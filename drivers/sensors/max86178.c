@@ -347,28 +347,38 @@ static void max86178_ppg_set_fps(FAR struct max86178_dev_s *priv,
 
 /* ECG sensor ops functions */
 
-static int max86178_ecg_activate(FAR struct sensor_lowerhalf_s *lower,
+static int max86178_ecg_activate(FAR struct file *filep,
+                                 FAR struct sensor_lowerhalf_s *lower,
                                  bool enable);
-static int max86178_ecg_set_interval(FAR struct sensor_lowerhalf_s *lower,
+static int max86178_ecg_set_interval(FAR struct file *filep,
+                                     FAR struct sensor_lowerhalf_s *lower,
                                      FAR unsigned long *period_us);
-static int max86178_ecg_batch(FAR struct sensor_lowerhalf_s *lower,
+static int max86178_ecg_batch(FAR struct file *filep,
+                              FAR struct sensor_lowerhalf_s *lower,
                               FAR unsigned long *latency_us);
-static int max86178_ecg_selftest(FAR struct sensor_lowerhalf_s *lower,
+static int max86178_ecg_selftest(FAR struct file *filep,
+                                 FAR struct sensor_lowerhalf_s *lower,
                                  unsigned long arg);
-static int max86178_ecg_control(FAR struct sensor_lowerhalf_s *lower,
+static int max86178_ecg_control(FAR struct file *filep,
+                                FAR struct sensor_lowerhalf_s *lower,
                                 int cmd, unsigned long arg);
 
 /* PPG sensor ops functions */
 
-static int max86178_ppg_activate(FAR struct sensor_lowerhalf_s *lower,
+static int max86178_ppg_activate(FAR struct file *filep,
+                                 FAR struct sensor_lowerhalf_s *lower,
                                  bool enable);
-static int max86178_ppg_set_interval(FAR struct sensor_lowerhalf_s *lower,
+static int max86178_ppg_set_interval(FAR struct file *filep,
+                                     FAR struct sensor_lowerhalf_s *lower,
                                      FAR unsigned long *period_us);
-static int max86178_ppg_batch(FAR struct sensor_lowerhalf_s *lower,
+static int max86178_ppg_batch(FAR struct file *filep,
+                              FAR struct sensor_lowerhalf_s *lower,
                               FAR unsigned long *latency_us);
-static int max86178_ppg_selftest(FAR struct sensor_lowerhalf_s *lower,
+static int max86178_ppg_selftest(FAR struct file *filep,
+                                 FAR struct sensor_lowerhalf_s *lower,
                                  unsigned long arg);
-static int max86178_ppg_control(FAR struct sensor_lowerhalf_s *lower,
+static int max86178_ppg_control(FAR struct file *filep,
+                                FAR struct sensor_lowerhalf_s *lower,
                                 int cmd, unsigned long arg);
 
 /* Sensor interrupt functions */
@@ -2429,8 +2439,9 @@ static void max86178_ppg_set_fps(FAR struct max86178_dev_s *priv,
  *   sensor, it will disable sense path and stop convert.
  *
  * Input Parameters:
- *   lower  - The instance of lower half sensor driver
- *   enable - true(enable) and false(disable)
+ *   filep  - The pointer of file, represents each user using the sensor.
+ *   lower  - The instance of lower half sensor driver.
+ *   enable - true(enable) and false(disable).
  *
  * Returned Value:
  *   Zero (OK) or positive on success; a negated errno value on any failure.
@@ -2440,7 +2451,8 @@ static void max86178_ppg_set_fps(FAR struct max86178_dev_s *priv,
  *
  ****************************************************************************/
 
-static int max86178_ecg_activate(FAR struct sensor_lowerhalf_s *lower,
+static int max86178_ecg_activate(FAR struct file *filep,
+                                 FAR struct sensor_lowerhalf_s *lower,
                                  bool enable)
 {
   FAR struct max86178_ecg_sensor_s *sensor =
@@ -2532,6 +2544,7 @@ static int max86178_ecg_activate(FAR struct sensor_lowerhalf_s *lower,
  *   Set ECG sensor's maximum report latency in microseconds.
  *
  * Input Parameters:
+ *   filep      - The pointer of file, represents each user using the sensor.
  *   lower      - The instance of lower half sensor driver.
  *   latency_us - the time between batch data, in us. It may by overwrite
  *                by lower half driver.
@@ -2544,7 +2557,8 @@ static int max86178_ecg_activate(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int max86178_ecg_batch(FAR struct sensor_lowerhalf_s *lower,
+static int max86178_ecg_batch(FAR struct file *filep,
+                              FAR struct sensor_lowerhalf_s *lower,
                               FAR unsigned long *latency_us)
 {
   FAR struct max86178_ecg_sensor_s *sensor =
@@ -2587,6 +2601,7 @@ static int max86178_ecg_batch(FAR struct sensor_lowerhalf_s *lower,
  *   new interval will take effect when activating or reading FIFO.
  *
  * Input Parameters:
+ *   filep     - The pointer of file, represents each user using the sensor.
  *   lower     - The instance of lower half sensor driver.
  *   period_us - The time between report data, in us. It may by overwrite
  *               by lower half driver.
@@ -2599,7 +2614,8 @@ static int max86178_ecg_batch(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int max86178_ecg_set_interval(FAR struct sensor_lowerhalf_s *lower,
+static int max86178_ecg_set_interval(FAR struct file *filep,
+                                     FAR struct sensor_lowerhalf_s *lower,
                                      FAR unsigned long *period_us)
 {
   FAR struct max86178_ecg_sensor_s *sensor =
@@ -2642,6 +2658,7 @@ static int max86178_ecg_set_interval(FAR struct sensor_lowerhalf_s *lower,
  *   Selftest of ECG sensor, i.e. the selftest of MAX86178.
  *
  * Input Parameters:
+ *   filep - The pointer of file, represents each user using the sensor.
  *   lower - The instance of lower half sensor driver.
  *   arg   - The parameters associated with cmd.
  *
@@ -2653,7 +2670,8 @@ static int max86178_ecg_set_interval(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int max86178_ecg_selftest(FAR struct sensor_lowerhalf_s *lower,
+static int max86178_ecg_selftest(FAR struct file *filep,
+                                 FAR struct sensor_lowerhalf_s *lower,
                                  unsigned long arg)
 {
   FAR struct max86178_ecg_sensor_s *sensor =
@@ -2673,6 +2691,7 @@ static int max86178_ecg_selftest(FAR struct sensor_lowerhalf_s *lower,
  *   etc, which are all parsed and implemented by lower half driver.
  *
  * Input Parameters:
+ *   filep - The pointer of file, represents each user using the sensor.
  *   lower - The instance of lower half sensor driver.
  *   cmd   - The special cmd for sensor.
  *   arg   - The parameters associated with cmd.
@@ -2685,7 +2704,8 @@ static int max86178_ecg_selftest(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int max86178_ecg_control(FAR struct sensor_lowerhalf_s *lower,
+static int max86178_ecg_control(FAR struct file *filep,
+                                FAR struct sensor_lowerhalf_s *lower,
                                 int cmd, unsigned long arg)
 {
   FAR struct max86178_ecg_sensor_s *sensor =
@@ -2734,8 +2754,9 @@ static int max86178_ecg_control(FAR struct sensor_lowerhalf_s *lower,
  *   sensor, it will disable sense path and stop convert.
  *
  * Input Parameters:
- *   lower  - The instance of lower half sensor driver
- *   enable - true(enable) and false(disable)
+ *   filep  - The pointer of file, represents each user using the sensor.
+ *   lower  - The instance of lower half sensor driver.
+ *   enable - true(enable) and false(disable).
  *
  * Returned Value:
  *   Zero (OK) or positive on success; a negated errno value on any failure.
@@ -2745,7 +2766,8 @@ static int max86178_ecg_control(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int max86178_ppg_activate(FAR struct sensor_lowerhalf_s *lower,
+static int max86178_ppg_activate(FAR struct file *filep,
+                                 FAR struct sensor_lowerhalf_s *lower,
                                  bool enable)
 {
   FAR struct max86178_ppg_sensor_s *sensor =
@@ -2833,6 +2855,7 @@ static int max86178_ppg_activate(FAR struct sensor_lowerhalf_s *lower,
  *   Set PPG sensor's maximum report latency in microseconds.
  *
  * Input Parameters:
+ *   filep      - The pointer of file, represents each user using the sensor.
  *   lower      - The instance of lower half sensor driver.
  *   latency_us - the time between batch data, in us. It may by overwrite
  *                by lower half driver.
@@ -2845,7 +2868,8 @@ static int max86178_ppg_activate(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int max86178_ppg_batch(FAR struct sensor_lowerhalf_s *lower,
+static int max86178_ppg_batch(FAR struct file *filep,
+                              FAR struct sensor_lowerhalf_s *lower,
                               FAR unsigned long *latency_us)
 {
   FAR struct max86178_ppg_sensor_s *sensor =
@@ -2888,6 +2912,7 @@ static int max86178_ppg_batch(FAR struct sensor_lowerhalf_s *lower,
  *   new interval will take effect when activating or reading FIFO.
  *
  * Input Parameters:
+ *   filep     - The pointer of file, represents each user using the sensor.
  *   lower     - The instance of lower half sensor driver.
  *   period_us - The time between report data, in us. It may by overwrite
  *               by lower half driver.
@@ -2901,7 +2926,8 @@ static int max86178_ppg_batch(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int max86178_ppg_set_interval(FAR struct sensor_lowerhalf_s *lower,
+static int max86178_ppg_set_interval(FAR struct file *filep,
+                                     FAR struct sensor_lowerhalf_s *lower,
                                      FAR unsigned long *period_us)
 {
   FAR struct max86178_ppg_sensor_s *sensor =
@@ -2945,6 +2971,7 @@ static int max86178_ppg_set_interval(FAR struct sensor_lowerhalf_s *lower,
  *   Selftest of PPG sensor, i.e. the selftest of MAX86178.
  *
  * Input Parameters:
+ *   filep - The pointer of file, represents each user using the sensor.
  *   lower - The instance of lower half sensor driver.
  *   arg   - The parameters associated with cmd.
  *
@@ -2956,7 +2983,8 @@ static int max86178_ppg_set_interval(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int max86178_ppg_selftest(FAR struct sensor_lowerhalf_s *lower,
+static int max86178_ppg_selftest(FAR struct file *filep,
+                                 FAR struct sensor_lowerhalf_s *lower,
                                  unsigned long arg)
 {
   FAR struct max86178_ppg_sensor_s *sensor =
@@ -2976,6 +3004,7 @@ static int max86178_ppg_selftest(FAR struct sensor_lowerhalf_s *lower,
  *   etc, which are all parsed and implemented by lower half driver.
  *
  * Input Parameters:
+ *   filep - The pointer of file, represents each user using the sensor.
  *   lower - The instance of lower half sensor driver.
  *   cmd   - The special cmd for sensor.
  *   arg   - The parameters associated with cmd.
@@ -2988,7 +3017,8 @@ static int max86178_ppg_selftest(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int max86178_ppg_control(FAR struct sensor_lowerhalf_s *lower,
+static int max86178_ppg_control(FAR struct file *filep,
+                                FAR struct sensor_lowerhalf_s *lower,
                                 int cmd, unsigned long arg)
 {
   FAR struct max86178_ppg_sensor_s *sensor =

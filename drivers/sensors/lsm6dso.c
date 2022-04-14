@@ -1295,15 +1295,20 @@ static int lsm6dso_fsm_handler(FAR struct lsm6dso_dev_s *priv,
 
 /* Sensor ops functions */
 
-static int lsm6dso_batch(FAR struct sensor_lowerhalf_s *lower,
+static int lsm6dso_batch(FAR struct file *filep,
+                         FAR struct sensor_lowerhalf_s *lower,
                          FAR unsigned long *latency_us);
-static int lsm6dso_set_interval(FAR struct sensor_lowerhalf_s *lower,
+static int lsm6dso_set_interval(FAR struct file *filep,
+                                FAR struct sensor_lowerhalf_s *lower,
                                 FAR unsigned long *period_us);
-static int lsm6dso_activate(FAR struct sensor_lowerhalf_s *lower,
+static int lsm6dso_activate(FAR struct file *filep,
+                            FAR struct sensor_lowerhalf_s *lower,
                             bool enable);
-static int lsm6dso_selftest(FAR struct sensor_lowerhalf_s *lower,
+static int lsm6dso_selftest(FAR struct file *filep,
+                            FAR struct sensor_lowerhalf_s *lower,
                             unsigned long arg);
-static int lsm6dso_control(FAR struct sensor_lowerhalf_s *lower,
+static int lsm6dso_control(FAR struct file *filep,
+                           FAR struct sensor_lowerhalf_s *lower,
                            int cmd, unsigned long arg);
 
 /* Sensor interrupt functions */
@@ -3894,6 +3899,7 @@ static int lsm6dso_fsm_handler(FAR struct lsm6dso_dev_s *priv,
  *   Set sensor's maximum report latency in microseconds.
  *
  * Input Parameters:
+ *   filep      - The pointer of file, represents each user using the sensor.
  *   lower      - The instance of lower half sensor driver.
  *   latency_us - the time between batch data, in us. It may by overwrite
  *                by lower half driver.
@@ -3906,7 +3912,8 @@ static int lsm6dso_fsm_handler(FAR struct lsm6dso_dev_s *priv,
  *
  ****************************************************************************/
 
-static int lsm6dso_batch(FAR struct sensor_lowerhalf_s *lower,
+static int lsm6dso_batch(FAR struct file *filep,
+                         FAR struct sensor_lowerhalf_s *lower,
                          FAR unsigned long *latency_us)
 {
   FAR struct lsm6dso_sensor_s *sensor = (FAR struct lsm6dso_sensor_s *)lower;
@@ -4057,6 +4064,7 @@ static int lsm6dso_batch(FAR struct sensor_lowerhalf_s *lower,
  *   *period_us < min_delay it will be replaced by min_delay.
  *
  * Input Parameters:
+ *   filep      - The pointer of file, represents each user using the sensor.
  *   lower      - The instance of lower half sensor driver.
  *   period_us  - The time between report data, in us. It may by overwrite
  *                by lower half driver.
@@ -4069,7 +4077,8 @@ static int lsm6dso_batch(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int lsm6dso_set_interval(FAR struct sensor_lowerhalf_s *lower,
+static int lsm6dso_set_interval(FAR struct file *filep,
+                                FAR struct sensor_lowerhalf_s *lower,
                                 FAR unsigned long *period_us)
 {
   FAR struct lsm6dso_sensor_s *sensor = (FAR struct lsm6dso_sensor_s *)lower;
@@ -4162,8 +4171,9 @@ static int lsm6dso_set_interval(FAR struct sensor_lowerhalf_s *lower,
  *   sensor, it will disable sense path and stop convert.
  *
  * Input Parameters:
- *   lower  - The instance of lower half sensor driver
- *   enable - true(enable) and false(disable)
+ *   filep  - The pointer of file, represents each user using the sensor.
+ *   lower  - The instance of lower half sensor driver.
+ *   enable - true(enable) and false(disable).
  *
  * Returned Value:
  *   Return 0 if the driver was success; A negated errno
@@ -4174,7 +4184,8 @@ static int lsm6dso_set_interval(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int lsm6dso_activate(FAR struct sensor_lowerhalf_s *lower,
+static int lsm6dso_activate(FAR struct file *filep,
+                            FAR struct sensor_lowerhalf_s *lower,
                             bool enable)
 {
   FAR struct lsm6dso_sensor_s *sensor = (FAR struct lsm6dso_sensor_s *)lower;
@@ -4264,6 +4275,7 @@ static int lsm6dso_activate(FAR struct sensor_lowerhalf_s *lower,
  * the part is deemed to have failed selftest.
  *
  * Input Parameters:
+ *   filep      - The pointer of file, represents each user using the sensor.
  *   lower      - The instance of lower half sensor driver.
  *   arg        - The parameters associated with selftest.
  *
@@ -4275,7 +4287,8 @@ static int lsm6dso_activate(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int lsm6dso_selftest(FAR struct sensor_lowerhalf_s *lower,
+static int lsm6dso_selftest(FAR struct file *filep,
+                            FAR struct sensor_lowerhalf_s *lower,
                             unsigned long arg)
 {
   FAR struct lsm6dso_sensor_s *sensor = (FAR struct lsm6dso_sensor_s *)lower;
@@ -4338,6 +4351,7 @@ static int lsm6dso_selftest(FAR struct sensor_lowerhalf_s *lower,
  *   etc, which are all parsed and implemented by lower half driver.
  *
  * Input Parameters:
+ *   filep      - The pointer of file, represents each user using the sensor.
  *   lower      - The instance of lower half sensor driver.
  *   cmd        - The special cmd for sensor.
  *   arg        - The parameters associated with cmd.
@@ -4352,7 +4366,8 @@ static int lsm6dso_selftest(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int lsm6dso_control(FAR struct sensor_lowerhalf_s *lower,
+static int lsm6dso_control(FAR struct file *filep,
+                           FAR struct sensor_lowerhalf_s *lower,
                            int cmd, unsigned long arg)
 {
   FAR struct lsm6dso_sensor_s *sensor = (FAR struct lsm6dso_sensor_s *)lower;

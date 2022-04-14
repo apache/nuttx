@@ -358,13 +358,17 @@ static uint32_t ad5940_wgfreqwordcal(float sinfreqhz, float wgclock);
 
 /* Sensor ops functions */
 
-static int  ad5940_activate(FAR struct sensor_lowerhalf_s *lower,
+static int  ad5940_activate(FAR struct file *filep,
+                            FAR struct sensor_lowerhalf_s *lower,
                             bool enable);
-static int  ad5940_set_interval(FAR struct sensor_lowerhalf_s *lower,
+static int  ad5940_set_interval(FAR struct file *filep,
+                                FAR struct sensor_lowerhalf_s *lower,
                                 FAR unsigned long *period_us);
-static int  ad5940_batch(FAR struct sensor_lowerhalf_s *lower,
+static int  ad5940_batch(FAR struct file *filep,
+                         FAR struct sensor_lowerhalf_s *lower,
                          FAR unsigned long *latency_us);
-static int  ad5940_selftest(FAR struct sensor_lowerhalf_s *lower,
+static int  ad5940_selftest(FAR struct file *filep,
+                            FAR struct sensor_lowerhalf_s *lower,
                             unsigned long arg);
 
 /* Sensor interrupt functions */
@@ -5357,8 +5361,9 @@ static uint32_t ad5940_wgfreqwordcal(float sinfreqhz, float wgclock)
  *   AFE.
  *
  * Input Parameters:
- *   lower  - The instance of lower half sensor driver
- *   enable - true(enable) and false(disable)
+ *   filep  - The pointer of file, represents each user using the sensor.
+ *   lower  - The instance of lower half sensor driver.
+ *   enable - true(enable) and false(disable).
  *
  * Returned Value:
  *   OK(0) for success; a negated errno on any failure.
@@ -5368,7 +5373,8 @@ static uint32_t ad5940_wgfreqwordcal(float sinfreqhz, float wgclock)
  *
  ****************************************************************************/
 
-static int ad5940_activate(FAR struct sensor_lowerhalf_s *lower,
+static int ad5940_activate(FAR struct file *filep,
+                           FAR struct sensor_lowerhalf_s *lower,
                            bool enable)
 {
   FAR struct ad5940_dev_s *priv = (FAR struct ad5940_dev_s *)lower;
@@ -5461,6 +5467,7 @@ static int ad5940_activate(FAR struct sensor_lowerhalf_s *lower,
  *   *period_us < min_delay it will be replaced by min_delay.
  *
  * Input Parameters:
+ *   filep      - The pointer of file, represents each user using the sensor.
  *   lower      - The instance of lower half sensor driver.
  *   period_us  - The time between report data, in us. It may by overwrite
  *                by lower half driver.
@@ -5473,7 +5480,8 @@ static int ad5940_activate(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int ad5940_set_interval(FAR struct sensor_lowerhalf_s *lower,
+static int ad5940_set_interval(FAR struct file *filep,
+                               FAR struct sensor_lowerhalf_s *lower,
                                FAR unsigned long *period_us)
 {
   FAR struct ad5940_dev_s * priv = (FAR struct ad5940_dev_s *)lower;
@@ -5520,6 +5528,7 @@ static int ad5940_set_interval(FAR struct sensor_lowerhalf_s *lower,
  *   Set sensor's maximum report latency in microseconds.
  *
  * Input Parameters:
+ *   filep      - The pointer of file, represents each user using the sensor.
  *   lower      - The instance of lower half sensor driver.
  *   latency_us - the time between batch data, in us. It may by overwrite
  *                by lower half driver.
@@ -5532,7 +5541,8 @@ static int ad5940_set_interval(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int ad5940_batch(FAR struct sensor_lowerhalf_s *lower,
+static int ad5940_batch(FAR struct file *filep,
+                        FAR struct sensor_lowerhalf_s *lower,
                         FAR unsigned long *latency_us)
 {
   FAR struct ad5940_dev_s *priv = (FAR struct ad5940_dev_s *)lower;
@@ -5599,6 +5609,7 @@ static int ad5940_batch(FAR struct sensor_lowerhalf_s *lower,
  *   checking device ID is supported.
  *
  * Input Parameters:
+ *   filep - The pointer of file, represents each user using the sensor.
  *   lower - The instance of lower half sensor driver.
  *   arg   - The parameters associated with cmd.
  *
@@ -5611,7 +5622,8 @@ static int ad5940_batch(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int ad5940_selftest(FAR struct sensor_lowerhalf_s *lower,
+static int ad5940_selftest(FAR struct file *filep,
+                           FAR struct sensor_lowerhalf_s *lower,
                            unsigned long arg)
 {
   FAR struct ad5940_dev_s *priv = (FAR struct ad5940_dev_s *)lower;

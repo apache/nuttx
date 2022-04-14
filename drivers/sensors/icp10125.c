@@ -203,13 +203,17 @@ static int icp10125_initchip(FAR struct icp10125_dev_s *priv);
 
 /* Sensor ops functions */
 
-static int icp10125_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                                 FAR unsigned int *period_us);
-static int icp10125_activate(FAR struct sensor_lowerhalf_s *lower,
+static int icp10125_set_interval(FAR struct file *filep,
+                                 FAR struct sensor_lowerhalf_s *lower,
+                                 FAR unsigned long *period_us);
+static int icp10125_activate(FAR struct file *filep,
+                             FAR struct sensor_lowerhalf_s *lower,
                              bool enable);
-static int icp10125_selftest(FAR struct sensor_lowerhalf_s *lower,
+static int icp10125_selftest(FAR struct file *filep,
+                             FAR struct sensor_lowerhalf_s *lower,
                              unsigned long arg);
-static int icp10125_set_calibvalue(FAR struct sensor_lowerhalf_s *lower,
+static int icp10125_set_calibvalue(FAR struct file *filep,
+                                   FAR struct sensor_lowerhalf_s *lower,
                                    unsigned long arg);
 
 /* Sensor worker functions */
@@ -923,6 +927,7 @@ static int icp10125_initchip(FAR struct icp10125_dev_s *priv)
  *   *period_us < min_delay it will be replaced by min_delay.
  *
  * Input Parameters:
+ *   filep      - The pointer of file, represents each user using the sensor.
  *   lower      - The instance of lower half sensor driver.
  *   period_us  - The time between report data, in us. It may by overwrite
  *                by lower half driver.
@@ -936,8 +941,9 @@ static int icp10125_initchip(FAR struct icp10125_dev_s *priv)
  *
  ****************************************************************************/
 
-static int icp10125_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                                 FAR unsigned int *period_us)
+static int icp10125_set_interval(FAR struct file *filep,
+                                 FAR struct sensor_lowerhalf_s *lower,
+                                 FAR unsigned long *period_us)
 {
   FAR struct icp10125_dev_s *priv = (FAR struct icp10125_dev_s *)lower;
   uint8_t idx;
@@ -971,8 +977,9 @@ static int icp10125_set_interval(FAR struct sensor_lowerhalf_s *lower,
  *   sensor, it will disable sense path and stop convert.
  *
  * Input Parameters:
- *   lower  - The instance of lower half sensor driver
- *   enable - true(enable) and false(disable)
+ *   filep  - The pointer of file, represents each user using the sensor.
+ *   lower  - The instance of lower half sensor driver.
+ *   enable - true(enable) and false(disable).
  *
  * Returned Value:
  *   Return 0 if the driver was success; A negated errno
@@ -983,7 +990,8 @@ static int icp10125_set_interval(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int icp10125_activate(FAR struct sensor_lowerhalf_s *lower,
+static int icp10125_activate(FAR struct file *filep,
+                             FAR struct sensor_lowerhalf_s *lower,
                              bool enable)
 {
   FAR struct icp10125_dev_s *priv = (FAR struct icp10125_dev_s *)lower;
@@ -1034,6 +1042,7 @@ static int icp10125_activate(FAR struct sensor_lowerhalf_s *lower,
  *   and device functional inspection.
  *
  * Input Parameters:
+ *   filep      - The pointer of file, represents each user using the sensor.
  *   lower      - The instance of lower half sensor driver.
  *   arg        - The parameters associated with cmd.
  *
@@ -1046,7 +1055,8 @@ static int icp10125_activate(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int icp10125_selftest(FAR struct sensor_lowerhalf_s *lower,
+static int icp10125_selftest(FAR struct file *filep,
+                             FAR struct sensor_lowerhalf_s *lower,
                              unsigned long arg)
 {
   FAR struct icp10125_dev_s *priv = (FAR struct icp10125_dev_s *)lower;
@@ -1078,6 +1088,7 @@ static int icp10125_selftest(FAR struct sensor_lowerhalf_s *lower,
  * before.
  *
  * Input Parameters:
+ *   filep - The pointer of file, represents each user using the sensor.
  *   lower - The instance of lower half sensor driver.
  *   arg   - The parameters associated with calibration value.
  *
@@ -1090,7 +1101,8 @@ static int icp10125_selftest(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int icp10125_set_calibvalue(FAR struct sensor_lowerhalf_s *lower,
+static int icp10125_set_calibvalue(FAR struct file *filep,
+                                   FAR struct sensor_lowerhalf_s *lower,
                                    unsigned long arg)
 {
   FAR struct icp10125_dev_s *priv = (FAR struct icp10125_dev_s *)lower;

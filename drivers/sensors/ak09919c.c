@@ -231,11 +231,14 @@ static int ak09919c_verifyparam(FAR struct ak09919c_magdata_s *magdata,
 
 /* Sensor ops functions. */
 
-static int ak09919c_activate(FAR struct sensor_lowerhalf_s *lower,
+static int ak09919c_activate(FAR struct file *filep,
+                             FAR struct sensor_lowerhalf_s *lower,
                              bool enable);
-static int ak09919c_set_interval(FAR struct sensor_lowerhalf_s *lower,
+static int ak09919c_set_interval(FAR struct file *filp,
+                                 FAR struct sensor_lowerhalf_s *lower,
                                  FAR unsigned long *interval_us);
-static int ak09919c_selftest(FAR struct sensor_lowerhalf_s *lower,
+static int ak09919c_selftest(FAR struct file *filep,
+                             FAR struct sensor_lowerhalf_s *lower,
                              unsigned long arg);
 
 /* Sensor poll functions. */
@@ -986,8 +989,9 @@ static int ak09919c_checkdev(FAR struct ak09919c_dev_s *priv)
  *   Set ODR
  *
  * Input Parameters
- *   lower       -The instance of lower half sensor driver
- *   interval_us -Sample interval
+ *   filep       - The pointer of file, represents each user using the sensor.
+ *   lower       - The instance of lower half sensor driver.
+ *   interval_us - Sample interval.
  *
  * Returned Value
  *   Return 0 if the driver was success; A negated errno
@@ -998,8 +1002,9 @@ static int ak09919c_checkdev(FAR struct ak09919c_dev_s *priv)
  *
  ****************************************************************************/
 
-static int ak09919c_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                                 FAR unsigned long * interval_us)
+static int ak09919c_set_interval(FAR struct file *filp,
+                                 FAR struct sensor_lowerhalf_s *lower,
+                                 FAR unsigned long *interval_us)
 {
   FAR struct ak09919c_dev_s *priv = (FAR struct ak09919c_dev_s *)lower;
   int ret;
@@ -1026,11 +1031,12 @@ static int ak09919c_set_interval(FAR struct sensor_lowerhalf_s *lower,
  * Name: ak09919c_activate
  *
  * Description:
- *   Enable or disable sensor device
+ *   Enable or disable sensor device.
  *
  * Input Parameters
- *   lower     -The instance of lower half sensor driver
- *   enable    -true(enable) and false(disable)
+ *   filep  - The pointer of file, represents each user using the sensor.
+ *   lower  - The instance of lower half sensor driver.
+ *   enable - true(enable) and false(disable).
  *
  * Returned Value
  *   Return 0 if the driver was success; A negated errno
@@ -1041,7 +1047,8 @@ static int ak09919c_set_interval(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int ak09919c_activate(FAR struct sensor_lowerhalf_s *lower,
+static int ak09919c_activate(FAR struct file *filep,
+                             FAR struct sensor_lowerhalf_s *lower,
                              bool enable)
 {
   FAR struct ak09919c_dev_s *priv = (FAR struct ak09919c_dev_s *)lower;
@@ -1076,8 +1083,9 @@ static int ak09919c_activate(FAR struct sensor_lowerhalf_s *lower,
  *   and device functional inspection.
  *
  * Input Parameters:
- *   lower      - The instance of lower half sensor driver.
- *   arg        - The parameters associated with cmd.
+ *   filep - The pointer of file, represents each user using the sensor.
+ *   lower - The instance of lower half sensor driver.
+ *   arg   - The parameters associated with cmd.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
@@ -1088,7 +1096,8 @@ static int ak09919c_activate(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int ak09919c_selftest(FAR struct sensor_lowerhalf_s *lower,
+static int ak09919c_selftest(FAR struct file *filep,
+                             FAR struct sensor_lowerhalf_s *lower,
                              unsigned long arg)
 {
   FAR struct ak09919c_dev_s *priv = (FAR struct ak09919c_dev_s *)lower;

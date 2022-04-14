@@ -259,11 +259,14 @@ static void sx9373_init_worker(FAR void *arg);
 
 /* Sensor ops functions. */
 
-static int sx9373_activate(FAR struct sensor_lowerhalf_s *lower,
+static int sx9373_activate(FAR struct file *filep,
+                           FAR struct sensor_lowerhalf_s *lower,
                            bool enable);
-static int sx9373_selftest(FAR struct sensor_lowerhalf_s *lower,
+static int sx9373_selftest(FAR struct file *filep,
+                           FAR struct sensor_lowerhalf_s *lower,
                            unsigned long arg);
-static int sx9373_calibrate(FAR struct sensor_lowerhalf_s *lower,
+static int sx9373_calibrate(FAR struct file *filep,
+                            FAR struct sensor_lowerhalf_s *lower,
                             unsigned long arg);
 
 /* Sensor poll functions. */
@@ -815,11 +818,12 @@ static int sx9373_init(FAR struct sx9373_dev_s *priv)
  * Name: sx9373_activate
  *
  * Description:
- *   Enable or disable sensor device
+ *   Enable or disable sensor device.
  *
  * Input Parameters
- *   lower     -The instance of lower half sensor driver
- *   enable    -true(enable) and false(disable)
+ *   filep  - The pointer of file, represents each user using the sensor.
+ *   lower  - The instance of lower half sensor driver.
+ *   enable - True(enable) and false(disable).
  *
  * Returned Value
  *   Return 0 if the driver was success; A negated errno
@@ -830,7 +834,8 @@ static int sx9373_init(FAR struct sx9373_dev_s *priv)
  *
  ****************************************************************************/
 
-static int sx9373_activate(FAR struct sensor_lowerhalf_s *lower,
+static int sx9373_activate(FAR struct file *filep,
+                           FAR struct sensor_lowerhalf_s *lower,
                            bool enable)
 {
   FAR struct sx9373_channel_s *cap_ch = (FAR struct sx9373_channel_s *)lower;
@@ -886,8 +891,9 @@ static int sx9373_activate(FAR struct sensor_lowerhalf_s *lower,
  *   and device functional inspection.
  *
  * Input Parameters:
- *   lower      - The instance of lower half sensor driver.
- *   arg        - The parameters associated with cmd.
+ *   filep - The pointer of file, represents each user using the sensor.
+ *   lower - The instance of lower half sensor driver.
+ *   arg   - The parameters associated with cmd.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
@@ -898,7 +904,8 @@ static int sx9373_activate(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int sx9373_selftest(FAR struct sensor_lowerhalf_s *lower,
+static int sx9373_selftest(FAR struct file *filep,
+                           FAR struct sensor_lowerhalf_s *lower,
                            unsigned long arg)
 {
   FAR struct sx9373_channel_s *cap_ch = (FAR struct sx9373_channel_s *)lower;
@@ -938,6 +945,7 @@ static int sx9373_selftest(FAR struct sensor_lowerhalf_s *lower,
  * Trigger clear calibration in an empty state.
  *
  * Input Parameters:
+ *   filep - The pointer of file, represents each user using the sensor.
  *   lower - The instance of lower half sensor driver.
  *   arg   - The parameters associated with calibration value.
  *
@@ -950,7 +958,8 @@ static int sx9373_selftest(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int sx9373_calibrate(FAR struct sensor_lowerhalf_s *lower,
+static int sx9373_calibrate(FAR struct file *filep,
+                            FAR struct sensor_lowerhalf_s *lower,
                             unsigned long arg)
 {
   FAR struct sx9373_channel_s *cap_ch = (FAR struct sx9373_channel_s *)lower;

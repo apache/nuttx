@@ -333,11 +333,14 @@ static int stk31850_readlux(FAR struct stk31850_dev_s *priv,
 
 /* Sensor ops functions */
 
-static int stk31850_set_interval(FAR struct sensor_lowerhalf_s *lower,
+static int stk31850_set_interval(FAR struct file *filep,
+                                 FAR struct sensor_lowerhalf_s *lower,
                                  FAR unsigned long *period_us);
-static int stk31850_activate(FAR struct sensor_lowerhalf_s *lower,
+static int stk31850_activate(FAR struct file *filep,
+                             FAR struct sensor_lowerhalf_s *lower,
                              bool enable);
-static int stk31850_selftest(FAR struct sensor_lowerhalf_s *lower,
+static int stk31850_selftest(FAR struct file *filep,
+                             FAR struct sensor_lowerhalf_s *lower,
                              unsigned long arg);
 
 /* Sensor poll functions */
@@ -1362,8 +1365,9 @@ static int stk31850_readlux(FAR struct stk31850_dev_s *priv,
  *   *period_us < min_delay it will be replaced by min_delay.
  *
  * Input Parameters:
- *   lower      - The instance of lower half sensor driver.
- *   period_us  - The time between report data, in us. It may by overwrite
+ *   filep     - The pointer of file, represents each user using the sensor.
+ *   lower     - The instance of lower half sensor driver.
+ *   period_us - The time between report data, in us. It may by overwrite
  *                by lower half driver.
  *
  * Returned Value:
@@ -1375,7 +1379,8 @@ static int stk31850_readlux(FAR struct stk31850_dev_s *priv,
  *
  ****************************************************************************/
 
-static int stk31850_set_interval(FAR struct sensor_lowerhalf_s *lower,
+static int stk31850_set_interval(FAR struct file *filep,
+                                 FAR struct sensor_lowerhalf_s *lower,
                                  FAR unsigned long *period_us)
 {
   FAR struct stk31850_dev_s *priv = (FAR struct stk31850_dev_s *)lower;
@@ -1414,8 +1419,9 @@ static int stk31850_set_interval(FAR struct sensor_lowerhalf_s *lower,
  *   sensor, it will disable sense path and stop convert.
  *
  * Input Parameters:
- *   lower  - The instance of lower half sensor driver
- *   enable - true(enable) and false(disable)
+ *   filep  - The pointer of file, represents each user using the sensor.
+ *   lower  - The instance of lower half sensor driver.
+ *   enable - true(enable) and false(disable).
  *
  * Returned Value:
  *   Return 0 if the driver was success; A negated errno
@@ -1426,8 +1432,9 @@ static int stk31850_set_interval(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int stk31850_activate(FAR struct sensor_lowerhalf_s *lower,
-                            bool enable)
+static int stk31850_activate(FAR struct file *filep,
+                             FAR struct sensor_lowerhalf_s *lower,
+                             bool enable)
 {
   FAR struct stk31850_dev_s *priv = (FAR struct stk31850_dev_s *)lower;
   int ret;
@@ -1466,8 +1473,9 @@ static int stk31850_activate(FAR struct sensor_lowerhalf_s *lower,
  * the part is deemed to have failed selftest.
  *
  * Input Parameters:
- *   lower      - The instance of lower half sensor driver.
- *   arg        - The parameters associated with selftest.
+ *   filep - The pointer of file, represents each user using the sensor.
+ *   lower - The instance of lower half sensor driver.
+ *   arg   - The parameters associated with selftest.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
@@ -1477,8 +1485,9 @@ static int stk31850_activate(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int stk31850_selftest(FAR struct sensor_lowerhalf_s *lower,
-                            unsigned long arg)
+static int stk31850_selftest(FAR struct file *filep,
+                             FAR struct sensor_lowerhalf_s *lower,
+                             unsigned long arg)
 {
   FAR struct stk31850_dev_s * priv = (FAR struct stk31850_dev_s *)lower;
   int ret;

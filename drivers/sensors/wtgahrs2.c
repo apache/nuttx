@@ -95,8 +95,10 @@ struct wtgahrs2_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int wtgahrs2_activate(FAR struct sensor_lowerhalf_s *lower, bool sw);
-static int wtgahrs2_set_interval(FAR struct sensor_lowerhalf_s *lower,
+static int wtgahrs2_activate(FAR struct file *filep,
+                             FAR struct sensor_lowerhalf_s *lower, bool sw);
+static int wtgahrs2_set_interval(FAR struct file *filep,
+                                 FAR struct sensor_lowerhalf_s *lower,
                                  FAR unsigned long *interval);
 
 /****************************************************************************
@@ -152,7 +154,8 @@ static void wtgahrs2_sendcmd(FAR struct wtgahrs2_dev_s *rtdata,
   usleep(10000);
 }
 
-static int wtgahrs2_activate(FAR struct sensor_lowerhalf_s *lower, bool sw)
+static int wtgahrs2_activate(FAR struct file *filep,
+                             FAR struct sensor_lowerhalf_s *lower, bool sw)
 {
   FAR struct wtgahrs2_sensor_s *dev = (FAR struct wtgahrs2_sensor_s *)lower;
   dev->enable = sw;
@@ -160,7 +163,8 @@ static int wtgahrs2_activate(FAR struct sensor_lowerhalf_s *lower, bool sw)
   return 0;
 }
 
-static int wtgahrs2_set_interval(FAR struct sensor_lowerhalf_s *lower,
+static int wtgahrs2_set_interval(FAR struct file *filep,
+                                 FAR struct sensor_lowerhalf_s *lower,
                                  FAR unsigned long *interval)
 {
   FAR struct wtgahrs2_sensor_s *dev = (FAR struct wtgahrs2_sensor_s *)lower;

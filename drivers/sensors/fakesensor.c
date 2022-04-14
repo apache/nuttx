@@ -59,11 +59,13 @@ struct fakesensor_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int fakesensor_activate(FAR struct sensor_lowerhalf_s *lower,
-                               bool sw);
-static int fakesensor_set_interval(FAR struct sensor_lowerhalf_s *lower,
+static int fakesensor_activate(FAR struct file *filep,
+                               FAR struct sensor_lowerhalf_s *lower, bool sw);
+static int fakesensor_set_interval(FAR struct file *filep,
+                                   FAR struct sensor_lowerhalf_s *lower,
                                    FAR unsigned long *period_us);
-static int fakesensor_batch(FAR struct sensor_lowerhalf_s *lower,
+static int fakesensor_batch(FAR struct file *filep,
+                            FAR struct sensor_lowerhalf_s *lower,
                             FAR unsigned long *latency_us);
 static void fakesensor_push_event(FAR struct sensor_lowerhalf_s *lower);
 static int fakesensor_thread(int argc, char** argv);
@@ -213,7 +215,8 @@ static inline void fakesensor_read_gps(FAR struct fakesensor_s *sensor)
                            sizeof(struct sensor_gps));
 }
 
-static int fakesensor_activate(FAR struct sensor_lowerhalf_s *lower, bool sw)
+static int fakesensor_activate(FAR struct file *filep,
+                               FAR struct sensor_lowerhalf_s *lower, bool sw)
 {
   FAR struct fakesensor_s *sensor = container_of(lower,
                                                  struct fakesensor_s, lower);
@@ -233,7 +236,8 @@ static int fakesensor_activate(FAR struct sensor_lowerhalf_s *lower, bool sw)
   return OK;
 }
 
-static int fakesensor_set_interval(FAR struct sensor_lowerhalf_s *lower,
+static int fakesensor_set_interval(FAR struct file *filep,
+                                   FAR struct sensor_lowerhalf_s *lower,
                                    FAR unsigned long *period_us)
 {
   FAR struct fakesensor_s *sensor = container_of(lower,
@@ -242,7 +246,8 @@ static int fakesensor_set_interval(FAR struct sensor_lowerhalf_s *lower,
   return OK;
 }
 
-static int fakesensor_batch(FAR struct sensor_lowerhalf_s *lower,
+static int fakesensor_batch(FAR struct file *filep,
+                            FAR struct sensor_lowerhalf_s *lower,
                             FAR unsigned long *latency_us)
 {
   FAR struct fakesensor_s *sensor = container_of(lower,

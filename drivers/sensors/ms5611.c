@@ -120,9 +120,11 @@ static unsigned long ms5611_curtime(void);
 
 /* Sensor methods */
 
-static int ms5611_set_interval(FAR struct sensor_lowerhalf_s *lower,
+static int ms5611_set_interval(FAR struct file *filep,
+                               FAR struct sensor_lowerhalf_s *lower,
                                FAR unsigned int *period_us);
-static int ms5611_activate(FAR struct sensor_lowerhalf_s *lower,
+static int ms5611_activate(FAR struct file *filep,
+                           FAR struct sensor_lowerhalf_s *lower,
                            bool enable);
 
 #if 0 /* Please read below */
@@ -539,7 +541,8 @@ static uint32_t ms5611_compensate_press(FAR struct ms5611_dev_s *priv,
  * Name: ms5611_set_interval
  ****************************************************************************/
 
-static int ms5611_set_interval(FAR struct sensor_lowerhalf_s *lower,
+static int ms5611_set_interval(FAR struct file *filep,
+                               FAR struct sensor_lowerhalf_s *lower,
                                FAR unsigned int *period_us)
 {
   FAR struct ms5611_dev_s *priv = container_of(lower,
@@ -554,7 +557,8 @@ static int ms5611_set_interval(FAR struct sensor_lowerhalf_s *lower,
  * Name: ms5611_activate
  ****************************************************************************/
 
-static int ms5611_activate(FAR struct sensor_lowerhalf_s *lower,
+static int ms5611_activate(FAR struct file *filep,
+                           FAR struct sensor_lowerhalf_s *lower,
                            bool enable)
 {
   bool start_thread = false;

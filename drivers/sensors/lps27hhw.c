@@ -250,13 +250,16 @@ static int lps27hhw_initchip(FAR struct lps27hhw_dev_s *priv);
 
 /* Sensor ops functions */
 
-static int lps27hhw_set_interval(FAR struct sensor_lowerhalf_s *lower,
+static int lps27hhw_set_interval(FAR struct file *filep,
+                                 FAR struct sensor_lowerhalf_s *lower,
                                  FAR unsigned long *period_us);
-static int lps27hhw_activate(FAR struct sensor_lowerhalf_s *lower,
-                             bool enable);
-static int lps27hhw_selftest(FAR struct sensor_lowerhalf_s *lower,
+static int lps27hhw_activate(FAR struct file *filep,
+                             FAR struct sensor_lowerhalf_s *lower, bool enable);
+static int lps27hhw_selftest(FAR struct file *filep,
+                             FAR struct sensor_lowerhalf_s *lower,
                              unsigned long arg);
-static int lps27hhw_set_calibvalue(FAR struct sensor_lowerhalf_s *lower,
+static int lps27hhw_set_calibvalue(FAR struct file *filep,
+                                   FAR struct sensor_lowerhalf_s *lower,
                                    unsigned long arg);
 
 /* Sensor poll functions */
@@ -962,6 +965,7 @@ static int lps27hhw_initchip(FAR struct lps27hhw_dev_s *priv)
  *   *period_us < min_delay it will be replaced by min_delay.
  *
  * Input Parameters:
+ *   filep      - The pointer of file, represents each user using the sensor.
  *   lower      - The instance of lower half sensor driver.
  *   period_us  - The time between report data, in us. It may by overwrite
  *                by lower half driver.
@@ -975,7 +979,8 @@ static int lps27hhw_initchip(FAR struct lps27hhw_dev_s *priv)
  *
  ****************************************************************************/
 
-static int lps27hhw_set_interval(FAR struct sensor_lowerhalf_s *lower,
+static int lps27hhw_set_interval(FAR struct file *filep,
+                                 FAR struct sensor_lowerhalf_s *lower,
                                  FAR unsigned long *period_us)
 {
   FAR struct lps27hhw_dev_s *priv = (FAR struct lps27hhw_dev_s *)lower;
@@ -1008,6 +1013,7 @@ static int lps27hhw_set_interval(FAR struct sensor_lowerhalf_s *lower,
  *   sensor, it will disable sense path and stop convert.
  *
  * Input Parameters:
+ *   filep  - The pointer of file, represents each user using the sensor.
  *   lower  - The instance of lower half sensor driver
  *   enable - true(enable) and false(disable)
  *
@@ -1020,8 +1026,8 @@ static int lps27hhw_set_interval(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int lps27hhw_activate(FAR struct sensor_lowerhalf_s *lower,
-                             bool enable)
+static int lps27hhw_activate(FAR struct file *filep,
+                             FAR struct sensor_lowerhalf_s *lower, bool enable)
 {
   FAR struct lps27hhw_dev_s *priv = (FAR struct lps27hhw_dev_s *)lower;
   int ret;
@@ -1088,6 +1094,7 @@ static int lps27hhw_activate(FAR struct sensor_lowerhalf_s *lower,
  *   and device functional inspection.
  *
  * Input Parameters:
+ *   filep      - The pointer of file, represents each user using the sensor.
  *   lower      - The instance of lower half sensor driver.
  *   arg        - The parameters associated with cmd.
  *
@@ -1100,7 +1107,8 @@ static int lps27hhw_activate(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int lps27hhw_selftest(FAR struct sensor_lowerhalf_s *lower,
+static int lps27hhw_selftest(FAR struct file *filep,
+                             FAR struct sensor_lowerhalf_s *lower,
                              unsigned long arg)
 {
   FAR struct lps27hhw_dev_s *priv = (FAR struct lps27hhw_dev_s *)lower;
@@ -1138,6 +1146,7 @@ static int lps27hhw_selftest(FAR struct sensor_lowerhalf_s *lower,
  * before.
  *
  * Input Parameters:
+ *   filep - The pointer of file, represents each user using the sensor.
  *   lower - The instance of lower half sensor driver.
  *   arg   - The parameters associated with calibration value.
  *
@@ -1150,7 +1159,8 @@ static int lps27hhw_selftest(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int lps27hhw_set_calibvalue(FAR struct sensor_lowerhalf_s *lower,
+static int lps27hhw_set_calibvalue(FAR struct file *filep,
+                                   FAR struct sensor_lowerhalf_s *lower,
                                    unsigned long arg)
 {
   FAR struct lps27hhw_dev_s *priv = (FAR struct lps27hhw_dev_s *)lower;
