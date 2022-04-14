@@ -41,10 +41,15 @@
 
 #include "riscv_internal.h"
 
+#ifdef CONFIG_NUTTSBI
+#include "sbi_mcall.h"
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
+#ifndef CONFIG_NUTTSBI
 static inline uintptr_t sbi_ecall(unsigned int extid, unsigned int fid,
                                   uintptr_t parm0, uintptr_t parm1,
                                   uintptr_t parm2, uintptr_t parm3,
@@ -69,6 +74,7 @@ static inline uintptr_t sbi_ecall(unsigned int extid, unsigned int fid,
 
   return r1;
 }
+#endif /* CONFIG_NUTTSBI */
 
 /****************************************************************************
  * Public Functions
@@ -87,12 +93,16 @@ static inline uintptr_t sbi_ecall(unsigned int extid, unsigned int fid,
 
 void riscv_sbi_set_timer(uint64_t stime_value)
 {
+#ifdef CONFIG_NUTTSBI
+  sbi_mcall_set_timer(stime_value);
+#else
 #ifdef CONFIG_ARCH_RV64
   sbi_ecall(SBI_EXT_TIME, SBI_EXT_TIME_SET_TIMER, stime_value, 0, 0, 0, 0,
             0);
 #else
   sbi_ecall(SBI_EXT_TIME, SBI_EXT_TIME_SET_TIMER, stime_value,
             stime_value >> 32, 0, 0, 0, 0);
+#endif
 #endif
 }
 
@@ -109,6 +119,9 @@ void riscv_sbi_set_timer(uint64_t stime_value)
 
 uint64_t riscv_sbi_get_time(void)
 {
+#ifdef CONFIG_NUTTSBI
+  return sbi_mcall_get_time();
+#else
 #ifdef CONFIG_ARCH_RV64
   return READ_CSR(time);
 #else
@@ -123,5 +136,6 @@ uint64_t riscv_sbi_get_time(void)
   while (hi != READ_CSR(timeh));
 
   return (((uint64_t) hi) << 32) | lo;
+#endif
 #endif
 }
