@@ -259,7 +259,6 @@ uint32_t *arm_syscall(uint32_t *regs)
            * set will determine the restored context.
            */
 
-          arm_restorefpu((uint32_t *)regs[REG_R1]);
           regs = (uint32_t *)regs[REG_R1];
           DEBUGASSERT(regs);
         }
@@ -285,8 +284,6 @@ uint32_t *arm_syscall(uint32_t *regs)
       case SYS_switch_context:
         {
           DEBUGASSERT(regs[REG_R1] != 0 && regs[REG_R2] != 0);
-          arm_savefpu(regs);
-          arm_restorefpu((uint32_t *)regs[REG_R2]);
           *(uint32_t **)regs[REG_R1] = regs;
           regs = (uint32_t *)regs[REG_R2];
         }
