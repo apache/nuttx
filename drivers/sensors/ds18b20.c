@@ -158,16 +158,20 @@ struct ds18b20_dev_s
 /* Sensor functions */
 
 static int ds18b20_active(FAR struct sensor_lowerhalf_s *lower,
+                          FAR struct file *filep,
                           bool enabled);
 
 static int ds18b20_fetch(FAR struct sensor_lowerhalf_s *lower,
+                         FAR struct file *filep,
                          FAR char *buffer, size_t buflen);
 
 static int ds18b20_control(FAR struct sensor_lowerhalf_s *lower,
+                           FAR struct file *filep,
                            int cmd, unsigned long arg);
 
 #ifdef CONFIG_SENSORS_DS18B20_POLL
 static int ds18b20_set_interval(FAR struct sensor_lowerhalf_s *lower,
+                                FAR struct file *filep,
                                 FAR unsigned long *period_us);
 #endif
 
@@ -623,16 +627,18 @@ static int ds18b20_measure_read(FAR struct ds18b20_dev_s *dev,
  *              conversion.
  *
  * Parameter:
- *   lower  - Pointer to lower half sensor driver instance
- *   buffer - Pointer to the buffer for reading data
- *   buflen - Size of the buffer
+ *   lower  - Pointer to lower half sensor driver instance.
+ *   filep  - The pointer of file, represents each user using the sensor.
+ *   buffer - Pointer to the buffer for reading data.
+ *   buflen - Size of the buffer.
  *
  * Return:
  *   OK - on success
  ****************************************************************************/
 
 static int ds18b20_fetch(FAR struct sensor_lowerhalf_s *lower,
-                        FAR char *buffer, size_t buflen)
+                         FAR struct file *filep,
+                         FAR char *buffer, size_t buflen)
 {
   int ret;
   struct ds18b20_sensor_data_s data;
@@ -673,7 +679,8 @@ static int ds18b20_fetch(FAR struct sensor_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int ds18b20_control(FAR struct sensor_lowerhalf_s *lower,
-                          int cmd, unsigned long arg)
+                           FAR struct file *filep,
+                           int cmd, unsigned long arg)
 {
   int ret;
   struct ds18b20_dev_s *priv = (FAR struct ds18b20_dev_s *)lower;
@@ -740,6 +747,7 @@ static int ds18b20_control(FAR struct sensor_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int ds18b20_active(FAR struct sensor_lowerhalf_s *lower,
+                          FAR struct file *filep,
                           bool enabled)
 {
 #ifdef CONFIG_SENSORS_DS18B20_POLL
@@ -778,7 +786,8 @@ static int ds18b20_active(FAR struct sensor_lowerhalf_s *lower,
 
 #ifdef CONFIG_SENSORS_DS18B20_POLL
 static int ds18b20_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                               FAR unsigned long *period_us)
+                                FAR struct file *filep,
+                                FAR unsigned long *period_us)
 {
   FAR struct ds18b20_dev_s *priv = (FAR struct ds18b20_dev_s *)lower;
   priv->interval = *period_us;
