@@ -31,9 +31,10 @@
 #include <nuttx/net/telnet.h>
 #include <nuttx/note/note_driver.h>
 #include <nuttx/power/pm.h>
+#include <nuttx/sensors/sensor.h>
+#include <nuttx/serial/pty.h>
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/syslog/syslog_console.h>
-#include <nuttx/serial/pty.h>
 
 /****************************************************************************
  * Public Functions
@@ -142,5 +143,13 @@ void drivers_initialize(void)
   /* Initialize the Telnet session factory */
 
   telnet_initialize();
+#endif
+
+#ifdef CONFIG_USENSOR
+  usensor_initialize();
+#endif
+
+#ifdef CONFIG_SENSORS_RPMSG
+  sensor_rpmsg_initialize();
 #endif
 }
