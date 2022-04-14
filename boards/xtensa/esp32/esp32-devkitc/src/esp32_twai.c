@@ -31,7 +31,6 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-/* #include "arm_arch.h" */
 
 #include "esp32_twai.h"
 #include "esp32-devkitc.h"
