@@ -109,6 +109,8 @@ static int stwlc38_get_det_state(FAR struct stwlc38_dev_s *priv,
                           FAR int *status);
 static int stwlc38_get_voltage(FAR struct battery_charger_dev_s *dev,
                                 int *value);
+static int stwlc38_get_standard_type(FAR struct battery_charger_dev_s *dev,
+                                      bool *status);
 
 /* Charger rx interrupt functions */
 
@@ -960,9 +962,13 @@ static int stwlc38_health(FAR struct battery_charger_dev_s *dev,
 static int stwlc38_online(FAR struct battery_charger_dev_s *dev,
                            FAR bool *status)
 {
-  FAR struct stwlc38_dev_s *priv = (FAR struct stwlc38_dev_s *)dev;
+  int ret;
 
-  *status = priv->tx_is_pp;
+  ret = stwlc38_get_standard_type(dev, status);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   return OK;
 }
@@ -1169,6 +1175,33 @@ static int stwlc38_init_interrupt(FAR struct stwlc38_dev_s *priv)
     {
       baterr("Failed to set option: %d\n", ret);
       IOEP_DETACH(priv->io_dev, stwlc38_interrupt_handler);
+    }
+
+  return ret;
+}
+
+static int stwlc38_get_standard_type(FAR struct battery_charger_dev_s *dev,
+                                      bool *status)
+{
+  int ret = 0;
+  uint8_t buffer[3];
+
+  FAR struct stwlc38_dev_s *priv = (FAR struct stwlc38_dev_s *)dev;
+
+  ret = fw_i2c_read(priv, WLC_XM_PP_STATUS, buffer, 3);
+  if (ret < 0)
+    {
+      baterr("Error: stwlc38 hw i2c read faild\n");
+      return ret;
+    }
+
+  if ((buffer[1] == WLC_SUPPORT_QC_3_0) && (buffer[2] == WLC_GEN_TX))
+    {
+      *status = true;
+    }
+  else
+    {
+      *status = false;
     }
 
   return ret;

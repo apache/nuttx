@@ -114,6 +114,8 @@
 #define WLC_RX_DTS_SEND_REG           0x00D8  /* Length: 4, default: 0x00 */
 #define WLC_RX_DTS_RCVD_REG           0x00DC  /* Length: 4, default: 0x00 */
 #define WLC_AUX_DATA_XX_REG           0x0180  /* Length: 1, default: 0x00 */
-
+#define WLC_XM_PP_STATUS              0x00E0
+#define WLC_XM_PP_ADAPTER_STYPE       0x00E1
+#define WLC_XM_PP_TX_MODEL            0x00E2
 #endif /* __POLARIS_REG_H */
 

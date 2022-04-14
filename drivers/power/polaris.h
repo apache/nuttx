@@ -105,13 +105,16 @@ struct rx_int_state_s
 #define WLC_HEALTH_GOOD      0
 #define WLC_HEALTH_OVERHEAT  1
 #define WLC_HEALTH_OVERCOLD  2
- 
+
 #define CHARGER_DETECT_WORK_TIME  50000
 #define DETECT_WORK_INIT_TIME     2000000
 
 #define DETECT_WORK_NO_EXIST       0
 #define DETECT_WORK_EXIST          1
 #define BATT_CHARGING_STAT_INIT   -1
+
+#define WLC_SUPPORT_QC_3_0        0x1a
+#define WLC_GEN_TX                0x11
 
 #endif /* __POLARIS_H */
 
