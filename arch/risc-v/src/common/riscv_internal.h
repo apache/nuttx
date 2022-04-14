@@ -250,6 +250,13 @@ int riscv_check_pmp_access(uintptr_t attr, uintptr_t base, uintptr_t size);
 int riscv_configured_pmp_regions(void);
 int riscv_next_free_pmp_region(void);
 
+/* RISC-V SBI wrappers ******************************************************/
+
+#ifdef CONFIG_ARCH_USE_S_MODE
+void riscv_sbi_set_timer(uint64_t stime_value);
+uint64_t riscv_sbi_get_time(void);
+#endif
+
 /* Power management *********************************************************/
 
 #ifdef CONFIG_PM
