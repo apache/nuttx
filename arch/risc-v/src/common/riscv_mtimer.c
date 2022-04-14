@@ -80,6 +80,7 @@ static const struct oneshot_operations_s g_riscv_mtimer_ops =
  * Private Functions
  ****************************************************************************/
 
+#ifndef CONFIG_ARCH_USE_S_MODE
 static uint64_t riscv_mtimer_get_mtime(struct riscv_mtimer_lowerhalf_s *priv)
 {
 #ifdef CONFIG_ARCH_RV64
@@ -114,6 +115,20 @@ static void riscv_mtimer_set_mtimecmp(struct riscv_mtimer_lowerhalf_s *priv,
 
   __DMB();
 }
+#else
+static uint64_t riscv_mtimer_get_mtime(struct riscv_mtimer_lowerhalf_s *priv)
+{
+  UNUSED(priv);
+  return riscv_sbi_get_time();
+}
+
+static void riscv_mtimer_set_mtimecmp(struct riscv_mtimer_lowerhalf_s *priv,
+                                      uint64_t value)
+{
+  UNUSED(priv);
+  riscv_sbi_set_timer(value);
+}
+#endif
 
 /****************************************************************************
  * Name: riscv_mtimer_max_delay
