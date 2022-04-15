@@ -139,6 +139,8 @@
 #define XCPTCONTEXT_REGS    (HW_XCPT_REGS + SW_XCPT_REGS)
 #define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
 
+#define FPU_CONTEXT_REGS    SW_FPU_REGS
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

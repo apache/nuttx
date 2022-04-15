@@ -48,6 +48,7 @@ endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
 CMN_ASRCS += riscv_fpu.S
+CMN_CSRCS += riscv_fpucmp.c
 endif
 
 ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)

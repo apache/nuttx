@@ -63,6 +63,7 @@ endif
 ifeq ($(CONFIG_ARCH_FPU),y)
 CMN_ASRCS += arm_fpu.S
 CMN_CSRCS += arm_fpuconfig.c
+CMN_CSRCS += arm_fpucmp.c
 endif
 
 CHIP_CSRCS  = lpc54_start.c lpc54_clockconfig.c lpc54_irq.c lpc54_clrpend.c
