@@ -240,7 +240,6 @@ int  or1k_print_cpuinfo(void);
 
 void up_copyfullstate(uint32_t *dest, uint32_t *src);
 void up_decodeirq(uint32_t *regs);
-int  up_saveusercontext(uint32_t *saveregs);
 void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
 void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
 

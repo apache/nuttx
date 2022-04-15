@@ -228,7 +228,6 @@ void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
 
 /* Context switching */
 
-int  up_saveusercontext(uint32_t *saveregs);
 void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
 void up_switchcontext(uint32_t **saveregs, uint32_t *restoreregs);
 

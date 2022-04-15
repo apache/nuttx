@@ -330,18 +330,6 @@ void *riscv_perform_syscall(uintptr_t *regs);
 
 /* Context switching via system calls ***************************************/
 
-/* SYS call 0:
- *
- * int riscv_saveusercontext(uintptr_t *saveregs);
- *
- * Return:
- * 0: Normal Return
- * 1: Context Switch Return
- */
-
-#define riscv_saveusercontext(saveregs) \
-  sys_call1(SYS_save_context, (uintptr_t)saveregs)
-
 /* SYS call 1:
  *
  * void riscv_fullcontextrestore(uintptr_t *restoreregs) noreturn_function;
