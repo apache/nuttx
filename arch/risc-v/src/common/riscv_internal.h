@@ -233,12 +233,8 @@ void riscv_exception_attach(void);
 
 #ifdef CONFIG_ARCH_FPU
 void riscv_fpuconfig(void);
-void riscv_savefpu(uintptr_t *regs);
-void riscv_restorefpu(const uintptr_t *regs);
 #else
 #  define riscv_fpuconfig()
-#  define riscv_savefpu(regs)
-#  define riscv_restorefpu(regs)
 #endif
 
 /* RISC-V PMP Config ********************************************************/
