@@ -31,7 +31,7 @@ config NET_CAN_HAVE_ERRORS
 	default n
 
 config CAN_CONNS
-	int "Number of CAN connections"
+	int "Max number of CAN socket connections"
 	default 4
 	---help---
 		Maximum number of CAN connections (all tasks).
