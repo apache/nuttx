@@ -40,6 +40,8 @@
  * Pre-processor Prototypes
  ****************************************************************************/
 
+#define up_getsp()              (uintptr_t)__builtin_frame_address(0)
+
 #ifdef CONFIG_PIC
 
 /* This identifies the register the is used by the processor as the PIC base
@@ -107,24 +109,6 @@ do { \
 /****************************************************************************
  * Inline functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: up_getsp
- ****************************************************************************/
-
-/* I don't know if the builtin to get SP is enabled */
-
-static inline uint32_t up_getsp(void)
-{
-  uint32_t sp;
-  __asm__
-  (
-    "\tmov %0, sp\n\t"
-    : "=r"(sp)
-  );
-
-  return sp;
-}
 
 /****************************************************************************
  * Public Types
