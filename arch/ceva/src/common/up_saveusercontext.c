@@ -39,7 +39,7 @@
  * Description:
  *   Save the current thread context.  Full prototype is:
  *
- *   int  up_saveusercontext(uint32_t *saveregs);
+ *   int  up_saveusercontext(void *saveregs);
  *
  * Return:
  *   0: Normal return
@@ -47,7 +47,7 @@
  *
  ****************************************************************************/
 
-int up_saveusercontext(uint32_t *saveregs)
+int up_saveusercontext(void *saveregs)
 {
   int ret;
 

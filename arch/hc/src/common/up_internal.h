@@ -148,7 +148,6 @@ void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
 
 void up_copystate(uint8_t *dest, uint8_t *src);
 void up_decodeirq(uint8_t *regs);
-int  up_saveusercontext(uint8_t *saveregs);
 void up_fullcontextrestore(uint8_t *restoreregs) noreturn_function;
 void up_switchcontext(uint8_t *saveregs, uint8_t *restoreregs);
 

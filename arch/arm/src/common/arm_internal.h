@@ -328,7 +328,6 @@ void arm_boot(void);
 /* Context switching */
 
 uint32_t *arm_decodeirq(uint32_t *regs);
-int  arm_saveusercontext(uint32_t *saveregs);
 void arm_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
 void arm_switchcontext(uint32_t **saveregs, uint32_t *restoreregs);
 

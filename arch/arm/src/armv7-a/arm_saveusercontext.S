@@ -44,12 +44,12 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arm_saveusercontext
+ * Name: up_saveusercontext
  *
  * Description:
  *   Save the current thread context.  Full prototype is:
  *
- *   int  arm_saveusercontext(uint32_t *saveregs);
+ *   int  up_saveusercontext(void *saveregs);
  *
  * Returned Value:
  *   0: Normal return
@@ -57,9 +57,9 @@
  *
  ****************************************************************************/
 
-	.globl	arm_saveusercontext
-	.type	arm_saveusercontext, function
-arm_saveusercontext:
+	.globl	up_saveusercontext
+	.type	up_saveusercontext, function
+up_saveusercontext:
 
 	/* On entry, a1 (r0) holds address of struct xcptcontext */
 
@@ -134,5 +134,5 @@ arm_saveusercontext:
 	mov		r0, #1			/* Return value == 1 */
 	bx		lr			/* Return */
 
-	.size	arm_saveusercontext, .-arm_saveusercontext
+	.size	up_saveusercontext, .-up_saveusercontext
 	.end
