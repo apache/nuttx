@@ -35,7 +35,7 @@ endif
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   ZDSINSTALLDIR = C:/PROGRA~2/ZiLOG/ZDSII_Z8Encore!_$(ZDSVERSION)
-  INSTALLDIR = ${shell echo $(ZDSINSTALLDIR)| sed -e "s/\//\\/g"}
+  INSTALLDIR = $(shell echo $(ZDSINSTALLDIR)| sed -e "s/\//\\/g")
   ZDSBINDIR = $(INSTALLDIR)\bin
   ZDSSTDINCDIR = $(INSTALLDIR)\include\std
   ZDSZILOGINCDIR = $(INSTALLDIR)\include\zilog
@@ -49,7 +49,7 @@ endif
   ZDSZILOGLIBDIR = $(INSTALLDIR)\lib\zilog
 else
   ZDSINSTALLDIR = C:/PROGRA~2/ZiLOG/ZDSII_Z8Encore!_$(ZDSVERSION)
-  INSTALLDIR = ${shell cygpath -u "$(ZDSINSTALLDIR)"}
+  INSTALLDIR = $(shell cygpath -u "$(ZDSINSTALLDIR)")
   ZDSBINDIR = $(INSTALLDIR)/bin
   ZDSSTDINCDIR = $(INSTALLDIR)/include/std
   ZDSZILOGINCDIR = $(INSTALLDIR)/include/zilog
@@ -65,18 +65,18 @@ endif
   # These are the same directories but with the directory separator
   # character swapped as needed by the ZDS-II compiler
 
-  WTOPDIR = ${shell cygpath -w "$(TOPDIR)"}
-  WZDSSTDINCDIR = ${shell cygpath -w "$(ZDSSTDINCDIR)"}
-  WZDSZILOGINCDIR = ${shell cygpath -w "$(ZDSZILOGINCDIR)"}
-  WZDSDEVINCDIR = ${shell cygpath -w "$(ZDSDEVINCDIR)"}
-  WZDSSTDLIBDIR = ${shell cygpath -w "$(ZDSSTDLIBDIR)"}
-  WZDSZILOGLIBDIR = ${shell cygpath -w "$(ZDSZILOGLIBDIR)"}
+  WTOPDIR = $(shell cygpath -w "$(TOPDIR)")
+  WZDSSTDINCDIR = $(shell cygpath -w "$(ZDSSTDINCDIR)")
+  WZDSZILOGINCDIR = $(shell cygpath -w "$(ZDSZILOGINCDIR)")
+  WZDSDEVINCDIR = $(shell cygpath -w "$(ZDSDEVINCDIR)")
+  WZDSSTDLIBDIR = $(shell cygpath -w "$(ZDSSTDLIBDIR)")
+  WZDSZILOGLIBDIR = $(shell cygpath -w "$(ZDSZILOGLIBDIR)")
 
   # Escaped versions
 
-  ETOPDIR = ${shell echo "$(WTOPDIR)" | sed -e "s/ /%20/g"}
-  EZDSSTDINCDIR = ${shell echo "$(WZDSSTDINCDIR)" | sed -e "s/ /%20/g"}
-  EZDSZILOGINCDIR = ${shell echo "$(WZDSZILOGINCDIR)" | sed -e "s/ /%20/g"}
+  ETOPDIR = $(shell echo "$(WTOPDIR)" | sed -e "s/ /%20/g")
+  EZDSSTDINCDIR = $(shell echo "$(WZDSSTDINCDIR)" | sed -e "s/ /%20/g")
+  EZDSZILOGINCDIR = $(shell echo "$(WZDSZILOGINCDIR)" | sed -e "s/ /%20/g")
 endif
 
 # CPU Identification
