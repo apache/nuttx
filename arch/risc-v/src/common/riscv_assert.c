@@ -337,7 +337,7 @@ static void riscv_dumpstate(void)
     }
   else
     {
-      riscv_saveusercontext(rtcb->xcp.regs);
+      up_saveusercontext(rtcb->xcp.regs);
     }
 
   /* Dump the registers (if available) */

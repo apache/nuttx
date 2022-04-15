@@ -78,7 +78,7 @@ void arch_getfpu(FAR uint32_t *fpusave)
   /* Take a snapshot of the thread context right now */
 
   flags = enter_critical_section();
-  arm_saveusercontext(g_saveregs);
+  up_saveusercontext(g_saveregs);
 
   /* Return only the floating register values */
 

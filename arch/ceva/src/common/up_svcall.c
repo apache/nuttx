@@ -85,7 +85,7 @@ int up_svcall(int irq, void *context, void *arg)
     {
       /* A0=SYS_save_context:  This is a save context command:
        *
-       *   int up_saveusercontext(uint32_t *saveregs);
+       *   int up_saveusercontext(void *saveregs);
        *
        * At this point, the following values are saved in context:
        *

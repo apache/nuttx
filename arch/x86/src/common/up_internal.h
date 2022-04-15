@@ -186,7 +186,6 @@ void up_decodeirq(uint32_t *regs);
 #ifdef CONFIG_ARCH_DMA
 void weak_function up_dma_initialize(void);
 #endif
-int  up_saveusercontext(uint32_t *saveregs);
 void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
 void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
 void up_sigdeliver(void);

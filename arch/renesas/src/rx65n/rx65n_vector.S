@@ -218,7 +218,7 @@ _up_vector:
   .size   _up_vector, . - _up_vector
 
 /****************************************************************************
- * Name: int up_saveusercontext(uint32_t *regs)
+ * Name: int up_saveusercontext(void *regs)
  *
  * Description:
  *   Save the context of the calling function at the point of the return from

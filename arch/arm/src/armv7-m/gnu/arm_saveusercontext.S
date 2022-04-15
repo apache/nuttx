@@ -49,12 +49,12 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arm_saveusercontext
+ * Name: up_saveusercontext
  *
  * Description:
  *   Save the current thread context.  Full prototype is:
  *
- *   int  arm_saveusercontext(uint32_t *saveregs);
+ *   int  up_saveusercontext(void *saveregs);
  *
  * Returned Value:
  *   0: Normal return
@@ -64,9 +64,9 @@
 
 	.text
 	.thumb_func
-	.globl	arm_saveusercontext
-	.type	arm_saveusercontext, function
-arm_saveusercontext:
+	.globl	up_saveusercontext
+	.type	up_saveusercontext, function
+up_saveusercontext:
 
 	/* Perform the System call with R0=0 and R1=regs */
 
@@ -84,5 +84,5 @@ arm_saveusercontext:
 	str		r3, [r2, #0]
 	bx		lr			/* "normal" return with r0=0 or
 						 * context switch with r0=1 */
-	.size	arm_saveusercontext, .-arm_saveusercontext
+	.size	up_saveusercontext, .-up_saveusercontext
 	.end

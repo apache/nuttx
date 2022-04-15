@@ -371,7 +371,7 @@ static void arm_dumpstate(void)
     }
   else
     {
-      arm_saveusercontext(rtcb->xcp.regs);
+      up_saveusercontext(rtcb->xcp.regs);
     }
 
   /* Dump the registers */

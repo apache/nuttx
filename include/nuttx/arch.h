@@ -2563,6 +2563,16 @@ uint32_t up_perf_gettime(void);
 uint32_t up_perf_getfreq(void);
 void up_perf_convert(uint32_t elapsed, FAR struct timespec *ts);
 
+/****************************************************************************
+ * Name: up_saveusercontext
+ *
+ * Description:
+ *   Save the current thread context
+ *
+ ****************************************************************************/
+
+int up_saveusercontext(FAR void *saveregs);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

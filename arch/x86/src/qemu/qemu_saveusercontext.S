@@ -66,7 +66,7 @@
  * Name: up_saveusercontext
  *
  * Full C prototype:
- *  int up_saveusercontext(uint32_t *regs);
+ *  int up_saveusercontext(void *regs);
  *
  * Description:
  *  Save the "user" context.  It is not necessary to save all of the
