@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <arch/arch.h>
+#include <arch/csr.h>
 #include <arch/irq.h>
 
 #include <sys/types.h>
@@ -87,6 +88,75 @@
 .endm
 
 /****************************************************************************
+ * Name: riscv_savefpu
+ *
+ * Parameter:
+ *   in - Pointer to where the save is performed (e.g. sp)
+ *
+ * Description:
+ *   Save the FPU context registers (i.e. work / temp / etc).
+ *
+ ****************************************************************************/
+
+.macro riscv_savefpu in
+
+#ifdef CONFIG_ARCH_FPU
+  REGLOAD    t0, REG_INT_CTX(\in)
+  li         t1, MSTATUS_FS
+  and        t2, t0, t1
+  li         t1, MSTATUS_FS_DIRTY
+  bne        t2, t1, skip_save_fpu
+  li         t1, ~MSTATUS_FS
+  and        t0, t0, t1
+  li         t1, MSTATUS_FS_CLEAN
+  or         t0, t0, t1
+  REGSTORE   t0, REG_INT_CTX(\in)
+
+  /* Store all floating point registers */
+
+  FSTORE     f0,  REG_F0(\in)
+  FSTORE     f1,  REG_F1(\in)
+  FSTORE     f2,  REG_F2(\in)
+  FSTORE     f3,  REG_F3(\in)
+  FSTORE     f4,  REG_F4(\in)
+  FSTORE     f5,  REG_F5(\in)
+  FSTORE     f6,  REG_F6(\in)
+  FSTORE     f7,  REG_F7(\in)
+  FSTORE     f8,  REG_F8(\in)
+  FSTORE     f9,  REG_F9(\in)
+  FSTORE     f10, REG_F10(\in)
+  FSTORE     f11, REG_F11(\in)
+  FSTORE     f12, REG_F12(\in)
+  FSTORE     f13, REG_F13(\in)
+  FSTORE     f14, REG_F14(\in)
+  FSTORE     f15, REG_F15(\in)
+  FSTORE     f16, REG_F16(\in)
+  FSTORE     f17, REG_F17(\in)
+  FSTORE     f18, REG_F18(\in)
+  FSTORE     f19, REG_F19(\in)
+  FSTORE     f20, REG_F20(\in)
+  FSTORE     f21, REG_F21(\in)
+  FSTORE     f22, REG_F22(\in)
+  FSTORE     f23, REG_F23(\in)
+  FSTORE     f24, REG_F24(\in)
+  FSTORE     f25, REG_F25(\in)
+  FSTORE     f26, REG_F26(\in)
+  FSTORE     f27, REG_F27(\in)
+  FSTORE     f28, REG_F28(\in)
+  FSTORE     f29, REG_F29(\in)
+  FSTORE     f30, REG_F30(\in)
+  FSTORE     f31, REG_F31(\in)
+
+  frcsr      t0
+  REGSTORE   t0, REG_FCSR(\in)
+
+skip_save_fpu:
+
+#endif
+
+.endm
+
+/****************************************************************************
  * Name: load_ctx
  *
  * Parameter:
@@ -131,6 +201,72 @@
   REGLOAD    x29, REG_X29(\out)  /* t4 */
   REGLOAD    x30, REG_X30(\out)  /* t5 */
   REGLOAD    x31, REG_X31(\out)  /* t6 */
+
+.endm
+
+/****************************************************************************
+ * Name: riscv_loadfpu
+ *
+ * Parameter:
+ *   out - Pointer to where the load is performed (e.g. sp)
+ *
+ * Description:
+ *   Load the FPU context registers (i.e. work / temp / etc).
+ *
+ ****************************************************************************/
+
+.macro riscv_loadfpu out
+
+#ifdef CONFIG_ARCH_FPU
+  REGLOAD      t0, REG_INT_CTX(\out)
+  li           t1, MSTATUS_FS
+  and          t2, t0, t1
+  li           t1, MSTATUS_FS_INIT
+  ble          t2, t1, skip_load_fpu
+
+  /* Load all floating point registers */
+
+  FLOAD        f0, REG_F0(\out)
+  FLOAD        f1, REG_F1(\out)
+  FLOAD        f2, REG_F2(\out)
+  FLOAD        f3, REG_F3(\out)
+  FLOAD        f4, REG_F4(\out)
+  FLOAD        f5, REG_F5(\out)
+  FLOAD        f6, REG_F6(\out)
+  FLOAD        f7, REG_F7(\out)
+  FLOAD        f8, REG_F8(\out)
+  FLOAD        f9, REG_F9(\out)
+  FLOAD        f10, REG_F10(\out)
+  FLOAD        f11, REG_F11(\out)
+  FLOAD        f12, REG_F12(\out)
+  FLOAD        f13, REG_F13(\out)
+  FLOAD        f14, REG_F14(\out)
+  FLOAD        f15, REG_F15(\out)
+  FLOAD        f16, REG_F16(\out)
+  FLOAD        f17, REG_F17(\out)
+  FLOAD        f18, REG_F18(\out)
+  FLOAD        f19, REG_F19(\out)
+  FLOAD        f20, REG_F20(\out)
+  FLOAD        f21, REG_F21(\out)
+  FLOAD        f22, REG_F22(\out)
+  FLOAD        f23, REG_F23(\out)
+  FLOAD        f24, REG_F24(\out)
+  FLOAD        f25, REG_F25(\out)
+  FLOAD        f26, REG_F26(\out)
+  FLOAD        f27, REG_F27(\out)
+  FLOAD        f28, REG_F28(\out)
+  FLOAD        f29, REG_F29(\out)
+  FLOAD        f30, REG_F30(\out)
+  FLOAD        f31, REG_F31(\out)
+
+  /* Store the floating point control and status register */
+
+  REGLOAD      t0, REG_FCSR(\out)
+  fscsr        t0
+
+skip_load_fpu:
+
+#endif
 
 .endm
 
