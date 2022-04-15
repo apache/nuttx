@@ -33,8 +33,4 @@ ifeq ($(CONFIG_DEV_GPIO),y)
 CSRCS += bl602_gpio.c
 endif
 
-ifeq ($(CONFIG_ARCH_FPU),y)
-CSRCS += bl602_ostest.c
-endif
-
 include $(TOPDIR)/boards/Board.mk
