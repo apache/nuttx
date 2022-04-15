@@ -60,10 +60,6 @@ ifeq ($(CONFIG_CAN),y)
 CSRCS += stm32_can.c
 endif
 
-ifeq ($(CONFIG_ARCH_FPU),y)
-CSRCS += stm32_ostest.c
-endif
-
 ifeq ($(CONFIG_DAC),y)
 CSRCS += stm32_dac.c
 endif

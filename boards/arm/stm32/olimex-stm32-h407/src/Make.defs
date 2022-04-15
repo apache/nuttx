@@ -64,10 +64,6 @@ ifeq ($(CONFIG_STM32_SDIO),y)
 CSRCS += stm32_sdio.c
 endif
 
-ifeq ($(CONFIG_ARCH_FPU),y)
-CSRCS += stm32_ostest.c
-endif
-
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)
