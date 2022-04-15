@@ -120,10 +120,6 @@ ifeq ($(CONFIG_USBMSC),y)
 CSRCS += sam_usbmsc.c
 endif
 
-ifeq ($(CONFIG_ARCH_FPU),y)
-CSRCS += sam_ostest.c
-endif
-
 ifeq ($(CONFIG_SAMA5_TSD),y)
 CSRCS += sam_touchscreen.c
 endif
