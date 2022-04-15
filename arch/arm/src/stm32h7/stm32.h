@@ -36,6 +36,7 @@
 
 #include "chip.h"
 #include "stm32_gpio.h"
+#include "stm32_fdcan_sock.h"
 #include "stm32_fmc.h"
 #include "stm32_i2c.h"
 #include "stm32_spi.h"
