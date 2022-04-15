@@ -107,6 +107,7 @@ CMN_CSRCS += arm_cache.c
 
 ifeq ($(CONFIG_ARCH_FPU),y)
 CMN_ASRCS += arm_savefpu.S arm_restorefpu.S
+CMN_CSRCS += arm_fpucmp.c
 endif
 
 ifeq ($(CONFIG_STACK_COLORATION),y)

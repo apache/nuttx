@@ -57,6 +57,7 @@ CMN_CSRCS += arm_vectors.c
 ifeq ($(CONFIG_ARCH_FPU),y)
 CMN_ASRCS += arm_fpu.S
 CMN_CSRCS += arm_fpuconfig.c
+CMN_CSRCS += arm_fpucmp.c
 endif
 
 ifeq ($(CONFIG_ARCH_RAMVECTORS),y)

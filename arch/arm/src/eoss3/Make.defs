@@ -54,6 +54,7 @@ endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
 CMN_CSRCS += arm_fpuconfig.c
+CMN_CSRCS += arm_fpucmp.c
 endif
 
 CHIP_CSRCS  = eoss3_start.c eoss3_gpio.c eoss3_lowputc.c eoss3_clockconfig.c
