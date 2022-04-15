@@ -708,7 +708,7 @@ static int nvt_bootloader_reset(FAR struct nt38350_dev_s *priv)
       ierr("ERROR: Failed to reset bootloader\n");
     }
 
-  usleep(NVT_DELAY_15MS);
+  usleep(NVT_DELAY_35MS);
 
   return ret;
 }
@@ -828,7 +828,7 @@ static int nvt_check_fw_reset_state(FAR struct nt38350_dev_s *priv,
       usleep(NVT_DELAY_10MS);
       buf[0] = EVENT_MAP_RESET_COMPLETE;
       buf[1] = 0x00;
-      ret = nt38350_read_reg(priv, NVT_I2C_FW_ADDRESS, buf, 2);
+      ret = nt38350_read_reg(priv, NVT_I2C_FW_ADDRESS, buf, 6);
 
       if ((buf[1] >= check_reset_state) && (buf[1] <= RESET_STATE_MAX))
         {
@@ -839,7 +839,8 @@ static int nvt_check_fw_reset_state(FAR struct nt38350_dev_s *priv,
       retry++;
       if (retry > 12)
         {
-          ierr("ERROR: Failed to check FW state\n");
+          ierr("buf[1]=0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X\n",
+               buf[1], buf[2], buf[3], buf[4], buf[5]);
           ret = -1;
           break;
         }
