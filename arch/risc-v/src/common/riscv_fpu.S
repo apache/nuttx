@@ -25,20 +25,11 @@
 #include <nuttx/config.h>
 
 #include <arch/arch.h>
+#include <arch/csr.h>
 #include <arch/irq.h>
 #include <arch/mode.h>
 
 #ifdef CONFIG_ARCH_FPU
-
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-#define FS_MASK     0x6000
-#define FS_OFF      0x0000
-#define FS_INITIAL  0x2000
-#define FS_CLEAN    0x4000
-#define FS_DIRTY    0x6000
 
 /************************************************************************************
  * Public Symbols
@@ -74,7 +65,7 @@
     .type        riscv_fpuconfig, function
 
 riscv_fpuconfig:
-    li           a0, FS_INITIAL
+    li           a0, MSTATUS_FS_INIT
     csrs         CSR_STATUS, a0
     csrwi        fcsr, 0
     ret
@@ -102,13 +93,13 @@ riscv_fpuconfig:
 
 riscv_savefpu:
     REGLOAD       t0, REG_INT_CTX(a0)
-    li            t1, FS_MASK
+    li            t1, MSTATUS_FS
     and           t2, t0, t1
-    li            t1, FS_DIRTY
+    li            t1, MSTATUS_FS_DIRTY
     bne           t2, t1, 1f
-    li            t1, ~FS_MASK
+    li            t1, ~MSTATUS_FS
     and           t0, t0, t1
-    li            t1, FS_CLEAN
+    li            t1, MSTATUS_FS_CLEAN
     or            t0, t0, t1
     REGSTORE      t0, REG_INT_CTX(a0)
 
@@ -177,9 +168,9 @@ riscv_savefpu:
 
 riscv_restorefpu:
     REGLOAD      t0, REG_INT_CTX(a0)
-    li           t1, FS_MASK
+    li           t1, MSTATUS_FS
     and          t2, t0, t1
-    li           t1, FS_INITIAL
+    li           t1, MSTATUS_FS_INIT
     ble          t2, t1, 1f
 
     /* Load all floating point registers */
