@@ -92,6 +92,7 @@ Configurations
        - Syslog with process name, priority, and timestamp
        - Process Snapshot with stack usage, cpu usage, and signal information
        - Interrupt Statistics
+       - procfs filesystem (required for ifconfig, ifup/ifdown)
 
       Networking:
        - IPv4 Networking
