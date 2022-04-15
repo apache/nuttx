@@ -276,8 +276,10 @@ NSH to behave as follows at NSH startup time:
 
        `--init.d/
             `-- rcS
+            `-- rc.sysinit
 
      Where rcS is the NSH start-up script.
+     Where rc.sysinit is the NSH system init script.
 
   -  NSH will then mount the ROMFS file system at ``/etc``,
      resulting in::
@@ -287,8 +289,9 @@ NSH to behave as follows at NSH startup time:
        `--etc/
            `--init.d/
                `-- rcS
+               `-- rc.sysinit
 
-  -  By default, the contents of rcS script are::
+  -  By default, the contents of rc.sysinit script are::
 
        # Create a RAMDISK and mount it at XXXRDMOUNTPOINTXXX
 
@@ -296,9 +299,9 @@ NSH to behave as follows at NSH startup time:
        mkfatfs /dev/ram1
        mount -t vfat /dev/ram1 /tmp
 
-  -  NSH will execute the script at ``/etc/init.d/rcS`` at start-up
-     (before the first NSH prompt). After execution of the script,
-     the root FS will look like::
+  -  NSH will execute the script at ``/etc/init.d/rc.sysinit`` at
+     system init script(before the first NSH prompt). After
+     execution of the script, the root FS will look like::
 
         |--dev/
         |   |-- ram0
@@ -306,6 +309,7 @@ NSH to behave as follows at NSH startup time:
         |--etc/
         |   `--init.d/
         |       `-- rcS
+        |       `-- rc.sysinit
         `--tmp/
 
 **Modifying the ROMFS Image**. The contents of the ``/etc``
@@ -330,28 +334,37 @@ start-up behavior, there are three things to study:
      -  The configuration settings then installed configuration.
      -  The ``genromfs`` tool (available from
         http://romfs.sourceforge.net).
-     -  The file ``apps/nshlib/rcS.template`` (OR, if
+     -  The file ``apps/nshlib/rc.sysinit.template`` (OR, if
+        ``CONFIG_NSH_ARCHROMFS`` is defined
+        ``include/arch/board/rc.sysinit.template``.
+        The file ``apps/nshlib/rcS.template`` (OR, if
         ``CONFIG_NSH_ARCHROMFS`` is defined
         ``include/arch/board/rcs.template``.
 
-  #. ``rcS.template``: The file ``apps/nshlib/rcS.template``
+  #. ``rc.sysinit.template``: The file ``apps/nshlib/rc.sysinit.template``
+     contains the general form of the ``rc.sysinit`` file; configured
+     values are plugged into this template file to produce the final
+     ``rc.sysinit`` file.
+
+     ``rcS.template``: The file ``apps/nshlib/rcS.template``
      contains the general form of the ``rcS`` file; configured
      values are plugged into this template file to produce the final
      ``rcS`` file.
 
 .. note::
-  ``apps/nshlib/rcS.template`` generates the standard,
-  default ``nsh_romfsimg.h`` file. If ``CONFIG_NSH_ARCHROMFS`` is
-  defined in the NuttX configuration file, then a custom,
-  board-specific ``nsh_romfsimg.h`` file residing in the
-  ``boards/<arch>/<chip>/<board>/include`` directory will be used.
-  NOTE when the OS is configured, ``include/arch/board`` will be
+  ``apps/nshlib/rcS.template`` and ``apps/nshlib/rc.sysinit.template``
+  generates the standard, default ``nsh_romfsimg.h`` file.
+  If ``CONFIG_NSH_ARCHROMFS`` is defined in the NuttX configuration
+  file, then a custom, board-specific ``nsh_romfsimg.h`` file residing
+  in the ``boards/<arch>/<chip>/<board>/include`` directory will be
+  used.  NOTE when the OS is configured, ``include/arch/board`` will be
   linked to ``boards/<arch>/<chip>/<board>/include``.
 
-All of the startup-behavior is contained in ``rcS.template``. The
-role of ``mkromfsimg.sh`` is to (1) apply the specific
-configuration settings to ``rcS.template`` to create the final
-``rcS``, and (2) to generate the header file ``nsh_romfsimg.h``
+All of the startup-behavior is contained in ``rc.sysinit.template``
+and ``rcS.template``. The role of ``mkromfsimg.sh`` is to (1) apply
+the specific configuration settings to ``rc.sysinit.template`` to create
+the final ``rc.sysinit``, and ``rc.sysinit.template`` to create the final
+``rcS`` and (2) to generate the header file ``nsh_romfsimg.h``
 containing the ROMFS file system image.
 
 **Further Information**. See the section on `Customizing the

@@ -20,7 +20,7 @@
 
 include $(TOPDIR)/Make.defs
 
-RCSRCS = etc/init.d/rcS
+RCSRCS = etc/init.d/rc.sysinit etc/init.d/rcS
 
 CSRCS = qemu_rv_appinit.c
 

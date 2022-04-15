@@ -164,9 +164,11 @@ and containing the password file, ``passwd`` like::
   /etc/init.d:
    dr-xr-xr-x       0 ..
    -r--r--r--     110 rcS
+   -r--r--r--     110 rc.sysinit
   nsh>
 
-Where ``/etc/init.d/rcS`` is the start-up script; ``/etc/passwd`` is a
+Where ``/etc/init.d/rc.sysinit`` is the system init script and
+``/etc/init.d/rcS`` is the start-up script; ``/etc/passwd`` is a
 the password file. Note that here we assume that you are already using a
 start-up script. We can then piggyback the passwd file into the ``/etc``
 file system already mounted for the NSH start up file as described above
