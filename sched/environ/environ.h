@@ -111,7 +111,7 @@ void env_release(FAR struct task_group_s *group);
  *   pname - The variable name to find
  *
  * Returned Value:
- *   A pointer to the name=value string in the environment
+ *   A index to the name=value string in the environment
  *
  * Assumptions:
  *   - Not called from an interrupt handler
@@ -119,7 +119,7 @@ void env_release(FAR struct task_group_s *group);
  *
  ****************************************************************************/
 
-FAR char *env_findvar(FAR struct task_group_s *group, FAR const char *pname);
+int env_findvar(FAR struct task_group_s *group, FAR const char *pname);
 
 /****************************************************************************
  * Name: env_removevar
@@ -130,10 +130,10 @@ FAR char *env_findvar(FAR struct task_group_s *group, FAR const char *pname);
  * Input Parameters:
  *   group - The task group with the environment containing the name=value
  *           pair
- *   pvar  - A pointer to the name=value pair in the restroom
+ *   index - A index to the name=value pair in the restroom
  *
  * Returned Value:
- *   Zero on success
+ *   None
  *
  * Assumptions:
  *   - Not called from an interrupt handler
@@ -142,7 +142,7 @@ FAR char *env_findvar(FAR struct task_group_s *group, FAR const char *pname);
  *
  ****************************************************************************/
 
-int env_removevar(FAR struct task_group_s *group, FAR char *pvar);
+void env_removevar(FAR struct task_group_s *group, int index);
 
 #undef EXTERN
 #ifdef __cplusplus
