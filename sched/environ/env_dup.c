@@ -64,8 +64,8 @@
 int env_dup(FAR struct task_group_s *group)
 {
   FAR struct tcb_s *ptcb = this_task();
-  FAR char *envp = NULL;
-  size_t envlen;
+  FAR char **envp = NULL;
+  size_t envc = 0;
   int ret = OK;
 
   DEBUGASSERT(group != NULL && ptcb != NULL && ptcb->group != NULL);
@@ -82,40 +82,59 @@ int env_dup(FAR struct task_group_s *group)
     {
       /* Yes.. The parent task has an environment allocation. */
 
-      envlen = ptcb->group->tg_envsize;
-      envp   = NULL;
+      while (ptcb->group->tg_envp[envc] != NULL)
+        {
+          envc++;
+        }
 
       /* A special case is that the parent has an "empty" environment
        * allocation, i.e., there is an allocation in place but it
-       * contains no variable definitions and, hence, envlen == 0.
+       * contains no variable definitions and, hence, envc == 0.
        */
 
-      if (envlen > 0)
+      if (envc > 0)
         {
           /* There is an environment, duplicate it */
 
-          envp = (FAR char *)group_malloc(group, envlen + 1);
+          envp = group_malloc(group, sizeof(*envp) * (envc + 1));
           if (envp == NULL)
             {
               /* The parent's environment can not be inherited due to a
                * failure in the allocation of the child environment.
                */
 
-              envlen = 0;
-              ret    = -ENOMEM;
+              ret = -ENOMEM;
             }
           else
             {
+              envp[envc] = NULL;
+
               /* Duplicate the parent environment. */
 
-              memcpy(envp, ptcb->group->tg_envp, envlen + 1);
+              while (envc-- > 0)
+                {
+                  envp[envc] = group_malloc(group,
+                                  strlen(ptcb->group->tg_envp[envc]) + 1);
+                  if (envp[envc] == NULL)
+                    {
+                      while (envp[++envc] != NULL)
+                        {
+                          group_free(group, envp[envc]);
+                        }
+
+                      group_free(group, envp);
+                      ret = -ENOMEM;
+                      break;
+                    }
+
+                  strcpy(envp[envc], ptcb->group->tg_envp[envc]);
+                }
             }
         }
 
-      /* Save the size and child environment allocation. */
+      /* Save the child environment allocation. */
 
-      group->tg_envsize = envlen;
-      group->tg_envp    = envp;
+      group->tg_envp = envp;
     }
 
   sched_unlock();

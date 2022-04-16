@@ -526,8 +526,7 @@ struct task_group_s
 #ifndef CONFIG_DISABLE_ENVIRON
   /* Environment variables **************************************************/
 
-  size_t     tg_envsize;            /* Size of environment string allocation    */
-  FAR char  *tg_envp;               /* Allocated environment strings            */
+  FAR char **tg_envp;               /* Allocated environment strings            */
 #endif
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
