@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/arm_fpucmp.c
+ * arch/arm/src/armv7-m/arm_fpucmp.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -53,7 +53,7 @@ bool up_fpucmp(const void *saveregs1, const void *saveregs2)
   const uint32_t *regs1 = saveregs1;
   const uint32_t *regs2 = saveregs2;
 
-  return memcmp(&regs1[REG_S0],
-                &regs2[REG_S0], (4 * FPU_CONTEXT_REGS)) == 0;
+  return memcmp(&regs1[REG_S0], &regs2[REG_S0], 4 * HW_FPU_REGS) == 0 &&
+         memcmp(&regs1[REG_S16], &regs2[REG_S16], 4 * SW_FPU_REGS) == 0;
 }
 #endif /* CONFIG_ARCH_FPU */
