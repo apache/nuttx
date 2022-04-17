@@ -67,7 +67,7 @@ const uintptr_t g_idle_topstack = (uintptr_t)&_ebss +
  *
  ****************************************************************************/
 
-void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
+void up_allocate_heap(void **heap_start, size_t *heap_size)
 {
   board_autoled_on(LED_HEAPALLOCATE);
 
