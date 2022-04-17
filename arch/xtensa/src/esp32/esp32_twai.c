@@ -150,32 +150,32 @@ static void twai_putreg(uint32_t addr, uint32_t value);
 
 /* TWAI methods */
 
-static void esp32twai_reset(FAR struct can_dev_s *dev);
-static int  esp32twai_setup(FAR struct can_dev_s *dev);
-static void esp32twai_shutdown(FAR struct can_dev_s *dev);
-static void esp32twai_rxint(FAR struct can_dev_s *dev, bool enable);
-static void esp32twai_txint(FAR struct can_dev_s *dev, bool enable);
-static int  esp32twai_ioctl(FAR struct can_dev_s *dev, int cmd,
+static void esp32twai_reset(struct can_dev_s *dev);
+static int  esp32twai_setup(struct can_dev_s *dev);
+static void esp32twai_shutdown(struct can_dev_s *dev);
+static void esp32twai_rxint(struct can_dev_s *dev, bool enable);
+static void esp32twai_txint(struct can_dev_s *dev, bool enable);
+static int  esp32twai_ioctl(struct can_dev_s *dev, int cmd,
                            unsigned long arg);
-static int  esp32twai_remoterequest(FAR struct can_dev_s *dev,
+static int  esp32twai_remoterequest(struct can_dev_s *dev,
                                       uint16_t id);
-static int  esp32twai_send(FAR struct can_dev_s *dev,
-                             FAR struct can_msg_s *msg);
-static bool esp32twai_txready(FAR struct can_dev_s *dev);
-static bool esp32twai_txempty(FAR struct can_dev_s *dev);
+static int  esp32twai_send(struct can_dev_s *dev,
+                           struct can_msg_s *msg);
+static bool esp32twai_txready(struct can_dev_s *dev);
+static bool esp32twai_txempty(struct can_dev_s *dev);
 
 /* TWAI interrupts */
 
-static int esp32twai_interrupt(int irq, void *context, FAR void *arg);
+static int esp32twai_interrupt(int irq, void *context, void *arg);
 
 /* TWAI acceptance filter */
 
 static void esp32twai_set_acc_filter(uint32_t code, uint32_t mask,
-                                       bool single_filter);
+                                     bool single_filter);
 
 /* TWAI bit-timing initialization */
 
-static int twai_baud_rate(FAR struct twai_dev_s *priv, int rate, int clock,
+static int twai_baud_rate(struct twai_dev_s *priv, int rate, int clock,
     int sjw, int sampl_pt, int flags);
 
 /****************************************************************************
@@ -378,9 +378,9 @@ static void twai_putreg(uint32_t addr, uint32_t value)
  *
  ****************************************************************************/
 
-static void esp32twai_reset(FAR struct can_dev_s *dev)
+static void esp32twai_reset(struct can_dev_s *dev)
 {
-  FAR struct twai_dev_s *priv = (FAR struct twai_dev_s *)dev->cd_priv;
+  struct twai_dev_s *priv = (struct twai_dev_s *)dev->cd_priv;
   irqstate_t flags;
   int ret;
 
@@ -447,9 +447,9 @@ static void esp32twai_reset(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static int esp32twai_setup(FAR struct can_dev_s *dev)
+static int esp32twai_setup(struct can_dev_s *dev)
 {
-  FAR struct twai_dev_s *priv = (FAR struct twai_dev_s *)dev->cd_priv;
+  struct twai_dev_s *priv = (struct twai_dev_s *)dev->cd_priv;
   irqstate_t flags;
   int ret = OK;
 
@@ -517,9 +517,9 @@ static int esp32twai_setup(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static void esp32twai_shutdown(FAR struct can_dev_s *dev)
+static void esp32twai_shutdown(struct can_dev_s *dev)
 {
-  FAR struct twai_dev_s *priv = (FAR struct twai_dev_s *)dev->cd_priv;
+  struct twai_dev_s *priv = (struct twai_dev_s *)dev->cd_priv;
 
 #ifdef CONFIG_DEBUG_CAN_INFO
   caninfo("shutdown TWAI%" PRIu8 "\n", priv->port);
@@ -559,9 +559,9 @@ static void esp32twai_shutdown(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static void esp32twai_rxint(FAR struct can_dev_s *dev, bool enable)
+static void esp32twai_rxint(struct can_dev_s *dev, bool enable)
 {
-  FAR struct twai_dev_s *priv = (FAR struct twai_dev_s *)dev->cd_priv;
+  struct twai_dev_s *priv = (struct twai_dev_s *)dev->cd_priv;
   uint32_t regval;
   irqstate_t flags;
 
@@ -602,9 +602,9 @@ static void esp32twai_rxint(FAR struct can_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static void esp32twai_txint(FAR struct can_dev_s *dev, bool enable)
+static void esp32twai_txint(struct can_dev_s *dev, bool enable)
 {
-  FAR struct twai_dev_s *priv = (FAR struct twai_dev_s *)dev->cd_priv;
+  struct twai_dev_s *priv = (struct twai_dev_s *)dev->cd_priv;
   uint32_t regval;
   irqstate_t flags;
 
@@ -648,10 +648,10 @@ static void esp32twai_txint(FAR struct can_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static int esp32twai_ioctl(FAR struct can_dev_s *dev, int cmd,
+static int esp32twai_ioctl(struct can_dev_s *dev, int cmd,
                            unsigned long arg)
 {
-  FAR struct twai_dev_s *priv = (FAR struct twai_dev_s *)dev->cd_priv;
+  struct twai_dev_s *priv = (struct twai_dev_s *)dev->cd_priv;
   int ret = -ENOTTY;
 
   caninfo("TWAI%" PRIu8 " cmd=%04x arg=%lu\n", priv->port, cmd, arg);
@@ -673,8 +673,8 @@ static int esp32twai_ioctl(FAR struct can_dev_s *dev, int cmd,
 
       case CANIOC_GET_BITTIMING:
         {
-          FAR struct canioc_bittiming_s *bt =
-            (FAR struct canioc_bittiming_s *)arg;
+          struct canioc_bittiming_s *bt =
+            (struct canioc_bittiming_s *)arg;
           uint32_t timing0;
           uint32_t timing1;
           uint32_t brp;
@@ -709,7 +709,7 @@ static int esp32twai_ioctl(FAR struct can_dev_s *dev, int cmd,
   return ret;
 }
 
-static int esp32twai_remoterequest(FAR struct can_dev_s *dev, uint16_t id)
+static int esp32twai_remoterequest(struct can_dev_s *dev, uint16_t id)
 {
   canwarn("Remote request not implemented\n");
   return -ENOSYS;
@@ -739,10 +739,10 @@ static int esp32twai_remoterequest(FAR struct can_dev_s *dev, uint16_t id)
  *
  ****************************************************************************/
 
-static int esp32twai_send(FAR struct can_dev_s *dev,
-                            FAR struct can_msg_s *msg)
+static int esp32twai_send(struct can_dev_s *dev,
+                          struct can_msg_s *msg)
 {
-  FAR struct twai_dev_s *priv = (FAR struct twai_dev_s *)dev->cd_priv;
+  struct twai_dev_s *priv = (struct twai_dev_s *)dev->cd_priv;
   uint32_t regval;
   uint32_t i;
   uint32_t len;
@@ -846,9 +846,9 @@ static int esp32twai_send(FAR struct can_dev_s *dev,
  *
  ****************************************************************************/
 
-static bool esp32twai_txready(FAR struct can_dev_s *dev)
+static bool esp32twai_txready(struct can_dev_s *dev)
 {
-  FAR struct twai_dev_s *priv = dev->cd_priv;
+  struct twai_dev_s *priv = dev->cd_priv;
   uint32_t regval = twai_getreg(TWAI_STATUS_REG);
 
   caninfo("TWAI%" PRIu8 " txready: %d\n", priv->port,
@@ -874,9 +874,9 @@ static bool esp32twai_txready(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static bool esp32twai_txempty(FAR struct can_dev_s *dev)
+static bool esp32twai_txempty(struct can_dev_s *dev)
 {
-  FAR struct twai_dev_s *priv = dev->cd_priv;
+  struct twai_dev_s *priv = dev->cd_priv;
   uint32_t regval = twai_getreg(TWAI_STATUS_REG);
 
   caninfo("TWAI%" PRIu8 " txempty: %d\n", priv->port,
@@ -900,10 +900,10 @@ static bool esp32twai_txempty(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static int esp32twai_interrupt(int irq, void *context, FAR void *arg)
+static int esp32twai_interrupt(int irq, void *context, void *arg)
 {
 #ifdef CONFIG_ESP32_TWAI0
-  FAR struct can_dev_s *dev = (FAR struct can_dev_s *)arg;
+  struct can_dev_s *dev = (struct can_dev_s *)arg;
   struct can_hdr_s hdr;
   uint8_t data[8];
   uint32_t frame_info;
@@ -1012,7 +1012,7 @@ static int esp32twai_interrupt(int irq, void *context, FAR void *arg)
  ****************************************************************************/
 
 static void esp32twai_set_acc_filter(uint32_t code, uint32_t mask,
-                                       bool single_filter)
+                                     bool single_filter)
 {
   uint32_t regval;
   uint32_t code_swapped = __builtin_bswap32(code);
@@ -1099,7 +1099,7 @@ static void esp32twai_set_acc_filter(uint32_t code, uint32_t mask,
 static int twai_baud_rate(struct twai_dev_s *priv, int rate, int clock,
                           int sjw, int sampl_pt, int flags)
 {
-  FAR const struct can_bittiming_const *timing =
+  const struct can_bittiming_const *timing =
       &esp32_twai_bittiming_const;
   int best_error = 1000000000;
   int error;
@@ -1208,9 +1208,9 @@ static int twai_baud_rate(struct twai_dev_s *priv, int rate, int clock,
  *
  ****************************************************************************/
 
-FAR struct can_dev_s *esp32_twaiinitialize(int port)
+struct can_dev_s *esp32_twaiinitialize(int port)
 {
-  FAR struct can_dev_s *twaidev;
+  struct can_dev_s *twaidev;
   irqstate_t flags;
 
   caninfo("TWAI%" PRIu8 "\n",  port);
