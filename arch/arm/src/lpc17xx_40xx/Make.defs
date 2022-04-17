@@ -20,8 +20,7 @@
 
 # Common ARM and Cortex-M3 files
 
-CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S
-CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S arm_exception.S
+CMN_ASRCS  = arm_testset.S arm_fetchadd.S vfork.S arm_exception.S
 
 CMN_CSRCS  = arm_assert.c arm_blocktask.c arm_createstack.c arm_vectors.c
 CMN_CSRCS += arm_mdelay.c arm_udelay.c arm_exit.c arm_initialize.c arm_memfault.c
@@ -31,7 +30,8 @@ CMN_CSRCS += arm_releasestack.c arm_reprioritizertr.c arm_schedulesigaction.c
 CMN_CSRCS += arm_sigdeliver.c arm_stackframe.c arm_trigger_irq.c
 CMN_CSRCS += arm_unblocktask.c arm_usestack.c arm_doirq.c arm_hardfault.c
 CMN_CSRCS += arm_svcall.c arm_checkstack.c arm_vfork.c arm_switchcontext.c
-CMN_CSRCS += arm_systemreset.c arm_puts.c arm_tcbinfo.c arm_perf.c
+CMN_CSRCS += arm_saveusercontext.c arm_fullcontextrestore.c arm_systemreset.c
+CMN_CSRCS += arm_puts.c arm_tcbinfo.c arm_perf.c
 
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
 CMN_CSRCS += arm_backtrace_thumb.c

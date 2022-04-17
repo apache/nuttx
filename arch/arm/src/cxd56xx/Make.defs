@@ -18,22 +18,20 @@
 #
 ############################################################################
 
-CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S
-CMN_ASRCS += vfork.S arm_exception.S
+CMN_ASRCS  = vfork.S arm_exception.S
 
 ifneq ($(CONFIG_CXD56_TESTSET),y)
 CMN_ASRCS += arm_testset.S
 endif
 
-CMN_CSRCS  = arm_assert.c arm_blocktask.c
-CMN_CSRCS += arm_createstack.c arm_exit.c
+CMN_CSRCS  = arm_assert.c arm_blocktask.c arm_createstack.c arm_exit.c
 CMN_CSRCS += arm_initialize.c arm_initialstate.c arm_interruptcontext.c
 CMN_CSRCS += arm_memfault.c arm_modifyreg8.c arm_modifyreg16.c arm_modifyreg32.c
 CMN_CSRCS += arm_releasepending.c arm_releasestack.c arm_reprioritizertr.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_stackframe.c
 CMN_CSRCS += arm_unblocktask.c arm_usestack.c arm_doirq.c arm_hardfault.c
-CMN_CSRCS += arm_svcall.c arm_vfork.c arm_switchcontext.c arm_puts.c
-CMN_CSRCS += arm_tcbinfo.c arm_vectors.c
+CMN_CSRCS += arm_svcall.c arm_vfork.c arm_switchcontext.c arm_saveusercontext.c
+CMN_CSRCS += arm_fullcontextrestore.c arm_puts.c arm_tcbinfo.c arm_vectors.c
 
 ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
 CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
