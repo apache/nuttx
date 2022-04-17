@@ -89,7 +89,7 @@
  *
  ****************************************************************************/
 
-int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
+int up_create_stack(struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 {
 #ifdef CONFIG_TLS
   /* The allocated stack size must not exceed the maximum possible for the
@@ -228,7 +228,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
  ****************************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
-void up_stack_color(FAR void *stackbase, size_t nbytes)
+void up_stack_color(void *stackbase, size_t nbytes)
 {
   uint32_t *stkptr;
   uintptr_t stkend;

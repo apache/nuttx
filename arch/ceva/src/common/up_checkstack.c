@@ -59,7 +59,7 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size);
 
 static size_t do_stackcheck(uintptr_t alloc, size_t size)
 {
-  FAR uint32_t *ptr;
+  uint32_t *ptr;
   size_t nwords;
   size_t mark;
 
@@ -71,7 +71,7 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size)
    * that does not have the magic value is the high water mark.
    */
 
-  for (ptr = (FAR uint32_t *)alloc, mark = nwords;
+  for (ptr = (uint32_t *)alloc, mark = nwords;
        *ptr == STACK_COLOR && mark > 0;
        ptr++, mark--);
 
@@ -91,7 +91,7 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size)
       int i;
       int j;
 
-      ptr = (FAR uint32_t *)start;
+      ptr = (uint32_t *)start;
       for (i = 0; i < nwords; i += 64)
         {
           for (j = 0; j < 64; j++)
@@ -139,13 +139,13 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size)
  *
  ****************************************************************************/
 
-size_t up_check_tcbstack(FAR struct tcb_s *tcb)
+size_t up_check_tcbstack(struct tcb_s *tcb)
 {
   return do_stackcheck((uintptr_t)tcb->stack_alloc_ptr,
                        tcb->adj_stack_size);
 }
 
-ssize_t up_check_tcbstack_remain(FAR struct tcb_s *tcb)
+ssize_t up_check_tcbstack_remain(struct tcb_s *tcb)
 {
   return tcb->adj_stack_size - up_check_tcbstack(tcb);
 }

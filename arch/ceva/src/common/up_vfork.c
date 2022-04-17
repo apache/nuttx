@@ -111,7 +111,7 @@ pid_t up_vfork(const uint32_t *regs)
 
   /* Allocate the stack for the TCB */
 
-  ret = up_create_stack((FAR struct tcb_s *)child, stacksize + argsize,
+  ret = up_create_stack((struct tcb_s *)child, stacksize + argsize,
                         parent->flags & TCB_FLAG_TTYPE_MASK);
   if (ret != OK)
     {
@@ -122,7 +122,7 @@ pid_t up_vfork(const uint32_t *regs)
 
   /* Allocate the memory and copy argument from parent task */
 
-  argv = up_stack_frame((FAR struct tcb_s *)child, argsize);
+  argv = up_stack_frame((struct tcb_s *)child, argsize);
   memcpy(argv, parent->stack_base_ptr, argsize);
 
   /* How much of the parent's stack was utilized?  The CEVA uses

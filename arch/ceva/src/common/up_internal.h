@@ -266,8 +266,8 @@ uint32_t *up_doirq(int irq, uint32_t *regs);
 
 /* Exception Handlers */
 
-int  up_svcall(int irq, FAR void *context, FAR void *arg);
-int  up_hardfault(int irq, FAR void *context, FAR void *arg);
+int  up_svcall(int irq, void *context, void *arg);
+int  up_hardfault(int irq, void *context, void *arg);
 
 void up_svcall_handler(void);
 
@@ -325,7 +325,7 @@ void up_usbuninitialize(void);
 #endif
 
 #ifdef CONFIG_STACK_COLORATION
-void up_stack_color(FAR void *stackbase, size_t nbytes);
+void up_stack_color(void *stackbase, size_t nbytes);
 #endif
 
 #undef EXTERN
