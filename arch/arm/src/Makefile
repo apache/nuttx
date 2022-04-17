@@ -109,9 +109,9 @@ VPATH += common
 VPATH += $(ARCH_SUBDIR)
 
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_IAR),y)
-  VPATH += $(ARCH_SUBDIR)$(DELIM)iar
+  VPATH += common$(DELIM)iar
 else # ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
-  VPATH += $(ARCH_SUBDIR)$(DELIM)gnu
+  VPATH += common$(DELIM)gnu
 endif
 
 all: $(HEAD_OBJ) $(BIN)
