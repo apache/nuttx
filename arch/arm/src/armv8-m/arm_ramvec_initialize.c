@@ -128,7 +128,7 @@ void arm_ramvec_initialize(void)
    * protect against NULL pointer references.
    */
 
-  src  = (const CODE up_vector_t *)getreg32(NVIC_VECTAB);
+  src  = (const up_vector_t *)getreg32(NVIC_VECTAB);
   dest = g_ram_vectors;
 
   irqinfo("src=%p dest=%p\n", src, dest);

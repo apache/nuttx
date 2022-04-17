@@ -46,7 +46,7 @@
  *
  ****************************************************************************/
 
-void arm_dumpnvic(FAR const char *msg)
+void arm_dumpnvic(const char *msg)
 {
 #ifdef CONFIG_DEBUG_INFO
   irqstate_t flags;

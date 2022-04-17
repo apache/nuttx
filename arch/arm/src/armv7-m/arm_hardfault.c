@@ -71,7 +71,7 @@
  *
  ****************************************************************************/
 
-int arm_hardfault(int irq, FAR void *context, FAR void *arg)
+int arm_hardfault(int irq, void *context, void *arg)
 {
   uint32_t hfsr = getreg32(NVIC_HFAULTS);
   uint32_t cfsr = getreg32(NVIC_CFAULTS);
