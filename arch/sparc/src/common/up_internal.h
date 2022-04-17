@@ -206,11 +206,11 @@ void up_dumpstate(void);
 
 /* Software interrupt 0 handler */
 
-int up_swint0(int irq, FAR void *context, FAR void *arg);
+int up_swint0(int irq, void *context, void *arg);
 
 /* Software interrupt 1 handler */
 
-int up_swint1(int irq, FAR void *context, FAR void *arg);
+int up_swint1(int irq, void *context, void *arg);
 
 /* Signals */
 
@@ -265,7 +265,7 @@ void up_usbuninitialize(void);
 
 /* Debug ********************************************************************/
 #ifdef CONFIG_STACK_COLORATION
-void up_stack_color(FAR void *stackbase, size_t nbytes);
+void up_stack_color(void *stackbase, size_t nbytes);
 #endif
 
 #endif /* __ASSEMBLY__ */

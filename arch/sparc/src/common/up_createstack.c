@@ -77,7 +77,7 @@
  *
  ****************************************************************************/
 
-int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
+int up_create_stack(struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 {
   /* Is there already a stack allocated of a different size?  Because of
    * alignment issues, stack_size might erroneously appear to be of a
