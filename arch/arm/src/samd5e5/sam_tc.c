@@ -657,7 +657,7 @@ TC_HANDLE sam_tc_allocate(int tc, int frequency)
       /* Initialize the TC driver structure */
 
       priv->flags = 0;
-      (void)nxsem_init(&priv->exclsem, 0, 1);
+      nxsem_init(&priv->exclsem, 0, 1);
 
       /* Enable clocking to the TC module in PCHCTRL */
 

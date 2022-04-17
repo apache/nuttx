@@ -3683,9 +3683,9 @@ static int cxd56_init_worker(FAR struct audio_lowerhalf_s *dev)
 
   pthread_attr_init(&t_attr);
   sparam.sched_priority = sched_get_priority_max(SCHED_FIFO) - 3;
-  (void)pthread_attr_setschedparam(&t_attr, &sparam);
-  (void)pthread_attr_setstacksize(&t_attr,
-                                  CONFIG_CXD56_AUDIO_WORKER_STACKSIZE);
+  pthread_attr_setschedparam(&t_attr, &sparam);
+  pthread_attr_setstacksize(&t_attr,
+                            CONFIG_CXD56_AUDIO_WORKER_STACKSIZE);
 
   ret = pthread_create(&priv->threadid, &t_attr, cxd56_workerthread,
                        (pthread_addr_t)priv);

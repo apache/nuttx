@@ -132,7 +132,7 @@ int xx3803_watchdog_initialize(void)
 
   /*  Close watchdog as it is not needed here anymore */
 
-  (void)file_close(&filestruct);
+  file_close(&filestruct);
 
   if (ret < 0)
     {

@@ -163,7 +163,7 @@ static int uart_takesem(FAR sem_t *sem, bool errout)
  * Name: uart_givesem
  ****************************************************************************/
 
-#define uart_givesem(sem) (void)nxsem_post(sem)
+#define uart_givesem(sem) nxsem_post(sem)
 
 /****************************************************************************
  * Name: uart_pollnotify

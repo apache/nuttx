@@ -236,7 +236,7 @@ uint32_t *arm_syscall(uint32_t *regs)
            */
 
           rtcb->flags          &= ~TCB_FLAG_SYSCALL;
-          (void)nxsig_unmask_pendingsignal();
+          nxsig_unmask_pendingsignal();
         }
         break;
 #endif

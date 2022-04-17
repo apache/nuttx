@@ -689,7 +689,7 @@ static void spi_dmatxwait(FAR struct stm32l5_spidev_s *priv)
 #ifdef CONFIG_STM32L5_SPI_DMA
 static inline void spi_dmarxwakeup(FAR struct stm32l5_spidev_s *priv)
 {
-  (void)nxsem_post(&priv->rxsem);
+  nxsem_post(&priv->rxsem);
 }
 #endif
 
@@ -704,7 +704,7 @@ static inline void spi_dmarxwakeup(FAR struct stm32l5_spidev_s *priv)
 #ifdef CONFIG_STM32L5_SPI_DMA
 static inline void spi_dmatxwakeup(FAR struct stm32l5_spidev_s *priv)
 {
-  (void)nxsem_post(&priv->txsem);
+  nxsem_post(&priv->txsem);
 }
 #endif
 
@@ -953,7 +953,7 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
     }
   else
     {
-      (void)nxsem_post(&priv->exclsem);
+      nxsem_post(&priv->exclsem);
       ret = OK;
     }
 

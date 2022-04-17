@@ -286,8 +286,8 @@ void ameba_wdt_initialize(void)
   /* Initialize the driver state structure. */
 
   priv->ops = &g_wdgops;
-  (void)watchdog_register(CONFIG_WATCHDOG_DEVPATH,
-                          (FAR struct watchdog_lowerhalf_s *)priv);
+  watchdog_register(CONFIG_WATCHDOG_DEVPATH,
+                    (FAR struct watchdog_lowerhalf_s *)priv);
 }
 
 #endif /* CONFIG_WATCHDOG */

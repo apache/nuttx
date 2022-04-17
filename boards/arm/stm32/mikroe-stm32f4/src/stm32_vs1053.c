@@ -170,7 +170,7 @@ void up_vs1053initialize(FAR struct spi_dev_s * spi)
    *        until the RST line is asserted.
    */
 
-  /* (void)stm32_configgpio(GPIO_VS1053_RST); */
+  /* stm32_configgpio(GPIO_VS1053_RST); */
 
   /* Initialize the VS1053 DREQ GPIO line */
 

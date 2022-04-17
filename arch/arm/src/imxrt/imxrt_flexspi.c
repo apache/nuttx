@@ -581,7 +581,7 @@ void imxrt_flexspi_get_default_config(struct flexspi_config_s *config)
 {
   /* Initializes the configure structure to zero */
 
-  (void)memset(config, 0, sizeof(*config));
+  memset(config, 0, sizeof(*config));
 
   config->rx_sample_clock = FLEXSPI_READ_SAMPLE_CLK_LOOPBACK_FROM_DQS_PAD;
   config->enable_sck_free_running     = false;
@@ -606,8 +606,8 @@ void imxrt_flexspi_get_default_config(struct flexspi_config_s *config)
   config->ahb_config.ahb_grant_timeout_cycle  = 0xff;
   config->ahb_config.ahb_bus_timeout_cycle    = 0xffff;
   config->ahb_config.resume_wait_cycle        = 0x20;
-  (void)memset(config->ahb_config.buffer, 0,
-               sizeof(config->ahb_config.buffer));
+  memset(config->ahb_config.buffer, 0,
+         sizeof(config->ahb_config.buffer));
 
   /* Use invalid master ID 0xF and buffer size 0 for the first several
    * buffers.

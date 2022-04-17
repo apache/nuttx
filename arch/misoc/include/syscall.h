@@ -90,7 +90,7 @@
  */
 
 #define SYS_syscall_return (3)
-#define up_syscall_return() (void)sys_call0(SYS_syscall_return)
+#define up_syscall_return() sys_call0(SYS_syscall_return)
 
 #endif
 

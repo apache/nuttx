@@ -214,7 +214,7 @@ void up_enable_irq(int irq)
 
       /* Read INTPTEN back to make it sure */
 
-      (void)getreg32(RV32M1_EU_INTPTEN);
+      getreg32(RV32M1_EU_INTPTEN);
     }
 }
 

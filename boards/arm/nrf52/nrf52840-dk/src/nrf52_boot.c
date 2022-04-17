@@ -80,6 +80,6 @@ void board_late_initialize(void)
 {
   /* Perform board-specific initialization */
 
-  (void)nrf52_bringup();
+  nrf52_bringup();
 }
 #endif
