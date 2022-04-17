@@ -50,7 +50,7 @@
 
 void up_release_pending(void)
 {
-  FAR struct tcb_s *rtcb = this_task();
+  struct tcb_s *rtcb = this_task();
 
   sinfo("From TCB=%p\n", rtcb);
 
