@@ -101,8 +101,8 @@
 int board_app_initialize(uintptr_t arg)
 {
 #ifdef HAVE_SST25
-  FAR struct spi_dev_s *spi;
-  FAR struct mtd_dev_s *mtd;
+  struct spi_dev_s *spi;
+  struct mtd_dev_s *mtd;
   int ret;
 
   /* Get the SPI port */

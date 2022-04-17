@@ -219,47 +219,47 @@ struct pic32mz_i2c_priv_s
  ****************************************************************************/
 
 static inline uint32_t
-  pic32mz_i2c_getreg(FAR struct pic32mz_i2c_priv_s *priv,
+  pic32mz_i2c_getreg(struct pic32mz_i2c_priv_s *priv,
                      uint8_t offset);
-static inline void pic32mz_i2c_putreg(FAR struct pic32mz_i2c_priv_s *priv,
+static inline void pic32mz_i2c_putreg(struct pic32mz_i2c_priv_s *priv,
                                       uint8_t offset, uint32_t value);
-static inline void pic32mz_i2c_modifyreg(FAR struct pic32mz_i2c_priv_s *priv,
+static inline void pic32mz_i2c_modifyreg(struct pic32mz_i2c_priv_s *priv,
                                          uint8_t offset, uint32_t clearbits,
                                          uint32_t setbits);
 
 #ifdef CONFIG_PICM32MZ_I2C_DYNTIMEO
-static useconds_t pic32mz_i2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs);
+static useconds_t pic32mz_i2c_tousecs(int msgc, struct i2c_msg_s *msgs);
 #endif /* CONFIG_PIC32MZ_I2C_DYNTIMEO */
 
 static inline int
-  pic32mz_i2c_sem_waitdone(FAR struct pic32mz_i2c_priv_s *priv);
+  pic32mz_i2c_sem_waitdone(struct pic32mz_i2c_priv_s *priv);
 static inline void
-  pic32mz_i2c_sem_waitidle(FAR struct pic32mz_i2c_priv_s *priv);
-static inline void pic32mz_i2c_sem_post(FAR struct pic32mz_i2c_priv_s *priv);
-static inline void pic32mz_i2c_sem_init(FAR struct pic32mz_i2c_priv_s *priv);
+  pic32mz_i2c_sem_waitidle(struct pic32mz_i2c_priv_s *priv);
+static inline void pic32mz_i2c_sem_post(struct pic32mz_i2c_priv_s *priv);
+static inline void pic32mz_i2c_sem_init(struct pic32mz_i2c_priv_s *priv);
 static inline void
-  pic32mz_i2c_sem_destroy(FAR struct pic32mz_i2c_priv_s *priv);
+  pic32mz_i2c_sem_destroy(struct pic32mz_i2c_priv_s *priv);
 
 #ifdef CONFIG_I2C_TRACE
-static void pic32mz_i2c_tracereset(FAR struct pic32mz_i2c_priv_s *priv);
-static void pic32mz_i2c_tracenew(FAR struct pic32mz_i2c_priv_s *priv,
+static void pic32mz_i2c_tracereset(struct pic32mz_i2c_priv_s *priv);
+static void pic32mz_i2c_tracenew(struct pic32mz_i2c_priv_s *priv,
                                  uint32_t status);
 static void
-  pic32mz_i2c_traceevent(FAR struct pic32mz_i2c_priv_s *priv,
+  pic32mz_i2c_traceevent(struct pic32mz_i2c_priv_s *priv,
                          enum pic32mz_trace_e event, uint32_t parm);
-static void pic32mz_i2c_tracedump(FAR struct pic32mz_i2c_priv_s *priv);
+static void pic32mz_i2c_tracedump(struct pic32mz_i2c_priv_s *priv);
 #endif /* CONFIG_I2C_TRACE */
 
 static inline int
-  pic32mz_i2c_setbaudrate(FAR struct pic32mz_i2c_priv_s *priv,
+  pic32mz_i2c_setbaudrate(struct pic32mz_i2c_priv_s *priv,
                           uint32_t frequency);
 static inline void
-  pic32mz_i2c_send_start(FAR struct pic32mz_i2c_priv_s *priv);
+  pic32mz_i2c_send_start(struct pic32mz_i2c_priv_s *priv);
 static inline void
-  pic32mz_i2c_send_stop(FAR struct pic32mz_i2c_priv_s *priv);
+  pic32mz_i2c_send_stop(struct pic32mz_i2c_priv_s *priv);
 static inline void
-  pic32mz_i2c_send_repeatedstart(FAR struct pic32mz_i2c_priv_s *priv);
-static inline void pic32mz_i2c_send_ack(FAR struct pic32mz_i2c_priv_s *priv,
+  pic32mz_i2c_send_repeatedstart(struct pic32mz_i2c_priv_s *priv);
+static inline void pic32mz_i2c_send_ack(struct pic32mz_i2c_priv_s *priv,
                                         bool ack);
 static inline void pic32mz_i2c_transmitbyte(struct pic32mz_i2c_priv_s *priv,
                                             uint8_t data);
@@ -267,23 +267,23 @@ static inline uint32_t
   pic32mz_i2c_receivebyte(struct pic32mz_i2c_priv_s *priv);
 
 static inline uint32_t
-  pic32mz_i2c_getstatus(FAR struct pic32mz_i2c_priv_s *priv);
+  pic32mz_i2c_getstatus(struct pic32mz_i2c_priv_s *priv);
 static inline bool
-  pic32mz_i2c_master_inactive(FAR struct pic32mz_i2c_priv_s *priv);
+  pic32mz_i2c_master_inactive(struct pic32mz_i2c_priv_s *priv);
 
 static int pic32mz_i2c_isr_process(struct pic32mz_i2c_priv_s * priv);
 
 #ifndef CONFIG_I2C_POLLED
-static int pic32mz_i2c_isr(int irq, void *context, FAR void *arg);
+static int pic32mz_i2c_isr(int irq, void *context, void *arg);
 #endif /* !CONFIG_I2C_POLLED */
 
-static int pic32mz_i2c_init(FAR struct pic32mz_i2c_priv_s *priv);
-static int pic32mz_i2c_deinit(FAR struct pic32mz_i2c_priv_s *priv);
+static int pic32mz_i2c_init(struct pic32mz_i2c_priv_s *priv);
+static int pic32mz_i2c_deinit(struct pic32mz_i2c_priv_s *priv);
 
-static int pic32mz_i2c_transfer(FAR struct i2c_master_s *dev,
-                                FAR struct i2c_msg_s *msgs, int count);
+static int pic32mz_i2c_transfer(struct i2c_master_s *dev,
+                                struct i2c_msg_s *msgs, int count);
 #ifdef CONFIG_I2C_RESET
-static int pic32mz_i2c_reset(FAR struct i2c_master_s *dev);
+static int pic32mz_i2c_reset(struct i2c_master_s *dev);
 #endif
 
 /****************************************************************************
@@ -465,7 +465,7 @@ static struct pic32mz_i2c_priv_s pic32mz_i2c5_priv =
  ****************************************************************************/
 
 #ifdef CONFIG_I2C_TRACE
-static void pic32mz_i2c_traceclear(FAR struct pic32mz_i2c_priv_s *priv)
+static void pic32mz_i2c_traceclear(struct pic32mz_i2c_priv_s *priv)
 {
   struct pic32mz_trace_s *trace = &priv->trace[priv->tndx];
 
@@ -476,7 +476,7 @@ static void pic32mz_i2c_traceclear(FAR struct pic32mz_i2c_priv_s *priv)
   trace->time   = 0;              /* Time of first status or event */
 }
 
-static void pic32mz_i2c_tracereset(FAR struct pic32mz_i2c_priv_s *priv)
+static void pic32mz_i2c_tracereset(struct pic32mz_i2c_priv_s *priv)
 {
   /* Reset the trace info for a new data collection */
 
@@ -485,7 +485,7 @@ static void pic32mz_i2c_tracereset(FAR struct pic32mz_i2c_priv_s *priv)
   pic32mz_i2c_traceclear(priv);
 }
 
-static void pic32mz_i2c_tracenew(FAR struct pic32mz_i2c_priv_s *priv,
+static void pic32mz_i2c_tracenew(struct pic32mz_i2c_priv_s *priv,
                                 uint32_t status)
 {
   struct pic32mz_trace_s *trace = &priv->trace[priv->tndx];
@@ -525,7 +525,7 @@ static void pic32mz_i2c_tracenew(FAR struct pic32mz_i2c_priv_s *priv,
     }
 }
 
-static void pic32mz_i2c_traceevent(FAR struct pic32mz_i2c_priv_s *priv,
+static void pic32mz_i2c_traceevent(struct pic32mz_i2c_priv_s *priv,
                                    enum pic32mz_trace_e event, uint32_t parm)
 {
   struct pic32mz_trace_s *trace;
@@ -552,7 +552,7 @@ static void pic32mz_i2c_traceevent(FAR struct pic32mz_i2c_priv_s *priv,
     }
 }
 
-static void pic32mz_i2c_tracedump(FAR struct pic32mz_i2c_priv_s *priv)
+static void pic32mz_i2c_tracedump(struct pic32mz_i2c_priv_s *priv)
 {
   struct pic32mz_trace_s *trace;
   int i;
@@ -581,7 +581,7 @@ static void pic32mz_i2c_tracedump(FAR struct pic32mz_i2c_priv_s *priv)
  ****************************************************************************/
 
 static inline uint32_t
-  pic32mz_i2c_getreg(FAR struct pic32mz_i2c_priv_s *priv, uint8_t offset)
+  pic32mz_i2c_getreg(struct pic32mz_i2c_priv_s *priv, uint8_t offset)
 {
   return getreg32(priv->config->base + offset);
 }
@@ -594,7 +594,7 @@ static inline uint32_t
  *
  ****************************************************************************/
 
-static inline void pic32mz_i2c_putreg(FAR struct pic32mz_i2c_priv_s *priv,
+static inline void pic32mz_i2c_putreg(struct pic32mz_i2c_priv_s *priv,
                                       uint8_t offset, uint32_t value)
 {
   putreg32(value, priv->config->base + offset);
@@ -608,7 +608,7 @@ static inline void pic32mz_i2c_putreg(FAR struct pic32mz_i2c_priv_s *priv,
  *
  ****************************************************************************/
 
-static inline void pic32mz_i2c_modifyreg(FAR struct pic32mz_i2c_priv_s *priv,
+static inline void pic32mz_i2c_modifyreg(struct pic32mz_i2c_priv_s *priv,
                                          uint8_t offset, uint32_t clearbits,
                                          uint32_t setbits)
 {
@@ -625,7 +625,7 @@ static inline void pic32mz_i2c_modifyreg(FAR struct pic32mz_i2c_priv_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_PIC32MZ_I2C_DYNTIMEO
-static useconds_t pic32mz_i2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs)
+static useconds_t pic32mz_i2c_tousecs(int msgc, struct i2c_msg_s *msgs)
 {
   size_t bytecount = 0;
   int i;
@@ -658,7 +658,7 @@ static useconds_t pic32mz_i2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs)
 
 #ifndef CONFIG_I2C_POLLED
 static inline int
-  pic32mz_i2c_sem_waitdone(FAR struct pic32mz_i2c_priv_s *priv)
+  pic32mz_i2c_sem_waitdone(struct pic32mz_i2c_priv_s *priv)
 {
   struct timespec abstime;
   irqstate_t flags;
@@ -731,7 +731,7 @@ static inline int
 }
 #else
 static inline int
-  pic32mz_i2c_sem_waitdone(FAR struct pic32mz_i2c_priv_s *priv)
+  pic32mz_i2c_sem_waitdone(struct pic32mz_i2c_priv_s *priv)
 {
   clock_t timeout;
   clock_t start;
@@ -791,7 +791,7 @@ static inline int
  ****************************************************************************/
 
 static inline void
-  pic32mz_i2c_sem_waitidle(FAR struct pic32mz_i2c_priv_s *priv)
+  pic32mz_i2c_sem_waitidle(struct pic32mz_i2c_priv_s *priv)
 {
   uint32_t timeout;
   uint32_t start;
@@ -838,7 +838,7 @@ static inline void
  *
  ****************************************************************************/
 
-static inline void pic32mz_i2c_sem_post(FAR struct pic32mz_i2c_priv_s *priv)
+static inline void pic32mz_i2c_sem_post(struct pic32mz_i2c_priv_s *priv)
 {
   nxsem_post(&priv->sem_excl);
 }
@@ -851,7 +851,7 @@ static inline void pic32mz_i2c_sem_post(FAR struct pic32mz_i2c_priv_s *priv)
  *
  ****************************************************************************/
 
-static inline void pic32mz_i2c_sem_init(FAR struct pic32mz_i2c_priv_s *priv)
+static inline void pic32mz_i2c_sem_init(struct pic32mz_i2c_priv_s *priv)
 {
   nxsem_init(&priv->sem_excl, 0, 1);
 
@@ -874,7 +874,7 @@ static inline void pic32mz_i2c_sem_init(FAR struct pic32mz_i2c_priv_s *priv)
  ****************************************************************************/
 
 static inline void
-  pic32mz_i2c_sem_destroy(FAR struct pic32mz_i2c_priv_s *priv)
+  pic32mz_i2c_sem_destroy(struct pic32mz_i2c_priv_s *priv)
 {
   nxsem_destroy(&priv->sem_excl);
 #ifndef CONFIG_I2C_POLLED
@@ -1279,7 +1279,7 @@ static int pic32mz_i2c_isr_process(struct pic32mz_i2c_priv_s *priv)
  ****************************************************************************/
 
 #ifndef CONFIG_I2C_POLLED
-static int pic32mz_i2c_isr(int irq, void *context, FAR void *arg)
+static int pic32mz_i2c_isr(int irq, void *context, void *arg)
 {
   struct pic32mz_i2c_priv_s *priv = (struct pic32mz_i2c_priv_s *)arg;
 
@@ -1297,7 +1297,7 @@ static int pic32mz_i2c_isr(int irq, void *context, FAR void *arg)
  ****************************************************************************/
 
 static inline int
-  pic32mz_i2c_setbaudrate(FAR struct pic32mz_i2c_priv_s *priv,
+  pic32mz_i2c_setbaudrate(struct pic32mz_i2c_priv_s *priv,
                           uint32_t frequency)
 {
   uint32_t baudrate;
@@ -1347,7 +1347,7 @@ static inline int
  ****************************************************************************/
 
 static inline void
-  pic32mz_i2c_send_start(FAR struct pic32mz_i2c_priv_s *priv)
+  pic32mz_i2c_send_start(struct pic32mz_i2c_priv_s *priv)
 {
   pic32mz_i2c_putreg(priv, PIC32MZ_I2C_CONSET_OFFSET, I2C_CON_SEN);
 
@@ -1367,7 +1367,7 @@ static inline void
  *
  ****************************************************************************/
 
-static inline void pic32mz_i2c_send_stop(FAR struct pic32mz_i2c_priv_s *priv)
+static inline void pic32mz_i2c_send_stop(struct pic32mz_i2c_priv_s *priv)
 {
   pic32mz_i2c_putreg(priv, PIC32MZ_I2C_CONSET_OFFSET, I2C_CON_PEN);
 
@@ -1388,7 +1388,7 @@ static inline void pic32mz_i2c_send_stop(FAR struct pic32mz_i2c_priv_s *priv)
  ****************************************************************************/
 
 static inline void
-  pic32mz_i2c_send_repeatedstart(FAR struct pic32mz_i2c_priv_s *priv)
+  pic32mz_i2c_send_repeatedstart(struct pic32mz_i2c_priv_s *priv)
 {
   pic32mz_i2c_putreg(priv, PIC32MZ_I2C_CONSET_OFFSET, I2C_CON_RSEN);
 
@@ -1408,7 +1408,7 @@ static inline void
  *
  ****************************************************************************/
 
-static inline void pic32mz_i2c_send_ack(FAR struct pic32mz_i2c_priv_s *priv,
+static inline void pic32mz_i2c_send_ack(struct pic32mz_i2c_priv_s *priv,
                                         bool ack)
 {
   if (ack)
@@ -1486,7 +1486,7 @@ static inline uint32_t
  ****************************************************************************/
 
 static inline bool
-  pic32mz_i2c_master_inactive(FAR struct pic32mz_i2c_priv_s *priv)
+  pic32mz_i2c_master_inactive(struct pic32mz_i2c_priv_s *priv)
 {
   uint32_t con;
 
@@ -1504,7 +1504,7 @@ static inline bool
  ****************************************************************************/
 
 static inline uint32_t
-  pic32mz_i2c_getstatus(FAR struct pic32mz_i2c_priv_s *priv)
+  pic32mz_i2c_getstatus(struct pic32mz_i2c_priv_s *priv)
 {
   return pic32mz_i2c_getreg(priv, PIC32MZ_I2C_STAT_OFFSET);
 }
@@ -1517,7 +1517,7 @@ static inline uint32_t
  *
  ****************************************************************************/
 
-static int pic32mz_i2c_init(FAR struct pic32mz_i2c_priv_s *priv)
+static int pic32mz_i2c_init(struct pic32mz_i2c_priv_s *priv)
 {
   /* Force a frequency update */
 
@@ -1550,7 +1550,7 @@ static int pic32mz_i2c_init(FAR struct pic32mz_i2c_priv_s *priv)
  *
  ****************************************************************************/
 
-static int pic32mz_i2c_deinit(FAR struct pic32mz_i2c_priv_s *priv)
+static int pic32mz_i2c_deinit(struct pic32mz_i2c_priv_s *priv)
 {
   /* Disable I2C */
 
@@ -1580,10 +1580,10 @@ static int pic32mz_i2c_deinit(FAR struct pic32mz_i2c_priv_s *priv)
  *
  ****************************************************************************/
 
-static int pic32mz_i2c_transfer(FAR struct i2c_master_s *dev,
-                                FAR struct i2c_msg_s *msgs, int count)
+static int pic32mz_i2c_transfer(struct i2c_master_s *dev,
+                                struct i2c_msg_s *msgs, int count)
 {
-  FAR struct pic32mz_i2c_priv_s *priv = (struct pic32mz_i2c_priv_s *)dev;
+  struct pic32mz_i2c_priv_s *priv = (struct pic32mz_i2c_priv_s *)dev;
   uint32_t status = 0;
   int ret;
 
@@ -1702,9 +1702,9 @@ static int pic32mz_i2c_transfer(FAR struct i2c_master_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
-static int pic32mz_i2c_reset(FAR struct i2c_master_s *dev)
+static int pic32mz_i2c_reset(struct i2c_master_s *dev)
 {
-  FAR struct pic32mz_i2c_priv_s *priv = (struct pic32mz_i2c_priv_s *)dev;
+  struct pic32mz_i2c_priv_s *priv = (struct pic32mz_i2c_priv_s *)dev;
   unsigned int clock_count;
   unsigned int stretch_count;
   uint32_t frequency;
@@ -1829,7 +1829,7 @@ out:
  *
  ****************************************************************************/
 
-FAR struct i2c_master_s *pic32mz_i2cbus_initialize(int port)
+struct i2c_master_s *pic32mz_i2cbus_initialize(int port)
 {
   struct pic32mz_i2c_priv_s * priv = NULL;
   irqstate_t flags;
@@ -1895,9 +1895,9 @@ FAR struct i2c_master_s *pic32mz_i2cbus_initialize(int port)
  *
  ****************************************************************************/
 
-int pic32mz_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
+int pic32mz_i2cbus_uninitialize(struct i2c_master_s *dev)
 {
-  FAR struct pic32mz_i2c_priv_s *priv = (struct pic32mz_i2c_priv_s *)dev;
+  struct pic32mz_i2c_priv_s *priv = (struct pic32mz_i2c_priv_s *)dev;
   irqstate_t flags;
 
   DEBUGASSERT(dev);

@@ -124,7 +124,7 @@ static const struct led_setting_s g_ledoffvalues[LED_NVALUES] =
  * Name: pic32mz_setleds
  ****************************************************************************/
 
-static void pic32mz_setleds(FAR const struct led_setting_s *setting)
+static void pic32mz_setleds(const struct led_setting_s *setting)
 {
   if (setting->led1 != LED_NC)
     {

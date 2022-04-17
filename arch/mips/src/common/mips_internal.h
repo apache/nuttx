@@ -215,7 +215,7 @@ uint32_t *up_doirq(int irq, uint32_t *regs);
 
 /* Software interrupt 0 handler */
 
-int up_swint0(int irq, FAR void *context, FAR void *arg);
+int up_swint0(int irq, void *context, void *arg);
 
 /* Signals */
 
