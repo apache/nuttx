@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/arm/vfork.S
+ * arch/arm/src/common/vfork.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -26,16 +26,8 @@
 
 #include "arm_vfork.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Symbols
- ****************************************************************************/
-
+	.syntax	unified
 	.file	"vfork.S"
-	.globl	up_vfork
 
 /****************************************************************************
  * Public Functions
@@ -85,6 +77,7 @@
 
 	.globl	vfork
 	.type	vfork, function
+
 vfork:
 	/* Create a stack frame */
 
@@ -94,31 +87,32 @@ vfork:
 	/* CPU registers */
 	/* Save the volatile registers */
 
-	str		r4, [sp, #VFORK_R4_OFFSET]
-	str		r5, [sp, #VFORK_R5_OFFSET]
-	str		r6, [sp, #VFORK_R6_OFFSET]
-	str		r7, [sp, #VFORK_R7_OFFSET]
-	str		r8, [sp, #VFORK_R8_OFFSET]
-	str		r9, [sp, #VFORK_R9_OFFSET]
-	str		r10, [sp, #VFORK_R10_OFFSET]
-
-	/* Save the frame pointer, stack pointer, and return address */
-
-	str		fp, [sp, #VFORK_FP_OFFSET]
-	str		r0, [sp, #VFORK_SP_OFFSET]
-	str		lr, [sp, #VFORK_LR_OFFSET]
-
-	/* Floating point registers (not yet) */
+	mov		r1, sp
+	stmia		r1!, {r4-r7}		/* Save r4-r7 in the structure */
+	mov		r4, r8			/* Copy high registers to low registers */
+	mov		r5, r9
+	mov		r6, r10
+	mov		r7, fp
+	stmia		r1!, {r4-r7}		/* Save r8-r10 and fp in the structure */
+	mov		r5, lr			/* Copy lr to a low register */
+	stmia		r1!, {r0,r5}		/* Save sp and lr in the structure */
 
 	/* Then, call up_vfork(), passing it a pointer to the stack structure */
 
 	mov		r0, sp
 	bl		up_vfork
 
+	/* Recover r4-r7 that were destroyed before up_vfork was called */
+
+	mov		r1, sp
+	ldmia		r1!, {r4-r7}
+
 	/* Release the stack data and return the value returned by up_vfork */
 
-	ldr		lr, [sp, #VFORK_LR_OFFSET]
+	ldr		r1, [sp, #VFORK_LR_OFFSET]
+	mov		r14, r1
 	add		sp, sp, #VFORK_SIZEOF
 	bx		lr
+
 	.size	vfork, .-vfork
 	.end

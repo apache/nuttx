@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/arm_testset.S
+ * arch/arm/src/common/iar/arm_testset.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,9 +25,8 @@
 #include <nuttx/config.h>
 #include <arch/spinlock.h>
 
-	.syntax	unified
-	.thumb
-	.file	"arm_testset.S"
+	MODULE up_testset
+	SECTION .text:CODE:NOROOT(2)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -37,7 +36,7 @@
  * Public Symbols
  ****************************************************************************/
 
-	.globl	up_testset
+	PUBLIC up_testset
 
 /****************************************************************************
  * Assembly Macros
@@ -46,8 +45,6 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-	.text
 
 /****************************************************************************
  * Public Functions
@@ -62,7 +59,7 @@
  *   This function must be provided via the architecture-specific logic.
  *
  * Input Parameters:
- *   lock  - A reference to the spinlock object.
+ *   lock - The address of spinlock object.
  *
  * Returned Value:
  *   The spinlock is always locked upon return.  The previous value of the
@@ -73,8 +70,7 @@
  *
  ****************************************************************************/
 
-	.globl	up_testset
-	.type	up_testset, %function
+	THUMB
 
 up_testset:
 
@@ -82,16 +78,16 @@ up_testset:
 
 	/* Test if the spinlock is locked or not */
 
-1:
+L1:
 	ldrexb		r2, [r0]			/* Test if spinlock is locked or not */
 	cmp		r2, r1				/* Already locked? */
-	beq		2f				/* If already locked, return SP_LOCKED */
+	beq		L2				/* If already locked, return SP_LOCKED */
 
 	/* Not locked ... attempt to lock it */
 
 	strexb		r2, r1, [r0]			/* Attempt to set the locked state */
 	cmp		r2, r1				/* r2 will be 1 is strexb failed */
-	beq		1b				/* Failed to lock... try again */
+	beq		L1				/* Failed to lock... try again */
 
 	/* Lock acquired -- return SP_UNLOCKED */
 
@@ -101,8 +97,8 @@ up_testset:
 
 	/* Lock not acquired -- return SP_LOCKED */
 
-2:
+L2:
 	mov		r0, #SP_LOCKED
 	bx		lr
-	.size	up_testset, . - up_testset
-	.end
+
+	END

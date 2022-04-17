@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/srcm/armv6-m/arm_signal_handler.S
+ * arch/arm/src/common/gnu/arm_testset.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,81 +23,85 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <arch/spinlock.h>
 
-#include <arch/syscall.h>
-
-#if defined(CONFIG_BUILD_PROTECTED) && !defined(__KERNEL__)
+	.syntax	unified
+	.file	"arm_testset.S"
 
 /****************************************************************************
- * File info
+ * Pre-processor Definitions
  ****************************************************************************/
 
-	.file		"arm_signal_handler.S"
+/****************************************************************************
+ * Public Symbols
+ ****************************************************************************/
+
+	.globl	up_testset
+
+/****************************************************************************
+ * Assembly Macros
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+	.text
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_signal_handler
+ * Name: up_testset
  *
  * Description:
- *   This function is the user-space, signal handler trampoline function.  It
- *   is called from up_signal_dispatch() in user-mode.
+ *   Perform an atomic test and set operation on the provided spinlock.
  *
- *     R0-R3, R11 - volatile registers need not be preserved.
- *     R4-R10 - static registers must be preserved
- *     R12-R14 - LR and SP must be preserved
+ *   This function must be provided via the architecture-specific logic.
  *
  * Input Parameters:
- *   R0 = sighand
- *     The address user-space signal handling function
- *   R1-R3 = signo, info, and ucontext
- *     Standard arguments to be passed to the signal handling function.
+ *   lock  - A reference to the spinlock object.
  *
  * Returned Value:
- *   None.  This function does not return in the normal sense.  It returns
- *   via the SYS_signal_handler_return (see syscall.h)
+ *   The spinlock is always locked upon return.  The previous value of the
+ *   spinlock variable is returned, either SP_LOCKED if the spinlock was
+ *   previously locked (meaning that the test-and-set operation failed to
+ *   obtain the lock) or SP_UNLOCKED if the spinlock was previously unlocked
+ *   (meaning that we successfully obtained the lock).
  *
  ****************************************************************************/
 
-	.text
-	.align	2
-	.code	16
-	.thumb_func
-	.globl	up_signal_handler
-	.type	up_signal_handler, function
-up_signal_handler:
+	.globl	up_testset
+	.type	up_testset, %function
 
-	/* Save some register */
+up_testset:
 
-	push		{r4, r5}		/* Save R4 and R5 on the stack */
-	mov		r5, lr			/* Save LR in R5 */
+	mov		r1, #SP_LOCKED
 
-	/* Call the signal handler */
+	/* Test if the spinlock is locked or not */
 
-	mov		r4, r0			/* R4=sighand */
-	mov		r0, r1			/* R0=signo */
-	mov		r1, r2			/* R1=info */
-	mov		r2, r3			/* R2=ucontext */
-	blx		r4			/* Call the signal handler */
+1:
+	ldrexb		r2, [r0]			/* Test if spinlock is locked or not */
+	cmp		r2, r1				/* Already locked? */
+	beq		2f				/* If already locked, return SP_LOCKED */
 
-	/* Restore the registers */
+	/* Not locked ... attempt to lock it */
 
-	mov		lr, r5			/* Restore LR */
-	pop		{r4, r5}		/* Restore R4 and R5 */
+	strexb		r2, r1, [r0]			/* Attempt to set the locked state */
+	cmp		r2, r1				/* r2 will be 1 is strexb failed */
+	beq		1b				/* Failed to lock... try again */
 
-	/* Execute the SYS_signal_handler_return SVCall (will not return) */
+	/* Lock acquired -- return SP_UNLOCKED */
 
-	mov		r0, #SYS_signal_handler_return
-	svc		#SYS_syscall
-	nop
+	dmb						/* Required before accessing protected resource */
+	mov		r0, #SP_UNLOCKED
+	bx		lr
 
-	.size	up_signal_handler, .-up_signal_handler
+	/* Lock not acquired -- return SP_LOCKED */
+
+2:
+	mov		r0, #SP_LOCKED
+	bx		lr
+	.size	up_testset, . - up_testset
 	.end
-
-#endif /* CONFIG_BUILD_PROTECTED && !__KERNEL__ */

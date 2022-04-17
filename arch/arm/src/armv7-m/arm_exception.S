@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-m/gnu/arm_exception.S
+ * arch/arm/src/armv7-m/arm_exception.S
  *
  *   Copyright (C) 2009-2013, 2015-2016, 2018 Gregory Nutt.
  *   All rights reserved.
