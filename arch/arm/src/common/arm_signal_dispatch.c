@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-m/arm_signal_dispatch.c
+ * arch/arm/src/common/arm_signal_dispatch.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -47,7 +47,7 @@
  *
  *   Normally the user-mode signaling handling stub will also execute
  *   before the ultimate signal handler is called.  See
- *   arch/arm/src/armv7-m/gnu/arm_signal_handler.S.  This function is the
+ *   arch/arm/src/armvx-y/arm_signal_handler.S.  This function is the
  *   user-space, signal handler trampoline function.  It is called from
  *   up_signal_dispatch() in user-mode.
  *
