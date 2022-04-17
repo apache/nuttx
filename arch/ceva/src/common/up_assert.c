@@ -87,7 +87,7 @@ static void up_stackdump(uint32_t sp, uint32_t stack_base)
  ****************************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
-static void up_taskdump(FAR struct tcb_s *tcb, FAR void *arg)
+static void up_taskdump(struct tcb_s *tcb, void *arg)
 {
   /* Dump interesting properties of this task */
 
@@ -156,7 +156,7 @@ static inline void up_registerdump(void)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_USBDUMP
-static int usbtrace_syslog(FAR const char *fmt, ...)
+static int usbtrace_syslog(const char *fmt, ...)
 {
   va_list ap;
 
@@ -168,7 +168,7 @@ static int usbtrace_syslog(FAR const char *fmt, ...)
   return 0;
 }
 
-static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
+static int assert_tracecallback(struct usbtrace_s *trace, void *arg)
 {
   usbtrace_trprintf(usbtrace_syslog, trace->event, trace->value);
   return 0;
