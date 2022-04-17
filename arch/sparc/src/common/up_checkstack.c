@@ -60,11 +60,11 @@
  *
  ****************************************************************************/
 
-static size_t do_stackcheck(FAR void *stackbase, size_t nbytes)
+static size_t do_stackcheck(void *stackbase, size_t nbytes)
 {
   uintptr_t start;
   uintptr_t end;
-  FAR uint32_t *ptr;
+  uint32_t *ptr;
   size_t mark;
 
   if (nbytes == 0)
@@ -87,7 +87,7 @@ static size_t do_stackcheck(FAR void *stackbase, size_t nbytes)
    * that does not have the magic value is the high water mark.
    */
 
-  for (ptr = (FAR uint32_t *)start, mark = (nbytes >> 2);
+  for (ptr = (uint32_t *)start, mark = (nbytes >> 2);
        *ptr == STACK_COLOR && mark > 0;
        ptr++, mark--);
 
@@ -107,7 +107,7 @@ static size_t do_stackcheck(FAR void *stackbase, size_t nbytes)
       int i;
       int j;
 
-      ptr = (FAR uint32_t *)start;
+      ptr = (uint32_t *)start;
       for (i = 0; i < size; i += 4 * 64)
         {
           for (j = 0; j < 64; j++)
@@ -147,7 +147,7 @@ static size_t do_stackcheck(FAR void *stackbase, size_t nbytes)
  *
  ****************************************************************************/
 
-void up_stack_color(FAR void *stackbase, size_t nbytes)
+void up_stack_color(void *stackbase, size_t nbytes)
 {
   uint32_t *stkptr;
   uintptr_t stkend;
@@ -198,12 +198,12 @@ void up_stack_color(FAR void *stackbase, size_t nbytes)
  *
  ****************************************************************************/
 
-size_t up_check_tcbstack(FAR struct tcb_s *tcb)
+size_t up_check_tcbstack(struct tcb_s *tcb)
 {
   return do_stackcheck(tcb->stack_base_ptr, tcb->adj_stack_size);
 }
 
-ssize_t up_check_tcbstack_remain(FAR struct tcb_s *tcb)
+ssize_t up_check_tcbstack_remain(struct tcb_s *tcb)
 {
   return tcb->adj_stack_size - up_check_tcbstack(tcb);
 }

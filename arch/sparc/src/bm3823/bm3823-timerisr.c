@@ -78,7 +78,7 @@
  *
  ****************************************************************************/
 
-static int bm3823_timerisr(int irq, uint32_t *regs, FAR void *arg)
+static int bm3823_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Clear the pending timer interrupt */
 
