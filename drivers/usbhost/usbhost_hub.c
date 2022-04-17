@@ -1236,7 +1236,7 @@ static void usbhost_callback(FAR void *arg, ssize_t nbytes)
 
   if (work_available(&priv->work) && !priv->disconnected)
     {
-      work_queue(LPWORK, &priv->work, (worker_t)usbhost_hub_event,
+      work_queue(LPWORK, &priv->work, usbhost_hub_event,
                  hubclass, delay);
     }
 }
@@ -1496,7 +1496,7 @@ static int usbhost_disconnected(struct usbhost_class_s *hubclass)
   /* Schedule the disconnection work */
 
   ret = work_queue(LPWORK, &priv->work,
-                   (worker_t)usbhost_disconnect_event, hubclass, 0);
+                   usbhost_disconnect_event, hubclass, 0);
   leave_critical_section(flags);
   return ret;
 }

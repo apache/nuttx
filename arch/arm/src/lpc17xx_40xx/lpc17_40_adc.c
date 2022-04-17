@@ -615,7 +615,7 @@ static int adc_interrupt(int irq, void *context, FAR void *arg)
 #ifdef CONFIG_ADC_WORKER_THREAD
       if (adc0_int_done == 1)
         {
-          work_queue(HPWORK, &priv->irqwork, (worker_t)adc_irqworker,
+          work_queue(HPWORK, &priv->irqwork, adc_irqworker,
                      (FAR void *)priv, 0);
         }
 

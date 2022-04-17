@@ -1103,7 +1103,7 @@ int bl_os_workqueue_submit_hpwork(void *work,
       return -EINVAL;
     }
 
-  return work_queue(OS_HPWORK, work, (worker_t)worker, argv, tick);
+  return work_queue(OS_HPWORK, work, worker, argv, tick);
 }
 
 /****************************************************************************
@@ -1132,7 +1132,7 @@ int bl_os_workqueue_submit_lpwork(void *work,
       return -EINVAL;
     }
 
-  return work_queue(OS_LPWORK, work, (worker_t)worker, argv, tick);
+  return work_queue(OS_LPWORK, work, worker, argv, tick);
 }
 
 /****************************************************************************

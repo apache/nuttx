@@ -3228,7 +3228,7 @@ static void sam_callback(void *arg)
         }
 
       mcinfo("Queuing callback to %p(%p)\n", priv->callback, priv->cbarg);
-      ret = work_queue(LPWORK, &priv->cbwork, (worker_t)priv->callback,
+      ret = work_queue(LPWORK, &priv->cbwork, priv->callback,
                        priv->cbarg, 0);
       if (ret < 0)
         {
