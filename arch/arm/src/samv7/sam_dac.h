@@ -104,7 +104,7 @@ extern "C"
  ****************************************************************************/
 
 struct dac_dev_s;
-FAR struct dac_dev_s *sam_dac_initialize(int intf);
+struct dac_dev_s *sam_dac_initialize(int intf);
 
 #undef EXTERN
 #ifdef __cplusplus

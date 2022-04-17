@@ -44,6 +44,6 @@
  *
  ****************************************************************************/
 
-int sam_timer_initialize(FAR const char *devpath, int chan);
+int sam_timer_initialize(const char *devpath, int chan);
 
 #endif /* __ARCH_ARM_SRC_SAMV7_SAM_TC_LOWERHALF_H */

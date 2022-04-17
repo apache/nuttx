@@ -76,17 +76,17 @@
 
 struct sam34_lowerhalf_s
 {
-  FAR const struct timer_ops_s  *ops;  /* Lower half operations */
+  const struct timer_ops_s *ops;  /* Lower half operations */
 
   /* Private data */
 
-  tccb_t    callback;        /* Current user interrupt callback */
-  FAR void *arg;             /* Argument that accompanies the callback */
-  uint32_t  timeout;         /* The current timeout value (us) */
-  uint32_t  clkticks;        /* Actual clock ticks for current interval */
-  uint32_t  val;             /* rtt value of current timeout */
-  uint32_t  adjustment;      /* Time lost due to clock resolution truncation (us) */
-  bool      started;         /* The timer has been started */
+  tccb_t    callback;   /* Current user interrupt callback */
+  void      *arg;       /* Argument that accompanies the callback */
+  uint32_t  timeout;    /* The current timeout value (us) */
+  uint32_t  clkticks;   /* Actual clock ticks for current interval */
+  uint32_t  val;        /* rtt value of current timeout */
+  uint32_t  adjustment; /* Time lost due to clock resolution truncation (us) */
+  bool      started;    /* The timer has been started */
 };
 
 /****************************************************************************
@@ -105,19 +105,19 @@ static void     sam34_putreg(uint32_t val, uint32_t addr);
 
 /* Interrupt handling *******************************************************/
 
-static int      sam34_interrupt(int irq, FAR void *context, FAR void *arg);
+static int      sam34_interrupt(int irq, void *context, void *arg);
 
 /* "Lower half" driver methods **********************************************/
 
-static int      sam34_start(FAR struct timer_lowerhalf_s *lower);
-static int      sam34_stop(FAR struct timer_lowerhalf_s *lower);
-static int      sam34_getstatus(FAR struct timer_lowerhalf_s *lower,
-                  FAR struct timer_status_s *status);
-static int      sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
+static int      sam34_start(struct timer_lowerhalf_s *lower);
+static int      sam34_stop(struct timer_lowerhalf_s *lower);
+static int      sam34_getstatus(struct timer_lowerhalf_s *lower,
+                  struct timer_status_s *status);
+static int      sam34_settimeout(struct timer_lowerhalf_s *lower,
                   uint32_t timeout);
-static void    sam34_setcallback(FAR struct timer_lowerhalf_s *lower,
-                  tccb_t callback, FAR void *arg);
-static int      sam34_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
+static void    sam34_setcallback(struct timer_lowerhalf_s *lower,
+                  tccb_t callback, void *arg);
+static int      sam34_ioctl(struct timer_lowerhalf_s *lower, int cmd,
                   unsigned long arg);
 
 /****************************************************************************
@@ -265,9 +265,9 @@ static void sam34_putreg(uint32_t val, uint32_t addr)
  *
  ****************************************************************************/
 
-static int sam34_interrupt(int irq, FAR void *context, FAR void *arg)
+static int sam34_interrupt(int irq, void *context, void *arg)
 {
-  FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)arg;
+  struct sam34_lowerhalf_s *priv = (struct sam34_lowerhalf_s *)arg;
 
   tmrinfo("Entry\n");
   DEBUGASSERT(priv != NULL);
@@ -326,7 +326,7 @@ static int sam34_interrupt(int irq, FAR void *context, FAR void *arg)
         }
       else /* stop */
         {
-          sam34_stop((FAR struct timer_lowerhalf_s *)priv);
+          sam34_stop((struct timer_lowerhalf_s *)priv);
         }
 
       /* RTT_SR_ALMS is cleared by reading SAM_RTT_SR */
@@ -350,9 +350,9 @@ static int sam34_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static int sam34_start(FAR struct timer_lowerhalf_s *lower)
+static int sam34_start(struct timer_lowerhalf_s *lower)
 {
-  FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
+  struct sam34_lowerhalf_s *priv = (struct sam34_lowerhalf_s *)lower;
   uint32_t mr;
   uint32_t vr;
 
@@ -413,9 +413,9 @@ static int sam34_start(FAR struct timer_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int sam34_stop(FAR struct timer_lowerhalf_s *lower)
+static int sam34_stop(struct timer_lowerhalf_s *lower)
 {
-  FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
+  struct sam34_lowerhalf_s *priv = (struct sam34_lowerhalf_s *)lower;
   tmrinfo("Entry\n");
   DEBUGASSERT(priv);
 
@@ -452,10 +452,10 @@ static int sam34_stop(FAR struct timer_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int sam34_getstatus(FAR struct timer_lowerhalf_s *lower,
-                           FAR struct timer_status_s *status)
+static int sam34_getstatus(struct timer_lowerhalf_s *lower,
+                           struct timer_status_s *status)
 {
-  FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
+  struct sam34_lowerhalf_s *priv = (struct sam34_lowerhalf_s *)lower;
 
   tmrinfo("Entry\n");
   DEBUGASSERT(priv);
@@ -504,10 +504,10 @@ static int sam34_getstatus(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
+static int sam34_settimeout(struct timer_lowerhalf_s *lower,
                             uint32_t timeout)
 {
-  FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
+  struct sam34_lowerhalf_s *priv = (struct sam34_lowerhalf_s *)lower;
 
   DEBUGASSERT(priv);
   tmrinfo("Entry: timeout=%d\n", timeout);
@@ -557,10 +557,10 @@ static int sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static void sam34_setcallback(FAR struct timer_lowerhalf_s *lower,
-                              tccb_t callback, FAR void *arg)
+static void sam34_setcallback(struct timer_lowerhalf_s *lower,
+                              tccb_t callback, void *arg)
 {
-  FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
+  struct sam34_lowerhalf_s *priv = (struct sam34_lowerhalf_s *)lower;
   irqstate_t flags;
 
   flags = enter_critical_section();
@@ -596,10 +596,10 @@ static void sam34_setcallback(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int sam34_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
-                    unsigned long arg)
+static int sam34_ioctl(struct timer_lowerhalf_s *lower, int cmd,
+                       unsigned long arg)
 {
-  FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
+  struct sam34_lowerhalf_s *priv = (struct sam34_lowerhalf_s *)lower;
   int ret = -ENOTTY;
 
   DEBUGASSERT(priv);
@@ -629,9 +629,9 @@ static int sam34_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
  *
  ****************************************************************************/
 
-void sam_rttinitialize(FAR const char *devpath)
+void sam_rttinitialize(const char *devpath)
 {
-  FAR struct sam34_lowerhalf_s *priv = &g_tcdev;
+  struct sam34_lowerhalf_s *priv = &g_tcdev;
 
   tmrinfo("Entry: devpath=%s\n", devpath);
 
@@ -650,7 +650,7 @@ void sam_rttinitialize(FAR const char *devpath)
 
   /* Register the timer driver as /dev/timerX */
 
-  timer_register(devpath, (FAR struct timer_lowerhalf_s *)priv);
+  timer_register(devpath, (struct timer_lowerhalf_s *)priv);
 }
 
 #endif /* CONFIG_TIMER && CONFIG_SAM34_TCx */

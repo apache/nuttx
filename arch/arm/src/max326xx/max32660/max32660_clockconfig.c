@@ -124,7 +124,7 @@ static uint32_t max326_sysclk_frequency(void)
  *
  ****************************************************************************/
 
-static void max326_enable_hfio(FAR const struct clock_setup_s *clksetup)
+static void max326_enable_hfio(const struct clock_setup_s *clksetup)
 {
   uint32_t regval;
 
@@ -154,7 +154,7 @@ static void max326_enable_hfio(FAR const struct clock_setup_s *clksetup)
  *
  ****************************************************************************/
 
-static void max326_disable_hfio(FAR const struct clock_setup_s *clksetup)
+static void max326_disable_hfio(const struct clock_setup_s *clksetup)
 {
   uint32_t regval;
 
@@ -232,7 +232,7 @@ static void max326_select_lirc8k(void)
  ****************************************************************************/
 
 #ifdef BOARD_HAVE_X32K
-static void max326_enable_x32k(FAR const struct clock_setup_s *clksetup)
+static void max326_enable_x32k(const struct clock_setup_s *clksetup)
 {
   uint32_t regval;
 
@@ -264,7 +264,7 @@ static void max326_enable_x32k(FAR const struct clock_setup_s *clksetup)
  ****************************************************************************/
 
 #ifdef BOARD_HAVE_X32K
-static void max326_disable_x32k(FAR const struct clock_setup_s *clksetup)
+static void max326_disable_x32k(const struct clock_setup_s *clksetup)
 {
   uint32_t regval;
 
@@ -317,7 +317,7 @@ static void max326_select_x32k(void)
  *
  ****************************************************************************/
 
-static void max326_set_ovr(FAR const struct clock_setup_s *clksetup)
+static void max326_set_ovr(const struct clock_setup_s *clksetup)
 {
   uint32_t ovr;
   uint32_t regval;
@@ -405,7 +405,7 @@ static void max326_set_ovr(FAR const struct clock_setup_s *clksetup)
  *
  ****************************************************************************/
 
-static void max326_set_clksrc(FAR const struct clock_setup_s *clksetup)
+static void max326_set_clksrc(const struct clock_setup_s *clksetup)
 {
   uint32_t regval;
   uint32_t clksrc;
@@ -586,7 +586,7 @@ static void max326_periph_reset(void)
  *
  ****************************************************************************/
 
-void max326_clockconfig(FAR const struct clock_setup_s *clksetup)
+void max326_clockconfig(const struct clock_setup_s *clksetup)
 {
   /* Set the the FLASH wait states to the default value (5) */
 

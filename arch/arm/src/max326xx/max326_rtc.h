@@ -36,7 +36,7 @@
 
 /* Type of callback invoked when an ALARM interrupt occurs */
 
-typedef CODE void (*alm_callback_t)(FAR void *arg, unsigned int alarmid);
+typedef void (*alm_callback_t)(void *arg, unsigned int alarmid);
 
 /****************************************************************************
  * Public Data
@@ -73,8 +73,8 @@ extern "C"
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-int max326_rtc_setalarm(FAR struct timespec *ts, alm_callback_t cb,
-                        FAR void *arg);
+int max326_rtc_setalarm(struct timespec *ts, alm_callback_t cb,
+                        void *arg);
 #endif
 
 /****************************************************************************
@@ -92,7 +92,7 @@ int max326_rtc_setalarm(FAR struct timespec *ts, alm_callback_t cb,
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-int max326_rtc_rdalarm(FAR b32_t *ftime);
+int max326_rtc_rdalarm(b32_t *ftime);
 #endif
 
 /****************************************************************************
@@ -137,7 +137,7 @@ int max326_rtc_cancelalarm(void);
 
 #ifdef CONFIG_RTC_DRIVER
 struct rtc_lowerhalf_s;
-FAR struct rtc_lowerhalf_s *max326_rtc_lowerhalf(void);
+struct rtc_lowerhalf_s *max326_rtc_lowerhalf(void);
 #endif
 
 #undef EXTERN

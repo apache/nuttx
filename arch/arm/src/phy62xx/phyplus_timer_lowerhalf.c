@@ -71,12 +71,12 @@
 
 struct phyplus_lowerhalf_s
 {
-  FAR const struct timer_ops_s   *ops;     /* Lower half operations        */
-  FAR struct phyplus_tim_dev_s   *tim;     /* pic32mz timer driver         */
-  tccb_t                         callback; /* Current user interrupt cb    */
-  FAR void                       *arg;     /* Argument to upper half cb    */
-  bool                           started;  /* True: Timer has been started */
-  uint32_t                       timeout;  /* Current timeout value (us)   */
+  const struct timer_ops_s *ops;     /* Lower half operations        */
+  struct phyplus_tim_dev_s *tim;     /* pic32mz timer driver         */
+  tccb_t                   callback; /* Current user interrupt cb    */
+  void                     *arg;     /* Argument to upper half cb    */
+  bool                     started;  /* True: Timer has been started */
+  uint32_t                 timeout;  /* Current timeout value (us)   */
 };
 
 /****************************************************************************
@@ -87,14 +87,14 @@ static int phyplus_timer_handler(int irq, void * context, void * arg);
 
 /* "Lower half" driver methods **********************************************/
 
-static int phyplus_start(FAR struct timer_lowerhalf_s *lower);
-static int phyplus_stop(FAR struct timer_lowerhalf_s *lower);
-static int phyplus_getstatus(FAR struct timer_lowerhalf_s *lower,
-                             FAR struct timer_status_s *status);
-static int phyplus_settimeout(FAR struct timer_lowerhalf_s *lower,
-                            uint32_t timeout);
-static void phyplus_setcallback(FAR struct timer_lowerhalf_s *lower,
-                            tccb_t callback, FAR void *arg);
+static int phyplus_start(struct timer_lowerhalf_s *lower);
+static int phyplus_stop(struct timer_lowerhalf_s *lower);
+static int phyplus_getstatus(struct timer_lowerhalf_s *lower,
+                             struct timer_status_s *status);
+static int phyplus_settimeout(struct timer_lowerhalf_s *lower,
+                              uint32_t timeout);
+static void phyplus_setcallback(struct timer_lowerhalf_s *lower,
+                                tccb_t callback, void *arg);
 
 /* static int phyplus_ioctl(struct timer_lowerhalf_s *lower, int cmd,
  *                           unsigned long arg);
@@ -196,7 +196,7 @@ static struct phyplus_lowerhalf_s g_tim6_lowerhalf =
 
 static int phyplus_timer_handler(int irq, void * context, void * arg)
 {
-  FAR struct phyplus_lowerhalf_s *lower = (struct phyplus_lowerhalf_s *) arg;
+  struct phyplus_lowerhalf_s *lower = (struct phyplus_lowerhalf_s *) arg;
 
   /* PHYPLUS_TIM_ACKINT(lower->tim); */
 
@@ -230,10 +230,10 @@ static int phyplus_timer_handler(int irq, void * context, void * arg)
  *
  ****************************************************************************/
 
-static int phyplus_start(FAR struct timer_lowerhalf_s *lower)
+static int phyplus_start(struct timer_lowerhalf_s *lower)
 {
-  FAR struct phyplus_lowerhalf_s *priv =
-      (FAR struct phyplus_lowerhalf_s *)lower;
+  struct phyplus_lowerhalf_s *priv =
+      (struct phyplus_lowerhalf_s *)lower;
   if (!(priv->started))
     {
       /* PHYPLUS_TIM_SETMODE(priv->tim, PHYPLUS_TIM_COUNT); */
@@ -310,11 +310,11 @@ static int phyplus_stop(struct timer_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int phyplus_settimeout(FAR struct timer_lowerhalf_s *lower,
+static int phyplus_settimeout(struct timer_lowerhalf_s *lower,
                             uint32_t timeout)
 {
-  FAR struct phyplus_lowerhalf_s *priv =
-      (FAR struct phyplus_lowerhalf_s *)lower;
+  struct phyplus_lowerhalf_s *priv =
+      (struct phyplus_lowerhalf_s *)lower;
 
   wdinfo("Entry: timeout=%" PRId32 "\n", timeout);
   DEBUGASSERT(priv);
@@ -362,11 +362,11 @@ static int phyplus_settimeout(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static void phyplus_setcallback(FAR struct timer_lowerhalf_s *lower,
-                              tccb_t callback, FAR void *arg)
+static void phyplus_setcallback(struct timer_lowerhalf_s *lower,
+                                tccb_t callback, void *arg)
 {
-  FAR struct phyplus_lowerhalf_s *priv =
-      (FAR struct phyplus_lowerhalf_s *)lower;
+  struct phyplus_lowerhalf_s *priv =
+      (struct phyplus_lowerhalf_s *)lower;
   int ret = OK;
   irqstate_t flags = enter_critical_section();
 
@@ -444,9 +444,9 @@ static void phyplus_setcallback(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-int phyplus_timer_initialize(FAR const char *devpath, int timer)
+int phyplus_timer_initialize(const char *devpath, int timer)
 {
-  FAR struct phyplus_lowerhalf_s *lower;
+  struct phyplus_lowerhalf_s *lower;
   syslog(LOG_ERR, "phuplus_timer_initialiize enter, timer=%d\n", timer);
   switch (timer)
     {
@@ -523,8 +523,8 @@ int phyplus_timer_initialize(FAR const char *devpath, int timer)
    * REVISIT: The returned handle is discard here.
    */
 
-  FAR void *drvr = timer_register(devpath,
-      (FAR struct timer_lowerhalf_s *)lower);
+  void *drvr = timer_register(devpath,
+      (struct timer_lowerhalf_s *)lower);
   if (drvr == NULL)
     {
       /* The actual cause of the failure may have been a failure to allocate
@@ -557,11 +557,11 @@ int phyplus_timer_initialize(FAR const char *devpath, int timer)
  *
  ****************************************************************************/
 
-static int phyplus_getstatus(FAR struct timer_lowerhalf_s *lower,
-                             FAR struct timer_status_s *status)
+static int phyplus_getstatus(struct timer_lowerhalf_s *lower,
+                             struct timer_status_s *status)
 {
-  FAR struct phyplus_lowerhalf_s *priv =
-      (FAR struct phyplus_lowerhalf_s *)lower;
+  struct phyplus_lowerhalf_s *priv =
+      (struct phyplus_lowerhalf_s *)lower;
   uint32_t value;
 
   DEBUGASSERT(priv);
@@ -593,10 +593,10 @@ static int phyplus_getstatus(FAR struct timer_lowerhalf_s *lower,
   return OK;
 }
 
-int phyplus_timer_register(FAR struct phyplus_timer_param_s
+int phyplus_timer_register(struct phyplus_timer_param_s
                            *phyplus_timer_param)
 {
-  FAR const char *fmt;
+  const char *fmt;
   char devname[16];
 
   fmt = "/dev/timer%u";
@@ -611,7 +611,7 @@ int phyplus_timer_register(FAR struct phyplus_timer_param_s
   return phyplus_timer_initialize(devname, phyplus_timer_param->timer_idx);
 }
 
-int phyplus_timer_ungister(FAR struct phyplus_timer_param_s
+int phyplus_timer_ungister(struct phyplus_timer_param_s
                            *phyplus_timer_param)
 {
   return 0;

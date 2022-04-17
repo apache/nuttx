@@ -66,7 +66,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct pwm_lowerhalf_s *sam_pwminitialize(int pwm);
+struct pwm_lowerhalf_s *sam_pwminitialize(int pwm);
 
 #undef EXTERN
 #if defined(__cplusplus)

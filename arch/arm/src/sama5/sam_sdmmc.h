@@ -79,8 +79,8 @@ extern "C"
  *
  ****************************************************************************/
 
-void sam_sdmmc_set_sdio_card_isr(FAR struct sdio_dev_s *dev,
-                                   int (*func)(void *), void *arg);
+void sam_sdmmc_set_sdio_card_isr(struct sdio_dev_s *dev,
+                                 int (*func)(void *), void *arg);
 
 /****************************************************************************
  * Name: sam_sdmmc_sdio_initialize
@@ -97,7 +97,7 @@ void sam_sdmmc_set_sdio_card_isr(FAR struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
-FAR struct sdio_dev_s *sam_sdmmc_sdio_initialize(int slotno);
+struct sdio_dev_s *sam_sdmmc_sdio_initialize(int slotno);
 
 /****************************************************************************
  * Name: sdio_mediachange
@@ -118,7 +118,7 @@ FAR struct sdio_dev_s *sam_sdmmc_sdio_initialize(int slotno);
  *
  ****************************************************************************/
 
-void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot);
+void sdio_mediachange(struct sdio_dev_s *dev, bool cardinslot);
 
 /****************************************************************************
  * Name: sdio_wrprotect
@@ -136,7 +136,7 @@ void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot);
  *
  ****************************************************************************/
 
-void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect);
+void sdio_wrprotect(struct sdio_dev_s *dev, bool wrprotect);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_SAMA5_SDMMC_H */

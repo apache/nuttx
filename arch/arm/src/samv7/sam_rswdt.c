@@ -83,7 +83,7 @@
 
 struct sam_lowerhalf_s
 {
-  FAR const struct watchdog_ops_s  *ops;  /* Lower half operations */
+  const struct watchdog_ops_s  *ops;  /* Lower half operations */
 #ifdef CONFIG_SAMV7_RSWDT_INTERRUPT
   xcpt_t   handler;  /* Current RSWDT interrupt handler */
 #endif
@@ -109,21 +109,21 @@ static void     sam_putreg(uint32_t regval, uintptr_t regaddr);
 /* Interrupt handling *******************************************************/
 
 #ifdef CONFIG_SAMV7_RSWDT_INTERRUPT
-static int      sam_interrupt(int irq, FAR void *context, FAR void *arg);
+static int      sam_interrupt(int irq, void *context, void *arg);
 #endif
 
 /* "Lower half" driver methods **********************************************/
 
-static int      sam_start(FAR struct watchdog_lowerhalf_s *lower);
-static int      sam_stop(FAR struct watchdog_lowerhalf_s *lower);
-static int      sam_keepalive(FAR struct watchdog_lowerhalf_s *lower);
-static int      sam_getstatus(FAR struct watchdog_lowerhalf_s *lower,
-                  FAR struct watchdog_status_s *status);
-static int      sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
+static int      sam_start(struct watchdog_lowerhalf_s *lower);
+static int      sam_stop(struct watchdog_lowerhalf_s *lower);
+static int      sam_keepalive(struct watchdog_lowerhalf_s *lower);
+static int      sam_getstatus(struct watchdog_lowerhalf_s *lower,
+                  struct watchdog_status_s *status);
+static int      sam_settimeout(struct watchdog_lowerhalf_s *lower,
                   uint32_t timeout);
-static xcpt_t   sam_capture(FAR struct watchdog_lowerhalf_s *lower,
+static xcpt_t   sam_capture(struct watchdog_lowerhalf_s *lower,
                   xcpt_t handler);
-static int      sam_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
+static int      sam_ioctl(struct watchdog_lowerhalf_s *lower, int cmd,
                   unsigned long arg);
 
 /****************************************************************************
@@ -250,9 +250,9 @@ static void sam_putreg(uint32_t regval, uintptr_t regaddr)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_RSWDT_INTERRUPT
-static int sam_interrupt(int irq, FAR void *context, FAR void *arg)
+static int sam_interrupt(int irq, void *context, void *arg)
 {
-  FAR struct sam_lowerhalf_s *priv = &g_wdtdev;
+  struct sam_lowerhalf_s *priv = &g_wdtdev;
 
   /* Is there a registered handler? */
 
@@ -285,9 +285,9 @@ static int sam_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static int sam_start(FAR struct watchdog_lowerhalf_s *lower)
+static int sam_start(struct watchdog_lowerhalf_s *lower)
 {
-  FAR struct sam_lowerhalf_s *priv = (FAR struct sam_lowerhalf_s *)lower;
+  struct sam_lowerhalf_s *priv = (struct sam_lowerhalf_s *)lower;
 
   /* The watchdog timer is enabled or disabled by writing to the MR register.
    *
@@ -316,7 +316,7 @@ static int sam_start(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int sam_stop(FAR struct watchdog_lowerhalf_s *lower)
+static int sam_stop(struct watchdog_lowerhalf_s *lower)
 {
   /* The watchdog timer is enabled or disabled by writing to the MR register.
    *
@@ -347,7 +347,7 @@ static int sam_stop(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int sam_keepalive(FAR struct watchdog_lowerhalf_s *lower)
+static int sam_keepalive(struct watchdog_lowerhalf_s *lower)
 {
   wdinfo("Entry\n");
 
@@ -376,10 +376,10 @@ static int sam_keepalive(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int sam_getstatus(FAR struct watchdog_lowerhalf_s *lower,
-                         FAR struct watchdog_status_s *status)
+static int sam_getstatus(struct watchdog_lowerhalf_s *lower,
+                         struct watchdog_status_s *status)
 {
-  FAR struct sam_lowerhalf_s *priv = (FAR struct sam_lowerhalf_s *)lower;
+  struct sam_lowerhalf_s *priv = (struct sam_lowerhalf_s *)lower;
 
   wdinfo("Entry\n");
   DEBUGASSERT(priv);
@@ -433,10 +433,10 @@ static int sam_getstatus(FAR struct watchdog_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
-                            uint32_t timeout)
+static int sam_settimeout(struct watchdog_lowerhalf_s *lower,
+                          uint32_t timeout)
 {
-  FAR struct sam_lowerhalf_s *priv = (FAR struct sam_lowerhalf_s *)lower;
+  struct sam_lowerhalf_s *priv = (struct sam_lowerhalf_s *)lower;
   uint32_t reload;
   uint32_t regval;
 
@@ -554,14 +554,14 @@ static int sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static xcpt_t sam_capture(FAR struct watchdog_lowerhalf_s *lower,
-                            xcpt_t handler)
+static xcpt_t sam_capture(struct watchdog_lowerhalf_s *lower,
+                          xcpt_t handler)
 {
 #ifndef CONFIG_SAMV7_RSWDT_INTERRUPT
   wderr("ERROR: Not configured for this mode\n");
   return NULL;
 #else
-  FAR struct sam_lowerhalf_s *priv = (FAR struct sam_lowerhalf_s *)lower;
+  struct sam_lowerhalf_s *priv = (struct sam_lowerhalf_s *)lower;
   irqstate_t flags;
   xcpt_t oldhandler;
 
@@ -617,8 +617,8 @@ static xcpt_t sam_capture(FAR struct watchdog_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int sam_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
-                    unsigned long arg)
+static int sam_ioctl(struct watchdog_lowerhalf_s *lower, int cmd,
+                     unsigned long arg)
 {
   wdinfo("cmd=%d arg=%ld\n", cmd, arg);
 
@@ -649,7 +649,7 @@ static int sam_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
 
 int sam_rswdt_initialize(void)
 {
-  FAR struct sam_lowerhalf_s *priv = &g_wdtdev;
+  struct sam_lowerhalf_s *priv = &g_wdtdev;
 
   wdinfo("Entry: CR: %08x MR: %08x SR: %08x\n",
          sam_getreg(SAM_RSWDT_CR), sam_getreg(SAM_RSWDT_MR),
@@ -683,7 +683,7 @@ int sam_rswdt_initialize(void)
   /* Register the watchdog driver as /dev/rswdt */
 
   watchdog_register("/dev/rswdt",
-                    (FAR struct watchdog_lowerhalf_s *)priv);
+                    (struct watchdog_lowerhalf_s *)priv);
   return OK;
 }
 

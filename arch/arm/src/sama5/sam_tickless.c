@@ -27,10 +27,10 @@
  *
  *   void up_timer_initialize(void): Initializes the timer facilities.
  *      Called early in the initialization sequence (by up_initialize()).
- *   int up_timer_gettime(FAR struct timespec *ts):  Returns the current
+ *   int up_timer_gettime(struct timespec *ts):  Returns the current
  *     time from the platform specific time source.
  *   int up_timer_cancel(void):  Cancels the interval timer.
- *   int up_timer_start(FAR const struct timespec *ts): Start (or re-starts)
+ *   int up_timer_start(const struct timespec *ts): Start (or re-starts)
  *     the interval timer.
  *
  * The RTOS will provide the following interfaces for use by the platform-
@@ -295,7 +295,7 @@ void up_timer_initialize(void)
  *   up_timer_initialize() was called).  This function is functionally
  *   equivalent to:
  *
- *      int clock_gettime(clockid_t clockid, FAR struct timespec *ts);
+ *      int clock_gettime(clockid_t clockid, struct timespec *ts);
  *
  *   when clockid is CLOCK_MONOTONIC.
  *
@@ -320,7 +320,7 @@ void up_timer_initialize(void)
  *
  ****************************************************************************/
 
-int up_timer_gettime(FAR struct timespec *ts)
+int up_timer_gettime(struct timespec *ts)
 {
   return FREERUN_INITIALIZED(&g_tickless.freerun) ?
          sam_freerun_counter(&g_tickless.freerun, ts) :
@@ -363,7 +363,7 @@ int up_timer_gettime(FAR struct timespec *ts)
  *
  ****************************************************************************/
 
-int up_timer_cancel(FAR struct timespec *ts)
+int up_timer_cancel(struct timespec *ts)
 {
   return ONESHOT_INITIALIZED(&g_tickless.oneshot) &&
          FREERUN_INITIALIZED(&g_tickless.freerun) ?
@@ -396,7 +396,7 @@ int up_timer_cancel(FAR struct timespec *ts)
  *
  ****************************************************************************/
 
-int up_timer_start(FAR const struct timespec *ts)
+int up_timer_start(const struct timespec *ts)
 {
   return ONESHOT_INITIALIZED(&g_tickless.oneshot) ?
          sam_oneshot_start(&g_tickless.oneshot, &g_tickless.freerun,

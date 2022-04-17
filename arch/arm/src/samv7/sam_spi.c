@@ -1990,10 +1990,10 @@ static void spi_recvblock(struct spi_dev_s *dev, void *buffer, size_t nwords)
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *sam_spibus_initialize(int port)
+struct spi_dev_s *sam_spibus_initialize(int port)
 {
-  FAR struct sam_spidev_s *spi;
-  FAR struct sam_spics_s *spics;
+  struct sam_spidev_s *spi;
+  struct sam_spics_s *spics;
   int csno  = (port & __SPI_CS_MASK) >> __SPI_CS_SHIFT;
   int spino = (port & __SPI_SPI_MASK) >> __SPI_SPI_SHIFT;
   irqstate_t flags;

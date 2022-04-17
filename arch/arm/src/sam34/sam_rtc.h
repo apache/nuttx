@@ -78,7 +78,7 @@ extern "C"
 
 #ifdef CONFIG_RTC_ALARM
 struct timespec;
-int sam_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback);
+int sam_rtc_setalarm(const struct timespec *tp, alarmcb_t callback);
 #endif
 
 #undef EXTERN

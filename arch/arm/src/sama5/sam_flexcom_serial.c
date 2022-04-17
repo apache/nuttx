@@ -215,7 +215,7 @@ struct flexus_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  flexus_interrupt(int irq, void *context, FAR void *arg);
+static int  flexus_interrupt(int irq, void *context, void *arg);
 static int  flexus_setup(struct uart_dev_s *dev);
 static void flexus_shutdown(struct uart_dev_s *dev);
 static int  flexus_attach(struct uart_dev_s *dev);
@@ -512,7 +512,7 @@ static void flexus_disableallints(struct flexus_dev_s *priv, uint32_t *imr)
  *
  ****************************************************************************/
 
-static int flexus_interrupt(int irq, void *context, FAR void *arg)
+static int flexus_interrupt(int irq, void *context, void *arg)
 {
   struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct flexus_dev_s *priv;

@@ -638,7 +638,7 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 #if defined(CONFIG_SAMA5_SAIC)
 /* This is the entry point from the ARM FIQ vector handler */
 
-uint32_t *arm_decodefiq(FAR uint32_t *regs)
+uint32_t *arm_decodefiq(uint32_t *regs)
 {
   uint32_t *ret;
 

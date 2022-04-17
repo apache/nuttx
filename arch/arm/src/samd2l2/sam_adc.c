@@ -69,13 +69,13 @@
 
 /* ADC methods */
 
-static int  sam_adc_bind(FAR struct adc_dev_s *dev,
-                         FAR const struct adc_callback_s *callback);
-static void sam_adc_reset(FAR struct adc_dev_s *dev);
-static int  sam_adc_setup(FAR struct adc_dev_s *dev);
-static void sam_adc_shutdown(FAR struct adc_dev_s *dev);
-static void sam_adc_rxint(FAR struct adc_dev_s *dev, bool enable);
-static int  sam_adc_ioctl(FAR struct adc_dev_s *dev, int cmd,
+static int  sam_adc_bind(struct adc_dev_s *dev,
+                         const struct adc_callback_s *callback);
+static void sam_adc_reset(struct adc_dev_s *dev);
+static int  sam_adc_setup(struct adc_dev_s *dev);
+static void sam_adc_shutdown(struct adc_dev_s *dev);
+static void sam_adc_rxint(struct adc_dev_s *dev, bool enable);
+static int  sam_adc_ioctl(struct adc_dev_s *dev, int cmd,
                           unsigned long arg);
 
 /****************************************************************************
@@ -121,7 +121,7 @@ static void sam_adc_synchronization(void)
   while ((getreg8(SAM_ADC_STATUS) & ADC_STATUS_SYNCBUSY) != 0);
 }
 
-static int sam_adc_interrupt(int irq, FAR void *context, FAR void *arg)
+static int sam_adc_interrupt(int irq, void *context, void *arg)
 {
   uint32_t result;
   struct adc_dev_s    *dev = (struct adc_dev_s *)arg;
@@ -206,8 +206,8 @@ static int sam_adc_calibrate(struct adc_dev_s *dev)
  * This must be called early in order to receive ADC event notifications.
  */
 
-static int sam_adc_bind(FAR struct adc_dev_s *dev,
-                        FAR const struct adc_callback_s *callback)
+static int sam_adc_bind(struct adc_dev_s *dev,
+                        const struct adc_callback_s *callback)
 {
   struct sam_adc_priv *priv = (struct sam_adc_priv *)dev->ad_priv;
   priv->adc_callback = callback;
@@ -229,7 +229,7 @@ static int sam_adc_bind(FAR struct adc_dev_s *dev,
  *
  ****************************************************************************/
 
-static void sam_adc_reset(FAR struct adc_dev_s *dev)
+static void sam_adc_reset(struct adc_dev_s *dev)
 {
   /* Disable ADC */
 
@@ -264,7 +264,7 @@ static void sam_adc_reset(FAR struct adc_dev_s *dev)
  *
  ****************************************************************************/
 
-static int sam_adc_setup(FAR struct adc_dev_s *dev)
+static int sam_adc_setup(struct adc_dev_s *dev)
 {
   uint8_t regval;
   struct sam_adc_priv *priv = (struct sam_adc_priv *)dev->ad_priv;
@@ -319,7 +319,7 @@ static int sam_adc_setup(FAR struct adc_dev_s *dev)
  *
  ****************************************************************************/
 
-static void sam_adc_shutdown(FAR struct adc_dev_s *dev)
+static void sam_adc_shutdown(struct adc_dev_s *dev)
 {
   /* Disable ADC */
 
@@ -342,7 +342,7 @@ static void sam_adc_shutdown(FAR struct adc_dev_s *dev)
  *
  ****************************************************************************/
 
-static void sam_adc_rxint(FAR struct adc_dev_s *dev, bool enable)
+static void sam_adc_rxint(struct adc_dev_s *dev, bool enable)
 {
   struct sam_adc_priv *priv = (struct sam_adc_priv *)dev->ad_priv;
 
@@ -380,7 +380,7 @@ static void sam_adc_rxint(FAR struct adc_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static int sam_adc_ioctl(FAR struct adc_dev_s *dev,
+static int sam_adc_ioctl(struct adc_dev_s *dev,
                          int cmd, unsigned long arg)
 {
   int ret = 0;

@@ -98,7 +98,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int nrf52_wdt_initialize(FAR const char *devpath, int16_t mode_sleep,
+int nrf52_wdt_initialize(const char *devpath, int16_t mode_sleep,
                          int16_t mode_halt);
 
 #endif /* __ARCH_ARM_SRC_NRF52_NRF52_WDT_LOWERHALF_H */

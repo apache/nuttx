@@ -118,7 +118,7 @@ static int  nrf52_setup(struct uart_dev_s *dev);
 static void nrf52_shutdown(struct uart_dev_s *dev);
 static int  nrf52_attach(struct uart_dev_s *dev);
 static void nrf52_detach(struct uart_dev_s *dev);
-static int  nrf52_interrupt(int irq, void *context, FAR void *arg);
+static int  nrf52_interrupt(int irq, void *context, void *arg);
 static int  nrf52_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  nrf52_receive(struct uart_dev_s *dev, unsigned int *status);
 static void nrf52_rxint(struct uart_dev_s *dev, bool enable);
@@ -384,7 +384,7 @@ static void nrf52_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int nrf52_interrupt(int irq, void *context, FAR void *arg)
+static int nrf52_interrupt(int irq, void *context, void *arg)
 {
   struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct nrf52_dev_s *priv;

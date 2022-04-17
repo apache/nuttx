@@ -47,7 +47,7 @@ static bool g_gpio_irq_init = false;
 /* GPIO interrupt handlers information */
 
 static xcpt_t g_gpio_irq_handlers[RP2040_GPIO_NUM];
-static FAR void *g_gpio_irq_args[RP2040_GPIO_NUM];
+static void *g_gpio_irq_args[RP2040_GPIO_NUM];
 static int g_gpio_irq_modes[RP2040_GPIO_NUM];
 
 /* GPIO pins function assignment */
@@ -98,7 +98,7 @@ static const int g_gpio_function_mapping_pwm[8][3] =
  *
  ****************************************************************************/
 
-static int rp2040_gpio_interrupt(int irq, void *context, FAR void *arg)
+static int rp2040_gpio_interrupt(int irq, void *context, void *arg)
 {
   int i;
   int j;
@@ -287,7 +287,7 @@ void rp2040_gpio_init(uint32_t gpio)
  ****************************************************************************/
 
 int rp2040_gpio_irq_attach(uint32_t gpio, uint32_t intrmode,
-                           xcpt_t isr, FAR void *arg)
+                           xcpt_t isr, void *arg)
 {
   if (!g_gpio_irq_init)
     {

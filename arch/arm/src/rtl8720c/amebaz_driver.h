@@ -86,27 +86,27 @@ struct amebaz_dev_s
   unsigned char             country[2];
 };
 
-int amebaz_wl_start_scan(FAR struct amebaz_dev_s *priv,
+int amebaz_wl_start_scan(struct amebaz_dev_s *priv,
                          struct iwreq *iwr);
-int amebaz_wl_get_scan_results(FAR struct amebaz_dev_s *priv,
+int amebaz_wl_get_scan_results(struct amebaz_dev_s *priv,
                                struct iwreq *iwr);
-int amebaz_wl_set_encode_ext(FAR struct amebaz_dev_s *priv,
+int amebaz_wl_set_encode_ext(struct amebaz_dev_s *priv,
                              struct iwreq *iwr);
-int amebaz_wl_get_encode_ext(FAR struct amebaz_dev_s *priv,
+int amebaz_wl_get_encode_ext(struct amebaz_dev_s *priv,
                              struct iwreq *iwr);
-int amebaz_wl_set_ssid(FAR struct amebaz_dev_s *priv,
+int amebaz_wl_set_ssid(struct amebaz_dev_s *priv,
                        struct iwreq *iwr);
-int amebaz_wl_set_bssid(FAR struct amebaz_dev_s *priv,
+int amebaz_wl_set_bssid(struct amebaz_dev_s *priv,
                         struct iwreq *iwr);
-int amebaz_wl_set_mode(FAR struct amebaz_dev_s *priv,
+int amebaz_wl_set_mode(struct amebaz_dev_s *priv,
                        struct iwreq *iwr);
-int amebaz_wl_set_country(FAR struct amebaz_dev_s *priv,
+int amebaz_wl_set_country(struct amebaz_dev_s *priv,
                           struct iwreq *iwr);
-int amebaz_wl_get_freq(FAR struct amebaz_dev_s *priv,
+int amebaz_wl_get_freq(struct amebaz_dev_s *priv,
                        struct iwreq *iwr);
-int amebaz_wl_set_freq(FAR struct amebaz_dev_s *priv,
+int amebaz_wl_set_freq(struct amebaz_dev_s *priv,
                        struct iwreq *iwr);
-int amebaz_wl_process_command(FAR struct amebaz_dev_s *priv,
+int amebaz_wl_process_command(struct amebaz_dev_s *priv,
                               int cmd, void *req);
 void amebaz_wl_connection_handler(int index,
                                   union iwreq_data *wrqu, char *extra);

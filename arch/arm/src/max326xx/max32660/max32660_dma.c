@@ -115,7 +115,7 @@ static void max326_dma_terminate(struct max326_dmach_s *dmach, int result)
  *
  ****************************************************************************/
 
-static int max326_dmach_interrupt(int irq, FAR void *context, FAR void *arg)
+static int max326_dmach_interrupt(int irq, void *context, void *arg)
 {
   struct max326_dmach_s *dmach = (struct max326_dmach_s *)arg;
   uintptr_t base;

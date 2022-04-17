@@ -61,7 +61,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct i2c_slave_s *s32k1xx_i2cbus_slave_initialize(int port);
+struct i2c_slave_s *s32k1xx_i2cbus_slave_initialize(int port);
 
 /****************************************************************************
  * Name: s32k1xx_i2cbus_slave_uninitialize
@@ -79,7 +79,7 @@ FAR struct i2c_slave_s *s32k1xx_i2cbus_slave_initialize(int port);
  *
  ****************************************************************************/
 
-int s32k1xx_i2cbus_slave_uninitialize(FAR struct i2c_slave_s *dev);
+int s32k1xx_i2cbus_slave_uninitialize(struct i2c_slave_s *dev);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -53,14 +53,14 @@
  ****************************************************************************/
 
 static ssize_t phyplus_stub_read(
-                FAR struct file *filep, FAR char *buffer, size_t buflen);
+                struct file *filep, char *buffer, size_t buflen);
 static ssize_t phyplus_stub_write(
-                FAR struct file *filep, FAR const char *buffer,
+                struct file *filep, const char *buffer,
                 size_t buflen);
 static off_t   phyplus_stub_seek(
-                FAR struct file *filep, off_t offset, int whence);
+                struct file *filep, off_t offset, int whence);
 static int     phyplus_stub_ioctl(
-                FAR struct file *filep, int cmd, unsigned long arg);
+                struct file *filep, int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -573,7 +573,7 @@ static int phyplus_parse_params_and_action(char *buff)
  ****************************************************************************/
 
 static ssize_t phyplus_stub_read(
-                FAR struct file *filep, FAR char *buffer, size_t buflen)
+                struct file *filep, char *buffer, size_t buflen)
 {
   buffer[0] = 'T';
   buffer[1] = 'E';
@@ -603,12 +603,12 @@ static ssize_t phyplus_stub_read(
 
 static char phyplus_cmd[CMD_LEN];
 
-static ssize_t phyplus_stub_write(FAR struct file *filep,
-                                  FAR const char *buffer, size_t buflen)
+static ssize_t phyplus_stub_write(struct file *filep,
+                                  const char *buffer, size_t buflen)
 {
-  FAR struct inode *inode;
+  struct inode *inode;
 
-  /* FAR struct gpio_dev_s *dev; */
+  /* struct gpio_dev_s *dev; */
 
   int ret = 0;
   static int cmd_pos = 0;
@@ -657,7 +657,7 @@ static ssize_t phyplus_stub_write(FAR struct file *filep,
  *
  ****************************************************************************/
 
-static off_t phyplus_stub_seek(FAR struct file *filep, off_t offset,
+static off_t phyplus_stub_seek(struct file *filep, off_t offset,
                                int whence)
 {
   /* Only SEEK_SET is supported, return ENOSYS for other valid options */
@@ -688,10 +688,10 @@ static off_t phyplus_stub_seek(FAR struct file *filep, off_t offset,
  *
  ****************************************************************************/
 
-static int phyplus_stub_ioctl(FAR struct file *filep, int cmd,
+static int phyplus_stub_ioctl(struct file *filep, int cmd,
                               unsigned long arg)
 {
-    FAR struct inode *inode;
+    struct inode *inode;
     int ret = 0;
 
       /* irqstate_t flags;
@@ -704,11 +704,11 @@ static int phyplus_stub_ioctl(FAR struct file *filep, int cmd,
     inode = filep->f_inode;
     DEBUGASSERT(inode->i_private != NULL);
 
-    FAR struct phyplus_gpio_param_s *phyplus_gpio =
-            (FAR struct phyplus_gpio_param_s *)arg;
+    struct phyplus_gpio_param_s *phyplus_gpio =
+            (struct phyplus_gpio_param_s *)arg;
 #if 0
-    FAR struct phyplus_timer_param_s *phyplus_timer =
-            (FAR struct phyplus_timer_param_s *)arg;
+    struct phyplus_timer_param_s *phyplus_timer =
+            (struct phyplus_timer_param_s *)arg;
 #endif
 
     switch (cmd)

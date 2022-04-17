@@ -87,19 +87,19 @@
 
 struct samv7_dev_s
 {
-  FAR const struct adc_callback_s *cb;  /* Upper driver callback */
-  uint8_t  intf;                        /* ADC number (i.e. ADC1, ADC2) */
-  uint32_t base;                        /* ADC register base */
-  uint8_t  initialized;                 /* ADC initialization counter */
-  uint8_t  resolution;                  /* ADC resolution (SAMV7_AFECn_RES) */
-  uint8_t  trigger;                     /* ADC trigger (software, timer...) */
-  uint8_t  timer_channel;               /* Timer channel to trigger ADC */
-  uint32_t frequency;                   /* Frequency of the timer */
-  int      irq;                         /* ADC IRQ number */
-  int      pid;                         /* ADC PID number */
-  int      nchannels;                   /* Number of configured channels */
-  uint8_t  chanlist[ADC_MAX_CHANNELS];  /* ADC channel list */
-  uint8_t  current;                     /* Current channel being converted */
+  const struct adc_callback_s *cb;     /* Upper driver callback */
+  uint8_t  intf;                       /* ADC number (i.e. ADC1, ADC2) */
+  uint32_t base;                       /* ADC register base */
+  uint8_t  initialized;                /* ADC initialization counter */
+  uint8_t  resolution;                 /* ADC resolution (SAMV7_AFECn_RES) */
+  uint8_t  trigger;                    /* ADC trigger (software, timer...) */
+  uint8_t  timer_channel;              /* Timer channel to trigger ADC */
+  uint32_t frequency;                  /* Frequency of the timer */
+  int      irq;                        /* ADC IRQ number */
+  int      pid;                        /* ADC PID number */
+  int      nchannels;                  /* Number of configured channels */
+  uint8_t  chanlist[ADC_MAX_CHANNELS]; /* ADC channel list */
+  uint8_t  current;                    /* Current channel being converted */
 #ifdef CONFIG_SAMV7_AFEC_TIOATRIG
   TC_HANDLE tc;          /* Handle for the timer channel */
 #endif
@@ -123,15 +123,15 @@ struct samv7_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static void afec_putreg(FAR struct samv7_dev_s *priv, uint32_t offset,
+static void afec_putreg(struct samv7_dev_s *priv, uint32_t offset,
                        uint32_t value);
-static uint32_t afec_getreg(FAR struct samv7_dev_s *priv, uint32_t offset);
+static uint32_t afec_getreg(struct samv7_dev_s *priv, uint32_t offset);
 
 #ifdef CONFIG_SAMV7_AFEC_DMA
 static void sam_afec_dmadone(void *arg);
 static void sam_afec_dmacallback(DMA_HANDLE handle, void *arg, int result);
-static int  sam_afec_dmasetup(struct adc_dev_s *dev, FAR uint8_t *buffer,
-                             size_t buflen);
+static int  sam_afec_dmasetup(struct adc_dev_s *dev, uint8_t *buffer,
+                              size_t buflen);
 static void sam_afec_dmastart(struct adc_dev_s *dev);
 #endif
 
@@ -145,15 +145,15 @@ static int sam_afec_trigger(struct samv7_dev_s *priv);
 
 /* ADC methods */
 
-static int  afec_bind(FAR struct adc_dev_s *dev,
-                     FAR const struct adc_callback_s *callback);
-static void afec_reset(FAR struct adc_dev_s *dev);
-static int  afec_setup(FAR struct adc_dev_s *dev);
-static void afec_shutdown(FAR struct adc_dev_s *dev);
-static void afec_rxint(FAR struct adc_dev_s *dev, bool enable);
-static int  afec_ioctl(FAR struct adc_dev_s *dev,
+static int  afec_bind(struct adc_dev_s *dev,
+                      const struct adc_callback_s *callback);
+static void afec_reset(struct adc_dev_s *dev);
+static int  afec_setup(struct adc_dev_s *dev);
+static void afec_shutdown(struct adc_dev_s *dev);
+static void afec_rxint(struct adc_dev_s *dev, bool enable);
+static int  afec_ioctl(struct adc_dev_s *dev,
                        int cmd, unsigned long arg);
-static int  afec_interrupt(int irq, void *context, FAR void *arg);
+static int  afec_interrupt(int irq, void *context, void *arg);
 
 /****************************************************************************
  * Private Data
@@ -253,13 +253,13 @@ gpio_pinset_t g_adcpinlist1[ADC_MAX_CHANNELS] =
  * Private Functions
  ****************************************************************************/
 
-static void afec_putreg(FAR struct samv7_dev_s *priv, uint32_t offset,
-                       uint32_t value)
+static void afec_putreg(struct samv7_dev_s *priv, uint32_t offset,
+                        uint32_t value)
 {
   putreg32(value, priv->base + offset);
 }
 
-static uint32_t afec_getreg(FAR struct samv7_dev_s *priv, uint32_t offset)
+static uint32_t afec_getreg(struct samv7_dev_s *priv, uint32_t offset)
 {
   return getreg32(priv->base + offset);
 }
@@ -298,8 +298,8 @@ static uint32_t afec_getreg(FAR struct samv7_dev_s *priv, uint32_t offset)
 #ifdef CONFIG_SAMV7_AFEC_DMA
 static void sam_afec_dmadone(void *arg)
 {
-  FAR struct adc_dev_s *dev = (FAR struct adc_dev_s *)arg;
-  FAR struct samv7_dev_s *priv = (FAR struct samv7_dev_s *)dev->ad_priv;
+  struct adc_dev_s *dev = (struct adc_dev_s *)arg;
+  struct samv7_dev_s *priv = (struct samv7_dev_s *)dev->ad_priv;
   uint32_t *buffer;
   uint32_t *next;
   uint32_t sample;
@@ -338,7 +338,7 @@ static void sam_afec_dmadone(void *arg)
        * buffer.
        */
 
-      sam_afec_dmasetup(dev, (FAR uint8_t *)next,
+      sam_afec_dmasetup(dev, (uint8_t *)next,
                        priv->nsamples * sizeof(uint32_t));
 
       /* Invalidate the DMA buffer so that we are guaranteed to reload the
@@ -389,8 +389,8 @@ static void sam_afec_dmadone(void *arg)
 
 static void sam_afec_dmacallback(DMA_HANDLE handle, void *arg, int result)
 {
-  FAR struct adc_dev_s *dev = (FAR struct adc_dev_s *)arg;
-  FAR struct samv7_dev_s *priv = (FAR struct samv7_dev_s *)dev->ad_priv;
+  struct adc_dev_s *dev = (struct adc_dev_s *)arg;
+  struct samv7_dev_s *priv = (struct samv7_dev_s *)dev->ad_priv;
   int ret;
 
   ainfo("ready=%d enabled=%d\n", priv->enabled, priv->ready);
@@ -442,10 +442,10 @@ static void sam_afec_dmacallback(DMA_HANDLE handle, void *arg, int result)
  *
  ****************************************************************************/
 
-static int sam_afec_dmasetup(FAR struct adc_dev_s *dev, FAR uint8_t *buffer,
-                            size_t buflen)
+static int sam_afec_dmasetup(struct adc_dev_s *dev, uint8_t *buffer,
+                             size_t buflen)
 {
-  FAR struct samv7_dev_s *priv = (FAR struct samv7_dev_s *)dev->ad_priv;
+  struct samv7_dev_s *priv = (struct samv7_dev_s *)dev->ad_priv;
   uint32_t paddr;
   uint32_t maddr;
 
@@ -480,15 +480,15 @@ static int sam_afec_dmasetup(FAR struct adc_dev_s *dev, FAR uint8_t *buffer,
 
 static void sam_afec_dmastart(struct adc_dev_s *dev)
 {
-  FAR struct samv7_dev_s *priv = (FAR struct samv7_dev_s *)dev->ad_priv;
+  struct samv7_dev_s *priv = (struct samv7_dev_s *)dev->ad_priv;
 
   /* Make sure that the worker is available and that DMA is not disabled */
 
   if (priv->ready && priv->enabled)
     {
       priv->odd = false;  /* Start with the even buffer */
-      sam_afec_dmasetup(dev, (FAR uint8_t *)priv->evenbuf,
-                       priv->nsamples * sizeof(uint32_t));
+      sam_afec_dmasetup(dev, (uint8_t *)priv->evenbuf,
+                        priv->nsamples * sizeof(uint32_t));
     }
 }
 #endif
@@ -672,10 +672,10 @@ static int sam_afec_trigger(struct samv7_dev_s *priv)
  *
  ****************************************************************************/
 
-static int afec_bind(FAR struct adc_dev_s *dev,
-                    FAR const struct adc_callback_s *callback)
+static int afec_bind(struct adc_dev_s *dev,
+                     const struct adc_callback_s *callback)
 {
-  FAR struct samv7_dev_s *priv = (FAR struct samv7_dev_s *)dev->ad_priv;
+  struct samv7_dev_s *priv = (struct samv7_dev_s *)dev->ad_priv;
 
   DEBUGASSERT(priv != NULL);
   priv->cb = callback;
@@ -691,9 +691,9 @@ static int afec_bind(FAR struct adc_dev_s *dev,
  *
  ****************************************************************************/
 
-static void afec_reset(FAR struct adc_dev_s *dev)
+static void afec_reset(struct adc_dev_s *dev)
 {
-  FAR struct samv7_dev_s *priv = (FAR struct samv7_dev_s *)dev->ad_priv;
+  struct samv7_dev_s *priv = (struct samv7_dev_s *)dev->ad_priv;
   irqstate_t flags;
 
   flags = enter_critical_section();
@@ -829,9 +829,9 @@ exit_leave_critical:
  *
  ****************************************************************************/
 
-static int afec_setup(FAR struct adc_dev_s *dev)
+static int afec_setup(struct adc_dev_s *dev)
 {
-  FAR struct samv7_dev_s *priv = (FAR struct samv7_dev_s *)dev->ad_priv;
+  struct samv7_dev_s *priv = (struct samv7_dev_s *)dev->ad_priv;
 
   /* Do nothing when the ADC device is already set up */
 
@@ -882,9 +882,9 @@ static int afec_setup(FAR struct adc_dev_s *dev)
  *
  ****************************************************************************/
 
-static void afec_rxint(FAR struct adc_dev_s *dev, bool enable)
+static void afec_rxint(struct adc_dev_s *dev, bool enable)
 {
-  FAR struct samv7_dev_s *priv = (FAR struct samv7_dev_s *)dev->ad_priv;
+  struct samv7_dev_s *priv = (struct samv7_dev_s *)dev->ad_priv;
 
 #ifdef CONFIG_SAMV7_AFEC_DMA
   /* Ignore redundant requests */
@@ -933,9 +933,9 @@ static void afec_rxint(FAR struct adc_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static void afec_shutdown(FAR struct adc_dev_s *dev)
+static void afec_shutdown(struct adc_dev_s *dev)
 {
-  FAR struct samv7_dev_s *priv = (FAR struct samv7_dev_s *)dev->ad_priv;
+  struct samv7_dev_s *priv = (struct samv7_dev_s *)dev->ad_priv;
 
   /* Shutdown the ADC device only when not in use */
 
@@ -975,9 +975,9 @@ static void afec_shutdown(FAR struct adc_dev_s *dev)
  *
  ****************************************************************************/
 
-static int afec_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
+static int afec_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 {
-  FAR struct samv7_dev_s *priv = (FAR struct samv7_dev_s *)dev->ad_priv;
+  struct samv7_dev_s *priv = (struct samv7_dev_s *)dev->ad_priv;
   int ret = OK;
 
   switch (cmd)
@@ -1016,10 +1016,10 @@ static int afec_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int afec_interrupt(int irq, void *context, FAR void *arg)
+static int afec_interrupt(int irq, void *context, void *arg)
 {
-  FAR struct adc_dev_s *dev = (FAR struct adc_dev_s *)arg;
-  FAR struct samv7_dev_s *priv = (FAR struct samv7_dev_s *)dev->ad_priv;
+  struct adc_dev_s *dev = (struct adc_dev_s *)arg;
+  struct samv7_dev_s *priv = (struct samv7_dev_s *)dev->ad_priv;
   int32_t data;
 
   if ((afec_getreg(priv, SAM_AFEC_ISR_OFFSET) & \
@@ -1079,12 +1079,12 @@ static int afec_interrupt(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-FAR struct adc_dev_s *sam_afec_initialize(int intf,
-                                          FAR const uint8_t *chanlist,
-                                          int nchannels)
+struct adc_dev_s *sam_afec_initialize(int intf,
+                                      const uint8_t *chanlist,
+                                      int nchannels)
 {
-  FAR struct adc_dev_s *dev;
-  FAR struct samv7_dev_s *priv;
+  struct adc_dev_s *dev;
+  struct samv7_dev_s *priv;
 
   DEBUGASSERT(nchannels > 0);
 
@@ -1113,7 +1113,7 @@ FAR struct adc_dev_s *sam_afec_initialize(int intf,
         }
     }
 
-  priv = (FAR struct samv7_dev_s *)dev->ad_priv;
+  priv = (struct samv7_dev_s *)dev->ad_priv;
 
   priv->nchannels = nchannels;
   memcpy(priv->chanlist, chanlist, nchannels);

@@ -1481,7 +1481,7 @@ static void sam_dmaterminate(struct sam_xdmach_s *xdmach, int result)
  *
  ****************************************************************************/
 
-static int sam_xdmac_interrupt(int irq, void *context, FAR void *arg)
+static int sam_xdmac_interrupt(int irq, void *context, void *arg)
 {
   struct sam_xdmac_s *xdmac = &g_xdmac;
   struct sam_xdmach_s *xdmach;

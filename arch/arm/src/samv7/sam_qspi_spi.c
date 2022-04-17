@@ -760,10 +760,10 @@ static void qspi_spi_recvblock(struct spi_dev_s *dev, void *buffer,
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *sam_qspi_spi_initialize(int intf)
+struct spi_dev_s *sam_qspi_spi_initialize(int intf)
 {
-  FAR struct sam_spidev_s *spi;
-  FAR struct sam_spics_s *spics;
+  struct sam_spidev_s *spi;
+  struct sam_spics_s *spics;
   irqstate_t flags;
   uint32_t regval;
 

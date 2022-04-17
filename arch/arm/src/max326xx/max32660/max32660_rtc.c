@@ -75,7 +75,7 @@
 /* Callback to use when the alarm expires */
 
 static alm_callback_t g_alarmcb;
-static FAR void *g_alarmarg;
+static void *g_alarmarg;
 #endif
 
 /****************************************************************************
@@ -189,7 +189,7 @@ static void max326_rtc_wrenable(bool enable)
  *
  ****************************************************************************/
 
-static b32_t max326_rtc_tm2b32(FAR const struct timespec *tp)
+static b32_t max326_rtc_tm2b32(const struct timespec *tp)
 {
   b32_t intpart;
   b32_t fracpart;
@@ -241,7 +241,7 @@ static b32_t max326_rtc_tm2b32(FAR const struct timespec *tp)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int max326_rtc_interrupt(int irq, void *context, FAR void *arg)
+static int max326_rtc_interrupt(int irq, void *context, void *arg)
 {
   uint32_t regval;
 
@@ -397,7 +397,7 @@ time_t up_rtc_time(void)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_HIRES
-int up_rtc_gettime(FAR struct timespec *tp)
+int up_rtc_gettime(struct timespec *tp)
 {
   uint64_t tmp;
   uint32_t sec;
@@ -441,7 +441,7 @@ int up_rtc_gettime(FAR struct timespec *tp)
  *
  ****************************************************************************/
 
-int up_rtc_settime(FAR const struct timespec *tp)
+int up_rtc_settime(const struct timespec *tp)
 {
   irqstate_t flags;
   b32_t ftime;
@@ -502,8 +502,8 @@ int up_rtc_settime(FAR const struct timespec *tp)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-int max326_rtc_setalarm(FAR struct timespec *ts,
-                        alm_callback_t cb, FAR void *arg)
+int max326_rtc_setalarm(struct timespec *ts,
+                        alm_callback_t cb, void *arg)
 {
   irqstate_t flags;
   b32_t b32now;
@@ -635,7 +635,7 @@ errout_with_lock:
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-int max326_rtc_rdalarm(FAR b32_t *ftime)
+int max326_rtc_rdalarm(b32_t *ftime)
 {
   b32_t b32now;
   b32_t b32delay;

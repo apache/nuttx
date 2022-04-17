@@ -94,13 +94,13 @@ static struct phyplus_gpio_dev_s g_phyplus_gpio_dev[GPIO_NUM];
  * Private Function Prototypes
  ****************************************************************************/
 
-static int phyplus_gpin_read(FAR struct gpio_dev_s *dev, FAR bool *value);
-static int phyplus_gpout_read(FAR struct gpio_dev_s *dev, FAR bool *value);
-static int phyplus_gpout_write(FAR struct gpio_dev_s *dev, bool value);
-static int phyplus_gpint_read(FAR struct gpio_dev_s *dev, FAR bool *value);
-static int phyplus_gpint_attach(FAR struct gpio_dev_s *dev,
-                FAR pin_interrupt_t callback);
-static int phyplus_gpint_enable(FAR struct gpio_dev_s *dev, bool enable);
+static int phyplus_gpin_read(struct gpio_dev_s *dev, bool *value);
+static int phyplus_gpout_read(struct gpio_dev_s *dev, bool *value);
+static int phyplus_gpout_write(struct gpio_dev_s *dev, bool value);
+static int phyplus_gpint_read(struct gpio_dev_s *dev, bool *value);
+static int phyplus_gpint_attach(struct gpio_dev_s *dev,
+                                pin_interrupt_t callback);
+static int phyplus_gpint_enable(struct gpio_dev_s *dev, bool enable);
 
 /****************************************************************************
  * Private Data
@@ -137,8 +137,8 @@ static const struct gpio_operations_s gpint_ops =
 /*  static int phyplus_gpio_interrupt(int irq, void *context, void *arg)
  *  {
  *  #if 0
- *    FAR struct stm32gpint_dev_s *stm32gpint =
- *                          (FAR struct stm32gpint_dev_s *)arg;
+ *    struct stm32gpint_dev_s *stm32gpint =
+ *                          (struct stm32gpint_dev_s *)arg;
  *
  *    DEBUGASSERT(stm32gpint != NULL && stm32gpint->callback != NULL);
  *    gpioinfo("Interrupt! callback=%p\n", stm32gpint->callback);
@@ -147,8 +147,8 @@ static const struct gpio_operations_s gpint_ops =
  *                         stm32gpint->stm32gpio.id);
  *  #endif
  *
- *    FAR struct phyplus_gpio_dev_s *phyplus_gpint =
- *                          (FAR struct phyplus_gpio_dev_s *)arg;
+ *    struct phyplus_gpio_dev_s *phyplus_gpint =
+ *                          (struct phyplus_gpio_dev_s *)arg;
  *
  *    DEBUGASSERT(phyplus_gpint != NULL && phyplus_gpint->callback != NULL);
  *    gpioinfo("Interrupt! callback=%p\n", phyplus_gpint->callback);
@@ -160,11 +160,11 @@ static const struct gpio_operations_s gpint_ops =
  *  }
  */
 
-static int phyplus_gpin_read(FAR struct gpio_dev_s *dev, FAR bool *value)
+static int phyplus_gpin_read(struct gpio_dev_s *dev, bool *value)
 {
 #if 0
-  FAR struct stm32gpio_dev_s *stm32gpio =
-                        (FAR struct stm32gpio_dev_s *)dev;
+  struct stm32gpio_dev_s *stm32gpio =
+                        (struct stm32gpio_dev_s *)dev;
 
   DEBUGASSERT(stm32gpio != NULL && value != NULL);
   DEBUGASSERT(stm32gpio->id < BOARD_NGPIOIN);
@@ -172,8 +172,8 @@ static int phyplus_gpin_read(FAR struct gpio_dev_s *dev, FAR bool *value)
 
   *value = stm32_gpioread(g_gpioinputs[stm32gpio->id]);
 #endif 
-  FAR struct phyplus_gpio_dev_s *phyplus_gpin =
-                        (FAR struct phyplus_gpio_dev_s *)dev;
+  struct phyplus_gpio_dev_s *phyplus_gpin =
+                        (struct phyplus_gpio_dev_s *)dev;
 
   DEBUGASSERT(phyplus_gpin != NULL && value != NULL);
   DEBUGASSERT(phyplus_gpin->idx < GPIO_NUM);
@@ -184,11 +184,11 @@ static int phyplus_gpin_read(FAR struct gpio_dev_s *dev, FAR bool *value)
   return 0;
 }
 
-static int phyplus_gpout_read(FAR struct gpio_dev_s *dev, FAR bool *value)
+static int phyplus_gpout_read(struct gpio_dev_s *dev, bool *value)
 {
 #if 0
-  FAR struct stm32gpio_dev_s *stm32gpio =
-                        (FAR struct stm32gpio_dev_s *)dev;
+  struct stm32gpio_dev_s *stm32gpio =
+                        (struct stm32gpio_dev_s *)dev;
 
   DEBUGASSERT(stm32gpio != NULL && value != NULL);
   DEBUGASSERT(stm32gpio->id < BOARD_NGPIOOUT);
@@ -197,8 +197,8 @@ static int phyplus_gpout_read(FAR struct gpio_dev_s *dev, FAR bool *value)
   *value = stm32_gpioread(g_gpiooutputs[stm32gpio->id]);
 #endif	
 
-  FAR struct phyplus_gpio_dev_s *phyplus_gpout =
-                (FAR struct phyplus_gpio_dev_s *)dev;
+  struct phyplus_gpio_dev_s *phyplus_gpout =
+                (struct phyplus_gpio_dev_s *)dev;
 
   DEBUGASSERT(phyplus_gpout != NULL && value != NULL);
   DEBUGASSERT(phyplus_gpout->idx < GPIO_NUM);
@@ -209,11 +209,11 @@ static int phyplus_gpout_read(FAR struct gpio_dev_s *dev, FAR bool *value)
   return 0;
 }
 
-static int phyplus_gpout_write(FAR struct gpio_dev_s *dev, bool value)
+static int phyplus_gpout_write(struct gpio_dev_s *dev, bool value)
 {
 #if 0
-  FAR struct stm32gpio_dev_s *stm32gpio =
-                             (FAR struct stm32gpio_dev_s *)dev;
+  struct stm32gpio_dev_s *stm32gpio =
+                             (struct stm32gpio_dev_s *)dev;
 
   DEBUGASSERT(stm32gpio != NULL);
   DEBUGASSERT(stm32gpio->id < BOARD_NGPIOOUT);
@@ -222,8 +222,8 @@ static int phyplus_gpout_write(FAR struct gpio_dev_s *dev, bool value)
   stm32_gpiowrite(g_gpiooutputs[stm32gpio->id], value);
 #endif
 
-  FAR struct phyplus_gpio_dev_s *phyplus_gpout =
-                             (FAR struct phyplus_gpio_dev_s *)dev;
+  struct phyplus_gpio_dev_s *phyplus_gpout =
+                             (struct phyplus_gpio_dev_s *)dev;
 
   DEBUGASSERT(phyplus_gpout != NULL);
   DEBUGASSERT(phyplus_gpout->idx < GPIO_NUM);
@@ -234,11 +234,11 @@ static int phyplus_gpout_write(FAR struct gpio_dev_s *dev, bool value)
   return 0;
 }
 
-static int phyplus_gpint_read(FAR struct gpio_dev_s *dev, FAR bool *value)
+static int phyplus_gpint_read(struct gpio_dev_s *dev, bool *value)
 {
 #if 0
-  FAR struct stm32gpint_dev_s *stm32gpint =
-                              (FAR struct stm32gpint_dev_s *)dev;
+  struct stm32gpint_dev_s *stm32gpint =
+                              (struct stm32gpint_dev_s *)dev;
 
   DEBUGASSERT(stm32gpint != NULL && value != NULL);
   DEBUGASSERT(stm32gpint->stm32gpio.id < BOARD_NGPIOINT);
@@ -247,8 +247,8 @@ static int phyplus_gpint_read(FAR struct gpio_dev_s *dev, FAR bool *value)
   *value = stm32_gpioread(g_gpiointinputs[stm32gpint->stm32gpio.id]);
 #endif
 
-  FAR struct phyplus_gpio_dev_s *phyplus_gpint =
-                             (FAR struct phyplus_gpio_dev_s *)dev;
+  struct phyplus_gpio_dev_s *phyplus_gpint =
+                             (struct phyplus_gpio_dev_s *)dev;
 
   DEBUGASSERT(phyplus_gpint != NULL && value != NULL);
   DEBUGASSERT(phyplus_gpint->idx < GPIO_NUM);
@@ -260,20 +260,20 @@ static int phyplus_gpint_read(FAR struct gpio_dev_s *dev, FAR bool *value)
 }
 
 /* static pin_interrupt_t phyplus_gpint_callback_register
- *                (FAR struct gpio_dev_s *dev, uint8_t pin)
+ *                (struct gpio_dev_s *dev, uint8_t pin)
  * {
  *  return 0;
  * }
  */
 
-static int phyplus_gpint_attach(FAR struct gpio_dev_s *dev,
-                        pin_interrupt_t callback)
+static int phyplus_gpint_attach(struct gpio_dev_s *dev,
+                                pin_interrupt_t callback)
 {
 #if 0
   /* do the regist callback things... */
 
-  FAR struct stm32gpint_dev_s *stm32gpint =
-                             (FAR struct stm32gpint_dev_s *)dev;
+  struct stm32gpint_dev_s *stm32gpint =
+                             (struct stm32gpint_dev_s *)dev;
 
   gpioinfo("Attaching the callback\n");
 
@@ -286,8 +286,8 @@ static int phyplus_gpint_attach(FAR struct gpio_dev_s *dev,
   stm32gpint->callback = callback;
 #endif
 
-  FAR struct phyplus_gpio_dev_s *phyplus_gpint =
-                (FAR struct phyplus_gpio_dev_s *)dev;
+  struct phyplus_gpio_dev_s *phyplus_gpint =
+                (struct phyplus_gpio_dev_s *)dev;
 
   gpioinfo("Attaching the callback\n");
 
@@ -299,11 +299,11 @@ static int phyplus_gpint_attach(FAR struct gpio_dev_s *dev,
   return 0;
 }
 
-static int phyplus_gpint_enable(FAR struct gpio_dev_s *dev, bool enable)
+static int phyplus_gpint_enable(struct gpio_dev_s *dev, bool enable)
 {
 #if 0
-  FAR struct stm32gpint_dev_s *stm32gpint =
-                              (FAR struct stm32gpint_dev_s *)dev;
+  struct stm32gpint_dev_s *stm32gpint =
+                              (struct stm32gpint_dev_s *)dev;
 
   if (enable)
     {
@@ -330,7 +330,7 @@ static int phyplus_gpint_enable(FAR struct gpio_dev_s *dev, bool enable)
 }
 
 static int phyplus_gpio_param_check(
-                FAR struct phyplus_gpio_param_s *phyplus_gpio_param)
+                struct phyplus_gpio_param_s *phyplus_gpio_param)
 {
   if (phyplus_gpio_param->pin_idx > NUMBER_OF_PINS)
     {
@@ -360,7 +360,7 @@ static int phyplus_gpio_param_check(
   return PPlus_SUCCESS;
 }
 
-int phyplus_gpio_register(FAR struct phyplus_gpio_param_s
+int phyplus_gpio_register(struct phyplus_gpio_param_s
                 *phyplus_gpio_param)
 {
   int ret;
@@ -396,7 +396,7 @@ int phyplus_gpio_register(FAR struct phyplus_gpio_param_s
   return PPlus_SUCCESS;
 }
 
-int phyplus_gpio_unregister(FAR struct phyplus_gpio_param_s
+int phyplus_gpio_unregister(struct phyplus_gpio_param_s
                 *phyplus_gpio_param)
 {
   gpio_pin_unregister(

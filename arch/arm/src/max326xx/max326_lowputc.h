@@ -86,7 +86,7 @@ void max326_lowsetup(void);
 
 #ifdef HAVE_UART_DEVICE
 void max326_uart_configure(uintptr_t base,
-                           FAR const struct uart_config_s *config);
+                           const struct uart_config_s *config);
 #endif
 
 /****************************************************************************
