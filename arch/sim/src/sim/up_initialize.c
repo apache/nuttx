@@ -50,12 +50,12 @@
 static void up_init_smartfs(void)
 {
 #if defined(CONFIG_MTD_M25P) || defined(CONFIG_MTD_W25) || defined(CONFIG_MTD_SST26)
-  FAR struct mtd_dev_s *mtd;
-  FAR struct spi_dev_s *spi;
+  struct mtd_dev_s *mtd;
+  struct spi_dev_s *spi;
   int minor = 0;
 #endif
 #ifdef CONFIG_MTD_N25QXXX
-  FAR struct qspi_dev_s *qspi;
+  struct qspi_dev_s *qspi;
 #endif
 
 #ifdef CONFIG_SPI_FLASH
@@ -138,7 +138,7 @@ static void up_init_smartfs(void)
 }
 #endif
 
-static int up_loop_task(int argc, FAR char **argv)
+static int up_loop_task(int argc, char **argv)
 {
   while (1)
     {

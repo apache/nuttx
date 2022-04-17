@@ -69,30 +69,30 @@
  * configuration of each color plane.
  */
 
-static int up_getvideoinfo(FAR struct fb_vtable_s *vtable,
-                           FAR struct fb_videoinfo_s *vinfo);
-static int up_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
-                           FAR struct fb_planeinfo_s *pinfo);
+static int up_getvideoinfo(struct fb_vtable_s *vtable,
+                           struct fb_videoinfo_s *vinfo);
+static int up_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
+                           struct fb_planeinfo_s *pinfo);
 
 /* The following is provided only if the video hardware supports
  * RGB color mapping.
  */
 
 #ifdef CONFIG_FB_CMAP
-static int up_getcmap(FAR struct fb_vtable_s *vtable,
-                      FAR struct fb_cmap_s *cmap);
-static int up_putcmap(FAR struct fb_vtable_s *vtable,
-                      FAR const struct fb_cmap_s *cmap);
+static int up_getcmap(struct fb_vtable_s *vtable,
+                      struct fb_cmap_s *cmap);
+static int up_putcmap(struct fb_vtable_s *vtable,
+                      const struct fb_cmap_s *cmap);
 #endif
   /* The following is provided only if the video hardware supports
    * a hardware cursor
    */
 
 #ifdef CONFIG_FB_HWCURSOR
-static int up_getcursor(FAR struct fb_vtable_s *vtable,
-                        FAR struct fb_cursorattrib_s *attrib);
-static int up_setcursor(FAR struct fb_vtable_s *vtable,
-                        FAR struct fb_setcursor_s *settings);
+static int up_getcursor(struct fb_vtable_s *vtable,
+                        struct fb_cursorattrib_s *attrib);
+static int up_setcursor(struct fb_vtable_s *vtable,
+                        struct fb_setcursor_s *settings);
 #endif
 
 /****************************************************************************
@@ -120,7 +120,7 @@ static const struct fb_videoinfo_s g_videoinfo =
 
 static const struct fb_planeinfo_s g_planeinfo =
 {
-  .fbmem    = (FAR void *)&g_fb,
+  .fbmem    = (void *)&g_fb,
   .fblen    = FB_SIZE,
   .stride   = FB_WIDTH,
   .display  = 0,
@@ -172,8 +172,8 @@ struct fb_vtable_s g_fbobject =
  * Name: up_getvideoinfo
  ****************************************************************************/
 
-static int up_getvideoinfo(FAR struct fb_vtable_s *vtable,
-                           FAR struct fb_videoinfo_s *vinfo)
+static int up_getvideoinfo(struct fb_vtable_s *vtable,
+                           struct fb_videoinfo_s *vinfo)
 {
   ginfo("vtable=%p vinfo=%p\n", vtable, vinfo);
   if (vtable && vinfo)
@@ -190,8 +190,8 @@ static int up_getvideoinfo(FAR struct fb_vtable_s *vtable,
  * Name: up_getplaneinfo
  ****************************************************************************/
 
-static int up_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
-                           FAR struct fb_planeinfo_s *pinfo)
+static int up_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
+                           struct fb_planeinfo_s *pinfo)
 {
   ginfo("vtable=%p planeno=%d pinfo=%p\n", vtable, planeno, pinfo);
   if (vtable && planeno == 0 && pinfo)
@@ -209,8 +209,8 @@ static int up_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
  ****************************************************************************/
 
 #ifdef CONFIG_FB_CMAP
-static int up_getcmap(FAR struct fb_vtable_s *vtable,
-                      FAR struct fb_cmap_s *cmap)
+static int up_getcmap(struct fb_vtable_s *vtable,
+                      struct fb_cmap_s *cmap)
 {
   int len;
   int i;
@@ -242,8 +242,8 @@ static int up_getcmap(FAR struct fb_vtable_s *vtable,
  ****************************************************************************/
 
 #ifdef CONFIG_FB_CMAP
-static int up_putcmap(FAR struct fb_vtable_s *vtable,
-                      FAR const struct fb_cmap_s *cmap)
+static int up_putcmap(struct fb_vtable_s *vtable,
+                      const struct fb_cmap_s *cmap)
 {
 #ifdef CONFIG_SIM_X11FB
   return up_x11cmap(cmap->first, cmap->len, cmap->red, cmap->green,
@@ -266,8 +266,8 @@ static int up_putcmap(FAR struct fb_vtable_s *vtable,
  ****************************************************************************/
 
 #ifdef CONFIG_FB_HWCURSOR
-static int up_getcursor(FAR struct fb_vtable_s *vtable,
-                        FAR struct fb_cursorattrib_s *attrib)
+static int up_getcursor(struct fb_vtable_s *vtable,
+                        struct fb_cursorattrib_s *attrib)
 {
   ginfo("vtable=%p attrib=%p\n", vtable, attrib);
   if (vtable && attrib)
@@ -296,8 +296,8 @@ static int up_getcursor(FAR struct fb_vtable_s *vtable,
  ****************************************************************************/
 
 #ifdef CONFIG_FB_HWCURSOR
-static int up_setcursor(FAR struct fb_vtable_s *vtable,
-                       FAR struct fb_setcursor_s *settings)
+static int up_setcursor(struct fb_vtable_s *vtable,
+                       struct fb_setcursor_s *settings)
 {
   ginfo("vtable=%p settings=%p\n", vtable, settings);
   if (vtable && settings)
@@ -339,7 +339,7 @@ static int up_setcursor(FAR struct fb_vtable_s *vtable,
  ****************************************************************************/
 
 #ifdef CONFIG_SIM_X11FB
-static void up_updatework(FAR void *arg)
+static void up_updatework(void *arg)
 {
   work_queue(LPWORK, &g_updatework, up_updatework, NULL, MSEC2TICK(33));
   up_x11update();
@@ -402,7 +402,7 @@ int up_fbinitialize(int display)
  *
  ****************************************************************************/
 
-FAR struct fb_vtable_s *up_fbgetvplane(int display, int vplane)
+struct fb_vtable_s *up_fbgetvplane(int display, int vplane)
 {
   if (vplane == 0)
     {

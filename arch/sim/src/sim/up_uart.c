@@ -48,7 +48,7 @@ struct tty_priv_s
 {
   /* tty-port path name */
 
-  FAR const char *path;
+  const char *path;
 
   /* The file descriptor. It is returned by open */
 
@@ -59,21 +59,21 @@ struct tty_priv_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  tty_setup(FAR struct uart_dev_s *dev);
-static void tty_shutdown(FAR struct uart_dev_s *dev);
-static int  tty_attach(FAR struct uart_dev_s *dev);
-static void tty_detach(FAR struct uart_dev_s *dev);
-static int  tty_ioctl(FAR struct file *filep, int cmd,
+static int  tty_setup(struct uart_dev_s *dev);
+static void tty_shutdown(struct uart_dev_s *dev);
+static int  tty_attach(struct uart_dev_s *dev);
+static void tty_detach(struct uart_dev_s *dev);
+static int  tty_ioctl(struct file *filep, int cmd,
                       unsigned long arg);
-static int  tty_receive(FAR struct uart_dev_s *dev, uint32_t *status);
-static void tty_rxint(FAR struct uart_dev_s *dev, bool enable);
-static bool tty_rxavailable(FAR struct uart_dev_s *dev);
-static bool tty_rxflowcontrol(FAR struct uart_dev_s *dev,
+static int  tty_receive(struct uart_dev_s *dev, uint32_t *status);
+static void tty_rxint(struct uart_dev_s *dev, bool enable);
+static bool tty_rxavailable(struct uart_dev_s *dev);
+static bool tty_rxflowcontrol(struct uart_dev_s *dev,
                               unsigned int nbuffered, bool upper);
-static void tty_send(FAR struct uart_dev_s *dev, int ch);
-static void tty_txint(FAR struct uart_dev_s *dev, bool enable);
-static bool tty_txready(FAR struct uart_dev_s *dev);
-static bool tty_txempty(FAR struct uart_dev_s *dev);
+static void tty_send(struct uart_dev_s *dev, int ch);
+static void tty_txint(struct uart_dev_s *dev, bool enable);
+static bool tty_txready(struct uart_dev_s *dev);
+static bool tty_txempty(struct uart_dev_s *dev);
 
 /****************************************************************************
  * Private Data
@@ -251,9 +251,9 @@ static struct uart_dev_s g_tty3_dev =
  *
  ****************************************************************************/
 
-static int tty_setup(FAR struct uart_dev_s *dev)
+static int tty_setup(struct uart_dev_s *dev)
 {
-  FAR struct tty_priv_s *priv = dev->priv;
+  struct tty_priv_s *priv = dev->priv;
 
   if (!dev->isconsole && priv->fd < 0)
     {
@@ -278,7 +278,7 @@ static int tty_setup(FAR struct uart_dev_s *dev)
 
 static void tty_shutdown(struct uart_dev_s *dev)
 {
-  FAR struct tty_priv_s *priv = dev->priv;
+  struct tty_priv_s *priv = dev->priv;
 
   if (!dev->isconsole && priv->fd >= 0)
     {
@@ -320,7 +320,7 @@ static int tty_attach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static void tty_detach(FAR struct uart_dev_s *dev)
+static void tty_detach(struct uart_dev_s *dev)
 {
 }
 
@@ -335,10 +335,10 @@ static void tty_detach(FAR struct uart_dev_s *dev)
 static int tty_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
 #ifdef CONFIG_SERIAL_TERMIOS
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct uart_dev_s *dev = inode->i_private;
-  FAR struct tty_priv_s *priv = dev->priv;
-  FAR struct termios *termiosp = (FAR struct termios *)(uintptr_t)arg;
+  struct inode *inode = filep->f_inode;
+  struct uart_dev_s *dev = inode->i_private;
+  struct tty_priv_s *priv = dev->priv;
+  struct termios *termiosp = (struct termios *)(uintptr_t)arg;
 
   if (!termiosp)
     {
@@ -372,7 +372,7 @@ static int tty_ioctl(struct file *filep, int cmd, unsigned long arg)
 
 static int tty_receive(struct uart_dev_s *dev, uint32_t *status)
 {
-  FAR struct tty_priv_s *priv = dev->priv;
+  struct tty_priv_s *priv = dev->priv;
 
   *status = 0;
   return simuart_getc(dev->isconsole ? 0 : priv->fd);
@@ -400,7 +400,7 @@ static void tty_rxint(struct uart_dev_s *dev, bool enable)
 
 static bool tty_rxavailable(struct uart_dev_s *dev)
 {
-  FAR struct tty_priv_s *priv = dev->priv;
+  struct tty_priv_s *priv = dev->priv;
 
   return simuart_checkc(dev->isconsole ? 0 : priv->fd);
 }
@@ -414,10 +414,10 @@ static bool tty_rxavailable(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static bool tty_rxflowcontrol(FAR struct uart_dev_s *dev,
+static bool tty_rxflowcontrol(struct uart_dev_s *dev,
                               unsigned int nbuffered, bool upper)
 {
-  FAR struct uart_buffer_s *rxbuf = &dev->recv;
+  struct uart_buffer_s *rxbuf = &dev->recv;
 
   if (nbuffered == rxbuf->size)
     {
@@ -437,7 +437,7 @@ static bool tty_rxflowcontrol(FAR struct uart_dev_s *dev,
 
 static void tty_send(struct uart_dev_s *dev, int ch)
 {
-  FAR struct tty_priv_s *priv = dev->priv;
+  struct tty_priv_s *priv = dev->priv;
 
   /* For console device */
 

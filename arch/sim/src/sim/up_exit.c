@@ -49,7 +49,7 @@
 
 void up_exit(int status)
 {
-  FAR struct tcb_s *tcb;
+  struct tcb_s *tcb;
 
   /* Make sure that we are in a critical section with local interrupts.
    * The IRQ state will be restored when the next task is started.
