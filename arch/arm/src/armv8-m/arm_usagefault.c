@@ -57,7 +57,7 @@
  *
  ****************************************************************************/
 
-int arm_usagefault(int irq, FAR void *context, FAR void *arg)
+int arm_usagefault(int irq, void *context, void *arg)
 {
   uint32_t cfsr = getreg32(NVIC_CFAULTS);
 

@@ -63,9 +63,9 @@ int up_tls_size(void)
  *
  ****************************************************************************/
 
-void up_tls_initialize(FAR struct tls_info_s *info)
+void up_tls_initialize(struct tls_info_s *info)
 {
-  FAR uint8_t *tls_data = (FAR uint8_t *)(info + 1);
+  uint8_t *tls_data = (uint8_t *)(info + 1);
 
   uint32_t tdata_len = sizeof(uint32_t) * (_END_TDATA - _START_TDATA);
   uint32_t tbss_len = sizeof(uint32_t) * (_END_TBSS - _START_TBSS);

@@ -57,15 +57,15 @@ struct systick_lowerhalf_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int systick_start(FAR struct timer_lowerhalf_s *lower_);
-static int systick_stop(FAR struct timer_lowerhalf_s *lower_);
-static int systick_getstatus(FAR struct timer_lowerhalf_s *lower_,
-                             FAR struct timer_status_s *status);
-static int systick_settimeout(FAR struct timer_lowerhalf_s *lower_,
+static int systick_start(struct timer_lowerhalf_s *lower_);
+static int systick_stop(struct timer_lowerhalf_s *lower_);
+static int systick_getstatus(struct timer_lowerhalf_s *lower_,
+                             struct timer_status_s *status);
+static int systick_settimeout(struct timer_lowerhalf_s *lower_,
                               uint32_t timeout);
-static void systick_setcallback(FAR struct timer_lowerhalf_s *lower_,
-                                tccb_t callback, FAR void *arg);
-static int systick_maxtimeout(FAR struct timer_lowerhalf_s *lower_,
+static void systick_setcallback(struct timer_lowerhalf_s *lower_,
+                                tccb_t callback, void *arg);
+static int systick_maxtimeout(struct timer_lowerhalf_s *lower_,
                               uint32_t *maxtimeout);
 
 /****************************************************************************
@@ -118,21 +118,21 @@ static bool systick_irq_pending(struct systick_lowerhalf_s *lower)
     }
 }
 
-static int systick_start(FAR struct timer_lowerhalf_s *lower_)
+static int systick_start(struct timer_lowerhalf_s *lower_)
 {
   putreg32(0, NVIC_SYSTICK_CURRENT);
   modifyreg32(NVIC_SYSTICK_CTRL, 0, NVIC_SYSTICK_CTRL_ENABLE);
   return 0;
 }
 
-static int systick_stop(FAR struct timer_lowerhalf_s *lower_)
+static int systick_stop(struct timer_lowerhalf_s *lower_)
 {
   modifyreg32(NVIC_SYSTICK_CTRL, NVIC_SYSTICK_CTRL_ENABLE, 0);
   return 0;
 }
 
-static int systick_getstatus(FAR struct timer_lowerhalf_s *lower_,
-                             FAR struct timer_status_s *status)
+static int systick_getstatus(struct timer_lowerhalf_s *lower_,
+                             struct timer_status_s *status)
 {
   struct systick_lowerhalf_s *lower = (struct systick_lowerhalf_s *)lower_;
   irqstate_t flags = enter_critical_section();
@@ -165,7 +165,7 @@ static int systick_getstatus(FAR struct timer_lowerhalf_s *lower_,
   return 0;
 }
 
-static int systick_settimeout(FAR struct timer_lowerhalf_s *lower_,
+static int systick_settimeout(struct timer_lowerhalf_s *lower_,
                               uint32_t timeout)
 {
   struct systick_lowerhalf_s *lower = (struct systick_lowerhalf_s *)lower_;
@@ -198,8 +198,8 @@ static int systick_settimeout(FAR struct timer_lowerhalf_s *lower_,
   return 0;
 }
 
-static void systick_setcallback(FAR struct timer_lowerhalf_s *lower_,
-                                CODE tccb_t callback, FAR void *arg)
+static void systick_setcallback(struct timer_lowerhalf_s *lower_,
+                                tccb_t callback, void *arg)
 {
   struct systick_lowerhalf_s *lower = (struct systick_lowerhalf_s *)lower_;
 
@@ -209,7 +209,7 @@ static void systick_setcallback(FAR struct timer_lowerhalf_s *lower_,
   leave_critical_section(flags);
 }
 
-static int systick_maxtimeout(FAR struct timer_lowerhalf_s *lower_,
+static int systick_maxtimeout(struct timer_lowerhalf_s *lower_,
                               uint32_t *maxtimeout)
 {
   uint64_t maxtimeout64 = usec_from_count(
@@ -227,7 +227,7 @@ static int systick_maxtimeout(FAR struct timer_lowerhalf_s *lower_,
   return 0;
 }
 
-static int systick_interrupt(int irq, FAR void *context, FAR void *arg)
+static int systick_interrupt(int irq, void *context, void *arg)
 {
   struct systick_lowerhalf_s *lower = arg;
 
