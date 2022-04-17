@@ -70,7 +70,7 @@ static struct up_dev_s g_simkeyboard;
 int sim_kbd_initialize(void)
 {
   int                  ret;
-  FAR struct up_dev_s *priv = &g_simkeyboard;
+  struct up_dev_s *priv = &g_simkeyboard;
 
   memset(priv, 0, sizeof(*priv));
 
@@ -96,7 +96,7 @@ int sim_kbd_initialize(void)
 
 void up_kbdevent(uint32_t key, bool is_press)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *) &g_simkeyboard;
+  struct up_dev_s *priv = (struct up_dev_s *) &g_simkeyboard;
   uint32_t types[2] =
     {
       KEYBOARD_RELEASE, KEYBOARD_PRESS

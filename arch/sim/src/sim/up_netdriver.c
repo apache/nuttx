@@ -89,7 +89,7 @@ static struct net_driver_s g_sim_dev;
  * Private Functions
  ****************************************************************************/
 
-static void netdriver_reply(FAR struct net_driver_s *dev)
+static void netdriver_reply(struct net_driver_s *dev)
 {
   /* If the receiving resulted in data that should be sent out on
    * the network, the field d_len is set to a value > 0.
@@ -127,10 +127,10 @@ static void netdriver_reply(FAR struct net_driver_s *dev)
     }
 }
 
-static void netdriver_recv_work(FAR void *arg)
+static void netdriver_recv_work(void *arg)
 {
-  FAR struct net_driver_s *dev = arg;
-  FAR struct eth_hdr_s *eth;
+  struct net_driver_s *dev = arg;
+  struct eth_hdr_s *eth;
 
   net_lock();
 
@@ -144,7 +144,7 @@ static void netdriver_recv_work(FAR void *arg)
        * on a data received event
        */
 
-      dev->d_len = netdev_read((FAR unsigned char *)dev->d_buf,
+      dev->d_len = netdev_read((unsigned char *)dev->d_buf,
                                dev->d_pktsize);
       if (dev->d_len > 0)
         {
@@ -154,7 +154,7 @@ static void netdriver_recv_work(FAR void *arg)
            * destination == our MAC address
            */
 
-          eth = (FAR struct eth_hdr_s *)dev->d_buf;
+          eth = (struct eth_hdr_s *)dev->d_buf;
           if (dev->d_len > ETH_HDRLEN)
             {
 #ifdef CONFIG_NET_PKT
@@ -240,7 +240,7 @@ static void netdriver_recv_work(FAR void *arg)
   net_unlock();
 }
 
-static int netdriver_txpoll(FAR struct net_driver_s *dev)
+static int netdriver_txpoll(struct net_driver_s *dev)
 {
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
@@ -287,9 +287,9 @@ static int netdriver_txpoll(FAR struct net_driver_s *dev)
   return 0;
 }
 
-static void netdriver_timer_work(FAR void *arg)
+static void netdriver_timer_work(void *arg)
 {
-  FAR struct net_driver_s *dev = arg;
+  struct net_driver_s *dev = arg;
 
   net_lock();
   if (IFF_IS_UP(dev->d_flags))
@@ -301,7 +301,7 @@ static void netdriver_timer_work(FAR void *arg)
   net_unlock();
 }
 
-static int netdriver_ifup(FAR struct net_driver_s *dev)
+static int netdriver_ifup(struct net_driver_s *dev)
 {
   netdev_ifup(dev->d_ipaddr);
   work_queue(LPWORK, &g_timer_work, netdriver_timer_work, dev, CLK_TCK);
@@ -309,7 +309,7 @@ static int netdriver_ifup(FAR struct net_driver_s *dev)
   return OK;
 }
 
-static int netdriver_ifdown(FAR struct net_driver_s *dev)
+static int netdriver_ifdown(struct net_driver_s *dev)
 {
   netdev_carrier_off(dev);
   work_cancel(LPWORK, &g_timer_work);
@@ -317,9 +317,9 @@ static int netdriver_ifdown(FAR struct net_driver_s *dev)
   return OK;
 }
 
-static void netdriver_txavail_work(FAR void *arg)
+static void netdriver_txavail_work(void *arg)
 {
-  FAR struct net_driver_s *dev = arg;
+  struct net_driver_s *dev = arg;
 
   net_lock();
   if (IFF_IS_UP(dev->d_flags))
@@ -330,7 +330,7 @@ static void netdriver_txavail_work(FAR void *arg)
   net_unlock();
 }
 
-static int netdriver_txavail(FAR struct net_driver_s *dev)
+static int netdriver_txavail(struct net_driver_s *dev)
 {
   if (work_available(&g_avail_work))
     {
@@ -340,20 +340,20 @@ static int netdriver_txavail(FAR struct net_driver_s *dev)
   return OK;
 }
 
-static void netdriver_txdone_interrupt(FAR void *priv)
+static void netdriver_txdone_interrupt(void *priv)
 {
   if (work_available(&g_avail_work))
     {
-      FAR struct net_driver_s *dev = (FAR struct net_driver_s *)priv;
+      struct net_driver_s *dev = (struct net_driver_s *)priv;
       work_queue(LPWORK, &g_avail_work, netdriver_txavail_work, dev, 0);
     }
 }
 
-static void netdriver_rxready_interrupt(FAR void *priv)
+static void netdriver_rxready_interrupt(void *priv)
 {
   if (work_available(&g_recv_work))
     {
-      FAR struct net_driver_s *dev = (FAR struct net_driver_s *)priv;
+      struct net_driver_s *dev = (struct net_driver_s *)priv;
       work_queue(LPWORK, &g_recv_work, netdriver_recv_work, dev, 0);
     }
 }
@@ -364,7 +364,7 @@ static void netdriver_rxready_interrupt(FAR void *priv)
 
 int netdriver_init(void)
 {
-  FAR struct net_driver_s *dev = &g_sim_dev;
+  struct net_driver_s *dev = &g_sim_dev;
   void *pktbuf;
   int pktsize;
 

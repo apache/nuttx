@@ -71,7 +71,7 @@ static int sim_audio_getcaps(struct audio_lowerhalf_s *dev, int type,
                              struct audio_caps_s *caps);
 #ifdef CONFIG_AUDIO_MULTI_SESSION
 static int sim_audio_configure(struct audio_lowerhalf_s *dev,
-                               FAR void *session,
+                               void *session,
                                const struct audio_caps_s *caps);
 #else
 static int sim_audio_configure(struct audio_lowerhalf_s *dev,
@@ -362,7 +362,7 @@ static int sim_audio_getcaps(struct audio_lowerhalf_s *dev, int type,
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
 static int sim_audio_configure(struct audio_lowerhalf_s *dev,
-                               FAR void *session,
+                               void *session,
                                const struct audio_caps_s *caps)
 #else
 static int sim_audio_configure(struct audio_lowerhalf_s *dev,

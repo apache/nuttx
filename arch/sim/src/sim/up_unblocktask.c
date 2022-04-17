@@ -54,9 +54,9 @@
  *
  ****************************************************************************/
 
-void up_unblock_task(FAR struct tcb_s *tcb)
+void up_unblock_task(struct tcb_s *tcb)
 {
-  FAR struct tcb_s *rtcb = this_task();
+  struct tcb_s *rtcb = this_task();
 
   /* Verify that the context switch can be performed */
 
