@@ -46,11 +46,11 @@
 #endif
 
 #ifndef bcopy /* See mm/README.txt */
-#define bcopy(b1,b2,len) (void)memmove(b2,b1,len)
+#define bcopy(b1,b2,len) memmove(b2,b1,len)
 #endif
 
 #ifndef bzero /* See mm/README.txt */
-#define bzero(s,n)       (void)memset(s,0,n)
+#define bzero(s,n)       memset(s,0,n)
 #endif
 
 #define strcasecmp_l(s1, s2, l)     strcasecmp(s1, s2)

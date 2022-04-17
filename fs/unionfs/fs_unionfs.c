@@ -96,7 +96,7 @@ struct unionfs_file_s
 /* Helper functions */
 
 static int     unionfs_semtake(FAR struct unionfs_inode_s *ui, bool noint);
-#define        unionfs_semgive(ui) (void)nxsem_post(&(ui)->ui_exclsem)
+#define        unionfs_semgive(ui) nxsem_post(&(ui)->ui_exclsem)
 
 static FAR const char *unionfs_offsetpath(FAR const char *relpath,
                  FAR const char *prefix);

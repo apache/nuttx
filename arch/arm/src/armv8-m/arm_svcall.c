@@ -274,7 +274,7 @@ int arm_svcall(int irq, FAR void *context, FAR void *arg)
            */
 
           rtcb->flags          &= ~TCB_FLAG_SYSCALL;
-          (void)nxsig_unmask_pendingsignal();
+          nxsig_unmask_pendingsignal();
         }
         break;
 #endif

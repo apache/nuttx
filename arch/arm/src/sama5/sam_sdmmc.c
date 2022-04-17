@@ -1427,8 +1427,8 @@ static int sam_interrupt(int irq, void *context, FAR void *arg)
 
           mcinfo("Queuing callback to %p(%p)\n", priv->callback,
                   priv->cbarg);
-          (void)work_queue(HPWORK, &priv->cbwork, priv->callback,
-                          priv->cbarg, 0);
+          work_queue(HPWORK, &priv->cbwork, priv->callback,
+                     priv->cbarg, 0);
         }
       else
         {

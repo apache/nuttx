@@ -496,8 +496,6 @@ FAR struct pwm_lowerhalf_s *cxd56_pwminitialize(uint32_t channel)
 {
   FAR struct cxd56_pwm_chan_s *pwmch;
 
-  (void)g_pwmops;
-
   switch (channel)
     {
 #ifdef CONFIG_CXD56_PWM0

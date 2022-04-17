@@ -539,7 +539,7 @@ ssize_t up_progmem_eraseblock(size_t cluster)
   /* Erase all pages in the cluster */
 
 #ifdef USE_UNLOCK
-  (void)nvm_unlock(page, SAMD5E5_PAGE_PER_CLUSTER);
+  nvm_unlock(page, SAMD5E5_PAGE_PER_CLUSTER);
 #endif
 
   finfo("INFO: erase block=%d address=0x%x\n",
@@ -547,7 +547,7 @@ ssize_t up_progmem_eraseblock(size_t cluster)
   ret = nvm_command(NVMCTRL_CTRLB_CMD_EB, SAMD5E5_PAGE2BYTE(page));
 
 #ifdef USE_LOCK
-  (void)nvm_lock(page, SAMD5E5_PAGE_PER_CLUSTER);
+  nvm_lock(page, SAMD5E5_PAGE_PER_CLUSTER);
 #endif
 
   if (ret < 0)
@@ -696,7 +696,7 @@ ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
 #ifdef USE_UNLOCK /* Make sure that the FLASH is unlocked */
   lock = page;
   locksize = SAMD5E5_BYTE2PAGE(buflen);
-  (void)nvm_unlock(lock, locksize);
+  nvm_unlock(lock, locksize);
 #endif
 
   flags = enter_critical_section();
@@ -858,7 +858,7 @@ ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
     }
 
 #ifdef USE_LOCK
-  (void)nvm_lock(lock, locksize);
+  nvm_lock(lock, locksize);
 #endif
 
   leave_critical_section(flags);

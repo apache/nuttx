@@ -118,7 +118,7 @@ void up_timer_initialize(void)
   unsigned long ecx;
   uint32_t vector = IRQ0;
 
-  (void)irq_attach(IRQ0, (xcpt_t)intel64_timerisr, NULL);
+  irq_attach(IRQ0, (xcpt_t)intel64_timerisr, NULL);
 
 #ifdef CONFIG_ARCH_INTEL64_HAVE_TSC_DEADLINE
   vector |= MSR_X2APIC_LVTT_TSC_DEADLINE;

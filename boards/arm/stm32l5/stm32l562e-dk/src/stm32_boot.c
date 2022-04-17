@@ -85,6 +85,6 @@ void board_late_initialize(void)
 {
   /* Perform board-specific initialization here if so configured */
 
-  (void)stm32_bringup();
+  stm32_bringup();
 }
 #endif

@@ -200,7 +200,7 @@ static void up_dumpstate(void)
 #ifdef CONFIG_ARCH_USBDUMP
   /* Dump USB trace data */
 
-  (void)usbtrace_enumerate(assert_tracecallback, NULL);
+  usbtrace_enumerate(assert_tracecallback, NULL);
 #endif
 }
 #else
@@ -221,7 +221,7 @@ static void _up_assert(void)
 
   if (g_current_regs || (running_task())->flink == NULL)
     {
-      (void)up_irq_save();
+      up_irq_save();
       for (; ; )
         {
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 1

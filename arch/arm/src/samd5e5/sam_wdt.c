@@ -457,7 +457,7 @@ void sam_wdt_initialize(FAR const char *devpath)
   priv->started = false;
   sam_settimeout((FAR struct watchdog_lowerhalf_s *)priv,
                   BOARD_SCLK_FREQUENCY / 2);
-  (void)watchdog_register(devpath, (FAR struct watchdog_lowerhalf_s *)priv);
+  watchdog_register(devpath, (FAR struct watchdog_lowerhalf_s *)priv);
 }
 
 #endif /* CONFIG_WATCHDOG && CONFIG__WDT */
