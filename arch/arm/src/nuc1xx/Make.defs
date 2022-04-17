@@ -18,8 +18,7 @@
 #
 ############################################################################
 
-CMN_ASRCS  = arm_exception.S arm_saveusercontext.S arm_fullcontextrestore.S
-CMN_ASRCS += vfork.S
+CMN_ASRCS  = arm_exception.S vfork.S
 
 CMN_CSRCS  = arm_allocateheap.c arm_assert.c arm_blocktask.c
 CMN_CSRCS += arm_createstack.c arm_mdelay.c arm_udelay.c arm_exit.c
@@ -29,7 +28,8 @@ CMN_CSRCS += arm_releasepending.c arm_releasestack.c arm_reprioritizertr.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_stackframe.c
 CMN_CSRCS += arm_systemreset.c arm_unblocktask.c arm_usestack.c arm_doirq.c
 CMN_CSRCS += arm_hardfault.c arm_svcall.c arm_vectors.c arm_vfork.c
-CMN_CSRCS += arm_switchcontext.c arm_puts.c arm_tcbinfo.c
+CMN_CSRCS += arm_switchcontext.c arm_saveusercontext.c
+CMN_CSRCS += arm_fullcontextrestore.c arm_puts.c arm_tcbinfo.c
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CMN_CSRCS += arm_task_start.c arm_pthread_start.c

@@ -20,14 +20,14 @@
 
 # Source files specific to the Cortex-M4F
 
-CMN_ASRCS += arm_saveusercontext.S arm_fullcontextrestore.S
-CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S arm_exception.S
+CMN_ASRCS  = arm_testset.S arm_fetchadd.S vfork.S arm_exception.S
 
 CMN_CSRCS += arm_assert.c arm_blocktask.c arm_createstack.c arm_vectors.c
 CMN_CSRCS += arm_doirq.c arm_hardfault.c arm_initialstate.c arm_memfault.c
 CMN_CSRCS += arm_releasepending.c arm_reprioritizertr.c arm_schedulesigaction.c
 CMN_CSRCS += arm_sigdeliver.c arm_svcall.c arm_trigger_irq.c arm_unblocktask.c
-CMN_CSRCS += arm_systemreset.c arm_switchcontext.c
+CMN_CSRCS += arm_systemreset.c arm_switchcontext.c arm_saveusercontext.c
+CMN_CSRCS += arm_fullcontextrestore.c
 
 ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
 CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c

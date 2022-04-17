@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-r/arm_fullcontextrestore.S
+ * arch/arm/src/common/arm_saveusercontext.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,52 +23,28 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/irq.h>
+
 #include <arch/syscall.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Symbols
- ****************************************************************************/
-
-	.file	"arm_fullcontextrestore.S"
-
-/****************************************************************************
- * Macros
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arm_fullcontextrestore
+ * Name: up_saveusercontext
  *
  * Description:
- *   Restore the current thread context.  Full prototype is:
+ *   Save the current thread context.  Full prototype is:
  *
- *   void arm_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
+ *   int  up_saveusercontext(void *saveregs);
  *
  * Returned Value:
- *   None
+ *   0: Normal return
+ *   1: Context switch return
  *
  ****************************************************************************/
 
-	.globl	arm_fullcontextrestore
-	.type	arm_fullcontextrestore, function
-arm_fullcontextrestore:
-
-	/* Perform the System call with R0=1 and R1=regs */
-
-	mov		r1, r0				/* R1: regs */
-	mov		r0, #SYS_restore_context	/* R0: restore context */
-	svc		#SYS_syscall			/* Force synchronous SVCall (or Hard Fault) */
-
-	/* This call should not return */
-
-	bx		lr				/* Unnecessary ... will not return */
-	.size	arm_fullcontextrestore, .-arm_fullcontextrestore
-	.end
+int up_saveusercontext(void *saveregs)
+{
+  return sys_call1(SYS_save_context, (uintptr_t)saveregs);
+}

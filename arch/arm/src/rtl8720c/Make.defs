@@ -29,7 +29,6 @@ CMN_CSRCS += arm_stackframe.c arm_task_start.c arm_usestack.c arm_vfork.c
 # arch/arm/src/armv8-m
 #
 CMN_ASRCS += arm_exception.S arm_fetchadd.S arm_setjmp.S
-CMN_ASRCS += arm_fullcontextrestore.S arm_saveusercontext.S
 CMN_ASRCS += arm_testset.S vfork.S
 
 CMN_UASRCS += arm_signal_handler.S
@@ -40,7 +39,8 @@ CMN_CSRCS += arm_itm_syslog.c arm_memfault.c arm_mpu.c arm_ramvec_attach.c
 CMN_CSRCS += arm_ramvec_initialize.c arm_releasepending.c arm_reprioritizertr.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_signal_dispatch.c
 CMN_CSRCS += arm_stackcheck.c arm_svcall.c arm_systick.c arm_unblocktask.c
-CMN_CSRCS += arm_switchcontext.c arm_tcbinfo.c
+CMN_CSRCS += arm_switchcontext.c arm_saveusercontext.c arm_fullcontextrestore.c
+CMN_CSRCS += arm_tcbinfo.c
 
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
 CMN_CSRCS += arm_backtrace_thumb.c
@@ -48,8 +48,8 @@ endif
 
 # arch/arm/src/rtl8720c
 #
-CHIP_CSRCS += ameba_nvic.c ameba_heap.c ameba_idle.c ameba_uart.c ameba_start.c ameba_vectors.c
-CHIP_CSRCS += ameba_efuse.c ameba_flash.c ameba_wdt.c ameba_hci.c
+CHIP_CSRCS += ameba_nvic.c ameba_heap.c ameba_idle.c ameba_uart.c ameba_start.c
+CHIP_CSRCS += ameba_vectors.c ameba_efuse.c ameba_flash.c ameba_wdt.c ameba_hci.c
 
 CHIP_ASRCS += ameba_lto.S
 
