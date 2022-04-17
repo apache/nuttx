@@ -1330,7 +1330,7 @@ static int imxrt_interrupt(int irq, void *context, FAR void *arg)
           mcinfo("Queuing callback to %p(%p)\n",
                  priv->callback, priv->cbarg);
 
-          (void)work_queue(HPWORK, &priv->cbwork, (worker_t)priv->callback,
+          (void)work_queue(HPWORK, &priv->cbwork, priv->callback,
                           priv->cbarg, 0);
         }
       else
@@ -3148,7 +3148,7 @@ static void imxrt_callback(void *arg)
           mcinfo("Queuing callback to %p(%p)\n",
                  priv->callback, priv->cbarg);
 
-          work_queue(HPWORK, &priv->cbwork, (worker_t)priv->callback,
+          work_queue(HPWORK, &priv->cbwork, priv->callback,
                      priv->cbarg, 0);
         }
       else
