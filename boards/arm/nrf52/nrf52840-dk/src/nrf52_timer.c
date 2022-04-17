@@ -52,7 +52,7 @@
  *
  ****************************************************************************/
 
-int nrf52_timer_driver_setup(FAR const char *devpath, int timer)
+int nrf52_timer_driver_setup(const char *devpath, int timer)
 {
   return nrf52_timer_initialize(devpath, timer);
 }

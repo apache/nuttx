@@ -42,7 +42,7 @@
 int board_bmp280_initialize(int bus)
 {
   int ret;
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
 
   snerr("Initializing BMP280..\n");
 

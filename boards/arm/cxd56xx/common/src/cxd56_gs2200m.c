@@ -65,7 +65,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  gs2200m_irq_attach(xcpt_t, FAR void *);
+static int  gs2200m_irq_attach(xcpt_t, void *);
 static void gs2200m_irq_enable(void);
 static void gs2200m_irq_disable(void);
 static uint32_t gs2200m_dready(int *);
@@ -84,7 +84,7 @@ static const struct gs2200m_lower_s g_wifi_lower =
   .reset   = gs2200m_reset
 };
 
-static FAR void *g_devhandle = NULL;
+static void *g_devhandle = NULL;
 static volatile int32_t  _enable_count = 0;
 static volatile uint32_t _n_called;
 
@@ -96,7 +96,7 @@ static volatile uint32_t _n_called;
  * Name: gs2200m_irq_attach
  ****************************************************************************/
 
-static int gs2200m_irq_attach(xcpt_t handler, FAR void *arg)
+static int gs2200m_irq_attach(xcpt_t handler, void *arg)
 {
   cxd56_gpioint_config(GS2200M_GPIO_37,
                        GPIOINT_LEVEL_HIGH,
@@ -223,9 +223,9 @@ static void spi_pincontrol(int bus, bool on)
  * Name: board_gs2200m_initialize
  ****************************************************************************/
 
-int board_gs2200m_initialize(FAR const char *devpath, int bus)
+int board_gs2200m_initialize(const char *devpath, int bus)
 {
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
   DMA_HANDLE    hdl;
   dma_config_t  conf;
 

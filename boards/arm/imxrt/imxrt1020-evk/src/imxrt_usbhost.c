@@ -88,7 +88,7 @@ static struct usbhost_connection_s *g_ehciconn;
 
 static int ehci_waiter(int argc, char *argv[])
 {
-  FAR struct usbhost_hubport_s *hport;
+  struct usbhost_hubport_s *hport;
 
   uinfo("ehci_waiter:  Running\n");
   for (; ; )
@@ -206,7 +206,7 @@ int imxrt_usbhost_initialize(void)
 
   ret = kthread_create("EHCI Monitor", CONFIG_USBHOST_DEFPRIO,
                        CONFIG_USBHOST_STACKSIZE,
-                       (main_t)ehci_waiter, (FAR char * const *)NULL);
+                       (main_t)ehci_waiter, (char * const *)NULL);
   if (ret < 0)
     {
       uerr("ERROR: Failed to create ehci_waiter task: %d\n", ret);

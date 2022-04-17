@@ -557,7 +557,7 @@ void set_deq_coef(uint32_t reg_id, cxd56_audio_deq_coef_func_t *coef)
 }
 
 static void set_cic_gain(uint8_t cic_num,
-                         FAR cxd56_audio_mic_gain_t *gain)
+                         cxd56_audio_mic_gain_t *gain)
 {
   uint32_t val;
   uint8_t  write_num;
@@ -1123,7 +1123,7 @@ void cxd56_audio_ac_reg_enable_dnc(cxd56_audio_dnc_id_t id)
 }
 
 void cxd56_audio_ac_reg_set_dncram(cxd56_audio_dnc_id_t id,
-                                   FAR cxd56_audio_dnc_bin_t *bin)
+                                   cxd56_audio_dnc_bin_t *bin)
 {
   uint32_t iram_reg;
   uint32_t cram_reg;
@@ -1159,7 +1159,7 @@ void cxd56_audio_ac_reg_disable_deq(void)
   write_ac_reg(RI_DEQ_EN, 0);
 }
 
-void cxd56_audio_ac_reg_set_deq_param(FAR cxd56_audio_deq_coef_t *deq)
+void cxd56_audio_ac_reg_set_deq_param(cxd56_audio_deq_coef_t *deq)
 {
   set_deq_coef(RI_DEQ_COEF_1B0, &deq->coef[0]);
   set_deq_coef(RI_DEQ_COEF_2B0, &deq->coef[1]);
@@ -1173,7 +1173,7 @@ CXD56_AUDIO_ECODE cxd56_audio_ac_reg_poweron_cic(
                                      uint8_t mic_in,
                                      uint8_t mic_mode,
                                      uint8_t cic_num,
-                                     FAR cxd56_audio_mic_gain_t *gain)
+                                     cxd56_audio_mic_gain_t *gain)
 {
   /* Power on CIC. */
 
@@ -1412,7 +1412,7 @@ void cxd56_audio_ac_reg_set_beep_vol(uint32_t vol)
 }
 
 void cxd56_audio_ac_reg_set_cicgain(uint8_t cic_num,
-                                   FAR cxd56_audio_mic_gain_t *gain)
+                                    cxd56_audio_mic_gain_t *gain)
 {
   set_cic_gain(cic_num, gain);
 }
@@ -1433,7 +1433,7 @@ void cxd56_audio_ac_reg_set_dsrrate(uint32_t rate)
 }
 
 void cxd56_audio_ac_reg_set_seloutch(
-                        FAR cxd56_audio_ac_reg_seloutch_t *seloutch)
+                        cxd56_audio_ac_reg_seloutch_t *seloutch)
 {
   write_ac_reg(RI_SEL_OUT1_L, seloutch->ch[0]);
   write_ac_reg(RI_SEL_OUT1_R, seloutch->ch[1]);

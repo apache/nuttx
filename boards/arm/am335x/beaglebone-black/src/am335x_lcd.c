@@ -118,7 +118,7 @@ static int am335x_enable(const struct tda19988_lower_s *lower, bool enable)
 
 int up_fbinitialize(int display)
 {
-  FAR const struct videomode_s *videomode;
+  const struct videomode_s *videomode;
   struct am335x_panel_info_s panel;
   int ret;
 

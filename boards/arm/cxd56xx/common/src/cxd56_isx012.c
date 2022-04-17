@@ -62,7 +62,7 @@
  * Private Data
  ****************************************************************************/
 
-FAR struct i2c_master_s *i2c;
+struct i2c_master_s *i2c;
 
 /****************************************************************************
  * Public Functions
@@ -157,7 +157,7 @@ void board_isx012_release_sleep(void)
   nxsig_usleep(SLEEP_CANCEL_TIME);
 }
 
-int isx012_register(FAR struct i2c_master_s *i2c);
+int isx012_register(struct i2c_master_s *i2c);
 int isx012_unregister(void);
 
 int board_isx012_initialize(int i2c_bus_num)

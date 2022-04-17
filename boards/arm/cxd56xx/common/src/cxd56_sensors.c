@@ -156,7 +156,7 @@
  ****************************************************************************/
 
 typedef int (*_init_t)(int bus);
-typedef int (*_initdev_t)(FAR const char *devpath, int bus);
+typedef int (*_initdev_t)(const char *devpath, int bus);
 
 struct sensor_device_s
 {
@@ -237,7 +237,7 @@ int board_sensors_initialize(void)
 {
   int ret = 0;
   int i;
-  FAR struct sensor_device_s *dev;
+  struct sensor_device_s *dev;
 
   ret = board_power_control(POWER_SENSOR, true);
   if (ret)

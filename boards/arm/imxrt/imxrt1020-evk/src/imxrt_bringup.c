@@ -76,8 +76,8 @@
 #if defined(CONFIG_I2C_DRIVER) && defined(CONFIG_IMXRT_LPI2C)
 static void imxrt_i2c_register(int bus)
 {
-  FAR struct i2c_master_s   *i2c;
-  int                       ret;
+  struct i2c_master_s   *i2c;
+  int                    ret;
 
   i2c = imxrt_i2cbus_initialize(bus);
   if (i2c == NULL)
@@ -170,7 +170,7 @@ int imxrt_bringup(void)
 #endif
 
 #if defined(CONFIG_I2C_DRIVER)
-    FAR struct i2c_master_s *i2c;
+    struct i2c_master_s *i2c;
 
 #if defined(CONFIG_IMXRT_LPI2C1)
   i2c = imxrt_i2c_register(1);

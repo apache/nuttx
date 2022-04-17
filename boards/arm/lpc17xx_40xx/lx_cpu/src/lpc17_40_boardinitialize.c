@@ -52,7 +52,7 @@
 void lpc17_40_boardinitialize(void)
 {
 #ifdef CONFIG_SCHED_IRQMONITOR
-  up_perf_init((FAR void *)LPC17_40_CCLK);
+  up_perf_init((void *)LPC17_40_CCLK);
 #endif
 
   /* Initialize the EMC, and SDRAM */

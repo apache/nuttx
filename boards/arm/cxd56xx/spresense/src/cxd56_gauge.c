@@ -46,7 +46,7 @@ static int g_gaugeinitialized = 0;
  *
  ****************************************************************************/
 
-int board_gauge_initialize(FAR const char *devpath, FAR int16_t *gaugemeter)
+int board_gauge_initialize(const char *devpath, int16_t *gaugemeter)
 {
   int ret;
 
@@ -73,7 +73,7 @@ int board_gauge_initialize(FAR const char *devpath, FAR int16_t *gaugemeter)
  *
  ****************************************************************************/
 
-int board_gauge_uninitialize(FAR const char *devpath)
+int board_gauge_uninitialize(const char *devpath)
 {
   int ret;
 

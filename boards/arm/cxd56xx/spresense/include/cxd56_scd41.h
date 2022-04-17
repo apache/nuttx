@@ -59,7 +59,7 @@ extern "C"
  ****************************************************************************/
 
 #if defined (CONFIG_SENSORS_SCD41)
-int board_scd41_initialize(FAR const char *devpath, int bus);
+int board_scd41_initialize(const char *devpath, int bus);
 #endif
 
 #undef EXTERN

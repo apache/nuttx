@@ -44,10 +44,10 @@
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_SCD41)
 
-int board_scd41_initialize(FAR const char *devpath, int bus)
+int board_scd41_initialize(const char *devpath, int bus)
 {
   int ret;
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
 
   sninfo("Initializing SCD41...\n");
 

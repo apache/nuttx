@@ -370,7 +370,7 @@ int lpc54_ft5x06_register(void);
  ****************************************************************************/
 
 #if defined(HAVE_I2CTOOL) || defined(HAVE_FT5x06)
-FAR struct i2c_master_s *lpc54_i2c_handle(int bus, int ndx);
+struct i2c_master_s *lpc54_i2c_handle(int bus, int ndx);
 #endif
 
 /****************************************************************************

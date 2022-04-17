@@ -43,7 +43,7 @@
  * Public Functions
  ****************************************************************************/
 
-CXD56_AUDIO_ECODE cxd56_audio_mic_enable(FAR cxd56_audio_mic_gain_t *gain)
+CXD56_AUDIO_ECODE cxd56_audio_mic_enable(cxd56_audio_mic_gain_t *gain)
 {
   CXD56_AUDIO_ECODE ret = CXD56_AUDIO_ECODE_OK;
   uint8_t mic_num;
@@ -117,7 +117,7 @@ CXD56_AUDIO_ECODE cxd56_audio_mic_disable(void)
   return CXD56_AUDIO_ECODE_OK;
 }
 
-CXD56_AUDIO_ECODE cxd56_audio_mic_set_gain(FAR cxd56_audio_mic_gain_t *gain)
+CXD56_AUDIO_ECODE cxd56_audio_mic_set_gain(cxd56_audio_mic_gain_t *gain)
 {
   CXD56_AUDIO_ECODE ret = CXD56_AUDIO_ECODE_OK;
   uint8_t mic_num;
