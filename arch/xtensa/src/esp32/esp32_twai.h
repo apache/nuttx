@@ -66,7 +66,7 @@ extern "C"
 
 #if defined(CONFIG_CAN) && defined(CONFIG_ESP32_TWAI)
 struct can_dev_s;
-FAR struct can_dev_s *esp32_twaiinitialize(int port);
+struct can_dev_s *esp32_twaiinitialize(int port);
 #endif
 
 #ifdef __cplusplus
