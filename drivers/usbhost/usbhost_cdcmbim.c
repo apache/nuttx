@@ -500,7 +500,7 @@ static ssize_t cdcwdm_read(FAR struct file *filep, FAR char *buffer,
       if (work_available(&priv->comm_rxwork))
         {
           (void)work_queue(LPWORK, &priv->comm_rxwork,
-                           (worker_t)usbhost_rxdata_work,
+                           usbhost_rxdata_work,
                            priv, 0);
         }
     }
@@ -797,7 +797,7 @@ static void usbhost_bulkin_callback(FAR void *arg, ssize_t nbytes)
   if (work_available(&priv->bulk_rxwork))
     {
       (void)work_queue(LPWORK, &priv->bulk_rxwork,
-                       (worker_t)usbhost_bulkin_work, priv, delay);
+                       usbhost_bulkin_work, priv, delay);
     }
 }
 
@@ -1022,7 +1022,7 @@ static void usbhost_notification_work(FAR void *arg)
                   if (work_available(&priv->comm_rxwork))
                     {
                       (void)work_queue(LPWORK, &priv->comm_rxwork,
-                                       (worker_t)usbhost_rxdata_work,
+                                       usbhost_rxdata_work,
                                        priv, 0);
                     }
                 }
@@ -1117,7 +1117,7 @@ static void usbhost_notification_callback(FAR void *arg, ssize_t nbytes)
       if (work_available(&priv->ntwork))
         {
           (void)work_queue(LPWORK, &priv->ntwork,
-                           (worker_t)usbhost_notification_work,
+                           usbhost_notification_work,
                            priv, delay);
         }
     }

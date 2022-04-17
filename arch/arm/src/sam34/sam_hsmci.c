@@ -2667,7 +2667,7 @@ static void sam_callback(void *arg)
                  priv->callback, priv->cbarg);
 
           work_queue(LPWORK, &priv->cbwork,
-                    (worker_t)priv->callback, priv->cbarg, 0);
+                    priv->callback, priv->cbarg, 0);
         }
       else
         {
