@@ -53,7 +53,7 @@
 #ifdef PIC32MZ_HAVE_MMCSD
 static int nsh_sdinitialize(void)
 {
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
   int ret;
 
   /* Get the SPI port */

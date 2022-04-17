@@ -209,7 +209,7 @@ static int nsh_waiter(int argc, char *argv[])
 #ifdef NSH_HAVE_MMCSD
 static int nsh_sdinitialize(void)
 {
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
   int ret;
 
   /* Get the SPI port */
@@ -315,7 +315,7 @@ static int nsh_usbhostinitialize(void)
 
       ret = kthread_create("usbhost", CONFIG_USBHOST_DEFPRIO,
                            CONFIG_USBHOST_STACKSIZE,
-                           (main_t)nsh_waiter, (FAR char * const *)NULL);
+                           (main_t)nsh_waiter, (char * const *)NULL);
       return ret < 0 ? -ENOEXEC : OK;
     }
 
