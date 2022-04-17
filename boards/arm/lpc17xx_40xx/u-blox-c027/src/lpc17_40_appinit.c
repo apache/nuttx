@@ -150,7 +150,7 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
 #ifdef NSH_HAVEMMCSD
-  FAR struct spi_dev_s *ssp;
+  struct spi_dev_s *ssp;
 
   /* Get the SSP port */
 

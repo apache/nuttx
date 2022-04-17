@@ -55,7 +55,7 @@
 
 int nrf52_lsm303agr_initialize(char *devpath)
 {
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
   int ret = OK;
 
   sninfo("Initializing LSM303AGR!\n");

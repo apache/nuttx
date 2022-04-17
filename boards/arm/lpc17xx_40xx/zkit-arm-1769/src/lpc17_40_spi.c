@@ -105,7 +105,7 @@ void weak_function zkit_spidev_initialize(void)
  *
  ****************************************************************************/
 
-void  lpc17_40_spiselect(FAR struct spi_dev_s *dev, uint32_t devid,
+void  lpc17_40_spiselect(struct spi_dev_s *dev, uint32_t devid,
                          bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
@@ -122,7 +122,7 @@ void  lpc17_40_spiselect(FAR struct spi_dev_s *dev, uint32_t devid,
   spi_dumpgpio("lpc17_40_spiselect() Exit");
 }
 
-uint8_t lpc17_40_spistatus(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t lpc17_40_spistatus(struct spi_dev_s *dev, uint32_t devid)
 {
   if (devid == SPIDEV_MMCSD(0))
     {
@@ -147,7 +147,7 @@ uint8_t lpc17_40_spistatus(FAR struct spi_dev_s *dev, uint32_t devid)
  *
  ****************************************************************************/
 
-int lpc17_40_spicmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int lpc17_40_spicmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return OK;
 }

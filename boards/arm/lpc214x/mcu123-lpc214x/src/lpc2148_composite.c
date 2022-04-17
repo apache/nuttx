@@ -55,7 +55,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_USBMSC_COMPOSITE
-static FAR void *g_mschandle;
+static void *g_mschandle;
 #endif
 
 /****************************************************************************
@@ -87,8 +87,8 @@ static FAR void *g_mschandle;
 
 #ifdef CONFIG_USBMSC_COMPOSITE
 static int board_mscclassobject(int minor,
-                                FAR struct usbdev_devinfo_s *devinfo,
-                                FAR struct usbdevclass_driver_s **classdev)
+                                struct usbdev_devinfo_s *devinfo,
+                                struct usbdevclass_driver_s **classdev)
 {
   int ret;
 
@@ -151,7 +151,7 @@ static int board_mscclassobject(int minor,
  ****************************************************************************/
 
 #ifdef CONFIG_USBMSC_COMPOSITE
-static void board_mscuninitialize(FAR struct usbdevclass_driver_s *classdev)
+static void board_mscuninitialize(struct usbdevclass_driver_s *classdev)
 {
   DEBUGASSERT(g_mschandle != NULL);
   usbmsc_uninitialize(g_mschandle);
@@ -176,7 +176,7 @@ static void board_mscuninitialize(FAR struct usbdevclass_driver_s *classdev)
  ****************************************************************************/
 
 #ifdef CONFIG_USBMSC_COMPOSITE
-static FAR void *board_composite0_connect(int port)
+static void *board_composite0_connect(int port)
 {
   /* Here we are composing the configuration of the usb composite device.
    *
@@ -276,7 +276,7 @@ static FAR void *board_composite0_connect(int port)
  *
  ****************************************************************************/
 
-static FAR void *board_composite1_connect(int port)
+static void *board_composite1_connect(int port)
 {
   struct composite_devdesc_s dev[2];
   int strbase = COMPOSITE_NSTRIDS;
@@ -344,7 +344,7 @@ int board_composite_initialize(int port)
    */
 
 #ifndef CONFIG_NSH_BUILTIN_APPS
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
   int ret;
 
   /* Get the SPI port */
@@ -402,7 +402,7 @@ int board_composite_initialize(int port)
  *
  ****************************************************************************/
 
-FAR void *board_composite_connect(int port, int configid)
+void *board_composite_connect(int port, int configid)
 {
   if (configid == 0)
     {

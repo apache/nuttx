@@ -47,9 +47,9 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-CXD56_AUDIO_ECODE cxd56_audio_mic_enable(FAR cxd56_audio_mic_gain_t *gain);
+CXD56_AUDIO_ECODE cxd56_audio_mic_enable(cxd56_audio_mic_gain_t *gain);
 CXD56_AUDIO_ECODE cxd56_audio_mic_disable(void);
-CXD56_AUDIO_ECODE cxd56_audio_mic_set_gain(FAR cxd56_audio_mic_gain_t *gain);
+CXD56_AUDIO_ECODE cxd56_audio_mic_set_gain(cxd56_audio_mic_gain_t *gain);
 CXD56_AUDIO_ECODE cxd56_audio_mic_set_seloutch(uint8_t mic_num,
                                               cxd56_audio_samp_fmt_t format);
 

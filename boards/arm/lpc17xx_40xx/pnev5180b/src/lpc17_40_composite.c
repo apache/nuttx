@@ -70,7 +70,7 @@ int board_composite_initialize(int port)
  *
  ****************************************************************************/
 
-FAR void *board_composite_connect(int port, int configid)
+void *board_composite_connect(int port, int configid)
 {
   struct composite_devdesc_s dev[2];
   int ifnobase = 0;

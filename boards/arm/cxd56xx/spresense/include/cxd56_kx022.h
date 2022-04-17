@@ -59,7 +59,7 @@ extern "C"
  ****************************************************************************/
 
 #if defined(CONFIG_SENSORS_KX022)||defined(CONFIG_SENSORS_KX022_SCU)
-int board_kx022_initialize(FAR const char *devpath, int bus);
+int board_kx022_initialize(const char *devpath, int bus);
 #endif
 
 #undef EXTERN

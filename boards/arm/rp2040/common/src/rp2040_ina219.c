@@ -75,7 +75,7 @@
 
 int board_ina219_initialize(int busno)
 {
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
   char devpath[14];
   int ret;
   const int devno = 0;

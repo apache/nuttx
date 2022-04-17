@@ -54,8 +54,8 @@ void cxd56_audio_filter_poweron_dnc(void);
 void cxd56_audio_filter_poweroff_dnc(void);
 void cxd56_audio_filter_set_dnc(cxd56_audio_dnc_id_t id,
                                 bool en,
-                                FAR cxd56_audio_dnc_bin_t *bin);
+                                cxd56_audio_dnc_bin_t *bin);
 void cxd56_audio_filter_set_deq(bool en,
-                                FAR cxd56_audio_deq_coef_t *deq);
+                                cxd56_audio_deq_coef_t *deq);
 
 #endif /* __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_FILTER_H */

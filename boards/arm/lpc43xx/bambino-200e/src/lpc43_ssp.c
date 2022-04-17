@@ -86,7 +86,7 @@ void weak_function lpc43_sspdev_initialize(void)
  *
  ****************************************************************************/
 
-void lpc43_ssp0select(FAR struct spi_dev_s *dev, uint32_t devid,
+void lpc43_ssp0select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
@@ -119,7 +119,7 @@ void lpc43_ssp0select(FAR struct spi_dev_s *dev, uint32_t devid,
  *   Zero
  ****************************************************************************/
 
-uint8_t lpc43_ssp0status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t lpc43_ssp0status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
@@ -138,7 +138,7 @@ uint8_t lpc43_ssp0status(FAR struct spi_dev_s *dev, uint32_t devid)
  *
  ****************************************************************************/
 
-void lpc43_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid,
+void lpc43_ssp1select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
@@ -171,7 +171,7 @@ void lpc43_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid,
  *   Zero
  ****************************************************************************/
 
-uint8_t lpc43_ssp1status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t lpc43_ssp1status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }

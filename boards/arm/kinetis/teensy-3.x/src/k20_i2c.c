@@ -53,7 +53,7 @@
 
 void kinetis_i2cdev_initialize(void)
 {
-  FAR struct i2c_master_s *i2c_dev = NULL;
+  struct i2c_master_s *i2c_dev = NULL;
 
 #if defined(CONFIG_KINETIS_I2C0)
   i2c_dev = kinetis_i2cbus_initialize(0);

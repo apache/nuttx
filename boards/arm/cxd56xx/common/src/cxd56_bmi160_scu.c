@@ -61,7 +61,7 @@
 int board_bmi160_initialize(int bus)
 {
   int ret;
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
 
   sninfo("Initializing BMI160..\n");
 
@@ -115,7 +115,7 @@ int board_bmi160_initialize(int bus)
 int board_bmi160_initialize(int bus)
 {
   int ret;
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
 
   sninfo("Initializing BMI160..\n");
 

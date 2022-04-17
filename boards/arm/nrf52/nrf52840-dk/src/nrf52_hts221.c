@@ -49,12 +49,12 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int nrf52_hts221_irq_attach(FAR struct hts221_config_s *state,
-                                   xcpt_t isr, FAR void *arg);
-static void nrf52_hts221_irq_enable(FAR const struct hts221_config_s *state,
+static int nrf52_hts221_irq_attach(struct hts221_config_s *state,
+                                   xcpt_t isr, void *arg);
+static void nrf52_hts221_irq_enable(const struct hts221_config_s *state,
                                     bool enable);
-static void nrf52_hts221_irq_clear(FAR const struct hts221_config_s *state);
-static int nrf52_hts221_set_power(FAR const struct hts221_config_s *state,
+static void nrf52_hts221_irq_clear(const struct hts221_config_s *state);
+static int nrf52_hts221_set_power(const struct hts221_config_s *state,
                                   bool on);
 
 /****************************************************************************
@@ -77,8 +77,8 @@ static hts221_config_t g_hts221_config =
  * Name: nrf52_hts221_irq_attach
  ****************************************************************************/
 
-static int nrf52_hts221_irq_attach(FAR struct hts221_config_s *state,
-                                   xcpt_t isr, FAR void *arg)
+static int nrf52_hts221_irq_attach(struct hts221_config_s *state,
+                                   xcpt_t isr, void *arg)
 {
   sinfo("Attach HTS221 IRQ\n");
 
@@ -93,8 +93,8 @@ static int nrf52_hts221_irq_attach(FAR struct hts221_config_s *state,
  * Name: nrf52_hts221_irq_enable
  ****************************************************************************/
 
-static void nrf52_hts221_irq_enable(FAR const struct hts221_config_s *state,
-                                   bool enable)
+static void nrf52_hts221_irq_enable(const struct hts221_config_s *state,
+                                    bool enable)
 {
   return;
 }
@@ -103,7 +103,7 @@ static void nrf52_hts221_irq_enable(FAR const struct hts221_config_s *state,
  * Name: nrf52_hts221_irq_clear
  ****************************************************************************/
 
-static void nrf52_hts221_irq_clear(FAR const struct hts221_config_s *state)
+static void nrf52_hts221_irq_clear(const struct hts221_config_s *state)
 {
   return;
 }
@@ -112,7 +112,7 @@ static void nrf52_hts221_irq_clear(FAR const struct hts221_config_s *state)
  * Name: nrf52_hts221_set_power
  ****************************************************************************/
 
-static int nrf52_hts221_set_power(FAR const struct hts221_config_s *state,
+static int nrf52_hts221_set_power(const struct hts221_config_s *state,
                                   bool on)
 {
   return OK;
@@ -132,7 +132,7 @@ static int nrf52_hts221_set_power(FAR const struct hts221_config_s *state,
 
 int nrf52_hts221_initialize(char *devpath)
 {
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
   int ret = OK;
 
   sninfo("Initializing HTS221!\n");

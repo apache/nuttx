@@ -55,7 +55,7 @@
 int k66_bringup(void)
 {
 #ifdef HAVE_SPI
-  FAR struct spi_dev_s *spi1;
+  struct spi_dev_s *spi1;
 #endif
   int ret;
 

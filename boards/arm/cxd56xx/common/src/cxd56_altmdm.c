@@ -363,9 +363,9 @@ static uint32_t altmdm_spi_maxfreq(void)
  *
  ****************************************************************************/
 
-int board_altmdm_initialize(FAR const char *devpath)
+int board_altmdm_initialize(const char *devpath)
 {
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
 #if defined(CONFIG_CXD56_LTE_SPI4_DMAC) || defined(CONFIG_CXD56_LTE_SPI5_DMAC)
   DMA_HANDLE            hdl;
   dma_config_t          conf;

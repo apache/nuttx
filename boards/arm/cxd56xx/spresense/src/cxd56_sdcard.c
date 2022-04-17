@@ -98,7 +98,7 @@ static struct pm_cpu_freqlock_s g_hv_lock =
  *
  ****************************************************************************/
 
-static void board_sdcard_enable(FAR void *arg)
+static void board_sdcard_enable(void *arg)
 {
   struct stat stat_sdio;
   int ret = OK;
@@ -190,7 +190,7 @@ release_frequency_lock:
  *
  ****************************************************************************/
 
-static void board_sdcard_disable(FAR void *arg)
+static void board_sdcard_disable(void *arg)
 {
   int ret;
 
@@ -253,7 +253,7 @@ static bool board_sdcard_inserted(int slotno)
  *
  ****************************************************************************/
 
-static int board_sdcard_detect_int(int irq, FAR void *context, FAR void *arg)
+static int board_sdcard_detect_int(int irq, void *context, void *arg)
 {
   bool inserted;
 

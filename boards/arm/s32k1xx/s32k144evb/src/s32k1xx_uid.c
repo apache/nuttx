@@ -42,7 +42,7 @@
  * Name: board_uniqueid
  ****************************************************************************/
 
-int board_uniqueid(FAR uint8_t *uniqueid)
+int board_uniqueid(uint8_t *uniqueid)
 {
   if (uniqueid == NULL)
     {

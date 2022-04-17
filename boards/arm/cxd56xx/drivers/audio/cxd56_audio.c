@@ -70,14 +70,14 @@ struct power_param_s
 struct dnc_param_s
 {
   bool en;
-  cxd56_audio_dnc_id_t       id;
-  FAR cxd56_audio_dnc_bin_t *bin;
+  cxd56_audio_dnc_id_t   id;
+  cxd56_audio_dnc_bin_t *bin;
 };
 
 struct deq_param_s
 {
   bool en;
-  FAR cxd56_audio_deq_coef_t *coef;
+  cxd56_audio_deq_coef_t *coef;
 };
 
 struct input_param_s
@@ -437,7 +437,7 @@ CXD56_AUDIO_ECODE cxd56_audio_poweroff_dnc(void)
 }
 
 CXD56_AUDIO_ECODE cxd56_audio_en_dnc(cxd56_audio_dnc_id_t id,
-                                     FAR cxd56_audio_dnc_bin_t *bin)
+                                     cxd56_audio_dnc_bin_t *bin)
 {
   CXD56_AUDIO_ECODE ret = CXD56_AUDIO_ECODE_OK;
 
@@ -475,7 +475,7 @@ CXD56_AUDIO_ECODE cxd56_audio_dis_dnc(cxd56_audio_dnc_id_t id)
   return ret;
 }
 
-CXD56_AUDIO_ECODE cxd56_audio_en_deq(FAR cxd56_audio_deq_coef_t *coef)
+CXD56_AUDIO_ECODE cxd56_audio_en_deq(cxd56_audio_deq_coef_t *coef)
 {
   CXD56_AUDIO_ECODE ret = CXD56_AUDIO_ECODE_OK;
 
@@ -863,7 +863,7 @@ CXD56_AUDIO_ECODE cxd56_audio_stop_beep(void)
   return ret;
 }
 
-CXD56_AUDIO_ECODE cxd56_audio_set_micgain(FAR cxd56_audio_mic_gain_t *gain)
+CXD56_AUDIO_ECODE cxd56_audio_set_micgain(cxd56_audio_mic_gain_t *gain)
 {
   CXD56_AUDIO_ECODE ret = CXD56_AUDIO_ECODE_OK;
 
@@ -900,7 +900,7 @@ CXD56_AUDIO_ECODE cxd56_audio_set_micgain(FAR cxd56_audio_mic_gain_t *gain)
 }
 
 CXD56_AUDIO_ECODE cxd56_audio_get_dmahandle(cxd56_audio_dma_path_t path,
-                                            FAR cxd56_audio_dma_t *handle)
+                                            cxd56_audio_dma_t *handle)
 {
   CXD56_AUDIO_ECODE ret = CXD56_AUDIO_ECODE_OK;
 
@@ -929,7 +929,7 @@ CXD56_AUDIO_ECODE cxd56_audio_get_dmahandle(cxd56_audio_dma_path_t path,
   return ret;
 }
 
-CXD56_AUDIO_ECODE cxd56_audio_free_dmahandle(FAR cxd56_audio_dma_t handle)
+CXD56_AUDIO_ECODE cxd56_audio_free_dmahandle(cxd56_audio_dma_t handle)
 {
   CXD56_AUDIO_ECODE ret = CXD56_AUDIO_ECODE_OK;
 
@@ -979,7 +979,7 @@ CXD56_AUDIO_ECODE cxd56_audio_set_datapath(cxd56_audio_signal_t sig,
 
 CXD56_AUDIO_ECODE cxd56_audio_init_dma(cxd56_audio_dma_t handle,
                                        cxd56_audio_samp_fmt_t fmt,
-                                       FAR uint8_t *ch_num)
+                                       uint8_t *ch_num)
 {
   CXD56_AUDIO_ECODE ret = CXD56_AUDIO_ECODE_OK;
 
@@ -1007,7 +1007,7 @@ CXD56_AUDIO_ECODE cxd56_audio_init_dma(cxd56_audio_dma_t handle,
 }
 
 CXD56_AUDIO_ECODE cxd56_audio_set_dmacb(cxd56_audio_dma_t handle,
-                                        FAR cxd56_audio_dma_cb_t cb)
+                                        cxd56_audio_dma_cb_t cb)
 {
   CXD56_AUDIO_ECODE ret = CXD56_AUDIO_ECODE_OK;
 
@@ -1029,7 +1029,7 @@ CXD56_AUDIO_ECODE cxd56_audio_set_dmacb(cxd56_audio_dma_t handle,
 
 CXD56_AUDIO_ECODE
 cxd56_audio_get_dmamstate(cxd56_audio_dma_t handle,
-                          FAR cxd56_audio_dma_mstate_t *state)
+                          cxd56_audio_dma_mstate_t *state)
 {
   CXD56_AUDIO_ECODE ret = CXD56_AUDIO_ECODE_OK;
 

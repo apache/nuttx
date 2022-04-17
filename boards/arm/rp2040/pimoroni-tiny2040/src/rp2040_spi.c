@@ -68,7 +68,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_RP2040_SPI0
-void rp2040_spi0select(FAR struct spi_dev_s *dev, uint32_t devid,
+void rp2040_spi0select(struct spi_dev_s *dev, uint32_t devid,
                        bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
@@ -77,7 +77,7 @@ void rp2040_spi0select(FAR struct spi_dev_s *dev, uint32_t devid,
   rp2040_gpio_put(CONFIG_RP2040_SPI0_GPIO + 1, !selected);
 }
 
-uint8_t rp2040_spi0status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t rp2040_spi0status(struct spi_dev_s *dev, uint32_t devid)
 {
   uint8_t ret = 0;
 
@@ -88,7 +88,7 @@ uint8_t rp2040_spi0status(FAR struct spi_dev_s *dev, uint32_t devid)
 }
 
 #ifdef CONFIG_SPI_CMDDATA
-int rp2040_spi0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int rp2040_spi0cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
 }
@@ -96,7 +96,7 @@ int rp2040_spi0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 #endif
 
 #ifdef CONFIG_RP2040_SPI1
-void rp2040_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
+void rp2040_spi1select(struct spi_dev_s *dev, uint32_t devid,
                        bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
@@ -105,7 +105,7 @@ void rp2040_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
   rp2040_gpio_put(CONFIG_RP2040_SPI1_GPIO + 1, !selected);
 }
 
-uint8_t rp2040_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t rp2040_spi1status(struct spi_dev_s *dev, uint32_t devid)
 {
   uint8_t ret = 0;
 
@@ -116,7 +116,7 @@ uint8_t rp2040_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 }
 
 #ifdef CONFIG_SPI_CMDDATA
-int rp2040_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int rp2040_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
 }

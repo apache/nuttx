@@ -63,10 +63,10 @@ struct rp2040_lower_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  up_attach(FAR const struct enc_lower_s *lower, xcpt_t handler,
-                      FAR void *arg);
-static void up_enable(FAR const struct enc_lower_s *lower);
-static void up_disable(FAR const struct enc_lower_s *lower);
+static int  up_attach(const struct enc_lower_s *lower, xcpt_t handler,
+                      void *arg);
+static void up_enable(const struct enc_lower_s *lower);
+static void up_disable(const struct enc_lower_s *lower);
 
 /****************************************************************************
  * Private Data
@@ -95,20 +95,20 @@ static struct rp2040_lower_s g_enclower =
  * Name: struct enc_lower_s methods
  ****************************************************************************/
 
-static int up_attach(FAR const struct enc_lower_s *lower, xcpt_t handler,
-                     FAR void *arg)
+static int up_attach(const struct enc_lower_s *lower, xcpt_t handler,
+                     void *arg)
 {
   rp2040_gpio_irq_attach(CONFIG_RP2040_ENC28J60_INTR_GPIO,
                          RP2040_GPIO_INTR_EDGE_LOW, handler, arg);
   return OK;
 }
 
-static void up_enable(FAR const struct enc_lower_s *lower)
+static void up_enable(const struct enc_lower_s *lower)
 {
   rp2040_gpio_enable_irq(CONFIG_RP2040_ENC28J60_INTR_GPIO);
 }
 
-static void up_disable(FAR const struct enc_lower_s *lower)
+static void up_disable(const struct enc_lower_s *lower)
 {
   rp2040_gpio_disable_irq(CONFIG_RP2040_ENC28J60_INTR_GPIO);
 }
@@ -123,7 +123,7 @@ static void up_disable(FAR const struct enc_lower_s *lower)
 
 void arm_netinitialize(void)
 {
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
   int ret;
 
   spi = rp2040_spibus_initialize(CONFIG_RP2040_ENC28J60_SPI_CH);

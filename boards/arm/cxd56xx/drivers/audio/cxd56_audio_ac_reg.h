@@ -393,15 +393,15 @@ void cxd56_audio_ac_reg_enable_dnc(cxd56_audio_dnc_id_t id);
 void cxd56_audio_ac_reg_mute_dnc(cxd56_audio_dnc_id_t id);
 void cxd56_audio_ac_reg_unmute_dnc(cxd56_audio_dnc_id_t id);
 void cxd56_audio_ac_reg_set_dncram(cxd56_audio_dnc_id_t id,
-                                   FAR cxd56_audio_dnc_bin_t *bin);
+                                   cxd56_audio_dnc_bin_t *bin);
 void cxd56_audio_ac_reg_enable_deq(void);
 void cxd56_audio_ac_reg_disable_deq(void);
-void cxd56_audio_ac_reg_set_deq_param(FAR cxd56_audio_deq_coef_t *deq);
+void cxd56_audio_ac_reg_set_deq_param(cxd56_audio_deq_coef_t *deq);
 CXD56_AUDIO_ECODE cxd56_audio_ac_reg_poweron_cic(
                                 uint8_t mic_in,
                                 uint8_t mic_mode,
                                 uint8_t cic_num,
-                                FAR cxd56_audio_mic_gain_t *gain);
+                                cxd56_audio_mic_gain_t *gain);
 void cxd56_audio_ac_reg_poweroff_cic(void);
 CXD56_AUDIO_ECODE cxd56_audio_ac_reg_poweron_decim(uint8_t mic_mode,
                                                    uint8_t clk_mode);
@@ -415,12 +415,12 @@ void cxd56_audio_ac_reg_disable_beep(void);
 void cxd56_audio_ac_reg_set_beep_freq(uint32_t freq);
 void cxd56_audio_ac_reg_set_beep_vol(uint32_t vol);
 void cxd56_audio_ac_reg_set_cicgain(uint8_t cic_num,
-                                    FAR cxd56_audio_mic_gain_t *gain);
+                                    cxd56_audio_mic_gain_t *gain);
 void cxd56_audio_ac_reg_enable_digsft(void);
 void cxd56_audio_ac_reg_disable_digsft(void);
 void cxd56_audio_ac_reg_set_dsrrate(uint32_t rate);
 void cxd56_audio_ac_reg_set_seloutch(
-                    FAR cxd56_audio_ac_reg_seloutch_t *seloutch);
+                    cxd56_audio_ac_reg_seloutch_t *seloutch);
 void cxd56_audio_ac_reg_enable_dma(void);
 
 void cxd56_audio_ac_reg_poweron_i2s(uint8_t clk_mode);

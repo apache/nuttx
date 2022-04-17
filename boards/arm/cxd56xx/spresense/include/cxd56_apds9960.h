@@ -59,7 +59,7 @@ extern "C"
  ****************************************************************************/
 
 #if defined(CONFIG_SENSORS_APDS9960) || defined(CONFIG_SENSORS_APDS9960_SCU)
-int board_apds9960_initialize(FAR const char *devpath, int bus);
+int board_apds9960_initialize(const char *devpath, int bus);
 #endif
 
 #undef EXTERN
