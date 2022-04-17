@@ -84,7 +84,7 @@
  *
  ****************************************************************************/
 
-char up_romgetc(FAR const char *ptr)
+char up_romgetc(const char *ptr)
 {
   return pgm_read_byte_near(ptr);
 }
