@@ -72,7 +72,7 @@ int board_lcd_initialize(void)
  * Name: board_lcd_getdev
  ****************************************************************************/
 
-FAR struct lcd_dev_s *board_lcd_getdev(int devno)
+struct lcd_dev_s *board_lcd_getdev(int devno)
 {
   return board_ssd1306_getdev();
 }

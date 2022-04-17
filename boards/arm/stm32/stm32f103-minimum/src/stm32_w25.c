@@ -90,11 +90,11 @@ int stm32_w25initialize(int minor)
 {
   int ret;
 #ifdef HAVE_W25
-  FAR struct spi_dev_s *spi;
-  FAR struct mtd_dev_s *mtd;
-  FAR struct mtd_geometry_s geo;
+  struct spi_dev_s *spi;
+  struct mtd_dev_s *mtd;
+  struct mtd_geometry_s geo;
 #if defined(CONFIG_MTD_PARTITION_NAMES)
-  FAR const char *partname = CONFIG_STM32F103MINIMUM_FLASH_PART_NAMES;
+  const char *partname = CONFIG_STM32F103MINIMUM_FLASH_PART_NAMES;
 #endif
 
   /* Get the SPI port */
@@ -147,7 +147,7 @@ int stm32_w25initialize(int minor)
       int erasesize;
       const char *partstring = CONFIG_STM32F103MINIMUM_FLASH_PART_LIST;
       const char *ptr;
-      FAR struct mtd_dev_s *mtd_part;
+      struct mtd_dev_s *mtd_part;
       char  partref[16];
 
       /* Now create a partition on the FLASH device */

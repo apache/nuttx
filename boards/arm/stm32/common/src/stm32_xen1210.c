@@ -60,9 +60,9 @@ struct stm32_xen1210config_s
 
   /* Additional private definitions only known to this driver */
 
-  XEN1210_HANDLE handle;      /* The XEN1210 driver handle */
-  xen1210_handler_t handler;  /* The XEN1210 interrupt handler */
-  FAR void *arg;              /* Argument to pass to the interrupt handler */
+  XEN1210_HANDLE handle;     /* The XEN1210 driver handle */
+  xen1210_handler_t handler; /* The XEN1210 interrupt handler */
+  void *arg;                 /* Argument to pass to the interrupt handler */
 };
 
 /****************************************************************************
@@ -78,10 +78,10 @@ struct stm32_xen1210config_s
  *   clear   - Acknowledge/clear any pending GPIO interrupt
  */
 
-static int  xen1210_attach(FAR struct xen1210_config_s *state,
-                           xen1210_handler_t handler, FAR void *arg);
-static void xen1210_enable(FAR struct xen1210_config_s *state, bool enable);
-static void xen1210_clear(FAR struct xen1210_config_s *state);
+static int  xen1210_attach(struct xen1210_config_s *state,
+                           xen1210_handler_t handler, void *arg);
+static void xen1210_enable(struct xen1210_config_s *state, bool enable);
+static void xen1210_clear(struct xen1210_config_s *state);
 
 /****************************************************************************
  * Private Data
@@ -114,7 +114,7 @@ static struct stm32_xen1210config_s g_xen1210config =
 
 /* This is the XEN1210 Interrupt handler */
 
-static int xen1210_interrupt(int irq, FAR void *context, FAR void *arg)
+static int xen1210_interrupt(int irq, void *context, void *arg)
 {
   /* Verify that we have a handler attached */
 
@@ -137,11 +137,11 @@ static int xen1210_interrupt(int irq, FAR void *context, FAR void *arg)
  *   clear   - Acknowledge/clear any pending GPIO interrupt
  */
 
-static int xen1210_attach(FAR struct xen1210_config_s *state,
-                           xen1210_handler_t handler, FAR void *arg)
+static int xen1210_attach(struct xen1210_config_s *state,
+                          xen1210_handler_t handler, void *arg)
 {
-  FAR struct stm32_xen1210config_s *priv =
-    (FAR struct stm32_xen1210config_s *)state;
+  struct stm32_xen1210config_s *priv =
+    (struct stm32_xen1210config_s *)state;
 
   sninfo("Saving handler %p\n", handler);
   DEBUGASSERT(priv);
@@ -155,7 +155,7 @@ static int xen1210_attach(FAR struct xen1210_config_s *state,
   return OK;
 }
 
-static void xen1210_enable(FAR struct xen1210_config_s *state, bool enable)
+static void xen1210_enable(struct xen1210_config_s *state, bool enable)
 {
   irqstate_t flags;
 
@@ -184,7 +184,7 @@ static void xen1210_enable(FAR struct xen1210_config_s *state, bool enable)
   leave_critical_section(flags);
 }
 
-static void xen1210_clear(FAR struct xen1210_config_s *state)
+static void xen1210_clear(struct xen1210_config_s *state)
 {
   /* Does nothing */
 }
@@ -257,7 +257,7 @@ static int xen1210_pwm_setup(void)
 
 int board_xen1210_initialize(int devno, int busno)
 {
-  FAR struct spi_dev_s *dev;
+  struct spi_dev_s *dev;
   int ret;
 
   /* Check if we are already initialized */
@@ -289,7 +289,7 @@ int board_xen1210_initialize(int devno, int busno)
 
       g_xen1210config.handle =
           xen1210_instantiate(dev,
-                              (FAR struct xen1210_config_s *)
+                              (struct xen1210_config_s *)
                               &g_xen1210config);
       if (!g_xen1210config.handle)
         {

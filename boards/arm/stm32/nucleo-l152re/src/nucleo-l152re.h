@@ -94,7 +94,7 @@
 #define GPIO_LCD_D7 ( GPIO_OUT | GPIO_PORTA | GPIO_PIN8)   /*  D7     PA8   */
 
 #ifdef CONFIG_LCD_ILI9341
-FAR struct lcd_dev_s *stm32_ili93418b_initialize(void);
+struct lcd_dev_s *stm32_ili93418b_initialize(void);
 #endif
 
 /* SPI sd card */

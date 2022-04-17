@@ -71,7 +71,7 @@ struct stm32_i2c_bus_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int stm32_i2c_power_reset(FAR struct hyt271_bus_s *bus);
+static int stm32_i2c_power_reset(struct hyt271_bus_s *bus);
 
 /****************************************************************************
  * Private Data
@@ -99,10 +99,10 @@ static struct stm32_i2c_bus_s g_bus =
  * Name: stm32_i2c_power_reset
  ****************************************************************************/
 
-static int stm32_i2c_power_reset(FAR struct hyt271_bus_s *bus)
+static int stm32_i2c_power_reset(struct hyt271_bus_s *bus)
 {
   volatile int n;
-  FAR struct stm32_i2c_bus_s *priv = (FAR struct stm32_i2c_bus_s *)bus;
+  struct stm32_i2c_bus_s *priv = (struct stm32_i2c_bus_s *)bus;
 
   if (priv->busnr != BOARD_HYT271_NBUS)
     {
@@ -155,7 +155,7 @@ int stm32_hyt271initialize(int devno)
   int n;
   int ret;
   int ndevices = 0;
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
 
   iinfo("Setup gpios for bus power handling on I2C%d\n", BOARD_HYT271_NBUS);
   stm32_configgpio(BOARD_HYT271_POWIN);

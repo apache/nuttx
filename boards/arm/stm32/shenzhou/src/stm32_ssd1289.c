@@ -63,9 +63,9 @@
 
 struct stm32_lower_s
 {
-  struct ssd1289_lcd_s  dev;    /* This is externally visible the driver state */
-  FAR struct lcd_dev_s *drvr;   /* The saved instance of the LCD driver */
-  bool                  output; /* True: Configured for output */
+  struct ssd1289_lcd_s dev;    /* This is externally visible the driver state */
+  struct lcd_dev_s    *drvr;   /* The saved instance of the LCD driver */
+  bool                 output; /* True: Configured for output */
 };
 
 /****************************************************************************
@@ -75,34 +75,34 @@ struct stm32_lower_s
 /* Helpers */
 
 #ifdef CONFIG_LCD_REGDEBUG
-static void stm32_lcdshow(FAR struct stm32_lower_s *priv,
-                          FAR const char *msg);
+static void stm32_lcdshow(struct stm32_lower_s *priv,
+                          const char *msg);
 #else
 #  define stm32_lcdshow(p,m)
 #endif
 
-static void stm32_wrdata(FAR struct stm32_lower_s *priv, uint16_t data);
+static void stm32_wrdata(struct stm32_lower_s *priv, uint16_t data);
 #ifndef CONFIG_LCD_NOGETRUN
-static inline uint16_t stm32_rddata(FAR struct stm32_lower_s *priv);
+static inline uint16_t stm32_rddata(struct stm32_lower_s *priv);
 #endif
 
 /* Low Level LCD access */
 
-static void stm32_select(FAR struct ssd1289_lcd_s *dev);
-static void stm32_deselect(FAR struct ssd1289_lcd_s *dev);
-static void stm32_index(FAR struct ssd1289_lcd_s *dev, uint8_t index);
+static void stm32_select(struct ssd1289_lcd_s *dev);
+static void stm32_deselect(struct ssd1289_lcd_s *dev);
+static void stm32_index(struct ssd1289_lcd_s *dev, uint8_t index);
 #ifndef CONFIG_LCD_NOGETRUN
-static uint16_t stm32_read(FAR struct ssd1289_lcd_s *dev);
+static uint16_t stm32_read(struct ssd1289_lcd_s *dev);
 #endif
-static void stm32_write(FAR struct ssd1289_lcd_s *dev, uint16_t data);
-static void stm32_backlight(FAR struct ssd1289_lcd_s *dev, int power);
+static void stm32_write(struct ssd1289_lcd_s *dev, uint16_t data);
+static void stm32_backlight(struct ssd1289_lcd_s *dev, int power);
 
 /* Initialization */
 
 #ifndef CONFIG_LCD_NOGETRUN
-static void stm32_lcdinput(FAR struct stm32_lower_s *priv);
+static void stm32_lcdinput(struct stm32_lower_s *priv);
 #endif
-static void stm32_lcdoutput(FAR struct stm32_lower_s *priv);
+static void stm32_lcdoutput(struct stm32_lower_s *priv);
 
 /****************************************************************************
  * Private Data
@@ -252,8 +252,8 @@ static struct stm32_lower_s g_lcdlower =
  ****************************************************************************/
 
 #ifdef CONFIG_LCD_REGDEBUG
-static void stm32_lcdshow(FAR struct stm32_lower_s *priv,
-                          FAR const char *msg)
+static void stm32_lcdshow(struct stm32_lower_s *priv,
+                          const char *msg)
 {
   _info("%s:\n", msg);
   _info("  CRTL   RS: %d CS: %d RD: %d WR: %d LE: %d\n",
@@ -279,7 +279,7 @@ static void stm32_lcdshow(FAR struct stm32_lower_s *priv,
  *
  ****************************************************************************/
 
-static void stm32_wrdata(FAR struct stm32_lower_s *priv, uint16_t data)
+static void stm32_wrdata(struct stm32_lower_s *priv, uint16_t data)
 {
   /* Make sure D0-D15 are configured as outputs */
 
@@ -304,7 +304,7 @@ static void stm32_wrdata(FAR struct stm32_lower_s *priv, uint16_t data)
  ****************************************************************************/
 
 #ifndef CONFIG_LCD_NOGETRUN
-static inline uint16_t stm32_rddata(FAR struct stm32_lower_s *priv)
+static inline uint16_t stm32_rddata(struct stm32_lower_s *priv)
 {
   uint16_t regval;
 
@@ -335,7 +335,7 @@ static inline uint16_t stm32_rddata(FAR struct stm32_lower_s *priv)
  *
  ****************************************************************************/
 
-static void stm32_select(FAR struct ssd1289_lcd_s *dev)
+static void stm32_select(struct ssd1289_lcd_s *dev)
 {
   /* Select the LCD by setting the LCD_CS low */
 
@@ -350,7 +350,7 @@ static void stm32_select(FAR struct ssd1289_lcd_s *dev)
  *
  ****************************************************************************/
 
-static void stm32_deselect(FAR struct ssd1289_lcd_s *dev)
+static void stm32_deselect(struct ssd1289_lcd_s *dev)
 {
   /* De-select the LCD by setting the LCD_CS high */
 
@@ -365,9 +365,9 @@ static void stm32_deselect(FAR struct ssd1289_lcd_s *dev)
  *
  ****************************************************************************/
 
-static void stm32_index(FAR struct ssd1289_lcd_s *dev, uint8_t index)
+static void stm32_index(struct ssd1289_lcd_s *dev, uint8_t index)
 {
-  FAR struct stm32_lower_s *priv = (FAR struct stm32_lower_s *)dev;
+  struct stm32_lower_s *priv = (struct stm32_lower_s *)dev;
 
   /* Clear the RS signal to select the index address */
 
@@ -387,9 +387,9 @@ static void stm32_index(FAR struct ssd1289_lcd_s *dev, uint8_t index)
  ****************************************************************************/
 
 #ifndef CONFIG_LCD_NOGETRUN
-static uint16_t stm32_read(FAR struct ssd1289_lcd_s *dev)
+static uint16_t stm32_read(struct ssd1289_lcd_s *dev)
 {
-  FAR struct stm32_lower_s *priv = (FAR struct stm32_lower_s *)dev;
+  struct stm32_lower_s *priv = (struct stm32_lower_s *)dev;
 
   /* Set the RS signal to select the data address */
 
@@ -409,9 +409,9 @@ static uint16_t stm32_read(FAR struct ssd1289_lcd_s *dev)
  *
  ****************************************************************************/
 
-static void stm32_write(FAR struct ssd1289_lcd_s *dev, uint16_t data)
+static void stm32_write(struct ssd1289_lcd_s *dev, uint16_t data)
 {
-  FAR struct stm32_lower_s *priv = (FAR struct stm32_lower_s *)dev;
+  struct stm32_lower_s *priv = (struct stm32_lower_s *)dev;
 
   /* Set the RS signal to select the data address */
 
@@ -430,7 +430,7 @@ static void stm32_write(FAR struct ssd1289_lcd_s *dev, uint16_t data)
  *
  ****************************************************************************/
 
-static void stm32_backlight(FAR struct ssd1289_lcd_s *dev, int power)
+static void stm32_backlight(struct ssd1289_lcd_s *dev, int power)
 {
   /* There is no software control over the backlight */
 }
@@ -444,7 +444,7 @@ static void stm32_backlight(FAR struct ssd1289_lcd_s *dev, int power)
  ****************************************************************************/
 
 #ifndef CONFIG_LCD_NOGETRUN
-static void stm32_lcdinput(FAR struct stm32_lower_s *priv)
+static void stm32_lcdinput(struct stm32_lower_s *priv)
 {
 #ifndef CONFIG_LCD_FASTCONFIG
   int i;
@@ -481,7 +481,7 @@ static void stm32_lcdinput(FAR struct stm32_lower_s *priv)
  *
  ****************************************************************************/
 
-static void stm32_lcdoutput(FAR struct stm32_lower_s *priv)
+static void stm32_lcdoutput(struct stm32_lower_s *priv)
 {
 #ifndef CONFIG_LCD_FASTCONFIG
   int i;
@@ -526,7 +526,7 @@ static void stm32_lcdoutput(FAR struct stm32_lower_s *priv)
 
 int board_lcd_initialize(void)
 {
-  FAR struct stm32_lower_s *priv = &g_lcdlower;
+  struct stm32_lower_s *priv = &g_lcdlower;
   int i;
 
   /* Only initialize the driver once */
@@ -568,9 +568,9 @@ int board_lcd_initialize(void)
  *
  ****************************************************************************/
 
-FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
+struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
-  FAR struct stm32_lower_s *priv = &g_lcdlower;
+  struct stm32_lower_s *priv = &g_lcdlower;
   DEBUGASSERT(lcddev == 0);
   return priv->drvr;
 }
@@ -585,7 +585,7 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
 
 void board_lcd_uninitialize(void)
 {
-  FAR struct stm32_lower_s *priv = &g_lcdlower;
+  struct stm32_lower_s *priv = &g_lcdlower;
 
   /* Turn the display off */
 

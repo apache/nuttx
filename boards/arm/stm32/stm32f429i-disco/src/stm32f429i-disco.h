@@ -317,7 +317,7 @@ void stm32_pmbuttons(void);
  ****************************************************************************/
 
 #ifdef CONFIG_STM32F429I_DISCO_ILI9341
-FAR struct ili9341_lcd_s *stm32_ili93414ws_initialize(void);
+struct ili9341_lcd_s *stm32_ili93414ws_initialize(void);
 #endif
 
 /****************************************************************************
@@ -343,7 +343,7 @@ FAR struct ili9341_lcd_s *stm32_ili93414ws_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_SPI5
-FAR struct spi_dev_s *stm32_spi5initialize(void);
+struct spi_dev_s *stm32_spi5initialize(void);
 #endif
 
 /****************************************************************************
@@ -361,7 +361,7 @@ FAR struct spi_dev_s *stm32_spi5initialize(void);
  ****************************************************************************/
 
 #if defined(CONFIG_SPI) & defined(CONFIG_SENSORS_L3GD20)
-int stm32_l3gd20initialize(FAR const char *devpath);
+int stm32_l3gd20initialize(const char *devpath);
 #endif
 
 /****************************************************************************

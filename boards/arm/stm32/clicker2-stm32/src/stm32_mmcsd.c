@@ -105,7 +105,7 @@ struct stm32_mmcsd_state_s
   xcpt_t              handler;  /* Interrupt handler */
   bool                cd;       /* TRUE: card is inserted */
   spi_mediachange_t   callback; /* SPI media change callback */
-  FAR void            *cbarg;   /* Argument to pass to media change callback */
+  void                *cbarg;   /* Argument to pass to media change callback */
   struct work_s       work;     /* For deferring card detect interrupt work */
 };
 
@@ -114,19 +114,19 @@ struct stm32_mmcsd_state_s
  ****************************************************************************/
 
 static bool stm32_cardinserted_internal(struct stm32_mmcsd_state_s *state);
-static void stm32_mmcsd_carddetect(FAR void *arg);
-static int stm32_mmcsd_setup(FAR struct stm32_mmcsd_state_s *);
+static void stm32_mmcsd_carddetect(void *arg);
+static int stm32_mmcsd_setup(struct stm32_mmcsd_state_s *);
 
 #ifdef CONFIG_CLICKER2_STM32_MB1_MMCSD
 static int stm32_mb1_mmcsd_carddetect(int irq,
-                                      FAR void *regs,
-                                      FAR void *arg);
+                                      void *regs,
+                                      void *arg);
 #endif
 
 #ifdef CONFIG_CLICKER2_STM32_MB2_MMCSD
 static int stm32_mb2_mmcsd_carddetect(int irq,
-                                      FAR void *regs,
-                                      FAR void *arg);
+                                      void *regs,
+                                      void *arg);
 #endif
 
 /****************************************************************************
@@ -136,7 +136,7 @@ static int stm32_mb2_mmcsd_carddetect(int irq,
 /* MMCSD device state */
 
 #ifdef CONFIG_CLICKER2_STM32_MB1_MMCSD
-static int stm32_mb1_mmcsd_carddetect(int irq, void *regs, FAR void *arg);
+static int stm32_mb1_mmcsd_carddetect(int irq, void *regs, void *arg);
 
 static struct stm32_mmcsd_state_s g_mb1_mmcsd =
 {
@@ -151,7 +151,7 @@ static struct stm32_mmcsd_state_s g_mb1_mmcsd =
 #endif
 
 #ifdef CONFIG_CLICKER2_STM32_MB2_MMCSD
-static int stm32_mb2_mmcsd_carddetect(int irq, void *regs, FAR void *arg);
+static int stm32_mb2_mmcsd_carddetect(int irq, void *regs, void *arg);
 
 static struct stm32_mmcsd_state_s g_mb2_mmcsd =
 {
@@ -197,11 +197,11 @@ static bool stm32_cardinserted_internal(struct stm32_mmcsd_state_s *state)
  *
  ****************************************************************************/
 
-static void stm32_mmcsd_carddetect(FAR void *arg)
+static void stm32_mmcsd_carddetect(void *arg)
 {
   bool cd;
-  FAR struct stm32_mmcsd_state_s *state =
-                                   (FAR struct stm32_mmcsd_state_s *)arg;
+  struct stm32_mmcsd_state_s *state =
+                                   (struct stm32_mmcsd_state_s *)arg;
 
   /* Get the current card insertion state */
 
@@ -231,7 +231,7 @@ static void stm32_mmcsd_carddetect(FAR void *arg)
 }
 
 #ifdef CONFIG_CLICKER2_STM32_MB1_MMCSD
-static int stm32_mb1_mmcsd_carddetect(int irq, FAR void *regs, FAR void *arg)
+static int stm32_mb1_mmcsd_carddetect(int irq, void *regs, void *arg)
 {
   if (work_available(&g_mb1_mmcsd.work))
     {
@@ -244,7 +244,7 @@ static int stm32_mb1_mmcsd_carddetect(int irq, FAR void *regs, FAR void *arg)
 #endif
 
 #ifdef CONFIG_CLICKER2_STM32_MB2_MMCSD
-static int stm32_mb2_mmcsd_carddetect(int irq, FAR void *regs, FAR void *arg)
+static int stm32_mb2_mmcsd_carddetect(int irq, void *regs, void *arg)
 {
   if (work_available(&g_mb2_mmcsd.work))
     {

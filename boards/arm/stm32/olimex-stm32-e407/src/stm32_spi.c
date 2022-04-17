@@ -127,7 +127,7 @@ void stm32_spidev_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_SPI1
-void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
+void stm32_spi1select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected)
 {
 #if defined(CONFIG_CAN_MCP2515)
@@ -205,7 +205,7 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
 #endif
 }
 
-uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t stm32_spi1status(struct spi_dev_s *dev, uint32_t devid)
 {
   uint8_t status = 0;
 
@@ -228,12 +228,12 @@ uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 #endif
 
 #ifdef CONFIG_STM32_SPI2
-void stm32_spi2select(FAR struct spi_dev_s *dev, uint32_t devid,
+void stm32_spi2select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected)
 {
 }
 
-uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t stm32_spi2status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
@@ -264,7 +264,7 @@ uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
 
 #ifdef CONFIG_SPI_CMDDATA
 #ifdef CONFIG_STM32_SPI1
-int stm32_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid,
+int stm32_spi1cmddata(struct spi_dev_s *dev, uint32_t devid,
                       bool cmd)
 {
 #ifdef CONFIG_LCD_ST7567

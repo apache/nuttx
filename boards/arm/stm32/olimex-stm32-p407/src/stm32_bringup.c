@@ -84,7 +84,7 @@ extern const int MODSYMS_NSYMBOLS_VAR;
 int stm32_bringup(void)
 {
 #ifdef HAVE_MMCSD
-  FAR struct sdio_dev_s *sdio;
+  struct sdio_dev_s *sdio;
 #endif
   int ret;
 

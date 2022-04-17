@@ -98,7 +98,7 @@ struct stm32_priv_s
 {
   struct xbee_lower_s dev;
   xcpt_t handler;
-  FAR void *arg;
+  void *arg;
   uint32_t rstcfg;
   uint32_t attncfg;
   uint8_t spidev;
@@ -121,13 +121,13 @@ struct stm32_priv_s
  *   attn_poll    - Poll the current state of the GPIO interrupt (ATTN)
  */
 
-static void stm32_reset(FAR const struct xbee_lower_s *lower);
-static int  stm32_attach_attn(FAR const struct xbee_lower_s *lower,
-                              xcpt_t handler, FAR void *arg);
-static void stm32_enable_attn(FAR const struct xbee_lower_s *lower,
+static void stm32_reset(const struct xbee_lower_s *lower);
+static int  stm32_attach_attn(const struct xbee_lower_s *lower,
+                              xcpt_t handler, void *arg);
+static void stm32_enable_attn(const struct xbee_lower_s *lower,
                               bool state);
-static bool stm32_poll_attn(FAR const struct xbee_lower_s *lower);
-static int  stm32_xbee_devsetup(FAR struct stm32_priv_s *priv);
+static bool stm32_poll_attn(const struct xbee_lower_s *lower);
+static int  stm32_xbee_devsetup(struct stm32_priv_s *priv);
 
 /****************************************************************************
  * Private Data
@@ -190,9 +190,9 @@ static struct stm32_priv_s g_xbee_mb2_priv =
  *   attn_poll    - Poll the current state of the GPIO interrupt (ATTN)
  */
 
-static void stm32_reset(FAR const struct xbee_lower_s *lower)
+static void stm32_reset(const struct xbee_lower_s *lower)
 {
-  FAR struct stm32_priv_s *priv = (FAR struct stm32_priv_s *)lower;
+  struct stm32_priv_s *priv = (struct stm32_priv_s *)lower;
 
   DEBUGASSERT(priv != NULL);
 
@@ -205,10 +205,10 @@ static void stm32_reset(FAR const struct xbee_lower_s *lower)
   up_mdelay(100);
 }
 
-static int stm32_attach_attn(FAR const struct xbee_lower_s *lower,
-                            xcpt_t handler, FAR void *arg)
+static int stm32_attach_attn(const struct xbee_lower_s *lower,
+                             xcpt_t handler, void *arg)
 {
-  FAR struct stm32_priv_s *priv = (FAR struct stm32_priv_s *)lower;
+  struct stm32_priv_s *priv = (struct stm32_priv_s *)lower;
 
   DEBUGASSERT(priv != NULL);
 
@@ -219,10 +219,10 @@ static int stm32_attach_attn(FAR const struct xbee_lower_s *lower,
   return OK;
 }
 
-static void stm32_enable_attn(FAR const struct xbee_lower_s *lower,
-                             bool state)
+static void stm32_enable_attn(const struct xbee_lower_s *lower,
+                              bool state)
 {
-  FAR struct stm32_priv_s *priv = (FAR struct stm32_priv_s *)lower;
+  struct stm32_priv_s *priv = (struct stm32_priv_s *)lower;
 
   /* The caller should not attempt to enable interrupts if the handler
    * has not yet been 'attached'
@@ -248,9 +248,9 @@ static void stm32_enable_attn(FAR const struct xbee_lower_s *lower,
     }
 }
 
-static bool stm32_poll_attn(FAR const struct xbee_lower_s *lower)
+static bool stm32_poll_attn(const struct xbee_lower_s *lower)
 {
-  FAR struct stm32_priv_s *priv = (FAR struct stm32_priv_s *)lower;
+  struct stm32_priv_s *priv = (struct stm32_priv_s *)lower;
 
   return !stm32_gpioread(priv->attncfg);
 }
@@ -267,9 +267,9 @@ static bool stm32_poll_attn(FAR const struct xbee_lower_s *lower)
  *
  ****************************************************************************/
 
-static int stm32_xbee_devsetup(FAR struct stm32_priv_s *priv)
+static int stm32_xbee_devsetup(struct stm32_priv_s *priv)
 {
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
   XBEEHANDLE xbee;
   int ret;
 

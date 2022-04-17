@@ -261,7 +261,7 @@ void stm3210e_lcdclear(uint16_t color);
  ****************************************************************************/
 
 #if defined(CONFIG_I2C) && defined(CONFIG_LM75_I2C) && defined(CONFIG_STM32_I2C1)
-int stm32_lm75initialize(FAR const char *devpath);
+int stm32_lm75initialize(const char *devpath);
 #endif
 
 /****************************************************************************

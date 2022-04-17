@@ -96,11 +96,11 @@ struct stm32_config_s
  * pendown - Return the state of the pen down GPIO input
  */
 
-static int  tsc_attach(FAR struct ads7843e_config_s *state, xcpt_t isr);
-static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable);
-static void tsc_clear(FAR struct ads7843e_config_s *state);
-static bool tsc_busy(FAR struct ads7843e_config_s *state);
-static bool tsc_pendown(FAR struct ads7843e_config_s *state);
+static int  tsc_attach(struct ads7843e_config_s *state, xcpt_t isr);
+static void tsc_enable(struct ads7843e_config_s *state, bool enable);
+static void tsc_clear(struct ads7843e_config_s *state);
+static bool tsc_busy(struct ads7843e_config_s *state);
+static bool tsc_pendown(struct ads7843e_config_s *state);
 
 /****************************************************************************
  * Private Data
@@ -145,9 +145,9 @@ static struct stm32_config_s g_tscinfo =
  * pendown - Return the state of the pen down GPIO input
  */
 
-static int tsc_attach(FAR struct ads7843e_config_s *state, xcpt_t handler)
+static int tsc_attach(struct ads7843e_config_s *state, xcpt_t handler)
 {
-  FAR struct stm32_config_s *priv = (FAR struct stm32_config_s *)state;
+  struct stm32_config_s *priv = (struct stm32_config_s *)state;
 
   /* Just save the handler for use when the interrupt is enabled */
 
@@ -155,9 +155,9 @@ static int tsc_attach(FAR struct ads7843e_config_s *state, xcpt_t handler)
   return OK;
 }
 
-static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
+static void tsc_enable(struct ads7843e_config_s *state, bool enable)
 {
-  FAR struct stm32_config_s *priv = (FAR struct stm32_config_s *)state;
+  struct stm32_config_s *priv = (struct stm32_config_s *)state;
 
   /* The caller should not attempt to enable interrupts if the handler
    * has not yet been 'attached'
@@ -180,12 +180,12 @@ static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
     }
 }
 
-static void tsc_clear(FAR struct ads7843e_config_s *state)
+static void tsc_clear(struct ads7843e_config_s *state)
 {
   /* Does nothing */
 }
 
-static bool tsc_busy(FAR struct ads7843e_config_s *state)
+static bool tsc_busy(struct ads7843e_config_s *state)
 {
   /* Hmmm... The ADS7843E BUSY pin is not brought out on the Shenzhou board.
    * We will most certainly have to revisit this.  There is this cryptic
@@ -199,7 +199,7 @@ static bool tsc_busy(FAR struct ads7843e_config_s *state)
   return false;
 }
 
-static bool tsc_pendown(FAR struct ads7843e_config_s *state)
+static bool tsc_pendown(struct ads7843e_config_s *state)
 {
   /* XPT2046 uses an an internal pullup resistor.  The PENIRQ output goes low
    * due to the current path through the touch screen to ground, which
@@ -234,7 +234,7 @@ static bool tsc_pendown(FAR struct ads7843e_config_s *state)
 
 int stm32_tsc_setup(int minor)
 {
-  FAR struct spi_dev_s *dev;
+  struct spi_dev_s *dev;
   int ret;
 
   iinfo("minor %d\n", minor);

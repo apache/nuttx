@@ -84,17 +84,17 @@ struct stm32_lower_s
 {
   const struct enc_lower_s lower;    /* Low-level MCU interface */
   xcpt_t                   handler;  /* ENCX24J600 interrupt handler */
-  FAR void                *arg;      /* Argument that accompanies the handler */
+  void                    *arg;      /* Argument that accompanies the handler */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  up_attach(FAR const struct enc_lower_s *lower, xcpt_t handler,
-                      FAR void *arg);
-static void up_enable(FAR const struct enc_lower_s *lower);
-static void up_disable(FAR const struct enc_lower_s *lower);
+static int  up_attach(const struct enc_lower_s *lower, xcpt_t handler,
+                      void *arg);
+static void up_enable(const struct enc_lower_s *lower);
+static void up_disable(const struct enc_lower_s *lower);
 
 /****************************************************************************
  * Private Data
@@ -125,10 +125,10 @@ static struct stm32_lower_s g_enclower =
  * Name: struct enc_lower_s methods
  ****************************************************************************/
 
-static int up_attach(FAR const struct enc_lower_s *lower, xcpt_t handler,
-                     FAR void *arg)
+static int up_attach(const struct enc_lower_s *lower, xcpt_t handler,
+                     void *arg)
 {
-  FAR struct stm32_lower_s *priv = (FAR struct stm32_lower_s *)lower;
+  struct stm32_lower_s *priv = (struct stm32_lower_s *)lower;
 
   /* Just save the handler for use when the interrupt is enabled */
 
@@ -137,9 +137,9 @@ static int up_attach(FAR const struct enc_lower_s *lower, xcpt_t handler,
   return OK;
 }
 
-static void up_enable(FAR const struct enc_lower_s *lower)
+static void up_enable(const struct enc_lower_s *lower)
 {
-  FAR struct stm32_lower_s *priv = (FAR struct stm32_lower_s *)lower;
+  struct stm32_lower_s *priv = (struct stm32_lower_s *)lower;
 
   DEBUGASSERT(priv->handler != NULL);
   stm32_gpiosetevent(GPIO_ENCX24J600_INTR, false, true, true,
@@ -150,7 +150,7 @@ static void up_enable(FAR const struct enc_lower_s *lower)
  * the occur while "disabled" will be lost.
  */
 
-static void up_disable(FAR const struct enc_lower_s *lower)
+static void up_disable(const struct enc_lower_s *lower)
 {
   stm32_gpiosetevent(GPIO_ENCX24J600_INTR, false, true, true,
                      NULL, NULL);
@@ -166,7 +166,7 @@ static void up_disable(FAR const struct enc_lower_s *lower)
 
 void arm_netinitialize(void)
 {
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
   int ret;
 
   /* Assumptions:

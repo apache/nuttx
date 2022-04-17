@@ -43,7 +43,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int l3gd20_attach(FAR struct l3gd20_config_s * cfg, xcpt_t irq);
+static int l3gd20_attach(struct l3gd20_config_s * cfg, xcpt_t irq);
 
 /****************************************************************************
  * Private Data
@@ -69,7 +69,7 @@ static struct l3gd20_config_s g_l3gd20_config =
  *
  ****************************************************************************/
 
-static int l3gd20_attach(FAR struct l3gd20_config_s *cfg, xcpt_t irq)
+static int l3gd20_attach(struct l3gd20_config_s *cfg, xcpt_t irq)
 {
   return stm32_gpiosetevent(BOARD_L3GD20_GPIO_DREADY, true, false,
                             true, irq, NULL);

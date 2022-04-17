@@ -311,7 +311,7 @@ int stm32_rgbled_setup(void);
  ****************************************************************************/
 
 #ifdef CONFIG_CAN_MCP2515
-int stm32_mcp2515initialize(FAR const char *devpath);
+int stm32_mcp2515initialize(const char *devpath);
 #endif
 
 /****************************************************************************
@@ -381,7 +381,7 @@ int stm32_ds18b20initialize(int devno);
  ****************************************************************************/
 
 #ifdef CONFIG_CL_MFRC522
-int stm32_mfrc522initialize(FAR const char *devpath);
+int stm32_mfrc522initialize(const char *devpath);
 #endif
 
 #endif /* __ASSEMBLY__ */

@@ -292,7 +292,7 @@ int board_ajoy_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_CAN_MCP2515
-int stm32_mcp2515initialize(FAR const char *devpath);
+int stm32_mcp2515initialize(const char *devpath);
 #endif
 
 #endif /* __BOARDS_ARM_STM32_NUCLEO_F401RE_SRC_NUCLEO_F401RE_H */

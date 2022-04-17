@@ -84,7 +84,7 @@ void stm32_usbdev_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_CHIP_STM32F103VC
-int stm32_usbpullup(FAR struct usbdev_s *dev, bool enable)
+int stm32_usbpullup(struct usbdev_s *dev, bool enable)
 {
   usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
   stm32_gpiowrite(GPIO_USB_PULLUP, !enable);
@@ -103,7 +103,7 @@ int stm32_usbpullup(FAR struct usbdev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
+void stm32_usbsuspend(struct usbdev_s *dev, bool resume)
 {
   uinfo("resume: %d\n", resume);
 }

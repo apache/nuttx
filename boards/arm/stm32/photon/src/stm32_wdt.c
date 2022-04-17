@@ -50,7 +50,7 @@
 
 static int wdog_daemon(int argc, char *argv[])
 {
-  FAR struct file filestruct;
+  struct file filestruct;
   int ret;
 
   /* Open watchdog device */
@@ -107,7 +107,7 @@ exit_close_dev:
 
 int photon_watchdog_initialize(void)
 {
-  FAR struct file filestruct;
+  struct file filestruct;
   int ret = 0;
 
   /* Open the watchdog device */
@@ -146,7 +146,7 @@ int photon_watchdog_initialize(void)
   int taskid = kthread_create(CONFIG_PHOTON_WDG_THREAD_NAME,
                               CONFIG_PHOTON_WDG_THREAD_PRIORITY,
                               CONFIG_PHOTON_WDG_THREAD_STACKSIZE,
-                              (main_t)wdog_daemon, (FAR char * const *)NULL);
+                              (main_t)wdog_daemon, (char * const *)NULL);
 
   if (taskid <= 0)
     {

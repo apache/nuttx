@@ -57,21 +57,21 @@ struct stm32_mwinfo_s
  * Private Functions
  ****************************************************************************/
 
-static int adau1961_attach(FAR const struct adau1961_lower_s *lower,
-                           adau1961_handler_t isr, FAR void *arg)
+static int adau1961_attach(const struct adau1961_lower_s *lower,
+                           adau1961_handler_t isr, void *arg)
 {
   audinfo("TODO\n");
   return 0;
 }
 
-static bool adau1961_enable(FAR const struct adau1961_lower_s *lower,
+static bool adau1961_enable(const struct adau1961_lower_s *lower,
                             bool enable)
 {
   audinfo("TODO\n");
   return 0;
 }
 
-static void adau1961_hw_reset(FAR const struct adau1961_lower_s *lower)
+static void adau1961_hw_reset(const struct adau1961_lower_s *lower)
 {
   audinfo("TODO\n");
 }
@@ -125,9 +125,9 @@ static struct stm32_mwinfo_s g_adau1961info =
 
 int stm32_adau1961_initialize(int minor)
 {
-  FAR struct audio_lowerhalf_s *adau1961;
-  FAR struct i2c_master_s *i2c;
-  FAR struct i2s_dev_s *i2s;
+  struct audio_lowerhalf_s *adau1961;
+  struct i2c_master_s *i2c;
+  struct i2s_dev_s *i2s;
   static bool initialized = false;
   char devname[12];
   int ret;

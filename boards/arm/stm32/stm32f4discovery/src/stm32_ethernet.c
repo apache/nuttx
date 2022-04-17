@@ -201,7 +201,7 @@ void weak_function stm32_netinitialize(void)
  ****************************************************************************/
 
 #ifdef HAVE_NETMONITOR
-int arch_phy_irq(FAR const char *intf, xcpt_t handler, void *arg,
+int arch_phy_irq(const char *intf, xcpt_t handler, void *arg,
                  phy_enable_t *enable)
 {
   phy_enable_t enabler;

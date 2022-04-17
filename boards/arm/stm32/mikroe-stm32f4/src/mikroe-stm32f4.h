@@ -287,7 +287,7 @@ int stm32_tsc_setup(int minor);
  ****************************************************************************/
 
 #ifdef CONFIG_AUDIO_VS1053
-void up_vs1053initialize(FAR struct spi_dev_s *spi);
+void up_vs1053initialize(struct spi_dev_s *spi);
 #endif
 
 #endif /* __ASSEMBLY__ */
