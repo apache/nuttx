@@ -25,9 +25,8 @@ HEAD_ASRC  = arm_vectortab.S
 
 # Common assembly language files
 
-CMN_ASRCS += arm_vectortab.S arm_vectors.S arm_head.S arm_fullcontextrestore.S
-CMN_ASRCS += arm_saveusercontext.S arm_vectoraddrexcptn.S
-CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S
+CMN_ASRCS += arm_vectortab.S arm_vectors.S arm_head.S
+CMN_ASRCS += arm_vectoraddrexcptn.S arm_testset.S arm_fetchadd.S vfork.S
 CMN_ASRCS += cp15_coherent_dcache.S cp15_invalidate_dcache.S
 CMN_ASRCS += cp15_clean_dcache.S cp15_flush_dcache.S
 CMN_ASRCS += cp15_clean_dcache_all.S cp15_flush_dcache_all.S
@@ -50,8 +49,8 @@ CMN_CSRCS += arm_assert.c arm_blocktask.c arm_dataabort.c
 CMN_CSRCS += arm_doirq.c arm_initialstate.c arm_prefetchabort.c
 CMN_CSRCS += arm_releasepending.c arm_reprioritizertr.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_syscall.c
-CMN_CSRCS += arm_unblocktask.c arm_undefinedinsn.c
-CMN_CSRCS += arm_switchcontext.c arm_cache.c
+CMN_CSRCS += arm_unblocktask.c arm_undefinedinsn.c arm_switchcontext.c
+CMN_CSRCS += arm_saveusercontext.c arm_fullcontextrestore.c arm_cache.c
 
 # Configuration dependent C files
 
