@@ -55,7 +55,7 @@ int board_spislavedev_initialize(int bus)
 {
   int ret;
 
-  FAR struct spi_slave_ctrlr_s *ctrlr;
+  struct spi_slave_ctrlr_s *ctrlr;
 
   spiinfo("Initializing /dev/spislv%d...\n", bus);
 
