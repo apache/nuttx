@@ -163,7 +163,7 @@ void weak_function pic32mx_spidev_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_PIC32MX_SPI2
-void pic32mx_spi2select(FAR struct spi_dev_s *dev, uint32_t devid,
+void pic32mx_spi2select(struct spi_dev_s *dev, uint32_t devid,
                         bool selected)
 {
   spiinfo("devid: %d CS: %s\n",
@@ -186,7 +186,7 @@ void pic32mx_spi2select(FAR struct spi_dev_s *dev, uint32_t devid,
 #endif
 }
 
-uint8_t pic32mx_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t pic32mx_spi2status(struct spi_dev_s *dev, uint32_t devid)
 {
   uint8_t ret = 0;
 

@@ -69,28 +69,28 @@ struct pic32mz_timer_ops_s
 {
   /* Timer's methods */
 
-  void     (*start)(FAR struct pic32mz_timer_dev_s *dev);
-  void     (*stop)(FAR struct pic32mz_timer_dev_s *dev);
-  void     (*setperiod)(FAR struct pic32mz_timer_dev_s *dev, uint32_t p);
-  uint32_t (*getcounter)(FAR struct pic32mz_timer_dev_s *dev);
-  void     (*setcounter)(FAR struct pic32mz_timer_dev_s *dev, uint32_t c);
-  uint32_t (*getfreq)(FAR struct pic32mz_timer_dev_s *dev);
-  bool     (*setfreq)(FAR struct pic32mz_timer_dev_s *dev, uint32_t freq);
-  uint8_t  (*getwidth)(FAR struct pic32mz_timer_dev_s *dev);
+  void     (*start)(struct pic32mz_timer_dev_s *dev);
+  void     (*stop)(struct pic32mz_timer_dev_s *dev);
+  void     (*setperiod)(struct pic32mz_timer_dev_s *dev, uint32_t p);
+  uint32_t (*getcounter)(struct pic32mz_timer_dev_s *dev);
+  void     (*setcounter)(struct pic32mz_timer_dev_s *dev, uint32_t c);
+  uint32_t (*getfreq)(struct pic32mz_timer_dev_s *dev);
+  bool     (*setfreq)(struct pic32mz_timer_dev_s *dev, uint32_t freq);
+  uint8_t  (*getwidth)(struct pic32mz_timer_dev_s *dev);
 
   /* Timer's interrupts */
 
-  int      (*setisr)(FAR struct pic32mz_timer_dev_s *dev, xcpt_t handler,
+  int      (*setisr)(struct pic32mz_timer_dev_s *dev, xcpt_t handler,
                      void * arg);
-  void     (*ackint)(FAR struct pic32mz_timer_dev_s *dev);
-  bool     (*checkint)(FAR struct pic32mz_timer_dev_s *dev);
+  void     (*ackint)(struct pic32mz_timer_dev_s *dev);
+  bool     (*checkint)(struct pic32mz_timer_dev_s *dev);
 };
 
 /* Timer's Device Structure */
 
 struct pic32mz_timer_dev_s
 {
-  FAR struct pic32mz_timer_ops_s *ops;
+  struct pic32mz_timer_ops_s *ops;
 };
 
 /****************************************************************************
@@ -105,7 +105,7 @@ struct pic32mz_timer_dev_s
  *
  ****************************************************************************/
 
-FAR struct pic32mz_timer_dev_s *pic32mz_timer_init(int timer);
+struct pic32mz_timer_dev_s *pic32mz_timer_init(int timer);
 
 /****************************************************************************
  * Name: pic32mz_timer_deinit
@@ -115,7 +115,7 @@ FAR struct pic32mz_timer_dev_s *pic32mz_timer_init(int timer);
  *
  ****************************************************************************/
 
-int pic32mz_timer_deinit(FAR struct pic32mz_timer_dev_s *dev);
+int pic32mz_timer_deinit(struct pic32mz_timer_dev_s *dev);
 
 /****************************************************************************
  * Name: pic32mz_timer_initialize
@@ -136,7 +136,7 @@ int pic32mz_timer_deinit(FAR struct pic32mz_timer_dev_s *dev);
  ****************************************************************************/
 
 #ifdef CONFIG_TIMER
-int pic32mz_timer_initialize(FAR const char *devpath, int timer);
+int pic32mz_timer_initialize(const char *devpath, int timer);
 #endif
 
 #undef EXTERN

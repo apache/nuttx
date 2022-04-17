@@ -218,20 +218,20 @@ static void tc_xplus_sample(void);
 static void tc_xminus_sample(void);
 static inline bool tc_valid_sample(uint16_t sample);
 
-static void tc_notify(FAR struct tc_dev_s *priv);
-static int tc_sample(FAR struct tc_dev_s *priv,
-                     FAR struct tc_sample_s *sample);
-static int tc_waitsample(FAR struct tc_dev_s *priv,
-                         FAR struct tc_sample_s *sample);
-static void tc_worker(FAR void *arg);
+static void tc_notify(struct tc_dev_s *priv);
+static int tc_sample(struct tc_dev_s *priv,
+                     struct tc_sample_s *sample);
+static int tc_waitsample(struct tc_dev_s *priv,
+                         struct tc_sample_s *sample);
+static void tc_worker(void *arg);
 
 /* Character driver methods */
 
-static int tc_open(FAR struct file *filep);
-static int tc_close(FAR struct file *filep);
-static ssize_t tc_read(FAR struct file *filep, FAR char *buffer, size_t len);
-static int tc_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-static int tc_poll(FAR struct file *filep, struct pollfd *fds, bool setup);
+static int tc_open(struct file *filep);
+static int tc_close(struct file *filep);
+static ssize_t tc_read(struct file *filep, char *buffer, size_t len);
+static int tc_ioctl(struct file *filep, int cmd, unsigned long arg);
+static int tc_poll(struct file *filep, struct pollfd *fds, bool setup);
 
 /****************************************************************************
  * Private Data
@@ -473,7 +473,7 @@ static inline bool tc_valid_sample(uint16_t sample)
  * Name: tc_notify
  ****************************************************************************/
 
-static void tc_notify(FAR struct tc_dev_s *priv)
+static void tc_notify(struct tc_dev_s *priv)
 {
   int i;
 
@@ -516,8 +516,8 @@ static void tc_notify(FAR struct tc_dev_s *priv)
  *
  ****************************************************************************/
 
-static int tc_sample(FAR struct tc_dev_s *priv,
-                          FAR struct tc_sample_s *sample)
+static int tc_sample(struct tc_dev_s *priv,
+                          struct tc_sample_s *sample)
 {
   int ret = -EAGAIN;
 
@@ -561,8 +561,8 @@ static int tc_sample(FAR struct tc_dev_s *priv,
  * Name: tc_waitsample
  ****************************************************************************/
 
-static int tc_waitsample(FAR struct tc_dev_s *priv,
-                              FAR struct tc_sample_s *sample)
+static int tc_waitsample(struct tc_dev_s *priv,
+                              struct tc_sample_s *sample)
 {
   int ret;
 
@@ -619,9 +619,9 @@ errout:
  * Name: tc_worker
  ****************************************************************************/
 
-static void tc_worker(FAR void *arg)
+static void tc_worker(void *arg)
 {
-  FAR struct tc_dev_s *priv = (FAR struct tc_dev_s *)arg;
+  struct tc_dev_s *priv = (struct tc_dev_s *)arg;
   uint32_t delay;
   uint16_t value;
   uint16_t newx;
@@ -974,11 +974,11 @@ static void tc_worker(FAR void *arg)
  * Name: tc_open
  ****************************************************************************/
 
-static int tc_open(FAR struct file *filep)
+static int tc_open(struct file *filep)
 {
 #ifdef CONFIG_TOUCHSCREEN_REFCNT
-  FAR struct inode         *inode;
-  FAR struct tc_dev_s *priv;
+  struct inode         *inode;
+  struct tc_dev_s *priv;
   uint8_t                   tmp;
   int                       ret;
 
@@ -986,7 +986,7 @@ static int tc_open(FAR struct file *filep)
   inode = filep->f_inode;
 
   DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct tc_dev_s *)inode->i_private;
+  priv  = (struct tc_dev_s *)inode->i_private;
 
   /* Get exclusive access to the driver data structure */
 
@@ -1027,18 +1027,18 @@ errout_with_sem:
  * Name: tc_close
  ****************************************************************************/
 
-static int tc_close(FAR struct file *filep)
+static int tc_close(struct file *filep)
 {
 #ifdef CONFIG_TOUCHSCREEN_REFCNT
-  FAR struct inode         *inode;
-  FAR struct tc_dev_s *priv;
+  struct inode         *inode;
+  struct tc_dev_s *priv;
   int                       ret;
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
   DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct tc_dev_s *)inode->i_private;
+  priv  = (struct tc_dev_s *)inode->i_private;
 
   /* Get exclusive access to the driver data structure */
 
@@ -1067,11 +1067,11 @@ static int tc_close(FAR struct file *filep)
  * Name: tc_read
  ****************************************************************************/
 
-static ssize_t tc_read(FAR struct file *filep, FAR char *buffer, size_t len)
+static ssize_t tc_read(struct file *filep, char *buffer, size_t len)
 {
-  FAR struct inode          *inode;
-  FAR struct tc_dev_s  *priv;
-  FAR struct touch_sample_s *report;
+  struct inode          *inode;
+  struct tc_dev_s  *priv;
+  struct touch_sample_s *report;
   struct tc_sample_s    sample;
   int                        ret;
 
@@ -1079,7 +1079,7 @@ static ssize_t tc_read(FAR struct file *filep, FAR char *buffer, size_t len)
   inode = filep->f_inode;
 
   DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct tc_dev_s *)inode->i_private;
+  priv  = (struct tc_dev_s *)inode->i_private;
 
   /* Verify that the caller has provided a buffer large enough to receive
    * the touch data.
@@ -1133,7 +1133,7 @@ static ssize_t tc_read(FAR struct file *filep, FAR char *buffer, size_t len)
    * to the caller.
    */
 
-  report = (FAR struct touch_sample_s *)buffer;
+  report = (struct touch_sample_s *)buffer;
   memset(report, 0, SIZEOF_TOUCH_SAMPLE_S(1));
   report->npoints            = 1;
   report->point[0].id        = sample.id;
@@ -1188,14 +1188,14 @@ errout:
  * Name: tc_ioctl
  ****************************************************************************/
 
-static int tc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int tc_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
 #if 1
   iinfo("cmd: %d arg: %ld\n", cmd, arg);
   return -ENOTTY; /* None yet supported */
 #else
-  FAR struct inode         *inode;
-  FAR struct tc_dev_s *priv;
+  struct inode         *inode;
+  struct tc_dev_s *priv;
   int                       ret;
 
   iinfo("cmd: %d arg: %ld\n", cmd, arg);
@@ -1203,7 +1203,7 @@ static int tc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   inode = filep->f_inode;
 
   DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct tc_dev_s *)inode->i_private;
+  priv  = (struct tc_dev_s *)inode->i_private;
 
   /* Get exclusive access to the driver data structure */
 
@@ -1233,11 +1233,11 @@ static int tc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: tc_poll
  ****************************************************************************/
 
-static int tc_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int tc_poll(struct file *filep, struct pollfd *fds,
                         bool setup)
 {
-  FAR struct inode         *inode;
-  FAR struct tc_dev_s *priv;
+  struct inode         *inode;
+  struct tc_dev_s *priv;
   int                       ret;
   int                       i;
 
@@ -1246,7 +1246,7 @@ static int tc_poll(FAR struct file *filep, FAR struct pollfd *fds,
   inode = filep->f_inode;
 
   DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct tc_dev_s *)inode->i_private;
+  priv  = (struct tc_dev_s *)inode->i_private;
 
   /* Are we setting up the poll?  Or tearing it down? */
 
@@ -1342,7 +1342,7 @@ errout:
 
 int pic32mx_tsc_setup(int minor)
 {
-  FAR struct tc_dev_s *priv;
+  struct tc_dev_s *priv;
   char devname[DEV_NAMELEN];
   int ret;
 
@@ -1365,7 +1365,7 @@ int pic32mx_tsc_setup(int minor)
 #ifndef CONFIG_TOUCHSCREEN_MULTIPLE
   priv = &g_touchscreen;
 #else
-  priv = (FAR struct tc_dev_s *)kmm_malloc(sizeof(struct tc_dev_s));
+  priv = (struct tc_dev_s *)kmm_malloc(sizeof(struct tc_dev_s));
   if (!priv)
     {
       ierr("ERROR: kmm_malloc(%d) failed\n", sizeof(struct tc_dev_s));

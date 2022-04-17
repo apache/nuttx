@@ -87,22 +87,22 @@ struct pic32mx_dev_s
 
 /* Low-level register access */
 
-static uint32_t spi_getreg(FAR struct pic32mx_dev_s *priv,
+static uint32_t spi_getreg(struct pic32mx_dev_s *priv,
                   unsigned int offset);
-static void     spi_putreg(FAR struct pic32mx_dev_s *priv,
+static void     spi_putreg(struct pic32mx_dev_s *priv,
                   unsigned int offset, uint32_t value);
 
 /* SPI methods */
 
-static int      spi_lock(FAR struct spi_dev_s *dev, bool lock);
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+static int      spi_lock(struct spi_dev_s *dev, bool lock);
+static uint32_t spi_setfrequency(struct spi_dev_s *dev,
                                  uint32_t frequency);
-static void     spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
-static void     spi_setbits(FAR struct spi_dev_s *dev, int nbits);
-static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd);
-static void     spi_sndblock(FAR struct spi_dev_s *dev,
-                             FAR const void *buffer, size_t nwords);
-static void     spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
+static void     spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode);
+static void     spi_setbits(struct spi_dev_s *dev, int nbits);
+static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd);
+static void     spi_sndblock(struct spi_dev_s *dev,
+                             const void *buffer, size_t nwords);
+static void     spi_recvblock(struct spi_dev_s *dev, void *buffer,
                               size_t nwords);
 
 /****************************************************************************
@@ -288,7 +288,7 @@ static struct pic32mx_dev_s g_spi4dev =
  ****************************************************************************/
 
 #ifdef CONFIG_PIC32MX_SPI_REGDEBUG
-static uint32_t spi_getreg(FAR struct pic32mx_dev_s *priv,
+static uint32_t spi_getreg(struct pic32mx_dev_s *priv,
                            unsigned int offset)
 {
   /* Last address, value, and count */
@@ -350,7 +350,7 @@ static uint32_t spi_getreg(FAR struct pic32mx_dev_s *priv,
   return value;
 }
 #else
-static uint32_t spi_getreg(FAR struct pic32mx_dev_s *priv,
+static uint32_t spi_getreg(struct pic32mx_dev_s *priv,
                            unsigned int offset)
 {
   return getreg32(priv->base + offset);
@@ -374,7 +374,7 @@ static uint32_t spi_getreg(FAR struct pic32mx_dev_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_PIC32MX_SPI_REGDEBUG
-static void spi_putreg(FAR struct pic32mx_dev_s *priv, unsigned int offset,
+static void spi_putreg(struct pic32mx_dev_s *priv, unsigned int offset,
                        uint32_t value)
 {
   uint32_t addr;
@@ -392,7 +392,7 @@ static void spi_putreg(FAR struct pic32mx_dev_s *priv, unsigned int offset,
   putreg32(value, addr);
 }
 #else
-static void spi_putreg(FAR struct pic32mx_dev_s *priv, unsigned int offset,
+static void spi_putreg(struct pic32mx_dev_s *priv, unsigned int offset,
                        uint32_t value)
 {
   putreg32(value, priv->base + offset);
@@ -420,9 +420,9 @@ static void spi_putreg(FAR struct pic32mx_dev_s *priv, unsigned int offset,
  *
  ****************************************************************************/
 
-static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
+static int spi_lock(struct spi_dev_s *dev, bool lock)
 {
-  FAR struct pic32mx_dev_s *priv = (FAR struct pic32mx_dev_s *)dev;
+  struct pic32mx_dev_s *priv = (struct pic32mx_dev_s *)dev;
   int ret;
 
   if (lock)
@@ -452,10 +452,10 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+static uint32_t spi_setfrequency(struct spi_dev_s *dev,
                                  uint32_t frequency)
 {
-  FAR struct pic32mx_dev_s *priv = (FAR struct pic32mx_dev_s *)dev;
+  struct pic32mx_dev_s *priv = (struct pic32mx_dev_s *)dev;
   uint32_t divisor;
   uint32_t actual;
   uint32_t regval;
@@ -534,9 +534,9 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
  *
  ****************************************************************************/
 
-static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
+static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 {
-  FAR struct pic32mx_dev_s *priv = (FAR struct pic32mx_dev_s *)dev;
+  struct pic32mx_dev_s *priv = (struct pic32mx_dev_s *)dev;
   uint32_t regval;
 
   spiinfo("Old mode: %d New mode: %d\n", priv->mode, mode);
@@ -624,9 +624,9 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
  *
  ****************************************************************************/
 
-static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
+static void spi_setbits(struct spi_dev_s *dev, int nbits)
 {
-  FAR struct pic32mx_dev_s *priv = (FAR struct pic32mx_dev_s *)dev;
+  struct pic32mx_dev_s *priv = (struct pic32mx_dev_s *)dev;
   uint32_t setting;
   uint32_t regval;
 
@@ -688,9 +688,9 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
  *
  ****************************************************************************/
 
-static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
+static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
 {
-  FAR struct pic32mx_dev_s *priv = (FAR struct pic32mx_dev_s *)dev;
+  struct pic32mx_dev_s *priv = (struct pic32mx_dev_s *)dev;
 
   spiinfo("wd: %04" PRIx32 "\n", wd);
 
@@ -739,11 +739,11 @@ static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
  *
  ****************************************************************************/
 
-static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
+static void spi_sndblock(struct spi_dev_s *dev, const void *buffer,
                          size_t nwords)
 {
-  FAR struct pic32mx_dev_s *priv = (FAR struct pic32mx_dev_s *)dev;
-  FAR uint8_t *ptr = (FAR uint8_t *)buffer;
+  struct pic32mx_dev_s *priv = (struct pic32mx_dev_s *)dev;
+  uint8_t *ptr = (uint8_t *)buffer;
   uint32_t regval;
   uint8_t data;
 
@@ -801,11 +801,11 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
  *
  ****************************************************************************/
 
-static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
+static void spi_recvblock(struct spi_dev_s *dev, void *buffer,
                           size_t nwords)
 {
-  FAR struct pic32mx_dev_s *priv = (FAR struct pic32mx_dev_s *)dev;
-  FAR uint8_t *ptr = (FAR uint8_t *)buffer;
+  struct pic32mx_dev_s *priv = (struct pic32mx_dev_s *)dev;
+  uint8_t *ptr = (uint8_t *)buffer;
 
   spiinfo("nwords: %d\n", nwords);
   while (nwords)
@@ -859,9 +859,9 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *pic32mx_spibus_initialize(int port)
+struct spi_dev_s *pic32mx_spibus_initialize(int port)
 {
-  FAR struct pic32mx_dev_s *priv;
+  struct pic32mx_dev_s *priv;
   irqstate_t flags;
   uint32_t regval;
 
@@ -937,7 +937,7 @@ FAR struct spi_dev_s *pic32mx_spibus_initialize(int port)
 
   /* Select a default frequency of approx. 400KHz */
 
-  spi_setfrequency((FAR struct spi_dev_s *)priv, 400000);
+  spi_setfrequency((struct spi_dev_s *)priv, 400000);
 
   /* Clear the SPIROV overflow bit (SPIxSTAT:6). */
 
