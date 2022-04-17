@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-a/arm_fetchadd.S
+ * arch/arm/src/common/gnu/arm_fetchadd.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+	.syntax		unified
 	.file		"arm_fetchadd.S"
 
 /****************************************************************************
