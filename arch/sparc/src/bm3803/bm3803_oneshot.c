@@ -217,7 +217,7 @@ int bm3803_oneshot_start(struct bm3803_oneshot_s *oneshot,
       /* Yes.. then cancel it */
 
       tmrinfo("Already running... cancelling\n");
-      (void)bm3803_oneshot_cancel(oneshot, NULL);
+      bm3803_oneshot_cancel(oneshot, NULL);
     }
 
   /* Save the new handler and its argument */

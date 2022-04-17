@@ -94,6 +94,6 @@ void board_late_initialize(void)
 {
   /* Perform board initialization */
 
-  (void)sam_bringup();
+  sam_bringup();
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */

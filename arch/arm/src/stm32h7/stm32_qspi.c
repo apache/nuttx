@@ -497,10 +497,11 @@ static inline void qspi_putreg(struct stm32h7_qspidev_s *priv,
 #ifdef CONFIG_DEBUG_SPI_INFO
 static void qspi_dumpregs(struct stm32h7_qspidev_s *priv, const char *msg)
 {
-  uint32_t regval;
   spiinfo("%s:\n", msg);
 
 #if 0
+  uint32_t regval;
+
   /* this extra verbose output may be helpful in some cases; you'll need
    * to make sure your syslog is large enough to accommodate extra output.
    */
@@ -575,7 +576,6 @@ static void qspi_dumpregs(struct stm32h7_qspidev_s *priv, const char *msg)
   spiinfo("   PIR:%08x  LPTR:%08x\n",
           getreg32(priv->base + STM32_QUADSPI_PIR_OFFSET),    /* Polling Interval Register */
           getreg32(priv->base + STM32_QUADSPI_LPTR_OFFSET));  /* Low-Power Timeout Register */
-  (void)regval;
 #endif
 }
 #endif

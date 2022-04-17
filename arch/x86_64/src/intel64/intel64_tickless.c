@@ -129,9 +129,9 @@ void up_timer_initialize(void)
   g_last_stop_time = g_start_tsc = rdtsc();
 
 #ifndef CONFIG_SCHED_TICKLESS_ALARM
-  (void)irq_attach(TMR_IRQ, (xcpt_t)up_timer_expire, NULL);
+  irq_attach(TMR_IRQ, (xcpt_t)up_timer_expire, NULL);
 #else
-  (void)irq_attach(TMR_IRQ, (xcpt_t)up_alarm_expire, NULL);
+  irq_attach(TMR_IRQ, (xcpt_t)up_alarm_expire, NULL);
 #endif
 
   return;

@@ -3925,7 +3925,7 @@ static uint16_t usb_cstd_is_set_frdy (uint16_t pipe, uint16_t fifosel,
 
       buffer = hw_usb_read_syscfg();
       buffer = hw_usb_read_syssts();
-      (void)nxsig_usleep(1);
+      nxsig_usleep(1);
     }
 
   return (RX65N_USB_FIFO_ERROR);
@@ -6322,7 +6322,7 @@ static void rx65n_usbhost_bottomhalf (void *arg)
 
   else
     {
-      (void)nxsig_usleep(100);
+      nxsig_usleep(100);
       uwarn("WARNING: un known bottomhalf. Value is %d\n",
          bottom_half_processing);
       syslog (LOG_INFO, "WARNING: un known bottomhalf. Value is %d\n",
@@ -6480,13 +6480,13 @@ static int rx65n_usbhost_rh_enumerate(struct usbhost_connection_s *conn,
 
   /* USB 2.0 spec says at least 50ms delay before port reset */
 
-  (void)nxsig_usleep(100 * 1000);
+  nxsig_usleep(100 * 1000);
 
   /* Put RH port 1 in reset.
    * Currently supporting only single downstream port)
    */
 
-  (void)nxsig_usleep(200 * 1000);
+  nxsig_usleep(200 * 1000);
   return OK;
 }
 

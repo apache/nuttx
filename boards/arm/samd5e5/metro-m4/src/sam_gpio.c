@@ -287,7 +287,7 @@ int sam_gpio_initialize(void)
       g_gpin[i].gpio.gp_pintype = GPIO_INPUT_PIN;
       g_gpin[i].gpio.gp_ops     = &gpin_ops;
       g_gpin[i].id              = i;
-      (void)gpio_pin_register(&g_gpin[i].gpio, pincount);
+      gpio_pin_register(&g_gpin[i].gpio, pincount);
 
       /* Configure the pin that will be used as input */
 
@@ -305,7 +305,7 @@ int sam_gpio_initialize(void)
       g_gpout[i].gpio.gp_pintype = GPIO_OUTPUT_PIN;
       g_gpout[i].gpio.gp_ops     = &gpout_ops;
       g_gpout[i].id              = i;
-      (void)gpio_pin_register(&g_gpout[i].gpio, pincount);
+      gpio_pin_register(&g_gpout[i].gpio, pincount);
 
       /* Configure the pin that will be used as output */
 
@@ -322,7 +322,7 @@ int sam_gpio_initialize(void)
       g_gpint[i].samgpio.gpio.gp_pintype = GPIO_INTERRUPT_PIN;
       g_gpint[i].samgpio.gpio.gp_ops     = &gpint_ops;
       g_gpint[i].samgpio.id              = i;
-      (void)gpio_pin_register(&g_gpint[i].samgpio.gpio, pincount);
+      gpio_pin_register(&g_gpint[i].samgpio.gpio, pincount);
 
       /* Configure the pin that will be used as interrupt input */
 

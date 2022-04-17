@@ -86,12 +86,10 @@ static void rtk_notify_info_to_wifi(uint8_t length, uint8_t *report_info)
 }
 
 void bt_coex_handle_cmd_complete_evt(uint16_t opcode, uint16_t cause,
-                                              uint8_t total_len, uint8_t *p)
+                                     uint8_t total_len, uint8_t *p)
 {
-  (void)cause;
   if (opcode == HCI_VENDOR_MAILBOX_CMD)
     {
-      uint8_t status;
       status = *p++; /* jump the double subcmd */
 
       total_len--;
@@ -101,7 +99,6 @@ void bt_coex_handle_cmd_complete_evt(uint16_t opcode, uint16_t cause,
           return ;
         }
 
-      (void)status;
       rltk_coex_mailbox_to_wifi(p, total_len);
 
       /* rtk_parse_vendor_mailbox_cmd_evt(p, total_len, status); */
@@ -149,10 +146,10 @@ static void bt_coex_dump_buf(net_buf_simple *tmp_buf)
 
 static int bt_coex_unpack_xiaomi_vendor_cmd(net_buf_simple *tmp_buf)
 {
-  if (tmp_buf-> data[0] == 0x25 && tmp_buf-> data[1] == 0x00)
+  if (tmp_buf->data[0] == 0x25 && tmp_buf->data[1] == 0x00)
     {
-      tmp_buf -> data += 2;
-      tmp_buf -> len -= 2;
+      tmp_buf->data += 2;
+      tmp_buf->len -= 2;
       return 1;
     }
 

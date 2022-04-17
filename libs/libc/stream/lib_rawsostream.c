@@ -76,7 +76,7 @@ static int rawoutstream_puts(FAR struct lib_outstream_s *this,
 static void rawoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 {
   char tmp = ch;
-  (void)rawoutstream_puts(this, &tmp, 1);
+  rawoutstream_puts(this, &tmp, 1);
 }
 
 /****************************************************************************

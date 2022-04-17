@@ -389,8 +389,8 @@ int main(int argc, char **argv, char **envp)
               exit(EXIT_FAILURE);
             }
 
-          (void)cygwin_conv_path(CCP_POSIX_TO_WIN_A, dirname, convpath,
-                                 bufsize);
+          cygwin_conv_path(CCP_POSIX_TO_WIN_A, dirname, convpath,
+                           bufsize);
           incpath = convpath;
         }
       else

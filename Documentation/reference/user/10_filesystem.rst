@@ -396,8 +396,8 @@ Standard String Operations
   #include <strings.h>
 
   #define bcmp(b1,b2,len)  memcmp(b1,b2,(size_t)len)
-  #define bcopy(b1,b2,len) (void)memmove(b2,b1,len)
-  #define bzero(s,n)       (void)memset(s,0,n)
+  #define bcopy(b1,b2,len) memmove(b2,b1,len)
+  #define bzero(s,n)       memset(s,0,n)
   #define index(s,c)       strchr(s,c)
   #define rindex(s,c)      strrchr(s,c)
 

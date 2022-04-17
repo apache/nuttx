@@ -278,7 +278,7 @@ static int rx65n_sbram_open(FAR struct file *filep)
 static int rx65n_sbram_internal_close(FAR struct sbramfh_s *bbf)
 {
   bbf->dirty = 0;
-  (void)clock_gettime(CLOCK_REALTIME, &bbf->lastwrite);
+  clock_gettime(CLOCK_REALTIME, &bbf->lastwrite);
   bbf->crc = rx65n_sbram_crc(bbf);
 
   SBRAM_DUMP(bbf, "close done");
