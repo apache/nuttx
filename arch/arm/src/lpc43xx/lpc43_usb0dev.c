@@ -355,10 +355,10 @@ static inline void lpc43_chgbits(uint32_t mask,
 
 /* Request queue operations *************************************************/
 
-static FAR struct
-lpc43_req_s *lpc43_rqdequeue(FAR struct lpc43_ep_s *privep);
-static bool       lpc43_rqenqueue(FAR struct lpc43_ep_s *privep,
-                    FAR struct lpc43_req_s *req);
+static struct
+lpc43_req_s *lpc43_rqdequeue(struct lpc43_ep_s *privep);
+static bool       lpc43_rqenqueue(struct lpc43_ep_s *privep,
+                    struct lpc43_req_s *req);
 
 /* Low level data transfers and request operations **************************/
 
@@ -405,34 +405,34 @@ static bool        lpc43_epcomplete(struct lpc43_usbdev_s *priv,
                                     uint8_t epphy);
 
 static int         lpc43_usbinterrupt(int irq,
-                                      FAR void *context, FAR void *arg);
+                                      void *context, void *arg);
 
 /* Endpoint operations ******************************************************/
 
 /* USB device controller operations *****************************************/
 
-static int         lpc43_epconfigure(FAR struct usbdev_ep_s *ep,
+static int         lpc43_epconfigure(struct usbdev_ep_s *ep,
                      const struct usb_epdesc_s *desc, bool last);
-static int         lpc43_epdisable(FAR struct usbdev_ep_s *ep);
-static FAR struct usbdev_req_s *lpc43_epallocreq(FAR struct usbdev_ep_s *ep);
-static void        lpc43_epfreereq(FAR struct usbdev_ep_s *ep,
-                     FAR struct usbdev_req_s *);
+static int         lpc43_epdisable(struct usbdev_ep_s *ep);
+static struct usbdev_req_s *lpc43_epallocreq(struct usbdev_ep_s *ep);
+static void        lpc43_epfreereq(struct usbdev_ep_s *ep,
+                     struct usbdev_req_s *);
 #ifdef CONFIG_USBDEV_DMA
-static void       *lpc43_epallocbuffer(FAR struct usbdev_ep_s *ep,
+static void       *lpc43_epallocbuffer(struct usbdev_ep_s *ep,
                      unsigned bytes);
-static void        lpc43_epfreebuffer(FAR struct usbdev_ep_s *ep,
-                     FAR void *buf);
+static void        lpc43_epfreebuffer(struct usbdev_ep_s *ep,
+                     void *buf);
 #endif
-static int         lpc43_epsubmit(FAR struct usbdev_ep_s *ep,
+static int         lpc43_epsubmit(struct usbdev_ep_s *ep,
                      struct usbdev_req_s *req);
-static int         lpc43_epcancel(FAR struct usbdev_ep_s *ep,
+static int         lpc43_epcancel(struct usbdev_ep_s *ep,
                      struct usbdev_req_s *req);
-static int         lpc43_epstall(FAR struct usbdev_ep_s *ep, bool resume);
+static int         lpc43_epstall(struct usbdev_ep_s *ep, bool resume);
 
-static FAR struct usbdev_ep_s *lpc43_allocep(FAR struct usbdev_s *dev,
+static struct usbdev_ep_s *lpc43_allocep(struct usbdev_s *dev,
                      uint8_t epno, bool in, uint8_t eptype);
-static void        lpc43_freeep(FAR struct usbdev_s *dev,
-                                FAR struct usbdev_ep_s *ep);
+static void        lpc43_freeep(struct usbdev_s *dev,
+                                struct usbdev_ep_s *ep);
 static int         lpc43_getframe(struct usbdev_s *dev);
 static int         lpc43_wakeup(struct usbdev_s *dev);
 static int         lpc43_selfpowered(struct usbdev_s *dev,
@@ -625,9 +625,9 @@ static inline void lpc43_chgbits(uint32_t mask, uint32_t val, uint32_t addr)
  *
  ****************************************************************************/
 
-static FAR struct lpc43_req_s *lpc43_rqdequeue(FAR struct lpc43_ep_s *privep)
+static struct lpc43_req_s *lpc43_rqdequeue(struct lpc43_ep_s *privep)
 {
-  FAR struct lpc43_req_s *ret = privep->head;
+  struct lpc43_req_s *ret = privep->head;
 
   if (ret)
     {
@@ -651,8 +651,8 @@ static FAR struct lpc43_req_s *lpc43_rqdequeue(FAR struct lpc43_ep_s *privep)
  *
  ****************************************************************************/
 
-static bool lpc43_rqenqueue(FAR struct lpc43_ep_s *privep,
-                              FAR struct lpc43_req_s *req)
+static bool lpc43_rqenqueue(struct lpc43_ep_s *privep,
+                            struct lpc43_req_s *req)
 {
   bool is_empty = !privep->head;
 
@@ -1832,7 +1832,7 @@ bool lpc43_epcomplete(struct lpc43_usbdev_s *priv, uint8_t epphy)
  *
  ****************************************************************************/
 
-static int lpc43_usbinterrupt(int irq, FAR void *context, FAR void *arg)
+static int lpc43_usbinterrupt(int irq, void *context, void *arg)
 {
   struct lpc43_usbdev_s *priv = &g_usbdev;
   uint32_t disr;
@@ -2037,11 +2037,11 @@ static int lpc43_usbinterrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static int lpc43_epconfigure(FAR struct usbdev_ep_s *ep,
-                               FAR const struct usb_epdesc_s *desc,
-                               bool last)
+static int lpc43_epconfigure(struct usbdev_ep_s *ep,
+                             const struct usb_epdesc_s *desc,
+                             bool last)
 {
-  FAR struct lpc43_ep_s *privep = (FAR struct lpc43_ep_s *)ep;
+  struct lpc43_ep_s *privep = (struct lpc43_ep_s *)ep;
 
   usbtrace(TRACE_EPCONFIGURE, privep->epphy);
   DEBUGASSERT(desc->addr == ep->eplog);
@@ -2143,9 +2143,9 @@ static int lpc43_epconfigure(FAR struct usbdev_ep_s *ep,
  *
  ****************************************************************************/
 
-static int lpc43_epdisable(FAR struct usbdev_ep_s *ep)
+static int lpc43_epdisable(struct usbdev_ep_s *ep)
 {
-  FAR struct lpc43_ep_s *privep = (FAR struct lpc43_ep_s *)ep;
+  struct lpc43_ep_s *privep = (struct lpc43_ep_s *)ep;
   irqstate_t flags;
 
 #ifdef CONFIG_DEBUG_FEATURES
@@ -2191,10 +2191,10 @@ static int lpc43_epdisable(FAR struct usbdev_ep_s *ep)
  *
  ****************************************************************************/
 
-static FAR struct
-usbdev_req_s *lpc43_epallocreq(FAR struct usbdev_ep_s *ep)
+static struct
+usbdev_req_s *lpc43_epallocreq(struct usbdev_ep_s *ep)
 {
-  FAR struct lpc43_req_s *privreq;
+  struct lpc43_req_s *privreq;
 
 #ifdef CONFIG_DEBUG_FEATURES
   if (!ep)
@@ -2204,9 +2204,9 @@ usbdev_req_s *lpc43_epallocreq(FAR struct usbdev_ep_s *ep)
     }
 #endif
 
-  usbtrace(TRACE_EPALLOCREQ, ((FAR struct lpc43_ep_s *)ep)->epphy);
+  usbtrace(TRACE_EPALLOCREQ, ((struct lpc43_ep_s *)ep)->epphy);
 
-  privreq = (FAR struct lpc43_req_s *)kmm_malloc(sizeof(struct lpc43_req_s));
+  privreq = (struct lpc43_req_s *)kmm_malloc(sizeof(struct lpc43_req_s));
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(LPC43_TRACEERR_ALLOCFAIL), 0);
@@ -2225,10 +2225,10 @@ usbdev_req_s *lpc43_epallocreq(FAR struct usbdev_ep_s *ep)
  *
  ****************************************************************************/
 
-static void lpc43_epfreereq(FAR struct usbdev_ep_s *ep,
-                            FAR struct usbdev_req_s *req)
+static void lpc43_epfreereq(struct usbdev_ep_s *ep,
+                            struct usbdev_req_s *req)
 {
-  FAR struct lpc43_req_s *privreq = (FAR struct lpc43_req_s *)req;
+  struct lpc43_req_s *privreq = (struct lpc43_req_s *)req;
 
 #ifdef CONFIG_DEBUG_FEATURES
   if (!ep || !req)
@@ -2238,7 +2238,7 @@ static void lpc43_epfreereq(FAR struct usbdev_ep_s *ep,
     }
 #endif
 
-  usbtrace(TRACE_EPFREEREQ, ((FAR struct lpc43_ep_s *)ep)->epphy);
+  usbtrace(TRACE_EPFREEREQ, ((struct lpc43_ep_s *)ep)->epphy);
   kmm_free(privreq);
 }
 
@@ -2251,7 +2251,7 @@ static void lpc43_epfreereq(FAR struct usbdev_ep_s *ep,
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DMA
-static void *lpc43_epallocbuffer(FAR struct usbdev_ep_s *ep, unsigned bytes)
+static void *lpc43_epallocbuffer(struct usbdev_ep_s *ep, unsigned bytes)
 {
   usbtrace(TRACE_EPALLOCBUFFER, privep->epphy);
 
@@ -2272,7 +2272,7 @@ static void *lpc43_epallocbuffer(FAR struct usbdev_ep_s *ep, unsigned bytes)
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DMA
-static void lpc43_epfreebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf)
+static void lpc43_epfreebuffer(struct usbdev_ep_s *ep, void *buf)
 {
   usbtrace(TRACE_EPFREEBUFFER, privep->epphy);
 
@@ -2292,12 +2292,12 @@ static void lpc43_epfreebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf)
  *
  ****************************************************************************/
 
-static int lpc43_epsubmit(FAR struct usbdev_ep_s *ep,
-                          FAR struct usbdev_req_s *req)
+static int lpc43_epsubmit(struct usbdev_ep_s *ep,
+                          struct usbdev_req_s *req)
 {
-  FAR struct lpc43_req_s *privreq = (FAR struct lpc43_req_s *)req;
-  FAR struct lpc43_ep_s *privep = (FAR struct lpc43_ep_s *)ep;
-  FAR struct lpc43_usbdev_s *priv;
+  struct lpc43_req_s *privreq = (struct lpc43_req_s *)req;
+  struct lpc43_ep_s *privep = (struct lpc43_ep_s *)ep;
+  struct lpc43_usbdev_s *priv;
   irqstate_t flags;
   int ret = OK;
 
@@ -2367,10 +2367,10 @@ static int lpc43_epsubmit(FAR struct usbdev_ep_s *ep,
  *
  ****************************************************************************/
 
-static int lpc43_epcancel(FAR struct usbdev_ep_s *ep,
-                          FAR struct usbdev_req_s *req)
+static int lpc43_epcancel(struct usbdev_ep_s *ep,
+                          struct usbdev_req_s *req)
 {
-  FAR struct lpc43_ep_s *privep = (FAR struct lpc43_ep_s *)ep;
+  struct lpc43_ep_s *privep = (struct lpc43_ep_s *)ep;
   irqstate_t flags;
 
 #ifdef CONFIG_DEBUG_FEATURES
@@ -2404,9 +2404,9 @@ static int lpc43_epcancel(FAR struct usbdev_ep_s *ep,
  *
  ****************************************************************************/
 
-static int lpc43_epstall(FAR struct usbdev_ep_s *ep, bool resume)
+static int lpc43_epstall(struct usbdev_ep_s *ep, bool resume)
 {
-  FAR struct lpc43_ep_s *privep = (FAR struct lpc43_ep_s *)ep;
+  struct lpc43_ep_s *privep = (struct lpc43_ep_s *)ep;
   irqstate_t flags;
 
   /* STALL or RESUME the endpoint */
@@ -2461,11 +2461,11 @@ static int lpc43_epstall(FAR struct usbdev_ep_s *ep, bool resume)
  *
  ****************************************************************************/
 
-static FAR struct usbdev_ep_s *lpc43_allocep(FAR struct usbdev_s *dev,
-                                             uint8_t eplog,
-                                             bool in, uint8_t eptype)
+static struct usbdev_ep_s *lpc43_allocep(struct usbdev_s *dev,
+                                         uint8_t eplog,
+                                         bool in, uint8_t eptype)
 {
-  FAR struct lpc43_usbdev_s *priv = (FAR struct lpc43_usbdev_s *)dev;
+  struct lpc43_usbdev_s *priv = (struct lpc43_usbdev_s *)dev;
   uint32_t epset = LPC43_EPALLSET & ~LPC43_EPCTRLSET;
   irqstate_t flags;
   int epndx = 0;
@@ -2585,11 +2585,11 @@ static FAR struct usbdev_ep_s *lpc43_allocep(FAR struct usbdev_s *dev,
  *
  ****************************************************************************/
 
-static void lpc43_freeep(FAR struct usbdev_s *dev,
-                         FAR struct usbdev_ep_s *ep)
+static void lpc43_freeep(struct usbdev_s *dev,
+                         struct usbdev_ep_s *ep)
 {
-  FAR struct lpc43_usbdev_s *priv = (FAR struct lpc43_usbdev_s *)dev;
-  FAR struct lpc43_ep_s *privep = (FAR struct lpc43_ep_s *)ep;
+  struct lpc43_usbdev_s *priv = (struct lpc43_usbdev_s *)dev;
+  struct lpc43_ep_s *privep = (struct lpc43_ep_s *)ep;
   irqstate_t flags;
 
   usbtrace(TRACE_DEVFREEEP, (uint16_t)privep->epphy);
@@ -2615,7 +2615,7 @@ static void lpc43_freeep(FAR struct usbdev_s *dev,
 static int lpc43_getframe(struct usbdev_s *dev)
 {
 #ifdef CONFIG_LPC43_USBDEV_FRAME_INTERRUPT
-  FAR struct lpc43_usbdev_s *priv = (FAR struct lpc43_usbdev_s *)dev;
+  struct lpc43_usbdev_s *priv = (struct lpc43_usbdev_s *)dev;
 
   /* Return last valid value of SOF read by the interrupt handler */
 
@@ -2662,7 +2662,7 @@ static int lpc43_wakeup(struct usbdev_s *dev)
 
 static int lpc43_selfpowered(struct usbdev_s *dev, bool selfpowered)
 {
-  FAR struct lpc43_usbdev_s *priv = (FAR struct lpc43_usbdev_s *)dev;
+  struct lpc43_usbdev_s *priv = (struct lpc43_usbdev_s *)dev;
 
   usbtrace(TRACE_DEVSELFPOWERED, (uint16_t)selfpowered);
 

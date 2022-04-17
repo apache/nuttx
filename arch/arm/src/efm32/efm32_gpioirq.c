@@ -118,7 +118,7 @@ static int  efm32_gpio_interrupt(uint32_t mask, void *context)
  *
  ****************************************************************************/
 
-static int efm32_even_interrupt(int irq, void *context, FAR void *arg)
+static int efm32_even_interrupt(int irq, void *context, void *arg)
 {
   return efm32_gpio_interrupt(0x00005555, context);
 }
@@ -131,7 +131,7 @@ static int efm32_even_interrupt(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static int efm32_odd_interrupt(int irq, void *context, FAR void *arg)
+static int efm32_odd_interrupt(int irq, void *context, void *arg)
 {
   return efm32_gpio_interrupt(0x0000aaaa, context);
 }

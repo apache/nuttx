@@ -66,12 +66,12 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int uart0_open(FAR struct file *filep);
-static int uart0_close(FAR struct file *filep);
-static ssize_t uart0_read(FAR struct file *filep,
-                          FAR char *buffer, size_t len);
-static ssize_t uart0_write(FAR struct file *filep,
-                           FAR const char *buffer, size_t len);
+static int uart0_open(struct file *filep);
+static int uart0_close(struct file *filep);
+static ssize_t uart0_read(struct file *filep,
+                          char *buffer, size_t len);
+static ssize_t uart0_write(struct file *filep,
+                           const char *buffer, size_t len);
 static int uart0_semtake(sem_t *id);
 static void uart0_semgive(sem_t *id);
 
@@ -128,9 +128,9 @@ static void uart0_semgive(sem_t *id)
  * Name: uart0_open
  ****************************************************************************/
 
-static int uart0_open(FAR struct file *filep)
+static int uart0_open(struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
+  struct inode *inode = filep->f_inode;
   int flowctl;
   int bits;
   int stop;
@@ -189,9 +189,9 @@ static int uart0_open(FAR struct file *filep)
  * Name: uart0_close
  ****************************************************************************/
 
-static int uart0_close(FAR struct file *filep)
+static int uart0_close(struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
+  struct inode *inode = filep->f_inode;
 
   if (inode->i_crefs == 1)
     {
@@ -214,8 +214,8 @@ static int uart0_close(FAR struct file *filep)
  * Name: uart0_read
  ****************************************************************************/
 
-static ssize_t uart0_read(FAR struct file *filep,
-                          FAR char *buffer, size_t len)
+static ssize_t uart0_read(struct file *filep,
+                          char *buffer, size_t len)
 {
   int ret;
 
@@ -233,14 +233,14 @@ static ssize_t uart0_read(FAR struct file *filep,
  * Name: uart0_write
  ****************************************************************************/
 
-static ssize_t uart0_write(FAR struct file *filep,
-                           FAR const char *buffer, size_t len)
+static ssize_t uart0_write(struct file *filep,
+                           const char *buffer, size_t len)
 {
   int ret;
 
   uart0_semtake(&g_lock);
 
-  ret = fw_pd_uartsend(0, (FAR void *)buffer, len,
+  ret = fw_pd_uartsend(0, (void *)buffer, len,
                        ((filep->f_oflags & O_NONBLOCK) != 0));
 
   uart0_semgive(&g_lock);
@@ -252,7 +252,7 @@ static ssize_t uart0_write(FAR struct file *filep,
  * Name: cxd56_uart0initialize
  ****************************************************************************/
 
-int cxd56_uart0initialize(FAR const char *devname)
+int cxd56_uart0initialize(const char *devname)
 {
   int ret;
 
@@ -271,7 +271,7 @@ int cxd56_uart0initialize(FAR const char *devname)
  * Name: cxd56_uart0uninitialize
  ****************************************************************************/
 
-void cxd56_uart0uninitialize(FAR const char *devname)
+void cxd56_uart0uninitialize(const char *devname)
 {
   unregister_driver(devname);
   nxsem_destroy(&g_lock);

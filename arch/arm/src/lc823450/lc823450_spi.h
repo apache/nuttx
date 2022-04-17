@@ -151,14 +151,14 @@ extern "C"
 #define EXTERN extern
 #endif
 
-FAR struct spi_dev_s *lc823450_spibus_initialize(int bus);
+struct spi_dev_s *lc823450_spibus_initialize(int bus);
 void lc823450_spiinitialize(void);
-void lc823450_spiselect(FAR struct spi_dev_s *dev, uint32_t devid,
+void lc823450_spiselect(struct spi_dev_s *dev, uint32_t devid,
                         bool selected);
-uint8_t lc823450_spistatus(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t lc823450_spistatus(struct spi_dev_s *dev, uint32_t devid);
 
 #ifdef CONFIG_SPI_CMDDATA
-int lc823450_spicmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int lc823450_spicmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 #undef EXTERN

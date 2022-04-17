@@ -69,7 +69,7 @@ extern "C"
 
 #ifdef CONFIG_USBHOST
 struct usbhost_connection_s;
-FAR struct usbhost_connection_s *lpc54_usbhost_initialize(int controller);
+struct usbhost_connection_s *lpc54_usbhost_initialize(int controller);
 #endif
 
 #undef EXTERN

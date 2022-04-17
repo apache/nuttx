@@ -69,7 +69,7 @@
 
 struct cxd56_lowerhalf_s
 {
-  FAR const struct watchdog_ops_s *ops; /* Lower half operations */
+  const struct watchdog_ops_s *ops; /* Lower half operations */
 #ifdef CONFIG_CXD56_WDT_INTERRUPT
   xcpt_t handler; /* Current WDT interrupt handler */
 #endif
@@ -95,21 +95,21 @@ static void cxd56_putreg(uint32_t regval, uintptr_t regaddr);
 /* Interrupt handling *******************************************************/
 
 #ifdef CONFIG_CXD56_WDT_INTERRUPT
-static int cxd56_wdtinterrupt(int irq, FAR void *context, FAR void *arg);
+static int cxd56_wdtinterrupt(int irq, void *context, void *arg);
 #endif
 
 /* "Lower half" driver methods **********************************************/
 
-static int cxd56_start(FAR struct watchdog_lowerhalf_s *lower);
-static int cxd56_stop(FAR struct watchdog_lowerhalf_s *lower);
-static int cxd56_keepalive(FAR struct watchdog_lowerhalf_s *lower);
-static int cxd56_getstatus(FAR struct watchdog_lowerhalf_s *lower,
-                           FAR struct watchdog_status_s *status);
-static int cxd56_settimeout(FAR struct watchdog_lowerhalf_s *lower,
+static int cxd56_start(struct watchdog_lowerhalf_s *lower);
+static int cxd56_stop(struct watchdog_lowerhalf_s *lower);
+static int cxd56_keepalive(struct watchdog_lowerhalf_s *lower);
+static int cxd56_getstatus(struct watchdog_lowerhalf_s *lower,
+                           struct watchdog_status_s *status);
+static int cxd56_settimeout(struct watchdog_lowerhalf_s *lower,
                             uint32_t timeout);
-static xcpt_t cxd56_capture(FAR struct watchdog_lowerhalf_s *lower,
+static xcpt_t cxd56_capture(struct watchdog_lowerhalf_s *lower,
                             xcpt_t handler);
-static int cxd56_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
+static int cxd56_ioctl(struct watchdog_lowerhalf_s *lower, int cmd,
                        unsigned long arg);
 static int cxd56_pm_event(uint8_t id);
 
@@ -241,9 +241,9 @@ static void cxd56_putreg(uint32_t regval, uintptr_t regaddr)
  ****************************************************************************/
 
 #ifdef CONFIG_CXD56_WDT_INTERRUPT
-static int cxd56_wdtinterrupt(int irq, FAR void *context, FAR void *arg)
+static int cxd56_wdtinterrupt(int irq, void *context, void *arg)
 {
-  FAR struct cxd56_lowerhalf_s *priv = arg;
+  struct cxd56_lowerhalf_s *priv = arg;
 
   /* Is there a registered handler? */
 
@@ -276,9 +276,9 @@ static int cxd56_wdtinterrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static int cxd56_start(FAR struct watchdog_lowerhalf_s *lower)
+static int cxd56_start(struct watchdog_lowerhalf_s *lower)
 {
-  FAR struct cxd56_lowerhalf_s *priv = (FAR struct cxd56_lowerhalf_s *)lower;
+  struct cxd56_lowerhalf_s *priv = (struct cxd56_lowerhalf_s *)lower;
 
   wdinfo("Entry\n");
 
@@ -305,9 +305,9 @@ static int cxd56_start(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int cxd56_stop(FAR struct watchdog_lowerhalf_s *lower)
+static int cxd56_stop(struct watchdog_lowerhalf_s *lower)
 {
-  FAR struct cxd56_lowerhalf_s *priv = (FAR struct cxd56_lowerhalf_s *)lower;
+  struct cxd56_lowerhalf_s *priv = (struct cxd56_lowerhalf_s *)lower;
 
   wdinfo("Entry\n");
   cxd56_putreg(WDOGLOCK_UNLOCK_KEY, CXD56_WDT_WDOGLOCK);
@@ -333,7 +333,7 @@ static int cxd56_stop(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int cxd56_keepalive(FAR struct watchdog_lowerhalf_s *lower)
+static int cxd56_keepalive(struct watchdog_lowerhalf_s *lower)
 {
   wdinfo("Entry\n");
   cxd56_putreg(WDOGLOCK_UNLOCK_KEY, CXD56_WDT_WDOGLOCK);
@@ -358,10 +358,10 @@ static int cxd56_keepalive(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int cxd56_getstatus(FAR struct watchdog_lowerhalf_s *lower,
-                           FAR struct watchdog_status_s *status)
+static int cxd56_getstatus(struct watchdog_lowerhalf_s *lower,
+                           struct watchdog_status_s *status)
 {
-  FAR struct cxd56_lowerhalf_s *priv = (FAR struct cxd56_lowerhalf_s *)lower;
+  struct cxd56_lowerhalf_s *priv = (struct cxd56_lowerhalf_s *)lower;
   uint64_t remain;
 
   wdinfo("Entry\n");
@@ -418,10 +418,10 @@ static int cxd56_getstatus(FAR struct watchdog_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int cxd56_settimeout(FAR struct watchdog_lowerhalf_s *lower,
+static int cxd56_settimeout(struct watchdog_lowerhalf_s *lower,
                             uint32_t timeout)
 {
-  FAR struct cxd56_lowerhalf_s *priv = (FAR struct cxd56_lowerhalf_s *)lower;
+  struct cxd56_lowerhalf_s *priv = (struct cxd56_lowerhalf_s *)lower;
   uint32_t reload;
   uint32_t freq;
   uint64_t llreload;
@@ -504,14 +504,14 @@ static int cxd56_settimeout(FAR struct watchdog_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static xcpt_t cxd56_capture(FAR struct watchdog_lowerhalf_s *lower,
+static xcpt_t cxd56_capture(struct watchdog_lowerhalf_s *lower,
                             xcpt_t handler)
 {
 #ifndef CONFIG_CXD56_WDT_INTERRUPT
   wderr("ERROR: Not configured for this mode\n");
   return NULL;
 #else
-  FAR struct cxd56_lowerhalf_s *priv = (FAR struct cxd56_lowerhalf_s *)lower;
+  struct cxd56_lowerhalf_s *priv = (struct cxd56_lowerhalf_s *)lower;
   irqstate_t flags;
   xcpt_t oldhandler;
 
@@ -567,7 +567,7 @@ static xcpt_t cxd56_capture(FAR struct watchdog_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int cxd56_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
+static int cxd56_ioctl(struct watchdog_lowerhalf_s *lower, int cmd,
                        unsigned long arg)
 {
   wdinfo("cmd=%d arg=%ld\n", cmd, arg);
@@ -593,7 +593,7 @@ static int cxd56_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
 
 static int cxd56_pm_event(uint8_t id)
 {
-  FAR struct cxd56_lowerhalf_s *priv = &g_wdtdev;
+  struct cxd56_lowerhalf_s *priv = &g_wdtdev;
 
   switch (id)
     {
@@ -647,7 +647,7 @@ static int cxd56_pm_event(uint8_t id)
 
 int cxd56_wdt_initialize(void)
 {
-  FAR struct cxd56_lowerhalf_s *priv = &g_wdtdev;
+  struct cxd56_lowerhalf_s *priv = &g_wdtdev;
 
   /* set load value to max and lock */
 
@@ -666,7 +666,7 @@ int cxd56_wdt_initialize(void)
 
   /* Register the watchdog driver as /dev/watchdog0 */
 
-  watchdog_register(DEVPATH, (FAR struct watchdog_lowerhalf_s *)priv);
+  watchdog_register(DEVPATH, (struct watchdog_lowerhalf_s *)priv);
 
   /* Register pm event callback */
 

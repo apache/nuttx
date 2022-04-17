@@ -220,7 +220,7 @@ struct am335x_panel_info_s
  *
  ****************************************************************************/
 
-int am335x_lcd_initialize(FAR const struct am335x_panel_info_s *panel);
+int am335x_lcd_initialize(const struct am335x_panel_info_s *panel);
 
 /****************************************************************************
  * Name:  am335x_lcdclear
@@ -255,8 +255,8 @@ void am335x_lcdclear(nxgl_mxpixel_t color);
 
 struct videomode_s; /* Forward reference */
 
-void am335x_lcd_videomode(FAR const struct videomode_s *videomode,
-                          FAR struct am335x_panel_info_s *panel);
+void am335x_lcd_videomode(const struct videomode_s *videomode,
+                          struct am335x_panel_info_s *panel);
 
 /****************************************************************************
  * Name: am335x_lcd_edid
@@ -281,9 +281,9 @@ void am335x_lcd_videomode(FAR const struct videomode_s *videomode,
  *
  ****************************************************************************/
 
-void am335x_lcd_edid(FAR const uint8_t *edid, size_t edid_len,
-                     FAR struct am335x_panel_info_s *panel,
-                     FAR const struct videomode_s **selected);
+void am335x_lcd_edid(const uint8_t *edid, size_t edid_len,
+                     struct am335x_panel_info_s *panel,
+                     const struct videomode_s **selected);
 
 /****************************************************************************
  * Name: am335x_backlight

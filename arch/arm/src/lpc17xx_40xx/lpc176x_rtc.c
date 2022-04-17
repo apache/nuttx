@@ -94,7 +94,7 @@ volatile bool g_rtc_enabled = false;
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_RTC_INFO
-static void rtc_dumpregs(FAR const char *msg)
+static void rtc_dumpregs(const char *msg)
 {
   rtcinfo("%s:\n", msg);
   rtcinfo("  DOM : %08x\n", (getreg32(LPC17_40_RTC_DOM) & RTC_DOM_MASK));
@@ -119,7 +119,7 @@ static void rtc_dumpregs(FAR const char *msg)
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_RTC_INFO
-static void rtc_dumptime(FAR struct tm *tp, FAR const char *msg)
+static void rtc_dumptime(struct tm *tp, const char *msg)
 {
   rtcinfo("%s:\n", msg);
   rtcinfo("  tm_sec: %08x\n", tp->tm_sec);
@@ -189,7 +189,7 @@ static int rtc_setup(void)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int rtc_interrupt(int irq, void *context, FAR void *arg)
+static int rtc_interrupt(int irq, void *context, void *arg)
 {
 #warning "Missing logic"
   return OK;
@@ -273,7 +273,7 @@ int up_rtc_initialize(void)
  *
  ****************************************************************************/
 
-int up_rtc_getdatetime(FAR struct tm *tp)
+int up_rtc_getdatetime(struct tm *tp)
 {
   rtc_dumpregs("Reading Time");
 
@@ -318,9 +318,9 @@ int up_rtc_getdatetime(FAR struct tm *tp)
  *
  ****************************************************************************/
 
-int up_rtc_settime(FAR const struct timespec *tp)
+int up_rtc_settime(const struct timespec *tp)
 {
-  FAR struct tm newtime;
+  struct tm newtime;
 
   /* Break out the time values
    * (not that the time is set only to units of seconds)
@@ -358,7 +358,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-int lpc17_40_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
+int lpc17_40_rtc_setalarm(const struct timespec *tp, alarmcb_t callback)
 {
   int ret = -EBUSY;
 

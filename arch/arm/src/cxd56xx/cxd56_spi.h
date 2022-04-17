@@ -99,7 +99,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *cxd56_spibus_initialize(int port);
+struct spi_dev_s *cxd56_spibus_initialize(int port);
 
 /****************************************************************************
  * Name: cxd56_spi_dmaconfig
@@ -120,7 +120,7 @@ FAR struct spi_dev_s *cxd56_spibus_initialize(int port);
 
 #ifdef CONFIG_CXD56_DMAC
 void cxd56_spi_dmaconfig(int port, int chtype, DMA_HANDLE handle,
-                         FAR dma_config_t *conf);
+                         dma_config_t *conf);
 #endif
 
 /****************************************************************************
@@ -140,52 +140,52 @@ void cxd56_spi_dmaconfig(int port, int chtype, DMA_HANDLE handle,
  ****************************************************************************/
 
 #ifdef CONFIG_CXD56_SPI0
-void  cxd56_spi0select(FAR struct spi_dev_s *dev,
+void  cxd56_spi0select(struct spi_dev_s *dev,
                        uint32_t devid,
                        bool selected);
-uint8_t cxd56_spi0status(FAR struct spi_dev_s *dev,
+uint8_t cxd56_spi0status(struct spi_dev_s *dev,
                          uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int cxd56_spi0cmddata(FAR struct spi_dev_s *dev,
+int cxd56_spi0cmddata(struct spi_dev_s *dev,
                       uint32_t devid,
                       bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_CXD56_SPI3
-void  cxd56_spi3select(FAR struct spi_dev_s *dev,
+void  cxd56_spi3select(struct spi_dev_s *dev,
                        uint32_t devid,
                        bool selected);
-uint8_t cxd56_spi3status(FAR struct spi_dev_s *dev,
+uint8_t cxd56_spi3status(struct spi_dev_s *dev,
                          uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int cxd56_spi3cmddata(FAR struct spi_dev_s *dev,
+int cxd56_spi3cmddata(struct spi_dev_s *dev,
                       uint32_t devid,
                       bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_CXD56_SPI4
-void  cxd56_spi4select(FAR struct spi_dev_s *dev,
+void  cxd56_spi4select(struct spi_dev_s *dev,
                        uint32_t devid,
                        bool selected);
-uint8_t cxd56_spi4status(FAR struct spi_dev_s *dev,
+uint8_t cxd56_spi4status(struct spi_dev_s *dev,
                          uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int cxd56_spi4cmddata(FAR struct spi_dev_s *dev,
+int cxd56_spi4cmddata(struct spi_dev_s *dev,
                       uint32_t devid,
                       bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_CXD56_SPI5
-void  cxd56_spi5select(FAR struct spi_dev_s *dev,
+void  cxd56_spi5select(struct spi_dev_s *dev,
                        uint32_t devid,
                        bool selected);
-uint8_t cxd56_spi5status(FAR struct spi_dev_s *dev,
+uint8_t cxd56_spi5status(struct spi_dev_s *dev,
                          uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int cxd56_spi5cmddata(FAR struct spi_dev_s *dev,
+int cxd56_spi5cmddata(struct spi_dev_s *dev,
                       uint32_t devid,
                       bool cmd);
 #endif
@@ -207,7 +207,7 @@ int cxd56_spi5cmddata(FAR struct spi_dev_s *dev,
  *
  ****************************************************************************/
 
-void spi_flush(FAR struct spi_dev_s *dev);
+void spi_flush(struct spi_dev_s *dev);
 
 /****************************************************************************
  * Name: cxd56_spiXregister
@@ -231,23 +231,23 @@ void spi_flush(FAR struct spi_dev_s *dev);
 
 #ifdef CONFIG_SPI_CALLBACK
 #ifdef CONFIG_CXD56_SPI0
-int cxd56_spi0register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
-                       FAR void *arg);
+int cxd56_spi0register(struct spi_dev_s *dev, spi_mediachange_t callback,
+                       void *arg);
 #endif
 
 #ifdef CONFIG_CXD56_SPI3
-int cxd56_spi3register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
-                       FAR void *arg);
+int cxd56_spi3register(struct spi_dev_s *dev, spi_mediachange_t callback,
+                       void *arg);
 #endif
 
 #ifdef CONFIG_CXD56_SPI4
-int cxd56_spi4register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
-                       FAR void *arg);
+int cxd56_spi4register(struct spi_dev_s *dev, spi_mediachange_t callback,
+                       void *arg);
 #endif
 
 #ifdef CONFIG_CXD56_SPI5
-int cxd56_spi5register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
-                       FAR void *arg);
+int cxd56_spi5register(struct spi_dev_s *dev, spi_mediachange_t callback,
+                       void *arg);
 #endif
 #endif
 

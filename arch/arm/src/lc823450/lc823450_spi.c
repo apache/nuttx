@@ -84,17 +84,17 @@ struct lc823450_spidev_s
 /* SPI methods */
 
 #ifndef CONFIG_SPI_OWNBUS
-static int      spi_lock(FAR struct spi_dev_s *dev, bool lock);
+static int      spi_lock(struct spi_dev_s *dev, bool lock);
 #endif
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+static uint32_t spi_setfrequency(struct spi_dev_s *dev,
                                  uint32_t frequency);
-static void     spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
-static void     spi_setbits(FAR struct spi_dev_s *dev, int nbits);
-static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd);
+static void     spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode);
+static void     spi_setbits(struct spi_dev_s *dev, int nbits);
+static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd);
 #ifndef CONFIG_SPI_EXCHANGE
-static void     spi_sndblock(FAR struct spi_dev_s *dev,
-                             FAR const void *buffer, size_t nwords);
-static void     spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
+static void     spi_sndblock(struct spi_dev_s *dev,
+                             const void *buffer, size_t nwords);
+static void     spi_recvblock(struct spi_dev_s *dev, void *buffer,
                               size_t nwords);
 #endif
 
@@ -137,9 +137,9 @@ static struct lc823450_spidev_s g_spidev =
  ****************************************************************************/
 
 #ifndef CONFIG_SPI_OWNBUS
-static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
+static int spi_lock(struct spi_dev_s *dev, bool lock)
 {
-  FAR struct lc823450_spidev_s *priv = (FAR struct lc823450_spidev_s *)dev;
+  struct lc823450_spidev_s *priv = (struct lc823450_spidev_s *)dev;
   int ret;
 
   if (lock)
@@ -170,10 +170,10 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+static uint32_t spi_setfrequency(struct spi_dev_s *dev,
                                  uint32_t frequency)
 {
-  FAR struct lc823450_spidev_s *priv = (FAR struct lc823450_spidev_s *)dev;
+  struct lc823450_spidev_s *priv = (struct lc823450_spidev_s *)dev;
   unsigned long  sysclk = lc823450_get_systemfreq();
   uint32_t actual;
   int div;
@@ -222,9 +222,9 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
  *
  ****************************************************************************/
 
-static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
+static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 {
-  FAR struct lc823450_spidev_s *priv = (FAR struct lc823450_spidev_s *)dev;
+  struct lc823450_spidev_s *priv = (struct lc823450_spidev_s *)dev;
 
 #ifndef CONFIG_SPI_OWNBUS
   if (priv->mode == mode)
@@ -276,9 +276,9 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
  *
  ****************************************************************************/
 
-static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
+static void spi_setbits(struct spi_dev_s *dev, int nbits)
 {
-  FAR struct lc823450_spidev_s *priv = (FAR struct lc823450_spidev_s *)dev;
+  struct lc823450_spidev_s *priv = (struct lc823450_spidev_s *)dev;
 
 #ifndef CONFIG_SPI_OWNBUS
   if (priv->nbits == nbits)
@@ -326,13 +326,13 @@ static void spi_dma_callback(DMA_HANDLE hdma, void *arg, int result)
  ****************************************************************************/
 
 #ifdef CONFIG_LC823450_SPI_DMA
-static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
+static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
 {
   spi_sndblock(dev, &wd, 1);
   return 0;
 }
 #else /* CONFIG_LC823450_SPI_DMA */
-static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
+static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
 {
   putreg16((uint16_t)wd, LC823450_SPI_STR);
 
@@ -370,10 +370,10 @@ static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
  ****************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
+static void spi_sndblock(struct spi_dev_s *dev, const void *buffer,
                          size_t nwords)
 {
-  FAR struct lc823450_spidev_s *priv = (FAR struct lc823450_spidev_s *)dev;
+  struct lc823450_spidev_s *priv = (struct lc823450_spidev_s *)dev;
 
 #ifdef CONFIG_LC823450_SPI_DMA
   /* TODO: 16bit */
@@ -459,10 +459,10 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
  ****************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
+static void spi_recvblock(struct spi_dev_s *dev, void *buffer,
                           size_t nwords)
 {
-  FAR struct lc823450_spidev_s *priv = (FAR struct lc823450_spidev_s *)dev;
+  struct lc823450_spidev_s *priv = (struct lc823450_spidev_s *)dev;
   int i;
   uint8_t *buf = buffer;
   uint16_t *buf16 = buffer;
@@ -502,9 +502,9 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *lc823450_spibus_initialize(int port)
+struct spi_dev_s *lc823450_spibus_initialize(int port)
 {
-  FAR struct lc823450_spidev_s *priv = &g_spidev;
+  struct lc823450_spidev_s *priv = &g_spidev;
   irqstate_t flags;
 
   DEBUGASSERT(port == 0);

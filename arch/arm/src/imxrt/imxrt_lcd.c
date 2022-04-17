@@ -93,20 +93,20 @@
  * configuration of each color plane.
  */
 
-static int imxrt_getvideoinfo(FAR struct fb_vtable_s *vtable,
-             FAR struct fb_videoinfo_s *vinfo);
-static int imxrt_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
-             FAR struct fb_planeinfo_s *pinfo);
+static int imxrt_getvideoinfo(struct fb_vtable_s *vtable,
+             struct fb_videoinfo_s *vinfo);
+static int imxrt_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
+             struct fb_planeinfo_s *pinfo);
 
 /* The following is provided only if the video hardware supports RGB color
  * mapping
  */
 
 #ifdef CONFIG_FB_CMAP
-static int imxrt_getcmap(FAR struct fb_vtable_s *vtable,
-             FAR struct fb_cmap_s *cmap);
-static int imxrt_putcmap(FAR struct fb_vtable_s *vtable,
-             FAR const struct fb_cmap_s *cmap);
+static int imxrt_getcmap(struct fb_vtable_s *vtable,
+                         struct fb_cmap_s *cmap);
+static int imxrt_putcmap(struct fb_vtable_s *vtable,
+                         const struct fb_cmap_s *cmap);
 #endif
 
 #ifdef CONFIG_FB_HWCURSOR
@@ -131,7 +131,7 @@ static const struct fb_videoinfo_s g_videoinfo =
 
 static const struct fb_planeinfo_s g_planeinfo =
 {
-  .fbmem    = (FAR void *)CONFIG_IMXRT_LCD_VRAMBASE,
+  .fbmem    = (void *)CONFIG_IMXRT_LCD_VRAMBASE,
   .fblen    = IMXRT_FBSIZE,
   .stride   = IMXRT_STRIDE,
   .display  = 0,
@@ -239,8 +239,8 @@ struct fb_vtable_s g_fbobject =
  * Name: imxrt_getvideoinfo
  ****************************************************************************/
 
-static int imxrt_getvideoinfo(FAR struct fb_vtable_s *vtable,
-                              FAR struct fb_videoinfo_s *vinfo)
+static int imxrt_getvideoinfo(struct fb_vtable_s *vtable,
+                              struct fb_videoinfo_s *vinfo)
 {
   lcdinfo("vtable=%p vinfo=%p\n", vtable, vinfo);
   if (vtable && vinfo)
@@ -257,8 +257,8 @@ static int imxrt_getvideoinfo(FAR struct fb_vtable_s *vtable,
  * Name: imxrt_getplaneinfo
  ****************************************************************************/
 
-static int imxrt_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
-                              FAR struct fb_planeinfo_s *pinfo)
+static int imxrt_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
+                              struct fb_planeinfo_s *pinfo)
 {
   lcdinfo("vtable=%p planeno=%d pinfo=%p\n", vtable, planeno, pinfo);
   if (vtable && planeno == 0 && pinfo)
@@ -276,8 +276,8 @@ static int imxrt_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
  ****************************************************************************/
 
 #ifdef CONFIG_FB_CMAP
-static int imxrt_getcmap(FAR struct fb_vtable_s *vtable,
-                         FAR struct fb_cmap_s *cmap)
+static int imxrt_getcmap(struct fb_vtable_s *vtable,
+                         struct fb_cmap_s *cmap)
 {
   uint32_t n;
   uint32_t reg;
@@ -324,8 +324,8 @@ static int imxrt_getcmap(FAR struct fb_vtable_s *vtable,
  ****************************************************************************/
 
 #ifdef CONFIG_FB_CMAP
-static int imxrt_putcmap(FAR struct fb_vtable_s *vtable,
-    FAR const struct fb_cmap_s *cmap)
+static int imxrt_putcmap(struct fb_vtable_s *vtable,
+                         const struct fb_cmap_s *cmap)
 {
   uint32_t n;
 
@@ -637,7 +637,7 @@ int up_fbinitialize(int display)
  *
  ****************************************************************************/
 
-FAR struct fb_vtable_s *up_fbgetvplane(int display, int vplane)
+struct fb_vtable_s *up_fbgetvplane(int display, int vplane)
 {
   lcdinfo("vplane: %d\n", vplane);
   if (vplane == 0)

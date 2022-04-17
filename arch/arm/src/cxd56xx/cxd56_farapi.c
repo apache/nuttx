@@ -160,7 +160,7 @@ static int cxd56_sendmsg(int cpuid, int protoid, int msgtype, uint16_t pdata,
 
 static int cxd56_farapidonehandler(int cpuid, int protoid,
                                    uint32_t pdata, uint32_t data,
-                                   FAR void *userdata)
+                                   void *userdata)
 {
   /* Receive event flag message as Far API done.
    * We need only far API done event.

@@ -72,7 +72,7 @@ struct timespec g_ts;
  * Private Functions
  ****************************************************************************/
 
-static int lpc43_rit_isr(int irq, FAR void *context, FAR void *arg)
+static int lpc43_rit_isr(int irq, void *context, void *arg)
 {
   irqstate_t flags;
 
@@ -206,7 +206,7 @@ void up_timer_initialize(void)
   lpc43_rit_timer_start();
 }
 
-int up_timer_gettime(FAR struct timespec *ts)
+int up_timer_gettime(struct timespec *ts)
 {
   ts->tv_sec = (uint32_t)(g_internal_timer / 1000000000);
   ts->tv_nsec = (uint32_t)(g_internal_timer % 1000000000);
@@ -214,7 +214,7 @@ int up_timer_gettime(FAR struct timespec *ts)
   return OK;
 }
 
-int up_alarm_cancel(FAR struct timespec *ts)
+int up_alarm_cancel(struct timespec *ts)
 {
   ts->tv_sec = (uint32_t)(g_internal_timer / 1000000000);
   ts->tv_nsec = (uint32_t)(g_internal_timer % 1000000000);
@@ -222,7 +222,7 @@ int up_alarm_cancel(FAR struct timespec *ts)
   return OK;
 }
 
-int up_alarm_start(FAR const struct timespec *ts)
+int up_alarm_start(const struct timespec *ts)
 {
   /* According to the docs, this version should expect to receive the time
    * in the future when the alarm should expire. So that's the way it's
@@ -234,7 +234,7 @@ int up_alarm_start(FAR const struct timespec *ts)
   return OK;
 }
 
-int up_timer_cancel(FAR struct timespec *ts)
+int up_timer_cancel(struct timespec *ts)
 {
   /* Currently this is just an alarm and both are implemented.  This is *NOT*
    * how it is supposed to be and will be corrected, but for now, this is a
@@ -245,7 +245,7 @@ int up_timer_cancel(FAR struct timespec *ts)
   return up_alarm_cancel(ts);
 }
 
-int up_timer_start(FAR const struct timespec *ts)
+int up_timer_start(const struct timespec *ts)
 {
   /* According to the docs, this version should basically compute the time
    * in the future when an alarm should go off.  That is the way it could

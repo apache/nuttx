@@ -52,7 +52,7 @@
  *
  ****************************************************************************/
 
-FAR struct i2c_master_s *imxrt_i2cbus_initialize(int port);
+struct i2c_master_s *imxrt_i2cbus_initialize(int port);
 
 /****************************************************************************
  * Name: imxrt_i2cbus_uninitialize
@@ -69,6 +69,6 @@ FAR struct i2c_master_s *imxrt_i2cbus_initialize(int port);
  *
  ****************************************************************************/
 
-int imxrt_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
+int imxrt_i2cbus_uninitialize(struct i2c_master_s *dev);
 
 #endif /* __ARCH_ARM_SRC_IMXRT_IMXRT_LPI2C_H */

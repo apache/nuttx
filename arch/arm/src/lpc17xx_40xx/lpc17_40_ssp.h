@@ -65,7 +65,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *lpc17_40_sspbus_initialize(int port);
+struct spi_dev_s *lpc17_40_sspbus_initialize(int port);
 
 /****************************************************************************
  * Name:
@@ -100,21 +100,21 @@ FAR struct spi_dev_s *lpc17_40_sspbus_initialize(int port);
  ****************************************************************************/
 
 #ifdef CONFIG_LPC17_40_SSP0
-void lpc17_40_ssp0select(FAR struct spi_dev_s *dev,
+void lpc17_40_ssp0select(struct spi_dev_s *dev,
                          uint32_t devid, bool selected);
-uint8_t lpc17_40_ssp0status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t lpc17_40_ssp0status(struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int lpc17_40_ssp0cmddata(FAR struct spi_dev_s *dev,
+int lpc17_40_ssp0cmddata(struct spi_dev_s *dev,
                          uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_LPC17_40_SSP1
-void lpc17_40_ssp1select(FAR struct spi_dev_s *dev,
+void lpc17_40_ssp1select(struct spi_dev_s *dev,
                          uint32_t devid, bool selected);
-uint8_t lpc17_40_ssp1status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t lpc17_40_ssp1status(struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int lpc17_40_ssp1cmddata(FAR struct spi_dev_s *dev,
+int lpc17_40_ssp1cmddata(struct spi_dev_s *dev,
                          uint32_t devid, bool cmd);
 #endif
 #endif
@@ -136,7 +136,7 @@ int lpc17_40_ssp1cmddata(FAR struct spi_dev_s *dev,
  ****************************************************************************/
 
 #if defined(CONFIG_LPC17_40_SSP0) || defined(CONFIG_LPC17_40_SSP1)
-void ssp_flush(FAR struct spi_dev_s *dev);
+void ssp_flush(struct spi_dev_s *dev);
 #endif
 
 /****************************************************************************
@@ -161,15 +161,15 @@ void ssp_flush(FAR struct spi_dev_s *dev);
 
 #ifdef CONFIG_SPI_CALLBACK
 #ifdef CONFIG_LPC17_40_SSP0
-int lpc17_40_ssp0register(FAR struct spi_dev_s *dev,
+int lpc17_40_ssp0register(struct spi_dev_s *dev,
                           spi_mediachange_t callback,
-                          FAR void *arg);
+                          void *arg);
 #endif
 
 #ifdef CONFIG_LPC17_40_SSP1
-int lpc17_40_ssp1register(FAR struct spi_dev_s *dev,
+int lpc17_40_ssp1register(struct spi_dev_s *dev,
                           spi_mediachange_t callback,
-                          FAR void *arg);
+                          void *arg);
 #endif
 #endif
 

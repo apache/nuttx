@@ -173,7 +173,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct pwm_lowerhalf_s *kl_pwminitialize(int timer);
+struct pwm_lowerhalf_s *kl_pwminitialize(int timer);
 
 #undef EXTERN
 #if defined(__cplusplus)

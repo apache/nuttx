@@ -181,7 +181,7 @@ struct spi_dev_s;  /* Forward reference */
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *lpc23_spibus_initialize(int port);
+struct spi_dev_s *lpc23_spibus_initialize(int port);
 
 /****************************************************************************
  * These functions must be provided by the board specific logic that has
@@ -189,8 +189,8 @@ FAR struct spi_dev_s *lpc23_spibus_initialize(int port);
  *
  ****************************************************************************/
 
-void  lpc23xx_spiselect(FAR struct spi_dev_s *dev,
+void  lpc23xx_spiselect(struct spi_dev_s *dev,
                         uint32_t devid, bool selected);
-uint8_t lpc23xx_spistatus(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t lpc23xx_spistatus(struct spi_dev_s *dev, uint32_t devid);
 
 #endif /* __ARCH_ARM_SRC_LPC2378_LPC23XX_SPI_H */

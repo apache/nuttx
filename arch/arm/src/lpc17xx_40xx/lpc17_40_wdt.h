@@ -66,7 +66,7 @@ extern "C"
  *
  ****************************************************************************/
 
-void lpc17_40_wdtinitialize(FAR const char *devpath);
+void lpc17_40_wdtinitialize(const char *devpath);
 
 #undef EXTERN
 #if defined(__cplusplus)

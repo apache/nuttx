@@ -343,7 +343,7 @@ static uint8_t g_mem_region_next = 0;
  ****************************************************************************/
 
 #ifdef CONFIG_HEAP_COLORATION
-static inline void up_heap_color(FAR void *start, size_t size)
+static inline void up_heap_color(void *start, size_t size)
 {
   memset(start, HEAP_COLOR, size);
 }
@@ -360,7 +360,7 @@ static inline void up_heap_color(FAR void *start, size_t size)
  ****************************************************************************/
 
 #ifdef MM_HAVE_REGION
-static void mem_addregion(FAR void *region_start, size_t region_size)
+static void mem_addregion(void *region_start, size_t region_size)
 {
   if (g_mem_region_next <= CONFIG_MM_REGIONS)
     {
@@ -408,7 +408,7 @@ static void mem_addregion(FAR void *region_start, size_t region_size)
  *
  ****************************************************************************/
 
-void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
+void up_allocate_heap(void **heap_start, size_t *heap_size)
 {
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
   /* Get the unaligned size and position of the user-space heap.
@@ -437,12 +437,12 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
   /* Return the user-space heap settings */
 
   board_autoled_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void *)ubase;
+  *heap_start = (void *)ubase;
   *heap_size  = usize;
 
   /* Colorize the heap for debug */
 
-  up_heap_color((FAR void *)ubase, usize);
+  up_heap_color((void *)ubase, usize);
 
   /* Allow user-mode access to the user heap memory */
 
@@ -452,7 +452,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
   /* Return the heap settings */
 
   board_autoled_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void *)g_idle_topstack;
+  *heap_start = (void *)g_idle_topstack;
   *heap_size  = CONFIG_RAM_END - g_idle_topstack;
 
   /* Colorize the heap for debug */
@@ -477,7 +477,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
  ****************************************************************************/
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
-void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
+void up_allocate_kheap(void **heap_start, size_t *heap_size)
 {
   /* Get the unaligned size and position of the user-space heap.
    * This heap begins after the user-space .bss section at an offset
@@ -506,7 +506,7 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
    * that was not dedicated to the user heap).
    */
 
-  *heap_start = (FAR void *)USERSPACE->us_bssend;
+  *heap_start = (void *)USERSPACE->us_bssend;
   *heap_size  = usize;
 }
 #endif
@@ -531,8 +531,8 @@ void arm_addregion(void)
 #ifdef MM_USE_LOCSRAM_BANK1
   /* Add the SRAM to the user heap */
 
-  mem_addregion((FAR void *)LPC43_LOCSRAM_BANK1_BASE,
-                            LPC43_LOCSRAM_BANK1_SIZE);
+  mem_addregion((void *)LPC43_LOCSRAM_BANK1_BASE,
+                        LPC43_LOCSRAM_BANK1_SIZE);
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
   /* Allow user-mode access to the SRAM heap */
@@ -545,8 +545,8 @@ void arm_addregion(void)
 #ifdef MM_USE_AHBSRAM_BANK0
   /* Add the SRAM to the user heap */
 
-  mem_addregion((FAR void *)LPC43_AHBSRAM_BANK0_BASE,
-                            LPC43_AHBSRAM_BANK0_SIZE);
+  mem_addregion((void *)LPC43_AHBSRAM_BANK0_BASE,
+                        LPC43_AHBSRAM_BANK0_SIZE);
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
   /* Allow user-mode access to the SRAM heap */
@@ -559,8 +559,8 @@ void arm_addregion(void)
 #ifdef MM_USE_AHBSRAM_BANK1
   /* Add the SRAM to the user heap */
 
-  mem_addregion((FAR void *)LPC43_AHBSRAM_BANK1_BASE,
-                            LPC43_AHBSRAM_BANK1_SIZE);
+  mem_addregion((void *)LPC43_AHBSRAM_BANK1_BASE,
+                        LPC43_AHBSRAM_BANK1_SIZE);
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
   /* Allow user-mode access to the SRAM heap */
@@ -573,7 +573,7 @@ void arm_addregion(void)
 #ifdef MM_USE_AHBSRAM_BANK2
   /* Add the SRAM heap to the user heap */
 
-  mem_addregion((FAR void *)MM_DMAREGION_BASE, MM_DMAREGION_SIZE);
+  mem_addregion((void *)MM_DMAREGION_BASE, MM_DMAREGION_SIZE);
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
   /* Allow user-mode access to the SRAM heap */
@@ -585,7 +585,7 @@ void arm_addregion(void)
 #ifdef MM_USE_EXTSDRAM0
   /* Add the SDRAM to the user heap */
 
-  mem_addregion((FAR void *)MM_EXTSDRAM0_REGION, MM_EXTSDRAM0_SIZE);
+  mem_addregion((void *)MM_EXTSDRAM0_REGION, MM_EXTSDRAM0_SIZE);
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
   /* Allow user-mode access to the SDRAM heap */
@@ -597,7 +597,7 @@ void arm_addregion(void)
 #ifdef MM_USE_EXTSDRAM1
   /* Add the SDRAM to the user heap */
 
-  mem_addregion((FAR void *)MM_EXTSDRAM1_REGION, MM_EXTSDRAM1_SIZE);
+  mem_addregion((void *)MM_EXTSDRAM1_REGION, MM_EXTSDRAM1_SIZE);
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
   /* Allow user-mode access to the SDRAM heap */
@@ -609,7 +609,7 @@ void arm_addregion(void)
 #ifdef MM_USE_EXTSDRAM2
   /* Add the SDRAM to the user heap */
 
-  mem_addregion((FAR void *)MM_EXTSDRAM2_REGION, MM_EXTSDRAM2_SIZE);
+  mem_addregion((void *)MM_EXTSDRAM2_REGION, MM_EXTSDRAM2_SIZE);
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
   /* Allow user-mode access to the SDRAM heap */
@@ -621,7 +621,7 @@ void arm_addregion(void)
 #ifdef MM_USE_EXTSDRAM3
   /* Add the SDRAM to the user heap */
 
-  mem_addregion((FAR void *)MM_EXTSDRAM3_REGION, MM_EXTSDRAM3_SIZE);
+  mem_addregion((void *)MM_EXTSDRAM3_REGION, MM_EXTSDRAM3_SIZE);
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
   /* Allow user-mode access to the SDRAM heap */

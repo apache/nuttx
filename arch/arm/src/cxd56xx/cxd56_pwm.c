@@ -95,12 +95,12 @@ typedef struct
 
 /* PWM driver methods */
 
-static int pwm_setup(FAR struct pwm_lowerhalf_s *dev);
-static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev);
-static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
-                     FAR const struct pwm_info_s *info);
-static int pwm_stop(FAR struct pwm_lowerhalf_s *dev);
-static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
+static int pwm_setup(struct pwm_lowerhalf_s *dev);
+static int pwm_shutdown(struct pwm_lowerhalf_s *dev);
+static int pwm_start(struct pwm_lowerhalf_s *dev,
+                     const struct pwm_info_s *info);
+static int pwm_stop(struct pwm_lowerhalf_s *dev);
+static int pwm_ioctl(struct pwm_lowerhalf_s *dev,
                      int cmd, unsigned long arg);
 
 /****************************************************************************
@@ -330,9 +330,9 @@ static int convert_freq2period(uint32_t freq, ub16_t duty, uint32_t *param,
  *
  ****************************************************************************/
 
-static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
+static int pwm_setup(struct pwm_lowerhalf_s *dev)
 {
-  FAR struct cxd56_pwm_chan_s *priv = (FAR struct cxd56_pwm_chan_s *)dev;
+  struct cxd56_pwm_chan_s *priv = (struct cxd56_pwm_chan_s *)dev;
   int ret;
 
   ret = pwm_pin_config(priv->ch);
@@ -361,7 +361,7 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
+static int pwm_shutdown(struct pwm_lowerhalf_s *dev)
 {
   return OK;
 }
@@ -381,10 +381,10 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
-                     FAR const struct pwm_info_s *info)
+static int pwm_start(struct pwm_lowerhalf_s *dev,
+                     const struct pwm_info_s *info)
 {
-  FAR struct cxd56_pwm_chan_s *priv = (FAR struct cxd56_pwm_chan_s *)dev;
+  struct cxd56_pwm_chan_s *priv = (struct cxd56_pwm_chan_s *)dev;
   uint32_t param;
   uint32_t phase;
   int ret;
@@ -442,9 +442,9 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
  *
  ****************************************************************************/
 
-static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
+static int pwm_stop(struct pwm_lowerhalf_s *dev)
 {
-  FAR struct cxd56_pwm_chan_s *priv = (FAR struct cxd56_pwm_chan_s *)dev;
+  struct cxd56_pwm_chan_s *priv = (struct cxd56_pwm_chan_s *)dev;
 
   PWM_REG(priv->ch)->EN = 0x0;
 
@@ -467,7 +467,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd,
+static int pwm_ioctl(struct pwm_lowerhalf_s *dev, int cmd,
                      unsigned long arg)
 {
   return -ENOTTY;
@@ -492,9 +492,9 @@ static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd,
  *
  ****************************************************************************/
 
-FAR struct pwm_lowerhalf_s *cxd56_pwminitialize(uint32_t channel)
+struct pwm_lowerhalf_s *cxd56_pwminitialize(uint32_t channel)
 {
-  FAR struct cxd56_pwm_chan_s *pwmch;
+  struct cxd56_pwm_chan_s *pwmch;
 
   switch (channel)
     {
@@ -523,5 +523,5 @@ FAR struct pwm_lowerhalf_s *cxd56_pwminitialize(uint32_t channel)
         return NULL;
     }
 
-  return (FAR struct pwm_lowerhalf_s *)pwmch;
+  return (struct pwm_lowerhalf_s *)pwmch;
 }

@@ -95,7 +95,7 @@
 #ifdef CONFIG_VECTORED_INTERRUPTS
 static int lpc23xx_timerisr(uint32_t * regs)
 #else
-static int lpc23xx_timerisr(int irq, uint32_t * regs, FAR void *arg)
+static int lpc23xx_timerisr(int irq, uint32_t * regs, void *arg)
 #endif
 {
   static uint32_t tick;

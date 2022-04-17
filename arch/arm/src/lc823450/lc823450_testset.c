@@ -63,7 +63,7 @@
  *
  ****************************************************************************/
 
-spinlock_t up_testset(volatile FAR spinlock_t *lock)
+spinlock_t up_testset(volatile spinlock_t *lock)
 {
   uint32_t val;
   spinlock_t ret;

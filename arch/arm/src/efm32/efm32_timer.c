@@ -68,7 +68,7 @@
  *
  ****************************************************************************/
 
-void efm32_timer_dumpregs(uintptr_t base, FAR const char *msg)
+void efm32_timer_dumpregs(uintptr_t base, const char *msg)
 {
 #ifdef CONFIG_DEBUG_TIMER_INFO
   int i;

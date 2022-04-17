@@ -63,7 +63,7 @@ extern "C"
  ****************************************************************************/
 
 struct lpc54_sdmmc_dev_s; /* See include/nuttx/sdio.h */
-FAR struct sdio_dev_s *lpc54_sdmmc_initialize(int slotno);
+struct sdio_dev_s *lpc54_sdmmc_initialize(int slotno);
 
 #undef EXTERN
 #if defined(__cplusplus)
