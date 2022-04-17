@@ -46,7 +46,7 @@
 
 #ifdef CONFIG_ESP32C3_SPI2
 
-uint8_t esp32c3_spi2_status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t esp32c3_spi2_status(struct spi_dev_s *dev, uint32_t devid)
 {
   uint8_t status = 0;
 
@@ -61,7 +61,7 @@ uint8_t esp32c3_spi2_status(FAR struct spi_dev_s *dev, uint32_t devid)
 
 #if defined(CONFIG_ESP32C3_SPI2) && defined(CONFIG_SPI_CMDDATA)
 
-int esp32c3_spi2_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int esp32c3_spi2_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   if (devid == SPIDEV_DISPLAY(0))
     {

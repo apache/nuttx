@@ -2098,7 +2098,7 @@ static int mpfs_getframe(struct usbdev_s *dev)
   return frameno;
 }
 
-void mpfs_usb_suspend(FAR struct usbdev_s *dev, bool resume)
+void mpfs_usb_suspend(struct usbdev_s *dev, bool resume)
 {
 }
 

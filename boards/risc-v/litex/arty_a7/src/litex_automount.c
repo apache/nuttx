@@ -51,10 +51,10 @@
 
 struct litex_automount_state_s
 {
-  volatile automount_handler_t handler;    /* Upper half handler */
-  FAR void *arg;                           /* Handler argument */
-  bool enable;                             /* Fake interrupt enable */
-  bool pending;                            /* Set if there an event while disabled */
+  volatile automount_handler_t handler; /* Upper half handler */
+  void *arg;                            /* Handler argument */
+  bool enable;                          /* Fake interrupt enable */
+  bool pending;                         /* Set if there an event while disabled */
 };
 
 /* This structure represents the static configuration of an automounter */
@@ -65,20 +65,20 @@ struct litex_automount_config_s
    * struct automount_lower_s to struct litex_automount_config_s
    */
 
-  struct automount_lower_s lower;             /* Publicly visible part */
-  uint8_t mmcsd;                              /* MB1_MMCSD_SLOTNO or MB2_MMCSD_SLOTNO */
-  FAR struct litex_automount_state_s *state;  /* Changeable state */
+  struct automount_lower_s lower;        /* Publicly visible part */
+  uint8_t mmcsd;                         /* MB1_MMCSD_SLOTNO or MB2_MMCSD_SLOTNO */
+  struct litex_automount_state_s *state; /* Changeable state */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  litex_attach(FAR const struct automount_lower_s *lower,
-                         automount_handler_t isr, FAR void *arg);
-static void litex_enable(FAR const struct automount_lower_s *lower,
+static int  litex_attach(const struct automount_lower_s *lower,
+                         automount_handler_t isr, void *arg);
+static void litex_enable(const struct automount_lower_s *lower,
                          bool enable);
-static bool litex_inserted(FAR const struct automount_lower_s *lower);
+static bool litex_inserted(const struct automount_lower_s *lower);
 
 /****************************************************************************
  * Private Data
@@ -126,15 +126,15 @@ static const struct litex_automount_config_s g_mb1_mmcsdconfig =
  *
  ****************************************************************************/
 
-static int litex_attach(FAR const struct automount_lower_s *lower,
-                      automount_handler_t isr, FAR void *arg)
+static int litex_attach(const struct automount_lower_s *lower,
+                      automount_handler_t isr, void *arg)
 {
-  FAR const struct litex_automount_config_s *config;
-  FAR struct litex_automount_state_s *state;
+  const struct litex_automount_config_s *config;
+  struct litex_automount_state_s *state;
 
   /* Recover references to our structure */
 
-  config = (FAR struct litex_automount_config_s *)lower;
+  config = (struct litex_automount_config_s *)lower;
   DEBUGASSERT(config && config->state);
 
   state = config->state;
@@ -165,16 +165,16 @@ static int litex_attach(FAR const struct automount_lower_s *lower,
  *
  ****************************************************************************/
 
-static void litex_enable(FAR const struct automount_lower_s *lower,
+static void litex_enable(const struct automount_lower_s *lower,
                          bool enable)
 {
-  FAR const struct litex_automount_config_s *config;
-  FAR struct litex_automount_state_s *state;
+  const struct litex_automount_config_s *config;
+  struct litex_automount_state_s *state;
   irqstate_t flags;
 
   /* Recover references to our structure */
 
-  config = (FAR struct litex_automount_config_s *)lower;
+  config = (struct litex_automount_config_s *)lower;
   DEBUGASSERT(config && config->state);
 
   state = config->state;
@@ -216,11 +216,11 @@ static void litex_enable(FAR const struct automount_lower_s *lower,
  *
  ****************************************************************************/
 
-static bool litex_inserted(FAR const struct automount_lower_s *lower)
+static bool litex_inserted(const struct automount_lower_s *lower)
 {
-  FAR const struct litex_automount_config_s *config;
+  const struct litex_automount_config_s *config;
 
-  config = (FAR struct litex_automount_config_s *)lower;
+  config = (struct litex_automount_config_s *)lower;
   DEBUGASSERT(config && config->state);
 
   return litex_cardinserted(config->mmcsd);
@@ -246,7 +246,7 @@ static bool litex_inserted(FAR const struct automount_lower_s *lower)
 
 int litex_automount_initialize(void)
 {
-  FAR void *handle;
+  void *handle;
 
   finfo("Initializing automounter(s)\n");
 
@@ -290,8 +290,8 @@ int litex_automount_initialize(void)
 
 void litex_automount_event(int slotno, bool inserted)
 {
-  FAR const struct litex_automount_config_s *config;
-  FAR struct litex_automount_state_s *state;
+  const struct litex_automount_config_s *config;
+  struct litex_automount_state_s *state;
 
 #ifdef CONFIG_LITEX_SDIO_MOUNT_MOUNTPOINT
   /* Is this a change in the MB1 MMCSD slot insertion state? */
