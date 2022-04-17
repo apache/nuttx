@@ -273,33 +273,5 @@ int minerva_swint(int irq, void *context, void *arg)
     }
 #endif
 
-#if defined(CONFIG_ARCH_FPU) || defined(CONFIG_ARCH_ADDRENV)
-  /* Check for a context switch.  If a context switch occurred, then
-   * g_current_regs will have a different value than it did on entry.  If an
-   * interrupt level context switch has occurred, then restore the floating
-   * point state and the establish the correct address environment before
-   * returning from the interrupt.
-   */
-
-  if (regs != g_current_regs)
-    {
-#ifdef CONFIG_ARCH_FPU
-      /* Restore floating point registers */
-
-      up_restorefpu((uint32_t *) g_current_regs);
-#endif
-
-#ifdef CONFIG_ARCH_ADDRENV
-      /* Make sure that the address environment for the previously running
-       * task is closed down gracefully (data caches dump, MMU flushed) and
-       * set up the address environment for the new thread at the head of
-       * the ready-to-run list.
-       */
-
-      group_addrenv(NULL);
-#endif
-    }
-#endif
-
   return OK;
 }
