@@ -54,7 +54,7 @@
 
 int stm32l4_lsm6dsl_initialize(char *devpath)
 {
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
   int ret = OK;
 
   sninfo("Initializing LMS6DSL!\n");

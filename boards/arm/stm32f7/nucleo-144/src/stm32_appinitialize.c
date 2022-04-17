@@ -47,7 +47,7 @@ int stm32_gpio_initialize(void);
 #endif
 
 #ifdef CONFIG_SENSORS_QENCODER
-int stm32f7_qencoder_initialize(FAR const char *devpath, int timer);
+int stm32f7_qencoder_initialize(const char *devpath, int timer);
 #endif
 
 #ifdef CONFIG_STM32F7_CAN
@@ -88,9 +88,9 @@ int board_app_initialize(uintptr_t arg)
   int ret;
 #ifdef CONFIG_I2C
   int i2c_bus;
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
 #ifdef CONFIG_MPU60X0_I2C
-  FAR struct mpu_config_s *mpu_config;
+  struct mpu_config_s *mpu_config;
 #endif
 #endif
 

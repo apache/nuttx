@@ -101,7 +101,7 @@ void weak_function sam_usbinitialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV
-void sam_usb_suspend(FAR struct usbdev_s *dev, bool resume)
+void sam_usb_suspend(struct usbdev_s *dev, bool resume)
 {
   uinfo("board: resume: %d\n", resume);
 }

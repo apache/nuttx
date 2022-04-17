@@ -112,11 +112,11 @@
 
 /* Lower-half SPI */
 
-static void spi_select(FAR struct spi_bitbang_s *priv, uint32_t devid,
+static void spi_select(struct spi_bitbang_s *priv, uint32_t devid,
                        bool selected);
-static uint8_t spi_status(FAR struct spi_bitbang_s *priv, uint32_t devid);
+static uint8_t spi_status(struct spi_bitbang_s *priv, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-static int spi_cmddata(FAR struct spi_bitbang_s *priv, uint32_t devid,
+static int spi_cmddata(struct spi_bitbang_s *priv, uint32_t devid,
                        bool cmd);
 #endif
 
@@ -132,11 +132,11 @@ static int spi_cmddata(FAR struct spi_bitbang_s *priv, uint32_t devid,
  * pendown - Return the state of the pen down GPIO input
  */
 
-static int  tsc_attach(FAR struct ads7843e_config_s *state, xcpt_t isr);
-static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable);
-static void tsc_clear(FAR struct ads7843e_config_s *state);
-static bool tsc_busy(FAR struct ads7843e_config_s *state);
-static bool tsc_pendown(FAR struct ads7843e_config_s *state);
+static int  tsc_attach(struct ads7843e_config_s *state, xcpt_t isr);
+static void tsc_enable(struct ads7843e_config_s *state, bool enable);
+static void tsc_clear(struct ads7843e_config_s *state);
+static bool tsc_busy(struct ads7843e_config_s *state);
+static bool tsc_pendown(struct ads7843e_config_s *state);
 
 /****************************************************************************
  * Private Data
@@ -183,7 +183,7 @@ static struct ads7843e_config_s g_tscinfo =
  *
  ****************************************************************************/
 
-static void spi_select(FAR struct spi_bitbang_s *priv, uint32_t devid,
+static void spi_select(struct spi_bitbang_s *priv, uint32_t devid,
                        bool selected)
 {
   /* The touchscreen controller is always selected */
@@ -204,7 +204,7 @@ static void spi_select(FAR struct spi_bitbang_s *priv, uint32_t devid,
  *
  ****************************************************************************/
 
-static uint8_t spi_status(FAR struct spi_bitbang_s *priv, uint32_t devid)
+static uint8_t spi_status(struct spi_bitbang_s *priv, uint32_t devid)
 {
   return 0;
 }
@@ -226,7 +226,7 @@ static uint8_t spi_status(FAR struct spi_bitbang_s *priv, uint32_t devid)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
-static int spi_cmddata(FAR struct spi_bitbang_s *priv, uint32_t devid,
+static int spi_cmddata(struct spi_bitbang_s *priv, uint32_t devid,
                        bool cmd)
 {
   return OK;
@@ -247,7 +247,7 @@ static int spi_cmddata(FAR struct spi_bitbang_s *priv, uint32_t devid,
  *
  ****************************************************************************/
 
-static int tsc_attach(FAR struct ads7843e_config_s *state, xcpt_t isr)
+static int tsc_attach(struct ads7843e_config_s *state, xcpt_t isr)
 {
   /* Attach the XPT2046 interrupt */
 
@@ -255,7 +255,7 @@ static int tsc_attach(FAR struct ads7843e_config_s *state, xcpt_t isr)
   return irq_attach(SAM_TSC_IRQ, isr, NULL);
 }
 
-static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
+static void tsc_enable(struct ads7843e_config_s *state, bool enable)
 {
   /* Attach and enable, or detach and disable */
 
@@ -270,17 +270,17 @@ static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
     }
 }
 
-static void tsc_clear(FAR struct ads7843e_config_s *state)
+static void tsc_clear(struct ads7843e_config_s *state)
 {
   /* Does nothing */
 }
 
-static bool tsc_busy(FAR struct ads7843e_config_s *state)
+static bool tsc_busy(struct ads7843e_config_s *state)
 {
   return false; /* The BUSY signal is not connected */
 }
 
-static bool tsc_pendown(FAR struct ads7843e_config_s *state)
+static bool tsc_pendown(struct ads7843e_config_s *state)
 {
   /* The /PENIRQ value is active low */
 
@@ -303,7 +303,7 @@ static bool tsc_pendown(FAR struct ads7843e_config_s *state)
  *
  ****************************************************************************/
 
-static FAR struct spi_dev_s *sam_tsc_spiinitialize(void)
+static struct spi_dev_s *sam_tsc_spiinitialize(void)
 {
   /* Configure the SPI bit-bang pins */
 
@@ -339,7 +339,7 @@ static FAR struct spi_dev_s *sam_tsc_spiinitialize(void)
 
 int sam_tsc_setup(int minor)
 {
-  FAR struct spi_dev_s *dev;
+  struct spi_dev_s *dev;
   int ret;
 
   iinfo("minor %d\n", minor);

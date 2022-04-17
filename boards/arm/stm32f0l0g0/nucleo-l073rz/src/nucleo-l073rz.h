@@ -178,7 +178,7 @@ int stm32_lpwaninitialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_CL_MFRC522
-int stm32_mfrc522initialize(FAR const char *devpath);
+int stm32_mfrc522initialize(const char *devpath);
 #endif
 
 #endif /* __BOARDS_ARM_STM32F0L0G0_NUCLEO_L073RZ_SRC_NUCLEO_L073RZ_H */

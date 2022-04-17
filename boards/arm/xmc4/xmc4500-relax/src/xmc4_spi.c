@@ -125,8 +125,8 @@ void weak_function xmc4_spidev_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_XMC4_SPI0
-void xmc4_spi0select(FAR struct spi_dev_s *dev, uint32_t devid,
-                   bool selected)
+void xmc4_spi0select(struct spi_dev_s *dev, uint32_t devid,
+                     bool selected)
 {
   spiinfo("devid: %d CS: %s\n",
            (int)devid, selected ? "assert" : "de-assert");
@@ -134,8 +134,8 @@ void xmc4_spi0select(FAR struct spi_dev_s *dev, uint32_t devid,
 #endif
 
 #ifdef CONFIG_XMC4_SPI1
-void xmc4_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
-                   bool selected)
+void xmc4_spi1select(struct spi_dev_s *dev, uint32_t devid,
+                     bool selected)
 {
   spiinfo("devid: %d CS: %s\n",
            (int)devid, selected ? "assert" : "de-assert");
@@ -143,8 +143,8 @@ void xmc4_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
 #endif
 
 #ifdef CONFIG_XMC4_SPI2
-void xmc4_spi2select(FAR struct spi_dev_s *dev, uint32_t devid,
-                   bool selected)
+void xmc4_spi2select(struct spi_dev_s *dev, uint32_t devid,
+                     bool selected)
 {
   spiinfo("devid: %d CS: %s\n",
            (int)devid, selected ? "assert" : "de-assert");
@@ -159,8 +159,8 @@ void xmc4_spi2select(FAR struct spi_dev_s *dev, uint32_t devid,
 #endif
 
 #ifdef CONFIG_XMC4_SPI3
-void xmc4_spi3select(FAR struct spi_dev_s *dev, uint32_t devid,
-                   bool selected)
+void xmc4_spi3select(struct spi_dev_s *dev, uint32_t devid,
+                     bool selected)
 {
   spiinfo("devid: %d CS: %s\n",
            (int)devid, selected ? "assert" : "de-assert");
@@ -182,28 +182,28 @@ void xmc4_spi3select(FAR struct spi_dev_s *dev, uint32_t devid,
  ****************************************************************************/
 
 #ifdef CONFIG_XMC4_SPI0
-uint8_t xmc4_spi0status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t xmc4_spi0status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_XMC4_SPI1
-uint8_t xmc4_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t xmc4_spi1status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_XMC4_SPI2
-uint8_t xmc4_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t xmc4_spi2status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_XMC4_SPI3
-uint8_t xmc4_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t xmc4_spi3status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
@@ -228,28 +228,28 @@ uint8_t xmc4_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
 
 #ifdef CONFIG_SPI_CMDDATA
 #ifdef CONFIG_XMC4_SPI0
-int xmc4_spi0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int xmc4_spi0cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_XMC4_SPI1
-int xmc4_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int xmc4_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_XMC4_SPI2
-int xmc4_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int xmc4_spi2cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_XMC4_SPI3
-int xmc4_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int xmc4_spi3cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return 0;
 }

@@ -84,7 +84,7 @@
 #ifdef HAVE_I2CTOOL
 static void tm4c_i2c_register(int bus)
 {
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
   int ret;
 
   i2c = tiva_i2cbus_initialize(bus);
@@ -167,7 +167,7 @@ static void tm4c_i2ctool(void)
 #ifdef HAVE_PWM
 static void tm4c_pwm_register(int channel)
 {
-  FAR struct pwm_lowerhalf_s *dev;
+  struct pwm_lowerhalf_s *dev;
   char pwm_path[PWM_PATH_FMTLEN];
   int ret;
 
@@ -244,7 +244,7 @@ static void tm4c_pwm(void)
 #ifdef HAVE_QEI
 static void tm4c_qei_register(int id)
 {
-  FAR struct qe_lowerhalf_s *dev;
+  struct qe_lowerhalf_s *dev;
   int ret;
   char qe_path[QEI_PATH_FMTLEN];
 

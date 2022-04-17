@@ -63,22 +63,22 @@ struct stm32_mwinfo_s
  * Private Functions
  ****************************************************************************/
 
-static int wm8994_attach(FAR const struct wm8994_lower_s *lower,
-                           wm8994_handler_t isr, FAR void *arg)
+static int wm8994_attach(const struct wm8994_lower_s *lower,
+                         wm8994_handler_t isr, void *arg)
 {
   audinfo("TODO\n");
   return 0;
 }
 
-static bool wm8994_enable(FAR const struct wm8994_lower_s *lower,
-                            bool enable)
+static bool wm8994_enable(const struct wm8994_lower_s *lower,
+                          bool enable)
 {
   audinfo("TODO\n");
   return 0;
 }
 
 #if 0
-static void wm8994_hw_reset(FAR const struct wm8994_lower_s *lower)
+static void wm8994_hw_reset(const struct wm8994_lower_s *lower)
 {
   audinfo("TODO\n");
 }
@@ -131,9 +131,9 @@ static struct stm32_mwinfo_s g_wm8994 =
 
 int stm32_wm8994_initialize(int minor)
 {
-  FAR struct audio_lowerhalf_s *wm8994;
-  FAR struct i2c_master_s *i2c;
-  FAR struct i2s_dev_s *i2s;
+  struct audio_lowerhalf_s *wm8994;
+  struct i2c_master_s *i2c;
+  struct i2s_dev_s *i2s;
   static bool initialized = false;
   char devname[12];
   int ret;

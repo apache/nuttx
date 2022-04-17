@@ -354,7 +354,7 @@ struct atmxt_config_s
   uint16_t addr;
   uint8_t id;
   uint8_t nbytes;
-  FAR const uint8_t *bytes;
+  const uint8_t *bytes;
 };
 
 /****************************************************************************

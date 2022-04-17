@@ -77,7 +77,7 @@
 
 int sam_sdinitialize(int port, int minor)
 {
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
   int ret;
 
   /* Get the SPI driver instance for the SD chip select */

@@ -278,7 +278,7 @@ int tiva_timer_configure(void);
  ****************************************************************************/
 
 #ifdef CONFIG_CAN_MCP2515
-int tiva_mcp2515initialize(FAR const char *devpath);
+int tiva_mcp2515initialize(const char *devpath);
 #endif
 
 #endif /* __ASSEMBLY__ */

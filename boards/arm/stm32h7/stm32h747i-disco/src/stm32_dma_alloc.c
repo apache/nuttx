@@ -97,7 +97,7 @@ void *fat_dma_alloc(size_t size)
   return gran_alloc(dma_allocator, size);
 }
 
-void fat_dma_free(FAR void *memory, size_t size)
+void fat_dma_free(void *memory, size_t size)
 {
   gran_free(dma_allocator, memory, size);
 }

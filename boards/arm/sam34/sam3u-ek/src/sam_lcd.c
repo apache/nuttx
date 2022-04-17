@@ -314,18 +314,18 @@ static void sam_dumpreg(uint8_t startreg, uint8_t endreg);
 /* LCD Data Transfer Methods */
 
 static int sam_putrun(fb_coord_t row, fb_coord_t col,
-                      FAR const uint8_t *buffer,
+                      const uint8_t *buffer,
                       size_t npixels);
 static int sam_getrun(fb_coord_t row, fb_coord_t col,
-                      FAR uint8_t *buffer,
+                      uint8_t *buffer,
                       size_t npixels);
 
 /* LCD Configuration */
 
-static int sam_getvideoinfo(FAR struct lcd_dev_s *dev,
-             FAR struct fb_videoinfo_s *vinfo);
-static int sam_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
-             FAR struct lcd_planeinfo_s *pinfo);
+static int sam_getvideoinfo(struct lcd_dev_s *dev,
+             struct fb_videoinfo_s *vinfo);
+static int sam_getplaneinfo(struct lcd_dev_s *dev, unsigned int planeno,
+             struct lcd_planeinfo_s *pinfo);
 
 /* LCD RGB Mapping */
 
@@ -592,7 +592,7 @@ static void sam_dumpreg(uint8_t startreg, uint8_t endreg)
  ****************************************************************************/
 
 static int sam_putrun(fb_coord_t row, fb_coord_t col,
-                      FAR const uint8_t *buffer,
+                      const uint8_t *buffer,
                       size_t npixels)
 {
   uint16_t *run = (uint16_t *)buffer;
@@ -662,7 +662,7 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col,
  *
  ****************************************************************************/
 
-static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
+static int sam_getrun(fb_coord_t row, fb_coord_t col, uint8_t *buffer,
                       size_t npixels)
 {
   uint16_t *run = (uint16_t *)buffer;
@@ -721,8 +721,8 @@ static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
  *
  ****************************************************************************/
 
-static int sam_getvideoinfo(FAR struct lcd_dev_s *dev,
-                            FAR struct fb_videoinfo_s *vinfo)
+static int sam_getvideoinfo(struct lcd_dev_s *dev,
+                            struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
   lcdinfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
@@ -740,8 +740,8 @@ static int sam_getvideoinfo(FAR struct lcd_dev_s *dev,
  *
  ****************************************************************************/
 
-static int sam_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
-                            FAR struct lcd_planeinfo_s *pinfo)
+static int sam_getplaneinfo(struct lcd_dev_s *dev, unsigned int planeno,
+                            struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(dev && pinfo && planeno == 0);
   lcdinfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
@@ -1060,7 +1060,7 @@ int board_lcd_initialize(void)
  *
  ****************************************************************************/
 
-FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
+struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
   lcdinfo("lcddev: %d\n", lcddev);
   return lcddev == 0 ? &g_lcddev_s.dev : NULL;

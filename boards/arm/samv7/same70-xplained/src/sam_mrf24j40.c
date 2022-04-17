@@ -76,11 +76,11 @@ struct sam_priv_s
  *   irq_enable - Enable or disable the GPIO interrupt
  */
 
-static int  sam_attach_irq(FAR const struct mrf24j40_lower_s *lower,
-                           xcpt_t handler, FAR void *arg);
-static void sam_enable_irq(FAR const struct mrf24j40_lower_s *lower,
+static int  sam_attach_irq(const struct mrf24j40_lower_s *lower,
+                           xcpt_t handler, void *arg);
+static void sam_enable_irq(const struct mrf24j40_lower_s *lower,
                            bool state);
-static int  sam_mrf24j40_devsetup(FAR struct sam_priv_s *priv);
+static int  sam_mrf24j40_devsetup(struct sam_priv_s *priv);
 
 /****************************************************************************
  * Private Data
@@ -139,10 +139,10 @@ static struct sam_priv_s g_mrf24j40_mb2_priv =
  *   irq_enable       - Enable or disable the GPIO interrupt
  */
 
-static int sam_attach_irq(FAR const struct mrf24j40_lower_s *lower,
-                            xcpt_t handler, FAR void *arg)
+static int sam_attach_irq(const struct mrf24j40_lower_s *lower,
+                          xcpt_t handler, void *arg)
 {
-  FAR struct sam_priv_s *priv = (FAR struct sam_priv_s *)lower;
+  struct sam_priv_s *priv = (struct sam_priv_s *)lower;
   int ret;
 
   DEBUGASSERT(priv != NULL);
@@ -156,10 +156,10 @@ static int sam_attach_irq(FAR const struct mrf24j40_lower_s *lower,
   return ret;
 }
 
-static void sam_enable_irq(FAR const struct mrf24j40_lower_s *lower,
-                             bool state)
+static void sam_enable_irq(const struct mrf24j40_lower_s *lower,
+                           bool state)
 {
-  FAR struct sam_priv_s *priv = (FAR struct sam_priv_s *)lower;
+  struct sam_priv_s *priv = (struct sam_priv_s *)lower;
   static bool enabled;
   irqstate_t flags;
 
@@ -206,11 +206,11 @@ static void sam_enable_irq(FAR const struct mrf24j40_lower_s *lower,
  *
  ****************************************************************************/
 
-static int sam_mrf24j40_devsetup(FAR struct sam_priv_s *priv)
+static int sam_mrf24j40_devsetup(struct sam_priv_s *priv)
 {
-  FAR struct ieee802154_radio_s *radio;
+  struct ieee802154_radio_s *radio;
   MACHANDLE mac;
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
   int ret;
 
 #ifdef BEE_RESET

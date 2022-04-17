@@ -99,11 +99,11 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static void spi_select(FAR struct spi_bitbang_s *priv, uint32_t devid,
+static void spi_select(struct spi_bitbang_s *priv, uint32_t devid,
                        bool selected);
-static uint8_t spi_status(FAR struct spi_bitbang_s *priv, uint32_t devid);
+static uint8_t spi_status(struct spi_bitbang_s *priv, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-static int spi_cmddata(FAR struct spi_bitbang_s *priv, uint32_t devid,
+static int spi_cmddata(struct spi_bitbang_s *priv, uint32_t devid,
                        bool cmd);
 #endif
 
@@ -127,7 +127,7 @@ static int spi_cmddata(FAR struct spi_bitbang_s *priv, uint32_t devid,
  *
  ****************************************************************************/
 
-static void spi_select(FAR struct spi_bitbang_s *priv, uint32_t devid,
+static void spi_select(struct spi_bitbang_s *priv, uint32_t devid,
                        bool selected)
 {
   if (devid == SPIDEV_MMCSD(0))
@@ -158,7 +158,7 @@ static void spi_select(FAR struct spi_bitbang_s *priv, uint32_t devid,
  *
  ****************************************************************************/
 
-static uint8_t spi_status(FAR struct spi_bitbang_s *priv, uint32_t devid)
+static uint8_t spi_status(struct spi_bitbang_s *priv, uint32_t devid)
 {
   if (devid == SPIDEV_MMCSD(0))
     {
@@ -185,7 +185,7 @@ static uint8_t spi_status(FAR struct spi_bitbang_s *priv, uint32_t devid)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
-static int spi_cmddata(FAR struct spi_bitbang_s *priv, uint32_t devid,
+static int spi_cmddata(struct spi_bitbang_s *priv, uint32_t devid,
                        bool cmd)
 {
   return OK;
@@ -206,7 +206,7 @@ static int spi_cmddata(FAR struct spi_bitbang_s *priv, uint32_t devid,
  *
  ****************************************************************************/
 
-static FAR struct spi_dev_s *sam_mmcsd_spiinitialize(void)
+static struct spi_dev_s *sam_mmcsd_spiinitialize(void)
 {
   /* Initialize GPIOs */
 
@@ -234,7 +234,7 @@ static FAR struct spi_dev_s *sam_mmcsd_spiinitialize(void)
 
 int sam_sdinitialize(int minor)
 {
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
   int ret;
 
   /* Get the SPI driver instance for the SD chip select */
