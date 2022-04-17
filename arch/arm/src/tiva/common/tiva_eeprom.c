@@ -97,20 +97,20 @@ struct tiva_dev_s
 
 /* MTD driver methods */
 
-static int tiva_eeprom_erase(FAR struct mtd_dev_s *dev, off_t startblock,
+static int tiva_eeprom_erase(struct mtd_dev_s *dev, off_t startblock,
                              size_t nblocks);
-static ssize_t tiva_eeprom_bread(FAR struct mtd_dev_s *dev, off_t startblock,
-                                 size_t nblocks, FAR uint8_t *buf);
-static ssize_t tiva_eeprom_bwrite(FAR struct mtd_dev_s *dev,
+static ssize_t tiva_eeprom_bread(struct mtd_dev_s *dev, off_t startblock,
+                                 size_t nblocks, uint8_t *buf);
+static ssize_t tiva_eeprom_bwrite(struct mtd_dev_s *dev,
                                   off_t startblock, size_t nblocks,
-                                  FAR const uint8_t *buf);
-static ssize_t tiva_eeprom_read(FAR struct mtd_dev_s *dev, off_t offset,
-                                size_t nbytes, FAR uint8_t *buf);
+                                  const uint8_t *buf);
+static ssize_t tiva_eeprom_read(struct mtd_dev_s *dev, off_t offset,
+                                size_t nbytes, uint8_t *buf);
 #ifdef CONFIG_MTD_BYTE_WRITE
-static ssize_t tiva_eeprom_write(FAR struct mtd_dev_s *dev, off_t offset,
-                                 size_t nbytes, FAR const uint8_t *buf);
+static ssize_t tiva_eeprom_write(struct mtd_dev_s *dev, off_t offset,
+                                 size_t nbytes, const uint8_t *buf);
 #endif
-static int tiva_eeprom_ioctl(FAR struct mtd_dev_s *dev, int cmd,
+static int tiva_eeprom_ioctl(struct mtd_dev_s *dev, int cmd,
                              unsigned long arg);
 
 /****************************************************************************
@@ -365,10 +365,10 @@ static void tiva_eeprom_sectormask_clear(void)
  ****************************************************************************/
 
 #ifdef CONFIG_MTD_BYTE_WRITE
-static ssize_t tiva_eeprom_write(FAR struct mtd_dev_s *dev, off_t offset,
-                                 size_t nbytes, FAR const uint8_t *buf)
+static ssize_t tiva_eeprom_write(struct mtd_dev_s *dev, off_t offset,
+                                 size_t nbytes, const uint8_t *buf)
 {
-  FAR uint32_t *data = (uint32_t *)buf;
+  uint32_t *data = (uint32_t *)buf;
   size_t remaining;
   uint32_t status;
   uint32_t regval;
@@ -487,10 +487,10 @@ static ssize_t tiva_eeprom_write(FAR struct mtd_dev_s *dev, off_t offset,
  *
  ****************************************************************************/
 
-static ssize_t tiva_eeprom_read(FAR struct mtd_dev_s *dev, off_t offset,
-                                size_t nbytes, FAR uint8_t *buf)
+static ssize_t tiva_eeprom_read(struct mtd_dev_s *dev, off_t offset,
+                                size_t nbytes, uint8_t *buf)
 {
-  FAR uint32_t *data = (uint32_t *)buf;
+  uint32_t *data = (uint32_t *)buf;
   size_t remaining;
   uint32_t regval;
 
@@ -539,25 +539,25 @@ static ssize_t tiva_eeprom_read(FAR struct mtd_dev_s *dev, off_t offset,
  * Unimplemented Methods
  ****************************************************************************/
 
-static int tiva_eeprom_erase(FAR struct mtd_dev_s *dev, off_t startblock,
+static int tiva_eeprom_erase(struct mtd_dev_s *dev, off_t startblock,
                              size_t nblocks)
 {
   return -ENOSYS;
 }
 
-static ssize_t tiva_eeprom_bread(FAR struct mtd_dev_s *dev, off_t startblock,
-                                 size_t nblocks, FAR uint8_t *buf)
+static ssize_t tiva_eeprom_bread(struct mtd_dev_s *dev, off_t startblock,
+                                 size_t nblocks, uint8_t *buf)
 {
   return -ENOSYS;
 }
 
-ssize_t tiva_eeprom_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
-                           size_t nblocks, FAR const uint8_t *buf)
+ssize_t tiva_eeprom_bwrite(struct mtd_dev_s *dev, off_t startblock,
+                           size_t nblocks, const uint8_t *buf)
 {
   return -ENOSYS;
 }
 
-static int tiva_eeprom_ioctl(FAR struct mtd_dev_s *dev, int cmd,
+static int tiva_eeprom_ioctl(struct mtd_dev_s *dev, int cmd,
                              unsigned long arg)
 {
   return -ENOSYS;
@@ -661,9 +661,9 @@ int tiva_eeprom_initialize(void)
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *tiva_eeprom_instance(void)
+struct mtd_dev_s *tiva_eeprom_instance(void)
 {
   /* Return the implementation-specific state structure as the MTD device */
 
-  return (FAR struct mtd_dev_s *)&g_eeprom_dev;
+  return (struct mtd_dev_s *)&g_eeprom_dev;
 }

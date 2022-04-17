@@ -65,7 +65,7 @@ static struct gpio_callback_s g_gpio_handlers[16];
  * Interrupt Service Routine - Dispatcher
  ****************************************************************************/
 
-static int stm32_exti0_15_isr(int irq, void *context, FAR void *arg)
+static int stm32_exti0_15_isr(int irq, void *context, void *arg)
 {
   int ret = OK;
   int exti;

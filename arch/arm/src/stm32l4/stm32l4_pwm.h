@@ -34,8 +34,11 @@
 #include <nuttx/config.h>
 
 #include <nuttx/timers/pwm.h>
+#include <arch/board/board.h>
 
 #include "chip.h"
+#include "hardware/stm32l4_tim.h"
+#include "hardware/stm32l4_lptim.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -99,10 +102,6 @@
     defined(CONFIG_STM32L4_TIM15_PWM) || defined(CONFIG_STM32L4_TIM16_PWM)  || \
     defined(CONFIG_STM32L4_TIM17_PWM) || defined(CONFIG_STM32L4_LPTIM1_PWM) || \
     defined(CONFIG_STM32L4_LPTIM2_PWM)
-
-#include <arch/board/board.h>
-#include "hardware/stm32l4_tim.h"
-#include "hardware/stm32l4_lptim.h"
 
 /* PWM driver channels configuration */
 
@@ -800,39 +799,39 @@
  */
 
 #define PWM_SETUP(dev)                                                             \
-        (dev)->ops->setup((FAR struct pwm_lowerhalf_s *)dev)
+        (dev)->ops->setup((struct pwm_lowerhalf_s *)dev)
 #define PWM_SHUTDOWN(dev)                                                          \
-        (dev)->ops->shutdown((FAR struct pwm_lowerhalf_s *)dev)
+        (dev)->ops->shutdown((struct pwm_lowerhalf_s *)dev)
 #define PWM_CCR_UPDATE(dev, index, ccr)                                            \
-        (dev)->llops->ccr_update((FAR struct pwm_lowerhalf_s *)dev, index, ccr)
+        (dev)->llops->ccr_update((struct pwm_lowerhalf_s *)dev, index, ccr)
 #define PWM_MODE_UPDATE(dev, index, mode)                                          \
-        (dev)->llops->mode_update((FAR struct pwm_lowerhalf_s *)dev, index, mode)
+        (dev)->llops->mode_update((struct pwm_lowerhalf_s *)dev, index, mode)
 #define PWM_CCR_GET(dev, index)                                                    \
-        (dev)->llops->ccr_get((FAR struct pwm_lowerhalf_s *)dev, index)
+        (dev)->llops->ccr_get((struct pwm_lowerhalf_s *)dev, index)
 #define PWM_ARR_UPDATE(dev, arr)                                                   \
-        (dev)->llops->arr_update((FAR struct pwm_lowerhalf_s *)dev, arr)
+        (dev)->llops->arr_update((struct pwm_lowerhalf_s *)dev, arr)
 #define PWM_ARR_GET(dev)                                                           \
-        (dev)->llops->arr_get((FAR struct pwm_lowerhalf_s *)dev)
+        (dev)->llops->arr_get((struct pwm_lowerhalf_s *)dev)
 #define PWM_OUTPUTS_ENABLE(dev, out, state)                                        \
-        (dev)->llops->outputs_enable((FAR struct pwm_lowerhalf_s *)dev, out, state)
+        (dev)->llops->outputs_enable((struct pwm_lowerhalf_s *)dev, out, state)
 #define PWM_SOFT_UPDATE(dev)                                                       \
-        (dev)->llops->soft_update((FAR struct pwm_lowerhalf_s *)dev)
+        (dev)->llops->soft_update((struct pwm_lowerhalf_s *)dev)
 #define PWM_CONFIGURE(dev)                                                         \
-        (dev)->llops->configure((FAR struct pwm_lowerhalf_s *)dev)
+        (dev)->llops->configure((struct pwm_lowerhalf_s *)dev)
 #define PWM_SOFT_BREAK(dev, state)                                                 \
-        (dev)->llops->soft_break((FAR struct pwm_lowerhalf_s *)dev, state)
+        (dev)->llops->soft_break((struct pwm_lowerhalf_s *)dev, state)
 #define PWM_FREQ_UPDATE(dev, freq)                                                 \
-        (dev)->llops->freq_update((FAR struct pwm_lowerhalf_s *)dev, freq)
+        (dev)->llops->freq_update((struct pwm_lowerhalf_s *)dev, freq)
 #define PWM_TIM_ENABLE(dev, state)                                                 \
-        (dev)->llops->tim_enable((FAR struct pwm_lowerhalf_s *)dev, state)
+        (dev)->llops->tim_enable((struct pwm_lowerhalf_s *)dev, state)
 #ifdef CONFIG_DEBUG_STM32L4_PWM_INFO
 #  define PWM_DUMP_REGS(dev, msg)                                                  \
-        (dev)->llops->dump_regs((FAR struct pwm_lowerhalf_s *)dev, msg)
+        (dev)->llops->dump_regs((struct pwm_lowerhalf_s *)dev, msg)
 #else
 #  define PWM_DUMP_REGS(dev, msg)
 #endif
 #define PWM_DT_UPDATE(dev, dt)                                                     \
-        (dev)->llops->dt_update((FAR struct pwm_lowerhalf_s *)dev, dt)
+        (dev)->llops->dt_update((struct pwm_lowerhalf_s *)dev, dt)
 #endif
 
 /****************************************************************************
@@ -933,11 +932,11 @@ struct stm32l4_pwm_dev_s
    * callback structure to be consistent with upper-half PWM driver.
    */
 
-  FAR const struct pwm_ops_s *ops;
+  const struct pwm_ops_s *ops;
 
   /* Publicly visible portion of the "lower-half" PWM driver structure */
 
-  FAR const struct stm32l4_pwm_ops_s *llops;
+  const struct stm32l4_pwm_ops_s *llops;
 
   /* Require cast-compatibility with private "lower-half" PWM structure */
 };
@@ -949,61 +948,61 @@ struct stm32l4_pwm_ops_s
 {
   /* Update CCR register */
 
-  int (*ccr_update)(FAR struct pwm_lowerhalf_s *dev,
+  int (*ccr_update)(struct pwm_lowerhalf_s *dev,
                     uint8_t index, uint32_t ccr);
 
   /* Update PWM mode */
 
-  int (*mode_update)(FAR struct pwm_lowerhalf_s *dev,
+  int (*mode_update)(struct pwm_lowerhalf_s *dev,
                      uint8_t index, uint32_t mode);
 
   /* Get CCR register */
 
-  uint32_t (*ccr_get)(FAR struct pwm_lowerhalf_s *dev, uint8_t index);
+  uint32_t (*ccr_get)(struct pwm_lowerhalf_s *dev, uint8_t index);
 
   /* Update ARR register */
 
-  int (*arr_update)(FAR struct pwm_lowerhalf_s *dev, uint32_t arr);
+  int (*arr_update)(struct pwm_lowerhalf_s *dev, uint32_t arr);
 
   /* Get ARR register */
 
-  uint32_t (*arr_get)(FAR struct pwm_lowerhalf_s *dev);
+  uint32_t (*arr_get)(struct pwm_lowerhalf_s *dev);
 
   /* Enable outputs */
 
-  int (*outputs_enable)(FAR struct pwm_lowerhalf_s *dev,
+  int (*outputs_enable)(struct pwm_lowerhalf_s *dev,
                         uint16_t outputs, bool state);
 
   /* Software update */
 
-  int (*soft_update)(FAR struct pwm_lowerhalf_s *dev);
+  int (*soft_update)(struct pwm_lowerhalf_s *dev);
 
   /* PWM configure */
 
-  int (*configure)(FAR struct pwm_lowerhalf_s *dev);
+  int (*configure)(struct pwm_lowerhalf_s *dev);
 
   /* Software break */
 
-  int (*soft_break)(FAR struct pwm_lowerhalf_s *dev, bool state);
+  int (*soft_break)(struct pwm_lowerhalf_s *dev, bool state);
 
   /* Update frequency */
 
-  int (*freq_update)(FAR struct pwm_lowerhalf_s *dev, uint32_t frequency);
+  int (*freq_update)(struct pwm_lowerhalf_s *dev, uint32_t frequency);
 
   /* Enable timer counter */
 
-  int (*tim_enable)(FAR struct pwm_lowerhalf_s *dev, bool state);
+  int (*tim_enable)(struct pwm_lowerhalf_s *dev, bool state);
 
 #ifdef CONFIG_DEBUG_PWM_INFO
   /* Dump timer registers */
 
-  void (*dump_regs)(FAR struct pwm_lowerhalf_s *dev, FAR const char *msg);
+  void (*dump_regs)(struct pwm_lowerhalf_s *dev, const char *msg);
 #endif
 
 #ifdef HAVE_PWM_COMPLEMENTARY
   /* Deadtime update */
 
-  int (*dt_update)(FAR struct pwm_lowerhalf_s *dev, uint8_t dt);
+  int (*dt_update)(struct pwm_lowerhalf_s *dev, uint8_t dt);
 #endif
 };
 
@@ -1045,7 +1044,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct pwm_lowerhalf_s *stm32l4_pwminitialize(int timer);
+struct pwm_lowerhalf_s *stm32l4_pwminitialize(int timer);
 
 /****************************************************************************
  * Name: stm32l4_lp_pwminitialize
@@ -1064,7 +1063,7 @@ FAR struct pwm_lowerhalf_s *stm32l4_pwminitialize(int timer);
  *
  ****************************************************************************/
 
-FAR struct pwm_lowerhalf_s *stm32l4_lp_pwminitialize(int timer);
+struct pwm_lowerhalf_s *stm32l4_lp_pwminitialize(int timer);
 
 #undef EXTERN
 #if defined(__cplusplus)

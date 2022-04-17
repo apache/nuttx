@@ -249,7 +249,7 @@ struct qspi_xctnspec_s
 
   uint8_t datamode;       /* 'data mode'; 0=none, 1=single, 2=dual, 3=quad */
   uint32_t datasize;      /* number of data bytes (0xffffffff == undefined) */
-  FAR void *buffer;       /* Data buffer */
+  void     *buffer;       /* Data buffer */
 
   uint8_t isddr;          /* true if 'double data rate' */
   uint8_t issioo;         /* true if 'send instruction only once' mode */
@@ -295,7 +295,7 @@ static void     qspi_dumpgpioconfig(const char *msg);
 /* Interrupts */
 
 #ifdef CONFIG_STM32H7_QSPI_INTERRUPTS
-static int     qspi0_interrupt(int irq, void *context, FAR void *arg);
+static int     qspi0_interrupt(int irq, void *context, void *arg);
 
 #endif
 
@@ -330,8 +330,8 @@ static int      qspi_command(struct qspi_dev_s *dev,
                   struct qspi_cmdinfo_s *cmdinfo);
 static int      qspi_memory(struct qspi_dev_s *dev,
                   struct qspi_meminfo_s *meminfo);
-static FAR void *qspi_alloc(FAR struct qspi_dev_s *dev, size_t buflen);
-static void     qspi_free(FAR struct qspi_dev_s *dev, FAR void *buffer);
+static void *qspi_alloc(struct qspi_dev_s *dev, size_t buflen);
+static void     qspi_free(struct qspi_dev_s *dev, void *buffer);
 
 /* Initialization */
 
@@ -1151,7 +1151,7 @@ static void qspi_ccrconfig(struct stm32h7_qspidev_s *priv,
  *
  ****************************************************************************/
 
-static int qspi0_interrupt(int irq, void *context, FAR void *arg)
+static int qspi0_interrupt(int irq, void *context, void *arg)
 {
   uint32_t status;
   uint32_t cr;
@@ -2411,7 +2411,7 @@ static int qspi_memory(struct qspi_dev_s *dev,
  *
  ****************************************************************************/
 
-static FAR void *qspi_alloc(FAR struct qspi_dev_s *dev, size_t buflen)
+static void *qspi_alloc(struct qspi_dev_s *dev, size_t buflen)
 {
   /* Here we exploit the carnal knowledge the kmm_malloc() will return memory
    * aligned to 64-bit addresses.  The buffer length must be large enough to
@@ -2436,7 +2436,7 @@ static FAR void *qspi_alloc(FAR struct qspi_dev_s *dev, size_t buflen)
  *
  ****************************************************************************/
 
-static void qspi_free(FAR struct qspi_dev_s *dev, FAR void *buffer)
+static void qspi_free(struct qspi_dev_s *dev, void *buffer)
 {
   if (buffer)
     {

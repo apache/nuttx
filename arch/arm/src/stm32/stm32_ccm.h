@@ -69,7 +69,7 @@
  */
 
 #define ccm_initialize() \
-  g_ccm_heap = mm_initialize("ccm", (FAR void *)CCM_START, CCM_END-CCM_START)
+  g_ccm_heap = mm_initialize("ccm", (void *)CCM_START, CCM_END-CCM_START)
 
 /* The ccm_addregion interface could be used if, for example, you want to
  * add some other memory region to the CCM heap.  I don't really know why
@@ -107,7 +107,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-EXTERN FAR struct mm_heap_s *g_ccm_heap;
+EXTERN struct mm_heap_s *g_ccm_heap;
 
 /****************************************************************************
  * Public Function Prototypes

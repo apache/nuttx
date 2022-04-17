@@ -105,7 +105,7 @@ extern "C"
  ****************************************************************************/
 
 #ifdef CONFIG_STM32F7_HAVE_RTC_SUBSECONDS
-int stm32_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec);
+int stm32_rtc_getdatetime_with_subseconds(struct tm *tp, long *nsec);
 #endif
 
 /****************************************************************************
@@ -126,7 +126,7 @@ int stm32_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec);
 
 #ifdef CONFIG_RTC_DATETIME
 struct tm;
-int stm32_rtc_setdatetime(FAR const struct tm *tp);
+int stm32_rtc_setdatetime(const struct tm *tp);
 #endif
 
 /****************************************************************************
@@ -166,7 +166,7 @@ bool stm32_rtc_havesettime(void);
 
 #ifdef CONFIG_RTC_DRIVER
 struct rtc_lowerhalf_s;
-FAR struct rtc_lowerhalf_s *stm32_rtc_lowerhalf(void);
+struct rtc_lowerhalf_s *stm32_rtc_lowerhalf(void);
 #endif
 
 #undef EXTERN

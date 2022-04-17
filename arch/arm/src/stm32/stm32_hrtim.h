@@ -1008,59 +1008,59 @@ enum stm32_hrtim_capture_triggers_e
 struct hrtim_dev_s;
 struct stm32_hrtim_ops_s
 {
-  int      (*cmp_update)(FAR struct hrtim_dev_s *dev, uint8_t timer,
+  int      (*cmp_update)(struct hrtim_dev_s *dev, uint8_t timer,
                          uint8_t index, uint16_t cmp);
-  int      (*per_update)(FAR struct hrtim_dev_s *dev,
+  int      (*per_update)(struct hrtim_dev_s *dev,
                          uint8_t timer, uint16_t per);
-  int      (*rep_update)(FAR struct hrtim_dev_s *dev,
+  int      (*rep_update)(struct hrtim_dev_s *dev,
                          uint8_t timer, uint8_t rep);
-  uint16_t (*per_get)(FAR struct hrtim_dev_s *dev, uint8_t timer);
-  uint16_t (*cmp_get)(FAR struct hrtim_dev_s *dev, uint8_t timer,
+  uint16_t (*per_get)(struct hrtim_dev_s *dev, uint8_t timer);
+  uint16_t (*cmp_get)(struct hrtim_dev_s *dev, uint8_t timer,
                       uint8_t index);
-  uint64_t (*fclk_get)(FAR struct hrtim_dev_s *dev, uint8_t timer);
-  int      (*soft_update)(FAR struct hrtim_dev_s *dev, uint8_t timer);
-  int      (*soft_reset)(FAR struct hrtim_dev_s *dev, uint8_t timer);
-  int      (*freq_set)(FAR struct hrtim_dev_s  *dev, uint8_t timer,
+  uint64_t (*fclk_get)(struct hrtim_dev_s *dev, uint8_t timer);
+  int      (*soft_update)(struct hrtim_dev_s *dev, uint8_t timer);
+  int      (*soft_reset)(struct hrtim_dev_s *dev, uint8_t timer);
+  int      (*freq_set)(struct hrtim_dev_s  *dev, uint8_t timer,
                                  uint64_t freq);
-  int      (*tim_enable)(FAR struct hrtim_dev_s  *dev, uint8_t timers,
+  int      (*tim_enable)(struct hrtim_dev_s  *dev, uint8_t timers,
                          bool state);
 
 #ifdef CONFIG_STM32_HRTIM_INTERRUPTS
-  int      (*irq_ack)(FAR struct hrtim_dev_s *dev,
+  int      (*irq_ack)(struct hrtim_dev_s *dev,
                       uint8_t timer, int source);
-  uint16_t (*irq_get)(FAR struct hrtim_dev_s *dev, uint8_t timer);
+  uint16_t (*irq_get)(struct hrtim_dev_s *dev, uint8_t timer);
 #endif
 #ifdef CONFIG_STM32_HRTIM_PWM
-  int      (*outputs_enable)(FAR struct hrtim_dev_s *dev, uint16_t outputs,
+  int      (*outputs_enable)(struct hrtim_dev_s *dev, uint16_t outputs,
                              bool state);
-  int      (*output_set_set)(FAR struct hrtim_dev_s *dev, uint16_t output,
+  int      (*output_set_set)(struct hrtim_dev_s *dev, uint16_t output,
                               uint32_t set);
-  int      (*output_rst_set)(FAR struct hrtim_dev_s *dev, uint16_t output,
+  int      (*output_rst_set)(struct hrtim_dev_s *dev, uint16_t output,
                               uint32_t rst);
 #endif
 #ifdef CONFIG_STM32_HRTIM_BURST
-  int      (*burst_enable)(FAR struct hrtim_dev_s *dev, bool state);
-  int      (*burst_cmp_set)(FAR struct hrtim_dev_s *dev, uint16_t cmp);
-  int      (*burst_per_set)(FAR struct hrtim_dev_s *dev, uint16_t per);
-  int      (*burst_pre_set)(FAR struct hrtim_dev_s *dev, uint8_t pre);
-  uint16_t (*burst_cmp_get)(FAR struct hrtim_dev_s *dev);
-  uint16_t (*burst_per_get)(FAR struct hrtim_dev_s *dev);
-  int      (*burst_pre_get)(FAR struct hrtim_dev_s *dev);
+  int      (*burst_enable)(struct hrtim_dev_s *dev, bool state);
+  int      (*burst_cmp_set)(struct hrtim_dev_s *dev, uint16_t cmp);
+  int      (*burst_per_set)(struct hrtim_dev_s *dev, uint16_t per);
+  int      (*burst_pre_set)(struct hrtim_dev_s *dev, uint8_t pre);
+  uint16_t (*burst_cmp_get)(struct hrtim_dev_s *dev);
+  uint16_t (*burst_per_get)(struct hrtim_dev_s *dev);
+  int      (*burst_pre_get)(struct hrtim_dev_s *dev);
 #endif
 #ifdef CONFIG_STM32_HRTIM_CHOPPER
-  int      (*chopper_enable)(FAR struct hrtim_dev_s *dev, uint8_t timer,
+  int      (*chopper_enable)(struct hrtim_dev_s *dev, uint8_t timer,
                              uint8_t chan, bool state);
 #endif
 #ifdef CONFIG_STM32_HRTIM_DEADTIME
-  int      (*deadtime_update)(FAR struct hrtim_dev_s *dev, uint8_t timer,
+  int      (*deadtime_update)(struct hrtim_dev_s *dev, uint8_t timer,
                               uint8_t dt, uint16_t value);
-  uint16_t (*deadtime_get)(FAR struct hrtim_dev_s *dev, uint8_t timer,
+  uint16_t (*deadtime_get)(struct hrtim_dev_s *dev, uint8_t timer,
                            uint8_t dt);
 #endif
 #ifdef CONFIG_STM32_HRTIM_CAPTURE
-  uint16_t (*capture_get)(FAR struct hrtim_dev_s *dev, uint8_t timer,
+  uint16_t (*capture_get)(struct hrtim_dev_s *dev, uint8_t timer,
                           uint8_t index);
-  int      (*soft_capture)(FAR struct hrtim_dev_s *dev, uint8_t timer,
+  int      (*soft_capture)(struct hrtim_dev_s *dev, uint8_t timer,
                            uint8_t index);
 
 #endif
@@ -1079,9 +1079,9 @@ struct hrtim_dev_s
 
   /* Fields provided by lower half HRTIM logic */
 
-  FAR const struct stm32_hrtim_ops_s *hd_ops; /* HRTIM operations */
-  FAR void *hd_priv;                          /* Used by the arch-specific logic */
-  bool initialized;                           /* true: HRTIM driver has been initialized */
+  const struct stm32_hrtim_ops_s *hd_ops; /* HRTIM operations */
+  void *hd_priv;                          /* Used by the arch-specific logic */
+  bool initialized;                       /* true: HRTIM driver has been initialized */
 };
 
 /****************************************************************************
@@ -1115,14 +1115,14 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct hrtim_dev_s *stm32_hrtiminitialize(void);
+struct hrtim_dev_s *stm32_hrtiminitialize(void);
 
 /****************************************************************************
  * Name: hrtim_register
  ****************************************************************************/
 
 #ifndef CONFIG_STM32_HRTIM_DISABLE_CHARDRV
-int hrtim_register(FAR const char *path, FAR struct hrtim_dev_s *dev);
+int hrtim_register(const char *path, struct hrtim_dev_s *dev);
 #endif
 
 #undef EXTERN

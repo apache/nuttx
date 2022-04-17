@@ -59,10 +59,10 @@
  *
  ****************************************************************************/
 
-static int stm32l4_freerun_handler(int irq, FAR void *context, void *arg)
+static int stm32l4_freerun_handler(int irq, void *context, void *arg)
 {
-  FAR struct stm32l4_freerun_s *freerun =
-                             (FAR struct stm32l4_freerun_s *)arg;
+  struct stm32l4_freerun_s *freerun =
+                             (struct stm32l4_freerun_s *)arg;
 
   DEBUGASSERT(freerun != NULL && freerun->overflow < UINT32_MAX);
   freerun->overflow++;
@@ -94,7 +94,7 @@ static int stm32l4_freerun_handler(int irq, FAR void *context, void *arg)
  *
  ****************************************************************************/
 
-int stm32l4_freerun_initialize(FAR struct stm32l4_freerun_s *freerun,
+int stm32l4_freerun_initialize(struct stm32l4_freerun_s *freerun,
                                int chan,
                                uint16_t resolution)
 {
@@ -160,8 +160,8 @@ int stm32l4_freerun_initialize(FAR struct stm32l4_freerun_s *freerun,
  *
  ****************************************************************************/
 
-int stm32l4_freerun_counter(FAR struct stm32l4_freerun_s *freerun,
-                            FAR struct timespec *ts)
+int stm32l4_freerun_counter(struct stm32l4_freerun_s *freerun,
+                            struct timespec *ts)
 {
   uint64_t usec;
   uint32_t counter;
@@ -252,7 +252,7 @@ int stm32l4_freerun_counter(FAR struct stm32l4_freerun_s *freerun,
  *
  ****************************************************************************/
 
-int stm32l4_freerun_uninitialize(FAR struct stm32l4_freerun_s *freerun)
+int stm32l4_freerun_uninitialize(struct stm32l4_freerun_s *freerun)
 {
   DEBUGASSERT(freerun && freerun->tch);
 

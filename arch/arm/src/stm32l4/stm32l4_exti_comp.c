@@ -82,7 +82,7 @@ static const uint32_t g_comp_lines[STM32L4_COMP_NUM] =
  * Private Functions
  ****************************************************************************/
 
-static int stm32l4_exti_comp_isr(int irq, void *context, FAR void *arg)
+static int stm32l4_exti_comp_isr(int irq, void *context, void *arg)
 {
   uint32_t pr;
   uint32_t ln;

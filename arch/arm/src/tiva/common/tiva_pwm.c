@@ -90,7 +90,7 @@ struct tiva_pwm_chan_s
   uint8_t irq;
   uint32_t count;
   uint32_t cur_count;
-  FAR void *handle;
+  void *handle;
 #endif
 };
 
@@ -100,22 +100,22 @@ struct tiva_pwm_chan_s
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_TIVA_PWM0_CHAN0)
 static int tiva_pwm_gen0_interrupt(int irq,
-                                   FAR void *context, FAR void *arg);
+                                   void *context, void *arg);
 #endif
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_TIVA_PWM0_CHAN2)
 static int tiva_pwm_gen1_interrupt(int irq,
-                                   FAR void *context, FAR void *arg);
+                                   void *context, void *arg);
 #endif
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_TIVA_PWM0_CHAN4)
 static int tiva_pwm_gen2_interrupt(int irq,
-                                   FAR void *context, FAR void *arg);
+                                   void *context, void *arg);
 #endif
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_TIVA_PWM0_CHAN6)
 static int tiva_pwm_gen3_interrupt(int irq,
-                                   FAR void *context, FAR void *arg);
+                                   void *context, void *arg);
 #endif
 
 #if defined(CONFIG_PWM_PULSECOUNT) && \
@@ -128,21 +128,21 @@ static inline void tiva_pwm_putreg(struct tiva_pwm_chan_s *chan,
                                    unsigned int offset, uint32_t regval);
 static inline uint32_t tiva_pwm_getreg(struct tiva_pwm_chan_s *chan,
                                        unsigned int offset);
-static inline int tiva_pwm_timer(FAR struct tiva_pwm_chan_s *chan,
-                                 FAR const struct pwm_info_s *info);
+static inline int tiva_pwm_timer(struct tiva_pwm_chan_s *chan,
+                                 const struct pwm_info_s *info);
 
-static int tiva_pwm_setup(FAR struct pwm_lowerhalf_s *dev);
-static int tiva_pwm_shutdown(FAR struct pwm_lowerhalf_s *dev);
+static int tiva_pwm_setup(struct pwm_lowerhalf_s *dev);
+static int tiva_pwm_shutdown(struct pwm_lowerhalf_s *dev);
 #ifdef CONFIG_PWM_PULSECOUNT
-static int tiva_pwm_start(FAR struct pwm_lowerhalf_s *dev,
-                          FAR const struct pwm_info_s *info,
-                          FAR void *handle);
+static int tiva_pwm_start(struct pwm_lowerhalf_s *dev,
+                          const struct pwm_info_s *info,
+                          void *handle);
 #else
-static int tiva_pwm_start(FAR struct pwm_lowerhalf_s *dev,
-                          FAR const struct pwm_info_s *info);
+static int tiva_pwm_start(struct pwm_lowerhalf_s *dev,
+                          const struct pwm_info_s *info);
 #endif
-static int tiva_pwm_stop(FAR struct pwm_lowerhalf_s *dev);
-static int tiva_pwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
+static int tiva_pwm_stop(struct pwm_lowerhalf_s *dev);
+static int tiva_pwm_ioctl(struct pwm_lowerhalf_s *dev,
                           int cmd, unsigned long arg);
 
 /****************************************************************************
@@ -334,28 +334,28 @@ static struct tiva_pwm_chan_s g_pwm_chan7 =
  ****************************************************************************/
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_TIVA_PWM0_CHAN0)
-static int tiva_pwm_gen0_interrupt(int irq, FAR void *context, FAR void *arg)
+static int tiva_pwm_gen0_interrupt(int irq, void *context, void *arg)
 {
   return tiva_pwm_interrupt(&g_pwm_chan0);
 }
 #endif
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_TIVA_PWM0_CHAN2)
-static int tiva_pwm_gen1_interrupt(int irq, FAR void *context, FAR void *arg)
+static int tiva_pwm_gen1_interrupt(int irq, void *context, void *arg)
 {
   return tiva_pwm_interrupt(&g_pwm_chan2);
 }
 #endif
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_TIVA_PWM0_CHAN4)
-static int tiva_pwm_gen2_interrupt(int irq, FAR void *context, FAR void *arg)
+static int tiva_pwm_gen2_interrupt(int irq, void *context, void *arg)
 {
   return tiva_pwm_interrupt(&g_pwm_chan4);
 }
 #endif
 
 #if defined(CONFIG_PWM_PULSECOUNT) && defined(CONFIG_TIVA_PWM0_CHAN6)
-static int tiva_pwm_gen3_interrupt(int irq, FAR void *context, FAR void *arg)
+static int tiva_pwm_gen3_interrupt(int irq, void *context, void *arg)
 {
   return tiva_pwm_interrupt(&g_pwm_chan6);
 }
@@ -443,9 +443,9 @@ static inline void tiva_pwm_putreg(struct tiva_pwm_chan_s *chan,
  *
  ****************************************************************************/
 
-static int tiva_pwm_setup(FAR struct pwm_lowerhalf_s *dev)
+static int tiva_pwm_setup(struct pwm_lowerhalf_s *dev)
 {
-  FAR struct tiva_pwm_chan_s *chan = (FAR struct tiva_pwm_chan_s *)dev;
+  struct tiva_pwm_chan_s *chan = (struct tiva_pwm_chan_s *)dev;
   pwminfo("setup PWM for channel %d\n", chan->channel_id);
 
   /* Enable GPIO port, GPIO pin type and GPIO alternate function (refer to
@@ -479,9 +479,9 @@ static int tiva_pwm_setup(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int tiva_pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
+static int tiva_pwm_shutdown(struct pwm_lowerhalf_s *dev)
 {
-  FAR struct tiva_pwm_chan_s *chan = (FAR struct tiva_pwm_chan_s *)dev;
+  struct tiva_pwm_chan_s *chan = (struct tiva_pwm_chan_s *)dev;
   pwminfo("shutdown PWM for channel %d\n", chan->channel_id);
 
   /* Remove unused-variable warning */
@@ -513,11 +513,11 @@ static int tiva_pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_PWM_PULSECOUNT
-static int tiva_pwm_start(FAR struct pwm_lowerhalf_s *dev,
-                          FAR const struct pwm_info_s *info,
-                          FAR void *handle)
+static int tiva_pwm_start(struct pwm_lowerhalf_s *dev,
+                          const struct pwm_info_s *info,
+                          void *handle)
 {
-  FAR struct tiva_pwm_chan_s *chan = (FAR struct tiva_pwm_chan_s *)dev;
+  struct tiva_pwm_chan_s *chan = (struct tiva_pwm_chan_s *)dev;
   pwminfo("start PWM for channel %d\n", chan->channel_id);
 
   /* Save the handle */
@@ -568,10 +568,10 @@ static int tiva_pwm_start(FAR struct pwm_lowerhalf_s *dev,
   return tiva_pwm_timer(chan, info);
 }
 #else
-static int tiva_pwm_start(FAR struct pwm_lowerhalf_s *dev,
-                          FAR const struct pwm_info_s *info)
+static int tiva_pwm_start(struct pwm_lowerhalf_s *dev,
+                          const struct pwm_info_s *info)
 {
-  FAR struct tiva_pwm_chan_s *chan = (FAR struct tiva_pwm_chan_s *)dev;
+  struct tiva_pwm_chan_s *chan = (struct tiva_pwm_chan_s *)dev;
   pwminfo("start PWM for channel %d\n", chan->channel_id);
 
   /* Start the timer */
@@ -595,8 +595,8 @@ static int tiva_pwm_start(FAR struct pwm_lowerhalf_s *dev,
  *
  ****************************************************************************/
 
-static inline int tiva_pwm_timer(FAR struct tiva_pwm_chan_s *chan,
-                                 FAR const struct pwm_info_s *info)
+static inline int tiva_pwm_timer(struct tiva_pwm_chan_s *chan,
+                                 const struct pwm_info_s *info)
 {
   uint16_t duty = info->duty;
   uint32_t frequency = info->frequency;
@@ -691,9 +691,9 @@ static inline int tiva_pwm_timer(FAR struct tiva_pwm_chan_s *chan,
  *
  ****************************************************************************/
 
-static int tiva_pwm_stop(FAR struct pwm_lowerhalf_s *dev)
+static int tiva_pwm_stop(struct pwm_lowerhalf_s *dev)
 {
-  FAR struct tiva_pwm_chan_s *chan = (FAR struct tiva_pwm_chan_s *)dev;
+  struct tiva_pwm_chan_s *chan = (struct tiva_pwm_chan_s *)dev;
   pwminfo("stop PWM for channel %d\n", chan->channel_id);
 
   /* Disable PWM channel */
@@ -721,10 +721,10 @@ static int tiva_pwm_stop(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int tiva_pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd,
+static int tiva_pwm_ioctl(struct pwm_lowerhalf_s *dev, int cmd,
                           unsigned long arg)
 {
-  FAR struct tiva_pwm_chan_s *chan = (FAR struct tiva_pwm_chan_s *)dev;
+  struct tiva_pwm_chan_s *chan = (struct tiva_pwm_chan_s *)dev;
   pwminfo("ioctl PWM for channel %d\n", chan->channel_id);
 
   /* Remove unused-variable warning */
@@ -755,10 +755,10 @@ static int tiva_pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd,
  *
  ****************************************************************************/
 
-FAR struct pwm_lowerhalf_s *tiva_pwm_initialize(int channel)
+struct pwm_lowerhalf_s *tiva_pwm_initialize(int channel)
 {
   assert(channel >= 0 && channel <= 7);
-  FAR struct tiva_pwm_chan_s *chan;
+  struct tiva_pwm_chan_s *chan;
 
   switch (channel)
     {
@@ -881,5 +881,5 @@ FAR struct pwm_lowerhalf_s *tiva_pwm_initialize(int channel)
 
 #endif
 
-  return (FAR struct pwm_lowerhalf_s *)chan;
+  return (struct pwm_lowerhalf_s *)chan;
 }

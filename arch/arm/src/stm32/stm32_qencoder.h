@@ -122,7 +122,7 @@
  *
  ****************************************************************************/
 
-int stm32_qeinitialize(FAR const char *devpath, int tim);
+int stm32_qeinitialize(const char *devpath, int tim);
 
 #ifdef CONFIG_STM32_QENCODER_INDEX_PIN
 /****************************************************************************

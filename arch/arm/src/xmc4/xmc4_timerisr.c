@@ -90,7 +90,7 @@
  *
  ****************************************************************************/
 
-static int xmc4_timerisr(int irq, uint32_t *regs, FAR void *arg)
+static int xmc4_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Process timer interrupt */
 

@@ -211,7 +211,7 @@ struct tiva_adc_s;
  *
  ****************************************************************************/
 
-int tiva_adc_lock(FAR struct tiva_adc_s *priv, int sse);
+int tiva_adc_lock(struct tiva_adc_s *priv, int sse);
 
 /****************************************************************************
  * Name: tiva_adc_unlock
@@ -221,7 +221,7 @@ int tiva_adc_lock(FAR struct tiva_adc_s *priv, int sse);
  *
  ****************************************************************************/
 
-void tiva_adc_unlock(FAR struct tiva_adc_s *priv, int sse);
+void tiva_adc_unlock(struct tiva_adc_s *priv, int sse);
 
 #endif /* CONFIG_TIVA_ADC */
 

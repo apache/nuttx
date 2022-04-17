@@ -34,7 +34,7 @@
  * Public Types
  ****************************************************************************/
 
-typedef CODE void (*alm_callback_t)(FAR void *arg, unsigned int alarmid);
+typedef void (*alm_callback_t)(void *arg, unsigned int alarmid);
 
 /* These features are known to map to STM32 RTC from stm32F4xx and appear to
  * map to beyond stm32F4xx and stm32L0xx there appears to be a small variant
@@ -43,8 +43,8 @@ typedef CODE void (*alm_callback_t)(FAR void *arg, unsigned int alarmid);
 
 enum alm_id_e
 {
-  RTC_ALARMA = 0,               /* RTC ALARM A */
-  RTC_ALARMB,                   /* RTC ALARM B */
+  RTC_ALARMA = 0,            /* RTC ALARM A */
+  RTC_ALARMB,                /* RTC ALARM B */
   RTC_ALARM_LAST
 };
 
@@ -52,18 +52,18 @@ enum alm_id_e
 
 struct alm_setalarm_s
 {
-  int as_id;                    /* enum alm_id_e */
-  struct tm as_time;            /* Alarm expiration time */
-  alm_callback_t as_cb;         /* Callback (if non-NULL) */
-  FAR void *as_arg;             /* Argument for callback */
+  int as_id;                /* enum alm_id_e */
+  struct tm as_time;        /* Alarm expiration time */
+  alm_callback_t as_cb;     /* Callback (if non-NULL) */
+  void *as_arg;             /* Argument for callback */
 };
 
 /* Structure used to pass parameters to query an alarm */
 
 struct alm_rdalarm_s
 {
-  int ar_id;                    /* enum alm_id_e */
-  FAR struct rtc_time *ar_time; /* Argument for storing ALARM RTC time */
+  int ar_id;                /* enum alm_id_e */
+  struct rtc_time *ar_time; /* Argument for storing ALARM RTC time */
 };
 
 /****************************************************************************
@@ -84,7 +84,7 @@ struct alm_rdalarm_s
  *
  ****************************************************************************/
 
-int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo);
+int stm32_rtc_setalarm(struct alm_setalarm_s *alminfo);
 
 /****************************************************************************
  * Name: stm32_rtc_rdalarm
@@ -100,7 +100,7 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo);
  *
  ****************************************************************************/
 
-int stm32_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo);
+int stm32_rtc_rdalarm(struct alm_rdalarm_s *alminfo);
 
 /****************************************************************************
  * Name: stm32_rtc_cancelalarm

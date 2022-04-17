@@ -166,7 +166,7 @@
 
 /* This is a helper pointer for accessing the contents of Ethernet header */
 
-#define ETHBUF ((FAR struct eth_hdr_s *)priv->ld_dev.d_buf)
+#define ETHBUF ((struct eth_hdr_s *)priv->ld_dev.d_buf)
 
 #define TIVA_MAX_MDCCLK 2500000
 
@@ -247,7 +247,7 @@ static void tiva_receive(struct tiva_driver_s *priv);
 static void tiva_txdone(struct tiva_driver_s *priv);
 
 static void tiva_interrupt_work(void *arg);
-static int  tiva_interrupt(int irq, void *context, FAR void *arg);
+static int  tiva_interrupt(int irq, void *context, void *arg);
 
 /* Watchdog timer expirations */
 
@@ -1063,7 +1063,7 @@ static void tiva_interrupt_work(void *arg)
  *
  ****************************************************************************/
 
-static int tiva_interrupt(int irq, void *context, FAR void *arg)
+static int tiva_interrupt(int irq, void *context, void *arg)
 {
   struct tiva_driver_s *priv;
   uint32_t ris;

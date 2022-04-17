@@ -93,7 +93,7 @@ static int      tiva_getstatus(struct timer_lowerhalf_s *lower,
 static int      tiva_settimeout(struct timer_lowerhalf_s *lower,
                                 uint32_t timeout);
 static void     tiva_setcallback(struct timer_lowerhalf_s *lower,
-                                 tccb_t callback, FAR void *arg);
+                                 tccb_t callback, void *arg);
 static int      tiva_ioctl(struct timer_lowerhalf_s *lower, int cmd,
                            unsigned long arg);
 
@@ -462,7 +462,7 @@ static int tiva_settimeout(struct timer_lowerhalf_s *lower, uint32_t timeout)
  ****************************************************************************/
 
 static void tiva_setcallback(struct timer_lowerhalf_s *lower,
-                             tccb_t callback, FAR void *arg)
+                             tccb_t callback, void *arg)
 {
   struct tiva_lowerhalf_s *priv = (struct tiva_lowerhalf_s *)lower;
   irqstate_t flags;
@@ -540,7 +540,7 @@ static int tiva_ioctl(struct timer_lowerhalf_s *lower, int cmd,
  *
  ****************************************************************************/
 
-int tiva_timer_initialize(FAR const char *devpath,
+int tiva_timer_initialize(const char *devpath,
                           struct tiva_gptm32config_s *config)
 {
   struct tiva_lowerhalf_s *priv;

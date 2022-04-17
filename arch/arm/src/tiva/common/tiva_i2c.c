@@ -273,7 +273,7 @@ static void tiva_i2c_nextxfr(struct tiva_i2c_priv_s *priv, uint32_t cmd);
 static int tiva_i2c_process(struct tiva_i2c_priv_s * priv, uint32_t status);
 
 #ifndef CONFIG_I2C_POLLED
-static int tiva_i2c_interrupt(int irq, void *context, FAR void *arg);
+static int tiva_i2c_interrupt(int irq, void *context, void *arg);
 #endif /* !CONFIG_I2C_POLLED */
 
 static int tiva_i2c_initialize(struct tiva_i2c_priv_s *priv,
@@ -285,7 +285,7 @@ static int tiva_i2c_transfer(struct i2c_master_s *dev,
                              struct i2c_msg_s *msgv,
                              int msgc);
 #ifdef CONFIG_I2C_RESET
-static int tiva_i2c_reset(FAR struct i2c_master_s *dev);
+static int tiva_i2c_reset(struct i2c_master_s *dev);
 #endif
 
 /****************************************************************************
@@ -1759,7 +1759,7 @@ static int tiva_i2c_transfer(struct i2c_master_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
-static int tiva_i2c_reset(FAR struct i2c_master_s * dev)
+static int tiva_i2c_reset(struct i2c_master_s * dev)
 {
   struct tiva_i2c_priv_s *priv = (struct tiva_i2c_priv_s *)dev;
   unsigned int clock_count;

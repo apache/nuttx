@@ -186,20 +186,20 @@ typedef enum
 
 struct stm32l4_lptim_ops_s
 {
-  int  (*setmode)(FAR struct stm32l4_lptim_dev_s *dev,
+  int  (*setmode)(struct stm32l4_lptim_dev_s *dev,
                   stm32l4_lptim_mode_t mode);
-  int  (*setclock)(FAR struct stm32l4_lptim_dev_s *dev, uint32_t freq);
-  int  (*setchannel)(FAR struct stm32l4_lptim_dev_s *dev,
+  int  (*setclock)(struct stm32l4_lptim_dev_s *dev, uint32_t freq);
+  int  (*setchannel)(struct stm32l4_lptim_dev_s *dev,
                      stm32l4_lptim_channel_t channel, int enable);
-  int  (*setclocksource)(FAR struct stm32l4_lptim_dev_s *dev,
+  int  (*setclocksource)(struct stm32l4_lptim_dev_s *dev,
                          stm32l4_lptim_clksrc_t clksrc);
-  int  (*setpolarity)(FAR struct stm32l4_lptim_dev_s *dev,
+  int  (*setpolarity)(struct stm32l4_lptim_dev_s *dev,
                       stm32l4_lptim_clkpol_t polarity);
-  uint32_t (*getcounter)(FAR struct stm32l4_lptim_dev_s *dev);
-  int  (*setcountmode)(FAR struct stm32l4_lptim_dev_s *dev,
+  uint32_t (*getcounter)(struct stm32l4_lptim_dev_s *dev);
+  int  (*setcountmode)(struct stm32l4_lptim_dev_s *dev,
                        stm32l4_lptim_cntmode_t cntmode);
-  void (*setperiod)(FAR struct stm32l4_lptim_dev_s *dev, uint32_t period);
-  uint32_t (*getperiod)(FAR struct stm32l4_lptim_dev_s *dev);
+  void (*setperiod)(struct stm32l4_lptim_dev_s *dev, uint32_t period);
+  uint32_t (*getperiod)(struct stm32l4_lptim_dev_s *dev);
 };
 
 /****************************************************************************
@@ -208,11 +208,11 @@ struct stm32l4_lptim_ops_s
 
 /* Get timer structure, power-up, reset, and mark it as used */
 
-FAR struct stm32l4_lptim_dev_s *stm32l4_lptim_init(int timer);
+struct stm32l4_lptim_dev_s *stm32l4_lptim_init(int timer);
 
 /* Power-down timer, mark it as unused */
 
-int stm32l4_lptim_deinit(FAR struct stm32l4_lptim_dev_s *dev);
+int stm32l4_lptim_deinit(struct stm32l4_lptim_dev_s *dev);
 
 #undef EXTERN
 #if defined(__cplusplus)
