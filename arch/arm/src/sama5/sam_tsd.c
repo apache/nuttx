@@ -829,8 +829,8 @@ static void sam_tsd_expiry(wdparm_t arg)
 
 static int sam_tsd_open(struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct sam_tsd_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct sam_tsd_s *priv = inode->i_private;
   uint8_t tmp;
   int ret;
 
@@ -880,8 +880,8 @@ static int sam_tsd_open(struct file *filep)
 
 static int sam_tsd_close(struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct sam_tsd_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct sam_tsd_s *priv = inode->i_private;
 
   iinfo("crefs: %d\n", priv->crefs);
 

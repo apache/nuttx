@@ -69,7 +69,7 @@ extern "C"
  *
  ****************************************************************************/
 
-void sam_wdt_initialize(FAR const char *devpath);
+void sam_wdt_initialize(const char *devpath);
 
 #undef EXTERN
 #if defined(__cplusplus)

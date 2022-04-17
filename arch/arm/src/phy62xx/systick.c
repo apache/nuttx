@@ -36,7 +36,7 @@
  * Public Functions
  ****************************************************************************/
 
-static int systic_timerisr(int irq, uint32_t *regs, FAR void *arg)
+static int systic_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Process timer interrupt */
 

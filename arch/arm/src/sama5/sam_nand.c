@@ -179,7 +179,7 @@ static void     nand_wait_nfcbusy(struct sam_nandcs_s *priv);
 #endif
 static uint32_t nand_nfc_poll(void);
 #ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
-static int      hsmc_interrupt(int irq, void *context, FAR void *arg);
+static int      hsmc_interrupt(int irq, void *context, void *arg);
 #endif
 
 /* DMA Helpers */
@@ -1043,7 +1043,7 @@ static uint32_t nand_nfc_poll(void)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
-static int hsmc_interrupt(int irq, void *context, FAR void *arg)
+static int hsmc_interrupt(int irq, void *context, void *arg)
 {
   uint32_t sr      = nand_nfc_poll();
   uint32_t imr     = nand_getreg(SAM_HSMC_IMR);

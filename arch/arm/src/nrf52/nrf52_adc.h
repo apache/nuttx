@@ -156,7 +156,7 @@ struct nrf52_adc_channel_s
  ****************************************************************************/
 
 struct adc_dev_s *nrf52_adcinitialize(
-    FAR const struct nrf52_adc_channel_s *chan,
+    const struct nrf52_adc_channel_s *chan,
     int channels);
 
 #endif  /* __ARCH_ARM_SRC_NRF52_NRF52_ADC_H */

@@ -159,7 +159,7 @@ static void     spi_dumpregs(struct sam_spidev_s *priv, const char *msg);
 /* Interrupt handling */
 
 #if 0 /* Not used */
-static int      spi_interrupt(int irq, void *context, FAR void *arg);
+static int      spi_interrupt(int irq, void *context, void *arg);
 #endif
 
 /* SPI methods */
@@ -831,7 +831,7 @@ static void spi_dumpregs(struct sam_spidev_s *priv, const char *msg)
  ****************************************************************************/
 
 #if 0 /* Not used */
-static int spi_interrupt(int irq, void *context, FAR void *arg)
+static int spi_interrupt(int irq, void *context, void *arg)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)arg
   uint8_t pending;

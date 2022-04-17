@@ -94,7 +94,7 @@ static struct dma_channel_s g_dmach[RP2040_DMA_NCHANNELS];
  *
  ****************************************************************************/
 
-static int rp2040_dmac_interrupt(int irq, void *context, FAR void *arg)
+static int rp2040_dmac_interrupt(int irq, void *context, void *arg)
 {
   struct dma_channel_s *dmach;
   int result = OK;

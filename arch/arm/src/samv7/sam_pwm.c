@@ -80,7 +80,7 @@ struct sam_pwm_channel_s
 struct sam_pwm_s
 {
   const struct pwm_ops_s *ops;    /* PWM operations */
-  FAR const struct sam_pwm_channel_s *channels;
+  const struct sam_pwm_channel_s *channels;
   uint8_t channels_num;           /* Number of channels */
   uint32_t frequency;             /* PWM frequency */
   uint32_t base;                  /* Base address of peripheral register */
@@ -88,12 +88,12 @@ struct sam_pwm_s
 
 /* PWM driver methods */
 
-static int pwm_setup(FAR struct pwm_lowerhalf_s *dev);
-static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev);
-static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
-                     FAR const struct pwm_info_s *info);
-static int pwm_stop(FAR struct pwm_lowerhalf_s *dev);
-static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
+static int pwm_setup(struct pwm_lowerhalf_s *dev);
+static int pwm_shutdown(struct pwm_lowerhalf_s *dev);
+static int pwm_start(struct pwm_lowerhalf_s *dev,
+                     const struct pwm_info_s *info);
+static int pwm_stop(struct pwm_lowerhalf_s *dev);
+static int pwm_ioctl(struct pwm_lowerhalf_s *dev,
                      int cmd, unsigned long arg);
 
 /****************************************************************************
@@ -202,28 +202,28 @@ static struct sam_pwm_s g_pwm1 =
  * Private Function Prototypes
  ****************************************************************************/
 
-static void pwm_putreg(FAR struct sam_pwm_s *priv, uint32_t offset,
+static void pwm_putreg(struct sam_pwm_s *priv, uint32_t offset,
                        uint32_t value);
-static uint32_t pwm_getreg(FAR struct sam_pwm_s *priv, uint32_t offset);
+static uint32_t pwm_getreg(struct sam_pwm_s *priv, uint32_t offset);
 
 /* Helper functions */
 
-static int pwm_set_output(FAR struct pwm_lowerhalf_s *dev, uint8_t channel,
-                           ub16_t duty);
-static int pwm_change_freq(FAR struct pwm_lowerhalf_s *dev,
-                     FAR const struct pwm_info_s *info, uint8_t channel);
+static int pwm_set_output(struct pwm_lowerhalf_s *dev, uint8_t channel,
+                          ub16_t duty);
+static int pwm_change_freq(struct pwm_lowerhalf_s *dev,
+                           const struct pwm_info_s *info, uint8_t channel);
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static void pwm_putreg(FAR struct sam_pwm_s *priv, uint32_t offset,
+static void pwm_putreg(struct sam_pwm_s *priv, uint32_t offset,
                        uint32_t value)
 {
   putreg32(value, priv->base + offset);
 }
 
-static uint32_t pwm_getreg(FAR struct sam_pwm_s *priv, uint32_t offset)
+static uint32_t pwm_getreg(struct sam_pwm_s *priv, uint32_t offset)
 {
   return getreg32(priv->base + offset);
 }
@@ -244,10 +244,10 @@ static uint32_t pwm_getreg(FAR struct sam_pwm_s *priv, uint32_t offset)
  *
  ****************************************************************************/
 
-static int pwm_change_freq(FAR struct pwm_lowerhalf_s *dev,
-                     FAR const struct pwm_info_s *info, uint8_t channel)
+static int pwm_change_freq(struct pwm_lowerhalf_s *dev,
+                           const struct pwm_info_s *info, uint8_t channel)
 {
-  FAR struct sam_pwm_s *priv = (FAR struct sam_pwm_s *)dev;
+  struct sam_pwm_s *priv = (struct sam_pwm_s *)dev;
 #ifdef CONFIG_PWM_MULTICHAN
   uint8_t shift = info->channels[channel].channel - 1;
 #else
@@ -305,10 +305,10 @@ static int pwm_change_freq(FAR struct pwm_lowerhalf_s *dev,
  *
  ****************************************************************************/
 
-static int pwm_set_output(FAR struct pwm_lowerhalf_s *dev, uint8_t channel,
-                           ub16_t duty)
+static int pwm_set_output(struct pwm_lowerhalf_s *dev, uint8_t channel,
+                          ub16_t duty)
 {
-  FAR struct sam_pwm_s *priv = (FAR struct sam_pwm_s *)dev;
+  struct sam_pwm_s *priv = (struct sam_pwm_s *)dev;
   uint16_t period;
   uint16_t width;
   uint16_t regval;
@@ -350,9 +350,9 @@ static int pwm_set_output(FAR struct pwm_lowerhalf_s *dev, uint8_t channel,
  *
  ****************************************************************************/
 
-static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
+static int pwm_setup(struct pwm_lowerhalf_s *dev)
 {
-  FAR struct sam_pwm_s *priv = (FAR struct sam_pwm_s *)dev;
+  struct sam_pwm_s *priv = (struct sam_pwm_s *)dev;
   uint32_t pin = 0;
   uint32_t regval;
 
@@ -436,9 +436,9 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
+static int pwm_shutdown(struct pwm_lowerhalf_s *dev)
 {
-  FAR struct sam_pwm_s *priv = (FAR struct sam_pwm_s *)dev;
+  struct sam_pwm_s *priv = (struct sam_pwm_s *)dev;
   uint32_t regval;
 
   /* Disable all channels and interrupts */
@@ -489,10 +489,10 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
-                     FAR const struct pwm_info_s *info)
+static int pwm_start(struct pwm_lowerhalf_s *dev,
+                     const struct pwm_info_s *info)
 {
-  FAR struct sam_pwm_s *priv = (FAR struct sam_pwm_s *)dev;
+  struct sam_pwm_s *priv = (struct sam_pwm_s *)dev;
   int ret = OK;
 
   /* Change frequency only if it is needed */
@@ -579,9 +579,9 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
  *
  ****************************************************************************/
 
-static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
+static int pwm_stop(struct pwm_lowerhalf_s *dev)
 {
-  FAR struct sam_pwm_s *priv = (FAR struct sam_pwm_s *)dev;
+  struct sam_pwm_s *priv = (struct sam_pwm_s *)dev;
   uint8_t shift;
   uint32_t regval;
 
@@ -628,7 +628,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd,
+static int pwm_ioctl(struct pwm_lowerhalf_s *dev, int cmd,
                      unsigned long arg)
 {
   return -ENOTTY;
@@ -653,9 +653,9 @@ static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd,
  *
  ****************************************************************************/
 
-FAR struct pwm_lowerhalf_s *sam_pwminitialize(int pwm)
+struct pwm_lowerhalf_s *sam_pwminitialize(int pwm)
 {
-  FAR struct sam_pwm_s *priv;
+  struct sam_pwm_s *priv;
 
   pwminfo("Initializing pwm %d\n", pwm);
 
@@ -678,6 +678,6 @@ FAR struct pwm_lowerhalf_s *sam_pwminitialize(int pwm)
       return NULL;
   }
 
-  return (FAR struct pwm_lowerhalf_s *)priv;
+  return (struct pwm_lowerhalf_s *)priv;
 }
 #endif /* CONFIG_SAMV7_PWM */

@@ -382,7 +382,7 @@ void tc_coreclk_configure(int tc, int coregen, bool wrlock)
  *
  ****************************************************************************/
 
-static int tc_interrupt(int irq, void *context, FAR void *arg)
+static int tc_interrupt(int irq, void *context, void *arg)
 {
   struct sam_tc_dev_s *priv = (struct sam_tc_dev_s *)arg;
   uint8_t flags;

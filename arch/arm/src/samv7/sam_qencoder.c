@@ -59,7 +59,7 @@ struct sam_lowerhalf_s
    * half callback structure:
    */
 
-  FAR const struct qe_ops_s *ops;  /* Lower half callback structure */
+  const struct qe_ops_s *ops;  /* Lower half callback structure */
 
   /* SAMV7 driver-specific fields: */
 
@@ -75,15 +75,15 @@ struct sam_lowerhalf_s
 
 /* Helper functions */
 
-static FAR struct sam_lowerhalf_s *sam_tc2lower(int tc);
+static struct sam_lowerhalf_s *sam_tc2lower(int tc);
 
 /* Lower-half Quadrature Encoder Driver Methods */
 
-static int sam_setup(FAR struct qe_lowerhalf_s *lower);
-static int sam_shutdown(FAR struct qe_lowerhalf_s *lower);
-static int sam_position(FAR struct qe_lowerhalf_s *lower, FAR int32_t *pos);
-static int sam_reset(FAR struct qe_lowerhalf_s *lower);
-static int sam_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
+static int sam_setup(struct qe_lowerhalf_s *lower);
+static int sam_shutdown(struct qe_lowerhalf_s *lower);
+static int sam_position(struct qe_lowerhalf_s *lower, int32_t *pos);
+static int sam_reset(struct qe_lowerhalf_s *lower);
+static int sam_ioctl(struct qe_lowerhalf_s *lower, int cmd,
                      unsigned long arg);
 
 /****************************************************************************
@@ -153,7 +153,7 @@ static struct sam_lowerhalf_s g_tc3lower =
  *
  ****************************************************************************/
 
-static FAR struct sam_lowerhalf_s *sam_tc2lower(int tc)
+static struct sam_lowerhalf_s *sam_tc2lower(int tc)
 {
   switch (tc)
     {
@@ -188,9 +188,9 @@ static FAR struct sam_lowerhalf_s *sam_tc2lower(int tc)
  *
  ****************************************************************************/
 
-static int sam_setup(FAR struct qe_lowerhalf_s *lower)
+static int sam_setup(struct qe_lowerhalf_s *lower)
 {
-  FAR struct sam_lowerhalf_s *priv = (FAR struct sam_lowerhalf_s *)lower;
+  struct sam_lowerhalf_s *priv = (struct sam_lowerhalf_s *)lower;
 
   /* Start the counter */
 
@@ -209,9 +209,9 @@ static int sam_setup(FAR struct qe_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int sam_shutdown(FAR struct qe_lowerhalf_s *lower)
+static int sam_shutdown(struct qe_lowerhalf_s *lower)
 {
-  FAR struct sam_lowerhalf_s *priv = (FAR struct sam_lowerhalf_s *)lower;
+  struct sam_lowerhalf_s *priv = (struct sam_lowerhalf_s *)lower;
 
   sam_tc_stop(priv->tch);
 
@@ -226,9 +226,9 @@ static int sam_shutdown(FAR struct qe_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int sam_position(FAR struct qe_lowerhalf_s *lower, FAR int32_t *pos)
+static int sam_position(struct qe_lowerhalf_s *lower, int32_t *pos)
 {
-  FAR struct sam_lowerhalf_s *priv = (FAR struct sam_lowerhalf_s *)lower;
+  struct sam_lowerhalf_s *priv = (struct sam_lowerhalf_s *)lower;
 
   /* Return the counter value */
 
@@ -245,9 +245,9 @@ static int sam_position(FAR struct qe_lowerhalf_s *lower, FAR int32_t *pos)
  *
  ****************************************************************************/
 
-static int sam_reset(FAR struct qe_lowerhalf_s *lower)
+static int sam_reset(struct qe_lowerhalf_s *lower)
 {
-  FAR struct sam_lowerhalf_s *priv = (FAR struct sam_lowerhalf_s *)lower;
+  struct sam_lowerhalf_s *priv = (struct sam_lowerhalf_s *)lower;
 
   sninfo("Resetting position to zero\n");
   DEBUGASSERT(lower && priv->inuse);
@@ -267,7 +267,7 @@ static int sam_reset(FAR struct qe_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int sam_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
+static int sam_ioctl(struct qe_lowerhalf_s *lower, int cmd,
                      unsigned long arg)
 {
   /* No ioctl commands supported */
@@ -296,9 +296,9 @@ static int sam_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
  *
  ****************************************************************************/
 
-int sam_qeinitialize(FAR const char *devpath, int tc)
+int sam_qeinitialize(const char *devpath, int tc)
 {
-  FAR struct sam_lowerhalf_s *priv;
+  struct sam_lowerhalf_s *priv;
   uint32_t mode;
   int ret;
 
@@ -352,7 +352,7 @@ int sam_qeinitialize(FAR const char *devpath, int tc)
 
   /* Register the upper-half driver */
 
-  ret = qe_register(devpath, (FAR struct qe_lowerhalf_s *)priv);
+  ret = qe_register(devpath, (struct qe_lowerhalf_s *)priv);
   if (ret < 0)
     {
       snerr("ERROR: qe_register failed: %d\n", ret);

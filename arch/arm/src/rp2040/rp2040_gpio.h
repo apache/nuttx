@@ -179,7 +179,7 @@ void rp2040_gpio_init(uint32_t gpio);
  ****************************************************************************/
 
 int rp2040_gpio_irq_attach(uint32_t gpio, uint32_t intrmode,
-                           xcpt_t isr, FAR void *arg);
+                           xcpt_t isr, void *arg);
 
 /****************************************************************************
  * Name: rp2040_gpio_enable_irq

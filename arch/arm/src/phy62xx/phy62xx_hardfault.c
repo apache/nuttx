@@ -68,7 +68,7 @@ extern uint32_t _etextram;
  *
  ****************************************************************************/
 
-int arm_hardfault(int irq, FAR void *context, FAR void *arg)
+int arm_hardfault(int irq, void *context, void *arg)
 {
   uint32_t *regs = (uint32_t *)context;
 

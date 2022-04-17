@@ -328,7 +328,7 @@ ssize_t up_progmem_ispageerased(size_t page)
  *
  ****************************************************************************/
 
-ssize_t up_progmem_write(size_t addr, FAR const void *buf, size_t count)
+ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
 {
   union fccob_flash_addr dest;
   uint32_t i;

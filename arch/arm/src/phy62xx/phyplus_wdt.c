@@ -69,13 +69,13 @@ void __attribute__((used))  hal_WATCHDOG_IRQHandler(void)
 
 /* "Lower half" driver methods **********************************************/
 
-static int    phyplus_wdt_start(FAR struct watchdog_lowerhalf_s *lower);
-static int    phyplus_wdt_stop(FAR struct watchdog_lowerhalf_s *lower);
-static int    phyplus_wdt_keepalive(FAR struct watchdog_lowerhalf_s *lower);
-static int    phyplus_wdt_getstatus(FAR struct watchdog_lowerhalf_s *lower,
-                                     FAR struct watchdog_status_s *status);
-static int    phyplus_wdt_settimeout(FAR struct watchdog_lowerhalf_s *lower,
-                                      uint32_t timeout);
+static int    phyplus_wdt_start(struct watchdog_lowerhalf_s *lower);
+static int    phyplus_wdt_stop(struct watchdog_lowerhalf_s *lower);
+static int    phyplus_wdt_keepalive(struct watchdog_lowerhalf_s *lower);
+static int    phyplus_wdt_getstatus(struct watchdog_lowerhalf_s *lower,
+                                    struct watchdog_status_s *status);
+static int    phyplus_wdt_settimeout(struct watchdog_lowerhalf_s *lower,
+                                     uint32_t timeout);
 
 /****************************************************************************
  * Private Data
@@ -96,9 +96,9 @@ static const struct watchdog_ops_s g_wdgops =
 
 struct phyplus_lowerhalf_s
 {
-  FAR const struct watchdog_ops_s  *ops; /* Lower half operations */
-  bool     started;                      /* true: The watchdog timer has been started */
-  bool     intr_mode;                    /* 0: not use intr_callback handle, 1: use intr_callback handle */
+  const struct watchdog_ops_s  *ops; /* Lower half operations */
+  bool     started;                  /* true: The watchdog timer has been started */
+  bool     intr_mode;                /* 0: not use intr_callback handle, 1: use intr_callback handle */
   WDG_CYCLE_Type_e wdt_cycle;
 };
 
@@ -219,10 +219,10 @@ static int pp_watchdog_feed(void)
  *
  ****************************************************************************/
 
-static int phyplus_wdt_start(FAR struct watchdog_lowerhalf_s *lower)
+static int phyplus_wdt_start(struct watchdog_lowerhalf_s *lower)
 {
-  FAR struct phyplus_lowerhalf_s *priv =
-    (FAR struct phyplus_lowerhalf_s *)lower;
+  struct phyplus_lowerhalf_s *priv =
+    (struct phyplus_lowerhalf_s *)lower;
   irqstate_t flags;
 
   wdinfo("wdt_start\n");
@@ -262,10 +262,10 @@ static int phyplus_wdt_start(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int phyplus_wdt_stop(FAR struct watchdog_lowerhalf_s *lower)
+static int phyplus_wdt_stop(struct watchdog_lowerhalf_s *lower)
 {
-  FAR struct phyplus_lowerhalf_s *priv =
-    (FAR struct phyplus_lowerhalf_s *)lower;
+  struct phyplus_lowerhalf_s *priv =
+    (struct phyplus_lowerhalf_s *)lower;
 
   wdinfo("wdt_stop\n");
 
@@ -295,10 +295,10 @@ static int phyplus_wdt_stop(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int phyplus_wdt_keepalive(FAR struct watchdog_lowerhalf_s *lower)
+static int phyplus_wdt_keepalive(struct watchdog_lowerhalf_s *lower)
 {
-  /* FAR struct phyplus_lowerhalf_s *priv =
-   * (FAR struct phyplus_lowerhalf_s *)lower;
+  /* struct phyplus_lowerhalf_s *priv =
+   * (struct phyplus_lowerhalf_s *)lower;
    */
 
   irqstate_t flags;
@@ -330,11 +330,11 @@ static int phyplus_wdt_keepalive(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int phyplus_wdt_getstatus(FAR struct watchdog_lowerhalf_s *lower,
-                             FAR struct watchdog_status_s *status)
+static int phyplus_wdt_getstatus(struct watchdog_lowerhalf_s *lower,
+                                 struct watchdog_status_s *status)
 {
-  FAR struct phyplus_lowerhalf_s *priv =
-    (FAR struct phyplus_lowerhalf_s *)lower;
+  struct phyplus_lowerhalf_s *priv =
+    (struct phyplus_lowerhalf_s *)lower;
   DEBUGASSERT(priv);
 
   wdinfo("wdt getstatus\n");
@@ -373,11 +373,11 @@ static int phyplus_wdt_getstatus(FAR struct watchdog_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int phyplus_wdt_settimeout(FAR struct watchdog_lowerhalf_s *lower,
-                              uint32_t timeout)
+static int phyplus_wdt_settimeout(struct watchdog_lowerhalf_s *lower,
+                                  uint32_t timeout)
 {
-  FAR struct phyplus_lowerhalf_s *priv =
-    (FAR struct phyplus_lowerhalf_s *)lower;
+  struct phyplus_lowerhalf_s *priv =
+    (struct phyplus_lowerhalf_s *)lower;
 
   wdinfo("wdt set timeout timeout=%lu\n", timeout);
   timeout = timeout / 1000;
@@ -442,9 +442,9 @@ static int phyplus_wdt_settimeout(FAR struct watchdog_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-void phyplus_wdt_initialize(FAR const char *devpath)
+void phyplus_wdt_initialize(const char *devpath)
 {
-  FAR struct phyplus_lowerhalf_s *priv = &g_wdgdev;
+  struct phyplus_lowerhalf_s *priv = &g_wdgdev;
 
   wdinfo("wdt initialize\n");
 
@@ -457,7 +457,7 @@ void phyplus_wdt_initialize(FAR const char *devpath)
 
   pp_watchdog_init();
 
-  watchdog_register(devpath, (FAR struct watchdog_lowerhalf_s *)priv);
+  watchdog_register(devpath, (struct watchdog_lowerhalf_s *)priv);
 }
 
 #endif /* CONFIG_WATCHDOG */

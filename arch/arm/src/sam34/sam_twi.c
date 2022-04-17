@@ -166,7 +166,7 @@ static inline void twi_putrel(struct twi_dev_s *priv, unsigned int offset,
 
 static int  twi_wait(struct twi_dev_s *priv);
 static void twi_wakeup(struct twi_dev_s *priv, int result);
-static int  twi_interrupt(int irq, FAR void *context, FAR void *arg);
+static int  twi_interrupt(int irq, void *context, void *arg);
 static void twi_timeout(wdparm_t arg);
 
 static void twi_startread(struct twi_dev_s *priv, struct i2c_msg_s *msg);
@@ -175,10 +175,10 @@ static void twi_startmessage(struct twi_dev_s *priv, struct i2c_msg_s *msg);
 
 /* I2C device operations */
 
-static int twi_transfer(FAR struct i2c_master_s *dev,
-          FAR struct i2c_msg_s *msgs, int count);
+static int twi_transfer(struct i2c_master_s *dev,
+          struct i2c_msg_s *msgs, int count);
 #ifdef CONFIG_I2C_RESET
-static int  twi_reset(FAR struct i2c_master_s * dev);
+static int  twi_reset(struct i2c_master_s * dev);
 #endif
 
 /* Initialization */
@@ -435,7 +435,7 @@ static void twi_wakeup(struct twi_dev_s *priv, int result)
  *
  ****************************************************************************/
 
-static int twi_interrupt(int irq, FAR void *context, FAR void *arg)
+static int twi_interrupt(int irq, void *context, void *arg)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *)arg;
   struct i2c_msg_s *msg;
@@ -680,8 +680,8 @@ static void twi_startmessage(struct twi_dev_s *priv, struct i2c_msg_s *msg)
  *
  ****************************************************************************/
 
-static int twi_transfer(FAR struct i2c_master_s *dev,
-                        FAR struct i2c_msg_s *msgs, int count)
+static int twi_transfer(struct i2c_master_s *dev,
+                        struct i2c_msg_s *msgs, int count)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *)dev;
   irqstate_t flags;
@@ -749,7 +749,7 @@ static int twi_transfer(FAR struct i2c_master_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
-static int twi_reset(FAR struct i2c_master_s * dev)
+static int twi_reset(struct i2c_master_s * dev)
 {
   return OK;
 }
@@ -1009,7 +1009,7 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
  *
  ****************************************************************************/
 
-int sam_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
+int sam_i2cbus_uninitialize(struct i2c_master_s * dev)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *) dev;
 

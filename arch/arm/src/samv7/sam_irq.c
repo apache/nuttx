@@ -175,7 +175,7 @@ static void sam_dumpnvic(const char *msg, int irq)
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-static int sam_nmi(int irq, FAR void *context, FAR void *arg)
+static int sam_nmi(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! NMI received\n");
@@ -183,7 +183,7 @@ static int sam_nmi(int irq, FAR void *context, FAR void *arg)
   return 0;
 }
 
-static int sam_busfault(int irq, FAR void *context, FAR void *arg)
+static int sam_busfault(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! Bus fault received: %08x\n", getreg32(NVIC_CFAULTS));
@@ -191,7 +191,7 @@ static int sam_busfault(int irq, FAR void *context, FAR void *arg)
   return 0;
 }
 
-static int sam_usagefault(int irq, FAR void *context, FAR void *arg)
+static int sam_usagefault(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! Usage fault received: %08x\n", getreg32(NVIC_CFAULTS));
@@ -199,7 +199,7 @@ static int sam_usagefault(int irq, FAR void *context, FAR void *arg)
   return 0;
 }
 
-static int sam_pendsv(int irq, FAR void *context, FAR void *arg)
+static int sam_pendsv(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! PendSV received\n");
@@ -207,7 +207,7 @@ static int sam_pendsv(int irq, FAR void *context, FAR void *arg)
   return 0;
 }
 
-static int sam_dbgmonitor(int irq, FAR void *context, FAR void *arg)
+static int sam_dbgmonitor(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! Debug Monitor received\n");
@@ -215,7 +215,7 @@ static int sam_dbgmonitor(int irq, FAR void *context, FAR void *arg)
   return 0;
 }
 
-static int sam_reserved(int irq, FAR void *context, FAR void *arg)
+static int sam_reserved(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! Reserved interrupt\n");

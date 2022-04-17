@@ -37,6 +37,6 @@
  * Name: nrf52_timer_initialize
  ****************************************************************************/
 
-int nrf52_timer_initialize(FAR const char *devpath, uint8_t timer);
+int nrf52_timer_initialize(const char *devpath, uint8_t timer);
 
 #endif /* __ARCH_ARM_SRC_NRF52_NRF52_TIM_LOWERHALF_H */

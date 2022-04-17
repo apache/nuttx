@@ -71,7 +71,7 @@ struct spi_dev_s;
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *max326_spibus_initialize(int bus);
+struct spi_dev_s *max326_spibus_initialize(int bus);
 
 /****************************************************************************
  * Name:  max326_spi[0|1|2]select, max326_spi[0|1|2]status, and
@@ -106,24 +106,24 @@ FAR struct spi_dev_s *max326_spibus_initialize(int bus);
  ****************************************************************************/
 
 #ifdef CONFIG_MAX326XX_SPIM0
-void max326_spi0select(FAR struct spi_dev_s *dev,
+void max326_spi0select(struct spi_dev_s *dev,
                        uint32_t devid, bool selected);
-uint8_t max326_spi0status(FAR struct spi_dev_s *dev, uint32_t devid);
-int max326_spi0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+uint8_t max326_spi0status(struct spi_dev_s *dev, uint32_t devid);
+int max326_spi0cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 #ifdef CONFIG_MAX326XX_SPIM1
-void max326_spi1select(FAR struct spi_dev_s *dev,
+void max326_spi1select(struct spi_dev_s *dev,
                        uint32_t devid, bool selected);
-uint8_t max326_spi1status(FAR struct spi_dev_s *dev, uint32_t devid);
-int max326_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+uint8_t max326_spi1status(struct spi_dev_s *dev, uint32_t devid);
+int max326_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 #ifdef CONFIG_MAX326XX_SPIMM2
-void max326_spi2select(FAR struct spi_dev_s *dev,
+void max326_spi2select(struct spi_dev_s *dev,
                        uint32_t devid, bool selected);
-uint8_t max326_spi2status(FAR struct spi_dev_s *dev, uint32_t devid);
-int max326_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+uint8_t max326_spi2status(struct spi_dev_s *dev, uint32_t devid);
+int max326_spi2cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 /****************************************************************************
@@ -149,21 +149,21 @@ int max326_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 
 #ifdef CONFIG_SPI_CALLBACK
 #ifdef CONFIG_MAX326XX_SPIM0
-int max326_spi0register(FAR struct spi_dev_s *dev,
+int max326_spi0register(struct spi_dev_s *dev,
                         spi_mediachange_t callback,
-                        FAR void *arg);
+                        void *arg);
 #endif
 
 #ifdef CONFIG_MAX326XX_SPIM1
-int max326_spi1register(FAR struct spi_dev_s *dev,
+int max326_spi1register(struct spi_dev_s *dev,
                         spi_mediachange_t callback,
-                        FAR void *arg);
+                        void *arg);
 #endif
 
 #ifdef CONFIG_MAX326XX_SPIM2
-int max326_spi2register(FAR struct spi_dev_s *dev,
+int max326_spi2register(struct spi_dev_s *dev,
                         spi_mediachange_t callback,
-                        FAR void *arg);
+                        void *arg);
 #endif
 #endif
 

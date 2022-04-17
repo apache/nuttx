@@ -343,7 +343,7 @@ int up_prioritize_irq(int irq, int priority)
  * Name: _up_doirq
  ****************************************************************************/
 
-int _up_doirq(int irq, FAR void *context, FAR void *arg)
+int _up_doirq(int irq, void *context, void *arg)
 {
   if (irq < NVIC_IRQ_FIRST)
     {

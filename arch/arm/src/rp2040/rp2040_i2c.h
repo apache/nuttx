@@ -59,7 +59,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct i2c_master_s *rp2040_i2cbus_initialize(int port);
+struct i2c_master_s *rp2040_i2cbus_initialize(int port);
 
 /****************************************************************************
  * Name: rp2040_i2cbus_uninitialize
@@ -76,7 +76,7 @@ FAR struct i2c_master_s *rp2040_i2cbus_initialize(int port);
  *
  ****************************************************************************/
 
-int rp2040_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
+int rp2040_i2cbus_uninitialize(struct i2c_master_s *dev);
 
 #undef EXTERN
 #if defined(__cplusplus)

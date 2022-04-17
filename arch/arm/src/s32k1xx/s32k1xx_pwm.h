@@ -26,8 +26,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <arch/board/board.h>
 
 #include "chip.h"
+#include "hardware/s32k1xx_pinmux.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -73,9 +75,6 @@
     defined(CONFIG_S32K1XX_FTM2_PWM) || defined(CONFIG_S32K1XX_FTM3_PWM) || \
     defined(CONFIG_S32K1XX_FTM4_PWM) || defined(CONFIG_S32K1XX_FTM5_PWM) || \
     defined(CONFIG_S32K1XX_FTM6_PWM) || defined(CONFIG_S32K1XX_FTM7_PWM)
-
-#include <arch/board/board.h>
-#include "hardware/s32k1xx_pinmux.h"
 
 /* For each timer that is enabled for PWM usage, we need the following
  * additional configuration settings:
@@ -316,7 +315,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct pwm_lowerhalf_s *s32k1xx_pwminitialize(int timer);
+struct pwm_lowerhalf_s *s32k1xx_pwminitialize(int timer);
 
 #undef EXTERN
 #if defined(__cplusplus)

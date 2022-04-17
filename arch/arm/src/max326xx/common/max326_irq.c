@@ -151,7 +151,7 @@ static void max326_dumpnvic(const char *msg, int irq)
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-static int max326_nmi(int irq, FAR void *context, FAR void *arg)
+static int max326_nmi(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! NMI received\n");
@@ -159,7 +159,7 @@ static int max326_nmi(int irq, FAR void *context, FAR void *arg)
   return 0;
 }
 
-static int max326_busfault(int irq, FAR void *context, FAR void *arg)
+static int max326_busfault(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! Bus fault received\n");
@@ -167,7 +167,7 @@ static int max326_busfault(int irq, FAR void *context, FAR void *arg)
   return 0;
 }
 
-static int max326_usagefault(int irq, FAR void *context, FAR void *arg)
+static int max326_usagefault(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! Usage fault received\n");
@@ -175,7 +175,7 @@ static int max326_usagefault(int irq, FAR void *context, FAR void *arg)
   return 0;
 }
 
-static int max326_pendsv(int irq, FAR void *context, FAR void *arg)
+static int max326_pendsv(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! PendSV received\n");
@@ -183,7 +183,7 @@ static int max326_pendsv(int irq, FAR void *context, FAR void *arg)
   return 0;
 }
 
-static int max326_dbgmonitor(int irq, FAR void *context, FAR void *arg)
+static int max326_dbgmonitor(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! Debug Monitor received\n");
@@ -191,7 +191,7 @@ static int max326_dbgmonitor(int irq, FAR void *context, FAR void *arg)
   return 0;
 }
 
-static int max326_reserved(int irq, FAR void *context, FAR void *arg)
+static int max326_reserved(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! Reserved interrupt\n");

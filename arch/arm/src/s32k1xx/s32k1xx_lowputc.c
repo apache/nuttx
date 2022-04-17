@@ -178,7 +178,7 @@ void s32k1xx_lowsetup(void)
 
 #ifdef HAVE_LPUART_DEVICE
 int s32k1xx_lpuart_configure(uint32_t base,
-                             FAR const struct uart_config_s *config)
+                             const struct uart_config_s *config)
 {
   enum clock_names_e clkname;
   uint32_t lpuart_freq = 0;

@@ -149,7 +149,7 @@ static inline void sam_chan_putreg(struct sam_chan_s *chan,
 
 /* Interrupt Handling *******************************************************/
 
-static int sam_tc_interrupt(int irq, void *context, FAR void *arg);
+static int sam_tc_interrupt(int irq, void *context, void *arg);
 
 /* Initialization ***********************************************************/
 
@@ -541,7 +541,7 @@ static inline void sam_chan_putreg(struct sam_chan_s *chan,
  *
  ****************************************************************************/
 
-static int sam_tc_interrupt(int irq, void *context, FAR void *arg)
+static int sam_tc_interrupt(int irq, void *context, void *arg)
 {
   struct sam_chan_s *chan = (struct sam_chan_s *)arg;
   uint32_t sr;

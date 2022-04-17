@@ -69,17 +69,17 @@ struct s32k1xx_resetcause_procfs_file_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int s32k1xx_resetcause_procfs_open(FAR struct file *filep,
-                                          FAR const char *relpath,
+static int s32k1xx_resetcause_procfs_open(struct file *filep,
+                                          const char *relpath,
                                           int oflags, mode_t mode);
-static int s32k1xx_resetcause_procfs_close(FAR struct file *filep);
-static ssize_t s32k1xx_resetcause_procfs_read(FAR struct file *filep,
-                                              FAR char *buffer,
+static int s32k1xx_resetcause_procfs_close(struct file *filep);
+static ssize_t s32k1xx_resetcause_procfs_read(struct file *filep,
+                                              char *buffer,
                                               size_t buflen);
-static int s32k1xx_resetcause_procfs_dup(FAR const struct file *oldp,
-                                         FAR struct file *newp);
-static int s32k1xx_resetcause_procfs_stat(FAR const char *relpath,
-                                          FAR struct stat *buf);
+static int s32k1xx_resetcause_procfs_dup(const struct file *oldp,
+                                         struct file *newp);
+static int s32k1xx_resetcause_procfs_stat(const char *relpath,
+                                          struct stat *buf);
 
 /****************************************************************************
  * Private Data
@@ -112,11 +112,11 @@ static const struct procfs_entry_s g_s32k1xx_resetcause_procfs =
  * Name: s32k1xx_resetcause_procfs_open
  ****************************************************************************/
 
-static int s32k1xx_resetcause_procfs_open(FAR struct file *filep,
-                                          FAR const char *relpath,
+static int s32k1xx_resetcause_procfs_open(struct file *filep,
+                                          const char *relpath,
                                           int oflags, mode_t mode)
 {
-  FAR struct s32k1xx_resetcause_procfs_file_s *attr;
+  struct s32k1xx_resetcause_procfs_file_s *attr;
 
   finfo("Open '%s'\n", relpath);
 
@@ -143,7 +143,7 @@ static int s32k1xx_resetcause_procfs_open(FAR struct file *filep,
 
   /* Save the attributes as the open-specific state in filep->f_priv */
 
-  filep->f_priv = (FAR void *)attr;
+  filep->f_priv = (void *)attr;
   return OK;
 }
 
@@ -151,13 +151,13 @@ static int s32k1xx_resetcause_procfs_open(FAR struct file *filep,
  * Name: s32k1xx_resetcause_procfs_close
  ****************************************************************************/
 
-static int s32k1xx_resetcause_procfs_close(FAR struct file *filep)
+static int s32k1xx_resetcause_procfs_close(struct file *filep)
 {
-  FAR struct s32k1xx_resetcause_procfs_file_s *attr;
+  struct s32k1xx_resetcause_procfs_file_s *attr;
 
   /* Recover our private data from the struct file instance */
 
-  attr = (FAR struct s32k1xx_resetcause_procfs_file_s *)filep->f_priv;
+  attr = (struct s32k1xx_resetcause_procfs_file_s *)filep->f_priv;
   DEBUGASSERT(attr);
 
   /* Release the file attributes structure */
@@ -171,11 +171,11 @@ static int s32k1xx_resetcause_procfs_close(FAR struct file *filep)
  * Name: s32k1xx_resetcause_procfs_read
  ****************************************************************************/
 
-static ssize_t s32k1xx_resetcause_procfs_read(FAR struct file *filep,
-                                              FAR char *buffer,
+static ssize_t s32k1xx_resetcause_procfs_read(struct file *filep,
+                                              char *buffer,
                                               size_t buflen)
 {
-  FAR struct s32k1xx_resetcause_procfs_file_s *attr;
+  struct s32k1xx_resetcause_procfs_file_s *attr;
   uint32_t resetcause;
   off_t offset;
 
@@ -183,7 +183,7 @@ static ssize_t s32k1xx_resetcause_procfs_read(FAR struct file *filep,
 
   /* Recover our private data from the struct file instance */
 
-  attr = (FAR struct s32k1xx_resetcause_procfs_file_s *)filep->f_priv;
+  attr = (struct s32k1xx_resetcause_procfs_file_s *)filep->f_priv;
   DEBUGASSERT(attr);
 
   /* Retrieve the reset cause */
@@ -212,17 +212,17 @@ static ssize_t s32k1xx_resetcause_procfs_read(FAR struct file *filep,
  *
  ****************************************************************************/
 
-static int s32k1xx_resetcause_procfs_dup(FAR const struct file *oldp,
-                                         FAR struct file *newp)
+static int s32k1xx_resetcause_procfs_dup(const struct file *oldp,
+                                         struct file *newp)
 {
-  FAR struct s32k1xx_resetcause_procfs_file_s *oldattr;
-  FAR struct s32k1xx_resetcause_procfs_file_s *newattr;
+  struct s32k1xx_resetcause_procfs_file_s *oldattr;
+  struct s32k1xx_resetcause_procfs_file_s *newattr;
 
   finfo("Dup %p->%p\n", oldp, newp);
 
   /* Recover our private data from the old struct file instance */
 
-  oldattr = (FAR struct s32k1xx_resetcause_procfs_file_s *)oldp->f_priv;
+  oldattr = (struct s32k1xx_resetcause_procfs_file_s *)oldp->f_priv;
   DEBUGASSERT(oldattr);
 
   /* Allocate a new container to hold the task and attribute selection */
@@ -240,7 +240,7 @@ static int s32k1xx_resetcause_procfs_dup(FAR const struct file *oldp,
 
   /* Save the new attributes in the new file structure */
 
-  newp->f_priv = (FAR void *)newattr;
+  newp->f_priv = (void *)newattr;
   return OK;
 }
 
@@ -251,8 +251,8 @@ static int s32k1xx_resetcause_procfs_dup(FAR const struct file *oldp,
  *
  ****************************************************************************/
 
-static int s32k1xx_resetcause_procfs_stat(FAR const char *relpath,
-                                          FAR struct stat *buf)
+static int s32k1xx_resetcause_procfs_stat(const char *relpath,
+                                          struct stat *buf)
 {
   /* "resetcause" is the name for a read-only file */
 

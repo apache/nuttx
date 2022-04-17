@@ -77,9 +77,9 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct adc_dev_s *sam_afec_initialize(int intf,
-                                          FAR const uint8_t *chanlist,
-                                          int nchannels);
+struct adc_dev_s *sam_afec_initialize(int intf,
+                                      const uint8_t *chanlist,
+                                      int nchannels);
 
 #undef EXTERN
 #if defined(__cplusplus)
