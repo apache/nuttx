@@ -89,7 +89,7 @@ void board_late_initialize(void)
    * SMP bringup is complete.
    */
 
-  umm_addregion((FAR void *)HEAP_REGION_ROMAPP_START,
+  umm_addregion((void *)HEAP_REGION_ROMAPP_START,
                 (size_t)(HEAP_REGION_ROMAPP_END - HEAP_REGION_ROMAPP_START));
 #endif
 }
