@@ -116,7 +116,7 @@
 
 struct up_dev_s
 {
-  FAR const struct adc_callback_s *cb;
+  const struct adc_callback_s *cb;
   uint8_t  mask;
   uint8_t  mask_int;
   uint32_t freq;
@@ -131,14 +131,14 @@ struct up_dev_s
 
 /* ADC methods */
 
-static int  adc_bind(FAR struct adc_dev_s *dev,
-                     FAR const struct adc_callback_s *callback);
-static void adc_reset(FAR struct adc_dev_s *dev);
-static int  adc_setup(FAR struct adc_dev_s *dev);
-static void adc_shutdown(FAR struct adc_dev_s *dev);
-static void adc_rxint(FAR struct adc_dev_s *dev, bool enable);
-static int  adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg);
-static int  adc_interrupt(int irq, void *context, FAR void *arg);
+static int  adc_bind(struct adc_dev_s *dev,
+                     const struct adc_callback_s *callback);
+static void adc_reset(struct adc_dev_s *dev);
+static int  adc_setup(struct adc_dev_s *dev);
+static void adc_shutdown(struct adc_dev_s *dev);
+static void adc_rxint(struct adc_dev_s *dev, bool enable);
+static int  adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg);
+static int  adc_interrupt(int irq, void *context, void *arg);
 
 /****************************************************************************
  * Private Data
@@ -184,10 +184,10 @@ static struct adc_dev_s g_adcdev =
  *
  ****************************************************************************/
 
-static int adc_bind(FAR struct adc_dev_s *dev,
-                    FAR const struct adc_callback_s *callback)
+static int adc_bind(struct adc_dev_s *dev,
+                    const struct adc_callback_s *callback)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->ad_priv;
 
   DEBUGASSERT(priv != NULL);
   priv->cb = callback;
@@ -203,9 +203,9 @@ static int adc_bind(FAR struct adc_dev_s *dev,
  *
  ****************************************************************************/
 
-static void adc_reset(FAR struct adc_dev_s *dev)
+static void adc_reset(struct adc_dev_s *dev)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->ad_priv;
   irqstate_t flags;
   uint32_t regval;
 
@@ -350,9 +350,9 @@ static void adc_reset(FAR struct adc_dev_s *dev)
  *
  ****************************************************************************/
 
-static int adc_setup(FAR struct adc_dev_s *dev)
+static int adc_setup(struct adc_dev_s *dev)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->ad_priv;
 
   int ret = irq_attach(priv->irq, adc_interrupt, NULL);
   if (ret == OK)
@@ -372,9 +372,9 @@ static int adc_setup(FAR struct adc_dev_s *dev)
  *
  ****************************************************************************/
 
-static void adc_shutdown(FAR struct adc_dev_s *dev)
+static void adc_shutdown(struct adc_dev_s *dev)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->ad_priv;
 
   if (priv->timer)
     {
@@ -401,9 +401,9 @@ static void adc_shutdown(FAR struct adc_dev_s *dev)
  *
  ****************************************************************************/
 
-static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
+static void adc_rxint(struct adc_dev_s *dev, bool enable)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->ad_priv;
 
   if (enable)
     {
@@ -445,7 +445,7 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
+static int adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 {
   /* No ioctl commands supported */
 
@@ -460,9 +460,9 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int adc_interrupt(int irq, void *context, FAR void *arg)
+static int adc_interrupt(int irq, void *context, void *arg)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)g_adcdev.ad_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)g_adcdev.ad_priv;
   uint32_t regval;
   int i;
 
@@ -524,7 +524,7 @@ static int adc_interrupt(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-FAR struct adc_dev_s *lpc43_adcinitialize(void)
+struct adc_dev_s *lpc43_adcinitialize(void)
 {
   return &g_adcdev;
 }

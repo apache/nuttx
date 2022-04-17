@@ -232,8 +232,8 @@ static int imxrt_gpio_info(int irq, uintptr_t *regaddr, unsigned int *pin)
  ****************************************************************************/
 
 #ifdef CONFIG_IMXRT_GPIO1_0_15_IRQ
-static int imxrt_gpio1_0_15_interrupt(int irq, FAR void *context,
-                                      FAR void *arg)
+static int imxrt_gpio1_0_15_interrupt(int irq, void *context,
+                                      void *arg)
 {
   uint32_t status;
   int gpioirq;
@@ -269,8 +269,8 @@ static int imxrt_gpio1_0_15_interrupt(int irq, FAR void *context,
 #endif
 
 #ifdef CONFIG_IMXRT_GPIO1_16_31_IRQ
-static int imxrt_gpio1_16_31_interrupt(int irq, FAR void *context,
-                                       FAR void *arg)
+static int imxrt_gpio1_16_31_interrupt(int irq, void *context,
+                                       void *arg)
 {
   uint32_t status;
   int gpioirq;
@@ -306,8 +306,8 @@ static int imxrt_gpio1_16_31_interrupt(int irq, FAR void *context,
 #endif
 
 #ifdef CONFIG_IMXRT_GPIO2_0_15_IRQ
-static int imxrt_gpio2_0_15_interrupt(int irq, FAR void *context,
-                                      FAR void *arg)
+static int imxrt_gpio2_0_15_interrupt(int irq, void *context,
+                                      void *arg)
 {
   uint32_t status;
   int gpioirq;
@@ -343,8 +343,8 @@ static int imxrt_gpio2_0_15_interrupt(int irq, FAR void *context,
 #endif
 
 #ifdef CONFIG_IMXRT_GPIO2_16_31_IRQ
-static int imxrt_gpio2_16_31_interrupt(int irq, FAR void *context,
-                                       FAR void *arg)
+static int imxrt_gpio2_16_31_interrupt(int irq, void *context,
+                                       void *arg)
 {
   uint32_t status;
   int gpioirq;
@@ -380,8 +380,8 @@ static int imxrt_gpio2_16_31_interrupt(int irq, FAR void *context,
 #endif
 
 #ifdef CONFIG_IMXRT_GPIO3_0_15_IRQ
-static int imxrt_gpio3_0_15_interrupt(int irq, FAR void *context,
-                                      FAR void *arg)
+static int imxrt_gpio3_0_15_interrupt(int irq, void *context,
+                                      void *arg)
 {
   uint32_t status;
   int gpioirq;
@@ -417,8 +417,8 @@ static int imxrt_gpio3_0_15_interrupt(int irq, FAR void *context,
 #endif
 
 #ifdef CONFIG_IMXRT_GPIO3_16_31_IRQ
-static int imxrt_gpio3_16_31_interrupt(int irq, FAR void *context,
-                                       FAR void *arg)
+static int imxrt_gpio3_16_31_interrupt(int irq, void *context,
+                                       void *arg)
 {
   uint32_t status;
   int gpioirq;
@@ -455,8 +455,8 @@ static int imxrt_gpio3_16_31_interrupt(int irq, FAR void *context,
 
 #ifdef IMXRT_GPIO4_IMR
 #ifdef CONFIG_IMXRT_GPIO4_0_15_IRQ
-static int imxrt_gpio4_0_15_interrupt(int irq, FAR void *context,
-                                      FAR void *arg)
+static int imxrt_gpio4_0_15_interrupt(int irq, void *context,
+                                      void *arg)
 {
   uint32_t status;
   int gpioirq;
@@ -492,8 +492,8 @@ static int imxrt_gpio4_0_15_interrupt(int irq, FAR void *context,
 #endif
 
 #ifdef CONFIG_IMXRT_GPIO4_16_31_IRQ
-static int imxrt_gpio4_16_31_interrupt(int irq, FAR void *context,
-                                       FAR void *arg)
+static int imxrt_gpio4_16_31_interrupt(int irq, void *context,
+                                       void *arg)
 {
   uint32_t status;
   int gpioirq;
@@ -530,8 +530,8 @@ static int imxrt_gpio4_16_31_interrupt(int irq, FAR void *context,
 #endif
 
 #ifdef CONFIG_IMXRT_GPIO5_0_15_IRQ
-static int imxrt_gpio5_0_15_interrupt(int irq, FAR void *context,
-                                      FAR void *arg)
+static int imxrt_gpio5_0_15_interrupt(int irq, void *context,
+                                      void *arg)
 {
   uint32_t status;
   int gpioirq;
@@ -567,8 +567,8 @@ static int imxrt_gpio5_0_15_interrupt(int irq, FAR void *context,
 #endif
 
 #ifdef CONFIG_IMXRT_GPIO5_16_31_IRQ
-static int imxrt_gpio5_16_31_interrupt(int irq, FAR void *context,
-                                       FAR void *arg)
+static int imxrt_gpio5_16_31_interrupt(int irq, void *context,
+                                       void *arg)
 {
   uint32_t status;
   int gpioirq;

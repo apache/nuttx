@@ -127,11 +127,11 @@ struct power_domain
 static void cxd56_img_clock_enable(void);
 static void cxd56_img_clock_disable(void);
 static void cxd56_scu_clock_ctrl(uint32_t block, uint32_t intr, int on);
-static void cxd56_scu_peri_clock_enable(FAR const struct scu_peripheral *p)
+static void cxd56_scu_peri_clock_enable(const struct scu_peripheral *p)
   unused_code;
-static void cxd56_scu_peri_clock_disable(FAR const struct scu_peripheral *p)
+static void cxd56_scu_peri_clock_disable(const struct scu_peripheral *p)
   unused_code;
-static void cxd56_scu_peri_clock_gating(FAR const struct scu_peripheral *p,
+static void cxd56_scu_peri_clock_gating(const struct scu_peripheral *p,
                                         int enable) unused_code;
 
 /****************************************************************************
@@ -1965,7 +1965,7 @@ void cxd56_scuseq_clock_disable(void)
   disable_pwd(PDID_SCU);
 }
 
-static void cxd56_scu_peri_clock_enable(FAR const struct scu_peripheral *p)
+static void cxd56_scu_peri_clock_enable(const struct scu_peripheral *p)
 {
   uint32_t val;
   uint32_t rst;
@@ -1994,7 +1994,7 @@ static void cxd56_scu_peri_clock_enable(FAR const struct scu_peripheral *p)
   cxd56_scu_clock_ctrl(cken, crgintmask, 1);
 }
 
-static void cxd56_scu_peri_clock_disable(FAR const struct scu_peripheral *p)
+static void cxd56_scu_peri_clock_disable(const struct scu_peripheral *p)
 {
   uint32_t val;
   uint32_t rst;
@@ -2019,7 +2019,7 @@ static void cxd56_scu_peri_clock_disable(FAR const struct scu_peripheral *p)
 }
 
 static void cxd56_scu_peri_clock_gating(
-  FAR const struct scu_peripheral *p, int enable)
+  const struct scu_peripheral *p, int enable)
 {
   uint32_t cken = 1u << p->cken;
 

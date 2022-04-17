@@ -77,7 +77,7 @@
 
 struct lc823450_adc_inst_s
 {
-  FAR const struct adc_callback_s *cb;
+  const struct adc_callback_s *cb;
   struct adc_dev_s dev;
 
   sem_t sem_excl;           /* Mutual exclusion semaphore */
@@ -94,17 +94,17 @@ struct lc823450_adc_inst_s
 
 static inline void lc823450_adc_clearirq(void);
 static inline int  lc823450_adc_sem_wait(
-    FAR struct lc823450_adc_inst_s *inst);
+    struct lc823450_adc_inst_s *inst);
 static inline void lc823450_adc_sem_post(
-    FAR struct lc823450_adc_inst_s *inst);
+    struct lc823450_adc_inst_s *inst);
 
-static int  lc823450_adc_bind(FAR struct adc_dev_s *dev,
-                              FAR const struct adc_callback_s *callback);
-static void lc823450_adc_reset(FAR struct adc_dev_s *dev);
-static int  lc823450_adc_setup(FAR struct adc_dev_s *dev);
-static void lc823450_adc_shutdown(FAR struct adc_dev_s *dev);
-static void lc823450_adc_rxint(FAR struct adc_dev_s *dev, bool enable);
-static int  lc823450_adc_ioctl(FAR struct adc_dev_s *dev, int cmd,
+static int  lc823450_adc_bind(struct adc_dev_s *dev,
+                              const struct adc_callback_s *callback);
+static void lc823450_adc_reset(struct adc_dev_s *dev);
+static int  lc823450_adc_setup(struct adc_dev_s *dev);
+static void lc823450_adc_shutdown(struct adc_dev_s *dev);
+static void lc823450_adc_rxint(struct adc_dev_s *dev, bool enable);
+static int  lc823450_adc_ioctl(struct adc_dev_s *dev, int cmd,
                                unsigned long arg);
 
 /****************************************************************************
@@ -206,7 +206,7 @@ static void lc823450_adc_standby(int on)
  *
  ****************************************************************************/
 
-static void lc823450_adc_start(FAR struct lc823450_adc_inst_s *inst)
+static void lc823450_adc_start(struct lc823450_adc_inst_s *inst)
 {
   uint32_t pclk;  /* APB clock in Hz */
   uint8_t i;
@@ -264,7 +264,7 @@ static void lc823450_adc_start(FAR struct lc823450_adc_inst_s *inst)
  *
  ****************************************************************************/
 
-static inline int lc823450_adc_sem_wait(FAR struct lc823450_adc_inst_s *inst)
+static inline int lc823450_adc_sem_wait(struct lc823450_adc_inst_s *inst)
 {
   return nxsem_wait_uninterruptible(&inst->sem_excl);
 }
@@ -278,7 +278,7 @@ static inline int lc823450_adc_sem_wait(FAR struct lc823450_adc_inst_s *inst)
  ****************************************************************************/
 
 static inline void lc823450_adc_sem_post(
-    FAR struct lc823450_adc_inst_s *inst)
+    struct lc823450_adc_inst_s *inst)
 {
   nxsem_post(&inst->sem_excl);
 }
@@ -292,7 +292,7 @@ static inline void lc823450_adc_sem_post(
  ****************************************************************************/
 
 #ifndef CONFIG_ADC_POLLED
-static int lc823450_adc_isr(int irq, void *context, FAR void *arg)
+static int lc823450_adc_isr(int irq, void *context, void *arg)
 {
   ainfo("interrupt\n");
 
@@ -311,11 +311,11 @@ static int lc823450_adc_isr(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static int lc823450_adc_bind(FAR struct adc_dev_s *dev,
-                             FAR const struct adc_callback_s *callback)
+static int lc823450_adc_bind(struct adc_dev_s *dev,
+                             const struct adc_callback_s *callback)
 {
-  FAR struct lc823450_adc_inst_s *priv =
-    (FAR struct lc823450_adc_inst_s *)dev->ad_priv;
+  struct lc823450_adc_inst_s *priv =
+    (struct lc823450_adc_inst_s *)dev->ad_priv;
 
   DEBUGASSERT(priv != NULL);
   priv->cb = callback;
@@ -335,7 +335,7 @@ static int lc823450_adc_bind(FAR struct adc_dev_s *dev,
  *
  ****************************************************************************/
 
-static void lc823450_adc_reset(FAR struct adc_dev_s *dev)
+static void lc823450_adc_reset(struct adc_dev_s *dev)
 {
   ainfo("\n");
 }
@@ -355,7 +355,7 @@ static void lc823450_adc_reset(FAR struct adc_dev_s *dev)
  *
  ****************************************************************************/
 
-static int lc823450_adc_setup(FAR struct adc_dev_s *dev)
+static int lc823450_adc_setup(struct adc_dev_s *dev)
 {
   ainfo("\n");
   return OK;
@@ -374,7 +374,7 @@ static int lc823450_adc_setup(FAR struct adc_dev_s *dev)
  *
  ****************************************************************************/
 
-static void lc823450_adc_shutdown(FAR struct adc_dev_s *dev)
+static void lc823450_adc_shutdown(struct adc_dev_s *dev)
 {
   ainfo("\n");
 }
@@ -391,10 +391,10 @@ static void lc823450_adc_shutdown(FAR struct adc_dev_s *dev)
  *
  ****************************************************************************/
 
-static void lc823450_adc_rxint(FAR struct adc_dev_s *dev, bool enable)
+static void lc823450_adc_rxint(struct adc_dev_s *dev, bool enable)
 {
-  FAR struct lc823450_adc_inst_s *inst =
-    (FAR struct lc823450_adc_inst_s *)dev->ad_priv;
+  struct lc823450_adc_inst_s *inst =
+    (struct lc823450_adc_inst_s *)dev->ad_priv;
   int ret;
 
   ainfo("enable: %d\n", enable);
@@ -431,14 +431,14 @@ static void lc823450_adc_rxint(FAR struct adc_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static int lc823450_adc_ioctl(FAR struct adc_dev_s *dev, int cmd,
+static int lc823450_adc_ioctl(struct adc_dev_s *dev, int cmd,
                               unsigned long arg)
 {
   int ret = 0;
   uint32_t val;
   uint8_t ch;
-  FAR struct lc823450_adc_inst_s *priv =
-    (FAR struct lc823450_adc_inst_s *)dev->ad_priv;
+  struct lc823450_adc_inst_s *priv =
+    (struct lc823450_adc_inst_s *)dev->ad_priv;
 
   ainfo("cmd=%xh\n", cmd);
 
@@ -515,7 +515,7 @@ static int lc823450_adc_ioctl(FAR struct adc_dev_s *dev, int cmd,
  *
  ****************************************************************************/
 
-FAR struct adc_dev_s *lc823450_adcinitialize(void)
+struct adc_dev_s *lc823450_adcinitialize(void)
 {
   int ret;
   struct lc823450_adc_inst_s *inst;
@@ -601,13 +601,13 @@ FAR struct adc_dev_s *lc823450_adcinitialize(void)
  * Name: lc823450_adc_receive
  ****************************************************************************/
 
-int lc823450_adc_receive(FAR struct adc_dev_s *dev,
-                         FAR struct adc_msg_s *msg)
+int lc823450_adc_receive(struct adc_dev_s *dev,
+                         struct adc_msg_s *msg)
 {
   uint8_t ch;
   int ret;
-  FAR struct lc823450_adc_inst_s *inst =
-    (FAR struct lc823450_adc_inst_s *)dev->ad_priv;
+  struct lc823450_adc_inst_s *inst =
+    (struct lc823450_adc_inst_s *)dev->ad_priv;
 
   if (!g_inst)
     {

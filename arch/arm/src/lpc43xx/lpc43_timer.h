@@ -71,7 +71,7 @@ extern "C"
 
 #if defined(CONFIG_LPC43_TMR0) || defined(CONFIG_LPC43_TMR1) || \
     defined(CONFIG_LPC43_TMR2) || defined(CONFIG_LPC43_TMR3)
-void lpc43_tmrinitialize(FAR const char *devpath, int irq);
+void lpc43_tmrinitialize(const char *devpath, int irq);
 #endif
 
 #undef EXTERN

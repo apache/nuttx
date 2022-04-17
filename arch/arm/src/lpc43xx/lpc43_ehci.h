@@ -82,7 +82,7 @@ extern "C"
 
 #if defined(CONFIG_LPC43_USBOTG) && defined(CONFIG_USBHOST)
 struct usbhost_connection_s;
-FAR struct usbhost_connection_s *lpc43_ehci_initialize(int controller);
+struct usbhost_connection_s *lpc43_ehci_initialize(int controller);
 #endif
 
 #undef EXTERN

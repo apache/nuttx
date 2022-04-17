@@ -100,21 +100,21 @@ struct lc823450_wdt_lowerhalf_s
 
 #ifdef CONFIG_LC823450_WDT_INTERRUPT
 static int    lc823450_wdt_interrupt(int irq,
-                                     FAR void *context, FAR void *arg);
+                                     void *context, void *arg);
 #endif
 
 /* "Lower half" driver methods **********************************************/
 
-static int    lc823450_wdt_start(FAR struct watchdog_lowerhalf_s *lower);
-static int    lc823450_wdt_stop(FAR struct watchdog_lowerhalf_s *lower);
-static int    lc823450_wdt_keepalive(FAR struct watchdog_lowerhalf_s *lower);
-static int    lc823450_wdt_getstatus(FAR struct watchdog_lowerhalf_s *lower,
-                                     FAR struct watchdog_status_s *status);
-static int    lc823450_wdt_settimeout(FAR struct watchdog_lowerhalf_s *lower,
+static int    lc823450_wdt_start(struct watchdog_lowerhalf_s *lower);
+static int    lc823450_wdt_stop(struct watchdog_lowerhalf_s *lower);
+static int    lc823450_wdt_keepalive(struct watchdog_lowerhalf_s *lower);
+static int    lc823450_wdt_getstatus(struct watchdog_lowerhalf_s *lower,
+                                     struct watchdog_status_s *status);
+static int    lc823450_wdt_settimeout(struct watchdog_lowerhalf_s *lower,
                                       uint32_t timeout);
-static xcpt_t lc823450_wdt_capture(FAR struct watchdog_lowerhalf_s *lower,
+static xcpt_t lc823450_wdt_capture(struct watchdog_lowerhalf_s *lower,
                                    xcpt_t handler);
-static int    lc823450_wdt_ioctl(FAR struct watchdog_lowerhalf_s *lower,
+static int    lc823450_wdt_ioctl(struct watchdog_lowerhalf_s *lower,
                                  int cmd, unsigned long arg);
 
 /****************************************************************************
@@ -172,9 +172,9 @@ static void wdg_work_func(void *arg)
  ****************************************************************************/
 
 #ifdef CONFIG_LC823450_WDT_INTERRUPT
-static int lc823450_wdt_interrupt(int irq, FAR void *context, FAR void *arg)
+static int lc823450_wdt_interrupt(int irq, void *context, void *arg)
 {
-  FAR struct lc823450_wdt_lowerhalf_s *priv = &g_wdtdev;
+  struct lc823450_wdt_lowerhalf_s *priv = &g_wdtdev;
 
   if (!(getreg32(WDT_PT0STS) & (1 << WDT_PT0STS_CSTS)))
     {
@@ -212,7 +212,7 @@ static int lc823450_wdt_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static int lc823450_wdt_start(FAR struct watchdog_lowerhalf_s *lower)
+static int lc823450_wdt_start(struct watchdog_lowerhalf_s *lower)
 {
   modifyreg32(WDT_PT0CTL, 0, 1 << WDT_PT0CTL_WT0ACT);
 
@@ -235,7 +235,7 @@ static int lc823450_wdt_start(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int lc823450_wdt_stop(FAR struct watchdog_lowerhalf_s *lower)
+static int lc823450_wdt_stop(struct watchdog_lowerhalf_s *lower)
 {
   modifyreg32(WDT_PT0CTL, 1 << WDT_PT0CTL_WT0ACT, 0);
 
@@ -260,10 +260,10 @@ static int lc823450_wdt_stop(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int lc823450_wdt_keepalive(FAR struct watchdog_lowerhalf_s *lower)
+static int lc823450_wdt_keepalive(struct watchdog_lowerhalf_s *lower)
 {
-  FAR struct lc823450_wdt_lowerhalf_s *priv =
-    (FAR struct lc823450_wdt_lowerhalf_s *)lower;
+  struct lc823450_wdt_lowerhalf_s *priv =
+    (struct lc823450_wdt_lowerhalf_s *)lower;
 
   wdinfo("Entry\n");
 
@@ -288,11 +288,11 @@ static int lc823450_wdt_keepalive(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int lc823450_wdt_getstatus(FAR struct watchdog_lowerhalf_s *lower,
-                         FAR struct watchdog_status_s *status)
+static int lc823450_wdt_getstatus(struct watchdog_lowerhalf_s *lower,
+                         struct watchdog_status_s *status)
 {
-  FAR struct lc823450_wdt_lowerhalf_s *priv =
-    (FAR struct lc823450_wdt_lowerhalf_s *)lower;
+  struct lc823450_wdt_lowerhalf_s *priv =
+    (struct lc823450_wdt_lowerhalf_s *)lower;
 
   uint32_t wdt_freq;
 
@@ -351,11 +351,11 @@ static int lc823450_wdt_getstatus(FAR struct watchdog_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int lc823450_wdt_settimeout(FAR struct watchdog_lowerhalf_s *lower,
+static int lc823450_wdt_settimeout(struct watchdog_lowerhalf_s *lower,
                                    uint32_t timeout)
 {
-  FAR struct lc823450_wdt_lowerhalf_s *priv =
-    (FAR struct lc823450_wdt_lowerhalf_s *)lower;
+  struct lc823450_wdt_lowerhalf_s *priv =
+    (struct lc823450_wdt_lowerhalf_s *)lower;
   int32_t wt0pstst;
   uint32_t wdt_freq;
 
@@ -422,15 +422,15 @@ static int lc823450_wdt_settimeout(FAR struct watchdog_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static xcpt_t lc823450_wdt_capture(FAR struct watchdog_lowerhalf_s *lower,
+static xcpt_t lc823450_wdt_capture(struct watchdog_lowerhalf_s *lower,
                             xcpt_t handler)
 {
 #ifndef CONFIG_LC823450_WDT_INTERRUPT
   wdinfo("ERROR: Not configured for this mode\n");
   return NULL;
 #else
-  FAR struct lc823450_wdt_lowerhalf_s *priv =
-    (FAR struct lc823450_wdt_lowerhalf_s *)lower;
+  struct lc823450_wdt_lowerhalf_s *priv =
+    (struct lc823450_wdt_lowerhalf_s *)lower;
   irqstate_t flags;
   xcpt_t oldhandler;
 
@@ -486,7 +486,7 @@ static xcpt_t lc823450_wdt_capture(FAR struct watchdog_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int lc823450_wdt_ioctl(FAR struct watchdog_lowerhalf_s *lower,
+static int lc823450_wdt_ioctl(struct watchdog_lowerhalf_s *lower,
                               int cmd, unsigned long arg)
 {
   wdinfo("cmd=%d arg=%ld\n", cmd, arg);
@@ -518,7 +518,7 @@ static int lc823450_wdt_ioctl(FAR struct watchdog_lowerhalf_s *lower,
 
 int lc823450_wdt_initialize(void)
 {
-  FAR struct lc823450_wdt_lowerhalf_s *priv = &g_wdtdev;
+  struct lc823450_wdt_lowerhalf_s *priv = &g_wdtdev;
 
   priv->wdt_lh.ops = &g_wdgops;
 
@@ -542,7 +542,7 @@ int lc823450_wdt_initialize(void)
   /* Register the watchdog driver as /dev/watchdog0 */
 
   watchdog_register("/dev/watchdog0",
-                    (FAR struct watchdog_lowerhalf_s *)priv);
+                    (struct watchdog_lowerhalf_s *)priv);
   return OK;
 }
 

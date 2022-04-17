@@ -95,7 +95,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-FAR struct adc_dev_s *lc823450_adcinitialize(void);
+struct adc_dev_s *lc823450_adcinitialize(void);
 
 #if defined(__cplusplus)
 }

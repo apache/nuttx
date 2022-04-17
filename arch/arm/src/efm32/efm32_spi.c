@@ -156,8 +156,8 @@ static void      spi_dmarxsetup(struct efm32_spidev_s *priv,
 static void      spi_dmatxsetup(struct efm32_spidev_s *priv,
                    const void *txbuffer, const void *txdummy,
                    size_t nwords);
-static inline void spi_dmarxstart(FAR struct efm32_spidev_s *priv);
-static inline void spi_dmatxstart(FAR struct efm32_spidev_s *priv);
+static inline void spi_dmarxstart(struct efm32_spidev_s *priv);
+static inline void spi_dmatxstart(struct efm32_spidev_s *priv);
 #endif
 
 /* SPI methods */
@@ -170,7 +170,7 @@ static uint32_t  spi_setfrequency(struct spi_dev_s *dev,
 static void      spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode);
 static void      spi_setbits(struct spi_dev_s *dev, int nbits);
 #ifdef CONFIG_SPI_HWFEATURES
-static int       spi_hwfeatures(FAR struct spi_dev_s *dev,
+static int       spi_hwfeatures(struct spi_dev_s *dev,
                                 spi_hwfeatures_t features);
 #endif
 static uint8_t   spi_status(struct spi_dev_s *dev, uint32_t devid);
@@ -667,7 +667,7 @@ static void spi_dmatxsetup(struct efm32_spidev_s *priv, const void *txbuffer,
  ****************************************************************************/
 
 #ifdef CONFIG_EFM32_SPI_DMA
-static void spi_dmarxstart(FAR struct efm32_spidev_s *priv)
+static void spi_dmarxstart(struct efm32_spidev_s *priv)
 {
   priv->rxresult = EINPROGRESS;
   efm32_dmastart(priv->rxdmach, spi_dmarxcallback, priv);
@@ -683,7 +683,7 @@ static void spi_dmarxstart(FAR struct efm32_spidev_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_EFM32_SPI_DMA
-static inline void spi_dmatxstart(FAR struct efm32_spidev_s *priv)
+static inline void spi_dmatxstart(struct efm32_spidev_s *priv)
 {
   priv->txresult = EINPROGRESS;
   efm32_dmastart(priv->txdmach, spi_dmatxcallback, priv);
@@ -1050,7 +1050,7 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_HWFEATURES
-static int spi_hwfeatures(FAR struct spi_dev_s *dev,
+static int spi_hwfeatures(struct spi_dev_s *dev,
                           spi_hwfeatures_t features)
 {
 #ifdef CONFIG_SPI_BITORDER

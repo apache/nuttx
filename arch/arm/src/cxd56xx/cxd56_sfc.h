@@ -43,7 +43,7 @@ extern "C"
  * Public Functions Prototypes
  ****************************************************************************/
 
-FAR struct mtd_dev_s *cxd56_sfc_initialize(void);
+struct mtd_dev_s *cxd56_sfc_initialize(void);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -88,7 +88,7 @@
 
 struct up_dev_s
 {
-  FAR const struct adc_callback_s *cb;
+  const struct adc_callback_s *cb;
   uint8_t  mask;
   uint32_t sps;
   int      irq;
@@ -100,18 +100,18 @@ struct up_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static void adc_receive(FAR struct up_dev_s *priv, uint8_t ch, int32_t data);
+static void adc_receive(struct up_dev_s *priv, uint8_t ch, int32_t data);
 
 /* ADC methods */
 
-static int  adc_bind(FAR struct adc_dev_s *dev,
-                     FAR const struct adc_callback_s *callback);
-static void adc_reset(FAR struct adc_dev_s *dev);
-static int  adc_setup(FAR struct adc_dev_s *dev);
-static void adc_shutdown(FAR struct adc_dev_s *dev);
-static void adc_rxint(FAR struct adc_dev_s *dev, bool enable);
-static int  adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg);
-static int  adc_interrupt(int irq, void *context, FAR void *arg);
+static int  adc_bind(struct adc_dev_s *dev,
+                     const struct adc_callback_s *callback);
+static void adc_reset(struct adc_dev_s *dev);
+static int  adc_setup(struct adc_dev_s *dev);
+static void adc_shutdown(struct adc_dev_s *dev);
+static void adc_rxint(struct adc_dev_s *dev, bool enable);
+static int  adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg);
+static int  adc_interrupt(int irq, void *context, void *arg);
 
 /****************************************************************************
  * Private Data
@@ -152,7 +152,7 @@ static struct adc_dev_s g_adcdev =
  *
  ****************************************************************************/
 
-static void adc_receive(FAR struct up_dev_s *priv, uint8_t ch, int32_t data)
+static void adc_receive(struct up_dev_s *priv, uint8_t ch, int32_t data)
 {
   /* Verify that the upper-half driver has bound its callback functions. */
 
@@ -174,10 +174,10 @@ static void adc_receive(FAR struct up_dev_s *priv, uint8_t ch, int32_t data)
  *
  ****************************************************************************/
 
-static int adc_bind(FAR struct adc_dev_s *dev,
-                    FAR const struct adc_callback_s *callback)
+static int adc_bind(struct adc_dev_s *dev,
+                    const struct adc_callback_s *callback)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->ad_priv;
 
   DEBUGASSERT(priv != NULL);
   priv->cb = callback;
@@ -193,9 +193,9 @@ static int adc_bind(FAR struct adc_dev_s *dev,
  *
  ****************************************************************************/
 
-static void adc_reset(FAR struct adc_dev_s *dev)
+static void adc_reset(struct adc_dev_s *dev)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->ad_priv;
   irqstate_t flags;
   uint32_t clkdiv;
   uint32_t regval;
@@ -308,9 +308,9 @@ static void adc_reset(FAR struct adc_dev_s *dev)
  *
  ****************************************************************************/
 
-static int adc_setup(FAR struct adc_dev_s *dev)
+static int adc_setup(struct adc_dev_s *dev)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->ad_priv;
   int i;
 
   int ret = irq_attach(priv->irq, adc_interrupt, NULL);
@@ -337,9 +337,9 @@ static int adc_setup(FAR struct adc_dev_s *dev)
  *
  ****************************************************************************/
 
-static void adc_shutdown(FAR struct adc_dev_s *dev)
+static void adc_shutdown(struct adc_dev_s *dev)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->ad_priv;
 
   /* Disable ADC interrupts, both at the level of the ADC device and at the
    * level of the NVIC.
@@ -361,9 +361,9 @@ static void adc_shutdown(FAR struct adc_dev_s *dev)
  *
  ****************************************************************************/
 
-static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
+static void adc_rxint(struct adc_dev_s *dev, bool enable)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->ad_priv;
 
   if (enable)
     {
@@ -401,7 +401,7 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
+static int adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 {
   /* No ioctl commands supported */
 
@@ -416,12 +416,12 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int adc_interrupt(int irq, void *context, FAR void *arg)
+static int adc_interrupt(int irq, void *context, void *arg)
 {
 #ifndef CONFIG_LPC17_40_ADC_BURSTMODE
 #ifdef CONFIG_LPC17_40_ADC_CHANLIST
 
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)g_adcdev.ad_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)g_adcdev.ad_priv;
   uint32_t regval;
   unsigned char ch;
   int32_t value;
@@ -453,7 +453,7 @@ static int adc_interrupt(int irq, void *context, FAR void *arg)
 
 #else
 
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)g_adcdev.ad_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)g_adcdev.ad_priv;
   uint32_t regval;
   unsigned char ch;
   int32_t value;
@@ -477,7 +477,7 @@ static int adc_interrupt(int irq, void *context, FAR void *arg)
 #endif
 #else /* CONFIG_LPC17_40_ADC_BURSTMODE */
 
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)g_adcdev.ad_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)g_adcdev.ad_priv;
   volatile uint32_t reg_val;
   volatile uint32_t reg_val2;
   volatile uint32_t reg_val3;
@@ -616,7 +616,7 @@ static int adc_interrupt(int irq, void *context, FAR void *arg)
       if (adc0_int_done == 1)
         {
           work_queue(HPWORK, &priv->irqwork, adc_irqworker,
-                     (FAR void *)priv, 0);
+                     (void *)priv, 0);
         }
 
 #endif /* CONFIG_ADC_WORKER_THREAD */
@@ -656,7 +656,7 @@ static int adc_interrupt(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-FAR struct adc_dev_s *lpc17_40_adcinitialize(void)
+struct adc_dev_s *lpc17_40_adcinitialize(void)
 {
   return &g_adcdev;
 }

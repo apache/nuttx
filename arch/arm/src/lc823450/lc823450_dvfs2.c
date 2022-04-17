@@ -158,7 +158,7 @@ static int _dvfs_another_cpu_state(int me)
  * Callback for 1 shot timer
  ****************************************************************************/
 
-int lc823450_dvfs_oneshot(int irq, uint32_t *regs, FAR void *arg)
+int lc823450_dvfs_oneshot(int irq, uint32_t *regs, void *arg)
 {
   /* voltage has reached at 1.2V */
 

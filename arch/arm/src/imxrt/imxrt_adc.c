@@ -64,36 +64,36 @@
 
 struct imxrt_dev_s
 {
-  FAR const struct adc_callback_s *cb;  /* Upper driver callback */
-  uint8_t  intf;                        /* ADC number (i.e. ADC1, ADC2) */
-  uint32_t base;                        /* ADC register base */
-  uint8_t  initialized;                 /* ADC initialization counter */
-  int      irq;                         /* ADC IRQ number */
-  int      nchannels;                   /* Number of configured ADC channels */
-  uint8_t  chanlist[ADC_MAX_CHANNELS];  /* ADC channel list */
-  uint8_t  current;                     /* Current channel being converted */
+  const struct adc_callback_s *cb;     /* Upper driver callback */
+  uint8_t  intf;                       /* ADC number (i.e. ADC1, ADC2) */
+  uint32_t base;                       /* ADC register base */
+  uint8_t  initialized;                /* ADC initialization counter */
+  int      irq;                        /* ADC IRQ number */
+  int      nchannels;                  /* Number of configured ADC channels */
+  uint8_t  chanlist[ADC_MAX_CHANNELS]; /* ADC channel list */
+  uint8_t  current;                    /* Current channel being converted */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static void adc_putreg(FAR struct imxrt_dev_s *priv, uint32_t offset,
+static void adc_putreg(struct imxrt_dev_s *priv, uint32_t offset,
                        uint32_t value);
-static uint32_t adc_getreg(FAR struct imxrt_dev_s *priv, uint32_t offset);
-static void adc_modifyreg(FAR struct imxrt_dev_s *priv, uint32_t offset,
+static uint32_t adc_getreg(struct imxrt_dev_s *priv, uint32_t offset);
+static void adc_modifyreg(struct imxrt_dev_s *priv, uint32_t offset,
                           uint32_t clearbits, uint32_t setbits);
 
 /* ADC methods */
 
-static int  adc_bind(FAR struct adc_dev_s *dev,
-                     FAR const struct adc_callback_s *callback);
-static void adc_reset(FAR struct adc_dev_s *dev);
-static int  adc_setup(FAR struct adc_dev_s *dev);
-static void adc_shutdown(FAR struct adc_dev_s *dev);
-static void adc_rxint(FAR struct adc_dev_s *dev, bool enable);
-static int  adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg);
-static int  adc_interrupt(int irq, void *context, FAR void *arg);
+static int  adc_bind(struct adc_dev_s *dev,
+                     const struct adc_callback_s *callback);
+static void adc_reset(struct adc_dev_s *dev);
+static int  adc_setup(struct adc_dev_s *dev);
+static void adc_shutdown(struct adc_dev_s *dev);
+static void adc_rxint(struct adc_dev_s *dev, bool enable);
+static int  adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg);
+static int  adc_interrupt(int irq, void *context, void *arg);
 
 /****************************************************************************
  * Private Data
@@ -185,18 +185,18 @@ gpio_pinset_t g_adcpinlist2[ADC_MAX_CHANNELS] =
  * Private Functions
  ****************************************************************************/
 
-static void adc_putreg(FAR struct imxrt_dev_s *priv, uint32_t offset,
+static void adc_putreg(struct imxrt_dev_s *priv, uint32_t offset,
                        uint32_t value)
 {
   putreg32(value, priv->base + offset);
 }
 
-static uint32_t adc_getreg(FAR struct imxrt_dev_s *priv, uint32_t offset)
+static uint32_t adc_getreg(struct imxrt_dev_s *priv, uint32_t offset)
 {
   return getreg32(priv->base + offset);
 }
 
-static void adc_modifyreg(FAR struct imxrt_dev_s *priv, uint32_t offset,
+static void adc_modifyreg(struct imxrt_dev_s *priv, uint32_t offset,
                           uint32_t clearbits, uint32_t setbits)
 {
   modifyreg32(priv->base + offset, clearbits, setbits);
@@ -211,10 +211,10 @@ static void adc_modifyreg(FAR struct imxrt_dev_s *priv, uint32_t offset,
  *
  ****************************************************************************/
 
-static int adc_bind(FAR struct adc_dev_s *dev,
-                    FAR const struct adc_callback_s *callback)
+static int adc_bind(struct adc_dev_s *dev,
+                    const struct adc_callback_s *callback)
 {
-  FAR struct imxrt_dev_s *priv = (FAR struct imxrt_dev_s *)dev->ad_priv;
+  struct imxrt_dev_s *priv = (struct imxrt_dev_s *)dev->ad_priv;
 
   DEBUGASSERT(priv != NULL);
   priv->cb = callback;
@@ -230,9 +230,9 @@ static int adc_bind(FAR struct adc_dev_s *dev,
  *
  ****************************************************************************/
 
-static void adc_reset(FAR struct adc_dev_s *dev)
+static void adc_reset(struct adc_dev_s *dev)
 {
-  FAR struct imxrt_dev_s *priv = (FAR struct imxrt_dev_s *)dev->ad_priv;
+  struct imxrt_dev_s *priv = (struct imxrt_dev_s *)dev->ad_priv;
   irqstate_t flags;
 
   flags = enter_critical_section();
@@ -350,9 +350,9 @@ exit_leave_critical:
  *
  ****************************************************************************/
 
-static int adc_setup(FAR struct adc_dev_s *dev)
+static int adc_setup(struct adc_dev_s *dev)
 {
-  FAR struct imxrt_dev_s *priv = (FAR struct imxrt_dev_s *)dev->ad_priv;
+  struct imxrt_dev_s *priv = (struct imxrt_dev_s *)dev->ad_priv;
 
   /* Do nothing when the ADC device is already set up */
 
@@ -390,9 +390,9 @@ static int adc_setup(FAR struct adc_dev_s *dev)
  *
  ****************************************************************************/
 
-static void adc_shutdown(FAR struct adc_dev_s *dev)
+static void adc_shutdown(struct adc_dev_s *dev)
 {
-  FAR struct imxrt_dev_s *priv = (FAR struct imxrt_dev_s *)dev->ad_priv;
+  struct imxrt_dev_s *priv = (struct imxrt_dev_s *)dev->ad_priv;
 
   /* Shutdown the ADC device only when not in use */
 
@@ -426,9 +426,9 @@ static void adc_shutdown(FAR struct adc_dev_s *dev)
  *
  ****************************************************************************/
 
-static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
+static void adc_rxint(struct adc_dev_s *dev, bool enable)
 {
-  FAR struct imxrt_dev_s *priv = (FAR struct imxrt_dev_s *)dev->ad_priv;
+  struct imxrt_dev_s *priv = (struct imxrt_dev_s *)dev->ad_priv;
 
   if (enable)
     {
@@ -455,11 +455,11 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
+static int adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 {
   /* TODO: ANIOC_TRIGGER, for SW triggered conversion */
 
-  FAR struct imxrt_dev_s *priv = (FAR struct imxrt_dev_s *)dev->ad_priv;
+  struct imxrt_dev_s *priv = (struct imxrt_dev_s *)dev->ad_priv;
   int ret = -ENOTTY;
 
   switch (cmd)
@@ -491,10 +491,10 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int adc_interrupt(int irq, void *context, FAR void *arg)
+static int adc_interrupt(int irq, void *context, void *arg)
 {
-  FAR struct adc_dev_s *dev = (FAR struct adc_dev_s *)arg;
-  FAR struct imxrt_dev_s *priv = (FAR struct imxrt_dev_s *)dev->ad_priv;
+  struct adc_dev_s *dev = (struct adc_dev_s *)arg;
+  struct imxrt_dev_s *priv = (struct imxrt_dev_s *)dev->ad_priv;
   int32_t data;
 
   if ((adc_getreg(priv, IMXRT_ADC_HS_OFFSET) & ADC_HS_COCO0) != 0)
@@ -553,12 +553,12 @@ static int adc_interrupt(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-FAR struct adc_dev_s *imxrt_adcinitialize(int intf,
-                                          FAR const uint8_t *chanlist,
-                                          int nchannels)
+struct adc_dev_s *imxrt_adcinitialize(int intf,
+                                      const uint8_t *chanlist,
+                                      int nchannels)
 {
-  FAR struct adc_dev_s *dev;
-  FAR struct imxrt_dev_s *priv;
+  struct adc_dev_s *dev;
+  struct imxrt_dev_s *priv;
 
   DEBUGASSERT(nchannels > 0);
 
@@ -587,7 +587,7 @@ FAR struct adc_dev_s *imxrt_adcinitialize(int intf,
         }
     }
 
-  priv = (FAR struct imxrt_dev_s *)dev->ad_priv;
+  priv = (struct imxrt_dev_s *)dev->ad_priv;
 
   priv->nchannels = nchannels;
   memcpy(priv->chanlist, chanlist, nchannels);

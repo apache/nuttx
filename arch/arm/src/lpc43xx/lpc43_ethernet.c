@@ -497,7 +497,7 @@
  * header
  */
 
-#define BUF ((FAR struct eth_hdr_s *)priv->dev.d_buf)
+#define BUF ((struct eth_hdr_s *)priv->dev.d_buf)
 
 /****************************************************************************
  * Private Types
@@ -567,41 +567,41 @@ static void lpc43_checksetup(void);
 
 /* Free buffer management */
 
-static void lpc43_initbuffer(FAR struct lpc43_ethmac_s *priv);
-static inline uint8_t *lpc43_allocbuffer(FAR struct lpc43_ethmac_s *priv);
-static inline void lpc43_freebuffer(FAR struct lpc43_ethmac_s *priv,
+static void lpc43_initbuffer(struct lpc43_ethmac_s *priv);
+static inline uint8_t *lpc43_allocbuffer(struct lpc43_ethmac_s *priv);
+static inline void lpc43_freebuffer(struct lpc43_ethmac_s *priv,
               uint8_t *buffer);
-static inline bool lpc43_isfreebuffer(FAR struct lpc43_ethmac_s *priv);
+static inline bool lpc43_isfreebuffer(struct lpc43_ethmac_s *priv);
 
 /* Common TX logic */
 
-static int  lpc43_transmit(FAR struct lpc43_ethmac_s *priv);
+static int  lpc43_transmit(struct lpc43_ethmac_s *priv);
 static int  lpc43_txpoll(struct net_driver_s *dev);
-static void lpc43_dopoll(FAR struct lpc43_ethmac_s *priv);
+static void lpc43_dopoll(struct lpc43_ethmac_s *priv);
 
 /* Interrupt handling */
 
-static void lpc43_enableint(FAR struct lpc43_ethmac_s *priv,
+static void lpc43_enableint(struct lpc43_ethmac_s *priv,
               uint32_t ierbit);
-static void lpc43_disableint(FAR struct lpc43_ethmac_s *priv,
+static void lpc43_disableint(struct lpc43_ethmac_s *priv,
               uint32_t ierbit);
 
-static void lpc43_freesegment(FAR struct lpc43_ethmac_s *priv,
-              FAR struct eth_rxdesc_s *rxfirst, int segments);
-static int  lpc43_recvframe(FAR struct lpc43_ethmac_s *priv);
-static void lpc43_receive(FAR struct lpc43_ethmac_s *priv);
-static void lpc43_freeframe(FAR struct lpc43_ethmac_s *priv);
-static void lpc43_txdone(FAR struct lpc43_ethmac_s *priv);
+static void lpc43_freesegment(struct lpc43_ethmac_s *priv,
+              struct eth_rxdesc_s *rxfirst, int segments);
+static int  lpc43_recvframe(struct lpc43_ethmac_s *priv);
+static void lpc43_receive(struct lpc43_ethmac_s *priv);
+static void lpc43_freeframe(struct lpc43_ethmac_s *priv);
+static void lpc43_txdone(struct lpc43_ethmac_s *priv);
 
-static void lpc43_interrupt_work(FAR void *arg);
-static int  lpc43_interrupt(int irq, FAR void *context, FAR void *arg);
+static void lpc43_interrupt_work(void *arg);
+static int  lpc43_interrupt(int irq, void *context, void *arg);
 
 /* Watchdog timer expirations */
 
-static void lpc43_txtimeout_work(FAR void *arg);
+static void lpc43_txtimeout_work(void *arg);
 static void lpc43_txtimeout_expiry(wdparm_t arg);
 
-static void lpc43_poll_work(FAR void *arg);
+static void lpc43_poll_work(void *arg);
 static void lpc43_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
@@ -609,14 +609,14 @@ static void lpc43_poll_expiry(wdparm_t arg);
 static int  lpc43_ifup(struct net_driver_s *dev);
 static int  lpc43_ifdown(struct net_driver_s *dev);
 
-static void lpc43_txavail_work(FAR void *arg);
+static void lpc43_txavail_work(void *arg);
 static int  lpc43_txavail(struct net_driver_s *dev);
 
 #if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
-static int  lpc43_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
+static int  lpc43_addmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
 #ifdef CONFIG_NET_MCASTGROUP
-static int  lpc43_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
+static int  lpc43_rmmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
 static int  lpc43_ioctl(struct net_driver_s *dev, int cmd,
@@ -624,21 +624,21 @@ static int  lpc43_ioctl(struct net_driver_s *dev, int cmd,
 #endif
 /* Descriptor Initialization */
 
-static void lpc43_txdescinit(FAR struct lpc43_ethmac_s *priv);
-static void lpc43_rxdescinit(FAR struct lpc43_ethmac_s *priv);
+static void lpc43_txdescinit(struct lpc43_ethmac_s *priv);
+static void lpc43_rxdescinit(struct lpc43_ethmac_s *priv);
 
 /* PHY Initialization */
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
-static int  lpc43_phyintenable(FAR struct lpc43_ethmac_s *priv);
+static int  lpc43_phyintenable(struct lpc43_ethmac_s *priv);
 #endif
 static int  lpc43_phyread(uint16_t phydevaddr, uint16_t phyregaddr,
               uint16_t *value);
 static int  lpc43_phywrite(uint16_t phydevaddr, uint16_t phyregaddr,
               uint16_t value);
 #ifdef CONFIG_ETH0_PHY_DM9161
-static inline int lpc43_dm9161(FAR struct lpc43_ethmac_s *priv);
+static inline int lpc43_dm9161(struct lpc43_ethmac_s *priv);
 #endif
-static int  lpc43_phyinit(FAR struct lpc43_ethmac_s *priv);
+static int  lpc43_phyinit(struct lpc43_ethmac_s *priv);
 
 /* MAC/DMA Initialization */
 
@@ -648,15 +648,15 @@ static inline void lpc43_selectmii(void);
 #ifdef CONFIG_LPC43_RMII
 static inline void lpc43_selectrmii(void);
 #endif
-static inline void lpc43_ethgpioconfig(FAR struct lpc43_ethmac_s *priv);
-static void lpc43_ethreset(FAR struct lpc43_ethmac_s *priv);
-static int  lpc43_macconfig(FAR struct lpc43_ethmac_s *priv);
-static void lpc43_macaddress(FAR struct lpc43_ethmac_s *priv);
+static inline void lpc43_ethgpioconfig(struct lpc43_ethmac_s *priv);
+static void lpc43_ethreset(struct lpc43_ethmac_s *priv);
+static int  lpc43_macconfig(struct lpc43_ethmac_s *priv);
+static void lpc43_macaddress(struct lpc43_ethmac_s *priv);
 #ifdef CONFIG_NET_ICMPv6
-static void lpc43_ipv6multicast(FAR struct lpc43_ethmac_s *priv);
+static void lpc43_ipv6multicast(struct lpc43_ethmac_s *priv);
 #endif
-static int  lpc43_macenable(FAR struct lpc43_ethmac_s *priv);
-static int  lpc43_ethconfig(FAR struct lpc43_ethmac_s *priv);
+static int  lpc43_macenable(struct lpc43_ethmac_s *priv);
+static int  lpc43_ethconfig(struct lpc43_ethmac_s *priv);
 
 /****************************************************************************
  * Private Functions
@@ -801,7 +801,7 @@ static void lpc43_checksetup(void)
  *
  ****************************************************************************/
 
-static void lpc43_initbuffer(FAR struct lpc43_ethmac_s *priv)
+static void lpc43_initbuffer(struct lpc43_ethmac_s *priv)
 {
   uint8_t *buffer;
   int i;
@@ -816,7 +816,7 @@ static void lpc43_initbuffer(FAR struct lpc43_ethmac_s *priv)
        i < LPC43_ETH_NFREEBUFFERS;
        i++, buffer += CONFIG_LPC43_ETH_BUFSIZE)
     {
-      sq_addlast((FAR sq_entry_t *)buffer, &priv->freeb);
+      sq_addlast((sq_entry_t *)buffer, &priv->freeb);
     }
 }
 
@@ -839,7 +839,7 @@ static void lpc43_initbuffer(FAR struct lpc43_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static inline uint8_t *lpc43_allocbuffer(FAR struct lpc43_ethmac_s *priv)
+static inline uint8_t *lpc43_allocbuffer(struct lpc43_ethmac_s *priv)
 {
   /* Allocate a buffer by returning the head of the free buffer list */
 
@@ -866,12 +866,12 @@ static inline uint8_t *lpc43_allocbuffer(FAR struct lpc43_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static inline void lpc43_freebuffer(FAR struct lpc43_ethmac_s *priv,
+static inline void lpc43_freebuffer(struct lpc43_ethmac_s *priv,
                                     uint8_t *buffer)
 {
   /* Free the buffer by adding it to the end of the free buffer list */
 
-  sq_addlast((FAR sq_entry_t *)buffer, &priv->freeb);
+  sq_addlast((sq_entry_t *)buffer, &priv->freeb);
 }
 
 /****************************************************************************
@@ -892,7 +892,7 @@ static inline void lpc43_freebuffer(FAR struct lpc43_ethmac_s *priv,
  *
  ****************************************************************************/
 
-static inline bool lpc43_isfreebuffer(FAR struct lpc43_ethmac_s *priv)
+static inline bool lpc43_isfreebuffer(struct lpc43_ethmac_s *priv)
 {
   /* Return TRUE if the free buffer list is not empty */
 
@@ -919,7 +919,7 @@ static inline bool lpc43_isfreebuffer(FAR struct lpc43_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static int lpc43_transmit(FAR struct lpc43_ethmac_s *priv)
+static int lpc43_transmit(struct lpc43_ethmac_s *priv)
 {
   struct eth_txdesc_s *txdesc;
   struct eth_txdesc_s *txfirst;
@@ -1135,8 +1135,8 @@ static int lpc43_transmit(FAR struct lpc43_ethmac_s *priv)
 
 static int lpc43_txpoll(struct net_driver_s *dev)
 {
-  FAR struct lpc43_ethmac_s *priv =
-    (FAR struct lpc43_ethmac_s *)dev->d_private;
+  struct lpc43_ethmac_s *priv =
+    (struct lpc43_ethmac_s *)dev->d_private;
 
   DEBUGASSERT(priv->dev.d_buf != NULL);
 
@@ -1242,9 +1242,9 @@ static int lpc43_txpoll(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void lpc43_dopoll(FAR struct lpc43_ethmac_s *priv)
+static void lpc43_dopoll(struct lpc43_ethmac_s *priv)
 {
-  FAR struct net_driver_s *dev = &priv->dev;
+  struct net_driver_s *dev = &priv->dev;
 
   /* Check if the next TX descriptor is owned by the Ethernet DMA or
    * CPU.  We cannot perform the TX poll if we are unable to accept
@@ -1303,7 +1303,7 @@ static void lpc43_dopoll(FAR struct lpc43_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static void lpc43_enableint(FAR struct lpc43_ethmac_s *priv,
+static void lpc43_enableint(struct lpc43_ethmac_s *priv,
                             uint32_t ierbit)
 {
   uint32_t regval;
@@ -1332,7 +1332,7 @@ static void lpc43_enableint(FAR struct lpc43_ethmac_s *priv,
  *
  ****************************************************************************/
 
-static void lpc43_disableint(FAR struct lpc43_ethmac_s *priv,
+static void lpc43_disableint(struct lpc43_ethmac_s *priv,
                              uint32_t ierbit)
 {
   uint32_t regval;
@@ -1372,8 +1372,8 @@ static void lpc43_disableint(FAR struct lpc43_ethmac_s *priv,
  *
  ****************************************************************************/
 
-static void lpc43_freesegment(FAR struct lpc43_ethmac_s *priv,
-                              FAR struct eth_rxdesc_s *rxfirst, int segments)
+static void lpc43_freesegment(struct lpc43_ethmac_s *priv,
+                              struct eth_rxdesc_s *rxfirst, int segments)
 {
   struct eth_rxdesc_s *rxdesc;
   int i;
@@ -1429,7 +1429,7 @@ static void lpc43_freesegment(FAR struct lpc43_ethmac_s *priv,
  *
  ****************************************************************************/
 
-static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
+static int lpc43_recvframe(struct lpc43_ethmac_s *priv)
 {
   struct eth_rxdesc_s *rxdesc;
   struct eth_rxdesc_s *rxcurr;
@@ -1595,7 +1595,7 @@ static int lpc43_recvframe(FAR struct lpc43_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
+static void lpc43_receive(struct lpc43_ethmac_s *priv)
 {
   struct net_driver_s *dev = &priv->dev;
 
@@ -1773,7 +1773,7 @@ static void lpc43_receive(FAR struct lpc43_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static void lpc43_freeframe(FAR struct lpc43_ethmac_s *priv)
+static void lpc43_freeframe(struct lpc43_ethmac_s *priv)
 {
   struct eth_txdesc_s *txdesc;
   int i;
@@ -1871,7 +1871,7 @@ static void lpc43_freeframe(FAR struct lpc43_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static void lpc43_txdone(FAR struct lpc43_ethmac_s *priv)
+static void lpc43_txdone(struct lpc43_ethmac_s *priv)
 {
   DEBUGASSERT(priv->txtail != NULL);
 
@@ -1914,9 +1914,9 @@ static void lpc43_txdone(FAR struct lpc43_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static void lpc43_interrupt_work(FAR void *arg)
+static void lpc43_interrupt_work(void *arg)
 {
-  FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)arg;
+  struct lpc43_ethmac_s *priv = (struct lpc43_ethmac_s *)arg;
   uint32_t dmasr;
 
   DEBUGASSERT(priv);
@@ -2017,9 +2017,9 @@ static void lpc43_interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int lpc43_interrupt(int irq, FAR void *context, FAR void *arg)
+static int lpc43_interrupt(int irq, void *context, void *arg)
 {
-  FAR struct lpc43_ethmac_s *priv = &g_lpc43ethmac;
+  struct lpc43_ethmac_s *priv = &g_lpc43ethmac;
   uint32_t dmasr;
 
   /* Get the DMA interrupt status bits (no MAC interrupts are expected) */
@@ -2071,9 +2071,9 @@ static int lpc43_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static void lpc43_txtimeout_work(FAR void *arg)
+static void lpc43_txtimeout_work(void *arg)
 {
-  FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)arg;
+  struct lpc43_ethmac_s *priv = (struct lpc43_ethmac_s *)arg;
 
   /* Then reset the hardware.  Just take the interface down, then back
    * up again.
@@ -2109,7 +2109,7 @@ static void lpc43_txtimeout_work(FAR void *arg)
 
 static void lpc43_txtimeout_expiry(wdparm_t arg)
 {
-  FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)arg;
+  struct lpc43_ethmac_s *priv = (struct lpc43_ethmac_s *)arg;
 
   ninfo("Timeout!\n");
 
@@ -2146,10 +2146,10 @@ static void lpc43_txtimeout_expiry(wdparm_t arg)
  *
  ****************************************************************************/
 
-static void lpc43_poll_work(FAR void *arg)
+static void lpc43_poll_work(void *arg)
 {
-  FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)arg;
-  FAR struct net_driver_s   *dev  = &priv->dev;
+  struct lpc43_ethmac_s *priv = (struct lpc43_ethmac_s *)arg;
+  struct net_driver_s   *dev  = &priv->dev;
 
   /* Check if the next TX descriptor is owned by the Ethernet DMA or
    * CPU.  We cannot perform the TX poll if we are unable to accept
@@ -2220,7 +2220,7 @@ static void lpc43_poll_work(FAR void *arg)
 
 static void lpc43_poll_expiry(wdparm_t arg)
 {
-  FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)arg;
+  struct lpc43_ethmac_s *priv = (struct lpc43_ethmac_s *)arg;
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
@@ -2246,8 +2246,8 @@ static void lpc43_poll_expiry(wdparm_t arg)
 
 static int lpc43_ifup(struct net_driver_s *dev)
 {
-  FAR struct lpc43_ethmac_s *priv =
-    (FAR struct lpc43_ethmac_s *)dev->d_private;
+  struct lpc43_ethmac_s *priv =
+    (struct lpc43_ethmac_s *)dev->d_private;
   int ret;
 
 #ifdef CONFIG_NET_IPv4
@@ -2304,8 +2304,8 @@ static int lpc43_ifup(struct net_driver_s *dev)
 
 static int lpc43_ifdown(struct net_driver_s *dev)
 {
-  FAR struct lpc43_ethmac_s *priv =
-    (FAR struct lpc43_ethmac_s *)dev->d_private;
+  struct lpc43_ethmac_s *priv =
+    (struct lpc43_ethmac_s *)dev->d_private;
   irqstate_t flags;
 
   ninfo("Taking the network down\n");
@@ -2351,9 +2351,9 @@ static int lpc43_ifdown(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void lpc43_txavail_work(FAR void *arg)
+static void lpc43_txavail_work(void *arg)
 {
-  FAR struct lpc43_ethmac_s *priv = (FAR struct lpc43_ethmac_s *)arg;
+  struct lpc43_ethmac_s *priv = (struct lpc43_ethmac_s *)arg;
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -2390,8 +2390,8 @@ static void lpc43_txavail_work(FAR void *arg)
 
 static int lpc43_txavail(struct net_driver_s *dev)
 {
-  FAR struct lpc43_ethmac_s *priv =
-    (FAR struct lpc43_ethmac_s *)dev->d_private;
+  struct lpc43_ethmac_s *priv =
+    (struct lpc43_ethmac_s *)dev->d_private;
 
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
@@ -2474,7 +2474,7 @@ static uint32_t lpc43_calcethcrc(const uint8_t *data, size_t length)
  ****************************************************************************/
 
 #if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
-static int lpc43_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
+static int lpc43_addmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   uint32_t crc;
   uint32_t hashindex;
@@ -2531,7 +2531,7 @@ static int lpc43_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_MCASTGROUP
-static int lpc43_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
+static int lpc43_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   uint32_t crc;
   uint32_t hashindex;
@@ -2591,7 +2591,7 @@ static int lpc43_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-static void lpc43_txdescinit(FAR struct lpc43_ethmac_s *priv)
+static void lpc43_txdescinit(struct lpc43_ethmac_s *priv)
 {
   struct eth_txdesc_s *txdesc;
   int i;
@@ -2675,7 +2675,7 @@ static void lpc43_txdescinit(FAR struct lpc43_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static void lpc43_rxdescinit(FAR struct lpc43_ethmac_s *priv)
+static void lpc43_rxdescinit(struct lpc43_ethmac_s *priv)
 {
   struct eth_rxdesc_s *rxdesc;
   int i;
@@ -2773,8 +2773,8 @@ static void lpc43_rxdescinit(FAR struct lpc43_ethmac_s *priv)
 static int lpc43_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 {
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
-  FAR struct lpc43_ethmac_s *priv =
-    (FAR struct lpc43_ethmac_s *)dev->d_private;
+  struct lpc43_ethmac_s *priv =
+    (struct lpc43_ethmac_s *)dev->d_private;
 #endif
   int ret;
 
@@ -3001,7 +3001,7 @@ static int lpc43_phywrite(uint16_t phydevaddr,
  ****************************************************************************/
 
 #ifdef CONFIG_ETH0_PHY_DM9161
-static inline int lpc43_dm9161(FAR struct lpc43_ethmac_s *priv)
+static inline int lpc43_dm9161(struct lpc43_ethmac_s *priv)
 {
   uint16_t phyval;
   int ret;
@@ -3066,7 +3066,7 @@ static inline int lpc43_dm9161(FAR struct lpc43_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
+static int lpc43_phyinit(struct lpc43_ethmac_s *priv)
 {
   volatile uint32_t timeout;
   uint32_t regval;
@@ -3363,7 +3363,7 @@ static inline void lpc43_selectrmii(void)
  *
  ****************************************************************************/
 
-static inline void lpc43_ethgpioconfig(FAR struct lpc43_ethmac_s *priv)
+static inline void lpc43_ethgpioconfig(struct lpc43_ethmac_s *priv)
 {
   /* Configure GPIO pins to support Ethernet */
 
@@ -3452,7 +3452,7 @@ static inline void lpc43_ethgpioconfig(FAR struct lpc43_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static void lpc43_ethreset(FAR struct lpc43_ethmac_s *priv)
+static void lpc43_ethreset(struct lpc43_ethmac_s *priv)
 {
   uint32_t regval;
 
@@ -3490,7 +3490,7 @@ static void lpc43_ethreset(FAR struct lpc43_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static int lpc43_macconfig(FAR struct lpc43_ethmac_s *priv)
+static int lpc43_macconfig(struct lpc43_ethmac_s *priv)
 {
   uint32_t regval;
 
@@ -3574,9 +3574,9 @@ static int lpc43_macconfig(FAR struct lpc43_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static void lpc43_macaddress(FAR struct lpc43_ethmac_s *priv)
+static void lpc43_macaddress(struct lpc43_ethmac_s *priv)
 {
-  FAR struct net_driver_s *dev = &priv->dev;
+  struct net_driver_s *dev = &priv->dev;
   uint32_t regval;
 
   ninfo("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
@@ -3620,7 +3620,7 @@ static void lpc43_macaddress(FAR struct lpc43_ethmac_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6
-static void lpc43_ipv6multicast(FAR struct lpc43_ethmac_s *priv)
+static void lpc43_ipv6multicast(struct lpc43_ethmac_s *priv)
 {
   struct net_driver_s *dev;
   uint16_t tmp16;
@@ -3692,7 +3692,7 @@ static void lpc43_ipv6multicast(FAR struct lpc43_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static int lpc43_macenable(FAR struct lpc43_ethmac_s *priv)
+static int lpc43_macenable(struct lpc43_ethmac_s *priv)
 {
   uint32_t regval;
 
@@ -3779,7 +3779,7 @@ static int lpc43_macenable(FAR struct lpc43_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static int lpc43_ethconfig(FAR struct lpc43_ethmac_s *priv)
+static int lpc43_ethconfig(struct lpc43_ethmac_s *priv)
 {
   int ret;
 

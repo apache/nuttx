@@ -165,7 +165,7 @@
 
 /* This is a helper pointer for accessing the contents of Ethernet header */
 
-#define BUF ((FAR struct eth_hdr_s *)priv->lp_dev.d_buf)
+#define BUF ((struct eth_hdr_s *)priv->lp_dev.d_buf)
 
 /* This is the number of ethernet GPIO pins that must be configured */
 
@@ -362,27 +362,27 @@ static int  lpc17_40_txpoll(struct net_driver_s *dev);
 
 static void lpc17_40_response(struct lpc17_40_driver_s *priv);
 
-static void lpc17_40_txdone_work(FAR void *arg);
-static void lpc17_40_rxdone_work(FAR void *arg);
-static int  lpc17_40_interrupt(int irq, void *context, FAR void *arg);
+static void lpc17_40_txdone_work(void *arg);
+static void lpc17_40_rxdone_work(void *arg);
+static int  lpc17_40_interrupt(int irq, void *context, void *arg);
 
 /* Watchdog timer expirations */
 
-static void lpc17_40_txtimeout_work(FAR void *arg);
+static void lpc17_40_txtimeout_work(void *arg);
 static void lpc17_40_txtimeout_expiry(wdparm_t arg);
 
-static void lpc17_40_poll_work(FAR void *arg);
+static void lpc17_40_poll_work(void *arg);
 static void lpc17_40_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
 #ifdef CONFIG_NET_ICMPv6
-static void lpc17_40_ipv6multicast(FAR struct lpc17_40_driver_s *priv);
+static void lpc17_40_ipv6multicast(struct lpc17_40_driver_s *priv);
 #endif
 static int lpc17_40_ifup(struct net_driver_s *dev);
 static int lpc17_40_ifdown(struct net_driver_s *dev);
 
-static void lpc17_40_txavail_work(FAR void *arg);
+static void lpc17_40_txavail_work(void *arg);
 static int lpc17_40_txavail(struct net_driver_s *dev);
 
 #if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
@@ -416,7 +416,7 @@ static void lpc17_40_showmii(uint8_t phyaddr, const char *msg);
 #  endif
 
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
-static int  lpc17_40_phyintenable(FAR struct lpc17_40_driver_s *priv);
+static int  lpc17_40_phyintenable(struct lpc17_40_driver_s *priv);
 #endif
 static void lpc17_40_phywrite(uint8_t phyaddr, uint8_t regaddr,
                            uint16_t phydata);
@@ -843,9 +843,9 @@ static void lpc17_40_response(struct lpc17_40_driver_s *priv)
  *
  ****************************************************************************/
 
-static void lpc17_40_rxdone_work(FAR void *arg)
+static void lpc17_40_rxdone_work(void *arg)
 {
-  FAR struct lpc17_40_driver_s *priv = (FAR struct lpc17_40_driver_s *)arg;
+  struct lpc17_40_driver_s *priv = (struct lpc17_40_driver_s *)arg;
   irqstate_t flags;
   uint32_t *rxstat;
   bool fragment;
@@ -1111,9 +1111,9 @@ static void lpc17_40_rxdone_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void lpc17_40_txdone_work(FAR void *arg)
+static void lpc17_40_txdone_work(void *arg)
 {
-  FAR struct lpc17_40_driver_s *priv = (FAR struct lpc17_40_driver_s *)arg;
+  struct lpc17_40_driver_s *priv = (struct lpc17_40_driver_s *)arg;
 
   /* Verify that the hardware is ready to send another packet.  Since a Tx
    * just completed, this must be the case.
@@ -1169,7 +1169,7 @@ static void lpc17_40_txdone_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int lpc17_40_interrupt(int irq, void *context, FAR void *arg)
+static int lpc17_40_interrupt(int irq, void *context, void *arg)
 {
   register struct lpc17_40_driver_s *priv;
   uint32_t status;
@@ -1374,9 +1374,9 @@ static int lpc17_40_interrupt(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static void lpc17_40_txtimeout_work(FAR void *arg)
+static void lpc17_40_txtimeout_work(void *arg)
 {
-  FAR struct lpc17_40_driver_s *priv = (FAR struct lpc17_40_driver_s *)arg;
+  struct lpc17_40_driver_s *priv = (struct lpc17_40_driver_s *)arg;
 
   /* Increment statistics and dump debug info */
 
@@ -1457,9 +1457,9 @@ static void lpc17_40_txtimeout_expiry(wdparm_t arg)
  *
  ****************************************************************************/
 
-static void lpc17_40_poll_work(FAR void *arg)
+static void lpc17_40_poll_work(void *arg)
 {
-  FAR struct lpc17_40_driver_s *priv = (FAR struct lpc17_40_driver_s *)arg;
+  struct lpc17_40_driver_s *priv = (struct lpc17_40_driver_s *)arg;
   unsigned int prodidx;
   unsigned int considx;
 
@@ -1519,7 +1519,7 @@ static void lpc17_40_poll_work(FAR void *arg)
 
 static void lpc17_40_poll_expiry(wdparm_t arg)
 {
-  FAR struct lpc17_40_driver_s *priv = (FAR struct lpc17_40_driver_s *)arg;
+  struct lpc17_40_driver_s *priv = (struct lpc17_40_driver_s *)arg;
 
   DEBUGASSERT(arg);
 
@@ -1545,7 +1545,7 @@ static void lpc17_40_poll_expiry(wdparm_t arg)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6
-static void lpc17_40_ipv6multicast(FAR struct lpc17_40_driver_s *priv)
+static void lpc17_40_ipv6multicast(struct lpc17_40_driver_s *priv)
 {
   struct net_driver_s *dev;
   uint16_t tmp16;
@@ -1824,9 +1824,9 @@ static int lpc17_40_ifdown(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void lpc17_40_txavail_work(FAR void *arg)
+static void lpc17_40_txavail_work(void *arg)
 {
-  FAR struct lpc17_40_driver_s *priv = (FAR struct lpc17_40_driver_s *)arg;
+  struct lpc17_40_driver_s *priv = (struct lpc17_40_driver_s *)arg;
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -1867,8 +1867,8 @@ static void lpc17_40_txavail_work(FAR void *arg)
 
 static int lpc17_40_txavail(struct net_driver_s *dev)
 {
-  FAR struct lpc17_40_driver_s *priv =
-    (FAR struct lpc17_40_driver_s *)dev->d_private;
+  struct lpc17_40_driver_s *priv =
+    (struct lpc17_40_driver_s *)dev->d_private;
 
   /* Is our single poll work structure available?  It may not be if there
    * are pending polling actions and we will have to ignore the Tx

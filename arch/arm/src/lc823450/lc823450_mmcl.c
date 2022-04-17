@@ -50,26 +50,26 @@
 struct mmcl_dev_s
 {
 #ifdef CONFIG_FS_EVFAT
-  uint32_t              channel;  /* 0: eMMC, 1: SD */
+  uint32_t              channel; /* 0: eMMC, 1: SD */
 #endif
-  FAR struct mtd_dev_s *mtd;      /* Contained MTD interface */
-  struct mtd_geometry_s geo;      /* Device geometry */
+  struct mtd_dev_s     *mtd;     /* Contained MTD interface */
+  struct mtd_geometry_s geo;     /* Device geometry */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     mmcl_open(FAR struct inode *inode);
-static int     mmcl_close(FAR struct inode *inode);
-static ssize_t mmcl_read(FAR struct inode *inode, unsigned char *buffer,
+static int     mmcl_open(struct inode *inode);
+static int     mmcl_close(struct inode *inode);
+static ssize_t mmcl_read(struct inode *inode, unsigned char *buffer,
                          blkcnt_t start_sector, unsigned int nsectors);
-static ssize_t mmcl_write(FAR struct inode *inode,
+static ssize_t mmcl_write(struct inode *inode,
                           const unsigned char *buffer, blkcnt_t start_sector,
                           unsigned int nsectors);
-static int     mmcl_geometry(FAR struct inode *inode,
+static int     mmcl_geometry(struct inode *inode,
                              struct geometry *geometry);
-static int     mmcl_ioctl(FAR struct inode *inode, int cmd,
+static int     mmcl_ioctl(struct inode *inode, int cmd,
                           unsigned long arg);
 
 /****************************************************************************
@@ -97,7 +97,7 @@ static const struct block_operations g_bops =
  *
  ****************************************************************************/
 
-static int mmcl_open(FAR struct inode *inode)
+static int mmcl_open(struct inode *inode)
 {
   finfo("Entry\n");
   return OK;
@@ -110,7 +110,7 @@ static int mmcl_open(FAR struct inode *inode)
  *
  ****************************************************************************/
 
-static int mmcl_close(FAR struct inode *inode)
+static int mmcl_close(struct inode *inode)
 {
   finfo("Entry\n");
   return OK;
@@ -123,7 +123,7 @@ static int mmcl_close(FAR struct inode *inode)
  *
  ****************************************************************************/
 
-static ssize_t mmcl_read(FAR struct inode *inode, unsigned char *buffer,
+static ssize_t mmcl_read(struct inode *inode, unsigned char *buffer,
   blkcnt_t start_sector, unsigned int nsectors)
 {
   ssize_t nread;
@@ -152,7 +152,7 @@ static ssize_t mmcl_read(FAR struct inode *inode, unsigned char *buffer,
  *
  ****************************************************************************/
 
-static ssize_t mmcl_write(FAR struct inode *inode,
+static ssize_t mmcl_write(struct inode *inode,
                           const unsigned char *buffer, blkcnt_t start_sector,
                           unsigned int nsectors)
 {
@@ -182,7 +182,7 @@ static ssize_t mmcl_write(FAR struct inode *inode,
  *
  ****************************************************************************/
 
-static int mmcl_geometry(FAR struct inode *inode, struct geometry *geometry)
+static int mmcl_geometry(struct inode *inode, struct geometry *geometry)
 {
   struct mmcl_dev_s *dev;
 
@@ -217,7 +217,7 @@ static int mmcl_geometry(FAR struct inode *inode, struct geometry *geometry)
  *
  ****************************************************************************/
 
-static int mmcl_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
+static int mmcl_ioctl(struct inode *inode, int cmd, unsigned long arg)
 {
   struct mmcl_dev_s *dev ;
   int ret;
@@ -239,8 +239,8 @@ static int mmcl_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
  * Name: mmcl_allocdev
  ****************************************************************************/
 
-static FAR struct mmcl_dev_s *mmcl_allocdev(int number,
-                                            FAR struct mtd_dev_s *mtd)
+static struct mmcl_dev_s *mmcl_allocdev(int number,
+                                        struct mtd_dev_s *mtd)
 {
   struct mmcl_dev_s *dev;
   int ret;
@@ -299,7 +299,7 @@ static void mmcl_freedev(struct mmcl_dev_s *dev)
  *
  ****************************************************************************/
 
-int mmcl_initialize(int minor, FAR struct mtd_dev_s *mtd)
+int mmcl_initialize(int minor, struct mtd_dev_s *mtd)
 {
   struct mmcl_dev_s *dev;
   const char *devname[CONFIG_MTD_DEV_MAX] =
@@ -350,11 +350,11 @@ int mmcl_initialize(int minor, FAR struct mtd_dev_s *mtd)
  * Name: mmcl_uninitialize
  ****************************************************************************/
 
-int mmcl_uninitialize(FAR const char *devname)
+int mmcl_uninitialize(const char *devname)
 {
   int ret;
-  FAR struct inode *inode;
-  FAR struct mmcl_dev_s *dev;
+  struct inode *inode;
+  struct mmcl_dev_s *dev;
 
   DEBUGASSERT(devname);
 
@@ -389,7 +389,7 @@ int mmcl_uninitialize(FAR const char *devname)
  * Name: mmcl_createpartition
  ****************************************************************************/
 
-int mmcl_createpartition(int minor, int number, FAR struct mtd_dev_s *mtd)
+int mmcl_createpartition(int minor, int number, struct mtd_dev_s *mtd)
 {
   struct mmcl_dev_s *dev;
   char devname[32];

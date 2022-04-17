@@ -68,7 +68,7 @@ struct spi_dev_s;
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *kinetis_spibus_initialize(int bus);
+struct spi_dev_s *kinetis_spibus_initialize(int bus);
 
 /****************************************************************************
  * Name:
@@ -102,27 +102,27 @@ FAR struct spi_dev_s *kinetis_spibus_initialize(int bus);
  ****************************************************************************/
 
 #ifdef CONFIG_KINETIS_SPI0
-void  kinetis_spi0select(FAR struct spi_dev_s *dev,
+void  kinetis_spi0select(struct spi_dev_s *dev,
                          uint32_t devid, bool selected);
-uint8_t kinetis_spi0status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t kinetis_spi0status(struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int kinetis_spi0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int kinetis_spi0cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 #ifdef CONFIG_KINETIS_SPI1
-void  kinetis_spi1select(FAR struct spi_dev_s *dev,
+void  kinetis_spi1select(struct spi_dev_s *dev,
                          uint32_t devid, bool selected);
-uint8_t kinetis_spi1status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t kinetis_spi1status(struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int kinetis_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int kinetis_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 #ifdef CONFIG_KINETIS_SPI2
-void  kinetis_spi2select(FAR struct spi_dev_s *dev,
+void  kinetis_spi2select(struct spi_dev_s *dev,
                          uint32_t devid, bool selected);
-uint8_t kinetis_spi2status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t kinetis_spi2status(struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int kinetis_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int kinetis_spi2cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
@@ -148,7 +148,7 @@ int kinetis_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #if defined(CONFIG_KINETIS_SPI0) || defined(CONFIG_KINETIS_SPI1) || defined(CONFIG_KINETIS_SPI2)
 struct spi_dev_s;
-void spi_flush(FAR struct spi_dev_s *dev);
+void spi_flush(struct spi_dev_s *dev);
 #endif
 
 #endif /* __ASSEMBLY__ */

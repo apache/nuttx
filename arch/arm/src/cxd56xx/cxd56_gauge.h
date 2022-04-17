@@ -23,7 +23,7 @@
 
 /* initialize function */
 
-int cxd56_gauge_initialize(FAR const char *devpath);
-int cxd56_gauge_uninitialize(FAR const char *devpath);
+int cxd56_gauge_initialize(const char *devpath);
+int cxd56_gauge_uninitialize(const char *devpath);
 
 #endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_GAUGE_H */

@@ -361,7 +361,7 @@ void imxrt_lowsetup(void)
 
 #ifdef HAVE_LPUART_DEVICE
 int imxrt_lpuart_configure(uint32_t base,
-                           FAR const struct uart_config_s *config)
+                           const struct uart_config_s *config)
 {
   uint32_t src_freq = 0;
   uint32_t pll3_div = 0;

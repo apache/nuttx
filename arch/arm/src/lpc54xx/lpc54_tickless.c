@@ -219,9 +219,9 @@ static uint32_t common_div(uint32_t a, uint32_t b)
   return a;
 }
 
-static void lpc54_ts_add(FAR const struct timespec *ts1,
-                         FAR const struct timespec *ts2,
-                         FAR struct timespec *ts3)
+static void lpc54_ts_add(const struct timespec *ts1,
+                         const struct timespec *ts2,
+                         struct timespec *ts3)
 {
   time_t sec = ts1->tv_sec + ts2->tv_sec;
   long nsec  = ts1->tv_nsec + ts2->tv_nsec;
@@ -236,9 +236,9 @@ static void lpc54_ts_add(FAR const struct timespec *ts1,
   ts3->tv_nsec = nsec;
 }
 
-static void lpc54_ts_sub(FAR const struct timespec *ts1,
-                         FAR const struct timespec *ts2,
-                         FAR struct timespec *ts3)
+static void lpc54_ts_sub(const struct timespec *ts1,
+                         const struct timespec *ts2,
+                         struct timespec *ts3)
 {
   time_t sec;
   long nsec;
@@ -271,13 +271,13 @@ static void lpc54_ts_sub(FAR const struct timespec *ts1,
   ts3->tv_nsec = nsec;
 }
 
-static inline uint64_t lpc54_ts2tick(FAR const struct timespec *ts)
+static inline uint64_t lpc54_ts2tick(const struct timespec *ts)
 {
   return ((uint64_t)ts->tv_sec * LPC54_CCLK +
           ((uint64_t)ts->tv_nsec / g_min_nsec * g_min_ticks));
 }
 
-static uint64_t lpc54_tick2ts(uint64_t ticks, FAR struct timespec *ts,
+static uint64_t lpc54_tick2ts(uint64_t ticks, struct timespec *ts,
                               bool with_rest)
 {
   uint64_t ticks_whole;
@@ -550,7 +550,7 @@ static inline void lpc54_tl_alarm(uint64_t curr)
 
 /* Interrupt handler */
 
-static int lpc54_tl_isr(int irq, FAR void *context, FAR void *arg)
+static int lpc54_tl_isr(int irq, void *context, void *arg)
 {
   uint64_t curr;
 
@@ -649,7 +649,7 @@ void up_timer_initialize(void)
 
 /* No reg changes, only processing */
 
-int up_timer_gettime(FAR struct timespec *ts)
+int up_timer_gettime(struct timespec *ts)
 {
   struct timespec count_ts;
   uint64_t count;
@@ -691,7 +691,7 @@ int up_timer_gettime(FAR struct timespec *ts)
   return OK;
 }
 
-int up_alarm_cancel(FAR struct timespec *ts)
+int up_alarm_cancel(struct timespec *ts)
 {
   lpc54_sync_up();
 
@@ -710,7 +710,7 @@ int up_alarm_cancel(FAR struct timespec *ts)
   return OK;
 }
 
-int up_alarm_start(FAR const struct timespec *ts)
+int up_alarm_start(const struct timespec *ts)
 {
   uint64_t toset;
   uint64_t curr;
@@ -754,7 +754,7 @@ int up_alarm_start(FAR const struct timespec *ts)
 }
 
 #ifndef CONFIG_SCHED_TICKLESS_ALARM
-int up_timer_cancel(FAR struct timespec *ts)
+int up_timer_cancel(struct timespec *ts)
 {
   lpc54_sync_up();
 
@@ -770,7 +770,7 @@ int up_timer_cancel(FAR struct timespec *ts)
   return OK;
 }
 
-int up_timer_start(FAR const struct timespec *ts)
+int up_timer_start(const struct timespec *ts)
 {
   lpc54_sync_up();
 

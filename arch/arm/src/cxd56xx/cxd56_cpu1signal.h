@@ -55,9 +55,9 @@
 #error "CXD56_CPU1_DEV must be smaller than 0xf"
 #endif
 
-typedef void (*cxd56_cpu1sighandler_t)(uint32_t data, FAR void *userdata);
+typedef void (*cxd56_cpu1sighandler_t)(uint32_t data, void *userdata);
 
-extern int cxd56_cpu1siginit(uint8_t cpu1dev, FAR void *data);
+extern int cxd56_cpu1siginit(uint8_t cpu1dev, void *data);
 extern int cxd56_cpu1siguninit(uint8_t cpu1dev);
 extern void cxd56_cpu1sigregisterhandler(uint8_t                cpu1dev,
                                          cxd56_cpu1sighandler_t handler);

@@ -51,8 +51,8 @@
 #ifdef CONFIG_RTC_ALARM
 struct cxd56_cbinfo_s
 {
-  volatile rtc_alarm_callback_t cb;  /* Callback when the alarm expires */
-  volatile FAR void *priv;           /* Private argurment to accompany callback */
+  volatile rtc_alarm_callback_t cb; /* Callback when the alarm expires */
+  volatile void *priv;              /* Private argurment to accompany callback */
 };
 #endif
 
@@ -66,7 +66,7 @@ struct cxd56_lowerhalf_s
    * operations vtable (which may lie in FLASH or ROM)
    */
 
-  FAR const struct rtc_ops_s *ops;
+  const struct rtc_ops_s *ops;
 
   /* Data following is private to this driver and not visible outside of
    * this file.
@@ -85,17 +85,17 @@ struct cxd56_lowerhalf_s
 
 /* Prototypes for static methods in struct rtc_ops_s */
 
-static int cxd56_rdtime(FAR struct rtc_lowerhalf_s *lower,
-                        FAR struct rtc_time *rtctime);
-static int cxd56_settime(FAR struct rtc_lowerhalf_s *lower,
-                         FAR const struct rtc_time *rtctime);
+static int cxd56_rdtime(struct rtc_lowerhalf_s *lower,
+                        struct rtc_time *rtctime);
+static int cxd56_settime(struct rtc_lowerhalf_s *lower,
+                         const struct rtc_time *rtctime);
 
 #ifdef CONFIG_RTC_ALARM
-static int cxd56_setalarm(FAR struct rtc_lowerhalf_s *lower,
-                          FAR const struct lower_setalarm_s *alarminfo);
-static int cxd56_setrelative(FAR struct rtc_lowerhalf_s *lower,
-                          FAR const struct lower_setrelative_s *alarminfo);
-static int cxd56_cancelalarm(FAR struct rtc_lowerhalf_s *lower,
+static int cxd56_setalarm(struct rtc_lowerhalf_s *lower,
+                          const struct lower_setalarm_s *alarminfo);
+static int cxd56_setrelative(struct rtc_lowerhalf_s *lower,
+                          const struct lower_setrelative_s *alarminfo);
+static int cxd56_cancelalarm(struct rtc_lowerhalf_s *lower,
                              int alarmid);
 #endif
 
@@ -146,12 +146,12 @@ static struct cxd56_lowerhalf_s g_rtc_lowerhalf =
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static void cxd56_alarm_callback(FAR void *arg, unsigned int alarmid)
+static void cxd56_alarm_callback(void *arg, unsigned int alarmid)
 {
-  FAR struct cxd56_lowerhalf_s *lower;
-  FAR struct cxd56_cbinfo_s *cbinfo;
+  struct cxd56_lowerhalf_s *lower;
+  struct cxd56_cbinfo_s *cbinfo;
   rtc_alarm_callback_t cb;
-  FAR void *priv;
+  void *priv;
 
   DEBUGASSERT((RTC_ALARM0 <= alarmid) && (alarmid < RTC_ALARM_LAST));
 
@@ -163,7 +163,7 @@ static void cxd56_alarm_callback(FAR void *arg, unsigned int alarmid)
    */
 
   cb           = (rtc_alarm_callback_t)cbinfo->cb;
-  priv         = (FAR void *)cbinfo->priv;
+  priv         = (void *)cbinfo->priv;
 
   cbinfo->cb   = NULL;
   cbinfo->priv = NULL;
@@ -193,11 +193,11 @@ static void cxd56_alarm_callback(FAR void *arg, unsigned int alarmid)
  *
  ****************************************************************************/
 
-static int cxd56_rdtime(FAR struct rtc_lowerhalf_s *lower,
-                        FAR struct rtc_time *rtctime)
+static int cxd56_rdtime(struct rtc_lowerhalf_s *lower,
+                        struct rtc_time *rtctime)
 {
 #if defined(CONFIG_RTC_HIRES)
-  FAR struct timespec ts;
+  struct timespec ts;
   int ret;
 
   /* Get the higher resolution time */
@@ -213,7 +213,7 @@ static int cxd56_rdtime(FAR struct rtc_lowerhalf_s *lower,
    * compatible.
    */
 
-  if (!gmtime_r(&ts.tv_sec, (FAR struct tm *)rtctime))
+  if (!gmtime_r(&ts.tv_sec, (struct tm *)rtctime))
     {
       ret = -get_errno();
       goto errout;
@@ -234,7 +234,7 @@ errout:
 
   /* Convert the one second epoch time to a struct tm */
 
-  if (!gmtime_r(&timer, (FAR struct tm *)rtctime))
+  if (!gmtime_r(&timer, (struct tm *)rtctime))
     {
       int errcode = get_errno();
       DEBUGASSERT(errcode > 0);
@@ -261,8 +261,8 @@ errout:
  *
  ****************************************************************************/
 
-static int cxd56_settime(FAR struct rtc_lowerhalf_s *lower,
-                         FAR const struct rtc_time *rtctime)
+static int cxd56_settime(struct rtc_lowerhalf_s *lower,
+                         const struct rtc_time *rtctime)
 {
   struct timespec ts;
 
@@ -270,7 +270,7 @@ static int cxd56_settime(FAR struct rtc_lowerhalf_s *lower,
    * rtc_time is cast compatible with struct tm.
    */
 
-  ts.tv_sec  = timegm((FAR struct tm *)rtctime);
+  ts.tv_sec  = timegm((struct tm *)rtctime);
   ts.tv_nsec = 0;
 
   /* Now set the time (to one second accuracy) */
@@ -296,18 +296,18 @@ static int cxd56_settime(FAR struct rtc_lowerhalf_s *lower,
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int cxd56_setalarm(FAR struct rtc_lowerhalf_s *lower,
-                          FAR const struct lower_setalarm_s *alarminfo)
+static int cxd56_setalarm(struct rtc_lowerhalf_s *lower,
+                          const struct lower_setalarm_s *alarminfo)
 {
-  FAR struct cxd56_lowerhalf_s *priv;
-  FAR struct cxd56_cbinfo_s *cbinfo;
+  struct cxd56_lowerhalf_s *priv;
+  struct cxd56_cbinfo_s *cbinfo;
   struct alm_setalarm_s lowerinfo;
   int ret = -EINVAL;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL);
   DEBUGASSERT(RTC_ALARM0 == alarminfo->id);
 
-  priv = (FAR struct cxd56_lowerhalf_s *)lower;
+  priv = (struct cxd56_lowerhalf_s *)lower;
 
   if (RTC_ALARM0 == alarminfo->id)
     {
@@ -325,7 +325,7 @@ static int cxd56_setalarm(FAR struct rtc_lowerhalf_s *lower,
 
       /* Convert the RTC time to a timespec (1 second accuracy) */
 
-      lowerinfo.as_time.tv_sec  = timegm((FAR struct tm *)&alarminfo->time);
+      lowerinfo.as_time.tv_sec  = timegm((struct tm *)&alarminfo->time);
       lowerinfo.as_time.tv_nsec = 0;
 
       /* And set the alarm */
@@ -360,11 +360,11 @@ static int cxd56_setalarm(FAR struct rtc_lowerhalf_s *lower,
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int cxd56_setrelative(FAR struct rtc_lowerhalf_s *lower,
-                             FAR const struct lower_setrelative_s *alarminfo)
+static int cxd56_setrelative(struct rtc_lowerhalf_s *lower,
+                             const struct lower_setrelative_s *alarminfo)
 {
   struct lower_setalarm_s setalarm;
-  FAR struct timespec ts;
+  struct timespec ts;
   time_t seconds;
   int ret = -EINVAL;
 
@@ -402,7 +402,7 @@ static int cxd56_setrelative(FAR struct rtc_lowerhalf_s *lower,
 
       seconds = ts.tv_sec + (alarminfo->reltime + 1);
 
-      gmtime_r(&seconds, (FAR struct tm *)&setalarm.time);
+      gmtime_r(&seconds, (struct tm *)&setalarm.time);
 
       /* The set the alarm using this absolute time */
 
@@ -437,16 +437,16 @@ static int cxd56_setrelative(FAR struct rtc_lowerhalf_s *lower,
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int cxd56_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
+static int cxd56_cancelalarm(struct rtc_lowerhalf_s *lower, int alarmid)
 {
-  FAR struct cxd56_lowerhalf_s *priv;
-  FAR struct cxd56_cbinfo_s *cbinfo;
+  struct cxd56_lowerhalf_s *priv;
+  struct cxd56_cbinfo_s *cbinfo;
   int ret = -EINVAL;
 
   DEBUGASSERT(lower != NULL);
   DEBUGASSERT((RTC_ALARM0 <= alarmid) && (alarmid < RTC_ALARM_LAST));
 
-  priv = (FAR struct cxd56_lowerhalf_s *)lower;
+  priv = (struct cxd56_lowerhalf_s *)lower;
 
   if ((RTC_ALARM0 <= alarmid) && (alarmid < RTC_ALARM_LAST))
     {
@@ -491,9 +491,9 @@ static int cxd56_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
  *
  ****************************************************************************/
 
-FAR struct rtc_lowerhalf_s *cxd56_rtc_lowerhalf(void)
+struct rtc_lowerhalf_s *cxd56_rtc_lowerhalf(void)
 {
-  return (FAR struct rtc_lowerhalf_s *)&g_rtc_lowerhalf;
+  return (struct rtc_lowerhalf_s *)&g_rtc_lowerhalf;
 }
 
 #endif /* CONFIG_RTC_DRIVER */

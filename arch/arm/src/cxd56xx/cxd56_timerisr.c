@@ -65,7 +65,7 @@ static uint32_t g_systrvr;
  ****************************************************************************/
 
 static int cxd56_changeclock(uint8_t id);
-static int cxd56_timerisr(int irq, uint32_t *regs, FAR void *arg);
+static int cxd56_timerisr(int irq, uint32_t *regs, void *arg);
 
 /****************************************************************************
  * Private Functions
@@ -129,7 +129,7 @@ static int cxd56_changeclock(uint8_t id)
  *
  ****************************************************************************/
 
-static int cxd56_timerisr(int irq, uint32_t *regs, FAR void *arg)
+static int cxd56_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Process timer interrupt */
 

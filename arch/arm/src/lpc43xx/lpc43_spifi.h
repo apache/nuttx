@@ -107,7 +107,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *lpc43_spifi_initialize(void);
+struct mtd_dev_s *lpc43_spifi_initialize(void);
 
 #undef EXTERN
 #ifdef __cplusplus

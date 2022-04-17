@@ -129,7 +129,7 @@ extern "C"
  ****************************************************************************/
 
 int cxd56_gpioint_config(uint32_t pin, uint32_t gpiocfg, xcpt_t isr,
-                         FAR void *arg);
+                         void *arg);
 
 /****************************************************************************
  * Name: cxd56_gpioint_irq

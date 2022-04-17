@@ -91,20 +91,20 @@
  * configuration of each color plane.
  */
 
-static int lpc17_40_getvideoinfo(FAR struct fb_vtable_s *vtable,
-             FAR struct fb_videoinfo_s *vinfo);
-static int lpc17_40_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
-             FAR struct fb_planeinfo_s *pinfo);
+static int lpc17_40_getvideoinfo(struct fb_vtable_s *vtable,
+             struct fb_videoinfo_s *vinfo);
+static int lpc17_40_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
+             struct fb_planeinfo_s *pinfo);
 
 /* The following is provided only if the video hardware supports RGB color
  * mapping
  */
 
 #ifdef CONFIG_FB_CMAP
-static int lpc17_40_getcmap(FAR struct fb_vtable_s *vtable,
-             FAR struct fb_cmap_s *cmap);
-static int lpc17_40_putcmap(FAR struct fb_vtable_s *vtable,
-             FAR const struct fb_cmap_s *cmap);
+static int lpc17_40_getcmap(struct fb_vtable_s *vtable,
+             struct fb_cmap_s *cmap);
+static int lpc17_40_putcmap(struct fb_vtable_s *vtable,
+             const struct fb_cmap_s *cmap);
 #endif
 
 /* The following is provided only if the video hardware supports a hardware
@@ -112,10 +112,10 @@ static int lpc17_40_putcmap(FAR struct fb_vtable_s *vtable,
  */
 
 #ifdef CONFIG_FB_HWCURSOR
-static int lpc17_40_getcursor(FAR struct fb_vtable_s *vtable,
-             FAR struct fb_cursorattrib_s *attrib);
-static int lpc17_40_setcursor(FAR struct fb_vtable_s *vtable,
-             FAR struct fb_setcursor_s *settings);
+static int lpc17_40_getcursor(struct fb_vtable_s *vtable,
+             struct fb_cursorattrib_s *attrib);
+static int lpc17_40_setcursor(struct fb_vtable_s *vtable,
+             struct fb_setcursor_s *settings);
 #endif
 
 /****************************************************************************
@@ -136,7 +136,7 @@ static const struct fb_videoinfo_s g_videoinfo =
 
 static const struct fb_planeinfo_s g_planeinfo =
 {
-  .fbmem    = (FAR void *)CONFIG_LPC17_40_LCD_VRAMBASE,
+  .fbmem    = (void *)CONFIG_LPC17_40_LCD_VRAMBASE,
   .fblen    = LPC17_40_FBSIZE,
   .stride   = LPC17_40_STRIDE,
   .display  = 0,
@@ -185,8 +185,8 @@ struct fb_vtable_s g_fbobject =
  * Name: lpc17_40_getvideoinfo
  ****************************************************************************/
 
-static int lpc17_40_getvideoinfo(FAR struct fb_vtable_s *vtable,
-                              FAR struct fb_videoinfo_s *vinfo)
+static int lpc17_40_getvideoinfo(struct fb_vtable_s *vtable,
+                                 struct fb_videoinfo_s *vinfo)
 {
   lcdinfo("vtable=%p vinfo=%p\n", vtable, vinfo);
   if (vtable && vinfo)
@@ -203,8 +203,8 @@ static int lpc17_40_getvideoinfo(FAR struct fb_vtable_s *vtable,
  * Name: lpc17_40_getplaneinfo
  ****************************************************************************/
 
-static int lpc17_40_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
-                              FAR struct fb_planeinfo_s *pinfo)
+static int lpc17_40_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
+                                 struct fb_planeinfo_s *pinfo)
 {
   lcdinfo("vtable=%p planeno=%d pinfo=%p\n", vtable, planeno, pinfo);
   if (vtable && planeno == 0 && pinfo)
@@ -222,8 +222,8 @@ static int lpc17_40_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
  ****************************************************************************/
 
 #ifdef CONFIG_FB_CMAP
-static int lpc17_40_getcmap(FAR struct fb_vtable_s *vtable,
-                         FAR struct fb_cmap_s *cmap)
+static int lpc17_40_getcmap(struct fb_vtable_s *vtable,
+                            struct fb_cmap_s *cmap)
 {
   uint32_t *pal;
   uint32_t rgb;
@@ -296,8 +296,8 @@ static int lpc17_40_getcmap(FAR struct fb_vtable_s *vtable,
  ****************************************************************************/
 
 #ifdef CONFIG_FB_CMAP
-static int lpc17_40_putcmap(FAR struct fb_vtable_s *vtable,
-                         FAR const struct fb_cmap_s *cmap)
+static int lpc17_40_putcmap(struct fb_vtable_s *vtable,
+                            const struct fb_cmap_s *cmap)
 {
   uint32_t *pal;
   uint32_t rgb0;
@@ -368,8 +368,8 @@ static int lpc17_40_putcmap(FAR struct fb_vtable_s *vtable,
  ****************************************************************************/
 
 #ifdef CONFIG_FB_HWCURSOR
-static int lpc17_40_getcursor(FAR struct fb_vtable_s *vtable,
-                        FAR struct fb_cursorattrib_s *attrib)
+static int lpc17_40_getcursor(struct fb_vtable_s *vtable,
+                              struct fb_cursorattrib_s *attrib)
 {
   lcdinfo("vtable=%p attrib=%p\n", vtable, attrib);
   if (vtable && attrib)
@@ -401,8 +401,8 @@ static int lpc17_40_getcursor(FAR struct fb_vtable_s *vtable,
  ****************************************************************************/
 
 #ifdef CONFIG_FB_HWCURSOR
-static int lpc17_40_setcursor(FAR struct fb_vtable_s *vtable,
-                       FAR struct fb_setcursor_s *settings)
+static int lpc17_40_setcursor(struct fb_vtable_s *vtable,
+                              struct fb_setcursor_s *settings)
 {
   lcdinfo("vtable=%p settings=%p\n", vtable, settings);
   if (vtable && settings)
@@ -723,7 +723,7 @@ int up_fbinitialize(int display)
  *
  ****************************************************************************/
 
-FAR struct fb_vtable_s *up_fbgetvplane(int display, int vplane)
+struct fb_vtable_s *up_fbgetvplane(int display, int vplane)
 {
   lcdinfo("vplane: %d\n", vplane);
   if (vplane == 0)

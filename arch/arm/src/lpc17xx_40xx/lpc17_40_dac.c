@@ -76,12 +76,12 @@
 
 /* DAC methods */
 
-static void dac_reset(FAR struct dac_dev_s *dev);
-static int  dac_setup(FAR struct dac_dev_s *dev);
-static void dac_shutdown(FAR struct dac_dev_s *dev);
-static void dac_txint(FAR struct dac_dev_s *dev, bool enable);
-static int  dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg);
-static int  dac_ioctl(FAR struct dac_dev_s *dev, int cmd, unsigned long arg);
+static void dac_reset(struct dac_dev_s *dev);
+static int  dac_setup(struct dac_dev_s *dev);
+static void dac_shutdown(struct dac_dev_s *dev);
+static void dac_txint(struct dac_dev_s *dev, bool enable);
+static int  dac_send(struct dac_dev_s *dev, struct dac_msg_s *msg);
+static int  dac_ioctl(struct dac_dev_s *dev, int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -110,7 +110,7 @@ static struct dac_dev_s g_dacdev =
  * is called, before ao_setup() and on error conditions.
  */
 
-static void dac_reset(FAR struct dac_dev_s *dev)
+static void dac_reset(struct dac_dev_s *dev)
 {
   irqstate_t flags;
   uint32_t regval;
@@ -135,7 +135,7 @@ static void dac_reset(FAR struct dac_dev_s *dev)
  * are all disabled upon return.
  */
 
-static int  dac_setup(FAR struct dac_dev_s *dev)
+static int  dac_setup(struct dac_dev_s *dev)
 {
   return OK;
 }
@@ -144,17 +144,17 @@ static int  dac_setup(FAR struct dac_dev_s *dev)
  * This method reverses the operation the setup method.
  */
 
-static void dac_shutdown(FAR struct dac_dev_s *dev)
+static void dac_shutdown(struct dac_dev_s *dev)
 {
 }
 
 /* Call to enable or disable TX interrupts */
 
-static void dac_txint(FAR struct dac_dev_s *dev, bool enable)
+static void dac_txint(struct dac_dev_s *dev, bool enable)
 {
 }
 
-static int  dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
+static int  dac_send(struct dac_dev_s *dev, struct dac_msg_s *msg)
 {
   /* adjust the binary value to the lpc1768's register format (plus high
    * speed profile in bit 16)
@@ -167,7 +167,7 @@ static int  dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
 
 /* All ioctl calls will be routed through this method */
 
-static int dac_ioctl(FAR struct dac_dev_s *dev, int cmd, unsigned long arg)
+static int dac_ioctl(struct dac_dev_s *dev, int cmd, unsigned long arg)
 {
   aerr("ERROR: Fix me -- Not Implemented\n");
   return 0;
@@ -188,7 +188,7 @@ static int dac_ioctl(FAR struct dac_dev_s *dev, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-FAR struct dac_dev_s *lpc17_40_dacinitialize(void)
+struct dac_dev_s *lpc17_40_dacinitialize(void)
 {
   return &g_dacdev;
 }

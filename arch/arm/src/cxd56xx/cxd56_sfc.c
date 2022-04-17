@@ -76,7 +76,7 @@ static struct flash_controller_s g_sfc;
  * Name: cxd56_erase
  ****************************************************************************/
 
-static int cxd56_erase(FAR struct mtd_dev_s *dev, off_t startblock,
+static int cxd56_erase(struct mtd_dev_s *dev, off_t startblock,
                        size_t nblocks)
 {
   int ret;
@@ -97,8 +97,8 @@ static int cxd56_erase(FAR struct mtd_dev_s *dev, off_t startblock,
   return OK;
 }
 
-static ssize_t cxd56_bread(FAR struct mtd_dev_s *dev, off_t startblock,
-                           size_t nblocks, FAR uint8_t *buffer)
+static ssize_t cxd56_bread(struct mtd_dev_s *dev, off_t startblock,
+                           size_t nblocks, uint8_t *buffer)
 {
   int ret;
 
@@ -115,8 +115,8 @@ static ssize_t cxd56_bread(FAR struct mtd_dev_s *dev, off_t startblock,
   return nblocks;
 }
 
-static ssize_t cxd56_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
-                            size_t nblocks, FAR const uint8_t *buffer)
+static ssize_t cxd56_bwrite(struct mtd_dev_s *dev, off_t startblock,
+                            size_t nblocks, const uint8_t *buffer)
 {
   int ret;
 
@@ -138,8 +138,8 @@ static ssize_t cxd56_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
   return nblocks;
 }
 
-static ssize_t cxd56_read(FAR struct mtd_dev_s *dev, off_t offset,
-                          size_t nbytes, FAR uint8_t *buffer)
+static ssize_t cxd56_read(struct mtd_dev_s *dev, off_t offset,
+                          size_t nbytes, uint8_t *buffer)
 {
   int ret;
 
@@ -155,8 +155,8 @@ static ssize_t cxd56_read(FAR struct mtd_dev_s *dev, off_t offset,
 }
 
 #ifdef CONFIG_MTD_BYTE_WRITE
-static ssize_t cxd56_write(FAR struct mtd_dev_s *dev, off_t offset,
-                           size_t nbytes, FAR const uint8_t *buffer)
+static ssize_t cxd56_write(struct mtd_dev_s *dev, off_t offset,
+                           size_t nbytes, const uint8_t *buffer)
 {
   int ret;
 
@@ -176,7 +176,7 @@ static ssize_t cxd56_write(FAR struct mtd_dev_s *dev, off_t offset,
 }
 #endif
 
-static int cxd56_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
+static int cxd56_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg)
 {
   struct flash_controller_s *priv = (struct flash_controller_s *)dev;
   int ret                         = OK;
@@ -185,8 +185,8 @@ static int cxd56_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
     {
       case MTDIOC_GEOMETRY:
         {
-          FAR struct mtd_geometry_s *geo =
-            (FAR struct mtd_geometry_s *)((uintptr_t)arg);
+          struct mtd_geometry_s *geo =
+            (struct mtd_geometry_s *)((uintptr_t)arg);
           finfo("cmd: GEOM\n");
           if (geo)
             {
@@ -214,8 +214,8 @@ static int cxd56_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 
       case BIOC_PARTINFO:
         {
-          FAR struct partition_info_s *info =
-            (FAR struct partition_info_s *)arg;
+          struct partition_info_s *info =
+            (struct partition_info_s *)arg;
           if (info != NULL)
             {
               info->numsectors  = priv->density / PAGE_SIZE;
@@ -251,7 +251,7 @@ static int cxd56_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
   return ret;
 }
 
-FAR struct mtd_dev_s *cxd56_sfc_initialize(void)
+struct mtd_dev_s *cxd56_sfc_initialize(void)
 {
   struct flash_controller_s *priv = &g_sfc;
 
@@ -272,7 +272,7 @@ FAR struct mtd_dev_s *cxd56_sfc_initialize(void)
 
   /* Allocate a buffer for the erase block cache */
 
-  priv->cache = (FAR uint8_t *)kmm_malloc(SPIFI_BLKSIZE);
+  priv->cache = (uint8_t *)kmm_malloc(SPIFI_BLKSIZE);
   if (!priv->cache)
     {
       /* Allocation failed! */

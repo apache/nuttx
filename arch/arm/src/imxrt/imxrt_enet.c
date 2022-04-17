@@ -244,7 +244,7 @@
  * the contents of the Ethernet header
  */
 
-#define BUF ((FAR struct eth_hdr_s *)priv->dev.d_buf)
+#define BUF ((struct eth_hdr_s *)priv->dev.d_buf)
 
 #define IMXRT_BUF_SIZE  ENET_ALIGN_UP(CONFIG_NET_ETH_PKTSIZE + \
                                       CONFIG_NET_GUARDSIZE)
@@ -319,25 +319,25 @@ static inline uint16_t imxrt_swap16(uint16_t value);
 
 /* Common TX logic */
 
-static bool imxrt_txringfull(FAR struct imxrt_driver_s *priv);
-static int  imxrt_transmit(FAR struct imxrt_driver_s *priv);
+static bool imxrt_txringfull(struct imxrt_driver_s *priv);
+static int  imxrt_transmit(struct imxrt_driver_s *priv);
 static int  imxrt_txpoll(struct net_driver_s *dev);
 
 /* Interrupt handling */
 
-static void imxrt_dispatch(FAR struct imxrt_driver_s *priv);
-static void imxrt_receive(FAR struct imxrt_driver_s *priv);
-static void imxrt_txdone(FAR struct imxrt_driver_s *priv);
+static void imxrt_dispatch(struct imxrt_driver_s *priv);
+static void imxrt_receive(struct imxrt_driver_s *priv);
+static void imxrt_txdone(struct imxrt_driver_s *priv);
 
-static void imxrt_enet_interrupt_work(FAR void *arg);
-static int  imxrt_enet_interrupt(int irq, FAR void *context, FAR void *arg);
+static void imxrt_enet_interrupt_work(void *arg);
+static int  imxrt_enet_interrupt(int irq, void *context, void *arg);
 
 /* Watchdog timer expirations */
 
-static void imxrt_txtimeout_work(FAR void *arg);
+static void imxrt_txtimeout_work(void *arg);
 static void imxrt_txtimeout_expiry(wdparm_t arg);
 
-static void imxrt_poll_work(FAR void *arg);
+static void imxrt_poll_work(void *arg);
 static void imxrt_polltimer_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
@@ -345,7 +345,7 @@ static void imxrt_polltimer_expiry(wdparm_t arg);
 static int  imxrt_ifup(struct net_driver_s *dev);
 static int  imxrt_ifdown(struct net_driver_s *dev);
 
-static void imxrt_txavail_work(FAR void *arg);
+static void imxrt_txavail_work(void *arg);
 static int  imxrt_txavail(struct net_driver_s *dev);
 
 /* Internal ifup function that allows phy reset to be optional */
@@ -354,8 +354,8 @@ static int imxrt_ifup_action(struct net_driver_s *dev, bool resetphy);
 
 #ifdef CONFIG_NET_MCASTGROUP
 static int  imxrt_addmac(struct net_driver_s *dev,
-              FAR const uint8_t *mac);
-static int  imxrt_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
+              const uint8_t *mac);
+static int  imxrt_rmmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
 
 #ifdef CONFIG_NETDEV_IOCTL
@@ -445,7 +445,7 @@ static inline uint16_t imxrt_swap16(uint16_t value)
  *
  ****************************************************************************/
 
-static bool imxrt_txringfull(FAR struct imxrt_driver_s *priv)
+static bool imxrt_txringfull(struct imxrt_driver_s *priv)
 {
   uint8_t txnext;
 
@@ -483,7 +483,7 @@ static bool imxrt_txringfull(FAR struct imxrt_driver_s *priv)
  *
  ****************************************************************************/
 
-static int imxrt_transmit(FAR struct imxrt_driver_s *priv)
+static int imxrt_transmit(struct imxrt_driver_s *priv)
 {
   struct enet_desc_s *txdesc;
   irqstate_t flags;
@@ -602,8 +602,8 @@ static int imxrt_transmit(FAR struct imxrt_driver_s *priv)
 
 static int imxrt_txpoll(struct net_driver_s *dev)
 {
-  FAR struct imxrt_driver_s *priv =
-    (FAR struct imxrt_driver_s *)dev->d_private;
+  struct imxrt_driver_s *priv =
+    (struct imxrt_driver_s *)dev->d_private;
 
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
@@ -677,7 +677,7 @@ static int imxrt_txpoll(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static inline void imxrt_dispatch(FAR struct imxrt_driver_s *priv)
+static inline void imxrt_dispatch(struct imxrt_driver_s *priv)
 {
   /* Update statistics */
 
@@ -814,7 +814,7 @@ static inline void imxrt_dispatch(FAR struct imxrt_driver_s *priv)
  *
  ****************************************************************************/
 
-static void imxrt_receive(FAR struct imxrt_driver_s *priv)
+static void imxrt_receive(struct imxrt_driver_s *priv)
 {
   struct enet_desc_s *rxdesc;
   bool received;
@@ -902,7 +902,7 @@ static void imxrt_receive(FAR struct imxrt_driver_s *priv)
  *
  ****************************************************************************/
 
-static void imxrt_txdone(FAR struct imxrt_driver_s *priv)
+static void imxrt_txdone(struct imxrt_driver_s *priv)
 {
   struct enet_desc_s *txdesc;
   uint32_t regval;
@@ -985,9 +985,9 @@ static void imxrt_txdone(FAR struct imxrt_driver_s *priv)
  *
  ****************************************************************************/
 
-static void imxrt_enet_interrupt_work(FAR void *arg)
+static void imxrt_enet_interrupt_work(void *arg)
 {
-  FAR struct imxrt_driver_s *priv = (FAR struct imxrt_driver_s *)arg;
+  struct imxrt_driver_s *priv = (struct imxrt_driver_s *)arg;
   uint32_t pending;
 #ifdef CONFIG_NET_MCASTGROUP
   uint32_t gaurstore;
@@ -1105,9 +1105,9 @@ static void imxrt_enet_interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int imxrt_enet_interrupt(int irq, FAR void *context, FAR void *arg)
+static int imxrt_enet_interrupt(int irq, void *context, void *arg)
 {
-  register FAR struct imxrt_driver_s *priv = &g_enet[0];
+  register struct imxrt_driver_s *priv = &g_enet[0];
 
   /* Disable further Ethernet interrupts.  Because Ethernet interrupts are
    * also disabled if the TX timeout event occurs, there can be no race
@@ -1138,9 +1138,9 @@ static int imxrt_enet_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static void imxrt_txtimeout_work(FAR void *arg)
+static void imxrt_txtimeout_work(void *arg)
 {
-  FAR struct imxrt_driver_s *priv = (FAR struct imxrt_driver_s *)arg;
+  struct imxrt_driver_s *priv = (struct imxrt_driver_s *)arg;
 
   /* Increment statistics and dump debug info */
 
@@ -1182,7 +1182,7 @@ static void imxrt_txtimeout_work(FAR void *arg)
 
 static void imxrt_txtimeout_expiry(wdparm_t arg)
 {
-  FAR struct imxrt_driver_s *priv = (FAR struct imxrt_driver_s *)arg;
+  struct imxrt_driver_s *priv = (struct imxrt_driver_s *)arg;
 
   /* Disable further Ethernet interrupts.  This will prevent some race
    * conditions with interrupt work.  There is still a potential race
@@ -1215,9 +1215,9 @@ static void imxrt_txtimeout_expiry(wdparm_t arg)
  *
  ****************************************************************************/
 
-static void imxrt_poll_work(FAR void *arg)
+static void imxrt_poll_work(void *arg)
 {
-  FAR struct imxrt_driver_s *priv = (FAR struct imxrt_driver_s *)arg;
+  struct imxrt_driver_s *priv = (struct imxrt_driver_s *)arg;
 
   /* Check if there is there is a transmission in progress.
    * We cannot perform the TX poll if he are unable to accept
@@ -1261,7 +1261,7 @@ static void imxrt_poll_work(FAR void *arg)
 
 static void imxrt_polltimer_expiry(wdparm_t arg)
 {
-  FAR struct imxrt_driver_s *priv = (FAR struct imxrt_driver_s *)arg;
+  struct imxrt_driver_s *priv = (struct imxrt_driver_s *)arg;
 
   /* Schedule to perform the poll processing on the worker thread. */
 
@@ -1291,8 +1291,8 @@ static void imxrt_polltimer_expiry(wdparm_t arg)
 
 static int imxrt_ifup_action(struct net_driver_s *dev, bool resetphy)
 {
-  FAR struct imxrt_driver_s *priv =
-    (FAR struct imxrt_driver_s *)dev->d_private;
+  struct imxrt_driver_s *priv =
+    (struct imxrt_driver_s *)dev->d_private;
   uint8_t *mac = dev->d_mac.ether.ether_addr_octet;
   uint32_t regval;
   int ret;
@@ -1438,8 +1438,8 @@ static int imxrt_ifup(struct net_driver_s *dev)
 
 static int imxrt_ifdown(struct net_driver_s *dev)
 {
-  FAR struct imxrt_driver_s *priv =
-    (FAR struct imxrt_driver_s *)dev->d_private;
+  struct imxrt_driver_s *priv =
+    (struct imxrt_driver_s *)dev->d_private;
   irqstate_t flags;
 
   ninfo("Taking down: %d.%d.%d.%d\n",
@@ -1491,9 +1491,9 @@ static int imxrt_ifdown(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void imxrt_txavail_work(FAR void *arg)
+static void imxrt_txavail_work(void *arg)
 {
-  FAR struct imxrt_driver_s *priv = (FAR struct imxrt_driver_s *)arg;
+  struct imxrt_driver_s *priv = (struct imxrt_driver_s *)arg;
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -1538,8 +1538,8 @@ static void imxrt_txavail_work(FAR void *arg)
 
 static int imxrt_txavail(struct net_driver_s *dev)
 {
-  FAR struct imxrt_driver_s *priv =
-    (FAR struct imxrt_driver_s *)dev->d_private;
+  struct imxrt_driver_s *priv =
+    (struct imxrt_driver_s *)dev->d_private;
 
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
@@ -1657,7 +1657,7 @@ static uint32_t imxrt_enet_hash_index(const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_MCASTGROUP
-static int imxrt_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
+static int imxrt_addmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   uint32_t hashindex;
   uint32_t temp;
@@ -1704,7 +1704,7 @@ static int imxrt_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_MCASTGROUP
-static int imxrt_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
+static int imxrt_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   uint32_t hashindex;
   uint32_t temp;
@@ -1754,8 +1754,8 @@ static int imxrt_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 static int imxrt_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 {
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-  FAR struct imxrt_driver_s *priv =
-    (FAR struct imxrt_driver_s *)dev->d_private;
+  struct imxrt_driver_s *priv =
+    (struct imxrt_driver_s *)dev->d_private;
 #endif
   int ret;
 

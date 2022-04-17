@@ -50,7 +50,7 @@
  *
  ****************************************************************************/
 
-FAR struct i2c_master_s *lpc17_40_i2cbus_initialize(int port);
+struct i2c_master_s *lpc17_40_i2cbus_initialize(int port);
 
 /****************************************************************************
  * Name: lpc17_40_i2cbus_uninitialize
@@ -67,6 +67,6 @@ FAR struct i2c_master_s *lpc17_40_i2cbus_initialize(int port);
  *
  ****************************************************************************/
 
-int lpc17_40_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
+int lpc17_40_i2cbus_uninitialize(struct i2c_master_s *dev);
 
 #endif /* __ARCH_ARM_SRC_LPC17XX_40XX_LPC17_40_I2C_H */

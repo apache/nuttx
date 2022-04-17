@@ -768,7 +768,7 @@ error:
  *
  ****************************************************************************/
 
-int cxd56_pmic_get_gauge(FAR struct pmic_gauge_s *gauge)
+int cxd56_pmic_get_gauge(struct pmic_gauge_s *gauge)
 {
   return fw_pm_pmiccontrol(PMIC_CMD_AFE, gauge);
 }
@@ -787,7 +787,7 @@ int cxd56_pmic_get_gauge(FAR struct pmic_gauge_s *gauge)
  *
  ****************************************************************************/
 
-int cxd56_pmic_getlowervol(FAR int *voltage)
+int cxd56_pmic_getlowervol(int *voltage)
 {
   return fw_pm_pmiccontrol(PMIC_CMD_GETVSYS, voltage);
 }
@@ -825,7 +825,7 @@ int cxd56_pmic_setlowervol(int voltage)
  *
  ****************************************************************************/
 
-int cxd56_pmic_getnotifyvol(FAR int *voltage)
+int cxd56_pmic_getnotifyvol(int *voltage)
 {
   return fw_pm_pmiccontrol(PMIC_CMD_GETPREVSYS, voltage);
 }
@@ -863,7 +863,7 @@ int cxd56_pmic_setnotifyvol(int voltage)
  *
  ****************************************************************************/
 
-int cxd56_pmic_getchargevol(FAR int *voltage)
+int cxd56_pmic_getchargevol(int *voltage)
 {
   int val;
   int ret;
@@ -942,7 +942,7 @@ int cxd56_pmic_setchargevol(int voltage)
  *
  ****************************************************************************/
 
-int cxd56_pmic_getchargecurrent(FAR int *current)
+int cxd56_pmic_getchargecurrent(int *current)
 {
   int val;
   int ret;
@@ -1032,7 +1032,7 @@ int cxd56_pmic_setchargecurrent(int current)
  *
  ****************************************************************************/
 
-int cxd56_pmic_getporttype(FAR int *porttype)
+int cxd56_pmic_getporttype(int *porttype)
 {
   return fw_pm_pmiccontrol(PMIC_CMD_GET_USB_PORT_TYPE, porttype);
 }
@@ -1134,7 +1134,7 @@ int cxd56_pmic_setrechargevol(int mv)
  *
  ****************************************************************************/
 
-int cxd56_pmic_getrechargevol(FAR int *mv)
+int cxd56_pmic_getrechargevol(int *mv)
 {
   int val;
   int ret;
@@ -1236,7 +1236,7 @@ int cxd56_pmic_setchargecompcurrent(int current)
  *
  ****************************************************************************/
 
-int cxd56_pmic_getchargecompcurrent(FAR int *current)
+int cxd56_pmic_getchargecompcurrent(int *current)
 {
   int val;
   int ret;
@@ -1295,7 +1295,7 @@ int cxd56_pmic_getchargecompcurrent(FAR int *current)
  *
  ****************************************************************************/
 
-int cxd56_pmic_gettemptable(FAR struct pmic_temp_table_s *table)
+int cxd56_pmic_gettemptable(struct pmic_temp_table_s *table)
 {
   /* SET_T60 (70h) - SET_T0_2 (78h) */
 
@@ -1317,7 +1317,7 @@ int cxd56_pmic_gettemptable(FAR struct pmic_temp_table_s *table)
  *
  ****************************************************************************/
 
-int cxd56_pmic_settemptable(FAR struct pmic_temp_table_s *table)
+int cxd56_pmic_settemptable(struct pmic_temp_table_s *table)
 {
   return fw_pm_pmiccontrol(PMIC_CMD_SET_CHG_TEMPERATURE_TABLE, table);
 }
@@ -1394,7 +1394,7 @@ int cxd56_pmic_setchargemode(int low, int high)
  *
  ****************************************************************************/
 
-int cxd56_pmic_getchargemode(FAR int *low, FAR int *high)
+int cxd56_pmic_getchargemode(int *low, int *high)
 {
   struct pmic_temp_mode_s arg;
   int ret;
@@ -1416,22 +1416,22 @@ int cxd56_pmic_getchargemode(FAR int *low, FAR int *high)
  * Battery monitor for debug
  ****************************************************************************/
 
-int cxd56_pmic_monitor_enable(FAR struct pmic_mon_s *ptr)
+int cxd56_pmic_monitor_enable(struct pmic_mon_s *ptr)
 {
   return fw_pm_pmiccontrol(PMIC_CMD_POWER_MONITOR_ENABLE, ptr);
 }
 
-int cxd56_pmic_monitor_status(FAR struct pmic_mon_status_s *ptr)
+int cxd56_pmic_monitor_status(struct pmic_mon_status_s *ptr)
 {
   return fw_pm_pmiccontrol(PMIC_CMD_POWER_MONITOR_STATUS, ptr);
 }
 
-int cxd56_pmic_monitor_set(FAR struct pmic_mon_set_s *ptr)
+int cxd56_pmic_monitor_set(struct pmic_mon_set_s *ptr)
 {
   return fw_pm_pmiccontrol(PMIC_CMD_POWER_MONITOR_SET, ptr);
 }
 
-int cxd56_pmic_monitor_get(FAR struct pmic_mon_log_s *ptr)
+int cxd56_pmic_monitor_get(struct pmic_mon_log_s *ptr)
 {
   return fw_pm_pmiccontrol(PMIC_CMD_POWER_MONITOR_GET, ptr);
 }

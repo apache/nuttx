@@ -70,7 +70,7 @@ extern "C"
  *
  ****************************************************************************/
 
-void cxd56_timer_initialize(FAR const char *devpath, int timer);
+void cxd56_timer_initialize(const char *devpath, int timer);
 
 #undef EXTERN
 #if defined(__cplusplus)
