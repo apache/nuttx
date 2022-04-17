@@ -91,14 +91,14 @@
 int stm32_bringup(void)
 {
 #if defined(CONFIG_STM32_SPI4)
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
 #endif
 #if defined(CONFIG_MTD)
-  FAR struct mtd_dev_s *mtd;
-  FAR struct mtd_geometry_s geo;
+  struct mtd_dev_s *mtd;
+  struct mtd_geometry_s geo;
 #endif
 #if defined(CONFIG_MTD_PARTITION_NAMES)
-  FAR const char *partname = CONFIG_STM32F429I_DISCO_FLASH_PART_NAMES;
+  const char *partname = CONFIG_STM32F429I_DISCO_FLASH_PART_NAMES;
 #endif
   int ret;
 
@@ -168,7 +168,7 @@ int stm32_bringup(void)
           int erasesize;
           const char *partstring = CONFIG_STM32F429I_DISCO_FLASH_PART_LIST;
           const char *ptr;
-          FAR struct mtd_dev_s *mtd_part;
+          struct mtd_dev_s *mtd_part;
           char  partref[16];
 
           /* Now create a partition on the FLASH device */

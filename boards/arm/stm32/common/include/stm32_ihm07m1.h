@@ -49,7 +49,7 @@ extern "C"
  * Name: stm32_ihm07m1_initialize
  ****************************************************************************/
 
-int board_ihm07m1_initialize(FAR struct stm32_foc_adc_s *adc_cfg);
+int board_ihm07m1_initialize(struct stm32_foc_adc_s *adc_cfg);
 
 #undef EXTERN
 #ifdef __cplusplus

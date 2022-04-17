@@ -189,7 +189,7 @@ int stm32_can_setup(void);
  ****************************************************************************/
 
 #ifdef CONFIG_TIMER
-int stm32_timer_driver_setup(FAR const char *devpath, int timer);
+int stm32_timer_driver_setup(const char *devpath, int timer);
 #endif
 
 /****************************************************************************

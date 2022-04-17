@@ -265,11 +265,11 @@
  ****************************************************************************/
 
 #ifdef CONFIG_STM32F429I_DISCO_ILI9341_LCDIFACE
-FAR struct lcd_dev_s *g_lcd = NULL;
+struct lcd_dev_s *g_lcd = NULL;
 #endif
 
 #ifdef CONFIG_STM32F429I_DISCO_ILI9341_FBIFACE
-FAR struct ili9341_lcd_s *g_ltdc = NULL;
+struct ili9341_lcd_s *g_ltdc = NULL;
 #endif
 
 /****************************************************************************
@@ -287,7 +287,7 @@ FAR struct ili9341_lcd_s *g_ltdc = NULL;
 
 static int stm32_ili9341_initialize(void)
 {
-  FAR struct ili9341_lcd_s *lcd = g_ltdc;
+  struct ili9341_lcd_s *lcd = g_ltdc;
 
   lcd = stm32_ili93414ws_initialize();
 
@@ -433,7 +433,7 @@ void board_lcd_uninitialize(void)
  *
  ****************************************************************************/
 
-FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
+struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
   if (lcddev == ILI9341_LCD_DEVICE)
     {
@@ -467,7 +467,7 @@ int board_lcd_initialize(void)
     {
       /* Initialize the sub driver structure */
 
-      FAR struct ili9341_lcd_s *dev = stm32_ili93414ws_initialize();
+      struct ili9341_lcd_s *dev = stm32_ili93414ws_initialize();
 
       /* Initialize public lcd driver structure */
 
@@ -556,7 +556,7 @@ int up_fbinitialize(int display)
  *
  ****************************************************************************/
 
-FAR struct fb_vtable_s *up_fbgetvplane(int display, int vplane)
+struct fb_vtable_s *up_fbgetvplane(int display, int vplane)
 {
   return stm32_ltdcgetvplane(vplane);
 }

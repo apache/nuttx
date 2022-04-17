@@ -54,7 +54,7 @@
  * Private Data
  ****************************************************************************/
 
-static FAR struct sdio_dev_s *g_sdio_dev;
+static struct sdio_dev_s *g_sdio_dev;
 #ifdef HAVE_NCD
 static bool g_sd_inserted = 0xff; /* Impossible value */
 #endif
@@ -72,7 +72,7 @@ static bool g_sd_inserted = 0xff; /* Impossible value */
  ****************************************************************************/
 
 #ifdef HAVE_NCD
-static int stm32_ncd_interrupt(int irq, FAR void *context, FAR void *arg)
+static int stm32_ncd_interrupt(int irq, void *context, void *arg)
 {
   bool present;
 

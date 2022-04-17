@@ -154,21 +154,21 @@ static const uint32_t g_lcdpin[] =
 
 /* Command and data transmission control */
 
-static int stm32_ili93418b_recvblock(FAR struct ili9341_lcd_s *lcd,
+static int stm32_ili93418b_recvblock(struct ili9341_lcd_s *lcd,
                                      uint16_t *wd, uint16_t nwords);
-static void stm32_ili93418b_deselect(FAR struct ili9341_lcd_s *lcd);
-static void stm32_ili93418b_select(FAR struct ili9341_lcd_s *lcd);
-static int stm32_ili93418b_sendcmd(FAR struct ili9341_lcd_s *lcd,
-                                     const uint8_t cmd);
-static int stm32_ili93418b_sendparam(FAR struct ili9341_lcd_s *lcd,
+static void stm32_ili93418b_deselect(struct ili9341_lcd_s *lcd);
+static void stm32_ili93418b_select(struct ili9341_lcd_s *lcd);
+static int stm32_ili93418b_sendcmd(struct ili9341_lcd_s *lcd,
+                                   const uint8_t cmd);
+static int stm32_ili93418b_sendparam(struct ili9341_lcd_s *lcd,
                                      const uint8_t param);
-static int stm32_ili93418b_recvparam(FAR struct ili9341_lcd_s *lcd,
+static int stm32_ili93418b_recvparam(struct ili9341_lcd_s *lcd,
                                      uint8_t *param);
-static int stm32_ili93418b_backlight(FAR struct ili9341_lcd_s *lcd,
+static int stm32_ili93418b_backlight(struct ili9341_lcd_s *lcd,
                                      int level);
-static int stm32_ili93418b_sendgram(FAR struct ili9341_lcd_s *lcd,
+static int stm32_ili93418b_sendgram(struct ili9341_lcd_s *lcd,
                                     const uint16_t *wd, uint32_t nwords);
-static int stm32_ili93418b_recvgram(FAR struct ili9341_lcd_s *lcd,
+static int stm32_ili93418b_recvgram(struct ili9341_lcd_s *lcd,
                                     uint16_t *wd, uint32_t nwords);
 
 /****************************************************************************
@@ -310,7 +310,7 @@ static inline uint8_t read_byte(void)
  *
  ****************************************************************************/
 
-static int stm32_ili93418b_recvblock(FAR struct ili9341_lcd_s *lcd,
+static int stm32_ili93418b_recvblock(struct ili9341_lcd_s *lcd,
                                      uint16_t *wd, uint16_t nwords)
 {
   /** ili9341 uses a 18-bit pixel format packed in a 24-bit stream per pixel.
@@ -367,7 +367,7 @@ static int stm32_ili93418b_recvblock(FAR struct ili9341_lcd_s *lcd,
  *
  ****************************************************************************/
 
-static void stm32_ili93418b_select(FAR struct ili9341_lcd_s *lcd)
+static void stm32_ili93418b_select(struct ili9341_lcd_s *lcd)
 {
   LCD_CS_CLR;
 }
@@ -385,7 +385,7 @@ static void stm32_ili93418b_select(FAR struct ili9341_lcd_s *lcd)
  *
  ****************************************************************************/
 
-static void stm32_ili93418b_deselect(FAR struct ili9341_lcd_s *lcd)
+static void stm32_ili93418b_deselect(struct ili9341_lcd_s *lcd)
 {
   LCD_CS_SET;
 }
@@ -405,7 +405,7 @@ static void stm32_ili93418b_deselect(FAR struct ili9341_lcd_s *lcd)
  *
  ****************************************************************************/
 
-static int stm32_ili93418b_sendparam(FAR struct ili9341_lcd_s *lcd,
+static int stm32_ili93418b_sendparam(struct ili9341_lcd_s *lcd,
                                      const uint8_t param)
 {
   lcdinfo("param=%04x\n", param);
@@ -430,7 +430,7 @@ static int stm32_ili93418b_sendparam(FAR struct ili9341_lcd_s *lcd,
  *
  ****************************************************************************/
 
-static int stm32_ili93418b_sendgram(FAR struct ili9341_lcd_s *lcd,
+static int stm32_ili93418b_sendgram(struct ili9341_lcd_s *lcd,
                                     const uint16_t *wd, uint32_t nwords)
 {
   lcdinfo("wd=%p , wd=0x%x, nwords=%" PRId32 "\n", wd, *wd, nwords);
@@ -467,7 +467,7 @@ static int stm32_ili93418b_sendgram(FAR struct ili9341_lcd_s *lcd,
  *
  ****************************************************************************/
 
-static int stm32_ili93418b_recvparam(FAR struct ili9341_lcd_s *lcd,
+static int stm32_ili93418b_recvparam(struct ili9341_lcd_s *lcd,
                                      uint8_t *param)
 {
   LCD_RS_DATA;
@@ -492,7 +492,7 @@ static int stm32_ili93418b_recvparam(FAR struct ili9341_lcd_s *lcd,
  *
  ****************************************************************************/
 
-static int stm32_ili93418b_recvgram(FAR struct ili9341_lcd_s *lcd,
+static int stm32_ili93418b_recvgram(struct ili9341_lcd_s *lcd,
                                     uint16_t *wd, uint32_t nwords)
 {
   lcdinfo("wd=%p, nwords=%" PRId32 "\n", wd, nwords);
@@ -515,7 +515,7 @@ static int stm32_ili93418b_recvgram(FAR struct ili9341_lcd_s *lcd,
  ****************************************************************************/
 
 static int stm32_ili93418b_sendcmd(
-    FAR struct ili9341_lcd_s *lcd, const uint8_t cmd)
+    struct ili9341_lcd_s *lcd, const uint8_t cmd)
 {
   lcdinfo("cmd=%04x\n", cmd);
   LCD_RS_CMD;
@@ -538,7 +538,7 @@ static int stm32_ili93418b_sendcmd(
  *
  ****************************************************************************/
 
-static int stm32_ili93418b_backlight(FAR struct ili9341_lcd_s *lcd,
+static int stm32_ili93418b_backlight(struct ili9341_lcd_s *lcd,
                                      int level)
 {
   return OK;
@@ -580,9 +580,9 @@ static inline void stm32_gpio_initialize(void)
  ****************************************************************************/
 
 struct lcd_dev_s *g_lcddev;
-FAR struct lcd_dev_s *stm32_ili93418b_initialize(void)
+struct lcd_dev_s *stm32_ili93418b_initialize(void)
 {
-  FAR struct ili9341_lcd_s *lcd = &g_ili9341_lcddev;
+  struct ili9341_lcd_s *lcd = &g_ili9341_lcddev;
 
   lcdinfo("initialize ili9341 8bit parallel subdriver\n");
 
@@ -705,7 +705,7 @@ int board_lcd_initialize(void)
  *
  ****************************************************************************/
 
-FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
+struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
   if (lcddev == 0)
     {

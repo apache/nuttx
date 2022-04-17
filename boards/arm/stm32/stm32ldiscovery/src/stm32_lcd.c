@@ -290,7 +290,7 @@
 struct slcd_instream_s
 {
   struct lib_instream_s stream;
-  FAR const char *buffer;
+  const char *buffer;
   ssize_t nbytes;
 };
 
@@ -312,8 +312,8 @@ struct stm32_slcdstate_s
 /* Debug */
 
 #ifdef CONFIG_DEBUG_LCD_INFO
-static void slcd_dumpstate(FAR const char *msg);
-static void slcd_dumpslcd(FAR const char *msg);
+static void slcd_dumpstate(const char *msg);
+static void slcd_dumpslcd(const char *msg);
 #else
 #  define slcd_dumpstate(msg)
 #  define slcd_dumpslcd(msg)
@@ -322,7 +322,7 @@ static void slcd_dumpslcd(FAR const char *msg);
 /* Internal utilities */
 
 static void slcd_clear(void);
-static int slcd_getstream(FAR struct lib_instream_s *instream);
+static int slcd_getstream(struct lib_instream_s *instream);
 static uint8_t slcd_getcontrast(void);
 static int slcd_setcontrast(uint8_t contrast);
 static void slcd_writebar(void);
@@ -334,10 +334,10 @@ static void slcd_action(enum slcdcode_e code, uint8_t count);
 
 /* Character driver methods */
 
-static ssize_t slcd_read(FAR struct file *, FAR char *, size_t);
-static ssize_t slcd_write(FAR struct file *, FAR const char *, size_t);
-static int slcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-static int slcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static ssize_t slcd_read(struct file *, char *, size_t);
+static ssize_t slcd_write(struct file *, const char *, size_t);
+static int slcd_ioctl(struct file *filep, int cmd, unsigned long arg);
+static int slcd_poll(struct file *filep, struct pollfd *fds,
                      bool setup);
 
 /****************************************************************************
@@ -458,7 +458,7 @@ static uint32_t g_slcdgpio[BOARD_SLCD_NGPIOS] =
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD_INFO
-static void slcd_dumpstate(FAR const char *msg)
+static void slcd_dumpstate(const char *msg)
 {
   lcdinfo("%s:\n", msg);
   lcdinfo("  curpos: %d\n",
@@ -481,7 +481,7 @@ static void slcd_dumpstate(FAR const char *msg)
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD_INFO
-static void slcd_dumpslcd(FAR const char *msg)
+static void slcd_dumpslcd(const char *msg)
 {
   lcdinfo("%s:\n", msg);
   lcdinfo("  CR: %08x FCR: %08x SR: %08x CLR: %08x\n",
@@ -538,9 +538,9 @@ static void slcd_clear(void)
  *
  ****************************************************************************/
 
-static int slcd_getstream(FAR struct lib_instream_s *instream)
+static int slcd_getstream(struct lib_instream_s *instream)
 {
-  FAR struct slcd_instream_s *slcdstream = (FAR struct slcd_instream_s *)
+  struct slcd_instream_s *slcdstream = (struct slcd_instream_s *)
                                            instream;
 
   DEBUGASSERT(slcdstream && slcdstream->buffer);
@@ -1117,7 +1117,7 @@ static void slcd_action(enum slcdcode_e code, uint8_t count)
  * Name: slcd_read
  ****************************************************************************/
 
-static ssize_t slcd_read(FAR struct file *filep, FAR char *buffer,
+static ssize_t slcd_read(struct file *filep, char *buffer,
                          size_t len)
 {
   int ret = 0;
@@ -1162,8 +1162,8 @@ static ssize_t slcd_read(FAR struct file *filep, FAR char *buffer,
  * Name: slcd_write
  ****************************************************************************/
 
-static ssize_t slcd_write(FAR struct file *filep,
-                          FAR const char *buffer, size_t len)
+static ssize_t slcd_write(struct file *filep,
+                          const char *buffer, size_t len)
 {
   struct slcd_instream_s instream;
   struct slcdstate_s state;
@@ -1352,7 +1352,7 @@ static ssize_t slcd_write(FAR struct file *filep,
  * Name: slcd_poll
  ****************************************************************************/
 
-static int slcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int slcd_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
   switch (cmd)
     {
@@ -1364,8 +1364,8 @@ static int slcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SLCDIOC_GETATTRIBUTES:
         {
-          FAR struct slcd_attributes_s *attr =
-              (FAR struct slcd_attributes_s *)((uintptr_t)arg);
+          struct slcd_attributes_s *attr =
+              (struct slcd_attributes_s *)((uintptr_t)arg);
 
           lcdinfo("SLCDIOC_GETATTRIBUTES:\n");
 
@@ -1390,8 +1390,8 @@ static int slcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SLCDIOC_CURPOS:
         {
-          FAR struct slcd_curpos_s *curpos =
-              (FAR struct slcd_curpos_s *)((uintptr_t)arg);
+          struct slcd_curpos_s *curpos =
+              (struct slcd_curpos_s *)((uintptr_t)arg);
 
           lcdinfo("SLCDIOC_CURPOS: row=0 column=%d\n", g_slcdstate.curpos);
 
@@ -1453,7 +1453,7 @@ static int slcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SLCDIOC_GETCONTRAST:
         {
-          FAR int *contrast = (FAR int *)((uintptr_t)arg);
+          int *contrast = (int *)((uintptr_t)arg);
           if (!contrast)
             {
               return -EINVAL;
@@ -1495,8 +1495,8 @@ static int slcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: slcd_poll
  ****************************************************************************/
 
-static int slcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                        bool setup)
+static int slcd_poll(struct file *filep, struct pollfd *fds,
+                     bool setup)
 {
   if (setup)
     {

@@ -195,17 +195,17 @@
  * Private Function Protototypes
  ****************************************************************************/
 
-static int board_foc_setup(FAR struct foc_dev_s *dev);
-static int board_foc_shutdown(FAR struct foc_dev_s *dev);
-static int board_foc_calibration(FAR struct foc_dev_s *dev, bool state);
-static int board_foc_fault_clear(FAR struct foc_dev_s *dev);
-static int board_foc_pwm_start(FAR struct foc_dev_s *dev, bool state);
-static int board_foc_current_get(FAR struct foc_dev_s *dev,
-                                 FAR int16_t *curr_raw,
-                                 FAR foc_current_t *curr);
+static int board_foc_setup(struct foc_dev_s *dev);
+static int board_foc_shutdown(struct foc_dev_s *dev);
+static int board_foc_calibration(struct foc_dev_s *dev, bool state);
+static int board_foc_fault_clear(struct foc_dev_s *dev);
+static int board_foc_pwm_start(struct foc_dev_s *dev, bool state);
+static int board_foc_current_get(struct foc_dev_s *dev,
+                                 int16_t *curr_raw,
+                                 foc_current_t *curr);
 #ifdef CONFIG_MOTOR_FOC_TRACE
-static int board_foc_trace_init(FAR struct foc_dev_s *dev);
-static void board_foc_trace(FAR struct foc_dev_s *dev, int type, bool state);
+static int board_foc_trace_init(struct foc_dev_s *dev);
+static void board_foc_trace(struct foc_dev_s *dev, int type, bool state);
 #endif
 
 /****************************************************************************
@@ -336,7 +336,7 @@ static struct stm32_foc_board_s g_stm32_foc_board =
 
 /* Global pointer to the upper FOC driver */
 
-static FAR struct foc_dev_s *g_foc_dev = NULL;
+static struct foc_dev_s *g_foc_dev = NULL;
 
 /****************************************************************************
  * Private Functions
@@ -346,7 +346,7 @@ static FAR struct foc_dev_s *g_foc_dev = NULL;
  * Name: board_foc_setup
  ****************************************************************************/
 
-static int board_foc_setup(FAR struct foc_dev_s *dev)
+static int board_foc_setup(struct foc_dev_s *dev)
 {
   uint32_t regval = 0;
 
@@ -412,7 +412,7 @@ static int board_foc_setup(FAR struct foc_dev_s *dev)
  * Name: board_foc_shutdown
  ****************************************************************************/
 
-static int board_foc_shutdown(FAR struct foc_dev_s *dev)
+static int board_foc_shutdown(struct foc_dev_s *dev)
 {
   DEBUGASSERT(dev);
 
@@ -425,7 +425,7 @@ static int board_foc_shutdown(FAR struct foc_dev_s *dev)
  * Name: board_foc_calibration
  ****************************************************************************/
 
-static int board_foc_calibration(FAR struct foc_dev_s *dev, bool state)
+static int board_foc_calibration(struct foc_dev_s *dev, bool state)
 {
   DEBUGASSERT(dev);
 
@@ -438,7 +438,7 @@ static int board_foc_calibration(FAR struct foc_dev_s *dev, bool state)
  * Name: board_foc_fault_clear
  ****************************************************************************/
 
-static int board_foc_fault_clear(FAR struct foc_dev_s *dev)
+static int board_foc_fault_clear(struct foc_dev_s *dev)
 {
   DEBUGASSERT(dev);
 
@@ -451,7 +451,7 @@ static int board_foc_fault_clear(FAR struct foc_dev_s *dev)
  * Name: board_foc_pwm_start
  ****************************************************************************/
 
-static int board_foc_pwm_start(FAR struct foc_dev_s *dev, bool state)
+static int board_foc_pwm_start(struct foc_dev_s *dev, bool state)
 {
   DEBUGASSERT(dev);
 
@@ -464,9 +464,9 @@ static int board_foc_pwm_start(FAR struct foc_dev_s *dev, bool state)
  * Name: board_foc_current_get
  ****************************************************************************/
 
-static int board_foc_current_get(FAR struct foc_dev_s *dev,
-                                 FAR int16_t *curr_raw,
-                                 FAR foc_current_t *curr)
+static int board_foc_current_get(struct foc_dev_s *dev,
+                                 int16_t *curr_raw,
+                                 foc_current_t *curr)
 {
   DEBUGASSERT(dev);
   DEBUGASSERT(curr_raw);
@@ -489,7 +489,7 @@ static int board_foc_current_get(FAR struct foc_dev_s *dev,
  * Name: board_foc_trace_init
  ****************************************************************************/
 
-static int board_foc_trace_init(FAR struct foc_dev_s *dev)
+static int board_foc_trace_init(struct foc_dev_s *dev)
 {
   DEBUGASSERT(dev);
 
@@ -504,7 +504,7 @@ static int board_foc_trace_init(FAR struct foc_dev_s *dev)
  * Name: board_foc_trace
  ****************************************************************************/
 
-static void board_foc_trace(FAR struct foc_dev_s *dev, int type, bool state)
+static void board_foc_trace(struct foc_dev_s *dev, int type, bool state)
 {
   DEBUGASSERT(dev);
 
@@ -531,8 +531,8 @@ static void board_foc_trace(FAR struct foc_dev_s *dev, int type, bool state)
 
 int stm32_foc_setup(void)
 {
-  FAR struct foc_dev_s *foc = NULL;
-  int                   ret = OK;
+  struct foc_dev_s *foc = NULL;
+  int               ret = OK;
 
   /* Initialize only once */
 
@@ -597,9 +597,9 @@ errout:
 
 int stm32_adc_setup(void)
 {
-  FAR struct adc_dev_s *adc         = NULL;
-  int                   ret         = OK;
-  static bool           initialized = false;
+  struct adc_dev_s *adc         = NULL;
+  int               ret         = OK;
+  static bool       initialized = false;
 
   /* Initialize only once */
 

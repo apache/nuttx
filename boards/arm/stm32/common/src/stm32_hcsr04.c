@@ -56,26 +56,26 @@ struct stm32_hcsr04config_s
 
   /* Additional private definitions only known to this driver */
 
-  FAR void *arg;  /* Argument to pass to the interrupt handler */
-  FAR xcpt_t isr; /* ISR Handler */
-  bool rising;    /* Rising edge enabled */
-  bool falling;   /* Falling edge enabled */
+  void *arg;    /* Argument to pass to the interrupt handler */
+  xcpt_t isr;   /* ISR Handler */
+  bool rising;  /* Rising edge enabled */
+  bool falling; /* Falling edge enabled */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  hcsr04_irq_attach(FAR struct hcsr04_config_s *state, xcpt_t isr,
-                              FAR void *arg);
-static void hcsr04_irq_enable(FAR const struct hcsr04_config_s *state,
+static int  hcsr04_irq_attach(struct hcsr04_config_s *state, xcpt_t isr,
+                              void *arg);
+static void hcsr04_irq_enable(const struct hcsr04_config_s *state,
                               bool enable);
-static void hcsr04_irq_clear(FAR const struct hcsr04_config_s *state);
-static void hcsr04_irq_setmode(FAR struct hcsr04_config_s *state,
+static void hcsr04_irq_clear(const struct hcsr04_config_s *state);
+static void hcsr04_irq_setmode(struct hcsr04_config_s *state,
                                bool rise_mode);
-static void hcsr04_set_trigger(FAR const struct hcsr04_config_s *state,
+static void hcsr04_set_trigger(const struct hcsr04_config_s *state,
                                bool on);
-static int64_t hcsr04_get_clock(FAR const struct hcsr04_config_s *state);
+static int64_t hcsr04_get_clock(const struct hcsr04_config_s *state);
 
 /****************************************************************************
  * Private Data
@@ -113,11 +113,11 @@ struct timespec ts;
 
 /* Attach the HC-SR04 interrupt handler to the GPIO interrupt */
 
-static int hcsr04_irq_attach(FAR struct hcsr04_config_s *state, xcpt_t isr,
-                             FAR void *arg)
+static int hcsr04_irq_attach(struct hcsr04_config_s *state, xcpt_t isr,
+                             void *arg)
 {
-  FAR struct stm32_hcsr04config_s *priv =
-             (FAR struct stm32_hcsr04config_s *)state;
+  struct stm32_hcsr04config_s *priv =
+             (struct stm32_hcsr04config_s *)state;
   irqstate_t flags;
 
   sinfo("hcsr04_irq_attach\n");
@@ -139,11 +139,11 @@ static int hcsr04_irq_attach(FAR struct hcsr04_config_s *state, xcpt_t isr,
 
 /* Setup the interruption mode: Rising or Falling */
 
-static void hcsr04_irq_setmode(FAR struct hcsr04_config_s *state,
+static void hcsr04_irq_setmode(struct hcsr04_config_s *state,
                                bool rise_mode)
 {
-  FAR struct stm32_hcsr04config_s *priv =
-             (FAR struct stm32_hcsr04config_s *)state;
+  struct stm32_hcsr04config_s *priv =
+             (struct stm32_hcsr04config_s *)state;
 
   if (rise_mode)
     {
@@ -159,11 +159,11 @@ static void hcsr04_irq_setmode(FAR struct hcsr04_config_s *state,
 
 /* Enable or disable the GPIO interrupt */
 
-static void hcsr04_irq_enable(FAR const struct hcsr04_config_s *state,
-                                 bool enable)
+static void hcsr04_irq_enable(const struct hcsr04_config_s *state,
+                              bool enable)
 {
-  FAR struct stm32_hcsr04config_s *priv =
-             (FAR struct stm32_hcsr04config_s *)state;
+  struct stm32_hcsr04config_s *priv =
+             (struct stm32_hcsr04config_s *)state;
 
   iinfo("%d\n", enable);
 
@@ -173,14 +173,14 @@ static void hcsr04_irq_enable(FAR const struct hcsr04_config_s *state,
 
 /* Acknowledge/clear any pending GPIO interrupt */
 
-static void hcsr04_irq_clear(FAR const struct hcsr04_config_s *state)
+static void hcsr04_irq_clear(const struct hcsr04_config_s *state)
 {
   /* FIXME: Nothing to do ? */
 }
 
 /* Set the Trigger pin state */
 
-static void hcsr04_set_trigger(FAR const struct hcsr04_config_s *state,
+static void hcsr04_set_trigger(const struct hcsr04_config_s *state,
                                bool on)
 {
   stm32_gpiowrite(BOARD_HCSR04_GPIO_TRIG, on);
@@ -188,7 +188,7 @@ static void hcsr04_set_trigger(FAR const struct hcsr04_config_s *state,
 
 /* Return the current Free Running clock tick */
 
-static int64_t hcsr04_get_clock(FAR const struct hcsr04_config_s *state)
+static int64_t hcsr04_get_clock(const struct hcsr04_config_s *state)
 {
   /* Get the time from free running timer */
 

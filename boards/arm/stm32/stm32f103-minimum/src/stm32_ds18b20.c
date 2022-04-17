@@ -80,9 +80,9 @@ struct ds18b20_device_s
  ****************************************************************************/
 
 static void stm32_ds18b20_cb_search(int family, uint64_t romcode,
-                                    FAR void *arg)
+                                    void *arg)
 {
-  FAR struct ds18b20_device_s *priv = (FAR struct ds18b20_device_s *)arg;
+  struct ds18b20_device_s *priv = (struct ds18b20_device_s *)arg;
 
   if (priv->discovered < priv->ndevices - 1)
     {
@@ -107,7 +107,7 @@ static void stm32_ds18b20_cb_search(int family, uint64_t romcode,
  *
  ****************************************************************************/
 
-static int stm32_ds18b20register(FAR struct onewire_master_s *onewire,
+static int stm32_ds18b20register(struct onewire_master_s *onewire,
                                  int maxslaves, int devno)
 {
   int n;
@@ -165,8 +165,8 @@ static int stm32_ds18b20register(FAR struct onewire_master_s *onewire,
 
 int stm32_ds18b20initialize(int devno)
 {
-  FAR struct onewire_dev_s *dev;
-  FAR struct onewire_master_s *onewire;
+  struct onewire_dev_s *dev;
+  struct onewire_master_s *onewire;
 
   dev = stm32_1wireinitialize(BOARD_DS18B20_NBUS);
   if (!dev)

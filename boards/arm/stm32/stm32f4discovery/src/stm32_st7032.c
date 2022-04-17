@@ -60,9 +60,9 @@
  *
  ****************************************************************************/
 
-int stm32_st7032init(FAR const char *devpath)
+int stm32_st7032init(const char *devpath)
 {
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
   int ret;
 
   i2c = stm32_i2cbus_initialize(ST7032_I2C_PORTNO);

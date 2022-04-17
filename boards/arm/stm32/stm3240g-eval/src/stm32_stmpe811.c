@@ -124,9 +124,9 @@ struct stm32_stmpe811config_s
 
   /* Additional private definitions only known to this driver */
 
-  STMPE811_HANDLE handle;   /* The STMPE811 driver handle */
-  xcpt_t          handler;  /* The STMPE811 interrupt handler */
-  FAR void       *arg;      /* Interrupt handler argument */
+  STMPE811_HANDLE handle;  /* The STMPE811 driver handle */
+  xcpt_t          handler; /* The STMPE811 interrupt handler */
+  void           *arg;     /* Interrupt handler argument */
 };
 
 /****************************************************************************
@@ -143,11 +143,11 @@ struct stm32_stmpe811config_s
  * clear   - Acknowledge/clear any pending GPIO interrupt
  */
 
-static int  stmpe811_attach(FAR struct stmpe811_config_s *state, xcpt_t isr,
-                            FAR void *arg);
-static void stmpe811_enable(FAR struct stmpe811_config_s *state,
+static int  stmpe811_attach(struct stmpe811_config_s *state, xcpt_t isr,
+                            void *arg);
+static void stmpe811_enable(struct stmpe811_config_s *state,
                             bool enable);
-static void stmpe811_clear(FAR struct stmpe811_config_s *state);
+static void stmpe811_clear(struct stmpe811_config_s *state);
 
 /****************************************************************************
  * Private Data
@@ -201,11 +201,11 @@ static struct stm32_stmpe811config_s g_stmpe811config =
  * clear   - Acknowledge/clear any pending GPIO interrupt
  */
 
-static int stmpe811_attach(FAR struct stmpe811_config_s *state, xcpt_t isr,
-                           FAR void *arg)
+static int stmpe811_attach(struct stmpe811_config_s *state, xcpt_t isr,
+                           void *arg)
 {
-  FAR struct stm32_stmpe811config_s *priv =
-                            (FAR struct stm32_stmpe811config_s *)state;
+  struct stm32_stmpe811config_s *priv =
+                            (struct stm32_stmpe811config_s *)state;
 
   iinfo("Saving handler %p\n", isr);
   DEBUGASSERT(priv);
@@ -219,10 +219,10 @@ static int stmpe811_attach(FAR struct stmpe811_config_s *state, xcpt_t isr,
   return OK;
 }
 
-static void stmpe811_enable(FAR struct stmpe811_config_s *state, bool enable)
+static void stmpe811_enable(struct stmpe811_config_s *state, bool enable)
 {
-  FAR struct stm32_stmpe811config_s *priv =
-                                (FAR struct stm32_stmpe811config_s *)state;
+  struct stm32_stmpe811config_s *priv =
+                                (struct stm32_stmpe811config_s *)state;
   irqstate_t flags;
 
   /* Attach and enable, or detach and disable.  Enabling and disabling GPIO
@@ -249,7 +249,7 @@ static void stmpe811_enable(FAR struct stmpe811_config_s *state, bool enable)
   leave_critical_section(flags);
 }
 
-static void stmpe811_clear(FAR struct stmpe811_config_s *state)
+static void stmpe811_clear(struct stmpe811_config_s *state)
 {
   /* Does nothing */
 }
@@ -278,7 +278,7 @@ static void stmpe811_clear(FAR struct stmpe811_config_s *state)
 int stm32_tsc_setup(int minor)
 {
 #ifndef CONFIG_STMPE811_TSC_DISABLE
-  FAR struct i2c_master_s *dev;
+  struct i2c_master_s *dev;
   int ret;
 
   iinfo("minor %d\n", minor);
@@ -308,7 +308,7 @@ int stm32_tsc_setup(int minor)
 
       g_stmpe811config.handle =
         stmpe811_instantiate(dev,
-                          (FAR struct stmpe811_config_s *)&g_stmpe811config);
+                          (struct stmpe811_config_s *)&g_stmpe811config);
       if (!g_stmpe811config.handle)
         {
           ierr("ERROR: Failed to instantiate the STMPE811 driver\n");

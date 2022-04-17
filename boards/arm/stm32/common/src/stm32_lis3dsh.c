@@ -60,7 +60,7 @@
  *
  ****************************************************************************/
 
-int attach_disc_lis3dsh(FAR struct lis3dsh_config_s *config,
+int attach_disc_lis3dsh(struct lis3dsh_config_s *config,
                         xcpt_t interrupt_handler)
 {
   return stm32_gpiosetevent(BOARD_LIS3DSH_GPIO_EXT0, true, false, false,

@@ -61,17 +61,17 @@ struct stm32gpint_dev_s
  ****************************************************************************/
 
 #if BOARD_NGPIOIN > 0
-static int gpin_read(FAR struct gpio_dev_s *dev, FAR bool *value);
+static int gpin_read(struct gpio_dev_s *dev, bool *value);
 #endif
 #if BOARD_NGPIOOUT > 0
-static int gpout_read(FAR struct gpio_dev_s *dev, FAR bool *value);
-static int gpout_write(FAR struct gpio_dev_s *dev, bool value);
+static int gpout_read(struct gpio_dev_s *dev, bool *value);
+static int gpout_write(struct gpio_dev_s *dev, bool value);
 #endif
 #if BOARD_NGPIOINT > 0
-static int gpint_read(FAR struct gpio_dev_s *dev, FAR bool *value);
-static int gpint_attach(FAR struct gpio_dev_s *dev,
+static int gpint_read(struct gpio_dev_s *dev, bool *value);
+static int gpint_attach(struct gpio_dev_s *dev,
                         pin_interrupt_t callback);
-static int gpint_enable(FAR struct gpio_dev_s *dev, bool enable);
+static int gpint_enable(struct gpio_dev_s *dev, bool enable);
 #endif
 
 /****************************************************************************
@@ -148,8 +148,8 @@ static struct stm32gpint_dev_s g_gpint[BOARD_NGPIOINT];
 #if BOARD_NGPIOINT > 0
 static int stm32gpio_interrupt(int irq, void *context, void *arg)
 {
-  FAR struct stm32gpint_dev_s *stm32gpint =
-                        (FAR struct stm32gpint_dev_s *)arg;
+  struct stm32gpint_dev_s *stm32gpint =
+                        (struct stm32gpint_dev_s *)arg;
 
   DEBUGASSERT(stm32gpint != NULL && stm32gpint->callback != NULL);
   gpioinfo("Interrupt! callback=%p\n", stm32gpint->callback);
@@ -161,10 +161,10 @@ static int stm32gpio_interrupt(int irq, void *context, void *arg)
 #endif
 
 #if BOARD_NGPIOIN > 0
-static int gpin_read(FAR struct gpio_dev_s *dev, FAR bool *value)
+static int gpin_read(struct gpio_dev_s *dev, bool *value)
 {
-  FAR struct stm32gpio_dev_s *stm32gpio =
-                        (FAR struct stm32gpio_dev_s *)dev;
+  struct stm32gpio_dev_s *stm32gpio =
+                        (struct stm32gpio_dev_s *)dev;
 
   DEBUGASSERT(stm32gpio != NULL && value != NULL);
   DEBUGASSERT(stm32gpio->id < BOARD_NGPIOIN);
@@ -176,10 +176,10 @@ static int gpin_read(FAR struct gpio_dev_s *dev, FAR bool *value)
 #endif
 
 #if BOARD_NGPIOOUT > 0
-static int gpout_read(FAR struct gpio_dev_s *dev, FAR bool *value)
+static int gpout_read(struct gpio_dev_s *dev, bool *value)
 {
-  FAR struct stm32gpio_dev_s *stm32gpio =
-                        (FAR struct stm32gpio_dev_s *)dev;
+  struct stm32gpio_dev_s *stm32gpio =
+                        (struct stm32gpio_dev_s *)dev;
 
   DEBUGASSERT(stm32gpio != NULL && value != NULL);
   DEBUGASSERT(stm32gpio->id < BOARD_NGPIOOUT);
@@ -189,10 +189,10 @@ static int gpout_read(FAR struct gpio_dev_s *dev, FAR bool *value)
   return OK;
 }
 
-static int gpout_write(FAR struct gpio_dev_s *dev, bool value)
+static int gpout_write(struct gpio_dev_s *dev, bool value)
 {
-  FAR struct stm32gpio_dev_s *stm32gpio =
-                             (FAR struct stm32gpio_dev_s *)dev;
+  struct stm32gpio_dev_s *stm32gpio =
+                             (struct stm32gpio_dev_s *)dev;
 
   DEBUGASSERT(stm32gpio != NULL);
   DEBUGASSERT(stm32gpio->id < BOARD_NGPIOOUT);
@@ -204,10 +204,10 @@ static int gpout_write(FAR struct gpio_dev_s *dev, bool value)
 #endif
 
 #if BOARD_NGPIOINT > 0
-static int gpint_read(FAR struct gpio_dev_s *dev, FAR bool *value)
+static int gpint_read(struct gpio_dev_s *dev, bool *value)
 {
-  FAR struct stm32gpint_dev_s *stm32gpint =
-                              (FAR struct stm32gpint_dev_s *)dev;
+  struct stm32gpint_dev_s *stm32gpint =
+                              (struct stm32gpint_dev_s *)dev;
 
   DEBUGASSERT(stm32gpint != NULL && value != NULL);
   DEBUGASSERT(stm32gpint->stm32gpio.id < BOARD_NGPIOINT);
@@ -217,11 +217,11 @@ static int gpint_read(FAR struct gpio_dev_s *dev, FAR bool *value)
   return OK;
 }
 
-static int gpint_attach(FAR struct gpio_dev_s *dev,
+static int gpint_attach(struct gpio_dev_s *dev,
                         pin_interrupt_t callback)
 {
-  FAR struct stm32gpint_dev_s *stm32gpint =
-                             (FAR struct stm32gpint_dev_s *)dev;
+  struct stm32gpint_dev_s *stm32gpint =
+                             (struct stm32gpint_dev_s *)dev;
 
   gpioinfo("Attaching the callback\n");
 
@@ -235,10 +235,10 @@ static int gpint_attach(FAR struct gpio_dev_s *dev,
   return OK;
 }
 
-static int gpint_enable(FAR struct gpio_dev_s *dev, bool enable)
+static int gpint_enable(struct gpio_dev_s *dev, bool enable)
 {
-  FAR struct stm32gpint_dev_s *stm32gpint =
-                              (FAR struct stm32gpint_dev_s *)dev;
+  struct stm32gpint_dev_s *stm32gpint =
+                              (struct stm32gpint_dev_s *)dev;
 
   if (enable)
     {

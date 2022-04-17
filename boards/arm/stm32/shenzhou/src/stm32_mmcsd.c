@@ -77,7 +77,7 @@
 int stm32_sdinitialize(int minor)
 {
 #ifdef HAVE_MMCSD
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
   int ret;
 
   /* Get the SPI port */

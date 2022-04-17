@@ -69,7 +69,7 @@ uint32_t board_buttons(void)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+int board_button_irq(int id, xcpt_t irqhandler, void *arg)
 {
   if (id != BOARD_BUTTON1)
     {

@@ -82,7 +82,7 @@
 
 int board_veml6070_initialize(int devno, int busno)
 {
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
   char devpath[14];
   int ret;
 

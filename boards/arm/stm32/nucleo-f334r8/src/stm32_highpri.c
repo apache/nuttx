@@ -132,12 +132,12 @@
 
 struct highpri_s
 {
-  FAR struct stm32_adc_dev_s *adc1;
+  struct stm32_adc_dev_s *adc1;
 #ifdef HIGHPRI_HAVE_HRTIM
-  FAR struct hrtim_dev_s     *hrtim;
+  struct hrtim_dev_s     *hrtim;
 #endif
 #ifdef HIGHPRI_HAVE_TIM1
-  struct stm32_pwm_dev_s     *pwm;
+  struct stm32_pwm_dev_s *pwm;
 #endif
   volatile uint32_t  cntr1;
   volatile uint32_t  cntr2;
@@ -206,7 +206,7 @@ static struct highpri_s g_highpri;
 #if !defined(CONFIG_STM32_ADC1_DMA) || defined(HIGHPRI_HAVE_INJECTED)
 void adc12_handler(void)
 {
-  FAR struct stm32_adc_dev_s *adc = g_highpri.adc1;
+  struct stm32_adc_dev_s *adc = g_highpri.adc1;
   float ref = ADC_REF_VOLTAGE;
   float bit = ADC_VAL_MAX;
   uint32_t pending;
@@ -342,13 +342,13 @@ irq_out:
 int highpri_main(int argc, char *argv[])
 {
 #ifdef HIGHPRI_HAVE_HRTIM
-  FAR struct hrtim_dev_s *hrtim;
+  struct hrtim_dev_s *hrtim;
 #endif
 #ifdef HIGHPRI_HAVE_TIM1
   struct stm32_pwm_dev_s *pwm1;
 #endif
-  FAR struct adc_dev_s *adc1;
-  FAR struct highpri_s *highpri;
+  struct adc_dev_s *adc1;
+  struct highpri_s *highpri;
   int ret;
   int i;
 
@@ -400,7 +400,7 @@ int highpri_main(int argc, char *argv[])
 #ifdef HIGHPRI_HAVE_TIM1
   /* Initialize TIM1 */
 
-  pwm1 = (FAR struct stm32_pwm_dev_s *) stm32_pwminitialize(1);
+  pwm1 = (struct stm32_pwm_dev_s *) stm32_pwminitialize(1);
   if (pwm1 == NULL)
     {
       printf("ERROR: Failed to get PWM1 interface\n");
