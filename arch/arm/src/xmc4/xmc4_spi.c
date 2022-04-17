@@ -183,8 +183,8 @@ struct xmc4_spics_s
 
 /* Type of board-specific SPI status function */
 
-typedef CODE void (*select_t)(struct spi_dev_s *dev, uint32_t devid,
-                              bool selected);
+typedef void (*select_t)(struct spi_dev_s *dev, uint32_t devid,
+                         bool selected);
 
 /* Chip select register offsets */
 

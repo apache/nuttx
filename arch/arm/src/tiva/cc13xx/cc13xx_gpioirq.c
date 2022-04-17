@@ -71,7 +71,7 @@ static struct gpio_handler_s g_gpio_inthandler[TIVA_NIRQ_PINS];
  *
  ****************************************************************************/
 
-static int cc13xx_gpio_interrupt(int irq, FAR void *context, FAR void *arg)
+static int cc13xx_gpio_interrupt(int irq, void *context, void *arg)
 {
   uint32_t evflags;
   uint32_t regval;
@@ -99,7 +99,7 @@ static int cc13xx_gpio_interrupt(int irq, FAR void *context, FAR void *arg)
         {
           /* Call any handler registered for each pending DIO interrupt */
 
-          FAR struct gpio_handler_s *handler = &g_gpio_inthandler[dio];
+          struct gpio_handler_s *handler = &g_gpio_inthandler[dio];
 
           gpioinfo("dio=%d isr=%p arg=%p\n", dio, handler->isr,
                    handler->arg);
@@ -163,7 +163,7 @@ int tiva_gpioirqinitialize(void)
 
 int tiva_gpioirqattach(pinconfig_t pinconfig, xcpt_t isr, void *arg)
 {
-  FAR struct gpio_handler_s *handler;
+  struct gpio_handler_s *handler;
   unsigned int dio;
   irqstate_t flags;
 

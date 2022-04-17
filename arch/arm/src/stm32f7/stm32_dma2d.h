@@ -38,11 +38,11 @@
 
 struct stm32_dma2d_overlay_s
 {
-  uint8_t    fmt;                         /* DMA2D pixel format */
-  uint8_t    transp_mode;                 /* DMA2D transparency mode */
-  fb_coord_t xres;                        /* X-resolution overlay */
-  fb_coord_t yres;                        /* Y-resolution overlay */
-  FAR struct fb_overlayinfo_s *oinfo;     /* Framebuffer overlay information */
+  uint8_t    fmt;                 /* DMA2D pixel format */
+  uint8_t    transp_mode;         /* DMA2D transparency mode */
+  fb_coord_t xres;                /* X-resolution overlay */
+  fb_coord_t yres;                /* Y-resolution overlay */
+  struct fb_overlayinfo_s *oinfo; /* Framebuffer overlay information */
 };
 
 /* DMA2D is controlled by the following interface */
@@ -64,7 +64,7 @@ struct dma2d_layer_s
    */
 
 #ifdef CONFIG_STM32F7_FB_CMAP
-  int (*setclut)(FAR const struct fb_cmap_s * cmap);
+  int (*setclut)(const struct fb_cmap_s * cmap);
 #endif
 
   /* Name: fillcolor
@@ -83,8 +83,8 @@ struct dma2d_layer_s
    *   On error   - -EINVAL
    */
 
-  int (*fillcolor)(FAR struct stm32_dma2d_overlay_s *oinfo,
-                   FAR const struct fb_area_s *area, uint32_t argb);
+  int (*fillcolor)(struct stm32_dma2d_overlay_s *oinfo,
+                   const struct fb_area_s *area, uint32_t argb);
 
   /* Name: blit
    *
@@ -106,10 +106,10 @@ struct dma2d_layer_s
    *   On error   - -EINVAL
    */
 
-  int (*blit)(FAR struct stm32_dma2d_overlay_s *doverlay,
+  int (*blit)(struct stm32_dma2d_overlay_s *doverlay,
               uint32_t destxpos, uint32_t destypos,
-              FAR struct stm32_dma2d_overlay_s *soverlay,
-              FAR const struct fb_area_s *sarea);
+              struct stm32_dma2d_overlay_s *soverlay,
+              const struct fb_area_s *sarea);
 
   /* Name: blend
    *
@@ -134,12 +134,12 @@ struct dma2d_layer_s
    *   On error   - -EINVAL or -ECANCELED
    */
 
-  int (*blend)(FAR struct stm32_dma2d_overlay_s *doverlay,
+  int (*blend)(struct stm32_dma2d_overlay_s *doverlay,
                uint32_t destxpos, uint32_t destypos,
-               FAR struct stm32_dma2d_overlay_s *foverlay,
+               struct stm32_dma2d_overlay_s *foverlay,
                uint32_t forexpos, uint32_t foreypos,
-               FAR struct stm32_dma2d_overlay_s *boverlay,
-               FAR const struct fb_area_s *barea);
+               struct stm32_dma2d_overlay_s *boverlay,
+               const struct fb_area_s *barea);
 };
 
 /****************************************************************************
@@ -159,7 +159,7 @@ struct dma2d_layer_s
  *
  ****************************************************************************/
 
-FAR struct dma2d_layer_s *stm32_dma2ddev(void);
+struct dma2d_layer_s *stm32_dma2ddev(void);
 
 /****************************************************************************
  * Name: up_dma2dinitialize

@@ -42,7 +42,7 @@
 #define TRENTRY(id,fmt1,string) {string}
 
 #ifndef NULL
-#  define NULL ((FAR void *)0)
+#  define NULL ((void *)0)
 #endif
 
 /****************************************************************************
@@ -55,7 +55,7 @@ struct stm32l4_usbhost_trace_s
   uint16_t id;
   bool fmt2;
 #endif
-  FAR const char *string;
+  const char *string;
 };
 
 /****************************************************************************
@@ -191,7 +191,7 @@ static const struct stm32l4_usbhost_trace_s g_trace2[TRACE2_NSTRINGS] =
  *
  ****************************************************************************/
 
-FAR const char *usbhost_trformat1(uint16_t id)
+const char *usbhost_trformat1(uint16_t id)
 {
   int ndx = TRACE1_INDEX(id);
 
@@ -203,7 +203,7 @@ FAR const char *usbhost_trformat1(uint16_t id)
   return NULL;
 }
 
-FAR const char *usbhost_trformat2(uint16_t id)
+const char *usbhost_trformat2(uint16_t id)
 {
   int ndx = TRACE2_INDEX(id);
 

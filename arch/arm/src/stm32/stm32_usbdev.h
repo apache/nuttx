@@ -58,7 +58,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int stm32_usbpullup(FAR struct usbdev_s *dev,  bool enable);
+int stm32_usbpullup(struct usbdev_s *dev,  bool enable);
 
 /****************************************************************************
  * Name:  stm32_usbsuspend
@@ -71,7 +71,7 @@ int stm32_usbpullup(FAR struct usbdev_s *dev,  bool enable);
  *
  ****************************************************************************/
 
-void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume);
+void stm32_usbsuspend(struct usbdev_s *dev, bool resume);
 
 #undef EXTERN
 #if defined(__cplusplus)

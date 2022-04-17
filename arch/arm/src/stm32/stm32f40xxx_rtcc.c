@@ -111,7 +111,7 @@ typedef unsigned int rtc_alarmreg_t;
 struct alm_cbinfo_s
 {
   volatile alm_callback_t ac_cb; /* Client callback function */
-  volatile FAR void *ac_arg;     /* Argument to pass with the callback function */
+  volatile void *ac_arg;         /* Argument to pass with the callback function */
 };
 #endif
 
@@ -157,7 +157,7 @@ static inline void rtc_enable_alarm(void);
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_RTC_INFO
-static void rtc_dumpregs(FAR const char *msg)
+static void rtc_dumpregs(const char *msg)
 {
   int rtc_state;
 
@@ -196,7 +196,7 @@ static void rtc_dumpregs(FAR const char *msg)
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_RTC_INFO
-static void rtc_dumptime(FAR const struct tm *tp, FAR const char *msg)
+static void rtc_dumptime(const struct tm *tp, const char *msg)
 {
   rtcinfo("%s:\n", msg);
   rtcinfo("  tm_sec: %08x\n", tp->tm_sec);
@@ -560,9 +560,9 @@ static void rtc_resume(void)
 #ifdef CONFIG_RTC_ALARM
 static int stm32_rtc_alarm_handler(int irq, void *context, void *arg)
 {
-  FAR struct alm_cbinfo_s *cbinfo;
+  struct alm_cbinfo_s *cbinfo;
   alm_callback_t cb;
-  FAR void *cb_arg;
+  void *cb_arg;
   uint32_t isr;
   uint32_t cr;
   int ret = OK;
@@ -586,7 +586,7 @@ static int stm32_rtc_alarm_handler(int irq, void *context, void *arg)
               /* Alarm A callback */
 
               cb  = cbinfo->ac_cb;
-              cb_arg = (FAR void *)cbinfo->ac_arg;
+              cb_arg = (void *)cbinfo->ac_arg;
 
               cbinfo->ac_cb  = NULL;
               cbinfo->ac_arg = NULL;
@@ -611,7 +611,7 @@ static int stm32_rtc_alarm_handler(int irq, void *context, void *arg)
               /* Alarm B callback */
 
               cb  = cbinfo->ac_cb;
-              cb_arg = (FAR void *)cbinfo->ac_arg;
+              cb_arg = (void *)cbinfo->ac_arg;
 
               cbinfo->ac_cb  = NULL;
               cbinfo->ac_arg = NULL;
@@ -837,7 +837,7 @@ static inline void rtc_enable_alarm(void)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int stm32_rtc_getalarmdatetime(rtc_alarmreg_t reg, FAR struct tm *tp)
+static int stm32_rtc_getalarmdatetime(rtc_alarmreg_t reg, struct tm *tp)
 {
   uint32_t data;
   uint32_t tmp;
@@ -1128,9 +1128,9 @@ int stm32_rtc_irqinitialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_HAVE_RTC_SUBSECONDS
-int stm32_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec)
+int stm32_rtc_getdatetime_with_subseconds(struct tm *tp, long *nsec)
 #else
-int up_rtc_getdatetime(FAR struct tm *tp)
+int up_rtc_getdatetime(struct tm *tp)
 #endif
 {
 #ifdef CONFIG_STM32_HAVE_RTC_SUBSECONDS
@@ -1234,7 +1234,7 @@ int up_rtc_getdatetime(FAR struct tm *tp)
     }
 #endif /* CONFIG_STM32_HAVE_RTC_SUBSECONDS */
 
-  rtc_dumptime((FAR const struct tm *)tp, "Returning");
+  rtc_dumptime((const struct tm *)tp, "Returning");
   return OK;
 }
 
@@ -1262,7 +1262,7 @@ int up_rtc_getdatetime(FAR struct tm *tp)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_HAVE_RTC_SUBSECONDS
-int up_rtc_getdatetime(FAR struct tm *tp)
+int up_rtc_getdatetime(struct tm *tp)
 {
   return stm32_rtc_getdatetime_with_subseconds(tp, NULL);
 }
@@ -1284,7 +1284,7 @@ int up_rtc_getdatetime(FAR struct tm *tp)
  *
  ****************************************************************************/
 
-int stm32_rtc_setdatetime(FAR const struct tm *tp)
+int stm32_rtc_setdatetime(const struct tm *tp)
 {
   uint32_t tr;
   uint32_t dr;
@@ -1375,9 +1375,9 @@ int stm32_rtc_setdatetime(FAR const struct tm *tp)
  *
  ****************************************************************************/
 
-int up_rtc_settime(FAR const struct timespec *tp)
+int up_rtc_settime(const struct timespec *tp)
 {
-  FAR struct tm newtime;
+  struct tm newtime;
 
   /* Break out the time values (not that the time is set only to units of
    * seconds)
@@ -1402,9 +1402,9 @@ int up_rtc_settime(FAR const struct timespec *tp)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
+int stm32_rtc_setalarm(struct alm_setalarm_s *alminfo)
 {
-  FAR struct alm_cbinfo_s *cbinfo;
+  struct alm_cbinfo_s *cbinfo;
   rtc_alarmreg_t alarmreg;
   int ret = -EINVAL;
 
@@ -1591,7 +1591,7 @@ errout_with_wprunlock:
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-int stm32_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo)
+int stm32_rtc_rdalarm(struct alm_rdalarm_s *alminfo)
 {
   rtc_alarmreg_t alarmreg;
   int ret = -EINVAL;

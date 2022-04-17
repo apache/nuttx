@@ -73,7 +73,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct pwm_lowerhalf_s *xmc4_pwm_initialize(int timer);
+struct pwm_lowerhalf_s *xmc4_pwm_initialize(int timer);
 
 #undef EXTERN
 #if defined(__cplusplus)

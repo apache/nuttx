@@ -48,8 +48,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <arch/board/board.h>
 
 #include "chip.h"
+#include "hardware/stm32_tim.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -99,9 +101,6 @@
     defined(CONFIG_STM32F0L0G0_TIM3_PWM)  || defined(CONFIG_STM32F0L0G0_TIM14_PWM)  || \
     defined(CONFIG_STM32F0L0G0_TIM15_PWM) || defined(CONFIG_STM32F0L0G0_TIM16_PWM)  || \
     defined(CONFIG_STM32F0L0G0_TIM17_PWM)
-
-#include <arch/board/board.h>
-#include "hardware/stm32_tim.h"
 
 #ifdef CONFIG_PWM_MULTICHAN
 
@@ -549,7 +548,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct pwm_lowerhalf_s *stm32_pwminitialize(int timer);
+struct pwm_lowerhalf_s *stm32_pwminitialize(int timer);
 
 #undef EXTERN
 #if defined(__cplusplus)

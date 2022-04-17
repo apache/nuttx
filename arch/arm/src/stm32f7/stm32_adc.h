@@ -739,7 +739,7 @@ extern "C"
 
 struct adc_dev_s;
 struct adc_dev_s *stm32_adc_initialize(int intf,
-                                       FAR const uint8_t *chanlist,
+                                       const uint8_t *chanlist,
                                        int nchannels);
 #undef EXTERN
 #ifdef __cplusplus

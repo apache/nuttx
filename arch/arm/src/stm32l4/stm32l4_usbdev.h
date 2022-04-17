@@ -58,7 +58,7 @@ extern "C"
  *
  ****************************************************************************/
 
-void stm32l4_usbsuspend(FAR struct usbdev_s *dev, bool resume);
+void stm32l4_usbsuspend(struct usbdev_s *dev, bool resume);
 
 #undef EXTERN
 #if defined(__cplusplus)

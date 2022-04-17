@@ -303,11 +303,11 @@ struct stm32_lowerhalf_s
    * half callback structure:
    */
 
-  FAR const struct qe_ops_s *ops;  /* Lower half callback structure */
+  const struct qe_ops_s *ops;  /* Lower half callback structure */
 
   /* STM32 driver-specific fields: */
 
-  FAR const struct stm32_qeconfig_s *config; /* static configuration */
+  const struct stm32_qeconfig_s *config; /* static configuration */
 
   bool             inuse;        /* True: The lower-half driver is in-use */
 #ifdef CONFIG_STM32_QENCODER_INDEX_PIN
@@ -327,40 +327,40 @@ struct stm32_lowerhalf_s
 
 /* Helper functions */
 
-static uint16_t stm32_getreg16(FAR struct stm32_lowerhalf_s *priv,
+static uint16_t stm32_getreg16(struct stm32_lowerhalf_s *priv,
                                int offset);
-static void stm32_putreg16(FAR struct stm32_lowerhalf_s *priv, int offset,
+static void stm32_putreg16(struct stm32_lowerhalf_s *priv, int offset,
                            uint16_t value);
-static uint32_t stm32_getreg32(FAR struct stm32_lowerhalf_s *priv,
+static uint32_t stm32_getreg32(struct stm32_lowerhalf_s *priv,
                                int offset);
-static void stm32_putreg32(FAR struct stm32_lowerhalf_s *priv, int offset,
+static void stm32_putreg32(struct stm32_lowerhalf_s *priv, int offset,
                            uint32_t value);
 
 #if defined(CONFIG_DEBUG_SENSORS) && defined(CONFIG_DEBUG_INFO)
-static void stm32_dumpregs(FAR struct stm32_lowerhalf_s *priv,
-                           FAR const char *msg);
+static void stm32_dumpregs(struct stm32_lowerhalf_s *priv,
+                           const char *msg);
 #else
 #  define stm32_dumpregs(priv,msg)
 #endif
 
-static FAR struct stm32_lowerhalf_s *stm32_tim2lower(int tim);
+static struct stm32_lowerhalf_s *stm32_tim2lower(int tim);
 
 /* Interrupt handling */
 
 #ifndef CONFIG_STM32_QENCODER_DISABLE_EXTEND16BTIMERS
-static int stm32_interrupt(int irq, FAR void *context, FAR void *arg);
+static int stm32_interrupt(int irq, void *context, void *arg);
 #endif
 
 /* Lower-half Quadrature Encoder Driver Methods */
 
-static int stm32_setup(FAR struct qe_lowerhalf_s *lower);
-static int stm32_shutdown(FAR struct qe_lowerhalf_s *lower);
-static int stm32_position(FAR struct qe_lowerhalf_s *lower,
-                          FAR int32_t *pos);
-static int stm32_setposmax(FAR struct qe_lowerhalf_s *lower, uint32_t pos);
-static int stm32_reset(FAR struct qe_lowerhalf_s *lower);
-static int stm32_setindex(FAR struct qe_lowerhalf_s *lower, uint32_t pos);
-static int stm32_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
+static int stm32_setup(struct qe_lowerhalf_s *lower);
+static int stm32_shutdown(struct qe_lowerhalf_s *lower);
+static int stm32_position(struct qe_lowerhalf_s *lower,
+                          int32_t *pos);
+static int stm32_setposmax(struct qe_lowerhalf_s *lower, uint32_t pos);
+static int stm32_reset(struct qe_lowerhalf_s *lower);
+static int stm32_setindex(struct qe_lowerhalf_s *lower, uint32_t pos);
+static int stm32_ioctl(struct qe_lowerhalf_s *lower, int cmd,
                        unsigned long arg);
 
 /****************************************************************************
@@ -571,7 +571,7 @@ static uint16_t stm32_getreg16(struct stm32_lowerhalf_s *priv, int offset)
  *
  ****************************************************************************/
 
-static void stm32_putreg16(FAR struct stm32_lowerhalf_s *priv, int offset,
+static void stm32_putreg16(struct stm32_lowerhalf_s *priv, int offset,
                            uint16_t value)
 {
   putreg16(value, priv->config->base + offset);
@@ -594,7 +594,7 @@ static void stm32_putreg16(FAR struct stm32_lowerhalf_s *priv, int offset,
  *
  ****************************************************************************/
 
-static uint32_t stm32_getreg32(FAR struct stm32_lowerhalf_s *priv,
+static uint32_t stm32_getreg32(struct stm32_lowerhalf_s *priv,
                                int offset)
 {
   return getreg32(priv->config->base + offset);
@@ -617,7 +617,7 @@ static uint32_t stm32_getreg32(FAR struct stm32_lowerhalf_s *priv,
  *
  ****************************************************************************/
 
-static void stm32_putreg32(FAR struct stm32_lowerhalf_s *priv, int offset,
+static void stm32_putreg32(struct stm32_lowerhalf_s *priv, int offset,
                            uint32_t value)
 {
   putreg32(value, priv->config->base + offset);
@@ -638,8 +638,8 @@ static void stm32_putreg32(FAR struct stm32_lowerhalf_s *priv, int offset,
  ****************************************************************************/
 
 #if defined(CONFIG_DEBUG_SENSORS) && defined(CONFIG_DEBUG_INFO)
-static void stm32_dumpregs(FAR struct stm32_lowerhalf_s *priv,
-                           FAR const char *msg)
+static void stm32_dumpregs(struct stm32_lowerhalf_s *priv,
+                           const char *msg)
 {
   sninfo("%s:\n", msg);
   sninfo("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
@@ -689,7 +689,7 @@ static void stm32_dumpregs(FAR struct stm32_lowerhalf_s *priv,
  *
  ****************************************************************************/
 
-static FAR struct stm32_lowerhalf_s *stm32_tim2lower(int tim)
+static struct stm32_lowerhalf_s *stm32_tim2lower(int tim)
 {
   switch (tim)
     {
@@ -732,9 +732,9 @@ static FAR struct stm32_lowerhalf_s *stm32_tim2lower(int tim)
  ****************************************************************************/
 
 #ifndef CONFIG_STM32_QENCODER_DISABLE_EXTEND16BTIMERS
-static int stm32_interrupt(int irq, FAR void *context, FAR void *arg)
+static int stm32_interrupt(int irq, void *context, void *arg)
 {
-  FAR struct stm32_lowerhalf_s *priv = (FAR struct stm32_lowerhalf_s *)arg;
+  struct stm32_lowerhalf_s *priv = (struct stm32_lowerhalf_s *)arg;
   uint16_t regval;
 
   DEBUGASSERT(priv != NULL);
@@ -775,16 +775,16 @@ static int stm32_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static int stm32_qe_index_irq(int irq, FAR void *context, FAR void *arg)
+static int stm32_qe_index_irq(int irq, void *context, void *arg)
 {
-  FAR struct stm32_lowerhalf_s *priv;
+  struct stm32_lowerhalf_s *priv;
   bool valid = false;
 
   DEBUGASSERT(arg);
 
   /* Get QE data */
 
-  priv = (FAR struct stm32_lowerhalf_s *)arg;
+  priv = (struct stm32_lowerhalf_s *)arg;
 
   /* Get pin state */
 
@@ -813,9 +813,9 @@ static int stm32_qe_index_irq(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
+static int stm32_setup(struct qe_lowerhalf_s *lower)
 {
-  FAR struct stm32_lowerhalf_s *priv = (FAR struct stm32_lowerhalf_s *)lower;
+  struct stm32_lowerhalf_s *priv = (struct stm32_lowerhalf_s *)lower;
   uint16_t dier;
   uint32_t smcr;
   uint32_t ccmr1;
@@ -1063,9 +1063,9 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int stm32_shutdown(FAR struct qe_lowerhalf_s *lower)
+static int stm32_shutdown(struct qe_lowerhalf_s *lower)
 {
-  FAR struct stm32_lowerhalf_s *priv = (FAR struct stm32_lowerhalf_s *)lower;
+  struct stm32_lowerhalf_s *priv = (struct stm32_lowerhalf_s *)lower;
   irqstate_t flags;
   uint32_t regaddr;
   uint32_t regval;
@@ -1180,9 +1180,9 @@ static int stm32_shutdown(FAR struct qe_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int stm32_position(FAR struct qe_lowerhalf_s *lower, FAR int32_t *pos)
+static int stm32_position(struct qe_lowerhalf_s *lower, int32_t *pos)
 {
-  FAR struct stm32_lowerhalf_s *priv = (FAR struct stm32_lowerhalf_s *)lower;
+  struct stm32_lowerhalf_s *priv = (struct stm32_lowerhalf_s *)lower;
 #ifndef CONFIG_STM32_QENCODER_DISABLE_EXTEND16BTIMERS
   int32_t position;
   int32_t verify;
@@ -1229,10 +1229,10 @@ static int stm32_position(FAR struct qe_lowerhalf_s *lower, FAR int32_t *pos)
  *
  ****************************************************************************/
 
-static int stm32_setposmax(FAR struct qe_lowerhalf_s *lower, uint32_t pos)
+static int stm32_setposmax(struct qe_lowerhalf_s *lower, uint32_t pos)
 {
 #ifdef CONFIG_STM32_QENCODER_DISABLE_EXTEND16BTIMERS
-  FAR struct stm32_lowerhalf_s *priv = (FAR struct stm32_lowerhalf_s *)lower;
+  struct stm32_lowerhalf_s *priv = (struct stm32_lowerhalf_s *)lower;
 
 #if defined(HAVE_MIXEDWIDTH_TIMERS)
   if (priv->config->width == 32)
@@ -1263,9 +1263,9 @@ static int stm32_setposmax(FAR struct qe_lowerhalf_s *lower, uint32_t pos)
  *
  ****************************************************************************/
 
-static int stm32_reset(FAR struct qe_lowerhalf_s *lower)
+static int stm32_reset(struct qe_lowerhalf_s *lower)
 {
-  FAR struct stm32_lowerhalf_s *priv = (FAR struct stm32_lowerhalf_s *)lower;
+  struct stm32_lowerhalf_s *priv = (struct stm32_lowerhalf_s *)lower;
 #ifndef CONFIG_STM32_QENCODER_DISABLE_EXTEND16BTIMERS
   irqstate_t flags;
 
@@ -1299,10 +1299,10 @@ static int stm32_reset(FAR struct qe_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int stm32_setindex(FAR struct qe_lowerhalf_s *lower, uint32_t pos)
+static int stm32_setindex(struct qe_lowerhalf_s *lower, uint32_t pos)
 {
 #ifdef CONFIG_STM32_QENCODER_INDEX_PIN
-  FAR struct stm32_lowerhalf_s *priv = (FAR struct stm32_lowerhalf_s *)lower;
+  struct stm32_lowerhalf_s *priv = (struct stm32_lowerhalf_s *)lower;
   int ret = OK;
 
   sninfo("Set QE TIM%d the index pin positon %" PRIx32 "\n",
@@ -1336,7 +1336,7 @@ errout:
  *
  ****************************************************************************/
 
-static int stm32_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
+static int stm32_ioctl(struct qe_lowerhalf_s *lower, int cmd,
                        unsigned long arg)
 {
   /* No ioctl commands supported */
@@ -1367,9 +1367,9 @@ static int stm32_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
  *
  ****************************************************************************/
 
-int stm32_qeinitialize(FAR const char *devpath, int tim)
+int stm32_qeinitialize(const char *devpath, int tim)
 {
-  FAR struct stm32_lowerhalf_s *priv;
+  struct stm32_lowerhalf_s *priv;
   int ret;
 
   /* Find the pre-allocated timer state structure corresponding to this
@@ -1393,7 +1393,7 @@ int stm32_qeinitialize(FAR const char *devpath, int tim)
 
   /* Register the upper-half driver */
 
-  ret = qe_register(devpath, (FAR struct qe_lowerhalf_s *)priv);
+  ret = qe_register(devpath, (struct qe_lowerhalf_s *)priv);
   if (ret < 0)
     {
       snerr("ERROR: qe_register failed: %d\n", ret);
@@ -1402,7 +1402,7 @@ int stm32_qeinitialize(FAR const char *devpath, int tim)
 
   /* Make sure that the timer is in the shutdown state */
 
-  stm32_shutdown((FAR struct qe_lowerhalf_s *)priv);
+  stm32_shutdown((struct qe_lowerhalf_s *)priv);
 
   /* The driver is now in-use */
 
@@ -1428,7 +1428,7 @@ int stm32_qeinitialize(FAR const char *devpath, int tim)
 
 int stm32_qe_index_init(int tim, uint32_t gpio)
 {
-  FAR struct stm32_lowerhalf_s *priv;
+  struct stm32_lowerhalf_s *priv;
   int ret = OK;
 
   /* Find the pre-allocated timer state structure corresponding to this

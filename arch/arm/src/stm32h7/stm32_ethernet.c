@@ -599,7 +599,7 @@
  * header
  */
 
-#define BUF ((FAR struct eth_hdr_s *)priv->dev.d_buf)
+#define BUF ((struct eth_hdr_s *)priv->dev.d_buf)
 
 /****************************************************************************
  * Private Types
@@ -727,7 +727,7 @@ static void stm32_freeframe(struct stm32_ethmac_s *priv);
 static void stm32_txdone(struct stm32_ethmac_s *priv);
 
 static void stm32_interrupt_work(void *arg);
-static int  stm32_interrupt(int irq, void *context, FAR void *arg);
+static int  stm32_interrupt(int irq, void *context, void *arg);
 
 /* Watchdog timer expirations */
 
@@ -2350,7 +2350,7 @@ static void stm32_interrupt_work(void *arg)
  *
  ****************************************************************************/
 
-static int stm32_interrupt(int irq, void *context, FAR void *arg)
+static int stm32_interrupt(int irq, void *context, void *arg)
 {
   struct stm32_ethmac_s *priv = &g_stm32ethmac[0];
   uint32_t dmasr;

@@ -109,7 +109,7 @@ struct stm32_dmamux_s
   uint32_t base;                /* DMAMUX base address */
 };
 
-typedef FAR const struct stm32_dmamux_s *DMA_MUX;
+typedef const struct stm32_dmamux_s *DMA_MUX;
 
 /* This structure describes one DMA controller */
 
@@ -137,7 +137,7 @@ struct stm32_dmach_s
   void             *arg;         /* Argument passed to callback function */
 };
 
-typedef FAR struct stm32_dmach_s *DMA_CHANNEL;
+typedef struct stm32_dmach_s *DMA_CHANNEL;
 
 /* DMA operations */
 
@@ -145,40 +145,40 @@ struct stm32_dma_ops_s
 {
   /* Disable the DMA transfer */
 
-  CODE void (*dma_disable)(DMA_CHANNEL dmachan);
+  void (*dma_disable)(DMA_CHANNEL dmachan);
 
   /* DMA interrupt */
 
-  CODE int (*dma_interrupt)(int irq, void *context, FAR void *arg);
+  int (*dma_interrupt)(int irq, void *context, void *arg);
 
   /* Setup the DMA */
 
-  CODE void (*dma_setup)(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
-                         size_t ntransfers, uint32_t ccr);
+  void (*dma_setup)(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
+                    size_t ntransfers, uint32_t ccr);
 
   /* Start the DMA */
 
-  CODE void (*dma_start)(DMA_HANDLE handle, dma_callback_t callback,
-                         void *arg, bool half);
+  void (*dma_start)(DMA_HANDLE handle, dma_callback_t callback,
+                    void *arg, bool half);
 
   /* Read remaining DMA bytes */
 
-  CODE size_t (*dma_residual)(DMA_HANDLE handle);
+  size_t (*dma_residual)(DMA_HANDLE handle);
 
   /* Check the DMA configuration  */
 
-  CODE bool (*dma_capable)(uint32_t maddr, uint32_t count, uint32_t ccr);
+  bool (*dma_capable)(uint32_t maddr, uint32_t count, uint32_t ccr);
 
 #ifdef CONFIG_DEBUG_DMA_INFO
   /* Sample the DMA registers */
 
-  CODE void (*dma_sample)(DMA_HANDLE handle, struct stm32_dmaregs_s *regs);
+  void (*dma_sample)(DMA_HANDLE handle, struct stm32_dmaregs_s *regs);
 
   /* Dump the DMA registers */
 
-  CODE void (*dma_dump)(DMA_HANDLE handle,
-                        const struct stm32_dmaregs_s *regs,
-                        const char *msg);
+  void (*dma_dump)(DMA_HANDLE handle,
+                   const struct stm32_dmaregs_s *regs,
+                   const char *msg);
 #endif
 };
 
@@ -188,7 +188,7 @@ struct stm32_dma_ops_s
 
 #if defined(CONFIG_STM32_DMA1) || defined(CONFIG_STM32_DMA2)
 static void stm32_dma12_disable(DMA_CHANNEL dmachan);
-static int stm32_dma12_interrupt(int irq, void *context, FAR void *arg);
+static int stm32_dma12_interrupt(int irq, void *context, void *arg);
 static void stm32_dma12_setup(DMA_HANDLE handle, uint32_t paddr,
                               uint32_t maddr, size_t ntransfers,
                               uint32_t ccr);
@@ -221,8 +221,8 @@ static void stm32_dmamux_dump(DMA_MUX dmamux, uint8_t channel,
 #endif
 static DMA_CHANNEL stm32_dma_channel_get(uint8_t channel,
                                          uint8_t controller);
-static void stm32_gdma_limits_get(uint8_t controller, FAR uint8_t *first,
-                                  FAR uint8_t *last);
+static void stm32_gdma_limits_get(uint8_t controller, uint8_t *first,
+                                  uint8_t *last);
 
 /****************************************************************************
  * Private Data
@@ -597,8 +597,8 @@ static DMA_CHANNEL stm32_dma_channel_get(uint8_t channel,
  *
  ****************************************************************************/
 
-static void stm32_gdma_limits_get(uint8_t controller, FAR uint8_t *first,
-                                  FAR uint8_t *nchan)
+static void stm32_gdma_limits_get(uint8_t controller, uint8_t *first,
+                                  uint8_t *nchan)
 {
   DEBUGASSERT(first != NULL);
   DEBUGASSERT(nchan != NULL);
@@ -653,7 +653,7 @@ static void stm32_dma12_disable(DMA_CHANNEL dmachan)
  *
  ****************************************************************************/
 
-static int stm32_dma12_interrupt(int irq, void *context, FAR void *arg)
+static int stm32_dma12_interrupt(int irq, void *context, void *arg)
 {
   DMA_CHANNEL dmachan;
   uint32_t isr;

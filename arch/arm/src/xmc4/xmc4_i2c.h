@@ -50,7 +50,7 @@
  *
  ****************************************************************************/
 
-FAR struct i2c_master_s *xmc4_i2cbus_initialize(int port);
+struct i2c_master_s *xmc4_i2cbus_initialize(int port);
 
 /****************************************************************************
  * Name: xmc4_i2cbus_uninitialize
@@ -67,6 +67,6 @@ FAR struct i2c_master_s *xmc4_i2cbus_initialize(int port);
  *
  ****************************************************************************/
 
-int xmc4_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
+int xmc4_i2cbus_uninitialize(struct i2c_master_s *dev);
 
 #endif /* __ARCH_ARM_SRC_XMC4_XMC4_I2C_H */

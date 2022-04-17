@@ -46,7 +46,7 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-FAR struct pwm_lowerhalf_s *tiva_pwm_initialize(int channel);
+struct pwm_lowerhalf_s *tiva_pwm_initialize(int channel);
 void tm4c_pwm_register(int channel);
 
 #endif /* __ARCH_ARM_SRC_TIVA_TIVA_PWM_H */

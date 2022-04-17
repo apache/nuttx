@@ -67,7 +67,7 @@
  *
  ****************************************************************************/
 
-FAR struct i2c_master_s *stm32_i2cbus_initialize(int port);
+struct i2c_master_s *stm32_i2cbus_initialize(int port);
 
 /****************************************************************************
  * Name: stm32_i2cbus_uninitialize
@@ -84,6 +84,6 @@ FAR struct i2c_master_s *stm32_i2cbus_initialize(int port);
  *
  ****************************************************************************/
 
-int stm32_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
+int stm32_i2cbus_uninitialize(struct i2c_master_s *dev);
 
 #endif /* __ARCH_ARM_SRC_STM32F7_STM32_I2C_H */

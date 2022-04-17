@@ -81,7 +81,7 @@ extern "C"
  ****************************************************************************/
 
 struct qspi_dev_s;
-FAR struct qspi_dev_s *stm32f7_qspi_initialize(int intf);
+struct qspi_dev_s *stm32f7_qspi_initialize(int intf);
 
 /****************************************************************************
  * Name: stm32l4_qspi_enter_memorymapped

@@ -608,7 +608,7 @@
  * header
  */
 
-#define BUF ((FAR struct eth_hdr_s *)priv->dev.d_buf)
+#define BUF ((struct eth_hdr_s *)priv->dev.d_buf)
 
 /****************************************************************************
  * Private Types
@@ -678,41 +678,41 @@ static void stm32_checksetup(void);
 
 /* Free buffer management */
 
-static void stm32_initbuffer(FAR struct stm32_ethmac_s *priv);
-static inline uint8_t *stm32_allocbuffer(FAR struct stm32_ethmac_s *priv);
-static inline void stm32_freebuffer(FAR struct stm32_ethmac_s *priv,
+static void stm32_initbuffer(struct stm32_ethmac_s *priv);
+static inline uint8_t *stm32_allocbuffer(struct stm32_ethmac_s *priv);
+static inline void stm32_freebuffer(struct stm32_ethmac_s *priv,
               uint8_t *buffer);
-static inline bool stm32_isfreebuffer(FAR struct stm32_ethmac_s *priv);
+static inline bool stm32_isfreebuffer(struct stm32_ethmac_s *priv);
 
 /* Common TX logic */
 
-static int  stm32_transmit(FAR struct stm32_ethmac_s *priv);
+static int  stm32_transmit(struct stm32_ethmac_s *priv);
 static int  stm32_txpoll(struct net_driver_s *dev);
-static void stm32_dopoll(FAR struct stm32_ethmac_s *priv);
+static void stm32_dopoll(struct stm32_ethmac_s *priv);
 
 /* Interrupt handling */
 
-static void stm32_enableint(FAR struct stm32_ethmac_s *priv,
+static void stm32_enableint(struct stm32_ethmac_s *priv,
               uint32_t ierbit);
-static void stm32_disableint(FAR struct stm32_ethmac_s *priv,
+static void stm32_disableint(struct stm32_ethmac_s *priv,
               uint32_t ierbit);
 
-static void stm32_freesegment(FAR struct stm32_ethmac_s *priv,
-              FAR struct eth_rxdesc_s *rxfirst, int segments);
-static int  stm32_recvframe(FAR struct stm32_ethmac_s *priv);
-static void stm32_receive(FAR struct stm32_ethmac_s *priv);
-static void stm32_freeframe(FAR struct stm32_ethmac_s *priv);
-static void stm32_txdone(FAR struct stm32_ethmac_s *priv);
+static void stm32_freesegment(struct stm32_ethmac_s *priv,
+              struct eth_rxdesc_s *rxfirst, int segments);
+static int  stm32_recvframe(struct stm32_ethmac_s *priv);
+static void stm32_receive(struct stm32_ethmac_s *priv);
+static void stm32_freeframe(struct stm32_ethmac_s *priv);
+static void stm32_txdone(struct stm32_ethmac_s *priv);
 
-static void stm32_interrupt_work(FAR void *arg);
-static int  stm32_interrupt(int irq, FAR void *context, FAR void *arg);
+static void stm32_interrupt_work(void *arg);
+static int  stm32_interrupt(int irq, void *context, void *arg);
 
 /* Watchdog timer expirations */
 
-static void stm32_txtimeout_work(FAR void *arg);
+static void stm32_txtimeout_work(void *arg);
 static void stm32_txtimeout_expiry(wdparm_t arg);
 
-static void stm32_poll_work(FAR void *arg);
+static void stm32_poll_work(void *arg);
 static void stm32_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
@@ -720,14 +720,14 @@ static void stm32_poll_expiry(wdparm_t arg);
 static int  stm32_ifup(struct net_driver_s *dev);
 static int  stm32_ifdown(struct net_driver_s *dev);
 
-static void stm32_txavail_work(FAR void *arg);
+static void stm32_txavail_work(void *arg);
 static int  stm32_txavail(struct net_driver_s *dev);
 
 #if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
-static int  stm32_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
+static int  stm32_addmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
 #ifdef CONFIG_NET_MCASTGROUP
-static int  stm32_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
+static int  stm32_rmmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
 static int  stm32_ioctl(struct net_driver_s *dev, int cmd,
@@ -736,13 +736,13 @@ static int  stm32_ioctl(struct net_driver_s *dev, int cmd,
 
 /* Descriptor Initialization */
 
-static void stm32_txdescinit(FAR struct stm32_ethmac_s *priv);
-static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv);
+static void stm32_txdescinit(struct stm32_ethmac_s *priv);
+static void stm32_rxdescinit(struct stm32_ethmac_s *priv);
 
 /* PHY Initialization */
 
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
-static int  stm32_phyintenable(FAR struct stm32_ethmac_s *priv);
+static int  stm32_phyintenable(struct stm32_ethmac_s *priv);
 #endif
 #if defined(CONFIG_STM32_AUTONEG) || defined(CONFIG_NETDEV_PHY_IOCTL) || \
     defined(CONFIG_ETH0_PHY_DM9161)
@@ -752,9 +752,9 @@ static int  stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr,
 static int  stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr,
               uint16_t value);
 #ifdef CONFIG_ETH0_PHY_DM9161
-static inline int stm32_dm9161(FAR struct stm32_ethmac_s *priv);
+static inline int stm32_dm9161(struct stm32_ethmac_s *priv);
 #endif
-static int  stm32_phyinit(FAR struct stm32_ethmac_s *priv);
+static int  stm32_phyinit(struct stm32_ethmac_s *priv);
 
 /* MAC/DMA Initialization */
 
@@ -764,15 +764,15 @@ static inline void stm32_selectmii(void);
 #ifdef CONFIG_STM32_RMII
 static inline void stm32_selectrmii(void);
 #endif
-static inline void stm32_ethgpioconfig(FAR struct stm32_ethmac_s *priv);
-static int  stm32_ethreset(FAR struct stm32_ethmac_s *priv);
-static int  stm32_macconfig(FAR struct stm32_ethmac_s *priv);
-static void stm32_macaddress(FAR struct stm32_ethmac_s *priv);
+static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv);
+static int  stm32_ethreset(struct stm32_ethmac_s *priv);
+static int  stm32_macconfig(struct stm32_ethmac_s *priv);
+static void stm32_macaddress(struct stm32_ethmac_s *priv);
 #ifdef CONFIG_NET_ICMPv6
-static void stm32_ipv6multicast(FAR struct stm32_ethmac_s *priv);
+static void stm32_ipv6multicast(struct stm32_ethmac_s *priv);
 #endif
-static int  stm32_macenable(FAR struct stm32_ethmac_s *priv);
-static int  stm32_ethconfig(FAR struct stm32_ethmac_s *priv);
+static int  stm32_macenable(struct stm32_ethmac_s *priv);
+static int  stm32_ethconfig(struct stm32_ethmac_s *priv);
 
 /****************************************************************************
  * Private Functions
@@ -917,7 +917,7 @@ static void stm32_checksetup(void)
  *
  ****************************************************************************/
 
-static void stm32_initbuffer(FAR struct stm32_ethmac_s *priv)
+static void stm32_initbuffer(struct stm32_ethmac_s *priv)
 {
   uint8_t *buffer;
   int i;
@@ -932,7 +932,7 @@ static void stm32_initbuffer(FAR struct stm32_ethmac_s *priv)
        i < STM32_ETH_NFREEBUFFERS;
        i++, buffer += CONFIG_STM32_ETH_BUFSIZE)
     {
-      sq_addlast((FAR sq_entry_t *)buffer, &priv->freeb);
+      sq_addlast((sq_entry_t *)buffer, &priv->freeb);
     }
 }
 
@@ -955,7 +955,7 @@ static void stm32_initbuffer(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static inline uint8_t *stm32_allocbuffer(FAR struct stm32_ethmac_s *priv)
+static inline uint8_t *stm32_allocbuffer(struct stm32_ethmac_s *priv)
 {
   /* Allocate a buffer by returning the head of the free buffer list */
 
@@ -982,12 +982,12 @@ static inline uint8_t *stm32_allocbuffer(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static inline void stm32_freebuffer(FAR struct stm32_ethmac_s *priv,
+static inline void stm32_freebuffer(struct stm32_ethmac_s *priv,
                                     uint8_t *buffer)
 {
   /* Free the buffer by adding it to the end of the free buffer list */
 
-  sq_addlast((FAR sq_entry_t *)buffer, &priv->freeb);
+  sq_addlast((sq_entry_t *)buffer, &priv->freeb);
 }
 
 /****************************************************************************
@@ -1008,7 +1008,7 @@ static inline void stm32_freebuffer(FAR struct stm32_ethmac_s *priv,
  *
  ****************************************************************************/
 
-static inline bool stm32_isfreebuffer(FAR struct stm32_ethmac_s *priv)
+static inline bool stm32_isfreebuffer(struct stm32_ethmac_s *priv)
 {
   /* Return TRUE if the free buffer list is not empty */
 
@@ -1035,7 +1035,7 @@ static inline bool stm32_isfreebuffer(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
+static int stm32_transmit(struct stm32_ethmac_s *priv)
 {
   struct eth_txdesc_s *txdesc;
   struct eth_txdesc_s *txfirst;
@@ -1251,8 +1251,8 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
 
 static int stm32_txpoll(struct net_driver_s *dev)
 {
-  FAR struct stm32_ethmac_s *priv =
-    (FAR struct stm32_ethmac_s *)dev->d_private;
+  struct stm32_ethmac_s *priv =
+    (struct stm32_ethmac_s *)dev->d_private;
 
   DEBUGASSERT(priv->dev.d_buf != NULL);
 
@@ -1358,9 +1358,9 @@ static int stm32_txpoll(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void stm32_dopoll(FAR struct stm32_ethmac_s *priv)
+static void stm32_dopoll(struct stm32_ethmac_s *priv)
 {
-  FAR struct net_driver_s *dev = &priv->dev;
+  struct net_driver_s *dev = &priv->dev;
 
   /* Check if the next TX descriptor is owned by the Ethernet DMA or
    * CPU.  We cannot perform the TX poll if we are unable to accept
@@ -1419,7 +1419,7 @@ static void stm32_dopoll(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static void stm32_enableint(FAR struct stm32_ethmac_s *priv,
+static void stm32_enableint(struct stm32_ethmac_s *priv,
                              uint32_t ierbit)
 {
   uint32_t regval;
@@ -1448,7 +1448,7 @@ static void stm32_enableint(FAR struct stm32_ethmac_s *priv,
  *
  ****************************************************************************/
 
-static void stm32_disableint(FAR struct stm32_ethmac_s *priv,
+static void stm32_disableint(struct stm32_ethmac_s *priv,
                              uint32_t ierbit)
 {
   uint32_t regval;
@@ -1488,8 +1488,8 @@ static void stm32_disableint(FAR struct stm32_ethmac_s *priv,
  *
  ****************************************************************************/
 
-static void stm32_freesegment(FAR struct stm32_ethmac_s *priv,
-                              FAR struct eth_rxdesc_s *rxfirst, int segments)
+static void stm32_freesegment(struct stm32_ethmac_s *priv,
+                              struct eth_rxdesc_s *rxfirst, int segments)
 {
   struct eth_rxdesc_s *rxdesc;
   int i;
@@ -1545,7 +1545,7 @@ static void stm32_freesegment(FAR struct stm32_ethmac_s *priv,
  *
  ****************************************************************************/
 
-static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
+static int stm32_recvframe(struct stm32_ethmac_s *priv)
 {
   struct eth_rxdesc_s *rxdesc;
   struct eth_rxdesc_s *rxcurr;
@@ -1724,7 +1724,7 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static void stm32_receive(FAR struct stm32_ethmac_s *priv)
+static void stm32_receive(struct stm32_ethmac_s *priv)
 {
   struct net_driver_s *dev = &priv->dev;
 
@@ -1896,7 +1896,7 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static void stm32_freeframe(FAR struct stm32_ethmac_s *priv)
+static void stm32_freeframe(struct stm32_ethmac_s *priv)
 {
   struct eth_txdesc_s *txdesc;
   int i;
@@ -1995,7 +1995,7 @@ static void stm32_freeframe(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static void stm32_txdone(FAR struct stm32_ethmac_s *priv)
+static void stm32_txdone(struct stm32_ethmac_s *priv)
 {
   DEBUGASSERT(priv->txtail != NULL);
 
@@ -2038,9 +2038,9 @@ static void stm32_txdone(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static void stm32_interrupt_work(FAR void *arg)
+static void stm32_interrupt_work(void *arg)
 {
-  FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
+  struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)arg;
   uint32_t dmasr;
 
   DEBUGASSERT(priv);
@@ -2145,9 +2145,9 @@ static void stm32_interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int stm32_interrupt(int irq, FAR void *context, FAR void *arg)
+static int stm32_interrupt(int irq, void *context, void *arg)
 {
-  FAR struct stm32_ethmac_s *priv = &g_stm32ethmac[0];
+  struct stm32_ethmac_s *priv = &g_stm32ethmac[0];
   uint32_t dmasr;
 
   /* Get the DMA interrupt status bits (no MAC interrupts are expected) */
@@ -2199,9 +2199,9 @@ static int stm32_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static void stm32_txtimeout_work(FAR void *arg)
+static void stm32_txtimeout_work(void *arg)
 {
-  FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
+  struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)arg;
 
   /* Reset the hardware.  Just take the interface down, then back up again. */
 
@@ -2235,7 +2235,7 @@ static void stm32_txtimeout_work(FAR void *arg)
 
 static void stm32_txtimeout_expiry(wdparm_t arg)
 {
-  FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
+  struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)arg;
 
   nerr("ERROR: Timeout!\n");
 
@@ -2272,10 +2272,10 @@ static void stm32_txtimeout_expiry(wdparm_t arg)
  *
  ****************************************************************************/
 
-static void stm32_poll_work(FAR void *arg)
+static void stm32_poll_work(void *arg)
 {
-  FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
-  FAR struct net_driver_s *dev  = &priv->dev;
+  struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)arg;
+  struct net_driver_s *dev  = &priv->dev;
 
   /* Check if the next TX descriptor is owned by the Ethernet DMA or
    * CPU.  We cannot perform the TX poll if we are unable to accept
@@ -2346,7 +2346,7 @@ static void stm32_poll_work(FAR void *arg)
 
 static void stm32_poll_expiry(wdparm_t arg)
 {
-  FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
+  struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)arg;
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
@@ -2373,8 +2373,8 @@ static void stm32_poll_expiry(wdparm_t arg)
 
 static int stm32_ifup(struct net_driver_s *dev)
 {
-  FAR struct stm32_ethmac_s *priv =
-    (FAR struct stm32_ethmac_s *)dev->d_private;
+  struct stm32_ethmac_s *priv =
+    (struct stm32_ethmac_s *)dev->d_private;
   int ret;
 
 #ifdef CONFIG_NET_IPv4
@@ -2432,8 +2432,8 @@ static int stm32_ifup(struct net_driver_s *dev)
 
 static int stm32_ifdown(struct net_driver_s *dev)
 {
-  FAR struct stm32_ethmac_s *priv =
-    (FAR struct stm32_ethmac_s *)dev->d_private;
+  struct stm32_ethmac_s *priv =
+    (struct stm32_ethmac_s *)dev->d_private;
   irqstate_t flags;
   int ret = OK;
 
@@ -2485,9 +2485,9 @@ static int stm32_ifdown(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void stm32_txavail_work(FAR void *arg)
+static void stm32_txavail_work(void *arg)
 {
-  FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
+  struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)arg;
 
   ninfo("ifup: %d\n", priv->ifup);
 
@@ -2525,8 +2525,8 @@ static void stm32_txavail_work(FAR void *arg)
 
 static int stm32_txavail(struct net_driver_s *dev)
 {
-  FAR struct stm32_ethmac_s *priv =
-    (FAR struct stm32_ethmac_s *)dev->d_private;
+  struct stm32_ethmac_s *priv =
+    (struct stm32_ethmac_s *)dev->d_private;
 
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
@@ -2607,7 +2607,7 @@ static uint32_t stm32_calcethcrc(const uint8_t *data, size_t length)
  ****************************************************************************/
 
 #if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
-static int stm32_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
+static int stm32_addmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   uint32_t crc;
   uint32_t hashindex;
@@ -2664,7 +2664,7 @@ static int stm32_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_MCASTGROUP
-static int stm32_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
+static int stm32_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   uint32_t crc;
   uint32_t hashindex;
@@ -2724,7 +2724,7 @@ static int stm32_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-static void stm32_txdescinit(FAR struct stm32_ethmac_s *priv)
+static void stm32_txdescinit(struct stm32_ethmac_s *priv)
 {
   struct eth_txdesc_s *txdesc;
   int i;
@@ -2808,7 +2808,7 @@ static void stm32_txdescinit(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv)
+static void stm32_rxdescinit(struct stm32_ethmac_s *priv)
 {
   struct eth_rxdesc_s *rxdesc;
   int i;
@@ -2906,8 +2906,8 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv)
 static int stm32_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 {
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
-  FAR struct stm32_ethmac_s *priv =
-    (FAR struct stm32_ethmac_s *)dev->d_private;
+  struct stm32_ethmac_s *priv =
+    (struct stm32_ethmac_s *)dev->d_private;
 #endif
   int ret;
 
@@ -3151,7 +3151,7 @@ static int stm32_phywrite(uint16_t phydevaddr,
  ****************************************************************************/
 
 #ifdef CONFIG_ETH0_PHY_DM9161
-static inline int stm32_dm9161(FAR struct stm32_ethmac_s *priv)
+static inline int stm32_dm9161(struct stm32_ethmac_s *priv)
 {
   uint16_t phyval;
   int ret;
@@ -3216,7 +3216,7 @@ static inline int stm32_dm9161(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
+static int stm32_phyinit(struct stm32_ethmac_s *priv)
 {
 #ifdef CONFIG_STM32_AUTONEG
   volatile uint32_t timeout;
@@ -3500,7 +3500,7 @@ static inline void stm32_selectrmii(void)
  *
  ****************************************************************************/
 
-static inline void stm32_ethgpioconfig(FAR struct stm32_ethmac_s *priv)
+static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
 {
   /* Configure GPIO pins to support Ethernet */
 
@@ -3653,7 +3653,7 @@ static inline void stm32_ethgpioconfig(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static int stm32_ethreset(FAR struct stm32_ethmac_s *priv)
+static int stm32_ethreset(struct stm32_ethmac_s *priv)
 {
   uint32_t regval;
   uint32_t retries;
@@ -3723,7 +3723,7 @@ static int stm32_ethreset(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static int stm32_macconfig(FAR struct stm32_ethmac_s *priv)
+static int stm32_macconfig(struct stm32_ethmac_s *priv)
 {
   uint32_t regval;
 
@@ -3807,9 +3807,9 @@ static int stm32_macconfig(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static void stm32_macaddress(FAR struct stm32_ethmac_s *priv)
+static void stm32_macaddress(struct stm32_ethmac_s *priv)
 {
-  FAR struct net_driver_s *dev = &priv->dev;
+  struct net_driver_s *dev = &priv->dev;
   uint32_t regval;
 
   ninfo("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
@@ -3853,7 +3853,7 @@ static void stm32_macaddress(FAR struct stm32_ethmac_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6
-static void stm32_ipv6multicast(FAR struct stm32_ethmac_s *priv)
+static void stm32_ipv6multicast(struct stm32_ethmac_s *priv)
 {
   struct net_driver_s *dev;
   uint16_t tmp16;
@@ -3925,7 +3925,7 @@ static void stm32_ipv6multicast(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static int stm32_macenable(FAR struct stm32_ethmac_s *priv)
+static int stm32_macenable(struct stm32_ethmac_s *priv)
 {
   uint32_t regval;
 
@@ -4012,7 +4012,7 @@ static int stm32_macenable(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static int stm32_ethconfig(FAR struct stm32_ethmac_s *priv)
+static int stm32_ethconfig(struct stm32_ethmac_s *priv)
 {
   int ret;
 

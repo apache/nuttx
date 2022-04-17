@@ -93,7 +93,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int stm32l4_firewallsetup(FAR struct stm32l4_firewall_t *setup);
+int stm32l4_firewallsetup(struct stm32l4_firewall_t *setup);
 
 #undef EXTERN
 #if defined(__cplusplus)

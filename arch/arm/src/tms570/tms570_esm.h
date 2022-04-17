@@ -64,7 +64,7 @@ int tms570_esm_initialize(void);
  *
  ****************************************************************************/
 
-int tms570_esm_interrupt(int irq, void *context, FAR void *arg);
+int tms570_esm_interrupt(int irq, void *context, void *arg);
 
 #undef EXTERN
 #if defined(__cplusplus)

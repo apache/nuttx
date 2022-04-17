@@ -165,7 +165,7 @@ enum tiva_timer16mode_e
  * tiva_gptm_configure()
  */
 
-typedef FAR void *TIMER_HANDLE;
+typedef void *TIMER_HANDLE;
 
 #ifdef CONFIG_TIVA_TIMER_32BIT
 /* This type describes the 32-bit timer interrupt handler.
@@ -900,7 +900,7 @@ static inline void tiva_gptm0_synchronize(uint32_t sync)
  ****************************************************************************/
 
 #ifdef CONFIG_TIMER
-int tiva_timer_initialize(FAR const char *devpath,
+int tiva_timer_initialize(const char *devpath,
                           struct tiva_gptm32config_s *config);
 #endif
 
