@@ -107,9 +107,9 @@
 
 #  if defined(CONFIG_ARCH_FPU) && (defined(CONFIG_ARMV7M_LAZYFPU) || \
                                    defined(CONFIG_ARMV8M_LAZYFPU))
-#    define arm_savestate(regs)  (regs = (FAR uint32_t *)CURRENT_REGS, arm_savefpu(regs))
+#    define arm_savestate(regs)  (regs = (uint32_t *)CURRENT_REGS, arm_savefpu(regs))
 #  else
-#    define arm_savestate(regs)  (regs = (FAR uint32_t *)CURRENT_REGS)
+#    define arm_savestate(regs)  (regs = (uint32_t *)CURRENT_REGS)
 #  endif
 #  define arm_restorestate(regs) (CURRENT_REGS = regs)
 
@@ -124,9 +124,9 @@
    */
 
 #  if defined(CONFIG_ARCH_FPU)
-#    define arm_savestate(regs)  (regs = (FAR uint32_t *)CURRENT_REGS, arm_savefpu(regs))
+#    define arm_savestate(regs)  (regs = (uint32_t *)CURRENT_REGS, arm_savefpu(regs))
 #  else
-#    define arm_savestate(regs)  (regs = (FAR uint32_t *)CURRENT_REGS)
+#    define arm_savestate(regs)  (regs = (uint32_t *)CURRENT_REGS)
 #  endif
 #  define arm_restorestate(regs) (CURRENT_REGS = regs)
 
@@ -143,9 +143,9 @@
    */
 
 #  if defined(CONFIG_ARCH_FPU)
-#    define arm_savestate(regs)  (regs = (FAR uint32_t *)CURRENT_REGS, arm_savefpu(regs))
+#    define arm_savestate(regs)  (regs = (uint32_t *)CURRENT_REGS, arm_savefpu(regs))
 #  else
-#    define arm_savestate(regs)  (regs = (FAR uint32_t *)CURRENT_REGS)
+#    define arm_savestate(regs)  (regs = (uint32_t *)CURRENT_REGS)
 #  endif
 #  define arm_restorestate(regs) (CURRENT_REGS = regs)
 
@@ -362,15 +362,15 @@ uint32_t *arm_doirq(int irq, uint32_t *regs);
 
 /* Exception Handlers */
 
-int  arm_svcall(int irq, FAR void *context, FAR void *arg);
-int  arm_hardfault(int irq, FAR void *context, FAR void *arg);
+int  arm_svcall(int irq, void *context, void *arg);
+int  arm_hardfault(int irq, void *context, void *arg);
 
 #  if defined(CONFIG_ARCH_ARMV7M) || defined(CONFIG_ARCH_ARMV8M)
 
-int  arm_memfault(int irq, FAR void *context, FAR void *arg);
-int  arm_busfault(int irq, FAR void *context, FAR void *arg);
-int  arm_usagefault(int irq, FAR void *context, FAR void *arg);
-int  arm_securefault(int irq, FAR void *context, FAR void *arg);
+int  arm_memfault(int irq, void *context, void *arg);
+int  arm_busfault(int irq, void *context, void *arg);
+int  arm_usagefault(int irq, void *context, void *arg);
+int  arm_securefault(int irq, void *context, void *arg);
 
 #  endif /* CONFIG_ARCH_CORTEXM3,4,7 */
 
@@ -514,7 +514,7 @@ void arm_usbuninitialize(void);
 
 /* Debug ********************************************************************/
 #ifdef CONFIG_STACK_COLORATION
-void arm_stack_color(FAR void *stackbase, size_t nbytes);
+void arm_stack_color(void *stackbase, size_t nbytes);
 #endif
 
 #undef EXTERN

@@ -86,7 +86,7 @@ static void arm_stackdump(uint32_t sp, uint32_t stack_top)
  * Name: arm_registerdump
  ****************************************************************************/
 
-static void arm_registerdump(FAR volatile uint32_t *regs)
+static void arm_registerdump(volatile uint32_t *regs)
 {
   /* Dump the interrupt registers */
 
@@ -125,7 +125,7 @@ static void arm_registerdump(FAR volatile uint32_t *regs)
  * Name: arm_dump_task
  ****************************************************************************/
 
-static void arm_dump_task(FAR struct tcb_s *tcb, FAR void *arg)
+static void arm_dump_task(struct tcb_s *tcb, void *arg)
 {
 #ifdef CONFIG_STACK_COLORATION
   uint32_t stack_filled = 0;
@@ -208,7 +208,7 @@ static void arm_dump_task(FAR struct tcb_s *tcb, FAR void *arg)
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_BACKTRACE
-static void arm_dump_backtrace(FAR struct tcb_s *tcb, FAR void *arg)
+static void arm_dump_backtrace(struct tcb_s *tcb, void *arg)
 {
   /* Show back trace */
 
@@ -299,7 +299,7 @@ static void arm_showtasks(void)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_USBDUMP
-static int usbtrace_syslog(FAR const char *fmt, ...)
+static int usbtrace_syslog(const char *fmt, ...)
 {
   va_list ap;
 
@@ -311,7 +311,7 @@ static int usbtrace_syslog(FAR const char *fmt, ...)
   return OK;
 }
 
-static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
+static int assert_tracecallback(struct usbtrace_s *trace, void *arg)
 {
   usbtrace_trprintf(usbtrace_syslog, trace->event, trace->value);
   return 0;
@@ -353,7 +353,7 @@ static void arm_dump_stack(const char *tag, uint32_t sp,
 
 static void arm_dumpstate(void)
 {
-  FAR struct tcb_s *rtcb = running_task();
+  struct tcb_s *rtcb = running_task();
   uint32_t sp = up_getsp();
 
   /* Show back trace */
@@ -367,7 +367,7 @@ static void arm_dumpstate(void)
   if (CURRENT_REGS)
     {
       memcpy(rtcb->xcp.regs,
-             (FAR uintptr_t *)CURRENT_REGS, XCPTCONTEXT_SIZE);
+             (uintptr_t *)CURRENT_REGS, XCPTCONTEXT_SIZE);
     }
   else
     {

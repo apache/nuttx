@@ -54,7 +54,7 @@
 
 uintptr_t arm_physpgaddr(uintptr_t vaddr)
 {
-  FAR uint32_t *l2table;
+  uint32_t *l2table;
   uintptr_t paddr;
   uint32_t l1entry;
 #ifndef CONFIG_ARCH_PGPOOL_MAPPING
@@ -84,14 +84,14 @@ uintptr_t arm_physpgaddr(uintptr_t vaddr)
 #ifdef CONFIG_ARCH_PGPOOL_MAPPING
           /* Get the virtual address of the base of level 2 page table */
 
-          l2table = (FAR uint32_t *)arm_pgvaddr(paddr);
+          l2table = (uint32_t *)arm_pgvaddr(paddr);
 #else
           /* Temporarily map the page into the virtual address space */
 
           l1save = mmu_l1_getentry(ARCH_SCRATCH_VBASE);
           mmu_l1_setentry(paddr & ~SECTION_MASK,
                           ARCH_SCRATCH_VBASE, MMU_MEMFLAGS);
-          l2table = (FAR uint32_t *)(ARCH_SCRATCH_VBASE |
+          l2table = (uint32_t *)(ARCH_SCRATCH_VBASE |
                                     (paddr & SECTION_MASK));
 #endif
           if (l2table)
