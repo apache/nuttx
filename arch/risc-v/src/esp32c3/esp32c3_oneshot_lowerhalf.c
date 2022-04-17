@@ -115,7 +115,7 @@ static void esp32c3_oneshot_lh_handler(void *arg)
   struct esp32c3_oneshot_lowerhalf_s *priv =
     (struct esp32c3_oneshot_lowerhalf_s *)arg;
   oneshot_callback_t callback;
-  FAR void *cb_arg;
+  void *cb_arg;
 
   DEBUGASSERT(priv != NULL);
   DEBUGASSERT(priv->callback != NULL);

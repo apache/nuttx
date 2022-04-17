@@ -44,7 +44,7 @@
  *
  ****************************************************************************/
 
-int up_saveusercontext(FAR void *saveregs)
+int up_saveusercontext(void *saveregs)
 {
   return sys_call1(SYS_save_context, (uintptr_t)saveregs);
 }

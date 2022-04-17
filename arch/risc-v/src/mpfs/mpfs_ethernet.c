@@ -468,7 +468,7 @@ static int mpfs_interrupt_0(int irq, void *context, void *arg)
   return OK;
 }
 
-static int mpfs_interrupt_1(int irq, void *context, FAR void *arg)
+static int mpfs_interrupt_1(int irq, void *context, void *arg)
 {
   struct mpfs_ethmac_s *priv = (struct mpfs_ethmac_s *)arg;
   UNUSED(priv);
@@ -479,7 +479,7 @@ static int mpfs_interrupt_1(int irq, void *context, FAR void *arg)
   return 0;
 }
 
-static int mpfs_interrupt_2(int irq, void *context, FAR void *arg)
+static int mpfs_interrupt_2(int irq, void *context, void *arg)
 {
   struct mpfs_ethmac_s *priv = (struct mpfs_ethmac_s *)arg;
   UNUSED(priv);
@@ -490,7 +490,7 @@ static int mpfs_interrupt_2(int irq, void *context, FAR void *arg)
   return 0;
 }
 
-static int mpfs_interrupt_3(int irq, void *context, FAR void *arg)
+static int mpfs_interrupt_3(int irq, void *context, void *arg)
 {
   struct mpfs_ethmac_s *priv = (struct mpfs_ethmac_s *)arg;
   UNUSED(priv);
