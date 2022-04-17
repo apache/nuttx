@@ -257,7 +257,7 @@ void weak_function stm32_spidev_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32L4_SPI1
-void stm32_spi1select(FAR struct spi_dev_s *dev,
+void stm32_spi1select(struct spi_dev_s *dev,
                       uint32_t devid, bool selected)
 {
   uint32_t index = SPIDEVID_INDEX(devid);
@@ -271,14 +271,14 @@ void stm32_spi1select(FAR struct spi_dev_s *dev,
     }
 }
 
-uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t stm32_spi1status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_STM32L4_SPI2
-void stm32_spi2select(FAR struct spi_dev_s *dev,
+void stm32_spi2select(struct spi_dev_s *dev,
                       uint32_t devid, bool selected)
 {
   uint32_t index = SPIDEVID_INDEX(devid);
@@ -292,14 +292,14 @@ void stm32_spi2select(FAR struct spi_dev_s *dev,
     }
 }
 
-uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t stm32_spi2status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_STM32L4_SPI3
-void stm32_spi3select(FAR struct spi_dev_s *dev,
+void stm32_spi3select(struct spi_dev_s *dev,
                       uint32_t devid, bool selected)
 {
   uint32_t index = SPIDEVID_INDEX(devid);
@@ -313,7 +313,7 @@ void stm32_spi3select(FAR struct spi_dev_s *dev,
     }
 }
 
-uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t stm32_spi3status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
@@ -344,21 +344,21 @@ uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
 
 #ifdef CONFIG_SPI_CMDDATA
 #ifdef CONFIG_STM32L4_SPI1
-int stm32_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int stm32_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
 }
 #endif
 
 #ifdef CONFIG_STM32L4_SPI2
-int stm32_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int stm32_spi2cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
 }
 #endif
 
 #ifdef CONFIG_STM32L4_SPI3
-int stm32_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int stm32_spi3cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
 }

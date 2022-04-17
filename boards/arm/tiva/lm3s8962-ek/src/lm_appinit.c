@@ -114,7 +114,7 @@
 int board_app_initialize(uintptr_t arg)
 {
 #ifdef NSH_HAVEMMCSD
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
   int ret;
 
   /* Get the SPI port */

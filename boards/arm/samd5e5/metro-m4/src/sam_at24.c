@@ -54,11 +54,11 @@
  *
  ****************************************************************************/
 
-extern FAR struct i2c_master_s *g_i2c5_dev;
+extern struct i2c_master_s *g_i2c5_dev;
 
 int sam_at24_automount(int minor)
 {
-  FAR struct mtd_dev_s *mtd;
+  struct mtd_dev_s *mtd;
   static bool initialized = false;
   int ret;
 

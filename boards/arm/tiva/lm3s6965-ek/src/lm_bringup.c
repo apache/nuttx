@@ -94,7 +94,7 @@ int lm_bringup(void)
   int ret = 0;
 
 #ifdef NSH_HAVEMMCSD
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
 
   /* Get the SPI port */
 

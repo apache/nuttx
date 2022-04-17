@@ -104,7 +104,7 @@ static struct i2c_master_s *g_i2c3;
 int board_app_initialize(uintptr_t arg)
 {
 #ifdef HAVE_RTC_DRIVER
-  FAR struct rtc_lowerhalf_s *rtclower;
+  struct rtc_lowerhalf_s *rtclower;
 #endif
   int ret = OK;
 

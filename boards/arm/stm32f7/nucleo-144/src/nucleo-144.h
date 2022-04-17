@@ -285,7 +285,7 @@ int stm32_bbsram_int(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_QENCODER
-int stm32f7_qencoder_initialize(FAR const char *devpath, int timer);
+int stm32f7_qencoder_initialize(const char *devpath, int timer);
 #endif
 
 #endif /* __ASSEMBLY__ */

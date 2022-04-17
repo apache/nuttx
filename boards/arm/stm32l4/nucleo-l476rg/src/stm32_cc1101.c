@@ -65,7 +65,7 @@ static void cc1101_wait(struct cc1101_dev_s *dev, uint32_t pin)
  *
  ****************************************************************************/
 
-static void cc1101_irq(FAR struct cc1101_dev_s *dev, bool enable)
+static void cc1101_irq(struct cc1101_dev_s *dev, bool enable)
 {
   if (enable)
     {
@@ -84,7 +84,7 @@ static void cc1101_irq(FAR struct cc1101_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static void cc1101_pwr(FAR struct cc1101_dev_s *dev, bool enable)
+static void cc1101_pwr(struct cc1101_dev_s *dev, bool enable)
 {
 }
 
@@ -102,8 +102,8 @@ static void cc1101_pwr(FAR struct cc1101_dev_s *dev, bool enable)
 
 int stm32l4_cc1101_initialize(void)
 {
-  FAR struct spi_dev_s *spi    = NULL;
-  FAR struct cc1101_dev_s *dev = NULL;
+  struct spi_dev_s *spi    = NULL;
+  struct cc1101_dev_s *dev = NULL;
 
   spi = stm32l4_spibus_initialize(CONFIG_CC1101_SPIDEV);
   if (spi == NULL)

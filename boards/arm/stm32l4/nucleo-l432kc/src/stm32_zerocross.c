@@ -41,11 +41,11 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static void zcross_enable(FAR const struct zc_lowerhalf_s *lower,
-                          zc_interrupt_t handler, FAR void *arg);
+static void zcross_enable(const struct zc_lowerhalf_s *lower,
+                          zc_interrupt_t handler, void *arg);
 
 static void zcross_disable(void);
-static int  zcross_interrupt(int irq, FAR void *context, FAR void *arg);
+static int  zcross_interrupt(int irq, void *context, void *arg);
 
 /****************************************************************************
  * Private Data
@@ -54,7 +54,7 @@ static int  zcross_interrupt(int irq, FAR void *context, FAR void *arg);
 /* Current interrupt handler and argument */
 
 static zc_interrupt_t g_zcrosshandler;
-static FAR void *g_zcrossarg;
+static void *g_zcrossarg;
 
 /* This is the zero cross lower half driver interface */
 
@@ -76,8 +76,8 @@ static struct zc_lowerhalf_s g_zcrosslower =
  *
  ****************************************************************************/
 
-static void zcross_enable(FAR const struct zc_lowerhalf_s *lower,
-                          zc_interrupt_t handler, FAR void *arg)
+static void zcross_enable(const struct zc_lowerhalf_s *lower,
+                          zc_interrupt_t handler, void *arg)
 {
   irqstate_t flags;
   bool rising = false;
@@ -136,7 +136,7 @@ static void zcross_disable(void)
  *
  ****************************************************************************/
 
-static int zcross_interrupt(int irq, FAR void *context, FAR void *arg)
+static int zcross_interrupt(int irq, void *context, void *arg)
 {
   DEBUGASSERT(g_zcrosshandler != NULL);
   if (g_zcrosshandler)

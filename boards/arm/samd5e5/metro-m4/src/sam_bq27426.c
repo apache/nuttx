@@ -61,11 +61,11 @@
  *
  ****************************************************************************/
 
-int sam_bq27426_initialize(FAR const char *devname)
+int sam_bq27426_initialize(const char *devname)
 {
-    FAR struct battery_gauge_dev_s *bq27426_m4;
+    struct battery_gauge_dev_s *bq27426_m4;
 
-    bq27426_m4 = (FAR struct battery_gauge_dev_s *)bq27426_initialize(
+    bq27426_m4 = (struct battery_gauge_dev_s *)bq27426_initialize(
                                                    g_i2c5_dev,
                                                    BQ27426_I2C_ADDRESS,
                                                    100000);

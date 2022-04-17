@@ -150,7 +150,7 @@ void sam_spi0select(uint32_t devid, bool selected)
  ****************************************************************************/
 
 #ifdef CONFIG_SAM34_SPI0
-uint8_t sam_spi0status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t sam_spi0status(struct spi_dev_s *dev, uint32_t devid)
 {
   return SPI_STATUS_PRESENT;
 }
@@ -158,7 +158,7 @@ uint8_t sam_spi0status(FAR struct spi_dev_s *dev, uint32_t devid)
 
 int sam_sdinitialize(int port, int minor)
 {
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
   int ret;
 
   /* Get the SPI driver instance for the SD chip select */

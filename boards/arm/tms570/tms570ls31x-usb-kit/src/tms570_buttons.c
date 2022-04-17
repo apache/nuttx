@@ -167,7 +167,7 @@ uint32_t board_buttons(void)
  *
  ****************************************************************************/
 
-int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+int board_button_irq(int id, xcpt_t irqhandler, void *arg)
 {
 #ifdef HAVE_IRQBUTTONS
   if (id == BUTTON_GIOA7)

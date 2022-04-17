@@ -53,8 +53,8 @@
 
 #ifdef CONFIG_FS_SMARTFS
   int ret;
-  FAR struct mtd_dev_s *mtd;
-  FAR struct mtd_geometry_s geo;
+  struct mtd_dev_s *mtd;
+  struct mtd_geometry_s geo;
 #endif
 
 #if defined(CONFIG_MTD_PARTITION_NAMES)
@@ -100,7 +100,7 @@ int sam_smartfs_initialize(void)
       int erasesize;
       const char *partstring = "256";
       const char *ptr;
-      FAR struct mtd_dev_s *mtd_part;
+      struct mtd_dev_s *mtd_part;
       char  partref[16];
 
       /* Now create a partition on the FLASH device */

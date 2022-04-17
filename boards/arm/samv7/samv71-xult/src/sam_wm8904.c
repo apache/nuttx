@@ -65,7 +65,7 @@ struct samv71xult_mwinfo_s
   /* Extensions for the samv71xult board */
 
   wm8904_handler_t handler;
-  FAR void *arg;
+  void *arg;
 };
 
 /****************************************************************************
@@ -82,9 +82,9 @@ struct samv71xult_mwinfo_s
  *   enable  - Enable or disable the GPIO interrupt
  */
 
-static int  wm8904_attach(FAR const struct wm8904_lower_s *lower,
-                          wm8904_handler_t isr, FAR void *arg);
-static bool wm8904_enable(FAR const struct wm8904_lower_s *lower,
+static int  wm8904_attach(const struct wm8904_lower_s *lower,
+                          wm8904_handler_t isr, void *arg);
+static bool wm8904_enable(const struct wm8904_lower_s *lower,
                           bool enable);
 
 /****************************************************************************
@@ -133,8 +133,8 @@ static struct samv71xult_mwinfo_s g_wm8904info =
  *
  ****************************************************************************/
 
-static int wm8904_attach(FAR const struct wm8904_lower_s *lower,
-                         wm8904_handler_t isr,  FAR void *arg)
+static int wm8904_attach(const struct wm8904_lower_s *lower,
+                         wm8904_handler_t isr,  void *arg)
 {
   if (isr)
     {
@@ -158,7 +158,7 @@ static int wm8904_attach(FAR const struct wm8904_lower_s *lower,
   return OK;
 }
 
-static bool wm8904_enable(FAR const struct wm8904_lower_s *lower,
+static bool wm8904_enable(const struct wm8904_lower_s *lower,
                           bool enable)
 {
   static bool enabled;
@@ -191,7 +191,7 @@ static bool wm8904_enable(FAR const struct wm8904_lower_s *lower,
   return ret;
 }
 
-static int wm8904_interrupt(int irq, FAR void *context, FAR void *arg)
+static int wm8904_interrupt(int irq, void *context, void *arg)
 {
   /* Just forward the interrupt to the WM8904 driver */
 
@@ -232,10 +232,10 @@ static int wm8904_interrupt(int irq, FAR void *context, FAR void *arg)
 
 int sam_wm8904_initialize(int minor)
 {
-  FAR struct audio_lowerhalf_s *wm8904;
-  FAR struct audio_lowerhalf_s *pcm;
-  FAR struct i2c_master_s *i2c;
-  FAR struct i2s_dev_s *i2s;
+  struct audio_lowerhalf_s *wm8904;
+  struct audio_lowerhalf_s *pcm;
+  struct i2c_master_s *i2c;
+  struct i2s_dev_s *i2s;
   static bool initialized = false;
   char devname[12];
   int ret;

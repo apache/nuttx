@@ -144,7 +144,7 @@ int at25_main(int argc, char *argv)
    * which we can buffer the binary data.
    */
 
-  lib_memsostream(&memoutstream, (FAR char *)SAM_DDRCS_VSECTION,
+  lib_memsostream(&memoutstream, (char *)SAM_DDRCS_VSECTION,
                   CONFIG_SAMA5D4EK_AT25_PROGSIZE);
 
   /* We are ready to load the Intel HEX stream into DRAM.

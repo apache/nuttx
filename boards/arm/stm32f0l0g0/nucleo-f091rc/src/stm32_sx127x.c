@@ -57,7 +57,7 @@ static void sx127x_chip_reset(void);
 static int sx127x_opmode_change(int opmode);
 static int sx127x_freq_select(uint32_t freq);
 static int sx127x_pa_select(bool enable);
-static int sx127x_irq0_attach(xcpt_t isr, FAR void *arg);
+static int sx127x_irq0_attach(xcpt_t isr, void *arg);
 
 /****************************************************************************
  * Private Data
@@ -81,7 +81,7 @@ struct sx127x_lower_s lower =
  * Name: sx127x_irq0_attach
  ****************************************************************************/
 
-static int sx127x_irq0_attach(xcpt_t isr, FAR void *arg)
+static int sx127x_irq0_attach(xcpt_t isr, void *arg)
 {
   wlinfo("Attach DIO0 IRQ\n");
 
@@ -177,7 +177,7 @@ static int sx127x_pa_select(bool enable)
 
 int stm32_lpwaninitialize(void)
 {
-  FAR struct spi_dev_s *spidev;
+  struct spi_dev_s *spidev;
   int ret = OK;
 
   wlinfo("Register the sx127x module\n");

@@ -64,8 +64,8 @@ static const int AT45DB_SPI_PORT = 1; /* AT45DB is connected to SPI1 port */
 
 int stm32_at45dbinitialize(int minor)
 {
-  FAR struct spi_dev_s *spi;
-  FAR struct mtd_dev_s *mtd;
+  struct spi_dev_s *spi;
+  struct mtd_dev_s *mtd;
   static bool initialized = false;
   int ret;
 

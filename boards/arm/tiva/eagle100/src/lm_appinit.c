@@ -107,7 +107,7 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
 #if defined (CONFIG_MMCSD) && defined (CONFIG_MMCSD_SPI)
   int ret;
 #endif

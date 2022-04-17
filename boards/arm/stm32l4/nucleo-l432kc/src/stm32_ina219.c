@@ -73,9 +73,9 @@
  *
  ****************************************************************************/
 
-int stm32_ina219initialize(FAR const char *devpath)
+int stm32_ina219initialize(const char *devpath)
 {
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
   int ret;
 
   sninfo("Initializing INA219\n");

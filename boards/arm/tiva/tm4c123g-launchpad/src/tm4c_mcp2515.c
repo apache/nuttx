@@ -56,9 +56,9 @@ struct tiva_mcp2515config_s
 
   /* Additional private definitions only known to this driver */
 
-  FAR struct mcp2515_can_s *handle; /* The MCP2515 driver handle */
-  mcp2515_handler_t handler;        /* The MCP2515 interrupt handler */
-  FAR void *arg;                    /* Argument to pass to the interrupt handler */
+  struct mcp2515_can_s *handle; /* The MCP2515 driver handle */
+  mcp2515_handler_t handler;    /* The MCP2515 interrupt handler */
+  void *arg;                    /* Argument to pass to the interrupt handler */
 };
 
 /****************************************************************************
@@ -72,8 +72,8 @@ struct tiva_mcp2515config_s
  *   attach  - Attach the MCP2515 interrupt handler to the GPIO interrupt
  */
 
-static int  mcp2515_attach(FAR struct mcp2515_config_s *state,
-                           mcp2515_handler_t handler, FAR void *arg);
+static int  mcp2515_attach(struct mcp2515_config_s *state,
+                           mcp2515_handler_t handler, void *arg);
 
 /****************************************************************************
  * Private Data
@@ -112,10 +112,10 @@ static struct tiva_mcp2515config_s g_mcp2515config =
 
 /* This is the MCP2515 Interrupt handler */
 
-int mcp2515_interrupt(int irq, FAR void *context, FAR void *arg)
+int mcp2515_interrupt(int irq, void *context, void *arg)
 {
-  FAR struct tiva_mcp2515config_s *priv =
-             (FAR struct tiva_mcp2515config_s *)arg;
+  struct tiva_mcp2515config_s *priv =
+             (struct tiva_mcp2515config_s *)arg;
 
   DEBUGASSERT(priv != NULL);
 
@@ -131,11 +131,11 @@ int mcp2515_interrupt(int irq, FAR void *context, FAR void *arg)
   return OK;
 }
 
-static int mcp2515_attach(FAR struct mcp2515_config_s *state,
-                          mcp2515_handler_t handler, FAR void *arg)
+static int mcp2515_attach(struct mcp2515_config_s *state,
+                          mcp2515_handler_t handler, void *arg)
 {
-  FAR struct tiva_mcp2515config_s *priv =
-             (FAR struct tiva_mcp2515config_s *)state;
+  struct tiva_mcp2515config_s *priv =
+             (struct tiva_mcp2515config_s *)state;
   irqstate_t flags;
 
   caninfo("Saving handler %p\n", handler);
@@ -172,11 +172,11 @@ static int mcp2515_attach(FAR struct mcp2515_config_s *state,
  *
  ****************************************************************************/
 
-int tiva_mcp2515initialize(FAR const char *devpath)
+int tiva_mcp2515initialize(const char *devpath)
 {
-  FAR struct spi_dev_s     *spi;
-  FAR struct can_dev_s     *can;
-  FAR struct mcp2515_can_s *mcp2515;
+  struct spi_dev_s     *spi;
+  struct can_dev_s     *can;
+  struct mcp2515_can_s *mcp2515;
   int ret;
 
   /* Check if we are already initialized */

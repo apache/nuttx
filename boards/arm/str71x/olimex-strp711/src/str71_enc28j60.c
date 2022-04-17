@@ -138,10 +138,10 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  up_attach(FAR const struct enc_lower_s *lower, xcpt_t handler,
-                      FAR void *arg);
-static void up_enable(FAR const struct enc_lower_s *lower);
-static void up_disable(FAR const struct enc_lower_s *lower);
+static int  up_attach(const struct enc_lower_s *lower, xcpt_t handler,
+                      void *arg);
+static void up_enable(const struct enc_lower_s *lower);
+static void up_disable(const struct enc_lower_s *lower);
 
 /****************************************************************************
  * Private Data
@@ -167,18 +167,18 @@ static const struct enc_lower_s g_enclower =
  * Name: struct enc_lower_s methods
  ****************************************************************************/
 
-static int up_attach(FAR const struct enc_lower_s *lower, xcpt_t handler,
-                     FAR void *arg)
+static int up_attach(const struct enc_lower_s *lower, xcpt_t handler,
+                     void *arg)
 {
   return irq_attach(ENC28J60_IRQ, handler, arg);
 }
 
-static void up_enable(FAR const struct enc_lower_s *lower)
+static void up_enable(const struct enc_lower_s *lower)
 {
   up_enable_irq(ENC28J60_IRQ);
 }
 
-static void up_disable(FAR const struct enc_lower_s *lower)
+static void up_disable(const struct enc_lower_s *lower)
 {
   up_disable_irq(ENC28J60_IRQ);
 }
@@ -193,7 +193,7 @@ static void up_disable(FAR const struct enc_lower_s *lower)
 
 void arm_netinitialize(void)
 {
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
   uint16_t reg16;
   int ret;
 

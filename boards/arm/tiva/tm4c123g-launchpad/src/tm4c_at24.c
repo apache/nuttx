@@ -72,8 +72,8 @@
 
 int tm4c_at24_automount(int minor)
 {
-  FAR struct i2c_master_s *i2c;
-  FAR struct mtd_dev_s *mtd;
+  struct i2c_master_s *i2c;
+  struct mtd_dev_s *mtd;
   static bool initialized = false;
   int ret;
 
