@@ -122,18 +122,11 @@ config ARMV7M_DTCM
 
 choice
 	prompt "Toolchain Selection"
-	default ARMV7M_TOOLCHAIN_GNU_EABIW if TOOLCHAIN_WINDOWS
-	default ARMV7M_TOOLCHAIN_GNU_EABIL if !TOOLCHAIN_WINDOWS
+	default ARMV7M_TOOLCHAIN_GNU_EABI
 
-config ARMV7M_TOOLCHAIN_IARW
-	bool "IAR for Windows"
-	depends on TOOLCHAIN_WINDOWS
+config ARMV7M_TOOLCHAIN_IAR
+	bool "IAR ANSI C/C++ toolchain"
 	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
-	select ARCH_TOOLCHAIN_IAR
-
-config ARMV7M_TOOLCHAIN_IARL
-	bool "IAR for Linux"
-	depends on HOST_LINUX
 	select ARCH_TOOLCHAIN_IAR
 
 config ARMV7M_TOOLCHAIN_BUILDROOT
@@ -141,33 +134,17 @@ config ARMV7M_TOOLCHAIN_BUILDROOT
 	depends on !WINDOWS_NATIVE
 	select ARCH_TOOLCHAIN_GNU
 
-config ARMV7M_TOOLCHAIN_GNU_EABIL
-	bool "Generic GNU EABI toolchain under Linux (or other POSIX environment)"
-	depends on !WINDOWS_NATIVE
-	select ARCH_TOOLCHAIN_GNU
-	---help---
-		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
-		configured for arm-none-eabi.
-
-config ARMV7M_TOOLCHAIN_GNU_EABIW
-	bool "Generic GNU EABI toolchain under Windows"
-	depends on TOOLCHAIN_WINDOWS
-	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
-	select ARCH_TOOLCHAIN_GNU
-
-config ARMV7M_TOOLCHAIN_CLANGL
-	bool "Generic Clang toolchain under Linux (or other POSIX environment)"
-	depends on !WINDOWS_NATIVE
-	select ARCH_TOOLCHAIN_GNU
-
-config ARMV7M_TOOLCHAIN_CLANGW
-	bool "Generic Clang toolchain under Windows"
-	depends on TOOLCHAIN_WINDOWS
+config ARMV7M_TOOLCHAIN_GNU_EABI
+	bool "Generic GNU EABI toolchain"
 	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
 	select ARCH_TOOLCHAIN_GNU
 	---help---
 		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
 		configured for arm-none-eabi.
+
+config ARMV7M_TOOLCHAIN_CLANG
+	bool "Generic Clang toolchain"
+	select ARCH_TOOLCHAIN_GNU
 
 endchoice
 

@@ -38,7 +38,7 @@ endif
 ARCHCFLAGS += -fno-common
 ARCHCXXFLAGS += -fno-common
 
-ifeq ($(CONFIG_ARMV7M_TOOLCHAIN_CLANGL),y)
+ifeq ($(CONFIG_ARMV7M_TOOLCHAIN_CLANG),y)
   ARCHCFLAGS += -nostdlib -ffreestanding
   ARCHCXXFLAGS += -nostdlib -ffreestanding
 endif

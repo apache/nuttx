@@ -491,7 +491,7 @@ Where <subdir> is one of the following:
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
     Configuration enables both the serial and telnet NSH interfaces.
 
-    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y       : GNU EABI toolchain for Windows
+    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y        : GNU EABI toolchain for Windows
     CONFIG_NSH_DHCPC=n                        : DHCP is disabled
     CONFIG_NSH_IPADDR=0x0a000002              : Target IP address 10.0.0.2
     CONFIG_NSH_DRIPADDR=0x0a000001            : Host IP address 10.0.0.1
