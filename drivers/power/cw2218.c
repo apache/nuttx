@@ -53,6 +53,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+#define CW2218_REG_TEMPMAX_DEFAULT_VALUE  0xAA /* Maximum temperature threshold register default value */
+#define CW2218_REG_TEMPMIN_DEFAULT_VALUE  0x50 /* Minimum temperature threshold register default value */
+#define CW2218_TEMP_ERROR_DEFAULT_VALUE   80   /* default temperature return when error */
 
 /****************************************************************************
  * Private
@@ -346,7 +349,7 @@ static inline int cw2218_getsoc(FAR struct cw2218_dev_s *priv,  b16_t *soc,
       ui_soc = ((buffer[0] * CW2218_SOC_MAGIC_BASE + buffer[1]) *
         CW2218_SOC_MAGIC_100) / (ui_100 * CW2218_SOC_MAGIC_BASE);
 
-      if (ui_soc >= CW2218_SOC_MAGIC_100)
+      if (ui_soc > CW2218_SOC_MAGIC_100)
         {
           baterr("CW2018 : UI_SOC = %d larger 100!\n", ui_soc);
           ui_soc = CW2218_SOC_MAGIC_100;
@@ -456,16 +459,22 @@ static inline int cw2218_getcurrent(FAR struct cw2218_dev_s *priv,
 
 static inline int cw2218_gettemp(FAR struct cw2218_dev_s *priv, b8_t *temp)
 {
-  uint8_t regval;
+  uint8_t regval = 0;
   b8_t cw_temp;
-  int ret;
+  int ret = -1;
 
   ret = cw2218_getreg8(priv, CW2218_COMMAND_TEMP, &regval, 1);
-  if (ret == OK)
+  if ((ret == OK) && \
+  (regval >= CW2218_REG_TEMPMIN_DEFAULT_VALUE) && \
+  (regval <= CW2218_REG_TEMPMAX_DEFAULT_VALUE))
     {
       cw_temp = (int)regval * CW2218_TEMP_MAGIC_PART1 /
         CW2218_TEMP_MAGIC_PART2 - CW2218_TEMP_MAGIC_PART3;
       *temp = cw_temp;
+    }
+  else /* error occurred */
+    {
+      *temp = CW2218_TEMP_ERROR_DEFAULT_VALUE;
     }
 
   return ret;
