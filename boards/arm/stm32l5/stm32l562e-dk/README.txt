@@ -235,7 +235,7 @@ Configurations
        CONFIG_HOST_LINUX=y                 : Linux environment
 
      System Type -> Toolchain:
-       CONFIG_ARMV8M_TOOLCHAIN_GNU_EABIL=y : GNU ARM EABI toolchain
+       CONFIG_ARMV8M_TOOLCHAIN_GNU_EABI=y : GNU ARM EABI toolchain
 
   Configuration sub-directories
   -----------------------------
