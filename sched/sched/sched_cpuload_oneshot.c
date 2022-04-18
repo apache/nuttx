@@ -31,6 +31,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/lib/xorshift128.h>
+#include <nuttx/power/pm.h>
 #include <nuttx/timers/oneshot.h>
 
 #include "clock/clock.h"
@@ -97,6 +98,9 @@ struct sched_oneshot_s
   struct xorshift128_state_s prng;
   int32_t maxdelay;
   int32_t error;
+#endif
+#ifdef CONFIG_PM
+  struct pm_callback_s pm_cb;
 #endif
 };
 
@@ -225,6 +229,24 @@ static void nxsched_oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
   nxsched_oneshot_start();
 }
 
+#ifdef CONFIG_PM
+static void nxsched_oneshot_pmnotify(struct pm_callback_s *cb, int domain,
+                                     enum pm_state_e pmstate)
+{
+  if (domain == PM_IDLE_DOMAIN)
+    {
+      if (pmstate == PM_RESTORE)
+        {
+          nxsched_oneshot_start();
+        }
+      else
+        {
+          ONESHOT_CANCEL(g_sched_oneshot.oneshot, NULL);
+        }
+    }
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -279,6 +301,13 @@ void nxsched_oneshot_extclk(FAR struct oneshot_lowerhalf_s *lower)
   g_sched_oneshot.prng.x = 101;
   g_sched_oneshot.prng.y = g_sched_oneshot.prng.w << 17;
   g_sched_oneshot.prng.z = g_sched_oneshot.prng.x << 25;
+#endif
+
+#ifdef CONFIG_PM
+  /* Register pm notify */
+
+  g_sched_oneshot.pm_cb.notify = nxsched_oneshot_pmnotify;
+  pm_register(&g_sched_oneshot.pm_cb);
 #endif
 
   /* Then start the oneshot */
