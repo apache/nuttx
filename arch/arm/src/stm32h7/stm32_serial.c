@@ -477,7 +477,6 @@
 #endif
 #if defined(CONFIG_PM)
 #  warning stm32h7 serial power managemnt was taken from stm32f7 and is untested!
-#  define PM_IDLE_DOMAIN             0 /* Revisit */
 #endif
 
 /* Since RX DMA or TX DMA or both may be enabled for a given U[S]ART.

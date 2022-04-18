@@ -67,10 +67,6 @@
 #  define CONFIG_TIVA_PM_SERIAL_ACTIVITY 10
 #endif
 
-#if defined(CONFIG_PM)
-#  define PM_IDLE_DOMAIN 0 /* Revisit */
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/

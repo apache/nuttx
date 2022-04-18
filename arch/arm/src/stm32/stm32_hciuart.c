@@ -215,10 +215,6 @@
 #  define CONFIG_STM32_PM_SERIAL_ACTIVITY 10
 #endif
 
-#if defined(CONFIG_PM)
-#  define PM_IDLE_DOMAIN 0 /* Revisit */
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
