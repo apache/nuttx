@@ -258,7 +258,7 @@ Configurations
        CONFIG_HOST_CYGWIN=y    : Using Cygwin or other POSIX environment
 
      System Type -> Toolchain:
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : General GCC EABI toolchain under windows
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y  : General GCC EABI toolchain under windows
 
      Library Routines ->
        CONFIG_ARCH_SIZET_LONG=n            : size_t is an unsigned int, not long
