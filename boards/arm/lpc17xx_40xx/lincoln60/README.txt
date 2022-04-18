@@ -348,7 +348,7 @@ Where <subdir> is one of the following:
 
        CONFIG_HOST_WINDOWS=y                   : Windows
        CONFIG_HOST_WINDOWS_CYGWIN=y            : under Cygwin
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y     : GNU EABI toolchain for Windows
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Windows
 
   STATUS:
     2015-06-06:  The BINFS CGI files are seems to be running, but the

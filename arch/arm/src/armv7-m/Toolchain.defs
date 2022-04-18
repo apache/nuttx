@@ -34,25 +34,13 @@ ifeq ($(filter y, \
 endif
 
 ifeq ($(filter y, \
-      $(CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL) \
+      $(CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI) \
     ),y)
   CONFIG_ARMV7M_TOOLCHAIN ?= GNU_EABI
 endif
 
 ifeq ($(filter y, \
-      $(CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW) \
-    ),y)
-  CONFIG_ARMV7M_TOOLCHAIN ?= GNU_EABI
-endif
-
-ifeq ($(filter y, \
-      $(CONFIG_ARMV7M_TOOLCHAIN_CLANGL) \
-    ),y)
-  CONFIG_ARMV7M_TOOLCHAIN ?= CLANG
-endif
-
-ifeq ($(filter y, \
-      $(CONFIG_ARMV7M_TOOLCHAIN_CLANGW) \
+      $(CONFIG_ARMV7M_TOOLCHAIN_CLANG) \
     ),y)
   CONFIG_ARMV7M_TOOLCHAIN ?= CLANG
 endif
