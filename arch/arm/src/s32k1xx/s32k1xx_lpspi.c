@@ -110,12 +110,6 @@
 #  define CONFIG_S32K1XX_PM_SPI_ACTIVITY 10
 #endif
 
-#if defined(CONFIG_PM)
-#ifndef PM_IDLE_DOMAIN
-#  define PM_IDLE_DOMAIN      0 /* Revisit */
-#endif
-#endif
-
 #if defined(CONFIG_PM_SPI0_STANDBY) || defined(CONFIG_PM_SPI0_SLEEP)
 #   define CONFIG_PM_SPI0
 #endif

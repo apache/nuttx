@@ -375,9 +375,6 @@
 #if defined(CONFIG_PM) && !defined(CONFIG_STM32_PM_SERIAL_ACTIVITY)
 #  define CONFIG_STM32_PM_SERIAL_ACTIVITY 10
 #endif
-#if defined(CONFIG_PM)
-#  define PM_IDLE_DOMAIN             0 /* Revisit */
-#endif
 
 /* Since RX DMA or TX DMA or both may be enabled for a given U[S]ART.
  * We need runtime detection in up_dma_setup and up_dma_shutdown
