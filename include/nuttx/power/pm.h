@@ -82,6 +82,8 @@
 #  error CONFIG_PM_NDOMAINS invalid
 #endif
 
+#define PM_IDLE_DOMAIN 0
+
 /* CONFIG_IDLE_CUSTOM. Some architectures support this definition.  This,
  * if defined, will allow you replace the default IDLE loop with your
  * own, custom idle loop to support board-specific IDLE time power management

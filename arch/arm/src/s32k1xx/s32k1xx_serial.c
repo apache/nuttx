@@ -131,12 +131,6 @@
 #  define CONFIG_S32K1XX_PM_SERIAL_ACTIVITY 10
 #endif
 
-#if defined(CONFIG_PM)
-#ifndef PM_IDLE_DOMAIN
-#  define PM_IDLE_DOMAIN      0 /* Revisit */
-#endif
-#endif
-
 #if defined(CONFIG_PM_SERIAL0_STANDBY) || defined(CONFIG_PM_SERIAL0_SLEEP)
 #   define CONFIG_PM_SERIAL0
 #endif
