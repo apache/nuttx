@@ -1,18 +1,8 @@
 /****************************************************************************
  * drivers/mtd/at24xx.c
- * Driver for I2C-based at24cxx EEPROM
- *   (at24c32,at24c64,at24c128,at24c256,at24c512)
  *
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
- *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
- *
  *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Derived from drivers/mtd/m25px.c
- *
- *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
