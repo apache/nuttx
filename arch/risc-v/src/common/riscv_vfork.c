@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/rv32im/riscv_vfork.c
+ * arch/risc-v/src/common/riscv_vfork.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -35,6 +35,8 @@
 #include <arch/irq.h>
 
 #include "riscv_vfork.h"
+#include "riscv_internal.h"
+
 #include "sched/sched.h"
 
 /****************************************************************************
@@ -95,40 +97,39 @@
 
 #ifdef CONFIG_ARCH_HAVE_VFORK
 
-#error This part of the port is not done yet!!
-
 pid_t up_vfork(const struct vfork_s *context)
 {
   struct tcb_s *parent = this_task();
   struct task_tcb_s *child;
-  uint32_t newsp;
+  uintptr_t newsp;
 #ifdef CONFIG_RISCV_FRAMEPOINTER
-  uint32_t newfp;
+  uintptr_t newfp;
 #endif
-  uint32_t newtop;
-  uint32_t stacktop;
-  uint32_t stackutil;
+  uintptr_t newtop;
+  uintptr_t stacktop;
+  uintptr_t stackutil;
 
-  sinfo("s0:%08x s1:%08x s2:%08x s3:%08x s4:%08x\n",
+  sinfo("s0:%" PRIxREG " s1:%" PRIxREG " s2:%" PRIxREG " s3:%" PRIxREG ""
+        " s4:%" PRIxREG "\n",
         context->s0, context->s1, context->s2, context->s3, context->s4);
 #ifdef CONFIG_RISCV_FRAMEPOINTER
-  sinfo("s5:%08x s6:%08x s7:%08x\n",
+  sinfo("s5:%" PRIxREG " s6:%" PRIxREG " s7:%" PRIxREG "\n",
         context->s5, context->s6, context->s7);
 #ifdef RISCV_SAVE_GP
-  sinfo("fp:%08x sp:%08x ra:%08x gp:%08x\n",
+  sinfo("fp:%" PRIxREG " sp:%" PRIxREG " ra:%" PRIxREG " gp:%" PRIxREG "\n",
         context->fp, context->sp, context->ra, context->gp);
 #else
-  sinfo("fp:%08x sp:%08x ra:%08x\n",
+  sinfo("fp:%" PRIxREG " sp:%" PRIxREG " ra:%" PRIxREG "\n",
         context->fp context->sp, context->ra);
 #endif
 #else
-  sinfo("s5:%08x s6:%08x s7:%08x s8:%08x\n",
+  sinfo("s5:%" PRIxREG " s6:%" PRIxREG " s7:%" PRIxREG " s8:%" PRIxREG "\n",
         context->s5, context->s6, context->s7, context->s8);
 #ifdef RISCV_SAVE_GP
-  sinfo("sp:%08x ra:%08x gp:%08x\n",
+  sinfo("sp:%" PRIxREG " ra:%" PRIxREG " gp:%" PRIxREG "\n",
         context->sp, context->ra, context->gp);
 #else
-  sinfo("sp:%08x ra:%08x\n",
+  sinfo("sp:%" PRIxREG " ra:%" PRIxREG "\n",
         context->sp, context->ra);
 #endif
 #endif
@@ -150,12 +151,11 @@ pid_t up_vfork(const struct vfork_s *context)
    * stack usage should be the difference between those two.
    */
 
-  stacktop = (uint32_t)parent->stack_base_ptr +
-                       parent->adj_stack_size;
+  stacktop = (uintptr_t)parent->stack_base_ptr + parent->adj_stack_size;
   DEBUGASSERT(stacktop > context->sp);
   stackutil = stacktop - context->sp;
 
-  sinfo("Parent: stackutil:%" PRIu32 "\n", stackutil);
+  sinfo("Parent: stackutil:%" PRIxREG "\n", stackutil);
 
   /* Make some feeble effort to preserve the stack contents.  This is
    * feeble because the stack surely contains invalid pointers and other
@@ -164,9 +164,15 @@ pid_t up_vfork(const struct vfork_s *context)
    * effort is overkill.
    */
 
-  newtop = (uint32_t)child->cmn.stack_base_ptr +
-                     child->cmn.adj_stack_size;
+  newtop = (uintptr_t)child->cmn.stack_base_ptr + child->cmn.adj_stack_size;
   newsp = newtop - stackutil;
+
+  /* Set up frame for context */
+
+  memcpy((void *)(newsp - XCPTCONTEXT_SIZE),
+         child->cmn.xcp.regs, XCPTCONTEXT_SIZE);
+
+  child->cmn.xcp.regs = (void *)(newsp - XCPTCONTEXT_SIZE);
   memcpy((void *)newsp, (const void *)context->sp, stackutil);
 
   /* Was there a frame pointer in place before? */
@@ -174,7 +180,7 @@ pid_t up_vfork(const struct vfork_s *context)
 #ifdef CONFIG_RISCV_FRAMEPOINTER
   if (context->fp >= context->sp && context->fp < stacktop)
     {
-      uint32_t frameutil = stacktop - context->fp;
+      uintptr_t frameutil = stacktop - context->fp;
       newfp = newtop - frameutil;
     }
   else
@@ -182,14 +188,14 @@ pid_t up_vfork(const struct vfork_s *context)
       newfp = context->fp;
     }
 
-  sinfo("Old stack top:%08x SP:%08x FP:%08x\n",
+  sinfo("Old stack top:%" PRIxREG " SP:%" PRIxREG " FP:%" PRIxREG "\n",
         stacktop, context->sp, context->fp);
-  sinfo("New stack top:%08x SP:%08x FP:%08x\n",
+  sinfo("New stack top:%" PRIxREG " SP:%" PRIxREG " FP:%" PRIxREG "\n",
         newtop, newsp, newfp);
 #else
-  sinfo("Old stack top:%08x SP:%08x\n",
+  sinfo("Old stack top:%" PRIxREG " SP:%" PRIxREG "\n",
         stacktop, context->sp);
-  sinfo("New stack top:%08x SP:%08x\n",
+  sinfo("New stack top:%" PRIxREG " SP:%" PRIxREG "\n",
         newtop, newsp);
 #endif
 
