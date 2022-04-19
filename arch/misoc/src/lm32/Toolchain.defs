@@ -32,13 +32,7 @@ ifeq ($(filter y, \
 endif
 
 ifeq ($(filter y, \
-      $(CONFIG_LM32_TOOLCHAIN_GNUL) \
-    ),y)
-  CONFIG_LM32_TOOLCHAIN ?= GNU
-endif
-
-ifeq ($(filter y, \
-      $(CONFIG_LM32_TOOLCHAIN_GNUW) \
+      $(CONFIG_LM32_TOOLCHAIN_GNU) \
     ),y)
   CONFIG_LM32_TOOLCHAIN ?= GNU
 endif
