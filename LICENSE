@@ -5827,6 +5827,7 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
 arch/arm/src/am335x/am335x_edid.c
+arch/arm/src/am335x/am335x_lcdc.c
 arch/arm/src/am335x/am335x_lcdc.h
 =======================================
 
