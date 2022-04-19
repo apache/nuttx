@@ -366,8 +366,7 @@ static void arm_dumpstate(void)
 
   if (CURRENT_REGS)
     {
-      memcpy(rtcb->xcp.regs,
-             (uintptr_t *)CURRENT_REGS, XCPTCONTEXT_SIZE);
+      rtcb->xcp.regs = (uint32_t *)CURRENT_REGS;
     }
   else
     {
