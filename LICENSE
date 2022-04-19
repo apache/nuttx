@@ -5705,7 +5705,7 @@ arch/arm/src/lpc2378/chip.h
 arch/arm/src/lpc2378/lpc2378.h
 arch/arm/src/lpc2378/lpc23xx_decodeirq.c
 arch/arm/src/lpc2378/lpc23xx_gpio.h
-arch/arm/src/arm/lpc2378/lpc23xx_head.S
+arch/arm/src/lpc2378/lpc23xx_head.S
 arch/arm/src/lpc2378/lpc23xx_i2c.c
 arch/arm/src/lpc2378/lpc23xx_io.c
 arch/arm/src/lpc2378/lpc23xx_irq.c
