@@ -292,6 +292,7 @@ Certain functions in the NuttX C-library derive from other BSD-compatible
 sources:
 
 fs/nfs
+include/nuttx/fs/nfs.h
 ======
 
    NFS:
