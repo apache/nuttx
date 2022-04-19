@@ -128,25 +128,15 @@ endif # ARMV7R_HAVE_L2CC
 
 choice
 	prompt "Toolchain Selection"
-	default ARMV7R_TOOLCHAIN_GNU_EABIW if TOOLCHAIN_WINDOWS
-	default ARMV7R_TOOLCHAIN_GNU_EABIL if !TOOLCHAIN_WINDOWS
+	default ARMV7R_TOOLCHAIN_GNU_EABI
 
 config ARMV7R_TOOLCHAIN_BUILDROOT
 	bool "Buildroot (Cygwin or Linux)"
 	select ARCH_TOOLCHAIN_GNU
 	depends on !WINDOWS_NATIVE
 
-config ARMV7R_TOOLCHAIN_GNU_EABIL
-	bool "Generic GNU EABI toolchain under Linux (or other POSIX environment)"
-	select ARCH_TOOLCHAIN_GNU
-	---help---
-		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
-		configured for arm-none-eabi-.
-
-config ARMV7R_TOOLCHAIN_GNU_EABIW
-	bool "Generic GNU EABI toolchain under Windows"
-	depends on TOOLCHAIN_WINDOWS
-	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
+config ARMV7R_TOOLCHAIN_GNU_EABI
+	bool "Generic GNU EABI toolchain"
 	select ARCH_TOOLCHAIN_GNU
 	---help---
 		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
