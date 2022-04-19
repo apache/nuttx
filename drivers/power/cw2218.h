@@ -92,7 +92,6 @@
 
 #define CW2218_WORK_POLL_TIME           50000     /* work time 5s */
 #define CW2218_WORK_INIT_TIME           15000     /* work time 1.5s */
-#define BATTERY_GAGUE_INIT_TIME         100000    /* work time 10s */
-#define BATTERY_GAGUE_INIT_FIRST_TIME   30000     /* work time 3s */
+#define CW2218_BATTERY_INIT_5S          5000000   /* delay time */
 
 #endif /* __DRIVERS_POWER_CW2218_H */

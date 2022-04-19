@@ -30,6 +30,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <nuttx/kthread.h>
 #include <errno.h>
 #include <debug.h>
 #include <nuttx/kmalloc.h>
@@ -1123,10 +1124,10 @@ static int cw2218_online(struct battery_gauge_dev_s *dev, bool *status)
 }
 
 /****************************************************************************
- * Name: init_worker
+ * Name: gauge_init_thread
  *
  * Description:
- * The battery gauge init detect, according to 10s Frequency
+ * The battery gauge init detect, according to 5s Frequency
  *
  * Input Parameters
  *   priv    - Device struct
@@ -1136,23 +1137,28 @@ static int cw2218_online(struct battery_gauge_dev_s *dev, bool *status)
  *
  ****************************************************************************/
 
-static void init_worker(FAR void *arg)
+static int gauge_init_thread(int argc, char** argv)
 {
-  FAR struct cw2218_dev_s *priv = arg;
+  FAR struct cw2218_dev_s *priv = (FAR struct cw2218_dev_s *)
+             ((uintptr_t)strtoul(argv[1], NULL, 0));
   int ret;
 
-  ret = cw2218_init(priv);
-  if (ret < 0)
+  while (1)
     {
-      baterr("battery gauge init error work runing\n");
-      work_queue(HPWORK, &priv->init_work, init_worker, priv,
-                 BATTERY_GAGUE_INIT_TIME);
+      nxsig_usleep(CW2218_BATTERY_INIT_5S);
+      ret = cw2218_init(priv);
+      if (ret < 0)
+        {
+          baterr("battery gauge init error thread runing\n");
+        }
+      else
+        {
+          baterr("battery gauge init success\n");
+          break;
+        }
     }
-  else
-    {
-      baterr("battery gauge init success work cancel\n");
-      work_cancel(HPWORK, &priv->init_work);
-    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -1189,6 +1195,8 @@ FAR struct battery_gauge_dev_s *cw2218_initialize(
                                                 uint32_t frequency)
 {
   FAR struct cw2218_dev_s *priv;
+  FAR char *argv[2];
+  char arg1[32];
   int ret;
 
   /* Initialize the cw2218 device structure */
@@ -1211,9 +1219,17 @@ FAR struct battery_gauge_dev_s *cw2218_initialize(
     {
       if (ret < 0)
         {
-          baterr("battery gauge init error start init work\n");
-          work_queue(HPWORK, &priv->init_work, init_worker, priv,
-                     BATTERY_GAGUE_INIT_FIRST_TIME);
+          snprintf(arg1, 32, "%p", priv);
+          argv[0] = arg1;
+          argv[1] = NULL;
+          ret = kthread_create("battery_init_thread",
+                SCHED_PRIORITY_DEFAULT, CONFIG_DEFAULT_TASK_STACKSIZE,
+                gauge_init_thread, argv);
+          if (ret < 0)
+            {
+              baterr("ERROR: Failed to create gauge init thread\n");
+              goto err;
+            }
         }
     }
 
