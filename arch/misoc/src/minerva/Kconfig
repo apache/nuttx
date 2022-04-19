@@ -7,25 +7,15 @@ if ARCH_CHIP_MINERVA
 
 choice
 	prompt "Toolchain Selection"
-	default MINERVA_TOOLCHAIN_GNUW if TOOLCHAIN_WINDOWS
-	default MINERVA_TOOLCHAIN_GNUL if !TOOLCHAIN_WINDOWS
+	default MINERVA_TOOLCHAIN_GNU
 
 config MINERVA_TOOLCHAIN_BUILDROOT
 	bool "Buildroot (Cygwin or Linux)"
 	depends on !WINDOWS_NATIVE
 	select ARCH_TOOLCHAIN_GNU
 
-config MINERVA_TOOLCHAIN_GNUL
-	bool "Generic GNU toolchain under Linux (or other POSIX environment)"
-	select ARCH_TOOLCHAIN_GNU
-	---help---
-		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
-		configured for risc64-elf-.
-
-config MINERVA_TOOLCHAIN_GNUW
-	bool "Generic GNU toolchain under Windows"
-	depends on TOOLCHAIN_WINDOWS
-	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
+config MINERVA_TOOLCHAIN_GNU
+	bool "Generic GNU toolchain"
 	select ARCH_TOOLCHAIN_GNU
 	---help---
 		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
