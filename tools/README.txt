@@ -1029,7 +1029,7 @@ testbuild.sh
     stm32f429i-disco:nsh
     arduino-due:nsh
     /arm
-    /risc-v,CONFIG_RISCV_TOOLCHAIN_GNU_RVGL
+    /risc-v
 
   The first value is the usual configuration description of the form
   <board-name>:<configuration-name> or /<folder-name> and must correspond to a
