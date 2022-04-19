@@ -240,6 +240,8 @@ net/udp/udp_conn.c
 net/udp/udp_devpoll.c
 net/udp/udp_input.c
 net/udp/udp_send.c
+libs/libc/netdb/lib_dns.h
+libs/libc/netdb/lib_dnsquery.c
 ====================
 
 Many lower-level networking components of NuttX derive from uIP:
@@ -419,6 +421,349 @@ libc/string/lib_vikmemcpy.c
 
   3. This notice may not be removed or altered from any source
      distribution.
+
+libs/libc/machine/arm/armv7-a/arch_memcpy.S
+libs/libc/machine/arm/armv7-r/arch_memcpy.S
+libs/libc/machine/arm/armv7-m/gnu/arch_memcpy.S
+================================================
+
+   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+
+ Based on the ARMv7-M version contributed by Mike Smith.  Apparently in the public
+ domain and is re-released here under the modified BSD license:
+
+ Obtained via a posting on the Stellaris forum:
+  http://e2e.ti.com/support/microcontrollers/\
+   stellaris_arm_cortex-m3_microcontroller/f/473/t/44360.aspx
+
+ Posted by rocksoft on Jul 24, 2008 10:19 AM
+
+   Hi,
+
+   I recently finished a "memcpy" replacement and thought it might be useful for
+   others...
+
+   I've put some instructions and the code here:
+
+   http://www.rock-software.net/downloads/memcpy/
+
+   Hope it works for you as well as it did for me.
+
+   Liam.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ 1. Redistributions of source code must retain the above copyright
+  notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+  notice, this list of conditions and the following disclaimer in
+  the documentation and/or other materials provided with the
+  distribution.
+ 3. Neither the name NuttX nor the names of its contributors may be
+  used to endorse or promote products derived from this software
+  without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+
+libs/libc/misc/lib_crc32.c
+=========================
+
+   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
+
+ The logic in this file was developed by Gary S. Brown:
+
+   COPYRIGHT (C) 1986 Gary S. Brown.  You may use this program, or code or tables
+   extracted from it, as desired without restriction.
+
+ First, the polynomial itself and its table of feedback terms.  The polynomial is:
+
+    X^32+X^26+X^23+X^22+X^16+X^12+X^11+X^10+X^8+X^7+X^5+X^4+X^2+X^1+X^0
+
+ Note that we take it "backwards" and put the highest-order term in the lowest-order bit.
+ The X^32 term is "implied"; the LSB is the X^31 term, etc.  The X^0 term (usually shown
+ as "+1") results in the MSB being 1
+
+ Note that the usual hardware shift register implementation, which is what we're using
+ (we're merely optimizing it by doing eight-bit chunks at a time) shifts bits into the
+ lowest-order term.  In our implementation, that means shifting towards the right.  Why
+ do we do it this way?  Because the calculated CRC must be transmitted in order from
+ highest-order term to lowest-order term.  UARTs transmit characters in order from LSB
+ to MSB.  By storing the CRC this way we hand it to the UART in the order low-byte to
+ high-byte; the UART sends each low-bit to hight-bit; and the result is transmission bit
+ by bit from highest- to lowest-order term without requiring any bit shuffling on our
+ part.  Reception works similarly
+
+ The feedback terms table consists of 256, 32-bit entries.  Notes
+
+ - The table can be generated at runtime if desired; code to do so is shown later.  It
+   might not be obvious, but the feedback terms simply represent the results of eight
+   shift/xor operations for all combinations of data and CRC register values
+
+ - The values must be right-shifted by eight bits by the updcrc logic; the shift must
+   be u_(bring in zeroes).  On some hardware you could probably optimize the shift in
+   assembler by using byte-swap instructions polynomial $edb88320
+
+libs/libc/misc/lib_fnmatch.c
+===============================
+
+   Copyright 1995, 2000 by Jef Poskanzer <jef@mail.acme.com>.
+   All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+
+ THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ SUCH DAMAGE.
+
+libs/libc/misc/lib_ncompress.c
+==============================
+
+   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+
+ This is the file compress24.c extracted from the ncompress-4.2.4 release
+ and adapted for NuttX.  The original code was released into the public
+ domain.   This NuttX version is re-released under the standard NuttX
+ BSD 3-clause license.  The original authors are listed below:
+
+   Spencer W. Thomas   (decvax!harpo!utah-cs!utah-gr!thomas)
+   Jim McKie           (decvax!mcvax!jim)
+   Steve Davies        (decvax!vax135!petsd!peora!srd)
+   Ken Turkowski       (decvax!decwrl!turtlevax!ken)
+   James A. Woods      (decvax!ihnp4!ames!jaw)
+   Joe Orost           (decvax!vax135!petsd!joe)
+   Dave Mack           (csu@alembic.acs.com)
+   Peter Jannesen, Network Communication Systems
+                       (peter@ncs.nl)
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+ 3. Neither the name NuttX nor the names of its contributors may be
+    used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+
+libs/libc/misc/lib_utsname.c
+=============================
+
+   Copyright (C) 2015 Stavros Polymenis. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+ 3. Neither the name NuttX nor the names of its contributors may be
+    used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+
+libs/libc/net/lib_addrconfig.c
+===============================
+
+   Copyright (c) 2015, Max Nekludov. All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+ 3. Neither the name of the Institute nor the names of its contributors
+    may be used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE INSTITUTE AND CONTRIBUTORS ``AS IS'' AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED.  IN NO EVENT SHALL THE INSTITUTE OR CONTRIBUTORS BE LIABLE
+ FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ SUCH DAMAGE.
+
+libs/libc/stdlib/lib_strtod.c
+libs/libc/stdlib/lib_strtof.c
+libs/libc/stdlib/lib_strtold.c
+=============================
+
+   Copyright (C) 2002 Michael Ringgaard. All rights reserved.
+   Copyright (C) 2006-2007 H. Peter Anvin.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+ 3. Neither the name of the project nor the names of its contributors
+    may be used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE
+ COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ OF THE POSSIBILITY OF SUCH DAMAGE.
+
+libs/libc/stdlib/lib_wctomb.c
+=============================
+
+ This code is derived from software contributed to Berkeley by
+ Chris Torek.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+ 3. Neither the name of the University nor the names of its contributors
+    may be used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+ FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ SUCH DAMAGE.
+
+libs/libc/string/lib_vikmemcpy.c
+==================================
+
+   Copyright (C) 1999-2010 Daniel Vik
+
+ Adaptations include:
+ - File name change
+ - Use of types defined in stdint.h
+ - Integration with the NuttX configuration system
+ - Other cosmetic changes for consistency with NuttX coding standards
+
+ This software is provided 'as-is', without any express or implied
+ warranty. In no event will the authors be held liable for any
+ damages arising from the use of this software.
+ Permission is granted to anyone to use this software for any
+ purpose, including commercial applications, and to alter it and
+ redistribute it freely, subject to the following restrictions:
+
+ 1. The origin of this software must not be misrepresented; you
+    must not claim that you wrote the original software. If you
+    use this software in a product, an acknowledgment in the
+    use this software in a product, an acknowledgment in the
+    product documentation would be appreciated but is not
+    required.
+
+ 2. Altered source versions must be plainly marked as such, and
+    must not be misrepresented as being the original software.
+
+ 3. This notice may not be removed or altered from any source
+    distribution.
+
+ Description: Implementation of the standard library function memcpy.
+              This implementation of memcpy() is ANSI-C89 compatible.
+
+ The following configuration options can be set:
+
+   CONFIG_ENDIAN_BIG
+     Uses processor with big endian addressing. Default is little endian.
+
+   CONFIG_MEMCPY_PRE_INC_PTRS
+     Use pre increment of pointers. Default is post increment of pointers.
+
+   CONFIG_MEMCPY_INDEXED_COPY
+     Copying data using array indexing. Using this option, disables the
+     CONFIG_MEMCPY_PRE_INC_PTRS option.
+
+   CONFIG_MEMCPY_64BIT - Compiles memcpy for 64 bit architectures
 
 libs/libc/math
 ==============
