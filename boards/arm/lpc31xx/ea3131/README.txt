@@ -39,7 +39,7 @@ GNU Toolchain Options
   a different toolchain, you simply need to modify the configuration.  As an
   example:
 
-    CONFIG_ARM_TOOLCHAIN_GNU_EABIL : Generic arm-none-eabi toolchain
+    CONFIG_ARM_TOOLCHAIN_GNU_EABI : Generic arm-none-eabi toolchain
 
   Generic arm-none-eabi GNU Toolchain
   -----------------------------------
@@ -560,7 +560,7 @@ Common Configuration Notes
 
         CONFIG_HOST_WINDOWS=y
         CONFIG_WINDOWS_CYGWIN=y
-        CONFIG_ARM_TOOLCHAIN_GNU_EABIW=y
+        CONFIG_ARM_TOOLCHAIN_GNU_EABI=y
 
 Configuration Sub-Directories
 -----------------------------
