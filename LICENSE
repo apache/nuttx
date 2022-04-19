@@ -5688,6 +5688,7 @@ SUCH DAMAGE.
 drivers/wireless/bluetooth/bt_uart.c
 drivers/wireless/bluetooth/bt_uart.h
 wireless/bluetooth
+include/nuttx/wireless/bluetooth
 tools/size_report
 ===========================
 
