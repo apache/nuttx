@@ -35,10 +35,11 @@
 #include <nuttx/sched.h>
 #include <nuttx/addrenv.h>
 
-#include "signal/signal.h"
-#include "arm.h"
 #include "addrenv.h"
+#include "arm.h"
 #include "arm_internal.h"
+#include "group/group.h"
+#include "signal/signal.h"
 
 /****************************************************************************
  * Private Functions
@@ -165,7 +166,13 @@ uint32_t *arm_syscall(uint32_t *regs)
 
   /* Nested interrupts are not supported */
 
-  DEBUGASSERT(regs);
+  DEBUGASSERT(CURRENT_REGS == NULL);
+
+  /* Current regs non-zero indicates that we are processing an interrupt;
+   * CURRENT_REGS is also used to manage interrupt level context switches.
+   */
+
+  CURRENT_REGS = regs;
 
   /* The SYSCALL command is in R0 on entry.  Parameters follow in R1..R7 */
 
@@ -262,8 +269,8 @@ uint32_t *arm_syscall(uint32_t *regs)
            * set will determine the restored context.
            */
 
-          regs = (uint32_t *)regs[REG_R1];
-          DEBUGASSERT(regs);
+          CURRENT_REGS = (uint32_t *)regs[REG_R1];
+          DEBUGASSERT(CURRENT_REGS);
         }
         break;
 
@@ -288,7 +295,7 @@ uint32_t *arm_syscall(uint32_t *regs)
         {
           DEBUGASSERT(regs[REG_R1] != 0 && regs[REG_R2] != 0);
           *(uint32_t **)regs[REG_R1] = regs;
-          regs = (uint32_t *)regs[REG_R2];
+          CURRENT_REGS = (uint32_t *)regs[REG_R2];
         }
         break;
 
@@ -529,9 +536,36 @@ uint32_t *arm_syscall(uint32_t *regs)
         break;
     }
 
+#ifdef CONFIG_ARCH_ADDRENV
+  /* Check for a context switch.  If a context switch occurred, then
+   * CURRENT_REGS will have a different value than it did on entry.  If an
+   * interrupt level context switch has occurred, then establish the correct
+   * address environment before returning from the interrupt.
+   */
+
+  if (regs != CURRENT_REGS)
+    {
+      /* Make sure that the address environment for the previously
+       * running task is closed down gracefully (data caches dump,
+       * MMU flushed) and set up the address environment for the new
+       * thread at the head of the ready-to-run list.
+       */
+
+      group_addrenv(NULL);
+    }
+#endif
+
+  regs = (uint32_t *)CURRENT_REGS;
+
   /* Report what happened */
 
   dump_syscall("Exit", cmd, regs);
+
+  /* Set CURRENT_REGS to NULL to indicate that we are no longer in an
+   * interrupt handler.
+   */
+
+  CURRENT_REGS = NULL;
 
   /* Return the last value of curent_regs.  This supports context switches
    * on return from the exception.  That capability is only used with the
