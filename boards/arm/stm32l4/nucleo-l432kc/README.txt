@@ -93,7 +93,7 @@ GNU Toolchain Options
   a different toolchain, you simply need to modify the configuration.  As an
   example:
 
-    CONFIG_ARM_TOOLCHAIN_GNU_EABIL : Generic arm-none-eabi toolchain
+    CONFIG_ARM_TOOLCHAIN_GNU_EABI : Generic arm-none-eabi toolchain
 
 IDEs
 ====
