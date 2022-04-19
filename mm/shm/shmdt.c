@@ -69,19 +69,13 @@
 int shmdt(FAR const void *shmaddr)
 {
   FAR struct shm_region_s *region;
-  FAR struct task_group_s *group;
-  FAR struct tcb_s *tcb;
   FAR const struct vm_map_entry_s *map;
   unsigned int npages;
   int shmid;
   int ret;
+  GRAN_HANDLE gran = vm_allocator_get(VM_ALLOCATOR_SHM);
 
-  /* Get the TCB and group containing our virtual memory allocator */
-
-  tcb = nxsched_self();
-  DEBUGASSERT(tcb && tcb->group);
-  group = tcb->group;
-  DEBUGASSERT(group->tg_shm.gs_handle != NULL);
+  DEBUGASSERT(gran);
 
   /* Perform the reverse lookup to get the shmid corresponding to this
    * shmaddr.
@@ -115,7 +109,7 @@ int shmdt(FAR const void *shmaddr)
 
   /* Free the virtual address space */
 
-  gran_free(group->tg_shm.gs_handle, (FAR void *)shmaddr,
+  gran_free(gran, (FAR void *)shmaddr,
             region->sr_ds.shm_segsz);
 
   /* Convert the region size to pages */
@@ -166,7 +160,7 @@ int shmdt(FAR const void *shmaddr)
 
   /* Save the process ID of the last operation */
 
-  region->sr_ds.shm_lpid = tcb->pid;
+  region->sr_ds.shm_lpid = getpid();
 
   /* Save the time of the last shmdt() */
 

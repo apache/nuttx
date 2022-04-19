@@ -69,20 +69,20 @@ struct shm_info_s g_shminfo =
 
 int shm_group_initialize(FAR struct task_group_s *group)
 {
-  DEBUGASSERT(group && !group->tg_shm.gs_handle);
+  int ret = -ENOMEM;
 
-  group->tg_shm.gs_handle =
+  GRAN_HANDLE shm_allocator =
     gran_initialize((FAR void *)CONFIG_ARCH_SHM_VBASE,
                     ARCH_SHM_MAXPAGES << MM_PGSHIFT,
                     MM_PGSHIFT, MM_PGSHIFT);
 
-  if (!group->tg_shm.gs_handle)
+  if (!shm_allocator)
     {
       shmerr("ERROR: gran_initialize() failed\n");
-      return -ENOMEM;
+      return ret;
     }
 
-  return OK;
+  return vm_allocator_add(VM_ALLOCATOR_SHM, shm_allocator);
 }
 
 /****************************************************************************
@@ -105,11 +105,13 @@ void shm_group_release(FAR struct task_group_s *group)
   GRAN_HANDLE handle;
   DEBUGASSERT(group);
 
-  handle = group->tg_shm.gs_handle;
+  handle = vm_allocator_get(VM_ALLOCATOR_SHM);
   if (handle)
     {
       gran_release(handle);
     }
+
+  vm_allocator_rm(VM_ALLOCATOR_SHM);
 }
 
 #endif /* CONFIG_MM_SHM */

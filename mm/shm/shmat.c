@@ -98,25 +98,19 @@
 FAR void *shmat(int shmid, FAR const void *shmaddr, int shmflg)
 {
   FAR struct shm_region_s *region;
-  FAR struct task_group_s *group;
-  FAR struct tcb_s *tcb;
   uintptr_t vaddr;
   unsigned int npages;
   int ret;
   union vm_map_id_u map_id;
+  GRAN_HANDLE gran = vm_allocator_get(VM_ALLOCATOR_SHM);
+
+  DEBUGASSERT(gran != NULL);
 
   /* Get the region associated with the shmid */
 
   DEBUGASSERT(shmid >= 0 && shmid < CONFIG_ARCH_SHM_MAXREGIONS);
   region =  &g_shminfo.si_region[shmid];
   DEBUGASSERT((region->sr_flags & SRFLAG_INUSE) != 0);
-
-  /* Get the TCB and group containing our virtual memory allocator */
-
-  tcb = nxsched_self();
-  DEBUGASSERT(tcb && tcb->group);
-
-  DEBUGASSERT(group->tg_shm.gs_handle != NULL);
 
   /* Get exclusive access to the region data structure */
 
@@ -129,7 +123,7 @@ FAR void *shmat(int shmid, FAR const void *shmaddr, int shmflg)
 
   /* Set aside a virtual address space to span this physical region */
 
-  vaddr = (uintptr_t)gran_alloc(group->tg_shm.gs_handle,
+  vaddr = (uintptr_t)gran_alloc(gran,
                                 region->sr_ds.shm_segsz);
   if (vaddr == 0)
     {
@@ -171,7 +165,7 @@ FAR void *shmat(int shmid, FAR const void *shmaddr, int shmflg)
 
   /* Save the process ID of the last operation */
 
-  region->sr_ds.shm_lpid = tcb->pid;
+  region->sr_ds.shm_lpid = getpid();
 
   /* Save the time of the last shmat() */
 
@@ -183,7 +177,7 @@ FAR void *shmat(int shmid, FAR const void *shmaddr, int shmflg)
   return (FAR void *)vaddr;
 
 errout_with_vaddr:
-  gran_free(group->tg_shm.gs_handle, (FAR void *)vaddr,
+  gran_free(gran, (FAR void *)vaddr,
             region->sr_ds.shm_segsz);
 
 errout_with_semaphore:

@@ -520,12 +520,6 @@ struct task_group_s
   group_addrenv_t tg_addrenv;       /* Task group address environment       */
 #endif
 
-#ifdef CONFIG_MM_SHM
-  /* Shared Memory **********************************************************/
-
-  struct group_shm_s tg_shm;        /* Task shared memory logic             */
-#endif
-
   /* Virtual memory mapping info ********************************************/
 
 #ifdef CONFIG_MM_VM_MAP

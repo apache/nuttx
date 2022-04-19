@@ -64,23 +64,6 @@
 #endif
 
 /****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/* This structure describes the virtual page allocator that is use to manage
- * the mapping of shared memory into the group/process address space.
- */
-
-struct group_shm_s
-{
-  /* Handle returned by gran_initialize() when the virtual page allocator
-   * was created.
-   */
-
-  GRAN_HANDLE gs_handle;
-};
-
-/****************************************************************************
  * Public Data
  ****************************************************************************/
 
