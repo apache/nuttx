@@ -203,7 +203,45 @@
 ------------------------------------------------------------------------------
 
 uIP
-===
+include/nuttx/net/arp.h
+include/nuttx/net/can.h
+include/nuttx/net/dns.h
+include/nuttx/net/ethernet.h
+include/nuttx/net/icmp.h
+include/nuttx/net/icmpv6.h
+include/nuttx/net/igmp.h
+include/nuttx/net/ip.h
+include/nuttx/net/netconfig.h
+include/nuttx/net/netdev.h
+include/nuttx/net/netstats.h
+include/nuttx/net/sixlowpan.h
+include/nuttx/net/tcp.h
+include/nuttx/net/tun.h
+include/nuttx/net/udp.h
+net/arp/arp_arpin.c
+net/arp/arp_dump.c
+net/arp/arp_format.c
+net/arp/arp_ipin.c
+net/arp/arp_out.c
+net/arp/arp_table.c
+net/devif/devif.h
+net/devif/devif_initialize.c
+net/devif/devif_send.c
+net/devif/ipv4_input.c
+net/icmp/icmp_input.c
+net/tcp/tcp_appsend.c
+net/tcp/tcp_conn.c
+net/tcp/tcp_devpoll.c
+net/tcp/tcp_input.c
+net/tcp/tcp_listen.c
+net/tcp/tcp_send.c
+net/tcp/tcp_seqno.c
+net/tcp/tcp_timer.c
+net/udp/udp_conn.c
+net/udp/udp_devpoll.c
+net/udp/udp_input.c
+net/udp/udp_send.c
+====================
 
 Many lower-level networking components of NuttX derive from uIP:
 
