@@ -224,6 +224,29 @@ pid_t up_vfork(const struct vfork_s *context)
   child->cmn.xcp.regs[REG_GP]  = newsp;        /* Global pointer */
 #endif
 
+#ifdef CONFIG_LIB_SYSCALL
+  /* If we got here via a syscall, then we are going to have to setup some
+   * syscall return information as well.
+   */
+
+  if (parent->xcp.nsyscalls > 0)
+    {
+      int index;
+      for (index = 0; index < parent->xcp.nsyscalls; index++)
+        {
+          child->cmn.xcp.syscall[index].sysreturn =
+            parent->xcp.syscall[index].sysreturn;
+
+#ifndef CONFIG_BUILD_FLAT
+          child->cmn.xcp.syscall[index].int_ctx =
+            parent->xcp.syscall[index].int_ctx;
+#endif
+        }
+
+      child->cmn.xcp.nsyscalls = parent->xcp.nsyscalls;
+    }
+#endif /* CONFIG_LIB_SYSCALL */
+
   /* And, finally, start the child task.  On a failure, nxtask_start_vfork()
    * will discard the TCB by calling nxtask_abort_vfork().
    */
