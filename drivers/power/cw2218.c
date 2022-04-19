@@ -351,7 +351,7 @@ static inline int cw2218_getsoc(FAR struct cw2218_dev_s *priv,  b16_t *soc,
 
       if (ui_soc > CW2218_SOC_MAGIC_100)
         {
-          baterr("CW2018 : UI_SOC = %d larger 100!\n", ui_soc);
+          batinfo("CW2018 : UI_SOC = %d larger 100!\n", ui_soc);
           ui_soc = CW2218_SOC_MAGIC_100;
         }
 
