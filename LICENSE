@@ -853,8 +853,10 @@ arch/arm/src/armv6-m/arm_exception.S
 
 arch/arm/src/armv7-a/cp15_cacheops.h
 arch/arm/src/armv7-a/cp15_clean_dcache.S
+arch/arm/src/armv7-a/cp15_clean_dcache_all.S
 arch/arm/src/armv7-a/cp15_coherent_dcache.S
 arch/arm/src/armv7-a/cp15_flush_dcache.S
+arch/arm/src/armv7-a/cp15_flush_dcache_all.S
 arch/arm/src/armv7-a/cp15_invalidate_dcache.S
 arch/arm/src/armv7-a/cp15_invalidate_dcache_all.S
 =================================================
@@ -1232,8 +1234,10 @@ arch/arm/src/armv7-r/cp15_cacheops.h
 
 arch/arm/src/armv7-r/cp15_cacheops.h
 arch/arm/src/armv7-r/cp15_clean_dcache.S
+arch/arm/src/armv7-r/cp15_clean_dcache_all.S
 arch/arm/src/armv7-r/cp15_coherent_dcache.S
 arch/arm/src/armv7-r/cp15_flush_dcache.S
+arch/arm/src/armv7-r/cp15_flush_dcache_all.S
 arch/arm/src/armv7-r/cp15_invalidate_dcache.S
 arch/arm/src/armv7-r/cp15_invalidate_dcache_all.S
 =================================================
