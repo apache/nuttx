@@ -22,6 +22,6 @@ config ARMV6M_TOOLCHAIN_GNU_EABI
 
 config ARMV6M_TOOLCHAIN_CLANG
 	bool "Generic Clang toolchain"
-	select ARCH_TOOLCHAIN_GNU
+	select ARCH_TOOLCHAIN_CLANG
 
 endchoice
