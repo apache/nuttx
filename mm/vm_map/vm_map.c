@@ -228,4 +228,75 @@ int vm_map_rm(FAR const void *vaddr)
   return -ENOENT;
 }
 
+/****************************************************************************
+ * Name: vm_allocator_add
+ *
+ * Description:
+ *   Adds a memory allocator handle
+ *
+ ****************************************************************************/
+
+int vm_allocator_add(enum vm_allocator_type id,
+                     FAR const void *allocator_handle)
+{
+  FAR struct tcb_s *tcb = nxsched_self();
+  FAR struct task_group_s *group = tcb->group;
+  FAR struct vm_map_s *mm = &group->tg_vm_map;
+
+  if (id >= VM_ALLOCATOR_END)
+    {
+      return -ENOENT;
+    }
+
+  mm->allocator_handle[id] = allocator_handle;
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: vm_allocator_get
+ *
+ * Description:
+ *   Returns a memory allocator handle
+ *
+ ****************************************************************************/
+
+FAR const void *vm_allocator_get(int id)
+{
+  FAR struct tcb_s *tcb = nxsched_self();
+  FAR struct task_group_s *group = tcb->group;
+  FAR struct vm_map_s *mm = &group->tg_vm_map;
+
+  if (id >= VM_ALLOCATOR_END)
+    {
+      return NULL;
+    }
+
+  return mm->allocator_handle[id];
+}
+
+/****************************************************************************
+ * Name: vm_allocator_rm
+ *
+ * Description:
+ *   Removes a memory allocator handle
+ *
+ ****************************************************************************/
+
+int vm_allocator_rm(int id)
+{
+  FAR struct tcb_s *tcb = nxsched_self();
+  FAR struct task_group_s *group = tcb->group;
+  FAR struct vm_map_s *mm = &group->tg_vm_map;
+
+  if (id >= VM_ALLOCATOR_END)
+    {
+      return -ENOENT;
+    }
+
+  mm->allocator_handle[id] = NULL;
+
+  return OK;
+}
+
 #endif /* defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__) */

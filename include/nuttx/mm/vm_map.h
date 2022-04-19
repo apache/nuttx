@@ -66,12 +66,24 @@ struct vm_map_entry_s
   size_t length;
 };
 
+/* Type of memory allocators */
+
+enum vm_allocator_type
+{
+#ifdef CONFIG_MM_SHM
+  VM_ALLOCATOR_SHM,
+#endif
+
+  VM_ALLOCATOR_END /* Last allocater, size of the table */
+};
+
 /* A structure for the task group */
 
 struct vm_map_s
 {
   sq_queue_t vm_map_sq;
   sem_t vm_map_sem;
+  FAR const void *allocator_handle[VM_ALLOCATOR_END];
 };
 
 /****************************************************************************
@@ -171,6 +183,58 @@ FAR const struct vm_map_entry_s *vm_map_find(FAR const void *vaddr);
  ****************************************************************************/
 
 int vm_map_rm(FAR const void *vaddr);
+
+/****************************************************************************
+ * Name: vm_allocator_add
+ *
+ * Description:
+ *   Stores a memory allocator handle
+ *
+ * Input Parameters:
+ *   id:               Type of the allocator
+ *   allocator_handle: Handle to the allocator
+ *
+ * Returned Value:
+ *   OK:               Added successfully
+ *   -ENOENT:          Invalid allocator type
+ *
+ ****************************************************************************/
+
+int vm_allocator_add(enum vm_allocator_type id,
+                     FAR const void *allocator_handle);
+
+/****************************************************************************
+ * Name: vm_allocator_get
+ *
+ * Description:
+ *   Returns a memory allocator handle
+ *
+ * Input Parameters:
+ *   id   - Id of a stored allocator
+ *
+ * Returned Value:
+ *   Handle to the stored allocator, NULL on error
+ *
+ ****************************************************************************/
+
+FAR const void *vm_allocator_get(enum vm_allocator_type id);
+
+/****************************************************************************
+ * Name: vm_allocator_rm
+ *
+ * Description:
+ *   Removes a stored memory allocator handle
+ *
+ * Input Parameters:
+ *   id:       Type of the allocator
+ *
+ * Returned Value:
+ *   OK:       Added successfully
+ *   -ENOENT:  Invalid allocator type
+ *
+ ****************************************************************************/
+
+int vm_allocator_rm(enum vm_allocator_type id);
 
 #endif /* defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__) */
 
