@@ -261,6 +261,11 @@ int socket(int domain, int type, int protocol)
       oflags |= O_CLOEXEC;
     }
 
+  if (type & SOCK_NONBLOCK)
+    {
+      oflags |= O_NONBLOCK;
+    }
+
   psock = kmm_zalloc(sizeof(*psock));
   if (psock == NULL)
     {
