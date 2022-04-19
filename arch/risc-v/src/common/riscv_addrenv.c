@@ -100,23 +100,6 @@ extern uintptr_t            g_kernel_mappings;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: wipe_page
- *
- * Description:
- *   Wipe a page of physical memory, first mapping it into virtual memory.
- *
- * Input Parameters:
- *   paddr - Physical address of page
- *
- ****************************************************************************/
-
-static inline void wipe_page(uintptr_t paddr)
-{
-  uintptr_t vaddr = riscv_pgvaddr(paddr);
-  memset((void *)vaddr, 0, MM_PGSIZE);
-}
-
-/****************************************************************************
  * Name: map_spgtables
  *
  * Description:
@@ -183,7 +166,7 @@ static int create_spgtables(group_addrenv_t *addrenv)
 
       /* Wipe the memory and assign it */
 
-      wipe_page(paddr);
+      riscv_pgwipe(paddr);
       addrenv->spgtables[i] = paddr;
     }
 
@@ -290,7 +273,7 @@ static int create_region(group_addrenv_t *addrenv, uintptr_t vaddr,
 
           /* This is then used to map the final level */
 
-          wipe_page(paddr);
+          riscv_pgwipe(paddr);
         }
 
       ptlast = riscv_pgvaddr(paddr);
@@ -307,7 +290,7 @@ static int create_region(group_addrenv_t *addrenv, uintptr_t vaddr,
 
           /* Wipe the physical page memory */
 
-          wipe_page(paddr);
+          riscv_pgwipe(paddr);
 
           /* Then map the virtual address to the physical address */
 

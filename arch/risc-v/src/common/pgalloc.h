@@ -78,5 +78,22 @@ static inline uintptr_t riscv_pgvaddr(uintptr_t paddr)
 }
 #endif /* CONFIG_ARCH_PGPOOL_MAPPING */
 
+/****************************************************************************
+ * Name: riscv_pgwipe
+ *
+ * Description:
+ *   Wipe a page of physical memory, first mapping it into virtual memory.
+ *
+ * Input Parameters:
+ *   paddr - Physical address of page
+ *
+ ****************************************************************************/
+
+static inline void riscv_pgwipe(uintptr_t paddr)
+{
+  uintptr_t vaddr = riscv_pgvaddr(paddr);
+  memset((void *)vaddr, 0, MM_PGSIZE);
+}
+
 #endif /* CONFIG_MM_PGALLOC */
 #endif /* __ARCH_RISC_V_SRC_COMMON_PGALLOC_H */
