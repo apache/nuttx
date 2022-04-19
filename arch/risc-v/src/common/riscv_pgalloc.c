@@ -55,23 +55,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: wipe_page
- *
- * Description:
- *   Wipe a page of physical memory, first mapping it into virtual memory.
- *
- * Input Parameters:
- *   paddr - Physical address of page
- *
- ****************************************************************************/
-
-static inline void wipe_page(uintptr_t paddr)
-{
-  uintptr_t vaddr = riscv_pgvaddr(paddr);
-  memset((void *)vaddr, 0, MM_PGSIZE);
-}
-
-/****************************************************************************
  * Name: get_pgtable
  *
  * Description:
@@ -101,7 +84,7 @@ static uintptr_t get_pgtable(group_addrenv_t *addrenv, uintptr_t vaddr)
         {
           /* Wipe the page and assign it */
 
-          wipe_page(paddr);
+          riscv_pgwipe(paddr);
           mmu_ln_setentry(ptlevel, ptprev, paddr, vaddr, MMU_UPGT_FLAGS);
         }
     }
@@ -205,7 +188,7 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
 
       /* Wipe the memory */
 
-      wipe_page(paddr);
+      riscv_pgwipe(paddr);
 
       /* Then add the reference */
 
