@@ -151,7 +151,7 @@ SYSCALL_LOOKUP(up_assert,                  2)
 #endif
 #ifdef CONFIG_LIBC_EXECFUNCS
   SYSCALL_LOOKUP(posix_spawn,              6)
-  SYSCALL_LOOKUP(execv,                    2)
+  SYSCALL_LOOKUP(execve,                   3)
 #endif
 #endif
 

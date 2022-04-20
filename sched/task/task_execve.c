@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/task/task_execv.c
+ * sched/task/task_execve.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -100,6 +100,9 @@
  *     absolute path to the program.
  *   argv - A pointer to an array of string arguments.  The end of the
  *     array is indicated with a NULL entry.
+ *   envp - An array of character pointers to null-terminated strings that
+ *     provide the environment for the new process image. The environment
+ *     array is terminated by a null pointer.
  *
  * Returned Value:
  *   This function does not return on success.  On failure, it will return
@@ -107,7 +110,8 @@
  *
  ****************************************************************************/
 
-int execv(FAR const char *path, FAR char * const argv[])
+int execve(FAR const char *path, FAR char * const argv[],
+           FAR char *const envp[])
 {
   FAR const struct symtab_s *symtab;
   int nsymbols;
@@ -119,7 +123,7 @@ int execv(FAR const char *path, FAR char * const argv[])
 
   /* Start the task */
 
-  ret = exec(path, (FAR char * const *)argv, symtab, nsymbols);
+  ret = exec(path, argv, envp, symtab, nsymbols);
   if (ret < 0)
     {
       serr("ERROR: exec failed: %d\n", get_errno());
