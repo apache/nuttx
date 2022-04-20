@@ -479,7 +479,7 @@ void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority);
  *
  ****************************************************************************/
 
-void up_exit() noreturn_function;
+void up_exit(int status) noreturn_function;
 
 /* Prototype is in unistd.h */
 
