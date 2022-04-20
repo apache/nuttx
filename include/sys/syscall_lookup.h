@@ -351,6 +351,7 @@ SYSCALL_LOOKUP(munmap,                     2)
 /* The following are defined only if environment variables are supported */
 
 #ifndef CONFIG_DISABLE_ENVIRON
+  SYSCALL_LOOKUP(get_environ_ptr,          0)
   SYSCALL_LOOKUP(clearenv,                 0)
   SYSCALL_LOOKUP(getenv,                   1)
   SYSCALL_LOOKUP(putenv,                   1)
