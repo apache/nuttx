@@ -151,5 +151,5 @@ void up_exit(int status)
    * software interrupts are disabled.
    */
 
-  DEBUGPANIC();
+  PANIC();
 }
