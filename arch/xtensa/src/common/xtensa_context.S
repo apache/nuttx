@@ -204,47 +204,6 @@ _xtensa_context_save:
 	.size	_xtensa_context_save, . - _xtensa_context_save
 
 /****************************************************************************
- * Name: xtensa_context_save
- *
- * Description:
- *
- *   This function implements the moral equivalent of setjmp().  It is
- *   called from user code (with interrupts disabled) to save the current
- *   state of the running thread.  This function always returns zero.
- *
- *   The counterpart to this function is xtensa_context_restore().
- *
- * Input State:
- *   a0 = The true return value to the caller.
- *   a2 = The address of the register state structure
- *
- * Return state:
- *   a0, a2, and a3 modified.
- *   Returned value is in a2
- *
- ****************************************************************************/
-
-	.global	xtensa_context_save
-	.type	xtensa_context_save, @function
-
-	.align	4
-	.literal_position
-	.align	4
-
-xtensa_context_save:
-	ENTRY(16)
-
-	mov  a3, a2
-	movi a2, SYS_save_context
-	movi a4, XCHAL_SWINT_CALL
-	wsr  a4, intset
-	rsync
-
-	RET(16)
-
-	.size	xtensa_context_save, . - xtensa_context_save
-
-/****************************************************************************
  * Name: _xtensa_context_restore
  *
  * Description:
@@ -329,50 +288,3 @@ _xtensa_context_restore:
 
 	.size	_xtensa_context_restore, . - _xtensa_context_restore
 
-/****************************************************************************
- * Name: xtensa_context_restore
- *
- * Description:
- *
- *   This functions implements the moral equivalent of longjmp().  It is
- *   called from user code (with interrupts disabled) to restore the current
- *   state of the running thread.  This function always appears to be a
- *   second return from xtensa_context_save except that that it returns the
- *   value 1 (because the saved value of A2 was set to 1
- *   inxtensa_context_save()).
- *
- *   The counterpart to this function is xtensa_context_save().
- *
- * Entry Conditions:
- *   - A0  = Return address to caller.
- *   - A2  = Pointer to the processor state save area
- *
- * Exit conditions:
- *   NOTE: That this function does NOT return to the caller but rather
- *   to a new threading context.  It is not necessary to save any of the
- *   caller's registers.
- *
- * Assumptions:
- *   - Interrupts are disabled.
- *
- ****************************************************************************/
-
-	.global	xtensa_context_restore
-	.type	xtensa_context_restore, @function
-
-	.align	4
-	.literal_position
-	.align	4
-
-xtensa_context_restore:
-	ENTRY(16)
-
-	mov  a3, a2
-	movi a2, SYS_restore_context
-	movi a4, XCHAL_SWINT_CALL
-	wsr  a4, intset
-	rsync
-
-	RET(16)
-
-	.size	xtensa_context_restore, . - xtensa_context_restore
