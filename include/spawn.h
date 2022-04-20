@@ -54,6 +54,13 @@
 #define POSIX_SPAWN_SETSIGMASK    (1 << 5)  /* 1: Set sigmask */
 #define POSIX_SPAWN_SETSID        (1 << 7)  /* 1: Create the new session(glibc specific) */
 
+/* NOTE: NuttX provides only one implementation:  If
+ * CONFIG_LIBC_ENVPATH is defined, then only posix_spawnp() behavior
+ * is supported; otherwise, only posix_spawn behavior is supported.
+ */
+
+#define posix_spawnp              posix_spawn
+
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/
@@ -129,8 +136,6 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
       FAR const posix_spawn_file_actions_t *file_actions,
       FAR const posix_spawnattr_t *attr,
       FAR char * const argv[], FAR char * const envp[]);
-#define posix_spawnp(pid,path,file_actions,attr,argv,envp) \
-      posix_spawn(pid,path,file_actions,attr,argv,envp)
 
 #ifndef CONFIG_BUILD_KERNEL
 /* Non-standard task_spawn interface.  This function uses the same
