@@ -50,8 +50,6 @@
 
 #define BMI270_READ_LEN               50         /* Bmi270 config read lenth */
 #define BMI270_CONFIG_LINE_NUM        12         /* Bmi270 config data number of each line */
-#define BMI270_INIT_DELAY             50000      /* Init delay time(us). */
-#define BMI270_MAX_RETRY              3          /* Max number of retries. */
 #define BMI270_SPI_WRITE_MAX_BUFFER   50         /* SPI write buffer size */
 #define BMI270_SPI_READ_MAX_BUFFER    20         /* SPI read buffer size */
 #define BMI270_WAIT_COUNT_MAX         300        /* Max count wait for reset */
@@ -137,7 +135,8 @@
 
 #define BMI270_DEVICE_ID              0x24       /* Device Identification */
 #define BMI270_DEFAULT_INTERVAL       40000      /* Default conversion interval(us) */
-#define BMI270_WAIT_TIME              10000      /* Sensor boot wait time(ms) */
+#define BMI270_WAIT_TIME              10000      /* Sensor boot wait time(us) */
+#define BMI270_SCALE_SET_TIME         1000       /* Sensor wait time after scale set(us) */
 
 /* Multi sensor index */
 
@@ -580,7 +579,6 @@ struct bmi270_sensor_s
   float                     factor;             /* Data factor */
   bool                      fifoen;             /* Sensor fifo enable */
   bool                      activated;          /* Sensor working state */
-  bool                      cfg_activated;      /* Sensor working state of cfg */
 };
 
 /* Device struct */
@@ -592,15 +590,12 @@ struct bmi270_dev_s
   uint64_t timestamp_fifolast;                  /* FIFO last timestamp, Units is microseconds */
   uint64_t timestamp;                           /* Units is microseconds */
   struct work_s work;                           /* Interrupt handler */
-  struct work_s cfg_work;                       /* Work queue for config. */
   FAR const char *file_path;                    /* File path of parameter. */
   unsigned int fifowtm;                         /* FIFO water marker */
   unsigned int featen;                          /* Feature enable */
   int16_t cross_sense;                          /* Gyroscope cross sensitivity coefficient */
   FAR uint8_t *fifo_buff;                       /* FIFO temp buffer */
   bool fifoen;                                  /* Sensor fifo enable */
-  int retry_cout;                               /* Number of retry. */
-  int cfg_status;                               /* Status of configuration. */
 };
 
 /* Structure to store the value of re-mapped axis and its sign */
@@ -732,7 +727,7 @@ static int bmi270_wait_selftest(FAR struct bmi270_dev_s *priv);
 static int bmi270_datatest(FAR struct bmi270_dev_s *priv, int type);
 static void bmi270_reset(FAR struct bmi270_dev_s *priv);
 static void bmi270_resetwait(FAR struct bmi270_dev_s *priv);
-static void bmi270_config_worker(FAR void *arg);
+static int bmi270_init_device(FAR struct bmi270_dev_s *priv);
 static int bmi270_read_cfg_param(FAR struct file *file,
                                  FAR char *buf, int len);
 static int bmi270_write_config(FAR struct bmi270_dev_s *priv,
@@ -1538,27 +1533,26 @@ static void bmi270_resetwait(FAR struct bmi270_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: bmi270_config_worker
+ * Name: bmi270_init_device
  *
  * Description:
- *   It is mainly used to initialize the device. When the driver is
- *   registered, the file system may not be ready and the configuration
- *   information cannot be read, so the configuration needs to be delayed.
+ *   It is mainly used to initialize the device. Read the config file and
+ *   initialize the device.
  *
  * Input Parameters:
- *   arg    - Device struct.
+ *   priv    - Device struct.
  *
  * Returned Value:
- *   none.
+ *   Return 0 if the driver was success; A negated errno
+ *   value is returned on any failure.
  *
  * Assumptions/Limitations:
  *   none.
  *
  ****************************************************************************/
 
-static void bmi270_config_worker(FAR void *arg)
+static int bmi270_init_device(FAR struct bmi270_dev_s *priv)
 {
-  FAR struct bmi270_dev_s *priv = arg;
   char buff[BMI270_READ_LEN];
   FAR uint8_t *config_buf;
   struct file file;
@@ -1568,22 +1562,11 @@ static void bmi270_config_worker(FAR void *arg)
 
   /* Open file of config parameter. */
 
-  ret = file_open(&file, priv->file_path, O_RDONLY, 0666);
+  ret = file_open(&file, priv->file_path, O_RDONLY);
   if (ret < 0)
     {
-      if (priv->retry_cout < BMI270_MAX_RETRY)
-        {
-          work_queue(HPWORK, &priv->cfg_work, bmi270_config_worker,
-                     priv, BMI270_INIT_DELAY / USEC_PER_TICK);
-          priv->retry_cout++;
-        }
-      else
-        {
-          snerr("Failed to open file:%s, err:%d\n",
-                priv->file_path, ret);
-        }
-
-      return;
+      snerr("Failed to open file:%s, err:%d\n", priv->file_path, ret);
+      return ret;
     }
 
   /* Read head information of config file. */
@@ -1593,7 +1576,7 @@ static void bmi270_config_worker(FAR void *arg)
     {
       snerr("Failed to read param: %d\n", ret);
       file_close(&file);
-      return;
+      return ret;
     }
   else
     {
@@ -1601,7 +1584,7 @@ static void bmi270_config_worker(FAR void *arg)
         {
           snerr("Failed to read head information: %d\n", -EINVAL);
           file_close(&file);
-          return;
+          return ret;
         }
     }
 
@@ -1612,7 +1595,7 @@ static void bmi270_config_worker(FAR void *arg)
     {
       snerr("Failed to read param: %d\n", ret);
       file_close(&file);
-      return;
+      return ret;
     }
   else
     {
@@ -1626,7 +1609,7 @@ static void bmi270_config_worker(FAR void *arg)
     {
       snerr("ERROR: Failed to allocate config buffer\n");
       file_close(&file);
-      return;
+      return ret;
     }
 
   for (i = 0; i < count; i = i + BMI270_CONFIG_LINE_NUM)
@@ -1637,7 +1620,7 @@ static void bmi270_config_worker(FAR void *arg)
           snerr("Failed to read param: %d\n", ret);
           kmm_free(config_buf);
           file_close(&file);
-          return;
+          return ret;
         }
       else
         {
@@ -1658,26 +1641,17 @@ static void bmi270_config_worker(FAR void *arg)
   if (ret < 0)
     {
       snerr("ERROR: Failed to load config file: %d\n", ret);
-      priv->cfg_status = BMI270_DISABLE;
       kmm_free(config_buf);
-      return;
+      return ret;
     }
 
-  priv->cfg_status = BMI270_ENABLE;
   kmm_free(config_buf);
 
   /* Get the gyroscope cross axis sensitivity */
 
   bmi270_get_gyro_crosssense(priv, &(priv->cross_sense));
 
-  /* Enable/disable sensor. */
-
-  bmi270_activate(&priv->dev[BMI270_XL_IDX].lower,
-                  priv->dev[BMI270_XL_IDX].cfg_activated);
-  bmi270_activate(&priv->dev[BMI270_GY_IDX].lower,
-                  priv->dev[BMI270_GY_IDX].cfg_activated);
-  bmi270_activate(&priv->dev[BMI270_FEAT_IDX].lower,
-                  priv->dev[BMI270_FEAT_IDX].cfg_activated);
+  return ret;
 }
 
 /****************************************************************************
@@ -2364,6 +2338,8 @@ static int bmi270_xl_setfullscale(FAR struct bmi270_dev_s *priv,
 
   regval.acc_range = value;
   bmi270_spi_write(priv, BMI270_ACC_RANGE, (FAR uint8_t *)&regval);
+
+  usleep(BMI270_SCALE_SET_TIME);
 
   return OK;
 }
@@ -3536,12 +3512,6 @@ static int bmi270_batch(FAR struct sensor_lowerhalf_s *lower,
       return -EINVAL;
     }
 
-  if (priv->cfg_status == BMI270_DISABLE)
-    {
-      snerr("Failed to configure device.\n");
-      return OK;
-    }
-
   if (sensor->fifowtm > 1)
     {
       sensor->fifoen = true;
@@ -3696,11 +3666,6 @@ static int bmi270_set_interval(FAR struct sensor_lowerhalf_s *lower,
   if (lower->type == SENSOR_TYPE_ACCELEROMETER)
     {
       priv = (struct bmi270_dev_s *)(sensor - BMI270_XL_IDX);
-      if (priv->cfg_status == BMI270_DISABLE)
-        {
-          snerr("Failed to configure device.\n");
-          return OK;
-        }
 
       /* Find the period that matches best.  */
 
@@ -3718,11 +3683,6 @@ static int bmi270_set_interval(FAR struct sensor_lowerhalf_s *lower,
   else if (lower->type == SENSOR_TYPE_GYROSCOPE)
     {
       priv = (struct bmi270_dev_s *)(sensor - BMI270_GY_IDX);
-      if (priv->cfg_status == BMI270_DISABLE)
-        {
-          snerr("Failed to configure device.\n");
-          return OK;
-        }
 
       /* Find the period that matches best.  */
 
@@ -3740,12 +3700,6 @@ static int bmi270_set_interval(FAR struct sensor_lowerhalf_s *lower,
   else if (lower->type == SENSOR_TYPE_WAKE_GESTURE)
     {
       priv = (struct bmi270_dev_s *)(sensor - BMI270_FEAT_IDX);
-      if (priv->cfg_status == BMI270_DISABLE)
-        {
-          snerr("Failed to configure device.\n");
-          return OK;
-        }
-
       ret = OK;
     }
   else
@@ -3790,13 +3744,6 @@ static int bmi270_activate(FAR struct sensor_lowerhalf_s *lower,
   if (lower->type == SENSOR_TYPE_ACCELEROMETER)
     {
       priv = (struct bmi270_dev_s *)(sensor - BMI270_XL_IDX);
-      if (priv->cfg_status == BMI270_DISABLE)
-        {
-          snerr("Failed to configure device.\n");
-          sensor->cfg_activated = enable;
-          return OK;
-        }
-
       if (sensor->activated != enable)
         {
           ret = bmi270_xl_enable(priv, enable);
@@ -3812,13 +3759,6 @@ static int bmi270_activate(FAR struct sensor_lowerhalf_s *lower,
   else if (lower->type == SENSOR_TYPE_GYROSCOPE)
     {
       priv = (struct bmi270_dev_s *)(sensor - BMI270_GY_IDX);
-      if (priv->cfg_status == BMI270_DISABLE)
-        {
-          snerr("Failed to configure device.\n");
-          sensor->cfg_activated = enable;
-          return OK;
-        }
-
       if (sensor->activated != enable)
         {
           ret = bmi270_gy_enable(priv, enable);
@@ -3834,13 +3774,6 @@ static int bmi270_activate(FAR struct sensor_lowerhalf_s *lower,
   else if (lower->type == SENSOR_TYPE_WAKE_GESTURE)
     {
       priv = (struct bmi270_dev_s *)(sensor - BMI270_FEAT_IDX);
-      if (priv->cfg_status == BMI270_DISABLE)
-        {
-          snerr("Failed to configure device.\n");
-          sensor->cfg_activated = enable;
-          return OK;
-        }
-
       if (sensor->activated != enable)
         {
           if (enable)
@@ -4022,12 +3955,6 @@ static int bmi270_control(FAR struct sensor_lowerhalf_s *lower,
     {
       snerr("Failed to match sensor type.\n");
       return -EINVAL;
-    }
-
-  if (priv->cfg_status == BMI270_DISABLE)
-    {
-      snerr("Failed to configure device.\n");
-      return OK;
     }
 
   /* Process ioctl commands. */
@@ -4243,7 +4170,6 @@ int bmi270_register(int devno, FAR const struct bmi270_config_s *config)
 
   priv->config = config;
   priv->file_path = config->file_path;
-  priv->cfg_status = BMI270_DISABLE;
 
   priv->dev[BMI270_XL_IDX].lower.ops = &g_bmi270_xl_ops;
   priv->dev[BMI270_XL_IDX].lower.type = SENSOR_TYPE_ACCELEROMETER;
@@ -4291,14 +4217,12 @@ int bmi270_register(int devno, FAR const struct bmi270_config_s *config)
   bmi270_reset(priv);
   bmi270_resetwait(priv);
 
-  /* Create config work queue for sensor. */
+  /* Start config for sensor. */
 
-  ret = work_queue(HPWORK, &priv->cfg_work,
-                   bmi270_config_worker, priv,
-                   BMI270_INIT_DELAY / USEC_PER_TICK);
+  ret = bmi270_init_device(priv);
   if (ret < 0)
     {
-      snerr("Failed to create bmi270 config task: %d\n", ret);
+      snerr("Failed to config bmi270 sensor: %d\n", ret);
       goto err;
     }
 
