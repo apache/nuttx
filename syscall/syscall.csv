@@ -35,6 +35,7 @@
 "fsync","unistd.h","!defined(CONFIG_DISABLE_MOUNTPOINT)","int","int"
 "ftruncate","unistd.h","!defined(CONFIG_DISABLE_MOUNTPOINT)","int","int","off_t"
 "futimens","sys/stat.h","","int","int","const struct timespec [2]|FAR const struct timespec *"
+"get_environ_ptr","stdlib.h","!defined(CONFIG_DISABLE_ENVIRON)","FAR char **"
 "getenv","stdlib.h","!defined(CONFIG_DISABLE_ENVIRON)","FAR char *","FAR const char *"
 "getgid","unistd.h","defined(CONFIG_SCHED_USER_IDENTITY)","gid_t"
 "gethostname","unistd.h","","int","FAR char *","size_t"
