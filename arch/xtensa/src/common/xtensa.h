@@ -115,9 +115,6 @@
 
 /* Context switching via system calls ***************************************/
 
-#define xtensa_context_save(regs)\
-  sys_call1(SYS_save_context, (uintptr_t)regs)
-
 #define xtensa_context_restore(regs)\
   sys_call1(SYS_restore_context, (uintptr_t)regs)
 
