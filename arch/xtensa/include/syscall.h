@@ -61,21 +61,21 @@
 
 /* SYS call 0:
  *
- * int xtensa_saveusercontext(uint32_t *saveregs);
+ * int up_saveusercontext(void *saveregs);
  */
 
 #define SYS_save_context          (0)
 
 /* SYS call 1:
  *
- * void xtensa_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
+ * void xtensa_context_restore(uint32_t **restoreregs) noreturn_function;
  */
 
 #define SYS_restore_context       (1)
 
 /* SYS call 2:
  *
- * void xtensa_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+ * void xtensa_switchcontext(uint32_t **saveregs, uint32_t *restoreregs);
  */
 
 #define SYS_switch_context        (2)

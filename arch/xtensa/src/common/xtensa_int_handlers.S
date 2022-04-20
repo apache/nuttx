@@ -137,6 +137,15 @@ g_intstacktop:
 
 	.macro	dispatch_c_isr	level mask tmp
 
+	/* If the interrupt stack is disabled, reserve xcpcontext to ensure
+	 * that signal processing can have a separate xcpcontext to handle
+	 * signal context (ref: xtensa_schedulesigaction.c):
+	 */
+
+#if CONFIG_ARCH_INTERRUPTSTACK < 15
+	addi	sp, sp, -XCPTCONTEXT_SIZE
+#endif
+
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
 
 	ps_setup	\level \tmp
@@ -215,6 +224,10 @@ g_intstacktop:
 	 */
 
 	mov		a12, a6						/* Switch to the save area of the new thread */
+#endif
+
+#if CONFIG_ARCH_INTERRUPTSTACK < 15
+	addi	sp, sp, XCPTCONTEXT_SIZE
 #endif
 
 	/* Done */
