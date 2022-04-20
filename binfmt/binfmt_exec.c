@@ -212,6 +212,9 @@ errout:
  *              program.
  *   argv     - A pointer to an array of string arguments. The end of the
  *              array is indicated with a NULL entry.
+ *   envp     - An array of character pointers to null-terminated strings
+ *              that provide the environment for the new process image.
+ *              The environment array is terminated by a null pointer.
  *   exports  - The address of the start of the caller-provided symbol
  *              table. This symbol table contains the addresses of symbols
  *              exported by the caller and made available for linking the
@@ -226,11 +229,12 @@ errout:
  ****************************************************************************/
 
 int exec(FAR const char *filename, FAR char * const *argv,
-         FAR const struct symtab_s *exports, int nexports)
+         FAR char * const *envp, FAR const struct symtab_s *exports,
+         int nexports)
 {
   int ret;
 
-  ret = exec_spawn(filename, argv, NULL, exports, nexports, NULL);
+  ret = exec_spawn(filename, argv, envp, exports, nexports, NULL);
   if (ret < 0)
     {
       set_errno(-ret);
