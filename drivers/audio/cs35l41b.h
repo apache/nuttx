@@ -1028,5 +1028,7 @@ int cs35l41b_debug_set_gain(FAR struct cs35l41b_dev_s *priv,
                             unsigned long arg);
 int cs35l41b_debug_get_gain(FAR struct cs35l41b_dev_s *priv,
                             unsigned long arg);
+int cs35l41b_debug_get_mode(FAR struct cs35l41b_dev_s *priv,
+                            unsigned long arg);
 #endif
 #endif

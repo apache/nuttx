@@ -130,18 +130,19 @@ void cs35l41b_dump_registers(FAR struct cs35l41b_dev_s *priv,
       dump_reg->regdump_size  = ARRAY_SIZE(g_cs35l41b_debug_reg);
     }
 
-  if (priv->dump_dsp_info)
+  for (i = 0; i < ARRAY_SIZE(g_cs35l41b_debug_reg); i++)
     {
-      for (i = 0; i < ARRAY_SIZE(g_cs35l41b_debug_reg); i++)
+      cs35l41b_read_register(priv, &g_cs35l41b_debug_reg[i].regval,
+                            g_cs35l41b_debug_reg[i].regaddr);
+      if (priv->dump_dsp_info)
         {
-          cs35l41b_read_register(priv, &g_cs35l41b_debug_reg[i].regval,
-                                g_cs35l41b_debug_reg[i].regaddr);
           syslog(LOG_WARNING, "-%25s[%08lx]: %08lx\n",
                 g_cs35l41b_debug_reg[i].regname,
                 g_cs35l41b_debug_reg[i].regaddr,
                 g_cs35l41b_debug_reg[i].regval);
         }
     }
+
 }
 #endif
 
@@ -230,6 +231,28 @@ int cs35l41b_debug_get_gain(FAR struct cs35l41b_dev_s *priv,
     }
 
   syslog(LOG_INFO, "cs35l41b mode:%d, gain:%ld \n", priv->mode, msg->gain);
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: cs35l41b_debug_get_gain
+ *
+ * Description:
+ *   cs35l41b debug get gain
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_AUDIO_CS35L41B_DEBUG
+int cs35l41b_debug_get_mode(FAR struct cs35l41b_dev_s *priv,
+                            unsigned long arg)
+{
+  struct cs35l41b_debug_msg_s *msg = (struct cs35l41b_debug_msg_s *)arg;
+
+  msg->mode = priv->mode;
+
+  syslog(LOG_INFO, "cs35l41b mode:%d", msg->mode);
 
   return OK;
 }

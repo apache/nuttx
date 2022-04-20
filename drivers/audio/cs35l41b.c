@@ -78,6 +78,7 @@
 # define IO_DEBUG_DUMP_INFO         13
 # define IO_DEBUG_DUMP_ENABLE       14
 # define IO_DEBUG_DUMP_DISABLE      15
+# define IO_DEBUG_GET_MODE          16
 #endif
 
 #define CALIBRATED_STATUS_OK        1
@@ -561,6 +562,10 @@ static int cs35l41b_ioctl(FAR struct audio_lowerhalf_s *dev,
 
           case IO_DEBUG_DUMP_DISABLE:
             priv->dump_dsp_info = false;
+            break;
+
+          case IO_DEBUG_GET_MODE:
+            cs35l41b_debug_get_mode(priv, (unsigned int)audio_msg->u.ptr);
             break;
 #endif
 
