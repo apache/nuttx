@@ -339,17 +339,17 @@ static int sc8551_get_flt_stat(FAR struct sc8551_dev_s * priv,
   uint8_t flt_reg;
   int ret;
 
-  ret  = sc8551_getreg8(priv, SC8551_REG_10, &flt_reg, 1);
+  ret  = sc8551_getreg8(priv, SC8551_REG_11, &flt_reg, 1);
   if (ret < 0)
     {
       baterr("ERROR: Failed to get flt_stat of sc8551: %d\n", ret);
       return ERROR;
     }
 
-  if (flt_reg & SC8551_BAT_OVP_FLT_STAT_MASK) *vbat_ovp = true;
-  if (flt_reg & SC8551_BAT_OCP_FLT_STAT_MASK) *ibat_ocp = true;
-  if (flt_reg & SC8551_BUS_OVP_FLT_STAT_MASK) *vbus_ovp = true;
-  if (flt_reg & SC8551_BUS_OCP_FLT_STAT_MASK) *ibus_ocp = true;
+  if (flt_reg & SC8551_BAT_OVP_FLT_FLAG_MASK) *vbat_ovp = true;
+  if (flt_reg & SC8551_BAT_OCP_FLT_FLAG_MASK) *ibat_ocp = true;
+  if (flt_reg & SC8551_BUS_OVP_FLT_FLAG_MASK) *vbus_ovp = true;
+  if (flt_reg & SC8551_BUS_OCP_FLT_FLAG_MASK) *ibus_ocp = true;
 
   return ret;
 }
