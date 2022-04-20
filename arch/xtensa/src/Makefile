@@ -108,7 +108,7 @@ define LINK_ALLSYMS
 endef
 
 nuttx$(EXEEXT): $(STARTUP_OBJS) board/libboard$(LIBEXT)
-	@echo "LD: nuttx"
+	$(Q) echo "LD: nuttx"
 ifneq ($(CONFIG_ALLSYMS),y)
 	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
 		-o $(NUTTX) $(filter-out board/libboard$(LIBEXT), $^) $(EXTRA_OBJS) \
