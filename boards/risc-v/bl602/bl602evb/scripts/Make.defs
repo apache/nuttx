@@ -34,15 +34,13 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ASARCHCPUFLAGS += -Wa,-g
 endif
 
-MAXOPTIMIZATION = -Os
-
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
 endif
 
 ARCHCPUFLAGS += -mno-relax
-ARCHCFLAGS += -fno-common -ffunction-sections -fdata-sections
-ARCHCXXFLAGS += -fno-common -ffunction-sections -fdata-sections -std=c++17 -pipe
+ARCHCFLAGS += -fno-common
+ARCHCXXFLAGS += -fno-common -std=c++17 -pipe
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
@@ -68,6 +66,6 @@ CXXELFFLAGS = $(CXXFLAGS)
 LDELFFLAGS = -melf32lriscv -r -e main
 LDELFFLAGS += -T $(call CONVERT_PATH,$(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld)
 
-LDFLAGS += --gc-sections -melf32lriscv --cref
+LDFLAGS += -melf32lriscv --cref
 LDFLAGS += -Map=$(TOPDIR)/nuttx.map
 

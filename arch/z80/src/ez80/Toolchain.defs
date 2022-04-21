@@ -51,7 +51,7 @@ endif
 ARCHSTDINCLUDES =
 
 ARCHCPUFLAGS = -Dinterrupt="__attribute__((__interrupt__))" -ffreestanding
-ARCHCPUFLAGS += -ffunction-sections -fdata-sections -Wa,-march=ez80
+ARCHCPUFLAGS += -Wa,-march=ez80
 ARCHLIST = 
 ARCHWARNINGS = -Wall -Wextra -Wno-incompatible-library-redeclaration
 ARCHWARNINGS += -Wno-main-return-type -Wno-unused-parameter
@@ -64,7 +64,12 @@ ARCHASMINCLUDES = -include chip/clang-compat.asm
 ARCHASMLIST =
 ARCHASMWARNINGS = -W
 
-LDFLAGS += --gc-sections
+# Optimization of unused sections
+
+ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
+  LDFLAGS         += --gc-sections
+  MAXOPTIMIZATION += -ffunction-sections -fdata-sections
+endif
 
 # Tool names/paths.
 

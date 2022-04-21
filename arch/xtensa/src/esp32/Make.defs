@@ -242,11 +242,6 @@ EXTRA_LIBS += -lbtdm_app
   endif
 endif
 
-# Due to some Wi-Fi related libraries, the option is need to avoid linking too much
-# unused functions.
-
-LDFLAGS += --gc-sections
-
 # Wireless interfaces.
 
 CHIP_CSRCS += esp32_wireless.c
