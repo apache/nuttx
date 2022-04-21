@@ -86,7 +86,6 @@ INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)ble)
 #INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)ble$(DELIM)include)
 #INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)osal$(DELIM)include)
 
-CFLAGS += -ffunction-sections
 CFLAGS += -DCFG_CP
 CFLAGS += -DPHY_MCU_TYPE=MCU_BUMBEE_M0
 CFLAGS += -DHOST_CONFIG=4 
