@@ -153,7 +153,7 @@ int exec_module(FAR const struct binary_s *binp,
 
   /* Make a copy of the environment here */
 
-  if (envp)
+  if (envp || (envp = get_environ_ptr()))
     {
       envp = binfmt_copyenv(envp);
       if (!envp)
