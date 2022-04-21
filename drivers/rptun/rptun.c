@@ -768,8 +768,6 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
 
   rptun_unlock();
 
-  virtqueue_enable_cb(priv->rvdev.svq);
-
 #ifdef CONFIG_RPTUN_PING
   rptun_ping_init(&priv->rvdev, &priv->ping);
 #endif
