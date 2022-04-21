@@ -62,7 +62,11 @@
  * function call.  However, get_environ_ptr() can be used in its place.
  */
 
-#define environ get_environ_ptr()
+#ifdef CONFIG_DISABLE_ENVIRON
+#  define environ NULL
+#else
+#  define environ get_environ_ptr()
+#endif
 
 #if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
 #  define mkstemp64            mkstemp
@@ -138,11 +142,7 @@ void      arc4random_buf(FAR void *bytes, size_t nbytes);
 
 /* Environment variable support */
 
-#ifdef CONFIG_DISABLE_ENVIRON
-#  define get_environ_ptr() NULL
-#else
 FAR char **get_environ_ptr(void);
-#endif
 FAR char *getenv(FAR const char *name);
 int       putenv(FAR const char *string);
 int       clearenv(void);
