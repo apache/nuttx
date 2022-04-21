@@ -152,7 +152,6 @@ void up_initial_state(struct tcb_s *tcb)
 
 #ifdef CONFIG_ARCH_FPU
   xcp->regs[REG_FPSCR] |= ARMV8M_FPSCR_LTPSIZE_NONE;
-  xcp->regs[REG_FP_RESERVED] = 0;
 #endif /* CONFIG_ARCH_FPU */
 
   /* Enable or disable interrupts, based on user configuration */
