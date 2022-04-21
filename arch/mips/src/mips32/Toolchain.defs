@@ -277,6 +277,13 @@ NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 
+# Optimization of unused sections
+
+ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
+  LDFLAGS         += --gc-sections
+  MAXOPTIMIZATION += -ffunction-sections -fdata-sections
+endif
+
 # Add the builtin library
 
 EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name))

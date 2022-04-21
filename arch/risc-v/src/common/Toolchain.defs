@@ -66,6 +66,13 @@ ifneq ($(CONFIG_CXX_RTTI),y)
   ARCHCXXFLAGS += -fno-rtti
 endif
 
+# Optimization of unused sections
+
+ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
+  LDFLAGS         += --gc-sections
+  MAXOPTIMIZATION += -ffunction-sections -fdata-sections
+endif
+
 # Generic GNU RVG toolchain
 
 ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)

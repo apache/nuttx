@@ -48,7 +48,7 @@ endif
 
 ARCHCPUFLAGS += -mcmodel=medany
 
-ARCHCFLAGS += -fno-common -ffunction-sections -fdata-sections
+ARCHCFLAGS += -fno-common
 ARCHCXXFLAGS += -fno-common
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
@@ -77,4 +77,4 @@ LDELFFLAGS += -T $(call CONVERT_PATH,$(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.
 
 # File extensions
 
-LDFLAGS += --gc-sections -melf64lriscv
+LDFLAGS += -melf64lriscv
