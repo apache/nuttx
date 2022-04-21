@@ -329,17 +329,92 @@ static bool decode_insn_compressed(uintptr_t *regs, riscv_insn_ctx_t *ctx)
         ctx->len  = 4;
         break;
 
-#  ifdef CONFIG_ARCH_RV32
+#  ifdef CONFIG_ARCH_FPU
+#    ifdef CONFIG_ARCH_RV32
       case INSN_C_FLW:
+
+        /* flw share the same encoding layout with lw */
+
+        imm = insn.lw.imm2 << 2 | insn.lw.imm53 << 3 | insn.lw.imm6 << 6;
+        ctx->dest = (uint8_t *)&regs[REG_F8 + insn.lw.rd];
+        ctx->src  = (uint8_t *)regs[REG_X8 + insn.lw.rs1] + imm;
+        ctx->len  = 4;
+        break;
+
       case INSN_C_FLWSP:
+
+        /* flwsp share the same encoding layout with lwsp */
+
+        imm = insn.lwsp.imm42 << 2 | insn.lwsp.imm5 << 5 |
+              insn.lwsp.imm76 << 6;
+        ctx->dest = (uint8_t *)&regs[REG_F0 + insn.lwsp.rd];
+        ctx->src  = (uint8_t *)regs[REG_SP] + imm;
+        ctx->len  = 4;
+        break;
+
       case INSN_C_FSW:
+
+        /* fsw share the same encoding layout with sw */
+
+        imm = insn.sw.imm2 << 2 | insn.sw.imm53 << 3 | insn.sw.imm6 << 6;
+        ctx->dest = (uint8_t *)regs[REG_X8 + insn.sw.rs1] + imm;
+        ctx->src  = (uint8_t *)&regs[REG_F8 + insn.sd.rs2];
+        ctx->len  = 4;
+        break;
+
       case INSN_C_FSWSP:
-#  endif
+
+        /* fswsp share the same encoding layout with swsp */
+
+        imm = insn.swsp.imm52 << 2 | insn.swsp.imm76 << 6;
+        ctx->dest = (uint8_t *)regs[REG_SP] + imm;
+        ctx->src  = (uint8_t *)&regs[REG_F0 + insn.swsp.rs2];
+        ctx->len  = 4;
+        break;
+
+#    endif
       case INSN_C_FLD:
+
+        /* fld share the same encoding layout with ld */
+
+        imm = insn.ld.imm53 << 3 | insn.ld.imm76 << 6;
+        ctx->dest = (uint8_t *)&regs[REG_F8 + insn.ld.rd];
+        ctx->src  = (uint8_t *)regs[REG_X8 + insn.ld.rs1] + imm;
+        ctx->len  = 8;
+        break;
+
       case INSN_C_FLDSP:
+
+        /* fldsp share the same encoding layout with ldsp */
+
+        imm = insn.ldsp.imm43 << 3 | insn.ldsp.imm5 << 5 |
+              insn.ldsp.imm86 << 6;
+        ctx->dest = (uint8_t *)&regs[REG_F0 + insn.ld.rd];
+        ctx->src  = (uint8_t *)regs[REG_SP] + imm;
+        ctx->len  = 8;
+        break;
+
       case INSN_C_FSD:
+
+        /* fsd share the same encoding layout with sd */
+
+        imm = insn.sd.imm53 << 3 | insn.sd.imm76 << 6;
+        ctx->dest = (uint8_t *)regs[REG_X8 + insn.sd.rs1] + imm;
+        ctx->src  = (uint8_t *)&regs[REG_F8 + insn.sd.rs2];
+        ctx->len  = 8;
+        break;
+
       case INSN_C_FSDSP:
-        _alert("Misaligned compressed float instruction not support yet\n");
+
+        /* fsdsp share the same encoding layout with sdsp */
+
+        imm = insn.sdsp.imm53 << 3 | insn.sdsp.imm86 << 6;
+        ctx->dest = (uint8_t *)regs[REG_SP] + imm;
+        ctx->src  = (uint8_t *)&regs[REG_F0 + insn.sdsp.rs2];
+        ctx->len  = 8;
+        break;
+
+#  endif
       default:
         _alert("Compressed: %x\n", insn.insn);
         return false;
@@ -439,13 +514,35 @@ static bool decode_insn(uintptr_t *regs, riscv_insn_ctx_t *ctx)
 
         break;
 
-      /* TODO: Handle float load / store instruction */
-
+#ifdef CONFIG_ARCH_FPU
       case INSN_FLW:
       case INSN_FLD:
+
+        ctx->dest = (uint8_t *)&regs[REG_F0 + insn.l.rd];
+        ctx->src = (uint8_t *)regs[insn.l.rs1] +
+                   sext(insn.l.imm, 12);
+
+        /* Is instruction flw or fld ? */
+
+        ctx->len = insn.l.funct3 == 0x2 ? 4 : 8;
+        break;
+
       case INSN_FSW:
       case INSN_FSD:
-        _alert("Misaligned float instruction not support yet\n");
+
+        /* Fetch signed imm */
+
+        imm = sext(insn.s.imm2 | insn.s.imm1 << 5, 12);
+
+        ctx->dest = (uint8_t *)regs[insn.s.rs1] + imm;
+        ctx->src = (uint8_t *)&regs[REG_F0 + insn.s.rs2];
+
+        /* Is instruction fsw or fsd ? */
+
+        ctx->len = insn.s.funct3 == 0x2 ? 4 : 8;
+
+        break;
+#endif
       default:
         _alert("Uncompressed: %x\n", insn.insn);
         return false;
