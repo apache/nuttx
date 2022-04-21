@@ -1969,6 +1969,16 @@ config DEBUG_OPT_UNUSED_SECTIONS
 		linker by compiling with " -ffunction-sections -fdata-sections ", and
 		linking with " --gc-sections ".
 
+config DEBUG_LINK_MAP
+	bool "Generate link map file"
+	default y
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Selecting this option will pass "-Map=$(TOPDIR)$(DELIM)nuttx.map" to ld
+		when linking NuttX ELF. That file can be useful for verifying
+		and debugging magic section games, and for seeing which
+		pieces of code get eliminated with DEBUG_OPT_UNUSED_SECTIONS.
+
 endmenu # Build Setup
 
 menu "System Type"

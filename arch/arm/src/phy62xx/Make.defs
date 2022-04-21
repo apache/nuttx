@@ -121,8 +121,6 @@ LDFLAGS += "$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)bb_rom_sym_m0.gdbsym"
 
 context:: .buildlib
 
-LDFLAGS += -Map="../../../phyplus_build.map"
-
 ifndef CONFIG_PHY6222_SDK
 EXTRA_LIBPATHS += -L$(TOPDIR)/arch/arm/src/chip
 EXTRA_LIBS += -lphy62xxble

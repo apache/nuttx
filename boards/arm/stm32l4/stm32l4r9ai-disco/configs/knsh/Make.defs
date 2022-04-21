@@ -57,6 +57,5 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS += -g
 endif
 
-#LDFLAGS += -Map=$(TOPDIR)/nuttx.map
 #CFLAGS += -Wa,-adhln
 #CXXFLAGS += -Wa,-adhln
