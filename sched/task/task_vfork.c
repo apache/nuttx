@@ -154,7 +154,7 @@ FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr)
 
   /* Duplicate the parent tasks environment */
 
-  ret = env_dup(child->cmn.group, get_environ_ptr());
+  ret = env_dup(child->cmn.group, environ);
   if (ret < 0)
     {
       goto errout_with_tcb;
