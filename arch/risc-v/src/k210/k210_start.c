@@ -67,6 +67,10 @@ void __k210_start(uint32_t mhartid)
   const uint32_t *src;
   uint32_t *dest;
 
+  /* Configure FPU */
+
+  riscv_fpuconfig();
+
   if (0 < mhartid)
     {
       goto cpu1;

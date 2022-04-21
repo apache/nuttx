@@ -54,6 +54,11 @@ ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
 CMN_CSRCS += riscv_vfork.c
 endif
 
+ifeq ($(CONFIG_ARCH_FPU),y)
+CMN_ASRCS += riscv_fpu.S
+CMN_CSRCS += riscv_fpucmp.c
+endif
+
 # Specify our C code within this directory to be included
 CHIP_CSRCS  = k210_allocateheap.c k210_clockconfig.c
 CHIP_CSRCS += k210_irq.c k210_irq_dispatch.c
