@@ -53,7 +53,10 @@ bool up_fpucmp(const void *saveregs1, const void *saveregs2)
   const uint32_t *regs1 = saveregs1;
   const uint32_t *regs2 = saveregs2;
 
-  return memcmp(&regs1[REG_S0], &regs2[REG_S0], 4 * HW_FPU_REGS) == 0 &&
+  /* compare of hardware fp registers should skip REG_FP_RESERVED */
+
+  return memcmp(&regs1[REG_S0], &regs2[REG_S0],
+                4 * (HW_FPU_REGS - 1)) == 0 &&
          memcmp(&regs1[REG_S16], &regs2[REG_S16], 4 * SW_FPU_REGS) == 0;
 }
 #endif /* CONFIG_ARCH_FPU */
