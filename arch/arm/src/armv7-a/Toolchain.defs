@@ -136,6 +136,12 @@ ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
   MAXOPTIMIZATION += -ffunction-sections -fdata-sections
 endif
 
+# Debug link map
+
+ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
+  LDFLAGS += --cref -Map=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
+endif
+
 # NuttX buildroot under Linux or Cygwin
 
 ifeq ($(CONFIG_ARMV7A_TOOLCHAIN),BUILDROOT)
