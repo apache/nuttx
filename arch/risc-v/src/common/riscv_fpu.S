@@ -64,7 +64,11 @@
 riscv_fpuconfig:
     li           a0, MSTATUS_FS_INIT
     csrs         CSR_STATUS, a0
-    csrwi        fcsr, 0
+
+    fsflags      zero
+    fsrm         zero
+
+    fence.i
     ret
 
 #endif /* CONFIG_ARCH_FPU */
