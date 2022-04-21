@@ -100,6 +100,24 @@ int up_cpu_idlestack(int cpu, struct tcb_s *tcb, size_t stack_size)
   tcb->adj_stack_size  = CPU1_IDLETHREAD_STACKSIZE;
   tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
 
+#ifdef CONFIG_STACK_COLORATION
+    {
+      register uint32_t *ptr;
+      register int i;
+
+      /* If stack debug is enabled, then fill the stack with a recognizable
+       * value that we can use later to test for high water marks.
+       */
+
+      for (i = 0, ptr = (uint32_t *)tcb->stack_alloc_ptr;
+           i < tcb->adj_stack_size;
+           i += sizeof(uint32_t))
+        {
+          *ptr++ = STACK_COLOR;
+        }
+    }
+#endif
+
   return OK;
 }
 
