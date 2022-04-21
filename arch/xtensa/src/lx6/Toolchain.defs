@@ -77,6 +77,12 @@ ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
   MAXOPTIMIZATION += -ffunction-sections -fdata-sections
 endif
 
+# Debug link map
+
+ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
+  LDFLAGS += --cref -Map=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
+endif
+
 # Default toolchain
 ifeq ($(CONFIG_XTENSA_TOOLCHAIN_XCC), y)
   CC = $(CROSSDEV)xcc

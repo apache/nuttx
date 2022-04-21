@@ -69,5 +69,4 @@ CXXELFFLAGS = $(CXXFLAGS) -fno-common
 LDELFFLAGS = -melf32lriscv -r -e main
 LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)binfmt$(DELIM)libelf$(DELIM)gnu-elf.ld)
 
-LDFLAGS += -Map=$(call CONVERT_PATH,$(TOPDIR)/nuttx.map) --cref
 LDFLAGS += -melf32lriscv
