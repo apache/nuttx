@@ -112,6 +112,7 @@
 #define NVT_XDATA_SECTOR_SIZE        256
 
 #define NVT_RESULT_FOLDER            "data/tp"
+#define NVT_OFFLOG_FOLDER            "data/log/tp"
 #define NVT_INIT_RETRY_TIMES         5
 
 #ifdef  CONFIG_NVT_OFFLINE_LOG
@@ -600,7 +601,7 @@ static int nt38350_read_reg(FAR struct nt38350_dev_s *priv,
   config.addrlen   = 7;
   ret = nt38350_i2c_read(priv->config->i2c, &config,
                          address, buffer, length);
-  if (ret != OK)
+  if (ret < 0)
     {
       ierr("ERROR: Failed to read reg: %d\n", ret);
       return ret;
@@ -624,7 +625,7 @@ static int nt38350_write_reg(FAR struct nt38350_dev_s *priv,
   config.addrlen   = 7;
   ret = nt38350_i2c_write(priv->config->i2c, &config,
                           address, buffer, length);
-  if (ret != OK)
+  if (ret < 0)
     {
       ierr("ERROR: Failed to write reg: %d\n", ret);
       return ret;
@@ -703,7 +704,7 @@ static int nvt_bootloader_reset(FAR struct nt38350_dev_s *priv)
   buf[1] = 0x69;
 
   ret = nt38350_write_reg(priv, NVT_I2C_HW_ADDRESS, buf, 2);
-  if (ret != OK)
+  if (ret < 0)
     {
       ierr("ERROR: Failed to reset bootloader\n");
     }
@@ -740,7 +741,7 @@ static int nvt_clear_fw_status(FAR struct nt38350_dev_s *priv)
       buf[0] = EVENT_MAP_HANDSHAKING_OR_SUB_CMD_BYTE;
       buf[1] = 0xff;
       ret = nt38350_read_reg(priv, NVT_I2C_FW_ADDRESS, buf, 2);
-      if (ret != OK)
+      if (ret < 0)
         {
           ierr("ERROR: Failed to read register\n");
         }
@@ -787,7 +788,7 @@ static int nvt_check_fw_status(FAR struct nt38350_dev_s *priv)
       buf[0] = EVENT_MAP_HANDSHAKING_OR_SUB_CMD_BYTE;
       buf[1] = 0x00;
       ret = nt38350_read_reg(priv, NVT_I2C_FW_ADDRESS, buf, 2);
-      if (ret != OK)
+      if (ret < 0)
         {
           ierr("ERROR: Failed to read register\n");
         }
@@ -907,9 +908,7 @@ info_retry:
   priv->max_button_num = buf[11];
   priv->fw_type = buf[14];
 
-  iwarn("fw_ver: 0x%02x, fw_type: 0x%02x, x_num: %d, y_num: %d,"
-        "abs_x_max: %d, abs_y_max: %d\n", priv->fw_ver, priv->fw_type,
-        priv->x_num, priv->y_num, priv->abs_x_max, priv->abs_y_max);
+  iwarn("fw_ver: 0x%02x, fw_type: 0x%02x\n", priv->fw_ver, priv->fw_type);
 
   if ((buf[1] + buf[2]) != 0xff)
     {
@@ -923,7 +922,6 @@ info_retry:
       if (retry_count < 3)
         {
           retry_count++;
-          ierr("retry_count = %ld\n", retry_count);
           goto info_retry;
         }
       else
@@ -942,14 +940,13 @@ info_retry:
  *   Novatek touchscreen check and stop crc reboot loop
  *
  *return:
- *   Executive outcomes. 0---succeed. other---access fail.
+ *   none
  ***************************************************************************/
 
-static int nvt_stop_crc_reboot(FAR struct nt38350_dev_s *priv)
+static void nvt_stop_crc_reboot(FAR struct nt38350_dev_s *priv)
 {
   uint8_t buf[8];
   int32_t retry;
-  int ret;
 
   /* ---change I2C index to prevent geting 0xFF, but not 0xFC--- */
 
@@ -958,24 +955,26 @@ static int nvt_stop_crc_reboot(FAR struct nt38350_dev_s *priv)
   /* ---read to check if buf is 0xFC which means IC is in CRC reboot */
 
   buf[0] = 0x4e;
-  ret = nt38350_read_reg(priv, NVT_I2C_BLDR_ADDRESS, buf, 4);
+  nt38350_read_reg(priv, NVT_I2C_BLDR_ADDRESS, buf, 4);
 
   if ((buf[1] == 0xfc) ||
              ((buf[1] == 0xff) && (buf[2] == 0xff) && (buf[3] == 0xff)))
     {
+      /* IC is in CRC fail reboot loop, need to be stopped */
+
       for (retry = 5; retry > 0; retry--)
         {
           /* ---write i2c cmds to reset idle : 1st--- */
 
           buf[0] = 0x00;
           buf[1] = 0xa5;
-          ret = nt38350_write_reg(priv, NVT_I2C_HW_ADDRESS, buf, 2);
+          nt38350_write_reg(priv, NVT_I2C_HW_ADDRESS, buf, 2);
 
           /* ---write i2c cmds to reset idle : 2ed--- */
 
           buf[0] = 0x00;
           buf[1] = 0xa5;
-          ret = nt38350_write_reg(priv, NVT_I2C_HW_ADDRESS, buf, 2);
+          nt38350_write_reg(priv, NVT_I2C_HW_ADDRESS, buf, 2);
           usleep(NVT_DELAY_1MS);
 
           /* ---clear CRC_ERR_FLAG--- */
@@ -984,7 +983,7 @@ static int nvt_stop_crc_reboot(FAR struct nt38350_dev_s *priv)
 
           buf[0] = 0x35;
           buf[1] = 0xa5;
-          ret = nt38350_write_reg(priv, NVT_I2C_BLDR_ADDRESS, buf, 2);
+          nt38350_write_reg(priv, NVT_I2C_BLDR_ADDRESS, buf, 2);
 
           /* ---check CRC_ERR_FLAG--- */
 
@@ -992,17 +991,16 @@ static int nvt_stop_crc_reboot(FAR struct nt38350_dev_s *priv)
 
           buf[0] = 0x35;
           buf[1] = 0x00;
-          ret = nt38350_read_reg(priv, NVT_I2C_BLDR_ADDRESS, buf, 2);
+          nt38350_read_reg(priv, NVT_I2C_BLDR_ADDRESS, buf, 2);
           if (buf[1] == 0xa5)
-               break;
+              break;
         }
 
       if (retry == 0)
           ierr("ERROR: CRC auto reboot is not able "
-               "to be stopped buf[1]=0x%02x\n", buf[1]);
-    }
+              "to be stopped buf[1]=0x%02x\n", buf[1]);
 
-  return ret;
+    }
 }
 
 /***************************************************************************
@@ -1010,11 +1008,11 @@ static int nvt_stop_crc_reboot(FAR struct nt38350_dev_s *priv)
  *   Novatek touchscreen check chip version trim function.
  *
  *return:
- *   Executive outcomes. 0---succeed. other---access fail.
+ *   Executive outcomes. 0---NVT IC. other---access fail
  ***************************************************************************/
 
 static int nvt_ts_check_chip_ver_trim(FAR struct nt38350_dev_s *priv,
-             uint32_t chip_ver_trim_addr)
+                                      uint32_t chip_ver_trim_addr)
 {
   int32_t found_nvt_chip = 0;
   uint8_t buf[8];
@@ -1023,10 +1021,11 @@ static int nvt_ts_check_chip_ver_trim(FAR struct nt38350_dev_s *priv,
   int32_t ret = -1;
   int32_t i;
 
+  /* if bootloader reset fail, i2c bus maybe is broken, return fail at once */
+
   ret = nvt_bootloader_reset(priv);
-  if (ret != OK)
+  if (ret < 0)
     {
-      ret = -ENODEV;
       return ret;
     }
 
@@ -1035,7 +1034,7 @@ static int nvt_ts_check_chip_ver_trim(FAR struct nt38350_dev_s *priv,
       nvt_sw_reset_idle(priv);
       buf[0] = 0x00;
       buf[1] = 0x35;
-      ret = nt38350_write_reg(priv, NVT_I2C_HW_ADDRESS, buf, 2);
+      nt38350_write_reg(priv, NVT_I2C_HW_ADDRESS, buf, 2);
       usleep(NVT_DELAY_10MS);
 
       nvt_set_page(priv, NVT_I2C_BLDR_ADDRESS, chip_ver_trim_addr);
@@ -1047,11 +1046,11 @@ static int nvt_ts_check_chip_ver_trim(FAR struct nt38350_dev_s *priv,
       buf[4] = 0x00;
       buf[5] = 0x00;
       buf[6] = 0x00;
-      ret = nt38350_read_reg(priv, NVT_I2C_BLDR_ADDRESS, buf, 7);
+      nt38350_read_reg(priv, NVT_I2C_BLDR_ADDRESS, buf, 7);
 
       /* Get Touch IC ID */
 
-      iwarn("buf[1]=0x%02x, buf[2]=0x%02x, buf[3]=0x%02x,"
+      iinfo("buf[1]=0x%02x, buf[2]=0x%02x, buf[3]=0x%02x,"
             "buf[4]=0x%02x, buf[5]=0x%02x,buf[6]=0x%02x\n",
             buf[1], buf[2], buf[3], buf[4], buf[5], buf[6]);
 
@@ -1078,7 +1077,7 @@ static int nvt_ts_check_chip_ver_trim(FAR struct nt38350_dev_s *priv,
               if (g_trim_id_table[list].mask[i])
                 {
                   if (buf[i + 1] != g_trim_id_table[list].id[i])
-                       break;
+                      break;
                 }
             }
 
@@ -1089,7 +1088,7 @@ static int nvt_ts_check_chip_ver_trim(FAR struct nt38350_dev_s *priv,
 
           if (found_nvt_chip)
             {
-              iwarn("This NVT touch IC\n");
+              iinfo("This NVT touch IC\n");
               priv->mmap = g_trim_id_table[list].mmap;
               priv->carrier_system =
                     g_trim_id_table[list].hwinfo->carrier_system;
@@ -2211,7 +2210,7 @@ static int nvt_update_firmware(FAR struct nt38350_dev_s *priv,
   /* Step 1 : initial bootloader */
 
   ret = nvt_init_bootloader(priv);
-  if (ret)
+  if (ret < 0)
     {
       return ret;
     }
@@ -2219,7 +2218,7 @@ static int nvt_update_firmware(FAR struct nt38350_dev_s *priv,
   /* Step 2 : Resume PD */
 
   ret = nvt_resume_pd(priv);
-  if (ret)
+  if (ret < 0)
     {
       return ret;
     }
@@ -2227,7 +2226,7 @@ static int nvt_update_firmware(FAR struct nt38350_dev_s *priv,
   /* Step 3 : Erase */
 
   ret = nvt_erase_flash(priv);
-  if (ret)
+  if (ret < 0)
     {
       return ret;
     }
@@ -2235,7 +2234,7 @@ static int nvt_update_firmware(FAR struct nt38350_dev_s *priv,
   /* Step 4 : Program */
 
   ret = nvt_write_flash(priv, data);
-  if (ret)
+  if (ret < 0)
     {
       return ret;
     }
@@ -2243,7 +2242,7 @@ static int nvt_update_firmware(FAR struct nt38350_dev_s *priv,
   /* Step 5 : Verify */
 
   ret = nvt_verify_flash(priv, data);
-  if (ret)
+  if (ret < 0)
     {
       return ret;
     }
@@ -2356,7 +2355,7 @@ static int nvt_check_flash_end_flag(FAR struct nt38350_dev_s *priv)
   /* Step 1 : initial bootloader */
 
   ret = nvt_init_bootloader(priv);
-  if (ret)
+  if (ret < 0)
     {
       return ret;
     }
@@ -2364,7 +2363,7 @@ static int nvt_check_flash_end_flag(FAR struct nt38350_dev_s *priv)
   /* Step 2 : Resume PD */
 
   ret = nvt_resume_pd(priv);
-  if (ret)
+  if (ret < 0)
     {
       return ret;
     }
@@ -2477,7 +2476,7 @@ static int nvt_boot_update_firmware(FAR struct nt38350_dev_s *priv)
   uint8_t *fw_data = NULL;
 
   ret = get_nvt_fw_size(priv);
-  if (ret)
+  if (ret < 0)
     {
       ierr("ERROR: Get nvt firmware size failed\n");
       goto err;
@@ -2491,14 +2490,14 @@ static int nvt_boot_update_firmware(FAR struct nt38350_dev_s *priv)
     }
 
   ret = get_nvt_fw_content(priv, fw_data);
-  if (ret)
+  if (ret < 0)
     {
       ierr("ERROR: Failed to get fimware content\n");
       goto err;
     }
 
   ret = nvt_update_firmware_request(priv, fw_data);
-  if (ret)
+  if (ret < 0)
     {
       ierr("ERROR: nvt_update_firmware_request failed. (%ld)\n", ret);
       goto err;
@@ -2533,7 +2532,7 @@ static int nvt_boot_update_firmware(FAR struct nt38350_dev_s *priv)
     {
       nvt_bootloader_reset(priv);
       ret = nvt_check_fw_reset_state(priv, RESET_STATE_INIT);
-      if (ret)
+      if (ret < 0)
         {
           ierr("ERROR: check fw reset state failed\n");
           ret = nvt_update_firmware(priv, fw_data);
@@ -2838,9 +2837,9 @@ static void nvt_log_data_to_csv(FAR void *arg)
 
   /* if file folder not exist, first create the folder */
 
-  if (access(NVT_RESULT_FOLDER, F_OK) < 0)
+  if (access(NVT_OFFLOG_FOLDER, F_OK) < 0)
     {
-      mkdir(NVT_RESULT_FOLDER, 0777);
+      mkdir(NVT_OFFLOG_FOLDER, 0777);
     }
 
   /* open csv file */
@@ -3812,8 +3811,8 @@ void nvt_ts_wakeup_gesture_report(FAR struct nt38350_dev_s *priv,
     }
   else if (gesture_id > DATA_PROTOCOL)
     {
-      ierr("gesture_id %d is invalid, func_type=%d, func_id=%d\n",
-           gesture_id, func_type, func_id);
+      iinfo("gesture_id %d is invalid, func_type=%d, func_id=%d\n",
+             gesture_id, func_type, func_id);
       return;
     }
 
@@ -4071,7 +4070,7 @@ static int nt38350_data_interrupt(FAR struct ioexpander_dev_s *dev,
    */
 
   ret = work_queue(HPWORK, &priv->work, nt38350_data_worker, priv, 0);
-  if (ret != OK)
+  if (ret < 0)
     {
       ierr("ERROR: Failed to queue work: %d\n", ret);
     }
@@ -4090,7 +4089,7 @@ static void nt38350_poweroff_cb(void *arg)
 
   ptr->times++;
   ptr->icpower_state = NVT_POWER_OFF;
-  iwarn("NT38350 ICPowerState %d\n", ptr->icpower_state);
+  iinfo("NT38350 ICPowerState %d\n", ptr->icpower_state);
 }
 #endif
 
@@ -4100,13 +4099,13 @@ static int nt38350_hardware_reinit(FAR struct nt38350_dev_s *priv)
   int ret;
 
   ret = nvt_ts_check_chip_ver_trim(priv, NVT_CHIP_VER_TRIM_ADDR);
-  if (ret)
+  if (ret < 0)
     {
       ret = nvt_ts_check_chip_ver_trim(priv, NVT_CHIP_VER_TRIM_OLD_ADDR);
-      if (ret)
+      if (ret < 0)
         {
           ierr("ERROR: Chip is not identified\n");
-          ret = -1;
+          return ret;
         }
     }
 
@@ -4128,15 +4127,16 @@ static int nt38350_ts_resume(FAR struct nt38350_dev_s *dev)
   config = dev->config;
   DEBUGASSERT(config != NULL);
 
-  iwarn("resume nt38350 touch IC\n");
-
-  nvt_bootloader_reset(dev);
   ret = nvt_check_fw_reset_state(dev, RESET_STATE_INIT);
-  if (ret)
+  if (ret < 0)
     {
-      iwarn("FW is not ready! Try to bootloader reset...\n");
       nvt_bootloader_reset(dev);
-      nvt_check_fw_reset_state(dev, RESET_STATE_INIT);
+      ret = nvt_check_fw_reset_state(dev, RESET_STATE_INIT);
+      if(ret < 0)
+        {
+          ierr("FW is not ready!\n");
+          return ret;
+        }
     }
 
   dev->touch_awake = 1;
@@ -4150,21 +4150,24 @@ static int nt38350_ts_resume(FAR struct nt38350_dev_s *dev)
 #if CONFIG_PM
 static int nt38350_ts_suspend(FAR struct nt38350_dev_s *dev, uint8_t cmd)
 {
+  int ret;
   FAR struct nt38350_config_s *config;
   uint8_t buf[2];
-
   config = dev->config;
   DEBUGASSERT(config != NULL);
 
-  iwarn("suspend nt38350 touch IC cmd 0x%02x\n", cmd);
-
   buf[0] = EVENT_MAP_HOST_CMD;
   buf[1] = cmd;
-  nt38350_write_reg(dev, NVT_I2C_FW_ADDRESS, buf, 2);
+  ret = nt38350_write_reg(dev, NVT_I2C_FW_ADDRESS, buf, 2);
+  if (ret < 0)
+    {
+      ierr("Failed to resume\n");
+      return ret;
+    }
 
   dev->touch_awake = 0;
 
-  return 0;
+  return ret;
 }
 #endif
 
@@ -4208,7 +4211,6 @@ static void nt38350_pm_notify(FAR struct pm_callback_s *cb,
 
           if (dev->nvt_pwr_resume.icpower_state == NVT_POWER_OFF)
             {
-              iwarn("Failed to resume, need to reset the IC\n");
               nt38350_hardware_reinit(dev);
             }
 
@@ -4248,15 +4250,21 @@ static int nt38350_recovery_cb(void *arg)
   FAR struct nt38350_dev_s *dev = (struct nt38350_dev_s *)arg;
 
   ret = nt38350_hardware_reinit(dev);
-  if (ret != OK)
+  if (ret < 0)
     {
       ierr("Failed to reinit hardware\n");
       return ret;
     }
 
-  nt38350_ts_resume(dev);
+  ret = nt38350_ts_resume(dev);
+  if (ret < 0)
+    {
+      ierr("Failed to resume\n");
+      return ret;
+    }
+
   dev->current_state = PM_NORMAL;
-  iwarn("Change to pm normal state\n");
+  iinfo("Change to pm normal state\n");
 
   return ret;
 }
@@ -4385,7 +4393,7 @@ int nt38350_register(FAR struct nt38350_config_s *config,
                      const char *devname)
 {
   FAR struct nt38350_dev_s *priv;
-  int ret;
+  int ret = 0;
 
 #ifdef CONFIG_NVT_DEBUG
   iinfo("devname: %s \n", devname);
@@ -4405,9 +4413,7 @@ int nt38350_register(FAR struct nt38350_config_s *config,
   /* Initialize the nt38350 device driver instance */
 
   priv->config = config;            /* Save the board configuration */
-
   priv->fw_path = CONFIG_NT38350_FW_PATH; /* Set up firmware path */
-
   priv->lower.maxpoint = NVT_TOUCH_MAX_FINGER_NUM;
   priv->lower.control  = nt38350_control;
 
@@ -4421,10 +4427,10 @@ int nt38350_register(FAR struct nt38350_config_s *config,
   usleep(NVT_DELAY_10MS);
 
   ret = nvt_ts_check_chip_ver_trim(priv, NVT_CHIP_VER_TRIM_ADDR);
-  if (ret)
+  if (ret < 0)
     {
       ret = nvt_ts_check_chip_ver_trim(priv, NVT_CHIP_VER_TRIM_OLD_ADDR);
-      if (ret)
+      if (ret < 0)
         {
           ierr("ERROR: Chip is not identified\n");
           ret = -ENODEV;
@@ -4440,8 +4446,8 @@ int nt38350_register(FAR struct nt38350_config_s *config,
 
 #ifdef CONFIG_NT38350_NEED_UPGRADE_FW
   ret = work_queue(HPWORK, &priv->fwwork, nvt_update_firmware_work,
-                   priv, 5000);
-  if (ret != OK)
+                   priv, 0);
+  if (ret < 0)
     {
       ierr("ERROR: Failed to queue work: %d\n", ret);
     }
@@ -4482,9 +4488,7 @@ int nt38350_register(FAR struct nt38350_config_s *config,
       goto errout_with_irq;
     }
 
-  /* And return success (?) */
-
-  return OK;
+  return ret;
 
 errout_with_irq:
   config->detach(config, nt38350_data_interrupt);
