@@ -27,6 +27,7 @@
 #include <nuttx/kthread.h>
 #include <nuttx/motor/foc/foc_dummy.h>
 #include <nuttx/mtd/mtd.h>
+#include <nuttx/power/pm.h>
 #include <nuttx/spi/spi_flash.h>
 #include <nuttx/spi/qspi_flash.h>
 
@@ -215,6 +216,16 @@ static int up_loop_task(int argc, char **argv)
 
 void up_initialize(void)
 {
+#ifdef CONFIG_PM
+  /* Initialize the power management subsystem.  This MCU-specific function
+   * must be called *very* early in the initialization sequence *before* any
+   * other device drivers are initialized (since they may attempt to register
+   * with the power management subsystem).
+   */
+
+  pm_initialize();
+#endif
+
   /* Register some tty-port to access tty-port on sim platform */
 
   up_uartinit();
