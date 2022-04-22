@@ -188,27 +188,27 @@ g_intstacktop:
 	and		a6, a6, a3				/* a6 = Set of pending, enabled interrupts for this level */
 	beqz	a6, 1f						/* Nothing to do */
 
-  /* At this point, the exception frame should have been allocated and filled,
-   * and current sp points to the interrupt stack (if enabled). Copy the
-   * pre-exception's base save area below the current SP.
-   */
+	/* At this point, the exception frame should have been allocated and filled,
+	 * and current sp points to the interrupt stack (if enabled). Copy the
+	 * pre-exception's base save area below the current SP. We saved the SP in A12
+	 * before getting here.
+	 */
 
 #ifdef CONFIG_XTENSA_INTBACKTRACE
-  rsr  a0, EXCSAVE_1 + \level - 1  /* Get exception frame pointer stored in EXCSAVE_x */
-  l32i a3, a0, (4 * REG_A0)        /* Copy pre-exception a0 (return address) */
-  s32e a3, sp, -16
-  l32i a3, a0, (4 * REG_A1)        /* Copy pre-exception a1 (stack pointer) */
-  s32e a3, sp, -12
+	l32i a3, a12, (4 * REG_A0)        /* Copy pre-exception a0 (return address) */
+	s32e a3, sp, -16
+	l32i a3, a12, (4 * REG_A1)        /* Copy pre-exception a1 (stack pointer) */
+	s32e a3, sp, -12
 
-  /* Backtracing only needs a0 and a1, no need to create full base save area.
-   * Also need to change current frame's return address to point to pre-exception's
-   * last run instruction.
-   */
+	/* Backtracing only needs a0 and a1, no need to create full base save area.
+	 * Also need to change current frame's return address to point to pre-exception's
+	 * last run instruction.
+	 */
 
-  rsr a0, EPC_1 + \level - 1  /* return address */
-  movi a4, 0xc0000000         /* constant with top 2 bits set (call size) */
-  or a0, a0, a4               /* set top 2 bits */
-  addx2 a0, a4, a0            /* clear top bit -- simulating call4 size   */
+	rsr a0, EPC_1 + \level - 1  /* return address */
+	movi a4, 0xc0000000         /* constant with top 2 bits set (call size) */
+	or a0, a0, a4               /* set top 2 bits */
+	addx2 a0, a4, a0            /* clear top bit -- simulating call4 size   */
 #endif
 
 	/* Call xtensa_int_decode passing the address of the register save area
@@ -304,10 +304,6 @@ _xtensa_level1_handler:
 	rsr		a0, EXCSAVE_1					            /* Save interruptee's a0 */
 	s32i	a0, sp, (4 * REG_A0)
 	s32i	a2, sp, (4 * REG_A2)
-
-#ifdef CONFIG_XTENSA_INTBACKTRACE
-  wsr sp, EXCSAVE_1
-#endif
 
 	/* Save rest of interrupt context. */
 
@@ -407,10 +403,6 @@ _xtensa_level2_handler:
 	s32i	a0, sp, (4 * REG_A0)
 	s32i	a2, sp, (4 * REG_A2)
 
-#ifdef CONFIG_XTENSA_INTBACKTRACE
-  wsr sp, EXCSAVE_2
-#endif
-
 	/* Save rest of interrupt context. */
 
 	call0	_xtensa_context_save
@@ -483,10 +475,6 @@ _xtensa_level3_handler:
 	rsr		a0, EXCSAVE_3					/* Save interruptee's a0 */
 	s32i	a0, sp, (4 * REG_A0)
 	s32i	a2, sp, (4 * REG_A2)
-
-#ifdef CONFIG_XTENSA_INTBACKTRACE
-  wsr sp, EXCSAVE_3
-#endif
 
 	/* Save rest of interrupt context. */
 
@@ -561,10 +549,6 @@ _xtensa_level4_handler:
 	s32i	a0, sp, (4 * REG_A0)
 	s32i	a2, sp, (4 * REG_A2)
 
-#ifdef CONFIG_XTENSA_INTBACKTRACE
-  wsr sp, EXCSAVE_4
-#endif
-
 	/* Save rest of interrupt context. */
 
 	call0	_xtensa_context_save
@@ -638,10 +622,6 @@ _xtensa_level5_handler:
 	s32i	a0, sp, (4 * REG_A0)
 	s32i	a2, sp, (4 * REG_A2)
 
-#ifdef CONFIG_XTENSA_INTBACKTRACE
-  wsr sp, EXCSAVE_5
-#endif
-
 	/* Save rest of interrupt context. */
 
 	call0	_xtensa_context_save
@@ -714,10 +694,6 @@ _xtensa_level6_handler:
 	rsr		a0, EXCSAVE_6					/* Save interruptee's a0 */
 	s32i	a0, sp, (4 * REG_A0)
 	s32i	a2, sp, (4 * REG_A2)
-
-#ifdef CONFIG_XTENSA_INTBACKTRACE
-  wsr sp, EXCSAVE_6
-#endif
 
 	/* Save rest of interrupt context. */
 
