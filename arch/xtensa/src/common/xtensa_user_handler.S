@@ -220,10 +220,6 @@ _xtensa_user_handler:
 	s32i	a0, sp, (4 * REG_A0)
 	s32i	a2, sp, (4 * REG_A2)
 
-#ifdef CONFIG_XTENSA_INTBACKTRACE
-	wsr sp, EXCSAVE_1
-#endif
-
 	/* Save EXCCAUSE and EXCVADDR into the user frame */
 
 	rsr		a0, EXCCAUSE
@@ -260,21 +256,21 @@ _xtensa_user_handler:
 
 	ps_setup	1 a0
 
-  /* Create pseudo base save area. At this point, sp is still pointing to the
-   * allocated and filled exception stack frame.
-   */
+	/* Create pseudo base save area. At this point, a12 points to the
+	 * allocated and filled exception stack frame (old value of SP in case of
+	 * an interrupt stack).
+	 */
 
 #ifdef CONFIG_XTENSA_INTBACKTRACE
-  rsr     a0, EXCSAVE_1            /* Get exception frame pointer stored in EXCSAVE_1 */
-  l32i    a3, a0, (4 * REG_A0)     /* Copy pre-exception a0 (return address) */
-  s32e    a3, sp, -16
-  l32i    a3, a0, (4 * REG_A1)     /* Copy pre-exception a1 (stack pointer) */
-  s32e    a3, sp, -12
+	l32i    a3, a12, (4 * REG_A0)     /* Copy pre-exception a0 (return address) */
+	s32e    a3, sp, -16
+	l32i    a3, a12, (4 * REG_A1)     /* Copy pre-exception a1 (stack pointer) */
+	s32e    a3, sp, -12
 
-  rsr     a0, EPC_1                /* return address for debug backtrace */
-  movi    a4, 0xc0000000           /* constant with top 2 bits set (call size) */
-  or      a0, a0, a4               /* set top 2 bits */
-  addx2   a0, a4, a0               /* clear top bit -- thus simulating call4 size */
+	rsr     a0, EPC_1                /* return address for debug backtrace */
+	movi    a4, 0xc0000000           /* constant with top 2 bits set (call size) */
+	or      a0, a0, a4               /* set top 2 bits */
+	addx2   a0, a4, a0               /* clear top bit -- thus simulating call4 size */
 #endif
 
 	/* Call xtensa_user, passing both the EXCCAUSE and a pointer to the
