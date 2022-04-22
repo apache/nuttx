@@ -90,8 +90,15 @@ BIN  = libarch$(LIBEXT)
 
 LDFLAGS += $(addprefix -T,$(call CONVERT_PATH,$(ARCHSCRIPT))) $(EXTRALINKCMDS)
 
-LDSTARTGROUP ?= --start-group
-LDENDGROUP ?= --end-group
+ifeq ($(LD),$(CC))
+  LDSTARTGROUP ?= -Wl,--start-group
+  LDENDGROUP   ?= -Wl,--end-group
+  LDFLAGS      := $(addprefix -Xlinker ,$(LDFLAGS))
+  LDFLAGS      += $(CFLAGS)
+else
+  LDSTARTGROUP ?= --start-group
+  LDENDGROUP   ?= --end-group
+endif
 
 BOARDMAKE = $(if $(wildcard board$(DELIM)Makefile),y,)
 
