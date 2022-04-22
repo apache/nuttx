@@ -99,6 +99,8 @@ struct sched_period_s
 #ifdef CONFIG_PM
   FAR struct timer_lowerhalf_s *lower;
   struct pm_callback_s pm_cb;
+  clock_t idle_start;
+  clock_t idle_ticks;
 #endif
 };
 #endif
@@ -198,11 +200,24 @@ static void nxsched_period_pmnotify(FAR struct pm_callback_s *cb, int domain,
     {
       if (pmstate == PM_RESTORE)
         {
+          g_sched_period.idle_ticks +=
+            clock_systime_ticks() - g_sched_period.idle_start;
+
+          if (g_sched_period.idle_ticks >= CPULOAD_PERIOD_NOMINAL)
+            {
+              nxsched_process_cpuload_ticks(
+                  g_sched_period.idle_ticks / CPULOAD_PERIOD_NOMINAL);
+
+              g_sched_period.idle_ticks %= CPULOAD_PERIOD_NOMINAL;
+            }
+
           g_sched_period.lower->ops->start(g_sched_period.lower);
         }
       else
         {
           g_sched_period.lower->ops->stop(g_sched_period.lower);
+
+          g_sched_period.idle_start = clock_systime_ticks();
         }
     }
 }
