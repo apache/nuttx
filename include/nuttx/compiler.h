@@ -383,9 +383,11 @@
 
 #  if defined(__clang__)
 #    define no_builtin(n) __attribute__((no_builtin(n)))
-#  else
+#  elif (__GNUC__ == 4 && __GNUC_MINOR__ >= 6) || (__GNUC__ > 4)
 #    define no_builtin(n) __attribute__((__optimize__("-fno-tree-loop-distribute-patterns")))
-#endif
+#  else
+#    define no_builtin(n)
+#  endif
 
 /* SDCC-specific definitions ************************************************/
 
