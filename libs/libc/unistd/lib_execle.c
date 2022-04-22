@@ -170,9 +170,9 @@ int execle(FAR const char *path, FAR const char *arg0, ...)
 
   va_end(ap);
 
-  /* Then let execv() do the real work */
+  /* Then let execve() do the real work */
 
-  ret = execv(path, argv, envp);
+  ret = execve(path, argv, envp);
 
   /* Free the allocated argv[] list */
 
