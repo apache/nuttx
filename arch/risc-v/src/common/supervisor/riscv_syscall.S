@@ -127,6 +127,8 @@ sys_call6:
 
   mv         sp, a0                    /* use sp, as a0 gets wiped */
 
+  riscv_loadfpu sp
+
   REGLOAD    s0, REG_EPC(sp)           /* restore epc */
   csrw       CSR_EPC, s0
 
@@ -145,7 +147,6 @@ sys_call6:
   csrw       CSR_STATUS, s0
 
   load_ctx   sp
-  riscv_loadfpu sp
 
   REGLOAD    sp, REG_SP(sp)            /* restore original sp */
 

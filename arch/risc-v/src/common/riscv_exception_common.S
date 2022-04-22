@@ -127,6 +127,8 @@ exception_common:
 
   mv         sp, a0
 
+  riscv_loadfpu   sp
+
   REGLOAD    s0, REG_EPC(sp)      /* restore sepc */
   csrw       CSR_EPC, s0
 
@@ -134,7 +136,6 @@ exception_common:
   csrw       CSR_STATUS, s0
 
   load_ctx   sp
-  riscv_loadfpu   sp
 
   REGLOAD    sp, REG_SP(sp)      /* restore original sp */
 
