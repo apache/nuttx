@@ -1801,7 +1801,7 @@ int up_timer_start(FAR const struct timespec *ts);
 #ifdef CONFIG_SCHED_THREAD_LOCAL
 int up_tls_size(void);
 #else
-#define up_tls_size() sizeof(struct tls_info_s) 
+#define up_tls_size() sizeof(struct tls_info_s)
 #endif
 
 /****************************************************************************
@@ -2239,6 +2239,31 @@ void nxsched_alarm_expiration(FAR const struct timespec *ts);
 
 #if defined(CONFIG_SCHED_CPULOAD) && defined(CONFIG_SCHED_CPULOAD_EXTCLK)
 void weak_function nxsched_process_cpuload(void);
+#endif
+
+/****************************************************************************
+ * Name: nxsched_process_cpuload_ticks
+ *
+ * Description:
+ *   Collect data that can be used for CPU load measurements.  When
+ *   CONFIG_SCHED_CPULOAD_EXTCLK is defined, this is an exported interface,
+ *   use the the external clock logic.  Otherwise, it is an OS internal
+ *   interface.
+ *
+ * Input Parameters:
+ *   ticks - The ticks that we increment in this cpuload
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions/Limitations:
+ *   This function is called from a timer interrupt handler with all
+ *   interrupts disabled.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SCHED_CPULOAD) && defined(CONFIG_SCHED_CPULOAD_EXTCLK)
+void weak_function nxsched_process_cpuload_ticks(uint32_t ticks);
 #endif
 
 /****************************************************************************
