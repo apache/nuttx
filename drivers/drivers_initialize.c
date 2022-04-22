@@ -54,12 +54,6 @@
 
 void drivers_initialize(void)
 {
-#ifdef CONFIG_PM
-  /* Initialize power management subsystem proper */
-
-  pm_initialize();
-#endif
-
   /* Register devices */
 
   syslog_initialize();
