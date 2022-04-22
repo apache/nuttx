@@ -186,7 +186,8 @@
 
 /* Factory test instructions */
 
-#define PAT9126JA_SIMPLE_CHECK          0x00      /* Simple communication check */
+#define PAT9126JA_SIMPLE_CHECK          0x00    /* Simple communication check */
+#define PAT9126JA_DISP_INFO             0x00    /* Displacement information */
 
 /****************************************************************************
  * Private Types
@@ -258,12 +259,16 @@ static int pat9126ja_initchip(FAR struct pat9126ja_dev_s *priv);
 
 static int pat9126ja_activate(FAR struct sensor_lowerhalf_s *lower,
                               bool enable);
+#ifdef CONFIG_FACTEST_SENSORS_PAT9126JA
 static int pat9126ja_selftest(FAR struct sensor_lowerhalf_s *lower,
                               unsigned long arg);
-static int pat9126ja_set_calibvalue(FAR struct sensor_lowerhalf_s *lower,
-                                    unsigned long arg);
 static int pat9126ja_calibrate(FAR struct sensor_lowerhalf_s *lower,
                                unsigned long arg);
+static int pat9126ja_control(FAR struct sensor_lowerhalf_s *lower,
+                             int cmd, unsigned long arg);
+#endif
+static int pat9126ja_set_calibvalue(FAR struct sensor_lowerhalf_s *lower,
+                                    unsigned long arg);
 
 /* Sensor interrupt functions */
 
@@ -280,9 +285,12 @@ static void pat9126ja_worker(FAR void *arg);
 static const struct sensor_ops_s g_pat9126ja_ops =
 {
   .activate       = pat9126ja_activate,       /* Enable/disable sensor */
+#ifdef CONFIG_FACTEST_SENSORS_PAT9126JA
   .selftest       = pat9126ja_selftest,       /* Sensor selftest */
-  .set_calibvalue = pat9126ja_set_calibvalue, /* Sensor set calibvalue */
-  .calibrate      = pat9126ja_calibrate       /* Sensor calibrate */
+  .calibrate      = pat9126ja_calibrate,      /* Sensor calibrate */
+  .control        = pat9126ja_control,        /* Set special config for sensor */
+#endif
+  .set_calibvalue = pat9126ja_set_calibvalue  /* Sensor set calibvalue */
 };
 
 /****************************************************************************
@@ -1071,7 +1079,7 @@ static int pat9126ja_activate(FAR struct sensor_lowerhalf_s *lower,
  *   None.
  *
  ****************************************************************************/
-
+#ifdef CONFIG_FACTEST_SENSORS_PAT9126JA
 static int pat9126ja_selftest(FAR struct sensor_lowerhalf_s *lower,
                               unsigned long arg)
 {
@@ -1099,6 +1107,7 @@ static int pat9126ja_selftest(FAR struct sensor_lowerhalf_s *lower,
 
   return ret;
 }
+#endif
 
 /****************************************************************************
  * Name: pat9126ja_set_calibvalue
@@ -1168,7 +1177,7 @@ static int pat9126ja_set_calibvalue(FAR struct sensor_lowerhalf_s *lower,
  *   Zero (OK) on success.
  *
  ****************************************************************************/
-
+#ifdef CONFIG_FACTEST_SENSORS_PAT9126JA
 static int pat9126ja_calibrate(FAR struct sensor_lowerhalf_s *lower,
                                unsigned long arg)
 {
@@ -1180,6 +1189,60 @@ static int pat9126ja_calibrate(FAR struct sensor_lowerhalf_s *lower,
 
   return OK;
 }
+#endif
+
+/****************************************************************************
+ * Name: pat9126ja_control
+ *
+ * Description:
+ *   With this method, the user can set some special config for the sensor,
+ *   such as changing the custom mode, setting the custom resolution, reset,
+ *   etc, which are all parsed and implemented by lower half driver.
+ *
+ * Input Parameters:
+ *   lower      - The instance of lower half sensor driver.
+ *   cmd        - The special cmd for sensor.
+ *   arg        - The parameters associated with cmd.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *   -ENOTTY    - The cmd don't support.
+ *   -EINVAL    - Failed to match sensor type.
+ *
+ * Assumptions/Limitations:
+ *   none.
+ *
+ ****************************************************************************/
+#ifdef CONFIG_FACTEST_SENSORS_PAT9126JA
+static int pat9126ja_control(FAR struct sensor_lowerhalf_s *lower,
+                             int cmd, unsigned long arg)
+{
+  FAR struct pat9126ja_dev_s *priv = (FAR struct pat9126ja_dev_s *)lower;
+  int ret = OK;
+
+  DEBUGASSERT(lower != NULL);
+
+  /* Process ioctl commands. */
+
+  switch (cmd)
+    {
+      case PAT9126JA_DISP_INFO:       /* Displacement information */
+        {
+          sprintf((FAR char *)arg, "%d", priv->dev.x_position);
+        }
+        break;
+
+      default:                        /* Other cmd tag */
+        {
+          ret = -ENOTTY;
+          snerr("ERROR: The cmd don't support: %d\n", ret);
+        }
+        break;
+    }
+
+  return ret;
+}
+#endif
 
 /* Sensor interrupt functions */
 
