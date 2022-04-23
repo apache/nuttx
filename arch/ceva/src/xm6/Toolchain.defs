@@ -50,13 +50,18 @@ else ifeq ($(CONFIG_DEBUG_FULLOPT),y)
   MAXOPTIMIZATION := -O3 -Os3
 endif
 
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  LDFLAGS         += -g
+  MAXOPTIMIZATION += -g
+endif
+
 ARCHCFLAGS += -fno-common
 ARCHCXXFLAGS += -fno-common
 
 ARCHCPUFLAGS  = -mrtl-version-$(RTL_VERSION) -Wa,-rtl$(RTL_VERSION)
 ARCHCPUFLAGS += -Wa,-p
 
-LDFLAGS  = -alignAllSections,c:0x20,d:0x20
+LDFLAGS += -alignAllSections,c:0x20,d:0x20
 LDFLAGS += -internalCode$(ITCM_KB) -internalData$(DTCM_KB)
 
 LIBGCC  = $(CROSSDEV)libs/cevaxm6/cevaxm6lib.lib

@@ -38,10 +38,6 @@ else
   OLDGCC = n
 endif
 
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION = -g
-endif
-
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
 endif
@@ -70,7 +66,3 @@ NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) \
    -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-gotoff.ld \
    -no-check-sections
 LDNXFLATFLAGS = -e main -s 2048
-
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  LDFLAGS += -g
-endif
