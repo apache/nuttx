@@ -79,6 +79,11 @@ ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
   LDFLAGS += --cref -Map=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
 endif
 
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  LDFLAGS         += -g
+  MAXOPTIMIZATION += -g
+endif
+
 # Generic GNU RVG toolchain
 
 ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
