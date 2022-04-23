@@ -25,10 +25,6 @@ include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)memory.ld
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)kernel-space.ld
 
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION = -g
-endif
-
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
 endif
@@ -68,7 +64,3 @@ LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)mo
 # File extensions
 
 # Linker flags
-
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  LDFLAGS += -g
-endif

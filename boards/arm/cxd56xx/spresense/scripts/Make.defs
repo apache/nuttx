@@ -36,10 +36,6 @@ ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 MKNXFLAT = mknxflat
 LDNXFLAT = ldnxflat
 
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION = -g
-endif
-
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
 endif
@@ -75,12 +71,6 @@ CXXELFFLAGS = $(CXXFLAGS)
 
 LDELFFLAGS = -r -e main
 LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/binfmt/libelf/gnu-elf.ld)
-
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  CFLAGS += -gdwarf-3
-  CXXFLAGS += -gdwarf-3
-  LDFLAGS += -g
-endif
 
 # Output map file with cross reference table
 
