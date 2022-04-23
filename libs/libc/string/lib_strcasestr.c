@@ -36,15 +36,12 @@ static FAR char *strcasechr(FAR const char *s, int uc)
 {
   register char ch;
 
-  if (s)
+  for (; *s; s++)
     {
-      for (; *s; s++)
+      ch = *s;
+      if (toupper(ch) == uc)
         {
-          ch = *s;
-          if (toupper(ch) == uc)
-            {
-              return (FAR char *)s;
-            }
+          return (FAR char *)s;
         }
     }
 
