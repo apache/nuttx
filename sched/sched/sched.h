@@ -390,6 +390,7 @@ int  nxsched_pause_cpu(FAR struct tcb_s *tcb);
 /* CPU load measurement support */
 
 void weak_function nxsched_process_cpuload(void);
+void weak_function nxsched_process_cpuload_ticks(uint32_t ticks);
 #endif
 
 /* Critical section monitor */
