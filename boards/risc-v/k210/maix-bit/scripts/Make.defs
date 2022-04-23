@@ -31,8 +31,6 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ASARCHCPUFLAGS += -Wa,-g
 endif
 
-MAXOPTIMIZATION = -Os
-
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
 endif
