@@ -424,11 +424,13 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 
       if (stcb->task_state == TSTATE_WAIT_SEM)
         {
+#ifdef SIGCONDTIMEDOUT
           if (info->si_signo == SIGCONDTIMEDOUT)
             {
               nxsem_wait_irq(stcb, ETIMEDOUT);
             }
           else
+#endif
             {
               nxsem_wait_irq(stcb, EINTR);
             }
@@ -442,11 +444,13 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
       if (stcb->task_state == TSTATE_WAIT_MQNOTEMPTY ||
           stcb->task_state == TSTATE_WAIT_MQNOTFULL)
         {
+#ifdef SIGCONDTIMEDOUT
           if (info->si_signo == SIGCONDTIMEDOUT)
             {
               nxsem_wait_irq(stcb, ETIMEDOUT);
             }
           else
+#endif
             {
               nxsem_wait_irq(stcb, EINTR);
             }
