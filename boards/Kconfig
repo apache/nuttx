@@ -225,6 +225,12 @@ config ARCH_BOARD_ESP32_DEVKITC
 		of two CPUs is symmetric, meaning they use the same addresses to
 		access the same memory.
 
+config ARCH_BOARD_TLSR8278ADK80D
+	bool "Telink tlsr8278adk80d board"
+	depends on ARCH_CHIP_TLSR82
+	---help---
+		Enable support for Telink tlsr8278adk80d board.
+
 config ARCH_BOARD_ESP32_ETHERNETKIT
 	bool "Espressif ESP32 Ethernet Kit"
 	depends on ARCH_CHIP_ESP32WROVER
@@ -2424,6 +2430,7 @@ config ARCH_BOARD
 	default "esp32s2-saola-1"          if ARCH_BOARD_ESP32S2_SAOLA_1
 	default "esp32s3-devkit"           if ARCH_BOARD_ESP32S3_DEVKIT
 	default "et-stm32-stamp"           if ARCH_BOARD_ET_STM32_STAMP
+	default "tlsr8278adk80d"           if ARCH_BOARD_TLSR8278ADK80D
 	default "ez80f910200kitg"          if ARCH_BOARD_EZ80F910200KITG
 	default "ez80f910200zco"           if ARCH_BOARD_EZ80F910200ZCO
 	default "fire-stm32v2"             if ARCH_BOARD_FIRE_STM32
@@ -3378,6 +3385,9 @@ source "boards/sparc/bm3803/xx3803/Kconfig"
 endif
 if ARCH_BOARD_XX3823
 source "boards/sparc/bm3823/xx3823/Kconfig"
+endif
+if ARCH_BOARD_TLSR8278ADK80D
+source "boards/arm/tlsr82/tlsr8278adk80d/Kconfig"
 endif
 
 comment "Board-Common Options"
