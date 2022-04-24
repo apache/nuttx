@@ -30,8 +30,6 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
 endif
 
-ARCHCFLAGS += -fno-common
-ARCHCXXFLAGS += -fno-common
 
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN_CLANG),y)
   ARCHCFLAGS += -nostdlib -ffreestanding

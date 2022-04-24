@@ -31,6 +31,9 @@
 # GNU, not AVRTOOLSW.
 #
 
+ARCHCFLAGS += -fno-common
+ARCHCXXFLAGS += -fno-common
+
 CROSSDEV = avr32-
 ARCHCPUFLAGS = -mpart=uc3b0256
 

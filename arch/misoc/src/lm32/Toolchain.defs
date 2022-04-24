@@ -55,6 +55,9 @@ else
   MAXOPTIMIZATION ?= -Os
 endif
 
+ARCHCFLAGS += -fno-common
+ARCHCXXFLAGS += -fno-common
+
 # NuttX buildroot under Linux or Cygwin
 
 ifeq ($(CONFIG_LM32_TOOLCHAIN),BUILDROOT)

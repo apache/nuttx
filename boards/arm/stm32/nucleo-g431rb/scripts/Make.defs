@@ -38,8 +38,8 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
 endif
 
-ARCHCFLAGS += -fno-common -funwind-tables
-ARCHCXXFLAGS += -fno-common -funwind-tables
+ARCHCFLAGS += -funwind-tables
+ARCHCXXFLAGS += -funwind-tables
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10

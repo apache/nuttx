@@ -38,6 +38,9 @@ else
   MAXOPTIMIZATION ?= -O2
 endif
 
+ARCHCFLAGS += -fno-common
+ARCHCXXFLAGS += -fno-common
+
 # Pick correct or1k architecture selection
 
 ifeq ($(CONFIG_ARCH_OR1K_MOR1KX),y)

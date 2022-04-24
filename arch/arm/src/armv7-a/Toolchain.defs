@@ -118,8 +118,8 @@ else
   TARGET_ARCH := arm
 endif
 
-ARCHCFLAGS =
-ARCHCXXFLAGS =
+ARCHCFLAGS += -fno-common
+ARCHCXXFLAGS += -fno-common
 
 ifneq ($(CONFIG_CXX_EXCEPTION),y)
   ARCHCXXFLAGS += -fno-exceptions -fcheck-new

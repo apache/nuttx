@@ -63,8 +63,6 @@ endif
 
 ARCHCPUFLAGS += -mcmodel=medany
 
-ARCHCFLAGS += -fno-common
-ARCHCXXFLAGS += -fno-common
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 
