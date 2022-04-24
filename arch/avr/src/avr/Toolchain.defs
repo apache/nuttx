@@ -90,6 +90,9 @@ else
   MAXOPTIMIZATION ?= -O2
 endif
 
+ARCHCFLAGS += -fno-common
+ARCHCXXFLAGS += -fno-common
+
 # NuttX buildroot GCC toolchain under Linux or Cygwin
 
 ifeq ($(CONFIG_AVR_TOOLCHAIN),BUILDROOT)

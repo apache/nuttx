@@ -38,8 +38,6 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
 endif
 
 ARCHCPUFLAGS += -mcmodel=medany -mstrict-align
-ARCHCFLAGS += -fno-common
-ARCHCXXFLAGS += -fno-common
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 

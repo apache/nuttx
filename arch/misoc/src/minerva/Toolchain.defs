@@ -27,6 +27,9 @@ else
   MAXOPTIMIZATION ?= -Os
 endif
 
+ARCHCFLAGS += -fno-common
+ARCHCXXFLAGS += -fno-common
+
 # Default toolchain
 
 CC = $(CROSSDEV)gcc

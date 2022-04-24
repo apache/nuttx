@@ -34,8 +34,6 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION += -g
 endif
 
-ARCHCFLAGS += -fno-common
-ARCHCXXFLAGS += -fno-common
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10

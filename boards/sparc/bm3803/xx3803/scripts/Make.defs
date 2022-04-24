@@ -51,8 +51,7 @@ endif
 # 20210818 zouboan
 ARCHOPTIMIZATION += -fno-delete-null-pointer-checks
 
-ARCHCFLAGS = -fno-common
-ARCHCXXFLAGS = -fno-common -fno-exceptions -fcheck-new
+ARCHCXXFLAGS = -fno-exceptions -fcheck-new
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHDEFINES =

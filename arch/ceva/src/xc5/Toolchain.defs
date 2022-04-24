@@ -50,6 +50,9 @@ else ifeq ($(CONFIG_DEBUG_FULLOPT),y)
   MAXOPTIMIZATION := -O3 -Os3
 endif
 
+ARCHCFLAGS += -fno-common
+ARCHCXXFLAGS += -fno-common
+
 ARCHCPUFLAGS  = -mrtl-version-$(RTL_VERSION) -Wa,-rtl$(RTL_VERSION)
 ARCHCPUFLAGS += -Wa,-p -mmsg-full-path -TARG:arch=cevaxc5 -Wa,-vdiv4 -Wno-unused
 

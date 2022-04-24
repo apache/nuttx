@@ -143,8 +143,8 @@ ifeq ($(CONFIG_MM_KASAN),y)
   ARCHCPUFLAGS += -fsanitize=kernel-address
 endif
 
-ARCHCFLAGS =
-ARCHCXXFLAGS =
+ARCHCFLAGS += -fno-common
+ARCHCXXFLAGS += -fno-common
 
 ifneq ($(CONFIG_CXX_EXCEPTION),y)
   ARCHCXXFLAGS += -fno-exceptions -fcheck-new
