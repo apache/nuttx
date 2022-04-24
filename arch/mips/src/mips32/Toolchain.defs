@@ -265,18 +265,6 @@ else
   MAXOPTIMIZATION += -fomit-frame-pointer
 endif
 
-# Default toolchain
-
-CC = $(CROSSDEV)gcc
-CXX = $(CROSSDEV)g++
-CPP = $(CROSSDEV)gcc -E -P -x c
-LD = $(CROSSDEV)ld
-STRIP = $(CROSSDEV)strip --strip-unneeded
-AR = $(CROSSDEV)ar rcs
-NM = $(CROSSDEV)nm
-OBJCOPY = $(CROSSDEV)objcopy
-OBJDUMP = $(CROSSDEV)objdump
-
 # Optimization of unused sections
 
 ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
@@ -289,6 +277,21 @@ endif
 ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
   LDFLAGS += --cref -Map=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
 endif
+
+ARCHCFLAGS += -fno-common
+ARCHCXXFLAGS += -fno-common
+
+# Default toolchain
+
+CC = $(CROSSDEV)gcc
+CXX = $(CROSSDEV)g++
+CPP = $(CROSSDEV)gcc -E -P -x c
+LD = $(CROSSDEV)ld
+STRIP = $(CROSSDEV)strip --strip-unneeded
+AR = $(CROSSDEV)ar rcs
+NM = $(CROSSDEV)nm
+OBJCOPY = $(CROSSDEV)objcopy
+OBJDUMP = $(CROSSDEV)objdump
 
 # Add the builtin library
 

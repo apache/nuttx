@@ -60,6 +60,15 @@ ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
   MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
 endif
 
+ifeq ($(CONFIG_FRAME_POINTER),y)
+  MAXOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+else
+  MAXOPTIMIZATION += -fomit-frame-pointer
+endif
+
+ARCHCFLAGS += -fno-common
+ARCHCXXFLAGS += -fno-common
+
 # NuttX buildroot GCC toolchain under Linux or Cygwin
 
 ifeq ($(CONFIG_SPARC_TOOLCHAIN),BUILDROOT)
@@ -76,10 +85,4 @@ ifeq ($(CONFIG_SPARC_TOOLCHAIN),CODEREDW)
   MAXOPTIMIZATION ?= -O2
   LDFLAGS += -nostartfiles -nodefaultlibs
   LDSCRIPT = sparc-elf-debug.ld
-endif
-
-ifeq ($(CONFIG_FRAME_POINTER),y)
-  MAXOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
-else
-  MAXOPTIMIZATION += -fomit-frame-pointer
 endif
