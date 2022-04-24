@@ -100,7 +100,10 @@ void rptun_dump(FAR struct rpmsg_virtio_device *rvdev)
       return;
     }
 
-  metal_mutex_acquire(&rdev->lock);
+  if (!up_interrupt_context() && !sched_idletask())
+    {
+      metal_mutex_acquire(&rdev->lock);
+    }
 
   metal_log(METAL_LOG_INFO,
             "Dump rpmsg info between cpu %s <==> %s:\n",
@@ -119,5 +122,8 @@ void rptun_dump(FAR struct rpmsg_virtio_device *rvdev)
   rptun_dump_buffer(rvdev, true);
   rptun_dump_buffer(rvdev, false);
 
-  metal_mutex_release(&rdev->lock);
+  if (!up_interrupt_context() && !sched_idletask())
+    {
+      metal_mutex_release(&rdev->lock);
+    }
 }
