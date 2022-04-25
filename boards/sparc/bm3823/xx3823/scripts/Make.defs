@@ -48,7 +48,6 @@ endif
 
 # ARCHOPTIMIZATION += -fno-zero-initialized-in-bss
 
-ARCHCXXFLAGS = -fno-exceptions -fcheck-new
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHDEFINES =
