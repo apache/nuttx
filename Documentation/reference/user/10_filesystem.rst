@@ -268,6 +268,7 @@ Standard I/O
   int    fgetc(FAR FILE *stream);
   int    fgetpos(FAR FILE *stream, FAR fpos_t *pos);
   FAR char *fgets(FAR char *s, int n, FAR FILE *stream);
+  void   flockfile(FAR FILE *stream);
   FAR FILE *fopen(FAR const char *path, FAR const char *type);
   int    fprintf(FAR FILE *stream, FAR const char *format, ...);
   int    fputc(int c, FAR FILE *stream);
@@ -278,6 +279,8 @@ Standard I/O
   int    fseek(FAR FILE *stream, long int offset, int whence);
   int    fsetpos(FAR FILE *stream, FAR fpos_t *pos);
   long   ftell(FAR FILE *stream);
+  int    ftrylockfile(FAR FILE *stream);
+  void   funlockfile(FAR FILE *stream);
   size_t fwrite(FAR const void *ptr, size_t size, size_t n_items, FAR FILE *stream);
   FAR char *gets(FAR char *s);
   FAR char *gets_s(FAR char *s, rsize_t n);

@@ -44,7 +44,7 @@ CSRCS += lib_rdflush.c lib_wrflush.c lib_putc.c lib_fputc.c
 CSRCS += lib_fputs.c lib_ungetc.c lib_fprintf.c lib_vfprintf.c
 CSRCS += lib_feof.c lib_ferror.c lib_rewind.c lib_clearerr.c
 CSRCS += lib_scanf.c lib_vscanf.c lib_fscanf.c lib_vfscanf.c lib_tmpfile.c
-CSRCS += lib_setbuf.c lib_setvbuf.c lib_libstream.c lib_libfilesem.c
+CSRCS += lib_setbuf.c lib_setvbuf.c lib_libstream.c lib_libfilelock.c
 endif
 
 # Add the stdio directory to the build

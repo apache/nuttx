@@ -125,7 +125,7 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
 
   /* Make sure that we have exclusive access to the stream */
 
-  lib_take_lock(stream);
+  flockfile(stream);
 
   /* setvbuf() may only be called AFTER the stream has been opened and
    * BEFORE any operations have been performed on the stream.
@@ -246,11 +246,11 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
 
 reuse_buffer:
   stream->fs_flags    = flags;
-  lib_give_lock(stream);
+  funlockfile(stream);
   return OK;
 
 errout_with_lock:
-  lib_give_lock(stream);
+  funlockfile(stream);
 
 errout:
   set_errno(errcode);

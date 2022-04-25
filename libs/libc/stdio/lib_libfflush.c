@@ -73,7 +73,7 @@ ssize_t lib_fflush(FAR FILE *stream, bool bforce)
 
   /* Make sure that we have exclusive access to the stream */
 
-  lib_take_lock(stream);
+  flockfile(stream);
 
   /* Check if there is an allocated I/O buffer */
 
@@ -156,11 +156,11 @@ ssize_t lib_fflush(FAR FILE *stream, bool bforce)
    * remaining in the buffer.
    */
 
-  lib_give_lock(stream);
+  funlockfile(stream);
   return stream->fs_bufpos - stream->fs_bufstart;
 
 errout_with_lock:
-  lib_give_lock(stream);
+  funlockfile(stream);
   return ret;
 
 #else
