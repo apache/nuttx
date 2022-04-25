@@ -89,6 +89,13 @@ void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
 
   /* Discard any currently buffered data */
 
+  if (conn->timeout)
+    {
+      conn->timeout = false;
+      tcp_timer(dev, conn);
+      return;
+    }
+
   dev->d_len     = 0;
   dev->d_sndlen  = 0;
 
