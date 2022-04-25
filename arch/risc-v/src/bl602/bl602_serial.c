@@ -391,7 +391,7 @@ static void bl602_shutdown(struct uart_dev_s *dev)
 
 static int bl602_attach(struct uart_dev_s *dev)
 {
-  int              ret;
+  int                  ret;
   struct bl602_uart_s *priv = (struct bl602_uart_s *)dev->priv;
 
   ret = irq_attach(priv->irq, __uart_interrupt, (void *)dev);
