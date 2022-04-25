@@ -362,8 +362,8 @@ static int bl602_pwm_start(struct pwm_lowerhalf_s *dev,
                            const struct pwm_info_s *info)
 {
   struct bl602_pwm_s *priv = (struct bl602_pwm_s *)dev;
-  int                     ret  = OK;
-  int                     i;
+  int                 ret  = OK;
+  int                 i;
 
   UNUSED(i);
 

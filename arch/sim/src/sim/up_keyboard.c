@@ -69,7 +69,7 @@ static struct up_dev_s g_simkeyboard;
 
 int sim_kbd_initialize(void)
 {
-  int                  ret;
+  int              ret;
   struct up_dev_s *priv = &g_simkeyboard;
 
   memset(priv, 0, sizeof(*priv));
