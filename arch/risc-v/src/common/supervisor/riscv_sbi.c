@@ -69,7 +69,9 @@ static inline uint64_t rdtime(void)
 
 void riscv_sbi_set_timer(uint64_t stime_value)
 {
+#if 0
 #error "Missing functionality..."
+#endif
 }
 
 /****************************************************************************
