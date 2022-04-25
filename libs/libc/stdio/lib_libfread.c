@@ -70,7 +70,7 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
     {
       /* The stream must be stable until we complete the read */
 
-      lib_take_lock(stream);
+      flockfile(stream);
 
 #if CONFIG_NUNGET_CHARS > 0
       /* First, re-read any previously ungotten characters */
@@ -304,7 +304,7 @@ shortread:
           stream->fs_flags |= __FS_FLAG_EOF;
         }
 
-      lib_give_lock(stream);
+      funlockfile(stream);
       return count - remaining;
     }
 
@@ -312,6 +312,6 @@ shortread:
 
 errout_with_errno:
   stream->fs_flags |= __FS_FLAG_ERROR;
-  lib_give_lock(stream);
+  funlockfile(stream);
   return ERROR;
 }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/lib_libfilesem.c
+ * libs/libc/stdio/lib_libfilelock.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -29,46 +29,36 @@
 #include <errno.h>
 #include <assert.h>
 
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/fs/fs.h>
-
-#include "libc.h"
-
-#ifndef CONFIG_STDIO_DISABLE_BUFFERING
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * lib_lock_init
+ * flockfile
  ****************************************************************************/
 
-void lib_lock_init(FAR struct file_struct *stream)
-{
-  /* Initialize the LIB mutex to one (to support one-at-a-time access
-   * to private data sets.
-   */
-
-  nxrmutex_init(&stream->fs_lock);
-}
-
-/****************************************************************************
- * lib_take_lock
- ****************************************************************************/
-
-void lib_take_lock(FAR struct file_struct *stream)
+void flockfile(FAR struct file_struct *stream)
 {
   nxrmutex_lock(&stream->fs_lock);
 }
 
 /****************************************************************************
- * lib_give_lock
+ * flockfile
  ****************************************************************************/
 
-void lib_give_lock(FAR struct file_struct *stream)
+int ftrylockfile(FAR struct file_struct *stream)
+{
+  return nxrmutex_trylock(&stream->fs_lock);
+}
+
+/****************************************************************************
+ * funlockfile
+ ****************************************************************************/
+
+void funlockfile(FAR struct file_struct *stream)
 {
   nxrmutex_unlock(&stream->fs_lock);
 }
-
-#endif /* CONFIG_STDIO_DISABLE_BUFFERING */

@@ -475,9 +475,9 @@ struct filelist
 struct file_struct
 {
   FAR struct file_struct *fs_next;      /* Pointer to next file stream */
+  rmutex_t                fs_lock;      /* Recursive lock */
   int                     fs_fd;        /* File descriptor associated with stream */
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
-  rmutex_t                fs_lock;      /* Recursive lock */
   FAR unsigned char      *fs_bufstart;  /* Pointer to start of buffer */
   FAR unsigned char      *fs_bufend;    /* Pointer to 1 past end of buffer */
   FAR unsigned char      *fs_bufpos;    /* Current position in buffer */
