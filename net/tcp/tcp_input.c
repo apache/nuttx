@@ -794,7 +794,7 @@ found:
 
       /* Reset the retransmission timer. */
 
-      conn->timer = conn->rto;
+      tcp_update_retrantimer(conn, conn->rto);
     }
 
   /* Update the connection's window size */
@@ -1145,7 +1145,7 @@ found:
           {
             /* Reset the "alive" timer. */
 
-            conn->keeptimer   = conn->keepidle;
+            tcp_update_keeptimer(conn, conn->keepidle);
             conn->keepretries = 0;
           }
 #endif
@@ -1225,7 +1225,8 @@ found:
             if ((flags & TCP_ACKDATA) != 0 && conn->tx_unacked == 0)
               {
                 conn->tcpstateflags = TCP_TIME_WAIT;
-                conn->timer         = TCP_TIME_WAIT_TIMEOUT * HSEC_PER_SEC;
+                tcp_update_retrantimer(conn,
+                                     TCP_TIME_WAIT_TIMEOUT * HSEC_PER_SEC);
                 ninfo("TCP state: TCP_TIME_WAIT\n");
               }
             else
@@ -1263,7 +1264,8 @@ found:
         if ((tcp->flags & TCP_FIN) != 0)
           {
             conn->tcpstateflags = TCP_TIME_WAIT;
-            conn->timer         = TCP_TIME_WAIT_TIMEOUT * HSEC_PER_SEC;
+            tcp_update_retrantimer(conn,
+                                 TCP_TIME_WAIT_TIMEOUT * HSEC_PER_SEC);
             ninfo("TCP state: TCP_TIME_WAIT\n");
 
             net_incr32(conn->rcvseq, 1); /* ack FIN */
@@ -1288,7 +1290,8 @@ found:
         if ((flags & TCP_ACKDATA) != 0)
           {
             conn->tcpstateflags = TCP_TIME_WAIT;
-            conn->timer         = TCP_TIME_WAIT_TIMEOUT * HSEC_PER_SEC;
+            tcp_update_retrantimer(conn,
+                                 TCP_TIME_WAIT_TIMEOUT * HSEC_PER_SEC);
             ninfo("TCP state: TCP_TIME_WAIT\n");
           }
 

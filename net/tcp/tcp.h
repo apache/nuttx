@@ -35,6 +35,7 @@
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/net.h>
+#include <nuttx/wqueue.h>
 
 #ifdef CONFIG_NET_TCP_NOTIFIER
 #  include <nuttx/wqueue.h>
@@ -189,6 +190,8 @@ struct tcp_conn_s
                            * variable */
   uint8_t  rto;           /* Retransmission time-out */
   uint8_t  tcpstateflags; /* TCP state and flags */
+  struct   work_s work;   /* TCP timer handle */
+  bool     timeout;       /* Trigger from timer expiry */
   uint8_t  timer;         /* The retransmission timer (units: half-seconds) */
   uint8_t  nrtx;          /* The number of retransmissions for the last
                            * segment sent */
@@ -812,7 +815,6 @@ void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn);
  * Input Parameters:
  *   dev  - The device driver structure to use in the send operation
  *   conn - The TCP "connection" to poll for TX data
- *   hsec - The polling interval in halves of a second
  *
  * Returned Value:
  *   None
@@ -822,8 +824,73 @@ void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn);
  *
  ****************************************************************************/
 
-void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
-               int hsec);
+void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn);
+
+/****************************************************************************
+ * Name: tcp_update_retrantimer
+ *
+ * Description:
+ *   Update the retransmit TCP timer for the provided TCP connection,
+ *   The timeout is accurate
+ *
+ * Input Parameters:
+ *   conn    - The TCP "connection" to poll for TX data
+ *   timeout - Time for the next timeout
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   conn is not NULL.
+ *   The connection (conn) is bound to the polling device (dev).
+ *
+ ****************************************************************************/
+
+void tcp_update_retrantimer(FAR struct tcp_conn_s *conn, int timeout);
+
+/****************************************************************************
+ * Name: tcp_update_keeptimer
+ *
+ * Description:
+ *   Update the keeplive TCP timer for the provided TCP connection,
+ *   The timeout is accurate
+ *
+ * Input Parameters:
+ *   conn    - The TCP "connection" to poll for TX data
+ *   timeout - Time for the next timeout
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   conn is not NULL.
+ *   The connection (conn) is bound to the polling device (dev).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCP_KEEPALIVE
+void tcp_update_keeptimer(FAR struct tcp_conn_s *conn, int timeout);
+#endif
+
+/****************************************************************************
+ * Name: tcp_stop_timer
+ *
+ * Description:
+ *   Stop TCP timer for the provided TCP connection
+ *   When the connection is closed
+ *
+ * Input Parameters:
+ *   conn - The TCP "connection" to poll for TX data
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   conn is not NULL.
+ *
+ ****************************************************************************/
+
+void tcp_stop_timer(FAR struct tcp_conn_s *conn);
 
 /****************************************************************************
  * Name: tcp_findlistener

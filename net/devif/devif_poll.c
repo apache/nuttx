@@ -617,57 +617,6 @@ static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
 #endif
 
 /****************************************************************************
- * Name: devif_poll_tcp_timer
- *
- * Description:
- *   The TCP timer has expired.  Update TCP timing state in each active,
- *   TCP connection.
- *
- * Assumptions:
- *   This function is called from the MAC device driver with the network
- *   locked.
- *
- ****************************************************************************/
-
-#ifdef NET_TCP_HAVE_STACK
-static inline int devif_poll_tcp_timer(FAR struct net_driver_s *dev,
-                                       devif_poll_callback_t callback,
-                                       int hsec)
-{
-  FAR struct tcp_conn_s *conn  = NULL;
-  int bstop = 0;
-
-  /* Traverse all of the active TCP connections and perform the poll
-   * action.
-   */
-
-  while (!bstop && (conn = tcp_nextconn(conn)))
-    {
-      /* Skip TCP connections that are bound to other polling devices */
-
-      if (dev == conn->dev)
-        {
-          /* Perform the TCP timer poll */
-
-          tcp_timer(dev, conn, hsec);
-
-          /* Perform any necessary conversions on outgoing packets */
-
-          devif_packet_conversion(dev, DEVIF_TCP);
-
-          /* Call back into the driver */
-
-          bstop = callback(dev);
-        }
-    }
-
-  return bstop;
-}
-#else
-# define devif_poll_tcp_timer(dev, callback, hsec) (0)
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -849,29 +798,7 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 int devif_timer(FAR struct net_driver_s *dev, int delay,
                 devif_poll_callback_t callback)
 {
-#if defined(NET_TCP_HAVE_STACK)
-  int hsec = TICK2HSEC(delay);
-#endif
-  int bstop = false;
-
-#ifdef NET_TCP_HAVE_STACK
-  /* Traverse all of the active TCP connections and perform the
-   * timer action.
-   */
-
-  bstop = devif_poll_tcp_timer(dev, callback, hsec);
-#endif
-
-  /* If possible, continue with a normal poll checking for pending
-   * network driver actions.
-   */
-
-  if (!bstop)
-    {
-      bstop = devif_poll(dev, callback);
-    }
-
-  return bstop;
+  return devif_poll(dev, callback);
 }
 
 #endif /* CONFIG_NET */
