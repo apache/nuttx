@@ -58,6 +58,14 @@ endif
 ARCHCFLAGS += -fno-common
 ARCHCXXFLAGS += -fno-common
 
+ifneq ($(CONFIG_CXX_EXCEPTION),y)
+  ARCHCXXFLAGS += -fno-exceptions -fcheck-new
+endif
+
+ifneq ($(CONFIG_CXX_RTTI),y)
+  ARCHCXXFLAGS += -fno-rtti
+endif
+
 # NuttX buildroot under Linux or Cygwin
 
 ifeq ($(CONFIG_LM32_TOOLCHAIN),BUILDROOT)
