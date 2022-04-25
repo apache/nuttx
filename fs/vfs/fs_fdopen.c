@@ -194,7 +194,7 @@ int fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb,
 
       /* Initialize the mutex the manages access to the buffer */
 
-      lib_lock_init(stream);
+      nxrmutex_init(&stream->fs_lock);
     }
   else
     {

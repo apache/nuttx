@@ -53,7 +53,7 @@
 static off_t lib_getoffset(FAR FILE *stream)
 {
   off_t offset = 0;
-  lib_take_lock(stream);
+  flockfile(stream);
 
   if (stream->fs_bufstart !=
       NULL && stream->fs_bufread !=
@@ -71,7 +71,7 @@ static off_t lib_getoffset(FAR FILE *stream)
       offset = -(stream->fs_bufpos - stream->fs_bufstart);
     }
 
-  lib_give_lock(stream);
+  funlockfile(stream);
   return offset;
 }
 #else

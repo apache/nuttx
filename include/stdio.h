@@ -173,6 +173,10 @@ int    setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size);
 
 int    ungetc(int c, FAR FILE *stream);
 
+void flockfile(FAR FILE *stream);
+int ftrylockfile(FAR FILE *stream);
+void funlockfile(FAR FILE *stream);
+
 /* Operations on the stdout stream, buffers, paths,
  * and the whole printf-family
  */

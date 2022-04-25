@@ -109,18 +109,6 @@ void lib_stream_initialize(FAR struct task_group_s *group);
 void lib_stream_release(FAR struct task_group_s *group);
 #endif
 
-/* Functions defined in lib_filesem.c ***************************************/
-
-#ifdef CONFIG_STDIO_DISABLE_BUFFERING
-#  define lib_lock_init(s)
-#  define lib_take_lock(s)
-#  define lib_give_lock(s)
-#else
-void lib_lock_init(FAR struct file_struct *stream);
-void lib_take_lock(FAR struct file_struct *stream);
-void lib_give_lock(FAR struct file_struct *stream);
-#endif
-
 /* Functions defined in lib_srand.c *****************************************/
 
 unsigned long nrand(unsigned long limit);
