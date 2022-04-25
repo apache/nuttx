@@ -172,6 +172,7 @@ static int bat_monitor_open(FAR struct file *filep)
   nxsem_init(&priv->lock, 0, 1);
   nxsem_init(&priv->wait, 0, 0);
   nxsem_set_protocol(&priv->wait, SEM_PRIO_NONE);
+  priv->mask = UINT32_MAX;
   list_add_tail(&dev->flist, &priv->node);
   nxsem_post(&dev->batsem);
   filep->f_priv = priv;
