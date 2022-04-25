@@ -435,7 +435,7 @@
 #define GH3020_SPI_WR_LEN_L                0x02    /* Write reg len low byte */
 #define GH3020_SPI_RD_BUF_LEN              3       /* Read reg buffer len */
 #define GH3020_SPI_BYTES_PER_REG           2       /* How many bytes in a reg */
-#define GH3020_SPI_LOCALBUF_SIZE           33      /* Size of local exchange buf */
+#define GH3020_SPI_LOCALBUF_SIZE           100     /* Size of local exchange buf */
 
 /* Part3. Enumerations and constants */
 
