@@ -59,11 +59,6 @@
 
 #define RPTUNIOC_NONE               0
 
-#define RPTUN_OPS_START             0
-#define RPTUN_OPS_DUMP              1
-#define RPTUN_OPS_RESET             2
-#define RPTUN_OPS_PANIC             3
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -158,7 +153,6 @@ static metal_phys_addr_t rptun_pa_to_da(FAR struct rptun_dev_s *dev,
                                         metal_phys_addr_t pa);
 static metal_phys_addr_t rptun_da_to_pa(FAR struct rptun_dev_s *dev,
                                         metal_phys_addr_t da);
-static int rptun_ops_foreach(FAR const char *cpuname, int ops, int value);
 
 /****************************************************************************
  * Private Data
@@ -767,11 +761,9 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
   return 0;
 }
 
-static int rptun_dev_ioctl(FAR struct file *filep, int cmd,
-                           unsigned long arg)
+static int rptun_do_ioctl(FAR struct rptun_priv_s *priv, int cmd,
+                          unsigned long arg)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct rptun_priv_s *priv = inode->i_private;
   int ret = OK;
 
   switch (cmd)
@@ -801,6 +793,13 @@ static int rptun_dev_ioctl(FAR struct file *filep, int cmd,
     }
 
   return ret;
+}
+
+static int rptun_dev_ioctl(FAR struct file *filep, int cmd,
+                           unsigned long arg)
+{
+  FAR struct inode *inode = filep->f_inode;
+  return rptun_do_ioctl(inode->i_private, cmd, arg);
 }
 
 #ifdef CONFIG_RPTUN_LOADER
@@ -918,9 +917,11 @@ static metal_phys_addr_t rptun_da_to_pa(FAR struct rptun_dev_s *dev,
   return da;
 }
 
-static int rptun_ops_foreach(FAR const char *cpuname, int ops, int value)
+static int rptun_ioctl_foreach(FAR const char *cpuname, int cmd,
+                               unsigned long value)
 {
   FAR struct metal_list *node;
+  int ret = OK;
 
   metal_list_for_each(&g_rptun_priv, node)
     {
@@ -930,28 +931,13 @@ static int rptun_ops_foreach(FAR const char *cpuname, int ops, int value)
 
       if (!cpuname || !strcmp(RPTUN_GET_CPUNAME(priv->dev), cpuname))
         {
-          switch (ops)
-            {
-              case RPTUN_OPS_START:
-                priv->cmd = RPTUNIOC_START;
-                rptun_wakeup(priv);
-                break;
-              case RPTUN_OPS_DUMP:
-                rptun_dump(&priv->rvdev);
-                break;
-              case RPTUN_OPS_RESET:
-                RPTUN_RESET(priv->dev, value);
-                break;
-              case RPTUN_OPS_PANIC:
-                RPTUN_PANIC(priv->dev);
-                break;
-              default:
-                return -ENOTTY;
-            }
+          ret = rptun_do_ioctl(priv, cmd, value);
+          if (ret < 0)
+              break;
         }
     }
 
-  return 0;
+  return ret;
 }
 
 /****************************************************************************
@@ -1196,17 +1182,17 @@ err_mem:
 
 int rptun_boot(FAR const char *cpuname)
 {
-  return rptun_ops_foreach(cpuname, RPTUN_OPS_START, 0);
+  return rptun_ioctl_foreach(cpuname, RPTUNIOC_START, 0);
 }
 
 int rptun_reset(FAR const char *cpuname, int value)
 {
-  return rptun_ops_foreach(cpuname, RPTUN_OPS_RESET, value);
+  return rptun_ioctl_foreach(cpuname, RPTUNIOC_RESET, value);
 }
 
 int rptun_panic(FAR const char *cpuname)
 {
-  return rptun_ops_foreach(cpuname, RPTUN_OPS_PANIC, 0);
+  return rptun_ioctl_foreach(cpuname, RPTUNIOC_PANIC, 0);
 }
 
 int rptun_buffer_nused(FAR struct rpmsg_virtio_device *rvdev, bool rx)
@@ -1226,5 +1212,5 @@ int rptun_buffer_nused(FAR struct rpmsg_virtio_device *rvdev, bool rx)
 
 void rptun_dump_all(void)
 {
-  rptun_ops_foreach(NULL, RPTUN_OPS_DUMP, 0);
+  rptun_ioctl_foreach(NULL, RPTUNIOC_DUMP, 0);
 }
