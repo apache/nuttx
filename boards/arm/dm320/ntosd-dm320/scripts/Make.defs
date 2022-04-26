@@ -38,10 +38,6 @@ else
   OLDGCC = n
 endif
 
-ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
-endif
-
 ifeq ($(OLDGCC),n)
   ARCHCPUFLAGS = -mtune=arm9tdmi -march=armv5te -mfloat-abi=soft
 else

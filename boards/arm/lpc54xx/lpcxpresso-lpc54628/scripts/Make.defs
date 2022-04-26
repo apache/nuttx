@@ -25,12 +25,7 @@ include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
 # Setup for the kind of memory that we are executing from
 
 LDSCRIPT = flash.ld
-
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
-
-ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
-endif
 
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef

@@ -24,17 +24,11 @@ include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
 
 ifeq ($(CONFIG_ARCH_CHIP_STM32F401RE),y)
 LDSCRIPT = f401re.ld
-else
-ifeq ($(CONFIG_ARCH_CHIP_STM32F411RE),y)
+else ifeq ($(CONFIG_ARCH_CHIP_STM32F411RE),y)
 LDSCRIPT = f411re.ld
-endif
 endif
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
-
-ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
-endif
 
 
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN_CLANG),y)

@@ -33,10 +33,6 @@ endif
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3_rom.ld
 
-ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
-endif
-
 ARCHCFLAGS += -msmall-data-limit=0
 ARCHCXXFLAGS += -msmall-data-limit=0
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef

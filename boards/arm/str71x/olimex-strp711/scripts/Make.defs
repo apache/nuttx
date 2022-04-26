@@ -45,10 +45,6 @@ ifeq ("${CONFIG_DEBUG_FEATURES}","y")
   ARCHOPTIMIZATION = -g
 endif
 
-ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
-endif
-
 ifeq ($(OLDGCC),n)
   ARCHCPUFLAGS = -mcpu=arm7tdmi -mfloat-abi=soft
 else
