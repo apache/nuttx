@@ -95,6 +95,7 @@ struct sensor_upperhalf_s
   struct circbuf_s   buffer;             /* The circular buffer of sensor device */
   sem_t              exclsem;            /* Manages exclusive access to file operations */
   struct list_node   userlist;           /* List of users */
+  bool               readlast;           /* The flag of readlast */
 };
 
 /****************************************************************************
@@ -525,52 +526,61 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
     }
   else
     {
-      /* We must make sure that when the semaphore is equal to 1, there must
-       * be events available in the buffer, so we use a while statement to
-       * synchronize this case that other read operations consume events
-       * that have just entered the buffer.
+      /* If readlast is true, you can always read the last data
+       * in the circbuffer as initial value for new users when the
+       * sensor device has not yet generated new data, otherwise,
+       * it will return 0 when there isn't new data.
        */
 
-      while (circbuf_is_empty(&upper->buffer))
+      if (upper->readlast)
         {
-          if (filep->f_oflags & O_NONBLOCK)
+          if (circbuf_is_empty(&upper->buffer))
             {
-              ret = -EAGAIN;
+              ret = -ENODATA;
               goto out;
             }
-          else
-            {
-              nxsem_post(&upper->exclsem);
-              ret = nxsem_wait_uninterruptible(&user->buffersem);
-              if (ret < 0)
-                {
-                  return ret;
-                }
 
-              ret = nxsem_wait(&upper->exclsem);
-              if (ret < 0)
-                {
-                  return ret;
-                }
+          if (user->generation == upper->state.generation)
+            {
+              user->generation--;
             }
         }
-
-      /* Always read the last data in the circbuffer as initial value
-       * for new users when the sensor device has not yet generated
-       * new data.
-       */
-
-      if (user->generation == upper->state.generation)
+      else
         {
-          user->generation--;
+          /* We must make sure that when the semaphore is equal to 1,
+           * there must be events available in the buffer, so we use a
+           * while statement to synchronize this case that other read
+           * operations consume events that have just entered the buffer.
+           */
+
+          while (circbuf_is_empty(&upper->buffer) ||
+                 user->generation == upper->state.generation)
+            {
+              if (filep->f_oflags & O_NONBLOCK)
+                {
+                  ret = -EAGAIN;
+                  goto out;
+                }
+              else
+                {
+                  nxmutex_unlock(&upper->lock);
+                  ret = nxsem_wait_uninterruptible(&user->buffersem);
+                  if (ret < 0)
+                    {
+                      return ret;
+                    }
+
+                  nxmutex_lock(&upper->lock);
+                }
+            }
         }
 
       /* If user's generation isn't within circbuffer range, the
        * oldest data in circbuffer are returned to the users.
        */
 
-      else if (!sensor_in_range(upper->state.generation - lower->nbuffer,
-                                user->generation, upper->state.generation))
+      if (!sensor_in_range(upper->state.generation - lower->nbuffer,
+                           user->generation, upper->state.generation))
 
         {
           user->generation = upper->state.generation - lower->nbuffer;
@@ -701,6 +711,12 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             {
               ret = -EBUSY;
             }
+        }
+        break;
+
+      case SNIOC_READLAST:
+        {
+          upper->readlast = !!arg;
         }
         break;
 
@@ -969,6 +985,7 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
   /* Initialize the upper-half data structure */
 
   list_initialize(&upper->userlist);
+  upper->readlast = true;
   upper->state.esize = esize;
   upper->state.min_interval = ULONG_MAX;
   upper->state.min_latency = ULONG_MAX;

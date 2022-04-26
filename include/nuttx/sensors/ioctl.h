@@ -326,4 +326,13 @@
 #define SNIOC_UNREGISTER           _SNIOC(0x0090)
 #endif
 
+/* Command:      SNIOC_READLAST
+ * Description:  If enable readlast, there is no data update in time,
+ *               the latest data can always be returned.
+ *               Disable readlast, if there is no data update, return 0.
+ * Argument:     True or false
+ */
+
+#define SNIOC_READLAST             _SNIOC(0x0091)
+
 #endif /* __INCLUDE_NUTTX_SENSORS_IOCTL_H */
