@@ -173,6 +173,7 @@ static int bat_gauge_open(FAR struct file *filep)
   nxsem_init(&priv->lock, 0, 1);
   nxsem_init(&priv->wait, 0, 0);
   nxsem_set_protocol(&priv->wait, SEM_PRIO_NONE);
+  priv->mask = dev->mask;
   list_add_tail(&dev->flist, &priv->node);
   nxsem_post(&dev->batsem);
   filep->f_priv = priv;
@@ -440,6 +441,7 @@ int battery_gauge_changed(FAR struct battery_gauge_dev_s *dev,
       return ret;
     }
 
+  dev->mask |= mask;
   list_for_every_entry(&dev->flist, priv,
                        struct battery_gauge_priv_s, node)
     {

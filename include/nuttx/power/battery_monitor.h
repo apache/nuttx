@@ -305,6 +305,8 @@ struct battery_monitor_dev_s
 
   struct list_node flist;
 
+  uint32_t mask;  /* record drive support features */
+
   /* Data fields specific to the lower-half driver may follow */
 };
 
