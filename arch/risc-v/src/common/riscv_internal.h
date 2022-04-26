@@ -323,7 +323,6 @@ uintptr_t riscv_mhartid(void);
 /* If kernel runs in Supervisor mode, a system call trampoline is needed */
 
 #ifdef CONFIG_ARCH_USE_S_MODE
-void riscv_dispatch_syscall(void) noreturn_function;
 void *riscv_perform_syscall(uintptr_t *regs);
 #endif
 
