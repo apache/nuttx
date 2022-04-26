@@ -24,10 +24,6 @@ include $(TOPDIR)/arch/avr/src/avr32/Toolchain.defs
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)avr32dev1.ld
 
-ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -ffunction-sections -fdata-sections -fno-strict-aliasing
-endif
-
 ARCHCFLAGS = -muse-rodata-section
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef

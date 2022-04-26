@@ -24,19 +24,13 @@ include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
 
 ifeq ($(CONFIG_LC823450_IPL2),y)
   LDSCRIPT = ld-ipl2.script
-else
-ifeq ($(CONFIG_LC823450_SPIFI_BOOT),y)
+else ifeq ($(CONFIG_LC823450_SPIFI_BOOT),y)
   LDSCRIPT = ld-spif-boot.script
 else
   LDSCRIPT = ld.script
 endif
-endif
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
-
-ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
-endif
 
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef

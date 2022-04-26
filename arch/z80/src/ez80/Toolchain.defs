@@ -43,7 +43,7 @@ else
 endif
 
 ifeq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += -O0
+  ARCHOPTIMIZATION += -O0 -fno-strict-aliasing
 else
   ARCHOPTIMIZATION += -Oz
 endif
@@ -66,9 +66,15 @@ ARCHASMWARNINGS = -W
 
 # Optimization of unused sections
 
+ifeq ($(CONFIG_FRAME_POINTER),y)
+  ARCHOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+else
+  ARCHOPTIMIZATION += -fomit-frame-pointer
+endif
+
 ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
-  LDFLAGS         += --gc-sections
-  MAXOPTIMIZATION += -ffunction-sections -fdata-sections
+  LDFLAGS          += --gc-sections
+  ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
 endif
 
 # Debug link map
