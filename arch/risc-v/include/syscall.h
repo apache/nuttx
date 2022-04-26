@@ -124,18 +124,6 @@
 #define SYS_signal_handler_return (7)
 #endif /* !CONFIG_BUILD_FLAT */
 
-#if defined (CONFIG_ARCH_USE_S_MODE) && defined (__KERNEL__)
-#  define ASM_SYS_CALL \
-     " addi sp, sp, -16\n"                  /* Make room */ \
-     REGSTORE " ra, 0(sp)\n"                /* Save ra */ \
-     " jal  ra, riscv_dispatch_syscall\n"   /* Dispatch (modifies ra) */ \
-     REGLOAD " ra, 0(sp)\n"                 /* Restore ra */ \
-     " addi sp, sp, 16\n"                   /* Restore sp */
-#else
-#  define ASM_SYS_CALL \
-     "ecall"
-#endif
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -162,6 +150,20 @@ extern "C"
 #define EXTERN extern
 #endif
 
+#if defined(CONFIG_ARCH_USE_S_MODE) && defined(__KERNEL__)
+uintptr_t sys_call0(unsigned int nbr);
+uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1);
+uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1, uintptr_t parm2);
+uintptr_t sys_call3(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
+                    uintptr_t parm3);
+uintptr_t sys_call4(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
+                    uintptr_t parm3, uintptr_t parm4);
+uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
+                    uintptr_t parm3, uintptr_t parm4, uintptr_t parm5);
+uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
+                    uintptr_t parm3, uintptr_t parm4, uintptr_t parm5,
+                    uintptr_t parm6);
+#else
 /****************************************************************************
  * Name: sys_call0
  *
@@ -176,7 +178,7 @@ static inline uintptr_t sys_call0(unsigned int nbr)
 
   asm volatile
     (
-     ASM_SYS_CALL
+     "ecall"
      :: "r"(r0)
      : "memory"
      );
@@ -201,7 +203,7 @@ static inline uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1)
 
   asm volatile
     (
-     ASM_SYS_CALL
+     "ecall"
      :: "r"(r0), "r"(r1)
      : "memory"
      );
@@ -228,7 +230,7 @@ static inline uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1,
 
   asm volatile
     (
-     ASM_SYS_CALL
+     "ecall"
      :: "r"(r0), "r"(r1), "r"(r2)
      : "memory"
      );
@@ -256,7 +258,7 @@ static inline uintptr_t sys_call3(unsigned int nbr, uintptr_t parm1,
 
   asm volatile
     (
-     ASM_SYS_CALL
+     "ecall"
      :: "r"(r0), "r"(r1), "r"(r2), "r"(r3)
      : "memory"
      );
@@ -286,7 +288,7 @@ static inline uintptr_t sys_call4(unsigned int nbr, uintptr_t parm1,
 
   asm volatile
     (
-     ASM_SYS_CALL
+     "ecall"
      :: "r"(r0), "r"(r1), "r"(r2), "r"(r3), "r"(r4)
      : "memory"
      );
@@ -317,7 +319,7 @@ static inline uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1,
 
   asm volatile
     (
-     ASM_SYS_CALL
+     "ecall"
      :: "r"(r0), "r"(r1), "r"(r2), "r"(r3), "r"(r4), "r"(r5)
      : "memory"
      );
@@ -350,7 +352,7 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
 
   asm volatile
     (
-     ASM_SYS_CALL
+     "ecall"
      :: "r"(r0), "r"(r1), "r"(r2), "r"(r3), "r"(r4), "r"(r5), "r"(r6)
      : "memory"
      );
@@ -359,6 +361,7 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
 
   return r0;
 }
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus
