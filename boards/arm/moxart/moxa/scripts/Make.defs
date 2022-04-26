@@ -24,10 +24,6 @@ include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)moxa.ld
 
-ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
-endif
-
 ARCHCFLAGS += -mno-thumb-interwork -march=armv4 -Uarm
 ARCHCXXFLAGS += -mno-thumb-interwork -march=armv4 -Uarm
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef

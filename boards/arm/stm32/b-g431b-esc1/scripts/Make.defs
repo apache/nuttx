@@ -30,10 +30,6 @@ endif
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
-ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
-endif
-
 ARCHCFLAGS += -funwind-tables
 ARCHCXXFLAGS += -funwind-tables
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef

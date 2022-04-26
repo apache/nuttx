@@ -24,10 +24,6 @@ include ${TOPDIR}/arch/arm/src/armv8-m/Toolchain.defs
 
 ARCHSCRIPT = $(BOARD_DIR)$(DELIM)scripts$(DELIM)flash.ld
 
-ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
-endif
-
 # enable precise stack overflow tracking
 ifeq ($(CONFIG_ARMV8M_STACKCHECK),y)
   INSTRUMENTATIONDEFINES = -finstrument-functions -ffixed-r10
