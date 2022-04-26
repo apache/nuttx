@@ -452,8 +452,9 @@ static void ioe_rpmsg_irqworker(FAR void *priv_)
   msg.cbfunc = cb->cbfunc;
   msg.cbarg  = cb->cbarg;
 
-  ioe_rpmsg_sendrecv(cb->ept, IOE_RPMSG_IRQ,
-                     (struct ioe_rpmsg_header_s *)&msg, sizeof(msg));
+  msg.header.command  = IOE_RPMSG_IRQ;
+  msg.header.response = 0;
+  rpmsg_send(cb->ept, &msg, sizeof(msg));
 
   cb->pendset = 0;
 }
