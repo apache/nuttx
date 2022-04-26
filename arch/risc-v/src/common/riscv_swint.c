@@ -130,9 +130,9 @@ static void dispatch_syscall(void)
      "mv   a2, a0\n"                        /* a2=Save return value in a0 */
      "li   a0, 3\n"                         /* a0=SYS_syscall_return (3) */
 #ifdef CONFIG_ARCH_USE_S_MODE
-     "j    riscv_dispatch_syscall"          /* Return from the syscall */
+     "j    sys_call2"                       /* Return from the syscall */
 #else
-     " ecall"                               /* Return from the syscall */
+     "ecall"                                /* Return from the syscall */
 #endif
   );
 }

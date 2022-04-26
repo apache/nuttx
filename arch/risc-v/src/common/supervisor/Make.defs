@@ -20,7 +20,7 @@
 
 # If the NuttX kernel runs in S-mode
 
-CMN_ASRCS += riscv_dispatch_syscall.S
+CMN_ASRCS += riscv_syscall.S
 CMN_CSRCS += riscv_perform_syscall.c
 CMN_CSRCS += riscv_percpu.c riscv_sbi.c
 
