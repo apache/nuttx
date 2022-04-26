@@ -49,6 +49,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <sys/random.h>
 
 #include <netinet/in.h>
 
@@ -201,12 +202,26 @@ static int tcp_selectport(uint8_t domain,
                           uint16_t portno)
 {
   static uint16_t g_last_tcp_port;
+  ssize_t ret;
 
   /* Generate port base dynamically */
 
   if (g_last_tcp_port == 0)
     {
-      g_last_tcp_port = clock_systime_ticks() % 32000;
+      ret = getrandom(&g_last_tcp_port, sizeof(uint16_t), 0);
+      if (ret < 0)
+        {
+          ret = getrandom(&g_last_tcp_port, sizeof(uint16_t), GRND_RANDOM);
+        }
+
+      if (ret != sizeof(uint16_t))
+        {
+          g_last_tcp_port = clock_systime_ticks() % 32000;
+        }
+      else
+        {
+          g_last_tcp_port = g_last_tcp_port % 32000;
+        }
 
       if (g_last_tcp_port < 4096)
         {
