@@ -56,6 +56,8 @@
 #define RPTUNIOC_NONE               0
 #define NO_HOLDER                   INVALID_PROCESS_ID
 
+#define RPTUN_TIMEOUT_MS            100
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -508,7 +510,8 @@ static int rptun_wait_tx_buffer(FAR struct remoteproc *rproc)
 
   /* Wait to wakeup */
 
-  nxsem_wait(&priv->semtx);
+  nxsem_tickwait(&priv->semtx, clock_systime_ticks(),
+                 MSEC2TICK(RPTUN_TIMEOUT_MS));
   rptun_worker(priv);
 
   return 0;
