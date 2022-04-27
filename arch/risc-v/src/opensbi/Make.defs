@@ -30,6 +30,7 @@ OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/utils/timer/aclint_mtimer.c
 
 OPENSBI_ASRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_expected_trap.S
 OPENSBI_ASRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_hfence.S
+OPENSBI_ASRCS += opensbi/opensbi-3rdparty/lib/sbi/riscv_hardfp.S
 
 OPENSBI_UNPACK  = opensbi-3rdparty
 OPENSBI_COMMIT  = 4998a712b2ab504eff306110879ee05af6050177
