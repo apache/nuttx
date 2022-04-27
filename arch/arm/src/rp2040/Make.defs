@@ -18,35 +18,16 @@
 #
 ############################################################################
 
-CMN_ASRCS  = arm_exception.S vfork.S
+include armv6-m/Make.defs
 
-CMN_CSRCS  = arm_allocateheap.c arm_assert.c arm_blocktask.c
-CMN_CSRCS += arm_createstack.c arm_mdelay.c arm_udelay.c arm_exit.c
-CMN_CSRCS += arm_initialize.c arm_initialstate.c arm_interruptcontext.c
-CMN_CSRCS += arm_modifyreg8.c arm_modifyreg16.c arm_modifyreg32.c
-CMN_CSRCS += arm_releasepending.c arm_releasestack.c arm_reprioritizertr.c
-CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_stackframe.c
-CMN_CSRCS += arm_systemreset.c arm_unblocktask.c arm_usestack.c arm_doirq.c
-CMN_CSRCS += arm_hardfault.c arm_svcall.c arm_vectors.c arm_vfork.c
-CMN_CSRCS += arm_switchcontext.c arm_saveusercontext.c
-CMN_CSRCS += arm_fullcontextrestore.c arm_puts.c arm_tcbinfo.c
+CMN_ASRCS += arm_exception.S
+
+CMN_CSRCS += arm_initialstate.c arm_schedulesigaction.c arm_sigdeliver.c
+CMN_CSRCS += arm_systemreset.c arm_doirq.c arm_hardfault.c arm_svcall.c
+CMN_CSRCS += arm_vectors.c arm_tcbinfo.c
 
 ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
 CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
-endif
-
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CMN_CSRCS += arm_task_start.c arm_pthread_start.c
-CMN_CSRCS += arm_signal_dispatch.c
-CMN_UASRCS += arm_signal_handler.S
-endif
-
-ifeq ($(CONFIG_SCHED_BACKTRACE),y)
-CMN_CSRCS += arm_backtrace_thumb.c
-endif
-
-ifeq ($(CONFIG_STACK_COLORATION),y)
-CMN_CSRCS += arm_checkstack.c
 endif
 
 ifeq ($(CONFIG_DEBUG_FEATURES),y)
