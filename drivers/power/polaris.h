@@ -107,7 +107,6 @@ struct rx_int_state_s
 #define WLC_HEALTH_OVERCOLD  2
 
 #define CHARGER_DETECT_WORK_TIME  50000
-#define DETECT_WORK_INIT_TIME     2000000
 
 #define DETECT_WORK_NO_EXIST       0
 #define DETECT_WORK_EXIST          1

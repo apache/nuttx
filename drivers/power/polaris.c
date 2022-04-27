@@ -1275,8 +1275,7 @@ FAR struct battery_charger_dev_s *
       baterr("Failed to trun ON wpc ldo output: %d\n", ret);
     }
 
-  work_queue(LPWORK, &priv->detect_work, detect_worker, priv,
-             DETECT_WORK_INIT_TIME / USEC_PER_TICK);
+  work_queue(LPWORK, &priv->detect_work, detect_worker, priv, 0);
 
   return (FAR struct battery_charger_dev_s *)priv;
 }

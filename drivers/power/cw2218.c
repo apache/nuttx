@@ -881,7 +881,7 @@ static void cw2218_worker(FAR void *arg)
 #endif
 
   work_queue(HPWORK, &priv->work, cw2218_worker, priv,
-             CW2218_WORK_POLL_TIME);
+             CW2218_WORK_POLL_TIME / USEC_PER_TICK);
 }
 
 /****************************************************************************
@@ -938,8 +938,7 @@ static int cw2218_init(FAR struct cw2218_dev_s *priv)
         }
     }
 
-  work_queue(HPWORK, &priv->work, cw2218_worker, priv,
-             CW2218_WORK_INIT_TIME);
+  work_queue(HPWORK, &priv->work, cw2218_worker, priv, 0);
 
   return OK;
 }
