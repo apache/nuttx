@@ -54,6 +54,8 @@
 
 #define RPTUNIOC_NONE               0
 
+#define RPTUN_TIMEOUT_MS            20
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -501,7 +503,7 @@ static int rptun_notify_wait(FAR struct remoteproc *rproc, uint32_t id)
 
   /* Wait to wakeup */
 
-  nxsem_wait(&priv->semtx);
+  nxsem_tickwait(&priv->semtx, MSEC2TICK(RPTUN_TIMEOUT_MS));
   rptun_worker(priv);
 
   return 0;
