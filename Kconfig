@@ -1972,7 +1972,6 @@ config DEBUG_OPT_UNUSED_SECTIONS
 config DEBUG_LINK_MAP
 	bool "Generate link map file"
 	default y
-	depends on ARCH_TOOLCHAIN_GNU
 	---help---
 		Selecting this option will pass "-Map=$(TOPDIR)$(DELIM)nuttx.map" to ld
 		when linking NuttX ELF. That file can be useful for verifying
