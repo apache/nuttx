@@ -213,9 +213,4 @@ endif
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)
 
-info:
-	@echo $(HEAD_OBJ)
-	@echo $(ASRCS)
-	@echo $(CONFIG_ARCH_CHIP)
-
 -include Make.dep
