@@ -326,7 +326,10 @@ static int rptun_callback(FAR void *arg, uint32_t vqid)
   if (vqid == RPTUN_NOTIFY_ALL ||
       vqid == vdev->vrings_info[rvq->vq_queue_index].notifyid)
     {
-      rptun_wakeup_rx(priv);
+      if (rptun_buffer_nused(&priv->rvdev, true))
+        {
+          rptun_wakeup_rx(priv);
+        }
     }
 
   if (vqid == RPTUN_NOTIFY_ALL ||
