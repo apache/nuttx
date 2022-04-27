@@ -245,7 +245,7 @@ config LTO_NONE
 
 config LTO_FULL
 	bool "GNU Full LTO (EXPERIMENTAL)"
-	depends on ARCH_TOOLCHAIN_GNU || ARCH_TOOLCHAIN_CLANG
+	depends on ARCH_TOOLCHAIN_GNU
 	---help---
 		Link time optimization is implemented as a GCC front end for a bytecode
 		bytecode representation of GIMPLE that is emitted in special sections
