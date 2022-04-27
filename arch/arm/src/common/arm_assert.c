@@ -76,7 +76,9 @@ static void arm_stackdump(uint32_t sp, uint32_t stack_top)
   for (stack = sp & ~0x1f; stack < (stack_top & ~0x1f); stack += 32)
     {
       uint32_t *ptr = (uint32_t *)stack;
-      _alert("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+      _alert("%08" PRIx32 ": %08" PRIx32 " %08" PRIx32 " %08" PRIx32
+             " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" PRIx32
+             " %08" PRIx32 "\n",
              stack, ptr[0], ptr[1], ptr[2], ptr[3],
              ptr[4], ptr[5], ptr[6], ptr[7]);
     }
@@ -90,34 +92,42 @@ static void arm_registerdump(volatile uint32_t *regs)
 {
   /* Dump the interrupt registers */
 
-  _alert("R0: %08x R1: %08x R2: %08x  R3: %08x\n",
+  _alert("R0: %08" PRIx32 " R1: %08" PRIx32
+         " R2: %08" PRIx32 "  R3: %08" PRIx32 "\n",
          regs[REG_R0], regs[REG_R1], regs[REG_R2], regs[REG_R3]);
 #ifdef CONFIG_ARM_THUMB
-  _alert("R4: %08x R5: %08x R6: %08x  FP: %08x\n",
+  _alert("R4: %08" PRIx32 " R5: %08" PRIx32
+         " R6: %08" PRIx32 "  FP: %08" PRIx32 "\n",
          regs[REG_R4], regs[REG_R5], regs[REG_R6], regs[REG_R7]);
-  _alert("R8: %08x SB: %08x SL: %08x R11: %08x\n",
+  _alert("R8: %08" PRIx32 " SB: %08" PRIx32
+         " SL: %08" PRIx32 " R11: %08" PRIx32 "\n",
          regs[REG_R8], regs[REG_R9], regs[REG_R10], regs[REG_R11]);
 #else
-  _alert("R4: %08x R5: %08x R6: %08x  R7: %08x\n",
+  _alert("R4: %08" PRIx32 " R5: %08" PRIx32
+         " R6: %08" PRIx32 "  R7: %08" PRIx32 "\n",
          regs[REG_R4], regs[REG_R5], regs[REG_R6], regs[REG_R7]);
-  _alert("R8: %08x SB: %08x SL: %08x  FP: %08x\n",
+  _alert("R8: %08" PRIx32 " SB: %08" PRIx32
+         " SL: %08" PRIx32 "  FP: %08" PRIx32 "\n",
          regs[REG_R8], regs[REG_R9], regs[REG_R10], regs[REG_R11]);
 #endif
-  _alert("IP: %08x SP: %08x LR: %08x  PC: %08x\n",
+  _alert("IP: %08" PRIx32 " SP: %08" PRIx32
+         " LR: %08" PRIx32 "  PC: %08" PRIx32 "\n",
          regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
 
 #if defined(REG_BASEPRI)
-  _alert("xPSR: %08x BASEPRI: %08x CONTROL: %08x\n",
+  _alert("xPSR: %08" PRIx32 " BASEPRI: %08" PRIx32
+         " CONTROL: %08" PRIx32 "\n",
          regs[REG_XPSR], regs[REG_BASEPRI], getcontrol());
 #elif defined(REG_PRIMASK)
-  _alert("xPSR: %08x PRIMASK: %08x CONTROL: %08x\n",
+  _alert("xPSR: %08" PRIx32 " PRIMASK: %08" PRIx32
+         " CONTROL: %08" PRIx32 "\n",
          regs[REG_XPSR], regs[REG_PRIMASK], getcontrol());
 #elif defined(REG_CPSR)
-  _alert("CPSR: %08x\n", regs[REG_CPSR]);
+  _alert("CPSR: %08" PRIx32 "\n", regs[REG_CPSR]);
 #endif
 
 #ifdef REG_EXC_RETURN
-  _alert("EXC_RETURN: %08x\n", regs[REG_EXC_RETURN]);
+  _alert("EXC_RETURN: %08" PRIx32 "\n", regs[REG_EXC_RETURN]);
 #endif
 }
 
@@ -328,9 +338,9 @@ static void arm_dump_stack(const char *tag, uint32_t sp,
   uint32_t top = base + size;
 
   _alert("%s Stack:\n", tag);
-  _alert("sp:     %08x\n", sp);
-  _alert("  base: %08x\n", base);
-  _alert("  size: %08x\n", size);
+  _alert("sp:     %08" PRIx32 "\n", sp);
+  _alert("  base: %08" PRIx32 "\n", base);
+  _alert("  size: %08" PRIx32 "\n", size);
 
   if (sp >= base && sp < top)
     {
