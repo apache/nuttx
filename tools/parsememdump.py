@@ -133,6 +133,8 @@ if __name__ == "__main__":
     for t in list:
         memstr = ""
         log.output("%-4d  %-6d %-3d   %s   " % (t.cnt, t.size, t.pid, t.addr))
+        if t.mem == []:
+            continue
         for mem in t.mem:
             log.output("%s " % mem)
             memstr += mem + " "
