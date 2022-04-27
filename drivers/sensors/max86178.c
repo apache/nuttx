@@ -2738,7 +2738,7 @@ static int max86178_ecg_control(FAR struct file *filep,
       default:                         /* Invalid command. */
         {
           snerr("No such command.\n");
-          return -EINVAL;
+          return -ENOTTY;
         }
     }
 

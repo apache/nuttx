@@ -1657,7 +1657,7 @@ static int gh3020_control(FAR struct file *filep,
       default:
         {
           snerr("No such command.\n");
-          return -EINVAL;
+          return -ENOTTY;
         }
     }
 
