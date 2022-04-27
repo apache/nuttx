@@ -600,9 +600,14 @@ int riscv_config_pmp_region(uintptr_t region, uintptr_t attr,
 #   error "XLEN of risc-v not supported"
 # endif
 
-  /* fence is needed when page-based virtual memory is implemented */
+#ifdef CONFIG_ARCH_USE_S_MODE
+  /* Fence is needed when page-based virtual memory is implemented.
+   * If page-based virtual memory is not implemented, memory accesses check
+   * the PMP settings synchronously, so no SFENCE.VMA is needed.
+   */
 
   __asm volatile("sfence.vma x0, x0" : : : "memory");
+#endif
 
   return OK;
 }
