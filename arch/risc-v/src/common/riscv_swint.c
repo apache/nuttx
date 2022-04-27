@@ -555,7 +555,7 @@ int riscv_swint(int irq, void *context, void *arg)
     }
   else
     {
-      svcinfo("SWInt Return: %d\n", regs[REG_A0]);
+      svcinfo("SWInt Return: %" PRIxPTR "\n", regs[REG_A0]);
     }
 #endif
 
