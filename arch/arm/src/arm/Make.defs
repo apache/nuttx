@@ -1,5 +1,5 @@
 ############################################################################
-# arch/arm/src/dm320/Make.defs
+# arch/arm/src/arm/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,26 +18,6 @@
 #
 ############################################################################
 
-include arm/Make.defs
+# Common ARM files
 
-HEAD_ASRC = arm_head.S
-
-CMN_ASRCS += arm_cache.S arm_vectors.S
-CMN_ASRCS += arm_vectoraddrexcptn.S arm_vectortab.S
-
-CMN_CSRCS += arm_dataabort.c arm_initialstate.c arm_prefetchabort.c
-CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_syscall.c
-CMN_CSRCS += arm_undefinedinsn.c arm_tcbinfo.c
-
-CHIP_ASRCS  = dm320_lowputc.S dm320_restart.S
-
-CHIP_CSRCS  = dm320_allocateheap.c dm320_boot.c dm320_decodeirq.c
-CHIP_CSRCS += dm320_irq.c dm320_serial.c dm320_framebuffer.c
-
-ifneq ($(CONFIG_SCHED_TICKLESS),y)
-CHIP_CSRCS += dm320_timerisr.c
-endif
-
-ifeq ($(CONFIG_USBDEV),y)
-CHIP_CSRCS += dm320_usbdev.c
-endif
+include common/Make.defs
