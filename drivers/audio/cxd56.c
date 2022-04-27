@@ -62,8 +62,8 @@
 #define CXD56_IRQ1_BIT_MIC  (1 << 6)   /* AU0 */
 #define CXD56_IRQ1_BIT_I2S1 (1 << 7)   /* AU1 */
 
-#define CXD56_VOL_MIN            -1020
-#define CXD56_VOL_MAX            120
+#define CXD56_VOL_MIN            (-1020)
+#define CXD56_VOL_MAX            (-30)
 #define CXD56_VOL_MUTE           (CXD56_VOL_MIN - 1)
 #define CXD56_VOL_RANGE          ((CXD56_VOL_MAX - CXD56_VOL_MIN) / 2)
 #define CXD56_VOL_NX_TO_CXD56(v) ((int)((float)((v) / 1000.0) * CXD56_VOL_RANGE) \
@@ -2733,8 +2733,8 @@ static int cxd56_configure(FAR struct audio_lowerhalf_s *lower,
                 priv->volume = CXD56_VOL_NX_TO_CXD56(volume);
 
                 cxd56_set_volume(CXD56_AUDIO_VOLID_MIXER_OUT, priv->volume);
-                cxd56_set_volume(CXD56_AUDIO_VOLID_MIXER_IN1, priv->volume);
-                cxd56_set_volume(CXD56_AUDIO_VOLID_MIXER_IN2, priv->volume);
+                cxd56_set_volume(CXD56_AUDIO_VOLID_MIXER_IN1, 0);
+                cxd56_set_volume(CXD56_AUDIO_VOLID_MIXER_IN2, 0);
               }
             else
               {
@@ -2762,8 +2762,8 @@ static int cxd56_configure(FAR struct audio_lowerhalf_s *lower,
             else
               {
                 cxd56_set_volume(CXD56_AUDIO_VOLID_MIXER_OUT, priv->volume);
-                cxd56_set_volume(CXD56_AUDIO_VOLID_MIXER_IN1, priv->volume);
-                cxd56_set_volume(CXD56_AUDIO_VOLID_MIXER_IN2, priv->volume);
+                cxd56_set_volume(CXD56_AUDIO_VOLID_MIXER_IN1, 0);
+                cxd56_set_volume(CXD56_AUDIO_VOLID_MIXER_IN2, 0);
               }
 
             if (CXD56_AUDIO_ECODE_OK != ret)
