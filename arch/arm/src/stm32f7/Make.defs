@@ -23,26 +23,14 @@
 
 # Common ARM and Cortex-M7 files
 
-CMN_ASRCS  = arm_testset.S arm_fetchadd.S vfork.S arm_exception.S
+include armv7-m/Make.defs
 
-CMN_CSRCS  = arm_assert.c arm_blocktask.c arm_createstack.c arm_vectors.c
-CMN_CSRCS += arm_doirq.c arm_exit.c arm_hardfault.c arm_initialize.c arm_puts.c
-CMN_CSRCS += arm_initialstate.c arm_interruptcontext.c arm_mdelay.c
-CMN_CSRCS += arm_memfault.c arm_modifyreg8.c arm_modifyreg16.c arm_modifyreg32.c
-CMN_CSRCS += arm_releasepending.c arm_releasestack.c arm_reprioritizertr.c
-CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_stackframe.c
-CMN_CSRCS += arm_svcall.c arm_systemreset.c arm_trigger_irq.c arm_unblocktask.c
-CMN_CSRCS += arm_udelay.c arm_usestack.c arm_vfork.c arm_switchcontext.c
-CMN_CSRCS += arm_saveusercontext.c arm_fullcontextrestore.c
+CMN_ASRCS += arm_exception.S
+
+CMN_CSRCS += arm_vectors.c arm_doirq.c arm_hardfault.c arm_initialstate.c
+CMN_CSRCS += arm_memfault.c arm_schedulesigaction.c arm_sigdeliver.c
+CMN_CSRCS += arm_svcall.c arm_systemreset.c arm_trigger_irq.c
 CMN_CSRCS += arm_tcbinfo.c arm_cache.c
-
-ifeq ($(CONFIG_SCHED_BACKTRACE),y)
-CMN_CSRCS += arm_backtrace_thumb.c
-endif
-
-ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
-CMN_CSRCS += arm_idle.c
-endif
 
 ifeq ($(CONFIG_ARMV7M_STACKCHECK),y)
 CMN_CSRCS += arm_stackcheck.c
@@ -65,16 +53,6 @@ endif
 
 ifneq ($(filter y,$(CONFIG_ARM_MPU) $(CONFIG_ARM_MPU_EARLY_RESET)),)
 CMN_CSRCS += arm_mpu.c
-endif
-
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CMN_CSRCS += arm_task_start.c arm_pthread_start.c
-CMN_CSRCS += arm_signal_dispatch.c
-CMN_UASRCS += arm_signal_handler.S
-endif
-
-ifeq ($(CONFIG_STACK_COLORATION),y)
-CMN_CSRCS += arm_checkstack.c
 endif
 
 # Required STM32F7 files
