@@ -78,12 +78,7 @@ ssize_t writev(int fildes, FAR const struct iovec *iov, int iovcnt)
   ssize_t nwritten;
   size_t remaining;
   FAR uint8_t *buffer;
-  off_t pos;
   int i;
-
-  /* Get the current file position in case we have to reset it */
-
-  pos = lseek(fildes, 0, SEEK_CUR);
 
   /* Process each entry in the struct iovec array */
 
@@ -108,21 +103,6 @@ ssize_t writev(int fildes, FAR const struct iovec *iov, int iovcnt)
 
               if (nwritten < 0)
                 {
-                  if (pos != (off_t)-1)
-                    {
-                      /* Save the errno value */
-
-                      int save = get_errno();
-
-                      /* Restore the file position */
-
-                      lseek(fildes, pos, SEEK_SET);
-
-                      /* Restore the errno value */
-
-                      set_errno(save);
-                    }
-
                   return ntotal ? ntotal : ERROR;
                 }
 
