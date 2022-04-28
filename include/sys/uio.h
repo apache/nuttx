@@ -156,6 +156,12 @@ ssize_t readv(int fildes, FAR const struct iovec *iov, int iovcnt);
 
 ssize_t writev(int fildes, FAR const struct iovec *iov, int iovcnt);
 
+ssize_t preadv(int fildes, FAR const struct iovec *iov, int iovcnt,
+               off_t offset);
+
+ssize_t pwritev(int fildes, FAR const struct iovec *iov, int iovcnt,
+                off_t offset);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
