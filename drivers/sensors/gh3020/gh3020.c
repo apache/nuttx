@@ -1588,6 +1588,7 @@ static int gh3020_control(FAR struct file *filep,
 {
   FAR struct gh3020_sensor_s *sensor = (FAR struct gh3020_sensor_s *)lower;
 #ifdef CONFIG_FACTEST_SENSORS_GH3020
+  FAR struct sensor_ioctl_s *ioctl = (FAR struct sensor_ioctl_s *)arg;
   FAR struct gh3020_dev_s *priv;
 #endif
 
@@ -1604,7 +1605,7 @@ static int gh3020_control(FAR struct file *filep,
         {
           if (priv->factest_mode == true)
             {
-              FAR uint32_t *current = (FAR uint32_t *)arg;
+              FAR uint32_t *current = (FAR uint32_t *)ioctl->data;
               uint32_t leddrv_val;
 
               leddrv_val = (uint32_t)roundf((float)*current * 0xffu / 1000 /

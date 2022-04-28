@@ -1231,6 +1231,7 @@ static int pat9126ja_control(FAR struct sensor_lowerhalf_s *lower,
                              int cmd, unsigned long arg)
 {
   FAR struct pat9126ja_dev_s *priv = (FAR struct pat9126ja_dev_s *)lower;
+  FAR struct sensor_ioctl_s *ioctl = (FAR struct sensor_ioctl_s *)arg;
   int ret = OK;
 
   DEBUGASSERT(lower != NULL);
@@ -1241,7 +1242,7 @@ static int pat9126ja_control(FAR struct sensor_lowerhalf_s *lower,
     {
       case PAT9126JA_DISP_INFO:       /* Displacement information */
         {
-          sprintf((FAR char *)arg, "%d", priv->dev.x_position);
+          sprintf((FAR char *)ioctl->data, "%d", priv->dev.x_position);
         }
         break;
 

@@ -3956,6 +3956,7 @@ static int bmi270_control(FAR struct file *filep,
                           int cmd, unsigned long arg)
 {
   FAR struct bmi270_sensor_s *sensor = (FAR struct bmi270_sensor_s *)lower;
+  FAR struct sensor_ioctl_s *ioctl = (FAR struct sensor_ioctl_s *)arg;
   FAR struct bmi270_dev_s * priv;
   int ret;
 
@@ -3985,7 +3986,7 @@ static int bmi270_control(FAR struct file *filep,
     {
       case BMI270_FEAT_MANAGE_CMD:    /* Feature manage cmd tag */
         {
-          priv->featen = (unsigned int)arg;
+          priv->featen = *(unsigned int *)ioctl->data;
           ret = bmi270_feat_manage(priv);
           if (ret < 0)
             {
@@ -3996,6 +3997,8 @@ static int bmi270_control(FAR struct file *filep,
 
       case BMI270_SET_SCALE_XL_CMD:   /* Set accelerator scale command tag */
         {
+          int data = *(int *)ioctl->data;
+
           ret = bmi270_xl_enable(priv, false);
           if (ret < 0)
             {
@@ -4005,7 +4008,7 @@ static int bmi270_control(FAR struct file *filep,
 
           priv->dev[BMI270_XL_IDX].activated = false;
 
-          switch (arg)
+          switch (data)
           {
             case BMI270_XL_SET_2G:
               {
