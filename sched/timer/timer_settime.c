@@ -287,7 +287,7 @@ int timer_settime(timer_t timerid, int flags,
     {
       /* Calculate a delay corresponding to the absolute time in 'value' */
 
-      clock_abstime2ticks(timer->pt_clock, &value->it_value, &delay);
+      ret = clock_abstime2ticks(timer->pt_clock, &value->it_value, &delay);
     }
   else
     {
@@ -296,7 +296,14 @@ int timer_settime(timer_t timerid, int flags,
        * returns success.
        */
 
-      clock_time2ticks(&value->it_value, &delay);
+      ret = clock_time2ticks(&value->it_value, &delay);
+    }
+
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+      goto errout;
     }
 
   /* If the time is in the past or now, then set up the next interval
@@ -324,6 +331,7 @@ int timer_settime(timer_t timerid, int flags,
         }
     }
 
+errout:
   leave_critical_section(intflags);
   return ret;
 }
