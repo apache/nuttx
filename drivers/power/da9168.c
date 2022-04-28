@@ -211,38 +211,29 @@ static int da9168_dump_regs(FAR struct da9168_dev_s *priv);
 static int da9168_getreg8(FAR struct da9168_dev_s *priv, uint8_t regaddr,
                           FAR uint8_t *regval)
 {
-  struct i2c_config_s config;
-  uint8_t val;
-  int ret;
+  FAR struct i2c_master_s *dev = priv->i2c;
+  struct i2c_msg_s msg[2];
+  int err;
 
-  /* Set up the I2C configuration */
+  msg[0].frequency = priv->frequency;
+  msg[0].addr = priv->addr;
+  msg[0].buffer = &regaddr;
+  msg[0].length = 1;
+  msg[0].flags = I2C_M_NOSTOP;
 
-  config.frequency = priv->frequency;
-  config.address   = priv->addr;
-  config.addrlen   = 7;
+  msg[1].frequency = priv->frequency;
+  msg[1].addr = priv->addr;
+  msg[1].buffer = regval;
+  msg[1].length = 1;
+  msg[1].flags = I2C_M_READ;
 
-  /* Write the register address */
-
-  ret = i2c_write(priv->i2c, &config, &regaddr, 1);
-  if (ret < 0)
+  if ((err = I2C_TRANSFER(dev, msg, 2)) < OK)
     {
-      baterr("ERROR: i2c_write failed: %d\n", ret);
-      return ret;
+      baterr("ERROR: i2c transfer failed! err: %d\n", err);
+      return err;
     }
 
-  /* Restart and read 8-bits from the register */
-
-  ret = i2c_read(priv->i2c, &config, &val, 1);
-  if (ret < 0)
-    {
-      baterr("ERROR: i2c_read failed: %d\n", ret);
-      return ret;
-    }
-
-  /* Copy 8-bit value to be returned */
-
-  *regval = val;
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
