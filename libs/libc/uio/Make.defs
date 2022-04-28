@@ -21,6 +21,7 @@
 # Add the uio.h C files to the build
 
 CSRCS += lib_readv.c lib_writev.c
+CSRCS += lib_preadv.c lib_pwritev.c
 
 # Add the uio.h directory to the build
 
