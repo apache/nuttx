@@ -266,7 +266,7 @@ struct nt38350_dev_s
   struct ts_nt38350_sample_s    sample;            /* Last sampled touch point data */
   struct ts_nt38350_sample_s    old_sample;        /* Old sampled touch point data */
   struct touch_lowerhalf_s      lower;             /* touchscreen device lowerhalf instance */
-#if CONFIG_PM
+#ifdef CONFIG_PM
   struct pm_callback_s          pm;
   enum pm_state_e               current_state;
   int8_t                        enable_fdm;
@@ -4081,7 +4081,7 @@ static int nt38350_data_interrupt(FAR struct ioexpander_dev_s *dev,
   return OK;
 }
 
-#if CONFIG_PM
+#ifdef CONFIG_PM
 static void nt38350_poweroff_cb(void *arg)
 {
   FAR struct nvt_power_resume_s *ptr =
@@ -4091,9 +4091,7 @@ static void nt38350_poweroff_cb(void *arg)
   ptr->icpower_state = NVT_POWER_OFF;
   iinfo("NT38350 ICPowerState %d\n", ptr->icpower_state);
 }
-#endif
 
-#if CONFIG_PM
 static int nt38350_hardware_reinit(FAR struct nt38350_dev_s *priv)
 {
   int ret;
@@ -4116,9 +4114,7 @@ static int nt38350_hardware_reinit(FAR struct nt38350_dev_s *priv)
 
   return ret;
 }
-#endif
 
-#if CONFIG_PM
 static int nt38350_ts_resume(FAR struct nt38350_dev_s *dev)
 {
   int ret;
@@ -4145,9 +4141,7 @@ static int nt38350_ts_resume(FAR struct nt38350_dev_s *dev)
 
   return ret;
 }
-#endif
 
-#if CONFIG_PM
 static int nt38350_ts_suspend(FAR struct nt38350_dev_s *dev, uint8_t cmd)
 {
   int ret;
@@ -4169,17 +4163,13 @@ static int nt38350_ts_suspend(FAR struct nt38350_dev_s *dev, uint8_t cmd)
 
   return ret;
 }
-#endif
 
-#if CONFIG_PM
 static int nt38350_pm_prepare(FAR struct pm_callback_s *cb, int domain,
                               enum pm_state_e pmstate)
 {
   return OK;
 }
-#endif
 
-#if CONFIG_PM
 static void nt38350_pm_notify(FAR struct pm_callback_s *cb,
                               int domain, enum pm_state_e pmstate)
 {
@@ -4241,9 +4231,7 @@ static void nt38350_pm_notify(FAR struct pm_callback_s *cb,
       dev->current_state = pmstate;
     }
 }
-#endif
 
-#if CONFIG_PM
 static int nt38350_recovery_cb(void *arg)
 {
   int ret;
@@ -4342,7 +4330,7 @@ static int nt38350_control(FAR struct touch_lowerhalf_s *lower,
           *ptr = nvt_boot_update_firmware(priv);
         }
         break;
-#if CONFIG_PM
+#ifdef CONFIG_PM
       case TSIOC_ENABLEGESTURE:
         {
           FAR int8_t *ptr = (FAR int8_t *)((uintptr_t)arg);
@@ -4370,7 +4358,7 @@ static void nvt_update_firmware_work(FAR void *arg)
 
   /* let touch screen stay in normal work mode, not power off */
 
-#if CONFIG_PM
+#ifdef CONFIG_PM
   pm_stay(PM_DOMAIN_OLED_TP, PM_NORMAL);
 #endif
 
@@ -4378,7 +4366,7 @@ static void nvt_update_firmware_work(FAR void *arg)
 
   /* after update process, relax pm state */
 
-#if CONFIG_PM
+#ifdef CONFIG_PM
   pm_relax(PM_DOMAIN_OLED_TP, PM_NORMAL);
 #endif
 }
@@ -4465,7 +4453,7 @@ int nt38350_register(FAR struct nt38350_config_s *config,
   priv->touch_awake = 1;
   priv->idle_mode   = false;
 
-#if CONFIG_PM
+#ifdef CONFIG_PM
   extern int lcdc_pmcb_early_register(struct pm_callback_s *cb);
   priv->current_state = PM_NORMAL;
   priv->pm.prepare = nt38350_pm_prepare;
