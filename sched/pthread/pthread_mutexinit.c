@@ -67,6 +67,13 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
   uint8_t proto = PTHREAD_PRIO_NONE;
 #  endif
 #endif
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+#ifdef CONFIG_PTHREAD_MUTEX_DEFAULT_UNSAFE
+  uint8_t flags = 0;
+#else
+  uint8_t flags = _PTHREAD_MFLAGS_ROBUST;
+#endif
+#endif
   int ret = OK;
   int status;
 
@@ -90,7 +97,8 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
           type    = attr->type;
 #endif
 #ifdef CONFIG_PTHREAD_MUTEX_BOTH
-          robust  = attr->robust;
+          flags  = attr->robust == PTHREAD_MUTEX_ROBUST ?
+                   _PTHREAD_MFLAGS_ROBUST : 0;
 #endif
         }
 
@@ -117,20 +125,11 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
 #endif
 
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+      /* Initial internal fields of the mutex */
 
       mutex->flink  = NULL;
 
-#ifdef CONFIG_PTHREAD_MUTEX_BOTH
-
-      /* Initial internal fields of the mutex */
-      mutex->flags  = (robust == PTHREAD_MUTEX_ROBUST ?
-                       _PTHREAD_MFLAGS_ROBUST : 0);
-#elif defined(CONFIG_PTHREAD_MUTEX_DEFAULT_UNSAFE)
-      mutex->flags = 0;
-#else
-      mutex->flags = _PTHREAD_MFLAGS_ROBUST;
-#endif
-
+      mutex->flags  = flags;
 #endif
 
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES
