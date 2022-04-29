@@ -385,7 +385,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
 
   /* Allocate 1 extra page for heap, temporary fix for #5811 */
 
-  heapsize = heapsize + MM_NPAGES(1);
+  heapsize = heapsize + MM_PGALIGNUP(1);
 
   /* Map the reserved area */
 
