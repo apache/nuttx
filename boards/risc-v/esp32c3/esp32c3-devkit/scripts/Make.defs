@@ -38,7 +38,7 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
 endif
 
 ARCHCFLAGS += -msmall-data-limit=0
-ARCHCXXFLAGS += -msmall-data-limit=0 -std=c++17
+ARCHCXXFLAGS += -msmall-data-limit=0
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHPICFLAGS = -fpic

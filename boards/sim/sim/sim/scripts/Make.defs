@@ -116,16 +116,6 @@ AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 RUSTFLAGS := $(ARCHOPTIMIZATIONRUST)
 
 ifeq ($(CONFIG_LIBCXX),y)
-  # Why c++17?
-  #  * libcxx seems to require c++11.
-  #  * The compiler defaults varies:
-  #      clang/macOS (from xcode): 199711L
-  #      gcc/ubuntu:               201402L
-  #  * There is a precedent to use c++14.
-  #    (boards/arm/stm32l4/nucleo-l476rg/scripts/Make.defs)
-  #  * libs/libxx/libcxx/src/barrier.cpp depends on aligned new
-  CXXFLAGS += -std=c++17
-
   ifeq ($(CONFIG_HOST_MACOS),y)
     # macOS uses libc++abi
     CXXFLAGS += -DLIBCXX_BUILDING_LIBCXXABI
