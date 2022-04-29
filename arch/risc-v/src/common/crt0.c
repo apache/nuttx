@@ -89,6 +89,53 @@ static void sig_trampoline(void)
 }
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* Linker defined symbols to .ctors and .dtors */
+
+extern void (*_sctors)(void);
+extern void (*_ectors)(void);
+extern void (*_sdtors)(void);
+extern void (*_edtors)(void);
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: exec_ctors
+ *
+ * Description:
+ *   Call static constructors
+ *
+ ****************************************************************************/
+
+static void exec_ctors(void)
+{
+  for (void (**ctor)(void) = &_sctors; ctor != &_ectors; ctor++)
+    {
+      (*ctor)();
+    }
+}
+
+/****************************************************************************
+ * Name: exec_dtors
+ *
+ * Description:
+ *   Call static destructors
+ *
+ ****************************************************************************/
+
+static void exec_dtors(void)
+{
+  for (void (**dtor)(void) = &_sdtors; dtor != &_edtors; dtor++)
+    {
+      (*dtor)();
+    }
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -124,9 +171,11 @@ void _start(int argc, char *argv[])
 
   /* Call C++ constructors */
 
+  exec_ctors();
+
   /* Setup so that C++ destructors called on task exit */
 
-  /* REVISIT: Missing logic */
+  atexit(exec_dtors);
 
   /* Call the main() entry point passing argc and argv. */
 
