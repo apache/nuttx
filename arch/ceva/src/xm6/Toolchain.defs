@@ -56,7 +56,7 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
 endif
 
 ARCHCFLAGS += -fno-common
-ARCHCXXFLAGS += -fno-common
+ARCHCXXFLAGS += -fno-common -nostdinc++
 
 ARCHCPUFLAGS  = -mrtl-version-$(RTL_VERSION) -Wa,-rtl$(RTL_VERSION)
 ARCHCPUFLAGS += -Wa,-p
