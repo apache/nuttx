@@ -203,8 +203,7 @@
 __start:
 	/* Make sure that we are in SYS mode with IRQs and FIQs disabled */
 
-	mov		r0, #(PSR_MODE_SYS | PSR_I_BIT | PSR_F_BIT)
-	msr		cpsr_c, r0
+	cpsid		if, #PSR_MODE_SYS
 
 	/* Clear the 16K level 1 page table */
 
