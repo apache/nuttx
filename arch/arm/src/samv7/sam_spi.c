@@ -1126,7 +1126,7 @@ static int spi_setdelay(struct spi_dev_s *dev, uint32_t startdelay,
   spiinfo("cs=%d startdelay=%d\n", spics->cs, startdelay);
   spiinfo("cs=%d stopdelay=%d\n", spics->cs, stopdelay);
   spiinfo("cs=%d csdelay=%d\n", spics->cs, csdelay);
-  spiinfo("cs=%d ifdelay=%d\n", spics->if, ifdelay);
+  spiinfo("cs=%d ifdelay=%d\n", spics->cs, ifdelay);
 
   offset = (unsigned int)g_csroffset[spics->cs];
 
