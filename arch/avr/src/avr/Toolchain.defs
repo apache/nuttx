@@ -80,8 +80,6 @@ else ifeq ($(CONFIG_ARCH_CHIP_AT90USB1287),y)
 else ifeq ($(CONFIG_ARCH_CHIP_ATMEGA2560),y)
   ARCHCPUFLAGS += -mmcu=atmega2560
   LDFLAGS += -mavr6
-else
-  $(error "No valid CONFIG_ARCH_CHIP_ set in the configuration")
 endif
 
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
