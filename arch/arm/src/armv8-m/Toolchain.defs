@@ -221,7 +221,7 @@ endif
 # Architecture flags
 
 ARCHCFLAGS += -fno-common
-ARCHCXXFLAGS += -fno-common
+ARCHCXXFLAGS += -fno-common -nostdinc++
 
 ifneq ($(CONFIG_CXX_EXCEPTION),y)
   ARCHCXXFLAGS += -fno-exceptions -fcheck-new

@@ -61,7 +61,7 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
 endif
 
 ARCHCFLAGS += -fno-common
-ARCHCXXFLAGS += -fno-common
+ARCHCXXFLAGS += -fno-common -nostdinc++
 
 ifneq ($(CONFIG_CXX_EXCEPTION),y)
   ARCHCXXFLAGS += -fno-exceptions -fcheck-new
