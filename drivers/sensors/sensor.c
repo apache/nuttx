@@ -95,6 +95,8 @@ struct sensor_upperhalf_s
   struct sensor_state_s          state;  /* The state of sensor device */
   struct circbuf_s   buffer;             /* The circular buffer of sensor device */
   sem_t              exclsem;            /* Manages exclusive access to file operations */
+  pid_t              semholder;          /* The current holder of the semaphore */
+  int16_t            semcount;           /* Number of counts held */
   struct list_node   userlist;           /* List of users */
 };
 
@@ -175,6 +177,38 @@ static const struct file_operations g_sensor_fops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static void sensor_semtake(FAR struct sensor_upperhalf_s *upper)
+{
+  pid_t pid = gettid();
+
+  if (pid == upper->semholder)
+    {
+      upper->semcount++;
+    }
+  else
+    {
+      nxsem_wait_uninterruptible(&upper->exclsem);
+      upper->semholder = pid;
+      upper->semcount = 1;
+    }
+}
+
+static void sensor_semgive(FAR struct sensor_upperhalf_s *upper)
+{
+  DEBUGASSERT(upper->semholder == gettid());
+
+  if (upper->semcount > 1)
+    {
+      upper->semcount--;
+    }
+  else
+    {
+      upper->semholder = INVALID_PROCESS_ID;
+      upper->semcount  = 0;
+      nxsem_post(&upper->exclsem);
+    }
+}
 
 static bool sensor_in_range(unsigned long left, unsigned long value,
                             unsigned long right)
@@ -356,14 +390,9 @@ static int sensor_open(FAR struct file *filep)
   FAR struct sensor_upperhalf_s *upper = inode->i_private;
   FAR struct sensor_lowerhalf_s *lower = upper->lower;
   FAR struct sensor_user_s *user;
-  int ret;
+  int ret = 0;
 
-  ret = nxsem_wait(&upper->exclsem);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
+  sensor_semtake(upper);
   user = kmm_zalloc(sizeof(struct sensor_user_s));
   if (user == NULL)
     {
@@ -423,7 +452,7 @@ errout_with_open:
 errout_with_user:
   kmm_free(user);
 errout_with_sem:
-  nxsem_post(&upper->exclsem);
+  sensor_semgive(upper);
   return ret;
 }
 
@@ -433,20 +462,15 @@ static int sensor_close(FAR struct file *filep)
   FAR struct sensor_upperhalf_s *upper = inode->i_private;
   FAR struct sensor_lowerhalf_s *lower = upper->lower;
   FAR struct sensor_user_s *user = filep->f_priv;
-  int ret;
+  int ret = 0;
 
-  ret = nxsem_wait(&upper->exclsem);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
+  sensor_semtake(upper);
   if (lower->ops->close)
     {
       ret = lower->ops->close(lower, filep);
       if (ret < 0)
         {
-          nxsem_post(&upper->exclsem);
+          sensor_semgive(upper);
           return ret;
         }
     }
@@ -473,7 +497,7 @@ static int sensor_close(FAR struct file *filep)
   /* The user is closed, notify to other users */
 
   sensor_pollnotify(upper, POLLPRI);
-  nxsem_post(&upper->exclsem);
+  sensor_semgive(upper);
 
   kmm_free(user);
   return ret;
@@ -494,28 +518,19 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
       return -EINVAL;
     }
 
-  ret = nxsem_wait(&upper->exclsem);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
+  sensor_semtake(upper);
   if (lower->ops->fetch)
     {
       if (!(filep->f_oflags & O_NONBLOCK))
         {
-          nxsem_post(&upper->exclsem);
+          sensor_semgive(upper);
           ret = nxsem_wait_uninterruptible(&user->buffersem);
           if (ret < 0)
             {
               return ret;
             }
 
-          ret = nxsem_wait(&upper->exclsem);
-          if (ret < 0)
-            {
-              return ret;
-            }
+          sensor_semtake(upper);
         }
       else if (!upper->state.nsubscribers)
         {
@@ -564,14 +579,14 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
                 }
               else
                 {
-                  nxmutex_unlock(&upper->lock);
+                  sensor_semgive(upper);
                   ret = nxsem_wait_uninterruptible(&user->buffersem);
                   if (ret < 0)
                     {
                       return ret;
                     }
 
-                  nxmutex_lock(&upper->lock);
+                  sensor_semtake(upper);
                 }
             }
         }
@@ -601,7 +616,7 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
     }
 
 out:
-  nxsem_post(&upper->exclsem);
+  sensor_semgive(upper);
   return ret;
 }
 
@@ -621,35 +636,35 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct sensor_upperhalf_s *upper = inode->i_private;
   FAR struct sensor_lowerhalf_s *lower = upper->lower;
   FAR struct sensor_user_s *user = filep->f_priv;
-  int ret;
+  int ret = 0;
 
   sninfo("cmd=%x arg=%08lx\n", cmd, arg);
-
-  ret = nxsem_wait(&upper->exclsem);
-  if (ret < 0)
-    {
-      return ret;
-    }
 
   switch (cmd)
     {
       case SNIOC_GET_STATE:
         {
+          sensor_semtake(upper);
           memcpy((FAR void *)(uintptr_t)arg,
                  &upper->state, sizeof(upper->state));
           user->changed = false;
+          sensor_semgive(upper);
         }
         break;
 
       case SNIOC_SET_INTERVAL:
         {
+          sensor_semtake(upper);
           ret = sensor_update_interval(filep, upper, user, arg);
+          sensor_semgive(upper);
         }
         break;
 
       case SNIOC_BATCH:
         {
+          sensor_semtake(upper);
           ret = sensor_update_latency(filep, upper, user, arg);
+          sensor_semgive(upper);
         }
         break;
 
@@ -691,12 +706,15 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_SET_USERPRIV:
         {
+          sensor_semtake(upper);
           upper->state.priv = (FAR void *)(uintptr_t)arg;
+          sensor_semgive(upper);
         }
         break;
 
       case SNIOC_SET_BUFFER_NUMBER:
         {
+          sensor_semtake(upper);
           if (!circbuf_is_init(&upper->buffer))
             {
               if (arg >= lower->nbuffer)
@@ -712,6 +730,8 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             {
               ret = -EBUSY;
             }
+
+          sensor_semgive(upper);
         }
         break;
 
@@ -739,7 +759,6 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
-  nxsem_post(&upper->exclsem);
   return ret;
 }
 
@@ -752,14 +771,9 @@ static int sensor_poll(FAR struct file *filep,
   FAR struct sensor_user_s *user = filep->f_priv;
   pollevent_t eventset = 0;
   int semcount;
-  int ret;
+  int ret = 0;
 
-  ret = nxsem_wait(&upper->exclsem);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
+  sensor_semtake(upper);
   if (setup)
     {
       /* Don't have enough space to store fds */
@@ -811,7 +825,7 @@ static int sensor_poll(FAR struct file *filep,
     }
 
 errout:
-  nxsem_post(&upper->exclsem);
+  sensor_semgive(upper);
   return ret;
 }
 
@@ -831,12 +845,7 @@ static ssize_t sensor_push_event(FAR void *priv, FAR const void *data,
       return -EINVAL;
     }
 
-  ret = nxsem_wait(&upper->exclsem);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
+  sensor_semtake(upper);
   if (!circbuf_is_init(&upper->buffer))
     {
       /* Initialize sensor buffer when data is first generated */
@@ -845,7 +854,7 @@ static ssize_t sensor_push_event(FAR void *priv, FAR const void *data,
                          upper->state.esize);
       if (ret < 0)
         {
-          nxsem_post(&upper->exclsem);
+          sensor_semgive(upper);
           return ret;
         }
     }
@@ -866,7 +875,7 @@ static ssize_t sensor_push_event(FAR void *priv, FAR const void *data,
         }
     }
 
-  nxsem_post(&upper->exclsem);
+  sensor_semgive(upper);
   return bytes;
 }
 
@@ -876,11 +885,7 @@ static void sensor_notify_event(FAR void *priv)
   FAR struct sensor_user_s *user;
   int semcount;
 
-  if (nxsem_wait(&upper->exclsem) < 0)
-    {
-      return;
-    }
-
+  sensor_semtake(upper);
   list_for_every_entry(&upper->userlist, user, struct sensor_user_s, node)
     {
       nxsem_get_value(&user->buffersem, &semcount);
@@ -892,7 +897,7 @@ static void sensor_notify_event(FAR void *priv)
       sensor_pollnotify_one(user, POLLIN);
     }
 
-  nxsem_post(&upper->exclsem);
+  sensor_semgive(upper);
 }
 
 /****************************************************************************
@@ -996,6 +1001,7 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
       upper->state.nadvertisers = 1;
     }
 
+  upper->semholder = INVALID_PROCESS_ID;
   nxsem_init(&upper->exclsem, 0, 1);
 
   /* Bind the lower half data structure member */
