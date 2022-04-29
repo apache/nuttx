@@ -1,6 +1,4 @@
 /arm/stm32/stm32f4discovery,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI
--stm32f4discovery:cxxtest
--stm32f4discovery:testlibcxx
 -stm32f4discovery:winbuild
 
 /arm/stm32/stm32ldiscovery,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI
