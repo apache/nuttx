@@ -175,8 +175,8 @@ void irq_dispatch(int irq, FAR void *context)
 #endif
 
 #ifdef CONFIG_DEBUG_MM
-  if ((g_running_tasks[this_cpu()]->flags & TCB_FLAG_MEM_CHECK) || \
-       (this_task()->flags & TCB_FLAG_MEM_CHECK))
+  if ((g_running_tasks[this_cpu()]->flags & TCB_FLAG_HEAPCHECK) || \
+       (this_task()->flags & TCB_FLAG_HEAPCHECK))
     {
       kmm_checkcorruption();
     }
