@@ -1779,7 +1779,7 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
       return ret;
     }
 
-  /* set charge current 300ma */
+  /* set charge current 140ma */
 
   ret = da9168_setcurr(priv, DA9168_ICHG_DEFAULT_UA);
   if (ret < 0)
@@ -1806,7 +1806,7 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
       return ret;
     }
 
-  /* set vbat 4440V */
+  /* set vbat 4440mV */
 
   ret = da9168_setvolt(priv, 4440);
   if (ret < 0)
