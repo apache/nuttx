@@ -107,7 +107,7 @@
 #define TCB_FLAG_SYSCALL           (1 << 10)                     /* Bit 9: In a system call */
 #define TCB_FLAG_EXIT_PROCESSING   (1 << 11)                     /* Bit 10: Exitting */
 #define TCB_FLAG_FREE_STACK        (1 << 12)                     /* Bit 12: Free stack after exit */
-#define TCB_FLAG_MEM_CHECK         (1 << 13)                     /* Bit 13: Memory check */
+#define TCB_FLAG_HEAPCHECK         (1 << 13)                     /* Bit 13: Heap check */
                                                                  /* Bits 14-15: Available */
 
 /* Values for struct task_group tg_flags */
