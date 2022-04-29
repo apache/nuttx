@@ -45,7 +45,7 @@ distclean::
 	$(Q) $(DIRUNLINK) $(TOPDIR)/include/libcxx
 	$(call DELDIR, libcxx)
 
-CXXFLAGS += ${shell $(DEFINE) "$(CC)" _LIBCPP_BUILDING_LIBRARY}
+CXXFLAGS += -std=c++17 ${shell $(DEFINE) "$(CC)" _LIBCPP_BUILDING_LIBRARY}
 
 ifeq ($(CONFIG_LIBSUPCXX), y)
 CXXFLAGS += ${shell $(DEFINE) "$(CC)" __GLIBCXX__}
