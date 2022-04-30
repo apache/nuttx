@@ -84,6 +84,7 @@ struct rptun_priv_s
 #endif
 #ifdef CONFIG_RPTUN_PM
   bool                         stay;
+  uint16_t                     headrx;
 #endif
 #ifdef CONFIG_RPTUN_PING
   struct rpmsg_endpoint        ping;
@@ -229,8 +230,40 @@ static inline void rptun_pm_action(FAR struct rptun_priv_s *priv,
   leave_critical_section(flags);
 }
 
+static inline void rptun_update_rx(FAR struct rptun_priv_s *priv)
+{
+  FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
+  FAR struct virtqueue *rvq = rvdev->rvq;
+
+  if (rpmsg_virtio_get_role(rvdev) == RPMSG_MASTER)
+    {
+      priv->headrx = rvq->vq_ring.used->idx;
+    }
+  else
+    {
+      priv->headrx = rvq->vq_ring.avail->idx;
+    }
+}
+
+static inline bool rptun_available_rx(FAR struct rptun_priv_s *priv)
+{
+  FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
+  FAR struct virtqueue *rvq = rvdev->rvq;
+
+  if (rpmsg_virtio_get_role(rvdev) == RPMSG_MASTER)
+    {
+      return rvq->vq_used_cons_idx < priv->headrx ? true : false;
+    }
+  else
+    {
+      return rvq->vq_available_idx < priv->headrx ? true : false;
+    }
+}
+
 #else
 #  define rptun_pm_action(priv, stay)
+#  define rptun_update_rx(priv)
+#  define rptun_available_rx(priv) true
 #endif
 
 static void rptun_worker(FAR void *arg)
@@ -255,7 +288,11 @@ static void rptun_worker(FAR void *arg)
     }
 
   priv->cmd = RPTUNIOC_NONE;
-  remoteproc_get_notification(&priv->rproc, RPTUN_NOTIFY_ALL);
+
+  if (rptun_available_rx(priv))
+    {
+      remoteproc_get_notification(&priv->rproc, RPTUN_NOTIFY_ALL);
+    }
 }
 
 #ifdef CONFIG_RPTUN_WORKQUEUE
@@ -326,10 +363,8 @@ static int rptun_callback(FAR void *arg, uint32_t vqid)
   if (vqid == RPTUN_NOTIFY_ALL ||
       vqid == vdev->vrings_info[rvq->vq_queue_index].notifyid)
     {
-      if (rptun_buffer_nused(&priv->rvdev, true))
-        {
-          rptun_wakeup_rx(priv);
-        }
+      rptun_update_rx(priv);
+      rptun_wakeup_rx(priv);
     }
 
   if (vqid == RPTUN_NOTIFY_ALL ||
