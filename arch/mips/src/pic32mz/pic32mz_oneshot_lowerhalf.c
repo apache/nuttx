@@ -300,7 +300,7 @@ static int pic32mz_cancel(struct oneshot_lowerhalf_s *lower,
  ****************************************************************************/
 
 struct oneshot_lowerhalf_s *oneshot_initialize(int chan,
-                                                   uint16_t resolution)
+                                               uint16_t resolution)
 {
   struct pic32mz_oneshot_lowerhalf_s *priv;
   int ret;
