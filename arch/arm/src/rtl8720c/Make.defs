@@ -20,16 +20,6 @@
 
 include armv8-m/Make.defs
 
-# arch/arm/src/armv8-m
-#
-CMN_ASRCS += arm_exception.S arm_setjmp.S
-
-CMN_CSRCS += arm_cache.c arm_doirq.c arm_hardfault.c arm_initialstate.c
-CMN_CSRCS += arm_itm_syslog.c arm_memfault.c arm_mpu.c arm_ramvec_attach.c
-CMN_CSRCS += arm_ramvec_initialize.c arm_schedulesigaction.c
-CMN_CSRCS += arm_sigdeliver.c arm_stackcheck.c arm_svcall.c arm_systick.c
-CMN_CSRCS += arm_tcbinfo.c
-
 # arch/arm/src/rtl8720c
 #
 CHIP_CSRCS += ameba_nvic.c ameba_heap.c ameba_idle.c ameba_uart.c ameba_start.c

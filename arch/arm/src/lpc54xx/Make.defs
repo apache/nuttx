@@ -20,25 +20,6 @@
 
 include armv7-m/Make.defs
 
-CMN_ASRCS += arm_exception.S
-
-CMN_CSRCS += arm_vectors.c arm_doirq.c arm_hardfault.c
-CMN_CSRCS += arm_initialstate.c arm_memfault.c arm_schedulesigaction.c
-CMN_CSRCS += arm_sigdeliver.c arm_svcall.c arm_trigger_irq.c arm_tcbinfo.c
-
-ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
-CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
-endif
-
-ifeq ($(CONFIG_ARM_MPU),y)
-CMN_CSRCS += arm_mpu.c
-endif
-
-ifeq ($(CONFIG_ARCH_FPU),y)
-CMN_CSRCS += arm_fpuconfig.c
-CMN_CSRCS += arm_fpucmp.c
-endif
-
 CHIP_CSRCS  = lpc54_start.c lpc54_clockconfig.c lpc54_irq.c lpc54_clrpend.c
 CHIP_CSRCS += lpc54_allocateheap.c lpc54_lowputc.c lpc54_gpio.c lpc54_reset.c
 

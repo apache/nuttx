@@ -27,31 +27,6 @@ HEAD_ASRC =
 
 include armv8-m/Make.defs
 
-CMN_ASRCS += arm_exception.S
-
-CMN_CSRCS += arm_vectors.c arm_doirq.c arm_hardfault.c arm_initialstate.c
-CMN_CSRCS += arm_memfault.c arm_schedulesigaction.c arm_sigdeliver.c
-CMN_CSRCS += arm_svcall.c arm_systemreset.c arm_trigger_irq.c arm_tcbinfo.c
-
-# Configuration-dependent common files
-
-ifeq ($(CONFIG_ARMV8M_STACKCHECK),y)
-CMN_CSRCS += arm_stackcheck.c
-endif
-
-ifeq ($(CONFIG_ARCH_FPU),y)
-CMN_CSRCS += arm_fpuconfig.c
-CMN_CSRCS += arm_fpucmp.c
-endif
-
-ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
-CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
-endif
-
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CMN_CSRCS += arm_mpu.c
-endif
-
 # Required STM32L5 files
 
 CHIP_ASRCS  =

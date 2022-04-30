@@ -22,32 +22,6 @@
 
 include armv7-m/Make.defs
 
-CMN_ASRCS += arm_exception.S
-
-CMN_CSRCS += arm_initialstate.c arm_memfault.c arm_schedulesigaction.c
-CMN_CSRCS += arm_sigdeliver.c arm_doirq.c arm_hardfault.c
-CMN_CSRCS += arm_svcall.c arm_trigger_irq.c arm_systemreset.c
-CMN_CSRCS += arm_tcbinfo.c arm_vectors.c
-
-ifeq ($(CONFIG_ARMV7M_STACKCHECK),y)
-CMN_CSRCS += arm_stackcheck.c
-endif
-
-ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
-CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
-endif
-
-ifeq ($(CONFIG_ARM_MPU),y)
-CMN_CSRCS += arm_mpu.c
-endif
-
-CMN_CSRCS += arm_cache.c
-
-ifeq ($(CONFIG_ARCH_FPU),y)
-CMN_CSRCS += arm_fpuconfig.c
-CMN_CSRCS += arm_fpucmp.c
-endif
-
 # Required i.MX RT files
 
 CHIP_CSRCS  = imxrt_allocateheap.c imxrt_start.c imxrt_clockconfig.c

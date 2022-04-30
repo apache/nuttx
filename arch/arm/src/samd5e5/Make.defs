@@ -24,27 +24,6 @@
 
 include armv7-m/Make.defs
 
-CMN_ASRCS += arm_exception.S
-
-CMN_CSRCS += arm_vectors.c arm_initialstate.c arm_memfault.c
-CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_svcall.c
-CMN_CSRCS += arm_trigger_irq.c arm_doirq.c arm_hardfault.c arm_tcbinfo.c
-
-# Configuration-dependent common files
-
-ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
-CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
-endif
-
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CMN_CSRCS += arm_mpu.c
-endif
-
-ifeq ($(CONFIG_ARCH_FPU),y)
-CMN_CSRCS += arm_fpuconfig.c
-CMN_CSRCS += arm_fpucmp.c
-endif
-
 # Required SAMD5x/E5x files
 
 CHIP_CSRCS  = sam_clockconfig.c sam_gclk.c sam_irq.c sam_lowputc.c

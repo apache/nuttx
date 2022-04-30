@@ -20,25 +20,6 @@
 
 include armv7-m/Make.defs
 
-CMN_ASRCS += arm_exception.S
-
-CMN_CSRCS += arm_initialstate.c arm_memfault.c
-CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_systemreset.c
-CMN_CSRCS += arm_doirq.c arm_hardfault.c arm_svcall.c arm_trigger_irq.c
-CMN_CSRCS += arm_tcbinfo.c arm_vectors.c
-
-ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
-CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
-endif
-
-ifeq ($(CONFIG_ARCH_MEMCPY),y)
-CMN_ASRCS += memcpy-armv7m.S
-endif
-
-ifeq ($(CONFIG_ARCH_MEMMOVE),y)
-CMN_CSRCS += up_memmove.c
-endif
-
 CHIP_CSRCS  = lc823450_allocateheap2.c lc823450_start.c lc823450_irq.c lc823450_timer.c
 CHIP_CSRCS += lc823450_lowputc.c lc823450_serial.c lc823450_clockconfig.c
 CHIP_CSRCS += lc823450_syscontrol.c lc823450_gpio.c
@@ -75,7 +56,7 @@ CHIP_CSRCS += lc823450_spi.c
 endif
 
 ifeq ($(CONFIG_ARCH_DMA), y)
-CMN_CSRCS += lc823450_dma.c
+CHIP_CSRCS += lc823450_dma.c
 endif
 
 ifeq ($(CONFIG_RTC),y)
@@ -134,6 +115,5 @@ CHIP_CSRCS += lc823450_userspace.c
 endif
 
 ifeq ($(CONFIG_ARM_MPU),y)
-CMN_CSRCS  += arm_mpu.c
 CHIP_CSRCS += lc823450_mpuinit2.c
 endif

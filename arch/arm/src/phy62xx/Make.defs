@@ -20,23 +20,9 @@
 
 include armv6-m/Make.defs
 
+CMN_ASRCS := $(filter-out arm_exception.S,$(CMN_ASRCS))
+
 CMN_ASRCS += phy62xx_exception.S phy62xx_start.S
-
-CMN_CSRCS += arm_initialstate.c arm_schedulesigaction.c arm_sigdeliver.c
-CMN_CSRCS += arm_systemreset.c arm_doirq.c phy62xx_hardfault.c
-CMN_CSRCS += arm_svcall.c arm_vectors.c arm_tcbinfo.c
-
-ifeq ($(CONFIG_ARCH_HAVE_BACKTRACE),y)
-CMN_CSRCS += arm_backtrace_thumb.c
-endif
-
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CMN_CSRCS += arm_pthread_exit.c
-endif
-
-ifeq ($(CONFIG_DEBUG_FEATURES),y)
-CMN_CSRCS += arm_dumpnvic.c
-endif
 
 CHIP_CSRCS  = start.c gpio.c irq.c timer.c uart.c pwrmgr.c idle.c my_printf.c
 #CHIP_CSRCS  = start.c gpio.c irq.c timer.c clock.c uart.c pwrmgr.c idle.c my_printf.c flash.c

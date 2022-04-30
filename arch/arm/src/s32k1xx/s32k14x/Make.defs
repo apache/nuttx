@@ -22,20 +22,6 @@
 
 include armv7-m/Make.defs
 
-CMN_ASRCS += arm_exception.S
-
-CMN_CSRCS += arm_vectors.c arm_doirq.c arm_hardfault.c
-CMN_CSRCS += arm_initialstate.c arm_memfault.c arm_schedulesigaction.c
-CMN_CSRCS += arm_sigdeliver.c arm_svcall.c arm_trigger_irq.c arm_systemreset.c
-
-ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
-CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
-endif
-
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CMN_CSRCS += arm_mpu.c
-endif
-
 # Source file specific to the S32k11x family
 
 CHIP_CSRCS += s32k14x_irq.c s32k14x_clrpend.c s32k14x_clockmapping.c

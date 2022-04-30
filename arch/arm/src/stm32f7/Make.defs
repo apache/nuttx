@@ -25,36 +25,6 @@
 
 include armv7-m/Make.defs
 
-CMN_ASRCS += arm_exception.S
-
-CMN_CSRCS += arm_vectors.c arm_doirq.c arm_hardfault.c arm_initialstate.c
-CMN_CSRCS += arm_memfault.c arm_schedulesigaction.c arm_sigdeliver.c
-CMN_CSRCS += arm_svcall.c arm_systemreset.c arm_trigger_irq.c
-CMN_CSRCS += arm_tcbinfo.c arm_cache.c
-
-ifeq ($(CONFIG_ARMV7M_STACKCHECK),y)
-CMN_CSRCS += arm_stackcheck.c
-endif
-
-# Configuration-dependent common files
-
-ifeq ($(CONFIG_ARCH_FPU),y)
-CMN_CSRCS += arm_fpuconfig.c
-CMN_CSRCS += arm_fpucmp.c
-endif
-
-ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
-CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
-endif
-
-ifeq ($(CONFIG_ARMV7M_ITMSYSLOG),y)
-CMN_CSRCS += arm_itm_syslog.c
-endif
-
-ifneq ($(filter y,$(CONFIG_ARM_MPU) $(CONFIG_ARM_MPU_EARLY_RESET)),)
-CMN_CSRCS += arm_mpu.c
-endif
-
 # Required STM32F7 files
 
 CHIP_CSRCS  = stm32_allocateheap.c stm32_exti_gpio.c stm32_gpio.c
