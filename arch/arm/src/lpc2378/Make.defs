@@ -20,12 +20,7 @@
 
 include arm/Make.defs
 
-HEAD_ASRC  = lpc23xx_head.S
-CMN_ASRCS += arm_vectors.S
-
-CMN_CSRCS += arm_dataabort.c arm_initialstate.c arm_prefetchabort.c
-CMN_CSRCS += arm_syscall.c arm_undefinedinsn.c arm_schedulesigaction.c
-CMN_CSRCS += arm_sigdeliver.c arm_tcbinfo.c
+HEAD_ASRC   = lpc23xx_head.S
 
 CHIP_ASRCS  = lpc23xx_lowputc.S
 CHIP_CSRCS += lpc23xx_pllsetup.c  lpc23xx_decodeirq.c lpc23xx_irq.c

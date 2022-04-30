@@ -20,15 +20,6 @@
 
 include arm/Make.defs
 
-HEAD_ASRC = arm_head.S
-
-CMN_ASRCS += arm_cache.S
-CMN_ASRCS += arm_vectors.S arm_vectoraddrexcptn.S arm_vectortab.S
-
-CMN_CSRCS += arm_dataabort.c arm_initialstate.c arm_prefetchabort.c
-CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_syscall.c
-CMN_CSRCS += arm_undefinedinsn.c arm_tcbinfo.c
-
 CHIP_ASRCS  = imx_lowputc.S
 CHIP_CSRCS  = imx_boot.c imx_gpio.c imx_allocateheap.c imx_irq.c
 CHIP_CSRCS += imx_serial.c imx_decodeirq.c imx_spi.c

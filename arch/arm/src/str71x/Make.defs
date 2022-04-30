@@ -22,12 +22,6 @@ include arm/Make.defs
 
 HEAD_ASRC = str71x_head.S
 
-CMN_ASRCS += arm_vectors.S
-
-CMN_CSRCS += arm_dataabort.c arm_initialstate.c arm_prefetchabort.c
-CMN_CSRCS += arm_syscall.c arm_undefinedinsn.c arm_schedulesigaction.c
-CMN_CSRCS += arm_sigdeliver.c arm_tcbinfo.c
-
 CHIP_CSRCS  = str71x_prccu.c str71x_lowputc.c str71x_decodeirq.c str71x_irq.c
 CHIP_CSRCS += str71x_serial.c
 
