@@ -21,3 +21,17 @@
 # Common ARM files
 
 include common/Make.defs
+
+CMN_ASRCS += arm_exception.S
+
+CMN_CSRCS += arm_doirq.c arm_hardfault.c arm_initialstate.c
+CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_svcall.c
+CMN_CSRCS += arm_systemreset.c arm_tcbinfo.c arm_vectors.c
+
+ifeq ($(CONFIG_DEBUG_FEATURES),y)
+  CMN_CSRCS += arm_dumpnvic.c
+endif
+
+ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
+  CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
+endif

@@ -18,15 +18,6 @@
 #
 ############################################################################
 
-# Common ARM source files
-
-CMN_CSRCS += arm_tcbinfo.c
-
-ifeq ($(CONFIG_ARCH_FPU),y)
-CMN_CSRCS += arm_fpuconfig.c
-CMN_CSRCS += arm_fpucmp.c
-endif
-
 # Source files common to all S32K1xx chip families.
 
 CHIP_CSRCS  = s32k1xx_start.c s32k1xx_lowputc.c s32k1xx_clockconfig.c

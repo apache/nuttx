@@ -20,16 +20,6 @@
 
 include armv6-m/Make.defs
 
-CMN_ASRCS += arm_exception.S
-
-CMN_CSRCS += arm_initialstate.c arm_schedulesigaction.c arm_sigdeliver.c
-CMN_CSRCS += arm_systemreset.c arm_doirq.c arm_hardfault.c arm_svcall.c
-CMN_CSRCS += arm_vectors.c arm_tcbinfo.c
-
-ifeq ($(CONFIG_DEBUG_FEATURES),y)
-CMN_CSRCS += arm_dumpnvic.c
-endif
-
 CHIP_CSRCS  = kl_clockconfig.c kl_gpio.c kl_irq.c kl_lowputc.c
 CHIP_CSRCS += kl_serial.c kl_start.c kl_cfmconfig.c
 
