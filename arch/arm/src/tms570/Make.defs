@@ -20,46 +20,6 @@
 
 include armv7-r/Make.defs
 
-# The vector table is the "head" object, i.e., the one that must forced into
-# the link in order to draw in all of the other components
-
-HEAD_ASRC += arm_vectortab.S
-
-# Common assembly language files
-
-CMN_ASRCS += arm_vectortab.S arm_vectors.S arm_head.S
-CMN_ASRCS += arm_vectoraddrexcptn.S
-CMN_ASRCS += cp15_coherent_dcache.S cp15_invalidate_dcache.S
-CMN_ASRCS += cp15_clean_dcache.S cp15_flush_dcache.S
-CMN_ASRCS += cp15_clean_dcache_all.S cp15_flush_dcache_all.S
-CMN_ASRCS += cp15_invalidate_dcache_all.S cp15_cache_size.S arm_tcbinfo.c
-
-# Configuration dependent assembly language files
-
-ifeq ($(CONFIG_ARCH_FPU),y)
-CMN_ASRCS += arm_fpuconfig.S
-endif
-
-# Common C source files
-
-CMN_CSRCS += arm_dataabort.c arm_doirq.c arm_initialstate.c
-CMN_CSRCS += arm_prefetchabort.c arm_schedulesigaction.c arm_sigdeliver.c
-CMN_CSRCS += arm_syscall.c arm_undefinedinsn.c arm_cache.c
-
-# Configuration dependent C files
-
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CMN_CSRCS += arm_mpu.c
-endif
-
-ifeq ($(CONFIG_ARMV7R_L2CC_PL310),y)
-CMN_CSRCS += arm_l2cc_pl310.c
-endif
-
-ifeq ($(CONFIG_ARCH_FPU),y)
-CMN_CSRCS += arm_fpucmp.c
-endif
-
 # SAMA5-specific C source files
 
 CHIP_CSRCS  = tms570_boot.c tms570_clockconfig.c tms570_esm.c tms570_gio.c
