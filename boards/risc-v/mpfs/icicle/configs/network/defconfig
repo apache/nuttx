@@ -6,7 +6,6 @@
 # modifications.
 #
 # CONFIG_DISABLE_OS_API is not set
-# CONFIG_NDEBUG is not set
 # CONFIG_NSH_DISABLE_LOSMART is not set
 CONFIG_ARCH="risc-v"
 CONFIG_ARCH_BOARD="icicle"

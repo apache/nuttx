@@ -559,7 +559,7 @@ menu "Debug Options"
 
 config NDEBUG
 	bool "Define NDEBUG globally"
-	default y
+	default !DEBUG_ASSERTIONS
 
 config DEBUG_ALERT
 	bool
