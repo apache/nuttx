@@ -69,6 +69,10 @@ ifeq ($(CONFIG_STM32H7_FMC),y)
 CHIP_CSRCS += stm32_fmc.c
 endif
 
+ifeq ($(CONFIG_STM32H7_FDCAN),y)
+CHIP_CSRCS += stm32_fdcan.c
+endif
+
 ifeq ($(filter y,$(CONFIG_STM32H7_IWDG) $(CONFIG_STM32H7_RTC_LSICLOCK)),y)
 CHIP_CSRCS += stm32_lsi.c
 endif
