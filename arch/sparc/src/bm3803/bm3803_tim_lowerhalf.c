@@ -446,7 +446,7 @@ int bm3803_timer_initialize(const char *devpath, int timer)
    */
 
   void *drvr = timer_register(devpath,
-                                  (struct timer_lowerhalf_s *)lower);
+                              (struct timer_lowerhalf_s *)lower);
   if (drvr == NULL)
     {
       /* The actual cause of the failure may have been a failure to allocate
