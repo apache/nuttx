@@ -20,16 +20,11 @@
 
 include arm/Make.defs
 
-HEAD_ASRC = moxart_head.S
-CMN_ASRCS += arm_vectors.S arm_nommuhead.S
+HEAD_ASRC  = moxart_head.S
 
-CMN_CSRCS += arm_dataabort.c arm_initialstate.c arm_prefetchabort.c
-CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_syscall.c
-CMN_CSRCS += arm_undefinedinsn.c arm_tcbinfo.c
+CHIP_ASRCS = moxart_lowputc.S
 
-CHIP_ASRCS  = moxart_lowputc.S
-
-CHIP_CSRCS  = moxart_16550.c moxart_irq.c moxart_timer.c moxart_systemreset.c
+CHIP_CSRCS = moxart_16550.c moxart_irq.c moxart_timer.c moxart_systemreset.c
 
 # Configuration-dependent Kinetis K files
 
