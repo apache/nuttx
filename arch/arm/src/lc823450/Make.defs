@@ -95,6 +95,7 @@ CHIP_CSRCS += lc823450_cpuindex.c
 CHIP_CSRCS += lc823450_cpupause.c
 CHIP_CSRCS += lc823450_cpustart.c
 CHIP_CSRCS += lc823450_testset.c
+CMN_ASRCS  := $(filter-out arm_testset.S,$(CMN_ASRCS))
 endif
 
 ifeq ($(CONFIG_LC823450_SDRAM), y)

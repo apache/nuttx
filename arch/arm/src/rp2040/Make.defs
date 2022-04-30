@@ -38,6 +38,7 @@ CHIP_CSRCS += rp2040_cpustart.c
 CHIP_CSRCS += rp2040_cpupause.c
 CHIP_CSRCS += rp2040_cpuidlestack.c
 CHIP_CSRCS += rp2040_testset.c
+CMN_ASRCS  := $(filter-out arm_testset.S,$(CMN_ASRCS))
 endif
 
 ifeq ($(CONFIG_RP2040_DMAC),y)
