@@ -373,7 +373,7 @@ static int sim_alarm_handler(int irq, void *context, void *arg)
  ****************************************************************************/
 
 struct oneshot_lowerhalf_s *oneshot_initialize(int chan,
-                                                   uint16_t resolution)
+                                               uint16_t resolution)
 {
   struct sim_oneshot_lowerhalf_s *priv;
 

@@ -342,7 +342,7 @@ static int esp32_lh_current(struct oneshot_lowerhalf_s *lower,
  ****************************************************************************/
 
 struct oneshot_lowerhalf_s *oneshot_initialize(int chan,
-                                                   uint16_t resolution)
+                                               uint16_t resolution)
 {
   struct esp32_oneshot_lowerhalf_s *priv;
   int ret;

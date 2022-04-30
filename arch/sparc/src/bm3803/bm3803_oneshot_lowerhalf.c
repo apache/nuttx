@@ -300,7 +300,7 @@ static int bm3803_cancel(struct oneshot_lowerhalf_s *lower,
  ****************************************************************************/
 
 struct oneshot_lowerhalf_s *oneshot_initialize(int chan,
-                                                   uint16_t resolution)
+                                               uint16_t resolution)
 {
   struct bm3803_oneshot_lowerhalf_s *priv;
   int ret;
