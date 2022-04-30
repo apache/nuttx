@@ -20,11 +20,7 @@
 
 include arm/Make.defs
 
-HEAD_ASRC = arm_nommuhead.S
-
-CMN_CSRCS += arm_dataabort.c arm_doirq.c arm_initialstate.c
-CMN_CSRCS += arm_prefetchabort.c arm_schedulesigaction.c arm_sigdeliver.c
-CMN_CSRCS += arm_syscall.c arm_undefinedinsn.c arm_tcbinfo.c
+HEAD_ASRC  = arm_nommuhead.S
 
 CHIP_ASRCS = c5471_lowputc.S c5471_vectors.S
 CHIP_CSRCS = c5471_irq.c c5471_serial.c c5471_watchdog.c c5471_ethernet.c
