@@ -20,30 +20,11 @@
 
 include armv7-m/Make.defs
 
-CMN_ASRCS += arm_exception.S
-
-CMN_CSRCS += arm_doirq.c arm_hardfault.c arm_initialstate.c
-CMN_CSRCS += arm_memfault.c arm_schedulesigaction.c arm_sigdeliver.c
-CMN_CSRCS += arm_svcall.c arm_trigger_irq.c arm_tcbinfo.c arm_vectors.c
-
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
-  CMN_CSRCS += tiva_idle.c
+  CHIP_CSRCS += tiva_idle.c
 endif
 
-ifeq ($(CONFIG_ARCH_FPU),y)
-  CMN_CSRCS += arm_fpuconfig.c
-  CMN_CSRCS += arm_fpucmp.c
-endif
-
-ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
-  CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
-endif
-
-ifeq ($(CONFIG_ARM_MPU),y)
-CMN_CSRCS += arm_mpu.c
-endif
-
-CHIP_CSRCS  = tiva_allocateheap.c tiva_irq.c tiva_lowputc.c tiva_serial.c
+CHIP_CSRCS += tiva_allocateheap.c tiva_irq.c tiva_lowputc.c tiva_serial.c
 CHIP_CSRCS += tiva_ssi.c
 
 ifeq ($(CONFIG_ARCH_CHIP_LM3S),y)

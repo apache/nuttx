@@ -20,22 +20,6 @@
 
 include armv7-m/Make.defs
 
-CMN_ASRCS += arm_exception.S
-
-CMN_CSRCS += arm_vectors.c arm_doirq.c arm_hardfault.c
-CMN_CSRCS += arm_initialstate.c arm_itm.c arm_memfault.c
-CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_svcall.c
-CMN_CSRCS += arm_systemreset.c arm_trigger_irq.c arm_tcbinfo.c
-
-ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
-CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
-endif
-
-ifeq ($(CONFIG_ARCH_FPU),y)
-CMN_CSRCS += arm_fpuconfig.c
-CMN_CSRCS += arm_fpucmp.c
-endif
-
 CHIP_CSRCS  = eoss3_start.c eoss3_gpio.c eoss3_lowputc.c eoss3_clockconfig.c
 CHIP_CSRCS += eoss3_irq.c
 CHIP_CSRCS += eoss3_serial.c

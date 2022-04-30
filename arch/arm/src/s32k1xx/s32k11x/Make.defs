@@ -22,16 +22,6 @@
 
 include armv6-m/Make.defs
 
-CMN_ASRCS += arm_exception.S
-
-CMN_CSRCS += arm_initialstate.c arm_schedulesigaction.c
-CMN_CSRCS += arm_sigdeliver.c arm_systemreset.c arm_doirq.c
-CMN_CSRCS += arm_hardfault.c arm_svcall.c arm_vectors.c
-
-ifeq ($(CONFIG_DEBUG_FEATURES),y)
-CMN_CSRCS += arm_dumpnvic.c
-endif
-
 # Source file specific to the S32k11x family
 
 CHIP_CSRCS += s32k11x_irq.c s32k11x_clockmapping.c s32k11x_periphfeatures.c
