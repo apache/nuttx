@@ -81,6 +81,10 @@ ifeq ($(CONFIG_STACK_CANARIES),y)
   ARCHOPTIMIZATION += -fstack-protector-all
 endif
 
+ifeq ($(CONFIG_ARMV8M_STACKCHECK),y)
+  ARCHOPTIMIZATION += -finstrument-functions -ffixed-r10
+endif
+
 # Parametrization for ARCHCPUFLAGS
 
 ifeq ($(CONFIG_ARCH_CORTEXM23),y)
