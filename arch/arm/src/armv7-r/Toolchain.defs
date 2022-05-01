@@ -65,6 +65,10 @@ else
   ARCHOPTIMIZATION += -fomit-frame-pointer
 endif
 
+ifeq ($(CONFIG_STACK_CANARIES),y)
+  ARCHOPTIMIZATION += -fstack-protector-all
+endif
+
 ifeq ($(CONFIG_ARCH_CORTEXR4),y)
   ARCHCPUFLAGS += -mcpu=cortex-r4
 else ifeq ($(CONFIG_ARCH_CORTEXR5),y)
