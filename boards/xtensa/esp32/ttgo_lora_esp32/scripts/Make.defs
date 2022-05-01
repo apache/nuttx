@@ -53,10 +53,6 @@ else
 	LDSCRIPT_TEMPLATE = $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32.template.ld
 endif
 
-ifeq ($(CONFIG_STACK_CANARIES),y)
-  ARCHOPTIMIZATION += -fstack-protector-all
-endif
-
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHPICFLAGS = -fpic
