@@ -57,6 +57,12 @@ else
   ARCHOPTIMIZATIONRUST += -C opt-level=0
 endif
 
+ifeq ($(CONFIG_FRAME_POINTER),y)
+  ARCHOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+else
+  ARCHOPTIMIZATION += -fomit-frame-pointer
+endif
+
 ifeq ($(CONFIG_STACK_CANARIES),y)
   ARCHOPTIMIZATION += -fstack-protector-all
 endif
@@ -146,14 +152,6 @@ endif
 ifeq ($(CONFIG_SIM_UBSAN),y)
   CFLAGS += -fsanitize=undefined
   CXXFLAGS += -fsanitize=undefined
-endif
-
-ifeq ($(CONFIG_FRAME_POINTER),y)
-  CFLAGS += -fno-omit-frame-pointer -fno-optimize-sibling-calls
-  CXXFLAGS += -fno-omit-frame-pointer -fno-optimize-sibling-calls
-else
-  CFLAGS += -fomit-frame-pointer
-  CXXFLAGS += -fomit-frame-pointer
 endif
 
 # Loadable module definitions
