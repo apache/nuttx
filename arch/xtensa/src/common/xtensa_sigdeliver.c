@@ -46,7 +46,7 @@
  *
  * Description:
  *   This is the a signal handling trampoline.  When a signal action was
- *   posted.  The task context was mucked with and forced to branch to this
+ *   posted, the task context was mucked with and forced to branch to this
  *   location with interrupts disabled.
  *
  ****************************************************************************/
