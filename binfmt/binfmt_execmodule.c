@@ -181,7 +181,8 @@ int exec_module(FAR const struct binary_s *binp,
       goto errout_with_addrenv;
     }
 
-  binfo("Initialize the user heap (heapsize=%zu)\n", binp->addrenv.heapsize);
+  binfo("Initialize the user heap (heapsize=%zu)\n",
+        up_addrenv_heapsize(&binp->addrenv));
   umm_initialize(vheap, up_addrenv_heapsize(&binp->addrenv));
 #endif
 
