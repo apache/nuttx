@@ -61,13 +61,6 @@ CXXELFFLAGS = $(CXXFLAGS)
 LDELFFLAGS = -r -e main
 LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/gnu-elf.ld)
 
-# File extensions
-
-ASMEXT = .S
-OBJEXT = .o
-LIBEXT = .a
-EXEEXT = .elf
-
 # Linker flags
 
 ifneq ($(CROSSDEV),sparc-nuttx-elf-)
