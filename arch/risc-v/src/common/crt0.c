@@ -32,6 +32,8 @@
 #include <sys/types.h>
 #include <stdlib.h>
 
+#include "riscv_internal.h"
+
 #ifdef CONFIG_BUILD_KERNEL
 
 /****************************************************************************
