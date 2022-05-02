@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/task/exit.c
+ * libs/libc/stdlib/lib_exit.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,63 +24,37 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/atexit.h>
+#include <nuttx/compiler.h>
+
 #include <stdlib.h>
 #include <unistd.h>
-#include <debug.h>
-#include <errno.h>
 
-#include <nuttx/fs/fs.h>
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
-#include "task/task.h"
-#include "group/group.h"
-#include "sched/sched.h"
-#include "pthread/pthread.h"
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+extern FAR void *__dso_handle weak_data;
+FAR void *__dso_handle = &__dso_handle;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: _exit
- *
- * Description:
- *   This function causes the currently executing task to cease
- *   to exist.  This is a special case of task_delete() where the task to
- *   be deleted is the currently executing task.  It is more complex because
- *   a context switch must be perform to the next ready to run task.
- *
- ****************************************************************************/
-
-void _exit(int status)
+void exit(int status)
 {
-  FAR struct tcb_s *tcb = this_task();
+  atexit_call_exitfuncs(status);
 
-  /* Only the lower 8-bits of status are used */
+  /* REVISIT: Need to flush files and streams */
 
-  status &= 0xff;
+  _exit(status);
+}
 
-#ifdef HAVE_GROUP_MEMBERS
-  /* Kill all of the children of the group, preserving only this thread.
-   * exit() is normally called from the main thread of the task.  pthreads
-   * exit through a different mechanism.
-   */
-
-  group_kill_children(tcb);
-#endif
-
-#if !defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
-  /* Recover any mutexes still held by the canceled thread */
-
-  pthread_mutex_inconsistent(tcb);
-#endif
-
-  /* Perform common task termination logic.  This will get called again later
-   * through logic kicked off by up_exit().  However, we need to call it here
-   * so that we can flush buffered I/O (both of which may required
-   * suspending). This will be fixed later when I/O flush is moved to libc.
-   */
-
-  nxtask_exithook(tcb, status, false);
-
-  up_exit(status);
+void _Exit(int status)
+{
+  _exit(status);
 }

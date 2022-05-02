@@ -24,11 +24,7 @@
 
 #include <nuttx/compiler.h>
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-int __cxa_atexit(void (*func)(void *), void *object, void *dso_handle);
+#include <nuttx/atexit.h>
 
 /****************************************************************************
  * Public Functions
@@ -50,5 +46,6 @@ int weak_function __aeabi_atexit(void *object,
                                  void (*func)(void *),
                                  void *dso_handle)
 {
-  return __cxa_atexit(func, object, dso_handle);
+  return atexit_register(ATTYPE_CXA, (void (*)(void))func, object,
+                         dso_handle);
 }

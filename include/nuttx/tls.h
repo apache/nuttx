@@ -27,6 +27,8 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/atexit.h>
+
 #include <sys/types.h>
 #include <pthread.h>
 
@@ -131,6 +133,9 @@ struct task_info_s
 #  ifdef CONFIG_LIBC_LOCALE
   char            ta_domain[NAME_MAX]; /* Current domain for gettext */
 #  endif
+#endif
+#if CONFIG_LIBC_MAX_EXITFUNS > 0
+  struct atexit_list_s ta_exit; /* Exit functions */
 #endif
 };
 
