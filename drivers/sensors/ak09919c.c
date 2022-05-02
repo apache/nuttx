@@ -34,8 +34,6 @@
 #include <nuttx/sensors/sensor.h>
 #include <nuttx/sensors/ak09919c.h>
 
-#include "akm_wrapper.h"
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -130,11 +128,6 @@
 /* Noise suppresion level control bit. */
 
 #define AK09919C_NOISE_SUPPRESION       0x60
-
-/* AK09919C calibration algorithm control bit. */
-
-#define AK09919C_CAL_ALGO_ENABLE        0x01
-#define AK09919C_CAL_ALGO_DISABLE       0x00
 
 #define SET_BITSLICE(s, v, offset, mask)         \
 do                                               \
@@ -242,10 +235,6 @@ static int ak09919c_activate(FAR struct sensor_lowerhalf_s *lower,
                              bool enable);
 static int ak09919c_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                  FAR unsigned int * interval_us);
-static int ak09919c_set_calibvalue(FAR struct sensor_lowerhalf_s *lower,
-                                   unsigned long arg);
-static int ak09919c_calibrate(FAR struct sensor_lowerhalf_s *lower,
-                              unsigned long arg);
 static int ak09919c_selftest(FAR struct sensor_lowerhalf_s *lower,
                              unsigned long arg);
 
@@ -269,10 +258,8 @@ static const struct ak09919c_odr_s g_ak09919c_odr[] =
 static const struct sensor_ops_s g_ak09919c_ops =
 {
   .activate = ak09919c_activate,             /* Enable/disable snesor. */
-  .set_interval = ak09919c_set_interval,     /* Set output data period. */
   .selftest = ak09919c_selftest,             /* Sensor selftest function. */
-  .set_calibvalue = ak09919c_set_calibvalue, /* Set calibration value. */
-  .calibrate = ak09919c_calibrate            /* Get calibration value. */
+  .set_interval = ak09919c_set_interval,     /* Set output data period. */
 };
 
 static const struct ak09919c_threshold_s g_ak09919c_sngthr =
@@ -775,15 +762,6 @@ static int ak09919c_enable(FAR struct ak09919c_dev_s *priv, bool enable)
           return ret;
         }
 
-      /* Enable calibration algorithm. */
-
-      ret = akm_wrapper_lib_enable(AK09919C_CAL_ALGO_ENABLE);
-      if (ret < 0)
-        {
-          snerr("Failed to enable calibration algorithm: %d\n", ret);
-          return ret;
-        }
-
       work_queue(HPWORK, &priv->work,
                  ak09919c_worker, priv,
                  priv->interval / USEC_PER_TICK);
@@ -791,15 +769,6 @@ static int ak09919c_enable(FAR struct ak09919c_dev_s *priv, bool enable)
   else
     {
       work_cancel(HPWORK, &priv->work);
-
-      /* Disable calibration algorithm. */
-
-      ret = akm_wrapper_lib_enable(AK09919C_CAL_ALGO_DISABLE);
-      if (ret < 0)
-        {
-          snerr("Failed to disable calibration algorithm: %d\n", ret);
-          return ret;
-        }
 
       /* Reset soft device. */
 
@@ -1054,58 +1023,6 @@ static int ak09919c_set_interval(FAR struct sensor_lowerhalf_s *lower,
 }
 
 /****************************************************************************
- * Name: ak09919c_set_calibvalue
- *
- * Description:
- *   Set calibration value.
- *
- * Input Parameters
- *   lower       -The instance of lower half sensor driver
- *   arg         -calibration value
- *
- * Returned Value
- *   Zero (OK) on success.
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-
-static int ak09919c_set_calibvalue(FAR struct sensor_lowerhalf_s *lower,
-                                   unsigned long arg)
-{
-  akm_wrapper_set_calibvalue((char *)arg);
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: ak09919c_get_calibvalue
- *
- * Description:
- *   Get calibration value.
- *
- * Input Parameters
- *   lower       -The instance of lower half sensor driver
- *   arg         -calibration value
- *
- * Returned Value
- *   Zero (OK) on success.
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-
-static int ak09919c_calibrate(FAR struct sensor_lowerhalf_s *lower,
-                              unsigned long arg)
-{
-  akm_wrapper_get_calibvalue((char *)arg);
-
-  return OK;
-}
-
-/****************************************************************************
  * Name: ak09919c_activate
  *
  * Description:
@@ -1236,8 +1153,6 @@ static void ak09919c_worker(FAR void *arg)
 {
   FAR struct ak09919c_dev_s *priv = arg;
   struct sensor_event_mag tmp;
-  ak09919c_cal_output_t output;
-  ak09919c_cal_input_t input;
 
   DEBUGASSERT(priv != NULL);
 
@@ -1252,21 +1167,8 @@ static void ak09919c_worker(FAR void *arg)
 
   if (ak09919c_readmag(priv, &tmp) >= 0)
     {
-      input.x = tmp.x;
-      input.y = tmp.y;
-      input.z = tmp.z;
-      input.timeStamp = (int64_t)(tmp.timestamp * 1000);
-
-      if (akm_wrapper_calibrate(&input, &output) >= 0)
-        {
-          tmp.x = output.x;
-          tmp.y = output.y;
-          tmp.z = output.z;
-          tmp.status = output.status;
-
-          priv->lower.push_event(priv->lower.priv, &tmp,
-                                 sizeof(struct sensor_event_mag));
-        }
+      priv->lower.push_event(priv->lower.priv, &tmp,
+                             sizeof(struct sensor_event_mag));
     }
 }
 
@@ -1314,6 +1216,7 @@ int ak09919c_register(int devno, FAR const struct ak09919c_config_s *config)
   priv->config = config;
   priv->lower.type = SENSOR_TYPE_MAGNETIC_FIELD;
   priv->lower.buffer_number = CONFIG_SENSORS_AK09919C_BUFFER_NUMBER;
+  priv->lower.uncalibrated = true;
   priv->lower.ops = &g_ak09919c_ops;
   priv->interval = AK09919C_DEFAULT_ODR;
   priv->workmode = AK09919C_CONTINUOUS_MODE4;
@@ -1333,15 +1236,6 @@ int ak09919c_register(int devno, FAR const struct ak09919c_config_s *config)
   if (ret < 0)
     {
       snerr("Failed to initialize physical device ak0991c:%d\n", ret);
-      goto err;
-    }
-
-  /* Init the calibration algorithm */
-
-  ret = akm_wrapper_lib_init();
-  if (ret < 0)
-    {
-      snerr("Failed to init calibration algorithm: %d\n", ret);
       goto err;
     }
 
