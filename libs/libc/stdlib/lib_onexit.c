@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/task/exit.c
+ * libs/libc/stdlib/lib_onexit.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,63 +24,45 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
-#include <unistd.h>
-#include <debug.h>
-#include <errno.h>
-
-#include <nuttx/fs/fs.h>
-
-#include "task/task.h"
-#include "group/group.h"
-#include "sched/sched.h"
-#include "pthread/pthread.h"
+#include <nuttx/atexit.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _exit
+ * Name: on_exit
  *
  * Description:
- *   This function causes the currently executing task to cease
- *   to exist.  This is a special case of task_delete() where the task to
- *   be deleted is the currently executing task.  It is more complex because
- *   a context switch must be perform to the next ready to run task.
+ *    Registers a function to be called at program exit.
+ *    The on_exit() function registers the given function to be called
+ *    at normal process termination, whether via exit or via return from
+ *    the program's main(). The function is passed the status argument
+ *    given to the last call to exit and the arg argument from on_exit().
+ *
+ *    NOTE 1: This function comes from SunOS 4, but is also present in
+ *    libc4, libc5 and glibc. It no longer occurs in Solaris (SunOS 5).
+ *    Avoid this function, and use the standard atexit() instead.
+ *
+ *    Limitations in the current implementation:
+ *
+ *      1. Only a single on_exit function can be registered unless
+ *         CONFIG_LIBC_MAX_EXITFUNS defines a larger number.
+ *      2. on_exit functions are not inherited when a new task is
+ *         created.
+ *
+ * Input Parameters:
+ *   func - A pointer to the function to be called when the task exits.
+ *   arg -  An argument that will be provided to the on_exit() function when
+ *          the task exits.
+ *
+ * Returned Value:
+ *   Zero on success. Non-zero on failure.
  *
  ****************************************************************************/
 
-void _exit(int status)
+int on_exit(CODE void (*func)(int, FAR void *), FAR void *arg)
 {
-  FAR struct tcb_s *tcb = this_task();
-
-  /* Only the lower 8-bits of status are used */
-
-  status &= 0xff;
-
-#ifdef HAVE_GROUP_MEMBERS
-  /* Kill all of the children of the group, preserving only this thread.
-   * exit() is normally called from the main thread of the task.  pthreads
-   * exit through a different mechanism.
-   */
-
-  group_kill_children(tcb);
-#endif
-
-#if !defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
-  /* Recover any mutexes still held by the canceled thread */
-
-  pthread_mutex_inconsistent(tcb);
-#endif
-
-  /* Perform common task termination logic.  This will get called again later
-   * through logic kicked off by up_exit().  However, we need to call it here
-   * so that we can flush buffered I/O (both of which may required
-   * suspending). This will be fixed later when I/O flush is moved to libc.
-   */
-
-  nxtask_exithook(tcb, status, false);
-
-  up_exit(status);
+  return atexit_register(ATTYPE_ONEXIT, (CODE void (*)(void))func, arg,
+                         NULL);
 }
