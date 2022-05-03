@@ -592,6 +592,7 @@
 #    define FLASH_OPTCR_WDG_SW      (1 << 5)                        /* Bit 5: WDG_SW */
 #  define FLASH_OPTCR_RDP_SHIFT     (8)                             /* Bits 8-15: Read protect */
 #  define FLASH_OPTCR_RDP_MASK      (0xff << FLASH_OPTCR_RDP_SHIFT)
+#  define FLASH_OPTCR_RDP(n)        ((uint32_t)(n) << FLASH_OPTCR_RDP_SHIFT)
 #  define FLASH_OPTCR_NWRP_SHIFT    (16)                            /* Bits 16-27: Not write protect */
 #  define FLASH_OPTCR_NWRP_MASK     (0xfff << FLASH_OPTCR_NWRP_SHIFT)
 #endif
