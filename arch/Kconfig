@@ -282,7 +282,6 @@ config ARCH_SIZET_LONG
 
 config ARCH_COVERAGE
 	bool "Enable code coverage analysis"
-	select HAVE_CXX
 	select HAVE_CXXINITIALIZE
 	default n
 	---help---
