@@ -252,7 +252,7 @@ xtensa_coproc_savestate:
 	 */
 
 	ENTRY(24)
-	s32i	a0,  sp, LOCAL_OFFSET(1)		/* Save return address */
+	s32i	a0,  sp, LOCAL_OFFSET(0)		/* Save return address */
 
 	/* Call _xtensa_coproc_savestate() with A2=address of co-processor
 	 * save area.
@@ -262,7 +262,7 @@ xtensa_coproc_savestate:
 
 	/* Restore a0 and return */
 
-	l32i	a0,  sp, LOCAL_OFFSET(1)		/* Recover return address */
+	l32i	a0,  sp, LOCAL_OFFSET(0)		/* Recover return address */
 	RET(24)
 
 #endif
@@ -451,7 +451,7 @@ xtensa_coproc_restorestate:
 	 */
 
 	ENTRY(24)
-	s32i	a0,  sp, LOCAL_OFFSET(1)		/* Save return address */
+	s32i	a0,  sp, LOCAL_OFFSET(0)		/* Save return address */
 
 	/* Call _xtensa_coproc_restorestate() with A2=address of co-processor
 	 * save area.   Registers a0, a2-a7, a13-a15 have been trashed.
@@ -461,7 +461,7 @@ xtensa_coproc_restorestate:
 
 	/* Restore a0 and return */
 
-	l32i	a0,  sp, LOCAL_OFFSET(1)		/* Recover return address */
+	l32i	a0,  sp, LOCAL_OFFSET(0)		/* Recover return address */
 	RET(24)
 
 #endif
