@@ -196,6 +196,7 @@
 
 /* Gyroscope performance optimized  */
 
+#define BMI270_POWER_OPT_MODE         0          /* Power optimize mode */
 #define BMI270_PERF_OPT_MODE          1          /* High performance mode */
 
 /* Factory test instructions. */
@@ -2114,9 +2115,6 @@ static int bmi270_xl_enable(FAR struct bmi270_dev_s *priv,
 {
   bmi270_pwr_ctrl_t regval_pwr_ctrl;
 
-  bmi270_xl_setfullscale(priv, BMI270_XL_RANGE_8G);
-  priv->dev[BMI270_XL_IDX].factor = BMI270_8G_FACTOR;
-
   bmi270_xl_setfilter(priv, BMI270_XL_OSR4_AVG1);
 
   /* Enable/disable accelerometer */
@@ -2370,7 +2368,7 @@ static int bmi270_xl_setfilter(FAR struct bmi270_dev_s *priv,
   bmi270_spi_read(priv, BMI270_ACC_CONF, (FAR uint8_t *)&regval, 1);
 
   regval.acc_bwp = value;
-  regval.acc_filter_perf = BMI270_PERF_OPT_MODE;
+  regval.acc_filter_perf = BMI270_POWER_OPT_MODE;
 
   bmi270_spi_write(priv, BMI270_ACC_CONF, (FAR uint8_t *)&regval);
 
@@ -2709,7 +2707,7 @@ static int bmi270_gy_setfilter(FAR struct bmi270_dev_s *priv,
   bmi270_spi_read(priv, BMI270_GYR_CONF, (FAR uint8_t *)&regval, 1);
 
   regval.gyr_bwp = value;
-  regval.gyr_filter_perf = BMI270_PERF_OPT_MODE;
+  regval.gyr_filter_perf = BMI270_POWER_OPT_MODE;
 
   bmi270_spi_write(priv, BMI270_ACC_CONF, (FAR uint8_t *)&regval);
 
@@ -3746,6 +3744,16 @@ static int bmi270_activate(FAR struct sensor_lowerhalf_s *lower,
       priv = (struct bmi270_dev_s *)(sensor - BMI270_XL_IDX);
       if (sensor->activated != enable)
         {
+          /* Set default accelerometer full scale. */
+
+          if (enable)
+            {
+              bmi270_xl_setfullscale(priv, BMI270_XL_RANGE_8G);
+              priv->dev[BMI270_XL_IDX].factor = BMI270_8G_FACTOR;
+            }
+
+          /* Enable/disable accelerometer. */
+
           ret = bmi270_xl_enable(priv, enable);
           if (ret < 0)
             {
@@ -3974,6 +3982,15 @@ static int bmi270_control(FAR struct sensor_lowerhalf_s *lower,
 
       case BMI270_SET_SCALE_XL_CMD:   /* Set accelerator scale command tag */
         {
+          ret = bmi270_xl_enable(priv, false);
+          if (ret < 0)
+            {
+              snerr("Failed to disable accelerometer sensor: %d\n", ret);
+              return ret;
+            }
+
+          priv->dev[BMI270_XL_IDX].activated = false;
+
           switch (arg)
           {
             case BMI270_XL_SET_2G:
@@ -4010,6 +4027,15 @@ static int bmi270_control(FAR struct sensor_lowerhalf_s *lower,
               }
               break;
           }
+
+          ret = bmi270_xl_enable(priv, true);
+          if (ret < 0)
+            {
+              snerr("Failed to enable accelerometer sensor: %d\n", ret);
+              return ret;
+            }
+
+          priv->dev[BMI270_XL_IDX].activated = true;
 
           if (ret < 0)
             {
