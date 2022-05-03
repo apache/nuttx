@@ -107,10 +107,6 @@ ifeq ($(CONFIG_STACK_COLORATION),y)
   CSRCS += up_checkstack.c
 endif
 
-ifeq ($(CONFIG_ARCH_COVERAGE),y)
-  STDLIBS += -lgcov
-endif
-
 ifeq ($(CONFIG_SPINLOCK),y)
   HOSTSRCS += up_testset.c
 endif
