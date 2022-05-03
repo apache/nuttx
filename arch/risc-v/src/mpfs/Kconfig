@@ -239,6 +239,13 @@ config MPFS_EMMCSD
 	---help---
 		Selects the MPFS eMMCSD driver.
 
+config MPFS_IHC
+	bool "IHC slave"
+	depends on RPTUN
+	default n
+	---help---
+		Selects and enables the Inter-Hart-Communication (IHC) slave driver.
+
 config MPFS_ETHMAC
 	bool
 	default n
