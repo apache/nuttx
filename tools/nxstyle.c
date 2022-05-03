@@ -230,6 +230,10 @@ static const char *g_white_list[] =
 
   "__gnu_Unwind_Find_exidx",
 
+  /* Ref:  lib_impure.c */
+
+  "__sFILE_fake",
+
   /* Ref:  stdlib.h */
 
   "_Exit",
