@@ -81,6 +81,10 @@ ifeq ($(CONFIG_STACK_CANARIES),y)
   ARCHOPTIMIZATION += -fstack-protector-all
 endif
 
+ifeq ($(CONFIG_ARCH_COVERAGE),y)
+  ARCHOPTIMIZATION += -fprofile-generate -ftest-coverage
+endif
+
 ifeq ($(CONFIG_ARMV7M_STACKCHECK),y)
   ARCHOPTIMIZATION += -finstrument-functions -ffixed-r10
 endif
@@ -271,4 +275,8 @@ endif
 
 ifeq ($(CONFIG_LIBSUPCXX),y)
   EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a))
+endif
+
+ifeq ($(CONFIG_ARCH_COVERAGE),y)
+  EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libgcov.a))
 endif
