@@ -777,7 +777,8 @@
                             MCAN_INT_TEFL)
 #define MCAN_TXDEDBUF_INTS MCAN_TXCOMMON_INTS
 
-#define MCAN_TXERR_INTS    (MCAN_INT_TEFL | MCAN_INT_PEA | MCAN_INT_PED | MCAN_INT_ACKE)
+#define MCAN_TXERR_INTS    (MCAN_INT_TEFL | MCAN_INT_PEA | MCAN_INT_PED | \
+                            MCAN_INT_ACKE)
 
 /* Common-, TX- and RX-Error-Mask */
 
