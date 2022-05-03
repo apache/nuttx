@@ -714,6 +714,7 @@ static void detect_worker(FAR void *arg)
     {
       if (priv->batt_state_flag != charger_is_exit)
         {
+          syslog(LOG_INFO, "rx wireless detect pin:%d\n", charger_is_exit);
           priv->batt_state_flag = charger_is_exit;
           battery_charger_changed(&priv->dev, BATTERY_STATE_CHANGED);
         }
