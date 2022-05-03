@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/sched/cxx_initialize_sinit.c
+ * libs/libc/sched/cxx_initialize.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -82,6 +82,11 @@ void cxx_initialize(void)
 
   if (inited == 0)
     {
+#if defined(CONFIG_ARCH_SIM) && defined(CONFIG_HOST_MACOS)
+      extern void macho_call_saved_init_funcs(void);
+
+      macho_call_saved_init_funcs();
+#else
       initializer_t *initp;
 
       sinfo("_sinit: %p _einit: %p _stext: %p _etext: %p\n",
@@ -106,6 +111,7 @@ void cxx_initialize(void)
               initializer();
             }
         }
+#endif
 
       inited = 1;
     }
