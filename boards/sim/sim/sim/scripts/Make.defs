@@ -68,7 +68,7 @@ ifeq ($(CONFIG_STACK_CANARIES),y)
 endif
 
 ifeq ($(CONFIG_ARCH_COVERAGE),y)
-  ARCHOPTIMIZATION += -fprofile-arcs -ftest-coverage
+  ARCHOPTIMIZATION += -fprofile-generate -ftest-coverage
 endif
 
 # Add -fno-common because macOS "ld -r" doesn't seem to pick objects
