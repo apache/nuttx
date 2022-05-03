@@ -22,7 +22,7 @@
 
 CSRCS += lib_mknod.c lib_umask.c lib_utsname.c lib_getrandom.c
 CSRCS += lib_xorshift128.c lib_tea_encrypt.c lib_tea_decrypt.c
-CSRCS += lib_cxx_initialize.c
+CSRCS += lib_cxx_initialize.c lib_impure.c
 
 # Support for platforms that do not have long long types
 

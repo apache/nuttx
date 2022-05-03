@@ -41,10 +41,6 @@ ifeq ($(CONFIG_LIBCXXABI),y)
 include libcxxabi.defs
 endif
 
-ifeq ($(CONFIG_LIBSUPCXX),y)
-CXXSRCS += libxx_impure.cxx
-endif
-
 # Object Files
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
