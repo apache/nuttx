@@ -37,7 +37,11 @@ else ifeq ($(CONFIG_BUILD_PROTECTED),y)
 else ifeq ($(CONFIG_BUILD_KERNEL),y)
   LDSCRIPT = ld-kernel.script
 else
-  LDSCRIPT = ld.script
+  ifeq ($(CONFIG_MPFS_IHC),y)
+    LDSCRIPT = ld-ihc.script
+  else
+    LDSCRIPT = ld.script
+  endif
 endif
 
 ifneq ($(LDMEMORY),)
