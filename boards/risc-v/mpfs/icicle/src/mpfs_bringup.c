@@ -145,5 +145,14 @@ int mpfs_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_MPFS_IHC
+  ret = mpfs_board_ihc_init();
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to init IHC driver: %d\n", ret);
+    }
+#endif
+
   return ret;
 }
