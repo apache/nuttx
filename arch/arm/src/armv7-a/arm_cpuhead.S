@@ -441,7 +441,7 @@ __cpu3_start:
 #ifdef CONFIG_STACK_COLORATION
 	.type	.Lstkinit, %object
 .Lstkinit:
-	.long	SMP_STACK_WORDS
+	.long	SMP_STACK_WORDS - (XCPTCONTEXT_SIZE / 4)
 	.long	STACK_COLOR				/* Stack coloration word */
 	.size	.Lstkinit, . -.Lstkinit
 #endif
