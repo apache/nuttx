@@ -224,7 +224,7 @@ function xtensa-esp32-gcc-toolchain {
     esac
   fi
   xtensa-esp32-elf-gcc --version
-  pip3 install esptool
+  pip3 install esptool==3.3.1
 }
 
 function avr-gcc-toolchain {
