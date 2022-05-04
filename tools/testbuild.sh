@@ -257,10 +257,6 @@ function build {
     xargs -I "{}" cp "{}" $artifactconfigdir < $nuttx/nuttx.manifest
   fi
 
-  return $fail
-}
-
-function refresh {
   # Ensure defconfig in the canonical form
 
   if ! ./tools/refresh.sh --silent $config; then
@@ -304,11 +300,10 @@ function dotest {
   config=`echo $1 | cut -d',' -f1`
   check=${HOST},${config/\//:}
 
-  skip=0
   for re in $blacklist; do
     if [[ "${check}" =~ ${re:1}$ ]]; then
       echo "Skipping: $1"
-      skip=1
+      return
     fi
   done
 
@@ -351,11 +346,8 @@ function dotest {
   echo "------------------------------------------------------------------------------------"
   distclean
   configure
-  if [ ${skip} -ne 1 ]; then
-    build
-    run
-  fi
-  refresh
+  build
+  run
 }
 
 # Perform the build test for each entry in the test list file
