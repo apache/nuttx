@@ -72,21 +72,13 @@ ifeq ($(CONFIG_SCHED_BACKTRACE),y)
 endif
 
 CMN_ASRCS += vfork.S
+
 ifeq ($(CONFIG_ARCH_HAVE_TESTSET),y)
   ifeq ($(CONFIG_ARCH_ARMV6M),)
     CMN_ASRCS += arm_testset.S
   endif
 endif
+
 ifeq ($(CONFIG_ARCH_HAVE_FETCHADD),y)
   CMN_ASRCS += arm_fetchadd.S
-endif
-
-# Use of common/arm_etherstub.c is deprecated.  The preferred mechanism is to
-# use CONFIG_NETDEV_LATEINIT=y to suppress the call to arm_netinitialize() in
-# up_initialize().  Then this stub would not be needed.
-
-ifeq ($(CONFIG_NET),y)
-  ifneq ($(CONFIG_ARCH_HAVE_PHY),y)
-    CMN_CSRCS += arm_etherstub.c
-  endif
 endif
