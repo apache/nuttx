@@ -54,8 +54,8 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-#define CW2218_REG_TEMPMAX_DEFAULT_VALUE  0xAA /* Maximum temperature threshold register default value */
-#define CW2218_REG_TEMPMIN_DEFAULT_VALUE  0x50 /* Minimum temperature threshold register default value */
+#define CW2218_REG_TEMPMAX_DEFAULT_VALUE  0xC8 /* Maximum temperature threshold register default value */
+#define CW2218_REG_TEMPMIN_DEFAULT_VALUE  0x28 /* Minimum temperature threshold register default value */
 #define CW2218_TEMP_ERROR_DEFAULT_VALUE   80   /* default temperature return when error */
 
 /****************************************************************************
