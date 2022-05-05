@@ -1,0 +1,41 @@
+From 5dce061e7d5cc922aa1a15649cc937cfeb5f14b8 Mon Sep 17 00:00:00 2001
+From: anjiahao <anjiahao@xiaomi.com>
+Date: Thu, 5 May 2022 19:55:38 +0800
+Subject: [PATCH 2/2] open-amp:use strlcpy inside of strncpy
+
+Signed-off-by: anjiahao <anjiahao@xiaomi.com>
+Change-Id: I796edd3d697e2cd59d20f40a140179cd968765e7
+---
+ lib/rpmsg/rpmsg.c          | 2 +-
+ lib/rpmsg/rpmsg_internal.h | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/lib/rpmsg/rpmsg.c b/lib/rpmsg/rpmsg.c
+index e52144b..3842454 100644
+--- a/lib/rpmsg/rpmsg.c
++++ b/lib/rpmsg/rpmsg.c
+@@ -134,7 +134,7 @@ int rpmsg_send_ns_message(struct rpmsg_endpoint *ept, unsigned long flags)
+ 
+ 	ns_msg.flags = flags;
+ 	ns_msg.addr = ept->addr;
+-	strncpy(ns_msg.name, ept->name, sizeof(ns_msg.name));
++	strlcpy(ns_msg.name, ept->name, sizeof(ns_msg.name));
+ 	ret = rpmsg_send_offchannel_raw(ept, ept->addr,
+ 					RPMSG_NS_EPT_ADDR,
+ 					&ns_msg, sizeof(ns_msg), true);
+diff --git a/lib/rpmsg/rpmsg_internal.h b/lib/rpmsg/rpmsg_internal.h
+index e64aeff..a1fbe90 100644
+--- a/lib/rpmsg/rpmsg_internal.h
++++ b/lib/rpmsg/rpmsg_internal.h
+@@ -105,7 +105,7 @@ static inline void rpmsg_initialize_ept(struct rpmsg_endpoint *ept,
+ 					rpmsg_ept_cb cb,
+ 					rpmsg_ns_unbind_cb ns_unbind_cb)
+ {
+-	strncpy(ept->name, name ? name : "", sizeof(ept->name));
++	strlcpy(ept->name, name ? name : "", sizeof(ept->name));
+ 	ept->addr = src;
+ 	ept->dest_addr = dest;
+ 	ept->cb = cb;
+-- 
+2.25.1
+

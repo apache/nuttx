@@ -1,0 +1,43 @@
+From aaa28e7ab36bf3b1f76225614377d59b85a07bc1 Mon Sep 17 00:00:00 2001
+From: anjiahao <anjiahao@xiaomi.com>
+Date: Thu, 5 May 2022 15:31:09 +0800
+Subject: [PATCH 1/2] open-amp:fix memory leak
+
+Signed-off-by: anjiahao <anjiahao@xiaomi.com>
+Change-Id: Id379ed376a2b4e1c2d792f6e314809c1ef5be06b
+---
+ lib/remoteproc/remoteproc.c | 9 +++------
+ 1 file changed, 3 insertions(+), 6 deletions(-)
+
+diff --git a/lib/remoteproc/remoteproc.c b/lib/remoteproc/remoteproc.c
+index ec808c9..56b29f1 100644
+--- a/lib/remoteproc/remoteproc.c
++++ b/lib/remoteproc/remoteproc.c
+@@ -120,21 +120,18 @@ static void *remoteproc_get_rsc_table(struct remoteproc *rproc,
+ 	if (ret < 0 || ret < (int)len || !img_data) {
+ 		metal_log(METAL_LOG_ERROR,
+ 			  "get rsc failed: 0x%llx, 0x%llx\r\n", offset, len);
++		metal_free_memory(rsc_table);
+ 		rsc_table = RPROC_ERR_PTR(-RPROC_EINVAL);
+-		goto error;
++		return rsc_table;
+ 	}
+ 	memcpy(rsc_table, img_data, len);
+ 
+ 	ret = handle_rsc_table(rproc, rsc_table, len, NULL);
+ 	if (ret < 0) {
++		metal_free_memory(rsc_table);
+ 		rsc_table = RPROC_ERR_PTR(ret);
+-		goto error;
+ 	}
+ 	return rsc_table;
+-
+-error:
+-	metal_free_memory(rsc_table);
+-	return rsc_table;
+ }
+ 
+ static int remoteproc_parse_rsc_table(struct remoteproc *rproc,
+-- 
+2.25.1
+
