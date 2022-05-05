@@ -53,6 +53,14 @@
 #  define CONFIG_HAVE_ANONYMOUS_UNION 1
 #endif
 
+/* ISO C99 supports _Bool */
+
+#undef CONFIG_C99_BOOL
+
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#  define CONFIG_C99_BOOL 1
+#endif
+
 /* C++ support */
 
 #if defined(__cplusplus) && __cplusplus >= 201402L
