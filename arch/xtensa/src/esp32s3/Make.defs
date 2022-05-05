@@ -48,6 +48,10 @@ ifeq ($(CONFIG_DEBUG_ALERT),y)
   CMN_CSRCS += xtensa_dumpstate.c
 endif
 
+ifeq ($(CONFIG_ARCH_FPU),y)
+  CMN_CSRCS += xtensa_fpucmp.c
+endif
+
 ifeq ($(CONFIG_SPINLOCK),y)
   CMN_CSRCS += xtensa_testset.c
 endif
