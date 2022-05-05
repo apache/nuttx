@@ -311,7 +311,8 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
     {
       /* Set up to receive TCP data event callbacks */
 
-      state.cl_cb->flags = (TCP_NEWDATA | TCP_POLL | TCP_DISCONN_EVENTS);
+      state.cl_cb->flags = (TCP_NEWDATA | TCP_ACKDATA | TCP_POLL
+                            | TCP_DISCONN_EVENTS);
       state.cl_cb->event = tcp_close_eventhandler;
 
       /* A non-NULL value of the priv field means that lingering is
