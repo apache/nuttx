@@ -118,12 +118,25 @@
 /* Storage for overlay state */
 
 #  error Overlays not supported
-#  define XCPTCONTEXT_REGS  _REG_OVLY_START
+#  define _REG_CP_START  _REG_OVLY_START
 #else
-#  define XCPTCONTEXT_REGS  _REG_OVLY_START
+#  define _REG_CP_START  _REG_OVLY_START
 #endif
 
-#define XCPTCONTEXT_SIZE    ((4 * XCPTCONTEXT_REGS) + 0x20)
+#if XCHAL_CP_NUM > 0
+#  if (XCHAL_TOTAL_SA_ALIGN == 8) && ((_REG_CP_START & 1) == 1)
+  /* Fpu first address must align to cp align size. */
+
+#    define REG_CP_DUMMY      (_REG_CP_START + 0)
+#    define XCPTCONTEXT_REGS  (_REG_CP_START + 1)
+#  else
+#    define XCPTCONTEXT_REGS  _REG_CP_START
+#  endif
+#  define XCPTCONTEXT_SIZE    ((4 * XCPTCONTEXT_REGS) + XTENSA_CP_SA_SIZE + 0x20)
+#else
+#  define XCPTCONTEXT_REGS    _REG_CP_START
+#  define XCPTCONTEXT_SIZE    ((4 * XCPTCONTEXT_REGS) + 0x20)
+#endif
 
 /****************************************************************************
  * Public Types
@@ -154,12 +167,6 @@ struct xcptcontext
   /* Register save area */
 
   uint32_t *regs;
-
-#if XCHAL_CP_NUM > 0
-  /* Co-processor save area */
-
-  struct xtensa_cpstate_s cpstate;
-#endif
 
 #ifdef CONFIG_LIB_SYSCALL
   /* The following array holds the return address and the exc_return value

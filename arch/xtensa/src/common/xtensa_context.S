@@ -195,8 +195,17 @@ _xtensa_context_save:
 	wsr     a2, PS                     /* Restore PS to the value at entry */
 	wsr     a0, EPC1                   /* Restore EPC1 to the value at entry */
 	rsync
-	l32i  a0, sp, (4 * REG_TMP0)       /* Restore return address */
+	l32i	a0, sp, (4 * REG_TMP0)       /* Restore return address */
 
+#endif
+
+#if XCHAL_CP_NUM > 0
+	s32i    a0, sp, (4 * REG_TMP0)     /* Save return address */
+
+	mov	a2, sp
+	call0	_xtensa_coproc_savestate
+
+	l32i	a0, sp, (4 * REG_TMP0)       /* Restore return address */
 #endif
 
 	ret
@@ -237,6 +246,14 @@ _xtensa_context_save:
 	.align  4
 
 _xtensa_context_restore:
+
+#if XCHAL_CP_NUM > 0
+	s32i    a0, a2, (4 * REG_TMP0)	     /* Save return address */
+
+	call0	_xtensa_coproc_restorestate
+
+	l32i	a0, a2, (4 * REG_TMP0)       /* Restore return address */
+#endif
 
 #if XCHAL_HAVE_LOOPS != 0
 	l32i	a3, a2, (4 * REG_LBEG)

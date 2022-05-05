@@ -71,34 +71,13 @@ uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs)
 
   irq_dispatch(irq, regs);
 
-#if XCHAL_CP_NUM > 0 || defined(CONFIG_ARCH_ADDRENV)
+#if defined(CONFIG_ARCH_ADDRENV)
   /* Check for a context switch.  If a context switch occurred, then
    * CURRENT_REGS will have a different value than it did on entry.
    */
 
   if (regs != CURRENT_REGS)
     {
-#if XCHAL_CP_NUM > 0
-      /* If an interrupt level context switch has occurred, then save the
-       * co-processor state in in the suspended thread's co-processor save
-       * area.
-       *
-       * NOTE 1. The state of the co-processor has not been altered and
-       *         still represents the to-be-suspended thread.
-       * NOTE 2. We saved a reference  TCB of the original thread on entry.
-       */
-
-      void *cpstate;
-      uintptr_t cpstate_off;
-
-      cpstate_off = offsetof(struct xcptcontext, cpstate) -
-                    offsetof(struct xcptcontext, regs);
-
-      cpstate = (void *)((uintptr_t)CURRENT_REGS + cpstate_off);
-      xtensa_coproc_restorestate(cpstate);
-
-#endif
-
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
        * running task is closed down gracefully (data caches dump,
