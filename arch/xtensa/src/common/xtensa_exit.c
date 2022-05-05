@@ -116,12 +116,6 @@ void up_exit(int status)
 
   sinfo("TCB=%p exiting\n", tcb);
 
-#if XCHAL_CP_NUM > 0
-  /* Disable co-processor support for the task that is exit-ing. */
-
-  xtensa_coproc_disable(&tcb->xcp.cpstate, XTENSA_CP_ALLSET);
-#endif
-
   /* Destroy the task at the head of the ready to run list. */
 
   nxtask_exit();
