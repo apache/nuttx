@@ -1375,8 +1375,7 @@ Configuration Sub-directories
        build uClibc with the following additions to the configuration file
        (from Leo aloe3132):
 
-       CONFIG_C99_BOOL8=y
-       CONFIG_HAVE_CXXINITIALIZE=y
+              CONFIG_HAVE_CXXINITIALIZE=y
 
        CONFIG_UCLIBCXX=y
        CONFIG_CXX_EXCEPTION=y
