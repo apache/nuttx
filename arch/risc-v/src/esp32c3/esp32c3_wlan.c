@@ -142,7 +142,7 @@ struct wlan_ops_s
 
 struct wlan_priv_s
 {
-  bool   ref;                   /* Reference count */
+  int    ref;                   /* Reference count */
 
   bool   ifup;                  /* true:ifup false:ifdown */
 
