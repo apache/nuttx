@@ -9,3 +9,4 @@
 -launchxl-tms57004:nsh
 -lm3s6965-ek:qemu-nxflat
 -tms570ls31x-usb-kit:nsh
+-tlsr8278adk80d:nsh
