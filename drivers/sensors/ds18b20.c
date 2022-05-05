@@ -158,7 +158,7 @@ struct ds18b20_dev_s
 /* Sensor functions */
 
 static int ds18b20_active(FAR struct sensor_lowerhalf_s *lower,
-                          unsigned char enabled);
+                          bool enabled);
 
 static int ds18b20_fetch(FAR struct sensor_lowerhalf_s *lower,
                          FAR char *buffer, size_t buflen);
@@ -740,7 +740,7 @@ static int ds18b20_control(FAR struct sensor_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int ds18b20_active(FAR struct sensor_lowerhalf_s *lower,
-                         unsigned char enabled)
+                          bool enabled)
 {
 #ifdef CONFIG_SENSORS_DS18B20_POLL
   bool start_thread = false;
