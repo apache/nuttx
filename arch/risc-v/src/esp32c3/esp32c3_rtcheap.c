@@ -54,7 +54,8 @@ void esp32c3_rtcheap_initialize(void)
   size_t size;
 
   /* These values come from the linker scripts (esp32c3.ld and
-   * esp32c3.template.ld.)  Check boards/risc-v/esp32c3.
+   * flat.template.ld).
+   * Check boards/risc-v/esp32c3.
    */
 
   extern uint8_t *_srtcheap;

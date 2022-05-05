@@ -116,7 +116,7 @@ endif
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 SCRIPTIN = $(SCRIPTDIR)$(DELIM)protected.template.ld
 else
-SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32c3.template.ld
+SCRIPTIN = $(SCRIPTDIR)$(DELIM)flat.template.ld
 endif
 SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32c3_out.ld
 

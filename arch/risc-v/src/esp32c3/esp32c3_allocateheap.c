@@ -87,7 +87,7 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
 
 #else
   /* These values come from the linker scripts (esp32c3.ld and
-   * esp32c3.template.ld).
+   * flat.template.ld).
    * Check boards/risc-v/esp32c3.
    */
 
