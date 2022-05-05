@@ -4201,6 +4201,11 @@ static void nt38350_pm_notify(FAR struct pm_callback_s *cb,
 
           if (dev->nvt_pwr_resume.icpower_state == NVT_POWER_OFF)
             {
+              /* if power off, reset i2c to make sure it can work normal */
+
+#ifdef CONFIG_I2C_RESET
+              I2C_RESET(dev->config->i2c);
+#endif
               nt38350_hardware_reinit(dev);
             }
 
