@@ -77,7 +77,7 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
 
   /* Take the memory manager semaphore */
 
-  DEBUGVERIFY(mm_takesemaphore(heap));
+  mm_takesemaphore(heap);
 
   /* Get the terminal node in the old heap.  The block to extend must
    * immediately follow this node.

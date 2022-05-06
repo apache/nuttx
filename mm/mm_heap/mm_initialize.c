@@ -91,7 +91,7 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 
   kasan_register(heapstart, &heapsize);
 
-  DEBUGVERIFY(mm_takesemaphore(heap));
+  mm_takesemaphore(heap);
 
   /* Adjust the provided heap start and size so that they are both aligned
    * with the MM_MIN_CHUNK size.

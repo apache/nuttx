@@ -108,7 +108,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
   /* We need to hold the MM semaphore while we muck with the nodelist. */
 
-  DEBUGVERIFY(mm_takesemaphore(heap));
+  mm_takesemaphore(heap);
   DEBUGASSERT(oldnode->preceding & MM_ALLOC_BIT);
   DEBUGASSERT(mm_heapmember(heap, oldmem));
 
