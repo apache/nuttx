@@ -144,6 +144,9 @@ static int cs35l41b_power(FAR struct cs35l41b_dev_s *priv,
 static int cs35l41b_mute(FAR struct cs35l41b_dev_s *priv,
                          bool state);
 
+static int cs35l41b_dre(FAR struct cs35l41b_dev_s *priv,
+                         bool state);
+
 static int cs35l41b_set_fadein(FAR struct cs35l41b_dev_s *priv);
 
 static int cs35l41b_set_mixer(FAR struct cs35l41b_dev_s *priv, int mode);
@@ -2554,6 +2557,47 @@ static int cs35l41b_mute(FAR struct cs35l41b_dev_s *priv,
 }
 
 /****************************************************************************
+ * Name: cs35l41b_dre
+ *
+ * Description:
+ *   cs35l41b dre (dis)enable
+ *
+ ****************************************************************************/
+
+static int cs35l41b_dre(FAR struct cs35l41b_dev_s *priv,
+                         bool state)
+{
+  uint32_t regval;
+  int ret = OK;
+
+  ret = cs35l41b_read_register(priv, &regval, CS35L41B_BLOCK_ENABLES2);
+  if (ret < 0)
+    {
+      auderr("cs35l41b read CS35L41B_BLOCK_ENABLES2  error\n");
+      return ERROR;
+    }
+
+  if (state)
+    {
+      regval |= CS35L41B_BLOCK_ENABLES2_AMP_DRE_EN;
+    }
+  else
+    {
+      regval &= ~CS35L41B_BLOCK_ENABLES2_AMP_DRE_EN;
+    }
+
+  if (cs35l41b_write_register(priv,
+                              CS35L41B_BLOCK_ENABLES2,
+                              regval) == ERROR)
+    {
+      auderr("write CS35L41B_BLOCK_ENABLES2 error\n");
+      return ERROR;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: cs35l41b_set_mixer
  *
  * Description:
@@ -2724,6 +2768,11 @@ static int cs35l41b_output_configuration(FAR struct cs35l41b_dev_s *priv)
         {
           return ERROR;
         }
+    }
+
+  if (cs35l41b_dre(priv, true) == ERROR)
+    {
+      return ERROR;
     }
 
   return OK;

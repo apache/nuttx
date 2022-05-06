@@ -940,6 +940,16 @@
 #define PWRMGT_PWRMGT_STS                                 (0x2908)
 #define PWRMGT_PWRMGT_STS_WR_PENDSTS_BITMASK              (0x00000002)
 
+/* block enables2 register */
+
+#define CS35L41B_BLOCK_ENABLES2                           (0x0000201c)
+#define CS35L41B_BLOCK_ENABLES2_CLASSH_EN                 (1 << 4)
+#define CS35L41B_BLOCK_ENABLES2_SYNC_EN                   (1 << 8)
+#define CS35L41B_BLOCK_ENABLES2_VPBR_EN                   (1 << 12)
+#define CS35L41B_BLOCK_ENABLES2_VBBR_EN                   (1 << 13)
+#define CS35L41B_BLOCK_ENABLES2_AMP_DRE_EN                (1 << 20)
+#define CS35L41B_BLOCK_ENABLES2_WKFET_AMP_EN              (1 << 24)
+
 #define CS35L41_STATE_UNCONFIGURED                        (0)
 #define CS35L41_STATE_CONFIGURED                          (1)
 #define CS35L41_STATE_STANDBY                             (2)

@@ -97,6 +97,7 @@ static struct cs35l41b_regdump_s g_cs35l41b_debug_reg[] =
   {"CAL_SET_STATUS",      0x0280027c},
   {"CPSL_HALO_STATUS",    0x028007e8},
   {"CPSL_HALO_HEARTBEAT", 0x028007ec},
+  {"block enables2",      0x0000201c},
 };
 #endif
 
@@ -142,7 +143,6 @@ void cs35l41b_dump_registers(FAR struct cs35l41b_dev_s *priv,
                 g_cs35l41b_debug_reg[i].regval);
         }
     }
-
 }
 #endif
 
