@@ -53,14 +53,6 @@ ifeq ($(CONFIG_SCHED_STARTHOOK),y)
 CSRCS += task_starthook.c
 endif
 
-ifeq ($(CONFIG_SCHED_ATEXIT),y)
-CSRCS += task_atexit.c
-endif
-
-ifeq ($(CONFIG_SCHED_ONEXIT),y)
-CSRCS += task_onexit.c
-endif
-
 # Include task build support
 
 DEPPATH += --dep-path task
