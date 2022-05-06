@@ -26,6 +26,7 @@
 
 #include <nuttx/power/pm.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/sched.h>
 
 #include "pm.h"
 
@@ -90,6 +91,9 @@ void pm_initialize(void)
       pm_set_governor(i, gov);
 
       nxsem_init(&g_pmglobals.domain[i].sem, 0, 1);
+
+      g_pmglobals.domain[i].holder = INVALID_PROCESS_ID;
+      g_pmglobals.domain[i].count  = 0;
     }
 }
 
