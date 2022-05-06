@@ -52,14 +52,14 @@ extern FAR struct task_group_s *g_grouphead;
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV
-/* This variable holds the PID of the current task group.  This ID is
- * zero if the current task is a kernel thread that has no address
- * environment (other than the kernel context).
+/* This variable holds the current task group.  This pointer is NULL
+ * if the current task is a kernel thread that has no address environment
+ * (other than the kernel context).
  *
  * This must only be accessed with interrupts disabled.
  */
 
-extern pid_t g_pid_current;
+extern FAR struct task_group_s *g_group_current[CONFIG_SMP_NCPUS];
 #endif
 
 /****************************************************************************
