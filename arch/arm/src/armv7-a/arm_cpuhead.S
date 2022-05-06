@@ -223,6 +223,10 @@ __cpu3_start:
 	 */
 
 	ldr		r1, .LCppgtable		/* r1=phys. page table */
+#ifdef CONFIG_ARCH_ADDRENV
+	mov		r2, #PGTABLE_SIZE
+	mla		r1, r2, r5, r1		/* page table of cpu1,2,3 */
+#endif
 	orr		r1, r1, #(TTBR0_RGN_WBWA | TTBR0_IRGN0)	/* Select cache properties */
 	mcr		CP15_TTBR0(r1)
 	mcr		CP15_TTBR1(r1)
