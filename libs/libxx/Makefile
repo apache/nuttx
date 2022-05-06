@@ -45,8 +45,6 @@ ifeq ($(CONFIG_LIBSUPCXX),y)
 CXXSRCS += libxx_impure.cxx
 endif
 
-CXXSRCS += libxx_cxa_atexit.cxx
-
 # Object Files
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))

@@ -44,126 +44,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxtask_atexit
- *
- * Description:
- *   Call any registered atexit function(s)
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SCHED_ATEXIT) && !defined(CONFIG_SCHED_ONEXIT)
-static inline void nxtask_atexit(FAR struct tcb_s *tcb)
-{
-  FAR struct task_group_s *group = tcb->group;
-
-  /* Make sure that we have not already left the group.  Only the final
-   * exiting thread in the task group should trigger the atexit()
-   * callbacks.
-   *
-   * REVISIT: This is a security problem In the PROTECTED and KERNEL builds:
-   * We must not call the registered function in supervisor mode!  See also
-   * on_exit() and pthread_cleanup_pop() callbacks.
-   *
-   * REVISIT:  In the case of task_delete(), the callback would execute in
-   * the context the caller of task_delete() cancel, not in the context of
-   * the exiting task (or process).
-   */
-
-  if (group && group->tg_nmembers == 1)
-    {
-      int index;
-
-      /* Call each atexit function in reverse order of registration atexit()
-       * functions are registered from lower to higher array indices; they
-       * must be called in the reverse order of registration when the task
-       * group exits, i.e., from higher to lower indices.
-       */
-
-      for (index = CONFIG_SCHED_EXIT_MAX - 1; index >= 0; index--)
-        {
-          if (group->tg_exit[index].func.at)
-            {
-              atexitfunc_t func;
-
-              /* Nullify the atexit function to prevent its reuse. */
-
-              func = group->tg_exit[index].func.at;
-              group->tg_exit[index].func.at = NULL;
-
-              /* Call the atexit function */
-
-              (*func)();
-            }
-        }
-    }
-}
-#else
-#  define nxtask_atexit(tcb)
-#endif
-
-/****************************************************************************
- * Name: nxtask_onexit
- *
- * Description:
- *   Call any registered on_exit function(s)
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SCHED_ONEXIT
-static inline void nxtask_onexit(FAR struct tcb_s *tcb, int status)
-{
-  FAR struct task_group_s *group = tcb->group;
-
-  /* Make sure that we have not already left the group.  Only the final
-   * exiting thread in the task group should trigger the atexit()
-   * callbacks.
-   *
-   * REVISIT: This is a security problem In the PROTECTED and KERNEL builds:
-   * We must not call the registered function in supervisor mode!  See also
-   * atexit() and pthread_cleanup_pop() callbacks.
-   *
-   * REVISIT:  In the case of task_delete(), the callback would execute in
-   * he context the caller of task_delete() cancel, not in the context of
-   * the exiting task (or process).
-   */
-
-  if (group && group->tg_nmembers == 1)
-    {
-      int index;
-
-      /* Call each on_exit function in reverse order of registration.
-       * on_exit() functions are registered from lower to higher array
-       * indices; they must be called in the reverse order of registration
-       * when the task group exits, i.e., from higher to lower indices.
-       */
-
-      for (index = CONFIG_SCHED_EXIT_MAX - 1; index >= 0; index--)
-        {
-          if (group->tg_exit[index].func.on)
-            {
-              onexitfunc_t func;
-              FAR void    *arg;
-
-              /* Nullify the on_exit function to prevent its reuse. */
-
-              func = group->tg_exit[index].func.on;
-              arg  = group->tg_exit[index].arg;
-
-              group->tg_exit[index].func.on = NULL;
-              group->tg_exit[index].arg     = NULL;
-
-              /* Call the on_exit function */
-
-              (*func)(status, arg);
-            }
-        }
-    }
-}
-#else
-#  define nxtask_onexit(tcb,status)
-#endif
-
-/****************************************************************************
  * Name: nxtask_exitstatus
  *
  * Description:
@@ -579,31 +459,8 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
   tcb->cpcount = 0;
 #endif
 
-  /* If exit function(s) were registered, call them now before we do any un-
-   * initialization.
-   *
-   * NOTES:
-   *
-   * 1. In the case of task_delete(), the exit function will *not* be called
-   *    on the thread execution of the task being deleted!  That is probably
-   *    a bug.
-   * 2. We cannot call the exit functions if nonblocking is requested:  These
-   *    functions might block.
-   * 3. This function will only be called with non-blocking == true
-   *    only when called through _exit(). _exit() behaviors requires that
-   *    the exit functions *not* be called.
-   */
-
   if (!nonblocking)
     {
-#if defined(CONFIG_SCHED_ATEXIT) || defined(CONFIG_SCHED_ONEXIT)
-      nxtask_atexit(tcb);
-
-      /* Call any registered on_exit function(s) */
-
-      nxtask_onexit(tcb, status);
-#endif
-
       /* If this is the last thread in the group, then flush all streams
        * (File descriptors will be closed when the TCB is deallocated).
        *
