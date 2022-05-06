@@ -78,6 +78,8 @@ struct pm_domain_s
    */
 
   sem_t sem;
+  pid_t holder;
+  unsigned int count;
 };
 
 /* This structure encapsulates all of the global data used by the PM system */
