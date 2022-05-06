@@ -42,13 +42,16 @@
  * Description:
  *   Lock the power management operation.
  *
+ * Input Parameters:
+ *   domain - The PM domain to lock
+ *
  ****************************************************************************/
 
-irqstate_t pm_lock(void)
+irqstate_t pm_lock(int domain)
 {
   if (!up_interrupt_context() && !sched_idletask())
     {
-      nxsem_wait_uninterruptible(&g_pmglobals.regsem);
+      nxsem_wait_uninterruptible(&g_pmglobals.domain[domain].sem);
     }
 
   return enter_critical_section();
@@ -60,15 +63,18 @@ irqstate_t pm_lock(void)
  * Description:
  *   Unlock the power management operation.
  *
+ * Input Parameters:
+ *   domain - The PM domain to unlock
+ *
  ****************************************************************************/
 
-void pm_unlock(irqstate_t flags)
+void pm_unlock(int domain, irqstate_t flags)
 {
   leave_critical_section(flags);
 
   if (!up_interrupt_context() && !sched_idletask())
     {
-      nxsem_post(&g_pmglobals.regsem);
+      nxsem_post(&g_pmglobals.domain[domain].sem);
     }
 }
 

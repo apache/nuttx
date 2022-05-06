@@ -213,7 +213,7 @@ int pm_changestate(int domain, enum pm_state_e newstate)
    * re-enabled.
    */
 
-  flags = pm_lock();
+  flags = pm_lock(domain);
 
   /* First, prepare the drivers for the state change.  In this phase,
    * drivers may refuse the state state change.
@@ -249,7 +249,7 @@ int pm_changestate(int domain, enum pm_state_e newstate)
 
   /* Restore the interrupt state */
 
-  pm_unlock(flags);
+  pm_unlock(domain, flags);
   return ret;
 }
 
