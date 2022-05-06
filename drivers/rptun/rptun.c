@@ -350,7 +350,7 @@ static void rptun_worker(FAR void *arg)
 
   priv->cmd = RPTUNIOC_NONE;
 
-  if (rptun_available_rx(priv))
+  while (rptun_available_rx(priv))
     {
       remoteproc_get_notification(&priv->rproc, RPTUN_NOTIFY_ALL);
     }
