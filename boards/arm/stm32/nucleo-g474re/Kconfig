@@ -1,0 +1,21 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_NUCLEO_G474RE
+
+#config SOME_CONFIG_INT
+#	int "Description"
+#	default 1
+#	depends on FEATURE_X
+#
+#config SOME_CONFIG_BOOL
+#	bool "Description"
+#	default n if !FEATURE_X
+#	default y if FEATURE_X
+#	depends on FEATURE_Y
+#	---help---
+#		Help text goes here.
+
+endif # ARCH_BOARD_NUCLEO_G474RE
