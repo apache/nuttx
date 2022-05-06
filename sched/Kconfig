@@ -1311,45 +1311,6 @@ config SCHED_STARTHOOK
 		starthook is useful, for example, for setting up automatic
 		configuration of C++ constructors.
 
-config SCHED_ATEXIT
-	bool "Enable atexit() API"
-	default n
-	---help---
-		Enables the atexit() API
-
-config SCHED_ATEXIT_MAX
-	int "Max number of atexit() functions"
-	default 1
-	depends on SCHED_ATEXIT && !SCHED_ONEXIT
-	---help---
-		By default if SCHED_ATEXIT is selected, only a single atexit() function
-		is supported. That number can be increased by defined this setting to
-		the number that you require.
-
-		If both SCHED_ONEXIT and SCHED_ATEXIT are selected, then atexit() is built
-		on top of the on_exit() implementation.  In that case, SCHED_ONEXIT_MAX
-		determines the size of the combined number of atexit(0) and on_exit calls
-		and SCHED_ATEXIT_MAX is not used.
-
-config SCHED_ONEXIT
-	bool "Enable on_exit() API"
-	default n
-	---help---
-		Enables the on_exit() API
-
-config SCHED_ONEXIT_MAX
-	int "Max number of on_exit() functions"
-	default 1
-	depends on SCHED_ONEXIT
-	---help---
-		By default if SCHED_ONEXIT is selected, only a single on_exit() function
-		is supported. That number can be increased by defined this setting to the
-		number that you require.
-
-		If both SCHED_ONEXIT and SCHED_ATEXIT are selected, then atexit() is built
-		on top of the on_exit() implementation.  In that case, SCHED_ONEXIT_MAX
-		determines the size of the combined number of atexit(0) and on_exit calls.
-
 endmenu # RTOS hooks
 
 menu "Signal Configuration"
