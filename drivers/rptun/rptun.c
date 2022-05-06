@@ -235,6 +235,11 @@ static inline void rptun_update_rx(FAR struct rptun_priv_s *priv)
   FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
   FAR struct virtqueue *rvq = rvdev->rvq;
 
+  if (!rvdev->vdev || !rvq)
+    {
+      return;
+    }
+
   if (rpmsg_virtio_get_role(rvdev) == RPMSG_MASTER)
     {
       priv->headrx = rvq->vq_ring.used->idx;
@@ -249,6 +254,11 @@ static inline bool rptun_available_rx(FAR struct rptun_priv_s *priv)
 {
   FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
   FAR struct virtqueue *rvq = rvdev->rvq;
+
+  if (!rvdev->vdev || !rvq)
+    {
+      return false;
+    }
 
   if (rpmsg_virtio_get_role(rvdev) == RPMSG_MASTER)
     {
