@@ -34,9 +34,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <sys/types.h>
 
 #ifndef __ASSEMBLY__
-#  include <sys/types.h>
 #  include <stdint.h>
 #  include "chip.h"
 #endif /* __ASSEMBLY__ */
@@ -91,13 +91,8 @@
 #define TTBR0_IRGN0          (1 << 6)               /* Bit 6:  Inner cacheability IRGN[0] (MP extensions) */
                                                     /* Bits 7-n: Reserved, n=7-13 */
 
-#define _TTBR0_LOWER(n)      (0xffffffff << (n))
-
-/*                                                     Bits (n+1)-31:
- *                                                   Translation table base 0
- */
-
-#define TTBR0_BASE_MASK(n)   (~_TTBR0_LOWER(n))
+#define TTBR0_BASE_SHIFT(n)  (14 - (n)) /* Bits (14-n)-31: Translation table base 0 */
+#define TTBR0_BASE_MASK(n)   (0xffffffff << TTBR0_BASE_SHIFT(n))
 
 /* Translation Table Base Register 1 (TTBR1) */
 
@@ -642,6 +637,7 @@
  */
 
 #define PGTABLE_SIZE       0x00004000
+#define ALL_PGTABLE_SIZE   (PGTABLE_SIZE * CONFIG_SMP_NCPUS)
 
 /* Virtual Page Table Location **********************************************/
 
@@ -1341,6 +1337,41 @@ static inline void cp15_wrttb(unsigned int ttb)
 }
 
 /****************************************************************************
+ * Name: mmu_l1_pgtable
+ *
+ * Description:
+ *   Return the value of the L1 page table base address.
+ *   The TTBR0 register contains the phys address for each cpu.
+ *
+ * Input Parameters:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_ARCH_ROMPGTABLE
+static inline uint32_t *mmu_l1_pgtable(void)
+{
+#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_ADDRENV)
+  uint32_t ttbr0;
+  uint32_t pgtable;
+
+  __asm__ __volatile__
+    (
+      "\tmrc p15, 0, %0, c2, c0, 0\n"
+      : "=r" (ttbr0)
+      :
+      :
+    );
+
+  pgtable = ttbr0 & TTBR0_BASE_MASK(0);
+  return (uint32_t *)(pgtable - PGTABLE_BASE_PADDR + PGTABLE_BASE_VADDR);
+#else
+  return (uint32_t *)PGTABLE_BASE_VADDR;
+#endif
+}
+#endif
+
+/****************************************************************************
  * Name: mmu_l1_getentry
  *
  * Description:
@@ -1355,7 +1386,7 @@ static inline void cp15_wrttb(unsigned int ttb)
 #ifndef CONFIG_ARCH_ROMPGTABLE
 static inline uint32_t mmu_l1_getentry(uint32_t vaddr)
 {
-  uint32_t *l1table = (uint32_t *)PGTABLE_BASE_VADDR;
+  uint32_t *l1table = mmu_l1_pgtable();
   uint32_t  index   = vaddr >> 20;
 
   /* Return the address of the page table entry */
