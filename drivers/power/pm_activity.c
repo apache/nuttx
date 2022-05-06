@@ -111,11 +111,11 @@ void pm_stay(int domain, enum pm_state_e state)
   DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
   pdom = &g_pmglobals.domain[domain];
 
-  flags = pm_lock();
+  flags = pm_lock(domain);
   DEBUGASSERT(state < PM_COUNT);
   DEBUGASSERT(pdom->stay[state] < UINT16_MAX);
   pdom->stay[state]++;
-  pm_unlock(flags);
+  pm_unlock(domain, flags);
 
   pm_auto_updatestate(domain);
 }
@@ -151,11 +151,11 @@ void pm_relax(int domain, enum pm_state_e state)
   DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
   pdom = &g_pmglobals.domain[domain];
 
-  flags = pm_lock();
+  flags = pm_lock(domain);
   DEBUGASSERT(state < PM_COUNT);
   DEBUGASSERT(pdom->stay[state] > 0);
   pdom->stay[state]--;
-  pm_unlock(flags);
+  pm_unlock(domain, flags);
 
   pm_auto_updatestate(domain);
 }
