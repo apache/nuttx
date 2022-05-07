@@ -38,11 +38,6 @@
 #include <nuttx/wqueue.h>
 #include <sys/types.h>
 
-#ifdef CONFIG_PM
-#include <nuttx/power/pm.h>
-#include <arch/board/pm_domain.h>
-#endif
-
 #include "gh3020_bridge.h"
 #include "gh3020_def.h"
 #include "gh3x2x_drv.h"
@@ -151,10 +146,6 @@ struct gh3020_dev_s
   uint32_t channelmode;                  /* PPG channels status mode */
   float tia_calibr;                      /* TIA calibration coefficent */
   float led_calibr;                      /* LED calibration coefficent */
-#ifdef CONFIG_PM
-  enum pm_state_e device_pmstate;        /* Current PM state */
-  bool lock;                             /* If it's locked for PM state */
-#endif
   uint16_t efuse;                        /* EFUSE for TIA and LED driver */
   uint16_t fifowtm;                      /* FIFO water marker */
   uint8_t ppgdatacnt[GH3020_SENSOR_NUM]; /* Data number of each PPG channel */
@@ -198,15 +189,6 @@ static void gh3020_update_sensor(FAR struct gh3020_dev_s *priv);
 
 #ifdef CONFIG_FACTEST_SENSORS_GH3020
 static void gh3x2x_factest_start(uint32_t channelmode, uint32_t current);
-#endif
-
-/* Operations for PM */
-
-#ifdef CONFIG_PM
-static void gh3020_pm_notify(FAR struct pm_callback_s *cb, int domain,
-                             enum pm_state_e pmstate);
-static int gh3020_pm_prepare(FAR struct pm_callback_s *cb, int domain,
-                             enum pm_state_e pmstate);
 #endif
 
 /* Sensor ops functions */
@@ -257,14 +239,6 @@ static const uint16_t gh3020_gain_list[] =
   {
     10, 25, 50, 75, 100, 250, 500, 750, 1000, 1250, 1500, 1750, 2000
   };
-
-#ifdef CONFIG_PM
-static struct pm_callback_s g_gh3020_pmcb =
-{
-  .notify = gh3020_pm_notify,
-  .prepare = gh3020_pm_prepare,
-};
-#endif
 
 /* Sensor operations */
 
@@ -1204,76 +1178,6 @@ static void gh3x2x_factest_start(uint32_t channelmode, uint32_t current)
 }
 #endif  /* CONFIG_FACTEST_SENSORS_GH3020 */
 
-#ifdef CONFIG_PM
-
-/****************************************************************************
- * Name: gh3020_pm_notify
- *
- * Description:
- *   Notify the driver of new power state.
- *
- * Input Parameters:
- *   cb      - Returned to the driver.  The driver version of the callback
- *             structure may include additional, driver-specific state
- *             data at the end of the structure.
- *   domain  - Identifies the activity domain of the state change
- *   pmstate - Identifies the new PM state
- *
- * Returned Value:
- *   None.
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-
-static void gh3020_pm_notify(FAR struct pm_callback_s *cb, int domain,
-                             enum pm_state_e pmstate)
-{
-  if (domain != PM_DOMAIN_CPU)
-    {
-      return;
-    }
-
-  g_priv->device_pmstate = pmstate;
-}
-
-/****************************************************************************
- * Name: gh3020_pm_prepare
- *
- * Description:
- *   Request the driver to prepare for a new power state. If the driver is
- *   using SPI, it will not be prepared.
- *
- * Input Parameters:
- *   cb      - Returned to the driver.  The driver version of the callback
- *             structure may include additional, driver-specific state
- *             data at the end of the structure.
- *   domain  - Identifies the activity domain of the state change
- *   pmstate - Identifies the new PM state
- *
- * Returned Value:
- *   0 (OK) if the driver is prepared for the PM state change. Non-zero means
- *   that the driver is not prepared to perform the state change.
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-
-static int gh3020_pm_prepare(FAR struct pm_callback_s *cb, int domain,
-                              enum pm_state_e pmstate)
-{
-  if (domain == PM_DOMAIN_CPU && pmstate > g_priv->device_pmstate
-      && g_priv->lock)
-    {
-      return -EINVAL;
-    }
-
-  return OK;
-}
-#endif  /* CONFIG_PM */
-
 /****************************************************************************
  * Name: gh3020_activate
  *
@@ -1820,12 +1724,6 @@ static void gh3020_worker_intrpt(FAR void *arg)
 
   DEBUGASSERT(priv != NULL);
 
-  /* FIFO process and data pushing can't be shut down */
-
-#ifdef CONFIG_PM
-  priv->lock = true;
-#endif
-
   /* Enable entering next interrupt. */
 
   IOEXP_SETOPTION(priv->config->ioedev, priv->config->intpin,
@@ -1849,10 +1747,6 @@ static void gh3020_worker_intrpt(FAR void *arg)
   gh3020_fifo_process();
   gh3020_update_sensor(priv);
   gh3020_push_data(priv);
-
-#ifdef CONFIG_PM
-  priv->lock = false;
-#endif
 }
 
 /****************************************************************************
@@ -1880,12 +1774,6 @@ static void gh3020_worker_poll(FAR void *arg)
 
   DEBUGASSERT(priv != NULL);
 
-  /* FIFO process and data pushing can't be shut down */
-
-#ifdef CONFIG_PM
-  priv->lock = true;
-#endif
-
   /* Get timestamp and arrange next worker immediately once enter polling. */
 
   priv->timestamp = sensor_get_timestamp();
@@ -1906,10 +1794,6 @@ static void gh3020_worker_poll(FAR void *arg)
   gh3020_fifo_process();
   gh3020_update_sensor(priv);
   gh3020_push_data(priv);
-
-#ifdef CONFIG_PM
-  priv->lock = false;
-#endif
 }
 
 /****************************************************************************
@@ -1982,10 +1866,6 @@ uint16_t GH3X2X_ReadReg(uint16_t regaddr)
 
 void gh3020_spi_sendcmd(uint8_t cmd)
 {
-#ifdef CONFIG_PM
-  g_priv->lock = true;
-#endif
-
   /* Lock the SPI bus thus only one device can access it at the same time. */
 
   SPI_LOCK(g_priv->config->spi, true);
@@ -2004,10 +1884,6 @@ void gh3020_spi_sendcmd(uint8_t cmd)
   /* Release the SPI bus. */
 
   SPI_LOCK(g_priv->config->spi, false);
-
-#ifdef CONFIG_PM
-  g_priv->lock = false;
-#endif
 }
 
 /****************************************************************************
@@ -2042,10 +1918,6 @@ void gh3020_spi_writereg(uint16_t regaddr, uint16_t regval)
   buf[5] = (uint8_t)((regval >> 8) & 0xff);
   buf[6] = (uint8_t)(regval & 0xff);
 
-#ifdef CONFIG_PM
-  g_priv->lock = true;
-#endif
-
   /* Lock the SPI bus thus only one device can access it at the same time. */
 
   SPI_LOCK(g_priv->config->spi, true);
@@ -2064,10 +1936,6 @@ void gh3020_spi_writereg(uint16_t regaddr, uint16_t regval)
   /* Release the SPI bus. */
 
   SPI_LOCK(g_priv->config->spi, false);
-
-#ifdef CONFIG_PM
-  g_priv->lock = false;
-#endif
 }
 
 /****************************************************************************
@@ -2095,10 +1963,6 @@ uint16_t gh3020_spi_readreg(uint16_t regaddr)
   buf[1] = (uint8_t)((regaddr >> 8) & 0xff);
   buf[2] = (uint8_t)(regaddr & 0xff);
 
-#ifdef CONFIG_PM
-  g_priv->lock = true;
-#endif
-
   /* Lock the SPI bus thus only one device can access it at the same time. */
 
   SPI_LOCK(g_priv->config->spi, true);
@@ -2124,10 +1988,6 @@ uint16_t gh3020_spi_readreg(uint16_t regaddr)
   /* Release the SPI bus. */
 
   SPI_LOCK(g_priv->config->spi, false);
-
-#ifdef CONFIG_PM
-  g_priv->lock = false;
-#endif
 
   return (uint16_t)((((uint16_t)buf[1] << 8) & 0xff00) |
                     ((uint16_t)buf[2] & 0xff));
@@ -2158,10 +2018,6 @@ void gh3020_spi_readfifo(FAR uint8_t *pbuf, uint16_t len)
   localbuf[0] = GH3020_SPI_CMD_WRITE;
   localbuf[1] = (uint8_t)((GH3020_REG_FIFO >> 8) & 0xff);
   localbuf[2] = (uint8_t)(GH3020_REG_FIFO & 0xff);
-
-#ifdef CONFIG_PM
-  g_priv->lock = true;
-#endif
 
   /* Lock the SPI bus thus only one device can access it at the same time. */
 
@@ -2223,10 +2079,6 @@ void gh3020_spi_readfifo(FAR uint8_t *pbuf, uint16_t len)
   /* Release the SPI bus. */
 
   SPI_LOCK(g_priv->config->spi, false);
-
-#ifdef CONFIG_PM
-  g_priv->lock = false;
-#endif
 }
 
 /****************************************************************************
@@ -2679,17 +2531,6 @@ int gh3020_register(int devno, FAR const struct gh3020_config_s *config)
           goto err_iodetach;
         }
     }
-
-  /* Register PM callback */
-
-#ifdef CONFIG_PM
-  ret = pm_register(&g_gh3020_pmcb);
-  if (ret < 0)
-    {
-      snerr("Failed to register PM callback for gh3020: %d.\n", ret);
-      goto err_iodetach;
-    }
-#endif
 
   return ret;
 
