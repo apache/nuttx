@@ -85,12 +85,13 @@
 #define CW2218_PROFILE_NOT_READY        2         /* cw2218 battery profile not ready flag */
 #define CW2218_PROFILE_NEED_UPDATE      3         /* cw2218 battery profile need update flag */
 
-#define GPIO_SOC_IRQ_VALUE              0x0       /* cw2218 soc irq value */
+#define GPIO_SOC_IRQ_VALUE              0x7F      /* cw2218 soc irq value */
+#define TEMP_MAX_INT_VALUE              0xC8      /* cw2218 high temp interrupt value */
+#define TEMP_MIN_INT_VALUE              0x28      /* cw2218 low temp interrupt value */
 
 #define CW2218_SLEEP_COUNTS_SOC         70        /* cw2218 sleep count soc value */
 #define CW2218_SLEEP_COUNTS             60        /* cw2218 sleep count value */
 
-#define CW2218_WORK_POLL_TIME           5000000   /* work time 5s */
 #define CW2218_BATTERY_INIT_5S          5000000   /* delay time */
 
 #endif /* __DRIVERS_POWER_CW2218_H */

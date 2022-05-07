@@ -33,8 +33,10 @@
 #include <nuttx/kthread.h>
 #include <errno.h>
 #include <debug.h>
+#include <assert.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/i2c/i2c_master.h>
+#include <nuttx/ioexpander/ioexpander.h>
 #include <nuttx/power/battery_gauge.h>
 #include <nuttx/power/battery_ioctl.h>
 #include <nuttx/signal.h>
@@ -71,10 +73,11 @@ struct cw2218_dev_s
   /* Data fields specific to the lower half cw2218 driver follow */
 
   FAR struct i2c_master_s *i2c;                      /* I2C interface */
+  FAR struct ioexpander_dev_s *ioe;                  /* Ioexpander device. */
   uint8_t addr;                                      /* I2C address */
   uint32_t frequency;                                /* I2C frequency */
+  int pin;                                           /* Interrupt pin */
   struct work_s work;                                /* Work queue for reading data. */
-  struct work_s init_work;                           /* Work queue for init work */
   int last_cap;                                      /* battery cap change */
   int last_batt_temp;                                /* battery temp change */
 };
@@ -122,6 +125,8 @@ static int cw2218_chipid(struct battery_gauge_dev_s *dev,
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static void cw2218_interrupt_worker(FAR void *arg);
 
 static const struct battery_gauge_operations_s g_cw2218ops =
 {
@@ -692,7 +697,6 @@ static int cw2218_get_state(FAR struct cw2218_dev_s *priv)
 static int cw2218_config_start_ic(FAR struct cw2218_dev_s *priv)
 {
   ub8_t soc_h;
-  unsigned char reg_val;
   int count = 0;
   int i;
   int ret = 0;
@@ -712,26 +716,6 @@ static int cw2218_config_start_ic(FAR struct cw2218_dev_s *priv)
   if (ret < 0)
     {
       baterr("ERROR: CW2218 write profile error, Error = %d\n", ret);
-      return ret;
-    }
-
-  /* set UPDATE_FLAG AND SOC INTTERRUP VALUE */
-
-  reg_val = CONFIG_UPDATE_FLG | GPIO_SOC_IRQ_VALUE;
-  ret = cw2218_putreg8(priv, CW2218_COMMAND_SOC_ALERT, reg_val);
-  if (ret < 0)
-    {
-      baterr("ERROR: CW2218 update value error, Error = %d\n", ret);
-      return ret;
-    }
-
-  /* close all interruptes */
-
-  reg_val = 0;
-  ret = cw2218_putreg8(priv, CW2218_COMMAND_INT_CONFIG, reg_val);
-  if (ret < 0)
-    {
-      baterr("ERROR: CW2218 close interruptes error, Error = %d\n", ret);
       return ret;
     }
 
@@ -809,6 +793,48 @@ static int cw2218_config_start_ic(FAR struct cw2218_dev_s *priv)
   return ret;
 }
 
+static int cw2218_config_interrupt(FAR struct cw2218_dev_s *priv)
+{
+  unsigned char reg_val;
+  int ret;
+
+  /* enable all interruptes */
+
+  reg_val = 0x70;
+  ret = cw2218_putreg8(priv, CW2218_COMMAND_INT_CONFIG, reg_val);
+  if (ret < 0)
+    {
+      baterr("ERROR: CW2218 enable interruptes error, Error = %d\n", ret);
+      return ret;
+    }
+
+  reg_val = CONFIG_UPDATE_FLG | GPIO_SOC_IRQ_VALUE;
+  ret = cw2218_putreg8(priv, CW2218_COMMAND_SOC_ALERT, reg_val);
+  if (ret < 0)
+    {
+      baterr("ERROR: CW2218 update value error, Error = %d\n", ret);
+      return ret;
+    }
+
+  reg_val = TEMP_MAX_INT_VALUE;
+  ret = cw2218_putreg8(priv, CW2218_COMMAND_TEMP_MAX, reg_val);
+  if (ret < 0)
+    {
+      baterr("ERROR: CW2218 setting max temp interrupt ret = %d\n", ret);
+      return ret;
+    }
+
+  reg_val = TEMP_MIN_INT_VALUE;
+  ret = cw2218_putreg8(priv, CW2218_COMMAND_TEMP_MIN, reg_val);
+  if (ret < 0)
+    {
+      baterr("ERROR: CW2218 setting min temp interrupt ret = %d\n", ret);
+      return ret;
+    }
+
+  return ret;
+}
+
 /****************************************************************************
  * Name: cw2218_worker
  *
@@ -874,9 +900,6 @@ static void cw2218_worker(FAR void *arg)
       battery_gauge_changed(&priv->dev, BATTERY_CURRENT_CHANGED);
     }
 #endif
-
-  work_queue(HPWORK, &priv->work, cw2218_worker, priv,
-             CW2218_WORK_POLL_TIME / USEC_PER_TICK);
 }
 
 /****************************************************************************
@@ -919,6 +942,13 @@ static int cw2218_init(FAR struct cw2218_dev_s *priv)
   if (ret < 0)
     {
       baterr("ERROR: CW2218 get state error! Error = %d\n", ret);
+      return ret;
+    }
+
+  ret = cw2218_config_interrupt(priv);
+  if (ret < 0)
+    {
+      baterr("ERROR: CW2218 get config interrupt! Error = %d\n", ret);
       return ret;
     }
 
@@ -1118,6 +1148,108 @@ static int cw2218_online(struct battery_gauge_dev_s *dev, bool *status)
 }
 
 /****************************************************************************
+ * Name: cw2218_interrupt_handler
+ *
+ * Description:
+ *   Handle the charger interrupt.
+ *
+ * Input Parameters:
+ *   dev     - ioexpander device.
+ *   pinset  - Interrupt pin.
+ *   arg     - Device struct.
+ *
+ * Returned Value:
+ *   Return 0 if the driver was success; A negated errno
+ *   value is returned on any failure.
+ *
+ * Assumptions/Limitations:
+ *   none.
+ *
+ ****************************************************************************/
+
+static int cw2218_interrupt_handler(FAR struct ioexpander_dev_s *dev,
+                                    ioe_pinset_t pinset, FAR void *arg)
+{
+  FAR struct cw2218_dev_s *priv = arg;
+
+  DEBUGASSERT(priv != NULL);
+
+  work_queue(LPWORK, &priv->work, cw2218_interrupt_worker, priv, 0);
+
+  IOEXP_SETOPTION(priv->ioe, priv->pin,
+                  IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cw2218_interrupt_worker
+ *
+ * Description:
+ *   Polling the battery gauge data, when interrupt occur
+ *
+ * Input Parameters
+ *   priv    - Device struct
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void cw2218_interrupt_worker(FAR void *arg)
+{
+  FAR struct cw2218_dev_s *priv = arg;
+  int ret;
+
+  DEBUGASSERT(priv != NULL);
+  ret = IOEXP_SETOPTION(priv->ioe, priv->pin,
+                        IOEXPANDER_OPTION_INTCFG,
+                        (FAR void *)IOEXPANDER_VAL_FALLING);
+  if (ret < 0)
+    {
+      baterr("Failed to set option: %d\n", ret);
+      IOEP_DETACH(priv->ioe, cw2218_interrupt_handler);
+    }
+
+  battery_gauge_changed(&priv->dev, BATTERY_CAPACITY_CHANGED);
+  battery_gauge_changed(&priv->dev, BATTERY_TEMPERATURE_CHANGED);
+}
+
+static int cw2218_init_interrupt(FAR struct cw2218_dev_s *priv)
+{
+  int ret;
+  int *ioephanle;
+
+  /* Interrupt pin */
+
+  ret = IOEXP_SETDIRECTION(priv->ioe, priv->pin,
+                           IOEXPANDER_DIRECTION_IN);
+  if (ret < 0)
+    {
+      baterr("Failed to set direction: %d\n", ret);
+    }
+
+  ioephanle = IOEP_ATTACH(priv->ioe, priv->pin,
+                          cw2218_interrupt_handler, priv);
+  if (!ioephanle)
+    {
+      baterr("Failed to attach cw2218_interrupt_handler\n");
+      ret = -EIO;
+    }
+
+  ret = IOEXP_SETOPTION(priv->ioe, priv->pin,
+                        IOEXPANDER_OPTION_INTCFG,
+                        (FAR void *)IOEXPANDER_VAL_FALLING);
+  if (ret < 0)
+    {
+      baterr("Failed to set option: %d\n", ret);
+      IOEP_DETACH(priv->ioe, cw2218_interrupt_handler);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: gauge_init_thread
  *
  * Description:
@@ -1184,9 +1316,11 @@ static int gauge_init_thread(int argc, char** argv)
  ****************************************************************************/
 
 FAR struct battery_gauge_dev_s *cw2218_initialize(
-                                                FAR struct i2c_master_s *i2c,
-                                                uint8_t addr,
-                                                uint32_t frequency)
+                                FAR struct i2c_master_s *i2c,
+                                FAR struct ioexpander_dev_s *dev,
+                                uint8_t addr,
+                                uint32_t frequency,
+                                int int_pin)
 {
   FAR struct cw2218_dev_s *priv;
   FAR char *argv[2];
@@ -1206,24 +1340,30 @@ FAR struct battery_gauge_dev_s *cw2218_initialize(
   priv->i2c       = i2c;
   priv->addr      = addr;
   priv->frequency = frequency;
+  priv->ioe       = dev;
+  priv->pin       = int_pin;
   priv->last_cap  = -1;
   priv->last_batt_temp  = -1;
 
-  ret = cw2218_init(priv);
+  ret = cw2218_init_interrupt(priv);
+  if (ret < 0)
     {
-      if (ret < 0)
-        {
-          snprintf(arg1, 32, "%p", priv);
-          argv[0] = arg1;
-          argv[1] = NULL;
-          ret = kthread_create("battery_init_thread",
+      baterr("Failed to init_interrupt: %d\n", ret);
+    }
+
+  ret = cw2218_init(priv);
+  if (ret < 0)
+    {
+      snprintf(arg1, 32, "%p", priv);
+      argv[0] = arg1;
+      argv[1] = NULL;
+      ret = kthread_create("battery_init_thread",
                 SCHED_PRIORITY_DEFAULT, CONFIG_DEFAULT_TASK_STACKSIZE,
                 gauge_init_thread, argv);
-          if (ret < 0)
-            {
-              baterr("ERROR: Failed to create gauge init thread\n");
-              goto err;
-            }
+      if (ret < 0)
+        {
+          baterr("ERROR: Failed to create gauge init thread\n");
+          goto err;
         }
     }
 

@@ -280,8 +280,10 @@ struct i2c_master_s; /* Forward reference */
 
 FAR struct battery_gauge_dev_s *cw2218_initialize(
                                                 FAR struct i2c_master_s *i2c,
+                                                FAR struct ioexpander_dev_s *dev,
                                                 uint8_t addr,
-                                                uint32_t frequency);
+                                                uint32_t frequency,
+                                                int int_pin);
 #endif
 
 #undef EXTERN
