@@ -1120,24 +1120,27 @@ static int get_nvt_fw_size(FAR struct nt38350_dev_s *priv)
 {
   uint32_t fw_size;
   char *fw_path = priv->fw_path;
-  FILE *fp = NULL;
+  struct file file;
+  int ret;
 
-  fp = fopen(fw_path, "rb");
-  if (fp != NULL)
+  ret = file_open(&file, fw_path, O_RDONLY | O_BINARY);
+  if (ret < 0)
     {
-      if (fseek(fp, 0, SEEK_END))
-        {
-          fclose(fp);
-          return -1;
-        }
-
-      fw_size = ftell(fp);
-      fclose(fp);
-      priv->fw_size = fw_size;
-      return 0;
+      return ret;
     }
 
-  return -1;
+  ret = file_seek(&file, 0, SEEK_END);
+  if (ret < 0)
+    {
+      goto out;
+    }
+
+  fw_size = file_seek(&file, 0, SEEK_CUR);
+  priv->fw_size = fw_size;
+  ret = 0;
+out:
+  file_close(&file);
+  return ret;
 }
 
 /***************************************************************************
@@ -1153,27 +1156,28 @@ static int get_nvt_fw_content(FAR struct nt38350_dev_s *priv,
 {
   int ret;
   char *fw_path = priv->fw_path;
-  FILE *fp = NULL;
+  struct file file;
   uint32_t fw_size = priv->fw_size;
 
-  fp = fopen(fw_path, "rb");
-  if (fp != NULL)
+  ret = file_open(&file, fw_path, O_RDONLY | O_BINARY);
+  if (ret < 0)
     {
-      fseek(fp, 0, SEEK_SET);
-
-      ret = fread(fw_data, fw_size, 1, fp);
-      if (ret == 0)
-        {
-          ierr("ERROR: Failed get firmware content\n");
-          return -1;
-        }
-      else
-        {
-          return 0;
-        }
+      return ret;
     }
 
-  return -1;
+  file_seek(&file, 0, SEEK_SET);
+  ret = file_read(&file, fw_data, fw_size);
+  if (ret != fw_size)
+    {
+      ierr("ERROR: Failed get firmware content\n");
+      ret = ret < 0 ? ret : -ENODATA;
+      goto out;
+    }
+
+  ret = 0;
+out:
+  file_close(&file);
+  return ret;
 }
 
 static int nvt_get_fw_need_write_size(FAR struct nt38350_dev_s *priv,
