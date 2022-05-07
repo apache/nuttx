@@ -465,7 +465,7 @@ rptun_get_mem(FAR struct remoteproc *rproc,
   FAR struct rptun_priv_s *priv = rproc->priv;
 
   metal_list_init(&buf->node);
-  strcpy(buf->name, name ? name : "");
+  strlcpy(buf->name, name ? name : "", RPROC_MAX_NAME_LEN);
   buf->io = metal_io_get_region();
   buf->size = size;
 
