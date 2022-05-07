@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_usbdev.c
+ * arch/arm/src/stm32/stm32_usbfs.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -17,11 +17,6 @@
  * under the License.
  *
  ****************************************************************************/
-
-/* References:
- *   - RM0008 Reference manual, STMicro document ID 13902
- *   - STM32F10xxx USB development kit, UM0424, STMicro
- */
 
 /****************************************************************************
  * Included Files
@@ -50,9 +45,9 @@
 #include "stm32.h"
 #include "stm32_syscfg.h"
 #include "stm32_gpio.h"
-#include "stm32_usbdev.h"
+#include "stm32_usbfs.h"
 
-#if defined(CONFIG_USBDEV) && defined(CONFIG_STM32_USB)
+#if defined(CONFIG_STM32_USBFS)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -68,26 +63,12 @@
 #  define CONFIG_USBDEV_SETUP_MAXDATASIZE CONFIG_USBDEV_EP0_MAXSIZE
 #endif
 
-/* USB Interrupts.  Should be re-mapped if CAN is used. */
-
-#ifdef CONFIG_STM32_STM32F30XX
-#  ifdef CONFIG_STM32_USB_ITRMP
-#    define STM32_IRQ_USBHP   STM32_IRQ_USBHP_2
-#    define STM32_IRQ_USBLP   STM32_IRQ_USBLP_2
-#    define STM32_IRQ_USBWKUP STM32_IRQ_USBWKUP_2
-#  else
-#    define STM32_IRQ_USBHP   STM32_IRQ_USBHP_1
-#    define STM32_IRQ_USBLP   STM32_IRQ_USBLP_1
-#    define STM32_IRQ_USBWKUP STM32_IRQ_USBWKUP_1
-#  endif
-#endif
-
 /* Extremely detailed register debug that you would normally never want
  * enabled.
  */
 
 #ifndef CONFIG_DEBUG_USB_INFO
-#  undef CONFIG_STM32_USBDEV_REGDEBUG
+#  undef CONFIG_STM32_USBFS_REGDEBUG
 #endif
 
 /* Initial interrupt mask: Reset + Suspend + Correct Transfer */
@@ -373,7 +354,7 @@ struct stm32_usbdev_s
 
 /* Register operations ******************************************************/
 
-#ifdef CONFIG_STM32_USBDEV_REGDEBUG
+#ifdef CONFIG_STM32_USBFS_REGDEBUG
 static uint16_t stm32_getreg(uint32_t addr);
 static void stm32_putreg(uint16_t val, uint32_t addr);
 static void stm32_checksetup(void);
@@ -512,6 +493,7 @@ static void   stm32_freeep(struct usbdev_s *dev, struct usbdev_ep_s *ep);
 static int    stm32_getframe(struct usbdev_s *dev);
 static int    stm32_wakeup(struct usbdev_s *dev);
 static int    stm32_selfpowered(struct usbdev_s *dev, bool selfpowered);
+static int    stm32_pullup(struct usbdev_s *dev, bool enable);
 
 /* Initialization/Reset *****************************************************/
 
@@ -548,7 +530,7 @@ static const struct usbdev_ops_s g_devops =
   .getframe    = stm32_getframe,
   .wakeup      = stm32_wakeup,
   .selfpowered = stm32_selfpowered,
-  .pullup      = stm32_usbpullup,
+  .pullup      = stm32_pullup,
 };
 
 /****************************************************************************
@@ -640,7 +622,7 @@ const struct trace_msg_t g_usb_trace_strings_deverror[] =
  * Name: stm32_getreg
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_USBDEV_REGDEBUG
+#ifdef CONFIG_STM32_USBFS_REGDEBUG
 static uint16_t stm32_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -699,7 +681,7 @@ static uint16_t stm32_getreg(uint32_t addr)
  * Name: stm32_putreg
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_USBDEV_REGDEBUG
+#ifdef CONFIG_STM32_USBFS_REGDEBUG
 static void stm32_putreg(uint16_t val, uint32_t addr)
 {
   /* Show the register value being written */
@@ -716,7 +698,7 @@ static void stm32_putreg(uint16_t val, uint32_t addr)
  * Name: stm32_dumpep
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_USBDEV_REGDEBUG
+#ifdef CONFIG_STM32_USBFS_REGDEBUG
 static void stm32_dumpep(int epno)
 {
   uint32_t addr;
@@ -759,18 +741,18 @@ static void stm32_dumpep(int epno)
  * Name: stm32_checksetup
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_USBDEV_REGDEBUG
+#ifdef CONFIG_STM32_USBFS_REGDEBUG
 static void stm32_checksetup(void)
 {
   uint32_t cfgr     = getreg32(STM32_RCC_CFGR);
-  uint32_t apb1rstr = getreg32(STM32_RCC_APB1RSTR);
-  uint32_t apb1enr  = getreg32(STM32_RCC_APB1ENR);
+  uint32_t apb1rstr = getreg32(STM32_RCC_APB1RSTR1);
+  uint32_t apb1enr  = getreg32(STM32_RCC_APB1ENR1);
 
   uinfo("CFGR: %08x APB1RSTR: %08x APB1ENR: %08x\n",
          cfgr, apb1rstr, apb1enr);
 
-  if ((apb1rstr & RCC_APB1RSTR_USBRST) != 0 ||
-      (apb1enr & RCC_APB1ENR_USBEN) == 0)
+  if ((apb1rstr & RCC_APB1RSTR1_USBRST) != 0 ||
+      (apb1enr & RCC_APB1ENR1_USBEN) == 0)
     {
       uerr("ERROR: USB is NOT setup correctly\n");
     }
@@ -787,7 +769,7 @@ static void stm32_checksetup(void)
 
 static inline void stm32_seteptxcount(uint8_t epno, uint16_t count)
 {
-  volatile uint32_t *epaddr = (uint32_t *)STM32_USB_COUNT_TX(epno);
+  volatile uint16_t *epaddr = (uint16_t *)STM32_USB_COUNT_TX(epno);
   *epaddr = count;
 }
 
@@ -797,7 +779,7 @@ static inline void stm32_seteptxcount(uint8_t epno, uint16_t count)
 
 static inline void stm32_seteptxaddr(uint8_t epno, uint16_t addr)
 {
-  volatile uint32_t *txaddr = (uint32_t *)STM32_USB_ADDR_TX(epno);
+  volatile uint16_t *txaddr = (uint16_t *)STM32_USB_ADDR_TX(epno);
   *txaddr = addr;
 }
 
@@ -807,7 +789,7 @@ static inline void stm32_seteptxaddr(uint8_t epno, uint16_t addr)
 
 static inline uint16_t stm32_geteptxaddr(uint8_t epno)
 {
-  volatile uint32_t *txaddr = (uint32_t *)STM32_USB_ADDR_TX(epno);
+  volatile uint16_t *txaddr = (uint16_t *)STM32_USB_ADDR_TX(epno);
   return (uint16_t)*txaddr;
 }
 
@@ -817,7 +799,7 @@ static inline uint16_t stm32_geteptxaddr(uint8_t epno)
 
 static void stm32_seteprxcount(uint8_t epno, uint16_t count)
 {
-  volatile uint32_t *epaddr = (uint32_t *)STM32_USB_COUNT_RX(epno);
+  volatile uint16_t *epaddr = (uint16_t *)STM32_USB_COUNT_RX(epno);
   uint32_t rxcount = 0;
   uint16_t nblocks;
 
@@ -866,7 +848,7 @@ static void stm32_seteprxcount(uint8_t epno, uint16_t count)
 
 static inline uint16_t stm32_geteprxcount(uint8_t epno)
 {
-  volatile uint32_t *epaddr = (uint32_t *)STM32_USB_COUNT_RX(epno);
+  volatile uint16_t *epaddr = (uint16_t *)STM32_USB_COUNT_RX(epno);
   return (*epaddr) & USB_COUNT_RX_MASK;
 }
 
@@ -876,7 +858,7 @@ static inline uint16_t stm32_geteprxcount(uint8_t epno)
 
 static inline void stm32_seteprxaddr(uint8_t epno, uint16_t addr)
 {
-  volatile uint32_t *rxaddr = (uint32_t *)STM32_USB_ADDR_RX(epno);
+  volatile uint16_t *rxaddr = (uint16_t *)STM32_USB_ADDR_RX(epno);
   *rxaddr = addr;
 }
 
@@ -886,7 +868,7 @@ static inline void stm32_seteprxaddr(uint8_t epno, uint16_t addr)
 
 static inline uint16_t stm32_geteprxaddr(uint8_t epno)
 {
-  volatile uint32_t *rxaddr = (uint32_t *)STM32_USB_ADDR_RX(epno);
+  volatile uint16_t *rxaddr = (uint16_t *)STM32_USB_ADDR_RX(epno);
   return (uint16_t)*rxaddr;
 }
 
@@ -1134,20 +1116,14 @@ static void stm32_copytopma(const uint8_t *buffer,
 
   /* Copy loop.  Source=user buffer, Dest=packet memory */
 
-  dest = (uint16_t *)(STM32_USBRAM_BASE + ((uint32_t)pma << 1));
+  dest = (uint16_t *)(STM32_USBRAM_BASE + (uint32_t)pma);
   for (i = nwords; i != 0; i--)
     {
       /* Read two bytes and pack into on 16-bit word */
 
       ls = (uint16_t)(*buffer++);
       ms = (uint16_t)(*buffer++);
-      *dest = ms << 8 | ls;
-
-      /* Source address increments by 2*sizeof(uint8_t) = 2; Dest address
-       * increments by 2*sizeof(uint16_t) = 4.
-       */
-
-      dest += 2;
+      *dest++ = ms << 8 | ls;
     }
 }
 
@@ -1158,20 +1134,20 @@ static void stm32_copytopma(const uint8_t *buffer,
 static inline void
 stm32_copyfrompma(uint8_t *buffer, uint16_t pma, uint16_t nbytes)
 {
-  uint32_t *src;
+  uint16_t *src;
   int     nwords = (nbytes + 1) >> 1;
   int     i;
 
   /* Copy loop.  Source=packet memory, Dest=user buffer */
 
-  src = (uint32_t *)(STM32_USBRAM_BASE + ((uint32_t)pma << 1));
+  src = (uint16_t *)(STM32_USBRAM_BASE + (uint32_t)pma);
   for (i = nwords; i != 0; i--)
     {
       /* Copy 16-bits from packet memory to user buffer. */
 
       *(uint16_t *)buffer = *src++;
 
-      /* Source address increments by 1*sizeof(uint32_t) = 4; Dest address
+      /* Source address increments by 1*sizeof(uint16_t) = 2; Dest address
        * increments by 2*sizeof(uint8_t) = 2.
        */
 
@@ -3542,6 +3518,41 @@ static int stm32_selfpowered(struct usbdev_s *dev, bool selfpowered)
 }
 
 /****************************************************************************
+ * Name: stm32_pullup
+ ****************************************************************************/
+
+static int stm32_pullup(struct usbdev_s *dev, bool enable)
+{
+  uint32_t regval;
+  irqstate_t flags;
+
+  usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
+
+  flags = enter_critical_section();
+  regval = stm32_getreg(STM32_USB_BCDR);
+  if (enable)
+    {
+      /* Connect the device by setting the DP pull-up bit in the BCDR
+       * register.
+       */
+
+      regval |= USB_BCDR_DPPU;
+    }
+  else
+    {
+      /* Disconnect the device by clearing the DP pull-up bit in the BCDR
+       * register.
+       */
+
+      regval &= ~USB_BCDR_DPPU;
+    }
+
+  stm32_putreg(regval, STM32_USB_BCDR);
+  leave_critical_section(flags);
+  return OK;
+}
+
+/****************************************************************************
  * Initialization/Reset
  ****************************************************************************/
 
@@ -3651,6 +3662,19 @@ static void stm32_hwsetup(struct stm32_usbdev_s *priv)
 {
   int epno;
 
+#ifdef CONFIG_STM32_STM32G47XX
+  /* FIXME
+   * Because stm32g4xxxx_rcc.c does not handle HSI48 for now,
+   * enable HSI48 clock for USB block here and wait till HSI48 is ready.
+   */
+
+  modifyreg32(STM32_RCC_CRRCR, RCC_CRRCR_HSI48ON, RCC_CRRCR_HSI48ON);
+  while (!(getreg32(STM32_RCC_CRRCR) & RCC_CRRCR_HSI48RDY))
+    {
+      /* nothing to do here */
+    }
+#endif
+
   /* Power the USB controller, put the USB controller into reset, disable
    * all USB interrupts
    */
@@ -3661,7 +3685,7 @@ static void stm32_hwsetup(struct stm32_usbdev_s *priv)
    * host to enumerate us until the class driver is registered.
    */
 
-  stm32_usbpullup(&priv->usbdev, false);
+  stm32_pullup(&priv->usbdev, false);
 
   /* Initialize the device state structure.  NOTE: many fields
    * have the initial value of zero and, hence, are not explicitly
@@ -3742,7 +3766,7 @@ static void stm32_hwshutdown(struct stm32_usbdev_s *priv)
 
   /* Disconnect the device / disable the pull-up */
 
-  stm32_usbpullup(&priv->usbdev, false);
+  stm32_pullup(&priv->usbdev, false);
 
   /* Power down the USB controller */
 
@@ -3777,13 +3801,6 @@ void arm_usbinitialize(void)
   usbtrace(TRACE_DEVINIT, 0);
   stm32_checksetup();
 
-  /* Configure USB GPIO alternate function pins */
-
-#ifdef CONFIG_STM32_STM32F30XX
-  stm32_configgpio(GPIO_USB_DM);
-  stm32_configgpio(GPIO_USB_DP);
-#endif
-
   /* Power up the USB controller, but leave it in the reset state */
 
   stm32_hwsetup(priv);
@@ -3791,18 +3808,6 @@ void arm_usbinitialize(void)
   /* Remap the USB interrupt as needed
    * (Only supported by the STM32 F3 family)
    */
-
-#ifdef CONFIG_STM32_STM32F30XX
-#  ifdef CONFIG_STM32_USB_ITRMP
-  /* Clear the ITRMP bit to use the legacy, shared USB/CAN interrupts */
-
-  modifyreg32(STM32_RCC_APB1ENR, SYSCFG_CFGR1_USB_ITRMP, 0);
-#  else
-  /* Set the ITRMP bit to use the STM32 F3's dedicated USB interrupts */
-
-  modifyreg32(STM32_RCC_APB1ENR, 0, SYSCFG_CFGR1_USB_ITRMP);
-#  endif
-#endif
 
   /* Attach USB controller interrupt handlers.  The hardware will not be
    * initialized and interrupts will not be enabled until the class device
@@ -3938,7 +3943,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
        * some time after this
        */
 
-      stm32_usbpullup(&priv->usbdev, true);
+      stm32_pullup(&priv->usbdev, true);
       priv->usbdev.speed = USB_SPEED_FULL;
     }
 
@@ -4007,4 +4012,4 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
   return OK;
 }
 
-#endif /* CONFIG_USBDEV && CONFIG_STM32_USB */
+#endif /* CONFIG_STM32_USBFS */
