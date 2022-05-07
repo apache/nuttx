@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32/hardware/stm32_usbdev.h
+ * arch/arm/src/stm32/hardware/stm32_usbfs.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_USBDEV_H
-#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_USBDEV_H
+#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_USBFS_H
+#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_USBFS_H
 
 /****************************************************************************
  * Included Files
@@ -28,8 +28,7 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) \
-    || defined(CONFIG_STM32_STM32F37XX)
+#if defined(CONFIG_STM32_USBFS)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -57,6 +56,8 @@
 #define STM32_USB_FNR_OFFSET         0x0048  /* USB frame number register (16-bits) */
 #define STM32_USB_DADDR_OFFSET       0x004c  /* USB device address (16-bits) */
 #define STM32_USB_BTABLE_OFFSET      0x0050  /* Buffer table address (16-bits) */
+#define STM32_USB_LPMCSR_OFFSET      0x0054  /* LPM control and status register */
+#define STM32_USB_BCDR_OFFSET        0x0058  /* Battery charging detector */
 
 /* Buffer Descriptor Table (Relatative to BTABLE address) */
 
@@ -65,7 +66,7 @@
 #define STM32_USB_ADDR_RX_WOFFSET   (4)     /* Reception buffer address n (16-bits) */
 #define STM32_USB_COUNT_RX_WOFFSET  (6)     /* Reception byte count n (16-bits) */
 
-#define STM32_USB_BTABLE_RADDR(ep,o) ((((uint32_t)getreg16(STM32_USB_BTABLE) + ((ep) << 3)) + (o))  << 1)
+#define STM32_USB_BTABLE_RADDR(ep,o) (((uint32_t)getreg16(STM32_USB_BTABLE) + ((ep) << 3)) + (o))
 #define STM32_USB_ADDR_TX_OFFSET(ep)  STM32_USB_BTABLE_RADDR(ep,STM32_USB_ADDR_TX_WOFFSET)
 #define STM32_USB_COUNT_TX_OFFSET(ep) STM32_USB_BTABLE_RADDR(ep,STM32_USB_COUNT_TX_WOFFSET)
 #define STM32_USB_ADDR_RX_OFFSET(ep)  STM32_USB_BTABLE_RADDR(ep,STM32_USB_ADDR_RX_WOFFSET)
@@ -92,6 +93,8 @@
 #define STM32_USB_FNR                (STM32_USB_BASE+STM32_USB_FNR_OFFSET)
 #define STM32_USB_DADDR              (STM32_USB_BASE+STM32_USB_DADDR_OFFSET)
 #define STM32_USB_BTABLE             (STM32_USB_BASE+STM32_USB_BTABLE_OFFSET)
+#define STM32_USB_LPMCSR             (STM32_USB_BASE+STM32_USB_LPMCSR_OFFSET)
+#define STM32_USB_BCDR               (STM32_USB_BASE+STM32_USB_BCDR_OFFSET)
 
 /* Buffer Descriptor Table (Relatative to BTABLE address) */
 
@@ -221,5 +224,25 @@
 #define USB_COUNT_RX_SHIFT           (0)       /* Bits 9-0: Reception Byte Count */
 #define USB_COUNT_RX_MASK            (0x03ff << USB_COUNT_RX_SHIFT)
 
-#endif /* CONFIG_STM32_STM32F10XX || CONFIG_STM32_STM32F30XX || CONFIG_STM32_STM32F37XX */
-#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32_USBDEV_H */
+/* LPM control and status register */
+
+#define USB_LPMCSR_LPMEN             (1 << 0) /* Bit 0: LPM support enable */
+#define USB_LPMCSR_LPMACK            (1 << 1) /* Bit 1: LPM Token acknowledge enable */
+#define USB_LPMCSR_REMWAKE           (1 << 3) /* Bit 3: bRemoteWake value */
+#define USB_LPMCSR_BESL_SHIFT        (4)      /* Bits 7-4: BESL value */
+#define USB_LPMCSR_BESL_MASK         (0x0f << USB_LPMCSR_BESL_SHIFT)
+
+/* Battery charging detector */
+
+#define USB_BCDR_BCDEN               (1 << 0)  /* Bit 0: Battery charging detector (BCD) enable */
+#define USB_BCDR_DCDEN               (1 << 1)  /* Bit 1: Data contact detection (DCD) mode enable */
+#define USB_BCDR_PDEN                (1 << 2)  /* Bit 2: Primary detection (PD) mode enable */
+#define USB_BCDR_SDEN                (1 << 3)  /* Bit 3: Secondary detection (SD) mode enable */
+#define USB_BCDR_DCDET               (1 << 4)  /* Bit 4: Data contact detection (DCD) status */
+#define USB_BCDR_PDET                (1 << 5)  /* Bit 5: Primary detection (PD) status */
+#define USB_BCDR_SDET                (1 << 6)  /* Bit 6: Secondary detection (SD) status */
+#define USB_BCDR_PS2DET              (1 << 7)  /* Bit 7: DM pull-up detection status */
+#define USB_BCDR_DPPU                (1 << 15) /* Bit 15: DP pull-up control */
+
+#endif /* CONFIG_STM32_USBFS */
+#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32_USBFS_H */

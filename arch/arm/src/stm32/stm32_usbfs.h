@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_usbdev.h
+ * arch/arm/src/stm32/stm32_usbfs.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_STM32_USBDEV_H
-#define __ARCH_ARM_SRC_STM32_STM32_USBDEV_H
+#ifndef __ARCH_ARM_SRC_STM32_STM32_USBFS_H
+#define __ARCH_ARM_SRC_STM32_STM32_USBFS_H
 
 /****************************************************************************
  * Included Files
@@ -30,7 +30,7 @@
 #include <stdint.h>
 
 #include "chip.h"
-#include "hardware/stm32_usbdev.h"
+#include "hardware/stm32_usbfs.h"
 
 /****************************************************************************
  * Public Functions Prototypes
@@ -46,19 +46,6 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
-
-/****************************************************************************
- * Name:  stm32_usbpullup
- *
- * Description:
- *   If USB is supported and the board supports a pullup via GPIO (for USB
- *   software connect and disconnect), then the board software must provide
- *   stm32_pullup. See include/nuttx/usb/usbdev.h for additional description
- *   of this method.
- *
- ****************************************************************************/
-
-int stm32_usbpullup(struct usbdev_s *dev,  bool enable);
 
 /****************************************************************************
  * Name:  stm32_usbsuspend
@@ -79,4 +66,4 @@ void stm32_usbsuspend(struct usbdev_s *dev, bool resume);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32_STM32_USBDEV_H */
+#endif /* __ARCH_ARM_SRC_STM32_STM32_USBFS_H */
