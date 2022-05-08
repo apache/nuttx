@@ -663,9 +663,9 @@
 #define   WM8994_HPOUT1R_ZC_DIABLED               (0)                                         /* Zero cross disabled */
 #define   WM8994_HPOUT1R_ZC_ENABLED               (1 << WM8994_HPOUT1R_ZC_SHIFT)              /* Zero cross enabled */
 #if 0
-#define WM8994_HPOUT1_VU_SHIFT                    (1 << 8)                                    /* Bit 8: Headphone Output PGA Volume Update */
-#define   WM8994_HPOUT1_VU_DISABLE                (0) 
-#define   WM8994_HPOUT1_VU_ENABLED                (1 << WM8994_HPOUT1L_VU_SHIFT)              /*  Writing a 1 to this bit will update HPOUT1LVOL and
+#define WM8994_HPOUT1_VU_SHIFT                    (8)                                         /* Bit 8: Headphone Output PGA Volume Update */
+#define   WM8994_HPOUT1_VU_DISABLE                (0)
+#define   WM8994_HPOUT1_VU_ENABLED                (1 << WM8994_HPOUT1_VU_SHIFT)               /*  Writing a 1 to this bit will update HPOUT1LVOL and
                                                                                                *  HPOUT1RVOL volumes simultaneously */
 #endif
 
@@ -805,6 +805,7 @@
 
 /* R54 (0x36) - Speaker Mixer
  */
+
 #define WM8994_DAC2L_TO_SPKMIXL                   (1 << 9)                                    /* Bit 9: Left DAC2 to SPKMXL Mute */
 #define   WM8994_DAC2L_TO_SPKMIXL_MUTE            (0)                                         /* Mute */
 #define   WM8994_DAC2L_TO_SPKMIXL_UNMUTE          (WM8994_DAC2L_TO_SPKMIXL)                   /* Un-mute */
@@ -962,7 +963,7 @@
 #define   WM8994_DCS_ENA_CHAN_1_ENABLE            (WM8994_DCS_ENA_CHAN_1)                     /* Enable */
 #define WM8994_DCS_ENA_CHAN_0                     (1 << 0)                                    /* Bit 0: DC Servo enable for HPOUT1L */
 #define   WM8994_DCS_ENA_CHAN_0_DISABLE           (0)                                         /* Diable */
-#define   WM8994_DCS_ENA_CHAN_0_ENABLE            (WM8994_DCS_ENA_CHAN_1)                     /* Enable */
+#define   WM8994_DCS_ENA_CHAN_0_ENABLE            (WM8994_DCS_ENA_CHAN_0)                     /* Enable */
 
 /* R85 (0x55) - DC Servo (2)
  */

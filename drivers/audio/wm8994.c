@@ -340,7 +340,7 @@ static void wm8994_writereg(FAR struct wm8994_dev_s *priv, uint16_t regaddr,
        * completed.
        */
 
-      ret = i2c_write(priv->i2c, &config, data, 3);
+      ret = i2c_write(priv->i2c, &config, data, 4);
       if (ret < 0)
         {
 #ifdef CONFIG_I2C_RESET
@@ -1964,7 +1964,7 @@ static void wm8994_audio_output(FAR struct wm8994_dev_s *priv)
    * 256 works from 8kHz to 48kHz.
    */
 
-  wm8994_setsamplefreq (priv);
+  wm8994_setbitrate(priv);
 
   /* AIF1 Word Length = 16-bits, AIF1 Format = I2S (Default Register Value) */
 
@@ -2082,8 +2082,8 @@ static void wm8994_audio_output(FAR struct wm8994_dev_s *priv)
 
       /* Enable Class W, Class W Envelope Tracking = AIF1 Timeslot 0 */
 
-      regval = WM8994_CP_DYN_PWR;
-      regval = 0x0005;  /* TODO: Check where this comes from? */
+      regval = wm8994_readreg(priv, WM8994_CLASS_W_1);
+      regval |= WM8994_CP_DYN_PWR;
       wm8994_writereg(priv, WM8994_CLASS_W_1, regval);
     }
 
@@ -2118,9 +2118,14 @@ static void wm8994_audio_output(FAR struct wm8994_dev_s *priv)
     WM8994_HPOUT1R_DLY;
   wm8994_writereg(priv, WM8994_ANA_HP1, regval);
 
-  /* Enable Charge Pump */
+  /* Enable Charge Pump
+   * Note: The STM32Cube_FW_F7_V1.16.0 BSP driver included the
+   * number 9F25h as write value for this register. This is the
+   * default value + CP_ENA set.
+   */
 
-  regval = WM8994_CP_ENA;
+  regval = wm8994_readreg(priv, WM8994_CHARGE_PUMP1);
+  regval |= WM8994_CP_ENA;
   wm8994_writereg(priv, WM8994_CHARGE_PUMP1, regval);
 
   /* Add Delay */
@@ -2320,9 +2325,14 @@ static void wm8994_hw_reset(FAR struct wm8994_dev_s *priv)
 
   /* wm8994 Errata Work-Arounds */
 
-  /* copy code from STM32Cube_FW_F7_V1.15.0 */
+  /* Note: Initially from STM32Cube_FW_F7_V1.15.0.
+   * The write to 0x56 comes from Linux (drivers/mfd/wm8994-core.c),
+   * where it is found for wm8994_revc_patch. Neither
+   * register 0x56 nor 0x817 is documented.
+   */
 
   wm8994_writereg(priv, 0x102, 0x0003);
+  wm8994_writereg(priv, 0x56, 0x0003);
   wm8994_writereg(priv, 0x817, 0x0000);
   wm8994_writereg(priv, 0x102, 0x0000);
 
