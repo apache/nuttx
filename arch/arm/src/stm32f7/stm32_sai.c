@@ -152,7 +152,7 @@
                                   DMA_SCR_PBURST_INCR4 | DMA_SCR_MBURST_INCR4)
 
 #  define SAI_TXDMA8_CONFIG    (DMA_SCR_DIR_M2P | DMA_SCR_MINC | \
-                                  DMA_SCR_PSIZE_32BITS | DMA_SCR_MSIZE_32BITS | \
+                                  DMA_SCR_PSIZE_8BITS | DMA_SCR_MSIZE_8BITS | \
                                   DMA_SCR_PBURST_INCR4 | DMA_SCR_MBURST_INCR4)
 #  define SAI_TXDMA16_CONFIG   (DMA_SCR_DIR_M2P | DMA_SCR_MINC | \
                                   DMA_SCR_PSIZE_16BITS | DMA_SCR_MSIZE_16BITS | \
