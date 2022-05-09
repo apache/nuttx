@@ -23,7 +23,11 @@ include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/risc-v/src/common/Toolchain.defs
 
 ifeq ($(CONFIG_ARCH_CHIP_QEMU_RV),y)
+ifeq ($(CONFIG_BUILD_KERNEL),y)
+  LDSCRIPT = ld-kernel.script
+else
   LDSCRIPT = ld.script
+endif
 endif
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
