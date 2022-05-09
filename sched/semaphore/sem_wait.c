@@ -63,9 +63,8 @@
  *   returned on success.  A negated errno value is returned on failure.
  *   Possible returned errors:
  *
- *   - EINVAL:   Invalid attempt to get the semaphore
- *   - EINTR:    The wait was interrupted by the receipt of a signal.
- *   - ETIMEOUT: The wait was interrupted by the receipt of a timeout signal.
+ *   - EINVAL:  Invalid attempt to get the semaphore
+ *   - EINTR:   The wait was interrupted by the receipt of a signal.
  *
  ****************************************************************************/
 

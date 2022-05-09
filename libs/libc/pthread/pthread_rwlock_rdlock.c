@@ -118,11 +118,6 @@ int pthread_rwlock_clockrdlock(FAR pthread_rwlock_t *rw_lock,
         {
           err = pthread_cond_clockwait(&rw_lock->cv, &rw_lock->lock,
                                        clockid, ts);
-
-          if (err == EINTR)
-            {
-              continue;
-            }
         }
       else
         {

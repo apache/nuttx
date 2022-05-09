@@ -283,13 +283,21 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
 
                   if (status < 0)
                     {
-                      /* If semaphore wait was awakened by the receipt
-                       * of a signal, presumably the signal is posted
-                       * by pthread_condtimedout(), nxsem_wait returns
-                       * -ETIMEOUT; otherwise nxsem_wait returns
-                       * -EINTR.
+                      /* NO.. Handle the special case where the semaphore
+                       * wait was awakened by the receipt of a signal --
+                       * presumably the signal posted by
+                       * pthread_condtimedout().
                        */
-                      ret = -status;
+
+                      if (status == -EINTR)
+                        {
+                          swarn("WARNING: Timedout!\n");
+                          ret = ETIMEDOUT;
+                        }
+                      else
+                        {
+                          ret = status;
+                        }
                     }
 
                   /* The interrupts stay disabled until after we sample
