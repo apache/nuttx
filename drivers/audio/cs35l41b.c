@@ -1633,7 +1633,7 @@ static int cs35l41_wait_for_pwrmgt_sts(FAR struct cs35l41b_dev_s *priv)
       ret = cs35l41b_read_register(priv, &wrpend_sts, PWRMGT_PWRMGT_STS);
       if (ret < 0)
         {
-          auderr("read PWRMGT_PWRMGT_STS error\n", 2 * i);
+          auderr("read PWRMGT_PWRMGT_STS error:%d\n", 2 * i);
           return ERROR;
         }
     }
