@@ -119,21 +119,21 @@ void up_disable_irq(int irq)
 {
   int extirq;
 
-  if (irq == RISCV_IRQ_MSOFT)
+  if (irq == RISCV_IRQ_SOFT)
     {
-      /* Read mstatus & clear machine software interrupt enable in mie */
+      /* Read m/sstatus & clear machine software interrupt enable in m/sie */
 
-      CLEAR_CSR(mie, MIE_MSIE);
+      CLEAR_CSR(CSR_IE, IE_SIE);
     }
-  else if (irq == RISCV_IRQ_MTIMER)
+  else if (irq == RISCV_IRQ_TIMER)
     {
-      /* Read mstatus & clear machine timer interrupt enable in mie */
+      /* Read m/sstatus & clear timer interrupt enable in m/sie */
 
-      CLEAR_CSR(mie, MIE_MTIE);
+      CLEAR_CSR(CSR_IE, IE_TIE);
     }
-  else if (irq > RISCV_IRQ_MEXT)
+  else if (irq > RISCV_IRQ_EXT)
     {
-      extirq = irq - RISCV_IRQ_MEXT;
+      extirq = irq - RISCV_IRQ_EXT;
 
       /* Clear enable bit for the irq */
 
@@ -161,21 +161,21 @@ void up_enable_irq(int irq)
 {
   int extirq;
 
-  if (irq == RISCV_IRQ_MSOFT)
+  if (irq == RISCV_IRQ_SOFT)
     {
-      /* Read mstatus & set machine software interrupt enable in mie */
+      /* Read m/sstatus & set machine software interrupt enable in m/sie */
 
-      SET_CSR(mie, MIE_MSIE);
+      SET_CSR(CSR_IE, IE_SIE);
     }
-  else if (irq == RISCV_IRQ_MTIMER)
+  else if (irq == RISCV_IRQ_TIMER)
     {
-      /* Read mstatus & set machine timer interrupt enable in mie */
+      /* Read m/sstatus & set timer interrupt enable in m/sie */
 
-      SET_CSR(mie, MIE_MTIE);
+      SET_CSR(CSR_IE, IE_TIE);
     }
-  else if (irq > RISCV_IRQ_MEXT)
+  else if (irq > RISCV_IRQ_EXT)
     {
-      extirq = irq - RISCV_IRQ_MEXT;
+      extirq = irq - RISCV_IRQ_EXT;
 
       /* Set enable bit for the irq */
 
@@ -195,16 +195,13 @@ irqstate_t up_irq_enable(void)
 {
   irqstate_t oldstat;
 
-#if 1
-  /* Enable MEIE (machine external interrupt enable) */
+  /* Enable external interrupts (mie/sie) */
 
-  /* TODO: should move to up_enable_irq() */
+  SET_CSR(CSR_IE, IE_EIE);
 
-  SET_CSR(mie, MIE_MEIE);
-#endif
+  /* Read and enable global interrupts (M/SIE) in m/sstatus */
 
-  /* Read mstatus & set machine interrupt enable (MIE) in mstatus */
+  oldstat = READ_AND_SET_CSR(CSR_STATUS, STATUS_IE);
 
-  oldstat = READ_AND_SET_CSR(mstatus, MSTATUS_MIE);
   return oldstat;
 }

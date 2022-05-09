@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/qemu-rv/hardware/qemu_rv_plic.h
+ * arch/risc-v/src/qemu-rv/qemu_rv_mm_init.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_QEMU_RV_HARDWARE_QEMU_RV_PLIC_H
-#define __ARCH_RISCV_SRC_QEMU_RV_HARDWARE_QEMU_RV_PLIC_H
+#ifndef __ARCH_RISC_V_SRC_QEMURV_QEMURV_MM_INIT_H
+#define __ARCH_RISC_V_SRC_QEMURV_QEMURV_MM_INIT_H
 
 /****************************************************************************
  * Included Files
@@ -27,23 +27,32 @@
 
 #include <nuttx/config.h>
 
+#include "riscv_mmu.h"
+
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions Prototypes
  ****************************************************************************/
 
-#define QEMU_RV_PLIC_PRIORITY    (QEMU_RV_PLIC_BASE + 0x000000)
-#define QEMU_RV_PLIC_PENDING1    (QEMU_RV_PLIC_BASE + 0x001000)
+/****************************************************************************
+ * Name: qemu_rv_kernel_mappings
+ *
+ * Description:
+ *  Setup kernel mappings when using CONFIG_BUILD_KERNEL. Sets up the kernel
+ *  MMU mappings.
+ *
+ ****************************************************************************/
 
-#ifdef CONFIG_ARCH_USE_S_MODE
-#  define QEMU_RV_PLIC_ENABLE1   (QEMU_RV_PLIC_BASE + 0x002080)
-#  define QEMU_RV_PLIC_ENABLE2   (QEMU_RV_PLIC_BASE + 0x002084)
-#  define QEMU_RV_PLIC_THRESHOLD (QEMU_RV_PLIC_BASE + 0x201000)
-#  define QEMU_RV_PLIC_CLAIM     (QEMU_RV_PLIC_BASE + 0x201004)
-#else
-#  define QEMU_RV_PLIC_ENABLE1   (QEMU_RV_PLIC_BASE + 0x002000)
-#  define QEMU_RV_PLIC_ENABLE2   (QEMU_RV_PLIC_BASE + 0x002004)
-#  define QEMU_RV_PLIC_THRESHOLD (QEMU_RV_PLIC_BASE + 0x200000)
-#  define QEMU_RV_PLIC_CLAIM     (QEMU_RV_PLIC_BASE + 0x200004)
-#endif
+void qemu_rv_kernel_mappings(void);
 
-#endif /* __ARCH_RISCV_SRC_QEMU_RV_HARDWARE_QEMU_RV_PLIC_H */
+/****************************************************************************
+ * Name: qemu_rv_mm_init
+ *
+ * Description:
+ *  Setup kernel mappings when using CONFIG_BUILD_KERNEL. Sets up kernel MMU
+ *  mappings. Function also sets the first address environment (satp value).
+ *
+ ****************************************************************************/
+
+void qemu_rv_mm_init(void);
+
+#endif /* __ARCH_RISC_V_SRC_QEMURV_QEMURV_MM_INIT_H */
