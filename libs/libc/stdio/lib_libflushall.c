@@ -55,10 +55,17 @@ int lib_flushall(FAR struct streamlist *list)
   if (list)
     {
       FAR FILE *stream;
+      int i;
 
       /* Process each stream in the thread's stream list */
 
       lib_stream_semtake(list);
+
+      for (i = 0; i < 3; i++)
+        {
+          lib_fflush(&list->sl_std[i], true);
+        }
+
       stream = list->sl_head;
       for (; stream != NULL; stream = stream->fs_next)
         {
