@@ -47,6 +47,7 @@ extern void up_serialinit(void);
 #include "hardware/qemu_rv_plic.h"
 
 #include "riscv_internal.h"
+#include "riscv_percpu.h"
 
 /****************************************************************************
  * Macro Definitions
@@ -72,6 +73,13 @@ extern void up_serialinit(void);
   sub   sp, \tmp0, \tmp1
 .endm
 #endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 15 */
+
+#if defined(CONFIG_ARCH_USE_S_MODE) && CONFIG_ARCH_INTERRUPTSTACK > 15
+.macro  setintstack tmp0, tmp1
+  csrr    \tmp0, CSR_SCRATCH
+  REGLOAD sp, RISCV_PERCPU_IRQSTACK(\tmp0)
+.endm
+#endif /* CONFIG_ARCH_USE_S_MODE && CONFIG_ARCH_INTERRUPTSTACK > 15 */
 
 #endif /* __ASSEMBLY__  */
 #endif /* __ARCH_RISCV_SRC_QEMU_RV_CHIP_H */

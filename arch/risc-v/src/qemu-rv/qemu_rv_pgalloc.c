@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/qemu-rv/qemu_rv_irq_dispatch.c
+ * arch/risc-v/src/qemu-rv/qemu_rv_pgalloc.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,67 +22,46 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <stdint.h>
-#include <assert.h>
-
-#include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <sys/types.h>
+#include <nuttx/config.h>
+#include <nuttx/pgalloc.h>
 
-#include "riscv_internal.h"
-#include "hardware/qemu_rv_memorymap.h"
-#include "hardware/qemu_rv_plic.h"
+#include <assert.h>
+#include <debug.h>
+
+#include <arch/board/board_memorymap.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_RV32
-#  define RV_IRQ_MASK 27
-#else
-#  define RV_IRQ_MASK 59
-#endif
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * riscv_dispatch_irq
+ * Name: up_allocate_pgheap
+ *
+ * Description:
+ *   If there is a page allocator in the configuration, then this function
+ *   must be provided by the platform-specific code.  The OS initialization
+ *   logic will call this function early in the initialization sequence to
+ *   get the page heap information needed to configure the page allocator.
+ *
  ****************************************************************************/
 
-void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
+void up_allocate_pgheap(void **heap_start, size_t *heap_size)
 {
-  int irq = (vector >> RV_IRQ_MASK) | (vector & 0xf);
+  DEBUGASSERT(heap_start && heap_size);
 
-  /* Firstly, check if the irq is machine external interrupt */
-
-  if (RISCV_IRQ_EXT == irq)
-    {
-      uintptr_t val = getreg32(QEMU_RV_PLIC_CLAIM);
-
-      /* Add the value to nuttx irq which is offset to the mext */
-
-      irq += val;
-    }
-
-  /* EXT means no interrupt */
-
-  if (RISCV_IRQ_EXT != irq)
-    {
-      /* Deliver the IRQ */
-
-      regs = riscv_doirq(irq, regs);
-    }
-
-  if (RISCV_IRQ_EXT <= irq)
-    {
-      /* Then write PLIC_CLAIM to clear pending in PLIC */
-
-      putreg32(irq - RISCV_IRQ_EXT, QEMU_RV_PLIC_CLAIM);
-    }
-
-  return regs;
+  *heap_start = (void *)PGPOOL_START;
+  *heap_size  = (size_t)PGPOOL_SIZE;
 }
