@@ -998,8 +998,7 @@ static void nvt_stop_crc_reboot(FAR struct nt38350_dev_s *priv)
 
       if (retry == 0)
           ierr("ERROR: CRC auto reboot is not able "
-              "to be stopped buf[1]=0x%02x\n", buf[1]);
-
+               "to be stopped buf[1]=0x%02x\n", buf[1]);
     }
 }
 
@@ -1021,7 +1020,7 @@ static int nvt_ts_check_chip_ver_trim(FAR struct nt38350_dev_s *priv,
   int32_t ret = -1;
   int32_t i;
 
-  /* if bootloader reset fail, i2c bus maybe is broken, return fail at once */
+  /* if bootloader reset fail, i2c bus maybe is broken, return fail */
 
   ret = nvt_bootloader_reset(priv);
   if (ret < 0)
@@ -2839,7 +2838,11 @@ static void nvt_log_data_to_csv(FAR void *arg)
 
   if (access(NVT_OFFLOG_FOLDER, F_OK) < 0)
     {
-      mkdir(NVT_OFFLOG_FOLDER, 0777);
+      if (mkdir(NVT_OFFLOG_FOLDER, 0777) != 0)
+        {
+          ierr("create file folder fail\n");
+          return;
+        }
     }
 
   /* open csv file */
@@ -3456,10 +3459,6 @@ static int32_t nvt_read_fw_noise(FAR struct nt38350_dev_s *priv,
     }
 
   frame_num = PS_CONFIG_DIFF_TEST_FRAME / 10;
-  if (frame_num <= 0)
-    {
-      frame_num = 1;
-    }
 
   nvt_enable_noise_collect(priv, frame_num);
 
@@ -3657,7 +3656,11 @@ static void nvt_selftest(FAR struct nt38350_dev_s *priv,
 
   if (access(NVT_RESULT_FOLDER, F_OK) < 0)
     {
-      mkdir(NVT_RESULT_FOLDER, 0777);
+      if (mkdir(NVT_RESULT_FOLDER, 0777) != 0)
+        {
+          ierr("create file folder fail\n");
+          return;
+        }
     }
 
   if (nvt_check_fw_reset_state(priv, RESET_STATE_REK))
@@ -3855,8 +3858,11 @@ static void nt38350_data_worker(FAR void *arg)
 {
   FAR struct nt38350_dev_s    *priv = (FAR struct nt38350_dev_s *)arg;
   FAR struct nt38350_config_s *config;
-  FAR struct touch_sample_s    sample;
-  int      i;
+  struct touch_sample_s  sample =
+  {
+    0
+  };
+
   int      ret;
 #ifdef CONFIG_NVT_OFFLINE_LOG
   uint8_t  point_data[NVT_POINT_DATA_EXBUF_LEN + 1] =
@@ -3886,24 +3892,22 @@ static void nt38350_data_worker(FAR void *arg)
 
 #ifdef CONFIG_NVT_OFFLINE_LOG
   ret = nt38350_read_reg(priv, NVT_I2C_FW_ADDRESS, point_data,
-                  NVT_POINT_DATA_EXBUF_LEN + 1);
+                         NVT_POINT_DATA_EXBUF_LEN + 1);
 #else
   ret = nt38350_read_reg(priv, NVT_I2C_FW_ADDRESS, point_data,
-                  NVT_POINT_DATA_LEN + 1);
+                         NVT_POINT_DATA_LEN + 1);
 #endif
+
   if (ret < 0)
     {
       ierr("Point data read failed!\n");
     }
 
 #ifdef CONFIG_NVT_DEBUG
-  for (i = 0; i < 1; i++)
-    {
-      iinfo("0x%02x, 0x%02x, 0x%02x, 0x%02x 0x%02x, 0x%02x\n",
-            point_data[1 + i * 6], point_data[2 + i * 6],
-            point_data[3 + i * 6], point_data[4 + i * 6],
-            point_data[5 + i * 6], point_data[6 + i * 6]);
-    }
+  iinfo("0x%02x, 0x%02x, 0x%02x, 0x%02x 0x%02x, 0x%02x\n",
+        point_data[1], point_data[2],
+        point_data[3], point_data[4],
+        point_data[5], point_data[6]);
 #endif
 
 #ifdef CONFIG_NVT_OFFLINE_LOG
@@ -3911,13 +3915,13 @@ static void nt38350_data_worker(FAR void *arg)
     {
       memcpy(priv->point_xdata_temp, (point_data + 1), NVT_POINT_DATA_LEN);
       memcpy((priv->point_xdata_temp + NVT_POINT_DATA_LEN),
-            (point_data + 1 + NVT_POINT_DATA_LEN + NVT_POINT_DATA_EXT_LEN),
-            NVT_S2D_DATA_LEN);
+             (point_data + 1 + NVT_POINT_DATA_LEN + NVT_POINT_DATA_EXT_LEN),
+             NVT_S2D_DATA_LEN);
       memcpy((priv->point_xdata_temp + NVT_POINT_DATA_LEN +
              NVT_S2D_DATA_LEN),
-            (point_data + 1 + NVT_POINT_DATA_LEN + NVT_POINT_DATA_EXT_LEN +
-            NVT_S2D_DATA_LEN + NVT_FW_CMD_HANDLE_LEN),
-            (NVT_S2D_DATA_EXT_LEN + NVT_FW_FRAME_CNT_LEN));
+             (point_data + 1 + NVT_POINT_DATA_LEN + NVT_POINT_DATA_EXT_LEN +
+             NVT_S2D_DATA_LEN + NVT_FW_CMD_HANDLE_LEN),
+             (NVT_S2D_DATA_EXT_LEN + NVT_FW_FRAME_CNT_LEN));
       nvt_log_data_to_csv(priv);
     }
 #endif
@@ -3930,73 +3934,64 @@ static void nt38350_data_worker(FAR void *arg)
       config->enable(config, true);
       return;
     }
-
 #endif
 
-  for (i = 0; i < priv->max_touch_num; i++)
+  /* only support single point touch */
+
+  position = 1;
+  if (((point_data[position] & 0x07) == FINGER_DOWN) ||
+      ((point_data[position] & 0x07) == FINGER_MOVE))
     {
-      position = 1 + 6 * i;
-      if (((point_data[position] & 0x07) == FINGER_DOWN) ||
-          ((point_data[position] & 0x07) == FINGER_MOVE))
-        {
-          if ((point_data[position] & 0x07) == FINGER_DOWN)
-            priv->sample.contact = CONTACT_DOWN;
-          else if ((point_data[position] & 0x07) == FINGER_MOVE)
-            priv->sample.contact = CONTACT_MOVE;
-          input_x = (uint32_t)(point_data[position + 1] << 4) +
-                    (uint32_t) (point_data[position + 3] >> 4);
-          input_y = (uint32_t)(point_data[position + 2] << 4) +
+      if ((point_data[position] & 0x07) == FINGER_DOWN)
+        priv->sample.contact = CONTACT_DOWN;
+      else if ((point_data[position] & 0x07) == FINGER_MOVE)
+        priv->sample.contact = CONTACT_MOVE;
+
+      input_x = (uint32_t)(point_data[position + 1] << 4) +
+                (uint32_t) (point_data[position + 3] >> 4);
+      input_y = (uint32_t)(point_data[position + 2] << 4) +
                 (uint32_t) (point_data[position + 3] & 0x0f);
 #ifdef CONFIG_ROTATION
-          priv->sample.x = NVT_TOUCH_DEFAULT_MAX_WIDTH - input_x;
-          priv->sample.y = NVT_TOUCH_DEFAULT_MAX_HEIGHT - input_y;
+      priv->sample.x = NVT_TOUCH_DEFAULT_MAX_WIDTH - input_x;
+      priv->sample.y = NVT_TOUCH_DEFAULT_MAX_HEIGHT - input_y;
 #else
-          priv->sample.x = input_x;
-          priv->sample.y = input_y;
+      priv->sample.x = input_x;
+      priv->sample.y = input_y;
 #endif
-          input_w = (uint32_t)(point_data[position + 4]);
-          if (input_w == 0)
-            input_w = 1;
-          priv->sample.width = input_w;
-          if (i < 2)
-            {
-              input_p = (uint32_t)(point_data[position + 5]) +
-                        (uint32_t)(point_data[i + 15] << 8);
-              if (input_p > NVT_TOUCH_FORCE_NUM)
-                  input_p = NVT_TOUCH_FORCE_NUM;
-            }
-          else
-            {
-              input_p = (uint32_t)(point_data[position + 5]);
-            }
+      input_w = (uint32_t)(point_data[position + 4]);
+      if (input_w == 0)
+        input_w = 1;
 
-          if (input_p == 0)
-            input_p = 1;
-          priv->sample.pressure = input_p;
-          priv->old_sample = priv->sample;
-        }
-      else if ((point_data[position] == lighting_palm[0]) &&
-               (point_data[position + 1] == lighting_palm[1]) &&
-               (point_data[position + 2] == lighting_palm[2]))
-        {
-          priv->sample.contact = CONTACT_PALM;
-        }
-      else if (point_data[position] == FINGER_UP)
-        {
-          priv->sample.contact = CONTACT_UP;
-          priv->sample.x = priv->old_sample.x;
-          priv->sample.y = priv->old_sample.y;
-          priv->sample.width = priv->old_sample.width;
-          priv->sample.pressure = priv->old_sample.pressure;
-        }
-      else
-        {
-          priv->sample.contact = CONTACT_NONE;
-          input_x = 0;
-          input_y = 0;
-          input_w = 0;
-          input_p = 0;
-        }
+      priv->sample.width = input_w;
+
+      /* nt38350 without force function, pressure set const 1 */
+
+      input_p = 1;
+      priv->sample.pressure = input_p;
+
+      priv->old_sample = priv->sample;
+    }
+  else if ((point_data[position] == lighting_palm[0]) &&
+           (point_data[position + 1] == lighting_palm[1]) &&
+           (point_data[position + 2] == lighting_palm[2]))
+    {
+      priv->sample.contact = CONTACT_PALM;
+    }
+  else if (point_data[position] == FINGER_UP)
+    {
+      priv->sample.contact = CONTACT_UP;
+      priv->sample.x = priv->old_sample.x;
+      priv->sample.y = priv->old_sample.y;
+      priv->sample.width = priv->old_sample.width;
+      priv->sample.pressure = priv->old_sample.pressure;
+    }
+  else
+    {
+      priv->sample.contact = CONTACT_NONE;
+      input_x = 0;
+      input_y = 0;
+      input_w = 0;
+      input_p = 0;
     }
 
   sample.npoints            = 1;
@@ -4008,20 +4003,26 @@ static void nt38350_data_worker(FAR void *arg)
   sample.point[0].pressure  = priv->sample.pressure;
   sample.point[0].timestamp = touch_get_time();
 
+#ifdef CONFIG_NVT_DEBUG
+  iinfo("x %d, y %d, width %d pressure %d\n",
+        sample.point[0].x, sample.point[0].y,
+        sample.point[0].w, sample.point[0].pressure);
+#endif
+
   if (priv->sample.contact == CONTACT_UP)
     {
       sample.point[0].flags = TOUCH_UP | TOUCH_ID_VALID |
-                     TOUCH_POS_VALID;
+                              TOUCH_POS_VALID;
     }
   else if (priv->sample.contact == CONTACT_DOWN)
     {
       sample.point[0].flags = TOUCH_DOWN | TOUCH_ID_VALID |
-                     TOUCH_POS_VALID;
+                              TOUCH_POS_VALID;
     }
   else if (priv->sample.contact == CONTACT_MOVE)
     {
       sample.point[0].flags = TOUCH_MOVE | TOUCH_ID_VALID |
-                     TOUCH_POS_VALID;
+                              TOUCH_POS_VALID;
     }
   else if (priv->sample.contact == CONTACT_PALM)
     {
@@ -4128,7 +4129,7 @@ static int nt38350_ts_resume(FAR struct nt38350_dev_s *dev)
     {
       nvt_bootloader_reset(dev);
       ret = nvt_check_fw_reset_state(dev, RESET_STATE_INIT);
-      if(ret < 0)
+      if (ret < 0)
         {
           ierr("FW is not ready!\n");
           return ret;
@@ -4405,7 +4406,7 @@ int nt38350_register(FAR struct nt38350_config_s *config,
 
   /* Initialize the nt38350 device driver instance */
 
-  priv->config = config;            /* Save the board configuration */
+  priv->config = config;                  /* Save the board configuration */
   priv->fw_path = CONFIG_NT38350_FW_PATH; /* Set up firmware path */
   priv->lower.maxpoint = NVT_TOUCH_MAX_FINGER_NUM;
   priv->lower.control  = nt38350_control;
