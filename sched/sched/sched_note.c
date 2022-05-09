@@ -431,8 +431,8 @@ static void note_spincommon(FAR struct tcb_s *tcb,
 
   note_common(tcb, &note.nsp_cmn, sizeof(struct note_spinlock_s), type);
 
-  sched_note_flatten(note.nsp_spinlock, &spinlock, sizeof(spilock));
-  note.nsp_value = (uint8_t)*spinlock;
+  sched_note_flatten(note.nsp_spinlock, &spinlock, sizeof(spinlock));
+  note.nsp_value = *(uint8_t *)spinlock;
 
   /* Add the note to circular buffer */
 
