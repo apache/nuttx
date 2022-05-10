@@ -394,9 +394,9 @@ static void stm32l4_gint_disconnected(struct stm32l4_usbhost_s *priv);
 static inline void stm32l4_gint_sofisr(struct stm32l4_usbhost_s *priv);
 #endif
 static inline void
-  stm32l4_gint_rxflvlisr(struct stm32l4_usbhost_s *priv);
+stm32l4_gint_rxflvlisr(struct stm32l4_usbhost_s *priv);
 static inline void
-  stm32l4_gint_nptxfeisr(struct stm32l4_usbhost_s *priv);
+stm32l4_gint_nptxfeisr(struct stm32l4_usbhost_s *priv);
 static inline void stm32l4_gint_ptxfeisr(struct stm32l4_usbhost_s *priv);
 static inline void stm32l4_gint_hcisr(struct stm32l4_usbhost_s *priv);
 static inline void stm32l4_gint_hprtisr(struct stm32l4_usbhost_s *priv);

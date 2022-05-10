@@ -931,7 +931,7 @@ int stm32l4_i2c_sem_waitdone(struct stm32l4_i2c_priv_s *priv)
  ****************************************************************************/
 
 static inline void
-  stm32l4_i2c_set_7bit_address(struct stm32l4_i2c_priv_s *priv)
+stm32l4_i2c_set_7bit_address(struct stm32l4_i2c_priv_s *priv)
 {
   stm32l4_i2c_modifyreg32(priv, STM32L4_I2C_CR2_OFFSET, I2C_CR2_SADD7_MASK,
                         ((priv->msgv->addr & 0x7f) << I2C_CR2_SADD7_SHIFT));

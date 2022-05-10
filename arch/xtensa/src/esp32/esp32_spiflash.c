@@ -194,9 +194,9 @@ static inline void spi_reset_regbits(struct esp32_spiflash_s *priv,
 /* Misc. helpers */
 
 static inline void IRAM_ATTR
-  esp32_spiflash_opstart(struct spiflash_cachestate_s *state);
+esp32_spiflash_opstart(struct spiflash_cachestate_s *state);
 static inline void IRAM_ATTR
-  esp32_spiflash_opdone(const struct spiflash_cachestate_s *state);
+esp32_spiflash_opdone(const struct spiflash_cachestate_s *state);
 
 static bool IRAM_ATTR spiflash_pagecached(uint32_t phypage);
 static void IRAM_ATTR spiflash_flushmapped(size_t start, size_t size);
@@ -408,7 +408,7 @@ static inline void spi_reset_regbits(struct esp32_spiflash_s *priv,
  ****************************************************************************/
 
 static inline void IRAM_ATTR
-  esp32_spiflash_opstart(struct spiflash_cachestate_s *state)
+esp32_spiflash_opstart(struct spiflash_cachestate_s *state)
 {
   state->flags = enter_critical_section();
 

@@ -1786,7 +1786,7 @@ static void hrtim_cmn_modifyreg(struct stm32_hrtim_s *priv,
  ****************************************************************************/
 
 static struct stm32_hrtim_tim_s *
-  hrtim_tim_get(struct stm32_hrtim_s *priv, uint8_t timer)
+hrtim_tim_get(struct stm32_hrtim_s *priv, uint8_t timer)
 {
   struct stm32_hrtim_tim_s *tim;
 
@@ -1865,7 +1865,7 @@ static struct stm32_hrtim_tim_s *
 
 #if defined(CONFIG_STM32_HRTIM_PWM) || defined(CONFIG_STM32_HRTIM_FAULTS)
 static struct stm32_hrtim_slave_priv_s *
-  hrtim_slave_get(struct stm32_hrtim_s *priv, uint8_t timer)
+hrtim_slave_get(struct stm32_hrtim_s *priv, uint8_t timer)
 {
   struct stm32_hrtim_tim_s *tim;
   struct stm32_hrtim_slave_priv_s *slave;

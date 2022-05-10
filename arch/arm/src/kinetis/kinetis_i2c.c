@@ -134,12 +134,12 @@ static void kinetis_i2c_putreg(struct kinetis_i2cdev_s *priv,
 
 static inline void kinetis_i2c_sem_init(struct kinetis_i2cdev_s *priv);
 static inline void
-  kinetis_i2c_sem_destroy(struct kinetis_i2cdev_s *priv);
+kinetis_i2c_sem_destroy(struct kinetis_i2cdev_s *priv);
 static inline int kinetis_i2c_sem_wait(struct kinetis_i2cdev_s *priv);
 
 #ifdef CONFIG_I2C_RESET
 static int
-  kinetis_i2c_sem_wait_noncancelable(struct kinetis_i2cdev_s *priv);
+kinetis_i2c_sem_wait_noncancelable(struct kinetis_i2cdev_s *priv);
 #endif
 
 static inline void kinetis_i2c_sem_post(struct kinetis_i2cdev_s *priv);
@@ -361,7 +361,7 @@ static inline int kinetis_i2c_sem_wait(struct kinetis_i2cdev_s *priv)
  ****************************************************************************/
 
 static int
-  kinetis_i2c_sem_wait_noncancelable(struct kinetis_i2cdev_s *priv)
+kinetis_i2c_sem_wait_noncancelable(struct kinetis_i2cdev_s *priv)
 {
   return nxsem_wait_uninterruptible(&priv->mutex);
 }

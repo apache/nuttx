@@ -989,7 +989,7 @@ static void stm32l4_putreg(uint32_t val, uint32_t addr)
  ****************************************************************************/
 
 static struct stm32l4_req_s *
-  stm32l4_req_remfirst(struct stm32l4_ep_s *privep)
+stm32l4_req_remfirst(struct stm32l4_ep_s *privep)
 {
   struct stm32l4_req_s *ret = privep->head;
 
@@ -1060,7 +1060,7 @@ static void stm32l4_ep0in_setupresponse(struct stm32l4_usbdev_s *priv,
  ****************************************************************************/
 
 static inline void
-  stm32l4_ep0in_transmitzlp(struct stm32l4_usbdev_s *priv)
+stm32l4_ep0in_transmitzlp(struct stm32l4_usbdev_s *priv)
 {
   stm32l4_ep0in_setupresponse(priv, NULL, 0);
 }
