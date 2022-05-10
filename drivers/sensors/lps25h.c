@@ -494,7 +494,6 @@ static int lps25h_one_shot(FAR struct lps25h_dev_s *dev)
 {
   int ret = ERROR;
   int retries;
-  struct timespec abstime;
   irqstate_t flags;
 
   if (!dev->irqenabled)
@@ -530,16 +529,8 @@ static int lps25h_one_shot(FAR struct lps25h_dev_s *dev)
           return ret;
         }
 
-      clock_gettime(CLOCK_REALTIME, &abstime);
-      abstime.tv_sec += (LPS25H_RETRY_TIMEOUT_MSECS / 1000);
-      abstime.tv_nsec += (LPS25H_RETRY_TIMEOUT_MSECS % 1000) * 1000 * 1000;
-      while (abstime.tv_nsec >= (1000 * 1000 * 1000))
-        {
-          abstime.tv_sec++;
-          abstime.tv_nsec -= 1000 * 1000 * 1000;
-        }
-
-      ret = nxsem_timedwait_uninterruptible(&dev->waitsem, &abstime);
+      ret = nxsem_tickwait_uninterruptible(&dev->waitsem,
+                                      MSEC2TICK(LPS25H_RETRY_TIMEOUT_MSECS));
       if (ret == OK)
         {
           break;

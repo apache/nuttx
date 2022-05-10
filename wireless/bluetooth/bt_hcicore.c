@@ -76,8 +76,7 @@
  * to be adjusted.
  */
 
-#define TIMEOUT_SEC    2
-#define TIMEOUT_NSEC   500 * 1024 * 1024
+#define TIMEOUT_MSEC   2500
 
 /****************************************************************************
  * Public Data
@@ -1816,8 +1815,6 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
     }
   else
     {
-      struct timespec abstime;
-
       /* Wait for the response to the command.  An I/O error will be
        * declared if the response does not occur within the timeout
        * interval.
@@ -1825,38 +1822,10 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
        * REVISIT: The cause of the timeout could be a failure to receive a
        * response to a sent frame or, perhaps, a failure to send the frame.
        * Should there also be logic to flush any unsent Tx packets?
-       *
-       * Get the current time.  Not that we lock the scheduler here so that
-       * we can be assured that there will be no context switches will occur
-       * between the time that we calculate the delay time and until we get
-       * to the wait.
        */
 
-      sched_lock();
-      ret = clock_gettime(CLOCK_REALTIME, &abstime);
-      if (ret >= 0)
-        {
-          /* Add the offset to the time in the future */
-
-          abstime.tv_sec  += TIMEOUT_SEC;
-          abstime.tv_nsec += TIMEOUT_NSEC;
-
-          /* Handle carry from nanoseconds to seconds */
-
-          if (abstime.tv_nsec >= NSEC_PER_SEC)
-            {
-              abstime.tv_nsec -= NSEC_PER_SEC;
-              abstime.tv_sec++;
-            }
-
-          /* Now wait for the response.  The scheduler lock will be
-           * released while we are waiting.
-           */
-
-          ret = nxsem_timedwait_uninterruptible(&sync_sem, &abstime);
-        }
-
-      sched_unlock();
+      ret = nxsem_tickwait_uninterruptible(&sync_sem,
+                                           MSEC2TICK(TIMEOUT_MSEC));
     }
 
   /* Indicate failure if we failed to get the response */
