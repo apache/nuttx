@@ -55,6 +55,11 @@
 
 #define PWM_PLUSE_CNT_REG         REG_ADDR8(0x7c0)
 
+/* PWM0 Mode select */
+
+#define PWM_MODE0_NORMAL          0
+#define PWM_MODE0_COUNT           1
+
 /* PWM IRQ status */
 
 #define PWM_IRQ_STA_PNUM0         BIT(0)
