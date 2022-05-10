@@ -920,7 +920,7 @@ static int semphr_take_wrapper(void *semphr, uint32_t block_time_ms)
 
   if (block_time_ms == OSI_FUNCS_TIME_BLOCKING)
     {
-      ret = sem_wait(&bt_sem->sem);
+      ret = nxsem_wait(&bt_sem->sem);
       if (ret)
         {
           wlerr("Failed to wait sem\n");
@@ -967,7 +967,7 @@ static int semphr_give_wrapper(void *semphr)
   int ret;
   struct bt_sem_s *bt_sem = (struct bt_sem_s *)semphr;
 
-  ret = sem_post(&bt_sem->sem);
+  ret = nxsem_post(&bt_sem->sem);
   if (ret)
     {
       wlerr("Failed to post sem error=%d\n", ret);

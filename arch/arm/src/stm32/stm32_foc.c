@@ -1570,7 +1570,7 @@ static int stm32_foc_adc_calibration_handler(struct foc_dev_s *dev)
 
       /* Post semaphore that calibration is done */
 
-      sem_post(&priv->cal_done_sem);
+      nxsem_post(&priv->cal_done_sem);
     }
   else
     {

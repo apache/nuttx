@@ -647,7 +647,7 @@ static void adc_read_work(struct adc_dev_s *dev)
   int32_t adc;
   struct adc_chan_s *priv = (struct adc_chan_s *)dev->ad_priv;
 
-  ret = sem_wait(&g_sem_excl);
+  ret = nxsem_wait(&g_sem_excl);
   if (ret < 0)
     {
       aerr("Failed to wait sem ret=%d\n", ret);
@@ -676,7 +676,7 @@ static void adc_read_work(struct adc_dev_s *dev)
   ainfo("channel: %" PRIu8 ", voltage: %" PRIu32 " mV\n", priv->channel,
         adc);
 
-  sem_post(&g_sem_excl);
+  nxsem_post(&g_sem_excl);
 }
 
 /****************************************************************************
