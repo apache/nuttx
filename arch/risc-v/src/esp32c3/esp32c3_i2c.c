@@ -84,6 +84,9 @@
 #define TIMESPEC_TO_US(sec, nano)  ((sec * USEC_PER_SEC) + (nano / NSEC_PER_USEC))
 #endif
 
+#define ESP32C3_I2CTIMEOTICKS \
+    (SEC2TICK(CONFIG_ESP32C3_I2CTIMEOSEC) + MSEC2TICK(CONFIG_ESP32C3_I2CTIMEOMS))
+
 /* I2C hardware FIFO depth */
 
 #define I2C_FIFO_SIZE (32)
@@ -793,27 +796,8 @@ static void esp32c3_i2c_reset_fsmc(struct esp32c3_i2c_priv_s *priv)
 #ifndef CONFIG_I2C_POLLED
 static int esp32c3_i2c_sem_waitdone(struct esp32c3_i2c_priv_s *priv)
 {
-  int ret;
-  struct timespec abstime;
-
-  clock_gettime(CLOCK_REALTIME, &abstime);
-
-#if CONFIG_ESP32C3_I2CTIMEOSEC > 0
-  abstime.tv_sec += CONFIG_ESP32C3_I2CTIMEOSEC;
-#endif
-
-#if CONFIG_ESP32C3_I2CTIMEOMS > 0
-  abstime.tv_nsec += CONFIG_ESP32C3_I2CTIMEOMS * NSEC_PER_MSEC;
-  if (abstime.tv_nsec >= 1000 * NSEC_PER_MSEC)
-    {
-      abstime.tv_sec++;
-      abstime.tv_nsec -= 1000 * NSEC_PER_MSEC;
-    }
-#endif
-
-  ret = nxsem_timedwait_uninterruptible(&priv->sem_isr, &abstime);
-
-  return ret;
+  return nxsem_tickwait_uninterruptible(&priv->sem_isr,
+                                        ESP32C3_I2CTIMEOTICKS);
 }
 #endif
 
