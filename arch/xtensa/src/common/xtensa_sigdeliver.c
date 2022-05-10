@@ -178,5 +178,5 @@ void xtensa_sig_deliver(void)
    */
 
   board_autoled_off(LED_SIGNAL);
-  xtensa_context_restore(&regs);
+  xtensa_context_restore(regs);
 }

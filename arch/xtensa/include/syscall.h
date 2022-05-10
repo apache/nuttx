@@ -68,7 +68,7 @@
 
 /* SYS call 1:
  *
- * void xtensa_context_restore(uint32_t **restoreregs) noreturn_function;
+ * void xtensa_context_restore(uint32_t *restoreregs) noreturn_function;
  */
 
 #define SYS_restore_context       (1)

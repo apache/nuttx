@@ -96,7 +96,7 @@ int xtensa_swint(int irq, void *context, void *arg)
       case SYS_save_context:
         {
           DEBUGASSERT(regs[REG_A3] != 0);
-          memcpy(*(uint32_t **)regs[REG_A3], regs, XCPTCONTEXT_SIZE);
+          memcpy((uint32_t *)regs[REG_A3], regs, XCPTCONTEXT_SIZE);
         }
 
         break;
@@ -121,7 +121,7 @@ int xtensa_swint(int irq, void *context, void *arg)
       case SYS_restore_context:
         {
           DEBUGASSERT(regs[REG_A3] != 0);
-          CURRENT_REGS = *(uint32_t **)regs[REG_A3];
+          CURRENT_REGS = (uint32_t *)regs[REG_A3];
         }
 
         break;

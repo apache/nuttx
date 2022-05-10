@@ -299,7 +299,7 @@ void xtensa_dumpstate(void)
     }
   else
     {
-      up_saveusercontext(&rtcb->xcp.regs);
+      up_saveusercontext(rtcb->xcp.regs);
     }
 
   /* Dump the registers (if available) */
