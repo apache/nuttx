@@ -262,7 +262,7 @@ static inline void efm32_i2c_modifyreg(struct efm32_i2c_priv_s *priv,
                                        uint32_t setbits);
 static inline int efm32_i2c_sem_wait(struct efm32_i2c_priv_s *priv);
 static int
-  efm32_i2c_sem_wait_noncancelable(struct efm32_i2c_priv_s *priv);
+efm32_i2c_sem_wait_noncancelable(struct efm32_i2c_priv_s *priv);
 
 #ifdef CONFIG_EFM32_I2C_DYNTIMEOUT
 static useconds_t efm32_i2c_tousecs(int msgc, struct i2c_msg_s *msgs);
@@ -482,7 +482,7 @@ static inline int efm32_i2c_sem_wait(struct efm32_i2c_priv_s *priv)
  ****************************************************************************/
 
 static int
-  efm32_i2c_sem_wait_noncancelable(struct efm32_i2c_priv_s *priv)
+efm32_i2c_sem_wait_noncancelable(struct efm32_i2c_priv_s *priv)
 {
   return nxsem_wait_uninterruptible(&priv->sem_excl);
 }

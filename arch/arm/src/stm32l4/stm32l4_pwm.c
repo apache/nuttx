@@ -2665,7 +2665,7 @@ static int pwm_soft_break(struct pwm_lowerhalf_s *dev, bool state)
  ****************************************************************************/
 
 static uint16_t
-  pwm_outputs_from_channels(struct stm32l4_pwmtimer_s *priv)
+pwm_outputs_from_channels(struct stm32l4_pwmtimer_s *priv)
 {
   uint16_t outputs = 0;
   uint8_t  channel = 0;

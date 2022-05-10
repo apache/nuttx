@@ -442,7 +442,7 @@ static void cxd56_usbreset(struct cxd56_usbdev_s *priv);
 /* Interrupt handling */
 
 static struct cxd56_ep_s *
-  cxd56_epfindbyaddr(struct cxd56_usbdev_s *priv, uint16_t eplog);
+cxd56_epfindbyaddr(struct cxd56_usbdev_s *priv, uint16_t eplog);
 static void cxd56_dispatchrequest(struct cxd56_usbdev_s *priv);
 static inline void cxd56_ep0setup(struct cxd56_usbdev_s *priv);
 static int cxd56_usbinterrupt(int irq, void *context, void *arg);

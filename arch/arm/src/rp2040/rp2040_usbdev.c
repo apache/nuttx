@@ -327,7 +327,7 @@ static void rp2040_handle_zlp(struct rp2040_usbdev_s *priv);
 
 static void rp2040_cancelrequests(struct rp2040_ep_s *privep);
 static struct rp2040_ep_s *
-  rp2040_epfindbyaddr(struct rp2040_usbdev_s *priv, uint16_t eplog);
+rp2040_epfindbyaddr(struct rp2040_usbdev_s *priv, uint16_t eplog);
 static void rp2040_dispatchrequest(struct rp2040_usbdev_s *priv);
 static void rp2040_ep0setup(struct rp2040_usbdev_s *priv);
 

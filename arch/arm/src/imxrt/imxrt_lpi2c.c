@@ -218,7 +218,7 @@ struct imxrt_lpi2c_priv_s
  ****************************************************************************/
 
 static inline uint32_t
-  imxrt_lpi2c_getreg(struct imxrt_lpi2c_priv_s *priv, uint16_t offset);
+imxrt_lpi2c_getreg(struct imxrt_lpi2c_priv_s *priv, uint16_t offset);
 static inline void imxrt_lpi2c_putreg(struct imxrt_lpi2c_priv_s *priv,
                                       uint16_t offset, uint32_t value);
 static inline void imxrt_lpi2c_modifyreg(struct imxrt_lpi2c_priv_s *priv,
@@ -227,7 +227,7 @@ static inline void imxrt_lpi2c_modifyreg(struct imxrt_lpi2c_priv_s *priv,
 static inline int imxrt_lpi2c_sem_wait(struct imxrt_lpi2c_priv_s *priv);
 #ifdef CONFIG_I2C_RESET
 static int
-  imxrt_lpi2c_sem_wait_noncancelable(struct imxrt_lpi2c_priv_s *priv);
+imxrt_lpi2c_sem_wait_noncancelable(struct imxrt_lpi2c_priv_s *priv);
 #endif
 
 #ifdef CONFIG_IMXRT_LPI2C_DYNTIMEO
@@ -235,15 +235,15 @@ static useconds_t imxrt_lpi2c_tousecs(int msgc, struct i2c_msg_s *msgs);
 #endif /* CONFIG_IMXRT_LPI2C_DYNTIMEO */
 
 static inline int
-  imxrt_lpi2c_sem_waitdone(struct imxrt_lpi2c_priv_s *priv);
+imxrt_lpi2c_sem_waitdone(struct imxrt_lpi2c_priv_s *priv);
 static inline void
-  imxrt_lpi2c_sem_waitstop(struct imxrt_lpi2c_priv_s *priv);
+imxrt_lpi2c_sem_waitstop(struct imxrt_lpi2c_priv_s *priv);
 static inline void
-  imxrt_lpi2c_sem_post(struct imxrt_lpi2c_priv_s *priv);
+imxrt_lpi2c_sem_post(struct imxrt_lpi2c_priv_s *priv);
 static inline void
-  imxrt_lpi2c_sem_init(struct imxrt_lpi2c_priv_s *priv);
+imxrt_lpi2c_sem_init(struct imxrt_lpi2c_priv_s *priv);
 static inline void
-  imxrt_lpi2c_sem_destroy(struct imxrt_lpi2c_priv_s *priv);
+imxrt_lpi2c_sem_destroy(struct imxrt_lpi2c_priv_s *priv);
 
 #ifdef CONFIG_I2C_TRACE
 static void imxrt_lpi2c_tracereset(struct imxrt_lpi2c_priv_s *priv);
@@ -260,7 +260,7 @@ static inline void imxrt_lpi2c_sendstart(struct imxrt_lpi2c_priv_s *priv,
                                          uint8_t address);
 static inline void imxrt_lpi2c_sendstop(struct imxrt_lpi2c_priv_s *priv);
 static inline uint32_t
-  imxrt_lpi2c_getstatus(struct imxrt_lpi2c_priv_s *priv);
+imxrt_lpi2c_getstatus(struct imxrt_lpi2c_priv_s *priv);
 
 static int imxrt_lpi2c_isr_process(struct imxrt_lpi2c_priv_s * priv);
 
@@ -475,7 +475,7 @@ static struct imxrt_lpi2c_priv_s imxrt_lpi2c4_priv =
  ****************************************************************************/
 
 static inline uint32_t
-  imxrt_lpi2c_getreg(struct imxrt_lpi2c_priv_s *priv, uint16_t offset)
+imxrt_lpi2c_getreg(struct imxrt_lpi2c_priv_s *priv, uint16_t offset)
 {
   return getreg32(priv->config->base + offset);
 }
@@ -533,7 +533,7 @@ static inline int imxrt_lpi2c_sem_wait(struct imxrt_lpi2c_priv_s *priv)
 
 #ifdef CONFIG_I2C_RESET
 static int
-  imxrt_lpi2c_sem_wait_noncancelable(struct imxrt_lpi2c_priv_s *priv)
+imxrt_lpi2c_sem_wait_noncancelable(struct imxrt_lpi2c_priv_s *priv)
 {
   return nxsem_wait_uninterruptible(&priv->sem_excl);
 }
@@ -579,7 +579,7 @@ static useconds_t imxrt_lpi2c_tousecs(int msgc, struct i2c_msg_s *msgs)
 
 #ifndef CONFIG_I2C_POLLED
 static inline int
-  imxrt_lpi2c_sem_waitdone(struct imxrt_lpi2c_priv_s *priv)
+imxrt_lpi2c_sem_waitdone(struct imxrt_lpi2c_priv_s *priv)
 {
   irqstate_t flags;
   uint32_t regval;
@@ -669,7 +669,7 @@ static inline int
 }
 #else
 static inline int
-  imxrt_lpi2c_sem_waitdone(struct imxrt_lpi2c_priv_s *priv)
+imxrt_lpi2c_sem_waitdone(struct imxrt_lpi2c_priv_s *priv)
 {
   clock_t timeout;
   clock_t start;
@@ -729,7 +729,7 @@ static inline int
  ****************************************************************************/
 
 static inline void
-  imxrt_lpi2c_sem_waitstop(struct imxrt_lpi2c_priv_s *priv)
+imxrt_lpi2c_sem_waitstop(struct imxrt_lpi2c_priv_s *priv)
 {
   clock_t start;
   clock_t elapsed;
@@ -853,7 +853,7 @@ static inline void imxrt_lpi2c_sem_init(struct imxrt_lpi2c_priv_s *priv)
  ****************************************************************************/
 
 static inline void
-  imxrt_lpi2c_sem_destroy(struct imxrt_lpi2c_priv_s *priv)
+imxrt_lpi2c_sem_destroy(struct imxrt_lpi2c_priv_s *priv)
 {
   nxsem_destroy(&priv->sem_excl);
 #ifndef CONFIG_I2C_POLLED
@@ -1187,7 +1187,7 @@ static inline void imxrt_lpi2c_sendstart(struct imxrt_lpi2c_priv_s *priv,
     }
 
   imxrt_lpi2c_putreg(priv, IMXRT_LPI2C_MTDR_OFFSET,
-                    (LPI2C_MTDR_CMD_START | LPI2C_MTDR_DATA(addr)));
+                     (LPI2C_MTDR_CMD_START | LPI2C_MTDR_DATA(addr)));
 }
 
 /****************************************************************************
@@ -1212,7 +1212,7 @@ static inline void imxrt_lpi2c_sendstop(struct imxrt_lpi2c_priv_s *priv)
  ****************************************************************************/
 
 static inline uint32_t
-  imxrt_lpi2c_getstatus(struct imxrt_lpi2c_priv_s *priv)
+imxrt_lpi2c_getstatus(struct imxrt_lpi2c_priv_s *priv)
 {
   return imxrt_lpi2c_getreg(priv, IMXRT_LPI2C_MSR_OFFSET);
 }
@@ -1562,9 +1562,9 @@ static int imxrt_lpi2c_init(struct imxrt_lpi2c_priv_s *priv)
   /* Set scl, sda glitch filters and busy idle */
 
   imxrt_lpi2c_putreg(priv, IMXRT_LPI2C_MCFGR2_OFFSET,
-                    LPI2C_MCFG2_BUSIDLE(priv->config->busy_idle) |
-                    LPI2C_MCFG2_FILTSCL_CYCLES(priv->config->filtscl) |
-                    LPI2C_MCFG2_FILTSDA_CYCLES(priv->config->filtsda));
+                     LPI2C_MCFG2_BUSIDLE(priv->config->busy_idle) |
+                     LPI2C_MCFG2_FILTSCL_CYCLES(priv->config->filtscl) |
+                     LPI2C_MCFG2_FILTSDA_CYCLES(priv->config->filtsda));
 
   /* Set pin low cycles to 0 (disable) */
 
