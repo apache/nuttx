@@ -32,7 +32,7 @@
 #include <assert.h>
 #include <debug.h>
 #include <sched.h>
-#include <semaphore.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/list.h>
@@ -1509,7 +1509,7 @@ static int bl602_ioctl_wifi_start(struct bl602_net_driver_s *priv,
           return -EPIPE;
         }
 
-      sem_wait(&g_wifi_connect_sem);
+      nxsem_wait(&g_wifi_connect_sem);
 
       /* check connect state */
 
@@ -1639,7 +1639,7 @@ bl602_net_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
               para->flags = 0;
             }
 
-          if (sem_trywait(&g_wifi_scan_sem) == 0)
+          if (nxsem_trywait(&g_wifi_scan_sem) == 0)
             {
               if (priv->channel != 0)
                 {
@@ -1672,24 +1672,24 @@ bl602_net_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         {
           struct iwreq *req = (struct iwreq *)arg;
 
-          sem_wait(&g_wifi_scan_sem);
+          nxsem_wait(&g_wifi_scan_sem);
 
           if (g_state.scan_result_status != 0)
             {
               wlwarn("scan failed\n");
-              sem_post(&g_wifi_scan_sem);
+              nxsem_post(&g_wifi_scan_sem);
               return -EIO;
             }
 
           if (g_state.scan_result_len == 0)
             {
               req->u.data.length = 0;
-              sem_post(&g_wifi_scan_sem);
+              nxsem_post(&g_wifi_scan_sem);
               return OK;
             }
 
           ret = format_scan_result_to_wapi(req, g_state.scan_result_len);
-          sem_post(&g_wifi_scan_sem);
+          nxsem_post(&g_wifi_scan_sem);
           return ret;
         }
       while (0);
@@ -2114,7 +2114,7 @@ void bl602_net_event(int evt, int val)
           netdev_carrier_on(&priv->net_dev);
 
           wifi_mgmr_sta_autoconnect_disable();
-          sem_post(&g_wifi_connect_sem);
+          nxsem_post(&g_wifi_connect_sem);
         }
       while (0);
       break;
@@ -2147,7 +2147,7 @@ void bl602_net_event(int evt, int val)
                   wifi_mgmr_sta_autoconnect_disable();
                   wifi_mgmr_api_idle();
 
-                  sem_post(&g_wifi_connect_sem);
+                  nxsem_post(&g_wifi_connect_sem);
                 }
             }
         }
@@ -2158,7 +2158,7 @@ void bl602_net_event(int evt, int val)
       do
         {
           g_state.scan_result_status = val;
-          sem_post(&g_wifi_scan_sem);
+          nxsem_post(&g_wifi_scan_sem);
         }
       while (0);
 
