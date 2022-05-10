@@ -915,7 +915,6 @@ static void esp_update_time(struct timespec *timespec, uint32_t ticks)
 static int semphr_take_wrapper(void *semphr, uint32_t block_time_ms)
 {
   int ret;
-  struct timespec timeout;
   struct bt_sem_s *bt_sem = (struct bt_sem_s *)semphr;
 
   if (block_time_ms == OSI_FUNCS_TIME_BLOCKING)
@@ -930,18 +929,11 @@ static int semphr_take_wrapper(void *semphr, uint32_t block_time_ms)
     {
       if (block_time_ms > 0)
         {
-          ret = clock_gettime(CLOCK_REALTIME, &timeout);
-          if (ret < 0)
-            {
-              wlerr("Failed to get time\n");
-              return false;
-            }
-          esp_update_time(&timeout, MSEC2TICK(block_time_ms));
-          ret = sem_timedwait(&bt_sem->sem, &timeout);
+          ret = nxsem_tickwait(&bt_sem->sem, MSEC2TICK(block_time_ms));
         }
       else
         {
-          ret = sem_trywait(&bt_sem->sem);
+          ret = nxsem_trywait(&bt_sem->sem);
         }
     }
 

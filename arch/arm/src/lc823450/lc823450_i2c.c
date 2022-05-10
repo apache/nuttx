@@ -351,7 +351,7 @@ static inline int
 
   /* Signal the interrupt handler that we are waiting.  NOTE:  Interrupts
    * are currently disabled but will be temporarily re-enabled below when
-   * sem_timedwait() sleeps.
+   * nxsem_tickwait() sleeps.
    */
 
   start = clock_systime_ticks();

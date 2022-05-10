@@ -196,25 +196,16 @@ void rtw_up_sema_from_isr(void **sema)
 
 uint32_t rtw_down_timeout_sema(void **sema, uint32_t timeout)
 {
-  struct timespec abstime;
   int ret;
+
   if (timeout == 0xffffffff)
     {
-      ret = sem_wait(*sema);
+      ret = nxsem_wait(*sema);
     }
 
   else
     {
-      clock_gettime(CLOCK_REALTIME, &abstime);
-      abstime.tv_sec += timeout / 1000;
-      abstime.tv_nsec += (timeout % 1000) * 1000 * 1000;
-      if (abstime.tv_nsec >= (1000 * 1000000))
-        {
-          abstime.tv_sec += 1;
-          abstime.tv_nsec -= (1000 * 1000000);
-        }
-
-      ret = sem_timedwait(*sema, &abstime);
+      ret = nxsem_tickwait(*sema, MSEC2TICK(timeout));
     }
 
   return !ret;

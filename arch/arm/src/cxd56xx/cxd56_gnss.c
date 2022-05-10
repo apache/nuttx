@@ -2108,18 +2108,7 @@ static int cxd56_gnss_get_1pps_output(FAR struct file *filep,
 
 static int cxd56_gnss_wait_notify(FAR sem_t *sem, time_t waitsec)
 {
-  int             ret;
-  struct timespec timeout;
-
-  ret = clock_gettime(CLOCK_REALTIME, &timeout);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  timeout.tv_sec += waitsec; /* <waitsec> seconds timeout for wait */
-
-  return nxsem_timedwait(sem, &timeout);
+  return nxsem_tickwait(sem, SEC2TICK(waitsec));
 }
 
 /****************************************************************************
