@@ -80,6 +80,7 @@ struct cw2218_dev_s
   struct work_s work;                                /* Work queue for reading data. */
   int last_cap;                                      /* battery cap change */
   int last_batt_temp;                                /* battery temp change */
+  bool gauge_init_status;                            /* gauge init status */
 };
 
 /****************************************************************************
@@ -1151,7 +1152,10 @@ static int cw2218_online(struct battery_gauge_dev_s *dev, bool *status)
 {
   /* There is no concept of online/offline in this driver */
 
-  *status = true;
+  FAR struct cw2218_dev_s *priv = (FAR struct cw2218_dev_s *)dev;
+
+  *status = priv->gauge_init_status;
+
   return OK;
 }
 
@@ -1288,6 +1292,7 @@ static int gauge_init_thread(int argc, char** argv)
       else
         {
           baterr("battery gauge init success\n");
+          priv->gauge_init_status = true;
           break;
         }
     }
@@ -1352,6 +1357,7 @@ FAR struct battery_gauge_dev_s *cw2218_initialize(
   priv->pin       = int_pin;
   priv->last_cap  = -1;
   priv->last_batt_temp  = -1;
+  priv->gauge_init_status = false;
 
   ret = cw2218_init_interrupt(priv);
   if (ret < 0)
