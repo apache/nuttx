@@ -95,6 +95,7 @@ struct sensor_user_s
   unsigned long    generation; /* Last generation subscriber has seen */
   unsigned long    interval;   /* The interval for subscriber */
   unsigned long    latency;    /* The bactch latency for subscriber */
+  bool             readlast;   /* The flag of readlast */
 };
 
 /* This structure describes the state of the upper half driver */
@@ -108,7 +109,6 @@ struct sensor_upperhalf_s
   pid_t              semholder;          /* The current holder of the semaphore */
   int16_t            semcount;           /* Number of counts held */
   struct list_node   userlist;           /* List of users */
-  bool               readlast;           /* The flag of readlast */
 };
 
 /****************************************************************************
@@ -454,6 +454,7 @@ static int sensor_open(FAR struct file *filep)
   user->interval   = ULONG_MAX;
   user->latency    = ULONG_MAX;
   user->generation = upper->state.generation;
+  user->readlast   = true;
   nxsem_init(&user->buffersem, 0, 0);
   nxsem_set_protocol(&user->buffersem, SEM_PRIO_NONE);
   list_add_tail(&upper->userlist, &user->node);
@@ -570,7 +571,7 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
        * it will return 0 when there isn't new data.
        */
 
-      if (upper->readlast)
+      if (user->readlast)
         {
           if (circbuf_is_empty(&upper->buffer))
             {
@@ -760,7 +761,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_READLAST:
         {
           sensor_semtake(upper);
-          upper->readlast = !!arg;
+          user->readlast = !!arg;
           sensor_semgive(upper);
         }
         break;
@@ -1044,7 +1045,6 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
   /* Initialize the upper-half data structure */
 
   list_initialize(&upper->userlist);
-  upper->readlast = true;
   upper->state.esize = esize;
   upper->state.min_interval = ULONG_MAX;
   upper->state.min_latency = ULONG_MAX;
