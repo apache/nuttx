@@ -39,7 +39,8 @@ function setup_toolchain()
   ARCH=(\
       "xtensa" \
       "arm" \
-      "risc-v" )
+      "risc-v" \
+      "tc32" )
 
   TOOLCHAIN=(\
             "gcc" \
