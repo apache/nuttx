@@ -965,6 +965,11 @@
 #define CS35L41_DSP_TUNE_MODE                             (1)
 #define CS35L41_DSP_CAL_MODE                              (2)
 
+/* scenario mode */
+
+#define CS35L41B_SCENARIO_SPEAKER                         (0)
+#define CS35L41B_SCENARIO_SCO                             (1)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -1011,6 +1016,7 @@ struct cs35l41b_dev_s
   int                     mode;
   uint32_t                asp_gain;
   uint32_t                dsp_gain;
+  int                     scenario_mode;
 
 #ifdef CONFIG_AUDIO_CS35L41B_DEBUG
   bool                    dump_dsp_info;
@@ -1041,4 +1047,8 @@ int cs35l41b_debug_get_gain(FAR struct cs35l41b_dev_s *priv,
 int cs35l41b_debug_get_mode(FAR struct cs35l41b_dev_s *priv,
                             unsigned long arg);
 #endif
+
+int cs35l41b_start_tuning_switch(FAR struct cs35l41b_dev_s *priv);
+int cs35l41b_finish_tuning_switch(FAR struct cs35l41b_dev_s *priv);
+
 #endif

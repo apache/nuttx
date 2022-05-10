@@ -98,6 +98,10 @@
                                               CS35L41B_WAKE_UP_PIN_LOW();  \
                                           } while(0)
 
+/* Maximum amount of times to poll for ACK to DSP Mailbox Command */
+
+#define CS35L41_POLL_ACKED_MBOX_CMD_MAX   (10)
+
 /****************************************************************************
  * Private Type Declarations
  ****************************************************************************/
@@ -111,11 +115,15 @@ typedef struct
   uint8_t size;   /* Bitwise size of register bitfield */
 } cs35l41_otp_packed_entry_t;
 
+typedef int (*cs35l41b_ioctl_handler_t)(FAR struct cs35l41b_dev_s *priv,
+                                        void *arg);
+
 typedef struct
 {
-  unsigned long cmd;  /* Command */
-  unsigned long data; /* Data */
-} cs35l41b_io_t;
+  char *key;
+  char *value;
+  cs35l41b_ioctl_handler_t handler;
+} cs35l41b_info_t;
 
 /****************************************************************************
  * Private Function Prototypes
@@ -155,6 +163,9 @@ static int cs35l41b_boot_initialize(FAR struct cs35l41b_dev_s *priv,
                                     int mode);
 
 static int cs35l41b_output_configuration(FAR struct cs35l41b_dev_s *priv);
+
+static int cs35l41b_set_scenario_handler(FAR struct cs35l41b_dev_s *priv,
+                                          void *arg);
 
 static int cs35l41b_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
                             FAR struct audio_caps_s *caps);
@@ -411,9 +422,46 @@ static const uint32_t g_cs35l41_pdn_patch[] =
   CS35L41_CTRL_KEYS_TEST_KEY_CTRL_REG, CS35L41_TEST_KEY_CTRL_LOCK_2,
 };
 
+static const cs35l41b_info_t cs35l41b_info[] =
+{
+  {
+    .key      = "set_scenario",
+    .value    = "music",
+    .handler  = cs35l41b_set_scenario_handler,
+  },
+
+  {
+    .key      = "set_scenario",
+    .value    = "sco",
+    .handler  = cs35l41b_set_scenario_handler,
+  },
+};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static int cs35l41b_set_scenario_handler(FAR struct cs35l41b_dev_s *priv,
+                                          void *arg)
+{
+  char *parse_ptr = (char *)arg;
+
+  if (!strncmp(parse_ptr, "music", strlen("music")))
+    {
+      priv->scenario_mode = CS35L41B_SCENARIO_SPEAKER;
+    }
+  else if (!strncmp(parse_ptr, "sco", strlen("sco")))
+    {
+      priv->scenario_mode = CS35L41B_SCENARIO_SCO;
+    }
+  else
+    {
+      auderr("value is invalid!\n");
+      return ERROR;
+    }
+
+  return OK;
+}
 
 /****************************************************************************
  * Name: cs35l41b_ioctl
@@ -427,10 +475,49 @@ static int cs35l41b_ioctl(FAR struct audio_lowerhalf_s *dev,
                           int cmd, unsigned long arg)
 {
   FAR struct cs35l41b_dev_s *priv = (FAR struct cs35l41b_dev_s *)dev;
-  FAR struct audio_msg_s *audio_msg = (FAR struct audio_msg_s *)arg;
+  FAR struct audio_msg_s *audio_msg;
+  FAR char *parse_ptr = (FAR char *)arg;
+  int ret;
+  int i;
 
   if (cmd == AUDIOIOC_SETPARAMTER)
     {
+      for (i = 0; i < ARRAY_SIZE(cs35l41b_info); i++)
+        {
+          if (!strncmp(parse_ptr,
+              cs35l41b_info[i].key, strlen(cs35l41b_info[i].key)))
+            {
+              parse_ptr += strlen(cs35l41b_info[i].key);
+              parse_ptr += strlen("=");
+
+              if (!strncmp(parse_ptr,
+                  cs35l41b_info[i].value,
+                  strlen(cs35l41b_info[i].value)))
+                {
+                  if (cs35l41b_info[i].handler != NULL)
+                    {
+                      ret = cs35l41b_info[i].handler(priv,
+                                                    cs35l41b_info[i].value);
+                      return ret;
+                    }
+                  else
+                    {
+                      return ERROR;
+                    }
+                }
+              else
+                {
+                  parse_ptr = (FAR char *)arg;
+                }
+            }
+          else
+            {
+              parse_ptr = (FAR char *)arg;
+            }
+        }
+
+      audio_msg = (FAR struct audio_msg_s *)arg;
+
       switch (audio_msg->msg_id)
         {
           case IO_SET_BYPASS:
@@ -440,7 +527,8 @@ static int cs35l41b_ioctl(FAR struct audio_lowerhalf_s *dev,
                 return ERROR;
               }
 
-            if (cs35l41b_boot_initialize(priv, CS35L41_ASP_MODE) == ERROR)
+            if (cs35l41b_boot_initialize(priv,
+                                        CS35L41_ASP_MODE) == ERROR)
               {
                 auderr("boot initialize failed!\n");
                 return ERROR;
@@ -456,7 +544,7 @@ static int cs35l41b_ioctl(FAR struct audio_lowerhalf_s *dev,
               }
 
             if (cs35l41b_boot_initialize(priv,
-                CS35L41_DSP_TUNE_MODE) == ERROR)
+                                        CS35L41_DSP_TUNE_MODE) == ERROR)
               {
                 auderr("boot initialize failed!\n");
                 return ERROR;
@@ -548,15 +636,18 @@ static int cs35l41b_ioctl(FAR struct audio_lowerhalf_s *dev,
 
 #ifdef CONFIG_AUDIO_CS35L41B_DEBUG
           case IO_DEBUG_SET_GAIN:
-            cs35l41b_debug_set_gain(priv, (unsigned int)audio_msg->u.ptr);
+            cs35l41b_debug_set_gain(priv,
+                                    (unsigned int)audio_msg->u.ptr);
             break;
 
           case IO_DEBUG_GET_GAIN:
-            cs35l41b_debug_get_gain(priv, (unsigned int)audio_msg->u.ptr);
+            cs35l41b_debug_get_gain(priv,
+                                    (unsigned int)audio_msg->u.ptr);
             break;
 
           case IO_DEBUG_DUMP_INFO:
-            cs35l41b_dump_registers(priv, (unsigned int)audio_msg->u.ptr);
+            cs35l41b_dump_registers(priv,
+                                    (unsigned int)audio_msg->u.ptr);
             break;
 
           case IO_DEBUG_DUMP_ENABLE:
@@ -568,7 +659,8 @@ static int cs35l41b_ioctl(FAR struct audio_lowerhalf_s *dev,
             break;
 
           case IO_DEBUG_GET_MODE:
-            cs35l41b_debug_get_mode(priv, (unsigned int)audio_msg->u.ptr);
+            cs35l41b_debug_get_mode(priv,
+                                    (unsigned int)audio_msg->u.ptr);
             break;
 #endif
 
@@ -841,6 +933,21 @@ static int cs35l41b_configure(FAR struct audio_lowerhalf_s *dev,
               auderr("output configuration failed!\n");
               return ERROR;
             }
+
+          if (cs35l41b_power(priv, POWER_UP) == ERROR)
+            {
+              auderr("power process failed\n");
+              return ERROR;
+            }
+
+          if (priv->mode != CS35L41_ASP_MODE)
+            {
+              if (cs35l41b_tune_change_params(priv) == ERROR)
+                {
+                  auderr("tune change params failed!\n");
+                  return ERROR;
+                }
+            }
         }
         break;
 
@@ -913,12 +1020,6 @@ static int cs35l41b_start(FAR struct audio_lowerhalf_s *dev)
   if (!priv->initialize)
     {
       return -EBUSY;
-    }
-
-  if (cs35l41b_power(priv, POWER_UP) == ERROR)
-    {
-      auderr("power process failed\n");
-      return ERROR;
     }
 
   if (cs35l41b_mute(priv, false) == ERROR)
@@ -2511,6 +2612,7 @@ static int cs35l41b_reset(FAR struct cs35l41b_dev_s *priv, bool hw_reset)
   priv->mode                      = CS35L41_ASP_MODE;
   priv->asp_gain                  = CS35L41B_AMP_GAIN_PCM_10P5DB;
   priv->dsp_gain                  = CS35L41B_AMP_GAIN_PCM_18P5DB;
+  priv->scenario_mode             = CS35L41B_SCENARIO_SPEAKER;
 
   return OK;
 }
@@ -2776,6 +2878,300 @@ static int cs35l41b_output_configuration(FAR struct cs35l41b_dev_s *priv)
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: cs35l41b_send_acked_mbox_cmd
+ *
+ * Description:
+ *   cs35l41b send acked command to mbox
+ *
+ ****************************************************************************/
+
+static int cs35l41b_send_acked_mbox_cmd(FAR struct cs35l41b_dev_s *priv,
+                                    uint32_t cmd)
+{
+  int ret = OK;
+  uint32_t regval;
+  int i;
+
+  /* Clear HALO DSP Virtual MBOX 1 IRQ flag */
+
+  ret = cs35l41b_write_register(priv, IRQ2_IRQ2_EINT_2_REG,
+  IRQ2_IRQ2_EINT_2_DSP_VIRTUAL1_MBOX_WR_EINT2_BITMASK);
+  if (ret == ERROR)
+    {
+      goto out;
+    }
+
+  /* Clear HALO DSP Virtual MBOX 2 IRQ flag */
+
+  ret = cs35l41b_write_register(priv, IRQ1_IRQ1_EINT_2_REG,
+  IRQ1_IRQ1_EINT_2_DSP_VIRTUAL2_MBOX_WR_EINT1_BITMASK);
+  if (ret == ERROR)
+    {
+      goto out;
+    }
+
+  /* Read IRQ2 Mask register */
+
+  ret = cs35l41b_read_register(priv, &regval, IRQ2_IRQ2_MASK_2_REG);
+  if (ret == ERROR)
+    {
+      goto out;
+    }
+
+  /* Clear HALO DSP Virtual MBOX 1 IRQ mask */
+
+  regval &= ~(IRQ2_IRQ2_MASK_2_DSP_VIRTUAL1_MBOX_WR_MASK2_BITMASK);
+  ret = cs35l41b_write_register(priv, IRQ2_IRQ2_MASK_2_REG, regval);
+  if (ret == ERROR)
+    {
+      goto out;
+    }
+
+  /* Send HALO DSP MBOX Command */
+
+  ret = cs35l41b_write_register(priv,
+        DSP_VIRTUAL1_MBOX_DSP_VIRTUAL1_MBOX_1_REG, cmd);
+  if (ret == ERROR)
+    {
+      goto out;
+    }
+
+  for (i = 0; i < CS35L41_POLL_ACKED_MBOX_CMD_MAX; i++)
+    {
+      /* Read IRQ1 flag register to poll for MBOX IRQ */
+
+      ret = cs35l41b_read_register(priv, &regval, IRQ1_IRQ1_EINT_2_REG);
+      if (ret == ERROR)
+        {
+          goto out;
+        }
+
+      if (regval & IRQ1_IRQ1_EINT_2_DSP_VIRTUAL2_MBOX_WR_EINT1_BITMASK)
+        {
+          break;
+        }
+
+      nxsig_usleep(1000 * 2);
+    }
+
+  if (i >= CS35L41_POLL_ACKED_MBOX_CMD_MAX)
+    {
+      ret = ERROR;
+      goto out;
+    }
+
+  /* Clear MBOX IRQ flag */
+
+  ret = cs35l41b_write_register(priv, IRQ1_IRQ1_EINT_2_REG,
+        IRQ1_IRQ1_EINT_2_DSP_VIRTUAL2_MBOX_WR_EINT1_BITMASK);
+  if (ret == ERROR)
+    {
+      goto out;
+    }
+
+  /* Read IRQ2 Mask register to re-mask HALO DSP Virtual MBOX 1 IRQ */
+
+  ret = cs35l41b_read_register(priv, &regval, IRQ2_IRQ2_MASK_2_REG);
+  if (ret == ERROR)
+    {
+      goto out;
+    }
+
+  /* Re-mask HALO DSP Virtual MBOX 1 IRQ */
+
+  regval |= IRQ2_IRQ2_MASK_2_DSP_VIRTUAL1_MBOX_WR_MASK2_BITMASK;
+  ret = cs35l41b_write_register(priv, IRQ2_IRQ2_MASK_2_REG, regval);
+  if (ret == ERROR)
+    {
+      goto out;
+    }
+
+  /* read the MBOX status */
+
+  ret = cs35l41b_read_register(priv, &regval, DSP_MBOX_DSP_MBOX_2_REG);
+  if (ret == ERROR)
+    {
+      goto out;
+    }
+
+  /* Check that MBOX status is correct for command just sent */
+
+  if (!(cs35l41_is_mbox_status_correct(cmd, regval)))
+    {
+      ret = ERROR;
+      goto out;
+    }
+
+out:
+  return ret;
+}
+
+/****************************************************************************
+ * Name: cs35l41b_start_tuning_switch
+ *
+ * Description:
+ *   cs35l41b start tune image switch
+ *
+ ****************************************************************************/
+
+int cs35l41b_start_tuning_switch(FAR struct cs35l41b_dev_s *priv)
+{
+  int ret = OK;
+  uint32_t regval;
+  int i;
+
+  /* The Host (i.e. the AP or the Codec driving the amp)
+   * sends a PAUSE request
+   * to the Prince FW and Pauses the current playback.
+   */
+
+  ret = cs35l41b_send_acked_mbox_cmd(priv, CS35L41_DSP_MBOX_CMD_PAUSE);
+  if (ret == ERROR)
+    {
+      goto out;
+    }
+
+  /* The Host ensures both PLL_FORCE_EN and GLOBAL_EN are set to 0.
+   * The Host checks the Power Down Done flag on Prince (MSM_PDN_DONE) to
+   * ensure that the PLL has stopped.
+   * Read GLOBAL_EN register in order to clear GLOBAL_EN
+   */
+
+  ret = cs35l41b_read_register(priv, &regval, MSM_GLOBAL_ENABLES_REG);
+  if (ret == ERROR)
+    {
+      goto out;
+    }
+
+  /* Clear GLOBAL_EN */
+
+  regval &= ~(MSM_GLOBAL_ENABLES_GLOBAL_EN_BITMASK);
+  ret = cs35l41b_write_register(priv, MSM_GLOBAL_ENABLES_REG, regval);
+  if (ret == ERROR)
+    {
+      goto out;
+    }
+
+  /* Read IRQ1 flag register to poll MSM_PDN_DONE bit */
+
+  for (i = 0; i < 100; i++)
+    {
+      ret = cs35l41b_read_register(priv, &regval, IRQ1_IRQ1_EINT_1_REG);
+      if (ret == ERROR)
+        {
+          goto out;
+        }
+
+      if (regval & IRQ1_IRQ1_EINT_1_MSM_PDN_DONE_EINT1_BITMASK)
+        {
+          break;
+        }
+
+      nxsig_usleep(1000 * 1);
+    }
+
+  if (i == 100)
+    {
+      ret = ERROR;
+      goto out;
+    }
+
+  /* Clear MSM_PDN_DONE IRQ flag */
+
+  ret = cs35l41b_write_register(priv, IRQ1_IRQ1_EINT_1_REG,
+        IRQ1_IRQ1_EINT_1_MSM_PDN_DONE_EINT1_BITMASK);
+  if (ret == ERROR)
+    {
+      goto out;
+    }
+
+  nxsig_usleep(1000 * 10);
+
+  /* The Host sends a CSPL_STOP_PRE_REINIT.
+   * This puts the FW into a state ready to accept a new
+   * tuning/configuration but leaves the DSP running.
+   * Poll for RDY_FOR_REINIT from MBOX2.
+   */
+
+  ret = cs35l41b_send_acked_mbox_cmd(priv,
+        CS35L41_DSP_MBOX_CMD_STOP_PRE_REINIT);
+  if (ret == ERROR)
+    {
+      goto out;
+    }
+
+out:
+  return ret;
+}
+
+/****************************************************************************
+ * Name: cs35l41b_finish_tuning_switch
+ *
+ * Description:
+ *   cs35l41b finish tune image switch
+ *
+ ****************************************************************************/
+
+int cs35l41b_finish_tuning_switch(FAR struct cs35l41b_dev_s *priv)
+{
+  int ret = OK;
+  uint32_t regval;
+
+  /* The Host sends a REINIT request.
+   * This causes the FW to read the new configuration and
+   * initialize the new CSPL.
+   * audio chain. This will compare the GLOBAL_FS with the sample rate
+   * from the tuning.
+   * Poll for RDY_FOR_REINIT from MBOX2
+   */
+
+  ret = cs35l41b_send_acked_mbox_cmd(priv, CS35L41_DSP_MBOX_CMD_REINIT);
+
+  if (ret == ERROR)
+    {
+      goto out;
+    }
+
+  /* The Host sets the GLOBAL_EN to 1.
+   * It is not expected that the PLL_FORCE_EN should be used
+   */
+
+  /* Read GLOBAL_EN register */
+
+  ret = cs35l41b_read_register(priv, &regval, MSM_GLOBAL_ENABLES_REG);
+  if (ret == ERROR)
+    {
+      goto out;
+    }
+
+  regval |= MSM_GLOBAL_ENABLES_GLOBAL_EN_BITMASK;
+
+  /* Set GLOBAL_EN */
+
+  ret = cs35l41b_write_register(priv, MSM_GLOBAL_ENABLES_REG, regval);
+  if (ret == ERROR)
+    {
+      goto out;
+    }
+
+  nxsig_usleep(1000 * 1);
+
+  /* The Host sends a RESUME command and
+   * the FW starts to process and output the new audio
+   */
+
+  ret = cs35l41b_send_acked_mbox_cmd(priv, CS35L41_DSP_MBOX_CMD_RESUME);
+
+  if (ret == ERROR)
+    {
+      goto out;
+    }
+
+out:
+  return ret;
 }
 
 /****************************************************************************

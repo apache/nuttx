@@ -224,9 +224,9 @@ static const uint32_t g_cs35l41_fs_syscfg[] =
 #elif (SUPPORT_DEFAULT_SAMPLERATE == 44100)
 static const uint32_t g_cs35l41_fs_syscfg[] =
 {
-  0x00002c04, 0x000003f0,
+  0x00002c04, 0x00000330,
   0x00002c0c, 0x0000000b,
-  0x00004804, 0x0000001f,
+  0x00004804, 0x00000019,
 };
 #endif
 
@@ -686,7 +686,15 @@ static int cs35l41b_load_main_fw_process(FAR struct cs35l41b_dev_s *priv)
 
 static int cs35l41b_load_tune_process(FAR struct cs35l41b_dev_s *priv)
 {
-  g_fw_info.imager_buffer = (uint8_t *)g_cs35l41_tune_fw_img;
+  if (priv->scenario_mode == CS35L41B_SCENARIO_SCO)
+    {
+      g_fw_info.imager_buffer = (uint8_t *)g_cs35l41_tune_sco_fw_img;
+    }
+  else
+    {
+      g_fw_info.imager_buffer = (uint8_t *)g_cs35l41_tune_fw_img;
+    }
+
   if (load_fw_process(priv, &g_fw_info) == ERROR)
     {
       return ERROR;
@@ -1111,6 +1119,50 @@ int cs35l41_dsp_boot(FAR struct cs35l41b_dev_s *priv, int mode)
     }
 
   priv->state = CS35L41_STATE_DSP_STANDBY;
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cs35l41b_tune_change_params
+ *
+ * Description:
+ *   cs35l41b change tune image
+ *
+ ****************************************************************************/
+
+int cs35l41b_tune_change_params(FAR struct cs35l41b_dev_s *priv)
+{
+  static int scenario_mode = CS35L41B_SCENARIO_SPEAKER;
+
+  /* do not need change current scenario mode */
+
+  if (priv->scenario_mode == scenario_mode)
+    {
+      return OK;
+    }
+
+  scenario_mode = priv->scenario_mode;
+
+  if (cs35l41b_start_tuning_switch(priv) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (cs35l41b_set_boot_configuration(priv) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (cs35l41b_load_tune_process(priv) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (cs35l41b_finish_tuning_switch(priv) == ERROR)
+    {
+      return ERROR;
+    }
 
   return OK;
 }

@@ -32,5 +32,6 @@
  ****************************************************************************/
 
 extern const uint8_t g_cs35l41_tune_fw_img[];
+extern const uint8_t g_cs35l41_tune_sco_fw_img[];
 
 #endif

@@ -97,7 +97,7 @@ static struct cs35l41b_regdump_s g_cs35l41b_debug_reg[] =
   {"CAL_SET_STATUS",      0x0280027c},
   {"CPSL_HALO_STATUS",    0x028007e8},
   {"CPSL_HALO_HEARTBEAT", 0x028007ec},
-  {"block enables2",      0x0000201c},
+  {"BLOCK ENABLES",       0x0000201c},
 };
 #endif
 
@@ -137,11 +137,22 @@ void cs35l41b_dump_registers(FAR struct cs35l41b_dev_s *priv,
                             g_cs35l41b_debug_reg[i].regaddr);
       if (priv->dump_dsp_info)
         {
-          syslog(LOG_WARNING, "-%25s[%08lx]: %08lx\n",
+          syslog(LOG_WARNING, "-%-25s[%08lx]: %08lx\n",
                 g_cs35l41b_debug_reg[i].regname,
                 g_cs35l41b_debug_reg[i].regaddr,
                 g_cs35l41b_debug_reg[i].regval);
         }
+    }
+
+  if (priv->dump_dsp_info)
+    {
+      syslog(LOG_WARNING, "-STATUES[%26s]: %d\n", "MODE", priv->mode);
+      syslog(LOG_WARNING, "-STATUES[%26s]: %d\n", "SCENARIO",
+            priv->scenario_mode);
+      syslog(LOG_WARNING, "-STATUES[%26s]: %ld\n", "ASP_GAIN",
+            priv->asp_gain);
+      syslog(LOG_WARNING, "-STATUES[%26s]: %ld\n", "DSP_GAIN",
+            priv->dsp_gain);
     }
 }
 #endif
