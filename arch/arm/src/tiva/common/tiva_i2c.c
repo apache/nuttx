@@ -671,7 +671,6 @@ static useconds_t tiva_i2c_tousecs(int msgc, struct i2c_msg_s *msgv)
 #ifndef CONFIG_I2C_POLLED
 static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
 {
-  struct timespec abstime;
   irqstate_t flags;
   int ret;
 
@@ -686,47 +685,25 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
 
   /* Signal the interrupt handler that we are waiting.
    * NOTE:  Interrupts  are currently disabled but will be temporarily
-   * re-enabled below when nxsem_timedwait() sleeps.
+   * re-enabled below when nxsem_tickwait_uninterruptible() sleeps.
    */
 
   do
     {
-      /* Get the current time */
-
-      clock_gettime(CLOCK_REALTIME, &abstime);
-
-      /* Calculate a time in the future */
-
-#if CONFIG_TIVA_I2C_TIMEOSEC > 0
-      abstime.tv_sec += CONFIG_TIVA_I2C_TIMEOSEC;
-#endif
-
-      /* Add a value proportional to the number of bytes in the transfer */
-
-#ifdef CONFIG_TIVA_I2C_DYNTIMEO
-      abstime.tv_nsec += 1000 * tiva_i2c_tousecs(priv->msgc, priv->msgv);
-      if (abstime.tv_nsec >= 1000 * 1000 * 1000)
-        {
-          abstime.tv_sec++;
-          abstime.tv_nsec -= 1000 * 1000 * 1000;
-        }
-
-#elif CONFIG_TIVA_I2C_TIMEOMS > 0
-      abstime.tv_nsec += CONFIG_TIVA_I2C_TIMEOMS * 1000 * 1000;
-      if (abstime.tv_nsec >= 1000 * 1000 * 1000)
-        {
-          abstime.tv_sec++;
-          abstime.tv_nsec -= 1000 * 1000 * 1000;
-        }
-#endif
-
       /* Wait until either the transfer is complete or the timeout expires */
 
-      ret = nxsem_timedwait_uninterruptible(&priv->waitsem, &abstime);
+#ifdef CONFIG_TIVA_I2C_DYNTIMEO
+      ret = nxsem_tickwait_uninterruptible(&priv->waitsem,
+                        USEC2TICK(tiva_i2c_tousecs(priv->msgc, priv->msgv)));
+#else
+      ret = nxsem_tickwait_uninterruptible(&priv->waitsem,
+                                           CONFIG_TIVA_I2C_TIMEOTICKS);
+#endif
       if (ret < 0)
         {
           /* Break out of the loop on irrecoverable errors.  This would
-           * include timeouts and mystery errors reported by nxsem_timedwait.
+           * include timeouts and mystery errors reported by
+           * nxsem_tickwait_uninterruptible.
            */
 
           tiva_i2c_traceevent(priv, I2CEVENT_TIMEOUT,
@@ -769,7 +746,7 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
 
   /* Signal the interrupt handler that we are waiting.  NOTE:  Interrupts
    * are currently disabled but will be temporarily re-enabled below when
-   * nxsem_timedwait() sleeps.
+   * nxsem_tickwait_uninterruptible() sleeps.
    */
 
   start = clock_systime_ticks();

@@ -291,37 +291,20 @@ static inline void
 static inline int
   lc823450_i2c_sem_waitdone(FAR struct lc823450_i2c_priv_s *priv)
 {
-  struct timespec abstime;
   int ret;
 
   do
     {
-      /* Get the current time */
-
-      clock_gettime(CLOCK_REALTIME, &abstime);
-
-      /* Calculate a time in the future */
-
-#if CONFIG_LC823450_I2C_TIMEOSEC > 0
-      abstime.tv_sec += CONFIG_LC823450_I2C_TIMEOSEC;
-#endif
-
-      /* Add a value proportional to the number of bytes in the transfer */
-
-      abstime.tv_nsec += priv->timeoms * 1000 * 1000;
-      if (abstime.tv_nsec >= 1000 * 1000 * 1000)
-        {
-          abstime.tv_sec++;
-          abstime.tv_nsec -= 1000 * 1000 * 1000;
-        }
-
       /* Wait until either the transfer is complete or the timeout expires */
 
-      ret = nxsem_timedwait_uninterruptible(&priv->sem_isr, &abstime);
+      ret = nxsem_tickwait_uninterruptible(&priv->sem_isr,
+                                     SEC2TICK(CONFIG_LC823450_I2C_TIMEOSEC) +
+                                     MSEC2TICK(priv->timeoms));
       if (ret < 0)
         {
           /* Break out of the loop on irrecoverable errors.  This would
-           * include timeouts and mystery errors reported by nxsem_timedwait.
+           * include timeouts and mystery errors reported by
+           * nxsem_tickwait_uninterruptible.
            */
 
           break;
