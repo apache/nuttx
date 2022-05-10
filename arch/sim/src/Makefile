@@ -188,12 +188,6 @@ endif
 
 ifeq ($(CONFIG_SIM_SPI_LINUX),y)
   HOSTSRCS += up_spilinux.c
-
-  up_spilinux.c: config.h
-
-  config.h: $(TOPDIR)/include/nuttx/config.h
-	@echo "CP:  $<"
-	$(Q) cp $< $@
 endif
 
 ifeq ($(CONFIG_RPTUN),y)
