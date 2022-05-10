@@ -569,7 +569,7 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
   sched_lock();
   if (ret == OK)
     {
-      pthread_sem_take(&ptcb->cmn.group->tg_joinsem, NULL, false);
+      nxsem_wait_uninterruptible(&ptcb->cmn.group->tg_joinsem);
       pthread_addjoininfo(ptcb->cmn.group, pjoin);
       pthread_sem_give(&ptcb->cmn.group->tg_joinsem);
       nxtask_activate((FAR struct tcb_s *)ptcb);
