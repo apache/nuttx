@@ -299,17 +299,17 @@ struct gh3020_reg_s gh3020_reglist_normal[] =
   {0x0174, 0x0106}, /* LED drv1 to LED1(to IR LED) pin, 5.3mA */
   {0x017a, 0x277c}, /* Slot_cfg4(tunning R): sync signal, use FIFO, 4ADCs */
   {0x0180, 0x0f16}, /* DC&BG cancel, ADC0 modifies drv0&1, 1st BG, 2048xADC */
-  {0x0182, 0x1111}, /* TIA0~3 25KOHm */
+  {0x0182, 0x0000}, /* TIA0~3 10KOHm */
   {0x0184, 0x00aa}, /* All ADCs use 200pF TIA_CF */
-  {0x018e, 0x022e}, /* LED drv0 to LED2(to red LED) pin, 39.87mA */
-  {0x0190, 0x022e}, /* LED drv1 to LED2(to red LED) pin, 40.52mA */
+  {0x018e, 0x023a}, /* LED drv0 to LED2(to red LED) pin, 50.04mA */
+  {0x0190, 0x0239}, /* LED drv1 to LED2(to red LED) pin, 50.18mA */
   {0x0192, 0x1c77}, /* Either LED driver current approximately 24~100 mA */
   {0x0196, 0x277c}, /* Slot_cfg5(tunning IR): sync signal, use FIFO, 4ADCs */
   {0x019c, 0x0f16}, /* DC&BG cancel, ADC0 modifies drv0&1, 1st BG, 2048xADC */
-  {0x019e, 0x1111}, /* TIA0~3 25KOHm */
+  {0x019e, 0x0000}, /* TIA0~3 10KOHm */
   {0x01a0, 0x00aa}, /* All ADCs use 200pF TIA_CF */
-  {0x01aa, 0x0128}, /* LED drv0 to LED1(to IR LED) pin, 34.7mA */
-  {0x01ac, 0x0128}, /* LED drv1 to LED1(to IR LED) pin, 35.2mA */
+  {0x01aa, 0x0133}, /* LED drv0 to LED1(to IR LED) pin, 44.12mA */
+  {0x01ac, 0x0134}, /* LED drv1 to LED1(to IR LED) pin, 45.79mA */
   {0x01ae, 0x1777}, /* Either LED driver current approximately 20~100 mA */
   {0x01b2, 0xc744}, /* Slot_cfg6(Goodix ADT): use FIFO, ADC0 */
   {0x01b4, 0x0001}, /* TIA0 connected to PD0, TIA disconnected */
@@ -352,8 +352,8 @@ struct gh3020_reg_s gh3020_reglist_normal[] =
   {0x1000, 0x0000}, /* Virtual register. Maintained by Goodix. */
   {0x1002, 0x3080}, /* Virtual register. Maintained by Goodix. */
   {0x1004, 0x0000}, /* Virtual register. Maintained by Goodix. */
-  {0x1006, 0xb6c4}, /* Virtual register. Maintained by Goodix. */
-  {0x1008, 0x29fe}, /* Virtual register. Maintained by Goodix. */
+  {0x1006, 0x40f7}, /* Virtual register. Maintained by Goodix. */
+  {0x1008, 0x2a0d}, /* Virtual register. Maintained by Goodix. */
   {0x100a, 0x0001}, /* Virtual register. Maintained by Goodix. */
   {0x10e0, 0x0202}, /* Virtual register. Maintained by Goodix. */
   {0x10e2, 0x0202}, /* Virtual register. Maintained by Goodix. */
@@ -419,45 +419,45 @@ struct gh3020_reg_s gh3020_reglist_normal[] =
 
 const struct gh3020_reg_s gh3020_reglist_factest[] =
 {
-  {0x0004, 0x001f},
-  {0x000a, 0x00c8},
-  {0x000e, 0x000d},
-  {0x0100, 0x0100},
-  {0x0102, 0x0302},
-  {0x010a, 0x277c},
-  {0x0110, 0x0004},
-  {0x0112, 0x0000},
-  {0x0114, 0x00aa},
-  {0x0126, 0x277c},
-  {0x012c, 0x0c14},
-  {0x012e, 0x0000},
-  {0x0130, 0x00aa},
-  {0x013a, 0x0019},
-  {0x013c, 0x0019},
-  {0x0142, 0x277c},
-  {0x0148, 0x0c14},
-  {0x014a, 0x0000},
-  {0x014c, 0x00aa},
-  {0x0156, 0x0219},
-  {0x0158, 0x0219},
-  {0x015e, 0x277c},
-  {0x0164, 0x0c14},
-  {0x0166, 0x0000},
-  {0x0168, 0x00aa},
-  {0x0172, 0x0119},
-  {0x0174, 0x0119},
-  {0x01ec, 0x005f},
-  {0x01ee, 0x0122},
-  {0x01f0, 0x0122},
-  {0x01f2, 0x0122},
-  {0x0200, 0x0120},
-  {0x0502, 0x4f60},
-  {0x0504, 0x000a},
-  {0x0588, 0x0008},
-  {0x0692, 0x0233},
-  {0x0694, 0x0400},
-  {0x0698, 0x2310},
-  {0x0700, 0x0000},
+  {0x0004, 0x001f}, /* Maxmium sample rate = 32KHz / (31 +１) = 1000Hz */
+  {0x000a, 0x00c8}, /* Default FIFO watermark = 200 */
+  {0x000e, 0x000d}, /* GH3020_REG_WKUP_TMR. Not mentioned in datasheet. */
+  {0x0100, 0x0100}, /* Slot0 uses slot_cfg0, slot1 uses slot_cfg1 */
+  {0x0102, 0x0302}, /* Slot2 uses slot_cfg2, slot3 uses slot_cfg3 */
+  {0x010a, 0x277c}, /* Slot_cfg0(dark): sync signal, use FIFO, 4ADCs */
+  {0x0110, 0x0004}, /* No BG or DC cancel, 512x ADC */
+  {0x0112, 0x0000}, /* TIA0~3 10KOHm */
+  {0x0114, 0x00aa}, /* All ADCs use 200pF TIA_CF */
+  {0x0126, 0x277c}, /* Slot_cfg1(fixed G): sync signal, use FIFO, 4ADCs */
+  {0x012c, 0x0c14}, /* DC&BG cancel, LED drv0&1 fixed, 1st BG, 512x ADC */
+  {0x012e, 0x0000}, /* TIA0~3 10KOHm */
+  {0x0130, 0x00aa}, /* All ADCs use 200pF TIA_CF */
+  {0x013a, 0x0019}, /* LED drv0 to LED0(to green LED) pin */
+  {0x013c, 0x0019}, /* LED drv0 to LED0(to green LED) pin */
+  {0x0142, 0x277c}, /* Slot_cfg2(fix R): sync signal, use FIFO, 4ADCs */
+  {0x0148, 0x0c14}, /* DC&BG cancel, LED drv0&1 fixed, 1st BG, 512x ADC */
+  {0x014a, 0x0000}, /* TIA0~3 10KOHm */
+  {0x014c, 0x00aa}, /* All ADCs use 200pF TIA_CF */
+  {0x0156, 0x0219}, /* LED drv0 to LED2(to red LED) pin */
+  {0x0158, 0x0219}, /* LED drv0 to LED2(to red LED) pin */
+  {0x015e, 0x277c}, /* Slot_cfg3(fix IR): sync signal, use FIFO, 4ADCs */
+  {0x0164, 0x0c14}, /* DC&BG cancel, LED drv0&1 fixed, 1st BG, 512x ADC */
+  {0x0166, 0x0000}, /* TIA0~3 10KOHm */
+  {0x0168, 0x00aa}, /* All ADCs use 200pF TIA_CF */
+  {0x0172, 0x0119}, /* LED drv0 to LED1(to IR LED) pin */
+  {0x0174, 0x0119}, /* LED drv0 to LED1(to IR LED) pin */
+  {0x01ec, 0x005f}, /* Slot0's time 95 us (dark) */
+  {0x01ee, 0x0122}, /* Slot1's time 290 us (green fixed) */
+  {0x01f0, 0x0122}, /* Slot1's time 290 us (R fixed) */
+  {0x01f2, 0x0122}, /* Slot1's time 290 us (IR fixed) */
+  {0x0200, 0x0120}, /* GH3020_REG_AFE_REG0. Not mentioned in datasheet. */
+  {0x0502, 0x4f60}, /* INT: Rst,wear-off/on,tunning fail/done,FIFO ovf/full */
+  {0x0504, 0x000a}, /* Interrupt pulse width 33us * 10 */
+  {0x0588, 0x0008}, /* OSC32K_TEMP. Not mentioned in datasheet. */
+  {0x0692, 0x0233}, /* LED_DRV_AD_REG. Not mentioned in datasheet. */
+  {0x0694, 0x0400}, /* ECG_IA_AD_REG. Not mentioned in datasheet. */
+  {0x0698, 0x2310}, /* ECG_IA_AD_REG2. Not mentioned in datasheet. */
+  {0x0700, 0x0000}, /* EFUSE for LED current calibration disabled */
   {0x1000, 0x0000}, /* Virtual register. Maintained by Goodix. */
   {0x1002, 0x3080}, /* Virtual register. Maintained by Goodix. */
   {0x1004, 0x0000}, /* Virtual register. Maintained by Goodix. */
@@ -2399,18 +2399,15 @@ void gh3020_get_rawdata(FAR uint8_t *pbuf, uint16_t len)
                 break;
             }
 
+          if (g_priv->sensor[chidx].activated == true)
+            {
+              syslog(LOG_INFO, "ch%uraw%u=%08x\n", chidx, fifoinfo.adc_idx,
+                     temp);
+            }
+
           if (chidx < GH3020_SENSOR_NUM)
             {
-              if (g_priv->load_efuse)
-                {
-                  ppg[chidx].ppg[fifoinfo.adc_idx] =
-                    (uint32_t)((float)rawdata * g_priv->tia_calibr);
-                }
-              else
-                {
-                  ppg[chidx].ppg[fifoinfo.adc_idx] = (uint32_t)rawdata;
-                }
-
+              ppg[chidx].ppg[fifoinfo.adc_idx] = (uint32_t)rawdata;
               ppg[chidx].current = g_priv->sensor[chidx].current;
               ppg[chidx].gain[fifoinfo.adc_idx] =
                 gh3020_gain_list[GH3020_TIAGAIN_FACTEST];
