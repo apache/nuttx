@@ -1261,7 +1261,6 @@ static void esp_update_time(struct timespec *timespec, uint32_t ticks)
 static int semphr_take_wrapper(void *semphr, uint32_t block_time_ms)
 {
   int ret;
-  struct timespec timeout;
   sem_t *sem = (sem_t *)semphr;
 
   if (block_time_ms == OSI_FUNCS_TIME_BLOCKING)
@@ -1274,19 +1273,7 @@ static int semphr_take_wrapper(void *semphr, uint32_t block_time_ms)
     }
   else
     {
-      ret = clock_gettime(CLOCK_REALTIME, &timeout);
-      if (ret < 0)
-        {
-          wlerr("Failed to get time\n");
-          return esp_errno_trans(ret);
-        }
-
-      if (block_time_ms)
-        {
-          esp_update_time(&timeout, MSEC2TICK(block_time_ms));
-        }
-
-      ret = sem_timedwait(sem, &timeout);
+      ret = nxsem_tickwait(sem, MSEC2TICK(block_time_ms));
     }
 
   return esp_errno_trans(ret);

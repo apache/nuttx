@@ -660,25 +660,12 @@ static inline void i2c_putrel(struct sam_i2c_dev_s *priv,
 
 static int i2c_wait_for_bus(struct sam_i2c_dev_s *priv, unsigned int size)
 {
-  struct timespec ts;
   int ret;
-  long usec;
 
-  clock_gettime(CLOCK_REALTIME, &ts);
-
-  usec = size * I2C_TIMEOUT_MSPB + ts.tv_nsec / 1000;
-  while (usec > USEC_PER_SEC)
-    {
-      ts.tv_sec += 1;
-      usec      -= USEC_PER_SEC;
-    }
-
-  ts.tv_nsec = usec * 1000;
-
-  ret = nxsem_timedwait(&priv->waitsem, (const struct timespec *)&ts);
+  ret = nxsem_tickwait(&priv->waitsem, USEC2TICK(size * I2C_TIMEOUT_MSPB));
   if (ret < 0)
     {
-      i2cinfo("timedwait error %d\n", ret);
+      i2cinfo("nxsem_tickwait error %d\n", ret);
       return ret;
     }
 
