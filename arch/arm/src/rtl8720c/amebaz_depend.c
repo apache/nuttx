@@ -186,7 +186,7 @@ void rtw_free_sema(void **sema)
 
 void rtw_up_sema(void **sema)
 {
-  sem_post(*sema);
+  nxsem_post(*sema);
 }
 
 void rtw_up_sema_from_isr(void **sema)

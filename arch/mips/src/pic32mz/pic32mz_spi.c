@@ -1747,7 +1747,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   spi_txdma_sample(priv, DMA_AFTER_START);
 
   /* Wait for DMA completion. This is done in a loop because there may be
-   * false alarm semaphore counts that cause sem_wait() not fail to wait
+   * false alarm semaphore counts that cause nxsem_wait() not fail to wait
    * or to wake-up prematurely (for example due to the receipt of a signal).
    * We know that the DMA has completed when the result is anything other
    * that -EBUSY.

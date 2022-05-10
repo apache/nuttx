@@ -1156,7 +1156,7 @@ void h4uart_rx_irq(void *arg)
         }
 
       circbuf_write(param->pcirc_h2c, buf, len);
-      sem_post(param->psem_h2c);
+      nxsem_post(param->psem_h2c);
     }
 }
 
