@@ -110,6 +110,18 @@ int tlsr8278_bringup(void)
 #endif /* defined(CONFIG_DEV_GPIO) && !defined(CONFIG_GPIO_LOWER_HALF) */
 
 #ifdef CONFIG_TLSR82_PWM
+#ifdef CONFIG_TLSR82_PWM0
+  ret = tlsr82_pwminitialize("/dev/pwm0", 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize pwm1 driver: %d\n",
+             ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_TLSR82_PWM1
   ret = tlsr82_pwminitialize("/dev/pwm1", 1);
   if (ret < 0)
     {
@@ -118,6 +130,7 @@ int tlsr8278_bringup(void)
              ret);
       return ret;
     }
+#endif
 #endif /* CONFIG_TLSR82_PWM */
 
 #ifdef CONFIG_TLSR82_ADC

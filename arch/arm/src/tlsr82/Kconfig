@@ -250,6 +250,53 @@ menuconfig TLSR82_USB
 menuconfig TLSR82_PWM
 	bool "PWM Configuration"
 	default n
+	select PWM
+
+if TLSR82_PWM
+
+# PWM0 configuration
+
+config TLSR82_PWM0
+	bool "TLSR82 PWM0 Enable"
+	default n
+
+config TLSR82_PWM0_PULSECOUNT
+	bool "TLSR82 PWM0 PulseCount Enable"
+	default n
+	depends on TLSR82_PWM0
+	select PWM_PULSECOUNT
+
+# PWM1 configuration
+
+config TLSR82_PWM1
+	bool " TLSR82 PWM1 Enable"
+	default n
+
+# PWM2 configuration
+
+config TLSR82_PWM2
+	bool "TLSR82 PWM2 Enable"
+	default n
+
+# PWM3 configuration
+
+config TLSR82_PWM3
+	bool "TLSR82 PWM3 Enable"
+	default n
+
+# PWM4 configuration
+
+config TLSR82_PWM4
+	bool "TLSR82 PWM4 Enable"
+	default n
+
+# PWM5 configuration
+
+config TLSR82_PWM5
+	bool "TLSR82 PWM5 Enable"
+	default n
+
+endif
 
 menuconfig TLSR82_AUDIO
 	bool "AUDIO Configuration"
@@ -295,47 +342,47 @@ menuconfig TLSR82_FLASH
 
 if TLSR82_FLASH
 
-	config TLSR82_FLASH_FS_OFFSET
-		hex "Start address of flash used by the file system"
-		default 0x00060000
-		---help---
-			This value is the start address of flash used by the file system,
-			therefore, this value must be larger than the end of code address.
+config TLSR82_FLASH_FS_OFFSET
+	hex "Start address of flash used by the file system"
+	default 0x00060000
+	---help---
+		This value is the start address of flash used by the file system,
+		therefore, this value must be larger than the end of code address.
 
-	config TLSR82_FLASH_FS_SIZE
-		hex "Size of flash used by the file system"
-		default 0x20000
-		---help---
-			This value is the size of flash used by the file system, therefore,
-			TLSR82_FLASH_FS_SIZE + TLSR82_FLASH_FS_OFFSET must less than the
-			boundary address of flash.
+config TLSR82_FLASH_FS_SIZE
+	hex "Size of flash used by the file system"
+	default 0x20000
+	---help---
+		This value is the size of flash used by the file system, therefore,
+		TLSR82_FLASH_FS_SIZE + TLSR82_FLASH_FS_OFFSET must less than the
+		boundary address of flash.
 
-	config TLSR82_FLASH_WRITE_BUFFER
-		bool "Enable the flash byte write buffer"
-		default n
-		depends on MTD_BYTE_WRITE
-		---help---
-			When enable this config, the flash byte write opreation will write the
-			data to a middle buffer and then write the flash using this buffer to
-			avoid the data buffer passed by apps is at flash. The flash not support
-			read during writing.
+config TLSR82_FLASH_WRITE_BUFFER
+	bool "Enable the flash byte write buffer"
+	default n
+	depends on MTD_BYTE_WRITE
+	---help---
+		When enable this config, the flash byte write opreation will write the
+		data to a middle buffer and then write the flash using this buffer to
+		avoid the data buffer passed by apps is at flash. The flash not support
+		read during writing.
 
-	config TLSR82_FLASH_WRITE_BUFFER_SIZE
-		int "Flash byte write buffer size"
-		default 40
-		range 16 256
-		depends on TLSR82_FLASH_WRITE_BUFFER
-		---help---
-			Flash byte write buffer size, the larger this size, the higher byte write
-			efficiency.
+config TLSR82_FLASH_WRITE_BUFFER_SIZE
+	int "Flash byte write buffer size"
+	default 40
+	range 16 256
+	depends on TLSR82_FLASH_WRITE_BUFFER
+	---help---
+		Flash byte write buffer size, the larger this size, the higher byte write
+		efficiency.
 
-	config TLSR82_FLASH_TEST
-		bool "Enable the falsh test when initializing"
-		default n
-		---help---
-			When enable this config, the flash test function will execute when
-			the flash initializing. This config is useful to debug the flash
-			problem.
+config TLSR82_FLASH_TEST
+	bool "Enable the falsh test when initializing"
+	default n
+	---help---
+		When enable this config, the flash test function will execute when
+		the flash initializing. This config is useful to debug the flash
+		problem.
 
 endif
 
