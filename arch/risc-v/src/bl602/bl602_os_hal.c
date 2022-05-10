@@ -1461,7 +1461,6 @@ void bl_os_sem_delete(void *semphr)
 int32_t bl_os_sem_take(void *semphr, uint32_t ticks)
 {
   int ret;
-  struct timespec timeout;
   sem_t *sem = (sem_t *)semphr;
 
   if (ticks == BL_OS_WAITING_FOREVER)
@@ -1474,19 +1473,7 @@ int32_t bl_os_sem_take(void *semphr, uint32_t ticks)
     }
   else
     {
-      ret = clock_gettime(CLOCK_REALTIME, &timeout);
-      if (ret < 0)
-        {
-          wlerr("ERROR: Failed to get time\n");
-          return false;
-        }
-
-      if (ticks)
-        {
-          bl_os_update_time(&timeout, ticks);
-        }
-
-      ret = nxsem_timedwait(sem, &timeout);
+      ret = nxsem_tickwait(sem, ticks);
       if (ret)
         {
           wlerr("ERROR: Failed to wait sem in %lu ticks\n", ticks);

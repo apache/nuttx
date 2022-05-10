@@ -1209,7 +1209,6 @@ static void esp_semphr_delete(void *semphr)
 static int32_t esp_semphr_take(void *semphr, uint32_t ticks)
 {
   int ret;
-  struct timespec timeout;
   sem_t *sem = (sem_t *)semphr;
 
   if (ticks == OSI_FUNCS_TIME_BLOCKING)
@@ -1222,19 +1221,7 @@ static int32_t esp_semphr_take(void *semphr, uint32_t ticks)
     }
   else
     {
-      ret = clock_gettime(CLOCK_REALTIME, &timeout);
-      if (ret < 0)
-        {
-          wlerr("ERROR: Failed to get time\n");
-          return false;
-        }
-
-      if (ticks)
-        {
-          esp_update_time(&timeout, ticks);
-        }
-
-      ret = nxsem_timedwait(sem, &timeout);
+      ret = nxsem_tickwait(sem, ticks);
       if (ret)
         {
           wlerr("ERROR: Failed to wait sem in %lu ticks\n", ticks);
