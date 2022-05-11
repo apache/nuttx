@@ -183,7 +183,7 @@ static const struct battery_charger_operations_s g_da9168ops =
   da9168_voltage,
   da9168_current,
   da9168_input_current,
-  da9168_operate
+  da9168_operate,
 };
 
 #ifdef CONFIG_DEBUG_DA9168

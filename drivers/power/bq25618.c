@@ -153,7 +153,7 @@ static const struct battery_charger_operations_s g_bq25618ops =
   bq25618_voltage,
   bq25618_current,
   bq25618_input_current,
-  bq25618_operate
+  bq25618_operate,
 };
 
 #ifdef CONFIG_DEBUG_BQ25618
