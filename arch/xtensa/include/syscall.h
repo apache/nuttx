@@ -34,9 +34,6 @@
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #endif
-#ifdef CONFIG_LIB_SYSCALL
-#  include <syscall.h>
-#endif
 
 #include <arch/xtensa/core.h>
 #include <arch/xtensa/xtensa_corebits.h>
