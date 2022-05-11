@@ -42,11 +42,12 @@ CMN_CSRCS := $(filter-out $(TC32_CSRCS_FILTER), $(CMN_CSRCS))
 
 # Common files in arch/arm/src/armv6-m
 
-CMN_CSRCS += arm_sigdeliver.c
+CMN_CSRCS += arm_sigdeliver.c arm_doirq.c
 
 # Common files in arch/arm/src/tlsr82/tc32
 
-CMN_ASRCS += tc32_fullcontextrestore.S tc32_switchcontext.S tc32_saveusercontext.S
+CMN_ASRCS += tc32_fullcontextrestore.S tc32_switchcontext.S
+CMN_ASRCS += tc32_saveusercontext.S tc32_exception.S
 
 CMN_CSRCS += tc32_doirq.c tc32_initialstate.c tc32_schedulesigaction.c
 CMN_CSRCS += tc32_syscall.c tc32_udelay.c
