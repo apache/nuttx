@@ -37,7 +37,7 @@ CMN_ASRCS :=
 
 TC32_CSRCS_FILTER := arm_backtrace_fp.c arm_backtrace_thumb.c
 TC32_CSRCS_FILTER += arm_switchcontext.c arm_fullcontextrestore.c
-TC32_CSRCS_FILTER += arm_saveusercontext.c
+TC32_CSRCS_FILTER += arm_saveusercontext.c arm_udelay.c
 CMN_CSRCS := $(filter-out $(TC32_CSRCS_FILTER), $(CMN_CSRCS))
 
 # Common files in arch/arm/src/armv6-m
