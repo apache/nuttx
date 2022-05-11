@@ -173,7 +173,7 @@
 "symlink","unistd.h","defined(CONFIG_PSEUDOFS_SOFTLINKS)","int","FAR const char *","FAR const char *"
 "sysinfo","sys/sysinfo.h","","int","FAR struct sysinfo *"
 "task_create","sched.h","!defined(CONFIG_BUILD_KERNEL)", "int","FAR const char *","int","int","main_t","FAR char * const []|FAR char * const *"
-"task_delete","sched.h","","int","pid_t"
+"task_delete","sched.h","!defined(CONFIG_BUILD_KERNEL)","int","pid_t"
 "task_restart","sched.h","","int","pid_t"
 "task_setcancelstate","sched.h","","int","int","FAR int *"
 "task_setcanceltype","sched.h","defined(CONFIG_CANCELLATION_POINTS)","int","int","FAR int *"
