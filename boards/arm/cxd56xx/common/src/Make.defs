@@ -154,6 +154,10 @@ ifeq ($(CONFIG_VIDEO_ISX012),y)
 CSRCS += cxd56_isx012.c
 endif
 
+ifeq ($(CONFIG_VIDEO_ISX019),y)
+CSRCS += cxd56_isx019.c
+endif
+
 ifeq ($(CONFIG_CXD56_IMAGEPROC),y)
   CSRCS += cxd56_imageproc.c
 endif

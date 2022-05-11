@@ -372,13 +372,21 @@ int cxd56_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_VIDEO_ISX019
+  ret = isx019_initialize();
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialize ISX019 board. %d\n", errno);
+    }
+#endif
+
 #ifdef CONFIG_VIDEO_ISX012
   ret = isx012_initialize();
   if (ret < 0)
     {
       _err("ERROR: Failed to initialize ISX012 board. %d\n", errno);
     }
-#endif /* CONFIG_VIDEO_ISX012 */
+#endif
 
 #ifdef CONFIG_CXD56_CISIF
   ret = cxd56_cisif_initialize();
@@ -387,7 +395,7 @@ int cxd56_bringup(void)
       _err("ERROR: Failed to initialize CISIF. %d\n", errno);
       ret = ERROR;
     }
-#endif /* CONFIG_CXD56_CISIF */
+#endif
 
 #if defined(CONFIG_CXD56_SDIO)
   /* In order to prevent Hi-Z from being input to the SD Card controller,

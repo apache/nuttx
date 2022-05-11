@@ -64,7 +64,12 @@
 #include "cxd56_scd41.h"
 #include "cxd56_sensors.h"
 
-#include "cxd56_isx012.h"
+#ifdef CONFIG_VIDEO_ISX012
+#  include "cxd56_isx012.h"
+#endif /* CONFIG_VIDEO_ISX012 */
+#ifdef CONFIG_VIDEO_ISX019
+#  include "cxd56_isx019.h"
+#endif /* CONFIG_VIDEO_ISX019 */
 
 /****************************************************************************
  * Pre-processor Definitions
