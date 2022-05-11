@@ -25,7 +25,7 @@ include common/Make.defs
 
 HEAD_CSRC = esp32_start.c esp32_wdt.c
 
-# Required ESP32 files (arch/xtensa/src/lx6)
+# Required ESP32 files (arch/xtensa/src/esp32)
 
 CHIP_CSRCS  = esp32_allocateheap.c esp32_clockconfig.c esp32_gpio.c
 CHIP_CSRCS += esp32_systemreset.c esp32_resetcause.c
@@ -35,6 +35,10 @@ CHIP_CSRCS += esp32_dma.c
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += esp32_idle.c
+endif
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CHIP_CSRCS += esp32_userspace.c
 endif
 
 ifeq ($(CONFIG_SCHED_TICKLESS),y)

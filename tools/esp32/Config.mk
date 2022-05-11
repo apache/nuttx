@@ -128,6 +128,10 @@ endif
 
 ESPTOOL_BINS += $(FLASH_APP)
 
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+	ESPTOOL_BINS += $(CONFIG_ESP32_USER_IMAGE_OFFSET) nuttx_user.bin
+endif
+
 # Commands for colored and formatted output
 
 RED    = \033[1;31m

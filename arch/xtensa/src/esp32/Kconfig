@@ -1601,6 +1601,16 @@ config ESP32_PARTITION_TABLE_OFFSET
 	default 0x8000
 	depends on ESP32_APP_FORMAT_LEGACY
 
+if BUILD_PROTECTED
+
+config ESP32_USER_IMAGE_OFFSET
+	hex "User image offset"
+	default 0x90000
+	---help---
+		Offset in SPI Flash for flashing the User application firmware image.
+
+endif
+
 source "arch/xtensa/src/esp32/Kconfig.security"
 
 endmenu # Application Image Configuration
