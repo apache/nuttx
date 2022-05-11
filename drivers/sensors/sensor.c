@@ -46,9 +46,10 @@
 
 /* Device naming ************************************************************/
 
-#define ROUNDUP(x, esize)  ((x + (esize - 1)) / (esize)) * (esize)
-#define DEVNAME_FMT        "/dev/sensor/sensor_%s%s%d"
-#define DEVNAME_UNCAL      "_uncal"
+#define ROUND_DOWN(x, y)    (((x) / (y)) * (y))
+#define DEVNAME_FMT         "/dev/sensor/sensor_%s%s%d"
+#define DEVNAME_UNCAL       "_uncal"
+#define TIMING_BUF_ESIZE    (sizeof(unsigned long))
 
 /****************************************************************************
  * Private Types
@@ -87,6 +88,7 @@ struct sensor_user_s
                                 * asynchronous notify other users
                                 */
   sem_t            buffersem;  /* Wakeup user waiting for data in circular buffer */
+  size_t           bufferpos;  /* The index of user generation in buffer */
 
   /* The subscriber info
    * Support multi advertisers to subscribe their own data when they
@@ -104,7 +106,8 @@ struct sensor_upperhalf_s
 {
   FAR struct sensor_lowerhalf_s *lower;  /* The handle of lower half driver */
   struct sensor_state_s          state;  /* The state of sensor device */
-  struct circbuf_s   buffer;             /* The circular buffer of sensor device */
+  struct circbuf_s   timing;             /* The circular buffer of generation */
+  struct circbuf_s   buffer;             /* The circular buffer of data */
   rmutex_t           lock;               /* Manages exclusive access to file operations */
   struct list_node   userlist;           /* List of users */
 };
@@ -209,27 +212,6 @@ static void sensor_unlock(FAR void *priv)
 {
   FAR struct sensor_upperhalf_s *upper = priv;
   nxrmutex_unlock(&upper->lock);
-}
-
-static bool sensor_in_range(unsigned long left, unsigned long value,
-                            unsigned long right)
-{
-  if (left < right)
-    {
-      return left <= value && value < right;
-    }
-  else
-    {
-      /* Maybe the data overflowed and a wraparound occurred */
-
-      return left <= value || value < right;
-    }
-}
-
-static bool sensor_is_updated(unsigned long generation,
-                              unsigned long ugeneration)
-{
-  return generation > ugeneration;
 }
 
 static int sensor_update_interval(FAR struct file *filep,
@@ -373,6 +355,159 @@ update:
   return ret;
 }
 
+static void sensor_generate_timing(FAR struct sensor_upperhalf_s *upper,
+                                   unsigned long nums)
+{
+  unsigned long interval = upper->state.min_interval != ULONG_MAX ?
+                           upper->state.min_interval : 1;
+  while (nums-- > 0)
+    {
+      upper->state.generation += interval;
+      circbuf_overwrite(&upper->timing, &upper->state.generation,
+                        TIMING_BUF_ESIZE);
+    }
+}
+
+static bool sensor_is_updated(FAR struct sensor_upperhalf_s *upper,
+                              FAR struct sensor_user_s *user)
+{
+  long delta = upper->state.generation - user->generation;
+
+  if (delta <= 0)
+    {
+      return false;
+    }
+  else if (user->interval == ULONG_MAX)
+    {
+      return true;
+    }
+  else
+    {
+      /* Check whether next generation user want in buffer.
+       * generation     next generation(not published yet)
+       * ____v_____________v
+       * ////|//////^      |
+       *         ^ middle point
+       *   next generation user want
+       */
+
+      return delta >= user->interval - (upper->state.min_interval >> 1);
+    }
+}
+
+static void sensor_catch_up(FAR struct sensor_upperhalf_s *upper,
+                            FAR struct sensor_user_s *user)
+{
+  unsigned long generation;
+  long delta;
+
+  circbuf_peek(&upper->timing, &generation, TIMING_BUF_ESIZE);
+  delta = generation - user->generation;
+  if (delta > 0)
+    {
+      user->bufferpos = upper->timing.tail / TIMING_BUF_ESIZE;
+      if (user->interval == ULONG_MAX)
+        {
+          user->generation = generation - 1;
+        }
+      else
+        {
+          delta -= upper->state.min_interval >> 1;
+          user->generation += ROUND_DOWN(delta, user->interval);
+        }
+    }
+}
+
+static ssize_t sensor_do_samples(FAR struct sensor_upperhalf_s *upper,
+                                 FAR struct sensor_user_s *user,
+                                 FAR char *buffer, size_t len)
+{
+  unsigned long generation;
+  ssize_t ret = 0;
+  size_t nums;
+  size_t pos;
+  size_t end;
+
+  sensor_catch_up(upper, user);
+  nums = upper->timing.head / TIMING_BUF_ESIZE - user->bufferpos;
+  if (len < nums * upper->state.esize)
+    {
+      nums = len / upper->state.esize;
+    }
+
+  len = nums * upper->state.esize;
+
+  /* Take samples continuously */
+
+  if (user->interval == ULONG_MAX)
+    {
+      ret = circbuf_peekat(&upper->buffer,
+                           user->bufferpos * upper->state.esize,
+                           buffer, len);
+      user->bufferpos += nums;
+      circbuf_peekat(&upper->timing,
+                     (user->bufferpos - 1) * TIMING_BUF_ESIZE,
+                     &user->generation, TIMING_BUF_ESIZE);
+      return ret;
+    }
+
+  /* Take samples one-bye-one, to determine whether a sample needed:
+   *
+   * If user's next generation is on the left side of middle point,
+   * we should copy this sample for user.
+   *                      next_generation(or end)
+   *                ________________v____
+   * timing buffer: //|//////.      |
+   *                  ^   middle
+   *              generation
+   *                        next sample(or end)
+   *                ________________v____
+   *  data  buffer:   |             |
+   *                  ^
+   *                sample
+   */
+
+  pos = user->bufferpos;
+  end = upper->timing.head / TIMING_BUF_ESIZE;
+  circbuf_peekat(&upper->timing, pos * TIMING_BUF_ESIZE,
+                 &generation, TIMING_BUF_ESIZE);
+  while (pos++ != end)
+    {
+      unsigned long next_generation;
+      long delta;
+
+      if (pos * TIMING_BUF_ESIZE == upper->timing.head)
+        {
+          next_generation = upper->state.generation +
+                            upper->state.min_interval;
+        }
+      else
+        {
+          circbuf_peekat(&upper->timing, pos * TIMING_BUF_ESIZE,
+                         &next_generation, TIMING_BUF_ESIZE);
+        }
+
+      delta = next_generation + generation -
+              ((user->generation + user->interval) << 1);
+      if (delta >= 0)
+        {
+          ret += circbuf_peekat(&upper->buffer,
+                                (pos - 1) * upper->state.esize,
+                                buffer + ret, upper->state.esize);
+          user->bufferpos = pos;
+          user->generation += user->interval;
+          if (ret >= len)
+            {
+              break;
+            }
+        }
+
+      generation = next_generation;
+    }
+
+  return ret;
+}
+
 static void sensor_pollnotify_one(FAR struct sensor_user_s *user,
                                   pollevent_t eventset)
 {
@@ -462,10 +597,12 @@ static int sensor_open(FAR struct file *filep)
   if (upper->state.generation && lower->persist)
     {
       user->generation = upper->state.generation - 1;
+      user->bufferpos  = upper->timing.head / TIMING_BUF_ESIZE - 1;
     }
   else
     {
       user->generation = upper->state.generation;
+      user->bufferpos  = upper->timing.head / TIMING_BUF_ESIZE;
     }
 
   user->interval = ULONG_MAX;
@@ -547,7 +684,6 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
   FAR struct sensor_upperhalf_s *upper = inode->i_private;
   FAR struct sensor_lowerhalf_s *lower = upper->lower;
   FAR struct sensor_user_s *user = filep->f_priv;
-  unsigned long nums;
   ssize_t ret;
 
   if (!buffer || !len)
@@ -577,54 +713,25 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
 
         ret = lower->ops->fetch(filep, lower, buffer, len);
     }
+  else if (circbuf_is_empty(&upper->buffer))
+    {
+      ret = -ENODATA;
+    }
+  else if (sensor_is_updated(upper, user))
+    {
+      ret = sensor_do_samples(upper, user, buffer, len);
+    }
+  else if (lower->persist)
+    {
+      /* Persistent device can get latest old data if not updated. */
+
+      ret = circbuf_peekat(&upper->buffer,
+                           (user->bufferpos - 1) * upper->state.esize,
+                           buffer, upper->state.esize);
+    }
   else
     {
-      if (circbuf_is_empty(&upper->buffer))
-        {
-          ret = -ENODATA;
-          goto out;
-        }
-
-      /* If the device data is persistent, and when the device has
-       * no new data, the user can copy the old data, otherwise
-       * return -ENODATA.
-       */
-
-      if (user->generation == upper->state.generation)
-        {
-          if (lower->persist)
-            {
-              user->generation--;
-            }
-          else
-            {
-              ret = -ENODATA;
-              goto out;
-            }
-        }
-
-      /* If user's generation isn't within circbuffer range, the
-       * oldest data in circbuffer are returned to the users.
-       */
-
-      if (!sensor_in_range(upper->state.generation - lower->nbuffer,
-                           user->generation, upper->state.generation))
-
-        {
-          user->generation = upper->state.generation - lower->nbuffer;
-        }
-
-      nums = upper->state.generation - user->generation;
-      if (len < nums * upper->state.esize)
-        {
-          nums = len / upper->state.esize;
-        }
-
-      len = nums * upper->state.esize;
-      ret = circbuf_peekat(&upper->buffer,
-                           user->generation * upper->state.esize,
-                           buffer, len);
-      user->generation += nums;
+      ret = -ENODATA;
     }
 
 out:
@@ -751,8 +858,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_UPDATED:
         {
           nxrmutex_lock(&upper->lock);
-          *(FAR bool *)(uintptr_t)arg =
-          sensor_is_updated(upper->state.generation, user->generation);
+          *(FAR bool *)(uintptr_t)arg = sensor_is_updated(upper, user);
           nxrmutex_unlock(&upper->lock);
         }
         break;
@@ -817,7 +923,7 @@ static int sensor_poll(FAR struct file *filep,
                 }
             }
         }
-      else if (sensor_is_updated(upper->state.generation, user->generation))
+      else if (sensor_is_updated(upper, user))
         {
           eventset |= (fds->events & POLLIN);
         }
@@ -871,13 +977,22 @@ static ssize_t sensor_push_event(FAR void *priv, FAR const void *data,
           nxrmutex_unlock(&upper->lock);
           return ret;
         }
+
+      ret = circbuf_init(&upper->timing, NULL, lower->nbuffer *
+                         TIMING_BUF_ESIZE);
+      if (ret < 0)
+        {
+          circbuf_uninit(&upper->buffer);
+          nxrmutex_unlock(&upper->lock);
+          return ret;
+        }
     }
 
   circbuf_overwrite(&upper->buffer, data, bytes);
-  upper->state.generation += envcount;
+  sensor_generate_timing(upper, envcount);
   list_for_every_entry(&upper->userlist, user, struct sensor_user_s, node)
     {
-      if (sensor_is_updated(upper->state.generation, user->generation))
+      if (sensor_is_updated(upper, user))
         {
           nxsem_get_value(&user->buffersem, &semcount);
           if (semcount < 1)
@@ -1154,6 +1269,7 @@ void sensor_custom_unregister(FAR struct sensor_lowerhalf_s *lower,
   if (circbuf_is_init(&upper->buffer))
     {
       circbuf_uninit(&upper->buffer);
+      circbuf_uninit(&upper->timing);
     }
 
   kmm_free(upper);
