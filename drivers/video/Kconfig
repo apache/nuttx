@@ -150,6 +150,41 @@ config VIDEO_ISX012
 	default n
 	select I2C
 
+config VIDEO_ISX019
+	bool "ISX019 Image sensor"
+	default n
+	select I2C
+
+if VIDEO_ISX019
+choice
+	prompt "HDR mode selection"
+	default VIDEO_ISX019_DOL3
+	---help---
+		ISX019 has the DOL-HDR feature, which combines images with different exposure so that
+		both bright and dark data of high-contrast subject can be viewed at the same time.
+		Select DOLX(X = 2 or 3), in which X represents the number of combined images.
+
+config VIDEO_ISX019_DOL3
+	bool "DOL3"
+	---help---
+		DOL3 is the mode that combines 3 images with different exposure.
+
+config VIDEO_ISX019_DOL2
+	bool "DOL2"
+	---help---
+		DOL2 is the mode that combines 2 images with different exposure.
+
+endchoice
+
+config VIDEO_ISX019_INITIAL_JPEG_QUALITY
+	int "Initial JPEG quality"
+	default 70
+	range 1 100
+	---help---
+		The initial JPEG quality.
+
+endif
+
 config VIDEO_OV2640
 	bool "OV2640 camera chip"
 	default n
