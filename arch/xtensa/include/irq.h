@@ -144,6 +144,15 @@
 
 #ifndef __ASSEMBLY__
 
+#ifdef CONFIG_LIB_SYSCALL
+/* This structure represents the return state from a system call */
+
+struct xcpt_syscall_s
+{
+  uintptr_t sysreturn;   /* The return PC */
+};
+#endif
+
 /* This struct defines the way the registers are stored. */
 
 struct xcptcontext
@@ -167,6 +176,14 @@ struct xcptcontext
   /* Register save area */
 
   uint32_t *regs;
+
+#ifndef CONFIG_BUILD_FLAT
+  /* This is the saved address to use when returning from a user-space
+   * signal handler.
+   */
+
+  uintptr_t sigreturn;
+#endif
 
 #ifdef CONFIG_LIB_SYSCALL
   /* The following array holds the return address and the exc_return value

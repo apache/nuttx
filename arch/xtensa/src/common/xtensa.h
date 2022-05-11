@@ -289,6 +289,12 @@ void xtensa_pause_handler(void);
 void _xtensa_sig_trampoline(void);
 void xtensa_sig_deliver(void);
 
+#ifdef CONFIG_LIB_SYSCALL
+void xtensa_dispatch_syscall(unsigned int nbr, uintptr_t parm1,
+                             uintptr_t parm2, uintptr_t parm3,
+                             uintptr_t parm4, uintptr_t parm5);
+#endif
+
 /* Chip-specific functions **************************************************/
 
 /* Chip specific functions defined in arch/xtensa/src/<chip> */
