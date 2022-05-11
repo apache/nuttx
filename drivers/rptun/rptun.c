@@ -849,6 +849,9 @@ static int rptun_do_ioctl(FAR struct rptun_priv_s *priv, int cmd,
         break;
       case RPTUNIOC_DUMP:
         rptun_dump(&priv->rvdev);
+#ifdef CONFIG_RPTUN_PM
+        metal_log(METAL_LOG_EMERGENCY, "rptun headrx %d\n", priv->headrx);
+#endif
         break;
 #ifdef CONFIG_RPTUN_PING
       case RPTUNIOC_PING:
