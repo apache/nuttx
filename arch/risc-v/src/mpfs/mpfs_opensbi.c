@@ -124,6 +124,12 @@ static int  mpfs_opensbi_ecall_handler(long extid, long funcid,
 
 extern void riscv_lowputc(char ch);
 
+/* domains init implemented in board specific file */
+
+#ifdef CONFIG_OPENSBI_DOMAINS
+extern int board_domains_init(void);
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -157,6 +163,9 @@ static struct aclint_mtimer_data mpfs_mtimer =
 
 static const struct sbi_platform_operations platform_ops =
 {
+#ifdef CONFIG_OPENSBI_DOMAINS
+  .domains_init        = board_domains_init,
+#endif
   .console_init        = mpfs_opensbi_console_init,
   .early_init          = mpfs_early_init,
   .irqchip_init        = mpfs_irqchip_init,
