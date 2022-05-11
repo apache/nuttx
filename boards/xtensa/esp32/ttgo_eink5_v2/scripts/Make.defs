@@ -34,10 +34,14 @@ ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_out.ld
 ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.ld),)
 	ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.ld
 else
-	ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
-		ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32_mcuboot.ld
+	ifeq ($(CONFIG_BUILD_PROTECTED),y)
+		ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)kernel-space.ld
 	else
-		ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32.ld
+		ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
+			ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32_mcuboot.ld
+		else
+			ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32.ld
+		endif
 	endif
 endif
 
@@ -50,7 +54,11 @@ endif
 ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.template.ld),)
 	LDSCRIPT_TEMPLATE = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.template.ld
 else
-	LDSCRIPT_TEMPLATE = $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32.template.ld
+	ifeq ($(CONFIG_BUILD_PROTECTED),y)
+		LDSCRIPT_TEMPLATE = $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)protected.template.ld
+	else
+		LDSCRIPT_TEMPLATE = $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)flat.template.ld
+	endif
 endif
 
 ARCHPICFLAGS = -fpic

@@ -34,13 +34,16 @@
 #include "xtensa.h"
 #include "xtensa_attr.h"
 
-#include "hardware/esp32_dport.h"
-#include "hardware/esp32_rtccntl.h"
 #include "esp32_clockconfig.h"
 #include "esp32_region.h"
 #include "esp32_start.h"
 #include "esp32_spiram.h"
 #include "esp32_wdt.h"
+#ifdef CONFIG_BUILD_PROTECTED
+#  include "esp32_userspace.h"
+#endif
+#include "hardware/esp32_dport.h"
+#include "hardware/esp32_rtccntl.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -231,6 +234,17 @@ static noreturn_function void __esp32_start(void)
   esp32_board_initialize();
 
   showprogress("B");
+
+  /* For the case of the separate user-/kernel-space build, perform whatever
+   * platform specific initialization of the user memory is required.
+   * Normally this just means initializing the user space .data and .bss
+   * segments.
+   */
+
+#ifdef CONFIG_BUILD_PROTECTED
+  esp32_userspace();
+  showprogress("C");
+#endif
 
   /* Bring up NuttX */
 
