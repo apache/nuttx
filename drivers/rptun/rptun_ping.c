@@ -161,6 +161,8 @@ int rptun_ping(FAR struct rpmsg_endpoint *ept,
       min    = MIN(min, tm);
       max    = MAX(max, tm);
       total += tm;
+
+      usleep(ping->sleep * 1000);
     }
 
   syslog(LOG_INFO, "current CPU freq: %" PRIu32 ", ping times: %d\n",
