@@ -10,3 +10,8 @@ config OPENSBI
 	---help---
 		Enable or disable Open Source Supervisor Binary Interface (OpenSBI) features
 		for RISC-V.
+
+config OPENSBI_DOMAINS
+	bool "Support multiple OpenSBI boot domains"
+	depends on OPENSBI
+	default n
