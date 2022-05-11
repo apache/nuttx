@@ -1610,6 +1610,10 @@ config TIVA_CAN_ERR_HANDLER_PER
 
 endmenu
 
+config TIVA_WITH_QEMU
+	bool "Run with qemu"
+	default n
+
 if TIVA_ETHERNET
 
 menu "Stellaris Ethernet Configuration"
@@ -1666,10 +1670,6 @@ config TIVA_DUMPPACKET
 	default n
 	---help---
 		Dump each packet received/sent to the console.
-
-config TIVA_WITH_QEMU
-	bool "Workaround for tiva with qemu"
-	default n
 
 endmenu # Stellaris Ethernet Configuration
 
