@@ -1044,9 +1044,6 @@ int sdio_enable_function(FAR struct sdio_dev_s *dev, uint8_t function);
 
 int sdio_enable_interrupt(FAR struct sdio_dev_s *dev, uint8_t function);
 
-int sdio_sendcmdpoll(FAR struct sdio_dev_s *dev,
-                     uint32_t cmd, uint32_t arg);
-
 int sdio_io_rw_direct(FAR struct sdio_dev_s *dev, bool write,
                       uint8_t function, uint32_t address,
                       uint8_t inb, uint8_t *outb);
