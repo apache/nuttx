@@ -47,6 +47,10 @@ CSRCS += aeabi_memcpy.c aeabi_memcpy4.c aeabi_memcpy8.c
 CSRCS += aeabi_memmove.c aeabi_memmove4.c aeabi_memmove8.c
 CSRCS += aeabi_memset.c aeabi_memset4.c aeabi_memset8.c
 
+ifneq ($(CONFIG_LIBSUPCXX),y)
+CSRCS += aeabi_atexit.c
+endif
+
 ifeq ($(CONFIG_CXX_EXCEPTION),y)
 CSRCS += gnu_unwind_find_exidx.c
 endif
