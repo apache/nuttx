@@ -66,7 +66,7 @@ if [ -f "${1}" ];then
   ${nm} -n ${1} | grep -E " [T|t] "  | uniq | \
   while read addr type name
   do
-    echo "  { \"`${filt} -p $name`\", (FAR ${CONST} void *)0x$addr },"
+    echo "  { \"$(${filt} $name | sed -e "s/(.*)$//")\", (FAR ${CONST} void *)0x$addr },"
   done
 fi
 
