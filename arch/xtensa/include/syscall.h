@@ -350,7 +350,7 @@ static inline uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1,
                                   uintptr_t parm4, uintptr_t parm5)
 {
   register long reg0 __asm__("a2") = (long)(nbr);
-  register long reg5 __asm__("a7") = (long)(parm4);
+  register long reg5 __asm__("a7") = (long)(parm5);
   register long reg4 __asm__("a6") = (long)(parm4);
   register long reg3 __asm__("a5") = (long)(parm3);
   register long reg2 __asm__("a4") = (long)(parm2);
@@ -384,8 +384,8 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
                                   uintptr_t parm6)
 {
   register long reg0 __asm__("a2") = (long)(nbr);
-  register long reg6 __asm__("a8") = (long)(parm4);
-  register long reg5 __asm__("a7") = (long)(parm4);
+  register long reg6 __asm__("a8") = (long)(parm6);
+  register long reg5 __asm__("a7") = (long)(parm5);
   register long reg4 __asm__("a6") = (long)(parm4);
   register long reg3 __asm__("a5") = (long)(parm3);
   register long reg2 __asm__("a4") = (long)(parm2);
