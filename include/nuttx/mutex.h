@@ -28,6 +28,8 @@
 #include <stdbool.h>
 #include <errno.h>
 #include <assert.h>
+#include <unistd.h>
+#include <nuttx/sched.h>
 #include <nuttx/semaphore.h>
 
 /****************************************************************************
@@ -35,12 +37,22 @@
  ****************************************************************************/
 
 #define MUTEX_INITIALIZER    SEM_INITIALIZER(1);
+#define RMUTEX_INITIALIZER   {SEM_INITIALIZER(1), INVALID_PROCESS_ID, 0}
 
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
 
 typedef sem_t mutex_t;
+
+struct rmutex_s
+{
+  mutex_t mutex;
+  pid_t holder;
+  uint16_t count;
+};
+
+typedef struct rmutex_s rmutex_t;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -203,6 +215,207 @@ static inline bool nxmutex_is_locked(FAR mutex_t *mutex)
 static inline int nxmutex_unlock(FAR mutex_t *mutex)
 {
   return nxsem_post(mutex);
+}
+
+/****************************************************************************
+ * Name: nxrmutex_init
+ *
+ * Description:
+ *   This function initializes the UNNAMED recursive mutex. Following a
+ *   successful call to nxrmutex_init(), the recursive mutex may be used in
+ *   subsequent calls to nxrmutex_lock(), nxrmutex_unlock(),
+ *   and nxrmutex_trylock(). The recursive mutex remains usable
+ *   until it is destroyed.
+ *
+ * Parameters:
+ *   rmutex - Recursive mutex to be initialized
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+static inline int nxrmutex_init(FAR rmutex_t *rmutex)
+{
+  rmutex->count = 0;
+  rmutex->holder = INVALID_PROCESS_ID;
+  return nxmutex_init(&rmutex->mutex);
+}
+
+/****************************************************************************
+ * Name: nxrmutex_destroy
+ *
+ * Description:
+ *   This function destroy the UNNAMED recursive mutex.
+ *
+ * Parameters:
+ *   rmutex - Recursive mutex to be destroyed
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+static inline int nxrmutex_destroy(FAR rmutex_t *rmutex)
+{
+  return nxmutex_destroy(&rmutex->mutex);
+}
+
+/****************************************************************************
+ * Name: nrxmutex_lock
+ *
+ * Description:
+ *   This function attempts to lock the recursive mutex referenced by
+ *   'rmutex'.The recursive mutex can be locked multiple times in the same
+ *   thread.
+ *
+ * Parameters:
+ *   rmutex - Recursive mutex descriptor.
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   Possible returned errors:
+ *
+ ****************************************************************************/
+
+static inline int nxrmutex_lock(FAR rmutex_t *rmutex)
+{
+  int ret = OK;
+  pid_t tid = gettid();
+
+  if (rmutex->holder == tid)
+    {
+      DEBUGASSERT(rmutex->count < UINT16_MAX);
+      rmutex->count++;
+    }
+  else
+    {
+      ret = nxmutex_lock(&rmutex->mutex);
+      if (ret == OK)
+        {
+          rmutex->holder = tid;
+          rmutex->count = 1;
+        }
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nxrmutex_trylock
+ *
+ * Description:
+ *   This function locks the recursive mutex if the recursive mutex is
+ *   currently not locked or the same thread call.
+ *   If the recursive mutex is locked and other thread call it,
+ *   the call returns without blocking.
+ *
+ * Parameters:
+ *   rmutex - Recursive mutex descriptor.
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   Possible returned errors:
+ *
+ *     -EINVAL - Invalid attempt to lock the recursive mutex
+ *     -EAGAIN - The recursive mutex is not available.
+ *
+ ****************************************************************************/
+
+static inline int nxrmutex_trylock(FAR rmutex_t *rmutex)
+{
+  int ret = OK;
+  pid_t tid = gettid();
+
+  if (rmutex->holder == tid)
+    {
+      DEBUGASSERT(rmutex->count < UINT16_MAX);
+      rmutex->count++;
+    }
+  else
+    {
+      ret = nxmutex_trylock(&rmutex->mutex);
+      if (ret == OK)
+      {
+        rmutex->holder = tid;
+        rmutex->count = 1;
+      }
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nxrmutex_is_locked
+ *
+ * Description:
+ *   This function get the lock state the recursive mutex
+ *   referenced by 'rmutex'.
+ *
+ * Parameters:
+ *   rmutex - Recursive mutex descriptor.
+ *
+ * Return Value:
+ *
+ ****************************************************************************/
+
+static inline bool nxrmutex_is_locked(FAR rmutex_t *rmutex)
+{
+  return rmutex->count > 0;
+}
+
+/****************************************************************************
+ * Name: nxrmutex_unlock
+ *
+ * Description:
+ *   This function attempts to unlock the recursive mutex
+ *   referenced by 'rmutex'.
+ *
+ * Parameters:
+ *   rmutex - Recursive mutex descriptor.
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   Possible returned errors:
+ *
+ * Assumptions:
+ *   This function may be called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+static inline int nxrmutex_unlock(FAR rmutex_t *rmutex)
+{
+  int ret = OK;
+  pid_t tid = gettid();
+
+  if (rmutex->holder != tid)
+  {
+    return -EPERM;
+  }
+
+  DEBUGASSERT(rmutex->count > 0);
+  if (rmutex->count == 1)
+    {
+      rmutex->count = 0;
+      rmutex->holder = INVALID_PROCESS_ID;
+      ret = nxmutex_unlock(&rmutex->mutex);
+    }
+  else
+    {
+      rmutex->count--;
+    }
+
+  return ret;
 }
 
 #undef EXTERN
