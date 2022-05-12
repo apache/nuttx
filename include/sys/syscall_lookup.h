@@ -93,11 +93,11 @@ SYSCALL_LOOKUP(sem_wait,                   1)
   SYSCALL_LOOKUP(task_create,              5)
   SYSCALL_LOOKUP(task_spawn,               6)
   SYSCALL_LOOKUP(task_delete,              1)
+  SYSCALL_LOOKUP(task_restart,             1)
 #else
   SYSCALL_LOOKUP(pgalloc,                  2)
 #endif
 
-SYSCALL_LOOKUP(task_restart,               1)
 SYSCALL_LOOKUP(task_setcancelstate,        2)
 SYSCALL_LOOKUP(up_assert,                  2)
 
