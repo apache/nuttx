@@ -200,6 +200,7 @@ static int sc8551_getreg8(FAR struct sc8551_dev_s *priv, uint8_t regaddr,
   FAR struct i2c_master_s *dev = priv->i2c;
   struct i2c_msg_s msg[2];
   int err;
+  int retries = 0;
 
   msg[0].frequency = priv->frequency;
   msg[0].addr = priv->addr;
@@ -213,13 +214,20 @@ static int sc8551_getreg8(FAR struct sc8551_dev_s *priv, uint8_t regaddr,
   msg[1].length = num_char;
   msg[1].flags = I2C_M_READ;
 
-  if ((err = I2C_TRANSFER(dev, msg, 2)) < OK)
+  for (retries = 0; retries < SC_IIC_RETRY_NUM; retries++)
     {
-      baterr("ERROR: i2c transfer failed! err: %d\n", err);
-      return err;
+      err = I2C_TRANSFER(dev, msg, 2);
+      if (err >= 0)
+        {
+          break;
+        }
+      else
+        {
+          baterr("ERROR: i2c transfer failed! err: %d retries:%d\n", err,retries);
+        }
     }
 
-  return OK;
+  return (err >= 0) ? OK : err;
 }
 
 /****************************************************************************

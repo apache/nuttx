@@ -633,6 +633,8 @@
 
 #define DA9168_DEV_ID                                   0xE7
 
+#define DA_IIC_RETRY_NUM                                3
+
 /* Ship mode entry delay time */
 
 enum da9168_ship_mode_entry_delay_sel

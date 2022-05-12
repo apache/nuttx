@@ -93,5 +93,6 @@
 #define CW2218_SLEEP_COUNTS             60        /* cw2218 sleep count value */
 
 #define CW2218_BATTERY_INIT_5S          5000000   /* delay time */
+#define CW_IIC_RETRY_NUM                3
 
 #endif /* __DRIVERS_POWER_CW2218_H */

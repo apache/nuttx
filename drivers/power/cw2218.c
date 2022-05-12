@@ -182,6 +182,7 @@ static int cw2218_getreg8(FAR struct cw2218_dev_s *priv, uint8_t regaddr,
                           FAR uint8_t *regval, int num_char)
 {
   int err;
+  int retries = 0;
   struct i2c_msg_s msg[2];
   FAR struct i2c_master_s *dev = priv->i2c;
 
@@ -197,13 +198,20 @@ static int cw2218_getreg8(FAR struct cw2218_dev_s *priv, uint8_t regaddr,
   msg[1].flags = I2C_M_READ;
   msg[1].frequency = priv->frequency;
 
-  if ((err = I2C_TRANSFER(dev, msg, 2)) < OK)
+  for (retries = 0; retries < CW_IIC_RETRY_NUM; retries++)
     {
-      baterr("ERROR: i2c_write failed: %d\n", err);
-      return err;
+      err = I2C_TRANSFER(dev, msg, 2);
+      if (err >= 0)
+        {
+          break;
+        }
+      else
+        {
+          baterr("ERROR: i2c_write failed: %d retries:%d\n", err, retries);
+        }
     }
 
-  return OK;
+  return (err >= 0) ? OK : err;
 }
 
 /****************************************************************************
@@ -945,13 +953,6 @@ static int cw2218_init(FAR struct cw2218_dev_s *priv)
       return ret;
     }
 
-  ret = cw2218_config_interrupt(priv);
-  if (ret < 0)
-    {
-      baterr("ERROR: CW2218 get config interrupt! Error = %d\n", ret);
-      return ret;
-    }
-
   if ((ret == CW2218_NOT_ACTIVE) || (ret == CW2218_PROFILE_NOT_READY) \
       || (ret == CW2218_PROFILE_NEED_UPDATE))
     {
@@ -961,6 +962,13 @@ static int cw2218_init(FAR struct cw2218_dev_s *priv)
           baterr("ERROR: CW2218 config start ic failed, Error = %d\n", ret);
           return ret;
         }
+    }
+
+  ret = cw2218_config_interrupt(priv);
+  if (ret < 0)
+    {
+      baterr("ERROR: CW2218 get config interrupt! Error = %d\n", ret);
+      return ret;
     }
 
   work_queue(HPWORK, &priv->work, cw2218_worker, priv, 0);
