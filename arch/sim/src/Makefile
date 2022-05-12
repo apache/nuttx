@@ -249,7 +249,7 @@ RELLIBS += -lboard
 
 all: up_head$(OBJEXT) libarch$(LIBEXT)
 
-.PHONY: board/libboard$(LIBEXT) export_startup clean distclean cleanrel depend
+.PHONY: export_startup clean distclean cleanrel depend
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -336,10 +336,9 @@ endif
 
 # This is part of the top-level export target
 
-export_startup: board/libboard$(LIBEXT) up_head.o $(HOSTOBJS) nuttx-names.dat
+export_startup: up_head.o $(HOSTOBJS) nuttx-names.dat
 	cp up_head.o $(HOSTOBJS) ${EXPORT_DIR}/startup
 	cp nuttx-names.dat ${EXPORT_DIR}/libs
-	echo main NXmain >> ${EXPORT_DIR}/libs/nuttx-names.dat
 
 # Dependencies
 
