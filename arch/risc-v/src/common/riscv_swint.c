@@ -326,14 +326,14 @@ int riscv_swint(int irq, void *context, void *arg)
 #if defined (CONFIG_BUILD_PROTECTED)
           /* Use the nxtask_startup trampoline function */
 
-          regs[REG_EPC]      = (uintptr_t)USERSPACE->task_startup & ~1;
+          regs[REG_EPC]      = (uintptr_t)USERSPACE->task_startup;
           regs[REG_A0]       = regs[REG_A1]; /* Task entry */
           regs[REG_A1]       = regs[REG_A2]; /* argc */
           regs[REG_A2]       = regs[REG_A3]; /* argv */
 #else
           /* Start the user task directly */
 
-          regs[REG_EPC]      = (uintptr_t)regs[REG_A1] & ~1;
+          regs[REG_EPC]      = (uintptr_t)regs[REG_A1];
           regs[REG_A0]       = regs[REG_A2]; /* argc */
           regs[REG_A1]       = regs[REG_A3]; /* argv */
 #endif
@@ -361,7 +361,7 @@ int riscv_swint(int irq, void *context, void *arg)
            * unprivileged mode.
            */
 
-          regs[REG_EPC]      = (uintptr_t)regs[REG_A1] & ~1;  /* startup */
+          regs[REG_EPC]      = (uintptr_t)regs[REG_A1];  /* startup */
 
           /* Change the parameter ordering to match the expectation of the
            * user space pthread_startup:
@@ -403,10 +403,10 @@ int riscv_swint(int irq, void *context, void *arg)
            */
 
 #if defined (CONFIG_BUILD_PROTECTED)
-          regs[REG_EPC]        = (uintptr_t)USERSPACE->signal_handler & ~1;
+          regs[REG_EPC]        = (uintptr_t)USERSPACE->signal_handler;
 #else
           regs[REG_EPC]        =
-              (uintptr_t)ARCH_DATA_RESERVE->ar_sigtramp & ~1;
+              (uintptr_t)ARCH_DATA_RESERVE->ar_sigtramp;
 #endif
           regs[REG_INT_CTX]   &= ~STATUS_PPP; /* User mode */
 
@@ -457,7 +457,7 @@ int riscv_swint(int irq, void *context, void *arg)
           /* Set up to return to the kernel-mode signal dispatching logic. */
 
           DEBUGASSERT(rtcb->xcp.sigreturn != 0);
-          regs[REG_EPC]        = rtcb->xcp.sigreturn & ~1;
+          regs[REG_EPC]        = rtcb->xcp.sigreturn;
           regs[REG_INT_CTX]   |= STATUS_PPP; /* Privileged mode */
 
           rtcb->xcp.sigreturn  = 0;
@@ -511,7 +511,7 @@ int riscv_swint(int irq, void *context, void *arg)
 
           rtcb->xcp.nsyscalls  = index + 1;
 
-          regs[REG_EPC]        = (uintptr_t)dispatch_syscall & ~1;
+          regs[REG_EPC]        = (uintptr_t)dispatch_syscall;
 
 #ifndef CONFIG_BUILD_FLAT
           regs[REG_INT_CTX]   |= STATUS_PPP; /* Privileged mode */
