@@ -25,16 +25,6 @@ include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
 LDSCRIPT = flash_config.ld
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
-CC = $(CROSSDEV)gcc
-CXX = $(CROSSDEV)g++
-CPP = $(CROSSDEV)gcc -E
-LD = $(CROSSDEV)ld
-STRIP = $(CROSSDEV)strip --strip-unneeded
-AR = $(CROSSDEV)ar rcs
-NM = $(CROSSDEV)nm
-OBJCOPY = $(CROSSDEV)objcopy
-OBJDUMP = $(CROSSDEV)objdump
-
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
