@@ -130,7 +130,7 @@ static int sdio_sendcmdpoll(FAR struct sdio_dev_s *dev,
 
 int sdio_io_rw_direct(FAR struct sdio_dev_s *dev, bool write,
                       uint8_t function, uint32_t address,
-                      uint8_t inb, uint8_t *outb)
+                      uint8_t inb, FAR uint8_t *outb)
 {
   union sdio_cmd5x arg;
   struct sdio_resp_r5 resp;
@@ -194,7 +194,7 @@ int sdio_io_rw_direct(FAR struct sdio_dev_s *dev, bool write,
 
 int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
                         uint8_t function, uint32_t address,
-                        bool inc_addr, uint8_t *buf,
+                        bool inc_addr, FAR uint8_t *buf,
                         unsigned int blocklen, unsigned int nblocks)
 {
   union sdio_cmd5x arg;
@@ -308,7 +308,7 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
   return OK;
 }
 
-int sdio_set_wide_bus(struct sdio_dev_s *dev)
+int sdio_set_wide_bus(FAR struct sdio_dev_s *dev)
 {
   int ret;
   uint8_t value;
