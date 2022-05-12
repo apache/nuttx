@@ -25,51 +25,40 @@
 #include <nuttx/config.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/compiler.h>
+
+#include <sys/mman.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_addrenv_text_enable_write
+ * Name: up_addrenv_mprot
  *
  * Description:
- *   Temporarily enable write access to the .text section. This must be
- *   called prior to loading the process code into memory.
+ *   Modify access rights to an address range.
  *
  * Input Parameters:
  *   addrenv - The address environment to be modified.
+ *   addr - Base address of the region.
+ *   len - Size of the region.
+ *   prot - Access right flags.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int up_addrenv_text_enable_write(group_addrenv_t *addrenv)
+int up_addrenv_mprot(group_addrenv_t *addrenv, uintptr_t addr, size_t len,
+                     int prot)
 {
   /* Nothing needs to be done */
 
-  return OK;
-}
-
-/****************************************************************************
- * Name: up_addrenv_text_disable_write
- *
- * Description:
- *   Disable write access to the .text section. This must be called after the
- *   process code is loaded into memory.
- *
- * Input Parameters:
- *   addrenv - The address environment to be modified.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-int up_addrenv_text_disable_write(group_addrenv_t *addrenv)
-{
-  /* Nothing needs to be done */
+  UNUSED(addrenv);
+  UNUSED(addr);
+  UNUSED(len);
+  UNUSED(prot);
 
   return OK;
 }

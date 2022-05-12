@@ -1186,14 +1186,16 @@ int up_addrenv_detach(FAR struct task_group_s *group, FAR struct tcb_s *tcb);
 #endif
 
 /****************************************************************************
- * Name: up_addrenv_text_enable_write
+ * Name: up_addrenv_mprot
  *
  * Description:
- *   Temporarily enable write access to the .text section. This must be
- *   called prior to loading the process code into memory.
+ *   Modify access rights to an address range.
  *
  * Input Parameters:
  *   addrenv - The address environment to be modified.
+ *   addr - Base address of the region.
+ *   len - Size of the region.
+ *   prot - Access right flags.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
@@ -1201,26 +1203,8 @@ int up_addrenv_detach(FAR struct task_group_s *group, FAR struct tcb_s *tcb);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-int up_addrenv_text_enable_write(FAR group_addrenv_t *addrenv);
-#endif
-
-/****************************************************************************
- * Name: up_addrenv_text_disable_write
- *
- * Description:
- *   Disable write access to the .text section. This must be called after the
- *   process code is loaded into memory.
- *
- * Input Parameters:
- *   addrenv - The address environment to be modified.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_ADDRENV
-int up_addrenv_text_disable_write(FAR group_addrenv_t *addrenv);
+int up_addrenv_mprot(group_addrenv_t *addrenv, uintptr_t addr, size_t len,
+                     int prot);
 #endif
 
 /****************************************************************************
