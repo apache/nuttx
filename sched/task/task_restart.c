@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: task_restart
+ * Name: nxtask_restart
  *
  * Description:
  *   This function "restarts" a task.  The task is first terminated and then
@@ -53,8 +53,7 @@
  *         calling task.
  *
  * Returned Value:
- *   Zero (OK) on success; -1 (ERROR) on failure with the errno variable set
- *   appropriately.
+ *   Zero (OK) on success; or negated errno on failure
  *
  *   This function can fail if:
  *   (1) A pid of zero or the pid of the calling task is provided
@@ -63,13 +62,13 @@
  *
  ****************************************************************************/
 
-int task_restart(pid_t pid)
+int nxtask_restart(pid_t pid)
 {
   FAR struct tcb_s *rtcb;
   FAR struct task_tcb_s *tcb;
   FAR dq_queue_t *tasklist;
   irqstate_t flags;
-  int errcode;
+  int ret;
 #ifdef CONFIG_SMP
   int cpu;
 #endif
@@ -81,7 +80,7 @@ int task_restart(pid_t pid)
     {
       /* Not implemented */
 
-      errcode = ENOSYS;
+      ret = -ENOSYS;
       goto errout;
     }
 
@@ -106,7 +105,7 @@ int task_restart(pid_t pid)
     {
       /* There is no TCB with this pid or, if there is, it is not a task. */
 
-      errcode = ESRCH;
+      ret = -ESRCH;
       goto errout_with_lock;
     }
 
@@ -187,10 +186,9 @@ int task_restart(pid_t pid)
 
   if (cpu >= 0)
     {
-      int ret = up_cpu_resume(cpu);
+      ret = up_cpu_resume(cpu);
       if (ret < 0)
         {
-          errcode = -ret;
           goto errout_with_lock;
         }
     }
@@ -206,6 +204,42 @@ int task_restart(pid_t pid)
 errout_with_lock:
   leave_critical_section(flags);
 errout:
-  set_errno(errcode);
-  return ERROR;
+  return ret;
 }
+
+/****************************************************************************
+ * Name: task_restart
+ *
+ * Description:
+ *   This function "restarts" a task.  The task is first terminated and then
+ *   reinitialized with same ID, priority, original entry point, stack size,
+ *   and parameters it had when it was first started.
+ *
+ * Input Parameters:
+ *   pid - The task ID of the task to delete.  An ID of zero signifies the
+ *         calling task.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; -1 (ERROR) on failure with the errno variable set
+ *   appropriately.
+ *
+ *   This function can fail if:
+ *   (1) A pid of zero or the pid of the calling task is provided
+ *      (functionality not implemented)
+ *   (2) The pid is not associated with any task known to the system.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_BUILD_KERNEL
+int task_restart(pid_t pid)
+{
+  int ret = nxtask_restart(pid);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
+
+  return ret;
+}
+#endif
