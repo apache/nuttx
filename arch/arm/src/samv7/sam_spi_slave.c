@@ -1234,7 +1234,7 @@ struct spi_slave_ctrlr_s *sam_spi_slave_initialize(int port)
       /* And enable the SPI */
 
       spi_putreg(priv, SPI_CR_SPIEN, SAM_SPI_CR_OFFSET);
-      up_mdelay(20);
+      nxsig_usleep(20000);
 
       /* Flush any pending interrupts/transfers */
 

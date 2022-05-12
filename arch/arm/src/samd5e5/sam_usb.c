@@ -8020,7 +8020,7 @@ static void sam_vbusdrive(struct sam_usbhost_s *priv, bool state)
 
   sam_usbhost_vbusdrive(0, state);
 
-  up_mdelay(200);
+  nxsig_usleep(200000);
 }
 
 /****************************************************************************

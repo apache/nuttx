@@ -38,6 +38,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/signal.h>
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/ili9340.h>
 
@@ -796,7 +797,7 @@ static int ili9340_hwinitialize(FAR struct ili9340_dev_s *dev)
 
   lcdinfo("ili9340 LCD driver: Sleep Out\n");
   lcd->sendcmd(lcd, ILI9340_SLEEP_OUT);
-  up_mdelay(120);
+  nxsig_usleep(120000);
 
   /* Deselect the device */
 
@@ -1037,7 +1038,7 @@ static int ili9340_setpower(FAR struct lcd_dev_s *dev, int power)
           /* And switch LCD on */
 
           lcd->sendcmd(lcd, ILI9340_DISPLAY_ON);
-          up_mdelay(120);
+          nxsig_usleep(120000);
         }
       else
         {

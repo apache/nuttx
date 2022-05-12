@@ -3963,7 +3963,7 @@ struct usbhost_connection_s *lpc17_40_usbhost_initialize(int controller)
 
   /* Wait 50MS then perform hardware reset */
 
-  up_mdelay(50);
+  nxsig_usleep(50000);
 
   lpc17_40_putreg(0, LPC17_40_USBHOST_CTRL);        /* Hardware reset */
   lpc17_40_putreg(0, LPC17_40_USBHOST_CTRLHEADED);  /* Initialize control list head to Zero */

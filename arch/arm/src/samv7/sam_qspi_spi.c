@@ -825,7 +825,7 @@ struct spi_dev_s *sam_qspi_spi_initialize(int intf)
       /* And enable the SPI */
 
       qspi_putreg(spi, QSPI_CR_QSPIEN, SAM_QSPI_CR_OFFSET);
-      up_mdelay(20);
+      nxsig_usleep(20000);
 
       /* Flush any pending transfers */
 

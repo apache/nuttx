@@ -201,7 +201,7 @@ static void lis3mdl_reset(FAR struct lis3mdl_dev_s *dev)
                          LIS3MDL_CTRL_REG_2,
                          LIS3MDL_CTRL_REG_2_SOFT_RST_BM);
 
-  up_mdelay(100);
+  nxsig_usleep(100000);
 }
 
 /****************************************************************************

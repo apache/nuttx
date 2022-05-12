@@ -39,6 +39,7 @@
 
 #include <nuttx/wdog.h>
 #include <nuttx/irq.h>
+#include <nuttx/signal.h>
 #include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/arp.h>
@@ -1892,7 +1893,7 @@ static int c5471_ifup(struct net_driver_s *dev)
 
   putreg32((getreg32(EIM_CTRL) | EIM_CTRL_ESM_EN), EIM_CTRL);      /* enable ESM */
   putreg32((getreg32(ENET0_MODE) | ENET_MODE_ENABLE), ENET0_MODE); /* enable ENET */
-  up_mdelay(100);
+  nxsig_usleep(100000);
 
   /* Set and activate a timer process */
 
@@ -2359,7 +2360,7 @@ static void c5471_eimconfig(struct c5471_driver_s *priv)
 #endif
 
   putreg32(0x00000000, ENET0_DRP);
-  up_mdelay(500);
+  nxsig_usleep(500000);
 }
 
 /****************************************************************************

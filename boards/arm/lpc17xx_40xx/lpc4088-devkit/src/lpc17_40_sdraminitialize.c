@@ -161,7 +161,7 @@ void lpc4088_devkit_sdram_initialize(void)
            EMC_DYNAMICCONFIG_AM1, LPC17_40_EMC_DYNAMICCONFIG0);
 #endif
 
-  up_mdelay(100);
+  nxsig_usleep(100000);
 
   /* Issue NOP command */
 
@@ -170,7 +170,7 @@ void lpc4088_devkit_sdram_initialize(void)
 
   /* Wait 200 Msec */
 
-  up_mdelay(200);
+  nxsig_usleep(200000);
 
   /* Issue PALL command */
 
@@ -211,7 +211,7 @@ void lpc4088_devkit_sdram_initialize(void)
   regval = getreg32(LPC17_40_EMC_DYNAMICCONFIG0);
   regval |= EMC_DYNAMICCONFIG_B;
   putreg32(regval, LPC17_40_EMC_DYNAMICCONFIG0);
-  up_mdelay(12);
+  nxsig_usleep(12000);
 
   regval = getreg32(LPC17_40_SYSCON_EMCDLYCTL);
   regval &= ~SYSCON_EMCDLYCTL_CMDDLY_MASK;

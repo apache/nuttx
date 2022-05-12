@@ -40,6 +40,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/arch.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/cdc.h>
@@ -2339,7 +2340,7 @@ static void usbclass_unbind(FAR struct usbdevclass_driver_s *driver,
        */
 
       usbclass_resetconfig(priv);
-      up_mdelay(50);
+      nxsig_usleep(50000);
 
       /* Free the interrupt IN endpoint */
 

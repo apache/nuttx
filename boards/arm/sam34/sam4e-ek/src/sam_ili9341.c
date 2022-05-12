@@ -889,7 +889,7 @@ static int sam_setpower(struct lcd_dev_s *dev, int power)
       /* Set the backlight level */
 
       sam_set_backlight((unsigned int)power);
-      up_mdelay(50);
+      nxsig_usleep(50000);
       priv->power = power;
     }
   else
@@ -1126,7 +1126,7 @@ static void sam_lcd9341_initialize(void)
   /* Leave sleep mode */
 
   sam_putreg(ILI9341_SLEEP_OUT, buffer, 0);
-  up_mdelay(10);
+  nxsig_usleep(10000);
 
   /* Initial state: LCD off */
 
@@ -1197,7 +1197,7 @@ int board_lcd_initialize(void)
 
   /* Identify and configure the LCD */
 
-  up_mdelay(50);
+  nxsig_usleep(50000);
   ret = sam_lcd_initialize();
   if (ret == OK)
     {

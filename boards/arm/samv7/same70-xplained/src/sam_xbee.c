@@ -143,7 +143,7 @@ static void sam_reset(const struct xbee_lower_s *lower)
   up_udelay(1);
   sam_gpiowrite(priv->rstcfg, true);
 
-  up_mdelay(100);
+  nxsig_usleep(100000);
 }
 
 static int sam_attach_irq(const struct xbee_lower_s *lower,

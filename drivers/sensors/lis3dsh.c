@@ -201,7 +201,7 @@ static void lis3dsh_reset(FAR struct lis3dsh_dev_s *dev)
   lis3dsh_write_register(dev, LIS3DSH_CTRL_REG_6,
                          LIS3DSH_CTRL_REG_6_BOOT_BM);
 
-  up_mdelay(100);
+  nxsig_usleep(100000);
 }
 
 /****************************************************************************

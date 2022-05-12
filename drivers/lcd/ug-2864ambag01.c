@@ -118,6 +118,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/signal.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/ug-2864ambag01.h>
@@ -1090,7 +1091,7 @@ FAR struct lcd_dev_s *ug2864ambag01_initialize(FAR struct spi_dev_s *spi,
 
   /* Clear the display */
 
-  up_mdelay(100);
+  nxsig_usleep(100000);
   ug2864ambag01_fill(&priv->dev, UG_Y1_BLACK);
   return &priv->dev;
 }

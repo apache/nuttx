@@ -31,6 +31,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <nuttx/signal.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/st7789.h>
@@ -82,7 +83,7 @@ int board_lcd_initialize(void)
   stm32_gpiowrite(STM32_LCD_RST, 0);
   up_mdelay(1);
   stm32_gpiowrite(STM32_LCD_RST, 1);
-  up_mdelay(120);
+  nxsig_usleep(120000);
 
   return OK;
 }

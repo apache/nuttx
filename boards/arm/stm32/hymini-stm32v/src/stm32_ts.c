@@ -111,7 +111,7 @@ static void hymini_ts_irq_clear(struct ads7843e_config_s *state)
 
 static bool hymini_ts_busy(struct ads7843e_config_s *state)
 {
-  up_mdelay(50);
+  nxsig_usleep(50000);
   return false;
 }
 

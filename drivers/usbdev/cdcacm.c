@@ -41,6 +41,7 @@
 #include <nuttx/wdog.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial/serial.h>
+#include <nuttx/signal.h>
 
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/cdc.h>
@@ -1518,7 +1519,7 @@ static void cdcacm_unbind(FAR struct usbdevclass_driver_s *driver,
        */
 
       cdcacm_resetconfig(priv);
-      up_mdelay(50);
+      nxsig_usleep(50000);
 
       /* Free the interrupt IN endpoint */
 

@@ -480,7 +480,8 @@ static int mio283qt9a_getrun(fb_coord_t row, fb_coord_t col,
   FAR struct mio283qt9a_dev_s *priv = &g_lcddev;
   FAR struct mio283qt9a_lcd_s *lcd = priv->lcd;
   FAR uint16_t *dest = (FAR uint16_t *)buffer;
-  uint16_t accum, test;
+  uint16_t accum;
+  uint16_t test;
   int i;
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
@@ -767,7 +768,7 @@ static inline int mio283qt9a_hwinitialize(FAR struct mio283qt9a_dev_s *priv)
       mio283qt9a_setarea(lcd, 0, 0, (MIO283QT9A_XRES - 1),
                         (MIO283QT9A_YRES - 1));
       mio283qt9a_putreg(lcd, 0x11, 0);      /* Sleep out mode */
-      up_mdelay(25);
+      nxsig_usleep(25000);
 
 #ifdef CONFIG_DEBUG_LCD
       /* Read back some info from the panel */

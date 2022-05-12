@@ -5359,7 +5359,7 @@ static void efm32_hwinitialize(struct efm32_usbdev_s *priv)
               _USB_GUSBCFG_CORRUPTTXPKT_MASK);
   regval |= USB_GUSBCFG_FORCEDEVMODE;
   efm32_putreg(regval, EFM32_USB_GUSBCFG);
-  up_mdelay(50);
+  nxsig_usleep(50000);
 
   /* Initialize device mode */
 

@@ -104,7 +104,7 @@ int stmpe811_adcinitialize(STMPE811_HANDLE handle)
 
   /* Wait for 20 ms */
 
-  up_mdelay(20);
+  nxsig_usleep(20000);
 
   /* Select the ADC clock speed */
 

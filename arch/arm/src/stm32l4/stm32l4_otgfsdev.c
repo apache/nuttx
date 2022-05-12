@@ -5427,7 +5427,7 @@ static void stm32l4_hwinitialize(struct stm32l4_usbdev_s *priv)
 # endif
 
   stm32l4_putreg(regval, STM32L4_OTGFS_GCCFG);
-  up_mdelay(20);
+  nxsig_usleep(20000);
 
   /* When VBUS sensing is not used we need to force the B session valid */
 
@@ -5443,7 +5443,7 @@ static void stm32l4_hwinitialize(struct stm32l4_usbdev_s *priv)
   regval &= ~OTGFS_GUSBCFG_FHMOD;
   regval |= OTGFS_GUSBCFG_FDMOD;
   stm32l4_putreg(regval, STM32L4_OTGFS_GUSBCFG);
-  up_mdelay(50);
+  nxsig_usleep(50000);
 
   /* Initialize device mode */
 

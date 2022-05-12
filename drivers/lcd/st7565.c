@@ -37,6 +37,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/signal.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/st7565.h>
@@ -966,7 +967,7 @@ FAR struct lcd_dev_s *st7565_initialize(FAR struct st7565_lcd_s *lcd,
    * INITIALIZATION...
    */
 
-  up_mdelay(150);
+  nxsig_usleep(150000);
 
   st7565_reset(priv, false);
 
@@ -974,7 +975,7 @@ FAR struct lcd_dev_s *st7565_initialize(FAR struct st7565_lcd_s *lcd,
    * INITIALIZATION...
    */
 
-  up_mdelay(150);
+  nxsig_usleep(150000);
 
   /* Make sure that LCD backlight is off */
 
@@ -1073,7 +1074,7 @@ FAR struct lcd_dev_s *st7565_initialize(FAR struct st7565_lcd_s *lcd,
 
   st7565_deselect(priv);
 
-  up_mdelay(10);
+  nxsig_usleep(10000);
 
   /* Clear the framebuffer */
 

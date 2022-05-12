@@ -328,9 +328,9 @@ static void ili9225_display(FAR struct ili9225_dev_s *dev, bool on)
 
       ili9225_writereg(dev, ILI9225_DISP_CTRL1, ILI9225_DISP_CTRL1_GON |
                                                 ILI9225_DISP_CTRL1_D(2));
-      up_mdelay(20);
+      nxsig_usleep(20000);
       ili9225_writereg(dev, ILI9225_DISP_CTRL1, 0);
-      up_mdelay(20);
+      nxsig_usleep(20000);
       ili9225_writereg(dev, ILI9225_POWER_CTRL1, ILI9225_POWER_CTRL1_SAP(0));
       ili9225_writereg(dev, ILI9225_POWER_CTRL2, ~ILI9225_POWER_CTRL2_PON);
       ili9225_writereg(dev, ILI9225_POWER_CTRL5, 0);

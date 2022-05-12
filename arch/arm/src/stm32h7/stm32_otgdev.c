@@ -36,6 +36,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
@@ -5303,7 +5304,7 @@ static void stm32_hwinitialize(struct stm32_usbdev_s *priv)
 #endif
 
   stm32_putreg(regval, STM32_OTG_GCCFG);
-  up_mdelay(20);
+  nxsig_usleep(20000);
 
   /* When VBUS sensing is not used we need to force the B session valid */
 
@@ -5319,7 +5320,7 @@ static void stm32_hwinitialize(struct stm32_usbdev_s *priv)
   regval &= ~OTG_GUSBCFG_FHMOD;
   regval |= OTG_GUSBCFG_FDMOD;
   stm32_putreg(regval, STM32_OTG_GUSBCFG);
-  up_mdelay(50);
+  nxsig_usleep(50000);
 
   /* Initialize device mode */
 

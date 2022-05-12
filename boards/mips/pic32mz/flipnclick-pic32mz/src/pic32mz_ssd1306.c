@@ -44,6 +44,7 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
+#include <nuttx/signal.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/ssd1306.h>
@@ -96,7 +97,7 @@ struct lcd_dev_s *pic32mz_graphics_setup(unsigned int devno)
 
   /* Wait a bit then release the OLED from the reset state */
 
-  up_mdelay(20);
+  nxsig_usleep(20000);
   pic32mz_gpiowrite(GPIO_SSD1306_RST, true);
 
   /* Get the SPI1 port interface */

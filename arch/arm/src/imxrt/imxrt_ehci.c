@@ -5392,7 +5392,7 @@ struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
       /* Enable VBUS power for the port */
 
       imxrt_usbhost_vbusdrive(i, true);
-      up_mdelay(25);
+      nxsig_usleep(25000);
     }
 
   /* If there is a USB device in the slot at power up, then we will not get

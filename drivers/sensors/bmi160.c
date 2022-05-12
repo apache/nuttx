@@ -541,9 +541,9 @@ static void bmi160_set_normal_imu(FAR struct bmi160_dev_s *priv)
   /* Set accel & gyro as normal mode. */
 
   bmi160_putreg8(priv, BMI160_CMD, ACCEL_PM_NORMAL);
-  up_mdelay(30);
+  nxsig_usleep(30000);
   bmi160_putreg8(priv, BMI160_CMD, GYRO_PM_NORMAL);
-  up_mdelay(30);
+  nxsig_usleep(30000);
 
   /* Set accel & gyro output data rate. */
 
@@ -587,10 +587,10 @@ static int bmi160_close(FAR struct file *filep)
   /* Set suspend mode to each sensors. */
 
   bmi160_putreg8(priv, BMI160_CMD, ACCEL_PM_SUSPEND);
-  up_mdelay(30);
+  nxsig_usleep(30000);
 
   bmi160_putreg8(priv, BMI160_CMD, GYRO_PM_SUSPEND);
-  up_mdelay(30);
+  nxsig_usleep(30000);
 
   return OK;
 }

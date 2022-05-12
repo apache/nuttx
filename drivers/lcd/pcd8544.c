@@ -988,7 +988,7 @@ FAR struct lcd_dev_s *pcd8544_initialize(FAR struct spi_dev_s *spi,
 
   /* Clear the framebuffer */
 
-  up_mdelay(100);
+  nxsig_usleep(100000);
   up_clear(priv);
   return &priv->dev;
 }

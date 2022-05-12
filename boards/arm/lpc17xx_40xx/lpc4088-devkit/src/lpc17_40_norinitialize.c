@@ -65,7 +65,7 @@ void lpc4088_devkit_nor_initialize(void)
   putreg32(31, LPC17_40_EMC_STATICWAITWR0);
   putreg32(31, LPC17_40_EMC_STATICWAITTURN0);
 
-  up_mdelay(10);
+  nxsig_usleep(10000);
 }
 
 #endif /* CONFIG_LPC17_40_EMC && CONFIG_LPC17_40_EXTNOR */

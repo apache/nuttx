@@ -84,7 +84,7 @@ int board_lcd_initialize(void)
 
   /* Wait a bit then release the OLED from the reset state */
 
-  up_mdelay(20);
+  nxsig_usleep(20000);
   esp32_gpiowrite(GPIO_SSD1306_RST, 1);
 
   /* Initialize I2C */

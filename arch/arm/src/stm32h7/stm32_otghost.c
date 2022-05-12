@@ -4996,12 +4996,12 @@ static void stm32_portreset(struct stm32_usbhost_s *priv)
   regval |= OTG_HPRT_PRST;
   stm32_putreg(STM32_OTG_HPRT, regval);
 
-  up_mdelay(20);
+  nxsig_usleep(20000);
 
   regval &= ~OTG_HPRT_PRST;
   stm32_putreg(STM32_OTG_HPRT, regval);
 
-  up_mdelay(20);
+  nxsig_usleep(20000);
 }
 
 /****************************************************************************
@@ -5124,7 +5124,7 @@ static void stm32_vbusdrive(struct stm32_usbhost_s *priv, bool state)
       stm32_putreg(STM32_OTG_HPRT, regval);
     }
 
-  up_mdelay(200);
+  nxsig_usleep(200000);
 }
 
 /****************************************************************************
@@ -5378,7 +5378,7 @@ static inline int stm32_hw_initialize(struct stm32_usbhost_s *priv)
 
   regval  = (OTG_GCCFG_PWRDWN | OTG_GCCFG_VBDEN);
   stm32_putreg(STM32_OTG_GCCFG, regval);
-  up_mdelay(20);
+  nxsig_usleep(20000);
 
   /* Initialize OTG features:  In order to support OTP, the HNPCAP and SRPCAP
    * bits would need to be set in the GUSBCFG register about here.
@@ -5390,7 +5390,7 @@ static inline int stm32_hw_initialize(struct stm32_usbhost_s *priv)
   regval &= ~OTG_GUSBCFG_FDMOD;
   regval |= OTG_GUSBCFG_FHMOD;
   stm32_putreg(STM32_OTG_GUSBCFG, regval);
-  up_mdelay(50);
+  nxsig_usleep(50000);
 
   /* Initialize host mode and return success */
 

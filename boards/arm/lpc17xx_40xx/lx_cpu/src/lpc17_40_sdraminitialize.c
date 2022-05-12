@@ -27,6 +27,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/signal.h>
 #include <arch/board/board.h>
 
 #include "nuttx/signal.h"
@@ -530,11 +531,11 @@ void lx_cpu_sdram_initialize(void)
   putreg32(1, LPC17_40_EMC_STATICEXTENDEDWAIT);  /* ( n + 1 ) -> 2 clock cycles */
 
   dynctl = EMC_DYNAMICCONTROL_CE | EMC_DYNAMICCONTROL_CS;
-  up_mdelay(100);
+  nxsig_usleep(100000);
   regval = dynctl | EMC_DYNAMICCONTROL_I_NOP;
   putreg32(regval, LPC17_40_EMC_DYNAMICCONTROL); /* Issue NOP command */
 
-  up_mdelay(200);                                /* wait 200ms */
+  nxsig_usleep(200000);                                /* wait 200ms */
   regval = dynctl | EMC_DYNAMICCONTROL_I_PALL;
   putreg32(regval, LPC17_40_EMC_DYNAMICCONTROL); /* Issue PAL command */
   putreg32(2, LPC17_40_EMC_DYNAMICREFRESH);      /* ( n * 16 ) -> 32 clock cycles */

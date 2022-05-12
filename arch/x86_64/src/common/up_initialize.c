@@ -50,7 +50,7 @@ static void up_calibratedelay(void)
   _warn("Beginning 100s delay\n");
   for (i = 0; i < 100; i++)
     {
-      up_mdelay(1000);
+      nxsig_usleep(1000000);
     }
 
   _warn("End 100s delay\n");

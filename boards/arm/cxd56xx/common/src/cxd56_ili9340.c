@@ -34,6 +34,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <nuttx/signal.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/ili9340.h>
@@ -364,11 +365,11 @@ int board_lcd_initialize(void)
 
       /* Reset ILI9340 */
 
-      up_mdelay(10);
+      nxsig_usleep(10000);
       cxd56_gpio_write(DISPLAY_RST, false);
-      up_mdelay(10);
+      nxsig_usleep(10000);
       cxd56_gpio_write(DISPLAY_RST, true);
-      up_mdelay(50);
+      nxsig_usleep(50000);
 
       /* Configure SPI */
 

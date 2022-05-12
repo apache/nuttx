@@ -112,8 +112,8 @@
 #define SDHCI_CMDTIMEOUT         (100000)
 #define SDHCI_LONGTIMEOUT        (1000000)
 
-#define SDHCI_WAIT_POWERON      MSEC2TICK(252)
-#define SDHCI_WAIT_POWEROFF     MSEC2TICK(300)
+#define SDHCI_WAIT_POWERON       (252000)
+#define SDHCI_WAIT_POWEROFF      (300000)
 
 /* Big DVS setting.  Range is 0=SDCLK*213 through 14=SDCLK*227 */
 
@@ -1318,7 +1318,7 @@ static void cxd56_sdio_sdhci_reset(struct sdio_dev_s *dev)
           break;
         }
 
-      up_mdelay(30);
+      nxsig_usleep(30000);
     }
 
   /* Make sure that all clocking is disabled */
@@ -1607,7 +1607,7 @@ static void cxd56_sdio_clock(struct sdio_dev_s *dev,
            CXD56_SDHCI_SYSCTL);
   for (i = 0; i < 20; i++)
     {
-      up_mdelay(50);
+      nxsig_usleep(50000);
       regval  = getreg32(CXD56_SDHCI_SYSCTL);
       if (regval & SDHCI_SYSCTL_ICLKSTA)
         {
@@ -3164,13 +3164,13 @@ static void cxd56_sdio_callback(void *arg)
                  priv->callback, priv->cbarg);
 
           work_queue(HPWORK, &priv->cbwork, priv->callback,
-                     priv->cbarg, delay);
+                     priv->cbarg, USEC2TICK(delay));
         }
       else
         {
           /* No.. then just call the callback here */
 
-          up_mdelay(delay);
+          nxsig_usleep(delay);
 
           mcinfo("Callback to %p(%p)\n", priv->callback, priv->cbarg);
 

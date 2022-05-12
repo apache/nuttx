@@ -2531,7 +2531,7 @@ static int sam_rh_enumerate(struct usbhost_connection_s *conn,
 
   /* USB 2.0 spec says at least 50ms delay before port reset */
 
-  up_mdelay(100);
+  nxsig_usleep(100000);
 
   /* Put the root hub port in reset (the SAMA5 supports three downstream
    * ports)
@@ -2547,7 +2547,7 @@ static int sam_rh_enumerate(struct usbhost_connection_s *conn,
   /* Release RH port 1 from reset and wait a bit */
 
   sam_putreg(OHCI_RHPORTST_PRSC, regaddr);
-  up_mdelay(200);
+  nxsig_usleep(200000);
   return OK;
 }
 
@@ -4170,7 +4170,7 @@ struct usbhost_connection_s *sam_ohci_initialize(int controller)
 
   /* Wait 50MS then perform hardware reset */
 
-  up_mdelay(50);
+  nxsig_usleep(50000);
 
   sam_putreg(0, SAM_USBHOST_CTRL);        /* Hardware reset */
   sam_putreg(0, SAM_USBHOST_CTRLHEADED);  /* Initialize control list head to Zero */
@@ -4241,7 +4241,7 @@ struct usbhost_connection_s *sam_ohci_initialize(int controller)
 #ifdef CONFIG_SAMA5_UHPHS_RHPORT3
   sam_usbhost_vbusdrive(SAM_RHPORT3, true);
 #endif
-  up_mdelay(50);
+  nxsig_usleep(50000);
 
   /* If there is a USB device in the slot at power up, then we will not
    * get the status change interrupt to signal us that the device is

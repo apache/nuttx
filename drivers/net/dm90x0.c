@@ -1530,7 +1530,7 @@ static int dm9x_ifup(FAR struct net_driver_s *dev)
         {
           /* Link OK... Wait a bit before getting the detected speed */
 
-          up_mdelay(200);
+          nxsig_usleep(200000);
           netstatus = getreg(DM9X_NETS);
           if ((netstatus & DM9X_NETS_SPEED) == 0)
             {

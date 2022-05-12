@@ -98,7 +98,7 @@ void lpc43_softreset(void)
 
   /* A delay seems to be necessary somewhere around here */
 
-  up_mdelay(20);
+  nxsig_usleep(20000);
 
   /* Clear all pending interrupts */
 

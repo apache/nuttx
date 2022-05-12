@@ -1913,7 +1913,7 @@ static void wm8994_audio_output(FAR struct wm8994_dev_s *priv)
     WM8994_VMID_SEL_2X40K;
   wm8994_writereg(priv, WM8994_PM1, regval);
 
-  up_mdelay(40);
+  nxsig_usleep(40000);
 
   /* Path configuration for output
    *
@@ -2006,7 +2006,7 @@ static void wm8994_audio_output(FAR struct wm8994_dev_s *priv)
                WM8994_WSEQ_START |
                (0x0 << WM8994_WSEQ_START_INDEX_SHIFT);  /* Start Index = 0 */
       wm8994_writereg(priv, WM8994_WR_CTL_SEQ1, regval);
-      up_mdelay(20);
+      nxsig_usleep(20000);
 
       /* Wait until sequencer indicates that sequence is completed */
 
@@ -2014,7 +2014,7 @@ static void wm8994_audio_output(FAR struct wm8994_dev_s *priv)
       while (regval & WM8994_WSEQ_BUSY)
         {
           regval = wm8994_readreg(priv, WM8994_WR_CTL_SEQ2);
-          up_mdelay(20);
+          nxsig_usleep(20000);
         }
 
       /* TODO: Manage cold/warm start correctly */
@@ -2027,7 +2027,7 @@ static void wm8994_audio_output(FAR struct wm8994_dev_s *priv)
                WM8994_WSEQ_START |
                (0x8 << WM8994_WSEQ_START_INDEX_SHIFT);  /* Start Index = 8 */
       wm8994_writereg(priv, WM8994_WR_CTL_SEQ1, regval);
-      up_mdelay(20);
+      nxsig_usleep(20000);
 
       /* Wait until sequencer indicates that sequence is completed */
 
@@ -2035,7 +2035,7 @@ static void wm8994_audio_output(FAR struct wm8994_dev_s *priv)
       while (regval & WM8994_WSEQ_BUSY)
         {
           regval = wm8994_readreg(priv, WM8994_WR_CTL_SEQ2);
-          up_mdelay(20);
+          nxsig_usleep(20000);
         }
     }
 
@@ -2130,7 +2130,7 @@ static void wm8994_audio_output(FAR struct wm8994_dev_s *priv)
 
   /* Add Delay */
 
-  up_mdelay(15);
+  nxsig_usleep(15000);
 
   /* Select DAC1 (Left) to Left Headphone Output PGA (HPOUT1LVOL) path */
 
@@ -2167,7 +2167,7 @@ static void wm8994_audio_output(FAR struct wm8994_dev_s *priv)
 
   /* Add Delay */
 
-  up_mdelay(257);
+  nxsig_usleep(257000);
 
   /* Enable HPOUT1 (Left) and HPOUT1 (Right) intermediate and output stages.
    * Remove clamps
@@ -2358,7 +2358,7 @@ static void wm8994_hw_reset(FAR struct wm8994_dev_s *priv)
   /* 0x01 = 0x0013 */
 
   wm8994_writereg(priv, WM8994_PM1, regval);
-  up_mdelay(50);
+  nxsig_usleep(50000);
 
   /* Configure the WM8994 hardware as an audio output device */
 
@@ -2624,13 +2624,13 @@ static void wm8994_hw_reset(FAR struct wm8994_dev_s *priv)
 
         /* 0x110 = regval */
 
-        up_mdelay(300);
+        nxsig_usleep(300000);
       }
       else
       {
         regval = 0x8108;
         wm8994_writereg(priv, WM8994_WR_CTL_SEQ1, regval); /* 0x110 = regval */
-        up_mdelay(50);
+        nxsig_usleep(50000);
       }
 
       regval = 0;
@@ -2668,7 +2668,7 @@ static void wm8994_hw_reset(FAR struct wm8994_dev_s *priv)
     regval = 0;
     wm8994_writereg(priv, WM8994_CHARGE_PUMP1, regval); /* 0x4c = 0x9F25 */
 
-    up_mdelay(15);
+    nxsig_usleep(15000);
 
     regval = 0;
     wm8994_writereg(priv, WM8994_OUTPUT_MIXER1, regval); /* 0x2d = 0x0001 */
@@ -2682,7 +2682,7 @@ static void wm8994_hw_reset(FAR struct wm8994_dev_s *priv)
     regval = 0x0033;
     wm8994_writereg(priv, 0x54, regval); /* 0x54 = 0x0033 */
 
-    up_mdelay(257);
+    nxsig_usleep(257000);
 
     regval = 0x00ee;
     wm8994_writereg(priv, 0x60, 0x00ee); /* 0x60 = 0x00ee */

@@ -589,7 +589,7 @@ static bool ez80emac_miipoll(FAR struct ez80emac_driver_s *priv,
             }
         }
 
-      up_mdelay(10);
+      nxsig_usleep(10000);
     }
 
   return false;
@@ -736,7 +736,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
            break;
         }
 
-      up_mdelay(10);
+      nxsig_usleep(10000);
     }
 
   if ((phyval & MII_MSR_LINKSTATUS) == 0)
@@ -810,7 +810,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
            break;
         }
 
-      up_mdelay(50);
+      nxsig_usleep(50000);
     }
 
   /* Wait link */

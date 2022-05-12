@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/signal.h>
 #include <errno.h>
 
 #include "arm_internal.h"
@@ -117,7 +118,7 @@
 /* Select a value close to a 10 millisecond delay */
 
 #  define XTAL_DELAY \
-   (10 * BOARD_XTAL_FREQUENCY + (LPC43_CCLK - 1)) / LPC43_CCLK
+   (10000 * BOARD_XTAL_FREQUENCY + (LPC43_CCLK - 1)) / LPC43_CCLK
 
 /* Check the ramp-up MSEL value */
 
@@ -303,7 +304,7 @@ static inline void lpc43_xtalconfig(void)
 
   /* Delay for stable clock input */
 
-  up_mdelay(20);
+  nxsig_usleep(20000);
 
   /* Select the crystal oscillator as the input to PLL1 */
 
@@ -654,7 +655,7 @@ void lpc43_clockconfig(void)
 
   /* Delay around 10 milliseconds */
 
-  up_mdelay(XTAL_DELAY);
+  nxsig_usleep(XTAL_DELAY);
 
   /* Configure the intermediate, ramp-up configuration for PLL1 */
 
@@ -666,7 +667,7 @@ void lpc43_clockconfig(void)
 
   /* Delay around 10 milliseconds */
 
-  up_mdelay(XTAL_DELAY);
+  nxsig_usleep(XTAL_DELAY);
 
   /* Go to the final, full-speed PLL1 configuration */
 

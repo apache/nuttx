@@ -75,7 +75,7 @@ void up_irqinitialize(void)
    * (Needs more investigation).
    */
 
-  up_mdelay(50);                        /* Wait a bit */
+  nxsig_usleep(50000);                        /* Wait a bit */
 #if 0
   putreg32(0, STR71X_EIC_IER);          /* Make sure that all interrupts are disabled */
   putreg32(0xffffffff, STR71X_EIC_IPR); /* And that no interrupts are pending */

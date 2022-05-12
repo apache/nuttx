@@ -2149,7 +2149,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
       /* And enable the SPI */
 
       spi_putreg(spi, SPI_CR_SPIEN, SAM_SPI_CR_OFFSET);
-      up_mdelay(20);
+      nxsig_usleep(20000);
 
       /* Flush any pending transfers */
 

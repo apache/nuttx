@@ -370,11 +370,11 @@ int board_lcd_initialize(void)
 
       /* Reset LPM013M091A */
 
-      up_mdelay(10);
+      nxsig_usleep(10000);
       cxd56_gpio_write(DISPLAY_RST, false);
-      up_mdelay(10);
+      nxsig_usleep(10000);
       cxd56_gpio_write(DISPLAY_RST, true);
-      up_mdelay(50);
+      nxsig_usleep(50000);
 
       /* Configure SPI */
 

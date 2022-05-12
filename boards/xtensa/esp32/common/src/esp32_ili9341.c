@@ -377,11 +377,11 @@ int board_lcd_initialize(void)
 
       /* Reset ILI9341 */
 
-      up_mdelay(10);
+      nxsig_usleep(10000);
       esp32_gpiowrite(DISPLAY_RST, false);
-      up_mdelay(10);
+      nxsig_usleep(10000);
       esp32_gpiowrite(DISPLAY_RST, true);
-      up_mdelay(50);
+      nxsig_usleep(50000);
 
       /* Configure SPI */
 

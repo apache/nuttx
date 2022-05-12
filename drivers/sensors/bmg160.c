@@ -193,7 +193,7 @@ static void bmg160_reset(FAR struct bmg160_dev_s *dev)
 {
   bmg160_write_register(dev, BMG160_BGW_SOFTRESET_REG, 0xb6);
 
-  up_mdelay(100);
+  nxsig_usleep(100000);
 }
 
 /****************************************************************************

@@ -5484,7 +5484,7 @@ struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
       /* Enable VBUS power for the port */
 
       lpc31_usbhost_vbusdrive(i, true);
-      up_mdelay(25);
+      nxsig_usleep(25000);
 
       /* Power up the power.  REVISIT:  Is this necessary?  The PP bit never
        * gets set unless I explicitly set it here.
@@ -5493,7 +5493,7 @@ struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
       regval  = lpc31_getreg(&HCOR->portsc[i]);
       regval |= EHCI_PORTSC_PP;
       lpc31_putreg(regval, &HCOR->portsc[i]);
-      up_mdelay(25);
+      nxsig_usleep(25000);
     }
 
   /* If there is a USB device in the slot at power up, then we will not

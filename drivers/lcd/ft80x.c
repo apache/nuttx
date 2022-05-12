@@ -1269,7 +1269,7 @@ static int ft80x_initialize(FAR struct ft80x_dev_s *priv)
 
   DEBUGASSERT(priv->lower != NULL && priv->lower->pwrdown != NULL);
   priv->lower->pwrdown(priv->lower, false);
-  up_mdelay(20);
+  nxsig_usleep(20000);
 
   /* Initialization Sequence during the boot up:
    *
@@ -1295,19 +1295,19 @@ static int ft80x_initialize(FAR struct ft80x_dev_s *priv)
    */
 
   ft80x_host_command(priv, FT80X_CMD_CLKEXT);
-  up_mdelay(10);
+  nxsig_usleep(10000);
 
 #if 0 /* Un-necessary? */
   /* Switch PLL output to 48MHz (should be the default) */
 
   ft80x_host_command(priv, FT80X_CMD_CLK48M);
-  up_mdelay(10);
+  nxsig_usleep(10000);
 #endif
 
   /* 3. Send Host command ACTIVE to enable clock and wake up the FT80x. */
 
   ft80x_host_command(priv, FT80X_CMD_ACTIVE);
-  up_mdelay(10);
+  nxsig_usleep(10000);
 
 #if 0 /* Un-necessary? */
   /* Do a core reset for safer */

@@ -328,7 +328,7 @@ static inline void st7735_sendcmd(FAR struct st7735_dev_s *dev, uint8_t cmd)
 static void st7735_sleep(FAR struct st7735_dev_s *dev, bool sleep)
 {
   st7735_sendcmd(dev, sleep ? ST7735_SLPIN : ST7735_SLPOUT);
-  up_mdelay(120);
+  nxsig_usleep(120000);
 }
 
 /****************************************************************************

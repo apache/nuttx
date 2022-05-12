@@ -27,6 +27,7 @@
 #include <stdbool.h>
 #include <debug.h>
 
+#include <nuttx/signal.h>
 #include <nuttx/usb/usbdev.h>
 
 #include "pic32mx.h"

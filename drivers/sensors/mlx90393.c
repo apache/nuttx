@@ -261,7 +261,7 @@ static void mlx90393_reset(FAR struct mlx90393_dev_s *dev)
 
   /* Wait a little so the device has time to perform a proper reset */
 
-  up_mdelay(100);
+  nxsig_usleep(100000);
 }
 
 /****************************************************************************

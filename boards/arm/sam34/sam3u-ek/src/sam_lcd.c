@@ -533,10 +533,10 @@ static void sam_lcdon(void)
   lcdinfo("ON\n");
   sam_putreg(HX8347_R90H, 0x7f);      /* SAP=0111 1111 */
   sam_putreg(HX8347_R26H, 0x04);      /* GON=0 DTE=0 D=01 */
-  up_mdelay(100);
+  nxsig_usleep(100000);
   sam_putreg(HX8347_R26H, 0x24);      /* GON=1 DTE=0 D=01 */
   sam_putreg(HX8347_R26H, 0x2c);      /* GON=1 DTE=0 D=11 */
-  up_mdelay(100);
+  nxsig_usleep(100000);
   sam_putreg(HX8347_R26H, 0x3c);      /* GON=1 DTE=1 D=11 */
 }
 
@@ -819,7 +819,7 @@ static int sam_setpower(struct lcd_dev_s *dev, int power)
 
   if (power != LCD_FULL_OFF)
     {
-      up_mdelay(100);
+      nxsig_usleep(100000);
     }
 
   priv->power = power;
@@ -981,9 +981,9 @@ int board_lcd_initialize(void)
   sam_putreg(HX8347_R1FH, 0x04);      /* VRH=0100 */
   sam_putreg(HX8347_R1CH, 0x04);      /* AP=100 */
   sam_putreg(HX8347_R1BH, 0x10);      /* GASENB=0 PON=1 DK=0 XDK=0 DDVDH_TRI=0 STB=0 */
-  up_mdelay(50);
+  nxsig_usleep(50000);
   sam_putreg(HX8347_R43H, 0x80);      /* Set VCOMG=1 */
-  up_mdelay(50);
+  nxsig_usleep(50000);
 
   /* Gamma for CMO 2.8 */
 

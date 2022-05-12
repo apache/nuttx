@@ -891,7 +891,7 @@ void cxd56_audio_ac_reg_resetdsp(void)
 
   /* Wait 20ms. */
 
-  up_mdelay(20);
+  nxsig_usleep(20000);
 }
 
 void cxd56_audio_ac_reg_initdsp(void)

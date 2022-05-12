@@ -156,7 +156,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
 
   /* Wait a bit then release the OLED from the reset state */
 
-  up_mdelay(20);
+  nxsig_usleep(20000);
   sam_portwrite(PORT_OLED_RST, true);
 
   /* Get the SPI1 port interface */

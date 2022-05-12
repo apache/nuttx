@@ -870,7 +870,7 @@ static int sam_setpower(struct lcd_dev_s *dev, int power)
       /* Set the backlight level */
 
       sam_set_backlight((unsigned int)power);
-      up_mdelay(50);
+      nxsig_usleep(50000);
       priv->power = power;
     }
   else
@@ -1052,7 +1052,7 @@ static void sam_lcd9325_initialize(void)
   /* Set VCOM amplitude */
 
   sam_write_reg(ILI9325_POWER_CTRL4, 0);
-  up_mdelay(200);
+  nxsig_usleep(200000);
 
   /* Enable power supply and source driver **********************************/
 
@@ -1071,13 +1071,13 @@ static void sam_lcd9325_initialize(void)
   sam_write_reg(ILI9325_POWER_CTRL2,
                 ILI9325_POWER_CTRL2_DC1(2) | ILI9325_POWER_CTRL2_DC0(2) |
                 ILI9325_POWER_CTRL2_VC(7));
-  up_mdelay(50);
+  nxsig_usleep(50000);
 
   /* Internal reference voltage= Vci */
 
   sam_write_reg(ILI9325_POWER_CTRL3,
                 ILI9325_POWER_CTRL3_PON | ILI9325_POWER_CTRL3_VRH(11));
-  up_mdelay(50);
+  nxsig_usleep(50000);
 
   /* Set VDV[4:0] for VCOM amplitude */
 
@@ -1091,7 +1091,7 @@ static void sam_lcd9325_initialize(void)
 
   sam_write_reg(ILI9325_FRAME_RATE_AND_COLOR_CTRL,
                 ILI9325_FRAME_RATE_AND_COLOR_CTRL_FRS(13));
-  up_mdelay(50);
+  nxsig_usleep(50000);
 
   /* Adjust the Gamma Curve */
 
@@ -1331,7 +1331,7 @@ int board_lcd_initialize(void)
 
   /* Identify and configure the LCD */
 
-  up_mdelay(50);
+  nxsig_usleep(50000);
   ret = sam_lcd_initialize();
   if (ret == OK)
     {

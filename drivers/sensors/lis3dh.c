@@ -234,7 +234,7 @@ static void lis3dh_write_register(FAR struct lis3dh_dev_s *dev,
 static void lis3dh_reset(FAR struct lis3dh_dev_s *dev)
 {
   lis3dh_write_register(dev, LIS3DH_CTRL_REG5, LIS3DH_CTRL_REG5_BOOT);
-  up_mdelay(100);
+  nxsig_usleep(100000);
 }
 
 /****************************************************************************

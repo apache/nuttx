@@ -202,7 +202,7 @@ static void stm32_reset(const struct xbee_lower_s *lower)
   up_udelay(1);
   stm32_gpiowrite(priv->rstcfg, true);
 
-  up_mdelay(100);
+  nxsig_usleep(100000);
 }
 
 static int stm32_attach_attn(const struct xbee_lower_s *lower,

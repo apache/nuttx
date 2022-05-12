@@ -1570,7 +1570,7 @@ static int vs1053_stop(FAR struct audio_lowerhalf_s *lower)
 
   /* Wait for a bit */
 
-  up_mdelay(40);
+  nxsig_usleep(40000);
 
   return OK;
 }

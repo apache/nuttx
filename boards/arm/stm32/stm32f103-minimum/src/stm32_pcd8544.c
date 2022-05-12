@@ -84,7 +84,7 @@ int board_lcd_initialize(void)
     }
 
   stm32_gpiowrite(STM32_LCD_RST, 0);
-  up_mdelay(10);
+  nxsig_usleep(10000);
   stm32_gpiowrite(STM32_LCD_RST, 1);
   return OK;
 }

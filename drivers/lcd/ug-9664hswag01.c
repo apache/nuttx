@@ -41,6 +41,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/signal.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/ug-9664hswag01.h>
@@ -1107,7 +1108,7 @@ FAR struct lcd_dev_s *ug_initialize(FAR struct spi_dev_s *spi,
 
   /* Clear the framebuffer */
 
-  up_mdelay(100);
+  nxsig_usleep(100000);
   up_clear(priv);
   return &priv->dev;
 }

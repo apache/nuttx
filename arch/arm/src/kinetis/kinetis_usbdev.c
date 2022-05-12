@@ -3194,7 +3194,7 @@ static void khci_remote_resume(struct khci_usbdev_s *priv)
 
   /* Keep the RESUME line set for 1-13 ms */
 
-  up_mdelay(10);
+  nxsig_usleep(10000);
 
   regval &= ~USB_CTL_RESUME;
   khci_putreg(regval, KINETIS_USB0_CTL);

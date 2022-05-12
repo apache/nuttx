@@ -45,6 +45,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
@@ -3020,7 +3021,7 @@ static void pic32mx_resume(struct pic32mx_usbdev_s *priv)
 
   /* Keep the RESUME line set for 1-13 ms */
 
-  up_mdelay(10);
+  nxsig_usleep(10000);
 
   regval &= ~USB_CON_RESUME;
   pic32mx_putreg(regval, PIC32MX_USB_CON);

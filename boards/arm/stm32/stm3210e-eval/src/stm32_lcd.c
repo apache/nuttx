@@ -54,6 +54,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <nuttx/signal.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
 
@@ -1215,7 +1216,7 @@ static void stm3210e_pm_notify(struct pm_callback_s *cb, int domain,
               /* Display off sequence */
 
               stm3210e_writereg(LCD_REG_0,  0xa0); /* White display mode setting */
-              up_mdelay(10);                       /* Wait for 2 frame scan */
+              nxsig_usleep(10000);                 /* Wait for 2 frame scan */
               stm3210e_writereg(LCD_REG_59, 0x00); /* Gate scan stop */
 
               /* Power off sequence */
@@ -1223,15 +1224,15 @@ static void stm3210e_pm_notify(struct pm_callback_s *cb, int domain,
               stm3210e_writereg(LCD_REG_30, 0x09); /* VCOM stop */
               stm3210e_writereg(LCD_REG_27, 0x0e); /* VS/VDH turn off */
               stm3210e_writereg(LCD_REG_24, 0xc0); /* CP1, CP2, CP3 turn off */
-              up_mdelay(10);                       /* wait 10 ms */
+              nxsig_usleep(10000);                 /* wait 10 ms */
 
               stm3210e_writereg(LCD_REG_24, 0x00); /* VR1 / VR2 off */
               stm3210e_writereg(LCD_REG_28, 0x30); /* Step up circuit operating current stop */
-              up_mdelay(10);
+              nxsig_usleep(10000);
 
               stm3210e_poweroff();
               stm3210e_writereg(LCD_REG_0,  0xa0); /* White display mode setting */
-              up_mdelay(10);                       /* Wait for 2 frame scan */
+              nxsig_usleep(10000);                 /* Wait for 2 frame scan */
 
               stm3210e_writereg(LCD_REG_59, 0x00); /* Gate scan stop */
             }
@@ -1345,20 +1346,20 @@ static inline void stm3210e_lcdinitialize(void)
       stm3210e_writereg(LCD_REG_17,  0x0000); /* DC1[2:0], DC0[2:0], VC[2:0] */
       stm3210e_writereg(LCD_REG_18,  0x0000); /* VREG1OUT voltage */
       stm3210e_writereg(LCD_REG_19,  0x0000); /* VDV[4:0] for VCOM amplitude */
-      up_mdelay(200);                         /* Dis-charge capacitor power voltage (200ms) */
+      nxsig_usleep(200000);                   /* Dis-charge capacitor power voltage (200ms) */
 
       stm3210e_writereg(LCD_REG_17,  0x0007);  /* DC1[2:0], DC0[2:0], VC[2:0] */
-      up_mdelay(50);
+      nxsig_usleep(50000);
 
       stm3210e_writereg(LCD_REG_16,  0x12b0);  /* SAP, BT[3:0], AP, DSTB, SLP, STB */
-      up_mdelay(50);
+      nxsig_usleep(50000);
 
       stm3210e_writereg(LCD_REG_18,  0x01bd);  /* External reference voltage= Vci */
-      up_mdelay(50);
+      nxsig_usleep(50000);
 
       stm3210e_writereg(LCD_REG_19,  0x1400);  /* VDV[4:0] for VCOM amplitude */
       stm3210e_writereg(LCD_REG_41,  0x000e);  /* VCM[4:0] for VCOMH */
-      up_mdelay(50);
+      nxsig_usleep(50000);
 
       stm3210e_writereg(LCD_REG_32,  0x0000); /* GRAM horizontal Address */
       stm3210e_writereg(LCD_REG_33,  0x013f); /* GRAM Vertical Address */
@@ -1435,13 +1436,13 @@ static inline void stm3210e_lcdinitialize(void)
 
       stm3210e_writereg(LCD_REG_0,   0x0000);
       stm3210e_writereg(LCD_REG_0,   0x0000);
-      up_mdelay(100);
+      nxsig_usleep(100000);
       stm3210e_writereg(LCD_REG_0,   0x0000);
       stm3210e_writereg(LCD_REG_0,   0x0000);
       stm3210e_writereg(LCD_REG_0,   0x0000);
       stm3210e_writereg(LCD_REG_0,   0x0000);
       stm3210e_writereg(LCD_REG_164, 0x0001);
-      up_mdelay(100);
+      nxsig_usleep(100000);
       stm3210e_writereg(LCD_REG_96,  0xa700);
       stm3210e_writereg(LCD_REG_8,   0x0808);
 
@@ -1465,7 +1466,7 @@ static inline void stm3210e_lcdinitialize(void)
       stm3210e_writereg(LCD_REG_17,  0x0237); /* DC1,DC0,VC */
       stm3210e_writereg(LCD_REG_18,  0x01bf);
       stm3210e_writereg(LCD_REG_19,  0x1000); /* VCOM */
-      up_mdelay(200);
+      nxsig_usleep(200000);
 
       stm3210e_writereg(LCD_REG_1,   0x0100); /* Set SS bit */
       stm3210e_writereg(LCD_REG_2,   0x0200);
@@ -1522,18 +1523,18 @@ static inline void stm3210e_lcdinitialize(void)
       stm3210e_writereg(LCD_REG_17,  0x0000); /* DC1[2:0], DC0[2:0], VC[2:0] */
       stm3210e_writereg(LCD_REG_18,  0x0000); /* VREG1OUT voltage */
       stm3210e_writereg(LCD_REG_19,  0x0000); /* VDV[4:0] for VCOM amplitude */
-      up_mdelay(200);                         /* Dis-charge capacitor power voltage (200ms) */
+      nxsig_usleep(200000);                   /* Dis-charge capacitor power voltage (200ms) */
 
       stm3210e_writereg(LCD_REG_16,  0x17b0); /* SAP, BT[3:0], AP, DSTB, SLP, STB */
       stm3210e_writereg(LCD_REG_17,  0x0137); /* DC1[2:0], DC0[2:0], VC[2:0] */
-      up_mdelay(50);
+      nxsig_usleep(50000);
 
       stm3210e_writereg(LCD_REG_18,  0x0139); /* VREG1OUT voltage */
-      up_mdelay(50);
+      nxsig_usleep(50000);
 
       stm3210e_writereg(LCD_REG_19,  0x1d00); /* VDV[4:0] for VCOM amplitude */
       stm3210e_writereg(LCD_REG_41,  0x0013); /* VCM[4:0] for VCOMH */
-      up_mdelay(50);
+      nxsig_usleep(50000);
 
       stm3210e_writereg(LCD_REG_32,  0x0000); /* GRAM horizontal Address */
       stm3210e_writereg(LCD_REG_33,  0x0000); /* GRAM Vertical Address */
@@ -1798,7 +1799,7 @@ int board_lcd_initialize(void)
 
   /* Configure and enable LCD */
 
-  up_mdelay(50);
+  nxsig_usleep(50000);
   stm3210e_lcdinitialize();
 
   /* Clear the display (setting it to the color 0=black) */

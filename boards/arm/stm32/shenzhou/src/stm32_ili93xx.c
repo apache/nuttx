@@ -1231,9 +1231,9 @@ static int stm32_setpower(struct lcd_dev_s *dev, int power)
       if (priv->type == LCD_TYPE_ILI9331)
         {
           stm32_writereg(priv, LCD_REG_7,   0x0021);
-          up_mdelay(50);
+          nxsig_usleep(50000);
           stm32_writereg(priv, LCD_REG_7,   0x0061);
-          up_mdelay(50);
+          nxsig_usleep(50000);
           stm32_writereg(priv, LCD_REG_7,   0x0133);  /* 262K color and display ON */
         }
       else
@@ -1249,9 +1249,9 @@ static int stm32_setpower(struct lcd_dev_s *dev, int power)
       if (priv->type == LCD_TYPE_ILI1505)
         {
           stm32_writereg(priv, LCD_REG_7,   0x0021);
-          up_mdelay(20);
+          nxsig_usleep(20000);
           stm32_writereg(priv, LCD_REG_7,   0x0061);
-          up_mdelay(20);
+          nxsig_usleep(20000);
           stm32_writereg(priv, LCD_REG_7,   0x0173);
         }
       else
@@ -1260,7 +1260,7 @@ static int stm32_setpower(struct lcd_dev_s *dev, int power)
           lcderr("ERROR: Unsupported LCD: %d\n", priv->type);
         }
 
-      up_mdelay(50);
+      nxsig_usleep(50000);
       priv->power = power;
     }
   else
@@ -1400,9 +1400,9 @@ static void stm32_lcd9300init(struct stm32_dev_s *priv,
   stm32_writereg(priv, LCD_REG_13,  0x0000); /* Frame Maker Position */
   stm32_writereg(priv, LCD_REG_15,  0x0000); /* RGB interface polarity */
 
-  up_mdelay(50);
+  nxsig_usleep(50000);
   stm32_writereg(priv, LCD_REG_7,   0x0101); /* Display Control */
-  up_mdelay(50);
+  nxsig_usleep(50000);
 
   /* Power On sequence */
 
@@ -1440,7 +1440,7 @@ static void stm32_lcd9300init(struct stm32_dev_s *priv,
   stm32_writereg(priv, LCD_REG_149, 0x0110); /* Frame Cycle Control */
   stm32_writereg(priv, LCD_REG_151, (0 << 8));
   stm32_writereg(priv, LCD_REG_152, 0x0000); /* Frame Cycle Control */
-  up_mdelay(50);
+  nxsig_usleep(50000);
   stm32_writereg(priv, LCD_REG_7,   0x0000); /* Display off */
 }
 #endif
@@ -1473,16 +1473,16 @@ static void stm32_lcd9331init(struct stm32_dev_s *priv)
   stm32_writereg(priv, LCD_REG_17,  0x0007); /* DC1[2:0], DC0[2:0], VC[2:0] */
   stm32_writereg(priv, LCD_REG_18,  0x0000); /* VREG1OUT voltage */
   stm32_writereg(priv, LCD_REG_19,  0x0000); /* VDV[4:0] for VCOM amplitude */
-  up_mdelay(200);                            /* Dis-charge capacitor power voltage */
+  nxsig_usleep(200000);                      /* Dis-charge capacitor power voltage */
   stm32_writereg(priv, LCD_REG_16,  0x1690); /* SAP, BT[3:0], AP, DSTB, SLP, STB */
   stm32_writereg(priv, LCD_REG_17,  0x0227); /* DC1[2:0], DC0[2:0], VC[2:0] */
-  up_mdelay(50);
+  nxsig_usleep(50000);
   stm32_writereg(priv, LCD_REG_18,  0x000c); /* Internal reference voltage= Vci; */
-  up_mdelay(50);
+  nxsig_usleep(50000);
   stm32_writereg(priv, LCD_REG_19,  0x0800); /* Set VDV[4:0] for VCOM amplitude */
   stm32_writereg(priv, LCD_REG_41,  0x0011); /* Set VCM[5:0] for VCOMH */
   stm32_writereg(priv, LCD_REG_43,  0x000b); /* Set Frame Rate */
-  up_mdelay(50);
+  nxsig_usleep(50000);
   stm32_writereg(priv, LCD_REG_32,  0x0000); /* GRAM horizontal Address */
   stm32_writereg(priv, LCD_REG_33,  0x0000); /* GRAM Vertical Address */
 
@@ -1564,19 +1564,19 @@ static void stm32_lcd9325init(struct stm32_dev_s *priv,
   stm32_writereg(priv, LCD_REG_17,  0x0007); /* DC1[2:0], DC0[2:0], VC[2:0] */
   stm32_writereg(priv, LCD_REG_18,  0x0000); /* VREG1OUT voltage */
   stm32_writereg(priv, LCD_REG_19,  0x0000); /* VDV[4:0] for VCOM amplitude */
-  up_mdelay(100);
+  nxsig_usleep(100000);
   stm32_writereg(priv, LCD_REG_16,  0x1590); /* SAP, BT[3:0], AP, DSTB, SLP, STB */
   stm32_writereg(priv, LCD_REG_17,  0x0227); /* DC1[2:0], DC0[2:0], VC[2:0] */
-  up_mdelay(100);
+  nxsig_usleep(100000);
   stm32_writereg(priv, LCD_REG_18,  0x009c); /* VREG1OUT voltage */
-  up_mdelay(100);
+  nxsig_usleep(100000);
   stm32_writereg(priv, LCD_REG_19,  0x1900); /* VDV[4:0] for VCOM amplitude */
   stm32_writereg(priv, LCD_REG_41,  0x0023); /* VCM[4:0] for VCOMH */
   stm32_writereg(priv, LCD_REG_43,  0x000e);
-  up_mdelay(100);
+  nxsig_usleep(100000);
   stm32_writereg(priv, LCD_REG_32,  0x0000); /* GRAM horizontal Address */
   stm32_writereg(priv, LCD_REG_33,  0x0000); /* GRAM Vertical Address */
-  up_mdelay(100);
+  nxsig_usleep(100000);
 
   /* Adjust the Gamma Curve */
 
@@ -1590,7 +1590,7 @@ static void stm32_lcd9325init(struct stm32_dev_s *priv,
   stm32_writereg(priv, LCD_REG_57,  0x0706);
   stm32_writereg(priv, LCD_REG_60,  0x0701);
   stm32_writereg(priv, LCD_REG_61,  0x000f);
-  up_mdelay(100);
+  nxsig_usleep(100000);
 
   /* Set GRAM area */
 
@@ -1794,13 +1794,13 @@ static inline int stm32_lcdinitialize(struct stm32_dev_s *priv)
   /* Check LCD ID */
 
   stm32_writereg(priv, LCD_REG_0, 0x0001); /* Start internal oscillator */
-  up_mdelay(50);
+  nxsig_usleep(50000);
 
   id = stm32_readreg(priv, LCD_REG_0);     /* Read the ID register */
   lcdinfo("LCD ID: %04x\n", id);
 
   stm32_lcdoutput(priv);
-  up_mdelay(10);
+  nxsig_usleep(10000);
 
   /* Initialize the LCD hardware */
 
@@ -1915,7 +1915,7 @@ int board_lcd_initialize(void)
 
   /* Configure and enable LCD */
 
-  up_mdelay(50);
+  nxsig_usleep(50000);
   ret = stm32_lcdinitialize(priv);
   if (ret == OK)
     {

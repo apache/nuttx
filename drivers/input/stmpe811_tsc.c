@@ -44,6 +44,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
+#include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/wqueue.h>
@@ -783,7 +784,7 @@ static inline void stmpe811_tscinitialize(FAR struct stmpe811_dev_s *priv)
 
   /* Wait for 20 ms */
 
-  up_mdelay(20);
+  nxsig_usleep(20000);
 
   /* Select the ADC clock speed */
 

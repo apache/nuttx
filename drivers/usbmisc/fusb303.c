@@ -610,7 +610,7 @@ static int fusb303_reset(FAR struct fusb303_dev_s *priv)
 
   /* tRESET max 100 ms. */
 
-  up_mdelay(100);
+  nxsig_usleep(100000);
 
   return ret;
 }

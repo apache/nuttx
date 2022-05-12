@@ -1020,15 +1020,15 @@ static inline int ra8875_hwinitialize(FAR struct ra8875_dev_s *priv)
   /* Reset */
 
   ra8875_putreg(lcd, RA8875_PWRR, RA8875_PWRR_SWRESET);
-  up_mdelay(100);
+  nxsig_usleep(100000);
   ra8875_putreg(lcd, RA8875_PWRR, 0);
 
   /* Setup the PLL config */
 
   ra8875_putreg(lcd, RA8875_PLLC1, RA8875_PLLC1_PLLDIVN(11));
-  up_mdelay(10);
+  nxsig_usleep(10000);
   ra8875_putreg(lcd, RA8875_PLLC2, RA8875_PLLC2_PLLDIVK(2));
-  up_mdelay(10);
+  nxsig_usleep(10000);
 
   /* Interface and color depth */
 

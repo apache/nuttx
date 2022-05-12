@@ -40,6 +40,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <nuttx/signal.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
 
@@ -1014,18 +1015,18 @@ static inline void stm3220g_lcdinitialize(void)
       stm3220g_writereg(LCD_REG_17,  0x0000); /* DC1[2:0], DC0[2:0], VC[2:0] */
       stm3220g_writereg(LCD_REG_18,  0x0000); /* VREG1OUT voltage */
       stm3220g_writereg(LCD_REG_19,  0x0000); /* VDV[4:0] for VCOM amplitude */
-      up_mdelay(200);                         /* Dis-charge capacitor power voltage (200ms) */
+      nxsig_usleep(200000);                   /* Dis-charge capacitor power voltage (200ms) */
 
       stm3220g_writereg(LCD_REG_16,  0x17b0); /* SAP, BT[3:0], AP, DSTB, SLP, STB */
       stm3220g_writereg(LCD_REG_17,  0x0137); /* DC1[2:0], DC0[2:0], VC[2:0] */
-      up_mdelay(50);
+      nxsig_usleep(50000);
 
       stm3220g_writereg(LCD_REG_18,  0x0139); /* VREG1OUT voltage */
-      up_mdelay(50);
+      nxsig_usleep(50000);
 
       stm3220g_writereg(LCD_REG_19,  0x1d00); /* VDV[4:0] for VCOM amplitude */
       stm3220g_writereg(LCD_REG_41,  0x0013); /* VCM[4:0] for VCOMH */
-      up_mdelay(50);
+      nxsig_usleep(50000);
 
       stm3220g_writereg(LCD_REG_32,  0x0000); /* GRAM horizontal Address */
       stm3220g_writereg(LCD_REG_33,  0x0000); /* GRAM Vertical Address */
@@ -1143,7 +1144,7 @@ int board_lcd_initialize(void)
 
   /* Configure and enable LCD */
 
-  up_mdelay(50);
+  nxsig_usleep(50000);
   stm3220g_lcdinitialize();
 
   /* Clear the display (setting it to the color 0=black) */

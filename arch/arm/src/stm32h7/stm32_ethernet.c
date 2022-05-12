@@ -289,8 +289,8 @@
 
 /* PHY reset/configuration delays in milliseconds */
 
-#define PHY_RESET_DELAY   (65)
-#define PHY_CONFIG_DELAY  (1000)
+#define PHY_RESET_DELAY   (65000)
+#define PHY_CONFIG_DELAY  (1000000)
 
 /* PHY read/write delays in loop counts */
 
@@ -3507,8 +3507,8 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
   to = PHY_RESET_DELAY;
   do
     {
-      up_mdelay(10);
-      to -= 10;
+      nxsig_usleep(10000);
+      to -= 10000;
       ret = stm32_phyread(CONFIG_STM32H7_PHYADDR, MII_MCR, &phyval);
     }
   while (phyval & MII_MCR_RESET && to > 0);
@@ -3682,7 +3682,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
       return ret;
     }
 
-  up_mdelay(PHY_CONFIG_DELAY);
+  nxsig_usleep(PHY_CONFIG_DELAY);
 
   /* Remember the selected speed and duplex modes */
 

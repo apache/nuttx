@@ -4044,7 +4044,7 @@ struct usbhost_connection_s *lpc54_usbhost_initialize(int controller)
 
   /* Wait 50MS then perform hardware reset */
 
-  up_mdelay(50);
+  nxsig_usleep(50000);
 
   lpc54_putreg(0, LPC54_OHCI_CTRL);        /* Hardware reset */
   lpc54_putreg(0, LPC54_OHCI_CTRLHEADED);  /* Initialize control list head to Zero */

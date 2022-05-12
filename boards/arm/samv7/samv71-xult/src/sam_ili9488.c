@@ -1295,7 +1295,7 @@ static int sam_setpower(struct lcd_dev_s *dev, int power)
       /* Set the backlight level */
 
       ret = sam_set_backlight((unsigned int)power);
-      up_mdelay(50);
+      nxsig_usleep(50000);
 
       /* Remember the power setting */
 
@@ -1427,7 +1427,7 @@ static inline int sam_lcd_initialize(void)
       return ret;
     }
 
-  up_mdelay(200);
+  nxsig_usleep(200000);
 
   sam_lcd_put(priv, ILI9488_CMD_SLEEP_OUT, &param, 0);
   if (ret < 0)
@@ -1435,7 +1435,7 @@ static inline int sam_lcd_initialize(void)
       return ret;
     }
 
-  up_mdelay(200);
+  nxsig_usleep(200000);
 
   /* Configure for tRGB and reverse the column order */
 
@@ -1447,7 +1447,7 @@ static inline int sam_lcd_initialize(void)
       return ret;
     }
 
-  up_mdelay(100);
+  nxsig_usleep(100000);
 
   param = 0x04;
   ret = sam_lcd_put(priv, ILI9488_CMD_CABC_CONTROL_9, &param,
@@ -1568,7 +1568,7 @@ int board_lcd_initialize(void)
 
   /* Identify and configure the LCD */
 
-  up_mdelay(50);
+  nxsig_usleep(50000);
   ret = sam_lcd_initialize();
   if (ret < 0)
     {

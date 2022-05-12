@@ -248,7 +248,7 @@ int board_sensors_initialize(void)
 
   /* Wait for power-up max time */
 
-  up_mdelay(10);
+  nxsig_usleep(10000);
 
   /* Initialize each sensor device */
 

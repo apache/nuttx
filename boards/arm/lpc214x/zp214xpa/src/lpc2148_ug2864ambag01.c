@@ -129,7 +129,7 @@ struct lcd_dev_s *board_graphics_setup(unsigned int devno)
 
   /* Wait a bit then release the OLED from the reset state */
 
-  up_mdelay(20);
+  nxsig_usleep(20000);
   putreg32(bits32, RESET_SET_REGISTER);
 
   lcdinfo("RESET release: PIN: %08" PRIx32 " DIR: %08" PRIx32 "\n",

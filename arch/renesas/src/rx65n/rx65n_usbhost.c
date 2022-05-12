@@ -918,7 +918,7 @@ void hw_usb_hmodule_init (void)
 
     syslog (LOG_INFO, "USB Device already connected\n");
     rx65n_usbhost_setbit (RX65N_USB_DVSTCTR0, RX65N_USB_DVSTCTR0_USBRST);
-    up_mdelay(20);                        /* Need to wait greater equal 10ms in USB spec */
+    nxsig_usleep(20000);                        /* Need to wait greater equal 10ms in USB spec */
     rx65n_usbhost_clearbit (RX65N_USB_DVSTCTR0,
                             RX65N_USB_DVSTCTR0_USBRST);
 
@@ -3206,14 +3206,14 @@ void usb_hstd_read_lnst (uint16_t *buf)
 
           /* 30ms wait */
 
-          up_mdelay(30);
+          nxsig_usleep(30000);
           buf[1] = hw_usb_read_syssts();
           if ((buf[0] & RX65N_USB_SYSSTS0_LNST) ==
           (buf[1] & RX65N_USB_SYSSTS0_LNST))
             {
               /* 20ms wait */
 
-              up_mdelay(20);
+              nxsig_usleep(20000);
               buf[1] = hw_usb_read_syssts();
             }
         }
@@ -3230,14 +3230,14 @@ void usb_hstd_read_lnst (uint16_t *buf)
 
           /* 30ms wait */
 
-          up_mdelay(30);
+          nxsig_usleep(30000);
           buf[1] = hw_usb_read_syssts();
           if ((buf[0] & RX65N_USB_SYSSTS0_LNST) ==
              (buf[1] & RX65N_USB_SYSSTS0_LNST))
             {
               /* 20ms wait */
 
-              up_mdelay(20);
+              nxsig_usleep(20000);
               buf[1] = hw_usb_read_syssts();
             }
         }
@@ -3333,7 +3333,7 @@ void usb_hstd_bus_reset (void)
 
   /* Wait 50ms */
 
-  up_mdelay(50); /* usb_cpu_delay_xms((uint16_t) 50); */
+  nxsig_usleep(50000); /* usb_cpu_delay_xms((uint16_t) 50); */
 
   /* USBRST=0, RESUME=0, UACT=1 */
 
@@ -3341,7 +3341,7 @@ void usb_hstd_bus_reset (void)
 
   /* Wait 10ms or more (USB reset recovery) */
 
-  up_mdelay(20); /* usb_cpu_delay_xms((uint16_t) 20); */
+  nxsig_usleep(20000); /* usb_cpu_delay_xms((uint16_t) 20); */
 
   /* WAIT_LOOP */
 
@@ -3359,13 +3359,13 @@ void usb_hstd_bus_reset (void)
         {
           /* Wait */
 
-          up_mdelay(10);
+          nxsig_usleep(10000);
         }
     }
 
   /* 30ms wait */
 
-  up_mdelay(30);
+  nxsig_usleep(30000);
 }
 
 /****************************************************************************
@@ -8225,7 +8225,7 @@ static void rx65n_usbhost_disconnect(struct usbhost_driver_s *drvr,
 
           /* Wait 50MS then perform hardware reset */
 
-          up_mdelay(50);
+          nxsig_usleep(50000);
 
           /* Set up the root hub port EP0 */
 
@@ -8439,7 +8439,7 @@ struct usbhost_connection_s *rx65n_usbhost_initialize(int controller)
   rx65n_usbhost_setbit (RX65N_USB_SOFCFG, RX65N_USB_SOFCFG_TRNENSEL);
 
   hw_usb_set_vbout ();
-  up_mdelay(100);
+  nxsig_usleep(100000);
 
   leave_critical_section(flags);
 
@@ -8508,7 +8508,7 @@ struct usbhost_connection_s *rx65n_usbhost_initialize(int controller)
 
   /* Wait 50MS then perform hardware reset */
 
-  up_mdelay(50);
+  nxsig_usleep(50000);
 
   /* Set up the root hub port EP0 */
 

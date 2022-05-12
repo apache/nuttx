@@ -97,7 +97,7 @@
 
 #define T67XX_I2C_FREQUENCY       100000    /* Only supported I2C speed */
 
-#define T67XX_I2C_DELAY_MSEC      10        /* 5-10 ms recommended, 10 ms
+#define T67XX_I2C_DELAY_USEC      10000     /* 5-10 ms recommended, 10 ms
                                              * is always safe. */
 
 /****************************************************************************
@@ -213,7 +213,7 @@ static int t67xx_read16(FAR struct t67xx_dev_s *priv, uint16_t regaddr,
 
   /* Wait and read response. */
 
-  up_mdelay(T67XX_I2C_DELAY_MSEC);
+  nxsig_usleep(T67XX_I2C_DELAY_USEC);
 
   ret = i2c_read(priv->i2c, &config, rxbuf, sizeof(rxbuf));
   if (ret < 0)
@@ -289,7 +289,7 @@ static int t67xx_write16(FAR struct t67xx_dev_s *priv, uint16_t regaddr,
 
   /* Wait and read response. */
 
-  up_mdelay(T67XX_I2C_DELAY_MSEC);
+  nxsig_usleep(T67XX_I2C_DELAY_USEC);
 
   ret = i2c_read(priv->i2c, &config, rxbuf, sizeof(rxbuf));
   if (ret < 0)

@@ -40,6 +40,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/signal.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/phy.h>
@@ -304,8 +305,8 @@
 
 /* PHY reset/configuration delays in milliseconds */
 
-#define PHY_RESET_DELAY   (65)
-#define PHY_CONFIG_DELAY  (1000)
+#define PHY_RESET_DELAY   (65000)
+#define PHY_CONFIG_DELAY  (1000000)
 
 /* PHY read/write delays in loop counts */
 
@@ -3247,7 +3248,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
       return ret;
     }
 
-  up_mdelay(PHY_RESET_DELAY);
+  nxsig_usleep(PHY_RESET_DELAY);
 
   /* Perform any necessary, board-specific PHY initialization */
 
@@ -3405,7 +3406,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
       return ret;
     }
 
-  up_mdelay(PHY_CONFIG_DELAY);
+  nxsig_usleep(PHY_CONFIG_DELAY);
 
   /* Remember the selected speed and duplex modes */
 
@@ -3696,7 +3697,7 @@ static int stm32_ethreset(struct stm32_ethmac_s *priv)
          retries > 0)
     {
       retries--;
-      up_mdelay(10);
+      nxsig_usleep(10000);
     }
 
   if (retries == 0)

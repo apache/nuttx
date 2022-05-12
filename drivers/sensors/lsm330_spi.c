@@ -628,7 +628,7 @@ static void lsm330acl_reset(FAR struct lsm330_dev_s *dev)
 
   /* Wait for boot to finish */
 
-  up_mdelay(20);
+  nxsig_usleep(20000);
 
   /* Set auto-increment.
    *
@@ -654,7 +654,7 @@ static void lsm330gyro_reset(FAR struct lsm330_dev_s *dev)
 
   /* Wait for boot to finish */
 
-  up_mdelay(20);
+  nxsig_usleep(20000);
 }
 
 /****************************************************************************

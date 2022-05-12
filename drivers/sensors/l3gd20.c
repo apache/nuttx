@@ -209,7 +209,7 @@ static void l3gd20_reset(FAR struct l3gd20_dev_s *dev)
 
   l3gd20_write_register(dev, L3GD20_CTRL_REG_5, L3GD20_CTRL_REG_5_BOOT_BM);
 
-  up_mdelay(100);
+  nxsig_usleep(100000);
 }
 
 /****************************************************************************

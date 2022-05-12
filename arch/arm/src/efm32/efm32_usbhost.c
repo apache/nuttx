@@ -4994,12 +4994,12 @@ static void efm32_portreset(struct efm32_usbhost_s *priv)
   regval |= USB_HPRT_PRTRST;
   efm32_putreg(EFM32_USB_HPRT, regval);
 
-  up_mdelay(20);
+  nxsig_usleep(20000);
 
   regval &= ~USB_HPRT_PRTRST;
   efm32_putreg(EFM32_USB_HPRT, regval);
 
-  up_mdelay(20);
+  nxsig_usleep(20000);
 }
 
 /****************************************************************************
@@ -5122,7 +5122,7 @@ static void efm32_vbusdrive(struct efm32_usbhost_s *priv, bool state)
       efm32_putreg(EFM32_USB_HPRT, regval);
     }
 
-  up_mdelay(200);
+  nxsig_usleep(200000);
 }
 
 /****************************************************************************
@@ -5401,7 +5401,7 @@ static inline int efm32_hw_initialize(struct efm32_usbhost_s *priv)
   regval &= ~_USB_GUSBCFG_FORCEDEVMODE_MASK;
   regval |= USB_GUSBCFG_FORCEHSTMODE;
   efm32_putreg(EFM32_USB_GUSBCFG, regval);
-  up_mdelay(50);
+  nxsig_usleep(50000);
 
   /* Initialize host mode and return success */
 

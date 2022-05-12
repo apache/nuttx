@@ -560,7 +560,7 @@ static int bmi160_open_gyro(struct file *filep)
       /* Change gyroscope to normal mode */
 
       bmi160_setcommand(priv, GYRO_PM_NORMAL);
-      up_mdelay(30);
+      nxsig_usleep(30000);
 
       /* Set gyro to normal bandwidth and output data rate 100Hz
        * Hz = 100/2^(8-n)
@@ -599,7 +599,7 @@ static int bmi160_open_accel(struct file *filep)
       /* Change accelerometer to normal mode */
 
       bmi160_setcommand(priv, ACCEL_PM_NORMAL);
-      up_mdelay(30);
+      nxsig_usleep(30000);
 
       /* Set accel to normal bandwidth and output data rate 100Hz
        * Hz = 100/2^(8-n)
@@ -640,7 +640,7 @@ static int bmi160_close_gyro(struct file *filep)
       /* Change gyroscope to suspend */
 
       bmi160_setcommand(priv, GYRO_PM_SUSPEND);
-      up_mdelay(30);
+      nxsig_usleep(30000);
 
       seq_close(g_seq_gyro);
       g_seq_gyro = NULL;
@@ -666,7 +666,7 @@ static int bmi160_close_accel(struct file *filep)
       /* Change accelerometer to suspend */
 
       bmi160_setcommand(priv, ACCEL_PM_SUSPEND);
-      up_mdelay(30);
+      nxsig_usleep(30000);
 
       /* Close sequencer */
 
@@ -870,7 +870,7 @@ static int bmi160_set_accel_pm(struct bmi160_dev_s *priv, int pm)
         /* Set suspend mode */
 
         bmi160_setcommand(priv, ACCEL_PM_SUSPEND);
-        up_mdelay(30);
+        nxsig_usleep(30000);
 
         break;
 
@@ -895,7 +895,7 @@ static int bmi160_set_accel_pm(struct bmi160_dev_s *priv, int pm)
         /* Set normal mode */
 
         bmi160_setcommand(priv, ACCEL_PM_NORMAL);
-        up_mdelay(30);
+        nxsig_usleep(30000);
 
         break;
 
@@ -915,7 +915,7 @@ static int bmi160_set_accel_pm(struct bmi160_dev_s *priv, int pm)
         /* Set low power mode */
 
         bmi160_setcommand(priv, ACCEL_PM_LOWPOWER);
-        up_mdelay(30);
+        nxsig_usleep(30000);
 
         break;
 

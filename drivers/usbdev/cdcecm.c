@@ -42,6 +42,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
@@ -1920,7 +1921,7 @@ static void cdcecm_unbind(FAR struct usbdevclass_driver_s *driver,
    */
 
   cdcecm_resetconfig(self);
-  up_mdelay(50);
+  nxsig_usleep(50000);
 
   /* Free the interrupt IN endpoint */
 

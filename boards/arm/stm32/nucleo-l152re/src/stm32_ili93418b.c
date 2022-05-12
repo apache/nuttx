@@ -589,14 +589,14 @@ struct lcd_dev_s *stm32_ili93418b_initialize(void)
   /* Configure gpios */
 
   stm32_gpio_initialize();
-  up_mdelay(50);
+  nxsig_usleep(50000);
 
   /* reset LCD   */
 
   stm32_gpiowrite(GPIO_LCD_RST, 0);
-  up_mdelay(100);
+  nxsig_usleep(100000);
   stm32_gpiowrite(GPIO_LCD_RST, 1);
-  up_mdelay(50);
+  nxsig_usleep(50000);
 
   /* initialize LCD */
 

@@ -36,6 +36,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include <nuttx/kthread.h>
+#include <nuttx/signal.h>
 #include <nuttx/wdog.h>
 #include <nuttx/sdio.h>
 
@@ -54,9 +55,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BCMF_DEVICE_RESET_DELAY_MS 10
-#define BCMF_DEVICE_START_DELAY_MS 10
-#define BCMF_CLOCK_SETUP_DELAY_MS  500
+#define BCMF_DEVICE_RESET_DELAY_US 10000
+#define BCMF_DEVICE_START_DELAY_US 10000
+#define BCMF_CLOCK_SETUP_DELAY_US  500000
 
 #define BCMF_THREAD_NAME       "bcmf"
 #define BCMF_THREAD_STACK_SIZE 2048
@@ -176,7 +177,7 @@ int bcmf_sdio_bus_sleep(FAR struct bcmf_sdio_dev_s *sbus, bool sleep)
 
           /* Wait for High Throughput clock */
 
-          up_mdelay(100);
+          nxsig_usleep(100000);
           ret = bcmf_read_reg(sbus, 1, SBSDIO_FUNC1_CHIPCLKCSR, &value);
 
           if (ret != OK)
@@ -283,7 +284,7 @@ int bcmf_probe(FAR struct bcmf_sdio_dev_s *sbus)
 #endif
 
   SDIO_CLOCK(sbus->sdio_dev, CLOCK_SD_TRANSFER_4BIT);
-  up_mdelay(BCMF_CLOCK_SETUP_DELAY_MS);
+  nxsig_usleep(BCMF_CLOCK_SETUP_DELAY_US);
 
   /* Enable bus FN1 */
 
@@ -326,7 +327,7 @@ int bcmf_businitialize(FAR struct bcmf_sdio_dev_s *sbus)
   loops = 10;
   while (--loops > 0)
     {
-      up_mdelay(10);
+      nxsig_usleep(10000);
       ret = bcmf_read_reg(sbus, 1, SBSDIO_FUNC1_CHIPCLKCSR, &value);
 
       if (ret != OK)
@@ -471,12 +472,12 @@ int bcmf_hwinitialize(FAR struct bcmf_sdio_dev_s *sbus)
 
   bcmf_board_reset(sbus->minor, true);
   bcmf_board_power(sbus->minor, true);
-  up_mdelay(BCMF_DEVICE_RESET_DELAY_MS);
+  nxsig_usleep(BCMF_DEVICE_RESET_DELAY_US);
   bcmf_board_reset(sbus->minor, false);
 
   /* Wait for device to start */
 
-  up_mdelay(BCMF_DEVICE_START_DELAY_MS);
+  nxsig_usleep(BCMF_DEVICE_START_DELAY_US);
 
   return OK;
 }
@@ -739,7 +740,7 @@ int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
       goto exit_uninit_hw;
     }
 
-  up_mdelay(100);
+  nxsig_usleep(100000);
 
   sbus->ready = true;
 
@@ -863,7 +864,7 @@ int bcmf_sdio_thread(int argc, char **argv)
 
   /*  FIXME wait for the chip to be ready to receive commands */
 
-  up_mdelay(50);
+  nxsig_usleep(50000);
 
   while (sbus->ready)
     {
@@ -996,7 +997,7 @@ struct bcmf_sdio_frame *bcmf_sdio_allocate_frame(FAR struct bcmf_dev_s *priv,
           /* TODO use signaling semaphore */
 
           wlinfo("alloc failed %d\n", tx);
-          up_mdelay(100);
+          nxsig_usleep(100000);
           continue;
         }
 

@@ -30,13 +30,14 @@
 #include <nuttx/compiler.h>
 #include <nuttx/arch.h>
 #include <nuttx/sdio.h>
+#include <nuttx/signal.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 #define SDIO_CMD53_TIMEOUT_MS 100
-#define SDIO_IDLE_DELAY_MS    50
+#define SDIO_IDLE_DELAY_US    50000
 
 #ifdef CONFIG_SDIO_MUXBUS
 #  define SDIO_TAKELOCK(dev)  SDIO_LOCK(dev, true)
@@ -351,7 +352,7 @@ int sdio_probe(FAR struct sdio_dev_s *dev)
       goto err;
     }
 
-  up_mdelay(SDIO_IDLE_DELAY_MS);
+  nxsig_usleep(SDIO_IDLE_DELAY_US);
 
   /* Device is SDIO card compatible so we can send CMD5 instead of ACMD41 */
 

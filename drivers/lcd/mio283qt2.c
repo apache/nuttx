@@ -750,7 +750,7 @@ static int mio283qt2_setpower(FAR struct lcd_dev_s *dev, int power)
        */
 
       mio283qt2_putreg(lcd, 0x28, 0x0038); /* GON=1, DTE=1, D=2 */
-      up_mdelay(40);
+      nxsig_usleep(40000);
       mio283qt2_putreg(lcd, 0x28, 0x003c); /* GON=1, DTE=1, D=3 */
 
       /* Deselect the LCD */

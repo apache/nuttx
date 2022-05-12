@@ -212,7 +212,7 @@ static int lpm013m091a_hwinitialize(FAR struct lpm013m091a_dev_s *dev)
   /* Soft reset */
 
   lcd->sendcmd(lcd, LPM013M091A_SWRESET);
-  up_mdelay(10);
+  nxsig_usleep(10000);
 
   /* Analog mode */
 
@@ -259,12 +259,12 @@ static int lpm013m091a_hwinitialize(FAR struct lpm013m091a_dev_s *dev)
   /* Sleep out */
 
   lcd->sendcmd(lcd, LPM013M091A_SLPOUT);
-  up_mdelay(10);
+  nxsig_usleep(10000);
 
   /* Display on */
 
   lcd->sendcmd(lcd, LPM013M091A_DISPON);
-  up_mdelay(120);
+  nxsig_usleep(120000);
 
   return OK;
 }
@@ -491,7 +491,7 @@ static int lpm013m091a_setpower(FAR struct lcd_dev_s *dev, int power)
       lcd->backlight(lcd, power);
 
       lcd->sendcmd(lcd, LPM013M091A_DISPON);
-      up_mdelay(120);
+      nxsig_usleep(120000);
     }
   else
     {

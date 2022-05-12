@@ -160,7 +160,7 @@ static void ads1242_reset(FAR struct ads1242_dev_s *dev)
   SPI_SEND(dev->spi, ADS1242_CMD_RESET); /* Issue reset command */
   SPI_SELECT(dev->spi, 0, false);        /* Set nADC_SPI_CS to high which
                                           * deselects the ADS1242 */
-  up_mdelay(100);                        /* Wait a little so the device has
+  nxsig_usleep(100000);                  /* Wait a little so the device has
                                           * time to perform a proper reset */
 
   ads1242_unlock(dev->spi);
@@ -417,10 +417,10 @@ static int ads1242_open(FAR struct file *filep)
   FAR struct ads1242_dev_s *priv = inode->i_private;
 
   ads1242_reset(priv);
-  up_mdelay(100);
+  nxsig_usleep(100000);
 
   ads1242_perform_selfgain_calibration(priv);
-  up_mdelay(100);
+  nxsig_usleep(100000);
 
   /* SPEED = 1 -> fMod = fOsc / 256 (fMod = Modulator Clock Speed)
    * BUFEN = 1 -> Internal input buffer enabled -> results in a very high
@@ -431,7 +431,7 @@ static int ads1242_open(FAR struct file *filep)
                     ADS1242_REG_ACR_BIT_SPEED | ADS1242_REG_ACR_BIT_BUFEN);
 
   ads1242_perform_selfoffset_calibration(priv);
-  up_mdelay(100);
+  nxsig_usleep(100000);
 
 #if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_INFO)
   ads1242_print_regs(priv, "ads1242_open");
@@ -450,7 +450,7 @@ static int ads1242_close(FAR struct file *filep)
   FAR struct ads1242_dev_s *priv = inode->i_private;
 
   ads1242_reset(priv);
-  up_mdelay(100);
+  nxsig_usleep(100000);
 
   return OK;
 }

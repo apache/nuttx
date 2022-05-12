@@ -5236,7 +5236,7 @@ struct usbhost_connection_s *sam_ehci_initialize(int controller)
 #ifdef CONFIG_SAMA5_UHPHS_RHPORT3
   sam_usbhost_vbusdrive(SAM_RHPORT3, true);
 #endif
-  up_mdelay(50);
+  nxsig_usleep(50000);
 
   /* If there is a USB device in the slot at power up, then we will not
    * get the status change interrupt to signal us that the device is

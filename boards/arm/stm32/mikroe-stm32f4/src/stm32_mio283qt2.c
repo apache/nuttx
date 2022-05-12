@@ -480,7 +480,7 @@ int board_lcd_initialize(void)
 
       /* Configure and enable the LCD */
 
-      up_mdelay(50);
+      nxsig_usleep(50000);
       g_stm32f4_lcd.drvr = mio283qt2_lcdinitialize(&g_stm32f4_lcd.dev);
       if (!g_stm32f4_lcd.drvr)
         {

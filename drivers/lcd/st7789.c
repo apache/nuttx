@@ -33,6 +33,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/signal.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/st7789.h>
@@ -318,7 +319,7 @@ static inline void st7789_sendcmd(FAR struct st7789_dev_s *dev, uint8_t cmd)
 static void st7789_sleep(FAR struct st7789_dev_s *dev, bool sleep)
 {
   st7789_sendcmd(dev, sleep ? ST7789_SLPIN : ST7789_SLPOUT);
-  up_mdelay(120);
+  nxsig_usleep(120000);
 }
 
 /****************************************************************************

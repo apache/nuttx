@@ -340,7 +340,7 @@ static void gc9a01_cmddata(FAR struct gc9a01_dev_s *dev, uint8_t cmd,
 static void gc9a01_init(FAR struct gc9a01_dev_s *dev)
 {
   gc9a01_sendcmd(dev, GC9A01_SWRESET);
-  up_mdelay(120);
+  nxsig_usleep(120000);
   gc9a01_sendcmd(dev, GC9A01_ENIREG2);
   gc9a01_cmddata(dev, 0xeb, (const uint8_t *) "\x14", 1);
   gc9a01_sendcmd(dev, GC9A01_ENIREG1);
@@ -394,7 +394,7 @@ static void gc9a01_init(FAR struct gc9a01_dev_s *dev)
                  "\x10\x85\x80\x00\x00\x4E\x00", 7);
   gc9a01_cmddata(dev, 0x98, (const uint8_t *) "\x3e\x07", 2);
   gc9a01_sendcmd(dev, GC9A01_TEON);
-  up_mdelay(120);
+  nxsig_usleep(120000);
 }
 
 /****************************************************************************
@@ -408,7 +408,7 @@ static void gc9a01_init(FAR struct gc9a01_dev_s *dev)
 static void gc9a01_sleep(FAR struct gc9a01_dev_s *dev, bool sleep)
 {
   gc9a01_sendcmd(dev, sleep ? GC9A01_SLPIN : GC9A01_SLPOUT);
-  up_mdelay(120);
+  nxsig_usleep(120000);
 }
 
 /****************************************************************************

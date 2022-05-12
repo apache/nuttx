@@ -96,7 +96,7 @@ int board_lcd_initialize(void)
   esp32c3_gpiowrite(LCD_RST, false);
   up_mdelay(1);
   esp32c3_gpiowrite(LCD_RST, true);
-  up_mdelay(10);
+  nxsig_usleep(10000);
 
   /* Set full brightness */
 

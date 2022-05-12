@@ -40,6 +40,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/signal.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/phy.h>
@@ -3645,7 +3646,7 @@ static int rx65n_ethreset(FAR struct rx65n_ethmac_s *priv)
          retries > 0)
     {
       retries--;
-      up_mdelay(10);
+      nxsig_usleep(10000);
     }
 
   if (retries == 0)
@@ -3702,7 +3703,7 @@ static int rx65n_macconfig(FAR struct rx65n_ethmac_s *priv)
          retries > 0)
     {
       retries--;
-      up_mdelay(10);
+      nxsig_usleep(10000);
     }
 
   /* Notification of ET0_LINKSTA signal change interrupt is disabled. */

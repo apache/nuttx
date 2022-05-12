@@ -3438,7 +3438,7 @@ static int gs2200m_initialize(FAR struct gs2200m_dev_s *dev,
   lower->reset(true);
   up_mdelay(1);
   lower->reset(false);
-  up_mdelay(180);
+  nxsig_usleep(180000);
 
   /* Attach interrupt handler */
 

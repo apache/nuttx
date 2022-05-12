@@ -1104,7 +1104,7 @@ static inline int ssd1289_hwinitialize(FAR struct ssd1289_dev_s *priv)
       /* Take the LCD out of sleep mode */
 
       ssd1289_putreg(lcd, SSD1289_SLEEP, 0);
-      up_mdelay(30);
+      nxsig_usleep(30000);
 
       /* Turn the display on:
        * D=INTERNAL(1) CM=0 DTE=1 GON=1 SPT=0 VLE=0 PT=0
@@ -1126,7 +1126,7 @@ static inline int ssd1289_hwinitialize(FAR struct ssd1289_dev_s *priv)
        * necessary.
        */
 
-      /* up_mdelay(15); */
+      /* nxsig_usleep(15000); */
 
       ssd1289_putreg(lcd, SSD1289_PWRCTRL3, PWRCTRL3_SETTING);
       ssd1289_putreg(lcd, SSD1289_PWRCTRL4, PWRCTRL4_SETTING);
@@ -1142,7 +1142,7 @@ static inline int ssd1289_hwinitialize(FAR struct ssd1289_dev_s *priv)
 
       /* The same driver does another small delay here */
 
-      up_mdelay(15);
+      nxsig_usleep(15000);
 #endif
 
       /* After this point, the drivers differ only in some varying register
@@ -1207,7 +1207,7 @@ static inline int ssd1289_hwinitialize(FAR struct ssd1289_dev_s *priv)
 
       /* One driver puts a huge, 100 millisecond delay here */
 
-      /* up_mdelay(100); */
+      /* nxsig_usleep(100000); */
 
       /* Set Horizontal and vertical porch.
        * Horizontal porch:  239 pixels per line, delay=28
@@ -1296,7 +1296,7 @@ static inline int ssd1289_hwinitialize(FAR struct ssd1289_dev_s *priv)
 
       /* One driver has a 50 msec delay here */
 
-      /* up_mdelay(50); */
+      /* nxsig_usleep(50000); */
 
       ret = OK;
     }

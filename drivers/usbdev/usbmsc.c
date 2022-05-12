@@ -61,6 +61,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
+#include <nuttx/signal.h>
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/usb/usb.h>
@@ -429,7 +430,7 @@ static void usbmsc_unbind(FAR struct usbdevclass_driver_s *driver,
        */
 
       usbmsc_resetconfig(priv);
-      up_mdelay(50);
+      nxsig_usleep(50000);
 
       /* Free the pre-allocated control request */
 

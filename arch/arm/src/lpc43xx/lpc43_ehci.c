@@ -5285,7 +5285,7 @@ struct usbhost_connection_s *lpc43_ehci_initialize(int controller)
 
       lpc43_usbhost_vbusdrive(i, true);
 #endif
-      up_mdelay(25);
+      nxsig_usleep(25000);
 
       /* Power up the hub.  REVISIT:  Is this necessary?  The PP bit never
        * gets set unless I explicitly set it here.
@@ -5294,7 +5294,7 @@ struct usbhost_connection_s *lpc43_ehci_initialize(int controller)
       regval  = lpc43_getreg(&HCOR->portsc[i]);
       regval |= EHCI_PORTSC_PP;
       lpc43_putreg(regval, &HCOR->portsc[i]);
-      up_mdelay(25);
+      nxsig_usleep(25000);
     }
 
   /* If there is a USB device in the slot at power up, then we will not

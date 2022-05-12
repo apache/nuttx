@@ -724,11 +724,11 @@ static inline void lcd_initialize(void)
   write_reg(0x20, 0x0000);
   write_reg(0x21, 0x0000);
   write_reg(0x07, 0x0021);
-  up_mdelay(20);             /* Delay 200 ms */
+  nxsig_usleep(20000);             /* Delay 200 ms */
   write_reg(0x07, 0x0061);
-  up_mdelay(20);             /* Delay 200 ms */
+  nxsig_usleep(20000);             /* Delay 200 ms */
   write_reg(0x07, 0x0173);
-  up_mdelay(20);             /* Delay 200 ms */
+  nxsig_usleep(20000);             /* Delay 200 ms */
 }
 
 /****************************************************************************
@@ -879,7 +879,7 @@ int board_lcd_initialize(void)
 
   /* Delay required here */
 
-  up_mdelay(50);
+  nxsig_usleep(50000);
 
   /* Check model id */
 

@@ -34,6 +34,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <nuttx/signal.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/ssd1289.h>
@@ -334,7 +335,7 @@ int board_lcd_initialize(void)
 
       /* Configure and enable the LCD */
 
-      up_mdelay(50);
+      nxsig_usleep(50000);
       g_ssd1289drvr = ssd1289_lcdinitialize(&g_ssd1289);
       if (!g_ssd1289drvr)
         {
