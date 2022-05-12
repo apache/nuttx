@@ -741,7 +741,7 @@ void tiva_gpioirqclear(pinconfig_t pinconfig)
    * logic register. Writing a 0 has no effect."
    */
 
-  putreg32((1 << pin), base + TIVA_GPIO_ICR_OFFSET);
+  putreg32(pin, base + TIVA_GPIO_ICR_OFFSET);
 }
 
 #endif /* CONFIG_TIVA_GPIO_IRQS */
