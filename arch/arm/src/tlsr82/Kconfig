@@ -269,7 +269,7 @@ config TLSR82_PWM0_PULSECOUNT
 # PWM1 configuration
 
 config TLSR82_PWM1
-	bool " TLSR82 PWM1 Enable"
+	bool "TLSR82 PWM1 Enable"
 	default n
 
 # PWM2 configuration
