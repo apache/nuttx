@@ -860,13 +860,13 @@ static inline int mio283qt2_hwinitialize(FAR struct mio283qt2_dev_s *priv)
       mio283qt2_putreg(lcd, 0x19, 0x0001); /* Start oscillator */
       mio283qt2_putreg(lcd, 0x01, 0x0000); /* Wakeup */
       mio283qt2_putreg(lcd, 0x1f, 0x0088);
-      up_mdelay(5);
+      up_udelay(5000);
       mio283qt2_putreg(lcd, 0x1f, 0x0080);
-      up_mdelay(5);
+      up_udelay(5000);
       mio283qt2_putreg(lcd, 0x1f, 0x0090);
-      up_mdelay(5);
+      up_udelay(5000);
       mio283qt2_putreg(lcd, 0x1f, 0x00d0);
-      up_mdelay(5);
+      up_udelay(5000);
 
       /* Gamma 2.8 setting  */
 

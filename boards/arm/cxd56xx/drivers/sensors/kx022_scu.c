@@ -310,7 +310,7 @@ static int kx022_open(struct file *filep)
       val = kx022_getreg8(priv, KX022_CNTL1);
       val |= KX022_CNTL1_PC1;
       kx022_putreg8(priv, KX022_CNTL1, val);
-      up_mdelay(1);
+      up_udelay(1000);
     }
   else
     {
@@ -349,7 +349,7 @@ static int kx022_close(struct file *filep)
       val = kx022_getreg8(priv, KX022_CNTL1);
       val &= ~KX022_CNTL1_PC1;
       kx022_putreg8(priv, KX022_CNTL1, val);
-      up_mdelay(1);
+      up_udelay(1000);
 
       seq_close(g_seq);
       g_seq = NULL;

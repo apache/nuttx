@@ -323,7 +323,7 @@ static int bm1422gmv_open(struct file *filep)
       val = BM1422GMV_CNTL1_PC1 | BM1422GMV_CNTL1_OUT_BIT |
             BM1422GMV_CNTL1_ODR_100Hz;
       bm1422gmv_putreg8(priv, BM1422GMV_CNTL1, val);
-      up_mdelay(1);
+      up_udelay(1000);
 
       /* release reset */
 
@@ -367,7 +367,7 @@ static int bm1422gmv_close(struct file *filep)
       /* goto power-down mode */
 
       bm1422gmv_putreg8(priv, BM1422GMV_CNTL1, BM1422GMV_CNTL1_RST_LV);
-      up_mdelay(1);
+      up_udelay(1000);
 
       seq_close(g_seq);
       g_seq = NULL;

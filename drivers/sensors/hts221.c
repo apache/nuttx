@@ -399,7 +399,7 @@ static int hts221_config_ctrl_reg2(FAR struct hts221_dev_s *priv,
                * recommended in HTS221 application note.
                */
 
-              up_mdelay(5);
+              up_udelay(5000);
               break;
             }
 

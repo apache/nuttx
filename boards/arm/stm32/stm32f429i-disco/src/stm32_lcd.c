@@ -322,7 +322,7 @@ static int stm32_ili9341_initialize(void)
 
   lcdinfo("ili9341 LCD driver: Software Reset\n");
   lcd->sendcmd(lcd, ILI9341_SOFTWARE_RESET);
-  up_mdelay(5);
+  up_udelay(5000);
 
   lcdinfo("ili9341 LCD driver: set Memory Access Control %08x\n",
         STM32_ILI9341_MADCTL_PARAM);
@@ -377,7 +377,7 @@ static int stm32_ili9341_initialize(void)
 
   lcdinfo("ili9341 LCD driver: Sleep Out\n");
   lcd->sendcmd(lcd, ILI9341_SLEEP_OUT);
-  up_mdelay(5); /* 120? */
+  up_udelay(5000); /* 120? */
 
   /* Display on */
 

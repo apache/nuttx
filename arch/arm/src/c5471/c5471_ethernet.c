@@ -2135,7 +2135,7 @@ static void c5471_eimreset (struct c5471_driver_s *priv)
 
   putreg32((CLKM_CTL_RST_EXT_RESET | CLKM_CTL_RST_LEAD_RESET),
            CLKM_CTL_RST);
-  up_mdelay(2);
+  up_udelay(2000);
 
   /* Release the peripheral nRESET signal */
 

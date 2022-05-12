@@ -1048,7 +1048,7 @@ static inline int ra8875_hwinitialize(FAR struct ra8875_dev_s *priv)
 
   ra8875_putreg(lcd, RA8875_PCSR,
                 RA8875_PCSR_PCLK_INV | RA8875_PCSR_PERIOD_4SYS);
-  up_mdelay(1);
+  up_udelay(1000);
 
   /* Horizontal Settings */
 

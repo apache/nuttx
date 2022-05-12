@@ -379,9 +379,9 @@ static int up_setup(struct uart_dev_s *dev)
   /* Both the IrDA and MODEM UARTs support RESET and UART mode. */
 
   up_serialout(priv, UART_MDR_OFFS, MDR_RESET_MODE);
-  up_mdelay(5);
+  up_udelay(5000);
   up_serialout(priv, UART_MDR_OFFS, MDR_UART_MODE);
-  up_mdelay(5);
+  up_udelay(5000);
 
   priv->regs.ier = up_inserial(priv, UART_IER_OFFS);
   priv->regs.lcr = up_inserial(priv, UART_LCR_OFFS);

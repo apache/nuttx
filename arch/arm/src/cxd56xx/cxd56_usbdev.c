@@ -2102,7 +2102,7 @@ static void cxd56_usbdevreset(struct cxd56_usbdev_s *priv)
           break;
         }
 
-      up_mdelay(1);
+      up_udelay(1000);
     }
 
   /* Workaround for recovery from reset to slow issue.
@@ -2119,7 +2119,7 @@ static void cxd56_usbdevreset(struct cxd56_usbdev_s *priv)
           break;
         }
 
-      up_mdelay(1);
+      up_udelay(1000);
     }
 
   putreg32(USB_INT_READY, CXD56_USB_SYS_INTR);

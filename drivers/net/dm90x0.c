@@ -50,6 +50,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/signal.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/arp.h>
@@ -1169,7 +1170,7 @@ static void dm9x_interrupt_work(FAR void *arg)
 
               for (i = 0; i < 200; i++)
                 {
-                  up_mdelay(1);
+                  up_udelay(1000);
                 }
 
               /* Set the new network speed */
@@ -1185,7 +1186,7 @@ static void dm9x_interrupt_work(FAR void *arg)
               break;
             }
 
-          up_mdelay(1);
+          up_udelay(1000);
         }
 
       nerr("ERROR: delay: %dmS speed: %s\n",
@@ -1541,7 +1542,7 @@ static int dm9x_ifup(FAR struct net_driver_s *dev)
         }
 
       i++;
-      up_mdelay(1);
+      up_udelay(1000);
     }
 
   ninfo("delay: %dmS speed: %s\n", i, priv->dm_b100m ? "100M" : "10M");
@@ -1895,7 +1896,7 @@ static void dm9x_reset(FAR struct dm9x_driver_s *priv)
           break;
         }
 
-      up_mdelay(1);
+      up_udelay(1000);
     }
 
   /* Restore previous register address */

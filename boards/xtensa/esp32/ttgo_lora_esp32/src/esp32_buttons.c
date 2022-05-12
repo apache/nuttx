@@ -81,7 +81,7 @@ uint32_t board_buttons(void)
 
   for (i = 0; i < 10; i++)
     {
-      up_mdelay(1); /* TODO */
+      up_udelay(1000); /* TODO */
 
       bool b1 = esp32_gpioread(BUTTON_BOOT);
 

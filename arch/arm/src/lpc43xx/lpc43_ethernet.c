@@ -3428,9 +3428,9 @@ static inline void lpc43_ethgpioconfig(struct lpc43_ethmac_s *priv)
   lpc43_pin_config(PINCONF_ENET_RESET);
   lpc43_gpio_config(GPIO_ENET_RESET);
   lpc43_gpio_write(GPIO_ENET_RESET, 0);
-  up_mdelay(5);
+  up_udelay(5000);
   lpc43_gpio_write(GPIO_ENET_RESET, 1);
-  up_mdelay(5);
+  up_udelay(5000);
 #endif
 #endif
 #endif

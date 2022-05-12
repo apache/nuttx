@@ -330,7 +330,7 @@ int board_lcd_initialize(void)
       /* Reset the LCD (active low) */
 
       stm32_gpiowrite(GPIO_LCD_RESET, false);
-      up_mdelay(5);
+      up_udelay(5000);
       stm32_gpiowrite(GPIO_LCD_RESET, true);
 
       /* Configure and enable the LCD */

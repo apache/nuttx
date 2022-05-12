@@ -474,7 +474,7 @@ static int emmc_is_powerup(void)
           return 0;
         }
 
-      up_mdelay(5);
+      up_udelay(5000);
     }
   while (--retry);
 

@@ -386,10 +386,10 @@ static void adxl372_reset(FAR struct adxl372_dev_s *dev)
 
   /* Wait for boot to finish (15 ms error timeout) */
 
-  up_mdelay(5);
+  up_udelay(5000);
   while (wdcnt > 0 && (0 != adxl372_read_register(dev, ADXL372_RESET)))
     {
-      up_mdelay(1);
+      up_udelay(1000);
     }
 
   /* Reset ADXL372 Accelerometer. Write only. Begin a boot. */
@@ -398,11 +398,11 @@ static void adxl372_reset(FAR struct adxl372_dev_s *dev)
 
   /* Wait for boot to finish (15 ms error timeout) */
 
-  up_mdelay(5);
+  up_udelay(5000);
   wdcnt = 10;
   while (wdcnt > 0 && (0 != adxl372_read_register(dev, ADXL372_RESET)))
     {
-      up_mdelay(1);
+      up_udelay(1000);
     }
 }
 

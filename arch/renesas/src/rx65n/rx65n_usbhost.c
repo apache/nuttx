@@ -564,9 +564,9 @@ uint16_t usb_chattaring (uint16_t *syssts)
   while (1)
     {
       lnst[0] = (*syssts) & RX65N_USB_SYSSTS0_LNST;
-      up_mdelay(1); /* 1ms wait */
+      up_udelay(1000); /* 1ms wait */
       lnst[1] = (*syssts) & RX65N_USB_SYSSTS0_LNST;
-      up_mdelay(1); /* 1ms wait */
+      up_udelay(1000); /* 1ms wait */
       lnst[2] = (*syssts) & RX65N_USB_SYSSTS0_LNST;
       if ((lnst[0] == lnst[1]) && (lnst[0] == lnst[2]))
         {
@@ -885,7 +885,7 @@ void hw_usb_hmodule_init (void)
   uint16_t sts;
 
   rx65n_usbhost_setbit (RX65N_USB_SYSCFG, RX65N_USB_SYSCFG_SCKE);
-  up_mdelay(1);
+  up_udelay(1000);
 
   /* wait until SCKE bit is set */
 
@@ -929,7 +929,7 @@ void hw_usb_hmodule_init (void)
       {
         /* Wait till the reset is completed */
 
-        up_mdelay(1);
+        up_udelay(1000);
       }
 
     if (((rx65n_usbhost_getreg(RX65N_USB_DVSTCTR0)) &
@@ -3311,7 +3311,7 @@ uint16_t usb_hstd_attach_process (void)
 
 void usb_hstd_chk_sof (void)
 {
-  up_mdelay(1);
+  up_udelay(1000);
 }
 
 /****************************************************************************
@@ -3597,7 +3597,7 @@ void usb_hstd_nrdy_endprocess (uint16_t pipe)
 
           /* 5ms wait */
 
-          up_mdelay(1);
+          up_udelay(1000);
 
           /* PIPEx Data Retry */
 

@@ -364,7 +364,7 @@ void stm32_fmc_sdram_init(void)
 
   /* Wait for clock to stabilize */
 
-  up_mdelay(1);
+  up_udelay(1000);
 
   /* Precharge all banks */
 

@@ -336,7 +336,7 @@ static void stm32_idlepm(void)
 #endif
             /* Wait 10ms */
 
-            up_mdelay(10);
+            up_udelay(10000);
 
             /* Enter the STM32 stop mode */
 
@@ -377,7 +377,7 @@ static void stm32_idlepm(void)
 #endif
             /* Wait 10ms */
 
-            up_mdelay(10);
+            up_udelay(10000);
 
             /* Enter the STM32 standby mode */
 

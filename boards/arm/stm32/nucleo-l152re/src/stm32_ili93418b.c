@@ -629,7 +629,7 @@ struct lcd_dev_s *stm32_ili93418b_initialize(void)
 
   lcdinfo("ili9341 LCD driver: Software Reset\n");
   lcd->sendcmd(lcd, ILI9341_SOFTWARE_RESET);
-  up_mdelay(5);
+  up_udelay(5000);
 
   /* RGB Interface signal control */
 
@@ -659,7 +659,7 @@ struct lcd_dev_s *stm32_ili93418b_initialize(void)
 
   lcdinfo("ili9341 LCD driver: Sleep Out\n");
   lcd->sendcmd(lcd, ILI9341_SLEEP_OUT);
-  up_mdelay(5);
+  up_udelay(5000);
 
   /* Display on */
 

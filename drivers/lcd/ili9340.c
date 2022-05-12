@@ -764,7 +764,7 @@ static int ili9340_hwinitialize(FAR struct ili9340_dev_s *dev)
 
   lcdinfo("ili9340 LCD driver: Software Reset\n");
   lcd->sendcmd(lcd, ILI9340_SOFTWARE_RESET);
-  up_mdelay(5);
+  up_udelay(5000);
 
   lcdinfo("ili9340 LCD driver: set Memory Access Control: %04x\n",
           dev->orient);

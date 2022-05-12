@@ -372,7 +372,7 @@ static void tiva_ethreset(struct tiva_driver_s *priv)
 
   /* Wait just a bit.  This is a much longer delay than necessary */
 
-  up_mdelay(2);
+  up_udelay(2000);
 
   /* Then take the Ethernet controller out of the reset state */
 
@@ -384,7 +384,7 @@ static void tiva_ethreset(struct tiva_driver_s *priv)
    * If we touch the ethernet too soon, we may busfault.
    */
 
-  up_mdelay(2);
+  up_udelay(2000);
 
   /* Enable Port F for Ethernet LEDs: LED0=Bit 3; LED1=Bit 2 */
 

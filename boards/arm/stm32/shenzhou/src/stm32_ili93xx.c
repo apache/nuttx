@@ -1696,7 +1696,7 @@ static inline void stm32_lcd9919init(struct stm32_dev_s *priv)
 static inline void stm32_lcd1505init(struct stm32_dev_s *priv)
 {
   stm32_writereg(priv, LCD_REG_7,   0x0000);
-  up_mdelay(5);
+  up_udelay(5000);
   stm32_writereg(priv, LCD_REG_18,  0x011c);
   stm32_writereg(priv, LCD_REG_164, 0x0001); /* NVM */
   stm32_writereg(priv, LCD_REG_8,   0x000f);
@@ -1719,11 +1719,11 @@ static inline void stm32_lcd1505init(struct stm32_dev_s *priv)
   stm32_writereg(priv, LCD_REG_59,  0x0000); /* 0x0303 */
   stm32_writereg(priv, LCD_REG_60,  0x0007); /* 0x0707 */
   stm32_writereg(priv, LCD_REG_61,  0x0000); /* 0x1313, 0x1f08 */
-  up_mdelay(5);
+  up_udelay(5000);
 
   stm32_writereg(priv, LCD_REG_7,   0x0001);
   stm32_writereg(priv, LCD_REG_23,  0x0001); /* Power supply startup enable */
-  up_mdelay(5);
+  up_udelay(5000);
 
   /* Power Control */
 

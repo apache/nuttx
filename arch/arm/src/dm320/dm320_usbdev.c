@@ -1738,7 +1738,7 @@ static int dm320_attachinterrupt(int irq, void *context, void *arg)
           if ((dm320_getreg8(DM320_USB_PERTXCSR1) & USB_TXCSR1_FIFOEMP))
             {
               dm320_putreg8(USB_TXCSR1_FLFIFO, DM320_USB_PERTXCSR1);
-              up_mdelay(5);
+              up_udelay(5000);
             }
         }
     }

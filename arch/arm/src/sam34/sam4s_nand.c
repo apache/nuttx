@@ -123,7 +123,7 @@ static void  nand_reset(struct sam_nandcs_s *priv)
 
   /* The device will be busy for a maximum of 1ms. */
 
-  up_mdelay(1);
+  up_udelay(1000);
 }
 
 /****************************************************************************

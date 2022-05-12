@@ -80,7 +80,7 @@ int board_lcd_initialize(void)
     }
 
   stm32_gpiowrite(GPIO_ST7735_RST, 0);
-  up_mdelay(1);
+  up_udelay(1000);
   stm32_gpiowrite(GPIO_ST7735_RST, 1);
   nxsig_usleep(120000);
 

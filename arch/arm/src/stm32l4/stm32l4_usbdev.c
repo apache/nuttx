@@ -3697,7 +3697,7 @@ static void stm32l4_hwsetup(struct stm32l4_usbdev_s *priv)
    */
 
   stm32l4_putreg(USB_CNTR_FRES, STM32L4_USB_CNTR);
-  up_mdelay(5);
+  up_udelay(5000);
 }
 
 /****************************************************************************

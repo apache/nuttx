@@ -5094,7 +5094,7 @@ static int stm32l4_wakeup(struct usbdev_s *dev)
           regval  = stm32l4_getreg(STM32L4_OTGFS_DCTL);
           regval |= OTGFS_DCTL_RWUSIG;
           stm32l4_putreg(regval, STM32L4_OTGFS_DCTL);
-          up_mdelay(5);
+          up_udelay(5000);
           regval &= ~OTGFS_DCTL_RWUSIG;
           stm32l4_putreg(regval, STM32L4_OTGFS_DCTL);
         }

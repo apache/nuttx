@@ -907,7 +907,7 @@ void cxd56_audio_ac_reg_initdsp(void)
 
   /* Wait 512 cycle @24.576MHz */
 
-  up_mdelay(1);
+  up_udelay(1000);
 
   write_ac_reg(RI_DSPRAM4_CLR, 0);
   write_ac_reg(RI_DSPRAM2_CLR, 0);
@@ -1089,7 +1089,7 @@ void cxd56_audio_ac_reg_poweroff_dnc(void)
 
   /* Wait 512 cycle @24.576MHz */
 
-  up_mdelay(1);
+  up_udelay(1000);
 
   write_ac_reg(RI_DSPRAM3_CLR, 0);
 }

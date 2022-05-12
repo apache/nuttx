@@ -94,7 +94,7 @@ int board_lcd_initialize(void)
 
   esp32c3_configgpio(LCD_RST, OUTPUT);
   esp32c3_gpiowrite(LCD_RST, false);
-  up_mdelay(1);
+  up_udelay(1000);
   esp32c3_gpiowrite(LCD_RST, true);
   nxsig_usleep(10000);
 

@@ -764,7 +764,7 @@ static int ili9341_hwinitialize(FAR struct ili9341_dev_s *dev)
 
   lcdinfo("ili9341 LCD driver: Software Reset\n");
   lcd->sendcmd(lcd, ILI9341_SOFTWARE_RESET);
-  up_mdelay(5);
+  up_udelay(5000);
 
   lcdinfo("ili9341 LCD driver: set Memory Access Control: %04x\n",
           dev->orient);

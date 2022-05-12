@@ -349,7 +349,7 @@ static int ak09912_open(struct file *filep)
         }
 
       ak09912_putreg8(priv, POWER_MODE_ADDR, AKM_CONT_MEAS_4);
-      up_mdelay(1);
+      up_udelay(1000);
     }
   else
     {
@@ -385,7 +385,7 @@ static int ak09912_close(struct file *filep)
       DEBUGASSERT(g_seq);
 
       ak09912_putreg8(priv, POWER_MODE_ADDR, AKM_POWER_DOWN_MODE);
-      up_mdelay(1);
+      up_udelay(1000);
 
       seq_close(g_seq);
       g_seq = NULL;
@@ -499,13 +499,13 @@ int ak09912_init(struct i2c_master_s *i2c, int port)
     }
 
   ak09912_putreg8(priv, POWER_MODE_ADDR, AKM_FUSE_ROM_MODE);
-  up_mdelay(1);
+  up_udelay(1000);
 
   ak09912_getreg(priv, AK09912_ASAX, (uint8_t *)&g_asa,
                  sizeof(struct ak09912_sensadj_s));
 
   ak09912_putreg8(priv, POWER_MODE_ADDR, AKM_POWER_DOWN_MODE);
-  up_mdelay(1);
+  up_udelay(1000);
 
   /* Set noise suppression filter to LOW */
 

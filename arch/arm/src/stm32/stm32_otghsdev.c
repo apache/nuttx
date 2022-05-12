@@ -4947,7 +4947,7 @@ static int stm32_wakeup(struct usbdev_s *dev)
           regval  = stm32_getreg(STM32_OTGHS_DCTL);
           regval |= OTGHS_DCTL_RWUSIG;
           stm32_putreg(regval, STM32_OTGHS_DCTL);
-          up_mdelay(5);
+          up_udelay(5000);
           regval &= ~OTGHS_DCTL_RWUSIG;
           stm32_putreg(regval, STM32_OTGHS_DCTL);
         }

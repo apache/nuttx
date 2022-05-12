@@ -319,7 +319,7 @@ static int bm1383glv_open(struct file *filep)
 
       bm1383glv_putreg8(priv, BM1383GLV_POWER_DOWN,
                         BM1383GLV_POWER_DOWN_PWR_DOWN);
-      up_mdelay(1);
+      up_udelay(1000);
 
       /* goto stand-by mode */
 

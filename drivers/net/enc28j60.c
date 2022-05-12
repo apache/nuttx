@@ -559,7 +559,7 @@ static inline void enc_src(FAR struct enc_driver_s *priv)
    * port buffer memory will maintain state throughout the System Reset."
    */
 
-  up_mdelay(2);
+  up_udelay(2000);
 #if 0
   while ((enc_rdgreg(priv, ENC_ESTAT) & ESTAT_CLKRDY) != 0);
 #endif

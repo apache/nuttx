@@ -448,7 +448,7 @@ static void bmi160_setcommand(struct bmi160_dev_s *priv, uint8_t command)
 
   /* Interface idle time delay */
 
-  up_mdelay(1);
+  up_udelay(1000);
 
   /* Save power mode status of Accel and gyro */
 
@@ -890,7 +890,7 @@ static int bmi160_set_accel_pm(struct bmi160_dev_s *priv, int pm)
         /* Reset undersampling and bandwidth setting */
 
         bmi160_putreg8(priv, BMI160_ACCEL_CONFIG, ACCEL_OSR4_AVG1 | value);
-        up_mdelay(1);
+        up_udelay(1000);
 
         /* Set normal mode */
 
@@ -910,7 +910,7 @@ static int bmi160_set_accel_pm(struct bmi160_dev_s *priv, int pm)
         bmi160_putreg8(priv,
                        BMI160_ACCEL_CONFIG,
                        ACCEL_US_ENABLE | ACCEL_LP_AVG32 | value);
-        up_mdelay(1);
+        up_udelay(1000);
 
         /* Set low power mode */
 
@@ -971,7 +971,7 @@ static int bmi160_set_accel_odr(struct bmi160_dev_s *priv, int odr)
   /* Set output data rate parameter */
 
   bmi160_putreg8(priv, BMI160_ACCEL_CONFIG, value | odr);
-  up_mdelay(1);
+  up_udelay(1000);
 
   return OK;
 }
@@ -1034,7 +1034,7 @@ int bmi160_init(struct spi_dev_s *dev)
   /* To avoid gyro wakeup it is required to write 0x00 to 0x6C */
 
   bmi160_putreg8(priv, BMI160_PMU_TRIGGER, 0);
-  up_mdelay(1);
+  up_udelay(1000);
 
   return OK;
 }

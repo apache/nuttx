@@ -4957,7 +4957,7 @@ static int efm32_wakeup(struct usbdev_s *dev)
           regval  = efm32_getreg(EFM32_USB_DCTL);
           regval |= USB_DCTL_RMTWKUPSIG;
           efm32_putreg(regval, EFM32_USB_DCTL);
-          up_mdelay(5);
+          up_udelay(5000);
           regval &= ~USB_DCTL_RMTWKUPSIG;
           efm32_putreg(regval, EFM32_USB_DCTL);
         }

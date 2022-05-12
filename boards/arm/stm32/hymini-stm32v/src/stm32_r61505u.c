@@ -646,7 +646,7 @@ static inline void lcd_initialize(void)
    */
 
   write_reg(0x07, 0x0000);
-  up_mdelay(5);               /* Delay 50 ms */
+  up_udelay(5000);            /* Delay 50 ms */
   write_reg(0x12, 0x011c);    /* Why need to set several times? */
   write_reg(0xa4, 0x0001);    /* NVM */
   write_reg(0x08, 0x000f);
@@ -669,10 +669,10 @@ static inline void lcd_initialize(void)
   write_reg(0x3b, 0x0000);
   write_reg(0x3c, 0x0007);
   write_reg(0x3d, 0x0000);
-  up_mdelay(5);               /* Delay 50 ms */
+  up_udelay(5000);            /* Delay 50 ms */
   write_reg(0x07, 0x0001);
   write_reg(0x17, 0x0001);    /* Power supply startup enable */
-  up_mdelay(5);               /* Delay 50 ms */
+  up_udelay(5000);            /* Delay 50 ms */
 
   /* Power control */
 

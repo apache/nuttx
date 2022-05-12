@@ -1511,7 +1511,7 @@ static int ov2640_reset(FAR struct i2c_master_s *i2c)
       return ret;
     }
 
-  up_mdelay(5);
+  up_udelay(5000);
   return OK;
 }
 

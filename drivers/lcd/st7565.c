@@ -1020,9 +1020,9 @@ FAR struct lcd_dev_s *st7565_initialize(FAR struct st7565_lcd_s *lcd,
   st7565_send_one_data(priv, ST7565_BIAS_1_7);
 
   st7565_send_one_data(priv, ST7565_POWERCTRL_B);
-  up_mdelay(2);
+  up_udelay(2000);
   st7565_send_one_data(priv, ST7565_POWERCTRL_BR);
-  up_mdelay(2);
+  up_udelay(2000);
   st7565_send_one_data(priv, ST7565_POWERCTRL_INT);
 
   st7565_send_one_data(priv, ST7565_REG_RES_4_5);

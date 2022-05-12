@@ -77,7 +77,7 @@ int board_lcd_initialize(void)
     }
 
   imxrt_gpio_write(GPIO_LCD_RST, 0);
-  up_mdelay(1);
+  up_udelay(1000);
   imxrt_gpio_write(GPIO_LCD_RST, 1);
   nxsig_usleep(120000);
 

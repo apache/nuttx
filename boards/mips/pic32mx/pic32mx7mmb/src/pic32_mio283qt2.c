@@ -433,7 +433,7 @@ int board_lcd_initialize(void)
 
       /* Bring the LCD out of reset */
 
-      up_mdelay(5);
+      up_udelay(5000);
       pic32mx_gpiowrite(GPIO_LCD_RST, true);
 
       /* Configure and enable the LCD */

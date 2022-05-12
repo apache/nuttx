@@ -3436,7 +3436,7 @@ static int gs2200m_initialize(FAR struct gs2200m_dev_s *dev,
   /* Reset and Unreset GS2200M */
 
   lower->reset(true);
-  up_mdelay(1);
+  up_udelay(1000);
   lower->reset(false);
   nxsig_usleep(180000);
 

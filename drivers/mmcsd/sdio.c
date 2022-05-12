@@ -467,7 +467,7 @@ int sdio_enable_function(FAR struct sdio_dev_s *dev, uint8_t function)
 
   while (loops-- > 0)
     {
-      up_mdelay(1);
+      up_udelay(1000);
 
       ret = sdio_io_rw_direct(dev, false, 0, SDIO_CCCR_IOEN, 0, &value);
       if (ret != OK)

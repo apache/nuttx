@@ -1082,7 +1082,7 @@ int up_lcd1602_initialize(void)
 
       /* Delay for 4.1MS or more */
 
-      up_mdelay(5);
+      up_udelay(5000);
 
       /* Select the 8-bit interface. BF cannot be checked before this
        * command. This needs to be done a few times with some magic delays.

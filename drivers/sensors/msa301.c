@@ -378,7 +378,7 @@ static int msa301_sensor_start(FAR struct msa301_dev_s *priv)
 
   msa301_set_axis(priv, 1);
 
-  up_mdelay(5);
+  up_udelay(5000);
 
   sninfo("Starting....");
 

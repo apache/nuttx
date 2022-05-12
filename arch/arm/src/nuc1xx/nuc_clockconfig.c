@@ -125,7 +125,7 @@ void nuc_clockconfig(void)
 
   /* Delay to assure that crystal input to be stable */
 
-  up_mdelay(5);
+  up_udelay(5000);
 
   /* Set up the PLL configuration.
    *
@@ -149,7 +149,7 @@ void nuc_clockconfig(void)
 
   /* Delay until the PLL output is stable */
 
-  up_mdelay(5);
+  up_udelay(5000);
 
   /* Set the HCLK divider per settings from the board.h file */
 
@@ -164,7 +164,7 @@ void nuc_clockconfig(void)
   regval &= ~CLK_CLKSEL0_HCLK_S_MASK;
   regval |= CLK_CLKSEL0_HCLK_S_PLL;
   putreg32(regval, NUC_CLK_CLKSEL0);
-  up_mdelay(1);
+  up_udelay(1000);
 
   /* Lock the registers */
 

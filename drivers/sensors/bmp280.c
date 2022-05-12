@@ -301,7 +301,7 @@ static int bmp280_checkid(FAR struct bmp280_dev_s *priv)
   /* Read device ID */
 
   devid = bmp280_getreg8(priv, BMP280_DEVID);
-  up_mdelay(1);
+  up_udelay(1000);
   sninfo("devid: 0x%02x\n", devid);
 
   if (devid != (uint16_t) DEVID)
@@ -623,7 +623,7 @@ static int bmp280_fetch(FAR struct sensor_lowerhalf_s *lower,
 
       /* Wait time according to ultra low power mode set during sleep */
 
-      up_mdelay(6);
+      up_udelay(6000);
     }
 
   /* Read pressure & data */
