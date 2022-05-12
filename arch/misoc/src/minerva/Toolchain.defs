@@ -45,6 +45,9 @@ endif
 ARCHCFLAGS += -fno-common
 ARCHCXXFLAGS += -fno-common -nostdinc++
 
+ARCHCFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wundef
+ARCHCXXFLAGS += -Wall -Wshadow -Wundef
+
 # Default toolchain
 
 CC = $(CROSSDEV)gcc
