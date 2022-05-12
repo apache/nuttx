@@ -232,6 +232,9 @@ endif
 ARCHCFLAGS += -fno-common
 ARCHCXXFLAGS += -fno-common -nostdinc++
 
+ARCHCFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wundef
+ARCHCXXFLAGS += -Wall -Wshadow -Wundef
+
 ifneq ($(CONFIG_CXX_EXCEPTION),y)
   ARCHCXXFLAGS += -fno-exceptions -fcheck-new
 endif
