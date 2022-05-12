@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -137,6 +138,7 @@ static void arm_registerdump(volatile uint32_t *regs)
 
 static void arm_dump_task(struct tcb_s *tcb, void *arg)
 {
+  char args[64] = "";
 #ifdef CONFIG_STACK_COLORATION
   uint32_t stack_filled = 0;
   uint32_t stack_used;
@@ -172,6 +174,26 @@ static void arm_dump_task(struct tcb_s *tcb, void *arg)
     }
 #endif
 
+#ifndef CONFIG_DISABLE_PTHREAD
+  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+    {
+      FAR struct pthread_tcb_s *ptcb = (FAR struct pthread_tcb_s *)tcb;
+
+      snprintf(args, sizeof(args), "%p ", ptcb->arg);
+    }
+  else
+#endif
+    {
+      FAR char **argv;
+      size_t npos = 0;
+
+      for (argv = tcb->group->tg_info->argv + 1; *argv; argv++)
+        {
+          npos += strlcpy(args + npos, *argv, sizeof(args) - npos);
+          npos += strlcpy(args + npos, " ", sizeof(args) - npos);
+        }
+    }
+
   /* Dump interesting properties of this task */
 
   _alert("  %4d   %4d"
@@ -189,9 +211,10 @@ static void arm_dump_task(struct tcb_s *tcb, void *arg)
          "   %3" PRId32 ".%01" PRId32 "%%"
 #endif
 #if CONFIG_TASK_NAME_SIZE > 0
-         "   %s"
+         "   %s %s\n",
+#else
+         "   %s\n",
 #endif
-         "\n",
          tcb->pid, tcb->sched_priority,
 #ifdef CONFIG_SMP
          tcb->cpu,
@@ -210,6 +233,7 @@ static void arm_dump_task(struct tcb_s *tcb, void *arg)
 #if CONFIG_TASK_NAME_SIZE > 0
          , tcb->name
 #endif
+         , args
         );
 }
 
@@ -263,10 +287,7 @@ static void arm_showtasks(void)
 #ifdef CONFIG_SCHED_CPULOAD
          "      CPU"
 #endif
-#if CONFIG_TASK_NAME_SIZE > 0
-         "   COMMAND"
-#endif
-         "\n");
+         "   COMMAND\n");
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
   _alert("  ----   ----"
