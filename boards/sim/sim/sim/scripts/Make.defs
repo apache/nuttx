@@ -83,18 +83,8 @@ endif
 
 # Add -fno-common because macOS "ld -r" doesn't seem to pick objects
 # for common symbols.
-ARCHCFLAGS = -fno-common -ffunction-sections -fdata-sections
-ARCHCXXFLAGS = -fno-common -ffunction-sections -fdata-sections -nostdinc++
-
-ifeq ($(CONFIG_CXX_EXCEPTION),)
-  ARCHCXXFLAGS += -fno-exceptions -fcheck-new
-endif
-ifeq ($(CONFIG_CXX_RTTI),)
-  ARCHCXXFLAGS += -fno-rtti
-endif
-ARCHPICFLAGS = -fpic
-ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
-ARCHWARNINGSXX = -Wall -Wshadow -Wundef
+ARCHCFLAGS += -fno-common
+ARCHCXXFLAGS += -fno-common -nostdinc++
 
 # Add -fvisibility=hidden
 # Because we don't want export nuttx's symbols to share libraries
@@ -102,10 +92,25 @@ ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHCFLAGS += -fvisibility=hidden
 ARCHCXXFLAGS += -fvisibility=hidden
 
+ARCHCFLAGS += -ffunction-sections -fdata-sections
+ARCHCXXFLAGS += -ffunction-sections -fdata-sections
+
+ARCHCFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wundef
+ARCHCXXFLAGS += -Wall -Wshadow -Wundef
+
+ifeq ($(CONFIG_CXX_EXCEPTION),)
+  ARCHCXXFLAGS += -fno-exceptions -fcheck-new
+endif
+ifeq ($(CONFIG_CXX_RTTI),)
+  ARCHCXXFLAGS += -fno-rtti
+endif
+
 ifeq ($(CONFIG_SIM_M32),y)
   ARCHCFLAGS += -m32
   ARCHCXXFLAGS += -m32
 endif
+
+ARCHPICFLAGS = -fpic
 
 CC = $(CROSSDEV)cc
 CXX = $(CROSSDEV)c++
@@ -123,10 +128,8 @@ OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 RUSTC = rustc --edition 2021
 
-CFLAGS := $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
-   $(ARCHCFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
-CXXFLAGS := $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) \
-   $(ARCHCXXFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CFLAGS := $(ARCHOPTIMIZATION) $(ARCHCFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CXXFLAGS := $(ARCHOPTIMIZATION) $(ARCHCXXFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 RUSTFLAGS := $(ARCHOPTIMIZATIONRUST)

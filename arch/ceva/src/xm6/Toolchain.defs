@@ -68,6 +68,9 @@ endif
 ARCHCFLAGS += -fno-common
 ARCHCXXFLAGS += -fno-common -nostdinc++
 
+ARCHCFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wundef
+ARCHCXXFLAGS += -Wall -Wshadow -Wundef
+
 ARCHCPUFLAGS  = -mrtl-version-$(RTL_VERSION) -Wa,-rtl$(RTL_VERSION)
 ARCHCPUFLAGS += -Wa,-p
 
