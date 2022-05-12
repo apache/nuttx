@@ -28,16 +28,6 @@ ARCHSCRIPT += $(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_
 ARCHINCLUDES = -I. -isystem $(call CONVERT_PATH,$(TOPDIR)/include)
 ARCHXXINCLUDES =  $(ARCHINCLUDES) -isystem $(call CONVERT_PATH,$(TOPDIR)/include/cxx)
 
-CC = $(CROSSDEV)gcc
-CXX = $(CROSSDEV)g++
-CPP = $(CROSSDEV)gcc -E
-LD = $(CROSSDEV)ld
-STRIP = $(CROSSDEV)strip --strip-unneeded
-AR = $(CROSSDEV)ar rcs
-NM = $(CROSSDEV)nm
-OBJCOPY = $(CROSSDEV)objcopy
-OBJDUMP = $(CROSSDEV)objdump
-
 # ARCHOPTIMIZATION += -fno-zero-initialized-in-bss
 
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
