@@ -254,9 +254,8 @@ void xtensa_dumpstate(void);
 /* Initialization */
 
 #if XCHAL_CP_NUM > 0
-struct xtensa_cpstate_s;
-void xtensa_coproc_enable(struct xtensa_cpstate_s *cpstate, int cpset);
-void xtensa_coproc_disable(struct xtensa_cpstate_s *cpstate, int cpset);
+void xtensa_coproc_enable(int cpset);
+void xtensa_coproc_disable(int cpset);
 #endif
 
 /* Window Spill */

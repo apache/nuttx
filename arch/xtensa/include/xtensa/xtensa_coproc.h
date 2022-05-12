@@ -140,6 +140,12 @@
 
 #ifndef __ASSEMBLY__
 
+#if 0
+
+/* This struct is not used as CP context switch was implement in interrupt
+ * handler. Will be reused when lazy context switch is implemented.
+ */
+
 struct xtensa_cpstate_s
 {
   uint16_t cpenable;                                 /* (2 bytes) Co-processors active for this thread */
@@ -149,6 +155,7 @@ struct xtensa_cpstate_s
 
 static_assert(offsetof(struct xtensa_cpstate_s, cpasa) == XTENSA_CPASA,
               "CP save area address alignment violation.");
+#endif
 
 /****************************************************************************
  * Inline Functions

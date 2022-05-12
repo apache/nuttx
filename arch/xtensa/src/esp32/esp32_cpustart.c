@@ -180,14 +180,6 @@ void IRAM_ATTR xtensa_appcpu_start(void)
 
   up_enable_irq(XTENSA_IRQ_SWINT);
 
-#if 0 /* Does it make since to have co-processors enabled on the IDLE thread? */
-#if XTENSA_CP_ALLSET != 0
-  /* Set initial co-processor state */
-
-  xtensa_coproc_enable(struct xtensa_cpstate_s *cpstate, int cpset);
-#endif
-#endif
-
   /* Dump registers so that we can see what is going to happen on return */
 
   xtensa_registerdump(tcb);
