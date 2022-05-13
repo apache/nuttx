@@ -104,9 +104,7 @@
 
 static inline void tms570_event_export(void)
 {
-  uint32_t pmcr = cp15_pmu_rdpmcr();
-  pmcr |= PMCR_X;
-  cp15_pmu_wrpmcr(pmcr);
+  cp15_pmu_pmcr(PMCR_X);
 }
 
 /****************************************************************************
