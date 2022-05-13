@@ -45,6 +45,10 @@ ifeq ($(CONFIG_TLSR82_ADC),y)
   CHIP_CSRCS += tlsr82_adc.c
 endif
 
+ifeq ($(CONFIG_TLSR82_AES),y)
+  CHIP_CSRCS += tlsr82_aes.c
+endif
+
 VPATH += chip/tc32
 VPATH += chip/chip/b87/boot
 
