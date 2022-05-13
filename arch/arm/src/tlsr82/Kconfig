@@ -325,6 +325,8 @@ menuconfig TLSR82_PKE
 menuconfig TLSR82_AES
 	bool "AES Configuration"
 	default n
+	select CRYPTO
+	select CRYPTO_AES
 
 menuconfig TLSR82_RNG
 	bool "RNG Configuration"
