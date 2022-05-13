@@ -204,7 +204,7 @@ gpio_pinset_t g_adcpinlist0[ADC_MAX_CHANNELS] =
     GPIO_AFE0_AD6,
     GPIO_AFE0_AD7,
     GPIO_AFE0_AD8,
-    GPIO_AFE0_AD0,
+    GPIO_AFE0_AD9,
     GPIO_AFE0_AD10,
 };
 #endif
@@ -244,7 +244,7 @@ gpio_pinset_t g_adcpinlist1[ADC_MAX_CHANNELS] =
     GPIO_AFE1_AD6,
     GPIO_AFE1_AD7,
     GPIO_AFE1_AD8,
-    GPIO_AFE1_AD0,
+    GPIO_AFE1_AD9,
     GPIO_AFE1_AD10,
 };
 #endif
