@@ -79,6 +79,11 @@ void weak_function stm32_spidev_initialize(void)
       spierr("ERROR: FAILED to initialize SPI port 1\n");
     }
 
+#ifdef CONFIG_LCD_SSD1306_SPI
+  stm32_configgpio(GPIO_SSD1306_CS);    /* SSD1306 chip select */
+  stm32_configgpio(GPIO_SSD1306_CMD);   /* SSD1306 data/!command */
+#endif
+
 #ifdef CONFIG_CAN_MCP2515
   stm32_configgpio(GPIO_MCP2515_CS);    /* MCP2515 chip select */
 #endif
@@ -127,6 +132,13 @@ void stm32_spi1select(struct spi_dev_s *dev, uint32_t devid,
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" :
           "de-assert");
+
+#if defined(CONFIG_LCD_SSD1306_SPI)
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      stm32_gpiowrite(GPIO_SSD1306_CS, !selected);
+    }
+#endif
 
 #if defined(CONFIG_CAN_MCP2515)
   if (devid == SPIDEV_CANBUS(0))
@@ -204,6 +216,13 @@ uint8_t stm32_spi3status(struct spi_dev_s *dev, uint32_t devid)
 #ifdef CONFIG_STM32_SPI1
 int stm32_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
+#if defined(CONFIG_LCD_SSD1306_SPI)
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      stm32_gpiowrite(GPIO_SSD1306_CMD, !cmd);
+    }
+#endif
+
   return OK;
 }
 #endif
