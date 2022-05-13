@@ -117,18 +117,18 @@ struct mpfs_rptun_dev_s
 
 typedef enum
 {
-  IHC_CHANNEL_TO_HART0 = 0x00,    /* Your hart to hart 0 */
-  IHC_CHANNEL_TO_HART1 = 0x01,    /* Your hart to hart 1 */
-  IHC_CHANNEL_TO_HART2 = 0x02,    /* Your hart to hart 2 */
-  IHC_CHANNEL_TO_HART3 = 0x03,    /* Your hart to hart 3 */
-  IHC_CHANNEL_TO_HART4 = 0x04,    /* Your hart to hart 4 */
-  ihc_channel_to_contexta = 0x05, /* Your hart to context A */
-  ihc_channel_to_contextb = 0x06, /* Your hart to context B */
+  IHC_CHANNEL_TO_HART0    = 0x00, /* Your hart to hart 0 */
+  IHC_CHANNEL_TO_HART1    = 0x01, /* Your hart to hart 1 */
+  IHC_CHANNEL_TO_HART2    = 0x02, /* Your hart to hart 2 */
+  IHC_CHANNEL_TO_HART3    = 0x03, /* Your hart to hart 3 */
+  IHC_CHANNEL_TO_HART4    = 0x04, /* Your hart to hart 4 */
+  IHC_CHANNEL_TO_CONTEXTA = 0x05, /* Your hart to context A */
+  IHC_CHANNEL_TO_CONTEXTB = 0x06, /* Your hart to context B */
 } ihc_channel_t;
 
 struct mpfs_queue_table
 {
-    void *data;
+  void *data;
 };
 
 /****************************************************************************
@@ -163,19 +163,19 @@ static int mpfs_rptun_register_callback(struct rptun_dev_s *dev,
 
 uint8_t unused_filler[0x80000] __attribute__((section(".filler_area")));
 
-static struct   rpmsg_endpoint        g_mpgs_echo_ping_ept;
-static struct   mpfs_queue_table      g_mpfs_virtqueue_table[VRINGS];
-static struct   mpfs_rptun_shmem_s    g_shmem;
-static struct   rpmsg_device         *g_mpfs_rpmsg_device;
-static struct   rpmsg_virtio_device  *g_mpfs_virtio_device;
+static struct rpmsg_endpoint        g_mpgs_echo_ping_ept;
+static struct mpfs_queue_table      g_mpfs_virtqueue_table[VRINGS];
+static struct mpfs_rptun_shmem_s    g_shmem;
+static struct rpmsg_device         *g_mpfs_rpmsg_device;
+static struct rpmsg_virtio_device  *g_mpfs_virtio_device;
 
-static sem_t   g_mpfs_ack_lock      = SEM_INITIALIZER(1);
-static sem_t   g_mpfs_rx_lock       = SEM_INITIALIZER(1);
-static struct  list_node g_dev_list = LIST_INITIAL_VALUE(g_dev_list);
+static sem_t  g_mpfs_ack_lock      = SEM_INITIALIZER(1);
+static sem_t  g_mpfs_rx_sig        = SEM_INITIALIZER(1);
+static struct list_node g_dev_list = LIST_INITIAL_VALUE(g_dev_list);
 
 static uint32_t g_connected_hart_ints;
 static uint32_t g_connected_harts;
-static int      g_vq_idx = 0;
+static int      g_vq_idx;
 
 const uint32_t ihcia_remote_harts[MPFS_NUM_HARTS] =
 {
@@ -302,7 +302,7 @@ static uint32_t mpfs_ihc_context_to_remote_hart_id(ihc_channel_t channel)
 
       /* Determine context we are in */
 
-      if (channel == ihc_channel_to_contexta)
+      if (channel == IHC_CHANNEL_TO_CONTEXTA)
         {
           harts_in_context = LIBERO_SETTING_CONTEXT_A_HART_EN;
         }
@@ -336,7 +336,7 @@ static uint32_t mpfs_ihc_context_to_remote_hart_id(ihc_channel_t channel)
  * Description:
  *   This handles the received information and either lets the vq to proceed
  *   via posting g_mpfs_ack_lock, or lets the mpfs_rptun_thread() run as it
- *   waits for the g_mpfs_rx_lock.  virtqueue_notification() cannot be called
+ *   waits for the g_mpfs_rx_sig.  virtqueue_notification() cannot be called
  *   from the interrupt context, thus the thread that will perform it.
  *
  * Input Parameters:
@@ -350,7 +350,7 @@ static uint32_t mpfs_ihc_context_to_remote_hart_id(ihc_channel_t channel)
 
 static void mpfs_ihc_rx_handler(uint32_t *message, bool is_ack)
 {
-  if (is_ack == true)
+  if (is_ack)
     {
       /* Received the ack */
 
@@ -362,7 +362,7 @@ static void mpfs_ihc_rx_handler(uint32_t *message, bool is_ack)
 
       DEBUGASSERT(g_vq_idx < VRINGS);
 
-      nxsem_post(&g_mpfs_rx_lock);
+      nxsem_post(&g_mpfs_rx_sig);
     }
 }
 
@@ -388,17 +388,17 @@ static void mpfs_ihc_rx_message(ihc_channel_t channel, bool is_ack)
   uint32_t rhartid  = mpfs_ihc_context_to_remote_hart_id(channel);
   uint32_t ctrl_reg = getreg32(MPFS_IHC_CTRL(mhartid, rhartid));
 
-  if (is_ack == true)
+  if (is_ack)
     {
       mpfs_ihc_rx_handler((uint32_t *)MPFS_IHC_MSG_IN(mhartid, rhartid),
-                           is_ack);
+                          is_ack);
     }
   else if (MP_MESSAGE_PRESENT == (ctrl_reg & MP_MASK))
     {
       /* Check if we have a message */
 
       mpfs_ihc_rx_handler((uint32_t *)MPFS_IHC_MSG_IN(mhartid, rhartid),
-                           is_ack);
+                          is_ack);
 
       /* Set MP to 0. Note this generates an interrupt on the other hart
        * if it has RMPIE bit set in the control register
@@ -452,7 +452,7 @@ static void mpfs_ihc_message_present_isr(void)
 
       mpfs_ihc_rx_message(origin_hart, is_ack);
 
-      if (is_ack == true)
+      if (is_ack)
         {
           /* Clear the ack */
 
@@ -591,7 +591,7 @@ static uint32_t mpfs_ihc_context_to_local_hart_id(ihc_channel_t channel)
     }
   else
     {
-      if (channel == ihc_channel_to_contexta)
+      if (channel == IHC_CHANNEL_TO_CONTEXTA)
         {
           /* We are context B */
 
@@ -942,7 +942,7 @@ static int mpfs_rptun_notify(struct rptun_dev_s *dev, uint32_t notifyid)
       tx_msg[1] = 0;
     }
 
-  return mpfs_ihc_tx_message(ihc_channel_to_contexta, tx_msg);
+  return mpfs_ihc_tx_message(IHC_CHANNEL_TO_CONTEXTA, tx_msg);
 }
 
 /****************************************************************************
@@ -1014,6 +1014,7 @@ static int mpfs_rptun_init(const char *shmemname, const char *cpuname)
   ret = rptun_initialize(&dev->rptun);
   if (ret < 0)
     {
+      list_remove_tail(&g_dev_list);
       kmm_free(dev);
     }
 
@@ -1039,9 +1040,8 @@ static int mpfs_rptun_init(const char *shmemname, const char *cpuname)
  *
  ****************************************************************************/
 
-static int mpfs_echo_ping_ept_cb(FAR struct rpmsg_endpoint *ept,
-                                 FAR void *data, size_t len, uint32_t src,
-                                 FAR void *priv)
+static int mpfs_echo_ping_ept_cb(struct rpmsg_endpoint *ept, void *data,
+                                 size_t len, uint32_t src, void *priv)
 {
   /* This is simply echoes the data back */
 
@@ -1065,8 +1065,8 @@ static int mpfs_echo_ping_ept_cb(FAR struct rpmsg_endpoint *ept,
  *
  ****************************************************************************/
 
-static int mpfs_echo_ping_init(FAR struct rpmsg_device *rdev,
-                               FAR struct rpmsg_endpoint *ept)
+static int mpfs_echo_ping_init(struct rpmsg_device *rdev,
+                               struct rpmsg_endpoint *ept)
 {
   return rpmsg_create_ept(ept, rdev, MPFS_RPTUN_PING_EPT_NAME,
                           RPMSG_ADDR_ANY, 0,
@@ -1090,8 +1090,7 @@ static int mpfs_echo_ping_init(FAR struct rpmsg_device *rdev,
  *
  ****************************************************************************/
 
-static void mpfs_rpmsg_device_created(FAR struct rpmsg_device *rdev,
-                                      FAR void *priv_)
+static void mpfs_rpmsg_device_created(struct rpmsg_device *rdev, void *priv_)
 {
   struct rpmsg_virtio_device *vdev = container_of(rdev,
                                                   struct rpmsg_virtio_device,
@@ -1110,7 +1109,7 @@ static void mpfs_rpmsg_device_created(FAR struct rpmsg_device *rdev,
  * Name: mpfs_rptun_thread
  *
  * Description:
- *   This is used to listen to the g_mpfs_rx_lock semaphore and then
+ *   This is used to listen to the g_mpfs_rx_sig semaphore and then
  *   notifying the associated virtqueue.  The virtqueue_notification()
  *   cannot be called from irq context.
  *
@@ -1123,13 +1122,13 @@ static void mpfs_rpmsg_device_created(FAR struct rpmsg_device *rdev,
  *
  ****************************************************************************/
 
-static int mpfs_rptun_thread(int argc, FAR char *argv[])
+static int mpfs_rptun_thread(int argc, char *argv[])
 {
   struct mpfs_queue_table *info;
 
   while (1)
     {
-      nxsem_wait(&g_mpfs_rx_lock);
+      nxsem_wait(&g_mpfs_rx_sig);
 
       info = &g_mpfs_virtqueue_table[g_vq_idx];
       virtqueue_notification((struct virtqueue *)info->data);
@@ -1161,8 +1160,8 @@ static int mpfs_rptun_thread(int argc, FAR char *argv[])
 
 int mpfs_ihc_init(void)
 {
-  uint64_t  mhartid = riscv_mhartid();
-  FAR char *argv[3];
+  uint32_t  mhartid = (uint32_t)riscv_mhartid();
+  char     *argv[3];
   char      arg1[19];
   uint32_t  rhartid;
   int       ret;
@@ -1177,8 +1176,8 @@ int mpfs_ihc_init(void)
 
   /* Initialize IHC FPGA module registers to a known state */
 
-  mpfs_ihc_local_context_init((uint32_t)mhartid);
-  mpfs_ihc_local_remote_config((uint32_t)mhartid, rhartid);
+  mpfs_ihc_local_context_init(mhartid);
+  mpfs_ihc_local_remote_config(mhartid, rhartid);
 
   /* Attach and enable the applicable irq */
 
@@ -1212,7 +1211,7 @@ int mpfs_ihc_init(void)
 
   snprintf(arg1, sizeof(arg1), "0x%" PRIxPTR,
           (uintptr_t)g_mpfs_virtqueue_table);
-  argv[0] = (void *)"mpfs_ihc_thread";
+  argv[0] = "mpfs_ihc_thread";
   argv[1] = arg1;
   argv[2] = NULL;
 
@@ -1248,11 +1247,9 @@ init_error:
  *
  ****************************************************************************/
 
-uintptr_t up_addrenv_va_to_pa(FAR void *va_)
+uintptr_t up_addrenv_va_to_pa(void *va)
 {
-  uintptr_t va = (uintptr_t)va_;
-
-  return va;
+  return (uintptr_t)va;
 }
 
 /****************************************************************************
@@ -1270,7 +1267,7 @@ uintptr_t up_addrenv_va_to_pa(FAR void *va_)
  *
  ****************************************************************************/
 
-FAR void *up_addrenv_pa_to_va(uintptr_t pa)
+void *up_addrenv_pa_to_va(uintptr_t pa)
 {
-  return (FAR void *)pa;
+  return (void *)pa;
 }
