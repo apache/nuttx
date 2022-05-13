@@ -211,8 +211,11 @@ static const char *g_white_prefix[] =
 
 static const char *g_white_suffix[] =
 {
-  "kHz",
+  /* Ref:  include/nuttx/wireless/nrf24l01.h */
+
   "Mbps",
+  "kHz",
+  "kbps",
   "us",
   NULL
 };
@@ -745,7 +748,7 @@ static bool white_list(const char *ident, int lineno)
     }
 
   len2 = strlen(ident);
-  while (!isalnum(ident[len2]))
+  while (!isalnum(ident[len2 - 1]))
     {
       len2--;
     }
