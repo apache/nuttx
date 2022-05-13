@@ -526,7 +526,7 @@ static inline void cp15_wractlr(unsigned int actlr)
 
 /* Read/write the Performance Monitor Control Register (PMCR) */
 
-static inline unsigned int cp15_rdpmcr(void)
+static inline unsigned int cp15_pmu_rdpmcr(void)
 {
   unsigned int pmcr;
   __asm__ __volatile__
@@ -540,7 +540,7 @@ static inline unsigned int cp15_rdpmcr(void)
   return pmcr;
 }
 
-static inline void cp15_wrpmcr(unsigned int pmcr)
+static inline void cp15_pmu_wrpmcr(unsigned int pmcr)
 {
   __asm__ __volatile__
     (
