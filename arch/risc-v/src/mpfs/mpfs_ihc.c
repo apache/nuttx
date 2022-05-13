@@ -169,8 +169,8 @@ static struct mpfs_rptun_shmem_s    g_shmem;
 static struct rpmsg_device         *g_mpfs_rpmsg_device;
 static struct rpmsg_virtio_device  *g_mpfs_virtio_device;
 
-static sem_t  g_mpfs_ack_lock      = SEM_INITIALIZER(1);
-static sem_t  g_mpfs_rx_sig        = SEM_INITIALIZER(1);
+static sem_t  g_mpfs_ack_sig       = SEM_INITIALIZER(0);
+static sem_t  g_mpfs_rx_sig        = SEM_INITIALIZER(0);
 static struct list_node g_dev_list = LIST_INITIAL_VALUE(g_dev_list);
 
 static uint32_t g_connected_hart_ints;
@@ -335,7 +335,7 @@ static uint32_t mpfs_ihc_context_to_remote_hart_id(ihc_channel_t channel)
  *
  * Description:
  *   This handles the received information and either lets the vq to proceed
- *   via posting g_mpfs_ack_lock, or lets the mpfs_rptun_thread() run as it
+ *   via posting g_mpfs_ack_sig, or lets the mpfs_rptun_thread() run as it
  *   waits for the g_mpfs_rx_sig.  virtqueue_notification() cannot be called
  *   from the interrupt context, thus the thread that will perform it.
  *
@@ -354,7 +354,7 @@ static void mpfs_ihc_rx_handler(uint32_t *message, bool is_ack)
     {
       /* Received the ack */
 
-      nxsem_post(&g_mpfs_ack_lock);
+      nxsem_post(&g_mpfs_ack_sig);
     }
   else
     {
@@ -683,7 +683,7 @@ static int mpfs_ihc_tx_message(ihc_channel_t channel, uint32_t *message)
 
       /* Wait for the ACK to arrive to maintain the logic */
 
-      nxsem_wait_uninterruptible(&g_mpfs_ack_lock);
+      nxsem_wait_uninterruptible(&g_mpfs_ack_sig);
     }
 
   return OK;
