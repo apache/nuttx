@@ -73,8 +73,8 @@ extern "C"
 int up_cryptoinitialize(void);
 
 #if defined(CONFIG_CRYPTO_AES)
-int aes_cypher(FAR void *out, FAR const void *in, uint32_t size,
-               FAR const void *iv, FAR const void *key, uint32_t keysize,
+int aes_cypher(FAR void *out, FAR const void *in, size_t size,
+               FAR const void *iv, FAR const void *key, size_t keysize,
                int mode, int encrypt);
 #endif
 

@@ -257,8 +257,8 @@ int stm32_aesuninitialize(void)
   return OK;
 }
 
-int aes_cypher(FAR void *out, FAR const void *in, uint32_t size,
-               FAR const void *iv, FAR const void *key, uint32_t keysize,
+int aes_cypher(void *out, const void *in, size_t size,
+               const void *iv, const void *key, size_t keysize,
                int mode, int encrypt)
 {
   int ret = OK;
