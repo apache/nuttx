@@ -286,7 +286,6 @@ static void rptun_worker(FAR void *arg)
         if (priv->rproc.state == RPROC_OFFLINE)
           {
             rptun_dev_start(&priv->rproc);
-            rptun_update_rx(priv);
           }
         break;
 
@@ -752,6 +751,8 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
       remoteproc_remove_virtio(rproc, vdev);
       return ret;
     }
+
+  rptun_update_rx(priv);
 
   rptun_lock();
 
