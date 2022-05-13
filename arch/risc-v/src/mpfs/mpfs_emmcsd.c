@@ -442,7 +442,11 @@ struct mpfs_dev_s g_emmcsd_dev =
   },
   .hw_base           = MPFS_EMMC_SD_BASE,
   .plic_irq          = MPFS_IRQ_MMC_MAIN,
-  .emmc              = false,               /* Set true for emmc operation */
+#ifdef CONFIG_MPFS_EMMCSD_MUX_EMMC
+  .emmc              = true,
+#else
+  .emmc              = false,
+#endif
   .blocksize         = 512,
   .onebit            = false,
   .polltransfer      = true,
