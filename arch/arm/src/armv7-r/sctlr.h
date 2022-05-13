@@ -251,18 +251,18 @@
  * TODO: To be provided
  */
 
-#define PCMR_E             (1 << 0)  /* Enable all counters */
-#define PCMR_P             (1 << 1)  /* Reset all counter eventts (except PMCCNTR) */
-#define PCMR_C             (1 << 2)  /* Reset cycle counter (PMCCNTR) to zero */
-#define PCMR_D             (1 << 3)  /* Enable cycle counter clock (PMCCNTR) divider */
-#define PCMR_X             (1 << 4)  /* Export of events is enabled */
-#define PCMR_DP            (1 << 5)  /* Disable PMCCNTR if event counting is prohibited */
-#define PCMR_N_SHIFT       (11)      /* Bits 11-15:  Number of event counters */
-#define PCMR_N_MASK        (0x1f << PCMR_N_SHIFT)
-#define PCMR_IDCODE_SHIFT  (16)      /* Bits 16-23: Identification code */
-#define PCMR_IDCODE_MASK   (0xff << PCMR_IDCODE_SHIFT)
-#define PCMR_IMP_SHIFT     (24)      /* Bits 24-31: Implementer code */
-#define PCMR_IMP_MASK      (0xff << PCMR_IMP_SHIFT)
+#define PMCR_E             (1 << 0)  /* Enable all counters */
+#define PMCR_P             (1 << 1)  /* Reset all counter eventts (except PMCCNTR) */
+#define PMCR_C             (1 << 2)  /* Reset cycle counter (PMCCNTR) to zero */
+#define PMCR_D             (1 << 3)  /* Enable cycle counter clock (PMCCNTR) divider */
+#define PMCR_X             (1 << 4)  /* Export of events is enabled */
+#define PMCR_DP            (1 << 5)  /* Disable PMCCNTR if event counting is prohibited */
+#define PMCR_N_SHIFT       (11)      /* Bits 11-15:  Number of event counters */
+#define PMCR_N_MASK        (0x1f << PMCR_N_SHIFT)
+#define PMCR_IDCODE_SHIFT  (16)      /* Bits 16-23: Identification code */
+#define PMCR_IDCODE_MASK   (0xff << PMCR_IDCODE_SHIFT)
+#define PMCR_IMP_SHIFT     (24)      /* Bits 24-31: Implementer code */
+#define PMCR_IMP_MASK      (0xff << PMCR_IMP_SHIFT)
 
 /* 32-bit Performance Monitors Count Enable Set register (PMCNTENSET):
  * CRn=c9, opc1=0, CRm=c12, opc2=1
