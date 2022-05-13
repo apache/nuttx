@@ -147,7 +147,7 @@ static struct sam_pwm_s g_pwm0 =
 {
   .ops = &g_pwmops,
   .channels = g_pwm0_channels,
-  .channels_num = 4,
+  .channels_num = PWM0_NCHANNELS,
   .frequency = 0,
   .base = SAM_PWM0_BASE,
 };
@@ -191,7 +191,7 @@ static struct sam_pwm_s g_pwm1 =
 {
   .ops = &g_pwmops,
   .channels = g_pwm1_channels,
-  .channels_num = 4,
+  .channels_num = PWM1_NCHANNELS,
   .frequency = 0,
   .base = SAM_PWM1_BASE,
 };
