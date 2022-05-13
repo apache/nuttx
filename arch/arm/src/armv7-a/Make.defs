@@ -49,6 +49,7 @@ CMN_CSRCS += arm_doirq.c arm_gicv2.c arm_gicv2_dump.c
 CMN_CSRCS += arm_initialstate.c arm_mmu.c arm_prefetchabort.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c
 CMN_CSRCS += arm_syscall.c arm_tcbinfo.c arm_undefinedinsn.c
+CMN_CSRCS += arm_perf.c
 
 ifeq ($(CONFIG_ARMV7A_L2CC_PL310),y)
   CMN_CSRCS += arm_l2cc_pl310.c
