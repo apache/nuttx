@@ -132,6 +132,17 @@ config MPFS_EMMCSD_MUX_GPIO
 	---help---
 		External mux GPIO between e.MMC and SD-card
 
+choice MPFS_EMMCSD_MUX
+	prompt "Configure SD/eMMC mux"
+
+config MPFS_EMMCSD_MUX_SDCARD
+	bool "SD card"
+
+config MPFS_EMMCSD_MUX_EMMC
+	bool "eMMC"
+
+endchoice
+
 config MPFS_ROMFS_MOUNT
 	bool "Mount the ROMFS file system"
 	depends on FS_ROMFS
