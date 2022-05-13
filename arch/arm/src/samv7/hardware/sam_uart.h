@@ -334,7 +334,7 @@
 #define UART_INT_RXBRK               (1 << 2)  /* Bit 2:  Break Received/End of Break (USART, UART mode only) */
 #define UART_INT_OVRE                (1 << 5)  /* Bit 5:  Overrun Error Interrupt (Common) */
 #define UART_INT_FRAME               (1 << 6)  /* Bit 6:  Framing Error Interrupt (Common, UART mode) */
-#define UART_INT_LSF                 (1 << 6)  /* Bit 6:   LON Short Frame Error Interrupt Enablee (USART, LON mode only) */
+#define UART_INT_LSF                 (1 << 6)  /* Bit 6:  LON Short Frame Error Interrupt Enablee (USART, LON mode only) */
 #define UART_INT_PARE                (1 << 7)  /* Bit 7:  Parity Error Interrupt (Common, UART mode) */
 #define UART_INT_LCRCE               (1 << 7)  /* Bit 7:  LON CRC Error Interrupt Enablee (USART, LON mode only) */
 #define UART_INT_TIMEOUT             (1 << 8)  /* Bit 8:  Time-out Interrupt (USART, UART mode only) */
@@ -377,7 +377,7 @@
 #endif
 #define UART_THR_TXCHR_SHIFT         (0)       /* Bits 0-8: Character to be Transmitted (USART only) */
 #define UART_THR_TXCHR_MASK          (0x1ff << UART_THR_TXCHR_SHIFT)
-#define UART_THR_TXSYNH              (1 << 15) /* Bit 15: Sync Field to be tran (USART only) */
+#define UART_THR_TXSYNH              (1 << 15) /* Bit 15: Sync Field to be Transmitted (USART only) */
 
 /* UART Baud Rate Generator Register */
 
@@ -488,7 +488,7 @@
 #define UART_LONMR_TCOL              (1 << 2)  /* Bit 2:  Terminate Frame upon Collision Notification */
 #define UART_LONMR_CDTAIL            (1 << 3)  /* Bit 3:  LON Collision Detection on Frame Tail */
 #define UART_LONMR_DMAM              (1 << 4)  /* Bit 4:  LON DMA Mode */
-#define UART_LONMR_LCDS              (1 << 5)  /* Bit 5: LON Collision Detection Source */
+#define UART_LONMR_LCDS              (1 << 5)  /* Bit 5:  LON Collision Detection Source */
 #define UART_LONMR_EOFS_SHIFT        (16)      /* Bits 16-23: End of Frame Condition Size */
 #define UART_LONMR_EOFS_MASK         (0xff << UART_LONMR_EOFS_SHIFT)
 #  define UART_LONMR_EOFS(n)         ((uint32_t)(n) << UART_LONMR_EOFS_SHIFT)
