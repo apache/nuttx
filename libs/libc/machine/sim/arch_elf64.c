@@ -81,7 +81,7 @@
  *
  ****************************************************************************/
 
-bool up_checkarch(FAR const Elf64_Ehdr *ehdr)
+bool up_checkarch(const Elf64_Ehdr *ehdr)
 {
   /* Make sure it's an x86_64 executable */
 
@@ -140,14 +140,13 @@ bool up_checkarch(FAR const Elf64_Ehdr *ehdr)
  *
  ****************************************************************************/
 
-int up_relocate(FAR const Elf64_Rel *rel, FAR const Elf64_Sym *sym,
-                uintptr_t addr)
+int up_relocate(const Elf64_Rel *rel, const Elf64_Sym *sym, uintptr_t addr)
 {
   berr("Not implemented\n");
   return -ENOSYS;
 }
 
-int up_relocateadd(FAR const Elf64_Rela *rel, FAR const Elf64_Sym *sym,
+int up_relocateadd(const Elf64_Rela *rel, const Elf64_Sym *sym,
                    uintptr_t addr)
 {
   unsigned int relotype;

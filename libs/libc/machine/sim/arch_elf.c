@@ -60,7 +60,7 @@
  *
  ****************************************************************************/
 
-bool up_checkarch(FAR const Elf32_Ehdr *hdr)
+bool up_checkarch(const Elf32_Ehdr *hdr)
 {
   return hdr->e_machine == EM_386 || hdr->e_machine == EM_486;
 }
@@ -87,10 +87,9 @@ bool up_checkarch(FAR const Elf32_Ehdr *hdr)
  *
  ****************************************************************************/
 
-int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
-                uintptr_t addr)
+int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
 {
-  FAR uint32_t *ptr = (FAR uint32_t *)addr;
+  uint32_t *ptr = (uint32_t *)addr;
 
   /* All relocations depend upon having valid symbol information. */
 
@@ -119,7 +118,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
   return OK;
 }
 
-int up_relocateadd(FAR const Elf32_Rela *rel, FAR const Elf32_Sym *sym,
+int up_relocateadd(const Elf32_Rela *rel, const Elf32_Sym *sym,
                    uintptr_t addr)
 {
   berr("ERROR: Not supported\n");

@@ -28,7 +28,7 @@
  * Public Functions
  ****************************************************************************/
 
-void weak_function __aeabi_memclr8(FAR void *s, size_t n)
+void weak_function __aeabi_memclr8(void *s, size_t n)
 {
   memset(s, 0, n);
 }

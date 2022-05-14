@@ -63,7 +63,7 @@
  *
  ****************************************************************************/
 
-bool up_checkarch(FAR const Elf32_Ehdr *ehdr)
+bool up_checkarch(const Elf32_Ehdr *ehdr)
 {
   /* Make sure it's an ARM executable */
 
@@ -131,8 +131,7 @@ bool up_checkarch(FAR const Elf32_Ehdr *ehdr)
  *
  ****************************************************************************/
 
-int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
-                uintptr_t addr)
+int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
 {
   int32_t offset;
   unsigned int relotype;
@@ -258,7 +257,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
   return OK;
 }
 
-int up_relocateadd(FAR const Elf32_Rela *rel, FAR const Elf32_Sym *sym,
+int up_relocateadd(const Elf32_Rela *rel, const Elf32_Sym *sym,
                    uintptr_t addr)
 {
   berr("ERROR: RELA relocation not supported\n");
