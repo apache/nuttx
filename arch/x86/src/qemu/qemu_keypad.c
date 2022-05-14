@@ -203,7 +203,7 @@ typedef enum
  * Private Function Prototypes
  ****************************************************************************/
 
-static ssize_t keypad_read(struct file *filep, FAR char *buf, size_t buflen);
+static ssize_t keypad_read(struct file *filep, char *buf, size_t buflen);
 
 /****************************************************************************
  * Private Data
@@ -267,7 +267,7 @@ static const struct file_operations g_keypadops =
  * Private Functions
  ****************************************************************************/
 
-static ssize_t keypad_read(struct file *filep, FAR char *buf, size_t buflen)
+static ssize_t keypad_read(struct file *filep, char *buf, size_t buflen)
 {
   uint_fast8_t keycode = 0;
   uint_fast8_t scancode = 0;

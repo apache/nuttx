@@ -28,7 +28,7 @@
  * Public Functions
  ****************************************************************************/
 
-void weak_function __aeabi_memset4(FAR void *s, size_t n, int c)
+void weak_function __aeabi_memset4(void *s, size_t n, int c)
 {
   memset(s, c, n);
 }
