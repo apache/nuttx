@@ -1305,6 +1305,10 @@ static int gh3020_activate(FAR struct file *filep,
   FAR struct gh3020_dev_s *priv;
   uint16_t rate;
 
+#ifdef CONFIG_FACTEST_SENSORS_GH3020
+  syslog(LOG_INFO, "[gh3020] ppg%u activate %d\n", sensor->chidx, enable);
+#endif
+
   DEBUGASSERT(sensor != NULL && sensor->dev != NULL);
 
   priv = sensor->dev;
@@ -1339,7 +1343,7 @@ static int gh3020_activate(FAR struct file *filep,
               gh3x2x_factest_start(
                 gh3020_channel_function_list[sensor->chidx],
                 sensor->current);
-              priv->activated++;
+              priv->activated = 1;
               priv->intvl_prev = priv->interval;
               priv->interval = GH3020_INTVL_DFT;
               work_queue(HPWORK, &priv->work_poll, gh3020_worker_poll, priv,
@@ -1348,7 +1352,7 @@ static int gh3020_activate(FAR struct file *filep,
           else
             {
               gh3020_stop_sampling_factest();
-              priv->activated--;
+              priv->activated = 0;
               priv->interval = priv->intvl_prev;
               work_cancel(HPWORK, &priv->work_poll);
             }
@@ -1690,6 +1694,7 @@ static int gh3020_control(FAR struct file *filep,
   DEBUGASSERT(sensor != NULL && sensor->dev != NULL);
 
 #ifdef CONFIG_FACTEST_SENSORS_GH3020
+  syslog(LOG_INFO, "[gh3020] ioctl cmd %x arg %lx\n", cmd, arg);
   priv = sensor->dev;
 #endif
 
@@ -1728,10 +1733,7 @@ static int gh3020_control(FAR struct file *filep,
           if (priv->factest_mode == false)
             {
               priv->factest_mode = true;
-              if (priv->activated > 0)
-                {
-                  gh3020_stop_sampling(priv->channelmode);
-                }
+              syslog(LOG_INFO, "[gh3020] enter factest\n");
             }
         }
         break;
@@ -1741,9 +1743,15 @@ static int gh3020_control(FAR struct file *filep,
           if (priv->factest_mode == true)
             {
               priv->factest_mode = false;
+              syslog(LOG_INFO, "[gh3020] exit factest\n");
               if (priv->activated > 0)
                 {
+                  syslog(LOG_INFO, "[gh3020] stop current factest sample\n");
                   gh3020_stop_sampling_factest();
+                  priv->activated = 0;
+                  sensor->activated = false;
+                  priv->interval = priv->intvl_prev;
+                  work_cancel(HPWORK, &priv->work_poll);
                 }
             }
         }
@@ -2548,8 +2556,8 @@ void gh3020_get_rawdata(FAR uint8_t *pbuf, uint16_t len)
 
           if (g_priv->sensor[chidx].activated == true)
             {
-              syslog(LOG_INFO, "ch%uraw%u=%08x\n", chidx, fifoinfo.adc_idx,
-                     temp);
+              syslog(LOG_INFO, "[gh3020] ch%uraw%u=%08x\n", chidx,
+                     fifoinfo.adc_idx, temp);
             }
 
           if (chidx < GH3020_SENSOR_NUM)
