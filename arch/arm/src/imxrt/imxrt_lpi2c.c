@@ -231,7 +231,7 @@ imxrt_lpi2c_sem_wait_noncancelable(struct imxrt_lpi2c_priv_s *priv);
 #endif
 
 #ifdef CONFIG_IMXRT_LPI2C_DYNTIMEO
-static useconds_t imxrt_lpi2c_tousecs(int msgc, struct i2c_msg_s *msgs);
+static uint32_t imxrt_lpi2c_toticks(int msgc, struct i2c_msg_s *msgs);
 #endif /* CONFIG_IMXRT_LPI2C_DYNTIMEO */
 
 static inline int
@@ -540,7 +540,7 @@ imxrt_lpi2c_sem_wait_noncancelable(struct imxrt_lpi2c_priv_s *priv)
 #endif
 
 /****************************************************************************
- * Name: imxrt_lpi2c_tousecs
+ * Name: imxrt_lpi2c_toticks
  *
  * Description:
  *   Return a micro-second delay based on the number of bytes left to be
@@ -549,7 +549,7 @@ imxrt_lpi2c_sem_wait_noncancelable(struct imxrt_lpi2c_priv_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_IMXRT_LPI2C_DYNTIMEO
-static useconds_t imxrt_lpi2c_tousecs(int msgc, struct i2c_msg_s *msgs)
+static uint32_t imxrt_lpi2c_toticks(int msgc, struct i2c_msg_s *msgs)
 {
   size_t bytecount = 0;
   int i;
@@ -565,7 +565,7 @@ static useconds_t imxrt_lpi2c_tousecs(int msgc, struct i2c_msg_s *msgs)
    * factor.
    */
 
-  return (useconds_t)(CONFIG_IMXRT_LPI2C_DYNTIMEO_USECPERBYTE * bytecount);
+  return USEC2TICK(CONFIG_IMXRT_LPI2C_DYNTIMEO_USECPERBYTE * bytecount);
 }
 #endif
 
@@ -624,7 +624,7 @@ imxrt_lpi2c_sem_waitdone(struct imxrt_lpi2c_priv_s *priv)
 
 #ifdef CONFIG_IMXRT_LPI2C_DYNTIMEO
       ret = nxsem_tickwait_uninterruptible(&priv->sem_isr,
-                     USEC2TICK(imxrt_lpi2c_tousecs(priv->msgc, priv->msgv)));
+                       imxrt_lpi2c_toticks(priv->msgc, priv->msgv));
 #else
       ret = nxsem_tickwait_uninterruptible(&priv->sem_isr,
                                            CONFIG_IMXRT_LPI2C_TIMEOTICKS);
@@ -679,7 +679,7 @@ imxrt_lpi2c_sem_waitdone(struct imxrt_lpi2c_priv_s *priv)
   /* Get the timeout value */
 
 #ifdef CONFIG_IMXRT_LPI2C_DYNTIMEO
-  timeout = USEC2TICK(imxrt_lpi2c_tousecs(priv->msgc, priv->msgv));
+  timeout = imxrt_lpi2c_toticks(priv->msgc, priv->msgv);
 #else
   timeout = CONFIG_IMXRT_LPI2C_TIMEOTICKS;
 #endif

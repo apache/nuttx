@@ -265,7 +265,7 @@ static int
 efm32_i2c_sem_wait_noncancelable(struct efm32_i2c_priv_s *priv);
 
 #ifdef CONFIG_EFM32_I2C_DYNTIMEO
-static useconds_t efm32_i2c_tousecs(int msgc, struct i2c_msg_s *msgs);
+static uint32_t efm32_i2c_toticks(int msgc, struct i2c_msg_s *msgs);
 #endif /* CONFIG_EFM32_I2C_DYNTIMEO */
 
 static inline int efm32_i2c_sem_waitdone(struct efm32_i2c_priv_s *priv);
@@ -488,7 +488,7 @@ efm32_i2c_sem_wait_noncancelable(struct efm32_i2c_priv_s *priv)
 }
 
 /****************************************************************************
- * Name: efm32_i2c_tousecs
+ * Name: efm32_i2c_toticks
  *
  * Description:
  *   Return a micro-second delay based on the number of bytes left to be
@@ -497,7 +497,7 @@ efm32_i2c_sem_wait_noncancelable(struct efm32_i2c_priv_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_EFM32_I2C_DYNTIMEO
-static useconds_t efm32_i2c_tousecs(int msgc, struct i2c_msg_s *msgs)
+static uint32_t efm32_i2c_toticks(int msgc, struct i2c_msg_s *msgs)
 {
   size_t bytecount = 0;
   int i;
@@ -513,7 +513,7 @@ static useconds_t efm32_i2c_tousecs(int msgc, struct i2c_msg_s *msgs)
    * factor.
    */
 
-  return (useconds_t) (CONFIG_EFM32_I2C_DYNTIMEO_USECPERBYTE * bytecount);
+  return USEC2TICK(CONFIG_EFM32_I2C_DYNTIMEO_USECPERBYTE * bytecount);
 }
 #endif
 
@@ -541,7 +541,7 @@ static inline int efm32_i2c_sem_waitdone(struct efm32_i2c_priv_s *priv)
 
 #ifdef CONFIG_EFM32_I2C_DYNTIMEO
       ret = nxsem_tickwait_uninterruptible(&priv->sem_isr,
-                       USEC2TICK(efm32_i2c_tousecs(priv->msgc, priv->msgv)));
+                         efm32_i2c_toticks(priv->msgc, priv->msgv));
 #else
       ret = nxsem_tickwait_uninterruptible(&priv->sem_isr,
                                            CONFIG_EFM32_I2CTIMEOTICKS);
@@ -584,7 +584,7 @@ static inline int efm32_i2c_sem_waitdone(struct efm32_i2c_priv_s *priv)
   /* Get the timeout value */
 
 #ifdef CONFIG_EFM32_I2C_DYNTIMEO
-  timeout = USEC2TICK(efm32_i2c_tousecs(priv->msgc, priv->msgv));
+  timeout = efm32_i2c_toticks(priv->msgc, priv->msgv);
 #else
   timeout = CONFIG_EFM32_I2CTIMEOTICKS;
 #endif

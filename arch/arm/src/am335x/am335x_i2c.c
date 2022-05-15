@@ -224,7 +224,7 @@ static int
 am335x_i2c_sem_wait_noncancelable(struct am335x_i2c_priv_s *priv);
 
 #ifdef CONFIG_AM335X_I2C_DYNTIMEO
-static useconds_t am335x_i2c_tousecs(int msgc, struct i2c_msg_s *msgs);
+static uint32_t am335x_i2c_toticks(int msgc, struct i2c_msg_s *msgs);
 #endif /* CONFIG_AM335X_I2C_DYNTIMEO */
 
 static inline int
@@ -468,7 +468,7 @@ am335x_i2c_sem_wait_noncancelable(struct am335x_i2c_priv_s *priv)
 }
 
 /****************************************************************************
- * Name: am335x_i2c_tousecs
+ * Name: am335x_i2c_toticks
  *
  * Description:
  *   Return a micro-second delay based on the number of bytes left to be
@@ -477,7 +477,7 @@ am335x_i2c_sem_wait_noncancelable(struct am335x_i2c_priv_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_AM335X_I2C_DYNTIMEO
-static useconds_t am335x_i2c_tousecs(int msgc, struct i2c_msg_s *msgs)
+static uint32_t am335x_i2c_toticks(int msgc, struct i2c_msg_s *msgs)
 {
   size_t bytecount = 0;
   int i;
@@ -493,7 +493,7 @@ static useconds_t am335x_i2c_tousecs(int msgc, struct i2c_msg_s *msgs)
    * factor.
    */
 
-  return (useconds_t)(CONFIG_AM335X_I2C_DYNTIMEO_USECPERBYTE * bytecount);
+  return USEC2TICK(CONFIG_AM335X_I2C_DYNTIMEO_USECPERBYTE * bytecount);
 }
 #endif
 
@@ -555,8 +555,7 @@ static inline int am335x_i2c_sem_waitdone(struct am335x_i2c_priv_s *priv)
 
 #ifdef CONFIG_AM335X_I2C_DYNTIMEO
       ret = nxsem_tickwait(&priv->sem_isr,
-                           USEC2TICK(am335x_i2c_tousecs(priv->msgc,
-                                                        priv->msgv));
+                           am335x_i2c_toticks(priv->msgc, priv->msgv));
 #else
       ret = nxsem_tickwait(&priv->sem_isr,
                            CONFIG_AM335X_I2CTIMEOTICKS);
@@ -598,7 +597,7 @@ static inline int am335x_i2c_sem_waitdone(struct am335x_i2c_priv_s *priv)
   /* Get the timeout value */
 
 #ifdef CONFIG_AM335X_I2C_DYNTIMEO
-  timeout = USEC2TICK(am335x_i2c_tousecs(priv->msgc, priv->msgv));
+  timeout = am335x_i2c_toticks(priv->msgc, priv->msgv);
 #else
   timeout = CONFIG_AM335X_I2CTIMEOTICKS;
 #endif

@@ -312,7 +312,7 @@ static inline void stm32_i2c_modifyreg(struct stm32_i2c_priv_s *priv,
                                        uint16_t setbits);
 
 #ifdef CONFIG_STM32_I2C_DYNTIMEO
-static useconds_t stm32_i2c_tousecs(int msgc, struct i2c_msg_s *msgs);
+static uint32_t stm32_i2c_toticks(int msgc, struct i2c_msg_s *msgs);
 #endif /* CONFIG_STM32_I2C_DYNTIMEO */
 
 static inline int  stm32_i2c_sem_waitdone(struct stm32_i2c_priv_s *priv);
@@ -541,7 +541,7 @@ static inline void stm32_i2c_modifyreg(struct stm32_i2c_priv_s *priv,
 }
 
 /****************************************************************************
- * Name: stm32_i2c_tousecs
+ * Name: stm32_i2c_toticks
  *
  * Description:
  *   Return a micro-second delay based on the number of bytes left to be
@@ -550,7 +550,7 @@ static inline void stm32_i2c_modifyreg(struct stm32_i2c_priv_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_I2C_DYNTIMEO
-static useconds_t stm32_i2c_tousecs(int msgc, struct i2c_msg_s *msgs)
+static uint32_t stm32_i2c_toticks(int msgc, struct i2c_msg_s *msgs)
 {
   size_t bytecount = 0;
   int i;
@@ -566,7 +566,7 @@ static useconds_t stm32_i2c_tousecs(int msgc, struct i2c_msg_s *msgs)
    * factor.
    */
 
-  return (useconds_t)(CONFIG_STM32_I2C_DYNTIMEO_USECPERBYTE * bytecount);
+  return USEC2TICK(CONFIG_STM32_I2C_DYNTIMEO_USECPERBYTE * bytecount);
 }
 #endif
 
@@ -605,7 +605,7 @@ static inline int stm32_i2c_sem_waitdone(struct stm32_i2c_priv_s *priv)
 
 #ifdef CONFIG_STM32_I2C_DYNTIMEO
       ret = nxsem_tickwait_uninterruptible(&priv->sem_isr,
-                       USEC2TICK(stm32_i2c_tousecs(priv->msgc, priv->msgv)));
+                         stm32_i2c_toticks(priv->msgc, priv->msgv));
 #else
       ret = nxsem_tickwait_uninterruptible(&priv->sem_isr,
                                            CONFIG_STM32_I2CTIMEOTICKS);
@@ -649,7 +649,7 @@ static inline int stm32_i2c_sem_waitdone(struct stm32_i2c_priv_s *priv)
   /* Get the timeout value */
 
 #ifdef CONFIG_STM32_I2C_DYNTIMEO
-  timeout = USEC2TICK(stm32_i2c_tousecs(priv->msgc, priv->msgv));
+  timeout = stm32_i2c_toticks(priv->msgc, priv->msgv);
 #else
   timeout = CONFIG_STM32_I2CTIMEOTICKS;
 #endif

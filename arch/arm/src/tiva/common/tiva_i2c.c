@@ -252,7 +252,7 @@ static inline void tiva_i2c_putreg(struct tiva_i2c_priv_s *priv,
 #endif
 
 #ifdef CONFIG_TIVA_I2C_DYNTIMEO
-static useconds_t tiva_i2c_tousecs(int msgc, struct i2c_msg_s *msgv);
+static uint32_t tiva_i2c_toticks(int msgc, struct i2c_msg_s *msgv);
 #endif /* CONFIG_TIVA_I2C_DYNTIMEO */
 
 static inline int  tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv);
@@ -631,7 +631,7 @@ static inline void tiva_i2c_putreg(struct tiva_i2c_priv_s *priv,
 #endif
 
 /****************************************************************************
- * Name: tiva_i2c_tousecs
+ * Name: tiva_i2c_toticks
  *
  * Description:
  *   Return a micro-second delay based on the number of bytes left to be
@@ -640,7 +640,7 @@ static inline void tiva_i2c_putreg(struct tiva_i2c_priv_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_TIVA_I2C_DYNTIMEO
-static useconds_t tiva_i2c_tousecs(int msgc, struct i2c_msg_s *msgv)
+static uint32_t tiva_i2c_toticks(int msgc, struct i2c_msg_s *msgv)
 {
   size_t bytecount = 0;
   int i;
@@ -656,7 +656,7 @@ static useconds_t tiva_i2c_tousecs(int msgc, struct i2c_msg_s *msgv)
    * factor.
    */
 
-  return (useconds_t)(CONFIG_TIVA_I2C_DYNTIMEO_USECPERBYTE * bytecount);
+  return USEC2TICK(CONFIG_TIVA_I2C_DYNTIMEO_USECPERBYTE * bytecount);
 }
 #endif
 
@@ -694,7 +694,7 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
 
 #ifdef CONFIG_TIVA_I2C_DYNTIMEO
       ret = nxsem_tickwait_uninterruptible(&priv->waitsem,
-                        USEC2TICK(tiva_i2c_tousecs(priv->msgc, priv->msgv)));
+                          tiva_i2c_toticks(priv->msgc, priv->msgv));
 #else
       ret = nxsem_tickwait_uninterruptible(&priv->waitsem,
                                            CONFIG_TIVA_I2C_TIMEOTICKS);
@@ -739,7 +739,7 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
   /* Get the timeout value */
 
 #ifdef CONFIG_TIVA_I2C_DYNTIMEO
-  timeout = USEC2TICK(tiva_i2c_tousecs(priv->msgc, priv->msgv));
+  timeout = tiva_i2c_toticks(priv->msgc, priv->msgv);
 #else
   timeout = CONFIG_TIVA_I2C_TIMEOTICKS;
 #endif
