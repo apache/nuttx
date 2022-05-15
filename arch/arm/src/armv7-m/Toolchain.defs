@@ -222,7 +222,6 @@ else
       AR := $(CROSSDEV)gcc-ar rcs
       NM := $(CROSSDEV)gcc-nm
       ARCHOPTIMIZATION += -fno-builtin
-      ARCHOPTIMIZATION += -nodefaultlibs
     endif
   endif
 endif
@@ -242,6 +241,8 @@ endif
 ifneq ($(CONFIG_CXX_RTTI),y)
   ARCHCXXFLAGS += -fno-rtti
 endif
+
+LDFLAGS += -nostdlib
 
 # Optimization of unused sections
 

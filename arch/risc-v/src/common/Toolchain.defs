@@ -94,6 +94,8 @@ ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
   ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
 endif
 
+LDFLAGS += -nostdlib
+
 # Debug link map
 
 ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
@@ -187,7 +189,6 @@ ifeq ($(CONFIG_LTO_FULL),y)
     NM := $(CROSSDEV)gcc-nm
     ARCHOPTIMIZATION += -fuse-linker-plugin
     ARCHOPTIMIZATION += -fno-builtin
-    ARCHOPTIMIZATION += -nodefaultlibs
   endif
 endif
 

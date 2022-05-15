@@ -145,7 +145,6 @@ ifeq ($(CONFIG_MIPS32_TOOLCHAIN),GNU_ELF)
   CROSSDEV ?= mips-elf-
   ARCHCPUFLAGS = -mlong32 -membedded-data -msoft-float -march=$(MIPS_MARCH) $(MIPS_MICROMIPS) -EL
   ARCHPICFLAGS = -fpic -membedded-pic
-  LDFLAGS += -nostartfiles -nodefaultlibs
   LDSCRIPT = mips-elf-debug.ld
 endif
 
@@ -155,7 +154,6 @@ ifeq ($(CONFIG_MIPS32_TOOLCHAIN),PINGUINOL)
   CROSSDEV ?= p32-
   ARCHCPUFLAGS = -mlong32 -membedded-data -msoft-float -march=$(MIPS_MARCH) $(MIPS_MICROMIPS) -EL
   ARCHPICFLAGS = -fpic -membedded-pic
-  LDFLAGS += -nostartfiles -nodefaultlibs
   LDSCRIPT = pinguino-debug.ld
 endif
 
@@ -165,7 +163,6 @@ ifeq ($(CONFIG_MIPS32_TOOLCHAIN),SOURCERY_CODEBENCH_LITE)
   CROSSDEV ?= mips-sde-elf-
   ARCHCPUFLAGS = -mlong32 -membedded-data -msoft-float -march=$(MIPS_MARCH) $(MIPS_MICROMIPS) -EL
   ARCHPICFLAGS = -fpic -membedded-pic
-  LDFLAGS += -nostartfiles -nodefaultlibs
   LDSCRIPT = sourcery-debug.ld
 endif
 
@@ -174,7 +171,6 @@ endif
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPL_XC32)
   CROSSDEV ?= xc32-
   ARCHCPUFLAGS = -mprocessor=$(MIPS_MPROCESSOR) -march=$(MIPS_MARCH) -EL $(MIPS_MICROMIPS) -msmart-io=0
-  LDFLAGS += -nostartfiles -nodefaultlibs
   LDSCRIPT = xc32-debug.ld
 endif
 
@@ -184,7 +180,6 @@ ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPL)
   CROSSDEV ?= pic32-
   ARCHCPUFLAGS = -mprocessor=$(MIPS_MPROCESSOR) $(MIPS_MICROMIPS) -mno-float -mlong32 -membedded-data
   ARCHPICFLAGS = -fpic -membedded-pic
-  LDFLAGS += -nostartfiles -nodefaultlibs
   LDSCRIPT = xc32-debug.ld
 endif
 
@@ -193,7 +188,6 @@ endif
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPW_XC32)
   CROSSDEV ?= xc32-
   ARCHCPUFLAGS = -mprocessor=$(MIPS_MPROCESSOR) -march=$(MIPS_MARCH) -EL $(MIPS_MICROMIPS) -msmart-io=0
-  LDFLAGS += -nostartfiles -nodefaultlibs
   LDSCRIPT = xc32-debug.ld
 endif
 
@@ -203,7 +197,6 @@ ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPW)
   CROSSDEV ?= pic32-
   ARCHCPUFLAGS = -mprocessor=$(MIPS_MPROCESSOR) $(MIPS_MICROMIPS) -mno-float -mlong32 -membedded-data
   ARCHPICFLAGS = -fpic -membedded-pic
-  LDFLAGS += -nostartfiles -nodefaultlibs
   LDSCRIPT = c32-debug.ld
 endif
 
@@ -213,7 +206,6 @@ ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPL_LITE)
   CROSSDEV ?= pic32-
   ARCHCPUFLAGS = -mprocessor=$(MIPS_MPROCESSOR) $(MIPS_MICROMIPS) -mno-float -mlong32 -membedded-data
   ARCHPICFLAGS = -fpic -membedded-pic
-  LDFLAGS += -nostartfiles -nodefaultlibs
   LDSCRIPT = xc32-debug.ld
 endif
 
@@ -223,7 +215,6 @@ ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPW_LITE)
   CROSSDEV ?= pic32-
   ARCHCPUFLAGS = -mprocessor=$(MIPS_MPROCESSOR) $(MIPS_MICROMIPS) -mno-float -mlong32 -membedded-data
   ARCHPICFLAGS = -fpic -membedded-pic
-  LDFLAGS += -nostartfiles -nodefaultlibs
   LDSCRIPT = c32-debug.ld
 endif
 
@@ -233,7 +224,6 @@ ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPOPENL)
   CROSSDEV ?= mypic32-
   ARCHCPUFLAGS = -mprocessor=$(MIPS_MPROCESSOR) $(MIPS_MICROMIPS) -mno-float -mlong32 -membedded-data
   ARCHPICFLAGS = -fpic -membedded-pic
-  LDFLAGS += -nostartfiles -nodefaultlibs
   LDSCRIPT = c32-debug.ld
 endif
 
@@ -243,7 +233,6 @@ ifeq ($(CONFIG_MIPS32_TOOLCHAIN),PINGUINOW)
   CROSSDEV ?= p32-
   ARCHCPUFLAGS = -mlong32 -membedded-data -msoft-float -march=$(MIPS_MARCH) $(MIPS_MICROMIPS) -EL
   ARCHPICFLAGS = -fpic -membedded-pic
-  LDFLAGS += -nostartfiles -nodefaultlibs
   LDSCRIPT = mips-elf-debug.ld
 endif
 
@@ -284,6 +273,8 @@ endif
 ifneq ($(CONFIG_CXX_RTTI),y)
   ARCHCXXFLAGS += -fno-rtti
 endif
+
+LDFLAGS += -nostdlib
 
 # Default toolchain
 
