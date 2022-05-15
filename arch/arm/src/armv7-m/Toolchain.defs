@@ -172,7 +172,7 @@ endif
 endif
 
 ifeq ($(CONFIG_MM_KASAN),y)
-  ARCHCPUFLAGS += -fsanitize=kernel-address
+  ARCHOPTIMIZATION += -fsanitize=kernel-address
 endif
 
 # Generic GNU EABI toolchain
