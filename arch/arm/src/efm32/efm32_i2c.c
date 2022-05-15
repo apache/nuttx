@@ -264,9 +264,9 @@ static inline int efm32_i2c_sem_wait(struct efm32_i2c_priv_s *priv);
 static int
 efm32_i2c_sem_wait_noncancelable(struct efm32_i2c_priv_s *priv);
 
-#ifdef CONFIG_EFM32_I2C_DYNTIMEOUT
+#ifdef CONFIG_EFM32_I2C_DYNTIMEO
 static useconds_t efm32_i2c_tousecs(int msgc, struct i2c_msg_s *msgs);
-#endif /* CONFIG_EFM32_I2C_DYNTIMEOUT */
+#endif /* CONFIG_EFM32_I2C_DYNTIMEO */
 
 static inline int efm32_i2c_sem_waitdone(struct efm32_i2c_priv_s *priv);
 static inline void efm32_i2c_sem_post(struct efm32_i2c_priv_s *priv);
