@@ -55,8 +55,6 @@ CXXELFFLAGS = $(CXXFLAGS) -mlong-calls # --target1-abs
 LDELFFLAGS = -r -e main
 LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/binfmt/libelf/gnu-elf.ld)
 
-# File extensions
-
 # Linker flags
 
 ifeq ($(CONFIG_LC823450_SDIF_PATCH),y)
