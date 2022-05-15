@@ -77,7 +77,7 @@ FAR void *operator new[](std::size_t nbytes)
     }
 #endif
 
-  DEBUGASSERT(alloc != nullptr);
+  DEBUGASSERT(alloc != NULL);
 
   // Return the allocated value
 
@@ -86,7 +86,7 @@ FAR void *operator new[](std::size_t nbytes)
 
 FAR void *operator new[](std::size_t nbytes, FAR void *ptr)
 {
-  DEBUGASSERT(ptr != nullptr);
+  DEBUGASSERT(ptr != NULL);
 
   // Return the ptr pointer
 
