@@ -59,7 +59,3 @@ CXXELFFLAGS = $(CXXFLAGS)
 
 LDELFFLAGS = -r -e main
 LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/binfmt/libelf/gnu-elf.ld)
-
-# File extensions
-
-LDFLAGS += -melf64lriscv

@@ -58,5 +58,3 @@ CXXELFFLAGS = $(CXXFLAGS)
 
 LDELFFLAGS = -melf32lriscv -r -e main
 LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)binfmt$(DELIM)libelf$(DELIM)gnu-elf.ld)
-
-LDFLAGS += -melf32lriscv

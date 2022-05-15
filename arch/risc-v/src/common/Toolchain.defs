@@ -81,6 +81,12 @@ ifneq ($(CONFIG_CXX_RTTI),y)
   ARCHCXXFLAGS += -fno-rtti
 endif
 
+ifeq ($(CONFIG_ARCH_RV32),y)
+LDFLAGS += -melf32lriscv
+else
+LDFLAGS += -melf64lriscv
+endif
+
 # Optimization of unused sections
 
 ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
