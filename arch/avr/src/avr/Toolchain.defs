@@ -112,6 +112,8 @@ ifneq ($(CONFIG_CXX_RTTI),y)
   ARCHCXXFLAGS += -fno-rtti
 endif
 
+LDFLAGS += -nostdlib
+
 # NuttX buildroot GCC toolchain under Linux or Cygwin
 
 ifeq ($(CONFIG_AVR_TOOLCHAIN),BUILDROOT)

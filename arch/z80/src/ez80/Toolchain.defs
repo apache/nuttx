@@ -72,6 +72,8 @@ else
   ARCHOPTIMIZATION += -fomit-frame-pointer
 endif
 
+LDFLAGS += -nostdlib
+
 ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
   LDFLAGS          += --gc-sections
   ARCHOPTIMIZATION += -ffunction-sections -fdata-sections

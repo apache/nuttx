@@ -144,6 +144,8 @@ ifneq ($(CONFIG_CXX_RTTI),y)
   ARCHCXXFLAGS += -fno-rtti
 endif
 
+LDFLAGS += -nostdlib
+
 # Optimization of unused sections
 
 ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
@@ -200,7 +202,6 @@ ifeq ($(CONFIG_LTO_FULL),y)
     NM := $(CROSSDEV)gcc-nm
     ARCHOPTIMIZATION += -fuse-linker-plugin
     ARCHOPTIMIZATION += -fno-builtin
-    ARCHOPTIMIZATION += -nodefaultlibs
   endif
 endif
 

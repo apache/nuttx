@@ -27,13 +27,9 @@ ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
 
-ifeq ($(CONFIG_ARMV7M_TOOLCHAIN_CLANG),y)
-  ARCHCFLAGS += -nostdlib -ffreestanding
-  ARCHCXXFLAGS += -nostdlib -ffreestanding
-else
+ifneq ($(CONFIG_ARMV7M_TOOLCHAIN_CLANG),y)
   ARCHCFLAGS += -funwind-tables
   ARCHCXXFLAGS += -funwind-tables
-
 endif
 
 CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe

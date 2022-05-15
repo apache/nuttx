@@ -48,6 +48,8 @@ else
   ARCHOPTIMIZATION += -fomit-frame-pointer
 endif
 
+LDFLAGS += -nostdlib
+
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS          += -g
   ARCHOPTIMIZATION += -g
@@ -79,7 +81,6 @@ endif
 CROSSDEV ?= or1k-elf-
 ARCHCPUFLAGS = -mboard=de0_nano
 ARCHPICFLAGS = -fpic -membedded-pic
-LDFLAGS += -nostartfiles -nodefaultlibs
 LDSCRIPT = or1k-elf-debug.ld
 #endif
 
