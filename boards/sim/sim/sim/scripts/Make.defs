@@ -71,6 +71,16 @@ ifeq ($(CONFIG_ARCH_COVERAGE),y)
   ARCHOPTIMIZATION += -fprofile-generate -ftest-coverage
 endif
 
+ifeq ($(CONFIG_SIM_ASAN),y)
+  ARCHOPTIMIZATION += -fsanitize=address
+else ifeq ($(CONFIG_MM_KASAN),y)
+  ARCHOPTIMIZATION += -fsanitize=kernel-address
+endif
+
+ifeq ($(CONFIG_SIM_UBSAN),y)
+  ARCHOPTIMIZATION += -fsanitize=undefined
+endif
+
 # Add -fno-common because macOS "ld -r" doesn't seem to pick objects
 # for common symbols.
 ARCHCFLAGS = -fno-common -ffunction-sections -fdata-sections
@@ -139,19 +149,6 @@ ifeq ($(CONFIG_LIBCXX),y)
   # It makes libcxx __availability header unhappy.
   # https://github.com/llvm/llvm-project/blob/2e2999cd44f6ec9a5e396fa0113497ea82582f69/libcxx/include/__availability#L258
   CXXFLAGS += -D_LIBCPP_DISABLE_AVAILABILITY
-endif
-
-ifeq ($(CONFIG_SIM_ASAN),y)
-  CFLAGS += -fsanitize=address
-  CXXFLAGS += -fsanitize=address
-else ifeq ($(CONFIG_MM_KASAN),y)
-  CFLAGS += -fsanitize=kernel-address
-  CXXFLAGS += -fsanitize=kernel-address
-endif
-
-ifeq ($(CONFIG_SIM_UBSAN),y)
-  CFLAGS += -fsanitize=undefined
-  CXXFLAGS += -fsanitize=undefined
 endif
 
 # Loadable module definitions

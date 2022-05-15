@@ -154,7 +154,7 @@ endif
 # Architecture flags
 
 ifeq ($(CONFIG_MM_KASAN),y)
-  ARCHCPUFLAGS += -fsanitize=kernel-address
+  ARCHOPTIMIZATION += -fsanitize=kernel-address
 endif
 
 ARCHCFLAGS += -fno-common
