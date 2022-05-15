@@ -55,11 +55,3 @@ endif
 
 LDELFFLAGS += -r -e main
 LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/binfmt/libelf/gnu-elf.ld)
-
-# File extensions
-
-ifeq ($(CONFIG_ARCH_RV32),y)
-LDFLAGS += -melf32lriscv
-else
-LDFLAGS += -melf64lriscv
-endif
