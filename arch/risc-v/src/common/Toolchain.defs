@@ -153,7 +153,7 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
 endif
 
 ifeq ($(CONFIG_MM_KASAN),y)
-  ARCHCPUFLAGS += -fsanitize=kernel-address
+  ARCHOPTIMIZATION += -fsanitize=kernel-address
 endif
 
 # Default toolchain

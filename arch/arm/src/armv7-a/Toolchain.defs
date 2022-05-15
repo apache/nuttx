@@ -97,7 +97,7 @@ else
 endif
 
 ifeq ($(CONFIG_MM_KASAN),y)
-  ARCHCPUFLAGS += -fsanitize=kernel-address
+  ARCHOPTIMIZATION += -fsanitize=kernel-address
 endif
 
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
