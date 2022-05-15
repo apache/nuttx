@@ -60,6 +60,8 @@ ifneq ($(CONFIG_CXX_RTTI),y)
   ARCHCXXFLAGS += -fno-rtti
 endif
 
+LDFLAGS += -nostdlib
+
 CROSSDEV = avr32-
 ARCHCPUFLAGS = -mpart=uc3b0256
 
