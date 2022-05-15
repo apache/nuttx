@@ -504,8 +504,7 @@ static int rptun_wait_tx(FAR struct remoteproc *rproc)
 
   /* Wait to wakeup */
 
-  nxsem_tickwait(&priv->semtx, clock_systime_ticks(),
-                 MSEC2TICK(RPTUN_TIMEOUT_MS));
+  nxsem_tickwait(&priv->semtx, MSEC2TICK(RPTUN_TIMEOUT_MS));
   rptun_worker(priv);
 
   return 0;
