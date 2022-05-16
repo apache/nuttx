@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/sys/ipc.h
+ * libs/libc/misc/lib_ftok.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,9 +18,6 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_SYS_IPC_H
-#define __INCLUDE_SYS_IPC_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -28,64 +25,11 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/ipc.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Mode bits:  The lower order 9-bit bits are the standard mode bits */
-
-#define IPC_MODE   0x01ff /* Mode bit mask */
-#define IPC_CREAT  0x0200 /* Create key if key does not exist. */
-#define IPC_EXCL   0x0400 /* Fail if key exists.  */
-#define IPC_NOWAIT 0x0800 /* Return error on wait.  */
-
-/* Keys: */
-
-#define IPC_PRIVATE 0     /* Private key */
-
-/* Control commands: */
-
-#define IPC_RMID    0    /* Remove identifier */
-#define IPC_SET     1    /* Set options */
-#define IPC_STAT    2    /* Get options */
-
-/****************************************************************************
- * Public Type Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/* The ipc_perm structure is used by three mechanisms for XSI interprocess
- * communication (IPC): messages, semaphores, and shared memory. All use a
- * common structure type, ipc_perm, to pass information used in determining
- * permission to perform an IPC operation.
- */
-
-struct ipc_perm
-{
-#if 0 /* User and group IDs not yet supported by NuttX */
-  uid_t  uid;    /* Owner's user ID */
-  gid_t  gid;    /* Owner's group ID */
-  uid_t  cuid;   /* Creator's user ID */
-  gid_t  cgid;   /* Creator's group ID */
-#endif
-  mode_t mode;   /* Read/write permission */
-};
-
-/****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -110,11 +54,16 @@ struct ipc_perm
  *
  ****************************************************************************/
 
-key_t ftok(FAR const char *pathname, int proj_id);
+key_t ftok(FAR const char *pathname, int proj_id)
+{
+  struct stat st;
 
-#undef EXTERN
-#if defined(__cplusplus)
+  if (stat(pathname, &st) < 0)
+    {
+      return (key_t)-1;
+    }
+
+  return ((key_t)proj_id << 24 |
+          (key_t)(st.st_dev & 0xff) << 16 |
+          (key_t)(st.st_ino & 0xffff));
 }
-#endif
-
-#endif /* __INCLUDE_SYS_IPC_H */
