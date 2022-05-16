@@ -733,3 +733,26 @@ SYNC_VAL_CMP_SWAP(4, uint32_t)
 SYNC_VAL_CMP_SWAP(8, uint64_t)
 
 #endif /* __clang__ */
+
+/****************************************************************************
+ * Name: up_testset
+ ****************************************************************************/
+
+#if defined(CONFIG_SPINLOCK) && !defined(CONFIG_ARCH_HAVE_TESTSET)
+spinlock_t up_testset(volatile FAR spinlock_t *lock)
+{
+  irqstate_t flags;
+  spinlock_t ret;
+
+  flags = spin_lock_irqsave(NULL);
+
+  ret = *lock;
+  if (ret == SP_UNLOCKED)
+    {
+      *lock = SP_LOCKED;
+    }
+
+  spin_unlock_irqrestore(NULL, flags);
+  return ret;
+}
+#endif

@@ -105,28 +105,7 @@ typedef uint8_t spinlock_t;
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_HAVE_TESTSET)
 spinlock_t up_testset(volatile FAR spinlock_t *lock);
-#elif !defined(CONFIG_SMP)
-static inline spinlock_t up_testset(volatile FAR spinlock_t *lock)
-{
-  irqstate_t flags;
-  spinlock_t ret;
-
-  flags = up_irq_save();
-
-  ret = *lock;
-
-  if (ret == SP_UNLOCKED)
-    {
-      *lock = SP_LOCKED;
-    }
-
-  up_irq_restore(flags);
-
-  return ret;
-}
-#endif
 
 /****************************************************************************
  * Name: spin_initialize
@@ -290,7 +269,7 @@ void spin_unlock_wo_note(FAR volatile spinlock_t *lock);
  * Name: spin_islocked
  *
  * Description:
- *   Release one count on a non-reentrant spinlock.
+ *   Check whether a non-reentrant spinlock hold the SP_LOCKED value.
  *
  * Input Parameters:
  *   lock - A reference to the spinlock object to test.
@@ -300,7 +279,7 @@ void spin_unlock_wo_note(FAR volatile spinlock_t *lock);
  *
  ****************************************************************************/
 
-/* bool spin_islocked(FAR spinlock_t lock); */
+/* bool spin_islocked(FAR spinlock_t *lock); */
 #define spin_islocked(l) (*(l) == SP_LOCKED)
 
 /****************************************************************************
