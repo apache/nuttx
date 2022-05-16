@@ -25,6 +25,7 @@ CSRCS += kasan.c
 # Disable kernel-address in mm subsystem
 
 CFLAGS += -fno-sanitize=kernel-address
+CFLAGS += -fno-lto
 
 # Add the core heap directory to the build
 
