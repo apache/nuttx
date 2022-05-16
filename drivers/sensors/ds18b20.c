@@ -729,7 +729,6 @@ static int ds18b20_control(FAR struct file *filep,
         break;
 
       default:
-        snerr("ERROR: Unrecognized cmd: %d\n", cmd);
         ret = -ENOTTY;
         break;
     }

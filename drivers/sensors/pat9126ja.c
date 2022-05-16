@@ -1249,7 +1249,6 @@ static int pat9126ja_control(FAR struct sensor_lowerhalf_s *lower,
       default:                        /* Other cmd tag */
         {
           ret = -ENOTTY;
-          snerr("ERROR: The cmd don't support: %d\n", ret);
         }
         break;
     }

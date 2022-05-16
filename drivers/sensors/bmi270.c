@@ -4064,7 +4064,6 @@ static int bmi270_control(FAR struct file *filep,
       default:                        /* Other cmd tag */
         {
           ret = -ENOTTY;
-          snerr("ERROR: The cmd don't support: %d\n", ret);
         }
         break;
     }

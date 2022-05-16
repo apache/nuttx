@@ -700,7 +700,6 @@ static int hyt271_control(FAR struct file *filep,
         break;
 
       default:
-        snerr("ERROR: Unrecognized cmd: %d\n", cmd);
         ret = -ENOTTY;
         break;
     }
