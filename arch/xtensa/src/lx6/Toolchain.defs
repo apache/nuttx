@@ -122,6 +122,8 @@ endif
 
 # Default toolchain
 ifeq ($(CONFIG_XTENSA_TOOLCHAIN_XCC), y)
+  ARCHCFLAGS += -Wno-atomic-alignment
+  ARCHCXXFLAGS += -Wno-atomic-alignment
   CC = $(CROSSDEV)xcc
   CXX = $(CROSSDEV)xc++
   CPP = $(CROSSDEV)xcc -E -P -x c
