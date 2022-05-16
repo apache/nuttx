@@ -174,7 +174,8 @@ static void watchdog_automonitor_idle(FAR struct pm_callback_s *cb,
   FAR struct watchdog_upperhalf_s *upper = (FAR void *)cb;
   FAR struct watchdog_lowerhalf_s *lower = upper->lower;
 
-  if (upper->monitor)
+  if (domain == PM_IDLE_DOMAIN &&
+      pmstate != PM_RESTORE && upper->monitor)
     {
       lower->ops->keepalive(lower);
     }
