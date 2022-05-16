@@ -324,18 +324,18 @@ struct gh3020_reg_s gh3020_reglist_normal[] =
   {0x0172, 0x0105}, /* LED drv1 to LED1(to IR LED) pin, 4.4mA */
   {0x0174, 0x0106}, /* LED drv1 to LED1(to IR LED) pin, 5.3mA */
   {0x017a, 0x277c}, /* Slot_cfg4(tunning R): sync signal, use FIFO, 4ADCs */
-  {0x0180, 0x0f16}, /* DC&BG cancel, ADC0 modifies drv0&1, 1st BG, 2048xADC */
-  {0x0182, 0x0000}, /* TIA0~3 10KOHm */
+  {0x0180, 0x0fd6}, /* DC&BG cancel, ADC3 modifies drv0&1, 1st BG, 2048xADC */
+  {0x0182, 0x1111}, /* TIA0~3 25KOHm */
   {0x0184, 0x00aa}, /* All ADCs use 200pF TIA_CF */
-  {0x018e, 0x023a}, /* LED drv0 to LED2(to red LED) pin, 50.04mA */
-  {0x0190, 0x0239}, /* LED drv1 to LED2(to red LED) pin, 50.18mA */
+  {0x018e, 0x0245}, /* LED drv0 to LED2(to red LED) pin, 59.28mA */
+  {0x0190, 0x0245}, /* LED drv1 to LED2(to red LED) pin, 60.72mA */
   {0x0192, 0x1c77}, /* Either LED driver current approximately 24~100 mA */
   {0x0196, 0x277c}, /* Slot_cfg5(tunning IR): sync signal, use FIFO, 4ADCs */
-  {0x019c, 0x0f16}, /* DC&BG cancel, ADC0 modifies drv0&1, 1st BG, 2048xADC */
-  {0x019e, 0x0000}, /* TIA0~3 10KOHm */
+  {0x019c, 0x0fd6}, /* DC&BG cancel, ADC3 modifies drv0&1, 1st BG, 2048xADC */
+  {0x019e, 0x1111}, /* TIA0~3 25KOHm */
   {0x01a0, 0x00aa}, /* All ADCs use 200pF TIA_CF */
-  {0x01aa, 0x0133}, /* LED drv0 to LED1(to IR LED) pin, 44.12mA */
-  {0x01ac, 0x0134}, /* LED drv1 to LED1(to IR LED) pin, 45.79mA */
+  {0x01aa, 0x012e}, /* LED drv0 to LED1(to IR LED) pin, 39.87mA */
+  {0x01ac, 0x012e}, /* LED drv1 to LED1(to IR LED) pin, 40.52mA */
   {0x01ae, 0x1777}, /* Either LED driver current approximately 20~100 mA */
   {0x01b2, 0xc744}, /* Slot_cfg6(Goodix ADT): use FIFO, ADC0 */
   {0x01b4, 0x0001}, /* TIA0 connected to PD0, TIA disconnected */
@@ -378,8 +378,8 @@ struct gh3020_reg_s gh3020_reglist_normal[] =
   {0x1000, 0x0000}, /* Virtual register. Maintained by Goodix. */
   {0x1002, 0x3080}, /* Virtual register. Maintained by Goodix. */
   {0x1004, 0x0000}, /* Virtual register. Maintained by Goodix. */
-  {0x1006, 0x40f7}, /* Virtual register. Maintained by Goodix. */
-  {0x1008, 0x2a0d}, /* Virtual register. Maintained by Goodix. */
+  {0x1006, 0x7165}, /* Virtual register. Maintained by Goodix. */
+  {0x1008, 0x2a11}, /* Virtual register. Maintained by Goodix. */
   {0x100a, 0x0001}, /* Virtual register. Maintained by Goodix. */
   {0x10e0, 0x0202}, /* Virtual register. Maintained by Goodix. */
   {0x10e2, 0x0202}, /* Virtual register. Maintained by Goodix. */
