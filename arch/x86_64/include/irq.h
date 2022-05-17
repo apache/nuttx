@@ -54,12 +54,16 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Inline functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Data
  ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+/* This holds a references to the current interrupt level register storage
+ * structure.  If is non-NULL only during interrupt processing.
+ */
+
+extern volatile uint64_t *g_current_regs;
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -73,6 +77,39 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+/****************************************************************************
+ * Name: up_cpu_index
+ *
+ * Description:
+ *   Return an index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
+ *   corresponds to the currently executing CPU.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   An integer index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
+ *   corresponds to the currently executing CPU.
+ *
+ ****************************************************************************/
+
+#define up_cpu_index() (0)
+
+/****************************************************************************
+ * Inline functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_interrupt_context
+ *
+ * Description:
+ *   Return true is we are currently executing in the interrupt handler
+ *   context.
+ *
+ ****************************************************************************/
+
+#define up_interrupt_context() (g_current_regs != NULL)
 
 #undef EXTERN
 #ifdef __cplusplus

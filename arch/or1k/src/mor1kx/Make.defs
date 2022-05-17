@@ -23,7 +23,6 @@ CMN_ASRCS  = up_vectortab.S \
              up_fullcontextrestore.S
 
 CMN_CSRCS  = up_initialize.c \
-             up_interruptcontext.c \
              up_allocateheap.c \
              up_createstack.c \
              up_usestack.c \
