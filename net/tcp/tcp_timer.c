@@ -167,19 +167,13 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
   if (conn->tcpstateflags == TCP_TIME_WAIT ||
       conn->tcpstateflags == TCP_FIN_WAIT_2)
     {
-      unsigned int newtimer;
-
-      /* Increment the connection timer */
-
-      newtimer = (unsigned int)conn->timer + hsec;
-
       /* Check if the timer exceeds the timeout value */
 
-      if (newtimer >= (TCP_TIME_WAIT_TIMEOUT * HSEC_PER_SEC))
+      if (conn->timer <= hsec)
         {
-          /* Set the timer to the maximum value */
+          /* Set the timer to zero value */
 
-          conn->timer = TCP_TIME_WAIT_TIMEOUT * HSEC_PER_SEC;
+          conn->timer         = 0;
           conn->tcpstateflags = TCP_CLOSED;
 
           /* Notify upper layers about the timeout */
@@ -190,9 +184,9 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
         }
       else
         {
-          /* No timeout. Just update the incremented timer */
+          /* No timeout. Just update the decremented timer */
 
-          conn->timer = newtimer;
+          conn->timer -= hsec;
         }
     }
   else if (conn->tcpstateflags != TCP_CLOSED)
@@ -301,7 +295,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
               /* Exponential backoff. */
 
               conn->timer = TCP_RTO << (conn->nrtx > 4 ? 4: conn->nrtx);
-              (conn->nrtx)++;
+              conn->nrtx++;
 
               /* Ok, so we need to retransmit. We do this differently
                * depending on which state we are in. In ESTABLISHED, we
