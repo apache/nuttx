@@ -664,7 +664,7 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
             {
               /* Yes.. Is it the oldest one we have seen so far? */
 
-              if (!conn || tmp->timer > conn->timer)
+              if (!conn || tmp->timer < conn->timer)
                 {
                   /* Yes.. remember it */
 
