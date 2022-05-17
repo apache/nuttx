@@ -211,7 +211,8 @@ static int gh3020_pm_prepare(FAR struct pm_callback_s *cb, int domain,
 /* Sensor ops functions */
 
 static int gh3020_activate(FAR struct file *filep,
-                           FAR struct sensor_lowerhalf_s *lower, bool enable);
+                           FAR struct sensor_lowerhalf_s *lower,
+                           bool enable);
 static int gh3020_set_interval(FAR struct file *filep,
                                FAR struct sensor_lowerhalf_s *lower,
                                FAR unsigned long *period_us);
@@ -1317,8 +1318,6 @@ static int gh3020_activate(FAR struct file *filep,
 
   if (sensor->activated != enable)
     {
-      sensor->activated = enable;
-
       /* If ppgq3(dark) is activated from inactivated status, mark it as
        * uncalibrated and a calibration will be performed.
        */
@@ -1335,6 +1334,11 @@ static int gh3020_activate(FAR struct file *filep,
 #ifdef CONFIG_FACTEST_SENSORS_GH3020
       if (priv->factest_mode == true)
         {
+          /* In factest mode, activate operation will be performed
+           * immediately, where we can change its activated status now.
+           */
+
+          sensor->activated = enable;
           if (enable == true)
             {
               gh3020_rdmode_switch(GH3020_RDMODE_POLLING);
@@ -1360,7 +1364,11 @@ static int gh3020_activate(FAR struct file *filep,
       else
 #endif  /* CONFIG_FACTEST_SENSORS_GH3020 */
         {
-          /* If any PPG channel has been activated, mark it. */
+          /* If any PPG channel has been activated, mark it as activating (
+           * will be activated) or inactivating (will be inactivated). The
+           * activated status will be changed in updating when a poll or
+           * interrupt comes.
+           */
 
           if (priv->activated > 0)
             {
@@ -1368,10 +1376,12 @@ static int gh3020_activate(FAR struct file *filep,
               if (enable == true)
                 {
                   sensor->activating = true;
+                  sensor->inactivating = false;
                 }
               else
                 {
                   sensor->inactivating = true;
+                  sensor->activating = false;
                 }
             }
 
@@ -1380,9 +1390,12 @@ static int gh3020_activate(FAR struct file *filep,
           else
             {
               /* If one want activated a channel. Here "enable" should not be
-               * false since no channel is activated now.
+               * false since no channel is activated now. Since there's no
+               * other activated channel, the activate operation of this
+               * channel is performed here and the activated status changes.
                */
 
+              sensor->activated = enable;
               if (enable == true)
                 {
                   rate = (uint16_t)(GH3020_ONE_SECOND / sensor->interval);
