@@ -98,6 +98,12 @@
 #  define USE_PLL3
 #endif
 
+#ifdef STM32_BOARD_USEHSI
+#ifndef STM32_BOARD_HSIDIV
+#error When HSI is used, you have to define STM32_BOARD_HSIDIV in board/include/board.h
+#endif
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -143,10 +149,6 @@ static inline void rcc_reset(void)
               RCC_CR_CSION | RCC_CR_PLL1ON |
               RCC_CR_PLL2ON | RCC_CR_PLL3ON |
               RCC_CR_HSIDIV_MASK);
-
-  /* Set HSI predivider to default (4, 16MHz) */
-
-  regval |= RCC_CR_HSIDIV_4;
 
   putreg32(regval, STM32_RCC_CR);
 
@@ -600,6 +602,11 @@ void stm32_stdclockconfig(void)
 
   regval  = getreg32(STM32_RCC_CR);
   regval |= RCC_CR_HSION;           /* Enable HSI */
+
+  /* Set HSI predivider to board specific value */
+
+  regval |= STM32_BOARD_HSIDIV;
+
   putreg32(regval, STM32_RCC_CR);
 
   /* Wait until the HSI is ready (or until a timeout elapsed) */
