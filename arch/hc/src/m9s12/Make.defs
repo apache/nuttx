@@ -21,7 +21,7 @@
 HEAD_ASRC = m9s12_vectors.S
 
 CMN_CSRCS  = up_allocateheap.c up_blocktask.c up_copystate.c up_createstack.c
-CMN_CSRCS += up_doirq.c up_exit.c up_idle.c up_initialize.c up_interruptcontext.c
+CMN_CSRCS += up_doirq.c up_exit.c up_idle.c up_initialize.c
 CMN_CSRCS += up_mdelay.c up_modifyreg16.c up_modifyreg32.c up_modifyreg8.c
 CMN_CSRCS += up_puts.c up_releasepending.c up_releasestack.c up_reprioritizertr.c
 CMN_CSRCS += up_stackframe.c up_udelay.c up_unblocktask.c up_usestack.c
