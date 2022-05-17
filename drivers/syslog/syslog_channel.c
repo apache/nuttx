@@ -129,6 +129,43 @@ static struct syslog_channel_s g_default_channel =
 };
 #endif
 
+/* This is a simply sanity check to avoid we have more elements than the
+ * `g_syslog_channel` array can hold
+ */
+
+#ifdef CONFIG_SYSLOG_DEFAULT
+#  define SYSLOG_DEFAULT_AVAILABLE 1
+#else
+#  define SYSLOG_DEFAULT_AVAILABLE 0
+#endif
+
+#ifdef CONFIG_RAMLOG_SYSLOG
+#  define RAMLOG_SYSLOG_AVAILABLE 1
+#else
+#  define RAMLOG_SYSLOG_AVAILABLE 0
+#endif
+
+#ifdef CONFIG_SYSLOG_RPMSG
+#  define SYSLOG_RPMSG_AVAILABLE 1
+#else
+#  define SYSLOG_RPMSG_AVAILABLE 0
+#endif
+
+#ifdef CONFIG_SYSLOG_RTT
+#  define SYSLOG_RTT_AVAILABLE 1
+#else
+#  define SYSLOG_RTT_AVAILABLE 0
+#endif
+
+#define SYSLOG_NCHANNELS (SYSLOG_DEFAULT_AVAILABLE + \
+                          RAMLOG_SYSLOG_AVAILABLE + \
+                          SYSLOG_RPMSG_AVAILABLE + \
+                          SYSLOG_RTT_AVAILABLE)
+
+#if SYSLOG_NCHANNELS > CONFIG_SYSLOG_MAX_CHANNELS
+#  error "Maximum channel number exceeds."
+#endif
+
 /* This is the current syslog channel in use */
 
 FAR struct syslog_channel_s
