@@ -246,6 +246,70 @@ config MPFS_IHC
 	---help---
 		Selects and enables the Inter-Hart-Communication (IHC) slave driver.
 
+config MPFS_IHC_LINUX_ON_HART1
+	int "Linux on hart1"
+	depends on MPFS_IHC
+	default 0
+	range 0 1
+	---help---
+		Set this to 1 if U-boot / Linux is running on hart1
+
+config MPFS_IHC_LINUX_ON_HART2
+	int "Linux on hart2"
+	depends on MPFS_IHC
+	default 0
+	range 0 1
+	---help---
+		Set this to 1 if U-boot / Linux is running on hart2
+
+config MPFS_IHC_LINUX_ON_HART3
+	int "Linux on hart3"
+	depends on MPFS_IHC
+	default 1
+	range 0 1
+	---help---
+		Set this to 1 if U-boot / Linux is running on hart3
+
+config MPFS_IHC_LINUX_ON_HART4
+	int "Linux on hart4"
+	depends on MPFS_IHC
+	default 1
+	range 0 1
+	---help---
+		Set this to 1 if U-boot / Linux is running on hart4
+
+config MPFS_IHC_NUTTX_ON_HART1
+	int "NuttX on hart1"
+	depends on MPFS_IHC
+	default 0
+	range 0 1
+	---help---
+		Set this to 1 if NuttX is running on hart1
+
+config MPFS_IHC_NUTTX_ON_HART2
+	int "NuttX on hart2"
+	depends on MPFS_IHC
+	default 1
+	range 0 1
+	---help---
+		Set this to 1 if NuttX is running on hart2
+
+config MPFS_IHC_NUTTX_ON_HART3
+        int "NuttX on hart3"
+        depends on MPFS_IHC
+        default 0
+	range 0 1
+	---help---
+		Set this to 1 if NuttX is running on hart3
+
+config MPFS_IHC_NUTTX_ON_HART4
+        int "NuttX on hart4"
+        depends on MPFS_IHC
+        default 0
+	range 0 1
+	---help---
+		Set this to 1 if NuttX is running on hart4
+
 config MPFS_ETHMAC
 	bool
 	default n
