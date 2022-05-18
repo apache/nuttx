@@ -57,7 +57,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 #define CW2218_REG_TEMPMAX_DEFAULT_VALUE  0xFF /* Maximum temperature threshold register default value */
-#define CW2218_REG_TEMPMIN_DEFAULT_VALUE  0x01 /* Minimum temperature threshold register default value */
+#define CW2218_REG_TEMPMIN_DEFAULT_VALUE  0x00 /* Minimum temperature threshold register default value */
 #define CW2218_TEMP_ERROR_DEFAULT_VALUE   80   /* default temperature return when error */
 
 /****************************************************************************
@@ -208,6 +208,7 @@ static int cw2218_getreg8(FAR struct cw2218_dev_s *priv, uint8_t regaddr,
         }
       else
         {
+          nxsig_usleep(1);
           baterr("ERROR: i2c_write failed: %d retries:%d\n", err, retries);
         }
     }

@@ -149,6 +149,7 @@ static int wlc_i2c_read(FAR struct stwlc38_dev_s *priv, uint8_t *cmd,
 {
   struct i2c_msg_s msg[2];
   int err;
+  int retries = 0;
   FAR struct i2c_master_s *dev = priv->i2c;
 
 #ifdef DEBUG
@@ -165,10 +166,18 @@ static int wlc_i2c_read(FAR struct stwlc38_dev_s *priv, uint8_t *cmd,
   msg[1].length = read_count;
   msg[1].flags = I2C_M_READ;
 
-  if ((err = I2C_TRANSFER(dev, msg, 2)) < OK)
+  for (retries = 0; retries < ST_IIC_RETRY_NUM; retries++)
     {
-      baterr("[WLC] i2c transfer failed! err: %d\n", err);
-      return err;
+      err = I2C_TRANSFER(dev, msg, 2);
+      if (err >= 0)
+        {
+          break;
+        }
+      else
+        {
+          nxsig_usleep(1);
+          baterr("ERROR: i2c transfer failed! err: %d retries:%d\n", err, retries);
+        }
     }
 
 #ifdef DEBUG

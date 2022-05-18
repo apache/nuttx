@@ -223,6 +223,7 @@ static int sc8551_getreg8(FAR struct sc8551_dev_s *priv, uint8_t regaddr,
         }
       else
         {
+          nxsig_usleep(1);
           baterr("ERROR: i2c transfer failed! err: %d retries:%d\n", err,retries);
         }
     }

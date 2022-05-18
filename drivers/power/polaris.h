@@ -115,5 +115,7 @@ struct rx_int_state_s
 #define WLC_SUPPORT_QC_3_0        0x1a
 #define WLC_GEN_TX                0x11
 
+#define ST_IIC_RETRY_NUM          3
+
 #endif /* __POLARIS_H */
 

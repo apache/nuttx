@@ -237,6 +237,7 @@ static int da9168_getreg8(FAR struct da9168_dev_s *priv, uint8_t regaddr,
         }
       else
         {
+          nxsig_usleep(1);
           baterr("ERROR: i2c transfer failed! err: %d retries:%d\n", err,retries);
         }
     }
