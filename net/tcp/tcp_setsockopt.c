@@ -129,11 +129,8 @@ int tcp_setsockopt(FAR struct socket *psock, int option,
 
                 /* Reset timer */
 
-                if (conn->keepalive)
-                  {
-                    conn->keeptimer   = conn->keepidle;
-                    conn->keepretries = 0;
-                  }
+                conn->keeptimer   = keepalive ? conn->keepidle : 0;
+                conn->keepretries = 0;
               }
           }
         break;
