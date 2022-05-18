@@ -134,7 +134,9 @@ int tlsr8278_bringup(void)
 #endif /* CONFIG_TLSR82_PWM */
 
 #ifdef CONFIG_TLSR82_ADC
-  ret = tlsr82_adc_init("/dev/adc0", 0);
+
+#ifdef CONFIG_TLSR82_ADC_CHAN0
+  ret = tlsr82_adc_init("/dev/adc0", ADC_CHAN_0);
   if (ret < 0)
     {
       syslog(LOG_ERR,
@@ -142,6 +144,41 @@ int tlsr8278_bringup(void)
              ret);
       return ret;
     }
+#endif
+
+#ifdef CONFIG_TLSR82_ADC_CHAN1
+  ret = tlsr82_adc_init("/dev/adc1", ADC_CHAN_1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize adc1 driver: %d\n",
+             ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_TLSR82_ADC_CHAN2
+  ret = tlsr82_adc_init("/dev/adc2", ADC_CHAN_2);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize adc2 driver: %d\n",
+             ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_TLSR82_ADC_VBAT
+  ret = tlsr82_adc_init("/dev/adcvbat", ADC_CHAN_VBAT);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize adcbat driver: %d\n",
+             ret);
+      return ret;
+    }
+#endif
+
 #endif /* CONFIG_TLSR82_ADC */
 
 #ifdef CONFIG_TLSR82_FLASH
