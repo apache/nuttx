@@ -121,6 +121,20 @@ struct tlsr82_timer_ops_s
 };
 
 /****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+static inline uint32_t tlsr82_time(void)
+{
+  return SYSTIMER_TICK_REG;
+}
+
+static inline bool tlsr82_time_exceed(uint32_t start, uint32_t us)
+{
+  return ((uint32_t)(tlsr82_time() - start) > us * 16);
+}
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 

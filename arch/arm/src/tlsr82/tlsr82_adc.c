@@ -37,6 +37,9 @@
 #include "tlsr82_adc.h"
 #include "tlsr82_gpio.h"
 #include "tlsr82_analog.h"
+#include "tlsr82_flash.h"
+#include "tlsr82_timer.h"
+#include "hardware/tlsr82_dfifo.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -52,6 +55,23 @@
 #  define MAX(a, b) ((a) > (b) ? (a) : (b))
 #endif
 
+/* Default reference voltage 1175 mV */
+
+#define ADC_DEFAULT_VREF     1175
+
+#define ADC_FILT_NUM         CONFIG_TLSR82_ADC_FILT_NUM
+
+#if (ADC_FILT_NUM & 0x3) != 0
+#  error "The filter number must be multiple of 4 !"
+#endif
+
+/* ADC Channel type definition */
+
+#define ADC_CHAN_TYPE_NONE   0
+#define ADC_CHAN_TYPE_BASE   1
+#define ADC_CHAN_TYPE_VBAT   2
+#define ADC_CHAN_TYPE_TEMP   3
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -60,22 +80,26 @@
 
 struct adc_info_s
 {
-  uint32_t   vref;        /* The reference voltage (mV) */
-  bool       calied;      /* Calibration finished or not */
-  bool       registered;  /* Have registered a adc device */
-  bool       configed;    /* Adc has been configured or not */
-  const bool cali;        /* Calibration enable/disable, default enable */
+  uint32_t   base_vref;    /* The reference voltage (mV) or gain for base/gpio mode */
+  int        base_off;     /* The offset for base/gpio mode two-point calibration */
+  uint32_t   vbat_vref;    /* The reference voltage (mV) for vbat mode */
+  bool       base_two;     /* Base/Gpio mode two-point calibration or not */
+  bool       registered;   /* Have registered a adc device */
+  bool       configed;     /* Adc has been configured or not */
+  uint8_t    channel;      /* Adc current channel */
+  uint8_t    channeltype;  /* Adc current channel type */
 };
 
 /* ADC Private Data */
 
 struct adc_chan_s
 {
-  uint32_t                     ref;     /* Reference count */
-  struct adc_info_s           *info;    /* Adc information */
-  const uint8_t                channel; /* Channel number */
-  const uint32_t               pinset;  /* GPIO pin number */
-  const struct adc_callback_s *cb;      /* Upper driver callback */
+  uint32_t                     ref;          /* Reference count */
+  struct adc_info_s           *info;         /* Adc information */
+  const uint8_t                channeltype;  /* Channel number */
+  const uint8_t                channel;      /* Channel number */
+  const uint32_t               pinset;       /* GPIO pin number */
+  const struct adc_callback_s *cb;           /* Upper driver callback */
 };
 
 /****************************************************************************
@@ -85,8 +109,7 @@ struct adc_chan_s
 static void tlsr82_adc_reset(void);
 static void tlsr82_adc_power_ctrl(bool enable);
 static void tlsr82_adc_clk_ctrl(bool enable);
-static void tlsr82_adc_set_sampleclk(uint32_t clk);
-static void tlsr82_adc_config(uint32_t cfg);
+static void tlsr82_adc_config(struct adc_chan_s *priv);
 static void tlsr82_adc_pin_config(uint32_t pinset);
 static void tlsr82_adc_chan_config(uint32_t pinset);
 
@@ -104,14 +127,18 @@ static void adc_read_work(struct adc_dev_s *dev);
  * Private Data
  ****************************************************************************/
 
-/* ADC information */
+/* ADC module information */
 
-static struct adc_info_s g_adc_chan0_info =
+static struct adc_info_s g_adc_module0_info =
 {
-  .vref       = 1175,  /* Default reference voltage is 1175mV (1.2V) */
-  .registered = false,
-  .configed   = false,
-  .cali       = true,  /* Default calibration switch is enable */
+  .base_vref    = ADC_DEFAULT_VREF,
+  .base_off     = 0,
+  .vbat_vref    = ADC_DEFAULT_VREF,
+  .base_two     = false,
+  .registered   = false,
+  .configed     = false,
+  .channel      = ADC_CHAN_NONE,
+  .channeltype  = ADC_CHAN_TYPE_NONE,
 };
 
 /* ADC interface operations */
@@ -126,20 +153,150 @@ static const struct adc_ops_s g_adcops =
   .ao_ioctl       = adc_ioctl,
 };
 
+/* ADC normal channel, for gpio sample */
+
+#ifdef CONFIG_TLSR82_ADC_CHAN0
 static struct adc_chan_s g_adc_chan0 =
 {
-  .info    = &g_adc_chan0_info,
-  .channel = 0,
-  .pinset  = GPIO_PIN_PB2,
+  .info        = &g_adc_module0_info,
+  .channeltype = ADC_CHAN_TYPE_BASE,
+  .channel     = ADC_CHAN_0,
+  .pinset      = GPIO_PIN_PB2,
 };
 
 static struct adc_dev_s g_adc_chan0_dev =
 {
-  .ad_ops      = &g_adcops,
-  .ad_priv     = &g_adc_chan0,
+  .ad_ops  = &g_adcops,
+  .ad_priv = &g_adc_chan0,
+};
+#endif
+
+#ifdef CONFIG_TLSR82_ADC_CHAN1
+static struct adc_chan_s g_adc_chan1 =
+{
+  .info        = &g_adc_module0_info,
+  .channeltype = ADC_CHAN_TYPE_BASE,
+  .channel     = ADC_CHAN_1,
+  .pinset      = GPIO_PIN_PB3,
 };
 
+static struct adc_dev_s g_adc_chan1_dev =
+{
+  .ad_ops  = &g_adcops,
+  .ad_priv = &g_adc_chan1,
+};
+#endif
+
+#ifdef CONFIG_TLSR82_ADC_CHAN2
+static struct adc_chan_s g_adc_chan2 =
+{
+  .info        = &g_adc_module0_info,
+  .channeltype = ADC_CHAN_TYPE_BASE,
+  .channel     = ADC_CHAN_2,
+  .pinset      = GPIO_PIN_PB5,
+};
+
+static struct adc_dev_s g_adc_chan2_dev =
+{
+  .ad_ops  = &g_adcops,
+  .ad_priv = &g_adc_chan2,
+};
+#endif
+
+/* ADC Bat channel, for chip battery sample */
+
+#ifdef CONFIG_TLSR82_ADC_VBAT
+static struct adc_chan_s g_adc_chanbat =
+{
+  .info        = &g_adc_module0_info,
+  .channeltype = ADC_CHAN_TYPE_VBAT,
+  .channel     = ADC_CHAN_VBAT,
+  .pinset      = GPIO_INVLD_CFG,
+};
+
+static struct adc_dev_s g_adc_chanbat_dev =
+{
+  .ad_ops  = &g_adcops,
+  .ad_priv = &g_adc_chanbat,
+};
+#endif
+
 static sem_t g_sem_excl = SEM_INITIALIZER(1);
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: tlsr82_adc_dfifo_enable
+ *
+ * Description:
+ *   Enable the adc dfifo/dfifo2, the dfifo2 will copy the adc sample data
+ *   to the address in DFIFO_ADC_ADDR_REG.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void tlsr82_adc_dfifo_enable(void)
+{
+  DFIFO_MODE_REG |= DFIFO_MODE_DFIFO2_IN;
+}
+
+/****************************************************************************
+ * Name: tlsr82_adc_dfifo_disable
+ *
+ * Description:
+ *   Disable the adc dfifo/dfifo2
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void tlsr82_adc_dfifo_disable(void)
+{
+  DFIFO_MODE_REG &= ~DFIFO_MODE_DFIFO2_IN;
+}
+
+/****************************************************************************
+ * Name: tlsr82_adc_dfifo_config
+ *
+ * Description:
+ *   Config the data buffer, so DFIFO2 can copy sample value to buffer
+ *
+ * Input Parameters:
+ *   buffer - the buffer to store the adc sample data
+ *   size   - the buffer size, this size must be multiple of 4
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void tlsr82_adc_dfifo_config(uint8_t *buffer, size_t size)
+{
+  /* Config the data buffer, so DFIFO2 can copy sample value to buffer
+   * DFIFO buffer address : only need low 16 bit, beacause the high 16 bit
+   *                        must be 0x0084
+   * DFIFO buffer size    : DFIFO_ADC_SIZE_REG = n ==> 4 * (n + 1) size
+   *                        DFIFO_ADC_SIZE_REG = size / 4 - 1
+   */
+
+  DFIFO_ADC_ADDR_REG = (uint16_t)((uint32_t)buffer & 0xffff);
+  DFIFO_ADC_SIZE_REG = (size >> 2) - 1;
+
+  /* Clear the dfifo write pointer */
+
+  DFIFO2_WPTR_REG    = 0;
+}
 
 /****************************************************************************
  * Private Functions
@@ -224,19 +381,66 @@ static void tlsr82_adc_clk_ctrl(bool enable)
  * Name: tlsr82_adc_config
  *
  * Description:
- *   Config the adc, after this, the adc can start sample.
+ *   Config the adc to different mode, after this, the adc can start sample
+ *   the voltage in the gpio pin (Base mode) or the chip volatge (Vbat
+ *   channel mode).
+ *   Five configuration conditions:
+ *   1. Same channel, do not need do not need re-configuration;
+ *   2. adc module has not been configured, must configure it;
+ *   3. adc module has been configured, but current channel and configured
+ *      channel are both vbat channel, do not need re-configuration;
+ *   4. adc module has been configured, but current channel and configured
+ *      channel are both base channel, only configure the channel;
+ *   5. others, need re-configuration.
  *
  * Input Parameters:
- *   cfg  -  adc pinset
+ *   priv  - adc channel handler
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void tlsr82_adc_config(uint32_t cfg)
+static void tlsr82_adc_config(struct adc_chan_s *priv)
 {
-  /* Follow the datasheet and sdk adc_vbat_init() to config the adc */
+  uint8_t channel     = priv->info->channel;
+  uint8_t channeltype = priv->info->channeltype;
+
+  ainfo("Current channel=%u, channeltype=%u\n", channel, channeltype);
+  ainfo("Input   channel=%u, channeltype=%u\n",
+        priv->channel, priv->channeltype);
+
+  DEBUGASSERT(priv != NULL && priv->channel != ADC_CHAN_NONE);
+
+  /* If current channel type is same as the priv channel type, do not
+   * need re-configure all the register.
+   */
+
+  if (channeltype == priv->channeltype)
+    {
+      if (channeltype == ADC_CHAN_TYPE_BASE && channel != priv->channel)
+        {
+          /* The channel type is base and the input channel (GPIO pin) is
+           * different, only need re-configure the adc input channel.
+           */
+
+          tlsr82_adc_chan_config(priv->pinset);
+          priv->info->channel = priv->channel;
+        }
+
+      return;
+    }
+
+  ainfo("Start config\n");
+
+  /* Follow the sdk code adc_base_init() and adc_vbat_channel_init()
+   * to config the adc, VBAT_CHAN mode is samiler to BASE mode, the
+   * differences are:
+   * 1. adc divider : VBAT_CHAN mode, 1/3
+   *                  BASE mode, 1
+   * 2. pre-scale   : VBAT_CHAN mode, 1
+   *                  BASE mode, 1/8
+   */
 
   /* Enable misc chanel and set totaol length for sampling state be 2 */
 
@@ -253,14 +457,34 @@ static void tlsr82_adc_config(uint32_t cfg)
   tlsr82_analog_write(ADC_SAMP1_REG, 240 & 0xff);
   tlsr82_analog_write(ADC_SAMP3_REG, ((240 >> 8) << 6) | (10 & 0xff));
 
-  /* Divider select OFF */
+  /* Divider select 1/3 or OFF */
 
-  tlsr82_analog_modify(ADC_DIVIDER_REG, ADC_DIVIDER_SEL_MASK,
-                       ADC_DIVIDER_SEL_OFF);
+#ifdef CONFIG_TLSR82_ADC_VBAT
+  if (priv->channeltype == ADC_CHAN_TYPE_VBAT)
+    {
+      tlsr82_analog_modify(ADC_DIVIDER_REG, ADC_DIVIDER_SEL_MASK,
+                           ADC_DIVIDER_SEL_1F3);
+    }
+  else
+#endif
+    {
+      tlsr82_analog_modify(ADC_DIVIDER_REG, ADC_DIVIDER_SEL_MASK,
+                           ADC_DIVIDER_SEL_OFF);
+    }
 
   /* Set the adc differential channel */
 
-  tlsr82_adc_chan_config(cfg);
+#ifdef CONFIG_TLSR82_ADC_VBAT
+  if (priv->channeltype == ADC_CHAN_TYPE_VBAT)
+    {
+      tlsr82_analog_write(ADC_CHAN_REG, ADC_CHAN_POS_VBAT |
+                                        ADC_CHAN_NEG_GND);
+    }
+  else
+#endif
+    {
+      tlsr82_adc_chan_config(priv->pinset);
+    }
 
   /* Enable the Different input mode */
 
@@ -286,8 +510,23 @@ static void tlsr82_adc_config(uint32_t cfg)
    * When pre-scaling is 1/8, the ADC_DIVIDER_REG_0xf9 <4> must be 1
    */
 
-  tlsr82_analog_modify(ADC_SCALE_REG, ADC_SCALE_MASK, ADC_SCALE_1F8);
-  tlsr82_analog_modify(ADC_DIVIDER_REG, 0, (0x1 << 4));
+#ifdef CONFIG_TLSR82_ADC_VBAT
+  if (priv->channeltype == ADC_CHAN_TYPE_VBAT)
+    {
+      tlsr82_analog_modify(ADC_SCALE_REG, ADC_SCALE_MASK, ADC_SCALE_1);
+      tlsr82_analog_modify(ADC_DIVIDER_REG, BIT_RNG(4, 5), 0);
+    }
+  else
+#endif
+    {
+      tlsr82_analog_modify(ADC_SCALE_REG, ADC_SCALE_MASK, ADC_SCALE_1F8);
+      tlsr82_analog_modify(ADC_DIVIDER_REG, BIT(4), BIT(4));
+    }
+
+  /* Set current channel and current type */
+
+  priv->info->channel     = priv->channel;
+  priv->info->channeltype = priv->channeltype;
 }
 
 /****************************************************************************
@@ -311,17 +550,13 @@ static void tlsr82_adc_pin_config(uint32_t pinset)
 
   GPIO_SET_AS_GPIO(GPIO_GET(GROUP, cfg), GPIO_GET(PIN, cfg));
 
-  /* Vbat mode pin config, disable input, enable output, output set high */
+  /* Base mode pin config, diable input, disable output, output set low */
 
   tlsr82_gpio_input_ctrl(cfg, false);
 
-  tlsr82_gpio_output_ctrl(cfg, true);
+  tlsr82_gpio_output_ctrl(cfg, false);
 
-  tlsr82_gpiowrite(cfg, true);
-
-  /* Base mode pin config, diable input, disable output, output set low */
-
-  /* nothing */
+  tlsr82_gpiowrite(cfg, false);
 }
 
 /****************************************************************************
@@ -364,53 +599,16 @@ static void tlsr82_adc_chan_config(uint32_t pinset)
       return;
     }
 
+  /* Config gpio */
+
+  tlsr82_adc_pin_config(pinset);
+
   /* Config the positive and negative input, here, the negative input
    * is always configured to GND (0x0f).
    */
 
-  tlsr82_analog_write(ADC_CHAN_REG, (pinadc << 4) | 0x0f);
-}
-
-/****************************************************************************
- * Name: read_efuse
- *
- * Description:
- *   Read Efuse data.
- *
- * Input Parameters:
- *   addr   - register address
- *   b_off  - bit offset
- *   b_size - bit size
- *
- * Returned Value:
- *  Efuse data.
- *
- ****************************************************************************/
-
-static uint32_t read_efuse(uint32_t addr, uint32_t b_off, uint32_t b_size)
-{
-  uint32_t data;
-  uint32_t regval;
-  uint32_t shift = 32 - b_size;
-  uint32_t mask = UINT32_MAX >> shift;
-  uint32_t res = b_off % 32;
-  uint32_t regaddr = addr + (b_off / 32 * 4);
-
-  regval = getreg32(regaddr);
-  data = regval >> res;
-  if (res <= shift)
-    {
-      data &= mask;
-    }
-  else
-    {
-      shift = 32 - res;
-
-      regval = getreg32(regaddr + 4);
-      data |= (regval & (mask >> shift)) << shift;
-    }
-
-  return data;
+  tlsr82_analog_write(ADC_CHAN_REG, (pinadc << ADC_CHAN_POS_SHIFT) |
+                                    ADC_CHAN_NEG_GND);
 }
 
 /****************************************************************************
@@ -490,49 +688,79 @@ static void adc_dump(const char *msg)
 
 static uint16_t adc_read(void)
 {
-  volatile uint8_t adc_misc_data_l;
-  volatile uint8_t adc_misc_data_h;
-  volatile uint16_t adc_misc_data;
+  volatile uint16_t data_buf[ADC_FILT_NUM];
+  uint16_t tmp;
+  uint16_t max = 0;
+  uint16_t min = UINT16_MAX;
+  uint32_t sum = 0;
+  uint32_t currtime;
+  int i;
 
-  /* Stop the adc sample */
+  /* Clear the data buffer and config */
 
-  tlsr82_analog_modify(ADC_CTRL1_REG, ADC_CTRL1_SAMP_MASK,
-                       ADC_CTRL1_SAMP_OFF);
+  memset((void *)data_buf, 0, ADC_FILT_NUM);
 
-  /* Get adc sample value */
+  tlsr82_adc_dfifo_config((uint8_t *)data_buf, ADC_FILT_NUM);
 
-  adc_misc_data_l = tlsr82_analog_read(ADC_DATAL_REG);
-  adc_misc_data_h = tlsr82_analog_read(ADC_DATAH_REG);
+  /* Enable DFIFO 2 */
 
-  /* Restart the adc sample */
+  tlsr82_adc_dfifo_enable();
 
-  tlsr82_analog_modify(ADC_CTRL1_REG, ADC_CTRL1_SAMP_MASK,
-                       ADC_CTRL1_SAMP_ON);
+  /* Wait at least 2 sample cycle, frequency = 96k, T = 10.4us */
 
-  /* Combine the adc sample value and process */
+  currtime = tlsr82_time();
+  while (!tlsr82_time_exceed(currtime, 25));
 
-  adc_misc_data = (adc_misc_data_h << 8 | adc_misc_data_l);
-
-  if (adc_misc_data & BIT(13))
+  for (i = 0; i < ADC_FILT_NUM; i++)
     {
+      while (data_buf[i] == 0 && !tlsr82_time_exceed(currtime, 25));
+      currtime = tlsr82_time();
+
       /* Bit13 is the sign bit, bit13 = 1 indicates the data
-       * is negative.
+       * is negative but we only get the low 13bit data.
        */
 
-      adc_misc_data = 0;
-    }
-  else
-    {
-      /* Only get the low 13bit data */
+      tmp = data_buf[i];
+      if (tmp & BIT(13))
+        {
+          tmp = 0;
+        }
+      else
+        {
+          tmp &= 0x1fff;
+        }
 
-      adc_misc_data &= 0x1fff;
+      sum += tmp;
+
+      if (tmp > max)
+        {
+          max = tmp;
+        }
+
+      if (tmp < min)
+        {
+          min = tmp;
+        }
+
+      ainfo("data_buf[%d]=%u\n", i, tmp);
     }
 
-  return adc_misc_data;
+  /* Disable DFIFO 2 */
+
+  tlsr82_adc_dfifo_disable();
+
+  ainfo("sum=%lu, max=%u, min=%u, filt_num=%d\n",
+        sum, max, min, ADC_FILT_NUM);
+
+  /* Remove max, min value and get the average value */
+
+  tmp = (sum - min - max) / (ADC_FILT_NUM - 2);
+
+  return tmp;
 }
 
 /****************************************************************************
- * Name: adc_calibrate
+ * Name: tlsr82_adc_calibrate
  *
  * Description:
  *   ADC calibration.
@@ -545,85 +773,80 @@ static uint16_t adc_read(void)
  *
  ****************************************************************************/
 
-#if 0
-
-static void adc_calibrate(void)
+#ifdef CONFIG_TLSR82_ADC_CALI
+static void tlsr82_adc_calibrate(struct adc_chan_s *priv)
 {
-  uint16_t cali_val;
-  uint16_t adc;
-  uint16_t adc_max = 0;
-  uint16_t adc_min = UINT16_MAX;
-  uint32_t adc_sum = 0;
-  uint32_t regval;
+  uint8_t cali_data[7];
 
-  regval = read_efuse(ADC_CAL_BASE_REG, ADC_CAL_VER_OFF, ADC_CAL_VER_LEN);
-  if (regval == 1)
+  uint32_t base_vref;
+  uint32_t vbat_vref;
+
+  memset((void *)cali_data, 0, sizeof(cali_data));
+  tlsr82_flash_read_data(CONFIG_TLSR82_ADC_CALI_PARA_ADDR, cali_data,
+                         sizeof(cali_data));
+
+  ainfo("Calibration data: 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x\n",
+        cali_data[0], cali_data[1], cali_data[2], cali_data[3],
+        cali_data[4], cali_data[5], cali_data[6]);
+
+  /* Calibration parameters format follow the telink sdk code */
+
+  /* Base/gpio mode calibration parameters read */
+
+  if (cali_data[4] <= 0x7f && cali_data[5] != 0xff &&
+      cali_data[6] != 0xff)
     {
-      ainfo("Calibrate based on efuse data\n");
+      /* Two-point calibration exist, the base_vref as the gain to use
+       * Method of calculating two-point gpio calibration Flash_gain
+       * and Flash_offset:
+       * gain   = (data[6] << 8) + data[5] + 1000 mv
+       * offset = data[4] - 20 mv
+       */
 
-      regval = read_efuse(ADC_CAL_BASE_REG, ADC_CAL_DATA_OFF,
-                          ADC_CAL_DATA_LEN);
-      cali_val = regval + ADC_CAL_DATA_COMP;
+      priv->info->base_vref = (cali_data[6] << 8) + cali_data[5] + 1000;
+      priv->info->base_off  = (int)cali_data[4] - 20;
+      priv->info->base_two  = true;
     }
   else
     {
-      ainfo("Calibrate based on GND voltage\n");
+      /* One-point calibration exist
+       * Method of calculating calibration Flash_gpio_vref value:
+       * vref = 1175 + data[0] - 255 + data[1] mV
+       *      = 920 + data[0] + data[1] mV
+       */
 
-      /* Enable Vdef */
-
-      rom_i2c_writereg_mask(I2C_ADC, I2C_ADC_HOSTID,
-                            I2C_ADC1_DEF, I2C_ADC1_DEF_MSB,
-                            I2C_ADC1_DEF_LSB, 1);
-
-      /* Start sampling */
-
-      adc_samplecfg(ADC_CAL_CHANNEL);
-
-      /* Enable internal connect GND (for calibration). */
-
-      rom_i2c_writereg_mask(I2C_ADC, I2C_ADC_HOSTID,
-                            I2C_ADC1_ENCAL_GND, I2C_ADC1_ENCAL_GND_MSB,
-                            I2C_ADC1_ENCAL_GND_LSB, 1);
-
-      for (int i = 1; i < ADC_CAL_CNT_MAX ; i++)
+      base_vref = 920 + cali_data[0] + cali_data[1];
+      if (base_vref >= 1047 && base_vref <= 1302)
         {
-          adc_set_calibration(0);
-          adc = adc_read();
-
-          adc_sum += adc;
-          adc_max  = MAX(adc, adc_max);
-          adc_min  = MIN(adc, adc_min);
+          priv->info->base_vref = base_vref;
         }
 
-      cali_val = (adc_sum - adc_max - adc_min) / (ADC_CAL_CNT_MAX - 2);
-
-      /* Disable internal connect GND (for calibration). */
-
-      rom_i2c_writereg_mask(I2C_ADC, I2C_ADC_HOSTID,
-                            I2C_ADC1_ENCAL_GND,
-                            I2C_ADC1_ENCAL_GND_MSB,
-                            I2C_ADC1_ENCAL_GND_LSB, 0);
+      priv->info->base_two = false;
     }
 
-  ainfo("calibration value: %" PRIu16 "\n", cali_val);
+  /* Vbat mode calibration parameters read */
 
-  /* Set final calibration parameters */
-
-  adc_set_calibration(cali_val);
-
-  /* Set calibration digital parameters */
-
-  regval = read_efuse(ADC_CAL_BASE_REG, ADC_CAL_VOL_OFF, ADC_CAL_VOL_LEN);
-  if (regval & BIT(ADC_CAL_VOL_LEN - 1))
+  if (cali_data[2] != 0xff || cali_data[3] != 0xff)
     {
-      g_cal_digit = 2000 - (regval & ~(BIT(ADC_CAL_VOL_LEN - 1)));
+      /* One-point calibration exist
+       * Method of calculating calibration Flash_vbat_vref value:
+       * vref = 1175 + data[2] - 255 + data[3] mV
+       *      = 920 + data[2] + data[3] mV
+       */
+
+      vbat_vref = 920 + cali_data[2] + cali_data[3];
+      if (vbat_vref >= 1047 && vbat_vref <= 1302)
+        {
+          priv->info->vbat_vref = vbat_vref;
+        }
     }
-  else
-    {
-      g_cal_digit = 2000 + regval;
-    }
+
+    ainfo("Calibration paramters:\n");
+    ainfo("  base two-point: gain=%d, offset=%d\n",
+          priv->info->base_vref, priv->info->base_off);
+    ainfo("  base one-point: vref=%lu\n", priv->info->base_vref);
+    ainfo("  vbat one-point: vref=%lu\n", priv->info->vbat_vref);
 }
-
 #endif
 
 /****************************************************************************
@@ -654,7 +877,9 @@ static void adc_read_work(struct adc_dev_s *dev)
       return;
     }
 
-  tlsr82_adc_chan_config(priv->pinset);
+  /* Config the adc */
+
+  tlsr82_adc_config(priv);
 
   /* Dump adc register for debug */
 
@@ -667,9 +892,27 @@ static void adc_read_work(struct adc_dev_s *dev)
    * negative input be gnd, so the actual adc resolution is 13bit.
    */
 
-  adc = (value * priv->info->vref * 8) >> 13;
+#ifdef CONFIG_TLSR82_ADC_VBAT
+  if (priv->channeltype == ADC_CHAN_TYPE_VBAT)
+    {
+      /* Vbat channel mode, divider = 1/3, scale = 1 ==> factor = 3 */
 
-  /* Calibration */
+      adc = (value * priv->info->vbat_vref * 3) >> 13;
+    }
+  else
+#endif
+    {
+      /* Base/gpio mode, divider = 1, scale = 1/8 ==> factor = 8 */
+
+      adc = (value * priv->info->base_vref * 8) >> 13;
+
+      if (priv->info->base_two)
+        {
+          adc += priv->info->base_off;
+        }
+    }
+
+  /* Put adc value to the adc buffer */
 
   priv->cb->au_receive(dev, priv->channel, adc);
 
@@ -793,11 +1036,18 @@ static int adc_setup(struct adc_dev_s *dev)
 
   tlsr82_adc_clk_ctrl(true);
 
-  /* Config ADC hardware (Calibration and gpio) */
+  /* Read the calibration parameters */
 
-  ainfo("pin: 0x%" PRIx32 "\n", priv->pinset);
+#ifdef CONFIG_TLSR82_ADC_CALI
+  tlsr82_adc_calibrate(priv);
+#endif
 
-  tlsr82_adc_config(priv->pinset);
+  /* Config ADC hardware */
+
+  ainfo("pin: 0x%" PRIx32 ", channel: %" PRIu8 "\n",
+        priv->pinset, priv->channel);
+
+  tlsr82_adc_config(priv);
 
   /* The ADC device is ready */
 
@@ -944,9 +1194,29 @@ int tlsr82_adc_init(const char *devpath, int miror)
 
   switch (miror)
     {
-      case 0:
+#ifdef CONFIG_TLSR82_ADC_CHAN0
+      case ADC_CHAN_0:
         dev = &g_adc_chan0_dev;
         break;
+#endif
+
+#ifdef CONFIG_TLSR82_ADC_CHAN1
+      case ADC_CHAN_1:
+        dev = &g_adc_chan1_dev;
+        break;
+#endif
+
+#ifdef CONFIG_TLSR82_ADC_CHAN2
+      case ADC_CHAN_2:
+        dev = &g_adc_chan2_dev;
+        break;
+#endif
+
+#ifdef CONFIG_TLSR82_ADC_VBAT
+      case ADC_CHAN_VBAT:
+        dev = &g_adc_chanbat_dev;
+        break;
+#endif
 
       default:
         {

@@ -314,6 +314,50 @@ menuconfig TLSR82_ADC
 	bool "ADC Configuration"
 	default n
 
+if TLSR82_ADC
+
+config TLSR82_ADC_CALI
+	bool "TLSR82 Adc calibration enable"
+	default n
+	---help---
+		When enable the adc calibration, adc driver will read the calibration
+		parameters stored in the falsh during initialization and use these
+		parameters to calibrate the sample value.
+
+config TLSR82_ADC_CALI_PARA_ADDR
+	hex
+	default 0x3fff8 if TLSR82_ADC_CALI
+	---help---
+		This is the adc calibration parameters address, this address must be
+		equal to the address defined in production tools.
+
+config TLSR82_ADC_CHAN0
+  bool "TLSR82 Adc channel 0 enable"
+  default n
+
+config TLSR82_ADC_CHAN1
+  bool "TLSR82 Adc channel 1 enable"
+  default n
+
+config TLSR82_ADC_CHAN2
+  bool "TLSR82 Adc channel 2 enable"
+  default n
+
+config TLSR82_ADC_VBAT
+  bool "TLSR82 Adc channel Vbat enable"
+  default n
+
+config TLSR82_ADC_FILT_NUM
+	int "TLSR82 Adc filter average number"
+	default 4
+	---help---
+		This number determines the average number during sampling, driver will
+		remove max and min sample values and calculate the average of the
+		remaining values as the last sample value.
+		Note: This number must be multiple of 4.
+
+endif
+
 menuconfig TLSR82_LPCOMP
 	bool "LPCOMP Configuration"
 	default n

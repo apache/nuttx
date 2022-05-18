@@ -62,6 +62,46 @@
 #define ADC_VREF_1P2V                      (0x2 << ADC_VREF_SHIFT)
 #define ADC_VREF_RSVD2                     (0x3 << ADC_VREF_SHIFT)
 
+/* ADC analog input positive and negative channel definition */
+
+#define ADC_CHAN_POS_SHIFT                 4
+#define ADC_CHAN_POS_MASK                  (0xf << ADC_CHAN_POS_SHIFT)
+#define ADC_CHAN_POS_NOINPUT               (0  << ADC_CHAN_POS_SHIFT)
+#define ADC_CHAN_POS_B0                    (1  << ADC_CHAN_POS_SHIFT)
+#define ADC_CHAN_POS_B1                    (2  << ADC_CHAN_POS_SHIFT)
+#define ADC_CHAN_POS_B2                    (3  << ADC_CHAN_POS_SHIFT)
+#define ADC_CHAN_POS_B3                    (4  << ADC_CHAN_POS_SHIFT)
+#define ADC_CHAN_POS_B4                    (5  << ADC_CHAN_POS_SHIFT)
+#define ADC_CHAN_POS_B5                    (6  << ADC_CHAN_POS_SHIFT)
+#define ADC_CHAN_POS_B6                    (7  << ADC_CHAN_POS_SHIFT)
+#define ADC_CHAN_POS_B7                    (8  << ADC_CHAN_POS_SHIFT)
+#define ADC_CHAN_POS_C4                    (9  << ADC_CHAN_POS_SHIFT)
+#define ADC_CHAN_POS_C5                    (10 << ADC_CHAN_POS_SHIFT)
+#define ADC_CHAN_POS_PGA0                  (11 << ADC_CHAN_POS_SHIFT)
+#define ADC_CHAN_POS_PGA1                  (12 << ADC_CHAN_POS_SHIFT)
+#define ADC_CHAN_POS_TEMSENSOR             (13 << ADC_CHAN_POS_SHIFT)
+#define ADC_CHAN_POS_TEMSENSOR_EE          (14 << ADC_CHAN_POS_SHIFT)
+#define ADC_CHAN_POS_VBAT                  (15 << ADC_CHAN_POS_SHIFT)
+
+#define ADC_CHAN_NEG_SHIFT                 0
+#define ADC_CHAN_NEG_MASK                  (0xf << ADC_CHAN_NEG_SHIFT)
+#define ADC_CHAN_NEG_NOINPUT               (0  << ADC_CHAN_NEG_SHIFT)
+#define ADC_CHAN_NEG_B0                    (1  << ADC_CHAN_NEG_SHIFT)
+#define ADC_CHAN_NEG_B1                    (2  << ADC_CHAN_NEG_SHIFT)
+#define ADC_CHAN_NEG_B2                    (3  << ADC_CHAN_NEG_SHIFT)
+#define ADC_CHAN_NEG_B3                    (4  << ADC_CHAN_NEG_SHIFT)
+#define ADC_CHAN_NEG_B4                    (5  << ADC_CHAN_NEG_SHIFT)
+#define ADC_CHAN_NEG_B5                    (6  << ADC_CHAN_NEG_SHIFT)
+#define ADC_CHAN_NEG_B6                    (7  << ADC_CHAN_NEG_SHIFT)
+#define ADC_CHAN_NEG_B7                    (8  << ADC_CHAN_NEG_SHIFT)
+#define ADC_CHAN_NEG_C4                    (9  << ADC_CHAN_NEG_SHIFT)
+#define ADC_CHAN_NEG_C5                    (10 << ADC_CHAN_NEG_SHIFT)
+#define ADC_CHAN_NEG_PGA0                  (11 << ADC_CHAN_NEG_SHIFT)
+#define ADC_CHAN_NEG_PGA1                  (12 << ADC_CHAN_NEG_SHIFT)
+#define ADC_CHAN_NEG_TEMSENSOR             (13 << ADC_CHAN_NEG_SHIFT)
+#define ADC_CHAN_NEG_TEMSENSOR_EE          (14 << ADC_CHAN_NEG_SHIFT)
+#define ADC_CHAN_NEG_GND                   (15 << ADC_CHAN_NEG_SHIFT)
+
 /* ADC Mode, Resolution definition */
 
 #define ADC_MODE_RES_SHIFT                 0
