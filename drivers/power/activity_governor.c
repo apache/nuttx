@@ -569,8 +569,10 @@ static void governor_timer(int domain)
 
   if (state < PM_SLEEP && !pdom->stay[pdom->state])
     {
-      int delay = pmtick[state] + pdomstate->btime - clock_systime_ticks();
-      int left  = wd_gettime(&pdomstate->wdog);
+      sclock_t delay = pmtick[state] +
+                       pdomstate->btime -
+                       clock_systime_ticks();
+      sclock_t left  = wd_gettime(&pdomstate->wdog);
 
       if (delay <= 0)
         {
