@@ -172,7 +172,7 @@
 /* DMA Register */
 
 #define DMAR_DMADUTY_SHIFT        (0)    /* Bits: 0-23  Duty Cycle Holding Register */
-#define DMAR_DMADUTY_MAS          (0xfffff << DMAR_DMADUTY_SHIFT)
+#define DMAR_DMADUTY_MASK         (0xffff << DMAR_DMADUTY_SHIFT)
 #  define DMAR_DMADUTY_SEL(n)     ((uint32_t)(n) << DMAR_DMADUTY_SHIFT)
 
 /* Sync Channels Update Control Register */
