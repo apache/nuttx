@@ -119,7 +119,7 @@
 #  define CLK_DIVB_CLKB_POFF       (0 << CLK_DIVB_SHIFT)  /* CLKB clock is turned off */
 #  define CLK_DIVB_PREB            (1 << CLK_DIVB_SHIFT)  /* CLKB clock is selected by PREB */
 
-#define CLK_PREB_SHIFT             (24)    /* Bits: 24-27  CLKA Source Clock Selection */
+#define CLK_PREB_SHIFT             (24)    /* Bits: 24-27  CLKB Source Clock Selection */
 #define CLK_PREB_MASK              (0x7 << CLK_PREB_SHIFT)
 #  define CLK_PREB_CLK             (0 << CLK_PREB_SHIFT)  /* Peripheral Clock */
 #  define CLK_PREB_CLK_DIV2        (1 << CLK_PREB_SHIFT)  /* Peripheral Clock/2 */
@@ -172,7 +172,7 @@
 /* DMA Register */
 
 #define DMAR_DMADUTY_SHIFT        (0)    /* Bits: 0-23  Duty Cycle Holding Register */
-#define DMAR_DMADUTY_MAS          (0xfffff << DMAR_DMADUTY_SHIFT)
+#define DMAR_DMADUTY_MASK         (0xffff << DMAR_DMADUTY_SHIFT)
 #  define DMAR_DMADUTY_SEL(n)     ((uint32_t)(n) << DMAR_DMADUTY_SHIFT)
 
 /* Sync Channels Update Control Register */
