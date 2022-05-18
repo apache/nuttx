@@ -30,6 +30,22 @@
 #include "hardware/tlsr82_adc.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define ADC_CHAN_0               0
+#define ADC_CHAN_1               1
+#define ADC_CHAN_2               2
+#define ADC_CHAN_3               3
+#define ADC_CHAN_4               4
+#define ADC_CHAN_5               5
+#define ADC_CHAN_6               6
+#define ADC_CHAN_7               7
+#define ADC_CHAN_TEMP            253
+#define ADC_CHAN_VBAT            254
+#define ADC_CHAN_NONE            255
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
