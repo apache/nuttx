@@ -162,6 +162,7 @@ __ramfunc__ int sam_eefc_readsequence(uint32_t start_cmd, uint32_t stop_cmd,
   volatile uint32_t regval;
   uint32_t *flash_data;
   size_t read_count;
+  irqstate_t flags;
 
   if (buffer == NULL)
     {
@@ -170,11 +171,17 @@ __ramfunc__ int sam_eefc_readsequence(uint32_t start_cmd, uint32_t stop_cmd,
 
   flash_data = (uint32_t *)SAM_INTFLASH_BASE;
 
-  /* Enabled Sequential Code Optimization of flash controller */
+  /* Disable Sequential Code Optimization of flash controller */
 
   regval = getreg32(SAM_EEFC_FMR);
   regval |= EEFC_FMR_SCOD;
   sam_eefc_writefmr(regval);
+
+  /* Perform a dummy read at the Flash base address */
+
+  regval = *flash_data;
+
+  flags = up_irq_save();
 
   /* Send the Start Read command */
 
@@ -217,30 +224,15 @@ __ramfunc__ int sam_eefc_readsequence(uint32_t start_cmd, uint32_t stop_cmd,
     }
   while ((regval & EEFC_FSR_FRDY) != EEFC_FSR_FRDY);
 
+  up_irq_restore(flags);
+
+  /* Enabled Sequential Code Optimization of flash controller */
+
   regval = getreg32(SAM_EEFC_FMR);
   regval &= ~EEFC_FMR_SCOD;
   sam_eefc_writefmr(regval);
 
   return OK;
-}
-
-/****************************************************************************
- * Name: sam_eefc_initaccess
- *
- * Description:
- *   Initial flash access mode and wait status
- *
- * Input Parameters:
- *   access_mode - 0 for 128-bit, EEFC_FMR_FAM for 64-bit.
- *   wait_status - The number of wait states in cycle (no shift).
- *
- * Returned Value:
- *   NONE
- ****************************************************************************/
-
-void sam_eefc_initaccess(uint32_t access_mode, uint32_t wait_status)
-{
-  sam_eefc_writefmr(access_mode | EEFC_FMR_FWS(wait_status));
 }
 
 /****************************************************************************

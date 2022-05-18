@@ -36,9 +36,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define SAM_EFC_ACCESS_MODE_128    0
-#define SAM_EFC_ACCESS_MODE_64     EEFC_FMR_FAM
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -96,16 +93,6 @@ __ramfunc__ int sam_eefc_command(uint32_t cmd, uint32_t arg);
 
 __ramfunc__ int sam_eefc_readsequence(uint32_t start_cmd, uint32_t stop_cmd,
                                       uint32_t *buffer, size_t bufsize);
-
-/****************************************************************************
- * Name: sam_eefc_initaccess
- *
- * Description:
- *   Initial enhanced embedded flash access mode.
- *
- ****************************************************************************/
-
-void sam_eefc_initaccess(uint32_t access_mode, uint32_t wait_status);
 
 /****************************************************************************
  * Name: sam_eefc_unlock

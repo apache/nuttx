@@ -52,10 +52,6 @@ void sam_get_uniqueid(uint8_t uniqueid[16])
   uint32_t buffer[4];
   uint8_t  index;
 
-  /* Set flash access mode to 128bit and wait status to 4 */
-
-  sam_eefc_initaccess(SAM_EFC_ACCESS_MODE_128, 4);
-
   /* Get device unique id */
 
   sam_eefc_readsequence(FCMD_STUI, FCMD_SPUI, buffer, 4);

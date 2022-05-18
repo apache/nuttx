@@ -172,10 +172,6 @@ void sam_progmem_initialize(void)
 {
   uint32_t regval;
 
-  /* Set flash access mode to 128bit and wait status to 4 */
-
-  sam_eefc_initaccess(SAM_EFC_ACCESS_MODE_128, 4);
-
   /* Make sure that the read interrupt is disabled */
 
   regval  = getreg32(SAM_EEFC_FMR);

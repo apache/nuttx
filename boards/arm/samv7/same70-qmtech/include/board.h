@@ -163,20 +163,22 @@
  *
  * Wait states Max frequency at 105 centigrade (STH conditions)
  *
- *           VDDIO
- *      1.62V     2.7V
+ *
+ * FWS      VDDIO
+ *      1.7V     3.0V
  * --- -------  -------
- *  0   26 MHz   30 MHz
- *  1   52 MHz   62 MHz
- *  2   78 MHz   93 MHz
- *  3  104 MHz  124 MHz
- *  4  131 MHz  150 MHz
- *  5  150 MHz  --- MHz
+ *  0   21 MHz   23 MHz
+ *  1   42 MHz   46 MHz
+ *  2   63 MHz   69 MHz
+ *  3   84 MHz   92 MHz
+ *  4  106 MHz  115 MHz
+ *  5  125 MHz  138 MHz
+ *  6  137 MHz  150 MHz
  *
  * Given: VDDIO=3.3V, VDDCORE=1.2V, MCK=150MHz
  */
 
-#define BOARD_FWS                  4
+#define BOARD_FWS                  6
 
 /* LED definitions **********************************************************/
 
