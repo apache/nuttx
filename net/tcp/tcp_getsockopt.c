@@ -132,7 +132,7 @@ int tcp_getsockopt(FAR struct socket *psock, int option,
         else
           {
             FAR int *keepalive = (FAR int *)value;
-            *keepalive         = (int)conn->keepalive;
+            *keepalive         = conn->keepalive;
             *value_len         = sizeof(int);
             ret                = OK;
           }
@@ -216,7 +216,7 @@ int tcp_getsockopt(FAR struct socket *psock, int option,
         else
           {
             FAR int *keepcnt = (FAR int *)value;
-            *keepcnt         = (int)conn->keepcnt;
+            *keepcnt         = conn->keepcnt;
             *value_len       = sizeof(int);
             ret              = OK;
           }

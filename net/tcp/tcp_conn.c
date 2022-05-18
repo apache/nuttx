@@ -727,7 +727,6 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
       conn->domain        = domain;
 #endif
 #ifdef CONFIG_NET_TCP_KEEPALIVE
-      conn->keeptime      = clock_systime_ticks();
       conn->keepidle      = 2 * DSEC_PER_HOUR;
       conn->keepintvl     = 2 * DSEC_PER_SEC;
       conn->keepcnt       = 3;

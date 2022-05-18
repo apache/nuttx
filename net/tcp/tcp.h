@@ -284,9 +284,7 @@ struct tcp_conn_s
    * system clock tick.
    */
 
-  clock_t    keeptime;    /* Last time that the TCP socket was known to be
-                           * alive (ACK or data received) OR time that the
-                           * last probe was sent. */
+  uint32_t   keeptimer;   /* KeepAlive timer (dsec) */
   uint32_t   keepidle;    /* Elapsed idle time before first probe sent (dsec) */
   uint32_t   keepintvl;   /* Interval between probes (dsec) */
   bool       keepalive;   /* True: KeepAlive enabled; false: disabled */
