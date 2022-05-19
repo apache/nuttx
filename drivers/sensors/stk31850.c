@@ -1560,8 +1560,11 @@ static void stk31850_worker(FAR void *arg)
 
   /* Set next task */
 
-  work_queue(HPWORK, &priv->work, stk31850_worker, priv,
-             priv->interval / USEC_PER_TICK);
+  if (priv->activated)
+    {
+      work_queue(HPWORK, &priv->work, stk31850_worker, priv,
+                 priv->interval / USEC_PER_TICK);
+    }
 }
 
 /****************************************************************************
