@@ -206,18 +206,21 @@ pid_t up_vfork(const struct vfork_s *context)
    * indication to the newly started child thread.
    */
 
-  child->cmn.xcp.regs[REG_S0]  = context->s0;  /* Saved register s0 */
   child->cmn.xcp.regs[REG_S1]  = context->s1;  /* Saved register s1 */
   child->cmn.xcp.regs[REG_S2]  = context->s2;  /* Saved register s2 */
-  child->cmn.xcp.regs[REG_S3]  = context->s3;  /* Volatile register s3 */
-  child->cmn.xcp.regs[REG_S4]  = context->s4;  /* Volatile register s4 */
-  child->cmn.xcp.regs[REG_S5]  = context->s5;  /* Volatile register s5 */
-  child->cmn.xcp.regs[REG_S6]  = context->s6;  /* Volatile register s6 */
-  child->cmn.xcp.regs[REG_S7]  = context->s7;  /* Volatile register s7 */
+  child->cmn.xcp.regs[REG_S3]  = context->s3;  /* Saved register s3 */
+  child->cmn.xcp.regs[REG_S4]  = context->s4;  /* Saved register s4 */
+  child->cmn.xcp.regs[REG_S5]  = context->s5;  /* Saved register s5 */
+  child->cmn.xcp.regs[REG_S6]  = context->s6;  /* Saved register s6 */
+  child->cmn.xcp.regs[REG_S7]  = context->s7;  /* Saved register s7 */
+  child->cmn.xcp.regs[REG_S8]  = context->s8;  /* Saved register s8 */
+  child->cmn.xcp.regs[REG_S9]  = context->s9;  /* Saved register s9 */
+  child->cmn.xcp.regs[REG_S10] = context->s10; /* Saved register s10 */
+  child->cmn.xcp.regs[REG_S11] = context->s11; /* Saved register s11 */
 #ifdef CONFIG_RISCV_FRAMEPOINTER
   child->cmn.xcp.regs[REG_FP]  = newfp;        /* Frame pointer */
 #else
-  child->cmn.xcp.regs[REG_S8]  = context->s8;  /* Volatile register s8 */
+  child->cmn.xcp.regs[REG_S0]  = context->s0;  /* Saved register s0 */
 #endif
   child->cmn.xcp.regs[REG_SP]  = newsp;        /* Stack pointer */
 #ifdef RISCV_SAVE_GP
