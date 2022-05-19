@@ -118,7 +118,22 @@ struct vfork_s
   uintptr_t gp;   /* Global pointer */
 #endif
 
-  /* Floating point registers (not yet) */
+  /* Floating point registers */
+
+#ifdef CONFIG_ARCH_FPU
+  uintptr_t fs0;   /* Saved register fs0 */
+  uintptr_t fs1;   /* Saved register fs1 */
+  uintptr_t fs2;   /* Saved register fs2 */
+  uintptr_t fs3;   /* Saved register fs3 */
+  uintptr_t fs4;   /* Saved register fs4 */
+  uintptr_t fs5;   /* Saved register fs5 */
+  uintptr_t fs6;   /* Saved register fs6 */
+  uintptr_t fs7;   /* Saved register fs7 */
+  uintptr_t fs8;   /* Saved register fs8 */
+  uintptr_t fs9;   /* Saved register fs9 */
+  uintptr_t fs10;  /* Saved register fs10 */
+  uintptr_t fs11;  /* Saved register fs11 */
+#endif
 };
 #endif
 
