@@ -95,7 +95,6 @@ vfork:
   /* CPU registers */
   /* Save the volatile registers */
 
-  REGSTORE    s0, VFORK_S0_OFFSET(sp)
   REGSTORE    s1, VFORK_S1_OFFSET(sp)
   REGSTORE    s2, VFORK_S2_OFFSET(sp)
   REGSTORE    s3, VFORK_S3_OFFSET(sp)
@@ -103,17 +102,39 @@ vfork:
   REGSTORE    s5, VFORK_S5_OFFSET(sp)
   REGSTORE    s6, VFORK_S6_OFFSET(sp)
   REGSTORE    s7, VFORK_S7_OFFSET(sp)
+  REGSTORE    s8, VFORK_S8_OFFSET(sp)
+  REGSTORE    s9, VFORK_S9_OFFSET(sp)
+  REGSTORE    s10, VFORK_S10_OFFSET(sp)
+  REGSTORE    s11, VFORK_S11_OFFSET(sp)
 
   /* Save the frame pointer, stack pointer, and return address */
 
 #ifdef CONFIG_RISCV_FRAMEPOINTER
   REGSTORE    fp, VFORK_FP_OFFSET(sp)
+#else
+  REGSTORE    s0, VFORK_S0_OFFSET(sp)
 #endif
+
   addi        s0, sp, VFORK_SIZEOF
   REGSTORE    s0, VFORK_SP_OFFSET(sp) /* original SP */
   REGSTORE    x1, VFORK_RA_OFFSET(sp) /* return address */
 
-  /* Floating point registers (not yet) */
+  /* Floating point registers */
+
+#ifdef CONFIG_ARCH_FPU
+  FSTORE      fs0, VFORK_FS0_OFFSET(sp)
+  FSTORE      fs1, VFORK_FS1_OFFSET(sp)
+  FSTORE      fs2, VFORK_FS2_OFFSET(sp)
+  FSTORE      fs3, VFORK_FS3_OFFSET(sp)
+  FSTORE      fs4, VFORK_FS4_OFFSET(sp)
+  FSTORE      fs5, VFORK_FS5_OFFSET(sp)
+  FSTORE      fs6, VFORK_FS6_OFFSET(sp)
+  FSTORE      fs7, VFORK_FS7_OFFSET(sp)
+  FSTORE      fs8, VFORK_FS8_OFFSET(sp)
+  FSTORE      fs9, VFORK_FS9_OFFSET(sp)
+  FSTORE      fs10, VFORK_FS10_OFFSET(sp)
+  FSTORE      fs11, VFORK_FS11_OFFSET(sp)
+#endif
 
   /* Then, call up_vfork(), passing it a pointer to the stack frame */
 
