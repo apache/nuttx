@@ -458,6 +458,26 @@
 #define REG_T5              REG_X30
 #define REG_T6              REG_X31
 
+#ifdef CONFIG_ARCH_FPU
+/* $0-$1 = fs0-fs1: Callee saved registers */
+
+#  define REG_FS0           REG_F8
+#  define REG_FS1           REG_F9
+
+/* $18-$27 = fs2-fs11: Callee saved registers */
+
+#  define REG_FS2           REG_F18
+#  define REG_FS3           REG_F19
+#  define REG_FS4           REG_F20
+#  define REG_FS5           REG_F21
+#  define REG_FS6           REG_F22
+#  define REG_FS7           REG_F23
+#  define REG_FS8           REG_F24
+#  define REG_FS9           REG_F25
+#  define REG_FS10          REG_F26
+#  define REG_FS11          REG_F27
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
