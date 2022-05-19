@@ -48,6 +48,7 @@
 
 /* Device state setup. */
 
+#define SX9373_IRQ_SOURCE             0x4000   /* Current interrupt events. */
 #define SX9373_DEVICE_RESET           0x4240   /* Issues a softwre reset on the device. */
 #define SX9373_COMMAND                0x4280   /* Start and stop sensing. */
 
@@ -216,11 +217,8 @@ struct sx9373_dev_s
   struct sx9373_channel_s cap_ch[SX9373_CH_VALID];  /* Infomartion of channel. */
   FAR const struct sx9373_config_s *config;         /* Pointer to the cfg struct. */
   uint64_t timestamp;                               /* Units is microseconds. */
-  struct work_s data_work;                          /* Work queue for read data. */
-  struct work_s cfg_work;                           /* Work queue for config. */
+  struct work_s work;                               /* Work queue for read data. */
   FAR const char *file_path;                        /* File path of parameter. */
-  int retry_cout;                                   /* Number of retry. */
-  int cfg_status;                                   /* Status of configuration. */
 };
 
 /****************************************************************************
@@ -255,7 +253,7 @@ static int sx9373_read_cfg_param(FAR struct file *file,
                                  FAR char *buf, int len);
 static int sx9373_write_cfg_param(FAR struct sx9373_dev_s *priv,
                                   FAR struct file *file);
-static void sx9373_init_worker(FAR void *arg);
+static int sx9373_config_device(FAR struct sx9373_dev_s *priv);
 
 /* Sensor ops functions. */
 
@@ -506,6 +504,12 @@ static int sx9373_setparam(FAR struct sx9373_dev_s *priv,
       return ret;
     }
 
+  ret = sx9373_i2c_read(priv, SX9373_IRQ_SOURCE, (FAR uint32_t *)&i);
+  if (ret < 0)
+    {
+      snerr("Failed to clear IRQ: %d\n", ret);
+    }
+
   return ret;
 }
 
@@ -741,12 +745,12 @@ static int sx9373_enable(FAR struct sx9373_dev_s *priv, bool enable)
           return ret;
         }
 
-      work_queue(HPWORK, &priv->data_work, sx9373_worker, priv,
+      work_queue(HPWORK, &priv->work, sx9373_worker, priv,
                  SX9373_POLL_INTERVAL / USEC_PER_TICK);
     }
   else
     {
-      work_cancel(HPWORK, &priv->data_work);
+      work_cancel(HPWORK, &priv->work);
 
       /* Suspend the device. */
 
@@ -846,12 +850,6 @@ static int sx9373_activate(FAR struct file *filep,
   if (lower->type != SENSOR_TYPE_CAP)
     {
       snerr("Failed to match sensor type.\n");
-      return -EINVAL;
-    }
-
-  if (!priv->cfg_status)
-    {
-      snerr("Failed to configure device.\n");
       return -EINVAL;
     }
 
@@ -1114,48 +1112,36 @@ static int sx9373_write_cfg_param(FAR struct sx9373_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: sx9373_init_worker
+ * Name: sx9373_config_device
  *
  * Description:
- *   It is mainly used to initialize the device. When the driver is
- *   registered, the file system may not be ready and the configuration
- *   information cannot be read, so the configuration needs to be delayed.
+ *   It is mainly used to initialize the device. Read the config file and
+ *   initialize the device.
  *
  * Input Parameters:
- *   arg    - Device struct.
+ *   priv    - Device struct.
  *
  * Returned Value:
- *   none.
+ *   Return 0 if the driver was success; A negated errno
+ *   value is returned on any failure.
  *
  * Assumptions/Limitations:
  *   none.
  *
  ****************************************************************************/
 
-static void sx9373_init_worker(FAR void *arg)
+static int sx9373_config_device(FAR struct sx9373_dev_s *priv)
 {
-  FAR struct sx9373_dev_s *priv = arg;
   struct file file;
   int ret;
 
   /* Open file of config parameter. */
 
-  ret = file_open(&file, priv->file_path, O_RDONLY, 0666);
+  ret = file_open(&file, priv->file_path, O_RDONLY);
   if (ret < 0)
     {
-      if (priv->retry_cout < SX9373_MAX_RETRY)
-        {
-          work_queue(HPWORK, &priv->cfg_work, sx9373_init_worker,
-                     priv, SX9373_INIT_DELAY / USEC_PER_TICK);
-          priv->retry_cout++;
-        }
-      else
-        {
-          snerr("Failed to open file:%s, err:%d\n",
-                priv->file_path, ret);
-        }
-
-      return;
+      snerr("Failed to open file:%s, err:%d\n", priv->file_path, ret);
+      return ret;
     }
 
   /* Configure the device. */
@@ -1165,11 +1151,10 @@ static void sx9373_init_worker(FAR void *arg)
     {
       snerr("Failed to config device: %d\n", ret);
     }
-  else
-    {
-      priv->cfg_status = 1;
-    }
 
+  file_close(&file);
+
+  return ret;
 }
 
 /* Sensor poll functions */
@@ -1207,7 +1192,7 @@ static void sx9373_worker(FAR void *arg)
 
   /* Set work queue. */
 
-  work_queue(HPWORK, &priv->data_work, sx9373_worker,
+  work_queue(HPWORK, &priv->work, sx9373_worker,
              priv, SX9373_POLL_INTERVAL / USEC_PER_TICK);
 
   ret = sx9373_readstate(priv, &rawdata);
@@ -1324,14 +1309,12 @@ int sx9373_register(int devno, FAR const struct sx9373_config_s *config)
       goto err;
     }
 
-  /* Create initialize work queue for sensor. */
+  /* Start config for sensor. */
 
-  ret = work_queue(HPWORK, &priv->cfg_work,
-                   sx9373_init_worker, priv,
-                   SX9373_INIT_DELAY / USEC_PER_TICK);
+  ret = sx9373_config_device(priv);
   if (ret < 0)
     {
-      snerr("Failed to create sx9373 init task: %d\n", ret);
+      snerr("Failed to config sx9373 sensor: %d\n", ret);
       goto err;
     }
 
