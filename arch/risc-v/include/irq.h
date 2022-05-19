@@ -233,8 +233,10 @@
 #  define REG_FCSR_NDX      (INT_XCPT_REGS + FPU_REG_SIZE * 32)
 
 #  define FPU_XCPT_REGS     (FPU_REG_SIZE * 33)
+#  define FPU_REG_FULL_SIZE (INT_REG_SIZE * FPU_REG_SIZE)
 #else /* !CONFIG_ARCH_FPU */
-#  define FPU_XCPT_REGS     0
+#  define FPU_XCPT_REGS     (0)
+#  define FPU_REG_FULL_SIZE (0)
 #endif /* CONFIG_ARCH_FPU */
 
 #define XCPTCONTEXT_REGS    (INT_XCPT_REGS + FPU_XCPT_REGS)

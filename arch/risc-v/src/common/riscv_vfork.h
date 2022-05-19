@@ -28,6 +28,8 @@
 #include <nuttx/config.h>
 #include <arch/irq.h>
 
+#include "riscv_internal.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -60,32 +62,52 @@
  * f28–31   ft8–11   FP temporaries                     Caller
  */
 
-#define VFORK_S1_OFFSET   (1*INT_REG_SIZE)   /* Saved register s1 */
-#define VFORK_S2_OFFSET   (2*INT_REG_SIZE)   /* Saved register s2 */
-#define VFORK_S3_OFFSET   (3*INT_REG_SIZE)   /* Saved register s3 */
-#define VFORK_S4_OFFSET   (4*INT_REG_SIZE)   /* Saved register s4 */
-#define VFORK_S5_OFFSET   (5*INT_REG_SIZE)   /* Saved register s5 */
-#define VFORK_S6_OFFSET   (6*INT_REG_SIZE)   /* Saved register s6 */
-#define VFORK_S7_OFFSET   (7*INT_REG_SIZE)   /* Saved register s7 */
-#define VFORK_S8_OFFSET   (8*INT_REG_SIZE)   /* Saved register s8 */
-#define VFORK_S9_OFFSET   (9*INT_REG_SIZE)   /* Saved register s9 */
-#define VFORK_S10_OFFSET  (10*INT_REG_SIZE)  /* Saved register s10 */
-#define VFORK_S11_OFFSET  (11*INT_REG_SIZE)  /* Saved register s11 */
+#define VFORK_S1_OFFSET     (1*INT_REG_SIZE)   /* Saved register s1 */
+#define VFORK_S2_OFFSET     (2*INT_REG_SIZE)   /* Saved register s2 */
+#define VFORK_S3_OFFSET     (3*INT_REG_SIZE)   /* Saved register s3 */
+#define VFORK_S4_OFFSET     (4*INT_REG_SIZE)   /* Saved register s4 */
+#define VFORK_S5_OFFSET     (5*INT_REG_SIZE)   /* Saved register s5 */
+#define VFORK_S6_OFFSET     (6*INT_REG_SIZE)   /* Saved register s6 */
+#define VFORK_S7_OFFSET     (7*INT_REG_SIZE)   /* Saved register s7 */
+#define VFORK_S8_OFFSET     (8*INT_REG_SIZE)   /* Saved register s8 */
+#define VFORK_S9_OFFSET     (9*INT_REG_SIZE)   /* Saved register s9 */
+#define VFORK_S10_OFFSET    (10*INT_REG_SIZE)  /* Saved register s10 */
+#define VFORK_S11_OFFSET    (11*INT_REG_SIZE)  /* Saved register s11 */
 
 #ifdef CONFIG_RISCV_FRAMEPOINTER
-#  define VFORK_FP_OFFSET (0*INT_REG_SIZE)   /* Frame pointer */
+#  define VFORK_FP_OFFSET   (0*INT_REG_SIZE)   /* Frame pointer */
 #else
-#  define VFORK_S0_OFFSET (0*INT_REG_SIZE)   /* Saved register s0 */
+#  define VFORK_S0_OFFSET   (0*INT_REG_SIZE)   /* Saved register s0 */
 #endif
 
-#define VFORK_SP_OFFSET   (12*INT_REG_SIZE)  /* Stack pointer*/
-#define VFORK_RA_OFFSET   (13*INT_REG_SIZE)  /* Return address*/
+#define VFORK_SP_OFFSET     (12*INT_REG_SIZE)  /* Stack pointer*/
+#define VFORK_RA_OFFSET     (13*INT_REG_SIZE)  /* Return address*/
 #ifdef RISCV_SAVE_GP
-#  define VFORK_GP_OFFSET (14*INT_REG_SIZE)  /* Global pointer */
-#  define VFORK_SIZEOF    (15*INT_REG_SIZE)
+#  define VFORK_GP_OFFSET   (14*INT_REG_SIZE)  /* Global pointer */
+#  define VFORK_INT_SIZE    (15*INT_REG_SIZE)
 #else
-#  define VFORK_SIZEOF    (13*INT_REG_SIZE)
+#  define VFORK_INT_SIZE    (14*INT_REG_SIZE)
 #endif
+
+#ifdef CONFIG_ARCH_FPU
+#  define VFORK_FS0_OFFSET  (VFORK_INT_SIZE + 0*FPU_REG_FULL_SIZE)
+#  define VFORK_FS1_OFFSET  (VFORK_INT_SIZE + 1*FPU_REG_FULL_SIZE)
+#  define VFORK_FS2_OFFSET  (VFORK_INT_SIZE + 2*FPU_REG_FULL_SIZE)
+#  define VFORK_FS3_OFFSET  (VFORK_INT_SIZE + 3*FPU_REG_FULL_SIZE)
+#  define VFORK_FS4_OFFSET  (VFORK_INT_SIZE + 4*FPU_REG_FULL_SIZE)
+#  define VFORK_FS5_OFFSET  (VFORK_INT_SIZE + 5*FPU_REG_FULL_SIZE)
+#  define VFORK_FS6_OFFSET  (VFORK_INT_SIZE + 6*FPU_REG_FULL_SIZE)
+#  define VFORK_FS7_OFFSET  (VFORK_INT_SIZE + 7*FPU_REG_FULL_SIZE)
+#  define VFORK_FS8_OFFSET  (VFORK_INT_SIZE + 8*FPU_REG_FULL_SIZE)
+#  define VFORK_FS9_OFFSET  (VFORK_INT_SIZE + 9*FPU_REG_FULL_SIZE)
+#  define VFORK_FS10_OFFSET (VFORK_INT_SIZE + 10*FPU_REG_FULL_SIZE)
+#  define VFORK_FS11_OFFSET (VFORK_INT_SIZE + 11*FPU_REG_FULL_SIZE)
+#  define VFORK_FPU_SIZE    (12*FPU_REG_FULL_SIZE)
+#else
+#  define VFORK_FPU_SIZE    (0)
+#endif
+
+#define VFORK_SIZEOF        STACK_ALIGN_UP(VFORK_INT_SIZE + VFORK_FPU_SIZE)
 
 /****************************************************************************
  * Public Types
