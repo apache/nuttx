@@ -451,6 +451,11 @@ ssize_t rpmsgfs_client_read(FAR void *handle, int fd,
   struct rpmsgfs_read_s msg;
   int ret = 0;
 
+  if (!buf || count <= 0)
+    {
+      return 0;
+    }
+
   memset(&cookie, 0, sizeof(cookie));
 
   nxsem_init(&cookie.sem, 0, 0);
@@ -489,6 +494,11 @@ ssize_t rpmsgfs_client_write(FAR void *handle, int fd,
   struct rpmsgfs_cookie_s cookie;
   size_t written = 0;
   int ret = 0;
+
+  if (!buf || count <= 0)
+    {
+      return 0;
+    }
 
   memset(&cookie, 0, sizeof(cookie));
   nxsem_init(&cookie.sem, 0, 0);
