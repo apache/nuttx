@@ -141,6 +141,7 @@ uint32_t g_idlestack[IDLETHREAD_STACKWORDS]
 static noreturn_function void __esp32_start(void)
 {
   uint32_t sp;
+  uint32_t regval unused_data;
 
   /* Make sure that normal interrupts are disabled.  This is really only an
    * issue when we are started in un-usual ways (such as from IRAM).  In this
@@ -163,17 +164,31 @@ static noreturn_function void __esp32_start(void)
 
   esp32_region_protection();
 
+#if defined(CONFIG_ESP32_PID) && defined(CONFIG_BUILD_PROTECTED)
+  /* We have 2 VECBASE Addresses: one in CPU and one in DPORT peripheral.
+   * CPU has no knowledge of PID hence any PID can change the CPU VECBASE
+   * address thus jumping to malicious interrupt vectors with higher
+   * privilege.
+   * So we configure CPU to use the VECBASE address in DPORT peripheral.
+   */
+
+  regval = ((uint32_t)&_init_start) >> 10;
+  putreg32(regval, DPORT_PRO_VECBASE_SET_REG);
+
+  regval  = getreg32(DPORT_PRO_VECBASE_CTRL_REG);
+  regval |= BIT(0) | BIT(1);
+  putreg32(regval, DPORT_PRO_VECBASE_CTRL_REG);
+#else
   /* Move CPU0 exception vectors to IRAM */
 
-  __asm__ __volatile__ ("wsr %0, vecbase\n"::"r" (&_init_start));
+  __asm__ __volatile__ ("wsr %0, vecbase\n"::"r"(&_init_start));
+#endif
 
   /* Set .bss to zero */
 
   memset(&_sbss, 0, (&_ebss - &_sbss) * sizeof(_sbss));
 
 #ifndef CONFIG_SMP
-  uint32_t regval;
-
   /* Make sure that the APP_CPU is disabled for now */
 
   regval  = getreg32(DPORT_APPCPU_CTRL_B_REG);

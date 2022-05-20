@@ -23,7 +23,11 @@ include common/Make.defs
 
 # The start-up, "head", file.  May be either a .S or a .c file.
 
-HEAD_CSRC = esp32_start.c esp32_wdt.c
+HEAD_CSRC  = esp32_start.c esp32_wdt.c
+
+ifeq ($(CONFIG_XTENSA_HAVE_EXCEPTION_HOOKS),y)
+HEAD_ASRC += esp32_window_hooks.S
+endif
 
 # Required ESP32 files (arch/xtensa/src/esp32)
 

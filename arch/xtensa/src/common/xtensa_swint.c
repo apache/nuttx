@@ -24,16 +24,16 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
 #include <assert.h>
 #include <debug.h>
+#include <stdint.h>
 
-#include <nuttx/arch.h>
 #include <arch/xtensa/xtensa_specregs.h>
+#include <nuttx/arch.h>
 #include <sys/syscall.h>
 
+#include "chip.h"
 #include "signal/signal.h"
-#include "syscall.h"
 #include "xtensa.h"
 
 /****************************************************************************
@@ -84,13 +84,8 @@ int xtensa_swint(int irq, void *context, void *arg)
    */
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
-# ifndef CONFIG_DEBUG_SYSCALL
-  if (cmd > SYS_switch_context)
-# endif
-    {
-      svcinfo("SYSCALL Entry: regs: %p cmd: %d\n", regs, cmd);
-      xtensa_registerdump(regs);
-    }
+  svcinfo("SYSCALL Entry: regs: %p cmd: %" PRIu32 "\n", regs, cmd);
+  xtensa_registerdump(regs);
 #endif
 
   /* Handle the syscall according to the command in A2 */
@@ -193,6 +188,9 @@ int xtensa_swint(int irq, void *context, void *arg)
            */
 
           regs[REG_PC]        = rtcb->xcp.syscall[index].sysreturn;
+#ifndef CONFIG_BUILD_FLAT
+          xtensa_restoreprivilege(regs, rtcb->xcp.syscall[index].int_ctx);
+#endif
 
           /* The return value must be in A2-A5.
            * xtensa_dispatch_syscall() temporarily moved the value into A3.
@@ -249,6 +247,10 @@ int xtensa_swint(int irq, void *context, void *arg)
           regs[REG_A7] = regs[REG_A5]; /* argv */
 #endif
 
+          /* Execute the task in User mode */
+
+          xtensa_lowerprivilege(regs);        /* User mode */
+
           /* User task rotates window, so pretend task was 'call4'd */
 
           regs[REG_PS] = PS_UM | PS_WOE | PS_CALLINC(1);
@@ -284,6 +286,10 @@ int xtensa_swint(int irq, void *context, void *arg)
 
           regs[REG_A6] = regs[REG_A4];  /* pthread entry */
           regs[REG_A7] = regs[REG_A5];  /* arg */
+
+          /* Execute the pthread in User mode */
+
+          xtensa_lowerprivilege(regs);        /* User mode */
 
           /* Startup task rotates window, so pretend task was 'call4'd */
 
@@ -322,6 +328,8 @@ int xtensa_swint(int irq, void *context, void *arg)
 
           regs[REG_PC]        = (uintptr_t)USERSPACE->signal_handler;
 
+          xtensa_lowerprivilege(regs);        /* User mode */
+
           /* Change the parameter ordering to match the expectation of struct
            * userpace_s signal_handler.
            */
@@ -353,6 +361,8 @@ int xtensa_swint(int irq, void *context, void *arg)
           DEBUGASSERT(rtcb->xcp.sigreturn != 0);
           regs[REG_PC] = rtcb->xcp.sigreturn;
 
+          xtensa_raiseprivilege(regs);        /* Privileged mode */
+
           rtcb->xcp.sigreturn = 0;
         }
         break;
@@ -382,10 +392,17 @@ int xtensa_swint(int irq, void *context, void *arg)
           /* Setup to return to xtensa_dispatch_syscall in privileged mode. */
 
           rtcb->xcp.syscall[index].sysreturn = regs[REG_PC];
+#ifndef CONFIG_BUILD_FLAT
+          xtensa_saveprivilege(regs, rtcb->xcp.syscall[index].int_ctx);
+#endif
 
           rtcb->xcp.nsyscalls = index + 1;
 
           regs[REG_PC]        = (uintptr_t)xtensa_dispatch_syscall;
+
+#ifndef CONFIG_BUILD_FLAT
+          xtensa_raiseprivilege(regs);        /* Privileged mode */
+#endif
 
           /* Offset A2 to account for the reserved values */
 
@@ -428,21 +445,15 @@ int xtensa_swint(int irq, void *context, void *arg)
    */
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
-# ifndef CONFIG_DEBUG_SYSCALL
-  if (cmd > SYS_switch_context)
-# else
   if (regs != CURRENT_REGS)
-# endif
     {
       svcinfo("SYSCALL Return: Context switch!\n");
       xtensa_registerdump((const uintptr_t *)CURRENT_REGS);
     }
-# ifdef CONFIG_DEBUG_SYSCALL
   else
     {
       svcinfo("SYSCALL Return: %" PRIu32 "\n", cmd);
     }
-# endif
 #endif
 
   return OK;
