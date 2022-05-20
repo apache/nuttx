@@ -99,6 +99,7 @@ extern "C"
 #  define kmm_memalign(a,s)      memalign(a,s)
 #  define kmm_free(p)            free(p)
 #  define kmm_mallinfo()         mallinfo()
+#  define kmm_heapmember(p)      umm_heapmember(p)
 
 #else
 /* Otherwise, the kernel-space allocators are declared in
