@@ -95,3 +95,21 @@ void up_textheap_free(void *p)
 
   kmm_free(p);
 }
+
+/****************************************************************************
+ * Name: up_textheap_heapmember()
+ ****************************************************************************/
+
+bool up_textheap_heapmember(void *p)
+{
+  if (p == NULL)
+    {
+      return false;
+    }
+
+#ifdef CONFIG_CXD56_USE_SYSBUS
+  p += SYSBUS_ADDRESS_OFFSET;
+#endif
+
+  return kmm_heapmember(p);
+}
