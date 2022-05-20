@@ -39,7 +39,11 @@
   .extern __trap_vec
 
   .section .start, "ax"
+#ifdef CONFIG_NUTTSBI
+  .global __start_s
+#else
   .global __start
+#endif
 
 /****************************************************************************
  * Name: __start
@@ -52,8 +56,11 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NUTTSBI
+__start_s:
+#else
 __start:
-
+#endif
   /* Disable all interrupts in sie */
 
   csrw sie, zero
