@@ -45,7 +45,7 @@
 
 /* Roundup func define */
 
-#define BMI270_ROUNDUP(x, esize)      ((x + (esize - 1)) / (esize)) * (esize)
+#define BMI270_ROUNDDOWN(x, esize)    ((x) / (esize)) * (esize)
 #define BMI270_CONFIG_NAME            "Device: bmi270"
 
 #define BMI270_READ_LEN               50         /* Bmi270 config read lenth */
@@ -57,7 +57,6 @@
 #define BMI270_WAIT_SELFTEST          500000     /* Wait for selftest complete(us) */
 #define BMI270_WAIT_SELFTEST_COUNT    5          /* Max count of wait for selftest complete */
 #define BMI270_SET_DELAY              10000      /* Delay after set(us) */
-#define BMI270_POWER_MODE_DELAY       1000       /* Delay after power mode switch(us) */
 #define BMI270_READWRITE_LEN          46         /* Max read/write length */
 #define BMI270_READWRITE_RLEN         2          /* Remaind read/write length */
 #define BMI270_FEAT_SIZE_IN_BYTES     16         /* Bytes remaining to read */
@@ -136,6 +135,7 @@
 #define BMI270_DEVICE_ID              0x24       /* Device Identification */
 #define BMI270_DEFAULT_INTERVAL       40000      /* Default conversion interval(us) */
 #define BMI270_WAIT_TIME              10000      /* Sensor boot wait time(us) */
+#define BMI270_SET_TIME               500        /* Sensor boot wait time(us) */
 #define BMI270_SCALE_SET_TIME         1000       /* Sensor wait time after scale set(us) */
 
 /* Multi sensor index */
@@ -222,11 +222,17 @@
 /* FIFO */
 
 #define BMI270_FIFO_DATA_BLOCK_SIZE   0x07       /* Data size of the fifo frame */
-#define BMI270_FIFO_REGULAR_FRAME     0x02       /* fifo regular frame */
-#define BMI270_FIFO_CONTROL_FRAME     0x01       /* fifo control frame */
-#define BMI270_FIFO_PARM_XL           0x00       /* Accelerometer included in the data part of the frame */
+#define BMI270_FIFO_BUFFER_SIZE       0x400      /* FIFO buffer size */
+#define BMI270_FIFO_REGULAR_FRAME     0x02       /* FIFO regular frame */
+#define BMI270_FIFO_CONTROL_FRAME     0x01       /* FIFO control frame */
+#define BMI270_FIFO_PARM_XL           0x01       /* Accelerometer included in the data part of the frame */
 #define BMI270_FIFO_PARM_GY           0x02       /* Gyroscope included in the data part of the frame */
 #define BMI270_FIFO_PARM_AUX          0x04       /* Aux included in the data part of the frame */
+#define BMI270_FIFO_TYPE_OTHER        -1         /* Other type FIFO data */
+
+#define BMI270_FIFO_SKIP_FRAME        0x00       /* Control head: Skip frame */
+#define BMI270_FIFO_SENSORTIME_FRAME  0x01       /* Control head: Sensortime frame */
+#define BMI270_FIFO_CONFIG_FRAME      0x02       /* Control head: FIFO input config frame */
 
 /* Axes remap */
 
@@ -762,6 +768,7 @@ static int bmi270_xl_findodr(FAR float *freq);
 static int bmi270_xl_setodr(FAR struct bmi270_dev_s *priv, uint8_t value);
 static int bmi270_xl_setfullscale(FAR struct bmi270_dev_s *priv,
                                   uint8_t value);
+static int bmi270_xl_setscalefactor(FAR struct bmi270_dev_s *priv);
 static int bmi270_xl_setfilter(FAR struct bmi270_dev_s *priv,
                                uint8_t value);
 
@@ -791,6 +798,8 @@ static int bmi270_fifo_xl_enable(FAR struct bmi270_dev_s *priv,
 static int bmi270_fifo_gy_enable(FAR struct bmi270_dev_s *priv,
                                  uint8_t value);
 static int bmi270_fifo_config(FAR struct bmi270_dev_s *priv);
+static int bmi270_fifo_gettype(FAR bmi270_fifo_header_t *fifo_header,
+                               FAR uint8_t *type, FAR uint8_t *payload);
 static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv);
 static int bmi270_fifo_getlevel(FAR struct bmi270_dev_s *priv,
                                 FAR unsigned int *value);
@@ -1642,6 +1651,10 @@ static int bmi270_init_device(FAR struct bmi270_dev_s *priv)
 
   file_close(&file);
 
+  /* Disable advanced power save mode. */
+
+  bmi270_set_powersave(priv, BMI270_DISABLE);
+
   ret = bmi270_write_config(priv, config_buf, count);
   if (ret < 0)
     {
@@ -1655,6 +1668,10 @@ static int bmi270_init_device(FAR struct bmi270_dev_s *priv)
   /* Get the gyroscope cross axis sensitivity */
 
   bmi270_get_gyro_crosssense(priv, &(priv->cross_sense));
+
+  /* Enable advanced power save mode. */
+
+  bmi270_set_powersave(priv, BMI270_ENABLE);
 
   return ret;
 }
@@ -1746,12 +1763,6 @@ static int bmi270_write_config(FAR struct bmi270_dev_s *priv,
 
   remain = (uint8_t)(config_size % BMI270_READWRITE_LEN);
 
-  /* Disable advanced power save mode. */
-
-  bmi270_set_powersave(priv, BMI270_DISABLE);
-
-  usleep(BMI270_POWER_MODE_DELAY);
-
   /* Write the configuration file. */
 
   bmi270_set_configload(priv, BMI270_DISABLE);
@@ -1823,9 +1834,10 @@ static int bmi270_set_powersave(FAR struct bmi270_dev_s *priv,
 
   bmi270_spi_read(priv, BMI270_PWR_CONF, (FAR uint8_t *)&reg, 1);
 
-  reg.adv_power_save = 0;
-  reg.fifo_self_wake_up = value;
+  reg.adv_power_save = value;
+  reg.fifo_self_wake_up = BMI270_ENABLE;
   bmi270_spi_write(priv, BMI270_PWR_CONF, (FAR uint8_t *)&reg);
+  usleep(BMI270_SET_TIME);
 
   return OK;
 }
@@ -2187,8 +2199,11 @@ static void bmi270_xl_worker(FAR void *arg)
 
   /* Set work queue. */
 
-  work_queue(HPWORK, &priv->dev[BMI270_XL_IDX].work, bmi270_xl_worker,
-             priv, priv->dev[BMI270_XL_IDX].interval / USEC_PER_TICK);
+  if (priv->dev[BMI270_XL_IDX].activated == true)
+    {
+      work_queue(HPWORK, &priv->dev[BMI270_XL_IDX].work, bmi270_xl_worker,
+                 priv, priv->dev[BMI270_XL_IDX].interval / USEC_PER_TICK);
+    }
 
   /* Read out the latest sensor data. */
 
@@ -2236,6 +2251,10 @@ static int bmi270_xl_getdata(FAR struct bmi270_dev_s *priv,
   bmi270_spi_read(priv, regaddr, temp.u8bit, 6);
 
   sensor_remap_vector_raw16(temp.i16bit, temp.i16bit, BMI270_VECTOR_REMAP);
+
+  /* Set scale factor. */
+
+  bmi270_xl_setscalefactor(priv);
 
   value->x = (GRAVITY_EARTH * temp.i16bit[0]
            * priv->dev[BMI270_XL_IDX].factor) / BMI270_HALF_SCALE;
@@ -2342,6 +2361,65 @@ static int bmi270_xl_setfullscale(FAR struct bmi270_dev_s *priv,
   bmi270_spi_write(priv, BMI270_ACC_RANGE, (FAR uint8_t *)&regval);
 
   usleep(BMI270_SCALE_SET_TIME);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: bmi270_xl_setscalefactor
+ *
+ * Description:
+ *   Set full scale data factor.
+ *
+ * Input Parameters:
+ *   priv  - Device struct.
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on failure.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int bmi270_xl_setscalefactor(FAR struct bmi270_dev_s *priv)
+{
+  bmi270_acc_range_t regval;
+
+  bmi270_spi_read(priv, BMI270_ACC_RANGE, (FAR uint8_t *)&regval, 1);
+
+  switch (regval.acc_range)
+    {
+      case BMI270_XL_RANGE_2G:
+        {
+          priv->dev[BMI270_XL_IDX].factor = BMI270_2G_FACTOR;
+        }
+        break;
+
+      case BMI270_XL_RANGE_4G:
+        {
+          priv->dev[BMI270_XL_IDX].factor = BMI270_4G_FACTOR;
+        }
+        break;
+
+      case BMI270_XL_RANGE_8G:
+        {
+          priv->dev[BMI270_XL_IDX].factor = BMI270_8G_FACTOR;
+        }
+        break;
+
+      case BMI270_XL_RANGE_16G:
+        {
+          priv->dev[BMI270_XL_IDX].factor = BMI270_16G_FACTOR;
+        }
+        break;
+
+      default:
+        {
+          snerr("Failed to set scale factor!\n");
+        }
+        break;
+    }
 
   return OK;
 }
@@ -2525,8 +2603,11 @@ static void bmi270_gy_worker(FAR void *arg)
 
   /* Set work queue. */
 
-  work_queue(HPWORK, &priv->dev[BMI270_GY_IDX].work, bmi270_gy_worker,
-             priv, priv->dev[BMI270_GY_IDX].interval / USEC_PER_TICK);
+  if (priv->dev[BMI270_GY_IDX].activated == true)
+    {
+      work_queue(HPWORK, &priv->dev[BMI270_GY_IDX].work, bmi270_gy_worker,
+                 priv, priv->dev[BMI270_GY_IDX].interval / USEC_PER_TICK);
+    }
 
   /* Read out the latest sensor data. */
 
@@ -2745,12 +2826,10 @@ static int bmi270_fifo_setwatermark(FAR struct bmi270_dev_s *priv,
   bmi270_fifo_wtm_1_t fifo_wtm1;
 
   value = value * BMI270_FIFO_DATA_BLOCK_SIZE;
-  if (priv->fifo_buff)
+  if (priv->fifo_buff == NULL)
     {
-      kmm_free(priv->fifo_buff);
+      priv->fifo_buff = kmm_zalloc(BMI270_FIFO_BUFFER_SIZE);
     }
-
-  priv->fifo_buff = kmm_zalloc(value);
 
   if (priv->fifo_buff == NULL)
     {
@@ -2866,6 +2945,59 @@ static int bmi270_fifo_config(FAR struct bmi270_dev_s *priv)
 }
 
 /****************************************************************************
+ * Name: bmi270_fifo_gettype
+ *
+ * Description:
+ *   Get fifo data type.
+ *
+ * Input Parameters:
+ *   fifo_header  - FIFO header frame.
+ *   type         - Return sensor type.
+ *   payload      - Return data lenth.
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on failure.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int bmi270_fifo_gettype(FAR bmi270_fifo_header_t *fifo_header,
+                               FAR uint8_t *type, FAR uint8_t *payload)
+{
+  if (fifo_header->fh_mode == BMI270_FIFO_CONTROL_FRAME)
+    {
+      *type = BMI270_FIFO_TYPE_OTHER;
+
+      if (fifo_header->fh_parm == BMI270_FIFO_SKIP_FRAME)
+        {
+          *payload = 2;
+        }
+      else if (fifo_header->fh_parm == BMI270_FIFO_SENSORTIME_FRAME)
+        {
+          *payload = 4;
+        }
+      else if (fifo_header->fh_parm == BMI270_FIFO_CONFIG_FRAME)
+        {
+          *payload = 5;
+        }
+    }
+  else if (fifo_header->fh_mode == BMI270_FIFO_REGULAR_FRAME)
+    {
+      *type = fifo_header->fh_parm;
+      *payload = 7;
+    }
+  else
+    {
+      *type = BMI270_FIFO_TYPE_OTHER;
+      *payload = 2;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: bmi270_fifo_readdata
  *
  * Description:
@@ -2884,13 +3016,14 @@ static int bmi270_fifo_config(FAR struct bmi270_dev_s *priv)
 
 static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv)
 {
-  bmi270_fifo_header_t header;
   axis3bit16_t temp;
   float temperature;
   struct sensor_accel
          temp_xl[CONFIG_SENSORS_BMI270_FIFO_SLOTS_NUMBER];
   struct sensor_gyro
          temp_gy[CONFIG_SENSORS_BMI270_FIFO_SLOTS_NUMBER];
+  uint8_t data_len = 0;
+  uint8_t fifo_type = -1;
   unsigned int counter_xl = 0;
   unsigned int counter_gy = 0;
   unsigned int fifo_interval;
@@ -2900,7 +3033,7 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv)
 
   memset(temp_xl, 0x00, sizeof(temp_xl));
   memset(temp_gy, 0x00, sizeof(temp_gy));
-  memset(priv->fifo_buff, 0, (priv->fifowtm * BMI270_FIFO_DATA_BLOCK_SIZE));
+  memset(priv->fifo_buff, 0, BMI270_FIFO_BUFFER_SIZE);
 
   ret = bmi270_fifo_getlevel(priv, &num);
 
@@ -2919,11 +3052,16 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv)
 
   bmi270_temp_getdata(priv, BMI270_ITEMPERATURE_0, &temperature);
 
-  for (i = 0; i < num; i = i + BMI270_FIFO_DATA_BLOCK_SIZE)
-    {
-      header = *((FAR bmi270_fifo_header_t *)&(priv->fifo_buff[i]));
+  /* Set scale factor. */
 
-      switch (header.fh_parm)
+  bmi270_xl_setscalefactor(priv);
+
+  for (i = 0; i < num; i = i + data_len)
+    {
+      bmi270_fifo_gettype((FAR bmi270_fifo_header_t *)&priv->fifo_buff[i],
+                          &fifo_type, &data_len);
+
+      switch (fifo_type)
         {
           case BMI270_FIFO_PARM_XL:    /* Accelerator data tag */
             {
@@ -3145,6 +3283,10 @@ static int bmi270_feat_enable(FAR struct bmi270_dev_s *priv,
       priv->featen = BMI270_DISABLE;
     }
 
+  /* Enable advance power save if enabled. */
+
+  bmi270_set_powersave(priv, BMI270_ENABLE);
+
   return OK;
 }
 
@@ -3248,6 +3390,10 @@ static int bmi270_get_wakeup_cfg(FAR struct bmi270_dev_s *priv,
 
   weakup_config->idx++;
   weakup_config->max_tilt_pu = *(data_p + weakup_config->idx);
+
+  /* Enable advance power save if enabled. */
+
+  bmi270_set_powersave(priv, BMI270_ENABLE);
 
   return OK;
 }
@@ -3497,7 +3643,7 @@ static int bmi270_batch(FAR struct file *filep,
       *latency_us = sensor->interval;
     }
 
-  sensor->fifowtm = BMI270_ROUNDUP(*latency_us, sensor->interval)
+  sensor->fifowtm = BMI270_ROUNDDOWN(*latency_us, sensor->interval)
                   / sensor->interval;
   *latency_us = sensor->fifowtm * sensor->interval;
   sensor->batch = *latency_us;
@@ -3516,10 +3662,11 @@ static int bmi270_batch(FAR struct file *filep,
       return -EINVAL;
     }
 
+  bmi270_set_powersave(priv, BMI270_DISABLE);
+
   if (sensor->fifowtm > 1)
     {
       sensor->fifoen = true;
-      bmi270_set_powersave(priv, BMI270_DISABLE);
 
       /* Get the fifo start timestamp. */
 
@@ -3627,6 +3774,10 @@ static int bmi270_batch(FAR struct file *filep,
 
   bmi270_spi_write(priv, BMI270_INT_MAP_DATA,
                    (FAR uint8_t *)&regval_int_map_data);
+
+  /* Enable advance power save if enabled. */
+
+  bmi270_set_powersave(priv, BMI270_ENABLE);
 
   return OK;
 }
@@ -3759,7 +3910,6 @@ static int bmi270_activate(FAR struct file *filep,
           if (enable)
             {
               bmi270_xl_setfullscale(priv, BMI270_XL_RANGE_8G);
-              priv->dev[BMI270_XL_IDX].factor = BMI270_8G_FACTOR;
             }
 
           /* Enable/disable accelerometer. */
@@ -3999,60 +4149,38 @@ static int bmi270_control(FAR struct file *filep,
         {
           int data = *(int *)ioctl->data;
 
-          ret = bmi270_xl_enable(priv, false);
-          if (ret < 0)
-            {
-              snerr("Failed to disable accelerometer sensor: %d\n", ret);
-              return ret;
-            }
-
-          priv->dev[BMI270_XL_IDX].activated = false;
-
           switch (data)
-          {
-            case BMI270_XL_SET_2G:
-              {
-                ret = bmi270_xl_setfullscale(priv, BMI270_XL_RANGE_2G);
-                priv->dev[BMI270_XL_IDX].factor = BMI270_2G_FACTOR;
-              }
-              break;
-
-            case BMI270_XL_SET_4G:
-              {
-                ret = bmi270_xl_setfullscale(priv, BMI270_XL_RANGE_4G);
-                priv->dev[BMI270_XL_IDX].factor = BMI270_4G_FACTOR;
-              }
-              break;
-
-            case BMI270_XL_SET_8G:
-              {
-                ret = bmi270_xl_setfullscale(priv, BMI270_XL_RANGE_8G);
-                priv->dev[BMI270_XL_IDX].factor = BMI270_8G_FACTOR;
-              }
-              break;
-
-            case BMI270_XL_SET_16G:
-              {
-                ret = bmi270_xl_setfullscale(priv, BMI270_XL_RANGE_16G);
-                priv->dev[BMI270_XL_IDX].factor = BMI270_16G_FACTOR;
-              }
-              break;
-
-            default:
-              {
-                ret = -EINVAL;
-              }
-              break;
-          }
-
-          ret = bmi270_xl_enable(priv, true);
-          if (ret < 0)
             {
-              snerr("Failed to enable accelerometer sensor: %d\n", ret);
-              return ret;
-            }
+              case BMI270_XL_SET_2G:
+                {
+                  ret = bmi270_xl_setfullscale(priv, BMI270_XL_RANGE_2G);
+                }
+                break;
 
-          priv->dev[BMI270_XL_IDX].activated = true;
+              case BMI270_XL_SET_4G:
+                {
+                  ret = bmi270_xl_setfullscale(priv, BMI270_XL_RANGE_4G);
+                }
+                break;
+
+              case BMI270_XL_SET_8G:
+                {
+                  ret = bmi270_xl_setfullscale(priv, BMI270_XL_RANGE_8G);
+                }
+                break;
+
+              case BMI270_XL_SET_16G:
+                {
+                  ret = bmi270_xl_setfullscale(priv, BMI270_XL_RANGE_16G);
+                }
+                break;
+
+              default:
+                {
+                  ret = -EINVAL;
+                }
+                break;
+            }
 
           if (ret < 0)
             {
