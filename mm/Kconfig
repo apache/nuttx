@@ -191,4 +191,9 @@ config MM_BACKTRACE_DEFAULT
 	default n
 	depends on DEBUG_MM
 
+config MM_DUMP_ON_FAILURE
+	bool "Dump heap info on allocation failure"
+	default n
+	depends on DEBUG_MM
+
 source "mm/iob/Kconfig"
