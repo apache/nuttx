@@ -902,7 +902,7 @@ static void stwlc38_det_worker(FAR void *arg)
       IOEP_DETACH(priv->rpmsg_dev, stwlc38_det_interrupt_handler);
     }
 
-  if (priv->detect_work_exit)
+  if (priv->batt_state_flag == BATT_CHARGING_STAT_ENTER)
     {
       if (priv->rx_vout_off_flag)
         {
@@ -916,7 +916,6 @@ static void stwlc38_det_worker(FAR void *arg)
         }
       else
         {
-          priv->rx_vout_update_flag  = true;
           work_queue(LPWORK, &priv->detect_work, detect_worker, priv,
                      RX_DETECT_WORK_TIME / USEC_PER_TICK);
         }
@@ -1130,6 +1129,11 @@ static int stwlc38_operate(FAR struct battery_charger_dev_s *dev,
 
       case BATIO_OPRTN_EN_TERM:
         priv->rx_vout_off_flag = msg->u8[0];
+        if (priv->rx_vout_off_flag)
+          {
+            priv->rx_vout_update_flag = true;
+          }
+
         break;
 
       default:

@@ -111,6 +111,7 @@ struct rx_int_state_s
 #define DETECT_WORK_NO_EXIST       0
 #define DETECT_WORK_EXIST          1
 #define BATT_CHARGING_STAT_INIT   -1
+#define BATT_CHARGING_STAT_ENTER   1
 
 #define WLC_SUPPORT_QC_3_0        0x1a
 #define WLC_GEN_TX                0x11
