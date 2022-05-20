@@ -1430,13 +1430,14 @@ static int littlefs_stat(FAR struct inode *mountpt, FAR const char *relpath,
       if (info.type == LFS_TYPE_REG)
         {
           buf->st_mode |= S_IFREG;
+          buf->st_size = info.size;
         }
       else
         {
           buf->st_mode |= S_IFDIR;
+          buf->st_size = 0;
         }
 
-      buf->st_size    = info.size;
       buf->st_blksize = fs->cfg.block_size;
       buf->st_blocks  = (buf->st_size + buf->st_blksize - 1) /
                         buf->st_blksize;
