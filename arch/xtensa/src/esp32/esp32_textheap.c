@@ -104,3 +104,28 @@ void up_textheap_free(void *p)
         }
     }
 }
+
+/****************************************************************************
+ * Name: up_textheap_heapmember
+ *
+ * Description:
+ *   Test if memory is from text heap.
+ *
+ ****************************************************************************/
+
+bool up_textheap_heapmember(void *p)
+{
+  if (p == NULL)
+    {
+      return false;
+    }
+
+#ifdef CONFIG_ESP32_RTC_HEAP
+  if (esp32_ptr_rtcslow(p))
+    {
+      return esp32_rtcheap_heapmember(p);
+    }
+#endif
+
+  return esp32_iramheap_heapmember(p);
+}
