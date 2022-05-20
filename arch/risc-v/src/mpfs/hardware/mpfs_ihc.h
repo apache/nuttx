@@ -272,59 +272,23 @@
 #define MPIE_MASK              (1 << 2)
 #define ACK_INT_MASK           (1 << 3)
 
-#define IHC_MAX_MESSAGE_SIZE    4
+#define IHC_MAX_MESSAGE_SIZE    2
 
-typedef union ihca_ip_int_en_t_
-{
-  uint32_t int_en;
-  struct
-  {
-    uint32_t mp_h0_en  : 1;
-    uint32_t ack_h0_en : 1;
-    uint32_t mp_h1_en  : 1;
-    uint32_t ack_h1_en : 1;
-    uint32_t mp_h2_en  : 1;
-    uint32_t ack_h2_en : 1;
-    uint32_t mp_h3_en  : 1;
-    uint32_t ack_h3_en : 1;
-    uint32_t mp_h4_en  : 1;
-    uint32_t ack_h4_en : 1;
-    uint32_t reserved  : 22;
-  } bitfield;
-} ihca_ip_int_en_t;
+#define SBI_EXT_IHC_CTX_INIT    0
+#define SBI_EXT_IHC_SEND        1
+#define SBI_EXT_IHC_RECEIVE     2
 
-typedef union ihca_ip_msg_avail_stat_t_
+enum ihc_channel_e
 {
-  uint32_t msg_avail;
-  struct
-  {
-    uint32_t mp_h0    : 1;
-    uint32_t ack_h0   : 1;
-    uint32_t mp_h1    : 1;
-    uint32_t ack_h1   : 1;
-    uint32_t mp_h2    : 1;
-    uint32_t ack_h2   : 1;
-    uint32_t mp_h3    : 1;
-    uint32_t ack_h3   : 1;
-    uint32_t mp_h4    : 1;
-    uint32_t ack_h4   : 1;
-    uint32_t reserved : 22;
-  } bitfield;
-} ihca_ip_msg_avail_stat_t;
+  IHC_CHANNEL_TO_HART0    = 0x00, /* Your hart to hart 0 */
+  IHC_CHANNEL_TO_HART1    = 0x01, /* Your hart to hart 1 */
+  IHC_CHANNEL_TO_HART2    = 0x02, /* Your hart to hart 2 */
+  IHC_CHANNEL_TO_HART3    = 0x03, /* Your hart to hart 3 */
+  IHC_CHANNEL_TO_HART4    = 0x04, /* Your hart to hart 4 */
+  IHC_CHANNEL_TO_CONTEXTA = 0x05, /* Your hart to context A */
+  IHC_CHANNEL_TO_CONTEXTB = 0x06, /* Your hart to context B */
+};
 
-typedef union
-{
-  uint32_t ctl_reg;
-  struct
-    {
-      uint32_t rpm        :1; /* Remote message present */
-      uint32_t mp         :1; /* Message present */
-      uint32_t mpie       :1; /* Message present interrupt enable */
-      uint32_t ack        :1;
-      uint32_t clr_ack    :1;
-      uint32_t ackie      :1; /* Ack interrupt enable */
-      uint32_t reserved   :26;
-    } bitfield;
-} miv_ihcc_ctl_reg_t;
+typedef enum ihc_channel_e ihc_channel_t;
 
 #endif /* __ARCH_RISCV_SRC_MPFS_HARDWARE_MPFS_IHC_H */
