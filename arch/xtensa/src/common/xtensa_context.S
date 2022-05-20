@@ -68,10 +68,26 @@
 
 #include <arch/syscall.h>
 #include "xtensa_asm_utils.h"
+#include "xtensa_coproc.S"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+	.section .rodata, "a"
+
+	/* Offset to CP n save area in thread's CP save area. */
+
+	.global	_xtensa_coproc_saoffsets
+	.type		_xtensa_coproc_saoffsets, @object
+	.align	16                      /* Minimize crossing cache boundaries */
+
+_xtensa_coproc_saoffsets:
+
+	.word	XTENSA_CP0_SA, XTENSA_CP1_SA, XTENSA_CP2_SA, XTENSA_CP3_SA
+	.word	XTENSA_CP4_SA, XTENSA_CP5_SA, XTENSA_CP6_SA, XTENSA_CP7_SA
+
+	.size	_xtensa_coproc_saoffsets, . - _xtensa_coproc_saoffsets
 
 	.text
 
@@ -200,12 +216,7 @@ _xtensa_context_save:
 #endif
 
 #if XCHAL_CP_NUM > 0
-	s32i    a0, sp, (4 * REG_TMP0)     /* Save return address */
-
-	mov	a2, sp
-	call0	_xtensa_coproc_savestate
-
-	l32i	a0, sp, (4 * REG_TMP0)       /* Restore return address */
+	xtensa_coproc_savestate
 #endif
 
 	ret
@@ -248,11 +259,7 @@ _xtensa_context_save:
 _xtensa_context_restore:
 
 #if XCHAL_CP_NUM > 0
-	s32i    a0, a2, (4 * REG_TMP0)	     /* Save return address */
-
-	call0	_xtensa_coproc_restorestate
-
-	l32i	a0, a2, (4 * REG_TMP0)       /* Restore return address */
+	xtensa_coproc_restorestate
 #endif
 
 #if XCHAL_HAVE_LOOPS != 0
