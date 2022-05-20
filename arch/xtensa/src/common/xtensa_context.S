@@ -68,6 +68,7 @@
 
 #include "syscall.h"
 #include "xtensa_asm_utils.h"
+#include "xtensa_coproc.S"
 
 /****************************************************************************
  * Public Functions
@@ -201,12 +202,7 @@ _xtensa_context_save:
 #endif
 
 #if XCHAL_CP_NUM > 0
-	s32i    a0, sp, (4 * REG_TMP0)     /* Save return address */
-
-	mov	a2, sp
-	call0	_xtensa_coproc_savestate
-
-	l32i	a0, sp, (4 * REG_TMP0)       /* Restore return address */
+	xtensa_coproc_savestate
 #endif
 
 	ret
@@ -249,11 +245,7 @@ _xtensa_context_save:
 _xtensa_context_restore:
 
 #if XCHAL_CP_NUM > 0
-	s32i    a0, a2, (4 * REG_TMP0)	     /* Save return address */
-
-	call0	_xtensa_coproc_restorestate
-
-	l32i	a0, a2, (4 * REG_TMP0)       /* Restore return address */
+	xtensa_coproc_restorestate
 #endif
 
 #if XCHAL_HAVE_LOOPS != 0
