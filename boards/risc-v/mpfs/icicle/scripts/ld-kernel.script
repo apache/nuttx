@@ -73,6 +73,13 @@ SECTIONS
 
     _eronly = ABSOLUTE(.);
 
+    /* No init section */
+
+    .noinit (NOLOAD) : ALIGN(4) {
+        *(.noinit)
+        *(.noinit.*)
+    } > ksram
+
     .data : ALIGN(4) {
         _sdata = ABSOLUTE(.);
         *(.data .data.*)
