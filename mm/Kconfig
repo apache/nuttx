@@ -201,4 +201,9 @@ config MM_DUMP_ON_FAILURE
 	default n
 	depends on DEBUG_MM
 
+config MM_PANIC_ON_FAILURE
+	bool "Panic on allocation failure"
+	default n
+	depends on DEBUG_MM
+
 source "mm/iob/Kconfig"
