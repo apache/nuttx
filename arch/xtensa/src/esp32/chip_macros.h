@@ -39,6 +39,10 @@
 
 #include <nuttx/config.h>
 
+#if defined(CONFIG_ESP32_PID) && defined(CONFIG_BUILD_PROTECTED)
+#include "hardware/esp32_pid.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -48,6 +52,23 @@
  */
 
 #define HANDLER_SECTION .iram1
+
+#if defined(CONFIG_ESP32_PID) && defined(CONFIG_BUILD_PROTECTED)
+
+/* Definitions for the PIDs reserved for Kernel and Userspace */
+
+#define PIDCTRL_PID_KERNEL              0   /* Privileged */
+#define PIDCTRL_PID_USER                5   /* Non-privileged */
+
+/* Macros for privilege handling with the PID Controller peripheral */
+
+#define xtensa_saveprivilege(regs,var)     ((var) = (regs)[REG_INT_CTX])
+#define xtensa_restoreprivilege(regs,var)  ((regs)[REG_INT_CTX] = (var))
+
+#define xtensa_lowerprivilege(regs) ((regs)[REG_INT_CTX] = PIDCTRL_PID_USER)
+#define xtensa_raiseprivilege(regs) ((regs)[REG_INT_CTX] = PIDCTRL_PID_KERNEL)
+
+#endif
 
 /****************************************************************************
  * Public Data
@@ -95,6 +116,116 @@
     l32i  a1, \tmp2, 0                /* a1   = *tmp2 */
     .endm
 #endif
+
+/****************************************************************************
+ * Name: get_prev_pid
+ *
+ * Description:
+ *   Retrieve PID information from interruptee.
+ *
+ * Entry Conditions:
+ *   level  - Interrupt level
+ *   out    - Temporary and output register
+ *
+ * Exit Conditions:
+ *   PID value to be returned will be written to "out" register.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_PID
+    .macro get_prev_pid level out
+    movi    \out, PIDCTRL_FROM_1_REG + (\level - 1) * 0x4
+    l32i    \out, \out, 0
+    extui   \out, \out, 0, 3
+    .endm
+#endif
+
+/****************************************************************************
+ * Name: set_next_pid
+ *
+ * Description:
+ *   Configure the PID Controller for the new execution context.
+ *
+ * Entry Conditions:
+ *   in     - PID to be set
+ *   tmp    - Temporary register
+ *
+ * Exit Conditions:
+ *   Register "in" has been trashed.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_PID
+    .macro set_next_pid in tmp
+    movi    \tmp, PIDCTRL_PID_NEW_REG
+    s32i    \in, \tmp, 0           /* Set new PID */
+
+    movi    \tmp, PIDCTRL_PID_DELAY_REG
+    movi    \in, 0x0
+    s32i    \in, \tmp, 0           /* Set delay (cycles) for PID change */
+
+    movi    \tmp, PIDCTRL_PID_CONFIRM_REG
+    movi    \in, 0x1
+    s32i    \in, \tmp, 0           /* Confirm change to the new PID */
+    .endm
+#endif
+
+/****************************************************************************
+ * Name: exception_entry_hook
+ *
+ * Description:
+ *   Perform chip-specific exception entry operations.
+ *
+ * Entry Conditions:
+ *   level  - Interrupt level
+ *   reg_sp - Stack pointer
+ *   tmp    - Temporary register
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_XTENSA_HAVE_EXCEPTION_HOOKS
+    .macro exception_entry_hook level reg_sp tmp
+
+  /* Save PID information from interruptee when handling User (Level 1) and
+   * Software-triggered interrupts (Level 3).
+   */
+
+    .ifeq (\level - 1) & (\level - 3)
+    get_prev_pid \level \tmp
+    s32i    \tmp, \reg_sp, (4 * REG_INT_CTX) /* Save PID into context area */
+    .endif
+    .endm
+#endif
+
+/****************************************************************************
+ * Name: exception_exit_hook
+ *
+ * Description:
+ *   Perform chip-specific exception exit operations.
+ *
+ * Entry Conditions:
+ *   level  - Interrupt level
+ *   reg_sp - Stack pointer
+ *   tmp1   - Temporary register 1
+ *   tmp2   - Temporary register 2
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_XTENSA_HAVE_EXCEPTION_HOOKS
+    .macro exception_exit_hook level reg_sp tmp1 tmp2
+
+  /* Configure the PID Controller for the new execution context before
+   * returning from User (Level 1) and Software-triggered interrupts
+   * (Level 3).
+   */
+
+    .ifeq (\level - 1) & (\level - 3)
+    l32i    \tmp1, \reg_sp, (4 * REG_INT_CTX)
+    set_next_pid \tmp1 \tmp2
+    .endif
+    .endm
+#endif
+
 #endif /* __ASSEMBLY */
 
 /****************************************************************************

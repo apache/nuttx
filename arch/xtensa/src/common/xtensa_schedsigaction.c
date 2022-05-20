@@ -32,10 +32,11 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
-#include "sched/sched.h"
-#include "xtensa.h"
-
 #include "irq/irq.h"
+#include "sched/sched.h"
+
+#include "chip.h"
+#include "xtensa.h"
 
 /****************************************************************************
  * Public Functions
@@ -155,6 +156,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                   (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM |
                    PS_WOE | PS_CALLINC(1));
 #endif
+#ifndef CONFIG_BUILD_FLAT
+              xtensa_raiseprivilege(CURRENT_REGS);
+#endif
 
               CURRENT_REGS[REG_A1] = (uint32_t)CURRENT_REGS +
                                       XCPTCONTEXT_SIZE;
@@ -200,6 +204,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
           tcb->xcp.regs[REG_PS] = (uint32_t)
               (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM |
                PS_WOE | PS_CALLINC(1));
+#endif
+#ifndef CONFIG_BUILD_FLAT
+          xtensa_raiseprivilege(tcb->xcp.regs);
 #endif
         }
     }
@@ -307,6 +314,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                       (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM |
                        PS_WOE | PS_CALLINC(1));
 #endif
+#ifndef CONFIG_BUILD_FLAT
+                  xtensa_raiseprivilege(tcb->xcp.regs);
+#endif
                 }
               else
                 {
@@ -348,6 +358,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                   CURRENT_REGS[REG_PS] = (uint32_t)
                       (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM |
                        PS_WOE | PS_CALLINC(1));
+#endif
+#ifndef CONFIG_BUILD_FLAT
+                  xtensa_raiseprivilege(CURRENT_REGS);
 #endif
                 }
 
@@ -422,6 +435,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
           tcb->xcp.regs[REG_PS] = (uint32_t)
               (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM |
                PS_WOE | PS_CALLINC(1));
+#endif
+#ifndef CONFIG_BUILD_FLAT
+          xtensa_raiseprivilege(tcb->xcp.regs);
 #endif
         }
     }

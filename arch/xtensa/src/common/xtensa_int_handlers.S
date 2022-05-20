@@ -517,6 +517,55 @@ _xtensa_level6_handler:
 
 #endif /* XCHAL_EXCM_LEVEL >= 6 */
 
+#if XCHAL_HAVE_NMI
+	.section HANDLER_SECTION, "ax"
+	.type	_xtensa_nmi_handler, @function
+	.global	_xtensa_nmi_handler
+	.align	4
+
+_xtensa_nmi_handler:
+	/* For now, just panic */
+
+	exception_entry XCHAL_NMILEVEL
+
+	movi	a2, XTENSA_NMI_EXCEPTION		/* Argument 1: Error code */
+	call0	_xtensa_panic					/* Does not return */
+
+	.size	_xtensa_nmi_handler, . -_xtensa_nmi_handler
+
+#endif /* XCHAL_HAVE_NMI */
+
+#if XCHAL_HAVE_DEBUG
+	.section HANDLER_SECTION, "ax"
+	.type	_xtensa_debug_handler, @function
+	.global	_xtensa_debug_handler
+	.align	4
+
+_xtensa_debug_handler:
+
+	exception_entry XCHAL_DEBUGLEVEL
+
+	movi	a2, XTENSA_DEBUG_EXCEPTION		/* Argument 1: Error code */
+	call0	_xtensa_panic					/* Does not return */
+
+	.size	_xtensa_debug_handler, . -_xtensa_debug_handler
+
+#endif /* XCHAL_HAVE_DEBUG */
+
+	.section HANDLER_SECTION, "ax"
+	.type	_xtensa_kernel_handler, @function
+	.global	_xtensa_kernel_handler
+	.align	4
+
+_xtensa_kernel_handler:
+
+	exception_entry 1
+
+	movi	a2, XTENSA_KERNEL_EXCEPTION		/* Argument 1: Error code */
+	call0	_xtensa_panic					/* Does not return */
+
+	.size	_xtensa_kernel_handler, . -_xtensa_kernel_handler
+
 /****************************************************************************
  * HIGH PRIORITY (LEVEL > XCHAL_EXCM_LEVEL) LOW-LEVEL HANDLERS
  *

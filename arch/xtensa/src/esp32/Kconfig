@@ -541,6 +541,13 @@ config ESP32_AES_ACCELERATOR
 	bool "AES Accelerator"
 	default n
 
+config ESP32_PID
+	bool "PID Controller"
+	default n
+	select ARCH_USE_MPU
+	select XTENSA_HAVE_EXCEPTION_HOOKS if BUILD_PROTECTED
+	depends on EXPERIMENTAL
+
 endmenu # ESP32 Peripheral Selection
 
 config ESP32_WIFI_BT_COEXIST

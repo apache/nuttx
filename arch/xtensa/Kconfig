@@ -129,6 +129,10 @@ config XTENSA_HAVE_DCACHE_LOCK
 	bool
 	default n
 
+config XTENSA_HAVE_EXCEPTION_HOOKS
+	bool
+	default n
+
 config XTENSA_ICACHE
 	bool "Use I-Cache"
 	default n
