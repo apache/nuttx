@@ -426,11 +426,23 @@ static int sensor_open(FAR struct file *filep)
   if (filep->f_oflags & O_WROK)
     {
       upper->state.nadvertisers++;
+      if (filep->f_oflags & SENSOR_PERSIST)
+        {
+          lower->persist = true;
+        }
+    }
+
+  if (upper->state.generation && lower->persist)
+    {
+      user->generation = upper->state.generation - 1;
+    }
+  else
+    {
+      user->generation = upper->state.generation;
     }
 
   user->interval   = ULONG_MAX;
   user->latency    = ULONG_MAX;
-  user->generation = upper->state.generation;
   user->readlast   = true;
   nxsem_init(&user->buffersem, 0, 0);
   nxsem_set_protocol(&user->buffersem, SEM_PRIO_NONE);
@@ -556,9 +568,22 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
               goto out;
             }
 
+          /* If the device data is persistent, and when the device has no
+           * new data, the user can copy the old data, otherwise return
+           * -ENODATA.
+           */
+
           if (user->generation == upper->state.generation)
             {
-              user->generation--;
+              if (lower->persist)
+                {
+                  user->generation--;
+                }
+              else
+                {
+                  ret = -ENODATA;
+                  goto out;
+                }
             }
         }
       else
