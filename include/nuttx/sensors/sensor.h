@@ -293,6 +293,11 @@
 
 #define SENSOR_TYPE_COUNT                           33
 
+/* The additional sensor open flags */
+
+#define SENSOR_REMOTE                               (1 << 31)
+#define SENSOR_PERSIST                              (1 << 30)
+
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
@@ -935,6 +940,12 @@ struct sensor_lowerhalf_s
   /* The private opaque pointer to be passed to upper-layer during callback */
 
   FAR void *priv;
+
+  /* The flag is used to indicate that the validity of sensor data is
+   * persistent, such as battery status information, switch information, etc.
+   */
+
+  bool persist;
 };
 
 /* This structure describes the state for the sensor device */
@@ -959,6 +970,12 @@ struct sensor_reginfo_s
   FAR const char *path;        /* The path of user sensor */
   unsigned long   esize;       /* The element size of user sensor */
   unsigned long   nbuffer;     /* The number of queue buffered elements */
+
+  /* The flag is used to indicate that the validity of sensor data
+   * is persistent.
+   */
+
+  bool            persist;
 };
 #endif
 
