@@ -48,4 +48,17 @@
 #define UART1_IOMUX_RTSPIN      (19)
 #define UART1_IOMUX_CTSPIN      (20)
 
+/* SPI2 */
+
+#define SPI2_IOMUX_MISOPIN      (13)
+#define SPI2_IOMUX_MOSIPIN      (11)
+#define SPI2_IOMUX_CLKPIN       (12)
+#define SPI2_IOMUX_CSPIN        (10)
+#define SPI2_IOMUX_WPPIN        (14)
+#define SPI2_IOMUX_HDPIN        (9)
+
+/* SPI3 */
+
+/* SPI3 have no iomux pins */
+
 #endif /* __ARCH_XTENSA_SRC_ESP32S3_HARDWARE_ESP32S3_PINMAP_H */
