@@ -78,6 +78,15 @@ static int locate_code(".ram_code") tc32_getirq(void)
 
   value = IRQ_SRC_REG & IRQ_MASK_REG;
 
+  if ((value & BIT(NR_RF_IRQ)) != 0)
+    {
+      return NR_RF_IRQ;
+    }
+  else if ((value & BIT(NR_SYSTEM_TIMER_IRQ)) != 0)
+    {
+      return NR_SYSTEM_TIMER_IRQ;
+    }
+
   if (value == 0)
     {
       irq = NR_IRQS;
@@ -102,7 +111,7 @@ static int locate_code(".ram_code") tc32_getirq(void)
  *
  ****************************************************************************/
 
-void arm_ack_irq(int irq)
+void locate_code(".ram_code") arm_ack_irq(int irq)
 {
 }
 
