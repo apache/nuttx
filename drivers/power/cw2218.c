@@ -57,8 +57,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 #define CW2218_REG_TEMPMAX_DEFAULT_VALUE  0xFF /* Maximum temperature threshold register default value */
-#define CW2218_REG_TEMPMIN_DEFAULT_VALUE  0x00 /* Minimum temperature threshold register default value */
-#define CW2218_TEMP_ERROR_DEFAULT_VALUE   80   /* default temperature return when error */
+#define CW2218_REG_TEMPMIN_DEFAULT_VALUE  0x14 /* Minimum temperature threshold register default value */
+#define CW2218_TEMP_ERROR_DEFAULT_VALUE   -10   /* default temperature return when error */
 
 /****************************************************************************
  * Private
@@ -475,17 +475,24 @@ static inline int cw2218_gettemp(FAR struct cw2218_dev_s *priv, b8_t *temp)
   int ret = -1;
 
   ret = cw2218_getreg8(priv, CW2218_COMMAND_TEMP, &regval, 1);
-  if ((ret == OK) && \
-  (regval >= CW2218_REG_TEMPMIN_DEFAULT_VALUE) && \
-  (regval <= CW2218_REG_TEMPMAX_DEFAULT_VALUE))
+  if (ret < 0)
     {
-      cw_temp = (int)regval * CW2218_TEMP_MAGIC_PART1 /
-        CW2218_TEMP_MAGIC_PART2 - CW2218_TEMP_MAGIC_PART3;
-      *temp = cw_temp;
+      return ret;
     }
-  else /* error occurred */
+  else
     {
-      *temp = CW2218_TEMP_ERROR_DEFAULT_VALUE;
+      if ((regval >= CW2218_REG_TEMPMIN_DEFAULT_VALUE) &&
+         (regval <= CW2218_REG_TEMPMAX_DEFAULT_VALUE))
+        {
+          cw_temp = (int)regval * CW2218_TEMP_MAGIC_PART1 /
+            CW2218_TEMP_MAGIC_PART2 - CW2218_TEMP_MAGIC_PART3;
+          *temp = cw_temp;
+        }
+      else /* error occurred */
+        {
+          baterr("cw2218 get abnormal temp:%d\n", regval);
+          *temp = CW2218_TEMP_ERROR_DEFAULT_VALUE;
+        }
     }
 
   return ret;
@@ -1289,6 +1296,7 @@ static int gauge_init_thread(int argc, char** argv)
       if (ret < 0)
         {
           baterr("battery gauge init error thread runing\n");
+          priv->gauge_init_status = false;
         }
       else
         {
@@ -1358,7 +1366,7 @@ FAR struct battery_gauge_dev_s *cw2218_initialize(
   priv->pin       = int_pin;
   priv->last_cap  = -1;
   priv->last_batt_temp  = -1;
-  priv->gauge_init_status = false;
+  priv->gauge_init_status = true;
 
   ret = cw2218_init_interrupt(priv);
   if (ret < 0)
@@ -1378,6 +1386,7 @@ FAR struct battery_gauge_dev_s *cw2218_initialize(
       if (ret < 0)
         {
           baterr("ERROR: Failed to create gauge init thread\n");
+          priv->gauge_init_status = false;
           goto err;
         }
     }
