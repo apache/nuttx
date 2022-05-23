@@ -646,7 +646,7 @@ static int sensor_rpmsg_control(FAR struct file *filep,
     {
       return drv->ops->control(filep, drv, cmd, arg);
     }
-  else if (!(filep->f_oflags & O_REMOTE))
+  else if (!(filep->f_oflags & O_REMOTE) && _SNIOCVALID(cmd))
     {
       return sensor_rpmsg_ioctl(dev, cmd, arg,
                                 sizeof(*ioctl) + ioctl->len, true);
