@@ -826,7 +826,6 @@ static int nvt_check_fw_reset_state(FAR struct nt38350_dev_s *priv,
 
   while (1)
     {
-      usleep(NVT_DELAY_10MS);
       buf[0] = EVENT_MAP_RESET_COMPLETE;
       buf[1] = 0x00;
       ret = nt38350_read_reg(priv, NVT_I2C_FW_ADDRESS, buf, 6);
@@ -845,6 +844,8 @@ static int nvt_check_fw_reset_state(FAR struct nt38350_dev_s *priv,
           ret = -1;
           break;
         }
+
+      usleep(NVT_DELAY_10MS);
     }
 
   return ret;
@@ -4101,20 +4102,7 @@ static int nt38350_hardware_reinit(FAR struct nt38350_dev_s *priv)
 {
   int ret;
 
-  ret = nvt_ts_check_chip_ver_trim(priv, NVT_CHIP_VER_TRIM_ADDR);
-  if (ret < 0)
-    {
-      ret = nvt_ts_check_chip_ver_trim(priv, NVT_CHIP_VER_TRIM_OLD_ADDR);
-      if (ret < 0)
-        {
-          ierr("ERROR: Chip is not identified\n");
-          return ret;
-        }
-    }
-
-  nvt_bootloader_reset(priv);
-  nvt_check_fw_reset_state(priv, RESET_STATE_INIT);
-  nvt_get_fw_info(priv);
+  ret = nvt_bootloader_reset(priv);
   priv->nvt_pwr_resume.icpower_state = NVT_POWER_ON;
 
   return ret;
@@ -4131,6 +4119,7 @@ static int nt38350_ts_resume(FAR struct nt38350_dev_s *dev)
   ret = nvt_check_fw_reset_state(dev, RESET_STATE_INIT);
   if (ret < 0)
     {
+      iwarn("FW is not ready, try to reset bootloader.\n");
       nvt_bootloader_reset(dev);
       ret = nvt_check_fw_reset_state(dev, RESET_STATE_INIT);
       if (ret < 0)
