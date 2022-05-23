@@ -138,8 +138,10 @@ int nxsem_post(FAR sem_t *sem)
 
       if (stcb != NULL)
         {
-          /* The task will be the new holder of the semaphore when
-           * it is awakened.
+          /* Check if there are any tasks in the waiting for semaphore
+           * task list that are waiting for this semaphore.  This is a
+           * prioritized list so the first one we encounter is the one
+           * that we want.
            */
 
           nxsem_add_holder_tcb(stcb, sem);

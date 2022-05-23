@@ -77,23 +77,6 @@ implementation:
      slightly increased code size and around 6-12 bytes times the value of
      ``CONFIG_SEM_PREALLOCHOLDERS``.
 
-  -  ``CONFIG_SEM_NNESTPRIO``: In addition, there may be multiple
-     threads of various priorities that need to wait for a count from the
-     semaphore. These, the lower priority thread holding the semaphore may
-     have to be boosted numerous times and, to make things more complex,
-     will have to keep track of all of the boost priorities values in
-     order to correctly restore the priorities after a count has been
-     handed out to the higher priority thread. The
-     ``CONFIG_SEM_NNESTPRIO`` defines the size of an array, one array per
-     active thread. This setting is the maximum number of higher priority
-     threads (minus 1) than can be waiting for another thread to release a
-     count on a semaphore. This value may be set to zero if no more than
-     one thread is expected to wait for a semaphore.
-
-     The cost associated with setting ``CONFIG_SEM_NNESTPRIO`` is slightly
-     increased code size and (``CONFIG_SEM_PREALLOCHOLDERS`` + 1) times
-     the maximum number of active threads.
-
   -  **Increased Susceptibility to Bad Thread Behavior**. These various
      structures tie the semaphore implementation more tightly to the
      behavior of the implementation. For examples, if a thread executes
