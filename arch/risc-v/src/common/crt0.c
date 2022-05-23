@@ -169,6 +169,7 @@ void _start(int argc, char *argv[])
 
   ARCH_DATA_RESERVE->ar_sigtramp = (addrenv_sigtramp_t)sig_trampoline;
 
+#ifdef CONFIG_HAVE_CXX
   /* Call C++ constructors */
 
   exec_ctors();
@@ -176,6 +177,7 @@ void _start(int argc, char *argv[])
   /* Setup so that C++ destructors called on task exit */
 
   atexit(exec_dtors);
+#endif
 
   /* Call the main() entry point passing argc and argv. */
 
