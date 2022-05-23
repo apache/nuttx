@@ -1172,16 +1172,6 @@ config SEM_PREALLOCHOLDERS
 		are only using semaphores as mutexes (only one holder) OR if no more
 		than two threads participate using a counting semaphore.
 
-config SEM_NNESTPRIO
-	int "Maximum number of higher priority threads"
-	default 16
-	---help---
-		If priority inheritance is enabled, then this setting is the
-		maximum number of higher priority threads (minus 1) than can be
-		waiting for another thread to release a count on a semaphore.
-		This value may be set to zero if no more than one thread is
-		expected to wait for a semaphore.
-
 endif # PRIORITY_INHERITANCE
 
 menu "RTOS hooks"
