@@ -86,12 +86,6 @@ int up_cpu_idlestack(int cpu, struct tcb_s *tcb, size_t stack_size)
   up_create_stack(tcb, stack_size, TCB_FLAG_TTYPE_KERNEL);
 #endif
 
-#if XCHAL_CP_NUM > 0
-  /* REVISIT: Does it make since to have co-processors enabled on the IDLE
-   * thread?
-   */
-#endif
-
   return OK;
 }
 
