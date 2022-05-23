@@ -30,6 +30,7 @@
 #include <errno.h>
 #include <poll.h>
 #include <debug.h>
+#include <stdio.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
@@ -116,12 +117,12 @@ typedef struct
 } cs35l41_otp_packed_entry_t;
 
 typedef int (*cs35l41b_ioctl_handler_t)(FAR struct cs35l41b_dev_s *priv,
-                                        void *arg);
+                                        FAR char *key, FAR char *value,
+                                        FAR void *arg);
 
 typedef struct
 {
   char *key;
-  char *value;
   cs35l41b_ioctl_handler_t handler;
 } cs35l41b_info_t;
 
@@ -165,7 +166,56 @@ static int cs35l41b_boot_initialize(FAR struct cs35l41b_dev_s *priv,
 static int cs35l41b_output_configuration(FAR struct cs35l41b_dev_s *priv);
 
 static int cs35l41b_set_scenario_handler(FAR struct cs35l41b_dev_s *priv,
-                                          void *arg);
+                                        FAR char *key, FAR char *value,
+                                        FAR void *arg);
+
+static int cs35l41b_set_mode_handler(FAR struct cs35l41b_dev_s *priv,
+                                    FAR char *key, FAR char *value,
+                                    FAR void *arg);
+static int cs35l41b_set_asp_gain_handler(FAR struct cs35l41b_dev_s *priv,
+                                        FAR char *key, FAR char *value,
+                                        FAR void *arg);
+
+static int cs35l41b_get_asp_gain_handler(FAR struct cs35l41b_dev_s *priv,
+                                        FAR char *key, FAR char *value,
+                                        FAR void *arg);
+
+static int cs35l41b_get_chip_id_handler(FAR struct cs35l41b_dev_s *priv,
+                                        FAR char *key, FAR char *value,
+                                        FAR void *arg);
+
+static int cs35l41b_set_dsp_gain_handler(FAR struct cs35l41b_dev_s *priv,
+                                        FAR char *key, FAR char *value,
+                                        FAR void *arg);
+
+static int cs35l41b_get_dsp_gain_handler(FAR struct cs35l41b_dev_s *priv,
+                                        FAR char *key, FAR char *value,
+                                        FAR void *arg);
+
+static int cs35l41b_get_caliberate_value_handler(FAR struct cs35l41b_dev_s *priv,
+                                                FAR char *key,
+                                                FAR char *value,
+                                                FAR void *arg);
+
+static int cs35l41b_set_debug_gain_handler(FAR struct cs35l41b_dev_s *priv,
+                                          FAR char *key, FAR char *value,
+                                          FAR void *arg);
+
+static int cs35l41b_get_debug_gain_handler(FAR struct cs35l41b_dev_s *priv,
+                                          FAR char *key, FAR char *value,
+                                          FAR void *arg);
+
+static int cs35l41b_get_dump_info_handler(FAR struct cs35l41b_dev_s *priv,
+                                          FAR char *key, FAR char *value,
+                                          FAR void *arg);
+
+static int cs35l41b_set_print_info_handler(FAR struct cs35l41b_dev_s *priv,
+                                          FAR char *key, FAR char *value,
+                                          FAR void *arg);
+
+static int cs35l41b_get_mode_handler(FAR struct cs35l41b_dev_s *priv,
+                                    FAR char *key, FAR char *value,
+                                    FAR void *arg);
 
 static int cs35l41b_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
                             FAR struct audio_caps_s *caps);
@@ -425,43 +475,454 @@ static const uint32_t g_cs35l41_pdn_patch[] =
 static const cs35l41b_info_t cs35l41b_info[] =
 {
   {
-    .key      = "set_scenario",
-    .value    = "music",
-    .handler  = cs35l41b_set_scenario_handler,
+    .key        = "set_scenario",
+    .handler    = cs35l41b_set_scenario_handler,
   },
 
   {
-    .key      = "set_scenario",
-    .value    = "sco",
-    .handler  = cs35l41b_set_scenario_handler,
+    .key        = "set_mode",
+    .handler    = cs35l41b_set_mode_handler,
   },
+
+  {
+    .key        = "set_asp_gain",
+    .handler    = cs35l41b_set_asp_gain_handler,
+  },
+
+  {
+    .key        = "get_asp_gain",
+    .handler    = cs35l41b_get_asp_gain_handler,
+  },
+
+  {
+    .key        = "get_pa_chip_id",
+    .handler    = cs35l41b_get_chip_id_handler,
+  },
+
+  {
+    .key        = "set_dsp_gain",
+    .handler    = cs35l41b_set_dsp_gain_handler,
+  },
+
+  {
+    .key        = "get_dsp_gain",
+    .handler    = cs35l41b_get_dsp_gain_handler,
+  },
+
+  {
+    .key        = "get_caliberate_value",
+    .handler    = cs35l41b_get_caliberate_value_handler,
+  },
+
+#ifdef CONFIG_AUDIO_CS35L41B_DEBUG
+  {
+    .key        = "set_debug_gain",
+    .handler    = cs35l41b_set_debug_gain_handler,
+  },
+
+  {
+    .key        = "get_debug_gain",
+    .handler    = cs35l41b_get_debug_gain_handler,
+  },
+
+  {
+    .key        = "get_dump_info",
+    .handler    = cs35l41b_get_dump_info_handler,
+  },
+
+  {
+    .key        = "set_printinfo",
+    .handler    = cs35l41b_set_print_info_handler,
+  },
+
+  {
+    .key        = "get_mode",
+    .handler    = cs35l41b_get_mode_handler,
+  },
+#endif
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static int cs35l41b_set_scenario_handler(FAR struct cs35l41b_dev_s *priv,
-                                          void *arg)
-{
-  char *parse_ptr = (char *)arg;
+/****************************************************************************
+ * Name: cs35l41b_parse_string
+ *
+ * Description:
+ *   parse string
+ *
+ ****************************************************************************/
 
-  if (!strncmp(parse_ptr, "music", strlen("music")))
+static void cs35l41b_parse_string(FAR char *src, FAR char *key,
+                                  FAR char **value)
+{
+  FAR char *parse_ptr = src;
+
+  if (!strncmp(parse_ptr, key, strlen(key)))
+    {
+      parse_ptr += strlen(key);
+      if (!strncmp(parse_ptr, "=", strlen("=")))
+        {
+          parse_ptr += strlen("=");
+
+          *value = parse_ptr;
+        }
+      else
+        {
+          *value = NULL;
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: cs35l41b_set_scenario_handler
+ *
+ * Description:
+ *   set scenario handler
+ *
+ ****************************************************************************/
+
+static int cs35l41b_set_scenario_handler(FAR struct cs35l41b_dev_s *priv,
+                                        FAR char *key, FAR char *value,
+                                        FAR void *arg)
+{
+  if (!strncmp(value, "music", strlen("music")))
     {
       priv->scenario_mode = CS35L41B_SCENARIO_SPEAKER;
     }
-  else if (!strncmp(parse_ptr, "sco", strlen("sco")))
+  else if (!strncmp(value, "sco", strlen("sco")))
     {
       priv->scenario_mode = CS35L41B_SCENARIO_SCO;
     }
   else
     {
-      auderr("value is invalid!\n");
+      auderr("%s value is invaild!\n", key);
       return ERROR;
     }
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: cs35l41b_set_mode_handler
+ *
+ * Description:
+ *   set mode handler
+ *
+ ****************************************************************************/
+
+static int cs35l41b_set_mode_handler(FAR struct cs35l41b_dev_s *priv,
+                                    FAR char *key, FAR char *value,
+                                    FAR void *arg)
+{
+  int mode;
+
+  if (!strncmp(value, "asp", strlen("asp")))
+    {
+      mode = CS35L41_ASP_MODE;
+    }
+  else if (!strncmp(value, "dsp", strlen("dsp")))
+    {
+      mode = CS35L41_DSP_TUNE_MODE;
+    }
+  else if (!strncmp(value, "cal", strlen("cal")))
+    {
+      mode = CS35L41_DSP_CAL_MODE;
+    }
+  else
+    {
+      auderr("%s value is invaild!\n", key);
+      return ERROR;
+    }
+
+  if (cs35l41b_reset(priv, true) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (cs35l41b_boot_initialize(priv, mode) == ERROR)
+    {
+      return ERROR;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cs35l41b_set_asp_gain_handler
+ *
+ * Description:
+ *   set asp gain handler
+ *
+ ****************************************************************************/
+
+static int cs35l41b_set_asp_gain_handler(FAR struct cs35l41b_dev_s *priv,
+                                         FAR char *key, FAR char *value,
+                                         FAR void *arg)
+{
+  uint32_t gain;
+
+  if (value == NULL)
+    {
+      auderr("%s value is invaild!\n", key);
+      return ERROR;
+    }
+
+  gain = atoi(value);
+
+  if (gain > 20)
+    {
+      auderr("set asp gain out of limit!\n");
+      return ERROR;
+    }
+
+  priv->asp_gain = (gain << CS35L41B_AMP_GAIN_PCM_SHIFT);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cs35l41b_get_asp_gain_handler
+ *
+ * Description:
+ *   get asp gain handler
+ *
+ ****************************************************************************/
+
+static int cs35l41b_get_asp_gain_handler(FAR struct cs35l41b_dev_s *priv,
+                                        FAR char *key, FAR char *value,
+                                        FAR void *arg)
+{
+  FAR char *parse_ptr = (char *)arg;
+  uint32_t gain = priv->asp_gain >> CS35L41B_AMP_GAIN_PCM_SHIFT;
+
+  memset(parse_ptr, 0, strlen(parse_ptr) + 1);
+  sprintf(parse_ptr, "%s=%ld", key, gain);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cs35l41b_get_chip_id_handler
+ *
+ * Description:
+ *   get chip id
+ *
+ ****************************************************************************/
+
+static int cs35l41b_get_chip_id_handler(FAR struct cs35l41b_dev_s *priv,
+                                        FAR char *key, FAR char *value,
+                                        FAR void *arg)
+{
+  FAR char *parse_ptr = (char *)arg;
+  int chip_id = CS35L41_DEVID;
+
+  memset(parse_ptr, 0, strlen(parse_ptr) + 1);
+  sprintf(parse_ptr, "%s=%d", key, chip_id);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cs35l41b_set_dsp_gain_handler
+ *
+ * Description:
+ *   set dsp gain
+ *
+ ****************************************************************************/
+
+static int cs35l41b_set_dsp_gain_handler(FAR struct cs35l41b_dev_s *priv,
+                                        FAR char *key, FAR char *value,
+                                        FAR void *arg)
+{
+  uint32_t gain;
+
+  if (value == NULL)
+    {
+      auderr("%s value is invaild!\n", key);
+      return ERROR;
+    }
+
+  gain = atoi(value);
+
+  if (gain > 20)
+    {
+      auderr("set asp gain out of limit!\n");
+      return ERROR;
+    }
+
+  priv->dsp_gain = (gain << CS35L41B_AMP_GAIN_PCM_SHIFT);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cs35l41b_get_dsp_gain_handler
+ *
+ * Description:
+ *   get dsp gain
+ *
+ ****************************************************************************/
+
+static int cs35l41b_get_dsp_gain_handler(FAR struct cs35l41b_dev_s *priv,
+                                        FAR char *key, FAR char *value,
+                                        FAR void *arg)
+{
+  FAR char *parse_ptr = (char *)arg;
+  uint32_t gain = priv->dsp_gain >> CS35L41B_AMP_GAIN_PCM_SHIFT;
+
+  memset(parse_ptr, 0, strlen(parse_ptr) + 1);
+  sprintf(parse_ptr, "%s=%ld", key, gain);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cs35l41b_get_caliberate_value_handler
+ *
+ * Description:
+ *   get caliberate value
+ *
+ ****************************************************************************/
+
+static int cs35l41b_get_caliberate_value_handler(FAR struct cs35l41b_dev_s *priv,
+                                                FAR char *key,
+                                                FAR char *value,
+                                                FAR void *arg)
+{
+  FAR char *parse_ptr = (char *)arg;
+  uint32_t caliberate_value = cs35l41b_get_calibration_result();
+
+  memset(parse_ptr, 0, strlen(parse_ptr) + 1);
+  sprintf(parse_ptr, "%s=%ld", key, caliberate_value);
+
+  return OK;
+}
+
+#ifdef CONFIG_AUDIO_CS35L41B_DEBUG
+
+/****************************************************************************
+ * Name: cs35l41b_set_debug_gain_handler
+ *
+ * Description:
+ *   set debug gain
+ *
+ ****************************************************************************/
+
+static int cs35l41b_set_debug_gain_handler(FAR struct cs35l41b_dev_s *priv,
+                                          FAR char *key, FAR char *value,
+                                          FAR void *arg)
+{
+  uint32_t gain;
+
+  if (value == NULL)
+    {
+      auderr("%s value is invaild!\n", key);
+      return ERROR;
+    }
+
+  gain = atoi(value);
+
+  cs35l41b_debug_set_gain(priv, gain);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cs35l41b_get_debug_gain_handler
+ *
+ * Description:
+ *   get debug gain
+ *
+ ****************************************************************************/
+
+static int cs35l41b_get_debug_gain_handler(FAR struct cs35l41b_dev_s *priv,
+                                          FAR char *key, FAR char *value,
+                                          FAR void *arg)
+{
+  FAR char *parse_ptr = (char *)arg;
+  uint32_t gain;
+
+  cs35l41b_debug_get_gain(priv, &gain);
+  memset(parse_ptr, 0, strlen(parse_ptr) + 1);
+  sprintf(parse_ptr, "%s=%ld", key, gain);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cs35l41b_get_dump_info_handler
+ *
+ * Description:
+ *   get dump info
+ *
+ ****************************************************************************/
+
+static int cs35l41b_get_dump_info_handler(FAR struct cs35l41b_dev_s *priv,
+                                          FAR char *key, FAR char *value,
+                                          FAR void *arg)
+{
+  cs35l41b_dump_registers(priv, (unsigned long) arg);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cs35l41b_set_print_info_handler
+ *
+ * Description:
+ *   enable/disable print information
+ *
+ ****************************************************************************/
+
+static int cs35l41b_set_print_info_handler(FAR struct cs35l41b_dev_s *priv,
+                                          FAR char *key, FAR char *value,
+                                          FAR void *arg)
+{
+  if (!strncmp(value, "on", strlen("on")))
+    {
+      priv->dump_dsp_info = true;
+    }
+  else if (!strncmp(value, "off", strlen("off")))
+    {
+      priv->dump_dsp_info = false;
+    }
+  else
+    {
+      auderr("%s value is invaild!\n", key);
+      return ERROR;
+    }
+
+  audwarn("priv->dump_dsp_info:%d\n", priv->dump_dsp_info);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cs35l41b_get_mode_handler
+ *
+ * Description:
+ *   get mode handler
+ *
+ ****************************************************************************/
+
+static int cs35l41b_get_mode_handler(FAR struct cs35l41b_dev_s *priv,
+                                    FAR char *key, FAR char *value,
+                                    FAR void *arg)
+{
+  FAR char *parse_ptr = (char *)arg;
+  int mode;
+
+  cs35l41b_debug_get_mode(priv, &mode);
+
+  memset(parse_ptr, 0, strlen(parse_ptr) + 1);
+  sprintf(parse_ptr, "%s=%d", key, mode);
+
+  return OK;
+}
+
+#endif
 
 /****************************************************************************
  * Name: cs35l41b_ioctl
@@ -475,8 +936,8 @@ static int cs35l41b_ioctl(FAR struct audio_lowerhalf_s *dev,
                           int cmd, unsigned long arg)
 {
   FAR struct cs35l41b_dev_s *priv = (FAR struct cs35l41b_dev_s *)dev;
-  FAR struct audio_msg_s *audio_msg;
   FAR char *parse_ptr = (FAR char *)arg;
+  FAR char *value = NULL;
   int ret;
   int i;
 
@@ -487,188 +948,30 @@ static int cs35l41b_ioctl(FAR struct audio_lowerhalf_s *dev,
           if (!strncmp(parse_ptr,
               cs35l41b_info[i].key, strlen(cs35l41b_info[i].key)))
             {
-              parse_ptr += strlen(cs35l41b_info[i].key);
-              parse_ptr += strlen("=");
+              cs35l41b_parse_string(parse_ptr, cs35l41b_info[i].key, &value);
 
-              if (!strncmp(parse_ptr,
-                  cs35l41b_info[i].value,
-                  strlen(cs35l41b_info[i].value)))
+              if (cs35l41b_info[i].handler != NULL)
                 {
-                  if (cs35l41b_info[i].handler != NULL)
+                  ret = cs35l41b_info[i].handler(priv,
+                                                cs35l41b_info[i].key,
+                                                value,
+                                                (void *)arg);
+                  if (ret < 0)
                     {
-                      ret = cs35l41b_info[i].handler(priv,
-                                                    cs35l41b_info[i].value);
-                      return ret;
-                    }
-                  else
-                    {
+                      auderr("cs35l41b ioctl handler failed!\n");
                       return ERROR;
                     }
+
+                  return OK;
                 }
               else
                 {
-                  parse_ptr = (FAR char *)arg;
+                  return ERROR;
                 }
             }
-          else
-            {
-              parse_ptr = (FAR char *)arg;
-            }
         }
 
-      audio_msg = (FAR struct audio_msg_s *)arg;
-
-      switch (audio_msg->msg_id)
-        {
-          case IO_SET_BYPASS:
-            if (cs35l41b_reset(priv, true) == ERROR)
-              {
-                auderr("cs35l41b reset failed!\n");
-                return ERROR;
-              }
-
-            if (cs35l41b_boot_initialize(priv,
-                                        CS35L41_ASP_MODE) == ERROR)
-              {
-                auderr("boot initialize failed!\n");
-                return ERROR;
-              }
-
-            break;
-
-          case IO_CANCEL_BYPASS:
-            if (cs35l41b_reset(priv, true) == ERROR)
-              {
-                auderr("cs35l41b reset failed!\n");
-                return ERROR;
-              }
-
-            if (cs35l41b_boot_initialize(priv,
-                                        CS35L41_DSP_TUNE_MODE) == ERROR)
-              {
-                auderr("boot initialize failed!\n");
-                return ERROR;
-              }
-            break;
-
-          case IO_GET_CHIP_ID:
-            audio_msg->msg_id = IO_GET_CHIP_ID;
-            audio_msg->u.data = CS35L41_DEVID;
-            break;
-
-          case IO_SET_CALIBRATED:
-            audio_msg->msg_id = IO_SET_CALIBRATED;
-
-            if (cs35l41b_reset(priv, true) == ERROR)
-              {
-                auderr("cs35l41b reset failed!\n");
-                return ERROR;
-              }
-
-            if (cs35l41b_boot_initialize(priv,
-                CS35L41_DSP_CAL_MODE) == ERROR)
-              {
-                auderr("boot initialize failed!\n");
-                return ERROR;
-              }
-
-            audio_msg->u.data = CALIBRATED_STATUS_OK;
-
-            *(FAR struct audio_msg_s *)arg = *audio_msg;
-            break;
-
-          case IO_GET_CALIBRATED:
-            audio_msg->msg_id = IO_GET_CALIBRATED;
-            audio_msg->u.data = cs35l41b_get_calibration_result();
-            break;
-
-          case IO_CALIBERATE_REBOOT:
-
-            if (cs35l41b_reset(priv, true) == ERROR)
-              {
-                auderr("cs35l41b reset failed!\n");
-                return ERROR;
-              }
-
-            if (cs35l41b_boot_initialize(priv,
-                CS35L41_DSP_TUNE_MODE) == ERROR)
-              {
-                auderr("boot initialize failed!\n");
-                return ERROR;
-              }
-            break;
-
-          case IO_SET_ASP_GAIN:
-            if (audio_msg->u.data > 20)
-              {
-                auderr("set asp gain out of limit!\n");
-                return ERROR;
-              }
-
-            priv->asp_gain =
-            (audio_msg->u.data << CS35L41B_AMP_GAIN_PCM_SHIFT);
-
-            break;
-
-          case IO_GET_ASP_GAIN:
-            audio_msg->u.data =
-            (priv->asp_gain >> CS35L41B_AMP_GAIN_PCM_SHIFT);
-
-            break;
-
-          case IO_SET_DSP_GAIN:
-            if (audio_msg->u.data > 20)
-              {
-                auderr("set dsp gain out of limit!\n");
-                return ERROR;
-              }
-
-            priv->dsp_gain =
-            (audio_msg->u.data << CS35L41B_AMP_GAIN_PCM_SHIFT);
-
-            break;
-
-          case IO_GET_DSP_GAIN:
-            audio_msg->u.data =
-            (priv->dsp_gain >> CS35L41B_AMP_GAIN_PCM_SHIFT);
-
-            break;
-
-#ifdef CONFIG_AUDIO_CS35L41B_DEBUG
-          case IO_DEBUG_SET_GAIN:
-            cs35l41b_debug_set_gain(priv,
-                                    (unsigned int)audio_msg->u.ptr);
-            break;
-
-          case IO_DEBUG_GET_GAIN:
-            cs35l41b_debug_get_gain(priv,
-                                    (unsigned int)audio_msg->u.ptr);
-            break;
-
-          case IO_DEBUG_DUMP_INFO:
-            cs35l41b_dump_registers(priv,
-                                    (unsigned int)audio_msg->u.ptr);
-            break;
-
-          case IO_DEBUG_DUMP_ENABLE:
-            priv->dump_dsp_info = true;
-            break;
-
-          case IO_DEBUG_DUMP_DISABLE:
-            priv->dump_dsp_info = false;
-            break;
-
-          case IO_DEBUG_GET_MODE:
-            cs35l41b_debug_get_mode(priv,
-                                    (unsigned int)audio_msg->u.ptr);
-            break;
-#endif
-
-          default:
-            auderr("paramter invaild!\n");
-            return ERROR;
-            break;
-        }
+      return ERROR;
     }
 
   return OK;

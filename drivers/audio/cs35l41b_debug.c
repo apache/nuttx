@@ -166,16 +166,14 @@ void cs35l41b_dump_registers(FAR struct cs35l41b_dev_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_AUDIO_CS35L41B_DEBUG
-int cs35l41b_debug_set_gain(FAR struct cs35l41b_dev_s *priv,
-                            unsigned long arg)
+int cs35l41b_debug_set_gain(FAR struct cs35l41b_dev_s *priv, uint32_t gain)
 {
   uint32_t regval;
   uint32_t temp;
-  uint32_t gain;
-  struct cs35l41b_debug_msg_s *msg = (struct cs35l41b_debug_msg_s *)arg;
+  uint32_t temp_gain;
   int ret;
 
-  if (msg->gain > 20)
+  if (gain > 20)
     {
       syslog(LOG_ERR, "gain parameter is invaild!\n");
       return ERROR;
@@ -183,17 +181,17 @@ int cs35l41b_debug_set_gain(FAR struct cs35l41b_dev_s *priv,
 
   if (priv->mode == CS35L41_ASP_MODE)
     {
-      priv->asp_gain = msg->gain << CS35L41B_AMP_GAIN_PCM_SHIFT;
+      priv->asp_gain = gain << CS35L41B_AMP_GAIN_PCM_SHIFT;
     }
   else
     {
-      priv->dsp_gain = msg->gain << CS35L41B_AMP_GAIN_PCM_SHIFT;
+      priv->dsp_gain = gain << CS35L41B_AMP_GAIN_PCM_SHIFT;
     }
 
   if ((priv->state == CS35L41_STATE_POWER_UP) ||
       (priv->state == CS35L41_STATE_DSP_POWER_UP))
     {
-      gain = msg->gain << CS35L41B_AMP_GAIN_PCM_SHIFT;
+      temp_gain = gain << CS35L41B_AMP_GAIN_PCM_SHIFT;
 
       ret = cs35l41b_read_register(priv, &regval, CS35L41B_AMP_GAIN_REG);
       if (ret < 0)
@@ -205,7 +203,7 @@ int cs35l41b_debug_set_gain(FAR struct cs35l41b_dev_s *priv,
       temp = ~CS35L41B_AMP_GAIN_PCM_MASK;
       temp &= regval;
 
-      temp |= gain;
+      temp |= temp_gain;
 
       if (cs35l41b_write_register(priv, CS35L41B_AMP_GAIN_REG, temp) < 0)
         {
@@ -227,21 +225,18 @@ int cs35l41b_debug_set_gain(FAR struct cs35l41b_dev_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_AUDIO_CS35L41B_DEBUG
-int cs35l41b_debug_get_gain(FAR struct cs35l41b_dev_s *priv,
-                            unsigned long arg)
+int cs35l41b_debug_get_gain(FAR struct cs35l41b_dev_s *priv, uint32_t *gain)
 {
-  struct cs35l41b_debug_msg_s *msg = (struct cs35l41b_debug_msg_s *)arg;
-
   if (priv->mode == CS35L41_ASP_MODE)
     {
-      msg->gain = (priv->asp_gain >> CS35L41B_AMP_GAIN_PCM_SHIFT);
+      *gain = (priv->asp_gain >> CS35L41B_AMP_GAIN_PCM_SHIFT);
     }
   else
     {
-      msg->gain = (priv->dsp_gain >> CS35L41B_AMP_GAIN_PCM_SHIFT);
+      *gain = (priv->dsp_gain >> CS35L41B_AMP_GAIN_PCM_SHIFT);
     }
 
-  syslog(LOG_INFO, "cs35l41b mode:%d, gain:%ld \n", priv->mode, msg->gain);
+  syslog(LOG_INFO, "cs35l41b mode:%d, gain:%ld \n", priv->mode, *gain);
 
   return OK;
 }
@@ -256,14 +251,11 @@ int cs35l41b_debug_get_gain(FAR struct cs35l41b_dev_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_AUDIO_CS35L41B_DEBUG
-int cs35l41b_debug_get_mode(FAR struct cs35l41b_dev_s *priv,
-                            unsigned long arg)
+int cs35l41b_debug_get_mode(FAR struct cs35l41b_dev_s *priv, int *mode)
 {
-  struct cs35l41b_debug_msg_s *msg = (struct cs35l41b_debug_msg_s *)arg;
+  *mode = priv->mode;
 
-  msg->mode = priv->mode;
-
-  syslog(LOG_INFO, "cs35l41b mode:%d", msg->mode);
+  syslog(LOG_INFO, "cs35l41b mode:%d", *mode);
 
   return OK;
 }
