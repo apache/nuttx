@@ -31,6 +31,7 @@
 #include <debug.h>
 
 #include "hardware/tlsr82_mspi.h"
+#include "hardware/tlsr82_irq.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -87,6 +88,69 @@
 
 #define FLASH_CMD_READ_UID1                  0x4b
 #define FLASH_CMD_READ_UID2                  0x5a
+
+/* Flash lock/unlock macros definitions */
+
+#ifndef CONFIG_TLSR8278_BLE_SDK
+
+#define FLASH_LOCK_INIT()                    \
+  irqstate_t _flags;
+
+#define FLASH_LOCK()                         \
+  do                                         \
+    {                                        \
+      _flags = enter_critical_section();     \
+    }                                        \
+  while(0)
+
+#define FLASH_UNLOCK()                       \
+  do                                         \
+    {                                        \
+      leave_critical_section(_flags);        \
+    }                                        \
+  while(0)
+
+#else
+
+/* When enable the ble sdk, we can not disable the system timer
+ * and rf(ble) interrupt to avoid loss of ble packets. We also
+ * need to call sched_lock()/sched_unlock() to avoid task switch
+ * beacause sem_post() will be called in ble interrupt (Task
+ * switch may leads that the chip execute code in flash during
+ * the operation of flash).
+ */
+
+#define IRQ_MASK_RF_SYSTIMER                 ((1 << NR_SYSTEM_TIMER_IRQ) | \
+                                              (1 << NR_RF_IRQ))
+
+#define FLASH_LOCK_INIT()                    \
+  irqstate_t _flags;                         \
+  uint32_t _mask;
+
+#define FLASH_LOCK()                         \
+  do                                         \
+    {                                        \
+      sched_lock();                          \
+      _flags = enter_critical_section();     \
+      _mask = IRQ_MASK_REG &                 \
+              (~IRQ_MASK_RF_SYSTIMER);       \
+      IRQ_MASK_REG &= IRQ_MASK_RF_SYSTIMER;  \
+      leave_critical_section(_flags);        \
+    }                                        \
+  while(0)
+
+#define FLASH_UNLOCK()                       \
+  do                                         \
+    {                                        \
+      _flags = enter_critical_section();     \
+      IRQ_MASK_REG = _mask |                 \
+      (IRQ_MASK_REG & IRQ_MASK_RF_SYSTIMER); \
+      leave_critical_section(_flags);        \
+      sched_unlock();                        \
+    }                                        \
+  while(0)
+
+#endif
 
 /****************************************************************************
  * Private Types
@@ -222,9 +286,10 @@ void locate_code(".ram_code") tlsr82_flash_read(uint8_t cmd, uint32_t addr,
                                                 uint8_t *buf, uint32_t len)
 {
   int i;
-  irqstate_t flags;
 
-  flags = enter_critical_section();
+  FLASH_LOCK_INIT();
+
+  FLASH_LOCK();
 
   flash_send_cmd(cmd);
 
@@ -265,7 +330,7 @@ void locate_code(".ram_code") tlsr82_flash_read(uint8_t cmd, uint32_t addr,
 
   MSPI_CS_HIGH();
 
-  leave_critical_section(flags);
+  FLASH_UNLOCK();
 }
 
 /****************************************************************************
@@ -290,9 +355,10 @@ void locate_code(".ram_code") tlsr82_flash_write(uint8_t cmd, uint32_t addr,
                                                  uint32_t len)
 {
   int i;
-  irqstate_t flags;
 
-  flags = enter_critical_section();
+  FLASH_LOCK_INIT();
+
+  FLASH_LOCK();
 
   flash_send_cmd(FLASH_CMD_WRITE_ENABLE);
   flash_send_cmd(cmd);
@@ -320,7 +386,7 @@ void locate_code(".ram_code") tlsr82_flash_write(uint8_t cmd, uint32_t addr,
 
   flash_wait_done();
 
-  leave_critical_section(flags);
+  FLASH_UNLOCK();
 }
 
 /****************************************************************************

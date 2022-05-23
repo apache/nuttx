@@ -22,7 +22,11 @@ include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/arm/src/tlsr82/Toolchain.defs
 
-ARCHSCRIPT = $(BOARD_DIR)$(DELIM)scripts$(DELIM)flash_boot.ld
+ifeq ($(CONFIG_TLSR8278_BLE_SDK),y)
+  ARCHSCRIPT = $(BOARD_DIR)$(DELIM)scripts$(DELIM)flash_boot_ble.ld
+else
+  ARCHSCRIPT = $(BOARD_DIR)$(DELIM)scripts$(DELIM)flash_boot.ld
+endif
 
 ARCHCFLAGS   += -DMCU_CORE_B87=1 -fms-extensions -std=gnu99
 ARCHPICFLAGS += -fpic
