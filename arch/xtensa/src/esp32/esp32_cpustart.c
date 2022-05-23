@@ -196,6 +196,10 @@ void xtensa_appcpu_start(void)
   up_irq_enable();
 #endif
 
+#if XCHAL_CP_NUM > 0
+  xtensa_set_cpenable(CONFIG_XTENSA_CP_INITSET);
+#endif
+
   /* Then switch contexts. This instantiates the exception context of the
    * tcb at the head of the assigned task list.  In this case, this should
    * be the CPUs NULL task.
