@@ -559,10 +559,7 @@ struct tcb_s
   uint8_t  task_state;                   /* Current state of the thread     */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-#if CONFIG_SEM_NNESTPRIO > 0
-  uint8_t  npend_reprio;             /* Number of nested reprioritizations  */
-  uint8_t  pend_reprios[CONFIG_SEM_NNESTPRIO];
-#endif
+  uint8_t  boost_priority;               /* "Boosted" priority of the thread */
   uint8_t  base_priority;                /* "Normal" priority of the thread */
   FAR struct semholder_s *holdsem;       /* List of held semaphores         */
 #endif
@@ -635,12 +632,12 @@ struct tcb_s
   /* Pre-emption monitor support ********************************************/
 
 #ifdef CONFIG_SCHED_CRITMONITOR
-  uint32_t premp_start;                  /* Time when preemption disabled       */
-  uint32_t premp_max;                    /* Max time preemption disabled        */
-  uint32_t crit_start;                   /* Time critical section entered       */
-  uint32_t crit_max;                     /* Max time in critical section        */
-  uint32_t run_start;                    /* Time when thread begin run          */
-  uint32_t run_max;                      /* Max time thread run                 */
+  uint32_t premp_start;                  /* Time when preemption disabled   */
+  uint32_t premp_max;                    /* Max time preemption disabled    */
+  uint32_t crit_start;                   /* Time critical section entered   */
+  uint32_t crit_max;                     /* Max time in critical section    */
+  uint32_t run_start;                    /* Time when thread begin run      */
+  uint32_t run_max;                      /* Max time thread run             */
 #endif
 
   /* State save areas *******************************************************/
@@ -670,7 +667,7 @@ struct task_tcb_s
 {
   /* Common TCB fields ******************************************************/
 
-  struct tcb_s cmn;                      /* Common TCB fields                   */
+  struct tcb_s cmn;                      /* Common TCB fields               */
 
   /* Task Management Fields *************************************************/
 
