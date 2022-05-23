@@ -106,6 +106,7 @@ static int lcdfb_setcursor(FAR struct fb_vtable_s *vtable,
 #endif
 
 static int lcdfb_setpower(FAR struct fb_vtable_s *vtable, FAR int power);
+static int lcdfb_configure(FAR struct fb_vtable_s *vtable);
 
 /****************************************************************************
  * Private Data
@@ -468,6 +469,35 @@ static int lcdfb_setpower(FAR struct fb_vtable_s *vtable, FAR int power)
 }
 
 /****************************************************************************
+ * Name: lcdfb_configure
+ ****************************************************************************/
+
+static int lcdfb_configure(FAR struct fb_vtable_s *vtable)
+{
+  int ret = -EINVAL;
+  FAR struct lcdfb_dev_s *priv;
+  FAR struct lcd_dev_s *lcd;
+
+  DEBUGASSERT(vtable != NULL);
+
+  priv = (FAR struct lcdfb_dev_s *)vtable;
+
+  if (priv != NULL)
+    {
+      lcd = priv->lcd;
+      DEBUGASSERT(lcd->configure != NULL);
+
+      ret = lcd->configure(lcd);
+      if (ret < 0)
+        {
+          lcderr("ERROR: LCD configure() failed: %d\n", ret);
+        }
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -523,6 +553,7 @@ int up_fbinitialize(int display)
 #endif
   priv->vtable.updatearea   = lcdfb_updateearea,
   priv->vtable.setpower     = lcdfb_setpower,
+  priv->vtable.configure    = lcdfb_configure,
 
 #ifdef CONFIG_LCD_EXTERNINIT
   /* Use external graphics driver initialization */

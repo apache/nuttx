@@ -535,6 +535,14 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      case FBIOCONFIGURE_DISPLAY:
+        {
+          DEBUGASSERT(fb->vtable != NULL &&
+                      fb->vtable->configure != NULL);
+          ret = fb->vtable->configure(fb->vtable);
+        }
+        break;
+
       default:
         gerr("ERROR: Unsupported IOCTL command: %d\n", cmd);
         ret = -ENOTTY;

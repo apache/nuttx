@@ -171,9 +171,9 @@ static int  ssd1306_setpower(struct lcd_dev_s *dev, int power);
 static int  ssd1306_getcontrast(struct lcd_dev_s *dev);
 static int  ssd1306_setcontrast(struct lcd_dev_s *dev,
                                 unsigned int contrast);
+static int  ssd1306_configuredisplay(struct lcd_dev_s *dev);
 
 static int  ssd1306_do_disponoff(struct ssd1306_dev_s *priv, bool on);
-static int  ssd1306_configuredisplay(struct ssd1306_dev_s *priv);
 static int  ssd1306_redrawfb(struct ssd1306_dev_s *priv);
 
 /****************************************************************************
@@ -232,6 +232,7 @@ static const struct lcd_dev_s g_oleddev_dev =
   .setpower     = ssd1306_setpower,
   .getcontrast  = ssd1306_getcontrast,
   .setcontrast  = ssd1306_setcontrast,
+  .configure    = ssd1306_configuredisplay,
 };
 
 /* This is the OLED driver instance. Only a single device is supported
@@ -782,7 +783,7 @@ static int ssd1306_setpower(FAR struct lcd_dev_s *dev, int power)
         {
           /* Configure display and turn the display on */
 
-          ret = ssd1306_configuredisplay(priv);
+          ret = ssd1306_configuredisplay(dev);
           if (ret < 0)
             {
               return ret;
@@ -901,9 +902,12 @@ static int ssd1306_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
  *
  ****************************************************************************/
 
-static int ssd1306_configuredisplay(struct ssd1306_dev_s *priv)
+static int ssd1306_configuredisplay(struct lcd_dev_s *dev)
 {
+  struct ssd1306_dev_s *priv = (struct ssd1306_dev_s *)dev;
   int ret;
+
+  DEBUGASSERT(priv);
 
   /* Lock and select device */
 

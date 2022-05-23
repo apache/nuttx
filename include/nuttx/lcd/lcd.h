@@ -212,6 +212,10 @@ struct lcd_dev_s
   /* Get LCD panel frame rate (0: disable refresh) */
 
   int (*getframerate)(struct lcd_dev_s *dev);
+
+  /* Configure the display */
+
+  int (*configure)(struct lcd_dev_s *dev);
 };
 
 /****************************************************************************

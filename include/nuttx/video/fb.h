@@ -285,6 +285,8 @@
 #define FBIOPAN_DISPLAY       _FBIOC(0x0016)  /* Pan display
                                                * Argument: read-only struct
                                                *           fb_planeinfo_s* */
+#define FBIOCONFIGURE_DISPLAY _FBIOC(0x0017)  /* Configure display
+                                               * Argument:            none */
 
 /****************************************************************************
  * Public Types
@@ -613,6 +615,10 @@ struct fb_vtable_s
   /* Enable/disable panel power (0: full off). */
 
   int (*setpower)(FAR struct fb_vtable_s *vtable, int power);
+
+  /* configure */
+
+  int (*configure)(FAR struct fb_vtable_s *vtable);
 };
 
 /****************************************************************************
