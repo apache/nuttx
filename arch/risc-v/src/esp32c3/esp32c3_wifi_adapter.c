@@ -49,6 +49,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/arch.h>
 #include <nuttx/wireless/wireless.h>
+#include <nuttx/tls.h>
 
 #include "riscv_internal.h"
 
@@ -1333,35 +1334,36 @@ static int IRAM_ATTR wifi_is_in_isr(void)
 
 static void *esp_thread_semphr_get(void)
 {
+  static int wifi_task_key = -1;
   int ret;
   void *sem;
 
-  if (g_wifi_tkey_init)
-  {
-    ret = pthread_key_create(&g_wifi_thread_key, esp_thread_semphr_free);
-    if (ret)
-      {
-        wlerr("ERROR: Failed to create pthread key\n");
-        return NULL;
-      }
+  if (wifi_task_key < 0)
+    {
+      ret = task_tls_alloc(esp_thread_semphr_free);
+      if (ret < 0)
+        {
+          wlerr("Failed to create task local key\n");
+          return NULL;
+        }
 
-    g_wifi_tkey_init = true;
-  }
+      wifi_task_key = ret;
+    }
 
-  sem = pthread_getspecific(g_wifi_thread_key);
-  if (!sem)
+  sem = (void *)task_tls_get_value(wifi_task_key);
+  if (sem == NULL)
     {
       sem = esp_semphr_create(1, 0);
       if (!sem)
         {
-          wlerr("ERROR: Failed to create semaphore\n");
+          wlerr("Failed to create semaphore\n");
           return NULL;
         }
 
-      ret = pthread_setspecific(g_wifi_thread_key, sem);
-      if (ret)
+      ret = task_tls_set_value(wifi_task_key, (uintptr_t)sem);
+      if (ret != OK)
         {
-          wlerr("ERROR: Failed to set specific\n");
+          wlerr("Failed to save semaphore on task local storage: %d\n", ret);
           esp_semphr_delete(sem);
           return NULL;
         }
