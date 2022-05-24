@@ -81,6 +81,7 @@ struct cw2218_dev_s
   int last_cap;                                      /* battery cap change */
   int last_batt_temp;                                /* battery temp change */
   bool gauge_init_status;                            /* gauge init status */
+  int full_work_exit;                                /* ui full work */
 };
 
 /****************************************************************************
@@ -128,6 +129,7 @@ static int cw2218_chipid(struct battery_gauge_dev_s *dev,
  ****************************************************************************/
 
 static void cw2218_interrupt_worker(FAR void *arg);
+static void soc_change_worker(FAR void *arg);
 
 static const struct battery_gauge_operations_s g_cw2218ops =
 {
@@ -368,6 +370,13 @@ static inline int cw2218_getsoc(FAR struct cw2218_dev_s *priv,  b16_t *soc,
 
       *soc = ui_soc;
       *soc_h = buffer[0];
+
+      if (ui_soc >= 99 && !priv->full_work_exit)
+        {
+          priv->full_work_exit = FULL_WORK_EXIT;
+          work_queue(LPWORK, &priv->work, soc_change_worker, priv,
+                     CW2218_UI_FULL_START_TIME / USEC_PER_TICK);
+        }
     }
 
   return ret;
@@ -1202,6 +1211,38 @@ static int cw2218_interrupt_handler(FAR struct ioexpander_dev_s *dev,
   return OK;
 }
 
+static void soc_change_worker(FAR void *arg)
+{
+  FAR struct cw2218_dev_s *priv = arg;
+  int ret;
+  int capacity;
+  b16_t cap;
+
+  ret = cw2218_capacity((struct battery_gauge_dev_s *)priv, &cap);
+  if (ret < 0)
+    {
+      baterr("ERROR: CW2218 work get capaity failed, Error = %d\n", ret);
+    }
+
+  capacity = cap;
+  if (capacity != priv->last_cap)
+    {
+      priv->last_cap = capacity;
+      battery_gauge_changed(&priv->dev, BATTERY_CAPACITY_CHANGED);
+    }
+
+  if (capacity <= 98)
+    {
+      priv->full_work_exit = FULL_WORK_NO_EXIT;
+      work_cancel(LPWORK, &priv->work);
+    }
+  else
+    {
+      work_queue(LPWORK, &priv->work, soc_change_worker, priv,
+                 CW2218_UI_FULL_TIME / USEC_PER_TICK);
+    }
+}
+
 /****************************************************************************
  * Name: cw2218_interrupt_worker
  *
@@ -1367,6 +1408,7 @@ FAR struct battery_gauge_dev_s *cw2218_initialize(
   priv->last_cap  = -1;
   priv->last_batt_temp  = -1;
   priv->gauge_init_status = true;
+  priv->full_work_exit = FULL_WORK_NO_EXIT;
 
   ret = cw2218_init_interrupt(priv);
   if (ret < 0)
