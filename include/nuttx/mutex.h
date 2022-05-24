@@ -36,7 +36,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define MUTEX_INITIALIZER    SEM_INITIALIZER(1);
+#define MUTEX_INITIALIZER    SEM_INITIALIZER(1)
 #define RMUTEX_INITIALIZER   {SEM_INITIALIZER(1), INVALID_PROCESS_ID, 0}
 
 /****************************************************************************
@@ -286,13 +286,14 @@ static inline int nxrmutex_destroy(FAR rmutex_t *rmutex)
 
 static inline int nxrmutex_lock(FAR rmutex_t *rmutex)
 {
-  int ret = OK;
   pid_t tid = gettid();
+  int ret;
 
   if (rmutex->holder == tid)
     {
       DEBUGASSERT(rmutex->count < UINT16_MAX);
       rmutex->count++;
+      ret = OK;
     }
   else
     {
@@ -332,22 +333,23 @@ static inline int nxrmutex_lock(FAR rmutex_t *rmutex)
 
 static inline int nxrmutex_trylock(FAR rmutex_t *rmutex)
 {
-  int ret = OK;
   pid_t tid = gettid();
+  int ret;
 
   if (rmutex->holder == tid)
     {
       DEBUGASSERT(rmutex->count < UINT16_MAX);
       rmutex->count++;
+      ret = OK;
     }
   else
     {
       ret = nxmutex_trylock(&rmutex->mutex);
       if (ret == OK)
-      {
-        rmutex->holder = tid;
-        rmutex->count = 1;
-      }
+        {
+          rmutex->holder = tid;
+          rmutex->count = 1;
+        }
     }
 
   return ret;
@@ -395,24 +397,23 @@ static inline bool nxrmutex_is_locked(FAR rmutex_t *rmutex)
 
 static inline int nxrmutex_unlock(FAR rmutex_t *rmutex)
 {
-  int ret = OK;
   pid_t tid = gettid();
+  int ret = -EPERM;
 
-  if (rmutex->holder != tid)
-  {
-    return -EPERM;
-  }
-
-  DEBUGASSERT(rmutex->count > 0);
-  if (rmutex->count == 1)
+  if (rmutex->holder == tid)
     {
-      rmutex->count = 0;
-      rmutex->holder = INVALID_PROCESS_ID;
-      ret = nxmutex_unlock(&rmutex->mutex);
-    }
-  else
-    {
-      rmutex->count--;
+      DEBUGASSERT(rmutex->count > 0);
+      if (rmutex->count == 1)
+        {
+          rmutex->count = 0;
+          rmutex->holder = INVALID_PROCESS_ID;
+          ret = nxmutex_unlock(&rmutex->mutex);
+        }
+      else
+        {
+          rmutex->count--;
+          ret = OK;
+        }
     }
 
   return ret;
