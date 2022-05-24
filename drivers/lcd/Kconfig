@@ -416,6 +416,12 @@ config SSD1306_I2CFREQ
 
 endif # LCD_SSD1306_I2C
 
+config SSD1306_POWEROFF_RECONFIGURE
+	bool "Reconfigure SSD1306 after power off"
+	default n
+	---help---
+		Forces a (re)configuration of the SSD1306 after calling power off.
+
 config LCD_SSD1351
 	bool "SSD1351 OLED Display Module"
 	default n

@@ -755,6 +755,13 @@ static int ssd1306_setpower(FAR struct lcd_dev_s *dev, int power)
 
       priv->on = false;
 
+#ifdef CONFIG_SSD1306_POWEROFF_RECONFIGURE
+
+      /* Display is not configured anymore. */
+
+      priv->is_conf = false;
+#else
+
       /* Try turn off power completely */
 
       if (priv->board_priv && priv->board_priv->set_vcc)
@@ -768,6 +775,7 @@ static int ssd1306_setpower(FAR struct lcd_dev_s *dev, int power)
               priv->is_conf = false;
             }
         }
+#endif
     }
   else
     {
