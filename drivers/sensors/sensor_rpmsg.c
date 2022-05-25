@@ -297,8 +297,8 @@ static void sensor_rpmsg_advsub_one(FAR struct sensor_rpmsg_dev_s *dev,
   msg = rpmsg_get_tx_payload_buffer(ept, &space, true);
   if (!msg)
     {
-      snerr("ERROR: advsub:%d get buffer failed:%s\n",
-            command, dev->path);
+      snerr("ERROR: advsub:%d get buffer failed:%s, %s\n",
+            command, dev->path, rpmsg_get_cpuname(ept->rdev));
       return;
     }
 
@@ -310,8 +310,8 @@ static void sensor_rpmsg_advsub_one(FAR struct sensor_rpmsg_dev_s *dev,
   ret = rpmsg_send_nocopy(ept, msg, sizeof(*msg) + len);
   if (ret < 0)
     {
-      snerr("ERROR: advsub:%d rpmsg send failed:%s %d\n",
-            command, dev->path, ret);
+      snerr("ERROR: advsub:%d rpmsg send failed:%s, %d, %s\n",
+            command, dev->path, ret, rpmsg_get_cpuname(ept->rdev));
     }
 }
 
@@ -362,7 +362,8 @@ static int sensor_rpmsg_ioctl(FAR struct sensor_rpmsg_dev_s *dev,
       if (!msg)
         {
           ret = -ENOMEM;
-          snerr("ERROR: ioctl get buffer failed:%s\n", dev->path);
+          snerr("ERROR: ioctl get buffer failed:%s, %s\n",
+                dev->path, rpmsg_get_cpuname(proxy->ept->rdev));
           break;
         }
 
@@ -383,7 +384,8 @@ static int sensor_rpmsg_ioctl(FAR struct sensor_rpmsg_dev_s *dev,
       ret = rpmsg_send_nocopy(proxy->ept, msg, sizeof(*msg) + len);
       if (ret < 0)
         {
-          snerr("ERROR: ioctl rpmsg send failed:%s %d\n", dev->path, ret);
+          snerr("ERROR: ioctl rpmsg send failed:%s, %d, %s\n",
+                dev->path, ret, rpmsg_get_cpuname(proxy->ept->rdev));
           break;
         }
 
@@ -397,7 +399,8 @@ static int sensor_rpmsg_ioctl(FAR struct sensor_rpmsg_dev_s *dev,
       nxmutex_lock(&dev->lock);
       if (ret < 0)
         {
-          snerr("ERROR: ioctl rpmsg wait failed:%s %d\n", dev->path, ret);
+          snerr("ERROR: ioctl rpmsg wait failed:%s, %d, %s\n",
+                dev->path, ret, rpmsg_get_cpuname(proxy->ept->rdev));
           break;
         }
 
@@ -786,8 +789,8 @@ static void sensor_rpmsg_push_event_one(FAR struct sensor_rpmsg_dev_s *dev,
       sre->buffer = NULL;
       if (ret < 0)
         {
-          snerr("ERROR: push event rpmsg send failed:%s %d\n",
-                rpmsg_get_cpuname(sre->ept.rdev), ret);
+          snerr("ERROR: push event rpmsg send failed:%d, %s\n",
+                ret, rpmsg_get_cpuname(sre->ept.rdev));
         }
     }
   else
@@ -882,7 +885,8 @@ static int sensor_rpmsg_adv_handler(FAR struct rpmsg_endpoint *ept,
       if (ret < 0)
         {
           sensor_rpmsg_free_proxy(proxy);
-          snerr("ERROR: adv rpmsg send failed:%s %d\n", dev->path, ret);
+          snerr("ERROR: adv rpmsg send failed:%s, %d, %s\n",
+                dev->path, ret, rpmsg_get_cpuname(ept->rdev));
         }
     }
 
@@ -900,7 +904,8 @@ static int sensor_rpmsg_advack_handler(FAR struct rpmsg_endpoint *ept,
   if (dev && !sensor_rpmsg_alloc_stub(dev, ept, msg->cookie))
     {
       sensor_rpmsg_advsub_one(dev, ept, SENSOR_RPMSG_UNADVERTISE);
-      snerr("ERROR: advack failed:%s\n", dev->path);
+      snerr("ERROR: advack failed:%s, %s\n", dev->path,
+            rpmsg_get_cpuname(ept->rdev));
     }
 
   return 0;
@@ -965,7 +970,8 @@ static int sensor_rpmsg_sub_handler(FAR struct rpmsg_endpoint *ept,
       if (ret < 0)
         {
           sensor_rpmsg_free_stub(stub);
-          snerr("ERROR: sub rpmsg send failed:%s %d\n", dev->path, ret);
+          snerr("ERROR: sub rpmsg send failed:%s, %d, %s\n",
+                dev->path, ret, rpmsg_get_cpuname(ept->rdev));
         }
     }
 
@@ -1067,8 +1073,8 @@ static int sensor_rpmsg_ioctl_handler(FAR struct rpmsg_endpoint *ept,
               ret = rpmsg_send(ept, msg, len);
               if (ret < 0)
                 {
-                  snerr("ERROR: ioctl rpmsg send failed:%s %d\n",
-                        dev->path, ret);
+                  snerr("ERROR: ioctl rpmsg send failed:%s, %d, %s\n",
+                        dev->path, ret, rpmsg_get_cpuname(ept->rdev));
                 }
             }
         }
