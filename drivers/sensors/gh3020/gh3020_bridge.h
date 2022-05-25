@@ -37,15 +37,17 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* GH3020 PPG has 4 different measurements and each one should be a node. */
+/* GH3020 PPG has 5 different measurements and each one should be a node.
+ * Note that ppg5's index is 4, since ppgq4 is removed but we should keep the
+ * old names of nodes to make them compatible to existing code.
+ */
 
 #define GH3020_PPG0_SENSOR_IDX   0          /* PPG0 (green dynamic) */
 #define GH3020_PPG1_SENSOR_IDX   1          /* PPG1 (red dynamic) */
 #define GH3020_PPG2_SENSOR_IDX   2          /* PPG2 (IR dynamic) */
 #define GH3020_PPG3_SENSOR_IDX   3          /* PPG3 (dark fixed) */
-#define GH3020_PPG4_SENSOR_IDX   4          /* PPG4 (green fixed) */
-#define GH3020_PPG5_SENSOR_IDX   5          /* PPG5 (IR fixed). */
-#define GH3020_SENSOR_NUM        6          /* Total PPG sensors number. */
+#define GH3020_PPG5_SENSOR_IDX   4          /* PPG5 (IR fixed). */
+#define GH3020_SENSOR_NUM        5          /* Total PPG sensors number. */
 
 /* Macros */
 

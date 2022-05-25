@@ -2268,7 +2268,9 @@ void GH3X2X_StopHardAdtAndStartGsDetect(void)
     GH3X2X_FunctionStop(g_pstGh3x2xFrameInfo[GH3X2X_FUNC_OFFSET_ADT]);
     uint16_t usGotEvent = 0;
     usGotEvent |= GH3X2X_IRQ_MSK_WEAR_OFF_BIT;
+#if (__SUPPORT_HARD_ADT_CONFIG__)
     Gh3x2xDemoWearEventProcess(&usGotEvent,WEAR_DETECT_FORCE_SWITCH);
+#endif
 #if (__SUPPORT_PROTOCOL_ANALYZE__)
     Gh3x2xDemoReportEvent(usGotEvent,0);
 #endif

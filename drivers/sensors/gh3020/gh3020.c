@@ -226,11 +226,10 @@ FAR static struct gh3020_dev_s *g_priv;
 static const uint32_t gh3020_channel_function_list[GH3020_SENSOR_NUM] =
   {
     GH3X2X_FUNCTION_HR,               /* HR(slot0) for ch0 (green dynamic) */
-    GH3X2X_FUNCTION_SPO2,             /* SPO2(slot4) for ch1 (red dynamic) */
-    GH3X2X_FUNCTION_HRV,              /* HRV(slot5) for ch2 (IR dynamic) */
-    GH3X2X_FUNCTION_RESP,             /* RESP(slot2) for ch3 (dark fixed) */
-    GH3X2X_FUNCTION_TEST2,            /* TEST2(slot1) for ch4 (green fixed) */
-    GH3X2X_FUNCTION_HSM               /* HSM(slot3) for ch5 (IR fixed) */
+    GH3X2X_FUNCTION_SPO2,             /* SPO2(slot3) for ch1 (red dynamic) */
+    GH3X2X_FUNCTION_HRV,              /* HRV(slot4) for ch2 (IR dynamic) */
+    GH3X2X_FUNCTION_RESP,             /* RESP(slot1) for ch3 (dark fixed) */
+    GH3X2X_FUNCTION_HSM               /* HSM(slot2) for ch5 (IR fixed) */
   };
 
 /* GH3020 ADC gain register values vs actual ADC gains (KOhm) */
@@ -262,67 +261,59 @@ static const struct sensor_ops_s g_gh3020_ops =
 struct gh3020_reg_s gh3020_reglist_normal[] =
 {
   {0x0004, 0x001f}, /* Maxmium sample rate = 32KHz / (31 +１) = 1000Hz */
-  {0x0006, 0x0006}, /* GH3020_REG_DATA_CTRL0. Not mentioned in datasheet. */
+  {0x0006, 0x0005}, /* GH3020_REG_DATA_CTRL0. Not mentioned in datasheet. */
   {0x000a, 0x00c8}, /* Default FIFO watermark = 200 */
   {0x000e, 0x000d}, /* GH3020_REG_WKUP_TMR. Not mentioned in datasheet. */
   {0x0100, 0x0100}, /* Slot0 uses slot_cfg0, slot1 uses slot_cfg1 */
   {0x0102, 0x0302}, /* Slot2 uses slot_cfg2, slot3 uses slot_cfg3 */
   {0x0104, 0x0504}, /* Slot4 uses slot_cfg4, slot5 uses slot_cfg5 */
-  {0x0106, 0x0806}, /* Slot6 uses slot_cfg6, slot7 is disabled */
   {0x010a, 0x277c}, /* Slot_cfg0(tunning G): sync signal, use FIFO, 4ADCs */
   {0x0110, 0x0f14}, /* DC&BG cancel, ADC0 modifies drv0&1, 1st BG, 512x ADC */
   {0x0114, 0x00aa}, /* All ADCs use 200pF TIA_CF */
   {0x011e, 0x0011}, /* LED drv0 to LED0(to green LED) pin, 14.9mA */
   {0x0120, 0x0011}, /* LED drv1 to LED4(to green LED) pin, 14.99mA */
   {0x0122, 0x0a77}, /* Either LED driver current approximately 9~100mA */
-  {0x0126, 0x277c}, /* Slot_cfg1(tunning Goodix IR): sync signal, FIFO, 4AD */
-  {0x012c, 0x0f16}, /* DC&BG cancel, ADC0 modifies drv0&1, 1st BG, 2048xADC */
+  {0x0126, 0x277c}, /* Slot_cfg1(dark): sync signal, use FIFO, 4ADCs */
+  {0x0128, 0x0000}, /* PDx not connected to TIAx */
+  {0x012a, 0x0000}, /* PDx not connected to TIAx */
+  {0x012c, 0x0000}, /* No BG or DC cancel, 64x ADC */
+  {0x012e, 0x2222}, /* TIA0~3 50KOHm */
   {0x0130, 0x00aa}, /* All ADCs use 200pF TIA_CF */
-  {0x013a, 0x0111}, /* LED drv0 to LED0(to IR LED) pin, 14.9mA */
-  {0x013c, 0x0111}, /* LED drv1 to LED0(to IR LED) pin, 14.99mA */
-  {0x013e, 0x0a77}, /* Either LED driver current approximately 9~100mA */
-  {0x0142, 0x277c}, /* Slot_cfg2(dark): sync signal, use FIFO, 4ADCs */
-  {0x0144, 0x0000}, /* PDx not connected to TIAx */
-  {0x0146, 0x0000}, /* PDx not connected to TIAx */
-  {0x0148, 0x0000}, /* No BG or DC cancel, 64x ADC */
+  {0x0142, 0x277c}, /* Slot_cfg2(fix IR): sync signal, use FIFO, 4ADCs */
+  {0x0148, 0x0c14}, /* DC&BG cancel, LED drv0&1 fixed, 1st BG, 512x ADC */
   {0x014a, 0x2222}, /* TIA0~3 50KOHm */
   {0x014c, 0x00aa}, /* All ADCs use 200pF TIA_CF */
-  {0x015e, 0x277c}, /* Slot_cfg3(fix IR): sync signal, use FIFO, 4ADCs */
-  {0x0164, 0x0c14}, /* DC&BG cancel, LED drv0&1 fixed, 1st BG, 512x ADC */
-  {0x0166, 0x2222}, /* TIA0~3 50KOHm */
+  {0x0156, 0x0105}, /* LED drv1 to LED1(to IR LED) pin, 4.4mA */
+  {0x0158, 0x0106}, /* LED drv1 to LED1(to IR LED) pin, 5.3mA */
+  {0x015e, 0x277c}, /* Slot_cfg3(tunning R): sync signal, use FIFO, 4ADCs */
+  {0x0164, 0x0fd6}, /* DC&BG cancel, ADC3 modifies drv0&1, 1st BG, 2048xADC */
+  {0x0166, 0x1111}, /* TIA0~3 25KOHm */
   {0x0168, 0x00aa}, /* All ADCs use 200pF TIA_CF */
-  {0x0172, 0x0105}, /* LED drv1 to LED1(to IR LED) pin, 4.4mA */
-  {0x0174, 0x0106}, /* LED drv1 to LED1(to IR LED) pin, 5.3mA */
-  {0x017a, 0x277c}, /* Slot_cfg4(tunning R): sync signal, use FIFO, 4ADCs */
+  {0x0172, 0x0245}, /* LED drv0 to LED2(to red LED) pin, 59.28mA */
+  {0x0174, 0x0245}, /* LED drv1 to LED2(to red LED) pin, 60.72mA */
+  {0x0176, 0x2e77}, /* Either LED driver current approximately 40~100 mA */
+  {0x017a, 0x277c}, /* Slot_cfg4(tunning IR): sync signal, use FIFO, 4ADCs */
   {0x0180, 0x0fd6}, /* DC&BG cancel, ADC3 modifies drv0&1, 1st BG, 2048xADC */
   {0x0182, 0x1111}, /* TIA0~3 25KOHm */
   {0x0184, 0x00aa}, /* All ADCs use 200pF TIA_CF */
-  {0x018e, 0x0245}, /* LED drv0 to LED2(to red LED) pin, 59.28mA */
-  {0x0190, 0x0245}, /* LED drv1 to LED2(to red LED) pin, 60.72mA */
-  {0x0192, 0x1c77}, /* Either LED driver current approximately 24~100 mA */
-  {0x0196, 0x277c}, /* Slot_cfg5(tunning IR): sync signal, use FIFO, 4ADCs */
-  {0x019c, 0x0fd6}, /* DC&BG cancel, ADC3 modifies drv0&1, 1st BG, 2048xADC */
-  {0x019e, 0x1111}, /* TIA0~3 25KOHm */
-  {0x01a0, 0x00aa}, /* All ADCs use 200pF TIA_CF */
-  {0x01aa, 0x012e}, /* LED drv0 to LED1(to IR LED) pin, 39.87mA */
-  {0x01ac, 0x012e}, /* LED drv1 to LED1(to IR LED) pin, 40.52mA */
-  {0x01ae, 0x1777}, /* Either LED driver current approximately 20~100 mA */
-  {0x01b2, 0xc744}, /* Slot_cfg6(Goodix ADT): use FIFO, ADC0 */
-  {0x01b4, 0x0001}, /* TIA0 connected to PD0, TIA disconnected */
-  {0x01b6, 0x0000}, /* TIA2&3 disconnected */
-  {0x01b8, 0x0c10}, /* BG&DC cancel, fixed LED current, 1st BG, 64x ADC */
-  {0x01ba, 0x4442}, /* TIA0 50KOhm, TIA1~3 100KOhm */
-  {0x01bc, 0x0002}, /* ADC0 uses 200pF TIA_CF, the rest use 50pF */
-  {0x01c2, 0x0003}, /* ADC0 BG cancel source 256uA max. */
-  {0x01c6, 0x0105}, /* LED drv0 to LED1(to IR LED) pin, 4.4mA */
-  {0x01c8, 0x0106}, /* LED drv1 to LED1(to IR LED) pin, 5.3mA */
+  {0x018e, 0x012e}, /* LED drv0 to LED1(to IR LED) pin, 39.87mA */
+  {0x0190, 0x012e}, /* LED drv1 to LED1(to IR LED) pin, 40.52mA */
+  {0x0192, 0x2277}, /* Either LED driver current approximately 30~100 mA */
+  {0x0196, 0xc744}, /* Slot_cfg5(Goodix ADT): use FIFO, ADC0 */
+  {0x0198, 0x0001}, /* TIA0 connected to PD0, TIA disconnected */
+  {0x019a, 0x0000}, /* TIA2&3 disconnected */
+  {0x019c, 0x0c10}, /* BG&DC cancel, fixed LED current, 1st BG, 64x ADC */
+  {0x019e, 0x4442}, /* TIA0 50KOhm, TIA1~3 100KOhm */
+  {0x01a0, 0x0002}, /* ADC0 uses 200pF TIA_CF, the rest use 50pF */
+  {0x01a6, 0x0003}, /* ADC0 BG cancel source 256uA max. */
+  {0x01aa, 0x0105}, /* LED drv0 to LED1(to IR LED) pin, 4.4mA */
+  {0x01ac, 0x0106}, /* LED drv1 to LED1(to IR LED) pin, 5.3mA */
   {0x01ec, 0x0122}, /* Slot0's time 290 us (green dynamic) */
-  {0x01ee, 0x02fa}, /* Slot1's time 762 us (IR dynamic Goodix) */
-  {0x01f0, 0x001a}, /* Slot2's time 26 us (dark fixed) */
-  {0x01f2, 0x0122}, /* Slot3's time 290 us (IR fixed) */
-  {0x01f4, 0x02fa}, /* Slot4's time 762 us (red dynamic) */
-  {0x01f6, 0x02fa}, /* Slot5's time 762 us (IR dynamic) */
-  {0x01f8, 0x0098}, /* Slot6's time 152 us (hard wear-on detection) */
+  {0x01ee, 0x001a}, /* Slot1's time 26 us (dark fixed) */
+  {0x01f0, 0x0122}, /* Slot2's time 290 us (IR fixed) */
+  {0x01f2, 0x02fa}, /* Slot3's time 762 us (red dynamic) */
+  {0x01f4, 0x02fa}, /* Slot4's time 762 us (IR dynamic) */
+  {0x01f6, 0x0098}, /* Slot5's time 152 us (hard wear-on detection) */
   {0x0200, 0x0120}, /* GH3020_REG_AFE_REG0. Not mentioned in datasheet. */
   {0x0280, 0x0a00}, /* Starting LED tunning need continuous 10 samples */
   {0x0282, 0xf530}, /* Tunning start upper threshold */
@@ -348,13 +339,13 @@ struct gh3020_reg_s gh3020_reglist_normal[] =
   {0x1000, 0x0000}, /* Virtual register. Maintained by Goodix. */
   {0x1002, 0x3080}, /* Virtual register. Maintained by Goodix. */
   {0x1004, 0x0000}, /* Virtual register. Maintained by Goodix. */
-  {0x1006, 0x7165}, /* Virtual register. Maintained by Goodix. */
-  {0x1008, 0x2a11}, /* Virtual register. Maintained by Goodix. */
+  {0x1006, 0xede4}, /* Virtual register. Maintained by Goodix. */
+  {0x1008, 0x2a1f}, /* Virtual register. Maintained by Goodix. */
   {0x100a, 0x0001}, /* Virtual register. Maintained by Goodix. */
   {0x10e0, 0x0202}, /* Virtual register. Maintained by Goodix. */
   {0x10e2, 0x0202}, /* Virtual register. Maintained by Goodix. */
   {0x10e4, 0x0202}, /* Virtual register. Maintained by Goodix. */
-  {0x10e6, 0xff02}, /* Virtual register. Maintained by Goodix. */
+  {0x10e6, 0xffff}, /* Virtual register. Maintained by Goodix. */
   {0x10e8, 0x0202}, /* Virtual register. Maintained by Goodix. */
   {0x10ea, 0x0202}, /* Virtual register. Maintained by Goodix. */
   {0x10ec, 0x0202}, /* Virtual register. Maintained by Goodix. */
@@ -362,7 +353,7 @@ struct gh3020_reg_s gh3020_reglist_normal[] =
   {0x1120, 0x00c8}, /* Virtual register. Maintained by Goodix. */
   {0x1122, 0x0005}, /* Virtual register. Maintained by Goodix. */
   {0x1124, 0x0000}, /* Virtual register. Maintained by Goodix. */
-  {0x1160, 0x0033}, /* Virtual register. Maintained by Goodix. */
+  {0x1160, 0x0019}, /* Virtual register. Maintained by Goodix. */
   {0x1162, 0x0000}, /* Virtual register. Maintained by Goodix. */
   {0x1164, 0x0000}, /* Virtual register. Maintained by Goodix. */
   {0x1166, 0x4568}, /* Virtual register. Maintained by Goodix. */
@@ -375,25 +366,22 @@ struct gh3020_reg_s gh3020_reglist_normal[] =
   {0x1174, 0x2800}, /* Virtual register. Maintained by Goodix. */
   {0x1176, 0x00a3}, /* Virtual register. Maintained by Goodix. */
   {0x2000, 0x0001}, /* Virtual register. Maintained by Goodix. */
-  {0x2002, 0x00c2}, /* Virtual register. Maintained by Goodix. */
+  {0x2002, 0x00a2}, /* Virtual register. Maintained by Goodix. */
   {0x2022, 0x0004}, /* Virtual register. Maintained by Goodix. */
   {0x2024, 0x0901}, /* Virtual register. Maintained by Goodix. */
   {0x2026, 0x1911}, /* Virtual register. Maintained by Goodix. */
   {0x2044, 0x0004}, /* Virtual register. Maintained by Goodix. */
-  {0x2046, 0xaaa2}, /* Virtual register. Maintained by Goodix. */
-  {0x2048, 0xbab2}, /* Virtual register. Maintained by Goodix. */
+  {0x2046, 0x8a82}, /* Virtual register. Maintained by Goodix. */
+  {0x2048, 0x9a92}, /* Virtual register. Maintained by Goodix. */
   {0x2066, 0x0004}, /* Virtual register. Maintained by Goodix. */
-  {0x2068, 0x6a62}, /* Virtual register. Maintained by Goodix. */
-  {0x206a, 0x7a72}, /* Virtual register. Maintained by Goodix. */
+  {0x2068, 0x4a42}, /* Virtual register. Maintained by Goodix. */
+  {0x206a, 0x5a52}, /* Virtual register. Maintained by Goodix. */
   {0x20cc, 0x0004}, /* Virtual register. Maintained by Goodix. */
-  {0x20ce, 0x8b83}, /* Virtual register. Maintained by Goodix. */
-  {0x20d0, 0x9b93}, /* Virtual register. Maintained by Goodix. */
+  {0x20ce, 0x6b63}, /* Virtual register. Maintained by Goodix. */
+  {0x20d0, 0x7b73}, /* Virtual register. Maintained by Goodix. */
   {0x2176, 0x0004}, /* Virtual register. Maintained by Goodix. */
-  {0x2178, 0x4d45}, /* Virtual register. Maintained by Goodix. */
-  {0x217a, 0x5d55}, /* Virtual register. Maintained by Goodix. */
-  {0x21dc, 0x0004}, /* Virtual register. Maintained by Goodix. */
-  {0x21de, 0x2a22}, /* Virtual register. Maintained by Goodix. */
-  {0x21e0, 0x3a32}, /* Virtual register. Maintained by Goodix. */
+  {0x2178, 0x2d25}, /* Virtual register. Maintained by Goodix. */
+  {0x217a, 0x3d35}, /* Virtual register. Maintained by Goodix. */
   {0x2880, 0x0005}, /* Virtual register. Maintained by Goodix. */
   {0x2882, 0x0019}, /* Virtual register. Maintained by Goodix. */
   {0x2884, 0x0019}, /* Virtual register. Maintained by Goodix. */
@@ -697,18 +685,18 @@ static void gh3020_dark_pd_mux(bool linked)
   uint16_t regval;
 
   regval = linked ? 0x0201 : 0;
-  gh3020_spi_writereg(GH3020_REG_SLOT2_CTRL_1, regval);
+  gh3020_spi_writereg(GH3020_REG_SLOT1_CTRL_1, regval);
   regval = linked ? 0x0804 : 0;
-  gh3020_spi_writereg(GH3020_REG_SLOT2_CTRL_2, regval);
+  gh3020_spi_writereg(GH3020_REG_SLOT1_CTRL_2, regval);
 
   for (i = 0; i < sizeof(gh3020_reglist_normal) /
       sizeof(FAR struct gh3020_reg_s); i++)
     {
-      if (gh3020_reglist_normal[i].regaddr == GH3020_REG_SLOT2_CTRL_1)
+      if (gh3020_reglist_normal[i].regaddr == GH3020_REG_SLOT1_CTRL_1)
         {
           gh3020_reglist_normal[i].regval = linked ? 0x0201 : 0;
         }
-      else if (gh3020_reglist_normal[i].regaddr == GH3020_REG_SLOT2_CTRL_2)
+      else if (gh3020_reglist_normal[i].regaddr == GH3020_REG_SLOT1_CTRL_2)
         {
           gh3020_reglist_normal[i].regval = linked ? 0x0804 : 0;
           return;
@@ -2325,12 +2313,6 @@ void gh3020_get_ppg_data(FAR const struct gh3020_frameinfo_s *pframeinfo)
         }
         break;
 
-      case GH3X2X_FUNCTION_TEST2:     /* green fixed */
-        {
-          idx = GH3020_PPG4_SENSOR_IDX;
-        }
-        break;
-
       case GH3X2X_FUNCTION_HSM:       /* IR fixed */
         {
           idx = GH3020_PPG5_SENSOR_IDX;
@@ -2508,6 +2490,7 @@ int gh3020_register(int devno, FAR const struct gh3020_config_s *config)
   FAR struct gh3020_dev_s *priv;
   FAR void *ioehandle;
   uint8_t idx;
+  uint8_t topic_idx;
   int ret;
 
   /* Sanity check */
@@ -2581,8 +2564,19 @@ int gh3020_register(int devno, FAR const struct gh3020_config_s *config)
 
   for (idx = 0; idx < GH3020_SENSOR_NUM; idx++)
     {
+      topic_idx = idx;
+
+      /* ppgq4 is not used now (2022-05-25), but ppgq5 is still used. ppgq5's
+       * index is 4 now but we should keep its node's name unchanged.
+       */
+
+      if (idx == GH3020_PPG5_SENSOR_IDX)
+        {
+          topic_idx = idx + 1;
+        }
+
       ret = sensor_register((&(priv->sensor[idx].lower)),
-                            devno * GH3020_SENSOR_NUM + idx);
+                            devno * GH3020_SENSOR_NUM + topic_idx);
       if (ret < 0)
         {
           snerr("Failed to register GH3020 PPGQ%d driver: %d\n",
@@ -2592,6 +2586,10 @@ int gh3020_register(int devno, FAR const struct gh3020_config_s *config)
 
           while (idx)
             {
+              /* PPG5 is the last node. If its registion failed, we need not
+               * to deal this special case (i.e. PPG5's topic_idx != idx)
+               */
+
               idx--;
               sensor_unregister(&priv->sensor[idx].lower,
                                 devno * GH3020_SENSOR_NUM + idx);

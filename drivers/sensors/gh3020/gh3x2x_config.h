@@ -52,7 +52,7 @@
 #define __FUNC_TYPE_AF_ENABLE__             (0)    /**< af function tye */
 #define __FUNC_TYPE_BP_ENABLE__             (0)    /**< bp function tye */
 #define __FUNC_TYPE_TEST_ENABLE__           (1)    /**< test function tye */
-#define __SUPPORT_HARD_ADT_CONFIG__         (1)    /**< support hard adt config */
+#define __SUPPORT_HARD_ADT_CONFIG__         (0)    /**< support hard adt config */
 #define __SUPPORT_SOFT_AGC_CONFIG__         (1)    /**< support soft agc config */
 
 
@@ -72,9 +72,7 @@
 #endif
 
 /* soft adt function type */
-#if (__SUPPORT_HARD_ADT_CONFIG__ && __FUNC_TYPE_HR_ENABLE__)
-#define __FUNC_TYPE_SOFT_ADT_ENABLE__       (0)    /**< support soft adt config */
-#endif
+#define __FUNC_TYPE_SOFT_ADT_ENABLE__       (0)*(__SUPPORT_HARD_ADT_CONFIG__)*(__FUNC_TYPE_HR_ENABLE__)    /**< support soft adt config */
 
 /* soft adt function threshold that can be judged as a movement */
 #if (__FUNC_TYPE_SOFT_ADT_ENABLE__)
