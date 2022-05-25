@@ -34,7 +34,6 @@
 #include "task/task.h"
 #include "group/group.h"
 #include "sched/sched.h"
-#include "pthread/pthread.h"
 
 /****************************************************************************
  * Public Functions
@@ -66,12 +65,6 @@ void _exit(int status)
    */
 
   group_kill_children(tcb);
-#endif
-
-#if !defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
-  /* Recover any mutexes still held by the canceled thread */
-
-  pthread_mutex_inconsistent(tcb);
 #endif
 
   /* Perform common task termination logic.  This will get called again later
