@@ -529,7 +529,9 @@ static const struct stm32_pwm_ops_s g_llpwmops =
   .ccr_get         = pwm_ccr_get,
   .arr_update      = pwm_arr_update,
   .arr_get         = pwm_arr_get,
+#ifdef HAVE_ADVTIM
   .rcr_update      = pwm_rcr_update,
+#endif
   .rcr_get         = pwm_rcr_get,
 #ifdef HAVE_TRGO
   .trgo_set        = pwm_trgo_configure,
