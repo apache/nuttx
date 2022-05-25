@@ -140,7 +140,6 @@ void xtensa_sig_deliver(void)
   rtcb->xcp.sigdeliver = NULL;  /* Allows next handler to be scheduled */
 
   /* Then restore the correct state for this thread of execution.
-   * NOTE: The co-processor state should already be correct.
    */
 
   board_autoled_off(LED_SIGNAL);
