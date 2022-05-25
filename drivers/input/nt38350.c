@@ -3834,6 +3834,7 @@ void nvt_ts_wakeup_gesture_report(FAR struct nt38350_dev_s *priv,
   switch (gesture_id)
     {
       case GESTURE_DOUBLE_CLICK:
+        iwarn("double click detect!\n");
         sample.point[0].gesture = TOUCH_DOUBLE_CLICK;
         break;
       case GESTURE_SLIDE_UP:
@@ -4021,6 +4022,7 @@ static void nt38350_data_worker(FAR void *arg)
     }
   else if (priv->sample.contact == CONTACT_DOWN)
     {
+      iwarn("press: x %d, y %d\n", sample.point[0].x, sample.point[0].y);
       sample.point[0].flags = TOUCH_DOWN | TOUCH_ID_VALID |
                               TOUCH_POS_VALID;
     }
@@ -4031,6 +4033,7 @@ static void nt38350_data_worker(FAR void *arg)
     }
   else if (priv->sample.contact == CONTACT_PALM)
     {
+      iwarn("palm detect！\n");
       sample.point[0].flags   = TOUCH_GESTURE_VALID | TOUCH_ID_VALID;
       sample.point[0].gesture = TOUCH_PALM;
     }
