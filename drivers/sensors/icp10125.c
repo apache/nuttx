@@ -104,10 +104,6 @@
 #define ICP10125_CMD_SEND_OTP_ADDR     0x00669c /* Command: send OTP addr */
 #define ICP10125_CMD_INC_OTP_ADDR      0xc7f7   /* Command: inc OTP addr */
 
-/* Factory test instructions */
-
-#define ICP10125_SIMPLE_CHECK          0x00     /* Communication check */
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -1068,7 +1064,7 @@ static int icp10125_selftest(FAR struct file *filep,
 
   switch (arg)
     {
-      case ICP10125_SIMPLE_CHECK: /* Simple communication check. */
+      case SNIOC_SIMPLE_CHECK: /* Simple communication check. */
         {
           ret = icp10125_readdevid(priv);
         }

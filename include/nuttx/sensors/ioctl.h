@@ -231,10 +231,27 @@
 
 /* IOCTL commands unique to the DS18B20 */
 
-/* SNIOC_SETRESOLUTION */                          /* Arg: uint8_t value */
+/* SNIOC_SETRESOLUTION */                         /* Arg: uint8_t value */
 
-#define SNIOC_READROMCODE          _SNIOC(0x0067)  /* Arg: uint64_t* pointer */
-#define SNIOC_SETALARM             _SNIOC(0x0068)  /* Arg: struct ds18b20_alarm_s* */
+#define SNIOC_READROMCODE          _SNIOC(0x0067) /* Arg: uint64_t* pointer */
+#define SNIOC_SETALARM             _SNIOC(0x0068) /* Arg: struct ds18b20_alarm_s* */
+
+/* IOCTL commands unique to the BMI270 */
+
+#define SNIOC_SIMPLE_CHECK         _SNIOC(0x0069) /* Simple check */
+#define SNIOC_FULL_CHECK           _SNIOC(0x006a) /* Full check */
+#define SNIOC_FEAT_MANAGE          _SNIOC(0x006b) /* Feature manage command */
+#define SNIOC_SET_SCALE_XL         _SNIOC(0x006c) /* Set accelerator scale command */
+
+/* IOCTL commands unique to the GH3020 */
+
+#define SNIOC_CTRL_LED_CURRENT     _SNIOC(0x006d) /* Set LED driver current */
+#define SNIOC_CTRL_OPEN_FACTEST    _SNIOC(0x006e) /* Enter factory test mode */
+#define SNIOC_CTRL_EXIT_FACTEST    _SNIOC(0x006f) /* Exit factory test mode */
+
+/* IOCTL commands unique to the PAT9126JA */
+
+#define SNIOC_DISPLACE_INFO        _SNIOC(0x0070)  /* Displacement information */
 
 /* Command:      SNIOC_GET_STATE
  * Description:  Get state for all subscribers, include min_interval,

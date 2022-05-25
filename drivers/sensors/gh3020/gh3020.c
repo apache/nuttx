@@ -67,13 +67,6 @@
 #define GH3020_RDMODE_POLLING    1          /* Read data with polling */
 #define GH3020_DARK_CALIBR_NUM   6          /* Samples for ppg3 calibration */
 
-/* Control commands */
-
-#define GH3020_CTRL_CHECKID      0          /* Check device ID. */
-#define GH3020_CTRL_LED_CURRENT  0x90       /* Set LED driver current */
-#define GH3020_CTRL_OPEN_FACTEST 0x91       /* Enter factory test mode */
-#define GH3020_CTRL_EXIT_FACTEST 0x92       /* Exit factory test mode */
-
 /* Default settings */
 
 #define GH3020_INTVL_DFT         40000      /* Default interval = 40 ms */
@@ -1572,7 +1565,7 @@ static int gh3020_selftest(FAR struct file *filep,
 
   switch (arg)
     {
-      case GH3020_CTRL_CHECKID:             /* Check ID command. */
+      case SNIOC_SIMPLE_CHECK:              /* Check ID command. */
         {
           if (gh3020_init() != OK)
             {
@@ -1639,7 +1632,7 @@ static int gh3020_control(FAR struct file *filep,
   switch (cmd)
     {
 #ifdef CONFIG_FACTEST_SENSORS_GH3020
-      case GH3020_CTRL_LED_CURRENT:      /* Set LED current(uA) */
+      case SNIOC_CTRL_LED_CURRENT:      /* Set LED current(uA) */
         {
           if (priv->factest_mode == true)
             {
@@ -1666,7 +1659,7 @@ static int gh3020_control(FAR struct file *filep,
         }
         break;
 
-      case GH3020_CTRL_OPEN_FACTEST:    /* Enter factory test mode */
+      case SNIOC_CTRL_OPEN_FACTEST:    /* Enter factory test mode */
         {
           if (priv->factest_mode == false)
             {
@@ -1676,7 +1669,7 @@ static int gh3020_control(FAR struct file *filep,
         }
         break;
 
-      case GH3020_CTRL_EXIT_FACTEST:     /* Exit factory test mode */
+      case SNIOC_CTRL_EXIT_FACTEST:     /* Exit factory test mode */
         {
           if (priv->factest_mode == true)
             {

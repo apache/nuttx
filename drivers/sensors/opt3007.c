@@ -63,10 +63,6 @@
 
 #define OPT3007_CONVERTEND_MODE    0x0c      /* Interrupt when convert end */
 
-/* Factory test instructions. */
-
-#define OPT3007_SIMPLE_CHECK       0x00      /* Simple check */
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -982,7 +978,7 @@ static int opt3007_selftest(FAR struct file *filep,
 
   switch (arg)
     {
-      case OPT3007_SIMPLE_CHECK:    /* Simple check tag */
+      case SNIOC_SIMPLE_CHECK:      /* Simple check tag */
         {
           /* Read device ID. */
 

@@ -71,11 +71,6 @@
 #define BMI270_ENABLE                 1          /* Enable value */
 #define BMI270_DISABLE                0          /* Disable value */
 
-/* IO control command. */
-
-#define BMI270_FEAT_MANAGE_CMD        0xf1       /* Feature manage command */
-#define BMI270_SET_SCALE_XL_CMD       0xf2       /* Set accelerator scale command */
-
 #define BMI270_XL_SET_2G              2          /* Accelerometer set 2G */
 #define BMI270_XL_SET_4G              4          /* Accelerometer set 4G */
 #define BMI270_XL_SET_8G              8          /* Accelerometer set 8G */
@@ -198,11 +193,6 @@
 
 #define BMI270_POWER_OPT_MODE         0          /* Power optimize mode */
 #define BMI270_PERF_OPT_MODE          1          /* High performance mode */
-
-/* Factory test instructions. */
-
-#define BMI270_SIMPLE_CHECK           0x00       /* Simple check */
-#define BMI270_FULL_CHECK             0x01       /* Full check */
 
 /* Self test. */
 
@@ -4095,7 +4085,7 @@ static int bmi270_selftest(FAR struct file *filep,
 
   switch (arg)
     {
-      case BMI270_SIMPLE_CHECK:    /* Simple check tag */
+      case SNIOC_SIMPLE_CHECK:     /* Simple check tag */
         {
           /* Read device ID. */
 
@@ -4103,7 +4093,7 @@ static int bmi270_selftest(FAR struct file *filep,
         }
         break;
 
-      case BMI270_FULL_CHECK:      /* Full check tag */
+      case SNIOC_FULL_CHECK:       /* Full check tag */
         {
           /* Run selftest. */
 
@@ -4179,7 +4169,7 @@ static int bmi270_control(FAR struct file *filep,
 
   switch (cmd)
     {
-      case BMI270_FEAT_MANAGE_CMD:    /* Feature manage cmd tag */
+      case SNIOC_FEAT_MANAGE:    /* Feature manage cmd tag */
         {
           priv->featen = *(unsigned int *)ioctl->data;
           ret = bmi270_feat_manage(priv);
@@ -4190,7 +4180,7 @@ static int bmi270_control(FAR struct file *filep,
         }
         break;
 
-      case BMI270_SET_SCALE_XL_CMD:   /* Set accelerator scale command tag */
+      case SNIOC_SET_SCALE_XL:   /* Set accelerator scale command tag */
         {
           int data = *(int *)ioctl->data;
 

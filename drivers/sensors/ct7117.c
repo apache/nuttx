@@ -66,10 +66,6 @@
 #define CT7117_SHOTDOWN_MODE      0x01        /* Control device in shotdown mode. */
 #define CT7117_NORMAL_MODE        0x00        /* Control device in normal mode. */
 
-/* Factory test instructions. */
-
-#define CT7117_SIMPLE_CHECK       0x00        /* Simple communication check. */
-
 #define CT7117_MAKE_S16(u8h, u8l) \
         (int16_t)(((uint16_t)(u8h) << 8) | (uint16_t)(u8l))
 
@@ -708,7 +704,7 @@ static int ct7117_selftest(FAR struct file *filep,
 
   switch (arg)
     {
-      case CT7117_SIMPLE_CHECK:      /* Simple communication check. */
+      case SNIOC_SIMPLE_CHECK:       /* Simple communication check. */
         {
           ret = ct7117_checkid(priv);
           if (ret < 0)

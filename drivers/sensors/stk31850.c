@@ -63,10 +63,6 @@
 
 #define STK31850_FIFO_BYPASS        0x01          /* FIFO bypass mode. */
 
-/* Factory test instructions. */
-
-#define STK31850_SIMPLE_CHECK       0x00          /* Simple check. */
-
 /* Sensor ODR */
 
 #define STK31850_UNIT_TIME          1000000.0f    /* Unit time 1000000us */
@@ -1498,7 +1494,7 @@ static int stk31850_selftest(FAR struct file *filep,
 
   switch (arg)
     {
-      case STK31850_SIMPLE_CHECK:    /* Simple check tag */
+      case SNIOC_SIMPLE_CHECK:    /* Simple check tag */
         {
           /* Read device ID. */
 

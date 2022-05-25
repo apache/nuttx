@@ -184,11 +184,6 @@
 #define PAT9126JA_REG_FEATURE3          0x2d    /* Feature3 register */
 #define PAT9126JA_FEATURE3_VALUE        0x00
 
-/* Factory test instructions */
-
-#define PAT9126JA_SIMPLE_CHECK          0x00    /* Simple communication check */
-#define PAT9126JA_DISP_INFO             0x00    /* Displacement information */
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -1100,7 +1095,7 @@ static int pat9126ja_selftest(FAR struct file *filep,
 
   switch (arg)
     {
-      case PAT9126JA_SIMPLE_CHECK: /* Simple communication check */
+      case SNIOC_SIMPLE_CHECK:     /* Simple communication check */
         {
           ret = pat9126ja_readdevid(priv);
         }
@@ -1240,7 +1235,7 @@ static int pat9126ja_control(FAR struct sensor_lowerhalf_s *lower,
 
   switch (cmd)
     {
-      case PAT9126JA_DISP_INFO:       /* Displacement information */
+      case SNIOC_DISPLACE_INFO:       /* Displacement information */
         {
           sprintf((FAR char *)ioctl->data, "%d", priv->dev.x_position);
         }

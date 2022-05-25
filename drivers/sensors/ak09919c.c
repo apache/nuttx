@@ -111,11 +111,6 @@
 #define AK09919C_LOLIMIT_SLF_ST2        4          /* low limit of st2 in selftest mode. */
 #define AK09919C_HILIMIT_SLF_ST2        116        /* high limit of st2 in selftest mode. */
 
-/* Factory test instructions. */
-
-#define AK09919C_SIMPLE_CHECK           0x00       /* Simple communication check. */
-#define AK09919C_FULL_CHECK             0x01       /* Fully functional check. */
-
 /* Reset control bit. */
 
 #define AK09919C_SOFT_RESET             0x01
@@ -1109,7 +1104,7 @@ static int ak09919c_selftest(FAR struct file *filep,
 
   switch (arg)
     {
-      case AK09919C_SIMPLE_CHECK:    /* Simple communication check. */
+      case SNIOC_SIMPLE_CHECK:    /* Simple communication check. */
         {
           ret = ak09919c_checkid(priv);
           if (ret < 0)
@@ -1119,7 +1114,7 @@ static int ak09919c_selftest(FAR struct file *filep,
         }
         break;
 
-      case AK09919C_FULL_CHECK:      /* Fully functional check. */
+      case SNIOC_FULL_CHECK:      /* Fully functional check. */
         {
           ret = ak09919c_checkdev(priv);
           if (ret < 0)
@@ -1129,7 +1124,7 @@ static int ak09919c_selftest(FAR struct file *filep,
         }
         break;
 
-      default:                       /* Other cmd tag. */
+      default:                    /* Other cmd tag. */
         {
           ret = -ENOTTY;
           snerr("The cmd don't support: %d\n", ret);

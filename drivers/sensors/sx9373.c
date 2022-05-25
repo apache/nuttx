@@ -133,10 +133,6 @@
 
 #define SX9373_POLL_INTERVAL          200000   /* Poll interval(us). */
 
-/* Factory test instructions. */
-
-#define SX9373_SIMPLE_CHECK           0x00     /* Simple communication check. */
-
 /* Read the maximum length of a line in the configuration file. */
 
 #define SX9373_MAX_READLINE           30
@@ -916,7 +912,7 @@ static int sx9373_selftest(FAR struct file *filep,
 
   switch (arg)
     {
-      case SX9373_SIMPLE_CHECK:      /* Simple communication check. */
+      case SNIOC_SIMPLE_CHECK:       /* Simple communication check. */
         {
           ret = sx9373_checkid(priv);
           if (ret < 0)
