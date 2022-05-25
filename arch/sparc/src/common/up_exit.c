@@ -66,9 +66,6 @@
 static void _up_dumponexit(struct tcb_s *tcb, void *arg)
 {
   struct filelist *filelist;
-#if CONFIG_NFILE_STREAMS > 0
-  struct streamlist *streamlist;
-#endif
   int i;
 
   sinfo("  TCB=%p name=%s pid=%d\n", tcb, tcb->argv[0], tcb->pid);
@@ -84,29 +81,6 @@ static void _up_dumponexit(struct tcb_s *tcb, void *arg)
                 i, inode->i_crefs);
         }
     }
-
-#if CONFIG_NFILE_STREAMS > 0
-  streamlist = tcb->group->tg_streamlist;
-  for (i = 0; i < CONFIG_NFILE_STREAMS; i++)
-    {
-      struct file_struct *filep = &streamlist->sl_streams[i];
-      if (filep->fs_fd >= 0)
-        {
-#ifndef CONFIG_STDIO_DISABLE_BUFFERING
-          if (filep->fs_bufstart != NULL)
-            {
-              sinfo("      fd=%d nbytes=%d\n",
-                    filep->fs_fd,
-                    filep->fs_bufpos - filep->fs_bufstart);
-            }
-          else
-#endif
-            {
-              sinfo("      fd=%d\n", filep->fs_fd);
-            }
-        }
-    }
-#endif
 }
 #endif
 
