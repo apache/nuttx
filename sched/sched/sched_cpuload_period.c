@@ -68,7 +68,14 @@
  * nominal = (1,000,000 usec/sec) / Frequency cycles/sec) = Period usec/cycle
  */
 
-#define CPULOAD_PERIOD_NOMINAL       (1000000 / CONFIG_SCHED_CPULOAD_TICKSPERSEC)
+#define CPULOAD_PERIOD_NOMINAL (1000000 / CONFIG_SCHED_CPULOAD_TICKSPERSEC)
+
+/* Calculate the systick for one cpuload tick:
+ *
+ * tick = (Tick_per_sec) / Cpuload tick_per_sec) = Systick for one cpuload
+ */
+
+#define CPULOAD_PERIOD_TICKS   (TICK_PER_SEC / CONFIG_SCHED_CPULOAD_TICKSPERSEC)
 
 #if CPULOAD_PERIOD_NOMINAL < 1 || CPULOAD_PERIOD_NOMINAL > 0x7fffffff
 #  error CPULOAD_PERIOD_NOMINAL is out of range
@@ -203,12 +210,12 @@ static void nxsched_period_pmnotify(FAR struct pm_callback_s *cb, int domain,
           g_sched_period.idle_ticks +=
             clock_systime_ticks() - g_sched_period.idle_start;
 
-          if (g_sched_period.idle_ticks >= CPULOAD_PERIOD_NOMINAL)
+          if (g_sched_period.idle_ticks >= CPULOAD_PERIOD_TICKS)
             {
               nxsched_process_cpuload_ticks(
-                  g_sched_period.idle_ticks / CPULOAD_PERIOD_NOMINAL);
+                  g_sched_period.idle_ticks / CPULOAD_PERIOD_TICKS);
 
-              g_sched_period.idle_ticks %= CPULOAD_PERIOD_NOMINAL;
+              g_sched_period.idle_ticks %= CPULOAD_PERIOD_TICKS;
             }
 
           g_sched_period.lower->ops->start(g_sched_period.lower);
