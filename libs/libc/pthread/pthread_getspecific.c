@@ -25,8 +25,12 @@
 #include <nuttx/config.h>
 
 #include <pthread.h>
+#include <assert.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/tls.h>
+
+#if CONFIG_TLS_NELEM > 0
 
 /****************************************************************************
  * Public Functions
@@ -59,5 +63,23 @@
 
 FAR void *pthread_getspecific(pthread_key_t key)
 {
-  return (FAR void *)tls_get_value((int)key);
+  FAR struct tls_info_s *info;
+  FAR void *ret = NULL;
+
+  DEBUGASSERT(key >= 0 && key < CONFIG_TLS_NELEM);
+  if (key >= 0 && key < CONFIG_TLS_NELEM)
+    {
+      /* Get the TLS info structure from the current threads stack */
+
+      info = up_tls_info();
+      DEBUGASSERT(info != NULL);
+
+      /* Get the element value from the TLS info. */
+
+      ret = (FAR void *)info->tl_elem[key];
+    }
+
+  return ret;
 }
+
+#endif /* CONFIG_TLS_NELEM */

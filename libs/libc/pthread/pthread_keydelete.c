@@ -25,8 +25,13 @@
 #include <nuttx/config.h>
 
 #include <pthread.h>
+#include <assert.h>
+#include <errno.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/tls.h>
+
+#if CONFIG_TLS_NELEM > 0
 
 /****************************************************************************
  * Public Functions
@@ -52,8 +57,33 @@
 
 int pthread_key_delete(pthread_key_t key)
 {
-  /* Free the TLS index */
+  FAR struct task_info_s *info = task_get_info();
+  tls_ndxset_t mask;
+  int ret = EINVAL;
 
-  int ret = tls_free((int)key);
-  return ret < 0 ? -ret : 0;
+  DEBUGASSERT(info != NULL);
+  DEBUGASSERT(key >= 0 && key < CONFIG_TLS_NELEM);
+  if (key >= 0 && key < CONFIG_TLS_NELEM)
+    {
+      /* This is done while holding a semaphore here to avoid concurrent
+       * modification of the group TLS index set.
+       */
+
+      mask = (tls_ndxset_t)1 << key;
+      ret = _SEM_WAIT(&info->ta_sem);
+      if (ret == OK)
+        {
+          DEBUGASSERT((info->ta_tlsset & mask) != 0);
+          info->ta_tlsset &= ~mask;
+          _SEM_POST(&info->ta_sem);
+        }
+      else
+        {
+          ret = _SEM_ERRNO(ret);
+        }
+    }
+
+  return ret;
 }
+
+#endif /* CONFIG_TLS_NELEM */
