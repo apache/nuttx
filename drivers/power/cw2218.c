@@ -78,6 +78,7 @@ struct cw2218_dev_s
   uint32_t frequency;                                /* I2C frequency */
   int pin;                                           /* Interrupt pin */
   struct work_s work;                                /* Work queue for reading data. */
+  struct work_s soc_full_work;                       /* Work queue for reading soc data. */
   int last_cap;                                      /* battery cap change */
   int last_batt_temp;                                /* battery temp change */
   bool gauge_init_status;                            /* gauge init status */
@@ -130,6 +131,7 @@ static int cw2218_chipid(struct battery_gauge_dev_s *dev,
 
 static void cw2218_interrupt_worker(FAR void *arg);
 static void soc_change_worker(FAR void *arg);
+static void cw2218_start_soc_full_work(FAR struct cw2218_dev_s *priv);
 
 static const struct battery_gauge_operations_s g_cw2218ops =
 {
@@ -370,13 +372,6 @@ static inline int cw2218_getsoc(FAR struct cw2218_dev_s *priv,  b16_t *soc,
 
       *soc = ui_soc;
       *soc_h = buffer[0];
-
-      if (ui_soc >= 99 && !priv->full_work_exit)
-        {
-          priv->full_work_exit = FULL_WORK_EXIT;
-          work_queue(LPWORK, &priv->work, soc_change_worker, priv,
-                     CW2218_UI_FULL_START_TIME / USEC_PER_TICK);
-        }
     }
 
   return ret;
@@ -899,7 +894,6 @@ static void cw2218_worker(FAR void *arg)
   capacity = cap;
   if (capacity != priv->last_cap)
     {
-      priv->last_cap = capacity;
       battery_gauge_changed(&priv->dev, BATTERY_CAPACITY_CHANGED);
     }
 
@@ -988,6 +982,8 @@ static int cw2218_init(FAR struct cw2218_dev_s *priv)
       baterr("ERROR: CW2218 get config interrupt! Error = %d\n", ret);
       return ret;
     }
+
+  cw2218_start_soc_full_work(priv);
 
   work_queue(HPWORK, &priv->work, cw2218_worker, priv, 0);
 
@@ -1211,6 +1207,26 @@ static int cw2218_interrupt_handler(FAR struct ioexpander_dev_s *dev,
   return OK;
 }
 
+static void cw2218_start_soc_full_work(FAR struct cw2218_dev_s *priv)
+{
+  ub8_t soc_h;
+  b16_t soc;
+  int ret = 0;
+
+  ret = cw2218_getsoc(priv, &soc, &soc_h);
+  if (ret < 0)
+    {
+      baterr("ERROR: CW2218 get soc error, Error = %d\n", ret);
+    }
+
+  if (soc >= 99 && !priv->full_work_exit)
+    {
+      priv->full_work_exit = FULL_WORK_EXIT;
+      work_queue(LPWORK, &priv->soc_full_work, soc_change_worker, priv,
+                 CW2218_UI_FULL_START_TIME / USEC_PER_TICK);
+    }
+}
+
 static void soc_change_worker(FAR void *arg)
 {
   FAR struct cw2218_dev_s *priv = arg;
@@ -1234,11 +1250,11 @@ static void soc_change_worker(FAR void *arg)
   if (capacity <= 98)
     {
       priv->full_work_exit = FULL_WORK_NO_EXIT;
-      work_cancel(LPWORK, &priv->work);
+      work_cancel(LPWORK, &priv->soc_full_work);
     }
   else
     {
-      work_queue(LPWORK, &priv->work, soc_change_worker, priv,
+      work_queue(LPWORK, &priv->soc_full_work, soc_change_worker, priv,
                  CW2218_UI_FULL_TIME / USEC_PER_TICK);
     }
 }
@@ -1274,6 +1290,8 @@ static void cw2218_interrupt_worker(FAR void *arg)
 
   battery_gauge_changed(&priv->dev, BATTERY_CAPACITY_CHANGED);
   battery_gauge_changed(&priv->dev, BATTERY_TEMPERATURE_CHANGED);
+
+  cw2218_start_soc_full_work(priv);
 }
 
 static int cw2218_init_interrupt(FAR struct cw2218_dev_s *priv)
