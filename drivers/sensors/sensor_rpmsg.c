@@ -898,7 +898,6 @@ static int sensor_rpmsg_advack_handler(FAR struct rpmsg_endpoint *ept,
 {
   FAR struct sensor_rpmsg_advsub_s *msg = data;
   FAR struct sensor_rpmsg_dev_s *dev;
-  FAR struct sensor_rpmsg_stub_s *stub;
 
   dev = sensor_rpmsg_find_dev(msg->path);
   if (dev && !sensor_rpmsg_alloc_stub(dev, ept, msg->cookie))
