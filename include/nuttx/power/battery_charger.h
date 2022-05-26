@@ -127,6 +127,10 @@ struct battery_charger_operations_s
 
   int (*get_voltage)(struct battery_charger_dev_s *dev, FAR int *value);
 
+  /* the voltage infomation for charging */
+
+  int (*voltage_info)(struct battery_charger_dev_s *dev, FAR int *value);
+
   /* Get charge protocol */
 
   int (*get_protocol)(struct battery_charger_dev_s *dev, FAR int *value);
