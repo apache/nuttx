@@ -95,7 +95,7 @@
 #define CW2218_BATTERY_INIT_5S          5000000   /* delay time */
 #define CW_IIC_RETRY_NUM                3
 #define CW2218_UI_FULL_TIME             10000000   /* delay time */
-#define CW2218_UI_FULL_START_TIME       2000000   /* delay time */
+#define CW2218_UI_FULL_START_TIME       2000000    /* delay time */
 #define FULL_WORK_NO_EXIT               0
 #define FULL_WORK_EXIT                  1
 

@@ -117,5 +117,6 @@
 #define WLC_XM_PP_STATUS              0x00E0
 #define WLC_XM_PP_ADAPTER_STYPE       0x00E1
 #define WLC_XM_PP_TX_MODEL            0x00E2
+#define WLC_LAST_CE                   0x013C /* Length: 2, default: 0x00 */
 #endif /* __POLARIS_REG_H */
 

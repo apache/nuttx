@@ -110,6 +110,8 @@ static int stwlc38_get_det_state(FAR struct stwlc38_dev_s *priv,
                           FAR int *status);
 static int stwlc38_get_voltage(FAR struct battery_charger_dev_s *dev,
                                 int *value);
+static int stwlc38_voltage_info(FAR struct battery_charger_dev_s *dev,
+                                int *value);
 static int stwlc38_get_standard_type(FAR struct battery_charger_dev_s *dev,
                                       bool *status);
 
@@ -138,6 +140,7 @@ static const struct battery_charger_operations_s g_stwlc38ops =
   stwlc38_operate,
   stwlc38_chipid,
   stwlc38_get_voltage,
+  stwlc38_voltage_info,
 };
 
 /****************************************************************************
@@ -176,7 +179,8 @@ static int wlc_i2c_read(FAR struct stwlc38_dev_s *priv, uint8_t *cmd,
       else
         {
           nxsig_usleep(1);
-          baterr("ERROR: i2c transfer failed! err: %d retries:%d\n", err, retries);
+          baterr("ERROR: i2c transfer failed! err: %d retries:%d\n",
+          err, retries);
         }
     }
 
@@ -1195,6 +1199,37 @@ static int stwlc38_get_voltage(FAR struct battery_charger_dev_s *dev,
   *value = (reg_value * 25) >> 6;
 
   batinfo("The the actual output voltage of stwlc38 is %d mv \n", *value);
+  return OK;
+}
+
+static int stwlc38_voltage_info(FAR struct battery_charger_dev_s *dev,
+                                int *value)
+{
+  FAR struct stwlc38_dev_s *priv = (FAR struct stwlc38_dev_s *)dev;
+  int16_t reg_ce = 0xff;
+  uint16_t reg_value = 0;
+  if (fw_i2c_read(priv, WLC_LAST_CE,
+                 (FAR uint8_t *)&reg_ce, 2) < OK)
+    {
+      baterr("[WLC] Error in reading WLC_LAST_CE\n");
+      return E_BUS_R;
+    }
+
+  if (reg_ce < -1 || reg_ce > 1)
+    {
+      baterr("[WLC] rx out not ready\n");
+      return E_BUS_R;
+    }
+
+  if (fw_i2c_read(priv, WLC_RX_VOUT_REG,
+                 (FAR uint8_t *)&reg_value, 2) < OK)
+    {
+      baterr("[WLC] Error in reading WLC_RX_VOUT_REG\n");
+      return E_BUS_R;
+    }
+
+  *value = reg_value;
+  batinfo("The rx output voltage of stwlc38 is %d mv \n", *value);
   return OK;
 }
 

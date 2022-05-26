@@ -389,6 +389,16 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
         }
         break;
 
+      case BATIOC_VOLTAGE_INFO:
+        {
+          FAR int *outvoltsp = (FAR int *)((uintptr_t)arg);
+          if (outvoltsp)
+            {
+              ret = dev->ops->voltage_info(dev, outvoltsp);
+            }
+        }
+        break;
+
       default:
         _err("ERROR: Unrecognized cmd: %d\n", cmd);
         ret = -ENOTTY;

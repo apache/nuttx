@@ -58,7 +58,7 @@
  ****************************************************************************/
 #define CW2218_REG_TEMPMAX_DEFAULT_VALUE  0xFF /* Maximum temperature threshold register default value */
 #define CW2218_REG_TEMPMIN_DEFAULT_VALUE  0x14 /* Minimum temperature threshold register default value */
-#define CW2218_TEMP_ERROR_DEFAULT_VALUE   -10   /* default temperature return when error */
+#define CW2218_TEMP_ERROR_DEFAULT_VALUE   -10  /* default temperature return when error */
 
 /****************************************************************************
  * Private
