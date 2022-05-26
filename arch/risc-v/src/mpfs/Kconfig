@@ -130,7 +130,7 @@ choice
 	prompt "Choose DDR type"
 	depends on MPFS_DDR_INIT
 	default MPFS_DDR_TYPE_LPDDR4
-	
+
 config MPFS_DDR_TYPE_DDR3
 	bool "Use DDR3"
 
@@ -471,6 +471,37 @@ config MPFS_COREPWM1_NCHANNELS
 	default 2
 	range 1 16
 	depends on MPFS_COREPWM1
+
+comment "CAN-FD Options"
+
+config MPFS_CANFD
+	bool "CAN FD"
+	select ARCH_HAVE_CAN_ERRORS
+	select NET_CAN_HAVE_CANFD
+	select NET_CAN_EXTID
+	select NET_CAN_HAVE_TX_DEADLINE
+	default n
+
+config MPFS_CANFD_BASE
+	hex "Base address for the instance"
+	default 0x46000000
+	depends on MPFS_CANFD
+
+config MPFS_CANFD_CLK
+	int "Clock frequency of the CANFD block (Hz)"
+	default 62500000
+	range 1000000 100000000
+	depends on MPFS_CANFD
+
+config MPFS_CANFD_ARBI_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	default 1000000
+	depends on MPFS_CANFD
+
+config MPFS_CANFD_DATA_BITRATE
+	int "CAN  Arbitration phase bitrate"
+	default 4000000
+	depends on MPFS_CANFD
 
 endmenu
 

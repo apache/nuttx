@@ -70,6 +70,10 @@ ifeq (${CONFIG_MPFS_HAVE_COREPWM},y)
 CHIP_CSRCS += mpfs_corepwm.c
 endif
 
+ifeq (${CONFIG_MPFS_CANFD}, y)
+CHIP_CSRCS += mpfs_fpga_canfd.c
+endif
+
 ifeq (${CONFIG_MPFS_DDR_INIT},y)
 CHIP_CSRCS += mpfs_ddr.c
 endif
