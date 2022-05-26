@@ -637,7 +637,11 @@
  */
 
 #define PGTABLE_SIZE       0x00004000
-#define ALL_PGTABLE_SIZE   (PGTABLE_SIZE * CONFIG_SMP_NCPUS)
+#ifdef CONFIG_ARCH_ADDRENV
+#  define ALL_PGTABLE_SIZE (PGTABLE_SIZE * CONFIG_SMP_NCPUS)
+#else
+#  define ALL_PGTABLE_SIZE PGTABLE_SIZE
+#endif
 
 /* Virtual Page Table Location **********************************************/
 
