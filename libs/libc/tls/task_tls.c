@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/tls/tls_alloc.c
+ * libs/libc/tls/task_tls.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,77 +24,77 @@
 
 #include <nuttx/config.h>
 
-#include <sched.h>
 #include <errno.h>
-#include <assert.h>
-#include <debug.h>
-
-#include <nuttx/spinlock.h>
 #include <nuttx/tls.h>
-#include <nuttx/sched.h>
 
-#if CONFIG_TLS_NELEM > 0
+#if CONFIG_TLS_TASK_NELEM > 0
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_alloc
+ * Name: task_tls_get_value
  *
  * Description:
- *   Allocate a group-unique TLS data index
+ *   Return an the task local storage data value associated with 'tlsindx'
  *
  * Input Parameters:
- *   None
+ *   tlsindex - Index of task local storage data element to return
  *
  * Returned Value:
- *   A TLS index that is unique for use within this task group.
- *   If unsuccessful, an errno value will be returned and set to errno.
+ *   The value of TLS element associated with 'tlsindex'. Errors are not
+ *   reported.  Zero is returned in the event of an error, but zero may also
+ *   be valid value and returned when there is no error.  The only possible
+ *   error would be if tlsindex < 0 or tlsindex >=CONFIG_TLS_TASK_NELEM.
  *
  ****************************************************************************/
 
-int tls_alloc(CODE void (*dtor)(FAR void *))
+uintptr_t task_tls_get_value(int tlsindex)
 {
   FAR struct task_info_s *info = task_get_info();
-  int candidate;
-  int ret;
 
-  DEBUGASSERT(info);
-
-  /* Search for an unused index.  This is done in a critical section here to
-   * avoid concurrent modification of the group TLS index set.
-   */
-
-  ret = _SEM_WAIT(&info->ta_sem);
-
-  if (ret < 0)
+  if (tlsindex >= 0 && tlsindex < CONFIG_TLS_TASK_NELEM)
     {
-      ret = _SEM_ERRVAL(ret);
-      return ret;
+      return info->ta_telem[tlsindex];
     }
 
-  ret = -EAGAIN;
-
-  for (candidate = 0; candidate < CONFIG_TLS_NELEM; candidate++)
-    {
-      /* Is this candidate index available? */
-
-      tls_ndxset_t mask = (tls_ndxset_t)1 << candidate;
-      if ((info->ta_tlsset & mask) == 0)
-        {
-          /* Yes.. allocate the index and break out of the loop */
-
-          info->ta_tlsset |= mask;
-          info->ta_tlsdtor[candidate] = dtor;
-          ret = candidate;
-          break;
-        }
-    }
-
-  _SEM_POST(&info->ta_sem);
-
-  return ret;
+  return 0;
 }
 
-#endif /* CONFIG_TLS_NELEM > 0 */
+/****************************************************************************
+ * Name: task_tls_set_value
+ *
+ * Description:
+ *   Set the task local storage element associated with the 'tlsindex' to
+ *   'tlsvalue'
+ *
+ * Input Parameters:
+ *   tlsindex - Index of task local storage data element to set
+ *   tlsvalue - The new value of the task local storage data element
+ *
+ * Returned Value:
+ *   Zero is returned on success, a negated errno value is return on
+ *   failure:
+ *
+ *     EINVAL - tlsindex is not in range.
+ *
+ ****************************************************************************/
+
+int task_tls_set_value(int tlsindex, uintptr_t tlsvalue)
+{
+  FAR struct task_info_s *info = task_get_info();
+
+  if (tlsindex >= 0 && tlsindex < CONFIG_TLS_TASK_NELEM)
+    {
+      info->ta_telem[tlsindex] = tlsvalue;
+    }
+  else
+    {
+      return -ERANGE;
+    }
+
+  return OK;
+}
+
+#endif
