@@ -79,25 +79,22 @@ extern "C"
  *
  *   1. If deferred cancellation does not apply to this thread, nothing is
  *      done, otherwise, it
- *   2. Sets state information in the caller's TCB and increments a nesting
- *      count.
- *   3. If this is the outermost nesting level, it checks if there is a
- *      pending cancellation and, if so, calls either exit() or
- *      pthread_exit(), depending upon the type of the thread.
+ *   2. Sets state information in the caller's TCB.
+ *   3. Checks if there is a pending cancellation and, if so, calls either
+ *      exit() or pthread_exit(), depending upon the type of the thread.
  *
  * Input Parameters:
  *   None
  *
  * Returned Value:
- *   true is returned if a cancellation is pending but cannot be performed
- *   now due to the nesting level.
+ *   None
  *
  ****************************************************************************/
 
 #ifdef CONFIG_CANCELLATION_POINTS
-bool enter_cancellation_point(void);
+void enter_cancellation_point(void);
 #else
-#  define enter_cancellation_point() false
+#  define enter_cancellation_point()
 #endif
 
 /****************************************************************************
@@ -109,11 +106,9 @@ bool enter_cancellation_point(void);
  *
  *   1. If deferred cancellation does not apply to this thread, nothing is
  *      done, otherwise, it
- *   2. Clears state information in the caller's TCB and decrements a
- *      nesting count.
- *   3. If this is the outermost nesting level, it checks if there is a
- *      pending cancellation and, if so, calls either exit() or
- *      pthread_exit(), depending upon the type of the thread.
+ *   2. Clears state information in the caller's TCB.
+ *   3. Checks if there is a pending cancellation and, if so, calls either
+ *      exit() or pthread_exit(), depending upon the type of the thread.
  *
  * Input Parameters:
  *   None
@@ -136,8 +131,7 @@ void leave_cancellation_point(void);
  *   Returns true if:
  *
  *   1. Deferred cancellation does applies to this thread,
- *   2. We are within a cancellation point (i.e., the nesting level in the
- *      TCB is greater than zero).
+ *   2. We are within a cancellation point.
  *
  * Input Parameters:
  *   None

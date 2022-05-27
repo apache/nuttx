@@ -130,21 +130,6 @@ int nxmq_wait_receive(FAR struct mqueue_inode_s *msgq,
   DEBUGASSERT(rcvmsg != NULL);
   *rcvmsg = NULL;  /* Assume failure */
 
-#ifdef CONFIG_CANCELLATION_POINTS
-  /* nxmq_wait_receive() is not a cancellation point, but it may be called
-   * from mq_receive() or mq_timedreceive() which are cancellation point.
-   */
-
-  if (check_cancellation_point())
-    {
-      /* If there is a pending cancellation, then do not perform
-       * the wait.  Exit now with ECANCELED.
-       */
-
-      return -ECANCELED;
-    }
-#endif
-
   /* Get the message from the head of the queue */
 
   while ((newmsg = (FAR struct mqueue_msg_s *)sq_remfirst(&msgq->msglist))
@@ -156,6 +141,22 @@ int nxmq_wait_receive(FAR struct mqueue_inode_s *msgq,
 
       if ((oflags & O_NONBLOCK) == 0)
         {
+#ifdef CONFIG_CANCELLATION_POINTS
+          /* nxmq_wait_receive() is not a cancellation point, but it
+           * may be called from mq_receive() or mq_timedreceive() which
+           * are cancellation point.
+           */
+
+          if (check_cancellation_point())
+            {
+              /* If there is a pending cancellation, then do not perform
+               * the wait.  Exit now with ECANCELED.
+               */
+
+              return -ECANCELED;
+            }
+#endif
+
           /* Yes.. Block and try again */
 
           rtcb           = this_task();
