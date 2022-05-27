@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/tls/tls.h
+ * sched/tls/task_initinfo.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,17 +18,20 @@
  *
  ****************************************************************************/
 
-#ifndef __SCHED_TLS_TLS_H
-#define __SCHED_TLS_TLS_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/sched.h>
+#include <errno.h>
+
+#include <nuttx/kmalloc.h>
+#include <nuttx/semaphore.h>
+#include <nuttx/tls.h>
+
+#include "tls.h"
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -45,55 +48,22 @@
  *
  ****************************************************************************/
 
-int task_init_info(FAR struct task_group_s *group);
+int task_init_info(FAR struct task_group_s *group)
+{
+  FAR struct task_info_s *info;
 
-/****************************************************************************
- * Name: task_uninit_info
- *
- * Description:
- *   Uninitilize and free task_info_s structure.
- *
- * Input Parameters:
- *   - group: The group of new task
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
+  /* Allocate task info for group */
 
-void task_uninit_info(FAR struct task_group_s *group);
+  info = group_zalloc(group, sizeof(struct task_info_s));
+  if (info == NULL)
+    {
+      return -ENOMEM;
+    }
 
-/****************************************************************************
- * Name: tls_init_info
- *
- * Description:
- *   Allocate and initilize tls_info_s structure.
- *
- * Input Parameters:
- *   - tcb: The TCB of new task
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
+  /* Initialize user space semaphore */
 
-int tls_init_info(FAR struct tcb_s *tcb);
+  nxsem_init(&info->ta_sem, 0, 1);
+  group->tg_info = info;
 
-/****************************************************************************
- * Name: tls_dup_info
- *
- * Description:
- *   Allocate and duplicate tls_info_s structure.
- *
- * Input Parameters:
- *   - dst: The TCB of new task
- *   - src: The TCB of source task
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-int tls_dup_info(FAR struct tcb_s *dst, FAR struct tcb_s *src);
-
-#endif /* __SCHED_TLS_TLS_H */
+  return OK;
+}

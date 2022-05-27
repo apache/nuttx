@@ -44,6 +44,7 @@
 #include "pthread/pthread.h"
 #include "mqueue/mqueue.h"
 #include "group/group.h"
+#include "tls/tls.h"
 
 /****************************************************************************
  * Private Functions
@@ -136,8 +137,7 @@ static inline void group_release(FAR struct task_group_s *group)
   task_tls_destruct();
 #endif
 
-  nxsem_destroy(&group->tg_info->ta_sem);
-  group_free(group, group->tg_info);
+  task_uninit_info(group);
 
 #if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
   /* Free all un-reaped child exit status */
