@@ -305,6 +305,7 @@ static void sensor_rpmsg_advsub_one(FAR struct sensor_rpmsg_dev_s *dev,
   msg->command = command;
   msg->cookie  = (uint64_t)(uintptr_t)dev;
   msg->nbuffer = dev->lower.nbuffer;
+  msg->persist = dev->lower.persist;
   memcpy(msg->path, dev->path, len);
   ret = rpmsg_send_nocopy(ept, msg, sizeof(*msg) + len);
   if (ret < 0)
