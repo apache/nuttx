@@ -145,6 +145,7 @@ struct local_conn_s
   /* SOCK_STREAM fields common to both client and server */
 
   sem_t lc_waitsem;            /* Use to wait for a connection to be accepted */
+  sem_t lc_donesem;            /* Use to wait for client connected done */
   FAR struct socket *lc_psock; /* A reference to the socket structure */
 
   /* The following is a list if poll structures of threads waiting for
