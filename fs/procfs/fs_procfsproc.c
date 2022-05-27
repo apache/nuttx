@@ -44,7 +44,7 @@
 #endif
 
 #include <nuttx/irq.h>
-#include <nuttx/arch.h>
+#include <nuttx/tls.h>
 #include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/environ.h>

@@ -89,7 +89,7 @@ int pthread_cancel(pthread_t thread)
       pthread_exit(PTHREAD_CANCELED);
     }
 
-  /* Refer to up_tls_info() */
+  /* Refer to tls_get_info() */
 
 #ifdef CONFIG_PTHREAD_CLEANUP
   pthread_cleanup_popall(tcb->stack_alloc_ptr);

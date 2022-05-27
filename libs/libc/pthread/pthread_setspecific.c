@@ -27,7 +27,6 @@
 #include <pthread.h>
 #include <assert.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/tls.h>
 
 #if CONFIG_TLS_NELEM > 0
@@ -81,7 +80,7 @@ int pthread_setspecific(pthread_key_t key, FAR const void *value)
     {
       /* Get the TLS info structure from the current threads stack */
 
-      info = up_tls_info();
+      info = tls_get_info();
       DEBUGASSERT(info != NULL);
 
       /* Set the element value int the TLS info. */

@@ -33,17 +33,15 @@
 #include <sched.h>
 #include <signal.h>
 #include <semaphore.h>
+#include <pthread.h>
 #include <time.h>
 
 #include <nuttx/clock.h>
 #include <nuttx/irq.h>
-#include <nuttx/tls.h>
 #include <nuttx/wdog.h>
 #include <nuttx/mm/shm.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
-
-#include <arch/arch.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -392,6 +390,8 @@ struct stackinfo_s
  * leaving the group.  When the reference count decrements to zero,
  * the struct task_group_s is free.
  */
+
+struct task_info_s;
 
 #ifndef CONFIG_DISABLE_PTHREAD
 struct join_s;                      /* Forward reference                        */
