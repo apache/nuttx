@@ -32,6 +32,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
+#include <nuttx/tls.h>
 
 #include "group/group.h"
 #include "sched/sched.h"

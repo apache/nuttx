@@ -24,7 +24,6 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/tls.h>
 
 /****************************************************************************
@@ -48,7 +47,7 @@
 
 FAR struct task_info_s *task_get_info(void)
 {
-  FAR struct tls_info_s *info = up_tls_info();
+  FAR struct tls_info_s *info = tls_get_info();
 
   return info->tl_task;
 }

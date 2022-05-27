@@ -26,7 +26,6 @@
 
 #include <assert.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/tls.h>
 
 #if CONFIG_TLS_NELEM > 0
@@ -52,7 +51,7 @@
 void tls_destruct(void)
 {
   FAR struct task_info_s *info = task_get_info();
-  FAR struct tls_info_s *tls = up_tls_info();
+  FAR struct tls_info_s *tls = tls_get_info();
   FAR void *tls_elem_ptr = NULL;
   tls_dtor_t destructor;
   tls_ndxset_t tlsset;

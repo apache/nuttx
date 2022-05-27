@@ -28,7 +28,6 @@
 #include <sched.h>
 #include <assert.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/tls.h>
 #include <nuttx/pthread.h>
@@ -119,7 +118,7 @@ static void pthread_cleanup_pop_tls(FAR struct tls_info_s *tls, int execute)
 
 void pthread_cleanup_pop(int execute)
 {
-  FAR struct tls_info_s *tls = up_tls_info();
+  FAR struct tls_info_s *tls = tls_get_info();
 
   DEBUGASSERT(tls != NULL);
 
@@ -135,7 +134,7 @@ void pthread_cleanup_pop(int execute)
 
 void pthread_cleanup_push(pthread_cleanup_t routine, FAR void *arg)
 {
-  FAR struct tls_info_s *tls = up_tls_info();
+  FAR struct tls_info_s *tls = tls_get_info();
 
   DEBUGASSERT(tls != NULL);
   DEBUGASSERT(tls->tos < CONFIG_PTHREAD_CLEANUP_STACKSIZE);
