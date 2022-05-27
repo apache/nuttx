@@ -470,6 +470,7 @@
 #define GH3020_FACTEST_CH_MAX              32        /* Maximum factest channels */
 #define GH3020_CMD_DELAY_US                750       /* Delay time(us) for a cmd */
 #define GH3020_ADC_NUM                     4         /* GH3020 has 4 ADC channels */
+#define GH3020_BYTES_PER_DATA              4         /* Each PD data has 4bytes */
 #define GH3020_DATA_PER_SAMPLE             4         /* Each sample has 4 PD data */
 #define GH3020_LEDDRV_CURRENT_MA_MAX       200       /* Each LED driver output 200mA max. */
 #define GH3020_ADC_BASELINE                0x800000  /* ADC baseline */

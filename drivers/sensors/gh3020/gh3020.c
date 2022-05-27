@@ -78,6 +78,8 @@
 
 #define GH3020_INTVL_DFT         40000      /* Default interval = 40 ms */
 #define GH3020_SR_DFT            25         /* Default sample rate = 25 Hz */
+#define GH3020_INTVL_CALIBR_DFT  20000      /* Default calibrate intvl=40ms */
+#define GH3020_SR_CALIBR_DFT     50         /* Default calibrate SR = 50Hz */
 #define GH3020_CURRENT_DFT       10000      /* Default LED current = 10mA */
 
 /* Constants */
@@ -147,11 +149,10 @@ struct gh3020_dev_s
   float tia_calibr;                      /* TIA calibration coefficent */
   float led_calibr;                      /* LED calibration coefficent */
   uint16_t efuse;                        /* EFUSE for TIA and LED driver */
-  uint16_t fifowtm;                      /* FIFO water marker */
+  uint16_t fifowtm;                      /* FIFO water marker, unit is data */
   uint8_t ppgdatacnt[GH3020_SENSOR_NUM]; /* Data number of each PPG channel */
   uint8_t activated;                     /* How many sensors are activated */
   uint8_t dark_calibr;                   /* Data count for dark calibration */
-  bool reinitializing;                   /* If device need reinitialization */
   bool factest_mode;                     /* If it's in factory test mode */
   bool updating;                         /* If any sensor need updating */
   bool load_efuse;                       /* If EFUSE has been loaded */
@@ -178,6 +179,7 @@ static void gh3020_extract_frame(FAR struct gh3020_dev_s *priv, uint8_t idx,
 
 /* GH3020 common operation functions */
 
+static void gh3020_calibr_dark_start(FAR struct gh3020_dev_s *priv);
 static void gh3020_push_data(FAR struct gh3020_dev_s *priv);
 static void gh3020_restart_new_fifowtm(FAR struct gh3020_dev_s *priv,
                                        uint16_t fifowtm);
@@ -670,7 +672,7 @@ static uint16_t gh3020_calcu_fifowtm(FAR struct gh3020_dev_s *priv)
                 }
             }
 
-          /* Each sample has 4 PD data */
+          /* Each sample has 4 PD data. */
 
           fifowtm = fifowtm * GH3020_DATA_PER_SAMPLE;
         }
@@ -791,16 +793,17 @@ static void gh3020_extract_frame(FAR struct gh3020_dev_s *priv, uint8_t idx,
               priv->adc_bias[i] = priv->adc_bias[i] +
                 (int32_t)(pframeinfo->punFrameRawdata[i]) -
                 GH3020_ADC_BASELINE;
-              gain = (uint32_t)pframeinfo->punFrameAgcInfo[i] & 0x0000000f;
-              pppg->gain[i] = gh3020_gain_list[gain];
-              pppg->ppg[i] = GH3020_ADC_BASELINE;
             }
 
           if (priv->dark_calibr == GH3020_DARK_CALIBR_NUM)
             {
               priv->dark_calibr++;
               gh3020_dark_pd_mux(true);
-              priv->reinitializing = true;
+              gh3020_stop_sampling(
+                gh3020_channel_function_list[GH3020_PPG3_SENSOR_IDX]);
+              IOEXP_SETOPTION(priv->config->ioedev, priv->config->intpin,
+                              IOEXPANDER_OPTION_INTCFG,
+                              (FAR void *)IOEXPANDER_VAL_DISABLE);
               for (i = 0; i < GH3020_ADC_NUM; i++)
                 {
                   priv->adc_bias[i] = priv->adc_bias[i] /
@@ -819,6 +822,38 @@ static void gh3020_extract_frame(FAR struct gh3020_dev_s *priv, uint8_t idx,
           pppg->gain[i] = gh3020_gain_list[gain];
         }
     }
+}
+
+/****************************************************************************
+ * Name: gh3020_calibr_dark_start
+ *
+ * Description:
+ *   Start to calibrate ADC bias for ambient measurements.
+ *
+ * Input Parameters:
+ *   priv - The device struct pointer.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void gh3020_calibr_dark_start(FAR struct gh3020_dev_s *priv)
+{
+  uint32_t channelmode;
+
+  priv->dark_calibr = 0;
+  channelmode = gh3020_channel_function_list[GH3020_PPG3_SENSOR_IDX];
+  gh3020_samplerate_set(channelmode, GH3020_SR_CALIBR_DFT);
+  gh3020_set_fifowtm(GH3020_DARK_CALIBR_NUM * GH3020_DATA_PER_SAMPLE);
+  gh3020_fifo_process();
+  gh3020_start_sampling(channelmode);
+  IOEXP_SETOPTION(priv->config->ioedev, priv->config->intpin,
+                  IOEXPANDER_OPTION_INTCFG,
+                  (FAR void *)IOEXPANDER_VAL_RISING);
 }
 
 /****************************************************************************
@@ -892,7 +927,7 @@ static void gh3020_restart_new_fifowtm(FAR struct gh3020_dev_s *priv,
    */
 
   if ((fifowtm > 0 && priv->fifowtm == 0) ||
-      (fifowtm == 0 && priv->fifowtm > 0) || priv->reinitializing == true)
+      (fifowtm == 0 && priv->fifowtm > 0))
     {
       /* GH3020 changes into corresponding reading mode. */
 
@@ -910,7 +945,6 @@ static void gh3020_restart_new_fifowtm(FAR struct gh3020_dev_s *priv,
        */
 
       gh3020_init();
-      priv->reinitializing = false;
       for (idx = 0; idx < GH3020_SENSOR_NUM; idx++)
         {
           if (priv->sensor[idx].activated)
@@ -928,6 +962,9 @@ static void gh3020_restart_new_fifowtm(FAR struct gh3020_dev_s *priv,
           gh3020_set_fifowtm(fifowtm);
         }
 
+      /* Some events may be processed between init and start */
+
+      gh3020_fifo_process();
       gh3020_start_sampling(priv->channelmode);
 
       /* Switch MCU's reading mode between polling and interrupt. */
@@ -1033,7 +1070,7 @@ static void gh3020_update_sensor(FAR struct gh3020_dev_s *priv)
   uint16_t rate;
   uint8_t idx;
 
-  if (priv->updating == true || priv->reinitializing == true)
+  if (priv->updating == true)
     {
       gh3020_stop_sampling(priv->channelmode);
       priv->updating = false;
@@ -1223,19 +1260,6 @@ static int gh3020_activate(FAR struct file *filep,
 
   if (sensor->activated != enable)
     {
-      /* If ppgq3(dark) is activated from inactivated status, mark it as
-       * uncalibrated and a calibration will be performed.
-       */
-
-      if (sensor->chidx == GH3020_PPG3_SENSOR_IDX && enable == true &&
-          priv->dark_calibr < GH3020_DARK_CALIBR_NUM)
-        {
-          priv->dark_calibr = 0;
-          memset(priv->adc_bias, 0, sizeof(priv->adc_bias));
-          gh3020_dark_pd_mux(false);
-          priv->reinitializing = true;
-        }
-
 #ifdef CONFIG_FACTEST_SENSORS_GH3020
       if (priv->factest_mode == true)
         {
@@ -1248,7 +1272,7 @@ static int gh3020_activate(FAR struct file *filep,
             {
               gh3020_rdmode_switch(GH3020_RDMODE_POLLING);
               gh3020_init();
-              priv->reinitializing = false;
+              gh3020_fifo_process();
               gh3x2x_factest_start(
                 gh3020_channel_function_list[sensor->chidx],
                 sensor->current);
@@ -1316,7 +1340,6 @@ static int gh3020_activate(FAR struct file *filep,
                   /* GH3020 must be initialized after switch reading mode. */
 
                   gh3020_init();
-                  priv->reinitializing = false;
                   priv->interval = sensor->interval;
                   priv->batch = sensor->batch;
                   priv->activated++;
@@ -2324,7 +2347,8 @@ void gh3020_get_ppg_data(FAR const struct gh3020_frameinfo_s *pframeinfo)
         return;
     }
 
-  if (g_priv->sensor[idx].activated == true &&
+  if ((g_priv->sensor[idx].activated == true  ||
+      g_priv->dark_calibr < GH3020_DARK_CALIBR_NUM) &&
       g_priv->ppgdatacnt[idx] < GH3020_BATCH_NUMBER)
     {
       gh3020_extract_frame(g_priv, idx,
@@ -2362,9 +2386,9 @@ void gh3020_get_rawdata(FAR uint8_t *pbuf, uint16_t len)
   uint8_t chidx;
   uint8_t i;
 
-  if (len / GH3020_DATA_PER_SAMPLE > 0 && g_priv->factest_mode == true)
+  if (len / GH3020_BYTES_PER_DATA > 0 && g_priv->factest_mode == true)
     {
-      for (i = 0; i < len; i = i + GH3020_DATA_PER_SAMPLE)
+      for (i = 0; i < len; i = i + GH3020_BYTES_PER_DATA)
         {
           /* Swap big endian to little endian */
 
@@ -2503,7 +2527,7 @@ int gh3020_register(int devno, FAR const struct gh3020_config_s *config)
    * Note that gh3020_init will return 0 for OK or a positive error code.
    */
 
-  gh3020_rdmode_switch(GH3020_RDMODE_POLLING);
+  gh3020_rdmode_switch(GH3020_RDMODE_INTERRPT);
   ret = gh3020_init();
   if (ret != OK)
     {
@@ -2563,6 +2587,10 @@ int gh3020_register(int devno, FAR const struct gh3020_config_s *config)
           goto err_iodetach;
         }
     }
+
+  /* Calibrate the ADC bias, once reboot */
+
+  gh3020_calibr_dark_start(priv);
 
   return ret;
 
