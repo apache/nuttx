@@ -85,7 +85,6 @@
 #include <nuttx/compiler.h>
 #include <nuttx/cache.h>
 #include <nuttx/sched.h>
-#include <nuttx/tls.h>
 
 /****************************************************************************
  * Pre-processor definitions
@@ -1825,14 +1824,6 @@ int up_timer_start(FAR const struct timespec *ts);
  * The actual definition is provided in arch/arch.h as a macro. The default
  * implementation provided here assume the arch has a "push down" stack.
  */
-
-#ifndef up_tls_info
-#  if defined(CONFIG_TLS_ALIGNED) && !defined(__KERNEL__)
-#    define up_tls_info() TLS_INFO((uintptr_t)up_getsp())
-#  else
-#    define up_tls_info() tls_get_info()
-#  endif
-#endif
 
 /****************************************************************************
  * Name: up_tls_size
