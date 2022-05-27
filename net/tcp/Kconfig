@@ -9,7 +9,7 @@ config NET_TCP
 	bool "TCP/IP Networking"
 	default n
 	select NET_READAHEAD if !NET_TCP_NO_STACK
-	depends on SCHED_LPWORK
+	depends on SCHED_WORKQUEUE
 	---help---
 		Enable or disable TCP networking support.
 
