@@ -18,7 +18,7 @@
 #
 ############################################################################
 
-CSRCS += tls_initinfo.c tls_dupinfo.c
+CSRCS += task_initinfo.c task_uninitinfo.c tls_initinfo.c tls_dupinfo.c
 
 # Include tls build support
 
