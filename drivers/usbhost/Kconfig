@@ -106,8 +106,7 @@ config USBHOST_MSC
 	default n
 	depends on !BULK_DISABLE
 	---help---
-		Enable support for the mass storage class driver.  This also depends on
-		SCHED_WORKQUEUE=y
+		Enable support for the mass storage class driver.
 
 config USBHOST_MSC_NOTIFIER
 	bool "Support USB Mass Storage notifications"
@@ -294,8 +293,7 @@ config USBHOST_HIDKBD
 	default n
 	depends on !INT_DISABLE
 	---help---
-		Enable support for the keyboard class driver.  This also depends on
-		SCHED_WORKQUEUE
+		Enable support for the keyboard class driver.
 
 if  USBHOST_HIDKBD
 
@@ -372,8 +370,7 @@ config USBHOST_HIDMOUSE
 	select INPUT
 	select INPUT_MOUSE
 	---help---
-		Enable support for the mouse class driver.  This also depends on
-		SCHED_WORKQUEUE
+		Enable support for the mouse class driver.
 
 		NOTE:  This driver checks out on a Labtec and an AOpen mouse, but
 		does not work correctly on a Microsoft mouse.  A little more work
