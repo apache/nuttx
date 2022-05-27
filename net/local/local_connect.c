@@ -178,6 +178,8 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
 
   DEBUGASSERT(client->lc_infile.f_inode != NULL);
 
+  nxsem_post(&client->lc_donesem);
+
   if (!nonblock)
     {
       client->lc_state = LOCAL_STATE_CONNECTED;

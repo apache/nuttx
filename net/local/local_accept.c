@@ -243,6 +243,12 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
             }
 
           nxsem_post(&client->lc_waitsem);
+
+          if (ret == OK)
+            {
+              ret = net_lockedwait(&client->lc_donesem);
+            }
+
           return ret;
         }
 
