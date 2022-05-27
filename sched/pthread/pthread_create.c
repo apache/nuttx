@@ -40,12 +40,12 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/pthread.h>
-#include <nuttx/tls.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
 #include "clock/clock.h"
 #include "pthread/pthread.h"
+#include "tls/tls.h"
 
 /****************************************************************************
  * Public Data
@@ -215,7 +215,6 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
                       pthread_startroutine_t entry, pthread_addr_t arg)
 {
   FAR struct pthread_tcb_s *ptcb;
-  FAR struct tls_info_s *info;
   FAR struct join_s *pjoin;
   struct sched_param param;
   int policy;
@@ -304,20 +303,12 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
 
   /* Initialize thread local storage */
 
-  info = up_stack_frame(&ptcb->cmn, up_tls_size());
-  if (info == NULL)
+  ret = tls_init_info(&ptcb->cmn);
+  if (ret != OK)
     {
-      errcode = ENOMEM;
+      errcode = -ret;
       goto errout_with_join;
     }
-
-  DEBUGASSERT(info == ptcb->cmn.stack_alloc_ptr);
-
-  up_tls_initialize(info);
-
-  /* Attach per-task info in group to TLS */
-
-  info->tl_task = ptcb->cmn.group->tg_info;
 
   /* Should we use the priority and scheduler specified in the pthread
    * attributes?  Or should we use the current thread's priority and
