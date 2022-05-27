@@ -1028,7 +1028,7 @@ static int stwlc38_voltage(FAR struct battery_charger_dev_s *dev,
   int ret;
   uint16_t reg_value;
 
-  reg_value = (uint16_t)((value << 6) / 25);
+  reg_value = (uint16_t)(((value - WLC_RX_VOL_BASE) << 6) / 25);
 
   ret = fw_i2c_write(priv, WLC_RX_VOUT_SET_REG, (uint8_t *)&reg_value, 2);
   if (ret != OK)
@@ -1196,7 +1196,7 @@ static int stwlc38_get_voltage(FAR struct battery_charger_dev_s *dev,
       return E_BUS_R;
     }
 
-  *value = (reg_value * 25) >> 6;
+  *value = ((reg_value * 25) >> 6) + WLC_RX_VOL_BASE;
 
   batinfo("The the actual output voltage of stwlc38 is %d mv \n", *value);
   return OK;
