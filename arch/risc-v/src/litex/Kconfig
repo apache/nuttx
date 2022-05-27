@@ -28,7 +28,6 @@ config LITEX_UART0
 config LITEX_SDIO
 	bool "SDIO"
 	default n
-	select SCHED_WORKQUEUE
 	select SCHED_HPWORK
 	select MMCSD
 	select MMCSD_SDIO

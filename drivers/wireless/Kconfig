@@ -16,7 +16,6 @@ config WL_CC1101
 	default n
 	select SPI
 	select SCHED_HPWORK
-	select SCHED_LPWORK
 
 if WL_CC1101
 

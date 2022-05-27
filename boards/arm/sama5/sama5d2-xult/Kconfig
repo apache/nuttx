@@ -38,7 +38,6 @@ config SAMA5_SDMMC
 	bool "enable SDMMC controller"
 	default y if SAMA5_HAVE_SDMMC
 	select SDIO_DMA
-	select SCHED_WORKQUEUE
 	select SCHED_HPWORK
 	select MMCSD
 	select MMCSD_SDIO
@@ -46,7 +45,7 @@ config SAMA5_SDMMC
 	select ARCH_HAVE_SDIO
 	select SAMA5_SDMMC_DMA
 	---help---
-		Enable SD Card interface SDMMC0. Selects SAMA5_SDMMC SAMA5_SDMMC0 SAMA5_SDMMC_DMA SDIO_DMA SCHED_WORKQUEUE SCHED_HPWORK SDIO_BLOCKSETUP
+		Enable SD Card interface SDMMC0. Selects SAMA5_SDMMC SAMA5_SDMMC0 SAMA5_SDMMC_DMA SDIO_DMA SCHED_HPWORK SDIO_BLOCKSETUP
 
 config SAMA5_SDMMC0
 	bool "Enable SDMMC0 (built-in eMMC)"

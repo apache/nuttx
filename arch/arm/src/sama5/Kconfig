@@ -5076,7 +5076,6 @@ config SAMA5_SDMMC
 	bool "enable SDMMC controller"
 	default y if SAMA5_HAVE_SDMMC
 	select SDIO_DMA
-	select SCHED_WORKQUEUE
 	select SCHED_HPWORK
 	select MMCSD
 	select MMCSD_SDIO
@@ -5084,7 +5083,7 @@ config SAMA5_SDMMC
 	select ARCH_HAVE_SDIO
 	select SAMA5_SDMMC_DMA
 	---help---
-		Enable SD Card interface SDMMC. Selects SAMA5_SDMMC SAMA5_SDMMC_DMA SDIO_DMA SCHED_WORKQUEUE SCHED_HPWORK SDIO_BLOCKSETUP
+		Enable SD Card interface SDMMC. Selects SAMA5_SDMMC SAMA5_SDMMC_DMA SDIO_DMA SCHED_HPWORK SDIO_BLOCKSETUP
 
 choice
 	prompt "SDMMC maximum bus speed"
