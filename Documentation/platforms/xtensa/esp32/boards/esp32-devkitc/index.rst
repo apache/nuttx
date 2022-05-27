@@ -326,32 +326,32 @@ This example uses littlefs on ESP32's SPI flash to store wasm modules.
 1. Create a littlefs image which contains wasm modules.
 
    https://github.com/jrast/littlefs-python/blob/master/examples/mkfsimg.py
-   is used in the following example.
+   is used in the following example::
 
-  % python3 mkfsimg.py \
-    --img-filename ..../littlefs.bin \
-    --img-size 3080192 \
-    --block-size 4096 \
-    --prog-size 256 \
-    --read-size 256 \
-    ..../wasm_binary_directory
+      % python3 mkfsimg.py \
+        --img-filename ..../littlefs.bin \
+        --img-size 3080192 \
+        --block-size 4096 \
+        --prog-size 256 \
+        --read-size 256 \
+        ..../wasm_binary_directory
 
-2. Write the NuttX image and the filesystem to ESP32.
+2. Write the NuttX image and the filesystem to ESP32::
 
-  % esptool.py \
-    --chip esp32 \
-    --port /dev/tty.SLAB_USBtoUART \
-    --baud 921600 \
-    write_flash \
-    0x1000 ..../bootloader-esp32.bin \
-    0x8000 ..../partition-table-esp32.bin \
-    0x10000 nuttx.bin \
-    0x180000 ..../littlefs.bin
+      % esptool.py \
+        --chip esp32 \
+        --port /dev/tty.SLAB_USBtoUART \
+        --baud 921600 \
+        write_flash \
+        0x1000 ..../bootloader-esp32.bin \
+        0x8000 ..../partition-table-esp32.bin \
+        0x10000 nuttx.bin \
+        0x180000 ..../littlefs.bin
 
-3. Mount the filesystem and run a wasm module on it.
+3. Mount the filesystem and run a wasm module on it::
 
-  nsh> mount -t littlefs /dev/esp32flash /mnt
-  nsh> iwasm /mnt/....
+      nsh> mount -t littlefs /dev/esp32flash /mnt
+      nsh> iwasm /mnt/....
 
 efuse
 -----
