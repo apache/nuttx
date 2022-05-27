@@ -409,6 +409,7 @@ __start:
 	bic		r0, r0, #(SCTLR_SW | SCTLR_I   | SCTLR_V   | SCTLR_RR | SCTLR_HA)
 	bic		r0, r0, #(SCTLR_EE | SCTLR_TRE | SCTLR_AFE | SCTLR_TE)
 
+#ifndef CONFIG_SMP
 	/* Set bits to enable the MMU
 	 *
 	 *   SCTLR_M     Bit 0:  Enable the MMU
@@ -416,6 +417,8 @@ __start:
 	 */
 
 	orr		r0, r0, #(SCTLR_M)
+#endif
+
 #ifndef CONFIG_ARCH_CORTEXA5
 	orr		r0, r0, #(SCTLR_Z)
 #endif
