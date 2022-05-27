@@ -40,6 +40,7 @@
 #include "environ/environ.h"
 #include "group/group.h"
 #include "task/task.h"
+#include "tls/tls.h"
 
 /* vfork() requires architecture-specific support as well as waipid(). */
 
@@ -97,7 +98,6 @@ FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr)
   FAR struct tcb_s *ptcb = this_task();
   FAR struct tcb_s *parent;
   FAR struct task_tcb_s *child;
-  FAR struct tls_info_s *info;
   size_t stack_size;
   uint8_t ttype;
   int priority;
@@ -181,18 +181,11 @@ FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr)
 
   /* Setup thread local storage */
 
-  info = up_stack_frame(&child->cmn, up_tls_size());
-  if (info == NULL)
+  ret = tls_dup_info(&child->cmn, parent);
+  if (ret < OK)
     {
-      ret = -ENOMEM;
       goto errout_with_tcb;
     }
-
-  DEBUGASSERT(info == child->cmn.stack_alloc_ptr);
-  memcpy(info, parent->stack_alloc_ptr, sizeof(struct tls_info_s));
-  info->tl_task = child->cmn.group->tg_info;
-
-  up_tls_initialize(info);
 
   /* Get the priority of the parent task */
 
