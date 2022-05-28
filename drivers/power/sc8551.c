@@ -595,6 +595,27 @@ static int sc8551_set_sense_resistor(FAR struct sc8551_dev_s *priv,
   return ret;
 }
 
+static int sc8551_enable_ibus_ucp(FAR struct sc8551_dev_s *priv, bool enable)
+{
+  int ret;
+  uint8_t val;
+
+  if (enable)
+    {
+      val = SC8551_IBUS_UCP_ENABLE;
+    }
+  else
+    {
+      val = SC8551_IBUS_UCP_DISABLE;
+    }
+
+  val <<= SC8551_IBUS_UCP_SHIFT;
+  ret = sc8551_update_bits(priv, SC8551_REG_31,
+                           SC8551_IBUS_UCP_MASK, val);
+
+  return ret;
+}
+
 static int sc8551_enable_charge(FAR struct sc8551_dev_s *priv, bool enable)
 {
   int ret;
@@ -1789,7 +1810,10 @@ static int sc8551_operate(FAR struct battery_charger_dev_s *dev,
         break;
 
       case BATIO_OPRTN_SYSON:
+        ret = sc8551_enable_ibus_ucp(priv, false);
         ret = sc8551_enable_charge(priv, true);
+        nxsig_usleep(SC8551_IBUSUCP_DELAY);
+        ret = sc8551_enable_ibus_ucp(priv, true);
         break;
 
       case BATIO_OPRTN_RESET:

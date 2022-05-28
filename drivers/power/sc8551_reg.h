@@ -793,6 +793,10 @@
 #define SC8551_CHARGE_MODE_SHIFT            0
 #define SC8551_CHARGE_MODE_2_1              0
 #define SC8551_CHARGE_MODE_1_1              1
+#define SC8551_IBUS_UCP_MASK                0x02
+#define SC8551_IBUS_UCP_SHIFT               1
+#define SC8551_IBUS_UCP_ENABLE              1
+#define SC8551_IBUS_UCP_DISABLE             0
 
 #define SC8551_REG_34                       0x34
 #define SC8551_REG_MAX                      0x35
