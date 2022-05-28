@@ -221,7 +221,7 @@
 
 /* FIFO */
 
-#define BMI270_FIFO_DATA_BLOCK_SIZE   0x07       /* Data size of the fifo frame */
+#define BMI270_FIFO_DATA_BLOCK_SIZE   0x06       /* Data size of the fifo frame */
 #define BMI270_FIFO_BUFFER_SIZE       0x400      /* FIFO buffer size */
 #define BMI270_FIFO_REGULAR_FRAME     0x02       /* FIFO regular frame */
 #define BMI270_FIFO_CONTROL_FRAME     0x01       /* FIFO control frame */
@@ -2873,6 +2873,19 @@ static int bmi270_fifo_xl_enable(FAR struct bmi270_dev_s *priv,
 
   bmi270_spi_read(priv, BMI270_FIFO_CONFIG_1, (FAR uint8_t *)&reg, 1);
 
+  if (reg.fifo_gyr_en ==  BMI270_ENABLE)
+    {
+      bmi270_xl_enable(priv, BMI270_DISABLE);
+      bmi270_gy_enable(priv, BMI270_DISABLE);
+      reg.fifo_acc_en = BMI270_DISABLE;
+      reg.fifo_gyr_en = BMI270_DISABLE;
+      bmi270_spi_write(priv, BMI270_FIFO_CONFIG_1, (FAR uint8_t *)&reg);
+      usleep(BMI270_SET_TIME);
+      reg.fifo_gyr_en = BMI270_ENABLE;
+      bmi270_xl_enable(priv, BMI270_ENABLE);
+      bmi270_gy_enable(priv, BMI270_ENABLE);
+    }
+
   reg.fifo_acc_en = value;
   bmi270_spi_write(priv, BMI270_FIFO_CONFIG_1, (FAR uint8_t *)&reg);
 
@@ -2903,6 +2916,19 @@ static int bmi270_fifo_gy_enable(FAR struct bmi270_dev_s *priv,
   bmi270_fifo_config_1_t reg;
 
   bmi270_spi_read(priv, BMI270_FIFO_CONFIG_1, (FAR uint8_t *)&reg, 1);
+
+  if (reg.fifo_acc_en ==  BMI270_ENABLE)
+    {
+      bmi270_xl_enable(priv, BMI270_DISABLE);
+      bmi270_gy_enable(priv, BMI270_DISABLE);
+      reg.fifo_acc_en = BMI270_DISABLE;
+      reg.fifo_gyr_en = BMI270_DISABLE;
+      bmi270_spi_write(priv, BMI270_FIFO_CONFIG_1, (FAR uint8_t *)&reg);
+      usleep(BMI270_SET_TIME);
+      reg.fifo_acc_en = BMI270_ENABLE;
+      bmi270_xl_enable(priv, BMI270_ENABLE);
+      bmi270_gy_enable(priv, BMI270_ENABLE);
+    }
 
   reg.fifo_gyr_en = value;
   bmi270_spi_write(priv, BMI270_FIFO_CONFIG_1, (FAR uint8_t *)&reg);
@@ -2986,7 +3012,14 @@ static int bmi270_fifo_gettype(FAR bmi270_fifo_header_t *fifo_header,
   else if (fifo_header->fh_mode == BMI270_FIFO_REGULAR_FRAME)
     {
       *type = fifo_header->fh_parm;
-      *payload = 7;
+      if (*type & BMI270_FIFO_PARM_GY && *type & BMI270_FIFO_PARM_XL)
+        {
+          *payload = 13;
+        }
+      else
+        {
+          *payload = 7;
+        }
     }
   else
     {
@@ -3019,9 +3052,9 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv)
   axis3bit16_t temp;
   float temperature;
   struct sensor_accel
-         temp_xl[CONFIG_SENSORS_BMI270_FIFO_SLOTS_NUMBER];
+         temp_xl[CONFIG_SENSORS_BMI270_FIFO_SLOTS_NUMBER * 2];
   struct sensor_gyro
-         temp_gy[CONFIG_SENSORS_BMI270_FIFO_SLOTS_NUMBER];
+         temp_gy[CONFIG_SENSORS_BMI270_FIFO_SLOTS_NUMBER * 2];
   uint8_t data_len = 0;
   uint8_t fifo_type = -1;
   unsigned int counter_xl = 0;
@@ -3061,50 +3094,63 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv)
       bmi270_fifo_gettype((FAR bmi270_fifo_header_t *)&priv->fifo_buff[i],
                           &fifo_type, &data_len);
 
-      switch (fifo_type)
+      if (counter_xl >= CONFIG_SENSORS_BMI270_FIFO_SLOTS_NUMBER * 2
+          || counter_gy >= CONFIG_SENSORS_BMI270_FIFO_SLOTS_NUMBER * 2)
         {
-          case BMI270_FIFO_PARM_XL:    /* Accelerator data tag */
+          snerr("FIFO data number out of range!\n");
+          break;
+        }
+
+      /* Must be parsed in the following order. */
+
+      if (fifo_type & BMI270_FIFO_PARM_GY)
+        {
+          /* Gyroscope data tag */
+
+          memcpy(temp.u8bit, &(priv->fifo_buff[i + 1]), 6);
+          temp.i16bit[0] = temp.i16bit[0] - priv->cross_sense
+                          * (temp.i16bit[2]) / (1 << 9);
+
+          sensor_remap_vector_raw16(temp.i16bit, temp.i16bit,
+                                    BMI270_VECTOR_REMAP);
+
+          temp_gy[counter_gy].x = (priv->dev[BMI270_GY_IDX].factor
+                                / BMI270_HALF_SCALE) * temp.i16bit[0];
+          temp_gy[counter_gy].y = (priv->dev[BMI270_GY_IDX].factor
+                                / BMI270_HALF_SCALE) * temp.i16bit[1];
+          temp_gy[counter_gy].z = (priv->dev[BMI270_GY_IDX].factor
+                                / BMI270_HALF_SCALE) * temp.i16bit[2];
+          temp_gy[counter_gy].temperature = temperature;
+          counter_gy++;
+        }
+
+      if (fifo_type & BMI270_FIFO_PARM_XL)
+        {
+          /* Accelerator data tag */
+
+          if (fifo_type & BMI270_FIFO_PARM_GY)
+            {
+              memcpy(temp.u8bit, &(priv->fifo_buff[i + 7]), 6);
+            }
+          else
             {
               memcpy(temp.u8bit, &(priv->fifo_buff[i + 1]), 6);
-              sensor_remap_vector_raw16(temp.i16bit, temp.i16bit,
-                                        BMI270_VECTOR_REMAP);
-
-              temp_xl[counter_xl].x = (GRAVITY_EARTH * temp.i16bit[0]
-                                    * priv->dev[BMI270_XL_IDX].factor)
-                                    / BMI270_HALF_SCALE;
-              temp_xl[counter_xl].y = (GRAVITY_EARTH * temp.i16bit[1]
-                                    * priv->dev[BMI270_XL_IDX].factor)
-                                    / BMI270_HALF_SCALE;
-              temp_xl[counter_xl].z = (GRAVITY_EARTH * temp.i16bit[2]
-                                    * priv->dev[BMI270_XL_IDX].factor)
-                                    / BMI270_HALF_SCALE;
-              temp_xl[counter_xl].temperature = temperature;
-              counter_xl++;
             }
-            break;
 
-          case BMI270_FIFO_PARM_GY:    /* Gyroscope data tag */
-            {
-              memcpy(temp.u8bit, &(priv->fifo_buff[i + 1]), 6);
-              temp.i16bit[0] = temp.i16bit[0] - priv->cross_sense
-                             * (temp.i16bit[2]) / (1 << 9);
+          sensor_remap_vector_raw16(temp.i16bit, temp.i16bit,
+                                    BMI270_VECTOR_REMAP);
 
-              sensor_remap_vector_raw16(temp.i16bit, temp.i16bit,
-                                        BMI270_VECTOR_REMAP);
-
-              temp_gy[counter_gy].x = (priv->dev[BMI270_GY_IDX].factor
-                                    / BMI270_HALF_SCALE) * temp.i16bit[0];
-              temp_gy[counter_gy].y = (priv->dev[BMI270_GY_IDX].factor
-                                    / BMI270_HALF_SCALE) * temp.i16bit[1];
-              temp_gy[counter_gy].z = (priv->dev[BMI270_GY_IDX].factor
-                                    / BMI270_HALF_SCALE) * temp.i16bit[2];
-              temp_gy[counter_gy].temperature = temperature;
-              counter_gy++;
-            }
-            break;
-
-          default:              /* Other data tag */
-            break;
+          temp_xl[counter_xl].x = (GRAVITY_EARTH * temp.i16bit[0]
+                                * priv->dev[BMI270_XL_IDX].factor)
+                                / BMI270_HALF_SCALE;
+          temp_xl[counter_xl].y = (GRAVITY_EARTH * temp.i16bit[1]
+                                * priv->dev[BMI270_XL_IDX].factor)
+                                / BMI270_HALF_SCALE;
+          temp_xl[counter_xl].z = (GRAVITY_EARTH * temp.i16bit[2]
+                                * priv->dev[BMI270_XL_IDX].factor)
+                                / BMI270_HALF_SCALE;
+          temp_xl[counter_xl].temperature = temperature;
+          counter_xl++;
         }
     }
 
@@ -3764,7 +3810,6 @@ static int bmi270_batch(FAR struct file *filep,
 
       priv->fifowtm = priv->dev[BMI270_XL_IDX].fifowtm
                     + priv->dev[BMI270_GY_IDX].fifowtm;
-
       bmi270_fifo_setwatermark(priv, priv->fifowtm);
     }
 
