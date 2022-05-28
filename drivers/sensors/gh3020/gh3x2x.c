@@ -1434,6 +1434,9 @@ void gh3020_fifo_process(void)
       g_uchGh3x2xIntCallBackIsCalled = 0;
     }
 
+  uint16_t current_fifowtm = GH3X2X_GetCurrentFifoWaterLine() *
+                             GH3020_BYTES_PER_DATA;
+  uint16_t readcnt = 0;
   do
     {
       uchRet = GH3X2X_INT_PROCESS_SUCCESS;
@@ -1489,7 +1492,14 @@ void gh3020_fifo_process(void)
           if (g_uchGh3x2xIntMode == __NORMAL_INT_PROCESS_MODE__)
             {
               uint8_t uchIsForceRead = (GH3X2X_GetSoftEvent() & GH3X2X_SOFT_EVENT_NEED_FORCE_READ_FIFO);
-              if(0 == uchIsForceRead)
+              if (readcnt < current_fifowtm)
+                {
+                    if (current_fifowtm - readcnt < usFifoByteNum)
+                      {
+                          usFifoByteNum = current_fifowtm - readcnt;
+                      }
+                }
+              else if(0 == uchIsForceRead)
                 {
                   if (usFifoByteNum < ((uint16_t)4)*GH3X2X_GetCurrentFifoWaterLine())  //data is too less
                     {
@@ -1504,9 +1514,18 @@ void gh3020_fifo_process(void)
               if (GH3X2X_RET_READ_FIFO_CONTINUE ==
                   GH3X2X_ReadFifodata(g_uchGh3x2xReadRawdataBuffer,
                                       &g_usGh3x2xReadRawdataLen, usFifoByteNum))
-              {
+                {
                   GH3X2X_SetSoftEvent(GH3X2X_SOFT_EVENT_NEED_TRY_READ_FIFO);
-              }
+                }
+
+              if (usFifoByteNum > __GH3X2X_RAWDATA_BUFFER_SIZE__)
+                {
+                  readcnt += __GH3X2X_RAWDATA_BUFFER_SIZE__;
+                }
+              else
+                {
+                  readcnt += usFifoByteNum;
+                }
           }
 
         #if ((__SUPPORT_PROTOCOL_ANALYZE__)||(__SUPPORT_ALGO_INPUT_OUTPUT_DATA_HOOK_CONFIG__))
@@ -1615,8 +1634,11 @@ void gh3020_fifo_process(void)
             GH3X2X_ClearSoftEvent(GH3X2X_SOFT_EVENT_WEAR_OFF);
         }
 
-        if ((usGotEvent & (GH3X2X_IRQ_MSK_FIFO_WATERMARK_BIT | GH3X2X_IRQ_MSK_FIFO_FULL_BIT)) \
-            || (GH3X2X_GetSoftEvent() & GH3X2X_SOFT_EVENT_NEED_FORCE_READ_FIFO))
+        if ((usGotEvent & (GH3X2X_IRQ_MSK_FIFO_WATERMARK_BIT |
+                           GH3X2X_IRQ_MSK_FIFO_FULL_BIT)) ||
+            (GH3X2X_GetSoftEvent() & (GH3X2X_SOFT_EVENT_NEED_FORCE_READ_FIFO |
+                                      GH3X2X_SOFT_EVENT_NEED_TRY_READ_FIFO))
+            || readcnt == current_fifowtm)
         {
         #if __GS_NONSYNC_READ_EN__
             uint16_t usGsensorNeedPointNum;
