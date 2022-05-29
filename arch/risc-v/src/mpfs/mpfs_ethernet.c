@@ -156,12 +156,6 @@
 
 /* Timing *******************************************************************/
 
-/* TX poll delay = 1 seconds.
- * CLK_TCK is the number of clock ticks per second
- */
-
-#define MPFS_WDDELAY     (1 * CLK_TCK)
-
 /* TX timeout = 1 minute */
 
 #define MPFS_TXTIMEOUT   (60 * CLK_TCK)
@@ -259,7 +253,6 @@ struct mpfs_ethmac_s
   uint8_t       ifup : 1;                        /* true:ifup false:ifdown */
   uint8_t       intf;                            /* Ethernet interface number */
   uint8_t       phyaddr;                         /* PHY address */
-  struct wdog_s txpoll;                          /* TX poll timer */
   struct wdog_s txtimeout;                       /* TX timeout timer */
   struct work_s irqwork;                         /* For deferring interrupt work to the work queue */
   struct work_s pollwork;                        /* For deferring poll work to the work queue */
@@ -311,9 +304,6 @@ static uint16_t mpfs_txfree(struct mpfs_ethmac_s *priv, unsigned int queue);
 static int mpfs_buffer_initialize(struct mpfs_ethmac_s *priv,
                                   unsigned int queue);
 static void mpfs_buffer_free(struct mpfs_ethmac_s *priv, unsigned int queue);
-
-static void mpfs_poll_expiry(wdparm_t arg);
-static void mpfs_poll_work(void *arg);
 
 static int  mpfs_transmit(struct mpfs_ethmac_s *priv, unsigned int queue);
 static int  mpfs_txpoll(struct net_driver_s *dev);
@@ -1514,82 +1504,8 @@ static void mpfs_dopoll(struct mpfs_ethmac_s *priv)
        * then poll the network for new XMIT data.
        */
 
-      devif_timer(dev, 0, mpfs_txpoll);
+      devif_poll(dev, mpfs_txpoll);
     }
-}
-
-/****************************************************************************
- * Function: mpfs_poll_expiry
- *
- * Description:
- *   Periodic timer handler.  Called from the timer interrupt handler.
- *
- * Parameters:
- *   arg  - The argument
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
- *
- ****************************************************************************/
-
-static void mpfs_poll_expiry(wdparm_t arg)
-{
-  struct mpfs_ethmac_s *priv = (struct mpfs_ethmac_s *)arg;
-
-  /* Schedule to perform the interrupt processing on the worker thread. */
-
-  if (work_available(&priv->pollwork))
-    {
-      work_queue(ETHWORK, &priv->pollwork, mpfs_poll_work, priv, 0);
-    }
-  else
-    {
-      wd_start(&priv->txpoll, MPFS_WDDELAY,
-               mpfs_poll_expiry, (wdparm_t)priv);
-    }
-}
-
-/****************************************************************************
- * Function: mpfs_poll_work
- *
- * Description:
- *   Perform periodic polling from the worker thread
- *
- * Input Parameters:
- *   arg - The argument passed when work_queue() as called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   Ethernet interrupts are disabled
- *
- ****************************************************************************/
-
-static void mpfs_poll_work(void *arg)
-{
-  struct mpfs_ethmac_s *priv = (struct mpfs_ethmac_s *)arg;
-  struct net_driver_s *dev = &priv->dev;
-
-  /* Check if there are any free TX descriptors.  We cannot perform the
-   * TX poll if we do not have buffering for another packet.
-   */
-
-  net_lock();
-  if (mpfs_txfree(priv, 0) > 0)
-    {
-      /* Update TCP timing states and poll the network for new XMIT data. */
-
-      devif_timer(dev, MPFS_WDDELAY, mpfs_txpoll);
-    }
-
-  /* Setup the watchdog poll timer again */
-
-  wd_start(&priv->txpoll, MPFS_WDDELAY, mpfs_poll_expiry, (wdparm_t)priv);
-  net_unlock();
 }
 
 /****************************************************************************
@@ -1671,11 +1587,6 @@ static int mpfs_ifup(struct net_driver_s *dev)
 
   ninfo("Enable normal operation\n");
 
-  /* Set and activate a timer process */
-
-  wd_start(&priv->txpoll, MPFS_WDDELAY,
-           mpfs_poll_expiry, (wdparm_t)priv);
-
   /* Enable the Ethernet interrupts */
 
   priv->ifup = true;
@@ -1723,9 +1634,8 @@ static int mpfs_ifdown(struct net_driver_s *dev)
   *priv->queue[2].int_disable = 0xffffffff;
   *priv->queue[3].int_disable = 0xffffffff;
 
-  /* Cancel the TX poll timer and TX timeout timers */
+  /* Cancel the TX timeout timers */
 
-  wd_cancel(&priv->txpoll);
   wd_cancel(&priv->txtimeout);
 
   /* Put the MAC in its reset, non-operational state.  This should be

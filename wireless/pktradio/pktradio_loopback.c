@@ -34,7 +34,6 @@
 #include <arpa/inet.h>
 #include <net/if.h>
 
-#include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/net.h>
@@ -76,12 +75,6 @@
 #  error No support for CONFIG_PKTRADIO_ADDRLEN other than {1,2,8}
 #endif
 
-/* TX poll delay = 1 seconds.
- * CLK_TCK is the number of clock ticks per second
- */
-
-#define LO_WDDELAY   (1*CLK_TCK)
-
 /* Fake value for MAC header length */
 
 #if CONFIG_IOB_BUFSIZE > 40
@@ -103,7 +96,6 @@ struct lo_driver_s
   bool lo_bifup;               /* true:ifup false:ifdown */
   bool lo_pending;             /* True: TX poll pending */
   uint8_t lo_panid[2];         /* Fake PAN ID for testing */
-  struct wdog_s lo_polldog;    /* TX poll timer */
   struct work_s lo_work;       /* For deferring poll work to the work queue */
   FAR struct iob_s *lo_head;   /* Head of IOBs queued for loopback */
   FAR struct iob_s *lo_tail;   /* Tail of IOBs queued for loopback */
@@ -146,8 +138,6 @@ static inline void lo_netmask(FAR struct net_driver_s *dev);
 
 static int  lo_loopback(FAR struct net_driver_s *dev);
 static void lo_loopback_work(FAR void *arg);
-static void lo_poll_work(FAR void *arg);
-static void lo_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -398,82 +388,6 @@ static void lo_loopback_work(FAR void *arg)
 }
 
 /****************************************************************************
- * Name: lo_poll_work
- *
- * Description:
- *   Perform periodic polling from the worker thread
- *
- * Input Parameters:
- *   arg - The argument passed when work_queue() as called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   The network is locked
- *
- ****************************************************************************/
-
-static void lo_poll_work(FAR void *arg)
-{
-  FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)arg;
-
-  /* Perform the poll */
-
-  net_lock();
-
-#ifdef CONFIG_NET_6LOWPAN
-  /* Make sure the our single packet buffer is attached */
-
-  priv->lo_radio.r_dev.d_buf = g_iobuffer.rb_buf;
-#endif
-
-  /* And perform the poll */
-
-  devif_timer(&priv->lo_radio.r_dev, LO_WDDELAY, lo_loopback);
-
-  /* Setup the watchdog poll timer again */
-
-  wd_start(&priv->lo_polldog, LO_WDDELAY, lo_poll_expiry, (wdparm_t)priv);
-  net_unlock();
-}
-
-/****************************************************************************
- * Name: lo_poll_expiry
- *
- * Description:
- *   Periodic timer handler.  Called from the timer interrupt handler.
- *
- * Input Parameters:
- *   arg  - The argument
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static void lo_poll_expiry(wdparm_t arg)
-{
-  FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)arg;
-
-  if (!work_available(&priv->lo_work) || priv->lo_head != NULL)
-    {
-      nwarn("WARNING: lo_work NOT available\n");
-      priv->lo_pending = true;
-    }
-  else
-    {
-      /* Schedule to perform the interrupt processing on the worker thread. */
-
-      priv->lo_pending = false;
-      work_queue(LPBKWORK, &priv->lo_work, lo_poll_work, priv, 0);
-    }
-}
-
-/****************************************************************************
  * Name: lo_ifup
  *
  * Description:
@@ -515,11 +429,6 @@ static int lo_ifup(FAR struct net_driver_s *dev)
          dev->d_mac.radio.nv_addr[6], dev->d_mac.radio.nv_addr[7]);
 #endif
 
-  /* Set and activate a timer process */
-
-  wd_start(&priv->lo_polldog, LO_WDDELAY,
-           lo_poll_expiry, (wdparm_t)priv);
-
   priv->lo_bifup = true;
   return OK;
 }
@@ -545,10 +454,6 @@ static int lo_ifdown(FAR struct net_driver_s *dev)
   FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)dev->d_private;
 
   ninfo("IP up: %u\n", priv->lo_bifup);
-
-  /* Cancel the TX poll timer and TX timeout timers */
-
-  wd_cancel(&priv->lo_polldog);
 
   /* Mark the device "down" */
 

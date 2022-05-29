@@ -269,12 +269,6 @@
 #   define CONFIG_DM9X_MODE_AUTO 1
 #endif
 
-/* TX poll deley = 1 seconds.
- * CLK_TCK is the number of clock ticks per second
- */
-
-#define DM9X_WDDELAY   (1*CLK_TCK)
-
 /* TX timeout = 1 minute */
 
 #define DM6X_TXTIMEOUT (60*CLK_TCK)
@@ -308,7 +302,6 @@ struct dm9x_driver_s
   bool dm_b100m;               /* true:speed == 100M; false:speed == 10M */
   uint8_t dm_ntxpending;       /* Count of packets pending transmission */
   uint8_t ncrxpackets;         /* Number of continuous rx packets  */
-  struct wdog_s dm_txpoll;     /* TX poll timer */
   struct wdog_s dm_txtimeout;  /* TX timeout timer */
   struct work_s dm_irqwork;    /* For deferring interrupt work to the work queue */
   struct work_s dm_pollwork;   /* For deferring poll work to the work queue */
@@ -384,9 +377,6 @@ static int  dm9x_interrupt(int irq, FAR void *context, FAR void *arg);
 
 static void dm9x_txtimeout_work(FAR void *arg);
 static void dm9x_txtimeout_expiry(wdparm_t arg);
-
-static void dm9x_poll_work(FAR void *arg);
-static void dm9x_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -1364,85 +1354,6 @@ static void dm9x_txtimeout_expiry(wdparm_t arg)
 }
 
 /****************************************************************************
- * Name: dm9x_poll_work
- *
- * Description:
- *   Perform periodic polling from the worker thread
- *
- * Input Parameters:
- *   arg - The argument passed when work_queue() as called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static void dm9x_poll_work(FAR void *arg)
-{
-  FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)arg;
-
-  /* Perform the poll */
-
-  net_lock();
-
-  /* If the number of contiguous RX packets exceeds a threshold, reset the
-   * counter and re-enable RX interrupts
-   */
-
-  if (priv->ncrxpackets >= DM9X_CRXTHRES)
-    {
-      priv->ncrxpackets = 0;
-      putreg(DM9X_IMR, DM9X_IMRENABLE);
-    }
-
-  /* Check if there is room in the DM90x0 to hold another packet.  In 100M
-   * mode, that can be 2 packets, otherwise it is a single packet.
-   */
-
-  if (priv->dm_ntxpending < 1 || (priv->dm_b100m && priv->dm_ntxpending < 2))
-    {
-      /* Update TCP timing states and poll the network for new XMIT data */
-
-      devif_timer(&priv->dm_dev, DM9X_WDDELAY, dm9x_txpoll);
-    }
-
-  /* Setup the watchdog poll timer again */
-
-  wd_start(&priv->dm_txpoll, DM9X_WDDELAY,
-           dm9x_poll_expiry, (wdparm_t)priv);
-  net_unlock();
-}
-
-/****************************************************************************
- * Name: dm9x_poll_expiry
- *
- * Description:
- *   Periodic timer handler.  Called from the timer interrupt handler.
- *
- * Input Parameters:
- *   arg  - The argument
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
- *
- ****************************************************************************/
-
-static void dm9x_poll_expiry(wdparm_t arg)
-{
-  FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)arg;
-
-  /* Schedule to perform the interrupt processing on the worker thread. */
-
-  work_queue(ETHWORK, &priv->dm_pollwork, dm9x_poll_work, priv, 0);
-}
-
-/****************************************************************************
  * Name: dm9x_phymode
  *
  * Description:
@@ -1546,11 +1457,6 @@ static int dm9x_ifup(FAR struct net_driver_s *dev)
 
   ninfo("delay: %dmS speed: %s\n", i, priv->dm_b100m ? "100M" : "10M");
 
-  /* Set and activate a timer process */
-
-  wd_start(&priv->dm_txpoll, DM9X_WDDELAY,
-           dm9x_poll_expiry, (wdparm_t)priv);
-
   /* Enable the DM9X interrupt */
 
   priv->dm_bifup = true;
@@ -1587,9 +1493,8 @@ static int dm9x_ifdown(FAR struct net_driver_s *dev)
   flags = enter_critical_section();
   up_disable_irq(CONFIG_DM9X_IRQ);
 
-  /* Cancel the TX poll timer and TX timeout timers */
+  /* Cancel the TX timeout timers */
 
-  wd_cancel(&priv->dm_txpoll);
   wd_cancel(&priv->dm_txtimeout);
 
   /* Reset the device */
@@ -1643,7 +1548,7 @@ static void dm9x_txavail_work(FAR void *arg)
         {
           /* If so, then poll the network for new XMIT data */
 
-          devif_timer(&priv->dm_dev, 0, dm9x_txpoll);
+          devif_poll(&priv->dm_dev, dm9x_txpoll);
         }
     }
 
@@ -1870,9 +1775,8 @@ static void dm9x_reset(FAR struct dm9x_driver_s *priv)
   uint8_t save;
   int i;
 
-  /* Cancel the TX poll timer and TX timeout timers */
+  /* Cancel the TX timeout timers */
 
-  wd_cancel(&priv->dm_txpoll);
   wd_cancel(&priv->dm_txtimeout);
 
   /* Save previous register address */

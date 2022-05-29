@@ -40,7 +40,6 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/phy.h>
 #include <nuttx/net/mii.h>
@@ -483,8 +482,6 @@ static int  rx65n_interrupt(int irq, FAR void *context, FAR void *arg);
 /* Timer expirations */
 
 static void rx65n_txtimeout_work(FAR void *arg);
-
-static void rx65n_poll_work(FAR void *arg);
 
 /* NuttX callback functions */
 
@@ -1180,7 +1177,7 @@ static void rx65n_dopoll(FAR struct rx65n_ethmac_s *priv)
 
       if (dev->d_buf)
         {
-          devif_timer(dev, 0, rx65n_txpoll);
+          devif_poll(dev, rx65n_txpoll);
 
           /* We will, most likely end up with a buffer to be freed.  But it
            * might not be the same one that we allocated above.
@@ -2088,114 +2085,6 @@ void rx65n_txtimeout_expiry(wdparm_t arg)
 }
 
 /****************************************************************************
- * Function: rx65n_poll_work
- *
- * Description:
- *   Perform periodic polling from the worker thread
- *
- * Input Parameters:
- *   arg - The argument passed when work_queue() as called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   Ethernet interrupts are disabled
- *
- ****************************************************************************/
-
-static void rx65n_poll_work(FAR void *arg)
-{
-  FAR struct rx65n_ethmac_s *priv = (FAR struct rx65n_ethmac_s *)arg;
-  FAR struct net_driver_s *dev  = &priv->dev;
-
-  /* Check if the next TX descriptor is owned by the Ethernet DMA or
-   * CPU.  We cannot perform the TX poll if we are unable to accept
-   * another packet for transmission.
-   *
-   * In a race condition, TACT may be cleared BUT still not available
-   * because rx65n_freeframe() has not yet run. If rx65n_freeframe()
-   * has run, the buffer1 pointer (tdes2) will be nullified (and
-   * inflight should be < CONFIG_RX65N_ETH_NTXDESC).
-   */
-
-  net_lock();
-  if ((priv->txhead->tdes0 & TACT) == 0 &&
-       priv->txhead->tdes2 == 0)
-    {
-      /* If we have the descriptor, then perform the timer poll.  Allocate a
-       * buffer for the poll.
-       */
-
-      DEBUGASSERT(dev->d_len == 0 && dev->d_buf == NULL);
-      dev->d_buf = rx65n_allocbuffer(priv);
-
-      /* We can't poll if we have no buffers */
-
-      if (dev->d_buf)
-        {
-          /* Update TCP timing states and poll the network for new XMIT data.
-           */
-
-          devif_timer(dev, CLK_TCK, rx65n_txpoll);
-
-          /* We will, most likely end up with a buffer to be freed.  But it
-           * might not be the same one that we allocated above.
-           */
-
-          if (dev->d_buf)
-            {
-              DEBUGASSERT(dev->d_len == 0);
-              rx65n_freebuffer(priv, dev->d_buf);
-              dev->d_buf = NULL;
-            }
-        }
-    }
-
-  /* Setup the poll timer again */
-
-  rx65n_cmtw0_start(rx65n_cmtw0_txpoll, RX65N_CMTW0_COUNT_VALUE_FOR_TXPOLL);
-
-  net_unlock();
-}
-
-/****************************************************************************
- * Function: rx65n_poll_expiry
- *
- * Description:
- *   Periodic timer handler.  Called from the timer interrupt handler.
- *
- * Input Parameters:
- *   arg  - The argument
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
- *
- ****************************************************************************/
-
-void rx65n_poll_expiry(wdparm_t arg)
-{
-  FAR struct rx65n_ethmac_s *priv = (FAR struct rx65n_ethmac_s *)arg;
-  rx65n_cmtw0_stop(rx65n_cmtw0_txpoll);
-  if (work_available(&priv->pollwork))
-    {
-      /* Schedule to perform the interrupt processing
-       * on the worker thread.
-       */
-
-      work_queue(ETHWORK, &priv->pollwork, rx65n_poll_work, priv, 0);
-    }
-  else
-    {
-      rx65n_cmtw0_start(rx65n_cmtw0_txpoll,
-                        RX65N_CMTW0_COUNT_VALUE_FOR_TXPOLL);
-    }
-}
-
-/****************************************************************************
  * Function: rx65n_ifup
  *
  * Description:
@@ -2241,9 +2130,6 @@ static int rx65n_ifup(struct net_driver_s *dev)
       return ret;
     }
 
-  /* Set and activate a timer process */
-
-  rx65n_cmtw0_start(rx65n_cmtw0_txpoll, RX65N_CMTW0_COUNT_VALUE_FOR_TXPOLL);
   priv->ifup = true;
 
   /* Enable the Ethernet interrupt */
@@ -2285,9 +2171,8 @@ static int rx65n_ifdown(struct net_driver_s *dev)
 
   up_disable_irq(RX65N_ETH_IRQ);
 
-  /* Cancel the TX poll timer and TX timeout timers */
+  /* Cancel the TX timeout timers */
 
-  rx65n_cmtw0_stop(rx65n_cmtw0_txpoll);
   rx65n_cmtw0_stop(rx65n_cmtw0_timeout);
 
   /* Put the EMAC in its reset, non-operational state.

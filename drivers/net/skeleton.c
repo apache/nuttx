@@ -76,12 +76,6 @@
 # define CONFIG_SKELETON_NINTERFACES 1
 #endif
 
-/* TX poll delay = 1 seconds.
- * CLK_TCK is the number of clock ticks per second
- */
-
-#define SKELETON_WDDELAY   (1*CLK_TCK)
-
 /* TX timeout = 1 minute */
 
 #define SKELETON_TXTIMEOUT (60*CLK_TCK)
@@ -101,7 +95,6 @@
 struct skel_driver_s
 {
   bool sk_bifup;               /* true:ifup false:ifdown */
-  struct wdog_s sk_txpoll;     /* TX poll timer */
   struct wdog_s sk_txtimeout;  /* TX timeout timer */
   struct work_s sk_irqwork;    /* For deferring interrupt work to the work queue */
   struct work_s sk_pollwork;   /* For deferring poll work to the work queue */
@@ -159,9 +152,6 @@ static int  skel_interrupt(int irq, FAR void *context, FAR void *arg);
 
 static void skel_txtimeout_work(FAR void *arg);
 static void skel_txtimeout_expiry(wdparm_t arg);
-
-static void skel_poll_work(FAR void *arg);
-static void skel_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -688,82 +678,6 @@ static void skel_txtimeout_expiry(wdparm_t arg)
 }
 
 /****************************************************************************
- * Name: skel_poll_work
- *
- * Description:
- *   Perform periodic polling from the worker thread
- *
- * Input Parameters:
- *   arg - The argument passed when work_queue() as called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   Run on a work queue thread.
- *
- ****************************************************************************/
-
-static void skel_poll_work(FAR void *arg)
-{
-  FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)arg;
-
-  /* Lock the network and serialize driver operations if necessary.
-   * NOTE: Serialization is only required in the case where the driver work
-   * is performed on an LP worker thread and where more than one LP worker
-   * thread has been configured.
-   */
-
-  net_lock();
-
-  /* Perform the poll */
-
-  /* Check if there is room in the send another TX packet.  We cannot perform
-   * the TX poll if he are unable to accept another packet for transmission.
-   */
-
-  /* If so, update TCP timing states and poll the network for new XMIT data.
-   * Hmmm.. might be bug here.  Does this mean if there is a transmit in
-   * progress, we will missing TCP time state updates?
-   */
-
-  devif_timer(&priv->sk_dev, SKELETON_WDDELAY, skel_txpoll);
-
-  /* Setup the watchdog poll timer again */
-
-  wd_start(&priv->sk_txpoll, SKELETON_WDDELAY,
-           skel_poll_expiry, (wdparm_t)priv);
-  net_unlock();
-}
-
-/****************************************************************************
- * Name: skel_poll_expiry
- *
- * Description:
- *   Periodic timer handler.  Called from the timer interrupt handler.
- *
- * Input Parameters:
- *   arg  - The argument
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Runs in the context of a the timer interrupt handler.  Local
- *   interrupts are disabled by the interrupt logic.
- *
- ****************************************************************************/
-
-static void skel_poll_expiry(wdparm_t arg)
-{
-  FAR struct skel_driver_s *priv = (FAR struct skel_driver_s *)arg;
-
-  /* Schedule to perform the interrupt processing on the worker thread. */
-
-  work_queue(ETHWORK, &priv->sk_pollwork, skel_poll_work, priv, 0);
-}
-
-/****************************************************************************
  * Name: skel_ifup
  *
  * Description:
@@ -808,11 +722,6 @@ static int skel_ifup(FAR struct net_driver_s *dev)
   skel_ipv6multicast(priv);
 #endif
 
-  /* Set and activate a timer process */
-
-  wd_start(&priv->sk_txpoll, SKELETON_WDDELAY,
-           skel_poll_expiry, (wdparm_t)priv);
-
   /* Enable the Ethernet interrupt */
 
   priv->sk_bifup = true;
@@ -848,9 +757,8 @@ static int skel_ifdown(FAR struct net_driver_s *dev)
   flags = enter_critical_section();
   up_disable_irq(CONFIG_SKELETON_IRQ);
 
-  /* Cancel the TX poll timer and TX timeout timers */
+  /* Cancel the TX timeout timers */
 
-  wd_cancel(&priv->sk_txpoll);
   wd_cancel(&priv->sk_txtimeout);
 
   /* Put the EMAC in its reset, non-operational state.  This should be
@@ -902,7 +810,7 @@ static void skel_txavail_work(FAR void *arg)
 
       /* If so, then poll the network for new XMIT data */
 
-      devif_timer(&priv->sk_dev, 0, skel_txpoll);
+      devif_poll(&priv->sk_dev, skel_txpoll);
     }
 
   net_unlock();

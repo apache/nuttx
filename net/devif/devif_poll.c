@@ -771,34 +771,4 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
   return bstop;
 }
 
-/****************************************************************************
- * Name: devif_timer
- *
- * Description:
- *   This function will traverse each active network connection structure and
- *   perform network timer operations. The Ethernet driver MUST implement
- *   logic to periodically call devif_timer().
- *
- *   This function will call the provided callback function for every active
- *   connection. Polling will continue until all connections have been polled
- *   or until the user-supplied function returns a non-zero value (which it
- *   should do only if it cannot accept further write data).
- *
- *   When the callback function is called, there may be an outbound packet
- *   waiting for service in the device packet buffer, and if so the d_len
- *   field is set to a value larger than zero.  The device driver should then
- *   send out the packet.
- *
- * Assumptions:
- *   This function is called from the MAC device driver with the network
- *   locked.
- *
- ****************************************************************************/
-
-int devif_timer(FAR struct net_driver_s *dev, int delay,
-                devif_poll_callback_t callback)
-{
-  return devif_poll(dev, callback);
-}
-
 #endif /* CONFIG_NET */
