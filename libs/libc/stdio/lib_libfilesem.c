@@ -50,10 +50,7 @@ void lib_sem_initialize(FAR struct file_struct *stream)
    * to private data sets.
    */
 
-  _SEM_INIT(&stream->fs_sem, 0, 1);
-
-  stream->fs_holder = -1;
-  stream->fs_counts = 0;
+  nxrmutex_init(&stream->fs_lock);
 }
 
 /****************************************************************************
@@ -62,37 +59,7 @@ void lib_sem_initialize(FAR struct file_struct *stream)
 
 void lib_take_semaphore(FAR struct file_struct *stream)
 {
-  pid_t my_pid = getpid();
-  int ret;
-
-  /* Do I already have the semaphore? */
-
-  if (stream->fs_holder == my_pid)
-    {
-      /* Yes, just increment the number of references that I have */
-
-      stream->fs_counts++;
-    }
-  else
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      while ((ret = _SEM_WAIT(&stream->fs_sem)) < 0)
-        {
-          /* The only case that an error should occr here is if the wait
-           * was awakened by a signal.
-           */
-
-          DEBUGASSERT(_SEM_ERRNO(ret) == EINTR ||
-                      _SEM_ERRNO(ret) == ECANCELED);
-          UNUSED(ret);
-        }
-
-      /* We have it.  Claim the stak and return */
-
-      stream->fs_holder = my_pid;
-      stream->fs_counts = 1;
-    }
+  nxrmutex_lock(&stream->fs_lock);
 }
 
 /****************************************************************************
@@ -101,26 +68,7 @@ void lib_take_semaphore(FAR struct file_struct *stream)
 
 void lib_give_semaphore(FAR struct file_struct *stream)
 {
-  /* I better be holding at least one reference to the semaphore */
-
-  DEBUGASSERT(stream->fs_holder == getpid());
-
-  /* Do I hold multiple references to the semphore */
-
-  if (stream->fs_counts > 1)
-    {
-      /* Yes, just release one count and return */
-
-      stream->fs_counts--;
-    }
-  else
-    {
-      /* Nope, this is the last reference I have */
-
-      stream->fs_holder = -1;
-      stream->fs_counts = 0;
-      DEBUGVERIFY(_SEM_POST(&stream->fs_sem));
-    }
+  nxrmutex_unlock(&stream->fs_lock);
 }
 
 #endif /* CONFIG_STDIO_DISABLE_BUFFERING */

@@ -45,6 +45,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
 #include <nuttx/signal.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/spi/spi.h>
@@ -130,6 +131,11 @@
 
 #define TRENTRY(id,fmt1,string) {string}
 
+/* Lock *********************************************************************/
+
+#define max3421e_take_exclsem(s) nxrmutex_lock(&(s)->lock)
+#define max3421e_give_exclsem(s) nxrmutex_unlock(&(s)->lock);
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -211,11 +217,9 @@ struct max3421e_usbhost_s
   uint8_t           xfrtype;   /* See enum mx3421e_hxfrdn_e */
   uint8_t           inflight;  /* Number of Tx bytes "in-flight" (<= 128) */
   uint8_t           result;    /* The result of the transfer */
-  uint8_t           exclcount; /* Number of nested exclem locks */
   uint16_t          buflen;    /* Buffer length (at start of transfer) */
   uint16_t          xfrd;      /* Bytes transferred (at end of transfer) */
-  pid_t             holder;    /* Current hold of the exclsem */
-  sem_t             exclsem;   /* Support mutually exclusive access */
+  rmutex_t          lock;      /* Support mutually exclusive access */
   sem_t             pscsem;    /* Semaphore to wait for a port event */
   sem_t             waitsem;   /* Channel wait semaphore */
   FAR uint8_t      *buffer;    /* Transfer buffer pointer */
@@ -1124,71 +1128,6 @@ static void max3421e_sndblock(FAR struct max3421e_usbhost_s *priv,
 static int max3421e_takesem(FAR sem_t *sem)
 {
   return nxsem_wait_uninterruptible(sem);
-}
-
-/****************************************************************************
- * Name: max3421e_take_exclsem and max3421e_give_exclsem
- *
- * Description:
- *   Implements a mutual re-entrant mutex for exclsem.
- *
- ****************************************************************************/
-
-static int max3421e_take_exclsem(FAR struct max3421e_usbhost_s *priv)
-{
-  pid_t me = getpid();
-  int ret = OK;
-
-  /* Does this thread already hold the mutual exclusion mutex? */
-
-  if (priv->holder == me)
-    {
-      /* Yes.. just increment the count */
-
-      DEBUGASSERT(priv->exclcount < UINT8_MAX);
-      priv->exclcount++;
-    }
-  else
-    {
-      /* No.. take the semaphore */
-
-      ret = max3421e_takesem(&priv->exclsem);
-      if (ret >= 0)
-        {
-          /* Now this thread is the holder with a count of one */
-
-          priv->holder = me;
-          priv->exclcount = 1;
-        }
-    }
-
-  return ret;
-}
-
-static void max3421e_give_exclsem(FAR struct max3421e_usbhost_s *priv)
-{
-#ifdef CONFIG_DEBUG_ASSERTIONS
-  pid_t me = getpid();
-
-  DEBUGASSERT(priv->holder == me);
-#endif
-
-  /* Is the lock nested? */
-
-  if (priv->exclcount > 0)
-    {
-      /* Yes.. just decrement the count */
-
-      priv->exclcount--;
-    }
-  else
-    {
-      /* No.. give the semaphore */
-
-      priv->holder    = NO_HOLDER;
-      priv->exclcount = 0;
-      max3421e_givesem(&priv->exclsem);
-    }
 }
 
 /****************************************************************************
@@ -4784,8 +4723,11 @@ static inline int max3421e_sw_initialize(FAR struct max3421e_usbhost_s *priv,
   /* Initialize semaphores */
 
   nxsem_init(&priv->pscsem,  0, 0);
-  nxsem_init(&priv->exclsem, 0, 1);
   nxsem_init(&priv->waitsem,  0, 0);
+
+  /* Initialize lock */
+
+  nxrmutex_init(&priv->lock);
 
   /* The pscsem and waitsem semaphores are used for signaling and, hence,
    * should not have
