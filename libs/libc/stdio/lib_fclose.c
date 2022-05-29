@@ -135,7 +135,7 @@ int fclose(FAR FILE *stream)
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
       /* Destroy the semaphore */
 
-      _SEM_DESTROY(&stream->fs_sem);
+      nxrmutex_destroy(&stream->fs_lock);
 
       /* Release the buffer */
 

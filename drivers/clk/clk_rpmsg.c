@@ -192,7 +192,7 @@ static int clk_rpmsg_set_phase(FAR struct clk_s *clk, int degrees);
  * Private Datas
  ****************************************************************************/
 
-static mutex_t g_clk_rpmsg_lock          = MUTEX_INITIALIZER;
+static mutex_t g_clk_rpmsg_lock          = NXMUTEX_INITIALIZER;
 static struct list_node g_clk_rpmsg_priv =
               LIST_INITIAL_VALUE(g_clk_rpmsg_priv);
 

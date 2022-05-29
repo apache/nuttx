@@ -31,8 +31,7 @@
 #include <arpa/inet.h>
 
 #include <nuttx/sched.h>
-#include <nuttx/semaphore.h>
-
+#include <nuttx/mutex.h>
 #include "netdb/lib_dns.h"
 
 /****************************************************************************
@@ -41,9 +40,7 @@
 
 /* Protects DNS cache, nameserver list and notify list. */
 
-static sem_t g_dns_sem    = SEM_INITIALIZER(1);
-static pid_t g_dns_holder = INVALID_PROCESS_ID;
-static int   g_dns_count;
+static rmutex_t g_dns_lock = NXRMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Public Data
@@ -140,56 +137,24 @@ bool dns_initialize(void)
  * Name: dns_semtake
  *
  * Description:
- *   Take the DNS semaphore, ignoring errors due to the receipt of signals.
+ *   Take the DNS lock, ignoring errors due to the receipt of signals.
  *
  ****************************************************************************/
 
 void dns_semtake(void)
 {
-  pid_t me = getpid();
-  int errcode = 0;
-  int ret;
-
-  /* Does this thread already hold the semaphore? */
-
-  if (g_dns_holder == me)
-    {
-      /* Yes.. just increment the reference count */
-
-      g_dns_count++;
-      return;
-    }
-
-  do
-    {
-      ret = _SEM_WAIT(&g_dns_sem);
-      if (ret < 0)
-        {
-          errcode = _SEM_ERRNO(ret);
-          DEBUGASSERT(errcode == EINTR || errcode == ECANCELED);
-        }
-    }
-  while (ret < 0 && errcode == EINTR);
-
-  g_dns_holder = me;
-  g_dns_count  = 1;
+  nxrmutex_lock(&g_dns_lock);
 }
 
 /****************************************************************************
  * Name: dns_semgive
  *
  * Description:
- *   Release the DNS semaphore
+ *   Release the DNS lock
  *
  ****************************************************************************/
 
 void dns_semgive(void)
 {
-  DEBUGASSERT(g_dns_holder == getpid() && g_dns_count > 0);
-
-  if (--g_dns_count == 0)
-    {
-      g_dns_holder = INVALID_PROCESS_ID;
-      DEBUGVERIFY(_SEM_POST(&g_dns_sem));
-    }
+  nxrmutex_unlock(&g_dns_lock);
 }

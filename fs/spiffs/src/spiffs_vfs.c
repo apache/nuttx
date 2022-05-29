@@ -72,17 +72,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define spiffs_lock_volume(fs)       (spiffs_lock_reentrant(&fs->exclsem))
-#define spiffs_unlock_volume(fs)     (spiffs_unlock_reentrant(&fs->exclsem))
+#define spiffs_lock_volume(fs)       (nxrmutex_lock(&fs->lock))
+#define spiffs_unlock_volume(fs)     (nxrmutex_unlock(&fs->lock))
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
-
-/* SPIFFS helpers */
-
-static int  spiffs_lock_reentrant(FAR struct spiffs_sem_s *sem);
-static void spiffs_unlock_reentrant(FAR struct spiffs_sem_s *sem);
 
 /* File system operations */
 
@@ -173,70 +168,6 @@ static inline int spiffs_map_errno(int errcode)
   /* Don't return any or our internal error codes to the application */
 
   return errcode < SPIFFS_ERR_INTERNAL ? -EFTYPE : errcode;
-}
-
-/****************************************************************************
- * Name: spiffs_lock_reentrant
- ****************************************************************************/
-
-static int spiffs_lock_reentrant(FAR struct spiffs_sem_s *rsem)
-{
-  pid_t me;
-  int ret = OK;
-
-  /* Do we already hold the semaphore? */
-
-  me = getpid();
-  if (me == rsem->holder)
-    {
-      /* Yes... just increment the count */
-
-      rsem->count++;
-      DEBUGASSERT(rsem->count > 0);
-    }
-
-  /* Take the semaphore (perhaps waiting) */
-
-  else
-    {
-      ret = nxsem_wait_uninterruptible(&rsem->sem);
-      if (ret >= 0)
-        {
-          /* No we hold the semaphore */
-
-          rsem->holder = me;
-          rsem->count  = 1;
-        }
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: spiffs_unlock_reentrant
- ****************************************************************************/
-
-static void spiffs_unlock_reentrant(FAR struct spiffs_sem_s *rsem)
-{
-  DEBUGASSERT(rsem->holder == getpid());
-
-  /* Is this our last count on the semaphore? */
-
-  if (rsem->count > 1)
-    {
-      /* No.. just decrement the count */
-
-      rsem->count--;
-    }
-
-  /* Yes.. then we can really release the semaphore */
-
-  else
-    {
-      rsem->holder = SPIFFS_NO_HOLDER;
-      rsem->count  = 0;
-      nxsem_post(&rsem->sem);
-    }
 }
 
 /****************************************************************************
@@ -1505,7 +1436,7 @@ static int spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
   fs->lu_work   = &work[SPIFFS_GEO_PAGE_SIZE(fs)];
   fs->mtd_work  = &work[2 * SPIFFS_GEO_PAGE_SIZE(fs)];
 
-  nxsem_init(&fs->exclsem.sem, 0, 1);
+  nxrmutex_init(&fs->lock);
 
   /* Check the file system */
 
@@ -1608,7 +1539,7 @@ static int spiffs_unbind(FAR void *handle, FAR struct inode **mtdinode,
 
   /* Free the volume memory (note that the semaphore is now stale!) */
 
-  nxsem_destroy(&fs->exclsem.sem);
+  nxrmutex_destroy(&fs->lock);
   kmm_free(fs);
   ret = OK;
 

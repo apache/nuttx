@@ -104,32 +104,6 @@ static inline uint32_t onewire_leuint32(uint32_t x)
 #endif
 
 /****************************************************************************
- * Name: onewire_sem_init
- *
- * Description:
- *
- ****************************************************************************/
-
-static inline void onewire_sem_init(FAR struct onewire_sem_s *sem)
-{
-  sem->holder = NO_HOLDER;
-  sem->count  = 0;
-  nxsem_init(&sem->sem, 0, 1);
-}
-
-/****************************************************************************
- * Name: onewire_sem_destroy
- *
- * Description:
- *
- ****************************************************************************/
-
-static inline void onewire_sem_destroy(FAR struct onewire_sem_s *sem)
-{
-  nxsem_destroy(&sem->sem);
-}
-
-/****************************************************************************
  * Name: onewire_pm_prepare
  *
  * Description:
@@ -210,80 +184,6 @@ static int onewire_pm_prepare(FAR struct pm_callback_s *cb, int domain,
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: onewire_sem_wait
- *
- * Description:
- *   Take the exclusive access, waiting as necessary
- *
- ****************************************************************************/
-
-int onewire_sem_wait(FAR struct onewire_master_s *master)
-{
-  pid_t me;
-  int ret;
-
-  /* Do we already hold the semaphore? */
-
-  me = getpid();
-  if (me == master->devsem.holder)
-    {
-      /* Yes... just increment the count */
-
-      master->devsem.count++;
-      DEBUGASSERT(master->devsem.count > 0);
-    }
-
-  /* Take the semaphore (perhaps waiting) */
-
-  else
-    {
-      ret = nxsem_wait(&master->devsem.sem);
-      if (ret < 0)
-        {
-          return ret;
-        }
-
-      /* Now we hold the semaphore */
-
-      master->devsem.holder = me;
-      master->devsem.count  = 1;
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: onewire_sem_post
- *
- * Description:
- *   Release the mutual exclusion semaphore
- *
- ****************************************************************************/
-
-void onewire_sem_post(FAR struct onewire_master_s *master)
-{
-  DEBUGASSERT(master->devsem.holder == getpid());
-
-  /* Is this our last count on the semaphore? */
-
-  if (master->devsem.count > 1)
-    {
-      /* No.. just decrement the count */
-
-      master->devsem.count--;
-    }
-
-  /* Yes.. then we can really release the semaphore */
-
-  else
-    {
-      master->devsem.holder = NO_HOLDER;
-      master->devsem.count  = 0;
-      nxsem_post(&master->devsem.sem);
-    }
-}
 
 /****************************************************************************
  * Name: onewire_reset_resume
@@ -529,7 +429,7 @@ int onewire_search(FAR struct onewire_master_s *master,
 
   /* Make complete search on the bus mutal exclusive */
 
-  ret = onewire_sem_wait(master);
+  ret = nxrmutex_lock(&master->devlock);
   if (ret < 0)
     {
       return ret;
@@ -663,7 +563,7 @@ int onewire_search(FAR struct onewire_master_s *master,
     }
 
 unlock:
-  onewire_sem_post(master);
+  nxrmutex_unlock(&master->devlock);
   return (ret < 0) ? ret : nslaves_match;
 }
 
@@ -743,7 +643,7 @@ onewire_initialize(FAR struct onewire_dev_s *dev, int maxslaves)
   /* Initialize the device structure */
 
   master->dev = dev;
-  onewire_sem_init(&master->devsem);
+  nxrmutex_init(&master->devlock);
   master->nslaves = 0;
   master->maxslaves = maxslaves;
   master->insearch = false;
@@ -780,7 +680,7 @@ int onewire_uninitialize(FAR struct onewire_master_s *master)
 
   /* Release resources. This does not touch the underlying onewire_dev_s */
 
-  onewire_sem_destroy(&master->devsem);
+  nxrmutex_destroy(&master->devlock);
   kmm_free(master);
   return OK;
 }
