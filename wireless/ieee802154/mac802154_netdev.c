@@ -38,7 +38,6 @@
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
-#include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/arp.h>
@@ -104,12 +103,6 @@
            "CONFIG_IOB_NBUFFERS to avoid waiting on req_data"
 #endif
 
-/* TX poll delay = 1 seconds.
- * CLK_TCK is the number of clock ticks per second
- */
-
-#define TXPOLL_WDDELAY   (1*CLK_TCK)
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -141,7 +134,6 @@ struct macnet_driver_s
   struct macnet_callback_s md_cb; /* Callback information */
   MACHANDLE md_mac;               /* Contained MAC interface */
   bool md_bifup;                  /* true:ifup false:ifdown */
-  struct wdog_s md_txpoll;        /* TX poll timer */
   struct work_s md_pollwork;      /* Defer poll work to the work queue */
 
   /* Hold a list of events */
@@ -184,8 +176,6 @@ static int  macnet_rxframe(FAR struct macnet_driver_s *maccb,
 /* Common TX logic */
 
 static int  macnet_txpoll_callback(FAR struct net_driver_s *dev);
-static void macnet_txpoll_work(FAR void *arg);
-static void macnet_txpoll_expiry(wdparm_t arg);
 
 /* IOCTL support */
 
@@ -535,78 +525,6 @@ static int macnet_txpoll_callback(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Name: macnet_txpoll_work
- *
- * Description:
- *   Perform periodic polling from the worker thread
- *
- * Input Parameters:
- *   arg - The argument passed when work_queue() as called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static void macnet_txpoll_work(FAR void *arg)
-{
-  FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)arg;
-
-  /* Lock the network and serialize driver operations if necessary.
-   * NOTE: Serialization is only required in the case where the driver work
-   * is performed on an LP worker thread and where more than one LP worker
-   * thread has been configured.
-   */
-
-  net_lock();
-
-#ifdef CONFIG_NET_6LOWPAN
-  /* Make sure the our single packet buffer is attached */
-
-  priv->md_dev.r_dev.d_buf = priv->md_iobuffer.rb_buf;
-#endif
-
-  /* Then perform the poll */
-
-  devif_timer(&priv->md_dev.r_dev, TXPOLL_WDDELAY, macnet_txpoll_callback);
-
-  /* Setup the watchdog poll timer again */
-
-  wd_start(&priv->md_txpoll, TXPOLL_WDDELAY,
-           macnet_txpoll_expiry, (wdparm_t)priv);
-  net_unlock();
-}
-
-/****************************************************************************
- * Name: macnet_txpoll_expiry
- *
- * Description:
- *   Periodic timer handler.  Called from the timer interrupt handler.
- *
- * Input Parameters:
- *   arg  - The argument
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
- *
- ****************************************************************************/
-
-static void macnet_txpoll_expiry(wdparm_t arg)
-{
-  FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)arg;
-
-  /* Schedule to perform the interrupt processing on the worker thread. */
-
-  work_queue(WPANWORK, &priv->md_pollwork, macnet_txpoll_work, priv, 0);
-}
-
-/****************************************************************************
  * Name: macnet_coord_eaddr
  *
  * Description:
@@ -760,11 +678,6 @@ static int macnet_ifup(FAR struct net_driver_s *dev)
              dev->d_mac.radio.nv_addr[0], dev->d_mac.radio.nv_addr[1]);
 #endif
 
-      /* Set and activate a timer process */
-
-      wd_start(&priv->md_txpoll, TXPOLL_WDDELAY,
-               macnet_txpoll_expiry, (wdparm_t)priv);
-
       ret = OK;
     }
 
@@ -799,10 +712,6 @@ static int macnet_ifdown(FAR struct net_driver_s *dev)
   /* Disable interruption */
 
   flags = enter_critical_section();
-
-  /* Cancel the TX poll timer and TX timeout timers */
-
-  wd_cancel(&priv->md_txpoll);
 
   /* Put the EMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the macnet_ifup() always

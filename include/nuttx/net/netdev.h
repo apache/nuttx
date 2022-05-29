@@ -546,8 +546,6 @@ int sixlowpan_input(FAR struct radio_driver_s *ieee,
  ****************************************************************************/
 
 int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback);
-int devif_timer(FAR struct net_driver_s *dev, int delay,
-                devif_poll_callback_t callback);
 
 /****************************************************************************
  * Name: neighbor_out

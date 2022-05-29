@@ -103,12 +103,6 @@
 #define NENET_NBUFFERS \
   (CONFIG_KINETIS_ENETNTXBUFFERS+CONFIG_KINETIS_ENETNRXBUFFERS)
 
-/* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per
- * second.
- */
-
-#define KINETIS_WDDELAY   (1*CLK_TCK)
-
 /* TX timeout = 1 minute */
 
 #define KINETIS_TXTIMEOUT (60*CLK_TCK)
@@ -223,7 +217,6 @@ struct kinetis_driver_s
   uint8_t txhead;              /* The next TX descriptor to use */
   uint8_t rxtail;              /* The next RX descriptor to use */
   uint8_t phyaddr;             /* Selected PHY address */
-  struct wdog_s txpoll;        /* TX poll timer */
   struct wdog_s txtimeout;     /* TX timeout timer */
   uint32_t ints;               /* Enabled interrupts */
   struct work_s irqwork;       /* For deferring interrupt work to the work queue */
@@ -293,9 +286,6 @@ static int  kinetis_interrupt(int irq, void *context, void *arg);
 
 static void kinetis_txtimeout_work(void *arg);
 static void kinetis_txtimeout_expiry(wdparm_t arg);
-
-static void kinetis_poll_work(void *arg);
-static void kinetis_polltimer_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -1047,76 +1037,6 @@ static void kinetis_txtimeout_expiry(wdparm_t arg)
 }
 
 /****************************************************************************
- * Function: kinetis_poll_work
- *
- * Description:
- *   Perform periodic polling from the worker thread
- *
- * Input Parameters:
- *   arg - The argument passed when work_queue() as called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static void kinetis_poll_work(void *arg)
-{
-  struct kinetis_driver_s *priv = (struct kinetis_driver_s *)arg;
-
-  /* Check if there is there is a transmission in progress.  We cannot
-   * perform the TX poll if he are unable to accept another packet for
-   * transmission.
-   */
-
-  net_lock();
-  if (!kinetis_txringfull(priv))
-    {
-      /* If so, update TCP timing states and poll the network for new XMIT
-       * data. Hmmm..might be bug here.  Does this mean if there is a
-       * transmit in progress, we will missing TCP time state updates?
-       */
-
-      devif_timer(&priv->dev, KINETIS_WDDELAY, kinetis_txpoll);
-    }
-
-  /* Setup the watchdog poll timer again in any case */
-
-  wd_start(&priv->txpoll, KINETIS_WDDELAY,
-           kinetis_polltimer_expiry, (wdparm_t)priv);
-  net_unlock();
-}
-
-/****************************************************************************
- * Function: kinetis_polltimer_expiry
- *
- * Description:
- *   Periodic timer handler.  Called from the timer interrupt handler.
- *
- * Input Parameters:
- *   arg  - The argument
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
- *
- ****************************************************************************/
-
-static void kinetis_polltimer_expiry(wdparm_t arg)
-{
-  struct kinetis_driver_s *priv = (struct kinetis_driver_s *)arg;
-
-  /* Schedule to perform the poll processing on the worker thread. */
-
-  work_queue(ETHWORK, &priv->pollwork, kinetis_poll_work, priv, 0);
-}
-
-/****************************************************************************
  * Function: kinetis_ifup
  *
  * Description:
@@ -1227,11 +1147,6 @@ static int kinetis_ifup(struct net_driver_s *dev)
 
   putreg32(ENET_RDAR, KINETIS_ENET_RDAR);
 
-  /* Set and activate a timer process */
-
-  wd_start(&priv->txpoll, KINETIS_WDDELAY,
-           kinetis_polltimer_expiry, (wdparm_t)priv);
-
   putreg32(0, KINETIS_ENET_EIMR);
 
   /* Clear all pending ENET interrupt */
@@ -1293,9 +1208,8 @@ static int kinetis_ifdown(struct net_driver_s *dev)
   up_disable_irq(KINETIS_IRQ_EMACRX);
   up_disable_irq(KINETIS_IRQ_EMACMISC);
 
-  /* Cancel the TX poll timer and TX timeout timers */
+  /* Cancel the TX timeout timers */
 
-  wd_cancel(&priv->txpoll);
   wd_cancel(&priv->txtimeout);
 
   /* Put the EMAC in its reset, non-operational state.  This should be
@@ -1352,7 +1266,7 @@ static void kinetis_txavail_work(void *arg)
            * new XMIT data.
            */
 
-          devif_timer(&priv->dev, 0, kinetis_txpoll);
+          devif_poll(&priv->dev, kinetis_txpoll);
         }
     }
 

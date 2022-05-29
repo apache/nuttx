@@ -1083,7 +1083,7 @@ static void stm32can_txavail_work(void *arg)
            * new XMIT data.
            */
 
-          devif_timer(&priv->dev, 0, stm32can_txpoll);
+          devif_poll(&priv->dev, stm32can_txpoll);
         }
     }
 
@@ -1511,7 +1511,7 @@ static void stm32can_txdone_work(void *arg)
    */
 
   net_lock();
-  devif_timer(&priv->dev, 0, stm32can_txpoll);
+  devif_poll(&priv->dev, stm32can_txpoll);
   net_unlock();
 }
 

@@ -31,19 +31,12 @@
 #include "amebaz_netdev.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define WDDELAY   (1 * CLK_TCK / 2)
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-static void amebaz_poll_work(void *arg);
 static void amebaz_netdev_notify_tx_done(struct amebaz_dev_s *priv)
 {
-  work_queue(LPWORK, &priv->pollwork, amebaz_poll_work, priv, 0);
+  work_queue(LPWORK, &priv->pollwork, amebaz_txavail_work, priv, 0);
 }
 
 static int amebaz_txpoll(struct net_driver_s *dev)
@@ -222,12 +215,6 @@ void amebaz_netdev_notify_receive(struct amebaz_dev_s *priv,
   net_unlock();
 }
 
-static void amebaz_poll_expiry(wdparm_t arg)
-{
-  struct amebaz_dev_s *priv = (struct amebaz_dev_s *)arg;
-  work_queue(LPWORK, &priv->pollwork, amebaz_poll_work, priv, 0);
-}
-
 static void amebaz_txavail_work(void *arg)
 {
   struct amebaz_dev_s *priv = (struct amebaz_dev_s *)arg;
@@ -247,37 +234,10 @@ static void amebaz_txavail_work(void *arg)
 
       if (priv->dev.d_buf)
         {
-          devif_timer(&priv->dev, 0, amebaz_txpoll);
+          devif_poll(&priv->dev, amebaz_txpoll);
         }
     }
 
-  net_unlock();
-}
-
-static void amebaz_poll_work(void *arg)
-{
-  struct amebaz_dev_s *priv = (struct amebaz_dev_s *)arg;
-  struct net_driver_s *dev = &priv->dev;
-  net_lock();
-  if (IFF_IS_UP(dev->d_flags))
-    {
-      if (!priv->curr && rltk_wlan_check_isup(priv->devnum))
-        {
-          priv->curr = rltk_wlan_alloc_skb(MAX_NETDEV_PKTSIZE);
-          if (priv->curr)
-            {
-              priv->dev.d_buf = priv->curr->tail;
-              priv->dev.d_len = 0;
-            }
-        }
-
-      if (priv->dev.d_buf)
-        {
-          devif_timer(&priv->dev, WDDELAY, amebaz_txpoll);
-        }
-    }
-
-  wd_start(&priv->txpoll, WDDELAY, amebaz_poll_expiry, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -365,7 +325,6 @@ static int amebaz_ifup(struct net_driver_s *dev)
     {
       priv->mode = RTW_MODE_NONE;
       priv->conn.status = AMEBAZ_STATUS_DISABLED;
-      wd_start(&priv->txpoll, WDDELAY, amebaz_poll_expiry, (wdparm_t)dev);
     }
 
   return OK;
@@ -393,7 +352,6 @@ static int amebaz_ifdown(struct net_driver_s *dev)
           priv->curr = NULL;
         }
 
-      wd_cancel(&priv->txpoll);
       if (priv->devnum == 0)
         {
           rltk_wlan_deinit();
