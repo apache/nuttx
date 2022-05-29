@@ -32,6 +32,7 @@
 #include <nuttx/board.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/rptun/openamp.h>
 #include <nuttx/rptun/rptun.h>
@@ -53,8 +54,10 @@
 #  define ALIGN_UP(s, a)            (((s) + (a) - 1) & ~((a) - 1))
 #endif
 
+#define rptun_lock()                nxrmutex_lock(&g_rptunlock)
+#define rptun_unlock()              nxrmutex_unlock(&g_rptunlock)
+
 #define RPTUNIOC_NONE               0
-#define NO_HOLDER                   INVALID_PROCESS_ID
 
 #define RPTUN_TIMEOUT_MS            100
 
@@ -195,9 +198,7 @@ static const struct image_store_ops g_rptun_storeops =
 };
 #endif
 
-static sem_t        g_rptunlock = SEM_INITIALIZER(1);
-static pid_t        g_holder    = NO_HOLDER;
-static unsigned int g_count;
+static rmutex_t g_rptunlock = NXRMUTEX_INITIALIZER;
 
 static METAL_DECLARE_LIST(g_rptun_cb);
 static METAL_DECLARE_LIST(g_rptun_priv);
@@ -205,58 +206,6 @@ static METAL_DECLARE_LIST(g_rptun_priv);
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-static int rptun_lock(void)
-{
-  pid_t me = getpid();
-  int ret = OK;
-
-  /* Does this thread already hold the semaphore? */
-
-  if (g_holder == me)
-    {
-      /* Yes.. just increment the reference count */
-
-      g_count++;
-    }
-  else
-    {
-      /* No.. take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait_uninterruptible(&g_rptunlock);
-      if (ret >= 0)
-        {
-          /* Now this thread holds the semaphore */
-
-          g_holder = me;
-          g_count  = 1;
-        }
-    }
-
-  return ret;
-}
-
-static void rptun_unlock(void)
-{
-  DEBUGASSERT(g_holder == getpid() && g_count > 0);
-
-  /* If the count would go to zero, then release the semaphore */
-
-  if (g_count == 1)
-    {
-      /* We no longer hold the semaphore */
-
-      g_holder = NO_HOLDER;
-      g_count  = 0;
-      nxsem_post(&g_rptunlock);
-    }
-  else
-    {
-      /* We still hold the semaphore. Just decrement the count */
-
-      g_count--;
-    }
-}
 
 #ifdef CONFIG_RPTUN_PM
 static inline void rptun_pm_action(FAR struct rptun_priv_s *priv,

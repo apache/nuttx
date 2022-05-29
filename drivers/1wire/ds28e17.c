@@ -155,7 +155,7 @@ static inline int ds_i2c_sem_wait(FAR struct i2c_master_s *i2cdev)
   FAR struct ds_i2c_inst_s *inst = (FAR struct ds_i2c_inst_s *)i2cdev;
   FAR struct onewire_master_s *master = inst->master;
 
-  return onewire_sem_wait(master);
+  return nxrmutex_lock(&master->devlock);
 }
 
 /****************************************************************************
@@ -171,7 +171,7 @@ static inline void ds_i2c_sem_post(FAR struct i2c_master_s *i2cdev)
   FAR struct ds_i2c_inst_s *inst = (FAR struct ds_i2c_inst_s *)i2cdev;
   FAR struct onewire_master_s *master = inst->master;
 
-  onewire_sem_post(master);
+  nxrmutex_unlock(&master->devlock);
 }
 
 static int ds_error(uint8_t buf[])
@@ -917,7 +917,7 @@ FAR struct i2c_master_s *
 
   /* We need a recursive lock as this may be called from a search callback. */
 
-  ret = onewire_sem_wait(master);
+  ret = nxrmutex_lock(&master->devlock);
   if (ret < 0)
     {
       kmm_free(inst);
@@ -929,7 +929,7 @@ FAR struct i2c_master_s *
     {
       kmm_free(inst);
       i2cerr("ERROR: Failed to add slave\n");
-      onewire_sem_post(master);
+      nxrmutex_unlock(&master->devlock);
       return NULL;
     }
 
@@ -947,7 +947,7 @@ FAR struct i2c_master_s *
       ds28e17_selftest(inst);
     }
 
-  onewire_sem_post(master);
+  nxrmutex_unlock(&master->devlock);
   return (struct i2c_master_s *)inst;
 }
 
@@ -973,7 +973,7 @@ int ds28e17_lower_half_unregister(FAR struct ds28e17_dev_s *priv,
   FAR struct onewire_master_s *master = inst->master;
   int ret;
 
-  ret = onewire_sem_wait(master);
+  ret = nxrmutex_lock(&master->devlock);
   if (ret < 0)
     {
       return ret;
@@ -984,12 +984,12 @@ int ds28e17_lower_half_unregister(FAR struct ds28e17_dev_s *priv,
     {
       kmm_free(inst);
       i2cerr("ERROR: Failed to remove slave\n");
-      onewire_sem_post(master);
+      nxrmutex_unlock(&master->devlock);
       return ret;
     }
 
   kmm_free(inst);
-  onewire_sem_post(master);
+  nxrmutex_unlock(&master->devlock);
 
   return OK;
 }

@@ -279,7 +279,7 @@ static const rpmsg_ept_cb g_sensor_rpmsg_handler[] =
 
 static struct list_node g_devlist = LIST_INITIAL_VALUE(g_devlist);
 static struct list_node g_eptlist = LIST_INITIAL_VALUE(g_eptlist);
-static mutex_t g_lock = MUTEX_INITIALIZER;
+static mutex_t g_lock = NXMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Private Functions

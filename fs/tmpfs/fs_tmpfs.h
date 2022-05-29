@@ -30,15 +30,11 @@
 #include <stdint.h>
 
 #include <nuttx/fs/fs.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Indicates that there is no holder of the re-entrant semaphore */
-
-#define TMPFS_NO_HOLDER   -1
 
 /* Bit definitions for file object flags */
 
@@ -66,15 +62,6 @@ enum tmpfs_foreach_e
   TMPFS_UNLINKED         /* Only the directory entry was deleted */
 };
 
-/* Re-entrant semaphore */
-
-struct tmpfs_sem_s
-{
-  sem_t    ts_sem;       /* The actual semaphore */
-  pid_t    ts_holder;    /* Current older (-1 if not held) */
-  uint16_t ts_count;     /* Number of counts held */
-};
-
 /* The form of one directory entry */
 
 struct tmpfs_dirent_s
@@ -87,7 +74,7 @@ struct tmpfs_dirent_s
 
 struct tmpfs_object_s
 {
-  struct tmpfs_sem_s to_exclsem;
+  rmutex_t to_lock;
 
   size_t   to_alloc;     /* Allocated size of the memory object */
   uint8_t  to_type;      /* See enum tmpfs_objtype_e */
@@ -100,7 +87,7 @@ struct tmpfs_directory_s
 {
   /* First fields must match common TMPFS object layout */
 
-  struct tmpfs_sem_s tdo_exclsem;
+  rmutex_t tdo_lock;
 
   size_t   tdo_alloc;    /* Allocated size of the directory object */
   uint8_t  tdo_type;     /* See enum tmpfs_objtype_e */
@@ -126,7 +113,7 @@ struct tmpfs_file_s
 {
   /* First fields must match common TMPFS object layout */
 
-  struct tmpfs_sem_s tfo_exclsem;
+  rmutex_t tfo_lock;
 
   size_t   tfo_alloc;    /* Allocated size of the file object */
   uint8_t  tfo_type;     /* See enum tmpfs_objtype_e */
@@ -146,7 +133,7 @@ struct tmpfs_s
   /* The root directory */
 
   FAR struct tmpfs_dirent_s tfs_root;
-  struct tmpfs_sem_s tfs_exclsem;
+  rmutex_t tfs_lock;
 };
 
 /* This is the type used the tmpfs_statfs_callout to accumulate memory

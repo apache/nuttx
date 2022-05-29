@@ -29,7 +29,7 @@
 
 #include <queue.h>
 
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/clock.h>
 #include <nuttx/power/pm.h>
 #include <nuttx/wdog.h>

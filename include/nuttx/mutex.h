@@ -29,15 +29,15 @@
 #include <errno.h>
 #include <assert.h>
 #include <unistd.h>
-#include <nuttx/sched.h>
 #include <nuttx/semaphore.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define MUTEX_INITIALIZER    SEM_INITIALIZER(1);
-#define RMUTEX_INITIALIZER   {SEM_INITIALIZER(1), INVALID_PROCESS_ID, 0}
+#define NXRMUTEX_NO_HOLDER     (pid_t)-1
+#define NXMUTEX_INITIALIZER    SEM_INITIALIZER(1)
+#define NXRMUTEX_INITIALIZER   {SEM_INITIALIZER(1), NXRMUTEX_NO_HOLDER, 0}
 
 /****************************************************************************
  * Public Type Definitions
@@ -45,12 +45,14 @@
 
 typedef sem_t mutex_t;
 
-typedef struct
+struct rmutex_s
 {
   mutex_t mutex;
   pid_t holder;
   uint16_t count;
-} rmutex_t;
+};
+
+typedef struct rmutex_s rmutex_t;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -87,7 +89,14 @@ extern "C"
 
 static inline int nxmutex_init(FAR mutex_t *mutex)
 {
-  return nxsem_init(mutex, 0, 1);
+  int ret = _SEM_INIT(mutex, 0, 1);
+
+  if (ret < 0)
+    {
+      return _SEM_ERRVAL(ret);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -111,7 +120,14 @@ static inline int nxmutex_init(FAR mutex_t *mutex)
 
 static inline int nxmutex_destroy(FAR mutex_t *mutex)
 {
-  return nxsem_destroy(mutex);
+  int ret = _SEM_DESTROY(mutex);
+
+  if (ret < 0)
+    {
+      return _SEM_ERRVAL(ret);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -136,7 +152,26 @@ static inline int nxmutex_destroy(FAR mutex_t *mutex)
 
 static inline int nxmutex_lock(FAR mutex_t *mutex)
 {
-  return nxsem_wait_uninterruptible(mutex);
+  int ret;
+
+  for (; ; )
+    {
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = _SEM_WAIT(mutex);
+      if (ret >= 0)
+        {
+          break;
+        }
+
+      ret = _SEM_ERRVAL(ret);
+      if (ret != -EINTR && ret != -ECANCELED)
+        {
+          break;
+        }
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -162,7 +197,14 @@ static inline int nxmutex_lock(FAR mutex_t *mutex)
 
 static inline int nxmutex_trylock(FAR mutex_t *mutex)
 {
-  return nxsem_trywait(mutex);
+  int ret = _SEM_TRYWAIT(mutex);
+
+  if (ret < 0)
+    {
+      return _SEM_ERRVAL(ret);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -183,7 +225,7 @@ static inline bool nxmutex_is_locked(FAR mutex_t *mutex)
   int cnt;
   int ret;
 
-  ret = nxsem_get_value(mutex, &cnt);
+  ret = _SEM_GETVALUE(mutex, &cnt);
 
   DEBUGASSERT(ret == OK);
 
@@ -212,7 +254,15 @@ static inline bool nxmutex_is_locked(FAR mutex_t *mutex)
 
 static inline int nxmutex_unlock(FAR mutex_t *mutex)
 {
-  return nxsem_post(mutex);
+  int ret;
+
+  ret = _SEM_POST(mutex);
+  if (ret < 0)
+    {
+      return _SEM_ERRVAL(ret);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -238,7 +288,7 @@ static inline int nxmutex_unlock(FAR mutex_t *mutex)
 static inline int nxrmutex_init(FAR rmutex_t *rmutex)
 {
   rmutex->count = 0;
-  rmutex->holder = INVALID_PROCESS_ID;
+  rmutex->holder = NXRMUTEX_NO_HOLDER;
   return nxmutex_init(&rmutex->mutex);
 }
 
@@ -284,17 +334,19 @@ static inline int nxrmutex_destroy(FAR rmutex_t *rmutex)
 
 static inline int nxrmutex_lock(FAR rmutex_t *rmutex)
 {
-  int ret = OK;
   pid_t tid = gettid();
+  int ret;
 
   if (rmutex->holder == tid)
     {
-      DEBUGASSERT(rmutex->count++ < UINT16_MAX);
+      DEBUGASSERT(rmutex->count < UINT16_MAX);
+      rmutex->count++;
+      ret = OK;
     }
   else
     {
       ret = nxmutex_lock(&rmutex->mutex);
-      if (ret >= OK)
+      if (ret == OK)
         {
           rmutex->holder = tid;
           rmutex->count = 1;
@@ -329,21 +381,23 @@ static inline int nxrmutex_lock(FAR rmutex_t *rmutex)
 
 static inline int nxrmutex_trylock(FAR rmutex_t *rmutex)
 {
-  int ret = OK;
   pid_t tid = gettid();
+  int ret;
 
   if (rmutex->holder == tid)
     {
-      DEBUGASSERT(rmutex->count++ < UINT16_MAX);
+      DEBUGASSERT(rmutex->count < UINT16_MAX);
+      rmutex->count++;
+      ret = OK;
     }
   else
     {
       ret = nxmutex_trylock(&rmutex->mutex);
-      if (ret >= OK)
-      {
-        rmutex->holder = tid;
-        rmutex->count = 1;
-      }
+      if (ret == OK)
+        {
+          rmutex->holder = tid;
+          rmutex->count = 1;
+        }
     }
 
   return ret;
@@ -365,7 +419,7 @@ static inline int nxrmutex_trylock(FAR rmutex_t *rmutex)
 
 static inline bool nxrmutex_is_locked(FAR rmutex_t *rmutex)
 {
-  return rmutex->count ? true : false;
+  return rmutex->count > 0;
 }
 
 /****************************************************************************
@@ -391,19 +445,23 @@ static inline bool nxrmutex_is_locked(FAR rmutex_t *rmutex)
 
 static inline int nxrmutex_unlock(FAR rmutex_t *rmutex)
 {
-  int ret = OK;
   pid_t tid = gettid();
+  int ret = -EPERM;
 
-  if (rmutex->holder != tid)
-  {
-    return -EPERM;
-  }
-
-  DEBUGASSERT(rmutex->count > 0);
-  if (--rmutex->count == 0)
+  if (rmutex->holder == tid)
     {
-      rmutex->holder = INVALID_PROCESS_ID;
-      ret = nxmutex_unlock(&rmutex->mutex);
+      DEBUGASSERT(rmutex->count > 0);
+      if (rmutex->count == 1)
+        {
+          rmutex->count = 0;
+          rmutex->holder = NXRMUTEX_NO_HOLDER;
+          ret = nxmutex_unlock(&rmutex->mutex);
+        }
+      else
+        {
+          rmutex->count--;
+          ret = OK;
+        }
     }
 
   return ret;
