@@ -56,7 +56,7 @@
  * character specified by the current locale.
  */
 
-#define MB_CUR_MAX 1
+#define MB_CUR_MAX 4
 
 /* The environ variable, normally 'char **environ;' is not implemented as a
  * function call.  However, get_environ_ptr() can be used in its place.

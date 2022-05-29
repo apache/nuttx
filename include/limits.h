@@ -60,7 +60,7 @@
  * the correct value.
  */
 
-#define MB_LEN_MAX            1
+#define MB_LEN_MAX            4
 
 /* Configurable limits required by POSIX ****************************************
  *

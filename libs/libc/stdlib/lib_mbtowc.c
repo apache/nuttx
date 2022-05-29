@@ -40,7 +40,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mbtowc.c
+ * Name: mbtowc
  *
  * Description:
  *   Minimal multibyte to wide char converter
@@ -59,10 +59,5 @@ int mbtowc(FAR wchar_t *pwc, FAR const char *s, size_t n)
       return -1;
     }
 
-  if (pwc)
-    {
-      *pwc = (wchar_t)*s;
-    }
-
-  return (*s != '\0');
+  return mbrtowc(pwc, s, n, NULL);
 }
