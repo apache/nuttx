@@ -292,12 +292,6 @@
 
 /* Timing *******************************************************************/
 
-/* TX poll delay = 1 seconds.
- * CLK_TCK is the number of clock ticks per second
- */
-
-#define STM32_WDDELAY     (1*CLK_TCK)
-
 /* TX timeout = 1 minute */
 
 #define STM32_TXTIMEOUT   (60*CLK_TCK)
@@ -623,7 +617,6 @@ struct stm32_ethmac_s
   uint8_t              ifup    : 1; /* true:ifup false:ifdown */
   uint8_t              mbps100 : 1; /* 100MBps operation (vs 10 MBps) */
   uint8_t              fduplex : 1; /* Full (vs. half) duplex */
-  struct wdog_s        txpoll;      /* TX poll timer */
   struct wdog_s        txtimeout;   /* TX timeout timer */
   struct work_s        irqwork;     /* For deferring interrupt work to the work queue */
   struct work_s        pollwork;    /* For deferring poll work to the work queue */
@@ -711,9 +704,6 @@ static int  stm32_interrupt(int irq, void *context, void *arg);
 
 static void stm32_txtimeout_work(void *arg);
 static void stm32_txtimeout_expiry(wdparm_t arg);
-
-static void stm32_poll_work(void *arg);
-static void stm32_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -1386,7 +1376,7 @@ static void stm32_dopoll(struct stm32_ethmac_s *priv)
 
       if (dev->d_buf)
         {
-          devif_timer(dev, 0, stm32_txpoll);
+          devif_poll(dev, stm32_txpoll);
 
           /* We will, most likely end up with a buffer to be freed.  But it
            * might not be the same one that we allocated above.
@@ -2256,104 +2246,6 @@ static void stm32_txtimeout_expiry(wdparm_t arg)
 }
 
 /****************************************************************************
- * Function: stm32_poll_work
- *
- * Description:
- *   Perform periodic polling from the worker thread
- *
- * Input Parameters:
- *   arg - The argument passed when work_queue() as called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   Ethernet interrupts are disabled
- *
- ****************************************************************************/
-
-static void stm32_poll_work(void *arg)
-{
-  struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)arg;
-  struct net_driver_s *dev  = &priv->dev;
-
-  /* Check if the next TX descriptor is owned by the Ethernet DMA or
-   * CPU.  We cannot perform the TX poll if we are unable to accept
-   * another packet for transmission.
-   *
-   * In a race condition, ETH_TDES0_OWN may be cleared BUT still
-   * not available because stm32_freeframe() has not yet run. If
-   * stm32_freeframe() has run, the buffer1 pointer (tdes2) will be
-   * nullified (and inflight should be < CONFIG_STM32_ETH_NTXDESC).
-   */
-
-  net_lock();
-  if ((priv->txhead->tdes0 & ETH_TDES0_OWN) == 0 &&
-       priv->txhead->tdes2 == 0)
-    {
-      /* If we have the descriptor, then perform the timer poll.  Allocate a
-       * buffer for the poll.
-       */
-
-      DEBUGASSERT(dev->d_len == 0 && dev->d_buf == NULL);
-      dev->d_buf = stm32_allocbuffer(priv);
-
-      /* We can't poll if we have no buffers */
-
-      if (dev->d_buf)
-        {
-          /* Update TCP timing states and poll the network for new XMIT data.
-           */
-
-          devif_timer(dev, STM32_WDDELAY, stm32_txpoll);
-
-          /* We will, most likely end up with a buffer to be freed.  But it
-           * might not be the same one that we allocated above.
-           */
-
-          if (dev->d_buf)
-            {
-              DEBUGASSERT(dev->d_len == 0);
-              stm32_freebuffer(priv, dev->d_buf);
-              dev->d_buf = NULL;
-            }
-        }
-    }
-
-  /* Setup the watchdog poll timer again */
-
-  wd_start(&priv->txpoll, STM32_WDDELAY,
-           stm32_poll_expiry, (wdparm_t)priv);
-  net_unlock();
-}
-
-/****************************************************************************
- * Function: stm32_poll_expiry
- *
- * Description:
- *   Periodic timer handler.  Called from the timer interrupt handler.
- *
- * Input Parameters:
- *   arg  - The argument
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
- *
- ****************************************************************************/
-
-static void stm32_poll_expiry(wdparm_t arg)
-{
-  struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)arg;
-
-  /* Schedule to perform the interrupt processing on the worker thread. */
-
-  work_queue(ETHWORK, &priv->pollwork, stm32_poll_work, priv, 0);
-}
-
-/****************************************************************************
  * Function: stm32_ifup
  *
  * Description:
@@ -2399,11 +2291,6 @@ static int stm32_ifup(struct net_driver_s *dev)
       return ret;
     }
 
-  /* Set and activate a timer process */
-
-  wd_start(&priv->txpoll, STM32_WDDELAY,
-           stm32_poll_expiry, (wdparm_t)priv);
-
   /* Enable the Ethernet interrupt */
 
   priv->ifup = true;
@@ -2444,9 +2331,8 @@ static int stm32_ifdown(struct net_driver_s *dev)
   flags = enter_critical_section();
   up_disable_irq(STM32_IRQ_ETH);
 
-  /* Cancel the TX poll timer and TX timeout timers */
+  /* Cancel the TX timeout timers */
 
-  wd_cancel(&priv->txpoll);
   wd_cancel(&priv->txtimeout);
 
   /* Put the EMAC in its reset, non-operational state.  This should be

@@ -57,12 +57,6 @@
 # define CONFIG_HCS12_NINTERFACES 1
 #endif
 
-/* TX poll deley = 1 seconds.
- * CLK_TCK is the number of clock ticks per second
- */
-
-#define HCS12_WDDELAY   (1*CLK_TCK)
-
 /* TX timeout = 1 minute */
 
 #define HCS12_TXTIMEOUT (60*CLK_TCK)
@@ -82,7 +76,6 @@
 struct emac_driver_s
 {
   bool    d_bifup;            /* true:ifup false:ifdown */
-  struct wdog_s d_txpoll;     /* TX poll timer */
   struct wdog_s d_txtimeout;  /* TX timeout timer */
 
   /* This holds the information visible to the NuttX network */
@@ -119,7 +112,6 @@ static int  emac_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
-static void emac_polltimer(wdparm_t arg);
 static void emac_txtimeout(wdparm_t arg);
 
 /* NuttX callback functions */
@@ -491,43 +483,6 @@ static void emac_txtimeout(wdparm_t arg)
 }
 
 /****************************************************************************
- * Function: emac_polltimer
- *
- * Description:
- *   Periodic timer handler.  Called from the timer interrupt handler.
- *
- * Input Parameters:
- *   arg  - The argument
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
- *
- ****************************************************************************/
-
-static void emac_polltimer(wdparm_t arg)
-{
-  FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)arg;
-
-  /* Check if there is room in the send another TX packet.  We cannot perform
-   * the TX poll if he are unable to accept another packet for transmission.
-   */
-
-  /* If so, update TCP timing states and poll the network for new XMIT data.
-   * Hmmm.. might be bug here.  Does this mean if there is a transmit in
-   * progress, we will missing TCP time state updates?
-   */
-
-  devif_timer(&priv->d_dev, HCS12_WDDELAY, emac_txpoll);
-
-  /* Setup the watchdog poll timer again */
-
-  wd_start(&priv->d_txpoll, HCS12_WDDELAY, emac_polltimer, (wdparm_t)arg);
-}
-
-/****************************************************************************
  * Function: emac_ifup
  *
  * Description:
@@ -554,11 +509,6 @@ static int emac_ifup(struct net_driver_s *dev)
         (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Initialize PHYs, Ethernet interface, and setup up Ethernet interrupts */
-
-  /* Set and activate a timer process */
-
-  wd_start(&priv->d_txpoll, HCS12_WDDELAY,
-           emac_polltimer, (wdparm_t)priv);
 
   /* Enable the Ethernet interrupt */
 
@@ -594,9 +544,8 @@ static int emac_ifdown(struct net_driver_s *dev)
   flags = enter_critical_section();
   up_disable_irq(CONFIG_HCS12_IRQ);
 
-  /* Cancel the TX poll timer and TX timeout timers */
+  /* Cancel the TX timeout timers */
 
-  wd_cancel(&priv->d_txpoll);
   wd_cancel(&priv->d_txtimeout);
 
   /* Put the EMAC is its reset, non-operational state.  This should be
@@ -650,7 +599,7 @@ static int emac_txavail(struct net_driver_s *dev)
 
       /* If so, then poll the network for new XMIT data */
 
-      devif_timer(&priv->d_dev, 0, emac_txpoll);
+      devif_poll(&priv->d_dev, emac_txpoll);
     }
 
   leave_critical_section(flags);

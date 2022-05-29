@@ -439,9 +439,6 @@ static int slip_txtask(int argc, FAR char *argv[])
 {
   FAR struct slip_driver_s *priv;
   unsigned int index = *(argv[1]) - '0';
-  clock_t start_ticks;
-  clock_t now_ticks;
-  unsigned int hsec;
   int ret;
 
   nerr("index: %d\n", index);
@@ -456,7 +453,6 @@ static int slip_txtask(int argc, FAR char *argv[])
 
   /* Loop forever */
 
-  start_ticks = clock_systime_ticks();
   for (; ; )
     {
       /* Wait for the timeout to expire (or until we are signaled by  */
@@ -488,23 +484,9 @@ static int slip_txtask(int argc, FAR char *argv[])
           net_lock();
           priv->dev.d_buf = priv->txbuf;
 
-          /* Has a half second elapsed since the last timer poll? */
+          /* perform the normal TX poll */
 
-          now_ticks = clock_systime_ticks();
-          hsec = (unsigned int)((now_ticks - start_ticks) / TICK_PER_HSEC);
-          if (hsec > 0)
-            {
-              /* Yes, perform the timer poll */
-
-              devif_timer(&priv->dev, hsec * TICK_PER_HSEC, slip_txpoll);
-              start_ticks += hsec * TICK_PER_HSEC;
-            }
-          else
-            {
-              /* No, perform the normal TX poll */
-
-              devif_timer(&priv->dev, 0, slip_txpoll);
-            }
+          devif_poll(&priv->dev, slip_txpoll);
 
           net_unlock();
         }

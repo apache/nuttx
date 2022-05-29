@@ -1981,7 +1981,7 @@ static void fdcan_txdone_work(void *arg)
    */
 
   net_lock();
-  devif_timer(&priv->dev, 0, fdcan_txpoll);
+  devif_poll(&priv->dev, fdcan_txpoll);
   net_unlock();
 }
 
@@ -3105,7 +3105,7 @@ static void fdcan_txavail_work(void *arg)
            * new XMIT data.
            */
 
-          devif_timer(&priv->dev, 0, fdcan_txpoll);
+          devif_poll(&priv->dev, fdcan_txpoll);
         }
     }
 

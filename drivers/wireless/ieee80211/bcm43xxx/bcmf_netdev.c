@@ -37,7 +37,6 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
@@ -83,12 +82,6 @@
 # define CONFIG_IEEE80211_BROADCOM_NINTERFACES 1
 #endif
 
-/* TX poll delay = 1 seconds.
- * CLK_TCK is the number of clock ticks per second
- */
-
-#define BCMF_WDDELAY   (1*CLK_TCK)
-
 /* TX timeout = 1 minute */
 
 #define BCMF_TXTIMEOUT (60*CLK_TCK)
@@ -108,11 +101,6 @@ static int  bcmf_transmit(FAR struct bcmf_dev_s *priv,
 static void bcmf_receive(FAR struct bcmf_dev_s *priv);
 static int  bcmf_txpoll(FAR struct net_driver_s *dev);
 static void bcmf_rxpoll_work(FAR void *arg);
-
-/* Watchdog timer expirations */
-
-static void bcmf_poll_work(FAR void *arg);
-static void bcmf_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -517,7 +505,7 @@ static void bcmf_txdone_poll_work(FAR void *arg)
 
       priv->bc_dev.d_buf = priv->cur_tx_frame->data;
       priv->bc_dev.d_len = 0;
-      devif_timer(&priv->bc_dev, 0, bcmf_txpoll);
+      devif_poll(&priv->bc_dev, bcmf_txpoll);
     }
 
   net_unlock();
@@ -603,97 +591,6 @@ void bcmf_netdev_notify_rx(FAR struct bcmf_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: bcmf_poll_work
- *
- * Description:
- *   Perform periodic polling from the worker thread
- *
- * Input Parameters:
- *   arg - The argument passed when work_queue() was called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static void bcmf_poll_work(FAR void *arg)
-{
-  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
-
-  /* Lock the network and serialize driver operations if necessary.
-   * NOTE: Serialization is only required in the case where the driver work
-   * is performed on an LP worker thread and where more than one LP worker
-   * thread has been configured.
-   */
-
-  net_lock();
-
-  /* Perform the poll */
-
-  /* Check if there is room in the send another TX packet.  We cannot perform
-   * the TX poll if he are unable to accept another packet for transmission.
-   */
-
-  if (bcmf_netdev_alloc_tx_frame(priv))
-    {
-      goto exit_unlock;
-    }
-
-  /* If so, update TCP timing states and poll the network for new XMIT data.
-   * Hmmm.. might be bug here.  Does this mean if there is a transmit in
-   * progress, we will missing TCP time state updates?
-   */
-
-  priv->bc_dev.d_buf = priv->cur_tx_frame->data;
-  priv->bc_dev.d_len = 0;
-  devif_timer(&priv->bc_dev, BCMF_WDDELAY, bcmf_txpoll);
-
-  /* Setup the watchdog poll timer again */
-
-exit_unlock:
-  wd_start(&priv->bc_txpoll, BCMF_WDDELAY,
-           bcmf_poll_expiry, (wdparm_t)priv);
-
-  net_unlock();
-}
-
-/****************************************************************************
- * Name: bcmf_poll_expiry
- *
- * Description:
- *   Periodic timer handler.  Called from the timer interrupt handler.
- *
- * Input Parameters:
- *   arg  - The argument
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
- *
- ****************************************************************************/
-
-static void bcmf_poll_expiry(wdparm_t arg)
-{
-  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
-
-  /* Schedule to perform the interrupt processing on the worker thread. */
-
-  if (work_available(&priv->bc_pollwork))
-    {
-      work_queue(BCMFWORK, &priv->bc_pollwork, bcmf_poll_work, priv, 0);
-    }
-  else
-    {
-      wd_start(&priv->bc_txpoll, BCMF_WDDELAY,
-           bcmf_poll_expiry, (wdparm_t)priv);
-    }
-}
-
-/****************************************************************************
  * Name: bcmf_ifup
  *
  * Description:
@@ -736,11 +633,6 @@ static int bcmf_ifup(FAR struct net_driver_s *dev)
   bcmf_ipv6multicast(priv);
 #endif
 
-  /* Set and activate a timer process */
-
-  wd_start(&priv->bc_txpoll, BCMF_WDDELAY,
-           bcmf_poll_expiry, (wdparm_t)priv);
-
   /* Enable the hardware interrupt */
 
   priv->bc_bifup = true;
@@ -772,10 +664,6 @@ static int bcmf_ifdown(FAR struct net_driver_s *dev)
 
   flags = enter_critical_section();
 #warning Missing logic
-
-  /* Cancel the TX poll timer */
-
-  wd_cancel(&priv->bc_txpoll);
 
   /* Put the EMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the bcmf_ifup() always
@@ -833,7 +721,7 @@ static void bcmf_txavail_work(FAR void *arg)
 
       priv->bc_dev.d_buf = priv->cur_tx_frame->data;
       priv->bc_dev.d_len = 0;
-      devif_timer(&priv->bc_dev, 0, bcmf_txpoll);
+      devif_poll(&priv->bc_dev, bcmf_txpoll);
     }
 
 exit_unlock:

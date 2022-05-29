@@ -1048,7 +1048,7 @@ static void kinetis_txdone_work(void *arg)
    */
 
   net_lock();
-  devif_timer(&priv->dev, 0, kinetis_txpoll);
+  devif_poll(&priv->dev, kinetis_txpoll);
   net_unlock();
 }
 
@@ -1404,7 +1404,7 @@ static void kinetis_txavail_work(void *arg)
            * new XMIT data.
            */
 
-          devif_timer(&priv->dev, 0, kinetis_txpoll);
+          devif_poll(&priv->dev, kinetis_txpoll);
         }
     }
 

@@ -34,7 +34,6 @@
 #include <errno.h>
 
 #include <nuttx/can.h>
-#include <nuttx/wdog.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
@@ -1045,7 +1044,7 @@ static void imxrt_txdone_work(void *arg)
    */
 
   net_lock();
-  devif_timer(&priv->dev, 0, imxrt_txpoll);
+  devif_poll(&priv->dev, imxrt_txpoll);
   net_unlock();
 }
 
@@ -1383,7 +1382,7 @@ static void imxrt_txavail_work(void *arg)
            * new XMIT data.
            */
 
-          devif_timer(&priv->dev, 0, imxrt_txpoll);
+          devif_poll(&priv->dev, imxrt_txpoll);
         }
     }
 

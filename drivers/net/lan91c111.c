@@ -31,7 +31,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 
 #include <nuttx/net/arp.h>
@@ -68,12 +67,6 @@
 #  define lan91c111_dumppacket(m, b, l)
 #endif
 
-/* TX poll delay = 1 seconds.
- * CLK_TCK is the number of clock ticks per second
- */
-
-#define LAN91C111_WDDELAY       (1*CLK_TCK)
-
 /* MII busy delay = 1 microsecond */
 
 #define LAN91C111_MIIDELAY      1
@@ -91,7 +84,6 @@ struct lan91c111_driver_s
   uintptr_t base;                         /* Base address */
   int       irq;                          /* IRQ number */
   uint16_t  bank;                         /* Current bank */
-  struct wdog_s txpoll;                   /* TX poll timer */
   struct work_s irqwork;                  /* For deferring interrupt work to the work queue */
   struct work_s pollwork;                 /* For deferring poll work to the work queue */
   uint8_t pktbuf[MAX_NETDEV_PKTSIZE + 4]; /* +4 due to getregs32/putregs32 */
@@ -118,11 +110,6 @@ static void lan91c111_txdone(FAR struct net_driver_s *dev);
 
 static void lan91c111_interrupt_work(FAR void *arg);
 static int  lan91c111_interrupt(int irq, FAR void *context, FAR void *arg);
-
-/* Watchdog timer expirations */
-
-static void lan91c111_poll_work(FAR void *arg);
-static void lan91c111_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -979,87 +966,6 @@ static int lan91c111_interrupt(int irq, FAR void *context, FAR void *arg)
 }
 
 /****************************************************************************
- * Name: lan91c111_poll_work
- *
- * Description:
- *   Perform periodic polling from the worker thread
- *
- * Parameters:
- *   arg - The argument passed when work_queue() as called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   Run on a work queue thread.
- *
- ****************************************************************************/
-
-static void lan91c111_poll_work(FAR void *arg)
-{
-  FAR struct net_driver_s *dev = arg;
-  FAR struct lan91c111_driver_s *priv = dev->d_private;
-
-  /* Lock the network and serialize driver operations if necessary.
-   * NOTE: Serialization is only required in the case where the driver work
-   * is performed on an LP worker thread and where more than one LP worker
-   * thread has been configured.
-   */
-
-  net_lock();
-
-  /* Perform the poll */
-
-  /* Check if there is room in the send another TX packet.  We cannot perform
-   * the TX poll if he are unable to accept another packet for transmission.
-   */
-
-  if (getreg16(priv, MIR_REG) & MIR_FREE_MASK)
-    {
-      /* If so, update TCP timing states and poll the network for new XMIT
-       * data.  Hmmm.. might be bug here.  Does this mean if there is a
-       * transmit in progress, we will missing TCP time state updates?
-       */
-
-      devif_timer(dev, LAN91C111_WDDELAY, lan91c111_txpoll);
-    }
-
-  /* Setup the watchdog poll timer again */
-
-  wd_start(&priv->txpoll, LAN91C111_WDDELAY,
-           lan91c111_poll_expiry, (wdparm_t)dev);
-  net_unlock();
-}
-
-/****************************************************************************
- * Name: lan91c111_poll_expiry
- *
- * Description:
- *   Periodic timer handler.  Called from the timer interrupt handler.
- *
- * Parameters:
- *   arg  - The argument
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Runs in the context of a the timer interrupt handler.  Local
- *   interrupts are disabled by the interrupt logic.
- *
- ****************************************************************************/
-
-static void lan91c111_poll_expiry(wdparm_t arg)
-{
-  FAR struct net_driver_s *dev = (FAR struct net_driver_s *)arg;
-  FAR struct lan91c111_driver_s *priv = dev->d_private;
-
-  /* Schedule to perform the interrupt processing on the worker thread. */
-
-  work_queue(LAN91C111_WORK, &priv->pollwork, lan91c111_poll_work, dev, 0);
-}
-
-/****************************************************************************
  * Name: lan91c111_ifup
  *
  * Description:
@@ -1124,10 +1030,6 @@ static int lan91c111_ifup(FAR struct net_driver_s *dev)
   lan91c111_ipv6multicast(dev);
 #endif
 
-  /* Set and activate a timer process */
-
-  wd_start(&priv->txpoll, LAN91C111_WDDELAY,
-           lan91c111_poll_expiry, (wdparm_t)dev);
   net_unlock();
 
   /* Enable the Ethernet interrupt */
@@ -1162,10 +1064,6 @@ static int lan91c111_ifdown(FAR struct net_driver_s *dev)
 
   flags = enter_critical_section();
   up_disable_irq(priv->irq);
-
-  /* Cancel the TX poll timer and work */
-
-  wd_cancel(&priv->txpoll);
 
   work_cancel(LAN91C111_WORK, &priv->irqwork);
   work_cancel(LAN91C111_WORK, &priv->pollwork);
@@ -1228,7 +1126,7 @@ static void lan91c111_txavail_work(FAR void *arg)
         {
           /* If so, then poll the network for new XMIT data */
 
-          devif_timer(dev, 0, lan91c111_txpoll);
+          devif_poll(dev, lan91c111_txpoll);
         }
     }
 

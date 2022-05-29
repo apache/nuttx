@@ -76,12 +76,6 @@
 # define CONFIG_MISOC_NET_NINTERFACES 1
 #endif
 
-/* TX poll delay = 1 seconds.
- * CLK_TCK is the number of clock ticks per second
- */
-
-#define MISOC_NET_WDDELAY   (1*CLK_TCK)
-
 /* TX timeout = 1 minute */
 
 #define MISOC_NET_TXTIMEOUT (60*CLK_TCK)
@@ -101,7 +95,6 @@
 struct misoc_net_driver_s
 {
   bool misoc_net_bifup;               /* true:ifup false:ifdown */
-  struct wdog_s misoc_net_txpoll;     /* TX poll timer */
   struct wdog_s misoc_net_txtimeout;  /* TX timeout timer */
   struct work_s misoc_net_irqwork;    /* For deferring interrupt work to the work queue */
   struct work_s misoc_net_pollwork;   /* For deferring poll work to the work queue */
@@ -150,9 +143,6 @@ static int  misoc_net_interrupt(int irq, void *context, void *arg);
 
 static void misoc_net_txtimeout_work(void *arg);
 static void misoc_net_txtimeout_expiry(wdparm_t arg);
-
-static void misoc_net_poll_work(void *arg);
-static void misoc_net_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -727,77 +717,6 @@ static void misoc_net_txtimeout_expiry(wdparm_t arg)
 }
 
 /****************************************************************************
- * Function: misoc_net_poll_work
- *
- * Description:
- *   Perform periodic polling from the worker thread
- *
- * Input Parameters:
- *   arg - The argument passed when work_queue() as called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static void misoc_net_poll_work(void *arg)
-{
-  struct misoc_net_driver_s *priv = (struct misoc_net_driver_s *)arg;
-
-  /* Perform the poll */
-
-  net_lock();
-
-  /* Check if there is room in the send another TX packet.  We cannot perform
-   * the TX poll if he are unable to accept another packet for transmission.
-   */
-
-  /* If so, update TCP timing states and poll the network for new XMIT data.
-   * Hmmm.. might be bug here.  Does this mean if there is a transmit in
-   * progress, we will missing TCP time state updates?
-   */
-
-  devif_timer(&priv->misoc_net_dev, MISOC_NET_WDDELAY, misoc_net_txpoll);
-
-  /* Setup the watchdog poll timer again */
-
-  wd_start(&priv->misoc_net_txpoll, MISOC_NET_WDDELAY,
-           misoc_net_poll_expiry, (wdparm_t)priv);
-
-  net_unlock();
-}
-
-/****************************************************************************
- * Function: misoc_net_poll_expiry
- *
- * Description:
- *   Periodic timer handler.  Called from the timer interrupt handler.
- *
- * Input Parameters:
- *   arg  - The argument
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
- *
- ****************************************************************************/
-
-static void misoc_net_poll_expiry(wdparm_t arg)
-{
-  struct misoc_net_driver_s *priv = (struct misoc_net_driver_s *)arg;
-
-  /* Schedule to perform the interrupt processing on the worker thread. */
-
-  work_queue(HPWORK, &priv->misoc_net_pollwork,
-             misoc_net_poll_work, priv, 0);
-}
-
-/****************************************************************************
  * Function: misoc_net_ifup
  *
  * Description:
@@ -846,11 +765,6 @@ static int misoc_net_ifup(struct net_driver_s *dev)
 
   flags = enter_critical_section();
 
-  /* Set and activate a timer process */
-
-  wd_start(&priv->misoc_net_txpoll, MISOC_NET_WDDELAY,
-           misoc_net_poll_expiry, (wdparm_t)priv);
-
   priv->misoc_net_bifup = true;
   up_enable_irq(ETHMAC_INTERRUPT);
 
@@ -891,9 +805,8 @@ static int misoc_net_ifdown(struct net_driver_s *dev)
   ethmac_sram_reader_ev_enable_write(0);
   ethmac_sram_writer_ev_enable_write(0);
 
-  /* Cancel the TX poll timer and TX timeout timers */
+  /* Cancel the TX timeout timers */
 
-  wd_cancel(&priv->misoc_net_txpoll);
   wd_cancel(&priv->misoc_net_txtimeout);
 
   /* Put the EMAC in its reset, non-operational state.  This should be
@@ -941,7 +854,7 @@ static void misoc_net_txavail_work(void *arg)
         {
           /* If so, then poll the network for new XMIT data */
 
-          devif_timer(&priv->misoc_net_dev, 0, misoc_net_txpoll);
+          devif_poll(&priv->misoc_net_dev, misoc_net_txpoll);
         }
     }
 

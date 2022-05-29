@@ -81,12 +81,6 @@
 # define CONFIG_FTMAC100_NINTERFACES 1
 #endif
 
-/* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per
- * second.
- */
-
-#define FTMAC100_WDDELAY   (1*CLK_TCK)
-
 /* TX timeout = 1 minute */
 
 #define FTMAC100_TXTIMEOUT (60*CLK_TCK)
@@ -161,7 +155,6 @@ struct ftmac100_driver_s
   /* NuttX net data */
 
   bool ft_bifup;               /* true:ifup false:ifdown */
-  struct wdog_s ft_txpoll;     /* TX poll timer */
   struct wdog_s ft_txtimeout;  /* TX timeout timer */
   unsigned int status;         /* Last ISR status */
   struct work_s ft_irqwork;    /* For deferring work to the work queue */
@@ -207,9 +200,6 @@ static int  ftmac100_interrupt(int irq, FAR void *context, FAR void *arg);
 
 static void ftmac100_txtimeout_work(FAR void *arg);
 static void ftmac100_txtimeout_expiry(wdparm_t arg);
-
-static void ftmac100_poll_work(FAR void *arg);
-static void ftmac100_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -1090,75 +1080,6 @@ static void ftmac100_txtimeout_expiry(wdparm_t arg)
 }
 
 /****************************************************************************
- * Name: ftmac100_poll_work
- *
- * Description:
- *   Perform periodic polling from the worker thread
- *
- * Input Parameters:
- *   arg - The argument passed when work_queue() as called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   Ethernet interrupts are disabled
- *
- ****************************************************************************/
-
-static void ftmac100_poll_work(FAR void *arg)
-{
-  FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)arg;
-
-  /* Perform the poll */
-
-  net_lock();
-
-  /* Check if there is room in the send another TX packet.  We cannot perform
-   * the TX poll if he are unable to accept another packet for transmission.
-   */
-
-  /* If so, update TCP timing states and poll the network for new XMIT data.
-   * Hmmm.. might be bug here.  Does this mean if there is a transmit in
-   * progress, we will missing TCP time state updates?
-   */
-
-  devif_timer(&priv->ft_dev, FTMAC100_WDDELAY, ftmac100_txpoll);
-
-  /* Setup the watchdog poll timer again */
-
-  wd_start(&priv->ft_txpoll, FTMAC100_WDDELAY,
-           ftmac100_poll_expiry, (wdparm_t)priv);
-  net_unlock();
-}
-
-/****************************************************************************
- * Name: ftmac100_poll_expiry
- *
- * Description:
- *   Periodic timer handler.  Called from the timer interrupt handler.
- *
- * Input Parameters:
- *   arg  - The argument
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
- *
- ****************************************************************************/
-
-static void ftmac100_poll_expiry(wdparm_t arg)
-{
-  FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)arg;
-
-  /* Schedule to perform the interrupt processing on the worker thread. */
-
-  work_queue(FTMAWORK, &priv->ft_pollwork, ftmac100_poll_work, priv, 0);
-}
-
-/****************************************************************************
  * Name: ftmac100_ifup
  *
  * Description:
@@ -1210,11 +1131,6 @@ static int ftmac100_ifup(struct net_driver_s *dev)
   ftmac100_ipv6multicast(priv);
 #endif
 
-  /* Set and activate a timer process */
-
-  wd_start(&priv->ft_txpoll, FTMAC100_WDDELAY,
-           ftmac100_poll_expiry, (wdparm_t)priv);
-
   /* Enable the Ethernet interrupt */
 
   priv->ft_bifup = true;
@@ -1251,9 +1167,8 @@ static int ftmac100_ifdown(struct net_driver_s *dev)
   flags = enter_critical_section();
   up_disable_irq(CONFIG_FTMAC100_IRQ);
 
-  /* Cancel the TX poll timer and TX timeout timers */
+  /* Cancel the TX timeout timers */
 
-  wd_cancel(&priv->ft_txpoll);
   wd_cancel(&priv->ft_txtimeout);
 
   /* Put the EMAC in its reset, non-operational state.  This should be
@@ -1305,7 +1220,7 @@ static void ftmac100_txavail_work(FAR void *arg)
 
       /* If so, then poll the network for new XMIT data */
 
-      devif_timer(&priv->ft_dev, 0, ftmac100_txpoll);
+      devif_poll(&priv->ft_dev, ftmac100_txpoll);
     }
 
   net_unlock();

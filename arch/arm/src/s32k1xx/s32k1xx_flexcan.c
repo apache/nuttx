@@ -1049,7 +1049,7 @@ static void s32k1xx_txdone_work(void *arg)
    */
 
   net_lock();
-  devif_timer(&priv->dev, 0, s32k1xx_txpoll);
+  devif_poll(&priv->dev, s32k1xx_txpoll);
   net_unlock();
 }
 
@@ -1406,7 +1406,7 @@ static void s32k1xx_txavail_work(void *arg)
            * new XMIT data.
            */
 
-          devif_timer(&priv->dev, 0, s32k1xx_txpoll);
+          devif_poll(&priv->dev, s32k1xx_txpoll);
         }
     }
 

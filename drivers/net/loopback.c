@@ -37,7 +37,6 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
@@ -60,12 +59,6 @@
 #  error Worker thread support is required (CONFIG_SCHED_WORKQUEUE)
 #endif
 
-/* TX poll delay = 1 seconds.
- * CLK_TCK is the number of clock ticks per second
- */
-
-#define LO_WDDELAY   (1*CLK_TCK)
-
 /* This is a helper pointer for accessing the contents of the IP header */
 
 #define IPv4BUF ((FAR struct ipv4_hdr_s *)priv->lo_dev.d_buf)
@@ -83,7 +76,6 @@ struct lo_driver_s
 {
   bool lo_bifup;               /* true:ifup false:ifdown */
   bool lo_txdone;              /* One RX packet was looped back */
-  struct wdog_s lo_polldog;    /* TX poll timer */
   struct work_s lo_work;       /* For deferring poll work to the work queue */
 
   /* This holds the information visible to the NuttX network */
@@ -105,8 +97,6 @@ static uint8_t g_iobuffer[NET_LO_PKTSIZE + CONFIG_NET_GUARDSIZE];
 /* Polling logic */
 
 static int  lo_txpoll(FAR struct net_driver_s *dev);
-static void lo_poll_work(FAR void *arg);
-static void lo_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -128,8 +118,8 @@ static int lo_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
  *
  * Description:
  *   Check if the network has any outgoing packets ready to send.  This is
- *   a callback from devif_poll() or devif_timer().  devif_poll() will be
- *   called only during normal TX polling.
+ *   a callback from devif_poll().  devif_poll() will be called only during
+ *   normal TX polling.
  *
  * Input Parameters:
  *   dev - Reference to the NuttX driver state structure
@@ -198,75 +188,6 @@ static int lo_txpoll(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Name: lo_poll_work
- *
- * Description:
- *   Perform periodic polling from the worker thread
- *
- * Input Parameters:
- *   arg - The argument passed when work_queue() as called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   The network is locked
- *
- ****************************************************************************/
-
-static void lo_poll_work(FAR void *arg)
-{
-  FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)arg;
-
-  /* Perform the poll */
-
-  net_lock();
-  priv->lo_txdone = false;
-  devif_timer(&priv->lo_dev, LO_WDDELAY, lo_txpoll);
-
-  /* Was something received and looped back? */
-
-  while (priv->lo_txdone)
-    {
-      /* Yes, poll again for more TX data */
-
-      priv->lo_txdone = false;
-      devif_poll(&priv->lo_dev, lo_txpoll);
-    }
-
-  /* Setup the watchdog poll timer again */
-
-  wd_start(&priv->lo_polldog, LO_WDDELAY, lo_poll_expiry, (wdparm_t)priv);
-  net_unlock();
-}
-
-/****************************************************************************
- * Name: lo_poll_expiry
- *
- * Description:
- *   Periodic timer handler.  Called from the timer interrupt handler.
- *
- * Input Parameters:
- *   arg  - The argument
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static void lo_poll_expiry(wdparm_t arg)
-{
-  FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)arg;
-
-  /* Schedule to perform the interrupt processing on the worker thread. */
-
-  work_queue(LPWORK, &priv->lo_work, lo_poll_work, priv, 0);
-}
-
-/****************************************************************************
  * Name: lo_ifup
  *
  * Description:
@@ -300,11 +221,6 @@ static int lo_ifup(FAR struct net_driver_s *dev)
         NTOHS(dev->d_ipv6addr[6]), NTOHS(dev->d_ipv6addr[7]));
 #endif
 
-  /* Set and activate a timer process */
-
-  wd_start(&priv->lo_polldog, LO_WDDELAY,
-           lo_poll_expiry, (wdparm_t)priv);
-
   priv->lo_bifup = true;
   netdev_carrier_on(dev);
   return OK;
@@ -331,10 +247,6 @@ static int lo_ifdown(FAR struct net_driver_s *dev)
   FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)dev->d_private;
 
   netdev_carrier_off(dev);
-
-  /* Cancel the TX poll timer and TX timeout timers */
-
-  wd_cancel(&priv->lo_polldog);
 
   /* Mark the device "down" */
 
@@ -373,7 +285,7 @@ static void lo_txavail_work(FAR void *arg)
           /* If so, then poll the network for new XMIT data */
 
           priv->lo_txdone = false;
-          devif_timer(&priv->lo_dev, 0, lo_txpoll);
+          devif_poll(&priv->lo_dev, lo_txpoll);
         }
       while (priv->lo_txdone);
     }

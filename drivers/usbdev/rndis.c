@@ -46,7 +46,6 @@
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
 #include <nuttx/usb/rndis.h>
-#include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 
 #ifdef CONFIG_RNDIS_BOARD_SERIALSTR
@@ -94,12 +93,6 @@
 #define RNDIS_BUFFER_SIZE       CONFIG_NET_ETH_PKTSIZE
 #define RNDIS_BUFFER_COUNT      4
 
-/* TX poll delay = 1 seconds.
- * CLK_TCK is the number of clock ticks per second
- */
-
-#define RNDIS_WDDELAY           (1*CLK_TCK)
-
 /* Work queue to use for network operations. LPWORK should be used here */
 
 #define ETHWORK                 LPWORK
@@ -145,7 +138,6 @@ struct rndis_dev_s
   struct rndis_req_s wrreqs[CONFIG_RNDIS_NWRREQS];
 
   struct work_s rxwork;                  /* Worker for dispatching RX packets */
-  struct wdog_s txpoll;                  /* TX poll watchdog */
   struct work_s pollwork;                /* TX poll worker */
 
   bool registered;                       /* Has netdev_register() been called */
@@ -221,7 +213,6 @@ static int rndis_ifdown(FAR struct net_driver_s *dev);
 static int rndis_txavail(FAR struct net_driver_s *dev);
 static int rndis_transmit(FAR struct rndis_dev_s *priv);
 static int rndis_txpoll(FAR struct net_driver_s *dev);
-static void rndis_polltimer(wdparm_t arg);
 
 /* usbclass callbacks */
 
@@ -1067,62 +1058,6 @@ static int rndis_transmit(FAR struct rndis_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: rndis_pollworker
- *
- * Description:
- *   Worker function called by txpoll worker.
- *
- ****************************************************************************/
-
-static void rndis_pollworker(FAR void *arg)
-{
-  FAR struct rndis_dev_s *priv = (struct rndis_dev_s *)arg;
-
-  DEBUGASSERT(priv != NULL);
-
-  net_lock();
-
-  if (rndis_allocnetreq(priv))
-    {
-      devif_timer(&priv->netdev, RNDIS_WDDELAY, rndis_txpoll);
-
-      if (priv->net_req != NULL)
-        {
-          rndis_freenetreq(priv);
-        }
-    }
-
-  net_unlock();
-}
-
-/****************************************************************************
- * Name: rndis_polltimer
- *
- * Description:
- *   Network poll watchdog timer callback
- *
- ****************************************************************************/
-
-static void rndis_polltimer(wdparm_t arg)
-{
-  FAR struct rndis_dev_s *priv = (FAR struct rndis_dev_s *)arg;
-  int ret;
-
-  if (work_available(&priv->pollwork))
-    {
-      ret = work_queue(ETHWORK, &priv->pollwork, rndis_pollworker,
-                       (FAR void *)priv, 0);
-      DEBUGASSERT(ret == OK);
-      UNUSED(ret);
-    }
-
-  /* Setup the watchdog poll timer again */
-
-  wd_start(&priv->txpoll, RNDIS_WDDELAY,
-           rndis_polltimer, (wdparm_t)arg);
-}
-
-/****************************************************************************
  * Name: rndis_ifup
  *
  * Description:
@@ -1132,10 +1067,6 @@ static void rndis_polltimer(wdparm_t arg)
 
 static int rndis_ifup(FAR struct net_driver_s *dev)
 {
-  FAR struct rndis_dev_s *priv = (FAR struct rndis_dev_s *)dev->d_private;
-
-  wd_start(&priv->txpoll, RNDIS_WDDELAY,
-           rndis_polltimer, (wdparm_t)priv);
   return OK;
 }
 
@@ -1149,9 +1080,6 @@ static int rndis_ifup(FAR struct net_driver_s *dev)
 
 static int rndis_ifdown(FAR struct net_driver_s *dev)
 {
-  FAR struct rndis_dev_s *priv = (FAR struct rndis_dev_s *)dev->d_private;
-
-  wd_cancel(&priv->txpoll);
   return OK;
 }
 
@@ -1171,7 +1099,7 @@ static void rndis_txavail_work(FAR void *arg)
 
   if (rndis_allocnetreq(priv))
     {
-      devif_timer(&priv->netdev, 0, rndis_txpoll);
+      devif_poll(&priv->netdev, rndis_txpoll);
       if (priv->net_req != NULL)
         {
           rndis_freenetreq(priv);
