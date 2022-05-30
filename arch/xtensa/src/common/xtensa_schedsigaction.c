@@ -146,13 +146,14 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                */
 
               tcb->xcp.sigdeliver  = sigdeliver;
-              CURRENT_REGS[REG_PC] = (uint32_t)_xtensa_sig_trampoline;
+              CURRENT_REGS[REG_PC] = (uint32_t)xtensa_sig_deliver;
 #ifdef __XTENSA_CALL0_ABI__
               CURRENT_REGS[REG_PS] = (uint32_t)
                   (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
 #else
               CURRENT_REGS[REG_PS] = (uint32_t)
-                  (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
+                  (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM |
+                   PS_WOE | PS_CALLINC(1));
 #endif
 
               CURRENT_REGS[REG_A1] = (uint32_t)CURRENT_REGS +
@@ -191,13 +192,14 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * disabled
            */
 
-          tcb->xcp.regs[REG_PC] = (uint32_t)_xtensa_sig_trampoline;
+          tcb->xcp.regs[REG_PC] = (uint32_t)xtensa_sig_deliver;
 #ifdef __XTENSA_CALL0_ABI__
           tcb->xcp.regs[REG_PS] = (uint32_t)
               (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
 #else
           tcb->xcp.regs[REG_PS] = (uint32_t)
-              (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
+              (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM |
+               PS_WOE | PS_CALLINC(1));
 #endif
         }
     }
@@ -296,13 +298,14 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    * disabled
                    */
 
-                  tcb->xcp.regs[REG_PC] = (uint32_t)_xtensa_sig_trampoline;
+                  tcb->xcp.regs[REG_PC] = (uint32_t)xtensa_sig_deliver;
 #ifdef __XTENSA_CALL0_ABI__
                   tcb->xcp.regs[REG_PS] = (uint32_t)
                       (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
 #else
                   tcb->xcp.regs[REG_PS] = (uint32_t)
-                      (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
+                      (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM |
+                       PS_WOE | PS_CALLINC(1));
 #endif
                 }
               else
@@ -337,13 +340,14 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    * disabled
                    */
 
-                  CURRENT_REGS[REG_PC] = (uint32_t)_xtensa_sig_trampoline;
+                  CURRENT_REGS[REG_PC] = (uint32_t)xtensa_sig_deliver;
 #ifdef __XTENSA_CALL0_ABI__
                   CURRENT_REGS[REG_PS] = (uint32_t)
                       (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
 #else
                   CURRENT_REGS[REG_PS] = (uint32_t)
-                      (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
+                      (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM |
+                       PS_WOE | PS_CALLINC(1));
 #endif
                 }
 
@@ -410,13 +414,14 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * disabled
            */
 
-          tcb->xcp.regs[REG_PC] = (uint32_t)_xtensa_sig_trampoline;
+          tcb->xcp.regs[REG_PC] = (uint32_t)xtensa_sig_deliver;
 #ifdef __XTENSA_CALL0_ABI__
           tcb->xcp.regs[REG_PS] = (uint32_t)
               (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
 #else
           tcb->xcp.regs[REG_PS] = (uint32_t)
-              (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
+              (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM |
+               PS_WOE | PS_CALLINC(1));
 #endif
         }
     }

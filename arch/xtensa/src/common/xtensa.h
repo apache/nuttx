@@ -269,7 +269,6 @@ void xtensa_pause_handler(void);
 
 /* Signals */
 
-void _xtensa_sig_trampoline(void);
 void xtensa_sig_deliver(void);
 
 #ifdef CONFIG_LIB_SYSCALL
