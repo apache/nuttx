@@ -53,5 +53,5 @@ int wctob(wint_t wc)
       return EOF;
     }
 
-  return wctomb(pmb, wc) == 1 ? (int)pmb[0] : EOF;
+  return wctomb(pmb, wc) == 1 ? pmb[0] : EOF;
 }
