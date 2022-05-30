@@ -18,36 +18,14 @@
 #
 ############################################################################
 
+include common/Make.defs
+
 # Specify our HEAD assembly file.  This will be linked as
 # the first object file, so it will appear at address 0
 HEAD_ASRC = rv32m1_head.S
 
 # Specify our general Assembly files
-CMN_ASRCS = riscv_vectors.S
-
-# Specify C code within the common directory to be included
-CMN_CSRCS += riscv_initialize.c riscv_swint.c riscv_doirq.c riscv_exception.c
-CMN_CSRCS += riscv_allocateheap.c riscv_createstack.c riscv_exit.c
-CMN_CSRCS += riscv_assert.c riscv_blocktask.c riscv_copystate.c riscv_initialstate.c
-CMN_CSRCS += riscv_modifyreg32.c riscv_puts.c
-CMN_CSRCS += riscv_releasepending.c riscv_reprioritizertr.c
-CMN_CSRCS += riscv_releasestack.c riscv_stackframe.c riscv_schedulesigaction.c
-CMN_CSRCS += riscv_sigdeliver.c riscv_unblocktask.c riscv_usestack.c
-CMN_CSRCS += riscv_idle.c riscv_tcbinfo.c riscv_getnewintctx.c
-CMN_CSRCS += riscv_saveusercontext.c
-
-ifeq ($(CONFIG_SCHED_BACKTRACE),y)
-CMN_CSRCS += riscv_backtrace.c
-endif
-
-ifeq ($(CONFIG_STACK_COLORATION),y)
-CMN_CSRCS += riscv_checkstack.c
-endif
-
-ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
-CMN_ASRCS += vfork.S
-CMN_CSRCS += riscv_vfork.c
-endif
+CMN_ASRCS := $(filter-out riscv_exception_common.S,$(CMN_ASRCS))
 
 # Specify our C code within this directory to be included
 CHIP_CSRCS  = rv32m1_allocateheap.c rv32m1_clockconfig.c rv32m1_gpio.c

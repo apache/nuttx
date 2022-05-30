@@ -19,6 +19,7 @@
 ############################################################################
 
 include chip/Bootloader.mk
+include common/Make.defs
 
 # Specify our HEAD assembly file.  This will be linked as
 # the first object file, so it will appear at address 0
@@ -29,36 +30,7 @@ CHIP_ASRCS = esp32c3_vectors.S
 
 # Specify our general Assembly files
 
-CMN_ASRCS = riscv_exception_common.S
-
-# Specify C code within the common directory to be included
-
-CMN_CSRCS += riscv_initialize.c riscv_swint.c
-CMN_CSRCS += riscv_allocateheap.c riscv_createstack.c riscv_exit.c riscv_exception.c
-CMN_CSRCS += riscv_assert.c riscv_blocktask.c riscv_copystate.c riscv_initialstate.c
-CMN_CSRCS += riscv_modifyreg32.c riscv_puts.c riscv_mdelay.c
-CMN_CSRCS += riscv_releasepending.c riscv_reprioritizertr.c
-CMN_CSRCS += riscv_releasestack.c riscv_stackframe.c riscv_schedulesigaction.c
-CMN_CSRCS += riscv_sigdeliver.c riscv_udelay.c riscv_unblocktask.c riscv_usestack.c
-CMN_CSRCS += riscv_tcbinfo.c riscv_getnewintctx.c riscv_doirq.c
-CMN_CSRCS += riscv_saveusercontext.c
-
-ifeq ($(CONFIG_SCHED_BACKTRACE),y)
-CMN_CSRCS += riscv_backtrace.c
-endif
-
-ifeq ($(CONFIG_STACK_COLORATION),y)
-CMN_CSRCS += riscv_checkstack.c
-endif
-
-ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
-CMN_ASRCS += vfork.S
-CMN_CSRCS += riscv_vfork.c
-endif
-
-ifeq ($(CONFIG_ARCH_USE_MPU),y)
-CMN_CSRCS += riscv_pmp.c
-endif
+CMN_ASRCS := $(filter-out riscv_vectors.S,$(CMN_ASRCS))
 
 # Specify our C code within this directory to be included
 
@@ -71,8 +43,6 @@ CHIP_CSRCS += esp32c3_uid.c
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += esp32c3_userspace.c
-CMN_UASRCS += riscv_signal_handler.S
-CMN_CSRCS  += riscv_task_start.c riscv_pthread_start.c riscv_signal_dispatch.c
 endif
 
 ifeq ($(CONFIG_SCHED_TICKLESS),y)
