@@ -18,52 +18,12 @@
 #
 ############################################################################
 
-# Specify our general Assembly files
-
-CMN_ASRCS += riscv_vectors.S riscv_exception_common.S riscv_testset.S
+include common/Make.defs
 
 ifeq ($(CONFIG_ARCH_USE_S_MODE),y)
 CMN_ASRCS += mpfs_shead.S
 else
 CMN_ASRCS += mpfs_head.S
-endif
-
-ifeq ($(CONFIG_BUILD_KERNEL),y)
-STARTUP_OBJS = crt0$(OBJEXT)
-endif
-
-# Specify C code within the common directory to be included
-CMN_CSRCS += riscv_initialize.c riscv_swint.c
-CMN_CSRCS += riscv_createstack.c riscv_exit.c riscv_exception.c
-CMN_CSRCS += riscv_assert.c riscv_blocktask.c riscv_copystate.c riscv_initialstate.c
-CMN_CSRCS += riscv_modifyreg32.c riscv_puts.c
-CMN_CSRCS += riscv_releasepending.c riscv_reprioritizertr.c
-CMN_CSRCS += riscv_releasestack.c riscv_stackframe.c riscv_schedulesigaction.c
-CMN_CSRCS += riscv_sigdeliver.c riscv_unblocktask.c riscv_usestack.c
-CMN_CSRCS += riscv_mdelay.c riscv_udelay.c
-CMN_CSRCS += riscv_idle.c riscv_tcbinfo.c riscv_getnewintctx.c
-CMN_CSRCS += riscv_doirq.c riscv_mtimer.c
-CMN_CSRCS += riscv_saveusercontext.c
-
-# Specify ASM code within the common directory to be included
-CMN_ASRCS += riscv_mhartid.S
-
-ifeq ($(CONFIG_SCHED_BACKTRACE),y)
-CMN_CSRCS += riscv_backtrace.c
-endif
-
-ifeq ($(CONFIG_STACK_COLORATION),y)
-CMN_CSRCS += riscv_checkstack.c
-endif
-
-ifeq ($(CONFIG_ARCH_FPU),y)
-CMN_ASRCS += riscv_fpu.S
-CMN_CSRCS += riscv_fpucmp.c
-endif
-
-ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
-CMN_ASRCS += vfork.S
-CMN_CSRCS += riscv_vfork.c
 endif
 
 # Specify our C code within this directory to be included
@@ -80,33 +40,10 @@ endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += mpfs_userspace.c
-CMN_UASRCS += riscv_signal_handler.S
 endif
 
 ifeq ($(CONFIG_BUILD_KERNEL),y)
 CHIP_CSRCS += mpfs_mm_init.c
-endif
-
-ifneq ($(CONFIG_BUILD_FLAT),y)
-CMN_CSRCS += riscv_task_start.c
-CMN_CSRCS += riscv_pthread_start.c
-CMN_CSRCS += riscv_signal_dispatch.c
-endif
-
-ifeq ($(CONFIG_ARCH_USE_MPU),y)
-CMN_CSRCS += riscv_pmp.c
-endif
-
-ifeq ($(CONFIG_ARCH_USE_MMU),y)
-CMN_CSRCS += riscv_mmu.c
-endif
-
-ifeq ($(CONFIG_ARCH_KERNEL_STACK),y)
-CMN_CSRCS += riscv_addrenv_kstack.c
-endif
-
-ifeq ($(CONFIG_ARCH_ADDRENV),y)
-CMN_CSRCS += riscv_addrenv.c riscv_pgalloc.c riscv_addrenv_perms.c
 endif
 
 ifeq ($(CONFIG_MM_PGALLOC),y)
