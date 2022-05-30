@@ -57,7 +57,7 @@ FAR wchar_t *wmemset(FAR wchar_t *s, wchar_t c, size_t n)
   FAR wchar_t *p;
   size_t i;
 
-  p = (FAR wchar_t *)s;
+  p = s;
   for (i = 0; i < n; i++)
     {
       *p = c;
