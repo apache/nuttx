@@ -2539,7 +2539,7 @@ int gh3020_register(int devno, FAR const struct gh3020_config_s *config)
   /* Configure interrupt pin */
 
   ret = IOEXP_SETDIRECTION(priv->config->ioedev, priv->config->intpin,
-                           IOEXPANDER_DIRECTION_IN_PULLDOWN);
+                           IOEXPANDER_DIRECTION_IN);
   if (ret < 0)
     {
       snerr("Failed to set direction: %d\n", ret);
