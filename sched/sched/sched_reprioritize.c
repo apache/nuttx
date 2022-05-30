@@ -65,10 +65,7 @@
 
 int nxsched_reprioritize(FAR struct tcb_s *tcb, int sched_priority)
 {
-  /* This function is equivalent to nxsched_set_priority() BUT it also has
-   * the side effect of discarding all priority inheritance history.  This
-   * is done only on explicit, user-initiated reprioritization.
-   */
+  /* This function is equivalent to nxsched_set_priority() */
 
   int ret = nxsched_set_priority(tcb, sched_priority);
   if (ret == 0)
@@ -79,10 +76,18 @@ int nxsched_reprioritize(FAR struct tcb_s *tcb, int sched_priority)
 
       tcb->base_priority  = (uint8_t)sched_priority;
 
-      /* Discard any pending reprioritizations as well */
-
 #if CONFIG_SEM_NNESTPRIO > 0
-      tcb->npend_reprio   = 0;
+      /* Discard any boosts that are above our new base priority */
+
+      for (int i = 0; i < tcb->nsem_boosts; i++)
+        {
+          if (tcb->sem_boosts[i].priority <= sched_priority)
+            {
+              tcb->sem_boosts[i] = tcb->sem_boosts[tcb->nsem_boosts - 1];
+              tcb->nsem_boosts--;
+              i--; /* Re check the current index */
+            }
+        }
 #endif
     }
 

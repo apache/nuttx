@@ -166,7 +166,7 @@ int nxtask_restart(pid_t pid)
 #ifdef CONFIG_PRIORITY_INHERITANCE
   tcb->cmn.base_priority = tcb->cmn.init_priority;
 #  if CONFIG_SEM_NNESTPRIO > 0
-  tcb->cmn.npend_reprio = 0;
+  tcb->cmn.nsem_boosts = 0;
 #  endif
 #endif
 
