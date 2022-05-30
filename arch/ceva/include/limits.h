@@ -37,4 +37,15 @@
 #define PTR_MAX     LONG_MAX
 #define UPTR_MAX    ULONG_MAX
 
+#if !defined(__WCHAR_TYPE__)
+#  define WCHAR_MIN INT_MIN
+#  define WCHAR_MAX INT_MAX
+#elif defined(__WCHAR_UNSIGNED__)
+#  define WCHAR_MIN 0
+#  define WCHAR_MAX __WCHAR_MAX__
+#else
+#  define WCHAR_MIN (-__WCHAR_MAX__ - 1)
+#  define WCHAR_MAX __WCHAR_MAX__
+#endif
+
 #endif /* __ARCH_CEVA_INCLUDE_LIMITS_H */
