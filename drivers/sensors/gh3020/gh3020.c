@@ -889,6 +889,11 @@ static void gh3020_push_data(FAR struct gh3020_dev_s *priv)
                                              * priv->ppgdatacnt[idx]);
         }
     }
+
+  GH3020_DEBUG_LOG("[gh3020] push ppgx-cnt = 0-%u, 1-%u, 2-%u, 3-%u, 5-%u\n",
+                   priv->ppgdatacnt[0], priv->ppgdatacnt[1],
+                   priv->ppgdatacnt[2], priv->ppgdatacnt[3],
+                   priv->ppgdatacnt[5]);
 }
 
 /****************************************************************************
@@ -914,6 +919,9 @@ static void gh3020_restart_new_fifowtm(FAR struct gh3020_dev_s *priv,
                                        uint16_t fifowtm)
 {
   uint8_t idx;
+
+  GH3020_DEBUG_LOG("[gh3020] restart, interval %lu, new wtm %u(data), old "
+                   "wtm %u(data)\n", priv->interval, fifowtm, priv->fifowtm);
 
   /* Either old or new FIFO watermark is 0 while the other one is not 0,
    * reading mode should switch between interrupt mode and polling mode.
@@ -1086,6 +1094,8 @@ static void gh3020_update_sensor(FAR struct gh3020_dev_s *priv)
               if (sensor->activating == true)
                 {
                   SCHED_NOTE_PRINTF("activate ppgq%u, rate=%u", idx, rate);
+                  GH3020_DEBUG_LOG("[gh3020] update ppg%u activate rate%u\n",
+                                   idx, rate);
                 }
 
               sensor->activating = false;
@@ -1097,6 +1107,7 @@ static void gh3020_update_sensor(FAR struct gh3020_dev_s *priv)
               sensor->inactivating = false;
               sensor->activated = false;
               SCHED_NOTE_PRINTF("inactivate ppgq%u", idx);
+              GH3020_DEBUG_LOG("[gh3020] update ppg%u inactivate\n", idx);
             }
         }
 
@@ -1138,6 +1149,7 @@ static void gh3020_update_sensor(FAR struct gh3020_dev_s *priv)
             }
 
           SCHED_NOTE_PRINTF("GH3020 stops");
+          GH3020_DEBUG_LOG("[gh3020] device stops\n");
         }
     }
 }
@@ -1241,13 +1253,13 @@ static int gh3020_activate(FAR struct file *filep,
   FAR struct gh3020_dev_s *priv;
   uint16_t rate;
 
-#ifdef CONFIG_FACTEST_SENSORS_GH3020
-  syslog(LOG_INFO, "[gh3020] ppg%u activate %d\n", sensor->chidx, enable);
-#endif
-
   DEBUGASSERT(sensor != NULL && sensor->dev != NULL);
 
   priv = sensor->dev;
+  GH3020_DEBUG_LOG("[gh3020] ppg%u activate %d, now %d\n", sensor->chidx,
+                   enable, sensor->activated);
+  GH3020_FACTEST_LOG("[gh3020] ppg%u activate %d, now %d\n", sensor->chidx,
+                     enable, sensor->activated);
 
 #ifdef CONFIG_FACTEST_SENSORS_GH3020
   if (priv->factest_mode == true)
@@ -1372,6 +1384,8 @@ static int gh3020_activate(FAR struct file *filep,
               SCHED_NOTE_PRINTF("activate ppgq%u, rate=%u, GH3020 starts"
                                 ", fifowtm=%u", sensor->chidx, rate,
                                 priv->fifowtm);
+              GH3020_DEBUG_LOG("activate ppg%u, rate=%u, GH3020 starts, fifo"
+                               "wtm=%u", sensor->chidx, rate, priv->fifowtm);
             }
         }
     }
@@ -1433,6 +1447,9 @@ static int gh3020_batch(FAR struct file *filep,
       fifowtm = GH3020_CEILING(*latency_us, sensor->interval);
       *latency_us = fifowtm * sensor->interval;
     }
+
+  GH3020_DEBUG_LOG("[gh3020] set ppg%u batch actual=%lu\n", sensor->chidx,
+                   *latency_us);
 
   /* Do something only when the batch changed. */
 
@@ -1510,6 +1527,8 @@ static int gh3020_set_interval(FAR struct file *filep,
     }
 
   *period_us = GH3020_ONE_SECOND / freq;
+  GH3020_DEBUG_LOG("[gh3020] set ppg%d interval actual=%lu\n", sensor->chidx,
+                   *period_us);
 
   /* Do something only when the interval changed. */
 
@@ -1771,6 +1790,7 @@ static void gh3020_worker_intrpt(FAR void *arg)
   /* Sanity check */
 
   DEBUGASSERT(priv != NULL);
+  GH3020_DEBUG_LOG("[gh3020] interrupt worker, ts=%llu\n", priv->timestamp);
 
   /* Enable entering next interrupt. */
 
@@ -1830,6 +1850,8 @@ static void gh3020_worker_poll(FAR void *arg)
       work_queue(HPWORK, &priv->work_poll, gh3020_worker_poll, priv,
                  priv->interval / USEC_PER_TICK);
     }
+
+  GH3020_DEBUG_LOG("[gh3020] poll worker, ts=%llu\n", priv->timestamp);
 
   /* Start new counter for each channel. */
 
@@ -2337,6 +2359,7 @@ void gh3020_get_ppg_data(FAR const struct gh3020_frameinfo_s *pframeinfo)
         return;
     }
 
+  GH3020_DEBUG_LOG("[gh3020] get ppg%u data hook\n", idx);
   if ((g_priv->sensor[idx].activated == true  ||
       g_priv->dark_calibr < GH3020_DARK_CALIBR_NUM) &&
       g_priv->ppgdatacnt[idx] < GH3020_BATCH_NUMBER)

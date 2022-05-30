@@ -171,6 +171,13 @@ config SENSORS_GH3020
 	---help---
 		Enable support for the Goodix GH3020 PPG sensor
 
+config SENSORS_GH3020_DEBUG_LOG
+	bool "Print debug log of GH3020"
+	default n
+	depends on SENSORS_GH3020
+	---help---
+		Print the debug log of GH3020 with syslog.
+
 config SENSORS_LSM6DSO
 	bool "STMicro LSM6DSO support"
 	default n

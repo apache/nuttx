@@ -29,7 +29,7 @@
 #include <sys/types.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/sensors/sensor.h>
-#include <debug.h>
+#include <syslog.h>
 #include "gh3x2x_drv.h"
 #include "gh3020_def.h"
 
@@ -46,6 +46,24 @@
 #define GH3020_PPG4_SENSOR_IDX   4          /* PPG4 (green fixed) */
 #define GH3020_PPG5_SENSOR_IDX   5          /* PPG5 (IR fixed). */
 #define GH3020_SENSOR_NUM        6          /* Total PPG sensors number. */
+
+/* Macros */
+
+/* Print log with syslog if debug config enabled, otherwise don't print. */
+
+#if defined(CONFIG_SENSORS_GH3020_DEBUG_LOG)
+#define GH3020_DEBUG_LOG(format, ...)   syslog(LOG_INFO, format, ##__VA_ARGS__)
+#else
+#define GH3020_DEBUG_LOG(format, ...)
+#endif
+
+/* Print log with syslog if factest config enabled, otherwise don't print. */
+
+#if defined(CONFIG_FACTEST_SENSORS_GH3020)
+#define GH3020_FACTEST_LOG(format, ...) syslog(LOG_INFO, format, ##__VA_ARGS__)
+#else
+#define GH3020_FACTEST_LOG(format, ...)
+#endif
 
 /****************************************************************************
  * Public Types

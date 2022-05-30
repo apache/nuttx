@@ -1488,6 +1488,7 @@ void gh3020_fifo_process(void)
           || (GH3X2X_GetSoftEvent() & (GH3X2X_SOFT_EVENT_NEED_FORCE_READ_FIFO|GH3X2X_SOFT_EVENT_NEED_TRY_READ_FIFO)))
         {
           uint16_t usFifoByteNum = ((uint16_t)4)*gh3020_spi_readreg(GH3020_REG_INT_FIFO_UR); //read fifo use
+          GH3020_DEBUG_LOG("[gh3020] fifo byte=%u\n", usFifoByteNum);
 
           if (g_uchGh3x2xIntMode == __NORMAL_INT_PROCESS_MODE__)
             {
@@ -1511,6 +1512,7 @@ void gh3020_fifo_process(void)
           GH3X2X_ClearSoftEvent(GH3X2X_SOFT_EVENT_NEED_FORCE_READ_FIFO|GH3X2X_SOFT_EVENT_NEED_TRY_READ_FIFO);
           if (usFifoByteNum != 0)
           {
+              GH3020_DEBUG_LOG("[gh3020] fifo read %uB\n", usFifoByteNum);
               if (GH3X2X_RET_READ_FIFO_CONTINUE ==
                   GH3X2X_ReadFifodata(g_uchGh3x2xReadRawdataBuffer,
                                       &g_usGh3x2xReadRawdataLen, usFifoByteNum))
