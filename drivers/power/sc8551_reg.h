@@ -697,13 +697,13 @@
 #define SC8551_SS_TIMEOUT_SET_MASK          0xE0
 #define SC8551_SS_TIMEOUT_SET_SHIFT         5
 #define SC8551_SS_TIMEOUT_DISABLE           0
-#define SC8551_SS_TIMEOUT_12P5MS            1
-#define SC8551_SS_TIMEOUT_25MS              2
-#define SC8551_SS_TIMEOUT_50MS              3
-#define SC8551_SS_TIMEOUT_100MS             4
-#define SC8551_SS_TIMEOUT_400MS             5
-#define SC8551_SS_TIMEOUT_1500MS            6
-#define SC8551_SS_TIMEOUT_100000MS          7
+#define SC8551_SS_TIMEOUT_40MS              1
+#define SC8551_SS_TIMEOUT_80MS              2
+#define SC8551_SS_TIMEOUT_320MS             3
+#define SC8551_SS_TIMEOUT_1S280MS           4
+#define SC8551_SS_TIMEOUT_5S120MS           5
+#define SC8551_SS_TIMEOUT_20S480MS          6
+#define SC8551_SS_TIMEOUT_81S920MS          7
 
 #define SC8551_EN_REGULATION_MASK           0x10
 #define SC8551_EN_REGULATION_SHIFT          4

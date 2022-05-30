@@ -224,7 +224,8 @@ static int sc8551_getreg8(FAR struct sc8551_dev_s *priv, uint8_t regaddr,
       else
         {
           nxsig_usleep(1);
-          baterr("ERROR: i2c transfer failed! err: %d retries:%d\n", err,retries);
+          baterr("ERROR: i2c transfer failed! err: %d retries:%d\n",
+                  err, retries);
         }
     }
 
@@ -539,26 +540,26 @@ static int sc8551_set_ss_timeout(FAR struct sc8551_dev_s *priv, int timeout)
       case 0:
         val = SC8551_SS_TIMEOUT_DISABLE;
       break;
-      case 12:
-        val = SC8551_SS_TIMEOUT_12P5MS;
+      case 40:
+        val = SC8551_SS_TIMEOUT_40MS;
       break;
-      case 25:
-        val = SC8551_SS_TIMEOUT_25MS;
+      case 80:
+        val = SC8551_SS_TIMEOUT_80MS;
       break;
-      case 50:
-        val = SC8551_SS_TIMEOUT_50MS;
+      case 320:
+        val = SC8551_SS_TIMEOUT_320MS;
       break;
-      case 100:
-        val = SC8551_SS_TIMEOUT_100MS;
+      case 1280:
+        val = SC8551_SS_TIMEOUT_1S280MS;
       break;
-      case 400:
-        val = SC8551_SS_TIMEOUT_400MS;
+      case 5120:
+        val = SC8551_SS_TIMEOUT_5S120MS;
       break;
-      case 1500:
-        val = SC8551_SS_TIMEOUT_1500MS;
+      case 20480:
+        val = SC8551_SS_TIMEOUT_20S480MS;
       break;
-      case 100000:
-        val = SC8551_SS_TIMEOUT_100000MS;
+      case 81920:
+        val = SC8551_SS_TIMEOUT_81S920MS;
       break;
       default:
         val = SC8551_SS_TIMEOUT_DISABLE;
@@ -1809,11 +1810,12 @@ static int sc8551_operate(FAR struct battery_charger_dev_s *dev,
         ret = sc8551_enable_charge(priv, false);
         break;
 
+      case BATIO_OPRTN_CHARGE:
+        ret = sc8551_enable_ibus_ucp(priv, (bool)value);
+        break;
+
       case BATIO_OPRTN_SYSON:
-        ret = sc8551_enable_ibus_ucp(priv, false);
         ret = sc8551_enable_charge(priv, true);
-        nxsig_usleep(SC8551_IBUSUCP_DELAY);
-        ret = sc8551_enable_ibus_ucp(priv, true);
         break;
 
       case BATIO_OPRTN_RESET:
@@ -2035,7 +2037,7 @@ FAR struct battery_charger_dev_s *
 
       /* Adjust timeout to rise to threshold */
 
-      ret = sc8551_set_ss_timeout(priv, 0);
+      ret = sc8551_set_ss_timeout(priv, 5120);
       if (ret < 0)
         {
           baterr("ERROR: Failed to Adjust timeout to \
