@@ -778,14 +778,7 @@ static int cps4019_interrupt_handler(FAR struct ioexpander_dev_s *dev,
 
   DEBUGASSERT(priv != NULL);
 
-  /* Task the worker with retrieving the latest sensor data. We should not
-   * do this in a interrupt since it might take too long. Also we cannot lock
-   * the I2C bus from within an interrupt.
-   */
-
   work_queue(LPWORK, &priv->work, cps4019_worker, priv, 0);
-  IOEXP_SETOPTION(priv->io_dev, priv->lower->int_pin,
-                      IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
 
   return OK;
 }
@@ -920,14 +913,6 @@ static void cps4019_worker(FAR void *arg)
   int ret;
 
   DEBUGASSERT(priv != NULL);
-
-  ret = IOEXP_SETOPTION(priv->io_dev, priv->lower->int_pin,
-                  IOEXPANDER_OPTION_INTCFG, (void *)IOEXPANDER_VAL_FALLING);
-  if (ret < 0)
-    {
-      baterr("Failed to set option: %d\n", ret);
-      IOEP_DETACH(priv->io_dev, cps4019_interrupt_handler);
-    }
 
   /* Read out the latest rx data */
 

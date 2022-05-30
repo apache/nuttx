@@ -1554,14 +1554,7 @@ static int sc8551_interrupt_handler(FAR struct ioexpander_dev_s *dev,
 
   DEBUGASSERT(priv != NULL);
 
-  /* Task the worker with retrieving the latest sensor data. We should not
-   * do this in a interrupt since it might take too long. Also we cannot lock
-   * the I2C bus from within an interrupt.
-   */
-
   work_queue(LPWORK, &priv->work, sc8551_worker, priv, 0);
-  IOEXP_SETOPTION(priv->ioedev, priv->pin,
-                      IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
 
   return OK;
 }
@@ -1598,14 +1591,6 @@ static void sc8551_worker(FAR void *arg)
   FAR struct sc8551_dev_s *priv = arg;
 
   DEBUGASSERT(priv != NULL);
-
-  ret = IOEXP_SETOPTION(priv->ioedev, priv->pin,
-              IOEXPANDER_OPTION_INTCFG, (FAR void *)IOEXPANDER_VAL_FALLING);
-  if (ret < 0)
-    {
-      baterr("ERROR: setting IOEXPANDER_OPTION_INTCFG! Error = %d\n", ret);
-      return;
-    }
 
   /* Read out the latest pump data */
 

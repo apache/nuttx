@@ -691,8 +691,6 @@ static int stwlc38_interrupt_handler(FAR struct ioexpander_dev_s *dev,
    */
 
   work_queue(LPWORK, &priv->work, stwlc38_worker, priv, 0);
-  IOEXP_SETOPTION(priv->io_dev, priv->lower->int_pin,
-                      IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
 
   return OK;
 }
@@ -839,13 +837,6 @@ static void stwlc38_worker(FAR void *arg)
   int ret;
 
   DEBUGASSERT(priv != NULL);
-  ret = IOEXP_SETOPTION(priv->io_dev, priv->lower->int_pin,
-                  IOEXPANDER_OPTION_INTCFG, (void *)IOEXPANDER_VAL_FALLING);
-  if (ret < 0)
-    {
-      baterr("Failed to set option: %d\n", ret);
-      IOEP_DETACH(priv->io_dev, stwlc38_interrupt_handler);
-    }
 
   /* Read out the latest rx data */
 
@@ -898,14 +889,6 @@ static void stwlc38_det_worker(FAR void *arg)
   int ret;
 
   DEBUGASSERT(priv != NULL);
-  ret = IOEXP_SETOPTION(priv->rpmsg_dev, priv->lower->detect_pin,
-                  IOEXPANDER_OPTION_INTCFG, (void *)IOEXPANDER_VAL_FALLING);
-  if (ret < 0)
-    {
-      baterr("Failed to set option: %d\n", ret);
-      IOEP_DETACH(priv->rpmsg_dev, stwlc38_det_interrupt_handler);
-    }
-
   if (priv->batt_state_flag == BATT_CHARGING_STAT_ENTER)
     {
       if (priv->rx_vout_off_flag)
@@ -1298,8 +1281,6 @@ static int stwlc38_det_interrupt_handler(FAR struct ioexpander_dev_s *dev,
   DEBUGASSERT(priv != NULL);
 
   work_queue(LPWORK, &priv->work, stwlc38_det_worker, priv, 0);
-  IOEXP_SETOPTION(priv->rpmsg_dev, priv->lower->detect_pin,
-                      IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
 
   return OK;
 }

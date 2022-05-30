@@ -1201,9 +1201,6 @@ static int cw2218_interrupt_handler(FAR struct ioexpander_dev_s *dev,
 
   work_queue(LPWORK, &priv->work, cw2218_interrupt_worker, priv, 0);
 
-  IOEXP_SETOPTION(priv->ioe, priv->pin,
-                  IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
-
   return OK;
 }
 
@@ -1279,14 +1276,6 @@ static void cw2218_interrupt_worker(FAR void *arg)
   int ret;
 
   DEBUGASSERT(priv != NULL);
-  ret = IOEXP_SETOPTION(priv->ioe, priv->pin,
-                        IOEXPANDER_OPTION_INTCFG,
-                        (FAR void *)IOEXPANDER_VAL_FALLING);
-  if (ret < 0)
-    {
-      baterr("Failed to set option: %d\n", ret);
-      IOEP_DETACH(priv->ioe, cw2218_interrupt_handler);
-    }
 
   battery_gauge_changed(&priv->dev, BATTERY_CAPACITY_CHANGED);
   battery_gauge_changed(&priv->dev, BATTERY_TEMPERATURE_CHANGED);
