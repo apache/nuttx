@@ -61,10 +61,6 @@
 #define WCHAR_MIN 0x0000
 #define WEOF      ((wint_t)-1)
 
-#ifndef NULL
-#  define NULL ((FAR void *)0)
-#endif
-
 #define wcsftime_l(s, m, f, t, l)   wcsftime(s, m, f, t)
 #define wcscasecmp_l(s1, s2, l)     wcscasecmp(s1, s2)
 #define wcsncasecmp_l(s1, s2, n, l) wcsncasecmp(s1, s2, n)

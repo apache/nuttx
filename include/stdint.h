@@ -145,21 +145,6 @@
 #  define UINTMAX_C(x)      UINT32_C(x)
 #endif
 
-/* Limits of Other Integer Types */
-
-#if 0
-#  define                   PTRDIFF_MIN
-#  define                   PTRDIFF_MAX
-#endif
-
-#if 0
-#  define                   WCHAR_MIN
-#  define                   WCHAR_MAX
-
-#  define                   WINT_MIN
-#  define                   WINT_MAX
-#endif
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
