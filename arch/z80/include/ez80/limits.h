@@ -37,11 +37,11 @@
 /* These could be different on machines where char is unsigned */
 
 #ifdef __CHAR_UNSIGNED__
-#define CHAR_MIN    0
-#define CHAR_MAX    UCHAR_MAX
+#  define CHAR_MIN  0
+#  define CHAR_MAX  UCHAR_MAX
 #else
-#define CHAR_MIN    SCHAR_MIN
-#define CHAR_MAX    SCHAR_MAX
+#  define CHAR_MIN  SCHAR_MIN
+#  define CHAR_MAX  SCHAR_MAX
 #endif
 
 #define SHRT_MIN    (-SHRT_MAX - 1)
@@ -67,17 +67,28 @@
 
 #define PTR_MIN     (-PTR_MAX - 1)
 #ifdef CONFIG_EZ80_Z80MODE
-#define PTR_MAX     32767
-#define UPTR_MAX    65535U
+#  define PTR_MAX   32767
+#  define UPTR_MAX  65535U
 #else
-#define PTR_MAX     8388607
-#define UPTR_MAX    16777215U
+#  define PTR_MAX   8388607
+#  define UPTR_MAX  16777215U
 #endif
 
 #ifdef __clang__
-#define LLONG_MIN       (-LLONG_MAX - 1)
-#define LLONG_MAX       9223372036854775807LL
-#define ULLONG_MAX      18446744073709551615ULL
+#  define LLONG_MIN  (-LLONG_MAX - 1)
+#  define LLONG_MAX  9223372036854775807LL
+#  define ULLONG_MAX 18446744073709551615ULL
+#endif
+
+#if !defined(__WCHAR_TYPE__)
+#  define WCHAR_MIN INT_MIN
+#  define WCHAR_MAX INT_MAX
+#elif defined(__WCHAR_UNSIGNED__)
+#  define WCHAR_MIN 0
+#  define WCHAR_MAX __WCHAR_MAX__
+#else
+#  define WCHAR_MIN (-__WCHAR_MAX__ - 1)
+#  define WCHAR_MAX __WCHAR_MAX__
 #endif
 
 #endif /* __ARCH_Z80_INCLUDE_EZ80_LIMITS_H */
