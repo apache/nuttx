@@ -51,7 +51,7 @@ int swprintf(FAR wchar_t *buf, size_t maxlen, FAR const wchar_t *fmt, ...)
   /* Initialize a memory stream to write to the buffer */
 
   lib_memoutstream((FAR struct lib_memoutstream_s *)&memoutstream,
-                   (FAR char *) buf, LIB_BUFLEN_UNKNOWN);
+                   (FAR char *)buf, maxlen);
 
   /* Then let lib_vsprintf do the real work */
 
