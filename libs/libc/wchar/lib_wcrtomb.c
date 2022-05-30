@@ -69,13 +69,6 @@ size_t wcrtomb(FAR char *s, wchar_t wc, FAR mbstate_t *ps)
       retval = wctomb(s, wc);
     }
 
-  if (retval == -1)
-    {
-      return (size_t)(-1);
-    }
-  else
-    {
-      return (size_t)retval;
-    }
+  return retval;
 }
 #endif
