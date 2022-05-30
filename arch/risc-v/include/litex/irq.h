@@ -35,7 +35,8 @@
 
 #define LITEX_IRQ_UART0    (RISCV_IRQ_MEXT + 1)
 #define LITEX_IRQ_TIMER0   (RISCV_IRQ_MEXT + 2)
-#define LITEX_IRQ_SDCARD   (RISCV_IRQ_MEXT + 3)
+#define LITEX_IRQ_ETHMAC   (RISCV_IRQ_MEXT + 3)
+#define LITEX_IRQ_SDCARD   (RISCV_IRQ_MEXT + 4)
 
 /* Total number of IRQs */
 
