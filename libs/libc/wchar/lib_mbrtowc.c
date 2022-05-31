@@ -57,15 +57,19 @@
 size_t mbrtowc(FAR wchar_t *pwc, FAR const char *s,
                size_t n, FAR mbstate_t *ps)
 {
-  int retval = 0;
+  FAR const char *e = s;
+  size_t retval = 0;
 
   if (s == NULL)
     {
-      retval = mbtowc(NULL, "", 1);
+      s = e = "";
+      n = 1;
     }
-  else
+
+  retval = mbsnrtowcs(pwc, &e, 1, n, ps);
+  if (retval == 1)
     {
-      retval = mbtowc(pwc, s, n);
+      retval = e - s;
     }
 
   return retval;
