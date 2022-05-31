@@ -131,7 +131,10 @@
 #define BMI270_DEFAULT_INTERVAL       40000      /* Default conversion interval(us) */
 #define BMI270_WAIT_TIME              10000      /* Sensor boot wait time(us) */
 #define BMI270_SET_TIME               500        /* Sensor boot wait time(us) */
+#define BMI270_CLEAR_WORKER_TIME      80000      /* Clear left worker(us) */
 #define BMI270_SCALE_SET_TIME         1000       /* Sensor wait time after scale set(us) */
+#define BMI270_LONG_DELAY             450        /* Delay after read/write(us) */
+#define BMI270_SHORT_DELAY            2          /* Delay after read/write(us) */
 
 /* Multi sensor index */
 
@@ -233,6 +236,15 @@
 #define BMI270_MAP_SIGN_NOT_INVERT    0x00       /* Map the axis sign to not invert */
 #define BMI270_MAP_SIGN_INVERT        0x01       /* Map the axis sign to invert */
 
+/* Weakup gesture config */
+
+#define BMI270_MIN_ANGLE_FOUCUS       1906       /* Cosine of minimum expected attitude change */
+#define BMI270_MIN_ANGLE_NONFOUCUS    1856       /* Cosine of minimum expected attitude change(non-focus)*/
+#define BMI270_MAX_TITLE_LR           128        /* Sine of the maximum allowed downward tilt angle in landscape right direction */
+#define BMI270_MAX_TITLE_LL           128        /* Sine of the maximum allowed downward tilt angle in landscape left direction */
+#define BMI270_MAX_TITLE_PD           22         /* Sine of the maximum allowed backward tilt angle in portrait down direction */
+#define BMI270_MAX_TITLE_PU           241        /* Sine of the maximum allowed downward tilt angle in portrait up direction */
+
 /* Device Register */
 
 #define BMI270_CHIP_ID                0x00       /* Chip identification code Register */
@@ -257,6 +269,7 @@
 #define BMI270_FIFO_CONFIG_0          0x48       /* FIFO frame content configuration */
 #define BMI270_FIFO_CONFIG_1          0x49       /* FIFO frame content configuration */
 #define BMI270_INT1_IO_CTRL           0x53       /* Configure the electrical behavior of the interrupt pin */
+#define BMI270_INT_LATCH              0x55       /* Configure interrupt modes */
 #define BMI270_INT1_MAP_FEAT          0x56       /* Interrupt/Feature mapping on INT1 */
 #define BMI270_INT2_MAP_FEAT          0x57       /* Interrupt/Feature mapping on INT2 */
 #define BMI270_INT_MAP_DATA           0x58       /* Data Interrupt mapping for both INT pins */
@@ -923,9 +936,6 @@ static void bmi270_spi_read(FAR struct bmi270_dev_s *priv,
   uint8_t sendbuffer[BMI270_SPI_READ_MAX_BUFFER];
   uint8_t revbuffer[BMI270_SPI_READ_MAX_BUFFER];
 
-  memset(sendbuffer, 0, BMI270_SPI_READ_MAX_BUFFER);
-  memset(revbuffer, 0, BMI270_SPI_READ_MAX_BUFFER);
-
   /* Lock the SPI bus so that only one device can access it at the same
    * time.
    */
@@ -1182,6 +1192,8 @@ static int bmi270_readdevid(FAR struct bmi270_dev_s *priv)
     {
       ret = OK;
     }
+
+  up_udelay(BMI270_SHORT_DELAY);
 
   return ret;
 }
@@ -1522,6 +1534,8 @@ static void bmi270_resetwait(FAR struct bmi270_dev_s *priv)
 
       bmi270_spi_read(priv, BMI270_CHIP_ID, (FAR uint8_t *)&regval, 1);
 
+      up_udelay(BMI270_SHORT_DELAY);
+
       /* Read the device ID. */
 
       bmi270_spi_read(priv, BMI270_CHIP_ID, (FAR uint8_t *)&regval, 1);
@@ -1644,6 +1658,10 @@ static int bmi270_init_device(FAR struct bmi270_dev_s *priv)
   /* Disable advanced power save mode. */
 
   bmi270_set_powersave(priv, BMI270_DISABLE);
+
+  /* Wating for out of low power. */
+
+  usleep(BMI270_LONG_DELAY);
 
   ret = bmi270_write_config(priv, config_buf, count);
   if (ret < 0)
@@ -1823,11 +1841,11 @@ static int bmi270_set_powersave(FAR struct bmi270_dev_s *priv,
   bmi270_pwr_conf_t reg;
 
   bmi270_spi_read(priv, BMI270_PWR_CONF, (FAR uint8_t *)&reg, 1);
+  up_udelay(BMI270_SHORT_DELAY);
 
   reg.adv_power_save = value;
   reg.fifo_self_wake_up = BMI270_ENABLE;
   bmi270_spi_write(priv, BMI270_PWR_CONF, (FAR uint8_t *)&reg);
-  usleep(BMI270_SET_TIME);
 
   return OK;
 }
@@ -1857,9 +1875,11 @@ static int bmi270_set_configload(FAR struct bmi270_dev_s *priv,
   bmi270_init_ctrl_t reg;
 
   bmi270_spi_read(priv, BMI270_INIT_CTRL, (FAR uint8_t *)&reg, 1);
+  up_udelay(BMI270_SHORT_DELAY);
 
   reg.value = value;
   bmi270_spi_write(priv, BMI270_INIT_CTRL, (FAR uint8_t *)&reg);
+  up_udelay(BMI270_SHORT_DELAY);
 
   return OK;
 }
@@ -1904,10 +1924,12 @@ static int bmi270_upload_file(FAR struct bmi270_dev_s *priv,
   /* Write the 2 bytes of address in consecutive locations. */
 
   bmi270_spi_write_len(priv, BMI270_INIT_ADDR_0, addr_array, 2);
+  up_udelay(BMI270_SHORT_DELAY);
 
   /* Burst write configuration file data corresponding to user set length */
 
   bmi270_spi_write_len(priv, BMI270_INIT_DATA, config_data, write_len);
+  up_udelay(BMI270_SHORT_DELAY);
 
   return OK;
 }
@@ -1971,6 +1993,7 @@ static int bmi270_set_int(FAR struct bmi270_dev_s *priv,
 
   bmi270_spi_read(priv, BMI270_INT1_IO_CTRL,
                   (FAR uint8_t *)&regval_int_ctrl, 1);
+  up_udelay(BMI270_SHORT_DELAY);
 
   regval_int_ctrl.lvl = 1;
   regval_int_ctrl.od = 0;
@@ -2008,6 +2031,7 @@ static int bmi270_get_feat_config(FAR struct bmi270_dev_s *priv,
   /* Switch page */
 
   bmi270_spi_write(priv, BMI270_FEAT_PAGE, (FAR uint8_t *)&page);
+  up_udelay(BMI270_SHORT_DELAY);
 
   /* Read from the page */
 
@@ -2044,6 +2068,7 @@ static int bmi270_temp_enable(FAR struct bmi270_dev_s *priv,
   /* Enable/disable temperature */
 
   bmi270_spi_read(priv, BMI270_PWR_CTRL, (FAR uint8_t *)&regval_pwr_ctrl, 1);
+  up_udelay(BMI270_SHORT_DELAY);
 
   if (enable)
     {
@@ -2122,10 +2147,12 @@ static int bmi270_xl_enable(FAR struct bmi270_dev_s *priv,
   bmi270_pwr_ctrl_t regval_pwr_ctrl;
 
   bmi270_xl_setfilter(priv, BMI270_XL_OSR4_AVG1);
+  up_udelay(BMI270_SHORT_DELAY);
 
   /* Enable/disable accelerometer */
 
   bmi270_spi_read(priv, BMI270_PWR_CTRL, (FAR uint8_t *)&regval_pwr_ctrl, 1);
+  up_udelay(BMI270_SHORT_DELAY);
 
   if (enable)
     {
@@ -2198,6 +2225,7 @@ static void bmi270_xl_worker(FAR void *arg)
   /* Read out the latest sensor data. */
 
   bmi270_xl_getdata(priv, BMI270_DATA_8, &temp_xl);
+  up_udelay(BMI270_SHORT_DELAY);
 
   /* Read temperature. */
 
@@ -2315,6 +2343,7 @@ static int bmi270_xl_setodr(FAR struct bmi270_dev_s *priv, uint8_t value)
   bmi270_acc_conf_t regval;
 
   bmi270_spi_read(priv, BMI270_ACC_CONF, (FAR uint8_t *)&regval, 1);
+  up_udelay(BMI270_SHORT_DELAY);
 
   regval.acc_odr = value;
   bmi270_spi_write(priv, BMI270_ACC_CONF, (FAR uint8_t *)&regval);
@@ -2346,11 +2375,10 @@ static int bmi270_xl_setfullscale(FAR struct bmi270_dev_s *priv,
   bmi270_acc_range_t regval;
 
   bmi270_spi_read(priv, BMI270_ACC_RANGE, (FAR uint8_t *)&regval, 1);
+  up_udelay(BMI270_SHORT_DELAY);
 
   regval.acc_range = value;
   bmi270_spi_write(priv, BMI270_ACC_RANGE, (FAR uint8_t *)&regval);
-
-  usleep(BMI270_SCALE_SET_TIME);
 
   return OK;
 }
@@ -2438,6 +2466,7 @@ static int bmi270_xl_setfilter(FAR struct bmi270_dev_s *priv,
   bmi270_acc_conf_t regval;
 
   bmi270_spi_read(priv, BMI270_ACC_CONF, (FAR uint8_t *)&regval, 1);
+  up_udelay(BMI270_SHORT_DELAY);
 
   regval.acc_bwp = value;
   regval.acc_filter_perf = BMI270_POWER_OPT_MODE;
@@ -2474,6 +2503,7 @@ static int bmi270_get_gyro_crosssense(FAR struct bmi270_dev_s *priv,
   uint8_t feat_config[BMI270_FEAT_SIZE_IN_BYTES];
 
   bmi270_get_feat_config(priv, BMI270_PAGE_0, feat_config);
+  up_udelay(BMI270_SHORT_DELAY);
 
   /* discard the MSB as GYR_CAS is of only 7 bit */
 
@@ -2522,14 +2552,17 @@ static int bmi270_gy_enable(FAR struct bmi270_dev_s *priv,
   bmi270_pwr_ctrl_t regval_pwr_ctrl;
 
   bmi270_gy_setfullscale(priv, BMI270_GY_RANGE_2000);
+  up_udelay(BMI270_SHORT_DELAY);
   priv->dev[BMI270_GY_IDX].factor = BMI270_2000DPS_FACTOR
                                   * BMI270_DPS2RPS_FACTOR;
 
   bmi270_gy_setfilter(priv, BMI270_GY_NORMAL_MODE);
+  up_udelay(BMI270_SHORT_DELAY);
 
   /* Enable/disable accelerometer */
 
   bmi270_spi_read(priv, BMI270_PWR_CTRL, (FAR uint8_t *)&regval_pwr_ctrl, 1);
+  up_udelay(BMI270_SHORT_DELAY);
 
   if (enable)
     {
@@ -2602,6 +2635,7 @@ static void bmi270_gy_worker(FAR void *arg)
   /* Read out the latest sensor data. */
 
   bmi270_gy_getdata(priv, BMI270_DATA_14, &temp_gy);
+  up_udelay(BMI270_SHORT_DELAY);
 
   /* Read temperature. */
 
@@ -2718,6 +2752,7 @@ static int bmi270_gy_setodr(FAR struct bmi270_dev_s *priv, uint8_t value)
   bmi270_gyr_conf_t regval;
 
   bmi270_spi_read(priv, BMI270_GYR_CONF, (FAR uint8_t *)&regval, 1);
+  up_udelay(BMI270_SHORT_DELAY);
 
   regval.gyr_odr = value;
   bmi270_spi_write(priv, BMI270_GYR_CONF, (FAR uint8_t *)&regval);
@@ -2749,6 +2784,7 @@ static int bmi270_gy_setfullscale(FAR struct bmi270_dev_s *priv,
   bmi270_gyr_range_t regval;
 
   bmi270_spi_read(priv, BMI270_GYR_RANGE, (FAR uint8_t *)&regval, 1);
+  up_udelay(BMI270_SHORT_DELAY);
 
   regval.gyr_range = value;
   bmi270_spi_write(priv, BMI270_GYR_RANGE, (FAR uint8_t *)&regval);
@@ -2780,6 +2816,7 @@ static int bmi270_gy_setfilter(FAR struct bmi270_dev_s *priv,
   bmi270_gyr_conf_t regval;
 
   bmi270_spi_read(priv, BMI270_GYR_CONF, (FAR uint8_t *)&regval, 1);
+  up_udelay(BMI270_SHORT_DELAY);
 
   regval.gyr_bwp = value;
   regval.gyr_filter_perf = BMI270_POWER_OPT_MODE;
@@ -2832,6 +2869,7 @@ static int bmi270_fifo_setwatermark(FAR struct bmi270_dev_s *priv,
 
   bmi270_spi_write(priv, BMI270_FIFO_WTM_0,
                    (FAR uint8_t *)&fifo_wtm0);
+  up_udelay(BMI270_SHORT_DELAY);
   bmi270_spi_write(priv, BMI270_FIFO_WTM_1,
                    (FAR uint8_t *)&fifo_wtm1);
 
@@ -2862,18 +2900,27 @@ static int bmi270_fifo_xl_enable(FAR struct bmi270_dev_s *priv,
   bmi270_fifo_config_1_t reg;
 
   bmi270_spi_read(priv, BMI270_FIFO_CONFIG_1, (FAR uint8_t *)&reg, 1);
+  up_udelay(BMI270_SHORT_DELAY);
 
   if (reg.fifo_gyr_en ==  BMI270_ENABLE)
     {
       bmi270_xl_enable(priv, BMI270_DISABLE);
+      up_udelay(BMI270_SHORT_DELAY);
       bmi270_gy_enable(priv, BMI270_DISABLE);
+      up_udelay(BMI270_SHORT_DELAY);
       reg.fifo_acc_en = BMI270_DISABLE;
       reg.fifo_gyr_en = BMI270_DISABLE;
       bmi270_spi_write(priv, BMI270_FIFO_CONFIG_1, (FAR uint8_t *)&reg);
-      usleep(BMI270_SET_TIME);
       reg.fifo_gyr_en = BMI270_ENABLE;
+      up_udelay(BMI270_SHORT_DELAY);
       bmi270_xl_enable(priv, BMI270_ENABLE);
-      bmi270_gy_enable(priv, BMI270_ENABLE);
+      up_udelay(BMI270_SHORT_DELAY);
+
+      if (priv->dev[BMI270_GY_IDX].activated)
+        {
+          bmi270_gy_enable(priv, BMI270_ENABLE);
+          up_udelay(BMI270_SHORT_DELAY);
+        }
     }
 
   reg.fifo_acc_en = value;
@@ -2906,18 +2953,26 @@ static int bmi270_fifo_gy_enable(FAR struct bmi270_dev_s *priv,
   bmi270_fifo_config_1_t reg;
 
   bmi270_spi_read(priv, BMI270_FIFO_CONFIG_1, (FAR uint8_t *)&reg, 1);
+  up_udelay(BMI270_SHORT_DELAY);
 
   if (reg.fifo_acc_en ==  BMI270_ENABLE)
     {
       bmi270_xl_enable(priv, BMI270_DISABLE);
+      up_udelay(BMI270_SHORT_DELAY);
       bmi270_gy_enable(priv, BMI270_DISABLE);
+      up_udelay(BMI270_SHORT_DELAY);
       reg.fifo_acc_en = BMI270_DISABLE;
       reg.fifo_gyr_en = BMI270_DISABLE;
       bmi270_spi_write(priv, BMI270_FIFO_CONFIG_1, (FAR uint8_t *)&reg);
-      usleep(BMI270_SET_TIME);
+      up_udelay(BMI270_SHORT_DELAY);
       reg.fifo_acc_en = BMI270_ENABLE;
-      bmi270_xl_enable(priv, BMI270_ENABLE);
       bmi270_gy_enable(priv, BMI270_ENABLE);
+      up_udelay(BMI270_SHORT_DELAY);
+      if (priv->dev[BMI270_XL_IDX].activated)
+        {
+          bmi270_xl_enable(priv, BMI270_ENABLE);
+          up_udelay(BMI270_SHORT_DELAY);
+        }
     }
 
   reg.fifo_gyr_en = value;
@@ -2949,12 +3004,14 @@ static int bmi270_fifo_config(FAR struct bmi270_dev_s *priv)
   bmi270_fifo_config_1_t reg_conf1;
 
   bmi270_spi_read(priv, BMI270_FIFO_CONFIG_1, (FAR uint8_t *)&reg_conf1, 1);
+  up_udelay(BMI270_SHORT_DELAY);
 
   reg_conf0.fifo_stop_on_full = BMI270_ENABLE;
   reg_conf0.fifo_time_en = BMI270_DISABLE;
   reg_conf1.fifo_tag_int1_en = 0;
   reg_conf1.fifo_header_en = BMI270_ENABLE;
   bmi270_spi_write(priv, BMI270_FIFO_CONFIG_0, (FAR uint8_t *)&reg_conf0);
+  up_udelay(BMI270_SHORT_DELAY);
   bmi270_spi_write(priv, BMI270_FIFO_CONFIG_1, (FAR uint8_t *)&reg_conf1);
 
   return OK;
@@ -3054,12 +3111,8 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv)
   unsigned int i;
   int ret;
 
-  memset(temp_xl, 0x00, sizeof(temp_xl));
-  memset(temp_gy, 0x00, sizeof(temp_gy));
-  memset(priv->fifo_buff, 0, BMI270_FIFO_BUFFER_SIZE);
-
   ret = bmi270_fifo_getlevel(priv, &num);
-
+  up_udelay(BMI270_SHORT_DELAY);
   if (ret < 0)
     {
       snerr("Failed to get FIFO level!\n");
@@ -3069,11 +3122,13 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv)
   if (num > 0)
     {
       bmi270_spi_read_enhance(priv, BMI270_FIFO_DATA, priv->fifo_buff, num);
+      up_udelay(BMI270_SHORT_DELAY);
     }
 
   /* Read temperature. */
 
   bmi270_temp_getdata(priv, BMI270_ITEMPERATURE_0, &temperature);
+  up_udelay(BMI270_SHORT_DELAY);
 
   /* Set scale factor. */
 
@@ -3221,6 +3276,7 @@ static int bmi270_fifo_getlevel(FAR struct bmi270_dev_s *priv,
 
   bmi270_spi_read(priv, BMI270_FIFO_LENGTH_0,
                   (FAR uint8_t *)&fifo_length0, 1);
+  up_udelay(BMI270_SHORT_DELAY);
   bmi270_spi_read(priv, BMI270_FIFO_LENGTH_1,
                   (FAR uint8_t *)&fifo_length1, 1);
   *value = ((uint16_t)fifo_length1.fifo_byte_counter_13_8 << 8) +
@@ -3257,10 +3313,6 @@ static int bmi270_feat_enable(FAR struct bmi270_dev_s *priv,
   struct bmi270_wakeup_s weakup_config;
   struct bmi270_axes_remap_s axes_map;
 
-  /* Disable advance power save if enabled. */
-
-  bmi270_set_powersave(priv, BMI270_DISABLE);
-
   /* Remap axis. */
 
   axes_map.x_axis = BMI270_MAP2Y_AXIS;
@@ -3272,10 +3324,12 @@ static int bmi270_feat_enable(FAR struct bmi270_dev_s *priv,
   axes_map.z_axis_sign = BMI270_MAP_SIGN_NOT_INVERT;
 
   bmi270_set_axis_map(priv, &axes_map);
+  up_udelay(BMI270_SHORT_DELAY);
 
   /* Enable the wrist wear wake up feature. */
 
   bmi270_get_feat_config(priv, BMI270_PAGE_7, feat_config);
+  up_udelay(BMI270_SHORT_DELAY);
 
   if (enable)
     {
@@ -3286,18 +3340,23 @@ static int bmi270_feat_enable(FAR struct bmi270_dev_s *priv,
 
       bmi270_spi_write_len(priv, BMI270_FEATURES, feat_config,
                            BMI270_FEAT_SIZE_IN_BYTES);
+      up_udelay(BMI270_SHORT_DELAY);
 
       /* Enable the wrist wear wake up interrupt. */
 
       bmi270_set_int(priv, BMI270_ENABLE);
+      up_udelay(BMI270_SHORT_DELAY);
       bmi270_get_wakeup_cfg(priv, &weakup_config);
 
       /* Sets wrist wear wake-up configurations. */
 
-      weakup_config.max_tilt_pu = 1925;
+      weakup_config.min_angle_focus = BMI270_MIN_ANGLE_FOUCUS;
+      weakup_config.min_angle_nonfocus = BMI270_MIN_ANGLE_NONFOUCUS;
 
       bmi270_set_wakeup_cfg(priv, &weakup_config);
+      up_udelay(BMI270_SHORT_DELAY);
       bmi270_map_feat_int(priv, BMI270_ENABLE);
+      up_udelay(BMI270_SHORT_DELAY);
 
       priv->featen = BMI270_ENABLE;
     }
@@ -3310,24 +3369,22 @@ static int bmi270_feat_enable(FAR struct bmi270_dev_s *priv,
 
       bmi270_spi_write_len(priv, BMI270_FEATURES, feat_config,
                            BMI270_FEAT_SIZE_IN_BYTES);
+      up_udelay(BMI270_SHORT_DELAY);
 
-      /* Enable the wrist wear wake up interrupt. */
+      /* Disable the wrist wear wake up interrupt. */
 
       bmi270_map_feat_int(priv, BMI270_DISABLE);
+      up_udelay(BMI270_SHORT_DELAY);
       bmi270_set_int(priv, BMI270_DISABLE);
 
       priv->featen = BMI270_DISABLE;
     }
 
-  /* Enable advance power save if enabled. */
-
-  bmi270_set_powersave(priv, BMI270_ENABLE);
-
   return OK;
 }
 
 /****************************************************************************
- * Name: bmi270_feat_enable
+ * Name: bmi270_map_feat_int
  *
  * Description:
  *   Maps/unmaps feature interrupts to that of interrupt pins.
@@ -3353,13 +3410,16 @@ static int bmi270_map_feat_int(FAR struct bmi270_dev_s *priv,
 
   bmi270_spi_read(priv, BMI270_INT1_MAP_FEAT,
                   (FAR uint8_t *)&reg_map_feat_int1, 1);
+  up_udelay(BMI270_SHORT_DELAY);
   bmi270_spi_read(priv, BMI270_INT2_MAP_FEAT,
                   (FAR uint8_t *)&reg_map_feat_int2, 1);
+  up_udelay(BMI270_SHORT_DELAY);
 
   reg_map_feat_int1.wrist_wear_wakeup_out = value;
   reg_map_feat_int2.wrist_wear_wakeup_out = 0;
   bmi270_spi_write(priv, BMI270_INT1_MAP_FEAT,
                    (FAR uint8_t *)&reg_map_feat_int1);
+  up_udelay(BMI270_SHORT_DELAY);
   bmi270_spi_write(priv, BMI270_INT2_MAP_FEAT,
                    (FAR uint8_t *)&reg_map_feat_int2);
 
@@ -3391,13 +3451,10 @@ static int bmi270_get_wakeup_cfg(FAR struct bmi270_dev_s *priv,
   uint8_t feat_config[BMI270_FEAT_SIZE_IN_BYTES];
   uint16_t *data_p = (uint16_t *) (void *)feat_config;
 
-  /* Disable advance power save if enabled */
-
-  bmi270_set_powersave(priv, BMI270_DISABLE);
-
   /* Enable the wrist wear wake up feature. */
 
   bmi270_get_feat_config(priv, BMI270_PAGE_7, feat_config);
+  up_udelay(BMI270_SHORT_DELAY);
 
   /* Define the offset in bytes for wrist wear wake-up select */
 
@@ -3426,10 +3483,6 @@ static int bmi270_get_wakeup_cfg(FAR struct bmi270_dev_s *priv,
 
   weakup_config->idx++;
   weakup_config->max_tilt_pu = *(data_p + weakup_config->idx);
-
-  /* Enable advance power save if enabled. */
-
-  bmi270_set_powersave(priv, BMI270_ENABLE);
 
   return OK;
 }
@@ -3461,6 +3514,7 @@ static int bmi270_set_wakeup_cfg(FAR struct bmi270_dev_s *priv,
   uint8_t index;
 
   bmi270_get_feat_config(priv, BMI270_PAGE_7, feat_config);
+  up_udelay(BMI270_SHORT_DELAY);
 
   weakup_config->idx = BMI270_WRIST_WEAR_WAKE_UP;
   weakup_config->idx = weakup_config->idx / 2;
@@ -3528,6 +3582,7 @@ static int bmi270_set_axis_map(FAR struct bmi270_dev_s *priv,
   bmi270_axes_remap_1_t reg_axes_remap_1;
 
   bmi270_get_feat_config(priv, BMI270_PAGE_1, feat_config);
+  up_udelay(BMI270_SHORT_DELAY);
 
   /* Get the axis map. */
 
@@ -3698,7 +3753,13 @@ static int bmi270_batch(FAR struct file *filep,
       return -EINVAL;
     }
 
+  /* Disable advance power save. */
+
   bmi270_set_powersave(priv, BMI270_DISABLE);
+
+  /* Wating for out of low power. */
+
+  usleep(BMI270_LONG_DELAY);
 
   if (sensor->fifowtm > 1)
     {
@@ -3711,11 +3772,13 @@ static int bmi270_batch(FAR struct file *filep,
       if (lower->type == SENSOR_TYPE_ACCELEROMETER)
         {
           bmi270_fifo_xl_enable(priv, BMI270_ENABLE);
+          up_udelay(BMI270_SHORT_DELAY);
           work_cancel(HPWORK, &priv->dev[BMI270_XL_IDX].work);
         }
       else if (lower->type == SENSOR_TYPE_GYROSCOPE)
         {
           bmi270_fifo_gy_enable(priv, BMI270_ENABLE);
+          up_udelay(BMI270_SHORT_DELAY);
           work_cancel(HPWORK, &priv->dev[BMI270_GY_IDX].work);
         }
       else
@@ -3733,6 +3796,7 @@ static int bmi270_batch(FAR struct file *filep,
       if (lower->type == SENSOR_TYPE_ACCELEROMETER)
         {
           bmi270_fifo_xl_enable(priv, BMI270_DISABLE);
+          up_udelay(BMI270_SHORT_DELAY);
           work_queue(HPWORK, &priv->dev[BMI270_XL_IDX].work,
                      bmi270_xl_worker, priv,
                      priv->dev[BMI270_XL_IDX].interval / USEC_PER_TICK);
@@ -3740,6 +3804,7 @@ static int bmi270_batch(FAR struct file *filep,
       else if (lower->type == SENSOR_TYPE_GYROSCOPE)
         {
           bmi270_fifo_gy_enable(priv, BMI270_DISABLE);
+          up_udelay(BMI270_SHORT_DELAY);
           work_queue(HPWORK, &priv->dev[BMI270_GY_IDX].work,
                      bmi270_gy_worker, priv,
                      priv->dev[BMI270_GY_IDX].interval / USEC_PER_TICK);
@@ -3757,6 +3822,7 @@ static int bmi270_batch(FAR struct file *filep,
 
   bmi270_spi_read(priv, BMI270_INT_MAP_DATA,
                   (FAR uint8_t *)&regval_int_map_data, 1);
+  up_udelay(BMI270_SHORT_DELAY);
 
   if (priv->dev[BMI270_XL_IDX].fifoen == false
       && priv->dev[BMI270_GY_IDX].fifoen == false)
@@ -3766,9 +3832,11 @@ static int bmi270_batch(FAR struct file *filep,
       if (priv->fifoen)
         {
           bmi270_fifo_readdata(priv);
+          up_udelay(BMI270_SHORT_DELAY);
         }
 
       bmi270_set_int(priv, BMI270_DISABLE);
+      up_udelay(BMI270_SHORT_DELAY);
 
       priv->fifoen = false;
       regval_int_map_data.ffull_int1 = BMI270_DISABLE;
@@ -3778,6 +3846,7 @@ static int bmi270_batch(FAR struct file *filep,
   else
     {
       bmi270_set_int(priv, BMI270_ENABLE);
+      up_udelay(BMI270_SHORT_DELAY);
 
       priv->fifoen = true;
       regval_int_map_data.ffull_int1 = BMI270_ENABLE;
@@ -3801,18 +3870,25 @@ static int bmi270_batch(FAR struct file *filep,
       priv->fifowtm = priv->dev[BMI270_XL_IDX].fifowtm
                     + priv->dev[BMI270_GY_IDX].fifowtm;
       bmi270_fifo_setwatermark(priv, priv->fifowtm);
+      up_udelay(BMI270_SHORT_DELAY);
     }
 
   bmi270_fifo_config(priv);
+  up_udelay(BMI270_SHORT_DELAY);
 
   /* Set interrupt route. */
 
   bmi270_spi_write(priv, BMI270_INT_MAP_DATA,
                    (FAR uint8_t *)&regval_int_map_data);
+  up_udelay(BMI270_SHORT_DELAY);
 
-  /* Enable advance power save if enabled. */
+  /* Enable advance power save. */
 
   bmi270_set_powersave(priv, BMI270_ENABLE);
+
+  /* Wating for into low power. */
+
+  usleep(BMI270_LONG_DELAY);
 
   return OK;
 }
@@ -3859,6 +3935,14 @@ static int bmi270_set_interval(FAR struct file *filep,
     {
       priv = (struct bmi270_dev_s *)(sensor - BMI270_XL_IDX);
 
+      /* Disable advance power save. */
+
+      bmi270_set_powersave(priv, BMI270_DISABLE);
+
+      /* Wating for out of low power. */
+
+      usleep(BMI270_LONG_DELAY);
+
       /* Find the period that matches best.  */
 
       idx = bmi270_xl_findodr(&freq);
@@ -3876,6 +3960,14 @@ static int bmi270_set_interval(FAR struct file *filep,
     {
       priv = (struct bmi270_dev_s *)(sensor - BMI270_GY_IDX);
 
+      /* Disable advance power save. */
+
+      bmi270_set_powersave(priv, BMI270_DISABLE);
+
+      /* Wating for out of low power. */
+
+      usleep(BMI270_LONG_DELAY);
+
       /* Find the period that matches best.  */
 
       idx = bmi270_gy_findodr(&freq);
@@ -3892,6 +3984,14 @@ static int bmi270_set_interval(FAR struct file *filep,
   else if (lower->type == SENSOR_TYPE_WAKE_GESTURE)
     {
       priv = (struct bmi270_dev_s *)(sensor - BMI270_FEAT_IDX);
+
+      /* Disable advance power save. */
+
+      bmi270_set_powersave(priv, BMI270_DISABLE);
+
+      /* Wating for out of low power. */
+
+      usleep(BMI270_LONG_DELAY);
       ret = OK;
     }
   else
@@ -3899,6 +3999,16 @@ static int bmi270_set_interval(FAR struct file *filep,
       snerr("Failed to match sensor type: %d\n", -EINVAL);
       return -EINVAL;
     }
+
+  up_udelay(BMI270_SHORT_DELAY);
+
+  /* Enable advance power save. */
+
+  bmi270_set_powersave(priv, BMI270_ENABLE);
+
+  /* Wating for into low power. */
+
+  usleep(BMI270_LONG_DELAY);
 
   return ret;
 }
@@ -3938,6 +4048,15 @@ static int bmi270_activate(FAR struct file *filep,
   if (lower->type == SENSOR_TYPE_ACCELEROMETER)
     {
       priv = (struct bmi270_dev_s *)(sensor - BMI270_XL_IDX);
+
+      /* Disable advance power save. */
+
+      bmi270_set_powersave(priv, BMI270_DISABLE);
+
+      /* Wating for out of low power. */
+
+      usleep(BMI270_LONG_DELAY);
+
       if (sensor->activated != enable)
         {
           /* Set default accelerometer full scale. */
@@ -3945,11 +4064,13 @@ static int bmi270_activate(FAR struct file *filep,
           if (enable)
             {
               bmi270_xl_setfullscale(priv, BMI270_XL_RANGE_8G);
+              up_udelay(BMI270_SHORT_DELAY);
             }
 
           /* Enable/disable accelerometer. */
 
           ret = bmi270_xl_enable(priv, enable);
+          up_udelay(BMI270_SHORT_DELAY);
           if (ret < 0)
             {
               snerr("Failed to enable accelerometer sensor: %d\n", ret);
@@ -3962,9 +4083,19 @@ static int bmi270_activate(FAR struct file *filep,
   else if (lower->type == SENSOR_TYPE_GYROSCOPE)
     {
       priv = (struct bmi270_dev_s *)(sensor - BMI270_GY_IDX);
+
+      /* Disable advance power save. */
+
+      bmi270_set_powersave(priv, BMI270_DISABLE);
+
+      /* Wating for out of low power. */
+
+      usleep(BMI270_LONG_DELAY);
+
       if (sensor->activated != enable)
         {
           ret = bmi270_gy_enable(priv, enable);
+          up_udelay(BMI270_SHORT_DELAY);
           if (ret < 0)
             {
               snerr("Failed to enable gyroscope sensor: %d\n", ret);
@@ -3977,6 +4108,15 @@ static int bmi270_activate(FAR struct file *filep,
   else if (lower->type == SENSOR_TYPE_WAKE_GESTURE)
     {
       priv = (struct bmi270_dev_s *)(sensor - BMI270_FEAT_IDX);
+
+      /* Disable advance power save. */
+
+      bmi270_set_powersave(priv, BMI270_DISABLE);
+
+      /* Wating for out of low power. */
+
+      usleep(BMI270_LONG_DELAY);
+
       if (sensor->activated != enable)
         {
           if (enable)
@@ -3987,6 +4127,7 @@ static int bmi270_activate(FAR struct file *filep,
             }
 
           ret = bmi270_feat_enable(priv, enable);
+          up_udelay(BMI270_SHORT_DELAY);
           if (ret < 0)
             {
               snerr("Failed to enable light sensor: %d\n", ret);
@@ -4030,6 +4171,16 @@ static int bmi270_activate(FAR struct file *filep,
           return ret;
         }
     }
+
+  up_udelay(BMI270_SHORT_DELAY);
+
+  /* Enable advance power save. */
+
+  bmi270_set_powersave(priv, BMI270_ENABLE);
+
+  /* Waiting for into low power. */
+
+  usleep(BMI270_LONG_DELAY);
 
   return ret;
 }
@@ -4184,6 +4335,21 @@ static int bmi270_control(FAR struct file *filep,
         {
           int data = *(int *)ioctl->data;
 
+          /* Disable advance power save. */
+
+          bmi270_set_powersave(priv, BMI270_DISABLE);
+
+          /* Wating for out of low power. */
+
+          usleep(BMI270_LONG_DELAY);
+
+          /* Clear old full scale worker. */
+
+          bmi270_xl_enable(priv, BMI270_DISABLE);
+          usleep(BMI270_CLEAR_WORKER_TIME);
+
+          /* Set new full scale. */
+
           switch (data)
             {
               case BMI270_XL_SET_2G:
@@ -4217,10 +4383,22 @@ static int bmi270_control(FAR struct file *filep,
                 break;
             }
 
+          /* Start sensor. */
+
+          bmi270_xl_enable(priv, BMI270_ENABLE);
+
           if (ret < 0)
             {
               snerr("ERROR: Failed to set scale for accelerator: %d\n", ret);
             }
+
+          /* Disable advance power save. */
+
+          bmi270_set_powersave(priv, BMI270_ENABLE);
+
+          /* Wating for into low power. */
+
+          usleep(BMI270_LONG_DELAY);
         }
         break;
 
@@ -4317,16 +4495,18 @@ static void bmi270_worker(FAR void *arg)
                   (FAR void *)IOEXPANDER_VAL_RISING);
 
   bmi270_spi_read(priv, BMI270_INT_STATUS_0, (FAR uint8_t *)&regval_int0, 1);
+  up_udelay(BMI270_SHORT_DELAY);
   bmi270_spi_read(priv, BMI270_INT_STATUS_1, (FAR uint8_t *)&regval_int1, 1);
-
-  if (regval_int0.wrist_wear_weakeup_out)
-    {
-      bmi270_feat_handler(priv, regval_int0);
-    }
+  up_udelay(BMI270_SHORT_DELAY);
 
   if (regval_int1.fwm_int || regval_int1.ffull_int)
     {
       bmi270_fifo_readdata(priv);
+    }
+
+  if (regval_int0.wrist_wear_weakeup_out)
+    {
+      bmi270_feat_handler(priv, regval_int0);
     }
 }
 
