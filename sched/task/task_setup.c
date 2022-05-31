@@ -545,6 +545,7 @@ static int nxtask_setup_stackargs(FAR struct task_tcb_s *tcb,
            */
 
           strtablen += (strlen(argv[argc]) + 1);
+          DEBUGASSERT(strtablen < tcb->cmn.adj_stack_size);
           if (strtablen >= tcb->cmn.adj_stack_size)
             {
               return -ENAMETOOLONG;
@@ -556,6 +557,7 @@ static int nxtask_setup_stackargs(FAR struct task_tcb_s *tcb,
            * happens in normal usage.
            */
 
+          DEBUGASSERT(argc <= MAX_STACK_ARGS);
           if (++argc > MAX_STACK_ARGS)
             {
               return -E2BIG;
