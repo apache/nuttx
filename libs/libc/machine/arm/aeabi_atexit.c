@@ -42,10 +42,10 @@
  *
  ****************************************************************************/
 
-int weak_function __aeabi_atexit(void *object,
-                                 void (*func)(void *),
-                                 void *dso_handle)
+int __aeabi_atexit(FAR void *object,
+                   CODE void (*func)(FAR void *),
+                   FAR void *dso_handle)
 {
-  return atexit_register(ATTYPE_CXA, (void (*)(void))func, object,
+  return atexit_register(ATTYPE_CXA, (CODE void (*)(void))func, object,
                          dso_handle);
 }
