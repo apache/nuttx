@@ -220,7 +220,7 @@ void GH3X2X_Log(char *log_string)
 
 void Gh3x2x_BspDelayUs(uint16_t usUsec)
 {
-  up_udelay(usUsec);
+  usleep(usUsec);
 }
 
 void GH3X2X_AdtFuncStartWithConfirmHook(void)
@@ -242,7 +242,7 @@ void GH3X2X_AdtFuncStartWithConfirmHook(void)
  */
 void Gh3x2x_BspDelayMs(uint16_t usMsec)
 {
-  up_mdelay(usMsec);
+  usleep(usMsec * 1000);
 }
 
 #if (__FUNC_TYPE_SOFT_ADT_ENABLE__)

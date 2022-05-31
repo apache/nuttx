@@ -1256,132 +1256,129 @@ static int gh3020_activate(FAR struct file *filep,
 
   priv = sensor->dev;
 
-  /* Operate only if the activated status will change. */
-
-  if (sensor->activated != enable)
-    {
 #ifdef CONFIG_FACTEST_SENSORS_GH3020
-      if (priv->factest_mode == true)
+  if (priv->factest_mode == true)
+    {
+      /* In factest mode, activate operation will be performed
+       * immediately, where we can change its activated status now.
+       */
+
+      sensor->activated = enable;
+      if (enable == true)
         {
-          /* In factest mode, activate operation will be performed
-           * immediately, where we can change its activated status now.
+          gh3020_rdmode_switch(GH3020_RDMODE_POLLING);
+          gh3020_init();
+          gh3020_fifo_process();
+          gh3x2x_factest_start(
+            gh3020_channel_function_list[sensor->chidx],
+            sensor->current);
+          priv->activated = 1;
+          priv->intvl_prev = priv->interval;
+          priv->interval = GH3020_INTVL_DFT;
+          work_queue(HPWORK, &priv->work_poll, gh3020_worker_poll, priv,
+                      priv->interval / USEC_PER_TICK);
+        }
+      else
+        {
+          gh3020_stop_sampling_factest();
+          priv->activated = 0;
+          priv->interval = priv->intvl_prev;
+          work_cancel(HPWORK, &priv->work_poll);
+        }
+    }
+  else
+#endif  /* CONFIG_FACTEST_SENSORS_GH3020 */
+    {
+      /* If any PPG channel has been activated, mark it as activating (
+       * will be activated) or inactivating (will be inactivated). The
+       * activated status will be changed in updating when a poll or
+       * interrupt comes. If it's changed several times, the last operation
+       * will be valid.
+       */
+
+      if (priv->activated > 0)
+        {
+          priv->updating = true;
+          if (enable == true)
+            {
+              sensor->activating = true;
+              sensor->inactivating = false;
+            }
+          else
+            {
+              sensor->inactivating = true;
+              sensor->activating = false;
+            }
+        }
+
+      /* Otherwise no channel is activated now. */
+
+      else
+        {
+          /* If one want to activate a channel, since there's no other
+           * activated channel, the activate operation of this channel is
+           * performed here and the activated status changes. If one want to
+           * deactive the channel, do nothing since no channel is activated.
            */
 
           sensor->activated = enable;
+
           if (enable == true)
             {
-              gh3020_rdmode_switch(GH3020_RDMODE_POLLING);
-              gh3020_init();
-              gh3020_fifo_process();
-              gh3x2x_factest_start(
-                gh3020_channel_function_list[sensor->chidx],
-                sensor->current);
-              priv->activated = 1;
-              priv->intvl_prev = priv->interval;
-              priv->interval = GH3020_INTVL_DFT;
-              work_queue(HPWORK, &priv->work_poll, gh3020_worker_poll, priv,
-                         priv->interval / USEC_PER_TICK);
-            }
-          else
-            {
-              gh3020_stop_sampling_factest();
-              priv->activated = 0;
-              priv->interval = priv->intvl_prev;
-              work_cancel(HPWORK, &priv->work_poll);
-            }
-        }
-      else
-#endif  /* CONFIG_FACTEST_SENSORS_GH3020 */
-        {
-          /* If any PPG channel has been activated, mark it as activating (
-           * will be activated) or inactivating (will be inactivated). The
-           * activated status will be changed in updating when a poll or
-           * interrupt comes.
-           */
-
-          if (priv->activated > 0)
-            {
-              priv->updating = true;
-              if (enable == true)
+              priv->activated++;
+              priv->interval = sensor->interval;
+              priv->batch = sensor->batch;
+              rate = (uint16_t)(GH3020_ONE_SECOND / sensor->interval);
+              if (sensor->batch > 0)
                 {
-                  sensor->activating = true;
-                  sensor->inactivating = false;
+                  gh3020_rdmode_switch(GH3020_RDMODE_INTERRPT);
                 }
               else
                 {
-                  sensor->inactivating = true;
-                  sensor->activating = false;
+                  gh3020_rdmode_switch(GH3020_RDMODE_POLLING);
                 }
-            }
 
-          /* Otherwise no channel is activated now. */
+              /* GH3020 must be initialized after switch reading mode. */
 
-          else
-            {
-              /* If one want activated a channel. Here "enable" should not be
-               * false since no channel is activated now. Since there's no
-               * other activated channel, the activate operation of this
-               * channel is performed here and the activated status changes.
-               */
+              gh3020_init();
 
-              sensor->activated = enable;
-              if (enable == true)
+              /* Enable the channel with desired sample rate. */
+
+              priv->channelmode =
+                gh3020_channel_function_list[sensor->chidx];
+              gh3020_samplerate_set(
+                gh3020_channel_function_list[sensor->chidx], rate);
+
+              /* Set FIFO watermark if needed. */
+
+              priv->fifowtm = sensor->batch / sensor->interval *
+                              GH3020_DATA_PER_SAMPLE;
+              if (sensor->batch > 0)
                 {
-                  rate = (uint16_t)(GH3020_ONE_SECOND / sensor->interval);
-                  if (sensor->batch > 0)
-                    {
-                      gh3020_rdmode_switch(GH3020_RDMODE_INTERRPT);
-                    }
-                  else
-                    {
-                      gh3020_rdmode_switch(GH3020_RDMODE_POLLING);
-                    }
-
-                  /* GH3020 must be initialized after switch reading mode. */
-
-                  gh3020_init();
-                  priv->interval = sensor->interval;
-                  priv->batch = sensor->batch;
-                  priv->activated++;
-
-                  /* Enable the channel with desired sample rate. */
-
-                  priv->channelmode =
-                    gh3020_channel_function_list[sensor->chidx];
-                  gh3020_samplerate_set(
-                    gh3020_channel_function_list[sensor->chidx], rate);
-
-                  /* Set FIFO watermark if needed. */
-
-                  priv->fifowtm = sensor->batch / sensor->interval *
-                                  GH3020_DATA_PER_SAMPLE;
-                  if (sensor->batch > 0)
-                    {
-                      gh3020_set_fifowtm(priv->fifowtm);
-                    }
-
-                  /* Some events may be processed between init and start */
-
-                  gh3020_fifo_process();
-                  gh3020_start_sampling(priv->channelmode);
-                  if (sensor->batch > 0)
-                    {
-                      IOEXP_SETOPTION(priv->config->ioedev,
-                                      priv->config->intpin,
-                                      IOEXPANDER_OPTION_INTCFG,
-                                      (FAR void *)IOEXPANDER_VAL_RISING);
-                    }
-                  else
-                    {
-                      work_queue(HPWORK, &priv->work_poll,
-                                 gh3020_worker_poll, priv,
-                                 priv->interval / USEC_PER_TICK);
-                    }
-
-                  SCHED_NOTE_PRINTF("activate ppgq%u, rate=%u, GH3020 starts"
-                                    ", fifowtm=%u", sensor->chidx, rate,
-                                    priv->fifowtm);
+                  gh3020_set_fifowtm(priv->fifowtm);
                 }
+
+              /* Some events may be processed between init and start */
+
+              gh3020_fifo_process();
+              gh3020_start_sampling(priv->channelmode);
+              if (sensor->batch > 0)
+                {
+                  IOEXP_SETOPTION(priv->config->ioedev,
+                                  priv->config->intpin,
+                                  IOEXPANDER_OPTION_INTCFG,
+                                  (FAR void *)IOEXPANDER_VAL_RISING);
+                }
+              else
+                {
+                  work_queue(HPWORK, &priv->work_poll,
+                              gh3020_worker_poll, priv,
+                              priv->interval / USEC_PER_TICK);
+                }
+
+              SCHED_NOTE_PRINTF("activate ppgq%u, rate=%u, GH3020 starts"
+                                ", fifowtm=%u", sensor->chidx, rate,
+                                priv->fifowtm);
             }
         }
     }
