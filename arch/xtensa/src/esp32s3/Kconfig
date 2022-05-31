@@ -581,6 +581,29 @@ config ESP32S3_SPI_UDCS
 
 if ESP32S3_SPI2
 
+config ESP32S3_SPI2_DMA
+	bool "SPI2 use GDMA"
+	default n
+	depends on ESP32S3_DMA
+	---help---
+		Enable support for transfers using the GDMA engine.
+
+config ESP32S3_SPI2_DMADESC_NUM
+	int "SPI2 Master GDMA maximum number of descriptors"
+	default 2
+	depends on ESP32S3_SPI2_DMA
+	---help---
+		Configure the maximum number of out-link/in-link descriptors to
+		be chained for a GDMA transfer.
+
+config ESP32S3_SPI2_DMATHRESHOLD
+	int "SPI2 Master GDMA threshold"
+	default 64
+	depends on ESP32S3_SPI2_DMA
+	---help---
+		When SPI GDMA is enabled, GDMA transfers whose size are below the
+		defined threshold will be performed by polling logic.
+
 config ESP32S3_SPI2_CSPIN
 	int "SPI2 CS Pin"
 	default 10
