@@ -1302,7 +1302,7 @@ int main(int argc, char **argv, char **envp)
   /* Now append the volume header to output file */
 
   fprintf(g_outstream, "/* CROMFS image */\n\n");
-  fprintf(g_outstream, "const uint8_t g_cromfs_image[] =\n");
+  fprintf(g_outstream, "const uint8_t aligned_data(4) g_cromfs_image[] =\n");
   fprintf(g_outstream, "{\n");
   fprintf(g_outstream, "  /* Offset %6lu:  Volume header */\n\n", 0ul);
 
