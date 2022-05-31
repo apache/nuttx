@@ -337,6 +337,11 @@ config ESP32S3_SPI3
 	select ESP32S3_SPI
 	select SPI
 
+config ESP32S3_DMA
+	bool "General DMA (GDMA)"
+	default n
+	select ARCH_DMA
+
 config ESP32S3_UART0
 	bool "UART 0"
 	default n
