@@ -22,8 +22,6 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
 #include <sys/types.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -31,8 +29,6 @@
 #include "libc.h"
 
 #include <nuttx/streams.h>
-
-#ifdef CONFIG_LIBC_WCHAR
 
 /****************************************************************************
  * Public Functions
@@ -62,5 +58,3 @@ int swprintf(FAR wchar_t *buf, size_t maxlen, FAR const wchar_t *fmt, ...)
 
   return n;
 }
-
-#endif /* CONFIG_LIBC_WCHAR */

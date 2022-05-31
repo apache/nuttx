@@ -36,7 +36,6 @@ config LIBCXXMINI
 config LIBCXX
 	bool "LLVM libc++ C++ Standard Library"
 	select HAVE_CXXINITIALIZE
-	select LIBC_WCHAR
 	select LIBC_LOCALE
 	---help---
 		LLVM "libc++" C++ Standard Library
@@ -81,6 +80,10 @@ config CXX_RTTI
 	bool "Enable RTTI Support"
 
 if UCLIBCXX
+
+config UCLIBCXX_WCHAR
+	bool "Enable Wide Stream Support"
+	default n
 
 config UCLIBCXX_BUFSIZE
 	int "IO Stream/Container Buffer Size"

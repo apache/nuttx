@@ -86,10 +86,8 @@ namespace std
 
   // Wide character operations
 
-#ifdef CONFIG_LIBC_WCHAR
   using ::mbtowc;
   using ::wctomb;
-#endif
 
   // Memory Management
 

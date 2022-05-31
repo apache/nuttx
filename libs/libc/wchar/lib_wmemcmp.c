@@ -32,11 +32,8 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
 #include <string.h>
 #include <wchar.h>
-
-#ifdef CONFIG_LIBC_WCHAR
 
 /****************************************************************************
  * Public Functions
@@ -71,4 +68,3 @@ int wmemcmp(FAR const wchar_t *s1, FAR const wchar_t *s2, size_t n)
 
   return 0;
 }
-#endif
