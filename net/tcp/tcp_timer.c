@@ -164,15 +164,14 @@ static void tcp_timer_expiry(FAR void *arg)
 
 static void tcp_update_timer(FAR struct tcp_conn_s *conn)
 {
-  int ticks = HSEC2TICK(tcp_get_timeout(conn));
+  int timeout = tcp_get_timeout(conn);
 
-  if (ticks > 0)
+  if (timeout > 0)
     {
-      sclock_t left = work_timeleft(&conn->work);
-      if (left <= 0 || abs(left - ticks) >= HSEC2TICK(1))
+      if (TICK2HSEC(work_timeleft(&conn->work)) != timeout)
         {
           work_queue(LPWORK, &conn->work, tcp_timer_expiry,
-                     conn, ticks);
+                     conn, HSEC2TICK(timeout));
         }
     }
   else
