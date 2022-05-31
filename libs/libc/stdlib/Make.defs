@@ -28,8 +28,9 @@ CSRCS += lib_strtoll.c lib_strtoul.c lib_strtoull.c lib_strtod.c lib_strtof.c
 CSRCS += lib_strtold.c lib_checkbase.c lib_mktemp.c lib_mkstemp.c lib_mkdtemp.c
 CSRCS += lib_aligned_alloc.c lib_posix_memalign.c lib_valloc.c
 
+CSRCS += lib_cxa_atexit.c
 ifneq ($(CONFIG_LIBC_MAX_EXITFUNS),0)
-CSRCS += lib_atexit.c lib_cxa_atexit.c lib_onexit.c
+CSRCS += lib_atexit.c lib_onexit.c
 endif
 
 ifeq ($(CONFIG_LIBC_WCHAR),y)
