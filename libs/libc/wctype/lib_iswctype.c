@@ -44,8 +44,6 @@
 #include <wctype.h>
 #include <errno.h>
 
-#ifdef CONFIG_LIBC_WCHAR
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -160,4 +158,3 @@ int iswctype(wint_t c, wctype_t desc)
 
   return 0;
 }
-#endif

@@ -32,14 +32,10 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <wchar.h>
-
-#ifdef CONFIG_LIBC_WCHAR
 
 /****************************************************************************
  * Public Functions
@@ -75,4 +71,3 @@ wint_t btowc(int c)
 
   return (wint_t)pwc;
 }
-#endif

@@ -32,13 +32,9 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
 #include <stddef.h>
 #include <string.h>
 #include <wchar.h>
-
-#ifdef CONFIG_LIBC_WCHAR
 
 /****************************************************************************
  * Public Functions
@@ -62,4 +58,3 @@ size_t wcsxfrm(FAR wchar_t *a, FAR const wchar_t *b, size_t n)
 {
   return wcslcpy(a, b, n);
 }
-#endif
