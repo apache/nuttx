@@ -36,7 +36,7 @@
 
 #if defined(CONFIG_ARCH_CHIP_S32K11X)
 #  define S32K1XX_NDMACH  4
-#elif defined(CONFIG_ARCH_CHIP_S32K14X
+#elif defined(CONFIG_ARCH_CHIP_S32K14X)
 #  define S32K1XX_NDMACH  16
 #endif
 

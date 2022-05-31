@@ -200,6 +200,7 @@ menu "S32K1XX Peripheral Selection"
 config S32K1XX_EDMA
 	bool "eDMA"
 	default n
+	select ARCH_DMA
 
 config S32K1XX_ENET
 	bool "Ethernet"

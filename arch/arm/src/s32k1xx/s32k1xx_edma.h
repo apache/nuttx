@@ -122,6 +122,18 @@
 #  define EDMA_CONFIG_LINKTYPE_MINORLINK (1 << EDMA_CONFIG_LINKTYPE_SHIFT) /* Channel link after each minor loop */
 #  define EDMA_CONFIG_LINKTYPE_MAJORLINK (2 << EDMA_CONFIG_LINKTYPE_SHIFT) /* Channel link when major loop count exhausted */
 
+#define EDMA_CONFIG_LOOP_SHIFT           (2) /* Bits 2-3: Loop type */
+#define EDMA_CONFIG_LOOP_MASK            (3 << EDMA_CONFIG_LOOP_SHIFT)
+#  define EDMA_CONFIG_LOOPNONE           (0 << EDMA_CONFIG_LOOP_SHIFT) /* No looping */
+#  define EDMA_CONFIG_LOOPSRC            (1 << EDMA_CONFIG_LOOP_SHIFT) /* Source looping */
+#  define EDMA_CONFIG_LOOPDEST           (2 << EDMA_CONFIG_LOOP_SHIFT) /* Dest looping */
+
+#define EDMA_CONFIG_INTHALF              (1 << 4) /* Bits 4: Int on HALF */
+#define EDMA_CONFIG_INTMAJOR             (1 << 5) /* Bits 5: Int on all Major completion
+                                                   * Default is only on last completion
+                                                   * if using scatter gather
+                                                   */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -130,18 +142,18 @@ typedef void *DMACH_HANDLE;
 typedef void (*edma_callback_t)(DMACH_HANDLE handle,
                                 void *arg, bool done, int result);
 
-/* eDMA transfer type */
-
-enum s32k1xx_edma_xfrtype_e
-{
-  EDMA_MEM2MEM = 0,      /* Transfer from memory to memory */
-  EDMA_PERIPH2MEM,       /* Transfer from peripheral to memory */
-  EDMA_MEM2PERIPH,       /* Transfer from memory to peripheral */
-};
-
 /* This structure holds the source/destination transfer attribute
  * configuration.
  */
+
+/* eDMA transfer sizes */
+
+enum s32k1xx_edma_sizes_e
+{
+  EDMA_8BIT    = 0,      /* Transfer data size 8 */
+  EDMA_16BIT   = 1,      /* Transfer data size 16 */
+  EDMA_32BIT   = 2,      /* Transfer data size 32 */
+};
 
 struct s32k1xx_edma_xfrconfig_s
 {
@@ -153,7 +165,6 @@ struct s32k1xx_edma_xfrconfig_s
     uint8_t  flags;      /* See EDMA_CONFIG_* definitions */
     uint8_t  ssize;      /* Source data transfer size (see TCD_ATTR_SIZE_* definitions in rdware/. */
     uint8_t  dsize;      /* Destination data transfer size. */
-    uint8_t  ttype;      /* Transfer type (see enum s32k1xx_edma_xfrtype_e). */
 #ifdef CONFIG_S32K1XX_EDMA_EMLIM
     uint16_t nbytes;     /* Bytes to transfer in a minor loop */
 #else
@@ -264,7 +275,7 @@ extern "C"
  *
  ****************************************************************************/
 
-DMACH_HANDLE s32k1xx_dmach_alloc(uint32_t dmamux, uint8_t dchpri);
+DMACH_HANDLE s32k1xx_dmach_alloc(uint8_t dmamux, uint8_t dchpri);
 
 /****************************************************************************
  * Name: s32k1xx_dmach_free
