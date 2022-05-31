@@ -3808,6 +3808,7 @@ void nvt_ts_wakeup_gesture_report(FAR struct nt38350_dev_s *priv,
   uint8_t func_type = data[2];
   uint8_t func_id = data[3];
   struct touch_sample_s    sample;
+  bool valid_gesture;
 
   /* support fw specifal data protocol */
 
@@ -3831,32 +3832,44 @@ void nvt_ts_wakeup_gesture_report(FAR struct nt38350_dev_s *priv,
   sample.npoints = 1;
   sample.point[0].flags = TOUCH_GESTURE_VALID;
 
+  /* only support double click gesture wakeup */
+
   switch (gesture_id)
     {
       case GESTURE_DOUBLE_CLICK:
         iwarn("double click detect!\n");
         sample.point[0].gesture = TOUCH_DOUBLE_CLICK;
+        valid_gesture = true;
         break;
       case GESTURE_SLIDE_UP:
         sample.point[0].gesture = TOUCH_SLIDE_UP;
+        valid_gesture = false;
         break;
       case GESTURE_SLIDE_DOWN:
         sample.point[0].gesture = TOUCH_SLIDE_DOWN;
+        valid_gesture = false;
         break;
       case GESTURE_SLIDE_LEFT:
         sample.point[0].gesture = TOUCH_SLIDE_LEFT;
+        valid_gesture = false;
         break;
       case GESTURE_SLIDE_RIGHT:
         sample.point[0].gesture = TOUCH_SLIDE_RIGHT;
+        valid_gesture = false;
         break;
       case GESTURE_PALM:
         sample.point[0].gesture = TOUCH_PALM;
+        valid_gesture = false;
         break;
       default:
+        valid_gesture = false;
         break;
     }
 
-  touch_event(priv->lower.priv, &sample);
+  if (valid_gesture)
+    {
+      touch_event(priv->lower.priv, &sample);
+    }
 }
 #endif
 
@@ -4033,7 +4046,7 @@ static void nt38350_data_worker(FAR void *arg)
     }
   else if (priv->sample.contact == CONTACT_PALM)
     {
-      iwarn("palm detect！\n");
+      iwarn("palm detect!\n");
       sample.point[0].flags   = TOUCH_GESTURE_VALID | TOUCH_ID_VALID;
       sample.point[0].gesture = TOUCH_PALM;
     }
