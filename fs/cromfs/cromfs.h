@@ -71,12 +71,12 @@
 
 struct cromfs_volume_s
 {
-  uint32_t cv_magic;     /* Must be first.  Must be CROMFS_MAGIC */
-  uint16_t cv_nnodes;    /* Total number of nodes in-use */
-  uint16_t cv_nblocks;   /* Total number of data blocks in-use */
-  uint32_t cv_root;      /* Offset to the first node in the root file system */
-  uint32_t cv_fsize;     /* Size of the compressed file system image */
-  uint32_t cv_bsize;     /* Optimal block size for transfers */
+  uint32_t cv_magic;   /* Must be first.  Must be CROMFS_MAGIC */
+  uint16_t cv_nnodes;  /* Total number of nodes in-use */
+  uint16_t cv_nblocks; /* Total number of data blocks in-use */
+  uint32_t cv_root;    /* Offset to the first node in the root file system */
+  uint32_t cv_fsize;   /* Size of the compressed file system image */
+  uint32_t cv_bsize;   /* Optimal block size for transfers */
 };
 
 /* This describes one node in the CROMFS file system. It holds node meta data
@@ -102,20 +102,20 @@ struct cromfs_volume_s
  *                Return 0
  */
 
-struct cromfs_node_s
+begin_packed_struct struct cromfs_node_s
 {
-  uint16_t cn_mode;      /* File type, attributes, and access mode bits */
-  uint16_t cn_pad;       /* Not used */
-  uint32_t cn_name;      /* Offset from the beginning of the volume header to the
-                          * node name string.  NUL-terminated. */
-  uint32_t cn_size;      /* Size of the uncompressed data (in bytes) */
-  uint32_t cn_peer;      /* Offset to next node in this directory (for readdir()) */
+  uint16_t cn_mode; /* File type, attributes, and access mode bits */
+  uint16_t cn_pad;  /* Not used */
+  uint32_t cn_name; /* Offset from the beginning of the volume header to the
+                     * node name string.  NUL-terminated. */
+  uint32_t cn_size; /* Size of the uncompressed data (in bytes) */
+  uint32_t cn_peer; /* Offset to next node in this directory (for readdir()) */
   union
   {
-    uint32_t cn_child;   /* Offset to first node in sub-directory (directories only) */
-    uint32_t cn_link;    /* Offset to an arbitrary node (for hard link) */
-    uint32_t cn_blocks;  /* Offset to first block of compressed data (for read) */
+    uint32_t cn_child;  /* Offset to first node in sub-directory (directories only) */
+    uint32_t cn_link;   /* Offset to an arbitrary node (for hard link) */
+    uint32_t cn_blocks; /* Offset to first block of compressed data (for read) */
   } u;
-};
+} end_packed_struct;    /* Use packed access since cromfs nodes may be unaligned */
 
 #endif /* __FS_CROMFS_CROMFS_H */
