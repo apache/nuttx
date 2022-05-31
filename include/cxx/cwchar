@@ -41,8 +41,6 @@ namespace std
   using ::wint_t;
   using ::wctype_t;
   using ::size_t;
-
-#ifdef CONFIG_LIBC_WCHAR
   using ::btowc;
   using ::fwprintf;
   using ::fwscanf;
@@ -126,7 +124,6 @@ namespace std
   using ::wmemset;
   using ::wprintf;
   using ::wscanf;
-#endif
 };
 
 #endif // __INCLUDE_CXX_CWCHAR

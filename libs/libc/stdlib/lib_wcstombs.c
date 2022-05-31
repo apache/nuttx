@@ -25,8 +25,6 @@
 #include <stdlib.h>
 #include <wchar.h>
 
-#ifdef CONFIG_LIBC_WCHAR
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -39,5 +37,3 @@ size_t wcstombs(FAR char *dst, FAR const wchar_t *src, size_t len)
 {
   return wcsrtombs(dst, &src, len, NULL);
 }
-
-#endif /* CONFIG_LIBC_WCHAR */

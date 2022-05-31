@@ -29,8 +29,6 @@
 #include <stdio.h>
 #include <errno.h>
 
-#ifdef CONFIG_LIBC_WCHAR
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -117,5 +115,3 @@ size_t wcsnrtombs(FAR char *dst, FAR const wchar_t **src, size_t nwc,
   *src += i;
   return i;
 }
-
-#endif /* CONFIG_LIBC_WCHAR */

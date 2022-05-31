@@ -26,8 +26,6 @@
 #include <string.h>
 #include <wchar.h>
 
-#ifdef CONFIG_LIBC_WCHAR
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -90,5 +88,3 @@ size_t mbsnrtowcs(FAR wchar_t *dst, FAR const char **src, size_t nms,
   *src += i;
   return i;
 }
-
-#endif /* CONFIG_LIBC_WCHAR */
