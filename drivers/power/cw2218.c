@@ -1273,7 +1273,6 @@ static void soc_change_worker(FAR void *arg)
 static void cw2218_interrupt_worker(FAR void *arg)
 {
   FAR struct cw2218_dev_s *priv = arg;
-  int ret;
 
   DEBUGASSERT(priv != NULL);
 

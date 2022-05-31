@@ -910,7 +910,6 @@ static void cps4019_worker(FAR void *arg)
 {
   FAR struct cps4019_dev_s *priv = arg;
   struct rx_int_state_s rx_int_state;
-  int ret;
 
   DEBUGASSERT(priv != NULL);
 

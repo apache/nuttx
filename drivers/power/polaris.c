@@ -834,7 +834,6 @@ static void stwlc38_worker(FAR void *arg)
 {
   FAR struct stwlc38_dev_s *priv = arg;
   struct rx_int_state_s rx_int_state;
-  int ret;
 
   DEBUGASSERT(priv != NULL);
 
@@ -886,7 +885,6 @@ static void stwlc38_worker(FAR void *arg)
 static void stwlc38_det_worker(FAR void *arg)
 {
   FAR struct stwlc38_dev_s *priv = arg;
-  int ret;
 
   DEBUGASSERT(priv != NULL);
   if (priv->batt_state_flag == BATT_CHARGING_STAT_ENTER)
