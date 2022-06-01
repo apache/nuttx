@@ -242,7 +242,7 @@ struct net_driver_s
 
   /* Drivers interface flags.  See IFF_* definitions in include/net/if.h */
 
-  uint8_t d_flags;
+  uint32_t d_flags;
 
   /* Multi network devices using multiple link layer protocols are
    * supported
