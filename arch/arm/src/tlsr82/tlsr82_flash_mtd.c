@@ -96,6 +96,14 @@
 #define FLASH_WRITE_TRACE_START()
 #define FLASH_WRITE_TRACE_END()
 
+/* Flash protect/unprotect trace marco definition */
+
+#define FLASH_PROT_TRACE_START()
+#define FLASH_PROT_TRACE_END()
+
+#define FLASH_UNPROT_TRACE_START()
+#define FLASH_UNPROT_TRACE_END()
+
 #define FLASH_BUF_LIST16(n) \
   n    , n + 1, n +  2, n +  3, n +  4, n +  5, n +  6, n +  7, \
   n + 8, n + 9, n + 10, n + 11, n + 12, n + 13, n + 14, n + 15,
@@ -481,6 +489,83 @@ static int tlsr82_flash_test(struct tlsr82_flash_dev_s *priv)
 
 #endif
 
+#ifdef CONFIG_TLSR82_FLASH_PROTECT
+  /* 5. Flash protect/unprotect test:
+   *    1) erase the chip;
+   *    2) write data into chip;
+   *    3) protect flash;
+   *    4) erase the chip with flash protected;
+   *    5) read the chip, the data should be same as the data written in 2);
+   */
+
+  uint8_t status;
+  uint32_t addr;
+
+  /* 1) erase the chip */
+
+  ferr("Erase chip for protect/unprotect test\n");
+  tlsr82_flash_chip_erase(priv);
+  ferr("Erase chip finished\n");
+
+  /* 2) write data into chip */
+
+  tlsr82_flash_print("Write buffer data:", flash_buffer, TLSR82_PAGE_SIZE);
+  for (i = 0; i < npages; i++)
+    {
+      ret = tlsr82_flash_bwrite(&priv->mtd, i, 1, flash_buffer);
+      if (ret != 1)
+        {
+          ferr("    Flash block write failed, ret=%d\n", ret);
+          goto errout;
+        }
+    }
+
+  /* 3) protect the flash, read the flash status register */
+
+  FLASH_PROT_TRACE_START();
+  tlsr82_flash_protect();
+  FLASH_PROT_TRACE_END();
+
+  status = tlsr82_flash_read_status(5);
+  ferr("Current flash status: 0x%x\n", status);
+
+  /* 4) erase the chip with flash protected */
+
+  addr = priv->baseaddr;
+  for (i = 0; i < priv->nsectors; i++)
+    {
+      tlsr82_flash_erase_sector(addr);
+      addr += priv->sectorsize;
+    }
+
+  FLASH_UNPROT_TRACE_START();
+  tlsr82_flash_unprotect();
+  FLASH_UNPROT_TRACE_END();
+
+  /* 5) read the chip, the data should be same as the data written in 2) */
+
+  for (i = 0; i < npages; i++)
+    {
+      memset(flash_read_buffer, 0, TLSR82_PAGE_SIZE);
+      ret = tlsr82_flash_bread(&priv->mtd, i, 1, flash_read_buffer);
+      if (ret != 1)
+        {
+          ferr("    Flash block read failed, ret=%d\n", ret);
+          goto errout;
+        }
+
+      if (memcmp(flash_read_buffer, flash_buffer, TLSR82_PAGE_SIZE) != 0)
+        {
+          ferr("    Flash write compre is not equal, page_i=%d\n", i);
+          tlsr82_flash_print("Write buffer data:", flash_buffer,
+                             TLSR82_PAGE_SIZE);
+          tlsr82_flash_print("Read buffer data:", flash_read_buffer,
+                             TLSR82_PAGE_SIZE);
+          goto errout;
+        }
+    }
+#endif
+
   ferr("======== Flash test Success ========\n");
 
   return OK;
@@ -685,6 +770,22 @@ static int tlsr82_flash_ioctl(struct mtd_dev_s *dev, int cmd,
         }
         break;
 
+      case MTDIOC_PROTECT:
+        {
+          /* Ignore arg, direct protect full chip */
+
+          tlsr82_flash_protect();
+        }
+        break;
+
+      case MTDIOC_UNPROTECT:
+        {
+          /* Ignore arg, direct unprotect full chip */
+
+          tlsr82_flash_unprotect();
+        }
+        break;
+
       default:
           ret = -ENOTTY; /* Bad/unsupported command */
           break;
@@ -775,6 +876,10 @@ struct mtd_dev_s *tlsr82_flash_initialize(uint32_t offset, uint32_t size)
            sizeof(struct tlsr82_flash_dev_s));
       goto errout;
     }
+
+  /* Calibrate the flash */
+
+  tlsr82_flash_calibrate(g_flash_mid);
 
 #ifdef CONFIG_TLSR82_FLASH_TEST
   ret = tlsr82_flash_test(priv);
