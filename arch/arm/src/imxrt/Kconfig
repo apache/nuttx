@@ -804,6 +804,11 @@ config LPI2C1_BUSYIDLE
 	int "Bus idle timeout period in clock cycles"
 	default 0
 
+config LPI2C1_DMA
+	bool "Enable DMA for I2C1"
+	default n
+	depends on IMXRT_LPI2C_DMA
+
 config LPI2C1_FILTSCL
 	int "I2C master digital glitch filters for SCL input in clock cycles"
 	default 0
@@ -824,6 +829,11 @@ if IMXRT_LPI2C2
 config LPI2C2_BUSYIDLE
 	int "Bus idle timeout period in clock cycles"
 	default 0
+
+config LPI2C2_DMA
+	bool "Enable DMA for I2C2"
+	default n
+	depends on IMXRT_LPI2C_DMA
 
 config LPI2C2_FILTSCL
 	int "I2C master digital glitch filters for SCL input in clock cycles"
@@ -846,6 +856,11 @@ config LPI2C3_BUSYIDLE
 	int "Bus idle timeout period in clock cycles"
 	default 0
 
+config LPI2C3_DMA
+	bool "Enable DMA for I2C3"
+	default n
+	depends on IMXRT_LPI2C_DMA
+
 config LPI2C3_FILTSCL
 	int "I2C master digital glitch filters for SCL input in clock cycles"
 	default 0
@@ -866,6 +881,11 @@ if IMXRT_LPI2C4
 config LPI2C4_BUSYIDLE
 	int "Bus idle timeout period in clock cycles"
 	default 0
+
+config LPI2C4_DMA
+	bool "Enable DMA for I2C4"
+	default n
+	depends on IMXRT_LPI2C_DMA
 
 config LPI2C4_FILTSCL
 	int "I2C master digital glitch filters for SCL input in clock cycles"
@@ -1590,6 +1610,25 @@ endmenu # Memory Configuration
 
 menu "LPI2C Configuration"
 	depends on IMXRT_LPI2C
+
+config IMXRT_LPI2C_DMA
+	bool "I2C DMA Support"
+	default n
+	depends on IMXRT_LPI2C && IMXRT_EDMA && !I2C_POLLED
+	---help---
+		This option enables the DMA for I2C transfers.
+		Note: The user can define CONFIG_I2C_DMAPRIO: a custom priority value
+		for the I2C dma streams, else the default priority level is set to
+		medium.
+
+config IMXRT_LPI2C_DMA_MAXMSG
+	int "Maximum number messages that will be DMAed"
+	default 8
+	depends on IMXRT_LPI2C_DMA
+	---help---
+		This option set the mumber of mesg that can be in a transfer.
+		It is used to allocate space for the 16 bit LPI2C commands
+		that will be DMA-ed to the LPI2C device.
 
 config IMXRT_LPI2C_DYNTIMEO
 	bool "Use dynamic timeouts"
