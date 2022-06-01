@@ -61,6 +61,35 @@
 #  define FLASH_MID_TH25D40UA                  0x1360eb
 #endif
 
+/* Flash status register bit definitions
+ * FLASH_STATUS_WIP: The Write In Progress (WIP) bit indicates whether
+ *                   the memory is busy in program/erase/write status
+ *                   register progress.
+ * FLASH_STATUS_WEL: The Write Enable Latch (WEL) bit indicates the
+ *                   status of the internal Write Enable Latch.
+ * FLASH_STATUS_BP:  The Block Protect (BP2, BP1, BP0) bits are
+ *                   non-volatile. They define the size of the area to be
+ *                   software protected against Program and Erase commands.
+ * FLASH_STATUS_SRP: The Status Register Protect (SRP) bit operates in
+ *                   conjunction with the Write Protect (WP#) signal.
+ */
+
+#define FLASH_STATUS_WIP_SHIFT               0
+#define FLASH_STATUS_WIP_MASK                (0x1 << FLASH_STATUS_WIP_SHIFT)
+#define FLASH_STATUS_WEL_SHIFT               1
+#define FLASH_STATUS_WEL_MASK                (0x1 << FLASH_STATUS_WEL_SHIFT)
+#define FLASH_STATUS_BP_SHIFT                2
+#define FLASH_STATUS_BP_MASK                 (0x7 << FLASH_STATUS_BP_SHIFT)
+#define FLASH_STATUS_RSVD_SHIFT              5
+#define FLASH_STATUS_RSVD_MASK               (0x3 << FLASH_STATUS_RSVD_SHIFT)
+#define FLASH_STATUS_SRP_SHIFT               7
+#define FLASH_STATUS_SRP_MASK                (0x1 << FLASH_STATUS_SRP_SHIFT)
+
+/* NONE: do not protect, ALL: protect all the flash */
+
+#define FLASH_STATUS_BP_NONE                 (0x0 << FLASH_STATUS_BP_SHIFT)
+#define FLASH_STATUS_BP_ALL                  (0x7 << FLASH_STATUS_BP_SHIFT)
+
 /* Flash command definitions */
 
 #define FLASH_INVALID_ADDR                   0xffffffff
@@ -88,6 +117,11 @@
 
 #define FLASH_CMD_READ_UID1                  0x4b
 #define FLASH_CMD_READ_UID2                  0x5a
+
+/* Flash status type definitions */
+
+#define FLASH_STATUS_TYPE_8BIT               0x0
+#define FLASH_STATUS_TYPE_16BIT              0x1
 
 /* Flash lock/unlock macros definitions */
 
@@ -453,6 +487,137 @@ void tlsr82_flash_write_data(uint32_t addr, const uint8_t *buf, uint32_t len)
 }
 
 /****************************************************************************
+ * Name: tlsr82_flash_read_status
+ *
+ * Description:
+ *   This function reads the status of flash.
+ *
+ * Input Parameters:
+ *   cmd  - the cmd of read status.
+ *
+ * Returned Value:
+ *   status.
+ *
+ ****************************************************************************/
+
+uint8_t tlsr82_flash_read_status(uint8_t cmd)
+{
+  uint8_t status = 0;
+
+  tlsr82_flash_read(cmd, FLASH_INVALID_ADDR, 0, &status, 1);
+
+  return status;
+}
+
+/****************************************************************************
+ * Name: tlsr82_flash_write_status
+ *
+ * Description:
+ *   Write the status to flash status register.
+ *
+ * Input Parameters:
+ *   type   - the type of status.8 bit or 16 bit.
+ *   status - the value of status.
+ *
+ * Returned Value:
+ *   void
+ *
+ ****************************************************************************/
+
+void tlsr82_flash_write_status(uint8_t type, uint16_t status)
+{
+  uint8_t buf[2];
+
+  /* Follow the sdk to write flash status register */
+
+  buf[0] = (uint8_t)(status & 0x00ff);
+  buf[1] = (uint8_t)(status >> 8);
+
+  if (type == FLASH_STATUS_TYPE_8BIT)
+    {
+      tlsr82_flash_write(FLASH_CMD_WRITE_STATUS_LBYTE,
+                         FLASH_INVALID_ADDR, buf, 1);
+    }
+  else if (type == FLASH_STATUS_TYPE_16BIT)
+    {
+      tlsr82_flash_write(FLASH_CMD_WRITE_STATUS_LBYTE,
+                         FLASH_INVALID_ADDR, buf, 2);
+    }
+}
+
+/****************************************************************************
+ * Name: tlsr82_flash_protect
+ *
+ * Description:
+ *   This function serves to set the protection area of the flash.
+ *   Note: after check the sdk code, this function can be applied to all
+ *         flash chips:
+ *         FLASH_MID_GD25LD10C 0x1160c8 128K
+ *         FLASH_MID_GD25LD40C 0x1360c8 512K
+ *         FLASH_MID_GD25LD80C 0x1460c8 1M
+ *         FLASH_MID_ZB25WD10A 0x11325e 128K
+ *         FLASH_MID_ZB25WD40B 0x13325e 512K
+ *         FLASH_MID_ZB25WD80B 0x14325e 1M
+ *         FLASH_MID_ZB25WD20A 0x12325e 256K
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TLSR82_FLASH_PROTECT
+void tlsr82_flash_protect(void)
+{
+  uint8_t status;
+  uint8_t data;
+
+  status = tlsr82_flash_read_status(FLASH_CMD_READ_STATUS_LBYTE);
+  data   = FLASH_STATUS_BP_ALL | (status & (~FLASH_STATUS_BP_MASK));
+
+  tlsr82_flash_write_status(FLASH_STATUS_TYPE_8BIT, data);
+}
+#endif
+
+/****************************************************************************
+ * Name: tlsr82_flash_unprotect
+ *
+ * Description:
+ *   This function serves to release flash protection.
+ *   Note: after check the sdk code, this function can be applied to all
+ *         flash chips:
+ *         FLASH_MID_GD25LD10C 0x1160c8 128K
+ *         FLASH_MID_GD25LD40C 0x1360c8 512K
+ *         FLASH_MID_GD25LD80C 0x1460c8 1M
+ *         FLASH_MID_ZB25WD10A 0x11325e 128K
+ *         FLASH_MID_ZB25WD40B 0x13325e 512K
+ *         FLASH_MID_ZB25WD80B 0x14325e 1M
+ *         FLASH_MID_ZB25WD20A 0x12325e 256K
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   void
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TLSR82_FLASH_PROTECT
+void tlsr82_flash_unprotect(void)
+{
+  uint8_t status;
+  uint8_t data;
+
+  status = tlsr82_flash_read_status(FLASH_CMD_READ_STATUS_LBYTE);
+  data   = FLASH_STATUS_BP_NONE | (status & (~FLASH_STATUS_BP_MASK));
+
+  tlsr82_flash_write_status(FLASH_STATUS_TYPE_8BIT, data);
+}
+#endif
+
+/****************************************************************************
  * Name: tlsr82_flash_read_uid
  *
  * Description:
@@ -502,7 +667,7 @@ int tlsr82_flash_miduid_check(uint32_t *pmid, uint8_t *puid)
   /* Read the flash manufacaturer ID */
 
   tlsr82_flash_read(FLASH_CMD_READ_JEDEC_ID, FLASH_INVALID_ADDR,
-           0, (uint8_t *)pmid, 3);
+                    0, (uint8_t *)pmid, 3);
 #ifdef CONFIG_ARCH_CHIP_TLSR8258
   if (mid == FLASH_MID_GD25LE80C)
     {
@@ -542,3 +707,98 @@ int tlsr82_flash_miduid_check(uint32_t *pmid, uint8_t *puid)
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: tlsr82_flash_calibrate
+ *
+ * Description:
+ *   Follow telink sdk to do flash voltage calibration, the flash supply
+ *   voltage accuracy is very important, the low flash supply voltage will
+ *   cause the flash data destoied.
+ *
+ * Input Parameters:
+ *   mid - manufacaturer
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TLSR82_FLASH_CALI
+void tlsr82_flash_calibrate(uint32_t mid)
+{
+#if defined(CONFIG_ARCH_CHIP_TLSR8278)
+
+  uint16_t cali_data = *(uint16_t *)CONFIG_TLSR82_FLASH_CALI_PARA_ADDR;
+
+  finfo("cali_data=0x%x\n");
+
+  if ((0xffff == cali_data) || (0 != (cali_data & 0xf8f8)))
+    {
+      /* No flash calibration paramters */
+
+      finfo("No flash calibration parameters\n");
+
+      if (mid == FLASH_MID_ZB25WD10A || mid == FLASH_MID_ZB25WD40B ||
+          mid == FLASH_MID_ZB25WD80B || mid == FLASH_MID_ZB25WD20A)
+        {
+          /* LDO mode flash ldo trim 1.95V */
+
+          tlsr82_analog_write(0x09, ((tlsr82_analog_read(0x09) & 0x8f) |
+                                     (FLASH_VOLTAGE_1V95 << 4)));
+
+          /* DCDC mode flash ldo trim 1.90V */
+
+          tlsr82_analog_write(0x0c, ((tlsr82_analog_read(0x0c) & 0xf8) |
+                                     FLASH_VOLTAGE_1V9));
+        }
+    }
+  else
+    {
+      /* Flash calibration parameters exist, write the flash calibration
+       * parameters to the register
+       */
+
+      finfo("Calibrate the flash voltage\n");
+
+      tlsr82_analog_write(0x09, ((tlsr82_analog_read(0x09) & 0x8f) |
+                                 ((cali_data & 0xff00) >> 4)));
+      tlsr82_analog_write(0x0c, ((tlsr82_analog_read(0x0c) & 0xf8) |
+                                 (cali_data & 0xff)));
+    }
+
+#elif defined(CONFIG_ARCH_CHIP_TLSR8258)
+
+  uint8_t cali_data = *(uint8_t *)CONFIG_TLSR82_FLASH_CALI_PARA_ADDR;
+
+  finfo("cali_data=0x%x\n");
+
+  if (0xff == cali_data)
+    {
+      /* No flash calibration paramters */
+
+      finfo("No flash calibration parameters\n");
+
+      if (mid == FLASH_MID_ZB25WD10A || mid == FLASH_MID_ZB25WD40B ||
+          mid == FLASH_MID_ZB25WD80B || mid == FLASH_MID_ZB25WD20A)
+        {
+          /* DCDC mode flash ldo trim 1.95V */
+
+          tlsr82_analog_write(0x0c, ((tlsr82_analog_read(0x0c) & 0xf8) |
+                                     FLASH_VOLTAGE_1V95));
+        }
+    }
+  else
+    {
+      /* Flash calibration parameters exist, write the flash calibration
+       * parameters to the register
+       */
+
+      finfo("Calibrate the flash voltage\n");
+
+      tlsr82_analog_write(0x0c, ((tlsr82_analog_read(0x0c) & 0xf8) |
+                                 (cali_data & 0x7)));
+    }
+#endif
+}
+#endif
