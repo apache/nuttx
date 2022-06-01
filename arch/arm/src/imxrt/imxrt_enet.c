@@ -106,25 +106,6 @@
 #define NENET_NBUFFERS \
   (CONFIG_IMXRT_ENET_NTXBUFFERS + CONFIG_IMXRT_ENET_NRXBUFFERS)
 
-/* Normally you would clean the cache after writing new values to the DMA
- * memory so assure that the dirty cache lines are flushed to memory
- * before the DMA occurs.  And you would invalid the cache after a data is
- * received via DMA so that you fetch the actual content of the data from
- * the cache.
- *
- * These conditions are not fully supported here.  If the write-throuch
- * D-Cache is enabled, however, then many of these issues go away:  The
- * cache clean operation does nothing (because there are not dirty cache
- * lines) and the cache invalid operation is innocuous (because there are
- * never dirty cache lines to be lost; valid data will always be reloaded).
- *
- * At present, we simply insist that write through cache be enabled.
- */
-
-#if defined(CONFIG_ARMV7M_DCACHE) && !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
-#  error Write back D-Cache not yet supported
-#endif
-
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per
  * second.
  */
@@ -506,7 +487,13 @@ static int imxrt_transmit(struct imxrt_driver_s *priv)
    * no transmission in progress.
    */
 
+  /* Flush the contents of the TX buffer into physical memory */
+
+  up_clean_dcache((uintptr_t)priv->dev.d_buf,
+                  (uintptr_t)priv->dev.d_buf + priv->dev.d_len);
+
   txdesc = &priv->txdesc[priv->txhead];
+
   priv->txhead++;
   if (priv->txhead >= CONFIG_IMXRT_ENET_NTXBUFFERS)
     {
@@ -514,8 +501,6 @@ static int imxrt_transmit(struct imxrt_driver_s *priv)
     }
 
 #ifdef CONFIG_DEBUG_ASSERTIONS
-  up_invalidate_dcache((uintptr_t)txdesc,
-                       (uintptr_t)txdesc + sizeof(struct enet_desc_s));
 
   DEBUGASSERT(priv->txtail != priv->txhead &&
              (txdesc->status1 & TXDESC_R) == 0);
@@ -566,6 +551,9 @@ static int imxrt_transmit(struct imxrt_driver_s *priv)
 
   wd_start(&priv->txtimeout, IMXRT_TXTIMEOUT,
            imxrt_txtimeout_expiry, (wdparm_t)priv);
+
+  up_clean_dcache((uintptr_t)txdesc,
+                  (uintptr_t)txdesc + sizeof(struct enet_desc_s));
 
   /* Start the TX transfer (if it was not already waiting for buffers) */
 
@@ -639,7 +627,7 @@ static int imxrt_txpoll(struct net_driver_s *dev)
 
           imxrt_transmit(priv);
           priv->dev.d_buf = (uint8_t *)
-            imxrt_swap32((uint32_t)priv->txdesc[priv->txhead].data);
+              imxrt_swap32((uint32_t)priv->txdesc[priv->txhead].data);
 
           /* Check if there is room in the device to hold another packet. If
            * not, return a non-zero value to terminate the poll.
@@ -773,6 +761,7 @@ static inline void imxrt_dispatch(struct imxrt_driver_s *priv)
   else
 #endif
 #ifdef CONFIG_NET_ARP
+
   /* Check for an ARP packet */
 
   if (BUF->type == HTONS(ETHTYPE_ARP))
@@ -866,7 +855,12 @@ static void imxrt_receive(struct imxrt_driver_s *priv)
 
           priv->dev.d_buf = (uint8_t *)
             imxrt_swap32((uint32_t)priv->txdesc[priv->txhead].data);
+          up_clean_dcache((uintptr_t)priv->dev.d_buf,
+                          (uintptr_t)priv->dev.d_buf + priv->dev.d_len);
+
           rxdesc->status1 |= RXDESC_E;
+          up_clean_dcache((uintptr_t)rxdesc,
+                          (uintptr_t)rxdesc + sizeof(struct enet_desc_s));
 
           /* Update the index to the next descriptor */
 
@@ -2424,6 +2418,12 @@ static void imxrt_initbuffers(struct imxrt_driver_s *priv)
 
   priv->dev.d_buf =
     (uint8_t *)imxrt_swap32((uint32_t)priv->txdesc[priv->txhead].data);
+  up_clean_dcache((uintptr_t)priv->rxdesc,
+                 (uintptr_t)priv->rxdesc + CONFIG_IMXRT_ENET_NRXBUFFERS
+                  * sizeof(struct enet_desc_s));
+  up_clean_dcache((uintptr_t)priv->txdesc,
+                 (uintptr_t)priv->txdesc + CONFIG_IMXRT_ENET_NTXBUFFERS
+                 * sizeof(struct enet_desc_s));
 }
 
 /****************************************************************************
