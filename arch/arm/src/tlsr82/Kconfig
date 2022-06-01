@@ -422,6 +422,31 @@ config TLSR82_FLASH_WRITE_BUFFER_SIZE
 		Flash byte write buffer size, the larger this size, the higher byte write
 		efficiency.
 
+config TLSR82_FLASH_PROTECT
+	bool "Flash erase/write protect enable"
+	default n
+	---help---
+		When enable this config, application can use ioctl(fd, MTDIOC_PROTECT/
+		MTDIOC_UNPROTECT, arg) to protect or unprotect the flash. The protect
+		and unprotect operations cost several millisecond, be careful to use it
+		if the application has performance requirements.
+
+config TLSR82_FLASH_CALI
+	bool "Flash volatge calibration enable"
+	default n
+	---help---
+		When enable the flash calibration, flash driver will read the calibration
+		parameters stored in the falsh during initialization and use these
+		parameters to calibrate the flash voltage.
+
+config TLSR82_FLASH_CALI_PARA_ADDR
+	hex "Flash voltage calibration address"
+	default 0x3ffd0
+	depends on TLSR82_FLASH_CALI
+	---help---
+		This is the flash calibration parameters address, this address must be
+		equal to the address defined in production tools.
+
 config TLSR82_FLASH_TEST
 	bool "Enable the falsh test when initializing"
 	default n
