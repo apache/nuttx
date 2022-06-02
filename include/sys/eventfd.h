@@ -33,7 +33,7 @@
  ****************************************************************************/
 
 #define EFD_NONBLOCK  O_NONBLOCK
-#define EFD_SEMAPHORE O_BINARY
+#define EFD_SEMAPHORE O_SYNC
 #define EFD_CLOEXEC   O_CLOEXEC
 
 /****************************************************************************

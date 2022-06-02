@@ -389,7 +389,7 @@ static int hci_open(FAR struct file *filep)
   FAR hci_dev_t *dev = inode->i_private;
   int ret;
   ret = file_open(&dev->filep,
-                  CONFIG_AMEBA_HCI_DEV_NAME, O_RDWR | O_BINARY);
+                  CONFIG_AMEBA_HCI_DEV_NAME, O_RDWR);
   if (ret < 0)
     {
       return ret;

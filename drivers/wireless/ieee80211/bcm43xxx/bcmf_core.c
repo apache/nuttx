@@ -248,7 +248,7 @@ int bcmf_upload_file(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
 
   /* Open the file in the detached state */
 
-  ret = file_open(&finfo, path, O_RDONLY | O_BINARY);
+  ret = file_open(&finfo, path, O_RDONLY);
   if (ret < 0)
     {
       wlerr("ERROR: Failed to open the FILE MTD file %s: %d\n", path, ret);

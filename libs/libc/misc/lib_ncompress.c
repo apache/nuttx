@@ -174,10 +174,6 @@
 #  define NOALLIGN 1
 #endif                                 /* DOS */
 
-#ifndef O_BINARY
-#  define O_BINARY 0            /* System has no binary mode */
-#endif
-
 #ifdef M_XENIX                  /* Stupid compiler can't handle arrays with */
 #  if BITS == 16                /* more than 65535 bytes - so we fake it */
 #    define MAXSEG_64K
