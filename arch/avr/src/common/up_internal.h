@@ -29,6 +29,8 @@
 
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
+#  include <nuttx/arch.h>
+#  include <nuttx/irq.h>
 #endif
 
 #ifdef CONFIG_ARCH_FAMILY_AVR32

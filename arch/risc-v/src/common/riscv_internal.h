@@ -165,8 +165,6 @@ extern "C"
 #endif
 
 #ifndef __ASSEMBLY__
-EXTERN volatile uintptr_t *g_current_regs[CONFIG_SMP_NCPUS];
-#define CURRENT_REGS (g_current_regs[up_cpu_index()])
 EXTERN uintptr_t g_idle_topstack;
 
 /* Address of per-cpu idle stack base */

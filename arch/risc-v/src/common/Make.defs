@@ -35,7 +35,7 @@ CMN_CSRCS += riscv_releasestack.c riscv_stackframe.c riscv_schedulesigaction.c
 CMN_CSRCS += riscv_sigdeliver.c riscv_unblocktask.c riscv_usestack.c
 CMN_CSRCS += riscv_idle.c riscv_tcbinfo.c riscv_cpuidlestack.c
 CMN_CSRCS += riscv_exception.c riscv_getnewintctx.c riscv_doirq.c
-CMN_CSRCS += riscv_saveusercontext.c riscv_interruptcontext.c
+CMN_CSRCS += riscv_saveusercontext.c
 
 ifeq ($(CONFIG_SMP),y)
 CMN_CSRCS += riscv_cpuindex.c riscv_cpupause.c riscv_cpustart.c
