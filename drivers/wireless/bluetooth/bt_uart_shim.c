@@ -401,7 +401,7 @@ FAR struct btuart_lowerhalf_s *btuart_shim_getdevice(FAR const char *path)
 
   s = &n->state;
 
-  ret = file_open(&s->f, path, O_RDWR | O_BINARY);
+  ret = file_open(&s->f, path, O_RDWR);
   if (ret < 0)
     {
       kmm_free(n);

@@ -49,7 +49,7 @@
 #define MODE_NONE 0        /* No access mode determined */
 #define MODE_MASK (MODE_R | MODE_W | MODE_A)
 
-#define FLAG_KEEP (O_BINARY | O_CLOEXEC | O_EXCL)
+#define FLAG_KEEP (O_TEXT | O_CLOEXEC | O_EXCL)
 
 /****************************************************************************
  * Public Functions
@@ -156,7 +156,7 @@ int lib_mode2oflags(FAR const char *mode)
               {
                 /* Open for read access */
 
-                oflags = O_RDOK;
+                oflags = O_RDOK | O_TEXT;
                 state  = MODE_R;
               }
             else
@@ -172,7 +172,7 @@ int lib_mode2oflags(FAR const char *mode)
               {
                 /* Open for write access, truncating any existing file */
 
-                oflags = (O_WROK | O_CREAT | O_TRUNC);
+                oflags = O_WROK | O_CREAT | O_TRUNC | O_TEXT;
                 state  = MODE_W;
               }
             else
@@ -188,7 +188,7 @@ int lib_mode2oflags(FAR const char *mode)
               {
                 /* Write to the end of the file */
 
-                oflags = O_WROK | O_CREAT | O_APPEND;
+                oflags = O_WROK | O_CREAT | O_APPEND | O_TEXT;
                 state  = MODE_A;
               }
             else
@@ -224,7 +224,7 @@ int lib_mode2oflags(FAR const char *mode)
                      * file.
                      */
 
-                    oflags |= (O_RDWR | O_CREAT | O_TRUNC);
+                    oflags |= O_RDWR | O_CREAT | O_TRUNC;
                   }
                   break;
 
@@ -238,7 +238,7 @@ int lib_mode2oflags(FAR const char *mode)
                      * end,
                      */
 
-                    oflags |= (O_RDWR | O_CREAT | O_APPEND);
+                    oflags |= O_RDWR | O_CREAT | O_APPEND;
                   }
                   break;
 
@@ -255,7 +255,7 @@ int lib_mode2oflags(FAR const char *mode)
               {
                 /* The file is opened in binary mode */
 
-                oflags |= O_BINARY;
+                oflags &= ~O_TEXT;
               }
             else
               {
