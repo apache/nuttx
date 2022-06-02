@@ -214,6 +214,18 @@
 #  define SIGPIPE       CONFIG_SIG_PIPE
 #endif
 
+#ifndef CONFIG_SIG_HUP
+#  define SIGHUP        14
+#else
+#  define SIGHUP        CONFIG_SIG_HUP
+#endif
+
+#ifndef CONFIG_SIG_TTIN
+#  define SIGTTIN       15
+#else
+#  define SIGTTIN       CONFIG_SIG_TTIN
+#endif
+
 /* The following are non-standard signal definitions */
 
 #ifndef CONFIG_DISABLE_PTHREAD
