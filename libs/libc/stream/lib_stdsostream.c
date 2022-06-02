@@ -126,7 +126,7 @@ void lib_stdsostream(FAR struct lib_stdsostream_s *outstream,
    */
 
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
-  if (stream->fs_bufstart != NULL && (stream->fs_oflags & O_BINARY) == 0)
+  if (stream->fs_bufstart != NULL && (stream->fs_oflags & O_TEXT) != 0)
     {
       outstream->public.flush = stdsostream_flush;
     }

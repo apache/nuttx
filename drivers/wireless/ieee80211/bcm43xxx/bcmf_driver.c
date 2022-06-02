@@ -259,7 +259,7 @@ int bcmf_driver_download_clm(FAR struct bcmf_dev_s *priv)
   wlinfo("Download %d bytes\n", datalen);
 
   ret = file_open(&finfo, CONFIG_IEEE80211_BROADCOM_FWCLMNAME,
-                  O_RDONLY | O_BINARY);
+                  O_RDONLY);
   if (ret < 0)
     {
       wlerr("ERROR: Failed to open the FILE MTD file\n", ret);
