@@ -49,6 +49,8 @@
 #define MODE_NONE 0        /* No access mode determined */
 #define MODE_MASK (MODE_R | MODE_W | MODE_A)
 
+#define FLAG_KEEP (O_BINARY | O_EXCL)
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -204,7 +206,7 @@ int lib_mode2oflags(FAR const char *mode)
                   {
                     /* Retain any binary and exclusive mode selections */
 
-                    oflags &= (O_BINARY | O_EXCL);
+                    oflags &= FLAG_KEEP;
 
                     /* Open for read/write access */
 
@@ -216,7 +218,7 @@ int lib_mode2oflags(FAR const char *mode)
                   {
                     /* Retain any binary and exclusive mode selections */
 
-                    oflags &= (O_BINARY | O_EXCL);
+                    oflags &= FLAG_KEEP;
 
                     /* Open for write read/access, truncating any existing
                      * file.
@@ -230,7 +232,7 @@ int lib_mode2oflags(FAR const char *mode)
                   {
                     /* Retain any binary and exclusive mode selections */
 
-                    oflags &= (O_BINARY | O_EXCL);
+                    oflags &= FLAG_KEEP;
 
                     /* Read from the beginning of the file; write to the
                      * end,
