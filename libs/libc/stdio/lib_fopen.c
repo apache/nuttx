@@ -263,7 +263,7 @@ int lib_mode2oflags(FAR const char *mode)
 
           /* Open for exclusive access ("{r|w|a|b|+}x") */
 
-          case 'X' :
+          case 'x' :
             if ((state & MODE_MASK) != MODE_NONE)
               {
                 /* The file is opened in exclusive mode */
