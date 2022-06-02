@@ -49,7 +49,7 @@
 #define MODE_NONE 0        /* No access mode determined */
 #define MODE_MASK (MODE_R | MODE_W | MODE_A)
 
-#define FLAG_KEEP (O_BINARY | O_EXCL)
+#define FLAG_KEEP (O_BINARY | O_CLOEXEC | O_EXCL)
 
 /****************************************************************************
  * Public Functions
@@ -256,6 +256,21 @@ int lib_mode2oflags(FAR const char *mode)
                 /* The file is opened in binary mode */
 
                 oflags |= O_BINARY;
+              }
+            else
+              {
+                goto errout;
+              }
+            break;
+
+          /* Open for close on execute */
+
+          case 'e' :
+            if ((state & MODE_MASK) != MODE_NONE)
+              {
+                /* The file will be closed on execute */
+
+                oflags |= O_CLOEXEC;
               }
             else
               {
