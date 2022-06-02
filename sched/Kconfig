@@ -1518,6 +1518,26 @@ config SIG_PIPE
 		This signal is generated when write on a pipe with no one to read it.
 		SIGPIPE may be ignored.
 
+config SIG_HUP
+	int "SIGHUP"
+	default 14
+	---help---
+		The SIGHUP would be sent to programs when the serial line was dropped,
+		often because the connected user terminated the connection by hanging up
+		the modem. The system would detect the line was dropped via the lost
+		Data Carrier Detect (DCD) signal.
+
+config SIG_TTIN
+	int "SIGTTIN"
+	default 15
+	---help---
+		A process cannot read from the user’s terminal while it is running as a
+		background job. When any process in a background job tries to read from
+		the terminal, all of the processes in the job are sent a SIGTTIN signal.
+		The default action for this signal is to stop the process. For more
+		information about how this interacts with the terminal driver, see Access
+		to the Controlling Terminal.
+
 comment "Non-standard Signal Numbers"
 
 config SIG_SIGCONDTIMEDOUT
