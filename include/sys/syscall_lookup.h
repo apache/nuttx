@@ -255,7 +255,7 @@ SYSCALL_LOOKUP(utimens,                    2)
 SYSCALL_LOOKUP(lutimens,                   2)
 SYSCALL_LOOKUP(futimens,                   2)
 
-#if defined(CONFIG_FS_RAMMAP)
+#if defined(CONFIG_FS_RAMMAP) || defined(CONFIG_MM_VM_MAP)
   SYSCALL_LOOKUP(munmap,                   2)
 #endif
 
