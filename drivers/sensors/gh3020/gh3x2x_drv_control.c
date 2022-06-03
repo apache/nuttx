@@ -191,7 +191,7 @@ int8_t GH3X2X_SoftReset(void)
     if (g_uchResetFromProtocolFlag == 1)
     {
         g_uchResetFromProtocolFlag = 0;
-        up_mdelay(20);
+        usleep(20000);
         gh3020_fifo_process();
     }
     return chRet;
@@ -1722,7 +1722,7 @@ int8_t GH3X2X_HardReset(void)
     if (g_pGh3x2xResetPinLevelControlFunc != GH3X2X_PTR_NULL)
     {
         g_pGh3x2xResetPinLevelControlFunc(0);
-        up_udelay(GH3X2X_HARD_RESET_DELAY_X_US); /* hard reset delay 20us. */
+        usleep(GH3X2X_HARD_RESET_DELAY_X_US); /* hard reset delay 20us. */
         g_pGh3x2xResetPinLevelControlFunc(1);
         chRet = GH3X2X_RET_OK;
     }
@@ -1734,7 +1734,7 @@ int8_t GH3X2X_HardReset(void)
     if (g_uchResetFromProtocolFlag == 1)
     {
         g_uchResetFromProtocolFlag = 0;
-        up_mdelay(20);
+        usleep(20000);
         gh3020_fifo_process();
     }
     return chRet;
@@ -1821,7 +1821,7 @@ int8_t GH3X2X_WearDetectSwitchTo(EMWearDetectType emWearDetectType, EMWearDetect
                     gh3020_spi_writereg(GH3020_REG_ADT_WEARON_CR, usWearStatus); // set system into wear off
                     gh3020_spi_writereg(GH3020_REG_ADT_WEARON_CR, \
                                     GH3X2X_SET_BIT(usWearStatus, GH3020_REGVAL_ADT_WEAR_CR_WEAR_ON));
-                    up_udelay(GH3X2X_WEAR_DETECT_SWITCH_WAIT_X_US);
+                    usleep(GH3X2X_WEAR_DETECT_SWITCH_WAIT_X_US);
                     gh3020_spi_writereg(GH3020_REG_ADT_WEARON_LOGIC_SEL, usWearLogicSel); // re-sel wear on logic
                 }
                 else
@@ -1861,7 +1861,7 @@ int8_t GH3X2X_WearDetectSwitchTo(EMWearDetectType emWearDetectType, EMWearDetect
                     gh3020_spi_writereg(GH3020_REG_ADT_WEARON_CR, usWearStatus); // set system into wear on
                     gh3020_spi_writereg(GH3020_REG_ADT_WEARON_CR, \
                                     GH3X2X_SET_BIT(usWearStatus, GH3020_REGVAL_ADT_WEAR_CR_WEAR_OFF));
-                    up_udelay(GH3X2X_WEAR_DETECT_SWITCH_WAIT_X_US);
+                    usleep(GH3X2X_WEAR_DETECT_SWITCH_WAIT_X_US);
                     gh3020_spi_writereg(GH3020_REG_ADT_WEAROFF_LOGIC_SEL, usWearLogicSel); // re-sel wear off logic
                 }
                 else
@@ -1922,7 +1922,7 @@ int8_t GH3X2X_HsiClockCalibration(void)
         GH3X2X_WAIT_CHIP_WAKEUP();
         gh3020_spi_writereg(GH3020_REG_OSC_THR, GH3X2X_HSI_CALI_THR_CNT_VAL);
         gh3020_spi_writereg(GH3020_REG_OSC_CR, GH3X2X_HSI_CALI_CTRL_EN_VAL);
-        up_udelay(GH3X2X_HSI_CALI_DELAY_VAL);
+        usleep(GH3X2X_HSI_CALI_DELAY_VAL);
         if (GH3X2X_CHECK_BIT_SET (gh3020_spi_readreg(GH3020_REG_OSC_FLAG), GH3X2X_OSC_CALI_CODE_LOACKED))
         {
             chRet = GH3X2X_RET_OK;
@@ -1967,7 +1967,7 @@ int8_t GH3X2X_LsiClockCalibration(void)
         GH3X2X_WAIT_CHIP_WAKEUP();
         gh3020_spi_writereg(GH3020_REG_OSC_THR, GH3X2X_LSI_CALI_THR_CNT_VAL);
         gh3020_spi_writereg(GH3020_REG_OSC_CR, GH3X2X_LSI_CALI_CTRL_C_EN_VAL);
-        up_udelay(GH3X2X_LSI_COR_CALI_DELAY_VAL);
+        usleep(GH3X2X_LSI_COR_CALI_DELAY_VAL);
         if (GH3X2X_CHECK_BIT_SET (gh3020_spi_readreg(GH3020_REG_OSC_FLAG), GH3X2X_OSC_CALI_CODE_LOACKED))
         {
             usCaliVal = gh3020_spi_readreg(GH3020_REG_OSC32K_TUNE);
@@ -1977,7 +1977,7 @@ int8_t GH3X2X_LsiClockCalibration(void)
                 usCaliVal = GH3X2X_MAKEUP_WORD(uchCalcVal, GH3X2X_GET_LOW_BYTE_FROM_WORD(usCaliVal));
                 gh3020_spi_writereg(GH3020_REG_OSC32K_TUNE, usCaliVal);
                 gh3020_spi_writereg(GH3020_REG_OSC_CR, GH3X2X_LSI_CALI_CTRL_F_EN_VAL);
-                up_udelay(GH3X2X_LSI_FINE_CALI_DELAY_VAL);
+                usleep(GH3X2X_LSI_FINE_CALI_DELAY_VAL);
                 sFreqErrVal = gh3020_spi_readreg(GH3020_REG_OSC_FREQ_ERR_UR);
                 if (sFreqErrVal > GH3X2X_LSI_CALI_ERR_MAX_VAL)
                 {

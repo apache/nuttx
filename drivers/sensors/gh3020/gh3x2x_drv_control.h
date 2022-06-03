@@ -54,7 +54,7 @@ typedef void (*pfnSetPinLevel)(uint8_t uchPinLevel);                            
 #define   GH3X2X_SEND_RESET_CMD()           do { gh3020_spi_sendcmd(GH3020_SPI_CMD_RESET); } while (0)
 
 /// wait send cmd done
-#define   GH3X2X_SEND_WAIT_CMD_DONE()       do { up_udelay(GH3020_CMD_DELAY_US); } while (0)
+#define   GH3X2X_SEND_WAIT_CMD_DONE()       do { usleep(GH3020_CMD_DELAY_US); } while (0)
 
 /// chip wakeup
 #define   GH3X2X_CHIP_WAKEUP(ret)       do {\

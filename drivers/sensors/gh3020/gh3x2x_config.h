@@ -146,7 +146,7 @@
 #define __SUPPORT_ALGO_INPUT_OUTPUT_DATA_HOOK_CONFIG__  (1)  /**< enable it ,we can get algo input and output data **/
 
 /* gh3x2x data buffer size config,this is related to gh3x2x fifo water mark config */
-#define __GH3X2X_RAWDATA_BUFFER_SIZE__                  (64 * 4)                                  /**< rawdata buffer size in byte */
+#define __GH3X2X_RAWDATA_BUFFER_SIZE__                  (128 * 4)                                  /**< rawdata buffer size in byte */
 #define __GH3X2X_RAWDATA_BUFFER_CRC_SIZE__              (8)                                        /**< rawdata buffer crc size in byte */
 
 /* gsensor data buffer size config,every g sensor data has 6 bytes(x,y,z) */
