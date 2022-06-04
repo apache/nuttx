@@ -27,7 +27,6 @@
 
 #include <sys/types.h>
 #include <stddef.h>
-#include <wchar.h>
 
 /****************************************************************************
  * Pre-processor Definitions
