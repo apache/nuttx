@@ -72,7 +72,7 @@ up_invalidate_dcache_all:
   .globl  up_invalidate_icache_all
   .type   up_invalidate_icache_all, function
 
-up_invalidate_dcaup_invalidate_icache_allhe_all:
+up_invalidate_icache_all:
   .word 0x100F
   nop
   nop
