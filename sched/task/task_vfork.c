@@ -33,9 +33,6 @@
 #include <queue.h>
 #include <debug.h>
 
-#include <nuttx/sched.h>
-#include <nuttx/tls.h>
-
 #include "sched/sched.h"
 #include "environ/environ.h"
 #include "group/group.h"

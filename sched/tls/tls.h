@@ -26,10 +26,28 @@
  ****************************************************************************/
 
 #include <nuttx/sched.h>
+#include <nuttx/tls.h>
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_tls_size
+ *
+ * Description:
+ *   Get TLS (sizeof(struct tls_info_s) + tdata + tbss) section size.
+ *
+ * Returned Value:
+ *   Size of (sizeof(struct tls_info_s) + tdata + tbss).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_THREAD_LOCAL
+#  define tls_info_size() up_tls_size()
+#else
+#  define tls_info_size() sizeof(struct tls_info_s)
+#endif
 
 /****************************************************************************
  * Name: task_init_info
