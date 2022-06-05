@@ -130,7 +130,7 @@ config SYSLOG_TIMESTAMP_LOCALTIME
 
 config SYSLOG_TIMESTAMP_FORMAT
 	string "Time format"
-	default "%e/%m/%y %H:%M:%S"
+	default "%d/%m/%y %H:%M:%S"
 	depends on SYSLOG_TIMESTAMP_FORMATTED
 	---help---
 		Formatter string for syslog timestamp printing.
@@ -139,7 +139,7 @@ config SYSLOG_TIMESTAMP_FORMAT
 config SYSLOG_TIMESTAMP_FORMAT_MICROSECOND
 	bool "Append microseconds after seconds"
 	default y
-	depends on SYSLOG_TIMESTAMP_FORMAT = "%e/%m/%y %H:%M:%S"
+	depends on SYSLOG_TIMESTAMP_FORMAT = "%d/%m/%y %H:%M:%S"
 
 config SYSLOG_TIMESTAMP_BUFFER
 	int "Formatted timestamp buffer size"
