@@ -31,6 +31,7 @@
 #include <debug.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/tls.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/syslog/syslog.h>
