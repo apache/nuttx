@@ -23,10 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <assert.h>
-
-#include <nuttx/tls.h>
 
 #include "unistd.h"
 
