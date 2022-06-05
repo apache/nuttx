@@ -37,7 +37,7 @@
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
-#include <wchar.h>
+#include <ctype.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
@@ -233,8 +233,9 @@ static void ramlog_pollnotify(FAR struct ramlog_dev_s *priv,
 static void ramlog_initbuf(void)
 {
   FAR struct ramlog_dev_s *priv = &g_sysdev;
-  FAR const char *tmp;
+  bool is_empty = true;
   char prev;
+  char cur;
   size_t i;
 
   if (priv->rl_head != CONFIG_RAMLOG_BUFSIZE ||
@@ -244,37 +245,33 @@ static void ramlog_initbuf(void)
     }
 
   prev = priv->rl_buffer[priv->rl_bufsize - 1];
+
   for (i = 0; i < priv->rl_bufsize; i++)
     {
-      if (!prev && priv->rl_buffer[i])
+      cur = priv->rl_buffer[i];
+
+      if (!isascii(cur))
         {
-          tmp = priv->rl_buffer + i;
-          if ((ssize_t)mbsnrtowcs(NULL, &tmp, priv->rl_bufsize - i, 0, NULL) < 0)
-            {
-              break;
-            }
-          else if (tmp == NULL)
-            {
-              priv->rl_head = i + strlen(priv->rl_buffer + i);
-              priv->rl_tail = i;
-              return;
-            }
-          else if ((ssize_t)mbstowcs(NULL, priv->rl_buffer, 0) < 0)
-            {
-              break;
-            }
-          else
-            {
-              priv->rl_head = strlen(priv->rl_buffer);
-              priv->rl_tail = i;
-              return;
-            }
+          memset(priv->rl_buffer, 0, priv->rl_bufsize);
+          break;
+        }
+      else if (prev && !cur)
+        {
+          priv->rl_head = i;
+          is_empty = false;
+        }
+      else if (!prev && cur)
+        {
+          priv->rl_tail = i;
         }
 
-      prev = priv->rl_buffer[i];
+      prev = cur;
     }
 
-  memset(priv->rl_buffer, 0, priv->rl_bufsize);
+  if (i != priv->rl_bufsize || is_empty)
+    {
+      priv->rl_head = priv->rl_tail = 0;
+    }
 }
 #endif
 
