@@ -58,6 +58,7 @@
 #include <nuttx/net/netstats.h>
 #include <nuttx/net/tcp.h>
 
+#include "netdev/netdev.h"
 #include "devif/devif.h"
 #include "socket/socket.h"
 #include "tcp/tcp.h"
@@ -139,8 +140,10 @@ static void tcp_timer_expiry(FAR void *arg)
 {
   FAR struct tcp_conn_s *conn = arg;
 
+  net_lock();
   conn->timeout = true;
-  conn->dev->d_txavail(conn->dev);
+  netdev_txnotify_dev(conn->dev);
+  net_unlock();
 }
 
 /****************************************************************************
