@@ -45,8 +45,8 @@
  *
  * Assumptions:
  *   This function is called from the MAC device driver indirectly through
- *   devif_poll() and devif_timer() and may be called from the timer
- *   interrupt/watchdog handler level.
+ *   devif_poll() and may be called from the timer  interrupt/watchdog
+ *   handler level.
  *
  ****************************************************************************/
 
