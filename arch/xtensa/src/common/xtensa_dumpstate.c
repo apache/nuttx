@@ -116,10 +116,10 @@ static void xtensa_dump_task(struct tcb_s *tcb, void *arg)
 #ifdef CONFIG_SMP
          "  %4d"
 #endif
+         "   %7lu"
 #ifdef CONFIG_STACK_COLORATION
          "   %7lu"
 #endif
-         "   %7lu"
 #ifdef CONFIG_STACK_COLORATION
          "   %3" PRId32 ".%1" PRId32 "%%%c"
 #endif
@@ -127,21 +127,21 @@ static void xtensa_dump_task(struct tcb_s *tcb, void *arg)
          "   %3" PRId32 ".%01" PRId32 "%%"
 #endif
 #if CONFIG_TASK_NAME_SIZE > 0
-         "   %s %s\n",
+         "   %s %s\n"
 #else
-         "   %s\n",
+         "   %s\n"
 #endif
-         tcb->pid, tcb->sched_priority,
+         , tcb->pid, tcb->sched_priority
 #ifdef CONFIG_SMP
-         tcb->cpu,
+         , tcb->cpu
+#endif
+         , (unsigned long)tcb->adj_stack_size
+#ifdef CONFIG_STACK_COLORATION
+         , (unsigned long)up_check_tcbstack(tcb)
 #endif
 #ifdef CONFIG_STACK_COLORATION
-         (unsigned long)up_check_tcbstack(tcb),
-#endif
-         (unsigned long)tcb->adj_stack_size
-#ifdef CONFIG_STACK_COLORATION
-         , stack_filled / 10, stack_filled % 10,
-         (stack_filled >= 10 * 80 ? '!' : ' ')
+         , stack_filled / 10, stack_filled % 10
+         , (stack_filled >= 10 * 80 ? '!' : ' ')
 #endif
 #ifdef CONFIG_SCHED_CPULOAD
          , intpart, fracpart
