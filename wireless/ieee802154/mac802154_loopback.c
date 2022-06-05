@@ -284,8 +284,8 @@ static inline void lo_netmask(FAR struct net_driver_s *dev)
  *
  * Description:
  *   Check if the network has any outgoing packets ready to send.  This is
- *   a callback from devif_poll() or devif_timer().  devif_poll() will be
- *   called only during normal TX polling.
+ *   a callback from devif_poll().  devif_poll() will be called only during
+ *   normal TX polling.
  *
  * Input Parameters:
  *   dev - Reference to the NuttX driver state structure
