@@ -138,11 +138,20 @@ static int tcp_get_timeout(FAR struct tcp_conn_s *conn)
 
 static void tcp_timer_expiry(FAR void *arg)
 {
-  FAR struct tcp_conn_s *conn = arg;
+  FAR struct tcp_conn_s *conn = NULL;
 
   net_lock();
-  conn->timeout = true;
-  netdev_txnotify_dev(conn->dev);
+
+  while ((conn = tcp_nextconn(conn)) != NULL)
+    {
+      if (conn == arg)
+        {
+          conn->timeout = true;
+          netdev_txnotify_dev(conn->dev);
+          break;
+        }
+    }
+
   net_unlock();
 }
 
