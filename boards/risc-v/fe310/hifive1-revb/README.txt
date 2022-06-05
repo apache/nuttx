@@ -11,8 +11,8 @@
 3. Configure and build NuttX
 
   $ mkdir ./nuttx; cd ./nuttx
-  $ git clone https://github.com/apache/incubator-nuttx.git
-  $ git clone https://github.com/apache/incubator-nuttx-apps.git
+  $ git clone https://github.com/apache/incubator-nuttx.git nuttx
+  $ git clone https://github.com/apache/incubator-nuttx-apps.git apps
   $ cd nuttx
   $ make distclean
   $ ./tools/configure.sh hifive1-revb:nsh
