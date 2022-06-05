@@ -153,7 +153,7 @@ static void ipfwd_packet_conversion(FAR struct net_driver_s *dev, int proto)
  *
  * Assumptions:
  *   This function is called from the MAC device driver indirectly through
- *   devif_poll() and devif_timer().
+ *   devif_poll().
  *
  ****************************************************************************/
 

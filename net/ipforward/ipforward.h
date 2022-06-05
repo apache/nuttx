@@ -234,7 +234,7 @@ int ipfwd_forward(FAR struct forward_s *fwd);
  *
  * Assumptions:
  *   This function is called from the MAC device driver indirectly through
- *   devif_poll() and devif_timer().
+ *   devif_poll().
  *
  ****************************************************************************/
 

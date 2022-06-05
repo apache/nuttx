@@ -215,7 +215,7 @@ int arp_send(in_addr_t ipaddr);
  *
  * Assumptions:
  *   This function is called from the MAC device driver indirectly through
- *   devif_poll() and devif_timer().  The network must be locked.
+ *   devif_poll().  The network must be locked.
  *
  ****************************************************************************/
 
