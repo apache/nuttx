@@ -8,11 +8,11 @@ comment "x86 Configuration Options"
 
 choice
 	prompt "x86 chip selection"
-	default ARCH_I486
+	default ARCH_CHIP_QEMU_I486
 
-config ARCH_I486
-	bool "i486"
-	select ARCH_X86_HAVE_32BIT
+config ARCH_CHIP_QEMU_I486
+	bool "Qemu x86 emulation"
+	select ARCH_I486
 	---help---
 		Intel i486 architecture
 
@@ -24,15 +24,15 @@ config ARCH_CHIP_X86_CUSTOM
 
 endchoice
 
-config ARCH_CHIP_QEMU
-	bool "Qemu x86 emulation"
-	default n
+config ARCH_I486
+	bool
+	select ARCH_X86_HAVE_32BIT
 	---help---
 		Intel i486 architecture
 
 config ARCH_CHIP
 	string
-	default "qemu" if ARCH_CHIP_QEMU
+	default "qemu" if ARCH_CHIP_QEMU_I486
 
 config ARCH_X86_HAVE_32BIT
 	bool
@@ -52,7 +52,7 @@ source "arch/x86/src/common/Kconfig"
 if ARCH_I486
 source "arch/x86/src/i486/Kconfig"
 endif # ARCH_I486
-if ARCH_CHIP_QEMU
+if ARCH_CHIP_QEMU_I486
 source "arch/x86/src/qemu/Kconfig"
-endif # ARCH_CHIP_QEMU
+endif # ARCH_CHIP_QEMU_I486
 endif # ARCH_X86

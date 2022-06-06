@@ -29,9 +29,9 @@
 
 /* Get customizations for each supported QEMU emulation */
 
-#ifdef CONFIG_ARCH_CHIP_QEMU
+#ifdef CONFIG_ARCH_CHIP_QEMU_I486
 #else
-#  error "Unsupported STM32 chip"
+#  error "Unsupported I486 chip"
 #endif
 
 /* Include only the memory map.  Other chip hardware files should then include this
