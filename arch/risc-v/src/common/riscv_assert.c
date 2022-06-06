@@ -185,13 +185,12 @@ static void riscv_dump_task(struct tcb_s *tcb, void *arg)
   else
 #endif
     {
-      FAR char **argv;
+      FAR char **argv = tcb->group->tg_info->argv + 1;
       size_t npos = 0;
 
-      for (argv = tcb->group->tg_info->argv + 1; *argv; argv++)
+      while (*argv != NULL && npos < sizeof(args))
         {
-          npos += strlcpy(args + npos, *argv, sizeof(args) - npos);
-          npos += strlcpy(args + npos, " ", sizeof(args) - npos);
+          npos += snprintf(args + npos, sizeof(args) - npos, "%s ", *argv++);
         }
     }
 
