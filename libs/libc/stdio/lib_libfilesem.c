@@ -50,7 +50,7 @@ void lib_sem_initialize(FAR struct file_struct *stream)
    * to private data sets.
    */
 
-  nxrmutex_init(&stream->fs_lock);
+  _RMUTEX_INIT(&stream->fs_lock);
 }
 
 /****************************************************************************
@@ -59,7 +59,7 @@ void lib_sem_initialize(FAR struct file_struct *stream)
 
 void lib_take_semaphore(FAR struct file_struct *stream)
 {
-  nxrmutex_lock(&stream->fs_lock);
+  _RMUTEX_LOCK(&stream->fs_lock);
 }
 
 /****************************************************************************
@@ -68,7 +68,7 @@ void lib_take_semaphore(FAR struct file_struct *stream)
 
 void lib_give_semaphore(FAR struct file_struct *stream)
 {
-  nxrmutex_unlock(&stream->fs_lock);
+  _RMUTEX_UNLOCK(&stream->fs_lock);
 }
 
 #endif /* CONFIG_STDIO_DISABLE_BUFFERING */

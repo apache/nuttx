@@ -40,7 +40,7 @@
 
 /* Protects DNS cache, nameserver list and notify list. */
 
-static rmutex_t g_dns_lock = NXRMUTEX_INITIALIZER;
+static rmutex_t g_dns_lock = RMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Public Data
@@ -143,7 +143,7 @@ bool dns_initialize(void)
 
 void dns_semtake(void)
 {
-  nxrmutex_lock(&g_dns_lock);
+  _RMUTEX_LOCK(&g_dns_lock);
 }
 
 /****************************************************************************
@@ -156,5 +156,5 @@ void dns_semtake(void)
 
 void dns_semgive(void)
 {
-  nxrmutex_unlock(&g_dns_lock);
+  _RMUTEX_UNLOCK(&g_dns_lock);
 }

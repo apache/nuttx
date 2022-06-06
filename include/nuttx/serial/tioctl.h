@@ -86,7 +86,7 @@
 /* Controlling TTY */
 
 #define TIOCSCTTY       _TIOC(0x0018)  /* Make controlling TTY: int */
-#define TIOCNOTTY       _TIOC(0x0019)  /* Give up controllinog TTY: void */
+#define TIOCNOTTY       _TIOC(0x0019)  /* Give up controlling TTY: void */
 
 /* Exclusive mode */
 

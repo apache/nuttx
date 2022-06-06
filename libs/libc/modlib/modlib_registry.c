@@ -44,7 +44,7 @@
  * Private Data
  ****************************************************************************/
 
-static rmutex_t g_modlock = NXRMUTEX_INITIALIZER;
+static rmutex_t g_modlock = RMUTEX_INITIALIZER;
 
 static FAR struct module_s *g_mod_registry;
 
@@ -68,7 +68,7 @@ static FAR struct module_s *g_mod_registry;
 
 void modlib_registry_lock(void)
 {
-  nxrmutex_lock(&g_modlock);
+  _RMUTEX_LOCK(&g_modlock);
 }
 
 /****************************************************************************
@@ -87,7 +87,7 @@ void modlib_registry_lock(void)
 
 void modlib_registry_unlock(void)
 {
-  nxrmutex_unlock(&g_modlock);
+  _RMUTEX_UNLOCK(&g_modlock);
 }
 
 /****************************************************************************
