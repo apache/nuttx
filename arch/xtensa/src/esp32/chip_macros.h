@@ -57,8 +57,18 @@
 
 /* Definitions for the PIDs reserved for Kernel and Userspace */
 
-#define PIDCTRL_PID_KERNEL              0   /* Privileged */
-#define PIDCTRL_PID_USER                5   /* Non-privileged */
+#  define PIDCTRL_PID_KERNEL            0   /* Privileged */
+
+#ifdef CONFIG_ESP32_USER_DATA_EXTMEM
+
+/* Allocating user data in External RAM is currently limited to only using
+ * privileged PIDs (0 and 1).
+ */
+
+#  define PIDCTRL_PID_USER              1   /* Privileged */
+#else
+#  define PIDCTRL_PID_USER              5   /* Non-privileged */
+#endif
 
 /* Macros for privilege handling with the PID Controller peripheral */
 

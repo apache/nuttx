@@ -624,7 +624,7 @@ config ESP32_SPI3
 config ESP32_SPIRAM
 	bool "SPI RAM Support"
 	default n
-	select ARCH_HAVE_HEAP2
+	select ARCH_HAVE_HEAP2 if !ESP32_USER_DATA_EXTMEM
 	select XTENSA_IMEM_USE_SEPARATE_HEAP
 
 if ESP32_SPIRAM && SMP
@@ -1362,7 +1362,7 @@ endchoice # ESP32_SPIRAM_SPEED
 
 config ESP32_SPIRAM_BOOT_INIT
 	bool "Initialize SPI RAM during startup"
-	depends on ESP32_SPIRAM
+	depends on ESP32_SPIRAM && !ESP32_USER_DATA_EXTMEM
 	default y
 	---help---
 		If this is enabled, the SPI RAM will be enabled during initial
@@ -1893,6 +1893,22 @@ config ESP32_USER_IMAGE_OFFSET
 	default 0x90000
 	---help---
 		Offset in SPI Flash for flashing the User application firmware image.
+
+config ESP32_USER_DATA_EXTMEM
+	bool "Allocate user data in SPI RAM (READ HELP FIRST)"
+	default n
+	depends on ESP32_SPIRAM && EXPERIMENTAL
+	---help---
+		Allocate all data from User application firmware image in the external
+		SPI RAM.
+
+		Enabling this configuration comes with the restriction of running the Userspace
+		with high privilege (same as Kernel space), which in turn makes the execution
+		under Protected Mode not really protected.
+
+		This feature is intended to allow experimentation of Protected Mode on ESP32 and
+		should not be used in production. Protected mode on ESP32 is only supported with
+		PSRAM disabled.
 
 endif
 

@@ -73,6 +73,17 @@ MEMORY
    * the amount of RAM available to the NuttX Kernel.
    */
 
+#ifdef CONFIG_ESP32_USER_DATA_EXTMEM
+  /* Physically located in External RAM */
+  UDRAM (RW)   : org = 0x3f800000, len = 0x400000
+
+  /* Physically located in SRAM2 */
+  KDRAM_0 (RW) : org = 0x3ffb0000 + CONFIG_ESP32_BT_RESERVE_DRAM,
+                 len = 0x30000 - CONFIG_ESP32_BT_RESERVE_DRAM
+
+  /* Physically located in SRAM1 */
+  KDRAM_1 (RW) : org = 0x3ffe0000, len = 0x20000
+#else
   /* Physically located in SRAM2 */
   KDRAM_0 (RW) : org = 0x3ffb0000 + CONFIG_ESP32_BT_RESERVE_DRAM,
                  len = 0x18000 - CONFIG_ESP32_BT_RESERVE_DRAM
@@ -80,6 +91,7 @@ MEMORY
 
   /* Physically located in SRAM1 */
   KDRAM_1 (RW) : org = 0x3ffe0000, len = 0x20000
+#endif
 
   /* Flash mapped constant data */
 
