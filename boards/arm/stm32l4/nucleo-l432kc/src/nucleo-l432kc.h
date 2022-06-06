@@ -133,7 +133,8 @@ int stm32l4_gpio_initialize(void);
  * Name: stm32l4_spiregister
  *
  * Description:
- *   Called to register spi character driver of initialized spi device for the Nucleo-L432KC board.
+ *   Called to register spi character driver of initialized
+ *   spi device for the Nucleo-L432KC board.
  *
  ****************************************************************************/
 
