@@ -430,6 +430,21 @@ config ARCH_CHIP_STM32U5
 	---help---
 		STMicro STM32 U5 architectures (ARM Cortex-M33).
 
+config ARCH_CHIP_STM32WL5
+	bool "STMicro STM32 WL5"
+	select ARCH_CORTEXM4
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FETCHADD
+	select ARCH_HAVE_I2CRESET
+	select ARCH_HAVE_HEAPCHECK
+	select ARCH_HAVE_PROGMEM
+	select ARCH_HAVE_SPI_BITORDER
+	select ARCH_HAVE_TICKLESS
+	select ARM_HAVE_MPU_UNIFIED
+	select ARMV7M_HAVE_STACKCHECK
+	---help---
+		STMicro STM32WL5 architectures (dual CPU ARM Cortex-M4 Cortex-M0).
+
 config ARCH_CHIP_STR71X
 	bool "STMicro STR71x"
 	select ARCH_ARM7TDMI
@@ -852,6 +867,7 @@ config ARCH_CHIP
 	default "stm32l4"	if ARCH_CHIP_STM32L4
 	default "stm32l5"	if ARCH_CHIP_STM32L5
 	default "stm32u5"	if ARCH_CHIP_STM32U5
+	default "stm32wl5"	if ARCH_CHIP_STM32WL5
 	default "str71x"	if ARCH_CHIP_STR71X
 	default "tms570"	if ARCH_CHIP_TMS570
 	default "xmc4"		if ARCH_CHIP_XMC4
@@ -1235,6 +1251,9 @@ source "arch/arm/src/stm32l5/Kconfig"
 endif
 if ARCH_CHIP_STM32U5
 source "arch/arm/src/stm32u5/Kconfig"
+endif
+if ARCH_CHIP_STM32WL5
+source "arch/arm/src/stm32wl5/Kconfig"
 endif
 if ARCH_CHIP_STR71X
 source "arch/arm/src/str71x/Kconfig"

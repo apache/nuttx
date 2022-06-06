@@ -1,0 +1,223 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_STM32WL5
+
+comment "STM32WL5 Configuration Options"
+
+choice
+	prompt "STM32 WL5 Chip Selection"
+	default ARCH_CHIP_STM32WL55JC_CPU1
+	depends on ARCH_CHIP_STM32WL5
+
+config ARCH_CHIP_STM32WL55JC_CPU1
+	bool "STM32WL55JC (cpu1)"
+	select STM32WL5_STM32WL5XXX_CPU1
+	select STM32WL5_STM32WL5XXX
+	select STM32WL5_FLASH_CONFIG_C
+	---help---
+		STM32 WL5 Cortex M4 (cpu1), 256kiB FLASH, 64kiB SRAM
+
+config ARCH_CHIP_STM32WL55JC_CPU2
+	bool "STM32WL55JC (cpu2)"
+	select STM32WL5_STM32WL5XXX_CPU2
+	select STM32WL5_STM32WL5XXX
+	select STM32WL5_FLASH_CONFIG_C
+	---help---
+		STM32 WL5 Cortex M0 (cpu2), 256kiB FLASH, 64kiB SRAM
+
+
+endchoice # STM32 WL5 Chip Selection
+
+# Chip product lines
+
+config STM32WL5_STM32WL5XXX
+	bool
+
+config STM32WL5_STM32WL5XXX_CPU1
+	bool
+	default y
+	select STM32WL5_HAVE_USART1
+	select STM32WL5_HAVE_USART2
+	select STM32WL5_HAVE_LPUART1
+
+
+comment "STM32WL5 Peripherals"
+
+menu "STM32WL5 Peripheral Support"
+
+choice
+	prompt "Override Flash Size Designator"
+	depends on ARCH_CHIP_STM32WL5
+	default STM32WL5_FLASH_OVERRIDE_DEFAULT
+	---help---
+		STM32WL5 series parts numbering (sans the package type) ends with a letter
+		that designates the FLASH size.
+
+		    Designator  Size in KiB
+		         8          64
+		         B         128
+		         C         256
+		         E         512
+		         G        1024
+		         I        2048
+
+		This configuration option defaults to using the configuration based on that designator
+		or the default smaller size if there is no last character designator is present in the
+		STM32 Chip Selection.
+
+		Examples:
+		   If the STM32WL55JC is chosen, the Flash configuration would be 'C', if a variant of
+		   the part with a 1024 KiB Flash is released in the future one could simply select
+		   the 'G' designator here.
+
+		   If an STM32WL5xxx Series parts is chosen the default Flash configuration will be set
+		   herein and can be changed.
+
+config STM32WL5_FLASH_OVERRIDE_DEFAULT
+	bool "Default"
+
+config STM32WL5_FLASH_OVERRIDE_8
+	bool "8 64 KB"
+
+config STM32WL5_FLASH_OVERRIDE_B
+	bool "B 128 KB"
+
+config STM32WL5_FLASH_OVERRIDE_C
+	bool "C 256 KB"
+
+config STM32WL5_FLASH_OVERRIDE_E
+	bool "E 512 KB"
+
+config STM32WL5_FLASH_OVERRIDE_G
+	bool "G 1024 KB"
+
+endchoice # "Override Flash Size Designator"
+
+# Flash configurations
+
+config STM32WL5_FLASH_CONFIG_8
+	bool
+	default n
+
+config STM32WL5_FLASH_CONFIG_B
+	bool
+	default n
+
+config STM32WL5_FLASH_CONFIG_C
+	bool
+	default n
+
+config STM32WL5_FLASH_CONFIG_E
+	bool
+	default n
+
+config STM32WL5_FLASH_CONFIG_G
+	bool
+	default n
+
+# These "hidden" settings determine whether a peripheral option is available
+# for the selected MCU
+
+config STM32WL5_HAVE_USART1
+	bool
+	default n
+
+config STM32WL5_HAVE_USART2
+	bool
+	default n
+
+config STM32WL5_HAVE_LPUART1
+	bool
+	default n
+
+# These "hidden" settings are the OR of individual peripheral selections
+# indicating that the general capability is required.
+
+config STM32WL5_USART
+	bool
+	default n
+
+
+# These are the peripheral selections proper
+
+comment "APB1 Peripherals"
+
+config STM32WL5_USART2
+	bool "USART2"
+	default n
+	depends on STM32WL5_HAVE_USART2
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32WL5_USART
+
+config STM32WL5_LPUART1
+	bool "LPUART1"
+	default n
+	depends on STM32WL5_HAVE_LPUART1
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32WL5_USART
+
+comment "APB2 Peripherals"
+
+config STM32WL5_SYSCFG
+	bool "SYSCFG"
+	default y
+
+config STM32WL5_USART1
+	bool "USART1"
+	default n
+	depends on STM32WL5_HAVE_USART1
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32WL5_USART
+
+
+endmenu # STM32WL5 Peripheral Support
+
+
+config STM32WL5_SERIALDRIVER
+	bool
+
+menu "[LP]U[S]ART Configuration"
+	depends on STM32WL5_USART
+
+choice
+	prompt "USART1 Driver Configuration"
+	default STM32WL5_USART1_SERIALDRIVER
+	depends on STM32WL5_USART1
+
+config STM32WL5_USART1_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART1_SERIALDRIVER
+	select STM32WL5_SERIALDRIVER
+
+endchoice # USART1 Driver Configuration
+
+choice
+	prompt "USART2 Driver Configuration"
+	default STM32WL5_USART2_SERIALDRIVER
+	depends on STM32WL5_USART2
+
+config STM32WL5_USART2_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART2_SERIALDRIVER
+	select STM32WL5_SERIALDRIVER
+
+endchoice # USART2 Driver Configuration
+
+choice
+	prompt "LPUART1 Driver Configuration"
+	default STM32WL5_LPUART1_SERIALDRIVER
+	depends on STM32WL5_LPUART1
+
+config STM32WL5_LPUART1_SERIALDRIVER
+	bool "Standard serial driver"
+	select LPUART1_SERIALDRIVER
+	select STM32WL5_SERIALDRIVER
+
+endchoice # LPUART1 Driver Configuration
+
+endmenu # [LP]U[S]ART Configuration
+
+endif # ARCH_CHIP_STM32WL5
