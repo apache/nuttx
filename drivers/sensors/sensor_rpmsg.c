@@ -245,7 +245,7 @@ static int sensor_rpmsg_ioctlack_handler(FAR struct rpmsg_endpoint *ept,
                                          FAR void *data, size_t len,
                                          uint32_t src, FAR void *priv);
 static void sensor_rpmsg_push_event_one(FAR struct sensor_rpmsg_dev_s *dev,
-                                        FAR struct sensor_rpmsg_stub_s *stub);
+                                       FAR struct sensor_rpmsg_stub_s *stub);
 
 /****************************************************************************
  * Private Data
@@ -1336,5 +1336,5 @@ void sensor_rpmsg_unregister(FAR struct sensor_lowerhalf_s *lower)
 int sensor_rpmsg_initialize(void)
 {
   return rpmsg_register_callback(NULL, sensor_rpmsg_device_created,
-                                 NULL, NULL);
+                                 NULL, NULL, NULL);
 }

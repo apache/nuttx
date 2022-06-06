@@ -258,7 +258,7 @@ static int uinput_rpmsg_initialize(FAR struct uinput_context_s *ctx,
   list_initialize(&ctx->eptlist);
   strlcpy(ctx->name, name, UINPUT_NAME_SIZE);
   return rpmsg_register_callback(ctx, uinput_rpmsg_device_created,
-                                 uinput_rpmsg_device_destroy, NULL);
+                                 uinput_rpmsg_device_destroy, NULL, NULL);
 }
 
 /****************************************************************************

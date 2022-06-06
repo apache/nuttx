@@ -433,5 +433,6 @@ int syslog_rpmsg_init(void)
   return rpmsg_register_callback(&g_syslog_rpmsg,
                                  syslog_rpmsg_device_created,
                                  syslog_rpmsg_device_destroy,
+                                 NULL,
                                  NULL);
 }

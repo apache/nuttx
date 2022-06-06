@@ -1200,7 +1200,8 @@ int mpfs_ihc_init(void)
 
   /* Register callback to notify when rpmsg device is ready */
 
-  ret = rpmsg_register_callback(NULL, mpfs_rpmsg_device_created, NULL, NULL);
+  ret = rpmsg_register_callback(NULL, mpfs_rpmsg_device_created,
+                                NULL, NULL, NULL);
   if (ret < 0)
     {
       ihcerr("ERROR: Not able to register rpmsg callback\n");
@@ -1220,7 +1221,8 @@ int mpfs_ihc_init(void)
   if (ret < 0)
     {
       ihcerr("ERROR: Not able to create a thread!\n");
-      rpmsg_unregister_callback(NULL, mpfs_rpmsg_device_created, NULL, NULL);
+      rpmsg_unregister_callback(NULL, mpfs_rpmsg_device_created,
+                                NULL, NULL, NULL);
       goto init_error;
     }
 
