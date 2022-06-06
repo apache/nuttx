@@ -2217,7 +2217,9 @@ static void imxrt_blocksetup(struct sdio_dev_s *dev,
 
   /* Configure block size for next transfer */
 
+#if defined(CONFIG_ARMV7M_DCACHE)
   priv->blocksize = blocklen;
+#endif
 
   putreg32(USDHC_BLKATTR_SIZE(blocklen) | USDHC_BLKATTR_CNT(nblocks),
            priv->addr + IMXRT_USDHC_BLKATTR_OFFSET);
