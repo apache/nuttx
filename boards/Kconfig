@@ -1399,7 +1399,7 @@ config ARCH_BOARD_NUCLEO_L552ZE
 
 config ARCH_BOARD_QEMU_I486
 	bool "Qemu i486 Mode"
-	depends on ARCH_X86 || ARCH_I486
+	depends on ARCH_CHIP_QEMU_I486
 	---help---
 		Port of NuttX to QEMU in i486 mode.  This port will also run on real i486
 		hardware (Google the Bifferboard).
