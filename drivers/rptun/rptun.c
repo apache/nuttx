@@ -100,6 +100,7 @@ struct rptun_cb_s
   FAR void          *priv;
   rpmsg_dev_cb_t    device_created;
   rpmsg_dev_cb_t    device_destroy;
+  rpmsg_match_cb_t  ns_match;
   rpmsg_bind_cb_t   ns_bind;
   struct metal_list node;
 };
@@ -480,33 +481,43 @@ static void rptun_ns_bind(FAR struct rpmsg_device *rdev,
 {
   FAR struct rptun_priv_s *priv = rptun_get_priv_by_rdev(rdev);
   FAR struct rptun_bind_s *bind;
+  FAR struct metal_list *node;
 
-  bind = kmm_malloc(sizeof(struct rptun_bind_s));
-  if (bind)
+  nxmutex_lock(&g_rptun_lockcb);
+
+  metal_list_for_each(&g_rptun_cb, node)
     {
-      FAR struct metal_list *node;
       FAR struct rptun_cb_s *cb;
 
-      bind->dest = dest;
-      strlcpy(bind->name, name, RPMSG_NAME_SIZE);
-
-      nxmutex_lock(&g_rptun_lockcb);
-
-      metal_list_for_each(&g_rptun_cb, node)
+      cb = metal_container_of(node, struct rptun_cb_s, node);
+      if (cb->ns_match && cb->ns_match(rdev, cb->priv, name, dest))
         {
-          cb = metal_container_of(node, struct rptun_cb_s, node);
-          if (cb->ns_bind)
-            {
-              cb->ns_bind(rdev, cb->priv, name, dest);
-            }
+          rpmsg_bind_cb_t ns_bind = cb->ns_bind;
+          FAR void *cb_priv = cb->priv;
+
+          nxmutex_unlock(&g_rptun_lockcb);
+
+          DEBUGASSERT(ns_bind != NULL);
+          ns_bind(rdev, cb_priv, name, dest);
+
+          return;
         }
-
-      nxmutex_unlock(&g_rptun_lockcb);
-
-      nxmutex_lock(&priv->lock);
-      metal_list_add_tail(&priv->bind, &bind->node);
-      nxmutex_unlock(&priv->lock);
     }
+
+  nxmutex_unlock(&g_rptun_lockcb);
+
+  bind = kmm_malloc(sizeof(struct rptun_bind_s));
+  if (bind == NULL)
+    {
+      return;
+    }
+
+  bind->dest = dest;
+  strlcpy(bind->name, name, RPMSG_NAME_SIZE);
+
+  nxmutex_lock(&priv->lock);
+  metal_list_add_tail(&priv->bind, &bind->node);
+  nxmutex_unlock(&priv->lock);
 }
 
 static void rptun_ns_unbind(FAR struct rpmsg_device *rdev,
@@ -1016,6 +1027,7 @@ FAR const char *rpmsg_get_cpuname(FAR struct rpmsg_device *rdev)
 int rpmsg_register_callback(FAR void *priv_,
                             rpmsg_dev_cb_t device_created,
                             rpmsg_dev_cb_t device_destroy,
+                            rpmsg_match_cb_t ns_match,
                             rpmsg_bind_cb_t ns_bind)
 {
   FAR struct metal_list *node;
@@ -1031,6 +1043,7 @@ int rpmsg_register_callback(FAR void *priv_,
   cb->priv           = priv_;
   cb->device_created = device_created;
   cb->device_destroy = device_destroy;
+  cb->ns_match       = ns_match;
   cb->ns_bind        = ns_bind;
 
   nxmutex_lock(&g_rptun_lockpriv);
@@ -1045,20 +1058,32 @@ int rpmsg_register_callback(FAR void *priv_,
           device_created(&priv->rvdev.rdev, priv_);
         }
 
-      if (ns_bind)
+      if (ns_bind == NULL)
         {
-          nxmutex_lock(&priv->lock);
-
-          metal_list_for_each(&priv->bind, bnode)
-            {
-              struct rptun_bind_s *bind;
-
-              bind = metal_container_of(bnode, struct rptun_bind_s, node);
-              ns_bind(&priv->rvdev.rdev, priv_, bind->name, bind->dest);
-            }
-
-          nxmutex_unlock(&priv->lock);
+          continue;
         }
+
+      DEBUGASSERT(ns_match != NULL);
+again:
+      nxmutex_lock(&priv->lock);
+
+      metal_list_for_each(&priv->bind, bnode)
+        {
+          FAR struct rptun_bind_s *bind;
+
+          bind = metal_container_of(bnode, struct rptun_bind_s, node);
+          if (ns_match(&priv->rvdev.rdev, priv_, bind->name, bind->dest))
+            {
+              metal_list_del(bnode);
+              nxmutex_unlock(&priv->lock);
+
+              ns_bind(&priv->rvdev.rdev, priv_, bind->name, bind->dest);
+              kmm_free(bind);
+              goto again;
+            }
+        }
+
+      nxmutex_unlock(&priv->lock);
     }
 
   nxmutex_unlock(&g_rptun_lockpriv);
@@ -1073,6 +1098,7 @@ int rpmsg_register_callback(FAR void *priv_,
 void rpmsg_unregister_callback(FAR void *priv_,
                                rpmsg_dev_cb_t device_created,
                                rpmsg_dev_cb_t device_destroy,
+                               rpmsg_match_cb_t ns_match,
                                rpmsg_bind_cb_t ns_bind)
 {
   FAR struct metal_list *node;
@@ -1082,12 +1108,13 @@ void rpmsg_unregister_callback(FAR void *priv_,
 
   metal_list_for_each(&g_rptun_cb, node)
     {
-      struct rptun_cb_s *cb = NULL;
+      FAR struct rptun_cb_s *cb = NULL;
 
       cb = metal_container_of(node, struct rptun_cb_s, node);
       if (cb->priv == priv_ &&
           cb->device_created == device_created &&
           cb->device_destroy == device_destroy &&
+          cb->ns_match == ns_match &&
           cb->ns_bind == ns_bind)
         {
           metal_list_del(&cb->node);

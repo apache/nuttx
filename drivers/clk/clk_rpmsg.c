@@ -160,6 +160,10 @@ static void clk_rpmsg_client_created(FAR struct rpmsg_device *rdev,
 static void clk_rpmsg_client_destroy(FAR struct rpmsg_device *rdev,
                                      FAR void *priv_);
 
+static bool clk_rpmsg_server_match(FAR struct rpmsg_device *rdev,
+                                   FAR void *priv_,
+                                   FAR const char *name,
+                                   uint32_t dest);
 static void clk_rpmsg_server_bind(FAR struct rpmsg_device *rdev,
                                   FAR void *priv_,
                                   FAR const char *name,
@@ -249,6 +253,7 @@ clk_rpmsg_get_priv(FAR const char *name)
   rpmsg_register_callback(priv,
                           clk_rpmsg_client_created,
                           clk_rpmsg_client_destroy,
+                          NULL,
                           NULL);
   return priv;
 
@@ -495,6 +500,14 @@ static int64_t clk_rpmsg_sendrecv(FAR struct rpmsg_endpoint *ept,
   return cookie.result;
 }
 
+static bool clk_rpmsg_server_match(FAR struct rpmsg_device *rdev,
+                                   FAR void *priv_,
+                                   FAR const char *name,
+                                   uint32_t dest)
+{
+  return !strcmp(name, CLK_RPMSG_EPT_NAME);
+}
+
 static void clk_rpmsg_server_bind(FAR struct rpmsg_device *rdev,
                                   FAR void *priv_,
                                   FAR const char *name,
@@ -502,23 +515,20 @@ static void clk_rpmsg_server_bind(FAR struct rpmsg_device *rdev,
 {
   FAR struct clk_rpmsg_server_s *priv;
 
-  if (!strcmp(name, CLK_RPMSG_EPT_NAME))
+  priv = kmm_zalloc(sizeof(struct clk_rpmsg_server_s));
+  if (!priv)
     {
-      priv = kmm_zalloc(sizeof(struct clk_rpmsg_server_s));
-      if (!priv)
-        {
-          return;
-        }
-
-      priv->ept.priv = priv;
-
-      list_initialize(&priv->clk_list);
-
-      rpmsg_create_ept(&priv->ept, rdev, name,
-                       RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
-                       clk_rpmsg_ept_cb,
-                       clk_rpmsg_server_unbind);
+      return;
     }
+
+  priv->ept.priv = priv;
+
+  list_initialize(&priv->clk_list);
+
+  rpmsg_create_ept(&priv->ept, rdev, name,
+                   RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
+                   clk_rpmsg_ept_cb,
+                   clk_rpmsg_server_unbind);
 }
 
 static void clk_rpmsg_server_unbind(FAR struct rpmsg_endpoint *ept)
@@ -905,5 +915,6 @@ int clk_rpmsg_server_initialize(void)
   return rpmsg_register_callback(NULL,
                                  NULL,
                                  NULL,
+                                 clk_rpmsg_server_match,
                                  clk_rpmsg_server_bind);
 }

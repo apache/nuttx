@@ -123,6 +123,9 @@ static int rpmsgfs_chstat_handler(FAR struct rpmsg_endpoint *ept,
                                   FAR void *data, size_t len,
                                   uint32_t src, FAR void *priv);
 
+static bool rpmsgfs_ns_match(FAR struct rpmsg_device *rdev,
+                             FAR void *priv_, FAR const char *name,
+                             uint32_t dest);
 static void rpmsgfs_ns_bind(FAR struct rpmsg_device *rdev,
                             FAR void *priv_, FAR const char *name,
                             uint32_t dest);
@@ -826,17 +829,19 @@ out:
   return rpmsg_send(ept, msg, sizeof(*msg));
 }
 
+static bool rpmsgfs_ns_match(FAR struct rpmsg_device *rdev,
+                             FAR void *priv_, FAR const char *name,
+                             uint32_t dest)
+{
+  return !strncmp(name, RPMSGFS_NAME_PREFIX, strlen(RPMSGFS_NAME_PREFIX));
+}
+
 static void rpmsgfs_ns_bind(FAR struct rpmsg_device *rdev,
                             FAR void *priv_, FAR const char *name,
                             uint32_t dest)
 {
   FAR struct rpmsgfs_server_s *priv;
   int ret;
-
-  if (strncmp(name, RPMSGFS_NAME_PREFIX, strlen(RPMSGFS_NAME_PREFIX)))
-    {
-      return;
-    }
 
   priv = kmm_zalloc(sizeof(*priv));
   if (!priv)
@@ -912,5 +917,6 @@ int rpmsgfs_server_init(void)
   return rpmsg_register_callback(NULL,
                                  NULL,
                                  NULL,
+                                 rpmsgfs_ns_match,
                                  rpmsgfs_ns_bind);
 }

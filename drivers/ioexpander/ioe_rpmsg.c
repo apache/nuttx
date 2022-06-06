@@ -613,31 +613,37 @@ static void ioe_rpmsg_server_unbind(FAR struct rpmsg_endpoint *ept)
   kmm_free(ept);
 }
 
-static void ioe_rpmsg_server_bind(FAR struct rpmsg_device *rdev,
-                                  FAR void *priv_,
-                                  FAR const char *name,
-                                  uint32_t dest)
+static bool ioe_rpmsg_server_match(FAR struct rpmsg_device *rdev,
+                                   FAR void *priv_,
+                                   FAR const char *name,
+                                   uint32_t dest)
 {
   FAR struct ioe_rpmsg_server_s *priv = priv_;
   char eptname[RPMSG_NAME_SIZE];
 
   snprintf(eptname, RPMSG_NAME_SIZE, IOE_RPMSG_EPT_FORMAT, priv->name);
 
-  if (!strcmp(name, eptname))
+  return !strcmp(name, eptname);
+}
+
+static void ioe_rpmsg_server_bind(FAR struct rpmsg_device *rdev,
+                                  FAR void *priv_,
+                                  FAR const char *name,
+                                  uint32_t dest)
+{
+  FAR struct ioe_rpmsg_server_s *priv = priv_;
+  FAR struct rpmsg_endpoint *ept;
+
+  ept = kmm_zalloc(sizeof(struct rpmsg_endpoint));
+  if (!ept)
     {
-      FAR struct rpmsg_endpoint *ept;
-
-      ept = kmm_zalloc(sizeof(struct rpmsg_endpoint));
-      if (!ept)
-        {
-          return;
-        }
-
-      ept->priv = priv;
-
-      rpmsg_create_ept(ept, rdev, name, RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
-                       ioe_rpmsg_server_ept_cb, ioe_rpmsg_server_unbind);
+      return;
     }
+
+  ept->priv = priv;
+
+  rpmsg_create_ept(ept, rdev, name, RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
+                   ioe_rpmsg_server_ept_cb, ioe_rpmsg_server_unbind);
 }
 
 /****************************************************************************
@@ -672,7 +678,9 @@ int ioe_rpmsg_server_initialize(FAR const char *name,
   priv->name = name;
   priv->ioe  = ioe;
 
-  ret = rpmsg_register_callback(priv, NULL, NULL, ioe_rpmsg_server_bind);
+  ret = rpmsg_register_callback(priv, NULL, NULL,
+                                ioe_rpmsg_server_match,
+                                ioe_rpmsg_server_bind);
   if (ret < 0)
     {
       kmm_free(priv);
@@ -712,7 +720,7 @@ ioe_rpmsg_client_initialize(FAR const char *cpuname, FAR const char *name)
 
   nxsem_init(&priv->sem, 0, 0);
   ret = rpmsg_register_callback(priv, ioe_rpmsg_client_created,
-                                ioe_rpmsg_client_destroy, NULL);
+                                ioe_rpmsg_client_destroy, NULL, NULL);
   if (ret < 0)
     {
       kmm_free(priv);
