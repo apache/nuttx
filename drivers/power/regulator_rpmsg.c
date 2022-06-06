@@ -136,6 +136,10 @@ static void regulator_rpmsg_client_destroy(struct rpmsg_device *rdev,
                                            FAR void *priv_);
 
 static void regulator_rpmsg_server_unbind(FAR struct rpmsg_endpoint *ept);
+static bool regulator_rpmsg_server_match(FAR struct rpmsg_device *rdev,
+                                         FAR void *priv_,
+                                         FAR const char *name,
+                                         uint32_t dest);
 static void regulator_rpmsg_server_bind(FAR struct rpmsg_device *rdev,
                                         FAR void *priv_,
                                         FAR const char *name,
@@ -216,6 +220,7 @@ regulator_rpmsg_get_priv(FAR const char *name)
   rpmsg_register_callback(priv,
                           regulator_rpmsg_client_created,
                           regulator_rpmsg_client_destroy,
+                          NULL,
                           NULL);
 
   return priv;
@@ -347,6 +352,14 @@ static void regulator_rpmsg_server_unbind(FAR struct rpmsg_endpoint *ept)
   kmm_free(priv);
 }
 
+static bool regulator_rpmsg_server_match(FAR struct rpmsg_device *rdev,
+                                         FAR void *priv_,
+                                         FAR const char *name,
+                                         uint32_t dest)
+{
+  return !strcmp(name, REGULATOR_RPMSG_EPT_NAME);
+}
+
 static void regulator_rpmsg_server_bind(FAR struct rpmsg_device *rdev,
                                         FAR void *priv_,
                                         FAR const char *name,
@@ -354,23 +367,20 @@ static void regulator_rpmsg_server_bind(FAR struct rpmsg_device *rdev,
 {
   FAR struct regulator_rpmsg_server_s *priv;
 
-  if (!strcmp(name, REGULATOR_RPMSG_EPT_NAME))
+  priv = kmm_zalloc(sizeof(struct regulator_rpmsg_server_s));
+  if (!priv)
     {
-      priv = kmm_zalloc(sizeof(struct regulator_rpmsg_server_s));
-      if (!priv)
-        {
-          return;
-        }
-
-      priv->ept.priv = priv;
-
-      list_initialize(&priv->regulator_list);
-
-      rpmsg_create_ept(&priv->ept, rdev, name,
-                       RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
-                       regulator_rpmsg_ept_cb,
-                       regulator_rpmsg_server_unbind);
+      return;
     }
+
+  priv->ept.priv = priv;
+
+  list_initialize(&priv->regulator_list);
+
+  rpmsg_create_ept(&priv->ept, rdev, name,
+                   RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
+                   regulator_rpmsg_ept_cb,
+                   regulator_rpmsg_server_unbind);
 }
 
 static int regulator_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
@@ -695,5 +705,6 @@ int regulator_rpmsg_server_init(void)
   return rpmsg_register_callback(NULL,
                                  NULL,
                                  NULL,
+                                 regulator_rpmsg_server_match,
                                  regulator_rpmsg_server_bind);
 }

@@ -434,6 +434,7 @@ int uart_rpmsg_init(FAR const char *cpuname, FAR const char *devname,
   ret = rpmsg_register_callback(dev,
                                 uart_rpmsg_device_created,
                                 uart_rpmsg_device_destroy,
+                                NULL,
                                 NULL);
   if (ret < 0)
     {

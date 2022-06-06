@@ -717,6 +717,7 @@ int rpmsgfs_client_bind(FAR void **handle, FAR const char *cpuname)
   ret = rpmsg_register_callback(priv,
                                 rpmsgfs_device_created,
                                 rpmsgfs_device_destroy,
+                                NULL,
                                 NULL);
   if (ret < 0)
     {
@@ -738,6 +739,7 @@ int rpmsgfs_client_unbind(FAR void *handle)
   rpmsg_unregister_callback(priv,
                             rpmsgfs_device_created,
                             rpmsgfs_device_destroy,
+                            NULL,
                             NULL);
 
   nxsem_destroy(&priv->wait);

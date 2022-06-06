@@ -468,22 +468,18 @@ static void rpmsg_socket_device_destroy(FAR struct rpmsg_device *rdev,
     }
 }
 
-static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
-                                 FAR void *priv, FAR const char *name,
-                                 uint32_t dest)
+static bool rpmsg_socket_ns_match(FAR struct rpmsg_device *rdev,
+                                  FAR void *priv, FAR const char *name,
+                                  uint32_t dest)
 {
   FAR struct rpmsg_socket_conn_s *server = priv;
-  FAR struct rpmsg_socket_conn_s *tmp;
-  FAR struct rpmsg_socket_conn_s *new;
   char buf[RPMSG_NAME_SIZE];
-  int cnt = 0;
-  int ret;
 
   snprintf(buf, sizeof(buf), "%s%s", RPMSG_SOCKET_NAME_PREFIX,
            server->rpaddr.rp_name);
   if (strncmp(name, buf, strlen(buf)))
     {
-      return;
+      return false;
     }
 
   if (strlen(server->rpaddr.rp_cpu) &&
@@ -491,8 +487,21 @@ static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
     {
       /* Bind specific CPU, then only listen that CPU */
 
-      return;
+      return false;
     }
+
+  return true;
+}
+
+static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
+                                 FAR void *priv, FAR const char *name,
+                                 uint32_t dest)
+{
+  FAR struct rpmsg_socket_conn_s *server = priv;
+  FAR struct rpmsg_socket_conn_s *tmp;
+  FAR struct rpmsg_socket_conn_s *new;
+  int cnt = 0;
+  int ret;
 
   new = rpmsg_socket_alloc();
   if (!new)
@@ -662,9 +671,10 @@ static int rpmsg_socket_listen(FAR struct socket *psock, int backlog)
 
   server->backlog = backlog;
   return rpmsg_register_callback(server,
-                                NULL,
-                                NULL,
-                                rpmsg_socket_ns_bind);
+                                 NULL,
+                                 NULL,
+                                 rpmsg_socket_ns_match,
+                                 rpmsg_socket_ns_bind);
 }
 
 static int rpmsg_socket_connect_internal(FAR struct socket *psock)
@@ -681,6 +691,7 @@ static int rpmsg_socket_connect_internal(FAR struct socket *psock)
   ret = rpmsg_register_callback(conn,
                                 rpmsg_socket_device_created,
                                 rpmsg_socket_device_destroy,
+                                NULL,
                                 NULL);
   if (ret < 0)
     {
@@ -702,6 +713,7 @@ static int rpmsg_socket_connect_internal(FAR struct socket *psock)
           rpmsg_unregister_callback(conn,
                                     rpmsg_socket_device_created,
                                     rpmsg_socket_device_destroy,
+                                    NULL,
                                     NULL);
         }
     }
@@ -769,6 +781,7 @@ static int rpmsg_socket_accept(FAR struct socket *psock,
           rpmsg_register_callback(conn,
                                   rpmsg_socket_device_created,
                                   rpmsg_socket_device_destroy,
+                                  NULL,
                                   NULL);
 
           if (conn->sendsize == 0)
@@ -1280,6 +1293,7 @@ static int rpmsg_socket_close(FAR struct socket *psock)
       rpmsg_unregister_callback(conn,
                                 NULL,
                                 NULL,
+                                rpmsg_socket_ns_match,
                                 rpmsg_socket_ns_bind);
     }
   else
@@ -1287,6 +1301,7 @@ static int rpmsg_socket_close(FAR struct socket *psock)
       rpmsg_unregister_callback(conn,
                                 rpmsg_socket_device_created,
                                 rpmsg_socket_device_destroy,
+                                NULL,
                                 NULL);
     }
 

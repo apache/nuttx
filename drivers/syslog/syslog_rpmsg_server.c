@@ -63,6 +63,9 @@ struct syslog_rpmsg_server_s
 
 static void syslog_rpmsg_write(FAR const char *buf1, size_t len1,
                                FAR const char *buf2, size_t len2);
+static bool syslog_rpmsg_ns_match(FAR struct rpmsg_device *rdev,
+                                  FAR void *priv_, FAR const char *name,
+                                  uint32_t dest);
 static void syslog_rpmsg_ns_bind(FAR struct rpmsg_device *rdev,
                                  FAR void *priv_, FAR const char *name,
                                  uint32_t dest);
@@ -167,17 +170,19 @@ static void syslog_rpmsg_write(FAR const char *buf1, size_t len1,
     }
 }
 
+static bool syslog_rpmsg_ns_match(FAR struct rpmsg_device *rdev,
+                                  FAR void *priv_, FAR const char *name,
+                                  uint32_t dest)
+{
+  return !strcmp(name, SYSLOG_RPMSG_EPT_NAME);
+}
+
 static void syslog_rpmsg_ns_bind(FAR struct rpmsg_device *rdev,
                                  FAR void *priv_, FAR const char *name,
                                  uint32_t dest)
 {
   FAR struct syslog_rpmsg_server_s *priv;
   int ret;
-
-  if (strcmp(name, SYSLOG_RPMSG_EPT_NAME))
-    {
-      return;
-    }
 
   priv = kmm_zalloc(sizeof(struct syslog_rpmsg_server_s));
   if (!priv)
@@ -308,5 +313,6 @@ int syslog_rpmsg_server_init(void)
   return rpmsg_register_callback(NULL,
                                  NULL,
                                  NULL,
+                                 syslog_rpmsg_ns_match,
                                  syslog_rpmsg_ns_bind);
 }
