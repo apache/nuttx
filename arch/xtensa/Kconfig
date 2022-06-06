@@ -250,6 +250,7 @@ config XTENSA_INTBACKTRACE
 
 config XTENSA_IMEM_USE_SEPARATE_HEAP
 	bool "Use a separate heap for internal memory"
+	select ARCH_HAVE_EXTRA_HEAPS
 	default n
 	---help---
 		This is a separate internal heap that's used by drivers when certain operations
