@@ -73,6 +73,10 @@ ifeq ($(CONFIG_LCD_SSD1289),y)
   CSRCS += ssd1289.c
 endif
 
+ifeq ($(CONFIG_LCD_SSD1680),y)
+  CSRCS += ssd1680.c
+endif
+
 ifeq ($(CONFIG_LCD_SSD1351),y)
   CSRCS += ssd1351.c
 endif
