@@ -3,7 +3,7 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-if ARCH_CHIP_QEMU
+if ARCH_CHIP_QEMU_I486
 comment "QEMU Configuration Options"
 
 config QEMU_KEYPAD
