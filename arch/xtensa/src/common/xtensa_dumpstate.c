@@ -95,7 +95,7 @@ static void xtensa_dump_task(struct tcb_s *tcb, void *arg)
     {
       FAR struct pthread_tcb_s *ptcb = (FAR struct pthread_tcb_s *)tcb;
 
-      snprintf(args, sizeof(args), "%p ", ptcb->arg);
+      snprintf(args, sizeof(args), " %p", ptcb->arg);
     }
   else
 #endif
@@ -105,7 +105,7 @@ static void xtensa_dump_task(struct tcb_s *tcb, void *arg)
 
       while (*argv != NULL && npos < sizeof(args))
         {
-          npos += snprintf(args + npos, sizeof(args) - npos, "%s ", *argv++);
+          npos += snprintf(args + npos, sizeof(args) - npos, " %s", *argv++);
         }
     }
 
@@ -126,9 +126,7 @@ static void xtensa_dump_task(struct tcb_s *tcb, void *arg)
          "   %3" PRId32 ".%01" PRId32 "%%"
 #endif
 #if CONFIG_TASK_NAME_SIZE > 0
-         "   %s %s\n"
-#else
-         "   %s\n"
+         "   %s%s\n"
 #endif
          , tcb->pid, tcb->sched_priority
 #ifdef CONFIG_SMP
@@ -147,6 +145,8 @@ static void xtensa_dump_task(struct tcb_s *tcb, void *arg)
 #endif
 #if CONFIG_TASK_NAME_SIZE > 0
          , tcb->name
+#else
+         , "<noname>"
 #endif
          , args
         );
