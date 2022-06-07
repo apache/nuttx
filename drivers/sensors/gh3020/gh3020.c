@@ -280,7 +280,7 @@ struct gh3020_reg_s gh3020_reglist_normal[] =
   {0x012e, 0x2222}, /* TIA0~3 50KOHm */
   {0x0130, 0x00aa}, /* All ADCs use 200pF TIA_CF */
   {0x0142, 0x277c}, /* Slot_cfg2(fix IR): sync signal, use FIFO, 4ADCs */
-  {0x0148, 0x0c14}, /* DC&BG cancel, LED drv0&1 fixed, 1st BG, 512x ADC */
+  {0x0148, 0x0c13}, /* DC&BG cancel, LED drv0&1 fixed, 1st BG, 256x ADC */
   {0x014a, 0x2222}, /* TIA0~3 50KOHm */
   {0x014c, 0x00aa}, /* All ADCs use 200pF TIA_CF */
   {0x0156, 0x0105}, /* LED drv1 to LED1(to IR LED) pin, 4.4mA */
@@ -310,7 +310,7 @@ struct gh3020_reg_s gh3020_reglist_normal[] =
   {0x01ac, 0x0106}, /* LED drv1 to LED1(to IR LED) pin, 5.3mA */
   {0x01ec, 0x0122}, /* Slot0's time 290 us (green dynamic) */
   {0x01ee, 0x001a}, /* Slot1's time 26 us (dark fixed) */
-  {0x01f0, 0x0122}, /* Slot2's time 290 us (IR fixed) */
+  {0x01f0, 0x00d3}, /* Slot2's time 211 us (IR fixed) */
   {0x01f2, 0x02fa}, /* Slot3's time 762 us (red dynamic) */
   {0x01f4, 0x02fa}, /* Slot4's time 762 us (IR dynamic) */
   {0x01f6, 0x0098}, /* Slot5's time 152 us (hard wear-on detection) */
@@ -339,8 +339,8 @@ struct gh3020_reg_s gh3020_reglist_normal[] =
   {0x1000, 0x0000}, /* Virtual register. Maintained by Goodix. */
   {0x1002, 0x3080}, /* Virtual register. Maintained by Goodix. */
   {0x1004, 0x0000}, /* Virtual register. Maintained by Goodix. */
-  {0x1006, 0xede4}, /* Virtual register. Maintained by Goodix. */
-  {0x1008, 0x2a1f}, /* Virtual register. Maintained by Goodix. */
+  {0x1006, 0xcecc}, /* Virtual register. Maintained by Goodix. */
+  {0x1008, 0x2a30}, /* Virtual register. Maintained by Goodix. */
   {0x100a, 0x0001}, /* Virtual register. Maintained by Goodix. */
   {0x10e0, 0x0202}, /* Virtual register. Maintained by Goodix. */
   {0x10e2, 0x0202}, /* Virtual register. Maintained by Goodix. */
