@@ -12,18 +12,18 @@ How to increase the command line length?
 ----------------------------------------
 
 You can increase the Max command line length from 64 to other value,
-this way:
+this way::
 
-Application Configuration  --->
-        NSH Library  --->
-            Command Line Configuration  --->
-                (64) Max command line length
+    Application Configuration  --->
+            NSH Library  --->
+                Command Line Configuration  --->
+                    (64) Max command line length
 
 How do I enable editing support on the command line?
 ----------------------------------------------------
 
 You need to change Command Line Editor from "Minimal readline" to
-"Command Line Editor", this way:
+"Command Line Editor", this way::
 
     Application Configuration  --->
         NSH Library  --->
@@ -33,7 +33,7 @@ You need to change Command Line Editor from "Minimal readline" to
 How to enable command line history?
 -----------------------------------
 
-You need to enable these options in the menuconfig:
+You need to enable these options in the menuconfig::
 
     Application Configuration  --->
         System Libraries and NSH Add-Ons  --->
@@ -43,19 +43,19 @@ You need to enable these options in the menuconfig:
                 (16)      Command line history records
 
 Note: If you are using the "Command Line Editor" instead of the "readline"
-then you need to use this other option:
+then you need to use this other option::
 
     Application Configuration  --->
         System Libraries and NSH Add-Ons  --->
             -*- EMACS-like Command Line Editor  --->
-                	[*]   Command line history
-                	(80)    Command line history length
-                	(16)    Command line history records
+                [*]   Command line history
+                (80)    Command line history length
+                (16)    Command line history records
 
 How to enable autocomplete on the command line?
 -----------------------------------------------
 
-You need to enable these options in the menuconfig:
+You need to enable these options in the menuconfig::
 
     Application Configuration  --->
         System Libraries and NSH Add-Ons  --->
@@ -70,7 +70,7 @@ Note: autocomplete is not enabled when "Command Line Editor" instead of the
 How to interrupt an NSH Application using Ctrl^C ?
 --------------------------------------------------
 
-You need to enable these options in the menuconfig:
+You need to enable these options in the menuconfig::
 
     RTOS Features --->
         Signal Configuration --->
@@ -90,7 +90,7 @@ How to start directly my application instead starting NSH?
 
 You can start you application directly instead of starting the default
 NSH terminal. Lets support your application is called "hello", then you
-will modify the ENTRYPOINT to call "hello_main" instead of "nsh_main":
+will modify the ENTRYPOINT to call "hello_main" instead of "nsh_main"::
 
     RTOS Features --->
         Tasks and Scheduling  --->
@@ -105,13 +105,13 @@ executed anymore and so some drivers initialiation that are called from
 it also stops to work.
 
 You can fix it enabling the Board Late Initialization that will replace the
-NSH_ARCHINIT to call those drivers initialization. Just enable it:
+NSH_ARCHINIT to call those drivers initialization. Just enable it::
 
     RTOS Features --->
         RTOS hooks --->
             [*] Custom board late initialization
 
-Also you need to disable the architecture-specific initialization:
+Also you need to disable the architecture-specific initialization::
 
     Application Configuration --->
         NSH Library --->
@@ -123,7 +123,7 @@ Why isn't /dev/ttySx created when using USB Console even when UART is enabled?
 If you don't use serial console then /dev/ttyS0 will not be created,
 even if you enable the UART peripheral at "System Type".
 
-You can fix it enabling the Serial Upper-Half Driver:
+You can fix it enabling the Serial Upper-Half Driver::
 
     Device Drivers --->
         Serial Driver Support --->
