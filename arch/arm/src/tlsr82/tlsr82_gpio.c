@@ -69,12 +69,74 @@ struct tlsr82_gpio_irq_cb gpio_irq_cbs[CONFIG_GPIO_IRQ_MAX_NUM];
  * Private Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_TLSR82_GPIO_DUMPREGS
+static void tlsr82_gpio_dumpregs(const char *msg);
+#else
+#  define tlsr82_gpio_dumpregs(msg)
+#endif
+
 static void tlsr82_gpio_ds_ctrl(gpio_cfg_t cfg, uint8_t ds);
 static void tlsr82_gpio_pol_ctrl(gpio_cfg_t cfg, uint8_t pol);
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#ifdef CONFIG_TLSR82_GPIO_DUMPREGS
+static void tlsr82_gpio_dumpregs(const char *msg)
+{
+  int i = 0;
+  gpioinfo("%s\n", msg);
+  for (i = 0; i < 5; i++)
+    {
+      gpioinfo("Group %d Gpio Register:\n", i);
+      gpioinfo("  ACT=0x%02x\n", GPIO_SETTING_ACT_REG(i));
+      gpioinfo("  IN =0x%02x\n", GPIO_SETTING_IN_REG(i));
+
+      if (i != 3)
+        {
+          gpioinfo("  IE =0x%02x\n", GPIO_SETTING_IE_REG(i));
+        }
+      else
+        {
+          gpioinfo("  IE =0x%02x\n", tlsr82_analog_read(ANALOG_PC_IE_ADDR));
+        }
+
+      gpioinfo("  OEN=0x%02x\n", GPIO_SETTING_OEN_REG(i));
+      gpioinfo("  OUT=0x%02x\n", GPIO_SETTING_OUT_REG(i));
+      gpioinfo("  POL=0x%02x\n", GPIO_SETTING_POL_REG(i));
+
+      if (i != 3)
+        {
+          gpioinfo("  DS =0x%02x\n", GPIO_SETTING_DS_REG(i));
+        }
+      else
+        {
+          gpioinfo("  DS =0x%02x\n", tlsr82_analog_read(ANALOG_PC_DS_ADDR));
+        }
+    }
+
+  gpioinfo("Interrupt Register:\n");
+  for (i = 0; i < 5; i++)
+    {
+      gpioinfo("  IRQ NORMAL %d: 0x%02x\n", i, GPIO_IRQ_NORMAL_REG(i));
+    }
+
+  gpioinfo("  IRQ NORMAL ALL 0x%02x\n", GPIO_IRQ_NORMAL_ALL_REG);
+  gpioinfo("  IRQ RISC: 0x%02x\n", GPIO_IRQ_RISC_EN_REG);
+  gpioinfo("  IRQ MASK: 0x%08lx\n", IRQ_MASK_REG);
+
+  for (i = 0; i < CONFIG_GPIO_IRQ_MAX_NUM; i++)
+    {
+      gpioinfo("gpio_irq_cbs[%d]->arg     : 0x%08x\n",
+               i, gpio_irq_cbs[i].arg);
+      gpioinfo("gpio_irq_cbs[%d]->callback: 0x%08x\n",
+               i, gpio_irq_cbs[i].callback);
+      gpioinfo("gpio_irq_cbs[%d]->cfg     : 0x%08x\n",
+               i, gpio_irq_cbs[i].cfg);
+    }
+}
+#endif
 
 /****************************************************************************
  * Name: tlsr82_gpio_ds_ctrl
@@ -184,6 +246,8 @@ static int tlsr82_gpio_irq(int irq, void *context, void *arg)
   xcpt_t callback;
   int ret = OK;
 
+  gpioinfo("Gpio irq entry!\n");
+
   /* Clear the GPIO interrupt status */
 
   BM_SET(IRQ_SRC_REG, 1 << NR_GPIO_IRQ);
@@ -219,6 +283,8 @@ static int tlsr82_gpio_risc0_irq(int irq, void *context, void *arg)
   xcpt_t callback;
   int ret = OK;
 
+  gpioinfo("Gpio risc0 irq entry!\n");
+
   /* Clear the GPIO interrupt status */
 
   BM_SET(IRQ_SRC_REG, 1 << NR_GPIO_RISC0_IRQ);
@@ -253,6 +319,8 @@ static int tlsr82_gpio_risc1_irq(int irq, void *context, void *arg)
   void *arg_cb;
   xcpt_t callback;
   int ret = OK;
+
+  gpioinfo("Gpio risc1 irq entry!\n");
 
   /* Clear the GPIO interrupt status */
 
@@ -486,21 +554,17 @@ int tlsr82_gpioconfig(gpio_cfg_t cfg)
 
   if (GPIO_IS(AF, INPUT, cfg))
     {
-      /* GPIO setting act as GPIO */
-
-      BM_SET(GPIO_SETTING_ACT_REG(group), BIT(pin));
-
       /* IE and OEN should be set to 1 for Input usage */
 
       tlsr82_gpio_input_ctrl(cfg, true);
       tlsr82_gpio_output_ctrl(cfg, false);
-    }
-  else if (GPIO_IS(AF, OUTPUT, cfg))
-    {
+
       /* GPIO setting act as GPIO */
 
       BM_SET(GPIO_SETTING_ACT_REG(group), BIT(pin));
-
+    }
+  else if (GPIO_IS(AF, OUTPUT, cfg))
+    {
       /* IE and OEN should be set to 0 for Output usage */
 
       tlsr82_gpio_input_ctrl(cfg, false);
@@ -509,6 +573,10 @@ int tlsr82_gpioconfig(gpio_cfg_t cfg)
       /* Drive Strength config */
 
       tlsr82_gpio_ds_ctrl(cfg, (bool)GPIO_GET(DS, cfg));
+
+      /* GPIO setting act as GPIO */
+
+      BM_SET(GPIO_SETTING_ACT_REG(group), BIT(pin));
     }
   else if (GPIO_GET(AF, cfg) >= GPIO_VAL(AF, MUX0) &&
            GPIO_GET(AF, cfg) <= GPIO_VAL(AF, MUX3))
@@ -667,6 +735,8 @@ void tlsr82_gpioirqinitialize(void)
  * Description:
  *   Config the gpio irq according to the cfg, and attach or
  *   detach the interrupt callback function according to value of func.
+ *   High Level or Rising Edge trigger, should set the pull-down resistor
+ *   Low Level or Failing Edge trigger, should set the pull-up resistor
  *
  ****************************************************************************/
 
@@ -675,6 +745,8 @@ int tlsr82_gpioirqconfig(gpio_cfg_t cfg, xcpt_t func, void *arg)
 {
   int i;
   gpio_cfg_t pinset;
+
+  gpioinfo("cfg=0x%lx, func=0x%lx\n", cfg, (uint32_t)func);
 
   /* Get pin information from cfg */
 
@@ -744,17 +816,25 @@ int tlsr82_gpioirqconfig(gpio_cfg_t cfg, xcpt_t func, void *arg)
       tlsr82_gpioirqenable(cfg);
     }
 
-  /* GPIO must be in input mode for gpio interrupt */
+  /* Configure the gpio */
 
-  tlsr82_gpioconfig(pinset | GPIO_AF_INPUT | GPIO_PUPD_NONE);
+  tlsr82_gpioconfig(cfg);
 
   /* Config gpio interrupt polarity */
 
-  tlsr82_gpio_pol_ctrl(GPIO_CFG2SDKPIN(cfg), GPIO_GET(POL, cfg));
+  tlsr82_gpio_pol_ctrl(cfg, GPIO_GET(POL, cfg));
+
+  /* Clear the interrupt flag */
+
+  tlsr82_gpioirqclear(cfg);
 
   /* Enable corresponding gpio interrupt */
 
   tlsr82_gpioirqenable_all();
+
+  /* Dump the gpio register for debug */
+
+  tlsr82_gpio_dumpregs("tlsr82_gpioirqconfig()");
 
   return OK;
 }
@@ -875,6 +955,43 @@ void tlsr82_gpioirqdisable(gpio_cfg_t cfg)
     {
       BM_CLR(GPIO_IRQ_M1_REG(group), BIT(pin));
       BM_CLR(GPIO_IRQ_RISC_EN_REG, GPIO_IRQ_RISC1_EN);
+    }
+  else
+    {
+      gpioerr("GPIO irq type is not correct, cfg=0x%lx\n", cfg);
+    }
+}
+
+#endif
+
+/****************************************************************************
+ * Name: tlsr82_gpioirqclear
+ *
+ * Description:
+ *   Clear the interrupt flag for specified GPIO IRQ
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TLSR82_GPIO_IRQ
+void tlsr82_gpioirqclear(gpio_cfg_t cfg)
+{
+  uint32_t irqmode;
+
+  irqmode = (uint32_t)GPIO_GET(IRQ, cfg);
+
+  /* Clear corresponding gpio interrupt flag */
+
+  if (irqmode == GPIO_IRQ_NORMAL_VAL)
+    {
+      BM_SET(IRQ_SRC_REG, BIT(NR_GPIO_IRQ));
+    }
+  else if (irqmode == GPIO_IRQ_RISC0_VAL)
+    {
+      BM_SET(IRQ_SRC_REG, BIT(NR_GPIO_RISC0_IRQ));
+    }
+  else if (irqmode == GPIO_IRQ_RISC1_VAL)
+    {
+      BM_SET(IRQ_SRC_REG, BIT(NR_GPIO_RISC1_IRQ));
     }
   else
     {

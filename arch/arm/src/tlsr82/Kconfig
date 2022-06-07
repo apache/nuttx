@@ -209,6 +209,14 @@ config TLSR82_GPIO_VALIDATION
 		gpio can be configured be this multiplex function. But this function
 		need more flash space.
 
+config TLSR82_GPIO_DUMPREGS
+	bool "Tlsr82 gpio dump registers enable"
+	default n
+	depends on DEBUG_GPIO_INFO
+	---help---
+		If enable this config, developer can call tlsr82_gpio_dumpregs() to
+		dump all the gpio registers.
+
 endif
 
 menuconfig TLSR82_I2C
