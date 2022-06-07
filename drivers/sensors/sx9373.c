@@ -49,6 +49,7 @@
 /* Device state setup. */
 
 #define SX9373_IRQ_SOURCE             0x4000   /* Current interrupt events. */
+#define SX9373_IRQ_DISABLE            0x4004   /* Disable interrupt*/
 #define SX9373_DEVICE_RESET           0x4240   /* Issues a softwre reset on the device. */
 #define SX9373_COMMAND                0x4280   /* Start and stop sensing. */
 
@@ -231,6 +232,7 @@ static int sx9373_i2c_write(FAR struct sx9373_dev_s *priv,
 /* Sensor handle functions. */
 
 static int sx9373_checkid(FAR struct sx9373_dev_s *priv);
+static int sx9373_disable_irq (FAR struct sx9373_dev_s *priv);
 static int sx9373_softreset(FAR struct sx9373_dev_s *priv);
 static int sx9373_suspend(FAR struct sx9373_dev_s *priv);
 static int sx9373_resume(FAR struct sx9373_dev_s *priv);
@@ -423,6 +425,46 @@ static int sx9373_checkid(FAR struct sx9373_dev_s *priv)
 }
 
 /****************************************************************************
+ * Name: sx9373_disable_irq
+ *
+ * Description:
+ *   disable SX9373 irq
+ *
+ * Input Parameters
+ *   priv     -Device struct
+ *
+ * Returned Value
+ *   Return 0 if the driver was success; A negated errno
+ *   value is returned on any failure;
+ *
+ * Assumptions/Limitations:
+ *   none.
+ *
+ ****************************************************************************/
+
+static int sx9373_disable_irq(FAR struct sx9373_dev_s *priv)
+{
+  int ret;
+  int value;
+
+  /* read SX9373_IRQ_SOURCE to pull up irq pin, reduce leakage */
+
+  ret = sx9373_i2c_read(priv, SX9373_IRQ_SOURCE, (FAR uint32_t *)&value);
+  if (ret < 0)
+    {
+      snerr("Failed to clear IRQ: %d\n", ret);
+    }
+
+  ret = sx9373_i2c_write(priv, SX9373_IRQ_DISABLE, 0x0);
+  if (ret < 0)
+    {
+      snerr("disable irq: %d\n", ret);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: sx9373_softreset
  *
  * Description:
@@ -452,6 +494,12 @@ static int sx9373_softreset(FAR struct sx9373_dev_s *priv)
   else
     {
       nxsig_usleep(50000);
+    }
+
+  ret = sx9373_disable_irq(priv);
+  if (ret < 0)
+    {
+      snerr("Failed to disable irq SX9373: %d\n", ret);
     }
 
   return ret;
@@ -498,12 +546,6 @@ static int sx9373_setparam(FAR struct sx9373_dev_s *priv,
     {
       snerr("Failed to set param: %d\n", ret);
       return ret;
-    }
-
-  ret = sx9373_i2c_read(priv, SX9373_IRQ_SOURCE, (FAR uint32_t *)&i);
-  if (ret < 0)
-    {
-      snerr("Failed to clear IRQ: %d\n", ret);
     }
 
   return ret;
