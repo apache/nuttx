@@ -57,6 +57,7 @@
 #define BATIOC_CHIPID        _BATIOC(0x0011)
 #define BATIOC_GET_VOLTAGE   _BATIOC(0x0012)
 #define BATIOC_VOLTAGE_INFO  _BATIOC(0x0013)
+#define BATIOC_GET_PROTOCOL  _BATIOC(0x0014)
 
 /* Special input values for BATIOC_INPUT_CURRENT that may optionally
  * be supported by lower-half driver:
@@ -109,6 +110,14 @@ enum battery_health_e
   BATTERY_HEALTH_WD_TMR_EXP,    /* Battery WatchDog Timer Expired */
   BATTERY_HEALTH_SAFE_TMR_EXP,  /* Battery Safety Timer Expired */
   BATTERY_HEALTH_DISCONNECTED   /* Battery is not connected */
+};
+
+/* battery charge protocol type */
+
+enum battery_protocol_e
+{
+  BATTERY_PROTOCOL_QC3P0 = 1 << 0,      /* Battery charge protocol of adapter is QC 3.0 */
+  BATTERY_PROTOCOL_TX_XIAOMI = 1 << 1,  /* Battery charge protocol of TX is xiaomi standard */
 };
 
 /* Battery operation message */

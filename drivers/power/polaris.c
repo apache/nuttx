@@ -112,6 +112,8 @@ static int stwlc38_get_voltage(FAR struct battery_charger_dev_s *dev,
                                 int *value);
 static int stwlc38_voltage_info(FAR struct battery_charger_dev_s *dev,
                                 int *value);
+static int stwlc38_get_protocol(FAR struct battery_charger_dev_s *dev,
+                                int *value);
 static int stwlc38_get_standard_type(FAR struct battery_charger_dev_s *dev,
                                       bool *status);
 
@@ -141,6 +143,7 @@ static const struct battery_charger_operations_s g_stwlc38ops =
   stwlc38_chipid,
   stwlc38_get_voltage,
   stwlc38_voltage_info,
+  stwlc38_get_protocol,
 };
 
 /****************************************************************************
@@ -1212,6 +1215,36 @@ static int stwlc38_voltage_info(FAR struct battery_charger_dev_s *dev,
   *value = reg_value;
   batinfo("The rx output voltage of stwlc38 is %d mv \n", *value);
   return OK;
+}
+
+static int stwlc38_get_protocol(FAR struct battery_charger_dev_s *dev,
+                           int *value)
+{
+  int ret = 0;
+  uint8_t buffer[3];
+  int protocol_type = 0;
+
+  FAR struct stwlc38_dev_s *priv = (FAR struct stwlc38_dev_s *)dev;
+
+  ret = fw_i2c_read(priv, WLC_XM_PP_STATUS, buffer, 3);
+  if (ret < 0)
+    {
+      baterr("Error: stwlc38 hw i2c read faild\n");
+      return ret;
+    }
+
+  if (buffer[1] == WLC_SUPPORT_QC_3_0)
+    {
+      protocol_type |= BATTERY_PROTOCOL_QC3P0;
+    }
+
+  if (buffer[2] == WLC_GEN_TX)
+    {
+      protocol_type |= BATTERY_PROTOCOL_TX_XIAOMI;
+    }
+
+  *value = protocol_type;
+  return ret;
 }
 
 static int stwlc38_init_interrupt(FAR struct stwlc38_dev_s *priv)
