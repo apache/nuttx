@@ -30,9 +30,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/tls.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#if CONFIG_LIBC_MAX_EXITFUNS > 0
 
 /****************************************************************************
  * Private Functions
@@ -102,35 +100,6 @@ static void exitfunc_unlock(void)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: atexit
- *
- * Description:
- *    Registers a function to be called at program exit.
- *    The atexit() function registers the given function to be called
- *    at normal process termination, whether via exit or via return from
- *    the program's main().
- *
- *    Limitations in the current implementation:
- *
- *      1. Only a single atexit function can be registered unless
- *         CONFIG_LIBC_MAX_EXITFUNS defines a larger number.
- *      2. atexit functions are not inherited when a new task is
- *         created.
- *
- * Input Parameters:
- *   func - A pointer to the function to be called when the task exits.
- *
- * Returned Value:
- *   Zero on success. Non-zero on failure.
- *
- ****************************************************************************/
-
-int atexit(CODE void (*func)(void))
-{
-  return atexit_register(ATTYPE_ATEXIT, func, NULL, NULL);
-}
 
 int atexit_register(int type, CODE void (*func)(void), FAR void *arg,
                     FAR void *dso)
@@ -218,4 +187,35 @@ void atexit_call_exitfuncs(int status)
           (*((CODE void (*)(FAR void *))func))(arg);
         }
     }
+}
+
+#endif
+
+/****************************************************************************
+ * Name: atexit
+ *
+ * Description:
+ *    Registers a function to be called at program exit.
+ *    The atexit() function registers the given function to be called
+ *    at normal process termination, whether via exit or via return from
+ *    the program's main().
+ *
+ *    Limitations in the current implementation:
+ *
+ *      1. Only a single atexit function can be registered unless
+ *         CONFIG_LIBC_MAX_EXITFUNS defines a larger number.
+ *      2. atexit functions are not inherited when a new task is
+ *         created.
+ *
+ * Input Parameters:
+ *   func - A pointer to the function to be called when the task exits.
+ *
+ * Returned Value:
+ *   Zero on success. Non-zero on failure.
+ *
+ ****************************************************************************/
+
+int atexit(CODE void (*func)(void))
+{
+  return atexit_register(ATTYPE_ATEXIT, func, NULL, NULL);
 }
