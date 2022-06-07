@@ -41,6 +41,10 @@ CHIP_CSRCS += esp32c3_lowputc.c esp32c3_serial.c
 CHIP_CSRCS += esp32c3_systemreset.c esp32c3_resetcause.c
 CHIP_CSRCS += esp32c3_uid.c
 
+ifeq ($(CONFIG_ESP32C3_REGION_PROTECTION),y)
+CHIP_CSRCS += esp32c3_region.c
+endif
+
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += esp32c3_userspace.c
 endif

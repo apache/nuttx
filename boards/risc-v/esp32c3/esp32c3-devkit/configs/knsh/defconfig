@@ -5,6 +5,7 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
+# CONFIG_ESP32C3_REGION_PROTECTION is not set
 # CONFIG_NSH_ARGCAT is not set
 # CONFIG_NSH_CMDOPT_HEXDUMP is not set
 # CONFIG_NSH_CMDPARMS is not set
