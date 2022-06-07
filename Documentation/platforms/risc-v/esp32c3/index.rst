@@ -123,7 +123,7 @@ LED_PWM      Yes
 SHA          Yes
 RSA          Yes
 CDC Console  Yes    Rev.3
-========== ======= =====
+=========== ======= =====
 
 Supported Boards
 ================
