@@ -156,6 +156,13 @@ config ESP32C3_CPU_FREQ_MHZ
 	default 80 if ESP32C3_CPU_FREQ_80
 	default 160 if ESP32C3_CPU_FREQ_160
 
+config ESP32C3_REGION_PROTECTION
+	bool "Enable region protection"
+	default y
+	select ARCH_USE_MPU
+	---help---
+		Configure the MPU to disable access to invalid memory regions.
+
 config ESP32C3_RT_TIMER
 	bool "Real-time Timer"
 	default n

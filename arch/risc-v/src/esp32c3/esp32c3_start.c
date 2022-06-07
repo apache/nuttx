@@ -36,6 +36,9 @@
 #include "esp32c3_clockconfig.h"
 #include "esp32c3_irq.h"
 #include "esp32c3_lowputc.h"
+#ifdef CONFIG_ESP32C3_REGION_PROTECTION
+#include "esp32c3_region.h"
+#endif
 #include "esp32c3_rtc.h"
 #include "esp32c3_start.h"
 #include "esp32c3_wdt.h"
@@ -241,6 +244,12 @@ void __esp32c3_start(void)
       while (true);
     }
 
+#endif
+
+#ifdef CONFIG_ESP32C3_REGION_PROTECTION
+  /* Configure region protection */
+
+  esp32c3_region_protection();
 #endif
 
   /* Initialize RTC parameters */
