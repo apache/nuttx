@@ -1159,7 +1159,7 @@ again:
             }
         }
 
-      nxmutex_lock(&priv->lock);
+      nxmutex_unlock(&priv->lock);
     }
 
   nxmutex_unlock(&g_rptun_lockpriv);
