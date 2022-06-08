@@ -125,43 +125,34 @@ int nxmq_verify_send(FAR struct mqueue_inode_s *msgq, int oflags,
 
 FAR struct mqueue_msg_s *nxmq_alloc_msg(void)
 {
-  FAR struct mqueue_msg_s *mqmsg;
+  FAR struct list_node *mqmsg;
 
-  /* If we were called from an interrupt handler, then try to get the message
-   * from generally available list of messages. If this fails, then try the
-   * list of messages reserved for interrupt handlers
-   */
+  /* Try to get the message from the generally available free list. */
 
-  if (up_interrupt_context())
+  mqmsg = list_remove_head(&g_msgfree);
+  if (mqmsg == NULL)
     {
-      /* Try the general free list */
+      /* If we were called from an interrupt handler, then try to get the
+       * message from generally available list of messages. If this fails,
+       * then try the list of messages reserved for interrupt handlers
+       */
 
-      mqmsg = (FAR struct mqueue_msg_s *)sq_remfirst(&g_msgfree);
-      if (mqmsg == NULL)
+      if (up_interrupt_context())
         {
           /* Try the free list reserved for interrupt handlers */
 
-          mqmsg = (FAR struct mqueue_msg_s *)sq_remfirst(&g_msgfreeirq);
+          mqmsg = list_remove_head(&g_msgfreeirq);
         }
-    }
 
-  /* We were not called from an interrupt handler. */
+      /* We were not called from an interrupt handler. */
 
-  else
-    {
-      /* Try to get the message from the generally available free list.
-       * Disable interrupts -- we might be called from an interrupt handler.
-       */
-
-      mqmsg = (FAR struct mqueue_msg_s *)sq_remfirst(&g_msgfree);
-
-      /* If we cannot a message from the free list, then we will have to
-       * allocate one.
-       */
-
-      if (mqmsg == NULL)
+      else
         {
-          mqmsg = (FAR struct mqueue_msg_s *)
+          /* If we cannot a message from the free list, then we will have to
+           * allocate one.
+           */
+
+          mqmsg = (FAR struct list_node *)
             kmm_malloc((sizeof (struct mqueue_msg_s)));
 
           /* Check if we allocated the message */
@@ -172,12 +163,12 @@ FAR struct mqueue_msg_s *nxmq_alloc_msg(void)
                * allocated.
                */
 
-              mqmsg->type = MQ_ALLOC_DYN;
+              ((FAR struct mqueue_msg_s *)mqmsg)->type = MQ_ALLOC_DYN;
             }
         }
     }
 
-  return mqmsg;
+  return (FAR struct mqueue_msg_s *)mqmsg;
 }
 
 /****************************************************************************
@@ -307,9 +298,9 @@ int nxmq_do_send(FAR struct mqueue_inode_s *msgq,
                  FAR struct mqueue_msg_s *mqmsg,
                  FAR const char *msg, size_t msglen, unsigned int prio)
 {
-  FAR struct tcb_s *btcb;
+  FAR struct mqueue_msg_s *prev = NULL;
   FAR struct mqueue_msg_s *next;
-  FAR struct mqueue_msg_s *prev;
+  FAR struct tcb_s *btcb;
 
   /* Construct the message header info */
 
@@ -325,20 +316,27 @@ int nxmq_do_send(FAR struct mqueue_inode_s *msgq,
    * message. Each is list is maintained in ascending priority order.
    */
 
-  for (prev = NULL, next = (FAR struct mqueue_msg_s *)msgq->msglist.head;
-       next && prio <= next->priority;
-       prev = next, next = next->next);
+  list_for_every_entry(&msgq->msglist, next, struct mqueue_msg_s, node)
+    {
+      if (prio > next->priority)
+        {
+          break;
+        }
+      else
+        {
+          prev = next;
+        }
+    }
 
   /* Add the message at the right place */
 
   if (prev)
     {
-      sq_addafter((FAR sq_entry_t *)prev, (FAR sq_entry_t *)mqmsg,
-                  &msgq->msglist);
+      list_add_after(&prev->node, &mqmsg->node);
     }
   else
     {
-      sq_addfirst((FAR sq_entry_t *)mqmsg, &msgq->msglist);
+      list_add_head(&msgq->msglist, &mqmsg->node);
     }
 
   /* Increment the count of messages in the queue */
