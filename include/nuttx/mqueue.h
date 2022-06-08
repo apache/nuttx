@@ -417,7 +417,11 @@ int nxmq_alloc_msgq(FAR struct mq_attr *attr,
  *
  ****************************************************************************/
 
+#if CONFIG_FS_MQUEUE_NPOLLWAITERS > 0
 void nxmq_pollnotify(FAR struct mqueue_inode_s *msgq, pollevent_t eventset);
+#else
+# define nxmq_pollnotify(msgq, eventset)
+#endif
 
 /****************************************************************************
  * Name: file_mq_open
