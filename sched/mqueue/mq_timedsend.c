@@ -185,10 +185,6 @@ int file_mq_timedsend(FAR struct file *mq, FAR const char *msg,
       return -ENOMEM;
     }
 
-  /* Get a pointer to the message queue */
-
-  sched_lock();
-
   /* OpenGroup.org: "Under no circumstance shall the operation fail with a
    * timeout if there is sufficient room in the queue to add the message
    * immediately. The validity of the abstime parameter need not be checked
@@ -209,9 +205,7 @@ int file_mq_timedsend(FAR struct file *mq, FAR const char *msg,
        * Currently nxmq_do_send() always returns OK.
        */
 
-      ret = nxmq_do_send(msgq, mqmsg, msg, msglen, prio);
-      sched_unlock();
-      return ret;
+      return nxmq_do_send(msgq, mqmsg, msg, msglen, prio);
     }
 
   /* The message queue is full... We are going to wait.  Now we must have a
@@ -285,10 +279,7 @@ int file_mq_timedsend(FAR struct file *mq, FAR const char *msg,
    * Currently nxmq_do_send() always returns OK.
    */
 
-  ret = nxmq_do_send(msgq, mqmsg, msg, msglen, prio);
-
-  sched_unlock();
-  return ret;
+  return nxmq_do_send(msgq, mqmsg, msg, msglen, prio);
 
   /* Exit here with (1) the scheduler locked, (2) a message allocated, (3) a
    * wdog allocated, and (4) interrupts disabled.
@@ -303,7 +294,6 @@ errout_in_critical_section:
 
 errout_with_mqmsg:
   nxmq_free_msg(mqmsg);
-  sched_unlock();
   return ret;
 }
 
