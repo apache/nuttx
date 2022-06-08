@@ -321,7 +321,7 @@ static int fatfs_open(FAR struct file *filep, FAR const char *relpath,
   int ret;
 
   fs = filep->f_inode->i_private;
-  fp = kmm_malloc(sizeof(*fp) - FF_MAX_SS + fs->fat.ssize);
+  fp = kmm_malloc(sizeof(*fp) - FF_MAX_SS + SS(&fs->fat));
   if (!fp)
     {
       return -ENOMEM;
@@ -1184,7 +1184,7 @@ static int fatfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   memset(buf, 0, sizeof(*buf));
   buf->f_type    = FATFS_SUPER_MAGIC;
   buf->f_namelen = FF_MAX_LFN;
-  buf->f_bsize   = fat->csize * fat->ssize;
+  buf->f_bsize   = fat->csize * SS(fat);
   buf->f_blocks  = fat->n_fatent - 2;
   buf->f_bfree   = nclst;
   buf->f_bavail  = nclst;
@@ -1471,7 +1471,9 @@ DRESULT disk_read(BYTE pdrv, BYTE *buff, LBA_t sector, UINT count)
 
   DEBUGASSERT(pdrv < FF_VOLUMES);
   drv = g_drv[pdrv];
-  size = drv->u.i_bops->read(drv, buff, sector, count);
+  count *= CONFIG_FS_FATFS_SECTOR_RATIO;
+  size = drv->u.i_bops->read(drv, buff,
+                             sector * CONFIG_FS_FATFS_SECTOR_RATIO, count);
   if (size != count)
     {
       ferr("Read failed: %zd\n", size);
@@ -1506,7 +1508,9 @@ DRESULT disk_write(BYTE pdrv, const BYTE *buff, LBA_t sector, UINT count)
 
   DEBUGASSERT(pdrv < FF_VOLUMES);
   drv = g_drv[pdrv];
-  size = drv->u.i_bops->write(drv, buff, sector, count);
+  count *= CONFIG_FS_FATFS_SECTOR_RATIO;
+  size = drv->u.i_bops->write(drv, buff,
+                              sector * CONFIG_FS_FATFS_SECTOR_RATIO, count);
   if (size != count)
     {
       ferr("Write failed: %zd\n", size);
@@ -1567,15 +1571,18 @@ DRESULT disk_ioctl(BYTE pdrv, BYTE cmd, void *buff)
 
           if (cmd == GET_SECTOR_COUNT)
             {
-              *(FAR LBA_t *)buff = geo.geo_nsectors;
+              *(FAR LBA_t *)buff = geo.geo_nsectors /
+                                   CONFIG_FS_FATFS_SECTOR_RATIO;
             }
           else if (cmd == GET_SECTOR_SIZE)
             {
-              *(FAR WORD *)buff = geo.geo_sectorsize;
+              *(FAR WORD *)buff = geo.geo_sectorsize *
+                                  CONFIG_FS_FATFS_SECTOR_RATIO;
             }
           else if (cmd == GET_BLOCK_SIZE)
             {
-              *(FAR DWORD *)buff = geo.geo_sectorsize;
+              *(FAR DWORD *)buff = geo.geo_sectorsize *
+                                   CONFIG_FS_FATFS_SECTOR_RATIO;
             }
         }
         break;

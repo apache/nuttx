@@ -9,3 +9,7 @@ menuconfig FS_FATFS
 	depends on !DISABLE_MOUNTPOINT
 	---help---
 		Build the FATFS file system. http://elm-chan.org/fsw/ff/00index_e.html
+
+config FS_FATFS_SECTOR_RATIO
+	int "The ratio between fatfs filesystem sector and block device sector"
+	default 1
