@@ -170,15 +170,6 @@ ssize_t file_mq_timedreceive(FAR struct file *mq, FAR char *msg,
       return -EINVAL;
     }
 
-  /* Get the next message from the message queue.  We will disable
-   * pre-emption until we have completed the message received.  This
-   * is not too bad because if the receipt takes a long time, it will
-   * be because we are blocked waiting for a message and pre-emption
-   * will be re-enabled while we are blocked
-   */
-
-  sched_lock();
-
   /* Furthermore, nxmq_wait_receive() expects to have interrupts disabled
    * because messages can be sent from interrupt level.
    */
@@ -213,7 +204,6 @@ ssize_t file_mq_timedreceive(FAR struct file *mq, FAR char *msg,
       if (result != OK)
         {
           leave_critical_section(flags);
-          sched_unlock();
           return -result;
         }
 
@@ -250,7 +240,6 @@ ssize_t file_mq_timedreceive(FAR struct file *mq, FAR char *msg,
       ret = nxmq_do_receive(msgq, mqmsg, msg, prio);
     }
 
-  sched_unlock();
   return ret;
 }
 
