@@ -155,8 +155,8 @@ int nxmq_wait_receive(FAR struct mqueue_inode_s *msgq,
 
   /* Get the message from the head of the queue */
 
-  while ((newmsg = (FAR struct mqueue_msg_s *)sq_remfirst(&msgq->msglist))
-          == NULL)
+  while ((newmsg = (FAR struct mqueue_msg_s *)
+                   list_remove_head(&msgq->msglist)) == NULL)
     {
       /* The queue is empty!  Should we block until there the above condition
        * has been satisfied?

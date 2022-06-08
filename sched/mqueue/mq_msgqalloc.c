@@ -86,7 +86,7 @@ int nxmq_alloc_msgq(FAR struct mq_attr *attr,
     {
       /* Initialize the new named message queue */
 
-      sq_init(&msgq->msglist);
+      list_initialize(&msgq->msglist);
       if (attr)
         {
           msgq->maxmsgs    = (int16_t)attr->mq_maxmsg;

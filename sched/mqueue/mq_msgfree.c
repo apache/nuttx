@@ -25,7 +25,6 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
-#include <queue.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
@@ -65,7 +64,7 @@ void nxmq_free_msg(FAR struct mqueue_msg_s *mqmsg)
        * list from interrupt handlers.
        */
 
-      sq_addlast((FAR sq_entry_t *)mqmsg, &g_msgfree);
+      list_add_tail(&g_msgfree, &mqmsg->node);
     }
 
   /* If this is a message pre-allocated for interrupts,
@@ -78,7 +77,7 @@ void nxmq_free_msg(FAR struct mqueue_msg_s *mqmsg)
        * list from interrupt handlers.
        */
 
-      sq_addlast((FAR sq_entry_t *)mqmsg, &g_msgfreeirq);
+      list_add_tail(&g_msgfreeirq, &mqmsg->node);
     }
 
   /* Otherwise, deallocate it.  Note:  interrupt handlers

@@ -173,7 +173,7 @@ ssize_t file_mq_timedreceive(FAR struct file *mq, FAR char *msg,
    * will not need to start timer.
    */
 
-  if (msgq->msglist.head == NULL)
+  if (list_is_empty(&msgq->msglist))
     {
       sclock_t ticks;
 
