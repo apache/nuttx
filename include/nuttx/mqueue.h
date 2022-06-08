@@ -29,6 +29,7 @@
 #include <nuttx/compiler.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/signal.h>
+#include <nuttx/list.h>
 
 #include <sys/types.h>
 #include <stdint.h>
@@ -87,7 +88,7 @@
 struct mqueue_inode_s
 {
   FAR struct inode *inode;    /* Containing inode */
-  sq_queue_t msglist;         /* Prioritized message list */
+  struct list_node msglist;   /* Prioritized message list */
   int16_t maxmsgs;            /* Maximum number of messages in the queue */
   int16_t nmsgs;              /* Number of message in the queue */
   int16_t nwaitnotfull;       /* Number tasks waiting for not full */
