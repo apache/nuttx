@@ -847,7 +847,6 @@ static int kinetis_dma_setup(struct uart_dev_s *dev)
   config.flags  = EDMA_CONFIG_LINKTYPE_LINKNONE | EDMA_CONFIG_LOOPDEST;
   config.ssize  = EDMA_8BIT;
   config.dsize  = EDMA_8BIT;
-  config.ttype  = EDMA_PERIPH2MEM;
   config.nbytes = 1;
 #ifdef CONFIG_KINETIS_EDMA_ELINK
   config.linkch = NULL;
@@ -859,6 +858,9 @@ static int kinetis_dma_setup(struct uart_dev_s *dev)
    */
 
   priv->rxdmanext = 0;
+
+  up_invalidate_dcache((uintptr_t)priv->rxfifo,
+                       (uintptr_t)priv->rxfifo + RXDMA_BUFFER_SIZE);
 
   /* Enable receive DMA for the UART */
 
