@@ -79,7 +79,6 @@ ssize_t file_mq_receive(FAR struct file *mq, FAR char *msg, size_t msglen,
   irqstate_t flags;
   ssize_t ret;
 
-  inode = mq->f_inode;
   if (!inode)
     {
       return -EBADF;
@@ -108,7 +107,6 @@ ssize_t file_mq_receive(FAR struct file *mq, FAR char *msg, size_t msglen,
   /* Get the message from the message queue */
 
   ret = nxmq_wait_receive(msgq, mq->f_oflags, &mqmsg);
-  leave_critical_section(flags);
 
   /* Check if we got a message from the message queue.  We might
    * not have a message if:
@@ -117,11 +115,12 @@ ssize_t file_mq_receive(FAR struct file *mq, FAR char *msg, size_t msglen,
    * - The wait was interrupted by a signal
    */
 
-  if (ret >= 0)
+  if (ret == OK)
     {
-      DEBUGASSERT(mqmsg != NULL);
       ret = nxmq_do_receive(msgq, mqmsg, msg, prio);
     }
+
+  leave_critical_section(flags);
 
   return ret;
 }
