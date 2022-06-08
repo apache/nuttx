@@ -145,7 +145,6 @@ ssize_t file_mq_timedreceive(FAR struct file *mq, FAR char *msg,
   irqstate_t flags;
   int ret;
 
-  inode = mq->f_inode;
   if (!inode)
     {
       return -EBADF;
@@ -188,23 +187,23 @@ ssize_t file_mq_timedreceive(FAR struct file *mq, FAR char *msg,
        * disabled here so that this time stays valid until the wait begins.
        */
 
-      int result = clock_abstime2ticks(CLOCK_REALTIME, abstime, &ticks);
+      ret = clock_abstime2ticks(CLOCK_REALTIME, abstime, &ticks);
 
       /* If the time has already expired and the message queue is empty,
        * return immediately.
        */
 
-      if (result == OK && ticks <= 0)
+      if (ret == OK && ticks <= 0)
         {
-          result = ETIMEDOUT;
+          ret = ETIMEDOUT;
         }
 
       /* Handle any time-related errors */
 
-      if (result != OK)
+      if (ret != OK)
         {
-          leave_critical_section(flags);
-          return -result;
+          ret = -ret;
+          goto errout_in_critical_section;
         }
 
       /* Start the watchdog */
@@ -222,10 +221,6 @@ ssize_t file_mq_timedreceive(FAR struct file *mq, FAR char *msg,
 
   wd_cancel(&rtcb->waitdog);
 
-  /* We can now restore interrupts */
-
-  leave_critical_section(flags);
-
   /* Check if we got a message from the message queue.  We might
    * not have a message if:
    *
@@ -234,11 +229,16 @@ ssize_t file_mq_timedreceive(FAR struct file *mq, FAR char *msg,
    * - The watchdog timeout expired
    */
 
-  if (ret >= 0)
+  if (ret == OK)
     {
       DEBUGASSERT(mqmsg != NULL);
       ret = nxmq_do_receive(msgq, mqmsg, msg, prio);
     }
+
+  /* We can now restore interrupts */
+
+errout_in_critical_section:
+  leave_critical_section(flags);
 
   return ret;
 }
