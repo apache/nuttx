@@ -1347,6 +1347,7 @@ int sx9373_register(int devno, FAR const struct sx9373_config_s *config)
       goto err;
     }
 
+#if 0
   /* Start config for sensor. */
 
   ret = sx9373_config_device(priv);
@@ -1378,6 +1379,7 @@ int sx9373_register(int devno, FAR const struct sx9373_config_s *config)
           goto err;
         }
     }
+#endif
 
   return ret;
 
