@@ -515,6 +515,13 @@ config ESP32_WIRELESS
 	---help---
 		Enable Wireless support
 
+config ESP32_WIFI
+	bool "Wi-Fi"
+	default n
+	select ESP32_WIRELESS
+	---help---
+		Enable Wi-Fi support
+
 config ESP32_BLE
 	bool "BLE"
 	default n
@@ -553,7 +560,7 @@ endmenu # ESP32 Peripheral Selection
 config ESP32_WIFI_BT_COEXIST
 	bool "Wi-Fi and BT coexist"
 	default n
-	depends on ESP32_WIRELESS && ESP32_BLE
+	depends on ESP32_WIFI && ESP32_BLE
 
 menu "Memory Configuration"
 
@@ -1225,7 +1232,7 @@ config ESP32_ETH_PHY_ADDR
 endmenu # ESP32_EMAC
 
 menu "Wi-Fi configuration"
-	depends on ESP32_WIRELESS
+	depends on ESP32_WIFI
 
 choice
 	prompt "ESP32 Wi-Fi mode"
@@ -1361,7 +1368,7 @@ choice EXAMPLE_POWER_SAVE_MODE
 		bool "maximum modem"
 endchoice
 
-endmenu # ESP32_WIRELESS
+endmenu # ESP32_WIFI
 
 menu "BLE Configuration"
 	depends on ESP32_BLE

@@ -31,6 +31,7 @@
 #include "xtensa.h"
 #include "hardware/esp32_soc.h"
 #include "hardware/esp32_dport.h"
+#include "hardware/esp32_emac.h"
 #include "esp32_wireless.h"
 #include "esp_phy_init.h"
 #include "phy_init_data.h"
@@ -46,10 +47,11 @@ static inline void phy_digital_regs_load(void);
  * Extern Functions declaration
  ****************************************************************************/
 
+extern uint8_t esp_crc8(const uint8_t *p, uint32_t len);
 extern void coex_bt_high_prio(void);
 extern void phy_wakeup_init(void);
 extern void phy_close_rf(void);
-extern void phy_dig_reg_backup(bool init, uint32_t *regs);
+extern uint8_t phy_dig_reg_backup(bool init, uint32_t *regs);
 extern int  register_chipv7_phy(const esp_phy_init_data_t *init_data,
                                 esp_phy_calibration_data_t *cal_data,
                                 esp_phy_calibration_mode_t cal_mode);
@@ -113,6 +115,102 @@ static inline void phy_digital_regs_load(void)
     {
       phy_dig_reg_backup(false, g_phy_digital_regs_mem);
     }
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Functions needed by libphy.a
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp_dport_access_reg_read
+ *
+ * Description:
+ *   Read register value safely in SMP
+ *
+ * Input Parameters:
+ *   reg - Register address
+ *
+ * Returned Value:
+ *   Register value
+ *
+ ****************************************************************************/
+
+uint32_t IRAM_ATTR esp_dport_access_reg_read(uint32_t reg)
+{
+  return getreg32(reg);
+}
+
+/****************************************************************************
+ * Name: phy_enter_critical
+ *
+ * Description:
+ *   Enter critical state
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   CPU PS value
+ *
+ ****************************************************************************/
+
+uint32_t IRAM_ATTR phy_enter_critical(void)
+{
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  return flags;
+}
+
+/****************************************************************************
+ * Name: phy_exit_critical
+ *
+ * Description:
+ *   Exit from critical state
+ *
+ * Input Parameters:
+ *   level - CPU PS value
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void IRAM_ATTR phy_exit_critical(uint32_t level)
+{
+  leave_critical_section(level);
+}
+
+/****************************************************************************
+ * Name: phy_printf
+ *
+ * Description:
+ *   Output format string and its arguments
+ *
+ * Input Parameters:
+ *   format - format string
+ *
+ * Returned Value:
+ *   0
+ *
+ ****************************************************************************/
+
+int phy_printf(const char *format, ...)
+{
+#ifdef CONFIG_DEBUG_WIRELESS_INFO
+  va_list arg;
+
+  va_start(arg, format);
+  vsyslog(LOG_INFO, format, arg);
+  va_end(arg);
+#endif
+
+  return 0;
 }
 
 /****************************************************************************
@@ -181,8 +279,89 @@ void esp32_phy_disable_clock(void)
 }
 
 /****************************************************************************
- * Public Functions
+ * Name: esp_read_mac
+ *
+ * Description:
+ *   Read MAC address from efuse
+ *
+ * Input Parameters:
+ *   mac  - MAC address buffer pointer
+ *   type - MAC address type
+ *
+ * Returned Value:
+ *   0 if success or -1 if fail
+ *
  ****************************************************************************/
+
+int32_t esp_read_mac(uint8_t *mac, esp_mac_type_t type)
+{
+  uint32_t regval[2];
+  uint8_t tmp;
+  uint8_t *data = (uint8_t *)regval;
+  uint8_t crc;
+  int i;
+
+  if (type > ESP_MAC_BT)
+    {
+      wlerr("Input type is error=%d\n", type);
+      return -1;
+    }
+
+  regval[0] = getreg32(MAC_ADDR0_REG);
+  regval[1] = getreg32(MAC_ADDR1_REG);
+
+  crc = data[6];
+  for (i = 0; i < MAC_LEN; i++)
+    {
+      mac[i] = data[5 - i];
+    }
+
+  if (crc != esp_crc8(mac, MAC_LEN))
+    {
+      wlerr("Failed to check MAC address CRC\n");
+      return -1;
+    }
+
+  if (type == ESP_MAC_WIFI_SOFTAP)
+    {
+      tmp = mac[0];
+      for (i = 0; i < 64; i++)
+        {
+          mac[0] = tmp | 0x02;
+          mac[0] ^= i << 2;
+
+          if (mac[0] != tmp)
+            {
+              break;
+            }
+        }
+
+      if (i >= 64)
+        {
+          wlerr("Failed to generate SoftAP MAC\n");
+          return -1;
+        }
+    }
+
+  if (type == ESP_MAC_BT)
+    {
+      tmp = mac[0];
+      for (i = 0; i < 64; i++)
+        {
+          mac[0] = tmp | 0x02;
+          mac[0] ^= i << 2;
+
+          if (mac[0] != tmp)
+            {
+              break;
+            }
+        }
+
+      mac[5] += 1;
+    }
+
+  return 0;
+}
 
 /****************************************************************************
  * Name: esp32_phy_disable
