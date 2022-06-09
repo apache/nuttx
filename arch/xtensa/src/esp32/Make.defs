@@ -206,10 +206,19 @@ distclean::
 
 INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)esp-wireless-drivers-3rdparty$(DELIM)include)
 INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)esp-wireless-drivers-3rdparty$(DELIM)include$(DELIM)esp32)
-CHIP_CSRCS += esp32_wlan.c esp32_wifi_utils.c esp32_wifi_adapter.c
 
 EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)esp-wireless-drivers-3rdparty$(DELIM)libs$(DELIM)esp32
-EXTRA_LIBS += -lcore -lrtc -lnet80211 -lpp -lsmartconfig -lespnow -lphy -lwpa_supplicant
+EXTRA_LIBS += -lphy -lrtc
+
+# Wireless interfaces.
+
+CHIP_CSRCS += esp32_wireless.c
+endif
+
+ifeq ($(CONFIG_ESP32_WIFI),y)
+CHIP_CSRCS += esp32_wlan.c esp32_wifi_utils.c esp32_wifi_adapter.c
+EXTRA_LIBS += -lcore -lnet80211 -lpp -lsmartconfig -lespnow -lwpa_supplicant
+endif
 
 ifeq ($(CONFIG_ESP32_BLE),y)
 CHIP_CSRCS += esp32_ble_adapter.c esp32_ble.c
@@ -217,9 +226,4 @@ EXTRA_LIBS += -lbtdm_app
   ifeq ($(CONFIG_ESP32_WIFI_BT_COEXIST),y)
     EXTRA_LIBS += -lcoexist
   endif
-endif
-
-# Wireless interfaces.
-
-CHIP_CSRCS += esp32_wireless.c
 endif

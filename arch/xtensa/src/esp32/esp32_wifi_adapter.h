@@ -61,8 +61,6 @@ extern "C"
 #  define ESP32_WLAN_DEVS         2
 #endif
 
-#define MAC_LEN                     (6)
-
 /* Needed to fix coex_adapter_funcs_t definition */
 
 #define CONFIG_IDF_TARGET_ESP32   1
