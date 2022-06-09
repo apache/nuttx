@@ -47,6 +47,14 @@
 #include "diskio.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* FAT: Log2 of sector size in unit of byte (BYTE) */
+
+#define FATFS_BytesPerSectorShift_FIELD  108
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -62,6 +70,12 @@ struct fatfs_mountpt_s
   FATFS      fat;
   BYTE       pdrv;
   sem_t      sem;
+};
+
+struct fatfs_driver_s
+{
+  FAR struct inode *drv;
+  int ratio;
 };
 
 /****************************************************************************
@@ -127,7 +141,7 @@ static sem_t g_sem = SEM_INITIALIZER(1);
 
 /* The number of block device mounted */
 
-static FAR struct inode *g_drv[FF_VOLUMES];
+static struct fatfs_driver_s g_drv[FF_VOLUMES];
 
 /****************************************************************************
  * Public Data
@@ -203,9 +217,10 @@ static BYTE fatfs_alloc_slot(FAR struct inode *drv)
 
   for (i = 0; i < FF_VOLUMES; i++)
     {
-      if (g_drv[i] == NULL)
+      if (g_drv[i].drv == NULL)
         {
-          g_drv[i] = drv;
+          g_drv[i].drv = drv;
+          g_drv[i].ratio = 1;
           nxsem_post(&g_sem);
           return i;
         }
@@ -224,8 +239,8 @@ static FAR struct inode *fatfs_free_slot(BYTE pdrv)
       return NULL;
     }
 
-  drv = g_drv[pdrv];
-  g_drv[pdrv] = NULL;
+  drv = g_drv[pdrv].drv;
+  g_drv[pdrv].drv = NULL;
   nxsem_post(&g_sem);
   return drv;
 }
@@ -549,7 +564,7 @@ static int fatfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     }
   else
     {
-      FAR struct inode *drv = g_drv[fs->pdrv];
+      FAR struct inode *drv = g_drv[fs->pdrv].drv;
       ret = drv->u.i_bops->ioctl(drv, cmd, arg);
     }
 
@@ -1047,6 +1062,7 @@ static int fatfs_bind(FAR struct inode *driver, FAR const void *data,
       memset(&opt, 0, sizeof(opt));
       opt.fmt = FM_EXFAT | FM_SFD;
       opt.n_fat = 2;
+      g_drv[fs->pdrv].ratio = CONFIG_FS_FATFS_SECTOR_RATIO;
       ret = fatfs_convert_result(f_mkfs(path, &opt, NULL, FF_MAX_SS));
       if (ret < 0)
         {
@@ -1065,6 +1081,7 @@ static int fatfs_bind(FAR struct inode *driver, FAR const void *data,
           goto errout_with_open;
         }
 
+      g_drv[fs->pdrv].ratio = CONFIG_FS_FATFS_SECTOR_RATIO;
       memset(&opt, 0, sizeof(opt));
       opt.fmt = FM_EXFAT | FM_SFD;
       opt.n_fat = 2;
@@ -1419,7 +1436,7 @@ static int fatfs_chstat(FAR struct inode *mountpt, FAR const char *relpath,
 DSTATUS disk_status(BYTE pdrv)
 {
   DEBUGASSERT(pdrv < FF_VOLUMES);
-  if (g_drv[pdrv])
+  if (g_drv[pdrv].drv)
     {
       return OK;
     }
@@ -1470,14 +1487,34 @@ DRESULT disk_read(BYTE pdrv, BYTE *buff, LBA_t sector, UINT count)
   ssize_t size;
 
   DEBUGASSERT(pdrv < FF_VOLUMES);
-  drv = g_drv[pdrv];
-  count *= CONFIG_FS_FATFS_SECTOR_RATIO;
-  size = drv->u.i_bops->read(drv, buff,
-                             sector * CONFIG_FS_FATFS_SECTOR_RATIO, count);
+  drv = g_drv[pdrv].drv;
+  count *= g_drv[pdrv].ratio;
+  size = drv->u.i_bops->read(drv, buff, sector * g_drv[pdrv].ratio, count);
   if (size != count)
     {
       ferr("Read failed: %zd\n", size);
       return RES_ERROR;
+    }
+
+  if (sector == 0 && g_drv[pdrv].ratio == 1)
+    {
+      struct geometry geo;
+      int ret;
+
+      ret = drv->u.i_bops->geometry(drv, &geo);
+      if (ret < 0)
+        {
+          ferr("Geometry failed: %d\n", ret);
+          return RES_ERROR;
+        }
+
+      g_drv[pdrv].ratio = (1 << buff[FATFS_BytesPerSectorShift_FIELD]) /
+                          geo.geo_sectorsize;
+      if (g_drv[pdrv].ratio != 1 &&
+          g_drv[pdrv].ratio != CONFIG_FS_FATFS_SECTOR_RATIO)
+        {
+          g_drv[pdrv].ratio = CONFIG_FS_FATFS_SECTOR_RATIO;
+        }
     }
 
   return RES_OK;
@@ -1507,10 +1544,9 @@ DRESULT disk_write(BYTE pdrv, const BYTE *buff, LBA_t sector, UINT count)
   ssize_t size;
 
   DEBUGASSERT(pdrv < FF_VOLUMES);
-  drv = g_drv[pdrv];
-  count *= CONFIG_FS_FATFS_SECTOR_RATIO;
-  size = drv->u.i_bops->write(drv, buff,
-                              sector * CONFIG_FS_FATFS_SECTOR_RATIO, count);
+  drv = g_drv[pdrv].drv;
+  count *= g_drv[pdrv].ratio;
+  size = drv->u.i_bops->write(drv, buff, sector * g_drv[pdrv].ratio, count);
   if (size != count)
     {
       ferr("Write failed: %zd\n", size);
@@ -1543,7 +1579,7 @@ DRESULT disk_ioctl(BYTE pdrv, BYTE cmd, void *buff)
   int ret = -ENOTTY;
 
   DEBUGASSERT(pdrv < FF_VOLUMES);
-  drv = g_drv[pdrv];
+  drv = g_drv[pdrv].drv;
   switch (cmd)
     {
       case CTRL_SYNC:
@@ -1571,18 +1607,15 @@ DRESULT disk_ioctl(BYTE pdrv, BYTE cmd, void *buff)
 
           if (cmd == GET_SECTOR_COUNT)
             {
-              *(FAR LBA_t *)buff = geo.geo_nsectors /
-                                   CONFIG_FS_FATFS_SECTOR_RATIO;
+              *(FAR LBA_t *)buff = geo.geo_nsectors / g_drv[pdrv].ratio;
             }
           else if (cmd == GET_SECTOR_SIZE)
             {
-              *(FAR WORD *)buff = geo.geo_sectorsize *
-                                  CONFIG_FS_FATFS_SECTOR_RATIO;
+              *(FAR WORD *)buff = geo.geo_sectorsize * g_drv[pdrv].ratio;
             }
           else if (cmd == GET_BLOCK_SIZE)
             {
-              *(FAR DWORD *)buff = geo.geo_sectorsize *
-                                   CONFIG_FS_FATFS_SECTOR_RATIO;
+              *(FAR DWORD *)buff = geo.geo_sectorsize * g_drv[pdrv].ratio;
             }
         }
         break;
