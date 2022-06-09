@@ -168,11 +168,6 @@ config ESP32C3_RTC_HEAP
 	select ARCH_HAVE_EXTRA_HEAPS
 	default n
 
-config ESP32C3_WIRELESS
-	bool
-	default n
-	select ESP32C3_RT_TIMER
-
 config ESP32C3_EXCEPTION_ENABLE_CACHE
 	bool
 	default y
