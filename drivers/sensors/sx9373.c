@@ -247,11 +247,13 @@ static int sx9373_read_rawdata(FAR struct sx9373_dev_s *priv,
                                FAR struct sx9373_rawdata_s *rawdata,
                                int channel);
 #endif
+#if 0
 static int sx9373_read_cfg_param(FAR struct file *file,
                                  FAR char *buf, int len);
 static int sx9373_write_cfg_param(FAR struct sx9373_dev_s *priv,
                                   FAR struct file *file);
 static int sx9373_config_device(FAR struct sx9373_dev_s *priv);
+#endif
 
 /* Sensor ops functions. */
 
@@ -1017,6 +1019,7 @@ static int sx9373_calibrate(FAR struct file *filep,
   return ret;
 }
 
+#if 0
 /****************************************************************************
  * Name: sx9373_read_cfg_param
  *
@@ -1194,6 +1197,7 @@ static int sx9373_config_device(FAR struct sx9373_dev_s *priv)
 
   return ret;
 }
+#endif
 
 /* Sensor poll functions */
 
