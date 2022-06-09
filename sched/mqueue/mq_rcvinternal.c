@@ -54,7 +54,6 @@
  *
  * Input Parameters:
  *   msgq   - Message queue descriptor
- *   oflags - flags from user set
  *   msg    - Buffer to receive the message
  *   msglen - Size of the buffer in bytes
  *
@@ -69,9 +68,19 @@
  *
  ****************************************************************************/
 
-int nxmq_verify_receive(FAR struct mqueue_inode_s *msgq,
-                        int oflags, FAR char *msg, size_t msglen)
+#ifdef CONFIG_DEBUG_FEATURES
+int nxmq_verify_receive(FAR struct file *mq, FAR char *msg, size_t msglen)
 {
+  FAR struct inode *inode = mq->f_inode;
+  FAR struct mqueue_inode_s *msgq;
+
+  if (inode == NULL)
+    {
+      return -EBADF;
+    }
+
+  msgq = inode->i_private;
+
   /* Verify the input parameters */
 
   if (!msg || !msgq)
@@ -79,7 +88,7 @@ int nxmq_verify_receive(FAR struct mqueue_inode_s *msgq,
       return -EINVAL;
     }
 
-  if ((oflags & O_RDOK) == 0)
+  if ((mq->f_oflags & O_RDOK) == 0)
     {
       return -EPERM;
     }
@@ -91,6 +100,7 @@ int nxmq_verify_receive(FAR struct mqueue_inode_s *msgq,
 
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: nxmq_wait_receive

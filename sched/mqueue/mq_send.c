@@ -70,28 +70,22 @@
 int file_mq_send(FAR struct file *mq, FAR const char *msg, size_t msglen,
                  unsigned int prio)
 {
-  FAR struct inode *inode = mq->f_inode;
   FAR struct mqueue_inode_s *msgq;
   FAR struct mqueue_msg_s *mqmsg;
   irqstate_t flags;
   int ret;
 
-  if (!inode)
-    {
-      return -EBADF;
-    }
-
-  msgq = inode->i_private;
-
   /* Verify the input parameters -- setting errno appropriately
    * on any failures to verify.
    */
 
-  ret = nxmq_verify_send(msgq, mq->f_oflags, msg, msglen, prio);
+  ret = nxmq_verify_send(mq, msg, msglen, prio);
   if (ret < 0)
     {
       return ret;
     }
+
+  msgq = mq->f_inode->i_private;
 
   /* Allocate a message structure:
    * - Immediately if we are called from an interrupt handler.
