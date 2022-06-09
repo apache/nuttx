@@ -392,7 +392,7 @@ int ipv6_input(FAR struct net_driver_s *dev)
                * drop the packet.
                */
 
-              nwarn("WARNING: Not destined for us... Dropping!\n");
+              ninfo("WARNING: Not destined for us... Dropping!\n");
               goto drop;
             }
         }
