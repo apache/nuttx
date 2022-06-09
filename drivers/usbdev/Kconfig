@@ -824,6 +824,20 @@ config USBMSC_BULKOUTREQLEN
 		beyond the maximum size of one packet.  Default:  512 or 64 bytes
 		(depending upon if dual speed operation is supported or not).
 
+if USBMSC_COMPOSITE
+
+config USBMSC_IFNOBASE
+	int "Mass storage interface number"
+	default 0
+	---help---
+		With composite USB drivers, the interface is not guaranteed to be zero
+		but rather, may vary according to the order in which the devices are
+		declared in the board_composite_connect() -function. This function may
+		be found in the corresponding board file. This index number may need to
+		be adjusted to match the proper interface number.
+
+endif
+
 if !USBMSC_COMPOSITE
 
 # In a composite device the Vendor- and Product-IDs are handled by the
