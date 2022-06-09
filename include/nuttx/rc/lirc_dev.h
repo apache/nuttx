@@ -146,6 +146,7 @@ struct lirc_lowerhalf_s
 {
   FAR const struct lirc_ops_s  *ops;
   FAR void                     *priv;
+  FAR void                     *conf;
   unsigned int                  timeout;
   unsigned int                  min_timeout;
   unsigned int                  max_timeout;
