@@ -1585,6 +1585,12 @@ config MQ_MAXMSGSIZE
 		Message structures are allocated with a fixed payload size given by this
 		setting (does not include other message structure overhead.
 
+config DISABLE_MQUEUE_NOTIFICATION
+	bool "Disable POSIX message queue notification"
+	default DEFAULT_SMALL
+	---help---
+		Disable POSIX message queue notification
+
 endmenu # POSIX Message Queue Options
 
 config MODULE
