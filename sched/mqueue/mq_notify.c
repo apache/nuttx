@@ -94,6 +94,7 @@
 
 int mq_notify(mqd_t mqdes, FAR const struct sigevent *notification)
 {
+#ifndef CONFIG_DISABLE_MQUEUE_NOTIFICATION
   FAR struct mqueue_inode_s *msgq;
   FAR struct inode *inode;
   FAR struct file *filep;
@@ -189,4 +190,8 @@ errout:
 errout_without_lock:
   set_errno(errval);
   return ERROR;
+#else
+  set_errno(ENOSYS);
+  return ERROR;
+#endif
 }

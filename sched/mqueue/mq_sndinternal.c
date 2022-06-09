@@ -373,6 +373,7 @@ int nxmq_do_send(FAR struct mqueue_inode_s *msgq,
    * message queue
    */
 
+#ifndef CONFIG_DISABLE_MQUEUE_NOTIFICATION
   if (msgq->ntpid != INVALID_PROCESS_ID)
     {
       struct sigevent event;
@@ -393,6 +394,7 @@ int nxmq_do_send(FAR struct mqueue_inode_s *msgq,
       DEBUGVERIFY(nxsig_notification(pid, &event,
                                      SI_MESGQ, &msgq->ntwork));
     }
+#endif
 
   /* Check if any tasks are waiting for the MQ not empty event. */
 
