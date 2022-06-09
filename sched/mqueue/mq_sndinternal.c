@@ -57,7 +57,6 @@
  *
  * Input Parameters:
  *   msgq   - Message queue descriptor
- *   oflags - flags from user set
  *   msg    - Message to send
  *   msglen - The length of the message in bytes
  *   prio   - The priority of the message
@@ -73,9 +72,20 @@
  *
  ****************************************************************************/
 
-int nxmq_verify_send(FAR struct mqueue_inode_s *msgq, int oflags,
-                     FAR const char *msg, size_t msglen, unsigned int prio)
+#ifdef CONFIG_DEBUG_FEATURES
+int nxmq_verify_send(FAR FAR struct file *mq, FAR const char *msg,
+                     size_t msglen, unsigned int prio)
 {
+  FAR struct inode *inode = mq->f_inode;
+  FAR struct mqueue_inode_s *msgq;
+
+  if (inode == NULL)
+    {
+      return -EBADF;
+    }
+
+  msgq = inode->i_private;
+
   /* Verify the input parameters */
 
   if (msg == NULL || msgq == NULL || prio > MQ_PRIO_MAX)
@@ -83,7 +93,7 @@ int nxmq_verify_send(FAR struct mqueue_inode_s *msgq, int oflags,
       return -EINVAL;
     }
 
-  if ((oflags & O_WROK) == 0)
+  if ((mq->f_oflags & O_WROK) == 0)
     {
       return -EPERM;
     }
@@ -95,6 +105,7 @@ int nxmq_verify_send(FAR struct mqueue_inode_s *msgq, int oflags,
 
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: nxmq_alloc_msg

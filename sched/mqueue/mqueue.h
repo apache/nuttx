@@ -115,8 +115,11 @@ void nxmq_wait_irq(FAR struct tcb_s *wtcb, int errcode);
 
 /* mq_rcvinternal.c *************************************************************/
 
-int nxmq_verify_receive(FAR struct mqueue_inode_s *msgq,
-                        int oflags, FAR char *msg, size_t msglen);
+#ifdef CONFIG_DEBUG_FEATURES
+int nxmq_verify_receive(FAR struct file *mq, FAR char *msg, size_t msglen);
+#else
+# define nxmq_verify_receive(msgq, msg, msglen) OK
+#endif
 int nxmq_wait_receive(FAR struct mqueue_inode_s *msgq,
                       int oflags, FAR struct mqueue_msg_s **rcvmsg);
 ssize_t nxmq_do_receive(FAR struct mqueue_inode_s *msgq,
@@ -125,8 +128,12 @@ ssize_t nxmq_do_receive(FAR struct mqueue_inode_s *msgq,
 
 /* mq_sndinternal.c *************************************************************/
 
-int nxmq_verify_send(FAR struct mqueue_inode_s *msgq, int oflags,
-                     FAR const char *msg, size_t msglen, unsigned int prio);
+#ifdef CONFIG_DEBUG_FEATURES
+int nxmq_verify_send(FAR struct file *mq, FAR const char *msg,
+                     size_t msglen, unsigned int prio);
+#else
+# define nxmq_verify_send(mq, msg, msglen, prio) OK
+#endif
 FAR struct mqueue_msg_s *nxmq_alloc_msg(void);
 int nxmq_wait_send(FAR struct mqueue_inode_s *msgq, int oflags);
 int nxmq_do_send(FAR struct mqueue_inode_s *msgq,
