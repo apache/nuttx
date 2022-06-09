@@ -146,7 +146,6 @@ int file_mq_timedsend(FAR struct file *mq, FAR const char *msg,
                       size_t msglen, unsigned int prio,
                       FAR const struct timespec *abstime)
 {
-  FAR struct inode *inode = mq->f_inode;
   FAR struct tcb_s *rtcb = this_task();
   FAR struct mqueue_inode_s *msgq;
   FAR struct mqueue_msg_s *mqmsg;
@@ -154,22 +153,17 @@ int file_mq_timedsend(FAR struct file *mq, FAR const char *msg,
   sclock_t ticks;
   int ret;
 
-  if (!inode)
-    {
-      return -EBADF;
-    }
-
-  msgq = inode->i_private;
-
   DEBUGASSERT(up_interrupt_context() == false);
 
   /* Verify the input parameters on any failures to verify. */
 
-  ret = nxmq_verify_send(msgq, mq->f_oflags, msg, msglen, prio);
+  ret = nxmq_verify_send(mq, msg, msglen, prio);
   if (ret < 0)
     {
       return ret;
     }
+
+  msgq = mq->f_inode->i_private;
 
   /* Disable interruption */
 

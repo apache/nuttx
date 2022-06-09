@@ -138,19 +138,11 @@ ssize_t file_mq_timedreceive(FAR struct file *mq, FAR char *msg,
                              size_t msglen, FAR unsigned int *prio,
                              FAR const struct timespec *abstime)
 {
-  FAR struct inode *inode = mq->f_inode;
   FAR struct tcb_s *rtcb = this_task();
   FAR struct mqueue_inode_s *msgq;
   FAR struct mqueue_msg_s *mqmsg;
   irqstate_t flags;
   int ret;
-
-  if (!inode)
-    {
-      return -EBADF;
-    }
-
-  msgq = inode->i_private;
 
   DEBUGASSERT(up_interrupt_context() == false);
 
@@ -158,7 +150,7 @@ ssize_t file_mq_timedreceive(FAR struct file *mq, FAR char *msg,
    * errno appropriately.
    */
 
-  ret = nxmq_verify_receive(msgq, mq->f_oflags, msg, msglen);
+  ret = nxmq_verify_receive(mq, msg, msglen);
   if (ret < 0)
     {
       return ret;
@@ -168,6 +160,8 @@ ssize_t file_mq_timedreceive(FAR struct file *mq, FAR char *msg,
     {
       return -EINVAL;
     }
+
+  msgq = mq->f_inode->i_private;
 
   /* Furthermore, nxmq_wait_receive() expects to have interrupts disabled
    * because messages can be sent from interrupt level.
