@@ -425,6 +425,13 @@ struct bmi270_int1_io_ctrl_s
 
 typedef struct bmi270_int1_io_ctrl_s bmi270_int1_io_ctrl_t;
 
+struct bmi270_int_latch_s
+{
+  uint8_t int_latch               : 8;
+};
+
+typedef struct bmi270_int_latch_s bmi270_int_latch_t;
+
 struct bmi270_int1_map_feat_s
 {
   uint8_t sig_motion_out          : 1;
@@ -2066,9 +2073,14 @@ static int bmi270_set_int(FAR struct bmi270_dev_s *priv,
                           uint8_t value)
 {
   bmi270_int1_io_ctrl_t regval_int_ctrl;
+  bmi270_int_latch_t regval_int_latch;
 
   bmi270_spi_read(priv, BMI270_INT1_IO_CTRL,
                   (FAR uint8_t *)&regval_int_ctrl, 1);
+
+  regval_int_latch.int_latch = BMI270_ENABLE;
+  bmi270_spi_write(priv, BMI270_INT_LATCH,
+                   (FAR uint8_t *)&regval_int_latch);
 
   regval_int_ctrl.lvl = 1;
   regval_int_ctrl.od = 0;
@@ -2076,7 +2088,6 @@ static int bmi270_set_int(FAR struct bmi270_dev_s *priv,
   regval_int_ctrl.output_en = value;
   bmi270_spi_write(priv, BMI270_INT1_IO_CTRL,
                    (FAR uint8_t *)&regval_int_ctrl);
-
   return OK;
 }
 
@@ -3150,6 +3161,7 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv)
          temp_gy[CONFIG_SENSORS_BMI270_FIFO_SLOTS_NUMBER * 2];
   uint8_t data_len = 0;
   uint8_t fifo_type = -1;
+  uint8_t reg_int[2];
   unsigned int counter_xl = 0;
   unsigned int counter_gy = 0;
   unsigned int fifo_interval;
@@ -3168,18 +3180,18 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv)
     {
       bmi270_spi_read_enhance(priv, BMI270_FIFO_DATA, priv->fifo_buff, num);
     }
+  else
+    {
+      return OK;
+    }
 
   /* Read temperature. */
 
   bmi270_temp_getdata(priv, BMI270_ITEMPERATURE_0, &temperature);
 
-  /* Set scale factor. */
+  /* Clear the interrupt status. */
 
-  bmi270_xl_setscalefactor(priv);
-
-  /* Unlock the SPI. */
-
-  bmi270_spi_unlock(priv);
+  bmi270_spi_read_unlock(priv, BMI270_INT_STATUS_0, reg_int, 2);
 
   for (i = 2; i < num + 2; i = i + data_len)
     {
@@ -3191,6 +3203,15 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv)
         {
           snerr("FIFO data number out of range!\n");
           break;
+        }
+
+      /* Sensor config check. */
+
+      if (fifo_type == BMI270_FIFO_TYPE_OTHER)
+        {
+          /* Set scale factor. */
+
+          bmi270_xl_setscalefactor(priv);
         }
 
       /* Must be parsed in the following order. */
@@ -3320,11 +3341,12 @@ static int bmi270_fifo_getlevel(FAR struct bmi270_dev_s *priv,
 {
   bmi270_fifo_length_0_t fifo_length0;
   bmi270_fifo_length_1_t fifo_length1;
+  uint8_t fifo_lenth[2];
 
-  bmi270_spi_read_unlock(priv, BMI270_FIFO_LENGTH_0,
-                         (FAR uint8_t *)&fifo_length0, 1);
-  bmi270_spi_read_unlock(priv, BMI270_FIFO_LENGTH_1,
-                         (FAR uint8_t *)&fifo_length1, 1);
+  bmi270_spi_read_unlock(priv, BMI270_FIFO_LENGTH_0, fifo_lenth, 2);
+  fifo_length0 = *(FAR bmi270_fifo_length_0_t *)&fifo_lenth[0];
+  fifo_length1 = *(FAR bmi270_fifo_length_1_t *)&fifo_lenth[1];
+
   *value = ((uint16_t)fifo_length1.fifo_byte_counter_13_8 << 8) +
            (uint16_t)fifo_length0.fifo_byte_counter_7_0;
 
@@ -3858,7 +3880,15 @@ static int bmi270_batch(FAR struct file *filep,
 
       if (priv->fifoen)
         {
+          /* Lock the SPI. */
+
+          bmi270_spi_lock(priv);
+
           bmi270_fifo_readdata(priv);
+
+          /* Unlock the SPI. */
+
+          bmi270_spi_unlock(priv);
         }
 
       bmi270_set_int(priv, BMI270_DISABLE);
@@ -4495,6 +4525,7 @@ static void bmi270_worker(FAR void *arg)
   FAR struct bmi270_dev_s *priv = arg;
   bmi270_int_status_0_t regval_int0;
   bmi270_int_status_1_t regval_int1;
+  uint8_t reg_int[2];
 
   /* Sanity check. */
 
@@ -4506,26 +4537,27 @@ static void bmi270_worker(FAR void *arg)
 
   /* Read the interrupt status. */
 
-  bmi270_spi_read_unlock(priv, BMI270_INT_STATUS_0,
-                         (FAR uint8_t *)&regval_int0, 1);
-  bmi270_spi_read_unlock(priv, BMI270_INT_STATUS_1,
-                         (FAR uint8_t *)&regval_int1, 1);
+  bmi270_spi_read_unlock(priv, BMI270_INT_STATUS_0, reg_int, 2);
+  regval_int0 = *(FAR bmi270_int_status_0_t *)&reg_int[0];
+  regval_int1 = *(FAR bmi270_int_status_1_t *)&reg_int[1];
 
   /* Handle the interrupt. */
 
   if (regval_int1.fwm_int || regval_int1.ffull_int)
     {
+      /* The SPI will be unlock in this function. */
+
       bmi270_fifo_readdata(priv);
     }
+
+  /* Unlock the SPI. */
+
+  bmi270_spi_unlock(priv);
 
   if (regval_int0.wrist_wear_weakeup_out)
     {
       bmi270_feat_handler(priv, regval_int0);
     }
-
-  /* Clear the interrupt status. */
-
-  bmi270_spi_read(priv, BMI270_INT_STATUS_1, (FAR uint8_t *)&regval_int1, 1);
 }
 
 /****************************************************************************
