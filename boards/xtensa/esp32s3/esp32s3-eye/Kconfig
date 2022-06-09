@@ -1,0 +1,51 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_ESP32S3_EYE
+
+config ESP32S3_STORAGE_MTD_OFFSET
+	hex "Storage MTD base address in SPI Flash"
+	default 0x180000
+	depends on ESP32S3_MTD
+	---help---
+		MTD base address in SPI Flash.
+
+config ESP32S3_STORAGE_MTD_SIZE
+	hex "Storage MTD size in SPI Flash"
+	default 0x100000
+	depends on ESP32S3_MTD
+	---help---
+		MTD size in SPI Flash.
+
+choice ESP32S3_SPIFLASH_FS
+	prompt "Mount SPI Flash MTD on bring-up"
+	default ESP32S3_SPIFLASH_SMARTFS
+	depends on ESP32S3_MTD
+	optional
+	---help---
+		Mount the SPI Flash MTD with the selected File System format on board
+		bring-up.
+		If not selected, the MTD will be registered as a device node on /dev.
+
+	config ESP32S3_SPIFLASH_SMARTFS
+		bool "SmartFS"
+		select FS_SMARTFS
+		select MTD_SMART
+
+	config ESP32S3_SPIFLASH_NXFFS
+		bool "NXFFS"
+		select FS_NXFFS
+
+	config ESP32S3_SPIFLASH_SPIFFS
+		bool "SPIFFS"
+		select FS_SPIFFS
+
+	config ESP32S3_SPIFLASH_LITTLEFS
+		bool "LittleFS"
+		select FS_LITTLEFS
+
+endchoice
+
+endif # ARCH_BOARD_ESP32S3_EYE

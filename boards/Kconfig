@@ -298,6 +298,17 @@ config ARCH_BOARD_ESP32S3_DEVKIT
 		ESP32-S3-DevKitC-1 version may be based either on ESP32-S3-WROOM-1/1U or
 		ESP32-S3-WROOM-2/2U.
 
+config ARCH_BOARD_ESP32S3_EYE
+	bool "Espressif ESP32-S3-EYE Board"
+	depends on ARCH_CHIP_ESP32S3WROOM1
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESP32S3_GPIO_IRQ
+	---help---
+		The ESP32-S3-EYE is a small-sized AI development board produced by Espressif
+		featuring the ESP32-S3 CPU with a 2-Megapixel camera, an LCD display,
+		a microphone, an 8 MB Octal PSRAM and an 8 MB flash.
+
 config ARCH_BOARD_ET_STM32_STAMP
 	bool "Futurlec: ET-STM32 Stamp"
 	depends on ARCH_CHIP_STM32F103RE
@@ -2448,6 +2459,7 @@ config ARCH_BOARD
 	default "esp32c3-devkit"           if ARCH_BOARD_ESP32C3_DEVKIT
 	default "esp32s2-saola-1"          if ARCH_BOARD_ESP32S2_SAOLA_1
 	default "esp32s3-devkit"           if ARCH_BOARD_ESP32S3_DEVKIT
+	default "esp32s3-eye"              if ARCH_BOARD_ESP32S3_EYE
 	default "et-stm32-stamp"           if ARCH_BOARD_ET_STM32_STAMP
 	default "tlsr8278adk80d"           if ARCH_BOARD_TLSR8278ADK80D
 	default "ez80f910200kitg"          if ARCH_BOARD_EZ80F910200KITG
@@ -3337,6 +3349,9 @@ source "boards/xtensa/esp32s2/esp32s2-saola-1/Kconfig"
 endif
 if ARCH_BOARD_ESP32S3_DEVKIT
 source "boards/xtensa/esp32s3/esp32s3-devkit/Kconfig"
+endif
+if ARCH_BOARD_ESP32S3_EYE
+source "boards/xtensa/esp32s3/esp32s3-eye/Kconfig"
 endif
 if ARCH_BOARD_SIM
 source "boards/sim/sim/sim/Kconfig"
