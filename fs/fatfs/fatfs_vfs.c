@@ -1014,6 +1014,8 @@ static int fatfs_bind(FAR struct inode *driver, FAR const void *data,
                       FAR void **handle)
 {
   FAR struct fatfs_mountpt_s *fs;
+  FAR unsigned char *sector;
+  struct geometry geo;
   MKFS_PARM opt;
   char path[3];
   int ret;
@@ -1049,6 +1051,38 @@ static int fatfs_bind(FAR struct inode *driver, FAR const void *data,
           ferr("ERROR: %d driver open failed\n", fs->pdrv);
           goto errout_with_pdrv;
         }
+
+      ret = driver->u.i_bops->geometry(driver, &geo);
+      if (ret < 0)
+        {
+          ferr("Geometry failed: %d\n", ret);
+          goto errout_with_open;
+        }
+
+      sector = kmm_malloc(geo.geo_sectorsize);
+      if (sector == NULL)
+        {
+          ret = -ENOMEM;
+          goto errout_with_open;
+        }
+
+      ret = driver->u.i_bops->read(driver, sector, 0, 1);
+      if (ret < 0)
+        {
+          ferr("Read failed: %zd\n", ret);
+          kmm_free(sector);
+          goto errout_with_open;
+        }
+
+      g_drv[fs->pdrv].ratio = (1 << sector[FATFS_BytesPerSectorShift_FIELD]) /
+                          geo.geo_sectorsize;
+      if (g_drv[fs->pdrv].ratio != 1 &&
+          g_drv[fs->pdrv].ratio != CONFIG_FS_FATFS_SECTOR_RATIO)
+        {
+          g_drv[fs->pdrv].ratio = CONFIG_FS_FATFS_SECTOR_RATIO;
+        }
+
+      kmm_free(sector);
     }
 
   nxsem_init(&fs->sem, 0, 0); /* Initialize the access control semaphore */
@@ -1512,27 +1546,6 @@ DRESULT disk_read(BYTE pdrv, BYTE *buff, LBA_t sector, UINT count)
     {
       ferr("Read failed: %zd\n", size);
       return RES_ERROR;
-    }
-
-  if (sector == 0 && g_drv[pdrv].ratio == 1)
-    {
-      struct geometry geo;
-      int ret;
-
-      ret = drv->u.i_bops->geometry(drv, &geo);
-      if (ret < 0)
-        {
-          ferr("Geometry failed: %d\n", ret);
-          return RES_ERROR;
-        }
-
-      g_drv[pdrv].ratio = (1 << buff[FATFS_BytesPerSectorShift_FIELD]) /
-                          geo.geo_sectorsize;
-      if (g_drv[pdrv].ratio != 1 &&
-          g_drv[pdrv].ratio != CONFIG_FS_FATFS_SECTOR_RATIO)
-        {
-          g_drv[pdrv].ratio = CONFIG_FS_FATFS_SECTOR_RATIO;
-        }
     }
 
   return RES_OK;
