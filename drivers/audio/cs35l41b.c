@@ -41,6 +41,7 @@
 #include <nuttx/audio/i2s.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/cs35l41b.h>
+#include <nuttx/ioexpander/ioexpander.h>
 
 #include "cs35l41b.h"
 #include "cs35l41b_fw.h"
@@ -125,6 +126,12 @@ typedef struct
   char *key;
   cs35l41b_ioctl_handler_t handler;
 } cs35l41b_info_t;
+
+typedef struct
+{
+  uint8_t id;
+  FAR const char *desc;
+} cs35l41b_event_desc_t;
 
 /****************************************************************************
  * Private Function Prototypes
@@ -216,6 +223,9 @@ static int cs35l41b_set_print_info_handler(FAR struct cs35l41b_dev_s *priv,
 static int cs35l41b_get_mode_handler(FAR struct cs35l41b_dev_s *priv,
                                     FAR char *key, FAR char *value,
                                     FAR void *arg);
+
+static int cs35l41b_interrupt_handler(FAR struct ioexpander_dev_s *dev,
+                                     ioe_pinset_t pinset, FAR void *arg);
 
 static int cs35l41b_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
                             FAR struct audio_caps_s *caps);
@@ -470,6 +480,29 @@ static const uint32_t g_cs35l41_pdn_patch[] =
   0x00002084,                          0x002f1aa3,
   CS35L41_CTRL_KEYS_TEST_KEY_CTRL_REG, CS35L41_TEST_KEY_CTRL_LOCK_1,
   CS35L41_CTRL_KEYS_TEST_KEY_CTRL_REG, CS35L41_TEST_KEY_CTRL_LOCK_2,
+};
+
+static const uint32_t cs35l41_irq_to_event_flag_map[] =
+{
+  IRQ1_IRQ1_EINT_1_AMP_ERR_EINT1_BITMASK,
+  CS35L41_EVENT_FLAG_AMP_SHORT,
+  IRQ1_IRQ1_EINT_1_TEMP_ERR_EINT1_BITMASK,
+  CS35L41_EVENT_FLAG_OVERTEMP,
+  IRQ1_IRQ1_EINT_1_BST_SHORT_ERR_EINT1_BITMASK,
+  CS35L41_EVENT_FLAG_BOOST_INDUCTOR_SHORT,
+  IRQ1_IRQ1_EINT_1_BST_DCM_UVP_ERR_EINT1_BITMASK,
+  CS35L41_EVENT_FLAG_BOOST_UNDERVOLTAGE,
+  IRQ1_IRQ1_EINT_1_BST_OVP_ERR_EINT1_BITMASK,
+  CS35L41_EVENT_FLAG_BOOST_OVERVOLTAGE
+};
+
+static const cs35l41b_event_desc_t g_cs35l41b_event_desc[] =
+{
+  { CS35L41_EVENT_FLAG_AMP_SHORT,            "cs35l41b amp short" },
+  { CS35L41_EVENT_FLAG_OVERTEMP,             "cs35l41b over temperature"},
+  { CS35L41_EVENT_FLAG_BOOST_INDUCTOR_SHORT, "ca35l41b boot inductor short"},
+  { CS35L41_EVENT_FLAG_BOOST_UNDERVOLTAGE,   "cs35l41b boot undervoltage"},
+  { CS35L41_EVENT_FLAG_BOOST_OVERVOLTAGE,    "cs35l41b boost overvoltage"},
 };
 
 static const cs35l41b_info_t cs35l41b_info[] =
@@ -1279,6 +1312,17 @@ static int cs35l41b_shutdown(FAR struct audio_lowerhalf_s *dev)
 
   audinfo("cs35l41b shutdown\n");
 
+  /* check event is happened */
+
+  if (priv->event_flags && priv->is_running)
+    {
+      nxsem_wait_uninterruptible(&priv->pendsem);
+      priv->event_flags = 0;
+      priv->is_running = false;
+
+      return ERROR;
+    }
+
   if (cs35l41b_mute(priv, true) == ERROR)
     {
       auderr("dsp mute failed\n");
@@ -1298,6 +1342,8 @@ static int cs35l41b_shutdown(FAR struct audio_lowerhalf_s *dev)
           return ERROR;
         }
     }
+
+  priv->is_running = false;
 
   return OK;
 }
@@ -1335,6 +1381,8 @@ static int cs35l41b_start(FAR struct audio_lowerhalf_s *dev)
   cs35l41b_dump_registers(priv, 0);
 #endif
 
+  priv->is_running = true;
+
   return OK;
 }
 
@@ -1358,6 +1406,17 @@ static int cs35l41b_stop(FAR struct audio_lowerhalf_s *dev)
   FAR struct cs35l41b_dev_s *priv = (FAR struct cs35l41b_dev_s *)dev;
 
   audinfo("cs35l41b stop!\n");
+
+  /* check event is happened */
+
+  if (priv->event_flags && priv->is_running)
+    {
+      nxsem_wait_uninterruptible(&priv->pendsem);
+      priv->event_flags = 0;
+      priv->is_running = false;
+
+      return ERROR;
+    }
 
 #ifdef CONFIG_AUDIO_CS35L41B_DEBUG
   cs35l41b_dump_registers(priv, 0);
@@ -1392,6 +1451,8 @@ static int cs35l41b_stop(FAR struct audio_lowerhalf_s *dev)
           return ERROR;
         }
     }
+
+  priv->is_running = false;
 
   return OK;
 }
@@ -3478,6 +3539,350 @@ out:
 }
 
 /****************************************************************************
+ * Name: cs35l41_irq_to_event_id
+ *
+ * Description:
+ *   cs35l41b irq to event ID
+ *
+ ****************************************************************************/
+
+static uint32_t cs35l41_irq_to_event_id(uint32_t *irq_statuses)
+{
+  uint32_t temp_event_flag = 0;
+
+  for (uint8_t i = 0;
+        i < (sizeof(cs35l41_irq_to_event_flag_map) / sizeof(uint32_t));
+        i += 2)
+    {
+      if (irq_statuses[0] & cs35l41_irq_to_event_flag_map[i])
+        {
+            temp_event_flag |= (1 << cs35l41_irq_to_event_flag_map[i + 1]);
+        }
+    }
+
+  return temp_event_flag;
+}
+
+/****************************************************************************
+ * Name: cs35l41b_event_handler
+ *
+ * Description:
+ *   cs35l41b event handler
+ *
+ ****************************************************************************/
+
+static uint32_t cs35l41b_event_handler(FAR struct cs35l41b_dev_s *priv)
+{
+  uint32_t irq_statuses[4];
+  uint32_t irq_masks[4];
+  uint32_t irq1_eint_1_flags_to_clear = 0;
+  uint32_t flags_to_clear;
+  uint32_t temp_reg_val;
+  uint8_t i;
+  int ret = OK;
+
+  /* if need  */
+
+  CS35L41B_GPIO_WAKE_UP();
+
+  for (i = 0; i < (sizeof(irq_statuses) / sizeof(uint32_t)); i++)
+    {
+      ret = cs35l41b_read_register(priv, &irq_statuses[i],
+            (IRQ1_IRQ1_EINT_1_REG + (i * 4)));
+
+      if (ret == ERROR)
+        {
+          goto end;
+        }
+
+      ret = cs35l41b_read_register(priv, &irq_masks[i],
+            (IRQ1_IRQ1_MASK_1_REG + (i * 4)));
+
+      if (ret == ERROR)
+        {
+          goto end;
+        }
+
+      flags_to_clear = irq_statuses[i] & ~(irq_masks[i]);
+      if (i == 0)
+        {
+          irq1_eint_1_flags_to_clear = flags_to_clear;
+        }
+
+      /* If there are unmasked IRQs, then process */
+
+      if (flags_to_clear)
+        {
+          /* Clear any IRQ1 flags from first register */
+
+          ret = cs35l41b_write_register(priv,
+                                        (IRQ1_IRQ1_EINT_1_REG + (i * 4)),
+                                        flags_to_clear);
+
+          if (ret == ERROR)
+            {
+              goto end;
+            }
+        }
+    }
+
+  if (!irq1_eint_1_flags_to_clear)
+    {
+      return OK;
+    }
+
+  /* IF there are no Boost-related Errors but are Speaker-Safe Mode errors,
+   * proceed to TOGGLE_ERR_RLS
+   */
+
+  if (irq_statuses[0] & CS35L41_INT1_SPEAKER_SAFE_MODE_IRQ_MASK)
+    {
+      /* If there are Boost-related Errors, proceed to DISABLE_BOOST */
+
+      if (irq_statuses[0] & CS35L41_INT1_BOOST_IRQ_MASK)
+        {
+          /* Read which MSM Blocks are enabled */
+
+          ret = cs35l41b_read_register(priv, &temp_reg_val,
+                                        MSM_BLOCK_ENABLES_REG);
+          if (ret == ERROR)
+            {
+              goto end;
+            }
+
+          /* Disable Boost converter */
+
+          temp_reg_val &= ~(MSM_BLOCK_ENABLES_BST_EN_BITMASK);
+          ret = cs35l41b_write_register(priv, MSM_BLOCK_ENABLES_REG,
+                                        temp_reg_val);
+          if (ret == ERROR)
+            {
+              goto end;
+            }
+        }
+
+      /* Clear the Error Release register */
+
+      ret = cs35l41b_write_register(priv, MSM_ERROR_RELEASE_REG, 0);
+      if (ret == ERROR)
+        {
+          goto end;
+        }
+
+      /* Set the Error Release register */
+
+      ret = cs35l41b_write_register(priv, MSM_ERROR_RELEASE_REG,
+                                    CS35L41_ERR_RLS_SPEAKER_SAFE_MODE_MASK);
+      if (ret == ERROR)
+        {
+          goto end;
+        }
+
+      /* Clear the Error Release register */
+
+      ret = cs35l41b_write_register(priv, MSM_ERROR_RELEASE_REG, 0);
+      if (ret == ERROR)
+        {
+          goto end;
+        }
+
+      /* If there are Boost-related Errors, re-enable Boost */
+
+      if (irq_statuses[0] & CS35L41_INT1_BOOST_IRQ_MASK)
+        {
+          /* Read register containing BST_EN */
+
+          ret = cs35l41b_read_register(priv, &temp_reg_val,
+                                        MSM_BLOCK_ENABLES_REG);
+          if (ret == ERROR)
+            {
+              goto end;
+            }
+
+          /* Re-enable Boost Converter */
+
+          temp_reg_val |= MSM_BLOCK_ENABLES_BST_EN_BITMASK;
+
+          ret = cs35l41b_write_register(priv, MSM_BLOCK_ENABLES_REG,
+                                        temp_reg_val);
+          if (ret == ERROR)
+            {
+              goto end;
+            }
+        }
+    }
+
+  /* Set event flags */
+
+  priv->event_flags = cs35l41_irq_to_event_id(irq_statuses);
+
+end:
+  return ret;
+}
+
+/****************************************************************************
+ * Name: cs35l41b_event_process
+ *
+ * Description:
+ *   cs35l41b event process
+ *
+ ****************************************************************************/
+
+static uint32_t cs35l41b_event_process(FAR struct cs35l41b_dev_s *priv)
+{
+  int ret = OK;
+  int i;
+  bool event_happend = false;
+
+  /* check for driver states */
+
+  if ((priv->state != CS35L41_STATE_UNCONFIGURED) &&
+     (priv->state != CS35L41_STATE_ERROR))
+    {
+      /* run through event handler */
+
+      ret = cs35l41b_event_handler(priv);
+      if (ret == ERROR || priv->event_flags)
+        {
+          priv->state = CS35L41_STATE_ERROR;
+        }
+    }
+
+  if (priv->state == CS35L41_STATE_ERROR)
+    {
+      for (i = 0; i < ARRAY_SIZE(g_cs35l41b_event_desc); i++)
+        {
+          if (priv->event_flags & (1 << g_cs35l41b_event_desc[i].id))
+            {
+              auderr("!!!%s!!!\n", g_cs35l41b_event_desc[i].desc);
+              event_happend = true;
+            }
+        }
+    }
+
+  /* if event happened, reset cs35l41b */
+
+  if (event_happend)
+    {
+      if (cs35l41b_reset(priv, true) == ERROR)
+        {
+          ret = ERROR;
+          goto error;
+        }
+
+      if (cs35l41b_boot_initialize(priv, CS35L41_DSP_TUNE_MODE) == ERROR)
+        {
+          ret = ERROR;
+          goto error;
+        }
+
+error:
+
+      /* if stream is running, clear event flags should wait until stop  */
+
+      if (priv->is_running)
+        {
+          nxsem_post(&priv->pendsem);
+        }
+      else
+        {
+          priv->event_flags = 0;
+        }
+
+      event_happend = false;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: cs35l41b_event_worker
+ *
+ * Description:
+ *   cs35l41b event worker
+ *
+ ****************************************************************************/
+
+static void cs35l41b_event_worker(FAR void *arg)
+{
+  int ret;
+  FAR struct cs35l41b_dev_s *priv = arg;
+
+  syslog(LOG_WARNING, "cs35l41b:enter event handler,"
+                      "there may be a hardware error\n");
+
+  cs35l41b_event_process(priv);
+
+  ret = IOEXP_SETOPTION(priv->io_dev, priv->lower->int_pin,
+              IOEXPANDER_OPTION_INTCFG, (FAR void *)IOEXPANDER_VAL_FALLING);
+  if (ret < 0)
+    {
+      auderr("Failed to set option: %d\n", ret);
+      IOEP_DETACH(priv->io_dev, cs35l41b_interrupt_handler);
+    }
+}
+
+/****************************************************************************
+ * Name: cs35l41b_interrupt_handler
+ *
+ * Description:
+ *   cs35l41b interrupt handler
+ *
+ ****************************************************************************/
+
+static int cs35l41b_interrupt_handler(FAR struct ioexpander_dev_s *dev,
+                                     ioe_pinset_t pinset, FAR void *arg)
+{
+  FAR struct cs35l41b_dev_s *priv = arg;
+
+  IOEXP_SETOPTION(priv->io_dev, priv->lower->int_pin,
+                  IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
+
+  work_queue(LPWORK, &priv->work, cs35l41b_event_worker, priv, 0);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cs35l41b_set_interrupt
+ *
+ * Description:
+ *   cs35l41b set interrupt
+ *
+ ****************************************************************************/
+
+int cs35l41b_set_interrupt(FAR struct cs35l41b_dev_s *priv)
+{
+  int ret = OK;
+  void *ioepattach;
+
+  ret = IOEXP_SETDIRECTION(priv->io_dev, priv->lower->int_pin,
+                           IOEXPANDER_DIRECTION_IN_PULLUP);
+  if (ret < 0)
+    {
+      auderr("Failed to set direction: %d\n", ret);
+    }
+
+  ioepattach = IOEP_ATTACH(priv->io_dev, priv->lower->int_pin,
+                          cs35l41b_interrupt_handler, priv);
+  if (ioepattach == NULL)
+    {
+      auderr("Failed to attach stwlc38_interrupt_handler");
+      ret = -EIO;
+    }
+
+  ret = IOEXP_SETOPTION(priv->io_dev, priv->lower->int_pin,
+              IOEXPANDER_OPTION_INTCFG, (FAR void *)IOEXPANDER_VAL_FALLING);
+  if (ret < 0)
+    {
+      auderr("Failed to set option: %d\n", ret);
+      IOEP_DETACH(priv->io_dev, cs35l41b_interrupt_handler);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: cs35l41b_write_register
  *
  * Description:
@@ -3732,6 +4137,12 @@ int cs35l41b_late_initialize(FAR struct audio_lowerhalf_s *dev)
       return ERROR;
     }
 
+  if (cs35l41b_set_interrupt(priv) == ERROR)
+    {
+      auderr("set interrupt error!\n");
+      return ERROR;
+    }
+
   return OK;
 }
 
@@ -3745,7 +4156,8 @@ int cs35l41b_late_initialize(FAR struct audio_lowerhalf_s *dev)
 
 FAR struct audio_lowerhalf_s *
 cs35l41b_initialize(FAR struct i2c_master_s *i2c,
-                    FAR struct cs35l41b_lower_s *lower)
+                    FAR struct cs35l41b_lower_s *lower,
+                    FAR struct ioexpander_dev_s *io_dev)
 {
   FAR struct cs35l41b_dev_s *priv;
 
@@ -3764,6 +4176,9 @@ cs35l41b_initialize(FAR struct i2c_master_s *i2c,
       priv->dev.ops     = &g_audioops;
       priv->lower       = lower;
       priv->i2c         = i2c;
+      priv->io_dev      = io_dev;
+
+      nxsem_init(&priv->pendsem, 0, 0);
 
       if (cs35l41b_reset(priv, false) != OK)
         {
@@ -3775,6 +4190,7 @@ cs35l41b_initialize(FAR struct i2c_master_s *i2c,
     }
 
 errout_with_dev:
+  nxsem_destroy(&priv->pendsem);
   kmm_free(priv);
   return NULL;
 }

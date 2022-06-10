@@ -29,6 +29,7 @@
 #include <stdbool.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/i2c/i2c_master.h>
+#include <nuttx/ioexpander/ioexpander.h>
 
 /****************************************************************************
  * Public Types
@@ -39,10 +40,10 @@ struct cs35l41b_lower_s
   uint32_t frequency;                 /* I2C frequency */
   uint8_t address;                    /* I2C device address */
   int bclk_factor;                    /* BCLK factor */
+  uint32_t int_pin;
 
   CODE int (*power_en)(bool flag);
   CODE int (*reset_en)(bool flag);
-  CODE int (*int_pin_set)();
   CODE int (*get_caliberate_result)(FAR uint32_t *value);
   CODE int (*wakeup_pin_set)(bool value);
 };
@@ -61,7 +62,8 @@ struct cs35l41b_lower_s
 
 FAR struct audio_lowerhalf_s *
 cs35l41b_initialize(FAR struct i2c_master_s *i2c,
-                    FAR struct cs35l41b_lower_s *lower);
+                    FAR struct cs35l41b_lower_s *lower,
+                    FAR struct ioexpander_dev_s *io_dev);
 
 int cs35l41b_late_initialize(FAR struct audio_lowerhalf_s *dev);
 #endif

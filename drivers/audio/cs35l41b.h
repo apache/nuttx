@@ -950,6 +950,45 @@
 #define CS35L41B_BLOCK_ENABLES2_AMP_DRE_EN                (1 << 20)
 #define CS35L41B_BLOCK_ENABLES2_WKFET_AMP_EN              (1 << 24)
 
+/* IRQ1 Status Bits for Speaker Safe Mode
+ *
+ * If any of the bits in the mask below are set in IRQ1_EINT_1,
+ * the amplifier will have entered Speaker Safe Mode.
+ * - b31 - AMP_ERR_MASK1
+ * - b17 - TEMP_ERR_MASK1
+ * - b8  - BST_SHORT_ERR_MASK1
+ * - b7  - BST_DCM_UVP_ERR_MASK1
+ * - b6  - BST_OVP_ERR_MASK1
+ */
+
+#define CS35L41_INT1_SPEAKER_SAFE_MODE_IRQ_MASK           (0x800201c0)
+
+/* IRQ1 Status Bits for Speaker Safe Mode Boost-related Events
+ *
+ * If any of the bits in the mask below are set in IRQ1_EINT_1,
+ * the amplifier will have entered Speaker Safe Mode
+ * and will require additional steps to release from Speaker Safe Mode.
+ * - b8 - BST_SHORT_ERR_MASK1
+ * - b7 - BST_DCM_UVP_ERR_MASK1
+ * - b6 - BST_OVP_ERR_MASK1
+ */
+
+#define CS35L41_INT1_BOOST_IRQ_MASK                       (0x000001c0)
+
+/* Toggle Mask for MSM_ERROR_RELEASE_REG to Release from Speaker Safe Mode
+ *
+ * The relevant fields in MSM_ERROR_RELEASE_REG that require
+ * release sequence are:
+ * - b6 - TEMP_ERR
+ * - b5 - TEMP_WARN
+ * - b4 - BST_UVP
+ * - b3 - BST_OVP
+ * - b2 - BST_SHORT
+ * - b1 - AMP_SHORT
+ */
+
+#define CS35L41_ERR_RLS_SPEAKER_SAFE_MODE_MASK            (0x0000007e)
+
 #define CS35L41_STATE_UNCONFIGURED                        (0)
 #define CS35L41_STATE_CONFIGURED                          (1)
 #define CS35L41_STATE_STANDBY                             (2)
@@ -958,6 +997,15 @@
 #define CS35L41_STATE_DSP_POWER_UP                        (5)
 #define CS35L41_STATE_DSP_STANDBY                         (6)
 #define CS35L41_STATE_HIBERNATE                           (7)
+
+#define MSM_ERROR_RELEASE_REG                             (0x2034)
+
+#define CS35L41_EVENT_FLAG_AMP_SHORT                      (0)
+#define CS35L41_EVENT_FLAG_OVERTEMP                       (1)
+#define CS35L41_EVENT_FLAG_BOOST_INDUCTOR_SHORT           (2)
+#define CS35L41_EVENT_FLAG_BOOST_UNDERVOLTAGE             (3)
+#define CS35L41_EVENT_FLAG_BOOST_OVERVOLTAGE              (4)
+#define CS35L41_EVENT_FLAG_STATE_ERROR                    (5)
 
 /* mode type */
 
@@ -1006,6 +1054,8 @@ struct cs35l41b_dev_s
   uint32_t                bclk;      /* IIS BCLK */
   struct work_s           work;      /* Work queue for load firmware */
 
+  FAR struct ioexpander_dev_s *io_dev;      /* Ioexpander device */
+
   /* is pa calibration value loaded */
 
   bool                    is_calibrate_value_loaded;
@@ -1017,6 +1067,9 @@ struct cs35l41b_dev_s
   uint32_t                asp_gain;
   uint32_t                dsp_gain;
   int                     scenario_mode;
+  uint32_t                event_flags;
+  bool                    is_running;
+  sem_t                   pendsem;
 
 #ifdef CONFIG_AUDIO_CS35L41B_DEBUG
   bool                    dump_dsp_info;
