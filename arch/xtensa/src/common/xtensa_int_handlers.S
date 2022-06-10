@@ -92,25 +92,6 @@ g_intstacktop:
  ****************************************************************************/
 
 /****************************************************************************
- * Macro extract_msb - return the input with only the highest bit set.
- *
- * Entry Conditions/Side Effects:
- *   Input  : "ain"  - Input value, clobbered.
- *   Output : "aout" - Output value, has only one bit set, MSB of "ain".
- *
- * The two arguments must be different AR registers.
- *
- ****************************************************************************/
-
-	.macro	extract_msb	aout ain
-1:
-	addi	\aout, \ain, -1				/* aout = ain - 1 */
-	and		\ain, \ain, \aout			/* ain  = ain & aout */
-	bnez	\ain, 1b					    /* Repeat until ain == 0 */
-	addi	\aout, \aout, 1				/* Return aout + 1 */
-	.endm
-
-/****************************************************************************
  * Macro dispatch_c_isr level mask tmp
  *
  * Description:
