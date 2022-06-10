@@ -157,7 +157,7 @@
 
 /* algoritm channel nunber config*/
 #define __HR_ALGORITHM_SUPPORT_CHNL_NUM__               (4)  /* range 1~4 */
-#define __SPO2_ALGORITHM_SUPPORT_CHNL_NUM__             (4)  /* range 1-4 */
+#define __SPO2_ALGORITHM_SUPPORT_CHNL_NUM__             (1)  /* range 1-4 */
 
 /* function channel nunber config*/
 #define   GH3X2X_ADT_CHNL_NUM         (16)        /**< ADT function channel num */

@@ -50,7 +50,7 @@
 
 /* Configurations */
 
-#define GH3020_BATCH_NUMBER      10         /* Maximum slots for each PPG */
+#define GH3020_BATCH_NUMBER      20         /* Maximum slots for each PPG */
 #define GH3020_TIAGAIN_FACTEST   0          /* TIA gain = 0(10K) in factest */
 
 /* SPI parameters */
@@ -65,14 +65,11 @@
 #define GH3020_SAMPLERATE_MIN    25.0f      /* Minimum sample rate = 25Hz */
 #define GH3020_RDMODE_INTERRPT   0          /* Read data in interrupts */
 #define GH3020_RDMODE_POLLING    1          /* Read data with polling */
-#define GH3020_DARK_CALIBR_NUM   6          /* Samples for ppg3 calibration */
 
 /* Default settings */
 
 #define GH3020_INTVL_DFT         40000      /* Default interval = 40 ms */
 #define GH3020_SR_DFT            25         /* Default sample rate = 25 Hz */
-#define GH3020_INTVL_CALIBR_DFT  20000      /* Default calibrate intvl=40ms */
-#define GH3020_SR_CALIBR_DFT     50         /* Default calibrate SR = 50Hz */
 #define GH3020_CURRENT_DFT       10000      /* Default LED current = 10mA */
 
 /* Constants */
@@ -134,7 +131,6 @@ struct gh3020_dev_s
   /* Buffer for pushing PPG data. */
 
   struct sensor_ppgq ppgdata[GH3020_SENSOR_NUM][GH3020_BATCH_NUMBER];
-  int32_t adc_bias[4];                   /* ADCs bias (Unit in ADC counts) */
   unsigned long batch;                   /* Common batch(us) for interrupts */
   unsigned long interval;                /* Common interval(us) for polling */
   uint32_t intvl_prev;                   /* Previous common interval(us) */
@@ -145,7 +141,6 @@ struct gh3020_dev_s
   uint16_t fifowtm;                      /* FIFO water marker, unit is data */
   uint8_t ppgdatacnt[GH3020_SENSOR_NUM]; /* Data number of each PPG channel */
   uint8_t activated;                     /* How many sensors are activated */
-  uint8_t dark_calibr;                   /* Data count for dark calibration */
   bool factest_mode;                     /* If it's in factory test mode */
   bool updating;                         /* If any sensor need updating */
   bool load_efuse;                       /* If EFUSE has been loaded */
@@ -164,7 +159,6 @@ static void gh3020_spi_exchange(FAR struct gh3020_dev_s *priv,
 /* Functions which won't operate GH3020 directly, such as data processions */
 
 static uint16_t gh3020_calcu_fifowtm(FAR struct gh3020_dev_s *priv);
-static void gh3020_dark_pd_mux(bool linked);
 static void gh3020_extract_frame(FAR struct gh3020_dev_s *priv, uint8_t idx,
                                  FAR struct sensor_ppgq *pppg,
                                  FAR const struct gh3020_frameinfo_s
@@ -172,7 +166,6 @@ static void gh3020_extract_frame(FAR struct gh3020_dev_s *priv, uint8_t idx,
 
 /* GH3020 common operation functions */
 
-static void gh3020_calibr_dark_start(FAR struct gh3020_dev_s *priv);
 static void gh3020_push_data(FAR struct gh3020_dev_s *priv);
 static void gh3020_restart_new_fifowtm(FAR struct gh3020_dev_s *priv,
                                        uint16_t fifowtm);
@@ -225,11 +218,41 @@ FAR static struct gh3020_dev_s *g_priv;
 
 static const uint32_t gh3020_channel_function_list[GH3020_SENSOR_NUM] =
   {
-    GH3X2X_FUNCTION_HR,               /* HR(slot0) for ch0 (green dynamic) */
-    GH3X2X_FUNCTION_SPO2,             /* SPO2(slot3) for ch1 (red dynamic) */
-    GH3X2X_FUNCTION_HRV,              /* HRV(slot4) for ch2 (IR dynamic) */
-    GH3X2X_FUNCTION_RESP,             /* RESP(slot1) for ch3 (dark fixed) */
-    GH3X2X_FUNCTION_HSM               /* HSM(slot2) for ch5 (IR fixed) */
+    GH3X2X_FUNCTION_HR,               /* HR(slot1) for ch0 (green dynamic) */
+    GH3X2X_FUNCTION_SPO2,             /* SPO2(slot2) for ch1 (red dynamic) */
+    GH3X2X_FUNCTION_HRV,              /* HRV(slot3) for ch2 (IR dynamic) */
+    GH3X2X_FUNCTION_HSM               /* HSM(slot0) for ch5 (IR fixed) */
+  };
+
+/* The ADC number of each PPG channel. */
+
+static const uint8_t gh3020_adc_num_list[GH3020_SENSOR_NUM] =
+  {
+    GH3020_QUAD_ADC_NUM,              /* HR(slot1) for ch0 (green dynamic) */
+    GH3020_SINGLE_ADC_NUM,            /* SPO2(slot3) for ch1 (red dynamic) */
+    GH3020_SINGLE_ADC_NUM,            /* HRV(slot4) for ch2 (IR dynamic) */
+    GH3020_SINGLE_ADC_NUM             /* HSM(slot0) for ch5 (IR fixed) */
+  };
+
+/* The instance number(node name, such ppgq0/1/2/5) of each PPG channel. */
+
+static const uint8_t gh3020_node_name_list[GH3020_SENSOR_NUM] =
+  {
+    GH3020_PPG0_NODE_NAME,           /* HR(slot1) for ch0 (green dynamic) */
+    GH3020_PPG1_NODE_NAME,           /* SPO2(slot3) for ch1 (red dynamic) */
+    GH3020_PPG2_NODE_NAME,           /* HRV(slot4) for ch2 (IR dynamic) */
+    GH3020_PPG5_NODE_NAME            /* HSM(slot0) for ch5 (IR fixed) */
+  };
+
+/* Green dynamic use 4 ADCs. R/IR dynamic use PD3-ADC0, IR fixed use PD0 */
+
+static const uint8_t
+  gh3020_adc_en_list[GH3020_SENSOR_NUM][GH3020_TOTAL_ADC_NUM] =
+  {
+    {1, 1, 1, 1},
+    {1, 0, 0, 0},
+    {1, 0, 0, 0},
+    {1, 0, 0, 0}
   };
 
 /* GH3020 ADC gain register values vs actual ADC gains (KOhm) */
@@ -261,59 +284,58 @@ static const struct sensor_ops_s g_gh3020_ops =
 struct gh3020_reg_s gh3020_reglist_normal[] =
 {
   {0x0004, 0x001f}, /* Maxmium sample rate = 32KHz / (31 +１) = 1000Hz */
-  {0x0006, 0x0005}, /* GH3020_REG_DATA_CTRL0. Not mentioned in datasheet. */
+  {0x0006, 0x0004}, /* GH3020_REG_DATA_CTRL0. Not mentioned in datasheet. */
   {0x000a, 0x00c8}, /* Default FIFO watermark = 200 */
   {0x000e, 0x000d}, /* GH3020_REG_WKUP_TMR. Not mentioned in datasheet. */
   {0x0100, 0x0100}, /* Slot0 uses slot_cfg0, slot1 uses slot_cfg1 */
   {0x0102, 0x0302}, /* Slot2 uses slot_cfg2, slot3 uses slot_cfg3 */
-  {0x0104, 0x0504}, /* Slot4 uses slot_cfg4, slot5 uses slot_cfg5 */
-  {0x010a, 0x277c}, /* Slot_cfg0(tunning G): sync signal, use FIFO, 4ADCs */
-  {0x0110, 0x0f14}, /* DC&BG cancel, ADC0 modifies drv0&1, 1st BG, 512x ADC */
-  {0x0114, 0x00aa}, /* All ADCs use 200pF TIA_CF */
-  {0x011e, 0x0011}, /* LED drv0 to LED0(to green LED) pin, 14.9mA */
-  {0x0120, 0x0011}, /* LED drv1 to LED4(to green LED) pin, 14.99mA */
-  {0x0122, 0x0a77}, /* Either LED driver current approximately 9~100mA */
-  {0x0126, 0x277c}, /* Slot_cfg1(dark): sync signal, use FIFO, 4ADCs */
-  {0x0128, 0x0000}, /* PDx not connected to TIAx */
-  {0x012a, 0x0000}, /* PDx not connected to TIAx */
-  {0x012c, 0x0000}, /* No BG or DC cancel, 64x ADC */
-  {0x012e, 0x2222}, /* TIA0~3 50KOHm */
+  {0x0104, 0x0804}, /* Slot4 uses slot_cfg4 */
+  {0x010a, 0x2744}, /* Slot_cfg0(fixed IR): use FIFO, only ADC0 */
+  {0x010c, 0x0001}, /* PD0 connected to TIA0 */
+  {0x010e, 0x0000}, /* PDx not connected to TIAx */
+  {0x0110, 0x0c13}, /* DC&BG cancel, LED drv0&1 fixed, 1st BG, 256x ADC */
+  {0x0112, 0x4442}, /* TIA0 50KOhm, others default 100KOhm */
+  {0x0114, 0x0002}, /* ADC0 use 200pF TIA_CF, others use default 50pF */
+  {0x011e, 0x0105}, /* LED drv1 to LED1(to IR LED) pin, 4.4mA */
+  {0x0120, 0x0106}, /* LED drv1 to LED1(to IR LED) pin, 5.3mA */
+  {0x0126, 0x277c}, /* Slot_cfg1(tunning G): sync signal, use FIFO, 4ADCs */
+  {0x012c, 0x0f14}, /* DC&BG cancel, ADC0 modifies drv0&1, 512x ADC */
   {0x0130, 0x00aa}, /* All ADCs use 200pF TIA_CF */
-  {0x0142, 0x277c}, /* Slot_cfg2(fix IR): sync signal, use FIFO, 4ADCs */
-  {0x0148, 0x0c13}, /* DC&BG cancel, LED drv0&1 fixed, 1st BG, 256x ADC */
-  {0x014a, 0x2222}, /* TIA0~3 50KOHm */
-  {0x014c, 0x00aa}, /* All ADCs use 200pF TIA_CF */
-  {0x0156, 0x0105}, /* LED drv1 to LED1(to IR LED) pin, 4.4mA */
-  {0x0158, 0x0106}, /* LED drv1 to LED1(to IR LED) pin, 5.3mA */
-  {0x015e, 0x277c}, /* Slot_cfg3(tunning R): sync signal, use FIFO, 4ADCs */
-  {0x0164, 0x0fd6}, /* DC&BG cancel, ADC3 modifies drv0&1, 1st BG, 2048xADC */
-  {0x0166, 0x1111}, /* TIA0~3 25KOHm */
-  {0x0168, 0x00aa}, /* All ADCs use 200pF TIA_CF */
-  {0x0172, 0x0245}, /* LED drv0 to LED2(to red LED) pin, 59.28mA */
-  {0x0174, 0x0245}, /* LED drv1 to LED2(to red LED) pin, 60.72mA */
-  {0x0176, 0x2e77}, /* Either LED driver current approximately 40~100 mA */
-  {0x017a, 0x277c}, /* Slot_cfg4(tunning IR): sync signal, use FIFO, 4ADCs */
-  {0x0180, 0x0fd6}, /* DC&BG cancel, ADC3 modifies drv0&1, 1st BG, 2048xADC */
-  {0x0182, 0x1111}, /* TIA0~3 25KOHm */
-  {0x0184, 0x00aa}, /* All ADCs use 200pF TIA_CF */
-  {0x018e, 0x012e}, /* LED drv0 to LED1(to IR LED) pin, 39.87mA */
-  {0x0190, 0x012e}, /* LED drv1 to LED1(to IR LED) pin, 40.52mA */
-  {0x0192, 0x2277}, /* Either LED driver current approximately 30~100 mA */
-  {0x0196, 0xc744}, /* Slot_cfg5(Goodix ADT): use FIFO, ADC0 */
-  {0x0198, 0x0001}, /* TIA0 connected to PD0, TIA disconnected */
-  {0x019a, 0x0000}, /* TIA2&3 disconnected */
-  {0x019c, 0x0c10}, /* BG&DC cancel, fixed LED current, 1st BG, 64x ADC */
-  {0x019e, 0x4442}, /* TIA0 50KOhm, TIA1~3 100KOhm */
-  {0x01a0, 0x0002}, /* ADC0 uses 200pF TIA_CF, the rest use 50pF */
-  {0x01a6, 0x0003}, /* ADC0 BG cancel source 256uA max. */
-  {0x01aa, 0x0105}, /* LED drv0 to LED1(to IR LED) pin, 4.4mA */
-  {0x01ac, 0x0106}, /* LED drv1 to LED1(to IR LED) pin, 5.3mA */
-  {0x01ec, 0x0122}, /* Slot0's time 290 us (green dynamic) */
-  {0x01ee, 0x001a}, /* Slot1's time 26 us (dark fixed) */
-  {0x01f0, 0x00d3}, /* Slot2's time 211 us (IR fixed) */
-  {0x01f2, 0x02fa}, /* Slot3's time 762 us (red dynamic) */
-  {0x01f4, 0x02fa}, /* Slot4's time 762 us (IR dynamic) */
-  {0x01f6, 0x0098}, /* Slot5's time 152 us (hard wear-on detection) */
+  {0x013a, 0x0011}, /* LED drv0 to LED0(to green LED) pin, 14.9mA */
+  {0x013c, 0x0011}, /* LED drv1 to LED4(to green LED) pin, 14.99mA */
+  {0x013e, 0x0a77}, /* Either LED driver current approximately 9~100mA */
+  {0x0142, 0x2744}, /* Slot_cfg2(tunning R): use FIFO, only ADC0 */
+  {0x0144, 0x0008}, /* PD3 connected to TIA0 */
+  {0x0146, 0x0000}, /* PDx not connected to TIAx */
+  {0x0148, 0x0f16}, /* DC&BG cancel, ADC0 modifies drv0&1, 2048x ADC */
+  {0x014a, 0x4441}, /* TIA0 25KOhm, others default 100KOhm */
+  {0x014c, 0x0002}, /* ADC0 use 200pF TIA_CF, others use default 50pF */
+  {0x0156, 0x0245}, /* LED drv0 to LED2(to red LED) pin, 59.28mA */
+  {0x0158, 0x0245}, /* LED drv1 to LED2(to red LED) pin, 60.72mA */
+  {0x015a, 0x2e77}, /* Either LED driver current approximately 40~100 mA */
+  {0x015e, 0x2744}, /* Slot_cfg3(tunning IR): use FIFO, only ADC0 */
+  {0x0160, 0x0008}, /* PD3 connected to TIA0 */
+  {0x0162, 0x0000}, /* PDx not connected to TIAx */
+  {0x0164, 0x0f16}, /* DC&BG cancel, ADC0 modifies drv0&1, 2048xADC */
+  {0x0166, 0x4441}, /* TIA0 25KOHm, others default 100KOhm */
+  {0x0168, 0x0002}, /* ADC0 use 200pF TIA_CF, others use default 50pF */
+  {0x0172, 0x012e}, /* LED drv0 to LED1(to IR LED) pin, 39.87mA */
+  {0x0174, 0x012e}, /* LED drv1 to LED1(to IR LED) pin, 40.52mA */
+  {0x0176, 0x2277}, /* Either LED driver current approximately 30~100 mA */
+  {0x017a, 0xc704}, /* Slot_cfg4(Goodix ADT): doesn't use FIFO, ADC0 */
+  {0x017c, 0x0001}, /* TIA0 connected to PD0, TIA disconnected */
+  {0x017e, 0x0000}, /* TIA2&3 disconnected */
+  {0x0180, 0x0c10}, /* BG&DC cancel, fixed LED current, 1st BG, 64x ADC */
+  {0x0182, 0x4442}, /* TIA0 50KOhm, TIA1~3 100KOhm */
+  {0x0184, 0x0002}, /* ADC0 uses 200pF TIA_CF, the rest use 50pF */
+  {0x018a, 0x0003}, /* ADC0 BG cancel source 256uA max. */
+  {0x018e, 0x0105}, /* LED drv0 to LED1(to IR LED) pin, 4.4mA */
+  {0x0190, 0x0106}, /* LED drv1 to LED1(to IR LED) pin, 5.3mA */
+  {0x01ec, 0x00d3}, /* Slot0's time 211 us (IR fixed) */
+  {0x01ee, 0x0122}, /* Slot1's time 290 us (green dynamic) */
+  {0x01f0, 0x02fa}, /* Slot2's time 762 us (red dynamic) */
+  {0x01f2, 0x02fa}, /* Slot3's time 762 us (IR dynamic) */
+  {0x01f4, 0x0098}, /* Slot4's time 152 us (hard wear-on detection) */
   {0x0200, 0x0120}, /* GH3020_REG_AFE_REG0. Not mentioned in datasheet. */
   {0x0280, 0x0a00}, /* Starting LED tunning need continuous 10 samples */
   {0x0282, 0xf530}, /* Tunning start upper threshold */
@@ -339,12 +361,12 @@ struct gh3020_reg_s gh3020_reglist_normal[] =
   {0x1000, 0x0000}, /* Virtual register. Maintained by Goodix. */
   {0x1002, 0x3080}, /* Virtual register. Maintained by Goodix. */
   {0x1004, 0x0000}, /* Virtual register. Maintained by Goodix. */
-  {0x1006, 0xcecc}, /* Virtual register. Maintained by Goodix. */
-  {0x1008, 0x2a30}, /* Virtual register. Maintained by Goodix. */
+  {0x1006, 0xf5ad}, /* Virtual register. Maintained by Goodix. */
+  {0x1008, 0x2a34}, /* Virtual register. Maintained by Goodix. */
   {0x100a, 0x0001}, /* Virtual register. Maintained by Goodix. */
   {0x10e0, 0x0202}, /* Virtual register. Maintained by Goodix. */
   {0x10e2, 0x0202}, /* Virtual register. Maintained by Goodix. */
-  {0x10e4, 0x0202}, /* Virtual register. Maintained by Goodix. */
+  {0x10e4, 0xff02}, /* Virtual register. Maintained by Goodix. */
   {0x10e6, 0xffff}, /* Virtual register. Maintained by Goodix. */
   {0x10e8, 0x0202}, /* Virtual register. Maintained by Goodix. */
   {0x10ea, 0x0202}, /* Virtual register. Maintained by Goodix. */
@@ -353,7 +375,7 @@ struct gh3020_reg_s gh3020_reglist_normal[] =
   {0x1120, 0x00c8}, /* Virtual register. Maintained by Goodix. */
   {0x1122, 0x0005}, /* Virtual register. Maintained by Goodix. */
   {0x1124, 0x0000}, /* Virtual register. Maintained by Goodix. */
-  {0x1160, 0x0019}, /* Virtual register. Maintained by Goodix. */
+  {0x1160, 0x000e}, /* Virtual register. Maintained by Goodix. */
   {0x1162, 0x0000}, /* Virtual register. Maintained by Goodix. */
   {0x1164, 0x0000}, /* Virtual register. Maintained by Goodix. */
   {0x1166, 0x4568}, /* Virtual register. Maintained by Goodix. */
@@ -366,29 +388,21 @@ struct gh3020_reg_s gh3020_reglist_normal[] =
   {0x1174, 0x2800}, /* Virtual register. Maintained by Goodix. */
   {0x1176, 0x00a3}, /* Virtual register. Maintained by Goodix. */
   {0x2000, 0x0001}, /* Virtual register. Maintained by Goodix. */
-  {0x2002, 0x00a2}, /* Virtual register. Maintained by Goodix. */
+  {0x2002, 0x0082}, /* Virtual register. Maintained by Goodix. */
   {0x2022, 0x0004}, /* Virtual register. Maintained by Goodix. */
-  {0x2024, 0x0901}, /* Virtual register. Maintained by Goodix. */
-  {0x2026, 0x1911}, /* Virtual register. Maintained by Goodix. */
-  {0x2044, 0x0004}, /* Virtual register. Maintained by Goodix. */
-  {0x2046, 0x8a82}, /* Virtual register. Maintained by Goodix. */
-  {0x2048, 0x9a92}, /* Virtual register. Maintained by Goodix. */
-  {0x2066, 0x0004}, /* Virtual register. Maintained by Goodix. */
-  {0x2068, 0x4a42}, /* Virtual register. Maintained by Goodix. */
-  {0x206a, 0x5a52}, /* Virtual register. Maintained by Goodix. */
-  {0x20cc, 0x0004}, /* Virtual register. Maintained by Goodix. */
-  {0x20ce, 0x6b63}, /* Virtual register. Maintained by Goodix. */
-  {0x20d0, 0x7b73}, /* Virtual register. Maintained by Goodix. */
-  {0x2176, 0x0004}, /* Virtual register. Maintained by Goodix. */
-  {0x2178, 0x2d25}, /* Virtual register. Maintained by Goodix. */
-  {0x217a, 0x3d35}, /* Virtual register. Maintained by Goodix. */
+  {0x2024, 0x2921}, /* Virtual register. Maintained by Goodix. */
+  {0x2026, 0x3931}, /* Virtual register. Maintained by Goodix. */
+  {0x2044, 0x0001}, /* Virtual register. Maintained by Goodix. */
+  {0x2046, 0x0062}, /* Virtual register. Maintained by Goodix. */
+  {0x2066, 0x0001}, /* Virtual register. Maintained by Goodix. */
+  {0x2068, 0x0002}, /* Virtual register. Maintained by Goodix. */
+  {0x20cc, 0x0001}, /* Virtual register. Maintained by Goodix. */
+  {0x20ce, 0x0043}, /* Virtual register. Maintained by Goodix. */
   {0x2880, 0x0005}, /* Virtual register. Maintained by Goodix. */
   {0x2882, 0x0019}, /* Virtual register. Maintained by Goodix. */
   {0x2884, 0x0019}, /* Virtual register. Maintained by Goodix. */
   {0x2886, 0x0019}, /* Virtual register. Maintained by Goodix. */
   {0x288c, 0x0019}, /* Virtual register. Maintained by Goodix. */
-  {0x2896, 0x0019}, /* Virtual register. Maintained by Goodix. */
-  {0x289c, 0x0019}, /* Virtual register. Maintained by Goodix. */
   {0x3000, 0x0001}, /* Virtual register. Maintained by Goodix. */
   {0x3002, 0x0000}, /* Virtual register. Maintained by Goodix. */
   {0x3004, 0x49f0}, /* Virtual register. Maintained by Goodix. */
@@ -647,61 +661,19 @@ static uint16_t gh3020_calcu_fifowtm(FAR struct gh3020_dev_s *priv)
             {
               if (priv->sensor[idx].activated == true)
                 {
-                  /* Device's watermark is sum of all components. */
+                  /* Device's watermark is sum of all components. The unit of
+                   * watermark is data (one data per ADC).
+                   */
 
-                  fifowtm = fifowtm + batch_min / priv->sensor[idx].interval;
+                  fifowtm = fifowtm +
+                            batch_min / priv->sensor[idx].interval *
+                            gh3020_adc_num_list[idx];
                 }
             }
-
-          /* Each sample has 4 PD data. */
-
-          fifowtm = fifowtm * GH3020_DATA_PER_SAMPLE;
         }
     }
 
   return fifowtm;
-}
-
-/****************************************************************************
- * Name: gh3020_dark_pd_mux
- *
- * Description:
- *   PD linked to ADC or not for ppg3(dark).
- *
- * Input Parameters:
- *   linked - true: PD linked to ADC; false: PD not linked to ADC.
- *
- * Returned Value:
- *   None.
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-
-static void gh3020_dark_pd_mux(bool linked)
-{
-  int i;
-  uint16_t regval;
-
-  regval = linked ? 0x0201 : 0;
-  gh3020_spi_writereg(GH3020_REG_SLOT1_CTRL_1, regval);
-  regval = linked ? 0x0804 : 0;
-  gh3020_spi_writereg(GH3020_REG_SLOT1_CTRL_2, regval);
-
-  for (i = 0; i < sizeof(gh3020_reglist_normal) /
-      sizeof(FAR struct gh3020_reg_s); i++)
-    {
-      if (gh3020_reglist_normal[i].regaddr == GH3020_REG_SLOT1_CTRL_1)
-        {
-          gh3020_reglist_normal[i].regval = linked ? 0x0201 : 0;
-        }
-      else if (gh3020_reglist_normal[i].regaddr == GH3020_REG_SLOT1_CTRL_2)
-        {
-          gh3020_reglist_normal[i].regval = linked ? 0x0804 : 0;
-          return;
-        }
-    }
 }
 
 /****************************************************************************
@@ -730,11 +702,11 @@ static void gh3020_extract_frame(FAR struct gh3020_dev_s *priv, uint8_t idx,
                                  FAR const struct gh3020_frameinfo_s
                                  *pframeinfo)
 {
-  int32_t raw;
   uint32_t gain;
   uint8_t led_drv0;
   uint8_t led_drv1;
   uint8_t i;
+  uint8_t fifo_data_idx;
 
   led_drv0 = (pframeinfo->punFrameAgcInfo[0] & 0x0000ff00u) >> 8;
   led_drv1 = (pframeinfo->punFrameAgcInfo[0] & 0x00ff0000u) >> 16;
@@ -753,88 +725,17 @@ static void gh3020_extract_frame(FAR struct gh3020_dev_s *priv, uint8_t idx,
          GH3020_LED_DRV_VOLTAGE / (255.0f / led_drv1 + GH3020_LED_DRV1_Y1));
     }
 
-  if (idx == GH3020_PPG3_SENSOR_IDX)
+  fifo_data_idx = 0;
+  for (i = 0; i < GH3020_TOTAL_ADC_NUM; i++)
     {
-      if (priv->dark_calibr > GH3020_DARK_CALIBR_NUM)
+      if (gh3020_adc_en_list[idx][i])
         {
-          for (i = 0; i < GH3020_ADC_NUM; i++)
-            {
-              raw = (int32_t)(pframeinfo->punFrameRawdata[i]) -
-                    priv->adc_bias[i];
-              gain = (uint32_t)pframeinfo->punFrameAgcInfo[i] & 0x0000000f;
-              pppg->gain[i] = gh3020_gain_list[gain];
-              pppg->ppg[i] = (uint32_t)raw;
-            }
-        }
-      else if (priv->dark_calibr < GH3020_DARK_CALIBR_NUM)
-        {
-          priv->dark_calibr++;
-          for (i = 0; i < GH3020_ADC_NUM; i++)
-            {
-              priv->adc_bias[i] = priv->adc_bias[i] +
-                (int32_t)(pframeinfo->punFrameRawdata[i]) -
-                GH3020_ADC_BASELINE;
-            }
-
-          if (priv->dark_calibr == GH3020_DARK_CALIBR_NUM)
-            {
-              priv->dark_calibr++;
-              gh3020_dark_pd_mux(true);
-              gh3020_stop_sampling(
-                gh3020_channel_function_list[GH3020_PPG3_SENSOR_IDX]);
-              IOEXP_SETOPTION(priv->config->ioedev, priv->config->intpin,
-                              IOEXPANDER_OPTION_INTCFG,
-                              (FAR void *)IOEXPANDER_VAL_DISABLE);
-              for (i = 0; i < GH3020_ADC_NUM; i++)
-                {
-                  priv->adc_bias[i] = priv->adc_bias[i] /
-                                      GH3020_DARK_CALIBR_NUM;
-                }
-            }
-        }
-    }
-  else
-    {
-      memcpy(pppg->ppg, pframeinfo->punFrameRawdata,
-             sizeof(uint32_t) * GH3020_ADC_NUM);
-      for (i = 0; i < GH3020_ADC_NUM; i++)
-        {
+          pppg->ppg[i] =  pframeinfo->punFrameRawdata[i];
           gain = (uint32_t)pframeinfo->punFrameAgcInfo[i] & 0x0000000f;
           pppg->gain[i] = gh3020_gain_list[gain];
+          fifo_data_idx++;
         }
     }
-}
-
-/****************************************************************************
- * Name: gh3020_calibr_dark_start
- *
- * Description:
- *   Start to calibrate ADC bias for ambient measurements.
- *
- * Input Parameters:
- *   priv - The device struct pointer.
- *
- * Returned Value:
- *   None.
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-
-static void gh3020_calibr_dark_start(FAR struct gh3020_dev_s *priv)
-{
-  uint32_t channelmode;
-
-  priv->dark_calibr = 0;
-  channelmode = gh3020_channel_function_list[GH3020_PPG3_SENSOR_IDX];
-  gh3020_samplerate_set(channelmode, GH3020_SR_CALIBR_DFT);
-  gh3020_set_fifowtm(GH3020_DARK_CALIBR_NUM * GH3020_DATA_PER_SAMPLE);
-  gh3020_fifo_process();
-  gh3020_start_sampling(channelmode);
-  IOEXP_SETOPTION(priv->config->ioedev, priv->config->intpin,
-                  IOEXPANDER_OPTION_INTCFG,
-                  (FAR void *)IOEXPANDER_VAL_RISING);
 }
 
 /****************************************************************************
@@ -878,10 +779,9 @@ static void gh3020_push_data(FAR struct gh3020_dev_s *priv)
         }
     }
 
-  GH3020_DEBUG_LOG("[gh3020] push ppgx-cnt = 0-%u, 1-%u, 2-%u, 3-%u, 5-%u\n",
+  GH3020_DEBUG_LOG("[gh3020] push ppgx-cnt = 0-%u, 1-%u, 2-%u, 5-%u\n",
                    priv->ppgdatacnt[0], priv->ppgdatacnt[1],
-                   priv->ppgdatacnt[2], priv->ppgdatacnt[3],
-                   priv->ppgdatacnt[5]);
+                   priv->ppgdatacnt[2], priv->ppgdatacnt[3]);
 }
 
 /****************************************************************************
@@ -1081,9 +981,10 @@ static void gh3020_update_sensor(FAR struct gh3020_dev_s *priv)
                     gh3020_channel_function_list[idx], rate);
               if (sensor->activating == true)
                 {
-                  SCHED_NOTE_PRINTF("activate ppgq%u, rate=%u", idx, rate);
-                  GH3020_DEBUG_LOG("[gh3020] update ppg%u activate rate%u\n",
-                                   idx, rate);
+                  SCHED_NOTE_PRINTF("activate ppgq%u, rate=%u",
+                                    gh3020_node_name_list[idx], rate);
+                  syslog(LOG_INFO, "[gh3020] update ppg%u r=%u\n",
+                         gh3020_node_name_list[idx], rate);
                 }
 
               sensor->activating = false;
@@ -1094,8 +995,10 @@ static void gh3020_update_sensor(FAR struct gh3020_dev_s *priv)
             {
               sensor->inactivating = false;
               sensor->activated = false;
-              SCHED_NOTE_PRINTF("inactivate ppgq%u", idx);
-              GH3020_DEBUG_LOG("[gh3020] update ppg%u inactivate\n", idx);
+              SCHED_NOTE_PRINTF("inactivate ppgq%u",
+                                gh3020_node_name_list[idx]);
+              syslog(LOG_INFO, "[gh3020] update ppg%u stop\n",
+                     gh3020_node_name_list[idx]);
             }
         }
 
@@ -1137,7 +1040,7 @@ static void gh3020_update_sensor(FAR struct gh3020_dev_s *priv)
             }
 
           SCHED_NOTE_PRINTF("GH3020 stops");
-          GH3020_DEBUG_LOG("[gh3020] device stops\n");
+          syslog(LOG_INFO, "[gh3020] stops\n");
         }
     }
 }
@@ -1244,10 +1147,8 @@ static int gh3020_activate(FAR struct file *filep,
   DEBUGASSERT(sensor != NULL && sensor->dev != NULL);
 
   priv = sensor->dev;
-  GH3020_DEBUG_LOG("[gh3020] ppg%u activate %d, now %d\n", sensor->chidx,
-                   enable, sensor->activated);
-  GH3020_FACTEST_LOG("[gh3020] ppg%u activate %d, now %d\n", sensor->chidx,
-                     enable, sensor->activated);
+  syslog(LOG_INFO, "[gh3020] ppg%u activate %d->%d\n",
+         gh3020_node_name_list[sensor->chidx], sensor->activated, enable);
 
 #ifdef CONFIG_FACTEST_SENSORS_GH3020
   if (priv->factest_mode == true)
@@ -1345,7 +1246,7 @@ static int gh3020_activate(FAR struct file *filep,
               /* Set FIFO watermark if needed. */
 
               priv->fifowtm = sensor->batch / sensor->interval *
-                              GH3020_DATA_PER_SAMPLE;
+                              gh3020_adc_num_list[sensor->chidx];
               if (sensor->batch > 0)
                 {
                   gh3020_set_fifowtm(priv->fifowtm);
@@ -1369,11 +1270,13 @@ static int gh3020_activate(FAR struct file *filep,
                               priv->interval / USEC_PER_TICK);
                 }
 
-              SCHED_NOTE_PRINTF("activate ppgq%u, rate=%u, GH3020 starts"
-                                ", fifowtm=%u", sensor->chidx, rate,
+              SCHED_NOTE_PRINTF("activate ppgq%u, rate=%u, GH3020 starts, "
+                                "fifowtm=%u",
+                                gh3020_node_name_list[sensor->chidx], rate,
                                 priv->fifowtm);
-              GH3020_DEBUG_LOG("activate ppg%u, rate=%u, GH3020 starts, fifo"
-                               "wtm=%u", sensor->chidx, rate, priv->fifowtm);
+              syslog(LOG_INFO, "[gh3020] en ppg%u r=%u wtm=%u\n",
+                     gh3020_node_name_list[sensor->chidx], rate,
+                     priv->fifowtm);
             }
         }
     }
@@ -1436,8 +1339,8 @@ static int gh3020_batch(FAR struct file *filep,
       *latency_us = fifowtm * sensor->interval;
     }
 
-  GH3020_DEBUG_LOG("[gh3020] set ppg%u batch actual=%lu\n", sensor->chidx,
-                   *latency_us);
+  GH3020_DEBUG_LOG("[gh3020] set ppg%u batch actual=%lu\n",
+                   gh3020_node_name_list[sensor->chidx], *latency_us);
 
   /* Do something only when the batch changed. */
 
@@ -1515,8 +1418,8 @@ static int gh3020_set_interval(FAR struct file *filep,
     }
 
   *period_us = GH3020_ONE_SECOND / freq;
-  GH3020_DEBUG_LOG("[gh3020] set ppg%d interval actual=%lu\n", sensor->chidx,
-                   *period_us);
+  GH3020_DEBUG_LOG("[gh3020] set ppg%d interval actual=%lu\n",
+                   gh3020_node_name_list[sensor->chidx], *period_us);
 
   /* Do something only when the interval changed. */
 
@@ -2307,33 +2210,27 @@ void gh3020_get_ppg_data(FAR const struct gh3020_frameinfo_s *pframeinfo)
 
   switch (pframeinfo->unFunctionID)
     {
-      case GH3X2X_FUNCTION_HR:        /* green dynamic */
+      case GH3X2X_FUNCTION_HR:        /* ppg0: green dynamic */
         {
-          idx = GH3020_PPG0_SENSOR_IDX;
+          idx = GH3020_PPG0_IDX;
         }
         break;
 
-      case GH3X2X_FUNCTION_HSM:       /* IR fixed */
+      case GH3X2X_FUNCTION_HSM:       /* ppg5: IR fixed */
         {
-          idx = GH3020_PPG5_SENSOR_IDX;
+          idx = GH3020_PPG5_IDX;
         }
         break;
 
-      case GH3X2X_FUNCTION_RESP:      /* Dark fixed */
+      case GH3X2X_FUNCTION_SPO2:      /* ppg1: red dynamic */
         {
-          idx = GH3020_PPG3_SENSOR_IDX;
+          idx = GH3020_PPG1_IDX;
         }
         break;
 
-      case GH3X2X_FUNCTION_SPO2:      /* red dynamic */
+      case GH3X2X_FUNCTION_HRV:       /* ppg2: IR dynamic */
         {
-          idx = GH3020_PPG1_SENSOR_IDX;
-        }
-        break;
-
-      case GH3X2X_FUNCTION_HRV:       /* IR dynamic */
-        {
-          idx = GH3020_PPG2_SENSOR_IDX;
+          idx = GH3020_PPG2_IDX;
         }
         break;
 
@@ -2341,9 +2238,9 @@ void gh3020_get_ppg_data(FAR const struct gh3020_frameinfo_s *pframeinfo)
         return;
     }
 
-  GH3020_DEBUG_LOG("[gh3020] get ppg%u data hook\n", idx);
-  if ((g_priv->sensor[idx].activated == true  ||
-      g_priv->dark_calibr < GH3020_DARK_CALIBR_NUM) &&
+  GH3020_DEBUG_LOG("[gh3020] get ppg%u data hook\n",
+                   gh3020_node_name_list[idx]);
+  if (g_priv->sensor[idx].activated == true &&
       g_priv->ppgdatacnt[idx] < GH3020_BATCH_NUMBER)
     {
       gh3020_extract_frame(g_priv, idx,
@@ -2409,25 +2306,25 @@ void gh3020_get_rawdata(FAR uint8_t *pbuf, uint16_t len)
             {
               case 0:       /* slot0 - dark */
                 {
-                  chidx = GH3020_PPG3_SENSOR_IDX;
+                  chidx = GH3020_PPG3_FACTEST_IDX;
                 }
                 break;
 
               case 1:       /* slot1 - green */
                 {
-                  chidx = GH3020_PPG0_SENSOR_IDX;
+                  chidx = GH3020_PPG0_FACTEST_IDX;
                 }
                 break;
 
               case 2:       /* slot2 - red */
                 {
-                  chidx = GH3020_PPG1_SENSOR_IDX;
+                  chidx = GH3020_PPG1_FACTEST_IDX;
                 }
                 break;
 
               case 3:       /* slot3 - ir */
                 {
-                  chidx = GH3020_PPG2_SENSOR_IDX;
+                  chidx = GH3020_PPG2_FACTEST_IDX;
                 }
                 break;
 
@@ -2440,7 +2337,7 @@ void gh3020_get_rawdata(FAR uint8_t *pbuf, uint16_t len)
 
           if (g_priv->sensor[chidx].activated == true)
             {
-              syslog(LOG_INFO, "[gh3020] ch%uraw%u=%08x\n", chidx,
+              syslog(LOG_INFO, "[gh3020] ch%uraw%u=%08lx\n", chidx,
                      fifoinfo.adc_idx, temp);
             }
 
@@ -2453,7 +2350,7 @@ void gh3020_get_rawdata(FAR uint8_t *pbuf, uint16_t len)
             }
         }
 
-      for (chidx = 0; chidx <= GH3020_PPG3_SENSOR_IDX; chidx++)
+      for (chidx = 0; chidx < GH3020_FACTEST_SENSOR_NUM; chidx++)
         {
           if (g_priv->sensor[chidx].activated == true &&
               g_priv->ppgdatacnt[chidx] < GH3020_BATCH_NUMBER)
@@ -2490,7 +2387,6 @@ int gh3020_register(int devno, FAR const struct gh3020_config_s *config)
   FAR struct gh3020_dev_s *priv;
   FAR void *ioehandle;
   uint8_t idx;
-  uint8_t topic_idx;
   int ret;
 
   /* Sanity check */
@@ -2564,23 +2460,13 @@ int gh3020_register(int devno, FAR const struct gh3020_config_s *config)
 
   for (idx = 0; idx < GH3020_SENSOR_NUM; idx++)
     {
-      topic_idx = idx;
-
-      /* ppgq4 is not used now (2022-05-25), but ppgq5 is still used. ppgq5's
-       * index is 4 now but we should keep its node's name unchanged.
-       */
-
-      if (idx == GH3020_PPG5_SENSOR_IDX)
-        {
-          topic_idx = idx + 1;
-        }
-
-      ret = sensor_register((&(priv->sensor[idx].lower)),
-                            devno * GH3020_SENSOR_NUM + topic_idx);
+      ret = sensor_register(&(priv->sensor[idx].lower),
+                            devno * GH3020_SENSOR_NUM +
+                            gh3020_node_name_list[idx]);
       if (ret < 0)
         {
-          snerr("Failed to register GH3020 PPGQ%d driver: %d\n",
-                devno * GH3020_SENSOR_NUM + idx, ret);
+          snerr("Failed to register GH3020 ppgq%d driver: %d\n",
+                devno * GH3020_SENSOR_NUM + gh3020_node_name_list[idx], ret);
 
           /* Unregister all registered ppgq sensors */
 
@@ -2592,16 +2478,15 @@ int gh3020_register(int devno, FAR const struct gh3020_config_s *config)
 
               idx--;
               sensor_unregister(&priv->sensor[idx].lower,
-                                devno * GH3020_SENSOR_NUM + idx);
+                                devno * GH3020_SENSOR_NUM +
+                                gh3020_node_name_list[idx]);
             }
 
           goto err_iodetach;
         }
     }
 
-  /* Calibrate the ADC bias, once reboot */
-
-  gh3020_calibr_dark_start(priv);
+  syslog(LOG_INFO, "[gh3020] driver v2.0.7, build 2022-06-14\n");
 
   return ret;
 

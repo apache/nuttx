@@ -37,17 +37,33 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* GH3020 PPG has 5 different measurements and each one should be a node.
- * Note that ppg5's index is 4, since ppgq4 is removed but we should keep the
- * old names of nodes to make them compatible to existing code.
+/* GH3020 PPG has 4 different measurements and each one should be a node.
+ * Note that there‘re no ppg3 and ppg4, which are used for dark and fixed
+ * green channel, but we should keep the old names of nodes to make them
+ * compatible to existing code.
  */
 
-#define GH3020_PPG0_SENSOR_IDX   0          /* PPG0 (green dynamic) */
-#define GH3020_PPG1_SENSOR_IDX   1          /* PPG1 (red dynamic) */
-#define GH3020_PPG2_SENSOR_IDX   2          /* PPG2 (IR dynamic) */
-#define GH3020_PPG3_SENSOR_IDX   3          /* PPG3 (dark fixed) */
-#define GH3020_PPG5_SENSOR_IDX   4          /* PPG5 (IR fixed). */
-#define GH3020_SENSOR_NUM        5          /* Total PPG sensors number. */
+#define GH3020_PPG0_NODE_NAME     0          /* PPG0 (green dynamic) */
+#define GH3020_PPG1_NODE_NAME     1          /* PPG1 (red dynamic) */
+#define GH3020_PPG2_NODE_NAME     2          /* PPG2 (IR dynamic) */
+#define GH3020_PPG5_NODE_NAME     5          /* PPG5 (IR fixed). */
+#define GH3020_SENSOR_NUM         4          /* Total PPG sensors number. */
+
+/* For user mode */
+
+#define GH3020_PPG0_IDX           0          /* PPG0 (green dynamic) */
+#define GH3020_PPG1_IDX           1          /* PPG1 (red dynamic) */
+#define GH3020_PPG2_IDX           2          /* PPG2 (IR dynamic) */
+#define GH3020_PPG5_IDX           3          /* PPG5 (IR fixed). */
+#define GH3020_SENSOR_NUM         4          /* Total PPG sensors number. */
+
+/* For factory test */
+
+#define GH3020_PPG0_FACTEST_IDX   0          /* PPG0 (green fixed) */
+#define GH3020_PPG1_FACTEST_IDX   1          /* PPG1 (red fixed) */
+#define GH3020_PPG2_FACTEST_IDX   2          /* PPG2 (IR fixed) */
+#define GH3020_PPG3_FACTEST_IDX   3          /* PPG5 (dark). */
+#define GH3020_FACTEST_SENSOR_NUM 4          /* Total PPG sensors number. */
 
 /* Macros */
 
