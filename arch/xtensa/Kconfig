@@ -22,18 +22,18 @@ config ARCH_CHIP_ESP32
 	select ARCH_HAVE_BOOTLOADER
 	select ARCH_HAVE_TESTSET
 	select ARCH_VECNOTIRQ
-	select LIBC_ARCH_MEMCPY
-	select LIBC_ARCH_MEMCHR
-	select LIBC_ARCH_MEMCMP
-	select LIBC_ARCH_MEMMOVE
-	select LIBC_ARCH_MEMSET
-	select LIBC_ARCH_STRCHR
-	select LIBC_ARCH_STRCMP
-	select LIBC_ARCH_STRCPY
-	select LIBC_ARCH_STRLCPY
-	select LIBC_ARCH_STRNCPY
-	select LIBC_ARCH_STRLEN
-	select LIBC_ARCH_STRNLEN
+	select LIBC_ARCH_MEMCPY if BUILD_FLAT
+	select LIBC_ARCH_MEMCHR if BUILD_FLAT
+	select LIBC_ARCH_MEMCMP if BUILD_FLAT
+	select LIBC_ARCH_MEMMOVE if BUILD_FLAT
+	select LIBC_ARCH_MEMSET if BUILD_FLAT
+	select LIBC_ARCH_STRCHR if BUILD_FLAT
+	select LIBC_ARCH_STRCMP if BUILD_FLAT
+	select LIBC_ARCH_STRCPY if BUILD_FLAT
+	select LIBC_ARCH_STRLCPY if BUILD_FLAT
+	select LIBC_ARCH_STRNCPY if BUILD_FLAT
+	select LIBC_ARCH_STRLEN if BUILD_FLAT
+	select LIBC_ARCH_STRNLEN if BUILD_FLAT
 	---help---
 		The ESP32 is a dual-core system from Espressif with two Harvard
 		architecture Xtensa LX6 CPUs. All embedded memory, external memory
