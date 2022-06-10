@@ -216,21 +216,6 @@ int nxmq_wait_send(FAR struct mqueue_inode_s *msgq, int oflags)
   FAR struct tcb_s *rtcb;
   int ret;
 
-#ifdef CONFIG_CANCELLATION_POINTS
-  /* nxmq_wait_send() is not a cancellation point, but may be called via
-   * mq_send() or mq_timedsend() which are cancellation points.
-   */
-
-  if (check_cancellation_point())
-    {
-      /* If there is a pending cancellation, then do not perform
-       * the wait.  Exit now with ECANCELED.
-       */
-
-      return -ECANCELED;
-    }
-#endif
-
   /* Verify that the queue is indeed full as the caller thinks */
 
   if (msgq->nmsgs >= msgq->maxmsgs)
@@ -258,6 +243,22 @@ int nxmq_wait_send(FAR struct mqueue_inode_s *msgq, int oflags)
 
           while (msgq->nmsgs >= msgq->maxmsgs)
             {
+#ifdef CONFIG_CANCELLATION_POINTS
+              /* nxmq_wait_send() is not a cancellation point, but may
+               * be called via mq_send() or mq_timedsend() which are
+               * cancellation points.
+               */
+
+              if (check_cancellation_point())
+                {
+                  /* If there is a pending cancellation, then do not perform
+                   * the wait.  Exit now with ECANCELED.
+                   */
+
+                  return -ECANCELED;
+                }
+#endif
+
               /* Block until the message queue is no longer full.
                * When we are unblocked, we will try again
                */

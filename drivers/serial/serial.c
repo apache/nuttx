@@ -420,19 +420,22 @@ static int uart_tcdrain(FAR uart_dev_t *dev,
 {
   int ret;
 
-  /* tcdrain is a cancellation point */
-
-  if (cancelable && enter_cancellation_point())
-    {
 #ifdef CONFIG_CANCELLATION_POINTS
+  /* close() and tcdrain() are cancellation points */
+
+  if (cancelable)
+    {
+      enter_cancellation_point();
+    }
+  else if (check_cancellation_point())
+    {
       /* If there is a pending cancellation, then do not perform
        * the wait.  Exit now with ECANCELED.
        */
 
-      leave_cancellation_point();
       return -ECANCELED;
-#endif
     }
+#endif
 
   /* Get exclusive access to the to dev->tmit.  We cannot permit new data to
    * be written while we are trying to flush the old data.
@@ -476,6 +479,21 @@ static int uart_tcdrain(FAR uart_dev_t *dev,
           ret = OK;
           while (ret >= 0 && dev->xmit.head != dev->xmit.tail)
             {
+#ifdef CONFIG_CANCELLATION_POINTS
+              /* close() and tcdrain() are cancellation points */
+
+              if (check_cancellation_point())
+                {
+                  /* If there is a pending cancellation, then do not perform
+                   * the wait.  Stop processing to leave cancelation point as
+                   * soon as possible.
+                   */
+
+                  ret = -ECANCELED;
+                  break;
+                }
+#endif
+
               /* Inform the interrupt level logic that we are waiting. */
 
               dev->xmitwaiting = true;

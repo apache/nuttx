@@ -575,7 +575,7 @@ struct tcb_s
   int16_t  irqcount;                     /* 0=Not in critical section       */
 #endif
 #ifdef CONFIG_CANCELLATION_POINTS
-  int16_t  cpcount;                      /* Nested cancellation point count */
+  bool     cpentered;                    /* true=Cancellation point entered */
 #endif
   int16_t  errcode;                      /* Used to pass error information  */
 

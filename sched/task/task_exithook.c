@@ -454,9 +454,9 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
    * actions taken during exit processing.
    */
 
-  tcb->flags  |= TCB_FLAG_NONCANCELABLE;
-  tcb->flags  &= ~TCB_FLAG_CANCEL_PENDING;
-  tcb->cpcount = 0;
+  tcb->flags    |= TCB_FLAG_NONCANCELABLE;
+  tcb->flags    &= ~TCB_FLAG_CANCEL_PENDING;
+  tcb->cpentered = false;
 #endif
 
   if (!nonblocking)

@@ -80,110 +80,114 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
 
   sinfo("cond=0x%p mutex=0x%p abstime=0x%p\n", cond, mutex, abstime);
 
-  /* pthread_cond_clockwait() is a cancellation point */
-
-  enter_cancellation_point();
-
-  /* Make sure that non-NULL references were provided. */
-
-  if (!cond || !mutex)
-    {
-      ret = EINVAL;
-    }
-
-  /* Make sure that the caller holds the mutex */
-
-  else if (mutex->pid != mypid)
-    {
-      ret = EPERM;
-    }
-
-  /* If no wait time is provided, this function degenerates to
-   * the same behavior as pthread_cond_wait().
+  /* If no wait time is provided, this function degenerates to the same
+   * behavior as pthread_cond_wait().  We need to check abstime at the first
+   * place because pthread_cond_wait is also a cancelation points and nested
+   * cancellation points are not supported.
    */
 
-  else if (!abstime)
+  if (abstime == NULL)
     {
       ret = pthread_cond_wait(cond, mutex);
     }
-
   else
     {
-#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-      uint8_t mflags;
-#endif
-#ifdef CONFIG_PTHREAD_MUTEX_TYPES
-      uint8_t type;
-      int16_t nlocks;
-#endif
+      /* pthread_cond_clockwait() is a cancellation point */
 
-      sinfo("Give up mutex...\n");
+      enter_cancellation_point();
 
-      /* We must disable pre-emption and interrupts here so that
-       * the time stays valid until the wait begins.   This adds
-       * complexity because we assure that interrupts and
-       * pre-emption are re-enabled correctly.
-       */
+      /* Make sure that non-NULL references were provided. */
 
-      sched_lock();
-      flags = enter_critical_section();
-
-      /* Give up the mutex */
-
-      mutex->pid = INVALID_PROCESS_ID;
-#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-      mflags     = mutex->flags;
-#endif
-#ifdef CONFIG_PTHREAD_MUTEX_TYPES
-      type       = mutex->type;
-      nlocks     = mutex->nlocks;
-#endif
-      ret        = pthread_mutex_give(mutex);
-      if (ret == 0)
+      if (cond == NULL || mutex == NULL)
         {
-          status = nxsem_clockwait_uninterruptible(
-                   &cond->sem, clockid, abstime);
-          if (status < 0)
+          ret = EINVAL;
+        }
+
+      /* Make sure that the caller holds the mutex */
+
+      else if (mutex->pid != mypid)
+        {
+          ret = EPERM;
+        }
+      else
+        {
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+          uint8_t mflags;
+#endif
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
+          uint8_t type;
+          int16_t nlocks;
+#endif
+
+          sinfo("Give up mutex...\n");
+
+          /* We must disable pre-emption and interrupts here so that
+           * the time stays valid until the wait begins.   This adds
+           * complexity because we assure that interrupts and
+           * pre-emption are re-enabled correctly.
+           */
+
+          sched_lock();
+          flags = enter_critical_section();
+
+          /* Give up the mutex */
+
+          mutex->pid = INVALID_PROCESS_ID;
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+          mflags     = mutex->flags;
+#endif
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
+          type       = mutex->type;
+          nlocks     = mutex->nlocks;
+#endif
+          ret        = pthread_mutex_give(mutex);
+          if (ret == 0)
             {
-              ret = -status;
+              status = nxsem_clockwait_uninterruptible(
+                       &cond->sem, clockid, abstime);
+              if (status < 0)
+                {
+                  ret = -status;
+                }
             }
-        }
 
-      /* Restore interrupts  (pre-emption will be enabled
-       * when we fall through the if/then/else)
-       */
+          /* Restore interrupts  (pre-emption will be enabled
+           * when we fall through the if/then/else)
+           */
 
-      leave_critical_section(flags);
+          leave_critical_section(flags);
 
-      /* Reacquire the mutex (retaining the ret). */
+          /* Reacquire the mutex (retaining the ret). */
 
-      sinfo("Re-locking...\n");
+          sinfo("Re-locking...\n");
 
-      status = pthread_mutex_take(mutex, NULL, false);
-      if (status == OK)
-        {
-          mutex->pid    = mypid;
+          status = pthread_mutex_take(mutex, NULL, false);
+          if (status == OK)
+            {
+              mutex->pid    = mypid;
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-          mutex->flags  = mflags;
+              mutex->flags  = mflags;
 #endif
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES
-          mutex->type   = type;
-          mutex->nlocks = nlocks;
+              mutex->type   = type;
+              mutex->nlocks = nlocks;
 #endif
-        }
-      else if (ret == 0)
-        {
-          ret           = status;
+            }
+          else if (ret == 0)
+            {
+              ret           = status;
+            }
+
+          /* Re-enable pre-emption (It is expected that interrupts
+           * have already been re-enabled in the above logic)
+           */
+
+          sched_unlock();
         }
 
-      /* Re-enable pre-emption (It is expected that interrupts
-       * have already been re-enabled in the above logic)
-       */
-
-      sched_unlock();
+      leave_cancellation_point();
     }
 
-  leave_cancellation_point();
   sinfo("Returning %d\n", ret);
   return ret;
 }

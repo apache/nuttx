@@ -80,25 +80,21 @@
  *
  *   1. If deferred cancellation does not apply to this thread, nothing is
  *      done, otherwise, it
- *   2. Sets state information in the caller's TCB and increments a nesting
- *      count.
- *   3. If this is the outermost nesting level, it checks if there is a
- *      pending cancellation and, if so, calls either exit() or
- *      pthread_exit(), depending upon the type of the thread.
+ *   2. Sets state information in the caller's TCB.
+ *   3. Checks if there is a pending cancellation and, if so, calls either
+ *      exit() or pthread_exit(), depending upon the type of the thread.
  *
  * Input Parameters:
  *   None
  *
  * Returned Value:
- *   true is returned if a cancellation is pending but cannot be performed
- *   now due to the nesting level.
+ *   None
  *
  ****************************************************************************/
 
-bool enter_cancellation_point(void)
+void enter_cancellation_point(void)
 {
   FAR struct tcb_s *tcb = this_task();
-  bool ret = false;
 
   /* Disabling pre-emption should provide sufficient protection.  We only
    * need the TCB to be stationary (no interrupt level modification is
@@ -109,58 +105,42 @@ bool enter_cancellation_point(void)
 
   sched_lock();
 
+  /* Do not allow nested cancellation points */
+
+  DEBUGASSERT(!tcb->cpentered);
+
   /* If cancellation is disabled on this thread or if this thread is using
    * asynchronous cancellation, then do nothing.
-   *
-   * Special case: if the cpcount count is greater than zero, then we are
-   * nested and the above condition was certainly true at the outermost
-   * nesting level.
    */
 
   if (((tcb->flags & TCB_FLAG_NONCANCELABLE) == 0 &&
-       (tcb->flags & TCB_FLAG_CANCEL_DEFERRED) != 0) ||
-      tcb->cpcount > 0)
+       (tcb->flags & TCB_FLAG_CANCEL_DEFERRED) != 0))
     {
       /* Check if there is a pending cancellation */
 
       if ((tcb->flags & TCB_FLAG_CANCEL_PENDING) != 0)
         {
-          /* Yes... return true (if we don't exit here) */
+          /* Yes, exit according to the type of the thread. */
 
-          ret = true;
-
-          /* If there is a pending cancellation and we are at the outermost
-           * nesting level of cancellation function calls, then exit
-           * according to the type of the thread.
-           */
-
-          if (tcb->cpcount == 0)
-            {
 #ifndef CONFIG_DISABLE_PTHREAD
-              if ((tcb->flags & TCB_FLAG_TTYPE_MASK) ==
-                  TCB_FLAG_TTYPE_PTHREAD)
-                {
-                  pthread_exit(PTHREAD_CANCELED);
-                }
-              else
+          if ((tcb->flags & TCB_FLAG_TTYPE_MASK) ==
+              TCB_FLAG_TTYPE_PTHREAD)
+            {
+              pthread_exit(PTHREAD_CANCELED);
+            }
+          else
 #endif
-                {
-                  exit(EXIT_FAILURE);
-                }
+            {
+              exit(EXIT_FAILURE);
             }
         }
 
-      /* Otherwise, indicate that we are at a cancellation point by
-       * incrementing the nesting level of the cancellation point
-       * functions.
-       */
+      /* Otherwise, indicate that we are at a cancellation point. */
 
-      DEBUGASSERT(tcb->cpcount < INT16_MAX);
-      tcb->cpcount++;
+      tcb->cpentered = true;
     }
 
   sched_unlock();
-  return ret;
 }
 
 /****************************************************************************
@@ -172,11 +152,9 @@ bool enter_cancellation_point(void)
  *
  *   1. If deferred cancellation does not apply to this thread, nothing is
  *      done, otherwise, it
- *   2. Clears state information in the caller's TCB and decrements a
- *      nesting count.
- *   3. If this is the outermost nesting level, it checks if there is a
- *      pending cancellation and, if so, calls either exit() or
- *      pthread_exit(), depending upon the type of the thread.
+ *   2. Clears state information in the caller's TCB.
+ *   3. Checks if there is a pending cancellation and, if so, calls either
+ *      exit() or pthread_exit(), depending upon the type of the thread.
  *
  * Input Parameters:
  *   None
@@ -200,50 +178,27 @@ void leave_cancellation_point(void)
   sched_lock();
 
   /* If cancellation is disabled on this thread or if this thread is using
-   * asynchronous cancellation, then do nothing.  Here we check only the
-   * nesting level: if the cpcount count is greater than zero, then the
-   * required condition was certainly true at the outermost nesting level.
+   * asynchronous cancellation, then do nothing.  If there is a pending
+   * cancellation then just exit according to the type of the thread.
    */
 
-  if (tcb->cpcount > 0)
+  if (tcb->cpentered)
     {
-      /* Decrement the nesting level.  If if would decrement to zero, then
-       * we are at the outermost nesting level and may need to do more.
-       */
-
-      if (tcb->cpcount == 1)
+      if ((tcb->flags & TCB_FLAG_CANCEL_PENDING) != 0)
         {
-          /* We are no longer at the cancellation point */
-
-          tcb->cpcount = 0;
-
-          /* If there is a pending cancellation then just exit according to
-           * the type of the thread.
-           */
-
-          if ((tcb->flags & TCB_FLAG_CANCEL_PENDING) != 0)
-            {
 #ifndef CONFIG_DISABLE_PTHREAD
-              if ((tcb->flags & TCB_FLAG_TTYPE_MASK) ==
-                  TCB_FLAG_TTYPE_PTHREAD)
-                {
-                  pthread_exit(PTHREAD_CANCELED);
-                }
-              else
+          if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+            {
+              pthread_exit(PTHREAD_CANCELED);
+            }
+          else
 #endif
-                {
-                  exit(EXIT_FAILURE);
-                }
+            {
+              exit(EXIT_FAILURE);
             }
         }
-      else
-        {
-          /* We are not at the outermost nesting level.  Just decrment the
-           * nesting level count.
-           */
 
-          tcb->cpcount--;
-        }
+      tcb->cpentered = false;
     }
 
   sched_unlock();
@@ -256,8 +211,7 @@ void leave_cancellation_point(void)
  *   Returns true if:
  *
  *   1. Deferred cancellation does applies to this thread,
- *   2. We are within a cancellation point (i.e., the nesting level in the
- *      TCB is greater than zero).
+ *   2. We are within a cancellation point.
  *
  * Input Parameters:
  *   None
@@ -285,13 +239,13 @@ bool check_cancellation_point(void)
   /* If cancellation is disabled on this thread or if this thread is using
    * asynchronous cancellation, then return false.
    *
-   * If the cpcount count is greater than zero, then we within a
-   * cancellation and will true if there is a pending cancellation.
+   * If the cpentered is true, then we within a cancellation and will true if
+   * there is a pending cancellation.
    */
 
   if (((tcb->flags & TCB_FLAG_NONCANCELABLE) == 0 &&
        (tcb->flags & TCB_FLAG_CANCEL_DEFERRED) != 0) ||
-      tcb->cpcount > 0)
+      tcb->cpentered)
     {
       /* Check if there is a pending cancellation.  If so, return true. */
 
@@ -372,7 +326,7 @@ bool nxnotify_cancellation(FAR struct tcb_s *tcb)
        * cancellation thereby waking the task up with an ECANCELED error.
        */
 
-      if (tcb->cpcount > 0)
+      if (tcb->cpentered)
         {
           /* If the thread is blocked waiting for a semaphore, then the
            * thread must be unblocked to handle the cancellation.

@@ -251,37 +251,21 @@ int nxsem_wait_uninterruptible(FAR sem_t *sem)
 
 int sem_wait(FAR sem_t *sem)
 {
-  int errcode;
   int ret;
 
   /* sem_wait() is a cancellation point */
 
-  if (enter_cancellation_point())
-    {
-#ifdef CONFIG_CANCELLATION_POINTS
-      /* If there is a pending cancellation, then do not perform
-       * the wait.  Exit now with ECANCELED.
-       */
-
-      errcode = ECANCELED;
-      goto errout_with_cancelpt;
-#endif
-    }
+  enter_cancellation_point();
 
   /* Let nxsem_wait() do the real work */
 
   ret = nxsem_wait(sem);
   if (ret < 0)
     {
-      errcode = -ret;
-      goto errout_with_cancelpt;
+      set_errno(-ret);
+      ret = ERROR;
     }
 
   leave_cancellation_point();
-  return OK;
-
-errout_with_cancelpt:
-  set_errno(errcode);
-  leave_cancellation_point();
-  return ERROR;
+  return ret;
 }
