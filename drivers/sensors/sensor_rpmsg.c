@@ -82,7 +82,7 @@ struct sensor_rpmsg_dev_s
 {
   struct sensor_lowerhalf_s      lower;
   FAR struct sensor_lowerhalf_s *drv;
-  mutex_t                        lock;
+  rmutex_t                       lock;
   struct list_node               node;
   struct list_node               stublist;
   struct list_node               proxylist;
@@ -354,7 +354,7 @@ static int sensor_rpmsg_ioctl(FAR struct sensor_rpmsg_dev_s *dev,
    * if device doesn't have proxy, it must return -ENOTTY.
    */
 
-  nxmutex_lock(&dev->lock);
+  nxrmutex_lock(&dev->lock);
   list_for_every_entry(&dev->proxylist, proxy,
                        struct sensor_rpmsg_proxy_s, node)
     {
@@ -394,9 +394,9 @@ static int sensor_rpmsg_ioctl(FAR struct sensor_rpmsg_dev_s *dev,
           continue;
         }
 
-      nxmutex_unlock(&dev->lock);
+      nxrmutex_unlock(&dev->lock);
       ret = rpmsg_wait(proxy->ept, &cookie.sem);
-      nxmutex_lock(&dev->lock);
+      nxrmutex_lock(&dev->lock);
       if (ret < 0)
         {
           snerr("ERROR: ioctl rpmsg wait failed:%s, %d, %s\n",
@@ -411,7 +411,7 @@ static int sensor_rpmsg_ioctl(FAR struct sensor_rpmsg_dev_s *dev,
         }
     }
 
-  nxmutex_unlock(&dev->lock);
+  nxrmutex_unlock(&dev->lock);
   if (wait)
     {
       nxsem_destroy(&cookie.sem);
@@ -460,7 +460,7 @@ sensor_rpmsg_alloc_proxy(FAR struct sensor_rpmsg_dev_s *dev,
   file_ioctl(&file, SNIOC_GET_STATE, &state);
   file_close(&file);
 
-  nxmutex_lock(&dev->lock);
+  nxrmutex_lock(&dev->lock);
   if (msg->persist)
     {
       dev->drv->persist = true;
@@ -468,7 +468,7 @@ sensor_rpmsg_alloc_proxy(FAR struct sensor_rpmsg_dev_s *dev,
     }
 
   list_add_tail(&dev->proxylist, &proxy->node);
-  nxmutex_unlock(&dev->lock);
+  nxrmutex_unlock(&dev->lock);
 
   /* sync interval and latency */
 
@@ -522,9 +522,9 @@ sensor_rpmsg_alloc_stub(FAR struct sensor_rpmsg_dev_s *dev,
     }
 
   file_ioctl(&stub->file, SNIOC_READLAST, false);
-  nxmutex_lock(&dev->lock);
+  nxrmutex_lock(&dev->lock);
   list_add_tail(&dev->stublist, &stub->node);
-  nxmutex_unlock(&dev->lock);
+  nxrmutex_unlock(&dev->lock);
 
   if (dev->lower.persist)
     {
@@ -568,7 +568,7 @@ static int sensor_rpmsg_open(FAR struct file *filep,
       return 0;
     }
 
-  nxmutex_lock(&dev->lock);
+  nxrmutex_lock(&dev->lock);
   if (filep->f_oflags & O_WROK)
     {
       if (dev->nadvertisers++ == 0)
@@ -585,7 +585,7 @@ static int sensor_rpmsg_open(FAR struct file *filep,
         }
     }
 
-  nxmutex_unlock(&dev->lock);
+  nxrmutex_unlock(&dev->lock);
   return 0;
 }
 
@@ -610,7 +610,7 @@ static int sensor_rpmsg_close(FAR struct file *filep,
       return ret;
     }
 
-  nxmutex_lock(&dev->lock);
+  nxrmutex_lock(&dev->lock);
   if (filep->f_oflags & O_WROK)
     {
       if (dev->nadvertisers == 1)
@@ -641,7 +641,7 @@ static int sensor_rpmsg_close(FAR struct file *filep,
       dev->nsubscribers--;
     }
 
-  nxmutex_unlock(&dev->lock);
+  nxrmutex_unlock(&dev->lock);
   return ret;
 }
 
@@ -827,14 +827,14 @@ static ssize_t sensor_rpmsg_push_event(FAR void *priv, FAR const void *data,
    * is successful, and must return length of written.
    */
 
-  nxmutex_lock(&dev->lock);
+  nxrmutex_lock(&dev->lock);
   list_for_every_entry(&dev->stublist, stub,
                        struct sensor_rpmsg_stub_s, node)
     {
       sensor_rpmsg_push_event_one(dev, stub);
     }
 
-  nxmutex_unlock(&dev->lock);
+  nxrmutex_unlock(&dev->lock);
   return ret;
 }
 
@@ -925,7 +925,7 @@ static int sensor_rpmsg_unadv_handler(FAR struct rpmsg_endpoint *ept,
       return 0;
     }
 
-  nxmutex_lock(&dev->lock);
+  nxrmutex_lock(&dev->lock);
   list_for_every_entry(&dev->proxylist, proxy,
                        struct sensor_rpmsg_proxy_s, node)
     {
@@ -936,7 +936,7 @@ static int sensor_rpmsg_unadv_handler(FAR struct rpmsg_endpoint *ept,
         }
     }
 
-  nxmutex_unlock(&dev->lock);
+  nxrmutex_unlock(&dev->lock);
   return 0;
 }
 
@@ -1010,7 +1010,7 @@ static int sensor_rpmsg_unsub_handler(FAR struct rpmsg_endpoint *ept,
       return 0;
     }
 
-  nxmutex_lock(&dev->lock);
+  nxrmutex_lock(&dev->lock);
   list_for_every_entry(&dev->stublist, stub,
                        struct sensor_rpmsg_stub_s, node)
     {
@@ -1021,7 +1021,7 @@ static int sensor_rpmsg_unsub_handler(FAR struct rpmsg_endpoint *ept,
         }
     }
 
-  nxmutex_unlock(&dev->lock);
+  nxrmutex_unlock(&dev->lock);
   return 0;
 }
 
@@ -1060,7 +1060,7 @@ static int sensor_rpmsg_ioctl_handler(FAR struct rpmsg_endpoint *ept,
   arg = msg->arglen > 0 ? (unsigned long)(uintptr_t)msg->argbuf :
                           msg->arg;
   dev = (FAR struct sensor_rpmsg_dev_s *)(uintptr_t)msg->proxy;
-  nxmutex_lock(&dev->lock);
+  nxrmutex_lock(&dev->lock);
   list_for_every_entry(&dev->stublist, stub,
                        struct sensor_rpmsg_stub_s, node)
     {
@@ -1080,7 +1080,7 @@ static int sensor_rpmsg_ioctl_handler(FAR struct rpmsg_endpoint *ept,
         }
     }
 
-  nxmutex_unlock(&dev->lock);
+  nxrmutex_unlock(&dev->lock);
   return 0;
 }
 
@@ -1137,7 +1137,7 @@ static void sensor_rpmsg_ns_unbind_cb(FAR struct rpmsg_endpoint *ept)
   list_for_every_entry(&g_devlist, dev,
                        struct sensor_rpmsg_dev_s, node)
     {
-      nxmutex_lock(&dev->lock);
+      nxrmutex_lock(&dev->lock);
       list_for_every_entry_safe(&dev->proxylist, proxy, ptmp,
                                 struct sensor_rpmsg_proxy_s, node)
         {
@@ -1156,7 +1156,7 @@ static void sensor_rpmsg_ns_unbind_cb(FAR struct rpmsg_endpoint *ept)
             }
         }
 
-      nxmutex_unlock(&dev->lock);
+      nxrmutex_unlock(&dev->lock);
     }
 
   list_delete(&sre->node);
@@ -1181,7 +1181,7 @@ static void sensor_rpmsg_device_ns_bound(FAR struct rpmsg_endpoint *ept)
   list_for_every_entry(&g_devlist, dev,
                        struct sensor_rpmsg_dev_s, node)
     {
-      nxmutex_lock(&dev->lock);
+      nxrmutex_lock(&dev->lock);
       if (dev->nadvertisers > 0)
         {
           sensor_rpmsg_advsub_one(dev, ept, SENSOR_RPMSG_ADVERTISE);
@@ -1192,7 +1192,7 @@ static void sensor_rpmsg_device_ns_bound(FAR struct rpmsg_endpoint *ept)
           sensor_rpmsg_advsub_one(dev, ept, SENSOR_RPMSG_SUBSCRIBE);
         }
 
-      nxmutex_unlock(&dev->lock);
+      nxrmutex_unlock(&dev->lock);
     }
 
   nxmutex_unlock(&g_lock);
@@ -1264,7 +1264,7 @@ sensor_rpmsg_register(FAR struct sensor_lowerhalf_s *lower,
 
   list_initialize(&dev->stublist);
   list_initialize(&dev->proxylist);
-  nxmutex_init(&dev->lock);
+  nxrmutex_init(&dev->lock);
   strcpy(dev->path, path);
 
   dev->push_event     = lower->push_event;
@@ -1318,7 +1318,7 @@ void sensor_rpmsg_unregister(FAR struct sensor_lowerhalf_s *lower)
   list_delete(&dev->node);
   nxmutex_unlock(&g_lock);
 
-  nxmutex_destroy(&dev->lock);
+  nxrmutex_destroy(&dev->lock);
   kmm_free(dev);
 }
 
