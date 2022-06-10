@@ -304,7 +304,7 @@ uintptr_t task_tls_get_value(int tlsindex);
 
 #if defined(up_tls_info)
 #  define tls_get_info() up_tls_info()
-#elif defined(CONFIG_TLS_ALIGNED)
+#elif defined(CONFIG_TLS_ALIGNED) && !defined(__KERNEL__)
 #  define tls_get_info() TLS_INFO(up_getsp())
 #else
 FAR struct tls_info_s *tls_get_info(void);

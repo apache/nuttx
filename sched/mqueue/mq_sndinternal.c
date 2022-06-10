@@ -327,10 +327,6 @@ int nxmq_do_send(FAR struct mqueue_inode_s *msgq,
   FAR struct mqueue_msg_s *prev;
   irqstate_t flags;
 
-  /* Get a pointer to the message queue */
-
-  sched_lock();
-
   /* Construct the message header info */
 
   mqmsg->priority = prio;
@@ -405,8 +401,9 @@ int nxmq_do_send(FAR struct mqueue_inode_s *msgq,
     {
       /* Find the highest priority task that is waiting for
        * this queue to be non-empty in g_waitingformqnotempty
-       * list. sched_lock() should give us sufficient protection since
-       * interrupts should never cause a change in this list
+       * list. leave_critical_section() should give us sufficient
+       * protection since interrupts should never cause a change
+       * in this list
        */
 
       for (btcb = (FAR struct tcb_s *)g_waitingformqnotempty.head;
@@ -425,6 +422,5 @@ int nxmq_do_send(FAR struct mqueue_inode_s *msgq,
     }
 
   leave_critical_section(flags);
-  sched_unlock();
   return OK;
 }

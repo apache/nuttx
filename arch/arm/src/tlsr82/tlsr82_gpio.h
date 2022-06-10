@@ -144,7 +144,7 @@
 #define GPIO_POL_SHIFT                 23
 #define GPIO_POL_MASK                  (0x1 << GPIO_POL_SHIFT)
 #define GPIO_POL_RISE                  (0 << GPIO_POL_SHIFT)
-#define GPIO_POL_FAIL                  (1 << GPIO_POL_SHIFT)
+#define GPIO_POL_FALL                  (1 << GPIO_POL_SHIFT)
 
 /* GPIO specific pin definitions */
 

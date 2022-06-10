@@ -90,7 +90,7 @@
 #define GPIO_IRQ_NORMAL_ALL_REG        REG_ADDR8(0x5b5)
 #define GPIO_IRQ_RISC_EN_REG           REG_ADDR8(0x642)
 
-#define GPIO_IRQ_NORMAL_REG(group)     REG_ADDR8(0x587 + (group))
+#define GPIO_IRQ_NORMAL_REG(group)     REG_ADDR8(0x587 + ((group) << 3))
 #define GPIO_IRQ_M0_REG(group)         REG_ADDR8(0x5b8 + (group))
 #define GPIO_IRQ_M1_REG(group)         REG_ADDR8(0x5c0 + (group))
 #define GPIO_IRQ_M2_REG(group)         REG_ADDR8(0x5c8 + (group))

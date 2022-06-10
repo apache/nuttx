@@ -184,7 +184,7 @@ USB
    
    :configuration: CONFIG_BOARDCTL && CONFIG_BOARDCTL_USBDEVCTRL
    
-   :dependencies: Board logic must provide ``board_<usbdev>_initialize()`.
+   :dependencies: Board logic must provide `board_<usbdev>_initialize()`.
    
 Graphics
 --------

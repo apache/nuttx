@@ -54,6 +54,10 @@
 
 void up_extraheaps_init(void)
 {
+#ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
+  xtensa_imm_initialize();
+#endif
+
 #ifdef CONFIG_ESP32_RTC_HEAP
   esp32_rtcheap_initialize();
 #endif

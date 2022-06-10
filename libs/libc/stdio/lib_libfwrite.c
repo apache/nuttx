@@ -49,7 +49,7 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
   FAR const unsigned char *start = ptr;
   FAR const unsigned char *src   = ptr;
   ssize_t ret = ERROR;
-  unsigned char *dest;
+  size_t gulp_size;
 
   /* Make sure that writing to this stream is allowed */
 
@@ -72,13 +72,11 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
   if (stream->fs_bufstart == NULL)
     {
       ret = _NX_WRITE(stream->fs_fd, ptr, count);
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
       if (ret < 0)
         {
           _NX_SETERRNO(ret);
           ret = ERROR;
         }
-#endif
 
       goto errout;
     }
@@ -97,18 +95,11 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
       goto errout_with_semaphore;
     }
 
-  /* Loop until all of the bytes have been buffered */
+  /* Determine the number of bytes left in the buffer */
 
-  while (count > 0)
+  gulp_size = stream->fs_bufend - stream->fs_bufpos;
+  if (gulp_size != CONFIG_STDIO_BUFFER_SIZE || count < gulp_size)
     {
-      /* Determine the number of bytes left in the buffer */
-
-      size_t gulp_size = stream->fs_bufend - stream->fs_bufpos;
-
-      /* Will the user data fit into the amount of buffer space
-       * that we have left?
-       */
-
       if (gulp_size > count)
         {
           /* Yes, clip the gulp to the size of the user data */
@@ -124,16 +115,13 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
 
       /* Transfer the data into the buffer */
 
-      for (dest = stream->fs_bufpos; gulp_size > 0; gulp_size--)
-        {
-          *dest++ = *src++;
-        }
-
-      stream->fs_bufpos = dest;
+      memcpy(stream->fs_bufpos, src, gulp_size);
+      stream->fs_bufpos += gulp_size;
+      src += gulp_size;
 
       /* Is the buffer full? */
 
-      if (dest >= stream->fs_bufend)
+      if (stream->fs_bufpos >= stream->fs_bufend)
         {
           /* Flush the buffered data to the IO stream */
 
@@ -143,6 +131,25 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
               goto errout_with_semaphore;
             }
         }
+    }
+
+  if (count >= CONFIG_STDIO_BUFFER_SIZE)
+    {
+      ret = _NX_WRITE(stream->fs_fd, src, count);
+      if (ret < 0)
+        {
+          _NX_SETERRNO(ret);
+          ret = ERROR;
+          goto errout_with_semaphore;
+        }
+
+      src += ret;
+    }
+  else if (count > 0)
+    {
+      memcpy(stream->fs_bufpos, src, count);
+      stream->fs_bufpos += count;
+      src += count;
     }
 
   /* Return the number of bytes written */

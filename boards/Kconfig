@@ -1415,9 +1415,18 @@ config ARCH_BOARD_NUCLEO_L552ZE
 	---help---
 		STMicro Nucleo STM32L552 board based on the STMicro STM32L552ZET6 MCU.
 
+config ARCH_BOARD_NUCLEO_WL55JC
+	bool "STM32WL55 Nucleo WL55JC"
+	depends on ARCH_CHIP_STM32WL55JC_CPU1 || ARCH_CHIP_STM32WL55JC_CPU2
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo STM32WL55 board based on the STMicro STM32WL55JC MCU.
+
 config ARCH_BOARD_QEMU_I486
 	bool "Qemu i486 Mode"
-	depends on ARCH_X86 || ARCH_I486
+	depends on ARCH_CHIP_QEMU_I486
 	---help---
 		Port of NuttX to QEMU in i486 mode.  This port will also run on real i486
 		hardware (Google the Bifferboard).
@@ -2544,6 +2553,7 @@ config ARCH_BOARD
 	default "nucleo-l476rg"            if ARCH_BOARD_NUCLEO_L476RG
 	default "nucleo-l496zg"            if ARCH_BOARD_NUCLEO_L496ZG
 	default "nucleo-l552ze"            if ARCH_BOARD_NUCLEO_L552ZE
+	default "nucleo-wl55jc"            if ARCH_BOARD_NUCLEO_WL55JC
 	default "nutiny-nuc120"            if ARCH_BOARD_NUTINY_NUC120
 	default "olimex-efm32g880f128-stk" if ARCH_BOARD_OLIMEX_EFM32G880F128_STK
 	default "olimex-lpc1766stk"        if ARCH_BOARD_LPC1766STK
@@ -3049,6 +3059,9 @@ source "boards/arm/stm32l4/nucleo-l496zg/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_L552ZE
 source "boards/arm/stm32l5/nucleo-l552ze/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_WL55JC
+source "boards/arm/stm32wl5/nucleo-wl55jc/Kconfig"
 endif
 if ARCH_BOARD_STM32L476_MDK
 source "boards/arm/stm32l4/stm32l476-mdk/Kconfig"

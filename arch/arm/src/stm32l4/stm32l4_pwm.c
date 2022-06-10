@@ -437,8 +437,8 @@ static struct stm32l4_pwmchan_s g_pwm1channels[] =
     .out1 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32L4L4_TIM1_CH4POL,
-      .idle    = CONFIG_STM32L4L4_TIM1_CH4IDLE,
+      .pol     = CONFIG_STM32L4_TIM1_CH4POL,
+      .idle    = CONFIG_STM32L4_TIM1_CH4IDLE,
       .pincfg  = PWM_TIM1_CH4CFG,
     }
 #endif

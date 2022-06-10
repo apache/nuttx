@@ -78,6 +78,9 @@
 #define MPFS_TRACEERR_IRQREGISTRATION      0x0012
 #define MPFS_TRACEERR_TXCOMPERR            0x0013
 #define MPFS_TRACEERR_INVALID_EP0_STATE    0x0014
+#define MPFS_TRACEERR_EP0SETUPOUTSIZE      0x0015
+#define MPFS_TRACEERR_EPOUTQEMPTY          0x0016
+#define MPFS_TRACEERR_EP0PREMATURETERM     0x0017
 
 /* USB trace interrupt codes */
 
@@ -571,7 +574,8 @@ static void mpfs_req_cancel(struct mpfs_ep_s *privep, int16_t result)
  *
  ****************************************************************************/
 
-void mpfs_write_tx_fifo(const void *in_data, uint32_t length, uint8_t epno)
+static void mpfs_write_tx_fifo(const void *in_data, uint32_t length,
+                               uint8_t epno)
 {
   uint32_t i;
   uint32_t *temp;
@@ -684,8 +688,32 @@ static void mpfs_req_wrsetup(struct mpfs_usbdev_s *priv,
 
   privep->epstate = USB_EPSTATE_SENDING;
 
-  mpfs_write_tx_fifo(buf, nbytes, epno);
-  privreq->req.xfrd = nbytes;
+  if (nbytes > packetsize)
+    {
+      mpfs_write_tx_fifo(buf, packetsize, epno);
+
+      if (epno == EP0)
+        {
+          mpfs_modifyreg16(MPFS_USB_INDEXED_CSR_EP0_CSR0, 0,
+                           CSR0L_DEV_TX_PKT_RDY_MASK);
+        }
+      else
+        {
+          mpfs_modifyreg16(MPFS_USB_ENDPOINT(epno) +
+                           MPFS_USB_ENDPOINT_TX_CSR_OFFSET,
+                           TXCSRL_REG_EPN_UNDERRUN_MASK,
+                           TXCSRL_REG_EPN_TX_PKT_RDY_MASK);
+        }
+
+      privreq->inflight = packetsize;
+      return;
+    }
+  else
+    {
+      mpfs_write_tx_fifo(buf, nbytes, epno);
+    }
+
+  privreq->req.xfrd += nbytes;
 
   /* With poll mode (no DMA), we're done sending */
 
@@ -700,7 +728,7 @@ static void mpfs_req_wrsetup(struct mpfs_usbdev_s *priv,
     {
       mpfs_modifyreg16(MPFS_USB_ENDPOINT(epno) +
                        MPFS_USB_ENDPOINT_TX_CSR_OFFSET,
-                       0,
+                       TXCSRL_REG_EPN_UNDERRUN_MASK,
                        TXCSRL_REG_EPN_TX_PKT_RDY_MASK);
     }
 }
@@ -757,10 +785,9 @@ static int mpfs_ep_stall(struct mpfs_ep_s *privep)
 
       if (epno == EP0)
         {
-          mpfs_modifyreg16(MPFS_USB_INDEXED_CSR_EP0_CSR0,
-                           0,
-                           CSR0L_DEV_SEND_STALL_MASK |
-                           CSR0L_DEV_SERVICED_RX_PKT_RDY_MASK);
+          mpfs_putreg16(CSR0L_DEV_SEND_STALL_MASK |
+                        CSR0L_DEV_SERVICED_RX_PKT_RDY_MASK,
+                        MPFS_USB_INDEXED_CSR_EP0_CSR0);
         }
       else if (USB_ISEPIN(privep->ep.eplog))
         {
@@ -858,15 +885,14 @@ static int mpfs_req_write(struct mpfs_usbdev_s *priv,
           /* If we get here, we requested to send the zero length packet now.
            */
 
+          DEBUGASSERT(epno == EP0);
+
           privep->zlpsent   = true;
           privreq->inflight = 0;
 
           /* Setup 0 length TX transfer */
 
           priv->eplist[EP0].descb[1]->addr = (uintptr_t)&priv->ep0out[0];
-
-          mpfs_putreg16(CSR0L_DEV_TX_PKT_RDY_MASK | CSR0L_DEV_DATA_END_MASK,
-                        MPFS_USB_INDEXED_CSR_EP0_CSR0);
         }
 
       if (privep->epstate == USB_EPSTATE_IDLE)
@@ -979,16 +1005,18 @@ static int mpfs_req_read(struct mpfs_usbdev_s *priv,
                          struct mpfs_ep_s *privep, uint16_t recvsize)
 {
   struct mpfs_req_s *privreq;
-  bool earlyread = false;
   int epno;
 
-  DEBUGASSERT(priv && privep && privep->epstate == USB_EPSTATE_IDLE);
+  DEBUGASSERT(priv && privep);
 
   /* Check the request from the head of the endpoint request queue */
 
   epno = USB_EPNO(privep->ep.eplog);
 
-  mpfs_putreg8(epno, MPFS_USB_INDEX);
+  uint16_t count = getreg16(MPFS_USB_ENDPOINT(epno) +
+                            MPFS_USB_ENDPOINT_RX_COUNT_OFFSET);
+
+  usbtrace(TRACE_READ(USB_EPNO(epno)), count);
 
   do
     {
@@ -998,12 +1026,13 @@ static int mpfs_req_read(struct mpfs_usbdev_s *priv,
       if (privreq == NULL)
         {
           /* When no read requests are pending no EP descriptors are set to
-           * ready. HW sends NAK to host if it tries to send something.
+           * ready. This is fatal at the moment!
            */
 
-          privep->epstate = USB_EPSTATE_RXSTOPPED;
+          usbtrace(TRACE_DEVERROR(MPFS_TRACEERR_EPOUTQEMPTY), epno);
 
-          return -ENOENT;
+          privep->epstate = USB_EPSTATE_RXSTOPPED;
+          return OK;
         }
 
       uinfo("EP%d: req.len=%d xfrd=%d recvsize=%d\n",
@@ -1014,28 +1043,51 @@ static int mpfs_req_read(struct mpfs_usbdev_s *priv,
       if (privreq->req.len == 0)
         {
           usbtrace(TRACE_DEVERROR(MPFS_TRACEERR_EPOUTNULLPACKET), 0);
+          if (epno == EP0)
+            {
+              mpfs_putreg16(CSR0L_DEV_SERVICED_RX_PKT_RDY_MASK |
+                            CSR0L_DEV_DATA_END_MASK,
+                            MPFS_USB_INDEXED_CSR_EP0_CSR0);
+            }
+          else
+            {
+              mpfs_modifyreg16(MPFS_USB_ENDPOINT(epno) +
+                               MPFS_USB_ENDPOINT_RX_CSR_OFFSET,
+                               RXCSRL_REG_EPN_RX_PKT_RDY_MASK, 0);
+            }
+
           mpfs_req_complete(privep, OK);
           privreq = NULL;
         }
 
-      /* complete read request with available data */
-
-      if ((privreq->inflight > 0) && (recvsize != 0))
+      if ((privreq->inflight) && (count != 0))
         {
           /* Update the total number of bytes transferred */
 
+          mpfs_putreg8(epno, MPFS_USB_INDEX);
           privep->rxactive   = true;
           privreq->req.xfrd += mpfs_read_rx_fifo(privreq->req.buf,
-                                                 privreq->req.len,
+                                                 recvsize,
                                                  epno);
 
-          /* Early read indicates a request that was already in place */
-
-          earlyread = true;
           privreq->inflight  = 0;
 
           usbtrace(TRACE_COMPLETE(epno), privreq->req.xfrd);
+
           mpfs_req_complete(privep, OK);
+
+          if (epno == EP0)
+            {
+              mpfs_putreg16(CSR0L_DEV_SERVICED_RX_PKT_RDY_MASK |
+                            CSR0L_DEV_DATA_END_MASK,
+                            MPFS_USB_INDEXED_CSR_EP0_CSR0);
+            }
+          else
+            {
+              mpfs_modifyreg16(MPFS_USB_ENDPOINT(epno) +
+                               MPFS_USB_ENDPOINT_RX_CSR_OFFSET,
+                               RXCSRL_REG_EPN_RX_PKT_RDY_MASK, 0);
+            }
 
           /* Need to set recvsize to zero.  When calling mpfs_req_complete()
            * class driver could call submit() again and we have new request
@@ -1049,39 +1101,12 @@ static int mpfs_req_read(struct mpfs_usbdev_s *priv,
     }
   while (privreq == NULL);
 
-  DEBUGASSERT(recvsize == 0);
-
   /* Activate new read request from queue */
 
+  privep->rxactive  = true;
+  privreq->req.xfrd = 0;
   privreq->inflight = privreq->req.len;
-
-  /* It's possible the request has been completed already. If so, don't
-   * repeat the read as the buffer is empty.
-   */
-
-  if (!earlyread)
-    {
-      privep->rxactive  = true;
-      privreq->req.xfrd = 0;
-      priv->eplist[epno].descb[0]->addr = (uintptr_t)privreq->req.buf;
-
-      privreq->req.xfrd += mpfs_read_rx_fifo(privreq->req.buf,
-                                             privreq->req.len,
-                                             epno);
-    }
-
-  if (epno == EP0)
-    {
-      mpfs_putreg16(CSR0L_DEV_SERVICED_RX_PKT_RDY_MASK |
-                    CSR0L_DEV_DATA_END_MASK,
-                    MPFS_USB_INDEXED_CSR_EP0_CSR0);
-    }
-  else
-    {
-      mpfs_modifyreg16(MPFS_USB_ENDPOINT(epno) +
-                       MPFS_USB_ENDPOINT_RX_CSR_OFFSET,
-                       RXCSRL_REG_EPN_RX_PKT_RDY_MASK, 0);
-    }
+  priv->eplist[epno].descb[0]->addr = (uintptr_t)privreq->req.buf;
 
   return OK;
 }
@@ -1129,6 +1154,8 @@ static void mpfs_ep_set_fifo_size(uint8_t epno, uint8_t in,
 
   if (in)
     {
+      i |= (1 << 4); /* Double buffering */
+
       mpfs_putreg8(i, MPFS_USB_TX_FIFO_SIZE);
     }
   else
@@ -1213,7 +1240,7 @@ static int mpfs_ep_configure_internal(struct mpfs_ep_s *privep,
 
       mpfs_putreg16(desc->addr, MPFS_USB_TX_FIFO_ADDR);
 
-      /* Disable double buffering for now */
+      /* Disable double buffering */
 
       mpfs_modifyreg16(MPFS_USB_TX_DPBUF_DIS, 0, (1 << epno));
 
@@ -1253,7 +1280,14 @@ static int mpfs_ep_configure_internal(struct mpfs_ep_s *privep,
       mpfs_ep_set_fifo_size(epno, dirin, maxpacket);
       mpfs_putreg16(desc->addr, MPFS_USB_RX_FIFO_ADDR);
 
-      mpfs_modifyreg16(MPFS_USB_RX_DPBUF_DIS, 0, (1 << epno));
+      /* Disable double buffering for RX, will run into trouble with it.
+       * The host will send faster than we can handle and all packets
+       * are ACK:ed now, although we should NAK in such situations. We
+       * cannot NACK in bulk mode now.
+       */
+
+      mpfs_modifyreg16(MPFS_USB_RX_DPBUF_DIS, 0,  (1 << epno));
+
       mpfs_putreg16(0, MPFS_USB_ENDPOINT(epno) +
                     MPFS_USB_ENDPOINT_RX_MAX_P_OFFSET);
       mpfs_putreg16(MPFS_NUM_USB_PKT - 1, MPFS_USB_ENDPOINT(epno) +
@@ -1367,6 +1401,8 @@ static int mpfs_ep_configure(struct usbdev_ep_s *ep,
   struct mpfs_ep_s *privep = (struct mpfs_ep_s *)ep;
   int ret;
 
+  usbtrace(TRACE_EPCONFIGURE, USB_EPNO(desc->addr));
+
   ret = mpfs_ep_configure_internal(privep, desc);
 
   /* If this was the last endpoint, then the class driver is fully
@@ -1381,7 +1417,6 @@ static int mpfs_ep_configure(struct usbdev_ep_s *ep,
        * state)
        */
 
-      DEBUGASSERT(priv && priv->devstate == USB_DEVSTATE_ADDRESSED);
       priv->devstate = USB_DEVSTATE_CONFIGURED;
     }
 
@@ -1443,10 +1478,6 @@ static void mpfs_setdevaddr(struct mpfs_usbdev_s *priv, uint8_t address)
   uinfo("ENTRY address=0x%x\n", address);
 
   DEBUGASSERT(address <= 0x7f);
-
-  /* Vendor specific delay before changing the address */
-
-  up_udelay(1000);
 
   mpfs_putreg8(address, MPFS_USB_FADDR);
 
@@ -1653,6 +1684,7 @@ static int mpfs_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
       if (privep->stalled || privep->pending)
         {
           mpfs_req_enqueue(&privep->pendq, privreq);
+          usbtrace(TRACE_INREQQUEUED(epno), req->len);
 
           ret = OK;
         }
@@ -1662,6 +1694,7 @@ static int mpfs_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
           /* Add the new request to the request queue for the IN endpoint */
 
           mpfs_req_enqueue(&privep->reqq, privreq);
+          usbtrace(TRACE_INREQQUEUED(epno), req->len);
 
           /* If the IN endpoint is IDLE and there is not write queue
            * processing in progress, then transfer the data now.
@@ -1681,6 +1714,7 @@ static int mpfs_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
       /* Add the new request to the request queue for the OUT endpoint */
 
       mpfs_req_enqueue(&privep->reqq, privreq);
+      usbtrace(TRACE_OUTREQQUEUED(epno), req->len);
 
       /* Check if we have stopped RX receipt due to lack of read
        * requests.  In that case we are not receiving anything from host.
@@ -1691,13 +1725,17 @@ static int mpfs_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
       if (privep->epstate == USB_EPSTATE_RXSTOPPED)
         {
           privep->epstate = USB_EPSTATE_IDLE;
+          privreq->inflight = privreq->req.len;
+          privep->rxactive  = true;
+          privreq->req.xfrd = 0;
+          ret = mpfs_req_read(priv, privep, req->len);
         }
 
       /* start new read if no active yet */
 
-      if (!privep->rxactive)
+      else if (!privep->rxactive)
         {
-          ret = mpfs_req_read(priv, privep, 0);
+          ret = mpfs_req_read(priv, privep, req->len);
         }
     }
 
@@ -1759,6 +1797,8 @@ static int mpfs_ep_resume(struct mpfs_ep_s *privep)
   /* Check that endpoint is in Idle state */
 
   DEBUGASSERT(privep->dev);
+
+  usbtrace(TRACE_EPRESUME, USB_EPNO(privep->ep.eplog));
 
   flags = enter_critical_section();
 
@@ -2319,7 +2359,7 @@ static void mpfs_ep0_wrstatus(struct mpfs_usbdev_s *priv,
    * reusing the static ep0 setup buffer
    */
 
-  DEBUGASSERT(buflen < MPFS_EP0_MAXPACKET);
+  DEBUGASSERT(buflen <= MPFS_EP0_MAXPACKET);
   memcpy(&priv->ep0out[0], buffer, buflen);
 
   /* Setup TX transfer */
@@ -2328,19 +2368,17 @@ static void mpfs_ep0_wrstatus(struct mpfs_usbdev_s *priv,
 
   if (buflen > 0)
     {
+      DEBUGASSERT(privep->epstate != USB_EPSTATE_SENDING);
       mpfs_write_tx_fifo(buffer, buflen, 0);
 
       mpfs_putreg16(CSR0L_DEV_TX_PKT_RDY_MASK | CSR0L_DEV_DATA_END_MASK,
                     MPFS_USB_INDEXED_CSR_EP0_CSR0);
     }
-  else if (privep->epstate == USB_EPSTATE_EP0ADDRESS)
+  else
     {
       mpfs_putreg16(CSR0L_DEV_SERVICED_RX_PKT_RDY_MASK |
                     CSR0L_DEV_DATA_END_MASK,
                     MPFS_USB_INDEXED_CSR_EP0_CSR0);
-
-      privep->epstate = USB_EPSTATE_IDLE;
-      mpfs_setdevaddr(priv, priv->devaddr);
     }
 
   /* set read for next setup OUT */
@@ -2370,9 +2408,6 @@ static void mpfs_ep0_dispatch(struct mpfs_usbdev_s *priv)
 
   usbtrace(TRACE_INTDECODE(MPFS_TRACEINTID_DISPATCH), 0);
 
-  mpfs_putreg16(CSR0L_DEV_SERVICED_RX_PKT_RDY_MASK,
-                MPFS_USB_INDEXED_CSR_EP0_CSR0);
-
   if (priv && priv->driver)
     {
       /* Assume IN SETUP (or OUT SETUP with no data) */
@@ -2396,7 +2431,6 @@ static void mpfs_ep0_dispatch(struct mpfs_usbdev_s *priv)
 
       ret = CLASS_SETUP(priv->driver, &priv->usbdev, &priv->ctrl,
                         dataout, outlen);
-
       if (ret < 0)
         {
           /* Stall on failure */
@@ -2962,6 +2996,8 @@ static void mpfs_ep_tx_interrupt(struct mpfs_usbdev_s *priv, int epno)
   struct mpfs_ep_s *privep;
   privep = &priv->eplist[epno];
 
+  mpfs_putreg8(epno, MPFS_USB_INDEX);
+
   uint16_t tx_csr = getreg16(MPFS_USB_ENDPOINT(epno) +
                              MPFS_USB_ENDPOINT_TX_CSR_OFFSET);
 
@@ -2988,14 +3024,10 @@ static void mpfs_ep_tx_interrupt(struct mpfs_usbdev_s *priv, int epno)
   if (privep->epstate == USB_EPSTATE_SENDING ||
       privep->epstate == USB_EPSTATE_EP0STATUSIN)
     {
-      /* Continue/resume processing the write requests */
+      /* Continue / resume processing the write requests */
 
       privep->epstate = USB_EPSTATE_IDLE;
       mpfs_req_write(priv, privep);
-    }
-  else
-    {
-      usbtrace(TRACE_DEVERROR(MPFS_TRACEERR_INVALID_EP0_STATE), tx_csr);
     }
 }
 
@@ -3032,17 +3064,20 @@ static void mpfs_ctrl_ep_interrupt(struct mpfs_usbdev_s *priv, int epno)
   mode = getreg8(MPFS_USB_DEV_CTRL) & DEV_CTRL_HOST_MODE_MASK;
   DEBUGASSERT(!mode);
 
-  /* Endpoint stall */
-
   count0 = getreg16(MPFS_USB_INDEXED_CSR_EP0_COUNT0);
   csr0 = getreg16(MPFS_USB_INDEXED_CSR_EP0_CSR0);
 
-  usbtrace(TRACE_INTDECODE(MPFS_TRACEINTID_EP0_CSR0), csr0);
-  usbtrace(TRACE_INTDECODE(MPFS_TRACEINTID_EP0_COUNT0), count0);
+  if (privep->epstate == USB_EPSTATE_EP0ADDRESS)
+    {
+      mpfs_setdevaddr(priv, priv->devaddr);
+      privep->epstate = USB_EPSTATE_IDLE;
+    }
+
+  /* Endpoint stall */
 
   if ((csr0 & CSR0L_DEV_STALL_SENT_MASK) != 0)
     {
-      if (privep->epstate != USB_EPSTATE_STALLED)
+      if (privep->epstate == USB_EPSTATE_STALLED)
         {
           usbtrace(TRACE_INTDECODE(MPFS_TRACEINTID_EP0_STALLSENT), csr0);
           mpfs_modifyreg16(MPFS_USB_INDEXED_CSR_EP0_CSR0,
@@ -3056,37 +3091,28 @@ static void mpfs_ctrl_ep_interrupt(struct mpfs_usbdev_s *priv, int epno)
     {
       /* Setting SERVICED_SETUP_END bit clears Setup End bit */
 
-      mpfs_putreg16(CSR0L_DEV_SERVICED_SETUP_END_MASK,
-                    MPFS_USB_INDEXED_CSR_EP0_CSR0);
+      mpfs_modifyreg16(MPFS_USB_INDEXED_CSR_EP0_CSR0, 0,
+                       CSR0L_DEV_SERVICED_SETUP_END_MASK);
     }
 
-  if (csr0 == 0)
+  if (privep->epstate == USB_EPSTATE_SENDING ||
+      privep->epstate == USB_EPSTATE_EP0STATUSIN)
     {
-      if (privep->epstate == USB_EPSTATE_SENDING ||
-          privep->epstate == USB_EPSTATE_EP0STATUSIN)
-        {
-          /* Continue/resume processing the write requests */
+      /* Continue/resume processing the write requests */
 
-          privep->epstate = USB_EPSTATE_IDLE;
-          mpfs_req_write(priv, privep);
-        }
-      else
-        {
-          /* Unexpected interrupt or tx completion */
-
-          usbtrace(TRACE_DEVERROR(MPFS_TRACEERR_TXCOMPERR),
-                   privep->epstate);
-        }
+      privep->epstate = USB_EPSTATE_IDLE;
+      mpfs_req_write(priv, privep);
     }
 
-  /* RX packet received  */
+  /* RX packet received.  Should not get them here. */
 
   if ((csr0 & CSR0L_DEV_DATA_END_MASK) != 0)
     {
-      usbtrace(TRACE_INTDECODE(MPFS_TRACEINTID_DATA_END), csr0);
-      mpfs_modifyreg16(MPFS_USB_INDEXED_CSR_EP0_CSR0, 0,
-                       CSR0L_DEV_DATA_END_MASK |
-                       CSR0L_DEV_SERVICED_RX_PKT_RDY_MASK);
+      /* Premature termination. Control transfer has ended before DATAEND,
+       * this indicates some trouble!
+       */
+
+      usbtrace(TRACE_DEVERROR(MPFS_TRACEERR_EP0PREMATURETERM), count0);
     }
 
   /* SETUP packet received */
@@ -3095,6 +3121,9 @@ static void mpfs_ctrl_ep_interrupt(struct mpfs_usbdev_s *priv, int epno)
     {
       uint16_t len;
 
+      usbtrace(TRACE_INTDECODE(MPFS_TRACEINTID_EP0_CSR0), csr0);
+      usbtrace(TRACE_INTDECODE(MPFS_TRACEINTID_EP0_COUNT0), count0);
+
       /* If a write request transfer was pending, complete it. */
 
       if (privep->epstate == USB_EPSTATE_SENDING)
@@ -3102,19 +3131,59 @@ static void mpfs_ctrl_ep_interrupt(struct mpfs_usbdev_s *priv, int epno)
           mpfs_req_complete(privep, -EPROTO);
         }
 
-      memset((uint8_t *)&priv->ctrl, 0, sizeof(struct usb_ctrlreq_s));
-
       usbtrace(TRACE_READ(USB_EPNO(EP0)), count0);
 
       if (count0 > 0)
         {
-          mpfs_read_rx_fifo((uint8_t *)&priv->ctrl, count0, EP0);
+          if (privep->epstate == USB_EPSTATE_EP0DATAOUT)
+            {
+              mpfs_read_rx_fifo((uint8_t *)&priv->ep0out, count0, EP0);
+              mpfs_putreg16(CSR0L_DEV_DATA_END_MASK |
+                            CSR0L_DEV_SERVICED_RX_PKT_RDY_MASK,
+                            MPFS_USB_INDEXED_CSR_EP0_CSR0);
+            }
+          else
+            {
+              DEBUGASSERT(count0 == sizeof(struct usb_ctrlreq_s));
 
-          /* Mark the read finished */
+              mpfs_read_rx_fifo((uint8_t *)&priv->ctrl, count0, EP0);
 
-          mpfs_putreg16(CSR0L_DEV_SERVICED_RX_PKT_RDY_MASK |
-                        CSR0L_DEV_DATA_END_MASK,
-                        MPFS_USB_INDEXED_CSR_EP0_CSR0);
+              mpfs_putreg16(CSR0L_DEV_SERVICED_RX_PKT_RDY_MASK,
+                            MPFS_USB_INDEXED_CSR_EP0_CSR0);
+            }
+        }
+
+      if (privep->epstate == USB_EPSTATE_EP0DATAOUT)
+        {
+          uint16_t rlen;
+
+          DEBUGASSERT(epno == EP0);
+
+          /* Yes.. back to the IDLE state */
+
+          privep->epstate = USB_EPSTATE_IDLE;
+
+          /* Get the size that we expected to receive */
+
+          rlen = GETUINT16(priv->ctrl.len);
+
+          if (rlen == count0)
+            {
+              /* And handle the EP0 SETUP now. */
+
+              mpfs_ep0_setup(priv);
+            }
+          else
+            {
+              /* Then stall. */
+
+              usbtrace(TRACE_DEVERROR(MPFS_TRACEERR_EP0SETUPOUTSIZE),
+                       count0);
+
+              mpfs_ep_stall(privep);
+            }
+
+          return;
         }
 
       /* SETUP data is ready */
@@ -3179,9 +3248,6 @@ static int mpfs_usb_interrupt(int irq, void *context, void *arg)
 
   pending_tx_ep = getreg16(MPFS_USB_TX_IRQ);
   pending_rx_ep = getreg16(MPFS_USB_RX_IRQ);
-
-  usbtrace(TRACE_INTDECODE(MPFS_TRACEINTID_EP_TX_IRQ), pending_tx_ep);
-  usbtrace(TRACE_INTDECODE(MPFS_TRACEINTID_EP_RX_IRQ), pending_rx_ep);
 
   if (isr & RESET_IRQ_MASK)
     {
@@ -3565,7 +3631,14 @@ static void mpfs_sw_setup(struct mpfs_usbdev_s *priv)
       /* We will use a maxpacket size for supported for each endpoint */
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-      priv->eplist[epno].ep.maxpacket = MPFS_USB_MAXPACKETSIZE_HS(epno);
+      if (epno == EP0)
+        {
+          priv->eplist[epno].ep.maxpacket = MPFS_USB_MAXPACKETSIZE(epno);
+        }
+      else
+        {
+          priv->eplist[epno].ep.maxpacket = MPFS_USB_MAXPACKETSIZE_HS(epno);
+        }
 #else
       priv->eplist[epno].ep.maxpacket = MPFS_USB_MAXPACKETSIZE(epno);
 #endif

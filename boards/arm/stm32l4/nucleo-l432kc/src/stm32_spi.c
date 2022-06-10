@@ -30,6 +30,7 @@
 #include <errno.h>
 
 #include <nuttx/spi/spi.h>
+#include <nuttx/spi/spi_transfer.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -55,6 +56,34 @@ struct spi_dev_s *g_spi2;
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32l4_spiregister
+ *
+ * Description:
+ *   Called to register spi character driver of
+ *   initialized spi device for the Nucleo-L432KC board.
+ *
+ ****************************************************************************/
+
+void stm32l4_spiregister(void)
+{
+#ifdef CONFIG_STM32L4_SPI1
+      int ret = spi_register(g_spi1, 1);
+      if (ret < 0)
+        {
+          spierr("ERROR: FAILED to register driver of SPI port 1\n");
+        }
+#endif
+
+#ifdef CONFIG_STM32L4_SPI2
+      int ret = spi_register(g_spi2, 2);
+      if (ret < 0)
+        {
+          spierr("ERROR: FAILED to register driver of SPI port 2\n");
+        }
+#endif
+}
 
 /****************************************************************************
  * Name: stm32l4_spiinitialize

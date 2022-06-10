@@ -123,21 +123,21 @@ APIs Exported by Architecture-Specific Logic to NuttX
   -  ``stack_base_ptr``: Adjusted stack base pointer after the TLS Data
      and Arguments has been removed from the stack allocation.
 
-  Here is the diagram after some allocation(tls, arg):
+  Here is the diagram after some allocation(tls, arg)::
 
-                   +-------------+ <-stack_alloc_ptr(lowest)
-                   |  TLS Data   |
-                   +-------------+
-                   |  Arguments  |
-  stack_base_ptr-> +-------------+\
-                   |  Available  | +
-                   |    Stack    | |
-                |  |             | |
-                |  |             | +->adj_stack_size
-                v  |             | |
-                   |             | |
-                   |             | +
-                   +-------------+/
+                     +-------------+ <-stack_alloc_ptr(lowest)
+                     |  TLS Data   |
+                     +-------------+
+                     |  Arguments  |
+    stack_base_ptr-> +-------------+\
+                     |  Available  | +
+                     |    Stack    | |
+                  |  |             | |
+                  |  |             | +->adj_stack_size
+                  v  |             | |
+                     |             | |
+                     |             | +
+                     +-------------+/
 
   :param tcb: The TCB of new task.
   :param frame_size: The size of the stack frame to allocate.

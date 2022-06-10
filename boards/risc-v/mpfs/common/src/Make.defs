@@ -42,6 +42,10 @@ ifeq ($(CONFIG_USBDEV),y)
 CSRCS += mpfs_usb.c
 endif
 
+ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
+CSRCS += mpfs_composite.c
+endif
+
 ifeq ($(CONFIG_MPFS_IHC),y)
 CSRCS += mpfs_ihc.c
 endif

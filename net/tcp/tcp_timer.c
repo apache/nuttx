@@ -58,6 +58,7 @@
 #include <nuttx/net/netstats.h>
 #include <nuttx/net/tcp.h>
 
+#include "netdev/netdev.h"
 #include "devif/devif.h"
 #include "socket/socket.h"
 #include "tcp/tcp.h"
@@ -137,10 +138,21 @@ static int tcp_get_timeout(FAR struct tcp_conn_s *conn)
 
 static void tcp_timer_expiry(FAR void *arg)
 {
-  FAR struct tcp_conn_s *conn = arg;
+  FAR struct tcp_conn_s *conn = NULL;
 
-  conn->timeout = true;
-  conn->dev->d_txavail(conn->dev);
+  net_lock();
+
+  while ((conn = tcp_nextconn(conn)) != NULL)
+    {
+      if (conn == arg)
+        {
+          conn->timeout = true;
+          netdev_txnotify_dev(conn->dev);
+          break;
+        }
+    }
+
+  net_unlock();
 }
 
 /****************************************************************************

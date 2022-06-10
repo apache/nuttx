@@ -104,12 +104,6 @@ void up_initialize(void)
   xtensa_pminitialize();
 #endif
 
-  /* Initialize the internal heap */
-
-#ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
-  xtensa_imm_initialize();
-#endif
-
 #ifdef CONFIG_ARCH_DMA
   /* Initialize the DMA subsystem if the weak function xtensa_dma_initialize
    * has been brought into the build

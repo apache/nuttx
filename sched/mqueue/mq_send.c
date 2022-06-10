@@ -94,10 +94,6 @@ int file_mq_send(FAR struct file *mq, FAR const char *msg, size_t msglen,
       return ret;
     }
 
-  /* Get a pointer to the message queue */
-
-  sched_lock();
-
   /* Allocate a message structure:
    * - Immediately if we are called from an interrupt handler.
    * - Immediately if the message queue is not full, or
@@ -156,7 +152,6 @@ int file_mq_send(FAR struct file *mq, FAR const char *msg, size_t msglen,
       ret = nxmq_do_send(msgq, mqmsg, msg, msglen, prio);
     }
 
-  sched_unlock();
   return ret;
 }
 

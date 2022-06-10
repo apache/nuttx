@@ -1838,8 +1838,6 @@ int up_timer_start(FAR const struct timespec *ts);
 
 #ifdef CONFIG_SCHED_THREAD_LOCAL
 int up_tls_size(void);
-#else
-#define up_tls_size() sizeof(struct tls_info_s)
 #endif
 
 /****************************************************************************
