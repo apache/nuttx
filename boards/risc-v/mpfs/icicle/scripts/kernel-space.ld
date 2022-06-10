@@ -40,12 +40,12 @@ __ksram_size = LENGTH(ksram);
 __ksram_end = ORIGIN(ksram) + LENGTH(ksram);
 
 ENTRY(_stext)
-EXTERN(_vectors)
+EXTERN(__start)
 SECTIONS
 {
     .text : {
         _stext = ABSOLUTE(.);
-        *(.vectors)
+        *(.start .start.*)
         *(.text .text.*)
         *(.fixup)
         *(.gnu.warning)
