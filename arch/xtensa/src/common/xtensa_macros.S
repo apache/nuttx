@@ -92,3 +92,32 @@
 
 	.endm
 
+/****************************************************************************
+ * Name: exceptin_backtrace
+ *
+ * Description:
+ *   Populate the base save area with the pre-exception A0 and SP to be able
+ *   to backtrace from it.
+ *
+ ****************************************************************************/
+
+	.macro	exception_backtrace	sa level
+
+#if !defined(__XTENSA_CALL0_ABI__) && defined(CONFIG_XTENSA_INTBACKTRACE)
+	l32i    a3, \sa, (4 * REG_A0)    /* Copy pre-exception a0 (return address) */
+	s32e    a3, sp, -16
+	l32i    a3, \sa, (4 * REG_A1)    /* Copy pre-exception a1 (stack pointer) */
+	s32e    a3, sp, -12
+
+	/* Backtracing only needs a0 and a1, no need to create full base save area.
+	 * Also need to change current frame's return address to point to pre-exception's
+	 * last run instruction.
+	 */
+
+	rsr     a0, EPC_1 + \level - 1   /* Return address for debug backtrace */
+	movi    a4, 0xc0000000           /* Constant with top 2 bits set (call size) */
+	or      a0, a0, a4               /* Set top 2 bits */
+	addx2   a0, a4, a0               /* Clear top bit to simulate a call4 size */
+#endif
+
+	.endm
