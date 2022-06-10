@@ -502,6 +502,30 @@ void pm_stay(int domain, enum pm_state_e state);
 void pm_relax(int domain, enum pm_state_e state);
 
 /****************************************************************************
+ * Name: pm_stay_timeout
+ *
+ * Description:
+ *   This function is called by a device driver to indicate that it is
+ *   performing meaningful activities (non-idle), needs the power at kept
+ *   last the specified level.
+ *   And this will be timeout after time (ms), menas auto pm_relax
+ *
+ * Input Parameters:
+ *   domain - The domain of the PM activity
+ *   state - The state want to stay.
+ *   ms - The timeout value ms
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions:
+ *   This function may be called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+void pm_stay_timeout(int domain, enum pm_state_e state, int ms);
+
+/****************************************************************************
  * Name: pm_staycount
  *
  * Description:

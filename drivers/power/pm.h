@@ -58,6 +58,7 @@ struct pm_domain_s
   /* The power state lock count */
 
   uint16_t stay[PM_COUNT];
+  struct wdog_s wdog[PM_COUNT];
 
   /* Auto update or not */
 
