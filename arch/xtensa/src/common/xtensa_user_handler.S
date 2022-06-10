@@ -451,12 +451,7 @@ _xtensa_coproc_handler:
 
 	/* Set up PS for C, re-enable hi-pri interrupts, and clear EXCM. */
 
-#ifdef __XTENSA_CALL0_ABI__
-	movi	a0, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM
-#else
-	movi	a0, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE
-#endif
-	wsr		a0, PS
+	ps_setup	1 a0
 
 	/* Call xtensa_user_panic, passing both the EXCCAUSE and a pointer to the
 	 * beginning of the register save area.
