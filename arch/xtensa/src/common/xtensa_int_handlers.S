@@ -192,22 +192,7 @@ g_intstacktop:
 	 * before getting here.
 	 */
 
-#ifdef CONFIG_XTENSA_INTBACKTRACE
-	l32i a3, a12, (4 * REG_A0)        /* Copy pre-exception a0 (return address) */
-	s32e a3, sp, -16
-	l32i a3, a12, (4 * REG_A1)        /* Copy pre-exception a1 (stack pointer) */
-	s32e a3, sp, -12
-
-	/* Backtracing only needs a0 and a1, no need to create full base save area.
-	 * Also need to change current frame's return address to point to pre-exception's
-	 * last run instruction.
-	 */
-
-	rsr a0, EPC_1 + \level - 1  /* return address */
-	movi a4, 0xc0000000         /* constant with top 2 bits set (call size) */
-	or a0, a0, a4               /* set top 2 bits */
-	addx2 a0, a4, a0            /* clear top bit -- simulating call4 size   */
-#endif
+	exception_backtrace a12 \level
 
 	/* Call xtensa_int_decode passing the address of the register save area
 	 * as a parameter (A7).
