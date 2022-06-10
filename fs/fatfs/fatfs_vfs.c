@@ -1066,7 +1066,16 @@ static int fatfs_bind(FAR struct inode *driver, FAR const void *data,
       ret = fatfs_convert_result(f_mkfs(path, &opt, NULL, FF_MAX_SS));
       if (ret < 0)
         {
-          goto errout_with_open;
+          if (ret == -EIO && CONFIG_FS_FATFS_SECTOR_RATIO != 1)
+            {
+              g_drv[fs->pdrv].ratio = 1;
+              ret = fatfs_convert_result(f_mkfs(path, &opt, NULL, FF_MAX_SS));
+            }
+
+          if (ret < 0)
+            {
+              goto errout_with_open;
+            }
         }
     }
 
@@ -1088,7 +1097,16 @@ static int fatfs_bind(FAR struct inode *driver, FAR const void *data,
       ret = fatfs_convert_result(f_mkfs(path, &opt, NULL, FF_MAX_SS));
       if (ret < 0)
         {
-          goto errout_with_open;
+          if (ret == -EIO && CONFIG_FS_FATFS_SECTOR_RATIO != 1)
+            {
+              g_drv[fs->pdrv].ratio = 1;
+              ret = fatfs_convert_result(f_mkfs(path, &opt, NULL, FF_MAX_SS));
+            }
+
+          if (ret < 0)
+            {
+              goto errout_with_open;
+            }
         }
 
       /* Try to mount the device again */
