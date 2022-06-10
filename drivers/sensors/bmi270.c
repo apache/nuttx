@@ -2304,14 +2304,20 @@ static void bmi270_xl_worker(FAR void *arg)
                  priv, priv->dev[BMI270_XL_IDX].interval / USEC_PER_TICK);
     }
 
-  /* Read out the latest sensor data. */
+  /* Lock the SPI. */
 
   bmi270_spi_lock(priv);
+
+  /* Read out the latest sensor data. */
+
   bmi270_xl_getdata(priv, BMI270_DATA_8, &temp_xl);
 
   /* Read temperature. */
 
   bmi270_temp_getdata(priv, BMI270_ITEMPERATURE_0, &temp_xl.temperature);
+
+  /* Unlock the SPI. */
+
   bmi270_spi_unlock(priv);
 
   /* push data to upper half driver. */
@@ -2708,6 +2714,10 @@ static void bmi270_gy_worker(FAR void *arg)
                  priv, priv->dev[BMI270_GY_IDX].interval / USEC_PER_TICK);
     }
 
+  /* Lock the SPI. */
+
+  bmi270_spi_lock(priv);
+
   /* Read out the latest sensor data. */
 
   bmi270_gy_getdata(priv, BMI270_DATA_14, &temp_gy);
@@ -2715,6 +2725,10 @@ static void bmi270_gy_worker(FAR void *arg)
   /* Read temperature. */
 
   bmi270_temp_getdata(priv, BMI270_ITEMPERATURE_0, &temp_gy.temperature);
+
+  /* Unlock the SPI. */
+
+  bmi270_spi_unlock(priv);
 
   /* push data to upper half driver. */
 
@@ -2751,7 +2765,7 @@ static int bmi270_gy_getdata(FAR struct bmi270_dev_s *priv,
 
   /* Get accel and gyro data for x, y and z axis. */
 
-  bmi270_spi_read(priv, regaddr, temp.u8bit, 6);
+  bmi270_spi_read_unlock(priv, regaddr, temp.u8bit, 6);
 
   temp.i16bit[0] = temp.i16bit[0] - priv->cross_sense
                  * (temp.i16bit[2]) / (1 << 9);
