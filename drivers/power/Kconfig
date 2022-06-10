@@ -41,22 +41,25 @@ config PM_GOVERNOR_ACTIVITY
 
 menu "Governor options"
 
-if PM_GOVERNOR_GREEDY
-
 config PM_GOVERNOR_EXPLICIT_RELAX
-	bool "Stay initially at PM_NORMAL"
+	int "Stay initially at PM_NORMAL"
+	default 0
 	---help---
-		If you boot into NSH, when using the greedy PM governor, since NuttX will
-		almost immediately go idle (when waiting for a prompt), he lowest possible
-		run-level will be selected, which may not be desirable.
+		If you boot into NSH, especially using the greedy PM governor, since
+		NuttX will almost immediately go idle (when waiting for a prompt), the
+		lowest possible run-level will be selected, which may not be desirable.
 		This is not a problem if you directly run you application at boot, which
 		can hold off power levels using pm_stay() (via boardctl).
 
-		This option will initialize all run levels as if pm_stay() were to be
-		called once for each, so that your application needs to call pm_relax()
-		(via boardctl()) for every run-level you wish to allow to enter.
+		This option will initialize all run levels as if
+		pm_stay/pm_stay_timeout() were to be called once for each.
 
-endif
+		if set to -1, that means pm_stay(), so that your application
+		needs to call pm_relax() (via boardctl()) for every run-level you
+		wish to allow to enter.
+
+		if set to timeout (unit: ms), that means pm_stay_timeout(ms).
+		pm_relax() will be auto called after timeout.
 
 if PM_GOVERNOR_ACTIVITY
 
