@@ -70,6 +70,11 @@
 
 int pm_set_governor(int domain, FAR const struct pm_governor_s *gov)
 {
+#if CONFIG_PM_GOVERNOR_EXPLICIT_RELAX
+  int state;
+  int dom;
+#endif
+
   if (gov == NULL)
     {
       return -EINVAL;
@@ -87,6 +92,20 @@ int pm_set_governor(int domain, FAR const struct pm_governor_s *gov)
     {
       g_pmglobals.domain[domain].governor->initialize();
     }
+
+#if CONFIG_PM_GOVERNOR_EXPLICIT_RELAX
+  for (dom = 0; dom < CONFIG_PM_NDOMAINS; dom++)
+    {
+      for (state = 0; state < PM_COUNT; state++)
+        {
+#if CONFIG_PM_GOVERNOR_EXPLICIT_RELAX < 0
+          pm_stay(dom, state);
+#else
+          pm_stay_timeout(dom, state, CONFIG_PM_GOVERNOR_EXPLICIT_RELAX);
+#endif
+        }
+    }
+#endif
 
   return 0;
 }

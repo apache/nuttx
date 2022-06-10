@@ -62,7 +62,6 @@ struct pm_greedy_governor_s
 
 /* PM governor methods */
 
-static void             greedy_governor_initialize(void);
 static void             greedy_governor_statechanged(int domain,
                                                 enum pm_state_e newstate);
 static enum pm_state_e  greedy_governor_checkstate(int domain);
@@ -74,7 +73,6 @@ static void             greedy_governor_activity(int domain, int count);
 
 static const struct pm_governor_s g_greedy_governor_ops =
 {
-  .initialize   = greedy_governor_initialize,   /* initialize */
   .statechanged = greedy_governor_statechanged, /* statechanged */
   .checkstate   = greedy_governor_checkstate,   /* checkstate */
   .activity     = greedy_governor_activity,     /* activity */
@@ -85,23 +83,6 @@ static struct pm_greedy_governor_s g_pm_greedy_governor;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: greedy_governor_initialize
- ****************************************************************************/
-
-static void greedy_governor_initialize(void)
-{
-#ifdef CONFIG_PM_GOVERNOR_EXPLICIT_RELAX
-  for (int dom = 0; dom < CONFIG_PM_NDOMAINS; dom++)
-    {
-      for (int state = 0; state < PM_COUNT; state++)
-        {
-          pm_stay(dom, state);
-        }
-    }
-#endif
-}
 
 /****************************************************************************
  * Name: greedy_governor_statechanged
