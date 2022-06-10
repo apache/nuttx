@@ -252,6 +252,7 @@ typedef CODE void (*mmchunk_handler_t)(FAR struct mm_allocnode_s *node,
 /* Functions contained in mm_sem.c ******************************************/
 
 void mm_seminitialize(FAR struct mm_heap_s *heap);
+void mm_semuninitialize(FAR struct mm_heap_s *heap);
 bool mm_takesemaphore(FAR struct mm_heap_s *heap);
 void mm_givesemaphore(FAR struct mm_heap_s *heap);
 

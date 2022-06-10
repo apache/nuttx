@@ -582,4 +582,28 @@ void procfs_register_meminfo(FAR struct procfs_meminfo_entry_s *entry)
   g_procfs_meminfo = entry;
 }
 
+/****************************************************************************
+ * Name: procfs_unregister_meminfo
+ *
+ * Description:
+ *   Remove a meminfo entry from the procfs file system.
+ *
+ * Input Parameters:
+ *   entry - Describes the entry to be unregistered.
+ *
+ ****************************************************************************/
+
+void procfs_unregister_meminfo(FAR struct procfs_meminfo_entry_s *entry)
+{
+  FAR struct procfs_meminfo_entry_s **cur;
+
+  for (cur = &g_procfs_meminfo; *cur != NULL; cur = &(*cur)->next)
+    {
+      if (*cur == entry)
+        {
+          *cur = entry->next;
+          break;
+        }
+    }
+}
 #endif /* !CONFIG_FS_PROCFS_EXCLUDE_MEMINFO */
