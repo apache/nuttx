@@ -57,6 +57,21 @@ void mm_seminitialize(FAR struct mm_heap_s *heap)
 }
 
 /****************************************************************************
+ * Name: mm_seminitialize
+ *
+ * Description:
+ *   Uninitialize the MM mutex
+ *
+ ****************************************************************************/
+
+void mm_semuninitialize(FAR struct mm_heap_s *heap)
+{
+  /* Uninitialize the MM semaphore */
+
+  _SEM_DESTROY(&heap->mm_semaphore);
+}
+
+/****************************************************************************
  * Name: mm_takesemaphore
  *
  * Description:

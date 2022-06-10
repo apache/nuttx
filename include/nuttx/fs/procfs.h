@@ -256,6 +256,19 @@ int procfs_register(FAR const struct procfs_entry_s *entry);
 
 void procfs_register_meminfo(FAR struct procfs_meminfo_entry_s *entry);
 
+/****************************************************************************
+ * Name: procfs_unregister_meminfo
+ *
+ * Description:
+ *   Remove a meminfo entry from the procfs file system.
+ *
+ * Input Parameters:
+ *   entry - Describes the entry to be unregistered.
+ *
+ ****************************************************************************/
+
+void procfs_unregister_meminfo(FAR struct procfs_meminfo_entry_s *entry);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
