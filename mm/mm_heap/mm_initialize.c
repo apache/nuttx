@@ -217,13 +217,13 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
   mm_seminitialize(heap);
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+#  if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   heap->mm_procfs.name = name;
   heap->mm_procfs.heap = heap;
-#if defined (CONFIG_DEBUG_MM) && defined(CONFIG_MM_BACKTRACE_DEFAULT)
+#    if defined (CONFIG_DEBUG_MM) && defined(CONFIG_MM_BACKTRACE_DEFAULT)
   heap->mm_procfs.backtrace = true;
-#endif
-#endif
+#    endif
+#  endif
 #endif
 
   /* Add the initial region of memory to the heap */
@@ -231,10 +231,34 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
   mm_addregion(heap, heapstart, heapsize);
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+#  if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   procfs_register_meminfo(&heap->mm_procfs);
-#endif
+#  endif
 #endif
 
   return heap;
+}
+
+/****************************************************************************
+ * Name: mm_uninitialize
+ *
+ * Description:
+ *   Uninitialize the selected heap data structures.
+ *
+ * Input Parameters:
+ *   heap - The heap to uninitialize
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void mm_uninitialize(FAR struct mm_heap_s *heap)
+{
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
+#  if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+  procfs_unregister_meminfo(&heap->mm_procfs);
+#  endif
+#endif
+  mm_semuninitialize(heap);
 }

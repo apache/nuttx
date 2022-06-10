@@ -156,6 +156,7 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
                                     FAR void *heap_start, size_t heap_size);
 void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
                   size_t heapsize);
+void mm_uninitialize(FAR struct mm_heap_s *heap);
 
 /* Functions contained in umm_initialize.c **********************************/
 
