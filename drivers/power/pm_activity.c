@@ -36,6 +36,30 @@
 #ifdef CONFIG_PM
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static void pm_stay_normal_cb(wdparm_t arg)
+{
+  pm_relax(arg, PM_NORMAL);
+}
+
+static void pm_stay_idle_cb(wdparm_t arg)
+{
+  pm_relax(arg, PM_IDLE);
+}
+
+static void pm_stay_standby_cb(wdparm_t arg)
+{
+  pm_relax(arg, PM_STANDBY);
+}
+
+static void pm_stay_sleep_cb(wdparm_t arg)
+{
+  pm_relax(arg, PM_SLEEP);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -155,6 +179,75 @@ void pm_relax(int domain, enum pm_state_e state)
   DEBUGASSERT(state < PM_COUNT);
   DEBUGASSERT(pdom->stay[state] > 0);
   pdom->stay[state]--;
+  pm_unlock(domain, flags);
+
+  pm_auto_updatestate(domain);
+}
+
+/****************************************************************************
+ * Name: pm_stay_timeout
+ *
+ * Description:
+ *   This function is called by a device driver to indicate that it is
+ *   performing meaningful activities (non-idle), needs the power at kept
+ *   last the specified level.
+ *   And this will be timeout after time (ms), menas auto pm_relax
+ *
+ * Input Parameters:
+ *   domain - The domain of the PM activity
+ *   state - The state want to stay.
+ *   ms - The timeout value ms
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions:
+ *   This function may be called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+void pm_stay_timeout(int domain, enum pm_state_e state, int ms)
+{
+  FAR struct pm_domain_s *pdom;
+  FAR struct wdog_s *wdog;
+  wdentry_t wdentry;
+  irqstate_t flags;
+
+  DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
+  DEBUGASSERT(state < PM_COUNT);
+
+  pdom = &g_pmglobals.domain[domain];
+  wdog = &pdom->wdog[state];
+
+  flags = pm_lock(domain);
+
+  if (!WDOG_ISACTIVE(wdog))
+    {
+      DEBUGASSERT(pdom->stay[state] < UINT16_MAX);
+      pdom->stay[state]++;
+    }
+
+  switch (state)
+    {
+      case PM_NORMAL:
+          wdentry = pm_stay_normal_cb;
+          break;
+      case PM_IDLE:
+          wdentry = pm_stay_idle_cb;
+          break;
+      case PM_STANDBY:
+          wdentry = pm_stay_standby_cb;
+          break;
+      default:
+          wdentry = pm_stay_sleep_cb;
+          break;
+    }
+
+  if (TICK2MSEC(wd_gettime(wdog)) < ms)
+    {
+      wd_start(wdog, MSEC2TICK(ms), wdentry, domain);
+    }
+
   pm_unlock(domain, flags);
 
   pm_auto_updatestate(domain);
