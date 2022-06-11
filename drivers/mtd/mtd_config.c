@@ -49,6 +49,8 @@
 
 #ifdef CONFIG_MTD_CONFIG
 
+#undef CONFIG_MTD_BYTE_WRITE
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -286,6 +288,10 @@ static int mtdconfig_writebytes(FAR struct mtdconfig_struct_s *dev,
           /* Now write data to the block */
 
           memcpy(&dev->buffer[index], pdata, bytes_this_block);
+
+          /* TODO: revisit SAMe70 progmem bit flip issue */
+          MTD_ERASE(dev->mtd, block, 1);
+
           ret = MTD_BWRITE(dev->mtd, block, 1, dev->buffer);
           if (ret != 1)
             {
