@@ -248,7 +248,7 @@
 #define UART_CR_STTBRK               (1 << 9)  /* Bit 9:  Start Break (USART, UART mode only) */
 #define UART_CR_STPBRK               (1 << 10) /* Bit 10: Stop Break (USART, UART mode only) */
 #define UART_CR_STTTO                (1 << 11) /* Bit 11: Start Time-out (USART, UART mode only) */
-#define UART_CR_REQCLR               (1 << 12) /* Bit 12:Request Clear (UART only) */
+#define UART_CR_REQCLR               (1 << 12) /* Bit 12: Request Clear (UART only) */
 #define UART_CR_SENDA                (1 << 12) /* Bit 12: Send Address (USART, UART mode only) */
 #define UART_CR_RETTO                (1 << 15) /* Bit 15: Rearm Time-out (USART, UART mode only) */
 #define UART_CR_RTSEN                (1 << 18) /* Bit 18: Request to Send Enable (USART, UART mode only) */

@@ -202,10 +202,6 @@
 
 #define TIOCSLINID      _TIOC(0x0037) /* Master send one LIN header with specified LIN identifier: uint8_t */
 
-/* Board disable support */
-#define TIOCSBDIS  _TIOC(0x0038)       /* call a board disable(bool disable)
-                                          function */
-
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
