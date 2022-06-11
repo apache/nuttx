@@ -815,7 +815,7 @@ static int bmi270_fifo_gy_enable(FAR struct bmi270_dev_s *priv,
 static int bmi270_fifo_config(FAR struct bmi270_dev_s *priv);
 static int bmi270_fifo_gettype(FAR bmi270_fifo_header_t *fifo_header,
                                FAR uint8_t *type, FAR uint8_t *payload);
-static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv);
+static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv, bool worker);
 static int bmi270_fifo_getlevel(FAR struct bmi270_dev_s *priv,
                                 FAR unsigned int *value);
 
@@ -3155,7 +3155,8 @@ static int bmi270_fifo_gettype(FAR bmi270_fifo_header_t *fifo_header,
  *   Read all data in FIFO.
  *
  * Input Parameters:
- *   priv  - Device struct.
+ *   priv   - Device struct.
+ *   worker - Used to identify whether it is a worker call.
  *
  * Returned Value:
  *   Zero (OK) or positive on success; a negated errno value on failure.
@@ -3165,7 +3166,7 @@ static int bmi270_fifo_gettype(FAR bmi270_fifo_header_t *fifo_header,
  *
  ****************************************************************************/
 
-static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv)
+static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv, bool worker)
 {
   axis3bit16_t temp;
   float temperature;
@@ -3173,6 +3174,8 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv)
          temp_xl[CONFIG_SENSORS_BMI270_FIFO_SLOTS_NUMBER * 2];
   struct sensor_gyro
          temp_gy[CONFIG_SENSORS_BMI270_FIFO_SLOTS_NUMBER * 2];
+  bmi270_int_status_0_t regval_int0;
+  bmi270_int_status_1_t regval_int1;
   uint8_t data_len = 0;
   uint8_t fifo_type = -1;
   uint8_t reg_int[2];
@@ -3181,13 +3184,35 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv)
   unsigned int fifo_interval;
   unsigned int num;
   unsigned int i;
-  int ret;
+  int ret = 0;
+
+  /* Lock the SPI. */
+
+  bmi270_spi_lock(priv);
+
+  if (worker)
+    {
+      /* Read the interrupt status. */
+
+      bmi270_spi_read_unlock(priv, BMI270_INT_STATUS_0, reg_int, 2);
+      regval_int0 = *(FAR bmi270_int_status_0_t *)&reg_int[0];
+      regval_int1 = *(FAR bmi270_int_status_1_t *)&reg_int[1];
+
+      /* Handle the interrupt. */
+
+      if (!regval_int1.fwm_int && !regval_int1.ffull_int)
+        {
+          bmi270_spi_unlock(priv);
+          goto out;
+        }
+    }
 
   ret = bmi270_fifo_getlevel(priv, &num);
   if (ret < 0)
     {
       snerr("Failed to get FIFO level!\n");
-      return ret;
+      bmi270_spi_unlock(priv);
+      goto out;
     }
 
   if (num > 0)
@@ -3196,7 +3221,8 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv)
     }
   else
     {
-      return OK;
+      bmi270_spi_unlock(priv);
+      goto out;
     }
 
   /* Read temperature. */
@@ -3281,6 +3307,10 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv)
         }
     }
 
+  /* Unlock the SPI. */
+
+  bmi270_spi_unlock(priv);
+
   if (counter_xl)
     {
       /* Inferred data timestamp. */
@@ -3328,6 +3358,12 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv)
     }
 
   priv->timestamp_fifolast = priv->timestamp;
+
+out:
+  if (worker && regval_int0.wrist_wear_weakeup_out)
+    {
+      bmi270_feat_handler(priv, regval_int0);
+    }
 
   return ret;
 }
@@ -3894,15 +3930,7 @@ static int bmi270_batch(FAR struct file *filep,
 
       if (priv->fifoen)
         {
-          /* Lock the SPI. */
-
-          bmi270_spi_lock(priv);
-
-          bmi270_fifo_readdata(priv);
-
-          /* Unlock the SPI. */
-
-          bmi270_spi_unlock(priv);
+          bmi270_fifo_readdata(priv, false);
         }
 
       bmi270_set_int(priv, BMI270_DISABLE);
@@ -4536,42 +4564,11 @@ static int bmi270_interrupt_handler(FAR struct ioexpander_dev_s *dev,
 
 static void bmi270_worker(FAR void *arg)
 {
-  FAR struct bmi270_dev_s *priv = arg;
-  bmi270_int_status_0_t regval_int0;
-  bmi270_int_status_1_t regval_int1;
-  uint8_t reg_int[2];
-
   /* Sanity check. */
 
-  DEBUGASSERT(priv != NULL);
+  DEBUGASSERT(arg != NULL);
 
-  /* Lock the SPI. */
-
-  bmi270_spi_lock(priv);
-
-  /* Read the interrupt status. */
-
-  bmi270_spi_read_unlock(priv, BMI270_INT_STATUS_0, reg_int, 2);
-  regval_int0 = *(FAR bmi270_int_status_0_t *)&reg_int[0];
-  regval_int1 = *(FAR bmi270_int_status_1_t *)&reg_int[1];
-
-  /* Handle the interrupt. */
-
-  if (regval_int1.fwm_int || regval_int1.ffull_int)
-    {
-      /* The SPI will be unlock in this function. */
-
-      bmi270_fifo_readdata(priv);
-    }
-
-  /* Unlock the SPI. */
-
-  bmi270_spi_unlock(priv);
-
-  if (regval_int0.wrist_wear_weakeup_out)
-    {
-      bmi270_feat_handler(priv, regval_int0);
-    }
+  bmi270_fifo_readdata(arg, true);
 }
 
 /****************************************************************************
