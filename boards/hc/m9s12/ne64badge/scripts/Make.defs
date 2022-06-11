@@ -25,7 +25,6 @@ include $(TOPDIR)/tools/Config.mk
 # NuttX buildroot under Linux or Cygwin
 
 CROSSDEV = m9s12x-nuttx-elf-
-MAXOPTIMIZATION = -Os
 
 ifeq ($(CONFIG_HCS12_NONBANKED),y)
   ARCHCPUFLAGS = -m9s12x -mshort -mnolong-calls
@@ -46,7 +45,7 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
 endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing -fomit-frame-pointer
+  ARCHOPTIMIZATION += -Os -fno-strict-aliasing -fomit-frame-pointer
 endif
 
 ARCHCFLAGS = -fno-common

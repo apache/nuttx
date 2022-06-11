@@ -59,8 +59,6 @@ struct lcddev_dev_s
 
 /* Character driver methods */
 
-static int lcddev_open(FAR struct file *filep);
-static int lcddev_close(FAR struct file *filep);
 static int lcddev_ioctl(FAR struct file *filep, int cmd,
                         unsigned long arg);
 
@@ -70,8 +68,8 @@ static int lcddev_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations lcddev_fops =
 {
-  lcddev_open,  /* open */
-  lcddev_close, /* close */
+  NULL,         /* open */
+  NULL,         /* close */
   NULL,         /* read */
   NULL,         /* write */
   NULL,         /* seek */
@@ -85,28 +83,6 @@ static const struct file_operations lcddev_fops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: lcddev_open
- ****************************************************************************/
-
-static int lcddev_open(FAR struct file *filep)
-{
-  /* Nothing to do */
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: lcddev_close
- ****************************************************************************/
-
-static int lcddev_close(FAR struct file *filep)
-{
-  /* Nothing to do */
-
-  return OK;
-}
 
 /****************************************************************************
  * Name: lcddev_ioctl
@@ -132,8 +108,8 @@ static int lcddev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
     case LCDDEVIO_PUTRUN:
       {
-        const FAR struct lcddev_run_s *lcd_run =
-            (const FAR struct lcddev_run_s *)arg;
+        FAR const struct lcddev_run_s *lcd_run =
+            (FAR const struct lcddev_run_s *)arg;
 
         ret = priv->planeinfo.putrun(lcd_run->row, lcd_run->col,
                                      lcd_run->data, lcd_run->npixels);
@@ -176,8 +152,8 @@ static int lcddev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
     case LCDDEVIO_PUTAREA:
       {
-        const FAR struct lcddev_area_s *lcd_area =
-            (const FAR struct lcddev_area_s *)arg;
+        FAR const struct lcddev_area_s *lcd_area =
+            (FAR const struct lcddev_area_s *)arg;
 
         if (priv->planeinfo.putarea)
           {

@@ -573,7 +573,7 @@ static void adc_read_work(struct adc_dev_s *dev)
   int32_t adc;
   struct adc_chan_s *priv = (struct adc_chan_s *)dev->ad_priv;
 
-  ret = sem_wait(&g_sem_excl);
+  ret = nxsem_wait(&g_sem_excl);
   if (ret < 0)
     {
       aerr("Failed to wait sem ret=%d\n", ret);
@@ -591,7 +591,7 @@ static void adc_read_work(struct adc_dev_s *dev)
   ainfo("channel: %" PRIu8 ", voltage: %" PRIu32 " mV\n", priv->channel,
         adc);
 
-  sem_post(&g_sem_excl);
+  nxsem_post(&g_sem_excl);
 }
 
 /****************************************************************************
@@ -706,7 +706,7 @@ static int adc_setup(struct adc_dev_s *dev)
 
   /* Start calibration only once  */
 
-  ret = sem_wait(&g_sem_excl);
+  ret = nxsem_wait(&g_sem_excl);
   if (ret < 0)
     {
       adc_disable_clk();
@@ -720,7 +720,7 @@ static int adc_setup(struct adc_dev_s *dev)
       g_calibrated = true;
     }
 
-  sem_post(&g_sem_excl);
+  nxsem_post(&g_sem_excl);
 
   /* The ADC device is ready */
 

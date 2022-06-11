@@ -67,7 +67,7 @@ allow_write(const void *start, const void *end)
    * the OS version.
    */
 
-  (void)mprotect(p, sz, PROT_READ | PROT_WRITE);
+  mprotect(p, sz, PROT_READ | PROT_WRITE);
 }
 
 __attribute__((constructor))

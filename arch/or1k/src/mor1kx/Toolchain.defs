@@ -28,14 +28,45 @@
 #  CROSSDEV         The GNU toolchain triple (command prefix)
 #  ARCHCPUFLAGS     CPU-specific flags selecting the instruction set
 #                   FPU options, etc.
-#  MAXOPTIMIZATION  The maximum optimization level that results in
+#  ARCHOPTIMIZATION The optimization level that results in
 #                   reliable code generation.
 #
 
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
-  MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
+  ARCHOPTIMIZATION += $(CONFIG_DEBUG_OPTLEVEL)
+else ifeq ($(CONFIG_DEBUG_FULLOPT),y)
+  ARCHOPTIMIZATION += -O2
+endif
+
+ifneq ($(CONFIG_DEBUG_NOOPT),y)
+  ARCHOPTIMIZATION += -fno-strict-aliasing
+endif
+
+ifeq ($(CONFIG_FRAME_POINTER),y)
+  ARCHOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
 else
-  MAXOPTIMIZATION ?= -O2
+  ARCHOPTIMIZATION += -fomit-frame-pointer
+endif
+
+LDFLAGS += -nostdlib
+
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  LDFLAGS          += -g
+  ARCHOPTIMIZATION += -g
+endif
+
+ARCHCFLAGS += -fno-common
+ARCHCXXFLAGS += -fno-common -nostdinc++
+
+ARCHCFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wundef
+ARCHCXXFLAGS += -Wall -Wshadow -Wundef
+
+ifneq ($(CONFIG_CXX_EXCEPTION),y)
+  ARCHCXXFLAGS += -fno-exceptions -fcheck-new
+endif
+
+ifneq ($(CONFIG_CXX_RTTI),y)
+  ARCHCXXFLAGS += -fno-rtti
 endif
 
 # Pick correct or1k architecture selection
@@ -50,7 +81,6 @@ endif
 CROSSDEV ?= or1k-elf-
 ARCHCPUFLAGS = -mboard=de0_nano
 ARCHPICFLAGS = -fpic -membedded-pic
-LDFLAGS += -nostartfiles -nodefaultlibs
 LDSCRIPT = or1k-elf-debug.ld
 #endif
 
@@ -68,12 +98,12 @@ OBJDUMP = $(CROSSDEV)objdump
 
 # Add the builtin library
 
-EXTRA_LIBS += ${wildcard ${shell $(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name}}
+EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name))
 
 ifneq ($(CONFIG_LIBM),y)
-  EXTRA_LIBS += ${wildcard ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a}}
+  EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a))
 endif
 
 ifeq ($(CONFIG_LIBSUPCXX),y)
-  EXTRA_LIBS += ${wildcard ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a}}
+  EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a))
 endif

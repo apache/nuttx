@@ -69,19 +69,19 @@ struct tiva_dev_s
 
 /* MTD driver methods */
 
-static int tiva_erase(FAR struct mtd_dev_s *dev, off_t startblock,
+static int tiva_erase(struct mtd_dev_s *dev, off_t startblock,
                       size_t nblocks);
-static ssize_t tiva_bread(FAR struct mtd_dev_s *dev, off_t startblock,
-                          size_t nblocks, FAR uint8_t *buf);
-static ssize_t tiva_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
-                           size_t nblocks, FAR const uint8_t *buf);
-static ssize_t tiva_read(FAR struct mtd_dev_s *dev, off_t offset,
-                         size_t nbytes, FAR uint8_t *buf);
+static ssize_t tiva_bread(struct mtd_dev_s *dev, off_t startblock,
+                          size_t nblocks, uint8_t *buf);
+static ssize_t tiva_bwrite(struct mtd_dev_s *dev, off_t startblock,
+                           size_t nblocks, const uint8_t *buf);
+static ssize_t tiva_read(struct mtd_dev_s *dev, off_t offset,
+                         size_t nbytes, uint8_t *buf);
 #ifdef CONFIG_MTD_BYTE_WRITE
-static ssize_t tiva_write(FAR struct mtd_dev_s *dev, off_t offset,
-                          size_t nbytes, FAR const uint8_t *buf);
+static ssize_t tiva_write(struct mtd_dev_s *dev, off_t offset,
+                          size_t nbytes, const uint8_t *buf);
 #endif
-static int tiva_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
+static int tiva_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -117,7 +117,7 @@ static struct tiva_dev_s g_lmdev =
  *
  ****************************************************************************/
 
-static int tiva_erase(FAR struct mtd_dev_s *dev, off_t startblock,
+static int tiva_erase(struct mtd_dev_s *dev, off_t startblock,
                       size_t nblocks)
 {
   off_t endblock;
@@ -171,8 +171,8 @@ static int tiva_erase(FAR struct mtd_dev_s *dev, off_t startblock,
  *
  ****************************************************************************/
 
-static ssize_t tiva_bread(FAR struct mtd_dev_s *dev, off_t startblock,
-                          size_t nblocks, FAR uint8_t *buf)
+static ssize_t tiva_bread(struct mtd_dev_s *dev, off_t startblock,
+                          size_t nblocks, uint8_t *buf)
 {
   DEBUGASSERT(startblock + nblocks <= TIVA_VIRTUAL_NPAGES);
 
@@ -190,11 +190,11 @@ static ssize_t tiva_bread(FAR struct mtd_dev_s *dev, off_t startblock,
  *
  ****************************************************************************/
 
-static ssize_t tiva_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
-                           size_t nblocks, FAR const uint8_t *buf)
+static ssize_t tiva_bwrite(struct mtd_dev_s *dev, off_t startblock,
+                           size_t nblocks, const uint8_t *buf)
 {
-  FAR uint32_t *src = (uint32_t *)buf;
-  FAR uint32_t *dst = (uint32_t *)(TIVA_VIRTUAL_BASE +
+  uint32_t *src = (uint32_t *)buf;
+  uint32_t *dst = (uint32_t *)(TIVA_VIRTUAL_BASE +
                                    startblock * TIVA_FLASH_PAGESIZE);
   int i;
 
@@ -230,8 +230,8 @@ static ssize_t tiva_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
  *
  ****************************************************************************/
 
-static ssize_t tiva_read(FAR struct mtd_dev_s *dev, off_t offset,
-                         size_t nbytes, FAR uint8_t *buf)
+static ssize_t tiva_read(struct mtd_dev_s *dev, off_t offset,
+                         size_t nbytes, uint8_t *buf)
 {
   DEBUGASSERT(offset + nbytes < TIVA_VIRTUAL_NPAGES * TIVA_FLASH_PAGESIZE);
 
@@ -258,8 +258,8 @@ static ssize_t tiva_read(FAR struct mtd_dev_s *dev, off_t offset,
  ****************************************************************************/
 
 #ifdef CONFIG_MTD_BYTE_WRITE
-static ssize_t tiva_write(FAR struct mtd_dev_s *dev, off_t offset,
-                          size_t nbytes, FAR const uint8_t *buf)
+static ssize_t tiva_write(struct mtd_dev_s *dev, off_t offset,
+                          size_t nbytes, const uint8_t *buf)
 {
   /* WARNING and REVISIT:
    * Because this function exports a byte write interface and
@@ -268,7 +268,7 @@ static ssize_t tiva_write(FAR struct mtd_dev_s *dev, off_t offset,
    * counts. But it doesn't. This needs to be fixed!
    */
 
-  FAR const uint32_t *src = (uint32_t *)((uintptr_t)buf & ~3);
+  const uint32_t *src = (uint32_t *)((uintptr_t)buf & ~3);
   ssize_t remaining;
   uint32_t regval;
 
@@ -366,7 +366,7 @@ static ssize_t tiva_write(FAR struct mtd_dev_s *dev, off_t offset,
  * Name: tiva_ioctl
  ****************************************************************************/
 
-static int tiva_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
+static int tiva_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg)
 {
   int ret = -EINVAL; /* Assume good command with bad parameters */
 
@@ -374,7 +374,7 @@ static int tiva_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
     {
       case MTDIOC_GEOMETRY:
         {
-          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)arg;
+          struct mtd_geometry_s *geo = (struct mtd_geometry_s *)arg;
           if (geo)
             {
               /* Populate the geometry structure with information needed to
@@ -396,8 +396,8 @@ static int tiva_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 
       case BIOC_PARTINFO:
         {
-          FAR struct partition_info_s *info =
-            (FAR struct partition_info_s *)arg;
+          struct partition_info_s *info =
+            (struct partition_info_s *)arg;
           if (info != NULL)
             {
               info->numsectors  = TIVA_VIRTUAL_NPAGES;
@@ -411,7 +411,7 @@ static int tiva_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 
       case BIOC_XIPBASE:
         {
-          FAR void **ppv = (FAR void**)arg;
+          void **ppv = (void**)arg;
 
           if (ppv)
             {
@@ -459,9 +459,9 @@ static int tiva_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *tiva_flash_initialize(void)
+struct mtd_dev_s *tiva_flash_initialize(void)
 {
   /* Return the implementation-specific state structure as the MTD device */
 
-  return (FAR struct mtd_dev_s *)&g_lmdev;
+  return (struct mtd_dev_s *)&g_lmdev;
 }

@@ -69,7 +69,7 @@ extern "C"
  ****************************************************************************/
 
 #ifdef CONFIG_LPC54_WWDT
-void lpc54_wwdt_initialize(FAR const char *devpath);
+void lpc54_wwdt_initialize(const char *devpath);
 #endif
 
 #undef EXTERN

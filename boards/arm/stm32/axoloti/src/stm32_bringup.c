@@ -72,7 +72,7 @@
 int stm32_bringup(void)
 {
 #ifdef HAVE_RTC_DRIVER
-  FAR struct rtc_lowerhalf_s *lower;
+  struct rtc_lowerhalf_s *lower;
 #endif
   int ret = OK;
 

@@ -746,6 +746,25 @@ void icmpv6_linkipaddr(FAR struct net_driver_s *dev, net_ipv6addr_t ipaddr);
 void icmpv6_reply(FAR struct net_driver_s *dev,
                   int type, int code, int data);
 
+/****************************************************************************
+ * Name: icmpv6_ioctl
+ *
+ * Description:
+ *   This function performs icmp specific ioctl() operations.
+ *
+ * Parameters:
+ *   conn     The ICMP connection of interest
+ *   cmd      The ioctl command
+ *   arg      The argument of the ioctl cmd
+ *   arglen   The length of 'arg'
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ICMPv6_SOCKET
+int icmpv6_ioctl(FAR struct socket *psock,
+                 int cmd, FAR void *arg, size_t arglen);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }

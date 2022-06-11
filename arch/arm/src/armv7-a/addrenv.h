@@ -85,7 +85,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int arm_addrenv_create_region(FAR uintptr_t **list, unsigned int listlen,
+int arm_addrenv_create_region(uintptr_t **list, unsigned int listlen,
                               uintptr_t vaddr, size_t regionsize,
                               uint32_t mmuflags);
 
@@ -97,7 +97,7 @@ int arm_addrenv_create_region(FAR uintptr_t **list, unsigned int listlen,
  *
  ****************************************************************************/
 
-void arm_addrenv_destroy_region(FAR uintptr_t **list, unsigned int listlen,
+void arm_addrenv_destroy_region(uintptr_t **list, unsigned int listlen,
                                 uintptr_t vaddr, bool keep);
 
 #undef EXTERN

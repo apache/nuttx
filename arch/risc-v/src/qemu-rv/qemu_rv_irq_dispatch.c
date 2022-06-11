@@ -29,8 +29,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/board.h>
-#include <arch/board/board.h>
+#include <sys/types.h>
 
 #include "riscv_internal.h"
 #include "hardware/qemu_rv_memorymap.h"
@@ -57,16 +56,10 @@
 void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 {
   int irq = (vector >> RV_IRQ_MASK) | (vector & 0xf);
-  uintptr_t *mepc = regs;
-
-  if (vector < RISCV_IRQ_ECALLM)
-    {
-      riscv_fault(irq, regs);
-    }
 
   /* Firstly, check if the irq is machine external interrupt */
 
-  if (RISCV_IRQ_MEXT == irq)
+  if (RISCV_IRQ_EXT == irq)
     {
       uintptr_t val = getreg32(QEMU_RV_PLIC_CLAIM);
 
@@ -75,70 +68,21 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
       irq += val;
     }
 
-  /* NOTE: In case of ecall, we need to adjust mepc in the context */
+  /* EXT means no interrupt */
 
-  if (RISCV_IRQ_ECALLM == irq)
-    {
-      *mepc += 4;
-    }
-
-#ifdef CONFIG_SUPPRESS_INTERRUPTS
-  PANIC();
-#else
-  /* Current regs non-zero indicates that we are processing an interrupt;
-   * CURRENT_REGS is also used to manage interrupt level context switches.
-   *
-   * Nested interrupts are not supported
-   */
-
-  DEBUGASSERT(CURRENT_REGS == NULL);
-  CURRENT_REGS = regs;
-
-  /* MEXT means no interrupt */
-
-  if (RISCV_IRQ_MEXT != irq)
+  if (RISCV_IRQ_EXT != irq)
     {
       /* Deliver the IRQ */
 
-      irq_dispatch(irq, regs);
+      regs = riscv_doirq(irq, regs);
     }
 
-  if (RISCV_IRQ_MEXT <= irq)
+  if (RISCV_IRQ_EXT <= irq)
     {
       /* Then write PLIC_CLAIM to clear pending in PLIC */
 
-      putreg32(irq - RISCV_IRQ_MEXT, QEMU_RV_PLIC_CLAIM);
+      putreg32(irq - RISCV_IRQ_EXT, QEMU_RV_PLIC_CLAIM);
     }
-#endif
-
-  /* Check for a context switch.  If a context switch occurred, then
-   * CURRENT_REGS will have a different value than it did on entry.  If an
-   * interrupt level context switch has occurred, then restore the floating
-   * point state and the establish the correct address environment before
-   * returning from the interrupt.
-   */
-
-  if (regs != CURRENT_REGS)
-    {
-#ifdef CONFIG_ARCH_ADDRENV
-      /* Make sure that the address environment for the previously
-       * running task is closed down gracefully (data caches dump,
-       * MMU flushed) and set up the address environment for the new
-       * thread at the head of the ready-to-run list.
-       */
-
-      group_addrenv(NULL);
-#endif
-    }
-
-  /* If a context switch occurred while processing the interrupt then
-   * CURRENT_REGS may have change value.  If we return any value different
-   * from the input regs, then the lower level will know that a context
-   * switch occurred during interrupt processing.
-   */
-
-  regs = (uintptr_t *)CURRENT_REGS;
-  CURRENT_REGS = NULL;
 
   return regs;
 }

@@ -97,24 +97,22 @@
 
 static int init_graph_vga(int width, int height, int chain4);
 static int vga_putrun(fb_coord_t row,
-                      fb_coord_t col, FAR const uint8_t *buffer,
+                      fb_coord_t col, const uint8_t *buffer,
                       size_t npixels);
-static int vga_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
+static int vga_getrun(fb_coord_t row, fb_coord_t col, uint8_t *buffer,
                       size_t npixels);
-static int vga_getvideoinfo(FAR struct lcd_dev_s *dev,
-                            FAR struct fb_videoinfo_s *vinfo);
-static int vga_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
-                            FAR struct lcd_planeinfo_s *pinfo);
+static int vga_getvideoinfo(struct lcd_dev_s *dev,
+                            struct fb_videoinfo_s *vinfo);
+static int vga_getplaneinfo(struct lcd_dev_s *dev, unsigned int planeno,
+                            struct lcd_planeinfo_s *pinfo);
 static int vga_getpower(struct lcd_dev_s *dev);
 static int vga_setpower(struct lcd_dev_s *dev, int power);
 static int vga_getcontrast(struct lcd_dev_s *dev);
 static int vga_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
-static int vga_open(struct file *filep);
-static int vga_close(struct file *filep);
-static ssize_t vga_read(struct file *filep, FAR char *buf, size_t buflen);
-static ssize_t vga_write(struct file *filep,
-                         FAR const char *buf, size_t buflen);
-static off_t vga_seek(FAR struct file *filp, off_t offset, int whence);
+static ssize_t vga_read(struct file *filep, char *buf, size_t buflen);
+static ssize_t vga_write(struct file *filep, const char *buf,
+                         size_t buflen);
+static off_t vga_seek(struct file *filp, off_t offset, int whence);
 
 /****************************************************************************
  * Private Data
@@ -233,15 +231,15 @@ static struct lcd_dev_s g_lcddev =
 
 static const struct file_operations g_vgaops =
 {
-  vga_open,                  /* open */
-  vga_close,                 /* close */
-  vga_read,                  /* read */
-  vga_write,                 /* write */
-  vga_seek,                  /* seek */
-  NULL,                      /* ioctl */
-  NULL                       /* poll */
+  NULL,         /* open */
+  NULL,         /* close */
+  vga_read,     /* read */
+  vga_write,    /* write */
+  vga_seek,     /* seek */
+  NULL,         /* ioctl */
+  NULL          /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL                     /* unlink */
+  , NULL        /* unlink */
 #endif
 };
 
@@ -417,22 +415,22 @@ static int init_graph_vga(int width, int height, int chain4)
 }
 
 static int vga_putrun(fb_coord_t row,
-                      fb_coord_t col, FAR const uint8_t *buffer,
+                      fb_coord_t col, const uint8_t *buffer,
                       size_t npixels)
 {
   memcpy(&g_pscreen[row*VGA_XRES + col], buffer, npixels);
   return OK;
 }
 
-static int vga_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
+static int vga_getrun(fb_coord_t row, fb_coord_t col, uint8_t *buffer,
                       size_t npixels)
 {
   memcpy(buffer, &g_pscreen[row*VGA_XRES + col], npixels);
   return OK;
 }
 
-static int vga_getvideoinfo(FAR struct lcd_dev_s *dev,
-                            FAR struct fb_videoinfo_s *vinfo)
+static int vga_getvideoinfo(struct lcd_dev_s *dev,
+                            struct fb_videoinfo_s *vinfo)
 {
   vinfo->fmt     = VGA_COLORFMT;
   vinfo->xres    = VGA_XRES;        /* Horizontal resolution in pixel columns */
@@ -441,8 +439,8 @@ static int vga_getvideoinfo(FAR struct lcd_dev_s *dev,
   return OK;
 }
 
-static int vga_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
-                            FAR struct lcd_planeinfo_s *pinfo)
+static int vga_getplaneinfo(struct lcd_dev_s *dev, unsigned int planeno,
+                            struct lcd_planeinfo_s *pinfo)
 {
   pinfo->putrun  = vga_putrun;      /* Put a run into LCD memory */
   pinfo->getrun  = vga_getrun;      /* Get a run from LCD memory */
@@ -472,17 +470,7 @@ static int vga_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
   return -ENOSYS;
 }
 
-static int vga_open(struct file * filep)
-{
-  return OK;
-}
-
-static int vga_close(struct file * filep)
-{
-  return OK;
-}
-
-static ssize_t vga_read(struct file *filep, FAR char *buf, size_t buflen)
+static ssize_t vga_read(struct file *filep, char *buf, size_t buflen)
 {
   if (buf == NULL || buflen < 1)
     {
@@ -494,8 +482,8 @@ static ssize_t vga_read(struct file *filep, FAR char *buf, size_t buflen)
   return buflen;
 }
 
-static ssize_t vga_write(struct file *filep,
-                         FAR const char *buf, size_t buflen)
+static ssize_t vga_write(struct file *filep, const char *buf,
+                         size_t buflen)
 {
   int i;
   int j;
@@ -518,7 +506,7 @@ static ssize_t vga_write(struct file *filep,
   return buflen;
 }
 
-static off_t vga_seek(FAR struct file *filp, off_t offset, int whence)
+static off_t vga_seek(struct file *filp, off_t offset, int whence)
 {
   ssize_t newpos;
 
@@ -571,7 +559,7 @@ static off_t vga_seek(FAR struct file *filp, off_t offset, int whence)
  *
  ****************************************************************************/
 
-FAR struct lcd_dev_s *qemu_vga_initialize(void)
+struct lcd_dev_s *qemu_vga_initialize(void)
 {
   int ret = init_graph_vga(VGA_XRES, VGA_YRES, 1);
   if (ret < 0)

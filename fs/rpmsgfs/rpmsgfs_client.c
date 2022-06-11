@@ -28,6 +28,7 @@
 #include <stdio.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/fs/ioctl.h>
 #include <nuttx/fs/rpmsgfs.h>
 #include <nuttx/rptun/openamp.h>
 #include <nuttx/semaphore.h>
@@ -42,6 +43,7 @@ struct rpmsgfs_s
 {
   struct rpmsg_endpoint ept;
   char                  cpuname[RPMSG_NAME_SIZE];
+  sem_t                 wait;
 };
 
 struct rpmsgfs_cookie_s
@@ -61,6 +63,9 @@ static int rpmsgfs_default_handler(FAR struct rpmsg_endpoint *ept,
 static int rpmsgfs_read_handler(FAR struct rpmsg_endpoint *ept,
                                 FAR void *data, size_t len,
                                 uint32_t src, FAR void *priv);
+static int rpmsgfs_ioctl_handler(FAR struct rpmsg_endpoint *ept,
+                                 FAR void *data, size_t len,
+                                 uint32_t src, FAR void *priv);
 static int rpmsgfs_readdir_handler(FAR struct rpmsg_endpoint *ept,
                                   FAR void *data, size_t len,
                                   uint32_t src, FAR void *priv);
@@ -93,7 +98,7 @@ static const rpmsg_ept_cb g_rpmsgfs_handler[] =
   [RPMSGFS_READ]      = rpmsgfs_read_handler,
   [RPMSGFS_WRITE]     = rpmsgfs_default_handler,
   [RPMSGFS_LSEEK]     = rpmsgfs_default_handler,
-  [RPMSGFS_IOCTL]     = rpmsgfs_default_handler,
+  [RPMSGFS_IOCTL]     = rpmsgfs_ioctl_handler,
   [RPMSGFS_SYNC]      = rpmsgfs_default_handler,
   [RPMSGFS_DUP]       = rpmsgfs_default_handler,
   [RPMSGFS_FSTAT]     = rpmsgfs_stat_handler,
@@ -130,7 +135,7 @@ static int rpmsgfs_default_handler(FAR struct rpmsg_endpoint *ept,
       memcpy(cookie->data, data, len);
     }
 
-  nxsem_post(&cookie->sem);
+  rpmsg_post(ept, &cookie->sem);
 
   return 0;
 }
@@ -150,7 +155,26 @@ static int rpmsgfs_read_handler(FAR struct rpmsg_endpoint *ept,
       memcpy(cookie->data, rsp->buf, cookie->result);
     }
 
-  nxsem_post(&cookie->sem);
+  rpmsg_post(ept, &cookie->sem);
+
+  return 0;
+}
+
+static int rpmsgfs_ioctl_handler(FAR struct rpmsg_endpoint *ept,
+                                 FAR void *data, size_t len,
+                                 uint32_t src, FAR void *priv)
+{
+  FAR struct rpmsgfs_header_s *header = data;
+  FAR struct rpmsgfs_cookie_s *cookie =
+      (FAR struct rpmsgfs_cookie_s *)(uintptr_t)header->cookie;
+  FAR struct rpmsgfs_ioctl_s *rsp = data;
+
+  if (cookie->result >= 0 && rsp->arglen > 0)
+    {
+      memcpy(cookie->data, (FAR void *)(uintptr_t)rsp->arg, rsp->arglen);
+    }
+
+  rpmsg_post(ept, &cookie->sem);
 
   return 0;
 }
@@ -172,7 +196,7 @@ static int rpmsgfs_readdir_handler(FAR struct rpmsg_endpoint *ept,
       entry->d_type = rsp->type;
     }
 
-  nxsem_post(&cookie->sem);
+  rpmsg_post(ept, &cookie->sem);
 
   return 0;
 }
@@ -200,7 +224,7 @@ static int rpmsgfs_statfs_handler(FAR struct rpmsg_endpoint *ept,
       buf->f_ffree   = rsp->buf.f_ffree;
     }
 
-  nxsem_post(&cookie->sem);
+  rpmsg_post(ept, &cookie->sem);
 
   return 0;
 }
@@ -233,9 +257,30 @@ static int rpmsgfs_stat_handler(FAR struct rpmsg_endpoint *ept,
       buf->st_blocks  = rsp->buf.st_blocks;
     }
 
-  nxsem_post(&cookie->sem);
+  rpmsg_post(ept, &cookie->sem);
 
   return 0;
+}
+
+static FAR void *rpmsgfs_get_tx_payload_buffer(FAR struct rpmsgfs_s *priv,
+                                               FAR uint32_t *len)
+{
+  int sval;
+
+  nxsem_get_value(&priv->wait, &sval);
+  if (sval <= 0)
+    {
+      rpmsg_wait(&priv->ept, &priv->wait);
+      rpmsg_post(&priv->ept, &priv->wait);
+    }
+
+  return rpmsg_get_tx_payload_buffer(&priv->ept, len, true);
+}
+
+static void rpmsgfs_ns_bound(struct rpmsg_endpoint *ept)
+{
+  FAR struct rpmsgfs_s *priv = ept->priv;
+  rpmsg_post(&priv->ept, &priv->wait);
 }
 
 static void rpmsgfs_device_created(FAR struct rpmsg_device *rdev,
@@ -247,6 +292,7 @@ static void rpmsgfs_device_created(FAR struct rpmsg_device *rdev,
   if (strcmp(priv->cpuname, rpmsg_get_cpuname(rdev)) == 0)
     {
       priv->ept.priv = priv;
+      priv->ept.ns_bound_cb = rpmsgfs_ns_bound;
       snprintf(buf, sizeof(buf), "%s%p", RPMSGFS_NAME_PREFIX, priv);
       rpmsg_create_ept(&priv->ept, rdev, buf,
                        RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
@@ -319,7 +365,7 @@ static int rpmsgfs_send_recv(FAR struct rpmsgfs_s *priv,
       goto fail;
     }
 
-  ret = nxsem_wait_uninterruptible(&cookie.sem);
+  ret = rpmsg_wait(&priv->ept, &cookie.sem);
   if (ret == 0)
     {
       ret = cookie.result;
@@ -328,6 +374,19 @@ static int rpmsgfs_send_recv(FAR struct rpmsgfs_s *priv,
 fail:
   nxsem_destroy(&cookie.sem);
   return ret;
+}
+
+static size_t rpmsgfs_ioctl_arglen(int cmd)
+{
+  switch (cmd)
+    {
+      case FIONBIO:
+      case FIONWRITE:
+      case FIONREAD:
+        return sizeof(int);
+      default:
+        return 0;
+    }
 }
 
 /****************************************************************************
@@ -345,7 +404,7 @@ int rpmsgfs_client_open(FAR void *handle, FAR const char *pathname,
   len  = sizeof(*msg);
   len += strlen(pathname) + 1;
 
-  msg = rpmsg_get_tx_payload_buffer(&priv->ept, &space, true);
+  msg = rpmsgfs_get_tx_payload_buffer(priv, &space);
   if (!msg)
     {
       return -ENOMEM;
@@ -412,7 +471,7 @@ ssize_t rpmsgfs_client_write(FAR void *handle, int fd,
       FAR struct rpmsgfs_write_s *msg;
       uint32_t space;
 
-      msg = rpmsg_get_tx_payload_buffer(&priv->ept, &space, true);
+      msg = rpmsgfs_get_tx_payload_buffer(priv, &space);
       if (!msg)
         {
           ret = -ENOMEM;
@@ -460,15 +519,34 @@ off_t rpmsgfs_client_lseek(FAR void *handle, int fd,
 int rpmsgfs_client_ioctl(FAR void *handle, int fd,
                          int request, unsigned long arg)
 {
-  struct rpmsgfs_ioctl_s msg =
-  {
-    .fd      = fd,
-    .request = request,
-    .arg     = arg,
-  };
+  size_t arglen = rpmsgfs_ioctl_arglen(request);
+  FAR struct rpmsgfs_s *priv = handle;
+  FAR struct rpmsgfs_ioctl_s *msg;
+  uint32_t space;
+  size_t len;
 
-  return rpmsgfs_send_recv(handle, RPMSGFS_IOCTL, true,
-          (struct rpmsgfs_header_s *)&msg, sizeof(msg), NULL);
+  len = sizeof(*msg) + arglen;
+  msg = rpmsgfs_get_tx_payload_buffer(priv, &space);
+  if (msg == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  DEBUGASSERT(len <= space);
+
+  msg->fd      = fd;
+  msg->request = request;
+  msg->arg     = arg;
+  msg->arglen  = arglen;
+
+  if (arglen > 0)
+    {
+      memcpy(msg->buf, (FAR void *)(uintptr_t)arg, arglen);
+    }
+
+  return rpmsgfs_send_recv(handle, RPMSGFS_IOCTL, false,
+                           (FAR struct rpmsgfs_header_s *)msg, len,
+                           arglen > 0 ? (FAR void *)arg : NULL);
 }
 
 void rpmsgfs_client_sync(FAR void *handle, int fd)
@@ -527,7 +605,7 @@ FAR void *rpmsgfs_client_opendir(FAR void *handle, FAR const char *name)
   len  = sizeof(*msg);
   len += strlen(name) + 1;
 
-  msg = rpmsg_get_tx_payload_buffer(&priv->ept, &space, true);
+  msg = rpmsgfs_get_tx_payload_buffer(priv, &space);
   if (!msg)
     {
       return NULL;
@@ -593,6 +671,8 @@ int rpmsgfs_client_bind(FAR void **handle, FAR const char *cpuname)
       return ret;
     }
 
+  nxsem_init(&priv->wait, 0, 0);
+  nxsem_set_protocol(&priv->wait, SEM_PRIO_NONE);
   *handle = priv;
 
   return 0;
@@ -607,6 +687,7 @@ int rpmsgfs_client_unbind(FAR void *handle)
                             rpmsgfs_device_destroy,
                             NULL);
 
+  nxsem_destroy(&priv->wait);
   kmm_free(priv);
   return 0;
 }
@@ -633,7 +714,7 @@ int rpmsgfs_client_statfs(FAR void *handle, FAR const char *path,
   len  = sizeof(*msg);
   len += strlen(path) + 1;
 
-  msg = rpmsg_get_tx_payload_buffer(&priv->ept, &space, true);
+  msg = rpmsgfs_get_tx_payload_buffer(priv, &space);
   if (!msg)
     {
       return -ENOMEM;
@@ -657,7 +738,7 @@ int rpmsgfs_client_unlink(FAR void *handle, FAR const char *pathname)
   len  = sizeof(*msg);
   len += strlen(pathname) + 1;
 
-  msg = rpmsg_get_tx_payload_buffer(&priv->ept, &space, true);
+  msg = rpmsgfs_get_tx_payload_buffer(priv, &space);
   if (!msg)
     {
       return -ENOMEM;
@@ -682,7 +763,7 @@ int rpmsgfs_client_mkdir(FAR void *handle, FAR const char *pathname,
   len  = sizeof(*msg);
   len += strlen(pathname) + 1;
 
-  msg = rpmsg_get_tx_payload_buffer(&priv->ept, &space, true);
+  msg = rpmsgfs_get_tx_payload_buffer(priv, &space);
   if (!msg)
     {
       return -ENOMEM;
@@ -705,7 +786,7 @@ int rpmsgfs_client_rmdir(FAR void *handle, FAR const char *pathname)
   len  = sizeof(*msg);
   len += strlen(pathname) + 1;
 
-  msg = rpmsg_get_tx_payload_buffer(&priv->ept, &space, true);
+  msg = rpmsgfs_get_tx_payload_buffer(priv, &space);
   if (!msg)
     {
       return -ENOMEM;
@@ -735,7 +816,7 @@ int rpmsgfs_client_rename(FAR void *handle, FAR const char *oldpath,
   newlen   = strlen(newpath) + 1;
   len      = sizeof(*msg) + alignlen + newlen;
 
-  msg = rpmsg_get_tx_payload_buffer(&priv->ept, &space, true);
+  msg = rpmsgfs_get_tx_payload_buffer(priv, &space);
   if (!msg)
     {
       return -ENOMEM;
@@ -761,7 +842,7 @@ int rpmsgfs_client_stat(FAR void *handle, FAR const char *path,
   len  = sizeof(*msg);
   len += strlen(path) + 1;
 
-  msg = rpmsg_get_tx_payload_buffer(&priv->ept, &space, true);
+  msg = rpmsgfs_get_tx_payload_buffer(priv, &space);
   if (!msg)
     {
       return -ENOMEM;
@@ -790,7 +871,7 @@ int rpmsgfs_client_fchstat(FAR void *handle, int fd,
 }
 
 int rpmsgfs_client_chstat(FAR void *handle, FAR const char *path,
-                          const FAR struct stat *buf, int flags)
+                          FAR const struct stat *buf, int flags)
 {
   FAR struct rpmsgfs_s *priv = handle;
   FAR struct rpmsgfs_chstat_s *msg;
@@ -800,7 +881,7 @@ int rpmsgfs_client_chstat(FAR void *handle, FAR const char *path,
   len  = sizeof(*msg);
   len += strlen(path) + 1;
 
-  msg = rpmsg_get_tx_payload_buffer(&priv->ept, &space, true);
+  msg = rpmsgfs_get_tx_payload_buffer(priv, &space);
   if (!msg)
     {
       return -ENOMEM;

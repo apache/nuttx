@@ -598,6 +598,22 @@ int pm_changestate(int domain, enum pm_state_e newstate);
 
 enum pm_state_e pm_querystate(int domain);
 
+/****************************************************************************
+ * Name: pm_auto_updatestate
+ *
+ * Description:
+ *   This function update the domain state and notify the power system.
+ *
+ * Input Parameters:
+ *   domain - The PM domain to check
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void pm_auto_updatestate(int domain);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

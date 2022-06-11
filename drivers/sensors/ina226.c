@@ -74,9 +74,9 @@ struct ina226_dev_s
 static int     ina226_write16(FAR struct ina226_dev_s *priv, uint8_t regaddr,
                               FAR uint16_t regvalue);
 static int     ina226_read16(FAR struct ina226_dev_s *priv, uint8_t regaddr,
-                              FAR uint16_t *regvalue);
+                             FAR uint16_t *regvalue);
 static int     ina226_readpower(FAR struct ina226_dev_s *priv,
-                                 FAR struct ina226_s *buffer);
+                                FAR struct ina226_s *buffer);
 
 /* Character driver methods */
 
@@ -86,8 +86,6 @@ static ssize_t ina226_read(FAR struct file *filep, FAR char *buffer,
                            size_t buflen);
 static ssize_t ina226_write(FAR struct file *filep, FAR const char *buffer,
                             size_t buflen);
-static int     ina226_ioctl(FAR struct file *filep, int cmd,
-                            unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -100,7 +98,7 @@ static const struct file_operations g_ina226fops =
   ina226_read,     /* read */
   ina226_write,    /* write */
   NULL,            /* seek */
-  ina226_ioctl,    /* ioctl */
+  NULL,            /* ioctl */
   NULL             /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL           /* unlink */
@@ -316,15 +314,6 @@ static ssize_t ina226_write(FAR struct file *filep, FAR const char *buffer,
                           size_t buflen)
 {
   return -ENOSYS;
-}
-
-/****************************************************************************
- * Name: ina226_ioctl
- ****************************************************************************/
-
-static int ina226_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
-{
-  return -ENOTTY;
 }
 
 /****************************************************************************

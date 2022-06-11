@@ -34,6 +34,7 @@ include semaphore/Make.defs
 include signal/Make.defs
 include task/Make.defs
 include timer/Make.defs
+include tls/Make.defs
 include wdog/Make.defs
 include wqueue/Make.defs
 

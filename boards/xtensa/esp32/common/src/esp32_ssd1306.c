@@ -55,7 +55,7 @@
  * Private Data
  ****************************************************************************/
 
-static FAR struct lcd_dev_s    *g_lcddev;
+static struct lcd_dev_s    *g_lcddev;
 
 /* Configuration ************************************************************/
 
@@ -69,7 +69,7 @@ static FAR struct lcd_dev_s    *g_lcddev;
 
 int board_lcd_initialize(void)
 {
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
   const int busno = OLED_I2C_PORT;
   const int devno = 0;
   int ret = OK;
@@ -130,7 +130,7 @@ int board_lcd_initialize(void)
  * Name:  board_lcd_getdev
  ****************************************************************************/
 
-FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
+struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
   if (lcddev == 0)
     {

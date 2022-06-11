@@ -73,7 +73,7 @@ static int bm3803_oneshot_handler(int irq, void *context, void *arg)
 {
   struct bm3803_oneshot_s *oneshot = (struct bm3803_oneshot_s *) arg;
   oneshot_handler_t oneshot_handler;
-  FAR void *oneshot_arg;
+  void *oneshot_arg;
 
   tmrinfo("Expired...\n");
   DEBUGASSERT(oneshot != NULL && oneshot->handler);
@@ -124,7 +124,7 @@ static int bm3803_oneshot_handler(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-int bm3803_oneshot_initialize(FAR struct bm3803_oneshot_s *oneshot,
+int bm3803_oneshot_initialize(struct bm3803_oneshot_s *oneshot,
                                int chan, uint16_t resolution)
 {
   uint32_t frequency;
@@ -166,8 +166,8 @@ int bm3803_oneshot_initialize(FAR struct bm3803_oneshot_s *oneshot,
  *
  ****************************************************************************/
 
-int bm3803_oneshot_max_delay(FAR struct bm3803_oneshot_s *oneshot,
-                              FAR uint64_t *usec)
+int bm3803_oneshot_max_delay(struct bm3803_oneshot_s *oneshot,
+                              uint64_t *usec)
 {
   DEBUGASSERT(oneshot != NULL && usec != NULL);
 
@@ -196,9 +196,9 @@ int bm3803_oneshot_max_delay(FAR struct bm3803_oneshot_s *oneshot,
  *
  ****************************************************************************/
 
-int bm3803_oneshot_start(FAR struct bm3803_oneshot_s *oneshot,
-                          oneshot_handler_t handler, FAR void *arg,
-                          FAR const struct timespec *ts)
+int bm3803_oneshot_start(struct bm3803_oneshot_s *oneshot,
+                          oneshot_handler_t handler, void *arg,
+                          const struct timespec *ts)
 {
   uint64_t usec;
   uint64_t period;
@@ -217,7 +217,7 @@ int bm3803_oneshot_start(FAR struct bm3803_oneshot_s *oneshot,
       /* Yes.. then cancel it */
 
       tmrinfo("Already running... cancelling\n");
-      (void)bm3803_oneshot_cancel(oneshot, NULL);
+      bm3803_oneshot_cancel(oneshot, NULL);
     }
 
   /* Save the new handler and its argument */
@@ -292,8 +292,8 @@ int bm3803_oneshot_start(FAR struct bm3803_oneshot_s *oneshot,
  *
  ****************************************************************************/
 
-int bm3803_oneshot_cancel(FAR struct bm3803_oneshot_s *oneshot,
-                           FAR struct timespec *ts)
+int bm3803_oneshot_cancel(struct bm3803_oneshot_s *oneshot,
+                           struct timespec *ts)
 {
   irqstate_t flags;
   uint64_t usec;

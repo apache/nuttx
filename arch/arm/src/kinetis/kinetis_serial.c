@@ -316,9 +316,9 @@ static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
 #ifdef CONFIG_DEBUG_FEATURES
-static int  up_interrupt(int irq, void *context, FAR void *arg);
+static int  up_interrupt(int irq, void *context, void *arg);
 #endif
-static int  up_interrupts(int irq, void *context, FAR void *arg);
+static int  up_interrupts(int irq, void *context, void *arg);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
 #if !defined(SERIAL_HAVE_ALL_DMA)
@@ -1123,7 +1123,7 @@ static void up_detach(struct uart_dev_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-static int up_interrupt(int irq, void *context, FAR void *arg)
+static int up_interrupt(int irq, void *context, void *arg)
 {
   struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct up_dev_s   *priv;
@@ -1165,7 +1165,7 @@ static int up_interrupt(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static int up_interrupts(int irq, void *context, FAR void *arg)
+static int up_interrupts(int irq, void *context, void *arg)
 {
   struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct up_dev_s   *priv;

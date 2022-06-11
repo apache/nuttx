@@ -110,7 +110,7 @@ struct hyt271_dev_s
 /* Sensor functions */
 
 static int hyt271_active(FAR struct sensor_lowerhalf_s *lower,
-                         unsigned char enabled);
+                         bool enabled);
 
 static int hyt271_fetch(FAR struct sensor_lowerhalf_s *lower,
                         FAR char *buffer, size_t buflen);
@@ -712,7 +712,7 @@ static int hyt271_control(FAR struct sensor_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int hyt271_active(FAR struct sensor_lowerhalf_s *lower,
-                         unsigned char enabled)
+                         bool enabled)
 {
 #ifdef CONFIG_SENSORS_HYT271_POLL
   bool start_thread = false;

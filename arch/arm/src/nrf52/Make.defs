@@ -18,57 +18,17 @@
 #
 ############################################################################
 
-CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S
-CMN_ASRCS += arm_testset.S vfork.S
-
-CMN_CSRCS  = arm_assert.c arm_blocktask.c
-CMN_CSRCS += arm_createstack.c arm_doirq.c arm_exit.c arm_hardfault.c
-CMN_CSRCS += arm_initialize.c arm_initialstate.c arm_interruptcontext.c
-CMN_CSRCS += arm_memfault.c arm_modifyreg8.c arm_modifyreg16.c
-CMN_CSRCS += arm_modifyreg32.c arm_releasepending.c arm_releasestack.c
-CMN_CSRCS += arm_reprioritizertr.c arm_schedulesigaction.c arm_sigdeliver.c
-CMN_CSRCS += arm_stackframe.c arm_svcall.c arm_trigger_irq.c arm_udelay.c
-CMN_CSRCS += arm_unblocktask.c arm_usestack.c arm_vfork.c arm_systemreset.c
-CMN_CSRCS += arm_switchcontext.c arm_puts.c arm_tcbinfo.c
+include armv7-m/Make.defs
 
 ifeq ($(CONFIG_NRF52_SYSTIMER_SYSTICK),y)
-CMN_CSRCS += arm_systick.c nrf52_systick.c
+CHIP_CSRCS += nrf52_systick.c
 else
 ifeq ($(CONFIG_NRF52_SYSTIMER_RTC),y)
-CMN_CSRCS += nrf52_tickless_rtc.c arm_mdelay.c
+CHIP_CSRCS += nrf52_tickless_rtc.c
 endif
 endif
 
-ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
-CMN_ASRCS += arm_lazyexception.S
-else
-CMN_ASRCS += arm_exception.S
-endif
-CMN_CSRCS += arm_vectors.c
-
-ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
-CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
-endif
-
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CMN_CSRCS += arm_mpu.c arm_task_start.c arm_pthread_start.c
-CMN_CSRCS += arm_signal_dispatch.c
-CMN_UASRCS += arm_signal_handler.S
-endif
-
-ifeq ($(CONFIG_STACK_COLORATION),y)
-CMN_CSRCS += arm_checkstack.c
-endif
-
-ifeq ($(CONFIG_ARMV7M_STACKCHECK),y)
-CMN_CSRCS += arm_stackcheck.c
-endif
-
-ifeq ($(CONFIG_ARCH_FPU),y)
-CMN_ASRCS += arm_fpu.S
-endif
-
-CHIP_CSRCS  = nrf52_start.c nrf52_clockconfig.c nrf52_irq.c nrf52_utils.c
+CHIP_CSRCS += nrf52_start.c nrf52_clockconfig.c nrf52_irq.c nrf52_utils.c
 CHIP_CSRCS += nrf52_allocateheap.c nrf52_lowputc.c nrf52_gpio.c nrf52_nvmc.c
 CHIP_CSRCS += nrf52_uid.c
 

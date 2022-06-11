@@ -1,0 +1,38 @@
+From ff00346174831ec01bc6b85c39c19d502cfa2093 Mon Sep 17 00:00:00 2001
+From: Brian Cain <bcain@quicinc.com>
+Date: Thu, 27 Jan 2022 08:09:11 -0800
+Subject: [PATCH 2/2] Omit atomic_{,un}signed_lock_free if unsupported
+
+On targets that have limited atomic support, e.g. ones that define
+ATOMIC_*_LOCK_FREE to '1' ("sometimes lock free"), we would end up
+referencing yet-undefined __libcpp_{,un}signed_lock_free.
+
+This commit adds a guard to prevent these references for such
+targets.
+
+Differential Revision: https://reviews.llvm.org/D118391
+---
+ libcxx/include/atomic | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/libcxx/include/atomic b/libcxx/include/atomic
+index 0fc799a24319..57d01ad2791a 100644
+--- a/libcxx/include/atomic
++++ b/libcxx/include/atomic
+@@ -2791,10 +2791,13 @@ typedef conditional<_LIBCPP_CONTENTION_LOCK_FREE, __cxx_contention_t, char>::typ
+ typedef conditional<_LIBCPP_CONTENTION_LOCK_FREE, __cxx_contention_t, unsigned char>::type      __libcpp_unsigned_lock_free;
+ #else
+     // No signed/unsigned lock-free types
++#define _LIBCPP_NO_LOCK_FREE_TYPES
+ #endif
+ 
++#if !defined(_LIBCPP_NO_LOCK_FREE_TYPES)
+ typedef atomic<__libcpp_signed_lock_free> atomic_signed_lock_free;
+ typedef atomic<__libcpp_unsigned_lock_free> atomic_unsigned_lock_free;
++#endif
+ 
+ #define ATOMIC_FLAG_INIT {false}
+ #define ATOMIC_VAR_INIT(__v) {__v}
+-- 
+2.32.0
+

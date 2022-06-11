@@ -49,7 +49,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-FAR struct i2s_dev_s *lc823450_i2sdev_initialize(void);
+struct i2s_dev_s *lc823450_i2sdev_initialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

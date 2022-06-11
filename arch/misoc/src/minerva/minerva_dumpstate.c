@@ -113,7 +113,7 @@ static inline void mineva_registerdump(void)
 
 void minerva_dumpstate(void)
 {
-  FAR struct tcb_s *rtcb = running_task();
+  struct tcb_s *rtcb = running_task();
   uint32_t sp = up_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;

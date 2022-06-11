@@ -96,6 +96,10 @@
 #  include <nuttx/irq.h>
 #endif
 
+#ifdef CONFIG_BOARDCTL_RESET_CAUSE
+#  include <sys/boardctl.h>
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  *
@@ -817,6 +821,20 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
 
 #ifdef CONFIG_BOARD_INITRNGSEED
 void board_init_rngseed(void);
+#endif
+
+/****************************************************************************
+ * Name: board_reset_cause
+ *
+ * Description:
+ *   This interface may be used by application specific logic to get the
+ *   cause of last reset. Support for this function is required by
+ *   board-level logic if CONFIG_BOARDCTL_RESET is selected.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARDCTL_RESET_CAUSE
+int board_reset_cause(FAR struct boardioc_reset_cause_s *cause);
 #endif
 
 #undef EXTERN

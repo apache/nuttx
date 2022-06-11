@@ -124,9 +124,6 @@ and the following changes to the configuration file:
   +CONFIG_HOST_WINDOWS=y
   +CONFIG_WINDOWS_NATIVE=y
 
-  -CONFIG_Z80_TOOLCHAIN_SDCCL=y
-  +CONFIG_Z80_TOOLCHAIN_SDCCW=y
-
 You may need to first manually change the CONFIG_APPS_DIR="../apps"
 definition in the .config file because the forward slash may upset some
 Windows-based tools.
@@ -151,8 +148,7 @@ site: http://sourceforge.net/projects/sdcc/files/ .  Pre-built binaries are
 available for Linux, macOS, and for Win32.  Various SDCC options can be
 selected with:
 
-  CONFIG_Z80_TOOLCHAIN_SDCCL=y : SDCC for Linux, macOS or Cygwin (see below)
-  CONFIG_Z80_TOOLCHAIN_SDCCW=y : SDCC for Win32
+  CONFIG_Z80_TOOLCHAIN_SDCC=y : SDCC for Win32, Linux, macOS or Cygwin
 
 SDCC versions 3.2.0 or higher are recommended.
 

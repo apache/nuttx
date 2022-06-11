@@ -633,7 +633,7 @@ int arm_cpu_sgi(int sgi, unsigned int cpuset);
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-int arm_start_handler(int irq, FAR void *context, FAR void *arg);
+int arm_start_handler(int irq, void *context, void *arg);
 #endif
 
 /****************************************************************************
@@ -657,7 +657,7 @@ int arm_start_handler(int irq, FAR void *context, FAR void *arg);
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-int arm_pause_handler(int irq, FAR void *context, FAR void *arg);
+int arm_pause_handler(int irq, void *context, void *arg);
 #endif
 
 #undef EXTERN

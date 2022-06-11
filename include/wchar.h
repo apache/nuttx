@@ -57,13 +57,7 @@
  * Reference: Opengroup.org
  */
 
-#define WCHAR_MAX 0xffff
-#define WCHAR_MIN 0x0000
-#define WEOF      ((wint_t)-1)
-
-#ifndef NULL
-#  define NULL ((FAR void *)0)
-#endif
+#define WEOF ((wint_t)-1)
 
 #define wcsftime_l(s, m, f, t, l)   wcsftime(s, m, f, t)
 #define wcscasecmp_l(s1, s2, l)     wcscasecmp(s1, s2)

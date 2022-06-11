@@ -237,13 +237,13 @@ static int ioe_rpmsg_wait_ready(FAR struct rpmsg_endpoint *ept)
       FAR struct ioe_rpmsg_client_s *priv =
         container_of(ept, struct ioe_rpmsg_client_s, ept);
 
-      ret = nxsem_wait_uninterruptible(&priv->sem);
+      ret = rpmsg_wait(ept, &priv->sem);
       if (ret < 0)
         {
           return ret;
         }
 
-      nxsem_post(&priv->sem);
+      rpmsg_post(ept, &priv->sem);
     }
 
   return ret;
@@ -281,7 +281,7 @@ static int ioe_rpmsg_sendrecv(FAR struct rpmsg_endpoint *ept,
       return ret;
     }
 
-  ret = nxsem_wait_uninterruptible(&cookie.sem);
+  ret = rpmsg_wait(ept, &cookie.sem);
   if (ret < 0)
     {
       return ret;
@@ -452,8 +452,9 @@ static void ioe_rpmsg_irqworker(FAR void *priv_)
   msg.cbfunc = cb->cbfunc;
   msg.cbarg  = cb->cbarg;
 
-  ioe_rpmsg_sendrecv(cb->ept, IOE_RPMSG_IRQ,
-                     (struct ioe_rpmsg_header_s *)&msg, sizeof(msg));
+  msg.header.command  = IOE_RPMSG_IRQ;
+  msg.header.response = 0;
+  rpmsg_send(cb->ept, &msg, sizeof(msg));
 
   cb->pendset = 0;
 }
@@ -550,7 +551,7 @@ static int ioe_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
   if (msg->response && cookie)
     {
       cookie->result = msg->result;
-      nxsem_post(&cookie->sem);
+      rpmsg_post(ept, &cookie->sem);
       ret = 0;
     }
   else if (cmd < ARRAY_SIZE(g_ioe_rpmsg_handler)
@@ -577,7 +578,7 @@ static void ioe_rpmsg_client_created(FAR struct rpmsg_device *rdev,
       rpmsg_create_ept(&priv->ept, rdev, eptname, RPMSG_ADDR_ANY,
                        RPMSG_ADDR_ANY, ioe_rpmsg_ept_cb, NULL);
 
-      nxsem_post(&priv->sem);
+      rpmsg_post(&priv->ept, &priv->sem);
     }
 }
 
@@ -588,7 +589,7 @@ static void ioe_rpmsg_client_destroy(FAR struct rpmsg_device *rdev,
 
   if (!strcmp(priv->cpuname, rpmsg_get_cpuname(rdev)))
     {
-      nxsem_wait(&priv->sem);
+      rpmsg_wait(&priv->ept, &priv->sem);
       rpmsg_destroy_ept(&priv->ept);
     }
 }

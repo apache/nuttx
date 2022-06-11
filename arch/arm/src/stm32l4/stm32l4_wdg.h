@@ -70,7 +70,7 @@ extern "C"
  ****************************************************************************/
 
 #ifdef CONFIG_STM32L4_IWDG
-void stm32l4_iwdginitialize(FAR const char *devpath, uint32_t lsifreq);
+void stm32l4_iwdginitialize(const char *devpath, uint32_t lsifreq);
 #endif
 
 /****************************************************************************
@@ -91,7 +91,7 @@ void stm32l4_iwdginitialize(FAR const char *devpath, uint32_t lsifreq);
  ****************************************************************************/
 
 #ifdef CONFIG_STM32L4_WWDG
-void stm32l4_wwdginitialize(FAR const char *devpath);
+void stm32l4_wwdginitialize(const char *devpath);
 #endif
 
 #undef EXTERN

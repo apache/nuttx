@@ -73,7 +73,7 @@ typedef struct stm32_dma_config_s stm32_dmacfg_t;
  * DMA stream.
  */
 
-typedef FAR void *DMA_HANDLE;
+typedef void *DMA_HANDLE;
 
 /* Description:
  *   This is the type of the callback that is used to inform the user of the

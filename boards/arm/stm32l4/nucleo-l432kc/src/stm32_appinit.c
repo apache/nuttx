@@ -106,13 +106,13 @@ void arm_netinitialize(void)
 int board_app_initialize(uintptr_t arg)
 {
 #ifdef HAVE_RTC_DRIVER
-  FAR struct rtc_lowerhalf_s *rtclower;
+  struct rtc_lowerhalf_s *rtclower;
 #endif
 #ifdef CONFIG_STM32L4_I2C1
-  FAR struct i2c_master_s *i2c1;
+  struct i2c_master_s *i2c1;
 #endif
 #ifdef CONFIG_STM32L4_I2C3
-  FAR struct i2c_master_s *i2c3;
+  struct i2c_master_s *i2c3;
 #endif
 #ifdef CONFIG_SENSORS_QENCODER
   int index;
@@ -215,6 +215,14 @@ int board_app_initialize(uintptr_t arg)
           i2cerr("ERROR: Failed to register I2C3 device: %d\n", ret);
         }
     }
+#endif
+
+#ifdef CONFIG_SPI_DRIVER
+  stm32l4_spiregister();
+  /* driver registering must be processed in appinit.
+   * If called it during board_init,
+   * registering failed due to heap doesn't be initialized yet.
+   */
 #endif
 
 #ifdef HAVE_AT45DB

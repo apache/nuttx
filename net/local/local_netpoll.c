@@ -135,7 +135,7 @@ void local_event_pollnotify(FAR struct local_conn_s *conn,
           fds->revents |= (fds->events & eventset);
           if (fds->revents != 0)
             {
-              ninfo("Report events: %02x\n", fds->revents);
+              ninfo("Report events: %08" PRIx32 "\n", fds->revents);
               nxsem_post(fds->sem);
             }
         }

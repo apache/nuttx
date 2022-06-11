@@ -514,6 +514,189 @@ config LCD_ON_MAIN_BOARD
 		Display connected to main board.
 
 endchoice
+
+if LCD_ON_MAIN_BOARD
+
+choice
+	prompt "LCD ILI934x RST Pin selection"
+	default LCD_RSTPIN_I2S0_BCK
+
+config LCD_RSTPIN_UART2_TX
+	bool "UART2_TX (D01) PIN"
+
+config LCD_RSTPIN_UART2_RX
+	bool "UART2_RX (D00) PIN"
+
+config LCD_RSTPIN_UART2_RTS
+	bool "UART2_RTS (D28) PIN"
+
+config LCD_RSTPIN_UART2_CTS
+	bool "UART2_CTS (D27) PIN"
+
+config LCD_RSTPIN_I2S0_BCK
+	bool "I2S0_BCK (D26) PIN"
+
+config LCD_RSTPIN_I2S0_LRCK
+	bool "I2S0_LRCK (D25) PIN"
+
+config LCD_RSTPIN_SEN_IRQ_IN
+	bool "SEN_IRQ_IN (D22) PIN"
+
+config LCD_RSTPIN_EMMC_DATA3
+	bool "EMMC_DATA3 (D21) PIN"
+
+config LCD_RSTPIN_EMMC_DATA2
+	bool "EMMC_DATA2 (D20) PIN"
+
+config LCD_RSTPIN_I2S0_DATA_IN
+	bool "I2S0_DATA_IN (D19) PIN"
+
+config LCD_RSTPIN_I2S0_DATA_OUT
+	bool "I2S0_DATA_OUT (D18) PIN"
+
+config LCD_RSTPIN_I2C0_SCL
+	bool "I2C0_SCL (D15) PIN"
+
+config LCD_RSTPIN_I2C0_SDA
+	bool "I2C0_SDA (D14) PIN"
+
+endchoice
+
+choice
+	prompt "LCD ILI934x DC Pin selection"
+	default LCD_DCPIN_I2S0_LRCK
+
+config LCD_DCPIN_UART2_TX
+	bool "UART2_TX (D01) PIN"
+
+config LCD_DCPIN_UART2_RX
+	bool "UART2_RX (D00) PIN"
+
+config LCD_DCPIN_UART2_RTS
+	bool "UART2_RTS (D28) PIN"
+
+config LCD_DCPIN_UART2_CTS
+	bool "UART2_CTS (D27) PIN"
+
+config LCD_DCPIN_I2S0_BCK
+	bool "I2S0_BCK (D26) PIN"
+
+config LCD_DCPIN_I2S0_LRCK
+	bool "I2S0_LRCK (D25) PIN"
+
+config LCD_DCPIN_SEN_IRQ_IN
+	bool "SEN_IRQ_IN (D22) PIN"
+
+config LCD_DCPIN_EMMC_DATA3
+	bool "EMMC_DATA3 (D21) PIN"
+
+config LCD_DCPIN_EMMC_DATA2
+	bool "EMMC_DATA2 (D20) PIN"
+
+config LCD_DCPIN_I2S0_DATA_IN
+	bool "I2S0_DATA_IN (D19) PIN"
+
+config LCD_DCPIN_I2S0_DATA_OUT
+	bool "I2S0_DATA_OUT (D18) PIN"
+
+config LCD_DCPIN_I2C0_SCL
+	bool "I2C0_SCL (D15) PIN"
+
+config LCD_DCPIN_I2C0_SDA
+	bool "I2C0_SDA (D14) PIN"
+
+endchoice
+
+endif
+
+if LCD_ON_EXTENSION_BOARD
+
+choice
+	prompt "LCD ILI934x RST Pin selection"
+	default LCD_RSTPIN_SPI2_MISO
+
+config LCD_RSTPIN_I2C0_SCL_E
+	bool "I2C0_SCL (D15) PIN"
+
+config LCD_RSTPIN_I2C0_SDA_E
+	bool "I2C0_SDA (D14) PIN"
+
+config LCD_RSTPIN_PWM2
+	bool "PWM2 (D09) PIN"
+
+config LCD_RSTPIN_SPI2_MISO
+	bool "SPI2_MISO (D08) PIN"
+
+config LCD_RSTPIN_SPI3_CS1_X
+	bool "SPI3_CS1_X (D07) PIN"
+
+config LCD_RSTPIN_PWM0
+	bool "PWM0 (D06) PIN"
+
+config LCD_RSTPIN_PWM1
+	bool "PWM1 (D05) PIN"
+
+config LCD_RSTPIN_SPI2_MOSI
+	bool "SPI2_MOSI (D04) PIN"
+
+config LCD_RSTPIN_PWM3
+	bool "PWM3 (D03) PIN"
+
+config LCD_RSTPIN_HIF_IRQ_OUT
+	bool "HIF_IRQ_OUT (D02) PIN"
+
+config LCD_RSTPIN_UART2_TX_E
+	bool "UART2_TX (D01) PIN"
+
+config LCD_RSTPIN_UART2_RX_E
+	bool "UART2_RX (D00) PIN"
+
+endchoice
+
+choice
+	prompt "LCD ILI934x DC Pin selection"
+	default LCD_DCPIN_PWM2
+
+config LCD_DCPIN_I2C0_SCL_E
+	bool "I2C0_SCL (D15) PIN"
+
+config LCD_DCPIN_I2C0_SDA_E
+	bool "I2C0_SDA (D14) PIN"
+
+config LCD_DCPIN_PWM2
+	bool "PWM2 (D09) PIN"
+
+config LCD_DCPIN_SPI2_MISO
+	bool "SPI2_MISO (D08) PIN"
+
+config LCD_DCPIN_SPI3_CS1_X
+	bool "SPI3_CS1_X (D07) PIN"
+
+config LCD_DCPIN_PWM0
+	bool "PWM0 (D06) PIN"
+
+config LCD_DCPIN_PWM1
+	bool "PWM1 (D05) PIN"
+
+config LCD_DCPIN_SPI2_MOSI
+	bool "SPI2_MOSI (D04) PIN"
+
+config LCD_DCPIN_PWM3
+	bool "PWM3 (D03) PIN"
+
+config LCD_DCPIN_HIF_IRQ_OUT
+	bool "HIF_IRQ_OUT (D02) PIN"
+
+config LCD_DCPIN_UART2_TX_E
+	bool "UART2_TX (D01) PIN"
+
+config LCD_DCPIN_UART2_RX_E
+	bool "UART2_RX (D00) PIN"
+
+endchoice
+
+endif
+
 endif
 
 choice

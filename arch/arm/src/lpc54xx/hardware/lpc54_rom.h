@@ -95,7 +95,7 @@
  *
  ****************************************************************************/
 
-typedef CODE unsigned int (*rng_read_t)(void);
+typedef unsigned int (*rng_read_t)(void);
 
 #define LPC54_RNG_READ ((rng_read_t)(lpc54_otg_vtable[LPC54_OTP_API_RNGREAD_OFFSET >> 2]))
 

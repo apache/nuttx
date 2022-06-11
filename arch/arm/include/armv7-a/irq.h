@@ -295,7 +295,7 @@ struct xcptcontext
    * handling to support dynamically sized stacks for each thread.
    */
 
-  FAR uintptr_t *ustack[ARCH_STACK_NSECTS];
+  uintptr_t *ustack[ARCH_STACK_NSECTS];
 #endif
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
@@ -307,9 +307,9 @@ struct xcptcontext
    * stack in place.
    */
 
-  FAR uint32_t *ustkptr;  /* Saved user stack pointer */
-  FAR uint32_t *kstack;   /* Allocate base of the (aligned) kernel stack */
-  FAR uint32_t *kstkptr;  /* Saved kernel stack pointer */
+  uint32_t *ustkptr;  /* Saved user stack pointer */
+  uint32_t *kstack;   /* Allocate base of the (aligned) kernel stack */
+  uint32_t *kstkptr;  /* Saved kernel stack pointer */
 #endif
 #endif
 };

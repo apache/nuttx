@@ -89,7 +89,6 @@
 
 #ifndef __ASSEMBLY__
 
-extern volatile uint32_t *g_current_regs;
 extern uint32_t g_idle_topstack;
 
 /****************************************************************************
@@ -115,7 +114,7 @@ uint32_t *minerva_doirq(int irq, uint32_t * regs);
 
 /* Software interrupts ******************************************************/
 
-int minerva_swint(int irq, FAR void *context, FAR void *arg);
+int minerva_swint(int irq, void *context, void *arg);
 
 /* Signal handling **********************************************************/
 

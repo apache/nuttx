@@ -209,6 +209,17 @@ static const char *g_white_prefix[] =
   NULL
 };
 
+static const char *g_white_suffix[] =
+{
+  /* Ref:  include/nuttx/wireless/nrf24l01.h */
+
+  "Mbps",
+  "kHz",
+  "kbps",
+  "us",
+  NULL
+};
+
 static const char *g_white_list[] =
 {
   /* Ref:  gnu_unwind_find_exidx.c */
@@ -218,6 +229,10 @@ static const char *g_white_list[] =
   /* Ref:  gnu_unwind_find_exidx.c */
 
   "__gnu_Unwind_Find_exidx",
+
+  /* Ref:  lib_impure.c */
+
+  "__sFILE_fake",
 
   /* Ref:  stdlib.h */
 
@@ -711,12 +726,32 @@ static bool white_list(const char *ident, int lineno)
 {
   const char **pptr;
   const char *str;
+  size_t len2;
+  size_t len;
 
   for (pptr = g_white_prefix;
        (str = *pptr) != NULL;
        pptr++)
     {
-      if (strncmp(ident, str, strlen(str)) == 0)
+      len = strlen(str);
+      if (strncmp(ident, str, len) == 0)
+        {
+          return true;
+        }
+    }
+
+  len2 = strlen(ident);
+  while (!isalnum(ident[len2 - 1]))
+    {
+      len2--;
+    }
+
+  for (pptr = g_white_suffix;
+       (str = *pptr) != NULL;
+       pptr++)
+    {
+      len = strlen(str);
+      if (len2 >= len && strncmp(ident + len2 - len, str, len) == 0)
         {
           return true;
         }
@@ -726,8 +761,7 @@ static bool white_list(const char *ident, int lineno)
        (str = *pptr) != NULL;
        pptr++)
     {
-      size_t len = strlen(str);
-
+      len = strlen(str);
       if (strncmp(ident, str, len) == 0 &&
           isalnum(ident[len]) == 0)
         {

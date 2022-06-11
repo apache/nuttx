@@ -1,0 +1,31 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+if ARCH_BOARD_TLSR8278ADK80D
+
+menu "Telink TLSR8278ADK80D board"
+
+choice
+  prompt "Default pin interrupt type"
+  default PIN_INTERRUPT_DEFAULT_RISING
+  depends on DEV_GPIO
+
+config PIN_INTERRUPT_DEFAULT_RISING
+  bool "Rising"
+
+config PIN_INTERRUPT_DEFAULT_FALLING
+  bool "Falling"
+
+config PIN_INTERRUPT_DEFAULT_HIGH
+  bool "High level"
+
+config PIN_INTERRUPT_DEFAULT_LOW
+  bool "Low level"
+
+endchoice
+
+endmenu
+
+endif

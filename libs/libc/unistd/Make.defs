@@ -39,7 +39,7 @@ CSRCS += lib_chdir.c lib_getcwd.c lib_restoredir.c
 endif
 
 ifeq ($(CONFIG_LIBC_EXECFUNCS),y)
-CSRCS += lib_execl.c
+CSRCS += lib_execl.c lib_execle.c lib_execv.c
 endif
 
 ifneq ($(CONFIG_DISABLE_MOUNTPOINTS),y)

@@ -160,7 +160,7 @@ volatile bool g_rtc_enabled = false;
  *
  ****************************************************************************/
 
-static int efm32_rtc_burtc_interrupt(int irq, void *context, FAR void *arg)
+static int efm32_rtc_burtc_interrupt(int irq, void *context, void *arg)
 {
   uint32_t source = getreg32(EFM32_BURTC_IF);
 
@@ -417,7 +417,7 @@ time_t up_rtc_time(void)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_HIRES
-int up_rtc_gettime(FAR struct timespec *tp)
+int up_rtc_gettime(struct timespec *tp)
 {
   uint64_t val;
 
@@ -450,7 +450,7 @@ int up_rtc_gettime(FAR struct timespec *tp)
  *
  ****************************************************************************/
 
-int up_rtc_settime(FAR const struct timespec *tp)
+int up_rtc_settime(const struct timespec *tp)
 {
   uint32_t cnt_carry;
   uint32_t cnt;
@@ -506,7 +506,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
 #ifdef CONFIG_RTC_ALARM
 #error "Sorry ! not yet implemented, just copied from STM32"
-int efm32_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
+int efm32_rtc_setalarm(const struct timespec *tp, alarmcb_t callback)
 {
   struct rtc_regvals_s regvals;
   irqstate_t flags;

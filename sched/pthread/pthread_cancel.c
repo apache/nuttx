@@ -30,7 +30,6 @@
 #include <assert.h>
 #include <errno.h>
 
-#include <nuttx/tls.h>
 #include <nuttx/pthread.h>
 
 #include "sched/sched.h"
@@ -89,7 +88,7 @@ int pthread_cancel(pthread_t thread)
       pthread_exit(PTHREAD_CANCELED);
     }
 
-  /* Refer to up_tls_info() */
+  /* Refer to tls_get_info() */
 
 #ifdef CONFIG_PTHREAD_CLEANUP
   pthread_cleanup_popall(tcb->stack_alloc_ptr);
@@ -98,12 +97,6 @@ int pthread_cancel(pthread_t thread)
   /* Complete pending join operations */
 
   pthread_completejoin((pid_t)thread, PTHREAD_CANCELED);
-
-#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-  /* Recover any mutexes still held by the canceled thread */
-
-  pthread_mutex_inconsistent(tcb);
-#endif
 
   /* Then let nxtask_terminate do the real work */
 

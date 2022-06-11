@@ -27,6 +27,9 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/arch.h>
+#include <nuttx/atexit.h>
+
 #include <sys/types.h>
 #include <pthread.h>
 
@@ -132,6 +135,9 @@ struct task_info_s
   char            ta_domain[NAME_MAX]; /* Current domain for gettext */
 #  endif
 #endif
+#if CONFIG_LIBC_MAX_EXITFUNS > 0
+  struct atexit_list_s ta_exit; /* Exit functions */
+#endif
 };
 
 /* struct pthread_cleanup_s *************************************************/
@@ -203,88 +209,6 @@ struct tls_info_s
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Name: tls_alloc
- *
- * Description:
- *   Allocate a group-unique TLS data index
- *
- * Input Parameters:
- *   dtor     - The destructor of TLS data element
- *
- * Returned Value:
- *   A TLS index that is unique for use within this task group.
- *
- ****************************************************************************/
-
-#if CONFIG_TLS_NELEM > 0
-int tls_alloc(CODE void (*dtor)(FAR void *));
-#endif
-
-/****************************************************************************
- * Name: tls_free
- *
- * Description:
- *   Release a group-unique TLS data index previous obtained by tls_alloc()
- *
- * Input Parameters:
- *   tlsindex - The previously allocated TLS index to be freed
- *
- * Returned Value:
- *   OK is returned on success; a negated errno value will be returned on
- *   failure:
- *
- *     -EINVAL - the index to be freed is out of range.
- *
- ****************************************************************************/
-
-#if CONFIG_TLS_NELEM > 0
-int tls_free(int tlsindex);
-#endif
-
-/****************************************************************************
- * Name: tls_get_value
- *
- * Description:
- *   Return an the TLS data value associated with the 'tlsindx'
- *
- * Input Parameters:
- *   tlsindex - Index of TLS data element to return
- *
- * Returned Value:
- *   The value of TLS element associated with 'tlsindex'. Errors are not
- *   reported.  Zero is returned in the event of an error, but zero may also
- *   be valid value and returned when there is no error.  The only possible
- *   error would be if tlsindex < 0 or tlsindex >=CONFIG_TLS_NELEM.
- *
- ****************************************************************************/
-
-#if CONFIG_TLS_NELEM > 0
-uintptr_t tls_get_value(int tlsindex);
-#endif
-
-/****************************************************************************
- * Name: tls_set_value
- *
- * Description:
- *   Set the TLS element associated with the 'tlsindex' to 'tlsvalue'
- *
- * Input Parameters:
- *   tlsindex - Index of TLS data element to set
- *   tlsvalue - The new value of the TLS data element
- *
- * Returned Value:
- *   Zero is returned on success, a negated errno value is return on
- *   failure:
- *
- *     EINVAL - tlsindex is not in range.
- *
- ****************************************************************************/
-
-#if CONFIG_TLS_NELEM > 0
-int tls_set_value(int tlsindex, uintptr_t tlsvalue);
-#endif
 
 #if CONFIG_TLS_TASK_NELEM > 0
 
@@ -378,7 +302,11 @@ uintptr_t task_tls_get_value(int tlsindex);
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_TLS_ALIGNED) || defined(__KERNEL__)
+#if defined(up_tls_info)
+#  define tls_get_info() up_tls_info()
+#elif defined(CONFIG_TLS_ALIGNED) && !defined(__KERNEL__)
+#  define tls_get_info() TLS_INFO(up_getsp())
+#else
 FAR struct tls_info_s *tls_get_info(void);
 #endif
 

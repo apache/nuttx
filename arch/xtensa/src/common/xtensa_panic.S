@@ -64,27 +64,9 @@
 #include <arch/xtensa/core.h>
 #include <arch/xtensa/xtensa_specregs.h>
 
+#include "xtensa_macros.S"
+
 #include "chip.h"
-
-/****************************************************************************
- * Assembly Language Macros
- ****************************************************************************/
-
-/****************************************************************************
- * Name: setintstack
- *
- * Description:
- *   Set the current stack pointer to the "top" the interrupt stack.
- *   Single CPU case.
- *   Must be provided by MCU-specific logic in the SMP case.
- *
- ****************************************************************************/
-
-#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
-	.macro	setintstack tmp1 tmp2
-	movi		a1, g_intstacktop
-	.endm
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -147,14 +129,7 @@ _xtensa_panic:
 
 	/* Set up PS for C, re-enable hi-pri interrupts, and clear EXCM. */
 
-#ifdef __XTENSA_CALL0_ABI__
-	movi	a0, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM
-#else
-	movi	a0, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE
-#endif
-
-	wsr		a0, PS
-	rsync
+  ps_setup XCHAL_EXCM_LEVEL a0
 
 	/* Call C panic handler:  Arg1 (A2) = Exception code; Arg 2 (A3) = start
 	 * of the register save area.

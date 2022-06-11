@@ -245,6 +245,17 @@ int esp32_bringup(void)
     }
 #endif /* CONFIG_ESP32_LEDC */
 
+#ifdef CONFIG_ESP32_TWAI
+
+  /* Initialize TWAI and register the TWAI driver. */
+
+  ret = esp32_twai_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp32_twai_setup failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_ESP32_RT_TIMER
   ret = esp32_rt_timer_init();
   if (ret < 0)

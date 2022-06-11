@@ -104,20 +104,20 @@ static bool    apds9960_isgestureavailable(FAR struct apds9960_dev_s *priv);
 /* I2C Helpers */
 
 static int     apds9960_i2c_read(FAR struct apds9960_dev_s *priv,
-                 uint8_t const regaddr, FAR uint8_t *regval, int len);
+                                 uint8_t const regaddr, FAR uint8_t *regval,
+                                 int len);
 static int     apds9960_i2c_read8(FAR struct apds9960_dev_s *priv,
-                 uint8_t const regaddr, FAR uint8_t *regval);
+                                  uint8_t const regaddr,
+                                  FAR uint8_t *regval);
 static int     apds9960_i2c_write(FAR struct apds9960_dev_s *priv,
-                 uint8_t const *data, int len);
+                                  uint8_t const *data, int len);
 static int     apds9960_i2c_write8(FAR struct apds9960_dev_s *priv,
-                 uint8_t const regaddr, uint8_t regval);
+                                   uint8_t const regaddr, uint8_t regval);
 
 /* Character driver methods */
 
-static int     apds9960_open(FAR struct file *filep);
-static int     apds9960_close(FAR struct file *filep);
 static ssize_t apds9960_read(FAR struct file *filep, FAR char *buffer,
-                 size_t buflen);
+                             size_t buflen);
 static ssize_t apds9960_write(FAR struct file *filep,
                  FAR const char *buffer, size_t buflen);
 
@@ -127,8 +127,8 @@ static ssize_t apds9960_write(FAR struct file *filep,
 
 static const struct file_operations g_apds9960_fops =
 {
-  apds9960_open,   /* open */
-  apds9960_close,  /* close */
+  NULL,            /* open */
+  NULL,            /* close */
   apds9960_read,   /* read */
   apds9960_write,  /* write */
   NULL,            /* seek */
@@ -1127,32 +1127,6 @@ static int apds9960_readgesture(FAR struct apds9960_dev_s *priv)
           return motion;
         }
     }
-}
-
-/****************************************************************************
- * Name: apds9960_open
- *
- * Description:
- *   This function is called whenever the APDS9960 device is opened.
- *
- ****************************************************************************/
-
-static int apds9960_open(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
- * Name: apds9960_close
- *
- * Description:
- *   This routine is called when the APDS9960 device is closed.
- *
- ****************************************************************************/
-
-static int apds9960_close(FAR struct file *filep)
-{
-  return OK;
 }
 
 /****************************************************************************

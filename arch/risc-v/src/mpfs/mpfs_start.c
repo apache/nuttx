@@ -33,8 +33,11 @@
 #include "mpfs_clockconfig.h"
 #include "mpfs_ddr.h"
 #include "mpfs_cache.h"
+#include "mpfs_mm_init.h"
 #include "mpfs_userspace.h"
+
 #include "riscv_internal.h"
+#include "riscv_percpu.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -44,6 +47,10 @@
 #  define showprogress(c) riscv_lowputc(c)
 #else
 #  define showprogress(c)
+#endif
+
+#if defined (CONFIG_BUILD_KERNEL) && !defined (CONFIG_ARCH_USE_S_MODE)
+#  error "Target requires kernel in S-mode, enable CONFIG_ARCH_USE_S_MODE"
 #endif
 
 /****************************************************************************
@@ -116,6 +123,13 @@ void __mpfs_start(uint64_t mhartid)
   const uint32_t *src;
   uint32_t *dest;
 
+  /* Configure FPU (hart 0 don't have an FPU) */
+
+  if (mhartid != 0)
+    {
+      riscv_fpuconfig();
+    }
+
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
    * certain that there are no issues with the state of global variables.
    */
@@ -153,7 +167,19 @@ void __mpfs_start(uint64_t mhartid)
 #endif
 
 #ifdef CONFIG_MPFS_DDR_INIT
-  mpfs_ddr_init();
+  if (mpfs_ddr_init() != 0)
+    {
+      /* We don't allow booting, ddr training failure will cause random
+       * behaviour
+       */
+
+      showprogress('X');
+
+      /* Reset, but let the progress come out of the uart first */
+
+      up_udelay(1000);
+      up_systemreset();
+    }
 #endif
 
   showprogress('B');
@@ -161,6 +187,15 @@ void __mpfs_start(uint64_t mhartid)
   /* Do board initialization */
 
   mpfs_boardinitialize();
+
+#ifdef CONFIG_ARCH_USE_S_MODE
+  /* Initialize the per CPU areas */
+
+  if (mhartid != 0)
+    {
+      riscv_percpu_add_hart(mhartid);
+    }
+#endif /* CONFIG_ARCH_USE_S_MODE */
 
   /* Initialize the caches.  Should only be executed from E51 (hart 0) to be
    * functional.  Consider the caches already configured if running without
@@ -185,6 +220,10 @@ void __mpfs_start(uint64_t mhartid)
 #ifdef CONFIG_BUILD_PROTECTED
   mpfs_userspace();
   showprogress('D');
+#endif
+
+#ifdef CONFIG_BUILD_KERNEL
+  mpfs_mm_init();
 #endif
 
   /* Call nx_start() */

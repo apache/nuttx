@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <pthread.h>
+#include <assert.h>
 
 #include <nuttx/tls.h>
 
@@ -72,9 +73,23 @@
 
 int pthread_setspecific(pthread_key_t key, FAR const void *value)
 {
-  int ret = tls_set_value((int)key, (uintptr_t)value);
-  return ret < 0 ? -ret : 0;
+  FAR struct tls_info_s *info;
+
+  DEBUGASSERT(key >= 0 && key < CONFIG_TLS_NELEM);
+  if (key >= 0 && key < CONFIG_TLS_NELEM)
+    {
+      /* Get the TLS info structure from the current threads stack */
+
+      info = tls_get_info();
+      DEBUGASSERT(info != NULL);
+
+      /* Set the element value int the TLS info. */
+
+      info->tl_elem[key] = (uintptr_t)value;
+      return OK;
+    }
+
+  return EINVAL;
 }
 
 #endif /* CONFIG_TLS_NELEM */
-

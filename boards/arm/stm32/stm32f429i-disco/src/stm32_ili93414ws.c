@@ -133,7 +133,7 @@ struct ili93414ws_lcd_s
 #ifdef ILI93414WS_SPI
   /* Reference to spi device structure */
 
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
 
   /* Backup cr1 register at selection */
 
@@ -173,24 +173,24 @@ static void stm32_ili93414ws_spienable(void);
 static void stm32_ili93414ws_spidisable(void);
 
 static inline void stm32_ili93414ws_set8bitmode(
-              FAR struct ili93414ws_lcd_s *dev);
+              struct ili93414ws_lcd_s *dev);
 static inline void stm32_ili93414ws_set16bitmode(
-              FAR struct ili93414ws_lcd_s *dev);
+              struct ili93414ws_lcd_s *dev);
 
 /* Command and data transmission control */
 
 static void stm32_ili93414ws_sndword(uint16_t wd);
-static int stm32_ili93414ws_sendblock(FAR struct ili93414ws_lcd_s *lcd,
+static int stm32_ili93414ws_sendblock(struct ili93414ws_lcd_s *lcd,
               const uint16_t *wd, uint16_t nwords);
 static uint16_t stm32_ili93414ws_recvword(void);
-static int stm32_ili93414ws_recvblock(FAR struct ili93414ws_lcd_s *lcd,
+static int stm32_ili93414ws_recvblock(struct ili93414ws_lcd_s *lcd,
               uint16_t *wd, uint16_t nwords);
 static inline void stm32_ili93414ws_cmddata(
-              FAR struct ili9341_lcd_s *lcd, bool cmd);
+              struct ili9341_lcd_s *lcd, bool cmd);
 
 /* Initializing / Configuration */
 
-static void stm32_ili93414ws_spiconfig(FAR struct ili9341_lcd_s *lcd);
+static void stm32_ili93414ws_spiconfig(struct ili9341_lcd_s *lcd);
 
 /****************************************************************************
  * Private Data
@@ -412,7 +412,7 @@ static void stm32_ili93414ws_sndword(uint16_t wd)
  *
  ****************************************************************************/
 
-static int stm32_ili93414ws_sendblock(FAR struct ili93414ws_lcd_s *lcd,
+static int stm32_ili93414ws_sendblock(struct ili93414ws_lcd_s *lcd,
                                       const uint16_t *wd, uint16_t nwords)
 {
   /* Set to bidirectional transmit mode and enable spi */
@@ -588,7 +588,7 @@ static uint16_t stm32_ili93414ws_recvword(void)
  *
  ****************************************************************************/
 
-static int stm32_ili93414ws_recvblock(FAR struct ili93414ws_lcd_s *lcd,
+static int stm32_ili93414ws_recvblock(struct ili93414ws_lcd_s *lcd,
                                 uint16_t *wd, uint16_t nwords)
 {
   /* ili9341 uses a 18-bit pixel format packed in a 24-bit stream per pixel.
@@ -727,7 +727,7 @@ static int stm32_ili93414ws_recvblock(FAR struct ili93414ws_lcd_s *lcd,
  ****************************************************************************/
 
 static inline void stm32_ili93414ws_set8bitmode(
-                      FAR struct ili93414ws_lcd_s *dev)
+                      struct ili93414ws_lcd_s *dev)
 {
   stm32_ili93414ws_modifycr1(0, SPI_CR1_DFF);
 #ifndef CONFIG_STM32F429I_DISCO_ILI9341_SPIBITS16
@@ -751,14 +751,14 @@ static inline void stm32_ili93414ws_set8bitmode(
  ****************************************************************************/
 
 static inline void stm32_ili93414ws_set16bitmode(
-                      FAR struct ili93414ws_lcd_s *dev)
+                      struct ili93414ws_lcd_s *dev)
 {
   stm32_ili93414ws_modifycr1(SPI_CR1_DFF, 0);
 }
 #else
 
 static inline void stm32_ili93414ws_set16bitmode(
-                      FAR struct ili93414ws_lcd_s *dev)
+                      struct ili93414ws_lcd_s *dev)
 {
   dev->gmode = 16;
 }
@@ -778,9 +778,9 @@ static inline void stm32_ili93414ws_set16bitmode(
  *
  ****************************************************************************/
 
-static void stm32_ili93414ws_spiconfig(FAR struct ili9341_lcd_s *lcd)
+static void stm32_ili93414ws_spiconfig(struct ili9341_lcd_s *lcd)
 {
-  FAR struct ili93414ws_lcd_s *priv = (FAR struct ili93414ws_lcd_s *)lcd;
+  struct ili93414ws_lcd_s *priv = (struct ili93414ws_lcd_s *)lcd;
   irqstate_t   flags;
 
   uint16_t   clrbitscr1 = SPI_CR1_CPHA | SPI_CR1_CPOL | SPI_CR1_BR_MASK |
@@ -844,15 +844,15 @@ static void stm32_ili93414ws_spiconfig(FAR struct ili9341_lcd_s *lcd)
 
 #ifdef ILI93414WS_SPI
 static inline void stm32_ili93414ws_cmddata(
-                      FAR struct ili9341_lcd_s *lcd, bool cmd)
+                      struct ili9341_lcd_s *lcd, bool cmd)
 {
-  FAR struct ili93414ws_lcd_s *priv = (FAR struct ili93414ws_lcd_s *)lcd;
+  struct ili93414ws_lcd_s *priv = (struct ili93414ws_lcd_s *)lcd;
 
   SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY(0), cmd);
 }
 #else
 static inline void stm32_ili93414ws_cmddata(
-                      FAR struct ili9341_lcd_s *lcd, bool cmd)
+                      struct ili9341_lcd_s *lcd, bool cmd)
 {
   stm32_gpiowrite(GPIO_LCD_DC, !cmd);
 }
@@ -877,7 +877,7 @@ static inline void stm32_ili93414ws_cmddata(
  *
  ****************************************************************************/
 
-static int stm32_ili93414ws_backlight(FAR struct ili9341_lcd_s *lcd,
+static int stm32_ili93414ws_backlight(struct ili9341_lcd_s *lcd,
                                       int level)
 {
   return OK;
@@ -897,9 +897,9 @@ static int stm32_ili93414ws_backlight(FAR struct ili9341_lcd_s *lcd,
  ****************************************************************************/
 
 #ifdef ILI93414WS_SPI
-static void stm32_ili93414ws_select(FAR struct ili9341_lcd_s *lcd)
+static void stm32_ili93414ws_select(struct ili9341_lcd_s *lcd)
 {
-  FAR struct ili93414ws_lcd_s *priv = (FAR struct ili93414ws_lcd_s *)lcd;
+  struct ili93414ws_lcd_s *priv = (struct ili93414ws_lcd_s *)lcd;
 
   /* Select ili9341 (locking the SPI bus in case there are multiple
    * devices competing for the SPI bus
@@ -913,7 +913,7 @@ static void stm32_ili93414ws_select(FAR struct ili9341_lcd_s *lcd)
   stm32_ili93414ws_spiconfig(lcd);
 }
 #else
-static void stm32_ili93414ws_select(FAR struct ili9341_lcd_s *lcd)
+static void stm32_ili93414ws_select(struct ili9341_lcd_s *lcd)
 {
   /* We own the spi bus, so just select the chip */
 
@@ -939,10 +939,10 @@ static void stm32_ili93414ws_select(FAR struct ili9341_lcd_s *lcd)
  ****************************************************************************/
 
 #ifdef ILI93414WS_SPI
-static void stm32_ili93414ws_deselect(FAR struct ili9341_lcd_s *lcd)
+static void stm32_ili93414ws_deselect(struct ili9341_lcd_s *lcd)
 {
   irqstate_t   flags;
-  FAR struct ili93414ws_lcd_s *priv = (FAR struct ili93414ws_lcd_s *)lcd;
+  struct ili93414ws_lcd_s *priv = (struct ili93414ws_lcd_s *)lcd;
 
   flags = enter_critical_section();
 
@@ -969,7 +969,7 @@ static void stm32_ili93414ws_deselect(FAR struct ili9341_lcd_s *lcd)
   SPI_LOCK(priv->spi, false);
 }
 #else
-static void stm32_ili93414ws_deselect(FAR struct ili9341_lcd_s *lcd)
+static void stm32_ili93414ws_deselect(struct ili9341_lcd_s *lcd)
 {
   stm32_gpiowrite(GPIO_CS_LCD, true);
 }
@@ -991,11 +991,11 @@ static void stm32_ili93414ws_deselect(FAR struct ili9341_lcd_s *lcd)
  ****************************************************************************/
 
 static int stm32_ili93414ws_sendcmd(
-              FAR struct ili9341_lcd_s *lcd, const uint8_t cmd)
+              struct ili9341_lcd_s *lcd, const uint8_t cmd)
 {
   int ret;
   const uint16_t bw = (const uint16_t)cmd;
-  FAR struct ili93414ws_lcd_s *priv = (FAR struct ili93414ws_lcd_s *)lcd;
+  struct ili93414ws_lcd_s *priv = (struct ili93414ws_lcd_s *)lcd;
 
   /* Set to 8-bit mode in disabled state, spi device is in disabled state */
 
@@ -1024,10 +1024,10 @@ static int stm32_ili93414ws_sendcmd(
  *
  ****************************************************************************/
 
-static int stm32_ili93414ws_sendparam(FAR struct ili9341_lcd_s *lcd,
-                                    const uint8_t param)
+static int stm32_ili93414ws_sendparam(struct ili9341_lcd_s *lcd,
+                                      const uint8_t param)
 {
-  FAR struct ili93414ws_lcd_s *priv = (FAR struct ili93414ws_lcd_s *)lcd;
+  struct ili93414ws_lcd_s *priv = (struct ili93414ws_lcd_s *)lcd;
   const uint16_t bw = (const uint16_t)param;
 
   /* Set to 8-bit mode in disabled state, spi device is in disabled state */
@@ -1054,10 +1054,10 @@ static int stm32_ili93414ws_sendparam(FAR struct ili9341_lcd_s *lcd,
  *
  ****************************************************************************/
 
-static int stm32_ili93414ws_sendgram(FAR struct ili9341_lcd_s *lcd,
-                          const uint16_t *wd, uint32_t nwords)
+static int stm32_ili93414ws_sendgram(struct ili9341_lcd_s *lcd,
+                                     const uint16_t *wd, uint32_t nwords)
 {
-  FAR struct ili93414ws_lcd_s *priv = (FAR struct ili93414ws_lcd_s *)lcd;
+  struct ili93414ws_lcd_s *priv = (struct ili93414ws_lcd_s *)lcd;
 
   lcdinfo("wd=%p, nwords=%" PRId32 "\n", wd, nwords);
 
@@ -1083,10 +1083,10 @@ static int stm32_ili93414ws_sendgram(FAR struct ili9341_lcd_s *lcd,
  *
  ****************************************************************************/
 
-static int stm32_ili93414ws_recvparam(FAR struct ili9341_lcd_s *lcd,
-                                        uint8_t *param)
+static int stm32_ili93414ws_recvparam(struct ili9341_lcd_s *lcd,
+                                      uint8_t *param)
 {
-  FAR struct ili93414ws_lcd_s *priv = (FAR struct ili93414ws_lcd_s *)lcd;
+  struct ili93414ws_lcd_s *priv = (struct ili93414ws_lcd_s *)lcd;
 
 #ifdef CONFIG_STM32F429I_DISCO_ILI9341_SPIBITS16
   /* Set to 8-bit mode in disabled state, spi device is in disabled state. */
@@ -1114,10 +1114,10 @@ static int stm32_ili93414ws_recvparam(FAR struct ili9341_lcd_s *lcd,
  *
  ****************************************************************************/
 
-static int stm32_ili93414ws_recvgram(FAR struct ili9341_lcd_s *lcd,
-                                    uint16_t *wd, uint32_t nwords)
+static int stm32_ili93414ws_recvgram(struct ili9341_lcd_s *lcd,
+                                     uint16_t *wd, uint32_t nwords)
 {
-  FAR struct ili93414ws_lcd_s *priv = (FAR struct ili93414ws_lcd_s *)lcd;
+  struct ili93414ws_lcd_s *priv = (struct ili93414ws_lcd_s *)lcd;
 
   lcdinfo("wd=%p, nwords=%" PRId32 "\n", wd, nwords);
 
@@ -1144,10 +1144,10 @@ static int stm32_ili93414ws_recvgram(FAR struct ili9341_lcd_s *lcd,
  ****************************************************************************/
 
 #ifdef ILI93414WS_SPI
-FAR struct ili9341_lcd_s *stm32_ili93414ws_initialize(void)
+struct ili9341_lcd_s *stm32_ili93414ws_initialize(void)
 {
-  FAR struct spi_dev_s *spi;
-  FAR struct ili93414ws_lcd_s *priv = &g_lcddev;
+  struct spi_dev_s *spi;
+  struct ili93414ws_lcd_s *priv = &g_lcddev;
 
   lcdinfo("initialize ili9341 4-wire serial subdriver\n");
 
@@ -1176,10 +1176,10 @@ FAR struct ili9341_lcd_s *stm32_ili93414ws_initialize(void)
 
 #else
 
-FAR struct ili9341_lcd_s *stm32_ili93414ws_initialize(void)
+struct ili9341_lcd_s *stm32_ili93414ws_initialize(void)
 {
   uint32_t    regval;
-  FAR struct ili93414ws_lcd_s *priv = &g_lcddev;
+  struct ili93414ws_lcd_s *priv = &g_lcddev;
 
   lcdinfo("initialize ili9341 4-wire serial subdriver\n");
 

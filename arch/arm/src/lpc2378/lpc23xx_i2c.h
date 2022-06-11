@@ -181,7 +181,7 @@
  *
  ****************************************************************************/
 
-FAR struct i2c_master_s *lpc2378_i2cbus_initialize(int port);
+struct i2c_master_s *lpc2378_i2cbus_initialize(int port);
 
 /****************************************************************************
  * Name: lpc2378_i2cbus_uninitialize
@@ -198,6 +198,6 @@ FAR struct i2c_master_s *lpc2378_i2cbus_initialize(int port);
  *
  ****************************************************************************/
 
-int lpc2378_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
+int lpc2378_i2cbus_uninitialize(struct i2c_master_s *dev);
 
 #endif /* __ARCH_ARM_SRC_LPC2378_LPC23XX_I2C_H */

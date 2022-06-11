@@ -1072,7 +1072,7 @@ static void hts221_notify(FAR struct hts221_dev_s *priv)
       if (fds)
         {
           fds->revents |= POLLIN;
-          hts221_dbg("Report events: %02x\n", fds->revents);
+          hts221_dbg("Report events: %08" PRIx32 "\n", fds->revents);
           nxsem_post(fds->sem);
         }
     }

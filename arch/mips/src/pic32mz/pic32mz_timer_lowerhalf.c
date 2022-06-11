@@ -58,16 +58,16 @@
 
 struct pic32mz_lowerhalf_s
 {
-  FAR const struct timer_ops_s   *ops;     /* Lower half operations        */
-  FAR struct pic32mz_timer_dev_s *timer;   /* pic32mz timer driver         */
-  tccb_t                         callback; /* Current user interrupt cb    */
-  FAR void                       *arg;     /* Argument to upper half cb    */
-  uint32_t                       timeout;  /* Current timeout value (us)   */
-  uint32_t                       ticks;    /* Timeout converted in ticks   */
-  uint32_t                       freq;     /* Timer's frequency (Hz)       */
-  uint8_t                        width;    /* Timer's width                */
-  uint32_t                       maxticks; /* Maximum ticks for this timer */
-  bool                           started;  /* True: Timer has been started */
+  const struct timer_ops_s   *ops;     /* Lower half operations        */
+  struct pic32mz_timer_dev_s *timer;   /* pic32mz timer driver         */
+  tccb_t                     callback; /* Current user interrupt cb    */
+  void                       *arg;     /* Argument to upper half cb    */
+  uint32_t                   timeout;  /* Current timeout value (us)   */
+  uint32_t                   ticks;    /* Timeout converted in ticks   */
+  uint32_t                   freq;     /* Timer's frequency (Hz)       */
+  uint8_t                    width;    /* Timer's width                */
+  uint32_t                   maxticks; /* Maximum ticks for this timer */
+  bool                       started;  /* True: Timer has been started */
 };
 
 /****************************************************************************
@@ -87,18 +87,18 @@ static int pic32mz_timer_handler(int irq, void * context, void * arg);
 
 /* "Lower half" driver methods **********************************************/
 
-static int  pic32mz_start(FAR struct timer_lowerhalf_s *lower);
-static int  pic32mz_stop(FAR struct timer_lowerhalf_s *lower);
+static int  pic32mz_start(struct timer_lowerhalf_s *lower);
+static int  pic32mz_stop(struct timer_lowerhalf_s *lower);
 static int  pic32mz_getstatus(struct timer_lowerhalf_s *lower,
                               struct timer_status_s *status);
-static int  pic32mz_settimeout(FAR struct timer_lowerhalf_s *lower,
+static int  pic32mz_settimeout(struct timer_lowerhalf_s *lower,
                                uint32_t timeout);
-static void pic32mz_setcallback(FAR struct timer_lowerhalf_s *lower,
-                              tccb_t callback, FAR void *arg);
+static void pic32mz_setcallback(struct timer_lowerhalf_s *lower,
+                              tccb_t callback, void *arg);
 static int  pic32mz_ioctl(struct timer_lowerhalf_s *lower, int cmd,
                           unsigned long arg);
-static int  pic32mz_maxtimeout(FAR struct timer_lowerhalf_s *lower,
-                               FAR uint32_t *maxtimeout);
+static int  pic32mz_maxtimeout(struct timer_lowerhalf_s *lower,
+                               uint32_t *maxtimeout);
 
 /****************************************************************************
  * Private Data
@@ -192,7 +192,7 @@ static struct pic32mz_lowerhalf_s g_t9_lowerhalf =
  *
  ****************************************************************************/
 
-static uint32_t pic32mz_usec2ticks(FAR struct pic32mz_lowerhalf_s *priv,
+static uint32_t pic32mz_usec2ticks(struct pic32mz_lowerhalf_s *priv,
                                    uint32_t usecs)
 {
   uint64_t bigticks;
@@ -222,7 +222,7 @@ static uint32_t pic32mz_usec2ticks(FAR struct pic32mz_lowerhalf_s *priv,
  *
  ****************************************************************************/
 
-static uint32_t pic32mz_ticks2usec(FAR struct pic32mz_lowerhalf_s *priv,
+static uint32_t pic32mz_ticks2usec(struct pic32mz_lowerhalf_s *priv,
                                    uint32_t ticks)
 {
   uint64_t bigusec;
@@ -248,10 +248,10 @@ static uint32_t pic32mz_ticks2usec(FAR struct pic32mz_lowerhalf_s *priv,
  *
  ****************************************************************************/
 
-static int pic32mz_timer_handler(int irq, FAR void *context, FAR void *arg)
+static int pic32mz_timer_handler(int irq, void *context, void *arg)
 {
-  FAR struct pic32mz_lowerhalf_s *lower =
-      (FAR struct pic32mz_lowerhalf_s *)arg;
+  struct pic32mz_lowerhalf_s *lower =
+      (struct pic32mz_lowerhalf_s *)arg;
   uint32_t next_interval_us = 0;
 
   PIC32MZ_TIMER_ACKINT(lower->timer);
@@ -294,10 +294,10 @@ static int pic32mz_timer_handler(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static int pic32mz_start(FAR struct timer_lowerhalf_s *lower)
+static int pic32mz_start(struct timer_lowerhalf_s *lower)
 {
-  FAR struct pic32mz_lowerhalf_s *priv =
-    (FAR struct pic32mz_lowerhalf_s *)lower;
+  struct pic32mz_lowerhalf_s *priv =
+    (struct pic32mz_lowerhalf_s *)lower;
 
   if (!priv->started)
     {
@@ -333,10 +333,10 @@ static int pic32mz_start(FAR struct timer_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int pic32mz_stop(FAR struct timer_lowerhalf_s *lower)
+static int pic32mz_stop(struct timer_lowerhalf_s *lower)
 {
-  FAR struct pic32mz_lowerhalf_s *priv =
-    (FAR struct pic32mz_lowerhalf_s *)lower;
+  struct pic32mz_lowerhalf_s *priv =
+    (struct pic32mz_lowerhalf_s *)lower;
 
   if (priv->started)
     {
@@ -368,11 +368,11 @@ static int pic32mz_stop(FAR struct timer_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int  pic32mz_getstatus(FAR struct timer_lowerhalf_s *lower,
-                              FAR struct timer_status_s *status)
+static int  pic32mz_getstatus(struct timer_lowerhalf_s *lower,
+                              struct timer_status_s *status)
 {
-  FAR struct pic32mz_lowerhalf_s *priv =
-    (FAR struct pic32mz_lowerhalf_s *)lower;
+  struct pic32mz_lowerhalf_s *priv =
+    (struct pic32mz_lowerhalf_s *)lower;
   uint32_t remainingticks;
 
   DEBUGASSERT(priv);
@@ -421,11 +421,11 @@ static int  pic32mz_getstatus(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int pic32mz_settimeout(FAR struct timer_lowerhalf_s *lower,
+static int pic32mz_settimeout(struct timer_lowerhalf_s *lower,
                               uint32_t timeout)
 {
-  FAR struct pic32mz_lowerhalf_s *priv =
-    (FAR struct pic32mz_lowerhalf_s *)lower;
+  struct pic32mz_lowerhalf_s *priv =
+    (struct pic32mz_lowerhalf_s *)lower;
 
   DEBUGASSERT(priv);
 
@@ -492,11 +492,11 @@ static int pic32mz_settimeout(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static void pic32mz_setcallback(FAR struct timer_lowerhalf_s *lower,
-                                tccb_t callback, FAR void *arg)
+static void pic32mz_setcallback(struct timer_lowerhalf_s *lower,
+                                tccb_t callback, void *arg)
 {
-  FAR struct pic32mz_lowerhalf_s *priv =
-    (FAR struct pic32mz_lowerhalf_s *)lower;
+  struct pic32mz_lowerhalf_s *priv =
+    (struct pic32mz_lowerhalf_s *)lower;
 
   irqstate_t flags = enter_critical_section();
 
@@ -530,7 +530,7 @@ static void pic32mz_setcallback(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int pic32mz_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
+static int pic32mz_ioctl(struct timer_lowerhalf_s *lower, int cmd,
                          unsigned long arg)
 {
   int ret = -ENOTTY;
@@ -557,11 +557,11 @@ static int pic32mz_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
  *
  ****************************************************************************/
 
-static int pic32mz_maxtimeout(FAR struct timer_lowerhalf_s *lower,
-                              FAR uint32_t *maxtimeout)
+static int pic32mz_maxtimeout(struct timer_lowerhalf_s *lower,
+                              uint32_t *maxtimeout)
 {
-  FAR struct pic32mz_lowerhalf_s *priv =
-    (FAR struct pic32mz_lowerhalf_s *)lower;
+  struct pic32mz_lowerhalf_s *priv =
+    (struct pic32mz_lowerhalf_s *)lower;
 
   DEBUGASSERT(priv);
 
@@ -594,10 +594,10 @@ static int pic32mz_maxtimeout(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-int pic32mz_timer_initialize(FAR const char *devpath, int timer)
+int pic32mz_timer_initialize(const char *devpath, int timer)
 {
-  FAR struct pic32mz_lowerhalf_s *lower;
-  FAR void *drvr;
+  struct pic32mz_lowerhalf_s *lower;
+  void *drvr;
 
   tmrinfo("Initializing %s - timer %d\n", devpath, timer);
 

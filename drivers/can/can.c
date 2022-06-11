@@ -186,7 +186,7 @@ static void can_pollnotify(FAR struct can_dev_s *dev, pollevent_t eventset)
           fds->revents |= fds->events & eventset;
           if (fds->revents != 0)
             {
-              caninfo("Report events: %02x\n", fds->revents);
+              caninfo("Report events: %08" PRIx32 "\n", fds->revents);
               nxsem_post(fds->sem);
             }
         }
@@ -923,7 +923,6 @@ static inline ssize_t can_rtrread(FAR struct file *filep,
 {
   FAR struct can_dev_s *dev = filep->f_inode->i_private;
   FAR struct can_rtrwait_s *wait = NULL;
-  struct timespec           abstimeout;
   irqstate_t                flags;
   int                       i;
   int                       sval;
@@ -1002,15 +1001,9 @@ static inline ssize_t can_rtrread(FAR struct file *filep,
         {
           /* Then wait for the response */
 
-          ret = clock_gettime(CLOCK_REALTIME, &abstimeout);
-
-          if (ret >= 0)
-            {
-              clock_timespec_add(&abstimeout,
-                                 &request->ci_timeout,
-                                 &abstimeout);
-              ret = nxsem_timedwait(&wait->cr_sem, &abstimeout);
-            }
+          ret = nxsem_tickwait(&wait->cr_sem,
+                               SEC2TICK(request->ci_timeout.tv_sec) +
+                               NSEC2TICK(request->ci_timeout.tv_nsec));
         }
     }
 

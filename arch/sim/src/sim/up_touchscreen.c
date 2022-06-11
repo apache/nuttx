@@ -96,7 +96,7 @@ static struct up_dev_s g_simtouchscreen;
 
 int sim_tsc_initialize(int minor)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)&g_simtouchscreen;
+  struct up_dev_s *priv = (struct up_dev_s *)&g_simtouchscreen;
   char devname[DEV_NAMELEN];
   int ret;
 
@@ -115,7 +115,7 @@ int sim_tsc_initialize(int minor)
 
   /* Register the device as an input device */
 
-  snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
+  snprintf(devname, sizeof(devname), DEV_FORMAT, minor);
   iinfo("Registering %s\n", devname);
 
   ret = touch_register(&priv->lower, devname, 1);
@@ -150,7 +150,7 @@ int sim_tsc_initialize(int minor)
 
 int sim_tsc_uninitialize(void)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)&g_simtouchscreen;
+  struct up_dev_s *priv = (struct up_dev_s *)&g_simtouchscreen;
   char devname[DEV_NAMELEN];
 
   /* Stop the event loop (Hmm.. the caller must be sure that there are no
@@ -162,7 +162,7 @@ int sim_tsc_uninitialize(void)
 
   /* Un-register the device */
 
-  snprintf(devname, DEV_NAMELEN, DEV_FORMAT, priv->minor);
+  snprintf(devname, sizeof(devname), DEV_FORMAT, priv->minor);
   iinfo("Un-registering %s\n", devname);
 
   touch_unregister(&priv->lower, devname);
@@ -176,7 +176,7 @@ int sim_tsc_uninitialize(void)
 
 void up_buttonevent(int x, int y, int buttons)
 {
-  FAR struct up_dev_s  *priv = (FAR struct up_dev_s *)&g_simtouchscreen;
+  struct up_dev_s  *priv = (struct up_dev_s *)&g_simtouchscreen;
   struct touch_sample_s sample;   /* Sampled touch point data */
   bool                  pendown;  /* true: pen is down */
 

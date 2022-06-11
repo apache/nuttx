@@ -55,8 +55,6 @@
 
 void nxmq_free_msg(FAR struct mqueue_msg_s *mqmsg)
 {
-  irqstate_t flags;
-
   /* If this is a generally available pre-allocated message,
    * then just put it back in the free list.
    */
@@ -67,9 +65,7 @@ void nxmq_free_msg(FAR struct mqueue_msg_s *mqmsg)
        * list from interrupt handlers.
        */
 
-      flags = enter_critical_section();
       sq_addlast((FAR sq_entry_t *)mqmsg, &g_msgfree);
-      leave_critical_section(flags);
     }
 
   /* If this is a message pre-allocated for interrupts,
@@ -82,9 +78,7 @@ void nxmq_free_msg(FAR struct mqueue_msg_s *mqmsg)
        * list from interrupt handlers.
        */
 
-      flags = enter_critical_section();
       sq_addlast((FAR sq_entry_t *)mqmsg, &g_msgfreeirq);
-      leave_critical_section(flags);
     }
 
   /* Otherwise, deallocate it.  Note:  interrupt handlers

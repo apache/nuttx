@@ -93,15 +93,26 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 
   DEBUGVERIFY(mm_takesemaphore(heap));
 
-  /* Adjust the provided heap start and size so that they are both aligned
-   * with the MM_MIN_CHUNK size.
+  /* Adjust the provided heap start and size.
+   *
+   * Note: (uintptr_t)node + SIZEOF_MM_ALLOCNODE is what's actually
+   * returned to the malloc user, which should have natural alignment.
+   * (that is, in this implementation, MM_MIN_CHUNK-alignment.)
    */
 
-  heapbase = MM_ALIGN_UP((uintptr_t)heapstart);
+  heapbase = MM_ALIGN_UP((uintptr_t)heapstart + 2 * SIZEOF_MM_ALLOCNODE) -
+             2 * SIZEOF_MM_ALLOCNODE;
   heapend  = MM_ALIGN_DOWN((uintptr_t)heapstart + (uintptr_t)heapsize);
   heapsize = heapend - heapbase;
 
+#if defined(CONFIG_FS_PROCFS) && \
+    !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO) && \
+    (defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__))
+  minfo("[%s] Region %d: base=%p size=%zu\n",
+        heap->mm_procfs.name, IDX + 1, heapstart, heapsize);
+#else
   minfo("Region %d: base=%p size=%zu\n", IDX + 1, heapstart, heapsize);
+#endif
 
   /* Add the size of this region to the total size of the heap */
 
@@ -205,10 +216,6 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
 
   mm_seminitialize(heap);
 
-  /* Add the initial region of memory to the heap */
-
-  mm_addregion(heap, heapstart, heapsize);
-
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   heap->mm_procfs.name = name;
@@ -216,6 +223,15 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
 #if defined (CONFIG_DEBUG_MM) && defined(CONFIG_MM_BACKTRACE_DEFAULT)
   heap->mm_procfs.backtrace = true;
 #endif
+#endif
+#endif
+
+  /* Add the initial region of memory to the heap */
+
+  mm_addregion(heap, heapstart, heapsize);
+
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   procfs_register_meminfo(&heap->mm_procfs);
 #endif
 #endif

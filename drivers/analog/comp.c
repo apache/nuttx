@@ -115,7 +115,7 @@ static void comp_pollnotify(FAR struct comp_dev_s *dev,
 
           if (fds->revents != 0)
             {
-              ainfo("Report events: %02x\n", fds->revents);
+              ainfo("Report events: %08" PRIx32 "\n", fds->revents);
               nxsem_post(fds->sem);
             }
         }

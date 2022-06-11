@@ -399,7 +399,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
            */
 
           dev->d_ifname[IFNAMSIZ - 1] = '\0';
-          strncpy(devfmt_str, dev->d_ifname, IFNAMSIZ);
+          strlcpy(devfmt_str, dev->d_ifname, IFNAMSIZ);
 
           /* Then use the content of the temporary buffer as the format
            * string.

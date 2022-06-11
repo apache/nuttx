@@ -256,7 +256,7 @@ config NETDEV_LATEINIT
 		Normally, networking initialization occur in the later phase of the
 		boot process in the function up_initialize() when it calls the
 		driver initialization function, up_netinitialize().  This
-		initialization occurs after a sufficient about of the OS has been
+		initialization occurs after a sufficient amount of the OS has been
 		initialized so that driver registration can be performed, but
 		before the completion of OS initialization and before the first
 		application is started.
@@ -272,7 +272,7 @@ config NETDEV_LATEINIT
 			  dependencies so that the hardware is not in an appropriate
 			  state for up_netinitialize() to be called.
 
-		Examples of this latter situation includes such things as network
+		Examples of this latter situation include such things as network
 		drivers that required some setup via an I2C I/O expander, or network
 		drivers that depend on USB, SPI, I2C, PCI, serial, or other
 		interfaces that may not be ready when up_netinitialize() is normally

@@ -65,7 +65,7 @@ struct spi_dev_s; /* Forward reference */
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *s32k1xx_lpspibus_initialize(int bus);
+struct spi_dev_s *s32k1xx_lpspibus_initialize(int bus);
 
 /****************************************************************************
  * Name:  s32k1xx_lpspi0/1/2/select and s32k1xx_lpspi0/1/2/status
@@ -99,26 +99,26 @@ FAR struct spi_dev_s *s32k1xx_lpspibus_initialize(int bus);
  ****************************************************************************/
 
 #ifdef CONFIG_S32K1XX_LPSPI0
-void s32k1xx_lpspi0select(FAR struct spi_dev_s *dev,
+void s32k1xx_lpspi0select(struct spi_dev_s *dev,
                           uint32_t devid, bool selected);
-uint8_t s32k1xx_lpspi0status(FAR struct spi_dev_s *dev, uint32_t devid);
-int s32k1xx_lpspi0cmddata(FAR struct spi_dev_s *dev,
+uint8_t s32k1xx_lpspi0status(struct spi_dev_s *dev, uint32_t devid);
+int s32k1xx_lpspi0cmddata(struct spi_dev_s *dev,
                           uint32_t devid, bool cmd);
 #endif
 
 #ifdef CONFIG_S32K1XX_LPSPI1
-void s32k1xx_lpspi1select(FAR struct spi_dev_s *dev,
+void s32k1xx_lpspi1select(struct spi_dev_s *dev,
                           uint32_t devid, bool selected);
-uint8_t s32k1xx_lpspi1status(FAR struct spi_dev_s *dev, uint32_t devid);
-int s32k1xx_lpspi1cmddata(FAR struct spi_dev_s *dev,
+uint8_t s32k1xx_lpspi1status(struct spi_dev_s *dev, uint32_t devid);
+int s32k1xx_lpspi1cmddata(struct spi_dev_s *dev,
                           uint32_t devid, bool cmd);
 #endif
 
 #ifdef CONFIG_S32K1XX_LPSPI2
-void s32k1xx_lpspi2select(FAR struct spi_dev_s *dev,
+void s32k1xx_lpspi2select(struct spi_dev_s *dev,
                           uint32_t devid, bool selected);
-uint8_t s32k1xx_lpspi2status(FAR struct spi_dev_s *dev, uint32_t devid);
-int s32k1xx_lpspi2cmddata(FAR struct spi_dev_s *dev,
+uint8_t s32k1xx_lpspi2status(struct spi_dev_s *dev, uint32_t devid);
+int s32k1xx_lpspi2cmddata(struct spi_dev_s *dev,
                           uint32_t devid, bool cmd);
 #endif
 
@@ -144,21 +144,21 @@ int s32k1xx_lpspi2cmddata(FAR struct spi_dev_s *dev,
 
 #ifdef CONFIG_SPI_CALLBACK
 #ifdef CONFIG_S32K1XX_LPSPI0
-int s32k1xx_lpspi0register(FAR struct spi_dev_s *dev,
+int s32k1xx_lpspi0register(struct spi_dev_s *dev,
                            spi_mediachange_t callback,
-                           FAR void *arg);
+                           void *arg);
 #endif
 
 #ifdef CONFIG_S32K1XX_LPSPI1
-int s32k1xx_lpspi1register(FAR struct spi_dev_s *dev,
+int s32k1xx_lpspi1register(struct spi_dev_s *dev,
                            spi_mediachange_t callback,
-                           FAR void *arg);
+                           void *arg);
 #endif
 
 #ifdef CONFIG_S32K1XX_LPSPI2
-int s32k1xx_lpspi2register(FAR struct spi_dev_s *dev,
+int s32k1xx_lpspi2register(struct spi_dev_s *dev,
                            spi_mediachange_t callback,
-                           FAR void *arg);
+                           void *arg);
 #endif
 #endif
 

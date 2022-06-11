@@ -173,9 +173,9 @@ const uintptr_t g_idle_topstack = (uintptr_t)&_ebss +
  ****************************************************************************/
 
 #ifdef CONFIG_BUILD_KERNEL
-void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
+void up_allocate_kheap(void **heap_start, size_t *heap_size)
 #else
-void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
+void up_allocate_heap(void **heap_start, size_t *heap_size)
 #endif
 {
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
@@ -193,14 +193,14 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
   /* Return the user-space heap settings */
 
   board_autoled_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void *)ubase;
+  *heap_start = (void *)ubase;
   *heap_size  = usize;
 #else
 
   /* Return the heap settings */
 
   board_autoled_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void *)g_idle_topstack;
+  *heap_start = (void *)g_idle_topstack;
   *heap_size  = CONFIG_RAM_END - g_idle_topstack;
 #endif
 }
@@ -217,7 +217,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
  ****************************************************************************/
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
-void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
+void up_allocate_kheap(void **heap_start, size_t *heap_size)
 {
   /* Get the unaligned size and position of the user-space heap.
    * This heap begins after the user-space .bss section at an offset
@@ -232,7 +232,7 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
    * that was not dedicated to the user heap).
    */
 
-  *heap_start = (FAR void *)USERSPACE->us_bssend;
+  *heap_start = (void *)USERSPACE->us_bssend;
   *heap_size  = ubase - (uintptr_t)USERSPACE->us_bssend;
 }
 #endif
@@ -250,7 +250,7 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
 void arm_addregion(void)
 {
   int remaining = CONFIG_MM_REGIONS;
-  FAR void *heapstart;
+  void *heapstart;
   size_t heapsize;
 
 #ifdef HAVE_STATIC_CS0
@@ -258,8 +258,8 @@ void arm_addregion(void)
     {
       /* Add the SRAM to the user heap */
 
-      heapstart = (FAR void *)(LPC54_SRAMCS0_BASE +
-                               CONFIG_LPC54_EMC_STATIC_CS0_OFFSET);
+      heapstart = (void *)(LPC54_SRAMCS0_BASE +
+                           CONFIG_LPC54_EMC_STATIC_CS0_OFFSET);
       heapsize  = CONFIG_LPC54_EMC_STATIC_CS0_SIZE;
       kumm_addregion(heapstart, heapsize);
 
@@ -277,8 +277,8 @@ void arm_addregion(void)
     {
       /* Add the SRAM to the user heap */
 
-      heapstart = (FAR void *)(LPC54_SRAMCS1_BASE +
-                               CONFIG_LPC54_EMC_STATIC_CS1_OFFSET);
+      heapstart = (void *)(LPC54_SRAMCS1_BASE +
+                           CONFIG_LPC54_EMC_STATIC_CS1_OFFSET);
       heapsize  = CONFIG_LPC54_EMC_STATIC_CS1_SIZE;
       kumm_addregion(heapstart, heapsize);
 
@@ -296,8 +296,8 @@ void arm_addregion(void)
     {
       /* Add the SRAM to the user heap */
 
-      heapstart = (FAR void *)(LPC54_SRAMCS2_BASE +
-                               CONFIG_LPC54_EMC_STATIC_CS2_OFFSET);
+      heapstart = (void *)(LPC54_SRAMCS2_BASE +
+                           CONFIG_LPC54_EMC_STATIC_CS2_OFFSET);
       heapsize  = CONFIG_LPC54_EMC_STATIC_CS2_SIZE;
       kumm_addregion(heapstart, heapsize);
 
@@ -315,8 +315,8 @@ void arm_addregion(void)
     {
       /* Add the SRAM to the user heap */
 
-      heapstart = (FAR void *)(LPC54_SRAMCS3_BASE +
-                               CONFIG_LPC54_EMC_STATIC_CS3_OFFSET);
+      heapstart = (void *)(LPC54_SRAMCS3_BASE +
+                           CONFIG_LPC54_EMC_STATIC_CS3_OFFSET);
       heapsize  = CONFIG_LPC54_EMC_STATIC_CS3_SIZE;
       kumm_addregion(heapstart, heapsize);
 
@@ -334,8 +334,8 @@ void arm_addregion(void)
     {
       /* Add the SDRAM to the user heap */
 
-      heapstart = (FAR void *)(LPC54_DRAMCS0_BASE +
-                               CONFIG_LPC54_EMC_DYNAMIC_CS0_OFFSET);
+      heapstart = (void *)(LPC54_DRAMCS0_BASE +
+                           CONFIG_LPC54_EMC_DYNAMIC_CS0_OFFSET);
       heapsize  = CONFIG_LPC54_EMC_DYNAMIC_CS0_SIZE;
       kumm_addregion(heapstart, heapsize);
 
@@ -353,8 +353,8 @@ void arm_addregion(void)
     {
       /* Add the SDRAM to the user heap */
 
-      heapstart = (FAR void *)(LPC54_DRAMCS1_BASE +
-                               CONFIG_LPC54_EMC_DYNAMIC_CS1_OFFSET);
+      heapstart = (void *)(LPC54_DRAMCS1_BASE +
+                           CONFIG_LPC54_EMC_DYNAMIC_CS1_OFFSET);
       heapsize  = CONFIG_LPC54_EMC_DYNAMIC_CS1_SIZE;
       kumm_addregion(heapstart, heapsize);
 
@@ -372,8 +372,8 @@ void arm_addregion(void)
     {
       /* Add the SDRAM to the user heap */
 
-      heapstart = (FAR void *)(LPC54_DRAMCS2_BASE +
-                               CONFIG_LPC54_EMC_DYNAMIC_CS2_OFFSET);
+      heapstart = (void *)(LPC54_DRAMCS2_BASE +
+                           CONFIG_LPC54_EMC_DYNAMIC_CS2_OFFSET);
       heapsize  = CONFIG_LPC54_EMC_DYNAMIC_CS2_SIZE;
       kumm_addregion(heapstart, heapsize);
 
@@ -391,8 +391,8 @@ void arm_addregion(void)
     {
       /* Add the SDRAM to the user heap */
 
-      heapstart = (FAR void *)(LPC54_DRAMCS3_BASE +
-                               CONFIG_LPC54_EMC_DYNAMIC_CS3_OFFSET);
+      heapstart = (void *)(LPC54_DRAMCS3_BASE +
+                           CONFIG_LPC54_EMC_DYNAMIC_CS3_OFFSET);
       heapsize  = CONFIG_LPC54_EMC_DYNAMIC_CS3_SIZE;
       kumm_addregion(heapstart, heapsize);
 

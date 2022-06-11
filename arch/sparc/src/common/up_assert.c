@@ -67,13 +67,13 @@ static void _up_assert(int errorcode)
 {
   /* Flush any buffered SYSLOG data */
 
-  (void)syslog_flush();
+  syslog_flush();
 
   /* Are we in an interrupt handler or the idle task? */
 
   if (g_current_regs || running_task()->flink == NULL)
     {
-      (void)up_irq_save();
+      up_irq_save();
       for (; ; )
         {
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 1
@@ -101,7 +101,7 @@ static void _up_assert(int errorcode)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_USBDUMP
-static int usbtrace_syslog(FAR const char *fmt, ...)
+static int usbtrace_syslog(const char *fmt, ...)
 {
   va_list ap;
 
@@ -113,7 +113,7 @@ static int usbtrace_syslog(FAR const char *fmt, ...)
   return 0;
 }
 
-static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
+static int assert_tracecallback(struct usbtrace_s *trace, void *arg)
 {
   usbtrace_trprintf(usbtrace_syslog, trace->event, trace->value);
   return 0;
@@ -136,7 +136,7 @@ void up_assert(const char *filename, int lineno)
 
   /* Flush any buffered SYSLOG data (prior to the assertion) */
 
-  (void)syslog_flush();
+  syslog_flush();
 
 #if CONFIG_TASK_NAME_SIZE > 0
   _alert("Assertion failed at file:%s line: %d task: %s\n",
@@ -150,7 +150,7 @@ void up_assert(const char *filename, int lineno)
 
   /* Flush any buffered SYSLOG data (from the above) */
 
-  (void)syslog_flush();
+  syslog_flush();
 
 #ifdef CONFIG_BOARD_CRASHDUMP
   board_crashdump(up_getsp(), running_task(), filename, lineno);
@@ -159,7 +159,7 @@ void up_assert(const char *filename, int lineno)
 #ifdef CONFIG_ARCH_USBDUMP
   /* Dump USB trace data */
 
-  (void)usbtrace_enumerate(assert_tracecallback, NULL);
+  usbtrace_enumerate(assert_tracecallback, NULL);
 #endif
 
   _up_assert(EXIT_FAILURE);

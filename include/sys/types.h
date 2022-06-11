@@ -158,7 +158,7 @@ typedef int          id_t;
  * semaphores. A key is simply an integer of type key_t
  */
 
-typedef int16_t      key_t;
+typedef int32_t      key_t;
 
 /* Signed integral type of the result of subtracting two pointers */
 

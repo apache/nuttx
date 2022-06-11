@@ -7,25 +7,15 @@ if ARCH_CHIP_LM32
 
 choice
 	prompt "Toolchain Selection"
-	default LM32_TOOLCHAIN_GNUW if TOOLCHAIN_WINDOWS
-	default LM32_TOOLCHAIN_GNUL if !TOOLCHAIN_WINDOWS
+	default LM32_TOOLCHAIN_GNU
 
 config LM32_TOOLCHAIN_BUILDROOT
 	bool "Buildroot (Cygwin or Linux)"
 	depends on !WINDOWS_NATIVE
 	select ARCH_TOOLCHAIN_GNU
 
-config LM32_TOOLCHAIN_GNUL
-	bool "Generic GNU toolchain under Linux (or other POSIX environment)"
-	select ARCH_TOOLCHAIN_GNU
-	---help---
-		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
-		configured for lm32-elf-.
-
-config LM32_TOOLCHAIN_GNUW
-	bool "Generic GNU toolchain under Windows"
-	depends on TOOLCHAIN_WINDOWS
-	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
+config LM32_TOOLCHAIN_GNU
+	bool "Generic GNU toolchain"
 	select ARCH_TOOLCHAIN_GNU
 	---help---
 		This option should work for any modern GNU toolchain (GCC 4.5 or newer)

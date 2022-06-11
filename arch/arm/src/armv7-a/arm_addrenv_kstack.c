@@ -129,7 +129,7 @@
  *
  ****************************************************************************/
 
-int up_addrenv_kstackalloc(FAR struct tcb_s *tcb)
+int up_addrenv_kstackalloc(struct tcb_s *tcb)
 {
   binfo("tcb=%p stacksize=%u\n", tcb, ARCH_KERNEL_STACKSIZE);
 
@@ -137,7 +137,7 @@ int up_addrenv_kstackalloc(FAR struct tcb_s *tcb)
 
   /* Allocate the kernel stack */
 
-  tcb->xcp.kstack = (FAR uint32_t *)kmm_memalign(8, ARCH_KERNEL_STACKSIZE);
+  tcb->xcp.kstack = (uint32_t *)kmm_memalign(8, ARCH_KERNEL_STACKSIZE);
   if (!tcb->xcp.kstack)
     {
       berr("ERROR: Failed to allocate the kernel stack\n");
@@ -162,7 +162,7 @@ int up_addrenv_kstackalloc(FAR struct tcb_s *tcb)
  *
  ****************************************************************************/
 
-int up_addrenv_kstackfree(FAR struct tcb_s *tcb)
+int up_addrenv_kstackfree(struct tcb_s *tcb)
 {
   binfo("tcb=%p\n", tcb);
   DEBUGASSERT(tcb);

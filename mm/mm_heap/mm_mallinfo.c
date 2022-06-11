@@ -75,7 +75,7 @@ static void mallinfo_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
     }
 }
 
-#ifdef CONFIG_DEBUG_MM
+#ifdef CONFIG_MM_BACKTRACE
 static void mallinfo_task_handler(FAR struct mm_allocnode_s *node,
                                   FAR void *arg)
 {
@@ -137,7 +137,7 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_MM
+#ifdef CONFIG_MM_BACKTRACE
 int mm_mallinfo_task(FAR struct mm_heap_s *heap,
                      FAR struct mallinfo_task *info)
 {

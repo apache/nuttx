@@ -29,7 +29,7 @@
 #include <queue.h>
 
 #include <nuttx/sched.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 
 #include "aio/aio.h"
 
@@ -50,16 +50,14 @@ static dq_queue_t g_aioc_free;
 /* This counting semaphore tracks the number of free AIO containers */
 
 static sem_t g_aioc_freesem = NXSEM_INITIALIZER(CONFIG_FS_NAIOC,
-                                                SEM_PRIO_NONE);
+                                                PRIOINHERIT_FLAGS_DISABLE);
 
-/* This binary semaphore supports exclusive access to the list of pending
+/* This binary lock supports exclusive access to the list of pending
  * asynchronous I/O.  g_aio_holder and a_aio_count support the reentrant
  * lock.
  */
 
-static sem_t g_aio_exclsem = SEM_INITIALIZER(1);
-static pid_t g_aio_holder = INVALID_PROCESS_ID;
-static uint16_t g_aio_count;
+static rmutex_t g_aio_lock = NXRMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Public Data
@@ -119,53 +117,12 @@ void aio_initialize(void)
 
 int aio_lock(void)
 {
-  pid_t me = getpid();
-  int ret = OK;
-
-  /* Does this thread already hold the semaphore? */
-
-  if (g_aio_holder == me)
-    {
-      /* Yes, just increment the counts held */
-
-      DEBUGASSERT(g_aio_count > 0 && g_aio_count < UINT16_MAX);
-      g_aio_count++;
-    }
-  else
-    {
-      ret = nxsem_wait_uninterruptible(&g_aio_exclsem);
-      if (ret >= 0)
-        {
-          /* And mark it as ours */
-
-          g_aio_holder = me;
-          g_aio_count  = 1;
-        }
-    }
-
-  return ret;
+  return nxrmutex_lock(&g_aio_lock);
 }
 
 void aio_unlock(void)
 {
-  DEBUGASSERT(g_aio_holder == getpid() && g_aio_count > 0);
-
-  /* Would decrementing the count release the lock? */
-
-  if (g_aio_count <= 1)
-    {
-      /* Yes.. that we will no longer be the holder */
-
-      g_aio_holder = INVALID_PROCESS_ID;
-      g_aio_count  = 0;
-      nxsem_post(&g_aio_exclsem);
-    }
-  else
-    {
-      /* Otherwise, just decrement the count.  We still hold the lock. */
-
-      g_aio_count--;
-    }
+  nxrmutex_unlock(&g_aio_lock);
 }
 
 /****************************************************************************

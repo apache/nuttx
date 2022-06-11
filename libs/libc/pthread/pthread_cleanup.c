@@ -28,7 +28,6 @@
 #include <sched.h>
 #include <assert.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/tls.h>
 #include <nuttx/pthread.h>
@@ -75,12 +74,7 @@ static void pthread_cleanup_pop_tls(FAR struct tls_info_s *tls, int execute)
         {
           FAR struct pthread_cleanup_s *cb;
 
-          /* Yes..  Execute the clean-up routine.
-           *
-           * REVISIT: This is a security problem In the PROTECTED and KERNEL
-           * builds:  We must not call the registered function in supervisor
-           * mode!  See also on_exit() and atexit() callbacks.
-           */
+          /* Yes..  Execute the clean-up routine. */
 
           cb  = &tls->stack[ndx];
           cb->pc_cleaner(cb->pc_arg);
@@ -124,7 +118,7 @@ static void pthread_cleanup_pop_tls(FAR struct tls_info_s *tls, int execute)
 
 void pthread_cleanup_pop(int execute)
 {
-  FAR struct tls_info_s *tls = up_tls_info();
+  FAR struct tls_info_s *tls = tls_get_info();
 
   DEBUGASSERT(tls != NULL);
 
@@ -140,7 +134,7 @@ void pthread_cleanup_pop(int execute)
 
 void pthread_cleanup_push(pthread_cleanup_t routine, FAR void *arg)
 {
-  FAR struct tls_info_s *tls = up_tls_info();
+  FAR struct tls_info_s *tls = tls_get_info();
 
   DEBUGASSERT(tls != NULL);
   DEBUGASSERT(tls->tos < CONFIG_PTHREAD_CLEANUP_STACKSIZE);

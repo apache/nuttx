@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <stdint.h>
 #include <time.h>
 #include <debug.h>
@@ -31,9 +32,11 @@
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/timers/arch_alarm.h>
 #include <arch/board/board.h>
 
 #include "riscv_internal.h"
+#include "riscv_mtimer.h"
 #include "hardware/qemu_rv_memorymap.h"
 #include "hardware/qemu_rv_clint.h"
 
@@ -41,61 +44,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define getreg64(a)   (*(volatile uint64_t *)(a))
-#define putreg64(v,a) (*(volatile uint64_t *)(a) = (v))
-
-#define TICK_COUNT (10000000 / TICK_PER_SEC)
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static bool _b_tick_started = false;
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name:  qemu_rv_reload_mtimecmp
- ****************************************************************************/
-
-static void qemu_rv_reload_mtimecmp(void)
-{
-  irqstate_t flags = spin_lock_irqsave(NULL);
-
-  uint64_t current;
-  uint64_t next;
-
-  if (!_b_tick_started)
-    {
-      _b_tick_started = true;
-      current = getreg64(QEMU_RV_CLINT_MTIME);
-    }
-  else
-    {
-      current = getreg64(QEMU_RV_CLINT_MTIMECMP);
-    }
-
-  next = current + TICK_COUNT;
-  putreg64(next, QEMU_RV_CLINT_MTIMECMP);
-
-  spin_unlock_irqrestore(NULL, flags);
-}
-
-/****************************************************************************
- * Name:  qemu_rv_timerisr
- ****************************************************************************/
-
-static int qemu_rv_timerisr(int irq, void *context, void *arg)
-{
-  qemu_rv_reload_mtimecmp();
-
-  /* Process timer interrupt */
-
-  nxsched_process_timer();
-  return 0;
-}
+#define MTIMER_FREQ 10000000
 
 /****************************************************************************
  * Public Functions
@@ -112,15 +61,13 @@ static int qemu_rv_timerisr(int irq, void *context, void *arg)
 
 void up_timer_initialize(void)
 {
-  /* Attach timer interrupt handler */
+#ifndef CONFIG_BUILD_KERNEL
+  struct oneshot_lowerhalf_s *lower = riscv_mtimer_initialize(
+    QEMU_RV_CLINT_MTIME, QEMU_RV_CLINT_MTIMECMP,
+    RISCV_IRQ_MTIMER, MTIMER_FREQ);
 
-  irq_attach(RISCV_IRQ_MTIMER, qemu_rv_timerisr, NULL);
+  DEBUGASSERT(lower);
 
-  /* Reload CLINT mtimecmp */
-
-  qemu_rv_reload_mtimecmp();
-
-  /* And enable the timer interrupt */
-
-  up_enable_irq(RISCV_IRQ_MTIMER);
+  up_alarm_set_lowerhalf(lower);
+#endif
 }

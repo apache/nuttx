@@ -49,7 +49,7 @@
 #define O_NDELAY    O_NONBLOCK      /* Synonym for O_NONBLOCK */
 #define O_SYNC      (1 << 7)        /* Synchronize output on write */
 #define O_DSYNC     O_SYNC          /* Equivalent to OSYNC in NuttX */
-#define O_BINARY    (1 << 8)        /* Open the file in binary (untranslated) mode. */
+#define O_TEXT      (1 << 8)        /* Open the file in text (translated) mode. */
 #define O_DIRECT    (1 << 9)        /* Avoid caching, write directly to hardware */
 #define O_CLOEXEC   (1 << 10)       /* Close on execute */
 
@@ -58,7 +58,7 @@
 #define O_RSYNC     0               /* Synchronize input on read */
 #define O_ACCMODE   O_RDWR          /* Mask for access mode */
 #define O_NOCTTY    0               /* Required by POSIX */
-#define O_TEXT      0               /* Open the file in text (translated) mode. */
+#define O_BINARY    0               /* Open the file in binary (untranslated) mode. */
 
 /* This is the highest bit number used in the open flags bitset.  Bits above
  * this bit number may be used within NuttX for other, internal purposes.

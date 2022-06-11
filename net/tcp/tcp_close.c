@@ -40,20 +40,28 @@
 #include "socket/socket.h"
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-struct tcp_close_s
-{
-  FAR struct tcp_conn_s       *cl_conn;   /* Needed to handle loss of connection */
-  FAR struct devif_callback_s *cl_cb;     /* Reference to TCP callback instance */
-  sem_t                        cl_sem;    /* Signals disconnect completion */
-  int                          cl_result; /* The result of the close */
-};
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: tcp_close_work
+ ****************************************************************************/
+
+static void tcp_close_work(FAR void *param)
+{
+  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)param;
+
+  net_lock();
+
+  tcp_callback_free(conn, conn->clscb);
+
+  /* Stop the network monitor for all sockets */
+
+  tcp_stop_monitor(conn, TCP_CLOSE);
+  tcp_free(conn);
+
+  net_unlock();
+}
 
 /****************************************************************************
  * Name: tcp_close_eventhandler
@@ -63,10 +71,7 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
                                        FAR void *pvconn, FAR void *pvpriv,
                                        uint16_t flags)
 {
-  FAR struct tcp_close_s *pstate = (FAR struct tcp_close_s *)pvpriv;
-  FAR struct tcp_conn_s *conn = pstate->cl_conn;
-
-  DEBUGASSERT(pstate != NULL);
+  FAR struct tcp_conn_s *conn = pvpriv;
 
   ninfo("flags: %04x\n", flags);
 
@@ -105,15 +110,6 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
        *   network is taken down but should recover later when the
        *   NETWORK_DOWN event is processed further.
        */
-
-      if ((flags & NETDEV_DOWN) != 0)
-        {
-          pstate->cl_result = -ENODEV;
-        }
-      else
-        {
-          pstate->cl_result = OK;
-        }
 
       goto end_wait;
     }
@@ -182,12 +178,14 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
   return flags;
 
 end_wait:
-  pstate->cl_cb->flags = 0;
-  pstate->cl_cb->priv  = NULL;
-  pstate->cl_cb->event = NULL;
-  nxsem_post(&pstate->cl_sem);
+  conn->clscb->flags = 0;
+  conn->clscb->priv  = NULL;
+  conn->clscb->event = NULL;
 
-  ninfo("Resuming\n");
+  /* Free network resources */
+
+  work_queue(LPWORK, &conn->clswork, tcp_close_work, conn, 0);
+
   return flags;
 }
 
@@ -257,7 +255,6 @@ static inline void tcp_close_txnotify(FAR struct socket *psock,
 
 static inline int tcp_close_disconnect(FAR struct socket *psock)
 {
-  struct tcp_close_s state;
   FAR struct tcp_conn_s *conn;
   int ret = OK;
 
@@ -307,58 +304,28 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
 
   if ((conn->tcpstateflags == TCP_ESTABLISHED ||
        conn->tcpstateflags == TCP_LAST_ACK) &&
-      (state.cl_cb = tcp_callback_alloc(conn)) != NULL)
+      (conn->clscb = tcp_callback_alloc(conn)) != NULL)
     {
       /* Set up to receive TCP data event callbacks */
 
-      state.cl_cb->flags = (TCP_NEWDATA | TCP_POLL | TCP_DISCONN_EVENTS);
-      state.cl_cb->event = tcp_close_eventhandler;
-
-      /* A non-NULL value of the priv field means that lingering is
-       * enabled.
-       */
-
-      state.cl_cb->priv  = (FAR void *)&state;
-
-      /* Set up for the lingering wait */
-
-      state.cl_conn      = conn;
-      state.cl_result    = -EBUSY;
-
-      /* This semaphore is used for signaling and, hence, should not have
-       * priority inheritance enabled.
-       */
-
-      nxsem_init(&state.cl_sem, 0, 0);
-      nxsem_set_protocol(&state.cl_sem, SEM_PRIO_NONE);
+      conn->clscb->flags = (TCP_NEWDATA | TCP_POLL | TCP_DISCONN_EVENTS);
+      conn->clscb->event = tcp_close_eventhandler;
+      conn->clscb->priv  = conn;
 
       /* Notify the device driver of the availability of TX data */
 
       tcp_close_txnotify(psock, conn);
-
-      /* Wait for the disconnect event */
-
-      net_lockedwait(&state.cl_sem);
-
-      /* We are now disconnected */
-
-      nxsem_destroy(&state.cl_sem);
-      tcp_callback_free(conn, state.cl_cb);
-
-      /* Free the connection
-       * No more references on the connection
-       */
-
-      conn->crefs = 0;
-
-      /* Get the result of the close */
-
-      ret = state.cl_result;
     }
+  else
+    {
+      /* Stop the network monitor for all sockets */
 
-  /* Free network resources */
+      tcp_stop_monitor(conn, TCP_CLOSE);
 
-  tcp_free(conn);
+      /* Free network resources */
+
+      tcp_free(conn);
+    }
 
   net_unlock();
   return ret;
@@ -385,7 +352,6 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
 int tcp_close(FAR struct socket *psock)
 {
   FAR struct tcp_conn_s *conn = psock->s_conn;
-  int ret;
 
   /* Perform the disconnection now */
 
@@ -394,21 +360,7 @@ int tcp_close(FAR struct socket *psock)
 
   /* Break any current connections and close the socket */
 
-  ret = tcp_close_disconnect(psock);
-  if (ret < 0)
-    {
-      /* This would normally occur only if there is a timeout
-       * from a lingering close.
-       */
-
-      nerr("ERROR: tcp_close_disconnect failed: %d\n", ret);
-      return ret;
-    }
-
-  /* Stop the network monitor for all sockets */
-
-  tcp_stop_monitor(conn, TCP_CLOSE);
-  return OK;
+  return tcp_close_disconnect(psock);
 }
 
 #endif /* CONFIG_NET_TCP */

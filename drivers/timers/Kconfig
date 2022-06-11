@@ -312,12 +312,12 @@ endif # RTC_RX8010SJ
 config RTC_RPMSG
 	bool "Rpmsg RTC Driver"
 	default n
-	depends on OPENAMP
+	depends on RPTUN
 	select ARCH_HAVE_RTC_SUBSECONDS
 
 config RTC_RPMSG_SERVER
 	bool "The RTC Rpmsg Role"
-	depends on OPENAMP
+	depends on RPTUN
 
 config RTC_RPMSG_SERVER_NAME
 	string "The name of RTC Rpmsg Server"

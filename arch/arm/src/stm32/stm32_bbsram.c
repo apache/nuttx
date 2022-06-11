@@ -86,40 +86,40 @@
 
 struct bbsramfh_s
 {
-  uint32_t crc;                /* CRC calculated over data and this struct
-                                * starting at fileno */
-  uint8_t fileno;              /* The minor number */
-  uint8_t dirty;               /* Data has been written to the file */
-  uint16_t len;                /* Total Bytes in this file */
-  struct timespec lastwrite;   /* Last write time */
-  uint8_t  data[];             /* Data in the file */
+  uint32_t crc;              /* CRC calculated over data and this struct
+                             * starting at fileno */
+  uint8_t fileno;            /* The minor number */
+  uint8_t dirty;             /* Data has been written to the file */
+  uint16_t len;              /* Total Bytes in this file */
+  struct timespec lastwrite; /* Last write time */
+  uint8_t  data[];           /* Data in the file */
 };
 
 struct stm32_bbsram_s
 {
-  sem_t    exclsem;            /* For atomic accesses to this structure */
-  uint8_t  refs;               /* Number of references */
-  FAR struct bbsramfh_s *bbf;  /* File in bbram */
+  sem_t    exclsem;          /* For atomic accesses to this structure */
+  uint8_t  refs;             /* Number of references */
+  struct bbsramfh_s *bbf;    /* File in bbram */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     stm32_bbsram_open(FAR struct file *filep);
-static int     stm32_bbsram_close(FAR struct file *filep);
-static off_t   stm32_bbsram_seek(FAR struct file *filep, off_t offset,
+static int     stm32_bbsram_open(struct file *filep);
+static int     stm32_bbsram_close(struct file *filep);
+static off_t   stm32_bbsram_seek(struct file *filep, off_t offset,
                  int whence);
-static ssize_t stm32_bbsram_read(FAR struct file *filep, FAR char *buffer,
+static ssize_t stm32_bbsram_read(struct file *filep, char *buffer,
                  size_t len);
-static ssize_t stm32_bbsram_write(FAR struct file *filep,
-                 FAR const char *buffer, size_t len);
-static int stm32_bbsram_ioctl(FAR struct file *filep, int cmd,
+static ssize_t stm32_bbsram_write(struct file *filep,
+                 const char *buffer, size_t len);
+static int stm32_bbsram_ioctl(struct file *filep, int cmd,
                  unsigned long arg);
-static int     stm32_bbsram_poll(FAR struct file *filep,
-                 FAR struct pollfd *fds, bool setup);
+static int     stm32_bbsram_poll(struct file *filep,
+                 struct pollfd *fds, bool setup);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static int     stm32_bbsram_unlink(FAR struct inode *inode);
+static int     stm32_bbsram_unlink(struct inode *inode);
 #endif
 
 /****************************************************************************
@@ -140,7 +140,7 @@ static const struct file_operations stm32_bbsram_fops =
   .ioctl  = stm32_bbsram_ioctl,
   .poll   = stm32_bbsram_poll,
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  .unlink = stm32_bbsram_unlink,
+  .unlink = stm32_bbsram_unlink
 #endif
 };
 
@@ -166,7 +166,7 @@ static void stm32_bbsram_rd(void)
  ****************************************************************************/
 
 #if defined(CONFIG_BBSRAM_DEBUG)
-static void stm32_bbsram_dump(FAR struct bbsramfh_s *bbf, char *op)
+static void stm32_bbsram_dump(struct bbsramfh_s *bbf, char *op)
 {
   BBSRAM_DEBUG_READ();
   _info("%s:\n", op);
@@ -185,7 +185,7 @@ static void stm32_bbsram_dump(FAR struct bbsramfh_s *bbf, char *op)
  * Name: stm32_bbsram_semgive
  ****************************************************************************/
 
-static void stm32_bbsram_semgive(FAR struct stm32_bbsram_s *priv)
+static void stm32_bbsram_semgive(struct stm32_bbsram_s *priv)
 {
   nxsem_post(&priv->exclsem);
 }
@@ -204,7 +204,7 @@ static void stm32_bbsram_semgive(FAR struct stm32_bbsram_s *priv)
  *
  ****************************************************************************/
 
-static int stm32_bbsram_semtake(FAR struct stm32_bbsram_s *priv)
+static int stm32_bbsram_semtake(struct stm32_bbsram_s *priv)
 {
   return nxsem_wait_uninterruptible(&priv->exclsem);
 }
@@ -263,7 +263,7 @@ static inline void stm32_bbsram_lock(void)
  *
  ****************************************************************************/
 
-static uint32_t stm32_bbsram_crc(FAR struct bbsramfh_s *pf)
+static uint32_t stm32_bbsram_crc(struct bbsramfh_s *pf)
 {
   return crc32((uint8_t *)pf + BBSRAM_CRCED_OFFSET,
                BBSRAM_CRCED_SIZE(pf->len));
@@ -276,14 +276,14 @@ static uint32_t stm32_bbsram_crc(FAR struct bbsramfh_s *pf)
  *
  ****************************************************************************/
 
-static int stm32_bbsram_open(FAR struct file *filep)
+static int stm32_bbsram_open(struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct stm32_bbsram_s *bbr;
+  struct inode *inode = filep->f_inode;
+  struct stm32_bbsram_s *bbr;
   int ret;
 
   DEBUGASSERT(inode && inode->i_private);
-  bbr = (FAR struct stm32_bbsram_s *)inode->i_private;
+  bbr = (struct stm32_bbsram_s *)inode->i_private;
 
   /* Increment the reference count */
 
@@ -314,7 +314,7 @@ static int stm32_bbsram_open(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static int stm32_bbsram_internal_close(FAR struct bbsramfh_s *bbf)
+static int stm32_bbsram_internal_close(struct bbsramfh_s *bbf)
 {
   bbf->dirty = 0;
   clock_gettime(CLOCK_REALTIME, &bbf->lastwrite);
@@ -331,14 +331,14 @@ static int stm32_bbsram_internal_close(FAR struct bbsramfh_s *bbf)
  *
  ****************************************************************************/
 
-static int stm32_bbsram_close(FAR struct file *filep)
+static int stm32_bbsram_close(struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct stm32_bbsram_s *bbr;
+  struct inode *inode = filep->f_inode;
+  struct stm32_bbsram_s *bbr;
   int ret = OK;
 
   DEBUGASSERT(inode && inode->i_private);
-  bbr = (FAR struct stm32_bbsram_s *)inode->i_private;
+  bbr = (struct stm32_bbsram_s *)inode->i_private;
 
   ret = stm32_bbsram_semtake(bbr);
   if (ret < 0)
@@ -377,16 +377,16 @@ static int stm32_bbsram_close(FAR struct file *filep)
  * Name: stm32_bbsram_seek
  ****************************************************************************/
 
-static off_t stm32_bbsram_seek(FAR struct file *filep, off_t offset,
+static off_t stm32_bbsram_seek(struct file *filep, off_t offset,
                                int whence)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct stm32_bbsram_s *bbr;
+  struct inode *inode = filep->f_inode;
+  struct stm32_bbsram_s *bbr;
   off_t newpos;
   int ret;
 
   DEBUGASSERT(inode && inode->i_private);
-  bbr = (FAR struct stm32_bbsram_s *)inode->i_private;
+  bbr = (struct stm32_bbsram_s *)inode->i_private;
 
   ret = stm32_bbsram_semtake(bbr);
   if (ret < 0)
@@ -448,15 +448,15 @@ static off_t stm32_bbsram_seek(FAR struct file *filep, off_t offset,
  * Name: stm32_bbsram_read
  ****************************************************************************/
 
-static ssize_t stm32_bbsram_read(FAR struct file *filep, FAR char *buffer,
+static ssize_t stm32_bbsram_read(struct file *filep, char *buffer,
                                  size_t len)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct stm32_bbsram_s *bbr;
+  struct inode *inode = filep->f_inode;
+  struct stm32_bbsram_s *bbr;
   int ret;
 
   DEBUGASSERT(inode && inode->i_private);
-  bbr = (FAR struct stm32_bbsram_s *)inode->i_private;
+  bbr = (struct stm32_bbsram_s *)inode->i_private;
 
   ret = stm32_bbsram_semtake(bbr);
   if (ret < 0)
@@ -481,8 +481,8 @@ static ssize_t stm32_bbsram_read(FAR struct file *filep, FAR char *buffer,
  * Name: stm32_bbsram_internal_write
  ****************************************************************************/
 
-static ssize_t stm32_bbsram_internal_write(FAR struct bbsramfh_s *bbf,
-                                           FAR const char *buffer,
+static ssize_t stm32_bbsram_internal_write(struct bbsramfh_s *bbf,
+                                           const char *buffer,
                                            off_t offset, size_t len)
 {
   bbf->dirty = 1;
@@ -494,15 +494,15 @@ static ssize_t stm32_bbsram_internal_write(FAR struct bbsramfh_s *bbf,
  * Name: stm32_bbsram_write
  ****************************************************************************/
 
-static ssize_t stm32_bbsram_write(FAR struct file *filep,
-                                  FAR const char *buffer, size_t len)
+static ssize_t stm32_bbsram_write(struct file *filep,
+                                  const char *buffer, size_t len)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct stm32_bbsram_s *bbr;
+  struct inode *inode = filep->f_inode;
+  struct stm32_bbsram_s *bbr;
   int ret = -EFBIG;
 
   DEBUGASSERT(inode && inode->i_private);
-  bbr = (FAR struct stm32_bbsram_s *)inode->i_private;
+  bbr = (struct stm32_bbsram_s *)inode->i_private;
 
   /* Forbid writes past the end of the device */
 
@@ -540,7 +540,7 @@ static ssize_t stm32_bbsram_write(FAR struct file *filep,
  * Name: stm32_bbsram_poll
  ****************************************************************************/
 
-static int stm32_bbsram_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int stm32_bbsram_poll(struct file *filep, struct pollfd *fds,
                              bool setup)
 {
   if (setup)
@@ -562,19 +562,19 @@ static int stm32_bbsram_poll(FAR struct file *filep, FAR struct pollfd *fds,
  *
  ****************************************************************************/
 
-static int stm32_bbsram_ioctl(FAR struct file *filep, int cmd,
+static int stm32_bbsram_ioctl(struct file *filep, int cmd,
                               unsigned long arg)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct stm32_bbsram_s *bbr;
+  struct inode *inode = filep->f_inode;
+  struct stm32_bbsram_s *bbr;
   int ret = -ENOTTY;
 
   DEBUGASSERT(inode && inode->i_private);
-  bbr = (FAR struct stm32_bbsram_s *)inode->i_private;
+  bbr = (struct stm32_bbsram_s *)inode->i_private;
 
   if (cmd == STM32_BBSRAM_GETDESC_IOCTL)
     {
-      FAR struct bbsramd_s *bbrr = (FAR struct bbsramd_s *)((uintptr_t)arg);
+      struct bbsramd_s *bbrr = (struct bbsramd_s *)((uintptr_t)arg);
 
       ret = stm32_bbsram_semtake(bbr);
       if (ret < 0)
@@ -617,13 +617,13 @@ static int stm32_bbsram_ioctl(FAR struct file *filep, int cmd,
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static int stm32_bbsram_unlink(FAR struct inode *inode)
+static int stm32_bbsram_unlink(struct inode *inode)
 {
-  FAR struct stm32_bbsram_s *bbr;
+  struct stm32_bbsram_s *bbr;
   int ret;
 
   DEBUGASSERT(inode && inode->i_private);
-  bbr = (FAR struct stm32_bbsram_s *)inode->i_private;
+  bbr = (struct stm32_bbsram_s *)inode->i_private;
 
   ret = stm32_bbsram_semtake(bbr);
   if (ret < 0)
@@ -818,7 +818,7 @@ int stm32_bbsraminitialize(char *devpath, int *sizes)
 #if defined(CONFIG_STM32_SAVE_CRASHDUMP)
 int stm32_bbsram_savepanic(int fileno, uint8_t *context, int length)
 {
-  FAR struct bbsramfh_s *bbf;
+  struct bbsramfh_s *bbf;
   int fill;
   int ret = -ENOSPC;
 

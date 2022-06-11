@@ -1276,7 +1276,7 @@ static void sam_dmaterminate(struct sam_dma_s *dmach, int result)
  *
  ****************************************************************************/
 
-static int sam_dmainterrupt(int irq, void *context, FAR void *arg)
+static int sam_dmainterrupt(int irq, void *context, void *arg)
 {
   struct sam_dma_s *dmach;
   unsigned int chndx;

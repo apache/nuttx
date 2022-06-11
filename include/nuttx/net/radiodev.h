@@ -68,11 +68,11 @@ struct radiodev_properties_s
  *     field of the IOB.
  *
  *     Outgoing frames are generated when the radio network driver calls
- *     the devif_poll(), devif_timer(), sixlowpan_input(), or
- *     ieee802154_input() interfaces.  In each case, the radio driver must
- *     provide a working buffer in the d_buf pointer.  A special form of
- *     the packet buffer must be used, struct sixlowpan_reassbuf_s.  This
- *     special for includes appended data for managing reassembly of packets.
+ *     the devif_poll(), sixlowpan_input(), or ieee802154_input()
+ *     interfaces.  In each case, the radio driver must provide a working
+ *     buffer in the d_buf pointer.  A special form of the packet buffer
+ *     must be used, struct sixlowpan_reassbuf_s.  This special for
+ *     includes appended data for managing reassembly of packets.
  *
  *   - Received frames are provided by radio network driver to the network
  *     via an IOB parameter in the sixlowpan_input() pr ieee802154_input()

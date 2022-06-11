@@ -134,10 +134,10 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * delivered.
                */
 
-              CURRENT_REGS              = (FAR void *)
+              CURRENT_REGS              = (void *)
                                           ((uint32_t)CURRENT_REGS -
                                            (uint32_t)XCPTCONTEXT_SIZE);
-              memcpy((FAR uint32_t *)CURRENT_REGS, tcb->xcp.saved_regs,
+              memcpy((uint32_t *)CURRENT_REGS, tcb->xcp.saved_regs,
                      XCPTCONTEXT_SIZE);
 
               CURRENT_REGS[REG_SP]      = (uint32_t)CURRENT_REGS +
@@ -180,7 +180,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * delivered.
            */
 
-          tcb->xcp.regs              = (FAR void *)
+          tcb->xcp.regs              = (void *)
                                        ((uint32_t)tcb->xcp.regs -
                                         (uint32_t)XCPTCONTEXT_SIZE);
           memcpy(tcb->xcp.regs, tcb->xcp.saved_regs, XCPTCONTEXT_SIZE);

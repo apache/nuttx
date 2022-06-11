@@ -376,6 +376,33 @@ int up_addrenv_vdata(FAR group_addrenv_t *addrenv, uintptr_t textsize,
 }
 
 /****************************************************************************
+ * Name: up_addrenv_vheap
+ *
+ * Description:
+ *   Return the heap virtual address associated with the newly created
+ *   address environment.  This function is used by the binary loaders in
+ *   order get an address that can be used to initialize the new task.
+ *
+ * Input Parameters:
+ *   addrenv - The representation of the task address environment previously
+ *      returned by up_addrenv_create.
+ *   vheap - The location to return the virtual address.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BUILD_KERNEL
+int up_addrenv_vheap(FAR const group_addrenv_t *addrenv, FAR void **vheap)
+{
+  /* Not implemented */
+
+  return -ENOSYS;
+}
+#endif
+
+/****************************************************************************
  * Name: up_addrenv_heapsize
  *
  * Description:

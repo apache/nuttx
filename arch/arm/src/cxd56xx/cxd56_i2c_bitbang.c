@@ -47,15 +47,15 @@ struct cxd56_i2c_bitbang_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static void i2c_bb_initialize(FAR struct i2c_bitbang_lower_dev_s *lower);
+static void i2c_bb_initialize(struct i2c_bitbang_lower_dev_s *lower);
 
-static void i2c_bb_set_scl(FAR struct i2c_bitbang_lower_dev_s *lower,
+static void i2c_bb_set_scl(struct i2c_bitbang_lower_dev_s *lower,
                            bool high);
-static void i2c_bb_set_sda(FAR struct i2c_bitbang_lower_dev_s *lower,
+static void i2c_bb_set_sda(struct i2c_bitbang_lower_dev_s *lower,
                            bool high);
 
-static bool i2c_bb_get_scl(FAR struct i2c_bitbang_lower_dev_s *lower);
-static bool i2c_bb_get_sda(FAR struct i2c_bitbang_lower_dev_s *lower);
+static bool i2c_bb_get_scl(struct i2c_bitbang_lower_dev_s *lower);
+static bool i2c_bb_get_sda(struct i2c_bitbang_lower_dev_s *lower);
 
 /****************************************************************************
  * Private Data
@@ -74,7 +74,7 @@ const static struct i2c_bitbang_lower_ops_s g_ops =
  * Private Functions
  ****************************************************************************/
 
-static void i2c_bb_initialize(FAR struct i2c_bitbang_lower_dev_s *lower)
+static void i2c_bb_initialize(struct i2c_bitbang_lower_dev_s *lower)
 {
   struct cxd56_i2c_bitbang_dev_s *dev = lower->priv;
 
@@ -84,7 +84,7 @@ static void i2c_bb_initialize(FAR struct i2c_bitbang_lower_dev_s *lower)
   board_gpio_config(dev->sda_pin, 0, true, true, PIN_PULLUP);
 }
 
-static void i2c_bb_set_scl(FAR struct i2c_bitbang_lower_dev_s *lower,
+static void i2c_bb_set_scl(struct i2c_bitbang_lower_dev_s *lower,
                            bool high)
 {
   struct cxd56_i2c_bitbang_dev_s *dev = lower->priv;
@@ -96,7 +96,7 @@ static void i2c_bb_set_scl(FAR struct i2c_bitbang_lower_dev_s *lower,
   board_gpio_write(dev->scl_pin, value);
 }
 
-static void i2c_bb_set_sda(FAR struct i2c_bitbang_lower_dev_s *lower,
+static void i2c_bb_set_sda(struct i2c_bitbang_lower_dev_s *lower,
                            bool high)
 {
   struct cxd56_i2c_bitbang_dev_s *dev = lower->priv;
@@ -108,14 +108,14 @@ static void i2c_bb_set_sda(FAR struct i2c_bitbang_lower_dev_s *lower,
   board_gpio_write(dev->sda_pin, value);
 }
 
-static bool i2c_bb_get_scl(FAR struct i2c_bitbang_lower_dev_s *lower)
+static bool i2c_bb_get_scl(struct i2c_bitbang_lower_dev_s *lower)
 {
   struct cxd56_i2c_bitbang_dev_s *dev = lower->priv;
 
   return board_gpio_read(dev->scl_pin);
 }
 
-static bool i2c_bb_get_sda(FAR struct i2c_bitbang_lower_dev_s *lower)
+static bool i2c_bb_get_sda(struct i2c_bitbang_lower_dev_s *lower)
 {
   struct cxd56_i2c_bitbang_dev_s *dev = lower->priv;
 

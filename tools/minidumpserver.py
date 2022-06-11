@@ -165,6 +165,28 @@ reg_table = {
         "T6": 31,
         "PC": 32,
     },
+    "xtensa": {
+        "PC": 0,
+        "SAR": 68,
+        "PS": 73,
+        "SCOM": 29,
+        "A0": 21,
+        "A1": 22,
+        "A2": 23,
+        "A3": 24,
+        "A4": 25,
+        "A5": 26,
+        "A6": 27,
+        "A7": 28,
+        "A8": 29,
+        "A9": 30,
+        "A10": 31,
+        "A11": 32,
+        "A12": 33,
+        "A13": 34,
+        "A14": 35,
+        "A15": 36,
+    }
 }
 
 
@@ -200,7 +222,7 @@ class dump_log_file:
                     logger.error("%s not supported" % (self.arch))
                 # init register list
                 if len(self.registers) == 0:
-                    for x in range(len(reg_table[self.arch])):
+                    for x in range(max(reg_table[self.arch].values()) + 1):
                         self.registers.append(b"x")
 
                 # find register value

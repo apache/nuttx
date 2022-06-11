@@ -58,7 +58,7 @@ static inline bool pic32mz_edgedetect(pinset_t pinset);
 static inline unsigned int pic32mz_edgemode(pinset_t pinset);
 static inline bool pic32mz_pullup(pinset_t pinset);
 static inline bool pic32mz_pulldown(pinset_t pinset);
-static int pic32mz_cninterrupt(int irq, FAR void *context, FAR void *arg);
+static int pic32mz_cninterrupt(int irq, void *context, void *arg);
 
 /****************************************************************************
  * Public Data
@@ -206,7 +206,7 @@ static inline unsigned int pic32mz_pin(pinset_t pinset)
  *
  ****************************************************************************/
 
-static int pic32mz_cninterrupt(int irq, FAR void *context, FAR void *arg)
+static int pic32mz_cninterrupt(int irq, void *context, void *arg)
 {
   struct ioport_level2_s *handlers;
   xcpt_t handler;

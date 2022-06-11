@@ -48,7 +48,7 @@
  ****************************************************************************/
 
 #if CONFIG_SMP_NCPUS > 1
-static FAR const uint32_t *g_cpu_stackalloc[CONFIG_SMP_NCPUS] =
+static const uint32_t *g_cpu_stackalloc[CONFIG_SMP_NCPUS] =
 {
     0
   , g_cpu1_idlestack
@@ -108,7 +108,7 @@ static FAR const uint32_t *g_cpu_stackalloc[CONFIG_SMP_NCPUS] =
  *
  ****************************************************************************/
 
-int up_cpu_idlestack(int cpu, FAR struct tcb_s *tcb, size_t stack_size)
+int up_cpu_idlestack(int cpu, struct tcb_s *tcb, size_t stack_size)
 {
 #if CONFIG_SMP_NCPUS > 1
   uintptr_t stack_alloc;
@@ -122,7 +122,7 @@ int up_cpu_idlestack(int cpu, FAR struct tcb_s *tcb, size_t stack_size)
   DEBUGASSERT(stack_alloc != 0 && STACK_ISALIGNED(stack_alloc));
 
   tcb->adj_stack_size  = SMP_STACK_SIZE;
-  tcb->stack_alloc_ptr = (FAR void *)stack_alloc;
+  tcb->stack_alloc_ptr = (void *)stack_alloc;
   tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
 #endif
 

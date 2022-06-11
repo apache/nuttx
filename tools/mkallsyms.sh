@@ -50,10 +50,6 @@ fi
 echo "#include <nuttx/compiler.h>"
 echo "#include <nuttx/symtab.h>"
 echo ""
-echo "#if defined(__GNUC__) && !defined(__clang__)"
-echo "#  pragma GCC diagnostic ignored \"-Wbuiltin-declaration-mismatch\""
-echo "#endif"
-echo ""
 echo "${CONST} int             g_nallsyms = ${count} + 2;"
 echo "${CONST} struct symtab_s g_allsyms[${count} + 2] = "
 echo "{"
@@ -66,7 +62,7 @@ if [ -f "${1}" ];then
   ${nm} -n ${1} | grep -E " [T|t] "  | uniq | \
   while read addr type name
   do
-    echo "  { \"`${filt} -p $name`\", (FAR ${CONST} void *)0x$addr },"
+    echo "  { \"$(${filt} $name | sed -e "s/(.*)$//")\", (FAR ${CONST} void *)0x$addr },"
   done
 fi
 

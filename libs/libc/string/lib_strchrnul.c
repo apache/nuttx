@@ -39,7 +39,7 @@
  *   considered to be part of the string.
  *
  * Returned Value:
- *   Upon completion, strchrnull() returns a pointer to the byte, or a
+ *   Upon completion, strchrnul() returns a pointer to the byte, or a
  *   pointer to null if the byte was not found.
  *
  ****************************************************************************/

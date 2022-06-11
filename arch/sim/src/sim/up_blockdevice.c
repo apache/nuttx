@@ -53,6 +53,6 @@
 
 void up_registerblockdevice(void)
 {
-  ramdisk_register(0, (FAR uint8_t *)up_deviceimage(), NSECTORS,
+  ramdisk_register(0, (uint8_t *)up_deviceimage(), NSECTORS,
                    LOGICAL_SECTOR_SIZE, RDFLAG_WRENABLED | RDFLAG_FUNLINK);
 }

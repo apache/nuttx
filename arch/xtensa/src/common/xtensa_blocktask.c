@@ -140,7 +140,7 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
 
           /* Then switch contexts */
 
-          xtensa_switchcontext(rtcb->xcp.regs, nexttcb->xcp.regs);
+          xtensa_switchcontext(&rtcb->xcp.regs, nexttcb->xcp.regs);
 
           /* xtensa_switchcontext forces a context switch to the task at the
            * head of the ready-to-run list.  It does not 'return' in the

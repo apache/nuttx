@@ -130,6 +130,17 @@ int stm32l4_gpio_initialize(void);
 #endif
 
 /****************************************************************************
+ * Name: stm32l4_spiregister
+ *
+ * Description:
+ *   Called to register spi character driver of initialized
+ *   spi device for the Nucleo-L432KC board.
+ *
+ ****************************************************************************/
+
+void stm32l4_spiregister(void);
+
+/****************************************************************************
  * Name: stm32l4_spiinitialize
  *
  * Description:
@@ -182,7 +193,7 @@ int stm32l4_adc_setup(void);
  ****************************************************************************/
 
 #ifdef CONFIG_DAC7571
-int stm32_dac7571initialize(FAR const char *devpath);
+int stm32_dac7571initialize(const char *devpath);
 #endif
 
 /****************************************************************************
@@ -206,7 +217,7 @@ int stm32_at45dbinitialize(int minor);
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_INA226
-int stm32_ina226initialize(FAR const char *devpath);
+int stm32_ina226initialize(const char *devpath);
 #endif
 
 /****************************************************************************
@@ -218,7 +229,7 @@ int stm32_ina226initialize(FAR const char *devpath);
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_INA219
-int stm32_ina219initialize(FAR const char *devpath);
+int stm32_ina219initialize(const char *devpath);
 #endif
 
 /****************************************************************************
@@ -242,7 +253,7 @@ int stm32_zerocross_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_TIMER
-int board_timer_driver_initialize(FAR const char *devpath, int timer);
+int board_timer_driver_initialize(const char *devpath, int timer);
 #endif
 
 /****************************************************************************
@@ -254,7 +265,7 @@ int board_timer_driver_initialize(FAR const char *devpath, int timer);
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_QENCODER
-int stm32l4_qencoder_initialize(FAR const char *devpath, int timer);
+int stm32l4_qencoder_initialize(const char *devpath, int timer);
 #endif
 
 #endif /* __BOARDS_ARM_STM32L4_NUCLEO_L432KC_SRC_NUCLEO_L432KC_H */

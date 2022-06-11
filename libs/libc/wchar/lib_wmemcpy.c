@@ -55,6 +55,6 @@
 
 FAR wchar_t *wmemcpy(FAR wchar_t *d, FAR const wchar_t *s, size_t n)
 {
-  return (FAR wchar_t *) memcpy(d, s, n * sizeof(wchar_t));
+  return memcpy(d, s, n * sizeof(wchar_t));
 }
 #endif

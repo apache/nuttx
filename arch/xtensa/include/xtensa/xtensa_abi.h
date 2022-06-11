@@ -159,9 +159,12 @@
 
 #endif
 
-/* Index into stack frame (skipping over saved A0) */
+/* Index into stack frame.
+ * For CALL0 ABI the argument "n" should be greater than 0 to avoid
+ * corrupting the saved A0 if ENTRY was used.
+ */
 
-#define LOCAL_OFFSET(n) ((n) << 2)  /* n = 1 .. ((size >> 2) - 1) */
+#define LOCAL_OFFSET(n) ((n) << 2)  /* n = 0/1 .. ((size >> 2) - 1) */
 
 #endif /* __ASSEMBLY_ */
 

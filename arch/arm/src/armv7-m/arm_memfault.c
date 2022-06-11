@@ -58,7 +58,7 @@
  *
  ****************************************************************************/
 
-int arm_memfault(int irq, FAR void *context, FAR void *arg)
+int arm_memfault(int irq, void *context, void *arg)
 {
   uint32_t cfsr = getreg32(NVIC_CFAULTS);
 

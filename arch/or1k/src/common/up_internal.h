@@ -131,19 +131,6 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* g_current_regs[] holds a references to the current interrupt level
- * register storage structure.  If is non-NULL only during interrupt
- * processing.  Access to g_current_regs[] must be through the macro
- * CURRENT_REGS for portability.
- */
-
-/* For the case of architectures with multiple CPUs, then there must be one
- * such value for each processor that can receive an interrupt.
- */
-
-EXTERN volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
-#define CURRENT_REGS (g_current_regs[up_cpu_index()])
-
 /* This is the beginning of heap as provided from up_head.S.
  * This is the first address in DRAM after the loaded
  * program+bss+idle stack.  The end of the heap is
@@ -240,7 +227,6 @@ int  or1k_print_cpuinfo(void);
 
 void up_copyfullstate(uint32_t *dest, uint32_t *src);
 void up_decodeirq(uint32_t *regs);
-int  up_saveusercontext(uint32_t *saveregs);
 void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
 void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
 
@@ -267,8 +253,8 @@ uint32_t *up_doirq(int irq, uint32_t *regs);
 
 /* Exception Handlers */
 
-int  up_hardfault(int irq, FAR void *context, FAR void *arg);
-int  up_memfault(int irq, FAR void *context, FAR void *arg);
+int  up_hardfault(int irq, void *context, void *arg);
+int  up_memfault(int irq, void *context, void *arg);
 
 /* Interrupt acknowledge and dispatch */
 
@@ -343,7 +329,7 @@ void up_usbuninitialize(void);
 
 /* Debug ********************************************************************/
 #ifdef CONFIG_STACK_COLORATION
-void up_stack_color(FAR void *stackbase, size_t nbytes);
+void up_stack_color(void *stackbase, size_t nbytes);
 #endif
 
 #undef EXTERN

@@ -85,15 +85,15 @@ static void ads7843e_lock(FAR struct spi_dev_s *spi);
 static void ads7843e_unlock(FAR struct spi_dev_s *spi);
 
 static uint16_t ads7843e_sendcmd(FAR struct ads7843e_dev_s *priv,
-              uint8_t cmd);
+                                 uint8_t cmd);
 
 /* Interrupts and data sampling */
 
 static void ads7843e_notify(FAR struct ads7843e_dev_s *priv);
 static int  ads7843e_sample(FAR struct ads7843e_dev_s *priv,
-                           FAR struct ads7843e_sample_s *sample);
+                            FAR struct ads7843e_sample_s *sample);
 static int  ads7843e_waitsample(FAR struct ads7843e_dev_s *priv,
-                               FAR struct ads7843e_sample_s *sample);
+                                FAR struct ads7843e_sample_s *sample);
 static void ads7843e_worker(FAR void *arg);
 static int  ads7843e_interrupt(int irq, FAR void *context, FAR void *arg);
 
@@ -102,11 +102,11 @@ static int  ads7843e_interrupt(int irq, FAR void *context, FAR void *arg);
 static int  ads7843e_open(FAR struct file *filep);
 static int  ads7843e_close(FAR struct file *filep);
 static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer,
-              size_t len);
+                             size_t len);
 static int  ads7843e_ioctl(FAR struct file *filep, int cmd,
-              unsigned long arg);
+                           unsigned long arg);
 static int  ads7843e_poll(FAR struct file *filep, struct pollfd *fds,
-              bool setup);
+                          bool setup);
 
 /****************************************************************************
  * Private Data
@@ -293,7 +293,7 @@ static void ads7843e_notify(FAR struct ads7843e_dev_s *priv)
       if (fds)
         {
           fds->revents |= POLLIN;
-          iinfo("Report events: %02x\n", fds->revents);
+          iinfo("Report events: %08" PRIx32 "\n", fds->revents);
           nxsem_post(fds->sem);
         }
     }
@@ -317,7 +317,7 @@ static void ads7843e_notify(FAR struct ads7843e_dev_s *priv)
  ****************************************************************************/
 
 static int ads7843e_sample(FAR struct ads7843e_dev_s *priv,
-                          FAR struct ads7843e_sample_s *sample)
+                           FAR struct ads7843e_sample_s *sample)
 {
   irqstate_t flags;
   int ret = -EAGAIN;
@@ -1018,7 +1018,7 @@ static int ads7843e_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 static int ads7843e_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                        bool setup)
+                         bool setup)
 {
   FAR struct inode *inode;
   FAR struct ads7843e_dev_s *priv;
@@ -1203,7 +1203,7 @@ int ads7843e_register(FAR struct spi_dev_s *spi,
 
   /* Register the device as an input device */
 
-  snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
+  snprintf(devname, sizeof(devname), DEV_FORMAT, minor);
   iinfo("Registering %s\n", devname);
 
   ret = register_driver(devname, &ads7843e_fops, 0666, priv);

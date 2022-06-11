@@ -92,7 +92,6 @@ static ssize_t lis3dsh_read(FAR struct file *, FAR char *buffer,
                             size_t buflen);
 static ssize_t lis3dsh_write(FAR struct file *filep, FAR const char *buffer,
                              size_t buflen);
-static int lis3dsh_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -105,7 +104,7 @@ static const struct file_operations g_lis3dsh_fops =
   lis3dsh_read,    /* read */
   lis3dsh_write,   /* write */
   NULL,            /* seek */
-  lis3dsh_ioctl,   /* ioctl */
+  NULL,            /* ioctl */
   NULL             /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL           /* unlink */
@@ -493,27 +492,6 @@ static ssize_t lis3dsh_write(FAR struct file *filep, FAR const char *buffer,
                              size_t buflen)
 {
   return -ENOSYS;
-}
-
-/****************************************************************************
- * Name: lis3dsh_ioctl
- ****************************************************************************/
-
-static int lis3dsh_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
-{
-  int ret = OK;
-
-  switch (cmd)
-    {
-      /* Command was not recognized */
-
-    default:
-      snerr("ERROR: Unrecognized cmd: %d\n", cmd);
-      ret = -ENOTTY;
-      break;
-    }
-
-  return ret;
 }
 
 /****************************************************************************

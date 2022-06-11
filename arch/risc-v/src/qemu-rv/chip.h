@@ -38,7 +38,7 @@
 extern void up_earlyserialinit(void);
 extern void up_serialinit(void);
 
-#endif
+#endif /* __ASSEMBLY__  */
 
 #include "qemu_rv_memorymap.h"
 
@@ -46,4 +46,40 @@ extern void up_serialinit(void);
 #include "hardware/qemu_rv_memorymap.h"
 #include "hardware/qemu_rv_plic.h"
 
+#include "riscv_internal.h"
+#include "riscv_percpu.h"
+
+/****************************************************************************
+ * Macro Definitions
+ ****************************************************************************/
+
+#ifdef __ASSEMBLY__
+
+/****************************************************************************
+ * Name: setintstack
+ *
+ * Description:
+ *   Set the current stack pointer to the  "top" the correct interrupt stack
+ *   for the current CPU.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
+.macro  setintstack tmp0, tmp1
+  csrr  \tmp0, mhartid
+  li    \tmp1, STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK)
+  mul   \tmp1, \tmp0, \tmp1
+  la    \tmp0, g_intstacktop
+  sub   sp, \tmp0, \tmp1
+.endm
+#endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 15 */
+
+#if defined(CONFIG_ARCH_USE_S_MODE) && CONFIG_ARCH_INTERRUPTSTACK > 15
+.macro  setintstack tmp0, tmp1
+  csrr    \tmp0, CSR_SCRATCH
+  REGLOAD sp, RISCV_PERCPU_IRQSTACK(\tmp0)
+.endm
+#endif /* CONFIG_ARCH_USE_S_MODE && CONFIG_ARCH_INTERRUPTSTACK > 15 */
+
+#endif /* __ASSEMBLY__  */
 #endif /* __ARCH_RISCV_SRC_QEMU_RV_CHIP_H */

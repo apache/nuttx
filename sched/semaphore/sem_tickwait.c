@@ -52,10 +52,6 @@
  *
  * Input Parameters:
  *   sem     - Semaphore object
- *   start   - The system time that the delay is relative to.  If the
- *             current time is not the same as the start time, then the
- *             delay will be adjust so that the end time will be the same
- *             in any event.
  *   delay   - Ticks to wait from the start time until the semaphore is
  *             posted.  If ticks is zero, then this function is equivalent
  *             to nxsem_trywait().
@@ -68,11 +64,10 @@
  *
  ****************************************************************************/
 
-int nxsem_tickwait(FAR sem_t *sem, clock_t start, uint32_t delay)
+int nxsem_tickwait(FAR sem_t *sem, uint32_t delay)
 {
   FAR struct tcb_s *rtcb = this_task();
   irqstate_t flags;
-  clock_t elapsed;
   int ret;
 
   DEBUGASSERT(sem != NULL && up_interrupt_context() == false);
@@ -108,17 +103,6 @@ int nxsem_tickwait(FAR sem_t *sem, clock_t start, uint32_t delay)
       goto out;
     }
 
-  /* Adjust the delay for any time since the delay was calculated */
-
-  elapsed = clock_systime_ticks() - start;
-  if (/* elapsed >= (UINT32_MAX / 2) || */ elapsed >= delay)
-    {
-      ret = -ETIMEDOUT;
-      goto out;
-    }
-
-  delay -= elapsed;
-
   /* Start the watchdog with interrupts still disabled */
 
   wd_start(&rtcb->waitdog, delay, nxsem_timeout, getpid());
@@ -147,10 +131,6 @@ out:
  *
  * Input Parameters:
  *   sem     - Semaphore object
- *   start   - The system time that the delay is relative to.  If the
- *             current time is not the same as the start time, then the
- *             delay will be adjust so that the end time will be the same
- *             in any event.
  *   delay   - Ticks to wait from the start time until the semaphore is
  *             posted.  If ticks is zero, then this function is equivalent
  *             to sem_trywait().
@@ -165,19 +145,27 @@ out:
  *
  ****************************************************************************/
 
-int nxsem_tickwait_uninterruptible(FAR sem_t *sem, clock_t start,
-                                   uint32_t delay)
+int nxsem_tickwait_uninterruptible(FAR sem_t *sem, uint32_t delay)
 {
+  clock_t end = clock_systime_ticks() + delay;
   int ret;
 
-  do
+  for (; ; )
     {
       /* Take the semaphore (perhaps waiting) */
 
-      ret = nxsem_tickwait(sem, start, delay);
+      ret = nxsem_tickwait(sem, delay);
+      if (ret != -EINTR)
+        {
+          break;
+        }
+
+      delay = end - clock_systime_ticks();
+      if ((int32_t)delay < 0)
+        {
+          delay = 0;
+        }
     }
-  while (ret == -EINTR);
 
   return ret;
 }
-

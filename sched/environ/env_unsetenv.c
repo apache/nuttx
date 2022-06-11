@@ -61,9 +61,6 @@ int unsetenv(FAR const char *name)
 {
   FAR struct tcb_s *rtcb = this_task();
   FAR struct task_group_s *group = rtcb->group;
-  FAR char *pvar;
-  FAR char *newenvp;
-  int newsize;
   int ret = OK;
 
   DEBUGASSERT(name && group);
@@ -71,48 +68,12 @@ int unsetenv(FAR const char *name)
   /* Check if the variable exists */
 
   sched_lock();
-  if (group && (pvar = env_findvar(group, name)) != NULL)
+  if (group && (ret = env_findvar(group, name)) >= 0)
     {
       /* It does!  Remove the name=value pair from the environment. */
 
-      env_removevar(group, pvar);
-
-      /* Reallocate the new environment buffer */
-
-      newsize = group->tg_envsize;
-      if (newsize <= 0)
-        {
-          /* Free the old environment (if there was one) */
-
-          if (group->tg_envp != NULL)
-            {
-              group_free(group, group->tg_envp);
-              group->tg_envp = NULL;
-            }
-
-          group->tg_envsize = 0;
-        }
-      else
-        {
-          /* Reallocate the environment to reclaim a little memory */
-
-          newenvp = (FAR char *)group_realloc(group, group->tg_envp,
-                                              newsize);
-
-          if (newenvp == NULL)
-            {
-              set_errno(ENOMEM);
-              ret = ERROR;
-            }
-          else
-            {
-              /* Save the new environment pointer (it might have changed due
-               * to reallocation).
-               */
-
-              group->tg_envp = newenvp;
-            }
-        }
+      env_removevar(group, ret);
+      ret = OK;
     }
 
   sched_unlock();

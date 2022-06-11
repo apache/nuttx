@@ -86,46 +86,46 @@ struct pic32mz_dmac_s
 static int pic32mz_dma_takesem(struct pic32mz_dmac_s *dmac);
 static inline void pic32mz_dma_givesem(struct pic32mz_dmac_s *dmac);
 
-static inline uint32_t pic32mz_dma_getreg(FAR struct pic32mz_dmach_s *dmach,
+static inline uint32_t pic32mz_dma_getreg(struct pic32mz_dmach_s *dmach,
                                           uint8_t offset);
-static inline void pic32mz_dma_putreg(FAR struct pic32mz_dmach_s *dmach,
+static inline void pic32mz_dma_putreg(struct pic32mz_dmach_s *dmach,
                                       uint8_t offset, uint32_t value);
-static inline void pic32mz_dma_modifyreg(FAR struct pic32mz_dmach_s *dmach,
+static inline void pic32mz_dma_modifyreg(struct pic32mz_dmach_s *dmach,
                                          uint8_t offset,
                                          uint32_t clrbits, uint32_t setbits);
 static inline uint32_t pic32mz_dma_getglobal(uint8_t offset);
 static inline void pic32mz_dma_putglobal(uint8_t offset, uint32_t value);
 
-static inline void pic32mz_dma_enable(FAR struct pic32mz_dmach_s *dmach);
-static inline void pic32mz_dma_disable(FAR struct pic32mz_dmach_s *dmach);
-static inline void pic32mz_dma_priority(FAR struct pic32mz_dmach_s *dmach,
+static inline void pic32mz_dma_enable(struct pic32mz_dmach_s *dmach);
+static inline void pic32mz_dma_disable(struct pic32mz_dmach_s *dmach);
+static inline void pic32mz_dma_priority(struct pic32mz_dmach_s *dmach,
                                         uint8_t priority);
-static inline void pic32mz_dma_srcaddr(FAR struct pic32mz_dmach_s *dmach,
+static inline void pic32mz_dma_srcaddr(struct pic32mz_dmach_s *dmach,
                                        uint32_t addr);
-static inline void pic32mz_dma_destaddr(FAR struct pic32mz_dmach_s *dmach,
+static inline void pic32mz_dma_destaddr(struct pic32mz_dmach_s *dmach,
                                         uint32_t addr);
-static inline void pic32mz_dma_srcsize(FAR struct pic32mz_dmach_s *dmach,
+static inline void pic32mz_dma_srcsize(struct pic32mz_dmach_s *dmach,
                                        uint16_t size);
-static inline void pic32mz_dma_destsize(FAR struct pic32mz_dmach_s *dmach,
+static inline void pic32mz_dma_destsize(struct pic32mz_dmach_s *dmach,
                                         uint16_t size);
-static inline void pic32mz_dma_cellsize(FAR struct pic32mz_dmach_s *dmach,
+static inline void pic32mz_dma_cellsize(struct pic32mz_dmach_s *dmach,
                                         uint16_t size);
-static inline void pic32mz_dma_startirq(FAR struct pic32mz_dmach_s *dmach,
+static inline void pic32mz_dma_startirq(struct pic32mz_dmach_s *dmach,
                                         int irq);
-static inline void pic32mz_dma_forcestart(FAR struct pic32mz_dmach_s *dmach);
-static inline void pic32mz_dma_abortirq(FAR struct pic32mz_dmach_s *dmach,
+static inline void pic32mz_dma_forcestart(struct pic32mz_dmach_s *dmach);
+static inline void pic32mz_dma_abortirq(struct pic32mz_dmach_s *dmach,
                                         int irq);
-static inline void pic32mz_dma_forceabort(FAR struct pic32mz_dmach_s *dmach);
+static inline void pic32mz_dma_forceabort(struct pic32mz_dmach_s *dmach);
 
-static inline void pic32mz_dma_intctrl(FAR struct pic32mz_dmach_s *dmach,
+static inline void pic32mz_dma_intctrl(struct pic32mz_dmach_s *dmach,
                                        uint8_t cfg);
-static inline void pic32mz_dma_intclr(FAR struct pic32mz_dmach_s *dmach);
-static int pic32mz_dma_interrupt(int irq, void *context, FAR void *arg);
+static inline void pic32mz_dma_intclr(struct pic32mz_dmach_s *dmach);
+static int pic32mz_dma_interrupt(int irq, void *context, void *arg);
 
-static void pic32mz_dma_mode(FAR struct pic32mz_dmach_s *dmach,
+static void pic32mz_dma_mode(struct pic32mz_dmach_s *dmach,
                              uint8_t mode);
-static void pic32mz_dma_config(FAR struct pic32mz_dmach_s *dmach,
-                               FAR const struct pic32mz_dma_chcfg_s *cfg);
+static void pic32mz_dma_config(struct pic32mz_dmach_s *dmach,
+                               const struct pic32mz_dma_chcfg_s *cfg);
 
 /****************************************************************************
  * Private Data
@@ -218,7 +218,7 @@ static inline void pic32mz_dma_givesem(struct pic32mz_dmac_s *dmac)
  *
  ****************************************************************************/
 
-static inline uint32_t pic32mz_dma_getreg(FAR struct pic32mz_dmach_s *dmach,
+static inline uint32_t pic32mz_dma_getreg(struct pic32mz_dmach_s *dmach,
                                           uint8_t offset)
 {
   return getreg32(dmach->base + offset);
@@ -232,7 +232,7 @@ static inline uint32_t pic32mz_dma_getreg(FAR struct pic32mz_dmach_s *dmach,
  *
  ****************************************************************************/
 
-static inline void pic32mz_dma_putreg(FAR struct pic32mz_dmach_s *dmach,
+static inline void pic32mz_dma_putreg(struct pic32mz_dmach_s *dmach,
                                       uint8_t offset, uint32_t value)
 {
   putreg32(value, dmach->base + offset);
@@ -246,7 +246,7 @@ static inline void pic32mz_dma_putreg(FAR struct pic32mz_dmach_s *dmach,
  *
  ****************************************************************************/
 
-static inline void pic32mz_dma_modifyreg(FAR struct pic32mz_dmach_s *dmach,
+static inline void pic32mz_dma_modifyreg(struct pic32mz_dmach_s *dmach,
                                          uint8_t offset,
                                          uint32_t clrbits, uint32_t setbits)
 {
@@ -287,7 +287,7 @@ static inline void pic32mz_dma_putglobal(uint8_t offset, uint32_t value)
  *
  ****************************************************************************/
 
-static inline void pic32mz_dma_enable(FAR struct pic32mz_dmach_s *dmach)
+static inline void pic32mz_dma_enable(struct pic32mz_dmach_s *dmach)
 {
   pic32mz_dma_putreg(dmach, PIC32MZ_DMA_CONSET_OFFSET, DMACH_CON_CHEN);
 }
@@ -300,7 +300,7 @@ static inline void pic32mz_dma_enable(FAR struct pic32mz_dmach_s *dmach)
  *
  ****************************************************************************/
 
-static inline void pic32mz_dma_disable(FAR struct pic32mz_dmach_s *dmach)
+static inline void pic32mz_dma_disable(struct pic32mz_dmach_s *dmach)
 {
   pic32mz_dma_putreg(dmach, PIC32MZ_DMA_CONCLR_OFFSET, DMACH_CON_CHEN);
 }
@@ -313,7 +313,7 @@ static inline void pic32mz_dma_disable(FAR struct pic32mz_dmach_s *dmach)
  *
  ****************************************************************************/
 
-static inline void pic32mz_dma_priority(FAR struct pic32mz_dmach_s *dmach,
+static inline void pic32mz_dma_priority(struct pic32mz_dmach_s *dmach,
                                         uint8_t priority)
 {
   /* Highest priority is 3. */
@@ -334,7 +334,7 @@ static inline void pic32mz_dma_priority(FAR struct pic32mz_dmach_s *dmach,
  *
  ****************************************************************************/
 
-static inline void pic32mz_dma_srcaddr(FAR struct pic32mz_dmach_s *dmach,
+static inline void pic32mz_dma_srcaddr(struct pic32mz_dmach_s *dmach,
                                        uint32_t addr)
 {
   pic32mz_dma_putreg(dmach, PIC32MZ_DMACH_SSA_OFFSET, PHYS_ADDR(addr));
@@ -348,7 +348,7 @@ static inline void pic32mz_dma_srcaddr(FAR struct pic32mz_dmach_s *dmach,
  *
  ****************************************************************************/
 
-static inline void pic32mz_dma_destaddr(FAR struct pic32mz_dmach_s *dmach,
+static inline void pic32mz_dma_destaddr(struct pic32mz_dmach_s *dmach,
                                         uint32_t addr)
 {
   pic32mz_dma_putreg(dmach, PIC32MZ_DMACH_DSA_OFFSET, PHYS_ADDR(addr));
@@ -362,7 +362,7 @@ static inline void pic32mz_dma_destaddr(FAR struct pic32mz_dmach_s *dmach,
  *
  ****************************************************************************/
 
-static inline void pic32mz_dma_srcsize(FAR struct pic32mz_dmach_s *dmach,
+static inline void pic32mz_dma_srcsize(struct pic32mz_dmach_s *dmach,
                                        uint16_t size)
 {
   pic32mz_dma_putreg(dmach, PIC32MZ_DMACH_SSIZ_OFFSET, size);
@@ -376,7 +376,7 @@ static inline void pic32mz_dma_srcsize(FAR struct pic32mz_dmach_s *dmach,
  *
  ****************************************************************************/
 
-static inline void pic32mz_dma_destsize(FAR struct pic32mz_dmach_s *dmach,
+static inline void pic32mz_dma_destsize(struct pic32mz_dmach_s *dmach,
                                         uint16_t size)
 {
   pic32mz_dma_putreg(dmach, PIC32MZ_DMACH_DSIZ_OFFSET, size);
@@ -390,7 +390,7 @@ static inline void pic32mz_dma_destsize(FAR struct pic32mz_dmach_s *dmach,
  *
  ****************************************************************************/
 
-static inline void pic32mz_dma_cellsize(FAR struct pic32mz_dmach_s *dmach,
+static inline void pic32mz_dma_cellsize(struct pic32mz_dmach_s *dmach,
                                         uint16_t size)
 {
   pic32mz_dma_putreg(dmach, PIC32MZ_DMACH_CSIZ_OFFSET, size);
@@ -404,7 +404,7 @@ static inline void pic32mz_dma_cellsize(FAR struct pic32mz_dmach_s *dmach,
  *
  ****************************************************************************/
 
-static inline void pic32mz_dma_startirq(FAR struct pic32mz_dmach_s *dmach,
+static inline void pic32mz_dma_startirq(struct pic32mz_dmach_s *dmach,
                                         int irq)
 {
   /* Enable start irq matching. */
@@ -426,7 +426,7 @@ static inline void pic32mz_dma_startirq(FAR struct pic32mz_dmach_s *dmach,
  *
  ****************************************************************************/
 
-static inline void pic32mz_dma_forcestart(FAR struct pic32mz_dmach_s *dmach)
+static inline void pic32mz_dma_forcestart(struct pic32mz_dmach_s *dmach)
 {
   pic32mz_dma_putreg(dmach, PIC32MZ_DMACH_ECONSET_OFFSET, DMACH_ECON_CFORCE);
 }
@@ -439,7 +439,7 @@ static inline void pic32mz_dma_forcestart(FAR struct pic32mz_dmach_s *dmach)
  *
  ****************************************************************************/
 
-static inline void pic32mz_dma_abortirq(FAR struct pic32mz_dmach_s *dmach,
+static inline void pic32mz_dma_abortirq(struct pic32mz_dmach_s *dmach,
                                         int irq)
 {
   /* Enable abort irq matching. */
@@ -461,7 +461,7 @@ static inline void pic32mz_dma_abortirq(FAR struct pic32mz_dmach_s *dmach,
  *
  ****************************************************************************/
 
-static inline void pic32mz_dma_forceabort(FAR struct pic32mz_dmach_s *dmach)
+static inline void pic32mz_dma_forceabort(struct pic32mz_dmach_s *dmach)
 {
   pic32mz_dma_putreg(dmach, PIC32MZ_DMACH_ECONSET_OFFSET, DMACH_ECON_CABORT);
 }
@@ -474,7 +474,7 @@ static inline void pic32mz_dma_forceabort(FAR struct pic32mz_dmach_s *dmach)
  *
  ****************************************************************************/
 
-static inline void pic32mz_dma_intclr(FAR struct pic32mz_dmach_s *dmach)
+static inline void pic32mz_dma_intclr(struct pic32mz_dmach_s *dmach)
 {
   pic32mz_dma_putreg(dmach, PIC32MZ_DMACH_INTCLR_OFFSET,
                      DMACH_INT_FLAGS_MASK);
@@ -488,7 +488,7 @@ static inline void pic32mz_dma_intclr(FAR struct pic32mz_dmach_s *dmach)
  *
  ****************************************************************************/
 
-static inline void pic32mz_dma_intctrl(FAR struct pic32mz_dmach_s *dmach,
+static inline void pic32mz_dma_intctrl(struct pic32mz_dmach_s *dmach,
                                        uint8_t cfg)
 {
   /* Clear all interrupts flags */
@@ -514,7 +514,7 @@ static inline void pic32mz_dma_intctrl(FAR struct pic32mz_dmach_s *dmach,
  *
  ****************************************************************************/
 
-static int pic32mz_dma_interrupt(int irq, void *context, FAR void *arg)
+static int pic32mz_dma_interrupt(int irq, void *context, void *arg)
 {
   struct pic32mz_dmach_s *dmach;
   uint8_t status;
@@ -553,7 +553,7 @@ static int pic32mz_dma_interrupt(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static void pic32mz_dma_mode(FAR struct pic32mz_dmach_s *dmach,
+static void pic32mz_dma_mode(struct pic32mz_dmach_s *dmach,
                              uint8_t mode)
 {
   if (mode & PIC32MZ_DMA_MODE_BASIC)
@@ -576,8 +576,8 @@ static void pic32mz_dma_mode(FAR struct pic32mz_dmach_s *dmach,
  *
  ****************************************************************************/
 
-static void pic32mz_dma_config(FAR struct pic32mz_dmach_s *dmach,
-                               FAR const struct pic32mz_dma_chcfg_s *cfg)
+static void pic32mz_dma_config(struct pic32mz_dmach_s *dmach,
+                               const struct pic32mz_dma_chcfg_s *cfg)
 {
   /* Set the channel's priority */
 
@@ -888,7 +888,7 @@ void pic32mz_dma_free(DMA_HANDLE handle)
  ****************************************************************************/
 
 int pic32mz_dma_chcfg(DMA_HANDLE handle,
-                      FAR const struct pic32mz_dma_chcfg_s *cfg)
+                      const struct pic32mz_dma_chcfg_s *cfg)
 {
   struct pic32mz_dmach_s *dmach = (struct pic32mz_dmach_s *)handle;
 
@@ -908,7 +908,7 @@ int pic32mz_dma_chcfg(DMA_HANDLE handle,
  ****************************************************************************/
 
 int pic32mz_dma_xfrsetup(DMA_HANDLE handle,
-                         FAR const struct pic32mz_dma_xfrcfg_s *cfg)
+                         const struct pic32mz_dma_xfrcfg_s *cfg)
 {
   struct pic32mz_dmach_s *dmach = (struct pic32mz_dmach_s *)handle;
 

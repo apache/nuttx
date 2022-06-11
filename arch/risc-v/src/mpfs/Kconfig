@@ -46,17 +46,12 @@ config MPFS_BOOTLOADER
 	---help---
 		This NuttX image is used as a bootloader, which will boot only on one hart, putting the others in WFI
 
-config IRQ_NSTACKS
-	int
-	depends on MPFS_BOOTLOADER
-	default 5
-
 config MPFS_OPENSBI
-        bool "Use OpenSBI"
-        depends on MPFS_BOOTLOADER && OPENSBI
-        default n
-        ---help---
-                This uses a ld-envm-opensbi.script linker script and the mpfs_opensbi.c code to use external OpenSBI.
+	bool "Use OpenSBI"
+	depends on MPFS_BOOTLOADER && OPENSBI
+	default n
+	---help---
+		This uses a ld-envm-opensbi.script linker script and the mpfs_opensbi.c code to use external OpenSBI.
 
 config MPFS_HART0_SBI
 	bool "HART0 boots via SBI"
@@ -243,6 +238,77 @@ config MPFS_EMMCSD
 	default n
 	---help---
 		Selects the MPFS eMMCSD driver.
+
+config MPFS_IHC
+	bool "IHC slave"
+	depends on RPTUN
+	default n
+	---help---
+		Selects and enables the Inter-Hart-Communication (IHC) slave driver.
+
+config MPFS_IHC_LINUX_ON_HART1
+	int "Linux on hart1"
+	depends on MPFS_IHC
+	default 0
+	range 0 1
+	---help---
+		Set this to 1 if U-boot / Linux is running on hart1
+
+config MPFS_IHC_LINUX_ON_HART2
+	int "Linux on hart2"
+	depends on MPFS_IHC
+	default 0
+	range 0 1
+	---help---
+		Set this to 1 if U-boot / Linux is running on hart2
+
+config MPFS_IHC_LINUX_ON_HART3
+	int "Linux on hart3"
+	depends on MPFS_IHC
+	default 1
+	range 0 1
+	---help---
+		Set this to 1 if U-boot / Linux is running on hart3
+
+config MPFS_IHC_LINUX_ON_HART4
+	int "Linux on hart4"
+	depends on MPFS_IHC
+	default 1
+	range 0 1
+	---help---
+		Set this to 1 if U-boot / Linux is running on hart4
+
+config MPFS_IHC_NUTTX_ON_HART1
+	int "NuttX on hart1"
+	depends on MPFS_IHC
+	default 0
+	range 0 1
+	---help---
+		Set this to 1 if NuttX is running on hart1
+
+config MPFS_IHC_NUTTX_ON_HART2
+	int "NuttX on hart2"
+	depends on MPFS_IHC
+	default 1
+	range 0 1
+	---help---
+		Set this to 1 if NuttX is running on hart2
+
+config MPFS_IHC_NUTTX_ON_HART3
+        int "NuttX on hart3"
+        depends on MPFS_IHC
+        default 0
+	range 0 1
+	---help---
+		Set this to 1 if NuttX is running on hart3
+
+config MPFS_IHC_NUTTX_ON_HART4
+        int "NuttX on hart4"
+        depends on MPFS_IHC
+        default 0
+	range 0 1
+	---help---
+		Set this to 1 if NuttX is running on hart4
 
 config MPFS_ETHMAC
 	bool

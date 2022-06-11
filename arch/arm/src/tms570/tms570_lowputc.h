@@ -98,7 +98,7 @@ void tms570_lowsetup(void);
  ****************************************************************************/
 
 int tms570_sci_configure(uint32_t base,
-                         FAR const struct sci_config_s *config);
+                         const struct sci_config_s *config);
 
 #undef EXTERN
 #if defined(__cplusplus)

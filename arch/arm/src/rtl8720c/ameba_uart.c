@@ -111,32 +111,32 @@ struct ameba_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  ameba_setup(FAR struct uart_dev_s *dev);
-static void ameba_shutdown(FAR struct uart_dev_s *dev);
-static int  ameba_attach(FAR struct uart_dev_s *dev);
-static void ameba_detach(FAR struct uart_dev_s *dev);
+static int  ameba_setup(struct uart_dev_s *dev);
+static void ameba_shutdown(struct uart_dev_s *dev);
+static int  ameba_attach(struct uart_dev_s *dev);
+static void ameba_detach(struct uart_dev_s *dev);
 static void ameba_interrupt(uint32_t id, uint32_t event);
-static int  ameba_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-static int  ameba_receive(FAR struct uart_dev_s *dev, uint32_t *status);
-static void ameba_rxint(FAR struct uart_dev_s *dev, bool enable);
-static bool ameba_rxavailable(FAR struct uart_dev_s *dev);
+static int  ameba_ioctl(struct file *filep, int cmd, unsigned long arg);
+static int  ameba_receive(struct uart_dev_s *dev, uint32_t *status);
+static void ameba_rxint(struct uart_dev_s *dev, bool enable);
+static bool ameba_rxavailable(struct uart_dev_s *dev);
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
 static bool ameba_rxflowcontrol(struct uart_dev_s *dev,
                                 unsigned int nbuffered,
                                 bool upper);
 #endif
 #ifdef CONFIG_SERIAL_TXDMA
-static void ameba_dmasend(FAR struct uart_dev_s *dev);
-static void ameba_dmatxavail(FAR struct uart_dev_s *dev);
+static void ameba_dmasend(struct uart_dev_s *dev);
+static void ameba_dmatxavail(struct uart_dev_s *dev);
 #endif
 #ifdef CONFIG_SERIAL_RXDMA
-static void ameba_dmareceive(FAR struct uart_dev_s *dev);
-static void ameba_dmarxfree(FAR struct uart_dev_s *dev);
+static void ameba_dmareceive(struct uart_dev_s *dev);
+static void ameba_dmarxfree(struct uart_dev_s *dev);
 #endif
-static void ameba_send(FAR struct uart_dev_s *dev, int ch);
-static void ameba_txint(FAR struct uart_dev_s *dev, bool enable);
-static bool ameba_txready(FAR struct uart_dev_s *dev);
-static bool ameba_txempty(FAR struct uart_dev_s *dev);
+static void ameba_send(struct uart_dev_s *dev, int ch);
+static void ameba_txint(struct uart_dev_s *dev, bool enable);
+static bool ameba_txready(struct uart_dev_s *dev);
+static bool ameba_txempty(struct uart_dev_s *dev);
 
 /****************************************************************************
  * Private Data
@@ -547,11 +547,11 @@ static uart_dev_t g_uart3port =
  *
  ****************************************************************************/
 
-static int ameba_setup(FAR struct uart_dev_s *dev)
+static int ameba_setup(struct uart_dev_s *dev)
 {
   uint32_t status = OK;
 #ifndef CONFIG_AMEBA_SUPRESS_CONFIG
-  FAR struct ameba_s *priv = (FAR struct ameba_s *)dev->priv;
+  struct ameba_s *priv = (struct ameba_s *)dev->priv;
   int uart_idx;
   uart_idx = hal_uart_stubs.hal_uart_pin_to_idx(priv->rx, UART_PIN_RX);
   if (uart_idx != hal_uart_stubs.hal_uart_pin_to_idx(priv->tx, UART_PIN_TX)
@@ -628,7 +628,7 @@ static int ameba_setup(FAR struct uart_dev_s *dev)
 
 static void ameba_shutdown(struct uart_dev_s *dev)
 {
-  FAR struct ameba_s *priv = (FAR struct ameba_s *)dev->priv;
+  struct ameba_s *priv = (struct ameba_s *)dev->priv;
   uint32_t uart_idx = priv->adapter.uart_idx;
   if (uart_idx == UART_2)
     {
@@ -663,7 +663,7 @@ static void ameba_shutdown(struct uart_dev_s *dev)
 
 static int ameba_attach(struct uart_dev_s *dev)
 {
-  FAR struct ameba_s *priv = (FAR struct ameba_s *)dev->priv;
+  struct ameba_s *priv = (struct ameba_s *)dev->priv;
   hal_uart_stubs.hal_uart_txtd_hook(&priv->adapter,
                                     ameba_interrupt, (uintptr_t)dev, 0);
   hal_uart_stubs.hal_uart_rxind_hook(&priv->adapter,
@@ -681,9 +681,9 @@ static int ameba_attach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static void ameba_detach(FAR struct uart_dev_s *dev)
+static void ameba_detach(struct uart_dev_s *dev)
 {
-  FAR struct ameba_s *priv = (FAR struct ameba_s *)dev->priv;
+  struct ameba_s *priv = (struct ameba_s *)dev->priv;
   hal_uart_stubs.hal_uart_txtd_hook(&priv->adapter,
                                     NULL, (uintptr_t)NULL, 0);
   hal_uart_stubs.hal_uart_rxind_hook(&priv->adapter,
@@ -728,7 +728,7 @@ static int ameba_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
   struct inode      *inode = filep->f_inode;
   struct uart_dev_s *dev   = inode->i_private;
-  FAR struct ameba_s *priv = (FAR struct ameba_s *)dev->priv;
+  struct ameba_s *priv = (struct ameba_s *)dev->priv;
   int ret;
 #ifdef CONFIG_SERIAL_UART_ARCH_IOCTL
   ret = uart_ioctl(filep, cmd, arg);
@@ -745,7 +745,7 @@ static int ameba_ioctl(struct file *filep, int cmd, unsigned long arg)
 #if defined(CONFIG_SERIAL_TERMIOS) && !defined(CONFIG_AMEBA_SUPRESS_CONFIG)
     case TCGETS:
     {
-      FAR struct termios *termiosp = (FAR struct termios *)arg;
+      struct termios *termiosp = (struct termios *)arg;
       irqstate_t flags;
       if (!termiosp)
         {
@@ -784,7 +784,7 @@ static int ameba_ioctl(struct file *filep, int cmd, unsigned long arg)
     break;
     case TCSETS:
     {
-      FAR struct termios *termiosp = (FAR struct termios *)arg;
+      struct termios *termiosp = (struct termios *)arg;
       irqstate_t flags;
       if (!termiosp)
         {
@@ -851,7 +851,7 @@ static int ameba_ioctl(struct file *filep, int cmd, unsigned long arg)
 
 static int ameba_receive(struct uart_dev_s *dev, uint32_t *status)
 {
-  FAR struct ameba_s *priv = (FAR struct ameba_s *)dev->priv;
+  struct ameba_s *priv = (struct ameba_s *)dev->priv;
   return hal_uart_stubs.hal_uart_getc(&priv->adapter);
 }
 
@@ -865,7 +865,7 @@ static int ameba_receive(struct uart_dev_s *dev, uint32_t *status)
 
 static void ameba_rxint(struct uart_dev_s *dev, bool enable)
 {
-  FAR struct ameba_s *priv = (FAR struct ameba_s *)dev->priv;
+  struct ameba_s *priv = (struct ameba_s *)dev->priv;
   hal_uart_stubs.hal_uart_set_rts(&priv->adapter, enable);
 }
 
@@ -879,7 +879,7 @@ static void ameba_rxint(struct uart_dev_s *dev, bool enable)
 
 static bool ameba_rxavailable(struct uart_dev_s *dev)
 {
-  FAR struct ameba_s *priv = (FAR struct ameba_s *)dev->priv;
+  struct ameba_s *priv = (struct ameba_s *)dev->priv;
   return hal_uart_stubs.hal_uart_readable(&priv->adapter);
 }
 
@@ -910,23 +910,23 @@ static bool ameba_rxflowcontrol(struct uart_dev_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_SERIAL_TXDMA
-static void ameba_dmasend(FAR struct uart_dev_s *dev)
+static void ameba_dmasend(struct uart_dev_s *dev)
 {
 }
 
 #endif
 #ifdef CONFIG_SERIAL_RXDMA
-static void ameba_dmareceive(FAR struct uart_dev_s *dev)
+static void ameba_dmareceive(struct uart_dev_s *dev)
 {
 }
 
-static void ameba_dmarxfree(FAR struct uart_dev_s *dev)
+static void ameba_dmarxfree(struct uart_dev_s *dev)
 {
 }
 
 #endif
 #ifdef CONFIG_SERIAL_TXDMA
-static void ameba_dmatxavail(FAR struct uart_dev_s *dev)
+static void ameba_dmatxavail(struct uart_dev_s *dev)
 {
 }
 
@@ -942,7 +942,7 @@ static void ameba_dmatxavail(FAR struct uart_dev_s *dev)
 
 static void ameba_send(struct uart_dev_s *dev, int ch)
 {
-  FAR struct ameba_s *priv = (FAR struct ameba_s *)dev->priv;
+  struct ameba_s *priv = (struct ameba_s *)dev->priv;
   while (hal_uart_stubs.hal_uart_writeable(&priv->adapter) == 0);
   hal_uart_stubs.hal_uart_putc(&priv->adapter, ch);
 }
@@ -957,7 +957,7 @@ static void ameba_send(struct uart_dev_s *dev, int ch)
 
 static void ameba_txint(struct uart_dev_s *dev, bool enable)
 {
-  FAR struct ameba_s *priv = (FAR struct ameba_s *)dev->priv;
+  struct ameba_s *priv = (struct ameba_s *)dev->priv;
   priv->adapter.base_addr->ier_b.etbei = enable;
   if (enable)
     {
@@ -975,7 +975,7 @@ static void ameba_txint(struct uart_dev_s *dev, bool enable)
 
 static bool ameba_txready(struct uart_dev_s *dev)
 {
-  FAR struct ameba_s *priv = (FAR struct ameba_s *)dev->priv;
+  struct ameba_s *priv = (struct ameba_s *)dev->priv;
   return hal_uart_stubs.hal_uart_writeable(&priv->adapter);
 }
 
@@ -989,7 +989,7 @@ static bool ameba_txready(struct uart_dev_s *dev)
 
 static bool ameba_txempty(struct uart_dev_s *dev)
 {
-  FAR struct ameba_s *priv = (FAR struct ameba_s *)dev->priv;
+  struct ameba_s *priv = (struct ameba_s *)dev->priv;
   return priv->adapter.base_addr->tflvr_b.tx_fifo_lv > 0 ? 0 : 1;
 }
 
@@ -1002,7 +1002,7 @@ static bool ameba_txempty(struct uart_dev_s *dev)
  ****************************************************************************/
 
 #ifdef HAVE_AMEBA_CONSOLE
-static void ameba_putc(FAR struct ameba_s *priv, int ch)
+static void ameba_putc(struct ameba_s *priv, int ch)
 {
   while (hal_uart_stubs.hal_uart_writeable(&priv->adapter) == 0);
   hal_uart_stubs.hal_uart_putc(&priv->adapter, ch);
@@ -1051,19 +1051,19 @@ void arm_earlyserialinit(void)
 void arm_serialinit(void)
 {
 #ifdef CONSOLE_DEV
-  (void)uart_register("/dev/console", &CONSOLE_DEV);
+  uart_register("/dev/console", &CONSOLE_DEV);
 #endif
 #ifdef TTYS0_DEV
-  (void)uart_register("/dev/ttyS0", &TTYS0_DEV);
+  uart_register("/dev/ttyS0", &TTYS0_DEV);
 #endif
 #ifdef TTYS1_DEV
-  (void)uart_register("/dev/ttyS1", &TTYS1_DEV);
+  uart_register("/dev/ttyS1", &TTYS1_DEV);
 #endif
 #ifdef TTYS2_DEV
-  (void)uart_register("/dev/ttyS2", &TTYS2_DEV);
+  uart_register("/dev/ttyS2", &TTYS2_DEV);
 #endif
 #ifdef TTYS3_DEV
-  (void)uart_register("/dev/ttyS3", &TTYS3_DEV);
+  uart_register("/dev/ttyS3", &TTYS3_DEV);
 #endif
 }
 
@@ -1078,7 +1078,7 @@ void arm_serialinit(void)
 #ifdef HAVE_AMEBA_CONSOLE
 int up_putc(int ch)
 {
-  FAR struct ameba_s *priv = (FAR struct ameba_s *)CONSOLE_DEV.priv;
+  struct ameba_s *priv = (struct ameba_s *)CONSOLE_DEV.priv;
 
   /* Check for LF */
 

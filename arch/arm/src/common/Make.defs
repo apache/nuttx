@@ -1,0 +1,84 @@
+############################################################################
+# arch/arm/src/common/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# Common ARM files
+
+CMN_CSRCS += arm_allocateheap.c arm_assert.c arm_blocktask.c
+CMN_CSRCS += arm_createstack.c arm_exit.c arm_fullcontextrestore.c
+CMN_CSRCS += arm_initialize.c arm_lowputs.c
+CMN_CSRCS += arm_modifyreg16.c arm_modifyreg32.c
+CMN_CSRCS += arm_modifyreg8.c arm_puts.c arm_releasepending.c
+CMN_CSRCS += arm_releasestack.c arm_reprioritizertr.c arm_saveusercontext.c
+CMN_CSRCS += arm_stackframe.c arm_switchcontext.c
+CMN_CSRCS += arm_vfork.c arm_unblocktask.c arm_usestack.c
+
+ifneq ($(CONFIG_ALARM_ARCH),y)
+  ifneq ($(CONFIG_TIMER_ARCH),y)
+    CMN_CSRCS += arm_mdelay.c arm_udelay.c
+  endif
+endif
+
+ifeq ($(CONFIG_STACK_COLORATION),y)
+  CMN_CSRCS += arm_checkstack.c
+endif
+
+ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
+  CMN_CSRCS += arm_idle.c
+endif
+
+ifeq ($(CONFIG_BUILD_PROTECTED)$(CONFIG_BUILD_KERNEL),y)
+  CMN_CSRCS += arm_task_start.c arm_pthread_start.c
+  CMN_CSRCS += arm_signal_dispatch.c
+  ifeq ($(CONFIG_BUILD_PROTECTED),y)
+    CMN_UASRCS += arm_signal_handler.S
+  endif
+endif
+
+ifeq ($(CONFIG_ARM_SEMIHOSTING_SYSLOG),y)
+  CMN_CSRCS += arm_semi_syslog.c
+endif
+
+ifeq ($(CONFIG_ARM_SEMIHOSTING_HOSTFS),y)
+  CMN_CSRCS += arm_hostfs.c
+endif
+
+ifeq ($(CONFIG_SCHED_THREAD_LOCAL),y)
+  CMN_CSRCS += arm_tls.c
+endif
+
+ifeq ($(CONFIG_SCHED_BACKTRACE),y)
+  ifeq ($(CONFIG_FRAME_POINTER),y)
+    CMN_CSRCS += arm_backtrace_fp.c
+  else
+    CMN_CSRCS += arm_backtrace_thumb.c
+  endif
+endif
+
+CMN_ASRCS += vfork.S
+
+ifeq ($(CONFIG_ARCH_HAVE_TESTSET),y)
+  ifeq ($(CONFIG_ARCH_ARMV6M),)
+    CMN_ASRCS += arm_testset.S
+  endif
+endif
+
+ifeq ($(CONFIG_ARCH_HAVE_FETCHADD),y)
+  CMN_ASRCS += arm_fetchadd.S
+endif

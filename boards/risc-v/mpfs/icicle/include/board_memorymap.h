@@ -31,6 +31,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* DDR start address */
+
+#define MPFS_DDR_BASE   (0x80000000)
+#define MPFS_DDR_SIZE   (0x40000000)
+
 /* Kernel code memory (RX) */
 
 #define KFLASH_START    (uintptr_t)&__kflash_start

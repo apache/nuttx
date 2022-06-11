@@ -77,7 +77,7 @@
 #ifdef HAVE_RTC_DRIVER
 static int rtc_driver_initialize(void)
 {
-  FAR struct rtc_lowerhalf_s *lower;
+  struct rtc_lowerhalf_s *lower;
   int ret;
 
   /* Instantiate the STM32 lower-half RTC driver */

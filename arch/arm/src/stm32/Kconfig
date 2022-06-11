@@ -1191,6 +1191,7 @@ config ARCH_CHIP_STM32G474R
 	select STM32_STM32G47XX
 	select STM32_STM32G4XXR
 	select STM32_STM32G474R
+	select STM32_HAVE_USBFS
 
 config ARCH_CHIP_STM32G474Q
 	bool "STM32G474Q"
@@ -2206,6 +2207,10 @@ config STM32_HAVE_UCPD
 	default n
 
 config STM32_HAVE_USBDEV
+	bool
+	default n
+
+config STM32_HAVE_USBFS
 	bool
 	default n
 
@@ -3320,6 +3325,12 @@ config STM32_USB
 	bool "USB Device"
 	default n
 	depends on STM32_HAVE_USBDEV
+	select USBDEV
+
+config STM32_USBFS
+	bool "USB Full Speed Device"
+	default n
+	depends on STM32_HAVE_USBFS
 	select USBDEV
 
 config STM32_UCPD
@@ -10824,6 +10835,18 @@ config STM32_USBHOST_PKTDUMP
 endmenu
 
 comment "USB Device Configuration"
+
+menu "USB Full Speed Debug Configuration"
+	depends on STM32_USBFS
+
+config STM32_USBFS_REGDEBUG
+	bool "Register-Level Debug"
+	default n
+	depends on STM32_USBFS && DEBUG_USB_INFO
+	---help---
+		Enable very low-level register access debug.
+
+endmenu
 
 menu "OTG Configuration"
 	depends on STM32_OTGFS

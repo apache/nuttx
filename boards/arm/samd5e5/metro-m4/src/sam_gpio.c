@@ -68,15 +68,15 @@ irqstate_t flags;
  ****************************************************************************/
 
 #if BOARD_NGPIOIN > 0
-static int gpin_read(FAR struct gpio_dev_s *dev, FAR bool *value);
+static int gpin_read(struct gpio_dev_s *dev, bool *value);
 #endif
-static int gpout_read(FAR struct gpio_dev_s *dev, FAR bool *value);
-static int gpout_write(FAR struct gpio_dev_s *dev, bool value);
+static int gpout_read(struct gpio_dev_s *dev, bool *value);
+static int gpout_write(struct gpio_dev_s *dev, bool value);
 
-static int gpint_read(FAR struct gpio_dev_s *dev, FAR bool *value);
-static int gpint_attach(FAR struct gpio_dev_s *dev,
+static int gpint_read(struct gpio_dev_s *dev, bool *value);
+static int gpint_attach(struct gpio_dev_s *dev,
                         pin_interrupt_t callback);
-static int gpint_enable(FAR struct gpio_dev_s *dev, bool enable);
+static int gpint_enable(struct gpio_dev_s *dev, bool enable);
 
 /****************************************************************************
  * Private Data
@@ -152,7 +152,7 @@ static struct samgpint_dev_s g_gpint[BOARD_NGPIOINT];
 
 static int samgpio_interrupt(int irq, void *context, void *arg)
 {
-  FAR struct samgpint_dev_s *samgpint = (FAR struct samgpint_dev_s *)arg;
+  struct samgpint_dev_s *samgpint = (struct samgpint_dev_s *)arg;
 
   DEBUGASSERT(samgpint != NULL && samgpint->callback != NULL);
   gpioinfo("Interrupt! callback=%p\n", samgpint->callback);
@@ -162,9 +162,9 @@ static int samgpio_interrupt(int irq, void *context, void *arg)
 }
 #if BOARD_NGPIOIN > 0
 
-static int gpin_read(FAR struct gpio_dev_s *dev, FAR bool *value)
+static int gpin_read(struct gpio_dev_s *dev, bool *value)
 {
-  FAR struct samgpio_dev_s *samgpio = (FAR struct samgpio_dev_s *)dev;
+  struct samgpio_dev_s *samgpio = (struct samgpio_dev_s *)dev;
 
   DEBUGASSERT(samgpio != NULL && value != NULL);
   DEBUGASSERT(samgpio->id < BOARD_NGPIOIN);
@@ -175,9 +175,9 @@ static int gpin_read(FAR struct gpio_dev_s *dev, FAR bool *value)
 }
 #endif
 
-static int gpout_read(FAR struct gpio_dev_s *dev, FAR bool *value)
+static int gpout_read(struct gpio_dev_s *dev, bool *value)
 {
-  FAR struct samgpio_dev_s *samgpio = (FAR struct samgpio_dev_s *)dev;
+  struct samgpio_dev_s *samgpio = (struct samgpio_dev_s *)dev;
 
   DEBUGASSERT(samgpio != NULL && value != NULL);
   DEBUGASSERT(samgpio->id < BOARD_NGPIOOUT);
@@ -187,9 +187,9 @@ static int gpout_read(FAR struct gpio_dev_s *dev, FAR bool *value)
   return OK;
 }
 
-static int gpout_write(FAR struct gpio_dev_s *dev, bool value)
+static int gpout_write(struct gpio_dev_s *dev, bool value)
 {
-  FAR struct samgpio_dev_s *samgpio = (FAR struct samgpio_dev_s *)dev;
+  struct samgpio_dev_s *samgpio = (struct samgpio_dev_s *)dev;
 
   DEBUGASSERT(samgpio != NULL);
   DEBUGASSERT(samgpio->id < BOARD_NGPIOOUT);
@@ -199,9 +199,9 @@ static int gpout_write(FAR struct gpio_dev_s *dev, bool value)
   return OK;
 }
 
-static int gpint_read(FAR struct gpio_dev_s *dev, FAR bool *value)
+static int gpint_read(struct gpio_dev_s *dev, bool *value)
 {
-  FAR struct samgpint_dev_s *samgpint = (FAR struct samgpint_dev_s *)dev;
+  struct samgpint_dev_s *samgpint = (struct samgpint_dev_s *)dev;
 
   DEBUGASSERT(samgpint != NULL && value != NULL);
   DEBUGASSERT(samgpint->samgpio.id < BOARD_NGPIOINT);
@@ -211,10 +211,10 @@ static int gpint_read(FAR struct gpio_dev_s *dev, FAR bool *value)
   return OK;
 }
 
-static int gpint_attach(FAR struct gpio_dev_s *dev,
+static int gpint_attach(struct gpio_dev_s *dev,
                         pin_interrupt_t callback)
 {
-  FAR struct samgpint_dev_s *samgpint = (FAR struct samgpint_dev_s *)dev;
+  struct samgpint_dev_s *samgpint = (struct samgpint_dev_s *)dev;
 
   gpioinfo("Attaching the callback\n");
 
@@ -240,9 +240,9 @@ static int gpint_attach(FAR struct gpio_dev_s *dev,
   return OK;
 }
 
-static int gpint_enable(FAR struct gpio_dev_s *dev, bool enable)
+static int gpint_enable(struct gpio_dev_s *dev, bool enable)
 {
-  FAR struct samgpint_dev_s *samgpint = (FAR struct samgpint_dev_s *)dev;
+  struct samgpint_dev_s *samgpint = (struct samgpint_dev_s *)dev;
   flags = enter_critical_section();
   if (enable)
     {
@@ -287,7 +287,7 @@ int sam_gpio_initialize(void)
       g_gpin[i].gpio.gp_pintype = GPIO_INPUT_PIN;
       g_gpin[i].gpio.gp_ops     = &gpin_ops;
       g_gpin[i].id              = i;
-      (void)gpio_pin_register(&g_gpin[i].gpio, pincount);
+      gpio_pin_register(&g_gpin[i].gpio, pincount);
 
       /* Configure the pin that will be used as input */
 
@@ -305,7 +305,7 @@ int sam_gpio_initialize(void)
       g_gpout[i].gpio.gp_pintype = GPIO_OUTPUT_PIN;
       g_gpout[i].gpio.gp_ops     = &gpout_ops;
       g_gpout[i].id              = i;
-      (void)gpio_pin_register(&g_gpout[i].gpio, pincount);
+      gpio_pin_register(&g_gpout[i].gpio, pincount);
 
       /* Configure the pin that will be used as output */
 
@@ -322,7 +322,7 @@ int sam_gpio_initialize(void)
       g_gpint[i].samgpio.gpio.gp_pintype = GPIO_INTERRUPT_PIN;
       g_gpint[i].samgpio.gpio.gp_ops     = &gpint_ops;
       g_gpint[i].samgpio.id              = i;
-      (void)gpio_pin_register(&g_gpint[i].samgpio.gpio, pincount);
+      gpio_pin_register(&g_gpint[i].samgpio.gpio, pincount);
 
       /* Configure the pin that will be used as interrupt input */
 

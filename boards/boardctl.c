@@ -777,6 +777,27 @@ int boardctl(unsigned int cmd, uintptr_t arg)
         break;
 #endif
 
+#ifdef CONFIG_BOARDCTL_RESET_CAUSE
+      /* CMD:           BOARDIOC_RESET_CAUSE
+       * DESCRIPTION:   Get the cause of last-time board reset
+       * ARG:           A pointer to an instance of struct
+       *                boardioc_reset_cause_s
+       * CONFIGURATION: CONFIG_BOARDCTL_RESET_CAUSE
+       * DEPENDENCIES:  Board logic must provide the
+       *                board_reset_cause() interface.
+       */
+
+      case BOARDIOC_RESET_CAUSE:
+        {
+          FAR struct boardioc_reset_cause_s *cause =
+            (FAR struct boardioc_reset_cause_s *)arg;
+
+          DEBUGASSERT(cause != NULL);
+          ret = board_reset_cause(cause);
+        }
+        break;
+#endif
+
        default:
          {
 #ifdef CONFIG_BOARDCTL_IOCTL
@@ -802,7 +823,7 @@ int boardctl(unsigned int cmd, uintptr_t arg)
       return ERROR;
     }
 
-  return OK;
+  return ret;
 }
 
 #endif /* CONFIG_BOARDCTL */

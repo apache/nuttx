@@ -244,15 +244,21 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 #ifdef CONFIG_DEBUG_MM
   else
     {
+#ifdef CONFIG_MM_DUMP_ON_FAILURE
       struct mallinfo minfo;
+#endif
 
       mwarn("WARNING: Allocation failed, size %zu\n", alignsize);
+#ifdef CONFIG_MM_DUMP_ON_FAILURE
       mm_mallinfo(heap, &minfo);
       mwarn("Total:%d, used:%d, free:%d, largest:%d, nused:%d, nfree:%d\n",
             minfo.arena, minfo.uordblks, minfo.fordblks,
             minfo.mxordblk, minfo.aordblks, minfo.ordblks);
       mm_memdump(heap, -1);
-      DEBUGASSERT(false);
+#endif
+#ifdef CONFIG_MM_PANIC_ON_FAILURE
+      PANIC();
+#endif
     }
 #endif
 

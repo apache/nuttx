@@ -45,11 +45,11 @@
 
 struct nrf52_rtc_priv_s
 {
-  FAR struct nrf52_rtc_ops_s *ops;
-  uint32_t                    base;
-  uint32_t                    irq;
-  uint8_t                     chan;
-  bool                        inuse;
+  struct nrf52_rtc_ops_s *ops;
+  uint32_t                base;
+  uint32_t                irq;
+  uint8_t                 chan;
+  bool                    inuse;
 };
 
 /****************************************************************************
@@ -58,42 +58,42 @@ struct nrf52_rtc_priv_s
 
 /* RTC registers access *****************************************************/
 
-static uint32_t nrf52_rtc_getreg(FAR struct nrf52_rtc_dev_s *dev,
+static uint32_t nrf52_rtc_getreg(struct nrf52_rtc_dev_s *dev,
                                  uint32_t offset);
-static void nrf52_rtc_putreg(FAR struct nrf52_rtc_dev_s *dev,
+static void nrf52_rtc_putreg(struct nrf52_rtc_dev_s *dev,
                              uint32_t offset,
                              uint32_t value);
 
 /* RTC helpers **************************************************************/
 
-static uint32_t nrf52_rtc_irq2reg(FAR struct nrf52_rtc_dev_s *dev,
+static uint32_t nrf52_rtc_irq2reg(struct nrf52_rtc_dev_s *dev,
                                   uint8_t s);
-static uint32_t nrf52_rtc_evt2reg(FAR struct nrf52_rtc_dev_s *dev,
+static uint32_t nrf52_rtc_evt2reg(struct nrf52_rtc_dev_s *dev,
                                   uint8_t evt);
 
 /* RTC operations ***********************************************************/
 
-static int nrf52_rtc_start(FAR struct nrf52_rtc_dev_s *dev);
-static int nrf52_rtc_stop(FAR struct nrf52_rtc_dev_s *dev);
-static int nrf52_rtc_clear(FAR struct nrf52_rtc_dev_s *dev);
-static int nrf52_rtc_trgovrflw(FAR struct nrf52_rtc_dev_s *dev);
-static int nrf52_rtc_getcounter(FAR struct nrf52_rtc_dev_s *dev,
-                                FAR uint32_t *cc);
-static int nrf52_rtc_setcc(FAR struct nrf52_rtc_dev_s *dev, uint8_t i,
+static int nrf52_rtc_start(struct nrf52_rtc_dev_s *dev);
+static int nrf52_rtc_stop(struct nrf52_rtc_dev_s *dev);
+static int nrf52_rtc_clear(struct nrf52_rtc_dev_s *dev);
+static int nrf52_rtc_trgovrflw(struct nrf52_rtc_dev_s *dev);
+static int nrf52_rtc_getcounter(struct nrf52_rtc_dev_s *dev,
+                                uint32_t *cc);
+static int nrf52_rtc_setcc(struct nrf52_rtc_dev_s *dev, uint8_t i,
                            uint32_t cc);
-static int nrf52_rtc_getcc(FAR struct nrf52_rtc_dev_s *dev, uint8_t i,
-                           FAR uint32_t *cc);
-static int nrf52_rtc_setpre(FAR struct nrf52_rtc_dev_s *dev, uint16_t pre);
-static int nrf52_rtc_setisr(FAR struct nrf52_rtc_dev_s *dev, xcpt_t handler,
-                            FAR void * arg);
-static int nrf52_rtc_enableint(FAR struct nrf52_rtc_dev_s *dev, uint8_t s);
-static int nrf52_rtc_disableint(FAR struct nrf52_rtc_dev_s *dev, uint8_t s);
-static int nrf52_rtc_checkint(FAR struct nrf52_rtc_dev_s *dev, uint8_t s);
-static int nrf52_rtc_ackint(FAR struct nrf52_rtc_dev_s *dev, uint8_t s);
-static int nrf52_rtc_enableevt(FAR struct nrf52_rtc_dev_s *dev, uint8_t evt);
-static int nrf52_rtc_disableevt(FAR struct nrf52_rtc_dev_s *dev,
+static int nrf52_rtc_getcc(struct nrf52_rtc_dev_s *dev, uint8_t i,
+                           uint32_t *cc);
+static int nrf52_rtc_setpre(struct nrf52_rtc_dev_s *dev, uint16_t pre);
+static int nrf52_rtc_setisr(struct nrf52_rtc_dev_s *dev, xcpt_t handler,
+                            void * arg);
+static int nrf52_rtc_enableint(struct nrf52_rtc_dev_s *dev, uint8_t s);
+static int nrf52_rtc_disableint(struct nrf52_rtc_dev_s *dev, uint8_t s);
+static int nrf52_rtc_checkint(struct nrf52_rtc_dev_s *dev, uint8_t s);
+static int nrf52_rtc_ackint(struct nrf52_rtc_dev_s *dev, uint8_t s);
+static int nrf52_rtc_enableevt(struct nrf52_rtc_dev_s *dev, uint8_t evt);
+static int nrf52_rtc_disableevt(struct nrf52_rtc_dev_s *dev,
                                 uint8_t evt);
-static uint32_t nrf52_rtc_getbase(FAR struct nrf52_rtc_dev_s *dev);
+static uint32_t nrf52_rtc_getbase(struct nrf52_rtc_dev_s *dev);
 
 /****************************************************************************
  * Private Data
@@ -172,7 +172,7 @@ struct nrf52_rtc_priv_s g_nrf52_rtc2_priv =
  *
  ****************************************************************************/
 
-static uint32_t nrf52_rtc_getreg(FAR struct nrf52_rtc_dev_s *dev,
+static uint32_t nrf52_rtc_getreg(struct nrf52_rtc_dev_s *dev,
                                  uint32_t offset)
 {
   DEBUGASSERT(dev);
@@ -188,7 +188,7 @@ static uint32_t nrf52_rtc_getreg(FAR struct nrf52_rtc_dev_s *dev,
  *
  ****************************************************************************/
 
-static void nrf52_rtc_putreg(FAR struct nrf52_rtc_dev_s *dev,
+static void nrf52_rtc_putreg(struct nrf52_rtc_dev_s *dev,
                              uint32_t offset,
                              uint32_t value)
 {
@@ -206,7 +206,7 @@ static void nrf52_rtc_putreg(FAR struct nrf52_rtc_dev_s *dev,
  *
  ****************************************************************************/
 
-static uint32_t nrf52_rtc_irq2reg(FAR struct nrf52_rtc_dev_s *dev, uint8_t s)
+static uint32_t nrf52_rtc_irq2reg(struct nrf52_rtc_dev_s *dev, uint8_t s)
 {
   uint32_t regval = 0;
 
@@ -268,7 +268,7 @@ errout:
  *
  ****************************************************************************/
 
-static uint32_t nrf52_rtc_evt2reg(FAR struct nrf52_rtc_dev_s *dev,
+static uint32_t nrf52_rtc_evt2reg(struct nrf52_rtc_dev_s *dev,
                                   uint8_t evt)
 {
   uint32_t regval;
@@ -327,7 +327,7 @@ errout:
  * Name: nrf52_rtc_start
  ****************************************************************************/
 
-static int nrf52_rtc_start(FAR struct nrf52_rtc_dev_s *dev)
+static int nrf52_rtc_start(struct nrf52_rtc_dev_s *dev)
 {
   DEBUGASSERT(dev);
 
@@ -340,7 +340,7 @@ static int nrf52_rtc_start(FAR struct nrf52_rtc_dev_s *dev)
  * Name: nrf52_rtc_stop
  ****************************************************************************/
 
-static int nrf52_rtc_stop(FAR struct nrf52_rtc_dev_s *dev)
+static int nrf52_rtc_stop(struct nrf52_rtc_dev_s *dev)
 {
   DEBUGASSERT(dev);
 
@@ -353,7 +353,7 @@ static int nrf52_rtc_stop(FAR struct nrf52_rtc_dev_s *dev)
  * Name: nrf52_rtc_clear
  ****************************************************************************/
 
-static int nrf52_rtc_clear(FAR struct nrf52_rtc_dev_s *dev)
+static int nrf52_rtc_clear(struct nrf52_rtc_dev_s *dev)
 {
   DEBUGASSERT(dev);
 
@@ -366,7 +366,7 @@ static int nrf52_rtc_clear(FAR struct nrf52_rtc_dev_s *dev)
  * Name: nrf52_rtc_trgovrflw
  ****************************************************************************/
 
-static int nrf52_rtc_trgovrflw(FAR struct nrf52_rtc_dev_s *dev)
+static int nrf52_rtc_trgovrflw(struct nrf52_rtc_dev_s *dev)
 {
   DEBUGASSERT(dev);
 
@@ -376,8 +376,8 @@ static int nrf52_rtc_trgovrflw(FAR struct nrf52_rtc_dev_s *dev)
   return OK;
 }
 
-static int nrf52_rtc_getcounter(FAR struct nrf52_rtc_dev_s *dev,
-                                FAR uint32_t *ctr)
+static int nrf52_rtc_getcounter(struct nrf52_rtc_dev_s *dev,
+                                uint32_t *ctr)
 {
   DEBUGASSERT(dev);
   DEBUGASSERT(ctr);
@@ -391,15 +391,15 @@ static int nrf52_rtc_getcounter(FAR struct nrf52_rtc_dev_s *dev,
  * Name: nrf52_rtc_setcc
  ****************************************************************************/
 
-static int nrf52_rtc_setcc(FAR struct nrf52_rtc_dev_s *dev, uint8_t i,
+static int nrf52_rtc_setcc(struct nrf52_rtc_dev_s *dev, uint8_t i,
                            uint32_t cc)
 {
-  FAR struct nrf52_rtc_priv_s *rtc = NULL;
+  struct nrf52_rtc_priv_s *rtc = NULL;
   int ret = OK;
 
   DEBUGASSERT(dev);
 
-  rtc = (FAR struct nrf52_rtc_priv_s *)dev;
+  rtc = (struct nrf52_rtc_priv_s *)dev;
 
   /* Is the channel supported? */
 
@@ -420,16 +420,16 @@ errout:
  * Name: nrf52_rtc_getcc
  ****************************************************************************/
 
-static int nrf52_rtc_getcc(FAR struct nrf52_rtc_dev_s *dev, uint8_t i,
-                           FAR uint32_t *cc)
+static int nrf52_rtc_getcc(struct nrf52_rtc_dev_s *dev, uint8_t i,
+                           uint32_t *cc)
 {
-  FAR struct nrf52_rtc_priv_s *rtc = NULL;
+  struct nrf52_rtc_priv_s *rtc = NULL;
   int ret = OK;
 
   DEBUGASSERT(dev);
   DEBUGASSERT(cc);
 
-  rtc = (FAR struct nrf52_rtc_priv_s *)dev;
+  rtc = (struct nrf52_rtc_priv_s *)dev;
 
   /* Is the channel supported? */
 
@@ -450,7 +450,7 @@ errout:
  * Name: nrf52_rtc_setpre
  ****************************************************************************/
 
-static int nrf52_rtc_setpre(FAR struct nrf52_rtc_dev_s *dev, uint16_t pre)
+static int nrf52_rtc_setpre(struct nrf52_rtc_dev_s *dev, uint16_t pre)
 {
   int ret = OK;
 
@@ -473,15 +473,15 @@ errout:
  * Name: nrf52_rtc_setisr
  ****************************************************************************/
 
-static int nrf52_rtc_setisr(FAR struct nrf52_rtc_dev_s *dev, xcpt_t handler,
-                            FAR void *arg)
+static int nrf52_rtc_setisr(struct nrf52_rtc_dev_s *dev, xcpt_t handler,
+                            void *arg)
 {
-  FAR struct nrf52_rtc_priv_s *rtc = NULL;
+  struct nrf52_rtc_priv_s *rtc = NULL;
   int ret = OK;
 
   DEBUGASSERT(dev);
 
-  rtc = (FAR struct nrf52_rtc_priv_s *)dev;
+  rtc = (struct nrf52_rtc_priv_s *)dev;
 
   /* Disable interrupt when callback is removed */
 
@@ -506,7 +506,7 @@ errout:
  * Name: nrf52_rtc_enableint
  ****************************************************************************/
 
-static int nrf52_rtc_enableint(FAR struct nrf52_rtc_dev_s *dev, uint8_t s)
+static int nrf52_rtc_enableint(struct nrf52_rtc_dev_s *dev, uint8_t s)
 {
   uint32_t regval = 0;
   int      ret    = OK;
@@ -532,7 +532,7 @@ errout:
  * Name: nrf52_rtc_disableint
  ****************************************************************************/
 
-static int nrf52_rtc_disableint(FAR struct nrf52_rtc_dev_s *dev, uint8_t s)
+static int nrf52_rtc_disableint(struct nrf52_rtc_dev_s *dev, uint8_t s)
 {
   uint32_t regval = 0;
   int      ret    = OK;
@@ -558,7 +558,7 @@ errout:
  * Name: nrf52_rtc_checkint
  ****************************************************************************/
 
-static int nrf52_rtc_checkint(FAR struct nrf52_rtc_dev_s *dev, uint8_t s)
+static int nrf52_rtc_checkint(struct nrf52_rtc_dev_s *dev, uint8_t s)
 {
   int ret = 0;
 
@@ -618,7 +618,7 @@ errout:
  * Name: nrf52_rtc_ackint
  ****************************************************************************/
 
-static int nrf52_rtc_ackint(FAR struct nrf52_rtc_dev_s *dev, uint8_t s)
+static int nrf52_rtc_ackint(struct nrf52_rtc_dev_s *dev, uint8_t s)
 {
   int ret = 0;
 
@@ -678,7 +678,7 @@ errout:
  * Name: nrf52_rtc_enableevt
  ****************************************************************************/
 
-static int nrf52_rtc_enableevt(FAR struct nrf52_rtc_dev_s *dev, uint8_t evt)
+static int nrf52_rtc_enableevt(struct nrf52_rtc_dev_s *dev, uint8_t evt)
 {
   uint32_t regval = 0;
   int      ret    = OK;
@@ -704,7 +704,7 @@ errout:
  * Name: nrf52_rtc_disableevt
  ****************************************************************************/
 
-static int nrf52_rtc_disableevt(FAR struct nrf52_rtc_dev_s *dev, uint8_t evt)
+static int nrf52_rtc_disableevt(struct nrf52_rtc_dev_s *dev, uint8_t evt)
 {
   uint32_t regval = 0;
   int      ret    = OK;
@@ -730,9 +730,9 @@ errout:
  * Name: nrf52_rtc_getbase
  ****************************************************************************/
 
-static uint32_t nrf52_rtc_getbase(FAR struct nrf52_rtc_dev_s *dev)
+static uint32_t nrf52_rtc_getbase(struct nrf52_rtc_dev_s *dev)
 {
-  FAR struct nrf52_rtc_priv_s *rtc = (FAR struct nrf52_rtc_priv_s *)dev;
+  struct nrf52_rtc_priv_s *rtc = (struct nrf52_rtc_priv_s *)dev;
   DEBUGASSERT(dev);
 
   return rtc->base;
@@ -750,9 +750,9 @@ static uint32_t nrf52_rtc_getbase(FAR struct nrf52_rtc_dev_s *dev)
  *
  ****************************************************************************/
 
-FAR struct nrf52_rtc_dev_s *nrf52_rtc_init(int rtc)
+struct nrf52_rtc_dev_s *nrf52_rtc_init(int rtc)
 {
-  FAR struct nrf52_rtc_priv_s *priv = NULL;
+  struct nrf52_rtc_priv_s *priv = NULL;
 
   /* Get RTC instance */
 
@@ -797,7 +797,7 @@ FAR struct nrf52_rtc_dev_s *nrf52_rtc_init(int rtc)
     }
 
 errout:
-  return (FAR struct nrf52_rtc_dev_s *)priv;
+  return (struct nrf52_rtc_dev_s *)priv;
 }
 
 /****************************************************************************
@@ -808,13 +808,13 @@ errout:
  *
  ****************************************************************************/
 
-int nrf52_rtc_deinit(FAR struct nrf52_rtc_dev_s *dev)
+int nrf52_rtc_deinit(struct nrf52_rtc_dev_s *dev)
 {
-  FAR struct nrf52_rtc_priv_s *rtc = NULL;
+  struct nrf52_rtc_priv_s *rtc = NULL;
 
   DEBUGASSERT(dev);
 
-  rtc = (FAR struct nrf52_rtc_priv_s *)dev;
+  rtc = (struct nrf52_rtc_priv_s *)dev;
 
   rtc->inuse = false;
 

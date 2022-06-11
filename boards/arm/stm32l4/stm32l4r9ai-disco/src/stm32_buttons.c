@@ -163,7 +163,7 @@ static void button_pm_notify(struct pm_callback_s *cb, int domain,
 
 #if 0
 #ifdef CONFIG_ARCH_IRQBUTTONS
-static int button_handler(int irq, FAR void *context, FAR void *arg)
+static int button_handler(int irq, void *context, void *arg)
 {
 #ifdef CONFIG_PM
   /* At this point the MCU should have already awakened.  The state
@@ -307,7 +307,7 @@ uint32_t board_buttons(void)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+int board_button_irq(int id, xcpt_t irqhandler, void *arg)
 {
   int ret = -EINVAL;
 

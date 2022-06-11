@@ -49,7 +49,7 @@
 
 /* Interrupts */
 
-static int sam_interrupt(int irq, void *context, FAR void *arg);
+static int sam_interrupt(int irq, void *context, void *arg);
 
 /* Character driver methods */
 
@@ -106,7 +106,7 @@ static const struct file_operations g_trngops =
  *
  ****************************************************************************/
 
-static int sam_interrupt(int irq, void *context, FAR void *arg)
+static int sam_interrupt(int irq, void *context, void *arg)
 {
   uint32_t odata;
 

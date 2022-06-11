@@ -58,7 +58,7 @@
 
 int stm32_ds1307_init(void)
 {
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
   static bool initialized = false;
   int ret;
 

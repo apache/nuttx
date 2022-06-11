@@ -123,7 +123,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * delivered.
                */
 
-              tcb->xcp.sigdeliver          = (FAR void *)sigdeliver;
+              tcb->xcp.sigdeliver          = (void *)sigdeliver;
 
               /* And make sure that the saved context in the TCB is the same
                * as the interrupt return context.
@@ -136,10 +136,10 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * delivered.
                */
 
-              CURRENT_REGS                 = (FAR void *)
+              CURRENT_REGS                 = (void *)
                                              ((uint32_t)CURRENT_REGS -
                                               (uint32_t)XCPTCONTEXT_SIZE);
-              memcpy((FAR uint32_t *)CURRENT_REGS, tcb->xcp.saved_regs,
+              memcpy((uint32_t *)CURRENT_REGS, tcb->xcp.saved_regs,
                      XCPTCONTEXT_SIZE);
 
               CURRENT_REGS[REG_SP]         = (uint32_t)CURRENT_REGS +
@@ -172,7 +172,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * by the signal trampoline after the signal has been delivered.
            */
 
-          tcb->xcp.sigdeliver        = (FAR void *)sigdeliver;
+          tcb->xcp.sigdeliver        = (void *)sigdeliver;
 
           /* Save the current register context location */
 
@@ -183,7 +183,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * delivered.
            */
 
-          tcb->xcp.regs              = (FAR void *)
+          tcb->xcp.regs              = (void *)
                                        ((uint32_t)tcb->xcp.regs -
                                         (uint32_t)XCPTCONTEXT_SIZE);
           memcpy(tcb->xcp.regs, tcb->xcp.saved_regs, XCPTCONTEXT_SIZE);
@@ -276,7 +276,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    * been delivered.
                    */
 
-                  tcb->xcp.sigdeliver        = (FAR void *)sigdeliver;
+                  tcb->xcp.sigdeliver        = (void *)sigdeliver;
 
                   /* Save the current register context location */
 
@@ -287,7 +287,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    * been delivered.
                    */
 
-                  tcb->xcp.regs              = (FAR void *)
+                  tcb->xcp.regs              = (void *)
                                                ((uint32_t)tcb->xcp.regs -
                                                 (uint32_t)XCPTCONTEXT_SIZE);
                   memcpy(tcb->xcp.regs, tcb->xcp.saved_regs,
@@ -318,7 +318,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    * signal has been delivered.
                    */
 
-                  tcb->xcp.sigdeliver       = (FAR void *)sigdeliver;
+                  tcb->xcp.sigdeliver       = (void *)sigdeliver;
 
                   /* And make sure that the saved context in the TCB is the
                    * same as the interrupt return context.
@@ -331,10 +331,10 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    * been delivered.
                    */
 
-                  CURRENT_REGS              = (FAR void *)
+                  CURRENT_REGS              = (void *)
                                               ((uint32_t)CURRENT_REGS -
                                                (uint32_t)XCPTCONTEXT_SIZE);
-                  memcpy((FAR uint32_t *)CURRENT_REGS, tcb->xcp.saved_regs,
+                  memcpy((uint32_t *)CURRENT_REGS, tcb->xcp.saved_regs,
                          XCPTCONTEXT_SIZE);
 
                   CURRENT_REGS[REG_SP]      = (uint32_t)CURRENT_REGS +
@@ -388,7 +388,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * by the signal trampoline after the signal has been delivered.
            */
 
-          tcb->xcp.sigdeliver        = (FAR void *)sigdeliver;
+          tcb->xcp.sigdeliver        = (void *)sigdeliver;
 
           /* Save the current register context location */
 
@@ -399,7 +399,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * delivered.
            */
 
-          tcb->xcp.regs              = (FAR void *)
+          tcb->xcp.regs              = (void *)
                                        ((uint32_t)tcb->xcp.regs -
                                         (uint32_t)XCPTCONTEXT_SIZE);
           memcpy(tcb->xcp.regs, tcb->xcp.saved_regs, XCPTCONTEXT_SIZE);

@@ -29,7 +29,7 @@
  ****************************************************************************/
 
 void weak_function
-__aeabi_memcpy8(FAR void *dest, FAR const void *src, size_t n)
+__aeabi_memcpy8(void *dest, const void *src, size_t n)
 {
   memcpy(dest, src, n);
 }

@@ -163,5 +163,8 @@ void weak_function up_cpu_normal(void)
 #ifdef CONFIG_PM
 void up_pminitialize(void)
 {
+  /* Initialize the NuttX power management subsystem proper */
+
+  pm_initialize();
 }
 #endif

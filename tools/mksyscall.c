@@ -313,7 +313,7 @@ static void generate_proxy(int nfixed, int nparms)
   if (strcmp(g_parm[RETTYPE_INDEX], "void") == 0 ||
       strcmp(g_parm[RETTYPE_INDEX], "noreturn") == 0)
     {
-      fprintf(stream, "  (void)sys_call%d(", nparms);
+      fprintf(stream, "  sys_call%d(", nparms);
     }
   else
     {

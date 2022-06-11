@@ -128,7 +128,7 @@ static void k28_mediachange(void)
  * Name: k28_cdinterrupt
  ****************************************************************************/
 
-static int k28_cdinterrupt(int irq, FAR void *context, FAR void *arg)
+static int k28_cdinterrupt(int irq, void *context, void *arg)
 {
   /* All of the work is done by k28_mediachange() */
 

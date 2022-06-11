@@ -97,7 +97,7 @@ struct sam_sdmmc_state_s
 /* SDMMC device state */
 
 #ifdef CONFIG_SAMA5_SDMMC0
-static int sam_sdmmc0_cardetect(int irq, void *regs, FAR void *arg);
+static int sam_sdmmc0_cardetect(int irq, void *regs, void *arg);
 
 static struct sam_sdmmc_state_s g_sdmmc0 =
 {
@@ -109,7 +109,7 @@ static struct sam_sdmmc_state_s g_sdmmc0 =
 #endif
 
 #ifdef CONFIG_SAMA5_SDMMC1
-static int sam_sdmmc1_cardetect(int irq, void *regs, FAR void *arg);
+static int sam_sdmmc1_cardetect(int irq, void *regs, void *arg);
 
 static struct sam_sdmmc_state_s g_sdmmc1 =
 {
@@ -174,14 +174,14 @@ static int sam_sdmmc_cardetect(struct sam_sdmmc_state_s *state)
 }
 
 #ifdef CONFIG_SAMA5_SDMMC0
-static int sam_sdmmc0_cardetect(int irq, void *regs, FAR void *arg)
+static int sam_sdmmc0_cardetect(int irq, void *regs, void *arg)
 {
   return sam_sdmmc_cardetect(&g_sdmmc0);
 }
 #endif
 
 #ifdef CONFIG_SAMA5_SDMMC1
-static int sam_sdmmc1_cardetect(int irq, void *regs, FAR void *arg)
+static int sam_sdmmc1_cardetect(int irq, void *regs, void *arg)
 {
   return sam_sdmmc_cardetect(&g_sdmmc1);
 }

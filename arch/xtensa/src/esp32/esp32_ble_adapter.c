@@ -1191,7 +1191,7 @@ static void semphr_delete_wrapper(void *semphr)
 
 static int IRAM_ATTR semphr_take_from_isr_wrapper(void *semphr, void *hptw)
 {
-  return esp_errno_trans(sem_trywait(semphr));
+  return esp_errno_trans(nxsem_trywait(semphr));
 }
 
 /****************************************************************************
@@ -1261,12 +1261,11 @@ static void esp_update_time(struct timespec *timespec, uint32_t ticks)
 static int semphr_take_wrapper(void *semphr, uint32_t block_time_ms)
 {
   int ret;
-  struct timespec timeout;
   sem_t *sem = (sem_t *)semphr;
 
   if (block_time_ms == OSI_FUNCS_TIME_BLOCKING)
     {
-      ret = sem_wait(sem);
+      ret = nxsem_wait(sem);
       if (ret)
         {
           wlerr("Failed to wait sem %d\n", ret);
@@ -1274,19 +1273,7 @@ static int semphr_take_wrapper(void *semphr, uint32_t block_time_ms)
     }
   else
     {
-      ret = clock_gettime(CLOCK_REALTIME, &timeout);
-      if (ret < 0)
-        {
-          wlerr("Failed to get time\n");
-          return esp_errno_trans(ret);
-        }
-
-      if (block_time_ms)
-        {
-          esp_update_time(&timeout, MSEC2TICK(block_time_ms));
-        }
-
-      ret = sem_timedwait(sem, &timeout);
+      ret = nxsem_tickwait(sem, MSEC2TICK(block_time_ms));
     }
 
   return esp_errno_trans(ret);
@@ -1311,7 +1298,7 @@ static int semphr_give_wrapper(void *semphr)
   int ret;
   sem_t *sem = (sem_t *)semphr;
 
-  ret = sem_post(sem);
+  ret = nxsem_post(sem);
   if (ret)
     {
       wlerr("Failed to post sem error=%d\n", ret);

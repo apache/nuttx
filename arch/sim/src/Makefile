@@ -103,10 +103,6 @@ ifeq ($(CONFIG_STACK_COLORATION),y)
   CSRCS += up_checkstack.c
 endif
 
-ifeq ($(CONFIG_ARCH_COVERAGE),y)
-  STDLIBS += -lgcov
-endif
-
 ifeq ($(CONFIG_SPINLOCK),y)
   HOSTSRCS += up_testset.c
 endif
@@ -143,6 +139,10 @@ else ifeq ($(CONFIG_SIM_AJOYSTICK),y)
   HOSTSRCS += up_x11eventloop.c
 else ifeq ($(CONFIG_SIM_BUTTONS),y)
   HOSTSRCS += up_x11eventloop.c
+endif
+
+ifeq ($(CONFIG_SIM_KEYBOARD),y)
+  CSRCS += up_keyboard.c
 endif
 endif
 
@@ -186,12 +186,6 @@ endif
 
 ifeq ($(CONFIG_SIM_SPI_LINUX),y)
   HOSTSRCS += up_spilinux.c
-
-  up_spilinux.c: config.h
-
-  config.h: $(TOPDIR)/include/nuttx/config.h
-	@echo "CP:  $<"
-	$(Q) cp $< $@
 endif
 
 ifeq ($(CONFIG_RPTUN),y)
@@ -253,7 +247,7 @@ RELLIBS += -lboard
 
 all: up_head$(OBJEXT) libarch$(LIBEXT)
 
-.PHONY: board/libboard$(LIBEXT) export_startup clean distclean cleanrel depend
+.PHONY: export_startup clean distclean cleanrel depend
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -287,10 +281,13 @@ board/libboard$(LIBEXT):
 # So we have to skip the standard facilities and do the construction by ourself.
 # But how to achieve the goal?
 # 1.Command linker generate the default script(-verbose)
-# 2.Replace __init_array_start/__init_array_end with _sinit/_einit
-# 3.Append __init_array_start = .; __init_array_end = .;
-# Step 2 let nxtask_startup find objects need to construct
-# Step 3 cheat the host there is no object to construct
+# 2.Move input sections out of .init_array/.fini_array into new .sinit/.einit
+#   output sections
+# 3.Replace __init_array_start/__init_array_end with _sinit/_einit
+# 4.Append __init_array_start = .; __init_array_end = .;
+# Step 2 cheat the host there is no object to construct (glibc >= 2.34)
+# Step 3 let nxtask_startup find objects need to construct
+# Step 4 cheat the host there is no object to construct (glibc < 2.34)
 # Note: the destructor can be fixed in the same way.
 
 nuttx-names.dat: nuttx-names.in
@@ -318,8 +315,11 @@ nuttx$(EXEEXT): libarch$(LIBEXT) board/libboard$(LIBEXT) $(HEADOBJ) $(LINKOBJS) 
 ifneq ($(CONFIG_HOST_MACOS),y)
 	$(Q) $(OBJCOPY) --redefine-syms=nuttx-names.dat nuttx.rel
 	$(Q) $(CC) $(CFLAGS) -Wl,-verbose 2>&1 | \
-	     sed -e '/====/,/====/!d;//d' -e 's/__executable_start/_stext/g' -e 's/__init_array_start/_sinit/g' \
-	         -e 's/__init_array_end/_einit/g' -e 's/__fini_array_start/_sfini/g' -e 's/__fini_array_end/_efini/g' >nuttx.ld
+	     sed -e '/====/,/====/!d;//d' -e 's/__executable_start/_stext/g' \
+	         -e 's/^\(\s\+\)\(\.init_array\)/\1\2 : { }\n\1.sinit/g' \
+	         -e 's/^\(\s\+\)\(\.fini_array\)/\1\2 : { }\n\1.einit/g' \
+	         -e 's/__init_array_start/_sinit/g' -e 's/__init_array_end/_einit/g' \
+	         -e 's/__fini_array_start/_sfini/g' -e 's/__fini_array_end/_efini/g' >nuttx.ld
 	$(Q) echo "__init_array_start = .; __init_array_end = .; __fini_array_start = .; __fini_array_end = .;" >>nuttx.ld
 endif
 ifneq ($(CONFIG_ALLSYMS),y)
@@ -340,10 +340,9 @@ endif
 
 # This is part of the top-level export target
 
-export_startup: board/libboard$(LIBEXT) up_head.o $(HOSTOBJS) nuttx-names.dat
+export_startup: up_head.o $(HOSTOBJS) nuttx-names.dat
 	cp up_head.o $(HOSTOBJS) ${EXPORT_DIR}/startup
 	cp nuttx-names.dat ${EXPORT_DIR}/libs
-	echo main NXmain >> ${EXPORT_DIR}/libs/nuttx-names.dat
 
 # Dependencies
 

@@ -51,7 +51,7 @@
  *
  ****************************************************************************/
 
-FAR struct i2c_master_s *nrf52_i2cbus_initialize(int port);
+struct i2c_master_s *nrf52_i2cbus_initialize(int port);
 
 /****************************************************************************
  * Name: nrf52_i2cbus_uninitialize
@@ -68,6 +68,6 @@ FAR struct i2c_master_s *nrf52_i2cbus_initialize(int port);
  *
  ****************************************************************************/
 
-int nrf52_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
+int nrf52_i2cbus_uninitialize(struct i2c_master_s *dev);
 
 #endif /* __ARCH_ARM_SRC_NRF52_NRF52_I2C_H */

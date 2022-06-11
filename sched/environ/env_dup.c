@@ -50,9 +50,9 @@
  *   private, exact duplicate of the parent task's environment.
  *
  * Input Parameters:
- *   group - The child task group to receive the newly allocated copy of the
- *           parent task groups environment structure.
- *
+ *   group - The child task group to receive the newly allocated copy of
+ *           the parent task groups environment structure.
+ *   envcp - Pointer to the environment strings to copy.
  * Returned Value:
  *   zero on success
  *
@@ -61,14 +61,14 @@
  *
  ****************************************************************************/
 
-int env_dup(FAR struct task_group_s *group)
+int env_dup(FAR struct task_group_s *group, FAR char * const *envcp)
 {
   FAR struct tcb_s *ptcb = this_task();
-  FAR char *envp = NULL;
-  size_t envlen;
+  FAR char **envp = NULL;
+  size_t envc = 0;
   int ret = OK;
 
-  DEBUGASSERT(group != NULL && ptcb != NULL && ptcb->group != NULL);
+  DEBUGASSERT(group != NULL);
 
   /* Pre-emption must be disabled throughout the following because the
    * environment may be shared.
@@ -76,46 +76,64 @@ int env_dup(FAR struct task_group_s *group)
 
   sched_lock();
 
-  /* Does the parent task have an environment? */
+  /* Is there an environment ? */
 
-  if (ptcb->group != NULL && ptcb->group->tg_envp != NULL)
+  if (envcp || (envcp = ptcb->group->tg_envp))
     {
-      /* Yes.. The parent task has an environment allocation. */
+      /* Count the strings */
 
-      envlen = ptcb->group->tg_envsize;
-      envp   = NULL;
+      while (envcp[envc] != NULL)
+        {
+          envc++;
+        }
 
       /* A special case is that the parent has an "empty" environment
        * allocation, i.e., there is an allocation in place but it
-       * contains no variable definitions and, hence, envlen == 0.
+       * contains no variable definitions and, hence, envc == 0.
        */
 
-      if (envlen > 0)
+      if (envc > 0)
         {
           /* There is an environment, duplicate it */
 
-          envp = (FAR char *)group_malloc(group, envlen);
+          envp = group_malloc(group, sizeof(*envp) * (envc + 1));
           if (envp == NULL)
             {
               /* The parent's environment can not be inherited due to a
                * failure in the allocation of the child environment.
                */
 
-              envlen = 0;
-              ret    = -ENOMEM;
+              ret = -ENOMEM;
             }
           else
             {
+              envp[envc] = NULL;
+
               /* Duplicate the parent environment. */
 
-              memcpy(envp, ptcb->group->tg_envp, envlen);
+              while (envc-- > 0)
+                {
+                  envp[envc] = group_malloc(group, strlen(envcp[envc]) + 1);
+                  if (envp[envc] == NULL)
+                    {
+                      while (envp[++envc] != NULL)
+                        {
+                          group_free(group, envp[envc]);
+                        }
+
+                      group_free(group, envp);
+                      ret = -ENOMEM;
+                      break;
+                    }
+
+                  strcpy(envp[envc], envcp[envc]);
+                }
             }
         }
 
-      /* Save the size and child environment allocation. */
+      /* Save the child environment allocation. */
 
-      group->tg_envsize = envlen;
-      group->tg_envp    = envp;
+      group->tg_envp = envp;
     }
 
   sched_unlock();

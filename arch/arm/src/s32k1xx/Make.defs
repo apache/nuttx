@@ -18,22 +18,6 @@
 #
 ############################################################################
 
-# Common ARM source files
-
-CMN_CSRCS  = arm_allocateheap.c arm_exit.c arm_initialize.c arm_interruptcontext.c
-CMN_CSRCS += arm_lowputs.c arm_mdelay.c arm_modifyreg8.c arm_modifyreg16.c
-CMN_CSRCS += arm_modifyreg32.c arm_puts.c arm_releasestack.c arm_stackframe.c
-CMN_CSRCS += arm_task_start.c arm_udelay.c arm_usestack.c arm_vfork.c
-CMN_CSRCS += arm_tcbinfo.c
-
-ifeq ($(CONFIG_STACK_COLORATION),y)
-CMN_CSRCS += arm_checkstack.c
-endif
-
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CMN_CSRCS += arm_pthread_start.c
-endif
-
 # Source files common to all S32K1xx chip families.
 
 CHIP_CSRCS  = s32k1xx_start.c s32k1xx_lowputc.c s32k1xx_clockconfig.c

@@ -30,10 +30,6 @@ ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += lpc43_appinit.c
 endif
 
-ifeq ($(CONFIG_ARCH_FPU),y)
-CSRCS += lpc43_ostest.c
-endif
-
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += lpc43_autoleds.c
 else

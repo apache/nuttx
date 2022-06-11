@@ -794,7 +794,7 @@ found:
 
       /* Reset the retransmission timer. */
 
-      conn->timer = conn->rto;
+      tcp_update_retrantimer(conn, conn->rto);
     }
 
   /* Update the connection's window size */
@@ -1143,13 +1143,9 @@ found:
         if (conn->keepalive &&
             (dev->d_len > 0 || (tcp->flags & TCP_ACK) != 0))
           {
-            /* Reset the last known "alive" time.
-             *
-             * REVISIT:  At this level, we don't actually know if keep-
-             * alive is enabled for this connection.
-             */
+            /* Reset the "alive" timer. */
 
-            conn->keeptime    = clock_systime_ticks();
+            tcp_update_keeptimer(conn, conn->keepidle);
             conn->keepretries = 0;
           }
 #endif
@@ -1229,7 +1225,8 @@ found:
             if ((flags & TCP_ACKDATA) != 0 && conn->tx_unacked == 0)
               {
                 conn->tcpstateflags = TCP_TIME_WAIT;
-                conn->timer         = 0;
+                tcp_update_retrantimer(conn,
+                                       TCP_TIME_WAIT_TIMEOUT * HSEC_PER_SEC);
                 ninfo("TCP state: TCP_TIME_WAIT\n");
               }
             else
@@ -1267,7 +1264,8 @@ found:
         if ((tcp->flags & TCP_FIN) != 0)
           {
             conn->tcpstateflags = TCP_TIME_WAIT;
-            conn->timer         = 0;
+            tcp_update_retrantimer(conn,
+                                   TCP_TIME_WAIT_TIMEOUT * HSEC_PER_SEC);
             ninfo("TCP state: TCP_TIME_WAIT\n");
 
             net_incr32(conn->rcvseq, 1); /* ack FIN */
@@ -1292,7 +1290,8 @@ found:
         if ((flags & TCP_ACKDATA) != 0)
           {
             conn->tcpstateflags = TCP_TIME_WAIT;
-            conn->timer        = 0;
+            tcp_update_retrantimer(conn,
+                                   TCP_TIME_WAIT_TIMEOUT * HSEC_PER_SEC);
             ninfo("TCP state: TCP_TIME_WAIT\n");
           }
 

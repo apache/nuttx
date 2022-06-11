@@ -118,7 +118,7 @@ static void imx_output_compare(uint32_t sr, uint32_t of)
  *
  ****************************************************************************/
 
-static int imx_timerisr(int irq, uint32_t *regs, FAR void *arg)
+static int imx_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Sample the SR (once) */
 

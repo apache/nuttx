@@ -154,19 +154,13 @@
 #  define tiva_dumppacket(m,a,n)
 #endif
 
-/* TX poll deley = 1 seconds.
- * CLK_TCK is the number of clock ticks per second
- */
-
-#define TIVA_WDDELAY   (1*CLK_TCK)
-
 /* TX timeout = 1 minute */
 
 #define TIVA_TXTIMEOUT (60*CLK_TCK)
 
 /* This is a helper pointer for accessing the contents of Ethernet header */
 
-#define ETHBUF ((FAR struct eth_hdr_s *)priv->ld_dev.d_buf)
+#define ETHBUF ((struct eth_hdr_s *)priv->ld_dev.d_buf)
 
 #define TIVA_MAX_MDCCLK 2500000
 
@@ -190,7 +184,6 @@ struct tiva_driver_s
 #endif
 
   bool     ld_bifup;           /* true:ifup false:ifdown */
-  struct wdog_s ld_txpoll;     /* TX poll timer */
   struct wdog_s ld_txtimeout;  /* TX timeout timer */
   struct work_s ld_irqwork;    /* For deferring interrupt work to the work queue */
   struct work_s ld_pollwork;   /* For deferring poll work to the work queue */
@@ -247,15 +240,12 @@ static void tiva_receive(struct tiva_driver_s *priv);
 static void tiva_txdone(struct tiva_driver_s *priv);
 
 static void tiva_interrupt_work(void *arg);
-static int  tiva_interrupt(int irq, void *context, FAR void *arg);
+static int  tiva_interrupt(int irq, void *context, void *arg);
 
 /* Watchdog timer expirations */
 
 static void tiva_txtimeout_work(void *arg);
 static void tiva_txtimeout_expiry(wdparm_t arg);
-
-static void tiva_poll_work(void *arg);
-static void tiva_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -1063,7 +1053,7 @@ static void tiva_interrupt_work(void *arg)
  *
  ****************************************************************************/
 
-static int tiva_interrupt(int irq, void *context, FAR void *arg)
+static int tiva_interrupt(int irq, void *context, void *arg)
 {
   struct tiva_driver_s *priv;
   uint32_t ris;
@@ -1185,79 +1175,6 @@ static void tiva_txtimeout_expiry(wdparm_t arg)
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
   work_queue(ETHWORK, &priv->ld_irqwork, tiva_txtimeout_work, priv, 0);
-}
-
-/****************************************************************************
- * Function: tiva_poll_work
- *
- * Description:
- *   Perform periodic polling from the worker thread
- *
- * Input Parameters:
- *   arg - The argument passed when work_queue() as called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static void tiva_poll_work(void *arg)
-{
-  struct tiva_driver_s *priv = (struct tiva_driver_s *)arg;
-
-  /* Check if we can send another Tx packet now.  The NEWTX bit initiates an
-   * Ethernet transmission once the packet has been placed in the TX FIFO.
-   * This bit is cleared once the transmission has been completed.
-   *
-   * NOTE: This can cause missing poll cycles and, hence, some timing
-   * inaccuracies.
-   */
-
-  net_lock();
-  if ((tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
-    {
-      /* If so, update TCP timing states and poll the network for new XMIT
-       * data.
-       */
-
-      devif_timer(&priv->ld_dev, TIVA_WDDELAY, tiva_txpoll);
-
-      /* Setup the watchdog poll timer again */
-
-      wd_start(&priv->ld_txpoll, TIVA_WDDELAY,
-               tiva_poll_expiry, (wdparm_t)priv);
-    }
-
-  net_unlock();
-}
-
-/****************************************************************************
- * Function: tiva_poll_expiry
- *
- * Description:
- *   Periodic timer handler.  Called from the timer interrupt handler.
- *
- * Input Parameters:
- *   arg  - The argument
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
- *
- ****************************************************************************/
-
-static void tiva_poll_expiry(wdparm_t arg)
-{
-  struct tiva_driver_s *priv = (struct tiva_driver_s *)arg;
-
-  /* Schedule to perform the interrupt processing on the worker thread. */
-
-  work_queue(ETHWORK, &priv->ld_pollwork, tiva_poll_work, priv, 0);
 }
 
 /****************************************************************************
@@ -1413,11 +1330,6 @@ static int tiva_ifup(struct net_driver_s *dev)
            (uint32_t)priv->ld_dev.d_mac.ether.ether_addr_octet[4];
   tiva_ethout(priv, TIVA_MAC_IA1_OFFSET, regval);
 
-  /* Set and activate a timer process */
-
-  wd_start(&priv->ld_txpoll, TIVA_WDDELAY,
-           tiva_poll_expiry, (wdparm_t)priv);
-
   priv->ld_bifup = true;
   leave_critical_section(flags);
   return OK;
@@ -1452,10 +1364,9 @@ static int tiva_ifdown(struct net_driver_s *dev)
         (int)((dev->d_ipaddr >> 16) & 0xff),
         (int)(dev->d_ipaddr >> 24));
 
-  /* Cancel the TX poll timer and TX timeout timers */
+  /* Cancel the TX timeout timers */
 
   flags = enter_critical_section();
-  wd_cancel(&priv->ld_txpoll);
   wd_cancel(&priv->ld_txtimeout);
 
   /* Disable the Ethernet interrupt */
@@ -1545,7 +1456,7 @@ static void tiva_txavail_work(void *arg)
        * network for new Tx data
        */
 
-      devif_timer(&priv->ld_dev, 0, tiva_txpoll);
+      devif_poll(&priv->ld_dev, tiva_txpoll);
     }
 
   net_unlock();

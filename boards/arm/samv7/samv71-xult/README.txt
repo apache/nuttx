@@ -1699,7 +1699,7 @@ NOTES:
        CONFIG_WINDOWS_CYGWIN=y             : Cywin under Windows
 
      System Type -> Toolchain:
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : GNU ARM EABI toolchain
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y  : GNU ARM EABI toolchain
 
 Configuration sub-directories
 -----------------------------
@@ -2561,7 +2561,7 @@ Configuration sub-directories
 
            while (sem_wait(&session->queuesem) < 0)
            ...
-           rect = (FAR struct vnc_fbupdate_s *)sq_remfirst(&session->updqueue);
+           rect = (struct vnc_fbupdate_s *)sq_remfirst(&session->updqueue);
            DEBUGASSERT(rect != NULL);
 
          I would think that could mean only that the semaphore counting is

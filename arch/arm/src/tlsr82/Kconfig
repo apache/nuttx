@@ -1,0 +1,470 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_TLSR82
+
+comment "TLSR82XX Configuration Options"
+
+choice
+	prompt "TLSR82XX Chip Selection"
+	default ARCH_CHIP_TLSR8278
+	depends on ARCH_CHIP_TLSR82
+
+config ARCH_CHIP_TLSR8278
+	bool "TELINK_TLSR8278"
+	select TLSR82_FLASH_512K
+	select TLSR82_SRAM_64K
+	---help---
+		Multi-mode, Bluetooth LE5.1, AoA/AoD QFN 7x7, 48 pins,
+		512KB FLASH, 64KB SRAM
+
+endchoice # TLSR82XX Chip Selection
+
+config TLSR82_FLASH_1M
+	bool
+	default n
+
+config TLSR82_FLASH_512K
+	bool
+	default n
+
+config TLSR82_SRAM_64K
+	bool
+	default n
+
+config TLSR82_SRAM_32K
+	bool
+	default n
+
+config TLSR82_FLASH_SIZE_KB
+	int
+	default 1024 if TLSR82_FLASH_1M
+	default 512 if TLSR82_FLASH_512K
+
+config TLSR82_SRAM_SIZE_KB
+	int
+	default 64 if TLSR82_SRAM_64K
+	default 32 if TLSR82_SRAM_32K
+
+config TLSR82_CPU_CLK_MHZ
+	int "TLSR82_CPU_CLK (Mhz)"
+	default 48
+
+config TLSR82_BOOTLOADER
+	bool "TLSR82_BOOTLOADER"
+	default n
+	---help---
+		Configure and position code for use with the telink bootloader.
+		Do not select this option if you will load code using JTAG/SWM.
+
+config TLSR82_SOFT_FPU
+	bool "TLSR82 Software Fpu Enable"
+	default n
+	---help---
+		Enable software fpu support for tlsr82.
+
+config TLSR82_SOFT_FPU_LIB_NAME
+	string "TLSR82 Software Fpu Library Name"
+	default "soft-fp"
+	depends on TLSR82_SOFT_FPU
+	---help---
+		This is the software fpu library name.
+
+config TLSR82_SOFT_FPU_LIB_PATH
+	string "TLSR82 Software Fpu Library Path"
+	default "arch/arm/src/tlsr82/common"
+	depends on TLSR82_SOFT_FPU
+	---help---
+		This is the software fpu library path.
+
+config TLSR8278_BLE_SDK
+	bool "TLSR8278 Bluetooth SDK Enable"
+	default n
+	depends on ARCH_CHIP_TLSR8278
+	---help---
+		Enable the Bluetooth SDK Code of tlsr8278.
+
+config TLSR8278_BLE_SDK_LIB_NAME
+	string "TLSR8278 Bluetooth SDK Library Name"
+	default "lt_8278"
+	depends on TLSR8278_BLE_SDK
+	---help---
+		This is the library name needed by bluetooth sdk.
+
+config TLSR8278_BLE_SDK_LIB_PATH
+	string "TLSR8278 Bluetooth SDK Library Path"
+	default "../apps/vendor/telink/proj_lib"
+	depends on TLSR8278_BLE_SDK
+	---help---
+		This is the library path needed by bluetooth sdk.
+
+menu "TLSR82 Peripheral Support"
+
+# These are the peripheral selections proper
+
+# "Timer Configuration"
+menuconfig TLSR82_TIMER
+	bool "Timer Configuration"
+	default n
+
+if TLSR82_TIMER
+
+config TLSR82_TIMER1
+	bool "Tlsr82 Timer1"
+	default n
+
+config TLSR82_TIMER2
+	bool "Tlsr82 Timer2"
+	default n
+	depends on !TLSR82_WATCHDOG
+
+config TLSR82_WATCHDOG
+	bool "Tlsr82 WatchDoag"
+	default n
+
+config TLSR82_WDOG_DEFTIMOUT
+	int "Tlsr82 Watchdog deafult timeout time (ms)"
+	default 5000
+	depends on TLSR82_WATCHDOG
+	---help---
+		This value is the default watchdog timeout time.
+
+endif
+
+# "Uart Configuration"
+menuconfig TLSR82_UART
+	bool "Uart Configuration"
+	default n
+
+if TLSR82_UART
+
+config TLSR82_UART0
+	bool "Tlsr82 Uart0"
+	default n
+
+config TLSR82_UART0_TX_BUF_SIZE
+	int "Tlsr82 Uart0 Tx Buffer Size"
+	default 240
+	depends on TLSR82_UART0
+	---help---
+		The Uart0 transmit buffer size.
+
+config TLSR82_UART0_RX_BUF_SIZE
+	int "Tlsr82 Uart0 Rx Buffer Size"
+	default 240
+	depends on TLSR82_UART0
+	---help---
+		The Uart0 receive buffer size.
+
+config TLSR82_UART0_RXDMA
+	bool "Tlsr82 Uart0 RxDma Enable"
+	default n
+	depends on TLSR82_UART0
+	select SERIAL_RXDMA
+
+config TLSR82_UART0_RXDMA_BUF_SIZE
+	int "Tlsr82 Uart0 RxDma Buffer Size"
+	default 240
+	range 16 240
+	depends on TLSR82_UART0_RXDMA
+	---help---
+		This value is the uart0 rx dma buffer size, this size must be less
+		than 240 and be multiple of 16.
+
+config TLSR82_UART0_TXDMA
+	bool "Tlsr82 Uart0 TxDma Enable"
+	default n
+	depends on TLSR82_UART0
+	select SERIAL_TXDMA
+
+config TLSR82_UART0_TXDMA_BUF_SIZE
+	int "Tlsr82 Uart0 TxDma Buffer Size"
+	default 240
+	range 16 240
+	depends on TLSR82_UART0_TXDMA
+	---help---
+		This value is the uart0 tx dma buffer size, this size must be less
+		than 240 and be multiple of 16.
+
+endif
+
+menuconfig TLSR82_GPIO
+	bool "GPIO Configuration"
+	default n
+
+if TLSR82_GPIO
+
+config TLSR82_GPIO_IRQ
+	bool "Tlsr82 gpio interrupt enable"
+	default n
+
+config TLSR82_GPIO_VALIDATION
+	bool "Tlsr82 gpio validation enable"
+	default n
+	---help---
+		If enable this config, when config the gpio as multiplex function,
+		function tlsr82_gpio_cfg_check() can be used to check whether the
+		gpio can be configured be this multiplex function. But this function
+		need more flash space.
+
+config TLSR82_GPIO_DUMPREGS
+	bool "Tlsr82 gpio dump registers enable"
+	default n
+	depends on DEBUG_GPIO_INFO
+	---help---
+		If enable this config, developer can call tlsr82_gpio_dumpregs() to
+		dump all the gpio registers.
+
+endif
+
+menuconfig TLSR82_I2C
+	bool "I2C Configuration"
+	default n
+
+# "SPI Configuration"
+menuconfig TLSR82_SPI
+	bool "SPI Configuration"
+	default n
+
+if TLSR82_SPI
+
+config TLSR82_SPI_CONSOLE
+	bool "TLSR82 SPI as console output"
+	default n
+	---help---
+		This configuration will enable the spi as the console output
+		(printf), input function is not implemented in current code.
+		This is a useful debug option, beacause some tc32 archtecture chips
+		only have one uart, another debug log output channel is needed
+		when the only uart is used for doing other things.
+
+config TLSR82_SPI_SYSLOG
+	bool "TLSR82 SPI as syslog output"
+	default n
+	---help---
+		This configuration will enable the spi as the syslog output
+		channel (syslog). This is a useful debug option, beacause some tc32
+		archtecture chips only have one uart, another debug log output
+		channel is needed when the only uart is used for doing other things.
+
+endif
+
+menuconfig TLSR82_USB
+	bool "USB Configuration"
+	default n
+
+menuconfig TLSR82_PWM
+	bool "PWM Configuration"
+	default n
+	select PWM
+
+if TLSR82_PWM
+
+# PWM0 configuration
+
+config TLSR82_PWM0
+	bool "TLSR82 PWM0 Enable"
+	default n
+
+config TLSR82_PWM0_PULSECOUNT
+	bool "TLSR82 PWM0 PulseCount Enable"
+	default n
+	depends on TLSR82_PWM0
+	select PWM_PULSECOUNT
+
+# PWM1 configuration
+
+config TLSR82_PWM1
+	bool "TLSR82 PWM1 Enable"
+	default n
+
+# PWM2 configuration
+
+config TLSR82_PWM2
+	bool "TLSR82 PWM2 Enable"
+	default n
+
+# PWM3 configuration
+
+config TLSR82_PWM3
+	bool "TLSR82 PWM3 Enable"
+	default n
+
+# PWM4 configuration
+
+config TLSR82_PWM4
+	bool "TLSR82 PWM4 Enable"
+	default n
+
+# PWM5 configuration
+
+config TLSR82_PWM5
+	bool "TLSR82 PWM5 Enable"
+	default n
+
+endif
+
+menuconfig TLSR82_AUDIO
+	bool "AUDIO Configuration"
+	default n
+
+menuconfig TLSR82_QEDC
+	bool "QEDE Configuration"
+	default n
+
+menuconfig TLSR82_MEDC
+	bool "MEDC Configuration"
+	default n
+
+menuconfig TLSR82_ADC
+	bool "ADC Configuration"
+	default n
+
+if TLSR82_ADC
+
+config TLSR82_ADC_CALI
+	bool "TLSR82 Adc calibration enable"
+	default n
+	---help---
+		When enable the adc calibration, adc driver will read the calibration
+		parameters stored in the falsh during initialization and use these
+		parameters to calibrate the sample value.
+
+config TLSR82_ADC_CALI_PARA_ADDR
+	hex
+	default 0x3fff8 if TLSR82_ADC_CALI
+	---help---
+		This is the adc calibration parameters address, this address must be
+		equal to the address defined in production tools.
+
+config TLSR82_ADC_CHAN0
+  bool "TLSR82 Adc channel 0 enable"
+  default n
+
+config TLSR82_ADC_CHAN1
+  bool "TLSR82 Adc channel 1 enable"
+  default n
+
+config TLSR82_ADC_CHAN2
+  bool "TLSR82 Adc channel 2 enable"
+  default n
+
+config TLSR82_ADC_VBAT
+  bool "TLSR82 Adc channel Vbat enable"
+  default n
+
+config TLSR82_ADC_FILT_NUM
+	int "TLSR82 Adc filter average number"
+	default 4
+	---help---
+		This number determines the average number during sampling, driver will
+		remove max and min sample values and calculate the average of the
+		remaining values as the last sample value.
+		Note: This number must be multiple of 4.
+
+endif
+
+menuconfig TLSR82_LPCOMP
+	bool "LPCOMP Configuration"
+	default n
+
+menuconfig TLSR82_PKE
+	bool "PKE Configuration"
+	default n
+
+menuconfig TLSR82_AES
+	bool "AES Configuration"
+	default n
+	select CRYPTO
+	select CRYPTO_AES
+
+menuconfig TLSR82_RNG
+	bool "RNG Configuration"
+	default n
+
+menuconfig TLSR82_PTA
+	bool "PTA Configuration"
+	default n
+
+menuconfig TLSR82_FLASH
+	bool "FLASH Configuration"
+	default n
+	depends on MTD
+	select MTD_BYTE_WRITE
+
+if TLSR82_FLASH
+
+config TLSR82_FLASH_FS_OFFSET
+	hex "Start address of flash used by the file system"
+	default 0x00060000
+	---help---
+		This value is the start address of flash used by the file system,
+		therefore, this value must be larger than the end of code address.
+
+config TLSR82_FLASH_FS_SIZE
+	hex "Size of flash used by the file system"
+	default 0x20000
+	---help---
+		This value is the size of flash used by the file system, therefore,
+		TLSR82_FLASH_FS_SIZE + TLSR82_FLASH_FS_OFFSET must less than the
+		boundary address of flash.
+
+config TLSR82_FLASH_WRITE_BUFFER
+	bool "Enable the flash byte write buffer"
+	default n
+	depends on MTD_BYTE_WRITE
+	---help---
+		When enable this config, the flash byte write opreation will write the
+		data to a middle buffer and then write the flash using this buffer to
+		avoid the data buffer passed by apps is at flash. The flash not support
+		read during writing.
+
+config TLSR82_FLASH_WRITE_BUFFER_SIZE
+	int "Flash byte write buffer size"
+	default 40
+	range 16 256
+	depends on TLSR82_FLASH_WRITE_BUFFER
+	---help---
+		Flash byte write buffer size, the larger this size, the higher byte write
+		efficiency.
+
+config TLSR82_FLASH_PROTECT
+	bool "Flash erase/write protect enable"
+	default n
+	---help---
+		When enable this config, application can use ioctl(fd, MTDIOC_PROTECT/
+		MTDIOC_UNPROTECT, arg) to protect or unprotect the flash. The protect
+		and unprotect operations cost several millisecond, be careful to use it
+		if the application has performance requirements.
+
+config TLSR82_FLASH_CALI
+	bool "Flash volatge calibration enable"
+	default n
+	---help---
+		When enable the flash calibration, flash driver will read the calibration
+		parameters stored in the falsh during initialization and use these
+		parameters to calibrate the flash voltage.
+
+config TLSR82_FLASH_CALI_PARA_ADDR
+	hex "Flash voltage calibration address"
+	default 0x3ffd0
+	depends on TLSR82_FLASH_CALI
+	---help---
+		This is the flash calibration parameters address, this address must be
+		equal to the address defined in production tools.
+
+config TLSR82_FLASH_TEST
+	bool "Enable the falsh test when initializing"
+	default n
+	---help---
+		When enable this config, the flash test function will execute when
+		the flash initializing. This config is useful to debug the flash
+		problem.
+
+endif
+
+endmenu # "TLSR82 Peripheral Support"
+
+endif # ARCH_CHIP_TLSR82

@@ -54,6 +54,6 @@
 
 FAR wchar_t *wmemmove(FAR wchar_t *d, FAR const wchar_t *s, size_t n)
 {
-  return (FAR wchar_t *) memmove(d, s, n * sizeof(wchar_t));
+  return memmove(d, s, n * sizeof(wchar_t));
 }
 #endif

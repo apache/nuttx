@@ -101,12 +101,18 @@ endif
 #  CROSSDEV         The GNU toolchain triple (command prefix)
 #  ARCHCPUFLAGS     CPU-specific flags selecting the instruction set
 #                   FPU options, etc.
-#  MAXOPTIMIZATION  The maximum optimization level that results in
+#  ARCHOPTIMIZATION The optimization level that results in
 #                   reliable code generation.
 #
 
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
-  MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
+  ARCHOPTIMIZATION += $(CONFIG_DEBUG_OPTLEVEL)
+else ifeq ($(CONFIG_DEBUG_FULLOPT),y)
+  ARCHOPTIMIZATION += -O2
+endif
+
+ifneq ($(CONFIG_DEBUG_NOOPT),y)
+  ARCHOPTIMIZATION += -fno-strict-aliasing
 endif
 
 # Pick correct MIPS architecture selection
@@ -137,10 +143,8 @@ endif
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN),GNU_ELF)
   CROSSDEV ?= mips-elf-
-  MAXOPTIMIZATION ?= -O2
   ARCHCPUFLAGS = -mlong32 -membedded-data -msoft-float -march=$(MIPS_MARCH) $(MIPS_MICROMIPS) -EL
   ARCHPICFLAGS = -fpic -membedded-pic
-  LDFLAGS += -nostartfiles -nodefaultlibs
   LDSCRIPT = mips-elf-debug.ld
 endif
 
@@ -148,10 +152,8 @@ endif
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN),PINGUINOL)
   CROSSDEV ?= p32-
-  MAXOPTIMIZATION ?= -O2
   ARCHCPUFLAGS = -mlong32 -membedded-data -msoft-float -march=$(MIPS_MARCH) $(MIPS_MICROMIPS) -EL
   ARCHPICFLAGS = -fpic -membedded-pic
-  LDFLAGS += -nostartfiles -nodefaultlibs
   LDSCRIPT = pinguino-debug.ld
 endif
 
@@ -159,10 +161,8 @@ endif
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN),SOURCERY_CODEBENCH_LITE)
   CROSSDEV ?= mips-sde-elf-
-  MAXOPTIMIZATION ?= -O2
   ARCHCPUFLAGS = -mlong32 -membedded-data -msoft-float -march=$(MIPS_MARCH) $(MIPS_MICROMIPS) -EL
   ARCHPICFLAGS = -fpic -membedded-pic
-  LDFLAGS += -nostartfiles -nodefaultlibs
   LDSCRIPT = sourcery-debug.ld
 endif
 
@@ -170,11 +170,7 @@ endif
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPL_XC32)
   CROSSDEV ?= xc32-
-ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIP_XC32_LICENSED),y)
-  MAXOPTIMIZATION ?= -O2
-endif
   ARCHCPUFLAGS = -mprocessor=$(MIPS_MPROCESSOR) -march=$(MIPS_MARCH) -EL $(MIPS_MICROMIPS) -msmart-io=0
-  LDFLAGS += -nostartfiles -nodefaultlibs
   LDSCRIPT = xc32-debug.ld
 endif
 
@@ -182,11 +178,8 @@ endif
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPL)
   CROSSDEV ?= pic32-
-  # CROSSDEV ?= xc32-
-  MAXOPTIMIZATION ?= -O2
   ARCHCPUFLAGS = -mprocessor=$(MIPS_MPROCESSOR) $(MIPS_MICROMIPS) -mno-float -mlong32 -membedded-data
   ARCHPICFLAGS = -fpic -membedded-pic
-  LDFLAGS += -nostartfiles -nodefaultlibs
   LDSCRIPT = xc32-debug.ld
 endif
 
@@ -194,11 +187,7 @@ endif
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPW_XC32)
   CROSSDEV ?= xc32-
-ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIP_XC32_LICENSED),y)
-  MAXOPTIMIZATION ?= -O2
-endif
   ARCHCPUFLAGS = -mprocessor=$(MIPS_MPROCESSOR) -march=$(MIPS_MARCH) -EL $(MIPS_MICROMIPS) -msmart-io=0
-  LDFLAGS += -nostartfiles -nodefaultlibs
   LDSCRIPT = xc32-debug.ld
 endif
 
@@ -206,10 +195,8 @@ endif
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPW)
   CROSSDEV ?= pic32-
-  MAXOPTIMIZATION ?= -O2
   ARCHCPUFLAGS = -mprocessor=$(MIPS_MPROCESSOR) $(MIPS_MICROMIPS) -mno-float -mlong32 -membedded-data
   ARCHPICFLAGS = -fpic -membedded-pic
-  LDFLAGS += -nostartfiles -nodefaultlibs
   LDSCRIPT = c32-debug.ld
 endif
 
@@ -217,10 +204,8 @@ endif
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPL_LITE)
   CROSSDEV ?= pic32-
-  # MAXOPTIMIZATION ?= -O2
   ARCHCPUFLAGS = -mprocessor=$(MIPS_MPROCESSOR) $(MIPS_MICROMIPS) -mno-float -mlong32 -membedded-data
   ARCHPICFLAGS = -fpic -membedded-pic
-  LDFLAGS += -nostartfiles -nodefaultlibs
   LDSCRIPT = xc32-debug.ld
 endif
 
@@ -228,11 +213,8 @@ endif
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPW_LITE)
   CROSSDEV ?= pic32-
-  # CROSSDEV ?= xc32-
-  # MAXOPTIMIZATION ?= -O2
   ARCHCPUFLAGS = -mprocessor=$(MIPS_MPROCESSOR) $(MIPS_MICROMIPS) -mno-float -mlong32 -membedded-data
   ARCHPICFLAGS = -fpic -membedded-pic
-  LDFLAGS += -nostartfiles -nodefaultlibs
   LDSCRIPT = c32-debug.ld
 endif
 
@@ -240,30 +222,59 @@ endif
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPOPENL)
   CROSSDEV ?= mypic32-
-  # MAXOPTIMIZATION ?= -O2
   ARCHCPUFLAGS = -mprocessor=$(MIPS_MPROCESSOR) $(MIPS_MICROMIPS) -mno-float -mlong32 -membedded-data
   ARCHPICFLAGS = -fpic -membedded-pic
-  LDFLAGS += -nostartfiles -nodefaultlibs
   LDSCRIPT = c32-debug.ld
 endif
 
 # Pinguino mips-elf toolchain under Windows
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN),PINGUINOW)
-  #CROSSDEV ?= mips-
   CROSSDEV ?= p32-
-  MAXOPTIMIZATION ?= -O2
   ARCHCPUFLAGS = -mlong32 -membedded-data -msoft-float -march=$(MIPS_MARCH) $(MIPS_MICROMIPS) -EL
   ARCHPICFLAGS = -fpic -membedded-pic
-  LDFLAGS += -nostartfiles -nodefaultlibs
   LDSCRIPT = mips-elf-debug.ld
 endif
 
 ifeq ($(CONFIG_FRAME_POINTER),y)
-  MAXOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+  ARCHOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
 else
-  MAXOPTIMIZATION += -fomit-frame-pointer
+  ARCHOPTIMIZATION += -fomit-frame-pointer
 endif
+
+# Optimization of unused sections
+
+ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
+  LDFLAGS          += --gc-sections
+  ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
+endif
+
+# Debug link map
+
+ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
+  LDFLAGS += --cref -Map=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
+endif
+
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  LDFLAGS          += -g
+  ARCHOPTIMIZATION += -g
+endif
+
+ARCHCFLAGS += -fno-common
+ARCHCXXFLAGS += -fno-common -nostdinc++
+
+ARCHCFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wundef
+ARCHCXXFLAGS += -Wall -Wshadow -Wundef
+
+ifneq ($(CONFIG_CXX_EXCEPTION),y)
+  ARCHCXXFLAGS += -fno-exceptions -fcheck-new
+endif
+
+ifneq ($(CONFIG_CXX_RTTI),y)
+  ARCHCXXFLAGS += -fno-rtti
+endif
+
+LDFLAGS += -nostdlib
 
 # Default toolchain
 
@@ -279,12 +290,12 @@ OBJDUMP = $(CROSSDEV)objdump
 
 # Add the builtin library
 
-EXTRA_LIBS += ${wildcard ${shell $(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name}}
+EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name))
 
 ifneq ($(CONFIG_LIBM),y)
-  EXTRA_LIBS += ${wildcard ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a}}
+  EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a))
 endif
 
 ifeq ($(CONFIG_LIBSUPCXX),y)
-  EXTRA_LIBS += ${wildcard ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a}}
+  EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a))
 endif

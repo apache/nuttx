@@ -277,28 +277,28 @@ struct stm32_opamp_s
 
 /* OPAMP Register access */
 
-static inline void opamp_modify_csr(FAR struct stm32_opamp_s *priv,
-                                   uint32_t clearbits, uint32_t setbits);
-static inline uint32_t opamp_getreg_csr(FAR struct stm32_opamp_s *priv);
-static inline void opamp_putreg_csr(FAR struct stm32_opamp_s *priv,
+static inline void opamp_modify_csr(struct stm32_opamp_s *priv,
+                                    uint32_t clearbits, uint32_t setbits);
+static inline uint32_t opamp_getreg_csr(struct stm32_opamp_s *priv);
+static inline void opamp_putreg_csr(struct stm32_opamp_s *priv,
                                     uint32_t value);
-static bool stm32_opamplock_get(FAR struct stm32_opamp_s *priv);
-static int stm32_opamplock(FAR struct stm32_opamp_s *priv, bool lock);
+static bool stm32_opamplock_get(struct stm32_opamp_s *priv);
+static int stm32_opamplock(struct stm32_opamp_s *priv, bool lock);
 
 /* Initialization */
 
-static int stm32_opampconfig(FAR struct stm32_opamp_s *priv);
-static int stm32_opampenable(FAR struct stm32_opamp_s *priv, bool enable);
-static int stm32_opampgain_set(FAR struct stm32_opamp_s *priv, uint8_t gain);
+static int stm32_opampconfig(struct stm32_opamp_s *priv);
+static int stm32_opampenable(struct stm32_opamp_s *priv, bool enable);
+static int stm32_opampgain_set(struct stm32_opamp_s *priv, uint8_t gain);
 #if 0
-static int stm32_opampcalibrate(FAR struct stm32_opamp_s *priv);
+static int stm32_opampcalibrate(struct stm32_opamp_s *priv);
 #endif
 
 /* OPAMP Driver Methods */
 
-static void opamp_shutdown(FAR struct opamp_dev_s *dev);
-static int opamp_setup(FAR struct opamp_dev_s *dev);
-static int opamp_ioctl(FAR struct opamp_dev_s *dev, int cmd,
+static void opamp_shutdown(struct opamp_dev_s *dev);
+static int opamp_setup(struct opamp_dev_s *dev);
+static int opamp_ioctl(struct opamp_dev_s *dev, int cmd,
                        unsigned long arg);
 
 /****************************************************************************
@@ -424,8 +424,8 @@ static struct opamp_dev_s g_opamp4dev =
  *
  ****************************************************************************/
 
-static inline void opamp_modify_csr(FAR struct stm32_opamp_s *priv,
-                                   uint32_t clearbits, uint32_t setbits)
+static inline void opamp_modify_csr(struct stm32_opamp_s *priv,
+                                    uint32_t clearbits, uint32_t setbits)
 {
   uint32_t csr = priv->csr;
 
@@ -446,7 +446,7 @@ static inline void opamp_modify_csr(FAR struct stm32_opamp_s *priv,
  *
  ****************************************************************************/
 
-static inline uint32_t opamp_getreg_csr(FAR struct stm32_opamp_s *priv)
+static inline uint32_t opamp_getreg_csr(struct stm32_opamp_s *priv)
 {
   uint32_t csr = priv->csr;
 
@@ -468,8 +468,8 @@ static inline uint32_t opamp_getreg_csr(FAR struct stm32_opamp_s *priv)
  *
  ****************************************************************************/
 
-static inline void opamp_putreg_csr(FAR struct stm32_opamp_s *priv,
-                                   uint32_t value)
+static inline void opamp_putreg_csr(struct stm32_opamp_s *priv,
+                                    uint32_t value)
 {
   uint32_t csr = priv->csr;
 
@@ -490,7 +490,7 @@ static inline void opamp_putreg_csr(FAR struct stm32_opamp_s *priv,
  *
  ****************************************************************************/
 
-static bool stm32_opamplock_get(FAR struct stm32_opamp_s *priv)
+static bool stm32_opamplock_get(struct stm32_opamp_s *priv)
 {
   uint32_t regval;
 
@@ -514,7 +514,7 @@ static bool stm32_opamplock_get(FAR struct stm32_opamp_s *priv)
  *
  ****************************************************************************/
 
-static int stm32_opamplock(FAR struct stm32_opamp_s *priv, bool lock)
+static int stm32_opamplock(struct stm32_opamp_s *priv, bool lock)
 {
   bool current;
 
@@ -556,7 +556,7 @@ static int stm32_opamplock(FAR struct stm32_opamp_s *priv, bool lock)
  *
  ****************************************************************************/
 
-static int stm32_opampconfig(FAR struct stm32_opamp_s *priv)
+static int stm32_opampconfig(struct stm32_opamp_s *priv)
 {
   uint32_t regval = 0;
   int index;
@@ -1139,7 +1139,7 @@ static int stm32_opampconfig(FAR struct stm32_opamp_s *priv)
  *
  ****************************************************************************/
 
-static int stm32_opampenable(FAR struct stm32_opamp_s *priv, bool enable)
+static int stm32_opampenable(struct stm32_opamp_s *priv, bool enable)
 {
   bool lock;
 
@@ -1187,7 +1187,7 @@ static int stm32_opampenable(FAR struct stm32_opamp_s *priv, bool enable)
  *
  ****************************************************************************/
 
-static int stm32_opampgain_set(FAR struct stm32_opamp_s *priv, uint8_t gain)
+static int stm32_opampgain_set(struct stm32_opamp_s *priv, uint8_t gain)
 {
   bool lock;
   uint32_t regval = 0;
@@ -1250,7 +1250,7 @@ static int stm32_opampgain_set(FAR struct stm32_opamp_s *priv, uint8_t gain)
 }
 
 #if 0
-static int stm32_opampcalibrate(FAR struct stm32_opamp_s *priv)
+static int stm32_opampcalibrate(struct stm32_opamp_s *priv)
 {
 #warning "Missing logic"
 
@@ -1273,7 +1273,7 @@ static int stm32_opampcalibrate(FAR struct stm32_opamp_s *priv)
  *
  ****************************************************************************/
 
-static void opamp_shutdown(FAR struct opamp_dev_s *dev)
+static void opamp_shutdown(struct opamp_dev_s *dev)
 {
 #warning "Missing logic"
 }
@@ -1293,7 +1293,7 @@ static void opamp_shutdown(FAR struct opamp_dev_s *dev)
  *
  ****************************************************************************/
 
-static int opamp_setup(FAR struct opamp_dev_s *dev)
+static int opamp_setup(struct opamp_dev_s *dev)
 {
 #warning "Missing logic"
   return OK;
@@ -1314,7 +1314,7 @@ static int opamp_setup(FAR struct opamp_dev_s *dev)
  *
  ****************************************************************************/
 
-static int opamp_ioctl(FAR struct opamp_dev_s *dev, int cmd,
+static int opamp_ioctl(struct opamp_dev_s *dev, int cmd,
                        unsigned long arg)
 {
 #warning "Missing logic"
@@ -1343,10 +1343,10 @@ static int opamp_ioctl(FAR struct opamp_dev_s *dev, int cmd,
  *
  ****************************************************************************/
 
-FAR struct opamp_dev_s *stm32_opampinitialize(int intf)
+struct opamp_dev_s *stm32_opampinitialize(int intf)
 {
-  FAR struct opamp_dev_s *dev;
-  FAR struct stm32_opamp_s *opamp;
+  struct opamp_dev_s *dev;
+  struct stm32_opamp_s *opamp;
   int ret;
 
   switch (intf)

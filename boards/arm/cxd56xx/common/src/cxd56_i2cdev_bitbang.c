@@ -53,7 +53,7 @@
 int board_i2cdev_bitbang_initialize(uint32_t sda_pin, uint32_t scl_pin)
 {
   int ret = 0;
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
   int port;
 
   /* Use a sda pin number as port number */

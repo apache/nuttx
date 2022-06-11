@@ -23,8 +23,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/csr.h>
-#include <arch/irq.h>
+
+#include <nuttx/irq.h>
 
 #include "chip.h"
 #include "mpfs_memorymap.h"
@@ -38,7 +38,7 @@
 
   .extern __trap_vec
 
-  .section .text
+  .section .start
   .global __start
 
 __start:
@@ -100,35 +100,19 @@ __start:
   csrr a0, mhartid
   beqz a0, .skip_e51
 
-  /* Init delegation registers, mideleg, medeleg, if a U54
-   * These are not initialised by the hardware and come up in a random state
-   */
+  /* Delegation registers must be explicitly reset */
 
   csrw mideleg, 0
   csrw medeleg, 0
 
-  /* Disable MMU if not done already */
+  /* Remove MMU mappings (if any) */
 
   csrw satp, zero
   fence
 
-  /* invalid all MMU TLB Entry */
+  /* Flush TLB (does not make a difference really) */
 
   sfence.vma x0, x0
-
-  /* enable FPU and accelerator if present, setting ignored on E51
-   * 15,16 = MSTATUS_XS, 17,18 = MSTATUS_MPRV
-   * not defined on riscv-v/include/csr.h
-   */
-
-  /*  li      t0, MSTATUS_FS_DIRTY | (1 << 15) | (1 << 16) | (1 << 17) | (1 << 18) */
-  li t0, 0x00006000 | 0x00018000 /* MSTATUS_FS | MSTATUS_XS */
-  csrs    mstatus, t0
-
-  /* Init floating point control register to zero */
-#ifdef __riscv_flen
-    fscsr x0
-#endif
 
 .skip_e51:
 
@@ -191,10 +175,10 @@ __start:
 
 .continue_boot:
 
-    /* Clear PMP */
+  /* Clear PMP */
 
-    csrw pmpcfg0, zero
-    csrw pmpcfg2, zero
+  csrw pmpcfg0, zero
+  csrw pmpcfg2, zero
 #endif
 
   /* Set stack pointer to the idle thread stack */

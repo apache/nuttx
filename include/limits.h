@@ -203,7 +203,11 @@
 #define NAME_MAX       _POSIX_NAME_MAX
 #define TTY_NAME_MAX   _POSIX_NAME_MAX
 #define NGROUPS_MAX    _POSIX_NGROUPS_MAX
-#define OPEN_MAX       _POSIX_OPEN_MAX
+#if CONFIG_LIBC_OPEN_MAX < _POSIX_OPEN_MAX
+#  define OPEN_MAX     _POSIX_OPEN_MAX
+#else
+#  define OPEN_MAX     CONFIG_LIBC_OPEN_MAX
+#endif
 #define PATH_MAX       _POSIX_PATH_MAX
 #define PIPE_BUF       _POSIX_PIPE_BUF
 #define SIZE_MAX       _POSIX_SIZE_MAX

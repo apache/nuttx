@@ -121,8 +121,8 @@ struct stm32_can_s
 
   /* A pointers to the list of TX/RX descriptors */
 
-  FAR struct can_frame *txdesc;
-  FAR struct can_frame *rxdesc;
+  struct can_frame *txdesc;
+  struct can_frame *rxdesc;
 
   /* TX/RX pool */
 
@@ -136,21 +136,21 @@ struct stm32_can_s
 
 /* CAN Register access */
 
-static uint32_t stm32can_getreg(FAR struct stm32_can_s *priv,
+static uint32_t stm32can_getreg(struct stm32_can_s *priv,
                                 int offset);
-static uint32_t stm32can_getfreg(FAR struct stm32_can_s *priv,
+static uint32_t stm32can_getfreg(struct stm32_can_s *priv,
                                  int offset);
-static void stm32can_putreg(FAR struct stm32_can_s *priv, int offset,
+static void stm32can_putreg(struct stm32_can_s *priv, int offset,
                             uint32_t value);
-static void stm32can_putfreg(FAR struct stm32_can_s *priv, int offset,
+static void stm32can_putfreg(struct stm32_can_s *priv, int offset,
                              uint32_t value);
 #ifdef CONFIG_STM32_CAN_REGDEBUG
-static void stm32can_dumpctrlregs(FAR struct stm32_can_s *priv,
-                                  FAR const char *msg);
-static void stm32can_dumpmbregs(FAR struct stm32_can_s *priv,
-                                FAR const char *msg);
-static void stm32can_dumpfiltregs(FAR struct stm32_can_s *priv,
-                                  FAR const char *msg);
+static void stm32can_dumpctrlregs(struct stm32_can_s *priv,
+                                  const char *msg);
+static void stm32can_dumpmbregs(struct stm32_can_s *priv,
+                                const char *msg);
+static void stm32can_dumpfiltregs(struct stm32_can_s *priv,
+                                  const char *msg);
 #else
 #  define stm32can_dumpctrlregs(priv,msg)
 #  define stm32can_dumpmbregs(priv,msg)
@@ -159,54 +159,54 @@ static void stm32can_dumpfiltregs(FAR struct stm32_can_s *priv,
 
 /* CAN interrupt enable functions */
 
-static void stm32can_rx0int(FAR struct stm32_can_s *priv, bool enable);
-static void stm32can_rx1int(FAR struct stm32_can_s *priv, bool enable);
-static void stm32can_txint(FAR struct stm32_can_s *priv, bool enable);
+static void stm32can_rx0int(struct stm32_can_s *priv, bool enable);
+static void stm32can_rx1int(struct stm32_can_s *priv, bool enable);
+static void stm32can_txint(struct stm32_can_s *priv, bool enable);
 #ifdef CONFIG_NET_CAN_ERRORS
-static void stm32can_errint(FAR struct stm32_can_s *priv, bool enable);
+static void stm32can_errint(struct stm32_can_s *priv, bool enable);
 #endif
 
 /* Common TX logic */
 
-static int stm32can_transmit(FAR struct stm32_can_s *priv);
-static bool stm32can_txready(FAR struct stm32_can_s *priv);
+static int stm32can_transmit(struct stm32_can_s *priv);
+static bool stm32can_txready(struct stm32_can_s *priv);
 static int  stm32can_txpoll(struct net_driver_s *dev);
 
 /* CAN RX interrupt handling */
 
-static int  stm32can_rxinterrupt_work(FAR struct stm32_can_s *priv,
+static int  stm32can_rxinterrupt_work(struct stm32_can_s *priv,
                                       int rxmb);
 
-static void stm32can_rx0interrupt_work(FAR void *arg);
-static void stm32can_rx1interrupt_work(FAR void *arg);
-static int stm32can_rxinterrupt(FAR struct stm32_can_s *priv, int rxmb);
+static void stm32can_rx0interrupt_work(void *arg);
+static void stm32can_rx1interrupt_work(void *arg);
+static int stm32can_rxinterrupt(struct stm32_can_s *priv, int rxmb);
 
-static int  stm32can_rx0interrupt(int irq, FAR void *context, FAR void *arg);
-static int  stm32can_rx1interrupt(int irq, FAR void *context, FAR void *arg);
+static int  stm32can_rx0interrupt(int irq, void *context, void *arg);
+static int  stm32can_rx1interrupt(int irq, void *context, void *arg);
 
 /* CAN TX interrupt handling */
 
-static int  stm32can_txinterrupt(int irq, FAR void *context, FAR void *arg);
-static void stm32can_txdone_work(FAR void *arg);
-static void stm32can_txdone(FAR struct stm32_can_s *priv);
+static int  stm32can_txinterrupt(int irq, void *context, void *arg);
+static void stm32can_txdone_work(void *arg);
+static void stm32can_txdone(struct stm32_can_s *priv);
 
 #ifdef CONFIG_NET_CAN_ERRORS
 /* CAN errors interrupt handling */
 
-static void stm32can_sceinterrupt_work(FAR void *arg);
-static int  stm32can_sceinterrupt(int irq, FAR void *context, FAR void *arg);
+static void stm32can_sceinterrupt_work(void *arg);
+static int  stm32can_sceinterrupt(int irq, void *context, void *arg);
 #endif
 
 /* Initialization */
 
-static int  stm32can_setup(FAR struct stm32_can_s *priv);
-static void  stm32can_shutdown(FAR struct stm32_can_s *priv);
-static void  stm32can_reset(FAR struct stm32_can_s *priv);
-static int  stm32can_enterinitmode(FAR struct stm32_can_s *priv);
-static int  stm32can_exitinitmode(FAR struct stm32_can_s *priv);
-static int  stm32can_bittiming(FAR struct stm32_can_s *priv);
-static int  stm32can_cellinit(FAR struct stm32_can_s *priv);
-static int  stm32can_filterinit(FAR struct stm32_can_s *priv);
+static int  stm32can_setup(struct stm32_can_s *priv);
+static void  stm32can_shutdown(struct stm32_can_s *priv);
+static void  stm32can_reset(struct stm32_can_s *priv);
+static int  stm32can_enterinitmode(struct stm32_can_s *priv);
+static int  stm32can_exitinitmode(struct stm32_can_s *priv);
+static int  stm32can_bittiming(struct stm32_can_s *priv);
+static int  stm32can_cellinit(struct stm32_can_s *priv);
+static int  stm32can_filterinit(struct stm32_can_s *priv);
 
 /* TX mailbox status */
 
@@ -219,7 +219,7 @@ static bool stm32can_txmb2empty(uint32_t tsr_regval);
 static int  stm32can_ifup(struct net_driver_s *dev);
 static int  stm32can_ifdown(struct net_driver_s *dev);
 
-static void stm32can_txavail_work(FAR void *arg);
+static void stm32can_txavail_work(void *arg);
 static int  stm32can_txavail(struct net_driver_s *dev);
 
 #ifdef CONFIG_NETDEV_IOCTL
@@ -342,23 +342,23 @@ static uint32_t stm32can_vgetreg(uint32_t addr)
   return val;
 }
 
-static uint32_t stm32can_getreg(FAR struct stm32_can_s *priv, int offset)
+static uint32_t stm32can_getreg(struct stm32_can_s *priv, int offset)
 {
   return stm32can_vgetreg(priv->base + offset);
 }
 
-static uint32_t stm32can_getfreg(FAR struct stm32_can_s *priv, int offset)
+static uint32_t stm32can_getfreg(struct stm32_can_s *priv, int offset)
 {
   return stm32can_vgetreg(priv->fbase + offset);
 }
 
 #else
-static uint32_t stm32can_getreg(FAR struct stm32_can_s *priv, int offset)
+static uint32_t stm32can_getreg(struct stm32_can_s *priv, int offset)
 {
   return getreg32(priv->base + offset);
 }
 
-static uint32_t stm32can_getfreg(FAR struct stm32_can_s *priv, int offset)
+static uint32_t stm32can_getfreg(struct stm32_can_s *priv, int offset)
 {
   return getreg32(priv->fbase + offset);
 }
@@ -386,26 +386,26 @@ static void stm32can_vputreg(uint32_t addr, uint32_t value)
   putreg32(value, addr);
 }
 
-static void stm32can_putreg(FAR struct stm32_can_s *priv, int offset,
+static void stm32can_putreg(struct stm32_can_s *priv, int offset,
                             uint32_t value)
 {
   stm32can_vputreg(priv->base + offset, value);
 }
 
-static void stm32can_putfreg(FAR struct stm32_can_s *priv, int offset,
+static void stm32can_putfreg(struct stm32_can_s *priv, int offset,
                              uint32_t value)
 {
   stm32can_vputreg(priv->fbase + offset, value);
 }
 
 #else
-static void stm32can_putreg(FAR struct stm32_can_s *priv, int offset,
+static void stm32can_putreg(struct stm32_can_s *priv, int offset,
                             uint32_t value)
 {
   putreg32(value, priv->base + offset);
 }
 
-static void stm32can_putfreg(FAR struct stm32_can_s *priv, int offset,
+static void stm32can_putfreg(struct stm32_can_s *priv, int offset,
                              uint32_t value)
 {
   putreg32(value, priv->fbase + offset);
@@ -428,8 +428,8 @@ static void stm32can_putfreg(FAR struct stm32_can_s *priv, int offset,
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_CAN_REGDEBUG
-static void stm32can_dumpctrlregs(FAR struct stm32_can_s *priv,
-                                  FAR const char *msg)
+static void stm32can_dumpctrlregs(struct stm32_can_s *priv,
+                                  const char *msg)
 {
   if (msg)
     {
@@ -474,8 +474,8 @@ static void stm32can_dumpctrlregs(FAR struct stm32_can_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_CAN_REGDEBUG
-static void stm32can_dumpmbregs(FAR struct stm32_can_s *priv,
-                                FAR const char *msg)
+static void stm32can_dumpmbregs(struct stm32_can_s *priv,
+                                const char *msg)
 {
   if (msg)
     {
@@ -541,8 +541,8 @@ static void stm32can_dumpmbregs(FAR struct stm32_can_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_CAN_REGDEBUG
-static void stm32can_dumpfiltregs(FAR struct stm32_can_s *priv,
-                                  FAR const char *msg)
+static void stm32can_dumpfiltregs(struct stm32_can_s *priv,
+                                  const char *msg)
 {
   int i;
 
@@ -586,7 +586,7 @@ static void stm32can_dumpfiltregs(FAR struct stm32_can_s *priv,
  *
  ****************************************************************************/
 
-static void stm32can_rx0int(FAR struct stm32_can_s *priv, bool enable)
+static void stm32can_rx0int(struct stm32_can_s *priv, bool enable)
 {
   uint32_t regval = 0;
 
@@ -621,7 +621,7 @@ static void stm32can_rx0int(FAR struct stm32_can_s *priv, bool enable)
  *
  ****************************************************************************/
 
-static void stm32can_rx1int(FAR struct stm32_can_s *priv, bool enable)
+static void stm32can_rx1int(struct stm32_can_s *priv, bool enable)
 {
   uint32_t regval = 0;
 
@@ -656,7 +656,7 @@ static void stm32can_rx1int(FAR struct stm32_can_s *priv, bool enable)
  *
  ****************************************************************************/
 
-static void stm32can_txint(FAR struct stm32_can_s *priv, bool enable)
+static void stm32can_txint(struct stm32_can_s *priv, bool enable)
 {
   uint32_t regval = 0;
 
@@ -692,7 +692,7 @@ static void stm32can_txint(FAR struct stm32_can_s *priv, bool enable)
  *
  ****************************************************************************/
 
-static void stm32can_errint(FAR struct stm32_can_s *priv, bool enable)
+static void stm32can_errint(struct stm32_can_s *priv, bool enable)
 {
   uint32_t regval = 0;
 
@@ -731,7 +731,7 @@ static void stm32can_errint(FAR struct stm32_can_s *priv, bool enable)
 
 static int stm32can_ifup(struct net_driver_s *dev)
 {
-  FAR struct stm32_can_s *priv = (FAR struct stm32_can_s *)dev->d_private;
+  struct stm32_can_s *priv = (struct stm32_can_s *)dev->d_private;
 
   /* Setup CAN */
 
@@ -783,7 +783,7 @@ static int stm32can_ifup(struct net_driver_s *dev)
 
 static int stm32can_ifdown(struct net_driver_s *dev)
 {
-  FAR struct stm32_can_s *priv = (FAR struct stm32_can_s *)dev->d_private;
+  struct stm32_can_s *priv = (struct stm32_can_s *)dev->d_private;
 
   /* Disable CAN interrupts */
 
@@ -804,7 +804,7 @@ static int stm32can_ifdown(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static bool stm32can_txready(FAR struct stm32_can_s *priv)
+static bool stm32can_txready(struct stm32_can_s *priv)
 {
   uint32_t regval;
 
@@ -837,10 +837,10 @@ static bool stm32can_txready(FAR struct stm32_can_s *priv)
  *
  ****************************************************************************/
 
-static int stm32can_transmit(FAR struct stm32_can_s *priv)
+static int stm32can_transmit(struct stm32_can_s *priv)
 {
   struct can_frame *frame = (struct can_frame *)priv->dev.d_buf;
-  FAR uint8_t      *ptr;
+  uint8_t          *ptr;
   uint32_t          regval;
   uint32_t          tmp;
   int               dlc;
@@ -1013,7 +1013,7 @@ static int stm32can_transmit(FAR struct stm32_can_s *priv)
 
 static int stm32can_txpoll(struct net_driver_s *dev)
 {
-  FAR struct stm32_can_s *priv = (FAR struct stm32_can_s *)dev->d_private;
+  struct stm32_can_s *priv = (struct stm32_can_s *)dev->d_private;
 
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
@@ -1064,9 +1064,9 @@ static int stm32can_txpoll(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void stm32can_txavail_work(FAR void *arg)
+static void stm32can_txavail_work(void *arg)
 {
-  FAR struct stm32_can_s *priv = (FAR struct stm32_can_s *)arg;
+  struct stm32_can_s *priv = (struct stm32_can_s *)arg;
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -1083,7 +1083,7 @@ static void stm32can_txavail_work(FAR void *arg)
            * new XMIT data.
            */
 
-          devif_timer(&priv->dev, 0, stm32can_txpoll);
+          devif_poll(&priv->dev, stm32can_txpoll);
         }
     }
 
@@ -1111,7 +1111,7 @@ static void stm32can_txavail_work(FAR void *arg)
 
 static int stm32can_txavail(struct net_driver_s *dev)
 {
-  FAR struct stm32_can_s *priv = (FAR struct stm32_can_s *)dev->d_private;
+  struct stm32_can_s *priv = (struct stm32_can_s *)dev->d_private;
 
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
@@ -1150,8 +1150,8 @@ static int stm32can_txavail(struct net_driver_s *dev)
 static int stm32can_netdev_ioctl(struct net_driver_s *dev, int cmd,
                                  unsigned long arg)
 {
-  FAR struct stm32_can_s *priv = (FAR struct stm32_can_s *)dev->d_private;
-  int                     ret  = OK;
+  struct stm32_can_s *priv = (struct stm32_can_s *)dev->d_private;
+  int                 ret  = OK;
 
   switch (cmd)
     {
@@ -1182,11 +1182,11 @@ static int stm32can_netdev_ioctl(struct net_driver_s *dev, int cmd,
  *
  ****************************************************************************/
 
-static int stm32can_rxinterrupt_work(FAR struct stm32_can_s *priv, int rxmb)
+static int stm32can_rxinterrupt_work(struct stm32_can_s *priv, int rxmb)
 {
-  FAR struct can_frame *frame = (struct can_frame *)priv->rxdesc;
-  uint32_t              regval;
-  int                   ret   = OK;
+  struct can_frame *frame = (struct can_frame *)priv->rxdesc;
+  uint32_t          regval;
+  int               ret   = OK;
 
   DEBUGASSERT(priv != NULL);
 
@@ -1304,9 +1304,9 @@ errout:
  * Name: stm32can_rx0interrupt_work
  ****************************************************************************/
 
-static void stm32can_rx0interrupt_work(FAR void *arg)
+static void stm32can_rx0interrupt_work(void *arg)
 {
-  FAR struct stm32_can_s *priv = (FAR struct stm32_can_s *)arg;
+  struct stm32_can_s *priv = (struct stm32_can_s *)arg;
   stm32can_rxinterrupt_work(priv, 0);
 }
 
@@ -1314,9 +1314,9 @@ static void stm32can_rx0interrupt_work(FAR void *arg)
  * Name: stm32can_rx1interrupt_work
  ****************************************************************************/
 
-static void stm32can_rx1interrupt_work(FAR void *arg)
+static void stm32can_rx1interrupt_work(void *arg)
 {
-  FAR struct stm32_can_s *priv = (FAR struct stm32_can_s *)arg;
+  struct stm32_can_s *priv = (struct stm32_can_s *)arg;
   stm32can_rxinterrupt_work(priv, 1);
 }
 
@@ -1328,7 +1328,7 @@ static void stm32can_rx1interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int stm32can_rxinterrupt(FAR struct stm32_can_s *priv, int rxmb)
+static int stm32can_rxinterrupt(struct stm32_can_s *priv, int rxmb)
 {
   uint32_t regval   = 0;
   int      npending = 0;
@@ -1382,9 +1382,9 @@ static int stm32can_rxinterrupt(FAR struct stm32_can_s *priv, int rxmb)
  *
  ****************************************************************************/
 
-static int stm32can_rx0interrupt(int irq, FAR void *context, FAR void *arg)
+static int stm32can_rx0interrupt(int irq, void *context, void *arg)
 {
-  FAR struct stm32_can_s *priv = (FAR struct stm32_can_s *)arg;
+  struct stm32_can_s *priv = (struct stm32_can_s *)arg;
   return stm32can_rxinterrupt(priv, 0);
 }
 
@@ -1403,9 +1403,9 @@ static int stm32can_rx0interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static int stm32can_rx1interrupt(int irq, FAR void *context, FAR void *arg)
+static int stm32can_rx1interrupt(int irq, void *context, void *arg)
 {
-  FAR struct stm32_can_s *priv = (FAR struct stm32_can_s *)arg;
+  struct stm32_can_s *priv = (struct stm32_can_s *)arg;
   return stm32can_rxinterrupt(priv, 1);
 }
 
@@ -1424,9 +1424,9 @@ static int stm32can_rx1interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static int stm32can_txinterrupt(int irq, FAR void *context, FAR void *arg)
+static int stm32can_txinterrupt(int irq, void *context, void *arg)
 {
-  FAR struct stm32_can_s *priv = (FAR struct stm32_can_s *)arg;
+  struct stm32_can_s *priv = (struct stm32_can_s *)arg;
   uint32_t regval;
 
   DEBUGASSERT(priv != NULL);
@@ -1500,9 +1500,9 @@ static int stm32can_txinterrupt(int irq, FAR void *context, FAR void *arg)
  * Name: stm32can_txdone_work
  ****************************************************************************/
 
-static void stm32can_txdone_work(FAR void *arg)
+static void stm32can_txdone_work(void *arg)
 {
-  FAR struct stm32_can_s *priv = (FAR struct stm32_can_s *)arg;
+  struct stm32_can_s *priv = (struct stm32_can_s *)arg;
 
   stm32can_txdone(priv);
 
@@ -1511,7 +1511,7 @@ static void stm32can_txdone_work(FAR void *arg)
    */
 
   net_lock();
-  devif_timer(&priv->dev, 0, stm32can_txpoll);
+  devif_poll(&priv->dev, stm32can_txpoll);
   net_unlock();
 }
 
@@ -1519,7 +1519,7 @@ static void stm32can_txdone_work(FAR void *arg)
  * Name: stm32can_txdone
  ****************************************************************************/
 
-static void stm32can_txdone(FAR struct stm32_can_s *priv)
+static void stm32can_txdone(struct stm32_can_s *priv)
 {
   stm32can_txint(priv, true);
 
@@ -1542,13 +1542,13 @@ static void stm32can_txdone(FAR struct stm32_can_s *priv)
  *
  ****************************************************************************/
 
-static void stm32can_sceinterrupt_work(FAR void *arg)
+static void stm32can_sceinterrupt_work(void *arg)
 {
-  FAR struct stm32_can_s *priv    = (FAR struct stm32_can_s *)arg;
-  struct can_frame       *frame   = (struct can_frame *)priv->rxdesc;
-  uint32_t                regval  = 0;
-  uint16_t                errbits = 0;
-  uint8_t                 data[CAN_ERR_DLC];
+  struct stm32_can_s *priv    = (struct stm32_can_s *)arg;
+  struct can_frame   *frame   = (struct can_frame *)priv->rxdesc;
+  uint32_t            regval  = 0;
+  uint16_t            errbits = 0;
+  uint8_t             data[CAN_ERR_DLC];
 
   DEBUGASSERT(priv != NULL);
 
@@ -1713,9 +1713,9 @@ static void stm32can_sceinterrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int stm32can_sceinterrupt(int irq, FAR void *context, FAR void *arg)
+static int stm32can_sceinterrupt(int irq, void *context, void *arg)
 {
-  FAR struct stm32_can_s *priv = (FAR struct stm32_can_s *)arg;
+  struct stm32_can_s *priv = (struct stm32_can_s *)arg;
 
   /* Disable further CAN SCE interrupts and schedule to perform the
    * interrupt processing on the worker thread
@@ -1786,7 +1786,7 @@ static int stm32can_sceinterrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static int stm32can_bittiming(FAR struct stm32_can_s *priv)
+static int stm32can_bittiming(struct stm32_can_s *priv)
 {
   uint32_t tmp;
   uint32_t brp;
@@ -1875,7 +1875,7 @@ static int stm32can_bittiming(FAR struct stm32_can_s *priv)
  * Name: stm32can_setup
  ****************************************************************************/
 
-static int  stm32can_setup(FAR struct stm32_can_s *priv)
+static int  stm32can_setup(struct stm32_can_s *priv)
 {
   int ret;
 
@@ -1960,7 +1960,7 @@ static int  stm32can_setup(FAR struct stm32_can_s *priv)
  * Name: stm32can_shutdown
  ****************************************************************************/
 
-static void stm32can_shutdown(FAR struct stm32_can_s *priv)
+static void stm32can_shutdown(struct stm32_can_s *priv)
 {
   ninfo("CAN%" PRIu8 "\n", priv->port);
 
@@ -1999,7 +1999,7 @@ static void stm32can_shutdown(FAR struct stm32_can_s *priv)
  *
  ****************************************************************************/
 
-static void stm32can_reset(FAR struct stm32_can_s *priv)
+static void stm32can_reset(struct stm32_can_s *priv)
 {
   uint32_t regval;
   uint32_t regbit = 0;
@@ -2061,7 +2061,7 @@ static void stm32can_reset(FAR struct stm32_can_s *priv)
  *
  ****************************************************************************/
 
-static int stm32can_enterinitmode(FAR struct stm32_can_s *priv)
+static int stm32can_enterinitmode(struct stm32_can_s *priv)
 {
   uint32_t regval;
   volatile uint32_t timeout;
@@ -2112,7 +2112,7 @@ static int stm32can_enterinitmode(FAR struct stm32_can_s *priv)
  *
  ****************************************************************************/
 
-static int stm32can_exitinitmode(FAR struct stm32_can_s *priv)
+static int stm32can_exitinitmode(struct stm32_can_s *priv)
 {
   uint32_t regval;
   volatile uint32_t timeout;
@@ -2162,7 +2162,7 @@ static int stm32can_exitinitmode(FAR struct stm32_can_s *priv)
  *
  ****************************************************************************/
 
-static int stm32can_cellinit(FAR struct stm32_can_s *priv)
+static int stm32can_cellinit(struct stm32_can_s *priv)
 {
   uint32_t regval;
   int ret;
@@ -2245,7 +2245,7 @@ static int stm32can_cellinit(FAR struct stm32_can_s *priv)
  *
  ****************************************************************************/
 
-static int stm32can_filterinit(FAR struct stm32_can_s *priv)
+static int stm32can_filterinit(struct stm32_can_s *priv)
 {
   uint32_t regval;
   uint32_t bitmask;
@@ -2461,3 +2461,28 @@ int stm32_cansockinitialize(int port)
 errout:
   return ret;
 }
+
+/****************************************************************************
+ * Name: arm_netinitialize
+ *
+ * Description:
+ *   Initialize the CAN device interfaces.  If there is more than one device
+ *   interface in the chip, then board-specific logic will have to provide
+ *   this function to determine which, if any, CAN interfaces should be
+ *   initialized.
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_NETDEV_LATEINIT)
+void arm_netinitialize(void)
+{
+#ifdef CONFIG_STM32_CAN1
+  stm32_cansockinitialize(0);
+#endif
+
+#ifdef CONFIG_STM32_CAN2
+  stm32_cansockinitialize(1);
+#endif
+}
+#endif
+

@@ -54,12 +54,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* TX poll delay = 1 seconds.
- * CLK_TCK is the number of clock ticks per second
- */
-
-#define WLAN_WDDELAY              (1 * CLK_TCK)
-
 /* TX timeout = 1 minute */
 
 #define WLAN_TXTOUT               (60 * CLK_TCK)
@@ -140,11 +134,10 @@ struct wlan_ops
 
 struct wlan_priv_s
 {
-  bool   ref;                   /* Referernce count */
+  int    ref;                   /* Referernce count */
 
   bool   ifup;                  /* true:ifup false:ifdown */
 
-  struct wdog_s txpoll;         /* TX poll timer */
   struct wdog_s txtimeout;      /* TX timeout timer */
 
   struct work_s rxwork;         /* Send packet work */
@@ -250,9 +243,6 @@ static void wlan_dopoll(struct wlan_priv_s *priv);
 
 static void wlan_txtimeout_work(void *arg);
 static void wlan_txtimeout_expiry(wdparm_t arg);
-
-static void wlan_poll_work(void *arg);
-static void wlan_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -1058,108 +1048,6 @@ static void wlan_txtimeout_expiry(wdparm_t arg)
 }
 
 /****************************************************************************
- * Name: wlan_poll_work
- *
- * Description:
- *   Perform periodic polling from the worker thread
- *
- * Input Parameters:
- *   arg - The argument passed when work_queue() as called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static void wlan_poll_work(void *arg)
-{
-  int32_t delay_tick = WLAN_WDDELAY;
-  struct wlan_priv_s *priv = (struct wlan_priv_s *)arg;
-  struct net_driver_s *dev = &priv->dev;
-  struct wlan_pktbuf *pktbuf;
-
-  /* Lock the network and serialize driver operations if necessary.
-   * NOTE: Serialization is only required in the case where the driver work
-   * is performed on an LP worker thread and where more than one LP worker
-   * thread has been configured.
-   */
-
-  net_lock();
-
-  pktbuf = wlan_alloc_buffer(priv);
-  if (!pktbuf)
-    {
-      /* Delay 10ms */
-
-      delay_tick = MSEC2TICK(10);
-      if (delay_tick == 0)
-        {
-          delay_tick = 1;
-        }
-
-      goto exit;
-    }
-
-  dev->d_buf = pktbuf->buffer;
-  dev->d_len = WLAN_BUF_SIZE;
-
-  /* Check if there is room in the send another TX packets. We cannot perform
-   * the TX poll if he are unable to accept another packet for transmission.
-   *
-   * If there is no room, we should reset the timeout value to be 1 to
-   * trigger the timer as soon as possible.
-   */
-
-  /* Update TCP timing states and poll the network for new XMIT data. */
-
-  devif_timer(&priv->dev, delay_tick, wlan_txpoll);
-
-  if (dev->d_buf)
-    {
-      wlan_free_buffer(priv, dev->d_buf);
-
-      dev->d_buf = NULL;
-      dev->d_len = 0;
-    }
-
-  /* Try to send all cached TX packets */
-
-  wlan_transmit(priv);
-
-exit:
-  wd_start(&priv->txpoll, delay_tick, wlan_poll_expiry, (wdparm_t)priv);
-  net_unlock();
-}
-
-/****************************************************************************
- * Name: wlan_poll_expiry
- *
- * Description:
- *   Periodic timer handler.  Called from the timer callback handler.
- *
- * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void wlan_poll_expiry(wdparm_t arg)
-{
-  struct wlan_priv_s *priv = (struct wlan_priv_s *)arg;
-
-  if (priv->ifup)
-    {
-      work_queue(WLAN_WORK, &priv->pollwork, wlan_poll_work, priv, 0);
-    }
-}
-
-/****************************************************************************
  * Name: wlan_txavail_work
  *
  * Description:
@@ -1261,10 +1149,6 @@ static int wlan_ifup(struct net_driver_s *dev)
 
   wlan_init_buffer(priv);
 
-  /* Set and activate a timer process */
-
-  wd_start(&priv->txpoll, WLAN_WDDELAY, wlan_poll_expiry, (wdparm_t)priv);
-
   priv->ifup = true;
   if (g_callback_register_ref == 0)
     {
@@ -1310,7 +1194,6 @@ static int wlan_ifdown(struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(&priv->txpoll);
   wd_cancel(&priv->txtimeout);
 
   /* Mark the device "down" */

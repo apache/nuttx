@@ -236,9 +236,9 @@
  ****************************************************************************/
 
 #if defined(CONFIG_BUILD_KERNEL)
-void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
+void up_allocate_kheap(void **heap_start, size_t *heap_size)
 #else
-void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
+void up_allocate_heap(void **heap_start, size_t *heap_size)
 #endif
 {
 #if defined(CONFIG_BOOT_SDRAM_DATA)
@@ -247,7 +247,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
    */
 
   board_autoled_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void *)&_ebss;
+  *heap_start = (void *)&_ebss;
   *heap_size  = SAMA5_PRIMARY_HEAP_END - (size_t)&_ebss;
 
 #else
@@ -256,7 +256,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
    */
 
   board_autoled_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void *)g_idle_topstack;
+  *heap_start = (void *)g_idle_topstack;
   *heap_size  = SAMA5_PRIMARY_HEAP_END - g_idle_topstack;
 #endif
 }

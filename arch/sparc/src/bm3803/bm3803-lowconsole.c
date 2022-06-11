@@ -140,7 +140,7 @@ void bm3803_uartconfigure(uintptr_t uart_base, uint32_t baudrate,
 
       uart1_flow_ctrl_config(OFF);
       uart1_loopback_config(OFF);
-
+      BM3803_REG.pio_dir = (BM3803_REG.pio_dir & 0xbfff) | 0x8000;
       uart1_enable();
     }
   else if (uart_base == BM3803_UART2_BASE)
@@ -166,8 +166,34 @@ void bm3803_uartconfigure(uintptr_t uart_base, uint32_t baudrate,
 
       uart2_flow_ctrl_config(OFF);
       uart2_loopback_config(OFF);
-
+      BM3803_REG.pio_dir = (BM3803_REG.pio_dir & 0xfbff) | 0x0800;
       uart2_enable();
+    }
+  else if (uart_base == BM3803_UART3_BASE)
+    {
+      /* Select baud. */
+
+      uart3_set_baudrate(baudrate);
+
+      /* Select parity */
+
+      if (parity == 1)
+        {
+          uart3_parity_config(ODD); /* Odd parity */
+        }
+      else if (parity == 2)
+        {
+          uart3_parity_config(EVEN); /* Even parity */
+        }
+      else
+        {
+          uart3_parity_config(NONE); /* Even none */
+        }
+
+      uart3_flow_ctrl_config(OFF);
+      uart3_loopback_config(OFF);
+
+      uart3_enable();
     }
   else
     {
@@ -195,7 +221,7 @@ void uart1_configure(void)
 
   uart1_flow_ctrl_config(OFF);
   uart1_loopback_config(OFF);
-
+  BM3803_REG.pio_dir = (BM3803_REG.pio_dir & 0xbfff) | 0x8000;
   uart1_enable();
 }
 #endif
@@ -219,7 +245,7 @@ void uart2_configure(void)
 
   uart2_flow_ctrl_config(OFF);
   uart2_loopback_config(OFF);
-
+  BM3803_REG.pio_dir = (BM3803_REG.pio_dir & 0xfbff) | 0x0800;
   uart2_enable();
 }
 #endif

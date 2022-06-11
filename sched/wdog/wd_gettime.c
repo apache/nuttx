@@ -50,7 +50,7 @@
  *
  ****************************************************************************/
 
-int wd_gettime(FAR struct wdog_s *wdog)
+sclock_t wd_gettime(FAR struct wdog_s *wdog)
 {
   irqstate_t flags;
 
@@ -64,7 +64,7 @@ int wd_gettime(FAR struct wdog_s *wdog)
        */
 
       FAR struct wdog_s *curr;
-      int delay = 0;
+      sclock_t delay = 0;
 
       for (curr = (FAR struct wdog_s *)g_wdactivelist.head;
            curr != NULL;

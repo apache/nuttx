@@ -190,8 +190,12 @@ exception_common:
 	 * where to put the registers.
 	 */
 
-	vstmdb		sp!, {s16-s31}			/* Save the non-volatile FP context */
+	/* Switched-out task including volatile FP registers ? */
 
+	tst		r14, #EXC_RETURN_STD_CONTEXT
+	ite		eq
+	vstmdbeq	sp!, {s16-s31}			/* Save the non-volatile FP context */
+	subne		sp, #(4*SW_FPU_REGS)
 #endif
 
 	stmdb		sp!, {r2-r11,r14}		/* Save the remaining registers plus the SP/PRIMASK values */
@@ -241,7 +245,12 @@ exception_common:
 
 	ldmia		r0!, {r2-r11,r14}	/* Recover R4-R11, r14 + 2 temp values */
 #ifdef CONFIG_ARCH_FPU
-	vldmia		r0!, {s16-s31}		/* Recover S16-S31 */
+	/* Switched-in task including volatile FP registers ? */
+
+	tst		r14, #EXC_RETURN_STD_CONTEXT
+	ite		eq
+	vldmiaeq	r0!, {s16-s31}		/* Recover S16-S31 */
+	addne		r0, #(4*SW_FPU_REGS)
 #endif
 
 #ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE

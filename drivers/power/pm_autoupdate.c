@@ -109,9 +109,9 @@ void pm_auto_update(int domain, bool auto_update)
   DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
   pdom = &g_pmglobals.domain[domain];
 
-  flags = enter_critical_section();
+  flags = pm_lock();
   pdom->auto_update = auto_update;
-  leave_critical_section(flags);
+  pm_unlock(flags);
 }
 
 #endif /* CONFIG_PM */

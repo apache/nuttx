@@ -106,7 +106,7 @@ GNU Toolchain Options
   a different toolchain, you simply need to modify the configuration.  As an
   example:
 
-    CONFIG_ARM_TOOLCHAIN_GNU_EABIL : Generic arm-none-eabi toolchain
+    CONFIG_ARM_TOOLCHAIN_GNU_EABI : Generic arm-none-eabi toolchain
 
 IDEs
 ====
@@ -535,7 +535,7 @@ Configurations
        for Linux.  That can easily be reconfigured, of course.
 
        CONFIG_HOST_LINUX=y                     : Builds under Linux
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y     : GNU EABI toolchain for Linux
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Linux
 
     3. Although the default console is USART2 (which would correspond to
        the Virtual COM port) I have done all testing with the console

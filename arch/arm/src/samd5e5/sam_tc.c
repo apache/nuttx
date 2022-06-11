@@ -382,7 +382,7 @@ void tc_coreclk_configure(int tc, int coregen, bool wrlock)
  *
  ****************************************************************************/
 
-static int tc_interrupt(int irq, void *context, FAR void *arg)
+static int tc_interrupt(int irq, void *context, void *arg)
 {
   struct sam_tc_dev_s *priv = (struct sam_tc_dev_s *)arg;
   uint8_t flags;
@@ -657,7 +657,7 @@ TC_HANDLE sam_tc_allocate(int tc, int frequency)
       /* Initialize the TC driver structure */
 
       priv->flags = 0;
-      (void)nxsem_init(&priv->exclsem, 0, 1);
+      nxsem_init(&priv->exclsem, 0, 1);
 
       /* Enable clocking to the TC module in PCHCTRL */
 

@@ -58,7 +58,7 @@
  ****************************************************************************/
 
 #if !defined(CONFIG_ARCH_PGPOOL_MAPPING) && defined(CONFIG_ARCH_USE_MMU)
-static inline uintptr_t arm_tmpmap(uintptr_t paddr, FAR uint32_t *l1save)
+static inline uintptr_t arm_tmpmap(uintptr_t paddr, uint32_t *l1save)
 {
   *l1save = mmu_l1_getentry(ARCH_SCRATCH_VBASE);
   mmu_l1_setentry(paddr & ~SECTION_MASK, ARCH_SCRATCH_VBASE, MMU_MEMFLAGS);
@@ -138,7 +138,7 @@ static inline bool arm_uservaddr(uintptr_t vaddr)
  *
  ****************************************************************************/
 
-static inline void set_l2_entry(FAR uint32_t *l2table, uintptr_t paddr,
+static inline void set_l2_entry(uint32_t *l2table, uintptr_t paddr,
                                 uintptr_t vaddr, uint32_t mmuflags)
 {
   uint32_t index;
@@ -163,7 +163,7 @@ static inline void set_l2_entry(FAR uint32_t *l2table, uintptr_t paddr,
  *
  ****************************************************************************/
 
-static inline void clr_l2_entry(FAR uint32_t *l2table, uintptr_t vaddr)
+static inline void clr_l2_entry(uint32_t *l2table, uintptr_t vaddr)
 {
   uint32_t index;
 
@@ -188,7 +188,7 @@ static inline void clr_l2_entry(FAR uint32_t *l2table, uintptr_t vaddr)
  *
  ****************************************************************************/
 
-static inline uintptr_t get_l2_entry(FAR uint32_t *l2table, uintptr_t vaddr)
+static inline uintptr_t get_l2_entry(uint32_t *l2table, uintptr_t vaddr)
 {
   uint32_t index;
 

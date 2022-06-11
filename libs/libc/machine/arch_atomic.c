@@ -34,59 +34,60 @@
 
 #define STORE(n, type)                                    \
                                                           \
-  void __atomic_store_ ## n (volatile void *ptr,          \
+  void __atomic_store_ ## n (FAR volatile void *ptr,      \
                              type value,                  \
                              int memorder)                \
   {                                                       \
     irqstate_t irqstate = spin_lock_irqsave(NULL);        \
                                                           \
-    *(type *)ptr = value;                                 \
+    *(FAR type *)ptr = value;                             \
                                                           \
     spin_unlock_irqrestore(NULL, irqstate);               \
   }
 
 #define LOAD(n, type)                                     \
                                                           \
-  type __atomic_load_ ## n (const volatile void *ptr,     \
+  type __atomic_load_ ## n (FAR const volatile void *ptr, \
                             int memorder)                 \
   {                                                       \
     irqstate_t irqstate = spin_lock_irqsave(NULL);        \
                                                           \
-    type ret = *(type *)ptr;                              \
+    type ret = *(FAR type *)ptr;                          \
                                                           \
     spin_unlock_irqrestore(NULL, irqstate);               \
-    return ret; \
+    return ret;                                           \
   }
 
 #define EXCHANGE(n, type)                                 \
                                                           \
-  type __atomic_exchange_ ## n (volatile void *ptr,       \
+  type __atomic_exchange_ ## n (FAR volatile void *ptr,   \
                                 type value,               \
                                 int memorder)             \
   {                                                       \
     irqstate_t irqstate = spin_lock_irqsave(NULL);        \
-    type *tmp = (type *)ptr;                              \
+    FAR type *tmp = (FAR type *)ptr;                      \
                                                           \
     type ret = *tmp;                                      \
     *tmp = value;                                         \
                                                           \
     spin_unlock_irqrestore(NULL, irqstate);               \
-    return ret; \
+    return ret;                                           \
   }
 
 #define CMP_EXCHANGE(n, type)                             \
                                                           \
-  bool __atomic_compare_exchange_ ## n (volatile void *mem,\
-                                        void *expect,     \
-                                        type desired,     \
-                                        bool weak,        \
-                                        int success,      \
-                                        int failure)      \
+  bool __atomic_compare_exchange_ ## n (                  \
+                                FAR volatile void *mem,   \
+                                FAR void *expect,         \
+                                type desired,             \
+                                bool weak,                \
+                                int success,              \
+                                int failure)              \
   {                                                       \
     bool ret = false;                                     \
     irqstate_t irqstate = spin_lock_irqsave(NULL);        \
-    type *tmpmem = (type *)mem;                           \
-    type *tmpexp = (type *)expect;                        \
+    FAR type *tmpmem = (FAR type *)mem;                   \
+    FAR type *tmpexp = (FAR type *)expect;                \
                                                           \
     if (*tmpmem == *tmpexp)                               \
       {                                                   \
@@ -99,17 +100,17 @@
       }                                                   \
                                                           \
     spin_unlock_irqrestore(NULL, irqstate);               \
-    return ret; \
+    return ret;                                           \
   }
 
 #define FETCH_ADD(n, type)                                \
                                                           \
-  type __atomic_fetch_add_ ## n (volatile void *ptr,      \
+  type __atomic_fetch_add_ ## n (FAR volatile void *ptr,  \
                                  type value,              \
                                  int memorder)            \
   {                                                       \
     irqstate_t irqstate = spin_lock_irqsave(NULL);        \
-    type *tmp = (type *)ptr;                              \
+    FAR type *tmp = (FAR type *)ptr;                      \
     type ret = *tmp;                                      \
                                                           \
     *tmp = *tmp + value;                                  \
@@ -120,12 +121,12 @@
 
 #define FETCH_SUB(n, type)                                \
                                                           \
-  type __atomic_fetch_sub_ ## n (volatile void *ptr,      \
+  type __atomic_fetch_sub_ ## n (FAR volatile void *ptr,  \
                                  type value,              \
                                  int memorder)            \
   {                                                       \
     irqstate_t irqstate = spin_lock_irqsave(NULL);        \
-    type *tmp = (type *)ptr;                              \
+    FAR type *tmp = (FAR type *)ptr;                      \
     type ret = *tmp;                                      \
                                                           \
     *tmp = *tmp - value;                                  \
@@ -136,12 +137,12 @@
 
 #define FETCH_AND(n, type)                                \
                                                           \
-  type __atomic_fetch_and_ ## n (volatile void *ptr,      \
+  type __atomic_fetch_and_ ## n (FAR volatile void *ptr,  \
                                  type value,              \
                                  int memorder)            \
   {                                                       \
     irqstate_t irqstate = spin_lock_irqsave(NULL);        \
-    type *tmp = (type *)ptr;                              \
+    FAR type *tmp = (FAR type *)ptr;                      \
     type ret = *tmp;                                      \
                                                           \
     *tmp = *tmp & value;                                  \
@@ -152,12 +153,12 @@
 
 #define FETCH_OR(n, type)                                 \
                                                           \
-  type __atomic_fetch_or_ ## n (volatile void *ptr,       \
+  type __atomic_fetch_or_ ## n (FAR volatile void *ptr,   \
                                 type value,               \
                                 int memorder)             \
   {                                                       \
     irqstate_t irqstate = spin_lock_irqsave(NULL);        \
-    type *tmp = (type *)ptr;                              \
+    FAR type *tmp = (FAR type *)ptr;                      \
     type ret = *tmp;                                      \
                                                           \
     *tmp = *tmp | value;                                  \
@@ -168,15 +169,146 @@
 
 #define FETCH_XOR(n, type)                                \
                                                           \
-  type __atomic_fetch_xor_ ## n (volatile void *ptr,      \
+  type __atomic_fetch_xor_ ## n (FAR volatile void *ptr,  \
                                  type value,              \
                                  int memorder)            \
   {                                                       \
     irqstate_t irqstate = spin_lock_irqsave(NULL);        \
-    type *tmp = (type *)ptr;                              \
+    FAR type *tmp = (FAR type *)ptr;                      \
     type ret = *tmp;                                      \
                                                           \
     *tmp = *tmp ^ value;                                  \
+                                                          \
+    spin_unlock_irqrestore(NULL, irqstate);               \
+    return ret;                                           \
+  }
+
+#define SYNC_ADD_FETCH(n, type)                           \
+                                                          \
+  type __sync_add_and_fetch_ ## n (                       \
+                                FAR volatile void *ptr,   \
+                                type value)               \
+  {                                                       \
+    irqstate_t irqstate = spin_lock_irqsave(NULL);        \
+    FAR type *tmp = (FAR type *)ptr;                      \
+                                                          \
+    *tmp = *tmp + value;                                  \
+                                                          \
+    spin_unlock_irqrestore(NULL, irqstate);               \
+    return *tmp;                                          \
+  }
+
+#define SYNC_SUB_FETCH(n, type)                           \
+                                                          \
+  type __sync_sub_and_fetch_ ## n (                       \
+                                FAR volatile void *ptr,   \
+                                type value)               \
+  {                                                       \
+    irqstate_t irqstate = spin_lock_irqsave(NULL);        \
+    FAR type *tmp = (FAR type *)ptr;                      \
+                                                          \
+    *tmp = *tmp - value;                                  \
+                                                          \
+    spin_unlock_irqrestore(NULL, irqstate);               \
+    return *tmp;                                          \
+  }
+
+#define SYNC_OR_FETCH(n, type)                            \
+                                                          \
+  type __sync_or_and_fetch_ ## n (                        \
+                                FAR volatile void *ptr,   \
+                                type value)               \
+  {                                                       \
+    irqstate_t irqstate = spin_lock_irqsave(NULL);        \
+    FAR type *tmp = (FAR type *)ptr;                      \
+                                                          \
+    *tmp = *tmp | value;                                  \
+                                                          \
+    spin_unlock_irqrestore(NULL, irqstate);               \
+    return *tmp;                                          \
+  }
+
+#define SYNC_AND_FETCH(n, type)                           \
+                                                          \
+  type __sync_and_and_fetch_ ## n (                       \
+                                FAR volatile void *ptr,   \
+                                type value)               \
+  {                                                       \
+    irqstate_t irqstate = spin_lock_irqsave(NULL);        \
+    FAR type *tmp = (FAR type *)ptr;                      \
+                                                          \
+    *tmp = *tmp & value;                                  \
+                                                          \
+    spin_unlock_irqrestore(NULL, irqstate);               \
+    return *tmp;                                          \
+  }
+
+#define SYNC_XOR_FETCH(n, type)                           \
+                                                          \
+  type __sync_xor_and_fetch_ ## n (                       \
+                                FAR volatile void *ptr,   \
+                                type value)               \
+  {                                                       \
+    irqstate_t irqstate = spin_lock_irqsave(NULL);        \
+    FAR type *tmp = (FAR type *)ptr;                      \
+                                                          \
+    *tmp = *tmp ^ value;                                  \
+                                                          \
+    spin_unlock_irqrestore(NULL, irqstate);               \
+    return *tmp;                                          \
+  }
+
+#define SYNC_NAND_FETCH(n, type)                          \
+                                                          \
+  type __sync_nand_and_fetch_ ## n (                      \
+                                FAR volatile void *ptr,   \
+                                type value)               \
+  {                                                       \
+    irqstate_t irqstate = spin_lock_irqsave(NULL);        \
+    FAR type *tmp = (FAR type *)ptr;                      \
+                                                          \
+    *tmp = ~(*tmp & value);                               \
+                                                          \
+    spin_unlock_irqrestore(NULL, irqstate);               \
+    return *tmp;                                          \
+  }
+
+#define SYNC_BOOL_CMP_SWAP(n, type)                       \
+                                                          \
+  bool __sync_bool_compare_and_swap_ ## n (               \
+                                  FAR volatile void *ptr, \
+                                  type oldvalue,          \
+                                  type newvalue)          \
+  {                                                       \
+    bool ret = false;                                     \
+    irqstate_t irqstate = spin_lock_irqsave(NULL);        \
+    FAR type *tmp = (FAR type *)ptr;                      \
+                                                          \
+    if (*tmp == oldvalue)                                 \
+      {                                                   \
+        ret = true;                                       \
+        *tmp = newvalue;                                  \
+      }                                                   \
+                                                          \
+    spin_unlock_irqrestore(NULL, irqstate);               \
+    return ret;                                           \
+  }
+
+#define SYNC_VAL_CMP_SWAP(n, type)                        \
+                                                          \
+  type __sync_val_compare_and_swap_ ## n (                \
+                                  FAR volatile void *ptr, \
+                                  type oldvalue,          \
+                                  type newvalue)          \
+  {                                                       \
+    irqstate_t irqstate = spin_lock_irqsave(NULL);        \
+    FAR type *tmp = (FAR type *)ptr;                      \
+    type ret = *tmp;                                      \
+                                                          \
+    if (*tmp == oldvalue)                                 \
+      {                                                   \
+        *tmp = newvalue;                                  \
+      }                                                   \
                                                           \
     spin_unlock_irqrestore(NULL, irqstate);               \
     return ret;                                           \
@@ -401,3 +533,203 @@ FETCH_XOR(4, uint32_t)
  ****************************************************************************/
 
 FETCH_XOR(8, uint64_t)
+
+/* Clang define the __sync builtins, add #ifndef to avoid
+ * redefined/redeclared problem.
+ */
+
+#ifndef __clang__
+
+/****************************************************************************
+ * Name: __sync_add_and_fetch_1
+ ****************************************************************************/
+
+SYNC_ADD_FETCH(1, uint8_t)
+
+/****************************************************************************
+ * Name: __sync_add_and_fetch_2
+ ****************************************************************************/
+
+SYNC_ADD_FETCH(2, uint16_t)
+
+/****************************************************************************
+ * Name: __sync_add_and_fetch_4
+ ****************************************************************************/
+
+SYNC_ADD_FETCH(4, uint32_t)
+
+/****************************************************************************
+ * Name: __sync_add_and_fetch_8
+ ****************************************************************************/
+
+SYNC_ADD_FETCH(8, uint64_t)
+
+/****************************************************************************
+ * Name: __sync_sub_and_fetch_1
+ ****************************************************************************/
+
+SYNC_SUB_FETCH(1, uint8_t)
+
+/****************************************************************************
+ * Name: __sync_sub_and_fetch_2
+ ****************************************************************************/
+
+SYNC_SUB_FETCH(2, uint16_t)
+
+/****************************************************************************
+ * Name: __sync_sub_and_fetch_4
+ ****************************************************************************/
+
+SYNC_SUB_FETCH(4, uint32_t)
+
+/****************************************************************************
+ * Name: __sync_sub_and_fetch_8
+ ****************************************************************************/
+
+SYNC_SUB_FETCH(8, uint64_t)
+
+/****************************************************************************
+ * Name: __sync_or_and_fetch_1
+ ****************************************************************************/
+
+SYNC_OR_FETCH(1, uint8_t)
+
+/****************************************************************************
+ * Name: __sync_or_and_fetch_2
+ ****************************************************************************/
+
+SYNC_OR_FETCH(2, uint16_t)
+
+/****************************************************************************
+ * Name: __sync_or_and_fetch_4
+ ****************************************************************************/
+
+SYNC_OR_FETCH(4, uint32_t)
+
+/****************************************************************************
+ * Name: __sync_or_and_fetch_8
+ ****************************************************************************/
+
+SYNC_OR_FETCH(8, uint64_t)
+
+/****************************************************************************
+ * Name: __sync_and_and_fetch_1
+ ****************************************************************************/
+
+SYNC_AND_FETCH(1, uint8_t)
+
+/****************************************************************************
+ * Name: __sync_and_and_fetch_2
+ ****************************************************************************/
+
+SYNC_AND_FETCH(2, uint16_t)
+
+/****************************************************************************
+ * Name: __sync_and_and_fetch_4
+ ****************************************************************************/
+
+SYNC_AND_FETCH(4, uint32_t)
+
+/****************************************************************************
+ * Name: __sync_and_and_fetch_8
+ ****************************************************************************/
+
+SYNC_AND_FETCH(8, uint64_t)
+
+/****************************************************************************
+ * Name: __sync_xor_and_fetch_1
+ ****************************************************************************/
+
+SYNC_XOR_FETCH(1, uint8_t)
+
+/****************************************************************************
+ * Name: __sync_xor_and_fetch_2
+ ****************************************************************************/
+
+SYNC_XOR_FETCH(2, uint16_t)
+
+/****************************************************************************
+ * Name: __sync_xor_and_fetch_4
+ ****************************************************************************/
+
+SYNC_XOR_FETCH(4, uint32_t)
+
+/****************************************************************************
+ * Name: __sync_xor_and_fetch_8
+ ****************************************************************************/
+
+SYNC_XOR_FETCH(8, uint64_t)
+
+/****************************************************************************
+ * Name: __sync_nand_and_fetch_1
+ ****************************************************************************/
+
+SYNC_NAND_FETCH(1, uint8_t)
+
+/****************************************************************************
+ * Name: __sync_nand_and_fetch_2
+ ****************************************************************************/
+
+SYNC_NAND_FETCH(2, uint16_t)
+
+/****************************************************************************
+ * Name: __sync_nand_and_fetch_4
+ ****************************************************************************/
+
+SYNC_NAND_FETCH(4, uint32_t)
+
+/****************************************************************************
+ * Name: __sync_nand_and_fetch_8
+ ****************************************************************************/
+
+SYNC_NAND_FETCH(8, uint64_t)
+
+/****************************************************************************
+ * Name: __sync_bool_compare_and_swap_1
+ ****************************************************************************/
+
+SYNC_BOOL_CMP_SWAP(1, uint8_t)
+
+/****************************************************************************
+ * Name: __sync_bool_compare_and_swap_2
+ ****************************************************************************/
+
+SYNC_BOOL_CMP_SWAP(2, uint16_t)
+
+/****************************************************************************
+ * Name: __sync_bool_compare_and_swap_4
+ ****************************************************************************/
+
+SYNC_BOOL_CMP_SWAP(4, uint32_t)
+
+/****************************************************************************
+ * Name: __sync_bool_compare_and_swap_8
+ ****************************************************************************/
+
+SYNC_BOOL_CMP_SWAP(8, uint64_t)
+
+/****************************************************************************
+ * Name: __sync_val_compare_and_swap_1
+ ****************************************************************************/
+
+SYNC_VAL_CMP_SWAP(1, uint8_t)
+
+/****************************************************************************
+ * Name: __sync_val_compare_and_swap_2
+ ****************************************************************************/
+
+SYNC_VAL_CMP_SWAP(2, uint16_t)
+
+/****************************************************************************
+ * Name: __sync_val_compare_and_swap_4
+ ****************************************************************************/
+
+SYNC_VAL_CMP_SWAP(4, uint32_t)
+
+/****************************************************************************
+ * Name: __sync_val_compare_and_swap_8
+ ****************************************************************************/
+
+SYNC_VAL_CMP_SWAP(8, uint64_t)
+
+#endif /* __clang__ */

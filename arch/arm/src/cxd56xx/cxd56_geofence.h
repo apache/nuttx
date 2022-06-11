@@ -60,7 +60,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int cxd56_geofenceinitialize(FAR const char *devpath);
+int cxd56_geofenceinitialize(const char *devpath);
 
 #undef EXTERN
 #if defined(__cplusplus)

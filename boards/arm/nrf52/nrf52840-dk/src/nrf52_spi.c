@@ -94,7 +94,7 @@ void nrf52_spidev_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_NRF52_SPI0_MASTER
-void nrf52_spi0select(FAR struct spi_dev_s *dev, uint32_t devid,
+void nrf52_spi0select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected)
 {
   spiinfo("devid: %08lx CS: %s\n",
@@ -122,7 +122,7 @@ void nrf52_spi0select(FAR struct spi_dev_s *dev, uint32_t devid,
     }
 }
 
-uint8_t nrf52_spi0status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t nrf52_spi0status(struct spi_dev_s *dev, uint32_t devid)
 {
   uint8_t status = 0;
 
@@ -147,42 +147,42 @@ uint8_t nrf52_spi0status(FAR struct spi_dev_s *dev, uint32_t devid)
 #endif
 
 #ifdef CONFIG_NRF52_SPI1_MASTER
-void nrf52_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
+void nrf52_spi1select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected)
 {
   spiinfo("devid: %08lx CS: %s\n",
           (unsigned long)devid, selected ? "assert" : "de-assert");
 }
 
-uint8_t nrf52_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t nrf52_spi1status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_nrf52_SPI2_MASTER
-void nrf52_spi2select(FAR struct spi_dev_s *dev, uint32_t devid,
+void nrf52_spi2select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected)
 {
   spiinfo("devid: %08lx CS: %s\n",
           (unsigned long)devid, selected ? "assert" : "de-assert");
 }
 
-uint8_t nrf52_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t nrf52_spi2status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_NRF52_SPI3_MASTER
-void nrf52_spi3select(FAR struct spi_dev_s *dev, uint32_t devid,
+void nrf52_spi3select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected)
 {
   spiinfo("devid: %08lx CS: %s\n",
           (unsigned long)devid, selected ? "assert" : "de-assert");
 }
 
-uint8_t nrf52_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t nrf52_spi3status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }

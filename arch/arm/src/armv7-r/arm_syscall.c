@@ -33,9 +33,10 @@
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 
-#include "signal/signal.h"
+#include "addrenv.h"
 #include "arm.h"
 #include "arm_internal.h"
+#include "signal/signal.h"
 
 /****************************************************************************
  * Private Functions
@@ -162,7 +163,13 @@ uint32_t *arm_syscall(uint32_t *regs)
 
   /* Nested interrupts are not supported */
 
-  DEBUGASSERT(regs);
+  DEBUGASSERT(CURRENT_REGS == NULL);
+
+  /* Current regs non-zero indicates that we are processing an interrupt;
+   * CURRENT_REGS is also used to manage interrupt level context switches.
+   */
+
+  CURRENT_REGS = regs;
 
   /* The SYSCALL command is in R0 on entry.  Parameters follow in R1..R7 */
 
@@ -193,7 +200,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 #ifdef CONFIG_LIB_SYSCALL
       case SYS_syscall_return:
         {
-          FAR struct tcb_s *rtcb = nxsched_self();
+          struct tcb_s *rtcb = nxsched_self();
           int index = (int)rtcb->xcp.nsyscalls - 1;
 
           /* Make sure that there is a saved SYSCALL return address. */
@@ -236,7 +243,7 @@ uint32_t *arm_syscall(uint32_t *regs)
            */
 
           rtcb->flags          &= ~TCB_FLAG_SYSCALL;
-          (void)nxsig_unmask_pendingsignal();
+          nxsig_unmask_pendingsignal();
         }
         break;
 #endif
@@ -259,9 +266,8 @@ uint32_t *arm_syscall(uint32_t *regs)
            * set will determine the restored context.
            */
 
-          arm_restorefpu((uint32_t *)regs[REG_R1]);
-          regs = (uint32_t *)regs[REG_R1];
-          DEBUGASSERT(regs);
+          CURRENT_REGS = (uint32_t *)regs[REG_R1];
+          DEBUGASSERT(CURRENT_REGS);
         }
         break;
 
@@ -285,16 +291,14 @@ uint32_t *arm_syscall(uint32_t *regs)
       case SYS_switch_context:
         {
           DEBUGASSERT(regs[REG_R1] != 0 && regs[REG_R2] != 0);
-          arm_savefpu(regs);
-          arm_restorefpu((uint32_t *)regs[REG_R2]);
           *(uint32_t **)regs[REG_R1] = regs;
-          regs = (uint32_t *)regs[REG_R2];
+          CURRENT_REGS = (uint32_t *)regs[REG_R2];
         }
         break;
 
       /* R0=SYS_task_start:  This a user task start
        *
-       *   void up_task_start(main_t taskentry, int argc, FAR char *argv[])
+       *   void up_task_start(main_t taskentry, int argc, char *argv[])
        *     noreturn_function;
        *
        * At this point, the following values are saved in context:
@@ -365,7 +369,7 @@ uint32_t *arm_syscall(uint32_t *regs)
       /* R0=SYS_signal_handler:  This a user signal handler callback
        *
        * void signal_handler(_sa_sigaction_t sighand, int signo,
-       *                     FAR siginfo_t *info, FAR void *ucontext);
+       *                     siginfo_t *info, void *ucontext);
        *
        * At this point, the following values are saved in context:
        *
@@ -378,7 +382,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 
       case SYS_signal_handler:
         {
-          FAR struct tcb_s *rtcb = nxsched_self();
+          struct tcb_s *rtcb = nxsched_self();
 
           /* Remember the caller's return address */
 
@@ -415,7 +419,7 @@ uint32_t *arm_syscall(uint32_t *regs)
               DEBUGASSERT(rtcb->xcp.kstkptr == NULL &&
                           rtcb->xcp.ustkptr != NULL);
 
-              rtcb->xcp.kstkptr = (FAR uint32_t *)regs[REG_SP];
+              rtcb->xcp.kstkptr = (uint32_t *)regs[REG_SP];
               regs[REG_SP]      = (uint32_t)rtcb->xcp.ustkptr;
             }
 #endif
@@ -435,7 +439,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 
       case SYS_signal_handler_return:
         {
-          FAR struct tcb_s *rtcb = nxsched_self();
+          struct tcb_s *rtcb = nxsched_self();
 
           /* Set up to return to the kernel-mode signal dispatching logic. */
 
@@ -473,7 +477,7 @@ uint32_t *arm_syscall(uint32_t *regs)
       default:
         {
 #ifdef CONFIG_LIB_SYSCALL
-          FAR struct tcb_s *rtcb = nxsched_self();
+          struct tcb_s *rtcb = nxsched_self();
           int index = rtcb->xcp.nsyscalls;
 
           /* Verify that the SYS call number is within range */
@@ -513,7 +517,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 
           if (index == 0 && rtcb->xcp.kstack != NULL)
             {
-              rtcb->xcp.ustkptr = (FAR uint32_t *)regs[REG_SP];
+              rtcb->xcp.ustkptr = (uint32_t *)regs[REG_SP];
               regs[REG_SP]      = (uint32_t)rtcb->xcp.kstack +
                                    ARCH_KERNEL_STACKSIZE;
             }
@@ -529,9 +533,17 @@ uint32_t *arm_syscall(uint32_t *regs)
         break;
     }
 
+  regs = (uint32_t *)CURRENT_REGS;
+
   /* Report what happened */
 
   dump_syscall("Exit", cmd, regs);
+
+  /* Set CURRENT_REGS to NULL to indicate that we are no longer in an
+   * interrupt handler.
+   */
+
+  CURRENT_REGS = NULL;
 
   /* Return the last value of curent_regs.  This supports context switches
    * on return from the exception.  That capability is only used with the

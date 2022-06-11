@@ -71,7 +71,7 @@ extern "C"
 
 #ifdef CONFIG_PIC32MZ_USBDEV
 struct usbdev_s;
-int pic32mz_usbpullup(FAR struct usbdev_s *dev,  bool enable);
+int pic32mz_usbpullup(struct usbdev_s *dev,  bool enable);
 #endif
 
 /************************************************************************************
@@ -86,7 +86,7 @@ int pic32mz_usbpullup(FAR struct usbdev_s *dev,  bool enable);
  ************************************************************************************/
 
 #ifdef CONFIG_PIC32MZ_USBDEV
-void pic32mz_usbsuspend(FAR struct usbdev_s *dev, bool resume);
+void pic32mz_usbsuspend(struct usbdev_s *dev, bool resume);
 #endif
 
 /************************************************************************************

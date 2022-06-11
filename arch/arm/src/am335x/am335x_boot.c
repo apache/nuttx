@@ -38,7 +38,6 @@
 #include "chip.h"
 #include "arm.h"
 #include "mmu.h"
-#include "fpu.h"
 #include "arm_internal.h"
 #include "am335x_clockconfig.h"
 #include "am335x_wdog.h"
@@ -402,11 +401,9 @@ void arm_boot(void)
 
   am335x_clockconfig();
 
-#ifdef CONFIG_ARCH_FPU
   /* Initialize the FPU */
 
   arm_fpuconfig();
-#endif
 
   /* Disable CPU Watchdog */
 

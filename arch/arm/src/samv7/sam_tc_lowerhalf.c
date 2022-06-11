@@ -59,11 +59,11 @@
 
 struct sam_lowerhalf_s
 {
-  FAR const struct timer_ops_s *ops;        /* Lower half operations */
-  TC_HANDLE                     tch;        /* Handle returned by sam_tc_initialize() */
-  tccb_t                        callback;   /* Current user interrupt callback */
-  FAR void                     *arg;        /* Argument passed to upper half callback */
-  bool                          started;    /* True: Timer has been started */
+  const struct timer_ops_s *ops;      /* Lower half operations */
+  TC_HANDLE                 tch;      /* Handle returned by sam_tc_initialize() */
+  tccb_t                    callback; /* Current user interrupt callback */
+  void                     *arg;      /* Argument passed to upper half callback */
+  bool                      started;  /* True: Timer has been started */
 };
 
 /****************************************************************************
@@ -74,16 +74,16 @@ static void sam_timer_handler(TC_HANDLE tch, void *arg, uint32_t sr);
 
 /* "Lower half" driver methods **********************************************/
 
-static int sam_start(FAR struct timer_lowerhalf_s *lower);
-static int sam_stop(FAR struct timer_lowerhalf_s *lower);
-static int sam_getstatus(FAR struct timer_lowerhalf_s *lower,
-                         FAR struct timer_status_s *status);
-static int sam_settimeout(FAR struct timer_lowerhalf_s *lower,
+static int sam_start(struct timer_lowerhalf_s *lower);
+static int sam_stop(struct timer_lowerhalf_s *lower);
+static int sam_getstatus(struct timer_lowerhalf_s *lower,
+                         struct timer_status_s *status);
+static int sam_settimeout(struct timer_lowerhalf_s *lower,
                           uint32_t timeout);
-static void sam_setcallback(FAR struct timer_lowerhalf_s *lower,
-                            tccb_t callback, FAR void *arg);
-static int sam_maxtimeout(FAR struct timer_lowerhalf_s *lower,
-                          FAR uint32_t *maxtimeout);
+static void sam_setcallback(struct timer_lowerhalf_s *lower,
+                            tccb_t callback, void *arg);
+static int sam_maxtimeout(struct timer_lowerhalf_s *lower,
+                          uint32_t *maxtimeout);
 
 /****************************************************************************
  * Private Data
@@ -188,7 +188,7 @@ static struct sam_lowerhalf_s g_tc11_lowerhalf =
 
 static void sam_timer_handler(TC_HANDLE tch, void *arg, uint32_t sr)
 {
-  FAR struct sam_lowerhalf_s *lower = (struct sam_lowerhalf_s *)arg;
+  struct sam_lowerhalf_s *lower = (struct sam_lowerhalf_s *)arg;
   uint32_t next_interval_us = 0;
 
   if (lower->callback(&next_interval_us, lower->arg))
@@ -224,9 +224,9 @@ static void sam_timer_handler(TC_HANDLE tch, void *arg, uint32_t sr)
  *
  ****************************************************************************/
 
-static int sam_start(FAR struct timer_lowerhalf_s *lower)
+static int sam_start(struct timer_lowerhalf_s *lower)
 {
-  FAR struct sam_lowerhalf_s *priv = (FAR struct sam_lowerhalf_s *)lower;
+  struct sam_lowerhalf_s *priv = (struct sam_lowerhalf_s *)lower;
   int ret = -EBUSY; /* EBUSY indicates that the timer was already running */
   irqstate_t flags;
 
@@ -306,10 +306,10 @@ static int sam_stop(struct timer_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int sam_getstatus(FAR struct timer_lowerhalf_s *lower,
-                         FAR struct timer_status_s *status)
+static int sam_getstatus(struct timer_lowerhalf_s *lower,
+                         struct timer_status_s *status)
 {
-  FAR struct sam_lowerhalf_s *priv = (FAR struct sam_lowerhalf_s *)lower;
+  struct sam_lowerhalf_s *priv = (struct sam_lowerhalf_s *)lower;
   uint32_t frequency;
   uint16_t period;
   uint16_t current;
@@ -360,10 +360,10 @@ static int sam_getstatus(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int sam_settimeout(FAR struct timer_lowerhalf_s *lower,
+static int sam_settimeout(struct timer_lowerhalf_s *lower,
                           uint32_t timeout)
 {
-  FAR struct sam_lowerhalf_s *priv = (FAR struct sam_lowerhalf_s *)lower;
+  struct sam_lowerhalf_s *priv = (struct sam_lowerhalf_s *)lower;
   uint64_t maxtimeout;
   uint64_t regval;
   uint32_t desired;
@@ -447,10 +447,10 @@ static int sam_settimeout(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static void sam_setcallback(FAR struct timer_lowerhalf_s *lower,
-                            tccb_t callback, FAR void *arg)
+static void sam_setcallback(struct timer_lowerhalf_s *lower,
+                            tccb_t callback, void *arg)
 {
-  FAR struct sam_lowerhalf_s *priv = (FAR struct sam_lowerhalf_s *)lower;
+  struct sam_lowerhalf_s *priv = (struct sam_lowerhalf_s *)lower;
 
   irqstate_t flags = enter_critical_section();
 
@@ -487,8 +487,8 @@ static void sam_setcallback(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int sam_maxtimeout(FAR struct timer_lowerhalf_s *lower,
-                          FAR uint32_t *maxtimeout)
+static int sam_maxtimeout(struct timer_lowerhalf_s *lower,
+                          uint32_t *maxtimeout)
 {
   uint64_t bigusec;
   uint32_t frequency = USEC_PER_SEC;
@@ -536,9 +536,9 @@ static int sam_maxtimeout(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-int sam_timer_initialize(FAR const char *devpath, int chan)
+int sam_timer_initialize(const char *devpath, int chan)
 {
-  FAR struct sam_lowerhalf_s *lower;
+  struct sam_lowerhalf_s *lower;
   uint32_t actual;
   uint32_t cmr;
   int ret;
@@ -658,8 +658,8 @@ int sam_timer_initialize(FAR const char *devpath, int chan)
    * REVISIT: The returned handle is discard here.
    */
 
-  FAR void *drvr = timer_register(devpath,
-                                  (FAR struct timer_lowerhalf_s *)lower);
+  void *drvr = timer_register(devpath,
+                              (struct timer_lowerhalf_s *)lower);
   if (drvr == NULL)
     {
       /* The actual cause of the failure may have been a failure to allocate

@@ -153,7 +153,7 @@ static int regulator_rpmsg_is_enabled(FAR struct regulator_dev_s *rdev);
  * Private Data
  ****************************************************************************/
 
-static mutex_t g_regulator_rpmsg_lock          =  MUTEX_INITIALIZER;
+static mutex_t g_regulator_rpmsg_lock          =  NXMUTEX_INITIALIZER;
 static struct list_node g_regulator_rpmsg_priv =
           LIST_INITIAL_VALUE(g_regulator_rpmsg_priv);
 

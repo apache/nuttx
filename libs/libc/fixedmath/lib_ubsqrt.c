@@ -55,7 +55,7 @@ ub16_t ub32sqrtub16(ub32_t a)
       xk = (uint64_t)1 << 63;
     }
 
-  do
+  while (xk)
     {
       uint64_t xk1 = (xk + n / xk) >> 1;
 
@@ -66,7 +66,6 @@ ub16_t ub32sqrtub16(ub32_t a)
 
       xk = xk1;
     }
-  while (1);
 
   /* 'xk' now holds 'sqrt(n)' => 'sqrt(a * 2^32)' => 'sqrt(a) * 2^16', thus
    * 'xk' holds square root of 'a' in ub16_t format.
@@ -101,7 +100,7 @@ ub8_t ub16sqrtub8(ub16_t a)
       xk = (uint32_t)1 << 31;
     }
 
-  do
+  while (xk)
     {
       uint32_t xk1 = (xk + n / xk) >> 1;
 
@@ -112,7 +111,6 @@ ub8_t ub16sqrtub8(ub16_t a)
 
       xk = xk1;
     }
-  while (1);
 
   /* 'xk' now holds 'sqrt(n)' => 'sqrt(a * 2^16)' => 'sqrt(a) * 2^8', thus
    * 'xk' holds square root of 'a' in ub8_t format.

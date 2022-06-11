@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/mpfs/icicle/scripts/ld.script
+ * boards/risc-v/mpfs/icicle/scripts/ld-kernel.script
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -46,12 +46,12 @@ __pgheap_start = ORIGIN(pgram);
 __pgheap_size = LENGTH(pgram);
 
 ENTRY(_stext)
-EXTERN(_vectors)
+EXTERN(__start)
 SECTIONS
 {
     .text : {
         _stext = ABSOLUTE(.);
-        *(.vectors)
+        *(.start .start.*)
         *(.text .text.*)
         *(.fixup)
         *(.gnu.warning)
@@ -93,15 +93,20 @@ SECTIONS
         *(.gnu.linkonce.b.*)
         *(.gnu.linkonce.sb.*)
         *(COMMON)
+    } > ksram
+
+    /* Page tables here, align to 4K boundary */
+
+    .pgtables : ALIGN(0x1000) {
+        *(.pgtables)
         . = ALIGN(4);
-        _ebss = ABSOLUTE(.);
     } > ksram
 
     /* Stack top */
 
     .stack_top : {
         . = ALIGN(32);
-        _default_stack_limit = ABSOLUTE(.);
+        _ebss = ABSOLUTE(.);
     } > ksram
 
     /* Stabs debugging sections. */

@@ -33,7 +33,6 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 #include <nuttx/lib/lib.h>
-#include <nuttx/tls.h>
 
 #ifdef CONFIG_BINFMT_LOADABLE
 #  include <nuttx/binfmt/binfmt.h>
@@ -44,6 +43,7 @@
 #include "pthread/pthread.h"
 #include "mqueue/mqueue.h"
 #include "group/group.h"
+#include "tls/tls.h"
 
 /****************************************************************************
  * Private Functions
@@ -130,14 +130,14 @@ static inline void group_release(FAR struct task_group_s *group)
 {
 #ifdef CONFIG_ARCH_ADDRENV
   save_addrenv_t oldenv;
+  int i;
 #endif
 
 #if CONFIG_TLS_TASK_NELEM > 0
   task_tls_destruct();
 #endif
 
-  nxsem_destroy(&group->tg_info->ta_sem);
-  group_free(group, group->tg_info);
+  task_uninit_info(group);
 
 #if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
   /* Free all un-reaped child exit status */
@@ -248,7 +248,13 @@ static inline void group_release(FAR struct task_group_s *group)
 
   /* Mark no address environment */
 
-  g_pid_current = INVALID_PROCESS_ID;
+  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+    {
+      if (group == g_group_current[i])
+        {
+          g_group_current[i] = NULL;
+        }
+    }
 
   /* Restore the previous addrenv */
 

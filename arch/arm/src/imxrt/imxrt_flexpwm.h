@@ -36,6 +36,114 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_IMXRT_FLEXPWM1_MOD1
+#define FLEXPWM1_MOD1 1
+#else
+#define FLEXPWM1_MOD1 0
+#endif
+
+#ifdef CONFIG_IMXRT_FLEXPWM1_MOD2
+#define FLEXPWM1_MOD2 1
+#else
+#define FLEXPWM1_MOD2 0
+#endif
+
+#ifdef CONFIG_IMXRT_FLEXPWM1_MOD3
+#define FLEXPWM1_MOD3 1
+#else
+#define FLEXPWM1_MOD3 0
+#endif
+
+#ifdef CONFIG_IMXRT_FLEXPWM1_MOD4
+#define FLEXPWM1_MOD4 1
+#else
+#define FLEXPWM1_MOD4 0
+#endif
+
+#define FLEXPWM1_NMODULES (FLEXPWM1_MOD1 + FLEXPWM1_MOD2 + \
+                           FLEXPWM1_MOD3 + FLEXPWM1_MOD4)
+
+#ifdef CONFIG_IMXRT_FLEXPWM2_MOD1
+#define FLEXPWM2_MOD1 1
+#else
+#define FLEXPWM2_MOD1 0
+#endif
+
+#ifdef CONFIG_IMXRT_FLEXPWM2_MOD2
+#define FLEXPWM2_MOD2 1
+#else
+#define FLEXPWM2_MOD2 0
+#endif
+
+#ifdef CONFIG_IMXRT_FLEXPWM2_MOD3
+#define FLEXPWM2_MOD3 1
+#else
+#define FLEXPWM2_MOD3 0
+#endif
+
+#ifdef CONFIG_IMXRT_FLEXPWM2_MOD4
+#define FLEXPWM2_MOD4 1
+#else
+#define FLEXPWM2_MOD4 0
+#endif
+
+#define FLEXPWM2_NMODULES (FLEXPWM2_MOD1 + FLEXPWM2_MOD2 + \
+                           FLEXPWM2_MOD3 + FLEXPWM2_MOD4)
+
+#ifdef CONFIG_IMXRT_FLEXPWM3_MOD1
+#define FLEXPWM3_MOD1 1
+#else
+#define FLEXPWM3_MOD1 0
+#endif
+
+#ifdef CONFIG_IMXRT_FLEXPWM3_MOD2
+#define FLEXPWM3_MOD2 1
+#else
+#define FLEXPWM3_MOD2 0
+#endif
+
+#ifdef CONFIG_IMXRT_FLEXPWM3_MOD3
+#define FLEXPWM3_MOD3 1
+#else
+#define FLEXPWM3_MOD3 0
+#endif
+
+#ifdef CONFIG_IMXRT_FLEXPWM3_MOD4
+#define FLEXPWM3_MOD4 1
+#else
+#define FLEXPWM3_MOD4 0
+#endif
+
+#define FLEXPWM3_NMODULES (FLEXPWM3_MOD1 + FLEXPWM3_MOD2 + \
+                           FLEXPWM3_MOD3 + FLEXPWM3_MOD4)
+
+#ifdef CONFIG_IMXRT_FLEXPWM4_MOD1
+#define FLEXPWM4_MOD1 1
+#else
+#define FLEXPWM4_MOD1 0
+#endif
+
+#ifdef CONFIG_IMXRT_FLEXPWM4_MOD2
+#define FLEXPWM4_MOD2 1
+#else
+#define FLEXPWM4_MOD2 0
+#endif
+
+#ifdef CONFIG_IMXRT_FLEXPWM4_MOD3
+#define FLEXPWM4_MOD3 1
+#else
+#define FLEXPWM4_MOD3 0
+#endif
+
+#ifdef CONFIG_IMXRT_FLEXPWM4_MOD4
+#define FLEXPWM4_MOD4 1
+#else
+#define FLEXPWM4_MOD4 0
+#endif
+
+#define FLEXPWM4_NMODULES (FLEXPWM4_MOD1 + FLEXPWM4_MOD2 + \
+                           FLEXPWM4_MOD3 + FLEXPWM4_MOD4)
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -66,7 +174,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct pwm_lowerhalf_s *imxrt_pwminitialize(int pwm);
+struct pwm_lowerhalf_s *imxrt_pwminitialize(int pwm);
 
 #undef EXTERN
 #if defined(__cplusplus)

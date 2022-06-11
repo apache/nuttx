@@ -53,13 +53,13 @@ struct sam_oneshot_lowerhalf_s
    * compatible to struct sam_oneshot_lowerhalf_s and vice versa.
    */
 
-  struct oneshot_lowerhalf_s lh;  /* Common lower-half driver fields */
+  struct oneshot_lowerhalf_s lh; /* Common lower-half driver fields */
 
   /* Private lower half data follows */
 
-  struct sam_oneshot_s oneshot;   /* SAM-specific oneshot state */
-  oneshot_callback_t callback;    /* internal handler that receives callback */
-  FAR void *arg;                  /* Argument that is passed to the handler */
+  struct sam_oneshot_s oneshot;  /* SAM-specific oneshot state */
+  oneshot_callback_t callback;   /* internal handler that receives callback */
+  void *arg;                     /* Argument that is passed to the handler */
 };
 
 /****************************************************************************
@@ -68,13 +68,13 @@ struct sam_oneshot_lowerhalf_s
 
 static void sam_oneshot_handler(void *arg);
 
-static int sam_max_delay(FAR struct oneshot_lowerhalf_s *lower,
-                         FAR struct timespec *ts);
-static int sam_start(FAR struct oneshot_lowerhalf_s *lower,
-                     oneshot_callback_t callback, FAR void *arg,
-                     FAR const struct timespec *ts);
-static int sam_cancel(FAR struct oneshot_lowerhalf_s *lower,
-                      FAR struct timespec *ts);
+static int sam_max_delay(struct oneshot_lowerhalf_s *lower,
+                         struct timespec *ts);
+static int sam_start(struct oneshot_lowerhalf_s *lower,
+                     oneshot_callback_t callback, void *arg,
+                     const struct timespec *ts);
+static int sam_cancel(struct oneshot_lowerhalf_s *lower,
+                      struct timespec *ts);
 
 /****************************************************************************
  * Private Data
@@ -110,10 +110,10 @@ static const struct oneshot_operations_s g_oneshot_ops =
 
 static void sam_oneshot_handler(void *arg)
 {
-  FAR struct sam_oneshot_lowerhalf_s *priv =
-    (FAR struct sam_oneshot_lowerhalf_s *)arg;
+  struct sam_oneshot_lowerhalf_s *priv =
+    (struct sam_oneshot_lowerhalf_s *)arg;
   oneshot_callback_t callback;
-  FAR void *cbarg;
+  void *cbarg;
 
   DEBUGASSERT(priv != NULL);
 
@@ -156,11 +156,11 @@ static void sam_oneshot_handler(void *arg)
  *
  ****************************************************************************/
 
-static int sam_max_delay(FAR struct oneshot_lowerhalf_s *lower,
-                         FAR struct timespec *ts)
+static int sam_max_delay(struct oneshot_lowerhalf_s *lower,
+                         struct timespec *ts)
 {
-  FAR struct sam_oneshot_lowerhalf_s *priv =
-    (FAR struct sam_oneshot_lowerhalf_s *)lower;
+  struct sam_oneshot_lowerhalf_s *priv =
+    (struct sam_oneshot_lowerhalf_s *)lower;
   uint64_t usecs;
   int ret;
 
@@ -198,12 +198,12 @@ static int sam_max_delay(FAR struct oneshot_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int sam_start(FAR struct oneshot_lowerhalf_s *lower,
-                     oneshot_callback_t callback, FAR void *arg,
-                     FAR const struct timespec *ts)
+static int sam_start(struct oneshot_lowerhalf_s *lower,
+                     oneshot_callback_t callback, void *arg,
+                     const struct timespec *ts)
 {
-  FAR struct sam_oneshot_lowerhalf_s *priv =
-    (FAR struct sam_oneshot_lowerhalf_s *)lower;
+  struct sam_oneshot_lowerhalf_s *priv =
+    (struct sam_oneshot_lowerhalf_s *)lower;
   irqstate_t flags;
   int ret;
 
@@ -250,11 +250,11 @@ static int sam_start(FAR struct oneshot_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int sam_cancel(FAR struct oneshot_lowerhalf_s *lower,
-                      FAR struct timespec *ts)
+static int sam_cancel(struct oneshot_lowerhalf_s *lower,
+                      struct timespec *ts)
 {
-  FAR struct sam_oneshot_lowerhalf_s *priv =
-    (FAR struct sam_oneshot_lowerhalf_s *)lower;
+  struct sam_oneshot_lowerhalf_s *priv =
+    (struct sam_oneshot_lowerhalf_s *)lower;
   irqstate_t flags;
   int ret;
 
@@ -299,15 +299,15 @@ static int sam_cancel(FAR struct oneshot_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-FAR struct oneshot_lowerhalf_s *oneshot_initialize(int chan,
-                                                   uint16_t resolution)
+struct oneshot_lowerhalf_s *oneshot_initialize(int chan,
+                                               uint16_t resolution)
 {
-  FAR struct sam_oneshot_lowerhalf_s *priv;
+  struct sam_oneshot_lowerhalf_s *priv;
   int ret;
 
   /* Allocate an instance of the lower half driver */
 
-  priv = (FAR struct sam_oneshot_lowerhalf_s *)
+  priv = (struct sam_oneshot_lowerhalf_s *)
     kmm_zalloc(sizeof(struct sam_oneshot_lowerhalf_s));
 
   if (priv == NULL)

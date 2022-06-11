@@ -110,6 +110,10 @@ ifeq ($(CONFIG_SENSORS_RPR0521RS_SCU),y)
 CSRCS += cxd56_rpr0521rs_scu.c
 endif
 
+ifeq ($(CONFIG_SENSORS_SCD41),y)
+CSRCS += cxd56_scd41_i2c.c
+endif
+
 ifeq ($(CONFIG_NETDEVICES),y)
 CSRCS += cxd56_netinit.c
 endif
@@ -148,6 +152,10 @@ endif
 
 ifeq ($(CONFIG_VIDEO_ISX012),y)
 CSRCS += cxd56_isx012.c
+endif
+
+ifeq ($(CONFIG_VIDEO_ISX019),y)
+CSRCS += cxd56_isx019.c
 endif
 
 ifeq ($(CONFIG_CXD56_IMAGEPROC),y)

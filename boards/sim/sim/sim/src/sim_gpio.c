@@ -58,11 +58,11 @@ struct simgpint_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int gpin_read(FAR struct gpio_dev_s *dev, FAR bool *value);
-static int gpout_write(FAR struct gpio_dev_s *dev, bool value);
-static int gpint_attach(FAR struct gpio_dev_s *dev,
+static int gpin_read(struct gpio_dev_s *dev, bool *value);
+static int gpout_write(struct gpio_dev_s *dev, bool value);
+static int gpint_attach(struct gpio_dev_s *dev,
                         pin_interrupt_t callback);
-static int gpint_enable(FAR struct gpio_dev_s *dev, bool enable);
+static int gpint_enable(struct gpio_dev_s *dev, bool enable);
 
 /****************************************************************************
  * Private Data
@@ -131,7 +131,7 @@ static struct simgpint_dev_s g_gpint =
 
 static int sim_interrupt(wdparm_t arg)
 {
-  FAR struct simgpint_dev_s *simgpint = (FAR struct simgpint_dev_s *)arg;
+  struct simgpint_dev_s *simgpint = (struct simgpint_dev_s *)arg;
 
   DEBUGASSERT(simgpint != NULL && simgpint->callback != NULL);
   gpioinfo("Interrupt! callback=%p\n", simgpint->callback);
@@ -140,9 +140,9 @@ static int sim_interrupt(wdparm_t arg)
   return OK;
 }
 
-static int gpin_read(FAR struct gpio_dev_s *dev, FAR bool *value)
+static int gpin_read(struct gpio_dev_s *dev, bool *value)
 {
-  FAR struct simgpio_dev_s *simgpio = (FAR struct simgpio_dev_s *)dev;
+  struct simgpio_dev_s *simgpio = (struct simgpio_dev_s *)dev;
 
   DEBUGASSERT(simgpio != NULL && value != NULL);
   gpioinfo("Reading %d (next=%d)\n",
@@ -153,9 +153,9 @@ static int gpin_read(FAR struct gpio_dev_s *dev, FAR bool *value)
   return OK;
 }
 
-static int gpout_write(FAR struct gpio_dev_s *dev, bool value)
+static int gpout_write(struct gpio_dev_s *dev, bool value)
 {
-  FAR struct simgpio_dev_s *simgpio = (FAR struct simgpio_dev_s *)dev;
+  struct simgpio_dev_s *simgpio = (struct simgpio_dev_s *)dev;
 
   DEBUGASSERT(simgpio != NULL);
   gpioinfo("Writing %d\n", (int)value);
@@ -164,10 +164,10 @@ static int gpout_write(FAR struct gpio_dev_s *dev, bool value)
   return OK;
 }
 
-static int gpint_attach(FAR struct gpio_dev_s *dev,
+static int gpint_attach(struct gpio_dev_s *dev,
                         pin_interrupt_t callback)
 {
-  FAR struct simgpint_dev_s *simgpint = (FAR struct simgpint_dev_s *)dev;
+  struct simgpint_dev_s *simgpint = (struct simgpint_dev_s *)dev;
 
   gpioinfo("Cancel 1 second timer\n");
   wd_cancel(&simgpint->wdog);
@@ -177,9 +177,9 @@ static int gpint_attach(FAR struct gpio_dev_s *dev,
   return OK;
 }
 
-static int gpint_enable(FAR struct gpio_dev_s *dev, bool enable)
+static int gpint_enable(struct gpio_dev_s *dev, bool enable)
 {
-  FAR struct simgpint_dev_s *simgpint = (FAR struct simgpint_dev_s *)dev;
+  struct simgpint_dev_s *simgpint = (struct simgpint_dev_s *)dev;
 
   if (enable)
     {

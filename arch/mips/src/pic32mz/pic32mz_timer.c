@@ -126,46 +126,46 @@ struct pic32mz_timer_priv_s
 
 /* Helpers */
 
-static inline uint32_t pic32mz_getreg(FAR struct pic32mz_timer_dev_s *dev,
+static inline uint32_t pic32mz_getreg(struct pic32mz_timer_dev_s *dev,
                                       uint16_t offset);
-static inline void pic32mz_putreg(FAR struct pic32mz_timer_dev_s *dev,
+static inline void pic32mz_putreg(struct pic32mz_timer_dev_s *dev,
                                   uint16_t offset, uint32_t value);
-static inline bool pic32mz_timer_mode32(FAR struct pic32mz_timer_dev_s *dev);
+static inline bool pic32mz_timer_mode32(struct pic32mz_timer_dev_s *dev);
 static inline uint32_t pic32mz_timer_oddoffset(uint32_t evenoffset);
 static inline uint32_t
-  pic32mz_timer_nextirq(FAR struct pic32mz_timer_dev_s *dev);
+pic32mz_timer_nextirq(struct pic32mz_timer_dev_s *dev);
 
-static void pic32mz_timer_stopinidle(FAR struct pic32mz_timer_dev_s *dev,
+static void pic32mz_timer_stopinidle(struct pic32mz_timer_dev_s *dev,
                                     bool stop);
-static void pic32mz_timer_enablegate(FAR struct pic32mz_timer_dev_s *dev,
+static void pic32mz_timer_enablegate(struct pic32mz_timer_dev_s *dev,
                                      bool enable);
-static void pic32mz_timer_setprescale(FAR struct pic32mz_timer_dev_s *dev,
+static void pic32mz_timer_setprescale(struct pic32mz_timer_dev_s *dev,
                                       uint8_t prescale);
-static void pic32mz_timer_setmode32(FAR struct pic32mz_timer_dev_s *dev,
+static void pic32mz_timer_setmode32(struct pic32mz_timer_dev_s *dev,
                                     bool enable);
-static void pic32mz_timer_extclocksource(FAR struct pic32mz_timer_dev_s *dev,
+static void pic32mz_timer_extclocksource(struct pic32mz_timer_dev_s *dev,
                                          bool enable);
-static void pic32mz_timer_inithardware(FAR struct pic32mz_timer_dev_s *dev);
+static void pic32mz_timer_inithardware(struct pic32mz_timer_dev_s *dev);
 
 /* Timer's methods */
 
-static void pic32mz_timer_start(FAR struct pic32mz_timer_dev_s *dev);
-static void pic32mz_timer_stop(FAR struct pic32mz_timer_dev_s *dev);
-static void pic32mz_timer_setperiod(FAR struct pic32mz_timer_dev_s *dev,
+static void pic32mz_timer_start(struct pic32mz_timer_dev_s *dev);
+static void pic32mz_timer_stop(struct pic32mz_timer_dev_s *dev);
+static void pic32mz_timer_setperiod(struct pic32mz_timer_dev_s *dev,
                                     uint32_t period);
 static
-uint32_t pic32mz_timer_getcounter(FAR struct pic32mz_timer_dev_s *dev);
-static void pic32mz_timer_setcounter(FAR struct pic32mz_timer_dev_s *dev,
+uint32_t pic32mz_timer_getcounter(struct pic32mz_timer_dev_s *dev);
+static void pic32mz_timer_setcounter(struct pic32mz_timer_dev_s *dev,
                                      uint32_t count);
-static uint32_t pic32mz_timer_getfreq(FAR struct pic32mz_timer_dev_s *dev);
-static bool pic32mz_timer_setfreq(FAR struct pic32mz_timer_dev_s *dev,
+static uint32_t pic32mz_timer_getfreq(struct pic32mz_timer_dev_s *dev);
+static bool pic32mz_timer_setfreq(struct pic32mz_timer_dev_s *dev,
                                   uint32_t freq);
-static uint8_t pic32mz_timer_getwidth(FAR struct pic32mz_timer_dev_s *dev);
+static uint8_t pic32mz_timer_getwidth(struct pic32mz_timer_dev_s *dev);
 
-static int  pic32mz_timer_setisr(FAR struct pic32mz_timer_dev_s *dev,
+static int  pic32mz_timer_setisr(struct pic32mz_timer_dev_s *dev,
                                  xcpt_t handler, void *arg);
-static void pic32mz_timer_ackint(FAR struct pic32mz_timer_dev_s *dev);
-static bool  pic32mz_timer_checkint(FAR struct pic32mz_timer_dev_s *dev);
+static void pic32mz_timer_ackint(struct pic32mz_timer_dev_s *dev);
+static bool  pic32mz_timer_checkint(struct pic32mz_timer_dev_s *dev);
 
 /****************************************************************************
  * Private Data
@@ -519,11 +519,11 @@ static struct pic32mz_timer_priv_s pic32mz_t9_priv =
  *
  ****************************************************************************/
 
-static inline uint32_t pic32mz_getreg(FAR struct pic32mz_timer_dev_s *dev,
+static inline uint32_t pic32mz_getreg(struct pic32mz_timer_dev_s *dev,
                                       uint16_t offset)
 {
-  FAR struct pic32mz_timer_priv_s *priv =
-    (FAR struct pic32mz_timer_priv_s *)dev;
+  struct pic32mz_timer_priv_s *priv =
+    (struct pic32mz_timer_priv_s *)dev;
 
   return getreg32(priv->config->base + offset);
 }
@@ -536,11 +536,11 @@ static inline uint32_t pic32mz_getreg(FAR struct pic32mz_timer_dev_s *dev,
  *
  ****************************************************************************/
 
-static inline void pic32mz_putreg(FAR struct pic32mz_timer_dev_s *dev,
+static inline void pic32mz_putreg(struct pic32mz_timer_dev_s *dev,
                                   uint16_t offset, uint32_t value)
 {
-  FAR struct pic32mz_timer_priv_s *priv =
-    (FAR struct pic32mz_timer_priv_s *)dev;
+  struct pic32mz_timer_priv_s *priv =
+    (struct pic32mz_timer_priv_s *)dev;
 
   putreg32(value, priv->config->base + offset);
 }
@@ -553,9 +553,9 @@ static inline void pic32mz_putreg(FAR struct pic32mz_timer_dev_s *dev,
  *
  ****************************************************************************/
 
-static inline bool pic32mz_timer_mode32(FAR struct pic32mz_timer_dev_s *dev)
+static inline bool pic32mz_timer_mode32(struct pic32mz_timer_dev_s *dev)
 {
-  return ((FAR struct pic32mz_timer_priv_s *)dev)->config->mode32;
+  return ((struct pic32mz_timer_priv_s *)dev)->config->mode32;
 }
 
 /****************************************************************************
@@ -588,11 +588,11 @@ static inline uint32_t pic32mz_timer_oddoffset(uint32_t evenoffset)
  ****************************************************************************/
 
 static inline uint32_t
-  pic32mz_timer_nextirq(FAR struct pic32mz_timer_dev_s *dev)
+pic32mz_timer_nextirq(struct pic32mz_timer_dev_s *dev)
 {
   uint32_t irq;
 
-  irq = ((FAR struct pic32mz_timer_priv_s *)dev)->config->irq;
+  irq = ((struct pic32mz_timer_priv_s *)dev)->config->irq;
 
   /* The irq offsets between odd and even timers
    * are not always the same.
@@ -616,7 +616,7 @@ static inline uint32_t
  *
  ****************************************************************************/
 
-static void pic32mz_timer_start(FAR struct pic32mz_timer_dev_s *dev)
+static void pic32mz_timer_start(struct pic32mz_timer_dev_s *dev)
 {
   pic32mz_putreg(dev, PIC32MZ_TIMER_CONSET_OFFSET, TIMER_CON_ON);
 }
@@ -629,7 +629,7 @@ static void pic32mz_timer_start(FAR struct pic32mz_timer_dev_s *dev)
  *
  ****************************************************************************/
 
-static void pic32mz_timer_stop(FAR struct pic32mz_timer_dev_s *dev)
+static void pic32mz_timer_stop(struct pic32mz_timer_dev_s *dev)
 {
   pic32mz_putreg(dev, PIC32MZ_TIMER_CONCLR_OFFSET, TIMER_CON_ON);
 }
@@ -642,7 +642,7 @@ static void pic32mz_timer_stop(FAR struct pic32mz_timer_dev_s *dev)
  *
  ****************************************************************************/
 
-static void pic32mz_timer_stopinidle(FAR struct pic32mz_timer_dev_s *dev,
+static void pic32mz_timer_stopinidle(struct pic32mz_timer_dev_s *dev,
                                      bool stop)
 {
   if (stop)
@@ -665,7 +665,7 @@ static void pic32mz_timer_stopinidle(FAR struct pic32mz_timer_dev_s *dev,
         }
     }
 
-  ((FAR struct pic32mz_timer_priv_s *)dev)->config->stopinidle = stop;
+  ((struct pic32mz_timer_priv_s *)dev)->config->stopinidle = stop;
 }
 
 /****************************************************************************
@@ -677,11 +677,11 @@ static void pic32mz_timer_stopinidle(FAR struct pic32mz_timer_dev_s *dev,
  *
  ****************************************************************************/
 
-static void pic32mz_timer_enablegate(FAR struct pic32mz_timer_dev_s *dev,
+static void pic32mz_timer_enablegate(struct pic32mz_timer_dev_s *dev,
                                      bool enable)
 {
-  FAR struct pic32mz_timer_priv_s *priv =
-    (FAR struct pic32mz_timer_priv_s *)dev;
+  struct pic32mz_timer_priv_s *priv =
+    (struct pic32mz_timer_priv_s *)dev;
 
   if (enable)
     {
@@ -708,13 +708,13 @@ static void pic32mz_timer_enablegate(FAR struct pic32mz_timer_dev_s *dev,
  *
  ****************************************************************************/
 
-static void pic32mz_timer_setprescale(FAR struct pic32mz_timer_dev_s *dev,
+static void pic32mz_timer_setprescale(struct pic32mz_timer_dev_s *dev,
                                       uint8_t prescale)
 {
   pic32mz_putreg(dev, PIC32MZ_TIMER_CONSET_OFFSET,
                  (prescale << TIMER_CON_TCKPS_SHIFT));
 
-  ((FAR struct pic32mz_timer_priv_s *)dev)->config->prescale = prescale;
+  ((struct pic32mz_timer_priv_s *)dev)->config->prescale = prescale;
 }
 
 /****************************************************************************
@@ -726,7 +726,7 @@ static void pic32mz_timer_setprescale(FAR struct pic32mz_timer_dev_s *dev,
  *
  ****************************************************************************/
 
-static void pic32mz_timer_setmode32(FAR struct pic32mz_timer_dev_s *dev,
+static void pic32mz_timer_setmode32(struct pic32mz_timer_dev_s *dev,
                                     bool enable)
 {
   /* Only even timers have the TIMER_CON_T32 bit. */
@@ -740,7 +740,7 @@ static void pic32mz_timer_setmode32(FAR struct pic32mz_timer_dev_s *dev,
       pic32mz_putreg(dev, PIC32MZ_TIMER_CONCLR_OFFSET, TIMER_CON_T32);
     }
 
-  ((FAR struct pic32mz_timer_priv_s *)dev)->config->mode32 = enable;
+  ((struct pic32mz_timer_priv_s *)dev)->config->mode32 = enable;
 }
 
 /****************************************************************************
@@ -751,11 +751,11 @@ static void pic32mz_timer_setmode32(FAR struct pic32mz_timer_dev_s *dev,
  *
  ****************************************************************************/
 
-static void pic32mz_timer_extclocksource(FAR struct pic32mz_timer_dev_s *dev,
+static void pic32mz_timer_extclocksource(struct pic32mz_timer_dev_s *dev,
                                          bool enable)
 {
-  FAR struct pic32mz_timer_priv_s *priv =
-    (FAR struct pic32mz_timer_priv_s *)dev;
+  struct pic32mz_timer_priv_s *priv =
+    (struct pic32mz_timer_priv_s *)dev;
 
   if (enable)
     {
@@ -784,10 +784,10 @@ static void pic32mz_timer_extclocksource(FAR struct pic32mz_timer_dev_s *dev,
  *
  ****************************************************************************/
 
-static void pic32mz_timer_inithardware(FAR struct pic32mz_timer_dev_s *dev)
+static void pic32mz_timer_inithardware(struct pic32mz_timer_dev_s *dev)
 {
-  FAR struct pic32mz_timer_priv_s *priv =
-    (FAR struct pic32mz_timer_priv_s *)dev;
+  struct pic32mz_timer_priv_s *priv =
+    (struct pic32mz_timer_priv_s *)dev;
 
   /* Initialize the hardware using the startup configuration.
    *
@@ -828,7 +828,7 @@ static void pic32mz_timer_inithardware(FAR struct pic32mz_timer_dev_s *dev)
  *
  ****************************************************************************/
 
-static void pic32mz_timer_setperiod(FAR struct pic32mz_timer_dev_s *dev,
+static void pic32mz_timer_setperiod(struct pic32mz_timer_dev_s *dev,
                                     uint32_t period)
 {
   /* In 32bit mode:
@@ -857,7 +857,7 @@ static void pic32mz_timer_setperiod(FAR struct pic32mz_timer_dev_s *dev,
  *
  ****************************************************************************/
 
-static uint32_t pic32mz_timer_getcounter(FAR struct pic32mz_timer_dev_s *dev)
+static uint32_t pic32mz_timer_getcounter(struct pic32mz_timer_dev_s *dev)
 {
   /* In 32bit mode:
    *  - even timers represent the least significant half words.
@@ -890,7 +890,7 @@ static uint32_t pic32mz_timer_getcounter(FAR struct pic32mz_timer_dev_s *dev)
  *
  ****************************************************************************/
 
-static void pic32mz_timer_setcounter(FAR struct pic32mz_timer_dev_s *dev,
+static void pic32mz_timer_setcounter(struct pic32mz_timer_dev_s *dev,
                                      uint32_t count)
 {
   /* In 32bit mode:
@@ -919,12 +919,12 @@ static void pic32mz_timer_setcounter(FAR struct pic32mz_timer_dev_s *dev,
  *
  ****************************************************************************/
 
-static uint32_t pic32mz_timer_getfreq(FAR struct pic32mz_timer_dev_s *dev)
+static uint32_t pic32mz_timer_getfreq(struct pic32mz_timer_dev_s *dev)
 {
   uint8_t prescale;
   uint32_t freq;
 
-  prescale = ((FAR struct pic32mz_timer_priv_s *)dev)->config->prescale;
+  prescale = ((struct pic32mz_timer_priv_s *)dev)->config->prescale;
 
   /* The prescale values are not a continuous power of 2.
    * There is a gap between 64 and 256 (the 128 is skipped).
@@ -950,7 +950,7 @@ static uint32_t pic32mz_timer_getfreq(FAR struct pic32mz_timer_dev_s *dev)
  *
  ****************************************************************************/
 
-static bool pic32mz_timer_setfreq(FAR struct pic32mz_timer_dev_s *dev,
+static bool pic32mz_timer_setfreq(struct pic32mz_timer_dev_s *dev,
                                   uint32_t freq)
 {
   uint16_t prescale;
@@ -1038,7 +1038,7 @@ static bool pic32mz_timer_setfreq(FAR struct pic32mz_timer_dev_s *dev,
  *
  ****************************************************************************/
 
-static uint8_t pic32mz_timer_getwidth(FAR struct pic32mz_timer_dev_s *dev)
+static uint8_t pic32mz_timer_getwidth(struct pic32mz_timer_dev_s *dev)
 {
   return pic32mz_timer_mode32(dev) ? 32 : 16;
 }
@@ -1051,11 +1051,11 @@ static uint8_t pic32mz_timer_getwidth(FAR struct pic32mz_timer_dev_s *dev)
  *
  ****************************************************************************/
 
-static int  pic32mz_timer_setisr(FAR struct pic32mz_timer_dev_s *dev,
-                                 xcpt_t handler, FAR void *arg)
+static int  pic32mz_timer_setisr(struct pic32mz_timer_dev_s *dev,
+                                 xcpt_t handler, void *arg)
 {
-  FAR struct pic32mz_timer_priv_s *priv =
-    (FAR struct pic32mz_timer_priv_s *)dev;
+  struct pic32mz_timer_priv_s *priv =
+    (struct pic32mz_timer_priv_s *)dev;
 
   /* Disable interrupt when callback is removed */
 
@@ -1108,9 +1108,9 @@ static int  pic32mz_timer_setisr(FAR struct pic32mz_timer_dev_s *dev,
  *
  ****************************************************************************/
 
-static void pic32mz_timer_ackint(FAR struct pic32mz_timer_dev_s *dev)
+static void pic32mz_timer_ackint(struct pic32mz_timer_dev_s *dev)
 {
-  up_clrpend_irq(((FAR struct pic32mz_timer_priv_s *)dev)->config->irq);
+  up_clrpend_irq(((struct pic32mz_timer_priv_s *)dev)->config->irq);
 
   if (pic32mz_timer_mode32(dev))
     {
@@ -1128,7 +1128,7 @@ static void pic32mz_timer_ackint(FAR struct pic32mz_timer_dev_s *dev)
  *
  ****************************************************************************/
 
-static bool  pic32mz_timer_checkint(FAR struct pic32mz_timer_dev_s *dev)
+static bool  pic32mz_timer_checkint(struct pic32mz_timer_dev_s *dev)
 {
   if (pic32mz_timer_mode32(dev))
     {
@@ -1138,8 +1138,8 @@ static bool  pic32mz_timer_checkint(FAR struct pic32mz_timer_dev_s *dev)
     }
   else
     {
-      FAR struct pic32mz_timer_priv_s *priv =
-          (FAR struct pic32mz_timer_priv_s *)dev;
+      struct pic32mz_timer_priv_s *priv =
+          (struct pic32mz_timer_priv_s *)dev;
 
       return up_pending_irq(priv->config->irq);
     }
@@ -1153,7 +1153,7 @@ static bool  pic32mz_timer_checkint(FAR struct pic32mz_timer_dev_s *dev)
  * Name: pic32mz_timer_init
  ****************************************************************************/
 
-FAR struct pic32mz_timer_dev_s *pic32mz_timer_init(int timer)
+struct pic32mz_timer_dev_s *pic32mz_timer_init(int timer)
 {
   struct pic32mz_timer_dev_s *dev = NULL;
 
@@ -1161,49 +1161,49 @@ FAR struct pic32mz_timer_dev_s *pic32mz_timer_init(int timer)
     {
 #ifdef CONFIG_PIC32MZ_T2
       case 2:
-        dev = (FAR struct pic32mz_timer_dev_s *)&pic32mz_t2_priv;
+        dev = (struct pic32mz_timer_dev_s *)&pic32mz_t2_priv;
         break;
 #endif
 #ifdef CONFIG_PIC32MZ_T3
       case 3:
-        dev = (FAR struct pic32mz_timer_dev_s *)&pic32mz_t3_priv;
+        dev = (struct pic32mz_timer_dev_s *)&pic32mz_t3_priv;
         break;
 #endif
 #ifdef CONFIG_PIC32MZ_T4
       case 4:
-        dev = (FAR struct pic32mz_timer_dev_s *)&pic32mz_t4_priv;
+        dev = (struct pic32mz_timer_dev_s *)&pic32mz_t4_priv;
         break;
 #endif
 #ifdef CONFIG_PIC32MZ_T5
       case 5:
-        dev = (FAR struct pic32mz_timer_dev_s *)&pic32mz_t5_priv;
+        dev = (struct pic32mz_timer_dev_s *)&pic32mz_t5_priv;
         break;
 #endif
 #ifdef CONFIG_PIC32MZ_T6
       case 6:
-        dev = (FAR struct pic32mz_timer_dev_s *)&pic32mz_t6_priv;
+        dev = (struct pic32mz_timer_dev_s *)&pic32mz_t6_priv;
         break;
 #endif
 #ifdef CONFIG_PIC32MZ_T7
       case 7:
-        dev = (FAR struct pic32mz_timer_dev_s *)&pic32mz_t7_priv;
+        dev = (struct pic32mz_timer_dev_s *)&pic32mz_t7_priv;
         break;
 #endif
 #ifdef CONFIG_PIC32MZ_T8
       case 8:
-        dev = (FAR struct pic32mz_timer_dev_s *)&pic32mz_t8_priv;
+        dev = (struct pic32mz_timer_dev_s *)&pic32mz_t8_priv;
         break;
 #endif
 #ifdef CONFIG_PIC32MZ_T9
       case 9:
-        dev = (FAR struct pic32mz_timer_dev_s *)&pic32mz_t9_priv;
+        dev = (struct pic32mz_timer_dev_s *)&pic32mz_t9_priv;
         break;
 #endif
       default:
         return NULL;
     }
 
-  if (((FAR struct pic32mz_timer_priv_s *)dev)->inuse)
+  if (((struct pic32mz_timer_priv_s *)dev)->inuse)
     {
       return NULL;
     }
@@ -1213,20 +1213,20 @@ FAR struct pic32mz_timer_dev_s *pic32mz_timer_init(int timer)
 
       pic32mz_timer_inithardware(dev);
 
-      ((FAR struct pic32mz_timer_priv_s *)dev)->inuse = true;
+      ((struct pic32mz_timer_priv_s *)dev)->inuse = true;
 
       return dev;
     }
 }
 
-int pic32mz_timer_deinit(FAR struct pic32mz_timer_dev_s *dev)
+int pic32mz_timer_deinit(struct pic32mz_timer_dev_s *dev)
 {
   /* Stop the timer in case it was still running
    * and mark it as unused.
    */
 
   pic32mz_timer_stop(dev);
-  ((FAR struct pic32mz_timer_priv_s *)dev)->inuse = false;
+  ((struct pic32mz_timer_priv_s *)dev)->inuse = false;
 
   return OK;
 }

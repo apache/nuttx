@@ -292,7 +292,7 @@ static inline void nx_start_application(void)
 #ifndef CONFIG_ARCH_ADDRENV
   attr.stacksize = CONFIG_INIT_STACKSIZE;
 #endif
-  ret = exec_spawn(CONFIG_INIT_FILEPATH, argv,
+  ret = exec_spawn(CONFIG_INIT_FILEPATH, argv, NULL,
                    CONFIG_INIT_SYMTAB, CONFIG_INIT_NEXPORTS, &attr);
   DEBUGASSERT(ret >= 0);
 #endif

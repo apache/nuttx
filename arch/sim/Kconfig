@@ -349,6 +349,21 @@ config SIM_NOINPUT
 	bool "No input device"
 
 endchoice # Input Device
+
+config SIM_KEYBOARD
+	bool "X11 keyboard"
+	select INPUT_KEYBOARD
+	depends on SIM_X11FB
+	---help---
+		Support an X11 mouse-based keyboard emulation.  Also needs INPUT=y
+
+config SIM_KEYBOARD_BUFFSIZE
+	int "sim keyboard buffer size"
+	default 64
+	depends on SIM_KEYBOARD
+	---help---
+		Emulator keyboard buffer size
+
 endif # if INPUT
 
 endmenu
@@ -362,6 +377,14 @@ config SIM_HCISOCKET
 		target via HCI_CHANNEL_USER. This gives NuttX full
 		control of the device, but is abstracted from the
 		physical interface which is still handled by Linux.
+
+config SIM_HCISOCKET_DEVID
+	int "Bluetooth Device ID"
+	default 0
+	depends on SIM_HCISOCKET
+	---help---
+		Attached the local bluetooth device use specific
+		Bluetooth HCI number id.
 
 config SIM_I2CBUS
 	bool "Simulated I2C Bus"

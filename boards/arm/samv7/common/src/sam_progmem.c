@@ -61,8 +61,8 @@
  *
  ****************************************************************************/
 
-static int sam_progmem_register_driver(int minor, FAR struct mtd_dev_s *mtd,
-                                       FAR const char *devpath)
+static int sam_progmem_register_driver(int minor, struct mtd_dev_s *mtd,
+                                       const char *devpath)
 {
 #ifdef CONFIG_BCH
   char blockdev[18];
@@ -118,7 +118,7 @@ static int sam_progmem_register_driver(int minor, FAR struct mtd_dev_s *mtd,
  *
  ****************************************************************************/
 
-static struct mtd_dev_s *sam_progmem_alloc_mtdpart(FAR struct mtd_dev_s *mtd,
+static struct mtd_dev_s *sam_progmem_alloc_mtdpart(struct mtd_dev_s *mtd,
                                                    size_t mtd_offset,
                                                    size_t mtd_size)
 {
@@ -168,7 +168,7 @@ static struct mtd_dev_s *sam_progmem_alloc_mtdpart(FAR struct mtd_dev_s *mtd,
 int board_progmem_init(int minor, struct mtd_partition_s *table,
                        size_t count)
 {
-  FAR struct mtd_dev_s *progmem_mtd;
+  struct mtd_dev_s *progmem_mtd;
   size_t i;
   int ret = OK;
 

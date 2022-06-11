@@ -45,7 +45,7 @@
  * Private Datas
  ****************************************************************************/
 
-static mutex_t g_clk_list_lock            = MUTEX_INITIALIZER;
+static mutex_t g_clk_list_lock            = NXMUTEX_INITIALIZER;
 
 static struct list_node g_clk_root_list
                             = LIST_INITIAL_VALUE(g_clk_root_list);

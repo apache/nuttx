@@ -497,17 +497,7 @@ static int esp32_spi_lock(struct spi_dev_s *dev, bool lock)
 
 static int esp32_spi_sem_waitdone(struct esp32_spi_priv_s *priv)
 {
-  int ret;
-  struct timespec abstime;
-
-  clock_gettime(CLOCK_REALTIME, &abstime);
-
-  abstime.tv_sec += 10;
-  abstime.tv_nsec += 0;
-
-  ret = nxsem_timedwait_uninterruptible(&priv->sem_isr, &abstime);
-
-  return ret;
+  return nxsem_tickwait_uninterruptible(&priv->sem_isr, SEC2TICK(10));
 }
 
 /****************************************************************************

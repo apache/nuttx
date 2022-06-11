@@ -46,8 +46,8 @@
 #ifdef CONFIG_RTC_ALARM
 struct lpc54_cbinfo_s
 {
-  volatile rtc_alarm_callback_t cb;  /* Callback when the alarm expires */
-  volatile FAR void *priv;           /* Private argument to accompany callback */
+  volatile rtc_alarm_callback_t cb; /* Callback when the alarm expires */
+  volatile void *priv;              /* Private argument to accompany callback */
 };
 #endif
 
@@ -61,7 +61,7 @@ struct lpc54_lowerhalf_s
    * operations vtable (which may lie in FLASH or ROM)
    */
 
-  FAR const struct rtc_ops_s *ops;
+  const struct rtc_ops_s *ops;
 
   /* Data following is private to this driver and not visible outside of
    * this file.
@@ -88,27 +88,27 @@ struct lpc54_lowerhalf_s
 
 /* Prototypes for static methods in struct rtc_ops_s */
 
-static int lpc54_rdtime(FAR struct rtc_lowerhalf_s *lower,
-             FAR struct rtc_time *rtctime);
-static int lpc54_settime(FAR struct rtc_lowerhalf_s *lower,
-             FAR const struct rtc_time *rtctime);
-static bool lpc54_havesettime(FAR struct rtc_lowerhalf_s *lower);
+static int lpc54_rdtime(struct rtc_lowerhalf_s *lower,
+             struct rtc_time *rtctime);
+static int lpc54_settime(struct rtc_lowerhalf_s *lower,
+             const struct rtc_time *rtctime);
+static bool lpc54_havesettime(struct rtc_lowerhalf_s *lower);
 
 #ifdef CONFIG_RTC_ALARM
-static int lpc54_setalarm(FAR struct rtc_lowerhalf_s *lower,
-             FAR const struct lower_setalarm_s *alarminfo);
-static int lpc54_setrelative(FAR struct rtc_lowerhalf_s *lower,
-             FAR const struct lower_setrelative_s *alarminfo);
-static int lpc54_cancelalarm(FAR struct rtc_lowerhalf_s *lower,
+static int lpc54_setalarm(struct rtc_lowerhalf_s *lower,
+             const struct lower_setalarm_s *alarminfo);
+static int lpc54_setrelative(struct rtc_lowerhalf_s *lower,
+             const struct lower_setrelative_s *alarminfo);
+static int lpc54_cancelalarm(struct rtc_lowerhalf_s *lower,
              int alarmid);
-static int lpc54_rdalarm(FAR struct rtc_lowerhalf_s *lower,
-             FAR struct lower_rdalarm_s *alarminfo);
+static int lpc54_rdalarm(struct rtc_lowerhalf_s *lower,
+             struct lower_rdalarm_s *alarminfo);
 #endif
 
 #ifdef CONFIG_RTC_PERIODIC
-static int lpc54_setperiodic(FAR struct rtc_lowerhalf_s *lower,
-             FAR const struct lower_setperiodic_s *alarminfo);
-static int lpc54_cancelperiodic(FAR struct rtc_lowerhalf_s *lower, int id);
+static int lpc54_setperiodic(struct rtc_lowerhalf_s *lower,
+             const struct lower_setperiodic_s *alarminfo);
+static int lpc54_cancelperiodic(struct rtc_lowerhalf_s *lower, int id);
 #endif
 
 /****************************************************************************
@@ -169,14 +169,14 @@ static struct lpc54_lowerhalf_s g_rtc_lowerhalf =
 #ifdef CONFIG_RTC_ALARM
 static void lpc54_alarm_callback(void)
 {
-  FAR struct lpc54_cbinfo_s *cbinfo = &g_rtc_lowerhalf.cbinfo;
+  struct lpc54_cbinfo_s *cbinfo = &g_rtc_lowerhalf.cbinfo;
 
   /* Sample and clear the callback information to minimize the window in
    * time in which race conditions can occur.
    */
 
   rtc_alarm_callback_t cb = (rtc_alarm_callback_t)cbinfo->cb;
-  FAR void *arg           = (FAR void *)cbinfo->priv;
+  void *arg               = (void *)cbinfo->priv;
 
   cbinfo->cb              = NULL;
   cbinfo->priv            = NULL;
@@ -206,8 +206,8 @@ static void lpc54_alarm_callback(void)
  *
  ****************************************************************************/
 
-static int lpc54_rdtime(FAR struct rtc_lowerhalf_s *lower,
-                        FAR struct rtc_time *rtctime)
+static int lpc54_rdtime(struct rtc_lowerhalf_s *lower,
+                        struct rtc_time *rtctime)
 {
   time_t timer;
 
@@ -217,7 +217,7 @@ static int lpc54_rdtime(FAR struct rtc_lowerhalf_s *lower,
 
   /* Convert the one second epoch time to a struct tm */
 
-  if (!gmtime_r(&timer, (FAR struct tm *)rtctime))
+  if (!gmtime_r(&timer, (struct tm *)rtctime))
     {
       int errcode = get_errno();
       DEBUGASSERT(errcode > 0);
@@ -243,8 +243,8 @@ static int lpc54_rdtime(FAR struct rtc_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int lpc54_settime(FAR struct rtc_lowerhalf_s *lower,
-                         FAR const struct rtc_time *rtctime)
+static int lpc54_settime(struct rtc_lowerhalf_s *lower,
+                         const struct rtc_time *rtctime)
 {
   struct timespec ts;
 
@@ -252,7 +252,7 @@ static int lpc54_settime(FAR struct rtc_lowerhalf_s *lower,
    * rtc_time is cast compatible with struct tm.
    */
 
-  ts.tv_sec  = timegm((FAR struct tm *)rtctime);
+  ts.tv_sec  = timegm((struct tm *)rtctime);
   ts.tv_nsec = 0;
 
   /* Now set the time (to one second accuracy) */
@@ -274,7 +274,7 @@ static int lpc54_settime(FAR struct rtc_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static bool lpc54_havesettime(FAR struct rtc_lowerhalf_s *lower)
+static bool lpc54_havesettime(struct rtc_lowerhalf_s *lower)
 {
   return getreg32(RTC_MAGIC_REG) == RTC_MAGIC;
 }
@@ -297,15 +297,15 @@ static bool lpc54_havesettime(FAR struct rtc_lowerhalf_s *lower)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int lpc54_setalarm(FAR struct rtc_lowerhalf_s *lower,
-                          FAR const struct lower_setalarm_s *alarminfo)
+static int lpc54_setalarm(struct rtc_lowerhalf_s *lower,
+                          const struct lower_setalarm_s *alarminfo)
 {
-  FAR struct lpc54_lowerhalf_s *priv;
-  FAR struct lpc54_cbinfo_s *cbinfo;
+  struct lpc54_lowerhalf_s *priv;
+  struct lpc54_cbinfo_s *cbinfo;
   int ret;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL && alarminfo->id == 0);
-  priv = (FAR struct lpc54_lowerhalf_s *)lower;
+  priv = (struct lpc54_lowerhalf_s *)lower;
 
   ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
@@ -320,7 +320,7 @@ static int lpc54_setalarm(FAR struct rtc_lowerhalf_s *lower,
 
       /* Convert the RTC time to a timespec (1 second accuracy) */
 
-      ts.tv_sec   = timegm((FAR struct tm *)&alarminfo->time);
+      ts.tv_sec   = timegm((struct tm *)&alarminfo->time);
       ts.tv_nsec  = 0;
 
       /* Remember the callback information */
@@ -362,16 +362,16 @@ static int lpc54_setalarm(FAR struct rtc_lowerhalf_s *lower,
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int lpc54_setrelative(FAR struct rtc_lowerhalf_s *lower,
-                             FAR const struct lower_setrelative_s *alarminfo)
+static int lpc54_setrelative(struct rtc_lowerhalf_s *lower,
+                             const struct lower_setrelative_s *alarminfo)
 {
-  FAR struct lpc54_lowerhalf_s *priv;
-  FAR struct lpc54_cbinfo_s *cbinfo;
-  FAR struct timespec ts;
+  struct lpc54_lowerhalf_s *priv;
+  struct lpc54_cbinfo_s *cbinfo;
+  struct timespec ts;
   int ret = -EINVAL;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL && alarminfo->id == 0);
-  priv = (FAR struct lpc54_lowerhalf_s *)lower;
+  priv = (struct lpc54_lowerhalf_s *)lower;
 
   if (alarminfo->id == 0 && alarminfo->reltime > 0)
     {
@@ -432,14 +432,14 @@ static int lpc54_setrelative(FAR struct rtc_lowerhalf_s *lower,
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int lpc54_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
+static int lpc54_cancelalarm(struct rtc_lowerhalf_s *lower, int alarmid)
 {
-  FAR struct lpc54_lowerhalf_s *priv;
-  FAR struct lpc54_cbinfo_s *cbinfo;
+  struct lpc54_lowerhalf_s *priv;
+  struct lpc54_cbinfo_s *cbinfo;
 
   DEBUGASSERT(lower != NULL);
   DEBUGASSERT(alarmid == 0);
-  priv = (FAR struct lpc54_lowerhalf_s *)lower;
+  priv = (struct lpc54_lowerhalf_s *)lower;
 
   /* Nullify callback information to reduce window for race conditions */
 
@@ -470,8 +470,8 @@ static int lpc54_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int lpc54_rdalarm(FAR struct rtc_lowerhalf_s *lower,
-                         FAR struct lower_rdalarm_s *alarminfo)
+static int lpc54_rdalarm(struct rtc_lowerhalf_s *lower,
+                         struct lower_rdalarm_s *alarminfo)
 {
   int ret = -EINVAL;
 
@@ -480,7 +480,7 @@ static int lpc54_rdalarm(FAR struct rtc_lowerhalf_s *lower,
 
   if (alarminfo->id == 0)
     {
-      ret = lpc54_rtc_rdalarm((FAR struct tm *)alarminfo->time);
+      ret = lpc54_rtc_rdalarm((struct tm *)alarminfo->time);
     }
 
   return ret;
@@ -506,16 +506,16 @@ static int lpc54_rdalarm(FAR struct rtc_lowerhalf_s *lower,
 #ifdef CONFIG_RTC_PERIODIC
 static int lpc54_periodic_callback(void)
 {
-  FAR struct lpc54_lowerhalf_s *lower;
+  struct lpc54_lowerhalf_s *lower;
   struct lower_setperiodic_s *cbinfo;
   rtc_wakeup_callback_t cb;
-  FAR void *priv;
+  void *priv;
 
-  lower = (FAR struct lpc54_lowerhalf_s *)&g_rtc_lowerhalf;
+  lower = (struct lpc54_lowerhalf_s *)&g_rtc_lowerhalf;
 
   cbinfo = &lower->periodic;
   cb     = (rtc_wakeup_callback_t)cbinfo->cb;
-  priv   = (FAR void *)cbinfo->priv;
+  priv   = (void *)cbinfo->priv;
 
   /* Perform the callback */
 
@@ -547,14 +547,14 @@ static int lpc54_periodic_callback(void)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_PERIODIC
-static int lpc54_setperiodic(FAR struct rtc_lowerhalf_s *lower,
-                             FAR const struct lower_setperiodic_s *alarminfo)
+static int lpc54_setperiodic(struct rtc_lowerhalf_s *lower,
+                             const struct lower_setperiodic_s *alarminfo)
 {
-  FAR struct lpc54_lowerhalf_s *priv;
+  struct lpc54_lowerhalf_s *priv;
   int ret;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL);
-  priv = (FAR struct lpc54_lowerhalf_s *)lower;
+  priv = (struct lpc54_lowerhalf_s *)lower;
 
   ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
@@ -588,13 +588,13 @@ static int lpc54_setperiodic(FAR struct rtc_lowerhalf_s *lower,
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_PERIODIC
-static int lpc54_cancelperiodic(FAR struct rtc_lowerhalf_s *lower, int id)
+static int lpc54_cancelperiodic(struct rtc_lowerhalf_s *lower, int id)
 {
-  FAR struct lpc54_lowerhalf_s *priv;
+  struct lpc54_lowerhalf_s *priv;
   int ret;
 
   DEBUGASSERT(lower != NULL);
-  priv = (FAR struct lpc54_lowerhalf_s *)lower;
+  priv = (struct lpc54_lowerhalf_s *)lower;
 
   DEBUGASSERT(id == 0);
 
@@ -637,11 +637,11 @@ static int lpc54_cancelperiodic(FAR struct rtc_lowerhalf_s *lower, int id)
  *
  ****************************************************************************/
 
-FAR struct rtc_lowerhalf_s *lpc54_rtc_lowerhalf(void)
+struct rtc_lowerhalf_s *lpc54_rtc_lowerhalf(void)
 {
   nxsem_init(&g_rtc_lowerhalf.devsem, 0, 1);
 
-  return (FAR struct rtc_lowerhalf_s *)&g_rtc_lowerhalf;
+  return (struct rtc_lowerhalf_s *)&g_rtc_lowerhalf;
 }
 
 #endif /* CONFIG_RTC_DRIVER */

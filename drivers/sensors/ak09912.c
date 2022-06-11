@@ -163,9 +163,9 @@ struct ak09912_dev_s
 static int ak09912_open(FAR struct file *filep);
 static int ak09912_close(FAR struct file *filep);
 static ssize_t ak09912_read(FAR struct file *filep, FAR char *buffer,
-                           size_t buflen);
-static ssize_t ak09912_write(FAR struct file *filep, FAR const char *buffer,
                             size_t buflen);
+static ssize_t ak09912_write(FAR struct file *filep, FAR const char *buffer,
+                             size_t buflen);
 static int ak09912_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 /****************************************************************************
@@ -558,7 +558,7 @@ static int ak09912_close(FAR struct file *filep)
  ****************************************************************************/
 
 static ssize_t ak09912_read(FAR struct file *filep, FAR char *buffer,
-                           size_t buflen)
+                            size_t buflen)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct ak09912_dev_s *priv = inode->i_private;
@@ -604,7 +604,7 @@ static ssize_t ak09912_read(FAR struct file *filep, FAR char *buffer,
  ****************************************************************************/
 
 static ssize_t ak09912_write(FAR struct file *filep, FAR const char *buffer,
-                            size_t buflen)
+                             size_t buflen)
 {
   return -ENOSYS;
 }

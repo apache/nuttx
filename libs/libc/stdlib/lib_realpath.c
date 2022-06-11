@@ -67,6 +67,7 @@ FAR char *realpath(FAR const char *path, FAR char *resolved)
       fres = resolved = lib_malloc(PATH_MAX);
       if (resolved == NULL)
         {
+          set_errno(ENOMEM);
           return NULL;
         }
     }

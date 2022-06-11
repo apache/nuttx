@@ -29,22 +29,30 @@ HEAD_CSRC  = esp32_start.c esp32_wdt.c
 # Common XTENSA files (arch/xtensa/src/common)
 
 CMN_ASRCS  = xtensa_context.S xtensa_coproc.S xtensa_cpuint.S xtensa_panic.S
-CMN_ASRCS += xtensa_sigtramp.S
 
-CMN_CSRCS  = xtensa_assert.c xtensa_blocktask.c xtensa_copystate.c
+CMN_CSRCS  = xtensa_assert.c xtensa_blocktask.c
 CMN_CSRCS += xtensa_cpenable.c xtensa_createstack.c xtensa_exit.c
-CMN_CSRCS += xtensa_initialize.c xtensa_initialstate.c xtensa_interruptcontext.c
+CMN_CSRCS += xtensa_initialize.c xtensa_initialstate.c
 CMN_CSRCS += xtensa_irqdispatch.c xtensa_lowputs.c xtensa_mdelay.c
 CMN_CSRCS += xtensa_modifyreg8.c xtensa_modifyreg16.c xtensa_modifyreg32.c
 CMN_CSRCS += xtensa_puts.c xtensa_releasepending.c xtensa_releasestack.c
 CMN_CSRCS += xtensa_reprioritizertr.c xtensa_schedsigaction.c
 CMN_CSRCS += xtensa_sigdeliver.c xtensa_stackframe.c xtensa_udelay.c
-CMN_CSRCS += xtensa_unblocktask.c xtensa_usestack.c xtensa_swint.c xtensa_switchcontext.c
+CMN_CSRCS += xtensa_unblocktask.c xtensa_usestack.c xtensa_swint.c
+CMN_CSRCS += xtensa_saveusercontext.c
 
 # Configuration-dependent common XTENSA files
 
+ifeq ($(CONFIG_DEBUG_TCBINFO),y)
+  CMN_CSRCS += xtensa_tcbinfo.c
+endif
+
 ifeq ($(CONFIG_DEBUG_ALERT),y)
   CMN_CSRCS += xtensa_dumpstate.c
+endif
+
+ifeq ($(CONFIG_ARCH_FPU),y)
+  CMN_CSRCS += xtensa_fpucmp.c
 endif
 
 ifeq ($(CONFIG_SPINLOCK),y)
@@ -101,6 +109,10 @@ endif
 
 ifeq ($(CONFIG_ESP32_I2C),y)
 CHIP_CSRCS += esp32_i2c.c
+endif
+
+ifeq ($(CONFIG_ESP32_TWAI),y)
+CHIP_CSRCS += esp32_twai.c
 endif
 
 ifeq ($(CONFIG_ESP32_SPI),y)
@@ -244,11 +256,6 @@ EXTRA_LIBS += -lbtdm_app
     EXTRA_LIBS += -lcoexist
   endif
 endif
-
-# Due to some Wi-Fi related libraries, the option is need to avoid linking too much
-# unused functions.
-
-LDFLAGS += --gc-sections
 
 # Wireless interfaces.
 

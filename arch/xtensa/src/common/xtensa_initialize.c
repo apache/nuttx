@@ -84,6 +84,10 @@ static inline void xtensa_color_intstack(void)
 
 void up_initialize(void)
 {
+#if XCHAL_CP_NUM > 0
+  xtensa_set_cpenable(CONFIG_XTENSA_CP_INITSET);
+#endif
+
   xtensa_color_intstack();
 
   /* Add any extra memory fragments to the memory manager */
@@ -98,12 +102,6 @@ void up_initialize(void)
    */
 
   xtensa_pminitialize();
-#endif
-
-  /* Initialize the internal heap */
-
-#ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
-  xtensa_imm_initialize();
 #endif
 
 #ifdef CONFIG_ARCH_DMA

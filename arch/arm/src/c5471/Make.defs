@@ -18,26 +18,9 @@
 #
 ############################################################################
 
-HEAD_ASRC = arm_nommuhead.S
+include arm/Make.defs
 
-CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S vfork.S
-
-CMN_CSRCS  = arm_allocateheap.c arm_assert.c arm_blocktask.c
-CMN_CSRCS += arm_createstack.c arm_dataabort.c arm_mdelay.c arm_udelay.c arm_doirq.c
-CMN_CSRCS += arm_exit.c arm_initialize.c arm_initialstate.c arm_interruptcontext.c
-CMN_CSRCS += arm_prefetchabort.c arm_releasepending.c arm_releasestack.c
-CMN_CSRCS += arm_reprioritizertr.c arm_schedulesigaction.c arm_sigdeliver.c
-CMN_CSRCS += arm_stackframe.c arm_syscall.c arm_unblocktask.c arm_undefinedinsn.c
-CMN_CSRCS += arm_usestack.c arm_vfork.c arm_puts.c arm_tcbinfo.c
-CMN_CSRCS += arm_switchcontext.c
-
-ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
-CMN_CSRCS += arm_idle.c
-endif
-
-ifeq ($(CONFIG_STACK_COLORATION),y)
-CMN_CSRCS += arm_checkstack.c
-endif
+HEAD_ASRC  = arm_nommuhead.S
 
 CHIP_ASRCS = c5471_lowputc.S c5471_vectors.S
 CHIP_CSRCS = c5471_irq.c c5471_serial.c c5471_watchdog.c c5471_ethernet.c

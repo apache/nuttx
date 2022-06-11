@@ -63,7 +63,7 @@
  *
  ****************************************************************************/
 
-char up_romgetc(FAR const char *ptr)
+char up_romgetc(const char *ptr)
 {
   /* This is basically a No-Op if enabled in the simulation environment */
 

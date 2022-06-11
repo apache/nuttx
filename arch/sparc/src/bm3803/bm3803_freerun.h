@@ -47,10 +47,10 @@
 
 struct bm3803_freerun_s
 {
-  uint8_t chan;                     /* The timer/counter in use */
-  bool running;                     /* True: the timer is running */
-  uint32_t overflow;                /* Timer counter overflow */
-  FAR struct bm3803_tim_dev_s *tch; /* Handle returned by bm3803_tim_init() */
+  uint8_t chan;                 /* The timer/counter in use */
+  bool running;                 /* True: the timer is running */
+  uint32_t overflow;            /* Timer counter overflow */
+  struct bm3803_tim_dev_s *tch; /* Handle returned by bm3803_tim_init() */
   uint32_t frequency;
 };
 

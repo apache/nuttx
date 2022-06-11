@@ -45,6 +45,12 @@
 #include "rpmsgfs.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define RPMSGFS_RETRY_DELAY_MS       10
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -71,6 +77,7 @@ struct rpmsgfs_mountpt_s
   FAR struct rpmsgfs_ofile_s *fs_head; /* Singly-linked list of open files */
   char                       fs_root[PATH_MAX];
   void                       *handle;
+  int                        timeout;  /* Connect timeout */
 };
 
 /****************************************************************************
@@ -200,7 +207,7 @@ static void rpmsgfs_semgive(FAR struct rpmsgfs_mountpt_s *fs)
  *
  ****************************************************************************/
 
-static void rpmsgfs_mkpath(FAR struct rpmsgfs_mountpt_s  *fs,
+static void rpmsgfs_mkpath(FAR struct rpmsgfs_mountpt_s *fs,
                            FAR const char *relpath,
                            FAR char *path, int pathlen)
 {
@@ -251,6 +258,21 @@ static void rpmsgfs_mkpath(FAR struct rpmsgfs_mountpt_s  *fs,
   if (depth >= 0)
     {
       strncat(path, &relpath[first], pathlen - strlen(path) - 1);
+    }
+
+  while (fs->timeout > 0)
+    {
+      struct stat buf;
+      int ret;
+
+      ret = rpmsgfs_client_stat(fs->handle, fs->fs_root, &buf);
+      if (ret == 0)
+        {
+          break;
+        }
+
+      usleep(RPMSGFS_RETRY_DELAY_MS * USEC_PER_MSEC);
+      fs->timeout -= RPMSGFS_RETRY_DELAY_MS;
     }
 }
 
@@ -1055,6 +1077,7 @@ static int rpmsgfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   /* The options we support are:
    *  "fs=whatever,cpu=cpuname", remote dir
+   *  "timeout=xx", connect timeout, unit (ms)
    */
 
   options = strdup(data);
@@ -1063,6 +1086,10 @@ static int rpmsgfs_bind(FAR struct inode *blkdriver, FAR const void *data,
       kmm_free(fs);
       return -ENOMEM;
     }
+
+  /* Set timeout default value */
+
+  fs->timeout = INT_MAX;
 
   ptr = strtok_r(options, ",", &saveptr);
   while (ptr != NULL)
@@ -1074,6 +1101,10 @@ static int rpmsgfs_bind(FAR struct inode *blkdriver, FAR const void *data,
       else if ((strncmp(ptr, "cpu=", 4) == 0))
         {
           cpuname = &ptr[4];
+        }
+      else if ((strncmp(ptr, "timeout=", 8) == 0))
+        {
+          fs->timeout = atoi(&ptr[8]);
         }
 
       ptr = strtok_r(NULL, ",", &saveptr);

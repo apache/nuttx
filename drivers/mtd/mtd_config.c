@@ -1497,6 +1497,149 @@ static int mtdconfig_deleteconfig(FAR struct mtdconfig_struct_s *dev,
 }
 
 /****************************************************************************
+ * Name: mtdconfig_firstconfig
+ ****************************************************************************/
+
+static int mtdconfig_firstconfig(FAR struct mtdconfig_struct_s *dev,
+                                 FAR struct config_data_s *pdata)
+{
+  int    ret = -ENOENT;
+  off_t bytes_to_read;
+  struct mtdconfig_header_s hdr;
+
+  /* Allocate a temp block buffer */
+
+  dev->buffer = (FAR uint8_t *)kmm_malloc(dev->blocksize);
+  if (dev->buffer == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  dev->readoff = mtdconfig_findfirstentry(dev, &hdr);
+
+  /* Test if the config item is valid */
+
+#ifdef CONFIG_MTD_CONFIG_NAMED
+  if (dev->readoff != 0 &&
+      hdr.name[0] != CONFIG_MTD_CONFIG_ERASEDVALUE)
+#else
+  if (dev->readoff != 0 && hdr.id != MTD_ERASED_ID)
+#endif
+    {
+      /* Perform the read */
+
+      bytes_to_read = hdr.len;
+      if (bytes_to_read > pdata->len)
+        {
+          bytes_to_read = pdata->len;
+        }
+
+      ret = mtdconfig_readbytes(dev, dev->readoff + sizeof(hdr),
+                                pdata->configdata, bytes_to_read);
+      if (ret < 0)
+        {
+          goto errout;
+        }
+
+      /* Set other return data items */
+
+#ifdef CONFIG_MTD_CONFIG_NAMED
+      strcpy(pdata->name, hdr.name);
+#else
+      pdata->id = hdr.id;
+      pdata->instance = hdr.instance;
+#endif
+      pdata->len = bytes_to_read;
+    }
+  else
+    {
+      ret = -ENOENT;
+    }
+
+errout:
+
+  /* Free the buffer */
+
+  kmm_free(dev->buffer);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: mtdconfig_nextconfig
+ ****************************************************************************/
+
+static int mtdconfig_nextconfig(FAR struct mtdconfig_struct_s *dev,
+                                FAR struct config_data_s *pdata)
+{
+  int    ret = -ENOENT;
+  off_t bytes_to_read;
+  struct mtdconfig_header_s hdr;
+
+  /* Allocate a temp block buffer */
+
+  dev->buffer = (FAR uint8_t *)kmm_malloc(dev->blocksize);
+  if (dev->buffer == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  ret = mtdconfig_readbytes(dev, dev->readoff, (FAR uint8_t *)&hdr,
+                            sizeof(hdr));
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  dev->readoff = mtdconfig_findnextentry(dev, dev->readoff, &hdr, 0);
+
+  /* Test if the config item is valid */
+
+#ifdef CONFIG_MTD_CONFIG_NAMED
+  if (dev->readoff != 0 &&
+      hdr.name[0] != CONFIG_MTD_CONFIG_ERASEDVALUE)
+#else
+  if (dev->readoff != 0 && hdr.id != MTD_ERASED_ID)
+#endif
+    {
+      /* Test if this is an empty slot */
+
+      bytes_to_read = hdr.len;
+      if (bytes_to_read > pdata->len)
+        {
+          bytes_to_read = pdata->len;
+        }
+
+      /* Read the config item data */
+
+      ret = mtdconfig_readbytes(dev, dev->readoff + sizeof(hdr),
+                                pdata->configdata, bytes_to_read);
+      if (ret < 0)
+        {
+          goto errout;
+        }
+
+#ifdef CONFIG_MTD_CONFIG_NAMED
+      strcpy(pdata->name, hdr.name);
+#else
+      pdata->id = hdr.id;
+      pdata->instance = hdr.instance;
+#endif
+      pdata->len = bytes_to_read;
+    }
+  else
+    {
+      ret = -ENOENT;
+    }
+
+errout:
+
+  /* Free the buffer */
+
+  kmm_free(dev->buffer);
+  return ret;
+}
+
+/****************************************************************************
  * Name: mtdconfig_ioctl
  ****************************************************************************/
 
@@ -1506,8 +1649,6 @@ static int mtdconfig_ioctl(FAR struct file *filep, int cmd,
   FAR struct inode *inode = filep->f_inode;
   FAR struct mtdconfig_struct_s *dev = inode->i_private;
   FAR struct config_data_s *pdata;
-  struct mtdconfig_header_s hdr;
-  off_t bytes_to_read;
   int ret = -ENOTTY;
 
   switch (cmd)
@@ -1541,47 +1682,7 @@ static int mtdconfig_ioctl(FAR struct file *filep, int cmd,
         /* Get the the first config item */
 
         pdata = (FAR struct config_data_s *)arg;
-        dev->readoff = mtdconfig_findfirstentry(dev, &hdr);
-
-        /* Test if the config item is valid */
-
-#ifdef CONFIG_MTD_CONFIG_NAMED
-        if (dev->readoff != 0 &&
-            hdr.name[0] != CONFIG_MTD_CONFIG_ERASEDVALUE)
-#else
-        if (dev->readoff != 0 && hdr.id != MTD_ERASED_ID)
-#endif
-          {
-            /* Perform the read */
-
-            bytes_to_read = hdr.len;
-            if (bytes_to_read > pdata->len)
-              {
-                bytes_to_read = pdata->len;
-              }
-
-            ret = mtdconfig_readbytes(dev, dev->readoff + sizeof(hdr),
-                                      pdata->configdata, bytes_to_read);
-            if (ret < 0)
-              {
-                break;
-              }
-
-            /* Set other return data items */
-
-#ifdef CONFIG_MTD_CONFIG_NAMED
-            strcpy(pdata->name, hdr.name);
-#else
-            pdata->id = hdr.id;
-            pdata->instance = hdr.instance;
-#endif
-            pdata->len = bytes_to_read;
-          }
-        else
-          {
-            ret = -ENOENT;
-          }
-
+        ret = mtdconfig_firstconfig(dev, pdata);
         break;
 
       case CFGDIOC_NEXTCONFIG:
@@ -1589,55 +1690,7 @@ static int mtdconfig_ioctl(FAR struct file *filep, int cmd,
         /* Get the next config item */
 
         pdata = (FAR struct config_data_s *)arg;
-
-        ret = mtdconfig_readbytes(dev, dev->readoff, (FAR uint8_t *)&hdr,
-                                  sizeof(hdr));
-        if (ret < 0)
-          {
-            break;
-          }
-
-        dev->readoff = mtdconfig_findnextentry(dev, dev->readoff, &hdr, 0);
-
-        /* Test if the config item is valid */
-
-#ifdef CONFIG_MTD_CONFIG_NAMED
-        if (dev->readoff != 0 &&
-            hdr.name[0] != CONFIG_MTD_CONFIG_ERASEDVALUE)
-#else
-        if (dev->readoff != 0 && hdr.id != MTD_ERASED_ID)
-#endif
-          {
-            /* Test if this is an empty slot */
-
-            bytes_to_read = hdr.len;
-            if (bytes_to_read > pdata->len)
-              {
-                bytes_to_read = pdata->len;
-              }
-
-            /* Read the config item data */
-
-            ret = mtdconfig_readbytes(dev, dev->readoff + sizeof(hdr),
-                                      pdata->configdata, bytes_to_read);
-            if (ret < 0)
-              {
-                break;
-              }
-
-#ifdef CONFIG_MTD_CONFIG_NAMED
-            strcpy(pdata->name, hdr.name);
-#else
-            pdata->id = hdr.id;
-            pdata->instance = hdr.instance;
-#endif
-            pdata->len = bytes_to_read;
-          }
-        else
-          {
-            ret = -ENOENT;
-          }
-
+        ret = mtdconfig_nextconfig(dev, pdata);
         break;
 
       case MTDIOC_BULKERASE:

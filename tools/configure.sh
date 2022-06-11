@@ -268,8 +268,8 @@ fi
 # Okay... Everything looks good.  Setup the configuration
 
 echo "  Copy files"
-install -m 644 ${src_makedefs} "${dest_makedefs}" || \
-  { echo "Failed to copy ${src_makedefs}" ; exit 8 ; }
+ln -sf ${src_makedefs} ${dest_makedefs} || \
+  { echo "Failed to symlink ${src_makedefs}" ; exit 8 ; }
 install -m 644 ${src_config} "${dest_config}" || \
   { echo "Failed to copy ${src_config}" ; exit 9 ; }
 install -m 644 ${src_config} "${backup_config}" || \

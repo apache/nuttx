@@ -559,7 +559,7 @@ menu "Debug Options"
 
 config NDEBUG
 	bool "Define NDEBUG globally"
-	default y
+	default !DEBUG_ASSERTIONS
 
 config DEBUG_ALERT
 	bool
@@ -1955,6 +1955,28 @@ config DEBUG_OPTLEVEL
 	---help---
 		This string represents the custom optimization level that will be
 		used if DEBUG_CUSTOMOPT.
+
+config DEBUG_OPT_UNUSED_SECTIONS
+	bool "Optimization to eliminate the unused input sections"
+	default y
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Use these options on systems where the linker can perform optimizations
+		to improve locality of reference in the instruction space.  Most systems
+		using the ELF object format have linkers with such optimizations.
+
+		Enable this option to optimization the unused input sections with the
+		linker by compiling with " -ffunction-sections -fdata-sections ", and
+		linking with " --gc-sections ".
+
+config DEBUG_LINK_MAP
+	bool "Generate link map file"
+	default y
+	---help---
+		Selecting this option will pass "-Map=$(TOPDIR)$(DELIM)nuttx.map" to ld
+		when linking NuttX ELF. That file can be useful for verifying
+		and debugging magic section games, and for seeing which
+		pieces of code get eliminated with DEBUG_OPT_UNUSED_SECTIONS.
 
 endmenu # Build Setup
 

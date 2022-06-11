@@ -48,6 +48,7 @@
 
 #ifndef CONFIG_LIBC_ARCH_MEMSET
 #undef memset /* See mm/README.txt */
+no_builtin("memset")
 FAR void *memset(FAR void *s, int c, size_t n)
 {
 #ifdef CONFIG_MEMSET_OPTSPEED

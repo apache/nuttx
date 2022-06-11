@@ -63,18 +63,15 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DUMP_ON_EXIT
-static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
+static void _up_dumponexit(struct tcb_s *tcb, void *arg)
 {
-  FAR struct filelist *filelist;
-#if CONFIG_NFILE_STREAMS > 0
-  FAR struct streamlist *streamlist;
-#endif
+  struct filelist *filelist;
   int i;
 
   sinfo("  TCB=%p name=%s pid=%d\n", tcb, tcb->argv[0], tcb->pid);
   sinfo("    priority=%d state=%d\n", tcb->sched_priority, tcb->task_state);
 
-  filelist = tcb->group->tg_filelist;
+  filelist = &tcb->group->tg_filelist;
   for (i = 0; i < CONFIG_NFILE_DESCRIPTORS; i++)
     {
       struct inode *inode = filelist->fl_files[i].f_inode;
@@ -84,29 +81,6 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
                 i, inode->i_crefs);
         }
     }
-
-#if CONFIG_NFILE_STREAMS > 0
-  streamlist = tcb->group->tg_streamlist;
-  for (i = 0; i < CONFIG_NFILE_STREAMS; i++)
-    {
-      struct file_struct *filep = &streamlist->sl_streams[i];
-      if (filep->fs_fd >= 0)
-        {
-#ifndef CONFIG_STDIO_DISABLE_BUFFERING
-          if (filep->fs_bufstart != NULL)
-            {
-              sinfo("      fd=%d nbytes=%d\n",
-                    filep->fs_fd,
-                    filep->fs_bufpos - filep->fs_bufstart);
-            }
-          else
-#endif
-            {
-              sinfo("      fd=%d\n", filep->fs_fd);
-            }
-        }
-    }
-#endif
 }
 #endif
 
@@ -137,11 +111,6 @@ void up_exit(int status)
 
   sinfo("TCB=%p exiting\n", tcb);
 
-#ifdef CONFIG_DUMP_ON_EXIT
-  sinfo("Other tasks:\n");
-  sched_foreach(_up_dumponexit, NULL);
-#endif
-
   /* Update scheduler parameters */
 
   nxsched_suspend_scheduler(tcb);
@@ -150,21 +119,16 @@ void up_exit(int status)
 
   (void)nxtask_exit();
 
+#ifdef CONFIG_DUMP_ON_EXIT
+  sinfo("Other tasks:\n");
+  sched_foreach(_up_dumponexit, NULL);
+#endif
+
   /* Now, perform the context switch to the new ready-to-run task at the
    * head of the list.
    */
 
   tcb = this_task();
-
-#ifdef CONFIG_ARCH_ADDRENV
-  /* Make sure that the address environment for the previously running
-   * task is closed down gracefully (data caches dump, MMU flushed) and
-   * set up the address environment for the new thread at the head of
-   * the ready-to-run list.
-   */
-
-  (void)group_addrenv(tcb);
-#endif
 
   /* Reset scheduler parameters */
 

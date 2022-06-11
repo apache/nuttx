@@ -49,11 +49,6 @@ uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs)
   PANIC();
 
 #else
-#if XCHAL_CP_NUM > 0
-  /* Save the TCB of in case we need to save co-processor state */
-
-  struct tcb_s *tcb = this_task();
-#endif
 
   board_autoled_on(LED_INIRQ);
 
@@ -76,35 +71,13 @@ uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs)
 
   irq_dispatch(irq, regs);
 
-#if XCHAL_CP_NUM > 0 || defined(CONFIG_ARCH_ADDRENV)
+#if defined(CONFIG_ARCH_ADDRENV)
   /* Check for a context switch.  If a context switch occurred, then
    * CURRENT_REGS will have a different value than it did on entry.
    */
 
   if (regs != CURRENT_REGS)
     {
-#if XCHAL_CP_NUM > 0
-      /* If an interrupt level context switch has occurred, then save the
-       * co-processor state in in the suspended thread's co-processor save
-       * area.
-       *
-       * NOTE 1. The state of the co-processor has not been altered and
-       *         still represents the to-be-suspended thread.
-       * NOTE 2. We saved a reference  TCB of the original thread on entry.
-       */
-
-      xtensa_coproc_savestate(&tcb->xcp.cpstate);
-
-      /* Then set up the co-processor state for the to-be-started thread.
-       *
-       * NOTE: The current thread for this CPU is the to-be-started
-       * thread.
-       */
-
-      tcb = this_task();
-      xtensa_coproc_restorestate(&tcb->xcp.cpstate);
-#endif
-
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
        * running task is closed down gracefully (data caches dump,

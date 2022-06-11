@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <stdint.h>
 #include <time.h>
 #include <debug.h>
@@ -31,8 +32,11 @@
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/timers/arch_alarm.h>
 
+#include "hardware/mpfs_clint.h"
 #include "riscv_internal.h"
+#include "riscv_mtimer.h"
 
 #include "mpfs.h"
 #include "mpfs_clockconfig.h"
@@ -41,62 +45,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define TICK_COUNT (MPFS_MSS_RTC_TOGGLE_CLK / TICK_PER_SEC)
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static bool _b_tick_started;
-static uint64_t *_mtime_cmp;
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name:  mpfs_reload_mtimecmp
- ****************************************************************************/
-
-static void mpfs_reload_mtimecmp(void)
-{
-  irqstate_t flags = spin_lock_irqsave(NULL);
-
-  uint64_t current;
-  uint64_t next;
-
-  if (!_b_tick_started)
-    {
-      _b_tick_started = true;
-      current = getreg64(MPFS_CLINT_MTIME);
-    }
-  else
-    {
-      current = getreg64(_mtime_cmp);
-    }
-
-  uint64_t tick = TICK_COUNT;
-  next = current + tick;
-
-  putreg64(next, _mtime_cmp);
-
-  spin_unlock_irqrestore(NULL, flags);
-}
-
-/****************************************************************************
- * Name:  mpfs_timerisr
- ****************************************************************************/
-
-static int mpfs_timerisr(int irq, void *context, void *arg)
-{
-  mpfs_reload_mtimecmp();
-
-  /* Process timer interrupt */
-
-  nxsched_process_timer();
-
-  return 0;
-}
+#define MTIMER_FREQ MPFS_MSS_RTC_TOGGLE_CLK
 
 /****************************************************************************
  * Public Functions
@@ -116,17 +65,12 @@ void up_timer_initialize(void)
   /* what is our timecmp address for this hart */
 
   uintptr_t hart_id = riscv_mhartid();
-  _mtime_cmp = (uint64_t *)MPFS_CLINT_MTIMECMP0 + hart_id;
 
-  /* Attach timer interrupt handler */
+  struct oneshot_lowerhalf_s *lower = riscv_mtimer_initialize(
+    MPFS_CLINT_MTIME, MPFS_CLINT_MTIMECMP0 + hart_id * sizeof(uintptr_t),
+    RISCV_IRQ_TIMER, MTIMER_FREQ);
 
-  irq_attach(RISCV_IRQ_MTIMER, mpfs_timerisr, NULL);
+  DEBUGASSERT(lower);
 
-  /* Reload CLINT mtimecmp */
-
-  mpfs_reload_mtimecmp();
-
-  /* And enable the timer interrupt */
-
-  up_enable_irq(RISCV_IRQ_MTIMER);
+  up_alarm_set_lowerhalf(lower);
 }

@@ -62,12 +62,10 @@ struct fb_chardev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     fb_open(FAR struct file *filep);
-static int     fb_close(FAR struct file *filep);
 static ssize_t fb_read(FAR struct file *filep, FAR char *buffer,
-                 size_t buflen);
+                       size_t buflen);
 static ssize_t fb_write(FAR struct file *filep, FAR const char *buffer,
-                 size_t buflen);
+                        size_t buflen);
 static off_t   fb_seek(FAR struct file *filep, off_t offset, int whence);
 static int     fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
@@ -77,8 +75,8 @@ static int     fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 static const struct file_operations fb_fops =
 {
-  fb_open,       /* open */
-  fb_close,      /* close */
+  NULL,          /* open */
+  NULL,          /* close */
   fb_read,       /* read */
   fb_write,      /* write */
   fb_seek,       /* seek */
@@ -92,34 +90,6 @@ static const struct file_operations fb_fops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: fb_open
- *
- * Description:
- *   This function is called whenever the framebuffer device is opened.
- *
- ****************************************************************************/
-
-static int fb_open(FAR struct file *filep)
-{
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
-  return OK;
-}
-
-/****************************************************************************
- * Name: fb_close
- *
- * Description:
- *   This function is called when the framebuffer device is closed.
- *
- ****************************************************************************/
-
-static int fb_close(FAR struct file *filep)
-{
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
-  return OK;
-}
 
 /****************************************************************************
  * Name: fb_read

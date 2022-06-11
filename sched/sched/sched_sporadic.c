@@ -463,7 +463,7 @@ static void sporadic_budget_expire(wdparm_t arg)
 
   if (nxsched_islocked_tcb(tcb))
     {
-      DEBUGASSERT((mrepl->flags && SPORADIC_FLAG_ALLOCED) != 0);
+      DEBUGASSERT((mrepl->flags & SPORADIC_FLAG_ALLOCED) != 0);
 
       /* Set the timeslice to the magic value */
 

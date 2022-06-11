@@ -443,7 +443,8 @@ static int rpmsgfs_ioctl_handler(FAR struct rpmsg_endpoint *ept,
   filep = rpmsgfs_get_file(priv, msg->fd);
   if (filep != NULL)
     {
-      ret = file_ioctl(filep, msg->request, msg->arg);
+      ret = file_ioctl(filep, msg->request, msg->arglen > 0 ?
+                       (unsigned long)msg->buf : msg->arg);
     }
 
   msg->header.result = ret;
@@ -768,6 +769,7 @@ static int rpmsgfs_chstat_handler(FAR struct rpmsg_endpoint *ept,
         }
       else
         {
+          times[0].tv_sec = 0;
           times[0].tv_nsec = UTIME_OMIT;
         }
 
@@ -777,6 +779,7 @@ static int rpmsgfs_chstat_handler(FAR struct rpmsg_endpoint *ept,
         }
       else
         {
+          times[1].tv_sec = 0;
           times[1].tv_nsec = UTIME_OMIT;
         }
 

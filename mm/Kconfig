@@ -186,8 +186,23 @@ config MM_KASAN
 		bugs in native code. After turn on this option, Please
 		add -fsanitize=kernel-address to CFLAGS/CXXFLAGS too.
 
+config MM_BACKTRACE
+	bool "Owner tracking and backtrace"
+	default n
+	depends on DEBUG_MM
+
 config MM_BACKTRACE_DEFAULT
 	bool "Enable the backtrace record by default"
+	default n
+	depends on MM_BACKTRACE
+
+config MM_DUMP_ON_FAILURE
+	bool "Dump heap info on allocation failure"
+	default n
+	depends on DEBUG_MM
+
+config MM_PANIC_ON_FAILURE
+	bool "Panic on allocation failure"
 	default n
 	depends on DEBUG_MM
 

@@ -23,13 +23,18 @@ ifeq ($(CONFIG_OPENSBI),y)
 DEPPATH += --dep-path opensbi/opensbi-3rdparty
 VPATH += :opensbi/opensbi-3rdparty
 
-OPENSBI_CSRCS = $(wildcard opensbi/opensbi-3rdparty/lib/sbi/*.c)
-OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/utils/ipi/aclint_mswi.c
-OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/utils/irqchip/plic.c
-OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/utils/timer/aclint_mtimer.c
+SBI_CSRCS  = $(wildcard opensbi/opensbi-3rdparty/lib/sbi/*.c)
+SBI_CSRCS += opensbi/opensbi-3rdparty/lib/utils/ipi/aclint_mswi.c
+SBI_CSRCS += opensbi/opensbi-3rdparty/lib/utils/irqchip/plic.c
+SBI_CSRCS += opensbi/opensbi-3rdparty/lib/utils/timer/aclint_mtimer.c
 
-OPENSBI_ASRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_expected_trap.S
-OPENSBI_ASRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_hfence.S
+SBI_ASRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_expected_trap.S
+SBI_ASRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_hfence.S
+SBI_ASRCS += opensbi/opensbi-3rdparty/lib/sbi/riscv_hardfp.S
+
+INCLUDES  += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)opensbi$(DELIM)opensbi-3rdparty$(DELIM)include)
+
+SBI_DIR   := opensbi
 
 OPENSBI_UNPACK  = opensbi-3rdparty
 OPENSBI_COMMIT  = 4998a712b2ab504eff306110879ee05af6050177

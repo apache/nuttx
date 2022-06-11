@@ -109,7 +109,6 @@ ports.
    file:
 
      CONFIG_ARCH_FPU=y
-     CONFIG_ARMV7M_LAZYFPU=y
 
 Bambino-200e Configuration Options
 ==================================
@@ -416,7 +415,7 @@ Where <subdir> is one of the following:
        SRAM.
 
          CONFIG_LPC43_BOOT_SRAM=y            : Executing in SRAM
-         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : GNU EABI toolchain for Windows
+         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y  : GNU EABI toolchain for Windows
 
     3. To execute from SPIFI, you would need to set:
 

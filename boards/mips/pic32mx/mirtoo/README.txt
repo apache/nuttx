@@ -583,7 +583,7 @@ Analog Input
   #include <nuttx/spi/spi.h>
   #include <nuttx/analog/pga11x.h>
 
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
   PGA11X_HANDLE handle;
 
   /* Get the SPI port */

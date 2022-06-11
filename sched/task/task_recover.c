@@ -33,6 +33,7 @@
 #include "semaphore/semaphore.h"
 #include "wdog/wdog.h"
 #include "mqueue/mqueue.h"
+#include "pthread/pthread.h"
 #include "sched/sched.h"
 #include "task/task.h"
 
@@ -61,6 +62,12 @@
 
 void nxtask_recover(FAR struct tcb_s *tcb)
 {
+#if !defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
+  /* Recover any mutexes still held by the canceled thread */
+
+  pthread_mutex_inconsistent(tcb);
+#endif
+
   /* The task is being deleted.  Cancel in pending timeout events. */
 
   wd_recover(tcb);

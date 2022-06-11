@@ -30,8 +30,4 @@ ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += c906_leds.c
 endif
 
-ifeq ($(CONFIG_ARCH_FPU),y)
-CSRCS += c906_ostest.c
-endif
-
 include $(TOPDIR)/boards/Board.mk

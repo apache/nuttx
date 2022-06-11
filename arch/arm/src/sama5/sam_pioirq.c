@@ -191,42 +191,42 @@ static int sam_piointerrupt(uint32_t base, int irq0, void *context)
 }
 
 #ifdef CONFIG_SAMA5_PIOA_IRQ
-static int sam_pioainterrupt(int irq, void *context, FAR void *arg)
+static int sam_pioainterrupt(int irq, void *context, void *arg)
 {
   return sam_piointerrupt(SAM_PIOA_VBASE, SAM_IRQ_PA0, context);
 }
 #endif
 
 #ifdef CONFIG_SAMA5_PIOB_IRQ
-static int sam_piobinterrupt(int irq, void *context, FAR void *arg)
+static int sam_piobinterrupt(int irq, void *context, void *arg)
 {
   return sam_piointerrupt(SAM_PIOB_VBASE, SAM_IRQ_PB0, context);
 }
 #endif
 
 #ifdef CONFIG_SAMA5_PIOC_IRQ
-static int sam_piocinterrupt(int irq, void *context, FAR void *arg)
+static int sam_piocinterrupt(int irq, void *context, void *arg)
 {
   return sam_piointerrupt(SAM_PIOC_VBASE, SAM_IRQ_PC0, context);
 }
 #endif
 
 #ifdef CONFIG_SAMA5_PIOD_IRQ
-static int sam_piodinterrupt(int irq, void *context, FAR void *arg)
+static int sam_piodinterrupt(int irq, void *context, void *arg)
 {
   return sam_piointerrupt(SAM_PIOD_VBASE, SAM_IRQ_PD0, context);
 }
 #endif
 
 #ifdef CONFIG_SAMA5_PIOE_IRQ
-static int sam_pioeinterrupt(int irq, void *context, FAR void *arg)
+static int sam_pioeinterrupt(int irq, void *context, void *arg)
 {
   return sam_piointerrupt(SAM_PIOE_VBASE, SAM_IRQ_PE0, context);
 }
 #endif
 
 #ifdef CONFIG_SAMA5_PIOF_IRQ
-static int sam_piofinterrupt(int irq, void *context, FAR void *arg)
+static int sam_piofinterrupt(int irq, void *context, void *arg)
 {
   return sam_piointerrupt(SAM_PIOF_VBASE, SAM_IRQ_PF0, context);
 }
@@ -479,7 +479,7 @@ void sam_pioirqenable(int irq)
     {
       /* Clear (all) pending interrupts and enable this pin interrupt */
 
-      (void)getreg32(base + SAM_PIO_ISR_OFFSET);
+      getreg32(base + SAM_PIO_ISR_OFFSET);
       putreg32((1 << pin), base + SAM_PIO_IER_OFFSET);
     }
 }

@@ -130,11 +130,16 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 
   if (ret > 0)
     {
+#if defined(CONFIG_SYSLOG_TIMESTAMP_FORMAT_MICROSECOND)
+      ret = lib_sprintf(&stream.public, "[%s.%06ld] ",
+                        date_buf, ts.tv_nsec / NSEC_PER_USEC);
+#else
       ret = lib_sprintf(&stream.public, "[%s] ", date_buf);
+#endif
     }
 #else
   ret = lib_sprintf(&stream.public, "[%5jd.%06ld] ",
-                    (uintmax_t)ts.tv_sec, ts.tv_nsec / 1000);
+                    (uintmax_t)ts.tv_sec, ts.tv_nsec / NSEC_PER_USEC);
 #endif
 #endif
 

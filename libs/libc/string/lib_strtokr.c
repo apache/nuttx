@@ -77,8 +77,8 @@
 
 FAR char *strtok_r(FAR char *str, FAR const char *delim, FAR char **saveptr)
 {
-  char *pbegin;
-  char *pend = NULL;
+  FAR char *pbegin;
+  FAR char *pend = NULL;
 
   /* Decide if we are starting a new string or continuing from
    * the point we left off.

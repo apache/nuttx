@@ -252,7 +252,7 @@ static inline void tiva_i2c_putreg(struct tiva_i2c_priv_s *priv,
 #endif
 
 #ifdef CONFIG_TIVA_I2C_DYNTIMEO
-static useconds_t tiva_i2c_tousecs(int msgc, struct i2c_msg_s *msgv);
+static uint32_t tiva_i2c_toticks(int msgc, struct i2c_msg_s *msgv);
 #endif /* CONFIG_TIVA_I2C_DYNTIMEO */
 
 static inline int  tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv);
@@ -273,7 +273,7 @@ static void tiva_i2c_nextxfr(struct tiva_i2c_priv_s *priv, uint32_t cmd);
 static int tiva_i2c_process(struct tiva_i2c_priv_s * priv, uint32_t status);
 
 #ifndef CONFIG_I2C_POLLED
-static int tiva_i2c_interrupt(int irq, void *context, FAR void *arg);
+static int tiva_i2c_interrupt(int irq, void *context, void *arg);
 #endif /* !CONFIG_I2C_POLLED */
 
 static int tiva_i2c_initialize(struct tiva_i2c_priv_s *priv,
@@ -285,7 +285,7 @@ static int tiva_i2c_transfer(struct i2c_master_s *dev,
                              struct i2c_msg_s *msgv,
                              int msgc);
 #ifdef CONFIG_I2C_RESET
-static int tiva_i2c_reset(FAR struct i2c_master_s *dev);
+static int tiva_i2c_reset(struct i2c_master_s *dev);
 #endif
 
 /****************************************************************************
@@ -631,7 +631,7 @@ static inline void tiva_i2c_putreg(struct tiva_i2c_priv_s *priv,
 #endif
 
 /****************************************************************************
- * Name: tiva_i2c_tousecs
+ * Name: tiva_i2c_toticks
  *
  * Description:
  *   Return a micro-second delay based on the number of bytes left to be
@@ -640,7 +640,7 @@ static inline void tiva_i2c_putreg(struct tiva_i2c_priv_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_TIVA_I2C_DYNTIMEO
-static useconds_t tiva_i2c_tousecs(int msgc, struct i2c_msg_s *msgv)
+static uint32_t tiva_i2c_toticks(int msgc, struct i2c_msg_s *msgv)
 {
   size_t bytecount = 0;
   int i;
@@ -656,7 +656,7 @@ static useconds_t tiva_i2c_tousecs(int msgc, struct i2c_msg_s *msgv)
    * factor.
    */
 
-  return (useconds_t)(CONFIG_TIVA_I2C_DYNTIMEO_USECPERBYTE * bytecount);
+  return USEC2TICK(CONFIG_TIVA_I2C_DYNTIMEO_USECPERBYTE * bytecount);
 }
 #endif
 
@@ -671,7 +671,6 @@ static useconds_t tiva_i2c_tousecs(int msgc, struct i2c_msg_s *msgv)
 #ifndef CONFIG_I2C_POLLED
 static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
 {
-  struct timespec abstime;
   irqstate_t flags;
   int ret;
 
@@ -686,47 +685,25 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
 
   /* Signal the interrupt handler that we are waiting.
    * NOTE:  Interrupts  are currently disabled but will be temporarily
-   * re-enabled below when nxsem_timedwait() sleeps.
+   * re-enabled below when nxsem_tickwait_uninterruptible() sleeps.
    */
 
   do
     {
-      /* Get the current time */
-
-      clock_gettime(CLOCK_REALTIME, &abstime);
-
-      /* Calculate a time in the future */
-
-#if CONFIG_TIVA_I2C_TIMEOSEC > 0
-      abstime.tv_sec += CONFIG_TIVA_I2C_TIMEOSEC;
-#endif
-
-      /* Add a value proportional to the number of bytes in the transfer */
-
-#ifdef CONFIG_TIVA_I2C_DYNTIMEO
-      abstime.tv_nsec += 1000 * tiva_i2c_tousecs(priv->msgc, priv->msgv);
-      if (abstime.tv_nsec >= 1000 * 1000 * 1000)
-        {
-          abstime.tv_sec++;
-          abstime.tv_nsec -= 1000 * 1000 * 1000;
-        }
-
-#elif CONFIG_TIVA_I2C_TIMEOMS > 0
-      abstime.tv_nsec += CONFIG_TIVA_I2C_TIMEOMS * 1000 * 1000;
-      if (abstime.tv_nsec >= 1000 * 1000 * 1000)
-        {
-          abstime.tv_sec++;
-          abstime.tv_nsec -= 1000 * 1000 * 1000;
-        }
-#endif
-
       /* Wait until either the transfer is complete or the timeout expires */
 
-      ret = nxsem_timedwait_uninterruptible(&priv->waitsem, &abstime);
+#ifdef CONFIG_TIVA_I2C_DYNTIMEO
+      ret = nxsem_tickwait_uninterruptible(&priv->waitsem,
+                          tiva_i2c_toticks(priv->msgc, priv->msgv));
+#else
+      ret = nxsem_tickwait_uninterruptible(&priv->waitsem,
+                                           CONFIG_TIVA_I2C_TIMEOTICKS);
+#endif
       if (ret < 0)
         {
           /* Break out of the loop on irrecoverable errors.  This would
-           * include timeouts and mystery errors reported by nxsem_timedwait.
+           * include timeouts and mystery errors reported by
+           * nxsem_tickwait_uninterruptible.
            */
 
           tiva_i2c_traceevent(priv, I2CEVENT_TIMEOUT,
@@ -762,14 +739,14 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
   /* Get the timeout value */
 
 #ifdef CONFIG_TIVA_I2C_DYNTIMEO
-  timeout = USEC2TICK(tiva_i2c_tousecs(priv->msgc, priv->msgv));
+  timeout = tiva_i2c_toticks(priv->msgc, priv->msgv);
 #else
   timeout = CONFIG_TIVA_I2C_TIMEOTICKS;
 #endif
 
   /* Signal the interrupt handler that we are waiting.  NOTE:  Interrupts
    * are currently disabled but will be temporarily re-enabled below when
-   * nxsem_timedwait() sleeps.
+   * nxsem_tickwait_uninterruptible() sleeps.
    */
 
   start = clock_systime_ticks();
@@ -1759,7 +1736,7 @@ static int tiva_i2c_transfer(struct i2c_master_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
-static int tiva_i2c_reset(FAR struct i2c_master_s * dev)
+static int tiva_i2c_reset(struct i2c_master_s * dev)
 {
   struct tiva_i2c_priv_s *priv = (struct tiva_i2c_priv_s *)dev;
   unsigned int clock_count;

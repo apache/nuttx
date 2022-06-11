@@ -55,7 +55,7 @@ struct cxd56_sigtype_s
 {
   int                    use;
   cxd56_cpu1sighandler_t handler;
-  FAR void *             data;
+  void                  *data;
 };
 
 struct cxd56cpu1_info_s
@@ -82,7 +82,7 @@ static struct cxd56cpu1_info_s g_cpu1_info =
  * Private Functions
  ****************************************************************************/
 
-static int cxd56cpu1_worker(int argc, FAR char *argv[])
+static int cxd56cpu1_worker(int argc, char *argv[])
 {
   struct cxd56cpu1_info_s *priv = &g_cpu1_info;
   iccmsg_t                 msg;
@@ -156,7 +156,7 @@ void cxd56_cpu1sigunregisterhandler(uint8_t sigtype)
   priv->sigtype[sigtype].handler = NULL;
 }
 
-int cxd56_cpu1siginit(uint8_t sigtype, FAR void *data)
+int cxd56_cpu1siginit(uint8_t sigtype, void *data)
 {
   struct cxd56cpu1_info_s *priv = &g_cpu1_info;
   int                      pid;
@@ -200,7 +200,7 @@ int cxd56_cpu1siginit(uint8_t sigtype, FAR void *data)
   pid = kthread_create("gnss_receiver",
                        CONFIG_CXD56CPU1_WORKER_THREAD_PRIORITY,
                        CONFIG_CXD56CPU1_WORKER_STACKSIZE, cxd56cpu1_worker,
-                       (FAR char * const *) NULL);
+                       NULL);
 
   if (pid < 0)
     {

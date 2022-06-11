@@ -55,7 +55,7 @@ int mpfs_board_i2c_init(void)
 #ifdef CONFIG_I2C_DRIVER
   int bus = 0;
 #endif
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
 #endif
 
 #ifdef CONFIG_MPFS_I2C0

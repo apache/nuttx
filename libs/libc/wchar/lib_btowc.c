@@ -66,13 +66,13 @@ wint_t btowc(int c)
 
   b = (char)c;
 
-  retval = mbtowc(&pwc, (FAR const char *)&b, 1);
+  retval = mbtowc(&pwc, &b, 1);
 
   if (retval != 0 && retval != 1)
     {
       return WEOF;
     }
 
-  return (wint_t)pwc;
+  return pwc;
 }
 #endif

@@ -265,8 +265,8 @@ GNU Toolchain Options
   the following configuration options to your .config (or defconfig) file:
 
     CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y  : NuttX buildroot under Linux or Cygwin (default)
-    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y  : Generic GCC ARM EABI toolchain for Linux
-    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y  : Generic GCC ARM EABI toolchain for Windows
+    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y   : Generic GCC ARM EABI toolchain for Linux
+    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y   : Generic GCC ARM EABI toolchain for Windows
 
   NOTE about Windows native toolchains
   ------------------------------------
@@ -694,7 +694,7 @@ Configurations
      that is easily reconfigured:
 
      System Type -> Toolchain:
-       CONFIG_ARMV6M_TOOLCHAIN_GNU_EABIW=y
+       CONFIG_ARMV6M_TOOLCHAIN_GNU_EABI=y
 
      Any re-configuration should be done before making NuttX or else the
      subsequent 'make' will fail.  If you have already attempted building

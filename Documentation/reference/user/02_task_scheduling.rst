@@ -55,7 +55,7 @@ Functions
   name. Differences from the full POSIX implementation include:
 
     -  The range of priority values for the POSIX call is 0 to 255. The
-      priority 0 is the lowest priority and 255 is the highest priority.
+       priority 0 is the lowest priority and 255 is the highest priority.
 
   .. note:: Setting a task's priority to the same value has the similar effect
     to ``sched_yield()``: The task will be moved to after all other tasks

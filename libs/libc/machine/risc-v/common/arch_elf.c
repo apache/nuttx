@@ -82,6 +82,7 @@ static struct rname_code_s _rname_table[] =
   {"CALL", R_RISCV_CALL},
   {"CALL_PLT", R_RISCV_CALL_PLT},
   {"BRANCH", R_RISCV_BRANCH},
+  {"JAL", R_RISCV_JAL},
   {"RVC_JUMP", R_RISCV_RVC_JUMP},
   {"RVC_BRANCH", R_RISCV_RVC_BRANCH},
 };
@@ -201,7 +202,7 @@ static void _calc_imm(long offset, long *imm_hi, long *imm_lo)
  *
  ****************************************************************************/
 
-bool up_checkarch(FAR const Elf_Ehdr *ehdr)
+bool up_checkarch(const Elf_Ehdr *ehdr)
 {
   /* Make sure it's an RISCV executable */
 
@@ -269,14 +270,13 @@ bool up_checkarch(FAR const Elf_Ehdr *ehdr)
  *
  ****************************************************************************/
 
-int up_relocate(FAR const Elf_Rel *rel, FAR const Elf_Sym *sym,
-                uintptr_t addr)
+int up_relocate(const Elf_Rel *rel, const Elf_Sym *sym, uintptr_t addr)
 {
   berr("Not implemented\n");
   return -ENOSYS;
 }
 
-int up_relocateadd(FAR const Elf_Rela *rel, FAR const Elf_Sym *sym,
+int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
                    uintptr_t addr)
 {
   long offset;
@@ -394,6 +394,29 @@ int up_relocateadd(FAR const Elf_Rela *rel, FAR const Elf_Sym *sym,
           ASSERT(offset && val);
 
           binfo("offset for Bx=%ld (0x%lx) (val=0x%08" PRIx32 ") "
+                "already set!\n",
+                offset, offset, val);
+        }
+        break;
+
+      case R_RISCV_JAL:
+        {
+          binfo("%s at %08" PRIxPTR " [%08" PRIx32 "] "
+                "to sym=%p st_value=%08lx\n",
+                _get_rname(relotype),
+                addr, _get_val((uint16_t *)addr),
+                sym, sym->st_value);
+
+          /* P.21 Unconditinal Jumps : UJ type (imm=20bit) */
+
+          offset = (long)sym->st_value + (long)rel->r_addend - (long)addr;
+          uint32_t val = _get_val((uint16_t *)addr) & 0xfffff000;
+
+          ASSERT(offset && val);
+
+          /* NOTE: we assume that a compiler adds an immediate value */
+
+          binfo("offset for JAL=%ld (0x%lx) (val=0x%08" PRIx32 ") "
                 "already set!\n",
                 offset, offset, val);
         }

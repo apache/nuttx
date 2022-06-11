@@ -51,7 +51,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-int cxd56_sphinitialize(FAR const char *devname);
+int cxd56_sphinitialize(const char *devname);
 
 #undef EXTERN
 #ifdef __cplusplus

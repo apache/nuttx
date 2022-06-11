@@ -198,9 +198,11 @@ FAR void *insmod(FAR const char *filename, FAR const char *modname)
       goto errout_with_loadinfo;
     }
 
+#ifdef HAVE_MODLIB_NAMES
   /* Save the module name in the registry entry */
 
-  strlcpy(modp->modname, modname, MODLIB_NAMEMAX);
+  strlcpy(modp->modname, modname, sizeof(modp->modname));
+#endif
 
   /* Load the program binary */
 

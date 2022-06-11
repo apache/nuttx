@@ -1026,10 +1026,10 @@ testbuild.sh
   The test list file is a sequence of build descriptions, one per line.  One
   build descriptions consists of two comma separated values.  For example:
 
-    stm32f429i-disco:nsh,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
-    arduino-due:nsh,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
-    /arm,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
-    /risc-v,CONFIG_RISCV_TOOLCHAIN_GNU_RVGL
+    stm32f429i-disco:nsh
+    arduino-due:nsh
+    /arm
+    /risc-v
 
   The first value is the usual configuration description of the form
   <board-name>:<configuration-name> or /<folder-name> and must correspond to a

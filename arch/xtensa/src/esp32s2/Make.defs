@@ -29,20 +29,23 @@ HEAD_CSRC  = esp32s2_start.c esp32s2_wdt.c
 # Common XTENSA files (arch/xtensa/src/common)
 
 CMN_ASRCS  = xtensa_context.S xtensa_coproc.S xtensa_cpuint.S xtensa_panic.S
-CMN_ASRCS += xtensa_sigtramp.S
 
-CMN_CSRCS  = xtensa_assert.c xtensa_blocktask.c xtensa_copystate.c
+CMN_CSRCS  = xtensa_assert.c xtensa_blocktask.c
 CMN_CSRCS += xtensa_cpenable.c xtensa_createstack.c xtensa_exit.c
-CMN_CSRCS += xtensa_initialize.c xtensa_initialstate.c xtensa_interruptcontext.c
+CMN_CSRCS += xtensa_initialize.c xtensa_initialstate.c
 CMN_CSRCS += xtensa_irqdispatch.c xtensa_lowputs.c xtensa_mdelay.c
 CMN_CSRCS += xtensa_modifyreg8.c xtensa_modifyreg16.c xtensa_modifyreg32.c
 CMN_CSRCS += xtensa_puts.c xtensa_releasepending.c xtensa_releasestack.c
 CMN_CSRCS += xtensa_reprioritizertr.c xtensa_schedsigaction.c
 CMN_CSRCS += xtensa_sigdeliver.c xtensa_stackframe.c xtensa_udelay.c
 CMN_CSRCS += xtensa_unblocktask.c xtensa_usestack.c xtensa_swint.c
-CMN_CSRCS += xtensa_switchcontext.c
+CMN_CSRCS += xtensa_saveusercontext.c
 
 # Configuration-dependent common XTENSA files
+
+ifeq ($(CONFIG_DEBUG_TCBINFO),y)
+  CMN_CSRCS += xtensa_tcbinfo.c
+endif
 
 ifeq ($(CONFIG_DEBUG_ALERT),y)
   CMN_CSRCS += xtensa_dumpstate.c
@@ -105,4 +108,9 @@ CHIP_CSRCS += esp32s2_oneshot.c
 ifeq ($(CONFIG_ONESHOT),y)
 CHIP_CSRCS += esp32s2_oneshot_lowerhalf.c
 endif
+endif
+
+ifeq ($(CONFIG_ESP32S2_SPIRAM),y)
+CHIP_CSRCS += esp32s2_spiram.c
+CHIP_CSRCS += esp32s2_psram.c
 endif

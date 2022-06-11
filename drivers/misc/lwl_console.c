@@ -110,8 +110,6 @@ static ssize_t lwlconsole_read(FAR struct file *filep, FAR char *buffer,
                                size_t buflen);
 static ssize_t lwlconsole_write(FAR struct file *filep,
                                 FAR const char *buffer, size_t buflen);
-static int lwlconsole_ioctl(FAR struct file *filep, int cmd,
-                            unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -131,15 +129,15 @@ static struct lwl_entry_s g_d =
 
 static const struct file_operations g_consoleops =
 {
-  NULL,                       /* open */
-  NULL,                       /* close */
-  lwlconsole_read,            /* read */
-  lwlconsole_write,           /* write */
-  NULL,                       /* seek */
-  lwlconsole_ioctl,           /* ioctl */
-  NULL                        /* poll */
+  NULL,                 /* open */
+  NULL,                 /* close */
+  lwlconsole_read,      /* read */
+  lwlconsole_write,     /* write */
+  NULL,                 /* seek */
+  NULL,                 /* ioctl */
+  NULL                  /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL                      /* unlink */
+  , NULL                /* unlink */
 #endif
 };
 
@@ -225,16 +223,6 @@ static bool read8bits(uint8_t port, FAR uint8_t *store)
   g_d.upword = (g_d.upword & ~LWL_DNSENSEBIT) | LWL_DNSENSE(g_d.downword);
 
   return true;
-}
-
-/****************************************************************************
- * Name: lwlconsole_ioctl
- ****************************************************************************/
-
-static int lwlconsole_ioctl(FAR struct file *filep, int cmd,
-                            unsigned long arg)
-{
-  return -ENOTTY;
 }
 
 /****************************************************************************

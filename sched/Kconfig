@@ -1311,45 +1311,6 @@ config SCHED_STARTHOOK
 		starthook is useful, for example, for setting up automatic
 		configuration of C++ constructors.
 
-config SCHED_ATEXIT
-	bool "Enable atexit() API"
-	default n
-	---help---
-		Enables the atexit() API
-
-config SCHED_ATEXIT_MAX
-	int "Max number of atexit() functions"
-	default 1
-	depends on SCHED_ATEXIT && !SCHED_ONEXIT
-	---help---
-		By default if SCHED_ATEXIT is selected, only a single atexit() function
-		is supported. That number can be increased by defined this setting to
-		the number that you require.
-
-		If both SCHED_ONEXIT and SCHED_ATEXIT are selected, then atexit() is built
-		on top of the on_exit() implementation.  In that case, SCHED_ONEXIT_MAX
-		determines the size of the combined number of atexit(0) and on_exit calls
-		and SCHED_ATEXIT_MAX is not used.
-
-config SCHED_ONEXIT
-	bool "Enable on_exit() API"
-	default n
-	---help---
-		Enables the on_exit() API
-
-config SCHED_ONEXIT_MAX
-	int "Max number of on_exit() functions"
-	default 1
-	depends on SCHED_ONEXIT
-	---help---
-		By default if SCHED_ONEXIT is selected, only a single on_exit() function
-		is supported. That number can be increased by defined this setting to the
-		number that you require.
-
-		If both SCHED_ONEXIT and SCHED_ATEXIT are selected, then atexit() is built
-		on top of the on_exit() implementation.  In that case, SCHED_ONEXIT_MAX
-		determines the size of the combined number of atexit(0) and on_exit calls.
-
 endmenu # RTOS hooks
 
 menu "Signal Configuration"
@@ -1557,6 +1518,26 @@ config SIG_PIPE
 		This signal is generated when write on a pipe with no one to read it.
 		SIGPIPE may be ignored.
 
+config SIG_HUP
+	int "SIGHUP"
+	default 14
+	---help---
+		The SIGHUP would be sent to programs when the serial line was dropped,
+		often because the connected user terminated the connection by hanging up
+		the modem. The system would detect the line was dropped via the lost
+		Data Carrier Detect (DCD) signal.
+
+config SIG_TTIN
+	int "SIGTTIN"
+	default 15
+	---help---
+		A process cannot read from the user’s terminal while it is running as a
+		background job. When any process in a background job tries to read from
+		the terminal, all of the processes in the job are sent a SIGTTIN signal.
+		The default action for this signal is to stop the process. For more
+		information about how this interacts with the terminal driver, see Access
+		to the Controlling Terminal.
+
 comment "Non-standard Signal Numbers"
 
 config SIG_SIGCONDTIMEDOUT
@@ -1603,6 +1584,12 @@ config MQ_MAXMSGSIZE
 	---help---
 		Message structures are allocated with a fixed payload size given by this
 		setting (does not include other message structure overhead.
+
+config DISABLE_MQUEUE_NOTIFICATION
+	bool "Disable POSIX message queue notification"
+	default DEFAULT_SMALL
+	---help---
+		Disable POSIX message queue notification
 
 endmenu # POSIX Message Queue Options
 

@@ -31,10 +31,6 @@ ifeq ($(CONFIG_BOARDCTL_IOCTL),y)
 CSRCS += cxd56_ioctl.c
 endif
 
-ifeq ($(CONFIG_ARCH_FPU),y)
-CSRCS += cxd56_ostest.c
-endif
-
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += cxd56_leds.c
 else

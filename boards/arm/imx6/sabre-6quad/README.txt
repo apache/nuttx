@@ -754,7 +754,7 @@ NOTES:
        CONFIG_WINDOWS_CYGWIN=y             : Cywin under Windows
 
      System Type -> Toolchain:
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : GNU ARM EABI toolchain
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y  : GNU ARM EABI toolchain
 
 Configuration sub-directories
 -----------------------------
@@ -940,3 +940,53 @@ Configuration sub-directories
     thread #0 finished, found 1230 primes, last one was 9973
     Done
     /system/bin/getprime took 1850 msec
+
+  knsh_smp
+  --------
+    This is a configuration of testing the BUILD_KERNEL and SMP configuration.
+
+    $ cd nuttx
+    $ ./tools/configure.sh sabre-6quad:knsh_smp
+    $ make
+    $ make export
+    $ cd ../apps
+    $ ./tools/mkimport.sh -x ../nuttx/nuttx-export-*.zip
+    $ make import
+    $ cd ../nuttx
+    $ qemu-system-arm -semihosting -M sabrelite -m 1024 -smp 4 -nographic -kernel ./nuttx
+
+    NuttShell (NSH) NuttX-10.3.0-RC2
+    nsh> uname -a
+    NuttX 10.3.0-RC2 d9e95a8f9b-dirty May 26 2022 23:39:42 arm sabre-6quad
+    nsh> ps
+      PID GROUP CPU PRI POLICY   TYPE    NPX STATE    EVENT     SIGMASK   STACK   USED  FILLED COMMAND
+        0     0   0   0 FIFO     Kthread N-- Assigned           00000000 002024 000880  43.4%  CPU0 IDLE
+        1     1   1   0 FIFO     Kthread N-- Running            00000000 002024 000664  32.8%  CPU1 IDLE
+        2     2   2   0 FIFO     Kthread N-- Running            00000000 002024 000664  32.8%  CPU2 IDLE
+        3     3   3   0 FIFO     Kthread N-- Running            00000000 002024 000664  32.8%  CPU3 IDLE
+        4     4   0 100 RR       Task    --- Running            00000000 004064 001116  27.4%  /system/bin/init
+    nsh> free
+                       total       used       free    largest  nused  nfree
+            Umem:    1048224       5872    1042352    1036256      9      2
+            Kmem: 1065247648      12800 1065234848 1065234768     45      3
+            Page:  134217728    1101824  133115904  133115904
+    nsh> hello
+    Hello, World!!
+    nsh> getprime 4
+    Set thread priority to 10
+    Set thread policy to SCHED_RR
+    Start thread #0
+    Start thread #1
+    thread #1 started, looking for primes < 10000, doing 10 run(s)
+    Start thread #2
+    thread #2 started, looking for primes < 10000, doing 10 run(s)
+    Start thread #3
+    thread #3 started, looking for primes < 10000, doing 10 run(s)
+    thread #0 started, looking for primes < 10000, doing 10 run(s)
+    thread #1 finished, found 1230 primes, last one was 9973
+    thread #2 finished, found 1230 primes, last one was 9973
+    thread #3 finished, found 1230 primes, last one was 9973
+    thread #0 finished, found 1230 primes, last one was 9973
+    Done
+    getprime took 1570 msec
+    nsh>

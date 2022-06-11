@@ -517,8 +517,10 @@ static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
       return;
     }
 
-  strcpy(new->rpaddr.rp_cpu, rpmsg_get_cpuname(rdev));
-  strcpy(new->rpaddr.rp_name, name + RPMSG_SOCKET_NAME_PREFIX_LEN);
+  strlcpy(new->rpaddr.rp_cpu, rpmsg_get_cpuname(rdev),
+          sizeof(new->rpaddr.rp_cpu));
+  strlcpy(new->rpaddr.rp_name, name + RPMSG_SOCKET_NAME_PREFIX_LEN,
+          sizeof(new->rpaddr.rp_name));
 
   rpmsg_socket_lock(&server->recvlock);
 

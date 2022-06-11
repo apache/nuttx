@@ -103,6 +103,8 @@ void icmp_reply(FAR struct net_driver_s *dev, int type, int code)
   if (net_ipv4addr_hdrcmp(ipv4->destipaddr, &any)
 #  ifdef CONFIG_NET_BROADCAST
       || net_ipv4addr_hdrcmp(ipv4->destipaddr, &bcast)
+      || net_ipv4addr_broadcast(net_ip4addr_conv32(ipv4->destipaddr),
+                                dev->d_netmask)
 #  endif /* CONFIG_NET_BROADCAST */
      )
     {

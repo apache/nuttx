@@ -192,6 +192,10 @@ ifeq ($(CONFIG_SENSORS_SCD30),y)
   CSRCS += scd30.c
 endif
 
+ifeq ($(CONFIG_SENSORS_SCD41),y)
+  CSRCS += scd41.c
+endif
+
 ifeq ($(CONFIG_SENSORS_SGP30),y)
   CSRCS += sgp30.c
 endif

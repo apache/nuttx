@@ -64,7 +64,7 @@
  *
  ****************************************************************************/
 
-int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size)
+int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 {
   uintptr_t top_of_stack;
   size_t size_of_stack;

@@ -79,8 +79,8 @@
 
 int sam_audio_null_initialize(int minor)
 {
-  FAR struct audio_lowerhalf_s *nullaudio;
-  FAR struct audio_lowerhalf_s *pcm;
+  struct audio_lowerhalf_s *nullaudio;
+  struct audio_lowerhalf_s *pcm;
   static bool initialized = false;
   char devname[12];
   int ret;

@@ -87,14 +87,14 @@
 
 /* Low Level LCD access */
 
-static void stm32_select(FAR struct ssd1289_lcd_s *dev);
-static void stm32_deselect(FAR struct ssd1289_lcd_s *dev);
-static void stm32_index(FAR struct ssd1289_lcd_s *dev, uint8_t index);
+static void stm32_select(struct ssd1289_lcd_s *dev);
+static void stm32_deselect(struct ssd1289_lcd_s *dev);
+static void stm32_index(struct ssd1289_lcd_s *dev, uint8_t index);
 #ifndef CONFIG_SSD1289_WRONLY
-static uint16_t stm32_read(FAR struct ssd1289_lcd_s *dev);
+static uint16_t stm32_read(struct ssd1289_lcd_s *dev);
 #endif
-static void stm32_write(FAR struct ssd1289_lcd_s *dev, uint16_t data);
-static void stm32_backlight(FAR struct ssd1289_lcd_s *dev, int power);
+static void stm32_write(struct ssd1289_lcd_s *dev, uint16_t data);
+static void stm32_backlight(struct ssd1289_lcd_s *dev, int power);
 
 static void stm32_extmemgpios(const uint16_t *gpios, int ngpios);
 
@@ -212,7 +212,7 @@ static struct ssd1289_lcd_s g_ssd1289 =
 
 /* The saved instance of the LCD driver */
 
-static FAR struct lcd_dev_s *g_ssd1289drvr;
+static struct lcd_dev_s *g_ssd1289drvr;
 
 /****************************************************************************
  * Private Functions
@@ -226,7 +226,7 @@ static FAR struct lcd_dev_s *g_ssd1289drvr;
  *
  ****************************************************************************/
 
-static void stm32_select(FAR struct ssd1289_lcd_s *dev)
+static void stm32_select(struct ssd1289_lcd_s *dev)
 {
   /* Does not apply to this hardware */
 }
@@ -239,7 +239,7 @@ static void stm32_select(FAR struct ssd1289_lcd_s *dev)
  *
  ****************************************************************************/
 
-static void stm32_deselect(FAR struct ssd1289_lcd_s *dev)
+static void stm32_deselect(struct ssd1289_lcd_s *dev)
 {
   /* Does not apply to this hardware */
 }
@@ -252,7 +252,7 @@ static void stm32_deselect(FAR struct ssd1289_lcd_s *dev)
  *
  ****************************************************************************/
 
-static void stm32_index(FAR struct ssd1289_lcd_s *dev, uint8_t index)
+static void stm32_index(struct ssd1289_lcd_s *dev, uint8_t index)
 {
   putreg16((uint16_t)index, LCD_INDEX);
 }
@@ -266,7 +266,7 @@ static void stm32_index(FAR struct ssd1289_lcd_s *dev, uint8_t index)
  ****************************************************************************/
 
 #ifndef CONFIG_SSD1289_WRONLY
-static uint16_t stm32_read(FAR struct ssd1289_lcd_s *dev)
+static uint16_t stm32_read(struct ssd1289_lcd_s *dev)
 {
   return getreg16(LCD_DATA);
 }
@@ -280,7 +280,7 @@ static uint16_t stm32_read(FAR struct ssd1289_lcd_s *dev)
  *
  ****************************************************************************/
 
-static void stm32_write(FAR struct ssd1289_lcd_s *dev, uint16_t data)
+static void stm32_write(struct ssd1289_lcd_s *dev, uint16_t data)
 {
   putreg16((uint16_t)data, LCD_DATA);
 }
@@ -295,7 +295,7 @@ static void stm32_write(FAR struct ssd1289_lcd_s *dev, uint16_t data)
  *
  ****************************************************************************/
 
-static void stm32_backlight(FAR struct ssd1289_lcd_s *dev, int power)
+static void stm32_backlight(struct ssd1289_lcd_s *dev, int power)
 {
   DEBUGASSERT(power <= CONFIG_LCD_MAXPOWER);
 
@@ -542,7 +542,7 @@ int board_lcd_initialize(void)
  *
  ****************************************************************************/
 
-FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
+struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
   DEBUGASSERT(lcddev == 0);
   return g_ssd1289drvr;

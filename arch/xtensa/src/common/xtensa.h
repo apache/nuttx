@@ -32,6 +32,7 @@
 #  include <stdint.h>
 #  include <sys/types.h>
 #  include <stdbool.h>
+#  include <syscall.h>
 #endif
 
 #include <arch/chip/core-isa.h>
@@ -102,15 +103,20 @@
 #define IDLETHREAD_STACKSIZE  ((CONFIG_IDLETHREAD_STACKSIZE + 15) & ~15)
 #define IDLETHREAD_STACKWORDS (IDLETHREAD_STACKSIZE >> 2)
 
-/* In the XTENSA model, the state is copied from the stack to the TCB, but
- * only a referenced is passed to get the state from the TCB.
- *
- * REVISIT: It would not be too difficult to save only a pointer to the
- * state save area in the TCB and thus avoid the copy.
+/* In the Xtensa model, the state is saved in stack,
+ * only a reference stored in TCB.
  */
 
-#define xtensa_savestate(regs)    xtensa_copystate(regs, (uint32_t*)CURRENT_REGS)
-#define xtensa_restorestate(regs) do { CURRENT_REGS = regs; } while (0)
+#define xtensa_savestate(regs)    ((regs) = (uint32_t *)CURRENT_REGS)
+#define xtensa_restorestate(regs) (CURRENT_REGS = (regs))
+
+/* Context switching via system calls ***************************************/
+
+#define xtensa_context_restore(regs)\
+  sys_call1(SYS_restore_context, (uintptr_t)regs)
+
+#define xtensa_switchcontext(saveregs, restoreregs)\
+  sys_call2(SYS_switch_context, (uintptr_t)saveregs, (uintptr_t)restoreregs)
 
 /* Interrupt codes from other CPUs: */
 
@@ -156,19 +162,6 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-/* g_current_regs[] holds a references to the current interrupt level
- * register storage structure.  If is non-NULL only during interrupt
- * processing.  Access to g_current_regs[] must be through the macro
- * CURRENT_REGS for portability.
- */
-
-/* For the case of architectures with multiple CPUs, then there must be one
- * such value for each processor that can receive an interrupt.
- */
-
-extern volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
-#define CURRENT_REGS (g_current_regs[up_cpu_index()])
-
 #if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
 /* The (optional) interrupt stack */
 
@@ -227,10 +220,6 @@ void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits);
 void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits);
 void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
 
-/* Context switching */
-
-void xtensa_copystate(uint32_t *dest, uint32_t *src);
-
 /* Serial output */
 
 void up_lowputs(const char *str);
@@ -248,9 +237,8 @@ void xtensa_dumpstate(void);
 /* Initialization */
 
 #if XCHAL_CP_NUM > 0
-struct xtensa_cpstate_s;
-void xtensa_coproc_enable(struct xtensa_cpstate_s *cpstate, int cpset);
-void xtensa_coproc_disable(struct xtensa_cpstate_s *cpstate, int cpset);
+void xtensa_coproc_enable(int cpset);
+void xtensa_coproc_disable(int cpset);
 #endif
 
 /* Window Spill */
@@ -279,21 +267,15 @@ int xtensa_intercpu_interrupt(int tocpu, int intcode);
 void xtensa_pause_handler(void);
 #endif
 
-/* Synchronous context switching */
-
-int xtensa_context_save(uint32_t *regs);
-void xtensa_context_restore(uint32_t *regs) noreturn_function;
-void xtensa_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
-
-#if XCHAL_CP_NUM > 0
-void xtensa_coproc_savestate(struct xtensa_cpstate_s *cpstate);
-void xtensa_coproc_restorestate(struct xtensa_cpstate_s *cpstate);
-#endif
-
 /* Signals */
 
-void _xtensa_sig_trampoline(void);
 void xtensa_sig_deliver(void);
+
+#ifdef CONFIG_LIB_SYSCALL
+void xtensa_dispatch_syscall(unsigned int nbr, uintptr_t parm1,
+                             uintptr_t parm2, uintptr_t parm3,
+                             uintptr_t parm4, uintptr_t parm5);
+#endif
 
 /* Chip-specific functions **************************************************/
 

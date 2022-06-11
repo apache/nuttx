@@ -189,7 +189,7 @@ static void lc823450_dumpnvic(const char *msg, int irq)
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG
-static int lc823450_nmi(int irq, FAR void *context, FAR void *arg)
+static int lc823450_nmi(int irq, void *context, void *arg)
 {
   enter_critical_section();
   irqinfo("PANIC!!! NMI received\n");
@@ -197,7 +197,7 @@ static int lc823450_nmi(int irq, FAR void *context, FAR void *arg)
   return 0;
 }
 
-static int lc823450_busfault(int irq, FAR void *context, FAR void *arg)
+static int lc823450_busfault(int irq, void *context, void *arg)
 {
   enter_critical_section();
   irqinfo("PANIC!!! Bus fault received: %08x\n", getreg32(NVIC_CFAULTS));
@@ -205,7 +205,7 @@ static int lc823450_busfault(int irq, FAR void *context, FAR void *arg)
   return 0;
 }
 
-static int lc823450_usagefault(int irq, FAR void *context, FAR void *arg)
+static int lc823450_usagefault(int irq, void *context, void *arg)
 {
   enter_critical_section();
   irqinfo("PANIC!!! Usage fault received: %08x\n", getreg32(NVIC_CFAULTS));
@@ -213,7 +213,7 @@ static int lc823450_usagefault(int irq, FAR void *context, FAR void *arg)
   return 0;
 }
 
-static int lc823450_pendsv(int irq, FAR void *context, FAR void *arg)
+static int lc823450_pendsv(int irq, void *context, void *arg)
 {
   enter_critical_section();
   irqinfo("PANIC!!! PendSV received\n");
@@ -221,7 +221,7 @@ static int lc823450_pendsv(int irq, FAR void *context, FAR void *arg)
   return 0;
 }
 
-static int lc823450_dbgmonitor(int irq, FAR void *context, FAR void *arg)
+static int lc823450_dbgmonitor(int irq, void *context, void *arg)
 {
   enter_critical_section();
   irqinfo("PANIC!!! Debug Monitor received\n");
@@ -229,7 +229,7 @@ static int lc823450_dbgmonitor(int irq, FAR void *context, FAR void *arg)
   return 0;
 }
 
-static int lc823450_reserved(int irq, FAR void *context, FAR void *arg)
+static int lc823450_reserved(int irq, void *context, void *arg)
 {
   enter_critical_section();
   irqinfo("PANIC!!! Reserved interrupt\n");
@@ -296,7 +296,7 @@ static void lc823450_extint_clr(int irq)
  *
  ****************************************************************************/
 
-static int lc823450_extint_isr(int irq, FAR void *context, FAR void *arg)
+static int lc823450_extint_isr(int irq, void *context, void *arg)
 {
   uint32_t regaddr;
   uint32_t pending;

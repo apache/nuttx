@@ -92,7 +92,7 @@
  *
  ****************************************************************************/
 
-static int dm320_timerisr(int irq, uint32_t *regs, FAR void *arg)
+static int dm320_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Process timer interrupt */
 

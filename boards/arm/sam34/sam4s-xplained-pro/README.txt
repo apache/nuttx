@@ -339,7 +339,7 @@ Configurations
        CONFIG_HOST_CYGWIN=y    : Using Cygwin or other POSIX environment
 
      System Type -> Toolchain:
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : General GCC EABI toolchain under windows
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y  : General GCC EABI toolchain under windows
 
      This re-configuration should be done before making NuttX or else the
      subsequent 'make' will fail.  If you have already attempted building

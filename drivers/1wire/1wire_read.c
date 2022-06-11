@@ -69,7 +69,7 @@ int onewire_read(FAR struct onewire_master_s *master,
       return -EAGAIN;
     }
 
-  ret = onewire_sem_wait(master);
+  ret = nxrmutex_lock(&master->devlock);
   if (ret < 0)
     {
       return ret;
@@ -86,6 +86,6 @@ int onewire_read(FAR struct onewire_master_s *master,
   ret = ONEWIRE_READ(master->dev, buffer, buflen);
 
 err_unlock:
-  onewire_sem_post(master);
+  nxrmutex_unlock(&master->devlock);
   return ret;
 }

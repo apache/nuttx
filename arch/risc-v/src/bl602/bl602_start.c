@@ -160,6 +160,10 @@ __cyg_profile_func_exit(void *this_fn, void *call_site)
 
 void bfl_main(void)
 {
+  /* Configure FPU */
+
+  riscv_fpuconfig();
+
   /* set interrupt vector */
 
   asm volatile("csrw mtvec, %0" ::"r"((uintptr_t)exception_common + 2));

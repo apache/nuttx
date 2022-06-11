@@ -59,7 +59,6 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
@@ -105,12 +104,6 @@
 
 #define NET_TUN_PKTSIZE ((CONFIG_NET_TUN_PKTSIZE + CONFIG_NET_GUARDSIZE + 1) & ~1)
 
-/* TX poll delay = 1 seconds.
- * CLK_TCK is the number of clock ticks per second
- */
-
-#define TUN_WDDELAY  (1 * CLK_TCK)
-
 /* This is a helper pointer for accessing the contents of the Ethernet
  * header.
  */
@@ -137,7 +130,6 @@ struct tun_device_s
   bool              bifup;     /* true:ifup false:ifdown */
   bool              read_wait;
   bool              write_wait;
-  struct wdog_s     txpoll;    /* TX poll timer */
   struct work_s     work;      /* For deferring poll work to the work queue */
   FAR struct pollfd *poll_fds;
   sem_t             waitsem;
@@ -190,11 +182,6 @@ static void tun_net_receive_tun(FAR struct tun_device_s *priv);
 
 static void tun_txdone(FAR struct tun_device_s *priv);
 
-/* Watchdog timer expirations */
-
-static void tun_poll_work(FAR void *arg);
-static void tun_poll_expiry(wdparm_t arg);
-
 /* NuttX callback functions */
 
 static int tun_ifup(FAR struct net_driver_s *dev);
@@ -212,7 +199,6 @@ static void tun_dev_uninit(FAR struct tun_device_s *priv);
 
 /* File interface */
 
-static int tun_open(FAR struct file *filep);
 static int tun_close(FAR struct file *filep);
 static ssize_t tun_read(FAR struct file *filep, FAR char *buffer,
                         size_t buflen);
@@ -231,7 +217,7 @@ static struct tun_device_s g_tun_devices[CONFIG_TUN_NINTERFACES];
 
 static const struct file_operations g_tun_file_ops =
 {
-  tun_open,     /* open */
+  NULL,         /* open */
   tun_close,    /* close */
   tun_read,     /* read */
   tun_write,    /* write */
@@ -761,89 +747,6 @@ static void tun_txdone(FAR struct tun_device_s *priv)
 }
 
 /****************************************************************************
- * Name: tun_poll_work
- *
- * Description:
- *   Perform periodic polling from the worker thread
- *
- * Input Parameters:
- *   arg - The argument passed when work_queue() as called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   Ethernet interrupts are disabled
- *
- ****************************************************************************/
-
-static void tun_poll_work(FAR void *arg)
-{
-  FAR struct tun_device_s *priv = (FAR struct tun_device_s *)arg;
-  int ret;
-
-  /* Perform the poll */
-
-  ret = tun_lock(priv);
-  if (ret < 0)
-    {
-      /* This would indicate that the worker thread was canceled.. not a
-       * likely event.
-       */
-
-      DEBUGASSERT(ret == -ECANCELED);
-      return;
-    }
-
-  net_lock();
-
-  /* Check if there is room in the send another TX packet.  We cannot perform
-   * the TX poll if he are unable to accept another packet for transmission.
-   */
-
-  if (priv->read_d_len == 0)
-    {
-      /* If so, poll the network for new XMIT data. */
-
-      priv->dev.d_buf = priv->read_buf;
-      devif_timer(&priv->dev, TUN_WDDELAY, tun_txpoll);
-    }
-
-  /* Setup the watchdog poll timer again */
-
-  wd_start(&priv->txpoll, TUN_WDDELAY, tun_poll_expiry, (wdparm_t)priv);
-
-  net_unlock();
-  tun_unlock(priv);
-}
-
-/****************************************************************************
- * Name: tun_poll_expiry
- *
- * Description:
- *   Periodic timer handler.  Called from the timer interrupt handler.
- *
- * Input Parameters:
- *   arg  - The argument
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
- *
- ****************************************************************************/
-
-static void tun_poll_expiry(wdparm_t arg)
-{
-  FAR struct tun_device_s *priv = (FAR struct tun_device_s *)arg;
-
-  /* Schedule to perform the timer expiration on the worker thread. */
-
-  work_queue(TUNWORK, &priv->work, tun_poll_work, priv, 0);
-}
-
-/****************************************************************************
  * Name: tun_ifup
  *
  * Description:
@@ -878,10 +781,6 @@ static int tun_ifup(FAR struct net_driver_s *dev)
         dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
 #endif
 
-  /* Set and activate a timer process */
-
-  wd_start(&priv->txpoll, TUN_WDDELAY, tun_poll_expiry, (wdparm_t)priv);
-
   priv->bifup = true;
   netdev_carrier_on(dev);
   return OK;
@@ -911,10 +810,6 @@ static int tun_ifdown(FAR struct net_driver_s *dev)
   netdev_carrier_off(dev);
 
   flags = enter_critical_section();
-
-  /* Cancel the TX poll timer */
-
-  wd_cancel(&priv->txpoll);
 
   /* Mark the device "down" */
 
@@ -970,7 +865,7 @@ static void tun_txavail_work(FAR void *arg)
       /* Poll the network for new XMIT data */
 
       priv->dev.d_buf = priv->read_buf;
-      devif_timer(&priv->dev, 0, tun_txpoll);
+      devif_poll(&priv->dev, tun_txpoll);
     }
 
   net_unlock();
@@ -1149,16 +1044,6 @@ static void tun_dev_uninit(FAR struct tun_device_s *priv)
   nxsem_destroy(&priv->waitsem);
   nxsem_destroy(&priv->read_wait_sem);
   nxsem_destroy(&priv->write_wait_sem);
-}
-
-/****************************************************************************
- * Name: tun_open
- ****************************************************************************/
-
-static int tun_open(FAR struct file *filep)
-{
-  filep->f_priv = 0;
-  return OK;
 }
 
 /****************************************************************************

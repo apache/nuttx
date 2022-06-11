@@ -1072,9 +1072,27 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
           if (dev && dev->d_ioctl)
             {
               struct can_ioctl_data_s *can_bitrate_data =
-                            &req->ifr_ifru.ifru_can_data;
+                &req->ifr_ifru.ifru_can_data;
               ret = dev->d_ioctl(dev, cmd,
                             (unsigned long)(uintptr_t)can_bitrate_data);
+            }
+        }
+        break;
+#endif
+
+#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NETDEV_CAN_FILTER_IOCTL)
+      case SIOCACANEXTFILTER:  /* Add an extended-ID filter */
+      case SIOCDCANEXTFILTER:  /* Delete an extended-ID filter */
+      case SIOCACANSTDFILTER:  /* Add a standard-ID filter */
+      case SIOCDCANSTDFILTER:  /* Delete a standard-ID filter */
+        {
+          dev = netdev_ifr_dev(req);
+          if (dev && dev->d_ioctl)
+            {
+              struct can_ioctl_filter_s *can_filter =
+                &req->ifr_ifru.ifru_can_filter;
+              ret = dev->d_ioctl(dev, cmd,
+                            (unsigned long)(uintptr_t)can_filter);
             }
         }
         break;
@@ -1086,7 +1104,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
           dev = netdev_findbyindex(req->ifr_ifindex);
           if (dev != NULL)
             {
-              strncpy(req->ifr_name, dev->d_ifname, IFNAMSIZ);
+              strlcpy(req->ifr_name, dev->d_ifname, IFNAMSIZ);
               ret = OK;
             }
           else
@@ -1522,7 +1540,7 @@ static int netdev_file_ioctl(FAR struct socket *psock, int cmd,
                    conn->s_flags &= ~_SF_NONBLOCK;
                  }
 
-               ret = OK;
+               ret = -ENOTTY; /* let file_vioctl update f_oflags */
             }
           else
             {

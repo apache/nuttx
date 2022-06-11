@@ -170,7 +170,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
                * thread at the head of the ready-to-run list.
                */
 
-              (void)group_addrenv(rtcb);
+              group_addrenv(rtcb);
 #endif
               /* Update scheduler parameters */
 

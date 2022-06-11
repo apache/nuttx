@@ -22,6 +22,7 @@
 
 CSRCS += lib_mknod.c lib_umask.c lib_utsname.c lib_getrandom.c
 CSRCS += lib_xorshift128.c lib_tea_encrypt.c lib_tea_decrypt.c
+CSRCS += lib_cxx_initialize.c lib_impure.c
 
 # Support for platforms that do not have long long types
 
@@ -36,7 +37,7 @@ endif
 
 CSRCS += lib_dumpbuffer.c lib_dumpvbuffer.c lib_fnmatch.c lib_debug.c
 CSRCS += lib_crc64.c lib_crc32.c lib_crc16.c lib_crc8.c lib_crc8ccitt.c
-CSRCS += lib_crc8table.c lib_glob.c lib_execinfo.c
+CSRCS += lib_crc8table.c lib_glob.c lib_execinfo.c lib_ftok.c
 
 # Keyboard driver encoder/decoder
 

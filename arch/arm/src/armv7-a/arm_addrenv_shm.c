@@ -63,12 +63,12 @@
  *
  ****************************************************************************/
 
-int up_shmat(FAR uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
+int up_shmat(uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
 {
-  FAR struct tcb_s *tcb = nxsched_self();
-  FAR struct task_group_s *group;
-  FAR uintptr_t *l1entry;
-  FAR uint32_t *l2table;
+  struct tcb_s *tcb = nxsched_self();
+  struct task_group_s *group;
+  uintptr_t *l1entry;
+  uint32_t *l2table;
   irqstate_t flags;
   uintptr_t paddr;
 #ifndef CONFIG_ARCH_PGPOOL_MAPPING
@@ -118,21 +118,21 @@ int up_shmat(FAR uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
            */
 
           flags = enter_critical_section();
-          group->tg_addrenv.shm[shmndx] = (FAR uintptr_t *)paddr;
+          group->tg_addrenv.shm[shmndx] = (uintptr_t *)paddr;
 
 #ifdef CONFIG_ARCH_PGPOOL_MAPPING
           /* Get the virtual address corresponding to the physical page
            * address.
            */
 
-          l2table = (FAR uint32_t *)arm_pgvaddr(paddr);
+          l2table = (uint32_t *)arm_pgvaddr(paddr);
 #else
           /* Temporarily map the page into the virtual address space */
 
           l1save = mmu_l1_getentry(ARCH_SCRATCH_VBASE);
           mmu_l1_setentry(paddr & ~SECTION_MASK, ARCH_SCRATCH_VBASE,
                           MMU_MEMFLAGS);
-          l2table = (FAR uint32_t *)
+          l2table = (uint32_t *)
             (ARCH_SCRATCH_VBASE | (paddr & SECTION_MASK));
 #endif
 
@@ -154,14 +154,14 @@ int up_shmat(FAR uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
            * address.
            */
 
-          l2table = (FAR uint32_t *)arm_pgvaddr(paddr);
+          l2table = (uint32_t *)arm_pgvaddr(paddr);
 #else
           /* Temporarily map the page into the virtual address space */
 
           l1save = mmu_l1_getentry(ARCH_SCRATCH_VBASE);
           mmu_l1_setentry(paddr & ~SECTION_MASK, ARCH_SCRATCH_VBASE,
                           MMU_MEMFLAGS);
-          l2table = (FAR uint32_t *)
+          l2table = (uint32_t *)
             (ARCH_SCRATCH_VBASE | (paddr & SECTION_MASK));
 #endif
         }
@@ -216,10 +216,10 @@ int up_shmat(FAR uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
 
 int up_shmdt(uintptr_t vaddr, unsigned int npages)
 {
-  FAR struct tcb_s *tcb = nxsched_self();
-  FAR struct task_group_s *group;
-  FAR uintptr_t *l1entry;
-  FAR uint32_t *l2table;
+  struct tcb_s *tcb = nxsched_self();
+  struct task_group_s *group;
+  uintptr_t *l1entry;
+  uint32_t *l2table;
   irqstate_t flags;
   uintptr_t paddr;
 #ifndef CONFIG_ARCH_PGPOOL_MAPPING
@@ -265,14 +265,14 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages)
        * address.
        */
 
-      l2table = (FAR uint32_t *)arm_pgvaddr(paddr);
+      l2table = (uint32_t *)arm_pgvaddr(paddr);
 #else
       /* Temporarily map the page into the virtual address space */
 
       l1save = mmu_l1_getentry(ARCH_SCRATCH_VBASE);
       mmu_l1_setentry(paddr & ~SECTION_MASK, ARCH_SCRATCH_VBASE,
                       MMU_MEMFLAGS);
-      l2table = (FAR uint32_t *)
+      l2table = (uint32_t *)
         (ARCH_SCRATCH_VBASE | (paddr & SECTION_MASK));
 #endif
 

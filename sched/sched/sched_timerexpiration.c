@@ -373,7 +373,9 @@ static inline unsigned int nxsched_process_wdtimer(uint32_t ticks,
 static unsigned int nxsched_timer_process(unsigned int ticks,
                                           bool noswitches)
 {
+#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
   unsigned int cmptime = UINT_MAX;
+#endif
   unsigned int rettime = 0;
   unsigned int tmp;
 
@@ -383,12 +385,27 @@ static unsigned int nxsched_timer_process(unsigned int ticks,
   clock_update_wall_time();
 #endif
 
+#if defined(CONFIG_SCHED_CPULOAD) && !defined(CONFIG_SCHED_CPULOAD_EXTCLK)
+  /* Perform CPU load measurements (before any timer-initiated context
+   * switches can occur)
+   */
+
+#ifdef CONFIG_HAVE_WEAKFUNCTIONS
+  if (nxsched_process_cpuload_ticks != NULL)
+#endif
+    {
+      nxsched_process_cpuload_ticks(ticks);
+    }
+#endif
+
   /* Process watchdogs */
 
   tmp = nxsched_process_wdtimer(ticks, noswitches);
   if (tmp > 0)
     {
+#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
       cmptime = tmp;
+#endif
       rettime = tmp;
     }
 
@@ -397,10 +414,13 @@ static unsigned int nxsched_timer_process(unsigned int ticks,
    */
 
   tmp = nxsched_process_scheduler(ticks, noswitches);
+
+#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
   if (tmp > 0 && tmp < cmptime)
     {
       rettime = tmp;
     }
+#endif
 
   return rettime;
 }

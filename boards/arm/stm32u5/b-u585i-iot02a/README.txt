@@ -5,10 +5,6 @@ B-U585I-IOT02A README
   B-U585I-IOT02A board.  That board features the STM32U585AII6QU MCU with 2MiB
   of Flash and 768KiB of SRAM.
 
-  This port is a proof-of-concept to demonstrate running NuttX in the Non-
-  Secure TrustZone domain as a companion to TrustedFirmware-M (TFM).  Running
-  NuttX on the B-U585I-IOT02A without TFM is currently not supported.
-
 Contents
 ========
 
@@ -22,6 +18,9 @@ Status
     NuttX binary image to get a tfm_ns_init.bin, the board now boots and the
     basic NSH configuration works with Apache NuttX as the OS running in the
     non-secure world.
+
+  2022-04-03: The dependency on TrustedFirmware-M was dropped.  I.e. the
+    b-u585i-iot02a:nsh configuration now runs standalone.
 
 Clock Source
 ============
@@ -131,7 +130,7 @@ Configurations
        CONFIG_HOST_LINUX=y                 : Linux environment
 
      System Type -> Toolchain:
-       CONFIG_ARMV8M_TOOLCHAIN_GNU_EABIL=y : GNU ARM EABI toolchain
+       CONFIG_ARMV8M_TOOLCHAIN_GNU_EABI=y : GNU ARM EABI toolchain
 
   Configuration sub-directories
   -----------------------------

@@ -149,7 +149,7 @@ static const uint16_t g_ledpincfg[PIC32MX_PIC32MX7MMB_NLEDS] =
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-static void pic32mx_setleds(FAR const struct led_setting_s *setting)
+static void pic32mx_setleds(const struct led_setting_s *setting)
 {
   /* LEDs are pulled up so writing a low value (false) illuminates them */
 

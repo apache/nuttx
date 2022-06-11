@@ -119,11 +119,11 @@
 
 struct rpr0521rs_dev_s
 {
-  FAR struct i2c_master_s *i2c; /* I2C interface */
-  uint8_t addr;                 /* I2C address */
-  int port;                     /* I2C port */
-  struct seq_s *seq;            /* Sequencer instance */
-  int minor;                    /* Minor device number */
+  struct i2c_master_s *i2c; /* I2C interface */
+  uint8_t addr;             /* I2C address */
+  int port;                 /* I2C port */
+  struct seq_s *seq;        /* Sequencer instance */
+  int minor;                /* Minor device number */
 };
 
 /****************************************************************************
@@ -132,23 +132,23 @@ struct rpr0521rs_dev_s
 
 /* Character driver methods */
 
-static int rpr0521rs_open_als(FAR struct file *filep);
-static int rpr0521rs_open_ps(FAR struct file *filep);
-static int rpr0521rs_close_als(FAR struct file *filep);
-static int rpr0521rs_close_ps(FAR struct file *filep);
-static ssize_t rpr0521rs_read_als(FAR struct file *filep,
-                                  FAR char *buffer,
+static int rpr0521rs_open_als(struct file *filep);
+static int rpr0521rs_open_ps(struct file *filep);
+static int rpr0521rs_close_als(struct file *filep);
+static int rpr0521rs_close_ps(struct file *filep);
+static ssize_t rpr0521rs_read_als(struct file *filep,
+                                  char *buffer,
                                   size_t buflen);
-static ssize_t rpr0521rs_read_ps(FAR struct file *filep,
-                                 FAR char *buffer,
+static ssize_t rpr0521rs_read_ps(struct file *filep,
+                                 char *buffer,
                                  size_t buflen);
-static ssize_t rpr0521rs_write(FAR struct file *filep,
-                               FAR const char *buffer,
+static ssize_t rpr0521rs_write(struct file *filep,
+                               const char *buffer,
                                size_t buflen);
-static int rpr0521rs_ioctl_als(FAR struct file *filep,
+static int rpr0521rs_ioctl_als(struct file *filep,
                                int cmd,
                                unsigned long arg);
-static int rpr0521rs_ioctl_ps(FAR struct file *filep,
+static int rpr0521rs_ioctl_ps(struct file *filep,
                               int cmd,
                               unsigned long arg);
 
@@ -237,7 +237,7 @@ static uint8_t g_ps_persistence = RPR0521RS_PS_CONTROL_PS_PERSISTENCE_2;
  *
  ****************************************************************************/
 
-static uint8_t rpr0521rs_getreg8(FAR struct rpr0521rs_dev_s *priv,
+static uint8_t rpr0521rs_getreg8(struct rpr0521rs_dev_s *priv,
                                  uint8_t regaddr)
 {
   uint8_t regval = 0;
@@ -261,7 +261,7 @@ static uint8_t rpr0521rs_getreg8(FAR struct rpr0521rs_dev_s *priv,
  *
  ****************************************************************************/
 
-static void rpr0521rs_putreg8(FAR struct rpr0521rs_dev_s *priv,
+static void rpr0521rs_putreg8(struct rpr0521rs_dev_s *priv,
                               uint8_t regaddr, uint8_t regval)
 {
   uint16_t inst[2];
@@ -283,7 +283,7 @@ static void rpr0521rs_putreg8(FAR struct rpr0521rs_dev_s *priv,
  *
  ****************************************************************************/
 
-static uint16_t rpr0521rs_getreg16(FAR struct rpr0521rs_dev_s *priv,
+static uint16_t rpr0521rs_getreg16(struct rpr0521rs_dev_s *priv,
                                    uint8_t regaddr)
 {
   uint16_t regval;
@@ -298,7 +298,7 @@ static uint16_t rpr0521rs_getreg16(FAR struct rpr0521rs_dev_s *priv,
                   priv->addr,
                   inst,
                   2,
-                 (FAR uint8_t *)&regval,
+                 (uint8_t *)&regval,
                   2);
 
   return regval;
@@ -312,7 +312,7 @@ static uint16_t rpr0521rs_getreg16(FAR struct rpr0521rs_dev_s *priv,
  *
  ****************************************************************************/
 
-static void rpr0521rs_putreg16(FAR struct rpr0521rs_dev_s *priv,
+static void rpr0521rs_putreg16(struct rpr0521rs_dev_s *priv,
                                uint8_t regaddr, uint16_t regval)
 {
   uint16_t inst[3];
@@ -335,7 +335,7 @@ static void rpr0521rs_putreg16(FAR struct rpr0521rs_dev_s *priv,
  *
  ****************************************************************************/
 
-static int rpr0521rs_checkid(FAR struct rpr0521rs_dev_s *priv)
+static int rpr0521rs_checkid(struct rpr0521rs_dev_s *priv)
 {
   uint8_t id;
 
@@ -374,7 +374,7 @@ static int rpr0521rs_checkid(FAR struct rpr0521rs_dev_s *priv)
  *
  ****************************************************************************/
 
-static void rpr0521rs_setmodecontrol(FAR struct rpr0521rs_dev_s *priv,
+static void rpr0521rs_setmodecontrol(struct rpr0521rs_dev_s *priv,
                                      uint8_t type, bool enable)
 {
   uint8_t val;
@@ -435,7 +435,7 @@ static void rpr0521rs_setmodecontrol(FAR struct rpr0521rs_dev_s *priv,
  *
  ****************************************************************************/
 
-static int rpr0521rsals_seqinit(FAR struct rpr0521rs_dev_s *priv)
+static int rpr0521rsals_seqinit(struct rpr0521rs_dev_s *priv)
 {
   DEBUGASSERT(g_als_seq == NULL);
 
@@ -474,7 +474,7 @@ static int rpr0521rsals_seqinit(FAR struct rpr0521rs_dev_s *priv)
  *
  ****************************************************************************/
 
-static int rpr0521rsps_seqinit(FAR struct rpr0521rs_dev_s *priv)
+static int rpr0521rsps_seqinit(struct rpr0521rs_dev_s *priv)
 {
   DEBUGASSERT(g_ps_seq == NULL);
 
@@ -513,10 +513,10 @@ static int rpr0521rsps_seqinit(FAR struct rpr0521rs_dev_s *priv)
  *
  ****************************************************************************/
 
-static int rpr0521rs_open_als(FAR struct file *filep)
+static int rpr0521rs_open_als(struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct rpr0521rs_dev_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct rpr0521rs_dev_s *priv = inode->i_private;
 
   if (g_als_refcnt == 0)
     {
@@ -550,11 +550,11 @@ static int rpr0521rs_open_als(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static int rpr0521rs_open_ps(FAR struct file *filep)
+static int rpr0521rs_open_ps(struct file *filep)
 {
 #ifndef CONFIG_RPR0521RS_PROXIMITY_INTERRUPT
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct rpr0521rs_dev_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct rpr0521rs_dev_s *priv = inode->i_private;
 
   if (g_ps_refcnt == 0)
     {
@@ -589,10 +589,10 @@ static int rpr0521rs_open_ps(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static int rpr0521rs_close_als(FAR struct file *filep)
+static int rpr0521rs_close_als(struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct rpr0521rs_dev_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct rpr0521rs_dev_s *priv = inode->i_private;
 
   g_als_refcnt--;
 
@@ -621,11 +621,11 @@ static int rpr0521rs_close_als(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static int rpr0521rs_close_ps(FAR struct file *filep)
+static int rpr0521rs_close_ps(struct file *filep)
 {
 #ifndef CONFIG_RPR0521RS_PROXIMITY_INTERRUPT
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct rpr0521rs_dev_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct rpr0521rs_dev_s *priv = inode->i_private;
 
   g_ps_refcnt--;
 
@@ -654,11 +654,11 @@ static int rpr0521rs_close_ps(FAR struct file *filep)
  * Name: rpr0521rs_read_als
  ****************************************************************************/
 
-static ssize_t rpr0521rs_read_als(FAR struct file *filep, FAR char *buffer,
+static ssize_t rpr0521rs_read_als(struct file *filep, char *buffer,
                                   size_t len)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct rpr0521rs_dev_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct rpr0521rs_dev_s *priv = inode->i_private;
 
   len = len / RPR0521RS_ALS_BYTESPERSAMPLE * RPR0521RS_ALS_BYTESPERSAMPLE;
   len = seq_read(priv->seq, priv->minor, buffer, len);
@@ -670,11 +670,11 @@ static ssize_t rpr0521rs_read_als(FAR struct file *filep, FAR char *buffer,
  * Name: rpr0521rs_read_ps
  ****************************************************************************/
 
-static ssize_t rpr0521rs_read_ps(FAR struct file *filep, FAR char *buffer,
+static ssize_t rpr0521rs_read_ps(struct file *filep, char *buffer,
                                  size_t len)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct rpr0521rs_dev_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct rpr0521rs_dev_s *priv = inode->i_private;
 
   len = len / RPR0521RS_PS_BYTESPERSAMPLE * RPR0521RS_PS_BYTESPERSAMPLE;
 
@@ -682,7 +682,7 @@ static ssize_t rpr0521rs_read_ps(FAR struct file *filep, FAR char *buffer,
   if (len)
     {
       len = RPR0521RS_PS_BYTESPERSAMPLE;
-      *(FAR uint16_t *)buffer = rpr0521rs_getreg16(priv,
+      *(uint16_t *)buffer = rpr0521rs_getreg16(priv,
                                                    RPR0521RS_PS_DATA_LSB);
     }
 #else
@@ -696,8 +696,8 @@ static ssize_t rpr0521rs_read_ps(FAR struct file *filep, FAR char *buffer,
  * Name: rpr0521rs_write
  ****************************************************************************/
 
-static ssize_t rpr0521rs_write(FAR struct file *filep,
-                               FAR const char *buffer,
+static ssize_t rpr0521rs_write(struct file *filep,
+                               const char *buffer,
                                size_t buflen)
 {
   return -ENOSYS;
@@ -707,12 +707,12 @@ static ssize_t rpr0521rs_write(FAR struct file *filep,
  * Name: rpr0521rs_ioctl_als
  ****************************************************************************/
 
-static int rpr0521rs_ioctl_als(FAR struct file *filep,
+static int rpr0521rs_ioctl_als(struct file *filep,
                                int cmd,
                                unsigned long arg)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct rpr0521rs_dev_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct rpr0521rs_dev_s *priv = inode->i_private;
   int ret = OK;
 
   switch (cmd)
@@ -741,12 +741,12 @@ static int rpr0521rs_ioctl_als(FAR struct file *filep,
  * Name: rpr0521rs_ioctl_ps
  ****************************************************************************/
 
-static int rpr0521rs_ioctl_ps(FAR struct file *filep,
+static int rpr0521rs_ioctl_ps(struct file *filep,
                               int cmd,
                               unsigned long arg)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct rpr0521rs_dev_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct rpr0521rs_dev_s *priv = inode->i_private;
   int ret = OK;
 #ifdef CONFIG_RPR0521RS_PROXIMITY_INTERRUPT
   uint8_t val;
@@ -802,9 +802,9 @@ static int rpr0521rs_ioctl_ps(FAR struct file *filep,
 
       case SNIOC_GETINTSTATUS:
         {
-          FAR uint8_t intstatus = rpr0521rs_getreg8(priv,
-                                                    RPR0521RS_INTERRUPT);
-          *(FAR uint8_t *)(uintptr_t)arg = intstatus;
+          uint8_t intstatus = rpr0521rs_getreg8(priv,
+                                                RPR0521RS_INTERRUPT);
+          *(uint8_t *)(uintptr_t)arg = intstatus;
           sninfo("Get proximity IntStatus 0x%02x\n", intstatus);
         }
         break;
@@ -854,10 +854,10 @@ static int rpr0521rs_ioctl_ps(FAR struct file *filep,
  *
  ****************************************************************************/
 
-int rpr0521rs_init(FAR struct i2c_master_s *i2c, int port)
+int rpr0521rs_init(struct i2c_master_s *i2c, int port)
 {
-  FAR struct rpr0521rs_dev_s tmp;
-  FAR struct rpr0521rs_dev_s *priv = &tmp;
+  struct rpr0521rs_dev_s tmp;
+  struct rpr0521rs_dev_s *priv = &tmp;
   int ret;
   uint8_t val;
 
@@ -913,16 +913,16 @@ int rpr0521rs_init(FAR struct i2c_master_s *i2c, int port)
  *
  ****************************************************************************/
 
-int rpr0521rsals_register(FAR const char *devpath, int minor,
-                          FAR struct i2c_master_s *i2c, int port)
+int rpr0521rsals_register(const char *devpath, int minor,
+                          struct i2c_master_s *i2c, int port)
 {
-  FAR struct rpr0521rs_dev_s *priv;
+  struct rpr0521rs_dev_s *priv;
   char path[16];
   int ret;
 
   /* Initialize the RPR0521RS device structure */
 
-  priv = (FAR struct rpr0521rs_dev_s *)
+  priv = (struct rpr0521rs_dev_s *)
     kmm_malloc(sizeof(struct rpr0521rs_dev_s));
   if (!priv)
     {
@@ -967,16 +967,16 @@ int rpr0521rsals_register(FAR const char *devpath, int minor,
  *
  ****************************************************************************/
 
-int rpr0521rsps_register(FAR const char *devpath, int minor,
-                         FAR struct i2c_master_s *i2c, int port)
+int rpr0521rsps_register(const char *devpath, int minor,
+                         struct i2c_master_s *i2c, int port)
 {
-  FAR struct rpr0521rs_dev_s *priv;
+  struct rpr0521rs_dev_s *priv;
   char path[16];
   int ret;
 
   /* Initialize the RPR0521RS device structure */
 
-  priv = (FAR struct rpr0521rs_dev_s *)
+  priv = (struct rpr0521rs_dev_s *)
     kmm_malloc(sizeof(struct rpr0521rs_dev_s));
   if (!priv)
     {

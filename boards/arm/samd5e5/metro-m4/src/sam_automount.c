@@ -44,7 +44,7 @@
  ****************************************************************************/
 
 #ifndef NULL
-#  define NULL (FAR void *)0
+#  define NULL (void *)0
 #endif
 
 #ifndef OK
@@ -59,10 +59,10 @@
 
 struct sam_automount_state_s
 {
-  volatile automount_handler_t handler;    /* Upper half handler */
-  FAR void *arg;                           /* Handler argument */
-  bool enable;                             /* Fake interrupt enable */
-  bool pending;                            /* Set if there an event while disabled */
+  volatile automount_handler_t handler; /* Upper half handler */
+  void *arg;                            /* Handler argument */
+  bool enable;                          /* Fake interrupt enable */
+  bool pending;                         /* Set if there an event while disabled */
   bool inserted;
 };
 
@@ -74,19 +74,19 @@ struct sam_automount_config_s
    * struct automount_lower_s to struct sam_automount_config_s
    */
 
-  struct automount_lower_s lower;          /* Publicly visible part */
-  FAR struct sam_automount_state_s *state; /* Changeable state */
+  struct automount_lower_s lower;      /* Publicly visible part */
+  struct sam_automount_state_s *state; /* Changeable state */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  sam_attach(FAR const struct automount_lower_s *lower,
-                       automount_handler_t isr, FAR void *arg);
-static void sam_enable(FAR const struct automount_lower_s *lower,
+static int  sam_attach(const struct automount_lower_s *lower,
+                       automount_handler_t isr, void *arg);
+static void sam_enable(const struct automount_lower_s *lower,
                        bool enable);
-static bool sam_inserted(FAR const struct automount_lower_s *lower);
+static bool sam_inserted(const struct automount_lower_s *lower);
 
 /****************************************************************************
  * Private Data
@@ -131,17 +131,17 @@ static const struct sam_automount_config_s g_port0config =
  *
  ****************************************************************************/
 
-static int sam_attach(FAR const struct automount_lower_s *lower,
-                      automount_handler_t isr, FAR void *arg)
+static int sam_attach(const struct automount_lower_s *lower,
+                      automount_handler_t isr, void *arg)
 {
-  FAR const struct sam_automount_config_s *config;
-  FAR struct sam_automount_state_s *state;
+  const struct sam_automount_config_s *config;
+  struct sam_automount_state_s *state;
 
   finfo("Entry\n");
 
   /* Recover references to our structure */
 
-  config = (FAR struct sam_automount_config_s *)lower;
+  config = (struct sam_automount_config_s *)lower;
   DEBUGASSERT(config && config->state);
 
   state = config->state;
@@ -172,18 +172,18 @@ static int sam_attach(FAR const struct automount_lower_s *lower,
  *
  ****************************************************************************/
 
-static void sam_enable(FAR const struct automount_lower_s *lower,
+static void sam_enable(const struct automount_lower_s *lower,
                        bool enable)
 {
-  FAR const struct sam_automount_config_s *config;
-  FAR struct sam_automount_state_s *state;
+  const struct sam_automount_config_s *config;
+  struct sam_automount_state_s *state;
   irqstate_t flags;
 
   finfo("Entry\n");
 
   /* Recover references to our structure */
 
-  config = (FAR struct sam_automount_config_s *)lower;
+  config = (struct sam_automount_config_s *)lower;
   DEBUGASSERT(config && config->state);
 
   state = config->state;
@@ -201,7 +201,7 @@ static void sam_enable(FAR const struct automount_lower_s *lower,
 
       if (state->handler)
         {
-          (void)state->handler(&config->lower, state->arg, true);
+          state->handler(&config->lower, state->arg, true);
         }
 
       state->pending = false;
@@ -224,11 +224,11 @@ static void sam_enable(FAR const struct automount_lower_s *lower,
  *
  ****************************************************************************/
 
-static bool sam_inserted(FAR const struct automount_lower_s *lower)
+static bool sam_inserted(const struct automount_lower_s *lower)
 {
-  FAR const struct sam_automount_config_s *config;
+  const struct sam_automount_config_s *config;
 
-  config = (FAR struct sam_automount_config_s *)lower;
+  config = (struct sam_automount_config_s *)lower;
   DEBUGASSERT(config && config->state);
   finfo("inserted:%d\n", config->state->inserted);
   return config->state->inserted;
@@ -254,7 +254,7 @@ static bool sam_inserted(FAR const struct automount_lower_s *lower)
 
 void sam_automount_initialize(void)
 {
-  FAR void *handle;
+  void *handle;
 
   finfo("Initializing automounter(s)\n");
 
@@ -290,8 +290,8 @@ void sam_automount_initialize(void)
 
 void sam_automount_event(bool inserted)
 {
-  FAR const struct sam_automount_config_s *config;
-  FAR struct sam_automount_state_s *state;
+  const struct sam_automount_config_s *config;
+  struct sam_automount_state_s *state;
 
 #ifdef CONFIG_METRO_M4_USB_AUTOMOUNT
   config = &g_port0config;
@@ -320,7 +320,7 @@ void sam_automount_event(bool inserted)
         {
           /* No.. forward the event to the handler */
 
-          (void)state->handler(&config->lower, state->arg, state->inserted);
+          state->handler(&config->lower, state->arg, state->inserted);
         }
     }
 }

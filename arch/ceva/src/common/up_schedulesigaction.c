@@ -141,7 +141,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
               /* Save the current register context location */
 
               tcb->xcp.saved_regs = g_current_regs[cpu];
-              tcb->xcp.sigdeliver = (FAR void *)sigdeliver;
+              tcb->xcp.sigdeliver = (void *)sigdeliver;
 
               /* Duplicate the register context.  These will be
                * restored by the signal trampoline after the signal has been
@@ -186,7 +186,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
           /* Save the current register context location */
 
           tcb->xcp.saved_regs = tcb->xcp.regs;
-          tcb->xcp.sigdeliver = (FAR void *)sigdeliver;
+          tcb->xcp.sigdeliver = (void *)sigdeliver;
 
           /* Duplicate the register context.  These will be restored
            * by the signal trampoline after the signal has been delivered.

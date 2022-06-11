@@ -598,7 +598,7 @@ static void mxt_notify(FAR struct mxt_dev_s *priv)
       if (fds)
         {
           fds->revents |= POLLIN;
-          iinfo("Report events: %02x\n", fds->revents);
+          iinfo("Report events: %08" PRIx32 "\n", fds->revents);
           nxsem_post(fds->sem);
         }
     }
@@ -1569,7 +1569,8 @@ static int mxt_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if ((fds->events & POLLIN) == 0)
         {
-          ierr("ERROR: Missing POLLIN: revents: %08x\n", fds->revents);
+          ierr("ERROR: Missing POLLIN: revents: %08" PRIx32 "\n",
+               fds->revents);
           ret = -EDEADLK;
           goto errout;
         }
@@ -1914,7 +1915,7 @@ int mxt_register(FAR struct i2c_master_s *i2c,
 
   /* Register the device as an input device */
 
-  snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
+  snprintf(devname, sizeof(devname), DEV_FORMAT, minor);
   iinfo("Registering %s\n", devname);
 
   ret = register_driver(devname, &mxt_fops, 0666, priv);

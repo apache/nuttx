@@ -55,11 +55,11 @@ struct imxrtgpio_dev_s
  ****************************************************************************/
 
 #if BOARD_NGPIOIN > 0
-static int gpin_read(FAR struct gpio_dev_s *dev, FAR bool *value);
+static int gpin_read(struct gpio_dev_s *dev, bool *value);
 #endif
 #if BOARD_NGPIOOUT > 0
-static int gpout_read(FAR struct gpio_dev_s *dev, FAR bool *value);
-static int gpout_write(FAR struct gpio_dev_s *dev, bool value);
+static int gpout_read(struct gpio_dev_s *dev, bool *value);
+static int gpout_write(struct gpio_dev_s *dev, bool value);
 #endif
 
 /****************************************************************************
@@ -113,10 +113,10 @@ static struct imxrtgpio_dev_s g_gpout[BOARD_NGPIOOUT];
  ****************************************************************************/
 
 #if BOARD_NGPIOIN > 0
-static int gpin_read(FAR struct gpio_dev_s *dev, FAR bool *value)
+static int gpin_read(struct gpio_dev_s *dev, bool *value)
 {
-  FAR struct imxrtgpio_dev_s *imxrtgpio =
-                        (FAR struct imxrtgpio_dev_s *)dev;
+  struct imxrtgpio_dev_s *imxrtgpio =
+                        (struct imxrtgpio_dev_s *)dev;
 
   DEBUGASSERT(imxrtgpio != NULL && value != NULL);
   DEBUGASSERT(imxrtgpio->id < BOARD_NGPIOIN);
@@ -128,10 +128,10 @@ static int gpin_read(FAR struct gpio_dev_s *dev, FAR bool *value)
 #endif
 
 #if BOARD_NGPIOOUT > 0
-static int gpout_read(FAR struct gpio_dev_s *dev, FAR bool *value)
+static int gpout_read(struct gpio_dev_s *dev, bool *value)
 {
-  FAR struct imxrtgpio_dev_s *imxrtgpio =
-                        (FAR struct imxrtgpio_dev_s *)dev;
+  struct imxrtgpio_dev_s *imxrtgpio =
+                        (struct imxrtgpio_dev_s *)dev;
 
   DEBUGASSERT(imxrtgpio != NULL && value != NULL);
   DEBUGASSERT(imxrtgpio->id < BOARD_NGPIOOUT);
@@ -141,10 +141,10 @@ static int gpout_read(FAR struct gpio_dev_s *dev, FAR bool *value)
   return OK;
 }
 
-static int gpout_write(FAR struct gpio_dev_s *dev, bool value)
+static int gpout_write(struct gpio_dev_s *dev, bool value)
 {
-  FAR struct imxrtgpio_dev_s *imxrtgpio =
-                             (FAR struct imxrtgpio_dev_s *)dev;
+  struct imxrtgpio_dev_s *imxrtgpio =
+                             (struct imxrtgpio_dev_s *)dev;
 
   DEBUGASSERT(imxrtgpio != NULL);
   DEBUGASSERT(imxrtgpio->id < BOARD_NGPIOOUT);

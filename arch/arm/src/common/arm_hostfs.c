@@ -78,18 +78,18 @@ static int host_flags_to_mode(int flags)
 {
   static const int modeflags[] =
   {
+    O_RDONLY | O_TEXT,
     O_RDONLY,
-    O_RDONLY | O_BINARY,
+    O_RDWR | O_TEXT,
     O_RDWR,
-    O_RDWR | O_BINARY,
+    O_WRONLY | O_CREAT | O_TRUNC | O_TEXT,
     O_WRONLY | O_CREAT | O_TRUNC,
-    O_WRONLY | O_CREAT | O_TRUNC | O_BINARY,
+    O_RDWR | O_CREAT | O_TRUNC | O_TEXT,
     O_RDWR | O_CREAT | O_TRUNC,
-    O_RDWR | O_CREAT | O_TRUNC | O_BINARY,
+    O_WRONLY | O_CREAT | O_APPEND | O_TEXT,
     O_WRONLY | O_CREAT | O_APPEND,
-    O_WRONLY | O_CREAT | O_APPEND | O_BINARY,
+    O_RDWR | O_CREAT | O_APPEND | O_TEXT,
     O_RDWR | O_CREAT | O_APPEND,
-    O_RDWR | O_CREAT | O_APPEND | O_BINARY,
     0,
   };
 

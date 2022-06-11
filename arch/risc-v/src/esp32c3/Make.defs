@@ -19,36 +19,18 @@
 ############################################################################
 
 include chip/Bootloader.mk
+include common/Make.defs
 
 # Specify our HEAD assembly file.  This will be linked as
 # the first object file, so it will appear at address 0
 
 HEAD_ASRC = esp32c3_head.S
 
-CHIP_ASRCS = esp32c3_vectors.S esp32c3_interrupt.S
+CHIP_ASRCS = esp32c3_vectors.S
 
-# Specify C code within the common directory to be included
+# Specify our general Assembly files
 
-CMN_CSRCS += riscv_initialize.c riscv_swint.c
-CMN_CSRCS += riscv_allocateheap.c riscv_createstack.c riscv_exit.c riscv_exception.c
-CMN_CSRCS += riscv_assert.c riscv_blocktask.c riscv_copystate.c riscv_initialstate.c
-CMN_CSRCS += riscv_interruptcontext.c riscv_modifyreg32.c riscv_puts.c riscv_mdelay.c
-CMN_CSRCS += riscv_releasepending.c riscv_reprioritizertr.c
-CMN_CSRCS += riscv_releasestack.c riscv_stackframe.c riscv_schedulesigaction.c
-CMN_CSRCS += riscv_sigdeliver.c riscv_udelay.c riscv_unblocktask.c riscv_usestack.c
-CMN_CSRCS += riscv_tcbinfo.c riscv_getnewintctx.c
-
-ifeq ($(CONFIG_SCHED_BACKTRACE),y)
-CMN_CSRCS += riscv_backtrace.c
-endif
-
-ifeq ($(CONFIG_STACK_COLORATION),y)
-CMN_CSRCS += riscv_checkstack.c
-endif
-
-ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
-CMN_CSRCS  += riscv_vfork.c
-endif
+CMN_ASRCS := $(filter-out riscv_vectors.S,$(CMN_ASRCS))
 
 # Specify our C code within this directory to be included
 
@@ -58,6 +40,14 @@ CHIP_CSRCS += esp32c3_clockconfig.c esp32c3_gpio.c
 CHIP_CSRCS += esp32c3_lowputc.c esp32c3_serial.c
 CHIP_CSRCS += esp32c3_systemreset.c esp32c3_resetcause.c
 CHIP_CSRCS += esp32c3_uid.c
+
+ifeq ($(CONFIG_ESP32C3_REGION_PROTECTION),y)
+CHIP_CSRCS += esp32c3_region.c
+endif
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CHIP_CSRCS += esp32c3_userspace.c
+endif
 
 ifeq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += esp32c3_tickless.c
@@ -75,6 +65,10 @@ endif
 
 ifeq ($(CONFIG_ESP32C3_I2C),y)
 CHIP_CSRCS += esp32c3_i2c.c
+endif
+
+ifeq ($(CONFIG_ESP32C3_TWAI),y)
+CHIP_CSRCS += esp32c3_twai.c
 endif
 
 ifeq ($(CONFIG_ESP32C3_SPI),y)
@@ -211,11 +205,6 @@ INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)esp-wire
 
 EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)esp-wireless-drivers-3rdparty$(DELIM)libs$(DELIM)esp32c3
 EXTRA_LIBS += -lphy
-
-# Due to some Wi-Fi related libraries, the option is need to avoid linking too much
-# unused functions.
-
-LDFLAGS += --gc-sections
 
 # Wireless interfaces.
 

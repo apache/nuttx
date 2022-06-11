@@ -1093,12 +1093,11 @@ int usbhost_msc_notifier_setup(worker_t worker, uint8_t event, char sdchar,
  *         usbhost_msc_notifier_setup().
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
+ *   None.
  *
  ****************************************************************************/
 
-int usbhost_msc_notifier_teardown(int key);
+void usbhost_msc_notifier_teardown(int key);
 
 /****************************************************************************
  * Name: usbhost_msc_notifier_signal

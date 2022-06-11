@@ -376,7 +376,7 @@ struct imxrt_ehci_trace_s
   uint16_t id;
   bool fmt2;
 #endif
-  FAR const char *string;
+  const char *string;
 };
 
 #endif /* HAVE_USBHOST_TRACE */
@@ -490,7 +490,7 @@ static ssize_t imxrt_transfer_wait(struct imxrt_epinfo_s *epinfo);
 #ifdef CONFIG_USBHOST_ASYNCH
 static inline int imxrt_ioc_async_setup(struct imxrt_rhport_s *rhport,
          struct imxrt_epinfo_s *epinfo, usbhost_asynch_t callback,
-         FAR void *arg);
+         void *arg);
 static void imxrt_asynch_completion(struct imxrt_epinfo_s *epinfo);
 #endif
 
@@ -509,50 +509,55 @@ static inline void imxrt_ioc_bottomhalf(void);
 static inline void imxrt_portsc_bottomhalf(void);
 static inline void imxrt_syserr_bottomhalf(void);
 static inline void imxrt_async_advance_bottomhalf(void);
-static void imxrt_ehci_bottomhalf(FAR void *arg);
-static int imxrt_ehci_interrupt(int irq, FAR void *context, FAR void *arg);
+static void imxrt_ehci_bottomhalf(void *arg);
+static int imxrt_ehci_interrupt(int irq, void *context, void *arg);
 
 /* USB Host Controller Operations *******************************************/
 
-static int imxrt_wait(FAR struct usbhost_connection_s *conn,
-         FAR struct usbhost_hubport_s **hport);
-static int imxrt_rh_enumerate(FAR struct usbhost_connection_s *conn,
-         FAR struct usbhost_hubport_s *hport);
-static int imxrt_enumerate(FAR struct usbhost_connection_s *conn,
-         FAR struct usbhost_hubport_s *hport);
+static int imxrt_wait(struct usbhost_connection_s *conn,
+                      struct usbhost_hubport_s **hport);
+static int imxrt_rh_enumerate(struct usbhost_connection_s *conn,
+                              struct usbhost_hubport_s *hport);
+static int imxrt_enumerate(struct usbhost_connection_s *conn,
+                           struct usbhost_hubport_s *hport);
 
-static int imxrt_ep0configure(FAR struct usbhost_driver_s *drvr,
-         usbhost_ep_t ep0, uint8_t funcaddr, uint8_t speed,
-         uint16_t maxpacketsize);
-static int imxrt_epalloc(FAR struct usbhost_driver_s *drvr,
-         const FAR struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep);
-static int imxrt_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
-static int imxrt_alloc(FAR struct usbhost_driver_s *drvr,
-         FAR uint8_t **buffer, FAR size_t *maxlen);
-static int imxrt_free(FAR struct usbhost_driver_s *drvr,
-         FAR uint8_t *buffer);
-static int imxrt_ioalloc(FAR struct usbhost_driver_s *drvr,
-         FAR uint8_t **buffer, size_t buflen);
-static int imxrt_iofree(FAR struct usbhost_driver_s *drvr,
-         FAR uint8_t *buffer);
-static int imxrt_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-         FAR const struct usb_ctrlreq_s *req, FAR uint8_t *buffer);
-static int imxrt_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-         FAR const struct usb_ctrlreq_s *req, FAR const uint8_t *buffer);
-static ssize_t imxrt_transfer(FAR struct usbhost_driver_s *drvr,
-         usbhost_ep_t ep, FAR uint8_t *buffer, size_t buflen);
+static int imxrt_ep0configure(struct usbhost_driver_s *drvr,
+                              usbhost_ep_t ep0, uint8_t funcaddr,
+                              uint8_t speed, uint16_t maxpacketsize);
+static int imxrt_epalloc(struct usbhost_driver_s *drvr,
+                         const struct usbhost_epdesc_s *epdesc,
+                         usbhost_ep_t *ep);
+static int imxrt_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep);
+static int imxrt_alloc(struct usbhost_driver_s *drvr,
+                       uint8_t **buffer, size_t *maxlen);
+static int imxrt_free(struct usbhost_driver_s *drvr,
+                      uint8_t *buffer);
+static int imxrt_ioalloc(struct usbhost_driver_s *drvr,
+                         uint8_t **buffer, size_t buflen);
+static int imxrt_iofree(struct usbhost_driver_s *drvr,
+                        uint8_t *buffer);
+static int imxrt_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+                        const struct usb_ctrlreq_s *req,
+                        uint8_t *buffer);
+static int imxrt_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+                         const struct usb_ctrlreq_s *req,
+                         const uint8_t *buffer);
+static ssize_t imxrt_transfer(struct usbhost_driver_s *drvr,
+                              usbhost_ep_t ep, uint8_t *buffer,
+                              size_t buflen);
 #ifdef CONFIG_USBHOST_ASYNCH
-static int imxrt_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-         FAR uint8_t *buffer, size_t buflen, usbhost_asynch_t callback,
-         FAR void *arg);
+static int imxrt_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+                        uint8_t *buffer, size_t buflen,
+                        usbhost_asynch_t callback, void *arg);
 #endif
-static int imxrt_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
+static int imxrt_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 #ifdef CONFIG_USBHOST_HUB
-static int imxrt_connect(FAR struct usbhost_driver_s *drvr,
-         FAR struct usbhost_hubport_s *hport, bool connected);
+static int imxrt_connect(struct usbhost_driver_s *drvr,
+                         struct usbhost_hubport_s *hport,
+                         bool connected);
 #endif
-static void imxrt_disconnect(FAR struct usbhost_driver_s *drvr,
-                             FAR struct usbhost_hubport_s *hport);
+static void imxrt_disconnect(struct usbhost_driver_s *drvr,
+                             struct usbhost_hubport_s *hport);
 
 /* Initialization ***********************************************************/
 
@@ -2644,7 +2649,7 @@ static ssize_t imxrt_transfer_wait(struct imxrt_epinfo_s *epinfo)
 static inline int imxrt_ioc_async_setup(struct imxrt_rhport_s *rhport,
                                         struct imxrt_epinfo_s *epinfo,
                                         usbhost_asynch_t callback,
-                                        FAR void *arg)
+                                        void *arg)
 {
   irqstate_t flags;
   int ret = -ENODEV;
@@ -3316,7 +3321,7 @@ static inline void imxrt_async_advance_bottomhalf(void)
  *
  ****************************************************************************/
 
-static void imxrt_ehci_bottomhalf(FAR void *arg)
+static void imxrt_ehci_bottomhalf(void *arg)
 {
   uint32_t pending = (uint32_t)arg;
 
@@ -3453,7 +3458,7 @@ static void imxrt_ehci_bottomhalf(FAR void *arg)
  *
  ****************************************************************************/
 
-static int imxrt_ehci_interrupt(int irq, FAR void *context, FAR void *arg)
+static int imxrt_ehci_interrupt(int irq, void *context, void *arg)
 {
   uint32_t usbsts;
   uint32_t pending;
@@ -3485,7 +3490,7 @@ static int imxrt_ehci_interrupt(int irq, FAR void *context, FAR void *arg)
 
       DEBUGASSERT(work_available(&g_ehci.work));
       DEBUGVERIFY(work_queue(HPWORK, &g_ehci.work, imxrt_ehci_bottomhalf,
-                            (FAR void *)pending, 0));
+                            (void *)pending, 0));
 
       /* Disable further EHCI interrupts so that we do not overrun the work
        * queue.
@@ -3528,8 +3533,8 @@ static int imxrt_ehci_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static int imxrt_wait(FAR struct usbhost_connection_s *conn,
-                      FAR struct usbhost_hubport_s **hport)
+static int imxrt_wait(struct usbhost_connection_s *conn,
+                      struct usbhost_hubport_s **hport)
 {
   irqstate_t flags;
   int rhpndx;
@@ -3631,8 +3636,8 @@ static int imxrt_wait(FAR struct usbhost_connection_s *conn,
  *
  ****************************************************************************/
 
-static int imxrt_rh_enumerate(FAR struct usbhost_connection_s *conn,
-                              FAR struct usbhost_hubport_s *hport)
+static int imxrt_rh_enumerate(struct usbhost_connection_s *conn,
+                              struct usbhost_hubport_s *hport)
 {
   struct imxrt_rhport_s *rhport;
   volatile uint32_t *regaddr;
@@ -3849,8 +3854,8 @@ static int imxrt_rh_enumerate(FAR struct usbhost_connection_s *conn,
   return OK;
 }
 
-static int imxrt_enumerate(FAR struct usbhost_connection_s *conn,
-                           FAR struct usbhost_hubport_s *hport)
+static int imxrt_enumerate(struct usbhost_connection_s *conn,
+                           struct usbhost_hubport_s *hport)
 {
   int ret;
 
@@ -3919,7 +3924,7 @@ static int imxrt_enumerate(FAR struct usbhost_connection_s *conn,
  *
  ****************************************************************************/
 
-static int imxrt_ep0configure(FAR struct usbhost_driver_s *drvr,
+static int imxrt_ep0configure(struct usbhost_driver_s *drvr,
                               usbhost_ep_t ep0, uint8_t funcaddr,
                               uint8_t speed, uint16_t maxpacketsize)
 {
@@ -3967,8 +3972,8 @@ static int imxrt_ep0configure(FAR struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-static int imxrt_epalloc(FAR struct usbhost_driver_s *drvr,
-                         const FAR struct usbhost_epdesc_s *epdesc,
+static int imxrt_epalloc(struct usbhost_driver_s *drvr,
+                         const struct usbhost_epdesc_s *epdesc,
                          usbhost_ep_t *ep)
 {
   struct imxrt_epinfo_s *epinfo;
@@ -4053,7 +4058,7 @@ static int imxrt_epalloc(FAR struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-static int imxrt_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
+static int imxrt_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
   struct imxrt_epinfo_s *epinfo = (struct imxrt_epinfo_s *)ep;
 
@@ -4100,8 +4105,8 @@ static int imxrt_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  *
  ****************************************************************************/
 
-static int imxrt_alloc(FAR struct usbhost_driver_s *drvr,
-                       FAR uint8_t **buffer, FAR size_t *maxlen)
+static int imxrt_alloc(struct usbhost_driver_s *drvr,
+                       uint8_t **buffer, size_t *maxlen)
 {
   int ret = -ENOMEM;
   DEBUGASSERT(drvr && buffer && maxlen);
@@ -4111,8 +4116,8 @@ static int imxrt_alloc(FAR struct usbhost_driver_s *drvr,
    * multiple of the cache line size in length.
    */
 
-  *buffer = (FAR uint8_t *)kmm_memalign(ARMV7M_DCACHE_LINESIZE,
-                                        IMXRT_EHCI_BUFSIZE);
+  *buffer = (uint8_t *)kmm_memalign(ARMV7M_DCACHE_LINESIZE,
+                                    IMXRT_EHCI_BUFSIZE);
   if (*buffer)
     {
       *maxlen = IMXRT_EHCI_BUFSIZE;
@@ -4146,7 +4151,7 @@ static int imxrt_alloc(FAR struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-static int imxrt_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
+static int imxrt_free(struct usbhost_driver_s *drvr, uint8_t *buffer)
 {
   DEBUGASSERT(drvr && buffer);
 
@@ -4187,8 +4192,8 @@ static int imxrt_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
  *
  ****************************************************************************/
 
-static int imxrt_ioalloc(FAR struct usbhost_driver_s *drvr,
-                         FAR uint8_t **buffer, size_t buflen)
+static int imxrt_ioalloc(struct usbhost_driver_s *drvr,
+                         uint8_t **buffer, size_t buflen)
 {
   DEBUGASSERT(drvr && buffer && buflen > 0);
 
@@ -4199,7 +4204,7 @@ static int imxrt_ioalloc(FAR struct usbhost_driver_s *drvr,
    */
 
   buflen  = (buflen + DCACHE_LINEMASK) & ~DCACHE_LINEMASK;
-  *buffer = (FAR uint8_t *)kumm_memalign(ARMV7M_DCACHE_LINESIZE, buflen);
+  *buffer = (uint8_t *)kumm_memalign(ARMV7M_DCACHE_LINESIZE, buflen);
   return *buffer ? OK : -ENOMEM;
 }
 
@@ -4226,8 +4231,8 @@ static int imxrt_ioalloc(FAR struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-static int imxrt_iofree(FAR struct usbhost_driver_s *drvr,
-                        FAR uint8_t *buffer)
+static int imxrt_iofree(struct usbhost_driver_s *drvr,
+                        uint8_t *buffer)
 {
   DEBUGASSERT(drvr && buffer);
 
@@ -4273,9 +4278,9 @@ static int imxrt_iofree(FAR struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-static int imxrt_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-                        FAR const struct usb_ctrlreq_s *req,
-                        FAR uint8_t *buffer)
+static int imxrt_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+                        const struct usb_ctrlreq_s *req,
+                        uint8_t *buffer)
 {
   struct imxrt_rhport_s *rhport = (struct imxrt_rhport_s *)drvr;
   struct imxrt_epinfo_s *ep0info = (struct imxrt_epinfo_s *)ep0;
@@ -4339,9 +4344,9 @@ errout_with_sem:
   return ret;
 }
 
-static int imxrt_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-                         FAR const struct usb_ctrlreq_s *req,
-                         FAR const uint8_t *buffer)
+static int imxrt_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+                         const struct usb_ctrlreq_s *req,
+                         const uint8_t *buffer)
 {
   /* imxrt_ctrlin can handle both directions.  We just need to work around
    * the differences in the function signatures.
@@ -4389,8 +4394,8 @@ static int imxrt_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  *
  ****************************************************************************/
 
-static ssize_t imxrt_transfer(FAR struct usbhost_driver_s *drvr,
-                              usbhost_ep_t ep, FAR uint8_t *buffer,
+static ssize_t imxrt_transfer(struct usbhost_driver_s *drvr,
+                              usbhost_ep_t ep, uint8_t *buffer,
                               size_t buflen)
 {
   struct imxrt_rhport_s *rhport = (struct imxrt_rhport_s *)drvr;
@@ -4504,9 +4509,9 @@ errout_with_sem:
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
-static int imxrt_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-                        FAR uint8_t *buffer, size_t buflen,
-                        usbhost_asynch_t callback, FAR void *arg)
+static int imxrt_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+                        uint8_t *buffer, size_t buflen,
+                        usbhost_asynch_t callback, void *arg)
 {
   struct imxrt_rhport_s *rhport = (struct imxrt_rhport_s *)drvr;
   struct imxrt_epinfo_s *epinfo = (struct imxrt_epinfo_s *)ep;
@@ -4598,7 +4603,7 @@ errout_with_sem:
  *
  ****************************************************************************/
 
-static int imxrt_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
+static int imxrt_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
   struct imxrt_epinfo_s *epinfo = (struct imxrt_epinfo_s *)ep;
   struct imxrt_qh_s *qh;
@@ -4803,8 +4808,8 @@ errout_with_sem:
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_HUB
-static int imxrt_connect(FAR struct usbhost_driver_s *drvr,
-                         FAR struct usbhost_hubport_s *hport,
+static int imxrt_connect(struct usbhost_driver_s *drvr,
+                         struct usbhost_hubport_s *hport,
                          bool connected)
 {
   irqstate_t flags;
@@ -4858,8 +4863,8 @@ static int imxrt_connect(FAR struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-static void imxrt_disconnect(FAR struct usbhost_driver_s *drvr,
-                             FAR struct usbhost_hubport_s *hport)
+static void imxrt_disconnect(struct usbhost_driver_s *drvr,
+                             struct usbhost_hubport_s *hport)
 {
   DEBUGASSERT(hport != NULL);
   hport->devclass = NULL;
@@ -5013,9 +5018,9 @@ static int imxrt_reset(void)
  *
  ****************************************************************************/
 
-FAR struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
+struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
 {
-  FAR struct usbhost_hubport_s *hport;
+  struct usbhost_hubport_s *hport;
   uint32_t regval;
 #  if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_INFO)
   uint16_t regval16;
@@ -5424,7 +5429,7 @@ FAR struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
  ****************************************************************************/
 
 #ifdef HAVE_USBHOST_TRACE
-FAR const char *usbhost_trformat1(uint16_t id)
+const char *usbhost_trformat1(uint16_t id)
 {
   int ndx = TRACE1_INDEX(id);
 
@@ -5436,7 +5441,7 @@ FAR const char *usbhost_trformat1(uint16_t id)
   return NULL;
 }
 
-FAR const char *usbhost_trformat2(uint16_t id)
+const char *usbhost_trformat2(uint16_t id)
 {
   int ndx = TRACE2_INDEX(id);
 

@@ -59,7 +59,7 @@ struct mallinfo mallinfo(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_MM
+#ifdef CONFIG_MM_BACKTRACE
 struct mallinfo_task mallinfo_task(pid_t pid)
 {
   struct mallinfo_task info;

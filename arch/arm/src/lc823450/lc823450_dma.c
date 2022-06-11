@@ -171,7 +171,7 @@ static int dma_interrupt_core(void *context)
  * Name: dma_interrupt
  ****************************************************************************/
 
-static int dma_interrupt(int irq, FAR void *context, FAR void *arg)
+static int dma_interrupt(int irq, void *context, void *arg)
 {
   int i;
   uint32_t stat;

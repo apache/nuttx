@@ -156,6 +156,13 @@ config ESP32C3_CPU_FREQ_MHZ
 	default 80 if ESP32C3_CPU_FREQ_80
 	default 160 if ESP32C3_CPU_FREQ_160
 
+config ESP32C3_REGION_PROTECTION
+	bool "Enable region protection"
+	default y
+	select ARCH_USE_MPU
+	---help---
+		Configure the MPU to disable access to invalid memory regions.
+
 config ESP32C3_RT_TIMER
 	bool "Real-time Timer"
 	default n
@@ -167,11 +174,6 @@ config ESP32C3_RTC_HEAP
 	bool "Use the RTC memory as a separate heap"
 	select ARCH_HAVE_EXTRA_HEAPS
 	default n
-
-config ESP32C3_WIRELESS
-	bool
-	default n
-	select ESP32C3_RT_TIMER
 
 config ESP32C3_EXCEPTION_ENABLE_CACHE
 	bool
@@ -196,6 +198,11 @@ config ESP32C3_UART
 config ESP32C3_I2C
 	bool
 	default n
+
+config ESP32C3_TWAI
+	bool
+	default n
+	select CAN
 
 config ESP32C3_TIMER
 	bool
@@ -251,6 +258,11 @@ config ESP32C3_I2C0
 	bool "I2C 0"
 	default n
 	select ESP32C3_I2C
+
+config ESP32C3_TWAI0
+	bool "TWAI (CAN) 0"
+	default n
+	select ESP32C3_TWAI
 
 config ESP32C3_RNG
 	bool "Random Number Generator (RNG)"
@@ -407,6 +419,58 @@ config ESP32C3_I2CTIMEOMS
 	default 500
 
 endmenu # I2C configuration
+
+menu "TWAI driver options"
+	depends on ESP32C3_TWAI
+
+if ESP32C3_TWAI0
+
+config ESP32C3_TWAI0_TXPIN
+	int "TWAI0 TX Pin"
+	default 2
+
+config ESP32C3_TWAI0_RXPIN
+	int "TWAI0 RX Pin"
+	default 3
+
+config ESP32C3_TWAI0_BITRATE
+	int "TWAI0 bitrate"
+	default 1000000
+	---help---
+		TWAI0 bit rate.  Required if ESP32C3_TWAI0 is defined.
+
+config ESP32C3_TWAI0_SAMPLEP
+	int "TWAI0 sample point"
+	default 80
+	---help---
+		TWAI0 sample point location as a percent value.  Required
+		if ESP32C3_TWAI0 is defined.
+
+config ESP32C3_TWAI0_SJW
+	int "TWAI0 synchronization jump width"
+	default 3
+	---help---
+		SJW limits the number of Time Quanta corrections during bit
+		Resynchronization. Default: 3
+
+config ESP32C3_TWAI0_SAM
+	bool "TWAI0 sampling"
+	default n
+	---help---
+		The bus is sampled 3 times (recommended for low to medium speed buses
+		to spikes on the bus-line).
+
+endif # ESP32C3_TWAI0
+
+config ESP32C3_TWAI_REGDEBUG
+	bool "TWAI register level debug"
+	depends on DEBUG_CAN_INFO
+	default n
+	---help---
+		Output detailed register-level TWAI debug information. Requires also
+		CONFIG_DEBUG_CAN_INFO.
+
+endmenu #ESP32C3_TWAI
 
 menu "SPI configuration"
 	depends on ESP32C3_SPI
@@ -1087,6 +1151,16 @@ config ESP32C3_PARTITION_TABLE_OFFSET
 	hex "Partition Table offset"
 	default 0x8000
 	depends on ESP32C3_APP_FORMAT_LEGACY
+
+if BUILD_PROTECTED
+
+config ESP32C3_USER_IMAGE_OFFSET
+	hex "User image offset"
+	default 0x90000
+	---help---
+		Offset in SPI Flash for flashing the User application firmware image.
+
+endif
 
 source "arch/risc-v/src/esp32c3/Kconfig.security"
 

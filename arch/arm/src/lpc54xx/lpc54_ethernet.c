@@ -132,12 +132,6 @@
 
 #define ETHWORK LPWORK
 
-/* TX poll delay = 1 seconds.
- * CLK_TCK is the number of clock ticks per second
- */
-
-#define LPC54_WDDELAY   (1*CLK_TCK)
-
 /* TX timeout = 1 minute */
 
 #define LPC54_TXTIMEOUT (60*CLK_TCK)
@@ -257,8 +251,8 @@
  * header.
  */
 
-#define ETHBUF       ((FAR struct eth_hdr_s *)priv->eth_dev.d_buf)
-#define ETH8021QWBUF ((FAR struct eth_8021qhdr_s *)priv->eth_dev.d_buf)
+#define ETHBUF       ((struct eth_hdr_s *)priv->eth_dev.d_buf)
+#define ETH8021QWBUF ((struct eth_8021qhdr_s *)priv->eth_dev.d_buf)
 
 /****************************************************************************
  * Private Types
@@ -296,7 +290,6 @@ struct lpc54_ethdriver_s
   uint8_t eth_fullduplex : 1;    /* 1:Full duplex 0:Half duplex mode */
   uint8_t eth_100mbps : 1;       /* 1:100mbps 0:10mbps */
   uint8_t eth_rxdiscard : 1;     /* 1:Discarding Rx data */
-  struct wdog_s eth_txpoll;      /* TX poll timer */
   struct wdog_s eth_txtimeout;   /* TX timeout timer */
   struct work_s eth_irqwork;     /* For deferring interrupt work to the work queue */
   struct work_s eth_pollwork;    /* For deferring poll work to the work queue */
@@ -404,14 +397,10 @@ static int  lpc54_mac_interrupt(int irq, void *context, void *arg);
 
 /* Watchdog timer expirations */
 
-static void lpc54_eth_dotimer(struct lpc54_ethdriver_s *priv);
 static void lpc54_eth_dopoll(struct lpc54_ethdriver_s *priv);
 
 static void lpc54_eth_txtimeout_work(void *arg);
 static void lpc54_eth_txtimeout_expiry(wdparm_t arg);
-
-static void lpc54_eth_poll_work(void *arg);
-static void lpc54_eth_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -1689,73 +1678,6 @@ static void lpc54_eth_txtimeout_expiry(wdparm_t arg)
 }
 
 /****************************************************************************
- * Name: lpc54_eth_dotimer
- *
- * Description:
- *   Check if there are Tx descriptors available and, if so, allocate a Tx
- *   then perform the normal Tx poll
- *
- * Input Parameters:
- *   priv - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static void lpc54_eth_dotimer(struct lpc54_ethdriver_s *priv)
-{
-  struct lpc54_txring_s *txring0;
-#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
-  struct lpc54_txring_s *txring1;
-#endif
-
-  DEBUGASSERT(priv->eth_dev.d_buf == NULL);
-
-  txring0 = &priv->eth_txring[0];
-#ifdef CONFIG_LPC54_ETH_MULTIQUEUE
-  txring1 = &priv->eth_txring[1];
-
-  /* We cannot perform the Tx poll now if all of the Tx descriptors for both
-   * channels are in-use.
-   */
-
-  if (txring0->tr_inuse < txring0->tr_ndesc &&
-      txring1->tr_inuse < txring1->tr_ndesc)
-#else
-  /* We cannot perform the Tx poll now if all of the Tx descriptors for this
-   * channel 0 are in-use.
-   */
-
-  if (txring0->tr_inuse < txring0->tr_ndesc)
-#endif
-    {
-      /* There is a free descriptor in the ring, allocate a new Tx buffer
-       * to perform the poll.
-       */
-
-      priv->eth_dev.d_buf = (uint8_t *)lpc54_pktbuf_alloc(priv);
-      if (priv->eth_dev.d_buf != NULL)
-        {
-          devif_timer(&priv->eth_dev, LPC54_WDDELAY, lpc54_eth_txpoll);
-
-          /* Make sure that the Tx buffer remaining after the poll is
-           * freed.
-           */
-
-          if (priv->eth_dev.d_buf != NULL)
-            {
-              lpc54_pktbuf_free(priv, (uint32_t *)priv->eth_dev.d_buf);
-              priv->eth_dev.d_buf = NULL;
-            }
-        }
-    }
-}
-
-/****************************************************************************
  * Name: lpc54_eth_dopoll
  *
  * Description:
@@ -1807,7 +1729,7 @@ static void lpc54_eth_dopoll(struct lpc54_ethdriver_s *priv)
       priv->eth_dev.d_buf = (uint8_t *)lpc54_pktbuf_alloc(priv);
       if (priv->eth_dev.d_buf != NULL)
         {
-          devif_timer(&priv->eth_dev, 0, lpc54_eth_txpoll);
+          devif_poll(&priv->eth_dev, lpc54_eth_txpoll);
 
           /* Make sure that the Tx buffer remaining after the poll is
            * freed.
@@ -1820,73 +1742,6 @@ static void lpc54_eth_dopoll(struct lpc54_ethdriver_s *priv)
             }
         }
     }
-}
-
-/****************************************************************************
- * Name: lpc54_eth_poll_work
- *
- * Description:
- *   Perform periodic polling from the worker thread
- *
- * Input Parameters:
- *   arg - The argument passed when work_queue() as called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   Run on a work queue thread.
- *
- ****************************************************************************/
-
-static void lpc54_eth_poll_work(void *arg)
-{
-  struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)arg;
-
-  /* Lock the network and serialize driver operations if necessary.
-   * NOTE: Serialization is only required in the case where the driver work
-   * is performed on an LP worker thread and where more than one LP worker
-   * thread has been configured.
-   */
-
-  net_lock();
-
-  /* Perform the timer poll */
-
-  lpc54_eth_dotimer(priv);
-
-  /* Setup the watchdog poll timer again */
-
-  wd_start(&priv->eth_txpoll, LPC54_WDDELAY,
-           lpc54_eth_poll_expiry, (wdparm_t)priv);
-  net_unlock();
-}
-
-/****************************************************************************
- * Name: lpc54_eth_poll_expiry
- *
- * Description:
- *   Periodic timer handler.  Called from the timer interrupt handler.
- *
- * Input Parameters:
- *   arg  - The argument
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Runs in the context of a the timer interrupt handler.  Local
- *   interrupts are disabled by the interrupt logic.
- *
- ****************************************************************************/
-
-static void lpc54_eth_poll_expiry(wdparm_t arg)
-{
-  struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)arg;
-
-  /* Schedule to perform the interrupt processing on the worker thread. */
-
-  work_queue(ETHWORK, &priv->eth_pollwork, lpc54_eth_poll_work, priv, 0);
 }
 
 /****************************************************************************
@@ -2167,11 +2022,6 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
   regval |= ETH_MAC_CONFIG_TE;
   lpc54_putreg(regval, LPC54_ETH_MAC_CONFIG);
 
-  /* Set and activate a timer process */
-
-  wd_start(&priv->eth_txpoll, LPC54_WDDELAY,
-           lpc54_eth_poll_expiry, (wdparm_t)priv);
-
   /* Enable the Ethernet interrupt */
 
   priv->eth_bifup = 1;
@@ -2209,9 +2059,8 @@ static int lpc54_eth_ifdown(struct net_driver_s *dev)
   flags = enter_critical_section();
   up_disable_irq(LPC54_IRQ_ETHERNET);
 
-  /* Cancel the TX poll timer and TX timeout timers */
+  /* Cancel the TX timeout timers */
 
-  wd_cancel(&priv->eth_txpoll);
   wd_cancel(&priv->eth_txtimeout);
 
   /* Put the EMAC in its post-reset, non-operational state.  This should be

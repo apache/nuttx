@@ -45,10 +45,10 @@
  *  10 DISPLAY_RESET  10 PB05 PORT           10 PB15 PORT
  *  ----------------- ---------------------- ----------------------
  *  11 N/C            11 PA08 SERCOM2 PAD[0] 11 PA08 SERCOM2 PAD[0]
- *                            I²C SDA                I²C SDA
+ *                            Iï¿½C SDA                Iï¿½C SDA
  *  ----------------- ---------------------- ----------------------
  *  12 N/C            12 PA09 SERCOM2 PAD[1] 12 PA09 SERCOM2 PAD[1]
- *                            I²C SCL                I²C SCL
+ *                            Iï¿½C SCL                Iï¿½C SCL
  *  ----------------- ---------------------- ----------------------
  *  13 N/C            13 PB09 SERCOM4 PAD[1] 13 PB13 SERCOM4 PAD[1]
  *                            USART RX               USART RX
@@ -143,10 +143,10 @@
  *
  ****************************************************************************/
 
-FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
+struct lcd_dev_s *board_graphics_setup(unsigned int devno)
 {
-  FAR struct spi_dev_s *spi;
-  FAR struct lcd_dev_s *dev;
+  struct spi_dev_s *spi;
+  struct lcd_dev_s *dev;
 
   /* Configure the OLED PORTs. This initial configuration is RESET low,
    * putting the OLED into reset state.

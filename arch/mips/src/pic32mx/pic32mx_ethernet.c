@@ -161,12 +161,6 @@
 
 /* Timing *******************************************************************/
 
-/* TX poll deley = 1 seconds. CLK_TCK is the number of clock ticks per
- * second
- */
-
-#define PIC32MX_WDDELAY        (1*CLK_TCK)
-
 /* TX timeout = 1 minute */
 
 #define PIC32MX_TXTIMEOUT      (60*CLK_TCK)
@@ -215,7 +209,7 @@
  * header
  */
 
-#define BUF ((FAR struct eth_hdr_s *)priv->pd_dev.d_buf)
+#define BUF ((struct eth_hdr_s *)priv->pd_dev.d_buf)
 
 /* PHYs *********************************************************************/
 
@@ -314,7 +308,6 @@ struct pic32mx_driver_s
 #endif
   uint8_t    pd_txnext;         /* Index to the next Tx descriptor */
   uint32_t   pd_inten;          /* Shadow copy of INTEN register */
-  struct wdog_s pd_txpoll;      /* TX poll timer */
   struct wdog_s pd_txtimeout;   /* TX timeout timer */
   struct work_s pd_irqwork;     /* For deferring interrupt work to the work queue */
   struct work_s pd_pollwork;    /* For deferring poll work to the work queue */
@@ -376,7 +369,7 @@ static void pic32mx_freebuffer(struct pic32mx_driver_s *priv,
 static inline void pic32mx_txdescinit(struct pic32mx_driver_s *priv);
 static inline void pic32mx_rxdescinit(struct pic32mx_driver_s *priv);
 static inline struct pic32mx_txdesc_s *
-  pic32mx_txdesc(struct pic32mx_driver_s *priv);
+pic32mx_txdesc(struct pic32mx_driver_s *priv);
 static inline void pic32mx_txnext(struct pic32mx_driver_s *priv);
 static inline void pic32mx_rxreturn(struct pic32mx_rxdesc_s *rxdesc);
 static struct pic32mx_rxdesc_s *
@@ -387,7 +380,6 @@ pic32mx_rxdesc(struct pic32mx_driver_s *priv);
 static int  pic32mx_transmit(struct pic32mx_driver_s *priv);
 static int  pic32mx_txpoll(struct net_driver_s *dev);
 static void pic32mx_poll(struct pic32mx_driver_s *priv);
-static void pic32mx_timerpoll(struct pic32mx_driver_s *priv);
 
 /* Interrupt handling */
 
@@ -402,9 +394,6 @@ static int  pic32mx_interrupt(int irq, void *context, void *arg);
 
 static void pic32mx_txtimeout_work(void *arg);
 static void pic32mx_txtimeout_expiry(wdparm_t arg);
-
-static void pic32mx_poll_work(void *arg);
-static void pic32mx_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -858,7 +847,7 @@ static inline void pic32mx_rxdescinit(struct pic32mx_driver_s *priv)
  ****************************************************************************/
 
 static inline struct pic32mx_txdesc_s *
-  pic32mx_txdesc(struct pic32mx_driver_s *priv)
+pic32mx_txdesc(struct pic32mx_driver_s *priv)
 {
   struct pic32mx_txdesc_s *txdesc;
 
@@ -1235,53 +1224,7 @@ static void pic32mx_poll(struct pic32mx_driver_s *priv)
           /* And perform the poll */
 
           priv->pd_polling = true;
-          devif_timer(&priv->pd_dev, 0, pic32mx_txpoll);
-
-          /* Free any buffer left attached after the poll */
-
-          if (priv->pd_dev.d_buf != NULL)
-            {
-              pic32mx_freebuffer(priv, priv->pd_dev.d_buf);
-              priv->pd_dev.d_buf = NULL;
-            }
-
-          priv->pd_polling = false;
-        }
-    }
-}
-
-/****************************************************************************
- * Function: pic32mx_timerpoll
- *
- * Description:
- *   Perform the network timer poll.
- *
- * Input Parameters:
- *   priv  - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void pic32mx_timerpoll(struct pic32mx_driver_s *priv)
-{
-  /* Is there already a poll in progress.  This happens, for example, when
-   * debugging output is enabled.  Interrupts may be re-enabled while debug
-   * output is performed and a timer expiration could attempt a concurrent
-   * poll.
-   */
-
-  if (!priv->pd_polling)
-    {
-      DEBUGASSERT(priv->pd_dev.d_buf == NULL);
-      priv->pd_dev.d_buf = pic32mx_allocbuffer(priv);
-      if (priv->pd_dev.d_buf != NULL)
-        {
-          /* And perform the poll */
-
-          priv->pd_polling = true;
-          devif_timer(&priv->pd_dev, PIC32MX_WDDELAY, pic32mx_txpoll);
+          devif_poll(&priv->pd_dev, pic32mx_txpoll);
 
           /* Free any buffer left attached after the poll */
 
@@ -1889,7 +1832,7 @@ static void pic32mx_interrupt_work(void *arg)
  *
  ****************************************************************************/
 
-static int pic32mx_interrupt(int irq, void *context, FAR void *arg)
+static int pic32mx_interrupt(int irq, void *context, void *arg)
 {
   struct pic32mx_driver_s *priv;
   uint32_t status;
@@ -2012,76 +1955,6 @@ static void pic32mx_txtimeout_expiry(wdparm_t arg)
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
   work_queue(ETHWORK, &priv->pd_irqwork, pic32mx_txtimeout_work, priv, 0);
-}
-
-/****************************************************************************
- * Function: pic32mx_poll_work
- *
- * Description:
- *   Perform periodic polling from the worker thread
- *
- * Input Parameters:
- *   arg - The argument passed when work_queue() as called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static void pic32mx_poll_work(void *arg)
-{
-  struct pic32mx_driver_s *priv = (struct pic32mx_driver_s *)arg;
-
-  /* Check if the next Tx descriptor is available.  We cannot perform the Tx
-   * poll if we are unable to accept another packet for transmission.
-   */
-
-  net_lock();
-  if (pic32mx_txdesc(priv) != NULL)
-    {
-      /* If so, update TCP timing states and poll the network for new XMIT
-       * data.
-       * Hmmm... might be bug here.  Does this mean if there is a transmit
-       * in progress we will missing TCP time state updates?
-       */
-
-      pic32mx_timerpoll(priv);
-    }
-
-  /* Setup the watchdog poll timer again */
-
-  wd_start(&priv->pd_txpoll, PIC32MX_WDDELAY,
-           pic32mx_poll_expiry, (wdparm_t)priv);
-  net_unlock();
-}
-
-/****************************************************************************
- * Function: pic32mx_poll_expiry
- *
- * Description:
- *   Periodic timer handler.  Called from the timer interrupt handler.
- *
- * Input Parameters:
- *   arg  - The argument
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
- *
- ****************************************************************************/
-
-static void pic32mx_poll_expiry(wdparm_t arg)
-{
-  struct pic32mx_driver_s *priv = (struct pic32mx_driver_s *)arg;
-
-  /* Schedule to perform the interrupt processing on the worker thread. */
-
-  work_queue(ETHWORK, &priv->pd_pollwork, pic32mx_poll_work, priv, 0);
 }
 
 /****************************************************************************
@@ -2384,11 +2257,6 @@ static int pic32mx_ifup(struct net_driver_s *dev)
   priv->pd_inten = ETH_RXINTS;
   pic32mx_putreg(ETH_RXINTS, PIC32MX_ETH_IENSET);
 
-  /* Set and activate a timer process */
-
-  wd_start(&priv->pd_txpoll, PIC32MX_WDDELAY,
-           pic32mx_poll_expiry, (wdparm_t)priv);
-
   /* Finally, enable the Ethernet interrupt at the interrupt controller */
 
   priv->pd_ifup = true;
@@ -2431,9 +2299,8 @@ static int pic32mx_ifdown(struct net_driver_s *dev)
   up_disable_irq(PIC32MX_IRQSRC_ETH);
 #endif
 
-  /* Cancel the TX poll timer and TX timeout timers */
+  /* Cancel the TX timeout timers */
 
-  wd_cancel(&priv->pd_txpoll);
   wd_cancel(&priv->pd_txtimeout);
 
   /* Reset the device and mark it as down. */

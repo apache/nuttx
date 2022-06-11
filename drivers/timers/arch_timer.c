@@ -77,7 +77,7 @@ static inline void timespec_from_usec(FAR struct timespec *ts,
 }
 
 #ifdef CONFIG_SCHED_TICKLESS
-static inline uint64_t timespec_to_usec(const FAR struct timespec *ts)
+static inline uint64_t timespec_to_usec(FAR const struct timespec *ts)
 {
   return (uint64_t)ts->tv_sec * USEC_PER_SEC + ts->tv_nsec / NSEC_PER_USEC;
 }

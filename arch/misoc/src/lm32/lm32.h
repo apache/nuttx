@@ -29,6 +29,7 @@
 
 #ifndef __ASSEMBLY__
 #  include <nuttx/compiler.h>
+#  include <nuttx/irq.h>
 #  include <sys/types.h>
 #  include <stdint.h>
 #endif
@@ -89,7 +90,6 @@
 
 #ifndef __ASSEMBLY__
 
-extern volatile uint32_t *g_current_regs;
 extern uint32_t g_idle_topstack;
 
 /****************************************************************************
@@ -115,7 +115,7 @@ uint32_t *lm32_doirq(int irq, uint32_t *regs);
 
 /* Software interrupts ******************************************************/
 
-int lm32_swint(int irq, FAR void *context, FAR void *arg);
+int lm32_swint(int irq, void *context, void *arg);
 
 /* Signal handling **********************************************************/
 

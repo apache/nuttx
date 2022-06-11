@@ -50,10 +50,10 @@
 
 struct sam_automount_state_s
 {
-  volatile automount_handler_t handler;    /* Upper half handler */
-  FAR void *arg;                           /* Handler argument */
-  bool enable;                             /* Fake interrupt enable */
-  bool pending;                            /* Set if there an event while disabled */
+  volatile automount_handler_t handler; /* Upper half handler */
+  void *arg;                            /* Handler argument */
+  bool enable;                          /* Fake interrupt enable */
+  bool pending;                         /* Set if there an event while disabled */
 };
 
 /* This structure represents the static configuration of an automounter */
@@ -64,20 +64,20 @@ struct sam_automount_config_s
    * struct automount_lower_s to struct sam_automount_config_s
    */
 
-  struct automount_lower_s lower;          /* Publicly visible part */
-  uint8_t hsmci;                           /* HSMCI0_SLOTNO or HSMCI1_SLOTNO */
-  FAR struct sam_automount_state_s *state; /* Changeable state */
+  struct automount_lower_s lower;      /* Publicly visible part */
+  uint8_t hsmci;                       /* HSMCI0_SLOTNO or HSMCI1_SLOTNO */
+  struct sam_automount_state_s *state; /* Changeable state */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  sam_attach(FAR const struct automount_lower_s *lower,
-                       automount_handler_t isr, FAR void *arg);
-static void sam_enable(FAR const struct automount_lower_s *lower,
+static int  sam_attach(const struct automount_lower_s *lower,
+                       automount_handler_t isr, void *arg);
+static void sam_enable(const struct automount_lower_s *lower,
                        bool enable);
-static bool sam_inserted(FAR const struct automount_lower_s *lower);
+static bool sam_inserted(const struct automount_lower_s *lower);
 
 /****************************************************************************
  * Private Data
@@ -123,15 +123,15 @@ static const struct sam_automount_config_s g_hsmci0config =
  *
  ****************************************************************************/
 
-static int sam_attach(FAR const struct automount_lower_s *lower,
-                      automount_handler_t isr, FAR void *arg)
+static int sam_attach(const struct automount_lower_s *lower,
+                      automount_handler_t isr, void *arg)
 {
-  FAR const struct sam_automount_config_s *config;
-  FAR struct sam_automount_state_s *state;
+  const struct sam_automount_config_s *config;
+  struct sam_automount_state_s *state;
 
   /* Recover references to our structure */
 
-  config = (FAR struct sam_automount_config_s *)lower;
+  config = (struct sam_automount_config_s *)lower;
   DEBUGASSERT(config && config->state);
 
   state = config->state;
@@ -162,16 +162,16 @@ static int sam_attach(FAR const struct automount_lower_s *lower,
  *
  ****************************************************************************/
 
-static void sam_enable(FAR const struct automount_lower_s *lower,
+static void sam_enable(const struct automount_lower_s *lower,
                        bool enable)
 {
-  FAR const struct sam_automount_config_s *config;
-  FAR struct sam_automount_state_s *state;
+  const struct sam_automount_config_s *config;
+  struct sam_automount_state_s *state;
   irqstate_t flags;
 
   /* Recover references to our structure */
 
-  config = (FAR struct sam_automount_config_s *)lower;
+  config = (struct sam_automount_config_s *)lower;
   DEBUGASSERT(config && config->state);
 
   state = config->state;
@@ -190,7 +190,7 @@ static void sam_enable(FAR const struct automount_lower_s *lower,
       if (state->handler)
         {
           bool inserted = sam_cardinserted(config->hsmci);
-          (void)state->handler(&config->lower, state->arg, inserted);
+          state->handler(&config->lower, state->arg, inserted);
         }
 
       state->pending = false;
@@ -213,11 +213,11 @@ static void sam_enable(FAR const struct automount_lower_s *lower,
  *
  ****************************************************************************/
 
-static bool sam_inserted(FAR const struct automount_lower_s *lower)
+static bool sam_inserted(const struct automount_lower_s *lower)
 {
-  FAR const struct sam_automount_config_s *config;
+  const struct sam_automount_config_s *config;
 
-  config = (FAR struct sam_automount_config_s *)lower;
+  config = (struct sam_automount_config_s *)lower;
   DEBUGASSERT(config && config->state);
 
   return sam_cardinserted(config->hsmci);
@@ -243,7 +243,7 @@ static bool sam_inserted(FAR const struct automount_lower_s *lower)
 
 void sam_automount_initialize(void)
 {
-  FAR void *handle;
+  void *handle;
 
   finfo("Initializing automounter(s)\n");
 
@@ -286,8 +286,8 @@ void sam_automount_initialize(void)
 
 void sam_automount_event(int slotno, bool inserted)
 {
-  FAR const struct sam_automount_config_s *config;
-  FAR struct sam_automount_state_s *state;
+  const struct sam_automount_config_s *config;
+  struct sam_automount_state_s *state;
 
 #ifdef CONFIG_SAMV7_HSMCI0_AUTOMOUNT
   /* Is this a change in the HSMCI0 insertion state? */
@@ -324,7 +324,7 @@ void sam_automount_event(int slotno, bool inserted)
         {
           /* No.. forward the event to the handler */
 
-          (void)state->handler(&config->lower, state->arg, inserted);
+          state->handler(&config->lower, state->arg, inserted);
         }
     }
 }

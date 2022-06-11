@@ -89,67 +89,10 @@
 
 #define INTSTACK_SIZE (CONFIG_ARCH_INTERRUPTSTACK & ~STACK_ALIGN_MASK)
 
-/* Macros to handle saving and restoring interrupt state.  In the current ARM
- * model, the state is always copied to and from the stack and TCB.  In the
- * Cortex-M0/3 model, the state is copied from the stack to the TCB, but only
- * a referenced is passed to get the state from the TCB.  Cortex-M4 is the
- * same, but may have additional complexity for floating point support in
- * some configurations.
- */
+/* Macros to handle saving and restoring interrupt state. */
 
-#if defined(CONFIG_ARCH_ARMV6M) || defined(CONFIG_ARCH_ARMV7M) || \
-    defined(CONFIG_ARCH_ARMV8M)
-
-  /* If the floating point unit is present and enabled, then save the
-   * floating point registers as well as normal ARM registers.  This only
-   * applies if "lazy" floating point register save/restore is used
-   */
-
-#  if defined(CONFIG_ARCH_FPU) && (defined(CONFIG_ARMV7M_LAZYFPU) || \
-                                   defined(CONFIG_ARMV8M_LAZYFPU))
-#    define arm_savestate(regs)  (regs = (FAR uint32_t *)CURRENT_REGS, arm_savefpu(regs))
-#  else
-#    define arm_savestate(regs)  (regs = (FAR uint32_t *)CURRENT_REGS)
-#  endif
-#  define arm_restorestate(regs) (CURRENT_REGS = regs)
-
-/* The Cortex-A and Cortex-R support the same mechanism, but only lazy
- * floating point register save/restore.
- */
-
-#elif defined(CONFIG_ARCH_ARMV7A) || defined(CONFIG_ARCH_ARMV7R)
-
-  /* If the floating point unit is present and enabled, then save the
-   * floating point registers as well as normal ARM registers.
-   */
-
-#  if defined(CONFIG_ARCH_FPU)
-#    define arm_savestate(regs)  (regs = (FAR uint32_t *)CURRENT_REGS, arm_savefpu(regs))
-#  else
-#    define arm_savestate(regs)  (regs = (FAR uint32_t *)CURRENT_REGS)
-#  endif
-#  define arm_restorestate(regs) (CURRENT_REGS = regs)
-
-/* Otherwise, for the ARM7 and ARM9.  The state is copied in full from stack
- * to stack.  This is not very efficient and should be fixed to match
- * Cortex-A5.
- */
-
-#else
-
-  /* If the floating point unit is present and enabled, then save the
-   * floating point registers as well as normal ARM registers.  Only "lazy"
-   * floating point save/restore is supported.
-   */
-
-#  if defined(CONFIG_ARCH_FPU)
-#    define arm_savestate(regs)  (regs = (FAR uint32_t *)CURRENT_REGS, arm_savefpu(regs))
-#  else
-#    define arm_savestate(regs)  (regs = (FAR uint32_t *)CURRENT_REGS)
-#  endif
-#  define arm_restorestate(regs) (CURRENT_REGS = regs)
-
-#endif
+#define arm_savestate(regs)    (regs = (uint32_t *)CURRENT_REGS)
+#define arm_restorestate(regs) (CURRENT_REGS = regs)
 
 /* Toolchain dependent, linker defined section addresses */
 
@@ -216,19 +159,6 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
-
-/* g_current_regs[] holds a references to the current interrupt level
- * register storage structure.  If is non-NULL only during interrupt
- * processing.  Access to g_current_regs[] must be through the macro
- * CURRENT_REGS for portability.
- */
-
-/* For the case of architectures with multiple CPUs, then there must be one
- * such value for each processor that can receive an interrupt.
- */
-
-EXTERN volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
-#define CURRENT_REGS (g_current_regs[up_cpu_index()])
 
 /* This is the beginning of heap as provided from arm_head.S.
  * This is the first address in DRAM after the loaded
@@ -328,7 +258,6 @@ void arm_boot(void);
 /* Context switching */
 
 uint32_t *arm_decodeirq(uint32_t *regs);
-int  arm_saveusercontext(uint32_t *saveregs);
 void arm_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
 void arm_switchcontext(uint32_t **saveregs, uint32_t *restoreregs);
 
@@ -363,15 +292,15 @@ uint32_t *arm_doirq(int irq, uint32_t *regs);
 
 /* Exception Handlers */
 
-int  arm_svcall(int irq, FAR void *context, FAR void *arg);
-int  arm_hardfault(int irq, FAR void *context, FAR void *arg);
+int  arm_svcall(int irq, void *context, void *arg);
+int  arm_hardfault(int irq, void *context, void *arg);
 
 #  if defined(CONFIG_ARCH_ARMV7M) || defined(CONFIG_ARCH_ARMV8M)
 
-int  arm_memfault(int irq, FAR void *context, FAR void *arg);
-int  arm_busfault(int irq, FAR void *context, FAR void *arg);
-int  arm_usagefault(int irq, FAR void *context, FAR void *arg);
-int  arm_securefault(int irq, FAR void *context, FAR void *arg);
+int  arm_memfault(int irq, void *context, void *arg);
+int  arm_busfault(int irq, void *context, void *arg);
+int  arm_usagefault(int irq, void *context, void *arg);
+int  arm_securefault(int irq, void *context, void *arg);
 
 #  endif /* CONFIG_ARCH_CORTEXM3,4,7 */
 
@@ -440,11 +369,9 @@ void arm_vectorfiq(void);
 /* Floating point unit ******************************************************/
 
 #ifdef CONFIG_ARCH_FPU
-void arm_savefpu(uint32_t *regs);
-void arm_restorefpu(const uint32_t *regs);
+void arm_fpuconfig(void);
 #else
-#  define arm_savefpu(regs)
-#  define arm_restorefpu(regs)
+#  define arm_fpuconfig()
 #endif
 
 /* Low level serial output **************************************************/
@@ -513,7 +440,7 @@ void arm_usbuninitialize(void);
 
 /* Debug ********************************************************************/
 #ifdef CONFIG_STACK_COLORATION
-void arm_stack_color(FAR void *stackbase, size_t nbytes);
+void arm_stack_color(void *stackbase, size_t nbytes);
 #endif
 
 #undef EXTERN

@@ -244,6 +244,7 @@ static inline void udp_readahead(struct udp_recvfrom_s *pstate)
           pstate->ir_recvlen  = recvlen;
           pstate->ir_buffer  += recvlen;
           pstate->ir_buflen  -= recvlen;
+          *pstate->ir_fromlen = src_addr_size;
         }
       else
         {
@@ -320,6 +321,7 @@ static inline void udp_sender(FAR struct net_driver_s *dev,
     {
       FAR struct sockaddr_in *infrom  =
         (FAR struct sockaddr_in *)pstate->ir_from;
+      FAR socklen_t *fromlen = pstate->ir_fromlen;
 
       if (infrom)
         {
@@ -334,7 +336,6 @@ static inline void udp_sender(FAR struct net_driver_s *dev,
             {
               FAR struct sockaddr_in6 *infrom6 =
                 (FAR struct sockaddr_in6 *)infrom;
-              FAR socklen_t *fromlen = pstate->ir_fromlen;
               FAR struct udp_hdr_s *udp   = UDPIPv6BUF;
               FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
               in_addr_t ipv4addr;
@@ -356,6 +357,7 @@ static inline void udp_sender(FAR struct net_driver_s *dev,
 
               infrom->sin_family = AF_INET;
               infrom->sin_port   = udp->srcport;
+              *fromlen = sizeof(struct sockaddr_in);
 
               net_ipv4addr_copy(infrom->sin_addr.s_addr,
                                 net_ip4addr_conv32(ipv4->srcipaddr));

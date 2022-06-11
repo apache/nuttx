@@ -43,7 +43,7 @@ else
 endif
 
 ifeq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += -O0
+  ARCHOPTIMIZATION += -O0 -fno-strict-aliasing
 else
   ARCHOPTIMIZATION += -Oz
 endif
@@ -51,7 +51,7 @@ endif
 ARCHSTDINCLUDES =
 
 ARCHCPUFLAGS = -Dinterrupt="__attribute__((__interrupt__))" -ffreestanding
-ARCHCPUFLAGS += -ffunction-sections -fdata-sections -Wa,-march=ez80
+ARCHCPUFLAGS += -Wa,-march=ez80
 ARCHLIST = 
 ARCHWARNINGS = -Wall -Wextra -Wno-incompatible-library-redeclaration
 ARCHWARNINGS += -Wno-main-return-type -Wno-unused-parameter
@@ -64,7 +64,26 @@ ARCHASMINCLUDES = -include chip/clang-compat.asm
 ARCHASMLIST =
 ARCHASMWARNINGS = -W
 
-LDFLAGS += --gc-sections
+# Optimization of unused sections
+
+ifeq ($(CONFIG_FRAME_POINTER),y)
+  ARCHOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+else
+  ARCHOPTIMIZATION += -fomit-frame-pointer
+endif
+
+LDFLAGS += -nostdlib
+
+ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
+  LDFLAGS          += --gc-sections
+  ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
+endif
+
+# Debug link map
+
+ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
+  LDFLAGS += --cref -Map=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
+endif
 
 # Tool names/paths.
 
@@ -114,14 +133,14 @@ endif
 
 ZDSINSTALLDIR := $(INSTALLROOT)/ZDSII_eZ80Acclaim!_$(ZDSVERSION)
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-  INSTALLDIR = ${shell echo $(ZDSINSTALLDIR)| sed -e "s/\//\\/g"}
+  INSTALLDIR = $(shell echo $(ZDSINSTALLDIR)| sed -e "s/\//\\/g")
   ZDSBINDIR := $(INSTALLDIR)\bin
   ZDSSTDINCDIR := $(INSTALLDIR)\include\std
   ZDSZILOGINCDIR := $(INSTALLDIR)\include\zilog
   ZDSSTDLIBDIR := $(INSTALLDIR)\lib\std
   ZDSZILOGLIBDIR := $(INSTALLDIR)\lib\zilog
 else
-  INSTALLDIR = ${shell cygpath -u "$(ZDSINSTALLDIR)"}
+  INSTALLDIR = $(shell cygpath -u "$(ZDSINSTALLDIR)")
   ZDSBINDIR := $(INSTALLDIR)/bin
   ZDSSTDINCDIR := $(INSTALLDIR)/include/std
   ZDSZILOGINCDIR := $(INSTALLDIR)/include/zilog
@@ -131,17 +150,17 @@ else
   # These are the same directories but with the directory separator
   # character swapped as needed by the ZDS-II compiler
 
-  WTOPDIR := ${shell cygpath -w "$(TOPDIR)"}
-  WZDSSTDINCDIR := ${shell cygpath -w "$(ZDSSTDINCDIR)"}
-  WZDSZILOGINCDIR := ${shell cygpath -w "$(ZDSZILOGINCDIR)"}
-  WZDSSTDLIBDIR := ${shell cygpath -w "$(ZDSSTDLIBDIR)"}
-  WZDSZILOGLIBDIR := ${shell cygpath -w "$(ZDSZILOGLIBDIR)"}
+  WTOPDIR := $(shell cygpath -w "$(TOPDIR)")
+  WZDSSTDINCDIR := $(shell cygpath -w "$(ZDSSTDINCDIR)")
+  WZDSZILOGINCDIR := $(shell cygpath -w "$(ZDSZILOGINCDIR)")
+  WZDSSTDLIBDIR := $(shell cygpath -w "$(ZDSSTDLIBDIR)")
+  WZDSZILOGLIBDIR := $(shell cygpath -w "$(ZDSZILOGLIBDIR)")
 
   # Escaped versions
 
-  ETOPDIR := ${shell echo $(WTOPDIR) | sed -e "s/ /%20/g"}
-  EZDSSTDINCDIR := ${shell echo "$(WZDSSTDINCDIR)" | sed -e "s/ /%20/g"}
-  EZDSZILOGINCDIR := ${shell echo "$(WZDSZILOGINCDIR)" | sed -e "s/ /%20/g"}
+  ETOPDIR := $(shell echo $(WTOPDIR) | sed -e "s/ /%20/g")
+  EZDSSTDINCDIR := $(shell echo "$(WZDSSTDINCDIR)" | sed -e "s/ /%20/g")
+  EZDSZILOGINCDIR := $(shell echo "$(WZDSZILOGINCDIR)" | sed -e "s/ /%20/g")
 endif
 
 # Optimization level

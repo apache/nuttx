@@ -81,7 +81,8 @@ const struct sock_intf_s g_icmpv6_sockif =
   icmpv6_netpoll,     /* si_poll */
   icmpv6_sendmsg,     /* si_sendmsg */
   icmpv6_recvmsg,     /* si_recvmsg */
-  icmpv6_close        /* si_close */
+  icmpv6_close,       /* si_close */
+  icmpv6_ioctl        /* si_ioctl */
 };
 
 /****************************************************************************

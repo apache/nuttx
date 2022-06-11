@@ -38,7 +38,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/compiler.h>
 
@@ -54,10 +54,8 @@
  */
 
 #define SYSLOG_OFLAGS (O_WRONLY | O_CREAT | O_APPEND)
-
-/* An invalid thread ID */
-
-#define NO_HOLDER     (INVALID_PROCESS_ID)
+#define syslog_dev_takesem(s) nxrmutex_lock(&(s)->sl_lock)
+#define syslog_dev_givesem(s) nxrmutex_unlock(&(s)->sl_lock)
 
 /****************************************************************************
  * Private Types
@@ -83,8 +81,7 @@ struct syslog_dev_s
   uint8_t      sl_state;    /* See enum syslog_dev_state */
   uint8_t      sl_oflags;   /* Saved open mode (for re-open) */
   uint16_t     sl_mode;     /* Saved open flags (for re-open) */
-  sem_t        sl_sem;      /* Enforces mutually exclusive access */
-  pid_t        sl_holder;   /* PID of the thread that holds the semaphore */
+  rmutex_t     sl_lock;     /* Enforces mutually exclusive access */
   struct file  sl_file;     /* The syslog file structure */
   FAR char    *sl_devpath;  /* Full path to the character device */
 };
@@ -122,63 +119,6 @@ static const uint8_t g_syscrlf[2] =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: syslog_dev_takesem
- ****************************************************************************/
-
-static inline int syslog_dev_takesem(FAR struct syslog_dev_s *syslog_dev)
-{
-  pid_t me = getpid();
-  int ret;
-
-  /* Does this thread already hold the semaphore?  That could happen if
-   * we were called recursively, i.e., if the logic kicked off by
-   * file_write() where to generate more debug output.  Return an
-   * error in that case.
-   */
-
-  if (syslog_dev->sl_holder == me)
-    {
-      /* Return an error (instead of deadlocking) */
-
-      return -EWOULDBLOCK;
-    }
-
-  /* Either the semaphore is available or is currently held by another
-   * thread.  Wait for it to become available.
-   */
-
-  ret = nxsem_wait(&syslog_dev->sl_sem);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* We hold the semaphore.  We can safely mark ourself as the holder
-   * of the semaphore.
-   */
-
-  syslog_dev->sl_holder = me;
-  return OK;
-}
-
-/****************************************************************************
- * Name: syslog_dev_givesem
- ****************************************************************************/
-
-static inline void syslog_dev_givesem(FAR struct syslog_dev_s *syslog_dev)
-{
-#ifdef CONFIG_DEBUG_ASSERTIONS
-  pid_t me = getpid();
-  DEBUGASSERT(syslog_dev->sl_holder == me);
-#endif
-
-  /* Relinquish the semaphore */
-
-  syslog_dev->sl_holder = NO_HOLDER;
-  nxsem_post(&syslog_dev->sl_sem);
-}
 
 /****************************************************************************
  * Name: syslog_dev_open
@@ -272,9 +212,8 @@ static int syslog_dev_open(FAR struct syslog_dev_s *syslog_dev,
 
   /* The SYSLOG device is open and ready for writing. */
 
-  nxsem_init(&syslog_dev->sl_sem, 0, 1);
-  syslog_dev->sl_holder = NO_HOLDER;
-  syslog_dev->sl_state  = SYSLOG_OPENED;
+  nxrmutex_init(&syslog_dev->sl_lock);
+  syslog_dev->sl_state = SYSLOG_OPENED;
   return OK;
 }
 
@@ -303,7 +242,7 @@ static int syslog_dev_open(FAR struct syslog_dev_s *syslog_dev,
  *     close the device, and set it for later re-opening.
  *
  * NOTE: That the third case is different.  It applies only to the thread
- * that currently holds the sl_sem semaphore.  Other threads should wait.
+ * that currently holds the sl_lock.  Other threads should wait.
  * that is why that case is handled in syslog_semtake().
  *
  * Input Parameters:
@@ -352,7 +291,7 @@ static int syslog_dev_outputready(FAR struct syslog_dev_s *syslog_dev)
       if (syslog_dev->sl_state == SYSLOG_FAILURE)
         {
           file_close(&syslog_dev->sl_file);
-          nxsem_destroy(&syslog_dev->sl_sem);
+          nxrmutex_destroy(&syslog_dev->sl_lock);
 
           syslog_dev->sl_state = SYSLOG_REOPEN;
         }
@@ -795,7 +734,7 @@ void syslog_dev_uninitialize(FAR struct syslog_channel_s *channel)
       syslog_dev->sl_state == SYSLOG_FAILURE)
     {
       file_close(&syslog_dev->sl_file);
-      nxsem_destroy(&syslog_dev->sl_sem);
+      nxrmutex_destroy(&syslog_dev->sl_lock);
     }
 
   /* Set the device in UNINITIALIZED state. */

@@ -145,7 +145,7 @@ static const struct uart_config_s g_console_config =
 
 #ifdef HAVE_UART_DEVICE
 static void max326_setbaud(uintptr_t base,
-                           FAR const struct uart_config_s *config)
+                           const struct uart_config_s *config)
 {
   ub32_t div;
   ub32_t pclk;
@@ -277,7 +277,7 @@ void max326_lowsetup(void)
 
 #ifdef HAVE_UART_DEVICE
 void max326_uart_configure(uintptr_t base,
-                           FAR const struct uart_config_s *config)
+                           const struct uart_config_s *config)
 {
   uint32_t regval;
   uint32_t ctrl0;

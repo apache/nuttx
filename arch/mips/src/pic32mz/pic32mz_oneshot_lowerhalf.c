@@ -55,7 +55,7 @@ struct pic32mz_oneshot_lowerhalf_s
 
   struct pic32mz_oneshot_s oneshot; /* PIC32MZ-specific oneshot state  */
   oneshot_callback_t callback;      /* Handler that receives callback  */
-  FAR void *arg;                    /* Argument passed to the handler  */
+  void *arg;                        /* Argument passed to the handler  */
 };
 
 /****************************************************************************
@@ -64,13 +64,13 @@ struct pic32mz_oneshot_lowerhalf_s
 
 static void pic32mz_oneshot_handler(void *arg);
 
-static int pic32mz_max_delay(FAR struct oneshot_lowerhalf_s *lower,
-                             FAR struct timespec *ts);
-static int pic32mz_start(FAR struct oneshot_lowerhalf_s *lower,
-                         oneshot_callback_t callback, FAR void *arg,
-                         FAR const struct timespec *ts);
-static int pic32mz_cancel(FAR struct oneshot_lowerhalf_s *lower,
-                          FAR struct timespec *ts);
+static int pic32mz_max_delay(struct oneshot_lowerhalf_s *lower,
+                             struct timespec *ts);
+static int pic32mz_start(struct oneshot_lowerhalf_s *lower,
+                         oneshot_callback_t callback, void *arg,
+                         const struct timespec *ts);
+static int pic32mz_cancel(struct oneshot_lowerhalf_s *lower,
+                          struct timespec *ts);
 
 /****************************************************************************
  * Private Data
@@ -106,10 +106,10 @@ static const struct oneshot_operations_s g_oneshot_ops =
 
 static void pic32mz_oneshot_handler(void *arg)
 {
-  FAR struct pic32mz_oneshot_lowerhalf_s *priv =
-    (FAR struct pic32mz_oneshot_lowerhalf_s *)arg;
+  struct pic32mz_oneshot_lowerhalf_s *priv =
+    (struct pic32mz_oneshot_lowerhalf_s *)arg;
   oneshot_callback_t callback;
-  FAR void *cbarg;
+  void *cbarg;
 
   DEBUGASSERT(priv != NULL);
 
@@ -152,11 +152,11 @@ static void pic32mz_oneshot_handler(void *arg)
  *
  ****************************************************************************/
 
-static int pic32mz_max_delay(FAR struct oneshot_lowerhalf_s *lower,
-                             FAR struct timespec *ts)
+static int pic32mz_max_delay(struct oneshot_lowerhalf_s *lower,
+                             struct timespec *ts)
 {
-  FAR struct pic32mz_oneshot_lowerhalf_s *priv =
-    (FAR struct pic32mz_oneshot_lowerhalf_s *)lower;
+  struct pic32mz_oneshot_lowerhalf_s *priv =
+    (struct pic32mz_oneshot_lowerhalf_s *)lower;
   uint64_t usecs;
   int ret;
 
@@ -197,12 +197,12 @@ static int pic32mz_max_delay(FAR struct oneshot_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int pic32mz_start(FAR struct oneshot_lowerhalf_s *lower,
-                         oneshot_callback_t callback, FAR void *arg,
-                         FAR const struct timespec *ts)
+static int pic32mz_start(struct oneshot_lowerhalf_s *lower,
+                         oneshot_callback_t callback, void *arg,
+                         const struct timespec *ts)
 {
-  FAR struct pic32mz_oneshot_lowerhalf_s *priv =
-    (FAR struct pic32mz_oneshot_lowerhalf_s *)lower;
+  struct pic32mz_oneshot_lowerhalf_s *priv =
+    (struct pic32mz_oneshot_lowerhalf_s *)lower;
   irqstate_t flags;
   int ret;
 
@@ -250,11 +250,11 @@ static int pic32mz_start(FAR struct oneshot_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int pic32mz_cancel(FAR struct oneshot_lowerhalf_s *lower,
-                        FAR struct timespec *ts)
+static int pic32mz_cancel(struct oneshot_lowerhalf_s *lower,
+                        struct timespec *ts)
 {
-  FAR struct pic32mz_oneshot_lowerhalf_s *priv =
-    (FAR struct pic32mz_oneshot_lowerhalf_s *)lower;
+  struct pic32mz_oneshot_lowerhalf_s *priv =
+    (struct pic32mz_oneshot_lowerhalf_s *)lower;
   irqstate_t flags;
   int ret;
 
@@ -299,15 +299,15 @@ static int pic32mz_cancel(FAR struct oneshot_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-FAR struct oneshot_lowerhalf_s *oneshot_initialize(int chan,
-                                                   uint16_t resolution)
+struct oneshot_lowerhalf_s *oneshot_initialize(int chan,
+                                               uint16_t resolution)
 {
-  FAR struct pic32mz_oneshot_lowerhalf_s *priv;
+  struct pic32mz_oneshot_lowerhalf_s *priv;
   int ret;
 
   /* Allocate an instance of the lower half driver */
 
-  priv = (FAR struct pic32mz_oneshot_lowerhalf_s *)
+  priv = (struct pic32mz_oneshot_lowerhalf_s *)
     kmm_zalloc(sizeof(struct pic32mz_oneshot_lowerhalf_s));
 
   if (priv == NULL)

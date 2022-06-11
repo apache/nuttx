@@ -225,6 +225,12 @@ config ARCH_BOARD_ESP32_DEVKITC
 		of two CPUs is symmetric, meaning they use the same addresses to
 		access the same memory.
 
+config ARCH_BOARD_TLSR8278ADK80D
+	bool "Telink tlsr8278adk80d board"
+	depends on ARCH_CHIP_TLSR82
+	---help---
+		Enable support for Telink tlsr8278adk80d board.
+
 config ARCH_BOARD_ESP32_ETHERNETKIT
 	bool "Espressif ESP32 Ethernet Kit"
 	depends on ARCH_CHIP_ESP32WROVER
@@ -1391,9 +1397,18 @@ config ARCH_BOARD_NUCLEO_L552ZE
 	---help---
 		STMicro Nucleo STM32L552 board based on the STMicro STM32L552ZET6 MCU.
 
+config ARCH_BOARD_NUCLEO_WL55JC
+	bool "STM32WL55 Nucleo WL55JC"
+	depends on ARCH_CHIP_STM32WL55JC_CPU1 || ARCH_CHIP_STM32WL55JC_CPU2
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo STM32WL55 board based on the STMicro STM32WL55JC MCU.
+
 config ARCH_BOARD_QEMU_I486
 	bool "Qemu i486 Mode"
-	depends on ARCH_X86 || ARCH_I486
+	depends on ARCH_CHIP_QEMU_I486
 	---help---
 		Port of NuttX to QEMU in i486 mode.  This port will also run on real i486
 		hardware (Google the Bifferboard).
@@ -1959,6 +1974,16 @@ config ARCH_BOARD_NUCLEO_G431RB
 	---help---
 		STMicro Nucleo-G431RB board based on the STMicro STM32G431RB MCU.
 
+config ARCH_BOARD_NUCLEO_G474RE
+	bool "ST Micro Nucleo G474RE"
+	depends on ARCH_CHIP_STM32G474R
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	---help---
+		STMicro Nucleo-G474RE board based on the STMicro STM32G474RET6
+		MCU, a Cortex-M4 with FPU, 170 MHz, 128 KB SRAM, 512 KB code.
+		See boards/arm/stm32/nucleo-g474re/README.txt.
+
 config ARCH_BOARD_B_L072Z_LRWAN1
 	bool "B-L072Z-LRWAN1"
 	depends on ARCH_CHIP_STM32L072CZ
@@ -2424,6 +2449,7 @@ config ARCH_BOARD
 	default "esp32s2-saola-1"          if ARCH_BOARD_ESP32S2_SAOLA_1
 	default "esp32s3-devkit"           if ARCH_BOARD_ESP32S3_DEVKIT
 	default "et-stm32-stamp"           if ARCH_BOARD_ET_STM32_STAMP
+	default "tlsr8278adk80d"           if ARCH_BOARD_TLSR8278ADK80D
 	default "ez80f910200kitg"          if ARCH_BOARD_EZ80F910200KITG
 	default "ez80f910200zco"           if ARCH_BOARD_EZ80F910200ZCO
 	default "fire-stm32v2"             if ARCH_BOARD_FIRE_STM32
@@ -2508,6 +2534,7 @@ config ARCH_BOARD
 	default "nucleo-l476rg"            if ARCH_BOARD_NUCLEO_L476RG
 	default "nucleo-l496zg"            if ARCH_BOARD_NUCLEO_L496ZG
 	default "nucleo-l552ze"            if ARCH_BOARD_NUCLEO_L552ZE
+	default "nucleo-wl55jc"            if ARCH_BOARD_NUCLEO_WL55JC
 	default "nutiny-nuc120"            if ARCH_BOARD_NUTINY_NUC120
 	default "olimex-efm32g880f128-stk" if ARCH_BOARD_OLIMEX_EFM32G880F128_STK
 	default "olimex-lpc1766stk"        if ARCH_BOARD_LPC1766STK
@@ -2590,6 +2617,7 @@ config ARCH_BOARD
 	default "b-g431b-esc1"             if ARCH_BOARD_B_G431B_ESC1
 	default "nucleo-g431kb"            if ARCH_BOARD_NUCLEO_G431KB
 	default "nucleo-g431rb"            if ARCH_BOARD_NUCLEO_G431RB
+	default "nucleo-g474re"            if ARCH_BOARD_NUCLEO_G474RE
 	default "b-l072z-lrwan1"           if ARCH_BOARD_B_L072Z_LRWAN1
 	default "b-l475e-iot01a"           if ARCH_BOARD_B_L475E_IOT01A
 	default "b-u585i-iot02a"           if ARCH_BOARD_B_U585I_IOT02A
@@ -3013,6 +3041,9 @@ endif
 if ARCH_BOARD_NUCLEO_L552ZE
 source "boards/arm/stm32l5/nucleo-l552ze/Kconfig"
 endif
+if ARCH_BOARD_NUCLEO_WL55JC
+source "boards/arm/stm32wl5/nucleo-wl55jc/Kconfig"
+endif
 if ARCH_BOARD_STM32L476_MDK
 source "boards/arm/stm32l4/stm32l476-mdk/Kconfig"
 endif
@@ -3379,6 +3410,9 @@ endif
 if ARCH_BOARD_XX3823
 source "boards/sparc/bm3823/xx3823/Kconfig"
 endif
+if ARCH_BOARD_TLSR8278ADK80D
+source "boards/arm/tlsr82/tlsr8278adk80d/Kconfig"
+endif
 
 comment "Board-Common Options"
 
@@ -3498,6 +3532,15 @@ config BOARD_ASSERT_RESET_VALUE
 		assertion occurs.  This may be used by board_reset()
 		implementations to handle the reset differently for the
 		case of a crash.
+
+config BOARDCTL_RESET_CAUSE
+	bool "Return reset cause"
+	default n
+	depends on ARCH_HAVE_RESET
+	---help---
+		Enables support for the BOARDIOC_RESET_CAUSE boardctl() command.
+		Architecture specific logic must provide the board_reset_cause()
+		interface.
 
 config BOARDCTL_UNIQUEID
 	bool "Return board unique ID"

@@ -39,4 +39,11 @@ config LIBC_MAX_TMPFILE
 		maximum size of that last filename.  This size is the size of the full
 		file path.
 
+config LIBC_MAX_EXITFUNS
+	int "Maximum amount of exit functions"
+	default 0
+		---help---
+		Configure the amount of exit functions for atexit/on_exit. The ANSI
+		default is 32, but most likely we don't need as many.
+
 endmenu # stdlib Options

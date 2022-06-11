@@ -149,7 +149,7 @@
 static struct usbhost_connection_s *g_usbconn;
 #endif
 #ifdef NSH_HAVE_MMCSD
-static FAR struct sdio_dev_s *g_sdiodev;
+static struct sdio_dev_s *g_sdiodev;
 #endif
 
 /****************************************************************************
@@ -203,7 +203,7 @@ static int nsh_waiter(int argc, char *argv[])
  ****************************************************************************/
 
 #ifdef NSH_HAVE_MMCSD_CDINT
-static int nsh_cdinterrupt(int irq, FAR void *context, FAR void *arg)
+static int nsh_cdinterrupt(int irq, void *context, void *arg)
 {
   static bool inserted = 0xff; /* Impossible value */
   bool present;
@@ -339,7 +339,7 @@ static int nsh_usbhostinitialize(void)
 
       ret = kthread_create("usbhost", CONFIG_USBHOST_DEFPRIO,
                            CONFIG_USBHOST_STACKSIZE,
-                           (main_t)nsh_waiter, (FAR char * const *)NULL);
+                           (main_t)nsh_waiter, (char * const *)NULL);
       return ret < 0 ? -ENOEXEC : OK;
     }
 

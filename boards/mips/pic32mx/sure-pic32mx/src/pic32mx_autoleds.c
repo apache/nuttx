@@ -115,7 +115,7 @@ static const struct led_setting_s g_ledoffvalues[LED_NVALUES] =
  * Name: pic32mx_setleds
  ****************************************************************************/
 
-static void pic32mx_setleds(FAR const struct led_setting_s *setting)
+static void pic32mx_setleds(const struct led_setting_s *setting)
 {
   if (setting->usb != LED_NC)
     {

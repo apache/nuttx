@@ -75,7 +75,7 @@
  *
  ****************************************************************************/
 
-int sam_qeinitialize(FAR const char *devpath, int tc);
+int sam_qeinitialize(const char *devpath, int tc);
 
 #endif /* CONFIG_SENSORS_QENCODER */
 #endif /* __ARCH_ARM_SRC_SAMV7_SAM_QENCODER_H */

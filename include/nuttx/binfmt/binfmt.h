@@ -258,7 +258,8 @@ int unload_module(FAR struct binary_s *bin);
  ****************************************************************************/
 
 int exec_module(FAR const struct binary_s *binp,
-                FAR const char *filename, FAR char * const *argv);
+                FAR const char *filename, FAR char * const *argv,
+                FAR char * const *envp);
 
 /****************************************************************************
  * Name: exec
@@ -308,6 +309,9 @@ int exec_module(FAR const struct binary_s *binp,
  *              program.
  *   argv     - A pointer to an array of string arguments. The end of the
  *              array is indicated with a NULL entry.
+ *   envp     - An array of character pointers to null-terminated strings
+ *              that provide the environment for the new process image.
+ *              The environment array is terminated by a null pointer.
  *   exports  - The address of the start of the caller-provided symbol
  *              table. This symbol table contains the addresses of symbols
  *              exported by the caller and made available for linking the
@@ -321,7 +325,8 @@ int exec_module(FAR const struct binary_s *binp,
  ****************************************************************************/
 
 int exec(FAR const char *filename, FAR char * const *argv,
-         FAR const struct symtab_s *exports, int nexports);
+         FAR char * const *envp, FAR const struct symtab_s *exports,
+         int nexports);
 
 /****************************************************************************
  * Name: exec_spawn
@@ -338,6 +343,8 @@ int exec(FAR const char *filename, FAR char * const *argv,
  *              program.
  *   argv     - A pointer to an array of string arguments. The end of the
  *              array is indicated with a NULL entry.
+ *   envp     - A pointer to an array of environment strings. Terminated with
+ *              a NULL entry.
  *   exports  - The address of the start of the caller-provided symbol
  *              table. This symbol table contains the addresses of symbols
  *              exported by the caller and made available for linking the
@@ -353,8 +360,8 @@ int exec(FAR const char *filename, FAR char * const *argv,
  ****************************************************************************/
 
 int exec_spawn(FAR const char *filename, FAR char * const *argv,
-               FAR const struct symtab_s *exports, int nexports,
-               FAR const posix_spawnattr_t *attr);
+               FAR char * const *envp, FAR const struct symtab_s *exports,
+               int nexports, FAR const posix_spawnattr_t *attr);
 
 /****************************************************************************
  * Name: binfmt_exit

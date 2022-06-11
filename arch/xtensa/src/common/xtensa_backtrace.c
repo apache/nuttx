@@ -233,7 +233,7 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
       if (up_interrupt_context())
         {
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
-          FAR void *istackbase;
+          void *istackbase;
 #ifdef CONFIG_SMP
           istackbase = xtensa_intstack_alloc();
 #else

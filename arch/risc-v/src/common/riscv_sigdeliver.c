@@ -120,7 +120,7 @@ void riscv_sigdeliver(void)
   DEBUGASSERT(rtcb->irqcount == 0);
   while (rtcb->irqcount < saved_irqcount)
     {
-      (void)enter_critical_section();
+      enter_critical_section();
     }
 #endif
 

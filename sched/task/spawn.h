@@ -49,6 +49,7 @@ struct spawn_parms_s
   FAR const posix_spawn_file_actions_t *file_actions;
   FAR const posix_spawnattr_t *attr;
   FAR char * const *argv;
+  FAR char * const *envp;
 
   /* Parameters that differ for posix_spawn[p] and task_spawn */
 

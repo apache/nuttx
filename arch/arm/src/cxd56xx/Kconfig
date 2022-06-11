@@ -80,7 +80,7 @@ if CXD56_PMIC
 config CXD56_PMIC_INT
 	bool "PMIC interrupt"
 	default n
-	depends on SCHED_LPWORK
+	depends on SCHED_WORKQUEUE
 	---help---
 		Enable PMIC interrupt.
 
@@ -1202,7 +1202,7 @@ menuconfig CXD56_SDIO
 	default n
 	select ARCH_HAVE_SDIO
 	select SDIO_BLOCKSETUP
-	depends on SCHED_HPWORK
+	depends on SCHED_WORKQUEUE
 
 if CXD56_SDIO
 

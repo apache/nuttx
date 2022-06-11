@@ -111,10 +111,6 @@
 
 /* Timing values ************************************************************/
 
-/* TX poll deley = 1 seconds. CLK_TCK=number of clock ticks per second */
-
-#define C5471_WDDELAY         (1*CLK_TCK)
-
 /* TX timeout = 1 minute */
 
 #define C5471_TXTIMEOUT       (60*CLK_TCK)
@@ -280,7 +276,7 @@
 
 /* This is a helper pointer for accessing the contents of Ethernet header */
 
-#define BUF ((FAR struct eth_hdr_s *)priv->c_dev.d_buf)
+#define BUF ((struct eth_hdr_s *)priv->c_dev.d_buf)
 
 /****************************************************************************
  * Private Types
@@ -297,7 +293,6 @@ static uint8_t g_pktbuf[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
 struct c5471_driver_s
 {
   bool    c_bifup;           /* true:ifup false:ifdown */
-  struct wdog_s c_txpoll;    /* TX poll timer */
   struct wdog_s c_txtimeout; /* TX timeout timer */
   struct work_s c_irqwork;   /* For deferring interrupt work to the work queue */
   struct work_s c_pollwork;  /* For deferring poll work to the work queue */
@@ -389,28 +384,25 @@ static void c5471_txstatus(struct c5471_driver_s *priv);
 #endif
 static void c5471_txdone(struct c5471_driver_s *priv);
 
-static void c5471_interrupt_work(FAR void *arg);
-static int  c5471_interrupt(int irq, FAR void *context, FAR void *arg);
+static void c5471_interrupt_work(void *arg);
+static int  c5471_interrupt(int irq, void *context, void *arg);
 
 /* Watchdog timer expirations */
 
-static void c5471_txtimeout_work(FAR void *arg);
+static void c5471_txtimeout_work(void *arg);
 static void c5471_txtimeout_expiry(wdparm_t arg);
-
-static void c5471_poll_work(FAR void *arg);
-static void c5471_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
 static int c5471_ifup(struct net_driver_s *dev);
 static int c5471_ifdown(struct net_driver_s *dev);
 
-static void c5471_txavail_work(FAR void *arg);
+static void c5471_txavail_work(void *arg);
 static int c5471_txavail(struct net_driver_s *dev);
 
 #ifdef CONFIG_NET_MCASTGROUP
-static int c5471_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
-static int c5471_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
+static int c5471_addmac(struct net_driver_s *dev, const uint8_t *mac);
+static int c5471_rmmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
 
 /* Initialization functions */
@@ -1580,9 +1572,9 @@ static void c5471_txdone(struct c5471_driver_s *priv)
  *
  ****************************************************************************/
 
-static void c5471_interrupt_work(FAR void *arg)
+static void c5471_interrupt_work(void *arg)
 {
-  FAR struct c5471_driver_s *priv = (FAR struct c5471_driver_s *)arg;
+  struct c5471_driver_s *priv = (struct c5471_driver_s *)arg;
 
   /* Process pending Ethernet interrupts */
 
@@ -1663,7 +1655,7 @@ static void c5471_interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int c5471_interrupt(int irq, FAR void *context, FAR void *arg)
+static int c5471_interrupt(int irq, void *context, void *arg)
 {
 #if CONFIG_C5471_NET_NINTERFACES == 1
   register struct c5471_driver_s *priv = &g_c5471[0];
@@ -1712,9 +1704,9 @@ static int c5471_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static void c5471_txtimeout_work(FAR void *arg)
+static void c5471_txtimeout_work(void *arg)
 {
-  FAR struct c5471_driver_s *priv = (FAR struct c5471_driver_s *)arg;
+  struct c5471_driver_s *priv = (struct c5471_driver_s *)arg;
 
   /* Increment statistics */
 
@@ -1772,74 +1764,6 @@ static void c5471_txtimeout_expiry(wdparm_t arg)
 }
 
 /****************************************************************************
- * Function: c5471_poll_work
- *
- * Description:
- *   Perform periodic polling from the worker thread
- *
- * Input Parameters:
- *   arg - The argument passed when work_queue() as called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static void c5471_poll_work(FAR void *arg)
-{
-  FAR struct c5471_driver_s *priv = (FAR struct c5471_driver_s *)arg;
-
-  /* Check if the ESM has let go of the RX descriptor giving us access rights
-   * to submit another Ethernet frame.
-   */
-
-  net_lock();
-  if ((EIM_TXDESC_OWN_HOST & getreg32(priv->c_rxcpudesc)) == 0)
-    {
-      /* If so, update TCP timing states and
-       * poll the network for new XMIT data
-       */
-
-      devif_timer(&priv->c_dev, C5471_WDDELAY, c5471_txpoll);
-    }
-
-  /* Setup the watchdog poll timer again */
-
-  wd_start(&priv->c_txpoll, C5471_WDDELAY,
-           c5471_poll_expiry, (wdparm_t)priv);
-  net_unlock();
-}
-
-/****************************************************************************
- * Function: c5471_poll_expiry
- *
- * Description:
- *   Periodic timer handler.  Called from the timer interrupt handler.
- *
- * Input Parameters:
- *   arg  - The argument
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
- *
- ****************************************************************************/
-
-static void c5471_poll_expiry(wdparm_t arg)
-{
-  struct c5471_driver_s *priv = (struct c5471_driver_s *)arg;
-
-  /* Schedule to perform the interrupt processing on the worker thread. */
-
-  work_queue(ETHWORK, &priv->c_pollwork, c5471_poll_work, priv, 0);
-}
-
-/****************************************************************************
  * Function: c5471_ifup
  *
  * Description:
@@ -1894,11 +1818,6 @@ static int c5471_ifup(struct net_driver_s *dev)
   putreg32((getreg32(ENET0_MODE) | ENET_MODE_ENABLE), ENET0_MODE); /* enable ENET */
   up_mdelay(100);
 
-  /* Set and activate a timer process */
-
-  wd_start(&priv->c_txpoll, C5471_WDDELAY,
-           c5471_poll_expiry, (wdparm_t)priv);
-
   /* Enable the Ethernet interrupt */
 
   priv->c_bifup = true;
@@ -1947,9 +1866,8 @@ static int c5471_ifdown(struct net_driver_s *dev)
 
   putreg32((getreg32(EIM_CTRL) & ~EIM_CTRL_ESM_EN), EIM_CTRL);  /* disable ESM */
 
-  /* Cancel the TX poll timer and TX timeout timers */
+  /* Cancel the TX timeout timers */
 
-  wd_cancel(&priv->c_txpoll);
   wd_cancel(&priv->c_txtimeout);
 
   /* Reset the device */
@@ -1976,9 +1894,9 @@ static int c5471_ifdown(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void c5471_txavail_work(FAR void *arg)
+static void c5471_txavail_work(void *arg)
 {
-  FAR struct c5471_driver_s *priv = (FAR struct c5471_driver_s *)arg;
+  struct c5471_driver_s *priv = (struct c5471_driver_s *)arg;
 
   ninfo("Polling\n");
 
@@ -1995,7 +1913,7 @@ static void c5471_txavail_work(FAR void *arg)
         {
           /* If so, then poll the network for new XMIT data */
 
-          devif_timer(&priv->c_dev, 0, c5471_txpoll);
+          devif_poll(&priv->c_dev, c5471_txpoll);
         }
     }
 
@@ -2021,7 +1939,7 @@ static void c5471_txavail_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int c5471_txavail(FAR struct net_driver_s *dev)
+static int c5471_txavail(struct net_driver_s *dev)
 {
   struct c5471_driver_s *priv = (struct c5471_driver_s *)dev->d_private;
 
@@ -2059,10 +1977,10 @@ static int c5471_txavail(FAR struct net_driver_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_MCASTGROUP
-static int c5471_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
+static int c5471_addmac(struct net_driver_s *dev, const uint8_t *mac)
 {
-  FAR struct c5471_driver_s *priv =
-    (FAR struct c5471_driver_s *)dev->d_private;
+  struct c5471_driver_s *priv =
+    (struct c5471_driver_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
 
@@ -2090,10 +2008,10 @@ static int c5471_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_MCASTGROUP
-static int c5471_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
+static int c5471_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 {
-  FAR struct c5471_driver_s *priv =
-    (FAR struct c5471_driver_s *)dev->d_private;
+  struct c5471_driver_s *priv =
+    (struct c5471_driver_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
 

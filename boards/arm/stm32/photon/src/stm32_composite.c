@@ -65,7 +65,7 @@
  *
  ****************************************************************************/
 
-static FAR void *board_composite0_connect(int port)
+static void *board_composite0_connect(int port)
 {
   /* Here we are composing the configuration of the usb composite device.
    *
@@ -151,7 +151,7 @@ int board_composite_initialize(int port)
  *
  ****************************************************************************/
 
-FAR void *board_composite_connect(int port, int configid)
+void *board_composite_connect(int port, int configid)
 {
   if (configid == 0)
     {

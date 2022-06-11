@@ -523,7 +523,7 @@ enum scg_system_clock_mode_e s32k1xx_set_runmode(enum scg_system_clock_mode_e
  *
  ****************************************************************************/
 
-int s32k1xx_clockconfig(FAR const struct clock_configuration_s *clkcfg);
+int s32k1xx_clockconfig(const struct clock_configuration_s *clkcfg);
 
 /****************************************************************************
  * Name: s32k1xx_get_coreclk

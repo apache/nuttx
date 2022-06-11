@@ -22,14 +22,28 @@
 #define __ARCH_RISCV_SRC_QEMU_RV_HARDWARE_QEMU_RV_PLIC_H
 
 /****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 #define QEMU_RV_PLIC_PRIORITY    (QEMU_RV_PLIC_BASE + 0x000000)
 #define QEMU_RV_PLIC_PENDING1    (QEMU_RV_PLIC_BASE + 0x001000)
-#define QEMU_RV_PLIC_ENABLE1     (QEMU_RV_PLIC_BASE + 0x002000)
-#define QEMU_RV_PLIC_ENABLE2     (QEMU_RV_PLIC_BASE + 0x002004)
-#define QEMU_RV_PLIC_THRESHOLD   (QEMU_RV_PLIC_BASE + 0x200000)
-#define QEMU_RV_PLIC_CLAIM       (QEMU_RV_PLIC_BASE + 0x200004)
+
+#ifdef CONFIG_ARCH_USE_S_MODE
+#  define QEMU_RV_PLIC_ENABLE1   (QEMU_RV_PLIC_BASE + 0x002080)
+#  define QEMU_RV_PLIC_ENABLE2   (QEMU_RV_PLIC_BASE + 0x002084)
+#  define QEMU_RV_PLIC_THRESHOLD (QEMU_RV_PLIC_BASE + 0x201000)
+#  define QEMU_RV_PLIC_CLAIM     (QEMU_RV_PLIC_BASE + 0x201004)
+#else
+#  define QEMU_RV_PLIC_ENABLE1   (QEMU_RV_PLIC_BASE + 0x002000)
+#  define QEMU_RV_PLIC_ENABLE2   (QEMU_RV_PLIC_BASE + 0x002004)
+#  define QEMU_RV_PLIC_THRESHOLD (QEMU_RV_PLIC_BASE + 0x200000)
+#  define QEMU_RV_PLIC_CLAIM     (QEMU_RV_PLIC_BASE + 0x200004)
+#endif
 
 #endif /* __ARCH_RISCV_SRC_QEMU_RV_HARDWARE_QEMU_RV_PLIC_H */

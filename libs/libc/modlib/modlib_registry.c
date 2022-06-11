@@ -29,36 +29,22 @@
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/lib/modlib.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define NO_HOLDER (INVALID_PROCESS_ID)
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-
-struct mod_registrylock_s
-{
-  sem_t lock;         /* The actual registry lock */
-  pid_t holder;       /* The PID of the current holder of the lock */
-  int16_t count;      /* The number of nested calls to modlib_registry_lock */
-};
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static struct mod_registrylock_s g_modlock =
-{
-  SEM_INITIALIZER(1), /* lock */
-  NO_HOLDER,          /* pid */
-  0                   /* count */
-};
+static rmutex_t g_modlock = NXRMUTEX_INITIALIZER;
 
 static FAR struct module_s *g_mod_registry;
 
@@ -82,40 +68,7 @@ static FAR struct module_s *g_mod_registry;
 
 void modlib_registry_lock(void)
 {
-  pid_t me;
-  int ret;
-
-  /* Do we already hold the semaphore? */
-
-  me = getpid();
-  if (me == g_modlock.holder)
-    {
-      /* Yes... just increment the count */
-
-      g_modlock.count++;
-      DEBUGASSERT(g_modlock.count > 0);
-    }
-
-  /* Take the semaphore (perhaps waiting) */
-
-  else
-    {
-      while ((ret = _SEM_WAIT(&g_modlock.lock)) < 0)
-        {
-          /* The only case that an error should occur here is if
-           * the wait was awakened by a signal.
-           */
-
-          DEBUGASSERT(_SEM_ERRNO(ret) == EINTR ||
-                      _SEM_ERRNO(ret) == ECANCELED);
-          UNUSED(ret);
-        }
-
-      /* No we hold the semaphore */
-
-      g_modlock.holder = me;
-      g_modlock.count  = 1;
-    }
+  nxrmutex_lock(&g_modlock);
 }
 
 /****************************************************************************
@@ -134,25 +87,7 @@ void modlib_registry_lock(void)
 
 void modlib_registry_unlock(void)
 {
-  DEBUGASSERT(g_modlock.holder == getpid());
-
-  /* Is this our last count on the semaphore? */
-
-  if (g_modlock.count > 1)
-    {
-      /* No.. just decrement the count */
-
-      g_modlock.count--;
-    }
-
-  /* Yes.. then we can really release the semaphore */
-
-  else
-    {
-      g_modlock.holder = NO_HOLDER;
-      g_modlock.count  = 0;
-      _SEM_POST(&g_modlock.lock);
-    }
+  nxrmutex_unlock(&g_modlock);
 }
 
 /****************************************************************************

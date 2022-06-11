@@ -462,9 +462,9 @@ int cxd56_src_init(FAR struct cxd56_dev_s *dev,
 
   pthread_attr_init(&t_attr);
   sparam.sched_priority = sched_get_priority_max(SCHED_FIFO) - 3;
-  (void)pthread_attr_setschedparam(&t_attr, &sparam);
-  (void)pthread_attr_setstacksize(&t_attr,
-                                  CONFIG_CXD56_AUDIO_SRC_STACKSIZE);
+  pthread_attr_setschedparam(&t_attr, &sparam);
+  pthread_attr_setstacksize(&t_attr,
+                            CONFIG_CXD56_AUDIO_SRC_STACKSIZE);
 
   ret = pthread_create(&g_src.threadid, &t_attr, cxd56_src_thread,
                        (pthread_addr_t)&g_src);

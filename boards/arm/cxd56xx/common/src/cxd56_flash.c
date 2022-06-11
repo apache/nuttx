@@ -61,7 +61,7 @@
 int board_flash_initialize(void)
 {
   int ret;
-  FAR struct mtd_dev_s *mtd;
+  struct mtd_dev_s *mtd;
 
   mtd = cxd56_sfc_initialize();
   if (!mtd)

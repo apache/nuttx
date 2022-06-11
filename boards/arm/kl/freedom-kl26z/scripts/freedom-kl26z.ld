@@ -43,7 +43,7 @@ SECTIONS
     } > vectflash
 
     .cfmprotect : {
-        *(.cfmconfig)
+        KEEP(*(.cfmconfig))
     } > cfmprotect
 
     .text : {

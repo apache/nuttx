@@ -48,9 +48,9 @@
 
 int stm32_cordic_setup(void)
 {
-  FAR struct cordic_lowerhalf_s *cordic      = NULL;
-  static bool                    initialized = false;
-  int                            ret         = OK;
+  struct cordic_lowerhalf_s *cordic      = NULL;
+  static bool                initialized = false;
+  int                        ret         = OK;
 
   /* Have we already initialized? */
 

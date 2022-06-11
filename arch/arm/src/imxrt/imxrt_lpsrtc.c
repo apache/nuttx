@@ -184,7 +184,7 @@ time_t up_rtc_time(void)
  *
  ****************************************************************************/
 
-int up_rtc_settime(FAR const struct timespec *ts)
+int up_rtc_settime(const struct timespec *ts)
 {
   uint32_t regval;
 

@@ -56,7 +56,7 @@ typedef void (*alarmcb_t)(void);
 
 #ifdef CONFIG_RTC_ALARM
 struct timespec;
-int efm32_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback);
+int efm32_rtc_setalarm(const struct timespec *tp, alarmcb_t callback);
 #endif
 
 /****************************************************************************

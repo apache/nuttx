@@ -142,7 +142,7 @@ static const size_t g_mtd_partition_table_size =
 #ifdef HAVE_I2CTOOL
 static void sam_i2c_register(int bus)
 {
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
   int ret;
 
   i2c = sam_i2cbus_initialize(bus);
@@ -203,13 +203,13 @@ static void sam_i2ctool(void)
 int sam_bringup(void)
 {
 #ifdef HAVE_S25FL1
-  FAR struct qspi_dev_s *qspi;
+  struct qspi_dev_s *qspi;
 #endif
 #if defined(HAVE_S25FL1)
-  FAR struct mtd_dev_s *mtd;
+  struct mtd_dev_s *mtd;
 #endif
 #if defined(HAVE_RTC_DSXXXX) || defined(HAVE_RTC_PCF85263)
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
 #endif
 #if defined(HAVE_S25FL1_CHARDEV)
 #if defined(CONFIG_BCH)

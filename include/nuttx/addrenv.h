@@ -283,6 +283,8 @@ struct addrenv_reserve_s
  *                         address environment
  *   up_addrenv_vdata    - Returns the virtual base address of the .bss/.data
  *                         address environment
+ *   up_addrenv_vheap    - Returns the virtual base address of the heap
+ *                         address environment
  *   up_addrenv_heapsize - Returns the size of the initial heap allocation.
  *   up_addrenv_select   - Instantiate an address environment
  *   up_addrenv_restore  - Restore an address environment

@@ -39,6 +39,18 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Offset to privilege mode, note that hart0 does not have S-mode */
+
+#ifdef CONFIG_ARCH_USE_S_MODE
+#  define MPFS_PLIC_IEPRIV_OFFSET         (MPFS_HART_SIE_OFFSET)
+#  define MPFS_PLIC_CLAIMPRIV_OFFSET      (MPFS_PLIC_CLAIM_S_OFFSET)
+#  define MPFS_PLIC_THRESHOLDPRIV_OFFSET  (MPFS_PLIC_THRESHOLD_S_OFFSET)
+#else
+#  define MPFS_PLIC_IEPRIV_OFFSET         (0)
+#  define MPFS_PLIC_CLAIMPRIV_OFFSET      (0)
+#  define MPFS_PLIC_THRESHOLDPRIV_OFFSET  (0)
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -65,7 +77,8 @@ uintptr_t mpfs_plic_get_iebase(void)
     }
   else
     {
-      iebase = MPFS_PLIC_H1_MIE0 + (hart_id - 1) * MPFS_HART_MIE_OFFSET;
+      iebase = MPFS_PLIC_H1_MIE0 + MPFS_PLIC_IEPRIV_OFFSET +
+        (hart_id - 1) * MPFS_HART_MIE_OFFSET;
     }
 
   return iebase;
@@ -93,7 +106,7 @@ uintptr_t mpfs_plic_get_claimbase(void)
     }
   else
     {
-      claim_address = MPFS_PLIC_H1_MCLAIM +
+      claim_address = MPFS_PLIC_H1_MCLAIM + MPFS_PLIC_CLAIMPRIV_OFFSET +
         (hart_id - 1) * MPFS_PLIC_NEXTHART_OFFSET;
     }
 
@@ -123,7 +136,8 @@ uintptr_t mpfs_plic_get_thresholdbase(void)
   else
     {
       threshold_address = MPFS_PLIC_H1_MTHRESHOLD +
-        (hart_id - 1) * MPFS_PLIC_NEXTHART_OFFSET;
+          MPFS_PLIC_THRESHOLDPRIV_OFFSET +
+          (hart_id - 1) * MPFS_PLIC_NEXTHART_OFFSET;
     }
 
   return threshold_address;

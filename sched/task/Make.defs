@@ -45,20 +45,12 @@ endif
 
 ifneq ($(CONFIG_BINFMT_DISABLE),y)
 ifeq ($(CONFIG_LIBC_EXECFUNCS),y)
-CSRCS += task_execv.c task_posixspawn.c
+CSRCS += task_execve.c task_posixspawn.c
 endif
 endif
 
 ifeq ($(CONFIG_SCHED_STARTHOOK),y)
 CSRCS += task_starthook.c
-endif
-
-ifeq ($(CONFIG_SCHED_ATEXIT),y)
-CSRCS += task_atexit.c
-endif
-
-ifeq ($(CONFIG_SCHED_ONEXIT),y)
-CSRCS += task_onexit.c
 endif
 
 # Include task build support

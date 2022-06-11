@@ -468,7 +468,7 @@ Where <subdir> is one of the following:
     2. Default platform/toolchain:
 
        CONFIG_HOST_LINUX=y                     : Linux
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y     : GNU EABI toolchain for Linux
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Linux
        CONFIG_RAW_BINARY=y                     : Output formats: ELF and raw binary
 
     3. As it is configured now, you MUST have a network connected.

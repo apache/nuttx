@@ -75,7 +75,7 @@ static int stm32l4_oneshot_handler(int irq, void *context, void *arg)
 {
   struct stm32l4_oneshot_s *oneshot = (struct stm32l4_oneshot_s *) arg;
   oneshot_handler_t oneshot_handler;
-  FAR void *oneshot_arg;
+  void *oneshot_arg;
 
   tmrinfo("Expired...\n");
   DEBUGASSERT(oneshot != NULL && oneshot->handler);
@@ -180,7 +180,7 @@ static inline int stm32l4_allocate_handler(struct stm32l4_oneshot_s *oneshot)
  *
  ****************************************************************************/
 
-int stm32l4_oneshot_initialize(FAR struct stm32l4_oneshot_s *oneshot,
+int stm32l4_oneshot_initialize(struct stm32l4_oneshot_s *oneshot,
                                int chan, uint16_t resolution)
 {
   uint32_t frequency;
@@ -222,8 +222,8 @@ int stm32l4_oneshot_initialize(FAR struct stm32l4_oneshot_s *oneshot,
  *
  ****************************************************************************/
 
-int stm32l4_oneshot_max_delay(FAR struct stm32l4_oneshot_s *oneshot,
-                              FAR uint64_t *usec)
+int stm32l4_oneshot_max_delay(struct stm32l4_oneshot_s *oneshot,
+                              uint64_t *usec)
 {
   DEBUGASSERT(oneshot != NULL && usec != NULL);
 
@@ -252,9 +252,9 @@ int stm32l4_oneshot_max_delay(FAR struct stm32l4_oneshot_s *oneshot,
  *
  ****************************************************************************/
 
-int stm32l4_oneshot_start(FAR struct stm32l4_oneshot_s *oneshot,
-                          oneshot_handler_t handler, FAR void *arg,
-                          FAR const struct timespec *ts)
+int stm32l4_oneshot_start(struct stm32l4_oneshot_s *oneshot,
+                          oneshot_handler_t handler, void *arg,
+                          const struct timespec *ts)
 {
   uint64_t usec;
   uint64_t period;
@@ -351,8 +351,8 @@ int stm32l4_oneshot_start(FAR struct stm32l4_oneshot_s *oneshot,
  *
  ****************************************************************************/
 
-int stm32l4_oneshot_cancel(FAR struct stm32l4_oneshot_s *oneshot,
-                           FAR struct timespec *ts)
+int stm32l4_oneshot_cancel(struct stm32l4_oneshot_s *oneshot,
+                           struct timespec *ts)
 {
   irqstate_t flags;
   uint64_t usec;

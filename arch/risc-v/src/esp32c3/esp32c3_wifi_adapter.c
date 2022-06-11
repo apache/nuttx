@@ -38,7 +38,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <irq/irq.h>
-#include <sched/sched.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mqueue.h>
 #include <nuttx/spinlock.h>
@@ -50,10 +49,15 @@
 #include <nuttx/signal.h>
 #include <nuttx/arch.h>
 #include <nuttx/wireless/wireless.h>
+#include <nuttx/tls.h>
+
+#include "riscv_internal.h"
+
 #include "hardware/esp32c3_system.h"
 #include "hardware/wdev_reg.h"
 #include "hardware/esp32c3_rtccntl.h"
 #include "hardware/esp32c3_syscon.h"
+
 #include "esp32c3.h"
 #include "esp32c3_attr.h"
 #include "esp32c3_irq.h"
@@ -79,10 +83,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#ifndef CONFIG_SCHED_ONEXIT
-#  error "on_exit() API must be enabled for deallocating Wi-Fi resources"
-#endif
 
 #define PHY_RF_MASK   ((1 << PHY_BT_MODULE) | (1 << PHY_WIFI_MODULE))
 
@@ -840,7 +840,7 @@ static int esp_int_adpt_cb(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-static void esp_thread_semphr_free(int status, void *semphr)
+static void esp_thread_semphr_free(void *semphr)
 {
   if (semphr)
     {
@@ -1205,7 +1205,6 @@ static void esp_semphr_delete(void *semphr)
 static int32_t esp_semphr_take(void *semphr, uint32_t ticks)
 {
   int ret;
-  struct timespec timeout;
   sem_t *sem = (sem_t *)semphr;
 
   if (ticks == OSI_FUNCS_TIME_BLOCKING)
@@ -1218,19 +1217,7 @@ static int32_t esp_semphr_take(void *semphr, uint32_t ticks)
     }
   else
     {
-      ret = clock_gettime(CLOCK_REALTIME, &timeout);
-      if (ret < 0)
-        {
-          wlerr("ERROR: Failed to get time\n");
-          return false;
-        }
-
-      if (ticks)
-        {
-          esp_update_time(&timeout, ticks);
-        }
-
-      ret = nxsem_timedwait(sem, &timeout);
+      ret = nxsem_tickwait(sem, ticks);
       if (ret)
         {
           wlerr("ERROR: Failed to wait sem in %lu ticks\n", ticks);
@@ -1347,40 +1334,39 @@ static int IRAM_ATTR wifi_is_in_isr(void)
 
 static void *esp_thread_semphr_get(void)
 {
+  static int wifi_task_key = -1;
   int ret;
-  int i;
   void *sem;
-  struct tcb_s *tcb = this_task();
-  struct task_group_s *group = tcb->group;
 
-  for (i = 0; i < CONFIG_SCHED_EXIT_MAX; i++)
+  if (wifi_task_key < 0)
     {
-      if (group->tg_exit[i].func.on == esp_thread_semphr_free)
+      ret = task_tls_alloc(esp_thread_semphr_free);
+      if (ret < 0)
         {
-          break;
+          wlerr("Failed to create task local key\n");
+          return NULL;
         }
+
+      wifi_task_key = ret;
     }
 
-  if (i >= CONFIG_SCHED_EXIT_MAX)
+  sem = (void *)task_tls_get_value(wifi_task_key);
+  if (sem == NULL)
     {
       sem = esp_semphr_create(1, 0);
       if (!sem)
         {
-          wlerr("ERROR: Failed to create semaphore\n");
+          wlerr("Failed to create semaphore\n");
           return NULL;
         }
 
-      ret = on_exit(esp_thread_semphr_free, sem);
-      if (ret < 0)
+      ret = task_tls_set_value(wifi_task_key, (uintptr_t)sem);
+      if (ret != OK)
         {
-          wlerr("ERROR: Failed to bind semaphore\n");
+          wlerr("Failed to save semaphore on task local storage: %d\n", ret);
           esp_semphr_delete(sem);
           return NULL;
         }
-    }
-  else
-    {
-      sem = group->tg_exit[i].arg;
     }
 
   return sem;

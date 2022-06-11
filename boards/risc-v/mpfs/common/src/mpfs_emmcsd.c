@@ -35,7 +35,7 @@
  * Private Data
  ****************************************************************************/
 
-static FAR struct sdio_dev_s *g_sdio_dev;
+static struct sdio_dev_s *g_sdio_dev;
 
 /****************************************************************************
  * Public Functions

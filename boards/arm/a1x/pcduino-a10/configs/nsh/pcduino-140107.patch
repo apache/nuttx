@@ -26,10 +26,8 @@ index 3cc6323..ad42790 100644
  
    /* Initialize the FPU */
  
- #ifdef CONFIG_ARCH_FPU
 +syslog(LOG_INFO, "Calling arm_fpuconfig\n"); // REMOVE ME
    arm_fpuconfig();
- #endif
  
    /* Perform common, low-level chip initialization (might do nothing) */
  

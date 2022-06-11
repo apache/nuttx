@@ -102,7 +102,9 @@
 #define MPFS_PLIC_MTHRESHOLD_OFFSET  (0x0000)
 #define MPFS_PLIC_MCLAIM_OFFSET      (0x0004)
 #define MPFS_PLIC_STHRESHOLD_OFFSET  (0x1000)
-#define MPFS_PLIC_SCLAIM_OFFSET      (0x1004)
+#define MPFS_PLIC_SCLAIM_OFFSET      (0x1004) /* From hart base */
+#define MPFS_PLIC_CLAIM_S_OFFSET     (0x1000) /* From mclaim to sclaim */
+#define MPFS_PLIC_THRESHOLD_S_OFFSET (0x1000) /* From mthresh to sthresh */
 
 #define MPFS_PLIC_H0_MTHRESHOLD  (MPFS_PLIC_BASE + 0x200000)
 #define MPFS_PLIC_H0_MCLAIM      (MPFS_PLIC_BASE + 0x200004)

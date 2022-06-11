@@ -147,7 +147,7 @@
 static int up_addrenv_initdata(uintptr_t l2table)
 {
   irqstate_t flags;
-  FAR uint32_t *virtptr;
+  uint32_t *virtptr;
   uintptr_t paddr;
 #ifndef CONFIG_ARCH_PGPOOL_MAPPING
   uint32_t l1save;
@@ -161,13 +161,13 @@ static int up_addrenv_initdata(uintptr_t l2table)
    * address
    */
 
-  virtptr = (FAR uint32_t *)arm_pgvaddr(l2table);
+  virtptr = (uint32_t *)arm_pgvaddr(l2table);
 #else
   /* Temporarily map the page into the virtual address space */
 
   l1save = mmu_l1_getentry(ARCH_SCRATCH_VBASE);
   mmu_l1_setentry(l2table & ~SECTION_MASK, ARCH_SCRATCH_VBASE, MMU_MEMFLAGS);
-  virtptr = (FAR uint32_t *)(ARCH_SCRATCH_VBASE | (l2table & SECTION_MASK));
+  virtptr = (uint32_t *)(ARCH_SCRATCH_VBASE | (l2table & SECTION_MASK));
 #endif
 
   /* Invalidate D-Cache so that we read from the physical memory */
@@ -183,12 +183,12 @@ static int up_addrenv_initdata(uintptr_t l2table)
 #ifdef CONFIG_ARCH_PGPOOL_MAPPING
   /* Get the virtual address corresponding to the physical page address */
 
-  virtptr = (FAR uint32_t *)arm_pgvaddr(paddr);
+  virtptr = (uint32_t *)arm_pgvaddr(paddr);
 #else
   /* Temporarily map the page into the virtual address space */
 
   mmu_l1_setentry(paddr & ~SECTION_MASK, ARCH_SCRATCH_VBASE, MMU_MEMFLAGS);
-  virtptr = (FAR uint32_t *)(ARCH_SCRATCH_VBASE | (paddr & SECTION_MASK));
+  virtptr = (uint32_t *)(ARCH_SCRATCH_VBASE | (paddr & SECTION_MASK));
 #endif
 
   /* Finally, after of all of that, we can initialize the tiny region at
@@ -246,7 +246,7 @@ static int up_addrenv_initdata(uintptr_t l2table)
  ****************************************************************************/
 
 int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
-                      FAR group_addrenv_t *addrenv)
+                      group_addrenv_t *addrenv)
 {
   int ret;
 
@@ -349,7 +349,7 @@ errout:
  *
  ****************************************************************************/
 
-int up_addrenv_destroy(FAR group_addrenv_t *addrenv)
+int up_addrenv_destroy(group_addrenv_t *addrenv)
 {
   binfo("addrenv=%p\n", addrenv);
   DEBUGASSERT(addrenv);
@@ -401,14 +401,14 @@ int up_addrenv_destroy(FAR group_addrenv_t *addrenv)
  *
  ****************************************************************************/
 
-int up_addrenv_vtext(FAR group_addrenv_t *addrenv, FAR void **vtext)
+int up_addrenv_vtext(group_addrenv_t *addrenv, void **vtext)
 {
-  binfo("return=%p\n", (FAR void *)CONFIG_ARCH_TEXT_VBASE);
+  binfo("return=%p\n", (void *)CONFIG_ARCH_TEXT_VBASE);
 
   /* Not much to do in this case */
 
   DEBUGASSERT(addrenv && vtext);
-  *vtext = (FAR void *)CONFIG_ARCH_TEXT_VBASE;
+  *vtext = (void *)CONFIG_ARCH_TEXT_VBASE;
   return OK;
 }
 
@@ -434,18 +434,45 @@ int up_addrenv_vtext(FAR group_addrenv_t *addrenv, FAR void **vtext)
  *
  ****************************************************************************/
 
-int up_addrenv_vdata(FAR group_addrenv_t *addrenv, uintptr_t textsize,
-                     FAR void **vdata)
+int up_addrenv_vdata(group_addrenv_t *addrenv, uintptr_t textsize,
+                     void **vdata)
 {
   binfo("return=%p\n",
-        (FAR void *)(CONFIG_ARCH_DATA_VBASE + ARCH_DATA_RESERVE_SIZE));
+        (void *)(CONFIG_ARCH_DATA_VBASE + ARCH_DATA_RESERVE_SIZE));
 
   /* Not much to do in this case */
 
   DEBUGASSERT(addrenv && vdata);
-  *vdata = (FAR void *)(CONFIG_ARCH_DATA_VBASE + ARCH_DATA_RESERVE_SIZE);
+  *vdata = (void *)(CONFIG_ARCH_DATA_VBASE + ARCH_DATA_RESERVE_SIZE);
   return OK;
 }
+
+/****************************************************************************
+ * Name: up_addrenv_vheap
+ *
+ * Description:
+ *   Return the heap virtual address associated with the newly created
+ *   address environment.  This function is used by the binary loaders in
+ *   order get an address that can be used to initialize the new task.
+ *
+ * Input Parameters:
+ *   addrenv - The representation of the task address environment previously
+ *      returned by up_addrenv_create.
+ *   vheap - The location to return the virtual address.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BUILD_KERNEL
+int up_addrenv_vheap(const group_addrenv_t *addrenv, void **vheap)
+{
+  DEBUGASSERT(addrenv && vheap);
+  *vheap = (void *)CONFIG_ARCH_HEAP_VBASE;
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Name: up_addrenv_heapsize
@@ -467,7 +494,7 @@ int up_addrenv_vdata(FAR group_addrenv_t *addrenv, uintptr_t textsize,
  ****************************************************************************/
 
 #ifdef CONFIG_BUILD_KERNEL
-ssize_t up_addrenv_heapsize(FAR const group_addrenv_t *addrenv)
+ssize_t up_addrenv_heapsize(const group_addrenv_t *addrenv)
 {
   DEBUGASSERT(addrenv);
   return (ssize_t)addrenv->heapsize;
@@ -499,8 +526,8 @@ ssize_t up_addrenv_heapsize(FAR const group_addrenv_t *addrenv)
  *
  ****************************************************************************/
 
-int up_addrenv_select(FAR const group_addrenv_t *addrenv,
-                      FAR save_addrenv_t *oldenv)
+int up_addrenv_select(const group_addrenv_t *addrenv,
+                      save_addrenv_t *oldenv)
 {
   uintptr_t vaddr;
   uintptr_t paddr;
@@ -636,7 +663,7 @@ int up_addrenv_select(FAR const group_addrenv_t *addrenv,
  *
  ****************************************************************************/
 
-int up_addrenv_restore(FAR const save_addrenv_t *oldenv)
+int up_addrenv_restore(const save_addrenv_t *oldenv)
 {
   uintptr_t vaddr;
   int i;
@@ -704,7 +731,7 @@ int up_addrenv_restore(FAR const save_addrenv_t *oldenv)
  *
  ****************************************************************************/
 
-int up_addrenv_coherent(FAR const group_addrenv_t *addrenv)
+int up_addrenv_coherent(const group_addrenv_t *addrenv)
 {
   DEBUGASSERT(addrenv);
 
@@ -754,8 +781,8 @@ int up_addrenv_coherent(FAR const group_addrenv_t *addrenv)
  *
  ****************************************************************************/
 
-int up_addrenv_clone(FAR const group_addrenv_t *src,
-                     FAR group_addrenv_t *dest)
+int up_addrenv_clone(const group_addrenv_t *src,
+                     group_addrenv_t *dest)
 {
   binfo("src=%p dest=%p\n", src, dest);
   DEBUGASSERT(src && dest);
@@ -787,7 +814,7 @@ int up_addrenv_clone(FAR const group_addrenv_t *src,
  *
  ****************************************************************************/
 
-int up_addrenv_attach(FAR struct task_group_s *group, FAR struct tcb_s *tcb)
+int up_addrenv_attach(struct task_group_s *group, struct tcb_s *tcb)
 {
   binfo("group=%p tcb=%p\n", group, tcb);
 
@@ -820,7 +847,7 @@ int up_addrenv_attach(FAR struct task_group_s *group, FAR struct tcb_s *tcb)
  *
  ****************************************************************************/
 
-int up_addrenv_detach(FAR struct task_group_s *group, FAR struct tcb_s *tcb)
+int up_addrenv_detach(struct task_group_s *group, struct tcb_s *tcb)
 {
   binfo("group=%p tcb=%p\n", group, tcb);
 

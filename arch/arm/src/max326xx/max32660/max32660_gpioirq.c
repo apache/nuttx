@@ -47,7 +47,7 @@
  *
  ****************************************************************************/
 
-static int max326_gpio0_interrupt(int irq, FAR void *context, FAR void *arg)
+static int max326_gpio0_interrupt(int irq, void *context, void *arg)
 {
   uint32_t pending;
   int i;

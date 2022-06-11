@@ -71,6 +71,11 @@ static int files_extend(FAR struct filelist *list, size_t row)
       return 0;
     }
 
+  if (row * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK > OPEN_MAX)
+    {
+      return -EMFILE;
+    }
+
   tmp = kmm_realloc(list->fl_files, sizeof(FAR struct file *) * row);
   DEBUGASSERT(tmp);
   if (tmp == NULL)
@@ -356,7 +361,7 @@ int fs_getfilep(int fd, FAR struct file **filep)
       return -EAGAIN;
     }
 
-  if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS_PER_BLOCK * list->fl_rows)
+  if (fd < 0 || fd >= list->fl_rows * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK)
     {
       return -EBADF;
     }
@@ -368,12 +373,23 @@ int fs_getfilep(int fd, FAR struct file **filep)
   /* And return the file pointer from the list */
 
   ret = _files_semtake(list);
-  if (ret >= 0)
+  if (ret < 0)
     {
-      *filep = &list->fl_files[fd / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK]
-                              [fd % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK];
-      _files_semgive(list);
+      return ret;
     }
+
+  *filep = &list->fl_files[fd / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK]
+                          [fd % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK];
+
+  /* if f_inode is NULL, fd was closed */
+
+  if (!(*filep)->f_inode)
+    {
+      *filep = (FAR struct file *)NULL;
+      ret = -EBADF;
+    }
+
+  _files_semgive(list);
 
   return ret;
 }

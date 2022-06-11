@@ -51,8 +51,8 @@ static struct lpc43_aes_s *g_aes;
  * Private Functions
  ****************************************************************************/
 
-static int aes_init(FAR const void *iv,
-                    FAR const void *key, uint32_t keysize,
+static int aes_init(const void *iv,
+                    const void *key, uint32_t keysize,
                     int mode, int encrypt)
 {
   unsigned int cmd = 0;
@@ -134,8 +134,8 @@ static int aes_init(FAR const void *iv,
   return 0;
 }
 
-static int aes_update(FAR const void *out,
-                      uint32_t *outl, FAR const void *in,
+static int aes_update(const void *out,
+                      uint32_t *outl, const void *in,
                       uint32_t inl)
 {
   if (g_aes == NULL)
@@ -161,8 +161,8 @@ static int aes_update(FAR const void *out,
  * Public Functions
  ****************************************************************************/
 
-int aes_cypher(void *out, const void *in, uint32_t size, const void *iv,
-               const void *key, uint32_t keysize, int mode, int encrypt)
+int aes_cypher(void *out, const void *in, size_t size, const void *iv,
+               const void *key, size_t keysize, int mode, int encrypt)
 {
   unsigned int ret = 0;
   uint32_t outl = size;

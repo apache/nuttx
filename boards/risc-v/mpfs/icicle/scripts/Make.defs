@@ -37,24 +37,17 @@ else ifeq ($(CONFIG_BUILD_PROTECTED),y)
 else ifeq ($(CONFIG_BUILD_KERNEL),y)
   LDSCRIPT = ld-kernel.script
 else
-  LDSCRIPT = ld.script
+  ifeq ($(CONFIG_MPFS_IHC),y)
+    LDSCRIPT = ld-ihc.script
+  else
+    LDSCRIPT = ld.script
+  endif
 endif
 
 ifneq ($(LDMEMORY),)
   ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDMEMORY)
 endif
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
-
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION = -g
-  ASARCHCPUFLAGS += -Wa,-g
-endif
-
-MAXOPTIMIZATION = -Os
-
-ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
-endif
 
 # The following options are for the toolchain from T-HEAD.
 # For more info ahout the T-HEAD ISA extensions, please refer to the MPFS user guide.
@@ -63,17 +56,13 @@ endif
 
 ARCHCPUFLAGS += -mcmodel=medany
 
-ARCHCFLAGS = -fno-common -ffunction-sections -fdata-sections
-ARCHCXXFLAGS = -fno-common -fno-exceptions -fcheck-new -fno-rtti
-ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
-ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 
-CFLAGS = $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CFLAGS = $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
-CXXFLAGS = $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CXXFLAGS = $(ARCHCXXFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
 CPPFLAGS = $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
-AFLAGS += $(CFLAGS) -D__ASSEMBLY__ $(ASARCHCPUFLAGS)
+AFLAGS += $(CFLAGS) -D__ASSEMBLY__
 
 # Loadable module definitions
 
@@ -88,8 +77,4 @@ CELFFLAGS = $(CFLAGS)
 CXXELFFLAGS = $(CXXFLAGS)
 
 LDELFFLAGS = -r -e main
-LDELFFLAGS += -T $(call CONVERT_PATH,$(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld)
-
-# File extensions
-
-LDFLAGS += --gc-sections -melf64lriscv
+LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/binfmt/libelf/gnu-elf.ld)

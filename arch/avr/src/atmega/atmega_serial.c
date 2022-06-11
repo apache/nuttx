@@ -371,7 +371,7 @@ static int usart0_attach(struct uart_dev_s *dev)
   irq_attach(ATMEGA_IRQ_U0RX, usart0_rxinterrupt, NULL);
   irq_attach(ATMEGA_IRQ_U0DRE, usart0_txinterrupt, NULL);
 
-  /* (void)irq_attach(ATMEGA_IRQ_U0TX, usart0_txinterrupt, NULL); */
+  /* irq_attach(ATMEGA_IRQ_U0TX, usart0_txinterrupt, NULL); */
 
   return OK;
 }
@@ -395,7 +395,7 @@ static int usart1_attach(struct uart_dev_s *dev)
   irq_attach(ATMEGA_IRQ_U1RX, usart1_rxinterrupt, NULL);
   irq_attach(ATMEGA_IRQ_U1DRE, usart1_txinterrupt, NULL);
 
-  /* (void)irq_attach(ATMEGA_IRQ_U1TX, usart1_txinterrupt, NULL); */
+  /* irq_attach(ATMEGA_IRQ_U1TX, usart1_txinterrupt, NULL); */
 
   return OK;
 }
@@ -423,7 +423,7 @@ static void usart0_detach(struct uart_dev_s *dev)
   irq_detach(ATMEGA_IRQ_U0RX);
   irq_detach(ATMEGA_IRQ_U0DRE);
 
-  /* (void)irq_detach(ATMEGA_IRQ_U0TX); */
+  /* irq_detach(ATMEGA_IRQ_U0TX); */
 }
 #endif
 
@@ -439,7 +439,7 @@ static void usart1_detach(struct uart_dev_s *dev)
   irq_detach(ATMEGA_IRQ_U1RX);
   irq_detach(ATMEGA_IRQ_U1DRE);
 
-  /* (void)irq_detach(ATMEGA_IRQ_U1TX); */
+  /* irq_detach(ATMEGA_IRQ_U1TX); */
 }
 #endif
 

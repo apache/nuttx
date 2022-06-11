@@ -79,8 +79,8 @@
 int stm32_w25initialize(int minor)
 {
 #ifdef HAVE_W25
-  FAR struct spi_dev_s *spi;
-  FAR struct mtd_dev_s *mtd;
+  struct spi_dev_s *spi;
+  struct mtd_dev_s *mtd;
 #ifdef CONFIG_FS_NXFFS
   char devname[12];
 #endif

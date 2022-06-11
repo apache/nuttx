@@ -653,7 +653,7 @@ Where <subdir> is one of the following:
     3. Build setup (easily reconfigured):
 
        CONFIG_HOST_LINUX=y                 : Linux
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y : GNU EABI toolchain for Linux
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y  : GNU EABI toolchain for Linux
 
     4. Jumpers: Nothing special.  Use the default base board jumper
        settings.

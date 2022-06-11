@@ -154,20 +154,19 @@ int kthread_create(FAR const char *name, int priority, int stack_size,
  *   function is equivalent to task_delete.c; the following definition
  *   simply reserves the name in the name space.
  *
- *   Refer to comments with task_delete() for a more detailed description of
- *   the operation of this function.
+ *   Refer to comments with nxtask_delete() for a more detailed description
+ *   of the operation of this function.
  *
  * Input Parameters:
  *   pid - The task ID of the task to delete.  A pid of zero
  *         signifies the calling task.
  *
  * Returned Value:
- *   OK on success; or ERROR on failure with the errno variable set
- *   appropriately.
+ *   OK on success; or negated errno on failure.
  *
  ****************************************************************************/
 
-#define kthread_delete(p) task_delete(p)
+#define kthread_delete(p) nxtask_delete(p)
 
 #undef EXTERN
 #ifdef __cplusplus

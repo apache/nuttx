@@ -16,6 +16,8 @@ config ARCH_CHIP_FE310
 	select ARCH_RV_ISA_M
 	select ARCH_RV_ISA_A
 	select ARCH_RV_ISA_C
+	select ONESHOT
+	select ALARM_ARCH
 	---help---
 		SiFive FE310 processor (E31 RISC-V Core with MAC extensions).
 
@@ -25,9 +27,14 @@ config ARCH_CHIP_K210
 	select ARCH_RV_ISA_M
 	select ARCH_RV_ISA_A
 	select ARCH_RV_ISA_C
+	select ARCH_HAVE_FPU if !K210_WITH_QEMU
+	select ARCH_HAVE_DPFPU if !K210_WITH_QEMU
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_TESTSET
 	select ARCH_HAVE_MULTICPU
+	select ARCH_HAVE_MISALIGN_EXCEPTION
+	select ONESHOT
+	select ALARM_ARCH
 	---help---
 		Kendryte K210 processor (RISC-V 64bit core with GC extensions)
 
@@ -36,6 +43,7 @@ config ARCH_CHIP_LITEX
 	select ARCH_RV32
 	select ARCH_RV_ISA_M
 	select ARCH_RV_ISA_A
+	select ARCH_DCACHE
 	---help---
 		Enjoy Digital LITEX VEXRISCV softcore processor (RV32IMA).
 
@@ -47,6 +55,9 @@ config ARCH_CHIP_BL602
 	select ARCH_RV_ISA_C
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_RESET
+	select ARCH_HAVE_MISALIGN_EXCEPTION
+	select ONESHOT
+	select ALARM_ARCH
 	---help---
 		BouffaloLab BL602(rv32imfc)
 
@@ -56,6 +67,7 @@ config ARCH_CHIP_ESP32C3
 	select ARCH_RV_ISA_M
 	select ARCH_RV_ISA_C
 	select ARCH_VECNOTIRQ
+	select ARCH_HAVE_MPU
 	select ARCH_HAVE_RESET
 	select LIBC_ARCH_ATOMIC
 	select LIBC_ARCH_MEMCPY
@@ -84,6 +96,8 @@ config ARCH_CHIP_C906
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU
 	select ARCH_HAVE_MPU
+	select ONESHOT
+	select ALARM_ARCH
 	---help---
 		THEAD C906 processor (RISC-V 64bit core with GCVX extensions).
 
@@ -98,10 +112,15 @@ config ARCH_CHIP_MPFS
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_MMU
 	select ARCH_MMU_TYPE_SV39
+	select ARCH_HAVE_ADDRENV
+	select ARCH_NEED_ADDRENV_MAPPING
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_SPI_CS_CONTROL
 	select ARCH_HAVE_PWM_MULTICHAN
+	select ARCH_HAVE_S_MODE
 	select PMP_HAS_LIMITED_FEATURES
+	select ONESHOT
+	select ALARM_ARCH
 	---help---
 		MicroChip Polarfire processor (RISC-V 64bit core with GCVX extensions).
 
@@ -115,9 +134,17 @@ config ARCH_CHIP_RV32M1
 
 config ARCH_CHIP_QEMU_RV
 	bool "QEMU RV"
-	select ARCH_HAVE_FPU
-	select ARCH_HAVE_DPFPU
+	select ARCH_HAVE_FPU if EXPERIMENTAL
+	select ARCH_HAVE_DPFPU if EXPERIMENTAL
 	select ARCH_HAVE_MULTICPU
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_MMU
+	select ARCH_MMU_TYPE_SV39 if ARCH_CHIP_QEMU_RV64
+	select ARCH_HAVE_ADDRENV
+	select ARCH_NEED_ADDRENV_MAPPING
+	select ARCH_HAVE_S_MODE
+	select ONESHOT
+	select ALARM_ARCH
 	---help---
 		QEMU Generic RV32/RV64 processor
 
@@ -188,6 +215,38 @@ config ARCH_MMU_TYPE_SV39
 	bool
 	default n
 
+config ARCH_HAVE_S_MODE
+	bool
+	default n
+
+config ARCH_HAVE_MISALIGN_EXCEPTION
+	bool
+	default n
+	---help---
+		The chip will raise a exception while misaligned memory access.
+
+config RISCV_MISALIGNED_HANDLER
+	bool "Software misaligned memory access handler"
+	depends on ARCH_HAVE_MISALIGN_EXCEPTION
+	default y
+
+# Option to run NuttX in supervisor mode. This is obviously not usable in
+# flat mode, is questionable in protected mode, but is mandatory in kernel
+# mode.
+#
+# Kernel mode requires this as M-mode uses flat addressing and the kernel
+# memory must be mapped in order to share memory between the kernel and
+# different user tasks which reside in virtual memory.
+
+config ARCH_USE_S_MODE
+	bool "Run the NuttX kernel in S-mode"
+	default n
+	depends on ARCH_HAVE_S_MODE && BUILD_KERNEL && ARCH_USE_MMU
+	---help---
+		Most of the RISC-V implementations run in M-mode (flat addressing)
+		and/or U-mode (in case of separate kernel-/userspaces). This provides
+		an option to run the kernel in S-mode, if the target supports it.
+
 # MPU has certain architecture dependent configurations, which are presented
 # here. Default is that the full RISC-V PMP specification is supported.
 
@@ -211,8 +270,39 @@ config ARCH_MPU_HAS_NAPOT
 	bool "PMP supports NAPOT"
 	default y	if !PMP_HAS_LIMITED_FEATURES
 
+choice
+	prompt "Toolchain Selection"
+	default RISCV_TOOLCHAIN_GNU_RVG
+
+config RISCV_TOOLCHAIN_GNU_RVG
+	bool "Generic GNU RVG toolchain"
+	select ARCH_TOOLCHAIN_GNU
+	---help---
+		This option should work for any modern GNU toolchain (GCC 5.2 or newer)
+		configured for riscv64-unknown-elf.
+
+endchoice
+
+config RISCV_SEMIHOSTING_HOSTFS
+	bool "Semihosting HostFS"
+	depends on FS_HOSTFS
+	---help---
+		Mount HostFS through semihosting.
+
+		This doesn't support some directory operations like readdir because
+		of the limitations of semihosting mechanism.
+
+if RISCV_SEMIHOSTING_HOSTFS
+
+config RISCV_SEMIHOSTING_HOSTFS_CACHE_COHERENCE
+	bool "Cache coherence in semihosting hostfs"
+	depends on ARCH_DCACHE
+	---help---
+		Flush & Invalidte cache before & after bkpt instruction.
+
+endif
+
 source "arch/risc-v/src/opensbi/Kconfig"
-source "arch/risc-v/src/common/Kconfig"
 
 if ARCH_CHIP_FE310
 source "arch/risc-v/src/fe310/Kconfig"

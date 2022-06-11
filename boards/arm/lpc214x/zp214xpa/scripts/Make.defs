@@ -41,30 +41,18 @@ ifneq ($(CONFIG_WINDOWS_CYGWIN),y)
 endif
 endif
 
-ifeq ("${CONFIG_DEBUG_FEATURES}","y")
-  ARCHOPTIMIZATION = -g
-endif
-
-ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
-endif
-
 ifeq ($(OLDGCC),n)
   ARCHCPUFLAGS = -mcpu=arm7tdmi -mfloat-abi=soft
 else
   ARCHCPUFLAGS = -mapcs-32 -mcpu=arm7tdmi -msoft-float
 endif
 
-ARCHCFLAGS = -fno-common
-ARCHCXXFLAGS = -fno-common -fno-exceptions -fcheck-new
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
-ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
-ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 
-CFLAGS := $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
+CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) \
          $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
-CXXFLAGS := $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) \
+CXXFLAGS := $(ARCHCXXFLAGS) $(ARCHOPTIMIZATION) \
            $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
 CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
@@ -75,7 +63,3 @@ NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) \
                  -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-gotoff.ld \
                  -no-check-sections
 LDNXFLATFLAGS = -e main -s 2048
-
-ifeq ($(CONFIG_DEBUG_FEATURES),y)
-  LDFLAGS += -g
-endif

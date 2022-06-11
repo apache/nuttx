@@ -71,7 +71,7 @@ static volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS];
  *
  ****************************************************************************/
 
-static int sim_cpupause_handler(int irq, FAR void *context, FAR void *arg)
+static int sim_cpupause_handler(int irq, void *context, void *arg)
 {
   int cpu = this_cpu();
 
@@ -221,7 +221,7 @@ __attribute__ ((visibility("default")))
 void up_cpu_started(void)
 {
 #ifdef CONFIG_SCHED_INSTRUMENTATION
-  FAR struct tcb_s *tcb = this_task();
+  struct tcb_s *tcb = this_task();
 
   /* Notify that this CPU has started */
 
@@ -262,7 +262,7 @@ void up_cpu_started(void)
 
 int up_cpu_start(int cpu)
 {
-  FAR struct tcb_s *tcb = current_task(cpu);
+  struct tcb_s *tcb = current_task(cpu);
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Notify of the start event */

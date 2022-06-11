@@ -26,6 +26,8 @@
 #include <arch/chip/core-isa.h>
 #include <arch/xtensa/xtensa_abi.h>
 
+#include <arch/syscall.h>
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -127,8 +129,10 @@ setjmp:
 
   /* Flush registers.  */
   mov a4, a2      # save a2 (jmp_buf)
-  movi  a2, 0
-  syscall
+  movi  a2, SYS_flush_context
+  movi a3, XCHAL_SWINT_CALL
+  wsr  a3, intset
+  isync
   mov a2, a4      # restore a2
 
   /* Copy the register save area at (sp - 16).  */

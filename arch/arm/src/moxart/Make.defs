@@ -18,22 +18,13 @@
 #
 ############################################################################
 
-HEAD_ASRC = moxart_head.S
+include arm/Make.defs
 
-CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S arm_vectors.S
-CMN_ASRCS += arm_nommuhead.S vfork.S
-CMN_CSRCS  = arm_allocateheap.c arm_assert.c arm_blocktask.c
-CMN_CSRCS += arm_createstack.c arm_dataabort.c arm_mdelay.c arm_udelay.c
-CMN_CSRCS += arm_exit.c arm_initialstate.c arm_initialize.c
-CMN_CSRCS += arm_interruptcontext.c arm_prefetchabort.c arm_releasepending.c
-CMN_CSRCS += arm_releasestack.c arm_reprioritizertr.c arm_schedulesigaction.c
-CMN_CSRCS += arm_sigdeliver.c arm_stackframe.c arm_syscall.c arm_unblocktask.c
-CMN_CSRCS += arm_undefinedinsn.c arm_usestack.c arm_vfork.c arm_etherstub.c
-CMN_CSRCS += arm_puts.c arm_tcbinfo.c arm_switchcontext.c
+HEAD_ASRC  = moxart_head.S
 
-CHIP_ASRCS  = moxart_lowputc.S
+CHIP_ASRCS = moxart_lowputc.S
 
-CHIP_CSRCS  = moxart_16550.c moxart_irq.c moxart_timer.c moxart_systemreset.c
+CHIP_CSRCS = moxart_16550.c moxart_irq.c moxart_timer.c moxart_systemreset.c
 
 # Configuration-dependent Kinetis K files
 

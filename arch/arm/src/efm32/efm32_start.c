@@ -71,14 +71,6 @@
 const uintptr_t g_idle_topstack = HEAP_BASE;
 
 /****************************************************************************
- * Private Function prototypes
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_FPU
-static inline void efm32_fpuconfig(void);
-#endif
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -92,7 +84,7 @@ static inline void efm32_fpuconfig(void);
 
 #ifdef CONFIG_DEBUG_FEATURES
 #  if defined(CONFIG_ARMV7M_ITMSYSLOG)
-#    define showprogress(c) (void)syslog_putc(c)
+#    define showprogress(c) syslog_putc(c)
 #  elif defined(HAVE_UART_CONSOLE) || defined(HAVE_LEUART_CONSOLE)
 #    define showprogress(c) efm32_lowputc(c)
 #  else
@@ -103,101 +95,11 @@ static inline void efm32_fpuconfig(void);
 #endif
 
 /****************************************************************************
- * Name: efm32_fpuconfig
- *
- * Description:
- *   Configure the FPU.  Relative bit settings:
- *
- *     CPACR:  Enables access to CP10 and CP11
- *     CONTROL.FPCA: Determines whether the FP extension is active in the
- *       current context:
- *     FPCCR.ASPEN:  Enables automatic FP state preservation, then the
- *       processor sets this bit to 1 on successful completion of any FP
- *       instruction.
- *     FPCCR.LSPEN:  Enables lazy context save of FP state. When this is
- *       done, the processor reserves space on the stack for the FP state,
- *       but does not save that state information to the stack.
- *
- *  Software must not change the value of the ASPEN bit or LSPEN bit either:
- *   - the CPACR permits access to CP10 and CP11, that give access to the FP
- *     extension, or
- *   - the CONTROL.FPCA bit is set to 1
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_FPU
-#ifndef CONFIG_ARMV7M_LAZYFPU
-
-static inline void efm32_fpuconfig(void)
-{
-  uint32_t regval;
-
-  /* Set CONTROL.FPCA so that we always get the extended context frame
-   * with the volatile FP registers stacked above the basic context.
-   */
-
-  regval = getcontrol();
-  regval |= CONTROL_FPCA;
-  setcontrol(regval);
-
-  /* Ensure that FPCCR.LSPEN is disabled, so that we don't have to contend
-   * with the lazy FP context save behaviour.  Clear FPCCR.ASPEN since we
-   * are going to turn on CONTROL.FPCA for all contexts.
-   */
-
-  regval = getreg32(NVIC_FPCCR);
-  regval &= ~(NVIC_FPCCR_ASPEN | NVIC_FPCCR_LSPEN);
-  putreg32(regval, NVIC_FPCCR);
-
-  /* Enable full access to CP10 and CP11 */
-
-  regval = getreg32(NVIC_CPACR);
-  regval |= NVIC_CPACR_CP_FULL(10) | NVIC_CPACR_CP_FULL(11);
-  putreg32(regval, NVIC_CPACR);
-}
-
-#else
-
-static inline void efm32_fpuconfig(void)
-{
-  uint32_t regval;
-
-  /* Clear CONTROL.FPCA so that we do not get the extended context frame
-   * with the volatile FP registers stacked in the saved context.
-   */
-
-  regval = getcontrol();
-  regval &= ~CONTROL_FPCA;
-  setcontrol(regval);
-
-  /* Ensure that FPCCR.LSPEN is disabled, so that we don't have to contend
-   * with the lazy FP context save behaviour.  Clear FPCCR.ASPEN since we
-   * are going to keep CONTROL.FPCA off for all contexts.
-   */
-
-  regval = getreg32(NVIC_FPCCR);
-  regval &= ~(NVIC_FPCCR_ASPEN | NVIC_FPCCR_LSPEN);
-  putreg32(regval, NVIC_FPCCR);
-
-  /* Enable full access to CP10 and CP11 */
-
-  regval = getreg32(NVIC_CPACR);
-  regval |= NVIC_CPACR_CP_FULL(10) | NVIC_CPACR_CP_FULL(11);
-  putreg32(regval, NVIC_CPACR);
-}
-
-#endif
-
-#else
-#  define efm32_fpuconfig()
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _start
+ * Name: __start
  *
  * Description:
  *   This is the reset entry point.
@@ -212,7 +114,7 @@ void __start(void)
   /* Configure the uart so that we can get debug output as soon as possible */
 
   efm32_clockconfig();
-  efm32_fpuconfig();
+  arm_fpuconfig();
   efm32_lowsetup();
   showprogress('A');
 

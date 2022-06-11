@@ -95,7 +95,7 @@
 struct alm_cbinfo_s
 {
   volatile alm_callback_t ac_cb; /* Client callback function */
-  volatile FAR void *ac_arg;     /* Argument to pass with the callback function */
+  volatile void *ac_arg;         /* Argument to pass with the callback function */
 };
 #endif
 
@@ -146,9 +146,9 @@ volatile bool g_rtc_enabled = false;
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_RTC
-static void rtc_dumptime(FAR const struct timespec *tp, FAR const char *msg)
+static void rtc_dumptime(const struct timespec *tp, const char *msg)
 {
-  FAR struct tm tm;
+  struct tm tm;
 
   gmtime_r(&tp->tv_sec, &tm);
 
@@ -178,11 +178,11 @@ static void rtc_dumptime(FAR const struct timespec *tp, FAR const char *msg)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int cxd56_rtc_interrupt(int irq, FAR void *context, FAR void *arg)
+static int cxd56_rtc_interrupt(int irq, void *context, void *arg)
 {
-  FAR struct alm_cbinfo_s *cbinfo;
+  struct alm_cbinfo_s *cbinfo;
   alm_callback_t cb;
-  FAR void *cb_arg;
+  void *cb_arg;
   uint32_t source;
   uint32_t clear;
   int id;
@@ -213,7 +213,7 @@ static int cxd56_rtc_interrupt(int irq, FAR void *context, FAR void *arg)
       /* Alarm callback */
 
       cb = cbinfo->ac_cb;
-      cb_arg = (FAR void *)cbinfo->ac_arg;
+      cb_arg = (void *)cbinfo->ac_arg;
 
       cbinfo->ac_cb  = NULL;
       cbinfo->ac_arg = NULL;
@@ -395,7 +395,7 @@ time_t up_rtc_time(void)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_HIRES
-int up_rtc_gettime(FAR struct timespec *tp)
+int up_rtc_gettime(struct timespec *tp)
 {
   uint64_t count;
 
@@ -429,7 +429,7 @@ int up_rtc_gettime(FAR struct timespec *tp)
  *
  ****************************************************************************/
 
-int up_rtc_settime(FAR const struct timespec *tp)
+int up_rtc_settime(const struct timespec *tp)
 {
   irqstate_t flags;
   uint64_t count;
@@ -538,9 +538,9 @@ uint64_t cxd56_rtc_almcount(void)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-int cxd56_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
+int cxd56_rtc_setalarm(struct alm_setalarm_s *alminfo)
 {
-  FAR struct alm_cbinfo_s *cbinfo;
+  struct alm_cbinfo_s *cbinfo;
   irqstate_t flags;
   int ret = -EBUSY;
   int id;
@@ -617,7 +617,7 @@ int cxd56_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
 #ifdef CONFIG_RTC_ALARM
 int cxd56_rtc_cancelalarm(enum alm_id_e alarmid)
 {
-  FAR struct alm_cbinfo_s *cbinfo;
+  struct alm_cbinfo_s *cbinfo;
   irqstate_t flags;
   int ret = -ENODATA;
   uint32_t mask;

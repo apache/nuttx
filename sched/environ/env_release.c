@@ -61,12 +61,19 @@
 
 void env_release(FAR struct task_group_s *group)
 {
-  DEBUGASSERT(group != NULL);
+  int i;
 
-  /* Free any allocate environment strings */
+  DEBUGASSERT(group != NULL);
 
   if (group->tg_envp)
     {
+      /* Free any allocate environment strings */
+
+      for (i = 0; group->tg_envp[i] != NULL; i++)
+        {
+          group_free(group, group->tg_envp[i]);
+        }
+
       /* Free the environment */
 
       group_free(group, group->tg_envp);
@@ -76,7 +83,6 @@ void env_release(FAR struct task_group_s *group)
    * task group structure are reset to initial values.
    */
 
-  group->tg_envsize = 0;
   group->tg_envp = NULL;
 }
 

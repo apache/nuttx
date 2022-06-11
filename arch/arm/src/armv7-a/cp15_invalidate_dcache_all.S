@@ -99,7 +99,7 @@ cp15_invalidate_dcache_all:
 	and		r0, r3, r1, lsr #13		/* r0=NumSets (number of sets - 1) */
 
 	ldr		r3,=0x7				/* Isolate the LineSize field (bits 0-2) */
-	and		r5, r3				/* r4=(Log2LineSize - 2) in word */
+	and		r5, r3, r1			/* r4=(Log2LineSize - 2) in word */
 	add		r5, #4				/* r4=Set/way operation line shfit */
 
 	ldr		r3, =0x3ff			/* Isolate the way field (bits 3-12) */

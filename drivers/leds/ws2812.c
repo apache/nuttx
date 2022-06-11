@@ -111,8 +111,6 @@ static void ws2812_pack(FAR uint8_t *buf, uint32_t rgb);
 
 /* Character driver methods */
 
-static int     ws2812_open(FAR struct file *filep);
-static int     ws2812_close(FAR struct file *filep);
 static ssize_t ws2812_read(FAR struct file *filep, FAR char *buffer,
                            size_t buflen);
 static ssize_t ws2812_write(FAR struct file *filep, FAR const char *buffer,
@@ -125,8 +123,8 @@ static off_t   ws2812_seek(FAR struct file *filep, off_t offset, int whence);
 
 static const struct file_operations g_ws2812fops =
 {
-  ws2812_open,    /* open */
-  ws2812_close,   /* close */
+  NULL,           /* open */
+  NULL,           /* close */
   ws2812_read,    /* read */
   ws2812_write,   /* write */
   ws2812_seek,    /* seek */
@@ -204,32 +202,6 @@ static void ws2812_pack(FAR uint8_t *buf, uint32_t rgb)
           offset++;
         }
     }
-}
-
-/****************************************************************************
- * Name: ws2812_open
- *
- * Description:
- *   This function is called whenever the WS2812 device is opened.
- *
- ****************************************************************************/
-
-static int ws2812_open(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
- * Name: ws2812_close
- *
- * Description:
- *   This routine is called when the WS2812 device is closed.
- *
- ****************************************************************************/
-
-static int ws2812_close(FAR struct file *filep)
-{
-  return OK;
 }
 
 /****************************************************************************

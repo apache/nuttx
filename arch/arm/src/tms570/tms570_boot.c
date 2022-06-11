@@ -54,7 +54,6 @@
 
 #include "chip.h"
 #include "arm.h"
-#include "fpu.h"
 #include "sctlr.h"
 #include "arm_internal.h"
 
@@ -105,9 +104,7 @@
 
 static inline void tms570_event_export(void)
 {
-  uint32_t pmcr = cp15_rdpmcr();
-  pmcr |= PCMR_X;
-  cp15_wrpmcr(pmcr);
+  cp15_pmu_pmcr(PMCR_X);
 }
 
 /****************************************************************************
@@ -375,11 +372,9 @@ void arm_boot(void)
 
   tms570_esm_initialize();
 
-#ifdef CONFIG_ARCH_FPU
   /* Initialize the FPU */
 
   arm_fpuconfig();
-#endif
 
 #ifdef CONFIG_ARMV7R_MEMINIT
   /* Initialize the .bss and .data sections as well as RAM functions

@@ -41,20 +41,26 @@ ARCHDEFINES += -U__NetBSD__ -U__linux__ -U__sun__ -U__unix__
 ARCHDEFINES += -U__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION = -g
-  ARCHOPTIMIZATIONRUST = -g
+  ARCHOPTIMIZATION += -g
+  ARCHOPTIMIZATIONRUST += -g
 endif
 
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
-  MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
-else
-  MAXOPTIMIZATION ?= -O2
+  ARCHOPTIMIZATION += $(CONFIG_DEBUG_OPTLEVEL)
+else ifeq ($(CONFIG_DEBUG_FULLOPT),y)
+  ARCHOPTIMIZATION += -O2
 endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
+  ARCHOPTIMIZATION += -fno-strict-aliasing
 else
   ARCHOPTIMIZATIONRUST += -C opt-level=0
+endif
+
+ifeq ($(CONFIG_FRAME_POINTER),y)
+  ARCHOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+else
+  ARCHOPTIMIZATION += -fomit-frame-pointer
 endif
 
 ifeq ($(CONFIG_STACK_CANARIES),y)
@@ -62,23 +68,23 @@ ifeq ($(CONFIG_STACK_CANARIES),y)
 endif
 
 ifeq ($(CONFIG_ARCH_COVERAGE),y)
-  ARCHOPTIMIZATION += -fprofile-arcs -ftest-coverage
+  ARCHOPTIMIZATION += -fprofile-generate -ftest-coverage
+endif
+
+ifeq ($(CONFIG_SIM_ASAN),y)
+  ARCHOPTIMIZATION += -fsanitize=address
+else ifeq ($(CONFIG_MM_KASAN),y)
+  ARCHOPTIMIZATION += -fsanitize=kernel-address
+endif
+
+ifeq ($(CONFIG_SIM_UBSAN),y)
+  ARCHOPTIMIZATION += -fsanitize=undefined
 endif
 
 # Add -fno-common because macOS "ld -r" doesn't seem to pick objects
 # for common symbols.
-ARCHCFLAGS = -fno-common -ffunction-sections -fdata-sections
-ARCHCXXFLAGS = -fno-common -ffunction-sections -fdata-sections -nostdinc++
-
-ifeq ($(CONFIG_CXX_EXCEPTION),)
-  ARCHCXXFLAGS += -fno-exceptions -fcheck-new
-endif
-ifeq ($(CONFIG_CXX_RTTI),)
-  ARCHCXXFLAGS += -fno-rtti
-endif
-ARCHPICFLAGS = -fpic
-ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
-ARCHWARNINGSXX = -Wall -Wshadow -Wundef
+ARCHCFLAGS += -fno-common
+ARCHCXXFLAGS += -fno-common -nostdinc++
 
 # Add -fvisibility=hidden
 # Because we don't want export nuttx's symbols to share libraries
@@ -86,10 +92,25 @@ ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHCFLAGS += -fvisibility=hidden
 ARCHCXXFLAGS += -fvisibility=hidden
 
+ARCHCFLAGS += -ffunction-sections -fdata-sections
+ARCHCXXFLAGS += -ffunction-sections -fdata-sections
+
+ARCHCFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wundef
+ARCHCXXFLAGS += -Wall -Wshadow -Wundef
+
+ifeq ($(CONFIG_CXX_EXCEPTION),)
+  ARCHCXXFLAGS += -fno-exceptions -fcheck-new
+endif
+ifeq ($(CONFIG_CXX_RTTI),)
+  ARCHCXXFLAGS += -fno-rtti
+endif
+
 ifeq ($(CONFIG_SIM_M32),y)
   ARCHCFLAGS += -m32
   ARCHCXXFLAGS += -m32
 endif
+
+ARCHPICFLAGS = -fpic
 
 CC = $(CROSSDEV)cc
 CXX = $(CROSSDEV)c++
@@ -107,25 +128,13 @@ OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 RUSTC = rustc --edition 2021
 
-CFLAGS := $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
-   $(ARCHCFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
-CXXFLAGS := $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) \
-   $(ARCHCXXFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CFLAGS := $(ARCHOPTIMIZATION) $(ARCHCFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CXXFLAGS := $(ARCHOPTIMIZATION) $(ARCHCXXFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 RUSTFLAGS := $(ARCHOPTIMIZATIONRUST)
 
 ifeq ($(CONFIG_LIBCXX),y)
-  # Why c++17?
-  #  * libcxx seems to require c++11.
-  #  * The compiler defaults varies:
-  #      clang/macOS (from xcode): 199711L
-  #      gcc/ubuntu:               201402L
-  #  * There is a precedent to use c++14.
-  #    (boards/arm/stm32l4/nucleo-l476rg/scripts/Make.defs)
-  #  * libs/libxx/libcxx/src/barrier.cpp depends on aligned new
-  CXXFLAGS += -std=c++17
-
   ifeq ($(CONFIG_HOST_MACOS),y)
     # macOS uses libc++abi
     CXXFLAGS += -DLIBCXX_BUILDING_LIBCXXABI
@@ -143,27 +152,6 @@ ifeq ($(CONFIG_LIBCXX),y)
   # It makes libcxx __availability header unhappy.
   # https://github.com/llvm/llvm-project/blob/2e2999cd44f6ec9a5e396fa0113497ea82582f69/libcxx/include/__availability#L258
   CXXFLAGS += -D_LIBCPP_DISABLE_AVAILABILITY
-endif
-
-ifeq ($(CONFIG_SIM_ASAN),y)
-  CFLAGS += -fsanitize=address
-  CXXFLAGS += -fsanitize=address
-else ifeq ($(CONFIG_MM_KASAN),y)
-  CFLAGS += -fsanitize=kernel-address
-  CXXFLAGS += -fsanitize=kernel-address
-endif
-
-ifeq ($(CONFIG_SIM_UBSAN),y)
-  CFLAGS += -fsanitize=undefined
-  CXXFLAGS += -fsanitize=undefined
-endif
-
-ifeq ($(CONFIG_FRAME_POINTER),y)
-  CFLAGS += -fno-omit-frame-pointer -fno-optimize-sibling-calls
-  CXXFLAGS += -fno-omit-frame-pointer -fno-optimize-sibling-calls
-else
-  CFLAGS += -fomit-frame-pointer
-  CXXFLAGS += -fomit-frame-pointer
 endif
 
 # Loadable module definitions
@@ -211,7 +199,7 @@ ifeq ($(CONFIG_LIBC_ARCH_ELF_64BIT),y)
 endif
 
 LDELFFLAGS = -r -e main --gc-sections
-LDELFFLAGS += -T $(call CONVERT_PATH,$(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld)
+LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/binfmt/libelf/gnu-elf.ld)
 
 ifeq ($(CONFIG_HOST_MACOS),y)
   LDFLAGS += -Wl,-dead_strip

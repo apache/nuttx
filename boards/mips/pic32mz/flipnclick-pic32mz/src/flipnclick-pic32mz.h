@@ -269,7 +269,7 @@ int pic32mz_bringup(void);
 
 #ifdef HAVE_SSD1306
 struct lcd_dev_s;  /* Forward reference */
-FAR struct lcd_dev_s *pic32mz_graphics_setup(unsigned int devno);
+struct lcd_dev_s *pic32mz_graphics_setup(unsigned int devno);
 #endif
 
 #undef EXTERN

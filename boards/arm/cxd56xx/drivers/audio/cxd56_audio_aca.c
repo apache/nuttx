@@ -375,7 +375,7 @@ static void get_osc_mode(uint8_t cfg_mclk,
 }
 
 static void get_mic_dev(uint32_t cfg_mic,
-                        FAR as_aca_pulco_mic_device_id_t *dev)
+                        as_aca_pulco_mic_device_id_t *dev)
 {
   bool is_amic = false;
   bool is_dmic = false;
@@ -410,7 +410,7 @@ static void get_mic_dev(uint32_t cfg_mic,
 }
 
 static void get_drv_str(uint8_t cfg_ds,
-                        FAR as_aca_pulco_io_ds_id_t *ds)
+                        as_aca_pulco_io_ds_id_t *ds)
 {
   switch (cfg_ds)
     {
@@ -437,7 +437,7 @@ static void get_drv_str(uint8_t cfg_ds,
 }
 
 static void get_mic_bias(uint8_t cfg_bsel,
-                         FAR as_aca_pulco_mic_bias_sel_id_t *bsel)
+                         as_aca_pulco_mic_bias_sel_id_t *bsel)
 {
   switch (cfg_bsel)
     {
@@ -456,7 +456,7 @@ static void get_mic_bias(uint8_t cfg_bsel,
 }
 
 static void get_sp_split_on(uint8_t cf_sp_spliton,
-                            FAR as_aca_sp_spliton_sel_id_t *sp_spliton)
+                            as_aca_sp_spliton_sel_id_t *sp_spliton)
 {
   switch (cf_sp_spliton)
     {
@@ -479,7 +479,7 @@ static void get_sp_split_on(uint8_t cf_sp_spliton,
 }
 
 static void get_sp_driver(uint8_t cfg_sp_drv,
-                          FAR as_aca_sp_drv_sel_id_t *sp_drv)
+                          as_aca_sp_drv_sel_id_t *sp_drv)
 {
   switch (cfg_sp_drv)
     {
@@ -539,7 +539,7 @@ void get_serial_param(as_ser_des_param_t *param)
 }
 
 void get_input_param(as_aca_pulco_in_param_t *param,
-                     FAR cxd56_audio_mic_gain_t *gain)
+                     cxd56_audio_mic_gain_t *gain)
 {
   uint8_t mic_sel;
   uint8_t mic_id;
@@ -666,7 +666,7 @@ CXD56_AUDIO_ECODE cxd56_audio_aca_poweron_micbias(void)
 }
 
 CXD56_AUDIO_ECODE cxd56_audio_aca_poweron_input(
-                                 FAR cxd56_audio_mic_gain_t *gain)
+                                 cxd56_audio_mic_gain_t *gain)
 {
   as_aca_pulco_in_param_t pwon_input_param;
 
@@ -753,7 +753,7 @@ CXD56_AUDIO_ECODE cxd56_audio_aca_disable_output(void)
 }
 
 CXD56_AUDIO_ECODE cxd56_audio_aca_set_micgain(
-                             FAR cxd56_audio_mic_gain_t *gain)
+                             cxd56_audio_mic_gain_t *gain)
 {
   as_aca_pulco_in_param_t mic_gain_param;
 

@@ -61,7 +61,7 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-void up_puts(FAR const char *str)
+void up_puts(const char *str)
 {
   smh_call(SEMI_SYSLOG_WRITE0, (char *)str);
 }

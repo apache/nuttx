@@ -29,8 +29,7 @@
 # built to run on Windows as a POSIX toolchain.  The various SDCC options
 # are selected in the NuttX configuration with:
 #
-#  CONFIG_Z180_TOOLCHAIN_SDCCL=y : SDCC for Linux, macOS or Cygwin
-#  CONFIG_Z180_TOOLCHAIN_SDCCW=y : SDCC for Win32
+#  CONFIG_Z180_TOOLCHAIN_SDCC=y : Win32, SDCC for Linux, macOS or Cygwin
 #
 
 # These are the directories where the SDCC toolchain is installed.  NOTE

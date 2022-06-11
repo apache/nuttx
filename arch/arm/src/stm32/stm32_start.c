@@ -68,14 +68,6 @@
 const uintptr_t g_idle_topstack = HEAP_BASE;
 
 /****************************************************************************
- * Private Function prototypes
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_FPU
-static inline void stm32_fpuconfig(void);
-#endif
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -104,101 +96,11 @@ void __start(void) noinstrument_function;
 #endif
 
 /****************************************************************************
- * Name: stm32_fpuconfig
- *
- * Description:
- *   Configure the FPU.  Relative bit settings:
- *
- *     CPACR:  Enables access to CP10 and CP11
- *     CONTROL.FPCA: Determines whether the FP extension is active in the
- *       current context:
- *     FPCCR.ASPEN:  Enables automatic FP state preservation, then the
- *       processor sets this bit to 1 on successful completion of any FP
- *       instruction.
- *     FPCCR.LSPEN:  Enables lazy context save of FP state. When this is
- *       done, the processor reserves space on the stack for the FP state,
- *       but does not save that state information to the stack.
- *
- *  Software must not change the value of the ASPEN bit or LSPEN bit either:
- *   - the CPACR permits access to CP10 and CP11, that give access to the FP
- *     extension, or
- *   - the CONTROL.FPCA bit is set to 1
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_FPU
-#ifndef CONFIG_ARMV7M_LAZYFPU
-
-static inline void stm32_fpuconfig(void)
-{
-  uint32_t regval;
-
-  /* Set CONTROL.FPCA so that we always get the extended context frame
-   * with the volatile FP registers stacked above the basic context.
-   */
-
-  regval = getcontrol();
-  regval |= CONTROL_FPCA;
-  setcontrol(regval);
-
-  /* Ensure that FPCCR.LSPEN is disabled, so that we don't have to contend
-   * with the lazy FP context save behaviour.  Clear FPCCR.ASPEN since we
-   * are going to turn on CONTROL.FPCA for all contexts.
-   */
-
-  regval = getreg32(NVIC_FPCCR);
-  regval &= ~(NVIC_FPCCR_ASPEN | NVIC_FPCCR_LSPEN);
-  putreg32(regval, NVIC_FPCCR);
-
-  /* Enable full access to CP10 and CP11 */
-
-  regval = getreg32(NVIC_CPACR);
-  regval |= NVIC_CPACR_CP_FULL(10) | NVIC_CPACR_CP_FULL(11);
-  putreg32(regval, NVIC_CPACR);
-}
-
-#else
-
-static inline void stm32_fpuconfig(void)
-{
-  uint32_t regval;
-
-  /* Clear CONTROL.FPCA so that we do not get the extended context frame
-   * with the volatile FP registers stacked in the saved context.
-   */
-
-  regval = getcontrol();
-  regval &= ~CONTROL_FPCA;
-  setcontrol(regval);
-
-  /* Ensure that FPCCR.LSPEN is disabled, so that we don't have to contend
-   * with the lazy FP context save behaviour.  Clear FPCCR.ASPEN since we
-   * are going to keep CONTROL.FPCA off for all contexts.
-   */
-
-  regval = getreg32(NVIC_FPCCR);
-  regval &= ~(NVIC_FPCCR_ASPEN | NVIC_FPCCR_LSPEN);
-  putreg32(regval, NVIC_FPCCR);
-
-  /* Enable full access to CP10 and CP11 */
-
-  regval = getreg32(NVIC_CPACR);
-  regval |= NVIC_CPACR_CP_FULL(10) | NVIC_CPACR_CP_FULL(11);
-  putreg32(regval, NVIC_CPACR);
-}
-
-#endif
-
-#else
-#  define stm32_fpuconfig()
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _start
+ * Name: __start
  *
  * Description:
  *   This is the reset entry point.
@@ -224,7 +126,7 @@ void __start(void)
   /* Configure the UART so that we can get debug output as soon as possible */
 
   stm32_clockconfig();
-  stm32_fpuconfig();
+  arm_fpuconfig();
   stm32_lowsetup();
   stm32_gpioinit();
   showprogress('A');

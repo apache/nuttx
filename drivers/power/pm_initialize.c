@@ -28,12 +28,6 @@
 
 #include "pm.h"
 
-#if defined(CONFIG_PM_GOVERNOR_ACTIVITY)
-#  include "activity_governor.h"
-#elif defined(CONFIG_PM_GOVERNOR_GREEDY)
-#  include "greedy_governor.h"
-#endif
-
 #ifdef CONFIG_PM
 
 /****************************************************************************

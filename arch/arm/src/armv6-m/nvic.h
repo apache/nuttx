@@ -378,7 +378,7 @@ extern "C"
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-void arm_dumpnvic(FAR const char *msg);
+void arm_dumpnvic(const char *msg);
 #else
 #  define arm_dumpnvic(m)
 #endif

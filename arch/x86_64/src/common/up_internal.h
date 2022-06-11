@@ -130,11 +130,6 @@ typedef void (*up_vector_t)(void);
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-/* This holds a references to the current interrupt level register storage
- * structure.  If is non-NULL only during interrupt processing.
- */
-
-extern volatile uint64_t *g_current_regs;
 
 /* This is the beginning of heap as provided from up_head.S. This is the
  * first address in DRAM after the loaded program+bss+idle stack.  The
@@ -205,7 +200,6 @@ void up_decodeirq(uint64_t *regs);
 #ifdef CONFIG_ARCH_DMA
 void weak_function up_dmainitialize(void);
 #endif
-int  up_saveusercontext(uint64_t *saveregs);
 void up_fullcontextrestore(uint64_t *restoreregs) noreturn_function;
 void up_switchcontext(uint64_t *saveregs, uint64_t *restoreregs);
 void up_sigdeliver(void);

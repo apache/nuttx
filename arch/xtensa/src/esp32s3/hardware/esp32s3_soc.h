@@ -95,6 +95,8 @@
 #define DR_REG_I2C1_EXT_BASE                    0x60027000
 #define DR_REG_SDMMC_BASE                       0x60028000
 
+#define REG_SPI_BASE(i)                         (DR_REG_SPI2_BASE + (((i) > 3) ? ((((i) - 2) * 0x1000) + 0x10000) : (((i) - 2) * 0x1000)))
+
 #define DR_REG_PERI_BACKUP_BASE                 0x6002A000
 
 #define DR_REG_TWAI_BASE                        0x6002B000

@@ -75,7 +75,7 @@ struct sama5d4ek_tscinfo_s
   /* Extensions for the sama5d4ek board */
 
   mxt_handler_t handler;
-  FAR void *arg;
+  void *arg;
 };
 
 /****************************************************************************
@@ -93,11 +93,11 @@ struct sama5d4ek_tscinfo_s
  *   clear   - Acknowledge/clear any pending PIO interrupt
  */
 
-static int  mxt_attach(FAR const struct mxt_lower_s *lower,
+static int  mxt_attach(const struct mxt_lower_s *lower,
                        mxt_handler_t isr,
-                       FAR void *arg);
-static void mxt_enable(FAR const struct mxt_lower_s *lower, bool enable);
-static void mxt_clear(FAR const struct mxt_lower_s *lower);
+                       void *arg);
+static void mxt_enable(const struct mxt_lower_s *lower, bool enable);
+static void mxt_clear(const struct mxt_lower_s *lower);
 
 /****************************************************************************
  * Private Data
@@ -141,8 +141,8 @@ static struct sama5d4ek_tscinfo_s g_mxtinfo =
  *
  ****************************************************************************/
 
-static int mxt_attach(FAR const struct mxt_lower_s *lower, mxt_handler_t isr,
-                      FAR void *arg)
+static int mxt_attach(const struct mxt_lower_s *lower, mxt_handler_t isr,
+                      void *arg)
 {
   if (isr)
     {
@@ -166,7 +166,7 @@ static int mxt_attach(FAR const struct mxt_lower_s *lower, mxt_handler_t isr,
   return OK;
 }
 
-static void mxt_enable(FAR const struct mxt_lower_s *lower, bool enable)
+static void mxt_enable(const struct mxt_lower_s *lower, bool enable)
 {
   /* Enable or disable interrupts */
 
@@ -180,12 +180,12 @@ static void mxt_enable(FAR const struct mxt_lower_s *lower, bool enable)
     }
 }
 
-static void mxt_clear(FAR const struct mxt_lower_s *lower)
+static void mxt_clear(const struct mxt_lower_s *lower)
 {
   /* Does nothing */
 }
 
-static int mxt_interrupt(int irq, FAR void *context, FAR void *arg)
+static int mxt_interrupt(int irq, void *context, void *arg)
 {
   /* Just forward the interrupt to the maXTouch driver */
 
@@ -225,7 +225,7 @@ static int mxt_interrupt(int irq, FAR void *context, FAR void *arg)
 
 int sam_tsc_setup(int minor)
 {
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
   int ret;
 
   iinfo("minor %d\n", minor);

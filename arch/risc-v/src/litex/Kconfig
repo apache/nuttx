@@ -25,4 +25,41 @@ config LITEX_UART0
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select LITEX_UART
 
+config LITEX_SDIO
+	bool "SDIO"
+	default n
+	select SCHED_HPWORK
+	select MMCSD
+	select MMCSD_SDIO
+	select SDIO_BLOCKSETUP
+	select ARCH_HAVE_SDIO
+	select SDIO_DMA
+
+config LITEX_SDIO1
+	bool "Enable SDIO1"
+	default y if LITEX_SDIO
+	select LITEX_SDIO_DMA
+	depends on LITEX_SDIO
+
+if LITEX_SDIO1
+
+config LITEX_IDMODE_FREQ
+	int "ID mode frequency"
+	default 400000
+	---help---
+		Initial, ID mode SD frequency
+
+config LITEX_MMCXFR_FREQ
+	int "MMC transfer frequency"
+	default 25000000
+	---help---
+		Frequency to use for transferring data to/from an MMC card
+
+config LITEX_SD4BIT_FREQ
+	int "SD 4-bit transfer frequency"
+	default 50000000
+	---help---
+		Frequency to use for transferring data to/from an SD card using all four data lines.
+
+endif
 endmenu

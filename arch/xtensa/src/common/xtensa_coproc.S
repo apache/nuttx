@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <arch/irq.h>
 #include <arch/xtensa/core.h>
 #include <arch/xtensa/xtensa_abi.h>
 #include <arch/xtensa/xtensa_coproc.h>
@@ -46,8 +47,6 @@
 #include <arch/chip/core-isa.h>
 #include <arch/chip/tie.h>
 #include <arch/chip/tie-asm.h>
-
-#if XCHAL_CP_NUM > 0
 
 /****************************************************************************
  * Public Data
@@ -58,7 +57,7 @@
   /* Offset to CP n save area in thread's CP save area. */
 
   .global	_xtensa_coproc_saoffsets
-  .type	_xtensa_coproc_saoffsets, @object
+  .type		_xtensa_coproc_saoffsets, @object
   .align	16                      /* Minimize crossing cache boundaries */
 
 _xtensa_coproc_saoffsets:
@@ -69,13 +68,11 @@ _xtensa_coproc_saoffsets:
   .size	_xtensa_coproc_saoffsets, . - _xtensa_coproc_saoffsets
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-  .text
-
 /****************************************************************************
- * Name: _xtensa_coproc_savestate
+ * Macro: xtensa_coproc_savestate
  *
  * Description:
  *   If there is a current thread and it has a coprocessor state save area,
@@ -88,189 +85,105 @@ _xtensa_coproc_saoffsets:
  *   around the assembly language call to _xtensa_coproc_savestate.
  *
  * Entry Conditions:
- *   - A2 holds the address of the co-processor state save area
- *   - The thread being switched out is still the current thread.
- *   - CPENABLE state reflects which coprocessors are active.
  *   - Registers have been saved/spilled already.
  *
  * Exit conditions:
  *   - All necessary CP callee-saved state has been saved.
- *   - Registers a2-a7, a13-a15 have been trashed.
- *
- * Must be called from assembly code only, using CALL0.
+ *   - Registers a2-a7, a13-a14 have been trashed.
  *
  ****************************************************************************/
 
-  .global	_xtensa_coproc_savestate
-  .type	_xtensa_coproc_savestate, @function
+	.macro xtensa_coproc_savestate
 
-  .align	4
-  .literal_position
-  .align	4
+	/* The stack when interrupt happened
+	* ----------------------------------------------------
+	* | Reserve area (0x20)                              |
+	* ----------------------------------------------------
+	* | Coproc context                                   |
+	* ----------------------------------------------------
+	* | Xtensa common regs                               |
+	* ---------------------------------------------------| <- SP
+	*/
 
-_xtensa_coproc_savestate:
-
-	/* Move the address of the thread state save area to R15 */
-
-	mov		a15, a2							/* A15 is now the address of the save area */
+	addi		a3, sp, (4 * XCPTCONTEXT_REGS)
 
 	/* CPENABLE should show which CPs are enabled. */
 
-	rsr		a2, CPENABLE					/* a2 = which CPs are enabled */
-	beqz	a2, .Ldone1						/* Quick exit if none */
+	rsr		a2, CPENABLE				/* a2 = which CPs are enabled */
+	beqz		a2, Ldone1				/* Quick exit if none */
 
-	s16i	a2, a15, XTENSA_CPSTORED		/* Save mask of CPs being stored */
-	movi	a13, _xtensa_coproc_saoffsets	/* Array of CP save offsets */
-	addi	a15, a15, XTENSA_CPASA			/* a15 = base of aligned save area */
+	movi		a13, _xtensa_coproc_saoffsets		/* Array of CP save offsets */
 
 #if XCHAL_CP0_SA_SIZE > 0
-	bbci.l	a2, 0, 2f						/* CP 0 not enabled */
-	l32i	a14, a13, 0						/* a14 = _xtensa_coproc_saoffsets[0] */
-	add		a3, a14, a15					/* a3 = save area for CP 0 */
-	xchal_cp0_store	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	bbci.l		a2,  0,   2f				/* CP 0 not enabled */
+	l32i		a14, a13, 0				/* a14 = _xtensa_coproc_saoffsets[0] */
+	add		a3,  a14, a3				/* a3 = save area for CP 0 */
+	xchal_cp0_store	a3,  a4,  a5, a6, a7
 2:
 #endif
 
 #if XCHAL_CP1_SA_SIZE > 0
-	bbci.l	a2, 1, 2f						/* CP 1 not enabled */
-	l32i	a14, a13, 4						/* a14 = _xtensa_coproc_saoffsets[1] */
-	add		a3, a14, a15					/* a3 = save area for CP 1 */
-	xchal_cp1_store	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	bbci.l		a2,  1,   2f				/* CP 1 not enabled */
+	l32i		a14, a13, 4				/* a14 = _xtensa_coproc_saoffsets[1] */
+	add		a3,  a14, a3				/* a3 = save area for CP 1 */
+	xchal_cp1_store	a3,  a4,  a5, a6, a7
 2:
 #endif
 
 #if XCHAL_CP2_SA_SIZE > 0
-	bbci.l	a2, 2, 2f
-	l32i	a14, a13, 8
-	add		a3, a14, a15
-	xchal_cp2_store	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	bbci.l		a2,  2,   2f
+	l32i		a14, a13, 8
+	add		a3,  a14, a3
+	xchal_cp2_store	a3,  a4,  a5, a6, a7
 2:
 #endif
 
 #if XCHAL_CP3_SA_SIZE > 0
-	bbci.l	a2, 3, 2f
-	l32i	a14, a13, 12
-	add		a3, a14, a15
-	xchal_cp3_store	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	bbci.l		a2,  3,   2f
+	l32i		a14, a13, 12
+	add		a3,  a14, a3
+	xchal_cp3_store	a3,  a4,  a5, a6, a7
 2:
 #endif
 
 #if XCHAL_CP4_SA_SIZE > 0
-	bbci.l	a2, 4, 2f
-	l32i	a14, a13, 16
-	add		a3, a14, a15
-	xchal_cp4_store	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	bbci.l		a2,  4,   2f
+	l32i		a14, a13, 16
+	add		a3,  a14, a3
+	xchal_cp4_store	a3,  a4,  a5, a6, a7
 2:
 #endif
 
 #if XCHAL_CP5_SA_SIZE > 0
-	bbci.l	a2, 5, 2f
-	l32i	a14, a13, 20
-	add		a3, a14, a15
-	xchal_cp5_store	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	bbci.l		a2,  5,   2f
+	l32i		a14, a13, 20
+	add		a3,  a14, a3
+	xchal_cp5_store	a3,  a4,  a5, a6, a7
 2:
 #endif
 
 #if XCHAL_CP6_SA_SIZE > 0
-	bbci.l	a2, 6, 2f
-	l32i	a14, a13, 24
-	add		a3, a14, a15
-	xchal_cp6_store	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	bbci.l		a2,  6,   2f
+	l32i		a14, a13, 24
+	add		a3,  a14, a3
+	xchal_cp6_store	a3,  a4,  a5, a6, a7
 2:
 #endif
 
 #if XCHAL_CP7_SA_SIZE > 0
-	bbci.l	a2, 7, 2f
-	l32i	a14, a13, 28
-	add		a3, a14, a15
-	xchal_cp7_store	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	bbci.l		a2,  7,   2f
+	l32i		a14, a13, 28
+	add		a3,  a14, a3
+	xchal_cp7_store	a3,  a4,  a5, a6, a7
 2:
 #endif
 
-.Ldone1:
-	ret
+Ldone1:
 
-	.size	_xtensa_coproc_savestate, . - _xtensa_coproc_savestate
-
-/****************************************************************************
- * Name: xtensa_coproc_savestate
- *
- * Description:
- *   If there is a current thread and it has a coprocessor state save area,
- *   then save all callee-saved state into this area. xtensa_coproc_savestate()
- *   is simply a C wrapper around the assembly language call to
- *   _xtensa_coproc_savestate.
- *
- * Input Parameters:
- *   A2 - Address of co-processor save area
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called with interrupts disabled.
- *
- ****************************************************************************/
-
-	.global	xtensa_coproc_savestate
-	.type	xtensa_coproc_savestate, @function
-
-	.align	4
-	.literal_position
-	.align	4
-
-xtensa_coproc_savestate:
-
-#ifdef __XTENSA_CALL0_ABI__
-	/* Need to preserve a8-11.  _xtensa_coproc_savestate modifies a2-a7,
-	 * a13-a15. a12-a15 are callee saved registers so a13-a14 must be
-	 * preserved.
-	 */
-
-	ENTRY(16)
-	s32i	a13, sp, LOCAL_OFFSET(1)		/* Save clobbered registers */
-	s32i	a14, sp, LOCAL_OFFSET(2)
-	s32i	a15, sp, LOCAL_OFFSET(3)
-
-	/* Call _xtensa_coproc_savestate() with A2=address of co-processor
-	 * save area.
-	 */
-
-	call0 _xtensa_coproc_savestate
-
-	/* Restore a13-15 and return */
-
-	l32i	a13, sp, LOCAL_OFFSET(1)		/* Restore clobbered registers */
-	l32i	a14, sp, LOCAL_OFFSET(2)
-	l32i	a15, sp, LOCAL_OFFSET(3)
-	RET(16)
-
-#else
-	/* Allocate the stack frame.  This function needs to allocate the usual 16
-	 * byte for the base save area + space for one variable.
-	 * NOTE: entry works in multiples of 8 bytes.
-	 */
-
-	ENTRY(24)
-	s32i	a0,  sp, LOCAL_OFFSET(1)		/* Save return address */
-
-	/* Call _xtensa_coproc_savestate() with A2=address of co-processor
-	 * save area.
-	 */
-
-	call0 _xtensa_coproc_savestate
-
-	/* Restore a0 and return */
-
-	l32i	a0,  sp, LOCAL_OFFSET(1)		/* Recover return address */
-	RET(24)
-
-#endif
-
-	.size	xtensa_coproc_savestate, . - xtensa_coproc_savestate
+.endm
 
 /****************************************************************************
- * Name: _xtensa_coproc_restorestate
+ * Macro: xtensa_coproc_restorestate
  *
  * Description:
  *   Restore any callee-saved coprocessor state for the incoming thread.
@@ -284,188 +197,99 @@ xtensa_coproc_savestate:
  *   around the assembly language call to _xtensa_coproc_restorestate.
  *
  * Entry Conditions:
- *   - A2 holds the address of the co-processor state save area
- *   - The incoming thread is set as the current thread.
  *
  * Exit conditions:
  *   - All necessary CP callee-saved state has been restored.
- *   - CPENABLE - Set up correctly for the current thread.
- *   - Registers a2-a7, a13-a15 have been trashed.
- *
- * Must be called from assembly code only, using CALL0.
+ *   - Registers a3-a8, a13-a14 have been trashed.
  *
  ****************************************************************************/
 
-	.global	_xtensa_coproc_restorestate
-	.type	_xtensa_coproc_restorestate, @function
+	.macro xtensa_coproc_restorestate
 
-	.align	4
-	.literal_position
-	.align	4
+	/* The stack when interrupt happened (the register A2)
+	* ----------------------------------------------------
+	* | Reserve area (0x20)                              |
+	* ----------------------------------------------------
+	* | Coproc context                                   |
+	* ----------------------------------------------------
+	* | Xtensa common regs                               |
+	* ---------------------------------------------------| <- SP
+	*/
 
-_xtensa_coproc_restorestate:
+	addi		a3, a2, (4 * XCPTCONTEXT_REGS)
 
-	/* Move the address of the thread state save area to R15 */
+	rsr		a8, CPENABLE			/* a8 = which CPs are enabled */
+	beqz		a8, Ldone2			/* Quick exit if none */
 
-	mov		a15, a2							/* A15 is now the address of the save area */
-
-#ifdef CONFIG_XTENSA_CP_LAZY
-	movi	a2, 0							/* a2 = Will disable all coprocessors */
-#else
-	l16ui	a2, a15, XTENSA_CPENABLE		/* a2 = Which CPs have been enable for this thread? */
-#endif
-	wsr		a2, CPENABLE					/* Set CPENABLE correctly for this thread */
-	l16ui	a2, a15, XTENSA_CPSTORED		/* a2 = Which CPs have been saved for this thread? */
-	movi	a3, 0							/* Clear the ones being restored (all of them) */
-	s16i	a3, a15, XTENSA_CPSTORED		/* Clear saved CP mask */
-
-	movi	a13, _xtensa_coproc_saoffsets	/* Array of CP save offsets */
-	addi	a15, a15, XTENSA_CPASA			/* a15 = base of aligned save area */
+	movi		a13, _xtensa_coproc_saoffsets	/* Array of CP save offsets */
 
 #if XCHAL_CP0_SA_SIZE
-	bbci.l	a2, 0, 2f						/* CP 0 not enabled */
-	l32i	a14, a13, 0						/* a14 = _xtensa_coproc_saoffsets[0] */
-	add		a3, a14, a15					/* a3 = save area for CP 0 */
-	xchal_cp0_load	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	bbci.l		a8,  0,   2f			/* CP 0 not enabled */
+	l32i		a14, a13, 0			/* a14 = _xtensa_coproc_saoffsets[0] */
+	add		a3,  a14, a3			/* a3 = save area for CP 0 */
+	xchal_cp0_load	a3,  a4,  a5, a6, a7
 2:
 #endif
 
 #if XCHAL_CP1_SA_SIZE
-	bbci.l	a2, 1, 2f						/* CP 1 not enabled */
-	l32i	a14, a13, 4						/* a14 = _xtensa_coproc_saoffsets[1] */
-	add		a3, a14, a15					/* a3 = save area for CP 1 */
-	xchal_cp1_load	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	bbci.l		a8,  1,   2f			/* CP 1 not enabled */
+	l32i		a14, a13, 4			/* a14 = _xtensa_coproc_saoffsets[1] */
+	add		a3,  a14, a3			/* a3 = save area for CP 1 */
+	xchal_cp1_load	a3,  a4,  a5, a6, a7
 2:
 #endif
 
 #if XCHAL_CP2_SA_SIZE
-	bbci.l	a2, 2, 2f
-	l32i	a14, a13, 8
-	add		a3, a14, a15
-	xchal_cp2_load	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	bbci.l		a8,  2,   2f
+	l32i		a14, a13, 8
+	add		a3,  a14, a3
+	xchal_cp2_load	a3,  a4,  a5, a6, a7
 2:
 #endif
 
 #if XCHAL_CP3_SA_SIZE
-	bbci.l	a2, 3, 2f
-	l32i	a14, a13, 12
-	add		a3, a14, a15
-	xchal_cp3_load	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	bbci.l		a8,  3,   2f
+	l32i		a14, a13, 12
+	add		a3,  a14, a3
+	xchal_cp3_load	a3,  a4,  a5, a6, a7
 2:
 #endif
 
 #if XCHAL_CP4_SA_SIZE
-	bbci.l	a2, 4, 2f
-	l32i	a14, a13, 16
-	add		a3, a14, a15
-	xchal_cp4_load	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	bbci.l		a8,  4,   2f
+	l32i		a14, a13, 16
+	add		a3,  a14, a3
+	xchal_cp4_load	a3,  a4,  a5, a6, a7
 2:
 #endif
 
 #if XCHAL_CP5_SA_SIZE
-	bbci.l	a2, 5, 2f
-	l32i	a14, a13, 20
-	add		a3, a14, a15
-	xchal_cp5_load	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	bbci.l		a8,  5,   2f
+	l32i		a14, a13, 20
+	add		a3,  a14, a3
+	xchal_cp5_load	a3,  a4,  a5, a6, a7
 2:
 #endif
 
 #if XCHAL_CP6_SA_SIZE
-	bbci.l	a2, 6, 2f
-	l32i	a14, a13, 24
-	add		a3, a14, a15
-	xchal_cp6_load	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	bbci.l		a8,  6,   2f
+	l32i		a14, a13, 24
+	add		a3,  a14, a3
+	xchal_cp6_load	a3,  a4,  a5, a6, a7
 2:
 #endif
 
 #if XCHAL_CP7_SA_SIZE
-	bbci.l	a2, 7, 2f
-	l32i	a14, a13, 28
-	add		a3, a14, a15
-	xchal_cp7_load	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	bbci.l		a8,  7,   2f
+	l32i		a14, a13, 28
+	add		a3,  a14, a3
+	xchal_cp7_load	a3,  a4,  a5, a6, a7
 2:
 #endif
 	/* Ensure wsr.CPENABLE has completed. */
 
 	rsync
-	ret
 
-	.size	_xtensa_coproc_restorestate, . - _xtensa_coproc_restorestate
+Ldone2:
 
-/****************************************************************************
- * Name: xtensa_coproc_restorestate
- *
- * Description:
- *   Restore any callee-saved coprocessor state for the incoming thread.
- *   xtensa_coproc_restorestate() is simply a C wrapper around the assembly
- *   language call to _xtensa_coproc_restorestate.
- *
- * Input Parameters:
- *   - A2 holds the address of the threads state save area
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called with interrupts disabled.
- *
- ****************************************************************************/
-
-	.global	xtensa_coproc_restorestate
-	.type	xtensa_coproc_restorestate, @function
-
-	.align	4
-	.literal_position
-	.align	4
-
-xtensa_coproc_restorestate:
-
-#ifdef __XTENSA_CALL0_ABI__
-	/* Need to preserve a8-11.  _xtensa_coproc_restorestate modifies a2-a7,
-	 * a13-a15. a12-a15 are callee saved registers so a13-a14 must be
-	 * preserved.
-	 */
-
-	ENTRY(16)
-	s32i	a13, sp, LOCAL_OFFSET(1)		/* Save clobbered values */
-	s32i	a14, sp, LOCAL_OFFSET(2)
-	s32i	a15, sp, LOCAL_OFFSET(3)
-
-	/* Call _xtensa_coproc_restorestate() with A2=address of co-processor
-	 * save area.   Registers a0, a2-a7, a13-a15 have been trashed.
-	 */
-
-	call0 _xtensa_coproc_restorestate
-
-	/* Restore a13-a15 and return */
-
-	l32i	a13, sp, LOCAL_OFFSET(1)		/* Restore clobbered registers */
-	l32i	a14, sp, LOCAL_OFFSET(2)
-	l32i	a15, sp, LOCAL_OFFSET(3)
-	RET(16)
-
-#else
-	/* Allocate the stack frame.  This function needs to allocate the usual 16
-	 * byte for the base save area + space for one variable.
-	 * NOTE: entry works in multiples of 8 bytes.
-	 */
-
-	ENTRY(24)
-	s32i	a0,  sp, LOCAL_OFFSET(1)		/* Save return address */
-
-	/* Call _xtensa_coproc_restorestate() with A2=address of co-processor
-	 * save area.   Registers a0, a2-a7, a13-a15 have been trashed.
-	 */
-
-	call0 _xtensa_coproc_restorestate
-
-	/* Restore a0 and return */
-
-	l32i	a0,  sp, LOCAL_OFFSET(1)		/* Recover return address */
-	RET(24)
-
-#endif
-
-  .size	xtensa_coproc_restorestate, . - xtensa_coproc_restorestate
-
-#endif /* XCHAL_CP_NUM > 0 */
+.endm

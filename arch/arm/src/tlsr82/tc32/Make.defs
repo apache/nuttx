@@ -1,0 +1,57 @@
+############################################################################
+# arch/arm/src/tlsr82/tc32/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+include common/Make.defs
+
+# Specify our HEAD assembly file.  This will be linked as
+# the first object file, so it will appear at address 0
+
+HEAD_ASRC = cstartup_flash.S
+
+# Arch Flags
+
+AFLAGS += -DMCU_STARTUP_FLASH
+
+# Filter-out unnecessary .S files
+
+CMN_ASRCS :=
+
+# Filter-out unnecessary .c files
+
+TC32_CSRCS_FILTER := arm_backtrace_fp.c arm_backtrace_thumb.c
+TC32_CSRCS_FILTER += arm_switchcontext.c arm_fullcontextrestore.c
+TC32_CSRCS_FILTER += arm_saveusercontext.c arm_udelay.c
+CMN_CSRCS := $(filter-out $(TC32_CSRCS_FILTER), $(CMN_CSRCS))
+
+# Common files in arch/arm/src/armv6-m
+
+CMN_CSRCS += arm_sigdeliver.c arm_doirq.c
+
+# Common files in arch/arm/src/tlsr82/tc32
+
+CMN_ASRCS += tc32_fullcontextrestore.S tc32_switchcontext.S
+CMN_ASRCS += tc32_saveusercontext.S tc32_exception.S
+
+CMN_CSRCS += tc32_doirq.c tc32_initialstate.c tc32_schedulesigaction.c
+CMN_CSRCS += tc32_syscall.c tc32_udelay.c
+
+ifeq ($(CONFIG_SCHED_BACKTRACE),y)
+  CMN_CSRCS += tc32_backtrace.c
+endif

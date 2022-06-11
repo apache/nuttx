@@ -61,8 +61,10 @@ behave as follows at NSH start-up time:
 
       `--init.d/
           `-- rcS
+          `-- rc.sysinit
 
      Where ``rcS`` is the NSH start-up script.
+     Where ``rc.sysinit`` is the NSH system-init script.
 
   -  NSH will then mount the ROMFS file system at ``/etc``, resulting in::
 
@@ -71,8 +73,9 @@ behave as follows at NSH start-up time:
       `--etc/
           `--init.d/
               `-- rcS
+              `-- rc.sysinit
 
-  -  By default, the contents of ``rcS`` script are::
+  -  By default, the contents of ``rc.sysinit`` script are::
 
       # Create a RAMDISK and mount it at /tmp
 
@@ -80,9 +83,9 @@ behave as follows at NSH start-up time:
       mkfatfs /dev/ram1
       mount -t vfat /dev/ram1 /tmp
 
-  -  NSH will execute the script at ``/etc/init.d/rcS`` at start-up
-     (before the first NSH prompt). After execution of the script, the
-     root FS will look like::
+  -  NSH will execute the script at ``/etc/init.d/rc.sysinit`` at system
+     init (before the first NSH prompt). After execution of the script,
+     the root FS will look like::
 
       |--dev/
       |   |-- ram0
@@ -90,6 +93,7 @@ behave as follows at NSH start-up time:
       |--etc/
       |   `--init.d/
       |       `-- rcS
+      |       `-- rc.sysinit
       `--tmp/
 
 **Example Configurations**. Here are some configurations that have
@@ -105,15 +109,16 @@ provide useful examples:
   -  ``boards/sim/sim/sim/touchscreen``
 
 In most of these cases, the configuration sets up the *default*
-``/etc/init.d/rcS`` script. The default script is here:
-``apps/nshlib/rcS.template``. (The funny values in the template like
-``XXXMKRDMINORXXX`` get replaced via ``sed`` at build time). This
+``/etc/init.d/rc.sysinit`` and ``/etc/init.d/rcS`` script. The default
+script is here: ``apps/nshlib/rc.sysinit.template`` and
+``apps/nshlib/rcS.template``. (The funny values in the rc.sysinit.template
+like ``XXXMKRDMINORXXX`` get replaced via ``sed`` at build time). This
 default configuration creates a ramdisk and mounts it at ``/tmp`` as
 discussed above.
 
 If that default behavior is not what you want, then you can provide your
-own custom ``rcS`` script by defining ``CONFIG_NSH_ARCHROMFS=y`` in the
-configuration file.
+own custom ``rc.sysinit`` and ``rcS`` script by defining
+``CONFIG_NSH_ARCHROMFS=y`` in the configuration file.
 
 **Modifying the ROMFS Image**. The contents of the ``/etc`` directory
 are retained in the file ``apps/nshlib/nsh_romfsimg.h`` OR, if
@@ -146,20 +151,33 @@ behavior, there are three things to study:
         is a normal part of a complete Linux or Cygwin installation,
         usually as part of the ``vi`` package).
 
-     #. The file ``apps/nshlib/rcS.template`` (OR, if
+     #. The file ``apps/nshlib/rc.sysinit.template`` (OR, if
+        ``CONFIG_NSH_ARCHROMFS`` is defined
+        ``include/arch/board/rc.sysinit.template``.
+
+        The file ``apps/nshlib/rcS.template`` (OR, if
         ``CONFIG_NSH_ARCHROMFS`` is defined
         ``include/arch/board/rcs.template``.
 
-  #. ``rcS.template``. The file ``apps/nshlib/rcS.template`` contains the
+  #. ``rc.sysinit.template``. The file ``apps/nshlib/rc.sysinit.template``
+     contains the general form of the ``rc.sysinit`` file; configured values
+     are plugged into this template file to produce the final ``rc.sysinit`` file.
+
+     ``rcS.template``. The file ``apps/nshlib/rcS.template`` contains the
      general form of the ``rcS`` file; configured values are plugged into
      this template file to produce the final ``rcS`` file.
 
-     To generate a custom ``rcS`` file a copy of ``rcS.template`` needs to
+     To generate a custom ``rc.sysinit`` and ``rcS`` file a copy of
+     ``rc.sysinit.template`` and ``rcS.template`` needs to
      be placed at ``tools/`` and changed according to the desired start-up
      behaviour. Running ``tools/mkromfsimg.h`` creates ``nsh_romfsimg.h``
      which needs to be copied to ``apps/nshlib`` OR if
      ``CONFIG_NSH_ARCHROMFS`` is defined to
      ``boards/<arch>/<chip>/<board>/include``.
+
+``rc.sysinit.template``. The default ``rc.sysinit.template``,
+``apps/nshlib/rc.sysinit.template``, generates the standard, default
+``apps/nshlib/nsh_romfsimg.h`` file.
 
 ``rcS.template``. The default ``rcS.template``,
 ``apps/nshlib/rcS.template``, generates the standard, default
@@ -171,10 +189,11 @@ then a custom, board-specific ``nsh_romfsimg.h`` file residing in
 is configured, ``include/arch/board`` will be linked to
 ``boards/<arch>/<chip>/<board>/include``.
 
-All of the startup-behavior is contained in ``rcS.template``. The role
-of ``mkromfsimg.sh`` script is to (1) apply the specific configuration
-settings to ``rcS.template`` to create the final ``rcS``, and (2) to
-generate the header file ``nsh_romfsimg.h`` containing the ROMFS file
+All of the startup-behavior is contained in ``rc.sysinit.template`` and
+``rcS.template``. The role of ``mkromfsimg.sh`` script is to (1) apply
+the specific configuration settings to ``rc.sysinit.template`` to create
+the final ``rc.sysinit``, and ``rcS.template`` to create the final ``rcS``,
+and (2) to generate the header file ``nsh_romfsimg.h`` containing the ROMFS file
 system image. To do this, ``mkromfsimg.sh`` uses two tools that must be
 installed in your system:
 

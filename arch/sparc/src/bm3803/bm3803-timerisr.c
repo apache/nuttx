@@ -77,7 +77,7 @@
  *
  ****************************************************************************/
 
-static int bm3803_timerisr(int irq, uint32_t *regs, FAR void *arg)
+static int bm3803_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Clear the pending timer interrupt */
 
@@ -123,12 +123,12 @@ void up_timer_initialize(void)
 
   up_clrpend_irq(BM3803_IRQ_TIMER1);
 #ifdef CONFIG_ARCH_IRQPRIO
-  (void)up_prioritize_irq(BM3803_IRQ_TIMER1, CONFIG_BM3803_TIMER1PRIO);
+  up_prioritize_irq(BM3803_IRQ_TIMER1, CONFIG_BM3803_TIMER1PRIO);
 #endif
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(BM3803_IRQ_TIMER1, (xcpt_t)bm3803_timerisr, NULL);
+  irq_attach(BM3803_IRQ_TIMER1, (xcpt_t)bm3803_timerisr, NULL);
 
   /* And enable the timer interrupt */
 

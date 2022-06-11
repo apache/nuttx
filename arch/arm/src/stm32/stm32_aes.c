@@ -58,10 +58,10 @@
 
 static void stm32aes_enable(bool on);
 static void stm32aes_ccfc(void);
-static void stm32aes_setkey(FAR const void *key, size_t key_len);
-static void stm32aes_setiv(FAR const void *iv);
-static void stm32aes_encryptblock(FAR void *block_out,
-                                  FAR const void *block_in);
+static void stm32aes_setkey(const void *key, size_t key_len);
+static void stm32aes_setiv(const void *iv);
+static void stm32aes_encryptblock(void *block_out,
+                                  const void *block_in);
 static int  stm32aes_setup_cr(int mode, int encrypt);
 
 /****************************************************************************
@@ -109,9 +109,9 @@ static void stm32aes_ccfc(void)
 
 /* TODO: Handle other AES key lengths or fail if length is not valid */
 
-static void stm32aes_setkey(FAR const void *key, size_t key_len)
+static void stm32aes_setkey(const void *key, size_t key_len)
 {
-  FAR uint32_t *in = (FAR uint32_t *)key;
+  uint32_t *in = (uint32_t *)key;
 
   putreg32(__builtin_bswap32(*in), STM32_AES_KEYR3);
   in++;
@@ -122,9 +122,9 @@ static void stm32aes_setkey(FAR const void *key, size_t key_len)
   putreg32(__builtin_bswap32(*in), STM32_AES_KEYR0);
 }
 
-static void stm32aes_setiv(FAR const void *iv)
+static void stm32aes_setiv(const void *iv)
 {
-  FAR uint32_t *in = (FAR uint32_t *)iv;
+  uint32_t *in = (uint32_t *)iv;
 
   putreg32(__builtin_bswap32(*in), STM32_AES_IVR3);
   in++;
@@ -135,11 +135,11 @@ static void stm32aes_setiv(FAR const void *iv)
   putreg32(__builtin_bswap32(*in), STM32_AES_IVR0);
 }
 
-static void stm32aes_encryptblock(FAR void *block_out,
-                                  FAR const void *block_in)
+static void stm32aes_encryptblock(void *block_out,
+                                  const void *block_in)
 {
-  FAR uint32_t *in  = (FAR uint32_t *)block_in;
-  FAR uint32_t *out = (FAR uint32_t *)block_out;
+  uint32_t *in  = (uint32_t *)block_in;
+  uint32_t *out = (uint32_t *)block_out;
 
   putreg32(*in, STM32_AES_DINR);
   in++;
@@ -257,8 +257,8 @@ int stm32_aesuninitialize(void)
   return OK;
 }
 
-int aes_cypher(FAR void *out, FAR const void *in, uint32_t size,
-               FAR const void *iv, FAR const void *key, uint32_t keysize,
+int aes_cypher(void *out, const void *in, size_t size,
+               const void *iv, const void *key, size_t keysize,
                int mode, int encrypt)
 {
   int ret = OK;
@@ -311,8 +311,8 @@ int aes_cypher(FAR void *out, FAR const void *in, uint32_t size,
   while (size)
     {
       stm32aes_encryptblock(out, in);
-      out   = (FAR uint8_t *)out + AES_BLOCK_SIZE;
-      in    = (FAR uint8_t *)in  + AES_BLOCK_SIZE;
+      out   = (uint8_t *)out + AES_BLOCK_SIZE;
+      in    = (uint8_t *)in  + AES_BLOCK_SIZE;
       size -= AES_BLOCK_SIZE;
     }
 

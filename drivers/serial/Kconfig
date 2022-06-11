@@ -66,7 +66,7 @@ config MCU_SERIAL
 config RPMSG_UART
 	bool "UART rpmsg support"
 	default n
-	depends on OPENAMP
+	depends on RPTUN
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select SERIAL_RXDMA
 	select SERIAL_TXDMA

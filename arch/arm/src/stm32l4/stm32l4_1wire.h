@@ -50,7 +50,7 @@
  *
  ****************************************************************************/
 
-FAR struct onewire_dev_s *stm32l4_1wireinitialize(int port);
+struct onewire_dev_s *stm32l4_1wireinitialize(int port);
 
 /****************************************************************************
  * Name: stm32l4_1wireuninitialize
@@ -67,6 +67,6 @@ FAR struct onewire_dev_s *stm32l4_1wireinitialize(int port);
  *
  ****************************************************************************/
 
-int stm32l4_1wireuninitialize(FAR struct onewire_dev_s *dev);
+int stm32l4_1wireuninitialize(struct onewire_dev_s *dev);
 
 #endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_1WIRE_H */

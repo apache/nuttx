@@ -1,4 +1,1 @@
-/arm/[i-k]*,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
--imxrt1050-evk:libcxxtest
--imxrt1060-evk:libcxxtest
--imxrt1064-evk:libcxxtest
+/arm/[i-k]*,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI

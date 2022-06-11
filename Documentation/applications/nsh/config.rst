@@ -298,9 +298,10 @@ Configuration                        Description
                                      registered as ``/dev/mmcsd``\ *N* where *N* is the minor number.
                                      Default is zero.
 
- ``CONFIG_NSH_ROMFSETC``             Mount a ROMFS file system at ``/etc`` and provide a startup
-                                     script at ``/etc/init.d/rcS``.
-                                     The default startup script will mount a FAT FS RAMDISK at
+ ``CONFIG_NSH_ROMFSETC``             Mount a ROMFS file system at ``/etc`` and provide a system init
+                                     script at ``/etc/init.d.rc.sysinit`` and a startup script at
+                                     ``/etc/init.d/rcS``.
+                                     The default system init script will mount a FAT FS RAMDISK at
                                      ``/tmp`` but the logic is `easily extensible <#startupscript>`__.
 
  ``CONFIG_NSH_CONSOLE``              If ``CONFIG_NSH_CONSOLE`` is set to *y*, then a serial console
@@ -462,6 +463,9 @@ Configuration                  Description
 ``CONFIG_NSH_ROMFSMOUNTPT``    The default mountpoint for the ROMFS volume is ``"/etc"``,
                                but that can be changed with this setting. This must be a
                                absolute path beginning with '``/``' and enclosed in quotes.
+``CONFIG_NSH_SYSINITSCRIPT``   This is the relative path to the system init script within the
+                               mountpoint. The default is ``"init.d/rc.sysinit"``. This is a relative
+                               path and must not start with '``/``' but must be enclosed in quotes.
 ``CONFIG_NSH_INITSCRIPT``      This is the relative path to the startup script within the
                                mountpoint. The default is ``"init.d/rcS"``. This is a relative
                                path and must not start with '``/``' but must be enclosed in quotes.
@@ -473,7 +477,7 @@ Configuration                  Description
                                Any value selected must be a power of 2.
 ============================== ==============================================================
 
-When the default ``rcS`` file used when ``CONFIG_NSH_ROMFSETC`` is
+When the default ``rc.sysinit`` file used when ``CONFIG_NSH_ROMFSETC`` is
 selected, it will mount a FAT FS under ``/tmp``. The following
 selections describe that FAT FS.
 

@@ -63,7 +63,7 @@ struct bm3803_oneshot_s
   uint8_t chan;                       /* The timer/counter in use */
 
   volatile bool running;              /* True: the timer is running */
-  FAR struct bm3803_tim_dev_s *tch;   /* Pointer returned by
+  struct bm3803_tim_dev_s *tch;       /* Pointer returned by
                                        * bm3803_tim_init() */
   volatile oneshot_handler_t handler; /* Oneshot expiration callback */
   volatile void *arg;                 /* The argument that will accompany

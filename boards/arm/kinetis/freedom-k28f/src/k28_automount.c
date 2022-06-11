@@ -44,7 +44,7 @@
  ****************************************************************************/
 
 #ifndef NULL
-#  define NULL (FAR void *)0
+#  define NULL (void *)0
 #endif
 
 #ifndef OK
@@ -59,10 +59,10 @@
 
 struct k28_automount_state_s
 {
-  volatile automount_handler_t handler;    /* Upper half handler */
-  FAR void *arg;                           /* Handler argument */
-  bool enable;                             /* Fake interrupt enable */
-  bool pending;                            /* Set if there an event while disabled */
+  volatile automount_handler_t handler; /* Upper half handler */
+  void *arg;                            /* Handler argument */
+  bool enable;                          /* Fake interrupt enable */
+  bool pending;                         /* Set if there an event while disabled */
 };
 
 /* This structure represents the static configuration of an automounter */
@@ -73,19 +73,19 @@ struct k28_automount_config_s
    * struct automount_lower_s to struct k28_automount_config_s
    */
 
-  struct automount_lower_s lower;          /* Publicly visible part */
-  FAR struct k28_automount_state_s *state; /* Changeable state */
+  struct automount_lower_s lower;      /* Publicly visible part */
+  struct k28_automount_state_s *state; /* Changeable state */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  k28_sdhc_attach(FAR const struct automount_lower_s *lower,
-                       automount_handler_t isr, FAR void *arg);
-static void k28_sdhc_enable(FAR const struct automount_lower_s *lower,
-                       bool enable);
-static bool k28_sdhc_inserted(FAR const struct automount_lower_s *lower);
+static int  k28_sdhc_attach(const struct automount_lower_s *lower,
+                            automount_handler_t isr, void *arg);
+static void k28_sdhc_enable(const struct automount_lower_s *lower,
+                            bool enable);
+static bool k28_sdhc_inserted(const struct automount_lower_s *lower);
 
 /****************************************************************************
  * Private Data
@@ -128,15 +128,15 @@ static const struct k28_automount_config_s g_sdhc_config =
  *
  ****************************************************************************/
 
-static int k28_sdhc_attach(FAR const struct automount_lower_s *lower,
-                      automount_handler_t isr, FAR void *arg)
+static int k28_sdhc_attach(const struct automount_lower_s *lower,
+                           automount_handler_t isr, void *arg)
 {
-  FAR const struct k28_automount_config_s *config;
-  FAR struct k28_automount_state_s *state;
+  const struct k28_automount_config_s *config;
+  struct k28_automount_state_s *state;
 
   /* Recover references to our structure */
 
-  config = (FAR struct k28_automount_config_s *)lower;
+  config = (struct k28_automount_config_s *)lower;
   DEBUGASSERT(config != NULL && config->state != NULL);
 
   state = config->state;
@@ -167,16 +167,16 @@ static int k28_sdhc_attach(FAR const struct automount_lower_s *lower,
  *
  ****************************************************************************/
 
-static void k28_sdhc_enable(FAR const struct automount_lower_s *lower,
-                       bool enable)
+static void k28_sdhc_enable(const struct automount_lower_s *lower,
+                            bool enable)
 {
-  FAR const struct k28_automount_config_s *config;
-  FAR struct k28_automount_state_s *state;
+  const struct k28_automount_config_s *config;
+  struct k28_automount_state_s *state;
   irqstate_t flags;
 
   /* Recover references to our structure */
 
-  config = (FAR struct k28_automount_config_s *)lower;
+  config = (struct k28_automount_config_s *)lower;
   DEBUGASSERT(config != NULL && config->state != NULL);
 
   state = config->state;
@@ -218,7 +218,7 @@ static void k28_sdhc_enable(FAR const struct automount_lower_s *lower,
  *
  ****************************************************************************/
 
-static bool k28_sdhc_inserted(FAR const struct automount_lower_s *lower)
+static bool k28_sdhc_inserted(const struct automount_lower_s *lower)
 {
   return k28_cardinserted();
 }
@@ -254,8 +254,8 @@ static bool k28_sdhc_inserted(FAR const struct automount_lower_s *lower)
 
 void k28_sdhc_automount_event(bool inserted)
 {
-  FAR const struct k28_automount_config_s *config = &g_sdhc_config;
-  FAR struct k28_automount_state_s *state = &g_sdhc_state;
+  const struct k28_automount_config_s *config = &g_sdhc_config;
+  struct k28_automount_state_s *state = &g_sdhc_state;
 
   /* Is the auto-mounter interrupt attached? */
 
@@ -296,7 +296,7 @@ void k28_sdhc_automount_event(bool inserted)
 
 void k28_automount_initialize(void)
 {
-  FAR void *handle;
+  void *handle;
 
   finfo("Initializing automounter(s)\n");
 

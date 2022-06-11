@@ -65,14 +65,14 @@ int pthread_detach(pthread_t thread)
   FAR struct tcb_s *rtcb = this_task();
   FAR struct task_group_s *group = rtcb->group;
   FAR struct join_s *pjoin;
-  int ret;
+  int ret = OK;
 
   sinfo("Thread=%d group=%p\n", thread, group);
   DEBUGASSERT(group);
 
   /* Find the entry associated with this pthread. */
 
-  pthread_sem_take(&group->tg_joinsem, NULL, false);
+  nxsem_wait_uninterruptible(&group->tg_joinsem);
   pjoin = pthread_findjoininfo(group, (pid_t)thread);
   if (!pjoin)
     {
@@ -96,12 +96,15 @@ int pthread_detach(pthread_t thread)
            * thread exits
            */
 
-          pjoin->detached = true;
+          if (pjoin->detached)
+            {
+              ret = EINVAL;
+            }
+          else
+            {
+              pjoin->detached = true;
+            }
         }
-
-      /* Either case is successful */
-
-      ret = OK;
     }
 
   pthread_sem_give(&group->tg_joinsem);

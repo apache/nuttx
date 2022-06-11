@@ -71,7 +71,7 @@ struct spi_dev_s; /* Forward reference */
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *lpc17_40_spibus_initialize(int port);
+struct spi_dev_s *lpc17_40_spibus_initialize(int port);
 
 /****************************************************************************
  * Name:  lpc17_40_spiselect, lpc17_40_status, and lpc17_40_spicmddata
@@ -103,11 +103,11 @@ FAR struct spi_dev_s *lpc17_40_spibus_initialize(int port);
  *
  ****************************************************************************/
 
-void lpc17_40_spiselect(FAR struct spi_dev_s *dev,
+void lpc17_40_spiselect(struct spi_dev_s *dev,
                         uint32_t devid, bool selected);
-uint8_t lpc17_40_spistatus(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t lpc17_40_spistatus(struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int lpc17_40_spicmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int lpc17_40_spicmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 /****************************************************************************
@@ -126,7 +126,7 @@ int lpc17_40_spicmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
  *
  ****************************************************************************/
 
-void spi_flush(FAR struct spi_dev_s *dev);
+void spi_flush(struct spi_dev_s *dev);
 
 /****************************************************************************
  * Name: lpc17_40_spiregister
@@ -149,9 +149,9 @@ void spi_flush(FAR struct spi_dev_s *dev);
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CALLBACK
-int lpc17_40_spiregister(FAR struct spi_dev_s *dev,
+int lpc17_40_spiregister(struct spi_dev_s *dev,
                          spi_mediachange_t callback,
-                         FAR void *arg);
+                         void *arg);
 #endif
 
 #if defined(__cplusplus)

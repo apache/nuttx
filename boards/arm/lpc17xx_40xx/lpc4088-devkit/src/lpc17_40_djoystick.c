@@ -74,15 +74,15 @@
  ****************************************************************************/
 
 static djoy_buttonset_t djoy_supported(
-                     FAR const struct djoy_lowerhalf_s *lower);
+                     const struct djoy_lowerhalf_s *lower);
 static djoy_buttonset_t djoy_sample(
-                     FAR const struct djoy_lowerhalf_s *lower);
-static void djoy_enable(FAR const struct djoy_lowerhalf_s *lower,
+                     const struct djoy_lowerhalf_s *lower);
+static void djoy_enable(const struct djoy_lowerhalf_s *lower,
                         djoy_buttonset_t press, djoy_buttonset_t release,
-                        djoy_interrupt_t handler, FAR void *arg);
+                        djoy_interrupt_t handler, void *arg);
 
 static void djoy_disable(void);
-static int djoy_interrupt(int irq, FAR void *context, FAR void *arg);
+static int djoy_interrupt(int irq, void *context, void *arg);
 
 /****************************************************************************
  * Private Data
@@ -114,7 +114,7 @@ static const uint8_t g_buttonirq[DJOY_NGPIOS] =
 /* Current interrupt handler and argument */
 
 static djoy_interrupt_t g_djoyhandler;
-static FAR void *g_djoyarg;
+static void *g_djoyarg;
 
 /* This is the discrete joystick lower half driver interface */
 
@@ -138,7 +138,7 @@ static const struct djoy_lowerhalf_s g_djoylower =
  ****************************************************************************/
 
 static djoy_buttonset_t djoy_supported(
-                               FAR const struct djoy_lowerhalf_s *lower)
+                               const struct djoy_lowerhalf_s *lower)
 {
   iinfo("Supported: %02x\n", DJOY_ALLBITS);
   return (djoy_buttonset_t)DJOY_ALLBITS;
@@ -152,7 +152,7 @@ static djoy_buttonset_t djoy_supported(
  *
  ****************************************************************************/
 
-static djoy_buttonset_t djoy_sample(FAR const struct djoy_lowerhalf_s *lower)
+static djoy_buttonset_t djoy_sample(const struct djoy_lowerhalf_s *lower)
 {
   djoy_buttonset_t ret = 0;
   int i;
@@ -186,9 +186,9 @@ static djoy_buttonset_t djoy_sample(FAR const struct djoy_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static void djoy_enable(FAR const struct djoy_lowerhalf_s *lower,
-                         djoy_buttonset_t press, djoy_buttonset_t release,
-                         djoy_interrupt_t handler, FAR void *arg)
+static void djoy_enable(const struct djoy_lowerhalf_s *lower,
+                        djoy_buttonset_t press, djoy_buttonset_t release,
+                        djoy_interrupt_t handler, void *arg)
 {
 #ifdef CONFIG_LPC17_40_GPIOIRQ
   irqstate_t flags;
@@ -279,7 +279,7 @@ static void djoy_disable(void)
  *
  ****************************************************************************/
 
-static int djoy_interrupt(int irq, FAR void *context, FAR void *arg)
+static int djoy_interrupt(int irq, void *context, void *arg)
 {
   DEBUGASSERT(g_djoyhandler != NULL);
   if (g_djoyhandler != NULL)

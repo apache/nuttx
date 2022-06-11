@@ -26,7 +26,9 @@
 
 #include <pthread.h>
 #include <assert.h>
+#include <errno.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/tls.h>
 
 #if CONFIG_TLS_NELEM > 0
@@ -70,23 +72,46 @@
 int pthread_key_create(FAR pthread_key_t *key,
                        CODE void (*destructor)(FAR void *))
 {
-  int tlsindex;
+  FAR struct task_info_s *info = task_get_info();
+  int candidate;
+  int ret;
 
   DEBUGASSERT(key != NULL);
+  DEBUGASSERT(info != NULL);
 
-  /* Allocate a TLS index */
+  /* Search for an unused index.  This is done in a critical section here to
+   * avoid concurrent modification of the group TLS index set.
+   */
 
-  tlsindex = tls_alloc(destructor);
+  ret = _SEM_WAIT(&info->ta_sem);
 
-  /* Check if found a TLS index. */
-
-  if (tlsindex >= 0)
+  if (ret < 0)
     {
-      *key = tlsindex;
-      return OK;
+      ret = _SEM_ERRNO(ret);
+      return ret;
     }
 
-  return -tlsindex;
+  ret = EAGAIN;
+
+  for (candidate = 0; candidate < CONFIG_TLS_NELEM; candidate++)
+    {
+      /* Is this candidate index available? */
+
+      tls_ndxset_t mask = (tls_ndxset_t)1 << candidate;
+      if ((info->ta_tlsset & mask) == 0)
+        {
+          /* Yes.. allocate the index and break out of the loop */
+
+          info->ta_tlsset |= mask;
+          info->ta_tlsdtor[candidate] = destructor;
+          *key = candidate;
+          ret = OK;
+          break;
+        }
+    }
+
+  _SEM_POST(&info->ta_sem);
+  return ret;
 }
 
 #endif /* CONFIG_TLS_NELEM */

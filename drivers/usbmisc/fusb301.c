@@ -755,7 +755,7 @@ static void fusb301_notify(FAR struct fusb301_dev_s *priv)
       if (fds)
         {
           fds->revents |= POLLIN;
-          fusb301_info("Report events: %02x\n", fds->revents);
+          fusb301_info("Report events: %08" PRIx32 "\n", fds->revents);
           nxsem_post(fds->sem);
         }
     }

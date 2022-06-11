@@ -30,6 +30,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/arch.h>
 #include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
@@ -140,6 +141,9 @@
                                               (((val - min) % step) == 0) ? \
                                               OK : -EINVAL))
 
+#define ISX012_CHIPID_L (0x0000c460)
+#define ISX012_CHIPID_H (0x00005516)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -165,6 +169,7 @@ typedef struct isx012_reg_s isx012_reg_t;
 
 struct isx012_dev_s
 {
+  sem_t                   i2c_lock;
   FAR struct i2c_master_s *i2c;        /* I2C interface */
   uint8_t                 i2c_addr;    /* I2C address */
   int                     i2c_freq;    /* Frequency */
@@ -182,7 +187,7 @@ typedef struct isx012_dev_s isx012_dev_t;
 
 /* register operations */
 
-static uint16_t isx012_getreg(isx012_dev_t *priv,
+static uint16_t isx012_getreg(FAR isx012_dev_t *priv,
                               uint16_t regaddr, uint16_t regsize);
 static int     isx012_putreg(isx012_dev_t *priv, uint16_t regaddr,
                              uint16_t regval, uint16_t regsize);
@@ -190,7 +195,7 @@ static int     isx012_putreglist(isx012_dev_t *priv,
                          FAR const isx012_reg_t *reglist, size_t nentries);
 #ifdef ISX012_CHECK_IN_DETAIL
 static int     isx012_putregs(isx012_dev_t *priv, uint16_t regaddr,
-                              uint8_t *regvals, uint8_t regsize);
+                              FAR uint8_t *regvals, uint8_t regsize);
 static int     isx012_chipid(FAR struct i2c_master_s *i2c);
 #endif
 
@@ -200,8 +205,8 @@ static int isx012_chk_int_state(isx012_dev_t *priv,
 static int isx012_set_mode_param(isx012_dev_t *priv,
                                  imgsensor_stream_type_t type,
                                  uint8_t nr_fmt,
-                                 imgsensor_format_t *fmt,
-                                 imgsensor_interval_t *interval);
+                                 FAR imgsensor_format_t *fmt,
+                                 FAR imgsensor_interval_t *interval);
 static int isx012_change_camera_mode(isx012_dev_t *priv, uint8_t mode);
 static int isx012_change_device_state(isx012_dev_t *priv,
                                       isx012_state_t state);
@@ -210,13 +215,15 @@ static int isx012_replace_frameinterval_to_regval
 static int8_t isx012_get_maximum_fps
                 (uint8_t nr_datafmt,
                  FAR imgsensor_format_t *datafmt);
-static int isx012_set_shd(FAR isx012_dev_t *priv);
+static int isx012_set_shd(isx012_dev_t *priv);
 static bool is_movie_needed(uint8_t fmt, uint8_t fps);
 
 /* image sensor device operations interface */
 
+static bool isx012_is_available(void);
 static int isx012_init(void);
 static int isx012_uninit(void);
+static FAR const char *isx012_get_driver_name(void);
 static int isx012_validate_frame_setting(imgsensor_stream_type_t type,
                                          uint8_t nr_datafmt,
                                          FAR imgsensor_format_t *datafmts,
@@ -614,8 +621,10 @@ static uint8_t g_isx012_iso_regval[] =
 
 static struct imgsensor_ops_s g_isx012_ops =
 {
+  isx012_is_available,                  /* is HW available */
   isx012_init,                          /* init */
   isx012_uninit,                        /* uninit */
+  isx012_get_driver_name,               /* get driver name */
   isx012_validate_frame_setting,        /* validate_frame_setting */
   isx012_start_capture,                 /* start_capture */
   isx012_stop_capture,                  /* stop_capture */
@@ -628,7 +637,17 @@ static struct imgsensor_ops_s g_isx012_ops =
  * Private Functions
  ****************************************************************************/
 
-static uint16_t isx012_getreg(isx012_dev_t *priv,
+static void i2c_lock(void)
+{
+  nxsem_wait_uninterruptible(&g_isx012_private.i2c_lock);
+}
+
+static void i2c_unlock(void)
+{
+  nxsem_post(&g_isx012_private.i2c_lock);
+}
+
+static uint16_t isx012_getreg(FAR isx012_dev_t *priv,
                               uint16_t regaddr, uint16_t regsize)
 {
   struct i2c_config_s config;
@@ -644,25 +663,32 @@ static uint16_t isx012_getreg(isx012_dev_t *priv,
   buffer[0] = regaddr >> 8;
   buffer[1] = regaddr & 0xff;
 
+  i2c_lock();
+
   /* Write the register address */
 
-  ret = i2c_write(priv->i2c, &config, (uint8_t *)buffer, 2);
+  ret = i2c_write(priv->i2c, &config, (FAR uint8_t *)buffer, 2);
   if (ret < 0)
     {
       verr("i2c_write failed: %d\n", ret);
-      return 0;
     }
-
-  /* Restart and read 16bits from the register */
-
-  ret = i2c_read(priv->i2c, &config, (uint8_t *)buffer, regsize);
-  if (ret < 0)
+  else
     {
-      verr("i2c_read failed: %d\n", ret);
-      return 0;
+      /* Restart and read 16bits from the register */
+
+      ret = i2c_read(priv->i2c, &config, (FAR uint8_t *)buffer, regsize);
+      if (ret < 0)
+        {
+          verr("i2c_read failed: %d\n", ret);
+        }
     }
 
-  memcpy((uint8_t *)&regval, (uint8_t *)buffer, regsize);
+  i2c_unlock();
+
+  if (ret >= 0)
+    {
+      memcpy((FAR uint8_t *)&regval, (FAR uint8_t *)buffer, regsize);
+    }
 
   return regval;
 }
@@ -685,16 +711,20 @@ static int isx012_putreg(isx012_dev_t *priv,
   buffer[0] = regaddr >> 8;   /* RegAddr Hi */
   buffer[1] = regaddr & 0xff; /* RegAddr Low */
 
-  memcpy((uint8_t *)&buffer[2], (uint8_t *)&regval, regsize);
+  memcpy((FAR uint8_t *)&buffer[2], (FAR uint8_t *)&regval, regsize);
+
+  i2c_lock();
 
   /* And do it */
 
   ret = i2c_write(priv->i2c, &config,
-                 (uint8_t *)buffer, regsize + 2);
+                 (FAR uint8_t *)buffer, regsize + 2);
   if (ret < 0)
     {
       verr("i2c_write failed: %d\n", ret);
     }
+
+  i2c_unlock();
 
   return ret;
 }
@@ -747,7 +777,7 @@ static int isx012_chk_int_state(isx012_dev_t *priv,
 }
 
 static int isx012_replace_fmt_to_regval(uint8_t nr_fmt,
-                                        imgsensor_format_t *fmt)
+                                        FAR imgsensor_format_t *fmt)
 {
   int ret;
 
@@ -809,8 +839,8 @@ static bool is_movie_needed(uint8_t fmt, uint8_t fps)
 static int isx012_set_mode_param(isx012_dev_t *priv,
                                  imgsensor_stream_type_t type,
                                  uint8_t nr_fmt,
-                                 imgsensor_format_t *fmt,
-                                 imgsensor_interval_t *interval)
+                                 FAR imgsensor_format_t *fmt,
+                                 FAR imgsensor_interval_t *interval)
 {
   int ret = 0;
   int fmt_val = isx012_replace_fmt_to_regval(nr_fmt, fmt);
@@ -1234,10 +1264,31 @@ int init_isx012(FAR struct isx012_dev_s *priv)
   return ret;
 }
 
+static bool isx012_is_available(void)
+{
+  bool ret;
+
+  isx012_init();
+
+  /* Try to access via I2C.
+   * Select DEVICESTS register, which has positive value.
+   */
+
+  ret = (isx012_getreg(&g_isx012_private, DEVICESTS, 1) == DEVICESTS_SLEEP);
+
+  isx012_uninit();
+
+  return ret;
+}
+
 static int isx012_init(void)
 {
   FAR struct isx012_dev_s *priv = &g_isx012_private;
   int ret = 0;
+
+  priv->i2c      = board_isx012_initialize();
+  priv->i2c_addr = ISX012_I2C_SLV_ADDR;
+  priv->i2c_freq = I2CFREQ_STANDARD;
 
   ret = board_isx012_power_on();
   if (ret < 0)
@@ -1278,10 +1329,17 @@ static int isx012_uninit(void)
       return ret;
     }
 
+  board_isx012_uninitialize(priv->i2c);
+
   priv->i2c_freq = I2CFREQ_STANDARD;
   priv->state    = STATE_ISX012_POWEROFF;
 
   return ret;
+}
+
+static FAR const char *isx012_get_driver_name(void)
+{
+  return "ISX012";
 }
 
 static int8_t isx012_get_maximum_fps(uint8_t nr_fmt,
@@ -1782,6 +1840,8 @@ static int isx012_get_value(uint32_t id,
   uint16_t   read_src;
   uint16_t   *read_dst;
   int        ret = OK;
+  uint16_t   exposure_time_lsb;
+  uint16_t   exposure_time_msb;
 
   ASSERT(value);
 
@@ -1942,6 +2002,21 @@ static int isx012_get_value(uint32_t id,
                                        ISX012_REG_EXPOSURETIME,
                                        ISX012_SIZE_EXPOSURETIME);
 
+        if (value->value32 == REGVAL_EXPOSURETIME_AUTO)
+          {
+            exposure_time_lsb = isx012_getreg
+                                (priv,
+                                 ISX012_REG_EXPOSUREAUTOVALUE_LSB,
+                                 ISX012_SIZE_EXPOSUREAUTOVALUE);
+            exposure_time_msb = isx012_getreg
+                                (priv,
+                                 ISX012_REG_EXPOSUREAUTOVALUE_MSB,
+                                 ISX012_SIZE_EXPOSUREAUTOVALUE);
+
+            value->value32 = (uint16_t)(((exposure_time_msb << 16)
+                                         | exposure_time_lsb)
+                                        / ISX012_UNIT_EXPOSURETIME_US);
+          }
         break;
 
       case IMGSENSOR_ID_AUTO_N_PRESET_WB:
@@ -1970,10 +2045,12 @@ static int isx012_get_value(uint32_t id,
         break;
 
       case IMGSENSOR_ID_ISO_SENSITIVITY:
-        readvalue = isx012_getreg(priv, ISX012_REG_ISO, ISX012_SIZE_ISO);
+        readvalue = isx012_getreg(priv,
+                                  ISX012_REG_ISOAUTOVALUE,
+                                  ISX012_SIZE_ISOAUTOVALUE);
 
         ret = -EINVAL;
-        for (cnt = 0; cnt < ARRAY_NENTRIES(g_isx012_presetwb_regval); cnt++)
+        for (cnt = 0; cnt < ARRAY_NENTRIES(g_isx012_iso_regval); cnt++)
           {
             if (g_isx012_iso_regval[cnt] == readvalue)
               {
@@ -2870,23 +2947,25 @@ static int isx012_set_shd(FAR isx012_dev_t *priv)
  * Public Functions
  ****************************************************************************/
 
-int isx012_initialize(FAR struct i2c_master_s *i2c)
+int isx012_initialize(void)
 {
+  int ret;
   FAR struct isx012_dev_s *priv = &g_isx012_private;
-
-  /* Save i2c information */
-
-  priv->i2c        = i2c;
-  priv->i2c_addr   = ISX012_I2C_SLV_ADDR;
-  priv->i2c_freq   = I2CFREQ_STANDARD;
 
   /* Regiser image sensor operations variable */
 
-  imgsensor_register(&g_isx012_ops);
+  ret = imgsensor_register(&g_isx012_ops);
+  if (ret != OK)
+    {
+      verr("Failed to register ops to video driver.\n");
+      return ret;
+    }
 
   /* Initialize other information */
 
   priv->state      = STATE_ISX012_POWEROFF;
+
+  nxsem_init(&priv->i2c_lock, 0, 1);
 
   return OK;
 }

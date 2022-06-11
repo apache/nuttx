@@ -59,7 +59,7 @@
  *
  ****************************************************************************/
 
-int up_addrenv_kstackalloc(FAR struct tcb_s *tcb)
+int up_addrenv_kstackalloc(struct tcb_s *tcb)
 {
   DEBUGASSERT(tcb && tcb->xcp.kstack == NULL);
 
@@ -91,7 +91,7 @@ int up_addrenv_kstackalloc(FAR struct tcb_s *tcb)
  *
  ****************************************************************************/
 
-int up_addrenv_kstackfree(FAR struct tcb_s *tcb)
+int up_addrenv_kstackfree(struct tcb_s *tcb)
 {
   DEBUGASSERT(tcb);
 

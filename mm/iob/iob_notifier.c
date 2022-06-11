@@ -92,16 +92,15 @@ int iob_notifier_setup(int qid, worker_t worker, FAR void *arg)
  *         iob_notifier_setup().
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
+ *   None.
  *
  ****************************************************************************/
 
-int iob_notifier_teardown(int key)
+void iob_notifier_teardown(int key)
 {
   /* This is just a simple wrapper around work_notifier_teardown(). */
 
-  return work_notifier_teardown(key);
+  work_notifier_teardown(key);
 }
 
 /****************************************************************************

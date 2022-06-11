@@ -150,6 +150,11 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
               oflags          &=  (FFCNTL & ~O_NONBLOCK);
               filep->f_oflags &= ~(FFCNTL & ~O_NONBLOCK);
               filep->f_oflags |=  oflags;
+
+              if ((filep->f_oflags & O_APPEND) != 0)
+                {
+                  file_seek(filep, 0, SEEK_END);
+                }
             }
         }
         break;

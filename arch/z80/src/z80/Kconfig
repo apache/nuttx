@@ -7,17 +7,10 @@ if ARCH_CHIP_Z80
 
 choice
 	prompt "Toolchain Selection"
-	default Z80_TOOLCHAIN_SDCCW if TOOLCHAIN_WINDOWS
-	default Z80_TOOLCHAIN_SDCCL if !TOOLCHAIN_WINDOWS
+	default Z80_TOOLCHAIN_SDCC
 
-config Z80_TOOLCHAIN_SDCCL
-	bool "SDCC for Linux, macOS, or Cygwin"
-	depends on !WINDOWS_NATIVE
-
-config Z80_TOOLCHAIN_SDCCW
-	bool "SDCC for Windows"
-	depends on TOOLCHAIN_WINDOWS
-	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
+config Z80_TOOLCHAIN_SDCC
+	bool "Win32, SDCC for Linux, macOS, or Cygwin"
 
 endchoice
 

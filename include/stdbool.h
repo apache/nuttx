@@ -35,21 +35,21 @@
 #ifdef CONFIG_ARCH_STDBOOL_H
 #  include <arch/stdbool.h>
 
+#else
+
 /* NuttX will insist that the sizeof(bool) is 8-bits.  The sizeof of _Bool
  * used by any specific compiler is implementation specific: It can vary from
  * compiler-to-compiler and even vary between different versions of the same
  * compiler.  Compilers seems to be converging to sizeof(_Bool) == 1. If that
- * is true for your compiler, you should define CONFIG_C99_BOOL8 in your
+ * is true for your compiler, you should define CONFIG_C99_BOOL in your
  * NuttX configuration for better standards compatibility.
  *
- * CONFIG_C99_BOOL8 - Means (1) your C++ compiler has sizeof(_Bool) == 8,
+ * CONFIG_C99_BOOL - Means (1) your C++ compiler has sizeof(_Bool) == 8,
  * (2) your C compiler supports the C99 _Bool intrinsic type, and (3) that
  * the C99 _Bool type also has size 1.
  */
 
-#else
-
-/* nuttx/compiler.h may also define or undefine CONFIG_C99_BOOL8 */
+/* nuttx/compiler.h define or undefine CONFIG_C99_BOOL */
 
 #  include <nuttx/compiler.h>
 #  include <stdint.h>
@@ -64,41 +64,21 @@
  * NOTE: Under C99 'bool' is required to be defined to be the intrinsic type
  * _Bool.  However, in this NuttX context, we need backward compatibility
  * to pre-C99 standards where _Bool is not an intrinsic type.  Hence, we
- * use _Bool8 as the underlying type (unless CONFIG_C99_BOOL8 is defined)
+ * use uint8_t as the underlying type (unless CONFIG_C99_BOOL is defined)
  */
 
-#ifndef __cplusplus
-#ifdef CONFIG_C99_BOOL8
-#  define bool _Bool
-#else
-#  define bool _Bool8
-#endif
+#  ifndef __cplusplus
+#    ifdef CONFIG_C99_BOOL
+#      define bool _Bool
+#    else
+#      define bool uint8_t
+#    endif
 
-#define true  (bool)1
-#define false (bool)0
+#    define true  (bool)1
+#    define false (bool)0
 
-#define __bool_true_false_are_defined 1
-#endif /* __cplusplus */
+#    define __bool_true_false_are_defined 1
+#  endif /* __cplusplus */
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/* A byte is the smallest address memory element (at least in architectures
- * that do not support bit banding).  The requirement is only that type _Bool
- * be large enough to hold the values 0 and 1.  We select uint8_t to minimize
- * the RAM footprint of the executable.
- *
- * NOTE: We can't actually define the type _Bool here.  Under C99 _Bool is
- * an intrinsic type and cannot be the target of a typedef.  However, in this
- * NuttX context, we also need backward compatibility to pre-C99 standards
- * where _Bool is not an intrinsic type.  We work around this by using _Bool8
- * as the underlying type.
- */
-
-#ifndef CONFIG_C99_BOOL8
-typedef uint8_t _Bool8;
-#endif
-
-#endif /* CONFIG_ARCH_STDBOOL_H */
+#  endif /* CONFIG_ARCH_STDBOOL_H */
 #endif /* __INCLUDE_STDBOOL_H */

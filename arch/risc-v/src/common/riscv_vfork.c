@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/rv32im/riscv_vfork.c
+ * arch/risc-v/src/common/riscv_vfork.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -35,6 +35,8 @@
 #include <arch/irq.h>
 
 #include "riscv_vfork.h"
+#include "riscv_internal.h"
+
 #include "sched/sched.h"
 
 /****************************************************************************
@@ -95,40 +97,39 @@
 
 #ifdef CONFIG_ARCH_HAVE_VFORK
 
-#error This part of the port is not done yet!!
-
 pid_t up_vfork(const struct vfork_s *context)
 {
   struct tcb_s *parent = this_task();
   struct task_tcb_s *child;
-  uint32_t newsp;
+  uintptr_t newsp;
 #ifdef CONFIG_RISCV_FRAMEPOINTER
-  uint32_t newfp;
+  uintptr_t newfp;
 #endif
-  uint32_t newtop;
-  uint32_t stacktop;
-  uint32_t stackutil;
+  uintptr_t newtop;
+  uintptr_t stacktop;
+  uintptr_t stackutil;
 
-  sinfo("s0:%08x s1:%08x s2:%08x s3:%08x s4:%08x\n",
+  sinfo("s0:%" PRIxREG " s1:%" PRIxREG " s2:%" PRIxREG " s3:%" PRIxREG ""
+        " s4:%" PRIxREG "\n",
         context->s0, context->s1, context->s2, context->s3, context->s4);
 #ifdef CONFIG_RISCV_FRAMEPOINTER
-  sinfo("s5:%08x s6:%08x s7:%08x\n",
+  sinfo("s5:%" PRIxREG " s6:%" PRIxREG " s7:%" PRIxREG "\n",
         context->s5, context->s6, context->s7);
 #ifdef RISCV_SAVE_GP
-  sinfo("fp:%08x sp:%08x ra:%08x gp:%08x\n",
+  sinfo("fp:%" PRIxREG " sp:%" PRIxREG " ra:%" PRIxREG " gp:%" PRIxREG "\n",
         context->fp, context->sp, context->ra, context->gp);
 #else
-  sinfo("fp:%08x sp:%08x ra:%08x\n",
+  sinfo("fp:%" PRIxREG " sp:%" PRIxREG " ra:%" PRIxREG "\n",
         context->fp context->sp, context->ra);
 #endif
 #else
-  sinfo("s5:%08x s6:%08x s7:%08x s8:%08x\n",
+  sinfo("s5:%" PRIxREG " s6:%" PRIxREG " s7:%" PRIxREG " s8:%" PRIxREG "\n",
         context->s5, context->s6, context->s7, context->s8);
 #ifdef RISCV_SAVE_GP
-  sinfo("sp:%08x ra:%08x gp:%08x\n",
+  sinfo("sp:%" PRIxREG " ra:%" PRIxREG " gp:%" PRIxREG "\n",
         context->sp, context->ra, context->gp);
 #else
-  sinfo("sp:%08x ra:%08x\n",
+  sinfo("sp:%" PRIxREG " ra:%" PRIxREG "\n",
         context->sp, context->ra);
 #endif
 #endif
@@ -150,12 +151,11 @@ pid_t up_vfork(const struct vfork_s *context)
    * stack usage should be the difference between those two.
    */
 
-  stacktop = (uint32_t)parent->stack_base_ptr +
-                       parent->adj_stack_size;
+  stacktop = (uintptr_t)parent->stack_base_ptr + parent->adj_stack_size;
   DEBUGASSERT(stacktop > context->sp);
   stackutil = stacktop - context->sp;
 
-  sinfo("Parent: stackutil:%" PRIu32 "\n", stackutil);
+  sinfo("Parent: stackutil:%" PRIxREG "\n", stackutil);
 
   /* Make some feeble effort to preserve the stack contents.  This is
    * feeble because the stack surely contains invalid pointers and other
@@ -164,9 +164,15 @@ pid_t up_vfork(const struct vfork_s *context)
    * effort is overkill.
    */
 
-  newtop = (uint32_t)child->cmn.stack_base_ptr +
-                     child->cmn.adj_stack_size;
+  newtop = (uintptr_t)child->cmn.stack_base_ptr + child->cmn.adj_stack_size;
   newsp = newtop - stackutil;
+
+  /* Set up frame for context */
+
+  memcpy((void *)(newsp - XCPTCONTEXT_SIZE),
+         child->cmn.xcp.regs, XCPTCONTEXT_SIZE);
+
+  child->cmn.xcp.regs = (void *)(newsp - XCPTCONTEXT_SIZE);
   memcpy((void *)newsp, (const void *)context->sp, stackutil);
 
   /* Was there a frame pointer in place before? */
@@ -174,7 +180,7 @@ pid_t up_vfork(const struct vfork_s *context)
 #ifdef CONFIG_RISCV_FRAMEPOINTER
   if (context->fp >= context->sp && context->fp < stacktop)
     {
-      uint32_t frameutil = stacktop - context->fp;
+      uintptr_t frameutil = stacktop - context->fp;
       newfp = newtop - frameutil;
     }
   else
@@ -182,14 +188,14 @@ pid_t up_vfork(const struct vfork_s *context)
       newfp = context->fp;
     }
 
-  sinfo("Old stack top:%08x SP:%08x FP:%08x\n",
+  sinfo("Old stack top:%" PRIxREG " SP:%" PRIxREG " FP:%" PRIxREG "\n",
         stacktop, context->sp, context->fp);
-  sinfo("New stack top:%08x SP:%08x FP:%08x\n",
+  sinfo("New stack top:%" PRIxREG " SP:%" PRIxREG " FP:%" PRIxREG "\n",
         newtop, newsp, newfp);
 #else
-  sinfo("Old stack top:%08x SP:%08x\n",
+  sinfo("Old stack top:%" PRIxREG " SP:%" PRIxREG "\n",
         stacktop, context->sp);
-  sinfo("New stack top:%08x SP:%08x\n",
+  sinfo("New stack top:%" PRIxREG " SP:%" PRIxREG "\n",
         newtop, newsp);
 #endif
 
@@ -200,23 +206,63 @@ pid_t up_vfork(const struct vfork_s *context)
    * indication to the newly started child thread.
    */
 
-  child->cmn.xcp.regs[REG_S0]  = context->s0;  /* Saved register s0 */
-  child->cmn.xcp.regs[REG_S1]  = context->s1;  /* Saved register s1 */
-  child->cmn.xcp.regs[REG_S2]  = context->s2;  /* Saved register s2 */
-  child->cmn.xcp.regs[REG_S3]  = context->s3;  /* Volatile register s3 */
-  child->cmn.xcp.regs[REG_S4]  = context->s4;  /* Volatile register s4 */
-  child->cmn.xcp.regs[REG_S5]  = context->s5;  /* Volatile register s5 */
-  child->cmn.xcp.regs[REG_S6]  = context->s6;  /* Volatile register s6 */
-  child->cmn.xcp.regs[REG_S7]  = context->s7;  /* Volatile register s7 */
+  child->cmn.xcp.regs[REG_S1]   = context->s1;  /* Saved register s1 */
+  child->cmn.xcp.regs[REG_S2]   = context->s2;  /* Saved register s2 */
+  child->cmn.xcp.regs[REG_S3]   = context->s3;  /* Saved register s3 */
+  child->cmn.xcp.regs[REG_S4]   = context->s4;  /* Saved register s4 */
+  child->cmn.xcp.regs[REG_S5]   = context->s5;  /* Saved register s5 */
+  child->cmn.xcp.regs[REG_S6]   = context->s6;  /* Saved register s6 */
+  child->cmn.xcp.regs[REG_S7]   = context->s7;  /* Saved register s7 */
+  child->cmn.xcp.regs[REG_S8]   = context->s8;  /* Saved register s8 */
+  child->cmn.xcp.regs[REG_S9]   = context->s9;  /* Saved register s9 */
+  child->cmn.xcp.regs[REG_S10]  = context->s10; /* Saved register s10 */
+  child->cmn.xcp.regs[REG_S11]  = context->s11; /* Saved register s11 */
 #ifdef CONFIG_RISCV_FRAMEPOINTER
-  child->cmn.xcp.regs[REG_FP]  = newfp;        /* Frame pointer */
+  child->cmn.xcp.regs[REG_FP]   = newfp;        /* Frame pointer */
 #else
-  child->cmn.xcp.regs[REG_S8]  = context->s8;  /* Volatile register s8 */
+  child->cmn.xcp.regs[REG_S0]   = context->s0;  /* Saved register s0 */
 #endif
-  child->cmn.xcp.regs[REG_SP]  = newsp;        /* Stack pointer */
+  child->cmn.xcp.regs[REG_SP]   = newsp;        /* Stack pointer */
 #ifdef RISCV_SAVE_GP
-  child->cmn.xcp.regs[REG_GP]  = newsp;        /* Global pointer */
+  child->cmn.xcp.regs[REG_GP]   = newsp;        /* Global pointer */
 #endif
+#ifdef CONFIG_ARCH_FPU
+  child->cmn.xcp.regs[REG_FS0]  = context->fs0;  /* Saved register fs1 */
+  child->cmn.xcp.regs[REG_FS1]  = context->fs1;  /* Saved register fs1 */
+  child->cmn.xcp.regs[REG_FS2]  = context->fs2;  /* Saved register fs2 */
+  child->cmn.xcp.regs[REG_FS3]  = context->fs3;  /* Saved register fs3 */
+  child->cmn.xcp.regs[REG_FS4]  = context->fs4;  /* Saved register fs4 */
+  child->cmn.xcp.regs[REG_FS5]  = context->fs5;  /* Saved register fs5 */
+  child->cmn.xcp.regs[REG_FS6]  = context->fs6;  /* Saved register fs6 */
+  child->cmn.xcp.regs[REG_FS7]  = context->fs7;  /* Saved register fs7 */
+  child->cmn.xcp.regs[REG_FS8]  = context->fs8;  /* Saved register fs8 */
+  child->cmn.xcp.regs[REG_FS9]  = context->fs9;  /* Saved register fs9 */
+  child->cmn.xcp.regs[REG_FS10] = context->fs10; /* Saved register fs10 */
+  child->cmn.xcp.regs[REG_FS11] = context->fs11; /* Saved register fs11 */
+#endif
+
+#ifdef CONFIG_LIB_SYSCALL
+  /* If we got here via a syscall, then we are going to have to setup some
+   * syscall return information as well.
+   */
+
+  if (parent->xcp.nsyscalls > 0)
+    {
+      int index;
+      for (index = 0; index < parent->xcp.nsyscalls; index++)
+        {
+          child->cmn.xcp.syscall[index].sysreturn =
+            parent->xcp.syscall[index].sysreturn;
+
+#ifndef CONFIG_BUILD_FLAT
+          child->cmn.xcp.syscall[index].int_ctx =
+            parent->xcp.syscall[index].int_ctx;
+#endif
+        }
+
+      child->cmn.xcp.nsyscalls = parent->xcp.nsyscalls;
+    }
+#endif /* CONFIG_LIB_SYSCALL */
 
   /* And, finally, start the child task.  On a failure, nxtask_start_vfork()
    * will discard the TCB by calling nxtask_abort_vfork().

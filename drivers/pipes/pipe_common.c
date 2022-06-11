@@ -104,7 +104,7 @@ static void pipecommon_pollnotify(FAR struct pipe_dev_s *dev,
 
           if (fds->revents != 0)
             {
-              finfo("Report events: %02x\n", fds->revents);
+              finfo("Report events: %08" PRIx32 "\n", fds->revents);
               nxsem_post(fds->sem);
             }
         }
@@ -144,7 +144,7 @@ FAR struct pipe_dev_s *pipecommon_allocdev(size_t bufsize)
       nxsem_set_protocol(&dev->d_rdsem, SEM_PRIO_NONE);
       nxsem_set_protocol(&dev->d_wrsem, SEM_PRIO_NONE);
 
-      dev->d_bufsize = bufsize;
+      dev->d_bufsize = bufsize + 1; /* +1 to compensate the full indicator */
     }
 
   return dev;

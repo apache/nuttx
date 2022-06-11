@@ -26,37 +26,12 @@
 
 #include <sys/stat.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 #include <errno.h>
 
 #include "libc.h"
 
 #ifndef CONFIG_DISABLE_ENVIRON
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: _trimdir
- ****************************************************************************/
-
-#if 0
-static inline void _trimdir(char *path)
-{
-  /* Skip any trailing '/' characters (unless it is also the leading '/') */
-
-  int len = strlen(path) - 1;
-  while (len > 0 && path[len] == '/')
-    {
-      path[len] = '\0';
-      len--;
-    }
-}
-#else
-#  define _trimdir(p)
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -98,42 +73,35 @@ static inline void _trimdir(char *path)
 int chdir(FAR const char *path)
 {
   struct stat buf;
-  char *oldpwd;
-  char *alloc;
-  char *abspath;
-  int errcode;
+  FAR char *oldpwd;
+  FAR char *abspath;
   int ret;
-
-  /* Verify the input parameters */
-
-  if (!path)
-    {
-      errcode = ENOENT;
-      goto errout;
-    }
 
   /* Verify that 'path' refers to a directory */
 
   ret = stat(path, &buf);
-  if (ret != 0)
+  if (ret < 0)
     {
-      errcode = ENOENT;
-      goto errout;
+      return ret;
     }
 
   /* Something exists here... is it a directory? */
 
   if (!S_ISDIR(buf.st_mode))
     {
-      errcode = ENOTDIR;
-      goto errout;
+      set_errno(ENOTDIR);
+      return ERROR;
     }
 
   /* Yes, it is a directory.
    * Remove any trailing '/' characters from the path
    */
 
-  _trimdir(path);
+  abspath = realpath(path, NULL);
+  if (abspath == NULL)
+    {
+      return ERROR;
+    }
 
   /* Replace any preceding OLDPWD with the current PWD (this is to
    * support 'cd -' in NSH)
@@ -146,26 +114,14 @@ int chdir(FAR const char *path)
       oldpwd = CONFIG_LIBC_HOMEDIR;
     }
 
-  alloc = strdup(oldpwd);  /* kludge needed because environment is realloc'ed */
-  setenv("OLDPWD", alloc, TRUE);
-  lib_free(alloc);
+  setenv("OLDPWD", oldpwd, TRUE);
 
   /* Set the cwd to the input 'path' */
 
-  abspath = realpath(path, NULL);
-  if (abspath == NULL)
-    {
-      errcode = ENOENT;
-      goto errout;
-    }
-
-  setenv("PWD", abspath, TRUE);
+  ret = setenv("PWD", abspath, TRUE);
   lib_free(abspath);
   sched_unlock();
-  return OK;
 
-errout:
-  set_errno(errcode);
-  return ERROR;
+  return ret;
 }
 #endif /* !CONFIG_DISABLE_ENVIRON */

@@ -142,7 +142,7 @@ void dns_save_answer(FAR const char *hostname,
   entry->ctime = (time_t)now.tv_sec;
 #endif
 
-  strncpy(entry->name, hostname, CONFIG_NETDB_DNSCLIENT_NAMESIZE);
+  strlcpy(entry->name, hostname, CONFIG_NETDB_DNSCLIENT_NAMESIZE);
   memcpy(&entry->addr, addr, naddr * sizeof(*addr));
   entry->naddr = naddr;
 

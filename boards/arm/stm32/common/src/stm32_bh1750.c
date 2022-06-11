@@ -60,7 +60,7 @@
 
 int board_bh1750_initialize(int devno, int busno)
 {
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
   int ret;
 
   sninfo("Initializing BH1750FVI!\n");

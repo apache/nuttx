@@ -541,7 +541,7 @@ ssize_t up_progmem_eraseblock(size_t cluster)
   /* Erase all pages in the cluster */
 
 #ifdef USE_UNLOCK
-  (void)nvm_unlock(page, SAMD5E5_PAGE_PER_CLUSTER);
+  nvm_unlock(page, SAMD5E5_PAGE_PER_CLUSTER);
 #endif
 
   finfo("INFO: erase block=%d address=0x%x\n",
@@ -549,7 +549,7 @@ ssize_t up_progmem_eraseblock(size_t cluster)
   ret = nvm_command(NVMCTRL_CTRLB_CMD_EB, SAMD5E5_PAGE2BYTE(page));
 
 #ifdef USE_LOCK
-  (void)nvm_lock(page, SAMD5E5_PAGE_PER_CLUSTER);
+  nvm_lock(page, SAMD5E5_PAGE_PER_CLUSTER);
 #endif
 
   if (ret < 0)
@@ -650,8 +650,8 @@ ssize_t up_progmem_ispageerased(size_t cluster)
 ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
 {
   irqstate_t flags;
-  FAR uint32_t *dest;
-  FAR const uint32_t *src;
+  uint32_t *dest;
+  const uint32_t *src;
   size_t written;
   size_t xfrsize;
   size_t offset;
@@ -698,14 +698,14 @@ ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
 #ifdef USE_UNLOCK /* Make sure that the FLASH is unlocked */
   lock = page;
   locksize = SAMD5E5_BYTE2PAGE(buflen);
-  (void)nvm_unlock(lock, locksize);
+  nvm_unlock(lock, locksize);
 #endif
 
   flags = enter_critical_section();
 
   /* Loop until all of the data has been written */
 
-  dest = (FAR uint32_t *)(address & ~SAMD5E5_PAGE_MASK);
+  dest = (uint32_t *)(address & ~SAMD5E5_PAGE_MASK);
   written = 0;
   while (buflen > 0)
     {
@@ -719,7 +719,7 @@ ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
         {
           /* No, we can take the data directly from the user buffer */
 
-          src = (FAR const uint32_t *)buffer;
+          src = (const uint32_t *)buffer;
         }
       else
         {
@@ -852,15 +852,15 @@ ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
       /* Adjust pointers and counts for the next time through the loop */
 
       address += xfrsize;
-      dest     = (FAR uint32_t *)address;
-      buffer   = (FAR void *)((uintptr_t)buffer + xfrsize);
+      dest     = (uint32_t *)address;
+      buffer   = (void *)((uintptr_t)buffer + xfrsize);
       buflen  -= xfrsize;
       offset   = 0;
       page++;
     }
 
 #ifdef USE_LOCK
-  (void)nvm_lock(lock, locksize);
+  nvm_lock(lock, locksize);
 #endif
 
   leave_critical_section(flags);
@@ -923,8 +923,8 @@ ssize_t up_progmem_writeuserpage(const uint32_t offset,
 {
   size_t i;
   size_t written;
-  FAR uint32_t *dest;
-  FAR const uint32_t *src;
+  uint32_t *dest;
+  const uint32_t *src;
   uint32_t userpage[128]; /* Copy of user page */
 
   ASSERT(buffer);
@@ -957,8 +957,8 @@ ssize_t up_progmem_writeuserpage(const uint32_t offset,
 
   nvm_command(NVMCTRL_CTRLB_CMD_EP, _NVM_USER_ROW_BASE);
 
-  dest = (FAR uint32_t *)(_NVM_USER_ROW_BASE);
-  src = (FAR const uint32_t *)userpage;
+  dest = (uint32_t *)(_NVM_USER_ROW_BASE);
+  src = (const uint32_t *)userpage;
   for (written = 0; written <
     _NVM_USER_PAGE_SIZE; written += 4*sizeof(uint32_t))
     {

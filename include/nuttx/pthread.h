@@ -184,6 +184,7 @@ void nx_pthread_exit(FAR void *exit_value) noreturn_function;
  ****************************************************************************/
 
 #ifdef CONFIG_PTHREAD_CLEANUP
+struct tls_info_s;
 void pthread_cleanup_popall(FAR struct tls_info_s *tls);
 #endif
 

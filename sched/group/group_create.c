@@ -35,11 +35,10 @@
 #include <nuttx/lib/lib.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/sched.h>
-#include <nuttx/tls.h>
 
-#include "environ/environ.h"
 #include "sched/sched.h"
 #include "group/group.h"
+#include "tls/tls.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -186,9 +185,8 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
 
   /* Alloc task info for group  */
 
-  group->tg_info = (FAR struct task_info_s *)
-    group_zalloc(group, sizeof(struct task_info_s));
-  if (!group->tg_info)
+  ret = task_init_info(group);
+  if (ret < 0)
     {
       goto errout_with_member;
     }
@@ -200,19 +198,6 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
   /* Inherit the user identity from the parent task group */
 
   group_inherit_identity(group);
-
-  /* Duplicate the parent tasks environment */
-
-  ret = env_dup(group);
-  if (ret < 0)
-    {
-      tcb->cmn.group = NULL;
-      goto errout_with_taskinfo;
-    }
-
-  /* Initial user space semaphore */
-
-  nxsem_init(&group->tg_info->ta_sem, 0, 1);
 
   /* Initialize file descriptors for the TCB */
 
@@ -243,8 +228,6 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
 
   return OK;
 
-errout_with_taskinfo:
-  group_free(group, group->tg_info);
 errout_with_member:
 #ifdef HAVE_GROUP_MEMBERS
   kmm_free(group->tg_members);

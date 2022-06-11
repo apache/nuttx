@@ -35,14 +35,6 @@ endif
 ifneq ($(CONFIG_BUILD_KERNEL),y)
 CSRCS += task_startup.c
 
-ifeq ($(CONFIG_CXX_INITIALIZE_SINIT),y)
-CSRCS += cxx_initialize_sinit.c
-endif
-
-ifeq ($(CONFIG_CXX_INITIALIZE_MACHO),y)
-CSRCS += cxx_initialize_macho.c
-endif
-
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
 CSRCS += sched_dumpstack.c sched_backtrace.c
 endif

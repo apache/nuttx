@@ -65,13 +65,13 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
   if ((node->preceding & MM_ALLOC_BIT) != 0)
     {
       DEBUGASSERT(node->size >= SIZEOF_MM_ALLOCNODE);
-#ifndef CONFIG_DEBUG_MM
+#ifndef CONFIG_MM_BACKTRACE
       if (info->pid == -1)
 #else
       if (info->pid == -1 || node->pid == info->pid)
 #endif
         {
-#ifndef CONFIG_DEBUG_MM
+#ifndef CONFIG_MM_BACKTRACE
           syslog(LOG_INFO, "%12zu%*p\n",
                  (size_t)node->size, MM_PTR_FMT_WIDTH,
                  ((FAR char *)node + SIZEOF_MM_ALLOCNODE));
@@ -141,7 +141,7 @@ void mm_memdump(FAR struct mm_heap_s *heap, pid_t pid)
   if (pid >= -1)
     {
       syslog(LOG_INFO, "Dump all used memory node info:\n");
-#ifndef CONFIG_DEBUG_MM
+#ifndef CONFIG_MM_BACKTRACE
       syslog(LOG_INFO, "%12s%*s\n", "Size", MM_PTR_FMT_WIDTH, "Address");
 #else
       syslog(LOG_INFO, "%6s%12s%*s %s\n", "PID", "Size", MM_PTR_FMT_WIDTH,

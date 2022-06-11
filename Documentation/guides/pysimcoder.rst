@@ -41,7 +41,7 @@ in case this documentation was not updated when new fuctionalities were added to
 NuttX Configuration
 -------------------
 
-Several configuration options are neccessary to be set in order to succesfully compile pysimCoder
+Several configuration options are necessary to be set in order to succesfully compile pysimCoder
 with NuttX. The list is the following:
 
 ==================================== =====================================
@@ -52,8 +52,8 @@ with NuttX. The list is the following:
 ``CONFIG_ELF=y``                     ``CONFIG_PSEUDOTERM=y``
 ``CONFIG_FS_BINFS=y``                ``CONFIG_PTHREAD_CLEANUP=y``
 ``CONFIG_FS_PROCFS=y``               ``CONFIG_PTHREAD_MUTEX_TYPES=y``
-``CONFIG_FS_PROCFS_REGISTER=y``      ``CONFIG_PTHREAD_MUTEX_TYPES=y``
-``CONFIG_FS_ROMFS=y``                ``CONFIG_PTHREAD_STACK_MIN=1024``
+``CONFIG_FS_PROCFS_REGISTER=y``      ``CONFIG_PTHREAD_STACK_MIN=1024``
+``CONFIG_FS_ROMFS=y``                ``CONFIG_LIBM=y``
 ``CONFIG_FS_TMPFS=y``                ``CONFIG_RR_INTERVAL=10``
 ``CONFIG_IDLETHREAD_STACKSIZE=2048`` ``CONFIG_SCHED_WAITPID=y``
 ``CONFIG_LIBC_EXECFUNCS=y``          ``CONFIG_SERIAL_TERMIOS=y``
@@ -62,6 +62,12 @@ with NuttX. The list is the following:
 ``CONFIG_NSH_BUILTIN_APPS=y``        ``CONFIG_SYSTEM_NSH_STACKSIZE=4096``
 ``CONFIG_NSH_FILEIOSIZE=512``        ``CONFIG_INIT_ENTRYPOINT="nsh_main"``
 ==================================== =====================================
+
+
+Note that ``CONFIG_LIBM=y`` might not be required for toolchains that already include
+standard math library. However it is recommended to add ``CONFIG_LIBM=y`` to ensure
+math library is included. Subsequently ``CONFIG_LIBC_FLOATINGPOINT=y`` is needed if double values
+are to be printed on terminal.
 
 In case you want to use Network and blocks like TCP or UDP, following configuration
 options are required:

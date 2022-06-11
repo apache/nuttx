@@ -992,7 +992,7 @@ static void mbr3108_poll_notify(FAR struct mbr3108_dev_s *priv)
       struct pollfd *fds = priv->fds[i];
       if (fds)
         {
-          mbr3108_dbg("Report events: %02x\n", fds->revents);
+          mbr3108_dbg("Report events: %08" PRIx32 "\n", fds->revents);
 
           fds->revents |= POLLIN;
           nxsem_post(fds->sem);

@@ -55,10 +55,6 @@ void riscv_copystate(uintptr_t *dest, uintptr_t *src)
 {
   int i;
 
-#ifdef CONFIG_ARCH_FPU
-  uintptr_t *regs = dest;
-#endif
-
   /* In the RISC-V model, the state is copied from the stack to the TCB,
    * but only a reference is passed to get the state from the TCB.  So the
    * following check avoids copying the TCB save area onto itself:
@@ -68,18 +64,9 @@ void riscv_copystate(uintptr_t *dest, uintptr_t *src)
     {
       /* save integer registers first */
 
-      for (i = 0; i < INT_XCPT_REGS; i++)
+      for (i = 0; i < XCPTCONTEXT_REGS; i++)
         {
           *dest++ = *src++;
         }
-
-      /* Save the floating point registers: This will initialize the floating
-       * registers at indices INT_XCPT_REGS through (XCPTCONTEXT_REGS-1).
-       * Do this after saving REG_INT_CTX with the ORIGINAL context pointer.
-       */
-
-#ifdef CONFIG_ARCH_FPU
-      riscv_savefpu(regs);
-#endif
     }
 }

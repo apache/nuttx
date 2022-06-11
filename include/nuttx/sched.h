@@ -33,17 +33,15 @@
 #include <sched.h>
 #include <signal.h>
 #include <semaphore.h>
+#include <pthread.h>
 #include <time.h>
 
 #include <nuttx/clock.h>
 #include <nuttx/irq.h>
-#include <nuttx/tls.h>
 #include <nuttx/wdog.h>
 #include <nuttx/mm/shm.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
-
-#include <arch/arch.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -172,18 +170,6 @@
 #  define _SCHED_ERRVAL(r)           (-errno)
 #endif
 
-/* The number of callback can be saved */
-
-#if defined(CONFIG_SCHED_ONEXIT_MAX)
-#  define CONFIG_SCHED_EXIT_MAX CONFIG_SCHED_ONEXIT_MAX
-#elif defined(CONFIG_SCHED_ATEXIT_MAX)
-#  define CONFIG_SCHED_EXIT_MAX CONFIG_SCHED_ATEXIT_MAX
-#endif
-
-#if defined(CONFIG_SCHED_EXIT_MAX) && CONFIG_SCHED_EXIT_MAX < 1
-#  error "CONFIG_SCHED_EXIT_MAX < 1"
-#endif
-
 #ifdef CONFIG_DEBUG_TCBINFO
 #  define TCB_PID_OFF                offsetof(struct tcb_s, pid)
 #  define TCB_STATE_OFF              offsetof(struct tcb_s, task_state)
@@ -193,7 +179,8 @@
 #else
 #  define TCB_NAME_OFF               0
 #endif
-#  define TCB_REG_OFF(reg)           offsetof(struct tcb_s, xcp.regs[reg])
+#  define TCB_REGS_OFF               offsetof(struct tcb_s, xcp.regs)
+#  define TCB_REG_OFF(reg)           (reg * sizeof(uint32_t))
 #endif
 
 /****************************************************************************
@@ -270,18 +257,6 @@ typedef union entry_u entry_t;
 
 #ifdef CONFIG_SCHED_STARTHOOK
 typedef CODE void (*starthook_t)(FAR void *arg);
-#endif
-
-/* These are the types of the functions that are executed with exit() is
- * called (if registered via atexit() on on_exit()).
- */
-
-#ifdef CONFIG_SCHED_ATEXIT
-typedef CODE void (*atexitfunc_t)(void);
-#endif
-
-#ifdef CONFIG_SCHED_ONEXIT
-typedef CODE void (*onexitfunc_t)(int exitcode, FAR void *arg);
 #endif
 
 /* struct sporadic_s ********************************************************/
@@ -391,24 +366,6 @@ struct stackinfo_s
                                          /* from the stack.                     */
 };
 
-/* struct exitinfo_s ********************************************************/
-
-struct exitinfo_s
-{
-  union
-  {
-#ifdef CONFIG_SCHED_ATEXIT
-    atexitfunc_t at;
-#endif
-#ifdef CONFIG_SCHED_ONEXIT
-    onexitfunc_t on;
-#endif
-  } func;
-#ifdef CONFIG_SCHED_ONEXIT
-  FAR void *arg;
-#endif
-};
-
 /* struct task_group_s ******************************************************/
 
 /* All threads created by pthread_create belong in the same task group (along
@@ -433,6 +390,8 @@ struct exitinfo_s
  * leaving the group.  When the reference count decrements to zero,
  * the struct task_group_s is free.
  */
+
+struct task_info_s;
 
 #ifndef CONFIG_DISABLE_PTHREAD
 struct join_s;                      /* Forward reference                        */
@@ -465,12 +424,6 @@ struct task_group_s
 #ifdef HAVE_GROUP_MEMBERS
   uint8_t    tg_mxmembers;          /* Number of members in allocation          */
   FAR pid_t *tg_members;            /* Members of the group                     */
-#endif
-
-  /* [at|on]exit support ****************************************************/
-
-#ifdef CONFIG_SCHED_EXIT_MAX
-  struct exitinfo_s tg_exit[CONFIG_SCHED_EXIT_MAX];
 #endif
 
 #ifdef CONFIG_BINFMT_LOADABLE
@@ -525,8 +478,7 @@ struct task_group_s
 #ifndef CONFIG_DISABLE_ENVIRON
   /* Environment variables **************************************************/
 
-  size_t     tg_envsize;            /* Size of environment string allocation    */
-  FAR char  *tg_envp;               /* Allocated environment strings            */
+  FAR char **tg_envp;               /* Allocated environment strings            */
 #endif
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
@@ -771,14 +723,16 @@ begin_packed_struct struct tcbinfo_s
   uint16_t state_off;                    /* Offset of tcb.task_state        */
   uint16_t pri_off;                      /* Offset of tcb.sched_priority    */
   uint16_t name_off;                     /* Offset of tcb.name              */
-  uint16_t reg_num;                      /* Num of regs in tcbinfo.reg_offs */
+  uint16_t regs_off;                     /* Offset of tcb.regs              */
+  uint16_t basic_num;                    /* Num of genernal regs            */
+  uint16_t total_num;                    /* Num of regs in tcbinfo.reg_offs */
 
   /* Offset pointer of xcp.regs, order in GDB org.gnu.gdb.xxx feature.
    * Please refer:
    * https://sourceware.org/gdb/current/onlinedocs/gdb/ARM-Features.html
    * https://sourceware.org/gdb/current/onlinedocs/gdb/RISC_002dV-Features
    * -.html
-   * value 0: This regsiter was not priovided by NuttX
+   * value UINT16_MAX: This regsiter was not priovided by NuttX
    */
 
   begin_packed_struct
@@ -931,6 +885,7 @@ FAR struct streamlist *nxsched_get_streams(void);
  *   argv       - A pointer to an array of input parameters.  The array
  *                should be terminated with a NULL argv[] value. If no
  *                parameters are required, argv may be NULL.
+ *   envp       - A pointer to the program's environment, envp may be NULL
  *
  * Returned Value:
  *   OK on success; negative error value on failure appropriately.  (See
@@ -943,7 +898,7 @@ FAR struct streamlist *nxsched_get_streams(void);
 
 int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
                 FAR void *stack, uint32_t stack_size, main_t entry,
-                FAR char * const argv[]);
+                FAR char * const argv[], FAR char * const envp[]);
 
 /****************************************************************************
  * Name: nxtask_uninit

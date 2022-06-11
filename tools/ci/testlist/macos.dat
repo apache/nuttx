@@ -17,13 +17,13 @@
 
 # RISC-V
 
-/risc-v/bl602/bl602evb/configs/wifi,CONFIG_RISCV_TOOLCHAIN_GNU_RVGL
+/risc-v/bl602/bl602evb/configs/wifi
 
-/risc-v/esp32c3/esp32c3-devkit/configs/wapi,CONFIG_RISCV_TOOLCHAIN_GNU_RVGL
+/risc-v/esp32c3/esp32c3-devkit/configs/wapi
 
 # ARM
 
-/arm/stm32/stm32f4discovery/configs/nsh,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
+/arm/stm32/stm32f4discovery/configs/nsh,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI
 
 # XTENSA
 

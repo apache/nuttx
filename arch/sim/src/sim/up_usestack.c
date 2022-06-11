@@ -66,7 +66,7 @@
  *
  ****************************************************************************/
 
-int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size)
+int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 {
 #if CONFIG_SIM_STACKSIZE_ADJUSTMENT == 0
   uintptr_t top_of_stack;

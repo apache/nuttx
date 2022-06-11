@@ -1,0 +1,200 @@
+############################################################################
+# arch/arm/src/tlsr82/Toolchain.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# Setup for the selected toolchain
+
+#
+# Handle old-style chip-specific toolchain names in the absence of
+# a new-style toolchain specification, force the selection of a single
+# toolchain and allow the selected toolchain to be overridden by a
+# command-line selection.
+#
+
+ifeq ($(filter y, $(CONFIG_ARMV6M_TOOLCHAIN_BUILDROOT)),y)
+  CONFIG_ARMV6M_TOOLCHAIN ?= BUILDROOT
+endif
+
+ifeq ($(filter y, $(CONFIG_ARMV6M_TOOLCHAIN_GNU_EABI)),y)
+  CONFIG_ARMV6M_TOOLCHAIN ?= GNU_EABI
+endif
+
+ifeq ($(filter y, $(CONFIG_ARMV6M_TOOLCHAIN_CLANG)),y)
+  CONFIG_ARMV6M_TOOLCHAIN ?= CLANG
+endif
+
+#
+# Supported toolchains
+#
+# Each toolchain definition should set:
+#
+#  CROSSDEV         The GNU toolchain triple (command prefix)
+#  ARCHCPUFLAGS     CPU-specific flags selecting the instruction set
+#                   options, etc.
+#  ARCHOPTIMIZATION The optimization level that results in
+#                   reliable code generation.
+#
+
+ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
+  ARCHOPTIMIZATION += $(CONFIG_DEBUG_OPTLEVEL)
+else ifeq ($(CONFIG_DEBUG_FULLOPT),y)
+  ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),CLANG)
+    ARCHOPTIMIZATION += -Oz
+  else
+    ARCHOPTIMIZATION += -Os
+  endif
+endif
+
+ifneq ($(CONFIG_DEBUG_NOOPT),y)
+  ARCHOPTIMIZATION += -fno-strict-aliasing
+endif
+
+ifeq ($(CONFIG_FRAME_POINTER),y)
+  ARCHOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+else
+  ARCHOPTIMIZATION += -fomit-frame-pointer
+endif
+
+ifeq ($(CONFIG_STACK_CANARIES),y)
+  ARCHOPTIMIZATION += -fstack-protector-all
+endif
+
+# Clang Configuration files
+
+ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),CLANG)
+  TOOLCHAIN_MARCH := --config armv6m_soft_nofp_nosys
+endif
+
+# Link Time Optimization
+
+ifeq ($(CONFIG_LTO_THIN),y)
+  ARCHOPTIMIZATION += -flto=thin
+else ifeq ($(CONFIG_LTO_FULL),y)
+  ARCHOPTIMIZATION += -flto
+endif
+
+# NuttX buildroot under Linux or Cygwin
+
+ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),BUILDROOT)
+  CROSSDEV ?= arm-nuttx-eabi-
+  ARCHCPUFLAGS = $(TOOLCHAIN_MARCH) $(TOOLCHAIN_MTUNE) $(TOOLCHAIN_MFLOAT)
+endif
+
+# Generic GNU EABI toolchain
+
+ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),GNU_EABI)
+  CROSSDEV ?= tc32-elf-
+  ARCHCPUFLAGS = $(TOOLCHAIN_MARCH) $(TOOLCHAIN_MTUNE) $(TOOLCHAIN_MFLOAT)
+endif
+
+# Clang toolchain
+
+ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),CLANG)
+  ARCHCPUFLAGS = $(TOOLCHAIN_MARCH) $(TOOLCHAIN_MTUNE) $(TOOLCHAIN_MFLOAT)
+
+  CC      = clang
+  CXX     = clang++
+  CPP     = clang -E -P -x c
+  LD      = ld.lld -m armelf
+  STRIP   = llvm-strip --strip-unneeded
+  AR      = llvm-ar rcs
+  NM      = llvm-nm
+  OBJCOPY = llvm-objcopy
+  OBJDUMP = llvm-objdump
+
+  # Since the no_builtin attribute is not fully supported on Clang
+  # disable the built-in functions, refer:
+  # https://github.com/apache/incubator-nuttx/pull/5971
+
+  ARCHOPTIMIZATION += -fno-builtin
+
+# Default toolchain
+
+else
+  CC      = $(CROSSDEV)gcc
+  CXX     = $(CROSSDEV)g++
+  CPP     = $(CROSSDEV)gcc -E -P -x c
+  LD      = $(CROSSDEV)ld
+  STRIP   = $(CROSSDEV)strip --strip-unneeded
+  AR      = $(CROSSDEV)ar rcs
+  NM      = $(CROSSDEV)nm
+  OBJCOPY = $(CROSSDEV)objcopy
+  OBJDUMP = $(CROSSDEV)objdump
+endif
+
+# Architecture flags
+
+ifeq ($(CONFIG_MM_KASAN),y)
+  ARCHOPTIMIZATION += -fsanitize=kernel-address
+endif
+
+ARCHCFLAGS += -fno-common
+ARCHCXXFLAGS += -fno-common -nostdinc++
+
+ARCHCFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wundef
+ARCHCXXFLAGS += -Wall -Wshadow -Wundef
+
+ifneq ($(CONFIG_CXX_EXCEPTION),y)
+  ARCHCXXFLAGS += -fno-exceptions -fcheck-new
+endif
+
+ifneq ($(CONFIG_CXX_RTTI),y)
+  ARCHCXXFLAGS += -fno-rtti
+endif
+
+LDFLAGS += -nostdlib
+
+# Optimization of unused sections
+
+ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
+  LDFLAGS          += --gc-sections
+  ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
+endif
+
+# Debug link map
+
+ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
+  LDFLAGS += --cref -Map=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
+endif
+
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  LDFLAGS          += -g
+  ARCHOPTIMIZATION += -g
+endif
+
+# Add the builtin library
+
+COMPILER_RT_LIB = $(shell $(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name)
+ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),CLANG)
+  ifeq ($(wildcard $(COMPILER_RT_LIB)),)
+    # if "--print-libgcc-file-name" unable to find the correct libgcc PATH
+    # then go ahead and try "--print-file-name"
+    COMPILER_RT_LIB := $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name $(notdir $(COMPILER_RT_LIB))))
+  endif
+endif
+
+EXTRA_LIBS += $(COMPILER_RT_LIB)
+
+ifneq ($(CONFIG_LIBM),y)
+  EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a))
+endif
+
+ifeq ($(CONFIG_LIBSUPCXX),y)
+  EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a))
+endif

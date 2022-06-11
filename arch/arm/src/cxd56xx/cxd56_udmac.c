@@ -169,7 +169,7 @@ static inline struct dma_descriptor_s *cxd56_get_descriptor(
  *
  ****************************************************************************/
 
-static int cxd56_dmac_interrupt(int irq, void *context, FAR void *arg)
+static int cxd56_dmac_interrupt(int irq, void *context, void *arg)
 {
   struct dma_channel_s *dmach;
   unsigned int chndx;

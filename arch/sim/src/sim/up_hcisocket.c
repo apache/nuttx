@@ -57,7 +57,7 @@
 
 struct bthcisock_s
 {
-  FAR struct bt_driver_s drv;
+  struct bt_driver_s drv;
   int                    id;
   int                    fd;
   sq_entry_t             link;
@@ -67,12 +67,12 @@ struct bthcisock_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  bthcisock_send(FAR struct bt_driver_s *drv,
+static int  bthcisock_send(struct bt_driver_s *drv,
                            enum bt_buf_type_e type,
-                           FAR void *data, size_t len);
-static int  bthcisock_open(FAR struct bt_driver_s *drv);
-static void bthcisock_close(FAR struct bt_driver_s *drv);
-static int  bthcisock_receive(FAR struct bt_driver_s *drv);
+                           void *data, size_t len);
+static int  bthcisock_open(struct bt_driver_s *drv);
+static void bthcisock_close(struct bt_driver_s *drv);
+static int  bthcisock_receive(struct bt_driver_s *drv);
 
 /****************************************************************************
  * Private Data
@@ -84,12 +84,12 @@ static sq_queue_t        g_bthcisock_list;
  * Private Functions
  ****************************************************************************/
 
-static int bthcisock_send(FAR struct bt_driver_s *drv,
+static int bthcisock_send(struct bt_driver_s *drv,
                           enum bt_buf_type_e type,
-                          FAR void *data, size_t len)
+                          void *data, size_t len)
 {
-  FAR struct bthcisock_s *dev = (FAR struct bthcisock_s *)drv;
-  FAR char *hdr = (FAR char *)data - drv->head_reserve;
+  struct bthcisock_s *dev = (struct bthcisock_s *)drv;
+  char *hdr = (char *)data - drv->head_reserve;
   int ret;
 
   if (type == BT_CMD)
@@ -114,17 +114,17 @@ static int bthcisock_send(FAR struct bt_driver_s *drv,
   return ret < 0 ? ret : len;
 }
 
-static void bthcisock_close(FAR struct bt_driver_s *drv)
+static void bthcisock_close(struct bt_driver_s *drv)
 {
-  FAR struct bthcisock_s *dev = (FAR struct bthcisock_s *)drv;
+  struct bthcisock_s *dev = (struct bthcisock_s *)drv;
 
   bthcisock_host_close(dev->fd);
   dev->fd = -1;
 }
 
-static int bthcisock_receive(FAR struct bt_driver_s *drv)
+static int bthcisock_receive(struct bt_driver_s *drv)
 {
-  FAR struct bthcisock_s *dev = (FAR struct bthcisock_s *)drv;
+  struct bthcisock_s *dev = (struct bthcisock_s *)drv;
   char data[BLUETOOTH_RX_FRAMELEN];
   enum bt_buf_type_e type;
   int ret;
@@ -157,9 +157,9 @@ static int bthcisock_receive(FAR struct bt_driver_s *drv)
                            ret - H4_HEADER_SIZE);
 }
 
-static int bthcisock_open(FAR struct bt_driver_s *drv)
+static int bthcisock_open(struct bt_driver_s *drv)
 {
-  FAR struct bthcisock_s *dev = (FAR struct bthcisock_s *)drv;
+  struct bthcisock_s *dev = (struct bthcisock_s *)drv;
   int fd;
 
   fd = bthcisock_host_open(dev->id);
@@ -174,14 +174,14 @@ static int bthcisock_open(FAR struct bt_driver_s *drv)
   return OK;
 }
 
-static FAR struct bthcisock_s *bthcisock_alloc(int dev_id)
+static struct bthcisock_s *bthcisock_alloc(int dev_id)
 {
   /* Register the driver with the Bluetooth stack */
 
-  FAR struct bthcisock_s *dev;
-  FAR struct bt_driver_s *drv;
+  struct bthcisock_s *dev;
+  struct bt_driver_s *drv;
 
-  dev = (FAR struct bthcisock_s *)kmm_zalloc(sizeof(*dev));
+  dev = (struct bthcisock_s *)kmm_zalloc(sizeof(*dev));
   if (dev == NULL)
     {
       return NULL;
@@ -221,7 +221,7 @@ static FAR struct bthcisock_s *bthcisock_alloc(int dev_id)
 
 int bthcisock_register(int dev_id)
 {
-  FAR struct bthcisock_s *dev;
+  struct bthcisock_s *dev;
 #if defined(CONFIG_UART_BTH4)
   char name[32];
 #endif
@@ -264,8 +264,8 @@ int bthcisock_register(int dev_id)
 
 int bthcisock_loop(void)
 {
-  FAR struct bthcisock_s *dev;
-  FAR sq_entry_t *entry;
+  struct bthcisock_s *dev;
+  sq_entry_t *entry;
 
   for (entry = sq_peek(&g_bthcisock_list); entry; entry = sq_next(entry))
     {

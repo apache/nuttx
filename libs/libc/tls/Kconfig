@@ -63,7 +63,7 @@ config TLS_TASK_NELEM
 		The number of unique Task Local Storage elements similar with
 		Thread Local Storage.
 		These can be accessed with task_tls_alloc/task_tls_get_value/task_tls_set_value.
-  		NOTE that the 0 value of CONFIG_SCHED_TLS_NELEM disables these
-  		TLS interfaces.
+		NOTE that the 0 value of CONFIG_SCHED_TLS_NELEM disables these
+		TLS interfaces.
 
 endmenu # Thread Local Storage (TLS)

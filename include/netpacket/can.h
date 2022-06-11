@@ -82,6 +82,22 @@
 #define CAN_RAW_TX_DEADLINE    (__SO_PROTOCOL + 6)
                                  /* Abort frame when deadline passed */
 
+/* CAN filter support (Hardware level filtering) ****************************/
+
+/* Some CAN hardware supports a notion of prioritizing messages that match
+ * filters. Only two priority levels are currently supported and are encoded
+ * as defined below:
+ */
+
+#define CAN_MSGPRIO_LOW   0
+#define CAN_MSGPRIO_HIGH  1
+
+/* Filter type.  Not all CAN hardware will support all filter types. */
+
+#define CAN_FILTER_MASK   0  /* Address match under a mask */
+#define CAN_FILTER_DUAL   1  /* Dual address match */
+#define CAN_FILTER_RANGE  2  /* Match a range of addresses */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

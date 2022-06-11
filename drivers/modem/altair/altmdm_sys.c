@@ -394,8 +394,6 @@ int altmdm_sys_waitflag(FAR struct altmdm_sys_flag_s *handle,
                         FAR uint32_t * pattern, uint32_t timeout_ms)
 {
   int ret = OK;
-  struct timespec abs_time;
-  struct timespec curr_time;
   irqstate_t flags;
   uint32_t ptn;
 
@@ -417,32 +415,6 @@ int altmdm_sys_waitflag(FAR struct altmdm_sys_flag_s *handle,
     default:
       m_err("invalid wait mode:%d\n", wait_mode);
       return ERROR;
-    }
-
-  if (timeout_ms != ALTMDM_SYS_FLAG_TMOFEVR)
-    {
-      /* Get current time. */
-
-      ret = clock_gettime(CLOCK_REALTIME, &curr_time);
-      if (ret != OK)
-        {
-          return ret;
-        }
-
-      abs_time.tv_sec = timeout_ms / 1000;
-      abs_time.tv_nsec = (timeout_ms - (abs_time.tv_sec * 1000)) *
-                          1000 * 1000;
-
-      abs_time.tv_sec += curr_time.tv_sec;
-      abs_time.tv_nsec += curr_time.tv_nsec;
-
-      /* Check more than 1 sec. */
-
-      if (abs_time.tv_nsec >= (1000 * 1000 * 1000))
-        {
-          abs_time.tv_sec += 1;
-          abs_time.tv_nsec -= (1000 * 1000 * 1000);
-        }
     }
 
   *pattern = 0;
@@ -514,10 +486,11 @@ int altmdm_sys_waitflag(FAR struct altmdm_sys_flag_s *handle,
         {
           /* Wait for the semaphore to be posted until timeout occurs. */
 
-          ret = nxsem_timedwait_uninterruptible(&handle->sem, &abs_time);
+          ret = nxsem_tickwait_uninterruptible(&handle->sem,
+                                               MSEC2TICK(timeout_ms));
           if (ret < 0)
             {
-              m_err("nxsem_timedwait_uninterruptible() failed:%d\n", ret);
+              m_err("nxsem_tickwait_uninterruptible() failed:%d\n", ret);
               break;
             }
         }

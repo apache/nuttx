@@ -22,13 +22,14 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <stdint.h>
 #include <stdbool.h>
 
 #include <nuttx/compiler.h>
-#include <nuttx/config.h>
 #include <nuttx/arch.h>
-#include <arch/csr.h>
+#include <nuttx/irq.h>
 
 #include "riscv_internal.h"
 
@@ -57,7 +58,7 @@
 #define BLOCK_ALIGN_MASK        (MIN_BLOCK_SIZE - 1)
 
 #define PMP_CFG_BITS_CNT        (8)
-#define PMP_CFG_FLAG_MASK       (0xFF)
+#define PMP_CFG_FLAG_MASK       ((uintptr_t)0xFF)
 
 #define PMP_CFG_CNT_IN_REG      (PMP_XLEN / PMP_CFG_BITS_CNT)
 
@@ -70,10 +71,10 @@
 
 #define PMP_READ_REGION_FROM_REG(region, reg) \
   ({ \
-    uintptr_t tmp = READ_CSR(reg); \
-    tmp >>= ((region % PMP_CFG_CNT_IN_REG) * PMP_CFG_BITS_CNT); \
-    tmp &= PMP_CFG_FLAG_MASK; \
-    tmp; \
+    uintptr_t region##_val = READ_CSR(reg); \
+    region##_val >>= ((region % PMP_CFG_CNT_IN_REG) * PMP_CFG_BITS_CNT); \
+    region##_val &= PMP_CFG_FLAG_MASK; \
+    region##_val; \
   })
 
 #ifndef min
@@ -599,9 +600,14 @@ int riscv_config_pmp_region(uintptr_t region, uintptr_t attr,
 #   error "XLEN of risc-v not supported"
 # endif
 
-  /* fence is needed when page-based virtual memory is implemented */
+#ifdef CONFIG_ARCH_USE_S_MODE
+  /* Fence is needed when page-based virtual memory is implemented.
+   * If page-based virtual memory is not implemented, memory accesses check
+   * the PMP settings synchronously, so no SFENCE.VMA is needed.
+   */
 
   __asm volatile("sfence.vma x0, x0" : : : "memory");
+#endif
 
   return OK;
 }

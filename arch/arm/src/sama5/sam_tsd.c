@@ -271,7 +271,7 @@ static void sam_tsd_notify(struct sam_tsd_s *priv)
       if (fds)
         {
           fds->revents |= POLLIN;
-          iinfo("Report events: %02x\n", fds->revents);
+          iinfo("Report events: %08" PRIx32 "\n", fds->revents);
           nxsem_post(fds->sem);
         }
     }
@@ -829,8 +829,8 @@ static void sam_tsd_expiry(wdparm_t arg)
 
 static int sam_tsd_open(struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct sam_tsd_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct sam_tsd_s *priv = inode->i_private;
   uint8_t tmp;
   int ret;
 
@@ -880,8 +880,8 @@ static int sam_tsd_open(struct file *filep)
 
 static int sam_tsd_close(struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct sam_tsd_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct sam_tsd_s *priv = inode->i_private;
 
   iinfo("crefs: %d\n", priv->crefs);
 
@@ -1675,7 +1675,7 @@ int sam_tsd_register(struct sam_adc_s *adc, int minor)
 
   /* Register the device as an input device */
 
-  snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
+  snprintf(devname, sizeof(devname), DEV_FORMAT, minor);
   iinfo("Registering %s\n", devname);
 
   ret = register_driver(devname, &g_tsdops, 0666, priv);

@@ -30,10 +30,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/board.h>
-#include <arch/irq.h>
-#include <arch/board/board.h>
-#include <arch/csr.h>
+#include <nuttx/irq.h>
 
 #include "riscv_internal.h"
 #include "litex.h"
@@ -75,9 +72,9 @@ void up_irqinitialize(void)
 
   CURRENT_REGS = NULL;
 
-  /* Attach the ecall interrupt handler */
+  /* Attach the common interrupt handler */
 
-  irq_attach(RISCV_IRQ_ECALLM, riscv_swint, NULL);
+  riscv_exception_attach();
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 

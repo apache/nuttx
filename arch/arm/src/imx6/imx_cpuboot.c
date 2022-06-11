@@ -35,8 +35,9 @@
 #include "sctlr.h"
 #include "smp.h"
 #include "scu.h"
-#include "fpu.h"
 #include "gic.h"
+#include "mmu.h"
+#include "barriers.h"
 
 #ifdef CONFIG_SMP
 
@@ -44,7 +45,7 @@
  * Private Types
  ****************************************************************************/
 
-typedef CODE void (*cpu_start_t)(void);
+typedef void (*cpu_start_t)(void);
 
 /****************************************************************************
  * Private Data
@@ -206,6 +207,14 @@ void imx_cpu_enable(void)
 
   for (cpu = 1; cpu < CONFIG_SMP_NCPUS; cpu++)
     {
+#ifdef CONFIG_ARCH_ADDRENV
+      /* Copy cpu0 page table to each cpu. */
+
+      memcpy((uint32_t *)(PGTABLE_BASE_VADDR + PGTABLE_SIZE * cpu),
+             (uint32_t *)PGTABLE_BASE_VADDR, PGTABLE_SIZE);
+      ARM_DSB();
+#endif
+
       /* Set the start up address */
 
       regaddr  = g_cpu_gpr[cpu];
@@ -247,11 +256,9 @@ void arm_cpu_boot(int cpu)
 
   arm_enable_smp(cpu);
 
-#ifdef CONFIG_ARCH_FPU
   /* Initialize the FPU */
 
   arm_fpuconfig();
-#endif
 
   /* Initialize the Generic Interrupt Controller (GIC) for CPUn (n != 0) */
 

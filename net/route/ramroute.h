@@ -200,20 +200,20 @@ void net_freeroute_ipv6(FAR struct net_route_ipv6_s *route);
 void ramroute_ipv4_addlast(FAR struct net_route_ipv4_entry_s *entry,
                            FAR struct net_route_ipv4_queue_s *list);
 FAR struct net_route_ipv4_entry_s *
-  ramroute_ipv4_remfirst(struct net_route_ipv4_queue_s *list);
+ramroute_ipv4_remfirst(FAR struct net_route_ipv4_queue_s *list);
 FAR struct net_route_ipv4_entry_s *
-  ramroute_ipv4_remafter(FAR struct net_route_ipv4_entry_s *entry,
-                         FAR struct net_route_ipv4_queue_s *list);
+ramroute_ipv4_remafter(FAR struct net_route_ipv4_entry_s *entry,
+                       FAR struct net_route_ipv4_queue_s *list);
 #endif
 
 #ifdef CONFIG_ROUTE_IPv6_RAMROUTE
 void ramroute_ipv6_addlast(FAR struct net_route_ipv6_entry_s *entry,
                            FAR struct net_route_ipv6_queue_s *list);
 FAR struct net_route_ipv6_entry_s *
-  ramroute_ipv6_remfirst(struct net_route_ipv6_queue_s *list);
+ramroute_ipv6_remfirst(FAR struct net_route_ipv6_queue_s *list);
 FAR struct net_route_ipv6_entry_s *
-  ramroute_ipv6_remafter(FAR struct net_route_ipv6_entry_s *entry,
-  struct net_route_ipv6_queue_s *list);
+ramroute_ipv6_remafter(FAR struct net_route_ipv6_entry_s *entry,
+                       FAR struct net_route_ipv6_queue_s *list);
 #endif
 
 #endif /* CONFIG_ROUTE_IPv4_RAMROUTE || CONFIG_ROUTE_IPv6_RAMROUTE */

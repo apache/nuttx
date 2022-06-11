@@ -87,7 +87,7 @@ static void sam_gclck_waitsyncbusy(void)
  *
  ****************************************************************************/
 
-void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
+void sam_gclk_config(const struct sam_gclkconfig_s *config)
 {
   uint32_t genctrl;
   uint32_t gendiv;

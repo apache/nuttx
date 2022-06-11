@@ -76,6 +76,19 @@ int udp_ioctl(FAR struct udp_conn_s *conn,
             *(FAR int *)((uintptr_t)arg) = 0;
           }
         break;
+      case FIONSPACE:
+#ifdef CONFIG_NET_UDP_WRITE_BUFFERS
+#  if CONFIG_NET_SEND_BUFSIZE == 0
+        *(FAR int *)((uintptr_t)arg) =
+                                iob_navail(true) * CONFIG_IOB_BUFSIZE;
+#  else
+        *(FAR int *)((uintptr_t)arg) =
+                        conn->sndbufs - udp_wrbuffer_inqueue_size(conn);
+#  endif
+#else
+        *(FAR int *)((uintptr_t)arg) = MIN_UDP_MSS;
+#endif
+        break;
       default:
         ret = -ENOTTY;
         break;

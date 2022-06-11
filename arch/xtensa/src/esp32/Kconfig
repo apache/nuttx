@@ -309,6 +309,11 @@ config ESP32_I2C
 	bool
 	default n
 
+config ESP32_TWAI
+	bool
+	default n
+	select CAN
+
 config ESP32_I2S0
 	bool "I2S 0"
 	default n
@@ -526,6 +531,11 @@ config ESP32_I2C1
 	bool "I2C 1"
 	default n
 	select ESP32_I2C
+
+config ESP32_TWAI0
+	bool "TWAI (CAN) 0"
+	default n
+	select ESP32_TWAI
 
 config ESP32_AES_ACCELERATOR
 	bool "AES Accelerator"
@@ -829,6 +839,58 @@ config ESP32_I2CTIMEOMS
 	default 500
 
 endmenu # I2C configuration
+
+menu "TWAI driver options"
+        depends on ESP32_TWAI
+
+if ESP32_TWAI0
+
+config ESP32_TWAI0_TXPIN
+	int "TWAI0 TX Pin"
+	default 21
+
+config ESP32_TWAI0_RXPIN
+	int "TWAI0 RX Pin"
+	default 22
+
+config ESP32_TWAI0_BITRATE
+	int "TWAI0 bitrate"
+	default 1000000
+	---help---
+		TWAI0 bit rate.  Required if ESP32_TWAI0 is defined.
+
+config ESP32_TWAI0_SAMPLEP
+	int "TWAI0 sample point"
+	default 80
+	---help---
+		TWAI0 sample point location as a percent value.  Required
+		if ESP32_TWAI0 is defined.
+
+config ESP32_TWAI0_SJW
+	int "TWAI0 synchronization jump width"
+	default 3
+	---help---
+		SJW limits the number of Time Quanta corrections during bit
+		Resynchronization. Default: 3
+
+config ESP32_TWAI0_SAM
+	bool "TWAI0 sampling"
+	default n
+	---help---
+		The bus is sampled 3 times (recommended for low to medium speed buses
+		to spikes on the bus-line).
+
+endif # ESP32_TWAI0
+
+config ESP32_TWAI_REGDEBUG
+    bool "TWAI register level debug"
+    depends on DEBUG_CAN_INFO
+    default n
+    ---help---
+        Output detailed register-level TWAI debug information. Requires also
+        CONFIG_DEBUG_CAN_INFO.
+
+endmenu #ESP32_TWAI
 
 menu "SPI configuration"
 	depends on ESP32_SPI

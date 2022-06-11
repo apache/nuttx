@@ -119,7 +119,7 @@
 #ifdef CONFIG_PWM_MULTICHAN
 struct pwm_chan_s
 {
-  ub16_t  duty;
+  ub16_t duty;
   int8_t channel;
 };
 #endif

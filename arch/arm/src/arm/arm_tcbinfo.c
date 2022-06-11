@@ -60,11 +60,13 @@ static const uint16_t g_reg_offs[] =
 
 const struct tcbinfo_s g_tcbinfo =
 {
-  TCB_PID_OFF,
-  TCB_STATE_OFF,
-  TCB_PRI_OFF,
-  TCB_NAME_OFF,
-  XCPTCONTEXT_REGS,
+  .pid_off   = TCB_PID_OFF,
+  .state_off = TCB_STATE_OFF,
+  .pri_off   = TCB_PRI_OFF,
+  .name_off  = TCB_NAME_OFF,
+  .regs_off  = TCB_REGS_OFF,
+  .basic_num = 17,
+  .total_num = XCPTCONTEXT_REGS,
   {
     .p = g_reg_offs,
   },

@@ -62,7 +62,11 @@
  * function call.  However, get_environ_ptr() can be used in its place.
  */
 
-#define environ get_environ_ptr()
+#ifdef CONFIG_DISABLE_ENVIRON
+#  define environ NULL
+#else
+#  define environ get_environ_ptr()
+#endif
 
 #if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
 #  define mkstemp64            mkstemp

@@ -82,7 +82,7 @@
 #define STM32L4_DMAMUX1_C10CR    (STM32L4_DMAMUX1_BASE+STM32L4_DMAMUX_C10CR_OFFSET)
 #define STM32L4_DMAMUX1_C11CR    (STM32L4_DMAMUX1_BASE+STM32L4_DMAMUX_C11CR_OFFSET)
 #define STM32L4_DMAMUX1_C12CR    (STM32L4_DMAMUX1_BASE+STM32L4_DMAMUX_C12CR_OFFSET)
-#define STM32L4_DMAMUX1_C13CR    (STM32L4_DMAMUX1_BASE+STM32L4_DMAMUX_C12CR_OFFSET)
+#define STM32L4_DMAMUX1_C13CR    (STM32L4_DMAMUX1_BASE+STM32L4_DMAMUX_C13CR_OFFSET)
 
 #define STM32L4_DMAMUX1_CSR      (STM32L4_DMAMUX1_BASE+STM32L4_DMAMUX_CSR_OFFSET)
 #define STM32L4_DMAMUX1_CFR      (STM32L4_DMAMUX1_BASE+STM32L4_DMAMUX_CFR_OFFSET)
@@ -106,7 +106,7 @@
 #define DMAMUX_CCR_EGE            (9)  /* Bit 9: Event generation enable */
 #define DMAMUX_CCR_SE             (16) /* Bit 16: Synchronization enable */
 #define DMAMUX_CCR_SPOL_SHIFT     (17) /* Bits 17-18: Synchronization polarity */
-#define DMAMUX_CCR_SPOL_MASK      (3 << DMAMUX_CCR_SPOL_SHIFT)
+#define DMAMUX_CCR_SPOL_MASK      (0x3 << DMAMUX_CCR_SPOL_SHIFT)
 #define DMAMUX_CCR_NBREQ_SHIFT    (19) /* Bits 19-23: Number of DMA request - 1 to forward */
 #define DMAMUX_CCR_NBREQ_MASK     (0x1f << DMAMUX_CCR_NBREQ_SHIFT)
 #define DMAMUX_CCR_SYNCID_SHIFT   (24) /* Bits 24-28: Synchronization identification */
@@ -127,9 +127,9 @@
 #define DMAMUX_RGCR_OIE           (8)  /* Bit 8: Trigger overrun interrupt enable */
 #define DMAMUX_RGCR_GE            (16) /* Bit 16: DMA request generator channel X enable*/
 #define DMAMUX_RGCR_GPOL_SHIFT    (17) /* Bits 17-18: DMA request generator trigger polarity */
-#define DMAMUX_RGCR_GPOL_MASK     (7 << DMAMUX_RGCR_GPOL_SHIFT)
-#define DMAMUX_RGCR_GNBREQ_SHIFT  (17) /* Bits 19-23: Number of DMA requests to be generated -1 */
-#define DMAMUX_RGCR_GNBREQL_MASK  (7 << DMAMUX_RGCR_GNBREQ_SHIFT)
+#define DMAMUX_RGCR_GPOL_MASK     (0x3 << DMAMUX_RGCR_GPOL_SHIFT)
+#define DMAMUX_RGCR_GNBREQ_SHIFT  (19) /* Bits 19-23: Number of DMA requests to be generated -1 */
+#define DMAMUX_RGCR_GNBREQ_MASK   (0x1f << DMAMUX_RGCR_GNBREQ_SHIFT)
 
 /* DMAMUX1 request generator interrupt status register */
 

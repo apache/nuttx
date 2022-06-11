@@ -1781,7 +1781,7 @@ static void sam_dmaterminate(struct sam_dmach_s *dmach, int result)
  *
  ****************************************************************************/
 
-static int sam_dmac_interrupt(int irq, void *context, FAR void *arg)
+static int sam_dmac_interrupt(int irq, void *context, void *arg)
 {
   struct sam_dmac_s *dmac = (struct sam_dmac_s *)arg;
   struct sam_dmach_s *dmach;

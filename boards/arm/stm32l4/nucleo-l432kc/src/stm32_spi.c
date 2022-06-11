@@ -30,6 +30,7 @@
 #include <errno.h>
 
 #include <nuttx/spi/spi.h>
+#include <nuttx/spi/spi_transfer.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -55,6 +56,34 @@ struct spi_dev_s *g_spi2;
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32l4_spiregister
+ *
+ * Description:
+ *   Called to register spi character driver of
+ *   initialized spi device for the Nucleo-L432KC board.
+ *
+ ****************************************************************************/
+
+void stm32l4_spiregister(void)
+{
+#ifdef CONFIG_STM32L4_SPI1
+      int ret = spi_register(g_spi1, 1);
+      if (ret < 0)
+        {
+          spierr("ERROR: FAILED to register driver of SPI port 1\n");
+        }
+#endif
+
+#ifdef CONFIG_STM32L4_SPI2
+      int ret = spi_register(g_spi2, 2);
+      if (ret < 0)
+        {
+          spierr("ERROR: FAILED to register driver of SPI port 2\n");
+        }
+#endif
+}
 
 /****************************************************************************
  * Name: stm32l4_spiinitialize
@@ -131,7 +160,7 @@ void stm32l4_spiinitialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32L4_SPI1
-void stm32l4_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
+void stm32l4_spi1select(struct spi_dev_s *dev, uint32_t devid,
                         bool selected)
 {
   spiinfo("devid: %08X CS: %s\n", (int)devid,
@@ -145,21 +174,21 @@ void stm32l4_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
 #endif
 }
 
-uint8_t stm32l4_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t stm32l4_spi1status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_STM32L4_SPI2
-void stm32l4_spi2select(FAR struct spi_dev_s *dev, uint32_t devid,
+void stm32l4_spi2select(struct spi_dev_s *dev, uint32_t devid,
                         bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
           selected ? "assert" : "de-assert");
 }
 
-uint8_t stm32l4_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t stm32l4_spi2status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
@@ -190,14 +219,14 @@ uint8_t stm32l4_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
 
 #ifdef CONFIG_SPI_CMDDATA
 #ifdef CONFIG_STM32L4_SPI1
-int stm32l4_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int stm32l4_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return OK;
 }
 #endif
 
 #ifdef CONFIG_STM32L4_SPI2
-int stm32l4_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int stm32l4_spi2cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return OK;
 }

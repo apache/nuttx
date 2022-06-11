@@ -106,12 +106,12 @@ struct group_addrenv_s
 {
   /* Level 1 page table entries for each group section */
 
-  FAR uintptr_t *text[ARCH_TEXT_NSECTS];
-  FAR uintptr_t *data[ARCH_DATA_NSECTS];
+  uintptr_t *text[ARCH_TEXT_NSECTS];
+  uintptr_t *data[ARCH_DATA_NSECTS];
 #ifdef CONFIG_BUILD_KERNEL
-  FAR uintptr_t *heap[ARCH_HEAP_NSECTS];
+  uintptr_t *heap[ARCH_HEAP_NSECTS];
 #ifdef CONFIG_MM_SHM
-  FAR uintptr_t *shm[ARCH_SHM_NSECTS];
+  uintptr_t *shm[ARCH_SHM_NSECTS];
 #endif
 
   /* Initial heap allocation (in bytes).  This exists only provide an
@@ -137,12 +137,12 @@ typedef struct group_addrenv_s group_addrenv_t;
 
 struct save_addrenv_s
 {
-  FAR uint32_t text[ARCH_TEXT_NSECTS];
-  FAR uint32_t data[ARCH_DATA_NSECTS];
+  uint32_t text[ARCH_TEXT_NSECTS];
+  uint32_t data[ARCH_DATA_NSECTS];
 #ifdef CONFIG_BUILD_KERNEL
-  FAR uint32_t heap[ARCH_HEAP_NSECTS];
+  uint32_t heap[ARCH_HEAP_NSECTS];
 #ifdef CONFIG_MM_SHM
-  FAR uint32_t shm[ARCH_SHM_NSECTS];
+  uint32_t shm[ARCH_SHM_NSECTS];
 #endif
 #endif
 };

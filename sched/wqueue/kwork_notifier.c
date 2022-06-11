@@ -276,16 +276,14 @@ int work_notifier_setup(FAR struct work_notifier_s *info)
  *         work_notifier_setup().
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
+ *   None.
  *
  ****************************************************************************/
 
-int work_notifier_teardown(int key)
+void work_notifier_teardown(int key)
 {
   FAR struct work_notifier_entry_s *notifier;
   irqstate_t flags;
-  int ret = OK;
 
   /* Disable interrupts very briefly. */
 
@@ -296,13 +294,7 @@ int work_notifier_teardown(int key)
    */
 
   notifier = work_notifier_find(key);
-  if (notifier == NULL)
-    {
-      /* There is no notification with this key in the pending list */
-
-      ret = -ENOENT;
-    }
-  else
+  if (notifier != NULL)
     {
       /* Found it!  Remove the notification from the pending list */
 
@@ -314,7 +306,6 @@ int work_notifier_teardown(int key)
     }
 
   leave_critical_section(flags);
-  return ret;
 }
 
 /****************************************************************************

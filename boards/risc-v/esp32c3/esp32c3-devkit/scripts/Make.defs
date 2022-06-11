@@ -25,31 +25,25 @@ include $(TOPDIR)/arch/risc-v/src/common/Toolchain.defs
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3_out.ld
 
-ifeq ($(CONFIG_ESP32C3_APP_FORMAT_MCUBOOT),y)
-  ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3_mcuboot.ld
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+  ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)kernel-space.ld
 else
-  ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3.ld
+  ifeq ($(CONFIG_ESP32C3_APP_FORMAT_MCUBOOT),y)
+    ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3_mcuboot.ld
+  else
+    ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3.ld
+  endif
 endif
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3_rom.ld
 
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION = -g
-endif
-
-ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
-endif
-
-ARCHCFLAGS = -fno-common -ffunction-sections -fdata-sections -msmall-data-limit=0
-ARCHCXXFLAGS = $(ARCHCFLAGS) -fno-exceptions -fcheck-new -fno-rtti
-ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
-ARCHWARNINGSXX = -Wall -Wshadow -Wundef
+ARCHCFLAGS += -msmall-data-limit=0
+ARCHCXXFLAGS += -msmall-data-limit=0
 ARCHPICFLAGS = -fpic
 
-CFLAGS := $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
-CXXFLAGS := $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CXXFLAGS := $(ARCHCXXFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
 CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 AFLAGS := $(CFLAGS) -D__ASSEMBLY__
@@ -63,11 +57,8 @@ LDMODULEFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
 
 # ELF module definitions
 
-CELFFLAGS = $(CFLAGS) -fno-common
-CXXELFFLAGS = $(CXXFLAGS) -fno-common
+CELFFLAGS = $(CFLAGS)
+CXXELFFLAGS = $(CXXFLAGS)
 
 LDELFFLAGS = -melf32lriscv -r -e main
 LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)binfmt$(DELIM)libelf$(DELIM)gnu-elf.ld)
-
-LDFLAGS += -Map=$(call CONVERT_PATH,$(TOPDIR)/nuttx.map) --cref
-LDFLAGS += --gc-sections -melf32lriscv

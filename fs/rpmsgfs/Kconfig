@@ -6,7 +6,7 @@
 config FS_RPMSGFS
 	bool "RPMSG File System"
 	default n
-	depends on OPENAMP
+	depends on RPTUN
 	---help---
 		Use rpmsg file system to mount remote directories to local.
 		This the method for user to use remote file like own core.

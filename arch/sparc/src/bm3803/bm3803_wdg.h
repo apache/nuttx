@@ -65,7 +65,7 @@ extern "C"
  ****************************************************************************/
 
 #ifdef CONFIG_BM3803_WDG
-void bm3803_wdginitialize(FAR const char *devpath);
+void bm3803_wdginitialize(const char *devpath);
 #endif
 
 #undef EXTERN

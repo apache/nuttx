@@ -45,7 +45,7 @@
 #endif
 
 #ifdef CONFIG_TIMER
-extern int phyplus_timer_initialize(FAR const char *devpath, int timer);
+extern int phyplus_timer_initialize(const char *devpath, int timer);
 #endif
 
 /****************************************************************************

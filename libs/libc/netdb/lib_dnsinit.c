@@ -30,8 +30,8 @@
 
 #include <arpa/inet.h>
 
-#include <nuttx/semaphore.h>
-
+#include <nuttx/sched.h>
+#include <nuttx/mutex.h>
 #include "netdb/lib_dns.h"
 
 /****************************************************************************
@@ -40,7 +40,7 @@
 
 /* Protects DNS cache, nameserver list and notify list. */
 
-static sem_t g_dns_sem = SEM_INITIALIZER(1);
+static rmutex_t g_dns_lock = NXRMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Public Data
@@ -137,36 +137,24 @@ bool dns_initialize(void)
  * Name: dns_semtake
  *
  * Description:
- *   Take the DNS semaphore, ignoring errors due to the receipt of signals.
+ *   Take the DNS lock, ignoring errors due to the receipt of signals.
  *
  ****************************************************************************/
 
 void dns_semtake(void)
 {
-  int errcode = 0;
-  int ret;
-
-  do
-    {
-      ret = _SEM_WAIT(&g_dns_sem);
-      if (ret < 0)
-        {
-          errcode = _SEM_ERRNO(ret);
-          DEBUGASSERT(errcode == EINTR || errcode == ECANCELED);
-        }
-    }
-  while (ret < 0 && errcode == EINTR);
+  nxrmutex_lock(&g_dns_lock);
 }
 
 /****************************************************************************
  * Name: dns_semgive
  *
  * Description:
- *   Release the DNS semaphore
+ *   Release the DNS lock
  *
  ****************************************************************************/
 
 void dns_semgive(void)
 {
-  DEBUGVERIFY(_SEM_POST(&g_dns_sem));
+  nxrmutex_unlock(&g_dns_lock);
 }

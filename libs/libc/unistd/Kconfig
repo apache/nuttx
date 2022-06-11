@@ -143,3 +143,10 @@ config LIBC_HOSTNAME
 	default ""
 	---help---
 		A unique name to identify device on the network
+
+config LIBC_OPEN_MAX
+	int "OPEN_MAX for this device"
+	default 255
+	---help---
+		The maximum number of files that a process can have open
+		at any time.  Must not be less than _POSIX_OPEN_MAX.

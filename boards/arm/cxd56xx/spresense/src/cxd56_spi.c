@@ -69,21 +69,21 @@
  ****************************************************************************/
 
 #ifdef CONFIG_CXD56_SPI0
-void cxd56_spi0select(FAR struct spi_dev_s *dev, uint32_t devid,
+void cxd56_spi0select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
           selected ? "assert" : "de-assert");
 }
 
-uint8_t cxd56_spi0status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t cxd56_spi0status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_CXD56_SPI3
-void cxd56_spi3select(FAR struct spi_dev_s *dev, uint32_t devid,
+void cxd56_spi3select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
@@ -107,21 +107,21 @@ void cxd56_spi3select(FAR struct spi_dev_s *dev, uint32_t devid,
   cxd56_spi_clock_gate_enable(3);
 }
 
-uint8_t cxd56_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t cxd56_spi3status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_CXD56_SPI4
-void cxd56_spi4select(FAR struct spi_dev_s *dev, uint32_t devid,
+void cxd56_spi4select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
           selected ? "assert" : "de-assert");
 }
 
-uint8_t cxd56_spi4status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t cxd56_spi4status(struct spi_dev_s *dev, uint32_t devid)
 {
   uint8_t ret = 0;
 
@@ -133,14 +133,14 @@ uint8_t cxd56_spi4status(FAR struct spi_dev_s *dev, uint32_t devid)
 #endif
 
 #ifdef CONFIG_CXD56_SPI5
-void cxd56_spi5select(FAR struct spi_dev_s *dev, uint32_t devid,
+void cxd56_spi5select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
           selected ? "assert" : "de-assert");
 }
 
-uint8_t cxd56_spi5status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t cxd56_spi5status(struct spi_dev_s *dev, uint32_t devid)
 {
   uint8_t ret = 0;
 

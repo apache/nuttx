@@ -32,7 +32,6 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/semaphore.h>
-#include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 
 #include <nuttx/net/arp.h>
@@ -58,12 +57,6 @@
 #  define net_rpmsg_drv_dumppacket(m, b, l)
 #endif
 
-/* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per
- * second.
- */
-
-#define NET_RPMSG_DRV_WDDELAY      (1*CLK_TCK)
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -83,7 +76,6 @@ struct net_rpmsg_drv_s
   FAR const char        *cpuname;
   FAR const char        *devname;
   struct rpmsg_endpoint ept;
-  struct wdog_s         txpoll;   /* TX poll timer */
   struct work_s         pollwork; /* For deferring poll work to the work queue */
 
   /* This holds the information visible to the NuttX network */
@@ -123,11 +115,6 @@ static int  net_rpmsg_drv_ept_cb(FAR struct rpmsg_endpoint *ept, void *data,
 
 static int  net_rpmsg_drv_send_recv(struct net_driver_s *dev,
                     void *header_, uint32_t command, int len);
-
-/* Watchdog timer expirations */
-
-static void net_rpmsg_drv_poll_work(FAR void *arg);
-static void net_rpmsg_drv_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -700,100 +687,6 @@ out:
 }
 
 /****************************************************************************
- * Name: net_rpmsg_drv_poll_work
- *
- * Description:
- *   Perform periodic polling from the worker thread
- *
- * Parameters:
- *   arg - The argument passed when work_queue() as called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   Run on a work queue thread.
- *
- ****************************************************************************/
-
-static void net_rpmsg_drv_poll_work(FAR void *arg)
-{
-  FAR struct net_driver_s *dev = arg;
-  FAR struct net_rpmsg_drv_s *priv = dev->d_private;
-  uint32_t size;
-
-  /* Lock the network and serialize driver operations if necessary.
-   * NOTE: Serialization is only required in the case where the driver work
-   * is performed on an LP worker thread and where more than one LP worker
-   * thread has been configured.
-   */
-
-  net_lock();
-
-  /* Perform the poll */
-
-  /* Check if there is room in the send another TX packet.  We cannot perform
-   * the TX poll if he are unable to accept another packet for transmission.
-   */
-
-  if (dev->d_buf == NULL)
-    {
-      /* Try to get the payload buffer if not yet */
-
-      dev->d_buf = rpmsg_get_tx_payload_buffer(&priv->ept, &size, false);
-      if (dev->d_buf)
-        {
-          dev->d_buf += sizeof(struct net_rpmsg_transfer_s);
-          dev->d_pktsize = size - sizeof(struct net_rpmsg_transfer_s);
-        }
-    }
-
-  if (dev->d_buf)
-    {
-      /* If so, update TCP timing states and poll the network for new XMIT
-       * data.  Hmmm.. might be bug here.  Does this mean if there is a
-       * transmit in progress, we will missing TCP time state updates?
-       */
-
-      devif_timer(dev, NET_RPMSG_DRV_WDDELAY, net_rpmsg_drv_txpoll);
-    }
-
-  /* Setup the watchdog poll timer again */
-
-  wd_start(&priv->txpoll, NET_RPMSG_DRV_WDDELAY,
-           net_rpmsg_drv_poll_expiry, (wdparm_t)dev);
-  net_unlock();
-}
-
-/****************************************************************************
- * Name: net_rpmsg_drv_poll_expiry
- *
- * Description:
- *   Periodic timer handler.  Called from the timer interrupt handler.
- *
- * Parameters:
- *   arg  - The argument
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Runs in the context of a the timer interrupt handler.  Local
- *   interrupts are disabled by the interrupt logic.
- *
- ****************************************************************************/
-
-static void net_rpmsg_drv_poll_expiry(wdparm_t arg)
-{
-  FAR struct net_driver_s *dev = (FAR struct net_driver_s *)arg;
-  FAR struct net_rpmsg_drv_s *priv = dev->d_private;
-
-  /* Schedule to perform the interrupt processing on the worker thread. */
-
-  work_queue(LPWORK, &priv->pollwork, net_rpmsg_drv_poll_work, dev, 0);
-}
-
-/****************************************************************************
  * Name: net_rpmsg_drv_ifup
  *
  * Description:
@@ -813,7 +706,6 @@ static void net_rpmsg_drv_poll_expiry(wdparm_t arg)
 
 static int net_rpmsg_drv_ifup(FAR struct net_driver_s *dev)
 {
-  FAR struct net_rpmsg_drv_s *priv = dev->d_private;
   struct net_rpmsg_ifup_s msg =
   {
   };
@@ -882,11 +774,6 @@ static int net_rpmsg_drv_ifup(FAR struct net_driver_s *dev)
   net_rpmsg_drv_ipv6multicast(dev);
 #endif
 
-  /* Set and activate a timer process */
-
-  wd_start(&priv->txpoll, NET_RPMSG_DRV_WDDELAY,
-           net_rpmsg_drv_poll_expiry, (wdparm_t)dev);
-
   net_unlock();
 
 #ifdef CONFIG_NETDB_DNSCLIENT
@@ -953,9 +840,6 @@ static int net_rpmsg_drv_ifdown(FAR struct net_driver_s *dev)
 
   flags = enter_critical_section();
 
-  /* Cancel the TX poll timer and work */
-
-  wd_cancel(&priv->txpoll);
   work_cancel(LPWORK, &priv->pollwork);
 
   leave_critical_section(flags);
@@ -1023,7 +907,7 @@ static void net_rpmsg_drv_txavail_work(FAR void *arg)
         {
           /* If so, then poll the network for new XMIT data */
 
-          devif_timer(dev, 0, net_rpmsg_drv_txpoll);
+          devif_poll(dev, net_rpmsg_drv_txpoll);
         }
     }
 

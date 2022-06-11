@@ -419,7 +419,7 @@ int nx_poll(FAR struct pollfd *fds, unsigned int nfds, int timeout)
            * will return immediately.
            */
 
-          ret = nxsem_tickwait(&sem, clock_systime_ticks(), ticks);
+          ret = nxsem_tickwait(&sem, ticks);
           if (ret < 0)
             {
               if (ret == -ETIMEDOUT)

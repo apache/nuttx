@@ -140,8 +140,8 @@ struct tm
 
 struct itimerspec
 {
+  struct timespec it_interval; /* Thereafter */
   struct timespec it_value;    /* First time */
-  struct timespec it_interval; /* and thereafter */
 };
 
 /* forward reference (defined in signal.h) */
@@ -200,6 +200,8 @@ FAR struct tm *localtime_r(FAR const time_t *timep, FAR struct tm *result);
 
 size_t strftime(FAR char *s, size_t max, FAR const char *format,
                 FAR const struct tm *tm) strftimelike(3);
+FAR char *strptime(FAR const char *s, FAR const char *format,
+                   FAR struct tm *tm);
 
 FAR char *asctime(FAR const struct tm *tp);
 FAR char *asctime_r(FAR const struct tm *tp, FAR char *buf);

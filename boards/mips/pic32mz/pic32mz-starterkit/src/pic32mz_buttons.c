@@ -139,7 +139,7 @@ uint32_t board_buttons(void)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+int board_button_irq(int id, xcpt_t irqhandler, void *arg)
 {
 #ifdef CONFIG_PIC32MZ_GPIOIRQ_PORTB
   int ret = OK;

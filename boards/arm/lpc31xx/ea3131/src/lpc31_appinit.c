@@ -112,7 +112,7 @@
 int board_app_initialize(uintptr_t arg)
 {
 #ifdef NSH_HAVEMMCSD
-  FAR struct sdio_dev_s *sdio;
+  struct sdio_dev_s *sdio;
   int ret;
 
   /* First, get an instance of the SDIO interface */

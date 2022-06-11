@@ -97,7 +97,9 @@ begin_packed_struct struct tcbinfo_s
   uint16_t state_off;
   uint16_t pri_off;
   uint16_t name_off;
-  uint16_t reg_num;
+  uint16_t regs_off;
+  uint16_t basic_num;
+  uint16_t total_num;
   begin_packed_struct
   union
   {
@@ -156,6 +158,7 @@ struct plugin_priv_s
 {
   uint32_t                 *pidhash;
   uint32_t                 npidhash;
+  uint32_t                 *regsaddr;
   struct tcbinfo_s         *tcbinfo;
   uint16_t                 running;
   uint32_t                 ntcb;
@@ -215,10 +218,9 @@ static int get_pid(struct plugin_priv_s *priv, uint32_t idx,
   if (ret != 0)
     {
       PERROR("read %d pid error return %d\n", idx, ret);
-      return ret;
     }
 
-  return 0;
+  return ret;
 }
 
 static int get_idx_from_pid(struct plugin_priv_s *priv,
@@ -230,9 +232,10 @@ static int get_idx_from_pid(struct plugin_priv_s *priv,
     {
       uint32_t tmppid;
 
-      if (get_pid(priv, idx, &tmppid))
+      int ret = get_pid(priv, idx, &tmppid);
+      if (ret != 0)
         {
-          return -1;
+          return ret;
         }
 
       if (tmppid == pid)
@@ -241,16 +244,25 @@ static int get_idx_from_pid(struct plugin_priv_s *priv,
         }
     }
 
-  return -1;
+  return -ENOENT;
 }
 
 static int setget_reg(struct plugin_priv_s *priv, uint32_t idx,
                       uint32_t regidx, uint32_t *regval, bool write)
 {
   uint32_t regaddr;
-  int ret = 0;
 
-  regaddr = priv->pidhash[idx] + priv->tcbinfo->reg_offs[regidx];
+  if (priv->tcbinfo->reg_offs[regidx] == UINT16_MAX)
+    {
+      if (write == 0)
+        {
+          *regval = 0;
+        }
+
+      return 0;
+    }
+
+  regaddr = priv->regsaddr[idx] + priv->tcbinfo->reg_offs[regidx];
 
   if (write)
     {
@@ -258,7 +270,7 @@ static int setget_reg(struct plugin_priv_s *priv, uint32_t idx,
     }
   else
     {
-      ret = READU32(regaddr, regval);
+      int ret = READU32(regaddr, regval);
       if (ret != 0)
         {
           PERROR("regread %d regidx %d error %d\n", idx, regidx, ret);
@@ -266,35 +278,40 @@ static int setget_reg(struct plugin_priv_s *priv, uint32_t idx,
         }
     }
 
-  return ret;
+  return 0;
 }
 
 static int update_tcbinfo(struct plugin_priv_s *priv)
 {
   if (!priv->tcbinfo)
     {
-      uint16_t reg_num;
-      int ret;
+      uint16_t total_num;
       uint32_t reg_off;
+      int ret;
 
       ret = READU16(g_symbols[TCBINFO].address +
-                    offsetof(struct tcbinfo_s, reg_num), &reg_num);
-      if (ret != 0 || !reg_num)
+                    offsetof(struct tcbinfo_s, total_num), &total_num);
+      if (ret != 0)
         {
           PERROR("error reading regs ret %d\n", ret);
           return ret;
         }
 
+      if (!total_num)
+        {
+          return -EIO;
+        }
+
       ret = READU32(g_symbols[TCBINFO].address +
                     offsetof(struct tcbinfo_s, reg_off), &reg_off);
-      if (ret != 0 || !reg_off)
+      if (ret != 0)
         {
           PERROR("error in read regoffs address ret %d\n", ret);
           return ret;
         }
 
       priv->tcbinfo = ALLOC(sizeof(struct tcbinfo_s) +
-                            reg_num * sizeof(uint16_t));
+                            total_num * sizeof(uint16_t));
 
       if (!priv->tcbinfo)
         {
@@ -311,14 +328,12 @@ static int update_tcbinfo(struct plugin_priv_s *priv)
         }
 
       ret = READMEM(reg_off, (char *)&priv->tcbinfo->reg_offs[0],
-                    reg_num * sizeof(uint16_t));
-      if (ret != reg_num * sizeof(uint16_t))
+                    total_num * sizeof(uint16_t));
+      if (ret != total_num * sizeof(uint16_t))
         {
           PERROR("error in read tcbinfo_s reg_offs ret %d\n", ret);
           return ret;
         }
-
-      PLOG("setup success! regs %d\n", priv->tcbinfo->reg_num);
     }
 
   return 0;
@@ -329,6 +344,7 @@ static int update_pidhash(struct plugin_priv_s *priv)
   uint32_t npidhash;
   uint32_t pidhashaddr;
   int ret;
+  int i;
 
   ret = READU32(g_symbols[NPIDHASH].address, &npidhash);
   if (ret != 0 || npidhash == 0)
@@ -344,6 +360,14 @@ static int update_pidhash(struct plugin_priv_s *priv)
       if (!priv->pidhash)
         {
           PERROR("error in malloc pidhash\n");
+          return -ENOMEM;
+        }
+
+      priv->regsaddr =
+        REALLOC(priv->regsaddr, npidhash * sizeof(uint32_t *));
+      if (!priv->regsaddr)
+        {
+          PERROR("error in malloc regsaddr\n");
           return -ENOMEM;
         }
 
@@ -366,6 +390,20 @@ static int update_pidhash(struct plugin_priv_s *priv)
       return ret;
     }
 
+  for (i = 0; i < priv->npidhash; i++)
+    {
+      if (priv->pidhash[i])
+        {
+          ret = READU32(priv->pidhash[i] + priv->tcbinfo->regs_off,
+                        &priv->regsaddr[i]);
+          if (ret != 0)
+            {
+              PERROR("error in task %d read regs pointer %d\n", i, ret);
+              return ret;
+            }
+        }
+    }
+
   return 0;
 }
 
@@ -381,7 +419,9 @@ static int normalize_tcb(struct plugin_priv_s *priv)
     {
       if (priv->pidhash[i])
         {
-          priv->pidhash[priv->ntcb++] = priv->pidhash[i];
+          priv->pidhash[priv->ntcb]  = priv->pidhash[i];
+          priv->regsaddr[priv->ntcb] = priv->regsaddr[i];
+          priv->ntcb++;
         }
     }
 
@@ -389,6 +429,7 @@ static int normalize_tcb(struct plugin_priv_s *priv)
   if (ret != 0)
     {
       PERROR("read readytorun error return %d\n", ret);
+      return ret;
     }
 
   ret = READU16(tcbaddr + priv->tcbinfo->pid_off, &priv->running);
@@ -491,7 +532,7 @@ int RTOS_GetThreadDisplay(char *display, uint32_t threadid)
   if (idx < 0)
     {
       PERROR("error in get_idx_from_pid return %d\n", idx);
-      return -1;
+      return idx;
     }
 
   len += snprintf(display + len,
@@ -544,6 +585,7 @@ int RTOS_GetThreadDisplay(char *display, uint32_t threadid)
 int RTOS_GetThreadReg(char *hexregval, uint32_t regindex, uint32_t threadid)
 {
   int idx;
+  int ret;
   uint32_t regval = 0;
 
   threadid -= THREADID_BASE;
@@ -552,30 +594,29 @@ int RTOS_GetThreadReg(char *hexregval, uint32_t regindex, uint32_t threadid)
 
   if (threadid == g_plugin_priv.running)
     {
-      return -1;
+      return -ENOTSUP;
     }
 
-  if (regindex > g_plugin_priv.tcbinfo->reg_num)
+  if (regindex > g_plugin_priv.tcbinfo->total_num)
     {
-      return -1;
+      return -EINVAL;
     }
 
   idx = get_idx_from_pid(&g_plugin_priv, threadid);
   if (idx < 0)
     {
       PERROR("error in get_idx_from_pid return %d\n", idx);
-      return -1;
+      return idx;
     }
 
-  if (g_plugin_priv.tcbinfo->reg_offs[regindex])
+  ret = setget_reg(&g_plugin_priv, idx, regindex, &regval, false);
+  if (ret != 0)
     {
-      setget_reg(&g_plugin_priv, idx, regindex, &regval, false);
-
-      encode_hex(hexregval, regval);
-      return 0;
+      return ret;
     }
 
-  return -1;
+  encode_hex(hexregval, regval);
+  return 0;
 }
 
 int RTOS_GetThreadRegList(char *hexreglist, uint32_t threadid)
@@ -590,23 +631,24 @@ int RTOS_GetThreadRegList(char *hexreglist, uint32_t threadid)
 
   if (threadid == g_plugin_priv.running)
     {
-      return -1;
+      return -ENOTSUP;
     }
 
   idx = get_idx_from_pid(&g_plugin_priv, threadid);
   if (idx < 0)
     {
       PERROR("error in get_idx_from_pid return %d\n", idx);
-      return -1;
+      return idx;
     }
 
-  for (j = 0; j < 17; j++)
+  for (j = 0; j < g_plugin_priv.tcbinfo->basic_num; j++)
     {
       regval = 0;
 
-      if (g_plugin_priv.tcbinfo->reg_offs[j])
+      int ret = setget_reg(&g_plugin_priv, idx, j, &regval, false);
+      if (ret != 0)
         {
-          setget_reg(&g_plugin_priv, idx, j, &regval, false);
+          return ret;
         }
 
       hexreglist += encode_hex(hexreglist, regval);
@@ -625,30 +667,24 @@ int RTOS_SetThreadReg(char *hexregval,
 
   if (threadid == g_plugin_priv.running)
     {
-      return -1;
+      return -ENOTSUP;
     }
 
-  if (regindex > g_plugin_priv.tcbinfo->reg_num)
+  if (regindex > g_plugin_priv.tcbinfo->total_num)
     {
-      return -1;
+      return -EINVAL;
     }
 
   idx = get_idx_from_pid(&g_plugin_priv, threadid);
   if (idx < 0)
     {
       PERROR("error in get_idx_from_pid return %d\n", idx);
-      return -1;
+      return idx;
     }
 
-  if (g_plugin_priv.tcbinfo->reg_offs[regindex])
-    {
-      regval = decode_hex(hexregval);
+  regval = decode_hex(hexregval);
 
-      setget_reg(&g_plugin_priv, idx, regindex, &regval, true);
-      return 0;
-    }
-
-  return -1;
+  return setget_reg(&g_plugin_priv, idx, regindex, &regval, true);
 }
 
 int RTOS_SetThreadRegList(char *hexreglist, uint32_t threadid)
@@ -661,30 +697,27 @@ int RTOS_SetThreadRegList(char *hexreglist, uint32_t threadid)
 
   if (threadid == g_plugin_priv.running)
     {
-      return -1;
+      return -ENOTSUP;
     }
 
   idx = get_idx_from_pid(&g_plugin_priv, threadid);
   if (idx < 0)
     {
       PERROR("error in get_idx_from_pid return %d\n", idx);
-      return -1;
+      return idx;
     }
 
-  for (j = 0; j < 17; j++)
+  for (j = 0; j < g_plugin_priv.tcbinfo->basic_num; j++)
     {
-      if (g_plugin_priv.tcbinfo->reg_offs[j])
-        {
-          regval = decode_hex(hexreglist);
+      regval = decode_hex(hexreglist);
 
-          setget_reg(&g_plugin_priv, idx, j, &regval, true);
-
-          hexreglist += 4;
-        }
-      else
+      int ret = setget_reg(&g_plugin_priv, idx, j, &regval, true);
+      if (ret != 0)
         {
-          return -1;
+          return ret;
         }
+
+      hexreglist += 4;
     }
 
   return 0;

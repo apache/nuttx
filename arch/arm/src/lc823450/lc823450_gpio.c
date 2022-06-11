@@ -53,12 +53,12 @@
  ****************************************************************************/
 
 #ifdef CONFIG_IOEX
-static FAR struct ioex_dev_s *g_ioex_dev;
+static struct ioex_dev_s *g_ioex_dev;
 #endif
 
 #ifdef CONFIG_LC823450_VGPIO
 #define GPIO_VIRTUAL_NUM 32
-static FAR struct vgpio_ops_s *vgpio_ops[GPIO_VIRTUAL_NUM];
+static struct vgpio_ops_s *vgpio_ops[GPIO_VIRTUAL_NUM];
 #endif /* CONFIG_LC823450_VGPIO */
 
 /****************************************************************************
@@ -504,7 +504,7 @@ int lc823450_gpio_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_LC823450_VGPIO
-int lc823450_vgpio_register(unsigned int pin, FAR struct vgpio_ops_s *ops)
+int lc823450_vgpio_register(unsigned int pin, struct vgpio_ops_s *ops)
 {
   assert(pin < GPIO_VIRTUAL_NUM);
   vgpio_ops[pin] = ops;

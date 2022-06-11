@@ -5,20 +5,20 @@
 
 comment "Basic CXX Support"
 
-config C99_BOOL8
-	bool "sizeof(_Bool) is 8-bits"
-	default n
-	---help---
-		This setting means (1) your C++ compiler has sizeof(_Bool) == 8, (2)
-		your C compiler supports the C99 _Bool intrinsic type, and (2) that
-		the C99 _Bool type also has size 1.
-
 config HAVE_CXX
 	bool "Have C++ compiler"
 	default n
 	---help---
 		Toolchain supports C++ and CXX, CXXFLAGS, and COMPILEXX have been
 		defined in the configurations Make.defs file.
+
+config HAVE_CXXINITIALIZE
+	bool "Have C++ initialization"
+	default n
+	---help---
+		The platform-specific logic includes support for initialization
+		of static C++ instances for this architecture and for the selected
+		toolchain.
 
 if HAVE_CXX
 
@@ -35,6 +35,7 @@ config LIBCXXMINI
 
 config LIBCXX
 	bool "LLVM libc++ C++ Standard Library"
+	select HAVE_CXXINITIALIZE
 	select LIBC_WCHAR
 	select LIBC_LOCALE
 	---help---
@@ -43,6 +44,7 @@ config LIBCXX
 
 config UCLIBCXX
 	bool "uClibc++ Standard C++ Library"
+	select HAVE_CXXINITIALIZE
 	---help---
 		uClibc++ C++ library
 		https://cxx.uclibc.org/
@@ -71,14 +73,6 @@ config LIBSUPCXX
 endchoice
 
 endif
-
-config HAVE_CXXINITIALIZE
-	bool "Have C++ initialization"
-	default LIBCXX || UCLIBCXX
-	---help---
-		The platform-specific logic includes support for initialization
-		of static C++ instances for this architecture and for the selected
-		toolchain (via up_cxxinitialize()).
 
 config CXX_EXCEPTION
 	bool "Enable Exception Support"

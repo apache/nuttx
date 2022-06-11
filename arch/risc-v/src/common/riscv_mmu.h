@@ -26,6 +26,10 @@
 #define RV_MMU_PAGE_SHIFT       (12)
 #define RV_MMU_PAGE_SIZE        (1 << RV_MMU_PAGE_SHIFT) /* 4K pages */
 
+/* Entries per PGT */
+
+#define RV_MMU_PAGE_ENTRIES     (RV_MMU_PAGE_SIZE / sizeof(uintptr_t))
+
 /* Supervisor Address Translation and Protection (satp) */
 
 #define SATP_PPN_SHIFT          (0)
@@ -45,6 +49,7 @@
 /* satp address to PPN translation */
 
 #define SATP_ADDR_TO_PPN(_addr) ((_addr) >> RV_MMU_PAGE_SHIFT)
+#define SATP_PPN_TO_ADDR(_ppn)  ((_ppn)  << RV_MMU_PAGE_SHIFT)
 
 /* Common Page Table Entry (PTE) bits */
 
@@ -90,10 +95,10 @@
 
 #ifdef CONFIG_ARCH_MMU_TYPE_SV39
 #define RV_MMU_PTE_PADDR_SHIFT  (10)
-#define RV_MMU_PTE_PPN_MASK     ((1 << RV_MMU_PTE_PADDR_SHIFT) - 1)
+#define RV_MMU_PTE_PPN_MASK     (((1ul << 44) - 1) << RV_MMU_PTE_PADDR_SHIFT)
 #define RV_MMU_PTE_PPN_SHIFT    (2)
 #define RV_MMU_VPN_WIDTH        (9)
-#define RV_MMU_VPN_MASK         ((1 << RV_MMU_VPN_WIDTH) - 1)
+#define RV_MMU_VPN_MASK         ((1ul << RV_MMU_VPN_WIDTH) - 1)
 #define RV_MMU_PT_LEVELS        (3)
 #define RV_MMU_VADDR_SHIFT(_n)  (RV_MMU_PAGE_SHIFT + RV_MMU_VPN_WIDTH * \
                                  (RV_MMU_PT_LEVELS - (_n)))
@@ -245,6 +250,47 @@ static inline void mmu_enable(uintptr_t pgbase, uint16_t asid)
 }
 
 /****************************************************************************
+ * Name: mmu_pte_to_paddr
+ *
+ * Description:
+ *   Extract physical address from PTE
+ *
+ * Input Parameters:
+ *   pte - Page table entry
+ *
+ * Returned Value:
+ *   Physical address from PTE
+ *
+ ****************************************************************************/
+
+static inline uintptr_t mmu_pte_to_paddr(uintptr_t pte)
+{
+  uintptr_t paddr = pte;
+  paddr  &= RV_MMU_PTE_PPN_MASK;  /* Remove flags */
+  paddr <<= RV_MMU_PTE_PPN_SHIFT; /* Move to correct position */
+  return paddr;
+}
+
+/****************************************************************************
+ * Name: mmu_get_satp_pgbase
+ *
+ * Description:
+ *   Utility function to read the base page table physical address
+ *
+ * Returned Value:
+ *   Physical address of the current base page table
+ *
+ ****************************************************************************/
+
+static inline uintptr_t mmu_get_satp_pgbase(void)
+{
+  uintptr_t ppn;
+  ppn = mmu_read_satp();
+  ppn = ((ppn >> SATP_PPN_SHIFT) & SATP_PPN_MASK);
+  return SATP_PPN_TO_ADDR(ppn);
+}
+
+/****************************************************************************
  * Name: mmu_ln_setentry
  *
  * Description:
@@ -279,10 +325,31 @@ void mmu_ln_setentry(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t paddr,
  *     level n
  *   vaddr - The virtual address to get pte for. Must be aligned to a PPN
  *     address boundary which is dependent on the level of the entry
+ *
  ****************************************************************************/
 
 uintptr_t mmu_ln_getentry(uint32_t ptlevel, uintptr_t lnvaddr,
                           uintptr_t vaddr);
+
+/****************************************************************************
+ * Name: mmu_ln_restore
+ *
+ * Description:
+ *   Restore a level n translation table entry.
+ *
+ * Input Parameters:
+ *   ptlevel - The translation table level, amount of levels is
+ *     MMU implementation specific
+ *   lnvaddr - The virtual address of the beginning of the page table at
+ *     level n
+ *   vaddr - The virtual address to get pte for. Must be aligned to a PPN
+ *     address boundary which is dependent on the level of the entry
+ *   entry - Entry to restore, previously obtained by mmu_ln_getentry
+ *
+ ****************************************************************************/
+
+void mmu_ln_restore(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t vaddr,
+                    uintptr_t entry);
 
 /****************************************************************************
  * Name: mmu_ln_map_region

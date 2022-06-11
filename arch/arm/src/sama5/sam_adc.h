@@ -109,7 +109,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct adc_dev_s *sam_adc_initialize(void);
+struct adc_dev_s *sam_adc_initialize(void);
 
 /****************************************************************************
  * Interfaces exported from the ADC to the touchscreen driver
@@ -124,7 +124,7 @@ FAR struct adc_dev_s *sam_adc_initialize(void);
  ****************************************************************************/
 
 struct sam_adc_s;
-int sam_adc_lock(FAR struct sam_adc_s *priv);
+int sam_adc_lock(struct sam_adc_s *priv);
 
 /****************************************************************************
  * Name: sam_adc_unlock
@@ -134,7 +134,7 @@ int sam_adc_lock(FAR struct sam_adc_s *priv);
  *
  ****************************************************************************/
 
-void sam_adc_unlock(FAR struct sam_adc_s *priv);
+void sam_adc_unlock(struct sam_adc_s *priv);
 
 /****************************************************************************
  * Name: sam_adc_getreg
@@ -145,7 +145,7 @@ void sam_adc_unlock(FAR struct sam_adc_s *priv);
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_ADC_REGDEBUG
-uint32_t sam_adc_getreg(FAR struct sam_adc_s *priv, uintptr_t address);
+uint32_t sam_adc_getreg(struct sam_adc_s *priv, uintptr_t address);
 #else
 #  define sam_adc_getreg(handle,addr) getreg32(addr)
 #endif
@@ -159,7 +159,7 @@ uint32_t sam_adc_getreg(FAR struct sam_adc_s *priv, uintptr_t address);
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_ADC_REGDEBUG
-void sam_adc_putreg(FAR struct sam_adc_s *priv, uintptr_t address,
+void sam_adc_putreg(struct sam_adc_s *priv, uintptr_t address,
                     uint32_t regval);
 #else
 #  define sam_adc_putreg(handle,addr,val) putreg32(val,addr)

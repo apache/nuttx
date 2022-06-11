@@ -89,8 +89,15 @@ LDFLAGS += $(addprefix -T,$(call CONVERT_PATH,$(ARCHSCRIPT))) $(EXTRALINKCMDS)
 
 # Override in Make.defs if linker is not 'ld'
 
-LDSTARTGROUP ?= --start-group
-LDENDGROUP ?= --end-group
+ifeq ($(LD),$(CC))
+  LDSTARTGROUP ?= -Wl,--start-group
+  LDENDGROUP   ?= -Wl,--end-group
+  LDFLAGS      := $(addprefix -Xlinker ,$(LDFLAGS))
+  LDFLAGS      += $(CFLAGS)
+else
+  LDSTARTGROUP ?= --start-group
+  LDENDGROUP   ?= --end-group
+endif
 
 BOARDMAKE = $(if $(wildcard board$(DELIM)Makefile),y,)
 
@@ -109,9 +116,9 @@ VPATH += common
 VPATH += $(ARCH_SUBDIR)
 
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_IAR),y)
-  VPATH += $(ARCH_SUBDIR)$(DELIM)iar
+  VPATH += common$(DELIM)iar
 else # ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
-  VPATH += $(ARCH_SUBDIR)$(DELIM)gnu
+  VPATH += common$(DELIM)gnu
 endif
 
 all: $(HEAD_OBJ) $(BIN)
@@ -171,7 +178,7 @@ endif
 # Note that there may not be a head object if layout is handled
 # by the linker configuration.
 
-export_startup: board$(DELIM)libboard$(LIBEXT) $(STARTUP_OBJS)
+export_startup: $(STARTUP_OBJS)
 ifneq ($(STARTUP_OBJS),)
 	$(Q) if [ -d "$(EXPORT_DIR)$(DELIM)startup" ]; then \
 		cp -f $(STARTUP_OBJS) "$(EXPORT_DIR)$(DELIM)startup$(DELIM)."; \

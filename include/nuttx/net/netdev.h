@@ -496,10 +496,8 @@ int sixlowpan_input(FAR struct radio_driver_s *ieee,
  * Polling of connections
  *
  * These functions will traverse each active network connection structure
- * and perform appropriate operations:  devif_timer() will perform TCP timer
- * operations (and UDP polling operations); devif_poll() will perform TCP
- * and UDP polling operations. The CAN driver MUST implement logic to
- * periodically call devif_timer(); devif_poll() may be called asynchronously
+ * and perform appropriate operations:  devif_poll() will perform TCP
+ * and UDP polling operations. devif_poll() may be called asynchronously
  * from the network driver can accept another outgoing packet.
  *
  * In both cases, these functions will call the provided callback function
@@ -546,8 +544,6 @@ int sixlowpan_input(FAR struct radio_driver_s *ieee,
  ****************************************************************************/
 
 int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback);
-int devif_timer(FAR struct net_driver_s *dev, int delay,
-                devif_poll_callback_t callback);
 
 /****************************************************************************
  * Name: neighbor_out

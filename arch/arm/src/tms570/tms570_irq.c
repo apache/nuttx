@@ -99,14 +99,14 @@ static void tms570_error_handler(void)
 
 void up_irqinitialize(void)
 {
-  FAR uintptr_t *vimram;
+  uintptr_t *vimram;
   int i;
 
   /* Initialize VIM RAM vectors.  These vectors are not used in the current
    * interrupt handler logic.
    */
 
-  vimram = (FAR uintptr_t *)TMS570_VIMRAM_BASE;
+  vimram = (uintptr_t *)TMS570_VIMRAM_BASE;
   for (i = 0; i < (TMS570_IRQ_NCHANNELS + 1); i++)
     {
       *vimram++ = (uintptr_t)tms570_error_handler;
@@ -233,7 +233,7 @@ uint32_t *arm_decodeirq(uint32_t *regs)
  ****************************************************************************/
 
 #ifdef CONFIG_ARMV7R_HAVE_DECODEFIQ
-uint32_t *arm_decodefiq(FAR uint32_t *regs)
+uint32_t *arm_decodefiq(uint32_t *regs)
 {
   int vector;
 

@@ -9,8 +9,8 @@ menu "pthread support"
 config PTHREAD_SPINLOCKS
 	bool "pthread spinlock support"
 	default n
-	depends on SPINLOCK && BOARDCTL
-	select BOARDCTL_TESTSET
+	depends on SPINLOCK && (BUILD_FLAT || BOARDCTL)
+	select BOARDCTL_TESTSET if !BUILD_FLAT
 	---help---
 		Enable support for pthread spinlocks.
 

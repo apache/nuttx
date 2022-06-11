@@ -172,39 +172,39 @@ static void nrf24l01_lock(FAR struct spi_dev_s *spi);
 static void nrf24l01_unlock(FAR struct spi_dev_s *spi);
 
 static uint8_t nrf24l01_access(FAR struct nrf24l01_dev_s *dev,
-             nrf24l01_access_mode_t mode, uint8_t cmd, FAR uint8_t *buf,
-             int length);
+                               nrf24l01_access_mode_t mode, uint8_t cmd,
+                               FAR uint8_t *buf, int length);
 static uint8_t nrf24l01_flush_rx(FAR struct nrf24l01_dev_s *dev);
 static uint8_t nrf24l01_flush_tx(FAR struct nrf24l01_dev_s *dev);
 
 /* Read register from nrf24 */
 
 static uint8_t nrf24l01_readreg(FAR struct nrf24l01_dev_s *dev, uint8_t reg,
-             FAR uint8_t *value, int len);
+                                FAR uint8_t *value, int len);
 
 /* Read single byte value from a register of nrf24 */
 
 static uint8_t nrf24l01_readregbyte(FAR struct nrf24l01_dev_s *dev,
-             uint8_t reg);
+                                    uint8_t reg);
 static void nrf24l01_writeregbyte(FAR struct nrf24l01_dev_s *dev,
-             uint8_t reg, uint8_t value);
+                                  uint8_t reg, uint8_t value);
 static uint8_t nrf24l01_setregbit(FAR struct nrf24l01_dev_s *dev,
-             uint8_t reg, uint8_t value, bool set);
+                                  uint8_t reg, uint8_t value, bool set);
 static void nrf24l01_tostate(FAR struct nrf24l01_dev_s *dev,
-             nrf24l01_state_t state);
+                             nrf24l01_state_t state);
 static int nrf24l01_irqhandler(FAR int irq, FAR void *context,
-             FAR void *arg);
+                               FAR void *arg);
 static inline int nrf24l01_attachirq(FAR struct nrf24l01_dev_s *dev,
-             xcpt_t isr, FAR void *arg);
+                                     xcpt_t isr, FAR void *arg);
 static int dosend(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data,
-             size_t datalen);
+                  size_t datalen);
 static int nrf24l01_unregister(FAR struct nrf24l01_dev_s *dev);
 
 #ifdef CONFIG_WL_NRF24L01_RXSUPPORT
 static void fifoput(FAR struct nrf24l01_dev_s *dev, uint8_t pipeno,
-             FAR uint8_t *buffer, uint8_t buflen);
+                    FAR uint8_t *buffer, uint8_t buflen);
 static uint8_t fifoget(FAR struct nrf24l01_dev_s *dev, FAR uint8_t *buffer,
-             uint8_t buflen, FAR uint8_t *pipeno);
+                       uint8_t buflen, FAR uint8_t *pipeno);
 static void nrf24l01_worker(FAR void *arg);
 #endif
 
@@ -218,13 +218,13 @@ static void binarycvt(FAR char *deststr, FAR const uint8_t *srcbin,
 static int nrf24l01_open(FAR struct file *filep);
 static int nrf24l01_close(FAR struct file *filep);
 static ssize_t nrf24l01_read(FAR struct file *filep, FAR char *buffer,
-             size_t buflen);
+                             size_t buflen);
 static ssize_t nrf24l01_write(FAR struct file *filep,
-             FAR const char *buffer, size_t buflen);
+                              FAR const char *buffer, size_t buflen);
 static int nrf24l01_ioctl(FAR struct file *filep, int cmd,
-             unsigned long arg);
+                          unsigned long arg);
 static int nrf24l01_poll(FAR struct file *filep, FAR struct pollfd *fds,
-             bool setup);
+                         bool setup);
 
 /****************************************************************************
  * Private Data
@@ -847,8 +847,7 @@ static int dosend(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data,
 
   /* Wait for IRQ (TX_DS or MAX_RT) - but don't hang on lost IRQ */
 
-  ret = nxsem_tickwait(&dev->sem_tx, clock_systime_ticks(),
-                       MSEC2TICK(NRF24L01_MAX_TX_IRQ_WAIT));
+  ret = nxsem_tickwait(&dev->sem_tx, MSEC2TICK(NRF24L01_MAX_TX_IRQ_WAIT));
 
   /* Re-acquire the SPI bus */
 
@@ -2120,6 +2119,6 @@ void nrf24l01_dumprxfifo(FAR struct nrf24l01_dev_s *dev)
 {
   syslog(LOG_INFO, "bytes count: %d\n", dev->fifo_len);
   syslog(LOG_INFO, "next read:   %d,  next write: %d\n",
-         dev->nxt_read, dev-> nxt_write);
+         dev->nxt_read, dev->nxt_write);
 }
 #endif /* CONFIG_DEBUG_WIRELESS && CONFIG_WL_NRF24L01_RXSUPPORT */

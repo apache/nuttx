@@ -96,7 +96,7 @@ extern int bl602_net_initialize(void);
 #if defined(CONFIG_BL602_BLE_CONTROLLER)
 struct bthci_s
 {
-  FAR struct bt_driver_s drv;
+  struct bt_driver_s drv;
   int id;
   int fd;
   sq_entry_t link;
@@ -115,16 +115,16 @@ struct uart_env_tag
   struct uart_rxchannel rx;
 };
 
-static FAR struct bthci_s *hci_dev;
-static FAR struct circbuf_s circbuf_rd;
+static struct bthci_s *hci_dev;
+static struct circbuf_s circbuf_rd;
 static struct uart_env_tag uart_env;
 
-static int bthci_send(FAR struct bt_driver_s *drv,
+static int bthci_send(struct bt_driver_s *drv,
                       enum bt_buf_type_e type,
-                      FAR void *data,
+                      void *data,
                       size_t len);
-static int bthci_open(FAR struct bt_driver_s *drv);
-static void bthci_close(FAR struct bt_driver_s *drv);
+static int bthci_open(struct bt_driver_s *drv);
+static void bthci_close(struct bt_driver_s *drv);
 static int bthci_receive(uint8_t *data, uint32_t len);
 
 static int bthci_register(void);
@@ -180,12 +180,12 @@ static void ble_uart_write(const uint8_t *bufptr,
   return;
 }
 
-static int bthci_send(FAR struct bt_driver_s *drv,
+static int bthci_send(struct bt_driver_s *drv,
                       enum bt_buf_type_e type,
-                      FAR void *data,
+                      void *data,
                       size_t len)
 {
-  FAR char *hdr = (FAR char *)data - drv->head_reserve;
+  char *hdr = (char *)data - drv->head_reserve;
   void (*callback)(void *, uint8_t) = NULL;
   void *dummy = NULL;
   int nlen;
@@ -247,7 +247,7 @@ static int bthci_send(FAR struct bt_driver_s *drv,
   return nlen;
 }
 
-static void bthci_close(FAR struct bt_driver_s *drv)
+static void bthci_close(struct bt_driver_s *drv)
 {
 }
 
@@ -283,19 +283,19 @@ static int bthci_receive(uint8_t *data, uint32_t len)
                            len - H4_HEADER_SIZE);
 }
 
-static int bthci_open(FAR struct bt_driver_s *drv)
+static int bthci_open(struct bt_driver_s *drv)
 {
   return OK;
 }
 
-static FAR struct bthci_s *bthci_alloc(void)
+static struct bthci_s *bthci_alloc(void)
 {
   /* Register the driver with the Bluetooth stack */
 
-  FAR struct bthci_s *dev;
-  FAR struct bt_driver_s *drv;
+  struct bthci_s *dev;
+  struct bt_driver_s *drv;
 
-  dev = (FAR struct bthci_s *)kmm_zalloc(sizeof(*dev));
+  dev = (struct bthci_s *)kmm_zalloc(sizeof(*dev));
   if (dev == NULL)
     {
       return NULL;
@@ -371,7 +371,7 @@ int bl602_bringup(void)
   struct oneshot_lowerhalf_s *os = NULL;
 #endif
 #if defined(CONFIG_BL602_SPIFLASH)
-  FAR struct mtd_dev_s *mtd_part = NULL;
+  struct mtd_dev_s *mtd_part = NULL;
   const char *path = "/dev/mtdflash";
 #endif
 #ifdef CONFIG_I2C
@@ -538,7 +538,7 @@ int bl602_bringup(void)
 #ifdef CONFIG_RTC_DRIVER
   /* Instantiate the BL602 lower-half RTC driver */
 
-  FAR struct rtc_lowerhalf_s *lower;
+  struct rtc_lowerhalf_s *lower;
 
   lower = bl602_rtc_lowerhalf_initialize();
   if (!lower)

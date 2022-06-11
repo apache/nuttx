@@ -47,7 +47,7 @@
 int board_spidev_initialize(int port)
 {
   int ret;
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
 
   spiinfo("Initializing /dev/spi%d...\n", port);
 

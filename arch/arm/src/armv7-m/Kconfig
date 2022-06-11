@@ -13,40 +13,6 @@ config ARMV7M_HAVE_DCACHE
 	bool
 	default n
 
-config ARMV7M_LAZYFPU
-	bool "Lazy FPU storage"
-	default n
-	depends on ARCH_HAVE_LAZYFPU
-	---help---
-		There are two forms of the common vector logic.  There are pros and
-		cons to each option:
-
-		1) The standard common vector logic exploits features of the ARMv7-M
-		   architecture to save the all of floating registers on entry into
-		   each interrupt and then to restore the floating registers when
-		   the interrupt returns.  The primary advantage to this approach is
-		   that floating point operations are available in interrupt
-		   handling logic.  Since the volatile registers are preserved,
-		   operations on the floating point registers by interrupt handling
-		   logic has no ill effect.  The downside is, of course, that more
-		   stack operations are required on each interrupt to save and store
-		   the floating point registers.  Because of the some special
-		   features of the ARMv-M, this is not as much overhead as you might
-		   expect, but overhead nonetheless.
-
-		2) The lazy FPU common vector logic does not save or restore
-		   floating point registers on entry and exit from the interrupt
-		   handler. Rather, the floating point registers are not restored
-		   until it is absolutely necessary to do so when a context switch
-		   occurs and the interrupt handler will be returning to a different
-		   floating point context.  Since floating point registers are not
-		   protected, floating point operations must not be performed in
-		   interrupt handling logic.  Better interrupt performance is be
-		   expected, however.
-
-		By default, the "standard" common vector logic is build.  This
-		option selects the alternate lazy FPU common vector logic.
-
 config ARMV7M_USEBASEPRI
 	bool "Use BASEPRI Register"
 	default y if ARCH_HIPRI_INTERRUPT
@@ -122,18 +88,11 @@ config ARMV7M_DTCM
 
 choice
 	prompt "Toolchain Selection"
-	default ARMV7M_TOOLCHAIN_GNU_EABIW if TOOLCHAIN_WINDOWS
-	default ARMV7M_TOOLCHAIN_GNU_EABIL if !TOOLCHAIN_WINDOWS
+	default ARMV7M_TOOLCHAIN_GNU_EABI
 
-config ARMV7M_TOOLCHAIN_IARW
-	bool "IAR for Windows"
-	depends on TOOLCHAIN_WINDOWS
+config ARMV7M_TOOLCHAIN_IAR
+	bool "IAR ANSI C/C++ toolchain"
 	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
-	select ARCH_TOOLCHAIN_IAR
-
-config ARMV7M_TOOLCHAIN_IARL
-	bool "IAR for Linux"
-	depends on HOST_LINUX
 	select ARCH_TOOLCHAIN_IAR
 
 config ARMV7M_TOOLCHAIN_BUILDROOT
@@ -141,33 +100,17 @@ config ARMV7M_TOOLCHAIN_BUILDROOT
 	depends on !WINDOWS_NATIVE
 	select ARCH_TOOLCHAIN_GNU
 
-config ARMV7M_TOOLCHAIN_GNU_EABIL
-	bool "Generic GNU EABI toolchain under Linux (or other POSIX environment)"
-	depends on !WINDOWS_NATIVE
-	select ARCH_TOOLCHAIN_GNU
-	---help---
-		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
-		configured for arm-none-eabi.
-
-config ARMV7M_TOOLCHAIN_GNU_EABIW
-	bool "Generic GNU EABI toolchain under Windows"
-	depends on TOOLCHAIN_WINDOWS
-	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
-	select ARCH_TOOLCHAIN_GNU
-
-config ARMV7M_TOOLCHAIN_CLANGL
-	bool "Generic Clang toolchain under Linux (or other POSIX environment)"
-	depends on !WINDOWS_NATIVE
-	select ARCH_TOOLCHAIN_GNU
-
-config ARMV7M_TOOLCHAIN_CLANGW
-	bool "Generic Clang toolchain under Windows"
-	depends on TOOLCHAIN_WINDOWS
+config ARMV7M_TOOLCHAIN_GNU_EABI
+	bool "Generic GNU EABI toolchain"
 	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
 	select ARCH_TOOLCHAIN_GNU
 	---help---
 		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
 		configured for arm-none-eabi.
+
+config ARMV7M_TOOLCHAIN_CLANG
+	bool "Generic Clang toolchain"
+	select ARCH_TOOLCHAIN_CLANG
 
 endchoice
 

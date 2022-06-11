@@ -55,12 +55,20 @@
  * Public Functions
  ****************************************************************************/
 
-uintptr_t *up_doirq(int irq, uintptr_t *regs)
+uintptr_t *riscv_doirq(int irq, uintptr_t *regs)
 {
   board_autoled_on(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();
 #else
+
+  /* NOTE: In case of ecall, we need to adjust mepc in the context */
+
+  if (irq >= RISCV_IRQ_ECALLU && irq <= RISCV_IRQ_ECALLM)
+    {
+      regs[REG_EPC] += 4;
+    }
+
   /* Current regs non-zero indicates that we are processing an interrupt;
    * CURRENT_REGS is also used to manage interrupt level context switches.
    *
@@ -70,17 +78,10 @@ uintptr_t *up_doirq(int irq, uintptr_t *regs)
   DEBUGASSERT(CURRENT_REGS == NULL);
   CURRENT_REGS = regs;
 
-  /* Disable further occurrences of this interrupt (until the interrupt
-   * sources have been clear by the driver).
-   */
-
-  up_disable_irq(irq);
-
   /* Deliver the IRQ */
 
   irq_dispatch(irq, regs);
 
-#if defined(CONFIG_ARCH_FPU) || defined(CONFIG_ARCH_ADDRENV)
   /* Check for a context switch.  If a context switch occurred, then
    * CURRENT_REGS will have a different value than it did on entry.  If an
    * interrupt level context switch has occurred, then restore the floating
@@ -88,15 +89,9 @@ uintptr_t *up_doirq(int irq, uintptr_t *regs)
    * returning from the interrupt.
    */
 
+#ifdef CONFIG_ARCH_ADDRENV
   if (regs != CURRENT_REGS)
     {
-#ifdef CONFIG_ARCH_FPU
-      /* Restore floating point registers */
-
-      riscv_restorefpu((uintptr_t *)CURRENT_REGS);
-#endif
-
-#ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
        * running task is closed down gracefully (data caches dump,
        * MMU flushed) and set up the address environment for the new
@@ -104,7 +99,6 @@ uintptr_t *up_doirq(int irq, uintptr_t *regs)
        */
 
       group_addrenv(NULL);
-#endif
     }
 #endif
 
@@ -122,9 +116,6 @@ uintptr_t *up_doirq(int irq, uintptr_t *regs)
 
   CURRENT_REGS = NULL;
 
-  /* Unmask the last interrupt (global interrupts are still disabled) */
-
-  up_enable_irq(irq);
 #endif
   board_autoled_off(LED_INIRQ);
   return regs;

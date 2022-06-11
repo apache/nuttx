@@ -239,7 +239,7 @@ bool lc823450_gpio_read(uint16_t gpiocfg);
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG
-int lc823450_gpio_dump(uint16_t gpiocfg, FAR const char *msg);
+int lc823450_gpio_dump(uint16_t gpiocfg, const char *msg);
 #else
 #  define lc823450_gpio_dump(p,m)
 #endif
@@ -253,7 +253,7 @@ int lc823450_gpio_dump(uint16_t gpiocfg, FAR const char *msg);
  ****************************************************************************/
 
 #ifdef CONFIG_LC823450_VGPIO
-int lc823450_vgpio_register(unsigned int pin, FAR struct vgpio_ops_s *ops);
+int lc823450_vgpio_register(unsigned int pin, struct vgpio_ops_s *ops);
 #endif /* CONFIG_LC823450_VGPIO */
 
 #if defined(__cplusplus)

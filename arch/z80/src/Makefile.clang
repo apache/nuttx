@@ -90,7 +90,7 @@ NUTTX = "$(TOPDIR)$(DELIM)nuttx$(EXEEXT)"
 nuttx$(EXEEXT): $(HEAD_OBJ) board$(DELIM)libboard$(LIBEXT) $(LINKCMD)
 	$(Q) echo "LD: nuttx into $(NUTTX)"
 	$(Q) "$(LD)" -o $(NUTTX) $(HEAD_OBJ) -T $(LINKCMD) --orphan-handling=error --print-memory-usage \
-	    $(LIBPATHS) "-(" $(LDLIBS) "-)" $(LDFLAGS) -Map="$(TOPDIR)$(DELIM)nuttx.map"
+	    $(LIBPATHS) "-(" $(LDLIBS) "-)" $(LDFLAGS)
 
 .depend: Makefile chip$(DELIM)Make.defs $(DEPSRCS) $(TOPDIR)$(DELIM).config
 	$(Q) if [ -e board$(DELIM)Makefile ]; then \
@@ -101,7 +101,7 @@ nuttx$(EXEEXT): $(HEAD_OBJ) board$(DELIM)libboard$(LIBEXT) $(LINKCMD)
 
 # This is part of the top-level export target
 
-export_startup: board$(DELIM)libboard$(LIBEXT) $(STARTUP_OBJS)
+export_startup: $(STARTUP_OBJS)
 	$(Q) if [ -d "$(EXPORT_DIR)$(DELIM)startup" ]; then \
 		cp -f $(STARTUP_OBJS) "$(EXPORT_DIR)$(DELIM)startup"; \
 	 else \

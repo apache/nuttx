@@ -83,7 +83,7 @@ void stm32_ltdcuninitialize(void);
  *
  ****************************************************************************/
 
-FAR struct fb_vtable_s *stm32_ltdcgetvplane(int vplane);
+struct fb_vtable_s *stm32_ltdcgetvplane(int vplane);
 
 /****************************************************************************
  * Name: stm32_lcd_backlight

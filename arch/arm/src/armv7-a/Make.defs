@@ -1,0 +1,95 @@
+############################################################################
+# arch/arm/src/armv7-a/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# Common ARM files
+
+include common/Make.defs
+
+# The vector table is the "head" object, i.e., the one that must forced into
+# the link in order to draw in all of the other components
+
+HEAD_ASRC += arm_vectortab.S
+
+ifeq ($(CONFIG_BUILD_KERNEL),y)
+crt0$(OBJEXT): crt0.c
+	$(CC) $(CFLAGS) -c armv7-a$(DELIM)crt0.c -o crt0$(OBJEXT)
+
+STARTUP_OBJS = crt0$(OBJEXT)
+endif
+
+# Common assembly language files
+
+CMN_ASRCS += arm_cpuhead.S arm_vectoraddrexcptn.S
+CMN_ASRCS += arm_vectors.S cp15_cache_size.S cp15_clean_dcache_all.S
+CMN_ASRCS += cp15_clean_dcache.S cp15_coherent_dcache.S
+CMN_ASRCS += cp15_flush_dcache_all.S cp15_flush_dcache.S
+CMN_ASRCS += cp15_invalidate_dcache_all.S cp15_invalidate_dcache.S
+
+# Common C source files
+
+CMN_CSRCS += arm_cache.c arm_dataabort.c
+CMN_CSRCS += arm_doirq.c arm_gicv2.c arm_gicv2_dump.c
+CMN_CSRCS += arm_initialstate.c arm_mmu.c arm_prefetchabort.c
+CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c
+CMN_CSRCS += arm_syscall.c arm_tcbinfo.c arm_undefinedinsn.c
+CMN_CSRCS += arm_perf.c
+
+ifeq ($(CONFIG_ARMV7A_L2CC_PL310),y)
+  CMN_CSRCS += arm_l2cc_pl310.c
+endif
+
+ifeq ($(CONFIG_PAGING),y)
+  CMN_CSRCS += arm_allocpage.c arm_checkmapping.c arm_pginitialize.c
+  CMN_CSRCS += arm_va2pte.c
+  CMN_ASRCS += arm_pghead.S
+else
+  CMN_ASRCS += arm_head.S
+endif
+
+ifeq ($(CONFIG_ARCH_ADDRENV),y)
+  CMN_CSRCS += arm_addrenv.c arm_addrenv_utils.c arm_addrenv_perms.c arm_pgalloc.c
+  ifeq ($(CONFIG_ARCH_STACK_DYNAMIC),y)
+    CMN_CSRCS += arm_addrenv_ustack.c
+  endif
+  ifeq ($(CONFIG_ARCH_KERNEL_STACK),y)
+    CMN_CSRCS += arm_addrenv_kstack.c
+  endif
+  ifeq ($(CONFIG_MM_SHM),y)
+    CMN_CSRCS += arm_addrenv_shm.c
+  endif
+endif
+
+ifeq ($(CONFIG_MM_PGALLOC),y)
+  CMN_CSRCS += arm_physpgaddr.c
+  ifeq ($(CONFIG_ARCH_PGPOOL_MAPPING),y)
+    CMN_CSRCS += arm_virtpgaddr.c
+  endif
+endif
+
+ifeq ($(CONFIG_ARCH_FPU),y)
+  CMN_CSRCS += arm_fpucmp.c
+  CMN_ASRCS += arm_fpuconfig.S
+endif
+
+ifeq ($(CONFIG_SMP),y)
+  CMN_CSRCS += arm_cpuindex.c arm_cpustart.c arm_cpupause.c arm_cpuidlestack.c
+  CMN_CSRCS += arm_scu.c
+endif
+

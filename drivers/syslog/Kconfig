@@ -110,8 +110,7 @@ config SYSLOG_TIMESTAMP_REALTIME
 	depends on SYSLOG_TIMESTAMP
 	---help---
 		Use wall-clock (CLOCK_REALTIME) for timestamp.  By default,
-		CLOCK_MONOTONIC, if enabled, will be used or the system timer
-		is not.
+		CLOCK_MONOTONIC will be used.
 
 config SYSLOG_TIMESTAMP_FORMATTED
 	bool "Formatted syslog time"
@@ -131,11 +130,16 @@ config SYSLOG_TIMESTAMP_LOCALTIME
 
 config SYSLOG_TIMESTAMP_FORMAT
 	string "Time format"
-	default "%e/%m/%y %H:%M:%S"
+	default "%d/%m/%y %H:%M:%S"
 	depends on SYSLOG_TIMESTAMP_FORMATTED
 	---help---
 		Formatter string for syslog timestamp printing.
 		Uses the standard "strftime" format specifiers.
+
+config SYSLOG_TIMESTAMP_FORMAT_MICROSECOND
+	bool "Append microseconds after seconds"
+	default y
+	depends on SYSLOG_TIMESTAMP_FORMAT = "%d/%m/%y %H:%M:%S"
 
 config SYSLOG_TIMESTAMP_BUFFER
 	int "Formatted timestamp buffer size"
@@ -203,7 +207,7 @@ config RAMLOG_SYSLOG
 
 config SYSLOG_RPMSG
 	bool "Log to RPMSG"
-	depends on OPENAMP
+	depends on RPTUN
 	depends on SCHED_WORKQUEUE
 	default n
 	---help---
@@ -287,7 +291,7 @@ endif # SYSLOG_RPMSG
 config SYSLOG_RPMSG_SERVER
 	bool "Enable RPMSG server for SYSLOG"
 	default n
-	depends on OPENAMP
+	depends on RPTUN
 	---help---
 		Use rpmsg to receive message from remote proc.
 

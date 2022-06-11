@@ -59,7 +59,7 @@ extern "C"
  ****************************************************************************/
 
 #if defined(CONFIG_SENSORS_BH1745NUC) || defined(CONFIG_SENSORS_BH1745NUC_SCU)
-int board_bh1745nuc_initialize(FAR const char *devpath, int bus);
+int board_bh1745nuc_initialize(const char *devpath, int bus);
 #endif
 
 #undef EXTERN

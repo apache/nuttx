@@ -30,6 +30,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/lib/xorshift128.h>
+#include <nuttx/power/pm.h>
 #include <nuttx/timers/timer.h>
 
 #ifdef CONFIG_CPULOAD_PERIOD
@@ -67,7 +68,14 @@
  * nominal = (1,000,000 usec/sec) / Frequency cycles/sec) = Period usec/cycle
  */
 
-#define CPULOAD_PERIOD_NOMINAL       (1000000 / CONFIG_SCHED_CPULOAD_TICKSPERSEC)
+#define CPULOAD_PERIOD_NOMINAL (1000000 / CONFIG_SCHED_CPULOAD_TICKSPERSEC)
+
+/* Calculate the systick for one cpuload tick:
+ *
+ * tick = (Tick_per_sec) / Cpuload tick_per_sec) = Systick for one cpuload
+ */
+
+#define CPULOAD_PERIOD_TICKS   (TICK_PER_SEC / CONFIG_SCHED_CPULOAD_TICKSPERSEC)
 
 #if CPULOAD_PERIOD_NOMINAL < 1 || CPULOAD_PERIOD_NOMINAL > 0x7fffffff
 #  error CPULOAD_PERIOD_NOMINAL is out of range
@@ -87,12 +95,20 @@
  * Private Types
  ****************************************************************************/
 
-#if CONFIG_CPULOAD_ENTROPY > 0
+#if CONFIG_CPULOAD_ENTROPY > 0 || defined(CONFIG_PM)
 struct sched_period_s
 {
+#if CONFIG_CPULOAD_ENTROPY > 0
   struct xorshift128_state_s prng;
   uint32_t maxtimeout;
   int32_t error;
+#endif
+#ifdef CONFIG_PM
+  FAR struct timer_lowerhalf_s *lower;
+  struct pm_callback_s pm_cb;
+  clock_t idle_start;
+  clock_t idle_ticks;
+#endif
 };
 #endif
 
@@ -107,7 +123,7 @@ static bool nxsched_period_callback(FAR uint32_t *next_interval_us,
  * Private Data
  ****************************************************************************/
 
-#if CONFIG_CPULOAD_ENTROPY > 0
+#if CONFIG_CPULOAD_ENTROPY > 0 || defined(CONFIG_PM)
 static struct sched_period_s g_sched_period;
 #endif
 
@@ -183,6 +199,37 @@ static bool nxsched_period_callback(FAR uint32_t *next_interval_us,
   return true;
 }
 
+#ifdef CONFIG_PM
+static void nxsched_period_pmnotify(FAR struct pm_callback_s *cb, int domain,
+                                    enum pm_state_e pmstate)
+{
+  if (domain == PM_IDLE_DOMAIN)
+    {
+      if (pmstate == PM_RESTORE)
+        {
+          g_sched_period.idle_ticks +=
+            clock_systime_ticks() - g_sched_period.idle_start;
+
+          if (g_sched_period.idle_ticks >= CPULOAD_PERIOD_TICKS)
+            {
+              nxsched_process_cpuload_ticks(
+                  g_sched_period.idle_ticks / CPULOAD_PERIOD_TICKS);
+
+              g_sched_period.idle_ticks %= CPULOAD_PERIOD_TICKS;
+            }
+
+          g_sched_period.lower->ops->start(g_sched_period.lower);
+        }
+      else
+        {
+          g_sched_period.lower->ops->stop(g_sched_period.lower);
+
+          g_sched_period.idle_start = clock_systime_ticks();
+        }
+    }
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -226,6 +273,15 @@ void nxsched_period_extclk(FAR struct timer_lowerhalf_s *lower)
   g_sched_period.prng.x = 101;
   g_sched_period.prng.y = g_sched_period.prng.w << 17;
   g_sched_period.prng.z = g_sched_period.prng.x << 25;
+#endif
+
+#ifdef CONFIG_PM
+  g_sched_period.lower = lower;
+
+  /* Register pm notify */
+
+  g_sched_period.pm_cb.notify = nxsched_period_pmnotify;
+  pm_register(&g_sched_period.pm_cb);
 #endif
 
   /* Then start the period timer */

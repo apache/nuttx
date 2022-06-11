@@ -81,10 +81,10 @@ int bm3823_am29lv_initialize(int minor)
 {
   int ret;
 #ifdef HAVE_AM29LV
-  FAR struct mtd_dev_s *mtd;
-  FAR struct mtd_geometry_s geo;
+  struct mtd_dev_s *mtd;
+  struct mtd_geometry_s geo;
 #if defined(CONFIG_MTD_PARTITION_NAMES)
-  FAR const char *partname = CONFIG_XX3823_FLASH_PART_NAMES;
+  const char *partname = CONFIG_XX3823_FLASH_PART_NAMES;
 #endif
 
   /* Now bind the SPI interface to the W25 SPI FLASH driver */

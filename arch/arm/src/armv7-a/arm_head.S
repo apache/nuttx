@@ -174,8 +174,7 @@
 __start:
 	/* Make sure that we are in SYS mode with IRQs and FIQs disabled */
 
-	mov		r0, #(PSR_MODE_SYS | PSR_I_BIT | PSR_F_BIT)
-	msr		cpsr_c, r0
+	cpsid		if, #PSR_MODE_SYS
 
 	/* The MMU and caches should be disabled */
 
@@ -327,11 +326,17 @@ __start:
 	 */
 
 	mov		r0, #0
+#ifdef CONFIG_ARM_HAVE_MPCORE
+	mcr		CP15_TLBIALLIS(r0)	/* Invalidate the entire unified TLB */
+	mcr		CP15_BPIALLIS(r0)	/* Invalidate entire branch prediction array */
+	mcr		CP15_ICIALLUIS(r0)	/* Invalidate I-cache */
+#else
 	mcr		CP15_TLBIALL(r0,c7)	/* Invalidate the entire unified TLB */
 	mcr		CP15_TLBIALL(r0,c6)
 	mcr		CP15_TLBIALL(r0,c5)
 	mcr		CP15_BPIALL(r0)		/* Invalidate entire branch prediction array */
 	mcr		CP15_ICIALLU(r0)	/* Invalidate I-cache */
+#endif
 
 	/* Load the page table address.
 	 *

@@ -68,7 +68,7 @@ Bootloader and partitions
 -------------------------
 
 ESP32 requires a bootloader to be flashed as well as a set of FLASH partitions. This is only needed the first time
-(or any time you which to modify either of these). An easy way is to use prebuilt binaries for NuttX from `here <https://github.com/espressif/esp-nuttx-bootloader>`_. In there you will find instructions to rebuild these if necessary. 
+(or any time you which to modify either of these). An easy way is to use prebuilt binaries for NuttX `from here <https://github.com/espressif/esp-nuttx-bootloader>`_. In there you will find instructions to rebuild these if necessary. 
 Once you downloaded both binaries, you can flash them by adding an ``ESPTOOL_BINDIR`` parameter, pointing to the directory where these binaries were downloaded:
 
 .. code-block:: console
@@ -155,8 +155,8 @@ Data        0x3ffae000 0x3ffdffff Internal SRAM 2 DMA
 Data        0x3ffe0000 0x3fffffff Internal SRAM 1 DMA
 =========== ========== ========== =============== ===============
 
-Boundary Address
----------------
+Boundary Address (Embedded)
+---------------------------
 
 ====================== ========== ========== =============== ===============
 BUS TYPE               START      LAST       DESCRIPTION     NOTES
@@ -184,8 +184,8 @@ Data        0x3f400000 0x3f7fffff External Flash  Read
 Data        0x3f800000 0x3fbfffff External SRAM   Read and Write
 =========== ========== ========== =============== ===============
 
-Boundary Address
-----------------
+Boundary Address (External)
+---------------------------
 
 Instruction 0x400c2000 0x40bfffff 11512 KB External Flash Read
 
@@ -271,7 +271,7 @@ following in ``scripts/esp32.cfg``::
   #set ESP32_ONLYCPU 2
 
 Wi-Fi
-====
+=====
 
 A standard network interface will be configured and can be initialized such as::
 
@@ -287,7 +287,7 @@ the result by running ``ifconfig`` afterwards.
 .. tip:: Boards usually expose a ``wapi`` defconfig which enables Wi-Fi
 
 Wi-Fi SoftAP
-===========
+============
 
 It is possible to use ESP32 as an Access Point (SoftAP). Actually there are some
 boards with a ``sta_softap`` which enables this support.

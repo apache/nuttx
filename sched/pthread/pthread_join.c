@@ -100,7 +100,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
    * because it will also attempt to get this semaphore.
    */
 
-  pthread_sem_take(&group->tg_joinsem, NULL, false);
+  nxsem_wait_uninterruptible(&group->tg_joinsem);
 
   /* Find the join information associated with this thread.
    * This can fail for one of three reasons:  (1) There is no
@@ -138,6 +138,13 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
     }
   else
     {
+      if (pjoin->detached)
+        {
+          pthread_sem_give(&group->tg_joinsem);
+          leave_cancellation_point();
+          return EINVAL;
+        }
+
       /* NOTE: sched_lock() is not enough for SMP
        * because another CPU would continue the pthread and exit
        * sequences so need to protect it with a critical section
@@ -192,7 +199,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
            * pthread to exit.
            */
 
-          pthread_sem_take(&pjoin->exit_sem, NULL, false);
+          nxsem_wait_uninterruptible(&pjoin->exit_sem);
 
           /* The thread has exited! Get the thread exit value */
 
@@ -212,7 +219,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
            * pthread_destroyjoin is called.
            */
 
-          pthread_sem_take(&group->tg_joinsem, NULL, false);
+          nxsem_wait_uninterruptible(&group->tg_joinsem);
         }
 
       /* Pre-emption is okay now. The logic still cannot be re-entered

@@ -19,8 +19,6 @@
 ############################################################################
 
 include $(TOPDIR)/Make.defs
-#ROMSYMTABLE = bb_rom_sym_m0.gdbsym
-#LDFLAGS += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(ROMSYMTABLE)
 CSRCS = boot.c bringup.c
 
 CSRCS += userleds.c

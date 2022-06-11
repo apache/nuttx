@@ -30,9 +30,32 @@
 
 #include <nuttx/arch.h>
 #include <arch/xtensa/xtensa_specregs.h>
+#include <sys/syscall.h>
 
+#include "signal/signal.h"
 #include "syscall.h"
 #include "xtensa.h"
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: xtensa_registerdump
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_SYSCALL_INFO
+static void xtensa_registerdump(const uintptr_t *regs)
+{
+  svcinfo("  A0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+          regs[REG_A0],  regs[REG_A1],  regs[REG_A2],  regs[REG_A3],
+          regs[REG_A4],  regs[REG_A5],  regs[REG_A6],  regs[REG_A7]);
+  svcinfo("  A8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+          regs[REG_A8],  regs[REG_A9],  regs[REG_A10], regs[REG_A11],
+          regs[REG_A12], regs[REG_A13], regs[REG_A14], regs[REG_A15]);
+  svcinfo("  PC: %08x PS: %08x\n", regs[REG_PC], regs[REG_PS]);
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -51,18 +74,12 @@ int xtensa_swint(int irq, void *context, void *arg)
 {
   uint32_t *regs = (uint32_t *)context;
   uint32_t cmd;
-#if XCHAL_CP_NUM > 0
-  uintptr_t cpstate;
-  uint32_t cpstate_off;
 
-  cpstate_off = offsetof(struct xcptcontext, cpstate) -
-                offsetof(struct xcptcontext, regs);
-#endif
+  DEBUGASSERT(regs != NULL && regs == CURRENT_REGS);
 
-  DEBUGASSERT(regs && regs == CURRENT_REGS);
   cmd = regs[REG_A2];
 
-  /* The SYSCall software interrupt is called with A2 = system call command
+  /* The syscall software interrupt is called with A2 = system call command
    * and A3..A9 = variable number of arguments depending on the system call.
    */
 
@@ -72,18 +89,11 @@ int xtensa_swint(int irq, void *context, void *arg)
 # endif
     {
       svcinfo("SYSCALL Entry: regs: %p cmd: %d\n", regs, cmd);
-      svcinfo("  A0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-              regs[REG_A0],  regs[REG_A1],  regs[REG_A2],  regs[REG_A3],
-              regs[REG_A4],  regs[REG_A5],  regs[REG_A6],  regs[REG_A7]);
-      svcinfo("  A8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-              regs[REG_A8],  regs[REG_A9],  regs[REG_A10], regs[REG_A11],
-              regs[REG_A12], regs[REG_A13], regs[REG_A14], regs[REG_A15]);
-      svcinfo(" PC: %08x PS: %08x\n",
-              regs[REG_PC], regs[REG_PS]);
+      xtensa_registerdump(regs);
     }
 #endif
 
-  /* Handle the SYSCall according to the command in A2 */
+  /* Handle the syscall according to the command in A2 */
 
   switch (cmd)
     {
@@ -103,13 +113,8 @@ int xtensa_swint(int irq, void *context, void *arg)
       case SYS_save_context:
         {
           DEBUGASSERT(regs[REG_A3] != 0);
-          memcpy((uint32_t *)regs[REG_A3], regs, (4 * XCPTCONTEXT_REGS));
-#if XCHAL_CP_NUM > 0
-          cpstate = (uintptr_t)regs[REG_A3] + cpstate_off;
-          xtensa_coproc_savestate((struct xtensa_cpstate_s *)cpstate);
-#endif
+          memcpy((uint32_t *)regs[REG_A3], regs, XCPTCONTEXT_SIZE);
         }
-
         break;
 
       /* A2=SYS_restore_context:  This is a restore context command:
@@ -133,12 +138,7 @@ int xtensa_swint(int irq, void *context, void *arg)
         {
           DEBUGASSERT(regs[REG_A3] != 0);
           CURRENT_REGS = (uint32_t *)regs[REG_A3];
-#if XCHAL_CP_NUM > 0
-          cpstate = (uintptr_t)regs[REG_A3] + cpstate_off;
-          xtensa_coproc_restorestate((struct xtensa_cpstate_s *)cpstate);
-#endif
         }
-
         break;
 
       /* A2=SYS_switch_context:  This is a switch context command:
@@ -161,10 +161,259 @@ int xtensa_swint(int irq, void *context, void *arg)
       case SYS_switch_context:
         {
           DEBUGASSERT(regs[REG_A3] != 0 && regs[REG_A4] != 0);
-
-          memcpy((uint32_t *)regs[REG_A3], regs, (4 * XCPTCONTEXT_REGS));
+          *(uint32_t **)regs[REG_A3] = regs;
           CURRENT_REGS = (uint32_t *)regs[REG_A4];
         }
+        break;
+
+      /* A2=SYS_syscall_return: This is a syscall return command:
+       *
+       *   void up_syscall_return(void);
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   A2 = SYS_syscall_return
+       *
+       * We need to restore the saved return address and return in
+       * unprivileged thread mode.
+       */
+
+#ifdef CONFIG_LIB_SYSCALL
+      case SYS_syscall_return:
+        {
+          struct tcb_s *rtcb = nxsched_self();
+          int index = (int)rtcb->xcp.nsyscalls - 1;
+
+          /* Make sure that there is a saved syscall return address. */
+
+          DEBUGASSERT(index >= 0);
+
+          /* Setup to return to the saved syscall return address in
+           * the original mode.
+           */
+
+          regs[REG_PC]        = rtcb->xcp.syscall[index].sysreturn;
+
+          /* The return value must be in A2-A5.
+           * xtensa_dispatch_syscall() temporarily moved the value into A3.
+           */
+
+          regs[REG_A2]        = regs[REG_A3];
+
+          /* Save the new syscall nesting level */
+
+          rtcb->xcp.nsyscalls = index;
+
+          /* Handle any signal actions that were deferred while processing
+           * the system call.
+           */
+
+          rtcb->flags         &= ~TCB_FLAG_SYSCALL;
+          nxsig_unmask_pendingsignal();
+        }
+        break;
+#endif
+
+      /* A2=SYS_task_start:  This a user task start
+       *
+       *   void up_task_start(main_t taskentry, int argc,
+       *                      char *argv[]) noreturn_function;
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   A2 = SYS_task_start
+       *   A3 = taskentry
+       *   A4 = argc
+       *   A5 = argv
+       */
+
+#ifndef CONFIG_BUILD_FLAT
+      case SYS_task_start:
+        {
+          /* Set up to return to the user-space task start-up function in
+           * unprivileged mode.
+           */
+
+#ifdef CONFIG_BUILD_PROTECTED
+          /* Use the nxtask_startup trampoline function */
+
+          regs[REG_PC] = (uintptr_t)USERSPACE->task_startup;
+          regs[REG_A6] = regs[REG_A3]; /* Task entry */
+          regs[REG_A7] = regs[REG_A4]; /* argc */
+          regs[REG_A8] = regs[REG_A5]; /* argv */
+#else
+          /* Start the user task directly */
+
+          regs[REG_PC] = (uintptr_t)regs[REG_A3];
+          regs[REG_A6] = regs[REG_A4]; /* argc */
+          regs[REG_A7] = regs[REG_A5]; /* argv */
+#endif
+
+          /* User task rotates window, so pretend task was 'call4'd */
+
+          regs[REG_PS] = PS_UM | PS_WOE | PS_CALLINC(1);
+        }
+        break;
+#endif
+
+      /* A2=SYS_pthread_start:  This a user pthread start
+       *
+       *   void up_pthread_start(pthread_startroutine_t entrypt,
+       *                         pthread_addr_t arg) noreturn_function;
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   A2 = SYS_pthread_start
+       *   A3 = startup
+       *   A4 = entrypt
+       *   A5 = arg
+       */
+
+#if !defined(CONFIG_BUILD_FLAT) && !defined(CONFIG_DISABLE_PTHREAD)
+      case SYS_pthread_start:
+        {
+          /* Set up to return to the user-space pthread start-up function in
+           * unprivileged mode.
+           */
+
+          regs[REG_PC] = (uintptr_t)regs[REG_A3];  /* startup */
+
+          /* Change the parameter ordering to match the expectation of the
+           * user space pthread_startup:
+           */
+
+          regs[REG_A6] = regs[REG_A4];  /* pthread entry */
+          regs[REG_A7] = regs[REG_A5];  /* arg */
+
+          /* Startup task rotates window, so pretend task was 'call4'd */
+
+          regs[REG_PS] = PS_UM | PS_WOE | PS_CALLINC(1);
+        }
+        break;
+#endif
+
+      /* A2=SYS_signal_handler:  This a user signal handler callback
+       *
+       * void signal_handler(_sa_sigaction_t sighand, int signo,
+       *                     siginfo_t *info, void *ucontext);
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   A2 = SYS_signal_handler
+       *   A3 = sighand
+       *   A4 = signo
+       *   A5 = info
+       *   A6 = ucontext
+       */
+
+#ifndef CONFIG_BUILD_FLAT
+      case SYS_signal_handler:
+        {
+          struct tcb_s *rtcb  = nxsched_self();
+
+          /* Remember the caller's return address */
+
+          DEBUGASSERT(rtcb->xcp.sigreturn == 0);
+          rtcb->xcp.sigreturn = regs[REG_PC];
+
+          /* Set up to return to the user-space trampoline function in
+           * unprivileged mode.
+           */
+
+          regs[REG_PC]        = (uintptr_t)USERSPACE->signal_handler;
+
+          /* Change the parameter ordering to match the expectation of struct
+           * userpace_s signal_handler.
+           */
+
+          regs[REG_A2]        = regs[REG_A3]; /* sighand */
+          regs[REG_A3]        = regs[REG_A4]; /* signal */
+          regs[REG_A4]        = regs[REG_A5]; /* info */
+          regs[REG_A5]        = regs[REG_A6]; /* ucontext */
+        }
+        break;
+#endif
+
+      /* A2=SYS_signal_handler_return:  This a user signal handler callback
+       *
+       *   void signal_handler_return(void);
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   A2 = SYS_signal_handler_return
+       */
+
+#ifndef CONFIG_BUILD_FLAT
+      case SYS_signal_handler_return:
+        {
+          struct tcb_s *rtcb  = nxsched_self();
+
+          /* Set up to return to the kernel-mode signal dispatching logic. */
+
+          DEBUGASSERT(rtcb->xcp.sigreturn != 0);
+          regs[REG_PC] = rtcb->xcp.sigreturn;
+
+          rtcb->xcp.sigreturn = 0;
+        }
+        break;
+#endif
+
+      /* This is not an architecture-specific system call. If NuttX is built
+       * as a standalone kernel with a system call interface, then all of the
+       * additional system calls must be handled as in the default case.
+       */
+
+      default:
+        {
+#ifdef CONFIG_LIB_SYSCALL
+          struct tcb_s *rtcb = nxsched_self();
+          int index = rtcb->xcp.nsyscalls;
+
+          /* Verify that the syscall number is within range */
+
+          DEBUGASSERT(cmd < SYS_maxsyscall);
+
+          /* Make sure that we got here that there is a no saved syscall
+           * return address.  We cannot yet handle nested system calls.
+           */
+
+          DEBUGASSERT(index < CONFIG_SYS_NNEST);
+
+          /* Setup to return to xtensa_dispatch_syscall in privileged mode. */
+
+          rtcb->xcp.syscall[index].sysreturn = regs[REG_PC];
+
+          rtcb->xcp.nsyscalls = index + 1;
+
+          regs[REG_PC]        = (uintptr_t)xtensa_dispatch_syscall;
+
+          /* Offset A2 to account for the reserved values */
+
+          regs[REG_A2]        -= CONFIG_SYS_RESERVED;
+
+          /* Indicate that we are in a syscall handler. */
+
+          rtcb->flags         |= TCB_FLAG_SYSCALL;
+#else
+          svcerr("ERROR: Bad SYSCALL: %" PRIu32 "\n", cmd);
+#endif
+        }
+        break;
+
+      /* A2=SYS_flush_context:  This flush windows to the stack:
+       *
+       * int xtensa_flushcontext(void);
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   A2 = SYS_flush_context
+       *
+       * In this case, we simply need to do nothing.
+       * As flush the register windows to the stack has be done by
+       * interrupt enter handler.
+       */
+
+      case SYS_flush_context:
 
         break;
     }
@@ -185,24 +434,13 @@ int xtensa_swint(int irq, void *context, void *arg)
   if (regs != CURRENT_REGS)
 # endif
     {
-      svcinfo("SYSCall Return:\n");
-      svcinfo("  A0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-              CURRENT_REGS[REG_A0],  CURRENT_REGS[REG_A1],
-              CURRENT_REGS[REG_A2],  CURRENT_REGS[REG_A3],
-              CURRENT_REGS[REG_A4],  CURRENT_REGS[REG_A5],
-              CURRENT_REGS[REG_A6],  CURRENT_REGS[REG_A7]);
-      svcinfo("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-              CURRENT_REGS[REG_A8],  CURRENT_REGS[REG_A9],
-              CURRENT_REGS[REG_A10], CURRENT_REGS[REG_A11],
-              CURRENT_REGS[REG_A12], CURRENT_REGS[REG_A13],
-              CURRENT_REGS[REG_A14], CURRENT_REGS[REG_A15]);
-      svcinfo(" PC: %08x PS: %08x\n",
-              regs[REG_PC], regs[REG_PS]);
+      svcinfo("SYSCALL Return: Context switch!\n");
+      xtensa_registerdump((const uintptr_t *)CURRENT_REGS);
     }
 # ifdef CONFIG_DEBUG_SYSCALL
   else
     {
-      svcinfo("SYSCall Return: %d\n", regs[REG_A2]);
+      svcinfo("SYSCALL Return: %" PRIu32 "\n", cmd);
     }
 # endif
 #endif

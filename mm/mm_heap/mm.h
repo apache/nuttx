@@ -90,7 +90,7 @@
 #  define MM_MAX_SHIFT    (22)  /*  4 Mb */
 #endif
 
-#ifdef CONFIG_DEBUG_MM
+#ifdef CONFIG_MM_BACKTRACE
 #  define MM_MIN_SHIFT       (MM_MIN_SHIFT_ + 2)
 #  define MM_BACKTRACE_DEPTH 8
 #  define MM_ADD_BACKTRACE(heap, ptr) \
@@ -124,15 +124,14 @@
 #define MM_ALIGN_UP(a)   (((a) + MM_GRAN_MASK) & ~MM_GRAN_MASK)
 #define MM_ALIGN_DOWN(a) ((a) & ~MM_GRAN_MASK)
 
-/* An allocated chunk is distinguished from a free chunk by bit 31 (or 15)
+/* An allocated chunk is distinguished from a free chunk by bit 0
  * of the 'preceding' chunk size.  If set, then this is an allocated chunk.
  */
 
+#define MM_ALLOC_BIT     0x1
 #ifdef CONFIG_MM_SMALL
-# define MM_ALLOC_BIT    0x8000
 # define MMSIZE_MAX      UINT16_MAX
 #else
-# define MM_ALLOC_BIT    0x80000000
 # define MMSIZE_MAX      UINT32_MAX
 #endif
 
@@ -166,7 +165,7 @@ typedef uint32_t mmsize_t;
 
 struct mm_allocnode_s
 {
-#ifdef CONFIG_DEBUG_MM
+#ifdef CONFIG_MM_BACKTRACE
   pid_t pid;                               /* The pid for caller */
   FAR void *backtrace[MM_BACKTRACE_DEPTH]; /* The backtrace buffer for caller */
 #endif
@@ -181,7 +180,7 @@ static_assert(SIZEOF_MM_ALLOCNODE <= MM_MIN_CHUNK,
 
 struct mm_freenode_s
 {
-#ifdef CONFIG_DEBUG_MM
+#ifdef CONFIG_MM_BACKTRACE
   pid_t pid;                               /* The pid for caller */
   FAR void *backtrace[MM_BACKTRACE_DEPTH]; /* The backtrace buffer for caller */
 #endif

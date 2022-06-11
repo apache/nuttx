@@ -75,6 +75,23 @@
 #define IMGSENSOR_ID_3A_STATUS            (0x00010015)
 #define IMGSENSOR_ID_FLASH_LED_MODE       (0x00020000)
 #define IMGSENSOR_ID_JPEG_QUALITY         (0x00030000)
+#define IMGSENSOR_ID_CLIP_VIDEO           (0xFFFF0000)
+#define IMGSENSOR_ID_CLIP_STILL           (0xFFFF0001)
+
+/* Number of elements in clip data array
+ * in IMGSENSOR_ID_CLIP_VIDEO and IMGSENSOR_ID_CLIP_STILL case
+ */
+
+#define IMGSENSOR_CLIP_NELEM              (4)
+
+/* Index of clip information
+ * in IMGSENSOR_ID_CLIP_VIDEO and IMGSENSOR_ID_CLIP_STILL case
+ */
+
+#define IMGSENSOR_CLIP_INDEX_LEFT         (0)
+#define IMGSENSOR_CLIP_INDEX_TOP          (1)
+#define IMGSENSOR_CLIP_INDEX_WIDTH        (2)
+#define IMGSENSOR_CLIP_INDEX_HEIGHT       (3)
 
 /* bit definition for IMGSENSOR_ID_3A_LOCK */
 
@@ -303,27 +320,28 @@ typedef union imgsensor_value_u
 
 struct imgsensor_ops_s
 {
-  CODE int (*init)(void);
-  CODE int (*uninit)(void);
+  CODE bool (*is_available)(void);
+  CODE int  (*init)(void);
+  CODE int  (*uninit)(void);
+  CODE const char * (*get_driver_name)(void);
+  CODE int  (*validate_frame_setting)(imgsensor_stream_type_t type,
+                                      uint8_t nr_datafmts,
+                                      FAR imgsensor_format_t *datafmts,
+                                      FAR imgsensor_interval_t *interval);
+  CODE int  (*start_capture)(imgsensor_stream_type_t type,
+                             uint8_t nr_datafmts,
+                             FAR imgsensor_format_t *datafmts,
+                             FAR imgsensor_interval_t *interval);
+  CODE int  (*stop_capture)(imgsensor_stream_type_t type);
 
-  CODE int (*validate_frame_setting)(imgsensor_stream_type_t type,
-                                     uint8_t nr_datafmts,
-                                     FAR imgsensor_format_t *datafmts,
-                                     FAR imgsensor_interval_t *interval);
-  CODE int (*start_capture)(imgsensor_stream_type_t type,
-                            uint8_t nr_datafmts,
-                            FAR imgsensor_format_t *datafmts,
-                            FAR imgsensor_interval_t *interval);
-  CODE int (*stop_capture)(imgsensor_stream_type_t type);
-
-  CODE int (*get_supported_value)(uint32_t id,
-                                  FAR imgsensor_supported_value_t *value);
-  CODE int (*get_value)(uint32_t id,
-                        uint32_t size,
-                        FAR imgsensor_value_t *value);
-  CODE int (*set_value)(uint32_t id,
-                        uint32_t size,
-                        imgsensor_value_t value);
+  CODE int  (*get_supported_value)(uint32_t id,
+                                   FAR imgsensor_supported_value_t *value);
+  CODE int  (*get_value)(uint32_t id,
+                         uint32_t size,
+                         FAR imgsensor_value_t *value);
+  CODE int  (*set_value)(uint32_t id,
+                         uint32_t size,
+                         imgsensor_value_t value);
 };
 
 #ifdef __cplusplus
@@ -340,7 +358,7 @@ extern "C"
 
 /* Register image sensor operations. */
 
-void imgsensor_register(const FAR struct imgsensor_ops_s *ops);
+int imgsensor_register(FAR const struct imgsensor_ops_s *ops);
 
 #undef EXTERN
 #ifdef __cplusplus

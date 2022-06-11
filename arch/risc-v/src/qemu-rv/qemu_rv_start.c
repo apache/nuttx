@@ -31,6 +31,10 @@
 #include "riscv_internal.h"
 #include "chip.h"
 
+#ifdef CONFIG_BUILD_KERNEL
+#  include "qemu_rv_mm_init.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -39,6 +43,10 @@
 #define showprogress(c) up_putc(c)
 #else
 #define showprogress(c)
+#endif
+
+#if defined (CONFIG_BUILD_KERNEL) && !defined (CONFIG_ARCH_USE_S_MODE)
+#  error "Target requires kernel in S-mode, enable CONFIG_ARCH_USE_S_MODE"
 #endif
 
 /****************************************************************************
@@ -62,6 +70,10 @@ uintptr_t g_idle_topstack = QEMU_RV_IDLESTACK_TOP;
 void qemu_rv_start(int mhartid)
 {
   uint32_t *dest;
+
+  /* Configure FPU */
+
+  riscv_fpuconfig();
 
   if (mhartid > 0)
     {
@@ -87,7 +99,17 @@ void qemu_rv_start(int mhartid)
 
   /* Do board initialization */
 
+#ifdef CONFIG_ARCH_USE_S_MODE
+  /* Initialize the per CPU areas */
+
+  riscv_percpu_add_hart(mhartid);
+#endif
+
   showprogress('C');
+
+#ifdef CONFIG_BUILD_KERNEL
+  qemu_rv_mm_init();
+#endif
 
   /* Call nx_start() */
 
@@ -104,6 +126,41 @@ cpux:
       asm("WFI");
     }
 }
+
+#ifdef CONFIG_ARCH_USE_S_MODE
+void qemu_rv_start_s(int mhartid)
+{
+  /* Disable MMU and enable PMP */
+
+  SET_CSR(satp, 0x0);
+  SET_CSR(pmpaddr0, 0x3fffffffffffffull);
+  SET_CSR(pmpcfg0, 0xf);
+
+  /* Set exception and interrupt delegation for S-mode */
+
+  SET_CSR(medeleg, 0xffff);
+  SET_CSR(mideleg, 0xffff);
+
+  /* Allow to write satp from S-mode */
+
+  CLEAR_CSR(mstatus, MSTATUS_TVM);
+
+  /* Set mstatus to S-mode and enable SUM */
+
+  CLEAR_CSR(mstatus, ~MSTATUS_MPP_MASK);
+  SET_CSR(mstatus, MSTATUS_MPPS | SSTATUS_SUM);
+
+  /* Set the trap vector for S-mode */
+
+  extern void __trap_vec(void);
+  SET_CSR(stvec, (uintptr_t)__trap_vec);
+
+  /* Set mepc to the entry */
+
+  SET_CSR(mepc, (uintptr_t)qemu_rv_start);
+  asm volatile("mret");
+}
+#endif
 
 void riscv_serialinit(void)
 {

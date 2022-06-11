@@ -43,7 +43,7 @@ endif
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   ZDSINSTALLDIR = $(INSTALLROOT)/ZDSII_ZNEO_$(ZDSVERSION)
-  INSTALLDIR = ${shell echo $(ZDSINSTALLDIR)| sed -e "s/\//\\/g"}
+  INSTALLDIR = $(shell echo $(ZDSINSTALLDIR)| sed -e "s/\//\\/g")
   ZDSBINDIR = $(INSTALLDIR)\bin
   ZDSSTDINCDIR = $(INSTALLDIR)\include\std
   ZDSZILOGINCDIR = $(INSTALLDIR)\include\zilog
@@ -51,7 +51,7 @@ ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   ZDSZILOGLIBDIR = $(INSTALLDIR)\lib\zilog
 else
   ZDSINSTALLDIR = $(INSTALLROOT)/ZDSII_ZNEO_$(ZDSVERSION)
-  INSTALLDIR = ${shell cygpath -u "$(ZDSINSTALLDIR)"}
+  INSTALLDIR = $(shell cygpath -u "$(ZDSINSTALLDIR)")
   ZDSBINDIR = $(INSTALLDIR)/bin
   ZDSSTDINCDIR = $(INSTALLDIR)/include/std
   ZDSZILOGINCDIR = $(INSTALLDIR)/include/zilog
@@ -61,17 +61,17 @@ else
   # These are the same directories but with the directory separator
   # character swapped as needed by the ZDS-II compiler
 
-  WTOPDIR = ${shell cygpath -w "$(TOPDIR)"}
-  WZDSSTDINCDIR = ${shell cygpath -w "$(ZDSSTDINCDIR)"}
-  WZDSZILOGINCDIR = ${shell cygpath -w "$(ZDSZILOGINCDIR)"}
-  WZDSSTDLIBDIR = ${shell cygpath -w "$(ZDSSTDLIBDIR)"}
-  WZDSZILOGLIBDIR = ${shell cygpath -w "$(ZDSZILOGLIBDIR)"}
+  WTOPDIR = $(shell cygpath -w "$(TOPDIR)")
+  WZDSSTDINCDIR = $(shell cygpath -w "$(ZDSSTDINCDIR)")
+  WZDSZILOGINCDIR = $(shell cygpath -w "$(ZDSZILOGINCDIR)")
+  WZDSSTDLIBDIR = $(shell cygpath -w "$(ZDSSTDLIBDIR)")
+  WZDSZILOGLIBDIR = $(shell cygpath -w "$(ZDSZILOGLIBDIR)")
 
   # Escaped versions
 
-  ETOPDIR = ${shell echo "$(WTOPDIR)" | sed -e "s/ /%20/g"}
-  EZDSSTDINCDIR = ${shell echo "$(WZDSSTDINCDIR)" | sed -e "s/ /%20/g"}
-  EZDSZILOGINCDIR = ${shell echo "$(WZDSZILOGINCDIR)" | sed -e "s/ /%20/g"}
+  ETOPDIR = $(shell echo "$(WTOPDIR)" | sed -e "s/ /%20/g")
+  EZDSSTDINCDIR = $(shell echo "$(WZDSSTDINCDIR)" | sed -e "s/ /%20/g")
+  EZDSZILOGINCDIR = $(shell echo "$(WZDSZILOGINCDIR)" | sed -e "s/ /%20/g")
 endif
 
 # CPU Identification

@@ -95,7 +95,7 @@ static inline void up_dmb(void)
  *
  ****************************************************************************/
 
-static inline spinlock_t up_testset(volatile FAR spinlock_t *lock)
+static inline spinlock_t up_testset(volatile spinlock_t *lock)
 {
   irqstate_t flags;
   spinlock_t old;

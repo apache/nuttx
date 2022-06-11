@@ -105,40 +105,6 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: udp_inqueue_wrb_size
- *
- * Description:
- *   Get the in-queued write buffer size from connection
- *
- * Input Parameters:
- *   conn - The UDP connection of interest
- *
- * Assumptions:
- *   Called from user logic with the network locked.
- *
- ****************************************************************************/
-
-#if CONFIG_NET_SEND_BUFSIZE > 0
-static uint32_t udp_inqueue_wrb_size(FAR struct udp_conn_s *conn)
-{
-  FAR struct udp_wrbuffer_s *wrb;
-  FAR sq_entry_t *entry;
-  uint32_t total = 0;
-
-  if (conn)
-    {
-      for (entry = sq_peek(&conn->write_q); entry; entry = sq_next(entry))
-        {
-          wrb = (FAR struct udp_wrbuffer_s *)entry;
-          total += wrb->wb_iob->io_pktlen;
-        }
-    }
-
-  return total;
-}
-#endif /* CONFIG_NET_SEND_BUFSIZE */
-
-/****************************************************************************
  * Name: sendto_writebuffer_release
  *
  * Description:
@@ -676,7 +642,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
        * wait for the write buffer to be released
        */
 
-      while (udp_inqueue_wrb_size(conn) + len > conn->sndbufs)
+      while (udp_wrbuffer_inqueue_size(conn) + len > conn->sndbufs)
         {
           if (nonblock)
             {

@@ -59,9 +59,9 @@
  *
  ****************************************************************************/
 
-static int bm3803_freerun_handler(int irq, FAR void *context, void *arg)
+static int bm3803_freerun_handler(int irq, void *context, void *arg)
 {
-  FAR struct bm3803_freerun_s *freerun = (FAR struct bm3803_freerun_s *) arg;
+  struct bm3803_freerun_s *freerun = (struct bm3803_freerun_s *) arg;
 
   DEBUGASSERT(freerun != NULL && freerun->overflow < UINT24_MAX);
   freerun->overflow++;
@@ -92,7 +92,7 @@ static int bm3803_freerun_handler(int irq, FAR void *context, void *arg)
  *
  ****************************************************************************/
 
-int bm3803_freerun_initialize(FAR struct bm3803_freerun_s *freerun, int chan,
+int bm3803_freerun_initialize(struct bm3803_freerun_s *freerun, int chan,
                                uint16_t resolution)
 {
   uint32_t frequency;
@@ -156,8 +156,8 @@ int bm3803_freerun_initialize(FAR struct bm3803_freerun_s *freerun, int chan,
  *
  ****************************************************************************/
 
-int bm3803_freerun_counter(FAR struct bm3803_freerun_s *freerun,
-                            FAR struct timespec *ts)
+int bm3803_freerun_counter(struct bm3803_freerun_s *freerun,
+                            struct timespec *ts)
 {
   uint64_t usec;
   uint32_t counter;
@@ -253,7 +253,7 @@ int bm3803_freerun_counter(FAR struct bm3803_freerun_s *freerun,
  *
  ****************************************************************************/
 
-int bm3803_freerun_uninitialize(FAR struct bm3803_freerun_s *freerun)
+int bm3803_freerun_uninitialize(struct bm3803_freerun_s *freerun)
 {
   DEBUGASSERT(freerun && freerun->tch);
 

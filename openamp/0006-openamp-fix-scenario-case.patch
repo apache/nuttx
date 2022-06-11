@@ -1,7 +1,7 @@
-From d14f87ea5ff1371318acaf4539116b72986bae2c Mon Sep 17 00:00:00 2001
+From c2b9d18c72eebe558c6a013bf39818c47cffecc3 Mon Sep 17 00:00:00 2001
 From: ligd <liguiding1@xiaomi.com>
 Date: Thu, 18 Nov 2021 20:54:45 +0800
-Subject: [PATCH] openamp: fix scenario case
+Subject: [PATCH 1/3] openamp: fix scenario case
 
 description:
 There are two CPUs use IPC.
@@ -43,7 +43,6 @@ Resolve:
 add recursive call rpmsg_virtio_rx_callback() when get_tx_buffer() failed
 
 Signed-off-by: ligd <liguiding1@xiaomi.com>
-Change-Id: I60512c50327f180a0aba891e3ec847b211e172db
 ---
  lib/include/openamp/remoteproc.h   |  10 +++
  lib/include/openamp/rpmsg_virtio.h |   6 ++
@@ -53,7 +52,7 @@ Change-Id: I60512c50327f180a0aba891e3ec847b211e172db
  5 files changed, 97 insertions(+), 66 deletions(-)
 
 diff --git a/lib/include/openamp/remoteproc.h open-amp/lib/include/openamp/remoteproc.h
-index a71327b..222079e 100644
+index a71327b..328ec3f 100644
 --- a/lib/include/openamp/remoteproc.h
 +++ open-amp/lib/include/openamp/remoteproc.h
 @@ -449,6 +449,16 @@ struct remoteproc_ops {
@@ -61,56 +60,56 @@ index a71327b..222079e 100644
  					  void *va, size_t size,
  					  struct remoteproc_mem *buf);
 +	/**
-+	 * can_recursive
++	 * wait_tx_buffer
 +	 *
-+	 * Check current vdev can do recursive rx_callabck or not
++	 * Wait tx buffer available
 +	 *
 +	 * @rproc - pointer to remoteproc instance
 +	 *
-+	 * return true if can do recursive rx_callabck.
++	 * return none
 +	 */
-+	int (*can_recursive)(struct remoteproc *rproc);
++	int (*wait_tx_buffer)(struct remoteproc *rproc);
  };
  
  /* Remoteproc error codes */
 diff --git a/lib/include/openamp/rpmsg_virtio.h open-amp/lib/include/openamp/rpmsg_virtio.h
-index e552b96..fa556a2 100644
+index e552b96..ac155fb 100644
 --- a/lib/include/openamp/rpmsg_virtio.h
 +++ open-amp/lib/include/openamp/rpmsg_virtio.h
 @@ -114,6 +114,12 @@ rpmsg_virtio_create_virtqueues(struct rpmsg_virtio_device *rvdev,
  					callbacks);
  }
  
-+static inline int rpmsg_virtio_can_recursive(struct rpmsg_virtio_device *rvdev)
++static inline int rpmsg_virtio_wait_tx_buffer(struct rpmsg_virtio_device *rvdev)
 +{
-+	return rvdev->vdev->func->can_recursive ?
-+			rvdev->vdev->func->can_recursive(rvdev->vdev) : 0;
++	return rvdev->vdev->func->wait_tx_buffer ?
++			rvdev->vdev->func->wait_tx_buffer(rvdev->vdev) : -EAGAIN;
 +}
 +
  /**
   * rpmsg_virtio_get_buffer_size - get rpmsg virtio buffer size
   *
 diff --git a/lib/include/openamp/virtio.h open-amp/lib/include/openamp/virtio.h
-index 55c8ea5..ce808cc 100644
+index 55c8ea5..34bccaa 100644
 --- a/lib/include/openamp/virtio.h
 +++ open-amp/lib/include/openamp/virtio.h
 @@ -137,6 +137,7 @@ struct virtio_dispatch {
  			     void *src, int length);
  	void (*reset_device)(struct virtio_device *dev);
  	void (*notify)(struct virtqueue *vq);
-+	int (*can_recursive)(struct virtio_device *dev);
++	int (*wait_tx_buffer)(struct virtio_device *dev);
  };
  
  int virtio_create_virtqueues(struct virtio_device *vdev, unsigned int flags,
 diff --git a/lib/remoteproc/remoteproc_virtio.c open-amp/lib/remoteproc/remoteproc_virtio.c
-index ed9f33c..937f294 100644
+index ed9f33c..0de31ee 100644
 --- a/lib/remoteproc/remoteproc_virtio.c
 +++ open-amp/lib/remoteproc/remoteproc_virtio.c
 @@ -30,6 +30,17 @@ static void rproc_virtio_virtqueue_notify(struct virtqueue *vq)
  	rpvdev->notify(rpvdev->priv, vring_info->notifyid);
  }
  
-+static int rproc_virtio_can_recursive(struct virtio_device *vdev)
++static int rproc_virtio_wait_tx_buffer(struct virtio_device *vdev)
 +{
 +	struct remoteproc_virtio *rpvdev;
 +	struct remoteproc *rproc;
@@ -118,7 +117,7 @@ index ed9f33c..937f294 100644
 +	rpvdev = metal_container_of(vdev, struct remoteproc_virtio, vdev);
 +	rproc  = rpvdev->priv;
 +
-+	return rproc->ops->can_recursive ? rproc->ops->can_recursive(rproc) : 0;
++	return rproc->ops->wait_tx_buffer ? rproc->ops->wait_tx_buffer(rproc) : -EAGAIN;
 +}
 +
  static unsigned char rproc_virtio_get_status(struct virtio_device *vdev)
@@ -128,12 +127,12 @@ index ed9f33c..937f294 100644
  	.get_features = rproc_virtio_get_features,
  	.read_config = rproc_virtio_read_config,
  	.notify = rproc_virtio_virtqueue_notify,
-+	.can_recursive = rproc_virtio_can_recursive,
++	.wait_tx_buffer = rproc_virtio_wait_tx_buffer,
  #ifndef VIRTIO_SLAVE_ONLY
  	/*
  	 * We suppose here that the vdev is in a shared memory so that can
 diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
-index 2687320..a407be9 100644
+index 2687320..30c3ab3 100644
 --- a/lib/rpmsg/rpmsg_virtio.c
 +++ open-amp/lib/rpmsg/rpmsg_virtio.c
 @@ -286,6 +286,72 @@ static void rpmsg_virtio_release_rx_buffer(struct rpmsg_device *rdev,
@@ -213,8 +212,8 @@ index 2687320..a407be9 100644
  		metal_mutex_release(&rdev->lock);
  		if (rp_hdr || !tick_count)
  			break;
-+		if (rpmsg_virtio_can_recursive(rvdev))
-+			rpmsg_virtio_rx_callback(rvdev->rvq);
++		if (rpmsg_virtio_wait_tx_buffer(rvdev) >= 0)
++			continue;
  		metal_sleep_usec(RPMSG_TICKS_PER_INTERVAL);
  		tick_count--;
  	}

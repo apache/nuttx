@@ -13,6 +13,7 @@ config ARCH_CHIP_ESP32
 	bool "Espressif ESP32"
 	select ARCH_FAMILY_LX6
 	select XTENSA_HAVE_INTERRUPTS
+	select ARCH_HAVE_FPU
 	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_TEXT_HEAP
 	select ARCH_HAVE_SDRAM
@@ -54,6 +55,7 @@ config ARCH_CHIP_ESP32S2
 	select ARCH_HAVE_BOOTLOADER
 	select ARCH_HAVE_TESTSET
 	select ARCH_VECNOTIRQ
+	select LIBC_ARCH_ATOMIC
 	select LIBC_ARCH_MEMCPY
 	select LIBC_ARCH_MEMCHR
 	select LIBC_ARCH_MEMCMP
@@ -76,6 +78,7 @@ config ARCH_CHIP_ESP32S3
 	bool "Espressif ESP32-S3"
 	select ARCH_FAMILY_LX7
 	select XTENSA_HAVE_INTERRUPTS
+	select ARCH_HAVE_FPU
 	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_TEXT_HEAP
 	select ARCH_HAVE_SDRAM
@@ -247,6 +250,7 @@ config XTENSA_INTBACKTRACE
 
 config XTENSA_IMEM_USE_SEPARATE_HEAP
 	bool "Use a separate heap for internal memory"
+	select ARCH_HAVE_EXTRA_HEAPS
 	default n
 	---help---
 		This is a separate internal heap that's used by drivers when certain operations

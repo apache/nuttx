@@ -46,6 +46,6 @@ $(BOOT_STAGE2).bin: %.bin: %.elf
 	$(OBJCOPY) -Obinary $< $@
 
 $(BOOT_STAGE2).elf: $(BOOT2SRC)
-	$(CC) -nostartfiles -nodefaultlibs $(ARCHSCRIPT) $(BOOT2CFLAGS) -o $@ $<
+	$(CC) -nostdlib $(ARCHSCRIPT) $(BOOT2CFLAGS) -o $@ $<
 
 EXTRADELFILE = $(BOOT_STAGE2).*

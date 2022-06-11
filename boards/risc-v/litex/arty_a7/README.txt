@@ -5,11 +5,14 @@
 2. Follow instruction on https://github.com/enjoy-digital/litex to build the vexriscv softcore fpga gateware
    and flash to arty_a7 board
 
+  $ cd litex-boards/litex_boards/targets
+  $ ./digilent_arty.py --with-sdcard --uart-baudrate 1000000 --cpu-type=vexriscv --cpu-variant=secure --build --load --flash
+
 3. Configure and build NuttX
 
   $ mkdir ./nuttx; cd ./nuttx
-  $ git clone https://github.com/apache/incubator-nuttx.git
-  $ git clone https://github.com/apache/incubator-nuttx-apps.git
+  $ git clone https://github.com/apache/incubator-nuttx.git nuttx
+  $ git clone https://github.com/apache/incubator-nuttx-apps.git apps
   $ cd nuttx
   $ make distclean
   $ ./tools/configure.sh arty_a7:nsh

@@ -215,23 +215,23 @@ static void can_putcommon(uint32_t addr, uint32_t value);
 
 /* CAN methods */
 
-static void lpc17can_reset(FAR struct can_dev_s *dev);
-static int  lpc17can_setup(FAR struct can_dev_s *dev);
-static void lpc17can_shutdown(FAR struct can_dev_s *dev);
-static void lpc17can_rxint(FAR struct can_dev_s *dev, bool enable);
-static void lpc17can_txint(FAR struct can_dev_s *dev, bool enable);
-static int  lpc17can_ioctl(FAR struct can_dev_s *dev, int cmd,
+static void lpc17can_reset(struct can_dev_s *dev);
+static int  lpc17can_setup(struct can_dev_s *dev);
+static void lpc17can_shutdown(struct can_dev_s *dev);
+static void lpc17can_rxint(struct can_dev_s *dev, bool enable);
+static void lpc17can_txint(struct can_dev_s *dev, bool enable);
+static int  lpc17can_ioctl(struct can_dev_s *dev, int cmd,
                            unsigned long arg);
-static int  lpc17can_remoterequest(FAR struct can_dev_s *dev, uint16_t id);
-static int  lpc17can_send(FAR struct can_dev_s *dev,
-                          FAR struct can_msg_s *msg);
-static bool lpc17can_txready(FAR struct can_dev_s *dev);
-static bool lpc17can_txempty(FAR struct can_dev_s *dev);
+static int  lpc17can_remoterequest(struct can_dev_s *dev, uint16_t id);
+static int  lpc17can_send(struct can_dev_s *dev,
+                          struct can_msg_s *msg);
+static bool lpc17can_txready(struct can_dev_s *dev);
+static bool lpc17can_txempty(struct can_dev_s *dev);
 
 /* CAN interrupts */
 
-static void can_interrupt(FAR struct can_dev_s *dev);
-static int  can12_interrupt(int irq, void *context, FAR void *arg);
+static void can_interrupt(struct can_dev_s *dev);
+static int  can12_interrupt(int irq, void *context, void *arg);
 
 /* Initialization */
 
@@ -496,9 +496,9 @@ static void can_putcommon(uint32_t addr, uint32_t value)
  *
  ****************************************************************************/
 
-static void lpc17can_reset(FAR struct can_dev_s *dev)
+static void lpc17can_reset(struct can_dev_s *dev)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->cd_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->cd_priv;
   irqstate_t flags;
   int ret;
 
@@ -549,9 +549,9 @@ static void lpc17can_reset(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static int lpc17can_setup(FAR struct can_dev_s *dev)
+static int lpc17can_setup(struct can_dev_s *dev)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->cd_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->cd_priv;
   int ret;
 
   caninfo("CAN%d\n", priv->port);
@@ -580,10 +580,10 @@ static int lpc17can_setup(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static void lpc17can_shutdown(FAR struct can_dev_s *dev)
+static void lpc17can_shutdown(struct can_dev_s *dev)
 {
 #ifdef CONFIG_DEBUG_CAN_INFO
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->cd_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->cd_priv;
 
   caninfo("CAN%d\n", priv->port);
 #endif
@@ -606,9 +606,9 @@ static void lpc17can_shutdown(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static void lpc17can_rxint(FAR struct can_dev_s *dev, bool enable)
+static void lpc17can_rxint(struct can_dev_s *dev, bool enable)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->cd_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->cd_priv;
   uint32_t regval;
   irqstate_t flags;
 
@@ -647,9 +647,9 @@ static void lpc17can_rxint(FAR struct can_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static void lpc17can_txint(FAR struct can_dev_s *dev, bool enable)
+static void lpc17can_txint(struct can_dev_s *dev, bool enable)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->cd_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->cd_priv;
   uint32_t regval;
   irqstate_t flags;
 
@@ -691,7 +691,7 @@ static void lpc17can_txint(FAR struct can_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static int lpc17can_ioctl(FAR struct can_dev_s *dev, int cmd,
+static int lpc17can_ioctl(struct can_dev_s *dev, int cmd,
                           unsigned long arg)
 {
   canerr("ERROR: Fix me -- Not Implemented\n");
@@ -712,7 +712,7 @@ static int lpc17can_ioctl(FAR struct can_dev_s *dev, int cmd,
  *
  ****************************************************************************/
 
-static int lpc17can_remoterequest(FAR struct can_dev_s *dev, uint16_t id)
+static int lpc17can_remoterequest(struct can_dev_s *dev, uint16_t id)
 {
   canerr("ERROR: Fix me -- Not Implemented\n");
   return 0;
@@ -741,10 +741,10 @@ static int lpc17can_remoterequest(FAR struct can_dev_s *dev, uint16_t id)
  *
  ****************************************************************************/
 
-static int lpc17can_send(FAR struct can_dev_s *dev,
-                         FAR struct can_msg_s *msg)
+static int lpc17can_send(struct can_dev_s *dev,
+                         struct can_msg_s *msg)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->cd_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->cd_priv;
   uint32_t tid = (uint32_t)msg->cm_hdr.ch_id;
   uint32_t tfi = (uint32_t)msg->cm_hdr.ch_dlc << 16;
   uint32_t regval;
@@ -905,9 +905,9 @@ static int lpc17can_send(FAR struct can_dev_s *dev,
  *
  ****************************************************************************/
 
-static bool lpc17can_txready(FAR struct can_dev_s *dev)
+static bool lpc17can_txready(struct can_dev_s *dev)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->cd_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->cd_priv;
   uint32_t regval = can_getreg(priv, LPC17_40_CAN_SR_OFFSET);
   return ((regval & (CAN_SR_TBS1 | CAN_SR_TBS2 | CAN_SR_TBS3)) != 0);
 }
@@ -930,9 +930,9 @@ static bool lpc17can_txready(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static bool lpc17can_txempty(FAR struct can_dev_s *dev)
+static bool lpc17can_txempty(struct can_dev_s *dev)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->cd_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->cd_priv;
   uint32_t regval = can_getreg(priv, LPC17_40_CAN_GSR_OFFSET);
   return ((regval & CAN_GSR_TBS) != 0);
 }
@@ -951,9 +951,9 @@ static bool lpc17can_txempty(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static void can_interrupt(FAR struct can_dev_s *dev)
+static void can_interrupt(struct can_dev_s *dev)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->cd_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->cd_priv;
   struct can_hdr_s hdr;
   uint32_t data[2];
   uint32_t rfs;
@@ -1069,7 +1069,7 @@ static void can_interrupt(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static int can12_interrupt(int irq, void *context, FAR void *arg)
+static int can12_interrupt(int irq, void *context, void *arg)
 {
   /* Handle CAN1/2 interrupts */
 
@@ -1246,9 +1246,9 @@ static int can_bittiming(struct up_dev_s *priv)
  *
  ****************************************************************************/
 
-FAR struct can_dev_s *lpc17_40_caninitialize(int port)
+struct can_dev_s *lpc17_40_caninitialize(int port)
 {
-  FAR struct can_dev_s *candev;
+  struct can_dev_s *candev;
   irqstate_t flags;
   uint32_t regval;
 

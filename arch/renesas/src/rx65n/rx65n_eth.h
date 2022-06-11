@@ -74,22 +74,6 @@ extern "C"
 int rx65n_ethinitialize(int intf);
 
 /****************************************************************************
- * Function: rx65n_poll_expiry
- *
- * Description:
- *   Poll Expiry timer
- *
- * Input Parameters:
- *   arg  - Input argument
- *
- * Returned Value:
- *  None
- *
- ****************************************************************************/
-
-void rx65n_poll_expiry(wdparm_t arg);
-
-/****************************************************************************
  * Function: rx65n_txtimeout_expiry
  *
  * Description:

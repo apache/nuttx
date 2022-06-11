@@ -111,7 +111,7 @@
  * Public Types
  ************************************************************************************/
 
-typedef FAR void *DMA_HANDLE;
+typedef void *DMA_HANDLE;
 typedef void (*dma_callback_t)(DMA_HANDLE handle, void *arg, int result);
 
 /* The following is used for sampling DMA registers when CONFIG DEBUG_DMA
@@ -388,7 +388,7 @@ void pic32mx_dumpgpio(uint32_t pinset, const char *msg);
  ************************************************************************************/
 
 struct spi_dev_s;  /* Forward reference */
-FAR struct spi_dev_s *pic32mx_spibus_initialize(int port);
+struct spi_dev_s *pic32mx_spibus_initialize(int port);
 
 /************************************************************************************
  * Name:  pic32mx_spiNselect, pic32mx_spiNstatus, and pic32mx_spiNcmddata
@@ -419,38 +419,38 @@ FAR struct spi_dev_s *pic32mx_spibus_initialize(int port);
  ************************************************************************************/
 
 #ifdef CONFIG_PIC32MX_SPI1
-void  pic32mx_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
+void  pic32mx_spi1select(struct spi_dev_s *dev, uint32_t devid,
                          bool selected);
-uint8_t pic32mx_spi1status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t pic32mx_spi1status(struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int pic32mx_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int pic32mx_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_PIC32MX_SPI2
-void  pic32mx_spi2select(FAR struct spi_dev_s *dev, uint32_t devid,
+void  pic32mx_spi2select(struct spi_dev_s *dev, uint32_t devid,
                          bool selected);
-uint8_t pic32mx_spi2status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t pic32mx_spi2status(struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int pic32mx_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int pic32mx_spi2cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_PIC32MX_SPI3
-void  pic32mx_spi3select(FAR struct spi_dev_s *dev, uint32_t devid,
+void  pic32mx_spi3select(struct spi_dev_s *dev, uint32_t devid,
                          bool selected);
-uint8_t pic32mx_spi3status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t pic32mx_spi3status(struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int pic32mx_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int pic32mx_spi3cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_PIC32MX_SPI3
-void  pic32mx_spi3select(FAR struct spi_dev_s *dev, uint32_t devid,
+void  pic32mx_spi3select(struct spi_dev_s *dev, uint32_t devid,
                          bool selected);
-uint8_t pic32mx_spi3status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t pic32mx_spi3status(struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int pic32mx_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int pic32mx_spi3cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
@@ -589,7 +589,7 @@ void pic32mx_dmadump(DMA_HANDLE handle, const struct pic32mx_dmaregs_s *regs,
 
 #ifdef CONFIG_PIC32MX_USBDEV
 struct usbdev_s;
-int pic32mx_usbpullup(FAR struct usbdev_s *dev,  bool enable);
+int pic32mx_usbpullup(struct usbdev_s *dev,  bool enable);
 #endif
 
 /************************************************************************************
@@ -604,7 +604,7 @@ int pic32mx_usbpullup(FAR struct usbdev_s *dev,  bool enable);
  ************************************************************************************/
 
 #ifdef CONFIG_PIC32MX_USBDEV
-void pic32mx_usbsuspend(FAR struct usbdev_s *dev, bool resume);
+void pic32mx_usbsuspend(struct usbdev_s *dev, bool resume);
 #endif
 
 /************************************************************************************

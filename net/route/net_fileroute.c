@@ -31,7 +31,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/fs/fs.h>
 
 #include "route/fileroute.h"
@@ -54,19 +54,15 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ROUTE_IPv4_FILEROUTE
-/* Semaphore used to lock a routing table for exclusive write-only access */
+/* Used to lock a routing table for exclusive write-only access */
 
-static sem_t g_ipv4_exclsem = SEM_INITIALIZER(1);
-static pid_t g_ipv4_holder = NO_HOLDER;
-static int g_ipv4_count;
+static rmutex_t g_ipv4_lock = RMUTEX_INITIALIZER;
 #endif
 
 #ifdef CONFIG_ROUTE_IPv6_FILEROUTE
-/* Semaphore used to lock a routing table for exclusive write-only access */
+/* Used to lock a routing table for exclusive write-only access */
 
-static sem_t g_ipv6_exclsem = SEM_INITIALIZER(1);
-static pid_t g_ipv6_holder = NO_HOLDER;
-static int g_ipv6_count;
+static rmutex_t g_ipv6_lock = RMUTEX_INITIALIZER;
 #endif
 
 /****************************************************************************
@@ -597,36 +593,10 @@ int net_routesize_ipv6(void)
 #ifdef CONFIG_ROUTE_IPv4_FILEROUTE
 int net_lockroute_ipv4(void)
 {
-  pid_t me = getpid();
-  int ret;
-
-  /* Are we already the holder of the lock? */
-
-  if (g_ipv4_holder == me)
+  int ret = nxrmutex_lock(&g_ipv4_lock);
+  if (ret < 0)
     {
-      /* Yes.. just increment the count of locks held */
-
-      g_ipv4_count++;
-      ret = OK;
-    }
-  else
-    {
-      /* No.. wait to get the lock */
-
-      ret = nxsem_wait(&g_ipv4_exclsem);
-      if (ret < 0)
-        {
-          nerr("ERROR: nxsem_wait() failed: %d\n", ret);
-        }
-      else
-        {
-          DEBUGASSERT(g_ipv4_holder == NO_HOLDER && g_ipv4_count == 0);
-
-          /* We are now the holder with one count */
-
-          g_ipv4_holder = me;
-          g_ipv4_count  = 1;
-        }
+      nerr("ERROR: nxrmutex_lock() failed: %d\n", ret);
     }
 
   return ret;
@@ -636,36 +606,10 @@ int net_lockroute_ipv4(void)
 #ifdef CONFIG_ROUTE_IPv6_FILEROUTE
 int net_lockroute_ipv6(void)
 {
-  pid_t me = getpid();
-  int ret;
-
-  /* Are we already the holder of the lock? */
-
-  if (g_ipv6_holder == me)
+  int ret = nxrmutex_lock(&g_ipv6_lock);
+  if (ret < 0)
     {
-      /* Yes.. just increment the count of locks held */
-
-      g_ipv6_count++;
-      ret = OK;
-    }
-  else
-    {
-      /* No.. wait to get the lock */
-
-      ret = nxsem_wait(&g_ipv6_exclsem);
-      if (ret < 0)
-        {
-          nerr("ERROR: nxsem_wait() failed: %d\n", ret);
-        }
-      else
-        {
-          DEBUGASSERT(g_ipv6_holder == NO_HOLDER && g_ipv6_count == 0);
-
-          /* We are now the holder with one count */
-
-          g_ipv6_holder = me;
-          g_ipv6_count  = 1;
-        }
+      nerr("ERROR: nxrmutex_lock() failed: %d\n", ret);
     }
 
   return ret;
@@ -690,38 +634,10 @@ int net_lockroute_ipv6(void)
 #ifdef CONFIG_ROUTE_IPv4_FILEROUTE
 int net_unlockroute_ipv4(void)
 {
-  pid_t me = getpid();
-  int ret;
-
-  /* If would be an error if we are called with on a thread that does not
-   * hold the lock.
-   */
-
-  DEBUGASSERT(me == g_ipv4_holder && g_ipv4_count > 0);
-
-  /* Release the count on the lock.  If this is the last count, then release
-   * the lock.
-   */
-
-  if (g_ipv4_count > 1)
+  int ret = nxrmutex_unlock(&g_ipv4_lock);
+  if (ret < 0)
     {
-      /* Not the last count... just decrement the count and return success */
-
-      g_ipv4_count--;
-      ret = OK;
-    }
-  else
-    {
-      /* This is the last count.  Release the lock */
-
-      g_ipv4_holder = NO_HOLDER;
-      g_ipv4_count  = 0;
-
-      ret = nxsem_post(&g_ipv4_exclsem);
-      if (ret < 0)
-        {
-          nerr("ERROR: nxsem_post() failed: %d\n", ret);
-        }
+      nerr("ERROR: nxrmutex_unlock() failed: %d\n", ret);
     }
 
   return ret;
@@ -731,38 +647,10 @@ int net_unlockroute_ipv4(void)
 #ifdef CONFIG_ROUTE_IPv6_FILEROUTE
 int net_unlockroute_ipv6(void)
 {
-  pid_t me = getpid();
-  int ret;
-
-  /* If would be an error if we are called with on a thread that does not
-   * hold the lock.
-   */
-
-  DEBUGASSERT(me == g_ipv6_holder && g_ipv6_count > 0);
-
-  /* Release the count on the lock.  If this is the last count, then release
-   * the lock.
-   */
-
-  if (g_ipv6_count > 1)
+  int ret = nxrmutex_unlock(&g_ipv6_lock);
+  if (ret < 0)
     {
-      /* Not the last count... just decrement the count and return success */
-
-      g_ipv6_count--;
-      ret = OK;
-    }
-  else
-    {
-      /* This is the last count.  Release the lock */
-
-      g_ipv6_holder = NO_HOLDER;
-      g_ipv6_count  = 0;
-
-      ret = nxsem_post(&g_ipv6_exclsem);
-      if (ret < 0)
-        {
-          nerr("ERROR: nxsem_post() failed: %d\n", ret);
-        }
+      nerr("ERROR: nxrmutex_unlock() failed: %d\n", ret);
     }
 
   return ret;

@@ -91,7 +91,7 @@ void board_late_initialize(void)
    * board_app_initialize().
    */
 
-  (void)stm32_bringup();
+  stm32_bringup();
 #endif
 }
 #endif

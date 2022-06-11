@@ -27,7 +27,7 @@
 
 #define SOFT_RESET_REG_MASK               0x03u
 
-#define MPFS_USB_NENDPOINTS               4   /* 4 IN and 4 OUT endpoints */
+#define MPFS_USB_NENDPOINTS               8   /* 4 IN and 4 OUT endpoints */
 #define MPFS_USB_MAXPACKETSIZE(ep)        64
 #define MPFS_USB_MAXPACKETSIZE_HS(ep)     512
 #define MPFS_EP0_MAXPACKET                64
@@ -120,7 +120,7 @@
 #define MPFS_USB_ENDPOINT_TX_INTERVAL_OFFSET 0x0b
 #define MPFS_USB_ENDPOINT_RX_TYPE_OFFSET     0x0c
 #define MPFS_USB_ENDPOINT_RX_INTERVAL_OFFSET 0x0d
-#define MPFS_USB_ENDPOINT_reserved_OFFSET    0x0e
+#define MPFS_USB_ENDPOINT_RESERVED_OFFSET    0x0e
 #define MPFS_USB_ENDPOINT_FIFO_SIZE_OFFSET   0x0f
 
 #define MPFS_USB_DMA_CHANNEL_OFFSET       0x200
@@ -131,7 +131,7 @@
 #define MPFS_USB_DMA_ADDR_OFFSET          0x08
 #define MPFS_USB_DMA_COUNT_OFFSET         0x0c
 
-#define MPFS_USB_reserved_EXT_OFFSET      0x280
+#define MPFS_USB_RESERVED_EXT_OFFSET      0x280
 #define MPFS_USB_RQ_PKT_CNT_OFFSET        0x300
 #define MPFS_USB_RQ_PKT_CNT_MAX_OFFSET    16
 #define MPFS_USB_RQ_PKT_CNT_SIZE_OFFSET   0x04
@@ -177,28 +177,6 @@
 
 #define MPFS_USB_DMA_CHANNEL(n) (MPFS_USB_BASE + MPFS_USB_DMA_CHANNEL_OFFSET + MPFS_USB_DMA_CHANNEL_SIZE * n)
 
-#define TXCSRL_REG_EPN_TX_PKT_RDY_MASK                  0x0001u
-#define TXCSRL_REG_EPN_TX_FIFO_NE_MASK                  0x0002u
-#define TXCSRL_REG_EPN_UNDERRUN_MASK                    0x0004u
-#define TXCSRL_REG_EPN_FLUSH_FIFO_MASK                  0x0008u
-#define TXCSRL_REG_EPN_SEND_STALL_MASK                  0x0010u
-#define TXCSRL_REG_EPN_STALL_SENT_MASK                  0x0020u
-#define TXCSRL_REG_EPN_CLR_DATA_TOG_MASK                0x0040u
-#define TXCSRL_REG_EPN_ISO_INCOMP_TX_MASK               0x0080u
-
-/****************************************************************************
- * Endpoint RXCSRL register bit masks
- ****************************************************************************/
-
-#define RXCSRL_REG_EPN_RX_PKT_RDY_MASK                  0x0001u
-#define RXCSRL_REG_EPN_RX_FIFO_FULL_MASK                0x0002u
-#define RXCSRL_REG_EPN_OVERRUN_MASK                     0x0004u
-#define RXCSRL_REG_EPN_DATA_ERR_MASK                    0x0008u
-#define RXCSRL_REG_EPN_FLUSH_FIFO_MASK                  0x0010u
-#define RXCSRL_REG_EPN_SEND_STALL_MASK                  0x0020u
-#define RXCSRL_REG_EPN_STALL_SENT_MASK                  0x0040u
-#define RXCSRL_REG_EPN_CLR_DAT_TOG_MASK                 0x0080u
-
 /****************************************************************************
  * CSR0H bit masks (peripheral mode)
  ****************************************************************************/
@@ -231,6 +209,19 @@
 #define TX_MAX_P_REG_NUM_USB_PKT_SHIFT                  11u
 
 /****************************************************************************
+ * Endpoint TXCSRL register bit masks
+ ****************************************************************************/
+
+#define TXCSRL_REG_EPN_TX_PKT_RDY_MASK                  0x0001u
+#define TXCSRL_REG_EPN_TX_FIFO_NE_MASK                  0x0002u
+#define TXCSRL_REG_EPN_UNDERRUN_MASK                    0x0004u
+#define TXCSRL_REG_EPN_FLUSH_FIFO_MASK                  0x0008u
+#define TXCSRL_REG_EPN_SEND_STALL_MASK                  0x0010u
+#define TXCSRL_REG_EPN_STALL_SENT_MASK                  0x0020u
+#define TXCSRL_REG_EPN_CLR_DATA_TOG_MASK                0x0040u
+#define TXCSRL_REG_EPN_ISO_INCOMP_TX_MASK               0x0080u
+
+/****************************************************************************
  * Endpoint TXCSRH register bit masks
  ****************************************************************************/
 
@@ -257,6 +248,19 @@
 #define DMA_CNTL_REG_DMA_EP_NUM_SHIFT                   4u
 #define DMA_CNTL_REG_DMA_DIR_SHIFT                      1u
 #define DMA_CNTL_REG_DMA_MODE_SHIFT                     2u
+
+/****************************************************************************
+ * Endpoint RXCSRL register bit masks
+ ****************************************************************************/
+
+#define RXCSRL_REG_EPN_RX_PKT_RDY_MASK                  0x0001u
+#define RXCSRL_REG_EPN_RX_FIFO_FULL_MASK                0x0002u
+#define RXCSRL_REG_EPN_OVERRUN_MASK                     0x0004u
+#define RXCSRL_REG_EPN_DATA_ERR_MASK                    0x0008u
+#define RXCSRL_REG_EPN_FLUSH_FIFO_MASK                  0x0010u
+#define RXCSRL_REG_EPN_SEND_STALL_MASK                  0x0020u
+#define RXCSRL_REG_EPN_STALL_SENT_MASK                  0x0040u
+#define RXCSRL_REG_EPN_CLR_DAT_TOG_MASK                 0x0080u
 
 /****************************************************************************
  * Endpoint RXCSRH register bit masks

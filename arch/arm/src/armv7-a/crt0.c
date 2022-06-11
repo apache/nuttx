@@ -110,7 +110,7 @@ static void sig_trampoline(void)
  *
  ****************************************************************************/
 
-void _start(int argc, FAR char *argv[])
+void _start(int argc, char *argv[])
 {
   int ret;
 

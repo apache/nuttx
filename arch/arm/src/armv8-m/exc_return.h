@@ -108,7 +108,7 @@
  * gets state from the main stack. Execution uses MSP after return.
  */
 
-#if !defined(CONFIG_ARMV8M_LAZYFPU) && defined(CONFIG_ARCH_FPU)
+#ifdef CONFIG_ARCH_FPU
 #  define EXC_RETURN_PRIVTHR     (EXC_RETURN_BASE | EXC_RETURN_THREAD_MODE | \
                                   EXC_RETURN_DEF_STACKING)
 #else
@@ -120,7 +120,7 @@
  * gets state from the process stack. Execution uses PSP after return.
  */
 
-#if !defined(CONFIG_ARMV8M_LAZYFPU) && defined(CONFIG_ARCH_FPU)
+#ifdef CONFIG_ARCH_FPU
 #  define EXC_RETURN_UNPRIVTHR   (EXC_RETURN_BASE | EXC_RETURN_THREAD_MODE | \
                                   EXC_RETURN_PROCESS_STACK | EXC_RETURN_DEF_STACKING)
 #else
@@ -129,7 +129,7 @@
                                   EXC_RETURN_DEF_STACKING)
 #endif
 
-#if defined(CONFIG_ARCH_FPU)
+#ifdef CONFIG_ARCH_FPU
 #define EXC_INTEGRITY_SIGNATURE  (0xfefa125a)
 #else
 #define EXC_INTEGRITY_SIGNATURE  (0xfefa125b)

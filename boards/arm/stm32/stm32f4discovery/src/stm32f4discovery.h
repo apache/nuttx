@@ -444,7 +444,7 @@ void weak_function stm32_i2sdev_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_BH1750FVI
-int stm32_bh1750initialize(FAR const char *devpath);
+int stm32_bh1750initialize(const char *devpath);
 #endif
 
 /****************************************************************************
@@ -479,7 +479,7 @@ int stm32_mmcsd_initialize(int port, int minor);
  ****************************************************************************/
 
 #ifdef CONFIG_INPUT_NUNCHUCK
-int nunchuck_initialize(FAR char *devname);
+int nunchuck_initialize(char *devname);
 #endif
 
 /****************************************************************************
@@ -491,7 +491,7 @@ int nunchuck_initialize(FAR char *devname);
  ****************************************************************************/
 
 #ifdef CONFIG_LEDS_MAX7219
-int stm32_max7219init(FAR const char *devpath);
+int stm32_max7219init(const char *devpath);
 #endif
 
 /****************************************************************************
@@ -514,7 +514,7 @@ int stm32_ds1307_init(void);
  *
  ****************************************************************************/
 
-int stm32_st7032init(FAR const char *devpath);
+int stm32_st7032init(const char *devpath);
 
 /****************************************************************************
  * Name: stm32_usbinitialize
@@ -683,7 +683,7 @@ int stm32_zerocross_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_MAX31855
-int stm32_max31855initialize(FAR const char *devpath, int bus,
+int stm32_max31855initialize(const char *devpath, int bus,
                              uint16_t devid);
 #endif
 
@@ -697,7 +697,7 @@ int stm32_max31855initialize(FAR const char *devpath, int bus,
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_MLX90614
-int stm32_mlx90614init(FAR const char *devpath);
+int stm32_mlx90614init(const char *devpath);
 #endif
 
 /****************************************************************************
@@ -709,7 +709,7 @@ int stm32_mlx90614init(FAR const char *devpath);
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_MAX6675
-int stm32_max6675initialize(FAR const char *devpath);
+int stm32_max6675initialize(const char *devpath);
 #endif
 
 /****************************************************************************
@@ -792,7 +792,7 @@ int stm32_rgbled_setup(void);
  ****************************************************************************/
 
 #ifdef CONFIG_TIMER
-int stm32_timer_driver_setup(FAR const char *devpath, int timer);
+int stm32_timer_driver_setup(const char *devpath, int timer);
 #endif
 
 /****************************************************************************
@@ -854,7 +854,7 @@ int hciuart_dev_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_WL_GS2200M
-int stm32_gs2200m_initialize(FAR const char *devpath, int bus);
+int stm32_gs2200m_initialize(const char *devpath, int bus);
 #endif
 
 #endif /* __ASSEMBLY__ */

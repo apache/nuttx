@@ -51,10 +51,10 @@
 
 struct stm32_automount_state_s
 {
-  volatile automount_handler_t handler;    /* Upper half handler */
-  FAR void *arg;                           /* Handler argument */
-  bool enable;                             /* Fake interrupt enable */
-  bool pending;                            /* Set if there an event while disabled */
+  volatile automount_handler_t handler; /* Upper half handler */
+  void *arg;                            /* Handler argument */
+  bool enable;                          /* Fake interrupt enable */
+  bool pending;                         /* Set if there an event while disabled */
 };
 
 /* This structure represents the static configuration of an automounter */
@@ -65,20 +65,20 @@ struct stm32_automount_config_s
    * struct automount_lower_s to struct stm32_automount_config_s
    */
 
-  struct automount_lower_s lower;             /* Publicly visible part */
-  uint8_t mmcsd;                              /* MB1_MMCSD_SLOTNO or MB2_MMCSD_SLOTNO */
-  FAR struct stm32_automount_state_s *state;  /* Changeable state */
+  struct automount_lower_s lower;        /* Publicly visible part */
+  uint8_t mmcsd;                         /* MB1_MMCSD_SLOTNO or MB2_MMCSD_SLOTNO */
+  struct stm32_automount_state_s *state; /* Changeable state */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  stm32_attach(FAR const struct automount_lower_s *lower,
-                         automount_handler_t isr, FAR void *arg);
-static void stm32_enable(FAR const struct automount_lower_s *lower,
+static int  stm32_attach(const struct automount_lower_s *lower,
+                         automount_handler_t isr, void *arg);
+static void stm32_enable(const struct automount_lower_s *lower,
                          bool enable);
-static bool stm32_inserted(FAR const struct automount_lower_s *lower);
+static bool stm32_inserted(const struct automount_lower_s *lower);
 
 /****************************************************************************
  * Private Data
@@ -148,15 +148,15 @@ static const struct stm32_automount_config_s g_mb2_mmcsdconfig =
  *
  ****************************************************************************/
 
-static int stm32_attach(FAR const struct automount_lower_s *lower,
-                      automount_handler_t isr, FAR void *arg)
+static int stm32_attach(const struct automount_lower_s *lower,
+                        automount_handler_t isr, void *arg)
 {
-  FAR const struct stm32_automount_config_s *config;
-  FAR struct stm32_automount_state_s *state;
+  const struct stm32_automount_config_s *config;
+  struct stm32_automount_state_s *state;
 
   /* Recover references to our structure */
 
-  config = (FAR struct stm32_automount_config_s *)lower;
+  config = (struct stm32_automount_config_s *)lower;
   DEBUGASSERT(config && config->state);
 
   state = config->state;
@@ -187,16 +187,16 @@ static int stm32_attach(FAR const struct automount_lower_s *lower,
  *
  ****************************************************************************/
 
-static void stm32_enable(FAR const struct automount_lower_s *lower,
+static void stm32_enable(const struct automount_lower_s *lower,
                          bool enable)
 {
-  FAR const struct stm32_automount_config_s *config;
-  FAR struct stm32_automount_state_s *state;
+  const struct stm32_automount_config_s *config;
+  struct stm32_automount_state_s *state;
   irqstate_t flags;
 
   /* Recover references to our structure */
 
-  config = (FAR struct stm32_automount_config_s *)lower;
+  config = (struct stm32_automount_config_s *)lower;
   DEBUGASSERT(config && config->state);
 
   state = config->state;
@@ -238,11 +238,11 @@ static void stm32_enable(FAR const struct automount_lower_s *lower,
  *
  ****************************************************************************/
 
-static bool stm32_inserted(FAR const struct automount_lower_s *lower)
+static bool stm32_inserted(const struct automount_lower_s *lower)
 {
-  FAR const struct stm32_automount_config_s *config;
+  const struct stm32_automount_config_s *config;
 
-  config = (FAR struct stm32_automount_config_s *)lower;
+  config = (struct stm32_automount_config_s *)lower;
   DEBUGASSERT(config && config->state);
 
   return stm32_cardinserted(config->mmcsd);
@@ -268,7 +268,7 @@ static bool stm32_inserted(FAR const struct automount_lower_s *lower)
 
 int stm32_automount_initialize(void)
 {
-  FAR void *handle;
+  void *handle;
 
   finfo("Initializing automounter(s)\n");
 
@@ -323,8 +323,8 @@ int stm32_automount_initialize(void)
 
 void stm32_automount_event(int slotno, bool inserted)
 {
-  FAR const struct stm32_automount_config_s *config;
-  FAR struct stm32_automount_state_s *state;
+  const struct stm32_automount_config_s *config;
+  struct stm32_automount_state_s *state;
 
 #ifdef CONFIG_CLICKER2_STM32_MB1_MMCSD_AUTOMOUNT
   /* Is this a change in the MB1 MMCSD slot insertion state? */

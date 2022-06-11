@@ -65,7 +65,20 @@ setjmp:
 	/* Store callee-saved Core registers */
 
 	mov		ip, sp				/* Move sp to ip so we can save it */
+
+#ifdef CONFIG_ARCH_ARMV6M
+	stmia		r0!, {r4-r7}			/* Save R4 ~ R7 */
+
+	mov		r2, r8
+	mov		r3, r9
+	mov		r4, r10
+	mov		r5, r11
+	mov		r6, ip
+	mov		r7, lr
+	stmia		r0!, {r2-r7}			/* Save R8 ~ R11, IP, LR */
+#else
 	stmia		r0!, {r4-r11, ip, lr}
+#endif
 
 #ifdef CONFIG_ARCH_FPU
 	vstmia		r0!, {s16-s31}			/* Save the callee-saved FP registers */
@@ -81,7 +94,7 @@ setjmp:
 
 	/* we're done, we're out of here */
 
-	mov		r0, #0
+	movs		r0, #0
 	bx		lr
 
 	.size	setjmp, .-setjmp
@@ -113,7 +126,24 @@ longjmp:
 
 	/* Load callee-saved Core registers */
 
+#ifdef CONFIG_ARCH_ARMV6M
+	ldmia		r0!, {r4-r7}			/* Restore R4 ~ R7 */
+
+	ldmia		r0!, {r2-r3}			/* Restore R8, R9 */
+	mov		r8, r2
+	mov		r9, r3
+
+	ldmia		r0!, {r2-r3}			/* Restore R10, R11 */
+	mov		r10, r2
+	mov		r11, r3
+
+	ldmia		r0!, {r2-r3}			/* Restore IP, LR */
+	mov		ip, r2
+	mov		lr, r3
+#else
 	ldmia		r0!, {r4-r11, ip, lr}
+#endif
+
 	mov		sp, ip				/* Restore sp */
 
 #ifdef CONFIG_ARCH_FPU

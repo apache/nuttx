@@ -65,7 +65,7 @@ extern "C"
  ****************************************************************************/
 
 #ifdef CONFIG_MAX326XX_WDOG
-int max326_wdt_initialize(FAR const char *devpath);
+int max326_wdt_initialize(const char *devpath);
 #endif
 
 #undef EXTERN

@@ -34,25 +34,13 @@ ifeq ($(filter y, \
 endif
 
 ifeq ($(filter y, \
-      $(CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL) \
+      $(CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI) \
     ),y)
   CONFIG_ARMV7M_TOOLCHAIN ?= GNU_EABI
 endif
 
 ifeq ($(filter y, \
-      $(CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW) \
-    ),y)
-  CONFIG_ARMV7M_TOOLCHAIN ?= GNU_EABI
-endif
-
-ifeq ($(filter y, \
-      $(CONFIG_ARMV7M_TOOLCHAIN_CLANGL) \
-    ),y)
-  CONFIG_ARMV7M_TOOLCHAIN ?= CLANG
-endif
-
-ifeq ($(filter y, \
-      $(CONFIG_ARMV7M_TOOLCHAIN_CLANGW) \
+      $(CONFIG_ARMV7M_TOOLCHAIN_CLANG) \
     ),y)
   CONFIG_ARMV7M_TOOLCHAIN ?= CLANG
 endif
@@ -65,20 +53,40 @@ endif
 #  CROSSDEV         The GNU toolchain triple (command prefix)
 #  ARCHCPUFLAGS     CPU-specific flags selecting the instruction set
 #                   FPU options, etc.
-#  MAXOPTIMIZATION  The maximum optimization level that results in
+#  ARCHOPTIMIZATION The optimization level that results in
 #                   reliable code generation.
 #
 
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
-  MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
-else
-  MAXOPTIMIZATION ?= -Os
+  ARCHOPTIMIZATION += $(CONFIG_DEBUG_OPTLEVEL)
+else ifeq ($(CONFIG_DEBUG_FULLOPT),y)
+  ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),CLANG)
+    ARCHOPTIMIZATION += -Oz
+  else
+    ARCHOPTIMIZATION += -Os
+  endif
+endif
+
+ifneq ($(CONFIG_DEBUG_NOOPT),y)
+  ARCHOPTIMIZATION += -fno-strict-aliasing
 endif
 
 ifeq ($(CONFIG_FRAME_POINTER),y)
-  MAXOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+  ARCHOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
 else
-  MAXOPTIMIZATION += -fomit-frame-pointer
+  ARCHOPTIMIZATION += -fomit-frame-pointer
+endif
+
+ifeq ($(CONFIG_STACK_CANARIES),y)
+  ARCHOPTIMIZATION += -fstack-protector-all
+endif
+
+ifeq ($(CONFIG_ARCH_COVERAGE),y)
+  ARCHOPTIMIZATION += -fprofile-generate -ftest-coverage
+endif
+
+ifeq ($(CONFIG_ARMV7M_STACKCHECK),y)
+  ARCHOPTIMIZATION += -finstrument-functions -ffixed-r10
 endif
 
 # Parametrization for ARCHCPUFLAGS
@@ -118,6 +126,39 @@ else
   TOOLCHAIN_MFLOAT += -mfloat-abi=soft
 endif
 
+# Clang Configuration files
+
+ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),CLANG)
+
+  ifeq ($(CONFIG_ARCH_CORTEXM4),y)
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      TOOLCHAIN_MARCH += --config armv7em_hard_fpv4_sp_d16_nosys
+    else
+      TOOLCHAIN_MARCH += --config armv7em_soft_nofp_nosys
+    endif
+  else ifeq ($(CONFIG_ARCH_CORTEXM7),y)
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      TOOLCHAIN_MARCH += --config armv7em_hard_fpv5_d16_nosys
+    else
+      TOOLCHAIN_MARCH += --config armv7em_soft_nofp_nosys
+    endif
+  else # ifeq ($(CONFIG_ARCH_CORTEXM3),y)
+      TOOLCHAIN_MARCH += --config armv7m_soft_nofp_nosys
+  endif
+
+endif
+
+# Link Time Optimization
+
+ifeq ($(CONFIG_LTO_THIN),y)
+  ARCHOPTIMIZATION += -flto=thin
+else ifeq ($(CONFIG_LTO_FULL),y)
+  ARCHOPTIMIZATION += -flto
+  ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),GNU_EABI)
+    ARCHOPTIMIZATION += -fuse-linker-plugin
+  endif
+endif
+
 # NuttX buildroot under Linux or Cygwin
 
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),BUILDROOT)
@@ -131,7 +172,7 @@ endif
 endif
 
 ifeq ($(CONFIG_MM_KASAN),y)
-  ARCHCPUFLAGS += -fsanitize=kernel-address
+  ARCHOPTIMIZATION += -fsanitize=kernel-address
 endif
 
 # Generic GNU EABI toolchain
@@ -144,32 +185,104 @@ endif
 # Clang toolchain
 
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),CLANG)
-  CROSSDEV ?= arm-none-eabi-
-  ARCHCPUFLAGS = -target arm-none-eabi $(TOOLCHAIN_MARCH) $(TOOLCHAIN_MTUNE) $(TOOLCHAIN_MFLOAT)
-  CC = clang
-  CXX = clang++
-  CPP = clang -E -P -x c
+  ARCHCPUFLAGS = $(TOOLCHAIN_MARCH) $(TOOLCHAIN_MTUNE) $(TOOLCHAIN_MFLOAT)
+
+  CC      = clang
+  CXX     = clang++
+  CPP     = clang -E -P -x c
+  LD      = ld.lld -m armelf
+  STRIP   = llvm-strip --strip-unneeded
+  AR      = llvm-ar rcs
+  NM      = llvm-nm
+  OBJCOPY = llvm-objcopy
+  OBJDUMP = llvm-objdump
+
+  # Since the no_builtin attribute is not fully supported on Clang
+  # disable the built-in functions, refer:
+  # https://github.com/apache/incubator-nuttx/pull/5971
+
+  ARCHOPTIMIZATION += -fno-builtin
+
+# Default toolchain
+
 else
-  CC = $(CROSSDEV)gcc
-  CXX = $(CROSSDEV)g++
-  CPP = $(CROSSDEV)gcc -E -P -x c
+  CC      = $(CROSSDEV)gcc
+  CXX     = $(CROSSDEV)g++
+  CPP     = $(CROSSDEV)gcc -E -P -x c
+  STRIP   = $(CROSSDEV)strip --strip-unneeded
+  OBJCOPY = $(CROSSDEV)objcopy
+  OBJDUMP = $(CROSSDEV)objdump
+  LD      = $(CROSSDEV)ld
+  AR      = $(CROSSDEV)ar rcs
+  NM      = $(CROSSDEV)nm
+
+  ifeq ($(CONFIG_LTO_FULL),y)
+    ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),GNU_EABI)
+      LD := $(CROSSDEV)gcc
+      AR := $(CROSSDEV)gcc-ar rcs
+      NM := $(CROSSDEV)gcc-nm
+      ARCHOPTIMIZATION += -fno-builtin
+    endif
+  endif
 endif
 
-LD = $(CROSSDEV)ld
-STRIP = $(CROSSDEV)strip --strip-unneeded
-AR = $(CROSSDEV)ar rcs
-NM = $(CROSSDEV)nm
-OBJCOPY = $(CROSSDEV)objcopy
-OBJDUMP = $(CROSSDEV)objdump
+# Architecture flags
+
+ARCHCFLAGS += -fno-common
+ARCHCXXFLAGS += -fno-common -nostdinc++
+
+ARCHCFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wundef
+ARCHCXXFLAGS += -Wall -Wshadow -Wundef
+
+ifneq ($(CONFIG_CXX_EXCEPTION),y)
+  ARCHCXXFLAGS += -fno-exceptions -fcheck-new
+endif
+
+ifneq ($(CONFIG_CXX_RTTI),y)
+  ARCHCXXFLAGS += -fno-rtti
+endif
+
+LDFLAGS += -nostdlib
+
+# Optimization of unused sections
+
+ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
+  LDFLAGS          += --gc-sections
+  ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
+endif
+
+# Debug link map
+
+ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
+  LDFLAGS += --cref -Map=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
+endif
+
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  LDFLAGS          += -g
+  ARCHOPTIMIZATION += -g
+endif
 
 # Add the builtin library
 
-EXTRA_LIBS += ${wildcard ${shell $(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name}}
+COMPILER_RT_LIB = $(shell $(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name)
+ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),CLANG)
+  ifeq ($(wildcard $(COMPILER_RT_LIB)),)
+    # if "--print-libgcc-file-name" unable to find the correct libgcc PATH
+    # then go ahead and try "--print-file-name"
+    COMPILER_RT_LIB := -$(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name $(notdir $(COMPILER_RT_LIB))))
+  endif
+endif
+
+EXTRA_LIBS += $(COMPILER_RT_LIB)
 
 ifneq ($(CONFIG_LIBM),y)
-  EXTRA_LIBS += ${wildcard ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a}}
+  EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a))
 endif
 
 ifeq ($(CONFIG_LIBSUPCXX),y)
-  EXTRA_LIBS += ${wildcard ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a}}
+  EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a))
+endif
+
+ifeq ($(CONFIG_ARCH_COVERAGE),y)
+  EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libgcov.a))
 endif

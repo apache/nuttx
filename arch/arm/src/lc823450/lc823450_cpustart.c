@@ -69,7 +69,7 @@ extern volatile spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS];
  * Private Functions
  ****************************************************************************/
 
-extern int lc823450_pause_handler(int irq, void *c, FAR void *arg);
+extern int lc823450_pause_handler(int irq, void *c, void *arg);
 
 /****************************************************************************
  * Name: cpu1_boot

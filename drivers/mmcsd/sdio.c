@@ -38,6 +38,14 @@
 #define SDIO_CMD53_TIMEOUT_MS 100
 #define SDIO_IDLE_DELAY_MS    50
 
+#ifdef CONFIG_SDIO_MUXBUS
+#  define SDIO_TAKELOCK(dev)  SDIO_LOCK(dev, true)
+#  define SDIO_GIVELOCK(dev)  SDIO_LOCK(dev, false)
+#else
+#  define SDIO_TAKELOCK(dev)
+#  define SDIO_GIVELOCK(dev)
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -89,10 +97,11 @@ union sdio_cmd5x
 };
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
-int sdio_sendcmdpoll(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
+static int sdio_sendcmdpoll(FAR struct sdio_dev_s *dev,
+                            uint32_t cmd, uint32_t arg)
 {
   int ret;
 
@@ -115,9 +124,13 @@ int sdio_sendcmdpoll(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
   return ret;
 }
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
 int sdio_io_rw_direct(FAR struct sdio_dev_s *dev, bool write,
                       uint8_t function, uint32_t address,
-                      uint8_t inb, uint8_t *outb)
+                      uint8_t inb, FAR uint8_t *outb)
 {
   union sdio_cmd5x arg;
   struct sdio_resp_r5 resp;
@@ -130,11 +143,11 @@ int sdio_io_rw_direct(FAR struct sdio_dev_s *dev, bool write,
 
   if (write)
     {
-      arg.cmd52.write_data       = inb;
+      arg.cmd52.write_data   = inb;
     }
   else
     {
-      arg.cmd52.write_data       = 0;
+      arg.cmd52.write_data   = 0;
     }
 
   arg.cmd52.register_address = address & 0x1ffff;
@@ -144,8 +157,10 @@ int sdio_io_rw_direct(FAR struct sdio_dev_s *dev, bool write,
 
   /* Send CMD52 command */
 
+  SDIO_TAKELOCK(dev);
   sdio_sendcmdpoll(dev, SD_ACMD52, arg.value);
   ret = SDIO_RECVR5(dev, SD_ACMD52, &data);
+  SDIO_GIVELOCK(dev);
 
   if (ret != OK)
     {
@@ -179,7 +194,7 @@ int sdio_io_rw_direct(FAR struct sdio_dev_s *dev, bool write,
 
 int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
                         uint8_t function, uint32_t address,
-                        bool inc_addr, uint8_t *buf,
+                        bool inc_addr, FAR uint8_t *buf,
                         unsigned int blocklen, unsigned int nblocks)
 {
   union sdio_cmd5x arg;
@@ -211,6 +226,8 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
       arg.cmd53.block_mode = 1;
       arg.cmd53.byte_block_count = nblocks;
     }
+
+  SDIO_TAKELOCK(dev);
 
   /* Send CMD53 command */
 
@@ -258,6 +275,7 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
   /* There may not be a response to this, so don't look for one */
 
   SDIO_RECVR1(dev, SD_ACMD52ABRT, &data);
+  SDIO_GIVELOCK(dev);
 
   if (ret != OK)
     {
@@ -290,7 +308,7 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
   return OK;
 }
 
-int sdio_set_wide_bus(struct sdio_dev_s *dev)
+int sdio_set_wide_bus(FAR struct sdio_dev_s *dev)
 {
   int ret;
   uint8_t value;
@@ -323,12 +341,14 @@ int sdio_probe(FAR struct sdio_dev_s *dev)
   int ret;
   uint32_t data = 0;
 
+  SDIO_TAKELOCK(dev);
+
   /* Set device state from reset to idle */
 
   ret = sdio_sendcmdpoll(dev, MMCSD_CMD0, 0);
   if (ret != OK)
     {
-      return ret;
+      goto err;
     }
 
   up_mdelay(SDIO_IDLE_DELAY_MS);
@@ -338,7 +358,7 @@ int sdio_probe(FAR struct sdio_dev_s *dev)
   ret = sdio_sendcmdpoll(dev, SDIO_CMD5, 0);
   if (ret != OK)
     {
-      return ret;
+      goto err;
     }
 
   /* Receive R4 response */
@@ -346,7 +366,7 @@ int sdio_probe(FAR struct sdio_dev_s *dev)
   ret = SDIO_RECVR4(dev, SDIO_CMD5, &data);
   if (ret != OK)
     {
-      return ret;
+      goto err;
     }
 
   /* Device is in Card Identification Mode, request device RCA */
@@ -354,14 +374,14 @@ int sdio_probe(FAR struct sdio_dev_s *dev)
   ret = sdio_sendcmdpoll(dev, SD_CMD3, 0);
   if (ret != OK)
     {
-      return ret;
+      goto err;
     }
 
   ret = SDIO_RECVR6(dev, SD_CMD3, &data);
   if (ret != OK)
     {
       wlerr("ERROR: RCA request failed: %d\n", ret);
-      return ret;
+      goto err;
     }
 
   wlinfo("rca is %" PRIx32 "\n", data >> 16);
@@ -374,24 +394,23 @@ int sdio_probe(FAR struct sdio_dev_s *dev)
   if (ret != OK)
     {
       wlerr("ERROR: CMD7 request failed: %d\n", ret);
-      return ret;
+      goto err;
     }
 
   ret = SDIO_RECVR1(dev, MMCSD_CMD7S, &data);
   if (ret != OK)
     {
       wlerr("ERROR: card selection failed: %d\n", ret);
-      return ret;
+      goto err;
     }
 
   /* Configure 4 bits bus width */
 
-  ret = sdio_set_wide_bus(dev);
-  if (ret != OK)
-    {
-      return ret;
-    }
+  SDIO_GIVELOCK(dev);
+  return sdio_set_wide_bus(dev);
 
+err:
+  SDIO_GIVELOCK(dev);
   return OK;
 }
 

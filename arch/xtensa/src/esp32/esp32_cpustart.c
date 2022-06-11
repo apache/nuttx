@@ -129,31 +129,14 @@ void IRAM_ATTR xtensa_appcpu_start(void)
   struct tcb_s *tcb = this_task();
   register uint32_t sp;
 
-#ifdef CONFIG_STACK_COLORATION
-    {
-      register uint32_t *ptr;
-      register int i;
-
-      /* If stack debug is enabled, then fill the stack with a recognizable
-       * value that we can use later to test for high water marks.
-       */
-
-      for (i = 0, ptr = (uint32_t *)tcb->stack_alloc_ptr;
-           i < tcb->adj_stack_size;
-           i += sizeof(uint32_t))
-        {
-          *ptr++ = STACK_COLOR;
-        }
-    }
-#endif
-
   /* Move to the stack assigned to us by up_smp_start immediately.  Although
    * we were give a stack pointer at start-up, we don't know where that stack
    * pointer is positioned respect to our memory map.  The only safe option
    * is to switch to a well-known IDLE thread stack.
    */
 
-  sp = (uint32_t)tcb->stack_base_ptr + tcb->adj_stack_size;
+  sp = (uint32_t)tcb->stack_base_ptr + tcb->adj_stack_size -
+       XCPTCONTEXT_SIZE;
   __asm__ __volatile__("mov sp, %0\n" : : "r"(sp));
 
   sinfo("CPU%d Started\n", up_cpu_index());
@@ -197,14 +180,6 @@ void IRAM_ATTR xtensa_appcpu_start(void)
 
   up_enable_irq(XTENSA_IRQ_SWINT);
 
-#if 0 /* Does it make since to have co-processors enabled on the IDLE thread? */
-#if XTENSA_CP_ALLSET != 0
-  /* Set initial co-processor state */
-
-  xtensa_coproc_enable(struct xtensa_cpstate_s *cpstate, int cpset);
-#endif
-#endif
-
   /* Dump registers so that we can see what is going to happen on return */
 
   xtensa_registerdump(tcb);
@@ -219,6 +194,10 @@ void IRAM_ATTR xtensa_appcpu_start(void)
   /* And Enable interrupts */
 
   up_irq_enable();
+#endif
+
+#if XCHAL_CP_NUM > 0
+  xtensa_set_cpenable(CONFIG_XTENSA_CP_INITSET);
 #endif
 
   /* Then switch contexts. This instantiates the exception context of the
