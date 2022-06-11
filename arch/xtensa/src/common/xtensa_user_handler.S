@@ -62,6 +62,7 @@
 
 #include <arch/irq.h>
 #include <arch/xtensa/core.h>
+#include <arch/xtensa/xtensa_abi.h>
 #include <arch/xtensa/xtensa_specregs.h>
 
 #include "xtensa_macros.S"
@@ -184,7 +185,7 @@ _xtensa_user_handler:
 
 	ps_setup	1 a0
 
-	/* Create pseudo base save area. At this point, a12 points to the
+	/* Link the pre-exception frame for debugging. At this point, a12 points to the
 	 * allocated and filled exception stack frame (old value of SP in case of
 	 * an interrupt stack).
 	 */
@@ -195,16 +196,9 @@ _xtensa_user_handler:
 	 * beginning of the register save area.
 	 */
 
-#ifdef __XTENSA_CALL0_ABI__
-	rsr		a2, EXCCAUSE					/* Argument 1 (a2) = EXCCAUSE */
-	mov		a3, a12							/* Argument 2 (a3) = pointer to register save area */
-	calx0	xtensa_user						/* Call xtensa_user */
-#else
-	rsr		a6, EXCCAUSE					/* Argument 1 (a6) = EXCCAUSE */
-	mov		a7, a12							/* Argument 2 (a7) = pointer to register save area */
-	call4	xtensa_user						/* Call xtensa_user */
-	mov		a12, a6
-#endif
+	rsr		ARG1, EXCCAUSE					/* Argument 1 = EXCCAUSE */
+	mov		ARG2, a12						/* Argument 2 = pointer to register save area */
+	CALL	xtensa_user						/* Call xtensa_user */
 
 	/* Restore registers in preparation to return from interrupt */
 
@@ -312,30 +306,16 @@ _xtensa_syscall_handler:
 
 	ps_setup	1 a0
 
-#ifdef __XTENSA_CALL0_ABI__
-	movi	a2, XTENSA_IRQ_SYSCALL			/* Argument 1: IRQ number */
-	mov		a3, a12							/* Argument 2: Top of stack = register save area */
-	call0	xtensa_irq_dispatch				/* Call xtensa_int_decode */
+	movi	ARG1, XTENSA_IRQ_SYSCALL			/* Argument 1: IRQ number */
+	mov		ARG2, a12							/* Argument 2: Top of stack = register save area */
+	CALL	xtensa_irq_dispatch					/* Call xtensa_int_decode */
 
-	/* On return from xtensa_irq_dispatch, A2 will contain the address of the new
-	 * register save area.  Usually this would be the same as the current SP.
-	 * But in the event of a context switch, A2 will instead refer to the TCB
-	 * register save area.
+	/* xtensa_irq_dispatch returns the address of the new register save area.
+	 * Usually this would be the same as the current SP. But in the event of
+	 * a context switch, it will instead refer to the TCB register save area.
 	 */
 
-#else
-	movi	a6, XTENSA_IRQ_SYSCALL			/* Argument 1: IRQ number */
-	mov		a7, a12							/* Argument 2: Top of stack = register save area */
-	call4	xtensa_irq_dispatch				/* Call xtensa_int_decode */
-
-	/* On return from xtensa_irq_dispatch, A6 will contain the address of the new
-	 * register save area.  Usually this would be the same as the current SP.
-	 * But in the event of a context switch, A6 will instead refer to the TCB
-	 * register save area.
-	 */
-
-	mov		a2, a6							/* Switch to the new register save area */
-#endif
+	mov		a2, RETVAL							/* Switch to the new register save area */
 
 	/* Restore registers in preparation to return from interrupt */
 
@@ -447,15 +427,9 @@ _xtensa_coproc_handler:
 	 * beginning of the register save area.
 	 */
 
-#ifdef __XTENSA_CALL0_ABI__
-	rsr		a2, EXCCAUSE					/* Argument 1 (a2) = EXCCAUSE */
-	mov		a3, sp							/* Argument 2 (a2) = pointer to register save area */
-	calx0	xtensa_user_panic				/* Call xtensa_user_panic */
-#else
-	rsr		a6, EXCCAUSE					/* Argument 1 (a2) = EXCCAUSE */
-	mov		a7, sp							/* Argument 2 (a2) = pointer to register save area */
-	call4	xtensa_user_panic				/* Call xtensa_user_panic */
-#endif
+	rsr		ARG1, EXCCAUSE					/* Argument 1 = EXCCAUSE */
+	mov		ARG2, sp						/* Argument 2 = pointer to register save area */
+	CALL	xtensa_user_panic				/* Call xtensa_user_panic */
 
 	/* xtensa_user_panic should not return */
 

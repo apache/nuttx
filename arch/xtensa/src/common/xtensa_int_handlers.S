@@ -131,66 +131,32 @@ g_intstacktop:
 
 	ps_setup	\level \tmp
 
-#ifdef __XTENSA_CALL0_ABI__
 	/* Get mask of pending, enabled interrupts at this level into a2. */
 
-	rsr		a2, INTENABLE
+	rsr		ARG1, INTENABLE
 	rsr		a3, INTERRUPT
 	movi	a4, \mask
-	and		a2, a2, a3
-	and		a2, a2, a4				/* a2 = Set of pending, enabled interrupts for this level */
-	beqz	a2, 1f						/* Nothing to do */
+	and		ARG1, ARG1, a3
+	and		ARG1, ARG1, a4				/* Set of pending, enabled interrupts for this level */
+	beqz	ARG1, 1f					/* Nothing to do */
 
-	/* Call xtensa_int_decode passing the address of the register save area
-	 * as a parameter (A3).
-	 */
-
-		          						  /* Argument 1: Set of CPU interrupt to dispatch */
-	mov		a3, a12					    /* Argument 2: Top of stack = register save area */
-	call0	xtensa_int_decode	  /* Call xtensa_int_decode */
-
-	/* On return from xtensa_int_decode, a2 will contain the address of the new
-	 * register save area.  Usually this would be the same as the current SP.
-	 * But in the event of a context switch, a2 will instead refer to the TCB
-	 * register save area.  This may or may not reside on a stack.
-	 */
-
-	mov		a12, a2						/* Switch to the save area of the new thread */
-
-#else
-	/* Get mask of pending, enabled interrupts at this level into a6. */
-
-	rsr		a6, INTENABLE
-	rsr		a2, INTERRUPT
-	movi	a3, \mask
-	and		a6, a6, a2
-	and		a6, a6, a3				/* a6 = Set of pending, enabled interrupts for this level */
-	beqz	a6, 1f						/* Nothing to do */
-
-	/* At this point, the exception frame should have been allocated and filled,
-	 * and current sp points to the interrupt stack (if enabled). Copy the
-	 * pre-exception's base save area below the current SP. We saved the SP in A12
-	 * before getting here.
+	/* Link the pre-exception frame for debugging. At this point, a12 points to the
+	 * allocated and filled exception stack frame (old value of SP in case of
+	 * an interrupt stack).
 	 */
 
 	exception_backtrace a12 \level
 
-	/* Call xtensa_int_decode passing the address of the register save area
-	 * as a parameter (A7).
+		          					    /* Argument 1: Set of CPU interrupt to dispatch */
+	mov		ARG2, a12					/* Argument 2: Top of stack = register save area */
+	CALL	xtensa_int_decode
+
+	/* xtensa_int_decode returns the address of the new register save area.
+	 * Usually this would be the same as the current SP. But in the event of
+	 * a context switch, it will instead refer to the TCB register save area.
 	 */
 
-										        /* Argument 1: Set of CPU interrupt to dispatch */
-	mov		a7, a12					  	/* Argument 2: Top of stack = register save area */
-	call4	xtensa_int_decode		/* Call xtensa_int_decode */
-
-	/* On return from xtensa_int_decode, a6 will contain the address of the new
-	 * register save area.  Usually this would be the same as the current SP.
-	 * But in the event of a context switch, a6 will instead refer to the TCB
-	 * register save area.  This may or may not reside on a stack.
-	 */
-
-	mov		a12, a6						/* Switch to the save area of the new thread */
-#endif
+	mov		a12, RETVAL					/* Switch to the save area of the new thread */
 
 #if CONFIG_ARCH_INTERRUPTSTACK < 15
 	addi	sp, sp, XCPTCONTEXT_SIZE
@@ -232,17 +198,17 @@ _xtensa_level1_handler:
 
 	call0	_xtensa_context_save
 
-  /* Save current SP before (possibly) overwriting it, it's the register save
-   * area. This value will be used later by dispatch_c_isr to retrieve the
-   * register save area.
-   */
+	/* Save current SP before (possibly) overwriting it, it's the register save
+	 * area. This value will be used later by dispatch_c_isr to retrieve the
+	 * register save area.
+	 */
+	
+	mov  a12, sp
 
-  mov  a12, sp
-
-  /* Switch to an interrupt stack if we have one */
+	/* Switch to an interrupt stack if we have one */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
-  setintstack a13 a14
+	setintstack a13 a14
 #endif
 
 	/* Decode and dispatch the interrupt.  In the event of an interrupt
