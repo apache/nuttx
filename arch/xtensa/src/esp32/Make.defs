@@ -28,7 +28,7 @@ HEAD_CSRC  = esp32_start.c esp32_wdt.c
 
 # Common XTENSA files (arch/xtensa/src/common)
 
-CMN_ASRCS  = xtensa_context.S xtensa_coproc.S xtensa_cpuint.S xtensa_panic.S
+CMN_ASRCS  = xtensa_context.S xtensa_cpuint.S xtensa_panic.S
 
 CMN_CSRCS  = xtensa_assert.c xtensa_blocktask.c
 CMN_CSRCS += xtensa_cpenable.c xtensa_createstack.c xtensa_exit.c
