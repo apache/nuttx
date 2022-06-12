@@ -279,6 +279,30 @@ int stm32wl5_configgpio(uint32_t cfgset)
 
   putreg32(regval, base + STM32WL5_GPIO_OTYPER_OFFSET);
 
+  /* Otherwise, it is an input pin.  Should it configured as an
+   * EXTI interrupt?
+   */
+
+  if (pinmode != GPIO_MODER_OUTPUT && (cfgset & GPIO_EXTI) != 0)
+    {
+      /* The selection of the EXTI line source is performed through the EXTIx
+       * bits in the SYSCFG_EXTICRx registers.
+       */
+
+      uint32_t regaddr;
+      int shift;
+
+      /* Set the bits in the SYSCFG EXTICR register */
+
+      regaddr = STM32WL5_SYSCFG_EXTICR(pin);
+      regval  = getreg32(regaddr);
+      shift   = SYSCFG_EXTICR_EXTI_SHIFT(pin);
+      regval &= ~(SYSCFG_EXTICR_PORT_MASK << shift);
+      regval |= (((uint32_t)port) << shift);
+
+      putreg32(regval, regaddr);
+    }
+
   leave_critical_section(flags);
   return OK;
 }

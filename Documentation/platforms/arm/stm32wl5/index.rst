@@ -30,14 +30,14 @@ Peripheral  Support  Notes
 ==========  =======  =====
 IRQs        Yes
 GPIO        Yes
-EXTI        No
+EXTI        Yes
 HSE         Yes
 PLL         Yes      Tested @ 48MHz
 HSI         Yes      Not tested
 MSI         Yes      Not tested
 LSE         Yes      Not tested
 RCC         Yes      All registers defined, not all peripherals enabled
-SYSCFG      Yes      All registers defined, remapping not tested
+SYSCFG      Yes      All registers defined, GPIO EXTI works, remapping not tested
 USART       Yes
 LPUART      Yes      full speed with HSE works, low power mode with LSE not implemented
 DMA         No
@@ -102,7 +102,7 @@ SYSCFG
 ------
 
 System configuration controller. Can be used to remap memory or
-manage external interrupts.
+manage GPIO multiplexer for EXTI.
 
 GPIO
 ----
@@ -122,6 +122,16 @@ IPCC
 
 Inter-processor communication controller. IPCC is used to exchange data
 between Cortex-M4 and Cortex-M0 CPUs.
+
+EXTI
+----
+
+Extended interrupts and event controller. Extends interrupts not provided
+by NVIC. For example, there is only one interrupt for GPIO5..9 in NVIC,
+but thanks to EXTI we can differentiate which GPIO caused interrupt. Such
+interrupt first goes through EXTI and is then forwarded to main NVIC.
+
+EXTI for gpio can be enabled via `stm32wl5_gpiosetevent` function.
 
 Supported Boards
 ================
