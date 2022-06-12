@@ -32,43 +32,48 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define STM32WL5_NEXTI1         31
+#define STM32WL5_EXTI1_MASK     0xffffffff
+#define STM32WL5_NEXTI2         9
+#define STM32WL5_EXTI2_MASK     0x000001ff
+
 /* Register Offsets *********************************************************/
 
-#define STM32WL5_EXTI_RTSR1_OFFSET      0x0000  /* Rising Trigger Selection 1       */
-#define STM32WL5_EXTI_FTSR1_OFFSET      0x0004  /* Falling Trigger Selection 1      */
-#define STM32WL5_EXTI_SWIER1_OFFSET     0x0008  /* Software Interrupt Event 1       */
-#define STM32WL5_EXTI_PR1_OFFSET        0x000c  /* Pending 1                        */
-#define STM32WL5_EXTI_RTSR2_OFFSET      0x0020  /* Rising Trigger Selection 2       */
-#define STM32WL5_EXTI_FTSR2_OFFSET      0x0024  /* Falling Trigger Selection 2      */
-#define STM32WL5_EXTI_SWIER2_OFFSET     0x0028  /* Software Interrupt Event 2       */
-#define STM32WL5_EXTI_PR2_OFFSET        0x002c  /* Pending 2                        */
-#define STM32WL5_EXTI_C1IMR1_OFFSET     0x0080  /* CPU Wakeup with Interrupt Mask 1 for cpu1 */
-#define STM32WL5_EXTI_C1EMR1_OFFSET     0x0084  /* CPU Wakeup with Event Mask 1 for cpu1 */
-#define STM32WL5_EXTI_C1IMR2_OFFSET     0x0090  /* CPU Wakeup with Interrupt Mask 2 for cpu1 */
-#define STM32WL5_EXTI_C1EMR2_OFFSET     0x0094  /* CPU Wakeup with Event Mask 2 for cpu1 */
-#define STM32WL5_EXTI_C2IMR1_OFFSET     0x00c0  /* CPU Wakeup with Interrupt Mask 1 for cpu2 */
-#define STM32WL5_EXTI_C2EMR1_OFFSET     0x00c4  /* CPU Wakeup with Event Mask 1 for cpu2 */
-#define STM32WL5_EXTI_C2IMR2_OFFSET     0x00d0  /* CPU Wakeup with Interrupt Mask 2 for cpu2 */
-#define STM32WL5_EXTI_C2EMR2_OFFSET     0x00d4  /* CPU Wakeup with Event Mask 2 for cpu2 */
+#define STM32WL5_EXTI_RTSR1_OFFSET  0x0000  /* Rising trigger selection 1 */
+#define STM32WL5_EXTI_FTSR1_OFFSET  0x0004  /* Falling trigger selection 1 */
+#define STM32WL5_EXTI_SWIER1_OFFSET 0x0008  /* Software interrupt event 1 */
+#define STM32WL5_EXTI_PR1_OFFSET    0x000c  /* Pending 1 */
+#define STM32WL5_EXTI_RTSR2_OFFSET  0x0020  /* Rising trigger selection 2 */
+#define STM32WL5_EXTI_FTSR2_OFFSET  0x0024  /* Falling trigger selection 2 */
+#define STM32WL5_EXTI_SWIER2_OFFSET 0x0028  /* Software interrupt event 2 */
+#define STM32WL5_EXTI_PR2_OFFSET    0x002c  /* Pending 2 */
+#define STM32WL5_EXTI_C1IMR1_OFFSET 0x0080  /* Interrupt mask 1 for cpu1 */
+#define STM32WL5_EXTI_C1EMR1_OFFSET 0x0084  /* Event mask 1 for cpu1 */
+#define STM32WL5_EXTI_C1IMR2_OFFSET 0x0090  /* Interrupt mask 2 for cpu1 */
+#define STM32WL5_EXTI_C1EMR2_OFFSET 0x0094  /* Event mask 2 for cpu1 */
+#define STM32WL5_EXTI_C2IMR1_OFFSET 0x00c0  /* Interrupt mask 1 for cpu2 */
+#define STM32WL5_EXTI_C2EMR1_OFFSET 0x00c4  /* Event mask 1 for cpu2 */
+#define STM32WL5_EXTI_C2IMR2_OFFSET 0x00d0  /* Interrupt mask 2 for cpu2 */
+#define STM32WL5_EXTI_C2EMR2_OFFSET 0x00d4  /* Event mask 2 for cpu2 */
 
 /* Register Addresses *******************************************************/
 
-#define STM32WL5_EXTI_RTSR1      (STM32WL5_EXTI_BASE+STM32WL5_EXTI_RTSR1_OFFSET)
-#define STM32WL5_EXTI_FTSR1      (STM32WL5_EXTI_BASE+STM32WL5_EXTI_FTSR1_OFFSET)
-#define STM32WL5_EXTI_SWIER1     (STM32WL5_EXTI_BASE+STM32WL5_EXTI_SWIER1_OFFSET)
-#define STM32WL5_EXTI_PR1        (STM32WL5_EXTI_BASE+STM32WL5_EXTI_PR1_OFFSET)
-#define STM32WL5_EXTI_RTSR2      (STM32WL5_EXTI_BASE+STM32WL5_EXTI_RTSR2_OFFSET)
-#define STM32WL5_EXTI_FTSR2      (STM32WL5_EXTI_BASE+STM32WL5_EXTI_FTSR2_OFFSET)
-#define STM32WL5_EXTI_SWIER2     (STM32WL5_EXTI_BASE+STM32WL5_EXTI_SWIER2_OFFSET)
-#define STM32WL5_EXTI_PR2        (STM32WL5_EXTI_BASE+STM32WL5_EXTI_PR2_OFFSET)
-#define STM32WL5_EXTI_C1IMR1     (STM32WL5_EXTI_BASE+STM32WL5_EXTI_C1IMR1_OFFSET)
-#define STM32WL5_EXTI_C1EMR1     (STM32WL5_EXTI_BASE+STM32WL5_EXTI_C1EMR1_OFFSET)
-#define STM32WL5_EXTI_C1IMR2     (STM32WL5_EXTI_BASE+STM32WL5_EXTI_C1IMR2_OFFSET)
-#define STM32WL5_EXTI_C1EMR2     (STM32WL5_EXTI_BASE+STM32WL5_EXTI_C1EMR2_OFFSET)
-#define STM32WL5_EXTI_C2IMR1     (STM32WL5_EXTI_BASE+STM32WL5_EXTI_C2IMR1_OFFSET)
-#define STM32WL5_EXTI_C2EMR1     (STM32WL5_EXTI_BASE+STM32WL5_EXTI_C2EMR1_OFFSET)
-#define STM32WL5_EXTI_C2IMR2     (STM32WL5_EXTI_BASE+STM32WL5_EXTI_C2IMR2_OFFSET)
-#define STM32WL5_EXTI_C2EMR2     (STM32WL5_EXTI_BASE+STM32WL5_EXTI_C2EMR2_OFFSET)
+#define STM32WL5_EXTI_RTSR1  (STM32WL5_EXTI_BASE+STM32WL5_EXTI_RTSR1_OFFSET)
+#define STM32WL5_EXTI_FTSR1  (STM32WL5_EXTI_BASE+STM32WL5_EXTI_FTSR1_OFFSET)
+#define STM32WL5_EXTI_SWIER1 (STM32WL5_EXTI_BASE+STM32WL5_EXTI_SWIER1_OFFSET)
+#define STM32WL5_EXTI_PR1    (STM32WL5_EXTI_BASE+STM32WL5_EXTI_PR1_OFFSET)
+#define STM32WL5_EXTI_RTSR2  (STM32WL5_EXTI_BASE+STM32WL5_EXTI_RTSR2_OFFSET)
+#define STM32WL5_EXTI_FTSR2  (STM32WL5_EXTI_BASE+STM32WL5_EXTI_FTSR2_OFFSET)
+#define STM32WL5_EXTI_SWIER2 (STM32WL5_EXTI_BASE+STM32WL5_EXTI_SWIER2_OFFSET)
+#define STM32WL5_EXTI_PR2    (STM32WL5_EXTI_BASE+STM32WL5_EXTI_PR2_OFFSET)
+#define STM32WL5_EXTI_C1IMR1 (STM32WL5_EXTI_BASE+STM32WL5_EXTI_C1IMR1_OFFSET)
+#define STM32WL5_EXTI_C1EMR1 (STM32WL5_EXTI_BASE+STM32WL5_EXTI_C1EMR1_OFFSET)
+#define STM32WL5_EXTI_C1IMR2 (STM32WL5_EXTI_BASE+STM32WL5_EXTI_C1IMR2_OFFSET)
+#define STM32WL5_EXTI_C1EMR2 (STM32WL5_EXTI_BASE+STM32WL5_EXTI_C1EMR2_OFFSET)
+#define STM32WL5_EXTI_C2IMR1 (STM32WL5_EXTI_BASE+STM32WL5_EXTI_C2IMR1_OFFSET)
+#define STM32WL5_EXTI_C2EMR1 (STM32WL5_EXTI_BASE+STM32WL5_EXTI_C2EMR1_OFFSET)
+#define STM32WL5_EXTI_C2IMR2 (STM32WL5_EXTI_BASE+STM32WL5_EXTI_C2IMR2_OFFSET)
+#define STM32WL5_EXTI_C2EMR2 (STM32WL5_EXTI_BASE+STM32WL5_EXTI_C2EMR2_OFFSET)
 
 /* Register Bitfield Definitions ********************************************/
 
@@ -102,5 +107,85 @@
 #define EXTI2_RADIOIRQ     (1 << 13)  /* EXTI line 44: Radio interrupt */
 #define EXTI2_RADIOBSY     (1 << 14)  /* EXTI line 45: Radio busy wakeup */
 #define EXTI2_CDBGPWRUPREQ (1 << 15)  /* EXTI line 46: Debug power-up request wakup */
+
+/* Rising Trigger selection register */
+
+#define EXTI_RTSR1_BIT(n)  (1 << (n)) /* 1=Rising trigger enabled (for Event and Interrupt) for input line */
+#define EXTI_RTSR1_SHIFT   (0)        /* Bits 0-X: Rising trigger event configuration bit for all lines */
+#define EXTI_RTSR1_MASK    (0x0061ffff)
+
+#define EXTI_RTSR2_BIT(n)  (1 << (n)) /* 1=Rising trigger enabled (for Event and Interrupt) for input line */
+#define EXTI_RTSR2_SHIFT   (0)        /* Bits 0-X: Rising trigger event configuration bit for all lines */
+#define EXTI_RTSR2_MASK    (0x00002304)
+
+/* Falling Trigger selection register */
+
+#define EXTI_FTSR1_BIT(n)  (1 << (n)) /* 1=Falling trigger enabled (for Event and Interrupt) for input line */
+#define EXTI_FTSR1_SHIFT   (0)        /* Bits 0-X: Falling trigger event configuration bitfor all lines */
+#define EXTI_FTSR1_MASK    (0x0061ffff)
+
+#define EXTI_FTSR2_BIT(n)  (1 << (n)) /* 1=Falling trigger enabled (for Event and Interrupt) for input line */
+#define EXTI_FTSR2_SHIFT   (0)        /* Bits 0-X: Falling trigger event configuration bitfor all lines */
+#define EXTI_FTSR2_MASK    (0x00002304)
+
+/* Software interrupt event register  */
+
+#define EXTI_SWIER1_BIT(n) (1 << (n)) /* 1=Sets the corresponding pending bit in EXTI_PR */
+#define EXTI_SWIER1_SHIFT  (0)        /* Bits 0-X: Software Interrupt for all lines */
+#define EXTI_SWIER1_MASK   (0x0061ffff)
+
+#define EXTI_SWIER2_BIT(n) (1 << (n)) /* 1=Sets the corresponding pending bit in EXTI_PR */
+#define EXTI_SWIER2_SHIFT  (0)        /* Bits 0-X: Software Interrupt for all lines */
+#define EXTI_SWIER2_MASK   (0x00002304)
+
+/* Pending register */
+
+#define EXTI_PR1_BIT(n)    (1 << (n)) /* 1=Selected trigger request occurred */
+#define EXTI_PR1_SHIFT     (0)        /* Bits 0-X: Pending bit for all lines */
+#define EXTI_PR1_MASK      (0x0061ffff)
+
+#define EXTI_PR2_BIT(n)    (1 << (n)) /* 1=Selected trigger request occurred */
+#define EXTI_PR2_SHIFT     (0)        /* Bits 0-X: Pending bit for all lines */
+#define EXTI_PR2_MASK      (0x00002304)
+
+/* Interrupt mask register */
+
+#define EXTI_C1IMR1_BIT(n) (1 << (n)) /* 1=Interrupt request from line x is not masked */
+#define EXTI_C1IMR1_SHIFT  (0)        /* Bits 0-X: Interrupt Mask for all lines */
+#define EXTI_C1IMR1_MASK   (0xffffffff)
+
+#define EXTI_C1IMR2_BIT(n) (1 << (n)) /* 1=Interrupt request from line x is not masked */
+#define EXTI_C1IMR2_SHIFT  (0)        /* Bits 0-X: Interrupt Mask for all lines */
+#define EXTI_C1IMR2_MASK   (0x007effff)
+
+/* Event mask register */
+
+#define EXTI_C1EMR1_BIT(n) (1 << (n)) /* 1=Event request from line x is not mask */
+#define EXTI_C1EMR1_SHIFT  (0)        /* Bits Bits 0-X:  Event Mask for all lines */
+#define EXTI_C1EMR1_MASK   (0x00007ff4)
+
+#define EXTI_C1EMR2_BIT(n) (1 << (n)) /* 1=Event request from line x is not mask */
+#define EXTI_C1EMR2_SHIFT  (0)        /* Bits Bits 0-X:  Event Mask for all lines */
+#define EXTI_C1EMR2_MASK   (0x00000300)
+
+/* Interrupt mask register */
+
+#define EXTI_C2IMR1_BIT(n) (1 << (n)) /* 1=Interrupt request from line x is not masked */
+#define EXTI_C2IMR1_SHIFT  (0)        /* Bits 0-X: Interrupt Mask for all lines */
+#define EXTI_C2IMR1_MASK   (0xffffffff)
+
+#define EXTI_C2IMR2_BIT(n) (1 << (n)) /* 1=Interrupt request from line x is not masked */
+#define EXTI_C2IMR2_SHIFT  (0)        /* Bits 0-X: Interrupt Mask for all lines */
+#define EXTI_C2IMR2_MASK   (0x007effff)
+
+/* Event mask register */
+
+#define EXTI_C2EMR1_BIT(n) (1 << (n)) /* 1=Event request from line x is not mask */
+#define EXTI_C2EMR1_SHIFT  (0)        /* Bits Bits 0-X:  Event Mask for all lines */
+#define EXTI_C2EMR1_MASK   (0x00007ff4)
+
+#define EXTI_C2EMR2_BIT(n) (1 << (n)) /* 1=Event request from line x is not mask */
+#define EXTI_C2EMR2_SHIFT  (0)        /* Bits Bits 0-X:  Event Mask for all lines */
+#define EXTI_C2EMR2_MASK   (0x00000300)
 
 #endif /* __ARCH_ARM_SRC_STM32WL5_HARDWARE_STM32WL5_EXTI_H */
