@@ -86,6 +86,11 @@
 #define QE_IMXRT_FIRST     (QE_AS5048B_FIRST + QE_AS5048B_NCMDS)
 #define QE_IMXRT_NCMDS     7
 
+/* See include/nuttx/sensors/as5048a.h */
+
+#define QE_AS5048A_FIRST   (QE_IMXRT_FIRST + QE_IMXRT_NCMDS)
+#define QE_AS5048A_NCMDS   4
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

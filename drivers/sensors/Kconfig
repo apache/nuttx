@@ -70,6 +70,14 @@ config SENSORS_AS5048B
 	---help---
 		Enable driver support for the AMS AS5048B magnetic rotary encoder.
 
+config SENSORS_AS5048A
+	bool "AMS AS5048A Magnetic Rotary Encoder support"
+	default n
+	select SPI
+	select SENSORS_QENCODER
+	---help---
+		Enable driver support for the AMS AS5048A magnetic rotary encoder.
+
 config SENSORS_AS726X
 	bool "AMS AS726X Spetral sensor support"
 	default n
