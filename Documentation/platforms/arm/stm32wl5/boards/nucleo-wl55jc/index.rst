@@ -79,6 +79,14 @@ nsh
 Basic NuttShell configuration (console enabled in LPUART1, exposed via USB
 connection, at 115200 bps 8n1).
 
+demo
+----
+
+This configuration contains demonstration code and programs to show what
+board is capable of. These programs and settings are usually absolutely
+useless in production code and are here just to show, by example, what
+you can do with the board.
+
 Flash & Debug
 =============
 

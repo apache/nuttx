@@ -136,6 +136,27 @@
 #define GPIO_LPUART1_RX GPIO_LPUART1_RX_1  /* PA3  */
 #define GPIO_LPUART1_TX GPIO_LPUART1_TX_1  /* PA2 */
 
+/* user buttons
+ *
+ * There are 3 buttons provided for user to program
+ *
+ * PA0 - Button 1
+ * PA1 - Button 2
+ * PC6 - Button 3
+ *
+ * Buttons need to be pulled up internaly by chip,
+ * and button press will pull pin down to LOW level.
+ */
+
+#define BOARD_BUTTON1  0
+#define BOARD_BUTTON2  1
+#define BOARD_BUTTON3  2
+#define BOARD_NBUTTONS 3
+
+#define BUTTON1_BIT (1 << BOARD_BUTTON1)
+#define BUTTON2_BIT (1 << BOARD_BUTTON2)
+#define BUTTON3_BIT (1 << BOARD_BUTTON3)
+
 /* LEDs
  *
  * The Nucleo wl55jc board provides 3 user leds

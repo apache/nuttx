@@ -35,6 +35,7 @@
 #include <nuttx/board.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/leds/userled.h>
+#include <nuttx/input/buttons.h>
 
 #include <stm32wl5.h>
 #include <stm32wl5_uart.h>
@@ -102,6 +103,16 @@ int board_app_initialize(uintptr_t arg)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_INPUT_BUTTONS_LOWER)
+  /* Register the Button driver */
+
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
     }
 #endif
 

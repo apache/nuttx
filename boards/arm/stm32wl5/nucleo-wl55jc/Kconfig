@@ -5,6 +5,16 @@
 
 if ARCH_BOARD_NUCLEO_WL55JC
 
-comment "empty"
+config ARCH_BOARD_NUCLEO_WL55JC_DEMO_LED_IRQ
+	bool "[demo] LED on button interrupt"
+	depends on ARCH_BUTTONS
+	depends on NSH_ARCHINIT
+	---help---
+		When enabled, pressing B3 button will toggle red LED.
+		This options is mostly for demo purposes of how one
+		can install GPIO interrupt.
+
+comment "[demo] LED on button interrupt requires NSH_ARCHINIT"
+	depends on !NSH_ARCHINIT || !ARCH_BUTTONS
 
 endif # ARCH_BOARD_NUCLEO_WL55JC
