@@ -27,6 +27,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <debug.h>
+#include <stdbool.h>
 
 #include <nuttx/board.h>
 #include <arch/board/board.h>
@@ -35,6 +36,8 @@
 #include "arm_internal.h"
 #include "stm32wl5.h"
 #include "nucleo-wl55jc.h"
+
+#include <stdio.h>
 
 /****************************************************************************
  * Private Types
@@ -73,6 +76,31 @@ static void led_state(int state, unsigned int leds)
       stm32wl5_gpiowrite(GPIO_LED_GREEN, state);
     }
 }
+
+/****************************************************************************
+ * Name: button3_led
+ *
+ * Description:
+ *   Toggles Red LED state from interrupt generated from button 3
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_BOARD_NUCLEO_WL55JC_DEMO_LED_IRQ
+static int button3_led(int irq, void *context, void *arg)
+{
+  (void)irq;
+  (void)context;
+  (void)arg;
+  int state;
+
+  state = stm32wl5_gpioread(GPIO_LED_RED);
+
+  /* toggle state */
+
+  state = !state;
+  stm32wl5_gpiowrite(GPIO_LED_RED, state);
+  return 0;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -188,7 +216,13 @@ void board_autoled_off(int state)
 
 uint32_t board_userled_initialize(void)
 {
-  /* Already initialized by stm32_led_initialize. */
+  /* Leds are already initialized by stm32_led_initialize. */
+
+#ifdef CONFIG_ARCH_BOARD_NUCLEO_WL55JC_DEMO_LED_IRQ
+  /* Configure B3 button to fire an interrupt on falling edge (on press)  */
+
+  stm32wl5_gpiosetevent(GPIO_BUTTON3, false, true, false, button3_led, NULL);
+#endif
 
   return BOARD_NLEDS;
 }
@@ -209,7 +243,7 @@ void board_userled(int led, bool ledon)
   unsigned int ledbit;
 
 #ifndef CONFIG_ARCH_LEDS
-  if (led == BOARD_BLUE)
+  if (led == BOARD_LED_BLUE)
     {
       return;
     }

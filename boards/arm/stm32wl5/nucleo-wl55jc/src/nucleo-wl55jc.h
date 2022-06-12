@@ -29,6 +29,7 @@
 #include <nuttx/compiler.h>
 
 #include <stdint.h>
+#include <stm32wl5.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -50,6 +51,10 @@
 #define GPIO_LED_GREEN (GPIO_PORTB|GPIO_PIN9 |GPIO_OUTPUT|GPIO_PULLUP|GPIO_SPEED_50MHz)
 #define GPIO_LED_RED   (GPIO_PORTB|GPIO_PIN11|GPIO_OUTPUT|GPIO_PULLUP|GPIO_SPEED_50MHz)
 #define GPIO_LED_BLUE  (GPIO_PORTB|GPIO_PIN15|GPIO_OUTPUT|GPIO_PULLUP|GPIO_SPEED_50MHz)
+
+#define GPIO_BUTTON1  (GPIO_PORTA|GPIO_PIN0|GPIO_INPUT|GPIO_PULLUP)
+#define GPIO_BUTTON2  (GPIO_PORTA|GPIO_PIN1|GPIO_INPUT|GPIO_PULLUP)
+#define GPIO_BUTTON3  (GPIO_PORTC|GPIO_PIN6|GPIO_INPUT|GPIO_PULLUP|GPIO_EXTI)
 
 /****************************************************************************
  * Public Data
