@@ -275,4 +275,155 @@ endif # ARCH_BOARD_FLASH_PART4_SIZE > 0
 
 endif # ARCH_BOARD_FLASH_MOUNT
 
+if LCD_SSD1680 && ARCH_BOARD_NUCLEO_WL55JC
+
+menu "E-ink SSD1680 pins config"
+
+choice
+	prompt "Port that handles Chip Select line (output)"
+	default SSD1680_GPIO_CS_PORTA if ARCH_BOARD_NUCLEO_WL55JC
+
+config SSD1680_GPIO_CS_DISABLED
+	bool "Not available"
+
+config SSD1680_GPIO_CS_PORTA
+	bool "Port A"
+
+config SSD1680_GPIO_CS_PORTB
+	bool "Port B"
+
+config SSD1680_GPIO_CS_PORTC
+	bool "Port C"
+
+config SSD1680_GPIO_CS_PORTD
+	bool "Port D"
+
+endchoice
+
+if SSD1680_GPIO_CS_PORTA || SSD1680_GPIO_CS_PORTB || SSD1680_GPIO_CS_PORTC || SSD1680_GPIO_CS_PORTD
+config SSD1680_GPIO_PIN_CS
+	int "Pin that select the chip on SPI bus (output)"
+	default "4" if ARCH_BOARD_NUCLEO_WL55JC
+	range 0 15
+endif #SSD1680_GPIO_CS_PORTA || SSD1680_GPIO_CS_PORTB || SSD1680_GPIO_CS_PORTC || SSD1680_GPIO_CS_PORTD
+
+choice
+	prompt "Port that handles Data/!Command line"
+	default SSD1680_GPIO_DTA_CMD_PORTA if ARCH_BOARD_NUCLEO_WL55JC
+
+config SSD1680_GPIO_DTA_CMD_DISABLED
+	bool "Not available"
+
+config SSD1680_GPIO_DTA_CMD_PORTA
+	bool "Port A"
+
+config SSD1680_GPIO_DTA_CMD_PORTB
+	bool "Port B"
+
+config SSD1680_GPIO_DTA_CMD_PORTC
+	bool "Port C"
+
+config SSD1680_GPIO_DTA_CMD_PORTD
+	bool "Port D"
+
+endchoice
+
+if SSD1680_GPIO_DTA_CMD_PORTA || SSD1680_GPIO_DTA_CMD_PORTB || SSD1680_GPIO_DTA_CMD_PORTC || SSD1680_GPIO_DTA_CMD_PORTD
+config SSD1680_GPIO_PIN_DTA_CMD
+	int "Pin that switch between command and data on 4-wire SPI bus"
+	default "9" if ARCH_BOARD_NUCLEO_WL55JC
+	range 0 15
+endif #SSD1680_GPIO_DTA_CMD_PORTA || SSD1680_GPIO_DTA_CMD_PORTB || SSD1680_GPIO_DTA_CMD_PORTC || SSD1680_GPIO_DTA_CMD_PORTD
+
+choice
+	prompt "Port that handles reset line (output)"
+	default SSD1680_GPIO_RST_PORTC if ARCH_BOARD_NUCLEO_WL55JC
+
+config SSD1680_GPIO_RST_DISABLED
+	bool "Not available"
+
+config SSD1680_GPIO_RST_PORTA
+	bool "Port A"
+
+config SSD1680_GPIO_RST_PORTB
+	bool "Port B"
+
+config SSD1680_GPIO_RST_PORTC
+	bool "Port C"
+
+config SSD1680_GPIO_RST_PORTD
+	bool "Port D"
+endchoice
+
+if SSD1680_GPIO_RST_PORTA || SSD1680_GPIO_RST_PORTB || SSD1680_GPIO_RST_PORTC || SSD1680_GPIO_RST_PORTD
+config SSD1680_GPIO_PIN_RST
+	int "Pin that handles the reset line (output)"
+	default "2" if ARCH_BOARD_NUCLEO_WL55JC
+	range 0 15
+endif #SSD1680_GPIO_RST_PORTA || SSD1680_GPIO_RST_PORTB || SSD1680_GPIO_RST_PORTC || SSD1680_GPIO_RST_PORTD
+
+choice
+	prompt "Port that handles busy line (input)"
+	default SSD1680_GPIO_BUSY_PORTC if ARCH_BOARD_NUCLEO_WL55JC
+
+config SSD1680_GPIO_BUSY_DISABLED
+	bool "Not available"
+
+config SSD1680_GPIO_BUSY_PORTA
+	bool "Port A"
+
+config SSD1680_GPIO_BUSY_PORTB
+	bool "Port B"
+
+config SSD1680_GPIO_BUSY_PORTC
+	bool "Port C"
+
+config SSD1680_GPIO_BUSY_PORTD
+	bool "Port D"
+
+endchoice
+
+if SSD1680_GPIO_BUSY_PORTA || SSD1680_GPIO_BUSY_PORTB || SSD1680_GPIO_BUSY_PORTC || SSD1680_GPIO_BUSY_PORTD
+config SSD1680_GPIO_PIN_BUSY
+	int "Pin that handles the busy line (input)"
+	default "1" if ARCH_BOARD_NUCLEO_WL55JC
+	range 0 15
+endif #SSD1680_GPIO_BUSY_PORTA || SSD1680_GPIO_BUSY_PORTB || SSD1680_GPIO_BUSY_PORTC || SSD1680_GPIO_BUSY_PORTD
+
+choice
+	prompt "Port that handles power line"
+	default SSD1680_GPIO_PWR_DISABLED if ARCH_BOARD_NUCLEO_WL55JC
+
+config SSD1680_GPIO_PWR_DISABLED
+	bool "Not available"
+
+config SSD1680_GPIO_PWR_PORTA
+	bool "Port A"
+
+config SSD1680_GPIO_PWR_PORTB
+	bool "Port B"
+
+config SSD1680_GPIO_PWR_PORTC
+	bool "Port C"
+
+config SSD1680_GPIO_PWR_PORTD
+	bool "Port D"
+
+endchoice
+
+if SSD1680_GPIO_PWR_PORTA || SSD1680_GPIO_PWR_PORTB || SSD1680_GPIO_PWR_PORTC || SSD1680_GPIO_PWR_PORTD
+config SSD1680_GPIO_PIN_PWR
+	int "Pin that handles the pwr on/off line (output)"
+	range 0 31
+endif #SSD1680_GPIO_PWR_PORTA || SSD1680_GPIO_PWR_PORTB || SSD1680_GPIO_PWR_PORTC || SSD1680_GPIO_PWR_PORTD
+
+
+config SSD1680_SPI_BUS
+	int "Spi bus no"
+	range 1 2
+	default "1"
+endmenu
+
+endif #LCD_SSD1680
+
 endif # ARCH_BOARD_NUCLEO_WL55JC

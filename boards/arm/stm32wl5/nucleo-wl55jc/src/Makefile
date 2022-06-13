@@ -34,4 +34,14 @@ ifeq ($(CONFIG_ARCH_BOARD_FLASH_MOUNT),y)
 CSRCS += stm32_flash.c
 endif
 
+ifeq ($(CONFIG_SPI_DRIVER),y)
+  CSRCS += stm32_spi.c
+endif
+
+ifeq ($(CONFIG_VIDEO_FB),y)
+ifeq ($(CONFIG_LCD_SSD1680),y)
+  CSRCS += stm32_ssd1680.c
+endif
+endif
+
 include $(TOPDIR)/boards/Board.mk

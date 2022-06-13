@@ -136,6 +136,14 @@
 #define GPIO_LPUART1_RX GPIO_LPUART1_RX_1  /* PA3  */
 #define GPIO_LPUART1_TX GPIO_LPUART1_TX_1  /* PA2 */
 
+#define GPIO_SPI1_MISO   GPIO_SPI1_MISO_2
+#define GPIO_SPI1_MOSI   GPIO_SPI1_MOSI_2
+#define GPIO_SPI1_SCK    GPIO_SPI1_SCK_2
+
+#define GPIO_SPI2S2_MISO   GPIO_SPI2_MISO_2
+#define GPIO_SPI2S2_MOSI   GPIO_SPI2_MOSI_2
+#define GPIO_SPI2S2_SCK    GPIO_SPI2_SCK_3
+
 /* user buttons
  *
  * There are 3 buttons provided for user to program
