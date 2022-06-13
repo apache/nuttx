@@ -26,6 +26,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#include <nuttx/fs/fs.h>
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -78,14 +80,23 @@ ssize_t getrandom(FAR void *bytes, size_t nbytes, unsigned int flags)
       dev = "/dev/urandom";
     }
 
-  fd = open(dev, oflags);
+  fd = _NX_OPEN(dev, oflags);
   if (fd < 0)
     {
+      _NX_SETERRNO(fd);
       return fd;
     }
 
-  nbytes = read(fd, bytes, nbytes);
-  close(fd);
+  nbytes = _NX_READ(fd, bytes, nbytes);
+  if (nbytes < 0)
+    {
+      /* An error occurred on the read. */
+
+      _NX_SETERRNO(nbytes);
+      nbytes = ERROR;
+    }
+
+  _NX_CLOSE(fd);
 
   return nbytes;
 }
