@@ -11,6 +11,12 @@ config IEEE80211_BROADCOM_HAVE_CLM
 	bool
 	default n
 
+config IEEE80211_BROADCOM_BCM43013
+	bool "Broadcom 43013 chip support"
+	depends on IEEE80211_BROADCOM_FULLMAC
+	default n
+	select IEEE80211_BROADCOM_HAVE_CLM
+
 config IEEE80211_BROADCOM_BCM43362
 	bool "Broadcom 43362 chip support"
 	depends on IEEE80211_BROADCOM_FULLMAC
@@ -31,7 +37,8 @@ config IEEE80211_BROADCOM_BCM43455
 config IEEE80211_BROADCOM_FWFILES
 	bool "Firmware files"
 	default y
-	depends on IEEE80211_BROADCOM_BCM43362 || \
+	depends on IEEE80211_BROADCOM_BCM43013 || \
+               IEEE80211_BROADCOM_BCM43362 || \
                IEEE80211_BROADCOM_BCM43438 || \
                IEEE80211_BROADCOM_BCM43455
 	---help---

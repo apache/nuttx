@@ -439,11 +439,13 @@ int bcmf_core_upload_firmware(FAR struct bcmf_sdio_dev_s *sbus)
 
   switch (sbus->cur_chip_id)
     {
-#if defined(CONFIG_IEEE80211_BROADCOM_BCM43362) || \
+#if defined(CONFIG_IEEE80211_BROADCOM_BCM43013) || \
+    defined(CONFIG_IEEE80211_BROADCOM_BCM43362) || \
     defined(CONFIG_IEEE80211_BROADCOM_BCM43438)
 
       case SDIO_DEVICE_ID_BROADCOM_43362:
       case SDIO_DEVICE_ID_BROADCOM_43430:
+      case SDIO_DEVICE_ID_BROADCOM_43013:
         /* Disable ARMCM3 core and reset SOCRAM core to set device in
          * firmware upload mode
          */
@@ -521,11 +523,13 @@ int bcmf_core_upload_firmware(FAR struct bcmf_sdio_dev_s *sbus)
 
   switch (sbus->cur_chip_id)
     {
-#if defined(CONFIG_IEEE80211_BROADCOM_BCM43362) || \
+#if defined(CONFIG_IEEE80211_BROADCOM_BCM43013) || \
+    defined(CONFIG_IEEE80211_BROADCOM_BCM43362) || \
     defined(CONFIG_IEEE80211_BROADCOM_BCM43438)
 
       case SDIO_DEVICE_ID_BROADCOM_43362:
       case SDIO_DEVICE_ID_BROADCOM_43430:
+      case SDIO_DEVICE_ID_BROADCOM_43013:
         up_mdelay(10);
         bcmf_core_reset(sbus, WLAN_ARMCM3_CORE_ID, 0, 0, 0);
 
