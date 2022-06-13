@@ -191,9 +191,10 @@ _xtensa_user_handler:
 	mov		ARG2, a12						/* Argument 2 = pointer to register save area */
 	CALL	xtensa_user						/* Call xtensa_user */
 
+	mov		a2, RETVAL							/* a2 = address of new state save area */
+
 	/* Restore registers in preparation to return from interrupt */
 
-	mov		a2, a12							/* a2 = address of new state save area */
 	call0	_xtensa_context_restore			/* (Preserves a2) */
 
 	/* Restore only level-specific regs (the rest were already restored) */

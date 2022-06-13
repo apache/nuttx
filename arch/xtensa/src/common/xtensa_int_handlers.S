@@ -110,9 +110,9 @@ g_intstacktop:
  *   a12   - register save area
  *
  * Exit Conditions:
- *   This macro will use registers a0 and a2-a5 and a12.
- *   a1  - May point to the new thread's SP
- *   a12 - Points to the register save area (which may not be on the stack).
+ *   This macro will use registers a0 and a2-a5 and a2.
+ *   a1 - May point to the new thread's SP
+ *   a2 - Points to the register save area (which may not be on the stack).
  *
  ****************************************************************************/
 
@@ -156,7 +156,7 @@ g_intstacktop:
 	 * a context switch, it will instead refer to the TCB register save area.
 	 */
 
-	mov		a12, RETVAL					/* Switch to the save area of the new thread */
+	mov		a2, RETVAL					/* Switch to the save area of the new thread */
 
 #if CONFIG_ARCH_INTERRUPTSTACK < 15
 	addi	sp, sp, XCPTCONTEXT_SIZE
@@ -207,7 +207,7 @@ _xtensa_level1_handler:
 	/* Decode and dispatch the interrupt.  In the event of an interrupt
 	 * level context dispatch_c_isr() will (1) switch stacks to the new
 	 * thread's and (2) provide the address of the register state save
-	 * area in a12.  NOTE that the state save area may or may not lie
+	 * area in a2.  NOTE that the state save area may or may not lie
 	 * in the new thread's stack.
 	 */
 
@@ -215,7 +215,6 @@ _xtensa_level1_handler:
 
 	/* Restore registers in preparation to return from interrupt */
 
-	mov     a2, a12                     /* a2 = address of new state save area */
 	call0   _xtensa_context_restore     /* (preserves a2) */
 
 	/* Restore only level-specific regs (the rest were already restored) */
@@ -287,7 +286,7 @@ _xtensa_level2_handler:
 	/* Decode and dispatch the interrupt.  In the event of an interrupt
 	 * level context dispatch_c_isr() will (1) switch stacks to the new
 	 * thread's and (2) provide the address of the register state save
-	 * area in a12.  NOTE that the state save area may or may not lie
+	 * area in a2.  NOTE that the state save area may or may not lie
 	 * in the new thread's stack.
 	 */
 
@@ -295,7 +294,6 @@ _xtensa_level2_handler:
 
 	/* Restore registers in preparation to return from interrupt */
 
-	mov		a2, a12							/* a2 = address of new state save area */
 	call0	_xtensa_context_restore			/* (preserves a2) */
 
 	/* Restore only level-specific regs (the rest were already restored) */
@@ -342,7 +340,7 @@ _xtensa_level3_handler:
 	/* Decode and dispatch the interrupt.  In the event of an interrupt
 	 * level context dispatch_c_isr() will (1) switch stacks to the new
 	 * thread's and (2) provide the address of the register state save
-	 * area in a12.  NOTE that the state save area may or may not lie
+	 * area in a2.  NOTE that the state save area may or may not lie
 	 * in the new thread's stack.
 	 */
 
@@ -350,7 +348,6 @@ _xtensa_level3_handler:
 
 	/* Restore registers in preparation to return from interrupt */
 
-	mov		a2, a12							/* a2 = address of new state save area */
 	call0	_xtensa_context_restore			/* (preserves a2) */
 
 	/* Restore only level-specific regs (the rest were already restored) */
@@ -397,7 +394,7 @@ _xtensa_level4_handler:
 	/* Decode and dispatch the interrupt.  In the event of an interrupt
 	 * level context dispatch_c_isr() will (1) switch stacks to the new
 	 * thread's and (2) provide the address of the register state save
-	 * area in a12.  NOTE that the state save area may or may not lie
+	 * area in a2.  NOTE that the state save area may or may not lie
 	 * in the new thread's stack.
 	 */
 
@@ -405,7 +402,6 @@ _xtensa_level4_handler:
 
 	/* Restore registers in preparation to return from interrupt */
 
-	mov		a2, a12							/* a2 = address of new state save area */
 	call0	_xtensa_context_restore			/* (preserves a2) */
 
 	/* Restore only level-specific regs (the rest were already restored) */
@@ -452,7 +448,7 @@ _xtensa_level5_handler:
 	/* Decode and dispatch the interrupt.  In the event of an interrupt
 	 * level context dispatch_c_isr() will (1) switch stacks to the new
 	 * thread's and (2) provide the address of the register state save
-	 * area in a12.  NOTE that the state save area may or may not lie
+	 * area in a2.  NOTE that the state save area may or may not lie
 	 * in the new thread's stack.
 	 */
 
@@ -460,7 +456,6 @@ _xtensa_level5_handler:
 
 	/* Restore registers in preparation to return from interrupt */
 
-	mov		a2, a12							/* a2 = address of new state save area */
 	call0	_xtensa_context_restore			/* (preserves a2) */
 
 	/* Restore only level-specific regs (the rest were already restored) */
@@ -507,7 +502,7 @@ _xtensa_level6_handler:
 	/* Decode and dispatch the interrupt.  In the event of an interrupt
 	 * level context dispatch_c_isr() will (1) switch stacks to the new
 	 * thread's and (2) provide the address of the register state save
-	 * area in a12.  NOTE that the state save area may or may not lie
+	 * area in a2.  NOTE that the state save area may or may not lie
 	 * in the new thread's stack.
 	 */
 
@@ -515,7 +510,6 @@ _xtensa_level6_handler:
 
 	/* Restore registers in preparation to return from interrupt */
 
-	mov		a2, a12							/* a2 = address of new state save area */
 	call0	_xtensa_context_restore			/* (preserves a2) */
 
 	/* Restore only level-specific regs (the rest were already restored) */
