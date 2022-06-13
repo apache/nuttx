@@ -33,6 +33,10 @@ ifeq ($(CONFIG_IEEE80211_BROADCOM_FULLMAC_SDIO),y)
   CSRCS += bcmf_sdpcm.c
 endif
 
+ifeq ($(CONFIG_IEEE80211_BROADCOM_BCM43013),y)
+CSRCS += bcmf_chip_43013.c
+endif
+
 ifeq ($(CONFIG_IEEE80211_BROADCOM_BCM43362),y)
 CSRCS += bcmf_chip_43362.c
 endif
