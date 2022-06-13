@@ -84,28 +84,24 @@ config NET_TCP_FAST_RETRANSMIT
 	bool "Enable the Fast Retransmit algorithm"
 	default y
 	---help---
-		RFC2001:
-		3.  Fast Retransmit
-			Modifications to the congestion avoidance algorithm were proposed in
-			1990 [3].  Before describing the change, realize that TCP may
-			generate an immediate acknowledgment (a duplicate ACK) when an out-
-			of-order segment is received (Section 4.2.2.21 of [1], with a note
-			that one reason for doing so was for the experimental fast-
-			retransmit algorithm).  This duplicate ACK should not be delayed.
-			The purpose of this duplicate ACK is to let the other end know that a
-			segment was received out of order, and to tell it what sequence
-			number is expected.
+		RFC 5681:
+		2. DUPLICATE ACKNOWLEDGMENT: An acknowledgment is considered a
+			"duplicate" in the following algorithms when (a) the receiver of
+			the ACK has outstanding data, (b) the incoming acknowledgment
+			carries no data, (c) the SYN and FIN bits are both off, (d) the
+			acknowledgment number is equal to the greatest acknowledgment
+			received on the given connection (TCP.UNA from [RFC793]) and (e)
+			the advertised window in the incoming acknowledgment equals the
+			advertised window in the last incoming acknowledgment.
 
-			Since TCP does not know whether a duplicate ACK is caused by a lost
-			segment or just a reordering of segments, it waits for a small number
-			of duplicate ACKs to be received.  It is assumed that if there is
-			just a reordering of the segments, there will be only one or two
-			duplicate ACKs before the reordered segment is processed, which will
-			then generate a new ACK.  If three or more duplicate ACKs are
-			received in a row, it is a strong indication that a segment has been
-			lost.  TCP then performs a retransmission of what appears to be the
-			missing segment, without waiting for a retransmission timer to
-			expire.
+		3.2. Fast Retransmit
+			The TCP sender SHOULD use the "fast retransmit" algorithm to detect
+			and repair loss, based on incoming duplicate ACKs.  The fast
+			retransmit algorithm uses the arrival of 3 duplicate ACKs (as defined
+			in section 2, without any intervening ACKs which move SND.UNA) as an
+			indication that a segment has been lost.  After receiving 3 duplicate
+			ACKs, TCP performs a retransmission of what appears to be the missing
+			segment, without waiting for the retransmission timer to expire.
 
 config NET_TCP_WINDOW_SCALE
 	bool "Enable TCP/IP Window Scale Option"

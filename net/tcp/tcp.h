@@ -63,9 +63,6 @@
 #  define TCP_WBPKTLEN(wrb)          ((wrb)->wb_iob->io_pktlen)
 #  define TCP_WBSENT(wrb)            ((wrb)->wb_sent)
 #  define TCP_WBNRTX(wrb)            ((wrb)->wb_nrtx)
-#ifdef CONFIG_NET_TCP_FAST_RETRANSMIT
-#  define TCP_WBNACK(wrb)            ((wrb)->wb_nack)
-#endif
 #  define TCP_WBIOB(wrb)             ((wrb)->wb_iob)
 #  define TCP_WBCOPYOUT(wrb,dest,n)  (iob_copyout(dest,(wrb)->wb_iob,(n),0))
 #  define TCP_WBCOPYIN(wrb,src,n,off) \
@@ -261,7 +258,20 @@ struct tcp_conn_s
   uint32_t   isn;         /* Initial sequence number */
   uint32_t   sndseq_max;  /* The sequence number of next not-retransmitted
                            * segment (next greater sndseq) */
-#endif
+
+#ifdef CONFIG_NET_TCP_FAST_RETRANSMIT
+  uint32_t   snd_prev_ack; /* The previous ACKed seq number */
+#ifdef CONFIG_NET_TCP_WINDOW_SCALE
+  uint32_t   snd_prev_wnd; /* The advertised window in the last
+                            * incoming acknowledgment
+                            */
+#else
+  uint16_t   snd_prev_wnd;
+#endif /* CONFIG_NET_TCP_WINDOW_SCALE */
+  int        snd_dup_acks; /* Duplicate ACK counter */
+#endif /* CONFIG_NET_TCP_FAST_RETRANSMIT */
+
+#endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
 
 #ifdef CONFIG_NET_TCPBACKLOG
   /* Listen backlog support
@@ -348,9 +358,6 @@ struct tcp_wrbuffer_s
   uint16_t   wb_sent;      /* Number of bytes sent from the I/O buffer chain */
   uint8_t    wb_nrtx;      /* The number of retransmissions for the last
                             * segment sent */
-#ifdef CONFIG_NET_TCP_FAST_RETRANSMIT
-  uint8_t    wb_nack;      /* The number of ack count */
-#endif
   struct iob_s *wb_iob;    /* Head of the I/O buffer chain */
 };
 #endif

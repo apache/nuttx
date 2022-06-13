@@ -485,33 +485,6 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                         wrb, TCP_WBSEQNO(wrb), TCP_WBPKTLEN(wrb));
                 }
             }
-#ifdef CONFIG_NET_TCP_FAST_RETRANSMIT
-          else if (ackno == TCP_WBSEQNO(wrb))
-            {
-              /* Reset the duplicate ack counter */
-
-              if ((flags & TCP_NEWDATA) != 0)
-                {
-                  TCP_WBNACK(wrb) = 0;
-                }
-
-              /* Duplicate ACK? Retransmit data if need */
-
-              if (++TCP_WBNACK(wrb) == TCP_FAST_RETRANSMISSION_THRESH)
-                {
-                  /* Do fast retransmit */
-
-                  rexmit = true;
-                }
-              else if ((TCP_WBNACK(wrb) > TCP_FAST_RETRANSMISSION_THRESH) &&
-                       TCP_WBNACK(wrb) == sq_count(&conn->unacked_q) - 1)
-                {
-                  /* Reset the duplicate ack counter */
-
-                  TCP_WBNACK(wrb) = 0;
-                }
-            }
-#endif
         }
 
       /* A special case is the head of the write_q which may be partially
@@ -547,6 +520,37 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           ninfo("ACK: wrb=%p seqno=%" PRIu32 " pktlen=%u sent=%u\n",
                 wrb, TCP_WBSEQNO(wrb), TCP_WBPKTLEN(wrb), TCP_WBSENT(wrb));
         }
+
+#ifdef CONFIG_NET_TCP_FAST_RETRANSMIT
+      /* Fast Retransmit (RFC 5681): an acknowledgment is considered a
+       * "duplicate" when (a) the receiver of the ACK has outstanding data,
+       * (b) the incoming acknowledgment carries no data, (c) the SYN and
+       * FIN bits are both off, (d) the acknowledgment number is equal to
+       * the greatest acknowledgment received on the given connection
+       * and (e) the advertised window in the incoming acknowledgment equals
+       * the advertised window in the last incoming acknowledgment.
+       */
+
+      if (conn->tx_unacked < conn->sent &&
+          (flags & TCP_NEWDATA) == 0 &&
+          (tcp->flags & (TCP_SYN | TCP_FIN)) == 0 &&
+          ackno == conn->snd_prev_ack &&
+          conn->snd_wnd == conn->snd_prev_wnd)
+        {
+          if (++conn->snd_dup_acks >= TCP_FAST_RETRANSMISSION_THRESH)
+            {
+              rexmit = true;
+              conn->snd_dup_acks = 0;
+            }
+        }
+      else
+        {
+          conn->snd_dup_acks = 0;
+        }
+
+      conn->snd_prev_ack = ackno;
+      conn->snd_prev_wnd = conn->snd_wnd;
+#endif
     }
 
   /* Check for a loss of connection */
