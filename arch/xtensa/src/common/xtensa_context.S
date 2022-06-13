@@ -66,6 +66,7 @@
 #include <arch/xtensa/xtensa_abi.h>
 #include <arch/xtensa/xtensa_specregs.h>
 
+#include "chip.h"
 #include "syscall.h"
 #include "xtensa_asm_utils.h"
 #include "xtensa_coproc.S"
@@ -73,8 +74,6 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-	.text
 
 /****************************************************************************
  * Name: _xtensa_context_save
@@ -106,6 +105,7 @@
  *
  ****************************************************************************/
 
+	.section HANDLER_SECTION, "ax"
 	.global	_xtensa_context_save
 	.type	_xtensa_context_save, @function
 
@@ -235,6 +235,7 @@ _xtensa_context_save:
  *
  ****************************************************************************/
 
+	.section HANDLER_SECTION, "ax"
 	.global _xtensa_context_restore
 	.type	_xtensa_context_restore,@function
 
