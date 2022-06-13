@@ -137,7 +137,7 @@ define LINK_ALLSYMS
 	$(Q) $(TOPDIR)/tools/mkallsyms.sh $(NUTTX) $(CROSSDEV) > allsyms.tmp
 	$(Q) $(call COMPILE, -x c allsyms.tmp, allsyms$(OBJEXT))
 	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
-		-o $(NUTTX) $(filter-out board/libboard$(LIBEXT), $1) allsyms$(OBJEXT) $(EXTRA_OBJS) \
+		-o $(NUTTX) $(STARTUP_OBJS) allsyms$(OBJEXT) $(EXTRA_OBJS) \
 		$(LDSTARTGROUP) $(LDLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
 	$(Q) $(call DELFILE, allsyms.tmp allsyms$(OBJEXT))
 endef
