@@ -267,6 +267,24 @@ config ARCH_BOARD_TTGO_LORA_ESP32
 		display. This port is for board version 1.0, more info:
 		https://github.com/Xinyuan-LilyGO/TTGO-LoRa-Series
 
+config ARCH_BOARD_TTGO_T5V2_ESP32
+	bool "TTGO e-ink T5v2.2"
+	depends on ARCH_CHIP_ESP32WROOM32 || ARCH_CHIP_ESP32WROOM32_8MB || ARCH_CHIP_ESP32WROOM32_16MB || ARCH_CHIP_ESP32WROVER || ARCH_CHIP_ESP32SOLO1
+	select ARCH_HAVE_BUTTONS
+	select DRIVERS_VIDEO
+	select VIDEO_FB
+	select FB_MODULEINFO
+	select LCD
+	select LCD_DEV
+	select LCD_FRAMEBUFFER
+	select LCD_PORTRAIT
+	select LCD_SSD1680
+	select LCD_SSD1680_2_9
+	---help---
+		TTGO T5v2 is an ESP32 board with e-ink 2.9 inch display.
+		Display resolution 128/296. More info:
+		https://github.com/Xinyuan-LilyGO/LilyGo-T5-Epaper-Series
+
 config ARCH_BOARD_ESP32C3_DEVKIT
 	bool "Espressif ESP32-C3 DevKit"
 	depends on ARCH_CHIP_ESP32C3MINI1 || ARCH_CHIP_ESP32C3WROOM02
@@ -2443,6 +2461,7 @@ config ARCH_BOARD
 	default "emw3162"                  if ARCH_BOARD_EMW3162
 	default "quickfeather"             if ARCH_BOARD_QUICKFEATHER
 	default "esp32-devkitc"            if ARCH_BOARD_ESP32_DEVKITC
+	default "ttgo_eink5_v2"            if ARCH_BOARD_TTGO_T5V2_ESP32
 	default "esp32-ethernet-kit"       if ARCH_BOARD_ESP32_ETHERNETKIT
 	default "esp32-wrover-kit"         if ARCH_BOARD_ESP32_WROVERKIT
 	default "esp32c3-devkit"           if ARCH_BOARD_ESP32C3_DEVKIT
@@ -3361,6 +3380,9 @@ source "boards/renesas/rx65n/rx65n-grrose/Kconfig"
 endif
 if ARCH_BOARD_ESP32_DEVKITC
 source "boards/xtensa/esp32/esp32-devkitc/Kconfig"
+endif
+if ARCH_BOARD_TTGO_T5V2_ESP32
+source "boards/xtensa/esp32/ttgo_eink5_v2/Kconfig"
 endif
 if ARCH_BOARD_ESP32_ETHERNETKIT
 source "boards/xtensa/esp32/esp32-ethernet-kit/Kconfig"
