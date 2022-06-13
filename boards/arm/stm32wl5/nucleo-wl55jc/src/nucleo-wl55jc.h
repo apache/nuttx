@@ -74,4 +74,14 @@
 
 void board_leds_initialize(void);
 
+/****************************************************************************
+ * Name: stm32wl5_flash_init
+ *
+ * Description:
+ *   Initialize on-board FLASH partition table
+ *
+ ****************************************************************************/
+
+int stm32wl5_flash_init(void);
+
 #endif /* __BOARDS_ARM_STM32WL5_NUCLEO_WL55JC_SRC_NUCLEO_WL55JC_H */
