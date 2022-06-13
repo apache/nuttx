@@ -26,14 +26,16 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdint.h>
+
 #include "hardware/stm32wl5_flash.h"
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions Prototypes
  ****************************************************************************/
 
-void stm32wl5_flash_lock(void);
-void stm32wl5_flash_unlock(void);
+int stm32wl5_flash_lock(void);
+int stm32wl5_flash_unlock(void);
 
 /****************************************************************************
  * Name: stm32wl5_flash_user_optbytes

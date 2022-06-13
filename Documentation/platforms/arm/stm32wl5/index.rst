@@ -40,6 +40,7 @@ RCC         Yes      All registers defined, not all peripherals enabled
 SYSCFG      Yes      All registers defined, GPIO EXTI works, remapping not tested
 USART       Yes
 LPUART      Yes      full speed with HSE works, low power mode with LSE not implemented
+FLASH       Yes      Progmem imlementation - mtd filesystems like smartfs or nxffs work
 DMA         No
 SRAM2       No
 SPI         No
@@ -132,6 +133,15 @@ but thanks to EXTI we can differentiate which GPIO caused interrupt. Such
 interrupt first goes through EXTI and is then forwarded to main NVIC.
 
 EXTI for gpio can be enabled via `stm32wl5_gpiosetevent` function.
+
+FLASH
+-----
+
+Place where program code lives. Part of flash can also be used to create
+small filesystems like nxffs or smartfs to hold persistant data between
+reboots without the need of attaching external flash or mmc card. Since
+flash has limited number of erases (writes) it's best to hold there only
+data that is no frequently updated (so, configuration is ok, logs are not).
 
 Supported Boards
 ================

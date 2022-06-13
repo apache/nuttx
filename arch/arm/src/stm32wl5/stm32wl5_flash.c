@@ -34,17 +34,17 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 #include <nuttx/progmem.h>
+#include <nuttx/semaphore.h>
 
-#include <semaphore.h>
 #include <assert.h>
 #include <debug.h>
 #include <errno.h>
+#include <inttypes.h>
 #include <string.h>
 
 #include "stm32wl5_rcc.h"
 #include "stm32wl5_waste.h"
 #include "stm32wl5_flash.h"
-
 #include "arm_internal.h"
 
 #if !defined(CONFIG_STM32WL5_FLASH_OVERRIDE_DEFAULT)
@@ -57,6 +57,7 @@
 
 #define FLASH_KEY1         0x45670123
 #define FLASH_KEY2         0xCDEF89AB
+#define FLASH_ERASEDVALUE  0xffu
 
 #define OPTBYTES_KEY1      0x08192A3B
 #define OPTBYTES_KEY2      0x4C5D6E7F
@@ -64,15 +65,7 @@
 #define FLASH_PAGE_SIZE    STM32WL5_FLASH_PAGESIZE
 #define FLASH_PAGE_WORDS   (FLASH_PAGE_SIZE / 4)
 #define FLASH_PAGE_MASK    (FLASH_PAGE_SIZE - 1)
-#if FLASH_PAGE_SIZE == 2048
-#  define FLASH_PAGE_SHIFT   (11)    /* 2**11  = 2048B */
-#elif FLASH_PAGE_SIZE == 4096
-#  define FLASH_PAGE_SHIFT   (12)    /* 2**12  = 4096B */
-#elif FLASH_PAGE_SIZE == 8192
-#  define FLASH_PAGE_SHIFT   (13)    /* 2**13  = 8192B */
-#else
-#  error Unsupported STM32WL5_FLASH_PAGESIZE
-#endif
+#define FLASH_PAGE_SHIFT   (11)    /* 2**11  = 2048B */
 #define FLASH_BYTE2PAGE(o) ((o) >> FLASH_PAGE_SHIFT)
 
 #define FLASH_CR_PAGE_ERASE              FLASH_CR_PER
@@ -99,23 +92,9 @@ static uint32_t g_page_buffer[FLASH_PAGE_WORDS];
  * Private Functions
  ****************************************************************************/
 
-static inline void sem_lock(void)
+static inline int sem_lock(void)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&g_sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  return nxsem_wait_uninterruptible(&g_sem);
 }
 
 static inline void sem_unlock(void)
@@ -168,10 +147,11 @@ static inline void flash_optbytes_lock(void)
 
 static inline void flash_erase(size_t page)
 {
-  finfo("erase page %u\n", page);
+  finfo("erase page %u\n", (unsigned int)page);
 
   modifyreg32(STM32WL5_FLASH_CR, 0, FLASH_CR_PAGE_ERASE);
-  modifyreg32(STM32WL5_FLASH_CR, FLASH_CR_PNB_MASK, FLASH_CR_PNB(page));
+  modifyreg32(STM32WL5_FLASH_CR, FLASH_CR_PNB_MASK,
+              FLASH_CR_PNB(page & 0xff));
   modifyreg32(STM32WL5_FLASH_CR, 0, FLASH_CR_START);
 
   while (getreg32(STM32WL5_FLASH_SR) & FLASH_SR_BSY)
@@ -186,18 +166,36 @@ static inline void flash_erase(size_t page)
  * Public Functions
  ****************************************************************************/
 
-void stm32wl5_flash_unlock(void)
+int stm32wl5_flash_unlock(void)
 {
-  sem_lock();
+  int ret;
+
+  ret = sem_lock();
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   flash_unlock();
   sem_unlock();
+
+  return ret;
 }
 
-void stm32wl5_flash_lock(void)
+int stm32wl5_flash_lock(void)
 {
-  sem_lock();
+  int ret;
+
+  ret = sem_lock();
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   flash_lock();
   sem_unlock();
+
+  return ret;
 }
 
 /****************************************************************************
@@ -220,6 +218,7 @@ void stm32wl5_flash_lock(void)
 uint32_t stm32wl5_flash_user_optbytes(uint32_t clrbits, uint32_t setbits)
 {
   uint32_t regval;
+  int ret;
 
   /* To avoid accidents, do not allow setting RDP via this function.
    * Remove these asserts if want to enable changing the protection level.
@@ -229,19 +228,24 @@ uint32_t stm32wl5_flash_user_optbytes(uint32_t clrbits, uint32_t setbits)
   DEBUGASSERT((clrbits & FLASH_OPTR_RDP_MASK) == 0);
   DEBUGASSERT((setbits & FLASH_OPTR_RDP_MASK) == 0);
 
-  sem_lock();
+  ret = sem_lock();
+  if (ret < 0)
+    {
+      return 0;
+    }
+
   flash_optbytes_unlock();
 
   /* Modify Option Bytes in register. */
 
   regval = getreg32(STM32WL5_FLASH_OPTR);
 
-  finfo("Flash option bytes before: 0x%x\n", (unsigned)regval);
+  finfo("Flash option bytes before: 0x%" PRIx32 "\n", regval);
 
   regval = (regval & ~clrbits) | setbits;
   putreg32(regval, STM32WL5_FLASH_OPTR);
 
-  finfo("Flash option bytes after:  0x%x\n", (unsigned)regval);
+  finfo("Flash option bytes after:  0x%" PRIx32 "\n", regval);
 
   /* Start Option Bytes programming and wait for completion. */
 
@@ -260,13 +264,11 @@ uint32_t stm32wl5_flash_user_optbytes(uint32_t clrbits, uint32_t setbits)
 
 size_t up_progmem_pagesize(size_t page)
 {
-  (void)page;
   return STM32WL5_FLASH_PAGESIZE;
 }
 
 size_t up_progmem_erasesize(size_t block)
 {
-  (void)block;
   return STM32WL5_FLASH_PAGESIZE;
 }
 
@@ -305,33 +307,10 @@ bool up_progmem_isuniform(void)
   return true;
 }
 
-ssize_t up_progmem_ispageerased(size_t page)
-{
-  size_t addr;
-  size_t count;
-  size_t bwritten = 0;
-
-  if (page >= STM32WL5_FLASH_NPAGES)
-    {
-      return -EFAULT;
-    }
-
-  /* Verify */
-
-  for (addr = up_progmem_getaddress(page), count = up_progmem_pagesize(page);
-       count; count--, addr++)
-    {
-      if (getreg8(addr) != 0xff)
-        {
-          bwritten++;
-        }
-    }
-
-  return bwritten;
-}
-
 ssize_t up_progmem_eraseblock(size_t block)
 {
+  int ret;
+
   if (block >= STM32WL5_FLASH_NPAGES)
     {
       return -EFAULT;
@@ -339,7 +318,12 @@ ssize_t up_progmem_eraseblock(size_t block)
 
   /* Erase single block */
 
-  sem_lock();
+  ret = sem_lock();
+  if (ret < 0)
+    {
+      return (ssize_t)ret;
+    }
+
   flash_unlock();
 
   flash_erase(block);
@@ -359,6 +343,31 @@ ssize_t up_progmem_eraseblock(size_t block)
     }
 }
 
+ssize_t up_progmem_ispageerased(size_t page)
+{
+  size_t addr;
+  size_t count;
+  size_t bwritten = 0;
+
+  if (page >= STM32WL5_FLASH_NPAGES)
+    {
+      return -EFAULT;
+    }
+
+  /* Verify */
+
+  for (addr = up_progmem_getaddress(page), count = up_progmem_pagesize(page);
+       count; count--, addr++)
+    {
+      if (getreg8(addr) != FLASH_ERASEDVALUE)
+        {
+          bwritten++;
+        }
+    }
+
+  return bwritten;
+}
+
 ssize_t up_progmem_write(size_t addr, const void *buf, size_t buflen)
 {
   uint32_t *dest;
@@ -367,6 +376,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t buflen)
   size_t xfrsize;
   size_t offset;
   size_t page;
+  bool set_pg_bit = false;
   int i;
   int ret = OK;
 
@@ -393,7 +403,11 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t buflen)
   dest = (uint32_t *)((uint8_t *)addr - offset);
   written = 0;
 
-  sem_lock();
+  ret = sem_lock();
+  if (ret < 0)
+    {
+      return (ssize_t)ret;
+    }
 
   /* Get flash ready and begin flashing. */
 
@@ -445,6 +459,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t buflen)
       /* Write the page. Must be with double-words. */
 
       modifyreg32(STM32WL5_FLASH_CR, 0, FLASH_CR_PG);
+      set_pg_bit = true;
 
       for (i = 0; i < FLASH_PAGE_WORDS; i += 2)
         {
@@ -460,7 +475,6 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t buflen)
 
           if (getreg32(STM32WL5_FLASH_SR) & FLASH_SR_WRITE_PROTECTION_ERROR)
             {
-              modifyreg32(STM32WL5_FLASH_CR, FLASH_CR_PG, 0);
               ret = -EROFS;
               goto out;
             }
@@ -468,13 +482,13 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t buflen)
           if (getreg32(dest - 1) != *(src - 1) ||
               getreg32(dest - 2) != *(src - 2))
             {
-              modifyreg32(STM32WL5_FLASH_CR, FLASH_CR_PG, 0);
               ret = -EIO;
               goto out;
             }
         }
 
       modifyreg32(STM32WL5_FLASH_CR, FLASH_CR_PG, 0);
+      set_pg_bit = false;
 
       /* Adjust pointers and counts for the next time through the loop */
 
@@ -487,19 +501,29 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t buflen)
     }
 
 out:
-  /* If there was an error, clear all error flags in status
-   * register (rc_w1 register so do this by writing the
-   * error bits).
+  if (set_pg_bit)
+    {
+      modifyreg32(STM32WL5_FLASH_CR, FLASH_CR_PG, 0);
+    }
+
+  /* If there was an error, clear all error flags in status register (rc_w1
+   * register so do this by writing the error bits).
    */
 
   if (ret != OK)
     {
-      ferr("flash write error: %d, status: 0x%x\n", ret,
-           (unsigned)getreg32(STM32WL5_FLASH_SR));
+      ferr("flash write error: %d, status: 0x%" PRIx32 "\n",
+           ret, getreg32(STM32WL5_FLASH_SR));
+
       modifyreg32(STM32WL5_FLASH_SR, 0, FLASH_SR_ALLERRS);
     }
 
   flash_lock();
   sem_unlock();
   return (ret == OK) ? written : ret;
+}
+
+uint8_t up_progmem_erasestate(void)
+{
+  return FLASH_ERASEDVALUE;
 }
