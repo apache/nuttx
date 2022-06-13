@@ -250,12 +250,7 @@ static void ramlog_initbuf(void)
     {
       cur = priv->rl_buffer[i];
 
-      if (!isascii(cur))
-        {
-          memset(priv->rl_buffer, 0, priv->rl_bufsize);
-          break;
-        }
-      else if (prev && !cur)
+      if (prev && !cur)
         {
           priv->rl_head = i;
           is_empty = false;
