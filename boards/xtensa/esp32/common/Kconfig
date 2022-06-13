@@ -60,6 +60,35 @@ choice ESP32_SPIFLASH_FS
 
 endchoice
 
+if LCD_SSD1680
+config SSD1680_GPIO_PIN_RST
+	int "Pin that handles the reset line (output)"
+	default "12" if ARCH_BOARD_TTGO_T5V2_ESP32
+
+config SSD1680_GPIO_PIN_BUSY
+	int "Pin that handles the busy line (input)"
+	default "4" if ARCH_BOARD_TTGO_T5V2_ESP32
+
+config SSD1680_GPIO_PIN_PWR
+	int "Pin that handles the pwr on/off line (output)"
+	default "-1" if ARCH_BOARD_TTGO_T5V2_ESP32
+
+config SSD1680_GPIO_PIN_CS
+	int "Pin that select the chip on SPI bus"
+	default "5" if ARCH_BOARD_TTGO_T5V2_ESP32
+
+config SSD1680_GPIO_PIN_DTA_CMD
+	int "Pin that switch between command and data on 4-wire SPI bus"
+	default "19" if ARCH_BOARD_TTGO_T5V2_ESP32
+
+config SSD1680_SPI_BUS
+	int "Spi bus no"
+	range 2 3
+	default "3"
+	depends on ESP32_SPI
+
+endif #LCD_SSD1680
+
 config ESP32_LCD_OVERCLOCK
 	bool "Run LCD at higher clock speed than allowed"
 	default n
