@@ -30,4 +30,8 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += stm32_buttons.c
 endif
 
+ifeq ($(CONFIG_ARCH_BOARD_FLASH_MOUNT),y)
+CSRCS += stm32_flash.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
