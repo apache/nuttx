@@ -63,7 +63,15 @@ int unsetenv(FAR const char *name)
   FAR struct task_group_s *group = rtcb->group;
   int idx;
 
-  DEBUGASSERT(name && group);
+  DEBUGASSERT(group);
+
+  /* Check the incoming parameter */
+
+  if (name == NULL || *name == '\0' || strchr(name, '=') != NULL)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
 
   /* Check if the variable exists */
 
