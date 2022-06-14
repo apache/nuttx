@@ -1016,7 +1016,8 @@ struct bcmf_sdio_frame *bcmf_sdio_allocate_frame(FAR struct bcmf_dev_s *priv,
 
   sframe = container_of(entry, struct bcmf_sdio_frame, list_entry);
 
-  sframe->header.len  = HEADER_SIZE + MAX_NETDEV_PKTSIZE;
+  sframe->header.len  = HEADER_SIZE + MAX_NETDEV_PKTSIZE +
+                        CONFIG_NET_GUARDSIZE;
   sframe->header.base = sframe->data;
   sframe->header.data = sframe->data;
   sframe->tx          = tx;
