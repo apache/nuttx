@@ -1099,14 +1099,6 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
       lower->nbuffer = 0;
     }
 
-  upper->state.nbuffer = lower->nbuffer;
-  sninfo("Registering %s\n", path);
-  ret = register_driver(path, &g_sensor_fops, 0666, upper);
-  if (ret)
-    {
-      goto drv_err;
-    }
-
 #ifdef CONFIG_SENSORS_RPMSG
   lower = sensor_rpmsg_register(lower, path);
   if (lower == NULL)
@@ -1116,7 +1108,15 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
     }
 #endif
 
+  upper->state.nbuffer = lower->nbuffer;
   upper->lower = lower;
+  sninfo("Registering %s\n", path);
+  ret = register_driver(path, &g_sensor_fops, 0666, upper);
+  if (ret)
+    {
+      goto drv_err;
+    }
+
   return ret;
 
 drv_err:
