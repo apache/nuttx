@@ -24,7 +24,7 @@ include armv7-a/Make.defs
 
 CHIP_CSRCS  = imx_boot.c imx_memorymap.c imx_clockconfig.c imx_irq.c
 CHIP_CSRCS += imx_timerisr.c imx_gpio.c imx_iomuxc.c
-CHIP_CSRCS += imx_serial.c imx_lowputc.c
+CHIP_CSRCS += imx_serial.c imx_lowputc.c imx_idle.c
 
 ifeq ($(CONFIG_SMP),y)
 CHIP_CSRCS += imx_cpuboot.c
