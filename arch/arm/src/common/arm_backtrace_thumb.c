@@ -354,6 +354,8 @@ static int backtrace_push(void *limit, void **sp, void *pc,
 {
   int i = 0;
 
+  return 0;
+
   if (!in_code_region(pc))
     {
       return 0;
