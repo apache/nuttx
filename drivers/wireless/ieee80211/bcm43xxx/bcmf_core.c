@@ -25,6 +25,9 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #include <assert.h>
 #include <debug.h>
 #include <errno.h>
@@ -328,24 +331,107 @@ errout_with_file:
 
 int bcmf_upload_nvram(FAR struct bcmf_sdio_dev_s *sbus)
 {
-  int ret;
-  uint32_t nvram_sz;
+  FAR uint8_t *nvram_buf = sbus->chip->nvram_image;
+  uint32_t nvram_sz = *sbus->chip->nvram_image_size;
   uint32_t token;
+  int ret;
+
+#ifdef CONFIG_IEEE80211_BROADCOM_FWFILES
+  FAR const char *nvfile = CONFIG_IEEE80211_BROADCOM_NVFILENAME;
+  bool skipline = false;
+  struct file finfo;
+  struct stat stat;
+  FAR uint8_t *buf;
+  int i;
+
+  if (strlen(nvfile) <= 0)
+    {
+      goto out;
+    }
+
+  ret = file_open(&finfo, nvfile, O_RDONLY);
+  if (ret < 0)
+    {
+      goto out;
+    }
+
+  ret = file_fstat(&finfo, &stat);
+  if (ret < 0 || stat.st_size <= 0)
+    {
+      goto out;
+    }
+
+  /* Round up the ram buffer size */
+
+  stat.st_size = (stat.st_size + 63) & (~63);
+
+  buf = (FAR uint8_t *)kmm_malloc(stat.st_size);
+  if (buf == NULL)
+    {
+      goto out;
+    }
+
+  /* Convert text pattern:
+   *  1. Remove the comment line (Prefix with '#')
+   *  2. Convert LF('\n') to NULL'\0'
+   */
+
+  ret = file_read(&finfo, buf, stat.st_size);
+  if (ret <= 0)
+    {
+      kmm_free(buf);
+      goto out;
+    }
+
+  nvram_buf = buf;
+
+  for (i = 0; i < ret; i++)
+    {
+      if (nvram_buf[i] == '\n')
+        {
+          if (buf != nvram_buf && *(buf - 1) != '\0')
+            {
+              *buf++ = '\0';
+            }
+
+          skipline = false;
+        }
+      else if (nvram_buf[i] == '#')
+        {
+          skipline = true;
+        }
+      else if (!skipline && (nvram_buf + i) != buf)
+        {
+          *buf++ = nvram_buf[i];
+        }
+    }
+
+  nvram_sz = buf - nvram_buf;
+
+out:
+  file_close(&finfo);
+#endif
 
   /* Round up the size of the image */
 
-  nvram_sz = (*sbus->chip->nvram_image_size + 63) & (-64);
+  nvram_sz = (nvram_sz + 63) & (~63);
 
-  wlinfo("nvram size is %" PRId32 " %d bytes\n",
-         nvram_sz, *sbus->chip->nvram_image_size);
+  wlinfo("nvram size is %" PRId32 " bytes\n", nvram_sz);
 
   /* Write image */
 
   ret = bcmf_upload_binary(sbus,
                            sbus->chip->ram_size - 4 - nvram_sz
                            + sbus->chip->ram_base,
-                           sbus->chip->nvram_image,
-                           *sbus->chip->nvram_image_size);
+                           nvram_buf, nvram_sz);
+
+#ifdef CONFIG_IEEE80211_BROADCOM_FWFILES
+  if (nvram_buf != sbus->chip->nvram_image)
+    {
+      kmm_free(nvram_buf);
+    }
+#endif
+
   if (ret != OK)
     {
       return ret;
@@ -358,15 +444,9 @@ int bcmf_upload_nvram(FAR struct bcmf_sdio_dev_s *sbus)
 
   /* Write the length token to the last word */
 
-  ret = bcmf_write_sbreg(sbus,
-                         sbus->chip->ram_size - 4 + sbus->chip->ram_base,
-                         (FAR uint8_t *)&token, 4);
-  if (ret != OK)
-    {
-      return ret;
-    }
-
-  return OK;
+  return bcmf_write_sbreg(sbus,
+                          sbus->chip->ram_size - 4 + sbus->chip->ram_base,
+                          (FAR uint8_t *)&token, 4);
 }
 
 /****************************************************************************
