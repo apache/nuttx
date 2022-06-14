@@ -91,6 +91,15 @@ config IEEE80211_BROADCOM_FWFILENAME
 		provides the full path to the file on a mounted file system where
 		the firmware can be found.
 
+config IEEE80211_BROADCOM_NVFILENAME
+	string "Firmware file"
+	default "/mnt/sdcard/nvram.bin"
+	depends on IEEE80211_BROADCOM_FWFILES
+	---help---
+		If firmware files are provided on a file system, then this option
+		provides the full path to the file on a mounted file system where
+		the firmware can be found.
+
 config IEEE80211_BROADCOM_FWCLMNAME
 	string "CLM file"
 	default "/mnt/sdcard/blob.bin"
