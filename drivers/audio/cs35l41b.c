@@ -2778,7 +2778,7 @@ static int cs35l41b_power(FAR struct cs35l41b_dev_s *priv,
   if (ret == OK)
     {
       priv->state = next_state;
-      audwarn("power state:%d\n", priv->state);
+      syslog(LOG_WARNING, "---cs35l41b power state:%d---\n", priv->state);
     }
 
   return ret;
