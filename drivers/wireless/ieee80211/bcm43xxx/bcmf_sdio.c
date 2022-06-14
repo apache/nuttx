@@ -75,8 +75,8 @@
 
 /* Supported chip configurations */
 
-#ifdef CONFIG_IEEE80211_BROADCOM_BCM43013
-  extern const struct bcmf_sdio_chip bcmf_43013_config_sdio;
+#ifdef CONFIG_IEEE80211_BROADCOM_BCM4301X
+  extern const struct bcmf_sdio_chip bcmf_4301x_config_sdio;
 #endif
 #ifdef CONFIG_IEEE80211_BROADCOM_BCM43362
   extern const struct bcmf_sdio_chip bcmf_43362_config_sdio;
@@ -816,10 +816,11 @@ int bcmf_chipinitialize(FAR struct bcmf_sdio_dev_s *sbus)
 
   switch (chipid)
     {
-#ifdef CONFIG_IEEE80211_BROADCOM_BCM43013
+#ifdef CONFIG_IEEE80211_BROADCOM_BCM4301X
+      case SDIO_DEVICE_ID_BROADCOM_43012:
       case SDIO_DEVICE_ID_BROADCOM_43013:
-        wlinfo("bcm43013 chip detected\n");
-        sbus->chip = (struct bcmf_sdio_chip *)&bcmf_43013_config_sdio;
+        wlinfo("bcm%d chip detected\n", chipid);
+        sbus->chip = (struct bcmf_sdio_chip *)&bcmf_4301x_config_sdio;
         break;
 #endif
 
