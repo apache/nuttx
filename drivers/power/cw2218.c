@@ -59,6 +59,7 @@
 #define CW2218_REG_TEMPMAX_DEFAULT_VALUE  0xFF /* Maximum temperature threshold register default value */
 #define CW2218_REG_TEMPMIN_DEFAULT_VALUE  0x14 /* Minimum temperature threshold register default value */
 #define CW2218_TEMP_ERROR_DEFAULT_VALUE   -10  /* default temperature return when error */
+#define CW2218_INIT_FAIL_DEFAULT_VALUE     80  /* default temperature return when gauge init failed */
 
 /****************************************************************************
  * Private
@@ -492,10 +493,15 @@ static inline int cw2218_gettemp(FAR struct cw2218_dev_s *priv, b8_t *temp)
             CW2218_TEMP_MAGIC_PART2 - CW2218_TEMP_MAGIC_PART3;
           *temp = cw_temp;
         }
-      else /* error occurred */
+      else if (priv->gauge_init_status) /* error occurred */
         {
           baterr("cw2218 get abnormal temp:%d\n", regval);
           *temp = CW2218_TEMP_ERROR_DEFAULT_VALUE;
+        }
+      else
+        {
+          baterr("cw2218 init failed get temp:%d\n", regval);
+          *temp = CW2218_INIT_FAIL_DEFAULT_VALUE;
         }
     }
 
