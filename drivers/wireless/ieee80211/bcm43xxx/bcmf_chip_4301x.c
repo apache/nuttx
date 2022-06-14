@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/ieee80211/bcm43xxx/bcmf_chip_43013.c
+ * drivers/wireless/ieee80211/bcm43xxx/bcmf_chip_4301x.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -37,15 +37,15 @@
  * Public Data
  ****************************************************************************/
 
-extern const char bcm43013_nvram_image[];
-extern const unsigned int bcm43013_nvram_image_len;
+extern const char bcm4301x_nvram_image[];
+extern const unsigned int bcm4301x_nvram_image_len;
 
 #ifndef CONFIG_IEEE80211_BROADCOM_FWFILES
-extern const uint8_t bcm43013_firmware_image[];
-extern const unsigned int bcm43013_firmware_image_len;
+extern const uint8_t bcm4301x_firmware_image[];
+extern const unsigned int bcm4301x_firmware_image_len;
 #endif
 
-const struct bcmf_sdio_chip bcmf_43013_config_sdio =
+const struct bcmf_sdio_chip bcmf_4301x_config_sdio =
 {
   /* General chip stats */
 
@@ -69,12 +69,12 @@ const struct bcmf_sdio_chip bcmf_43013_config_sdio =
 
   /* TODO find something smarter than using image_len references */
 
-  .nvram_image         = (FAR uint8_t *)bcm43013_nvram_image,
-  .nvram_image_size    = (FAR unsigned int *)&bcm43013_nvram_image_len,
+  .nvram_image         = (FAR uint8_t *)bcm4301x_nvram_image,
+  .nvram_image_size    = (FAR unsigned int *)&bcm4301x_nvram_image_len,
 
 #ifndef CONFIG_IEEE80211_BROADCOM_FWFILES
-  .firmware_image      = (FAR uint8_t *)bcm43013_firmware_image,
-  .firmware_image_size = (FAR unsigned int *)&bcm43013_firmware_image_len,
+  .firmware_image      = (FAR uint8_t *)bcm4301x_firmware_image,
+  .firmware_image_size = (FAR unsigned int *)&bcm4301x_firmware_image_len,
 #endif
 };
 
