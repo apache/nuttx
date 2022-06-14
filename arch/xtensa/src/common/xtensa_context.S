@@ -91,13 +91,11 @@
  *
  * Entry Conditions:
  *   - A0  = Return address to caller.
- *   - A2  = Pointer to the processor state save area
  *   - Other processor state except PC, PS, A0, A1 (SP), A2 and A3 are as at
  *     the point of interruption.
  *
  * Exit conditions:
  *   - A0  = Return address in caller.
- *   - A2, A12-A15 as at entry (preserved).
  *
  * Assumptions:
  *   - Caller is expected to have saved PC, PS, A0, A1 (SP), and A2.
