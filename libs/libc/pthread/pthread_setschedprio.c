@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/spawn/lib_psa_init.c
+ * libs/libc/pthread/pthread_setschedprio.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,8 +24,8 @@
 
 #include <nuttx/config.h>
 
-#include <spawn.h>
-#include <assert.h>
+#include <sys/types.h>
+#include <pthread.h>
 
 #include <nuttx/sched.h>
 
@@ -34,73 +34,55 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: posix_spawnattr_init
+ * Name:  pthread_setsetprio
  *
  * Description:
- *   The posix_spawnattr_init() function initializes the object referenced
- *   by attr, to an empty set of spawn attributes for subsequent use in a
- *   call to posix_spawn() or posix_spawnp().
+ *   The pthread_setschedprio() function sets the scheduling priority for
+ *   the thread whose thread ID is given by 'thread' to the value given by
+ *   'prio'.  If the  thread_setschedprio() function fails, the scheduling
+ *   priority of the target thread will not be changed.
  *
  * Input Parameters:
- *   attr - The address of the spawn attributes to be initialized.
+ *   thread - the thread ID of the task to reprioritize.
+ *   prio - The new thread priority.  The range of valid priority numbers is
+ *     from SCHED_PRIORITY_MIN through SCHED_PRIORITY_MAX.
  *
  * Returned Value:
- *   On success, these functions return 0; on failure they return an error
- *   number from <errno.h>.
+ *    OK if successful, otherwise an error number.  This function can
+ *    fail for the following reasons:
+ *
+ *    EINVAL - prio is out of range.
+ *    ESRCH  - thread ID does not correspond to any thread.
+ *
+ * Assumptions:
  *
  ****************************************************************************/
 
-int posix_spawnattr_init(posix_spawnattr_t *attr)
+int pthread_setschedprio(pthread_t thread, int prio)
 {
   struct sched_param param;
   int ret;
 
-  DEBUGASSERT(attr);
-
-  /* Flags: None */
-
-  attr->flags = 0;
-
-  /* Set the default priority to the same priority as this task */
-
-  ret = nxsched_get_param(0, &param);
-  if (ret < 0)
-    {
-      return -ret;
-    }
-
-  attr->priority            = param.sched_priority;
-
-  /* Set the default scheduler policy to the policy of this task */
-
-  ret = nxsched_get_scheduler(0);
-  if (ret < 0)
-    {
-      return -ret;
-    }
-
-  attr->policy              = ret;
-
-  /* Empty signal mask */
-
-  attr->sigmask             = 0;
-
 #ifdef CONFIG_SCHED_SPORADIC
-  /* Sporadic scheduling parameters */
+  /* Get the current sporadic scheduling parameters.  Those will not be
+   * modified.
+   */
 
-  attr->low_priority        = (uint8_t)param.sched_ss_low_priority;
-  attr->max_repl            = (uint8_t)param.sched_ss_max_repl;
-  attr->repl_period.tv_sec  = param.sched_ss_repl_period.tv_sec;
-  attr->repl_period.tv_nsec = param.sched_ss_repl_period.tv_nsec;
-  attr->budget.tv_sec       = param.sched_ss_init_budget.tv_sec;
-  attr->budget.tv_nsec      = param.sched_ss_init_budget.tv_nsec;
+  ret = nxsched_get_param((pid_t)thread, &param);
+  if (ret < 0)
+    {
+      return -ret;
+    }
 #endif
 
-#ifndef CONFIG_ARCH_ADDRENV
-  /* Default stack size */
+  /* Call nxsched_set_param() to change the priority */
 
-  attr->stacksize           = CONFIG_TASK_SPAWN_DEFAULT_STACKSIZE;
-#endif
+  param.sched_priority = prio;
+  ret = nxsched_set_param((pid_t)thread, &param);
+  if (ret < 0)
+    {
+      return -ret;
+    }
 
   return OK;
 }

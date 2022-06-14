@@ -818,7 +818,7 @@ int nxsched_initialize_sporadic(FAR struct tcb_s *tcb)
  *     - When establishing sporadic scheduling policy via
  *       sched_setscheduler()
  *     - When the sporadic scheduling parameters are changed via
- *       sched_setparam().
+ *       nxsched_set_param().
  *
  * Input Parameters:
  *   tcb - The TCB of the thread that is beginning sporadic scheduling.
@@ -905,7 +905,7 @@ int nxsched_stop_sporadic(FAR struct tcb_s *tcb)
  *   function is called in the following circumstances:
  *
  *     - When the sporadic scheduling parameters are changed via
- *       sched_setparam()
+ *       nxsched_set_param()
  *     - From nxsched_stop_sporadic when under those conditions.
  *
  * Input Parameters:

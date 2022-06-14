@@ -133,43 +133,6 @@
 #define SPORADIC_FLAG_REPLENISH    (1 << 2)                      /* Bit 2: Replenishment cycle */
                                                                  /* Bits 3-7: Available */
 
-/* Most internal nxsched_* interfaces are not available in the user space in
- * PROTECTED and KERNEL builds.  In that context, the application semaphore
- * interfaces must be used.  The differences between the two sets of
- * interfaces are:  (1) the nxsched_* interfaces do not cause cancellation
- * points and (2) they do not modify the errno variable.
- *
- * This is only important when compiling libraries (libc or libnx) that are
- * used both by the OS (libkc.a and libknx.a) or by the applications
- * (libc.a and libnx.a).  In that case, the correct interface must be
- * used for the build context.
- *
- * REVISIT:  In the flat build, the same functions must be used both by
- * the OS and by applications.  We have to use the normal user functions
- * in this case or we will fail to set the errno or fail to create the
- * cancellation point.
- */
-
-#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
-#  define _SCHED_GETPARAM(t,p)       nxsched_get_param(t,p)
-#  define _SCHED_SETPARAM(t,p)       nxsched_set_param(t,p)
-#  define _SCHED_GETSCHEDULER(t)     nxsched_get_scheduler(t)
-#  define _SCHED_SETSCHEDULER(t,s,p) nxsched_set_scheduler(t,s,p)
-#  define _SCHED_GETAFFINITY(t,c,m)  nxsched_get_affinity(t,c,m)
-#  define _SCHED_SETAFFINITY(t,c,m)  nxsched_set_affinity(t,c,m)
-#  define _SCHED_ERRNO(r)            (-(r))
-#  define _SCHED_ERRVAL(r)           (r)
-#else
-#  define _SCHED_GETPARAM(t,p)       sched_getparam(t,p)
-#  define _SCHED_SETPARAM(t,p)       sched_setparam(t,p)
-#  define _SCHED_GETSCHEDULER(t)     sched_getscheduler(t)
-#  define _SCHED_SETSCHEDULER(t,s,p) sched_setscheduler(t,s,p)
-#  define _SCHED_GETAFFINITY(t,c,m)  sched_getaffinity(t,c,m)
-#  define _SCHED_SETAFFINITY(t,c,m)  sched_setaffinity(t,c,m)
-#  define _SCHED_ERRNO(r)            errno
-#  define _SCHED_ERRVAL(r)           (-errno)
-#endif
-
 #ifdef CONFIG_DEBUG_TCBINFO
 #  define TCB_PID_OFF                offsetof(struct tcb_s, pid)
 #  define TCB_STATE_OFF              offsetof(struct tcb_s, task_state)
@@ -1113,7 +1076,7 @@ void nxsched_suspend_scheduler(FAR struct tcb_s *tcb);
  ****************************************************************************/
 
 struct sched_param;  /* Forward reference */
-int nxsched_get_param (pid_t pid, FAR struct sched_param *param);
+int nxsched_get_param(pid_t pid, FAR struct sched_param *param);
 
 /****************************************************************************
  * Name:  nxsched_set_param
@@ -1257,7 +1220,7 @@ int nxsched_get_affinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask);
  * Name: nxsched_set_affinity
  *
  * Description:
- *   sched_setaffinity() sets the CPU affinity mask of the thread whose ID
+ *   nxsched_set_affinity() sets the CPU affinity mask of the thread whose ID
  *   is pid to the value specified by mask.  If pid is zero, then the
  *   calling thread is used.  The argument cpusetsize is the length (i
  *   bytes) of the data pointed to by mask.  Normally this argument would

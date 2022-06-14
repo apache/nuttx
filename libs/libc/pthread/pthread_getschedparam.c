@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread/pthread_getschedparam.c
+ * libs/libc/pthread/pthread_getschedparam.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -26,13 +26,10 @@
 
 #include <sys/types.h>
 #include <pthread.h>
-#include <sched.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/sched.h>
-
-#include "pthread/pthread.h"
 
 /****************************************************************************
  * Public Functions

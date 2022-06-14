@@ -40,7 +40,7 @@ CSRCS += pthread_barrierinit.c pthread_barrierdestroy.c pthread_barrierwait.c
 CSRCS += pthread_condattr_init.c pthread_condattr_destroy.c
 CSRCS += pthread_condattr_setclock.c pthread_condattr_getclock.c
 CSRCS += pthread_condinit.c pthread_conddestroy.c pthread_condtimedwait.c
-CSRCS += pthread_create.c pthread_exit.c
+CSRCS += pthread_create.c pthread_exit.c pthread_setschedprio.c
 CSRCS += pthread_setname_np.c pthread_getname_np.c
 CSRCS += pthread_get_stackaddr_np.c pthread_get_stacksize_np.c
 CSRCS += pthread_mutexattr_init.c pthread_mutexattr_destroy.c
@@ -48,13 +48,14 @@ CSRCS += pthread_mutexattr_getpshared.c pthread_mutexattr_setpshared.c
 CSRCS += pthread_mutexattr_setprotocol.c pthread_mutexattr_getprotocol.c
 CSRCS += pthread_mutexattr_settype.c pthread_mutexattr_gettype.c
 CSRCS += pthread_mutexattr_setrobust.c pthread_mutexattr_getrobust.c
-CSRCS += pthread_mutex_lock.c
+CSRCS += pthread_mutex_lock.c pthread_getschedparam.c pthread_setschedparam.c
 CSRCS += pthread_once.c pthread_yield.c pthread_atfork.c
 CSRCS += pthread_rwlock.c pthread_rwlock_rdlock.c pthread_rwlock_wrlock.c
 CSRCS += pthread_setcancelstate.c pthread_setcanceltype.c
 CSRCS += pthread_testcancel.c
 
 ifeq ($(CONFIG_SMP),y)
+CSRCS += pthread_getaffinity.c pthread_setaffinity.c
 CSRCS += pthread_attr_getaffinity.c pthread_attr_setaffinity.c
 endif
 

@@ -20,16 +20,17 @@
 
 # Add the sched C files to the build
 
-CSRCS += sched_getprioritymax.c sched_getprioritymin.c
-CSRCS += clock_ticks2time.c clock_time2ticks.c
+CSRCS += sched_getprioritymax.c sched_getprioritymin.c sched_getscheduler.c
+CSRCS += sched_setscheduler.c clock_ticks2time.c clock_time2ticks.c
 CSRCS += clock_timespec_add.c clock_timespec_subtract.c
+CSRCS += sched_getparam.c sched_setparam.c
 
 ifneq ($(CONFIG_CANCELLATION_POINTS),y)
 CSRCS += task_setcanceltype.c task_testcancel.c
 endif
 
 ifeq ($(CONFIG_SMP),y)
-CSRCS += sched_cpucount.c
+CSRCS += sched_cpucount.c sched_getaffinity.c sched_setaffinity.c
 endif
 
 ifneq ($(CONFIG_BUILD_KERNEL),y)

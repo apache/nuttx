@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sched/sched_getaffinity.c
+ * sched/sched/sched_get_affinity.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -52,7 +52,7 @@
  *
  *   This is a non-standard, internal OS function and is not intended for
  *   use by application logic.  Applications should use the standard
- *   sched_getparam().
+ *   sched_getaffinity().
  *
  * Input Parameters:
  *   pid        - The ID of thread whose affinity set will be retrieved.
@@ -98,42 +98,5 @@ int nxsched_get_affinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask)
     }
 
   sched_unlock();
-  return ret;
-}
-
-/****************************************************************************
- * Name: sched_getaffinity
- *
- * Description:
- *   sched_getaffinity() writes the affinity mask of the thread whose ID
- *   is pid into the cpu_set_t pointed to by mask.  The  cpusetsize
- *   argument specifies the size (in bytes) of mask.  If pid is zero, then
- *   the mask of the calling thread is returned.
- *
- *   This function is a simply wrapper around nxsched_get_affinity() that
- *   sets the errno value in the event of an error.
- *
- * Input Parameters:
- *   pid        - The ID of thread whose affinity set will be retrieved.
- *   cpusetsize - Size of mask.  MUST be sizeofcpu_set_t().
- *   mask       - The location to return the thread's new affinity set.
- *
- * Returned Value:
- *   0 if successful.  Otherwise, ERROR (-1) is returned, and errno is
- *   set appropriately:
- *
- *      ESRCH  The task whose ID is pid could not be found.
- *
- ****************************************************************************/
-
-int sched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask)
-{
-  int ret = nxsched_get_affinity(pid, cpusetsize, mask);
-  if (ret < 0)
-    {
-      set_errno(-ret);
-      ret = ERROR;
-    }
-
   return ret;
 }
