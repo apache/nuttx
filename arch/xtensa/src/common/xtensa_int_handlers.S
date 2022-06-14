@@ -110,9 +110,8 @@ g_intstacktop:
  *   a12   - register save area
  *
  * Exit Conditions:
- *   This macro will use registers a0 and a2-a5 and a2.
- *   a1 - May point to the new thread's SP
- *   a2 - Points to the register save area (which may not be on the stack).
+ *   This macro will use registers a2, a3 and a4.
+ *   a2 - Points to the, possbily, new register save area.
  *
  ****************************************************************************/
 
@@ -131,7 +130,7 @@ g_intstacktop:
 
 	ps_setup	\level \tmp
 
-	/* Get mask of pending, enabled interrupts at this level into a2. */
+	/* Get the mask of pending, enabled interrupts at this level. */
 
 	rsr    ARG1, INTENABLE
 	rsr    a3, INTERRUPT
@@ -156,7 +155,7 @@ g_intstacktop:
 	 * a context switch, it will instead refer to the TCB register save area.
 	 */
 
-	mov		a2, RETVAL					/* Switch to the save area of the new thread */
+	mov		a2, RETVAL
 
 #if CONFIG_ARCH_INTERRUPTSTACK < 15
 	addi	sp, sp, XCPTCONTEXT_SIZE
@@ -187,7 +186,7 @@ _xtensa_level1_handler:
 
 	exception_entry 1
 
-	/* Save rest of interrupt context. */
+	/* Save the rest of the state context. */
 
 	call0	_xtensa_context_save
 
@@ -207,15 +206,14 @@ _xtensa_level1_handler:
 	/* Decode and dispatch the interrupt.  In the event of an interrupt
 	 * level context dispatch_c_isr() will (1) switch stacks to the new
 	 * thread's and (2) provide the address of the register state save
-	 * area in a2.  NOTE that the state save area may or may not lie
-	 * in the new thread's stack.
+	 * area in a2.
 	 */
 
 	dispatch_c_isr	1 XCHAL_INTLEVEL1_MASK a0
 
 	/* Restore registers in preparation to return from interrupt */
 
-	call0   _xtensa_context_restore     /* (preserves a2) */
+	call0   _xtensa_context_restore     /* Preserves a2 */
 
 	/* Restore only level-specific regs (the rest were already restored) */
 
@@ -226,7 +224,7 @@ _xtensa_level1_handler:
 	 * jumps to the address in EPC[1]. PS.UM and PS.WOE are left unchanged.
 	 */
 
-	rfe                                 /* And return from "exception" */
+	rfe
 
 /****************************************************************************
  * MEDIUM PRIORITY (LEVEL 2+) INTERRUPT LOW LEVEL HANDLERS.
@@ -266,7 +264,7 @@ _xtensa_level2_handler:
 
 	exception_entry 2
 
-	/* Save rest of interrupt context. */
+	/* Save the rest of the state context. */
 
 	call0	_xtensa_context_save
 
@@ -286,21 +284,20 @@ _xtensa_level2_handler:
 	/* Decode and dispatch the interrupt.  In the event of an interrupt
 	 * level context dispatch_c_isr() will (1) switch stacks to the new
 	 * thread's and (2) provide the address of the register state save
-	 * area in a2.  NOTE that the state save area may or may not lie
-	 * in the new thread's stack.
+	 * area in a2.
 	 */
 
 	dispatch_c_isr	2 XCHAL_INTLEVEL2_MASK a0
 
 	/* Restore registers in preparation to return from interrupt */
 
-	call0	_xtensa_context_restore			/* (preserves a2) */
+	call0	_xtensa_context_restore			/* Preserves a2 */
 
 	/* Restore only level-specific regs (the rest were already restored) */
 
 	exception_exit 2
 
-	/* Return from interrupt.  RFI  restores the PS from EPS_2 and jumps to
+	/* Return from interrupt.  RFI restores the PS from EPS_2 and jumps to
 	 * the address in EPC_2.
 	 */
 
@@ -316,11 +313,11 @@ _xtensa_level2_handler:
 
 _xtensa_level3_handler:
 
-	/* Create interrupt frame and save minimal context. */
+	/* Create an interrupt frame and save minimal context. */
 
 	exception_entry 3
 
-	/* Save rest of interrupt context. */
+	/* Save the rest of the state context. */
 
 	call0	_xtensa_context_save
 
@@ -340,21 +337,20 @@ _xtensa_level3_handler:
 	/* Decode and dispatch the interrupt.  In the event of an interrupt
 	 * level context dispatch_c_isr() will (1) switch stacks to the new
 	 * thread's and (2) provide the address of the register state save
-	 * area in a2.  NOTE that the state save area may or may not lie
-	 * in the new thread's stack.
+	 * area in a2.
 	 */
 
 	dispatch_c_isr	3 XCHAL_INTLEVEL3_MASK a0
 
 	/* Restore registers in preparation to return from interrupt */
 
-	call0	_xtensa_context_restore			/* (preserves a2) */
+	call0	_xtensa_context_restore			/* Preserves a2 */
 
 	/* Restore only level-specific regs (the rest were already restored) */
 
 	exception_exit 3
 
-	/* Return from interrupt.  RFI  restores the PS from EPS_3 and jumps to
+	/* Return from interrupt.  RFI restores the PS from EPS_3 and jumps to
 	 * the address in EPC_3.
 	 */
 
@@ -370,11 +366,11 @@ _xtensa_level3_handler:
 
 _xtensa_level4_handler:
 
-	/* Create interrupt frame and save minimal context. */
+	/* Create an interrupt frame and save minimal context. */
 
 	exception_entry 4
 
-	/* Save rest of interrupt context. */
+	/* Save the rest of the state context. */
 
 	call0	_xtensa_context_save
 
@@ -394,21 +390,20 @@ _xtensa_level4_handler:
 	/* Decode and dispatch the interrupt.  In the event of an interrupt
 	 * level context dispatch_c_isr() will (1) switch stacks to the new
 	 * thread's and (2) provide the address of the register state save
-	 * area in a2.  NOTE that the state save area may or may not lie
-	 * in the new thread's stack.
+	 * area in a2.
 	 */
 
 	dispatch_c_isr	4 XCHAL_INTLEVEL4_MASK a0
 
 	/* Restore registers in preparation to return from interrupt */
 
-	call0	_xtensa_context_restore			/* (preserves a2) */
+	call0	_xtensa_context_restore			/* Preserves a2 */
 
 	/* Restore only level-specific regs (the rest were already restored) */
 
 	exception_exit 4
 
-	/* Return from interrupt.  RFI  restores the PS from EPS_4 and jumps to
+	/* Return from interrupt.  RFI restores the PS from EPS_4 and jumps to
 	 * the address in EPC_4.
 	 */
 
@@ -424,11 +419,11 @@ _xtensa_level4_handler:
 
 _xtensa_level5_handler:
 
-	/* Create interrupt frame and save minimal context. */
+	/* Create an interrupt frame and save minimal context. */
 
 	exception_entry 5
 
-	/* Save rest of interrupt context. */
+	/* Save the rest of the state context. */
 
 	call0	_xtensa_context_save
 
@@ -448,21 +443,20 @@ _xtensa_level5_handler:
 	/* Decode and dispatch the interrupt.  In the event of an interrupt
 	 * level context dispatch_c_isr() will (1) switch stacks to the new
 	 * thread's and (2) provide the address of the register state save
-	 * area in a2.  NOTE that the state save area may or may not lie
-	 * in the new thread's stack.
+	 * area in a2.
 	 */
 
 	dispatch_c_isr	5 XCHAL_INTLEVEL5_MASK a0
 
 	/* Restore registers in preparation to return from interrupt */
 
-	call0	_xtensa_context_restore			/* (preserves a2) */
+	call0	_xtensa_context_restore			/* Preserves a2 */
 
 	/* Restore only level-specific regs (the rest were already restored) */
 
 	exception_exit 5
 
-	/* Return from interrupt.  RFI  restores the PS from EPS_5 and jumps to
+	/* Return from interrupt.  RFI restores the PS from EPS_5 and jumps to
 	 * the address in EPC_5.
 	 */
 
@@ -478,11 +472,11 @@ _xtensa_level5_handler:
 
 _xtensa_level6_handler:
 
-	/* Create interrupt frame and save minimal context. */
+	/* Create an interrupt frame and save minimal context. */
 
 	exception_entry 6
 
-	/* Save rest of interrupt context. */
+	/* Save the rest of the state context. */
 
 	call0	_xtensa_context_save
 
@@ -502,21 +496,20 @@ _xtensa_level6_handler:
 	/* Decode and dispatch the interrupt.  In the event of an interrupt
 	 * level context dispatch_c_isr() will (1) switch stacks to the new
 	 * thread's and (2) provide the address of the register state save
-	 * area in a2.  NOTE that the state save area may or may not lie
-	 * in the new thread's stack.
+	 * area in a2.
 	 */
 
 	dispatch_c_isr	6 XCHAL_INTLEVEL6_MASK a0
 
 	/* Restore registers in preparation to return from interrupt */
 
-	call0	_xtensa_context_restore			/* (preserves a2) */
+	call0	_xtensa_context_restore			/* Preserves a2 */
 
 	/* Restore only level-specific regs (the rest were already restored) */
 
 	exception_exit 6
 
-	/* Return from interrupt.  RFI  restores the PS from EPS_6 and jumps to
+	/* Return from interrupt.  RFI restores the PS from EPS_6 and jumps to
 	 * the address in EPC_6.
 	 */
 
@@ -571,7 +564,7 @@ _xtensa_level2_handler:
 #if 1
 	/* For now, just panic */
 
-	/* Create interrupt frame and save minimal context. */
+	/* Create an interrupt frame and save minimal context. */
 
 	exception_entry 2
 
@@ -599,7 +592,7 @@ _xtensa_level3_handler:
 #if 1
 	/* For now, just panic */
 
-	/* Create interrupt frame and save minimal context. */
+	/* Create an interrupt frame and save minimal context. */
 
 	exception_entry 3
 
@@ -629,7 +622,7 @@ _xtensa_level4_handler:
 #if 1
 	/* For now, just panic */
 
-	/* Create interrupt frame and save minimal context. */
+	/* Create an interrupt frame and save minimal context. */
 
 	exception_entry 4
 
@@ -659,7 +652,7 @@ _xtensa_level5_handler:
 #if 1
 	/* For now, just panic */
 
-	/* Create interrupt frame and save minimal context. */
+	/* Create an interrupt frame and save minimal context. */
 
 	exception_entry 5
 
@@ -689,7 +682,7 @@ _xtensa_level6_handler:
 #if 1
 	/* For now, just panic */
 
-	/* Create interrupt frame and save minimal context. */
+	/* Create an interrupt frame and save minimal context. */
 
 	exception_entry 6
 

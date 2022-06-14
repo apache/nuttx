@@ -131,7 +131,7 @@
 	.endm
 
 /****************************************************************************
- * Name: exceptin_backtrace
+ * Name: exception_backtrace
  *
  * Description:
  *   Populate the base save area with the pre-exception A0 and SP to be able
