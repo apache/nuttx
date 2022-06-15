@@ -647,7 +647,8 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_SET_INTERVAL:
         {
           nxrmutex_lock(&upper->lock);
-          ret = sensor_update_interval(filep, upper, user, arg);
+          ret = sensor_update_interval(filep, upper, user,
+                                       arg ? arg : ULONG_MAX);
           nxrmutex_unlock(&upper->lock);
         }
         break;
