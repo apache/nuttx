@@ -1094,7 +1094,7 @@ int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
   /* Lock control_mutex semaphore */
 
-  if ((ret = nxsem_wait(&priv->control_mutex)) < 0)
+  if ((ret = nxsem_wait_uninterruptible(&priv->control_mutex)) < 0)
     {
       goto exit_failed;
     }
@@ -1161,7 +1161,7 @@ int bcmf_wl_get_scan_results(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
   /* Lock control_mutex semaphore to avoid race condition */
 
-  if ((ret = nxsem_wait(&priv->control_mutex)) < 0)
+  if ((ret = nxsem_wait_uninterruptible(&priv->control_mutex)) < 0)
     {
       goto exit_failed;
     }

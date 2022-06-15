@@ -880,7 +880,7 @@ int bcmf_sdio_thread(int argc, char **argv)
     {
       /* Wait for event (device interrupt, user request or waitdog timer) */
 
-      ret = nxsem_wait(&sbus->thread_signal);
+      ret = nxsem_wait_uninterruptible(&sbus->thread_signal);
       if (ret < 0)
         {
           wlerr("Error while waiting for semaphore\n");
@@ -977,7 +977,7 @@ struct bcmf_sdio_frame *bcmf_sdio_allocate_frame(FAR struct bcmf_dev_s *priv,
 
   while (1)
     {
-      if (nxsem_wait(&sbus->queue_mutex) < 0)
+      if (nxsem_wait_uninterruptible(&sbus->queue_mutex) < 0)
         {
           DEBUGPANIC();
         }
@@ -1030,7 +1030,7 @@ void bcmf_sdio_free_frame(FAR struct bcmf_dev_s *priv,
 {
   FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
 
-  if (nxsem_wait(&sbus->queue_mutex) < 0)
+  if (nxsem_wait_uninterruptible(&sbus->queue_mutex) < 0)
     {
       DEBUGPANIC();
     }
