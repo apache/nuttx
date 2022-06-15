@@ -64,8 +64,6 @@ struct bcmf_dev_s
   FAR struct bcmf_bus_dev_s *bus; /* Bus interface structure */
 
   bool bc_bifup;             /* true:ifup false:ifdown */
-  struct wdog_s bc_txpoll;   /* TX poll timer */
-  struct work_s bc_irqwork;  /* For deferring interrupt work to the work queue */
   struct work_s bc_rxwork;   /* For deferring rx work to the work queue */
   struct work_s bc_pollwork; /* For deferring poll work to the work queue */
 
