@@ -133,5 +133,24 @@ int board_oneshot_init(int timer, uint16_t resolution);
 int board_i2c_init(void);
 #endif
 
+/****************************************************************************
+ * Name: board_bmp180_initialize
+ *
+ * Description:
+ *   Initialize and register the BMP180 Pressure Sensor driver.
+ *
+ * Input Parameters:
+ *   devno - The device number, used to build the device path as /dev/pressN
+ *   busno - The I2C bus number
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_BMP180
+int board_bmp180_initialize(int devno, int busno);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_XTENSA_ESP32S2_ESP32S2_SAOLA_1_SRC_ESP32S2_SAOLA_1_H */

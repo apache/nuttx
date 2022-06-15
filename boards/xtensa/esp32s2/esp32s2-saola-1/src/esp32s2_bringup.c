@@ -50,6 +50,10 @@
 #  include "esp32s2_tim_lowerhalf.h"
 #endif
 
+#ifdef CONFIG_ESP32S2_I2C
+#  include "esp32s2_i2c.h"
+#endif
+
 #ifdef CONFIG_ESP32S2_RT_TIMER
 #  include "esp32s2_rt_timer.h"
 #endif
@@ -199,6 +203,17 @@ int esp32s2_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize I2C driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_BMP180
+  /* Try to register BMP180 device in I2C0 */
+
+  ret = board_bmp180_initialize(0, ESP32S2_I2C0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "Failed to initialize BMP180 driver for I2C0: %d\n", ret);
     }
 #endif
 
