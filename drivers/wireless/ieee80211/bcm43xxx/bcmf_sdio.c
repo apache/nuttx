@@ -693,9 +693,9 @@ int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
       goto exit_free_bus;
     }
 
-  sq_init(&sbus->tx_queue);
-  sq_init(&sbus->rx_queue);
-  sq_init(&sbus->free_queue);
+  dq_init(&sbus->tx_queue);
+  dq_init(&sbus->rx_queue);
+  dq_init(&sbus->free_queue);
 
   /* Setup free buffer list */
 
