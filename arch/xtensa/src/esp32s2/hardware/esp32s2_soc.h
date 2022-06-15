@@ -190,7 +190,7 @@
 
 /* Helper to place a value in a field */
 
-#define VALUE_TO_FIELD(_value, _field) ((_value << (_field##_S)) & (_field##_M))
+#define VALUE_TO_FIELD(_value, _field) (((_value) << (_field##_S)) & (_field##_M))
 
 /* Periheral Clock */
 
