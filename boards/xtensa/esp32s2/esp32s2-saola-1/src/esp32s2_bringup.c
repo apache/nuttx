@@ -192,6 +192,16 @@ int esp32s2_bringup(void)
 
 #endif /* CONFIG_ONESHOT */
 
+#ifdef CONFIG_I2C_DRIVER
+  /* Configure I2C peripheral interfaces */
+
+  ret = board_i2c_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize I2C driver: %d\n", ret);
+    }
+#endif
+
   /* If we got here then perhaps not all initialization was successful, but
    * at least enough succeeded to bring-up NSH with perhaps reduced
    * capabilities.
