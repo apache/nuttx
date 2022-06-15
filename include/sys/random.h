@@ -50,12 +50,10 @@
  * Name: getrandom
  *
  * Description:
- *   Fill a buffer of arbitrary length with randomness. This is the
- *   preferred interface for getting random numbers. The traditional
- *   /dev/random approach is susceptible for things like the attacker
- *   exhausting file descriptors on purpose.
- *
- *   Note that this function cannot fail, other than by asserting.
+ *   Fill a buffer of arbitrary length with randomness. This uses
+ *   either /dev/random (if GRND_RANDOM flag) or /dev/urandom device and
+ *   is therefore susceptible for things like the attacker exhausting file
+ *   descriptors on purpose.
  *
  * Input Parameters:
  *   bytes  - Buffer for returned random bytes
