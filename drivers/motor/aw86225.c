@@ -104,6 +104,7 @@ struct aw86225_dev_s
   struct aw86225_data_s data;                /* The struct of data */
   int pattern_index;
   uint8_t state;
+  uint8_t pattern_play_cnt;
   FAR struct aw86225_patterns_s *patterns;
   struct wdog_s wdog;
   struct work_s worker;
@@ -1761,12 +1762,16 @@ static void worker_cb(FAR void *arg)
     {
       if (priv->patterns->repeatable)
         {
-          mtrinfo("repeat again\n");
           priv->pattern_index = 0;
         }
       else
         {
-          mtrinfo("exit\n");
+          priv->pattern_play_cnt++;
+          if (priv->pattern_play_cnt >= 50)
+            {
+              syslog(LOG_WARNING, "---aw86225 short pattern play reached 50 times---\n");
+              priv->pattern_play_cnt = 0;
+            }
 
           /* set state idle, play finish */
 
@@ -1828,7 +1833,15 @@ static int aw86225_excute_patterns(FAR struct aw86225_dev_s *priv,
   DEBUGASSERT(priv != NULL && patterns != NULL);
   priv->pattern_index = 0;
   priv->patterns = patterns;
-  mtrinfo("pattern 0 duration %ld\n", patterns->pattern[0].duration);
+
+  /* if pattern play duration is longer than 1 second, print the log */
+
+  if (patterns->pattern[0].duration > 1000 )
+    {
+      syslog(LOG_WARNING, "---aw86225 pattern duration %ld---\n",
+             patterns->pattern[0].duration);
+    }
+
   ret = aw86225_excute_pattern(priv, &patterns->pattern[0]);
   if (ret < 0)
     {
@@ -2237,6 +2250,7 @@ int aw86225_register(FAR const char *devname,
   priv->config = config;
   priv->lower.ops = &g_aw86225_ops;
   priv->state = MOTOR_OPMODE_INIT;
+  priv->pattern_play_cnt = 0;
 
   /* Check Device ID */
 
