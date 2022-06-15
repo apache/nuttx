@@ -117,5 +117,21 @@ int esp32s2_gpio_init(void);
 int board_oneshot_init(int timer, uint16_t resolution);
 #endif
 
+/****************************************************************************
+ * Name: board_i2c_init
+ *
+ * Description:
+ *   Configure the I2C driver.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_I2C_DRIVER
+int board_i2c_init(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_XTENSA_ESP32S2_ESP32S2_SAOLA_1_SRC_ESP32S2_SAOLA_1_H */

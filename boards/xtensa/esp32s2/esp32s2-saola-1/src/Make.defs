@@ -41,6 +41,10 @@ ifeq ($(CONFIG_ONESHOT),y)
 CSRCS += esp32s2_oneshot.c
 endif
 
+ifeq ($(CONFIG_I2C_DRIVER),y)
+CSRCS += esp32s2_board_i2c.c
+endif
+
 SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32s2.template.ld
 SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32s2_out.ld
 
