@@ -351,6 +351,12 @@ config ESP32S3_UART2
 	select UART2_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
+config ESP32S3_USBSERIAL
+        bool "USB-Serial Driver"
+        default n
+        select OTHER_UART_SERIALDRIVER
+        select ARCH_HAVE_SERIAL_TERMIOS
+
 config ESP32S3_TIMER0
 	bool "54-bit Timer 0 (Group 0 Timer 0)"
 	default n
