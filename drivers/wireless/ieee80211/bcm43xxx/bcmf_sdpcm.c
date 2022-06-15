@@ -433,7 +433,7 @@ int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv)
     {
       /* Notify upper layer at least one TX buffer is available */
 
-      bcmf_netdev_notify_tx_done(priv);
+      bcmf_netdev_notify_tx(priv);
     }
 
   return OK;
