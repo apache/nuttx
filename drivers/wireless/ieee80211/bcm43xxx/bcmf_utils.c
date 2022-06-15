@@ -85,7 +85,7 @@ void bcmf_hexdump(uint8_t *data, unsigned int len, unsigned long offset)
 
 int bcmf_sem_wait(sem_t *sem, unsigned int timeout_ms)
 {
-  return nxsem_tickwait(sem, MSEC2TICK(timeout_ms));
+  return nxsem_tickwait_uninterruptible(sem, MSEC2TICK(timeout_ms));
 }
 
 void bcmf_dqueue_push(dq_queue_t *queue, dq_entry_t *entry)
