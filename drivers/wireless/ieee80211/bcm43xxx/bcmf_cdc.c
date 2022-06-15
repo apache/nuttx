@@ -166,7 +166,7 @@ int bcmf_cdc_control_request(FAR struct bcmf_dev_s *priv,
 
   /* Take device control mutex */
 
-  if ((ret = nxsem_wait(&priv->control_mutex)) < 0)
+  if ((ret = nxsem_wait_uninterruptible(&priv->control_mutex)) < 0)
     {
       return ret;
     }
