@@ -773,7 +773,8 @@ int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
 
   /* Spawn bcmf daemon thread */
 
-  ret = kthread_create(BCMF_THREAD_NAME, SCHED_PRIORITY_MAX,
+  ret = kthread_create(BCMF_THREAD_NAME,
+                       CONFIG_IEEE80211_BROADCOM_SCHED_PRIORITY,
                        BCMF_THREAD_STACK_SIZE, bcmf_sdio_thread,
                        (FAR char * const *)NULL);
 
