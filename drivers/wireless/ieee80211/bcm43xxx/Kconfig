@@ -118,6 +118,13 @@ config IEEE80211_BROADCOM_FULLMAC_SDIO
 		This selection enables support for broadcom
 		FullMAC-compliant devices using SDIO bus.
 
+config IEEE80211_BROADCOM_SCHED_PRIORITY
+	int "Broadcom BCMF daemon thread schedule priority"
+	default 255
+	---help---
+		This parameter should be set the bcmf daemon thread
+		schedule priority
+
 if IEEE80211_BROADCOM_FULLMAC
 
 config IEEE80211_BROADCOM_NINTERFACES
