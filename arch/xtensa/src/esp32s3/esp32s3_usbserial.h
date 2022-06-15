@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32s3/esp32s3_config.h
+ * arch/xtensa/src/esp32s3/esp32s3_usbserial.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,52 +18,34 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_CONFIG_H
-#define __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_CONFIG_H
+#ifndef __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_USBSERIAL_H
+#define __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_USBSERIAL_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <arch/chip/chip.h>
-#include <arch/board/board.h>
+#include <nuttx/serial/serial.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Data
  ****************************************************************************/
 
-/* UARTs ********************************************************************/
+extern uart_dev_t g_uart_usbserial;
 
-/* Are any UARTs enabled? */
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
-#undef HAVE_UART_DEVICE
-#ifdef CONFIG_ESP32S3_UART
-#  define HAVE_UART_DEVICE 1
-#endif
+/****************************************************************************
+ * Name: esp32s3_usbserial_write
+ *
+ * Description:
+ *   Write one character through the USB serial.  Used mainly for early
+ *   debugging.
+ *
+ ****************************************************************************/
 
-/* Serial Console ***********************************************************/
+void esp32s3_usbserial_write(char ch);
 
-/* Is there a serial console?  There should be no more than one defined.  It
- * could be on any UARTn. n E {0,1}
- */
-
-#undef CONSOLE_UART
-#if defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(CONFIG_ESP32S3_UART0)
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#  define CONSOLE_UART 1
-#elif defined(CONFIG_UART1_SERIAL_CONSOLE) && defined(CONFIG_ESP32S3_UART1)
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  define CONSOLE_UART 1
-#else
-#  undef CONFIG_UART0_SERIAL_CONSOLE
-#  undef CONFIG_UART1_SERIAL_CONSOLE
-#endif
-
-#ifdef CONFIG_ESP32S3_USBSERIAL
-#  define HAVE_SERIAL_CONSOLE 1
-#  define HAVE_UART_DEVICE 1
-#endif
-
-#endif /* __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_CONFIG_H */
+#endif /* __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_USBSERIAL_H */
