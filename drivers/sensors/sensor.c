@@ -206,6 +206,8 @@ static int sensor_update_interval(FAR struct file *filep,
   FAR struct sensor_lowerhalf_s *lower = upper->lower;
   FAR struct sensor_user_s *tmp;
   unsigned long min_interval = interval;
+  unsigned long min_latency = interval != ULONG_MAX ?
+                              user->latency : ULONG_MAX;
   int ret = 0;
 
   if (interval == user->interval)
@@ -213,14 +215,9 @@ static int sensor_update_interval(FAR struct file *filep,
       return 0;
     }
 
-  if (interval <= upper->state.min_interval)
-    {
-      goto update;
-    }
-
   list_for_every_entry(&upper->userlist, tmp, struct sensor_user_s, node)
     {
-      if (tmp == user)
+      if (tmp == user || tmp->interval == ULONG_MAX)
         {
           continue;
         }
@@ -229,26 +226,39 @@ static int sensor_update_interval(FAR struct file *filep,
         {
           min_interval = tmp->interval;
         }
-    }
 
-update:
-  if (min_interval == upper->state.min_interval)
-    {
-      user->interval = interval;
-      return ret;
-    }
-
-  if (min_interval != ULONG_MAX && lower->ops->set_interval)
-    {
-      ret = lower->ops->set_interval(lower, filep, &min_interval);
-      if (ret < 0)
+      if (min_latency > tmp->latency)
         {
-          return ret;
+          min_latency = tmp->latency;
+        }
+    }
+
+  if (lower->ops->set_interval)
+    {
+      if (min_interval != ULONG_MAX &&
+          min_interval != upper->state.min_interval)
+        {
+          ret = lower->ops->set_interval(lower, filep, &min_interval);
+          if (ret < 0)
+            {
+              return ret;
+            }
         }
 
-      if (upper->state.min_latency != ULONG_MAX)
+      if (min_latency == ULONG_MAX)
         {
-          lower->ops->batch(filep, lower, &upper->state.min_latency);
+          min_latency = 0;
+        }
+
+      if (lower->ops->batch &&
+          (min_latency != upper->state.min_latency ||
+          (min_interval != upper->state.min_interval && min_latency)))
+        {
+          ret = lower->ops->batch(lower, filep, &min_latency);
+          if (ret >= 0)
+            {
+              upper->state.min_latency = min_latency;
+            }
         }
     }
 
@@ -268,13 +278,14 @@ static int sensor_update_latency(FAR struct file *filep,
   unsigned long min_latency = latency;
   int ret = 0;
 
-  if (upper->state.min_interval == 0)
-    {
-      return -EINVAL;
-    }
-
   if (latency == user->latency)
     {
+      return 0;
+    }
+
+  if (user->interval == ULONG_MAX)
+    {
+      user->latency = latency;
       return 0;
     }
 
@@ -285,7 +296,7 @@ static int sensor_update_latency(FAR struct file *filep,
 
   list_for_every_entry(&upper->userlist, tmp, struct sensor_user_s, node)
     {
-      if (tmp == user)
+      if (tmp == user || tmp->interval == ULONG_MAX)
         {
           continue;
         }
@@ -297,13 +308,18 @@ static int sensor_update_latency(FAR struct file *filep,
     }
 
 update:
+  if (min_latency == ULONG_MAX)
+    {
+      min_latency = 0;
+    }
+
   if (min_latency == upper->state.min_latency)
     {
       user->latency = latency;
       return ret;
     }
 
-  if (min_latency != ULONG_MAX && lower->ops->batch)
+  if (lower->ops->batch)
     {
       ret = lower->ops->batch(lower, filep, &min_latency);
       if (ret < 0)
@@ -413,9 +429,8 @@ static int sensor_open(FAR struct file *filep)
       user->generation = upper->state.generation;
     }
 
-  user->interval   = ULONG_MAX;
-  user->latency    = ULONG_MAX;
-  user->readlast   = true;
+  user->interval = ULONG_MAX;
+  user->readlast = true;
   nxsem_init(&user->buffersem, 0, 0);
   nxsem_set_protocol(&user->buffersem, SEM_PRIO_NONE);
   list_add_tail(&upper->userlist, &user->node);
@@ -993,7 +1008,6 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
   list_initialize(&upper->userlist);
   upper->state.esize = esize;
   upper->state.min_interval = ULONG_MAX;
-  upper->state.min_latency = ULONG_MAX;
   if (lower->ops->activate)
     {
       upper->state.nadvertisers = 1;
