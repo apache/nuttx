@@ -50,6 +50,7 @@
 #include "bcmf_cdc.h"
 #include "bcmf_bdc.h"
 #include "bcmf_ioctl.h"
+#include "bcmf_netdev.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -144,6 +145,9 @@ int bcmf_netdev_alloc_tx_frame(FAR struct bcmf_dev_s *priv)
       return -ENOMEM;
     }
 
+  priv->bc_dev.d_buf = priv->cur_tx_frame->data;
+  priv->bc_dev.d_len = 0;
+
   return OK;
 }
 
@@ -218,6 +222,7 @@ static void bcmf_receive(FAR struct bcmf_dev_s *priv)
         {
           /* No more frame to process */
 
+          bcmf_netdev_notify_tx(priv);
           break;
         }
 
@@ -498,13 +503,22 @@ static void bcmf_tx_poll_work(FAR void *arg)
     {
       /* Check if there is room in the hardware to hold another packet. */
 
-      if (bcmf_netdev_alloc_tx_frame(priv) == OK)
+      while (bcmf_netdev_alloc_tx_frame(priv) == OK)
         {
           /* If so, then poll the network for new XMIT data */
 
-          priv->bc_dev.d_buf = priv->cur_tx_frame->data;
-          priv->bc_dev.d_len = 0;
           devif_poll(&priv->bc_dev, bcmf_txpoll);
+
+          /* Break out the continuous send if :
+           * 1. IP stack has no data to send.
+           * 2. RX worker ready.
+           */
+
+          if (priv->cur_tx_frame != NULL ||
+              !work_available(&priv->bc_rxwork))
+            {
+              break;
+            }
         }
     }
 
@@ -530,6 +544,7 @@ static void bcmf_tx_poll_work(FAR void *arg)
 static void bcmf_rxpoll_work(FAR void *arg)
 {
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
+  FAR void *oldbuf;
 
   /* Lock the network and serialize driver operations if necessary.
    * NOTE: Serialization is only required in the case where the driver work
@@ -539,7 +554,15 @@ static void bcmf_rxpoll_work(FAR void *arg)
 
   net_lock();
 
+  /* Tx work will hold the d_buf until there is data to send,
+   * replace and cache the d_buf temporarily
+   */
+
+  oldbuf = priv->bc_dev.d_buf;
+
   bcmf_receive(priv);
+
+  priv->bc_dev.d_buf = oldbuf;
 
   /* Check if a packet transmission just completed.  If so, call bcmf_txdone.
    * This may disable further Tx interrupts if there are no pending
@@ -587,7 +610,10 @@ void bcmf_netdev_notify_rx(FAR struct bcmf_dev_s *priv)
 {
   /* Queue a job to process RX frames */
 
-  work_queue(BCMFWORK, &priv->bc_rxwork, bcmf_rxpoll_work, priv, 0);
+  if (work_available(&priv->bc_rxwork))
+    {
+      work_queue(BCMFWORK, &priv->bc_rxwork, bcmf_rxpoll_work, priv, 0);
+    }
 }
 
 /****************************************************************************
