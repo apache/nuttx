@@ -203,7 +203,7 @@ static inline void pm_changeall(int domain, enum pm_state_e newstate)
 int pm_changestate(int domain, enum pm_state_e newstate)
 {
   irqstate_t flags;
-  int ret;
+  int ret = OK;
 
   DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
 
@@ -215,19 +215,22 @@ int pm_changestate(int domain, enum pm_state_e newstate)
 
   flags = pm_lock(domain);
 
-  /* First, prepare the drivers for the state change.  In this phase,
-   * drivers may refuse the state state change.
-   */
-
-  ret = pm_prepall(domain, newstate);
-  if (ret != OK)
+  if (newstate != PM_RESTORE)
     {
-      /* One or more drivers is not ready for this state change.  Revert to
-       * the preceding state.
+      /* First, prepare the drivers for the state change.  In this phase,
+       * drivers may refuse the state state change.
        */
 
-      newstate =  g_pmglobals.domain[domain].state;
-      pm_prepall(domain, newstate);
+      ret = pm_prepall(domain, newstate);
+      if (ret != OK)
+        {
+          /* One or more drivers is not ready for this state change.
+           * Revert to the preceding state.
+           */
+
+          newstate = g_pmglobals.domain[domain].state;
+          pm_prepall(domain, newstate);
+        }
     }
 
   /* All drivers have agreed to the state change (or, one or more have
