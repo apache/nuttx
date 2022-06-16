@@ -955,10 +955,6 @@ int bcmf_sdio_thread(int argc, char **argv)
           continue;
         }
 
-      /* Re-configure the board GPIO interrupt pin */
-
-      bcmf_board_setup_oob_irq(sbus->minor, bcmf_oob_irq, (void *)sbus);
-
       /* If we're done for now, turn off clock request. */
 
 #if 0
