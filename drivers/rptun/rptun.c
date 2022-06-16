@@ -81,7 +81,7 @@ struct rptun_priv_s
   int                          tid;
 #endif
 #ifdef CONFIG_RPTUN_PM
-  bool                         stay;
+  struct pm_wakelock_s         wakelock;
   uint16_t                     headrx;
 #endif
 #ifdef CONFIG_RPTUN_PING
@@ -213,19 +213,20 @@ static inline void rptun_pm_action(FAR struct rptun_priv_s *priv,
                                    bool stay)
 {
   irqstate_t flags;
+  int count;
 
   flags = enter_critical_section();
 
-  if (stay && !priv->stay)
+  count = pm_wakelock_staycount(&priv->wakelock);
+
+  if (stay && count == 0)
     {
-      pm_stay(PM_IDLE_DOMAIN, PM_IDLE);
-      priv->stay = true;
+      pm_wakelock_stay(&priv->wakelock);
     }
 
-  if (!stay && priv->stay && !rptun_buffer_nused(&priv->rvdev, false))
+  if (!stay && count > 0 && !rptun_buffer_nused(&priv->rvdev, false))
     {
-      pm_relax(PM_IDLE_DOMAIN, PM_IDLE);
-      priv->stay = false;
+      pm_wakelock_relax(&priv->wakelock);
     }
 
   leave_critical_section(flags);
@@ -1285,6 +1286,10 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
       nxsem_destroy(&priv->semrx);
       goto err_driver;
     }
+#endif
+
+#ifdef CONFIG_RPTUN_PM
+  pm_wakelock_init(&priv->wakelock, "rptun", PM_IDLE_DOMAIN, PM_IDLE);
 #endif
 
   nxsem_init(&priv->semtx, 0, 0);
