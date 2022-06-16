@@ -1036,6 +1036,8 @@ static int pat9126ja_activate(FAR struct file *filep,
           snerr("ERROR: Failed to set chip run in normal mode: %d\n", ret);
           return ret;
         }
+
+      syslog(LOG_WARNING, "---PAT9126JA power state: start---\n");
     }
   else
     {
@@ -1049,6 +1051,8 @@ static int pat9126ja_activate(FAR struct file *filep,
         }
 
       work_cancel(HPWORK, &priv->work);
+
+      syslog(LOG_WARNING, "---PAT9126JA power state: end---\n");
     }
 
   /* Enable/disable interrupt */
@@ -1308,6 +1312,8 @@ static int pat9126ja_interrupt_handler(FAR struct ioexpander_dev_s *dev,
                   IOEXPANDER_OPTION_INTCFG,
                   (FAR void *)IOEXPANDER_VAL_DISABLE);
 
+  syslog(LOG_WARNING, "---PAT9126JA work state: start---\n");
+
   return OK;
 }
 
@@ -1375,6 +1381,8 @@ static void pat9126ja_worker(FAR void *arg)
           IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
                           IOEXPANDER_OPTION_INTCFG,
                           (FAR void *)IOEXPANDER_VAL_FALLING);
+
+          syslog(LOG_WARNING, "---PAT9126JA work state: stop---\n");
         }
     }
 }
