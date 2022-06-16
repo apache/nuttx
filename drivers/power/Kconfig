@@ -52,13 +52,13 @@ config PM_GOVERNOR_EXPLICIT_RELAX
 		can hold off power levels using pm_stay() (via boardctl).
 
 		This option will initialize all run levels as if
-		pm_stay/pm_stay_timeout() were to be called once for each.
+		pm_stay/pm_staytimeout() were to be called once for each.
 
 		if set to -1, that means pm_stay(), so that your application
 		needs to call pm_relax() (via boardctl()) for every run-level you
 		wish to allow to enter.
 
-		if set to timeout (unit: ms), that means pm_stay_timeout(ms).
+		if set to timeout (unit: ms), that means pm_staytimeout(ms).
 		pm_relax() will be auto called after timeout.
 
 if PM_GOVERNOR_ACTIVITY

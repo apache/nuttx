@@ -185,7 +185,7 @@ void pm_relax(int domain, enum pm_state_e state)
 }
 
 /****************************************************************************
- * Name: pm_stay_timeout
+ * Name: pm_staytimeout
  *
  * Description:
  *   This function is called by a device driver to indicate that it is
@@ -206,7 +206,7 @@ void pm_relax(int domain, enum pm_state_e state)
  *
  ****************************************************************************/
 
-void pm_stay_timeout(int domain, enum pm_state_e state, int ms)
+void pm_staytimeout(int domain, enum pm_state_e state, int ms)
 {
   FAR struct pm_domain_s *pdom;
   FAR struct wdog_s *wdog;
