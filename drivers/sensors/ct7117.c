@@ -114,6 +114,7 @@ struct ct7117_dev_s
   bool activated;                           /* Sensor working state. */
   unsigned long interval;                   /* Sensor acquisition interval. */
   struct work_s work;                       /* Work queue for reading data. */
+  int devno;                                /* The device number */
 };
 
 /****************************************************************************
@@ -511,6 +512,9 @@ static int ct7117_enable(FAR struct ct7117_dev_s *priv, bool enable)
       work_queue(LPWORK, &priv->work,
                  ct7117_worker, priv,
                  priv->interval / USEC_PER_TICK);
+
+      syslog(LOG_WARNING, "---CT7117 device %d power state: start---\n",
+             priv->devno);
     }
   else
     {
@@ -524,6 +528,9 @@ static int ct7117_enable(FAR struct ct7117_dev_s *priv, bool enable)
           snerr("Failed to set shotdown mode: %d\n", ret);
           return ret;
         }
+
+      syslog(LOG_WARNING, "---CT7117 device %d power state: end---\n",
+             priv->devno);
     }
 
   return ret;
@@ -808,6 +815,7 @@ int ct7117_register(int devno, FAR const struct ct7117_config_s *config)
   priv->lower.nbuffer = CONFIG_SENSORS_CT7117_BUFFER_NUMBER;
   priv->lower.ops = &g_ct7117_ops;
   priv->interval = CT7117_DEFAULT_ODR;
+  priv->devno = devno;
 
   /* Check Device ID. */
 
