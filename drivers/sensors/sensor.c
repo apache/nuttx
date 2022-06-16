@@ -268,6 +268,11 @@ update:
         {
           return ret;
         }
+
+      if (upper->state.min_latency != ULONG_MAX)
+        {
+          lower->ops->batch(filep, lower, &upper->state.min_latency);
+        }
     }
 
   upper->state.min_interval = min_interval;
