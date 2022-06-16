@@ -57,7 +57,7 @@ struct pm_domain_s
 
   /* The power state lock count */
 
-  uint16_t stay[PM_COUNT];
+  struct dq_queue_s wakelock[PM_COUNT];
   struct wdog_s wdog[PM_COUNT];
 
   /* Auto update or not */
@@ -151,6 +151,22 @@ irqstate_t pm_lock(int domain);
  ****************************************************************************/
 
 void pm_unlock(int domain, irqstate_t flags);
+
+/****************************************************************************
+ * Name: pm_wakelock_global_init
+ *
+ * Description:
+ *   This function is called to setup global wakelock when system init
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void pm_wakelock_global_init(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

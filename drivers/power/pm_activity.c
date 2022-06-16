@@ -24,8 +24,9 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
 #include <assert.h>
+#include <stdint.h>
+#include <string.h>
 
 #include <nuttx/power/pm.h>
 #include <nuttx/clock.h>
@@ -36,27 +37,18 @@
 #ifdef CONFIG_PM
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static struct pm_wakelock_s g_wakelock[CONFIG_PM_NDOMAINS][PM_COUNT];
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static void pm_stay_normal_cb(wdparm_t arg)
+static void pm_waklock_cb(wdparm_t arg)
 {
-  pm_relax(arg, PM_NORMAL);
-}
-
-static void pm_stay_idle_cb(wdparm_t arg)
-{
-  pm_relax(arg, PM_IDLE);
-}
-
-static void pm_stay_standby_cb(wdparm_t arg)
-{
-  pm_relax(arg, PM_STANDBY);
-}
-
-static void pm_stay_sleep_cb(wdparm_t arg)
-{
-  pm_relax(arg, PM_SLEEP);
+  pm_wakelock_relax((FAR struct pm_wakelock_s *)arg);
 }
 
 /****************************************************************************
@@ -127,21 +119,10 @@ void pm_activity(int domain, int priority)
 
 void pm_stay(int domain, enum pm_state_e state)
 {
-  FAR struct pm_domain_s *pdom;
-  irqstate_t flags;
-
-  /* Get a convenience pointer to minimize all of the indexing */
-
-  DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
-  pdom = &g_pmglobals.domain[domain];
-
-  flags = pm_lock(domain);
   DEBUGASSERT(state < PM_COUNT);
-  DEBUGASSERT(pdom->stay[state] < UINT16_MAX);
-  pdom->stay[state]++;
-  pm_unlock(domain, flags);
+  DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
 
-  pm_auto_updatestate(domain);
+  pm_wakelock_stay(&g_wakelock[domain][state]);
 }
 
 /****************************************************************************
@@ -167,21 +148,10 @@ void pm_stay(int domain, enum pm_state_e state)
 
 void pm_relax(int domain, enum pm_state_e state)
 {
-  FAR struct pm_domain_s *pdom;
-  irqstate_t flags;
-
-  /* Get a convenience pointer to minimize all of the indexing */
-
-  DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
-  pdom = &g_pmglobals.domain[domain];
-
-  flags = pm_lock(domain);
   DEBUGASSERT(state < PM_COUNT);
-  DEBUGASSERT(pdom->stay[state] > 0);
-  pdom->stay[state]--;
-  pm_unlock(domain, flags);
+  DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
 
-  pm_auto_updatestate(domain);
+  pm_wakelock_relax(&g_wakelock[domain][state]);
 }
 
 /****************************************************************************
@@ -208,49 +178,10 @@ void pm_relax(int domain, enum pm_state_e state)
 
 void pm_staytimeout(int domain, enum pm_state_e state, int ms)
 {
-  FAR struct pm_domain_s *pdom;
-  FAR struct wdog_s *wdog;
-  wdentry_t wdentry;
-  irqstate_t flags;
-
-  DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
   DEBUGASSERT(state < PM_COUNT);
+  DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
 
-  pdom = &g_pmglobals.domain[domain];
-  wdog = &pdom->wdog[state];
-
-  flags = pm_lock(domain);
-
-  if (!WDOG_ISACTIVE(wdog))
-    {
-      DEBUGASSERT(pdom->stay[state] < UINT16_MAX);
-      pdom->stay[state]++;
-    }
-
-  switch (state)
-    {
-      case PM_NORMAL:
-          wdentry = pm_stay_normal_cb;
-          break;
-      case PM_IDLE:
-          wdentry = pm_stay_idle_cb;
-          break;
-      case PM_STANDBY:
-          wdentry = pm_stay_standby_cb;
-          break;
-      default:
-          wdentry = pm_stay_sleep_cb;
-          break;
-    }
-
-  if (TICK2MSEC(wd_gettime(wdog)) < ms)
-    {
-      wd_start(wdog, MSEC2TICK(ms), wdentry, domain);
-    }
-
-  pm_unlock(domain, flags);
-
-  pm_auto_updatestate(domain);
+  pm_wakelock_staytimeout(&g_wakelock[domain][state], ms);
 }
 
 /****************************************************************************
@@ -273,14 +204,287 @@ void pm_staytimeout(int domain, enum pm_state_e state, int ms)
 
 uint32_t pm_staycount(int domain, enum pm_state_e state)
 {
+  DEBUGASSERT(state < PM_COUNT);
+  DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
+
+  return pm_wakelock_staycount(&g_wakelock[domain][state]);
+}
+
+/****************************************************************************
+ * Name: pm_wakelock_init
+ *
+ * Description:
+ *   This function is used to init struct pm_wakelock_s
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void pm_wakelock_init(FAR struct pm_wakelock_s *wakelock,
+                      FAR const char *name, int domain,
+                      enum pm_state_e state)
+{
+  DEBUGASSERT(wakelock);
+  DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
+  DEBUGASSERT(state < PM_COUNT);
+
+  strlcpy(wakelock->name, name, sizeof(wakelock->name));
+
+  wakelock->domain = domain;
+  wakelock->state  = state;
+  wakelock->count  = 0;
+}
+
+/****************************************************************************
+ * Name: pm_wakelock_uninit
+ *
+ * Description:
+ *   Uninit wakelock ID
+ *
+ * Input Parameters:
+ *   wakelock - wakelock ID
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void pm_wakelock_uninit(FAR struct pm_wakelock_s *wakelock)
+{
   FAR struct pm_domain_s *pdom;
+  FAR struct dq_queue_s *dq;
+  FAR struct wdog_s *wdog;
+  irqstate_t flags;
+  int domain;
+
+  DEBUGASSERT(wakelock);
 
   /* Get a convenience pointer to minimize all of the indexing */
 
-  DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
-  pdom = &g_pmglobals.domain[domain];
+  domain = wakelock->domain;
+  pdom   = &g_pmglobals.domain[domain];
+  dq     = &pdom->wakelock[wakelock->state];
+  wdog   = &pdom->wdog[wakelock->state];
 
-  return pdom->stay[state];
+  flags = pm_lock(domain);
+
+  if (wakelock->count > 0)
+    {
+      dq_rem(&wakelock->node, dq);
+    }
+
+  wakelock->count = 0;
+  wd_cancel(wdog);
+
+  pm_unlock(domain, flags);
+}
+
+/****************************************************************************
+ * Name: pm_wakelock_stay
+ *
+ * Description:
+ *   This function is called by a device driver to indicate that it is
+ *   performing meaningful activities (non-idle), needs the power kept at
+ *   least the specified level.
+ *
+ * Input Parameters:
+ *   wakelock - wakelock ID
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions:
+ *   This function may be called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+void pm_wakelock_stay(FAR struct pm_wakelock_s *wakelock)
+{
+  FAR struct pm_domain_s *pdom;
+  FAR struct dq_queue_s *dq;
+  irqstate_t flags;
+  int domain;
+
+  DEBUGASSERT(wakelock);
+
+  /* Get a convenience pointer to minimize all of the indexing */
+
+  domain = wakelock->domain;
+  pdom   = &g_pmglobals.domain[domain];
+  dq     = &pdom->wakelock[wakelock->state];
+
+  flags = pm_lock(domain);
+
+  DEBUGASSERT(wakelock->count < UINT32_MAX);
+  if (wakelock->count++ == 0)
+    {
+      dq_addfirst(&wakelock->node, dq);
+    }
+
+  pm_unlock(domain, flags);
+
+  pm_auto_updatestate(domain);
+}
+
+/****************************************************************************
+ * Name: pm_wakelock_relax
+ *
+ * Description:
+ *   This function is called by a device driver to indicate that it is
+ *   idle now, could relax the previous requested power level.
+ *
+ * Input Parameters:
+ *   wakelock - wakelock ID
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions:
+ *   This function may be called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+void pm_wakelock_relax(FAR struct pm_wakelock_s *wakelock)
+{
+  FAR struct pm_domain_s *pdom;
+  FAR struct dq_queue_s *dq;
+  irqstate_t flags;
+  int domain;
+
+  DEBUGASSERT(wakelock);
+
+  /* Get a convenience pointer to minimize all of the indexing */
+
+  domain = wakelock->domain;
+  pdom   = &g_pmglobals.domain[domain];
+  dq     = &pdom->wakelock[wakelock->state];
+
+  flags = pm_lock(domain);
+
+  DEBUGASSERT(wakelock->count > 0);
+  if (--wakelock->count == 0)
+    {
+      dq_rem(&wakelock->node, dq);
+    }
+
+  pm_unlock(domain, flags);
+
+  pm_auto_updatestate(domain);
+}
+
+/****************************************************************************
+ * Name: pm_wakelock_staytimeout
+ *
+ * Description:
+ *   This function is called by a device driver to indicate that it is
+ *   performing meaningful activities (non-idle), needs the power at kept
+ *   last the specified level.
+ *   And this will be timeout after time (ms), menas auto pm_wakelock_relax
+ *
+ * Input Parameters:
+ *   wakelock - wakelock ID
+ *   ms       - The timeout value ms
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions:
+ *   This function may be called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+void pm_wakelock_staytimeout(FAR struct pm_wakelock_s *wakelock, int ms)
+{
+  FAR struct pm_domain_s *pdom;
+  FAR struct dq_queue_s *dq;
+  FAR struct wdog_s *wdog;
+  irqstate_t flags;
+  int domain;
+
+  DEBUGASSERT(wakelock);
+
+  /* Get a convenience pointer to minimize all of the indexing */
+
+  domain = wakelock->domain;
+  pdom   = &g_pmglobals.domain[domain];
+  dq     = &pdom->wakelock[wakelock->state];
+  wdog   = &pdom->wdog[wakelock->state];
+
+  flags = pm_lock(domain);
+
+  if (!WDOG_ISACTIVE(wdog))
+    {
+      DEBUGASSERT(wakelock->count < UINT32_MAX);
+      if (wakelock->count++ == 0)
+        {
+          dq_addfirst(&wakelock->node, dq);
+        }
+    }
+
+  if (TICK2MSEC(wd_gettime(wdog)) < ms)
+    {
+      wd_start(wdog, MSEC2TICK(ms), pm_waklock_cb, (wdparm_t)wakelock);
+    }
+
+  pm_unlock(domain, flags);
+
+  pm_auto_updatestate(domain);
+}
+
+/****************************************************************************
+ * Name: pm_wakelock_staycount
+ *
+ * Description:
+ *   This function is called to get current stay count in this wakelock ID
+ *
+ * Input Parameters:
+ *   wakelock - wakelock ID
+ *
+ * Returned Value:
+ *   Current pm stay count in this wakelock ID
+ *
+ * Assumptions:
+ *   This function may be called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+int pm_wakelock_staycount(FAR struct pm_wakelock_s *wakelock)
+{
+  DEBUGASSERT(wakelock);
+
+  return wakelock->count;
+}
+
+/****************************************************************************
+ * Name: pm_wakelock_global_init
+ *
+ * Description:
+ *   This function is called to setup global wakelock when system init
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void pm_wakelock_global_init(void)
+{
+  int i;
+  int j;
+
+  for (i = 0; i < CONFIG_PM_NDOMAINS; i++)
+    {
+      for (j = 0; j < PM_COUNT; j++)
+        {
+          pm_wakelock_init(&g_wakelock[i][j], "system", i, j);
+        }
+    }
 }
 
 #endif /* CONFIG_PM */
