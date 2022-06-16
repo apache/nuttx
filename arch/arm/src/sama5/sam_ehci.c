@@ -2743,7 +2743,7 @@ static int sam_qtd_cancel(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
  * Name: sam_qh_cancel
  *
  * Description:
- *   This function is a imxrt_qh_foreach() callback function.  It cancels
+ *   This function is a sam_qh_foreach() callback function.  It cancels
  *   one QH in the asynchronous queue.  It will remove all attached qTD
  *   structures and remove all of the structures that are no longer active.
  *   Then QH itself will also be removed.
@@ -4363,20 +4363,18 @@ errout_with_sem:
  * Name: sam_cancel
  *
  * Description:
- *   New connections may be detected by an attached hub.  This method is the
- *   mechanism that is used by the hub class to introduce a new connection
- *   and port description to the system.
+ *   Cancel a pending transfer on an endpoint.  Cancelled synchronous or
+ *   asynchronous transfer will complete normally with the error -ESHUTDOWN.
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the
  *     call to the class create() method.
- *   hport - The descriptor of the hub port that detected the connection
- *     related event
- *   connected - True: device connected; false: device disconnected
+ *   ep - The IN or OUT endpoint descriptor for the device endpoint on which
+ *     an asynchronous transfer should be transferred.
  *
  * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value
- *   is returned indicating the nature of the failure
+ *   is returned indicating the nature of the failure.
  *
  ****************************************************************************/
 
