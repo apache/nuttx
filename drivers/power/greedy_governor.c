@@ -122,7 +122,7 @@ static enum pm_state_e greedy_governor_checkstate(int domain)
     {
       /* Find the lowest power-level which is not locked. */
 
-      while (!pdom->stay[state] && state < (PM_COUNT - 1))
+      while (!dq_count(&pdom->wakelock[state]) && state < (PM_COUNT - 1))
         {
           state++;
         }

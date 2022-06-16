@@ -95,6 +95,8 @@ void pm_initialize(void)
       g_pmglobals.domain[i].holder = INVALID_PROCESS_ID;
       g_pmglobals.domain[i].count  = 0;
     }
+
+  pm_wakelock_global_init();
 }
 
 #endif /* CONFIG_PM */
