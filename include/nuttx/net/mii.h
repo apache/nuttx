@@ -384,8 +384,8 @@
 
 /* PHYSTS Register (0x10) */
 
-#define MII_DP83825I_PHYSTS_SPEED   (1 << 1)   /* Bit 2: Speed Status Register */
-#define MII_DP83825I_PHYSTS_DUPLEX  (1 << 2)   /* Bit 3: Duplex Status Register */
+#define MII_DP83825I_PHYSTS_SPEED   (1 << 1)   /* Bit 1: Speed Status Register */
+#define MII_DP83825I_PHYSTS_DUPLEX  (1 << 2)   /* Bit 2: Duplex Status Register */
 
 /* RCSC Register (0x17) */
 
