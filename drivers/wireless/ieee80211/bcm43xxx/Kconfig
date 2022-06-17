@@ -125,11 +125,11 @@ config IEEE80211_BROADCOM_SCHED_PRIORITY
 		This parameter should be set the bcmf daemon thread
 		schedule priority
 
-config IEEE80211_BROADCOM_SCAN_RESULT_SIZE
-	int "Broadcom BCMF escan result size"
-	default 1024
+config IEEE80211_BROADCOM_SCAN_RESULT_ENTRIES
+	int "Broadcom BCMF escan result entries"
+	default 10
 	---help---
-		This parameter should be set the bcmf escan result buffer size
+		This parameter should be set the bcmf escan result buffer entries
 
 if IEEE80211_BROADCOM_FULLMAC
 

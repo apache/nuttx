@@ -89,8 +89,8 @@ struct bcmf_dev_s
 
   int scan_status;                     /* Current scan status */
   struct wdog_s scan_timeout;          /* Scan timeout timer */
-  FAR uint8_t *scan_result;            /* Temp buffer that holds results */
-  unsigned int scan_result_size;       /* Current size of temp buffer */
+  FAR wl_bss_info_t *scan_result;      /* Temp buffer that holds results */
+  unsigned int scan_result_entries;    /* Current entries of temp buffer */
 
   sem_t auth_signal; /* Authentication notification signal */
   int   auth_status; /* Authentication status */
