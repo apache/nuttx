@@ -165,6 +165,8 @@ jobs:
         continue-on-error: true
 
   macOS:
+    permissions:
+      contents: none
     runs-on: macos-10.15
     needs: Fetch-Source
     strategy:
