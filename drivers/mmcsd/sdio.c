@@ -370,6 +370,8 @@ int sdio_probe(FAR struct sdio_dev_s *dev)
       goto err;
     }
 
+  return OK;
+
   /* Device is in Card Identification Mode, request device RCA */
 
   ret = sdio_sendcmdpoll(dev, SD_CMD3, 0);
