@@ -151,7 +151,22 @@ int bcmf_wl_set_auth_param(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
 int bcmf_wl_set_encode_ext(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
 
 int bcmf_wl_set_mode(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+int bcmf_wl_get_mode(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
 
 int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+int bcmf_wl_get_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+
+int bcmf_wl_set_bssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+int bcmf_wl_get_bssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+
+int bcmf_wl_get_channel(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+
+int bcmf_wl_get_rate(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+
+int bcmf_wl_get_txpower(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+
+int bcmf_wl_get_rssi(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+
+int bcmf_wl_get_iwrange(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
 
 #endif /* __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_DRIVER_H */

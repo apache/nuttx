@@ -915,8 +915,7 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
         break;
 
       case SIOCGIWFREQ:     /* Get channel/frequency (Hz) */
-        wlwarn("WARNING: SIOCGIWFREQ not implemented\n");
-        ret = -ENOSYS;
+        ret = bcmf_wl_get_channel(priv, (struct iwreq *)arg);
         break;
 
       case SIOCSIWMODE:     /* Set operation mode */
@@ -924,18 +923,15 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
         break;
 
       case SIOCGIWMODE:     /* Get operation mode */
-        wlwarn("WARNING: SIOCGIWMODE not implemented\n");
-        ret = -ENOSYS;
+        ret = bcmf_wl_get_mode(priv, (struct iwreq *)arg);
         break;
 
       case SIOCSIWAP:       /* Set access point MAC addresses */
-        wlwarn("WARNING: SIOCSIWAP not implemented\n");
-        ret = -ENOSYS;
+        ret = bcmf_wl_set_bssid(priv, (struct iwreq *)arg);
         break;
 
       case SIOCGIWAP:       /* Get access point MAC addresses */
-        wlwarn("WARNING: SIOCGIWAP not implemented\n");
-        ret = -ENOSYS;
+        ret = bcmf_wl_get_bssid(priv, (struct iwreq *)arg);
         break;
 
       case SIOCSIWESSID:    /* Set ESSID (network name) */
@@ -943,8 +939,7 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
         break;
 
       case SIOCGIWESSID:    /* Get ESSID */
-        wlwarn("WARNING: SIOCGIWESSID not implemented\n");
-        ret = -ENOSYS;
+        ret = bcmf_wl_get_ssid(priv, (struct iwreq *)arg);
         break;
 
       case SIOCSIWRATE:     /* Set default bit rate (bps) */
@@ -953,8 +948,7 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
         break;
 
       case SIOCGIWRATE:     /* Get default bit rate (bps) */
-        wlwarn("WARNING: SIOCGIWRATE not implemented\n");
-        ret = -ENOSYS;
+        ret = bcmf_wl_get_rate(priv, (struct iwreq *)arg);
         break;
 
       case SIOCSIWTXPOW:    /* Set transmit power (dBm) */
@@ -963,8 +957,15 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
         break;
 
       case SIOCGIWTXPOW:    /* Get transmit power (dBm) */
-        wlwarn("WARNING: SIOCGIWTXPOW not implemented\n");
-        ret = -ENOSYS;
+        ret = bcmf_wl_get_txpower(priv, (struct iwreq *)arg);
+        break;
+
+      case SIOCGIWSENS:     /* Get transmit power (dBm) */
+        ret = bcmf_wl_get_rssi(priv, (struct iwreq *)arg);
+        break;
+
+      case SIOCGIWRANGE:    /* Get range of parameters */
+        ret = bcmf_wl_get_iwrange(priv, (struct iwreq *)arg);
         break;
 
       default:

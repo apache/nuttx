@@ -155,6 +155,32 @@ static int bcmf_wl_get_interface(FAR struct bcmf_dev_s *priv,
  * Private Functions
  ****************************************************************************/
 
+static int bcmf_wl_channel_to_frequency(int chan)
+{
+  if (chan <= 0)
+    {
+      return 0;
+    }
+  else if (chan < 14)
+    {
+      return 2407 + chan * 5;
+    }
+  else if (chan == 14)
+    {
+      return 2484;
+    }
+  else if ((chan >= 36) && (chan <= 165))
+    {
+      return 5000 + chan * 5;
+    }
+  else if ((chan >= 182) && (chan <= 196))
+    {
+      return 4000 + chan * 5;
+    }
+
+  return 0; /* not supported */
+}
+
 FAR struct bcmf_dev_s *bcmf_allocate_device(void)
 {
   int ret;
@@ -1357,9 +1383,9 @@ int bcmf_wl_set_auth_param(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
 int bcmf_wl_set_mode(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 {
-  int interface;
   uint32_t out_len;
   uint32_t value;
+  int interface;
 
   interface = bcmf_wl_get_interface(priv, iwr);
 
@@ -1368,15 +1394,255 @@ int bcmf_wl_set_mode(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
       return -EINVAL;
     }
 
-  out_len = 4;
+  out_len = sizeof(value);
   value = iwr->u.mode == IW_MODE_INFRA ? 1 : 0;
-  if (bcmf_cdc_ioctl(priv, interface, true,
-                     WLC_SET_INFRA, (uint8_t *)&value, &out_len))
+
+  return bcmf_cdc_ioctl(priv, interface, true,
+                        WLC_SET_INFRA, (uint8_t *)&value, &out_len);
+}
+
+int bcmf_wl_get_mode(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
+{
+  uint32_t out_len;
+  uint32_t infra;
+  int interface;
+  uint32_t ap;
+  int ret;
+
+  interface = bcmf_wl_get_interface(priv, iwr);
+
+  if (interface < 0)
     {
-      return -EIO;
+      return -EINVAL;
+    }
+
+  out_len = sizeof(infra);
+  ret = bcmf_cdc_ioctl(priv, interface, false,
+                       WLC_GET_INFRA, (uint8_t *)&infra, &out_len);
+  if (ret == OK)
+    {
+      out_len = sizeof(ap);
+      ret = bcmf_cdc_ioctl(priv, interface, false,
+                           WLC_GET_AP, (uint8_t *)&ap, &out_len);
+    }
+
+  if (ret == OK)
+    {
+      if (infra == 0)
+        {
+          iwr->u.mode = IW_MODE_ADHOC;
+        }
+      else if (ap)
+        {
+          iwr->u.mode = IW_MODE_MASTER;
+        }
+      else
+        {
+          iwr->u.mode = IW_MODE_INFRA;
+        }
+    }
+
+  return ret;
+}
+
+int bcmf_wl_set_bssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
+{
+  uint32_t out_len;
+  int interface;
+  int ap = 0;
+  int ret;
+
+  interface = bcmf_wl_get_interface(priv, iwr);
+
+  if (interface < 0)
+    {
+      return -EINVAL;
+    }
+
+  out_len = sizeof(ap);
+  ret = bcmf_cdc_ioctl(priv, interface, false, WLC_GET_AP,
+                       (uint8_t *)&ap, &out_len);
+  if (ret == OK)
+    {
+      out_len = sizeof(struct ether_addr);
+      ret = bcmf_cdc_ioctl(priv, interface, true,
+                           (ap ? WLC_SET_BSSID : WLC_REASSOC),
+                           (uint8_t *)iwr->u.ap_addr.sa_data, &out_len);
+    }
+
+  return ret;
+}
+
+int bcmf_wl_get_bssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
+{
+  uint32_t out_len;
+  int interface;
+
+  interface = bcmf_wl_get_interface(priv, iwr);
+
+  if (interface < 0)
+    {
+      return -EINVAL;
+    }
+
+  iwr->u.ap_addr.sa_family = ARPHRD_ETHER;
+  out_len = sizeof(struct ether_addr);
+
+  return bcmf_cdc_ioctl(priv, interface, false, WLC_GET_BSSID,
+                        (uint8_t *)iwr->u.ap_addr.sa_data, &out_len);
+}
+
+int bcmf_wl_get_channel(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
+{
+  channel_info_t ci;
+  uint32_t out_len;
+  int interface;
+  int ret;
+
+  interface = bcmf_wl_get_interface(priv, iwr);
+
+  if (interface < 0)
+    {
+      return -EINVAL;
+    }
+
+  out_len = sizeof(ci);
+  ret = bcmf_cdc_ioctl(priv, interface, false,
+                       WLC_GET_CHANNEL, (uint8_t *)&ci, &out_len);
+  if (ret == OK)
+    {
+      iwr->u.freq.m = bcmf_wl_channel_to_frequency(ci.target_channel);
+    }
+
+  return ret;
+}
+
+int bcmf_wl_get_rate(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
+{
+  uint32_t out_len;
+  uint32_t rate;
+  int interface;
+  int ret;
+
+  interface = bcmf_wl_get_interface(priv, iwr);
+
+  if (interface < 0)
+    {
+      return -EINVAL;
+    }
+
+  out_len = sizeof(rate);
+  ret = bcmf_cdc_ioctl(priv, interface, false,
+                       WLC_GET_RATE, (uint8_t *)&rate, &out_len);
+  if (ret == OK)
+    {
+      iwr->u.bitrate.value = ((rate / 2) * 1000) + ((rate & 1) ? 500 : 0);
+      iwr->u.bitrate.fixed = 1;
+    }
+
+  return ret;
+}
+
+int bcmf_wl_get_txpower(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
+{
+  uint32_t out_len;
+  int interface;
+  int radio;
+  int ret;
+
+  interface = bcmf_wl_get_interface(priv, iwr);
+
+  if (interface < 0)
+    {
+      return -EINVAL;
+    }
+
+  out_len = sizeof(radio);
+  ret = bcmf_cdc_ioctl(priv, interface, false,
+                       WLC_GET_RADIO, (uint8_t *)&radio, &out_len);
+  if (ret == OK)
+    {
+      out_len = sizeof(iwr->u.txpower.value);
+      ret = bcmf_cdc_iovar_request(priv, interface, false,
+                                   IOVAR_STR_QTXPOWER,
+                                   (uint8_t *)&(iwr->u.txpower.value),
+                                   &out_len);
+      if (ret == OK)
+        {
+          iwr->u.txpower.value   &= ~WL_TXPWR_OVERRIDE;
+          iwr->u.txpower.value   /= 4;
+
+          iwr->u.txpower.fixed    = 0;
+          iwr->u.txpower.disabled = radio;
+          iwr->u.txpower.flags    = IW_TXPOW_DBM;
+        }
+    }
+
+  return ret;
+}
+
+int bcmf_wl_get_iwrange(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
+{
+  struct iw_range *range;
+  channel_info_t ci;
+  uint32_t out_len;
+  int interface;
+  int ret;
+
+  interface = bcmf_wl_get_interface(priv, iwr);
+
+  if (interface < 0)
+    {
+      return -EINVAL;
+    }
+
+  if (iwr->u.data.length < sizeof(struct iw_range))
+    {
+      return -EINVAL;
+    }
+
+  range = iwr->u.data.pointer;
+
+  memset(range, 0, sizeof(*range));
+
+  out_len = sizeof(ci);
+  ret = bcmf_cdc_ioctl(priv, interface, false,
+                       WLC_GET_CHANNEL, (uint8_t *)&ci, &out_len);
+  if (ret == OK)
+    {
+      range->num_frequency = 1;
+      range->freq[0].m     = bcmf_wl_channel_to_frequency(ci.target_channel);
+      range->freq[0].i     = ci.target_channel;
     }
 
   return OK;
+}
+
+int bcmf_wl_get_rssi(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
+{
+  wl_sta_rssi_t rssi;
+  uint32_t out_len;
+  int interface;
+  int ret;
+
+  interface = bcmf_wl_get_interface(priv, iwr);
+
+  if (interface < 0)
+    {
+      return -EINVAL;
+    }
+
+  memset(&rssi.sta_addr, 0x0, sizeof(rssi.sta_addr));
+
+  out_len = sizeof(rssi);
+  ret = bcmf_cdc_ioctl(priv, interface, false,
+                       WLC_GET_RSSI, (uint8_t *)&rssi, &out_len);
+  if (ret == OK)
+    {
+      iwr->u.sens.value = -rssi.rssi;
+    }
+
+  return ret;
 }
 
 int bcmf_wl_set_encode_ext(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
@@ -1466,4 +1732,33 @@ int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
     }
 
   return OK;
+}
+
+int bcmf_wl_get_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
+{
+  uint32_t out_len;
+  wlc_ssid_t ssid;
+  int interface;
+  int ret;
+
+  interface = bcmf_wl_get_interface(priv, iwr);
+
+  if (interface < 0)
+    {
+      return -EINVAL;
+    }
+
+  /* Configure AP SSID and trig authentication request */
+
+  out_len = sizeof(ssid);
+  ret = bcmf_cdc_ioctl(priv, interface, false,
+                       WLC_GET_SSID, (uint8_t *)&ssid, &out_len);
+  if (ret == OK)
+    {
+      iwr->u.essid.flags  = iwr->u.data.flags = 1;
+      iwr->u.essid.length = iwr->u.data.length = ssid.ssid_len + 1;
+      memcpy(iwr->u.essid.pointer, ssid.SSID, iwr->u.essid.length);
+    }
+
+  return ret;
 }
