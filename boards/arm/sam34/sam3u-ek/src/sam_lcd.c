@@ -313,10 +313,12 @@ static void sam_dumpreg(uint8_t startreg, uint8_t endreg);
 
 /* LCD Data Transfer Methods */
 
-static int sam_putrun(fb_coord_t row, fb_coord_t col,
+static int sam_putrun(struct lcd_dev_s *dev,
+                      fb_coord_t row, fb_coord_t col,
                       const uint8_t *buffer,
                       size_t npixels);
-static int sam_getrun(fb_coord_t row, fb_coord_t col,
+static int sam_getrun(struct lcd_dev_s *dev,
+                      fb_coord_t row, fb_coord_t col,
                       uint8_t *buffer,
                       size_t npixels);
 
@@ -583,6 +585,7 @@ static void sam_dumpreg(uint8_t startreg, uint8_t endreg)
  * Description:
  *   This method can be used to write a partial raster line to the LCD:
  *
+ *   dev     - LCD device
  *   row     - Starting row to write to (range: 0 <= row < yres)
  *   col     - Starting column to write to (range: 0 <= col <= xres-npixels)
  *   buffer  - The buffer containing the run to be written to the LCD
@@ -591,7 +594,8 @@ static void sam_dumpreg(uint8_t startreg, uint8_t endreg)
  *
  ****************************************************************************/
 
-static int sam_putrun(fb_coord_t row, fb_coord_t col,
+static int sam_putrun(struct lcd_dev_s *dev,
+                      fb_coord_t row, fb_coord_t col,
                       const uint8_t *buffer,
                       size_t npixels)
 {
@@ -654,6 +658,7 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col,
  * Description:
  *   This method can be used to read a partial raster line from the LCD:
  *
+ *  dev     - LCD device
  *  row     - Starting row to read from (range: 0 <= row < yres)
  *  col     - Starting column to read read (range: 0 <= col <= xres-npixels)
  *  buffer  - The buffer in which to return the run read from the LCD
@@ -662,7 +667,9 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col,
  *
  ****************************************************************************/
 
-static int sam_getrun(fb_coord_t row, fb_coord_t col, uint8_t *buffer,
+static int sam_getrun(struct lcd_dev_s *dev,
+                      fb_coord_t row, fb_coord_t col,
+                      uint8_t *buffer,
                       size_t npixels)
 {
   uint16_t *run = (uint16_t *)buffer;
@@ -746,6 +753,7 @@ static int sam_getplaneinfo(struct lcd_dev_s *dev, unsigned int planeno,
   DEBUGASSERT(dev && pinfo && planeno == 0);
   lcdinfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
+  pinfo->dev = dev;
   return OK;
 }
 

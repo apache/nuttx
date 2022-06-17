@@ -373,11 +373,14 @@ static int  sam_lcd_rxtransfer(struct sam_dev_s *priv,
 
 /* LCD Data Transfer Methods */
 
-static int  sam_putrun(fb_coord_t row, fb_coord_t col,
+static int  sam_putrun(struct lcd_dev_s *dev,
+                       fb_coord_t row, fb_coord_t col,
                        const uint8_t *buffer,
                        size_t npixels);
-static int  sam_getrun(fb_coord_t row, fb_coord_t col, uint8_t *buffer,
-              size_t npixels);
+static int  sam_getrun(struct lcd_dev_s *dev,
+                       fb_coord_t row, fb_coord_t col,
+                       uint8_t *buffer,
+                       size_t npixels);
 
 /* LCD Configuration */
 
@@ -1117,6 +1120,7 @@ static int sam_lcd_rxtransfer(struct sam_dev_s *priv,
  * Description:
  *   This method can be used to write a partial raster line to the LCD:
  *
+ *   dev     - LCD device
  *   row     - Starting row to write to (range: 0 <= row < yres)
  *   col     - Starting column to write to (range: 0 <= col <= xres-npixels)
  *   buffer  - The buffer containing the run to be written to the LCD
@@ -1125,8 +1129,10 @@ static int sam_lcd_rxtransfer(struct sam_dev_s *priv,
  *
  ****************************************************************************/
 
-static int sam_putrun(fb_coord_t row, fb_coord_t col,
-                      const uint8_t *buffer, size_t npixels)
+static int sam_putrun(struct lcd_dev_s *dev,
+                      fb_coord_t row, fb_coord_t col,
+                      const uint8_t *buffer,
+                      size_t npixels)
 {
   struct sam_dev_s *priv = &g_lcddev;
   int ret;
@@ -1158,6 +1164,7 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col,
  * Description:
  *   This method can be used to read a partial raster line from the LCD:
  *
+ *  dev     - LCD device
  *  row     - Starting row to read from (range: 0 <= row < yres)
  *  col     - Starting column to read read (range: 0 <= col <= xres-npixels)
  *  buffer  - The buffer in which to return the run read from the LCD
@@ -1166,7 +1173,9 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col,
  *
  ****************************************************************************/
 
-static int sam_getrun(fb_coord_t row, fb_coord_t col, uint8_t *buffer,
+static int sam_getrun(struct lcd_dev_s *dev,
+                      fb_coord_t row, fb_coord_t col,
+                      uint8_t *buffer,
                       size_t npixels)
 {
   struct sam_dev_s *priv = &g_lcddev;
@@ -1226,6 +1235,7 @@ static int sam_getplaneinfo(struct lcd_dev_s *dev, unsigned int planeno,
   DEBUGASSERT(dev && pinfo && planeno == 0);
   lcdinfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
+  pinfo->dev = dev;
   return OK;
 }
 
@@ -1681,7 +1691,8 @@ void sam_lcdclear(uint16_t color)
 
   for (row = 0; row < SAM_YRES; row++)
     {
-      ret = sam_putrun(row, 0, (const uint8_t *)g_runbuffer, SAM_XRES);
+      ret = sam_putrun(&priv->dev, row, 0, (const uint8_t *)g_runbuffer,
+                       SAM_XRES);
       if (ret < 0)
         {
           lcderr("ERROR: sam_putrun failed on row %d: %d\n", row, ret);

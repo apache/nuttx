@@ -201,10 +201,12 @@ static void rit_sndcmds(FAR struct rit_dev_s *priv,
 
 /* LCD Data Transfer Methods */
 
-static int rit_putrun(fb_coord_t row, fb_coord_t col,
+static int rit_putrun(FAR struct lcd_dev_s *dev,
+                      fb_coord_t row, fb_coord_t col,
                       FAR const uint8_t *buffer,
                       size_t npixels);
-static int rit_getrun(fb_coord_t row, fb_coord_t col,
+static int rit_getrun(FAR struct lcd_dev_s *dev,
+                      fb_coord_t row, fb_coord_t col,
                       FAR uint8_t *buffer,
                       size_t npixels);
 
@@ -634,6 +636,7 @@ static inline void rit_clear(FAR struct rit_dev_s *priv)
  *   This method can be used to write a partial raster line to the LCD.
  *
  * Input Parameters:
+ *   dev     - The lcd device
  *   row     - Starting row to write to (range: 0 <= row < yres)
  *   col     - Starting column to write to (range: 0 <= col <= xres-npixels)
  *   buffer  - The buffer containing the run to be written to the LCD
@@ -643,11 +646,12 @@ static inline void rit_clear(FAR struct rit_dev_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_P14201_FRAMEBUFFER
-static int rit_putrun(fb_coord_t row, fb_coord_t col,
+static int rit_putrun(FAR struct lcd_dev_s *dev,
+                      fb_coord_t row, fb_coord_t col,
                       FAR const uint8_t *buffer,
                       size_t npixels)
 {
-  FAR struct rit_dev_s *priv = (FAR struct rit_dev_s *)&g_oleddev;
+  FAR struct rit_dev_s *priv = (FAR struct rit_dev_s *)dev;
   uint8_t cmd[3];
   uint8_t *run;
   int start;
@@ -809,11 +813,12 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col,
   return OK;
 }
 #else
-static int rit_putrun(fb_coord_t row, fb_coord_t col,
+static int rit_putrun(FAR struct lcd_dev_s *dev,
+                      fb_coord_t row, fb_coord_t col,
                       FAR const uint8_t *buffer,
                       size_t npixels)
 {
-  FAR struct rit_dev_s *priv = (FAR struct rit_dev_s *)&g_oleddev;
+  FAR struct rit_dev_s *priv = (FAR struct rit_dev_s *)dev;
   uint8_t cmd[3];
 
   ritinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
@@ -871,6 +876,7 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col,
  * Description:
  *   This method can be used to read a partial raster line from the LCD:
  *
+ *  dev     - The lcd device
  *  row     - Starting row to read from (range: 0 <= row < yres)
  *  col     - Starting column to read read (range: 0 <= col <= xres-npixels)
  *  buffer  - The buffer in which to return the run read from the LCD
@@ -880,7 +886,9 @@ static int rit_putrun(fb_coord_t row, fb_coord_t col,
  ****************************************************************************/
 
 #ifdef CONFIG_P14201_FRAMEBUFFER
-static int rit_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
+static int rit_getrun(FAR struct lcd_dev_s *dev,
+                      fb_coord_t row, fb_coord_t col,
+                      FAR uint8_t *buffer,
                       size_t npixels)
 {
   uint8_t *run;
@@ -980,8 +988,8 @@ static int rit_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   return OK;
 }
 #else
-static int rit_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
-                      size_t npixels)
+static int rit_getrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
+                      fb_coord_t col, FAR uint8_t *buffer, size_t npixels)
 {
   /* Can't read from OLED GDDRAM in SPI mode */
 
@@ -1023,6 +1031,7 @@ static int rit_getplaneinfo(FAR struct lcd_dev_s *dev,
   DEBUGASSERT(pinfo && planeno == 0);
   ginfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
+  pinfo->dev = dev;
   return OK;
 }
 

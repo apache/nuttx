@@ -360,6 +360,14 @@ config LCD_SSD1306
 
 if LCD_SSD1306
 
+config SSD1306_NUMDEVS
+	int "Number of SSD1306 displays"
+	range 1 256
+	default 1
+	---help---
+		Specifies the number of SSD1306 devices present on the respective board.
+		Currently only multiple displays of the same type are supported.
+
 choice
 	prompt "SSD1306 Interface"
 	default LCD_SSD1306_SPI

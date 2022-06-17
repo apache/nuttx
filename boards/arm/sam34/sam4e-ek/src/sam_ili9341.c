@@ -302,10 +302,12 @@ static int  sam_poweroff(struct sam_dev_s *priv);
 
 /* LCD Data Transfer Methods */
 
-static int  sam_putrun(fb_coord_t row, fb_coord_t col,
+static int  sam_putrun(struct lcd_dev_s *dev,
+                       fb_coord_t row, fb_coord_t col,
                        const uint8_t *buffer,
                        size_t npixels);
-static int  sam_getrun(fb_coord_t row, fb_coord_t col,
+static int  sam_getrun(struct lcd_dev_s *dev,
+                       fb_coord_t row, fb_coord_t col,
                        uint8_t *buffer,
                        size_t npixels);
 
@@ -704,7 +706,8 @@ static int sam_poweroff(struct sam_dev_s *priv)
  *
  ****************************************************************************/
 
-static int sam_putrun(fb_coord_t row, fb_coord_t col,
+static int sam_putrun(struct lcd_dev_s *dev,
+                      fb_coord_t row, fb_coord_t col,
                       const uint8_t *buffer,
                       size_t npixels)
 {
@@ -763,7 +766,9 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col,
  *
  ****************************************************************************/
 
-static int sam_getrun(fb_coord_t row, fb_coord_t col, uint8_t *buffer,
+static int sam_getrun(struct lcd_dev_s *dev,
+                      fb_coord_t row, fb_coord_t col,
+                      uint8_t *buffer,
                       size_t npixels)
 {
 #if defined(CONFIG_SAM4EEK_LCD_RGB565)
@@ -840,6 +845,7 @@ static int sam_getplaneinfo(struct lcd_dev_s *dev, unsigned int planeno,
   DEBUGASSERT(dev && pinfo && planeno == 0);
   lcdinfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
+  pinfo->dev = dev;
   return OK;
 }
 

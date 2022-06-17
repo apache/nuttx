@@ -96,11 +96,10 @@
  ****************************************************************************/
 
 static int init_graph_vga(int width, int height, int chain4);
-static int vga_putrun(fb_coord_t row,
-                      fb_coord_t col, const uint8_t *buffer,
-                      size_t npixels);
-static int vga_getrun(fb_coord_t row, fb_coord_t col, uint8_t *buffer,
-                      size_t npixels);
+static int vga_putrun(struct lcd_dev_s *dev, fb_coord_t row, fb_coord_t col,
+                      const uint8_t *buffer, size_t npixels);
+static int vga_getrun(struct lcd_dev_s *dev, fb_coord_t row, fb_coord_t col,
+                      uint8_t *buffer, size_t npixels);
 static int vga_getvideoinfo(struct lcd_dev_s *dev,
                             struct fb_videoinfo_s *vinfo);
 static int vga_getplaneinfo(struct lcd_dev_s *dev, unsigned int planeno,
@@ -414,16 +413,15 @@ static int init_graph_vga(int width, int height, int chain4)
   return 0;
 }
 
-static int vga_putrun(fb_coord_t row,
-                      fb_coord_t col, const uint8_t *buffer,
-                      size_t npixels)
+static int vga_putrun(struct lcd_dev_s *dev, fb_coord_t row, fb_coord_t col,
+                      const uint8_t *buffer, size_t npixels)
 {
   memcpy(&g_pscreen[row*VGA_XRES + col], buffer, npixels);
   return OK;
 }
 
-static int vga_getrun(fb_coord_t row, fb_coord_t col, uint8_t *buffer,
-                      size_t npixels)
+static int vga_getrun(struct lcd_dev_s *dev, fb_coord_t row, fb_coord_t col,
+                      uint8_t *buffer, size_t npixels)
 {
   memcpy(buffer, &g_pscreen[row*VGA_XRES + col], npixels);
   return OK;
@@ -445,8 +443,8 @@ static int vga_getplaneinfo(struct lcd_dev_s *dev, unsigned int planeno,
   pinfo->putrun  = vga_putrun;      /* Put a run into LCD memory */
   pinfo->getrun  = vga_getrun;      /* Get a run from LCD memory */
   pinfo->buffer  = g_runbuffer;     /* Run scratch buffer */
-  pinfo->display = 0;
   pinfo->bpp     = VGA_BPP;         /* Bits-per-pixel */
+  pinfo->dev     = dev;             /* LCD device */
   return OK;
 }
 

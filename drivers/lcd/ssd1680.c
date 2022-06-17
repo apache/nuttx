@@ -163,11 +163,13 @@ static void ssd1680_configspi(FAR struct spi_dev_s *spi);
 static void ssd1680_select(FAR struct ssd1680_dev_s *priv, bool cs);
 static void ssd1680_cmddata(FAR struct ssd1680_dev_s *priv, bool cmd);
 
-static int ssd1680_putrun(fb_coord_t row, fb_coord_t col,
-    FAR const uint8_t *buffer, size_t npixels);
+static int ssd1680_putrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
+                          fb_coord_t col, FAR const uint8_t *buffer,
+                          size_t npixels);
 
-static int ssd1680_getrun(fb_coord_t row, fb_coord_t col,
-    FAR uint8_t *buffer, size_t npixels);
+static int ssd1680_getrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
+                          fb_coord_t col, FAR uint8_t *buffer,
+                          size_t npixels);
 
 /* LCD Configuration */
 
@@ -287,6 +289,7 @@ static const uint8_t ssd1680_lut[] =
  *   This method can be used to write a partial raster line to the LCD.
  *
  * Input Parameters:
+ *   dev     - The lcd device
  *   row     - Starting row to write to (range: 0 <= row < yres)
  *   col     - Starting column to write to (range: 0 <= col <= xres-npixels)
  *   buffer  - The buffer containing the run to be written to the LCD
@@ -295,10 +298,11 @@ static const uint8_t ssd1680_lut[] =
  *
  ****************************************************************************/
 
-static int ssd1680_putrun(fb_coord_t row, fb_coord_t col,
-    FAR const uint8_t *buffer, size_t npixels)
+static int ssd1680_putrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
+                          fb_coord_t col, FAR const uint8_t *buffer,
+                          size_t npixels)
 {
-  FAR struct ssd1680_dev_s *priv = (FAR struct ssd1680_dev_s *)&g_epaperdev;
+  FAR struct ssd1680_dev_s *priv = (FAR struct ssd1680_dev_s *)dev;
 
   uint8_t *dst = priv->shadow_fb +
       row * SSD1680_DEV_ROWSIZE + (col >> SSD1680_PDF);
@@ -324,6 +328,7 @@ static int ssd1680_putrun(fb_coord_t row, fb_coord_t col,
  *
  * Input Parameters:
  *
+ *  dev     - The lcd device
  *  row     - Starting row to read from (range: 0 <= row < yres)
  *  col     - Starting column to read read
  *            (range: 0 <= col <= xres-npixels)
@@ -332,11 +337,12 @@ static int ssd1680_putrun(fb_coord_t row, fb_coord_t col,
  *            (range: 0 < npixels <= xres-col)
  */
 
-static int ssd1680_getrun(fb_coord_t row, fb_coord_t col,
-    FAR uint8_t *buffer, size_t npixels)
+static int ssd1680_getrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
+                          fb_coord_t col, FAR uint8_t *buffer,
+                          size_t npixels)
 {
   lcdinfo("(%d, %d, %d)\n", row, col, npixels);
-  FAR struct ssd1680_dev_s *priv = (FAR struct ssd1680_dev_s *)&g_epaperdev;
+  FAR struct ssd1680_dev_s *priv = (FAR struct ssd1680_dev_s *)dev;
 
   bitscpy_ss(buffer,
       priv->shadow_fb + row * SSD1680_DEV_FBSIZE + (col >> SSD1680_PDF),
@@ -381,6 +387,7 @@ static int ssd1680_getplaneinfo(FAR struct lcd_dev_s *dev,
 
   lcdinfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
+  pinfo->dev = dev;
   return OK;
 }
 

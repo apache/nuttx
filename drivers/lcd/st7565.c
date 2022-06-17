@@ -192,10 +192,11 @@ static inline int st7565_backlight(FAR struct st7565_dev_s *priv, int level);
 
 /* LCD Data Transfer Methods */
 
-static int st7565_putrun(fb_coord_t row, fb_coord_t col,
-                         FAR const uint8_t * buffer, size_t npixels);
-static int st7565_getrun(fb_coord_t row, fb_coord_t col,
-                         FAR uint8_t * buffer,
+static int st7565_putrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
+                         fb_coord_t col, FAR const uint8_t *buffer,
+                         size_t npixels);
+static int st7565_getrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
+                         fb_coord_t col, FAR uint8_t *buffer,
                          size_t npixels);
 
 /* LCD Configuration */
@@ -416,6 +417,7 @@ static inline int st7565_backlight(FAR struct st7565_dev_s *priv, int level)
  * Description:
  *   This method can be used to write a partial raster line to the LCD:
  *
+ *   dev     - The lcd device
  *   row     - Starting row to write to (range: 0 <= row < yres)
  *   col     - Starting column to write to (range: 0 <= col <= xres-npixels)
  *   buffer  - The buffer containing the run to be written to the LCD
@@ -424,14 +426,11 @@ static inline int st7565_backlight(FAR struct st7565_dev_s *priv, int level)
  *
  ****************************************************************************/
 
-static int st7565_putrun(fb_coord_t row, fb_coord_t col,
-                         FAR const uint8_t * buffer, size_t npixels)
+static int st7565_putrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
+                         fb_coord_t col, FAR const uint8_t *buffer,
+                         size_t npixels)
 {
-  /* Because of this line of code, we will only be able to support a single
-   * ST7565 device.
-   */
-
-  FAR struct st7565_dev_s *priv = &g_st7565dev;
+  FAR struct st7565_dev_s *priv = (FAR struct st7565_dev_s *)dev;
   FAR uint8_t *fbptr;
   FAR uint8_t *ptr;
   uint8_t fbmask;
@@ -578,15 +577,11 @@ static int st7565_putrun(fb_coord_t row, fb_coord_t col,
  *
  ****************************************************************************/
 
-static int st7565_getrun(fb_coord_t row, fb_coord_t col,
-                         FAR uint8_t * buffer,
+static int st7565_getrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
+                         fb_coord_t col, FAR uint8_t *buffer,
                          size_t npixels)
 {
-  /* Because of this line of code, we will only be able to support a single
-   * ST7565 device.
-   */
-
-  FAR struct st7565_dev_s *priv = &g_st7565dev;
+  FAR struct st7565_dev_s *priv = (FAR struct st7565_dev_s *)dev;
   FAR uint8_t *fbptr;
   uint8_t page;
   uint8_t fbmask;

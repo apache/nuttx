@@ -345,10 +345,12 @@ static void stm3210e_setcursor(uint16_t col, uint16_t row);
 
 /* LCD Data Transfer Methods */
 
-static int stm3210e_putrun(fb_coord_t row, fb_coord_t col,
+static int stm3210e_putrun(struct lcd_dev_s *dev,
+                           fb_coord_t row, fb_coord_t col,
                            const uint8_t *buffer,
                            size_t npixels);
-static int stm3210e_getrun(fb_coord_t row, fb_coord_t col,
+static int stm3210e_getrun(struct lcd_dev_s *dev,
+                           fb_coord_t row, fb_coord_t col,
                            uint8_t *buffer,
                            size_t npixels);
 
@@ -704,6 +706,7 @@ static void stm3210e_dumprun(const char *msg, uint16_t *run,
  * Description:
  *   This method can be used to write a partial raster line to the LCD:
  *
+ *   dev     - The lcd device
  *   row     - Starting row to write to (range: 0 <= row < yres)
  *   col     - Starting column to write to (range: 0 <= col <= xres-npixels)
  *   buffer  - The buffer containing the run to be written to the LCD
@@ -712,7 +715,8 @@ static void stm3210e_dumprun(const char *msg, uint16_t *run,
  *
  ****************************************************************************/
 
-static int stm3210e_putrun(fb_coord_t row, fb_coord_t col,
+static int stm3210e_putrun(struct lcd_dev_s *dev,
+                           fb_coord_t row, fb_coord_t col,
                            const uint8_t *buffer,
                            size_t npixels)
 {
@@ -798,6 +802,7 @@ static int stm3210e_putrun(fb_coord_t row, fb_coord_t col,
  * Description:
  *   This method can be used to read a partial raster line from the LCD:
  *
+ *  dev     - The lcd device
  *  row     - Starting row to read from (range: 0 <= row < yres)
  *  col     - Starting column to read read (range: 0 <= col <= xres-npixels)
  *  buffer  - The buffer in which to return the run read from the LCD
@@ -806,7 +811,8 @@ static int stm3210e_putrun(fb_coord_t row, fb_coord_t col,
  *
  ****************************************************************************/
 
-static int stm3210e_getrun(fb_coord_t row, fb_coord_t col,
+static int stm3210e_getrun(struct lcd_dev_s *dev,
+                           fb_coord_t row, fb_coord_t col,
                            uint8_t *buffer,
                            size_t npixels)
 {
@@ -959,6 +965,7 @@ static int stm3210e_getplaneinfo(struct lcd_dev_s *dev,
   DEBUGASSERT(dev && pinfo && planeno == 0);
   ginfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
+  pinfo->dev = dev;
   return OK;
 }
 

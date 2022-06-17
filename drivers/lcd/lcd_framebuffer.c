@@ -226,7 +226,7 @@ static int lcdfb_updateearea(FAR struct fb_vtable_s *vtable,
        * memory.
        */
 
-      ret = pinfo->putrun(row, startx, run, width);
+      ret = pinfo->putrun(pinfo->dev, row, startx, run, width);
       if (ret < 0)
         {
           return ret;
