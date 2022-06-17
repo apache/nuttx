@@ -283,6 +283,7 @@ struct ssd1306_dev_s
   FAR struct i2c_master_s  *i2c;   /* Cached I2C device reference */
   uint8_t                addr;     /* 7-bit I2C address */
 #endif
+  uint8_t                devno;    /* LCD device instance */
   uint8_t                contrast; /* Current contrast setting */
   bool                   on;       /* true: display is on */
   bool                   is_conf;  /* true: display had been configured */
@@ -296,6 +297,7 @@ struct ssd1306_dev_s
    */
 
   uint8_t fb[SSD1306_DEV_FBSIZE];
+  uint8_t runbuffer[SSD1306_DEV_ROWSIZE];
 };
 
 /****************************************************************************

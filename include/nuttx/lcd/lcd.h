@@ -45,6 +45,8 @@
  * Type Definitions
  ****************************************************************************/
 
+struct lcd_dev_s;
+
 /* This structure describes one color plane.  Some YUV formats may support
  * up to 4 planes (although they probably wouldn't be used on LCD hardware).
  * The framebuffer driver provides the video memory address in its
@@ -58,6 +60,7 @@ struct lcd_planeinfo_s
 
   /* This method can be used to write a partial raster line to the LCD:
    *
+   *  dev     - LCD interface to write to
    *  row     - Starting row to write to (range: 0 <= row < yres)
    *  col     - Starting column to write to (range: 0 <= col <= xres-npixels)
    *  buffer  - The buffer containing the run to be written to the LCD
@@ -65,11 +68,12 @@ struct lcd_planeinfo_s
    *            (range: 0 < npixels <= xres-col)
    */
 
-  int (*putrun)(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
-                size_t npixels);
+  int (*putrun)(FAR struct lcd_dev_s *dev, fb_coord_t row, fb_coord_t col,
+                FAR const uint8_t *buffer, size_t npixels);
 
   /* This method can be used to write a rectangular area to the LCD:
    *
+   *  dev       - LCD interface to write to
    *  row_start - Starting row to write to (range: 0 <= row < yres)
    *  row_end   - Ending row to write to (range: row_start <= row < yres)
    *  col_start - Starting column to write to (range: 0 <= col <= xres)
@@ -82,12 +86,13 @@ struct lcd_planeinfo_s
    * used.
    */
 
-  int (*putarea)(fb_coord_t row_start, fb_coord_t row_end,
-                 fb_coord_t col_start, fb_coord_t col_end,
-                 FAR const uint8_t *buffer);
+  int (*putarea)(FAR struct lcd_dev_s *dev, fb_coord_t row_start,
+                 fb_coord_t row_end, fb_coord_t col_start,
+                 fb_coord_t col_end, FAR const uint8_t *buffer);
 
   /* This method can be used to read a partial raster line from the LCD:
    *
+   *  dev     - LCD interface to read from
    *  row     - Starting row to read from (range: 0 <= row < yres)
    *  col     - Starting column to read read
    *            (range: 0 <= col <= xres-npixels)
@@ -96,11 +101,12 @@ struct lcd_planeinfo_s
    *            (range: 0 < npixels <= xres-col)
    */
 
-  int (*getrun)(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
-                size_t npixels);
+  int (*getrun)(FAR struct lcd_dev_s *dev, fb_coord_t row,
+                fb_coord_t col, FAR uint8_t *buffer, size_t npixels);
 
   /* This method can be used to read a rectangular area from the LCD:
    *
+   *  dev       - LCD interface to read from
    *  row_start - Starting row to read from (range: 0 <= row < yres)
    *  row_end   - Ending row to read from (range: row_start <= row < yres)
    *  col_start - Starting column to read from (range: 0 <= col <= xres)
@@ -113,9 +119,9 @@ struct lcd_planeinfo_s
    * used.
    */
 
-  int (*getarea)(fb_coord_t row_start, fb_coord_t row_end,
-                 fb_coord_t col_start, fb_coord_t col_end,
-                 FAR uint8_t *buffer);
+  int (*getarea)(FAR struct lcd_dev_s *dev, fb_coord_t row_start,
+                 fb_coord_t row_end, fb_coord_t col_start,
+                 fb_coord_t col_end, FAR uint8_t *buffer);
 
   /* Plane color characteristics ********************************************/
 
@@ -131,7 +137,7 @@ struct lcd_planeinfo_s
    * buffers.
    */
 
-  uint8_t *buffer;
+  FAR uint8_t *buffer;
 
   /* This is the number of bits in one pixel.  This may be one of {1, 2, 4,
    * 8, 16, 24, or 32} unless support for one or more of those resolutions
@@ -139,6 +145,12 @@ struct lcd_planeinfo_s
    */
 
   uint8_t  bpp;
+
+  /* This is the LCD interface corresponding to which this color plane
+   * belongs.
+   */
+
+  FAR struct lcd_dev_s *dev;
 };
 
 /* This structure defines an LCD interface */

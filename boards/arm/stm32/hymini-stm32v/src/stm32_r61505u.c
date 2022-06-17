@@ -118,9 +118,9 @@ static void lcd_clear(uint16_t color);
 
 /* LCD Data Transfer Methods */
 
-static int lcd_putrun(fb_coord_t row, fb_coord_t col,
+static int lcd_putrun(struct lcd_dev_s *dev, fb_coord_t row, fb_coord_t col,
                       const uint8_t *buffer, size_t npixels);
-static int lcd_getrun(fb_coord_t row, fb_coord_t col,
+static int lcd_getrun(struct lcd_dev_s *dev, fb_coord_t row, fb_coord_t col,
                       uint8_t *buffer, size_t npixels);
 
 /* LCD Configuration */
@@ -428,9 +428,8 @@ static void lcd_setcursor(unsigned int x, unsigned int y)
  *
  ****************************************************************************/
 
-static int lcd_putrun(fb_coord_t row, fb_coord_t col,
-                      const uint8_t *buffer,
-                      size_t npixels)
+static int lcd_putrun(struct lcd_dev_s *dev, fb_coord_t row, fb_coord_t col,
+                      const uint8_t *buffer, size_t npixels)
 {
   int i;
   const uint16_t *src = (const uint16_t *) buffer;
@@ -466,8 +465,8 @@ static int lcd_putrun(fb_coord_t row, fb_coord_t col,
  *
  ****************************************************************************/
 
-static int lcd_getrun(fb_coord_t row, fb_coord_t col, uint8_t *buffer,
-                      size_t npixels)
+static int lcd_getrun(struct lcd_dev_s *dev, fb_coord_t row, fb_coord_t col,
+                      uint8_t *buffer, size_t npixels)
 {
   uint16_t *dest = (uint16_t *) buffer;
   int i;
@@ -528,6 +527,7 @@ static int lcd_getplaneinfo(struct lcd_dev_s *dev, unsigned int planeno,
   ginfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
 
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
+  pinfo->dev = dev;
   return OK;
 }
 

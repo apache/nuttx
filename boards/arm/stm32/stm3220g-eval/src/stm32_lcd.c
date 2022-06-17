@@ -289,9 +289,11 @@ static void stm3220g_setcursor(uint16_t col, uint16_t row);
 
 /* LCD Data Transfer Methods */
 
-static int stm3220g_putrun(fb_coord_t row, fb_coord_t col,
+static int stm3220g_putrun(struct lcd_dev_s *dev,
+                           fb_coord_t row, fb_coord_t col,
                            const uint8_t *buffer, size_t npixels);
-static int stm3220g_getrun(fb_coord_t row, fb_coord_t col,
+static int stm3220g_getrun(struct lcd_dev_s *dev,
+                           fb_coord_t row, fb_coord_t col,
                            uint8_t *buffer, size_t npixels);
 
 /* LCD Configuration */
@@ -543,6 +545,7 @@ static void stm3220g_dumprun(const char *msg,
  * Description:
  *   This method can be used to write a partial raster line to the LCD:
  *
+ *   dev     - The LCD device
  *   row     - Starting row to write to (range: 0 <= row < yres)
  *   col     - Starting column to write to (range: 0 <= col <= xres-npixels)
  *   buffer  - The buffer containing the run to be written to the LCD
@@ -551,10 +554,9 @@ static void stm3220g_dumprun(const char *msg,
  *
  ****************************************************************************/
 
-static int stm3220g_putrun(fb_coord_t row,
-                           fb_coord_t col,
-                           const uint8_t *buffer,
-                           size_t npixels)
+static int stm3220g_putrun(struct lcd_dev_s *dev,
+                           fb_coord_t row, fb_coord_t col,
+                           const uint8_t *buffer, size_t npixels)
 {
   const uint16_t *src = (const uint16_t *)buffer;
   int i;
@@ -665,6 +667,7 @@ static int stm3220g_putrun(fb_coord_t row,
  * Description:
  *   This method can be used to read a partial raster line from the LCD:
  *
+ *  dev     - The LCD device
  *  row     - Starting row to read from (range: 0 <= row < yres)
  *  col     - Starting column to read read (range: 0 <= col <= xres-npixels)
  *  buffer  - The buffer in which to return the run read from the LCD
@@ -673,7 +676,8 @@ static int stm3220g_putrun(fb_coord_t row,
  *
  ****************************************************************************/
 
-static int stm3220g_getrun(fb_coord_t row, fb_coord_t col,
+static int stm3220g_getrun(struct lcd_dev_s *dev,
+                           fb_coord_t row, fb_coord_t col,
                            uint8_t *buffer, size_t npixels)
 {
   uint16_t *dest = (uint16_t *)buffer;
@@ -838,6 +842,7 @@ static int stm3220g_getplaneinfo(struct lcd_dev_s *dev,
   DEBUGASSERT(dev && pinfo && planeno == 0);
   lcdinfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
+  pinfo->dev = dev;
   return OK;
 }
 

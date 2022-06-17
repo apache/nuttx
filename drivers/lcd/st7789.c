@@ -195,13 +195,16 @@ static void st7789_fill(FAR struct st7789_dev_s *dev, uint16_t color);
 
 /* LCD Data Transfer Methods */
 
-static int st7789_putrun(fb_coord_t row, fb_coord_t col,
+static int st7789_putrun(FAR struct lcd_dev_s *dev,
+                         fb_coord_t row, fb_coord_t col,
                          FAR const uint8_t *buffer, size_t npixels);
-static int st7789_putarea(fb_coord_t row_start, fb_coord_t row_end,
+static int st7789_putarea(FAR struct lcd_dev_s *dev,
+                          fb_coord_t row_start, fb_coord_t row_end,
                           fb_coord_t col_start, fb_coord_t col_end,
                           FAR const uint8_t *buffer);
 #ifndef CONFIG_LCD_NOGETRUN
-static int st7789_getrun(fb_coord_t row, fb_coord_t col,
+static int st7789_getrun(FAR struct lcd_dev_s *dev,
+                         fb_coord_t row, fb_coord_t col,
                          FAR uint8_t *buffer, size_t npixels);
 #endif
 
@@ -503,6 +506,7 @@ static void st7789_fill(FAR struct st7789_dev_s *dev, uint16_t color)
  * Description:
  *   This method can be used to write a partial raster line to the LCD:
  *
+ *   dev     - The lcd device
  *   row     - Starting row to write to (range: 0 <= row < yres)
  *   col     - Starting column to write to (range: 0 <= col <= xres-npixels)
  *   buffer  - The buffer containing the run to be written to the LCD
@@ -511,10 +515,11 @@ static void st7789_fill(FAR struct st7789_dev_s *dev, uint16_t color)
  *
  ****************************************************************************/
 
-static int st7789_putrun(fb_coord_t row, fb_coord_t col,
+static int st7789_putrun(FAR struct lcd_dev_s *dev,
+                         fb_coord_t row, fb_coord_t col,
                          FAR const uint8_t *buffer, size_t npixels)
 {
-  FAR struct st7789_dev_s *priv = &g_lcddev;
+  FAR struct st7789_dev_s *priv = (FAR struct st7789_dev_s *)dev;
   FAR const uint16_t *src = (FAR const uint16_t *)buffer;
 
   ginfo("row: %d col: %d npixels: %d\n", row, col, npixels);
@@ -532,6 +537,7 @@ static int st7789_putrun(fb_coord_t row, fb_coord_t col,
  * Description:
  *   This method can be used to write a partial area to the LCD:
  *
+ *   dev       - The lcd device
  *   row_start - Starting row to write to (range: 0 <= row < yres)
  *   row_end   - Ending row to write to (range: row_start <= row < yres)
  *   col_start - Starting column to write to (range: 0 <= col <= xres)
@@ -541,11 +547,12 @@ static int st7789_putrun(fb_coord_t row, fb_coord_t col,
  *
  ****************************************************************************/
 
-static int st7789_putarea(fb_coord_t row_start, fb_coord_t row_end,
+static int st7789_putarea(FAR struct lcd_dev_s *dev,
+                          fb_coord_t row_start, fb_coord_t row_end,
                           fb_coord_t col_start, fb_coord_t col_end,
                           FAR const uint8_t *buffer)
 {
-  FAR struct st7789_dev_s *priv = &g_lcddev;
+  FAR struct st7789_dev_s *priv = (FAR struct st7789_dev_s *)dev;
   FAR const uint16_t *src = (FAR const uint16_t *)buffer;
 
   ginfo("row_start: %d row_end: %d col_start: %d col_end: %d\n",
@@ -566,6 +573,7 @@ static int st7789_putarea(fb_coord_t row_start, fb_coord_t row_end,
  * Description:
  *   This method can be used to read a partial raster line from the LCD:
  *
+ *  dev     - The lcd device
  *  row     - Starting row to read from (range: 0 <= row < yres)
  *  col     - Starting column to read read (range: 0 <= col <= xres-npixels)
  *  buffer  - The buffer in which to return the run read from the LCD
@@ -575,10 +583,11 @@ static int st7789_putarea(fb_coord_t row_start, fb_coord_t row_end,
  ****************************************************************************/
 
 #ifndef CONFIG_LCD_NOGETRUN
-static int st7789_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
-                         size_t npixels)
+static int st7789_getrun(FAR struct lcd_dev_s *dev,
+                         fb_coord_t row, fb_coord_t col,
+                         FAR uint8_t *buffer, size_t npixels)
 {
-  FAR struct st7789_dev_s *priv = &g_lcddev;
+  FAR struct st7789_dev_s *priv = (FAR struct st7789_dev_s *)dev;
   FAR uint16_t *dest = (FAR uint16_t *)buffer;
 
   ginfo("row: %d col: %d npixels: %d\n", row, col, npixels);

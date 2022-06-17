@@ -234,10 +234,12 @@ static void ug_deselect(FAR struct spi_dev_s *spi);
 
 /* LCD Data Transfer Methods */
 
-static int ug_putrun(fb_coord_t row, fb_coord_t col,
+static int ug_putrun(FAR struct lcd_dev_s *dev,
+                     fb_coord_t row, fb_coord_t col,
                      FAR const uint8_t *buffer,
                      size_t npixels);
-static int ug_getrun(fb_coord_t row, fb_coord_t col,
+static int ug_getrun(FAR struct lcd_dev_s *dev,
+                     fb_coord_t row, fb_coord_t col,
                      FAR uint8_t *buffer,
                      size_t npixels);
 
@@ -432,6 +434,7 @@ static void ug_deselect(FAR struct spi_dev_s *spi)
  * Description:
  *   This method can be used to write a partial raster line to the LCD:
  *
+ *   dev     - The lcd device
  *   row     - Starting row to write to (range: 0 <= row < yres)
  *   col     - Starting column to write to (range: 0 <= col <= xres-npixels)
  *   buffer  - The buffer containing the run to be written to the LCD
@@ -440,15 +443,12 @@ static void ug_deselect(FAR struct spi_dev_s *spi)
  *
  ****************************************************************************/
 
-static int ug_putrun(fb_coord_t row, fb_coord_t col,
+static int ug_putrun(FAR struct lcd_dev_s *dev,
+                     fb_coord_t row, fb_coord_t col,
                      FAR const uint8_t *buffer,
                      size_t npixels)
 {
-  /* Because of this line of code, we will only be able to support a single
-   * UG device
-   */
-
-  FAR struct ug_dev_s *priv = &g_ugdev;
+  FAR struct ug_dev_s *priv = (FAR struct ug_dev_s *)dev;
   FAR uint8_t *fbptr;
   FAR uint8_t *ptr;
   uint8_t devcol;
@@ -634,6 +634,7 @@ static int ug_putrun(fb_coord_t row, fb_coord_t col,
  * Description:
  *   This method can be used to read a partial raster line from the LCD.
  *
+ *  dev     - The lcd device
  *  row     - Starting row to read from (range: 0 <= row < yres)
  *  col     - Starting column to read read (range: 0 <= col <= xres-npixels)
  *  buffer  - The buffer in which to return the run read from the LCD
@@ -642,14 +643,12 @@ static int ug_putrun(fb_coord_t row, fb_coord_t col,
  *
  ****************************************************************************/
 
-static int ug_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
+static int ug_getrun(FAR struct lcd_dev_s *dev,
+                     fb_coord_t row, fb_coord_t col,
+                     FAR uint8_t *buffer,
                      size_t npixels)
 {
-  /* Because of this line of code, we will only be able to support a single
-   * UG device
-   */
-
-  FAR struct ug_dev_s *priv = &g_ugdev;
+  FAR struct ug_dev_s *priv = (FAR struct ug_dev_s *)dev;
   FAR uint8_t *fbptr;
   uint8_t page;
   uint8_t fbmask;
@@ -822,6 +821,7 @@ static int ug_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
   DEBUGASSERT(dev && pinfo && planeno == 0);
   ginfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
+  pinfo->dev = dev;
   return OK;
 }
 
