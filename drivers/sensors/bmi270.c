@@ -65,8 +65,8 @@
 #define BMI270_ODR_FLT_EPSILON        0.1f       /* ODR float epsilon */
 #define GRAVITY_EARTH                 9.80665f   /* Gravity of earth */
 #define BMI270_HALF_SCALE             32768.0f   /* Half scale of sensor((1 << 16) / 2.0f) */
-#define BMI270_TEMPER_COEFF           512.0f     /* Temperature coefficient(1/512 K per LSB) */
-#define BMI270_TEMPER_OFFSET          23.0f      /* Temperature K to ℃ */
+#define BMI270_TEMPER_COEFF           512.0f     /* temperature coefficient(1/512 K per LSB) */
+#define BMI270_TEMPER_OFFSET          23.0f      /* temperature K to ℃ */
 
 #define BMI270_ENABLE                 1          /* Enable value */
 #define BMI270_DISABLE                0          /* Disable value */
@@ -80,7 +80,6 @@
 
 #define BMI270_G_TRIGGER_CMD          0x02       /* Trigger special gyro operations */
 #define BMI270_SOFT_RESET_CMD         0xb6       /* Software reset command */
-#define BMI270_FIFO_FLUSH_CMD         0xb0       /* Clear FIFO content */
 
 /* Sensor ODR */
 
@@ -733,7 +732,7 @@ static void bmi270_spi_read_unlock(FAR struct bmi270_dev_s *priv,
 static void bmi270_spi_read_enhance(FAR struct bmi270_dev_s *priv,
                                     uint8_t regaddr,
                                     FAR uint8_t *regval,
-                                    unsigned int len);
+                                    uint8_t len);
 static void bmi270_spi_write(FAR struct bmi270_dev_s *priv,
                              uint8_t regaddr,
                              FAR uint8_t *value);
@@ -819,7 +818,6 @@ static int bmi270_fifo_gettype(FAR bmi270_fifo_header_t *fifo_header,
 static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv, bool worker);
 static int bmi270_fifo_getlevel(FAR struct bmi270_dev_s *priv,
                                 FAR unsigned int *value);
-static void bmi270_flush_fifo(FAR struct bmi270_dev_s *priv);
 
 /* Feature handle functions */
 
@@ -1114,7 +1112,7 @@ static void bmi270_spi_read_unlock(FAR struct bmi270_dev_s *priv,
 static void bmi270_spi_read_enhance(FAR struct bmi270_dev_s *priv,
                                     uint8_t regaddr,
                                     FAR uint8_t *regval,
-                                    unsigned int len)
+                                    uint8_t len)
 {
   /* Transmit the register address from where we want to read - the MSB
    * needs to be set to indicate the read indication. Then Write some
@@ -3202,8 +3200,7 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv, bool worker)
 
       /* Handle the interrupt. */
 
-      if (!regval_int1.fwm_int && !regval_int1.ffull_int
-          && regval_int0.wrist_wear_weakeup_out)
+      if (!regval_int1.fwm_int && !regval_int1.ffull_int)
         {
           bmi270_spi_unlock(priv);
           goto out;
@@ -3215,18 +3212,6 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv, bool worker)
     {
       snerr("Failed to get FIFO level!\n");
       bmi270_spi_unlock(priv);
-      goto out;
-    }
-
-  if (num >= BMI270_FIFO_BUFFER_SIZE)
-    {
-      /* Clear the fifo and drop the data. */
-
-      snerr("FIFO data number out of range! num: %d latch time: %llu\n",
-            num, sensor_get_timestamp() - priv->timestamp);
-
-      bmi270_spi_unlock(priv);
-      bmi270_flush_fifo(priv);
       goto out;
     }
 
@@ -3256,6 +3241,7 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv, bool worker)
       if (counter_xl >= CONFIG_SENSORS_BMI270_FIFO_SLOTS_NUMBER * 2
           || counter_gy >= CONFIG_SENSORS_BMI270_FIFO_SLOTS_NUMBER * 2)
         {
+          snerr("FIFO data number out of range!\n");
           break;
         }
 
@@ -3379,13 +3365,6 @@ out:
       bmi270_feat_handler(priv, regval_int0);
     }
 
-  if (worker)
-    {
-      IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
-                      IOEXPANDER_OPTION_INTCFG,
-                      (FAR void *)IOEXPANDER_VAL_HIGH);
-    }
-
   return ret;
 }
 
@@ -3422,31 +3401,6 @@ static int bmi270_fifo_getlevel(FAR struct bmi270_dev_s *priv,
            (uint16_t)fifo_length0.fifo_byte_counter_7_0;
 
   return OK;
-}
-
-/****************************************************************************
- * Name: bmi270_flush_fifo
- *
- * Description:
- *   Clear FIFO content.
- *
- * Input Parameters:
- *   priv  - Device struct.
- *
- * Returned Value:
- *   None.
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-
-static void bmi270_flush_fifo(FAR struct bmi270_dev_s *priv)
-{
-  bmi270_cmd_reg_t reg;
-
-  reg.value = BMI270_FIFO_FLUSH_CMD;
-  bmi270_spi_write(priv, BMI270_CMD_REG, (FAR uint8_t *)&reg);
 }
 
 /* Feature handle functions */
@@ -3512,10 +3466,6 @@ static int bmi270_feat_enable(FAR struct bmi270_dev_s *priv,
 
       weakup_config.min_angle_focus = BMI270_MIN_ANGLE_FOUCUS;
       weakup_config.min_angle_nonfocus = BMI270_MIN_ANGLE_NONFOUCUS;
-      weakup_config.max_tilt_lr = BMI270_MAX_TITLE_LR;
-      weakup_config.max_tilt_ll = BMI270_MAX_TITLE_LL;
-      weakup_config.max_tilt_pd = BMI270_MAX_TITLE_PD;
-      weakup_config.max_tilt_pu = BMI270_MAX_TITLE_PU;
 
       bmi270_set_wakeup_cfg(priv, &weakup_config);
       bmi270_map_feat_int(priv, BMI270_ENABLE);
@@ -3535,12 +3485,7 @@ static int bmi270_feat_enable(FAR struct bmi270_dev_s *priv,
       /* Disable the wrist wear wake up interrupt. */
 
       bmi270_map_feat_int(priv, BMI270_DISABLE);
-
-      if (priv->dev[BMI270_XL_IDX].fifoen == false
-          && priv->dev[BMI270_GY_IDX].fifoen == false)
-        {
-          bmi270_set_int(priv, BMI270_DISABLE);
-        }
+      bmi270_set_int(priv, BMI270_DISABLE);
 
       priv->featen = BMI270_DISABLE;
     }
@@ -3883,9 +3828,6 @@ static int bmi270_batch(FAR struct file *filep,
 
   DEBUGASSERT(sensor != NULL && latency_us != NULL);
 
-  sninfo("bmi270 batch: type: %d, latency_us: %lu\n", lower->type,
-         *latency_us);
-
   max_latency = sensor->lower.nbuffer * sensor->interval;
   if (*latency_us > max_latency)
     {
@@ -3900,8 +3842,6 @@ static int bmi270_batch(FAR struct file *filep,
                   / sensor->interval;
   *latency_us = sensor->fifowtm * sensor->interval;
   sensor->batch = *latency_us;
-
-  sninfo("bmi270 fifo water level:%lu\n", sensor->fifowtm);
 
   if (lower->type == SENSOR_TYPE_ACCELEROMETER)
     {
@@ -3951,7 +3891,7 @@ static int bmi270_batch(FAR struct file *filep,
 
       IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
                       IOEXPANDER_OPTION_INTCFG,
-                      (FAR void *)IOEXPANDER_VAL_HIGH);
+                      (FAR void *)IOEXPANDER_VAL_RISING);
     }
   else
     {
@@ -3990,15 +3930,12 @@ static int bmi270_batch(FAR struct file *filep,
 
       if (priv->fifoen)
         {
-          priv->fifoen = false;
           bmi270_fifo_readdata(priv, false);
         }
 
-      if (priv->featen == false)
-        {
-          bmi270_set_int(priv, BMI270_DISABLE);
-        }
+      bmi270_set_int(priv, BMI270_DISABLE);
 
+      priv->fifoen = false;
       regval_int_map_data.ffull_int1 = BMI270_DISABLE;
       regval_int_map_data.err_int1 = BMI270_DISABLE;
       regval_int_map_data.fwm_int1 = BMI270_DISABLE;
@@ -4086,8 +4023,6 @@ static int bmi270_set_interval(FAR struct file *filep,
   DEBUGASSERT(sensor != NULL && period_us != NULL);
 
   freq = BMI270_UNIT_TIME / *period_us;
-
-  sninfo("bmi270 set interval: type: %d, freq: %f\n", lower->type, freq);
 
   if (lower->type == SENSOR_TYPE_ACCELEROMETER)
     {
@@ -4201,8 +4136,6 @@ static int bmi270_activate(FAR struct file *filep,
 
   DEBUGASSERT(lower != NULL);
 
-  sninfo("bmi270 activate: type: %d, enable: %d\n", lower->type, enable);
-
   if (lower->type == SENSOR_TYPE_ACCELEROMETER)
     {
       priv = (struct bmi270_dev_s *)(sensor - BMI270_XL_IDX);
@@ -4278,7 +4211,7 @@ static int bmi270_activate(FAR struct file *filep,
             {
               IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
                               IOEXPANDER_OPTION_INTCFG,
-                              (FAR void *)IOEXPANDER_VAL_HIGH);
+                              (FAR void *)IOEXPANDER_VAL_RISING);
             }
 
           ret = bmi270_feat_enable(priv, enable);
@@ -4608,9 +4541,6 @@ static int bmi270_interrupt_handler(FAR struct ioexpander_dev_s *dev,
    */
 
   work_queue(HPWORK, &priv->work, bmi270_worker, priv, 0);
-  IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
-                  IOEXPANDER_OPTION_INTCFG,
-                  (FAR void *)IOEXPANDER_VAL_DISABLE);
 
   return OK;
 }
