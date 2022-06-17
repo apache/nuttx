@@ -6,8 +6,14 @@ concurrency:
   group: lint-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   lint:
+    permissions:
+      contents: read  # for actions/checkout to fetch code
+      statuses: write  # for github/super-linter to mark status of each linter run
     name: Lint
     runs-on: ubuntu-latest
     steps:
