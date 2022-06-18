@@ -612,9 +612,14 @@ void bcmf_wl_auth_event_handler(FAR struct bcmf_dev_s *priv,
     {
       /* Auth complete */
 
-      priv->auth_status = OK;
+      netdev_carrier_on(&priv->bc_dev);
 
+      priv->auth_status = OK;
       nxsem_post(&priv->auth_signal);
+    }
+  else if (type == WLC_E_DISASSOC)
+    {
+      netdev_carrier_off(&priv->bc_dev);
     }
 }
 
@@ -1364,6 +1369,7 @@ int bcmf_wl_set_bssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 {
   uint32_t out_len;
   int interface;
+  int infra = 0;
   int ap = 0;
   int ret;
 
@@ -1379,10 +1385,18 @@ int bcmf_wl_set_bssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
                        (uint8_t *)&ap, &out_len);
   if (ret == OK)
     {
-      out_len = sizeof(struct ether_addr);
-      ret = bcmf_cdc_ioctl(priv, interface, true,
-                           (ap ? WLC_SET_BSSID : WLC_REASSOC),
-                           (uint8_t *)iwr->u.ap_addr.sa_data, &out_len);
+      out_len = sizeof(infra);
+      ret = bcmf_cdc_ioctl(priv, interface, false, WLC_GET_INFRA,
+                           (uint8_t *)&infra, &out_len);
+
+      if (ret == OK)
+        {
+          out_len = sizeof(struct ether_addr);
+          ret = bcmf_cdc_ioctl(priv, interface, true,
+                               ((ap || !infra) ? WLC_SET_BSSID :
+                                                 WLC_REASSOC),
+                               (uint8_t *)iwr->u.ap_addr.sa_data, &out_len);
+        }
     }
 
   return ret;
@@ -1605,6 +1619,7 @@ int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
   int interface;
   uint32_t out_len;
   wlc_ssid_t ssid;
+  scb_val_t scbval;
 
   interface = bcmf_wl_get_interface(priv, iwr);
 
@@ -1613,16 +1628,29 @@ int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
       return -EINVAL;
     }
 
-  ssid.ssid_len = iwr->u.essid.length;
-  memcpy(ssid.SSID, iwr->u.essid.pointer, iwr->u.essid.length);
-
-  /* Configure AP SSID and trig authentication request */
-
-  out_len = sizeof(ssid);
-  if (bcmf_cdc_ioctl(priv, interface, true,
-                     WLC_SET_SSID, (uint8_t *)&ssid, &out_len))
+  if (iwr->u.essid.flags)
     {
-      return -EIO;
+      ssid.ssid_len = iwr->u.essid.length;
+      memcpy(ssid.SSID, iwr->u.essid.pointer, iwr->u.essid.length);
+
+      /* Configure AP SSID and trig authentication request */
+
+      out_len = sizeof(ssid);
+      ret = bcmf_cdc_ioctl(priv, interface, true,
+                         WLC_SET_SSID, (uint8_t *)&ssid, &out_len);
+      if (ret < 0)
+        {
+          wlerr("Associate request failure\n");
+          return ret;
+        }
+    }
+  else
+    {
+      out_len = sizeof(scbval);
+      memset(&scbval, 0x0, out_len);
+
+      return bcmf_cdc_ioctl(priv, interface, true,
+                            WLC_DISASSOC, (uint8_t *)&scbval, &out_len);
     }
 
   ret = bcmf_sem_wait(&priv->auth_signal, BCMF_AUTH_TIMEOUT_MS);
