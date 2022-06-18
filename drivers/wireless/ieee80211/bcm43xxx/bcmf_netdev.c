@@ -637,20 +637,55 @@ void bcmf_netdev_notify_rx(FAR struct bcmf_dev_s *priv)
 static int bcmf_ifup(FAR struct net_driver_s *dev)
 {
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
+  irqstate_t flags;
+  uint32_t out_len;
+  int ret;
 
-#ifdef CONFIG_NET_IPv4
-  ninfo("Bringing up: %d.%d.%d.%d\n",
-        (int)(dev->d_ipaddr & 0xff),
-        (int)((dev->d_ipaddr >> 8) & 0xff),
-        (int)((dev->d_ipaddr >> 16) & 0xff),
-        (int)(dev->d_ipaddr >> 24));
-#endif
-#ifdef CONFIG_NET_IPv6
-  ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
-        dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
-        dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
-#endif
+  /* Disable the hardware interrupt */
+
+  flags = enter_critical_section();
+
+  if (priv->bc_bifup)
+    {
+      goto errout_in_critical_section;
+    }
+
+  ret = bcmf_wl_active(priv, true);
+  if (ret != OK)
+    {
+      goto errout_in_critical_section;
+    }
+
+  /* Enable chip */
+
+  ret = bcmf_wl_enable(priv, true);
+  if (ret != OK)
+    {
+      goto errout_in_wl_active;
+    }
+
+  /* Set customized MAC address */
+
+  if (bcmf_board_etheraddr(&priv->bc_dev.d_mac.ether))
+    {
+      out_len = ETHER_ADDR_LEN;
+      bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, true,
+                             IOVAR_STR_CUR_ETHERADDR,
+                             priv->bc_dev.d_mac.ether.ether_addr_octet,
+                             &out_len);
+    }
+
+  /* Query MAC address */
+
+  out_len = ETHER_ADDR_LEN;
+  ret = bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, false,
+                               IOVAR_STR_CUR_ETHERADDR,
+                               priv->bc_dev.d_mac.ether.ether_addr_octet,
+                               &out_len);
+  if (ret != OK)
+    {
+      goto errout_in_wl_active;
+    }
 
   /* Instantiate MAC address from priv->bc_dev.d_mac.ether.ether_addr_octet */
 
@@ -663,6 +698,16 @@ static int bcmf_ifup(FAR struct net_driver_s *dev)
   /* Enable the hardware interrupt */
 
   priv->bc_bifup = true;
+
+  goto errout_in_critical_section;
+
+errout_in_wl_active:
+  bcmf_wl_active(priv, false);
+
+errout_in_critical_section:
+
+  leave_critical_section(flags);
+
   return OK;
 }
 
@@ -690,17 +735,19 @@ static int bcmf_ifdown(FAR struct net_driver_s *dev)
   /* Disable the hardware interrupt */
 
   flags = enter_critical_section();
-#warning Missing logic
 
-  /* Put the EMAC in its reset, non-operational state.  This should be
-   * a known configuration that will guarantee the bcmf_ifup() always
-   * successfully brings the interface back up.
-   */
+  if (priv->bc_bifup)
+    {
+      bcmf_wl_enable(priv, false);
+      bcmf_wl_active(priv, false);
 
-  /* Mark the device "down" */
+      /* Mark the device "down" */
 
-  priv->bc_bifup = false;
+      priv->bc_bifup = false;
+    }
+
   leave_critical_section(flags);
+
   return OK;
 }
 
@@ -883,8 +930,15 @@ static void bcmf_ipv6multicast(FAR struct bcmf_dev_s *priv)
 static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
                       unsigned long arg)
 {
-  int ret;
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
+  int ret;
+
+  if (!priv->bc_bifup)
+    {
+      wlerr("ERROR: invaild state "
+            "(IFF_DOWN, unable to execute command: %x)\n", cmd);
+      return -EPERM;
+    }
 
   /* Decode and dispatch the driver-specific IOCTL command */
 
@@ -970,7 +1024,7 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
         break;
 
       default:
-        nerr("ERROR: Unrecognized IOCTL command: %d\n", cmd);
+        nerr("ERROR: Unrecognized IOCTL command: %x\n", cmd);
         ret = -ENOTTY;  /* Special return value for this case */
         break;
     }
@@ -1001,8 +1055,6 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
 
 int bcmf_netdev_register(FAR struct bcmf_dev_s *priv)
 {
-  uint32_t out_len;
-
   /* Initialize network driver structure */
 
   memset(&priv->bc_dev, 0, sizeof(priv->bc_dev));
@@ -1023,38 +1075,9 @@ int bcmf_netdev_register(FAR struct bcmf_dev_s *priv)
   priv->cur_tx_frame     = NULL;
   priv->bc_dev.d_buf     = NULL;
 
-  /* Put the interface in the down state.  This usually amounts to resetting
-   * the device and/or calling bcmf_ifdown().
-   */
+  /* Initialize MAC address */
 
-  /* Enable chip */
-
-  if (bcmf_wl_enable(priv, true) != OK)
-    {
-      return -EIO;
-    }
-
-  /* Set customized MAC address */
-
-  if (bcmf_board_etheraddr(&priv->bc_dev.d_mac.ether))
-    {
-      out_len = ETHER_ADDR_LEN;
-      bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, true,
-                             IOVAR_STR_CUR_ETHERADDR,
-                             priv->bc_dev.d_mac.ether.ether_addr_octet,
-                             &out_len);
-    }
-
-  /* Query MAC address */
-
-  out_len = ETHER_ADDR_LEN;
-  if (bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, false,
-                             IOVAR_STR_CUR_ETHERADDR,
-                             priv->bc_dev.d_mac.ether.ether_addr_octet,
-                             &out_len) != OK)
-    {
-      return -EIO;
-    }
+  bcmf_board_etheraddr(&priv->bc_dev.d_mac.ether);
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
