@@ -141,6 +141,8 @@ struct bcmf_sdio_frame
 int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
           int minor, FAR struct sdio_dev_s *dev);
 
+int bcmf_bus_sdio_active(FAR struct bcmf_dev_s *priv, bool active);
+
 /* FIXME: Low level bus data transfer function
  * To avoid bus error, len will be aligned to:
  * - upper power of 2 iflen is lesser than 64

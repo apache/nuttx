@@ -433,13 +433,19 @@ int bcmf_driver_download_clm(FAR struct bcmf_dev_s *priv)
 #endif
 #endif /* CONFIG_IEEE80211_BROADCOM_HAVE_CLM */
 
-int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
+int bcmf_wl_active(FAR struct bcmf_dev_s *priv, bool active)
 {
-  int ret;
+  int interface = CHIP_STA_INTERFACE;
+  uint8_t tmp_buf[64];
   uint32_t out_len;
   uint32_t value;
-  uint8_t tmp_buf[64];
-  int interface = CHIP_STA_INTERFACE;
+  int ret;
+
+  ret = bcmf_bus_sdio_active(priv, active);
+  if (ret != OK || !active)
+    {
+      return ret;
+    }
 
 #ifdef CONFIG_IEEE80211_BROADCOM_HAVE_CLM
   /* Download CLM blob if needed */
@@ -447,7 +453,7 @@ int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
   ret = bcmf_driver_download_clm(priv);
   if (ret != OK)
     {
-      return -EIO;
+      goto errout_in_sdio_active;
     }
 #endif
 
@@ -460,7 +466,7 @@ int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
                                &out_len);
   if (ret != OK)
     {
-      return -EIO;
+      goto errout_in_sdio_active;
     }
 
   /* FIXME disable power save mode */
@@ -471,7 +477,7 @@ int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
                            (uint8_t *)&value, &out_len);
   if (ret != OK)
     {
-      return ret;
+      goto errout_in_sdio_active;
     }
 
   /* Set the GMode to auto */
@@ -482,7 +488,7 @@ int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
                        (uint8_t *)&value, &out_len);
   if (ret != OK)
     {
-      return ret;
+      goto errout_in_sdio_active;
     }
 
   /* TODO configure roaming if needed. Disable for now */
@@ -493,6 +499,10 @@ int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
                                    IOVAR_STR_ROAM_OFF,
                                    (FAR uint8_t *)&value,
                                    &out_len);
+  if (ret != OK)
+    {
+      goto errout_in_sdio_active;
+    }
 
   /* TODO configure EAPOL version to default */
 
@@ -500,11 +510,12 @@ int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
   ((FAR uint32_t *)tmp_buf)[0] = interface;
   ((FAR uint32_t *)tmp_buf)[1] = (uint32_t)-1;
 
-  if (bcmf_cdc_iovar_request(priv, interface, true,
-                             "bsscfg:"IOVAR_STR_SUP_WPA2_EAPVER, tmp_buf,
-                             &out_len))
+  ret = bcmf_cdc_iovar_request(priv, interface, true,
+                               "bsscfg:"IOVAR_STR_SUP_WPA2_EAPVER,
+                               tmp_buf, &out_len);
+  if (ret != OK)
     {
-      return -EIO;
+      goto errout_in_sdio_active;
     }
 
   /* Query firmware version string */
@@ -515,7 +526,7 @@ int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
                                    &out_len);
   if (ret != OK)
     {
-      return -EIO;
+      goto errout_in_sdio_active;
     }
 
   tmp_buf[sizeof(tmp_buf)-1] = 0;
@@ -530,11 +541,26 @@ int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
 
   wlinfo("fw version <%s>\n", tmp_buf);
 
+  ret = bcmf_event_push_config(priv);
+
+errout_in_sdio_active:
+  if (ret != OK)
+    {
+      bcmf_bus_sdio_active(priv, false);
+    }
+
+  return ret;
+}
+
+int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
+{
+  int i;
+
   /* FIXME Configure event mask to enable all asynchronous events */
 
-  for (ret = 0; ret < BCMF_EVENT_COUNT; ret++)
+  for (i = 0; i < BCMF_EVENT_COUNT; i++)
     {
-      bcmf_event_register(priv, bcmf_wl_default_event_handler, ret);
+      bcmf_event_register(priv, bcmf_wl_default_event_handler, i);
     }
 
   /*  Register radio event */
@@ -567,11 +593,6 @@ int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
                       WLC_E_DISASSOC);
   bcmf_event_register(priv, bcmf_wl_auth_event_handler,
                       WLC_E_DISASSOC_IND);
-
-  if (bcmf_event_push_config(priv))
-    {
-      return -EIO;
-    }
 
   /* Register network driver */
 
