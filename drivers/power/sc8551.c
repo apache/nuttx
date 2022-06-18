@@ -1644,7 +1644,7 @@ static int sc8551_state(FAR struct battery_charger_dev_s *dev,
   if (sc8551_key_state.cp_switching_stat) *status |= CP_SWITCHING_STAT_MASK;
   if (sc8551_key_state.charge_en_stat) *status |= CHG_EN_STAT_MASK;
 
-  baterr("ATTENION INFO: status is 0x%4x \n", *status);
+  batinfo("ATTENION INFO: status is 0x%4x \n", *status);
 
   return OK;
 }
