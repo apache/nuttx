@@ -22,6 +22,20 @@ config ARCH_ARM
 	---help---
 		The ARM architectures
 
+config ARCH_ARM64
+	bool "ARM64"
+	select ARCH_HAVE_BACKTRACE
+	select ARCH_HAVE_INTERRUPTSTACK
+	select ARCH_HAVE_VFORK
+	select ARCH_HAVE_STACKCHECK
+	select ARCH_HAVE_CUSTOMOPT
+	select ARCH_HAVE_STDARG_H
+	select ARCH_HAVE_SYSCALL_HOOKS
+	select ARCH_HAVE_RDWR_MEM_CPU_RUN
+	select ARCH_HAVE_THREAD_LOCAL
+	---help---
+		The ARM64 architectures
+
 config ARCH_AVR
 	bool "AVR"
 	select ARCH_NOINTC
@@ -147,6 +161,7 @@ endchoice
 config ARCH
 	string
 	default "arm"     if ARCH_ARM
+	default "arm64"   if ARCH_ARM64
 	default "avr"     if ARCH_AVR
 	default "hc"      if ARCH_HC
 	default "mips"    if ARCH_MIPS
@@ -162,6 +177,7 @@ config ARCH
 	default "sparc"   if ARCH_SPARC
 
 source "arch/arm/Kconfig"
+source "arch/arm64/Kconfig"
 source "arch/avr/Kconfig"
 source "arch/hc/Kconfig"
 source "arch/mips/Kconfig"
