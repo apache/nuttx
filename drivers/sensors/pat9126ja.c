@@ -68,6 +68,10 @@
 #define PAT9126JA_RESET_DELAY           3       /* Reset time */
 #define PAT9126JA_RESET_MAX_COUNT       3       /* Max reset count */
 
+/* Run number max of print log define */
+
+#define PAT9126JA_RUNNUM_MAX            50
+
 /* Read polling time and count define */
 
 #define PAT9126JA_POLLING_TIME          16667
@@ -1312,8 +1316,6 @@ static int pat9126ja_interrupt_handler(FAR struct ioexpander_dev_s *dev,
                   IOEXPANDER_OPTION_INTCFG,
                   (FAR void *)IOEXPANDER_VAL_DISABLE);
 
-  syslog(LOG_WARNING, "---PAT9126JA work state: start---\n");
-
   return OK;
 }
 
@@ -1340,6 +1342,7 @@ static void pat9126ja_worker(FAR void *arg)
 {
   FAR struct pat9126ja_dev_s *priv = arg;
   bool pin_val;
+  static uint8_t run_num = 0;
 
   /* Sanity check */
 
@@ -1382,7 +1385,11 @@ static void pat9126ja_worker(FAR void *arg)
                           IOEXPANDER_OPTION_INTCFG,
                           (FAR void *)IOEXPANDER_VAL_FALLING);
 
-          syslog(LOG_WARNING, "---PAT9126JA work state: stop---\n");
+          if (run_num++ > PAT9126JA_RUNNUM_MAX)
+            {
+              run_num = 0;
+              syslog(LOG_WARNING, "---PAT9126JA power state: running---\n");
+            }
         }
     }
 }
