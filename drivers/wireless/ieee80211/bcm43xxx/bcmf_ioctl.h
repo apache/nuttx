@@ -581,6 +581,7 @@ typedef struct
 {
   uint32_t val;
   struct ether_addr ea;
+  uint16_t pad;
 } scb_val_t;
 
 #define BCM_MAC_STATUS_INDICATION    (0x40010200L)
