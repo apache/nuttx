@@ -59,7 +59,6 @@
 #define CW2218_REG_TEMPMAX_DEFAULT_VALUE  0xFF /* Maximum temperature threshold register default value */
 #define CW2218_REG_TEMPMIN_DEFAULT_VALUE  0x14 /* Minimum temperature threshold register default value */
 #define CW2218_TEMP_ERROR_DEFAULT_VALUE   -10  /* default temperature return when error */
-#define CW2218_INIT_FAIL_DEFAULT_VALUE     80  /* default temperature return when gauge init failed */
 
 /****************************************************************************
  * Private
@@ -493,15 +492,10 @@ static inline int cw2218_gettemp(FAR struct cw2218_dev_s *priv, b8_t *temp)
             CW2218_TEMP_MAGIC_PART2 - CW2218_TEMP_MAGIC_PART3;
           *temp = cw_temp;
         }
-      else if (priv->gauge_init_status) /* error occurred */
+      else /* error occurred */
         {
           baterr("cw2218 get abnormal temp:%d\n", regval);
           *temp = CW2218_TEMP_ERROR_DEFAULT_VALUE;
-        }
-      else
-        {
-          baterr("cw2218 init failed get temp:%d\n", regval);
-          *temp = CW2218_INIT_FAIL_DEFAULT_VALUE;
         }
     }
 
@@ -1340,6 +1334,7 @@ static int gauge_init_thread(int argc, char** argv)
 {
   FAR struct cw2218_dev_s *priv = (FAR struct cw2218_dev_s *)
              ((uintptr_t)strtoul(argv[1], NULL, 0));
+  uint8_t regval = 0;
   int ret;
 
   while (1)
@@ -1353,9 +1348,19 @@ static int gauge_init_thread(int argc, char** argv)
         }
       else
         {
-          baterr("battery gauge init success\n");
-          priv->gauge_init_status = true;
-          break;
+          ret = cw2218_getreg8(priv, CW2218_COMMAND_TEMP, &regval, 1);
+          if (ret < 0)
+            {
+              baterr("ERROR: CW2218 get temp error, Error = %d\n", ret);
+              return ret;
+            }
+
+          if (regval != 0)
+            {
+              baterr("battery gauge init success\n");
+              priv->gauge_init_status = true;
+              break;
+            }
         }
     }
 
@@ -1434,6 +1439,7 @@ FAR struct battery_gauge_dev_s *cw2218_initialize(
       snprintf(arg1, 32, "%p", priv);
       argv[0] = arg1;
       argv[1] = NULL;
+      priv->gauge_init_status = false;
       ret = kthread_create("battery_init_thread",
                 SCHED_PRIORITY_DEFAULT, CONFIG_DEFAULT_TASK_STACKSIZE,
                 gauge_init_thread, argv);
