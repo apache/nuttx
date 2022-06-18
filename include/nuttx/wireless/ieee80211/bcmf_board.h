@@ -27,6 +27,7 @@
 
 #include <stdbool.h>
 #include <nuttx/irq.h>
+#include <net/ethernet.h>
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -107,6 +108,24 @@ void bcmf_board_reset(int minor, bool reset);
  ****************************************************************************/
 
 void bcmf_board_setup_oob_irq(int minor, int (*func)(void *), void *arg);
+
+/****************************************************************************
+ * Name: bcmf_board_etheraddr
+ *
+ * Description:
+ *   Board specific function called from Broadcom FullMAC driver
+ *   that must be implemented to get the customized MAC address
+ *
+ * Returned Value:
+ *   Return true if customized MAC address is set,
+ *   otherwise use firmware default MAC address
+ *
+ * Input Parameters:
+ *   ethaddr - Pointer to MAC address
+ *
+ ****************************************************************************/
+
+bool bcmf_board_etheraddr(FAR struct ether_addr *ethaddr);
 
 #undef EXTERN
 #ifdef __cplusplus

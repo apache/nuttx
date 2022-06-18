@@ -41,6 +41,7 @@
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/wireless/wireless.h>
+#include <nuttx/wireless/ieee80211/bcmf_board.h>
 
 #ifdef CONFIG_NET_PKT
 #  include <nuttx/net/pkt.h>
@@ -1031,6 +1032,17 @@ int bcmf_netdev_register(FAR struct bcmf_dev_s *priv)
   if (bcmf_wl_enable(priv, true) != OK)
     {
       return -EIO;
+    }
+
+  /* Set customized MAC address */
+
+  if (bcmf_board_etheraddr(&priv->bc_dev.d_mac.ether))
+    {
+      out_len = ETHER_ADDR_LEN;
+      bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, true,
+                             IOVAR_STR_CUR_ETHERADDR,
+                             priv->bc_dev.d_mac.ether.ether_addr_octet,
+                             &out_len);
     }
 
   /* Query MAC address */
