@@ -28,6 +28,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdio.h>
 #include <debug.h>
 #include <errno.h>
 #include <queue.h>
@@ -114,10 +115,6 @@ static bool brcm_chip_sr_capable(FAR struct bcmf_sdio_dev_s *sbus);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-/* FIXME remove */
-
-FAR struct bcmf_dev_s *g_sdio_priv;
 
 /* Buffer pool for SDIO bus interface
  * This pool is shared between all driver devices
@@ -660,8 +657,10 @@ int bcmf_write_reg(FAR struct bcmf_sdio_dev_s *sbus, uint8_t function,
 int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
                              int minor, FAR struct sdio_dev_s *dev)
 {
-  int ret;
   FAR struct bcmf_sdio_dev_s *sbus;
+  FAR char *argv[2];
+  char arg1[32];
+  int ret;
 
   /* Allocate sdio bus structure */
 
@@ -759,10 +758,6 @@ int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
       goto exit_uninit_hw;
     }
 
-  /* FIXME global variable for now */
-
-  g_sdio_priv = priv;
-
   /* Register sdio bus */
 
   priv->bus = &sbus->bus;
@@ -774,11 +769,13 @@ int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
 
   /* Spawn bcmf daemon thread */
 
+  snprintf(arg1, sizeof(arg1), "%p", priv);
+  argv[0] = arg1;
+  argv[1] = NULL;
   ret = kthread_create(BCMF_THREAD_NAME,
                        CONFIG_IEEE80211_BROADCOM_SCHED_PRIORITY,
                        BCMF_THREAD_STACK_SIZE, bcmf_sdio_thread,
-                       (FAR char * const *)NULL);
-
+                       argv);
   if (ret <= 0)
     {
       wlerr("Cannot spawn bcmf thread\n");
@@ -868,7 +865,8 @@ void bcmf_sdio_waitdog_timeout(wdparm_t arg)
 
 int bcmf_sdio_thread(int argc, char **argv)
 {
-  FAR struct bcmf_dev_s *priv = g_sdio_priv;
+  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)
+                                ((uintptr_t)strtoul(argv[1], NULL, 16));
   FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
   int ret;
 
