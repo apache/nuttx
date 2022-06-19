@@ -85,7 +85,7 @@ jobs:
           echo ::set-output name=apps_ref::$APPS_REF
 
       - name: Checkout nuttx repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: apache/incubator-nuttx
           ref: ${{ steps.gittargets.outputs.os_ref }}
@@ -95,7 +95,7 @@ jobs:
         run: git -C sources/nuttx fetch --tags
 
       - name: Checkout apps repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: apache/incubator-nuttx-apps
           ref: ${{ steps.gittargets.outputs.apps_ref }}

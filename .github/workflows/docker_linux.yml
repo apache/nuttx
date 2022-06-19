@@ -45,7 +45,7 @@ jobs:
       IMAGE_TAG: ghcr.io/${{ github.repository }}/apache-nuttx-ci-linux
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1

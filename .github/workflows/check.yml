@@ -30,7 +30,7 @@ jobs:
 
     steps:
       - name: Checkout nuttx repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: apache/incubator-nuttx
           path: nuttx
