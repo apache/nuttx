@@ -59,20 +59,13 @@
 #define BCMF_SCAN_RESULT_ENTRIES  CONFIG_IEEE80211_BROADCOM_SCAN_RESULT_ENTRIES
 
 /* CLM file is cut into pieces of MAX_CHUNK_LEN.
- * It is relatively small because dongles (FW) have a small maximum size
- * input payload restriction for ioctl's ... something like 1900'ish bytes.
- * So chunk len should not exceed 1400 bytes
  *
  * NOTE:  CONFIG_NET_ETH_PKTSIZE is the MTU plus the size of the Ethernet
  * header (14 bytes).
  */
 
-#ifdef CONFIG_IEEE80211_BROADCOM_FWFILES  /* REVISIT */
-#  define MAX_CHUNK_LEN (100)
-#else
-#  define MAX_CHUNK_LEN \
-     (CONFIG_NET_ETH_PKTSIZE > 1514 ? 1400 : CONFIG_NET_ETH_PKTSIZE - 114)
-#endif
+#define MAX_CHUNK_LEN \
+  (CONFIG_NET_ETH_PKTSIZE > 1514 ? 1400 : CONFIG_NET_ETH_PKTSIZE - 114)
 
 /* Helper to get iw_event size */
 
