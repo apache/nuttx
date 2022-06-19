@@ -106,7 +106,7 @@ jobs:
         run: tar zcf sources.tar.gz sources
 
       - name: Archive Source Bundle
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: source-bundle
           path: sources.tar.gz
@@ -158,7 +158,7 @@ jobs:
             ./cibuild.sh -A -R -c testlist/${{matrix.boards}}.dat
             ccache -s
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: linux-builds
           path: buildartifacts/
@@ -204,7 +204,7 @@ jobs:
           ./cibuild.sh -i -A -R -c testlist/${{matrix.boards}}.dat
           ccache -s
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: macos-builds
           path: buildartifacts/
