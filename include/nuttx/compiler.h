@@ -73,6 +73,20 @@
 
 #ifdef __GNUC__
 
+/* Built-ins */
+#  if __GNUC__ >= 4
+#    define CONFIG_HAVE_BUILTIN_BSWAP16 1
+#    define CONFIG_HAVE_BUILTIN_BSWAP32 1
+#    define CONFIG_HAVE_BUILTIN_BSWAP64 1
+#    define CONFIG_HAVE_BUILTIN_CTZ 1
+#    define CONFIG_HAVE_BUILTIN_CLZ 1
+#    define CONFIG_HAVE_BUILTIN_POPCOUNT 1
+#    define CONFIG_HAVE_BUILTIN_POPCOUNTLL 1
+#    define CONFIG_HAVE_BUILTIN_FFS 1
+#    define CONFIG_HAVE_BUILTIN_FFSL 1
+#    define CONFIG_HAVE_BUILTIN_FFSLL 1
+#  endif
+
 /* Pre-processor */
 
 #  define CONFIG_CPP_HAVE_VARARGS 1 /* Supports variable argument macros */
@@ -102,18 +116,6 @@
  */
 
 #  define offsetof(a, b) __builtin_offsetof(a, b)
-
-/* GCC 4.x have __builtin_ctz(|l|ll) and __builtin_clz(|l|ll). These count
- * trailing/leading zeros of input number and typically will generate few
- * fast bit-counting instructions. Inputting zero to these functions is
- * undefined and needs to be taken care of by the caller.
- */
-
-#  if __GNUC__ >= 4
-#    define CONFIG_HAVE_BUILTIN_CTZ      1
-#    define CONFIG_HAVE_BUILTIN_CLZ      1
-#    define CONFIG_HAVE_BUILTIN_POPCOUNT 1
-#  endif
 
 /* Attributes
  *
