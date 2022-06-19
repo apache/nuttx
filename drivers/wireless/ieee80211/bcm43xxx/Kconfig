@@ -120,6 +120,7 @@ config IEEE80211_BROADCOM_FULLMAC_SDIO
 
 config IEEE80211_BROADCOM_SCHED_PRIORITY
 	int "Broadcom BCMF daemon thread schedule priority"
+	default SCHED_HPWORKPRIORITY if SCHED_HPWORK
 	default 255
 	---help---
 		This parameter should be set the bcmf daemon thread

@@ -68,13 +68,17 @@
 /* The low priority work queue is preferred.  If it is not enabled, LPWORK
  * will be the same as HPWORK.
  *
- * NOTE:  However, the network should NEVER run on the high priority work
- * queue!  That queue is intended only to service short back end interrupt
- * processing that never suspends.  Suspending the high priority work queue
- * may bring the system to its knees!
+ * Use high priority queue if the bcmf daemon task has a higher priority
+ * than HPWORK, which will bring better performance especially on devices
+ * that focus on real-time of network.
  */
 
-#define BCMFWORK LPWORK
+#if defined(CONFIG_SCHED_HPWORK) && \
+    (CONFIG_IEEE80211_BROADCOM_SCHED_PRIORITY >= CONFIG_SCHED_HPWORKPRIORITY)
+# define BCMFWORK HPWORK
+#else
+# define BCMFWORK LPWORK
+#endif
 
 /* CONFIG_IEEE80211_BROADCOM_NINTERFACES determines the number of physical
  * interfaces that will be supported.
