@@ -57,7 +57,9 @@ int ffsll(long long j)
 
   if (j != 0)
     {
-#ifdef CONFIG_HAVE_BUILTIN_CTZ
+#ifdef CONFIG_HAVE_BUILTIN_FFSLL
+      ret = __builtin_ffsll(j);
+#elif defined (CONFIG_HAVE_BUILTIN_CTZ)
       /* Count trailing zeros function can be used to implement ffs. */
 
       ret = __builtin_ctzll(j) + 1;
