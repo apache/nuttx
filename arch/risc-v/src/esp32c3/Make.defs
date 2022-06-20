@@ -39,7 +39,7 @@ CHIP_CSRCS += esp32c3_irq.c
 CHIP_CSRCS += esp32c3_clockconfig.c esp32c3_gpio.c
 CHIP_CSRCS += esp32c3_lowputc.c esp32c3_serial.c
 CHIP_CSRCS += esp32c3_systemreset.c esp32c3_resetcause.c
-CHIP_CSRCS += esp32c3_uid.c
+CHIP_CSRCS += esp32c3_uid.c esp32c3_perf.c
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += esp32c3_userspace.c
