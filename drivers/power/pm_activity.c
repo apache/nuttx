@@ -268,7 +268,7 @@ void pm_wakelock_uninit(FAR struct pm_wakelock_s *wakelock)
   domain = wakelock->domain;
   pdom   = &g_pmglobals.domain[domain];
   dq     = &pdom->wakelock[wakelock->state];
-  wdog   = &pdom->wdog[wakelock->state];
+  wdog   = &wakelock->wdog;
 
   flags = pm_lock(domain);
 
@@ -412,7 +412,7 @@ void pm_wakelock_staytimeout(FAR struct pm_wakelock_s *wakelock, int ms)
   domain = wakelock->domain;
   pdom   = &g_pmglobals.domain[domain];
   dq     = &pdom->wakelock[wakelock->state];
-  wdog   = &pdom->wdog[wakelock->state];
+  wdog   = &wakelock->wdog;
 
   flags = pm_lock(domain);
 

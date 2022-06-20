@@ -32,7 +32,6 @@
 #include <nuttx/mutex.h>
 #include <nuttx/clock.h>
 #include <nuttx/power/pm.h>
-#include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 
 #ifdef CONFIG_PM
@@ -58,7 +57,6 @@ struct pm_domain_s
   /* The power state lock count */
 
   struct dq_queue_s wakelock[PM_COUNT];
-  struct wdog_s wdog[PM_COUNT];
 
   /* Auto update or not */
 
