@@ -76,6 +76,8 @@ void pm_initialize(void)
   FAR const struct pm_governor_s *gov;
   int i;
 
+  pm_wakelock_global_init();
+
   /* Select governor */
 
   for (i = 0; i < CONFIG_PM_NDOMAINS; i++)
@@ -95,8 +97,6 @@ void pm_initialize(void)
       g_pmglobals.domain[i].holder = INVALID_PROCESS_ID;
       g_pmglobals.domain[i].count  = 0;
     }
-
-  pm_wakelock_global_init();
 }
 
 #endif /* CONFIG_PM */
