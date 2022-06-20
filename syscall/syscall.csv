@@ -24,7 +24,6 @@
 "eventfd","sys/eventfd.h","defined(CONFIG_EVENT_FD)","int","unsigned int","int"
 "exec","nuttx/binfmt/binfmt.h","!defined(CONFIG_BINFMT_DISABLE) && !defined(CONFIG_BUILD_KERNEL)","int","FAR const char *","FAR char * const *","FAR char * const *","FAR const struct symtab_s *","int"
 "execve","unistd.h","!defined(CONFIG_BINFMT_DISABLE) && defined(CONFIG_LIBC_EXECFUNCS)","int","FAR const char *","FAR char * const []|FAR char * const *","FAR char * const []|FAR char * const *"
-"exit","stdlib.h","","noreturn","int"
 "fchmod","sys/stat.h","","int","int","mode_t"
 "fchown","unistd.h","","int","int","uid_t","gid_t"
 "fcntl","fcntl.h","","int","int","int","...","int"
