@@ -1289,7 +1289,8 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
 #endif
 
 #ifdef CONFIG_RPTUN_PM
-  pm_wakelock_init(&priv->wakelock, "rptun", PM_IDLE_DOMAIN, PM_IDLE);
+  snprintf(name, sizeof(name), "rptun-%s", RPTUN_GET_CPUNAME(dev));
+  pm_wakelock_init(&priv->wakelock, name, PM_IDLE_DOMAIN, PM_IDLE);
 #endif
 
   nxsem_init(&priv->semtx, 0, 0);
