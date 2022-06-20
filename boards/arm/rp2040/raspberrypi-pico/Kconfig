@@ -50,6 +50,118 @@ config RP2040_I2C1_GPIO
 	range -1 29
 	depends on RP2040_I2C1
 
+config RP2040_PWM0A_GPIO
+	int "PWM0 channel 1 GPIO pin assign (0, 16 or -1:no assign)"
+	default -1
+	range -1 29
+	depends on RP2040_PWM0
+
+if PWM_MULTICHAN && PWM_NCHANNELS > 1
+	config RP2040_PWM0B_GPIO
+		int "PWM0 channel 2 GPIO pin assign (1, 17 or -1:no assign)"
+		default -1
+		range -1 29
+	depends on RP2040_PWM0
+endif
+
+config RP2040_PWM1A_GPIO
+	int "PWM1 channel 1 GPIO pin assign (2, 18 or -1:no assign)"
+	default -1
+	range -1 29
+	depends on RP2040_PWM1
+
+if PWM_MULTICHAN && PWM_NCHANNELS > 1
+	config RP2040_PWM1B_GPIO
+		int "PWM1 channel 2 GPIO pin assign (3, 19 or -1:no assign)"
+		default -1
+		range -1 29
+		depends on RP2040_PWM1
+endif
+
+config RP2040_PWM2A_GPIO
+	int "PWM2 channel 1 GPIO pin assign (4, 20 or -1:no assign)"
+	default -1
+	range -1 29
+	depends on RP2040_PWM2
+
+if PWM_MULTICHAN && PWM_NCHANNELS > 1
+	config RP2040_PWM2B_GPIO
+		int "PWM2 channel 2 GPIO pin assign (5, 21 or -1:no assign)"
+		default -1
+		range -1 29
+		depends on RP2040_PWM2
+endif
+
+config RP2040_PWM3A_GPIO
+	int "PWM3 channel 1 GPIO pin assign (6, 22 or -1:no assign)"
+	default -1
+	range -1 29
+	depends on RP2040_PWM3
+
+if PWM_MULTICHAN && PWM_NCHANNELS > 1
+	config RP2040_PWM3B_GPIO
+		int "PWM3 channel 2 GPIO pin assign (7, 23 or -1:no assign)"
+		default -1
+		range -1 29
+		depends on RP2040_PWM3
+endif
+
+config RP2040_PWM4A_GPIO
+	int "PWM4 channel 1 GPIO pin assign (8, 24 or -1:no assign)"
+	default -1
+	range -1 29
+	depends on RP2040_PWM4
+
+if PWM_MULTICHAN && PWM_NCHANNELS > 1
+	config RP2040_PWM4B_GPIO
+		int "PWM4 channel 2 GPIO pin assign (9, 25 or -1:no assign)"
+		default -1
+		range -1 29
+		depends on RP2040_PWM4
+endif
+
+config RP2040_PWM5A_GPIO
+	int "PWM5 channel 1 GPIO pin assign (10, 26 or -1:no assign)"
+	default -1
+	range -1 29
+	depends on RP2040_PWM5
+
+if PWM_MULTICHAN && PWM_NCHANNELS > 1
+	config RP2040_PWM5B_GPIO
+		int "PWM5 channel 2 GPIO pin assign (11, 27 or -1:no assign)"
+		default -1
+		range -1 29
+		depends on RP2040_PWM5
+endif
+
+config RP2040_PWM6A_GPIO
+	int "PWM6 channel 1 GPIO pin assign (12, 28 or -1:no assign)"
+	default -1
+	range -1 29
+	depends on RP2040_PWM6
+
+if PWM_MULTICHAN && PWM_NCHANNELS > 1
+	config RP2040_PWM6B_GPIO
+		int "PWM6 channel 2 GPIO pin assign (13, 29 or -1:no assign)"
+		default -1
+		range -1 29
+		depends on RP2040_PWM6
+endif
+
+config RP2040_PWM7A_GPIO
+	int "PWM7 channel 1 GPIO pin assign (14 or -1:no assign)"
+	default -1
+	range -1 29
+	depends on RP2040_PWM7
+
+if PWM_MULTICHAN && PWM_NCHANNELS > 1
+	config RP2040_PWM7B_GPIO
+		int "PWM7 channel 2 GPIO pin assign (15 or -1:no assign)"
+		default -1
+		range -1 29
+		depends on RP2040_PWM7
+endif
+
 config RP2040_SPI0_GPIO
 	int "SPI0 GPIO pin assign (0,4,16,20 or -1:no assign)"
 	default -1

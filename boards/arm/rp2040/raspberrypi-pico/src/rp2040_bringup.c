@@ -59,6 +59,10 @@
 #include "rp2040_bmp180.h"
 #endif
 
+#ifdef CONFIG_RP2040_PWM
+#include "rp2040_pwmdev.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -105,6 +109,128 @@ int rp2040_bringup(void)
       _err("ERROR: Failed to initialize SPI1.\n");
     }
   #endif
+#endif
+
+#ifdef CONFIG_RP2040_PWM
+#ifdef CONFIG_RP2040_PWM0
+#if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
+  ret = rp2040_pwmdev_initialize( 0, 
+                                  CONFIG_RP2040_PWM0A_GPIO, 
+                                  CONFIG_RP2040_PWM0B_GPIO );
+#else
+  ret = rp2040_pwmdev_initialize( 0, 
+                                  CONFIG_RP2040_PWM0A_GPIO );
+#endif
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialize PWM0.\n");
+    }
+#endif
+
+#ifdef CONFIG_RP2040_PWM1
+#if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
+  ret = rp2040_pwmdev_initialize( 1, 
+                                  CONFIG_RP2040_PWM1A_GPIO, 
+                                  CONFIG_RP2040_PWM1B_GPIO );
+#else
+  ret = rp2040_pwmdev_initialize( 1, 
+                                  CONFIG_RP2040_PWM1A_GPIO );
+#endif
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialize PWM1.\n");
+    }
+#endif
+
+#ifdef CONFIG_RP2040_PWM2
+#if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
+  ret = rp2040_pwmdev_initialize( 2, 
+                                  CONFIG_RP2040_PWM2A_GPIO, 
+                                  CONFIG_RP2040_PWM2B_GPIO );
+#else
+  ret = rp2040_pwmdev_initialize( 2, 
+                                  CONFIG_RP2040_PWM2A_GPIO );
+#endif
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialize PWM2.\n");
+    }
+#endif
+
+#ifdef CONFIG_RP2040_PWM3
+#if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
+  ret = rp2040_pwmdev_initialize( 3, 
+                                  CONFIG_RP2040_PWM3A_GPIO, 
+                                  CONFIG_RP2040_PWM3B_GPIO );
+#else
+  ret = rp2040_pwmdev_initialize( 3, 
+                                  CONFIG_RP2040_PWM3A_GPIO );
+#endif
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialize PWM3.\n");
+    }
+#endif
+
+#ifdef CONFIG_RP2040_PWM4
+#if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
+  ret = rp2040_pwmdev_initialize( 4, 
+                                  CONFIG_RP2040_PWM4A_GPIO, 
+                                  CONFIG_RP2040_PWM4B_GPIO );
+#else
+  ret = rp2040_pwmdev_initialize( 4, 
+                                  CONFIG_RP2040_PWM4A_GPIO );
+#endif
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialize PWM4.\n");
+    }
+#endif
+
+#ifdef CONFIG_RP2040_PWM5
+#if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
+  ret = rp2040_pwmdev_initialize( 5, 
+                                  CONFIG_RP2040_PWM5A_GPIO, 
+                                  CONFIG_RP2040_PWM5B_GPIO );
+#else
+  ret = rp2040_pwmdev_initialize( 5, 
+                                  CONFIG_RP2040_PWM5A_GPIO );
+#endif
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialize PWM5.\n");
+    }
+#endif
+
+#ifdef CONFIG_RP2040_PWM6
+#if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
+  ret = rp2040_pwmdev_initialize( 6, 
+                                  CONFIG_RP2040_PWM6A_GPIO, 
+                                  CONFIG_RP2040_PWM6B_GPIO );
+#else
+  ret = rp2040_pwmdev_initialize( 6, 
+                                  CONFIG_RP2040_PWM6A_GPIO );
+#endif
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialize PWM6.\n");
+    }
+#endif
+
+#ifdef CONFIG_RP2040_PWM7
+#if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
+  ret = rp2040_pwmdev_initialize( 7, 
+                                  CONFIG_RP2040_PWM7A_GPIO, 
+                                  CONFIG_RP2040_PWM7B_GPIO );
+#else
+  ret = rp2040_pwmdev_initialize( 7, 
+                                  CONFIG_RP2040_PWM7A_GPIO );
+#endif
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialize PWM7.\n");
+    }
+#endif
 #endif
 
 #ifdef CONFIG_RP2040_SPISD

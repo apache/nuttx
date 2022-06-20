@@ -141,6 +141,51 @@ config RP2040_I2C_DRIVER
 
 endif
 
+config RP2040_PWM
+	bool "PWM"
+	select PWM
+	select ARCH_HAVE_PWM_MULTICHAN
+
+if RP2040_PWM
+
+config PWM_MULTICHAN
+	bool "support muli-channel PWM"
+	default y
+
+	if PWM_MULTICHAN
+
+		config PWM_NCHANNELS
+		int "number of channels"
+		default 2
+
+	endif
+
+config RP2040_PWM0
+	bool "PWM0 (Pin  0 or 16)"
+
+config RP2040_PWM1
+	bool "PWM1 (Pin  2 or 18)"
+
+config RP2040_PWM2
+	bool "PWM2 (Pin  4 or 20)"
+
+config RP2040_PWM3
+	bool "PWM3 (Pin  6 or 22)"
+
+config RP2040_PWM4
+	bool "PWM4 (Pin  8 or 24)"
+
+config RP2040_PWM5
+	bool "PWM5 (Pin 10 or 26)"
+
+config RP2040_PWM6
+	bool "PWM6 (Pin 12 or 28)"
+
+config RP2040_PWM7
+	bool "PWM7 (Pin 14)"
+
+endif
+
 config RP2040_I2S
 	bool "I2S"
 	select I2S
