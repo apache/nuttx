@@ -54,6 +54,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/wdog.h>
 
 #include <stdbool.h>
 #include <queue.h>
@@ -85,8 +86,7 @@
  * own, custom idle loop to support board-specific IDLE time power management
  */
 
-#define PM_WAKELOCK_INITIALIZER(name, domain, state) \
-                 {{NULL, NULL}, name, domain, state, 0}
+#define PM_WAKELOCK_INITIALIZER(name, domain, state) {name, domain, state}
 
 #define PM_WAKELOCK_DECLARE(var, name, domain, state) \
       struct pm_wakelock_s var = PM_WAKELOCK_INITIALIZER(name, domain, state)
@@ -297,11 +297,12 @@ struct pm_user_governor_state_s
 
 struct pm_wakelock_s
 {
-  struct dq_entry_s node;
   char name[32];
   int domain;
   enum pm_state_e state;
   uint32_t count;
+  struct dq_entry_s node;
+  struct wdog_s wdog;
 };
 
 /****************************************************************************
