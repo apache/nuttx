@@ -24,6 +24,11 @@ config PM_NDOMAINS
 		Network domain, shutting down the network when it is not be used,
 		from the UI domain, shutting down the UI when it is not in use.
 
+config PM_PROCFS
+	bool "PM proc fs support"
+	---help---
+		Enable procfs for pm.
+
 config PM_GOVERNOR_GREEDY
 	bool "Greedy governor"
 	---help---
