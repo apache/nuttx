@@ -426,6 +426,34 @@ int bcmf_driver_download_clm(FAR struct bcmf_dev_s *priv)
 #endif
 #endif /* CONFIG_IEEE80211_BROADCOM_HAVE_CLM */
 
+int bcmf_wl_set_pm(FAR struct bcmf_dev_s *priv, int mode)
+{
+  int interface = CHIP_STA_INTERFACE;
+  uint32_t out_len;
+  uint32_t value;
+  int ret;
+
+  /* Set default power save mode */
+
+#ifdef CONFIG_IEEE80211_BROADCOM_LOWPOWER
+  if (priv->lp_mode != mode)
+#endif
+    {
+      out_len = 4;
+      value   = mode;
+      ret = bcmf_cdc_ioctl(priv, interface, true, WLC_SET_PM,
+                           (uint8_t *)&value, &out_len);
+#ifdef CONFIG_IEEE80211_BROADCOM_LOWPOWER
+      if (ret == OK)
+        {
+          priv->lp_mode = mode;
+        }
+#endif
+    }
+
+  return ret;
+}
+
 int bcmf_wl_active(FAR struct bcmf_dev_s *priv, bool active)
 {
   int interface = CHIP_STA_INTERFACE;
@@ -462,12 +490,9 @@ int bcmf_wl_active(FAR struct bcmf_dev_s *priv, bool active)
       goto errout_in_sdio_active;
     }
 
-  /* FIXME disable power save mode */
+  /* Set default power save mode */
 
-  out_len = 4;
-  value   = 0;
-  ret     = bcmf_cdc_ioctl(priv, interface, true, WLC_SET_PM,
-                           (uint8_t *)&value, &out_len);
+  ret = bcmf_wl_set_pm(priv, PM_OFF);
   if (ret != OK)
     {
       goto errout_in_sdio_active;
