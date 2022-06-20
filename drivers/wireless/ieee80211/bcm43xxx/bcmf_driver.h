@@ -94,6 +94,12 @@ struct bcmf_dev_s
 
   sem_t auth_signal; /* Authentication notification signal */
   int   auth_status; /* Authentication status */
+
+#ifdef CONFIG_IEEE80211_BROADCOM_LOWPOWER
+  struct work_s lp_work;    /* Low power work to work queue */
+  int           lp_mode;    /* Low power mode */
+  sclock_t      lp_ticks;   /* Ticks of last tx time */
+#endif
 };
 
 /* Default bus interface structure */
@@ -138,6 +144,10 @@ int bcmf_wl_set_mac_address(FAR struct bcmf_dev_s *priv, struct ifreq *req);
 
 int bcmf_wl_enable(FAR struct bcmf_dev_s *priv, bool enable);
 
+int bcmf_wl_active(FAR struct bcmf_dev_s *priv, bool active);
+
+int bcmf_wl_set_pm(FAR struct bcmf_dev_s *priv, int mode);
+
 /* IOCTLs AP scan interface implementation */
 
 int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
@@ -168,7 +178,5 @@ int bcmf_wl_get_txpower(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
 int bcmf_wl_get_rssi(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
 
 int bcmf_wl_get_iwrange(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
-
-int bcmf_wl_active(FAR struct bcmf_dev_s *priv, bool active);
 
 #endif /* __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_DRIVER_H */

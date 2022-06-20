@@ -127,6 +127,10 @@ static int  bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
                        unsigned long arg);
 #endif
 
+#ifdef CONFIG_IEEE80211_BROADCOM_LOWPOWER
+static void bcmf_lowpower_poll(FAR struct bcmf_dev_s *priv);
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -703,6 +707,10 @@ static int bcmf_ifup(FAR struct net_driver_s *dev)
 
   priv->bc_bifup = true;
 
+#ifdef CONFIG_IEEE80211_BROADCOM_LOWPOWER
+  bcmf_lowpower_poll(priv);
+#endif
+
   goto errout_in_critical_section;
 
 errout_in_wl_active:
@@ -742,6 +750,13 @@ static int bcmf_ifdown(FAR struct net_driver_s *dev)
 
   if (priv->bc_bifup)
     {
+#ifdef CONFIG_IEEE80211_BROADCOM_LOWPOWER
+      if (!work_available(&priv->lp_work))
+        {
+          work_cancel(LPWORK, &priv->lp_work);
+        }
+#endif
+
       bcmf_wl_enable(priv, false);
       bcmf_wl_active(priv, false);
 
@@ -754,6 +769,84 @@ static int bcmf_ifdown(FAR struct net_driver_s *dev)
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: bcmf_lowpower_work
+ *
+ * Description:
+ *   Process low power saving dueto work timer expiration
+ *
+ * Input Parameters:
+ *   arg - context of device to use
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IEEE80211_BROADCOM_LOWPOWER
+static void bcmf_lowpower_work(FAR void *arg)
+{
+  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
+  irqstate_t flags;
+  clock_t ticks;
+  clock_t timeout;
+
+  if (priv->bc_bifup)
+    {
+      /* Disable the hardware interrupt */
+
+      flags = enter_critical_section();
+
+      ticks = clock_systime_ticks() - priv->lp_ticks;
+      timeout = SEC2TICK(CONFIG_IEEE80211_BROADCOM_LOWPOWER_TIMEOUT);
+
+      if (ticks >= timeout)
+        {
+          leave_critical_section(flags);
+          bcmf_wl_set_pm(priv, PM_MAX);
+        }
+      else
+        {
+          work_queue(LPWORK, &priv->lp_work, bcmf_lowpower_work,
+                     priv, timeout - ticks);
+          leave_critical_section(flags);
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: bcmf_lowpower_poll
+ *
+ * Description:
+ *   Polling low power
+ *
+ * Input Parameters:
+ *   arg - context of device to use
+ *
+ ****************************************************************************/
+
+static void bcmf_lowpower_poll(FAR struct bcmf_dev_s *priv)
+{
+  irqstate_t flags;
+
+  if (priv->bc_bifup)
+    {
+      bcmf_wl_set_pm(priv, PM_FAST);
+
+      /* Disable the hardware interrupt */
+
+      flags = enter_critical_section();
+
+      priv->lp_ticks = clock_systime_ticks();
+      if (work_available(&priv->lp_work) && priv->lp_mode != PM_MAX)
+        {
+          work_queue(LPWORK, &priv->lp_work, bcmf_lowpower_work, priv,
+                     SEC2TICK(CONFIG_IEEE80211_BROADCOM_LOWPOWER_TIMEOUT));
+        }
+
+      leave_critical_section(flags);
+    }
+}
+
+#endif
 
 /****************************************************************************
  * Name: bcmf_txavail
@@ -778,6 +871,9 @@ static int bcmf_txavail(FAR struct net_driver_s *dev)
 {
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
 
+#ifdef CONFIG_IEEE80211_BROADCOM_LOWPOWER
+  bcmf_lowpower_poll(priv);
+#endif
   bcmf_netdev_notify_tx(priv);
   return OK;
 }
@@ -943,6 +1039,10 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
             "(IFF_DOWN, unable to execute command: %x)\n", cmd);
       return -EPERM;
     }
+
+#ifdef CONFIG_IEEE80211_BROADCOM_LOWPOWER
+  bcmf_lowpower_poll(priv);
+#endif
 
   /* Decode and dispatch the driver-specific IOCTL command */
 

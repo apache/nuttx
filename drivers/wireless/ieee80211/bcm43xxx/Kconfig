@@ -132,6 +132,22 @@ config IEEE80211_BROADCOM_SCAN_RESULT_ENTRIES
 	---help---
 		This parameter should be set the bcmf escan result buffer entries
 
+config IEEE80211_BROADCOM_LOWPOWER
+	bool "Broadcom BCMF lower power"
+	default n
+	---help---
+		This parameter should be enable the bcmf lower power mode
+
+if IEEE80211_BROADCOM_LOWPOWER
+
+config IEEE80211_BROADCOM_LOWPOWER_TIMEOUT
+	int "Broadcom BCMF lower power timeout(second)"
+	default 10
+	---help---
+		This parameter should be enable the bcmf lower power timeout
+
+endif # IEEE80211_BROADCOM_LOWPOWER
+
 if IEEE80211_BROADCOM_FULLMAC
 
 config IEEE80211_BROADCOM_NINTERFACES
