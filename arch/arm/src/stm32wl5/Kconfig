@@ -42,6 +42,8 @@ config STM32WL5_STM32WL5XXX_CPU1
 	select STM32WL5_HAVE_USART1
 	select STM32WL5_HAVE_USART2
 	select STM32WL5_HAVE_LPUART1
+	select STM32WL5_HAVE_SPI1
+	select STM32WL5_HAVE_SPI2S2
 
 
 comment "STM32WL5 Peripherals"
@@ -133,6 +135,14 @@ config STM32WL5_HAVE_LPUART1
 	bool
 	default n
 
+config STM32WL5_HAVE_SPI1
+	bool
+	default n
+
+config STM32WL5_HAVE_SPI2S2
+	bool
+	default n
+
 # These "hidden" settings are the OR of individual peripheral selections
 # indicating that the general capability is required.
 
@@ -140,6 +150,8 @@ config STM32WL5_USART
 	bool
 	default n
 
+config STM32WL5_SPI
+	bool
 
 # These are the peripheral selections proper
 
@@ -159,6 +171,12 @@ config STM32WL5_LPUART1
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select STM32WL5_USART
 
+config STM32WL5_SPI2S2
+	bool "SPI2S2"
+	default n
+	depends on STM32WL5_HAVE_SPI2S2
+	select STM32WL5_SPI
+
 comment "APB2 Peripherals"
 
 config STM32WL5_SYSCFG
@@ -172,6 +190,11 @@ config STM32WL5_USART1
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select STM32WL5_USART
 
+config STM32WL5_SPI1
+	bool "SPI1"
+	default n
+	depends on STM32WL5_HAVE_SPI1
+	select STM32WL5_SPI
 
 endmenu # STM32WL5 Peripheral Support
 
@@ -219,5 +242,61 @@ config STM32WL5_LPUART1_SERIALDRIVER
 endchoice # LPUART1 Driver Configuration
 
 endmenu # [LP]U[S]ART Configuration
+
+menu "SPI Configuration"
+	depends on STM32WL5_SPI
+
+config STM32WL5_SPI_INTERRUPTS
+	bool "Interrupt driver SPI"
+	default n
+	---help---
+		Select to enable interrupt driven SPI support. Non-interrupt-driven,
+		poll-waiting is recommended if the interrupt rate would be to high in
+		the interrupt driven case.
+
+config STM32WL5_SPI_DMA
+	bool "SPI DMA"
+	default n
+	---help---
+		Use DMA to improve SPI transfer performance.  Cannot be used with STM32WL5_SPI_INTERRUPT.
+
+config STM32WL5_SPI1_DMA
+	bool "SPI1 DMA"
+	default n
+	depends on STM32WL5_SPI1 && STM32WL5_SPI_DMA
+	---help---
+		Use DMA to improve SPI1 transfer performance.
+
+config STM32WL5_SPI1_DMA_BUFFER
+	int "SPI1 DMA buffer size"
+	default 0
+	depends on STM32WL5_SPI1_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI1.
+
+config STM32WL5_SPI_DMATHRESHOLD
+	int "SPI DMA threshold"
+	default 4
+	depends on STM32WL5_SPI_DMA
+	---help---
+		When SPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.
+
+config STM32WL5_SPI2S2_DMA
+	bool "SPI2S2 DMA"
+	default n
+	depends on STM32WL5_SPI2S2 && STM32WL5_SPI_DMA
+	---help---
+		Use DMA to improve SPI2S2 transfer performance.
+
+config STM32WL5_SPI2S2_DMA_BUFFER
+	int "SPI2S2 DMA buffer size"
+	default 0
+	depends on STM32WL5_SPI2S2_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI2S2.
+
+endmenu # SPI Configuration
 
 endif # ARCH_CHIP_STM32WL5
