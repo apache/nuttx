@@ -6,7 +6,7 @@
    and flash to arty_a7 board
 
   $ cd litex-boards/litex_boards/targets
-  $ ./digilent_arty.py --with-sdcard --uart-baudrate 1000000 --cpu-type=vexriscv --cpu-variant=secure --build --load --flash
+  $ ./digilent_arty.py --with-ethernet --with-sdcard --uart-baudrate 1000000 --cpu-type=vexriscv --cpu-variant=secure --build --load --flash
 
 3. Configure and build NuttX
 
