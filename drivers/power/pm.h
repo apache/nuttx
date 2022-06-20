@@ -58,6 +58,13 @@ struct pm_domain_s
 
   struct dq_queue_s wakelock[PM_COUNT];
 
+#ifdef CONFIG_PM_PROCFS
+  struct dq_queue_s wakelockall;
+  struct timespec start;
+  struct timespec wake[PM_COUNT];
+  struct timespec sleep[PM_COUNT];
+#endif
+
   /* Auto update or not */
 
   bool auto_update;

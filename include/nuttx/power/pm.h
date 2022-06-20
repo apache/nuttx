@@ -57,6 +57,7 @@
 #include <nuttx/wdog.h>
 
 #include <stdbool.h>
+#include <time.h>
 #include <queue.h>
 
 #ifdef CONFIG_PM
@@ -305,6 +306,12 @@ struct pm_wakelock_s
   uint32_t count;
   struct dq_entry_s node;
   struct wdog_s wdog;
+
+#ifdef CONFIG_PM_PROCFS
+  struct dq_entry_s fsnode;
+  struct timespec start;
+  struct timespec elapse;
+#endif
 };
 
 /****************************************************************************

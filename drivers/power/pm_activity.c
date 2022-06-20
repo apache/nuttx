@@ -51,6 +51,40 @@ static void pm_waklock_cb(wdparm_t arg)
   pm_wakelock_relax((FAR struct pm_wakelock_s *)arg);
 }
 
+#ifdef CONFIG_PM_PROCFS
+static void pm_wakelock_stats_rm(FAR struct pm_wakelock_s *wakelock)
+{
+  FAR struct pm_domain_s *pdom = &g_pmglobals.domain[wakelock->domain];
+
+  dq_rem(&wakelock->fsnode, &pdom->wakelockall);
+}
+
+static void pm_wakelock_stats(FAR struct pm_wakelock_s *wakelock, bool stay)
+{
+  FAR struct pm_domain_s *pdom = &g_pmglobals.domain[wakelock->domain];
+  struct timespec ts;
+
+  if (stay)
+    {
+      if (!wakelock->fsnode.blink && !wakelock->fsnode.flink)
+        {
+          dq_addlast(&wakelock->fsnode, &pdom->wakelockall);
+        }
+
+      clock_systime_timespec(&wakelock->start);
+    }
+  else
+    {
+      clock_systime_timespec(&ts);
+      clock_timespec_subtract(&ts, &wakelock->start, &ts);
+      clock_timespec_add(&ts, &wakelock->elapse, &wakelock->elapse);
+    }
+}
+#else
+#define pm_wakelock_stats_rm(w)
+#define pm_wakelock_stats(w, s)
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -279,6 +313,7 @@ void pm_wakelock_uninit(FAR struct pm_wakelock_s *wakelock)
 
   wakelock->count = 0;
   wd_cancel(wdog);
+  pm_wakelock_stats_rm(wakelock);
 
   pm_unlock(domain, flags);
 }
@@ -323,6 +358,7 @@ void pm_wakelock_stay(FAR struct pm_wakelock_s *wakelock)
   if (wakelock->count++ == 0)
     {
       dq_addfirst(&wakelock->node, dq);
+      pm_wakelock_stats(wakelock, true);
     }
 
   pm_unlock(domain, flags);
@@ -369,6 +405,7 @@ void pm_wakelock_relax(FAR struct pm_wakelock_s *wakelock)
   if (--wakelock->count == 0)
     {
       dq_rem(&wakelock->node, dq);
+      pm_wakelock_stats(wakelock, false);
     }
 
   pm_unlock(domain, flags);
@@ -422,6 +459,7 @@ void pm_wakelock_staytimeout(FAR struct pm_wakelock_s *wakelock, int ms)
       if (wakelock->count++ == 0)
         {
           dq_addfirst(&wakelock->node, dq);
+          pm_wakelock_stats(wakelock, true);
         }
     }
 
