@@ -40,11 +40,26 @@
 #include "stm32wl5_lowputc.h"
 #include "stm32wl5_pwr.h"
 #include "stm32wl5_rcc.h"
+#include "stm32wl5_spi.h"
 #include "stm32wl5_tim.h"
 #include "stm32wl5_uart.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32wl5_spidev_initialize
+ *
+ * Description:
+ *   Called to configure SPI chip select GPIO pins.
+ *
+ ****************************************************************************/
+
+void stm32wl5_spidev_initialize(void);
 
 #endif /* __ARCH_ARM_SRC_STM32WL5_STM32WL5_H */
