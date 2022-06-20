@@ -168,6 +168,35 @@ static inline void pm_changeall(int domain, enum pm_state_e newstate)
     }
 }
 
+#ifdef CONFIG_PM_PROCFS
+static void pm_stats(FAR struct pm_domain_s *dom, int curstate, int newstate)
+{
+  struct timespec ts;
+
+  clock_systime_timespec(&ts);
+  clock_timespec_subtract(&ts, &dom->start, &ts);
+
+  if (newstate == PM_RESTORE)
+    {
+      /* Wakeup from WFI */
+
+      clock_timespec_add(&ts, &dom->sleep[curstate], &dom->sleep[curstate]);
+    }
+  else
+    {
+      /* Sleep to WFI */
+
+      clock_timespec_add(&ts, &dom->wake[curstate], &dom->wake[curstate]);
+    }
+
+  /* Update start */
+
+  clock_systime_timespec(&dom->start);
+}
+#else
+#define pm_stats(dom, curstate, newstate)
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -232,6 +261,11 @@ int pm_changestate(int domain, enum pm_state_e newstate)
           pm_prepall(domain, newstate);
         }
     }
+
+  /* Statistics */
+
+  pm_stats(&g_pmglobals.domain[domain],
+           g_pmglobals.domain[domain].state, newstate);
 
   /* All drivers have agreed to the state change (or, one or more have
    * disagreed and the state has been reverted).  Set the new state.

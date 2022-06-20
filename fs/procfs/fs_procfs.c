@@ -62,6 +62,7 @@
  ****************************************************************************/
 
 extern const struct procfs_operations proc_operations;
+extern const struct procfs_operations pm_operations;
 extern const struct procfs_operations irq_operations;
 extern const struct procfs_operations cpuload_operations;
 extern const struct procfs_operations critmon_operations;
@@ -156,6 +157,11 @@ static const struct procfs_entry_s g_procfs_entries[] =
 
 #if defined(CONFIG_MTD_PARTITION) && !defined(CONFIG_FS_PROCFS_EXCLUDE_PARTITIONS)
   { "partitions",    &part_procfsoperations,      PROCFS_FILE_TYPE   },
+#endif
+
+#if defined(CONFIG_PM) && defined(CONFIG_PM_PROCFS)
+  { "pm",            &pm_operations,              PROCFS_DIR_TYPE    },
+  { "pm/**",         &pm_operations,              PROCFS_UNKOWN_TYPE },
 #endif
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_PROCESS
