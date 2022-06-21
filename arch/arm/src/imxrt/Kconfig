@@ -1409,6 +1409,16 @@ config IMXRT_ENET_PHYINIT
 		imxrt_phy_boardinitialize();  The i.MXRT ENET driver will call this
 		function one time before it first uses the PHY.
 
+config IMXRT_PHY_POLLING
+	bool "Support network monitoring by poling the PHY"
+	default n
+	depends on IMXRT_ENET
+	select ARCH_PHY_POLLED
+	---help---
+		Some boards may not have an interrupt connected to the PHY.
+		This option allows the network monitor to be used by polling the
+		the PHY for status.
+
 endmenu # IMXRT_ENET
 
 menu "Memory Configuration"
