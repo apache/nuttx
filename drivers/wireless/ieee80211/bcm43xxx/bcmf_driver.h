@@ -148,6 +148,9 @@ int bcmf_wl_active(FAR struct bcmf_dev_s *priv, bool active);
 
 int bcmf_wl_set_pm(FAR struct bcmf_dev_s *priv, int mode);
 
+int bcmf_wl_set_country_code(FAR struct bcmf_dev_s *priv,
+                             int interface, FAR void *code);
+
 /* IOCTLs AP scan interface implementation */
 
 int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
@@ -178,5 +181,7 @@ int bcmf_wl_get_txpower(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
 int bcmf_wl_get_rssi(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
 
 int bcmf_wl_get_iwrange(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+
+int bcmf_wl_set_country(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
 
 #endif /* __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_DRIVER_H */

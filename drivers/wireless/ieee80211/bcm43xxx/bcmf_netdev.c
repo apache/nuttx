@@ -695,6 +695,12 @@ static int bcmf_ifup(FAR struct net_driver_s *dev)
       goto errout_in_wl_active;
     }
 
+  if (strnlen(CONFIG_IEEE80211_BROADCOM_DEFAULT_COUNTRY, 2) == 2)
+    {
+      bcmf_wl_set_country_code(priv, CHIP_STA_INTERFACE,
+                               CONFIG_IEEE80211_BROADCOM_DEFAULT_COUNTRY);
+    }
+
   /* Instantiate MAC address from priv->bc_dev.d_mac.ether.ether_addr_octet */
 
 #ifdef CONFIG_NET_ICMPv6
@@ -1125,6 +1131,10 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
 
       case SIOCGIWRANGE:    /* Get range of parameters */
         ret = bcmf_wl_get_iwrange(priv, (struct iwreq *)arg);
+        break;
+
+      case SIOCSIWCOUNTRY:  /* Set country code */
+        ret = bcmf_wl_set_country(priv, (struct iwreq *)arg);
         break;
 
       default:
