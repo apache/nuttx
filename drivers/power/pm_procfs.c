@@ -342,15 +342,26 @@ static ssize_t pm_read_wakelock(FAR struct file *filep, FAR char *buffer,
     {
       FAR struct pm_wakelock_s *wakelock =
           container_of(entry, struct pm_wakelock_s, fsnode);
+      time_t time = wakelock->elapse.tv_sec;
 
       buffer += copysize;
       buflen -= copysize;
+
+      if (wakelock->count > 0)
+        {
+          struct timespec ts;
+
+          clock_systime_timespec(&ts);
+          clock_timespec_subtract(&ts, &wakelock->start, &ts);
+
+          time += ts.tv_sec;
+        }
 
       linesize = snprintf(pmfile->line, PM_LINELEN, WAFMT,
                           wakelock->name,
                           g_pm_state[wakelock->state],
                           wakelock->count,
-                          wakelock->elapse.tv_sec);
+                          time);
 
       copysize = procfs_memcpy(pmfile->line, linesize, buffer,
                                buflen, &offset);
