@@ -1744,3 +1744,39 @@ int bcmf_wl_get_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
   return ret;
 }
+
+int bcmf_wl_set_country_code(FAR struct bcmf_dev_s *priv,
+                             int interface, FAR void *code)
+{
+  uint8_t country[4] =
+    {
+    };
+
+  uint32_t out_len;
+
+  memcpy(country, code, 2);
+
+  /* Why out_len = 4 ? Padding bytes to ensure array is
+   * terminating with null byte
+   */
+
+  out_len = sizeof(country);
+
+  return bcmf_cdc_iovar_request(priv, interface, true,
+                                IOVAR_STR_COUNTRY, country,
+                                &out_len);
+}
+
+int bcmf_wl_set_country(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
+{
+  int interface;
+
+  interface = bcmf_wl_get_interface(priv, iwr);
+
+  if (interface < 0)
+    {
+      return -EINVAL;
+    }
+
+  return bcmf_wl_set_country_code(priv, interface, iwr->u.data.pointer);
+}
