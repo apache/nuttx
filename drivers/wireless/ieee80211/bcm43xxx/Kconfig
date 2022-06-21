@@ -132,6 +132,12 @@ config IEEE80211_BROADCOM_SCAN_RESULT_ENTRIES
 	---help---
 		This parameter should be set the bcmf escan result buffer entries
 
+config IEEE80211_BROADCOM_PTA_PRIORITY
+	bool "Broadcom BCMF Packet Traffic Arbitration priority"
+	default n
+	---help---
+		This parameter should be enable the bcmf PTA priority feature
+
 config IEEE80211_BROADCOM_LOWPOWER
 	bool "Broadcom BCMF lower power"
 	default n

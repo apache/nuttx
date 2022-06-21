@@ -431,7 +431,7 @@ int bcmf_wl_set_pm(FAR struct bcmf_dev_s *priv, int mode)
   int interface = CHIP_STA_INTERFACE;
   uint32_t out_len;
   uint32_t value;
-  int ret;
+  int ret = OK;
 
   /* Set default power save mode */
 
@@ -1460,12 +1460,22 @@ int bcmf_wl_get_bssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
                         (uint8_t *)iwr->u.ap_addr.sa_data, &out_len);
 }
 
-int bcmf_wl_get_channel(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
+int bcmf_wl_get_channel(FAR struct bcmf_dev_s *priv, int interface)
 {
   channel_info_t ci;
   uint32_t out_len;
-  int interface;
   int ret;
+
+  out_len = sizeof(ci);
+  ret = bcmf_cdc_ioctl(priv, interface, false,
+                       WLC_GET_CHANNEL, (uint8_t *)&ci, &out_len);
+  return ret == OK ? ci.target_channel : ret;
+}
+
+int bcmf_wl_get_frequency(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
+{
+  int interface;
+  int channel;
 
   interface = bcmf_wl_get_interface(priv, iwr);
 
@@ -1474,15 +1484,15 @@ int bcmf_wl_get_channel(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
       return -EINVAL;
     }
 
-  out_len = sizeof(ci);
-  ret = bcmf_cdc_ioctl(priv, interface, false,
-                       WLC_GET_CHANNEL, (uint8_t *)&ci, &out_len);
-  if (ret == OK)
+  channel = bcmf_wl_get_channel(priv, interface);
+  if (channel < 0)
     {
-      iwr->u.freq.m = bcmf_wl_channel_to_frequency(ci.target_channel);
+      return channel;
     }
 
-  return ret;
+  iwr->u.freq.m = bcmf_wl_channel_to_frequency(channel);
+
+  return OK;
 }
 
 int bcmf_wl_get_rate(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
@@ -1552,10 +1562,8 @@ int bcmf_wl_get_txpower(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 int bcmf_wl_get_iwrange(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 {
   struct iw_range *range;
-  channel_info_t ci;
-  uint32_t out_len;
   int interface;
-  int ret;
+  int channel;
 
   interface = bcmf_wl_get_interface(priv, iwr);
 
@@ -1573,15 +1581,15 @@ int bcmf_wl_get_iwrange(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
   memset(range, 0, sizeof(*range));
 
-  out_len = sizeof(ci);
-  ret = bcmf_cdc_ioctl(priv, interface, false,
-                       WLC_GET_CHANNEL, (uint8_t *)&ci, &out_len);
-  if (ret == OK)
+  channel = bcmf_wl_get_channel(priv, interface);
+  if (channel < 0)
     {
-      range->num_frequency = 1;
-      range->freq[0].m     = bcmf_wl_channel_to_frequency(ci.target_channel);
-      range->freq[0].i     = ci.target_channel;
+      return channel;
     }
+
+  range->num_frequency = 1;
+  range->freq[0].m     = bcmf_wl_channel_to_frequency(channel);
+  range->freq[0].i     = channel;
 
   return OK;
 }
@@ -1780,3 +1788,61 @@ int bcmf_wl_set_country(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
   return bcmf_wl_set_country_code(priv, interface, iwr->u.data.pointer);
 }
+
+#ifdef CONFIG_IEEE80211_BROADCOM_PTA_PRIORITY
+
+int bcmf_wl_get_pta(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
+{
+  iwr->u.param.value = priv->pta_priority;
+  return OK;
+}
+
+int bcmf_wl_set_pta_priority(FAR struct bcmf_dev_s *priv, uint32_t prio)
+{
+  uint32_t out_len;
+  int ret;
+
+  wl_pta_t pta_prio_map[IW_PTA_PRIORITY_WLAN_MAXIMIZED + 1] =
+    {
+      {  0, 50, },
+      { 10, 50, },
+      { 25, 50, },
+      { 40, 50, },
+      { 50, 50, },
+    };
+
+  if (prio > IW_PTA_PRIORITY_WLAN_MAXIMIZED)
+    {
+      return -EINVAL;
+    }
+
+  if (priv->pta_priority == prio)
+    {
+      return OK;
+    }
+
+
+  out_len = sizeof(wl_pta_t);
+  ret = bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, true,
+                               IOVAR_STR_COEX_PARA,
+                               (uint8_t *)&pta_prio_map[prio],
+                               &out_len);
+  if (ret == OK)
+    {
+      priv->pta_priority = prio;
+    }
+
+  return ret;
+}
+
+int bcmf_wl_set_pta(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
+{
+  if (bcmf_wl_get_interface(priv, iwr) < 0)
+    {
+      return -EINVAL;
+    }
+
+  return bcmf_wl_set_pta_priority(priv, iwr->u.param.value);
+}
+
+#endif

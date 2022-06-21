@@ -763,6 +763,7 @@ typedef struct wlc_iov_trx_s
 #define IOVAR_STR_MIMO_BW_CAP            "mimo_bw_cap"
 #define IOVAR_STR_CLMLOAD                "clmload"
 #define IOVAR_STR_JOIN                   "join"
+#define IOVAR_STR_COEX_PARA              "coex_para"
 
 #define WLC_IOCTL_MAGIC                    ( 0x14e46c77 )
 #define WLC_IOCTL_VERSION                  (          1 )
@@ -2784,6 +2785,14 @@ struct edcf_acparam
 };
 
 typedef struct edcf_acparam edcf_acparam_t;
+
+/* Packet Traffic Arbitration */
+
+typedef struct wl_pta
+{
+  uint16_t radio;
+  uint16_t duration;
+} wl_pta_t;
 
 /* Stop packing structures */
 
