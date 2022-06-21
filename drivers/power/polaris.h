@@ -98,6 +98,14 @@ struct rx_int_state_s
   bool wlc_rx_pp_done;
 };
 
+enum rx_sleep_state_e
+{
+  RX_SLEEP_NOT = 0,
+  RX_SLEEP_ENTER,
+  RX_SLEEP_QUIT,
+  RX_SLEEP_MAX,
+};
+
 #define WLC_HEALTH_TEMP_MAX  80
 #define WLC_HEALTH_TEMP_MIN  10
 
@@ -106,7 +114,9 @@ struct rx_int_state_s
 #define WLC_HEALTH_OVERHEAT  1
 #define WLC_HEALTH_OVERCOLD  2
 
-#define RX_DETECT_WORK_TIME  1000000
+#define RX_DETECT_WORK_TIME               1000000
+#define RX_VOUT_RESTART_DETECT_WORK_TIME  2200000
+#define RX_VOUT_RESTART_INT_WORK_TIME     4000000
 
 #define DETECT_WORK_NO_EXIST       0
 #define DETECT_WORK_EXIST          1
