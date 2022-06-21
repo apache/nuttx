@@ -490,12 +490,12 @@ static int rtc_setup(void)
       /* Configure RTC pre-scaler with the required values */
 
 #ifdef CONFIG_STM32F7_RTC_HSECLOCK
-      /* For a 1 MHz clock this yields 0.9999360041 Hz on the second
-       * timer - which is pretty close.
+      /* STMicro app note AN4759 suggests using 7999 and 124 to
+       * get exactly 1MHz when using the RTC at 8MHz.
        */
 
-      putreg32(((uint32_t)7182 << RTC_PRER_PREDIV_S_SHIFT) |
-              ((uint32_t)0x7f << RTC_PRER_PREDIV_A_SHIFT),
+      putreg32(((uint32_t)7999 << RTC_PRER_PREDIV_S_SHIFT) |
+              ((uint32_t)124 << RTC_PRER_PREDIV_A_SHIFT),
               STM32_RTC_PRER);
 #else
       /* Correct values for 32.768 KHz LSE clock and inaccurate LSI clock */
