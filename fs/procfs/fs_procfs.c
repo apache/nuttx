@@ -670,6 +670,11 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
               break;
             }
         }
+
+      if (x == g_procfs_entrycount)
+        {
+          return -ENOENT;
+        }
     }
 
   dir->u.procfs = priv;
