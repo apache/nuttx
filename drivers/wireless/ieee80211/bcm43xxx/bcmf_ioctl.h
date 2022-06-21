@@ -873,6 +873,7 @@ end_packed_struct wlc_iov_trx_t;
 #define IOVAR_STR_CCGPIOIN               "ccgpioin"
 #define IOVAR_STR_CCGPIOOUT              "ccgpioout"
 #define IOVAR_STR_CCGPIOPUTEN            "ccgpioputen"
+#define IOVAR_STR_COEX_PARA              "coex_para"
 
 #define WLC_IOCTL_MAGIC                    ( 0x14e46c77 )
 #define WLC_IOCTL_VERSION                  (          1 )
@@ -3024,6 +3025,14 @@ struct edcf_acparam
 end_packed_struct;
 
 typedef struct edcf_acparam edcf_acparam_t;
+
+/* Packet Traffic Arbitration */
+
+typedef struct wl_pta
+{
+  uint16_t radio;
+  uint16_t duration;
+} wl_pta_t;
 
 /* Stop packing structures */
 

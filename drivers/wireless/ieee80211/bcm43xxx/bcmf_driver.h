@@ -103,6 +103,9 @@ struct bcmf_dev_s
   int           lp_dtim;        /* Listen interval Delivery Traffic Indication Message */
   sclock_t      lp_ticks;       /* Ticks of last tx time */
 #endif
+#ifdef CONFIG_IEEE80211_BROADCOM_PTA_PRIORITY
+  int pta_priority; /* Current priority of Packet Traffic Arbitration */
+#endif
 };
 
 /* Default bus interface structure */
@@ -187,7 +190,7 @@ int bcmf_wl_get_ssid(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr);
 int bcmf_wl_set_bssid(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr);
 int bcmf_wl_get_bssid(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr);
 
-int bcmf_wl_get_channel(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr);
+int bcmf_wl_get_frequency(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
 
 int bcmf_wl_get_rate(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr);
 
@@ -199,5 +202,18 @@ int bcmf_wl_get_iwrange(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr);
 
 int bcmf_wl_set_country(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr);
 int bcmf_wl_get_country(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr);
+
+int bcmf_wl_get_channel(FAR struct bcmf_dev_s *priv, int interface);
+
+#ifdef CONFIG_IEEE80211_BROADCOM_PTA_PRIORITY
+int bcmf_wl_get_pta(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+int bcmf_wl_set_pta(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+
+int bcmf_wl_set_pta_priority(FAR struct bcmf_dev_s *priv, uint32_t prio);
+#else
+# define bcmf_wl_get_pta(...)
+# define bcmf_wl_set_pta(...)
+# define bcmf_wl_set_pta_priority(...)
+#endif
 
 #endif /* __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_DRIVER_H */
