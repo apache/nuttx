@@ -141,6 +141,7 @@ static enum pm_state_e greedy_governor_checkstate(int domain)
 
 static void greedy_governor_timer_cb(wdparm_t arg)
 {
+  pm_auto_updatestate((int)arg);
 }
 
 /****************************************************************************
