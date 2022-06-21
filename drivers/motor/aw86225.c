@@ -1773,11 +1773,18 @@ static void worker_cb(FAR void *arg)
               priv->pattern_play_cnt = 0;
             }
 
-          /* set state idle, play finish */
-
           priv->state = MOTOR_STATE_IDLE ;
-          return;
         }
+    }
+
+  /* if state idle, exit worker cb */
+  /* 1. set idle state when pattern play finish */
+  /* 2. set idle state via stop cmd */
+
+  if (priv->state == MOTOR_STATE_IDLE)
+    {
+      aw86225_play_go(priv, false);
+      return;
     }
 
   mtrinfo("pattern %d duration %ld\n", priv->pattern_index,
@@ -1943,19 +1950,18 @@ static int aw86225_stop(FAR struct motor_lowerhalf_s *dev)
   int ret;
 
   DEBUGASSERT(dev != NULL);
-
-  wd_cancel(&priv->wdog);
-  if (!work_available(&priv->worker))
-    {
-      mtrinfo("work cancel\n");
-      work_cancel(HPWORK, &priv->worker);
-    }
-
   ret = aw86225_haptic_stop(priv);
   if (ret == 0)
     {
       priv->state = MOTOR_STATE_IDLE ;
     }
+  else
+    {
+      mtrerr("motor stop fail\n");
+    }
+
+   wd_cancel(&priv->wdog);
+   work_cancel(HPWORK, &priv->worker);
 
   return ret;
 }
