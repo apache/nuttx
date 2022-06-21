@@ -115,6 +115,7 @@ struct rx_int_state_s
 
 #define WLC_SUPPORT_QC_3_0        0x1a
 #define WLC_GEN_TX                0x11
+#define WLC_HANDSHAKE_OK          0x01
 
 #define ST_IIC_RETRY_NUM          3
 

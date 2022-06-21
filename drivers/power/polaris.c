@@ -1238,7 +1238,7 @@ static int stwlc38_get_protocol(FAR struct battery_charger_dev_s *dev,
       protocol_type |= BATTERY_PROTOCOL_QC3P0;
     }
 
-  if (buffer[2] == WLC_GEN_TX)
+  if (buffer[0] & WLC_HANDSHAKE_OK)
     {
       protocol_type |= BATTERY_PROTOCOL_TX_XIAOMI;
     }
