@@ -138,6 +138,12 @@ config IEEE80211_BROADCOM_LOWPOWER
 	---help---
 		This parameter should be enable the bcmf lower power mode
 
+config IEEE80211_BROADCOM_DEFAULT_COUNTRY
+	string "Broadcom BCMF default country code"
+	default ""
+	---help---
+		This parameter should be set the default country code
+
 if IEEE80211_BROADCOM_LOWPOWER
 
 config IEEE80211_BROADCOM_LOWPOWER_TIMEOUT
