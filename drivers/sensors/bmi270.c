@@ -2911,7 +2911,7 @@ static int bmi270_gy_setfilter(FAR struct bmi270_dev_s *priv,
   regval.gyr_bwp = value;
   regval.gyr_filter_perf = BMI270_POWER_OPT_MODE;
 
-  bmi270_spi_write(priv, BMI270_ACC_CONF, (FAR uint8_t *)&regval);
+  bmi270_spi_write(priv, BMI270_GYR_CONF, (FAR uint8_t *)&regval);
 
   return OK;
 }
