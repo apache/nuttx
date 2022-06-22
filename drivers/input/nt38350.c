@@ -823,6 +823,7 @@ static int nvt_check_fw_reset_state(FAR struct nt38350_dev_s *priv,
   uint8_t buf[8];
   int32_t ret;
   int32_t retry = 0;
+  int32_t retry_max = (check_reset_state == RESET_STATE_INIT) ? 12 : 50;
 
   while (1)
     {
@@ -837,7 +838,7 @@ static int nvt_check_fw_reset_state(FAR struct nt38350_dev_s *priv,
         }
 
       retry++;
-      if (retry > 12)
+      if (retry > retry_max)
         {
           ierr("buf[1]=0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X\n",
                buf[1], buf[2], buf[3], buf[4], buf[5]);
@@ -4132,12 +4133,12 @@ static int nt38350_ts_resume(FAR struct nt38350_dev_s *dev)
   config = dev->config;
   DEBUGASSERT(config != NULL);
 
-  ret = nvt_check_fw_reset_state(dev, RESET_STATE_INIT);
+  ret = nvt_check_fw_reset_state(dev, RESET_STATE_REK);
   if (ret < 0)
     {
       iwarn("FW is not ready, try to reset bootloader.\n");
       nvt_bootloader_reset(dev);
-      ret = nvt_check_fw_reset_state(dev, RESET_STATE_INIT);
+      ret = nvt_check_fw_reset_state(dev, RESET_STATE_REK);
       if (ret < 0)
         {
           ierr("FW is not ready!\n");
