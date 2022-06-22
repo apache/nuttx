@@ -510,11 +510,6 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
                      * SYNACK.
                      */
 
-#if !defined(CONFIG_NET_TCP_WRITE_BUFFERS)
-                    tcp_setsequence(conn->sndseq, conn->rexmit_seq);
-#else
-                    /* REVISIT for the buffered mode */
-#endif
                     tcp_synack(dev, conn, TCP_ACK | TCP_SYN);
                     goto done;
 
@@ -522,11 +517,6 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
 
                     /* In the SYN_SENT state, we retransmit out SYN. */
 
-#if !defined(CONFIG_NET_TCP_WRITE_BUFFERS)
-                    tcp_setsequence(conn->sndseq, conn->rexmit_seq);
-#else
-                    /* REVISIT for the buffered mode */
-#endif
                     tcp_synack(dev, conn, TCP_SYN);
                     goto done;
 
@@ -547,11 +537,6 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
 
                     /* In all these states we should retransmit a FINACK. */
 
-#if !defined(CONFIG_NET_TCP_WRITE_BUFFERS)
-                    tcp_setsequence(conn->sndseq, conn->rexmit_seq);
-#else
-                    /* REVISIT for the buffered mode */
-#endif
                     tcp_send(dev, conn, TCP_FIN | TCP_ACK, hdrlen);
                     goto done;
                 }
