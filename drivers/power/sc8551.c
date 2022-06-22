@@ -224,7 +224,7 @@ static int sc8551_getreg8(FAR struct sc8551_dev_s *priv, uint8_t regaddr,
       else
         {
           nxsig_usleep(1);
-          baterr("ERROR: i2c transfer failed! err: %d retries:%d\n",
+          baterr("i2c transf err:%d retry:%d\n",
                   err, retries);
         }
     }
@@ -277,8 +277,7 @@ static int sc8551_update_bits(FAR struct sc8551_dev_s *priv,
   ret = sc8551_getreg8(priv, reg, &val_r, 1);
   if (ret < 0)
     {
-      baterr("[ SC8551] Failed: reg=%02X\r\n", reg);
-      return -1;
+      goto err_exit;
     }
 
   val_r &= ~mask;
@@ -287,11 +286,14 @@ static int sc8551_update_bits(FAR struct sc8551_dev_s *priv,
   ret = sc8551_putreg8(priv, reg, val_r);
   if (ret < 0)
     {
-      baterr("[ SC8551] Failed: reg=%02X\r\n", reg);
-      return -1;
+      goto err_exit;
     }
 
   return 0;
+
+err_exit:
+  baterr("err:reg=%02X\r\n", reg);
+  return -1;
 }
 
 static uint16_t sc8551_get_vbus(FAR struct sc8551_dev_s * priv,
@@ -304,7 +306,7 @@ static uint16_t sc8551_get_vbus(FAR struct sc8551_dev_s * priv,
   ret  = sc8551_getreg8(priv, SC8551_REG_19, &vbus_reg[1], 1);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to get vbus voltage of sc8551: %d\n", ret);
+      baterr("get vbus err:%d\n", ret);
       return ERROR;
     }
 
@@ -324,7 +326,7 @@ static int sc8551_get_vout(FAR struct sc8551_dev_s * priv, uint16_t *vout)
   ret = sc8551_getreg8(priv, SC8551_REG_1D, &vout_reg[1], 1);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to get output voltage of sc8551: %d\n", ret);
+      baterr("get vout err:%d\n", ret);
       return ERROR;
     }
 
@@ -347,7 +349,7 @@ static int sc8551_get_flt_stat(FAR struct sc8551_dev_s * priv,
   ret  = sc8551_getreg8(priv, SC8551_REG_11, &flt_reg, 1);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to get flt_stat of sc8551: %d\n", ret);
+      baterr("get flt_stat err:%d\n", ret);
       return ERROR;
     }
 
@@ -368,7 +370,7 @@ static int sc8551_get_ibus_ucp(FAR struct sc8551_dev_s * priv,
   ret  = sc8551_getreg8(priv, SC8551_REG_08, &ibus_reg, 1);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to get flt_stat of sc8551: %d\n", ret);
+      baterr("get ibus_ucp err:%d\n", ret);
       return ERROR;
     }
 
@@ -388,7 +390,7 @@ static int sc8551_get_int_stat(FAR struct sc8551_dev_s * priv,
   ret = sc8551_getreg8(priv, SC8551_REG_0D, &int_reg, 1);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to get flt_stat of sc8551: %d\n", ret);
+      baterr("get int_stat err:%d\n", ret);
       return ERROR;
     }
 
@@ -410,7 +412,7 @@ static int sc8551_get_converse_stat(FAR struct sc8551_dev_s * priv,
   ret = sc8551_getreg8(priv, SC8551_REG_0A, &conv_reg, 1);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to get flt_stat of sc8551: %d\n", ret);
+      baterr("get converse_stat err:%d\n", ret);
       return ERROR;
     }
 
@@ -430,7 +432,7 @@ static int sc8551_get_charge_en_stat(FAR struct sc8551_dev_s * priv,
   ret = sc8551_getreg8(priv, SC8551_REG_0C, &chg_ctl, 1);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to get charge_en_stat of sc8551: %d\n", ret);
+      baterr("get charge_en err:%d\n", ret);
       return ERROR;
     }
 
@@ -467,7 +469,7 @@ static int sc8551_get_key_state(FAR struct sc8551_dev_s * priv,
                                  &(sc8551_key_state->charge_en_stat));
   if (ret < 0)
     {
-      baterr("ERROR: !!! Failed to get key_state of sc8551: %d\n", ret);
+      baterr("get key_state err:%d\n", ret);
       return ERROR;
     }
 
@@ -1430,7 +1432,7 @@ static int sc8551_get_temp(FAR struct sc8551_dev_s *priv)
   ret = sc8551_getreg8(priv, SC8551_REG_27, &value, 1);
   if (ret < 0)
     {
-      baterr("ERROR: Error reading from SC8551_REG_27! Error = %d\n", ret);
+      baterr("get temp err:%d\n", ret);
       return ret;
     }
 
@@ -1600,7 +1602,7 @@ static void sc8551_worker(FAR void *arg)
     {
       /* push data to upper half driver */
 
-      baterr("SUCCESS: sc8551_readpump!");
+      batinfo("SUCCESS: sc8551_readpump!");
     }
 
   return;
@@ -1625,7 +1627,6 @@ static int sc8551_state(FAR struct battery_charger_dev_s *dev,
   ret = sc8551_get_key_state(priv, &sc8551_key_state);
   if (ret < 0)
     {
-      baterr("ERROR: Error sc8551_get_key_state! Error = %d\n", ret);
       *status = BATTERY_UNKNOWN;
       return ret;
     }
@@ -1711,7 +1712,7 @@ static int sc8551_powersupply(FAR struct sc8551_dev_s *priv, int current)
 
   if (ret < 0)
     {
-      baterr("ERROR: Error setting sc8551 bus OCP ! Error = %d\n", ret);
+      baterr("set bus ocp err:%d\n", ret);
       return ret;
     }
 
@@ -1747,7 +1748,7 @@ static int sc8551_current(FAR struct battery_charger_dev_s *dev, int value)
   ret = sc8551_set_batocp_th(priv, value);
   if (ret < 0)
     {
-      baterr("ERROR: Error Set the charger current! Error = %d\n", ret);
+      baterr("set current err:%d\n", ret);
       return ret;
     }
 
@@ -1837,7 +1838,7 @@ static int sc8551_chipid(FAR struct battery_charger_dev_s *dev,
   ret = sc8551_getreg8(priv, SC8551_REG_13, (uint8_t *)value, 1);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to Get sc8551 chipid: %d\n", ret);
+      baterr("Get chipid err:%d\n", ret);
       return ERROR;
     }
 
@@ -1867,7 +1868,7 @@ static int sc8551_get_voltage(FAR struct battery_charger_dev_s *dev,
   ret = sc8551_getreg8(priv, SC8551_REG_1D, &val[1], 1);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to get output voltage of sc8551: %d\n", ret);
+      baterr("get voltage err:%d\n", ret);
       return ERROR;
     }
 
@@ -1951,14 +1952,14 @@ FAR struct battery_charger_dev_s *
                                IOEXPANDER_DIRECTION_IN_PULLUP);
       if (ret < 0)
         {
-          baterr("Failed to set direction: %d\n", ret);
+          baterr("set direction err:%d\n", ret);
         }
 
       ioepattach = IOEP_ATTACH(priv->ioedev, priv->pin,
                               sc8551_interrupt_handler, priv);
       if (ioepattach == NULL)
         {
-          baterr("Failed to attach sc8551_interrupt_handler");
+          baterr("attach sc8551_int_handler err\n");
           ret = -EIO;
         }
 
@@ -1966,7 +1967,7 @@ FAR struct battery_charger_dev_s *
                         IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
       if (ret < 0)
         {
-          baterr("Failed to set option: %d\n", ret);
+          baterr("set option err:%d\n", ret);
           IOEP_DETACH(priv->ioedev, sc8551_interrupt_handler);
         }
 
@@ -1975,7 +1976,7 @@ FAR struct battery_charger_dev_s *
       ret = sc8551_reset(priv);
       if (ret < 0)
         {
-          baterr("ERROR: Failed to reset the SC8551: %d\n", ret);
+          baterr("reset SC8551 err:%d\n", ret);
           kmm_free(priv);
           return NULL;
         }
@@ -1985,7 +1986,7 @@ FAR struct battery_charger_dev_s *
       ret = sc8551_watchdog(priv, true);
       if (ret < 0)
         {
-          baterr("ERROR: Failed to disable SC8551 watchdog: %d\n", ret);
+          baterr("en SC8551 watchdog err:%d\n", ret);
           kmm_free(priv);
           return NULL;
         }
@@ -1995,7 +1996,7 @@ FAR struct battery_charger_dev_s *
       ret = sc8551_powersupply(priv, current);
       if (ret < 0)
         {
-          baterr("ERROR: Failed to set SC8551 power supply: %d\n", ret);
+          baterr("set power supply err:%d\n", ret);
           kmm_free(priv);
           return NULL;
         }
@@ -2005,7 +2006,7 @@ FAR struct battery_charger_dev_s *
       ret = sc8551_detect_device(priv);
       if (ret < 0)
         {
-          baterr("ERROR: Failed to detect_device: %d\n", ret);
+          baterr("detect_device err:%d\n", ret);
           kmm_free(priv);
           return NULL;
         }
@@ -2015,7 +2016,7 @@ FAR struct battery_charger_dev_s *
       ret = sc8551_watchdog(priv, false);
       if (ret < 0)
         {
-          baterr("ERROR: Failed to disable watchdog: %d\n", ret);
+          baterr("disen watchdog err:%d\n", ret);
           kmm_free(priv);
           return NULL;
         }
@@ -2025,8 +2026,7 @@ FAR struct battery_charger_dev_s *
       ret = sc8551_set_ss_timeout(priv, 5120);
       if (ret < 0)
         {
-          baterr("ERROR: Failed to Adjust timeout to \
-            rise to threshold: %d\n", ret);
+          baterr("set ss tiomout err:%d\n", ret);
           kmm_free(priv);
           return NULL;
         }
@@ -2034,7 +2034,7 @@ FAR struct battery_charger_dev_s *
       ret = sc8551_set_sense_resistor(priv, g_sc8551_cfg.sense_r_mohm);
       if (ret < 0)
         {
-          baterr("ERROR: Failed to set sense resistor: %d\n", ret);
+          baterr("set resistor:%d\n", ret);
           kmm_free(priv);
           return NULL;
         }
@@ -2042,7 +2042,7 @@ FAR struct battery_charger_dev_s *
       ret = sc8551_init_protection(priv);
       if (ret < 0)
         {
-          baterr("ERROR: Failed to init protection: %d\n", ret);
+          baterr("init protection err:%d\n", ret);
           kmm_free(priv);
           return NULL;
         }
@@ -2050,7 +2050,7 @@ FAR struct battery_charger_dev_s *
       ret = sc8551_init_adc(priv);
       if (ret < 0)
         {
-          baterr("ERROR: Failed to init adc: %d\n", ret);
+          baterr("init adc err:%d\n", ret);
           kmm_free(priv);
           return NULL;
         }
@@ -2058,7 +2058,7 @@ FAR struct battery_charger_dev_s *
       ret = sc8551_init_int_src(priv);
       if (ret < 0)
         {
-          baterr("ERROR: Failed to init src: %d\n", ret);
+          baterr("init src err:%d\n", ret);
           kmm_free(priv);
           return NULL;
         }
@@ -2066,7 +2066,7 @@ FAR struct battery_charger_dev_s *
       ret = sc8551_init_regulation(priv);
       if (ret < 0)
         {
-          baterr("ERROR: Failed to init regulation: %d\n", ret);
+          baterr("init regulation:%d\n", ret);
           kmm_free(priv);
           return NULL;
         }
@@ -2078,7 +2078,7 @@ FAR struct battery_charger_dev_s *
   ret = sc8551_get_key_state(priv, &sc8551_key_state);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to sc8551_get_key_state: %d\n", ret);
+      baterr("get_key_state err:%d\n", ret);
       kmm_free(priv);
       return NULL;
     }
