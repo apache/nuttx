@@ -996,8 +996,8 @@ static void mpfs_endtransfer(struct mpfs_dev_s *priv,
 
   /* Clear Buffer Read Ready (BRR), BWR and DMA statuses */
 
-  putreg32(MPFS_EMMCSD_SRS12, MPFS_EMMCSD_SRS12_BRR |
-           MPFS_EMMCSD_SRS12_BWR | MPFS_EMMCSD_SRS12_DMAINT);
+  putreg32(MPFS_EMMCSD_SRS12_BRR | MPFS_EMMCSD_SRS12_BWR |
+           MPFS_EMMCSD_SRS12_DMAINT, MPFS_EMMCSD_SRS12);
 
   /* Mark the transfer finished */
 

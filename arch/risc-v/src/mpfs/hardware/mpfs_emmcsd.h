@@ -145,7 +145,7 @@
 
 #define MPFS_EMMCSD_HRS06_ETR           (1 << 15)
 #define MPFS_EMMCSD_HRS06_ETV           (0x3f << 8)
-#define MPFS_EMMCSD_HRS06_EMM           (0x3 << 0)
+#define MPFS_EMMCSD_HRS06_EMM           (0x7 << 0)
 
 /* HRS07 register */
 
