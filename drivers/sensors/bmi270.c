@@ -1282,7 +1282,6 @@ static int bmi270_readdevid(FAR struct bmi270_dev_s *priv)
   if (regval != BMI270_DEVICE_ID)
     {
       ret = -ENODEV;
-      snerr("Wrong device ID! : %d\n", regval);
     }
   else
     {
@@ -1556,17 +1555,17 @@ static int bmi270_datatest(FAR struct bmi270_dev_s *priv, int type)
     }
   else
     {
-      snerr("Failed to match sensor type.\n");
+      snerr("err sen type\n");
       return -EINVAL;
     }
 
   if (result == BMI270_ST_PASS)
     {
-      snerr("Self Test - PASS\n");
+      snerr("SelfTest:P\n");
     }
   else
     {
-      snerr("Self Test - FAIL\n");
+      snerr("SelfTest:F\n");
     }
 
   return result;
@@ -1638,7 +1637,7 @@ static void bmi270_resetwait(FAR struct bmi270_dev_s *priv)
 
   if (maxcount == 0)
     {
-      snerr("bmi270 reset wait timeout!\n");
+      snerr("bmi270 rst wait timeout\n");
     }
 }
 
@@ -1675,7 +1674,6 @@ static int bmi270_init_device(FAR struct bmi270_dev_s *priv)
   ret = file_open(&file, priv->file_path, O_RDONLY);
   if (ret < 0)
     {
-      snerr("Failed to open file:%s, err:%d\n", priv->file_path, ret);
       return ret;
     }
 
@@ -1684,7 +1682,6 @@ static int bmi270_init_device(FAR struct bmi270_dev_s *priv)
   ret = bmi270_read_cfg_param(&file, buff, sizeof(buff));
   if (ret < 0)
     {
-      snerr("Failed to read param: %d\n", ret);
       file_close(&file);
       return ret;
     }
@@ -1692,7 +1689,6 @@ static int bmi270_init_device(FAR struct bmi270_dev_s *priv)
     {
       if (!strstr(buff, BMI270_CONFIG_NAME))
         {
-          snerr("Failed to read head information: %d\n", -EINVAL);
           file_close(&file);
           return ret;
         }
@@ -1703,7 +1699,6 @@ static int bmi270_init_device(FAR struct bmi270_dev_s *priv)
   ret = bmi270_read_cfg_param(&file, buff, sizeof(buff));
   if (ret < 0)
     {
-      snerr("Failed to read param: %d\n", ret);
       file_close(&file);
       return ret;
     }
@@ -1717,7 +1712,6 @@ static int bmi270_init_device(FAR struct bmi270_dev_s *priv)
   config_buf = kmm_zalloc(count);
   if (config_buf == NULL)
     {
-      snerr("ERROR: Failed to allocate config buffer\n");
       file_close(&file);
       return ret;
     }
@@ -1727,7 +1721,6 @@ static int bmi270_init_device(FAR struct bmi270_dev_s *priv)
       ret = bmi270_read_cfg_param(&file, buff, sizeof(buff));
       if (ret < 0)
         {
-          snerr("Failed to read param: %d\n", ret);
           kmm_free(config_buf);
           file_close(&file);
           return ret;
@@ -1758,7 +1751,6 @@ static int bmi270_init_device(FAR struct bmi270_dev_s *priv)
   ret = bmi270_write_config(priv, config_buf, count);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to load config file: %d\n", ret);
       kmm_free(config_buf);
       return ret;
     }
@@ -1807,7 +1799,7 @@ static int bmi270_read_cfg_param(FAR struct file *file,
       len = file_read(file, buf, len);
       if (len <= 0)
         {
-          snerr("Failed to read parameters: %d\n", -EINVAL);
+          snerr("bmi270 read param fail:%d\n", -EINVAL);
           return -EINVAL;
         }
     }
@@ -2525,7 +2517,7 @@ static int bmi270_xl_setscalefactor(FAR struct bmi270_dev_s *priv)
 
       default:
         {
-          snerr("Failed to set scale factor!\n");
+          snerr("set scale factor fail\n");
         }
         break;
     }
@@ -2950,7 +2942,7 @@ static int bmi270_fifo_setwatermark(FAR struct bmi270_dev_s *priv,
 
   if (priv->fifo_buff == NULL)
     {
-      snerr("ERROR: Failed to allocate fifo temp buffer\n");
+      snerr("alloc fifo buf fail\n");
       return -ENOMEM;
     }
 
@@ -3227,7 +3219,7 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv, bool worker)
   ret = bmi270_fifo_getlevel(priv, &num);
   if (ret < 0)
     {
-      snerr("Failed to get FIFO level!\n");
+      snerr("get fifo lvl fail\n");
       bmi270_spi_unlock(priv);
       goto out;
     }
@@ -3236,7 +3228,7 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv, bool worker)
     {
       /* Clear the fifo and drop the data. */
 
-      snerr("FIFO data number out of range! num: %d latch time: %llu\n",
+      snerr("out of range!num:%d latch time:%llu\n",
             num, sensor_get_timestamp() - priv->timestamp);
 
       bmi270_spi_unlock(priv);
@@ -3920,7 +3912,7 @@ static int bmi270_batch(FAR struct file *filep,
     }
   else
     {
-      snerr("Failed to match sensor type.\n");
+      snerr("err sen type\n");
       return -EINVAL;
     }
 
@@ -3952,7 +3944,7 @@ static int bmi270_batch(FAR struct file *filep,
         }
       else
         {
-          snerr("Failed to match sensor type.\n");
+          snerr("err sen type\n");
           return -EINVAL;
         }
 
@@ -3978,7 +3970,7 @@ static int bmi270_batch(FAR struct file *filep,
         }
       else
         {
-          snerr("Failed to match sensor type.\n");
+          snerr("err sen type\n");
           return -EINVAL;
         }
 
@@ -4121,7 +4113,7 @@ static int bmi270_set_interval(FAR struct file *filep,
       ret = bmi270_xl_setodr(priv, g_bmi270_xl_odr[idx].regval);
       if (ret < 0)
         {
-          snerr("Failed to set interval: %d\n", ret);
+          snerr("set interval fail:%d\n", ret);
           return ret;
         }
 
@@ -4146,7 +4138,7 @@ static int bmi270_set_interval(FAR struct file *filep,
       ret = bmi270_gy_setodr(priv, g_bmi270_gy_odr[idx].regval);
       if (ret < 0)
         {
-          snerr("Failed to set interval: %d\n", ret);
+          snerr("set interval fail:%d\n", ret);
           return ret;
         }
 
@@ -4168,7 +4160,7 @@ static int bmi270_set_interval(FAR struct file *filep,
     }
   else
     {
-      snerr("Failed to match sensor type: %d\n", -EINVAL);
+      snerr("err sen type\n");
       return -EINVAL;
     }
 
@@ -4243,7 +4235,7 @@ static int bmi270_activate(FAR struct file *filep,
           ret = bmi270_xl_enable(priv, enable);
           if (ret < 0)
             {
-              snerr("Failed to enable accelerometer sensor: %d\n", ret);
+              snerr("en acc fail:%d\n", ret);
               return ret;
             }
 
@@ -4267,7 +4259,7 @@ static int bmi270_activate(FAR struct file *filep,
           ret = bmi270_gy_enable(priv, enable);
           if (ret < 0)
             {
-              snerr("Failed to enable gyroscope sensor: %d\n", ret);
+              snerr("en gyro fail:%d\n", ret);
               return ret;
             }
 
@@ -4298,7 +4290,7 @@ static int bmi270_activate(FAR struct file *filep,
           ret = bmi270_feat_enable(priv, enable);
           if (ret < 0)
             {
-              snerr("Failed to enable light sensor: %d\n", ret);
+              snerr("en feat fail:%d\n", ret);
               return ret;
             }
 
@@ -4307,7 +4299,7 @@ static int bmi270_activate(FAR struct file *filep,
     }
   else
     {
-      snerr("Failed to match sensor type.\n");
+      snerr("err sen type\n");
       return -EINVAL;
     }
 
@@ -4326,7 +4318,7 @@ static int bmi270_activate(FAR struct file *filep,
       ret = bmi270_temp_enable(priv, BMI270_DISABLE);
       if (ret < 0)
         {
-          snerr("Failed to disable temperature of sensor: %d\n", ret);
+          snerr("dis temp fail:%d\n", ret);
           return ret;
         }
     }
@@ -4335,7 +4327,7 @@ static int bmi270_activate(FAR struct file *filep,
       ret = bmi270_temp_enable(priv, BMI270_ENABLE);
       if (ret < 0)
         {
-          snerr("Failed to disable temperature of sensor: %d\n", ret);
+          snerr("en temp fail:%d\n", ret);
           return ret;
         }
     }
@@ -4394,7 +4386,7 @@ static int bmi270_selftest(FAR struct file *filep,
     }
   else
     {
-      snerr("Failed to match sensor type.\n");
+      snerr("err sen type\n");
       return -EINVAL;
     }
 
@@ -4421,7 +4413,6 @@ static int bmi270_selftest(FAR struct file *filep,
       default:                     /* Other cmd tag */
         {
           ret = -ENOTTY;
-          snerr("ERROR: The cmd don't support: %d\n", ret);
         }
         break;
     }
@@ -4478,7 +4469,7 @@ static int bmi270_control(FAR struct file *filep,
     }
   else
     {
-      snerr("Failed to match sensor type.\n");
+      snerr("err sen type\n");
       return -EINVAL;
     }
 
@@ -4492,7 +4483,7 @@ static int bmi270_control(FAR struct file *filep,
           ret = bmi270_feat_manage(priv);
           if (ret < 0)
             {
-              snerr("ERROR: Failed to set feature: %d\n", ret);
+              snerr("set feature fail:%d\n", ret);
             }
         }
         break;
@@ -4555,7 +4546,7 @@ static int bmi270_control(FAR struct file *filep,
 
           if (ret < 0)
             {
-              snerr("ERROR: Failed to set scale for accelerator: %d\n", ret);
+              snerr("set acc scale fail:%d\n", ret);
             }
 
           /* Disable advance power save. */
@@ -4691,7 +4682,6 @@ int bmi270_register(int devno, FAR const struct bmi270_config_s *config)
   priv = kmm_zalloc(sizeof(*priv));
   if (priv == NULL)
     {
-      snerr("ERROR: Failed to allocate instance\n");
       return -ENOMEM;
     }
 
@@ -4729,7 +4719,7 @@ int bmi270_register(int devno, FAR const struct bmi270_config_s *config)
   ret = bmi270_readdevid(priv);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to get DeviceID: %d\n", ret);
+      snerr("get bmi270 id fail:%d\n", ret);
       goto err;
     }
 
@@ -4743,7 +4733,7 @@ int bmi270_register(int devno, FAR const struct bmi270_config_s *config)
   ret = bmi270_init_device(priv);
   if (ret < 0)
     {
-      snerr("Failed to config bmi270 sensor: %d\n", ret);
+      snerr("config bmi270 fail:%d\n", ret);
       goto err;
     }
 
@@ -4753,7 +4743,7 @@ int bmi270_register(int devno, FAR const struct bmi270_config_s *config)
                            IOEXPANDER_DIRECTION_IN_PULLDOWN);
   if (ret < 0)
     {
-      snerr("Failed to set direction: %d\n", ret);
+      snerr("set dir fail:%d\n", ret);
       goto err;
     }
 
@@ -4762,7 +4752,7 @@ int bmi270_register(int devno, FAR const struct bmi270_config_s *config)
   if (ioephandle == NULL)
     {
       ret = -EIO;
-      snerr("Failed to attach: %d\n", ret);
+      snerr("attach fail:%d\n", ret);
       goto err;
     }
 
@@ -4771,7 +4761,7 @@ int bmi270_register(int devno, FAR const struct bmi270_config_s *config)
                         (FAR void *)IOEXPANDER_VAL_DISABLE);
   if (ret < 0)
     {
-      snerr("Failed to set option: %d\n", ret);
+      snerr("set option fail:%d\n", ret);
       goto err_detach;
     }
 
@@ -4780,14 +4770,14 @@ int bmi270_register(int devno, FAR const struct bmi270_config_s *config)
   ret = sensor_register((&(priv->dev[BMI270_XL_IDX].lower)), devno);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to register driver: %d\n", ret);
+      snerr("regist bmi270 xl fail:%d\n", ret);
       goto err_detach;
     }
 
   ret = sensor_register((&(priv->dev[BMI270_GY_IDX].lower)), devno);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to register driver: %d\n", ret);
+      snerr("regist bmi270 gy fail:%d\n", ret);
       sensor_unregister((&(priv->dev[BMI270_XL_IDX].lower)), devno);
       goto err_detach;
     }
@@ -4797,7 +4787,7 @@ int bmi270_register(int devno, FAR const struct bmi270_config_s *config)
     {
       sensor_unregister((&(priv->dev[BMI270_XL_IDX].lower)), devno);
       sensor_unregister((&(priv->dev[BMI270_GY_IDX].lower)), devno);
-      snerr("ERROR: Failed to register driver: %d\n", ret);
+      snerr("regist bmi270 ft fail:%d\n", ret);
       goto err_detach;
     }
 
