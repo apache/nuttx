@@ -89,19 +89,18 @@
 #define RP2040_PWN_CSR_DIVMODE_LEVEL  0x01
 #define RP2040_PWN_CSR_DIVMODE_RISE   0x02
 #define RP2040_PWN_CSR_DIVMODE_FALL   0x03
-             
 #define RP2040_PWM_DIV_INT_SHIFT     (4)      /* divisor integer part */
 #define RP2040_PWM_DIV_INT_MASK      (0xff << RP2040_PWM_DIV_INT_SHIFT)
 #define RP2040_PWM_DIV_FRAC_SHIFT    (0)      /* divisor fraction part */
 #define RP2040_PWM_DIV_FRAC_MASK     (0x0f << RP2040_PWM_DIV_FRAC_SHIFT)
 
 #define RP2040_PWM_CC_B_SHIFT        (16)      /* channel B compare register */
-#define RP2040_PWM_CC_B_MASK         (0xFFFF << RP2040_PWM_CC_B_SHIFT)
+#define RP2040_PWM_CC_B_MASK         (0xffff << RP2040_PWM_CC_B_SHIFT)
 #define RP2040_PWM_CC_A_SHIFT        (0)       /* channel A compare register */
-#define RP2040_PWM_CC_A_MASK         (0xFFFF << RP2040_PWM_CC_A_SHIFT)
+#define RP2040_PWM_CC_A_MASK         (0xffff << RP2040_PWM_CC_A_SHIFT)
 
-#define RP2040_PWM_TOP_SHIFT        (0)       /* channel A compare register */
-#define RP2040_PWM_TOP_MASK         (0xFFFF << RP2040_PWM_TOP_SHIFT)
+#define RP2040_PWM_TOP_SHIFT         (0)       /* channel A compare register */
+#define RP2040_PWM_TOP_MASK          (0xffff << RP2040_PWM_TOP_SHIFT)
 
 /*  Bit mask for ENA, INTR, INTE, INTF, and INTS registers */
 
@@ -114,33 +113,31 @@
 #define RP2040_PWM_CH1              (1 << 1) /* PWM channel 1 */
 #define RP2040_PWM_CH0              (1 << 0) /* PWM channel 0 */
 
-
-
 /****************************************************************************
- * The following IOCTL values set additional flags in the RP2040 PWM 
+ * The following IOCTL values set additional flags in the RP2040 PWM
  * device.
  ****************************************************************************/
 
 /****************************************************************************
- * PWMIOC_RP2040_SETINVERTPULSE sets the pulse invert flag.    
- * 
- * The argument is an integer where: 
+ * PWMIOC_RP2040_SETINVERTPULSE sets the pulse invert flag.
+ *
+ * The argument is an integer where:
  *   bit zero is set to invert channel A
  *   bit one  is set to invert channel B
  ****************************************************************************/
 
-#define PWMIOC_RP2040_SETINVERTPULSE  _PWMIOC(0x80) 
+#define PWMIOC_RP2040_SETINVERTPULSE  _PWMIOC(0x80)
 
-#define PWMIOC_RP2040_GETINVERTPULSE  _PWMIOC(0x81) 
+#define PWMIOC_RP2040_GETINVERTPULSE  _PWMIOC(0x81)
 
 /****************************************************************************
  * PWMIOC_RP2040_SETPHASECORRECT sets phase correct flags.
- * 
- * The argument is an integer which if non-zero sets the phase correct flag
+ *
+ * The argument is an integer which if non-zero sets the phase correct flag.
  ****************************************************************************/
 
-#define PWMIOC_RP2040_SETPHASECORRECT _PWMIOC(0x82) 
+#define PWMIOC_RP2040_SETPHASECORRECT _PWMIOC(0x82)
 
-#define PWMIOC_RP2040_GETPHASECORRECT _PWMIOC(0x83) 
+#define PWMIOC_RP2040_GETPHASECORRECT _PWMIOC(0x83)
 
 #endif

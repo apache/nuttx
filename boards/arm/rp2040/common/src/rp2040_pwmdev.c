@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp2040/common/src/rp2040_pwm.c
+ * boards/arm/rp2040/common/src/rp2040_pwmdev.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -28,20 +28,7 @@
 #include <debug.h>
 #include <errno.h>
 
-#include "nuttx/timers/pwm.h"
 #include "rp2040_pwm.h"
-
-// #include <stdint.h>
-// #include <stdbool.h>
-// #include <debug.h>
-// #include <assert.h>
-
-// #include <nuttx/board.h>
-// #include <arch/board/board.h>
-// #include <nuttx/arch.h>
-// #include <nuttx/irq.h>
-// #include <arch/irq.h>
-// #include <nuttx/signal.h>
 
 #ifdef CONFIG_RP2040_PWM
 
@@ -58,22 +45,31 @@
  ****************************************************************************/
 
 #if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
-int rp2040_pwmdev_initialize( int slice, int pin_a, int pin_b )
+int rp2040_pwmdev_initialize(int      slice,
+                             int      pin_a,
+                             int      pin_b,
+                             uint32_t flags)
 #else
-int rp2040_pwmdev_initialize( int slice, int pin )
+int rp2040_pwmdev_initialize(int      slice,
+                             int      pin,
+                             uint32_t flags)
 #endif
 {
   int ret;
   struct rp2040_pwm_lowerhalf_s *pwm_lowerhalf;
 
-  pwminfo("Initializing /dev/pwm%d..\n", slice);
+  pwminfo("Initializing /dev/pwm%d a %d b %d f 0x%08lX..\n",
+           slice,
+           pin_a,
+           pin_b,
+           flags);
 
   /* Initialize spi device */
 
 #if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
-  pwm_lowerhalf = rp2040_pwm_initialize( slice, pin_a, pin_b );
+  pwm_lowerhalf = rp2040_pwm_initialize(slice, pin_a, pin_b, flags);
 #else
-  pwm_lowerhalf = rp2040_pwm_initialize( slice, pin );
+  pwm_lowerhalf = rp2040_pwm_initialize(slice, pin, flags);
 #endif
 
   if (!pwm_lowerhalf)

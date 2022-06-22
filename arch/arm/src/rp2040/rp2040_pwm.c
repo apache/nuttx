@@ -36,46 +36,33 @@
 #include <nuttx/irq.h>
 #include <nuttx/timers/pwm.h>
 #include <arch/board/board.h>
-#include "rp2040_pwm.h"
 #include "rp2040_gpio.h"
-
+#include "rp2040_pwm.h"
 
 /****************************************************************************
  * Local Function Prototypes
  ****************************************************************************/
 
-static int  pwm_setup    ( struct pwm_lowerhalf_s  * dev ); 
+static int  pwm_setup    (struct pwm_lowerhalf_s  * dev);
 
-static int  pwm_shutdown ( struct pwm_lowerhalf_s  * dev );
+static int  pwm_shutdown (struct pwm_lowerhalf_s  * dev);
 
-static int  pwm_start    ( struct pwm_lowerhalf_s  * dev,
-                           const struct pwm_info_s * info );
+static int  pwm_start    (struct pwm_lowerhalf_s  * dev,
+                           const struct pwm_info_s * info);
 
-static int  pwm_stop     ( struct pwm_lowerhalf_s  * dev );
+static int  pwm_stop     (struct pwm_lowerhalf_s  * dev);
 
-static int  pwm_ioctl    ( struct pwm_lowerhalf_s  * dev, 
+static int  pwm_ioctl    (struct pwm_lowerhalf_s  * dev,
                            int                       cmd,
-                           unsigned long             arg );
+                           unsigned long             arg);
 
+static void setup_period (struct rp2040_pwm_lowerhalf_s  * priv);
 
-static void setup_slice  ( struct rp2040_pwm_lowerhalf_s  * priv );
+static void setup_pulse  (struct rp2040_pwm_lowerhalf_s  * priv);
 
-static void setup_duty   ( struct rp2040_pwm_lowerhalf_s  * priv );
+static void set_enabled  (struct rp2040_pwm_lowerhalf_s  * priv);
 
-/****************************************************************************
- * Local Inline Function
- ****************************************************************************/
-
-
-static inline void pwm_set_enabled( uint slice_num )
-{
-  (*(volatile uint32_t *) RP2040_PWM_CSR(slice_num)) |= RP2040_PWM_CSR_EN;
-}
-
-static inline void pwm_clear_enabled( uint slice_num )
-{
-  putreg32( 0, RP2040_PWM_CSR(slice_num) );
-}
+static void clear_enabled(struct rp2040_pwm_lowerhalf_s  * priv);
 
 /****************************************************************************
  * Private Data
@@ -93,11 +80,15 @@ static const struct pwm_ops_s g_pwmops =
 };
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: rp2040_pwm_initialize
  *
  * Description:
  *   Initialize the selected PWM port. And return a unique instance of struct
- *   struct rp2040_pwm_lowerhalf_s.  This function may be called to obtain 
+ *   struct rp2040_pwm_lowerhalf_s.  This function may be called to obtain
  *   multiple instances of the interface, each of which may be set up with a
  *   different frequency and address.
  *
@@ -112,21 +103,25 @@ static const struct pwm_ops_s g_pwmops =
  ****************************************************************************/
 
 #if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
-struct rp2040_pwm_lowerhalf_s *rp2040_pwm_initialize( int port, 
-                                                      int pin_a, 
-                                                      int pin_b )
+struct rp2040_pwm_lowerhalf_s *rp2040_pwm_initialize(int      port,
+                                                      int      pin_a,
+                                                      int      pin_b,
+                                                      uint32_t flags)
 #else
-struct rp2040_pwm_lowerhalf_s *rp2040_pwm_initialize(int port, int pin)
+struct rp2040_pwm_lowerhalf_s *rp2040_pwm_initialize(int      port,
+                                                      int      pin,
+                                                      uint32_t flags)
 #endif
 {
   struct rp2040_pwm_lowerhalf_s *data;
 
-  data = calloc( 1, sizeof (struct rp2040_pwm_lowerhalf_s) );
+  data = calloc(1, sizeof (struct rp2040_pwm_lowerhalf_s));
 
   if (data != NULL)
     {
-      data->ops  = &g_pwmops;
-      data->num  = port;
+      data->ops   = &g_pwmops;
+      data->num   = port;
+      data->flags = flags;
 #if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
       if (pin_a == 2*port  ||  pin_a == 2*port + 16)
         {
@@ -178,12 +173,12 @@ struct rp2040_pwm_lowerhalf_s *rp2040_pwm_initialize(int port, int pin)
 
 int rp2040_pwm_uninitialize(struct pwm_lowerhalf_s *dev)
 {
-  free( dev );
-  return ( OK );
+  free(dev);
+  return (OK);
 }
 
 /****************************************************************************
- * Local Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -202,37 +197,34 @@ int rp2040_pwm_uninitialize(struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-int pwm_setup( struct pwm_lowerhalf_s  * dev )
+int pwm_setup(struct pwm_lowerhalf_s  * dev)
 {
   struct rp2040_pwm_lowerhalf_s *priv = (struct rp2040_pwm_lowerhalf_s *)dev;
 
 #if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
-  pwminfo( "PWM%d pin_a %d pin_b %d\n", priv->num, priv->pin[0], priv->pin[1] );
+  pwminfo("PWM%d pin_a %d pin_b %d\n",
+          priv->num,
+          priv->pin[0],
+          priv->pin[1]);
 
   if (priv->pin[0] >= 0)
     {
-      pwminfo( "PWM%d setting pin_a %d\n", priv->num );
-
-      rp2040_gpio_set_function( priv->pin[0], RP2040_GPIO_FUNC_PWM );
+      rp2040_gpio_set_function(priv->pin[0], RP2040_GPIO_FUNC_PWM);
     }
 
   if (priv->pin[1] >= 0)
     {
-      pwminfo( "PWM%d setting pin_b %d\n", priv->num );
-
-      rp2040_gpio_set_function( priv->pin[1], RP2040_GPIO_FUNC_PWM );
+      rp2040_gpio_set_function(priv->pin[1], RP2040_GPIO_FUNC_PWM);
     }
 #else
-  pwminfo( "PWM%d pin %d\n", priv->num, priv->pin );
-
   if (priv->pin >= 0)
     {
-      rp2040_gpio_set_function( priv->pin, RP2040_GPIO_FUNC_PWM );
+      rp2040_gpio_set_function(priv->pin, RP2040_GPIO_FUNC_PWM);
     }
 #endif
 
   return 0;
-} 
+}
 
 /****************************************************************************
  * Name: pwm_shutdown
@@ -250,21 +242,64 @@ int pwm_setup( struct pwm_lowerhalf_s  * dev )
  *
  ****************************************************************************/
 
-int pwm_shutdown ( struct pwm_lowerhalf_s  * dev )
+int pwm_shutdown (struct pwm_lowerhalf_s  * dev)
 {
   struct rp2040_pwm_lowerhalf_s *priv = (struct rp2040_pwm_lowerhalf_s *)dev;
 
-  pwminfo( "PWM%d\n", priv->num );
+  pwminfo("PWM%d\n", priv->num);
 
   /* Stop timer */
 
-  pwm_stop( dev );
+  pwm_stop(dev);
+
+  /* Force the GPIO pins to the appropriate idle state */
+
+#if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
+  pwminfo("PWM%d pin_a %d pin_b %d\n",
+          priv->num,
+          priv->pin[0],
+          priv->pin[1]);
+
+  if (priv->pin[0] >= 0)
+    {
+      pwminfo("PWM%d setting pin_a %d\n",
+              priv->num,
+              (priv->flags & RP2040_PWM_CSR_A_INV) ? 1 : 0);
+
+      rp2040_gpio_setdir(priv->pin[0], true);
+      rp2040_gpio_put(priv->pin[0],
+                      ((priv->flags & RP2040_PWM_CSR_A_INV) != 0));
+      rp2040_gpio_set_function(priv->pin[0], RP2040_GPIO_FUNC_SIO);
+    }
+
+  if (priv->pin[1] >= 0)
+    {
+      pwminfo("PWM%d setting pin_b %d\n",
+              priv->num,
+              (priv->flags & RP2040_PWM_CSR_B_INV) ? 1 : 0);
+
+      rp2040_gpio_setdir(priv->pin[1], true);
+      rp2040_gpio_put(priv->pin[1],
+                      ((priv->flags & RP2040_PWM_CSR_B_INV) != 0));
+      rp2040_gpio_set_function(priv->pin[1], RP2040_GPIO_FUNC_SIO);
+    }
+#else
+  pwminfo("PWM%d pin %d\n", priv->num, priv->pin);
+
+  if (priv->pin >= 0)
+    {
+      rp2040_gpio_setdir(priv->pin[0], true);
+      rp2040_gpio_put(priv->pin[0],
+                      ((priv->flags & RP2040_PWM_CSR_A_INV) != 0));
+      rp2040_gpio_set_function(priv->pin, RP2040_GPIO_FUNC_SIO);
+    }
+#endif
 
   /* Clear timer and channel configuration */
 
   priv->frequency = 0;
   priv->divisor   = 0x00000010;  /* hex 1.0 */
-  priv->top       = 0xFFFF;
+  priv->top       = 0xffff;
 
 #if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
   for (int i = 0; i < CONFIG_PWM_NCHANNELS; ++i)
@@ -293,12 +328,12 @@ int pwm_shutdown ( struct pwm_lowerhalf_s  * dev )
  *
  ****************************************************************************/
 
-int pwm_start( struct pwm_lowerhalf_s  * dev,
-               const struct pwm_info_s * info )
+int pwm_start(struct pwm_lowerhalf_s  * dev,
+               const struct pwm_info_s * info)
 {
   struct rp2040_pwm_lowerhalf_s *priv = (struct rp2040_pwm_lowerhalf_s *)dev;
 
-  pwminfo( "PWM%d\n", priv->num );
+  pwminfo("PWM%d\n", priv->num);
 
   /* Update timer with given PWM timer frequency */
 
@@ -308,7 +343,7 @@ int pwm_start( struct pwm_lowerhalf_s  * dev,
 
       /* We want to compute the top and divisor to give the finest control */
 
-      setup_slice( priv );
+      setup_period(priv);
     }
 
   /* Update timer with given PWM channel duty */
@@ -328,12 +363,13 @@ int pwm_start( struct pwm_lowerhalf_s  * dev,
     }
 #endif
 
-  setup_duty( priv );
-  pwm_set_enabled( priv->num );
+  setup_pulse(priv);
+
+  set_enabled(priv);
 
   return 0;
 }
-                      
+
 /****************************************************************************
  * Name: pwm_stop
  *
@@ -348,18 +384,14 @@ int pwm_start( struct pwm_lowerhalf_s  * dev,
  *
  ****************************************************************************/
 
-int pwm_stop( struct pwm_lowerhalf_s  * dev )
+int pwm_stop(struct pwm_lowerhalf_s  * dev)
 {
   struct rp2040_pwm_lowerhalf_s *priv = (struct rp2040_pwm_lowerhalf_s *)dev;
-  irqstate_t flags;
 
-  pwminfo( "PWM%d\n", priv->num );
+  pwminfo("PWM%d\n", priv->num);
 
-  flags = enter_critical_section();
+  clear_enabled(priv);
 
-  pwm_clear_enabled( priv->num );
-
-  leave_critical_section(flags);
   return 0;
 }
 
@@ -379,47 +411,49 @@ int pwm_stop( struct pwm_lowerhalf_s  * dev )
  *
  ****************************************************************************/
 
-int pwm_ioctl( struct pwm_lowerhalf_s  * dev, 
+int pwm_ioctl(struct pwm_lowerhalf_s  * dev,
                int                       cmd,
-               unsigned long             arg )
+               unsigned long             arg)
 {
-#ifdef CONFIG_DEBUG_PWM_INFO
   struct rp2040_pwm_lowerhalf_s *priv = (struct rp2040_pwm_lowerhalf_s *)dev;
 
-  pwminfo( "PWM%d\n", priv->num );
+#ifdef CONFIG_DEBUG_PWM_INFO
+  pwminfo("PWM%d\n", priv->num);
 #endif
 
   switch (cmd)
     {
     case PWMIOC_RP2040_SETINVERTPULSE:
+      priv->flags &= ~(RP2040_PWM_CSR_B_INV | RP2040_PWM_CSR_A_INV);
+      priv->flags |= (arg & 0x03) << 2;
 
-      modreg32( (arg & 0x03) << 2,
-                RP2040_PWM_CSR_B_INV | RP2040_PWM_CSR_A_INV, 
-                RP2040_PWM_CSR_OFFSET(priv->num) );
-                
+      setup_period(priv);
+      setup_pulse(priv);
+
       return 0;
 
     case PWMIOC_RP2040_GETINVERTPULSE:
-      return (  getreg32( RP2040_PWM_CSR_OFFSET(priv->num) ) 
-              & (RP2040_PWM_CSR_B_INV | RP2040_PWM_CSR_A_INV)) >> 2;
+      return (priv->flags &  (RP2040_PWM_CSR_B_INV
+                            | RP2040_PWM_CSR_A_INV)) >> 2;
 
     case PWMIOC_RP2040_SETPHASECORRECT:
-      modreg32( (arg != 0) ? RP2040_PWM_CSR_PH_CORRECT : 0x00,
-                RP2040_PWM_CSR_PH_CORRECT, 
-                RP2040_PWM_CSR_OFFSET(priv->num) );
+      priv->flags &= ~(RP2040_PWM_CSR_PH_CORRECT);
+      priv->flags |= (arg != 0) ? RP2040_PWM_CSR_PH_CORRECT : 0x00;
+
+      setup_period(priv);
+      setup_pulse(priv);
 
       return 0;
 
     case PWMIOC_RP2040_GETPHASECORRECT:
-      return (  getreg32( RP2040_PWM_CSR_OFFSET(priv->num) ) 
-              & RP2040_PWM_CSR_PH_CORRECT) ? 1 : 0;
+      return (priv->flags & RP2040_PWM_CSR_PH_CORRECT) ? 1 : 0;
   }
 
   return -ENOTTY;
 }
 
 /****************************************************************************
- * Name: setup_slice
+ * Name: setup_period
  *
  * Description:
  *   compute and set the clock divisor and top value based on frequency.
@@ -429,56 +463,134 @@ int pwm_ioctl( struct pwm_lowerhalf_s  * dev,
  *
  ****************************************************************************/
 
-void setup_slice( struct rp2040_pwm_lowerhalf_s  * priv )
+void setup_period(struct rp2040_pwm_lowerhalf_s  * priv)
 {
+  irqstate_t flags;
   uint32_t max_freq = BOARD_SYS_FREQ / 0x10000; /* initially, with full range count */
+  uint32_t frequency = priv->frequency;
 
-  pwminfo( "PWM%d freq %d max %d\n", priv->num, priv->frequency, max_freq );
+  /* If we are running phase correct we double the frequency value
+   * since the PWM will generate a pulse chain at half what it
+   * would be in normal (non-phase correct) mode
+   */
 
-  if (priv->frequency <= max_freq)
+  if (priv->flags & RP2040_PWM_CSR_PH_CORRECT)
+    {
+      frequency *= 2;
+    }
+
+  pwminfo("PWM%d freq %d max %d\n", priv->num, priv->frequency, max_freq);
+
+  if (frequency <= max_freq)
     {
       /* We can keep full range count and slow clock down with divisor */
 
-      priv->top     = 0xFFFF;
+      priv->top = 0xffff;
     }
     else
     {
       /* we need to speed things up by reducing top */
-      priv->top     = 0xFFFF / (priv->frequency / max_freq);
+
+      priv->top = 0xffff / (frequency / max_freq);
 
       /* compute new maximum frequency */
-      max_freq      = BOARD_SYS_FREQ / (priv->top + 1);
+
+      max_freq  = BOARD_SYS_FREQ / (priv->top + 1);
     }
 
-  priv->divisor = 16 * max_freq / priv->frequency;
+  priv->divisor = 16 * max_freq / frequency;
 
-  pwminfo( "PWM%d top 0x%08X div 0x%08X\n", priv->num, priv->top, priv->divisor );
+  pwminfo("PWM%d top 0x%08X div 0x%08X\n",
+          priv->num,
+          priv->top,
+          priv->divisor);
 
-  putreg32( priv->top,     RP2040_PWM_TOP(priv->num) );
-  putreg32( priv->divisor, RP2040_PWM_DIV(priv->num) );
+  flags = enter_critical_section();
+
+  putreg32(priv->top,     RP2040_PWM_TOP(priv->num));
+  putreg32(priv->divisor, RP2040_PWM_DIV(priv->num));
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
- * Name: setup_duty
+ * Name: setup_pulse
  *
  * Description:
- *   compute and set the compare values.
+ *   compute and set the compare values and set CSR flags.
  *
  * Input Parameters:
  *   priv    - A reference to the lower half PWM driver state structure
  *
  ****************************************************************************/
 
-void setup_duty( struct rp2040_pwm_lowerhalf_s  * priv )
-{  
+void setup_pulse(struct rp2040_pwm_lowerhalf_s  * priv)
+{
+  irqstate_t flags;
+
 #if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
-  uint32_t compare =    (0xFFFF * (uint32_t)priv->duty[0] / priv->top)
-                     + ((0xFFFF * (uint32_t)priv->duty[1] / priv->top) << 16);
+  uint32_t compare =
+             (0xffff * (uint32_t)priv->duty[0] / priv->top)
+          + ((0xffff * (uint32_t)priv->duty[1] / priv->top) << 16);
 #else
-  uint32_t compare = 0xFFFF * (uint32_t)priv->duty / priv->top;
+  uint32_t compare = 0xffff * (uint32_t)priv->duty / priv->top;
 #endif
 
-  pwminfo( "PWM%d duties 0x%08X\n", priv->num, compare );
+  pwminfo("PWM%d compare 0x%08X  flags 0x%08X\n",
+          priv->num,
+          compare,
+          priv->flags);
 
-  putreg32( compare, RP2040_PWM_CC(priv->num) );
+  flags = enter_critical_section();
+
+  putreg32(compare, RP2040_PWM_CC(priv->num));
+
+  modreg32(priv->flags,
+            RP2040_PWM_CSR_DIVMODE_MASK
+          | RP2040_PWM_CSR_B_INV
+          | RP2040_PWM_CSR_A_INV
+          | RP2040_PWM_CSR_PH_CORRECT,
+          RP2040_PWM_CSR(priv->num));
+
+  leave_critical_section(flags);
+}
+
+/****************************************************************************
+ * Name: set_enabled
+ *
+ * Description:
+ *   set the enable bit for a given slice.
+ *
+ * Input Parameters:
+ *   priv    - A reference to the lower half PWM driver state structure
+ *
+ ****************************************************************************/
+
+static inline void set_enabled(struct rp2040_pwm_lowerhalf_s  * priv)
+{
+  irqstate_t flags = enter_critical_section();
+
+  modreg32(1 << priv->num, 1 << priv->num,  RP2040_PWM_ENA);
+
+  leave_critical_section(flags);
+}
+
+/****************************************************************************
+ * Name: clear_enabled
+ *
+ * Description:
+ *   clear the enable bit for a given slice.
+ *
+ * Input Parameters:
+ *   priv    - A reference to the lower half PWM driver state structure
+ *
+ ****************************************************************************/
+
+static inline void clear_enabled(struct rp2040_pwm_lowerhalf_s  * priv)
+{
+  irqstate_t flags = enter_critical_section();
+
+  modreg32(0, 1 << priv->num, RP2040_PWM_ENA);
+
+  leave_critical_section(flags);
 }

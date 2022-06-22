@@ -21,13 +21,13 @@
 #ifndef __ARCH_ARM_SRC_RP2040_RP2040_PWM_H
 #define __ARCH_ARM_SRC_RP2040_RP2040_PWM_H
 
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/rp2040_pwm.h"
+#include "nuttx/timers/pwm.h"
 
 #ifndef __ASSEMBLY__
 #if defined(__cplusplus)
@@ -46,6 +46,7 @@ struct rp2040_pwm_lowerhalf_s
 
   uint32_t                   frequency;  /* PWM current frequency */
   uint32_t                   divisor;    /* PWM current clock divisor */
+  uint32_t                   flags;      /* PWM mode flags */
   uint16_t                   top;        /* PWM current top value */
 
 #if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
@@ -68,7 +69,7 @@ struct rp2040_pwm_lowerhalf_s
  *
  * Description:
  *   Initialize the selected PWM port. And return a unique instance of struct
- *   struct rp2040_pwm_lowerhalf_s.  This function may be called to obtain 
+ *   struct rp2040_pwm_lowerhalf_s.  This function may be called to obtain
  *   multiple instances of the interface, each of which may be set up with a
  *   different frequency and address.
  *
@@ -76,19 +77,21 @@ struct rp2040_pwm_lowerhalf_s
  *   Port number (for hardware that has multiple PWM interfaces)
  *   GPIO pin number for pin A
  *   GPIO pin number for pin B (CONFIG_PWM_NCHANNELS == 2)
- * 
+ *
  * Returned Value:
  *   Valid PWM device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
 #if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
-struct rp2040_pwm_lowerhalf_s *rp2040_pwm_initialize( int port, 
-                                                      int pin_a, 
-                                                      int pin_b );
+struct rp2040_pwm_lowerhalf_s *rp2040_pwm_initialize(int      port,
+                                                     int      pin_a,
+                                                     int      pin_b,
+                                                     uint32_t flags);
 #else
-struct rp2040_pwm_lowerhalf_s *rp2040_pwm_initialize( int port, 
-                                                      int pin );
+struct rp2040_pwm_lowerhalf_s *rp2040_pwm_initialize(int      port,
+                                                     int      pin,
+                                                     uint32_t flags);
 #endif
 
 /****************************************************************************

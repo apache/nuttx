@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp2040/raspberrypi-pico/include/rp2040_pwm.h
+ * boards/arm/rp2040/common/include/rp2040_pwmdev.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -49,6 +49,7 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
 /****************************************************************************
  * Name: rp2040_pwmdev_initialize
  *
@@ -58,9 +59,14 @@ extern "C"
  ****************************************************************************/
 
 #if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
-int rp2040_pwmdev_initialize( int slice, int pin_a, int pin_b );
+int rp2040_pwmdev_initialize(int      slice,
+                             int      pin_a,
+                             int      pin_b,
+                             uint32_t flags);
 #else
-int rp2040_pwmdev_initialize( int slice, int pin );
+int rp2040_pwmdev_initialize(int      slice,
+                             int      pin,
+                             uint32_t flags);
 #endif
 
 #undef EXTERN
