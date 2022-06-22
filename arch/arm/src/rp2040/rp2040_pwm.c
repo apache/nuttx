@@ -479,7 +479,7 @@ void setup_period(struct rp2040_pwm_lowerhalf_s  * priv)
       frequency *= 2;
     }
 
-  pwminfo("PWM%d freq %d max %d\n", priv->num, priv->frequency, max_freq);
+  pwminfo("PWM%d freq %ld max %ld\n", priv->num, priv->frequency, max_freq);
 
   if (frequency <= max_freq)
     {
@@ -500,7 +500,7 @@ void setup_period(struct rp2040_pwm_lowerhalf_s  * priv)
 
   priv->divisor = 16 * max_freq / frequency;
 
-  pwminfo("PWM%d top 0x%08X div 0x%08X\n",
+  pwminfo("PWM%d top 0x%08X div 0x%08lX\n",
           priv->num,
           priv->top,
           priv->divisor);
@@ -536,7 +536,7 @@ void setup_pulse(struct rp2040_pwm_lowerhalf_s  * priv)
   uint32_t compare = 0xffff * (uint32_t)priv->duty / priv->top;
 #endif
 
-  pwminfo("PWM%d compare 0x%08X  flags 0x%08X\n",
+  pwminfo("PWM%d compare 0x%08lX  flags 0x%08lX\n",
           priv->num,
           compare,
           priv->flags);
