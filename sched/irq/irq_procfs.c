@@ -206,6 +206,7 @@ static int irq_callback(int irq, FAR struct irq_info_s *info,
    * rate    = <interrupt-count> * TICKS_PER_SEC / elapsed
    */
 
+  elapsed = elapsed ? elapsed : 1;
   intpart = (unsigned int)((copy.count * TICK_PER_SEC) / elapsed);
   if (intpart >= 10000)
     {
