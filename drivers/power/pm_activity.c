@@ -266,11 +266,12 @@ void pm_wakelock_init(FAR struct pm_wakelock_s *wakelock,
   DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
   DEBUGASSERT(state < PM_COUNT);
 
+  memset(wakelock, 0, sizeof(*wakelock));
+
   strlcpy(wakelock->name, name, sizeof(wakelock->name));
 
   wakelock->domain = domain;
   wakelock->state  = state;
-  wakelock->count  = 0;
 }
 
 /****************************************************************************
