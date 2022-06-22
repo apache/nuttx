@@ -238,7 +238,7 @@ static int da9168_getreg8(FAR struct da9168_dev_s *priv, uint8_t regaddr,
       else
         {
           nxsig_usleep(1);
-          baterr("ERROR: i2c transfer failed! err: %d retries:%d\n", err,retries);
+          baterr("i2c transf err:%d retry:%d\n", err, retries);
         }
     }
 
@@ -372,6 +372,7 @@ static int da9168_reg_update_bits(FAR struct da9168_dev_s *priv,
   ret = da9168_getreg8(priv, regaddr, &regval);
   if (ret < 0)
     {
+      baterr("get %x reg err:%d\n", regaddr, ret);
       return ret;
     }
 
@@ -380,6 +381,7 @@ static int da9168_reg_update_bits(FAR struct da9168_dev_s *priv,
   ret = da9168_putreg8(priv, regaddr, regval);
   if (ret < 0)
     {
+      baterr("set %x reg err:%d\n", regaddr, ret);
       return ret;
     }
 
@@ -463,7 +465,6 @@ static inline int da9168_enable_interrput(FAR struct da9168_dev_s *priv,
   if (ret < 0)
     {
       return ret;
-      baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
     }
 
   return ret;
@@ -487,7 +488,7 @@ int da9168_enable_shipmode(FAR struct da9168_dev_s *priv)
                                DA9168_SHIP_MODE_MASK, regval);
   if (ret < 0)
     {
-      baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
+      return ret;
     }
 
   return OK;
@@ -512,14 +513,14 @@ int da9168_config_shipmode(
   if ((entry_delay_sel < DA9168_SHIP_MODE_ENTRY_DELAY_2S) ||
       (entry_delay_sel > DA9168_SHIP_MODE_ENTRY_DELAY_10S))
     {
-      baterr("Invalid ship mode entry delay\n");
+      baterr("shipmode delay err\n");
       return -EINVAL;
     }
 
   if ((exit_deb_sel < DA9168_SHIP_MODE_EXIT_DEB_20MS) ||
       (exit_deb_sel > DA9168_SHIP_MODE_EXIT_DEB_2S))
     {
-      baterr("Invalid ship mode exit debounce\n");
+      baterr("shipmode deb err\n");
       return -EINVAL;
     }
 
@@ -531,7 +532,7 @@ int da9168_config_shipmode(
                                DA9168_RIN_N_SHIP_EXIT_TMR_MASK, regval);
   if (ret < 0)
     {
-      baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
+      return ret;
     }
 
   return OK;
@@ -553,7 +554,6 @@ static int da9168_control_charge(FAR struct da9168_dev_s *priv, bool enable)
                                (enable) ? DA9168_CHG_EN_MASK : 0);
   if (ret < 0)
     {
-      baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
       return ret;
     }
 
@@ -576,7 +576,6 @@ static int da9168_control_hiz(FAR struct da9168_dev_s *priv, bool enable)
                                enable ? DA9168_HIZ_MODE_MASK : 0);
   if (ret < 0)
     {
-      baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
       return ret;
     }
 
@@ -600,7 +599,6 @@ static int da9168_control_rev_vbus(FAR struct da9168_dev_s *priv,
         DA9168_REV_VBUS_EN_MASK, enable ? DA9168_REV_VBUS_EN_MASK : 0);
   if (ret < 0)
     {
-      baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
       return ret;
     }
 
@@ -624,7 +622,6 @@ static int da9168_control_boost_en(FAR struct da9168_dev_s *priv,
                                enable ? DA9168_BOOST_EN_MASK : 0);
   if (ret < 0)
     {
-      baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
       return ret;
     }
 
@@ -925,7 +922,7 @@ static int da9168_detect_device(FAR struct da9168_dev_s *priv)
   ret = da9168_getreg8(priv, DA9168_OTP_DEVICE_ID, &regval);
   if (ret < 0)
     {
-      baterr("ERROR: Error reading from DA9168! Error = %d\n", ret);
+      baterr("reading otp devid err:%d\n", ret);
       return ret;
     }
 
@@ -956,7 +953,6 @@ static inline int da9168_reset(FAR struct da9168_dev_s *priv)
   ret = da9168_getreg8(priv, DA9168_PMC_SYS_03, &regval);
   if (ret < 0)
     {
-      baterr("ERROR: Error reading from DA9168! Error = %d\n", ret);
       return ret;
     }
 
@@ -966,7 +962,6 @@ static inline int da9168_reset(FAR struct da9168_dev_s *priv)
   ret = da9168_putreg8(priv, DA9168_PMC_SYS_03, regval);
   if (ret < 0)
     {
-      baterr("ERROR: Error writing to DA9168! Error = %d\n", ret);
       return ret;
     }
 
@@ -990,7 +985,6 @@ static inline int da9168_watchdog(FAR struct da9168_dev_s *priv,
   ret = da9168_getreg8(priv, DA9168_PMC_SYS_03, &regval);
   if (ret < 0)
     {
-      baterr("ERROR: Error reading from DA9168! Error = %d\n", ret);
       return ret;
     }
 
@@ -1006,7 +1000,6 @@ static inline int da9168_watchdog(FAR struct da9168_dev_s *priv,
   ret = da9168_putreg8(priv, DA9168_PMC_SYS_03, regval);
   if (ret < 0)
     {
-      baterr("ERROR: Error writing to DA9168! Error = %d\n", ret);
       return ret;
     }
 
@@ -1173,7 +1166,6 @@ static inline int da9168_set_vindpm(FAR struct da9168_dev_s *priv, int value)
                                regval);
   if (ret < 0)
     {
-      baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
       return ret;
     }
 
@@ -1197,7 +1189,6 @@ static inline int da9168_control_pre_charge_safe_timer(
         DA9168_CHG_TMR_PRE_MASK, (value << DA9168_CHG_TMR_PRE_SHIFT));
   if (ret < 0)
     {
-      baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
       return ret;
     }
 
@@ -1223,7 +1214,6 @@ static inline int da9168_set_vbus_ovsel(FAR struct da9168_dev_s *priv,
                                      DA9168_VBUS_OVSEL_MASK, regval);
   if (ret < 0)
     {
-      baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
       return ret;
     }
 
@@ -1254,7 +1244,7 @@ static inline int da9168_setvolt(FAR struct da9168_dev_s *priv, int volts)
   ret = da9168_putreg8(priv, DA9168_PMC_CHG_04, regval);
   if (ret < 0)
     {
-      baterr("ERROR: Error writing to DA9168! Error = %d\n", ret);
+      baterr("write pmc_chg_04 err:%d\n", ret);
       return ret;
     }
 
@@ -1279,7 +1269,6 @@ static inline int da9168_set_recharge_level(FAR struct da9168_dev_s *priv,
                                (rchg_voltage_sel << DA9168_CHG_VRCHG_SHIFT));
   if (ret < 0)
     {
-      baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
       return ret;
     }
 
@@ -1305,7 +1294,6 @@ static inline int da9168_set_chg_range(FAR struct da9168_dev_s *priv,
   if (ret < 0)
     {
       return ret;
-      baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
     }
 
   return ret;
@@ -1337,7 +1325,6 @@ static inline int da9168_powersupply(FAR struct da9168_dev_s *priv,
                                regval);
   if (ret < 0)
     {
-      baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
       return ret;
     }
 
@@ -1394,7 +1381,7 @@ static inline int da9168_set_pre_curr(FAR struct da9168_dev_s *priv,
   ret = da9168_getreg8(priv, DA9168_PMC_CHG_02, &regval);
   if (ret < 0)
     {
-      baterr("ERROR: Error reading to DA9168! Error = %d\n", ret);
+      baterr("read pmc_chg_02 err:%d\n", ret);
       return ret;
     }
 
@@ -1440,7 +1427,7 @@ static inline int da9168_set_pre_curr(FAR struct da9168_dev_s *priv,
   ret = da9168_putreg8(priv, DA9168_PMC_CHG_02, regval);
   if (ret < 0)
     {
-      baterr("ERROR: Error writing to DA9168! Error = %d\n", ret);
+      baterr("write pmc_chg_02 err:%d\n", ret);
       return ret;
     }
 
@@ -1477,7 +1464,7 @@ static inline int da9168_set_iterm_curr(FAR struct da9168_dev_s *priv,
   ret = da9168_getreg8(priv, DA9168_PMC_CHG_02, &regval);
   if (ret < 0)
     {
-      baterr("ERROR: Error reading to DA9168! Error = %d\n", ret);
+      baterr("read pmc_chg_02 err:%d\n", ret);
       return ret;
     }
 
@@ -1504,7 +1491,7 @@ static inline int da9168_set_iterm_curr(FAR struct da9168_dev_s *priv,
   ret = da9168_putreg8(priv, DA9168_PMC_CHG_02, regval);
   if (ret < 0)
     {
-      baterr("ERROR: Error writing to DA9168! Error = %d\n", ret);
+      baterr("write pmc_chg_02 err:%d\n", ret);
       return ret;
     }
 
@@ -1529,7 +1516,7 @@ static inline int da9168_setcurr(FAR struct da9168_dev_s *priv,
   ret = da9168_getreg8(priv, DA9168_PMC_CHG_03, &regval);
   if (ret < 0)
     {
-      baterr("ERROR: Error reading to DA9168! Error = %d\n", ret);
+      baterr("read pmc_chg_03 err:%d\n", ret);
       return ret;
     }
   else
@@ -1577,7 +1564,7 @@ static inline int da9168_setcurr(FAR struct da9168_dev_s *priv,
   ret = da9168_putreg8(priv, DA9168_PMC_CHG_03, regval);
   if (ret < 0)
     {
-      baterr("ERROR: Error writing to DA9168! Error = %d\n", ret);
+      baterr("write pmc_chg_03 err:%d\n", ret);
       return ret;
     }
 
@@ -1619,7 +1606,6 @@ static int da9168_voltage(FAR struct battery_charger_dev_s *dev, int value)
   ret = da9168_setvolt(priv, value);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to set DA9168 voltage: %d\n", ret);
       return ret;
     }
 
@@ -1644,7 +1630,6 @@ static int da9168_current(FAR struct battery_charger_dev_s *dev, int value)
   ret = da9168_setcurr(priv, value);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to set DA9168 currrent: %d\n", ret);
       return ret;
     }
 
@@ -1668,7 +1653,7 @@ static int da9168_input_current(FAR struct battery_charger_dev_s *dev,
   ret = da9168_powersupply(priv, value);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to set DA9168 power supply: %d\n", ret);
+      baterr("da9168 power supply err:%d\n", ret);
       return ret;
     }
 
@@ -1700,7 +1685,7 @@ static int da9168_operate(FAR struct battery_charger_dev_s *dev,
           ret = da9168_enable_shipmode(priv);
           if (ret < 0)
             {
-              baterr("ERROR: DA9168 enter shiomode fail: %d\n", ret);
+              baterr("da9168 en shipmode err:%d\n", ret);
             }
         }
 
@@ -1711,7 +1696,7 @@ static int da9168_operate(FAR struct battery_charger_dev_s *dev,
           ret = da9168_control_charge(priv, value);
           if (ret < 0)
             {
-              baterr("ERROR: Failed to enable DA9168 charge: %d\n", ret);
+              baterr("da9168 en charge err:%d\n", ret);
              }
         }
 
@@ -1724,14 +1709,14 @@ static int da9168_operate(FAR struct battery_charger_dev_s *dev,
           ret |= da9168_control_boost_en(priv, value);
           if (ret < 0)
             {
-              baterr("ERROR: Failed to enable DA9168 boost: %d\n", ret);
+              baterr("da9168 en boost:%d\n", ret);
             }
         }
 
       break;
 
       default:
-        baterr("Unsupported operate type: %d\n", msg->operate_type);
+        baterr("Unsupported otp:%d\n", msg->operate_type);
         ret = -EINVAL;
         break;
     }
@@ -1756,8 +1741,7 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
   ret = da9168_set_chg_range(priv, true);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to set da9168 charging current  \
-             range: %d\n", ret);
+      baterr("da9168 set charge range err:%d\n", ret);
       return ret;
     }
 
@@ -1766,7 +1750,7 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
   ret = da9168_set_vindpm(priv, 4700);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to set da9168  vindpm: %d\n", ret);
+      baterr("da9168 set vindpm err:%d\n", ret);
       return ret;
     }
 
@@ -1775,7 +1759,7 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
   ret =  da9168_set_vbus_ovsel(priv, 0x03);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to set da9168 vbus overvoltage: %d\n", ret);
+      baterr("da9168 set vbus ovsel er:%d\n", ret);
       return ret;
     }
 
@@ -1784,7 +1768,7 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
   ret = da9168_powersupply(priv, current);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to set da9168 input current: %d\n", ret);
+      baterr("da9168 set input cur err:%d\n", ret);
       return ret;
     }
 
@@ -1793,7 +1777,7 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
   ret = da9168_setcurr(priv, DA9168_ICHG_DEFAULT_UA);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to set da9168 charge current: %d\n", ret);
+      baterr("da9168 set charge cur err:%d\n", ret);
       return ret;
     }
 
@@ -1802,7 +1786,7 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
   ret = da9168_set_pre_curr(priv, DA9168_PRE_CURR_DEFAULT_UA, TRUE);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to set da9168 pre current, Error = %d\n", ret);
+      baterr("da9168 set pre cur err:%d\n", ret);
       return ret;
     }
 
@@ -1811,7 +1795,7 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
   ret = da9168_set_iterm_curr(priv, 40, TRUE);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to set da9168 iterm current, Error = %d\n", ret);
+      baterr("da9168 set iterm cur err:%d\n", ret);
       return ret;
     }
 
@@ -1820,7 +1804,7 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
   ret = da9168_setvolt(priv, 4440);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to set DA9168 bat voltage: %d\n", ret);
+      baterr("da9168 set bat vol err:%d\n", ret);
       return ret;
     }
 
@@ -1829,7 +1813,7 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
   ret = da9168_set_recharge_level(priv, false);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to set DA9168 recharge level: %d\n", ret);
+      baterr("da9168 set recharge level err:%d\n", ret);
       return ret;
     }
 
@@ -1840,7 +1824,7 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
                                 DA9168_M_VBUS_UV_SHIFT, false);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to enable DA9168 vbus_uv interrput: %d\n", ret);
+      baterr("da9168 en interrput err:%d\n", ret);
       return ret;
     }
 
@@ -1850,7 +1834,7 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
                          DA9168_SHIP_MODE_EXIT_DEB_2S);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to config DA9168 shipmode parameter: %d\n", ret);
+      baterr("da9168 shipmode param err:%d\n", ret);
       return ret;
     }
 
@@ -1859,7 +1843,7 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
   ret = da9168_control_rev_vbus(priv, true);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to enable DA9168 rev vubs: %d\n", ret);
+      baterr("da9168 control rev vubs err:%d\n", ret);
       return ret;
     }
 
@@ -1868,7 +1852,7 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
   ret = da9168_control_boost_en(priv, true);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to enable DA9168 boost: %d\n", ret);
+      baterr("da9168 control boost err:%d\n", ret);
       return ret;
     }
 
@@ -1877,7 +1861,7 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
   ret = da9168_control_pre_charge_safe_timer(priv, 0x03);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to set pre charge safe timer: %d\n", ret);
+      baterr("set pre charge safe timer err: %d\n", ret);
       return ret;
     }
 
@@ -1922,7 +1906,7 @@ FAR struct battery_charger_dev_s *
   priv = kmm_zalloc(sizeof(struct da9168_dev_s));
   if (!priv)
     {
-      baterr("ERROR: Failed to allocate instance\n");
+      baterr("allocate instance err\n");
       goto err;
     }
 
@@ -1940,7 +1924,7 @@ FAR struct battery_charger_dev_s *
   ret = da9168_reset(priv);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to reset the DA9168: %d\n", ret);
+      baterr("da9168 reset err:%d\n", ret);
       goto err;
     }
 
@@ -1949,7 +1933,7 @@ FAR struct battery_charger_dev_s *
   ret = da9168_detect_device(priv);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to detect_device: %d\n", ret);
+      baterr("da9168 deviceid err:%d\n", ret);
       goto err;
     }
 
@@ -1958,7 +1942,7 @@ FAR struct battery_charger_dev_s *
   ret = da9168_watchdog(priv, false);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to disable DA9168 watchdog: %d\n", ret);
+      baterr("da9168 watchdog err:%d\n", ret);
       goto err;
     }
 
@@ -1967,7 +1951,7 @@ FAR struct battery_charger_dev_s *
   ret = da9168_control_charge(priv, true);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to enable DA9168 charge: %d\n", ret);
+      baterr("da9168 control charge err:%d\n", ret);
       goto err;
     }
 
@@ -1976,7 +1960,7 @@ FAR struct battery_charger_dev_s *
   ret = da9168_control_hiz(priv, false);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to enable DA9168 hiz: %d\n", ret);
+      baterr("da9168 control hiz err:%d\n", ret);
       goto err;
     }
 
@@ -1986,7 +1970,7 @@ FAR struct battery_charger_dev_s *
                            IOEXPANDER_DIRECTION_IN);
   if (ret < 0)
     {
-      baterr("Failed to set direction: %d\n", ret);
+      baterr("set direction err:%d\n", ret);
       goto err;
     }
 
@@ -1994,7 +1978,7 @@ FAR struct battery_charger_dev_s *
                           da9168_interrupt_handler, priv);
   if (!ioephanle)
     {
-      baterr("Failed to attach: %d\n", ret);
+      baterr("attach err:%d\n", ret);
       ret = -EIO;
       goto err;
     }
@@ -2003,7 +1987,7 @@ FAR struct battery_charger_dev_s *
                         IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
   if (ret < 0)
     {
-      baterr("Failed to set option: %d\n", ret);
+      baterr("set option err:%d\n", ret);
       IOEP_DETACH(priv->ioe, da9168_interrupt_handler);
       goto err;
     }
@@ -2011,7 +1995,7 @@ FAR struct battery_charger_dev_s *
   ret = da9168_init(priv, current);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to init DA9168: %d\n", ret);
+      baterr("da9168 init err:%d\n", ret);
       goto err;
     }
 
