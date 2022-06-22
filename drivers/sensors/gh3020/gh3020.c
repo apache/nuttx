@@ -65,6 +65,7 @@
 #define GH3020_SAMPLERATE_MIN    25.0f      /* Minimum sample rate = 25Hz */
 #define GH3020_RDMODE_INTERRPT   0          /* Read data in interrupts */
 #define GH3020_RDMODE_POLLING    1          /* Read data with polling */
+#define GH3020_LED_DRV_SCALE_N   GH3020_LED_DRV_N_FOR_EFUSE_200MA
 
 /* Default settings */
 
@@ -111,6 +112,7 @@ struct gh3020_sensor_s
   bool activated;                        /* If it's activated now. */
   bool activating;                       /* If it will be activated later */
   bool inactivating;                     /* If it will be inactivated later */
+  bool reset_cfg;                    /* If it will reset LED current */
 };
 
 /* Device struct */
@@ -168,6 +170,7 @@ static void gh3020_extract_frame(FAR struct gh3020_dev_s *priv, uint8_t idx,
 /* GH3020 common operation functions */
 
 static void gh3020_push_data(FAR struct gh3020_dev_s *priv);
+static void gh3020_reset_cfg(FAR struct gh3020_dev_s *priv, uint8_t chidx);
 static void gh3020_restart_new_fifowtm(FAR struct gh3020_dev_s *priv,
                                        uint16_t fifowtm);
 static void gh3020_switch_poll2intrpt(FAR struct gh3020_dev_s *priv);
@@ -303,7 +306,7 @@ struct gh3020_reg_s gh3020_reglist_normal[] =
   {0x012c, 0x0f14}, /* DC&BG cancel, ADC0 modifies drv0&1, 512x ADC */
   {0x0130, 0x00aa}, /* All ADCs use 200pF TIA_CF */
   {0x013a, 0x0011}, /* LED drv0 to LED0(to green LED) pin, 14.9mA */
-  {0x013c, 0x0011}, /* LED drv1 to LED4(to green LED) pin, 14.99mA */
+  {0x013c, 0x0011}, /* LED drv1 to LED0(to green LED) pin, 14.99mA */
   {0x013e, 0x0a77}, /* Either LED driver current approximately 9~100mA */
   {0x0142, 0x2744}, /* Slot_cfg2(tunning R): use FIFO, only ADC0 */
   {0x0144, 0x0008}, /* PD3 connected to TIA0 */
@@ -714,16 +717,16 @@ static void gh3020_extract_frame(FAR struct gh3020_dev_s *priv, uint8_t idx,
   if (priv->load_efuse)
     {
       pppg->current = (uint32_t)
-        (GH3020_LED_DRV_VOLTAGE / (priv->led_calibr * 255.0f / led_drv0 +
+        (GH3020_LED_DRV_VOLTAGE_UV / (priv->led_calibr * 255.0f / led_drv0 +
                                    GH3020_LED_DRV0_Y0) +
-         GH3020_LED_DRV_VOLTAGE / (priv->led_calibr * 255.0f / led_drv1 +
+         GH3020_LED_DRV_VOLTAGE_UV / (priv->led_calibr * 255.0f / led_drv1 +
                                    GH3020_LED_DRV1_Y1));
     }
   else
     {
       pppg->current = (uint32_t)
-        (GH3020_LED_DRV_VOLTAGE / (255.0f / led_drv0 + GH3020_LED_DRV0_Y0) +
-         GH3020_LED_DRV_VOLTAGE / (255.0f / led_drv1 + GH3020_LED_DRV1_Y1));
+        (GH3020_LED_DRV_VOLTAGE_UV / (255.0f / led_drv0 + GH3020_LED_DRV0_Y0) +
+         GH3020_LED_DRV_VOLTAGE_UV / (255.0f / led_drv1 + GH3020_LED_DRV1_Y1));
     }
 
   fifo_data_idx = 0;
@@ -803,9 +806,82 @@ static void gh3020_push_data(FAR struct gh3020_dev_s *priv)
         }
     }
 
-  GH3020_DEBUG_LOG("[gh3020] push ppgx-cnt = 0-%u, 1-%u, 2-%u, 5-%u\n",
-                   priv->ppgdatacnt[0], priv->ppgdatacnt[1],
+  GH3020_DEBUG_LOG("[gh3020] ts %llu push: 0-%u, 1-%u, 2-%u, 5-%u\n",
+                   priv->timestamp, priv->ppgdatacnt[0], priv->ppgdatacnt[1],
                    priv->ppgdatacnt[2], priv->ppgdatacnt[3]);
+}
+
+/****************************************************************************
+ * Name: gh3020_reset_cfg
+ *
+ * Description:
+ *   For PPG0/1/2/, reset their LED current and TIA gain config.
+ *
+ * Input Parameters:
+ *   priv - The device struct pointer.
+ *   chidx - PPG channel index, 0, 1, or 2.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Limitations:
+ *   The full scale of LED driver is prior defined.
+ *
+ ****************************************************************************/
+
+static void gh3020_reset_cfg(FAR struct gh3020_dev_s *priv, uint8_t chidx)
+{
+  float current_ma;
+  float resist;
+  uint16_t drv_code;
+  uint8_t i;
+  struct gh3020_reg_s cfg_init[9] =
+    {
+      {0X012e, 0x4444}, /* TIAx 100KOhm */
+      {0x013a, 0x0011}, /* LED drv0 to LED0(to green LED) pin, 14.9mA */
+      {0x013c, 0x0011}, /* LED drv1 to LED0(to green LED) pin, 14.99mA */
+      {0x014a, 0x4441}, /* TIA0 25KOhm, others default 100KOhm */
+      {0x0156, 0x0245}, /* LED drv0 to LED2(to red LED) pin, 59.28mA */
+      {0x0158, 0x0245}, /* LED drv1 to LED2(to red LED) pin, 60.72mA */
+      {0x0166, 0x4441}, /* TIA0 25KOhm, others default 100KOhm */
+      {0x0172, 0x012e}, /* LED drv0 to LED1(to IR LED) pin, 39.87mA */
+      {0x0174, 0x012e}  /* LED drv1 to LED1(to IR LED) pin, 40.52mA */
+    };
+
+  if (chidx > GH3020_PPG2_IDX)
+    {
+      return;
+    }
+
+  /* Reset TIA gain cfg */
+
+  gh3020_spi_writereg(cfg_init[chidx * 3].regaddr,
+                      cfg_init[chidx * 3].regval);
+
+  /* There are 2 LED drivers */
+
+  for (i = 1; i < 3; i++)
+    {
+      drv_code = cfg_init[chidx * 3 + i].regval & 0xff;
+
+      /* Calibrate LED driver code if EFUSE exists */
+
+      if (priv->efuse)
+        {
+          resist = ((i == 1) ? GH3020_LED_DRV0_Y0 : GH3020_LED_DRV1_Y1);
+          current_ma = GH3020_LED_DRV_VOLTAGE_MV /
+                       (255.0f * GH3020_LED_DRV_SCALE_N /
+                        (float)drv_code + resist);
+          drv_code = (uint16_t)(0.5f + (priv->led_calibr * 255.0f *
+                                (float)GH3020_LED_DRV_SCALE_N) /
+                                (GH3020_LED_DRV_VOLTAGE_MV / current_ma -
+                                 resist));
+        }
+
+      gh3020_spi_writereg(cfg_init[chidx * 3 + i].regaddr,
+                          (cfg_init[chidx * 3 + i].regval & 0xff00) |
+                           drv_code);
+    }
 }
 
 /****************************************************************************
@@ -834,6 +910,18 @@ static void gh3020_restart_new_fifowtm(FAR struct gh3020_dev_s *priv,
 
   GH3020_DEBUG_LOG("[gh3020] restart, interval %lu, new wtm %u(data), old "
                    "wtm %u(data)\n", priv->interval, fifowtm, priv->fifowtm);
+
+  /* Reset with initialize and some other operations may cause the device's
+   * interrupt pin to toggle abnormally. If interrupt reading is used,
+   * disable it first.
+   */
+
+  if (priv->fifowtm > 0)
+    {
+      IOEXP_SETOPTION(priv->config->ioedev, priv->config->intpin,
+                      IOEXPANDER_OPTION_INTCFG,
+                      (FAR void *)IOEXPANDER_VAL_DISABLE);
+    }
 
   /* Either old or new FIFO watermark is 0 while the other one is not 0,
    * reading mode should switch between interrupt mode and polling mode.
@@ -880,27 +968,79 @@ static void gh3020_restart_new_fifowtm(FAR struct gh3020_dev_s *priv,
       gh3020_fifo_process();
       gh3020_start_sampling(priv->channelmode);
 
-      /* Switch MCU's reading mode between polling and interrupt. */
+      /* Switch MCU's reading mode between polling and interrupt if needed,
+       * or just enable the interrupt again
+       */
 
       if (fifowtm > 0)
         {
-          gh3020_switch_poll2intrpt(priv);
+          /* If it's polling before, switch to interrupt */
+
+          if (priv->fifowtm == 0)
+            {
+              gh3020_switch_poll2intrpt(priv);
+            }
+
+          /* Otherwise only turn on the interrupt again */
+
+          else
+            {
+              IOEXP_SETOPTION(priv->config->ioedev, priv->config->intpin,
+                              IOEXPANDER_OPTION_INTCFG,
+                              (FAR void *)IOEXPANDER_VAL_RISING);
+            }
         }
-      else
+      else if (fifowtm == 0 && priv->fifowtm > 0)
         {
           gh3020_switch_intrpt2poll(priv);
         }
+
+      GH3020_DEBUG_LOG("[gh3020] reinit+restart\n");
     }
   else
     {
+      /* Seek if any PPG channel need reset LED current */
+
+      for (idx = 0; idx < GH3020_SENSOR_NUM; idx++)
+        {
+          if (priv->sensor[idx].reset_cfg == true)
+            {
+              GH3020_DEBUG_LOG("[gh3020] need reset LED\n");
+              break;
+            }
+        }
+
+      /* If YES, the device must exit low power mode first, then write reg */
+
+      if (idx < GH3020_SENSOR_NUM)
+        {
+          /* Exit low power mode. Note that we dont't enter low power, since
+           * it will enter low power mode when calling gh3020_start_sampling
+           */
+
+          GH3X2X_ExitLowPowerMode();
+          for (idx = 0; idx < GH3020_SENSOR_NUM; idx++)
+            {
+              if (priv->sensor[idx].reset_cfg)
+                {
+                  gh3020_reset_cfg(priv, idx);
+                  priv->sensor[idx].reset_cfg = false;
+                }
+            }
+        }
+
       /* GH3020 remains interrupt/polling, only watermark shall be changed. */
 
-      if (fifowtm > 0 && fifowtm != priv->fifowtm)
+      if (fifowtm > 0)
         {
           gh3020_set_fifowtm(fifowtm);
+          IOEXP_SETOPTION(priv->config->ioedev, priv->config->intpin,
+                          IOEXPANDER_OPTION_INTCFG,
+                          (FAR void *)IOEXPANDER_VAL_RISING);
         }
 
       gh3020_start_sampling(priv->channelmode);
+      GH3020_DEBUG_LOG("[gh3020] restart\n");
     }
 
   SCHED_NOTE_PRINTF("GH3020 starts, fifowtm=%u", fifowtm);
@@ -1221,11 +1361,17 @@ static int gh3020_activate(FAR struct file *filep,
             {
               sensor->activating = true;
               sensor->inactivating = false;
+              if (sensor->activated == false &&
+                  sensor->chidx != GH3020_PPG5_IDX)
+                {
+                  sensor->reset_cfg = true;
+                }
             }
           else
             {
               sensor->inactivating = true;
               sensor->activating = false;
+              sensor->reset_cfg = false;
             }
         }
 
@@ -2206,7 +2352,7 @@ uint16_t gh3020_get_efuse(void)
       tia_efuse = (int8_t)(g_priv->efuse >> GH3020_OFFSET_EFUSE1_TIA);
       led_efuse = (int8_t)(g_priv->efuse & GH3020_MSK_EFUSE_CTRL_RDATA1_LED);
       g_priv->tia_calibr = 1.0f / (1.0f + (float)tia_efuse / 512.0f);
-      g_priv->led_calibr = 1.0f + (float)led_efuse / 255.0f;
+      g_priv->led_calibr = 1.0f + (float)led_efuse / 256.0f;
       g_priv->load_efuse = true;
     }
 
@@ -2513,7 +2659,7 @@ int gh3020_register(int devno, FAR const struct gh3020_config_s *config)
         }
     }
 
-  syslog(LOG_INFO, "[gh3020] driver v2.0.7, build 2022-06-14\n");
+  syslog(LOG_INFO, "[gh3020] driver v2.1.16, build 2022-07-12\n");
 
   return ret;
 

@@ -439,6 +439,13 @@
 
 /* Part3. Enumerations and constants */
 
+/* LED driver scale N for EFUSE calibration */
+
+#define GH3020_LED_DRV_N_FOR_EFUSE_25MA    8       /* The parameter used in 25mA LED driver EFUSE calibration */
+#define GH3020_LED_DRV_N_FOR_EFUSE_50MA    4       /* The parameter used in 50mA LED driver EFUSE calibration */
+#define GH3020_LED_DRV_N_FOR_EFUSE_100MA   2       /* The parameter used in 100mA LED driver EFUSE calibration */
+#define GH3020_LED_DRV_N_FOR_EFUSE_200MA   1       /* The parameter used in 200mA LED driver EFUSE calibration */
+
 /* Factest mode integration time */
 
 #define GH3020_FACTEST_INT_TIME_10_US      0       /* Integration time = 10 us */
@@ -477,7 +484,8 @@
 #define GH3020_ADC_BASELINE                0x800000  /* ADC baseline */
 #define GH3020_LED_DRV0_Y0                 0.1f      /* LED driver0 Y0 = 0.1 Ohm */
 #define GH3020_LED_DRV1_Y1                 0.01f     /* LED driver0 Y1 = 0.01 Ohm */
-#define GH3020_LED_DRV_VOLTAGE             225000.0f /* LED driver source voltage = 225000 uV */
+#define GH3020_LED_DRV_VOLTAGE_UV          225000.0f /* LED driver source voltage = 225000 uV */
+#define GH3020_LED_DRV_VOLTAGE_MV          225.0f    /* LED driver source voltage = 225 mV */
 
 /* Part5 Macros */
 
