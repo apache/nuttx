@@ -40,7 +40,7 @@ RCC         Yes      All registers defined, not all peripherals enabled
 SYSCFG      Yes      All registers defined, GPIO EXTI works, remapping not tested
 USART       Yes
 LPUART      Yes      full speed with HSE works, low power mode with LSE not implemented
-FLASH       Yes      Progmem imlementation - mtd filesystems like smartfs or nxffs work
+FLASH       Yes      Progmem implementation - mtd filesystems like smartfs or nxffs work
 DMA         No
 SRAM2       No
 SPI         No
@@ -138,7 +138,7 @@ FLASH
 -----
 
 Place where program code lives. Part of flash can also be used to create
-small filesystems like nxffs or smartfs to hold persistant data between
+small filesystems like nxffs or smartfs to hold persistent data between
 reboots without the need of attaching external flash or mmc card. Since
 flash has limited number of erases (writes) it's best to hold there only
 data that is no frequently updated (so, configuration is ok, logs are not).

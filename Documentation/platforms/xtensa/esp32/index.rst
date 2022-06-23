@@ -314,7 +314,7 @@ First configure to use the BLE board profile::
     $ ./tools/configure.sh esp32-devkitc:ble
     $ make flash ESPTOOL_PORT=/dev/ttyUSB0
 
-Enter in the NSH shell using your prefered serial console tool and run the scan command::
+Enter in the NSH shell using your preferred serial console tool and run the scan command::
 
     NuttShell (NSH) NuttX-10.2.0
     nsh> ifconfig

@@ -18,7 +18,7 @@ All you need is your machine ``gcc`` working.
 Compiling
 =========
 
-All you need to do is select your desired board profile configuratioon
+All you need to do is select your desired board profile configuration
 (see: nuttx/sim/sim/sim/configs for the listing) ::
 
     $ make distclean

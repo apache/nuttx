@@ -100,8 +100,8 @@ Why after putting my application on ENTRYPOINT it stops to work?
 ----------------------------------------------------------------
 
 When you replace the ENTRYPOINT from "nsh_main" to your application some
-initialization flow are changed, for instace the NSH_ARCHINIT is not
-executed anymore and so some drivers initialiation that are called from
+initialization flow are changed, for instance the NSH_ARCHINIT is not
+executed anymore and so some drivers initialization that are called from
 it also stops to work.
 
 You can fix it enabling the Board Late Initialization that will replace the
