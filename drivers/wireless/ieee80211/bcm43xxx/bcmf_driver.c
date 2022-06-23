@@ -82,6 +82,16 @@
 #define DL_BEGIN              0x0002
 #define DL_END                0x0004
 
+#define WPA_OUI               "\x00\x50\xF2"  /* WPA OUI */
+#define WPA_OUI_LEN           3               /* WPA OUI length */
+#define WPA_OUI_TYPE          1
+#define WPA_VERSION           1               /* WPA version */
+#define WPA_VERSION_LEN       2               /* WPA version length */
+#define WLAN_WPA_OUI          0xf25000
+#define WLAN_WPA_OUI_TYPE     0x01
+#define WLAN_WPA_SEL(x)       (((x) << 24) | WLAN_WPA_OUI)
+#define WLAN_AKM_PSK          0x02
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -113,6 +123,39 @@ enum
   DL_TYPE_UCODE = 1,
   DL_TYPE_CLM = 2
 };
+
+typedef begin_packed_struct struct wpa_cipher_suite
+{
+  uint8_t oui[3];
+  uint8_t type;
+} end_packed_struct wpa_cipher_suite_t;
+
+typedef begin_packed_struct struct wpa_rsn
+{
+  uint16_t            version;
+  wpa_cipher_suite_t  group;
+  uint16_t            scount;
+  wpa_cipher_suite_t  pairwise[0];
+} end_packed_struct wpa_rsn_t;
+
+typedef begin_packed_struct struct wpa_akm
+{
+  uint16_t            scount;
+  wpa_cipher_suite_t  suite[0];
+} end_packed_struct wpa_akm_t;
+
+typedef begin_packed_struct struct
+{
+  uint8_t tag;                  /* TAG */
+  uint8_t length;               /* TAG length */
+  uint8_t oui[3];               /* IE OUI */
+  uint8_t oui_type;             /* OUI type */
+  begin_packed_struct struct
+    {
+      uint8_t low;
+      uint8_t high;
+    } end_packed_struct version;  /* IE version */
+} end_packed_struct wpa_ie_fixed_t;
 
 /****************************************************************************
  * Private Function Prototypes
@@ -623,12 +666,16 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
 {
   FAR struct wl_escan_result *result;
   unsigned int escan_result_len;
-  FAR struct wl_bss_info *curr;
-  FAR struct wl_bss_info *bss;
+  FAR wl_bss_info_t *curr;
+  FAR wl_bss_info_t *bss;
+  unsigned int ie_offset;
+  FAR uint8_t *ie_buffer;
   uint32_t event_len;
   int16_t worst_rssi;
   int worst_entry;
   uint32_t status;
+  bool vaild_bss;
+  int suitelen;
   int i;
   int j;
 
@@ -676,12 +723,13 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
 
   /* Process bss_infos */
 
-  bss = result->bss_info;
-
   for (i = 0; i < result->bss_count; i++)
     {
+      bss = &result->bss_info[i];
+
       worst_entry = -1;
       worst_rssi = 0;
+      vaild_bss = true;
 
       wlinfo("Scan result: <%.32s> "
              "%02x:%02x:%02x:%02x:%02x:%02x "
@@ -694,6 +742,111 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
              bss->BSSID.ether_addr_octet[4],
              bss->BSSID.ether_addr_octet[5],
              bss->RSSI, bss->phy_noise, bss->SNR);
+
+      if (strnlen((FAR const char *)bss->SSID,
+                   sizeof(bss->SSID)) == 0)
+        {
+          continue;
+        }
+
+      ie_offset = 0;
+      ie_buffer = (FAR uint8_t *)bss + bss->ie_offset;
+
+      while (1)
+        {
+          size_t ie_frame_size;
+
+          if (bss->ie_length - ie_offset < 2)
+            {
+              /* Minimum Information element size is 2 bytes */
+
+              break;
+            }
+
+          ie_frame_size = ie_buffer[ie_offset + 1] + 2;
+
+          if (ie_frame_size > bss->ie_length - ie_offset)
+            {
+              /* Entry too big */
+
+              break;
+            }
+
+          switch (ie_buffer[ie_offset])
+            {
+              case WLAN_EID_RSN:
+                {
+                  FAR wpa_rsn_t *rsn = (FAR wpa_rsn_t *)&ie_buffer[ie_offset + 2];
+                  FAR wpa_akm_t *akm;
+
+                  if (rsn->version != WPA_VERSION)
+                    {
+                      goto process_next_bss;
+                    }
+
+                  vaild_bss = false;
+
+                  suitelen = sizeof(*rsn) + rsn->scount *
+                             sizeof(wpa_cipher_suite_t);
+
+                  if (ie_buffer[ie_offset + 1] > suitelen + 2)
+                    {
+                      akm = (FAR wpa_akm_t *)&ie_buffer[ie_offset + suitelen + 2];
+                      for (j = 0; j < akm->scount; j++)
+                        {
+                          uint32_t suite = ntohl(*(FAR uint32_t *)&akm->suite[j]);
+                          if (suite == WLAN_AKM_SUITE_PSK)
+                            {
+                              goto vaild_bss;
+                            }
+                        }
+                    }
+                  break;
+                }
+
+              case WLAN_EID_VENDOR_SPECIFIC:
+                {
+                  FAR wpa_ie_fixed_t *ie = (wpa_ie_fixed_t *)&ie_buffer[ie_offset];
+                  FAR wpa_akm_t *akm;
+                  FAR wpa_rsn_t *rsn;
+
+                  if (memcmp(&ie->oui[0], WPA_OUI "\x01", 4))
+                    {
+                      break;
+                    }
+
+                  vaild_bss = false;
+
+                  rsn = (wpa_rsn_t *)&ie_buffer[ie_offset + sizeof(wpa_ie_fixed_t) - 2];
+                  suitelen = sizeof(wpa_ie_fixed_t) + sizeof(*rsn) + rsn->scount *
+                             sizeof(wpa_cipher_suite_t) - 2;
+                  if (ie_buffer[ie_offset + 1] + 2 > suitelen)
+                    {
+                      akm = (FAR wpa_akm_t *)&ie_buffer[ie_offset + suitelen];
+                      for (j = 0; j < akm->scount; j++)
+                        {
+                          if (*(FAR uint32_t *)&akm->suite[j] == WLAN_WPA_SEL(WLAN_AKM_PSK))
+                            {
+                              goto vaild_bss;
+                            }
+                        }
+                    }
+                  break;
+                }
+
+              default:
+                break;
+            }
+
+          ie_offset += ie_buffer[ie_offset + 1] + 2;
+        }
+
+  if (vaild_bss == false)
+    {
+      goto process_next_bss;
+    }
+
+vaild_bss:
 
       for (j = 0; j < priv->scan_result_entries; j++)
         {
