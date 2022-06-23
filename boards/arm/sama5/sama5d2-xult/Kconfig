@@ -127,8 +127,4 @@ config SAMA5_SDMMC1_WIDTH_D1_D4
 	default y
 	depends on SAMA5_SDMMC1
 
-config SAMA5_SYSTEMRESET
-	bool "Enable system reset - this will enable the nsh reboot command"
-	select BOARDCTL_RESET
-
 endif # ARCH_BOARD_SAMA5D2_XULT
