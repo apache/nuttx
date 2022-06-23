@@ -66,8 +66,8 @@ stlink that provides virtual serial port.
 
 NSH is configured to use LPUART and virtual serial port. After flashing
 you can open /dev/ttyACM0 (may change depending on your system) and nsh
-prompt will be waiting for you there. Serial device does not disapear
-when flashing and reseting board - it can be left opened and flashing
+prompt will be waiting for you there. Serial device does not disappear
+when flashing and resetting board - it can be left opened and flashing
 will work without problems.
 
 Configurations
