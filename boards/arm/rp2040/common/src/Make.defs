@@ -24,6 +24,10 @@ ifeq ($(CONFIG_RP2040_I2C_DRIVER),y)
 CSRCS += rp2040_i2cdev.c
 endif
 
+ifeq ($(CONFIG_RP2040_PWM),y)
+CSRCS += rp2040_pwmdev.c
+endif
+
 ifeq ($(CONFIG_RP2040_SPI_DRIVER),y)
 CSRCS += rp2040_spidev.c
 endif
