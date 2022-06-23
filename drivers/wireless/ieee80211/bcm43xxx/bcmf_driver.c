@@ -1781,3 +1781,33 @@ int bcmf_wl_set_country(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr)
 
   return bcmf_wl_set_country_code(priv, interface, iwr->u.data.pointer);
 }
+
+int bcmf_wl_get_country(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr)
+{
+  uint8_t country[4] =
+    {
+      0
+    };
+
+  uint32_t out_len;
+  int interface;
+  int ret;
+
+  interface = bcmf_wl_get_interface(priv, iwr);
+
+  if (interface < 0 || iwr->u.data.pointer == NULL)
+    {
+      return -EINVAL;
+    }
+
+  out_len = sizeof(country);
+  ret = bcmf_cdc_iovar_request(priv, interface, false,
+                               IOVAR_STR_COUNTRY, country,
+                               &out_len);
+  if (ret == OK)
+    {
+      memcpy(iwr->u.data.pointer, country, 2);
+    }
+
+  return ret;
+}
