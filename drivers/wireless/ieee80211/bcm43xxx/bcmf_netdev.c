@@ -1137,6 +1137,10 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
         ret = bcmf_wl_set_country(priv, (struct iwreq *)arg);
         break;
 
+      case SIOCGIWCOUNTRY:  /* Get country code */
+        ret = bcmf_wl_get_country(priv, (struct iwreq *)arg);
+        break;
+
       default:
         nerr("ERROR: Unrecognized IOCTL command: %x\n", cmd);
         ret = -ENOTTY;  /* Special return value for this case */
