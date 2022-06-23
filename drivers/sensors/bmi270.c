@@ -614,6 +614,13 @@ struct bmi270_dev_s
   int16_t cross_sense;                          /* Gyroscope cross sensitivity coefficient */
   FAR uint8_t *fifo_buff;                       /* FIFO temp buffer */
   bool fifoen;                                  /* Sensor fifo enable */
+
+  /* temporary batch buffer */
+
+  struct sensor_accel
+         temp_xl[CONFIG_SENSORS_BMI270_FIFO_SLOTS_NUMBER * 2];
+  struct sensor_gyro
+         temp_gy[CONFIG_SENSORS_BMI270_FIFO_SLOTS_NUMBER * 2];
 };
 
 /* Structure to store the value of re-mapped axis and its sign */
@@ -3166,10 +3173,6 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv, bool worker)
 {
   axis3bit16_t temp;
   float temperature;
-  struct sensor_accel
-         temp_xl[CONFIG_SENSORS_BMI270_FIFO_SLOTS_NUMBER * 2];
-  struct sensor_gyro
-         temp_gy[CONFIG_SENSORS_BMI270_FIFO_SLOTS_NUMBER * 2];
   bmi270_int_status_0_t regval_int0;
   bmi270_int_status_1_t regval_int1;
   uint8_t data_len = 0;
@@ -3287,13 +3290,13 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv, bool worker)
           sensor_remap_vector_raw16(temp.i16bit, temp.i16bit,
                                     BMI270_VECTOR_REMAP);
 
-          temp_gy[counter_gy].x = (priv->dev[BMI270_GY_IDX].factor
+          priv->temp_gy[counter_gy].x = (priv->dev[BMI270_GY_IDX].factor
                                 / BMI270_HALF_SCALE) * temp.i16bit[0];
-          temp_gy[counter_gy].y = (priv->dev[BMI270_GY_IDX].factor
+          priv->temp_gy[counter_gy].y = (priv->dev[BMI270_GY_IDX].factor
                                 / BMI270_HALF_SCALE) * temp.i16bit[1];
-          temp_gy[counter_gy].z = (priv->dev[BMI270_GY_IDX].factor
+          priv->temp_gy[counter_gy].z = (priv->dev[BMI270_GY_IDX].factor
                                 / BMI270_HALF_SCALE) * temp.i16bit[2];
-          temp_gy[counter_gy].temperature = temperature;
+          priv->temp_gy[counter_gy].temperature = temperature;
           counter_gy++;
         }
 
@@ -3313,16 +3316,16 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv, bool worker)
           sensor_remap_vector_raw16(temp.i16bit, temp.i16bit,
                                     BMI270_VECTOR_REMAP);
 
-          temp_xl[counter_xl].x = (GRAVITY_EARTH * temp.i16bit[0]
+          priv->temp_xl[counter_xl].x = (GRAVITY_EARTH * temp.i16bit[0]
                                 * priv->dev[BMI270_XL_IDX].factor)
                                 / BMI270_HALF_SCALE;
-          temp_xl[counter_xl].y = (GRAVITY_EARTH * temp.i16bit[1]
+          priv->temp_xl[counter_xl].y = (GRAVITY_EARTH * temp.i16bit[1]
                                 * priv->dev[BMI270_XL_IDX].factor)
                                 / BMI270_HALF_SCALE;
-          temp_xl[counter_xl].z = (GRAVITY_EARTH * temp.i16bit[2]
+          priv->temp_xl[counter_xl].z = (GRAVITY_EARTH * temp.i16bit[2]
                                 * priv->dev[BMI270_XL_IDX].factor)
                                 / BMI270_HALF_SCALE;
-          temp_xl[counter_xl].temperature = temperature;
+          priv->temp_xl[counter_xl].temperature = temperature;
           counter_xl++;
         }
     }
@@ -3340,7 +3343,7 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv, bool worker)
 
       for (i = 0; i < counter_xl; i++)
         {
-          temp_xl[i].timestamp
+          priv->temp_xl[i].timestamp
             = priv->timestamp
             - fifo_interval
             * (counter_xl - i - 1);
@@ -3350,7 +3353,7 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv, bool worker)
 
       priv->dev[BMI270_XL_IDX].lower.push_event(
             priv->dev[BMI270_XL_IDX].lower.priv,
-            temp_xl,
+            priv->temp_xl,
             sizeof(struct sensor_accel) * counter_xl);
     }
 
@@ -3363,7 +3366,7 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv, bool worker)
 
       for (i = 0; i < counter_gy; i++)
         {
-          temp_gy[i].timestamp
+          priv->temp_gy[i].timestamp
             = priv->timestamp
             - fifo_interval
             * (counter_gy - i - 1);
@@ -3373,7 +3376,7 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv, bool worker)
 
       priv->dev[BMI270_GY_IDX].lower.push_event(
             priv->dev[BMI270_GY_IDX].lower.priv,
-            temp_gy,
+            priv->temp_gy,
             sizeof(struct sensor_gyro) * counter_gy);
     }
 
