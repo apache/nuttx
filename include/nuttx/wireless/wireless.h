@@ -142,11 +142,13 @@
 
 /* Country code extension */
 
-#define SIOCSIWCOUNTRY      _WLIOC(0x0037)  /* Country code extension */
+#define SIOCSIWCOUNTRY      _WLIOC(0x0037)  /* Set country code */
+#define SIOCGIWCOUNTRY      _WLIOC(0x0038)  /* Get country code */
 
 #define WL_IS80211POINTERCMD(cmd) ((cmd) == SIOCGIWSCAN || \
                                    (cmd) == SIOCSIWSCAN || \
                                    (cmd) == SIOCSIWCOUNTRY || \
+                                   (cmd) == SIOCGIWCOUNTRY || \
                                    (cmd) == SIOCGIWRANGE || \
                                    (cmd) == SIOCSIWENCODEEXT || \
                                    (cmd) == SIOCGIWENCODEEXT || \
@@ -156,7 +158,7 @@
 /* Device-specific network IOCTL commands *******************************************/
 
 #define WL_NETFIRST         0x0000          /* First network command */
-#define WL_NNETCMDS         0x0038          /* Number of network commands */
+#define WL_NNETCMDS         0x0039          /* Number of network commands */
 
 /* Reserved for Bluetooth network devices (see bt_ioctls.h) */
 
