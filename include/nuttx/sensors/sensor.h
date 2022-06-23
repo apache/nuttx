@@ -937,6 +937,19 @@ struct sensor_lowerhalf_s
       sensor_notify_event_t notify_event;
     };
 
+/****************************************************************************
+ * Name: sensor_lock/sensor_unlock
+ *
+ * Description:
+ *   Lower half driver can lock/unlock upper half driver by this interface.
+ *
+ * Input Parameters:
+ *   priv   - Upper half driver handle
+ ****************************************************************************/
+
+  void (*sensor_lock)(void * priv);
+  void (*sensor_unlock)(void * priv);
+
   /* The private opaque pointer to be passed to upper-layer during callback */
 
   FAR void *priv;
