@@ -63,7 +63,7 @@
 #define BCMF_THREAD_NAME       "bcmf"
 #define BCMF_THREAD_STACK_SIZE 2048
 
-#define BCMF_WAITDOG_TIMEOUT_TICK (5*CLOCKS_PER_SEC)
+#define BCMF_LOWPOWER_TIMEOUT_TICK SEC2TICK(2)
 
 /* Chip-common registers */
 
@@ -104,7 +104,6 @@ static int  bcmf_oob_irq(FAR void *arg);
 static int  bcmf_sdio_bus_sleep(FAR struct bcmf_sdio_dev_s *sbus,
                                 bool sleep);
 
-static void bcmf_sdio_waitdog_timeout(wdparm_t arg);
 static int  bcmf_sdio_thread(int argc, char **argv);
 
 static int  bcmf_sdio_find_block_size(unsigned int size);
@@ -132,23 +131,96 @@ static struct bcmf_sdio_frame
 int bcmf_oob_irq(FAR void *arg)
 {
   FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)arg;
+  int semcount;
 
   if (sbus->ready)
     {
       /* Signal bmcf thread */
 
       sbus->irq_pending = true;
-      nxsem_post(&sbus->thread_signal);
+
+      nxsem_get_value(&sbus->thread_signal, &semcount);
+      if (semcount < 0)
+        {
+          nxsem_post(&sbus->thread_signal);
+        }
     }
 
   return OK;
 }
 
+int bcmf_sdio_kso_enable(FAR struct bcmf_sdio_dev_s *sbus, bool enable)
+{
+  uint8_t value;
+  int loops;
+  int ret;
+
+  if (!sbus->ready)
+    {
+      return -EPERM;
+    }
+
+  if (sbus->kso_enable == enable)
+    {
+      return OK;
+    }
+
+  if (enable)
+    {
+      loops = 200;
+      while (--loops > 0)
+        {
+          ret = bcmf_write_reg(sbus, 1, SBSDIO_FUNC1_SLEEPCSR,
+                               SBSDIO_FUNC1_SLEEPCSR_KSO_MASK |
+                               SBSDIO_FUNC1_SLEEPCSR_DEVON_MASK);
+          if (ret != OK)
+            {
+              wlerr("HT Avail request failed %d\n", ret);
+              return ret;
+            }
+
+          nxsig_usleep(100 * 1000);
+          ret = bcmf_read_reg(sbus, 1, SBSDIO_FUNC1_SLEEPCSR, &value);
+          if (ret != OK)
+            {
+              return ret;
+            }
+
+          if (value & (SBSDIO_FUNC1_SLEEPCSR_KSO_MASK |
+                       SBSDIO_FUNC1_SLEEPCSR_DEVON_MASK))
+            {
+              break;
+            }
+        }
+
+      if (loops <= 0)
+        {
+          return -ETIMEDOUT;
+        }
+    }
+  else
+    {
+      ret = bcmf_write_reg(sbus, 1, SBSDIO_FUNC1_SLEEPCSR, 0);
+    }
+
+  if (ret == OK)
+    {
+      sbus->kso_enable = enable;
+    }
+
+  return ret;
+}
+
 int bcmf_sdio_bus_sleep(FAR struct bcmf_sdio_dev_s *sbus, bool sleep)
 {
-  int ret;
-  int loops;
   uint8_t value;
+  int loops;
+  int ret;
+
+  if (!sbus->ready)
+    {
+      return -EPERM;
+    }
 
   if (sbus->sleeping == sleep)
     {
@@ -203,6 +275,12 @@ int bcmf_sdio_bus_sleep(FAR struct bcmf_sdio_dev_s *sbus, bool sleep)
     }
 
   return OK;
+}
+
+int bcmf_sdio_bus_lowpower(FAR struct bcmf_sdio_dev_s *sbus, bool enable)
+{
+  return sbus->support_sr ? bcmf_sdio_kso_enable(sbus, !enable) :
+                            bcmf_sdio_bus_sleep(sbus, enable);
 }
 
 /****************************************************************************
@@ -542,12 +620,9 @@ static int bcmf_sdio_sr_init(FAR struct bcmf_sdio_dev_s *sbus)
 
       /* Enable KeepSdioOn (KSO) bit for normal operation */
 
-      bcmf_read_reg(sbus, 1, SBSDIO_FUNC1_SLEEPCSR, &data);
-      if ((data & SBSDIO_FUNC1_SLEEPCSR_KSO_MASK) == 0)
-        {
-          data |= SBSDIO_FUNC1_SLEEPCSR_KSO_MASK;
-          bcmf_write_reg(sbus, 1, SBSDIO_FUNC1_SLEEPCSR, data);
-        }
+      bcmf_sdio_kso_enable(sbus, true);
+
+      sbus->support_sr = true;
     }
 
   return OK;
@@ -589,6 +664,11 @@ int bcmf_transfer_bytes(FAR struct bcmf_sdio_dev_s *sbus, bool write,
 {
   unsigned int blocklen;
   unsigned int nblocks;
+
+  if (!sbus->ready)
+    {
+      return -EPERM;
+    }
 
   /*  Use rw_io_direct method if len is 1 */
 
@@ -673,6 +753,8 @@ int bcmf_bus_sdio_active(FAR struct bcmf_dev_s *priv, bool active)
       return ret;
     }
 
+  sbus->ready = active;
+
   /* Probe device */
 
   ret = bcmf_probe(sbus);
@@ -690,8 +772,6 @@ int bcmf_bus_sdio_active(FAR struct bcmf_dev_s *priv, bool active)
     }
 
   nxsig_usleep(100 * 1000);
-
-  sbus->ready = active;
 
   ret = bcmf_bus_setup_interrupts(sbus);
   if (ret != OK)
@@ -868,22 +948,12 @@ int bcmf_chipinitialize(FAR struct bcmf_sdio_dev_s *sbus)
   return OK;
 }
 
-void bcmf_sdio_waitdog_timeout(wdparm_t arg)
-{
-  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
-  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
-
-  /* Notify bcmf thread */
-
-  wlinfo("Notify bcmf thread\n");
-  nxsem_post(&sbus->thread_signal);
-}
-
 int bcmf_sdio_thread(int argc, char **argv)
 {
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)
                                 ((uintptr_t)strtoul(argv[1], NULL, 16));
   FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
+  uint32_t timeout = BCMF_LOWPOWER_TIMEOUT_TICK;
   int ret;
 
   wlinfo(" Enter\n");
@@ -894,23 +964,45 @@ int bcmf_sdio_thread(int argc, char **argv)
 
   while (true)
     {
-      /* Wait for event (device interrupt, user request or waitdog timer) */
+      /* Check if RX/TX frames are available */
 
-      ret = nxsem_wait_uninterruptible(&sbus->thread_signal);
-      if (ret < 0)
+      if ((sbus->intstatus & I_HMB_FRAME_IND) == 0 &&
+          (sbus->tx_queue.tail == NULL) &&
+          !sbus->irq_pending)
         {
-          wlerr("Error while waiting for semaphore\n");
-          break;
+          /* Wait for event (device interrupt or user request) */
+
+          if (timeout == UINT_MAX)
+            {
+              ret = nxsem_wait_uninterruptible(&sbus->thread_signal);
+            }
+          else
+            {
+              ret = nxsem_tickwait_uninterruptible(&sbus->thread_signal,
+                                                   timeout);
+            }
+
+          if (ret == -ETIMEDOUT)
+            {
+              /* Turn off clock request. */
+
+              timeout = UINT_MAX;
+              bcmf_sdio_bus_lowpower(sbus, true);
+              continue;
+            }
+          else if (ret < 0)
+            {
+
+              wlerr("Error while waiting for semaphore\n");
+              break;
+            }
         }
 
-      /* Restart the waitdog timer */
-
-      wd_start(&sbus->waitdog, BCMF_WAITDOG_TIMEOUT_TICK,
-               bcmf_sdio_waitdog_timeout, (wdparm_t)priv);
+      timeout = BCMF_LOWPOWER_TIMEOUT_TICK;
 
       /* Wake up device */
 
-      bcmf_sdio_bus_sleep(sbus, false);
+      bcmf_sdio_bus_lowpower(sbus, false);
 
       if (sbus->irq_pending)
         {
@@ -956,24 +1048,6 @@ int bcmf_sdio_thread(int argc, char **argv)
           ret = bcmf_sdpcm_sendframe(priv);
         }
       while (ret == OK);
-
-      /* Check if RX frames are available */
-
-      if (sbus->intstatus & I_HMB_FRAME_IND)
-        {
-          /* Try again */
-
-          wlinfo("Try read again\n");
-          continue;
-        }
-
-      /* If we're done for now, turn off clock request. */
-
-#if 0
-      /* TODO add wakelock */
-
-      bcmf_sdio_bus_sleep(sbus, true);
-#endif
     }
 
   wlinfo("Exit\n");
