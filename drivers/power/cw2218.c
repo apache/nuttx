@@ -213,7 +213,7 @@ static int cw2218_getreg8(FAR struct cw2218_dev_s *priv, uint8_t regaddr,
       else
         {
           nxsig_usleep(1);
-          baterr("ERROR: i2c_write failed: %d retries:%d\n", err, retries);
+          baterr("i2c_write failed:%d retries:%d\n", err, retries);
         }
     }
 
@@ -494,7 +494,7 @@ static inline int cw2218_gettemp(FAR struct cw2218_dev_s *priv, b8_t *temp)
         }
       else /* error occurred */
         {
-          baterr("cw2218 get abnormal temp:%d\n", regval);
+          baterr("get abnormal value:%d\n", regval);
           *temp = CW2218_TEMP_ERROR_DEFAULT_VALUE;
         }
     }
@@ -617,7 +617,7 @@ static int cw2218_write_profile(FAR struct cw2218_dev_s *priv,
 
       if (ret < 0)
         {
-          baterr("ERROR: CW2218 wirte profile error, Error = %d\n", ret);
+          baterr("wirte profile err:%d\n", ret);
           return ret;
         }
     }
@@ -653,7 +653,6 @@ static int cw2218_get_state(FAR struct cw2218_dev_s *priv)
   ret = cw2218_getreg8(priv, CW2218_COMMAND_CONFIG, &reg_val, 1);
   if (ret < 0)
     {
-      baterr("Error: Get CW2218 command config failed, Error = %d\n", ret);
       return ret;
     }
 
@@ -665,7 +664,6 @@ static int cw2218_get_state(FAR struct cw2218_dev_s *priv)
   ret = cw2218_getreg8(priv, CW2218_COMMAND_SOC_ALERT, &reg_val, 1);
   if (ret < 0)
     {
-      baterr("Error: get CW2218 command soc alert failed\n");
       return ret;
     }
 
@@ -727,7 +725,7 @@ static int cw2218_config_start_ic(FAR struct cw2218_dev_s *priv)
   ret = cw2218_sleep(priv);
   if (ret < 0)
     {
-      baterr("ERROR: CW2218 sleep error, Error = %d\n", ret);
+      baterr("sleep err:%d\n", ret);
       return ret;
     }
 
@@ -736,14 +734,13 @@ static int cw2218_config_start_ic(FAR struct cw2218_dev_s *priv)
   ret = cw2218_write_profile(priv, g_config_profile_info);
   if (ret < 0)
     {
-      baterr("ERROR: CW2218 write profile error, Error = %d\n", ret);
       return ret;
     }
 
   ret = cw2218_active(priv);
   if (ret < 0)
     {
-      baterr("ERROR: CW2218 active error, Error = %d\n", ret);
+      baterr("active err:%d\n", ret);
       return ret;
     }
 
@@ -753,14 +750,14 @@ static int cw2218_config_start_ic(FAR struct cw2218_dev_s *priv)
       ret = cw2218_getvoltage(priv, &voltage);
       if (ret < 0)
         {
-          baterr("ERROR: CW2218 get voltage error, Error = %d\n", ret);
+          baterr("get voltage err:%d\n", ret);
           return ret;
         }
 
       ret = cw2218_getsoc(priv, &soc, &soc_h);
       if (ret < 0)
         {
-          baterr("ERROR: CW2218 get soc error, Error = %d\n", ret);
+          baterr("get soc err:%d\n", ret);
           return ret;
         }
 
@@ -775,7 +772,7 @@ static int cw2218_config_start_ic(FAR struct cw2218_dev_s *priv)
           ret = cw2218_sleep(priv);
           if (ret < 0)
             {
-              baterr("ERROR: CW2218 sleep error, Error = %d\n", ret);
+              baterr("sleep err:%d\n", ret);
               return ret;
             }
 
@@ -789,7 +786,7 @@ static int cw2218_config_start_ic(FAR struct cw2218_dev_s *priv)
       ret = cw2218_getsoc(priv, &soc, &soc_h);
       if (ret < 0)
         {
-          baterr("ERROR: CW2218 get soc error, Error = %d\n", ret);
+          baterr("get soc err:%d\n", ret);
           return ret;
         }
 
@@ -804,7 +801,7 @@ static int cw2218_config_start_ic(FAR struct cw2218_dev_s *priv)
       cw2218_sleep(priv);
       if (ret < 0)
         {
-          baterr("ERROR: CW2218 sleep error, Error = %d\n", ret);
+          baterr("sleep err:%d\n", ret);
           return ret;
         }
 
@@ -825,7 +822,6 @@ static int cw2218_config_interrupt(FAR struct cw2218_dev_s *priv)
   ret = cw2218_putreg8(priv, CW2218_COMMAND_INT_CONFIG, reg_val);
   if (ret < 0)
     {
-      baterr("ERROR: CW2218 enable interruptes error, Error = %d\n", ret);
       return ret;
     }
 
@@ -833,7 +829,6 @@ static int cw2218_config_interrupt(FAR struct cw2218_dev_s *priv)
   ret = cw2218_putreg8(priv, CW2218_COMMAND_SOC_ALERT, reg_val);
   if (ret < 0)
     {
-      baterr("ERROR: CW2218 update value error, Error = %d\n", ret);
       return ret;
     }
 
@@ -841,7 +836,6 @@ static int cw2218_config_interrupt(FAR struct cw2218_dev_s *priv)
   ret = cw2218_putreg8(priv, CW2218_COMMAND_TEMP_MAX, reg_val);
   if (ret < 0)
     {
-      baterr("ERROR: CW2218 setting max temp interrupt ret = %d\n", ret);
       return ret;
     }
 
@@ -849,7 +843,6 @@ static int cw2218_config_interrupt(FAR struct cw2218_dev_s *priv)
   ret = cw2218_putreg8(priv, CW2218_COMMAND_TEMP_MIN, reg_val);
   if (ret < 0)
     {
-      baterr("ERROR: CW2218 setting min temp interrupt ret = %d\n", ret);
       return ret;
     }
 
@@ -888,7 +881,7 @@ static void cw2218_worker(FAR void *arg)
   ret = cw2218_capacity((struct battery_gauge_dev_s *)priv, &cap);
   if (ret < 0)
     {
-      baterr("ERROR: CW2218 work get capaity failed, Error = %d\n", ret);
+      baterr("work get cap err:%d\n", ret);
     }
 
   capacity = cap;
@@ -900,7 +893,7 @@ static void cw2218_worker(FAR void *arg)
   ret = cw2218_gettemp(priv, &batt_temp);
   if (ret < 0)
     {
-      baterr("ERROR: CW2218 work get temp failed, Error = %d\n", ret);
+      baterr("work get temp err:%d\n", ret);
     }
 
   if (priv->last_batt_temp != batt_temp)
@@ -913,7 +906,7 @@ static void cw2218_worker(FAR void *arg)
   ret =  cw2218_getcurrent(priv, &current);
   if (ret < 0)
     {
-      baterr("ERROR: CW2218 work get current failed, Error = %d\n", ret);
+      baterr("work get current err:%d\n", ret);
     }
   else
     {
@@ -948,20 +941,20 @@ static int cw2218_init(FAR struct cw2218_dev_s *priv)
   ret = cw2218_get_chipid(priv, &id);
   if (ret < 0)
     {
-      baterr("ERROR: CW2218 read iic error, Error = %d\n", ret);
+      baterr("read id err:%d\n", ret);
       return ret;
     }
 
   if (id != CW2218_DEVICE_ID)
     {
-      baterr("ERROR: Not CW2218 device id\n");
+      baterr("device id mismatch\n");
       return ERROR;
     }
 
   ret = cw2218_get_state(priv);
   if (ret < 0)
     {
-      baterr("ERROR: CW2218 get state error! Error = %d\n", ret);
+      baterr("get state err:%d\n", ret);
       return ret;
     }
 
@@ -971,7 +964,7 @@ static int cw2218_init(FAR struct cw2218_dev_s *priv)
       ret = cw2218_config_start_ic(priv);
       if (ret < 0)
         {
-          baterr("ERROR: CW2218 config start ic failed, Error = %d\n", ret);
+          baterr("config start ic err:%d\n", ret);
           return ret;
         }
     }
@@ -979,7 +972,7 @@ static int cw2218_init(FAR struct cw2218_dev_s *priv)
   ret = cw2218_config_interrupt(priv);
   if (ret < 0)
     {
-      baterr("ERROR: CW2218 get config interrupt! Error = %d\n", ret);
+      baterr("get config interrupt err:%d\n", ret);
       return ret;
     }
 
@@ -1213,7 +1206,7 @@ static void cw2218_start_soc_full_work(FAR struct cw2218_dev_s *priv)
   ret = cw2218_getsoc(priv, &soc, &soc_h);
   if (ret < 0)
     {
-      baterr("ERROR: CW2218 get soc error, Error = %d\n", ret);
+      baterr("get soc err:%d\n", ret);
     }
 
   if (soc >= 99 && !priv->full_work_exit)
@@ -1234,7 +1227,7 @@ static void soc_change_worker(FAR void *arg)
   ret = cw2218_capacity((struct battery_gauge_dev_s *)priv, &cap);
   if (ret < 0)
     {
-      baterr("ERROR: CW2218 work get capaity failed, Error = %d\n", ret);
+      baterr("work get cap err:%d\n", ret);
     }
 
   capacity = cap;
@@ -1293,14 +1286,14 @@ static int cw2218_init_interrupt(FAR struct cw2218_dev_s *priv)
                            IOEXPANDER_DIRECTION_IN);
   if (ret < 0)
     {
-      baterr("Failed to set direction: %d\n", ret);
+      baterr("err to set dir:%d\n", ret);
     }
 
   ioephanle = IOEP_ATTACH(priv->ioe, priv->pin,
                           cw2218_interrupt_handler, priv);
   if (!ioephanle)
     {
-      baterr("Failed to attach cw2218_interrupt_handler\n");
+      baterr("err attach cw2218_interrupt\n");
       ret = -EIO;
     }
 
@@ -1309,7 +1302,7 @@ static int cw2218_init_interrupt(FAR struct cw2218_dev_s *priv)
                         (FAR void *)IOEXPANDER_VAL_FALLING);
   if (ret < 0)
     {
-      baterr("Failed to set option: %d\n", ret);
+      baterr("err set option:%d\n", ret);
       IOEP_DETACH(priv->ioe, cw2218_interrupt_handler);
     }
 
@@ -1343,7 +1336,7 @@ static int gauge_init_thread(int argc, char** argv)
       ret = cw2218_init(priv);
       if (ret < 0)
         {
-          baterr("battery gauge init error thread runing\n");
+          baterr("gauge init thread runing\n");
           priv->gauge_init_status = false;
         }
       else
@@ -1351,13 +1344,12 @@ static int gauge_init_thread(int argc, char** argv)
           ret = cw2218_getreg8(priv, CW2218_COMMAND_TEMP, &regval, 1);
           if (ret < 0)
             {
-              baterr("ERROR: CW2218 get temp error, Error = %d\n", ret);
               return ret;
             }
 
           if (regval != 0)
             {
-              baterr("battery gauge init success\n");
+              baterr("gauge init success\n");
               priv->gauge_init_status = true;
               break;
             }
@@ -1412,7 +1404,7 @@ FAR struct battery_gauge_dev_s *cw2218_initialize(
   priv = (FAR struct cw2218_dev_s *)kmm_zalloc(sizeof(struct cw2218_dev_s));
   if (!priv)
     {
-      baterr("ERROR: Failed to allocate instance\n");
+      baterr("err alloc instance\n");
       goto err;
     }
 
@@ -1430,7 +1422,7 @@ FAR struct battery_gauge_dev_s *cw2218_initialize(
   ret = cw2218_init_interrupt(priv);
   if (ret < 0)
     {
-      baterr("Failed to init_interrupt: %d\n", ret);
+      baterr("err init interrupt:%d\n", ret);
     }
 
   ret = cw2218_init(priv);
@@ -1445,7 +1437,7 @@ FAR struct battery_gauge_dev_s *cw2218_initialize(
                 gauge_init_thread, argv);
       if (ret < 0)
         {
-          baterr("ERROR: Failed to create gauge init thread\n");
+          baterr("err create gauge init thread\n");
           priv->gauge_init_status = false;
           goto err;
         }
