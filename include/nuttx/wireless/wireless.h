@@ -142,12 +142,13 @@
 
 /* Country code extension */
 
-#define SIOCSIWCOUNTRY      _WLIOC(0x0037)  /* Country code extension */
+#define SIOCSIWCOUNTRY      _WLIOC(0x0037)  /* Set country code */
+#define SIOCGIWCOUNTRY      _WLIOC(0x0038)  /* Get country code */
 
 /* WIFI / BT coexist type */
 
-#define SIOCSIWPTAPRIO      _WLIOC(0x0038)  /* Set PTA priority type */
-#define SIOCGIWPTAPRIO      _WLIOC(0x0039)  /* Get PTA priority type */
+#define SIOCSIWPTAPRIO      _WLIOC(0x0039)  /* Set PTA priority type */
+#define SIOCGIWPTAPRIO      _WLIOC(0x003a)  /* Get PTA priority type */
 
 #define WL_IS80211POINTERCMD(cmd) ((cmd) == SIOCGIWSCAN || \
                                    (cmd) == SIOCSIWSCAN || \
@@ -161,7 +162,7 @@
 /* Device-specific network IOCTL commands *******************************************/
 
 #define WL_NETFIRST         0x0000          /* First network command */
-#define WL_NNETCMDS         0x003a          /* Number of network commands */
+#define WL_NNETCMDS         0x003b          /* Number of network commands */
 
 /* Reserved for Bluetooth network devices (see bt_ioctls.h) */
 
