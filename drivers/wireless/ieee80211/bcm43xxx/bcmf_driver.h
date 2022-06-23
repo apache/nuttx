@@ -186,6 +186,7 @@ int bcmf_wl_get_rssi(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
 int bcmf_wl_get_iwrange(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
 
 int bcmf_wl_set_country(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+int bcmf_wl_get_country(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
 
 int bcmf_wl_get_channel(FAR struct bcmf_dev_s *priv, int interface);
 

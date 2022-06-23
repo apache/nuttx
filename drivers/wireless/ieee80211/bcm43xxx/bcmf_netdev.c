@@ -1165,6 +1165,10 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
         ret = bcmf_wl_set_country(priv, (struct iwreq *)arg);
         break;
 
+      case SIOCGIWCOUNTRY:  /* Get country code */
+        ret = bcmf_wl_get_country(priv, (struct iwreq *)arg);
+        break;
+
 #ifdef CONFIG_IEEE80211_BROADCOM_PTA_PRIORITY
       case SIOCGIWPTAPRIO:  /* Get Packet Traffic Arbitration */
         ret = bcmf_wl_get_pta(priv, (struct iwreq *)arg);
