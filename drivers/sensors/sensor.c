@@ -200,6 +200,18 @@ static const struct file_operations g_sensor_fops =
  * Private Functions
  ****************************************************************************/
 
+static void sensor_lock(FAR void *priv)
+{
+  FAR struct sensor_upperhalf_s *upper = priv;
+  nxrmutex_lock(&upper->lock);
+}
+
+static void sensor_unlock(FAR void *priv)
+{
+  FAR struct sensor_upperhalf_s *upper = priv;
+  nxrmutex_unlock(&upper->lock);
+}
+
 static bool sensor_in_range(unsigned long left, unsigned long value,
                             unsigned long right)
 {
@@ -1068,7 +1080,9 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
 
   /* Bind the lower half data structure member */
 
-  lower->priv = upper;
+  lower->priv          = upper;
+  lower->sensor_lock   = sensor_lock;
+  lower->sensor_unlock = sensor_unlock;
 
   if (!lower->ops->fetch)
     {
