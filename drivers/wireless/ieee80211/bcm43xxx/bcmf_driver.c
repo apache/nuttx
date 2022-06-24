@@ -124,27 +124,33 @@ enum
   DL_TYPE_CLM = 2
 };
 
-typedef begin_packed_struct struct wpa_cipher_suite
+begin_packed_struct struct wpa_cipher_suite
 {
   uint8_t oui[3];
   uint8_t type;
-} end_packed_struct wpa_cipher_suite_t;
+} end_packed_struct;
 
-typedef begin_packed_struct struct wpa_rsn
+typedef struct wpa_cipher_suite wpa_cipher_suite_t;
+
+begin_packed_struct struct wpa_rsn
 {
   uint16_t            version;
   wpa_cipher_suite_t  group;
   uint16_t            scount;
   wpa_cipher_suite_t  pairwise[0];
-} end_packed_struct wpa_rsn_t;
+} end_packed_struct;
 
-typedef begin_packed_struct struct wpa_akm
+typedef struct wpa_rsn wpa_rsn_t
+
+begin_packed_struct struct wpa_akm
 {
   uint16_t            scount;
   wpa_cipher_suite_t  suite[0];
-} end_packed_struct wpa_akm_t;
+} end_packed_struct;
 
-typedef begin_packed_struct struct
+typedef struct wpa_akm wpa_akm_t
+
+begin_packed_struct struct wpa_ie_fixed
 {
   uint8_t tag;                  /* TAG */
   uint8_t length;               /* TAG length */
@@ -154,8 +160,11 @@ typedef begin_packed_struct struct
     {
       uint8_t low;
       uint8_t high;
-    } end_packed_struct version;  /* IE version */
-} end_packed_struct wpa_ie_fixed_t;
+    }
+  end_packed_struct version;  /* IE version */
+} end_packed_struct;
+
+typedef struct wpa_ie_fixed wpa_ie_fixed_t
 
 /****************************************************************************
  * Private Function Prototypes
@@ -841,7 +850,8 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
             {
               case WLAN_EID_RSN:
                 {
-                  FAR wpa_rsn_t *rsn = (FAR wpa_rsn_t *)&ie_buffer[ie_offset + 2];
+                  FAR wpa_rsn_t *rsn = (FAR wpa_rsn_t *)
+                                       &ie_buffer[ie_offset + 2];
                   FAR wpa_akm_t *akm;
 
                   if (rsn->version != WPA_VERSION)
@@ -856,10 +866,12 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
 
                   if (ie_buffer[ie_offset + 1] > suitelen + 2)
                     {
-                      akm = (FAR wpa_akm_t *)&ie_buffer[ie_offset + suitelen + 2];
+                      akm = (FAR wpa_akm_t *)
+                            &ie_buffer[ie_offset + suitelen + 2];
                       for (j = 0; j < akm->scount; j++)
                         {
-                          uint32_t suite = ntohl(*(FAR uint32_t *)&akm->suite[j]);
+                          uint32_t suite = ntohl
+                                   (*(FAR uint32_t *)&akm->suite[j]);
                           if (suite == WLAN_AKM_SUITE_PSK)
                             {
                               goto vaild_bss;
@@ -871,7 +883,8 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
 
               case WLAN_EID_VENDOR_SPECIFIC:
                 {
-                  FAR wpa_ie_fixed_t *ie = (wpa_ie_fixed_t *)&ie_buffer[ie_offset];
+                  FAR wpa_ie_fixed_t *ie = (wpa_ie_fixed_t *)
+                                           &ie_buffer[ie_offset];
                   FAR wpa_akm_t *akm;
                   FAR wpa_rsn_t *rsn;
 
@@ -882,15 +895,19 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
 
                   vaild_bss = false;
 
-                  rsn = (wpa_rsn_t *)&ie_buffer[ie_offset + sizeof(wpa_ie_fixed_t) - 2];
-                  suitelen = sizeof(wpa_ie_fixed_t) + sizeof(*rsn) + rsn->scount *
+                  rsn = (wpa_rsn_t *)&ie_buffer[ie_offset +
+                                                sizeof(wpa_ie_fixed_t) - 2];
+                  suitelen = sizeof(wpa_ie_fixed_t) +
+                             sizeof(*rsn) + rsn->scount *
                              sizeof(wpa_cipher_suite_t) - 2;
                   if (ie_buffer[ie_offset + 1] + 2 > suitelen)
                     {
-                      akm = (FAR wpa_akm_t *)&ie_buffer[ie_offset + suitelen];
+                      akm = (FAR wpa_akm_t *)&ie_buffer[ie_offset +
+                                                        suitelen];
                       for (j = 0; j < akm->scount; j++)
                         {
-                          if (*(FAR uint32_t *)&akm->suite[j] == WLAN_WPA_SEL(WLAN_AKM_PSK))
+                          if (*(FAR uint32_t *)&akm->suite[j] ==
+                              WLAN_WPA_SEL(WLAN_AKM_PSK))
                             {
                               goto vaild_bss;
                             }
@@ -2034,11 +2051,25 @@ int bcmf_wl_set_pta_priority(FAR struct bcmf_dev_s *priv, uint32_t prio)
 
   wl_pta_t pta_prio_map[IW_PTA_PRIORITY_WLAN_MAXIMIZED + 1] =
     {
-      {  0, 50, },
-      { 10, 50, },
-      { 25, 50, },
-      { 40, 50, },
-      { 50, 50, },
+    {
+      0, 50,
+    },
+
+    {
+      10, 50,
+    },
+
+    {
+      25, 50,
+    },
+
+    {
+      40, 50,
+    },
+
+    {
+      50, 50,
+    },
     };
 
   if (prio > IW_PTA_PRIORITY_WLAN_MAXIMIZED)
@@ -2050,7 +2081,6 @@ int bcmf_wl_set_pta_priority(FAR struct bcmf_dev_s *priv, uint32_t prio)
     {
       return OK;
     }
-
 
   out_len = sizeof(wl_pta_t);
   ret = bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, true,
