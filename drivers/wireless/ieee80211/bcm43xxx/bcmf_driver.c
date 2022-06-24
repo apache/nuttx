@@ -619,8 +619,9 @@ void bcmf_wl_auth_event_handler(FAR struct bcmf_dev_s *priv,
   status = bcmf_getle32(&event->status);
   reason = bcmf_getle32(&event->reason);
 
-  wlinfo("Got auth event %" PRId32 " status %" PRId32 " from <%s>\n",
-         type, status, event->src_name);
+  wlinfo("Got auth event %" PRId32 " "
+         "status %" PRId32 " reason %" PRId32 " from <%s>\n",
+         type, status, reason, event->src_name);
 
   if (!priv->bc_bifup)
     {
