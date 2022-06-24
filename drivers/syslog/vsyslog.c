@@ -79,6 +79,10 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #endif
 #endif
 
+#ifdef CONFIG_SYSLOG_SCHEDLOCK
+  sched_lock();
+#endif
+
   /* Wrap the low-level output in a stream object and let lib_vsprintf
    * do the work.
    */
@@ -225,6 +229,10 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
   /* Flush and destroy the syslog stream buffer */
 
   syslogstream_destroy(&stream);
+#endif
+
+#ifdef CONFIG_SYSLOG_SCHEDLOCK
+  sched_unlock();
 #endif
 
   return ret;
