@@ -92,8 +92,10 @@ struct bcmf_dev_s
   FAR wl_bss_info_t *scan_result;      /* Temp buffer that holds results */
   unsigned int scan_result_entries;    /* Current entries of temp buffer */
 
-  sem_t auth_signal; /* Authentication notification signal */
-  int   auth_status; /* Authentication status */
+  sem_t *auth_signal;   /* Authentication notification signal */
+  uint32_t auth_status; /* Authentication status */
+  wsec_pmk_t auth_pmk;  /* Authentication pmk */
+  bool auth_pending;    /* Authentication pending */
 
 #ifdef CONFIG_IEEE80211_BROADCOM_LOWPOWER
   struct work_s lp_work;    /* Low power work to work queue */

@@ -55,7 +55,7 @@
 
 #define DOT11_BSSTYPE_ANY         2
 #define BCMF_SCAN_TIMEOUT_TICK    (5*CLOCKS_PER_SEC)
-#define BCMF_AUTH_TIMEOUT_MS      20000  /* was 10000 */
+#define BCMF_AUTH_TIMEOUT_MS      15000  /* was 10000 */
 #define BCMF_SCAN_RESULT_ENTRIES  CONFIG_IEEE80211_BROADCOM_SCAN_RESULT_ENTRIES
 
 /* CLM file is cut into pieces of MAX_CHUNK_LEN.
@@ -248,18 +248,6 @@ FAR struct bcmf_dev_s *bcmf_allocate_device(void)
 
   if ((ret = nxsem_set_protocol(&priv->control_timeout, SEM_PRIO_NONE)) !=
       OK)
-    {
-      goto exit_free_priv;
-    }
-
-  /* Init authentication signal semaphore */
-
-  if ((ret = nxsem_init(&priv->auth_signal, 0, 0)) != OK)
-    {
-      goto exit_free_priv;
-    }
-
-  if ((ret = nxsem_set_protocol(&priv->auth_signal, SEM_PRIO_NONE)) != OK)
     {
       goto exit_free_priv;
     }
@@ -679,29 +667,59 @@ void bcmf_wl_auth_event_handler(FAR struct bcmf_dev_s *priv,
                                 struct bcmf_event_s *event,
                                 unsigned int len)
 {
-  uint32_t type;
+  bool auth = false;
+  int carrier = -1;
+  uint32_t reason;
   uint32_t status;
+  uint32_t type;
 
   type = bcmf_getle32(&event->type);
   status = bcmf_getle32(&event->status);
+  reason = bcmf_getle32(&event->reason);
 
   wlinfo("Got auth event %" PRId32 " status %" PRId32 " from <%s>\n",
          type, status, event->src_name);
 
   bcmf_hexdump((uint8_t *)event, len, (unsigned long)event);
 
-  if (type == WLC_E_SET_SSID && status == WLC_E_STATUS_SUCCESS)
+  if (type == WLC_E_PSK_SUP)
     {
-      /* Auth complete */
-
-      netdev_carrier_on(&priv->bc_dev);
-
-      priv->auth_status = OK;
-      nxsem_post(&priv->auth_signal);
+      carrier = (reason == WLC_E_SUP_OTHER) ? 1 : 0;
+      if (priv->auth_pending)
+        {
+          priv->auth_status = reason;
+          auth = true;
+        }
+    }
+  else if (type == WLC_E_SET_SSID)
+    {
+      carrier = (status == WLC_E_STATUS_SUCCESS) ? 1 : 0;
+      if (!priv->auth_pending || !carrier)
+        {
+          priv->auth_status = status;
+          auth = true;
+        }
     }
   else if (type == WLC_E_DISASSOC)
     {
-      netdev_carrier_off(&priv->bc_dev);
+      carrier = 0;
+    }
+
+  if (carrier >= 0)
+    {
+      if (carrier)
+        {
+          netdev_carrier_on(&priv->bc_dev);
+        }
+      else
+        {
+          netdev_carrier_off(&priv->bc_dev);
+        }
+    }
+
+  if (auth && priv->auth_signal)
+    {
+      nxsem_post(priv->auth_signal);
     }
 }
 
@@ -1776,10 +1794,9 @@ int bcmf_wl_get_rssi(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
 int bcmf_wl_set_encode_ext(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 {
-  int interface;
   struct iw_encode_ext *ext;
-  uint32_t out_len;
   wsec_pmk_t psk;
+  int interface;
 
   interface = bcmf_wl_get_interface(priv, iwr);
 
@@ -1808,18 +1825,20 @@ int bcmf_wl_set_encode_ext(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
   psk.key_len = ext->key_len;
   psk.flags = WSEC_PASSPHRASE;
 
-  out_len = sizeof(psk);
-  return bcmf_cdc_ioctl(priv, interface, true,
-                        WLC_SET_WSEC_PMK, (uint8_t *)&psk, &out_len);
+  priv->auth_pending = true;
+  memcpy(&priv->auth_pmk, &psk, sizeof(psk));
+
+  return OK;
 }
 
 int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 {
-  int ret;
-  int interface;
+  sem_t auth_signal;
   uint32_t out_len;
-  wlc_ssid_t ssid;
   scb_val_t scbval;
+  wlc_ssid_t ssid;
+  int interface;
+  int ret;
 
   interface = bcmf_wl_get_interface(priv, iwr);
 
@@ -1828,39 +1847,63 @@ int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
       return -EINVAL;
     }
 
-  if (iwr->u.essid.flags)
+  out_len = sizeof(scbval);
+  memset(&scbval, 0x0, out_len);
+  ret = bcmf_cdc_ioctl(priv, interface, true,
+                       WLC_DISASSOC, (uint8_t *)&scbval, &out_len);
+  if (ret < 0 || !iwr->u.essid.flags)
     {
-      ssid.ssid_len = iwr->u.essid.length;
-      memcpy(ssid.SSID, iwr->u.essid.pointer, iwr->u.essid.length);
+      goto errout_with_auth;
+    }
 
-      /* Configure AP SSID and trig authentication request */
-
-      out_len = sizeof(ssid);
+  if (priv->auth_pending)
+    {
+      out_len = sizeof(priv->auth_pmk);
       ret = bcmf_cdc_ioctl(priv, interface, true,
-                         WLC_SET_SSID, (uint8_t *)&ssid, &out_len);
+                           WLC_SET_WSEC_PMK,
+                           (uint8_t *)&priv->auth_pmk, &out_len);
       if (ret < 0)
         {
-          wlerr("Associate request failure\n");
-          return ret;
+          goto errout_with_auth;
         }
     }
-  else
-    {
-      out_len = sizeof(scbval);
-      memset(&scbval, 0x0, out_len);
 
-      return bcmf_cdc_ioctl(priv, interface, true,
-                            WLC_DISASSOC, (uint8_t *)&scbval, &out_len);
+  /* Init authentication signal semaphore */
+
+  ret = nxsem_init(&auth_signal, 0, 0);
+  if (ret == OK)
+    {
+      ret = nxsem_set_protocol(&auth_signal, SEM_PRIO_NONE);
     }
 
-  ret = bcmf_sem_wait(&priv->auth_signal, BCMF_AUTH_TIMEOUT_MS);
+  if (ret < OK)
+    {
+      goto errout_with_auth;
+    }
 
-  wlinfo("semwait done ! %d\n", ret);
+  priv->auth_signal = &auth_signal;
+
+  ssid.ssid_len = iwr->u.essid.length;
+  memcpy(ssid.SSID, iwr->u.essid.pointer, iwr->u.essid.length);
+
+  /* Configure AP SSID and trig authentication request */
+
+  out_len = sizeof(ssid);
+  ret = bcmf_cdc_ioctl(priv, interface, true,
+                       WLC_SET_SSID,
+                       (uint8_t *)&ssid, &out_len);
+  if (ret == OK)
+    {
+      ret = bcmf_sem_wait(priv->auth_signal, BCMF_AUTH_TIMEOUT_MS);
+    }
+
+  priv->auth_signal = NULL;
+  nxsem_destroy(&auth_signal);
 
   if (ret < 0)
     {
       wlerr("Associate request timeout\n");
-      return ret;
+      goto errout_with_auth;
     }
 
   switch (priv->auth_status)
@@ -1871,10 +1914,13 @@ int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
       default:
         wlerr("AP join failed %d\n", priv->auth_status);
-        return -EINVAL;
+        ret = -EINVAL;
+        break;
     }
 
-  return OK;
+errout_with_auth:
+  priv->auth_pending = false;
+  return ret;
 }
 
 int bcmf_wl_get_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
