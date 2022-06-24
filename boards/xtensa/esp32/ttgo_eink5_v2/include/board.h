@@ -82,4 +82,12 @@
 #define BOARD_NGPIOIN     1 /* Amount of GPIO Input without Interruption */
 #define BOARD_NGPIOINT    1 /* Amount of GPIO Input w/ Interruption pins */
 
+/* E-INK SSD1680  */
+
+#define DISPLAY_DC      19
+#define DISPLAY_RST     12
+#define DISPLAY_BUSY    4
+#define DISPLAY_CS      5
+#define DISPLAY_SPI_BUS 3
+
 #endif /* __BOARDS_XTENSA_ESP32_TTGO_EINK_5_V2_INCLUDE_BOARD_H */

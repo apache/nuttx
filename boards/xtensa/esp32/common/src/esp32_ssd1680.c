@@ -35,36 +35,27 @@
 #  include <nuttx/video/fb.h>
 #endif
 
+#include <arch/board/board.h>
+
 #include "esp32_gpio.h"
 #include "esp32_spi.h"
 
 #ifdef CONFIG_LCD_SSD1680
 
 /****************************************************************************
- * Private Functions
+ * Private Functions Prototypes
  ****************************************************************************/
 
-#if defined(CONFIG_SSD1680_GPIO_PIN_PWR) && (CONFIG_SSD1680_GPIO_PIN_PWR>=0)
-static bool ssd1680_set_vcc(bool state)
-{
-  esp32_gpiowrite(CONFIG_SSD1680_GPIO_PIN_PWR, state);
-  return true;
-}
+#ifdef DISPLAY_VCC
+static bool ssd1680_set_vcc(bool state);
 #endif
 
-#if defined(CONFIG_SSD1680_GPIO_PIN_RST) && (CONFIG_SSD1680_GPIO_PIN_RST>=0)
-static bool ssd1680_set_rst(bool state)
-{
-  esp32_gpiowrite(CONFIG_SSD1680_GPIO_PIN_RST, state);
-  return true;
-}
+#ifdef DISPLAY_RST
+static bool ssd1680_set_rst(bool state);
 #endif
 
-#if defined(CONFIG_SSD1680_GPIO_PIN_BUSY) && (CONFIG_SSD1680_GPIO_PIN_BUSY>=0)
-static bool ssd1680_check_busy(void)
-{
-  return esp32_gpioread(CONFIG_SSD1680_GPIO_PIN_BUSY);
-}
+#ifdef DISPLAY_BUSY
+static bool ssd1680_check_busy(void);
 #endif
 
 /****************************************************************************
@@ -72,28 +63,59 @@ static bool ssd1680_check_busy(void)
  ****************************************************************************/
 
 static struct lcd_dev_s    *g_lcddev;
-struct ssd1680_priv_s g_ssd1680_priv =
+
+static struct ssd1680_priv_s g_ssd1680_priv =
 {
-#if defined(CONFIG_SSD1680_GPIO_PIN_PWR) && (CONFIG_SSD1680_GPIO_PIN_PWR >= 0)
+#ifdef DISPLAY_VCC
   .set_vcc = ssd1680_set_vcc,
-#else
-  .set_vcc = NULL,
 #endif
-#if defined(CONFIG_SSD1680_GPIO_PIN_RST)  && (CONFIG_SSD1680_GPIO_PIN_RST >= 0)
+#ifdef DISPLAY_RST
   .set_rst = ssd1680_set_rst,
-#else
-  .set_rst = NULL,
 #endif
-#if defined(CONFIG_SSD1680_GPIO_PIN_BUSY) && (CONFIG_SSD1680_GPIO_PIN_BUSY >= 0)
+#ifdef DISPLAY_BUSY
   .check_busy = ssd1680_check_busy,
-#else
-  .check_busy = NULL,
 #endif
 };
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+#ifdef DISPLAY_VCC
+static bool ssd1680_set_vcc(bool state)
+{
+  esp32_gpiowrite(DISPLAY_VCC, state);
+  return true;
+}
+#endif
+
+#ifdef DISPLAY_RST
+static bool ssd1680_set_rst(bool state)
+{
+  esp32_gpiowrite(DISPLAY_RST, state);
+  return true;
+}
+#endif
+
+#ifdef DISPLAY_BUSY
+static bool ssd1680_check_busy(void)
+{
+  return esp32_gpioread(DISPLAY_BUSY);
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: board_lcd_getdev
+ ****************************************************************************/
+
+struct lcd_dev_s *board_lcd_getdev(int devno)
+{
+  return g_lcddev;
+}
 
 /****************************************************************************
  * Name: board_lcd_initialize
@@ -101,50 +123,47 @@ struct ssd1680_priv_s g_ssd1680_priv =
 
 int board_lcd_initialize(void)
 {
+  int ret = ERROR;
+
   struct spi_dev_s *spi;
 
   /* Initialize additional I/O for e-ink display */
 
-#if defined(CONFIG_SSD1680_GPIO_PIN_DTA_CMD) && \
-  (CONFIG_SSD1680_GPIO_PIN_DTA_CMD >= 0)
-  esp32_configgpio(CONFIG_SSD1680_GPIO_PIN_DTA_CMD, OUTPUT);
+  esp32_configgpio(DISPLAY_DC, OUTPUT);
+
+#ifdef DISPLAY_VCC
+  esp32_configgpio(DISPLAY_VCC, OUTPUT);
+  lcdinfo("Using pin %d as VCC control\n", DISPLAY_VCC);
+#else
+  lcdinfo("VCC line is disabled\n");
 #endif
 
-#if defined(CONFIG_SSD1680_GPIO_PIN_PWR) && (CONFIG_SSD1680_GPIO_PIN_PWR >= 0)
-  esp32_configgpio(CONFIG_SSD1680_GPIO_PIN_PWR, OUTPUT);
-  lcdinfo("Using pin %d as PWR control\n", CONFIG_SSD1680_GPIO_PIN_PWR);
+#ifdef DISPLAY_RST
+  esp32_configgpio(DISPLAY_RST, OUTPUT);
+  lcdinfo("Using pin %d as RESET\n", DISPLAY_RST);
 #else
-  lcdinfo("PWR control line is disabled\n");
-#endif
-#if defined(CONFIG_SSD1680_GPIO_PIN_RST) && (CONFIG_SSD1680_GPIO_PIN_RST >= 0)
-  esp32_configgpio(CONFIG_SSD1680_GPIO_PIN_RST, OUTPUT);
-  lcdinfo("Using pin %d as RESET\n", CONFIG_SSD1680_GPIO_PIN_RST);
-#elif
   lcdinfo("RESET line is disabled\n");
 #endif
 
-#if defined(CONFIG_SSD1680_GPIO_PIN_BUSY) && \
-  (CONFIG_SSD1680_GPIO_PIN_BUSY >= 0)
-  esp32_configgpio(CONFIG_SSD1680_GPIO_PIN_BUSY, INPUT | PULLUP);
+#ifdef DISPLAY_BUSY
+  esp32_configgpio(DISPLAY_BUSY, INPUT | PULLUP);
   lcdinfo("Using pin %d for reading busy state\n",
-          CONFIG_SSD1680_GPIO_PIN_BUSY);
-#elif
+          DISPLAY_BUSY);
+#else
   lcdinfo("Read busy line is disabled\n");
 #endif
 
   /* Initialize SPI */
 
-  spi = esp32_spibus_initialize(CONFIG_SSD1680_SPI_BUS);
+  spi = esp32_spibus_initialize(DISPLAY_SPI_BUS);
   if (!spi)
     {
-      lcderr("ERROR: Failed to initialize SPI port %d\n",
-             CONFIG_SSD1680_SPI_BUS);
+      lcderr("ERROR: Failed to initialize SPI port %d\n", DISPLAY_SPI_BUS);
       return -ENODEV;
     }
   else
     {
-      lcdinfo("Using SPI bus %d. SPI is initialized\n",
-              CONFIG_SSD1680_SPI_BUS);
+      lcdinfo("Using SPI bus %d. SPI is initialized\n", DISPLAY_SPI_BUS);
     }
 
   /* Bind the SPI port to the E-PAPER display */
@@ -153,37 +172,30 @@ int board_lcd_initialize(void)
   if (!g_lcddev)
     {
       lcderr("ERROR: Failed to bind SPI port %d to E-paper display\n",
-             CONFIG_SSD1680_SPI_BUS);
+             DISPLAY_SPI_BUS);
       return -ENODEV;
     }
   else
     {
-      lcdinfo("Bound SPI port %d to E-PAPER\n", CONFIG_SSD1680_SPI_BUS);
+      lcdinfo("Bound SPI port %d to E-PAPER\n", DISPLAY_SPI_BUS);
 
-      /* And turn the OLED on.
+      /* And turn the E-PAPER display on in order to clear.
        * Must be because setpower(1) function invokes the chip configuration
        */
 
       g_lcddev->setpower(g_lcddev, CONFIG_LCD_MAXPOWER);
     }
 
-  return OK;
+  return ret;
+}
+
+/****************************************************************************
+ * Name: board_lcd_uninitialize
+ ****************************************************************************/
+
+void board_lcd_uninitialize(void)
+{
+  /* TO-FIX */
 }
 
 #endif
-
-/****************************************************************************
- * Name: board_ssd1680_getdev
- *
- * Description:
- *   Get the SSD1680 device driver instance
- *
- * Returned Value:
- *   Pointer to the instance
- *
- ****************************************************************************/
-
-struct lcd_dev_s *board_ssd1680_getdev(void)
-{
-  return g_lcddev;
-}
