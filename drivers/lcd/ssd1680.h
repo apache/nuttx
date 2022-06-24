@@ -41,7 +41,7 @@
 
 /* Limitations of the current configuration that I hope to fix someday */
 
-#if !defined(CONFIG_LCD_SSD1680_2_13) && !defined(CONFIG_LCD_SSD1680_2_9)
+#if !defined(CONFIG_LCD_SSD1680_2_13_V2) && !defined(CONFIG_LCD_SSD1680_2_90)
 #  error "Unknown and unsupported SSD16800 LCD"
 #endif
 
@@ -97,26 +97,49 @@
 #define SSD1680_READ_OTP 0x2D
 #define SSD1680_READ_STATUS 0x2F
 #define SSD1680_WRITE_LUT 0x32
+#define SSD1680_DUMMY_LINE 0x3A
+#define SSD1680_GATE_TIME 0x3B
 #define SSD1680_WRITE_BORDER 0x3C
 #define SSD1680_SET_RAMXPOS 0x44
 #define SSD1680_SET_RAMYPOS 0x45
 #define SSD1680_SET_RAMXCOUNT 0x4E
 #define SSD1680_SET_RAMYCOUNT 0x4F
+#define SSD1680_SET_ANALOG_BLOCK_CTRL 0x74
+#define SSD1680_SET_DIGITAL_BLOCK_CTRL 0x7E
 #define SSD1680_NOP 0x7F
 
+/* Register Values **********************************************************/
+
+#  define SSD1680_VALUE_G_VOLTAGE     0x15
+#  define SSD1680_VALUE_S_VOLTAGE_1   0x41
+#  define SSD1680_VALUE_S_VOLTAGE_2   0xA8
+#  define SSD1680_VALUE_S_VOLTAGE_3   0x32
+
+#if defined(CONFIG_LCD_SSD1680_2_13_V2) || defined(CONFIG_LCD_SSD1680_2_13_RED)
+#  define SSD1680_VALUE_VCOM          0x55
+#  define SSD1680_VALUE_DUMMY_LINE    0x30
+#  define SSD1680_VALUE_GATE_TIME     0x0A
+#elif defined(CONFIG_LCD_SSD1680_2_90) || defined(CONFIG_LCD_SSD1680_2_90_RED)
+#  define SSD1680_VALUE_VCOM          0xA8
+#  define SSD1680_VALUE_DUMMY_LINE    0x1A
+#  define SSD1680_VALUE_GATE_TIME     0x08
+#else
+#  error "Not supported display"
+#endif
+
 /* Color Properties *********************************************************/
-#if defined(CONFIG_LCD_SSD1680_2_13) || defined(CONFIG_LCD_SSD1680_2_9)
+#if defined(CONFIG_LCD_SSD1680_2_13_V2) || defined(CONFIG_LCD_SSD1680_2_90)
 /* 1 bit per pixel */
 #  define SSD1680_DEV_COLORFMT  FB_FMT_Y1
 #  define SSD1680_DEV_BPP       1
 #  define SSD1680_NO_OF_PLANES  1
-#elif defined (CONFIG_LCD_SSD1680_2_13_RED) || (CONFIG_LCD_SSD1680_2_9_RED)
+#elif defined (CONFIG_LCD_SSD1680_2_13_RED) || (CONFIG_LCD_SSD1680_2_90_RED)
 /* 2 bits per pixel, it is not agrayscale, but indexed colours */
 #  define SSD1680_DEV_COLORFMT  FB_FMT_Y2
 #  define SSD1680_DEV_BPP       2
 #  define SSD1680_NO_OF_PLANES  1
 #else
-#error "Can't prepare macros for not supported display"
+#  error "Can't prepare macros for not supported display"
 #endif
 
 #if SSD1680_DEV_BPP == 1
@@ -135,17 +158,19 @@
  * The portrait mode is default.
  * Display size vs its resolution:
  *   2.13 : 122 / 250
- *   2.9  : 128 / 296
+ *   2.90 : 128 / 296
  */
 
-#if defined(CONFIG_LCD_SSD1680_2_13) || defined(CONFIG_LCD_SSD1680_2_13_RED)
+#if defined(CONFIG_LCD_SSD1680_2_13_V2) || defined(CONFIG_LCD_SSD1680_2_13_RED)
 #  define SSD1680_DEV_GATE_LAYOUT 0x00
 #  define SSD1680_DEV_NATIVE_XRES 122
 #  define SSD1680_DEV_NATIVE_YRES 250
-#elif defined(CONFIG_LCD_SSD1680_2_9) || defined(CONFIG_LCD_SSD1680_2_9_RED)
+#elif defined(CONFIG_LCD_SSD1680_2_90) || defined(CONFIG_LCD_SSD1680_2_90_RED)
 #  define SSD1680_DEV_GATE_LAYOUT 0x00
 #  define SSD1680_DEV_NATIVE_XRES 128
 #  define SSD1680_DEV_NATIVE_YRES 296
+#else
+#  error "Unknown resulution"
 #endif
 
 /* SSD1680 memory write algorithm */
@@ -157,6 +182,8 @@
 #  define SSD1680_VAL_DATA_MODE 0x07
 #elif defined(CONFIG_LCD_RLANDSCAPE)
 #  define SSD1680_VAL_DATA_MODE 0x07
+#else
+#  define SSD1680_VAL_DATA_MODE 0x03
 #endif
 
 /* Rotating screen if the orientation is changed */

@@ -279,7 +279,7 @@ config ARCH_BOARD_TTGO_T5V2_ESP32
 	select LCD_FRAMEBUFFER
 	select LCD_PORTRAIT
 	select LCD_SSD1680
-	select LCD_SSD1680_2_9
+	select LCD_SSD1680_2_90
 	---help---
 		TTGO T5v2 is an ESP32 board with e-ink 2.9 inch display.
 		Display resolution 128/296. More info:
