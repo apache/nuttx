@@ -2245,11 +2245,25 @@ int bcmf_wl_set_pta_priority(FAR struct bcmf_dev_s *priv, uint32_t prio)
 
   wl_pta_t pta_prio_map[IW_PTA_PRIORITY_WLAN_MAXIMIZED + 1] =
     {
-      {  0, 50, },
-      { 10, 50, },
-      { 25, 50, },
-      { 40, 50, },
-      { 50, 50, },
+    {
+      0, 50,
+    },
+
+    {
+      10, 50,
+    },
+
+    {
+      25, 50,
+    },
+
+    {
+      40, 50,
+    },
+
+    {
+      50, 50,
+    },
     };
 
   if (prio > IW_PTA_PRIORITY_WLAN_MAXIMIZED)
@@ -2261,7 +2275,6 @@ int bcmf_wl_set_pta_priority(FAR struct bcmf_dev_s *priv, uint32_t prio)
     {
       return OK;
     }
-
 
   out_len = sizeof(wl_pta_t);
   ret = bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, true,
