@@ -2700,6 +2700,16 @@ static int unionfs_dobind(FAR const char *fspath1, FAR const char *prefix1,
         }
     }
 
+  /* Unlink the contained mountpoint inodes from the pseudo file system.
+   * The inodes will be marked as deleted so that they will be removed when
+   * the reference count decrements to zero in inode_release().  Because we
+   * hold a reference count on the inodes, they will not be deleted until
+   * this logic calls inode_release() in the unionfs_destroy() function.
+   */
+
+  inode_remove(fspath1);
+  inode_remove(fspath2);
+
   *handle = ui;
   return OK;
 
