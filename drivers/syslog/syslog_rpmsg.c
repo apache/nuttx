@@ -45,7 +45,11 @@
  * Pre-processor definitions
  ****************************************************************************/
 
-#define SYSLOG_RPMSG_WORK_DELAY MSEC2TICK(CONFIG_SYSLOG_RPMSG_WORK_DELAY)
+#if CONFIG_SYSLOG_RPMSG_WORK_DELAY
+#  define SYSLOG_RPMSG_WORK_DELAY MSEC2TICK(CONFIG_SYSLOG_RPMSG_WORK_DELAY)
+#else
+#  define SYSLOG_RPMSG_WORK_DELAY MSEC2TICK(100)
+#endif
 
 #define SYSLOG_RPMSG_COUNT(p)       ((p)->head - (p)->tail)
 #define SYSLOG_RPMSG_SPACE(p)       ((p)->size - 1 - SYSLOG_RPMSG_COUNT(p))
@@ -234,10 +238,16 @@ static void syslog_rpmsg_putchar(FAR struct syslog_rpmsg_s *priv, int ch,
 
       /* Start work immediately when data more then 75% and meet '\n' */
 
-      if (space < priv->size / 4 && ch == '\n')
+      if (space < priv->size / 4)
         {
           delay = 0;
         }
+#if CONFIG_SYSLOG_RPMSG_WORK_DELAY == 0
+      else
+        {
+          return;
+        }
+#endif
 
       priv->transfer = true;
       work_queue(HPWORK, &priv->work, syslog_rpmsg_work, priv, delay);
@@ -260,8 +270,7 @@ static void syslog_rpmsg_device_created(FAR struct rpmsg_device *rdev,
                              syslog_rpmsg_ept_cb, NULL);
       if (ret == 0)
         {
-          work_queue(HPWORK, &priv->work,
-                     syslog_rpmsg_work, priv, SYSLOG_RPMSG_WORK_DELAY);
+          work_queue(HPWORK, &priv->work, syslog_rpmsg_work, priv, 0);
         }
     }
 }
@@ -293,8 +302,7 @@ static int syslog_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
   else if (header->command == SYSLOG_RPMSG_RESUME)
     {
       priv->suspend = false;
-      work_queue(HPWORK, &priv->work,
-        syslog_rpmsg_work, priv, SYSLOG_RPMSG_WORK_DELAY);
+      work_queue(HPWORK, &priv->work, syslog_rpmsg_work, priv, 0);
     }
   else if (header->command == SYSLOG_RPMSG_TRANSFER_DONE)
     {
