@@ -647,7 +647,7 @@ static int bcmf_ifup(FAR struct net_driver_s *dev)
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
   irqstate_t flags;
   uint32_t out_len;
-  int ret;
+  int ret = OK;
 
   /* Disable the hardware interrupt */
 
@@ -726,7 +726,7 @@ errout_in_critical_section:
 
   leave_critical_section(flags);
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
