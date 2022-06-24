@@ -578,7 +578,7 @@ static int ili9341_putrun(FAR struct lcd_dev_s *lcd_dev, fb_coord_t row,
                           fb_coord_t col,
                           FAR const uint8_t * buffer, size_t npixels)
 {
-  FAR struct ili9341_dev_s *dev = (FAR struct ili9341_dev_s *)dev;
+  FAR struct ili9341_dev_s *dev = (FAR struct ili9341_dev_s *)lcd_dev;
   FAR struct ili9341_lcd_s *lcd = dev->lcd;
   FAR const uint16_t *src = (FAR const uint16_t *)buffer;
 
