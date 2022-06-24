@@ -23,16 +23,23 @@
  * References:
  *   1. https://www.crystalfontz.com/controllers/SolomonSystech/SSD1680/497/
  *   2. https://www.adafruit.com/product/4947
- *   3. https://github.com/adamkaliszan/TTGO-Electronic-Badge
+ *        (driver for display 2.9 inch mono)
+ *   3. https://github.com/waveshare/e-Paper
+ *        (driver for display 2.13 v2 mono)
 
- * TTGO-Electronic-Badge sequence that display picture:
+ * TTGO-Electronic-Badge mixed with commands found in waveshare library that
+ * display picture. Additional commands from Waveshare library have suffixes
+ * with letters e.g. 1a, 2b
  *      cmd:      dta:
  * Hardware reset and busy wait
  *   1)   0x01      27 01 00
+ *   1a)  0x74      0x54
+ *   2b)  0x7E      0x3B
  *   2)   0x0C      D7 D6 9D         boost soft start
  *   3)   0x2c      A8               write VCom
- *   4)   0x3A      1A           ??? Can't find it in in SSD documentation
- *   5)   0x3B      08           ??? Can't find it in in SSD documentation
+ *   4)   0x3A      0x1A Set dumy line. Can't find it in in SSD documentation
+ *   5)   0x3B      0x08 Set gate time. Can't find it in in SSD documentation
+ *   5a)  0x3C      0x03             write border with data. Only in 2.13 v2
  *   6)   0x11      01               Data Mode
  *   7)   0x44      00 0F
  *   8)   0x45      27 01 00 00
@@ -40,6 +47,7 @@
  *   10)  0x4F      27 01
  *   11)  0x32      50 AA 55 AA 11 00 00 00 00 00 00 00 00 00 00 00
  *                  00 00 00 00 FF FF 1F 00 00 00 00 00 00 00
+ *                  LUT depends on display and step 5a
  *   12)  0x22      C0
  *   13)  0x20
  * Busy Wait
@@ -126,7 +134,7 @@ FAR void *bitscpy_ss(FAR void *dest, FAR const void *src, int src_offset,
 
 /* LCD Data Transfer Methods */
 
-static void ssd1680_busy_wait(FAR struct ssd1680_dev_s *priv);
+static int ssd1680_busy_wait(FAR struct ssd1680_dev_s *priv);
 
 static void ssd1680_snd_cmd_with_data0(FAR struct ssd1680_dev_s *priv,
     uint8_t cmd);
@@ -195,14 +203,11 @@ static int ssd1680_getplaneinfo(FAR struct lcd_dev_s *dev,
 
 static int ssd1680_getpower(struct lcd_dev_s *dev);
 static int ssd1680_setpower(struct lcd_dev_s *dev, int power);
-static int ssd1680_getcontrast(struct lcd_dev_s *dev);
-static int ssd1680_setcontrast(struct lcd_dev_s *dev,
-                               unsigned int contrast);
 
 static int ssd1680_configuredisplay(struct ssd1680_dev_s *priv);
 static int ssd1680_redraw_display(struct ssd1680_dev_s *priv);
-static int ssd1680_redrawfb_row(struct ssd1680_dev_s *priv, int row);
-static int ssd1680_redrawfb(struct ssd1680_dev_s *priv);
+static int ssd1680_update_row(struct ssd1680_dev_s *priv, int row);
+static int ssd1680_update_all(struct ssd1680_dev_s *priv);
 
 /****************************************************************************
  * Private Data
@@ -225,10 +230,10 @@ static uint8_t g_runbuffer[SSD1680_DEV_ROWSIZE];
 
 static const struct fb_videoinfo_s g_videoinfo =
 {
-  .fmt     = SSD1680_DEV_COLORFMT,    /* Color format: B&W */
-  .xres    = SSD1680_DEV_FB_XRES,     /* Horizontal resolution in pixel columns */
-  .yres    = SSD1680_DEV_FB_YRES,     /* Vertical resolution in pixel rows */
-  .nplanes = SSD1680_NO_OF_PLANES,    /* Number of color planes supported */
+  .fmt     = SSD1680_DEV_COLORFMT, /* Color format: B&W */
+  .xres    = SSD1680_DEV_FB_XRES,  /* Horizontal resolution in pixel col */
+  .yres    = SSD1680_DEV_FB_YRES,  /* Vertical resolution in pixel rows */
+  .nplanes = SSD1680_NO_OF_PLANES, /* Number of color planes supported */
 };
 
 /* This is the standard, NuttX Plane information object */
@@ -260,8 +265,10 @@ static const struct lcd_dev_s g_lcd_epaper_dev =
 
   .getpower     = ssd1680_getpower,
   .setpower     = ssd1680_setpower,
-  .getcontrast  = ssd1680_getcontrast,
-  .setcontrast  = ssd1680_setcontrast,
+
+  /* setcontrast could be implemented in future by changing
+   * dispalys voltage and LUT table
+   */
 };
 
 /* This is the OLED driver instance. Only a single device is supported
@@ -272,10 +279,29 @@ static struct ssd1680_dev_s g_epaperdev;
 
 static const uint8_t ssd1680_lut[] =
 {
-  0x50, 0xaa, 0x55, 0xaa, 0x11, 0x00, 0x00, 0x00,
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-  0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0x1f, 0x00,
+#if defined(CONFIG_LCD_SSD1680_2_90)
+  0x50, 0xaa, 0x55, 0xaa, 0x11, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0xff, 0xff, 0x1f, 0x00,
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+#elif defined(CONFIG_LCD_SSD1680_2_13_V2)
+  0x80, 0x60, 0x40, 0x00, 0x00, 0x00, 0x00,   /* LUT0: BB:     VS 0 ~7 */
+  0x10, 0x60, 0x20, 0x00, 0x00, 0x00, 0x00,   /* LUT1: BW:     VS 0 ~7 */
+  0x80, 0x60, 0x40, 0x00, 0x00, 0x00, 0x00,   /* LUT2: WB:     VS 0 ~7 */
+  0x10, 0x60, 0x20, 0x00, 0x00, 0x00, 0x00,   /* LUT3: WW:     VS 0 ~7 */
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,   /* LUT4: VCOM:   VS 0 ~7 */
+
+  0x03, 0x03, 0x00, 0x00, 0x02,               /* TP0 A~D RP0 */
+  0x09, 0x09, 0x00, 0x00, 0x02,               /* TP1 A~D RP1 */
+  0x03, 0x03, 0x00, 0x00, 0x02,               /* TP2 A~D RP2 */
+  0x00, 0x00, 0x00, 0x00, 0x00,               /* TP3 A~D RP3 */
+  0x00, 0x00, 0x00, 0x00, 0x00,               /* TP4 A~D RP4 */
+  0x00, 0x00, 0x00, 0x00, 0x00,               /* TP5 A~D RP5 */
+  0x00, 0x00, 0x00, 0x00, 0x00                /* TP6 A~D RP6 */
+#else
+#  error "Missing LUT table"
+#endif
 };
 
 /****************************************************************************
@@ -293,8 +319,9 @@ static const uint8_t ssd1680_lut[] =
  *   row     - Starting row to write to (range: 0 <= row < yres)
  *   col     - Starting column to write to (range: 0 <= col <= xres-npixels)
  *   buffer  - The buffer containing the run to be written to the LCD
- *   npixels - The number of pixels to write to the LCD
- *             (range: 0 < npixels <= xres-col)
+ *   npixels - The number of pixels to write to the LCD.
+ *             If npixels = 0 then do redraw e-ink screen. If range:
+ *               0 < npixels <= xres-col then update displays memory
  *
  ****************************************************************************/
 
@@ -303,6 +330,16 @@ static int ssd1680_putrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
                           size_t npixels)
 {
   FAR struct ssd1680_dev_s *priv = (FAR struct ssd1680_dev_s *)dev;
+
+  /* TODO Special IOCTL function in lcd_framebuf has to be implemented.
+   * Those function would call ssd1680_putrun with npixels = 0
+   */
+
+  if (npixels == 0)
+    {
+      ssd1680_redraw_display(priv);
+      return OK;
+    }
 
   uint8_t *dst = priv->shadow_fb +
       row * SSD1680_DEV_ROWSIZE + (col >> SSD1680_PDF);
@@ -313,9 +350,16 @@ static int ssd1680_putrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
 
   bitscpy_ds(dst,  dst_start_bitshift, buffer, npixels);
 
-  /* Redraw Screen */
+  /* Write data to memory of display driver */
 
-  ssd1680_redrawfb_row(priv, row);
+  ssd1680_update_row(priv, row);
+
+  /* TODO Remove it after IOCTL refresh implementation */
+
+  if (row == SSD1680_DEV_FB_YRES / 2)
+    {
+      ssd1680_redraw_display(priv);
+    }
 
   return OK;
 }
@@ -459,7 +503,7 @@ static int ssd1680_setpower(FAR struct lcd_dev_s *dev, int power)
             {
               /* Display is completely powered off, not configured anymore. */
 
-            priv->is_conf = false;
+              priv->is_conf = false;
             }
         }
     }
@@ -483,14 +527,14 @@ static int ssd1680_setpower(FAR struct lcd_dev_s *dev, int power)
           ssd1680_reset(priv);
 
           ret = ssd1680_configuredisplay(priv);
-          if (ret < 0)
+          if (ret != OK)
             {
               return ret;
             }
 
           /* Draw the framebuffer */
 
-          ret = ssd1680_redrawfb(priv);
+          ret = ssd1680_update_all(priv);
         }
 
       if (ret < 0)
@@ -505,50 +549,6 @@ static int ssd1680_setpower(FAR struct lcd_dev_s *dev, int power)
 }
 
 /****************************************************************************
- * Name:  ssd1680_getcontrast
- *
- * Description:
- *   Get the current contrast setting (0-CONFIG_LCD_MAXCONTRAST).
- *
- ****************************************************************************/
-
-static int ssd1680_getcontrast(struct lcd_dev_s *dev)
-{
-  struct ssd1680_dev_s *priv = (struct ssd1680_dev_s *)dev;
-  DEBUGASSERT(priv);
-
-  lcdinfo("contrast: %d\n", priv->contrast);
-  return priv->contrast;
-}
-
-/****************************************************************************
- * Name:  ssd1680_setcontrast
- *
- * Description:
- *   Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST).
- *
- ****************************************************************************/
-
-static int ssd1680_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
-{
-  struct ssd1680_dev_s *priv = (struct ssd1680_dev_s *)dev;
-
-  lcdinfo("ignoring set constrast(%d)\n", contrast);
-  DEBUGASSERT(priv);
-
-  /* Verify the contrast value */
-
-#ifdef CONFIG_DEBUG_FEATURES
-  if (contrast > CONFIG_LCD_MAXCONTRAST)
-    {
-      return -EINVAL;
-    }
-#endif
-
-  return OK;
-}
-
-/****************************************************************************
  * Name:  ssd1680_configuredisplay
  *
  * Description:
@@ -558,7 +558,7 @@ static int ssd1680_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 
 static int ssd1680_configuredisplay(struct ssd1680_dev_s *priv)
 {
-  lcdinfo("Start\n");
+  int ret;
 
   /* Software Reset */
 
@@ -567,8 +567,12 @@ static int ssd1680_configuredisplay(struct ssd1680_dev_s *priv)
 
   /* Busy wait */
 
-  ssd1680_busy_wait(priv);
-  lcdinfo("SSD1680 is ready\n");
+  ret = ssd1680_busy_wait(priv);
+  if (ret != OK)
+    {
+      lcderr("Configuration is not ready\n");
+      return ret;
+    }
 
   /* Step 1: Driver Output Control 3 bytes of data:
    * - A[8:0] MUX Gate lines
@@ -576,40 +580,84 @@ static int ssd1680_configuredisplay(struct ssd1680_dev_s *priv)
    * last data byte depends on connection between display and controller
    */
 
-  lcdinfo("Set the driver output controll (0x%02x): %d 0x%02x\n",
-      SSD1680_DRIVER_CONTROL, SSD1680_DEV_NATIVE_YRES - 1,
+  lcdinfo("Set the driver output control (0x%02x): %d 0x%02x\n",
+      SSD1680_DRIVER_CONTROL,
+      SSD1680_DEV_NATIVE_YRES - 1,
       SSD1680_DEV_GATE_LAYOUT);
   ssd1680_snd_cmd_with_data3(priv, SSD1680_DRIVER_CONTROL,
      (uint8_t)((SSD1680_DEV_NATIVE_YRES - 1) & 0xff),
      (SSD1680_DEV_NATIVE_YRES - 1) >> 8,
      SSD1680_DEV_GATE_LAYOUT);
 
+#if defined(CONFIG_LCD_SSD1680_2_13_V2)
+  /* Step 1a: Set analog block control
+   * After reset this register should have proper value
+   */
+
+  lcdinfo("Set analog block control (0x74): 0x54\n");
+  ssd1680_snd_cmd_with_data1(priv, SSD1680_SET_ANALOG_BLOCK_CTRL, 0x54);
+
+  /* Step 1b: Set digital block control
+   * After reset this register should have proper value
+   */
+
+  lcdinfo("Set digital block control (0x7e): 0x3b\n");
+  ssd1680_snd_cmd_with_data1(priv, SSD1680_SET_DIGITAL_BLOCK_CTRL, 0x3b);
+#endif
+
   /* Step 2: SSD1680_BOOST_SOFTSTART 0x0C D7 D6 9D */
 
-  lcdinfo("Set boost soft start\n");
+  lcdinfo("Set boost soft start (0x%02x): 0x%02x, 0x%02x, 0x%02x\n",
+      SSD1680_BOOST_SOFTSTART, 0xd7, 0xd6, 0x9d);
   ssd1680_snd_cmd_with_data3(priv, SSD1680_BOOST_SOFTSTART,
       0xd7, 0xd6, 0x9d);
 
-  /* Step 3: Vcom Voltage SSD1680_WRITE_VCOM, 0x36 */
+  /* Step 3: Vcom Voltage SSD1680_WRITE_VCOM */
 
-  lcdinfo("Set Vcom voltage (0x%02x): 0x%2x\n", SSD1680_WRITE_VCOM, 0xa8);
-  ssd1680_snd_cmd_with_data1(priv, SSD1680_WRITE_VCOM, 0xa8);
+  lcdinfo("Set Vcom voltage (0x%02x): 0x%02x\n", SSD1680_WRITE_VCOM,
+      SSD1680_VALUE_VCOM);
+  ssd1680_snd_cmd_with_data1(priv, SSD1680_WRITE_VCOM, SSD1680_VALUE_VCOM);
+
+  lcdinfo("Set Gate voltage (0x%02x): 0x%02x\n", SSD1680_GATE_VOLTAGE,
+      SSD1680_VALUE_G_VOLTAGE);
+  ssd1680_snd_cmd_with_data1(priv, SSD1680_GATE_VOLTAGE,
+      SSD1680_VALUE_G_VOLTAGE);
+
+  lcdinfo("Set Source voltage (0x%02x): 0x%02x, 0x%02x, 0x%02x\n",
+      SSD1680_SOURCE_VOLTAGE, SSD1680_VALUE_S_VOLTAGE_1,
+      SSD1680_VALUE_S_VOLTAGE_2, SSD1680_VALUE_S_VOLTAGE_3);
+  ssd1680_snd_cmd_with_data3(priv, SSD1680_SOURCE_VOLTAGE,
+      SSD1680_VALUE_S_VOLTAGE_1, SSD1680_VALUE_S_VOLTAGE_2,
+      SSD1680_VALUE_S_VOLTAGE_3);
 
   /* Step 4: Sending undocumented command: 0x3a with data 1A */
 
-  lcdinfo("Set (0x%02x): 0x%2x\n", 0x3a, 0x1a);
-  ssd1680_snd_cmd_with_data1(priv, 0x3a, 0x1a);
+  lcdinfo("Set dummy line (0x%02x): 0x%02x\n", SSD1680_DUMMY_LINE,
+          SSD1680_VALUE_DUMMY_LINE);
+  ssd1680_snd_cmd_with_data1(priv, SSD1680_DUMMY_LINE,
+                             SSD1680_VALUE_DUMMY_LINE);
 
   /* Step 5: Sending undocumented command: 0x3b with data 08 */
 
-  lcdinfo("Set (0x%02x): 0x%2x\n", 0x3b, 0x08);
-  ssd1680_snd_cmd_with_data1(priv, 0x3b, 0x08);
+  lcdinfo("Set gate time (0x%02x): 0x%02x\n", SSD1680_GATE_TIME,
+          SSD1680_VALUE_GATE_TIME);
+  ssd1680_snd_cmd_with_data1(priv, SSD1680_GATE_TIME,
+          SSD1680_VALUE_GATE_TIME);
 
-  /* Step 6: Data entry mode SSD1680_DATA_MODE, 0x03
-   * TODO w arduino była wartość 0x01
+#if defined(CONFIG_LCD_SSD1680_2_13_V2)
+  /* Step 5a: Sending command write border with data 0x03:
+   *  - Follow LUT (Output VCOM @ RED)
+   *  - Transition setting for VBD: LUT3
    */
 
-  lcdinfo("Set data entry mode (0x%02x): 0x%2x\n",
+  lcdinfo("Set Border Waveform (0x%02x): 0x%02x\n",
+      SSD1680_WRITE_BORDER, 0x03);
+  ssd1680_snd_cmd_with_data1(priv, SSD1680_WRITE_BORDER, 0x03);
+#endif
+
+  /* Step 6: Data entry mode SSD1680_DATA_MODE, 0x03 */
+
+  lcdinfo("Set data entry mode (0x%02x): 0x%02x\n",
       SSD1680_DATA_MODE, SSD1680_VAL_DATA_MODE);
   ssd1680_snd_cmd_with_data1(priv,
       SSD1680_DATA_MODE, SSD1680_VAL_DATA_MODE);
@@ -621,11 +669,9 @@ static int ssd1680_configuredisplay(struct ssd1680_dev_s *priv)
   ssd1680_snd_cmd_with_data2(priv, SSD1680_SET_RAMXPOS,
       0x00, (SSD1680_DEV_X_ROUND_UP >> 3)-1);
 
-  /* Step 8: Set ram Y start/end postion
-   * TODO w adruino zamieniona start ze stopem
-   */
+  /* Step 8: Set ram Y start/end postion */
 
-  lcdinfo("Set ram Y start/end position (%x): 0, %d\n",
+  lcdinfo("Set ram Y start/end position (0x%02x): 0, %d\n",
       SSD1680_SET_RAMYPOS, SSD1680_DEV_NATIVE_YRES - 1);
   ssd1680_snd_cmd_with_data4(priv, SSD1680_SET_RAMYPOS,
       0x00, 0x00,
@@ -634,35 +680,49 @@ static int ssd1680_configuredisplay(struct ssd1680_dev_s *priv)
 
   /* Step 9: SSD1680_SET_RAMXCOUNT, 0 */
 
+  lcdinfo("Set ram X count (0x%02x): 0\n", SSD1680_SET_RAMXCOUNT);
   ssd1680_snd_cmd_with_data1(priv, SSD1680_SET_RAMXCOUNT, 0x00);
 
   /* Step 10: SSD1680_SET_RAMYCOUNT, 0, 0 */
 
+  lcdinfo("Set ram Y count (0x%02x): 0\n", SSD1680_SET_RAMYCOUNT);
   ssd1680_snd_cmd_with_data2(priv, SSD1680_SET_RAMYCOUNT, 0x00, 0x00);
 
   /* Step 11: Lookup table */
 
-  lcdinfo("Write lookup table (%d bytes)\n", sizeof (ssd1680_lut));
+  lcdinfo("Write lookup table (0x%02x): (%d bytes)\n", SSD1680_WRITE_LUT,
+      sizeof (ssd1680_lut));
   ssd1680_snd_cmd_with_data(priv, SSD1680_WRITE_LUT, ssd1680_lut,
       sizeof (ssd1680_lut));
 
   /* Step 12: Write sequence */
 
-  lcdinfo("Write controll sequence 0x%02x\n", 0xc0);
-  ssd1680_snd_cmd_with_data1(priv, SSD1680_DISP_CTRL2, 0xc0);
+  lcdinfo("Write control sequence (0x%02x): 0x%02x\n", SSD1680_DISP_CTRL2,
+      0xc0);
+  ssd1680_snd_cmd_with_data1(priv, SSD1680_DISP_CTRL2, 0xc7);
 
   /* Step 13: Master Activate and busy wait */
 
+  lcdinfo("Write master activate (0x%02x) command\n",
+      SSD1680_MASTER_ACTIVATE);
   ssd1680_snd_cmd_with_data0(priv, SSD1680_MASTER_ACTIVATE);
-  ssd1680_busy_wait(priv);
 
-  lcdinfo("Configuration ready\n");
-  priv->is_conf = true;
-  return OK;
+  ret = ssd1680_busy_wait(priv);
+  if (ret == OK)
+    {
+      lcdinfo("Configuration ready\n");
+      priv->is_conf = true;
+    }
+  else
+    {
+      lcderr("Configuration is not ready\n");
+    }
+
+  return ret;
 }
 
 /****************************************************************************
- * Name:  ssd1680_redrawfb
+ * Name:  ssd1680_update_all
  *
  * Description:
  *   Redraw full framebuffer to display
@@ -671,69 +731,28 @@ static int ssd1680_configuredisplay(struct ssd1680_dev_s *priv)
  *   priv   - Reference to private driver structure
  *
  * Assumptions:
- *   Caller has selected the OLED section.
+ *   E-ink is slow, so we don't need to optimize code in order to send all
+ *   lines at once using DMA. Now function sends each line in separate
+ *   function calls. E-ink driver lets to send all frame buffer using one
+ *   transmission (only in portrait and reverse portrait mode)
  *
  ****************************************************************************/
 
-static int ssd1680_redrawfb(struct ssd1680_dev_s *priv)
+static int ssd1680_update_all(struct ssd1680_dev_s *priv)
 {
-  /* Step 9: SSD1680_SET_RAMXCOUNT, 0 */
-
-  ssd1680_snd_cmd_with_data1(priv, SSD1680_SET_RAMXCOUNT, 0x00);
-
-  /* Step 10: SSD1680_SET_RAMYCOUNT, 0, 0 */
-
-#if defined(CONFIG_LCD_PORTRAIT) | defined(CONFIG_LCD_RLANDSCAPE)
-  ssd1680_snd_cmd_with_data2(priv, SSD1680_SET_RAMYCOUNT, 0x00, 0x00);
-#elif defined (CONFIG_LCD_LANDSCAPE)
-  ssd1680_snd_cmd_with_data2(priv, SSD1680_SET_RAMYCOUNT, 0, 0);
-#elif defined (CONFIG_LCD_RORTRAIT)
-#error "Not implemented LSC orientation"
-#endif
-
-  /* Step 14: */
-
-#if SSD1680_DEV_BPP == 1
-#if defined(CONFIG_LCD_PORTRAIT) || defined(CONFIG_LCD_RPORTRAIT)
-  ssd1680_snd_cmd_with_data(priv,
-    SSD1680_WRITE_RAM1, priv->shadow_fb, SSD1680_DEV_FBSIZE);
-#else
-  int line;
-#  if SSD1680_DEV_BPP == 1
-  for (line = 0; line < SSD1680_DEV_FB_YRES; line += 8)
+  int row;
+  for (row = 0; row < SSD1680_DEV_FB_YRES; row++)
     {
-      ssd1680_snd_cmd_with_data_bitstrip(priv, SSD1680_WRITE_RAM1,
-          priv->shadow_fb + line * SSD1680_DEV_NATIVE_YRES,
-          SSD1680_DEV_NATIVE_YRES, SSD1680_DEV_ROWSIZE);
+      ssd1680_update_row(priv, row);
     }
-#  else
-#    error "3 color mode not implemented yet"
-#  endif
-#endif
 
-#else
-  ssd1680_snd_cmd_with_data_even_bits(priv,
-    SSD1680_WRITE_RAM1, priv->shadow_fb, SSD1680_DEV_FBSIZE);
-
-  /* Step 9: SSD1680_SET_RAMXCOUNT, 0 */
-
-  ssd1680_snd_cmd_with_data1(priv, SSD1680_SET_RAMXCOUNT, 0x00);
-
-  /* Step 10: SSD1680_SET_RAMYCOUNT, 0, 0 */
-
-  ssd1680_snd_cmd_with_data2(priv, SSD1680_SET_RAMYCOUNT, 0x00, 0x00);
-
-  /* Step 14b: */
-
-  ssd1680_snd_cmd_with_data_odd_bits(priv,
-    SSD1680_WRITE_RAM2, priv->shadow_fb, SSD1680_DEV_FBSIZE);
-#endif
   ssd1680_redraw_display(priv);
   return OK;
 }
 
 static int ssd1680_redraw_display(struct ssd1680_dev_s *priv)
 {
+  int ret;
   /* Step 15:
    * Set control register 2.
    * 1 byte of data with following bits:
@@ -752,7 +771,7 @@ static int ssd1680_redraw_display(struct ssd1680_dev_s *priv)
   /* Step 16: */
 
   ssd1680_snd_cmd_with_data0(priv, SSD1680_MASTER_ACTIVATE);
-  ssd1680_busy_wait(priv);
+  ret = ssd1680_busy_wait(priv);
 
   /* Step 18: */
 
@@ -763,10 +782,19 @@ static int ssd1680_redraw_display(struct ssd1680_dev_s *priv)
   ssd1680_snd_cmd_with_data0(priv, SSD1680_MASTER_ACTIVATE);
   ssd1680_busy_wait(priv);
 
+  if (ret != OK)
+    {
+      lcderr("FAILED!!! Busy state timeout\n");
+    }
+  else
+    {
+      lcdinfo("Done\n");
+    }
+
   return OK;
 }
 
-static int ssd1680_redrawfb_row(struct ssd1680_dev_s *priv, int row)
+static int ssd1680_update_row(struct ssd1680_dev_s *priv, int row)
 {
 #if defined(CONFIG_LCD_PORTRAIT) || defined(CONFIG_LCD_RPORTRAIT)
   uint8_t *src = priv->shadow_fb + row * SSD1680_DEV_ROWSIZE;
@@ -788,10 +816,6 @@ static int ssd1680_redrawfb_row(struct ssd1680_dev_s *priv, int row)
     SSD1680_WRITE_RAM2, src, SSD1680_DEV_FBSIZE);
 #endif
 
-  if (row == SSD1680_DEV_FB_YRES - 1)
-    {
-      ssd1680_redraw_display(priv);
-    }
 #else
   int row_group = (row >> 3) << 3;
   uint8_t *src = priv->shadow_fb + row_group * SSD1680_DEV_ROWSIZE;
@@ -799,11 +823,11 @@ static int ssd1680_redrawfb_row(struct ssd1680_dev_s *priv, int row)
   ssd1680_snd_cmd_with_data1(priv, SSD1680_SET_RAMXCOUNT, row >> 3);
   ssd1680_snd_cmd_with_data2(priv, SSD1680_SET_RAMYCOUNT, 0, 0);
 
-#if SSD1680_DEV_BPP == 1
+#  if SSD1680_DEV_BPP == 1
   ssd1680_snd_cmd_with_data_bitstrip(priv, SSD1680_WRITE_RAM1, src,
       SSD1680_DEV_NATIVE_YRES, SSD1680_DEV_ROWSIZE);
-#else
-#error "Landscape mode with 3 colors is not implemented"
+#  else
+#  error "Landscape mode with 3 colors is not implemented"
   /* TODO send ssd1680_snd_cmd_with_data_even_bits_bitstrip
    * (priv, SSD1680_WRITE_RAM1, src, SSD1680_DEV_NATIVE_YRES,
    *  SSD1680_DEV_ROWSIZE);
@@ -816,14 +840,8 @@ static int ssd1680_redrawfb_row(struct ssd1680_dev_s *priv, int row)
    *  SSD1680_WRITE_RAM2, src, SSD1680_DEV_NATIVE_YRESSSD1680_DEV_ROWSIZE, );
    */
 
+#  endif
 #endif
-
-  if (row == SSD1680_DEV_FB_YRES - 1)
-    {
-      ssd1680_redraw_display(priv);
-    }
-#endif
-
   return OK;
 }
 
@@ -878,19 +896,29 @@ static void ssd1680_select(FAR struct ssd1680_dev_s *priv, bool cs)
     }
 }
 
-static void ssd1680_busy_wait(FAR struct ssd1680_dev_s *priv)
+static int ssd1680_busy_wait(FAR struct ssd1680_dev_s *priv)
 {
+  int max_wait_time = 200;
   if ((priv->board_priv != NULL) && (priv->board_priv->check_busy != NULL))
     {
-      while (priv->board_priv->check_busy())
+      while (priv->board_priv->check_busy() && max_wait_time-- > 0)
         {
-          nxsig_usleep(1);
+          nxsig_usleep(1000);
         }
     }
   else
     {
-      nxsig_usleep(2000000);
+      nxsig_usleep(max_wait_time * 1000);
     }
+
+  if (max_wait_time == 0)
+    {
+      lcderr("Timout. Ignoring Busy state... "
+             "Display is probably not ready\n");
+      return ERROR;
+    }
+
+  return OK;
 }
 
 static void ssd1680_snd_cmd_with_data0(FAR struct ssd1680_dev_s *priv,
@@ -1250,6 +1278,7 @@ inline static void ssd1680_cmddata(FAR struct ssd1680_dev_s *priv, bool cmd)
 FAR struct lcd_dev_s *ssd1680_initialize(FAR struct spi_dev_s *dev,
                           FAR const struct ssd1680_priv_s *board_priv)
 {
+  int ret;
   FAR struct ssd1680_dev_s *priv = &g_epaperdev;
   DEBUGASSERT(dev);
 
@@ -1269,11 +1298,16 @@ FAR struct lcd_dev_s *ssd1680_initialize(FAR struct spi_dev_s *dev,
   /* Initialize the framebuffer */
 
   memset(priv->shadow_fb, SSD1680_Y1_BLACK & 1 ?
-    0xff : 0x00, SSD1680_DEV_FBSIZE);
+         0xff : 0x00, SSD1680_DEV_FBSIZE);
 
   /* Power on and configure display */
 
-  ssd1680_setpower(&priv->dev, true);
+  ret = ssd1680_setpower(&priv->dev, true);
+
+  if (ret != OK)
+    {
+      return NULL;
+    }
 
   return &priv->dev;
 }

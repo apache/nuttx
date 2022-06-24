@@ -1532,18 +1532,18 @@ if LCD_SSD1680
 
 choice
 	prompt "Display type and size"
-	default LCD_SSD1680_2_9
+	default LCD_SSD1680_2_90
 
-config LCD_SSD1680_2_13
-	bool "2.13 inch 122/250 mono"
+config LCD_SSD1680_2_13_V2
+	bool "2.13 inch 122/250 mono v2"
 
 config LCD_SSD1680_2_13_RED
 	bool "2.13 inch 122/250 tri color (red)"
 
-config LCD_SSD1680_2_9
+config LCD_SSD1680_2_90
 	bool "2.9 inch 128/296 mono"
 
-config LCD_SSD1680_2_9_RED
+config LCD_SSD1680_2_90_RED
 	bool "2.9 inch 128/296 tri color (red)"
 
 endchoice # Display size
