@@ -140,7 +140,7 @@ begin_packed_struct struct wpa_rsn
   wpa_cipher_suite_t  pairwise[0];
 } end_packed_struct;
 
-typedef struct wpa_rsn wpa_rsn_t
+typedef struct wpa_rsn wpa_rsn_t;
 
 begin_packed_struct struct wpa_akm
 {
@@ -148,7 +148,7 @@ begin_packed_struct struct wpa_akm
   wpa_cipher_suite_t  suite[0];
 } end_packed_struct;
 
-typedef struct wpa_akm wpa_akm_t
+typedef struct wpa_akm wpa_akm_t;
 
 begin_packed_struct struct wpa_ie_fixed
 {
@@ -164,7 +164,7 @@ begin_packed_struct struct wpa_ie_fixed
   end_packed_struct version;  /* IE version */
 } end_packed_struct;
 
-typedef struct wpa_ie_fixed wpa_ie_fixed_t
+typedef struct wpa_ie_fixed wpa_ie_fixed_t;
 
 /****************************************************************************
  * Private Function Prototypes
