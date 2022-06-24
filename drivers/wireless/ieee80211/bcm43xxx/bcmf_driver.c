@@ -1967,6 +1967,7 @@ int bcmf_wl_get_country(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
   if (ret == OK)
     {
       memcpy(iwr->u.data.pointer, country, 2);
+      ((uint8_t *)iwr->u.data.pointer)[2] = '\0';
     }
 
   return ret;
