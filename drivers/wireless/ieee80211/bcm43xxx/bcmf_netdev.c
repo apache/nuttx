@@ -728,7 +728,7 @@ errout_in_critical_section:
 
   leave_critical_section(flags);
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
