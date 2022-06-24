@@ -1557,8 +1557,8 @@ config SSD1680_SPIMODE
 
 config SSD1680_FREQUENCY
 	int "SSD1680 SPI Frequency"
-	default 2000000
-	range 100000 2000000
+	default 5000000
+	range 100000 20000000
 	---help---
 		Selects the SPI bus frequency used with the SSD1680 device. 
 		Max for read mode is 2.5 MHz, for write mode is 20 HHz

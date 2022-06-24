@@ -31,10 +31,6 @@ CSRCS += esp32_reset.c
 endif
 endif
 
-ifeq ($(CONFIG_VIDEO_FB),y)
-  CSRCS += esp32_lcd_ssd1680.c
-endif
-
 ifeq ($(CONFIG_MMCSD),y)
 CSRCS += esp32_mmcsd.c
 endif

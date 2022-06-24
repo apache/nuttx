@@ -45,8 +45,6 @@
 
 #define SND 25
 
-/* E-INK SSD1680 Out */
-
 /* LED
  *
  * This is an externally connected LED used for testing.
