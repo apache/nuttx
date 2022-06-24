@@ -424,7 +424,7 @@ static int stk31850_i2c_read(FAR struct stk31850_dev_s *priv,
   ret = i2c_writeread(priv->config->i2c, &config, &regaddr, 1, regval, 1);
   if (ret < 0)
     {
-      snerr("I2C writeread failed: %d\n", ret);
+      snerr("stk31850 I2C r fail:%d\n", ret);
       return ret;
     }
 
@@ -474,7 +474,7 @@ static int stk31850_i2c_write(FAR struct stk31850_dev_s *priv,
   ret = i2c_write(priv->config->i2c, &config, buf, sizeof(buf));
   if (ret < 0)
     {
-      snerr("I2C write failed: %d\n", ret);
+      snerr("stk31850 I2C w fail:%d\n", ret);
     }
 
   return ret;
@@ -521,7 +521,7 @@ static int stk31850_i2c_readword(FAR struct stk31850_dev_s *priv,
   ret = i2c_writeread(priv->config->i2c, &config, &regaddr, 1, buffer, 2);
   if (ret < 0)
     {
-      snerr("I2C writeread failed: %d\n", ret);
+      snerr("stk31850 I2C r fail:%d\n", ret);
       return ret;
     }
 
@@ -560,7 +560,7 @@ static int stk31850_readdevid(FAR struct stk31850_dev_s *priv)
   ret = stk31850_i2c_read(priv, STK31850_PDT_ID, &regval);
   if (ret < 0 || regval != STK31850_DEVICE_ID)
     {
-      snerr("Wrong device ID: %d\n", regval);
+      snerr("stk31850 ID error %d\n", regval);
       ret = -ENODEV;
     }
 
@@ -595,7 +595,7 @@ static int stk31850_reset(FAR struct stk31850_dev_s *priv)
   ret = stk31850_i2c_write(priv, STK31850_SOFT_RESET, &value);
   if (ret < 0)
     {
-      snerr("Failed to write register: %d\n", ret);
+      snerr("stk31850 rst fail\n");
       return ret;
     }
 
@@ -637,7 +637,7 @@ static int stk31850_enable(FAR struct stk31850_dev_s *priv,
       ret = stk31850_setintmode(priv, STK31850_DISABLE);
       if (ret < 0)
         {
-          snerr("Failed to disable interrupt: %d\n", ret);
+          snerr("stk31850 disable intrpt fail\n");
           return ret;
         }
 
@@ -646,7 +646,6 @@ static int stk31850_enable(FAR struct stk31850_dev_s *priv,
       ret = stk31850_setgain(priv);
       if (ret < 0)
         {
-          snerr("Failed to set gain: %d\n", ret);
           return ret;
         }
 
@@ -655,7 +654,7 @@ static int stk31850_enable(FAR struct stk31850_dev_s *priv,
       ret = stk31850_setpd(priv, STK31850_ENABLE);
       if (ret < 0)
         {
-          snerr("Failed to set pd: %d\n", ret);
+          snerr("stk31850 set pd fail\n");
           return ret;
         }
 
@@ -664,7 +663,7 @@ static int stk31850_enable(FAR struct stk31850_dev_s *priv,
       ret = stk31850_setwait(priv, STK31850_DEFAULT_WAIT);
       if (ret < 0)
         {
-          snerr("Failed to set wait: %d\n", ret);
+          snerr("stk31850 set wait fail\n");
           return ret;
         }
 
@@ -673,7 +672,7 @@ static int stk31850_enable(FAR struct stk31850_dev_s *priv,
       ret = stk31850_setfifo(priv);
       if (ret < 0)
         {
-          snerr("Failed to disale fifo: %d\n", ret);
+          snerr("stk31850 disale fifo fail\n");
           return ret;
         }
 
@@ -682,7 +681,7 @@ static int stk31850_enable(FAR struct stk31850_dev_s *priv,
       ret = stk31850_setspec(priv);
       if (ret < 0)
         {
-          snerr("Failed to set spec: %d\n", ret);
+          snerr("stk31850 set spec fail: %d\n");
           return ret;
         }
 
@@ -691,7 +690,6 @@ static int stk31850_enable(FAR struct stk31850_dev_s *priv,
       ret = stk31850_setstate(priv, STK31850_ENABLE);
       if (ret < 0)
         {
-          snerr("Failed to set state: %d\n", ret);
           return ret;
         }
 
@@ -708,7 +706,6 @@ static int stk31850_enable(FAR struct stk31850_dev_s *priv,
       ret = stk31850_setstate(priv, STK31850_DISABLE);
       if (ret < 0)
         {
-          snerr("Failed set sensor down: %d\n", ret);
           return ret;
         }
     }
@@ -777,14 +774,12 @@ static int stk31850_setodr(FAR struct stk31850_dev_s *priv, uint8_t value)
   ret = stk31850_i2c_read(priv, STK31850_ALSCTRL2, (FAR uint8_t *)&reg_ctl2);
   if (ret < 0)
     {
-      snerr("Failed to read alsctl2 register: %d\n", ret);
       return ret;
     }
 
   ret = stk31850_i2c_read(priv, STK31850_ALSCTRL1, (FAR uint8_t *)&reg_ctl1);
   if (ret < 0)
     {
-      snerr("Failed to read alsctl1 register: %d\n", ret);
       return ret;
     }
 
@@ -798,16 +793,11 @@ static int stk31850_setodr(FAR struct stk31850_dev_s *priv, uint8_t value)
                            (FAR uint8_t *)&reg_ctl2);
   if (ret < 0)
     {
-      snerr("Failed to write alsctl2 register: %d\n", ret);
       return ret;
     }
 
   ret = stk31850_i2c_write(priv, STK31850_ALSCTRL1,
                            (FAR uint8_t *)&reg_ctl1);
-  if (ret < 0)
-    {
-      snerr("Failed to write alsctl1 register: %d\n", ret);
-    }
 
   return ret;
 }
@@ -839,24 +829,21 @@ static int stk31850_setgain(FAR struct stk31850_dev_s *priv)
   ret = stk31850_i2c_read(priv, STK31850_GAINCTRL, (FAR uint8_t *)&reg_gain);
   if (ret < 0)
     {
-      snerr("Failed to read gain register: %d\n", ret);
-      return ret;
+      goto exit;
     }
 
   ret = stk31850_i2c_read(priv, STK31850_AGAINCTRL1,
                           (FAR uint8_t *)&reg_again);
   if (ret < 0)
     {
-      snerr("Failed to read again register: %d\n", ret);
-      return ret;
+      goto exit;
     }
 
   ret = stk31850_i2c_read(priv, STK31850_ALSCTRL1,
                           (FAR uint8_t *)&reg_alsctrl1);
   if (ret < 0)
     {
-      snerr("Failed to read als ctrl1 register: %d\n", ret);
-      return ret;
+      goto exit;
     }
 
   reg_gain.gain_c = g_stk31850_gain[priv->gain_idx].gain_c;
@@ -872,22 +859,23 @@ static int stk31850_setgain(FAR struct stk31850_dev_s *priv)
                            (FAR uint8_t *)&reg_gain);
   if (ret < 0)
     {
-      snerr("Failed to write gain register: %d\n", ret);
-      return ret;
+      goto exit;
     }
 
   ret = stk31850_i2c_write(priv, STK31850_AGAINCTRL1,
                            (FAR uint8_t *)&reg_again);
   if (ret < 0)
     {
-      snerr("Failed to write again register: %d\n", ret);
+      goto exit;
     }
 
   ret = stk31850_i2c_write(priv, STK31850_ALSCTRL1,
                            (FAR uint8_t *)&reg_alsctrl1);
+
+exit:
   if (ret < 0)
     {
-      snerr("Failed to write als ctrl1 register: %d\n", ret);
+      snerr("stk31850 set gain fail\n");
     }
 
   return ret;
@@ -924,7 +912,6 @@ static int stk31850_setintmode(FAR struct stk31850_dev_s *priv,
                           (FAR uint8_t *)&reg_initctl1);
   if (ret < 0)
     {
-      snerr("Failed to read initctl1 register: %d\n", ret);
       return ret;
     }
 
@@ -932,7 +919,6 @@ static int stk31850_setintmode(FAR struct stk31850_dev_s *priv,
                           (FAR uint8_t *)&reg_initctl2);
   if (ret < 0)
     {
-      snerr("Failed to read initctl2 register: %d\n", ret);
       return ret;
     }
 
@@ -943,14 +929,13 @@ static int stk31850_setintmode(FAR struct stk31850_dev_s *priv,
                            (FAR uint8_t *)&reg_initctl1);
   if (ret < 0)
     {
-      snerr("Failed to write initctl1 register: %d\n", ret);
+      return ret;
     }
 
   ret = stk31850_i2c_write(priv, STK31850_INTCTRL2,
                            (FAR uint8_t *)&reg_initctl2);
   if (ret < 0)
     {
-      snerr("Failed to write initctl2 register: %d\n", ret);
       return ret;
     }
 
@@ -960,10 +945,6 @@ static int stk31850_setintmode(FAR struct stk31850_dev_s *priv,
   reg_flag.flg_als_dr = 0;
 
   ret = stk31850_i2c_write(priv, STK31850_FLAG, (FAR uint8_t *)&reg_flag);
-  if (ret < 0)
-    {
-      snerr("Failed to write flag register: %d\n", ret);
-    }
 
   return ret;
 }
@@ -991,18 +972,11 @@ static int stk31850_setpd(FAR struct stk31850_dev_s *priv,
                           uint8_t value)
 {
   stk31850_pdctrl1_t reg;
-  int ret;
 
   reg.c = value;
   reg.als = value;
 
-  ret = stk31850_i2c_write(priv, STK31850_PDCTRL1, (FAR uint8_t *)&reg);
-  if (ret < 0)
-    {
-      snerr("Failed to write pd control register: %d\n", ret);
-    }
-
-  return ret;
+  return stk31850_i2c_write(priv, STK31850_PDCTRL1, (FAR uint8_t *)&reg);
 }
 
 /****************************************************************************
@@ -1028,15 +1002,8 @@ static int stk31850_setwait(FAR struct stk31850_dev_s *priv,
                             uint8_t value)
 {
   stk31850_wait_t reg;
-  int ret;
 
-  ret = stk31850_i2c_write(priv, STK31850_WAIT, (FAR uint8_t *)&reg);
-  if (ret < 0)
-    {
-      snerr("Failed to write wait register: %d\n", ret);
-    }
-
-  return ret;
+  return stk31850_i2c_write(priv, STK31850_WAIT, (FAR uint8_t *)&reg);
 }
 
 /****************************************************************************
@@ -1080,7 +1047,6 @@ static int stk31850_setfifo(FAR struct stk31850_dev_s *priv)
                            (FAR uint8_t *)&reg_fifoctrl1);
   if (ret < 0)
     {
-      snerr("Failed to write fifo control 1 register: %d\n", ret);
       return ret;
     }
 
@@ -1088,7 +1054,6 @@ static int stk31850_setfifo(FAR struct stk31850_dev_s *priv)
                            (FAR uint8_t *)&reg_fifoctrl2);
   if (ret < 0)
     {
-      snerr("Failed to write fifo control 2 register: %d\n", ret);
       return ret;
     }
 
@@ -1096,16 +1061,11 @@ static int stk31850_setfifo(FAR struct stk31850_dev_s *priv)
                            (FAR uint8_t *)&reg_fifo1wm);
   if (ret < 0)
     {
-      snerr("Failed to write fifo watermark 1 register: %d\n", ret);
       return ret;
     }
 
   ret = stk31850_i2c_write(priv, STK31850_FIFO2_WM_LV,
                            (FAR uint8_t *)&reg_fifo2wm);
-  if (ret < 0)
-    {
-      snerr("Failed to write fifo watermark 2 register: %d\n", ret);
-    }
 
   return ret;
 }
@@ -1139,17 +1099,12 @@ static int stk31850_setspec(FAR struct stk31850_dev_s *priv)
   ret = stk31850_i2c_write(priv, STK31850_SPEC1, (FAR uint8_t *)&reg1);
   if (ret < 0)
     {
-      snerr("Failed to write spec 1 register: %d\n", ret);
       return ret;
     }
 
   reg2.value = STK31850_DEFAULT_SPEC2;
 
   ret = stk31850_i2c_write(priv, STK31850_SPEC2, (FAR uint8_t *)&reg2);
-  if (ret < 0)
-    {
-      snerr("Failed to write spec 2 register: %d\n", ret);
-    }
 
   return ret;
 }
@@ -1209,14 +1164,12 @@ static int stk31850_checkgain(FAR struct stk31850_dev_s *priv,
       ret = stk31850_setgain(priv);
       if (ret < 0)
         {
-          snerr("Failed to set gain: %d\n", ret);
           return ret;
         }
 
       ret = stk31850_i2c_write(priv, STK31850_FSM, &fsm_reg);
       if (ret < 0)
         {
-          snerr("Failed to set gain: %d\n", ret);
           return ret;
         }
 
@@ -1256,7 +1209,7 @@ static int stk31850_setstate(FAR struct stk31850_dev_s *priv, uint8_t value)
   ret = stk31850_i2c_write(priv, STK31850_STATE, (FAR uint8_t *)&reg);
   if (ret < 0)
     {
-      snerr("Failed to write state register: %d\n", ret);
+      snerr("stk31850 set state fail\n");
     }
 
   return ret;
@@ -1296,7 +1249,6 @@ static int stk31850_readlux(FAR struct stk31850_dev_s *priv,
                               (FAR uint8_t *)&reg_flag);
       if (ret < 0)
         {
-          snerr("Failed to read flag: %d\n", ret);
           return ret;
         }
 
@@ -1310,28 +1262,26 @@ static int stk31850_readlux(FAR struct stk31850_dev_s *priv,
 
   if (count == STK31850_WAIT_COUNT)
     {
-      snerr("Failed to read data: %d\n", ret);
+      snerr("stk31850 rd data fail\n");
       return -ETIME;
     }
 
   ret = stk31850_i2c_readword(priv, STK31850_DATA1_ALS_F_REG, &value_f);
   if (ret < 0)
     {
-      snerr("Failed to read f data: %d\n", ret);
       return ret;
     }
 
   ret = stk31850_i2c_readword(priv, STK31850_DATA1_C_REG, &value_c);
   if (ret < 0)
     {
-      snerr("Failed to read c data: %d\n", ret);
       return ret;
     }
 
   ret = stk31850_checkgain(priv, value_f, value_c);
   if (ret < 0)
     {
-      snerr("Failed to check gain: %d\n", ret);
+      snerr("stk31850 check gain fail\n");
       return ret;
     }
   else if (ret == 0)
@@ -1396,7 +1346,7 @@ static int stk31850_set_interval(FAR struct file *filep,
   ret = stk31850_setodr(priv, g_stk31850_odr[idx].regval);
   if (ret < 0)
     {
-      snerr("Failed to set interval: %d\n", ret);
+      snerr("stk31850 set intrvl fail\n");
       return ret;
     }
 
@@ -1442,7 +1392,6 @@ static int stk31850_activate(FAR struct file *filep,
           ret = stk31850_enable(priv, enable);
           if (ret < 0)
             {
-              snerr("Failed to enable light sensor: %d\n", ret);
               return ret;
             }
 
@@ -1451,7 +1400,6 @@ static int stk31850_activate(FAR struct file *filep,
     }
   else
     {
-      snerr("Failed to match sensor type.\n");
       return -EINVAL;
     }
 
@@ -1505,7 +1453,6 @@ static int stk31850_selftest(FAR struct file *filep,
       default:                      /* Other cmd tag */
         {
           ret = -ENOTTY;
-          snerr("ERROR: The cmd don't support: %d\n", ret);
         }
         break;
     }
@@ -1601,7 +1548,6 @@ int stk31850_register(int devno, FAR const struct stk31850_config_s *config)
   priv = kmm_zalloc(sizeof(*priv));
   if (priv == NULL)
     {
-      snerr("Failed to allocate instance\n");
       return -ENOMEM;
     }
 
@@ -1618,21 +1564,18 @@ int stk31850_register(int devno, FAR const struct stk31850_config_s *config)
   ret = stk31850_readdevid(priv);
   if (ret < 0)
     {
-      snerr("Failed to verify the DeviceID: %d\n", ret);
       goto err;
     }
 
   ret = stk31850_reset(priv);
   if (ret < 0)
     {
-      snerr("Failed to reset: %d\n", ret);
       goto err;
     }
 
   ret = stk31850_setstate(priv, STK31850_DISABLE);
   if (ret < 0)
     {
-      snerr("Failed to switch off sensor: %d\n", ret);
       goto err;
     }
 
@@ -1641,7 +1584,6 @@ int stk31850_register(int devno, FAR const struct stk31850_config_s *config)
   ret = sensor_register(&priv->lower, devno);
   if (ret < 0)
     {
-      snerr("Failed to register driver: %d\n", ret);
       goto err;
     }
 

@@ -390,14 +390,14 @@ static int icp10125_readdevid(FAR struct icp10125_dev_s *priv)
   ret = icp10125_writeread(priv, buff, 2, &buff[2], 2);
   if (ret < 0)
     {
-      snerr("Failed to read device id: %d\n", ret);
+      snerr("icp10125 get ID fail\n");
       return ret;
     }
 
   regval = ((uint16_t)buff[2]) << 8 | (buff[3]);
   if ((regval & 0x003f) != ICP10125_WHOAMI_VALUE)
     {
-      snerr("Wrong device ID: %x\n", regval);
+      snerr("icp10125 ID error %x\n", regval);
       ret = -ENODEV;
     }
 
@@ -435,7 +435,7 @@ static int icp10125_reset(FAR struct icp10125_dev_s *priv)
   ret = icp10125_write(priv, buff, 2);
   if (ret < 0)
     {
-      snerr("Failed to software reset: %d\n", ret);
+      snerr("icp10125 rst fail\n");
     }
 
   /* Delay for reset booting. */
@@ -482,8 +482,7 @@ static int icp10125_read_otp(FAR struct icp10125_dev_s *priv, FAR int *out)
   ret = icp10125_write(priv, wbuffer, 5);
   if (ret < 0)
     {
-      snerr("Failed to set OTP read mode: %d\n", ret);
-      return ret;
+      goto exit;
     }
 
   /* Read OTP values. */
@@ -498,8 +497,7 @@ static int icp10125_read_otp(FAR struct icp10125_dev_s *priv, FAR int *out)
       ret = icp10125_write(priv, wbuffer, 2);
       if (ret < 0)
         {
-          snerr("Failed to increase OTP address: %d\n", ret);
-          return ret;
+          goto exit;
         }
 
       /* Read OTP values. */
@@ -507,12 +505,17 @@ static int icp10125_read_otp(FAR struct icp10125_dev_s *priv, FAR int *out)
       ret = icp10125_read(priv, rbuffer, 3);
       if (ret < 0)
         {
-          snerr("Failed to read OTP values %d\n", ret);
-          return ret;
+          goto exit;
         }
 
       out[i] = (((uint16_t)rbuffer[0] << 8 | rbuffer[1]) + 32768) %
                65536 - 32768;
+    }
+
+exit:
+  if (ret < 0)
+    {
+      snerr("icp10125 read OTP fail\n");
     }
 
   return ret;
@@ -624,11 +627,6 @@ static int icp10125_setmode(FAR struct icp10125_dev_s *priv,
           mode_buff[0] = (ICP10125_CMD_NORMAL_MODE & 0xff00) >> 8;
           mode_buff[1] = ICP10125_CMD_NORMAL_MODE & 0x00ff;
           ret = icp10125_write(priv, mode_buff, 2);
-          if (ret < 0)
-            {
-              snerr("ERROR: Failed to set chip in normal mode\n");
-              return ret;
-            }
         }
         break;
 
@@ -637,11 +635,6 @@ static int icp10125_setmode(FAR struct icp10125_dev_s *priv,
           mode_buff[0] = (ICP10125_CMD_LOWPOWER_MODE & 0xff00) >> 8;
           mode_buff[1] = ICP10125_CMD_LOWPOWER_MODE & 0x00ff;
           ret = icp10125_write(priv, mode_buff, 2);
-          if (ret < 0)
-            {
-              snerr("ERROR: Failed to set chip in lowpower mode\n");
-              return ret;
-            }
         }
         break;
 
@@ -650,11 +643,6 @@ static int icp10125_setmode(FAR struct icp10125_dev_s *priv,
           mode_buff[0] = (ICP10125_CMD_LOWNOISE_MODE & 0xff00) >> 8;
           mode_buff[1] = ICP10125_CMD_LOWNOISE_MODE & 0x00ff;
           ret = icp10125_write(priv, mode_buff, 2);
-          if (ret < 0)
-            {
-              snerr("ERROR: Failed to set chip in lowpower mode\n");
-              return ret;
-            }
         }
         break;
 
@@ -663,13 +651,13 @@ static int icp10125_setmode(FAR struct icp10125_dev_s *priv,
           mode_buff[0] = (ICP10125_CMD_ULTRA_LN_MODE & 0xff00) >> 8;
           mode_buff[1] = ICP10125_CMD_ULTRA_LN_MODE & 0x00ff;
           ret = icp10125_write(priv, mode_buff, 2);
-          if (ret < 0)
-            {
-              snerr("ERROR: Failed to set chip in lowpower mode\n");
-              return ret;
-            }
         }
         break;
+    }
+
+  if (ret < 0)
+    {
+      snerr("icp10125 set mode fail\n");
     }
 
   return ret;
@@ -747,7 +735,6 @@ static int icp10125_getdata(FAR struct icp10125_dev_s *priv,
   ret = icp10125_read(priv, rbuffer, 9);
   if (ret < 0)
     {
-      snerr("Failed to read raw data: %d\n", ret);
       return ret;
     }
 
@@ -764,10 +751,6 @@ static int icp10125_getdata(FAR struct icp10125_dev_s *priv,
   /* Set sensor mode after every data reading. */
 
   ret = icp10125_setmode(priv, ICP10125_MODE_LOWNOISE);
-  if (ret < 0)
-    {
-      snerr("Failed to set mode: low noise: %d\n", ret);
-    }
 
   return ret;
 }
@@ -801,7 +784,7 @@ static int icp10125_read_push(FAR struct icp10125_dev_s *priv)
   ret = icp10125_getdata(priv, &baro);
   if (ret < 0)
     {
-      snerr("Failed to get raw data: %d\n", ret);
+      snerr("icp10125 get raw fail\n");
       return ret;
     }
 
@@ -879,7 +862,6 @@ static int icp10125_initchip(FAR struct icp10125_dev_s *priv)
   ret = icp10125_readdevid(priv);
   if (ret < 0)
     {
-      snerr("Failed to reading chip id: %d\n", ret);
       return ret;
     }
 
@@ -888,7 +870,6 @@ static int icp10125_initchip(FAR struct icp10125_dev_s *priv)
   ret = icp10125_reset(priv);
   if (ret < 0)
     {
-      snerr("Failed to reset chip: %d\n", ret);
       return ret;
     }
 
@@ -897,17 +878,12 @@ static int icp10125_initchip(FAR struct icp10125_dev_s *priv)
   ret = icp10125_read_otp(priv, otp);
   if (ret < 0)
     {
-      snerr("Failed to read otp values: %d\n", ret);
       return ret;
     }
 
   /* Initialize base structure. */
 
   icp10125_init_base(priv, otp);
-  if (ret < 0)
-    {
-      snerr("Failed to initialize base structure: %d\n", ret);
-    }
 
   return ret;
 }
@@ -1011,7 +987,6 @@ static int icp10125_activate(FAR struct file *filep,
       ret = icp10125_setmode(priv, ICP10125_MODE_LOWNOISE);
       if (ret < 0)
         {
-          snerr("Failed to set mode: low noise mode: %d\n", ret);
           return ret;
         }
 
@@ -1191,7 +1166,6 @@ int icp10125_register(int devno, FAR const struct icp10125_config_s *config)
   priv = kmm_zalloc(sizeof(*priv));
   if (priv == NULL)
     {
-      snerr("ERROR: Failed to allocate instance\n");
       return -ENOMEM;
     }
 
@@ -1206,7 +1180,6 @@ int icp10125_register(int devno, FAR const struct icp10125_config_s *config)
   ret = icp10125_initchip(priv);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to init chip: %d\n", ret);
       goto err;
     }
 
@@ -1215,7 +1188,6 @@ int icp10125_register(int devno, FAR const struct icp10125_config_s *config)
   ret = sensor_register(&priv->dev.lower, devno);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to register driver: %d\n", ret);
       goto err;
     }
 

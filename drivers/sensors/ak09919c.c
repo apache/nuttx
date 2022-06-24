@@ -337,7 +337,7 @@ static int ak09919c_i2c_read(FAR struct ak09919c_dev_s *priv,
   ret = I2C_TRANSFER(priv->config->i2c, msg, 2);
   if (ret < 0)
     {
-      snerr("I2C_TRANSFER failed: %d\n", ret);
+      snerr("ak09919 I2C fail\n");
     }
 
   return ret;
@@ -408,7 +408,7 @@ static int ak09919c_i2c_writereg(FAR struct ak09919c_dev_s *priv,
   ret = I2C_TRANSFER(priv->config->i2c, &msg, 1);
   if (ret < 0)
     {
-      snerr("I2C_TRANSFER failed: %d\n", ret);
+      snerr("ak09919 I2C fail\n");
     }
 
   return ret;
@@ -441,12 +441,9 @@ static int ak09919c_setmode(FAR struct ak09919c_dev_s *priv,
   int ret;
 
   ret = ak09919c_i2c_writereg(priv, AK09919C_REG_CNTL2, mode);
-  if (ret < 0)
+  if (ret == 0)
     {
-      snerr("Failed to set work mode: %d\n", ret);
-    }
-  else
-    {
+      snerr("ak09919 set mode fail\n");
       up_udelay(AK09919C_MODE_SWITCH_DELAY);
     }
 
@@ -481,17 +478,18 @@ static int ak09919c_setnoisefilter(FAR struct ak09919c_dev_s *priv,
   ret = ak09919c_i2c_readreg(priv, AK09919C_REG_CNTL1, &ctrl1);
   if (ret < 0)
     {
-      snerr("Failed to set noise filter: %d\n", ret);
+      goto exit;
     }
 
   SET_BITSLICE(ctrl1, nsf, 5, AK09919C_NOISE_SUPPRESION);
 
   ret = ak09919c_i2c_writereg(priv, AK09919C_REG_CNTL1, ctrl1);
+
+exit:
   if (ret < 0)
     {
-      snerr("Failed to set noise filter: %d\n", ret);
+      snerr("ak09919 set noise filter fail\n");
     }
-
   return ret;
 }
 
@@ -527,7 +525,6 @@ static int ak09919c_readmag(FAR struct ak09919c_dev_s *priv,
   ret = ak09919c_i2c_readreg(priv, AK09919C_REG_ST1, &state);
   if (ret < 0)
     {
-      snerr("Failed to read drdy: %d\n", ret);
       return ret;
     }
 
@@ -537,7 +534,6 @@ static int ak09919c_readmag(FAR struct ak09919c_dev_s *priv,
                           buffer, sizeof(buffer));
   if (ret < 0)
     {
-      snerr("Failed to read mag: %d\n", ret);
       return ret;
     }
 
@@ -580,13 +576,12 @@ static int ak09919c_checkid(FAR struct ak09919c_dev_s *priv)
   ret = ak09919c_i2c_read(priv, AK09919C_REG_WIA1, (uint8_t *)&devid, 2);
   if (ret < 0)
     {
-      snerr("Failed to read device id: %d\n", ret);
       return ret;
     }
 
   if (devid != AK09919C_DEVID)
     {
-      snerr("Wrong Device ID! %02x\n", devid);
+      snerr("ak09919 ID %02x\n", devid);
       ret = -ENODEV;
     }
 
@@ -619,7 +614,7 @@ static int ak09919c_softreset(FAR struct ak09919c_dev_s *priv)
                               AK09919C_SOFT_RESET);
   if (ret < 0)
     {
-      snerr("Failed to reset AK09919C: %d\n", ret);
+      snerr("ak09919 rst fail\n");
     }
   else
     {
@@ -666,7 +661,7 @@ static int ak09919c_verifyparam(FAR struct ak09919c_magdata_s *magdata,
                          threshold->st1_hilimit);
   if (ret < 0)
     {
-      snerr("ST1 data is abnormal: %d\n", ret);
+      snerr("ak09919 ST1\n", ret);
       return ret;
     }
 
@@ -675,7 +670,7 @@ static int ak09919c_verifyparam(FAR struct ak09919c_magdata_s *magdata,
                          threshold->st2_hilimit);
   if (ret < 0)
     {
-      snerr("ST2 data is abnormal: %d\n", ret);
+      snerr("ak09919 ST2\n", ret);
       return ret;
     }
 
@@ -684,7 +679,7 @@ static int ak09919c_verifyparam(FAR struct ak09919c_magdata_s *magdata,
                          threshold->xdata_hilimit);
   if (ret < 0)
     {
-      snerr("X-axis data is abnormal: %d\n", ret);
+      snerr("ak09919 X data\n", ret);
       return ret;
     }
 
@@ -693,7 +688,7 @@ static int ak09919c_verifyparam(FAR struct ak09919c_magdata_s *magdata,
                          threshold->ydata_hilimit);
   if (ret < 0)
     {
-      snerr("Y-axis data is abnormal: %d\n", ret);
+      snerr("ak09919 Y data\n");
       return ret;
     }
 
@@ -702,7 +697,7 @@ static int ak09919c_verifyparam(FAR struct ak09919c_magdata_s *magdata,
                          threshold->zdata_hilimit);
   if (ret < 0)
     {
-      snerr("Z-axis data is abnormal: %d\n", ret);
+      snerr("ak09919 Z data\n", ret);
       return ret;
     }
 
@@ -738,7 +733,6 @@ static int ak09919c_enable(FAR struct ak09919c_dev_s *priv, bool enable)
       ret = ak09919c_softreset(priv);
       if (ret < 0)
         {
-          snerr("Failed reset device: %d\n", ret);
           return ret;
         }
 
@@ -747,7 +741,6 @@ static int ak09919c_enable(FAR struct ak09919c_dev_s *priv, bool enable)
       ret = ak09919c_setnoisefilter(priv, AK09919C_NSF_LOW);
       if (ret < 0)
         {
-          snerr("Failed set noise filter: %d\n", ret);
           return ret;
         }
 
@@ -756,7 +749,6 @@ static int ak09919c_enable(FAR struct ak09919c_dev_s *priv, bool enable)
       ret = ak09919c_setmode(priv, priv->workmode);
       if (ret < 0)
         {
-          snerr("Failed set work mode: %d\n", ret);
           return ret;
         }
 
@@ -771,10 +763,6 @@ static int ak09919c_enable(FAR struct ak09919c_dev_s *priv, bool enable)
       /* Reset soft device. */
 
       ret = ak09919c_softreset(priv);
-      if (ret < 0)
-        {
-          snerr("Failed reset device: %d\n", ret);
-        }
     }
 
   return ret;
@@ -840,7 +828,6 @@ static int ak09919c_init(FAR struct ak09919c_dev_s *priv)
   ret = ak09919c_softreset(priv);
   if (ret < 0)
     {
-      snerr("Failed reset device: %d\n", ret);
       return ret;
     }
 
@@ -849,17 +836,12 @@ static int ak09919c_init(FAR struct ak09919c_dev_s *priv)
   ret = ak09919c_setnoisefilter(priv, AK09919C_NSF_LOW);
   if (ret < 0)
     {
-      snerr("Failed set Noise suppression filter: %d\n", ret);
       return ret;
     }
 
   /* Set power down mode. */
 
   ret = ak09919c_setmode(priv, AK09919C_POWER_DOWN_MODE);
-  if (ret < 0)
-    {
-      snerr("Failed set work mode: %d\n", ret);
-    }
 
   return ret;
 }
@@ -892,7 +874,6 @@ static int ak09919c_checkdev(FAR struct ak09919c_dev_s *priv)
   ret = ak09919c_softreset(priv);
   if (ret < 0)
     {
-      snerr("Failed reset device: %d\n", ret);
       return ret;
     }
 
@@ -901,7 +882,6 @@ static int ak09919c_checkdev(FAR struct ak09919c_dev_s *priv)
   ret = ak09919c_setmode(priv, AK09919C_SINGLESHOT_MODE);
   if (ret < 0)
     {
-      snerr("Failed set single measurement mode: %d\n", ret);
       return ret;
     }
 
@@ -910,7 +890,6 @@ static int ak09919c_checkdev(FAR struct ak09919c_dev_s *priv)
   ret = ak09919c_i2c_readreg(priv, AK09919C_REG_ST1, &magdata.st1);
   if (ret < 0)
     {
-      snerr("Failed to read state: %d\n", ret);
       return ret;
     }
 
@@ -920,7 +899,6 @@ static int ak09919c_checkdev(FAR struct ak09919c_dev_s *priv)
                           &magdata.xdata_hi, 8);
   if (ret < 0)
     {
-      snerr("Failed to read mag: %d\n", ret);
       return ret;
     }
 
@@ -930,7 +908,6 @@ static int ak09919c_checkdev(FAR struct ak09919c_dev_s *priv)
                              &g_ak09919c_sngthr);
   if (ret < 0)
     {
-      snerr("The data of single mode is error: %d\n", ret);
       return ret;
     }
 
@@ -939,7 +916,6 @@ static int ak09919c_checkdev(FAR struct ak09919c_dev_s *priv)
   ret = ak09919c_setmode(priv, AK09919C_SELF_TEST_MODE);
   if (ret < 0)
     {
-      snerr("Failed set selftest mode: %d\n", ret);
       return ret;
     }
 
@@ -948,7 +924,6 @@ static int ak09919c_checkdev(FAR struct ak09919c_dev_s *priv)
   ret = ak09919c_i2c_readreg(priv, AK09919C_REG_ST1, &magdata.st1);
   if (ret < 0)
     {
-      snerr("Failed to read state: %d\n", ret);
       return ret;
     }
 
@@ -958,7 +933,6 @@ static int ak09919c_checkdev(FAR struct ak09919c_dev_s *priv)
                           &magdata.xdata_hi, 8);
   if (ret < 0)
     {
-      snerr("Failed to read mag: %d\n", ret);
       return ret;
     }
 
@@ -968,7 +942,6 @@ static int ak09919c_checkdev(FAR struct ak09919c_dev_s *priv)
                              &g_ak09919c_slfthr);
   if (ret < 0)
     {
-      snerr("The data of selftest mode is error: %d\n", ret);
       return ret;
     }
 
@@ -1014,10 +987,6 @@ static int ak09919c_set_interval(FAR struct file *filp,
   priv->workmode = g_ak09919c_odr[idx].regval;
 
   ret = ak09919c_setmode(priv, priv->workmode);
-  if (ret < 0)
-    {
-      snerr("Failed set work mode: %d\n", ret);
-    }
 
   return ret;
 }
@@ -1051,7 +1020,6 @@ static int ak09919c_activate(FAR struct file *filep,
 
   if (lower->type != SENSOR_TYPE_MAGNETIC_FIELD)
     {
-      snerr("Failed to match sensor type.\n");
       return -EINVAL;
     }
 
@@ -1060,7 +1028,6 @@ static int ak09919c_activate(FAR struct file *filep,
       ret = ak09919c_enable(priv, enable);
       if (ret < 0)
         {
-          snerr("Failed to enable mag sensor: %d\n", ret);
           return ret;
         }
 
@@ -1107,27 +1074,18 @@ static int ak09919c_selftest(FAR struct file *filep,
       case SNIOC_SIMPLE_CHECK:    /* Simple communication check. */
         {
           ret = ak09919c_checkid(priv);
-          if (ret < 0)
-            {
-              snerr("Failed to get DeviceID: %d\n", ret);
-            }
         }
         break;
 
       case SNIOC_FULL_CHECK:      /* Fully functional check. */
         {
           ret = ak09919c_checkdev(priv);
-          if (ret < 0)
-            {
-              snerr("Failed to selftest: %d\n", ret);
-            }
         }
         break;
 
       default:                    /* Other cmd tag. */
         {
           ret = -ENOTTY;
-          snerr("The cmd don't support: %d\n", ret);
         }
         break;
     }
@@ -1213,7 +1171,6 @@ int ak09919c_register(int devno, FAR const struct ak09919c_config_s *config)
   priv = kmm_zalloc(sizeof(struct ak09919c_dev_s));
   if (priv == NULL)
     {
-      snerr("Failed to allocate instance\n");
       return -ENOMEM;
     }
 
@@ -1230,7 +1187,6 @@ int ak09919c_register(int devno, FAR const struct ak09919c_config_s *config)
   ret = ak09919c_checkid(priv);
   if (ret < 0)
     {
-      snerr("Failed to register driver: %d\n", ret);
       goto err;
     }
 
@@ -1239,7 +1195,6 @@ int ak09919c_register(int devno, FAR const struct ak09919c_config_s *config)
   ret = ak09919c_init(priv);
   if (ret < 0)
     {
-      snerr("Failed to initialize physical device ak0991c:%d\n", ret);
       goto err;
     }
 
@@ -1248,7 +1203,6 @@ int ak09919c_register(int devno, FAR const struct ak09919c_config_s *config)
   ret = sensor_register(&priv->lower, devno);
   if (ret < 0)
     {
-      snerr("Failed to register driver:%d\n", ret);
       goto err;
     }
 

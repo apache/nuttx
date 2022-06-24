@@ -334,7 +334,7 @@ static int sx9373_i2c_read(FAR struct sx9373_dev_s *priv,
   ret = I2C_TRANSFER(priv->config->i2c, msg, 2);
   if (ret < 0)
     {
-      snerr("I2C_TRANSFER failed: %d\n", ret);
+      snerr("sx9373 I2C fail:%d\n", ret);
       return ret;
     }
 
@@ -387,7 +387,7 @@ static int sx9373_i2c_write(FAR struct sx9373_dev_s *priv,
   ret = I2C_TRANSFER(priv->config->i2c, &msg, 1);
   if (ret < 0)
     {
-      snerr("I2C_TRANSFER failed: %d\n", ret);
+      snerr("sx9373 I2C fail:%d\n", ret);
     }
 
   return ret;
@@ -419,7 +419,7 @@ static int sx9373_checkid(FAR struct sx9373_dev_s *priv)
   ret = sx9373_i2c_read(priv, SX9373_DEVICE_INFO, &devid);
   if (ret < 0 || devid != SX9373_WHOAMI_VALUE)
     {
-      snerr("Wrong Device ID: %ld\n", devid);
+      snerr("sx9373 ID error %ld\n", devid);
       ret = -ENODEV;
     }
 
@@ -454,14 +454,10 @@ static int sx9373_disable_irq(FAR struct sx9373_dev_s *priv)
   ret = sx9373_i2c_read(priv, SX9373_IRQ_SOURCE, (FAR uint32_t *)&value);
   if (ret < 0)
     {
-      snerr("Failed to clear IRQ: %d\n", ret);
+      return ret;
     }
 
   ret = sx9373_i2c_write(priv, SX9373_IRQ_DISABLE, 0x0);
-  if (ret < 0)
-    {
-      snerr("disable irq: %d\n", ret);
-    }
 
   return ret;
 }
@@ -489,11 +485,7 @@ static int sx9373_softreset(FAR struct sx9373_dev_s *priv)
   int ret;
 
   ret = sx9373_i2c_write(priv, SX9373_DEVICE_RESET, SX9373_RESET_CONTROL);
-  if (ret < 0)
-    {
-      snerr("Failed to reset SX9373: %d\n", ret);
-    }
-  else
+  if (ret == 0)
     {
       nxsig_usleep(50000);
     }
@@ -501,7 +493,7 @@ static int sx9373_softreset(FAR struct sx9373_dev_s *priv)
   ret = sx9373_disable_irq(priv);
   if (ret < 0)
     {
-      snerr("Failed to disable irq SX9373: %d\n", ret);
+      snerr("sx9373 disable irq fail\n");
     }
 
   return ret;
@@ -538,16 +530,16 @@ static int sx9373_setparam(FAR struct sx9373_dev_s *priv,
       ret = sx9373_i2c_write(priv, param[i].reg, param[i].val);
       if (ret < 0)
         {
-          snerr("Failed to set param: %d\n", ret);
-          return ret;
+          goto exit;
         }
     }
 
   ret = sx9373_i2c_write(priv, SX9373_COMMAND, SX9373_PHASE_CONTROL);
+
+exit:
   if (ret < 0)
     {
-      snerr("Failed to set param: %d\n", ret);
-      return ret;
+      snerr("sx9373 set param fail\n");
     }
 
   return ret;
@@ -580,7 +572,6 @@ static int sx9373_readstate(FAR struct sx9373_dev_s *priv,
   ret = sx9373_i2c_read(priv, SX9373_DEVICE_STATUS_A, &buf);
   if (ret < 0)
     {
-      snerr("Failed to read status register: %d\n", ret);
       return ret;
     }
   else
@@ -642,7 +633,7 @@ static int sx9373_read_rawdata(FAR struct sx9373_dev_s *priv,
   ret = sx9373_i2c_read(priv, SX9373_USEFUL_PH0 + 4 * channel, &buf);
   if (ret < 0)
     {
-      snerr("Failed to read useful data: %d\n", ret);
+      snerr("sx9373 read useful fail:%d\n", ret);
       return ret;
     }
   else
@@ -653,7 +644,7 @@ static int sx9373_read_rawdata(FAR struct sx9373_dev_s *priv,
   ret = sx9373_i2c_read(priv, SX9373_AVERAGE_PH0 + 4 * channel, &buf);
   if (ret < 0)
     {
-      snerr("Failed to read average data: %d\n", ret);
+      snerr("sx9373 read avg fail:%d\n", ret);
       return ret;
     }
   else
@@ -664,7 +655,7 @@ static int sx9373_read_rawdata(FAR struct sx9373_dev_s *priv,
   ret = sx9373_i2c_read(priv, SX9373_DIFF_PH0 + 4 * channel, &buf);
   if (ret < 0)
     {
-      snerr("Failed to read diff data: %d\n", ret);
+      snerr("sx9373 read diff fail:%d\n", ret);
       return ret;
     }
   else
@@ -675,7 +666,7 @@ static int sx9373_read_rawdata(FAR struct sx9373_dev_s *priv,
   ret = sx9373_i2c_read(priv, SX9373_OFFSET_PH0 + 4 * channel, &buf);
   if (ret < 0)
     {
-      snerr("Failed to read offest data: %d\n", ret);
+      snerr("sx9373 read offest fail:%d\n", ret);
       return ret;
     }
   else
@@ -710,11 +701,10 @@ static int sx9373_suspend(FAR struct sx9373_dev_s *priv)
 {
   int ret;
 
-  ret = sx9373_i2c_write(priv, SX9373_COMMAND,
-                         SX9373_ENTER_CONTROL);
+  ret = sx9373_i2c_write(priv, SX9373_COMMAND, SX9373_ENTER_CONTROL);
   if (ret < 0)
     {
-      snerr("Failed to suspend device: %d\n", ret);
+      snerr("sx9373 suspend fail\n");
     }
 
   return ret;
@@ -742,11 +732,10 @@ static int sx9373_resume(FAR struct sx9373_dev_s *priv)
 {
   int ret;
 
-  ret = sx9373_i2c_write(priv, SX9373_COMMAND,
-                         SX9373_EXIT_CONTROL);
+  ret = sx9373_i2c_write(priv, SX9373_COMMAND, SX9373_EXIT_CONTROL);
   if (ret < 0)
     {
-      snerr("Failed to resume device: %d\n", ret);
+      snerr("sx9373 resume fail\n");
     }
 
   return ret;
@@ -781,7 +770,6 @@ static int sx9373_enable(FAR struct sx9373_dev_s *priv, bool enable)
       ret = sx9373_resume(priv);
       if (ret < 0)
         {
-          snerr("Failed to resume device: %d\n", ret);
           return ret;
         }
 
@@ -795,10 +783,6 @@ static int sx9373_enable(FAR struct sx9373_dev_s *priv, bool enable)
       /* Suspend the device. */
 
       ret = sx9373_suspend(priv);
-      if (ret < 0)
-        {
-          snerr("Failed to suspend device: %d\n", ret);
-        }
     }
 
   return ret;
@@ -832,7 +816,7 @@ static int sx9373_init(FAR struct sx9373_dev_s *priv)
   ret = sx9373_softreset(priv);
   if (ret < 0)
     {
-      snerr("Failed to reset device: %d\n", ret);
+      snerr("sx9373 rst fail\n");
       return ret;
     }
 
@@ -841,17 +825,12 @@ static int sx9373_init(FAR struct sx9373_dev_s *priv)
   ret = sx9373_setparam(priv, g_sx9373_default, len);
   if (ret < 0)
     {
-      snerr("Failed to set param: %d\n", ret);
       return ret;
     }
 
   /* suspend the device. */
 
   ret = sx9373_enable(priv, false);
-  if (ret < 0)
-    {
-      snerr("Failed to suspend device: %d\n", ret);
-    }
 
   return ret;
 }
@@ -889,7 +868,6 @@ static int sx9373_activate(FAR struct file *filep,
 
   if (lower->type != SENSOR_TYPE_CAP)
     {
-      snerr("Failed to match sensor type.\n");
       return -EINVAL;
     }
 
@@ -911,7 +889,6 @@ static int sx9373_activate(FAR struct file *filep,
       ret = sx9373_enable(priv, enable);
       if (ret < 0)
         {
-          snerr("Failed to enable cap sensor: %d\n", ret);
           return ret;
         }
     }
@@ -959,17 +936,10 @@ static int sx9373_selftest(FAR struct file *filep,
       case SNIOC_SIMPLE_CHECK:       /* Simple communication check. */
         {
           ret = sx9373_checkid(priv);
-          if (ret < 0)
-            {
-              snerr("Failed to get DeviceID: %d\n", ret);
-            }
         }
         break;
 
       default:                       /* Other cmd tag. */
-        {
-          snerr("The cmd don't support: %d\n", ret);
-        }
         break;
     }
 
@@ -1003,20 +973,13 @@ static int sx9373_calibrate(FAR struct file *filep,
   FAR struct sx9373_channel_s *cap_ch = (FAR struct sx9373_channel_s *)lower;
   FAR struct sx9373_dev_s *priv = cap_ch->dev;
   FAR struct sx9373_param_s param;
-  int ret;
 
   DEBUGASSERT(lower != NULL);
 
   param.reg = SX9373_COMMAND;
   param.val = SX9373_COMPENSATION_CONTROL;
 
-  ret = sx9373_setparam(priv, &param, 1);
-  if (ret < 0)
-    {
-      snerr("Failed to set param: %d\n", ret);
-    }
-
-  return ret;
+  return sx9373_setparam(priv, &param, 1);
 }
 
 #if 0
@@ -1143,7 +1106,6 @@ static int sx9373_write_cfg_param(FAR struct sx9373_dev_s *priv,
           ret = sx9373_setparam(priv, &param, 1);
           if (ret < 0)
             {
-              snerr("Failed to set param: %d\n", ret);
               return ret;
             }
         }
@@ -1240,7 +1202,7 @@ static void sx9373_worker(FAR void *arg)
   ret = sx9373_readstate(priv, &rawdata);
   if (ret < 0)
     {
-      snerr("Failed to read state: %d\n", ret);
+      snerr("sx9373 rd state fail\n");
       return;
     }
   else
@@ -1257,7 +1219,6 @@ static void sx9373_worker(FAR void *arg)
       ret = sx9373_read_rawdata(priv, &rawdata, i);
       if (ret < 0)
         {
-          snerr("Failed to read rawdata: %d\n", ret);
           return;
         }
       else
@@ -1316,7 +1277,6 @@ int sx9373_register(int devno, FAR const struct sx9373_config_s *config)
   priv = kmm_zalloc(sizeof(struct sx9373_dev_s));
   if (priv == NULL)
     {
-      snerr("ERROR: Failed to allocate instance\n");
       ret = -ENOMEM;
       goto err;
     }
@@ -1338,7 +1298,6 @@ int sx9373_register(int devno, FAR const struct sx9373_config_s *config)
   ret = sx9373_checkid(priv);
   if (ret < 0)
     {
-      snerr("Failed to register driver: %d\n", ret);
       goto err;
     }
 
@@ -1347,7 +1306,6 @@ int sx9373_register(int devno, FAR const struct sx9373_config_s *config)
   ret = sx9373_init(priv);
   if (ret < 0)
     {
-      snerr("Failed to initialize physical device sx9373:%d\n", ret);
       goto err;
     }
 

@@ -226,7 +226,7 @@ static int ct7117_i2c_read(FAR struct ct7117_dev_s *priv,
   ret = I2C_TRANSFER(priv->config->i2c, msg, 2);
   if (ret < 0)
     {
-      snerr("I2C_TRANSFER failed: %d\n", ret);
+      snerr("ct7117 I2C fail:%d\n", ret);
     }
 
   return ret;
@@ -272,7 +272,7 @@ static int ct7117_i2c_write(FAR struct ct7117_dev_s *priv,
   ret = I2C_TRANSFER(priv->config->i2c, &msg, 1);
   if (ret < 0)
     {
-      snerr("I2C_TRANSFER failed: %d\n", ret);
+      snerr("ct7117 I2C fail:%d\n", ret);
     }
 
   return ret;
@@ -304,11 +304,7 @@ static int ct7117_i2c_readcfg(FAR struct ct7117_dev_s *priv,
   uint8_t r_buf[2];
 
   ret = ct7117_i2c_read(priv, CT7117_REG_CONF, r_buf, 2);
-  if (ret < 0)
-    {
-      snerr("Fail to read config register: %d\n", ret);
-    }
-  else
+  if (ret == 0)
     {
       ctrl->ctrl_w = (uint16_t)((r_buf[0] << 8) | (r_buf[1]));
     }
@@ -338,19 +334,12 @@ static int ct7117_i2c_readcfg(FAR struct ct7117_dev_s *priv,
 static int ct7117_i2c_writecfg(FAR struct ct7117_dev_s *priv,
                                FAR ct7117_control_t *ctrl)
 {
-  int ret;
   uint8_t w_buf[2];
 
   w_buf[0] = (uint8_t)((ctrl->ctrl_w) >> 8);
   w_buf[1] = (uint8_t)(ctrl->ctrl_w);
 
-  ret = ct7117_i2c_write(priv, CT7117_REG_CONF, w_buf);
-  if (ret < 0)
-    {
-      snerr("Fail to write config register: %d\n", ret);
-    }
-
-  return ret;
+  return ct7117_i2c_write(priv, CT7117_REG_CONF, w_buf);
 }
 
 /* Sensor handle functions */
@@ -383,7 +372,6 @@ static int ct7117_setmode(FAR struct ct7117_dev_s *priv,
   ret = ct7117_i2c_readcfg(priv, &ctrl);
   if (ret < 0)
     {
-      snerr("Failed to read config register: %d\n", ret);
       return ret;
     }
 
@@ -397,10 +385,6 @@ static int ct7117_setmode(FAR struct ct7117_dev_s *priv,
     }
 
   ret = ct7117_i2c_writecfg(priv, &ctrl);
-  if (ret < 0)
-    {
-      snerr("Failed to set work mode: %d\n", ret);
-    }
 
   return ret;
 }
@@ -433,7 +417,6 @@ static int ct7117_readtemp(FAR struct ct7117_dev_s *priv,
   ret = ct7117_i2c_read(priv, CT7117_REG_DATA, buffer, 2);
   if (ret < 0)
     {
-      snerr("Failed to read temperature: %d\n", ret);
       return ret;
     }
 
@@ -469,7 +452,7 @@ static int ct7117_checkid(FAR struct ct7117_dev_s *priv)
   ret = ct7117_i2c_read(priv, CT7117_REG_WIA, &devid, 1);
   if (ret < 0 || devid != CT7117_DEVID)
     {
-      snerr("Wrong Device ID! %02x\n", devid);
+      snerr("ct7117 ID error %02x\n", devid);
       ret = -ENODEV;
     }
 
@@ -505,7 +488,6 @@ static int ct7117_enable(FAR struct ct7117_dev_s *priv, bool enable)
       ret = ct7117_setmode(priv, CT7117_NORMAL_MODE);
       if (ret < 0)
         {
-          snerr("Failed to set normal mode: %d\n", ret);
           return ret;
         }
 
@@ -513,7 +495,7 @@ static int ct7117_enable(FAR struct ct7117_dev_s *priv, bool enable)
                  ct7117_worker, priv,
                  priv->interval / USEC_PER_TICK);
 
-      syslog(LOG_WARNING, "---CT7117 device %d power state: start---\n",
+      syslog(LOG_WARNING, "---CT7117-%d power state: start---\n",
              priv->devno);
     }
   else
@@ -525,11 +507,10 @@ static int ct7117_enable(FAR struct ct7117_dev_s *priv, bool enable)
       ret = ct7117_setmode(priv, CT7117_SHOTDOWN_MODE);
       if (ret < 0)
         {
-          snerr("Failed to set shotdown mode: %d\n", ret);
           return ret;
         }
 
-      syslog(LOG_WARNING, "---CT7117 device %d power state: end---\n",
+      syslog(LOG_WARNING, "---CT7117-%d power state: end---\n",
              priv->devno);
     }
 
@@ -610,17 +591,12 @@ static int ct7117_set_interval(FAR struct file *filep,
       ret = ct7117_i2c_readcfg(priv, &ctrl);
       if (ret < 0)
         {
-          snerr("Failed to read config register: %d\n", ret);
           return ret;
         }
 
       ctrl.ctrl_b.cr = g_ct7117_odr[idx].regval;
       ret = ct7117_i2c_writecfg(priv, &ctrl);
-      if (ret < 0)
-        {
-          snerr("Failed to set interval: %d\n", ret);
-        }
-      else
+      if (ret == 0)
         {
           priv->interval = g_ct7117_odr[idx].odr;
         }
@@ -658,7 +634,6 @@ static int ct7117_activate(FAR struct file *filep,
 
   if (lower->type != SENSOR_TYPE_AMBIENT_TEMPERATURE)
     {
-      snerr("Failed to match sensor type.\n");
       return -EINVAL;
     }
 
@@ -667,7 +642,7 @@ static int ct7117_activate(FAR struct file *filep,
       ret = ct7117_enable(priv, enable);
       if (ret < 0)
         {
-          snerr("Failed to enable temperature sensor: %d\n", ret);
+          snerr("ct7117 enable fail\n");
           return ret;
         }
 
@@ -714,17 +689,12 @@ static int ct7117_selftest(FAR struct file *filep,
       case SNIOC_SIMPLE_CHECK:       /* Simple communication check. */
         {
           ret = ct7117_checkid(priv);
-          if (ret < 0)
-            {
-              snerr("Failed to get DeviceID: %d\n", ret);
-            }
         }
         break;
 
       default:                       /* Other cmd tag. */
         {
           ret = -ENOTTY;
-          snerr("The cmd don't support: %d\n", ret);
         }
         break;
     }
@@ -806,7 +776,6 @@ int ct7117_register(int devno, FAR const struct ct7117_config_s *config)
   priv = kmm_zalloc(sizeof(struct ct7117_dev_s));
   if (priv == NULL)
     {
-      snerr("Failed to allocate instance\n");
       return -ENOMEM;
     }
 
@@ -822,7 +791,6 @@ int ct7117_register(int devno, FAR const struct ct7117_config_s *config)
   ret = ct7117_checkid(priv);
   if (ret < 0)
     {
-      snerr("Failed to register driver: %d\n", ret);
       goto err;
     }
 
@@ -831,7 +799,6 @@ int ct7117_register(int devno, FAR const struct ct7117_config_s *config)
   ret = ct7117_enable(priv, false);
   if (ret < 0)
     {
-      snerr("Failed to enter shotdown mode : %d\n", ret);
       goto err;
     }
 
@@ -840,7 +807,6 @@ int ct7117_register(int devno, FAR const struct ct7117_config_s *config)
   ret = sensor_register(&priv->lower, devno);
   if (ret < 0)
     {
-      snerr("Failed to register driver:%d\n", ret);
       goto err;
     }
 
