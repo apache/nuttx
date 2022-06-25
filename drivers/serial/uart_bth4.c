@@ -174,6 +174,10 @@ static int uart_bth4_receive(FAR struct bt_driver_s *drv,
           uart_bth4_pollnotify(dev, POLLIN);
         }
     }
+  else
+    {
+      ret = -ENOMEM;
+    }
 
   leave_critical_section(flags);
   return ret;

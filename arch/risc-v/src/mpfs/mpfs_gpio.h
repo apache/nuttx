@@ -138,6 +138,10 @@
 #define GPIO_BANK1         (1 << GPIO_BANK_SHIFT)
 #define GPIO_BANK2         (2 << GPIO_BANK_SHIFT)
 
+#define GPIO_BANK0_NUM_PINS 14
+#define GPIO_BANK1_NUM_PINS 24
+#define GPIO_BANK2_NUM_PINS 32
+
 /* This identifies the bit in the bank:
  *
  * 1111 1100 0000 0000
@@ -255,6 +259,32 @@ void mpfs_gpiowrite(gpio_pinset_t pinset, bool value);
  ****************************************************************************/
 
 bool mpfs_gpioread(gpio_pinset_t pinset);
+
+/****************************************************************************
+ * Name: mpfs_gpiosetevent
+ *
+ * Description:
+ *   Sets/clears GPIO based event and interrupt triggers.
+ *
+ * Input Parameters:
+ *  - pinset:      GPIO pin configuration
+ *  - risingedge:  Enables interrupt on rising edges
+ *  - fallingedge: Enables interrupt on falling edges
+ *  - high:        Enables interrupt on level high
+ *  - low:         Enables interrupt on level low
+ *  - event:       Generate event when set
+ *  - func:        When non-NULL, generate interrupt
+ *  - arg:         Argument passed to the interrupt callback
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure indicating the
+ *   nature of the failure.
+ *
+ ****************************************************************************/
+
+int mpfs_gpiosetevent(gpio_pinset_t pinset, bool risingedge,
+                      bool fallingedge, bool high, bool low, bool event,
+                      xcpt_t func, void *arg);
 
 /****************************************************************************
  * Name: mpfs_gpio_initialize

@@ -49,6 +49,10 @@ ifeq ($(CONFIG_RP2040_SPI),y)
 CHIP_CSRCS += rp2040_spi.c
 endif
 
+ifeq ($(CONFIG_RP2040_PWM),y)
+CHIP_CSRCS += rp2040_pwm.c
+endif
+
 ifeq ($(CONFIG_RP2040_I2C),y)
 CHIP_CSRCS += rp2040_i2c.c
 endif

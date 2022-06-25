@@ -235,6 +235,7 @@ config ARCH_CHIP_RP2040
 	select ARCH_HAVE_I2CRESET
 	select ARM_HAVE_WFE_SEV
 	select LIBC_ARCH_ATOMIC
+	select ARCH_HAVE_PWM_MULTICHAN
 	---help---
 		Raspberry Pi RP2040 architectures (ARM dual Cortex-M0+).
 

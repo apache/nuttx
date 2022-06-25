@@ -29,7 +29,7 @@ Serial Device Drivers
 
    You can choose launch method:
    ``TTY_LAUNCH_ENTRY`` or ``TTY_LAUNCH_FILE``,
-   If``TTY_LAUNCH_ENTRY`` you can set program entery by ``TTY_LAUNCH_ENTRYPOINT``.
+   If``TTY_LAUNCH_ENTRY`` you can set program entry by ``TTY_LAUNCH_ENTRYPOINT``.
    If``TTY_LAUNCH_FILE`` you can set file path by ``TTY_LAUNCH_FILEPATH``.
 
    Also, you can customize:

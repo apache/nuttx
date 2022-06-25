@@ -64,7 +64,7 @@ int esp32_mmcsd_initialize(int minor)
 
   mcinfo("INFO: Initializing mmcsd card\n");
 
-  spi = esp32_spibus_initialize(2);
+  spi = esp32_spibus_initialize(CONFIG_NSH_MMCSDSPIPORTNO);
   if (spi == NULL)
     {
       mcerr("ERROR: Failed to initialize SPI port %d\n", 2);

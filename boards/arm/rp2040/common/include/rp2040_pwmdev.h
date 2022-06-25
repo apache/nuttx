@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/esp32-devkitc/src/esp32_mmcsd.c
+ * boards/arm/rp2040/common/include/rp2040_pwmdev.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,67 +18,61 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_ARM_RP2040_RASPBERRYPI_PICO_INCLUDE_RP2040_PWMDEV_H
+#define __BOARDS_ARM_RP2040_RASPBERRYPI_PICO_INCLUDE_RP2040_PWMDEV_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <debug.h>
 #include <nuttx/config.h>
-#include <nuttx/mmcsd.h>
-#include <nuttx/spi/spi.h>
-#include <pthread.h>
-#include <sched.h>
-#include <time.h>
-#include <unistd.h>
-
-#include "esp32_spi.h"
-#include "esp32-devkitc.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Types
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Private Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: esp32_mmcsd_initialize
+ * Name: rp2040_pwmdev_initialize
  *
  * Description:
- *   Initialize SPI-based SD card and card detect thread.
+ *   Initialize pwm driver and register the /dev/pwm device.
+ *
  ****************************************************************************/
 
-int esp32_mmcsd_initialize(int minor)
-{
-  struct spi_dev_s *spi;
-  int rv;
+#if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
+int rp2040_pwmdev_initialize(int      slice,
+                             int      pin_a,
+                             int      pin_b,
+                             uint32_t flags);
+#else
+int rp2040_pwmdev_initialize(int      slice,
+                             int      pin,
+                             uint32_t flags);
+#endif
 
-  mcinfo("INFO: Initializing mmcsd card\n");
-
-  spi = esp32_spibus_initialize(CONFIG_NSH_MMCSDSPIPORTNO);
-  if (spi == NULL)
-    {
-      mcerr("ERROR: Failed to initialize SPI port %d\n", 2);
-      return -ENODEV;
-    }
-
-  rv = mmcsd_spislotinitialize(minor, 0, spi);
-  if (rv < 0)
-    {
-      mcerr("ERROR: Failed to bind SPI port %d to SD slot %d\n",
-            2, 0);
-      return rv;
-    }
-
-  spiinfo("INFO: mmcsd card has been initialized successfully\n");
-  return OK;
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARDS_ARM_RP2040_RASPBERRYPI_PICO_INCLUDE_RP2040_PWMDEV_H */

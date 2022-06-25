@@ -651,17 +651,40 @@ static int stm32_cap_setclock(struct stm32_cap_dev_s *dev,
           regval = GTIM_SMCR_DISAB;
           break;
 
+      case STM32_CAP_CLK_ENC1:
+          regval = GTIM_SMCR_ENCMD1;
+          break;
+
+      case STM32_CAP_CLK_ENC2:
+          regval = GTIM_SMCR_ENCMD2;
+          break;
+
+      case STM32_CAP_CLK_ENC3:
+          regval = GTIM_SMCR_ENCMD3;
+          break;
+
+      case STM32_CAP_CLK_RST:
+          regval = GTIM_SMCR_RESET;
+          break;
+
+      case STM32_CAP_CLK_GAT:
+          regval = GTIM_SMCR_GATED;
+          break;
+
+      case STM32_CAP_CLK_TRG:
+          regval = GTIM_SMCR_TRIGGER;
+          break;
+
       case STM32_CAP_CLK_EXT:
           regval = GTIM_SMCR_EXTCLK1;
           break;
-
-      /* TODO: Add other case */
 
       default:
         return ERROR;
     }
 
-  stm32_modifyreg16(priv, STM32_BTIM_EGR_OFFSET, GTIM_SMCR_SMS_MASK, regval);
+  stm32_modifyreg16(priv, STM32_GTIM_SMCR_OFFSET,
+                    GTIM_SMCR_SMS_MASK, regval);
 
   /* Set Maximum */
 

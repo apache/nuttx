@@ -440,6 +440,7 @@ int bcmf_sdpcm_queue_frame(FAR struct bcmf_dev_s *priv,
   struct bcmf_sdio_frame *sframe = (struct bcmf_sdio_frame *)frame;
   struct bcmf_sdpcm_header *header =
     (struct bcmf_sdpcm_header *)sframe->data;
+  int semcount;
 
   /* Prepare sw header */
 
@@ -470,7 +471,11 @@ int bcmf_sdpcm_queue_frame(FAR struct bcmf_dev_s *priv,
 
   /* Notify bcmf thread tx frame is ready */
 
-  nxsem_post(&sbus->thread_signal);
+  nxsem_get_value(&sbus->thread_signal, &semcount);
+  if (semcount < 1)
+    {
+      nxsem_post(&sbus->thread_signal);
+    }
 
   return OK;
 }
