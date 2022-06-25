@@ -661,7 +661,7 @@ static int stm32_cap_setclock(struct stm32_cap_dev_s *dev,
         return ERROR;
     }
 
-  stm32_modifyreg16(priv, STM32_BTIM_EGR_OFFSET, GTIM_SMCR_SMS_MASK, regval);
+  stm32_modifyreg16(priv, STM32_GTIM_SMCR_OFFSET, GTIM_SMCR_SMS_MASK, regval);
 
   /* Set Maximum */
 
