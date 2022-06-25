@@ -374,7 +374,7 @@ config SYSLOG_CHARDEV
 		supported.
 
 config SYSLOG_SCHEDLOCK
-	bool "SYSLOG schedlock"
+	bool "SYSLOG schedlock (DANGER: may degrade NuttX Realtime Performance)"
 	default n
 	---help---
 		Use schedlock to make sure syslogs from multiple threads are not garbled.
