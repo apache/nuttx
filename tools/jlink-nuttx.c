@@ -252,6 +252,11 @@ static int setget_reg(struct plugin_priv_s *priv, uint32_t idx,
 {
   uint32_t regaddr;
 
+  if (regidx >= priv->tcbinfo->total_num)
+    {
+      return -EINVAL;
+    }
+
   if (priv->tcbinfo->reg_offs[regidx] == UINT16_MAX)
     {
       if (write == 0)
@@ -597,11 +602,6 @@ int RTOS_GetThreadReg(char *hexregval, uint32_t regindex, uint32_t threadid)
       return -ENOTSUP;
     }
 
-  if (regindex > g_plugin_priv.tcbinfo->total_num)
-    {
-      return -EINVAL;
-    }
-
   idx = get_idx_from_pid(&g_plugin_priv, threadid);
   if (idx < 0)
     {
@@ -668,11 +668,6 @@ int RTOS_SetThreadReg(char *hexregval,
   if (threadid == g_plugin_priv.running)
     {
       return -ENOTSUP;
-    }
-
-  if (regindex > g_plugin_priv.tcbinfo->total_num)
-    {
-      return -EINVAL;
     }
 
   idx = get_idx_from_pid(&g_plugin_priv, threadid);
