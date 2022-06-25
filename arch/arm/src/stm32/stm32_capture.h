@@ -127,9 +127,13 @@ typedef enum
 typedef enum
 {
   STM32_CAP_CLK_INT = 0,
+  STM32_CAP_CLK_ENC1,
+  STM32_CAP_CLK_ENC2,
+  STM32_CAP_CLK_ENC3,
+  STM32_CAP_CLK_RST,
+  STM32_CAP_CLK_GAT,
+  STM32_CAP_CLK_TRG,
   STM32_CAP_CLK_EXT,
-
-  /* TODO: Add other clock */
 } stm32_cap_clk_t;
 
 /* Capture flags */
