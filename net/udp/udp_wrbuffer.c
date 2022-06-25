@@ -156,10 +156,74 @@ FAR struct udp_wrbuffer_s *udp_wrbuffer_alloc(void)
 }
 
 /****************************************************************************
+ * Name: udp_wrbuffer_timedalloc
+ *
+ * Description:
+ *   Allocate a UDP write buffer by taking a pre-allocated buffer from
+ *   the free list.  This function is called from udp logic when a buffer
+ *   of udp data is about to sent
+ *   This function is wrapped version of udp_wrbuffer_alloc(),
+ *   this wait will be terminated when the specified timeout expires.
+ *
+ * Input Parameters:
+ *   timeout   - The relative time to wait until a timeout is declared.
+ *
+ * Assumptions:
+ *   Called from user logic with the network locked.
+ *
+ ****************************************************************************/
+
+FAR struct udp_wrbuffer_s *udp_wrbuffer_timedalloc(unsigned int timeout)
+{
+  FAR struct udp_wrbuffer_s *wrb;
+  int ret;
+
+  /* We need to allocate two things:  (1) A write buffer structure and (2)
+   * at least one I/O buffer to start the chain.
+   *
+   * Allocate the write buffer structure first then the IOB.  In order to
+   * avoid deadlocks, we will need to free the IOB first, then the write
+   * buffer
+   */
+
+  ret = net_timedwait_uninterruptible(&g_wrbuffer.sem, timeout);
+  if (ret != OK)
+    {
+      return NULL;
+    }
+
+  /* Now, we are guaranteed to have a write buffer structure reserved
+   * for us in the free list.
+   */
+
+  wrb = (FAR struct udp_wrbuffer_s *)sq_remfirst(&g_wrbuffer.freebuffers);
+  DEBUGASSERT(wrb);
+  memset(wrb, 0, sizeof(struct udp_wrbuffer_s));
+
+  /* Now get the first I/O buffer for the write buffer structure */
+
+  wrb->wb_iob = net_iobtimedalloc(true, timeout,
+                                  IOBUSER_NET_UDP_WRITEBUFFER);
+
+  /* Did we get an IOB?  We should always get one except under some really
+   * weird error conditions.
+   */
+
+  if (wrb->wb_iob == NULL)
+    {
+      nerr("ERROR: Failed to allocate I/O buffer\n");
+      udp_wrbuffer_release(wrb);
+      return NULL;
+    }
+
+  return wrb;
+}
+
+/****************************************************************************
  * Name: udp_wrbuffer_tryalloc
  *
  * Description:
- *   Try to allocate a TCP write buffer by taking a pre-allocated buffer from
+ *   Try to allocate a UDP write buffer by taking a pre-allocated buffer from
  *   the free list.  This function is called from UDP logic when a buffer
  *   of UDP data is about to be sent on a non-blocking socket. Returns
  *   immediately if the allocation failed.
