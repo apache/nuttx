@@ -501,6 +501,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 {
   FAR struct udp_wrbuffer_s *wrb;
   FAR struct udp_conn_s *conn;
+  unsigned int timeout;
   bool nonblock;
   bool empty;
   int ret = OK;
@@ -628,6 +629,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
   nonblock = _SS_ISNONBLOCK(conn->sconn.s_flags) ||
                             (flags & MSG_DONTWAIT) != 0;
+  timeout  = _SO_TIMEOUT(conn->sconn.s_sndtimeo);
 
   /* Dump the incoming buffer */
 
@@ -650,7 +652,12 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
               goto errout_with_lock;
             }
 
-          net_lockedwait_uninterruptible(&conn->sndsem);
+          ret = net_timedwait_uninterruptible(&conn->sndsem, timeout);
+          if (ret < 0)
+            {
+              ret = -EAGAIN;
+              goto errout_with_lock;
+            }
         }
 #endif /* CONFIG_NET_SEND_BUFSIZE */
 
@@ -664,7 +671,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
         }
       else
         {
-          wrb = udp_wrbuffer_alloc();
+          wrb = udp_wrbuffer_timedalloc(timeout);
         }
 
       if (wrb == NULL)
@@ -672,7 +679,16 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
           /* A buffer allocation error occurred */
 
           nerr("ERROR: Failed to allocate write buffer\n");
-          ret = nonblock ? -EAGAIN : -ENOMEM;
+
+          if (nonblock || timeout != UINT_MAX)
+            {
+              ret = -EAGAIN;
+            }
+          else
+            {
+              ret = -ENOMEM;
+            }
+
           goto errout_with_lock;
         }
 
