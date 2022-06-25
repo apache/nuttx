@@ -1562,18 +1562,10 @@ static int bmi270_datatest(FAR struct bmi270_dev_s *priv, int type)
     }
   else
     {
-      snerr("err sen type\n");
       return -EINVAL;
     }
 
-  if (result == BMI270_ST_PASS)
-    {
-      snerr("SelfTest:P\n");
-    }
-  else
-    {
-      snerr("SelfTest:F\n");
-    }
+  sninfo("SelfTest:%s\n",result == BMI270_ST_PASS ? "PASS" : "FAIL");
 
   return result;
 }
@@ -2947,11 +2939,7 @@ static int bmi270_fifo_setwatermark(FAR struct bmi270_dev_s *priv,
       priv->fifo_buff = kmm_zalloc(BMI270_FIFO_BUFFER_SIZE);
     }
 
-  if (priv->fifo_buff == NULL)
-    {
-      snerr("alloc fifo buf fail\n");
-      return -ENOMEM;
-    }
+  DEBUGASSERT(priv->fifo_buff);
 
   fifo_wtm0.fifo_water_mark_7_0 = 0x00ff & value;
   fifo_wtm1.fifo_water_mark_12_8 = ((0x1f00 & value) >> 8);
@@ -3351,10 +3339,13 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv, bool worker)
 
       /* Push data to the upper layer. */
 
-      priv->dev[BMI270_XL_IDX].lower.push_event(
-            priv->dev[BMI270_XL_IDX].lower.priv,
-            priv->temp_xl,
-            sizeof(struct sensor_accel) * counter_xl);
+      if (worker)
+        {
+          priv->dev[BMI270_XL_IDX].lower.push_event(
+                priv->dev[BMI270_XL_IDX].lower.priv,
+                priv->temp_xl,
+                sizeof(struct sensor_accel) * counter_xl);
+        }
     }
 
   if (counter_gy)
@@ -3374,10 +3365,13 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv, bool worker)
 
       /* Push data to the upper layer. */
 
-      priv->dev[BMI270_GY_IDX].lower.push_event(
-            priv->dev[BMI270_GY_IDX].lower.priv,
-            priv->temp_gy,
-            sizeof(struct sensor_gyro) * counter_gy);
+      if (worker)
+        {
+          priv->dev[BMI270_GY_IDX].lower.push_event(
+                priv->dev[BMI270_GY_IDX].lower.priv,
+                priv->temp_gy,
+                sizeof(struct sensor_gyro) * counter_gy);
+        }
     }
 
   priv->timestamp_fifolast = priv->timestamp;
@@ -3915,7 +3909,6 @@ static int bmi270_batch(FAR struct file *filep,
     }
   else
     {
-      snerr("err sen type\n");
       return -EINVAL;
     }
 
@@ -3947,7 +3940,6 @@ static int bmi270_batch(FAR struct file *filep,
         }
       else
         {
-          snerr("err sen type\n");
           return -EINVAL;
         }
 
@@ -3973,7 +3965,6 @@ static int bmi270_batch(FAR struct file *filep,
         }
       else
         {
-          snerr("err sen type\n");
           return -EINVAL;
         }
 
@@ -4163,7 +4154,6 @@ static int bmi270_set_interval(FAR struct file *filep,
     }
   else
     {
-      snerr("err sen type\n");
       return -EINVAL;
     }
 
@@ -4302,7 +4292,6 @@ static int bmi270_activate(FAR struct file *filep,
     }
   else
     {
-      snerr("err sen type\n");
       return -EINVAL;
     }
 
@@ -4321,7 +4310,6 @@ static int bmi270_activate(FAR struct file *filep,
       ret = bmi270_temp_enable(priv, BMI270_DISABLE);
       if (ret < 0)
         {
-          snerr("dis temp fail:%d\n", ret);
           return ret;
         }
     }
@@ -4330,7 +4318,6 @@ static int bmi270_activate(FAR struct file *filep,
       ret = bmi270_temp_enable(priv, BMI270_ENABLE);
       if (ret < 0)
         {
-          snerr("en temp fail:%d\n", ret);
           return ret;
         }
     }
@@ -4389,7 +4376,6 @@ static int bmi270_selftest(FAR struct file *filep,
     }
   else
     {
-      snerr("err sen type\n");
       return -EINVAL;
     }
 
@@ -4472,7 +4458,6 @@ static int bmi270_control(FAR struct file *filep,
     }
   else
     {
-      snerr("err sen type\n");
       return -EINVAL;
     }
 
@@ -4746,7 +4731,6 @@ int bmi270_register(int devno, FAR const struct bmi270_config_s *config)
                            IOEXPANDER_DIRECTION_IN_PULLDOWN);
   if (ret < 0)
     {
-      snerr("set dir fail:%d\n", ret);
       goto err;
     }
 
@@ -4764,7 +4748,6 @@ int bmi270_register(int devno, FAR const struct bmi270_config_s *config)
                         (FAR void *)IOEXPANDER_VAL_DISABLE);
   if (ret < 0)
     {
-      snerr("set option fail:%d\n", ret);
       goto err_detach;
     }
 
@@ -4773,14 +4756,12 @@ int bmi270_register(int devno, FAR const struct bmi270_config_s *config)
   ret = sensor_register((&(priv->dev[BMI270_XL_IDX].lower)), devno);
   if (ret < 0)
     {
-      snerr("regist bmi270 xl fail:%d\n", ret);
       goto err_detach;
     }
 
   ret = sensor_register((&(priv->dev[BMI270_GY_IDX].lower)), devno);
   if (ret < 0)
     {
-      snerr("regist bmi270 gy fail:%d\n", ret);
       sensor_unregister((&(priv->dev[BMI270_XL_IDX].lower)), devno);
       goto err_detach;
     }
@@ -4790,7 +4771,6 @@ int bmi270_register(int devno, FAR const struct bmi270_config_s *config)
     {
       sensor_unregister((&(priv->dev[BMI270_XL_IDX].lower)), devno);
       sensor_unregister((&(priv->dev[BMI270_GY_IDX].lower)), devno);
-      snerr("regist bmi270 ft fail:%d\n", ret);
       goto err_detach;
     }
 
