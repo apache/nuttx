@@ -419,7 +419,7 @@ static int pat9126ja_updatereg(FAR struct pat9126ja_dev_s *priv,
   ret = pat9126ja_readreg(priv, regaddr, &old_value);
   if (ret < 0)
     {
-      snerr("Failed to read register: %d\n", ret);
+      snerr("pat9126ja I2C err:%d\n", ret);
       return ret;
     }
 
@@ -462,16 +462,10 @@ static int pat9126ja_readdevid(FAR struct pat9126ja_dev_s *priv)
   int ret;
 
   ret = pat9126ja_readreg(priv, PAT9126JA_REG_WHOAMI, &regval);
-  if (ret < 0)
+  if (ret < 0 || regval != PAT9126JA_WHOAMI_VALUE)
     {
-      snerr("Failed to read device id: %d\n", ret);
+      snerr("pat9126ja ID err:%d\n", ret);
       return ret;
-    }
-
-  if (regval != PAT9126JA_WHOAMI_VALUE)
-    {
-      snerr("Wrong device ID: %x\n", regval);
-      return -ENODEV;
     }
 
   return ret;
@@ -506,20 +500,12 @@ static int pat9126ja_writeprotect(FAR struct pat9126ja_dev_s *priv,
       ret = pat9126ja_updatereg(priv, PAT9126JA_REG_W_PROTECT,
                                 PAT9126JA_MASK_W_PROTECT,
                                 PAT9126JA_ENABLE_W_PROTECT);
-      if (ret < 0)
-        {
-          snerr("Failed to enable write protect: %d\n", ret);
-        }
     }
   else
     {
       ret = pat9126ja_updatereg(priv, PAT9126JA_REG_W_PROTECT,
                                 PAT9126JA_MASK_W_PROTECT,
                                 PAT9126JA_DISABLE_W_PROTECT);
-      if (ret < 0)
-        {
-          snerr("Failed to disable write protect: %d\n", ret);
-        }
     }
 
   return ret;
@@ -566,7 +552,6 @@ static int pat9126ja_reset(FAR struct pat9126ja_dev_s *priv)
       ret = pat9126ja_readreg(priv, PAT9126JA_REG_CONFIG, &regval);
       if (ret < 0)
         {
-          snerr("Failed to read reset status: %d\n", ret);
           return ret;
         }
 
@@ -577,7 +562,7 @@ static int pat9126ja_reset(FAR struct pat9126ja_dev_s *priv)
 
       if (count > PAT9126JA_RESET_MAX_COUNT)
         {
-          snerr("Reset timeout: %d\n", count);
+          snerr("pat9126ja RESET err:%d\n", ret);
           return -EIO;
         }
     }
@@ -614,20 +599,12 @@ static int pat9126ja_setmode(FAR struct pat9126ja_dev_s *priv,
   /* If the chip is powerdown, need to exit this state */
 
   ret = pat9126ja_readreg(priv, PAT9126JA_REG_CONFIG, &regval);
-  if (ret < 0)
-    {
-      snerr("Failied to read config register: %d\n", ret);
-    }
 
   if ((regval & PAT9126JA_MASK_CONFIG_PD_ENH)
       >> PAT9126JA_SHIFT_CONFIG_PD_ENH)
     {
       ret = pat9126ja_writereg(priv, PAT9126JA_REG_CONFIG,
                                PAT9126JA_CONFIG_RESET_OK);
-      if (ret < 0)
-        {
-          snerr("Failed to make chip exit powerdown: %d\n", ret);
-        }
     }
 
   switch (mode)
@@ -636,10 +613,6 @@ static int pat9126ja_setmode(FAR struct pat9126ja_dev_s *priv,
         {
           ret = pat9126ja_writereg(priv, PAT9126JA_REG_MODE,
                                    PAT9126JA_MODE_WAKEUP_TO_RUN);
-          if (ret < 0)
-            {
-              snerr("Failed to make chip wake up to run: %d\n", ret);
-            }
         }
         break;
 
@@ -647,10 +620,6 @@ static int pat9126ja_setmode(FAR struct pat9126ja_dev_s *priv,
         {
           ret = pat9126ja_writereg(priv, PAT9126JA_REG_MODE,
                                    PAT9126JA_MODE_EN_SLP1_DIS_SLP2);
-          if (ret < 0)
-            {
-              snerr("Failed to make chip into lowpower1 mode: %d\n", ret);
-            }
         }
         break;
 
@@ -658,10 +627,6 @@ static int pat9126ja_setmode(FAR struct pat9126ja_dev_s *priv,
         {
           ret = pat9126ja_writereg(priv, PAT9126JA_REG_MODE,
                                    PAT9126JA_MODE_EN_SLP1_SLP2);
-          if (ret < 0)
-            {
-              snerr("Failed to make chip into lowpower2 mode: %d\n", ret);
-            }
         }
         break;
 
@@ -669,16 +634,11 @@ static int pat9126ja_setmode(FAR struct pat9126ja_dev_s *priv,
         {
           ret = pat9126ja_writereg(priv, PAT9126JA_REG_CONFIG,
                                    PAT9126JA_CONFIG_POWERDOWN);
-          if (ret < 0)
-            {
-              snerr("Failied to make chip into powerdown state: %d\n", ret);
-            }
         }
         break;
 
       default:
         {
-          snerr("Mode type is not supported\n");
           return -EINVAL;
         }
    }
@@ -714,7 +674,6 @@ static int pat9126ja_isready(FAR struct pat9126ja_dev_s *priv,
   ret = pat9126ja_readreg(priv, PAT9126JA_REG_MOTION_STATUS, &status);
   if (ret < 0)
     {
-      snerr("Failed to read motion status: %d\n", ret);
       return ret;
     }
 
@@ -756,21 +715,18 @@ static int pat9126ja_getdata(FAR struct pat9126ja_dev_s *priv,
   ret = pat9126ja_readreg(priv, PAT9126JA_REG_DELTA_X_LO, &x_low);
   if (ret < 0)
     {
-      snerr("Failed to read delta_x_lo: %d\n", ret);
       return ret;
     }
 
   ret = pat9126ja_readreg(priv, PAT9126JA_REG_DELTA_Y_LO, &y_low);
   if (ret < 0)
     {
-      snerr("Failed to read delta_y_lo: %d\n", ret);
       return ret;
     }
 
   ret = pat9126ja_readreg(priv, PAT9126JA_REG_DELTA_XY_HI, &xy_hi);
   if (ret < 0)
     {
-      snerr("Failed to read xy_hi: %d\n", ret);
       return ret;
     }
 
@@ -824,7 +780,6 @@ static int pat9126ja_read_push(FAR struct pat9126ja_dev_s *priv, bool push)
   ret = pat9126ja_isready(priv, &status);
   if (ret)
     {
-      snerr("Failed to check is ready: %d\n", ret);
       return ret;
     }
 
@@ -835,7 +790,6 @@ static int pat9126ja_read_push(FAR struct pat9126ja_dev_s *priv, bool push)
       ret = pat9126ja_getdata(priv, &ots);
       if (ret < 0)
         {
-          snerr("Failed to get data: %d\n", ret);
           return ret;
         }
     }
@@ -882,7 +836,6 @@ static int pat9126ja_initchip(FAR struct pat9126ja_dev_s *priv)
   ret = pat9126ja_readdevid(priv);
   if (ret < 0)
     {
-      snerr("Failed to reading chip id: %d\n", ret);
       return ret;
     }
 
@@ -891,7 +844,6 @@ static int pat9126ja_initchip(FAR struct pat9126ja_dev_s *priv)
   ret = pat9126ja_reset(priv);
   if (ret < 0)
     {
-      snerr("Failed to reset chip: %d\n", ret);
       return ret;
     }
 
@@ -900,7 +852,6 @@ static int pat9126ja_initchip(FAR struct pat9126ja_dev_s *priv)
   ret = pat9126ja_writereg(priv, PAT9126JA_REG_BANK, PAT9126JA_BANK0);
   if (ret < 0)
     {
-      snerr("Failed to swicth to bank0: %d\n", ret);
       return ret;
     }
 
@@ -909,7 +860,6 @@ static int pat9126ja_initchip(FAR struct pat9126ja_dev_s *priv)
   ret = pat9126ja_writeprotect(priv, PAT9126JA_DISABLE);
   if (ret < 0)
     {
-      snerr("Failed to disable write protect: %d\n", ret);
       return ret;
     }
 
@@ -919,7 +869,6 @@ static int pat9126ja_initchip(FAR struct pat9126ja_dev_s *priv)
                            priv->dev.x_resolution);
   if (ret < 0)
     {
-      snerr("Failed to set X-axis resolution: %d\n", ret);
       return ret;
     }
 
@@ -929,7 +878,6 @@ static int pat9126ja_initchip(FAR struct pat9126ja_dev_s *priv)
                            PAT9126JA_Y_RESOLUTION);
   if (ret < 0)
     {
-      snerr("Failed to set Y-axis resolution: %d\n", ret);
       return ret;
     }
 
@@ -939,7 +887,6 @@ static int pat9126ja_initchip(FAR struct pat9126ja_dev_s *priv)
                            PAT9126JA_DATAFORMAT_12_BIT);
   if (ret < 0)
     {
-      snerr("Failed to set 12-bit X/Y data format: %d\n", ret);
       return ret;
     }
 
@@ -949,7 +896,6 @@ static int pat9126ja_initchip(FAR struct pat9126ja_dev_s *priv)
                            PAT9126JA_LOWVOLT_SEGMENT);
   if (ret < 0)
     {
-      snerr("Failed to set the chip for low voltage segment: %d\n", ret);
       return ret;
     }
 
@@ -959,7 +905,6 @@ static int pat9126ja_initchip(FAR struct pat9126ja_dev_s *priv)
                            PAT9126JA_FEATURE1_VALUE);
   if (ret < 0)
     {
-      snerr("Failed to set feature1 register: %d\n", ret);
       return ret;
     }
 
@@ -967,16 +912,11 @@ static int pat9126ja_initchip(FAR struct pat9126ja_dev_s *priv)
                            PAT9126JA_FEATURE2_VALUE);
   if (ret < 0)
     {
-      snerr("Failed to set feature2 register: %d\n", ret);
       return ret;
     }
 
   ret = pat9126ja_writereg(priv, PAT9126JA_REG_FEATURE3,
                            PAT9126JA_FEATURE3_VALUE);
-  if (ret < 0)
-    {
-      snerr("Failed to set feature3 register: %d\n", ret);
-    }
 
   return ret;
 }
@@ -1030,14 +970,12 @@ static int pat9126ja_activate(FAR struct file *filep,
       ret = pat9126ja_read_push(priv, false);
       if (ret < 0)
         {
-          snerr("ERROR: Failed to read push: %d\n", ret);
           return ret;
         }
 
       ret = pat9126ja_setmode(priv, PAT9126JA_MODE_NORMAL);
       if (ret < 0)
         {
-          snerr("ERROR: Failed to set chip run in normal mode: %d\n", ret);
           return ret;
         }
 
@@ -1050,7 +988,6 @@ static int pat9126ja_activate(FAR struct file *filep,
       ret = pat9126ja_setmode(priv, PAT9126JA_MODE_POWERDOWN);
       if (ret < 0)
         {
-          snerr("ERROR: Failed to set chip powerdown: %d\n", ret);
           return ret;
         }
 
@@ -1112,7 +1049,7 @@ static int pat9126ja_selftest(FAR struct file *filep,
 
       default:                     /* Other cmd tag */
         {
-          snerr("ERROR: Cmd is not supported: %d\n", ret);
+          ret = -EINVAL;
         }
         break;
     }
@@ -1161,7 +1098,7 @@ static int pat9126ja_set_calibvalue(FAR struct file *filep,
   ret = pat9126ja_writereg(priv, PAT9126JA_REG_RES_X, x_res);
   if (ret < 0)
     {
-      snerr("Failed to set X-axis resolution: %d\n", ret);
+      return ret;
     }
   else
     {
@@ -1434,7 +1371,6 @@ int pat9126ja_register(int devno,
   priv = kmm_zalloc(sizeof(*priv));
   if (priv == NULL)
     {
-      snerr("ERROR: Failed to allocate instance\n");
       return -ENOMEM;
     }
 
@@ -1449,7 +1385,6 @@ int pat9126ja_register(int devno,
   ret = pat9126ja_initchip(priv);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to init chip: %d\n", ret);
       goto err;
     }
 
@@ -1459,7 +1394,6 @@ int pat9126ja_register(int devno,
                            IOEXPANDER_DIRECTION_IN_PULLUP);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to set direction: %d\n", ret);
       goto err;
     }
 
@@ -1468,7 +1402,6 @@ int pat9126ja_register(int devno,
   if (ioephandle == NULL)
     {
       ret = -EIO;
-      snerr("ERROR: Failed to attach: %d\n", ret);
       goto err;
     }
 
@@ -1477,7 +1410,6 @@ int pat9126ja_register(int devno,
                         (FAR void *)IOEXPANDER_VAL_DISABLE);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to set option: %d\n", ret);
       goto irq_err;
     }
 
@@ -1486,7 +1418,6 @@ int pat9126ja_register(int devno,
   ret = sensor_register(&priv->dev.lower, devno);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to register driver: %d\n", ret);
       goto irq_err;
     }
 
