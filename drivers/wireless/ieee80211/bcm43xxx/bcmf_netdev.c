@@ -518,13 +518,11 @@ static void bcmf_tx_poll_work(FAR void *arg)
 
           devif_poll(&priv->bc_dev, bcmf_txpoll);
 
-          /* Break out the continuous send if :
-           * 1. IP stack has no data to send.
-           * 2. RX worker ready.
+          /* Break out the continuous send if IP stack has
+           * no data to send.
            */
 
-          if (priv->cur_tx_frame != NULL ||
-              !work_available(&priv->bc_rxwork))
+          if (priv->cur_tx_frame != NULL)
             {
               break;
             }
