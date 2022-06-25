@@ -273,10 +273,15 @@ static int sensor_update_interval(FAR struct file *filep,
       if (min_interval != ULONG_MAX &&
           min_interval != upper->state.min_interval)
         {
+          unsigned long expected_interval = min_interval;
           ret = lower->ops->set_interval(filep, lower, &min_interval);
           if (ret < 0)
             {
               return ret;
+            }
+          else if (min_interval > expected_interval)
+            {
+              return -EINVAL;
             }
         }
 
