@@ -472,7 +472,7 @@ int bcmf_sdpcm_queue_frame(FAR struct bcmf_dev_s *priv,
   /* Notify bcmf thread tx frame is ready */
 
   nxsem_get_value(&sbus->thread_signal, &semcount);
-  if (semcount < 0)
+  if (semcount < 1)
     {
       nxsem_post(&sbus->thread_signal);
     }

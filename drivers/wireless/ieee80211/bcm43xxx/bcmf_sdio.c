@@ -140,7 +140,7 @@ int bcmf_oob_irq(FAR void *arg)
       sbus->irq_pending = true;
 
       nxsem_get_value(&sbus->thread_signal, &semcount);
-      if (semcount < 0)
+      if (semcount < 1)
         {
           nxsem_post(&sbus->thread_signal);
         }
