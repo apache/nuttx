@@ -150,7 +150,7 @@ int bcmf_netdev_alloc_tx_frame(FAR struct bcmf_dev_s *priv)
                                                MAX_NETDEV_PKTSIZE, false);
   if (!priv->cur_tx_frame)
     {
-      wlerr("ERROR: Cannot allocate TX frame\n");
+      wlinfo("ERROR: Cannot allocate TX frame\n");
       return -ENOMEM;
     }
 
