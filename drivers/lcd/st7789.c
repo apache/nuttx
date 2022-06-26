@@ -646,6 +646,7 @@ static int st7789_getplaneinfo(FAR struct lcd_dev_s *dev,
 #endif
   pinfo->buffer = (FAR uint8_t *)priv->runbuffer; /* Run scratch buffer */
   pinfo->bpp    = priv->bpp;                      /* Bits-per-pixel */
+  pinfo->dev    = dev;                            /* The lcd device */
   return OK;
 }
 

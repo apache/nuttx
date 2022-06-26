@@ -723,6 +723,7 @@ static int st7565_getplaneinfo(FAR struct lcd_dev_s *dev,
   DEBUGASSERT(dev && pinfo && planeno == 0);
   ginfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
+  pinfo->dev = dev;
   return OK;
 }
 
