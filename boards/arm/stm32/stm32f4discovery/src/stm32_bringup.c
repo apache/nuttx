@@ -347,6 +347,17 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_CAPTURE
+  /* Initialize Capture and register the Capture driver. */
+
+  ret = stm32_capture_setup("/dev/capture0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_capture_setup failed: %d\n", ret);
+      return ret;
+    }
+#endif
+
 #ifdef CONFIG_STM32_CAN_CHARDRIVER
   /* Initialize CAN and register the CAN driver. */
 

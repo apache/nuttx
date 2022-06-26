@@ -243,6 +243,15 @@
 #define STM32F4DISCOVERY_PWMTIMER   4
 #define STM32F4DISCOVERY_PWMCHANNEL 2
 
+/* Capture
+ *
+ * The STM32F4 Discovery has no real on-board pwm capture devices, but the
+ * board can be configured to capture pwm using TIM3 CH2 PB5.
+ */
+
+#define STM32F4DISCOVERY_CAPTURETIMER   3
+#define STM32F4DISCOVERY_CAPTURECHANNEL 2
+
 /* SPI chip selects */
 
 #define GPIO_CS_MEMS      (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
@@ -553,6 +562,18 @@ int stm32_usbhost_initialize(void);
 
 #ifdef CONFIG_PWM
 int stm32_pwm_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_capture_setup
+ *
+ * Description:
+ *  Initialize pwm capture support
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CAPTURE
+int stm32_capture_setup(FAR const char *devpath);
 #endif
 
 /****************************************************************************

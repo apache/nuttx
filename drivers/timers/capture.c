@@ -358,7 +358,6 @@ int cap_register(FAR const char *devpath, FAR struct cap_lowerhalf_s *lower)
            kmm_zalloc(sizeof(struct cap_upperhalf_s));
   if (!upper)
     {
-      snprintf("ERROR: Allocation failed\n");
       return -ENOMEM;
     }
 
