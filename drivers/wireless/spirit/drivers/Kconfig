@@ -9,7 +9,7 @@ config SPIRIT_NETDEV
 	select WL_SPIRIT
 	select ARCH_HAVE_NETDEV_STATISTICS
 	---help---
-		This selection enables support for the TMicro Spirit1-based device.
+		This selection enables support for the STMicro Spirit1-based device.
 		This configuration generates an IEEE802.15.4 work-alike radio device that
 		works with the 6LoWPAN stack.
 
