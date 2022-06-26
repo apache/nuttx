@@ -314,6 +314,15 @@
 
 #define GPIO_TIM4_CH2OUT  GPIO_TIM4_CH2OUT_2
 
+/* Capture
+ *
+ * The STM32F4 Discovery has no real on-board pwm capture devices, but the
+ * board can be configured to capture pwm using TIM3 CH2 PB5.
+ */
+
+#define GPIO_TIM3_CH2IN  GPIO_TIM3_CH2IN_2
+#define GPIO_TIM3_CH1IN  GPIO_TIM3_CH2IN_2
+
 /* RGB LED
  *
  * R = TIM1 CH1 on PE9 | G = TIM2 CH2 on PA1 | B = TIM3 CH3 on PB0
