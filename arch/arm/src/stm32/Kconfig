@@ -3413,6 +3413,10 @@ config STM32_PWM
 	bool
 	default n
 
+config STM32_CAP
+	bool
+	default n
+
 config STM32_COMP
 	bool
 	default n
@@ -6765,121 +6769,349 @@ config STM32_TIM1_CAP
 	bool "TIM1 Capture"
 	default n
 	depends on STM32_TIM1
+	select STM32_CAP
 	---help---
 		Reserve timer 1 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
 
+if STM32_TIM1_CAP
+
+config STM32_TIM1_CHANNEL
+	int "TIM1 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM1 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config STM32_TIM1_CLOCK
+	int "TIM1 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # STM32_TIM1_CAP
+
 config STM32_TIM2_CAP
 	bool "TIM2 Capture"
 	default n
 	depends on STM32_TIM2
+	select STM32_CAP
 	---help---
 		Reserve timer 2 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
 
+if STM32_TIM2_CAP
+
+config STM32_TIM2_CHANNEL
+	int "TIM2 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM2 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config STM32_TIM2_CLOCK
+	int "TIM2 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # STM32_TIM2_CAP
+
 config STM32_TIM3_CAP
 	bool "TIM3 Capture"
 	default n
 	depends on STM32_TIM3
+	select STM32_CAP
 	---help---
 		Reserve timer 3 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
 
+if STM32_TIM3_CAP
+
+config STM32_TIM3_CHANNEL
+	int "TIM3 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM3 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config STM32_TIM3_CLOCK
+	int "TIM3 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # STM32_TIM3_CAP
+
 config STM32_TIM4_CAP
 	bool "TIM4 Capture"
 	default n
 	depends on STM32_TIM4
+	select STM32_CAP
 	---help---
 		Reserve timer 4 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
 
+if STM32_TIM4_CAP
+
+config STM32_TIM4_CHANNEL
+	int "TIM4 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM4 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config STM32_TIM4_CLOCK
+	int "TIM4 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # STM32_TIM4_CAP
+
 config STM32_TIM5_CAP
 	bool "TIM5 Capture"
 	default n
 	depends on STM32_TIM5
+	select STM32_CAP
 	---help---
 		Reserve timer 5 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
 
+if STM32_TIM5_CAP
+
+config STM32_TIM5_CHANNEL
+	int "TIM5 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM5 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config STM32_TIM5_CLOCK
+	int "TIM5 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # STM32_TIM5_CAP
+
 config STM32_TIM8_CAP
 	bool "TIM8 Capture"
 	default n
 	depends on STM32_TIM8
+	select STM32_CAP
 	---help---
 		Reserve timer 8 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
 
+if STM32_TIM8_CAP
+
+config STM32_TIM8_CHANNEL
+	int "TIM8 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM8 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config STM32_TIM8_CLOCK
+	int "TIM8 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # STM32_TIM8_CAP
+
 config STM32_TIM9_CAP
 	bool "TIM9 Capture"
 	default n
 	depends on STM32_TIM9
+	select STM32_CAP
 	---help---
 		Reserve timer 9 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
 
+if STM32_TIM9_CAP
+
+config STM32_TIM9_CHANNEL
+	int "TIM9 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM9 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config STM32_TIM9_CLOCK
+	int "TIM9 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # STM32_TIM9_CAP
+
 config STM32_TIM10_CAP
 	bool "TIM10 Capture"
 	default n
 	depends on STM32_TIM10
+	select STM32_CAP
 	---help---
 		Reserve timer 10 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
 
+if STM32_TIM10_CAP
+
+config STM32_TIM10_CHANNEL
+	int "TIM10 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM10 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config STM32_TIM10_CLOCK
+	int "TIM10 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # STM32_TIM10_CAP
+
 config STM32_TIM11_CAP
 	bool "TIM11 Capture"
 	default n
 	depends on STM32_TIM11
+	select STM32_CAP
 	---help---
 		Reserve timer 11 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
 
+if STM32_TIM11_CAP
+
+config STM32_TIM11_CHANNEL
+	int "TIM11 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM11 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config STM32_TIM11_CLOCK
+	int "TIM11 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # STM32_TIM11_CAP
+
 config STM32_TIM12_CAP
 	bool "TIM12 Capture"
 	default n
 	depends on STM32_TIM12
+	select STM32_CAP
 	---help---
 		Reserve timer 12 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
 
+if STM32_TIM12_CAP
+
+config STM32_TIM12_CHANNEL
+	int "TIM12 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM12 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config STM32_TIM12_CLOCK
+	int "TIM12 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # STM32_TIM12_CAP
+
 config STM32_TIM13_CAP
 	bool "TIM13 Capture"
 	default n
 	depends on STM32_TIM13
+	select STM32_CAP
 	---help---
 		Reserve timer 13 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
 
+if STM32_TIM13_CAP
+
+config STM32_TIM13_CHANNEL
+	int "TIM13 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM13 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config STM32_TIM13_CLOCK
+	int "TIM13 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # STM32_TIM13_CAP
+
 config STM32_TIM14_CAP
 	bool "TIM14 Capture"
 	default n
 	depends on STM32_TIM14
+	select STM32_CAP
 	---help---
 		Reserve timer 14 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
+
+if STM32_TIM14_CAP
+
+config STM32_TIM14_CHANNEL
+	int "TIM14 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM14 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config STM32_TIM14_CLOCK
+	int "TIM14 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # STM32_TIM14_CAP
 
 menu "STM32 TIMx Outputs Configuration"
 
