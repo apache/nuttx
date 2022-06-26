@@ -71,23 +71,28 @@
  */
 
 #if defined(CONFIG_STM32_TIM1_PWM) || defined (CONFIG_STM32_TIM1_ADC) || \
-    defined(CONFIG_STM32_TIM1_DAC) || defined(CONFIG_STM32_TIM1_QE)
+    defined(CONFIG_STM32_TIM1_DAC) || defined(CONFIG_STM32_TIM1_QE) || \
+    defined(CONFIG_STM32_TIM1_CAP)
 #  undef CONFIG_STM32_TIM1
 #endif
 #if defined(CONFIG_STM32_TIM2_PWM) || defined (CONFIG_STM32_TIM2_ADC) || \
-    defined(CONFIG_STM32_TIM2_DAC) || defined(CONFIG_STM32_TIM2_QE)
+    defined(CONFIG_STM32_TIM2_DAC) || defined(CONFIG_STM32_TIM2_QE) || \
+    defined(CONFIG_STM32_TIM2_CAP)
 #  undef CONFIG_STM32_TIM2
 #endif
 #if defined(CONFIG_STM32_TIM3_PWM) || defined (CONFIG_STM32_TIM3_ADC) || \
-    defined(CONFIG_STM32_TIM3_DAC) || defined(CONFIG_STM32_TIM3_QE)
+    defined(CONFIG_STM32_TIM3_DAC) || defined(CONFIG_STM32_TIM3_QE) || \
+    defined(CONFIG_STM32_TIM3_CAP)
 #  undef CONFIG_STM32_TIM3
 #endif
 #if defined(CONFIG_STM32_TIM4_PWM) || defined (CONFIG_STM32_TIM4_ADC) || \
-    defined(CONFIG_STM32_TIM4_DAC) || defined(CONFIG_STM32_TIM4_QE)
+    defined(CONFIG_STM32_TIM4_DAC) || defined(CONFIG_STM32_TIM4_QE) || \
+    defined(CONFIG_STM32_TIM4_CAP)
 #  undef CONFIG_STM32_TIM4
 #endif
 #if defined(CONFIG_STM32_TIM5_PWM) || defined (CONFIG_STM32_TIM5_ADC) || \
-    defined(CONFIG_STM32_TIM5_DAC) || defined(CONFIG_STM32_TIM5_QE)
+    defined(CONFIG_STM32_TIM5_DAC) || defined(CONFIG_STM32_TIM5_QE) || \
+    defined(CONFIG_STM32_TIM5_CAP)
 #  undef CONFIG_STM32_TIM5
 #endif
 #if defined(CONFIG_STM32_TIM6_PWM) || defined (CONFIG_STM32_TIM6_ADC) || \
@@ -99,31 +104,38 @@
 #  undef CONFIG_STM32_TIM7
 #endif
 #if defined(CONFIG_STM32_TIM8_PWM) || defined (CONFIG_STM32_TIM8_ADC) || \
-    defined(CONFIG_STM32_TIM8_DAC) || defined(CONFIG_STM32_TIM8_QE)
+    defined(CONFIG_STM32_TIM8_DAC) || defined(CONFIG_STM32_TIM8_QE) || \
+    defined(CONFIG_STM32_TIM8_CAP)
 #  undef CONFIG_STM32_TIM8
 #endif
 #if defined(CONFIG_STM32_TIM9_PWM) || defined (CONFIG_STM32_TIM9_ADC) || \
-    defined(CONFIG_STM32_TIM9_DAC) || defined(CONFIG_STM32_TIM9_QE)
+    defined(CONFIG_STM32_TIM9_DAC) || defined(CONFIG_STM32_TIM9_QE) || \
+    defined(CONFIG_STM32_TIM9_CAP)
 #  undef CONFIG_STM32_TIM9
 #endif
 #if defined(CONFIG_STM32_TIM10_PWM) || defined (CONFIG_STM32_TIM10_ADC) || \
-    defined(CONFIG_STM32_TIM10_DAC) || defined(CONFIG_STM32_TIM10_QE)
+    defined(CONFIG_STM32_TIM10_DAC) || defined(CONFIG_STM32_TIM10_QE) || \
+    defined(CONFIG_STM32_TIM10_CAP)
 #  undef CONFIG_STM32_TIM10
 #endif
 #if defined(CONFIG_STM32_TIM11_PWM) || defined (CONFIG_STM32_TIM11_ADC) || \
-    defined(CONFIG_STM32_TIM11_DAC) || defined(CONFIG_STM32_TIM11_QE)
+    defined(CONFIG_STM32_TIM11_DAC) || defined(CONFIG_STM32_TIM11_QE) || \
+    defined(CONFIG_STM32_TIM11_CAP)
 #  undef CONFIG_STM32_TIM11
 #endif
 #if defined(CONFIG_STM32_TIM12_PWM) || defined (CONFIG_STM32_TIM12_ADC) || \
-    defined(CONFIG_STM32_TIM12_DAC) || defined(CONFIG_STM32_TIM12_QE)
+    defined(CONFIG_STM32_TIM12_DAC) || defined(CONFIG_STM32_TIM12_QE) || \
+    defined(CONFIG_STM32_TIM12_CAP)
 #  undef CONFIG_STM32_TIM12
 #endif
 #if defined(CONFIG_STM32_TIM13_PWM) || defined (CONFIG_STM32_TIM13_ADC) || \
-    defined(CONFIG_STM32_TIM13_DAC) || defined(CONFIG_STM32_TIM13_QE)
+    defined(CONFIG_STM32_TIM13_DAC) || defined(CONFIG_STM32_TIM13_QE) || \
+    defined(CONFIG_STM32_TIM13_CAP)
 #  undef CONFIG_STM32_TIM13
 #endif
 #if defined(CONFIG_STM32_TIM14_PWM) || defined (CONFIG_STM32_TIM14_ADC) || \
-    defined(CONFIG_STM32_TIM14_DAC) || defined(CONFIG_STM32_TIM14_QE)
+    defined(CONFIG_STM32_TIM14_DAC) || defined(CONFIG_STM32_TIM14_QE) || \
+    defined(CONFIG_STM32_TIM14_CAP)
 #  undef CONFIG_STM32_TIM14
 #endif
 #if defined(CONFIG_STM32_TIM15_PWM) || defined (CONFIG_STM32_TIM15_ADC) || \
