@@ -125,10 +125,6 @@ int bcmf_sdpcm_process_header(FAR struct bcmf_sdio_dev_s *sbus,
 
   sbus->max_seq = header->credit;
 
-  /* Update flow control status */
-
-  sbus->flow_ctrl = (header->flow_control != 0);
-
   return OK;
 }
 
@@ -356,11 +352,6 @@ int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv)
       /* No more frames to send */
 
       return -ENODATA;
-    }
-
-  if (sbus->flow_ctrl)
-    {
-      return -EAGAIN;
     }
 
   if (sbus->tx_seq == sbus->max_seq)
