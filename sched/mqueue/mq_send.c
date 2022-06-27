@@ -91,7 +91,7 @@ int file_mq_send(FAR struct file *mq, FAR const char *msg, size_t msglen,
    * - Immediately if we are called from an interrupt handler.
    * - Immediately if the message queue is not full, or
    * - After successfully waiting for the message queue to become
-   *   non-FULL.  This would fail with EAGAIN, EINTR, or ETIMEOUT.
+   *   non-FULL.  This would fail with EAGAIN, EINTR, or ETIMEDOUT.
    */
 
   flags = enter_critical_section();
