@@ -82,15 +82,14 @@
 #define DL_BEGIN              0x0002
 #define DL_END                0x0004
 
-#define WPA_OUI               "\x00\x50\xF2"  /* WPA OUI */
 #define WPA_OUI_LEN           3               /* WPA OUI length */
-#define WPA_OUI_TYPE          1
-#define WPA_VERSION           1               /* WPA version */
 #define WPA_VERSION_LEN       2               /* WPA version length */
 #define WLAN_WPA_OUI          0xf25000
 #define WLAN_WPA_OUI_TYPE     0x01
 #define WLAN_WPA_SEL(x)       (((x) << 24) | WLAN_WPA_OUI)
 #define WLAN_AKM_PSK          0x02
+#define SUITE(oui, id)        (((oui) << 8) | (id))
+#define WLAN_AKM_SUITE_PSK    SUITE(0x000FAC, WLAN_AKM_PSK)
 
 /****************************************************************************
  * Private Types
@@ -788,6 +787,11 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
           continue;
         }
 
+      if (bss->ctl_ch == 0)
+        {
+          continue;
+        }
+
       ie_offset = 0;
       ie_buffer = (FAR uint8_t *)bss + bss->ie_offset;
 
@@ -813,7 +817,7 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
 
           switch (ie_buffer[ie_offset])
             {
-              case WLAN_EID_RSN:
+              case IEEE80211_ELEMID_RSN:
                 {
                   FAR wpa_rsn_t *rsn = (FAR wpa_rsn_t *)
                                        &ie_buffer[ie_offset + 2];
@@ -846,14 +850,16 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
                   break;
                 }
 
-              case WLAN_EID_VENDOR_SPECIFIC:
+              case IEEE80211_ELEMID_VENDOR:
                 {
                   FAR wpa_ie_fixed_t *ie = (FAR wpa_ie_fixed_t *)
                                            &ie_buffer[ie_offset];
                   FAR wpa_akm_t *akm;
                   FAR wpa_rsn_t *rsn;
 
-                  if (memcmp(&ie->oui[0], WPA_OUI "\x01", 4))
+                  /* WPA_OUI */
+
+                  if (memcmp(&ie->oui[0], "\x00\x50\xf2\x01", 4))
                     {
                       break;
                     }
@@ -2015,7 +2021,8 @@ int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
                        (FAR uint8_t *)&ssid, &out_len);
   if (ret == OK)
     {
-      ret = bcmf_sem_wait(priv->auth_signal, BCMF_AUTH_TIMEOUT_MS);
+      ret = nxsem_tickwait_uninterruptible(priv->auth_signal,
+                                     MSEC2TICK(BCMF_AUTH_TIMEOUT_MS));
     }
 
   priv->auth_signal = NULL;
@@ -2034,7 +2041,7 @@ int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
         break;
 
       default:
-        wlerr("AP join failed %d\n", priv->auth_status);
+        wlerr("AP join failed %" PRIu32 "\n", priv->auth_status);
         ret = -EINVAL;
         break;
     }
