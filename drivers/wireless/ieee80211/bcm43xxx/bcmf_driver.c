@@ -830,6 +830,11 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
           continue;
         }
 
+      if (bss->ctl_ch == 0)
+        {
+          continue;
+        }
+
       ie_offset = 0;
       ie_buffer = (FAR uint8_t *)bss + bss->ie_offset;
 
