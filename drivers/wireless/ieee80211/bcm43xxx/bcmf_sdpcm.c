@@ -204,7 +204,7 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
 
   /* Request free frame buffer */
 
-  sframe = bcmf_sdio_allocate_frame(priv, true, false);
+  sframe = bcmf_sdio_allocate_frame(priv, false, false);
 
   if (sframe == NULL)
     {
