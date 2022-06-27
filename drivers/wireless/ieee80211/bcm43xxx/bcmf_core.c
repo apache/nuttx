@@ -299,6 +299,8 @@ int bcmf_upload_file(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
 
       total_read = nread;
 
+      nxsig_usleep(1 * 1000);
+
       /* Transfer firmware data */
 
       ret = bcmf_transfer_bytes(sbus, true, 1,
