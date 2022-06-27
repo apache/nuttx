@@ -754,7 +754,9 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
           /* Check if current bss AP is not already detected */
 
           if (memcmp(&curr->BSSID, &bss[i].BSSID,
-                     sizeof(curr->BSSID)) == 0)
+                     sizeof(curr->BSSID)) == 0 ||
+              memcmp(&curr->SSID, &bss[i].SSID,
+                     sizeof(curr->SSID)) == 0)
             {
               /* Replace the duplicate entry if rssi is
                * better than before
