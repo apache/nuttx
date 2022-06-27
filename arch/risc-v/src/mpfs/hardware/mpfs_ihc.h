@@ -74,43 +74,43 @@
 
 /* My Hart 0 */
 
-#define IHC_LOCAL_H0_REMOTE_H1       0x50000000
-#define IHC_LOCAL_H0_REMOTE_H2       0x50000100
-#define IHC_LOCAL_H0_REMOTE_H3       0x50000200
-#define IHC_LOCAL_H0_REMOTE_H4       0x50000300
-#define IHCIA_LOCAL_H0               0x50000400
+#define IHC_LOCAL_H0_REMOTE_H1       0x50000000UL
+#define IHC_LOCAL_H0_REMOTE_H2       0x50000100UL
+#define IHC_LOCAL_H0_REMOTE_H3       0x50000200UL
+#define IHC_LOCAL_H0_REMOTE_H4       0x50000300UL
+#define IHCIA_LOCAL_H0               0x50000400UL
 
 /* My Hart 1 */
 
-#define IHC_LOCAL_H1_REMOTE_H0       0x50000500
-#define IHC_LOCAL_H1_REMOTE_H2       0x50000600
-#define IHC_LOCAL_H1_REMOTE_H3       0x50000700
-#define IHC_LOCAL_H1_REMOTE_H4       0x50000800
-#define IHCIA_LOCAL_H1               0x50000900
+#define IHC_LOCAL_H1_REMOTE_H0       0x50000500UL
+#define IHC_LOCAL_H1_REMOTE_H2       0x50000600UL
+#define IHC_LOCAL_H1_REMOTE_H3       0x50000700UL
+#define IHC_LOCAL_H1_REMOTE_H4       0x50000800UL
+#define IHCIA_LOCAL_H1               0x50000900UL
 
 /* My Hart 2 */
 
-#define IHC_LOCAL_H2_REMOTE_H0       0x50000a00
-#define IHC_LOCAL_H2_REMOTE_H1       0x50000b00
-#define IHC_LOCAL_H2_REMOTE_H3       0x50000c00
-#define IHC_LOCAL_H2_REMOTE_H4       0x50000d00
-#define IHCIA_LOCAL_H2               0x50000e00
+#define IHC_LOCAL_H2_REMOTE_H0       0x50000a00UL
+#define IHC_LOCAL_H2_REMOTE_H1       0x50000b00UL
+#define IHC_LOCAL_H2_REMOTE_H3       0x50000c00UL
+#define IHC_LOCAL_H2_REMOTE_H4       0x50000d00UL
+#define IHCIA_LOCAL_H2               0x50000e00UL
 
 /* My Hart 3 */
 
-#define IHC_LOCAL_H3_REMOTE_H0       0x50000f00
-#define IHC_LOCAL_H3_REMOTE_H1       0x50001000
-#define IHC_LOCAL_H3_REMOTE_H2       0x50001100
-#define IHC_LOCAL_H3_REMOTE_H4       0x50001200
-#define IHCIA_LOCAL_H3               0x50001300
+#define IHC_LOCAL_H3_REMOTE_H0       0x50000f00UL
+#define IHC_LOCAL_H3_REMOTE_H1       0x50001000UL
+#define IHC_LOCAL_H3_REMOTE_H2       0x50001100UL
+#define IHC_LOCAL_H3_REMOTE_H4       0x50001200UL
+#define IHCIA_LOCAL_H3               0x50001300UL
 
 /* My Hart 4 */
 
-#define IHC_LOCAL_H4_REMOTE_H0       0x50001400
-#define IHC_LOCAL_H4_REMOTE_H1       0x50001500
-#define IHC_LOCAL_H4_REMOTE_H2       0x50001600
-#define IHC_LOCAL_H4_REMOTE_H3       0x50001700
-#define IHCIA_LOCAL_H4               0x50001800
+#define IHC_LOCAL_H4_REMOTE_H0       0x50001400UL
+#define IHC_LOCAL_H4_REMOTE_H1       0x50001500UL
+#define IHC_LOCAL_H4_REMOTE_H2       0x50001600UL
+#define IHC_LOCAL_H4_REMOTE_H3       0x50001700UL
+#define IHCIA_LOCAL_H4               0x50001800UL
 
 #define MPFS_IHC_VERSION_OFFSET      0x00
 #define MPFS_IHC_CTRL_OFFSET         0x04
@@ -123,11 +123,11 @@
 #define MPFS_IHC_INT_EN_OFFSET       0x04
 #define MPFS_IHC_MSG_AVAIL_OFFSET    0x08
 
-#define MPFS_LOCAL_REMOTE_OFFSET(l, r) (0x500 * l + 0x100 * r)
+#define MPFS_LOCAL_REMOTE_OFFSET(l, r) (0x500 * (l) + 0x100 * (r))
 
 /* The registers don't go linearly in all cases, use a fixup */
 
-#define MPFS_L_R_FIXUP(l, r)        (((l > 0 && l < 4) && (l < r)) ? -0x100 : 0)
+#define MPFS_L_R_FIXUP(l, r)        ((((l) > 0 && (l) < 4) && ((l) < (r))) ? -0x100 : 0)
 
 #define MPFS_IHC_VERSION(l, r)      (IHC_LOCAL_H0_REMOTE_H1 + MPFS_IHC_VERSION_OFFSET + MPFS_LOCAL_REMOTE_OFFSET(l, r) + MPFS_L_R_FIXUP(l, r))
 #define MPFS_IHC_CTRL(l, r)         (IHC_LOCAL_H0_REMOTE_H1 + MPFS_IHC_CTRL_OFFSET + MPFS_LOCAL_REMOTE_OFFSET(l, r) + MPFS_L_R_FIXUP(l, r))
@@ -136,8 +136,8 @@
 #define MPFS_IHC_MSG_IN(l, r)       (IHC_LOCAL_H0_REMOTE_H1 + MPFS_IHC_MSG_IN_OFFSET + MPFS_LOCAL_REMOTE_OFFSET(l, r) + MPFS_L_R_FIXUP(l, r))
 #define MPFS_IHC_MSG_OUT(l, r)      (IHC_LOCAL_H0_REMOTE_H1 + MPFS_IHC_MSG_OUT_OFFSET + MPFS_LOCAL_REMOTE_OFFSET(l, r) + MPFS_L_R_FIXUP(l, r))
 
-#define MPFS_IHC_INT_EN(l)          (IHCIA_LOCAL_H0 + MPFS_IHC_INT_EN_OFFSET + 0x500 * l)
-#define MPFS_IHC_MSG_AVAIL(l)       (IHCIA_LOCAL_H0 + MPFS_IHC_MSG_AVAIL_OFFSET + 0x500 * l)
+#define MPFS_IHC_INT_EN(l)          (IHCIA_LOCAL_H0 + MPFS_IHC_INT_EN_OFFSET + 0x500 * (l))
+#define MPFS_IHC_MSG_AVAIL(l)       (IHCIA_LOCAL_H0 + MPFS_IHC_MSG_AVAIL_OFFSET + 0x500 * (l))
 
 /* Hart mask defines */
 
