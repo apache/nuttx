@@ -646,6 +646,8 @@ int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
   bcmf_event_register(priv, bcmf_wl_auth_event_handler,
                       WLC_E_SET_SSID);
   bcmf_event_register(priv, bcmf_wl_auth_event_handler,
+                      WLC_E_DEAUTH);
+  bcmf_event_register(priv, bcmf_wl_auth_event_handler,
                       WLC_E_DEAUTH_IND);
   bcmf_event_register(priv, bcmf_wl_auth_event_handler,
                       WLC_E_DISASSOC);
@@ -710,7 +712,10 @@ void bcmf_wl_auth_event_handler(FAR struct bcmf_dev_s *priv,
           auth = true;
         }
     }
-  else if (type == WLC_E_DISASSOC ||
+  else if (type == WLC_E_DEAUTH ||
+           type == WLC_E_DEAUTH_IND ||
+           type == WLC_E_DISASSOC ||
+           type == WLC_E_DISASSOC_IND ||
            (type == WLC_E_LINK && reason != 0))
     {
       carrier = 0;
