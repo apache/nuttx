@@ -894,10 +894,12 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
           ie_offset += ie_buffer[ie_offset + 1] + 2;
         }
 
-  if (vaild_bss == false)
-    {
-      goto process_next_bss;
-    }
+      /* Check if AP is configured for WEP or unsupport privacy */
+
+      if ((vaild_bss && (bss->capability & DOT11_CAP_PRIVACY)) || !vaild_bss)
+        {
+          goto process_next_bss;
+        }
 
 vaild_bss:
 
