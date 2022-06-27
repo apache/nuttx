@@ -186,6 +186,15 @@ config SYSLOG_COLOR_OUTPUT
 
 comment "SYSLOG channels"
 
+config SYSLOG_DEVPATH
+	string "System log device"
+	default "/dev/ttyS1"
+	---help---
+		The full path to the system logging device.  For the RAMLOG SYSLOG device,
+		this is normally "/dev/kmsg".  For character SYSLOG devices, it should be
+		some other existing character device (or file) supported by the configuration
+		(such as "/dev/ttyS1")/
+
 if !ARCH_SYSLOG
 config SYSLOG_CHAR
 	bool "Log to a character device"
@@ -236,19 +245,6 @@ config SYSLOG_DEFAULT
 
 endif
 
-if SYSLOG_CHAR
-
-config SYSLOG_DEVPATH
-	string "System log device"
-	default "/dev/ttyS1"
-	---help---
-		The full path to the system logging device.  For the RAMLOG SYSLOG device,
-		this is normally "/dev/kmsg".  For character SYSLOG devices, it should be
-		some other existing character device (or file) supported by the configuration
-		(such as "/dev/ttyS1")/
-
-endif # SYSLOG_CHAR
-
 if RAMLOG_SYSLOG
 
 config RAMLOG_BUFFER_SECTION
@@ -285,6 +281,10 @@ config SYSLOG_RPMSG_OVERWRITE
 	---help---
 		Allow syslog rpmsg overwrite, may cause syslog to lose some logs.
 		Set 'n' if you don't want lost logs, but may harm performance.
+
+config SYSLOG_RPMSG_CHARDEV
+	bool "SYSLOG rpmsg character device"
+	default !SYSLOG_RPMSG_WORK_DELAY
 
 endif # SYSLOG_RPMSG
 

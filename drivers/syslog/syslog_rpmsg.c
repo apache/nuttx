@@ -87,12 +87,34 @@ static void syslog_rpmsg_device_destroy(FAR struct rpmsg_device *rdev,
 static int  syslog_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
                                 FAR void *data, size_t len, uint32_t src,
                                 FAR void *priv_);
+#ifdef CONFIG_SYSLOG_RPMSG_CHARDEV
+static ssize_t syslog_rpmsg_file_read(FAR struct file *filep,
+                                      FAR char *buffer, size_t len);
+static ssize_t syslog_rpmsg_file_write(FAR struct file *filep,
+                                       FAR const char *buffer, size_t len);
+#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
 static struct syslog_rpmsg_s g_syslog_rpmsg;
+
+#ifdef CONFIG_SYSLOG_RPMSG_CHARDEV
+static const struct file_operations g_syslog_rpmsgfops =
+{
+  NULL,                    /* open */
+  NULL,                    /* close */
+  syslog_rpmsg_file_read,  /* read */
+  syslog_rpmsg_file_write, /* write */
+  NULL,                    /* seek */
+  NULL,                    /* ioctl */
+  NULL                     /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL                   /* unlink */
+#endif
+};
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -319,6 +341,39 @@ static int syslog_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
   return 0;
 }
 
+#ifdef CONFIG_SYSLOG_RPMSG_CHARDEV
+static ssize_t syslog_rpmsg_file_read(FAR struct file *filep,
+                                      FAR char *buffer, size_t len)
+{
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct syslog_rpmsg_s *priv;
+  irqstate_t flags;
+
+  /* Some sanity checking */
+
+  DEBUGASSERT(inode && inode->i_private);
+  priv = (FAR struct syslog_rpmsg_s *)inode->i_private;
+
+  flags = enter_critical_section();
+  if (!priv->suspend && !priv->transfer &&
+      is_rpmsg_ept_ready(&priv->ept))
+    {
+      priv->transfer = true;
+      work_queue(HPWORK, &priv->work, syslog_rpmsg_work, priv, 0);
+    }
+
+  leave_critical_section(flags);
+  return 0;
+}
+
+static ssize_t syslog_rpmsg_file_write(FAR struct file *filep,
+                                       FAR const char *buffer, size_t len)
+{
+  syslog(LOG_INFO, "%.*s", (int)len, buffer);
+  return len;
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -428,6 +483,17 @@ void syslog_rpmsg_init_early(FAR void *buffer, size_t size)
 
 int syslog_rpmsg_init(void)
 {
+#ifdef CONFIG_SYSLOG_RPMSG_CHARDEV
+  int ret;
+
+  ret = register_driver(CONFIG_SYSLOG_DEVPATH, &g_syslog_rpmsgfops,
+                        0666, &g_syslog_rpmsg);
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
+
   return rpmsg_register_callback(&g_syslog_rpmsg,
                                  syslog_rpmsg_device_created,
                                  syslog_rpmsg_device_destroy,
