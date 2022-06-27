@@ -678,6 +678,11 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
                                   _SO_TIMEOUT(conn->sconn.s_sndtimeo));
               if (ret != -ETIMEDOUT || acked == state.snd_acked)
                 {
+                  if (ret == -ETIMEDOUT)
+                    {
+                      ret = -EAGAIN;
+                    }
+
                   break; /* Timeout without any progress */
                 }
             }

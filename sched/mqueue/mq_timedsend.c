@@ -251,7 +251,7 @@ int file_mq_timedsend(FAR struct file *mq, FAR const char *msg,
   ret = nxmq_wait_send(msgq, mq->f_oflags);
 
   /* This may return with an error and errno set to either EINTR
-   * or ETIMEOUT.  Cancel the watchdog timer in any event.
+   * or ETIMEDOUT.  Cancel the watchdog timer in any event.
    */
 
   wd_cancel(&rtcb->waitdog);

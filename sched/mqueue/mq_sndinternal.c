@@ -198,11 +198,11 @@ FAR struct mqueue_msg_s *nxmq_alloc_msg(void)
  *   On success, nxmq_wait_send() returns 0 (OK); a negated errno value is
  *   returned on any failure:
  *
- *   EAGAIN   The queue was full and the O_NONBLOCK flag was set for the
- *            message queue description referred to by msgq.
- *   EINTR    The call was interrupted by a signal handler.
- *   ETIMEOUT A timeout expired before the message queue became non-full
- *            (mq_timedsend only).
+ *   EAGAIN    The queue was full and the O_NONBLOCK flag was set for the
+ *             message queue description referred to by msgq.
+ *   EINTR     The call was interrupted by a signal handler.
+ *   ETIMEDOUT A timeout expired before the message queue became non-full
+ *             (mq_timedsend only).
  *
  * Assumptions/restrictions:
  * - The caller has verified the input parameters using nxmq_verify_send().
@@ -272,7 +272,7 @@ int nxmq_wait_send(FAR struct mqueue_inode_s *msgq, int oflags)
       /* When we resume at this point, either (1) the message queue
        * is no longer empty, or (2) the wait has been interrupted by
        * a signal.  We can detect the latter case be examining the
-       * per-task errno value (should be EINTR or ETIMEOUT).
+       * per-task errno value (should be EINTR or ETIMEDOUT).
        */
 
       if (rtcb->errcode != OK)

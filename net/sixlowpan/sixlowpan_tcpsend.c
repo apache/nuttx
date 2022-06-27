@@ -660,6 +660,11 @@ static int sixlowpan_send_packet(FAR struct socket *psock,
               ret = net_timedwait(&sinfo.s_waitsem, timeout);
               if (ret != -ETIMEDOUT || acked == sinfo.s_acked)
                 {
+                  if (ret == -ETIMEDOUT)
+                    {
+                      ret = -EAGAIN;
+                    }
+
                   break; /* Timeout without any progress */
                 }
             }
