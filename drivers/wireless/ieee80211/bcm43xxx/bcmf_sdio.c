@@ -820,7 +820,6 @@ int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
   sbus->minor              = minor;
   sbus->ready              = false;
   sbus->sleeping           = true;
-  sbus->flow_ctrl          = false;
 
   sbus->bus.txframe        = bcmf_sdpcm_queue_frame;
   sbus->bus.rxframe        = bcmf_sdpcm_get_rx_frame;
