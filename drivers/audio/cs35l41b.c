@@ -3175,7 +3175,7 @@ static int cs35l41b_output_configuration(FAR struct cs35l41b_dev_s *priv)
         }
     }
 
-  if (cs35l41b_dre(priv, true) == ERROR)
+  if (cs35l41b_dre(priv, false) == ERROR)
     {
       return ERROR;
     }
