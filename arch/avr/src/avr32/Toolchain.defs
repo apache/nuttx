@@ -36,7 +36,6 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
 endif
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  LDFLAGS          += -g
   ARCHOPTIMIZATION += -g
 endif
 

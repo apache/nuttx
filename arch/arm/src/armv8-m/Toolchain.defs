@@ -267,7 +267,6 @@ ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
 endif
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  LDFLAGS          += -g
   ARCHOPTIMIZATION += -g
 endif
 
