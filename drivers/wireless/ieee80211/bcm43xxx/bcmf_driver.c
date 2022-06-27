@@ -679,6 +679,11 @@ void bcmf_wl_auth_event_handler(FAR struct bcmf_dev_s *priv,
            (type == WLC_E_LINK && reason != 0))
     {
       carrier = 0;
+      if (priv->auth_pending)
+        {
+          priv->auth_status = reason;
+          auth = true;
+        }
     }
 
   if (carrier >= 0)
@@ -1907,7 +1912,19 @@ int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
       default:
         wlerr("AP join failed %d\n", priv->auth_status);
-        ret = -EINVAL;
+        if (priv->auth_status == WLC_E_REASON_DEAUTH ||
+            priv->auth_status == WLC_E_SUP_DEAUTH ||
+            priv->auth_status == WLC_E_SUP_WPA_PSK_TMO)
+          {
+            ret = -WLAN_REASON_CIPHER_SUITE_REJECTED;
+          }
+        else
+          {
+            ret = -EINVAL;
+          }
+
+        bcmf_cdc_ioctl(priv, interface, true,
+                            WLC_DISASSOC, (uint8_t *)&scbval, &out_len);
         break;
     }
 
