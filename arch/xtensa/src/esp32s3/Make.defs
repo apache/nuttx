@@ -125,6 +125,10 @@ ifeq ($(CONFIG_ESP32S3_RT_TIMER),y)
 CHIP_CSRCS += esp32s3_rt_timer.c
 endif
 
+ifeq ($(CONFIG_ESP32S3_I2C),y)
+CHIP_CSRCS += esp32s3_i2c.c
+endif
+
 ifeq ($(CONFIG_ESP32S3_SPI),y)
 CHIP_CSRCS += esp32s3_spi.c
 endif
