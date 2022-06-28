@@ -28,9 +28,8 @@
 #define SYSLOG_RPMSG_EPT_NAME           "rpmsg-syslog"
 
 #define SYSLOG_RPMSG_TRANSFER           0
-#define SYSLOG_RPMSG_TRANSFER_DONE      1
-#define SYSLOG_RPMSG_SUSPEND            2
-#define SYSLOG_RPMSG_RESUME             3
+#define SYSLOG_RPMSG_SUSPEND            1
+#define SYSLOG_RPMSG_RESUME             2
 
 /****************************************************************************
  * Public Types
