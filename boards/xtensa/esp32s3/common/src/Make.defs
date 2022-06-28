@@ -36,6 +36,10 @@ ifeq ($(CONFIG_I2C_DRIVER),y)
   CSRCS += esp32s3_board_i2c.c
 endif
 
+ifeq ($(CONFIG_SENSORS_BMP180),y)
+  CSRCS += esp32s3_board_bmp180.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)

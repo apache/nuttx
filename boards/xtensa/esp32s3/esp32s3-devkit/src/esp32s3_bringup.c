@@ -141,6 +141,17 @@ int esp32s3_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_SENSORS_BMP180
+  /* Try to register BMP180 device in I2C0 */
+
+  ret = board_bmp180_initialize(0, ESP32S3_I2C0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "Failed to initialize BMP180 driver for I2C0: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_INPUT_BUTTONS
   /* Register the BUTTON driver */
 
