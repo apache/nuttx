@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sched/sched_setaffinity.c
+ * sched/sched/sched_set_affinity.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -29,7 +29,7 @@
 #include <assert.h>
 #include <errno.h>
 
-#include <nuttx/arch.h>
+#include <nuttx/sched.h>
 
 #include "sched/sched.h"
 
@@ -41,7 +41,7 @@
  * Name: nxsched_set_affinity
  *
  * Description:
- *   sched_setaffinity() sets the CPU affinity mask of the thread whose ID
+ *   nxsched_set_affinity() sets the CPU affinity mask of the thread whose ID
  *   is pid to the value specified by mask.  If pid is zero, then the
  *   calling thread is used.  The argument cpusetsize is the length (i
  *   bytes) of the data pointed to by mask.  Normally this argument would
@@ -51,11 +51,11 @@
  *   CPUs specified in mask, then that thread is migrated to one of the
  *   CPUs specified in mask.
  *
- *   nxsched_set_affinity() is identical to the function sched_setparam(),
+ *   nxsched_set_affinity() is identical to the function nxsched_set_param(),
  *   differing only in its return value:  This function does not modify
  *   the errno variable.  This is a non-standard, internal OS function and
  *   is not intended for use by application logic.  Applications should
- *   use the standard sched_setparam().
+ *   use the standard nxsched_set_param().
  *
  * Input Parameters:
  *   pid        - The ID of thread whose affinity set will be modified.
@@ -143,48 +143,5 @@ errout_with_csection:
   leave_critical_section(flags);
 
 errout:
-  return ret;
-}
-
-/****************************************************************************
- * Name: sched_setaffinity
- *
- * Description:
- *   sched_setaffinity() sets the CPU affinity mask of the thread whose ID
- *   is pid to the value specified by mask.  If pid is zero, then the
- *   calling thread is used.  The argument cpusetsize is the length (i
- *   bytes) of the data pointed to by mask.  Normally this argument would
- *   be specified as sizeof(cpu_set_t).
- *
- *   If the thread specified by pid is not currently running on one of the
- *   CPUs specified in mask, then that thread is migrated to one of the
- *   CPUs specified in mask.
- *
- *   This function is a simply wrapper around nxsched_set_affinity() that
- *   sets the errno value in the event of an error.
- *
- * Input Parameters:
- *   pid        - The ID of thread whose affinity set will be modified.
- *   cpusetsize - Size of mask.  MUST be sizeofcpu_set_t().
- *   mask       - The location to return the thread's new affinity set.
- *
- * Returned Value:
- *   0 if successful.  Otherwise, ERROR (-1) is returned, and errno is
- *   set appropriately:
- *
- *     ESRCH  The task whose ID is pid could not be found.
- *
- ****************************************************************************/
-
-int sched_setaffinity(pid_t pid, size_t cpusetsize,
-                      FAR const cpu_set_t *mask)
-{
-  int ret = nxsched_set_affinity(pid, cpusetsize, mask);
-  if (ret < 0)
-    {
-      set_errno(-ret);
-      ret = ERROR;
-    }
-
   return ret;
 }

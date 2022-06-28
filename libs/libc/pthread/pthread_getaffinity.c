@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread/pthread_getaffinity.c
+ * libs/libc/pthread/pthread_getaffinity.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,16 +25,11 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <stdint.h>
 #include <pthread.h>
-#include <sched.h>
 #include <assert.h>
-#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/sched.h>
-
-#include "pthread/pthread.h"
 
 #ifdef CONFIG_SMP
 
@@ -43,7 +38,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_getschedparam
+ * Name: pthread_getaffinity_np
  *
  * Description:
  *   The pthread_getaffinity_np() function returns the CPU affinity mask

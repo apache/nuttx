@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/unistd/lib_getpriority.c
+ * libs/libc/sched/sched_setscheduler.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,9 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/resource.h>
 
-#include <unistd.h>
 #include <errno.h>
 
 #include <nuttx/sched.h>
@@ -35,54 +33,43 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: getpriority
+ * Name: sched_setscheduler
  *
  * Description:
- *   The getpriority() function shall obtain the nice value of a process,
- *   process group, or user.
+ *   sched_setscheduler() sets both the scheduling policy and the priority
+ *   for the task identified by pid. If pid equals zero, the scheduler of
+ *   the calling task will be set.  The parameter 'param' holds the priority
+ *   of the thread under the new policy.
+ *
+ *   This function is a simply wrapper around nxsched_set_scheduler() that
+ *   sets the errno value in the event of an error.
  *
  * Input Parameters:
- *   which  - PRIO_PROCESS, PRIO_PGRP, or PRIO_USER, ignored in current
- *            implementation.
- *   who    - Process id is interpreted relative to "which"
+ *   pid - the task ID of the task to modify.  If pid is zero, the calling
+ *      task is modified.
+ *   policy - Scheduling policy requested (either SCHED_FIFO or SCHED_RR)
+ *   param - A structure whose member sched_priority is the new priority.
+ *      The range of valid priority numbers is from SCHED_PRIORITY_MIN
+ *      through SCHED_PRIORITY_MAX.
  *
  * Returned Value:
- *   Upon successful completion, getpriority() shall return an integer in
- *   the range -{NZERO} to {NZERO}-1. Otherwise, -1 shall be returned and
- *   errno set to indicate the error. The following errors may be
- *   reported:
+ *   On success, sched_setscheduler() returns OK (zero).  On error, ERROR
+ *   (-1) is returned, and errno is set appropriately:
  *
- *   - ESRCH: No process was located using the which and who values
- *            specified.
- *   - EINVAL: which was not one of PRIO_PROCESS, PRIO_PGRP, or
- *             PRIO_USER.
- *
- * Assumptions:
+ *   EINVAL The scheduling policy is not one of the recognized policies.
+ *   ESRCH  The task whose ID is pid could not be found.
  *
  ****************************************************************************/
 
-int getpriority(int which, id_t who)
+int sched_setscheduler(pid_t pid, int policy,
+                       FAR const struct sched_param *param)
 {
-  struct sched_param param;
-  int ret;
-
-  if (which > PRIO_USER || which < PRIO_PROCESS)
-    {
-      set_errno(EINVAL);
-      return ERROR;
-    }
-
-  if (who == 0)
-    {
-      who = getpid();
-    }
-
-  ret = nxsched_get_param(who, &param);
+  int ret = nxsched_set_scheduler(pid, policy, param);
   if (ret < 0)
     {
       set_errno(-ret);
-      return ERROR;
+      ret = ERROR;
     }
 
-  return NZERO - param.sched_priority;
+  return ret;
 }

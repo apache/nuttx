@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread/pthread_setschedprio.c
+ * libs/libc/sched/sched_getaffinity.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,69 +24,47 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <sched.h>
 #include <errno.h>
 
 #include <nuttx/sched.h>
-#include <nuttx/arch.h>
-
-#include "sched/sched.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  pthread_setsetprio
+ * Name: sched_getaffinity
  *
  * Description:
- *   The pthread_setschedprio() function sets the scheduling priority for
- *   the thread whose thread ID is given by 'thread' to the value given by
- *   'prio'.  If the  thread_setschedprio() function fails, the scheduling
- *   priority of the target thread will not be changed.
+ *   sched_getaffinity() writes the affinity mask of the thread whose ID
+ *   is pid into the cpu_set_t pointed to by mask.  The  cpusetsize
+ *   argument specifies the size (in bytes) of mask.  If pid is zero, then
+ *   the mask of the calling thread is returned.
+ *
+ *   This function is a simply wrapper around nxsched_get_affinity() that
+ *   sets the errno value in the event of an error.
  *
  * Input Parameters:
- *   thread - the thread ID of the task to reprioritize.
- *   prio - The new thread priority.  The range of valid priority numbers is
- *     from SCHED_PRIORITY_MIN through SCHED_PRIORITY_MAX.
+ *   pid        - The ID of thread whose affinity set will be retrieved.
+ *   cpusetsize - Size of mask.  MUST be sizeofcpu_set_t().
+ *   mask       - The location to return the thread's new affinity set.
  *
  * Returned Value:
- *    OK if successful, otherwise an error number.  This function can
- *    fail for the following reasons:
+ *   0 if successful.  Otherwise, ERROR (-1) is returned, and errno is
+ *   set appropriately:
  *
- *    EINVAL - prio is out of range.
- *    ESRCH  - thread ID does not correspond to any thread.
- *
- * Assumptions:
+ *      ESRCH  The task whose ID is pid could not be found.
  *
  ****************************************************************************/
 
-int pthread_setschedprio(pthread_t thread, int prio)
+int sched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask)
 {
-  struct sched_param param;
-  int ret;
-
-#ifdef CONFIG_SCHED_SPORADIC
-  /* Get the current sporadic scheduling parameters.  Those will not be
-   * modified.
-   */
-
-  ret = nxsched_get_param((pid_t)thread, &param);
+  int ret = nxsched_get_affinity(pid, cpusetsize, mask);
   if (ret < 0)
     {
-      return -ret;
-    }
-#endif
-
-  /* Call nxsched_set_param() to change the priority */
-
-  param.sched_priority = prio;
-  ret = nxsched_set_param((pid_t)thread, &param);
-  if (ret < 0)
-    {
-      return -ret;
+      set_errno(-ret);
+      ret = ERROR;
     }
 
-  return OK;
+  return ret;
 }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/unistd/lib_getpriority.c
+ * libs/libc/sched/sched_setparam.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,9 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/resource.h>
 
-#include <unistd.h>
 #include <errno.h>
 
 #include <nuttx/sched.h>
@@ -35,54 +33,45 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: getpriority
+ * Name:  sched_setparam
  *
  * Description:
- *   The getpriority() function shall obtain the nice value of a process,
- *   process group, or user.
+ *   This function sets the priority of a specified task.  This function is
+ *   a simply wrapper around nxsched_set_param() that sets the errno value in
+ *   the event of an error.
+ *
+ *   NOTE: Setting a task's priority to the same value has a similar effect
+ *   to sched_yield() -- The task will be moved to  after all other tasks
+ *   with the same priority.
  *
  * Input Parameters:
- *   which  - PRIO_PROCESS, PRIO_PGRP, or PRIO_USER, ignored in current
- *            implementation.
- *   who    - Process id is interpreted relative to "which"
+ *   pid - the task ID of the task to reprioritize.  If pid is zero, the
+ *      priority of the calling task is changed.
+ *   param - A structure whose member sched_priority is the integer priority.
+ *      The range of valid priority numbers is from SCHED_PRIORITY_MIN
+ *      through SCHED_PRIORITY_MAX.
  *
  * Returned Value:
- *   Upon successful completion, getpriority() shall return an integer in
- *   the range -{NZERO} to {NZERO}-1. Otherwise, -1 shall be returned and
- *   errno set to indicate the error. The following errors may be
- *   reported:
+ *   On success, sched_setparam() returns 0 (OK). On error, -1 (ERROR) is
+ *   returned, and errno is set appropriately.
  *
- *   - ESRCH: No process was located using the which and who values
- *            specified.
- *   - EINVAL: which was not one of PRIO_PROCESS, PRIO_PGRP, or
- *             PRIO_USER.
+ *  EINVAL The parameter 'param' is invalid or does not make sense for the
+ *         current scheduling policy.
+ *  EPERM  The calling task does not have appropriate privileges.
+ *  ESRCH  The task whose ID is pid could not be found.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int getpriority(int which, id_t who)
+int sched_setparam(pid_t pid, FAR const struct sched_param *param)
 {
-  struct sched_param param;
-  int ret;
-
-  if (which > PRIO_USER || which < PRIO_PROCESS)
-    {
-      set_errno(EINVAL);
-      return ERROR;
-    }
-
-  if (who == 0)
-    {
-      who = getpid();
-    }
-
-  ret = nxsched_get_param(who, &param);
+  int ret = nxsched_set_param(pid, param);
   if (ret < 0)
     {
       set_errno(-ret);
-      return ERROR;
+      ret = ERROR;
     }
 
-  return NZERO - param.sched_priority;
+  return ret;
 }

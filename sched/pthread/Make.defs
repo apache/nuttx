@@ -21,21 +21,15 @@
 ifneq ($(CONFIG_DISABLE_PTHREAD),y)
 
 CSRCS += pthread_create.c pthread_exit.c pthread_join.c pthread_detach.c
-CSRCS += pthread_getschedparam.c pthread_setschedparam.c
 CSRCS += pthread_mutexinit.c pthread_mutexdestroy.c
 CSRCS += pthread_mutextimedlock.c pthread_mutextrylock.c pthread_mutexunlock.c
 CSRCS += pthread_condwait.c pthread_condsignal.c pthread_condbroadcast.c
 CSRCS += pthread_condclockwait.c pthread_kill.c pthread_sigmask.c
-CSRCS += pthread_cancel.c
+CSRCS += pthread_cancel.c pthread_release.c
 CSRCS += pthread_initialize.c pthread_completejoin.c pthread_findjoininfo.c
-CSRCS += pthread_release.c pthread_setschedprio.c
 
 ifneq ($(CONFIG_PTHREAD_MUTEX_UNSAFE),y)
 CSRCS += pthread_mutex.c pthread_mutexconsistent.c pthread_mutexinconsistent.c
-endif
-
-ifeq ($(CONFIG_SMP),y)
-CSRCS += pthread_setaffinity.c pthread_getaffinity.c
 endif
 
 # Include pthread build support

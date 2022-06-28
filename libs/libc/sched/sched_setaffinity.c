@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/unistd/lib_getpriority.c
+ * libs/libc/sched/sched_setaffinity.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,9 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/resource.h>
 
-#include <unistd.h>
 #include <errno.h>
 
 #include <nuttx/sched.h>
@@ -35,54 +33,44 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: getpriority
+ * Name: sched_setaffinity
  *
  * Description:
- *   The getpriority() function shall obtain the nice value of a process,
- *   process group, or user.
+ *   sched_setaffinity() sets the CPU affinity mask of the thread whose ID
+ *   is pid to the value specified by mask.  If pid is zero, then the
+ *   calling thread is used.  The argument cpusetsize is the length (i
+ *   bytes) of the data pointed to by mask.  Normally this argument would
+ *   be specified as sizeof(cpu_set_t).
+ *
+ *   If the thread specified by pid is not currently running on one of the
+ *   CPUs specified in mask, then that thread is migrated to one of the
+ *   CPUs specified in mask.
+ *
+ *   This function is a simply wrapper around nxsched_set_affinity() that
+ *   sets the errno value in the event of an error.
  *
  * Input Parameters:
- *   which  - PRIO_PROCESS, PRIO_PGRP, or PRIO_USER, ignored in current
- *            implementation.
- *   who    - Process id is interpreted relative to "which"
+ *   pid        - The ID of thread whose affinity set will be modified.
+ *   cpusetsize - Size of mask.  MUST be sizeofcpu_set_t().
+ *   mask       - The location to return the thread's new affinity set.
  *
  * Returned Value:
- *   Upon successful completion, getpriority() shall return an integer in
- *   the range -{NZERO} to {NZERO}-1. Otherwise, -1 shall be returned and
- *   errno set to indicate the error. The following errors may be
- *   reported:
+ *   0 if successful.  Otherwise, ERROR (-1) is returned, and errno is
+ *   set appropriately:
  *
- *   - ESRCH: No process was located using the which and who values
- *            specified.
- *   - EINVAL: which was not one of PRIO_PROCESS, PRIO_PGRP, or
- *             PRIO_USER.
- *
- * Assumptions:
+ *     ESRCH  The task whose ID is pid could not be found.
  *
  ****************************************************************************/
 
-int getpriority(int which, id_t who)
+int sched_setaffinity(pid_t pid, size_t cpusetsize,
+                      FAR const cpu_set_t *mask)
 {
-  struct sched_param param;
-  int ret;
-
-  if (which > PRIO_USER || which < PRIO_PROCESS)
-    {
-      set_errno(EINVAL);
-      return ERROR;
-    }
-
-  if (who == 0)
-    {
-      who = getpid();
-    }
-
-  ret = nxsched_get_param(who, &param);
+  int ret = nxsched_set_affinity(pid, cpusetsize, mask);
   if (ret < 0)
     {
       set_errno(-ret);
-      return ERROR;
+      ret = ERROR;
     }
 
-  return NZERO - param.sched_priority;
+  return ret;
 }

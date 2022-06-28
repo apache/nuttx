@@ -32,13 +32,13 @@ SYSCALL_LOOKUP(gettid,                     0)
   SYSCALL_LOOKUP(getppid,                  0)
 #endif
 
-SYSCALL_LOOKUP(sched_getparam,             2)
-SYSCALL_LOOKUP(sched_getscheduler,         1)
+SYSCALL_LOOKUP(nxsched_get_param,          2)
+SYSCALL_LOOKUP(nxsched_get_scheduler,      1)
 SYSCALL_LOOKUP(sched_lock,                 0)
 SYSCALL_LOOKUP(sched_lockcount,            0)
 SYSCALL_LOOKUP(sched_rr_get_interval,      2)
-SYSCALL_LOOKUP(sched_setparam,             2)
-SYSCALL_LOOKUP(sched_setscheduler,         3)
+SYSCALL_LOOKUP(nxsched_set_param,          2)
+SYSCALL_LOOKUP(nxsched_set_scheduler,      3)
 SYSCALL_LOOKUP(sched_unlock,               0)
 SYSCALL_LOOKUP(sched_yield,                0)
 SYSCALL_LOOKUP(nxsched_get_stackinfo,      2)
@@ -48,9 +48,9 @@ SYSCALL_LOOKUP(nxsched_get_stackinfo,      2)
 #endif
 
 #ifdef CONFIG_SMP
-  SYSCALL_LOOKUP(sched_getaffinity,        3)
+  SYSCALL_LOOKUP(nxsched_get_affinity,     3)
   SYSCALL_LOOKUP(sched_getcpu,             0)
-  SYSCALL_LOOKUP(sched_setaffinity,        3)
+  SYSCALL_LOOKUP(nxsched_set_affinity,     3)
 #endif
 
 SYSCALL_LOOKUP(sysinfo,                    1)
@@ -306,7 +306,6 @@ SYSCALL_LOOKUP(futimens,                   2)
   SYSCALL_LOOKUP(nx_pthread_create,        5)
   SYSCALL_LOOKUP(pthread_detach,           1)
   SYSCALL_LOOKUP(nx_pthread_exit,          1)
-  SYSCALL_LOOKUP(pthread_getschedparam,    3)
   SYSCALL_LOOKUP(pthread_join,             2)
   SYSCALL_LOOKUP(pthread_mutex_destroy,    1)
   SYSCALL_LOOKUP(pthread_mutex_init,       2)
@@ -315,12 +314,6 @@ SYSCALL_LOOKUP(futimens,                   2)
   SYSCALL_LOOKUP(pthread_mutex_unlock,     1)
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
   SYSCALL_LOOKUP(pthread_mutex_consistent, 1)
-#endif
-  SYSCALL_LOOKUP(pthread_setschedparam,    3)
-  SYSCALL_LOOKUP(pthread_setschedprio,     2)
-#ifdef CONFIG_SMP
-  SYSCALL_LOOKUP(pthread_setaffinity_np,   3)
-  SYSCALL_LOOKUP(pthread_getaffinity_np,   3)
 #endif
   SYSCALL_LOOKUP(pthread_cond_clockwait,   4)
   SYSCALL_LOOKUP(pthread_kill,             2)
