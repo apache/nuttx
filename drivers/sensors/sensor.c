@@ -96,7 +96,6 @@ struct sensor_user_s
   unsigned long    generation; /* Last generation subscriber has seen */
   unsigned long    interval;   /* The interval for subscriber */
   unsigned long    latency;    /* The bactch latency for subscriber */
-  bool             readlast;   /* The flag of readlast */
 };
 
 /* This structure describes the state of the upper half driver */
@@ -470,7 +469,6 @@ static int sensor_open(FAR struct file *filep)
     }
 
   user->interval = ULONG_MAX;
-  user->readlast = true;
   nxsem_init(&user->buffersem, 0, 0);
   nxsem_set_protocol(&user->buffersem, SEM_PRIO_NONE);
   list_add_tail(&upper->userlist, &user->node);
@@ -581,64 +579,27 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
     }
   else
     {
-      /* If readlast is true, you can always read the last data
-       * in the circbuffer as initial value for new users when the
-       * sensor device has not yet generated new data, otherwise,
-       * it will return 0 when there isn't new data.
+      if (circbuf_is_empty(&upper->buffer))
+        {
+          ret = -ENODATA;
+          goto out;
+        }
+
+      /* If the device data is persistent, and when the device has
+       * no new data, the user can copy the old data, otherwise
+       * return -ENODATA.
        */
 
-      if (user->readlast)
+      if (!sensor_is_updated(upper, user))
         {
-          if (circbuf_is_empty(&upper->buffer))
+          if (lower->persist)
+            {
+              user->generation--;
+            }
+          else
             {
               ret = -ENODATA;
               goto out;
-            }
-
-          /* If the device data is persistent, and when the device has no new data,
-           * the user can copy the old data, otherwise return -ENODATA
-           */
-
-          if (user->generation == upper->state.generation)
-            {
-              if (lower->persist)
-                {
-                  user->generation--;
-                }
-              else
-                {
-                  ret = -ENODATA;
-                  goto out;
-                }
-            }
-        }
-      else
-        {
-          /* We must make sure that when the semaphore is equal to 1, there must
-           * be events available in the buffer, so we use a while statement to
-           * synchronize this case that other read operations consume events
-           * that have just entered the buffer.
-           */
-
-          while (circbuf_is_empty(&upper->buffer) ||
-                 user->generation == upper->state.generation)
-            {
-              if (filep->f_oflags & O_NONBLOCK)
-                {
-                  ret = -EAGAIN;
-                  goto out;
-                }
-              else
-                {
-                  nxrmutex_unlock(&upper->lock);
-                  ret = nxsem_wait_uninterruptible(&user->buffersem);
-                  if (ret < 0)
-                    {
-                      return ret;
-                    }
-
-                  nxrmutex_lock(&upper->lock);
-                }
             }
         }
 
@@ -787,10 +748,10 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      case SNIOC_READLAST:
+      case SNIOC_UPDATED:
         {
           nxrmutex_lock(&upper->lock);
-          user->readlast = !!arg;
+          *(FAR bool *)(uintptr_t)arg = sensor_is_updated(upper, user);
           nxrmutex_unlock(&upper->lock);
         }
         break;

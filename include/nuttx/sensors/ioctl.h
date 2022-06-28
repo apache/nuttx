@@ -345,13 +345,12 @@
 #define SNIOC_UNREGISTER           _SNIOC(0x0090)
 #endif
 
-/* Command:      SNIOC_READLAST
- * Description:  If enable readlast, there is no data update in time,
- *               the latest data can always be returned.
- *               Disable readlast, if there is no data update, return 0.
- * Argument:     True or false
+/* Command:      SNIOC_UPDATED
+ * Description:  Check whether the topic has been updated since
+ *               it was last read.
+ * Argument:     Sets *(bool *)arg
  */
 
-#define SNIOC_READLAST             _SNIOC(0x0091)
+#define SNIOC_UPDATED              _SNIOC(0x0091)
 
 #endif /* __INCLUDE_NUTTX_SENSORS_IOCTL_H */
