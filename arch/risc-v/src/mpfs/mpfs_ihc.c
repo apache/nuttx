@@ -74,7 +74,7 @@
 
 /* rptun initialization names */
 
-#define MPFS_RPTUN_CPU_NAME      "mpfs-hart4"
+#define MPFS_RPTUN_CPU_NAME      "mpfs-ihc"
 #define MPFS_RPTUN_SHMEM_NAME    "mpfs-shmem"
 
 /* Vring configuration parameters */
@@ -185,6 +185,7 @@ static uint32_t g_connected_hart_ints;
 static uint32_t g_connected_harts;
 static int      g_vq_idx;
 static int      g_plic_irq;
+static bool     g_rptun_initialized;
 
 const uint32_t ihcia_remote_harts[MPFS_NUM_HARTS] =
 {
@@ -590,6 +591,15 @@ static void mpfs_ihc_message_present_isr(void)
 
   if (origin_hart != UNDEFINED_HART_ID)
     {
+      /* If autostart is false, we delay the ack until rptun is up.  Note
+       * that the master will keep sending the irq if no ack is received.
+       */
+
+      if (!g_rptun_initialized)
+        {
+          return;
+        }
+
       /* This is used to declare the master is up and running */
 
       g_shmem.master_up = true;
@@ -952,6 +962,12 @@ mpfs_rptun_get_resource(struct rptun_dev_s *dev)
       rsc->config.txbuf_size        = VRING_SIZE;
     }
 
+  /* It might be tempting to set this at mpfs_rptun_start(), but it's only
+   * called if we're the bus master.
+   */
+
+  g_rptun_initialized = true;
+
   return &priv->shmem->rsc;
 }
 
@@ -960,19 +976,20 @@ mpfs_rptun_get_resource(struct rptun_dev_s *dev)
  *
  * Description:
  *   Checks whether the rptun needs to autostart without explicit user
- *   start command.
+ *   start command.  Currently autostart is false, which means that the user
+ *   must start the service explicitly, eg.  rptun start /dev/rptun/mpfs-ihc
  *
  * Input Parameters:
  *   dev   - Rptun device.
  *
  * Returned Value:
- *   Always true
+ *   Always false
  *
  ****************************************************************************/
 
 static bool mpfs_rptun_is_autostart(struct rptun_dev_s *dev)
 {
-  return true;
+  return false;
 }
 
 /****************************************************************************
