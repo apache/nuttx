@@ -14,6 +14,7 @@ choice
 config ARCH_CHIP_ESP32S3WROOM1
 	bool "ESP32-S3-WROOM-1"
 	select ESP32S3_FLASH_4M
+	select ARCH_HAVE_I2CRESET
 	---help---
 		Generic module with an embedded ESP32-S3.
 
@@ -21,12 +22,14 @@ config ARCH_CHIP_ESP32S3WROOM2
 	bool "ESP32-S3-WROOM-2"
 	select ESP32S3_FLASH_16M
 	select ESP32S3_PSRAM_8M
+	select ARCH_HAVE_I2CRESET
 	---help---
 		Generic module with an embedded ESP32-S3.
 
 config ARCH_CHIP_ESP32S3MINI1
 	bool "ESP32-S3-MINI-1"
 	select ESP32S3_FLASH_8M
+	select ARCH_HAVE_I2CRESET
 	---help---
 		Generic module with an embedded ESP32-S3.
 
@@ -306,6 +309,10 @@ config ESP32S3_TIMER
 	bool
 	default n
 
+config ESP32S3_I2C
+	bool
+	default n
+
 config ESP32S3_SPI
 	bool
 	default n
@@ -351,11 +358,23 @@ config ESP32S3_UART2
 	select UART2_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
+config ESP32S3_I2C0
+	bool "I2C 0"
+	default n
+	select ESP32S3_I2C
+	select I2C
+
+config ESP32S3_I2C1
+	bool "I2C 1"
+	default n
+	select ESP32S3_I2C
+	select I2C
+
 config ESP32S3_USBSERIAL
-        bool "USB-Serial Driver"
-        default n
-        select OTHER_UART_SERIALDRIVER
-        select ARCH_HAVE_SERIAL_TERMIOS
+	bool "USB-Serial Driver"
+	default n
+	select OTHER_UART_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config ESP32S3_TIMER0
 	bool "54-bit Timer 0 (Group 0 Timer 0)"
@@ -484,7 +503,7 @@ config ESP32S3_SPIRAM_RODATA
 	default n
 	---help---
 		If enabled, rodata in flash will be copied into SPIRAM.
-		If ESP32S3_ESP32S2_SPIRAM_FETCH_INSTRUCTIONS is also enabled,
+		If ESP32S3_SPIRAM_FETCH_INSTRUCTIONS is also enabled,
 		you can run the instruction when erasing or programming the
 		flash.
 
@@ -687,6 +706,47 @@ config ESP32S3_UART2_CTSPIN
 endif # ESP32S3_UART2
 
 endmenu # UART Configuration
+
+menu "I2C Configuration"
+	depends on ESP32S3_I2C
+
+if ESP32S3_I2C0
+
+config ESP32S3_I2C0_SCLPIN
+	int "I2C0 SCL Pin"
+	default 2
+	range 0 48
+
+config ESP32S3_I2C0_SDAPIN
+	int "I2C0 SDA Pin"
+	default 1
+	range 0 48
+
+endif # ESP32S3_I2C0
+
+if ESP32S3_I2C1
+
+config ESP32S3_I2C1_SCLPIN
+	int "I2C1 SCL Pin"
+	default 5
+	range 0 48
+
+config ESP32S3_I2C1_SDAPIN
+	int "I2C1 SDA Pin"
+	default 4
+	range 0 48
+
+endif # ESP32S3_I2C1
+
+config ESP32S3_I2CTIMEOSEC
+	int "Timeout seconds"
+	default 0
+
+config ESP32S3_I2CTIMEOMS
+	int "Timeout milliseconds"
+	default 500
+
+endmenu # I2C Configuration
 
 menu "Timer/Counter Configuration"
 	depends on ESP32S3_TIMER
