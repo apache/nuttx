@@ -590,7 +590,7 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
        * return -ENODATA.
        */
 
-      if (!sensor_is_updated(upper, user))
+      if (user->generation == upper->state.generation)
         {
           if (lower->persist)
             {
@@ -751,7 +751,8 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_UPDATED:
         {
           nxrmutex_lock(&upper->lock);
-          *(FAR bool *)(uintptr_t)arg = sensor_is_updated(upper, user);
+          *(FAR bool *)(uintptr_t)arg =
+          sensor_is_updated(upper->state.generation, user->generation);
           nxrmutex_unlock(&upper->lock);
         }
         break;
