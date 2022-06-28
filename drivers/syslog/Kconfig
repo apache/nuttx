@@ -288,6 +288,10 @@ config SYSLOG_RPMSG_SERVER
 	---help---
 		Use rpmsg to receive message from remote proc.
 
+config SYSLOG_RPMSG_SERVER_CHARDEV
+	bool "SYSLOG rpmsg server character device"
+	default n
+
 menuconfig SYSLOG_FILE
 	bool "Syslog file output"
 	default n
