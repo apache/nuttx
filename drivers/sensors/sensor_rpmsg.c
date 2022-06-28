@@ -539,7 +539,6 @@ sensor_rpmsg_alloc_stub(FAR struct sensor_rpmsg_dev_s *dev,
       return NULL;
     }
 
-  file_ioctl(&stub->file, SNIOC_READLAST, false);
   sensor_rpmsg_lock(dev);
   list_add_tail(&dev->stublist, &stub->node);
   sensor_rpmsg_unlock(dev);
@@ -729,6 +728,7 @@ static void sensor_rpmsg_push_event_one(FAR struct sensor_rpmsg_dev_s *dev,
   FAR struct sensor_rpmsg_data_s *msg;
   struct sensor_state_s state;
   uint64_t now;
+  bool updated;
   int ret;
 
   /* Get state of device to do send data with timeout */
@@ -756,6 +756,12 @@ static void sensor_rpmsg_push_event_one(FAR struct sensor_rpmsg_dev_s *dev,
 
   for (; ; )
     {
+      ret = file_ioctl(&stub->file, SNIOC_UPDATED, &updated);
+      if (ret < 0 || !updated)
+        {
+          break;
+        }
+
       /* If buffer isn't created or it doesn't have enough space to fill
        * new data, you should create or send this buffer at once.
        */
