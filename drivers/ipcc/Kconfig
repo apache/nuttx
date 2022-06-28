@@ -1,0 +1,33 @@
+menuconfig IPCC
+	bool "IPCC (Inter Processor Communication Controller) driver"
+	select MM_CIRCBUF
+	depends on EXPERIMENTAL
+	default n
+	---help---
+		IPCC driver. Generic driver to communicate between two
+		processors via character device.
+
+comment "IPCC driver requires CONFIG_EXPERIMENTAL"
+	depends on !EXPERIMENTAL
+
+if IPCC
+
+config IPCC_BUFFERED
+	bool "Enable buffering in driver"
+	default y
+	---help---
+		If enabled, data read and written to/from IPCC will be
+		buffered in driver. This will reduce thread waiting for
+		read and write to complete during busy period, but it
+		will also increase RAM usage.
+
+		Buffer size for tx and rx can be separately defined for
+		each channel during driver registration.
+
+config IPCC_NPOLLWAITERS
+	int "Number of poll threads"
+	default 4
+	---help---
+		Maximum number of threads that can be waiting for POLL events.
+
+endif # IPCC
