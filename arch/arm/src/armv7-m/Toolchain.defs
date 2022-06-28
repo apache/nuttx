@@ -269,7 +269,7 @@ ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),CLANG)
   ifeq ($(wildcard $(COMPILER_RT_LIB)),)
     # if "--print-libgcc-file-name" unable to find the correct libgcc PATH
     # then go ahead and try "--print-file-name"
-    COMPILER_RT_LIB := -$(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name $(notdir $(COMPILER_RT_LIB))))
+    COMPILER_RT_LIB := $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name $(notdir $(COMPILER_RT_LIB))))
   endif
 endif
 
