@@ -26,7 +26,10 @@
 
 #include <assert.h>
 
+#include <nuttx/fs/ioctl.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/list.h>
+#include <nuttx/mutex.h>
 #include <nuttx/rptun/openamp.h>
 #include <nuttx/syslog/syslog_rpmsg.h>
 
@@ -45,6 +48,9 @@
 
 struct syslog_rpmsg_server_s
 {
+#ifdef CONFIG_SYSLOG_RPMSG_SERVER_CHARDEV
+  struct list_node      node;
+#endif
   struct rpmsg_endpoint ept;
   FAR char              *tmpbuf;
   unsigned int          nextpos;
@@ -67,10 +73,76 @@ static void syslog_rpmsg_ns_unbind(FAR struct rpmsg_endpoint *ept);
 static int  syslog_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
                                 FAR void *data, size_t len, uint32_t src,
                                 FAR void *priv_);
+#ifdef CONFIG_SYSLOG_RPMSG_SERVER_CHARDEV
+static int syslog_rpmsg_file_ioctl(FAR struct file *filep, int cmd,
+                                   unsigned long arg);
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_SYSLOG_RPMSG_SERVER_CHARDEV
+static struct list_node g_list = LIST_INITIAL_VALUE(g_list);
+static mutex_t g_lock = NXMUTEX_INITIALIZER;
+
+static const struct file_operations g_syslog_rpmsg_fops =
+{
+  NULL,                    /* open */
+  NULL,                    /* close */
+  NULL,                    /* read */
+  NULL,                    /* write */
+  NULL,                    /* seek */
+  syslog_rpmsg_file_ioctl, /* ioctl */
+  NULL                     /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL                   /* unlink */
+#endif
+};
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static int syslog_rpmsg_file_ioctl(FAR struct file *filep, int cmd,
+                                   unsigned long arg)
+{
+  FAR struct syslog_rpmsg_server_s *priv;
+  struct syslog_rpmsg_sync_s msg;
+  sem_t sem;
+  int ret = 0;
+
+  if (cmd != FIOC_DUMP)
+    {
+      return -ENOTTY;
+    }
+
+  nxsem_init(&sem, 0, 0);
+  nxsem_set_protocol(&sem, SEM_PRIO_NONE);
+
+  nxmutex_lock(&g_lock);
+  list_for_every_entry(&g_list, priv, struct syslog_rpmsg_server_s, node)
+    {
+      msg.cookie = (uint64_t)(uintptr_t)&sem;
+      msg.header.command = SYSLOG_RPMSG_SYNC;
+      ret = rpmsg_send(&priv->ept, &msg, sizeof(msg));
+      if (ret < 0)
+        {
+          continue;
+        }
+
+      ret = rpmsg_wait(&priv->ept, &sem);
+      if (ret < 0)
+        {
+          continue;
+        }
+    }
+
+  nxmutex_unlock(&g_lock);
+  nxsem_destroy(&sem);
+  return ret;
+}
+#endif
 
 static void syslog_rpmsg_write(FAR const char *buf1, size_t len1,
                                FAR const char *buf2, size_t len2)
@@ -128,6 +200,12 @@ static void syslog_rpmsg_ns_bind(FAR struct rpmsg_device *rdev,
 
   priv->ept.priv = priv;
 
+#ifdef CONFIG_SYSLOG_RPMSG_SERVER_CHARDEV
+  nxmutex_lock(&g_lock);
+  list_add_tail(&g_list, &priv->node);
+  nxmutex_unlock(&g_lock);
+#endif
+
   ret = rpmsg_create_ept(&priv->ept, rdev, SYSLOG_RPMSG_EPT_NAME,
                          RPMSG_ADDR_ANY, dest,
                          syslog_rpmsg_ept_cb, syslog_rpmsg_ns_unbind);
@@ -147,6 +225,12 @@ static void syslog_rpmsg_ns_unbind(FAR struct rpmsg_endpoint *ept)
     }
 
   rpmsg_destroy_ept(ept);
+
+#ifdef CONFIG_SYSLOG_RPMSG_SERVER_CHARDEV
+  nxmutex_lock(&g_lock);
+  list_delete(&priv->node);
+  nxmutex_unlock(&g_lock);
+#endif
 
   kmm_free(priv->tmpbuf);
   kmm_free(priv);
@@ -205,6 +289,15 @@ static int syslog_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
           priv->nextpos += copied;
         }
     }
+#ifdef CONFIG_SYSLOG_RPMSG_SERVER_CHARDEV
+  else if (header->command == SYSLOG_RPMSG_SYNC)
+    {
+      FAR struct syslog_rpmsg_sync_s *msg = data;
+      sem_t *sem = (FAR sem_t *)(uintptr_t)msg->cookie;
+
+      rpmsg_post(ept, sem);
+    }
+#endif
 
   return 0;
 }
@@ -215,6 +308,16 @@ static int syslog_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
 
 int syslog_rpmsg_server_init(void)
 {
+#ifdef CONFIG_SYSLOG_RPMSG_SERVER_CHARDEV
+  int ret;
+
+  ret = register_driver("/dev/logrpmsg", &g_syslog_rpmsg_fops, 0666, NULL);
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
+
   return rpmsg_register_callback(NULL,
                                  NULL,
                                  NULL,
