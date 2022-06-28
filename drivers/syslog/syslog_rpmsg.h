@@ -30,6 +30,7 @@
 #define SYSLOG_RPMSG_TRANSFER           0
 #define SYSLOG_RPMSG_SUSPEND            1
 #define SYSLOG_RPMSG_RESUME             2
+#define SYSLOG_RPMSG_SYNC               3
 
 /****************************************************************************
  * Public Types
@@ -46,6 +47,12 @@ begin_packed_struct struct syslog_rpmsg_transfer_s
   struct syslog_rpmsg_header_s header;
   int32_t                      count;
   char                         data[0];
+} end_packed_struct;
+
+begin_packed_struct struct syslog_rpmsg_sync_s
+{
+  struct syslog_rpmsg_header_s header;
+  uint64_t                     cookie;
 } end_packed_struct;
 
 #endif /* __DRIVERS_SYSLOG_SYSLOG_RPMSG_H */

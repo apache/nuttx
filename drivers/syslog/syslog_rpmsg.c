@@ -290,6 +290,11 @@ static int syslog_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
       priv->suspend = false;
       work_queue(HPWORK, &priv->work, syslog_rpmsg_work, priv, 0);
     }
+  else if (header->command == SYSLOG_RPMSG_SYNC)
+    {
+      syslog_rpmsg_transfer(priv, true);
+      rpmsg_send(ept, data, len);
+    }
 
   return 0;
 }
