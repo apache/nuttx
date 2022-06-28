@@ -106,6 +106,7 @@ struct bcmf_sdio_dev_s
   dq_queue_t free_queue;           /* Queue of available frames */
   dq_queue_t tx_queue;             /* Queue of frames to transmit */
   dq_queue_t rx_queue;             /* Queue of frames used to receive */
+  volatile int tx_queue_count;     /* Count of items in TX queue */
 };
 
 /* Structure used to manage SDIO frames */

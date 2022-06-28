@@ -1065,10 +1065,22 @@ struct bcmf_sdio_frame *bcmf_sdio_allocate_frame(FAR struct bcmf_dev_s *priv,
           DEBUGPANIC();
         }
 
-      if ((entry = bcmf_dqueue_pop_tail(&sbus->free_queue)) != NULL)
+#if 0
+      if (!tx ||
+          sbus->tx_queue_count <
+            CONFIG_IEEE80211_BROADCOM_FRAME_POOL_SIZE - 1)
+#endif
         {
-          nxsem_post(&sbus->queue_mutex);
-          break;
+          if ((entry = bcmf_dqueue_pop_tail(&sbus->free_queue)) != NULL)
+            {
+              if (tx)
+                {
+                  sbus->tx_queue_count++;
+                }
+
+              nxsem_post(&sbus->queue_mutex);
+              break;
+            }
         }
 
       nxsem_post(&sbus->queue_mutex);
@@ -1107,6 +1119,11 @@ void bcmf_sdio_free_frame(FAR struct bcmf_dev_s *priv,
     }
 
   bcmf_dqueue_push(&sbus->free_queue, &sframe->list_entry);
+
+  if (sframe->tx)
+    {
+      sbus->tx_queue_count--;
+    }
 
   nxsem_post(&sbus->queue_mutex);
 }
