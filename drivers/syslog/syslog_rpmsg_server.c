@@ -157,7 +157,6 @@ static int syslog_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
   if (header->command == SYSLOG_RPMSG_TRANSFER)
     {
       FAR struct syslog_rpmsg_transfer_s *msg = data;
-      struct syslog_rpmsg_header_s done;
       unsigned int copied = msg->count;
       unsigned int printed = 0;
       FAR const char *nl;
@@ -200,10 +199,6 @@ static int syslog_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
           memcpy(priv->tmpbuf + priv->nextpos, msg->data + printed, copied);
           priv->nextpos += copied;
         }
-
-      done.command = SYSLOG_RPMSG_TRANSFER_DONE;
-      done.result  = printed + copied;
-      rpmsg_send(ept, &done, sizeof(done));
     }
 
   return 0;
