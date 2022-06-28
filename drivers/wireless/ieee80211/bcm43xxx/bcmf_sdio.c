@@ -1065,11 +1065,9 @@ struct bcmf_sdio_frame *bcmf_sdio_allocate_frame(FAR struct bcmf_dev_s *priv,
           DEBUGPANIC();
         }
 
-#if 0
       if (!tx ||
           sbus->tx_queue_count <
-            CONFIG_IEEE80211_BROADCOM_FRAME_POOL_SIZE - 1)
-#endif
+            CONFIG_IEEE80211_BROADCOM_FRAME_POOL_SIZE / 2)
         {
           if ((entry = bcmf_dqueue_pop_tail(&sbus->free_queue)) != NULL)
             {
