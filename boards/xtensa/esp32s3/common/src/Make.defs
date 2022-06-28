@@ -32,6 +32,10 @@ ifeq ($(CONFIG_ESP32S3_SPIFLASH),y)
   CSRCS += esp32s3_board_spiflash.c
 endif
 
+ifeq ($(CONFIG_I2C_DRIVER),y)
+  CSRCS += esp32s3_board_i2c.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)
