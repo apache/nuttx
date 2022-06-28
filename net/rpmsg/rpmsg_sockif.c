@@ -569,7 +569,7 @@ static int rpmsg_socket_setaddr(FAR struct rpmsg_socket_conn_s *conn,
   FAR struct sockaddr_rpmsg *rpaddr = (FAR struct sockaddr_rpmsg *)addr;
 
   if (rpaddr->rp_family != AF_RPMSG ||
-      addrlen != sizeof(struct sockaddr_rpmsg))
+      addrlen < sizeof(struct sockaddr_rpmsg))
     {
       return -EINVAL;
     }
