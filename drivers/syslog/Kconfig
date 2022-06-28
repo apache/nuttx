@@ -275,13 +275,6 @@ config SYSLOG_RPMSG_WORK_DELAY
 	int "SYSLOG RPMSG work delay(ms)"
 	default 100
 
-config SYSLOG_RPMSG_OVERWRITE
-	bool "SYSLOG RPMSG overwrite"
-	default n
-	---help---
-		Allow syslog rpmsg overwrite, maybe caused syslog lost.
-		Set 'n' if you don't want lost logs, but may harmful to preformance.
-
 config SYSLOG_RPMSG_CHARDEV
 	bool "SYSLOG rpmsg character device"
 	default !SYSLOG_RPMSG_WORK_DELAY
