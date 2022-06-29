@@ -30,6 +30,7 @@
 #include <assert.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/signal.h>
 
 #include <stddef.h>
 #include <string.h>
