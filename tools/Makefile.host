@@ -228,7 +228,7 @@ endif
 # jlink-nuttx - Create jlink GDBServer nuttx plugin
 
 jlink-nuttx$(HOSTDYNEXT): jlink-nuttx.c
-	$(Q) $(HOSTCC) $(HOSTCFLAGS) -shared jlink-nuttx.c -o jlink-nuttx$(HOSTDYNEXT)
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) -shared -fPIC jlink-nuttx.c -o jlink-nuttx$(HOSTDYNEXT)
 
 ifdef HOSTDYNEXT
 jlink-nuttx: jlink-nuttx$(HOSTDYNEXT)
