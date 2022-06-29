@@ -731,17 +731,20 @@ static int mpu_reset(FAR struct mpu_dev_s *dev)
 
   __mpu_write_pwr_mgmt_2(dev, 0);
 
-  /* No FSYNC, set accel LPF at 184 Hz, gyro LPF at 188 Hz */
+  /* default No FSYNC, set accel LPF at 184 Hz, gyro LPF at 188 Hz in
+   * menuconfig
+   */
 
-  __mpu_write_config(dev, 0, 1);
+  __mpu_write_config(dev, CONFIG_MPU60X0_EXT_SYNC_SET,
+                     CONFIG_MPU60X0_DLPF_CFG);
 
-  /* ± 1000 deg/sec */
+  /* default ± 1000 deg/sec in menuconfig */
 
-  __mpu_write_gyro_config(dev, 2);
+  __mpu_write_gyro_config(dev, CONFIG_MPU60X0_GYRO_FS_SEL);
 
-  /* ± 8g */
+  /* default ± 8g in menuconfig */
 
-  __mpu_write_accel_config(dev, 2);
+  __mpu_write_accel_config(dev, CONFIG_MPU60X0_ACCEL_AFS_SEL);
 
   /* clear INT on any read (we aren't using that pin right now) */
 
