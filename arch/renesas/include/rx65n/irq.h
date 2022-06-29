@@ -1031,6 +1031,23 @@ static inline void __setsr(irqstate_t psw)
   __asm__ __volatile__("mvtc %0, psw": :"r"(psw));
 }
 
+/* Return the current value of the stack pointer */
+
+static inline uint16_t up_getsp(void)
+{
+  uint16_t sp;
+
+  __asm__ __volatile__
+    (
+      "\tmvfc usp, %0\n\t"
+      : "=r" (sp)
+      :
+      :"memory"
+    );
+
+  return sp;
+}
+
 /* Disable interrupts */
 
 static inline void up_irq_disable(void)
