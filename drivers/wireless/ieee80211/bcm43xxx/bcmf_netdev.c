@@ -645,6 +645,7 @@ void bcmf_netdev_notify_rx(FAR struct bcmf_dev_s *priv)
 static int bcmf_ifup(FAR struct net_driver_s *dev)
 {
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
+  struct ether_addr zmac;
   irqstate_t flags;
   uint32_t out_len;
   int ret = OK;
@@ -674,7 +675,9 @@ static int bcmf_ifup(FAR struct net_driver_s *dev)
 
   /* Set customized MAC address */
 
-  if (bcmf_board_etheraddr(&priv->bc_dev.d_mac.ether))
+  memset(&zmac, 0, sizeof(zmac));
+
+  if (memcmp(&priv->bc_dev.d_mac.ether, &zmac, sizeof(zmac)) != 0)
     {
       out_len = ETHER_ADDR_LEN;
       bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, true,
