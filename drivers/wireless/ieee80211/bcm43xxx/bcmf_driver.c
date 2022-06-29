@@ -2048,6 +2048,8 @@ int bcmf_wl_set_dtim(FAR struct bcmf_dev_s *priv,
       return OK;
     }
 
+  syslog(LOG_WARNING, "--- [wifi] DTIM interval"
+                      " -> %" PRIu32 " ms ---\n", interval_ms);
   ret = bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, true,
                                IOVAR_STR_LISTEN_INTERVAL_DTIM,
                                (uint8_t *)&value, &out_len);
