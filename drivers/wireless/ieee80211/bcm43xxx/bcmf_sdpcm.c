@@ -387,20 +387,17 @@ int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv)
   ret = bcmf_transfer_bytes(sbus, true, 2, 0,
                             sframe->header.base,
                             sframe->header.len);
-  if (ret == OK)
+  is_txframe = sframe->tx;
+
+  /* Free frame buffer */
+
+  bcmf_sdio_free_frame(priv, sframe);
+
+  if (ret == OK && is_txframe)
     {
-      is_txframe = sframe->tx;
+      /* Notify upper layer at least one TX buffer is available */
 
-      /* Free frame buffer */
-
-      bcmf_sdio_free_frame(priv, sframe);
-
-      if (is_txframe)
-        {
-          /* Notify upper layer at least one TX buffer is available */
-
-          bcmf_netdev_notify_tx(priv);
-        }
+      bcmf_netdev_notify_tx(priv);
     }
 
   return ret;
