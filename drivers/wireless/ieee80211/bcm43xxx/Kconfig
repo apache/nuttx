@@ -152,11 +152,23 @@ config IEEE80211_BROADCOM_DEFAULT_COUNTRY
 
 if IEEE80211_BROADCOM_LOWPOWER
 
-config IEEE80211_BROADCOM_LOWPOWER_TIMEOUT
+config IEEE80211_BROADCOM_LP_DTIM_TIMEOUT
 	int "Broadcom BCMF lower power timeout(second)"
 	default 10
 	---help---
 		This parameter should be enable the bcmf lower power timeout
+
+config IEEE80211_BROADCOM_LP_DTIM_INTERVAL
+	int "Broadcom BCMF listen interval dtim(millisecond)"
+	default 500
+	---help---
+		This parameter should be set the listen interval dtim in milliseconds
+
+config IEEE80211_BROADCOM_LP_IFDOWN_TIMEOUT
+	int "Broadcom BCMF lower power if down timeout(second)"
+	default 600
+	---help---
+		This parameter should be enable the bcmf lower power if down timeout
 
 endif # IEEE80211_BROADCOM_LOWPOWER
 
