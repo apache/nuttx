@@ -357,7 +357,7 @@ int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv)
       /* TODO handle this case */
 
       wlinfo("No credit to send frame\n");
-      return -EAGAIN;
+      nxsig_usleep(10 * 1000);
     }
 
   if (nxsem_wait_uninterruptible(&sbus->queue_mutex) < 0)
