@@ -977,6 +977,16 @@ struct sensor_state_s
   FAR void     *priv;          /* The pointer to private data of userspace user */
 };
 
+/* This structure describes the state for the sensor user */
+
+struct sensor_ustate_s
+{
+  unsigned long esize;         /* The element size of circular buffer */
+  unsigned long latency;       /* The batch latency for user, in us */
+  unsigned long interval;      /* The subscription interval for user, in us */
+  unsigned long generation;    /* The recent generation of circular buffer */
+};
+
 /* This structure describes the register info for the user sensor */
 
 #ifdef CONFIG_USENSOR

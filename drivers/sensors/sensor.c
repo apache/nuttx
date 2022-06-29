@@ -95,9 +95,7 @@ struct sensor_user_s
    * appear in dual role
    */
 
-  unsigned long    generation; /* Last generation subscriber has seen */
-  unsigned long    interval;   /* The interval for subscriber */
-  unsigned long    latency;    /* The bactch latency for subscriber */
+  struct sensor_ustate_s state;
 };
 
 /* This structure describes the state of the upper half driver */
@@ -223,29 +221,29 @@ static int sensor_update_interval(FAR struct file *filep,
   FAR struct sensor_user_s *tmp;
   unsigned long min_interval = interval;
   unsigned long min_latency = interval != ULONG_MAX ?
-                              user->latency : ULONG_MAX;
+                              user->state.latency : ULONG_MAX;
   int ret = 0;
 
-  if (interval == user->interval)
+  if (interval == user->state.interval)
     {
       return 0;
     }
 
   list_for_every_entry(&upper->userlist, tmp, struct sensor_user_s, node)
     {
-      if (tmp == user || tmp->interval == ULONG_MAX)
+      if (tmp == user || tmp->state.interval == ULONG_MAX)
         {
           continue;
         }
 
-      if (min_interval > tmp->interval)
+      if (min_interval > tmp->state.interval)
         {
-          min_interval = tmp->interval;
+          min_interval = tmp->state.interval;
         }
 
-      if (min_latency > tmp->latency)
+      if (min_latency > tmp->state.latency)
         {
-          min_latency = tmp->latency;
+          min_latency = tmp->state.latency;
         }
     }
 
@@ -284,7 +282,7 @@ static int sensor_update_interval(FAR struct file *filep,
     }
 
   upper->state.min_interval = min_interval;
-  user->interval = interval;
+  user->state.interval = interval;
   sensor_pollnotify(upper, POLLPRI);
   return ret;
 }
@@ -299,14 +297,14 @@ static int sensor_update_latency(FAR struct file *filep,
   unsigned long min_latency = latency;
   int ret = 0;
 
-  if (latency == user->latency)
+  if (latency == user->state.latency)
     {
       return 0;
     }
 
-  if (user->interval == ULONG_MAX)
+  if (user->state.interval == ULONG_MAX)
     {
-      user->latency = latency;
+      user->state.latency = latency;
       return 0;
     }
 
@@ -317,14 +315,14 @@ static int sensor_update_latency(FAR struct file *filep,
 
   list_for_every_entry(&upper->userlist, tmp, struct sensor_user_s, node)
     {
-      if (tmp == user || tmp->interval == ULONG_MAX)
+      if (tmp == user || tmp->state.interval == ULONG_MAX)
         {
           continue;
         }
 
-      if (min_latency > tmp->latency)
+      if (min_latency > tmp->state.latency)
         {
-          min_latency = tmp->latency;
+          min_latency = tmp->state.latency;
         }
     }
 
@@ -336,7 +334,7 @@ update:
 
   if (min_latency == upper->state.min_latency)
     {
-      user->latency = latency;
+      user->state.latency = latency;
       return ret;
     }
 
@@ -350,7 +348,7 @@ update:
     }
 
   upper->state.min_latency = min_latency;
-  user->latency = latency;
+  user->state.latency = latency;
   sensor_pollnotify(upper, POLLPRI);
   return ret;
 }
@@ -371,13 +369,13 @@ static void sensor_generate_timing(FAR struct sensor_upperhalf_s *upper,
 static bool sensor_is_updated(FAR struct sensor_upperhalf_s *upper,
                               FAR struct sensor_user_s *user)
 {
-  long delta = upper->state.generation - user->generation;
+  long delta = upper->state.generation - user->state.generation;
 
   if (delta <= 0)
     {
       return false;
     }
-  else if (user->interval == ULONG_MAX)
+  else if (user->state.interval == ULONG_MAX)
     {
       return true;
     }
@@ -391,7 +389,8 @@ static bool sensor_is_updated(FAR struct sensor_upperhalf_s *upper,
        *   next generation user want
        */
 
-      return delta >= user->interval - (upper->state.min_interval >> 1);
+      return delta >= user->state.interval -
+                      (upper->state.min_interval >> 1);
     }
 }
 
@@ -402,18 +401,19 @@ static void sensor_catch_up(FAR struct sensor_upperhalf_s *upper,
   long delta;
 
   circbuf_peek(&upper->timing, &generation, TIMING_BUF_ESIZE);
-  delta = generation - user->generation;
+  delta = generation - user->state.generation;
   if (delta > 0)
     {
       user->bufferpos = upper->timing.tail / TIMING_BUF_ESIZE;
-      if (user->interval == ULONG_MAX)
+      if (user->state.interval == ULONG_MAX)
         {
-          user->generation = generation - 1;
+          user->state.generation = generation - 1;
         }
       else
         {
           delta -= upper->state.min_interval >> 1;
-          user->generation += ROUND_DOWN(delta, user->interval);
+          user->state.generation += ROUND_DOWN(delta,
+                                               user->state.interval);
         }
     }
 }
@@ -439,7 +439,7 @@ static ssize_t sensor_do_samples(FAR struct sensor_upperhalf_s *upper,
 
   /* Take samples continuously */
 
-  if (user->interval == ULONG_MAX)
+  if (user->state.interval == ULONG_MAX)
     {
       ret = circbuf_peekat(&upper->buffer,
                            user->bufferpos * upper->state.esize,
@@ -447,7 +447,7 @@ static ssize_t sensor_do_samples(FAR struct sensor_upperhalf_s *upper,
       user->bufferpos += nums;
       circbuf_peekat(&upper->timing,
                      (user->bufferpos - 1) * TIMING_BUF_ESIZE,
-                     &user->generation, TIMING_BUF_ESIZE);
+                     &user->state.generation, TIMING_BUF_ESIZE);
       return ret;
     }
 
@@ -488,14 +488,14 @@ static ssize_t sensor_do_samples(FAR struct sensor_upperhalf_s *upper,
         }
 
       delta = next_generation + generation -
-              ((user->generation + user->interval) << 1);
+              ((user->state.generation + user->state.interval) << 1);
       if (delta >= 0)
         {
           ret += circbuf_peekat(&upper->buffer,
                                 (pos - 1) * upper->state.esize,
                                 buffer + ret, upper->state.esize);
           user->bufferpos = pos;
-          user->generation += user->interval;
+          user->state.generation += user->state.interval;
           if (ret >= len)
             {
               break;
@@ -596,16 +596,17 @@ static int sensor_open(FAR struct file *filep)
 
   if (upper->state.generation && lower->persist)
     {
-      user->generation = upper->state.generation - 1;
+      user->state.generation = upper->state.generation - 1;
       user->bufferpos  = upper->timing.head / TIMING_BUF_ESIZE - 1;
     }
   else
     {
-      user->generation = upper->state.generation;
+      user->state.generation = upper->state.generation;
       user->bufferpos  = upper->timing.head / TIMING_BUF_ESIZE;
     }
 
-  user->interval = ULONG_MAX;
+  user->state.interval = ULONG_MAX;
+  user->state.esize = upper->state.esize;
   nxsem_init(&user->buffersem, 0, 0);
   nxsem_set_protocol(&user->buffersem, SEM_PRIO_NONE);
   list_add_tail(&upper->userlist, &user->node);
@@ -767,6 +768,15 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           memcpy((FAR void *)(uintptr_t)arg,
                  &upper->state, sizeof(upper->state));
           user->changed = false;
+          nxrmutex_unlock(&upper->lock);
+        }
+        break;
+
+      case SNIOC_GET_USTATE:
+        {
+          nxrmutex_lock(&upper->lock);
+          memcpy((FAR void *)(uintptr_t)arg,
+                 &user->state, sizeof(user->state));
           nxrmutex_unlock(&upper->lock);
         }
         break;

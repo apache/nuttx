@@ -353,4 +353,11 @@
 
 #define SNIOC_UPDATED              _SNIOC(0x0091)
 
+/* Command:      SNIOC_GET_USTATE
+ * Description:  Get state for user.
+ * Argument:     This is the state pointer(struct sensor_state_s)
+ */
+
+#define SNIOC_GET_USTATE           _SNIOC(0x0092)
+
 #endif /* __INCLUDE_NUTTX_SENSORS_IOCTL_H */
