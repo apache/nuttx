@@ -349,63 +349,7 @@ begin_packed_struct struct idt_ptr_s
   uint32_t base;             /* The address of the first GDT entry */
 } end_packed_struct;
 
-/****************************************************************************
- * Inline functions
- ****************************************************************************/
-
 #ifndef __ASSEMBLY__
-
-/* Return stack pointer */
-
-static inline uint32_t up_getsp(void)
-{
-  uint32_t regval;
-
-  asm volatile(
-    "\tmovl %%esp, %0\n"
-    : "=rm" (regval)
-    :
-    : "memory");
-  return regval;
-}
-
-/* Get segment registers */
-
-static inline uint32_t up_getds(void)
-{
-  uint32_t regval;
-
-  asm volatile(
-    "\tmov %%ds, %0\n"
-    : "=rm" (regval)
-    :
-    : "memory");
-  return regval;
-}
-
-static inline uint32_t up_getcs(void)
-{
-  uint32_t regval;
-
-  asm volatile(
-    "\tmov %%cs, %0\n"
-    : "=rm" (regval)
-    :
-    : "memory");
-  return regval;
-}
-
-static inline uint32_t up_getss(void)
-{
-  uint32_t regval;
-
-  asm volatile(
-    "\tmov %%ss, %0\n"
-    : "=rm" (regval)
-    :
-    : "memory");
-  return regval;
-}
 
 /****************************************************************************
  * Public Types

@@ -232,6 +232,21 @@ static inline void xtensa_setps(uint32_t ps)
   );
 }
 
+/* Return the current value of the stack pointer */
+
+static inline uint32_t up_getsp(void)
+{
+  register uint32_t sp;
+
+  __asm__ __volatile__
+  (
+    "mov %0, sp\n"
+    : "=r" (sp)
+  );
+
+  return sp;
+}
+
 /* Restore the value of the PS register */
 
 static inline void up_irq_restore(uint32_t ps)
