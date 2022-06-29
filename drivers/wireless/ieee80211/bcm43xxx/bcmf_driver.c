@@ -181,9 +181,6 @@ static int bcmf_driver_download_clm(FAR struct bcmf_dev_s *priv);
 
 /* FIXME only for debug purpose */
 
-static void bcmf_wl_default_event_handler(FAR struct bcmf_dev_s *priv,
-                            struct bcmf_event_s *event, unsigned int len);
-
 static void bcmf_wl_radio_event_handler(FAR struct bcmf_dev_s *priv,
                             struct bcmf_event_s *event, unsigned int len);
 
@@ -587,14 +584,6 @@ errout_in_sdio_active:
 
 int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
 {
-  int i;
-
-  /* FIXME Configure event mask to enable all asynchronous events */
-
-  for (i = 0; i < BCMF_EVENT_COUNT; i++)
-    {
-      bcmf_event_register(priv, bcmf_wl_default_event_handler, i);
-    }
 
   /*  Register radio event */
 
@@ -632,15 +621,6 @@ int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
   /* Register network driver */
 
   return bcmf_netdev_register(priv);
-}
-
-void bcmf_wl_default_event_handler(FAR struct bcmf_dev_s *priv,
-                                   struct bcmf_event_s *event,
-                                   unsigned int len)
-{
-  wlinfo("Got event %" PRId32 " from <%s>\n",
-         bcmf_getle32(&event->type),
-         event->src_name);
 }
 
 void bcmf_wl_radio_event_handler(FAR struct bcmf_dev_s *priv,
