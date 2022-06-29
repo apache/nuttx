@@ -400,6 +400,34 @@ struct sensor_ir            /* Type: Infrared Ray */
   float ir;                 /* in SI units lux */
 };
 
+enum sensor_gps_vendor_type
+{
+  SENSOR_GPS_VENDOR_NONE = 0,
+  SENSOR_GPS_VENDOR_BREAM,
+};
+
+struct sensor_gps_vendor_brm
+{
+  float hspeed_err;         /* Horizontal speed error RMS (m/s) */
+  float vspeed_err;         /* Vertical speed error RMS (m/s) */
+  float env_range_resid;    /* Environment RangeResid (meters) */
+  float altitude_err;       /* Altitude error RMS (meters) */
+  int32_t lat;              /* Latitude. Unit is degree */
+  int32_t lon;              /* Longitude. Unit is degree */
+  int32_t hmsl;             /* Height above mean sea level */
+  int32_t gspeed;           /* Ground speed (two-dimensional) */
+  uint32_t sacc;            /* Reserved. Speed accuracy estimate */
+  uint32_t hacc;            /* Horizontal accuracy estimate */
+  int32_t vele;             /* NED east velocity */
+  int32_t veln;             /* NED north velocity */
+  int32_t veld;             /* NED down velocity */
+  uint32_t vacc;            /* Reserved. Vertical accuracy estimate */
+  int32_t headmot;          /* Heading of motion (two-dimensional) */
+  uint32_t headacc;         /* Reserved. Heading accuracy estimate (both motion and vehicle) */
+  int16_t magdec;           /* Magnetic declination */
+  uint16_t magacc;          /* Magnetic declination accuracy */
+};
+
 struct sensor_gps           /* Type: Gps */
 {
   uint64_t timestamp;       /* Time since system start, Units is microseconds */
@@ -432,6 +460,12 @@ struct sensor_gps           /* Type: Gps */
   float course;
 
   uint32_t satellites_used; /* Number of satellites used */
+
+  enum sensor_gps_vendor_type vendor;
+  union
+  {
+    struct sensor_gps_vendor_brm brm;
+  };
 };
 
 struct sensor_uv            /* Type: Ultraviolet Light */
