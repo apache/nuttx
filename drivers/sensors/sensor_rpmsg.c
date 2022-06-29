@@ -726,22 +726,22 @@ static void sensor_rpmsg_push_event_one(FAR struct sensor_rpmsg_dev_s *dev,
   FAR struct sensor_rpmsg_cell_s *cell;
   FAR struct sensor_rpmsg_ept_s *sre;
   FAR struct sensor_rpmsg_data_s *msg;
-  struct sensor_state_s state;
+  struct sensor_ustate_s state;
   uint64_t now;
   bool updated;
   int ret;
 
   /* Get state of device to do send data with timeout */
 
-  ret = file_ioctl(&stub->file, SNIOC_GET_STATE, &state);
+  ret = file_ioctl(&stub->file, SNIOC_GET_USTATE, &state);
   if (ret < 0)
     {
       return;
     }
 
-  if (state.min_interval == ULONG_MAX)
+  if (state.interval == ULONG_MAX)
     {
-      state.min_interval = 0;
+      state.interval = 0;
     }
 
   sre = container_of(stub->ept, struct sensor_rpmsg_ept_s, ept);
@@ -807,7 +807,7 @@ static void sensor_rpmsg_push_event_one(FAR struct sensor_rpmsg_dev_s *dev,
    */
 
   now = sensor_get_timestamp();
-  if (sre->expire <= now)
+  if (sre->expire <= now && sre->buffer)
     {
       ret = rpmsg_send_nocopy(&sre->ept, sre->buffer, sre->written);
       sre->buffer = NULL;
@@ -820,9 +820,9 @@ static void sensor_rpmsg_push_event_one(FAR struct sensor_rpmsg_dev_s *dev,
   else
     {
       if (sre->expire == UINT64_MAX ||
-          sre->expire - now > state.min_interval / 2)
+          sre->expire - now > state.interval / 2)
         {
-          sre->expire = now + state.min_interval / 2;
+          sre->expire = now + state.interval / 2;
         }
 
       work_queue(HPWORK, &sre->work, sensor_rpmsg_data_worker, sre,
