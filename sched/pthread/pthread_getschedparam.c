@@ -78,7 +78,7 @@ int pthread_getschedparam(pthread_t thread, FAR int *policy,
 {
   int ret;
 
-  sinfo("Thread ID=%d policy=0x%p param=0x%p\n", thread, policy, param);
+  sinfo("Thread ID=%d policy=%p param=%p\n", thread, policy, param);
 
   if (policy == NULL || param == NULL)
     {

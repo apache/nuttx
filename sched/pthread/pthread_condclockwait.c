@@ -78,7 +78,7 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
   int ret = OK;
   int status;
 
-  sinfo("cond=0x%p mutex=0x%p abstime=0x%p\n", cond, mutex, abstime);
+  sinfo("cond=%p mutex=%p abstime=%p\n", cond, mutex, abstime);
 
   /* pthread_cond_clockwait() is a cancellation point */
 
