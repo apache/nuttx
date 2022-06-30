@@ -102,7 +102,7 @@ static void z8_sigsetup(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver,
 
 void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver)
 {
-  sinfo("tcb=0x%p sigdeliver=0x%04x\n", tcb, (uint16_t)sigdeliver);
+  sinfo("tcb=%p sigdeliver=0x%04x\n", tcb, (uint16_t)sigdeliver);
 
   /* Refuse to handle nested signal actions */
 

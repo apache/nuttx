@@ -729,7 +729,7 @@ TC_HANDLE sam_tc_allocate(int tc, int frequency)
 
   /* Return an opaque reference to the tc */
 
-  tmrinfo("Returning 0x%p\n", priv);
+  tmrinfo("Returning %p\n", priv);
   return (TC_HANDLE)priv;
 }
 

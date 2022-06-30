@@ -7613,7 +7613,7 @@ static ssize_t sam_transfer(struct usbhost_driver_s *drvr,
   unsigned int idx = (unsigned int)ep;
   ssize_t nbytes;
 
-  uwarn("pipe%d buffer:0x%p buflen:%d\n",  idx, buffer, buflen);
+  uwarn("pipe%d buffer:%p buflen:%d\n",  idx, buffer, buflen);
 
   DEBUGASSERT(priv && buffer && idx < SAM_USB_NENDPOINTS && buflen > 0);
   pipe = &priv->pipelist[idx];

@@ -401,7 +401,7 @@ static int lc823450_epconfigure(struct usbdev_ep_s *ep,
       priv->eplist[epnum].ep.maxpacket = GETUINT16(desc->mxpacketsize);
     }
 
-  DPRINTF("epnum = %d, ep = 0x%p, max = %d, speed = 0x%x, in = 0x%x\n",
+  DPRINTF("epnum = %d, ep = %p, max = %d, speed = 0x%x, in = 0x%x\n",
           epnum, ep, priv->eplist[epnum].ep.maxpacket,
           priv->usbdev.speed, priv->eplist[epnum].in);
 
