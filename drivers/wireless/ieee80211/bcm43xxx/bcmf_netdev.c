@@ -766,10 +766,19 @@ static int bcmf_ifdown(FAR struct net_driver_s *dev)
 
   if (priv->bc_bifup)
     {
+      /* Mark the device "down" */
+
+      priv->bc_bifup = false;
+
 #ifdef CONFIG_IEEE80211_BROADCOM_LOWPOWER
       if (!work_available(&priv->lp_work_dtim))
         {
           work_cancel(LPWORK, &priv->lp_work_dtim);
+        }
+
+      if (!work_available(&priv->lp_work_ifdown))
+        {
+          work_cancel(LPWORK, &priv->lp_work_ifdown);
         }
 #endif
       bcmf_wl_set_pta_priority(priv, IW_PTA_PRIORITY_COEX_MAXIMIZED);
@@ -777,9 +786,6 @@ static int bcmf_ifdown(FAR struct net_driver_s *dev)
       bcmf_wl_enable(priv, false);
       bcmf_wl_active(priv, false);
 
-      /* Mark the device "down" */
-
-      priv->bc_bifup = false;
       syslog(LOG_WARNING, "--- [wifi] power off ---\n");
     }
 

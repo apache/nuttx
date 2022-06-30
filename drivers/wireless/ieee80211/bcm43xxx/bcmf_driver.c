@@ -647,6 +647,11 @@ void bcmf_wl_auth_event_handler(FAR struct bcmf_dev_s *priv,
          "status %" PRId32 " reason %" PRId32 " from <%s>\n",
          type, status, reason, event->src_name);
 
+  if (!priv->bc_bifup)
+    {
+      return;
+    }
+
   bcmf_hexdump((uint8_t *)event, len, (unsigned long)event);
 
   if (type == WLC_E_PSK_SUP)
