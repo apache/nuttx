@@ -71,7 +71,7 @@ int pthread_attr_init(FAR pthread_attr_t *attr)
 {
   int ret = OK;
 
-  linfo("attr=0x%p\n", attr);
+  linfo("attr=%p\n", attr);
   if (!attr)
     {
       ret = ENOMEM;

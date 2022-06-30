@@ -53,7 +53,7 @@ int pthread_attr_destroy(FAR pthread_attr_t *attr)
 {
   int ret;
 
-  linfo("attr=0x%p\n", attr);
+  linfo("attr=%p\n", attr);
 
   if (!attr)
     {

@@ -52,7 +52,7 @@ int pthread_condattr_init(FAR pthread_condattr_t *attr)
 {
   int ret = OK;
 
-  linfo("attr=0x%p\n", attr);
+  linfo("attr=%p\n", attr);
 
   if (!attr)
     {
