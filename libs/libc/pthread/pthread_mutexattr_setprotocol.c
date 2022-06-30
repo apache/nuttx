@@ -51,7 +51,7 @@
 int pthread_mutexattr_setprotocol(FAR pthread_mutexattr_t *attr,
                                   int protocol)
 {
-  linfo("attr=0x%p protocol=%d\n", attr, protocol);
+  linfo("attr=%p protocol=%d\n", attr, protocol);
   DEBUGASSERT(attr != NULL);
 
   if (protocol >= PTHREAD_PRIO_NONE && protocol <= PTHREAD_PRIO_PROTECT)

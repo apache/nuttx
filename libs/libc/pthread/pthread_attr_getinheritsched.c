@@ -57,7 +57,7 @@ int pthread_attr_getinheritsched(FAR const pthread_attr_t *attr,
 {
   int ret;
 
-  linfo("attr=0x%p inheritsched=0x%p\n", attr, inheritsched);
+  linfo("attr=%p inheritsched=%p\n", attr, inheritsched);
 
   if (!attr || !inheritsched)
     {

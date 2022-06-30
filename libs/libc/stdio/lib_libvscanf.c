@@ -864,17 +864,17 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                       switch (modifier)
                         {
                         case HH_MOD:
-                          linfo("Return %ld to 0x%p\n", tmplong, pchar);
+                          linfo("Return %ld to %p\n", tmplong, pchar);
                           *pchar = (unsigned char)tmplong;
                           break;
 
                         case H_MOD:
-                          linfo("Return %ld to 0x%p\n", tmplong, pshort);
+                          linfo("Return %ld to %p\n", tmplong, pshort);
                           *pshort = (unsigned short)tmplong;
                           break;
 
                         case NO_MOD:
-                          linfo("Return %ld to 0x%p\n", tmplong, pint);
+                          linfo("Return %ld to %p\n", tmplong, pint);
                           *pint = (unsigned int)tmplong;
                           break;
 
@@ -882,13 +882,13 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                         case L_MOD:
 #endif
                         default:
-                          linfo("Return %ld to 0x%p\n", tmplong, plong);
+                          linfo("Return %ld to %p\n", tmplong, plong);
                           *plong = tmplong;
                           break;
 
 #ifdef CONFIG_LIBC_LONG_LONG
                         case LL_MOD:
-                          linfo("Return %lld to 0x%p\n", tmplonglong,
+                          linfo("Return %lld to %p\n", tmplonglong,
                                 plonglong);
                           *plonglong = tmplonglong;
                           break;

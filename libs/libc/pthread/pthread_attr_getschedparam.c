@@ -55,7 +55,7 @@ int pthread_attr_getschedparam(FAR const pthread_attr_t *attr,
 {
   int ret;
 
-  linfo("attr=0x%p param=0x%p\n", attr, param);
+  linfo("attr=%p param=%p\n", attr, param);
 
   if (!attr || !param)
     {

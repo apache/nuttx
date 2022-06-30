@@ -53,7 +53,7 @@ int pthread_attr_getstacksize(FAR const pthread_attr_t *attr,
 {
   int ret;
 
-  linfo("attr=0x%p stacksize=0x%p\n", attr, stacksize);
+  linfo("attr=%p stacksize=%p\n", attr, stacksize);
 
   if (!stacksize)
     {
