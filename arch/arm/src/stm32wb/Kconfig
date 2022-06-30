@@ -1,0 +1,944 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_STM32WB
+
+comment "STM32WB Configuration Options"
+
+choice
+	prompt "STM32 WB Chip Selection"
+	default ARCH_CHIP_STM32WB55RG
+	depends on ARCH_CHIP_STM32WB
+
+config ARCH_CHIP_STM32WB10CC
+	bool "STM32WB10CC"
+	select STM32WB_STM32WB10
+	select STM32WB_IO_CONFIG_C
+	select STM32WB_FLASH_CONFIG_C_320
+	---help---
+		STM32 WB Cortex M4, 320 Kb FLASH, 12+32+4 Kb SRAM
+
+config ARCH_CHIP_STM32WB15CC
+	bool "STM32WB15CC"
+	select STM32WB_STM32WB15
+	select STM32WB_IO_CONFIG_C
+	select STM32WB_FLASH_CONFIG_C_320
+	---help---
+		STM32 WB Cortex M4, 320 Kb FLASH, 12+32+4 Kb SRAM
+
+config ARCH_CHIP_STM32WB30CE
+	bool "STM32WB30CE"
+	select STM32WB_STM32WB30
+	select STM32WB_IO_CONFIG_C
+	select STM32WB_FLASH_CONFIG_E_512
+	---help---
+		STM32 WB Cortex M4, 512 Kb FLASH, 32+32+32 Kb SRAM
+
+config ARCH_CHIP_STM32WB50CG
+	bool "STM32WB50CG"
+	select STM32WB_STM32WB50
+	select STM32WB_IO_CONFIG_C
+	select STM32WB_FLASH_CONFIG_G_1024
+	---help---
+		STM32 WB Cortex M4, 1024 Kb FLASH, 64+32+32 Kb SRAM
+
+config ARCH_CHIP_STM32WB35CC
+	bool "STM32WB35CC"
+	select STM32WB_STM32WB35
+	select STM32WB_IO_CONFIG_C
+	select STM32WB_FLASH_CONFIG_C_256
+	---help---
+		STM32 WB Cortex M4, 256 Kb FLASH, 32+32+32 Kb SRAM
+
+config ARCH_CHIP_STM32WB35CE
+	bool "STM32WB35CE"
+	select STM32WB_STM32WB35
+	select STM32WB_IO_CONFIG_C
+	select STM32WB_FLASH_CONFIG_E_512
+	---help---
+		STM32 WB Cortex M4, 512 Kb FLASH, 32+32+32 Kb SRAM
+
+config ARCH_CHIP_STM32WB55CC
+	bool "STM32WB55CC"
+	select STM32WB_STM32WB55
+	select STM32WB_IO_CONFIG_C
+	select STM32WB_FLASH_CONFIG_C_256
+	---help---
+		STM32 WB Cortex M4, 256 Kb FLASH, 64+32+32 Kb SRAM
+
+config ARCH_CHIP_STM32WB55RC
+	bool "STM32WB55RC"
+	select STM32WB_STM32WB55
+	select STM32WB_IO_CONFIG_R
+	select STM32WB_FLASH_CONFIG_C_256
+	---help---
+		STM32 WB Cortex M4, 256 Kb FLASH, 64+32+32 Kb SRAM
+
+config ARCH_CHIP_STM32WB55VC
+	bool "STM32WB55VC"
+	select STM32WB_STM32WB55
+	select STM32WB_IO_CONFIG_V
+	select STM32WB_FLASH_CONFIG_C_256
+	---help---
+		STM32 WB Cortex M4, 256 Kb FLASH, 64+32+32 Kb SRAM
+
+config ARCH_CHIP_STM32WB55CE
+	bool "STM32WB55CE"
+	select STM32WB_STM32WB55
+	select STM32WB_IO_CONFIG_C
+	select STM32WB_FLASH_CONFIG_E_512
+	---help---
+		STM32 WB Cortex M4, 512 Kb FLASH, 192+32+32 Kb SRAM
+
+config ARCH_CHIP_STM32WB55RE
+	bool "STM32WB55RE"
+	select STM32WB_STM32WB55
+	select STM32WB_IO_CONFIG_R
+	select STM32WB_FLASH_CONFIG_E_512
+	---help---
+		STM32 WB Cortex M4, 512 Kb FLASH, 192+32+32 Kb SRAM
+
+config ARCH_CHIP_STM32WB55VE
+	bool "STM32WB55VE"
+	select STM32WB_STM32WB55
+	select STM32WB_IO_CONFIG_V
+	select STM32WB_FLASH_CONFIG_E_512
+	---help---
+		STM32 WB Cortex M4, 512 Kb FLASH, 192+32+32 Kb SRAM
+
+config ARCH_CHIP_STM32WB55VY
+	bool "STM32WB55VY"
+	select STM32WB_STM32WB55
+	select STM32WB_IO_CONFIG_V
+	select STM32WB_FLASH_CONFIG_Y_640
+	---help---
+		STM32 WB Cortex M4, 640 Kb FLASH, 192+32+32 Kb SRAM
+
+config ARCH_CHIP_STM32WB55CG
+	bool "STM32WB55CG"
+	select STM32WB_STM32WB55
+	select STM32WB_IO_CONFIG_C
+	select STM32WB_FLASH_CONFIG_G_1024
+	---help---
+		STM32 WB Cortex M4, 1024 Kb FLASH, 192+32+32 Kb SRAM
+
+config ARCH_CHIP_STM32WB55RG
+	bool "STM32WB55RG"
+	select STM32WB_STM32WB55
+	select STM32WB_IO_CONFIG_R
+	select STM32WB_FLASH_CONFIG_G_1024
+	---help---
+		STM32 WB Cortex M4, 1024 Kb FLASH, 192+32+32 Kb SRAM
+
+config ARCH_CHIP_STM32WB55VG
+	bool "STM32WB55VG"
+	select STM32WB_STM32WB55
+	select STM32WB_IO_CONFIG_V
+	select STM32WB_FLASH_CONFIG_G_1024
+	---help---
+		STM32 WB Cortex M4, 1024 Kb FLASH, 192+32+32 Kb SRAM
+
+endchoice # STM32 WB Chip Selection
+
+# Chip product lines
+
+config STM32WB_STM32WB10
+	# STM32WB10 Value Line
+	bool
+	default n
+	select STM32WB_HAVE_TSC
+
+config STM32WB_STM32WB15
+	# STM32WB15 Standard Line
+	bool
+	default n
+	select STM32WB_HAVE_TSC
+	select STM32WB_HAVE_LPUART
+	select STM32WB_HAVE_SMPS if !ARCH_CHIP_STM32WB15CCUXE
+
+config STM32WB_STM32WB30
+	# STM32WB30 Value Line
+	bool
+	default n
+	select STM32WB_HAVE_HSI48
+	select STM32WB_HAVE_TIM16
+	select STM32WB_HAVE_TIM17
+
+config STM32WB_STM32WB50
+	# STM32WB50 Value Line
+	bool
+	default n
+	select STM32WB_HAVE_HSI48
+	select STM32WB_HAVE_TIM16
+	select STM32WB_HAVE_TIM17
+
+config STM32WB_STM32WB35
+	# STM32WB35 Standard Line
+	bool
+	default n
+	select STM32WB_HAVE_HSI48
+	select STM32WB_HAVE_DMA2
+	select STM32WB_HAVE_TIM16
+	select STM32WB_HAVE_TIM17
+	select STM32WB_HAVE_I2C3
+	select STM32WB_HAVE_QSPI
+	select STM32WB_HAVE_USB
+	select STM32WB_HAVE_SAI
+	select STM32WB_HAVE_COMP
+	select STM32WB_HAVE_SMPS
+
+config STM32WB_STM32WB55
+	# STM32WB55 Standard Line
+	bool
+	default n
+	select STM32WB_HAVE_HSI48
+	select STM32WB_HAVE_DMA2
+	select STM32WB_HAVE_TIM16
+	select STM32WB_HAVE_TIM17
+	select STM32WB_HAVE_I2C3
+	select STM32WB_HAVE_SPI2 if STM32WB_IO_CONFIG_R || STM32WB_IO_CONFIG_V
+	select STM32WB_HAVE_QSPI
+	select STM32WB_HAVE_USB
+	select STM32WB_HAVE_SAI
+	select STM32WB_HAVE_COMP
+	select STM32WB_HAVE_LPUART
+	select STM32WB_HAVE_TSC if STM32WB_IO_CONFIG_R || STM32WB_IO_CONFIG_V
+	select STM32WB_HAVE_LCD
+	select STM32WB_HAVE_SMPS
+
+choice
+	prompt "Override Flash Size Designator"
+	depends on ARCH_CHIP_STM32WB
+	default STM32WB_FLASH_OVERRIDE_DEFAULT
+	---help---
+		STM32WB series parts numbering (sans the package type) ends with a letter
+		that designates the FLASH size.
+
+			Designator	Size in KiB
+			C			256 or 320
+			E			512
+			Y			640
+			G			1024
+
+		This configuration option defaults to using the configuration based on that designator
+		or the default smaller size if there is no last character designator is present in the
+		STM32WB Chip Selection.
+
+		Examples:
+			If the STM32WB55RG is chosen, the Flash configuration would be 'G', if a variant of
+			the part with a 2048 KiB Flash is released in the future one could simply select
+			the 'I' designator here.
+
+			If an STM32WB Series parts is chosen the default Flash configuration will be set
+			herein and can be changed.
+
+config STM32WB_FLASH_OVERRIDE_DEFAULT
+	bool "Default"
+
+config STM32WB_FLASH_OVERRIDE_C_256
+	bool "C 256 KB"
+
+config STM32WB_FLASH_OVERRIDE_C_320
+	bool "C 320 KB"
+
+config STM32WB_FLASH_OVERRIDE_E_512
+	bool "E 512 KB"
+
+config STM32WB_FLASH_OVERRIDE_Y_640
+	bool "Y 640 KB"
+
+config STM32WB_FLASH_OVERRIDE_G_1024
+	bool "G 1024 KB"
+
+endchoice # "Override Flash Size Designator"
+
+# Flash configurations
+
+config STM32WB_FLASH_CONFIG_C_256
+	bool
+	default n
+
+config STM32WB_FLASH_CONFIG_C_320
+	bool
+	default n
+
+config STM32WB_FLASH_CONFIG_E_512
+	bool
+	default n
+
+config STM32WB_FLASH_CONFIG_Y_640
+	bool
+	default n
+
+config STM32WB_FLASH_CONFIG_G_1024
+	bool
+	default n
+
+# Pin/package configurations
+
+config STM32WB_IO_CONFIG_C
+	# UFQFPN48 package
+	bool
+	default n
+	select STM32WB_GPIO_HAVE_PORTE
+
+config STM32WB_IO_CONFIG_C_48E
+	# UFQFPN48E package
+	bool
+	default n
+	select STM32WB_GPIO_HAVE_PORTE
+
+config STM32WB_IO_CONFIG_C_49
+	# WLCSP49 package
+	bool
+	default n
+
+config STM32WB_IO_CONFIG_R
+	# VFQFPN68 package
+	bool
+	default n
+	select STM32WB_GPIO_HAVE_PORTD
+	select STM32WB_GPIO_HAVE_PORTE
+
+config STM32WB_IO_CONFIG_V
+	# WLCSP100 and UFBGA129 packages
+	bool
+	default n
+	select STM32WB_GPIO_HAVE_PORTD
+	select STM32WB_GPIO_HAVE_PORTE
+
+comment "STM32WB SRAM2a and SRAM2b Options"
+
+config STM32WB_SRAM2A_HEAP
+	bool "SRAM2a is used for heap"
+	default n
+
+config STM32WB_SRAM2A_USER_BASE_OFFSET
+	int "SRAM2a user application base offset"
+	default 2048
+	range 0 32768
+	depends on STM32WB_SRAM2A_HEAP
+	---help---
+		The beginning part of the SRAM2a memory can be used by RF stack.  The
+		available space for the user application can be obtained from the
+		release notes for STM32WB coprocessor wireless binaries.
+
+config STM32WB_SRAM2A_USER_SIZE
+	int "SRAM2a user application size"
+	default 8192
+	range 0 32768
+	depends on STM32WB_SRAM2A_HEAP
+	---help---
+		The ending part of the SRAM2a memory contains a secure section, which
+		cannot be read nor written by CPU1.  The secure start address for the
+		SRAM2a memory can be read from the SBRSA option byte.  When CPU2 update
+		support required, there must be some free sectors just below the secure
+		memory to support CPU2 firmware updates requiring more sectors to be
+		secure.
+
+config STM32WB_SRAM2A_INIT
+	bool "SRAM2a is initialized to zero"
+	default y
+	depends on STM32WB_SRAM2A_HEAP
+	---help---
+		The STM32WB SRAM2a region has parity checking.  However, when the system
+		powers on, the memory is in an unknown state, and reads from uninitialized
+		memory can trigger parity faults from the random data.  This can be
+		avoided by first writing to all locations to force the parity into a valid
+		state.
+		However, if the SRAM2a is being retained in Standby mode, this may be 
+		undesirable (because it will destroy the contents).  In that case, the board
+		should handle the initialization itself at the appropriate time.
+
+config STM32WB_SRAM2B_HEAP
+	bool "SRAM2b is used for heap"
+	default n
+
+config STM32WB_SRAM2B_USER_SIZE
+	int "SRAM2b user application size"
+	default 32768
+	range 0 32768	
+	depends on STM32WB_SRAM2B_HEAP
+	---help---
+		For any CPU2 firmware supporting the BLE protocol the ending part of
+		the SRAM2b memory contains a secure section, which cannot be read nor
+		written by CPU1.  The secure start address for the SRAM2b memory can be
+		read from the SNBRSA option byte. When CPU2 update support required,
+		there must be some free sectors just below the secure memory to support
+		CPU2 firmware updates requiring more sectors to be secure.  The SRAM2b
+		memory is all secure for any CPU2 firmware supporting the Thread protocol.
+
+config STM32WB_SRAM2B_INIT
+	bool "SRAM2b is initialized to zero"
+	default y
+	depends on STM32WB_SRAM2B_HEAP
+	---help---
+		The STM32WB SRAM2b region has parity checking.  However, when the system
+		powers on, the memory is in an unknown state, and reads from uninitialized
+		memory can trigger parity faults from the random data.  This can be
+		avoided by first writing to all locations to force the parity into a valid
+		state.
+
+comment "STM32WB Peripherals"
+
+menu "STM32WB Peripheral Support"
+
+# These "hidden" settings determine whether a peripheral option is available
+# for the selected MCU
+
+config STM32WB_GPIO_HAVE_PORTD
+	bool
+	default n
+
+config STM32WB_GPIO_HAVE_PORTE
+	bool
+	default n
+
+config STM32WB_HAVE_COMP
+	bool
+	default n
+
+config STM32WB_HAVE_LPUART
+	bool
+	default n
+
+config STM32WB_HAVE_DMA2
+	bool
+	default n
+
+config STM32WB_HAVE_TIM16
+	bool
+	default n
+
+config STM32WB_HAVE_TIM17
+	bool
+	default n
+
+config STM32WB_HAVE_SPI2
+	bool
+	default n
+
+config STM32WB_HAVE_I2C3
+	bool
+	default n
+
+config STM32WB_HAVE_SAI
+	bool
+	default n
+
+config STM32WB_HAVE_LCD
+	bool
+	default n
+
+config STM32WB_HAVE_TSC
+	bool
+	default n
+
+config STM32WB_HAVE_USB
+	bool
+	default n
+
+config STM32WB_HAVE_QSPI
+	bool
+	default n
+
+config STM32WB_HAVE_SMPS
+	bool
+	default n
+
+# These are the peripheral selections proper
+
+config STM32WB_RTC
+	bool "RTC"
+	default n
+	select RTC
+
+# These "hidden" settings are the OR of individual peripheral selections
+# indicating that the general capability is required.
+
+config STM32WB_ADC
+	bool
+	default n
+
+config STM32WB_DMAMUX
+	bool
+	default n
+
+config STM32WB_DMA
+	bool
+	default n
+	select STM32WB_DMAMUX
+
+config STM32WB_IPCC
+	bool
+	default n
+
+config STM32WB_I2C
+	bool
+	default n
+
+config STM32WB_SAI
+	bool
+	default n
+
+config STM32WB_SPI
+	bool
+	default n
+
+config STM32WB_USART
+	bool
+	default n
+
+config STM32WB_LPTIM
+	bool
+	default n
+
+# These are the peripheral selections proper
+
+comment "AHB1 Peripherals"
+
+config STM32WB_DMA1
+	bool "DMA1"
+	default n
+	select ARCH_DMA
+	select STM32WB_DMA
+
+config STM32WB_DMA2
+	bool "DMA2"
+	default n
+	depends on STM32WB_HAVE_DMA2
+	select ARCH_DMA
+	select STM32WB_DMA
+
+config STM32WB_CRC
+	bool "CRC"
+	default n
+
+comment "APB1 Peripherals"
+
+config STM32WB_PWR
+	bool "PWR"
+	default n
+
+config STM32WB_TIM2
+	bool "TIM2"
+	default n
+
+config STM32WB_SPI2
+	bool "SPI2"
+	default n
+	depends on STM32WB_HAVE_SPI2
+	select SPI
+	select STM32WB_SPI
+
+config STM32WB_LPTIM1
+	bool "LPTIM1"
+	default n
+	select STM32WB_LPTIM
+
+config STM32WB_LPTIM2
+	bool "LPTIM2"
+	default n
+	select STM32WB_LPTIM
+
+config STM32WB_LPUART1
+	bool "LPUART1"
+	default n
+	depends on STM32WB_HAVE_LPUART
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select ARCH_HAVE_LPUART1
+	select STM32WB_USART
+
+comment "APB2 Peripherals"
+
+config STM32WB_SYSCFG
+	bool "SYSCFG"
+	default y
+
+config STM32WB_TIM1
+	bool "TIM1"
+	default n
+
+config STM32WB_SPI1
+	bool "SPI1"
+	default n
+	select SPI
+	select STM32WB_SPI
+
+config STM32WB_USART1
+	bool "USART1"
+	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32WB_USART
+
+config STM32WB_TIM16
+	bool "TIM16"
+	default n
+	depends on STM32WB_HAVE_TIM16
+
+config STM32WB_TIM17
+	bool "TIM17"
+	default n
+	depends on STM32WB_HAVE_TIM17
+
+endmenu
+
+config STM32WB_FLASH_PREFETCH
+	bool "Enable FLASH Pre-fetch"
+	default y
+	---help---
+		Enable FLASH prefetch
+
+config STM32WB_DISABLE_IDLE_SLEEP_DURING_DEBUG
+	bool "Disable IDLE Sleep (WFI) in debug mode"
+	default n
+	---help---
+		In debug configuration, disables the WFI instruction in the IDLE loop
+		to prevent the JTAG from disconnecting.  With some JTAG debuggers, such
+		as the ST-LINK2 with OpenOCD, if the ARM is put to sleep via the WFI
+		instruction, the debugger will disconnect, terminating the debug session.
+
+config ARCH_BOARD_STM32WB_CUSTOM_CLOCKCONFIG
+	bool "Custom clock configuration"
+	default n
+	---help---
+		Enables special, board-specific STM32WB clock configuration.
+
+config STM32WB_HAVE_RTC_SUBSECONDS
+	bool
+	select ARCH_HAVE_RTC_SUBSECONDS
+	default y
+
+menu "RTC Configuration"
+	depends on STM32WB_RTC
+
+config STM32WB_RTC_MAGIC_REG
+	int "BKP register"
+	default 0
+	range  0 31
+	---help---
+		The BKP register used to store/check the Magic value to determine if
+		RTC is already setup
+
+config STM32WB_RTC_MAGIC
+	hex "RTC Magic 1"
+	default 0xfacefeed
+	---help---
+		Value used as Magic to determine if the RTC is already setup
+
+config STM32WB_RTC_MAGIC_TIME_SET
+	hex "RTC Magic 2"
+	default 0xf00dface
+	---help---
+		Value used as Magic to determine if the RTC has been setup and has
+		time set
+
+choice
+	prompt "RTC clock source"
+	default STM32WB_RTC_LSECLOCK
+	depends on STM32WB_RTC
+
+config STM32WB_RTC_LSECLOCK
+	bool "LSE clock"
+	---help---
+		Drive the RTC with the LSE clock
+
+config STM32WB_RTC_LSICLOCK
+	bool "LSI clock"
+	---help---
+		Drive the RTC with the LSI clock
+
+config STM32WB_RTC_HSECLOCK
+	bool "HSE clock"
+	---help---
+		Drive the RTC with the HSE clock, divided down to 1MHz.
+
+endchoice
+
+if STM32WB_RTC_LSECLOCK
+
+config STM32WB_RTC_LSECLOCK_START_DRV_CAPABILITY
+	int "LSE oscillator drive capability level at LSE start-up"
+	default 0
+	range 0 3
+	---help---
+		0 = Low drive capability (default)
+		1 = Medium low drive capability
+		2 = Medium high drive capability
+		3 = High drive capability
+
+config STM32WB_RTC_LSECLOCK_RUN_DRV_CAPABILITY
+	int "LSE oscillator drive capability level after LSE start-up"
+	default 0
+	range 0 3
+	---help---
+		0 = Low drive capability (default)
+		1 = Medium low drive capability
+		2 = Medium high drive capability
+		3 = High drive capability
+
+endif # STM32WB_RTC_LSECLOCK
+
+endmenu # RTC Configuration
+
+menu "Timer Configuration"
+
+if SCHED_TICKLESS
+
+config STM32WB_TICKLESS_TIMER
+	int "Tickless hardware timer"
+	default 2
+	range 1 17
+	depends on !STM32WB_TICKLESS_SYSTICK
+	---help---
+		If the Tickless OS feature is enabled, then one clock must be
+		assigned to provided the timer needed by the OS.
+
+config STM32WB_TICKLESS_CHANNEL
+	int "Tickless timer channel"
+	default 1
+	range 1 4
+	---help---
+		If the Tickless OS feature is enabled, the one clock must be
+		assigned to provided the free-running timer needed by the OS
+		and one channel on that clock is needed to handle intervals.
+
+endif # SCHED_TICKLESS
+
+config STM32WB_ONESHOT
+	bool "TIM one-shot wrapper"
+	default n
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support one-shot timer.
+
+config STM32WB_FREERUN
+	bool "TIM free-running wrapper"
+	default n
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support a free-running timer.
+
+config STM32WB_ONESHOT_MAXTIMERS
+	int "Maximum number of oneshot timers"
+	default 1
+	range 1 8
+	depends on STM32WB_ONESHOT
+	---help---
+		Determines the maximum number of oneshot timers that can be
+		supported.  This setting pre-allocates some minimal support for each
+		of the timers and places an upper limit on the number of oneshot
+		timers that you can use.
+
+endmenu # Timer Configuration
+
+config STM32WB_SERIALDRIVER
+	bool
+
+menu "[LP]U[S]ART Configuration"
+	depends on STM32WB_LPUART1 || STM32WB_USART1
+
+choice
+	prompt "LPUART1 Driver Configuration"
+	default STM32WB_LPUART1_SERIALDRIVER
+	depends on STM32WB_LPUART1
+
+config STM32WB_LPUART1_SERIALDRIVER
+	bool "Standard serial driver"
+	select LPUART1_SERIALDRIVER
+	select STM32WB_SERIALDRIVER
+
+endchoice # LPUART1 Driver Configuration
+
+if LPUART1_SERIALDRIVER
+
+config LPUART1_RS485
+	bool "RS-485 on LPUART1"
+	default n
+	depends on STM32WB_LPUART1
+	---help---
+		Enable RS-485 interface on LPUART1. Your board config will have to
+		provide GPIO_LPUART1_RS485_DIR pin definition. Currently it cannot be
+		used with LPUART1_RXDMA.
+
+config LPUART1_RS485_DIR_POLARITY
+	int "LPUART1 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on LPUART1_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on LPUART1. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config LPUART1_RXDMA
+	bool "LPUART1 Rx DMA"
+	default n
+	depends on STM32WB_LPUART1 && STM32WB_DMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # LPUART1_SERIALDRIVER
+
+choice
+	prompt "USART1 Driver Configuration"
+	default STM32WB_USART1_SERIALDRIVER
+	depends on STM32WB_USART1
+
+config STM32WB_USART1_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART1_SERIALDRIVER
+	select STM32WB_SERIALDRIVER
+
+endchoice # USART1 Driver Configuration
+
+if USART1_SERIALDRIVER
+
+config USART1_RS485
+	bool "RS-485 on USART1"
+	default n
+	depends on STM32WB_USART1
+	---help---
+		Enable RS-485 interface on USART1. Your board config will have to
+		provide GPIO_USART1_RS485_DIR pin definition. Currently it cannot be
+		used with USART1_RXDMA.
+
+config USART1_RS485_DIR_POLARITY
+	int "USART1 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART1_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART1. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config USART1_RXDMA
+	bool "USART1 Rx DMA"
+	default n
+	depends on STM32WB_USART1 && STM32WB_DMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # USART1_SERIALDRIVER
+
+if STM32WB_SERIALDRIVER
+
+comment "Serial Driver Configuration"
+
+config STM32WB_SERIAL_RXDMA_BUFFER_SIZE
+	int "Rx DMA buffer size"
+	default 32
+	depends on USART1_RXDMA
+	---help---
+		The DMA buffer size when using RX DMA to emulate a FIFO.
+
+		When streaming data, the generic serial layer will be called
+		every time the FIFO receives half this number of bytes.
+
+		Value given here will be rounded up to next multiple of 32 bytes.
+
+config STM32WB_SERIAL_DISABLE_REORDERING
+	bool "Disable reordering of ttySx devices."
+	depends on STM32WB_USART1
+	default n
+	---help---
+		NuttX per default reorders the serial ports (/dev/ttySx) so that the
+		console is always on /dev/ttyS0. If more than one UART is in use this
+		can, however, have the side-effect that all port mappings
+		(hardware USART1 -> /dev/ttyS0) change if the console is moved to another
+		UART. This is in particular relevant if a project uses the USB console
+		in some boards and a serial console in other boards, but does not
+		want the side effect of having all serial port names change when just
+		the console is moved from serial to USB.
+
+config STM32WB_FLOWCONTROL_BROKEN
+	bool "Use Software UART RTS flow control"
+	depends on STM32WB_USART1
+	default n
+	---help---
+		Enable UART RTS flow control using Software. Because STM
+		Current STM32WB have broken HW based RTS behavior (they assert
+		nRTS after every byte received)  Enable this setting workaround
+		this issue by using software based management of RTS
+
+config STM32WB_USART_BREAKS
+	bool "Add TIOxSBRK to support sending Breaks"
+	depends on STM32WB_USART1
+	default n
+	---help---
+		Add TIOCxBRK routines to send a line break per the STM32WB manual, the
+		break will be a pulse based on the value M. This is not a BSD compatible
+		break.
+
+config STM32WB_SERIALBRK_BSDCOMPAT
+	bool "Use GPIO To send Break"
+	depends on STM32WB_USART1 && STM32WB_USART_BREAKS
+	default n
+	---help---
+		Enable using GPIO on the TX pin to send a BSD compatible break:
+		TIOCSBRK will start the break and TIOCCBRK will end the break.
+		The current STM32WB U[S]ARTS have no way to leave the break (TX=LOW)
+		on because the SW starts the break and then the HW automatically clears
+		the break. This makes it is difficult to sent a long break.
+
+config STM32WB_USART_SINGLEWIRE
+	bool "Single Wire Support"
+	default n
+	depends on STM32WB_USART1
+	---help---
+		Enable single wire UART support.  The option enables support for the
+		TIOCSSINGLEWIRE ioctl in the STM32WB serial driver.
+
+config STM32WB_USART_INVERT
+	bool "Signal Invert Support"
+	default n
+	depends on STM32WB_USART1
+	---help---
+		Enable signal inversion UART support. The option enables support for the
+		TIOCSINVERT ioctl in the STM32WB serial driver.
+
+config STM32WB_USART_SWAP
+	bool "Swap RX/TX pins support"
+	default n
+	depends on STM32WB_USART1
+	---help---
+		Enable RX/TX pin swapping support. The option enables support for the
+		TIOCSSWAP ioctl in the STM32WB serial driver.
+
+if PM
+
+config STM32WB_PM_SERIAL_ACTIVITY
+	int "PM serial activity"
+	default 10
+	---help---
+		PM activity reported to power management logic on every serial
+		interrupt.
+
+endif
+
+endif # STM32WB_SERIALDRIVER
+
+endmenu # [LP]U[S]ART Configuration
+
+menu "SPI Configuration"
+	depends on STM32WB_SPI1 || STM32WB_SPI2
+
+config STM32WB_SPI_INTERRUPTS
+	bool "Interrupt driver SPI"
+	default n
+	---help---
+		Select to enable interrupt driven SPI support. Non-interrupt-driven,
+		poll-waiting is recommended if the interrupt rate would be to high in
+		the interrupt driven case.
+
+config STM32WB_SPI_DMA
+	bool "SPI DMA"
+	depends on STM32WB_DMA
+	default n
+	---help---
+		Use DMA to improve SPI transfer performance.  Cannot be used with STM32WB_SPI_INTERRUPT.
+
+endmenu
+
+endif # ARCH_CHIP_STM32WB
