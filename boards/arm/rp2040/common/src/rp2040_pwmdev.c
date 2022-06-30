@@ -37,7 +37,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_pwmdev_initialize
+ * Name: rp2040_pwmdev_initialize
  *
  * Description:
  *   Initialize and register spi driver for the specified pwm port

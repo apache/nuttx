@@ -1220,7 +1220,7 @@ endif # DEBUG_LCD
 config DEBUG_LEDS
 	bool "Low-level LED Debug Features"
 	default n
-	depends on ARCH_HAVE_LEDS
+	depends on ARCH_HAVE_LEDS || WS2812
 	---help---
 		Enable LED driver debug features.
 

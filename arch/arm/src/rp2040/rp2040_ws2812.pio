@@ -1,0 +1,46 @@
+; arch/arm/src/rp2040/rp2040_ws2812.pio
+;
+; Adapted from code release under the BSD-3-Clause license
+; supplied by Raspberry Pi (Trading) Ltd.
+;
+;   Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
+;
+; This code was compiled with pioasm and the results included
+; in "arch/arm/src/rp2040/rp2040_ws2812.c".  This file is
+; supplied for documentation purposes only
+;
+; Each bit of the input word generaes one of two patterns for output:
+;
+;  clock    +-----+-----+-----+-----+-----+-----+-----+-----+-----+
+|           |    T1     |          T2           |       T3        |
+;  
+;           +-----------+
+;  zero-bit |           |                                         |
+;                       +-----------------------------------------+         
+;
+;           +-----------------------------------+
+;  one-bit  |                                   |                 |
+;                                               +-----------------+
+;
+;  Each clock tick should be ~ 139 nS (7.2 Mhz)
+;
+;  A zero bit is 0.278 µs high and 1.123 µs low.
+;  A one  bit is 0.973 µs high and 0.417 µs low.
+
+;
+.program ws2812
+.side_set 1
+
+.define public T1 2
+.define public T2 5
+.define public T3 3
+
+.wrap_target
+bitloop:
+    out x, 1       side 0 [T3 - 1] ; Side-set still takes place when instruction stalls
+    jmp !x do_zero side 1 [T1 - 1] ; Branch on the bit we shifted out. Positive pulse
+do_one:
+    jmp  bitloop   side 1 [T2 - 1] ; Continue driving high, for a long pulse
+do_zero:
+    nop            side 0 [T2 - 1] ; Or drive low, for a short pulse
+.wrap

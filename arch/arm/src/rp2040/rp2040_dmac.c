@@ -372,7 +372,7 @@ void rp2040_rxdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
  * Name: rp2040_txdmasetup
  *
  * Description:
- *   Configure an TX (memory-to-memory) DMA before starting the transfer.
+ *   Configure an TX (memory-to-peripheral) DMA before starting the transfer.
  *
  * Input Parameters:
  *   paddr  - Peripheral address (destination)
