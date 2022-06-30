@@ -186,7 +186,7 @@ struct lifreq
     struct sockaddr           lifru_hwaddr;             /* MAC address */
     int                       lifru_count;              /* Number of devices */
     int                       lifru_mtu;                /* MTU size */
-    uint8_t                   lifru_flags;              /* Interface flags */
+    uint32_t                  lifru_flags;              /* Interface flags */
     struct mii_ioctl_notify_s llfru_mii_notify;         /* PHY event notification */
     struct mii_ioctl_data_s   lifru_mii_data;           /* MII request data */
     struct can_ioctl_data_s   lifru_can_data;           /* CAN bitrate request data */
@@ -238,7 +238,7 @@ struct ifreq
     struct sockaddr           ifru_hwaddr;              /* MAC address */
     int                       ifru_count;               /* Number of devices */
     int                       ifru_mtu;                 /* MTU size */
-    uint8_t                   ifru_flags;               /* Interface flags */
+    uint32_t                  ifru_flags;               /* Interface flags */
     struct mii_ioctl_notify_s ifru_mii_notify;          /* PHY event notification */
     struct mii_ioctl_data_s   ifru_mii_data;            /* MII request data */
     struct can_ioctl_data_s   ifru_can_data;            /* CAN bitrate request data */
