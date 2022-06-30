@@ -2426,6 +2426,7 @@ static int fat_putlfname(FAR struct fat_mountpt_s *fs,
       LDIR_PUTATTRIBUTES(direntry, LDDIR_LFNATTR);
       LDIR_PUTNTRES(direntry, 0);
       LDIR_PUTCHECKSUM(direntry, checksum);
+      LDIR_PUTFSTCLUSTLO(direntry, 0);
       fs->fs_dirty = true;
 
       /* Read next directory entry */
