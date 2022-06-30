@@ -1222,7 +1222,7 @@ void gh3020_samplerate_set(uint32_t unFunctionID,  uint16_t usSampleRate)
     if((0 == usSampleRate)||(0 !=(usSampleRate%25)))
     {
         EXAMPLE_LOG("%s : usSampleRate is invalid !!!\r\n", __FUNCTION__);
-        while(1);
+        return;
     }
 
     for(uint8_t uchFunctionCnt = 0; uchFunctionCnt < GH3X2X_FUNC_OFFSET_MAX; uchFunctionCnt++)
