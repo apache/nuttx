@@ -77,7 +77,7 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
   int ret = OK;
   int status;
 
-  sinfo("mutex=0x%p attr=0x%p\n", mutex, attr);
+  sinfo("mutex=%p attr=%p\n", mutex, attr);
 
   if (!mutex)
     {
