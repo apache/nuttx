@@ -443,7 +443,6 @@ static int ak09919c_setmode(FAR struct ak09919c_dev_s *priv,
   ret = ak09919c_i2c_writereg(priv, AK09919C_REG_CNTL2, mode);
   if (ret == 0)
     {
-      snerr("ak09919 set mode fail\n");
       up_udelay(AK09919C_MODE_SWITCH_DELAY);
     }
 
