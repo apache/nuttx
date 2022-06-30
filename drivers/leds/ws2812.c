@@ -30,14 +30,35 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/spi/spi.h>
 #include <nuttx/leds/ws2812.h>
+
+#ifndef CONFIG_WS2812_NON_SPI_DRIVER
+#include <nuttx/spi/spi.h>
+#endif /* CONFIG_WS2812_NON_SPI_DRIVER */
 
 #ifdef CONFIG_WS2812
 
 /****************************************************************************
+ * ######## ATTENTION #######
+ * This file contains code that supports two separate ws2812 upper-half
+ * models:
+ *
+ * If CONFIG_WS2812_NON_SPI_DRIVER is NOT defined the older upper-half
+ * code that uses SPI to send the serial data will be built.
+ *
+ * If WS2812_NEW_MODEL_DRIVER is defined the upper-half code that does
+ * not relay on SPI will be built.
+ ****************************************************************************/
+
+/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define WS2812_RW_PIXEL_SIZE  4
+
+#ifdef CONFIG_WS2812_NON_SPI_DRIVER
+
+#else /* CONFIG_WS2812_NON_SPI_DRIVER */
 
 /* In order to meet the signaling timing requirements, the waveforms required
  * to represent a 0/1 symbol are created by specific SPI bytes defined here.
@@ -57,10 +78,10 @@
  * Reset: low signal >50us
  */
 
-#if CONFIG_WS2812_FREQUENCY >= 3600000 && CONFIG_WS2812_FREQUENCY <= 5000000
+#if CONFIG_WS2812_FREQUENCY >= 360000 && CONFIG_WS2812_FREQUENCY <= 500000
 #  define WS2812_ZERO_BYTE  0b01000000 /* 200ns at 5 MHz, 278ns at 3.6 MHz */
 #  define WS2812_ONE_BYTE   0b01110000 /* 600ns at 5 MHz, 833ns at 3.6 MHz */
-#elif CONFIG_WS2812_FREQUENCY >= 5900000 && CONFIG_WS2812_FREQUENCY <= 9000000
+#elif CONFIG_WS2812_FREQUENCY >= 590000 && CONFIG_WS2812_FREQUENCY <= 900000
 #  define WS2812_ZERO_BYTE  0b01100000 /* 222ns at 9 MHz, 339ns at 5.9 MHz */
 #  define WS2812_ONE_BYTE   0b01111100 /* 556ns at 9 MHz, 847ns at 5.9 MHz */
 #else
@@ -72,10 +93,9 @@
  * Aiming for 60 us, safely above the 50us required.
  */
 
-#define WS2812_RST_CYCLES (CONFIG_WS2812_FREQUENCY * 60 / 1000000 / 8) 
+#define WS2812_RST_CYCLES (CONFIG_WS2812_FREQUENCY * 60 / 100000 / 8)
 
 #define WS2812_BYTES_PER_LED  (8 * 3)
-#define WS2812_RW_PIXEL_SIZE  4
 
 /* Transmit buffer looks like:
  * [<----N reset bytes---->|<-RGBn->...<-RGB0->|<----1 reset byte---->]
@@ -90,9 +110,13 @@
 
 #define TXBUFF_SIZE(n) (WS2812_RST_CYCLES + n * WS2812_BYTES_PER_LED + 1)
 
+#endif /* CONFIG_WS2812_NON_SPI_DRIVER */
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+#ifndef CONFIG_WS2812_NON_SPI_DRIVER
 
 struct ws2812_dev_s
 {
@@ -102,14 +126,28 @@ struct ws2812_dev_s
   sem_t exclsem;              /* Assures exclusive access to the driver */
 };
 
+#endif /* CONFIG_WS2812_NON_SPI_DRIVER */
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
+#ifndef CONFIG_WS2812_NON_SPI_DRIVER
+
 static inline void ws2812_configspi(FAR struct spi_dev_s *spi);
 static void ws2812_pack(FAR uint8_t *buf, uint32_t rgb);
 
+#endif /* CONFIG_WS2812_NON_SPI_DRIVER */
+
 /* Character driver methods */
+
+#ifdef CONFIG_WS2812_NON_SPI_DRIVER
+
+static ssize_t  ws2812_open(FAR struct file  *filep);
+
+static ssize_t  ws2812_close(FAR struct file  *filep);
+
+#endif /* CONFIG_WS2812_NON_SPI_DRIVER */
 
 static ssize_t ws2812_read(FAR struct file *filep, FAR char *buffer,
                            size_t buflen);
@@ -123,8 +161,13 @@ static off_t   ws2812_seek(FAR struct file *filep, off_t offset, int whence);
 
 static const struct file_operations g_ws2812fops =
 {
+#ifdef CONFIG_WS2812_NON_SPI_DRIVER
+  ws2812_open,    /* open */
+  ws2812_close,   /* close */
+#else /* CONFIG_WS2812_NON_SPI_DRIVER */
   NULL,           /* open */
   NULL,           /* close */
+#endif /* CONFIG_WS2812_NON_SPI_DRIVER */
   ws2812_read,    /* read */
   ws2812_write,   /* write */
   ws2812_seek,    /* seek */
@@ -136,8 +179,197 @@ static const struct file_operations g_ws2812fops =
 };
 
 /****************************************************************************
+ * #### TODO ####
+ *
+ * Consider supporting mmap by returning memory buffer using...
+ *       file_ioctl(filep, FIOC_MMAP, (unsigned long)((uintptr_t)&addr));
+ * Code using this would be non-portable across architectures as the format
+ * of the buffer can be different.
+ *
+ * Consider supporting rectangular arrays of ws2812s as a video output
+ * device.
+ *
+ ****************************************************************************/
+
+/****************************************************************************
+ * Table of Gamma Correction Values
+ *
+ * This table is based on:
+ *                y = 255 * (x / 255)^2.6
+ ****************************************************************************/
+
+static const uint8_t ws2812_gamma[256] =
+{
+  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+  0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1,   1,   1,   1,   1,
+  1,   1,   1,   1,   1,   1,   2,   2,   2,   2,   2,   2,   2,   2,   3,
+  3,   3,   3,   3,   3,   4,   4,   4,   4,   5,   5,   5,   5,   5,   6,
+  6,   6,   6,   7,   7,   7,   8,   8,   8,   9,   9,   9,   10,  10,  10,
+  11,  11,  11,  12,  12,  13,  13,  13,  14,  14,  15,  15,  16,  16,  17,
+  17,  18,  18,  19,  19,  20,  20,  21,  21,  22,  22,  23,  24,  24,  25,
+  25,  26,  27,  27,  28,  29,  29,  30,  31,  31,  32,  33,  34,  34,  35,
+  36,  37,  38,  38,  39,  40,  41,  42,  42,  43,  44,  45,  46,  47,  48,
+  49,  50,  51,  52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  62,  63,
+  64,  65,  66,  68,  69,  70,  71,  72,  73,  75,  76,  77,  78,  80,  81,
+  82,  84,  85,  86,  88,  89,  90,  92,  93,  94,  96,  97,  99,  100, 102,
+  103, 105, 106, 108, 109, 111, 112, 114, 115, 117, 119, 120, 122, 124, 125,
+  127, 129, 130, 132, 134, 136, 137, 139, 141, 143, 145, 146, 148, 150, 152,
+  154, 156, 158, 160, 162, 164, 166, 168, 170, 172, 174, 176, 178, 180, 182,
+  184, 186, 188, 191, 193, 195, 197, 199, 202, 204, 206, 209, 211, 213, 215,
+  218, 220, 223, 225, 227, 230, 232, 235, 237, 240, 242, 245, 247, 250, 252,
+  255
+};
+
+/****************************************************************************
+ * Table for HSV to RGB conversion
+ ****************************************************************************/
+
+  static const uint8_t hsv_rgb[43] =
+  {
+      0,   6,  12,  18,  24,  30,  36,  43,  49,  55,
+     61,  67,  73,  79,  85,  91,  97, 103, 109, 115,
+     121, 128, 134, 140, 146, 152, 158, 164, 170, 176,
+     182, 188, 194, 200, 206, 213, 219, 225, 231, 237,
+     243, 249, 255
+  };
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#ifdef CONFIG_WS2812_NON_SPI_DRIVER
+
+/****************************************************************************
+ * Name: ws2812_open
+ *
+ * Description:
+ *   Prepare the ws2812 for use.  This method just calls the lower-half
+ *   open routine if one exists.
+ *
+ * Input Parameters:
+ *   filep    - Pointer system file data
+ *
+ * Returned Value:
+ *   A pointer to an internal structure used by rp2040_ws2812
+ *
+ ****************************************************************************/
+
+ssize_t  ws2812_open(FAR struct file  *filep)
+{
+  FAR struct inode        *inode = filep->f_inode;
+  FAR struct ws2812_dev_s *priv  = inode->i_private;
+  int                      res;
+
+  res = priv->open(filep);
+
+  return res;
+}
+
+/****************************************************************************
+ * Name: ws2812_close
+ *
+ * Description:
+ *   Cleanup after use.  This method just calls the lower-half
+ *   open routine if one exists.
+ *
+ * Input Parameters:
+ *   filep    - Pointer system file data
+ *
+ * Returned Value:
+ *   OK if successful, or an error code on failure.
+ *
+ ****************************************************************************/
+
+static int ws2812_close(FAR struct file *filep)
+{
+  FAR struct inode         *inode    = filep->f_inode;
+  FAR struct ws2812_dev_s  *priv     = inode->i_private;
+  int                       res      = OK;
+
+  if (priv != NULL  &&  priv->close != NULL)
+    {
+      res = priv->close(filep);
+    }
+
+  return res;
+}
+
+/****************************************************************************
+ * Name: ws2812_write
+ * Description:
+ *   Updates the data buffer with the supplied data any then sends the data
+ *   to the LEDs.  A write length of zero does not update data but will
+ *   re-send the data to the leds.
+ *
+ * Input Parameter:
+ *   filep    - Pointer system file data
+ *   data     - Data to send.
+ *   len      - Length of data in bytes.
+ *
+ * Returned Value:
+ *   number of bytes written on success, ERROR if write fails.
+ *
+ ****************************************************************************/
+
+ssize_t ws2812_write(FAR struct file *filep,
+                     FAR const char  *data,
+                     size_t           len)
+{
+  FAR struct inode         *inode    = filep->f_inode;
+  FAR struct ws2812_dev_s  *priv     = inode->i_private;
+  ssize_t                   res;
+
+  if ((len % WS2812_RW_PIXEL_SIZE) != 0)
+    {
+      lederr("ERROR: LED values must be 24bit packed in 32bit\n");
+      return -EINVAL;
+    }
+
+  res = priv->write(filep, data, len);
+
+  return res;
+}
+
+/****************************************************************************
+ * Name: ws2812_read
+ * Description:
+ *   Fetches data from the pixel buffer.
+ *
+ * Input Parameter:
+ *   filep    - Pointer system file data
+ *   data     - pointer to receive buffer.
+ *   len      - Length to read in bytes.
+ *
+ * Returned Value:
+ *   number of bytes read on success, ERROR if read fails.
+ *
+ ****************************************************************************/
+
+ssize_t ws2812_read(FAR struct file *filep,
+                    FAR char        *data,
+                    size_t           len)
+{
+  FAR struct inode         *inode    = filep->f_inode;
+  FAR struct ws2812_dev_s  *priv     = inode->i_private;
+  ssize_t                   res;
+
+  if (priv == NULL  ||  priv->read == NULL)
+    {
+      return -ENOSYS;
+    }
+
+  if ((len % WS2812_RW_PIXEL_SIZE) != 0)
+    {
+      lederr("ERROR: LED values must be packed in 32bit words.\n");
+      return -EINVAL;
+    }
+
+  res = priv->read(filep, data, len);
+
+  return res;
+}
+
+#else /* CONFIG_WS2812_NON_SPI_DRIVER */
 
 /****************************************************************************
  * Name: ws2812_configspi
@@ -157,7 +389,7 @@ static inline void ws2812_configspi(FAR struct spi_dev_s *spi)
   SPI_SETMODE(spi, SPIDEV_MODE3);
   SPI_SETBITS(spi, 8);
   SPI_HWFEATURES(spi, 0);
-  SPI_SETFREQUENCY(spi, CONFIG_WS2812_FREQUENCY);
+  SPI_SETFREQUENCY(spi, 10 * CONFIG_WS2812_FREQUENCY);
 }
 
 /****************************************************************************
@@ -293,6 +525,8 @@ static ssize_t ws2812_write(FAR struct file *filep, FAR const char *buffer,
   return written;
 }
 
+#endif /* CONFIG_WS2812_NON_SPI_DRIVER */
+
 /****************************************************************************
  * Name: ws2812_seek
  *
@@ -325,61 +559,80 @@ static off_t ws2812_seek(FAR struct file *filep, off_t offset, int whence)
     {
       case SEEK_CUR:
         pos += offset;
-        if (pos > maxpos)
-          {
-            pos = maxpos;
-          }
-        else if (pos < 0)
-          {
-            pos = 0;
-          }
-
         filep->f_pos = pos;
         break;
 
       case SEEK_SET:
         pos = offset;
-        if (pos > maxpos)
-          {
-            pos = maxpos;
-          }
-        else if (pos < 0)
-          {
-            pos = 0;
-          }
-
-        filep->f_pos = pos;
         break;
 
       case SEEK_END:
-        pos = maxpos + offset;
-        if (pos > maxpos)
-          {
-            pos = maxpos;
-          }
-        else if (pos < 0)
-          {
-            pos = 0;
-          }
-
-        filep->f_pos = pos;
+        pos = maxpos + offset + 4;
         break;
 
       default:
 
         /* Return EINVAL if the whence argument is invalid */
 
-        pos = (off_t)-EINVAL;
-        break;
+        nxsem_post(&priv->exclsem);
+
+        return (off_t)-EINVAL;
     }
 
+  if (pos > maxpos)
+    {
+      pos = maxpos;
+    }
+  else if (pos < 0)
+    {
+      pos = 0;
+    }
+
+  filep->f_pos = pos;
+
   nxsem_post(&priv->exclsem);
+
   return pos;
 }
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+#ifdef CONFIG_WS2812_NON_SPI_DRIVER
+
+/****************************************************************************
+ * Name: ws2812_register
+ *
+ * Description:
+ *   Initialize a ws2812 device as a LEDs interface.
+ *
+ * Input Parameters:
+ *   dev_path  - The full path to the driver to register. E.g., "/dev/leds0"
+ *   count     - The number of ws2812s in the chain
+ *   has_white - Set true if the ws2812s in the chain have while LEDs
+ *   slow_leds - Set true to support older 400 kHz leds.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int ws2812_register(FAR const char          *dev_path,
+                    FAR struct ws2812_dev_s *dev_data)
+{
+  /* Register the character driver */
+
+  int ret = register_driver(dev_path, &g_ws2812fops, 0666, dev_data);
+  if (ret < 0)
+    {
+      lederr("ERROR: Failed to register ws2812 driver: %d\n", ret);
+    }
+
+  return ret;
+}
+
+#else /* CONFIG_WS2812_NON_SPI_DRIVER */
 
 /****************************************************************************
  * Name: ws2812_leds_register
@@ -451,4 +704,158 @@ int ws2812_leds_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 
   return ret;
 }
+
+#endif /* CONFIG_WS2812_NON_SPI_DRIVER */
+
+/****************************************************************************
+ * Name: ws2812_hsv_to_rgb
+ *
+ * Description:
+ *   Convert a set of hue, saturation and value numbers to an RGB pixel.
+ *
+ *   Representative "hue" values:
+ *     Red       0
+ *     Yellow   42
+ *     Green    86
+ *     Cyan    128
+ *     Blue    170
+ *     Magenta 212
+ *
+ *   "Saturation" values run from 0 (gray) to 255 (pure color)
+ *
+ *   "Value" values run from 0 (black) to 255 (full brightness)
+ *
+ * Input Parameters:
+ *   hue        in range (0-255) (red -> 0, green -> 85, blue -> 170)
+ *   saturation in range (0-255)
+ *   value      in range (0-255)
+ *
+ * Returned Value:
+ *   A 32-bit pixel in 0x00RRGGBB format.
+ *
+ ****************************************************************************/
+
+uint32_t ws2812_hsv_to_rgb(uint8_t hue,
+                           uint8_t saturation,
+                           uint8_t value)
+{
+  uint32_t val = value      + 1;   /* move value to range 1...256 */
+  uint32_t sat = saturation + 1;   /* move value to range 1...256 */
+  uint16_t  r;
+  uint16_t  g;
+  uint16_t  b;
+
+  /* ===== Compute full saturation R,G,B based on hue =====
+   *
+   * These computed values are inverted from the normal
+   * sense. (0 -> full color   255 -> black) in preparation
+   * for the saturation adjustment.
+   */
+
+  if (hue < 86)
+    {
+      /* Color between Red and Green */
+
+      b = 255;
+      if (hue < 43)
+        {
+          /* 0 - 42     Color between Red and Yellow */
+
+          r = 0;
+          g = 255 - hsv_rgb[hue];
+        }
+      else
+        {
+          /* 43 - 85     Color between Yellow and Green */
+
+          r = hsv_rgb[hue - 43];
+          g = 0;
+        }
+    }
+  else if (hue < 171)
+    {
+      /* Color between Green and Blue */
+
+      r = 255;
+      if (hue < 128)
+        {
+          /* 86 - 127    Color between Green and Cyan */
+
+          g = 0;
+          b = 255 - hsv_rgb[hue - 86];
+        }
+      else
+        {
+          /* 128 - 170    Color between Cyan and Blue */
+
+          g = hsv_rgb[hue - 128];
+          b = 0;
+        }
+    }
+  else
+    {
+      /* Color between Blue and Red */
+
+      g = 255;
+      if (hue < 214)
+        {
+          /* 171 - 213   Color between Blue and Magenta */
+
+          b = 0;
+          r = 255 - hsv_rgb[hue - 171];
+        }
+      else
+        {
+          /* 214 - 255   Color between Magenta and Red */
+
+          b = hsv_rgb[hue - 214];
+          r = 0;
+        }
+    }
+
+  /* This step scales the color for saturation and inverts
+   * back to 255 -> bright and 0 -> black.
+   */
+
+  r = 255 - ((r * sat) >> 8);
+  g = 255 - ((g * sat) >> 8);
+  b = 255 - ((b * sat) >> 8);
+
+  /* compute the return value using the r, g, and b values scaled
+   * by the value parameter
+   */
+
+  return   (((r * val) << 8) & 0xff0000)
+         | (((g * val) << 0) & 0x00ff00)
+         | (((b * val) >> 8) & 0x0000ff);
+}
+
+/****************************************************************************
+ * Name: ws2812_gamma_correct
+ *
+ * Description:
+ *   Applies a gamma correction to the supplied pixel.
+ *
+ * Input Parameters:
+ *   a 32-bit pixel with 8-bit color components.
+ *
+ * Returned Value:
+ *   A 32-bit gamma corrected pixel.
+ *
+ ****************************************************************************/
+
+uint32_t ws2812_gamma_correct(uint32_t pixel)
+{
+  uint32_t     res;
+  FAR uint8_t *in  = (FAR uint8_t *) &pixel;
+  FAR uint8_t *out = (FAR uint8_t *) &res;
+
+  *out++ = ws2812_gamma[*in++];
+  *out++ = ws2812_gamma[*in++];
+  *out++ = ws2812_gamma[*in++];
+  *out   = ws2812_gamma[*in];
+
+  return res;
+}
+
 #endif /* CONFIG_WS2812 */

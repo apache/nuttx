@@ -141,7 +141,7 @@ config RP2040_I2C_DRIVER
 
 endif
 
-config RP2040_PWM
+menuconfig RP2040_PWM
 	bool "PWM"
 	select PWM
 	---help---
@@ -210,7 +210,7 @@ config PWM_MULTICHAN
 			drives GPIO pin 13 or 29 with the B channel.
 
 	config RP2040_PWM7
-		bool "PWM7 (Pin 14  and  15)"
+		bool "PWM7"
 		---help---
 			Drives GPIO pin 14 with the A channel, and
 			drives GPIO pin 15 with the B channel.
@@ -281,3 +281,14 @@ config RP2040_SPISD_SPI_CH
 		Select spi channel number to use spi sd card.
 
 endif # SPISD Configuration
+
+config RP2040_BOARD_HAS_WS2812
+	bool "Has ws2812 pixels"
+	default n
+	depends on WS2812
+
+menuconfig RP2040_WS2812_GPIO_PIN
+	int "GPIO pin for ws2812 pixels"
+	default 0
+	range 0 29
+	depends on RP2040_BOARD_HAS_WS2812
