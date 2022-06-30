@@ -82,7 +82,7 @@
 #ifndef CONFIG_SMP
 void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 {
-  sinfo("tcb=0x%p sigdeliver=0x%p\n", tcb, sigdeliver);
+  sinfo("tcb=%p sigdeliver=%p\n", tcb, sigdeliver);
   DEBUGASSERT(tcb != NULL && sigdeliver != NULL);
 
   /* Refuse to handle nested signal actions */
@@ -93,7 +93,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
        * to the currently executing task.
        */
 
-      sinfo("rtcb=0x%p CURRENT_REGS=0x%p\n", this_task(), CURRENT_REGS);
+      sinfo("rtcb=%p CURRENT_REGS=%p\n", this_task(), CURRENT_REGS);
 
       if (tcb == this_task())
         {
@@ -222,7 +222,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
   int cpu;
   int me;
 
-  sinfo("tcb=0x%p sigdeliver=0x%p\n", tcb, sigdeliver);
+  sinfo("tcb=%p sigdeliver=%p\n", tcb, sigdeliver);
 
   /* Refuse to handle nested signal actions */
 
@@ -232,7 +232,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
        * to task that is currently executing on any CPU.
        */
 
-      sinfo("rtcb=0x%p CURRENT_REGS=0x%p\n", this_task(), CURRENT_REGS);
+      sinfo("rtcb=%p CURRENT_REGS=%p\n", this_task(), CURRENT_REGS);
 
       if (tcb->task_state == TSTATE_TASK_RUNNING)
         {

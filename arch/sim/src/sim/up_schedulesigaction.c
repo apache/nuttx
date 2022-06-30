@@ -77,7 +77,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
   /* We don't have to anything complex for the simulated target */
 
-  sinfo("tcb=0x%p sigdeliver=0x%p\n", tcb, sigdeliver);
+  sinfo("tcb=%p sigdeliver=%p\n", tcb, sigdeliver);
 
   /* Make sure that interrupts are disabled */
 
