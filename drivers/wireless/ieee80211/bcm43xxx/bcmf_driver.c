@@ -622,6 +622,11 @@ void bcmf_wl_auth_event_handler(FAR struct bcmf_dev_s *priv,
       return;
     }
 
+  if (!priv->bc_bifup)
+    {
+      return;
+    }
+
   bcmf_hexdump((uint8_t *)event, len, (unsigned long)event);
 
   if (type == WLC_E_PSK_SUP)
