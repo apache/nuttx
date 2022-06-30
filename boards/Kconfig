@@ -1426,6 +1426,15 @@ config ARCH_BOARD_NUCLEO_L552ZE
 	---help---
 		STMicro Nucleo STM32L552 board based on the STMicro STM32L552ZET6 MCU.
 
+config ARCH_BOARD_NUCLEO_WB55RG
+	bool "STM32WB55 Nucleo WB55RG"
+	depends on ARCH_CHIP_STM32WB55RG
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo WB55RG board based on the STMicro STM32WB55RGV6 MCU.
+
 config ARCH_BOARD_NUCLEO_WL55JC
 	bool "STM32WL55 Nucleo WL55JC"
 	depends on ARCH_CHIP_STM32WL55JC_CPU1 || ARCH_CHIP_STM32WL55JC_CPU2
@@ -2565,6 +2574,7 @@ config ARCH_BOARD
 	default "nucleo-l476rg"            if ARCH_BOARD_NUCLEO_L476RG
 	default "nucleo-l496zg"            if ARCH_BOARD_NUCLEO_L496ZG
 	default "nucleo-l552ze"            if ARCH_BOARD_NUCLEO_L552ZE
+	default "nucleo-wb55rg"            if ARCH_BOARD_NUCLEO_WB55RG
 	default "nucleo-wl55jc"            if ARCH_BOARD_NUCLEO_WL55JC
 	default "nutiny-nuc120"            if ARCH_BOARD_NUTINY_NUC120
 	default "olimex-efm32g880f128-stk" if ARCH_BOARD_OLIMEX_EFM32G880F128_STK
@@ -3086,6 +3096,9 @@ source "boards/arm/stm32l4/stm32l4r9ai-disco/Kconfig"
 endif
 if ARCH_BOARD_STM32L562E_DK
 source "boards/arm/stm32l5/stm32l562e-dk/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_WB55RG
+source "boards/arm/stm32wb/nucleo-wb55rg/Kconfig"
 endif
 if ARCH_BOARD_AXOLOTI
 source "boards/arm/stm32/axoloti/Kconfig"
