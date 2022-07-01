@@ -38,7 +38,7 @@
  * Description:
  *   Fill a buffer of arbitrary length with randomness. This uses
  *   either /dev/random (if GRND_RANDOM flag) or /dev/urandom device and
- *   is therefore susceptible for things like the attacker exhausting file
+ *   is therefore susceptible to things like the attacker exhausting file
  *   descriptors on purpose.
  *
  * Input Parameters:
@@ -63,6 +63,7 @@ ssize_t getrandom(FAR void *bytes, size_t nbytes, unsigned int flags)
   int oflags = O_RDONLY;
   FAR const char *dev;
   int fd;
+  ssize_t ret;
 
   if ((flags & GRND_NONBLOCK) != 0)
     {
@@ -85,16 +86,16 @@ ssize_t getrandom(FAR void *bytes, size_t nbytes, unsigned int flags)
       return fd;
     }
 
-  nbytes = _NX_READ(fd, bytes, nbytes);
-  if (nbytes < 0)
+  ret = _NX_READ(fd, bytes, nbytes);
+  if (ret < 0)
     {
       /* An error occurred on the read. */
 
-      _NX_SETERRNO(nbytes);
-      nbytes = ERROR;
+      _NX_SETERRNO(ret);
+      ret = ERROR;
     }
 
   _NX_CLOSE(fd);
 
-  return nbytes;
+  return ret;
 }
