@@ -477,6 +477,7 @@ int bcmf_wl_active(FAR struct bcmf_dev_s *priv, bool active)
       return ret;
     }
 
+  priv->bc_bfwload = true;
 #ifdef CONFIG_IEEE80211_BROADCOM_HAVE_CLM
   /* Download CLM blob if needed */
 

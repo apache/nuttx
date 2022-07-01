@@ -990,10 +990,19 @@ int bcmf_sdio_thread(int argc, char **argv)
             }
           else if (ret < 0)
             {
-
               wlerr("Error while waiting for semaphore\n");
               break;
             }
+        }
+
+      if (priv->bc_bfwload != true)
+        {
+          /* bcfm start too early, so wait firmware load done,
+           * or start thread when set priv->bc_bfwload = true;
+           */
+
+          usleep(20 * 1000);
+          continue;
         }
 
       timeout = BCMF_LOWPOWER_TIMEOUT_TICK;
