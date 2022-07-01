@@ -1061,31 +1061,31 @@ static void esp32s3_spi_init(struct spi_dev_s *dev)
   if (esp32s3_spi_iomux(priv))
     {
 #if !SPI_HAVE_SWCS
-      esp32s3_configgpio(config->cs_pin, OUTPUT_FUNCTION_4);
+      esp32s3_configgpio(config->cs_pin, OUTPUT_FUNCTION_5);
       esp32s3_gpio_matrix_out(config->cs_pin, SIG_GPIO_OUT_IDX, 0, 0);
 #endif
-      esp32s3_configgpio(config->mosi_pin, OUTPUT_FUNCTION_4);
+      esp32s3_configgpio(config->mosi_pin, OUTPUT_FUNCTION_5);
       esp32s3_gpio_matrix_out(config->mosi_pin, SIG_GPIO_OUT_IDX, 0, 0);
 
-      esp32s3_configgpio(config->miso_pin, INPUT_FUNCTION_4 | PULLUP);
+      esp32s3_configgpio(config->miso_pin, INPUT_FUNCTION_5 | PULLUP);
       esp32s3_gpio_matrix_out(config->miso_pin, SIG_GPIO_OUT_IDX, 0, 0);
 
-      esp32s3_configgpio(config->clk_pin, OUTPUT_FUNCTION_4);
+      esp32s3_configgpio(config->clk_pin, OUTPUT_FUNCTION_5);
       esp32s3_gpio_matrix_out(config->clk_pin, SIG_GPIO_OUT_IDX, 0, 0);
     }
   else
     {
 #if !SPI_HAVE_SWCS
-      esp32s3_configgpio(config->cs_pin, OUTPUT_FUNCTION_1);
+      esp32s3_configgpio(config->cs_pin, OUTPUT);
       esp32s3_gpio_matrix_out(config->cs_pin, config->cs_outsig, 0, 0);
 #endif
-      esp32s3_configgpio(config->mosi_pin, OUTPUT_FUNCTION_1);
+      esp32s3_configgpio(config->mosi_pin, OUTPUT);
       esp32s3_gpio_matrix_out(config->mosi_pin, config->mosi_outsig, 0, 0);
 
-      esp32s3_configgpio(config->miso_pin, INPUT_FUNCTION_1 | PULLUP);
+      esp32s3_configgpio(config->miso_pin, INPUT | PULLUP);
       esp32s3_gpio_matrix_in(config->miso_pin, config->miso_insig, 0);
 
-      esp32s3_configgpio(config->clk_pin, OUTPUT_FUNCTION_1);
+      esp32s3_configgpio(config->clk_pin, OUTPUT);
       esp32s3_gpio_matrix_out(config->clk_pin, config->clk_outsig, 0, 0);
     }
 
