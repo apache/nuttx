@@ -183,7 +183,7 @@ int board_lcd_initialize(void)
        * Must be because setpower(1) function invokes the chip configuration
        */
 
-      g_lcddev->setpower(g_lcddev, CONFIG_LCD_MAXPOWER);
+      ret = g_lcddev->setpower(g_lcddev, CONFIG_LCD_MAXPOWER);
     }
 
   return ret;
