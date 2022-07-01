@@ -164,61 +164,76 @@ static int lcdfb_updateearea(FAR struct fb_vtable_s *vtable,
 {
   FAR struct lcdfb_dev_s *priv = (FAR struct lcdfb_dev_s *)vtable;
   FAR struct lcd_planeinfo_s *pinfo = &priv->pinfo;
-  FAR uint8_t *run;
+  FAR uint8_t *run = priv->fbmem;
   fb_coord_t row;
-  fb_coord_t startx;
-  fb_coord_t endx;
-  fb_coord_t width;
-  fb_coord_t starty;
-  fb_coord_t endy;
+  fb_coord_t startx = 0;
+  fb_coord_t endx = priv->xres - 1;
+  fb_coord_t width = priv->xres;
+  fb_coord_t starty = 0;
+  fb_coord_t endy = priv->yres - 1;
   int ret;
 
-  DEBUGASSERT(area != NULL);
-  DEBUGASSERT(area->w >= 1);
-  DEBUGASSERT(area->h >= 1);
-
-  /* Clip to fit in the framebuffer */
-
-  startx = area->x;
-  if (startx < 0)
+  if (area != NULL)
     {
-      startx = 0;
+      /* Clip to fit in the framebuffer */
+
+      startx = area->x;
+      if (startx < 0)
+        {
+          startx = 0;
+        }
+
+      endx = startx + area->w - 1;
+      if (endx >= priv->xres)
+        {
+          endx = priv->xres - 1;
+        }
+
+      starty = area->y;
+      if (starty < 0)
+        {
+          starty = 0;
+        }
+
+      endy = starty + area->h - 1;
+      if (endy >= priv->yres)
+        {
+          endy = priv->yres - 1;
+        }
+
+      /* If the display uses a value of BPP < 8, then we may have to extend
+       * the rectangle on the left so that it is byte aligned.  Works for
+       * BPP={1,2,4}
+       */
+
+      if (pinfo->bpp < 8)
+        {
+          unsigned int pixperbyte = 8 / pinfo->bpp;
+          startx &= ~(pixperbyte - 1);
+        }
+
+      width = endx - startx + 1;
+
+      /* Get the starting position in the framebuffer */
+
+      run  = priv->fbmem + starty * priv->stride;
+      run += (startx * pinfo->bpp + 7) >> 3;
     }
 
-  endx = startx + area->w - 1;
-  if (endx >= priv->xres)
+  /* Update the whole screen? */
+
+  if (startx == 0 && endx == priv->xres - 1 &&
+      starty == 0 && endy == priv->yres - 1)
     {
-      endx = priv->xres - 1;
+      /* Yes, LCD driver support putarea callback? */
+
+      if (pinfo->putarea != NULL)
+        {
+          /* Yes, go the fast path */
+
+          return pinfo->putarea(pinfo->dev, starty, endy, startx, endx, run);
+        }
     }
-
-  starty = area->y;
-  if (starty < 0)
-    {
-      starty = 0;
-    }
-
-  endy = starty + area->h - 1;
-  if (endy >= priv->yres)
-    {
-      endy = priv->yres - 1;
-    }
-
-  /* If the display uses a value of BPP < 8, then we may have to extend the
-   * rectangle on the left so that it is byte aligned.  Works for BPP={1,2,4}
-   */
-
-  if (pinfo->bpp < 8)
-    {
-      unsigned int pixperbyte = 8 / pinfo->bpp;
-      startx &= ~(pixperbyte - 1);
-    }
-
-  width = endx - startx + 1;
-
-  /* Get the starting position in the framebuffer */
-
-  run  = priv->fbmem + starty * priv->stride;
-  run += (startx * pinfo->bpp + 7) >> 3;
 
   for (row = starty; row <= endy; row++)
     {
