@@ -645,6 +645,11 @@ void bcmf_wl_auth_event_handler(FAR struct bcmf_dev_s *priv,
   wlinfo("Got auth event %" PRId32 " status %" PRId32 " from <%s>\n",
          type, status, event->src_name);
 
+  if (!priv->bc_bifup)
+    {
+      return;
+    }
+
   bcmf_hexdump((uint8_t *)event, len, (unsigned long)event);
 
   if (type == WLC_E_SET_SSID && status == WLC_E_STATUS_SUCCESS)
