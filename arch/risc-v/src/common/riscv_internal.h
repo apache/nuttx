@@ -29,17 +29,37 @@
 
 #ifndef __ASSEMBLY__
 #  include <nuttx/compiler.h>
-#  include <nuttx/arch.h>
 #  include <sys/types.h>
 #  include <stdint.h>
 #  include <syscall.h>
 #endif
+
+#include <nuttx/irq.h>
 
 #include "riscv_common_memorymap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#if defined(CONFIG_ARCH_QPFPU)
+#  define FLOAD     __STR(flq)
+#  define FSTORE    __STR(fsq)
+#elif defined(CONFIG_ARCH_DPFPU)
+#  define FLOAD     __STR(fld)
+#  define FSTORE    __STR(fsd)
+#else
+#  define FLOAD     __STR(flw)
+#  define FSTORE    __STR(fsw)
+#endif
+
+#ifdef CONFIG_ARCH_RV32
+#  define REGLOAD   __STR(lw)
+#  define REGSTORE  __STR(sw)
+#else
+#  define REGLOAD   __STR(ld)
+#  define REGSTORE  __STR(sd)
+#endif
 
 /* This is the value used to mark the stack for subsequent stack monitoring
  * logic.

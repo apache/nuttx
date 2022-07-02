@@ -40,32 +40,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef __ASSEMBLY__
-#  define __STR(s)  s
-#else
-#  define __STR(s)  #s
-#endif
-#define __XSTR(s)   __STR(s)
-
-#if defined(CONFIG_ARCH_QPFPU)
-#  define FLOAD     __STR(flq)
-#  define FSTORE    __STR(fsq)
-#elif defined(CONFIG_ARCH_DPFPU)
-#  define FLOAD     __STR(fld)
-#  define FSTORE    __STR(fsd)
-#else
-#  define FLOAD     __STR(flw)
-#  define FSTORE    __STR(fsw)
-#endif
-
-#ifdef CONFIG_ARCH_RV32
-#  define REGLOAD   __STR(lw)
-#  define REGSTORE  __STR(sw)
-#else
-#  define REGLOAD   __STR(ld)
-#  define REGSTORE  __STR(sd)
-#endif
-
 /* Provide the maximum amount of page table levels per MMU type */
 
 #ifdef CONFIG_ARCH_MMU_TYPE_SV39
