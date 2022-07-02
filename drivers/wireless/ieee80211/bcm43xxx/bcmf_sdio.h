@@ -29,8 +29,8 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <queue.h>
 
+#include <nuttx/list.h>
 #include <nuttx/sdio.h>
 #include <nuttx/semaphore.h>
 
@@ -103,9 +103,9 @@ struct bcmf_sdio_dev_s
   bool    flow_ctrl;               /* Current flow control status */
 
   sem_t queue_mutex;               /* Lock for TX/RX/free queues */
-  dq_queue_t free_queue;           /* Queue of available frames */
-  dq_queue_t tx_queue;             /* Queue of frames to transmit */
-  dq_queue_t rx_queue;             /* Queue of frames used to receive */
+  struct list_node free_queue;     /* Queue of available frames */
+  struct list_node tx_queue;       /* Queue of frames to transmit */
+  struct list_node rx_queue;       /* Queue of frames used to receive */
   volatile int tx_queue_count;     /* Count of items in TX queue */
 };
 
@@ -115,7 +115,7 @@ struct bcmf_sdio_frame
 {
   struct bcmf_frame_s header;
   bool                tx;
-  dq_entry_t          list_entry;
+  struct list_node    list_entry;
   uint8_t             pad[CONFIG_IEEE80211_BROADCOM_DMABUF_ALIGNMENT -
                           FIRST_WORD_SIZE]
   aligned_data(CONFIG_IEEE80211_BROADCOM_DMABUF_ALIGNMENT);

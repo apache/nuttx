@@ -33,7 +33,6 @@
 
 #include <stddef.h>
 #include <string.h>
-#include <queue.h>
 
 #include "bcmf_sdio.h"
 #include "bcmf_core.h"
@@ -317,7 +316,7 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
             DEBUGPANIC();
           }
 
-        bcmf_dqueue_push(&sbus->rx_queue, &sframe->list_entry);
+        list_add_tail(&sbus->rx_queue, &sframe->list_entry);
         nxsem_post(&sbus->queue_mutex);
 
         bcmf_netdev_notify_rx(priv);
@@ -346,12 +345,11 @@ int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv)
 {
   int ret;
   bool is_txframe;
-  dq_entry_t *entry;
   struct bcmf_sdio_frame *sframe;
   struct bcmf_sdpcm_header *header;
   FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
 
-  if (sbus->tx_queue.tail == NULL)
+  if (list_is_empty(&sbus->tx_queue))
     {
       /* No more frames to send */
 
@@ -376,8 +374,10 @@ int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv)
       DEBUGPANIC();
     }
 
-  entry = sbus->tx_queue.tail;
-  sframe = container_of(entry, struct bcmf_sdio_frame, list_entry);
+  sframe = list_remove_head_type(&sbus->tx_queue, struct bcmf_sdio_frame,
+                                 list_entry);
+  nxsem_post(&sbus->queue_mutex);
+
   header = (struct bcmf_sdpcm_header *)sframe->header.base;
 
   /* Set frame sequence id */
@@ -396,40 +396,22 @@ int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv)
   ret = bcmf_transfer_bytes(sbus, true, 2, 0,
                             sframe->header.base,
                             sframe->header.len);
-  if (ret != OK)
+  if (ret == OK)
     {
-      /* TODO handle retry count and remove frame from queue + abort TX */
+      is_txframe = sframe->tx;
 
-      wlinfo("fail send frame %d\n", ret);
-      ret = -EIO;
-      goto exit_abort;
+      /* Free frame buffer */
+
+      bcmf_sdio_free_frame(priv, sframe);
+
+      if (is_txframe)
+        {
+          /* Notify upper layer at least one TX buffer is available */
+
+          bcmf_netdev_notify_tx(priv);
+        }
     }
 
-  /* Frame sent, remove it from queue */
-
-  bcmf_dqueue_pop_tail(&sbus->tx_queue);
-  nxsem_post(&sbus->queue_mutex);
-  is_txframe = sframe->tx;
-
-  /* Free frame buffer */
-
-  bcmf_sdio_free_frame(priv, sframe);
-
-  if (is_txframe)
-    {
-      /* Notify upper layer at least one TX buffer is available */
-
-      bcmf_netdev_notify_tx(priv);
-    }
-
-  return OK;
-
-exit_abort:
-#if 0
-  bcmf_sdpcm_txfail(sbus, false);
-#endif
-
-  nxsem_post(&sbus->queue_mutex);
   return ret;
 }
 
@@ -465,7 +447,7 @@ int bcmf_sdpcm_queue_frame(FAR struct bcmf_dev_s *priv,
       DEBUGPANIC();
     }
 
-  bcmf_dqueue_push(&sbus->tx_queue, &sframe->list_entry);
+  list_add_tail(&sbus->tx_queue, &sframe->list_entry);
 
   nxsem_post(&sbus->queue_mutex);
 
@@ -520,7 +502,6 @@ void bcmf_sdpcm_free_frame(FAR struct bcmf_dev_s *priv,
 
 struct bcmf_frame_s *bcmf_sdpcm_get_rx_frame(FAR struct bcmf_dev_s *priv)
 {
-  dq_entry_t *entry;
   struct bcmf_sdio_frame *sframe;
   FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
 
@@ -529,15 +510,16 @@ struct bcmf_frame_s *bcmf_sdpcm_get_rx_frame(FAR struct bcmf_dev_s *priv)
       DEBUGPANIC();
     }
 
-  entry = bcmf_dqueue_pop_tail(&sbus->rx_queue);
+  sframe = list_remove_head_type(&sbus->rx_queue,
+                                 struct bcmf_sdio_frame,
+                                 list_entry);
 
   nxsem_post(&sbus->queue_mutex);
 
-  if (entry == NULL)
+  if (sframe == NULL)
     {
       return NULL;
     }
 
-  sframe = container_of(entry, struct bcmf_sdio_frame, list_entry);
   return &sframe->header;
 }
