@@ -91,17 +91,6 @@ typedef int (*netdev_callback_t)(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: netdev_ifup / netdev_ifdown
- *
- * Description:
- *   Bring the interface up/down
- *
- ****************************************************************************/
-
-void netdev_ifup(FAR struct net_driver_s *dev);
-void netdev_ifdown(FAR struct net_driver_s *dev);
-
-/****************************************************************************
  * Name: netdev_verify
  *
  * Description:
