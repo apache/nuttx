@@ -96,9 +96,10 @@ struct bcmf_dev_s
   int   auth_status; /* Authentication status */
 
 #ifdef CONFIG_IEEE80211_BROADCOM_LOWPOWER
-  struct work_s lp_work;    /* Low power work to work queue */
-  int           lp_mode;    /* Low power mode */
-  sclock_t      lp_ticks;   /* Ticks of last tx time */
+  struct work_s lp_work_ifdown; /* Ifdown work to work queue */
+  struct work_s lp_work_dtim;   /* Low power work to work queue */
+  int           lp_dtim;        /* Listen interval Delivery Traffic Indication Message */
+  sclock_t      lp_ticks;       /* Ticks of last tx time */
 #endif
 };
 
@@ -146,7 +147,9 @@ int bcmf_wl_enable(FAR struct bcmf_dev_s *priv, bool enable);
 
 int bcmf_wl_active(FAR struct bcmf_dev_s *priv, bool active);
 
-int bcmf_wl_set_pm(FAR struct bcmf_dev_s *priv, int mode);
+#ifdef CONFIG_IEEE80211_BROADCOM_LOWPOWER
+int bcmf_wl_set_dtim(FAR struct bcmf_dev_s *priv, uint32_t interval_ms);
+#endif
 
 int bcmf_wl_set_country_code(FAR struct bcmf_dev_s *priv,
                              int interface, FAR void *code);
