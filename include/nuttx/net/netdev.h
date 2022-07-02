@@ -593,6 +593,17 @@ void neighbor_out(FAR struct net_driver_s *dev);
 int devif_loopback(FAR struct net_driver_s *dev);
 
 /****************************************************************************
+ * Name: netdev_ifup / netdev_ifdown
+ *
+ * Description:
+ *   Bring the interface up/down
+ *
+ ****************************************************************************/
+
+void netdev_ifup(FAR struct net_driver_s *dev);
+void netdev_ifdown(FAR struct net_driver_s *dev);
+
+/****************************************************************************
  * Carrier detection
  *
  * Call netdev_carrier_on when the carrier has become available and the
