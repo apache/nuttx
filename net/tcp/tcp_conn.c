@@ -696,6 +696,7 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
            * waiting for it.
            */
 
+          conn->crefs = 0;
           tcp_free(conn);
 
           /* Now there is guaranteed to be one free connection.  Get it! */
