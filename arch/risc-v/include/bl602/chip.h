@@ -25,11 +25,4 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <sys/types.h>
-#include <stdint.h>
-#include <stdbool.h>
-
-#include <arch/irq.h>
-
 #endif /* __ARCH_RISCV_INCLUDE_BL602_CHIP_H */
