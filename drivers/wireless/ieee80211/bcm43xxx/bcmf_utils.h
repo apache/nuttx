@@ -26,12 +26,8 @@
  ****************************************************************************/
 
 #include <stdint.h>
-#include <queue.h>
 
 #include <nuttx/semaphore.h>
-
-#define container_of(ptr, type, member) \
-        (type *)((uint8_t *)(ptr) - offsetof(type, member))
 
 #ifndef min
 #define min(a,b) ((a) < (b) ? (a) : (b))
@@ -48,9 +44,6 @@
 void bcmf_hexdump(uint8_t *data, unsigned int len, unsigned long offset);
 
 int bcmf_sem_wait(sem_t *sem, unsigned int timeout_ms);
-
-dq_entry_t *bcmf_dqueue_pop_tail(dq_queue_t *queue);
-void bcmf_dqueue_push(dq_queue_t *queue, dq_entry_t *entry);
 
 static inline uint16_t bcmf_getle16(void *val)
 {
