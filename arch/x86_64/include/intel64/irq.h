@@ -29,12 +29,13 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #  include <stdbool.h>
 #  include <arch/arch.h>
 #  include <time.h>
-#  include <nuttx/config.h>
 #endif
 
 /****************************************************************************
