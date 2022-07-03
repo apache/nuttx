@@ -51,27 +51,27 @@ void stm32wb_ipccreset(void)
 
   /* Disable CPU1 IPCC interrupts */
 
-  putreg32(STM32WB_IPCC_C1CR, 0x00000000);
+  putreg32(0x00000000, STM32WB_IPCC_C1CR);
 
   /* Clear CPU1 IPCC receive channel status */
 
-  putreg32(STM32WB_IPCC_C1SCR, IPCC_C1SCR_CLR_MASK);
+  putreg32(IPCC_C1SCR_CLR_MASK, STM32WB_IPCC_C1SCR);
 
   /* Clear CPU2 IPCC receive channel status */
 
-  putreg32(STM32WB_IPCC_C2SCR, IPCC_C2SCR_CLR_MASK);
+  putreg32(IPCC_C2SCR_CLR_MASK, STM32WB_IPCC_C2SCR);
 
   /* Disable CPU1 transmit/receive channels */
 
   regval = getreg32(STM32WB_IPCC_C1MR);
   regval |= IPCC_C1MR_OM_MASK | IPCC_C1MR_FM_MASK;
-  putreg32(STM32WB_IPCC_C1MR, regval);
+  putreg32(regval, STM32WB_IPCC_C1MR);
 
   /* Disable CPU2 transmit/receive channels */
 
   regval = getreg32(STM32WB_IPCC_C2MR);
   regval |= IPCC_C2MR_OM_MASK | IPCC_C2MR_FM_MASK;
-  putreg32(STM32WB_IPCC_C2MR, regval);
+  putreg32(regval, STM32WB_IPCC_C2MR);
 }
 
 /****************************************************************************
@@ -90,19 +90,19 @@ void stm32wb_ipccenable(void)
 
   regval = getreg32(STM32WB_RCC_C2AHB3ENR);
   regval |= RCC_C2AHB3ENR_IPCCEN;
-  putreg32(STM32WB_RCC_C2AHB3ENR, regval);
+  putreg32(regval, STM32WB_RCC_C2AHB3ENR);
 
   /* Enable EXTI event request for C1SEV interrupt to CPU2 */
 
   regval = getreg32(STM32WB_EXTI_C2EMR2);
   regval |= EXTI_C2EMR2_EM(EXTI_EVT_C1SEV);
-  putreg32(STM32WB_EXTI_C2EMR2, regval);
+  putreg32(regval, STM32WB_EXTI_C2EMR2);
 
   /* Enable EXTI rising edge trigger for C1SEV interrupt to CPU2 */
 
   regval = getreg32(STM32WB_EXTI_RTSR2);
   regval |= EXTI_RTSR2_RT(EXTI_EVT_C1SEV);
-  putreg32(STM32WB_EXTI_RTSR2, regval);
+  putreg32(regval, STM32WB_EXTI_RTSR2);
 
   /* Set the internal event flag and send an event to CPU2 */
 
@@ -116,5 +116,5 @@ void stm32wb_ipccenable(void)
 
   regval = getreg32(STM32WB_PWR_CR4);
   regval |= PWR_CR4_C2BOOT;
-  putreg32(STM32WB_PWR_CR4, regval);
+  putreg32(regval, STM32WB_PWR_CR4);
 }
