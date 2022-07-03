@@ -322,23 +322,31 @@ void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
    * new data in it, we must send out a packet.
    */
 
-  if ((result & TCP_REXMIT) != 0 &&
-      dev->d_sndlen > 0 && conn->tx_unacked > 0)
+#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_NET_SENDFILE)
+  if (conn->sendfile)
+#endif
     {
-      uint32_t saveseq;
+#if !defined(CONFIG_NET_TCP_WRITE_BUFFERS) || defined(CONFIG_NET_SENDFILE)
+      if ((result & TCP_REXMIT) != 0 &&
+          dev->d_sndlen > 0 && conn->tx_unacked > 0 &&
+          conn->rexmit_seq > 0)
+        {
+          uint32_t saveseq;
 
-      /* According to RFC 6298 (5.4), retransmit the earliest segment
-       * that has not been acknowledged by the TCP receiver.
-       */
+          /* According to RFC 6298 (5.4), retransmit the earliest segment
+           * that has not been acknowledged by the TCP receiver.
+           */
 
-      saveseq = tcp_getsequence(conn->sndseq);
-      tcp_setsequence(conn->sndseq, conn->rexmit_seq);
+          saveseq = tcp_getsequence(conn->sndseq);
+          tcp_setsequence(conn->sndseq, conn->rexmit_seq);
 
-      tcp_send(dev, conn, TCP_ACK | TCP_PSH, dev->d_sndlen + hdrlen);
+          tcp_send(dev, conn, TCP_ACK | TCP_PSH, dev->d_sndlen + hdrlen);
 
-      tcp_setsequence(conn->sndseq, saveseq);
+          tcp_setsequence(conn->sndseq, saveseq);
 
-      return;
+          return;
+        }
+#endif
     }
 
 #if defined(CONFIG_NET_TCP_WRITE_BUFFERS)
