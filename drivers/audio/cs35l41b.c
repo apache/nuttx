@@ -204,6 +204,7 @@ static int cs35l41b_get_caliberate_value_handler(FAR struct cs35l41b_dev_s *priv
                                                 FAR char *value,
                                                 FAR void *arg);
 
+#ifdef CONFIG_AUDIO_CS35L41B_DEBUG
 static int cs35l41b_set_debug_gain_handler(FAR struct cs35l41b_dev_s *priv,
                                           FAR char *key, FAR char *value,
                                           FAR void *arg);
@@ -223,6 +224,7 @@ static int cs35l41b_set_print_info_handler(FAR struct cs35l41b_dev_s *priv,
 static int cs35l41b_get_mode_handler(FAR struct cs35l41b_dev_s *priv,
                                     FAR char *key, FAR char *value,
                                     FAR void *arg);
+#endif
 
 static int cs35l41b_interrupt_handler(FAR struct ioexpander_dev_s *dev,
                                      ioe_pinset_t pinset, FAR void *arg);
