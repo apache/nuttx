@@ -946,13 +946,6 @@ static int stwlc38_get_det_state(FAR struct stwlc38_dev_s *priv,
 
   /* Check WPC_DET, output High when SS package sent */
 
-  ret = IOEXP_SETDIRECTION(priv->rpmsg_dev, priv->lower->detect_pin,
-                           IOEXPANDER_DIRECTION_IN_PULLDOWN);
-  if (ret < 0)
-    {
-      baterr("set det direction err:%d\n", ret);
-    }
-
   ret = IOEXP_READPIN(priv->rpmsg_dev, priv->lower->detect_pin, &wpc_det);
   if (ret < 0)
     {
