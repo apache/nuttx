@@ -767,7 +767,7 @@ static int adc_timinit(struct stm32_dev_s *priv)
    *   position.
    */
 
-  ainfo("Initializing timers extsel = 0x%08lx\n", priv->extsel);
+  ainfo("Initializing timers extsel = 0x%08" PRIx32 "\n", priv->extsel);
 
   adc_modifyreg(priv, STM32_ADC_CFGR_OFFSET,
                 ADC_CFGR_EXTEN_MASK | ADC_CFGR_EXTSEL_MASK,
@@ -1478,17 +1478,19 @@ static int adc_setup(struct adc_dev_s *dev)
 
   leave_critical_section(flags);
 
-  ainfo("ISR:   0x%08lx CR:    0x%08lx CFGR:  0x%08lx CFGR2: 0x%08lx\n",
+  ainfo("ISR:   0x%08" PRIx32 " CR:    0x%08" PRIx32 " CFGR:  0x%08" PRIx32
+        " CFGR2: 0x%08" PRIx32 "\n",
         adc_getreg(priv, STM32_ADC_ISR_OFFSET),
         adc_getreg(priv, STM32_ADC_CR_OFFSET),
         adc_getreg(priv, STM32_ADC_CFGR_OFFSET),
         adc_getreg(priv, STM32_ADC_CFGR2_OFFSET));
-  ainfo("SQR1:  0x%08lx SQR2:  0x%08lx SQR3:  0x%08lx SQR4:  0x%08lx\n",
+  ainfo("SQR1:  0x%08" PRIx32 " SQR2:  0x%08" PRIx32 " SQR3:  0x%08" PRIx32
+       " SQR4:  0x%08" PRIx32 "\n",
         adc_getreg(priv, STM32_ADC_SQR1_OFFSET),
         adc_getreg(priv, STM32_ADC_SQR2_OFFSET),
         adc_getreg(priv, STM32_ADC_SQR3_OFFSET),
         adc_getreg(priv, STM32_ADC_SQR4_OFFSET));
-  ainfo("CCR:   0x%08lx\n", adc_getregm(priv, STM32_ADC_CCR_OFFSET));
+  ainfo("CCR:   0x%08" PRIx32 "\n", adc_getregm(priv, STM32_ADC_CCR_OFFSET));
 
   /* Enable the ADC interrupt */
 
