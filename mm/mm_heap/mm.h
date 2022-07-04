@@ -90,9 +90,17 @@
 #  define MM_MAX_SHIFT    (22)  /*  4 Mb */
 #endif
 
-#ifdef CONFIG_MM_BACKTRACE
-#  define MM_MIN_SHIFT       (MM_MIN_SHIFT_ + 2)
-#  define MM_BACKTRACE_DEPTH 8
+#if CONFIG_MM_BACKTRACE == 0
+#  define MM_MIN_SHIFT    (MM_MIN_SHIFT_ + 1)
+#  define MM_ADD_BACKTRACE(heap, ptr) \
+     do \
+       { \
+         FAR struct mm_allocnode_s *tmp = (FAR struct mm_allocnode_s *)(ptr); \
+         tmp->pid = getpid(); \
+       } \
+     while (0)
+#elif CONFIG_MM_BACKTRACE > 0
+#  define MM_MIN_SHIFT    (MM_MIN_SHIFT_ + 2)
 #  define MM_ADD_BACKTRACE(heap, ptr) \
      do \
        { \
@@ -101,7 +109,7 @@
          if ((heap)->mm_procfs.backtrace) \
            { \
              memset(tmp->backtrace, 0, sizeof(tmp->backtrace)); \
-             backtrace(tmp->backtrace, MM_BACKTRACE_DEPTH); \
+             backtrace(tmp->backtrace, CONFIG_MM_BACKTRACE); \
            } \
          else \
            { \
@@ -165,12 +173,14 @@ typedef uint32_t mmsize_t;
 
 struct mm_allocnode_s
 {
-#ifdef CONFIG_MM_BACKTRACE
-  pid_t pid;                               /* The pid for caller */
-  FAR void *backtrace[MM_BACKTRACE_DEPTH]; /* The backtrace buffer for caller */
+#if CONFIG_MM_BACKTRACE >= 0
+  pid_t pid;                                /* The pid for caller */
+#  if CONFIG_MM_BACKTRACE > 0
+  FAR void *backtrace[CONFIG_MM_BACKTRACE]; /* The backtrace buffer for caller */
+#  endif
 #endif
-  mmsize_t size;                           /* Size of this chunk */
-  mmsize_t preceding;                      /* Size of the preceding chunk */
+  mmsize_t size;                            /* Size of this chunk */
+  mmsize_t preceding;                       /* Size of the preceding chunk */
 };
 
 static_assert(SIZEOF_MM_ALLOCNODE <= MM_MIN_CHUNK,
@@ -180,13 +190,15 @@ static_assert(SIZEOF_MM_ALLOCNODE <= MM_MIN_CHUNK,
 
 struct mm_freenode_s
 {
-#ifdef CONFIG_MM_BACKTRACE
-  pid_t pid;                               /* The pid for caller */
-  FAR void *backtrace[MM_BACKTRACE_DEPTH]; /* The backtrace buffer for caller */
+#if CONFIG_MM_BACKTRACE >= 0
+  pid_t pid;                                /* The pid for caller */
+#  if CONFIG_MM_BACKTRACE > 0
+  FAR void *backtrace[CONFIG_MM_BACKTRACE]; /* The backtrace buffer for caller */
+#  endif
 #endif
-  mmsize_t size;                           /* Size of this chunk */
-  mmsize_t preceding;                      /* Size of the preceding chunk */
-  FAR struct mm_freenode_s *flink;         /* Supports a doubly linked list */
+  mmsize_t size;                            /* Size of this chunk */
+  mmsize_t preceding;                       /* Size of the preceding chunk */
+  FAR struct mm_freenode_s *flink;          /* Supports a doubly linked list */
   FAR struct mm_freenode_s *blink;
 };
 
