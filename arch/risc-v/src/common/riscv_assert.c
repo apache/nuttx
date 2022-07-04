@@ -331,7 +331,15 @@ static void riscv_dump_stack(const char *tag, uintptr_t sp,
 
       if (force)
         {
-          riscv_stackdump(base, top);
+#ifdef CONFIG_STACK_COLORATION
+          uint32_t remain;
+
+          remain = size - riscv_stack_check((uintptr_t)base, size);
+          base  += remain;
+          size  -= remain;
+#endif
+
+          riscv_stackdump(base, base + size);
         }
     }
 }
