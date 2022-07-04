@@ -1280,6 +1280,10 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
           if (mmcsd_recvblock(slot, buffer, SECTORSIZE(slot)) != 0)
             {
               ferr("ERROR: Failed: to receive the block\n");
+
+              /* Send CMD12: Stops transmission */
+
+              response = mmcsd_sendcmd(slot, &g_cmd12, 0);
               goto errout_with_eio;
             }
 
