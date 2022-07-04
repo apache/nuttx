@@ -12,6 +12,19 @@ config SEGGER_RTT
 
 if SEGGER_RTT
 
+config SEGGER_RTT_SECTION
+	string "Segger RTT Control Block Section"
+	default ""
+	---help---
+		Declare _SEGGER_RTT global variable in the specific data section.
+
+config SEGGER_RTT_BUFFER_SECTION
+	string "Segger RTT Buffer Block Section"
+	default SEGGER_RTT_SECTION
+	---help---
+		Declare _acUpBuffer/_acDownBuffer global variables in the specific
+		data section.
+
 config SEGGER_RTT_CPU_CACHE_LINE_SIZE
 	int "Segger RTT Cache Line Size"
 	default 0
