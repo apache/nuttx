@@ -126,33 +126,38 @@ struct ssd1680_dev_s
 
 /* Libc extension */
 
-FAR void *bitscpy_ds(FAR void *dest, int dest_offset, FAR const void *src,
-    size_t nbits);
+static FAR void *bitscpy_ds(FAR void *dest, int dest_offset,
+                            FAR const void *src, size_t nbits);
 
-FAR void *bitscpy_ss(FAR void *dest, FAR const void *src, int src_offset,
-    size_t nbits);
+static FAR void *bitscpy_ss(FAR void *dest, FAR const void *src,
+                            int src_offset, size_t nbits);
 
 /* LCD Data Transfer Methods */
 
 static int ssd1680_busy_wait(FAR struct ssd1680_dev_s *priv);
 
 static void ssd1680_snd_cmd_with_data0(FAR struct ssd1680_dev_s *priv,
-    uint8_t cmd);
+                                       uint8_t cmd);
 
 static void ssd1680_snd_cmd_with_data1(FAR struct ssd1680_dev_s *priv,
-    uint8_t cmd, uint8_t dta1);
+                                       uint8_t cmd, uint8_t dta1);
 
 static void ssd1680_snd_cmd_with_data2(FAR struct ssd1680_dev_s *priv,
-    uint8_t cmd, uint8_t dta1, uint8_t dta2);
+                                       uint8_t cmd, uint8_t dta1,
+                                       uint8_t dta2);
 
 static void ssd1680_snd_cmd_with_data3(FAR struct ssd1680_dev_s *priv,
-    uint8_t cmd, uint8_t dta1, uint8_t dta2, uint8_t dta3);
+                                       uint8_t cmd, uint8_t dta1,
+                                       uint8_t dta2, uint8_t dta3);
 
 static void ssd1680_snd_cmd_with_data4(FAR struct ssd1680_dev_s *priv,
-    uint8_t cmd, uint8_t dta1, uint8_t dta2, uint8_t dta3, uint8_t dta4);
+                                       uint8_t cmd, uint8_t dta1,
+                                       uint8_t dta2, uint8_t dta3,
+                                       uint8_t dta4);
 
 static void ssd1680_snd_cmd_with_data(FAR struct ssd1680_dev_s *priv,
-    uint8_t cmd, const uint8_t *dta, int dta_len);
+                                      uint8_t cmd, const uint8_t *dta,
+                                      int dta_len);
 
 #if !defined(CONFIG_LCD_PORTRAIT) && !defined(CONFIG_LCD_RPORTRAIT)
 #  if SSD1680_DEV_BPP == 1
@@ -178,6 +183,8 @@ static int ssd1680_putrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
 static int ssd1680_getrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
                           fb_coord_t col, FAR uint8_t *buffer,
                           size_t npixels);
+
+static int ssd1680_redraw(FAR struct lcd_dev_s *dev);
 
 /* LCD Configuration */
 
@@ -207,7 +214,7 @@ static int ssd1680_setpower(struct lcd_dev_s *dev, int power);
 static int ssd1680_configuredisplay(struct ssd1680_dev_s *priv);
 static int ssd1680_redraw_display(struct ssd1680_dev_s *priv);
 static int ssd1680_update_row(struct ssd1680_dev_s *priv, int row);
-static int ssd1680_update_all(struct ssd1680_dev_s *priv);
+static int ssd1680_update_all_and_redraw(struct ssd1680_dev_s *priv);
 
 /****************************************************************************
  * Private Data
@@ -244,6 +251,7 @@ static const struct lcd_planeinfo_s g_planeinfo =
   .putarea = NULL,                       /* Not need to implement */
   .getrun  = ssd1680_getrun,             /* Read content of shadow memory */
   .getarea = NULL,                       /* Not need to implement */
+  .redraw  = ssd1680_redraw,             /* Update drivers memory and redraw */
   .buffer  = (FAR uint8_t *)g_runbuffer, /* Run scratch buffer */
   .bpp     = SSD1680_DEV_BPP,            /* Bits-per-pixel */
 };
@@ -331,16 +339,6 @@ static int ssd1680_putrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
 {
   FAR struct ssd1680_dev_s *priv = (FAR struct ssd1680_dev_s *)dev;
 
-  /* TODO Special IOCTL function in lcd_framebuf has to be implemented.
-   * Those function would call ssd1680_putrun with npixels = 0
-   */
-
-  if (npixels == 0)
-    {
-      ssd1680_redraw_display(priv);
-      return OK;
-    }
-
   uint8_t *dst = priv->shadow_fb +
       row * SSD1680_DEV_ROWSIZE + (col >> SSD1680_PDF);
 
@@ -349,17 +347,6 @@ static int ssd1680_putrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
   /* Write data to shadow memory */
 
   bitscpy_ds(dst,  dst_start_bitshift, buffer, npixels);
-
-  /* Write data to memory of display driver */
-
-  ssd1680_update_row(priv, row);
-
-  /* TODO Remove it after IOCTL refresh implementation */
-
-  if (row == SSD1680_DEV_FB_YRES / 2)
-    {
-      ssd1680_redraw_display(priv);
-    }
 
   return OK;
 }
@@ -385,7 +372,6 @@ static int ssd1680_getrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
                           fb_coord_t col, FAR uint8_t *buffer,
                           size_t npixels)
 {
-  lcdinfo("(%d, %d, %d)\n", row, col, npixels);
   FAR struct ssd1680_dev_s *priv = (FAR struct ssd1680_dev_s *)dev;
 
   bitscpy_ss(buffer,
@@ -394,6 +380,12 @@ static int ssd1680_getrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
       npixels);
 
   return OK;
+}
+
+static int ssd1680_redraw(FAR struct lcd_dev_s *dev)
+{
+  FAR struct ssd1680_dev_s *priv = (FAR struct ssd1680_dev_s *)dev;
+  return ssd1680_update_all_and_redraw(priv);
 }
 
 /****************************************************************************
@@ -529,17 +521,18 @@ static int ssd1680_setpower(FAR struct lcd_dev_s *dev, int power)
           ret = ssd1680_configuredisplay(priv);
           if (ret != OK)
             {
+              lcderr("Failed to configure display\n");
               return ret;
             }
 
           /* Draw the framebuffer */
 
-          ret = ssd1680_update_all(priv);
-        }
-
-      if (ret < 0)
-        {
-          return ret;
+          ret = ssd1680_update_all_and_redraw(priv);
+          if (ret != OK)
+            {
+              lcderr("Failed to update and redraw\n");
+              return ret;
+            }
         }
 
       priv->on = true;
@@ -722,10 +715,11 @@ static int ssd1680_configuredisplay(struct ssd1680_dev_s *priv)
 }
 
 /****************************************************************************
- * Name:  ssd1680_update_all
+ * Name:  ssd1680_update_all_and_redraw
  *
  * Description:
- *   Redraw full framebuffer to display
+ *   Copy content of shadow buffer to drivers memory.
+ *   Redraws the display
  *
  * Input Parameters:
  *   priv   - Reference to private driver structure
@@ -738,7 +732,7 @@ static int ssd1680_configuredisplay(struct ssd1680_dev_s *priv)
  *
  ****************************************************************************/
 
-static int ssd1680_update_all(struct ssd1680_dev_s *priv)
+static int ssd1680_update_all_and_redraw(struct ssd1680_dev_s *priv)
 {
   int row;
   for (row = 0; row < SSD1680_DEV_FB_YRES; row++)
@@ -752,6 +746,8 @@ static int ssd1680_update_all(struct ssd1680_dev_s *priv)
 
 static int ssd1680_redraw_display(struct ssd1680_dev_s *priv)
 {
+  /* Synchronize shadow buffer with drivers memory */
+
   int ret;
   /* Step 15:
    * Set control register 2.
@@ -1312,8 +1308,8 @@ FAR struct lcd_dev_s *ssd1680_initialize(FAR struct spi_dev_s *dev,
   return &priv->dev;
 }
 
-FAR void *bitscpy_ds(FAR void *dest, int dest_offset, FAR const void *src,
-    size_t nbits)
+static FAR void *bitscpy_ds(FAR void *dest, int dest_offset,
+                            FAR const void *src, size_t nbits)
 {
   FAR unsigned char *pout = (FAR unsigned char *)dest;
   FAR unsigned char *pin  = (FAR unsigned char *)src;
@@ -1371,8 +1367,8 @@ FAR void *bitscpy_ds(FAR void *dest, int dest_offset, FAR const void *src,
   return dest;
 }
 
-FAR void *bitscpy_ss(FAR void *dest, FAR const void *src, int src_offset,
-    size_t nbits)
+static FAR void *bitscpy_ss(FAR void *dest, FAR const void *src,
+                            int src_offset, size_t nbits)
 {
   FAR unsigned char *pout = (FAR unsigned char *)dest;
   FAR unsigned char *pin  = (FAR unsigned char *)src;

@@ -123,6 +123,21 @@ struct lcd_planeinfo_s
                  fb_coord_t row_end, fb_coord_t col_start,
                  fb_coord_t col_end, FAR uint8_t *buffer);
 
+  /* This method can be used to redraw display's content.
+   *
+   *  dev       - LCD interface to redraw its memory content
+   *
+   * NOTE: In case of non e-ink dispalys redrawing is cheap and can be done
+   * after each memory modification. Redrawing e-ink display is time and
+   * energy consuming.
+   * In order to avoid such operation (time and energy consumption) we can
+   * implement callback function putrun without redrawing the screen.
+   * Function putrun is called many times unless the function putarea is
+   * implemented.
+   */
+
+  int (*redraw)(FAR struct lcd_dev_s *dev);
+
   /* Plane color characteristics ********************************************/
 
   /* This is working memory allocated by the LCD driver for each LCD device
