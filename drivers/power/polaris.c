@@ -815,6 +815,12 @@ static int stwlc38_check_intr(FAR struct stwlc38_dev_s *priv,
 
   if (rx_int_state->wlc_rx_pp_done == true)  priv->tx_is_pp = true;
 
+  if (rx_int_state->wlc_rx_int_ovp || rx_int_state->wlc_rx_int_ocp ||
+      rx_int_state->wlc_rx_int_otp)
+    {
+      syslog(LOG_DEBUG, "WLC_RX_INTR_LATCH_REG is %08"PRIx32"\n", reg_value);
+    }
+
   /* CLR int register */
 
   batinfo("[WLC] start to CLR INTR states !!!\n");
