@@ -541,12 +541,13 @@ sensor_rpmsg_alloc_stub(FAR struct sensor_rpmsg_dev_s *dev,
 
   sensor_rpmsg_lock(dev);
   list_add_tail(&dev->stublist, &stub->node);
-  sensor_rpmsg_unlock(dev);
 
   if (dev->lower.persist)
     {
       sensor_rpmsg_push_event_one(dev, stub);
     }
+
+  sensor_rpmsg_unlock(dev);
 
   return stub;
 }
