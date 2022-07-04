@@ -83,7 +83,7 @@ static void mm_free_delaylist(FAR struct mm_heap_s *heap)
 #endif
 }
 
-#ifdef CONFIG_MM_BACKTRACE
+#if CONFIG_MM_BACKTRACE >= 0
 void mm_dump_handler(FAR struct tcb_s *tcb, FAR void *arg)
 {
   struct mallinfo_task info;
@@ -267,7 +267,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
       mwarn("Total:%d, used:%d, free:%d, largest:%d, nused:%d, nfree:%d\n",
             minfo.arena, minfo.uordblks, minfo.fordblks,
             minfo.mxordblk, minfo.aordblks, minfo.ordblks);
-#  ifdef CONFIG_MM_BACKTRACE
+#  if CONFIG_MM_BACKTRACE >= 0
       nxsched_foreach(mm_dump_handler, heap);
 #  endif
 #endif

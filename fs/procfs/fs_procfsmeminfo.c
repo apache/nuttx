@@ -415,7 +415,7 @@ static ssize_t memdump_read(FAR struct file *filep, FAR char *buffer,
   procfile = (FAR struct meminfo_file_s *)filep->f_priv;
   DEBUGASSERT(procfile);
 
-#ifdef CONFIG_MM_BACKTRACE
+#if CONFIG_MM_BACKTRACE >= 0
   linesize  = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
                               "usage: <pid/used/free/on/off>\n"
                               "on/off backtrace\n"
@@ -460,7 +460,7 @@ static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
   procfile = filep->f_priv;
   DEBUGASSERT(procfile);
 
-#ifdef CONFIG_MM_BACKTRACE
+#if CONFIG_MM_BACKTRACE > 0
   if (strcmp(buffer, "on") == 0)
     {
       for (entry = g_procfs_meminfo; entry != NULL; entry = entry->next)
@@ -490,7 +490,7 @@ static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
       case 'f':
         pid = (pid_t)-2;
         break;
-#ifdef CONFIG_MM_BACKTRACE
+#if CONFIG_MM_BACKTRACE >= 0
       default:
         pid = atoi(buffer);
 #endif

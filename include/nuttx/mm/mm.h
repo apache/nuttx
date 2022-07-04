@@ -297,7 +297,7 @@ void kmm_extend(FAR void *mem, size_t size, int region);
 
 struct mallinfo; /* Forward reference */
 int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info);
-#ifdef CONFIG_MM_BACKTRACE
+#if CONFIG_MM_BACKTRACE >= 0
 struct mallinfo_task; /* Forward reference */
 int mm_mallinfo_task(FAR struct mm_heap_s *heap,
                      FAR struct mallinfo_task *info);
@@ -307,7 +307,7 @@ int mm_mallinfo_task(FAR struct mm_heap_s *heap,
 
 #ifdef CONFIG_MM_KERNEL_HEAP
 struct mallinfo kmm_mallinfo(void);
-#  ifdef CONFIG_MM_BACKTRACE
+#  if CONFIG_MM_BACKTRACE >= 0
 struct mallinfo_task kmm_mallinfo_task(pid_t pid);
 #  endif
 #endif

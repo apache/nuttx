@@ -187,14 +187,17 @@ config MM_KASAN
 		add -fsanitize=kernel-address to CFLAGS/CXXFLAGS too.
 
 config MM_BACKTRACE
-	bool "Owner tracking and backtrace"
-	default n
-	depends on DEBUG_MM
+	int "The depth of backtrace"
+	default -1
+	---help---
+		Config the depth of backtrace in memory block by specified this
+		config: disable backtrace by -1, only record pid info by zero and
+		enable record backtrace info by 8(fixed depth).
 
 config MM_BACKTRACE_DEFAULT
 	bool "Enable the backtrace record by default"
 	default n
-	depends on MM_BACKTRACE
+	depends on MM_BACKTRACE > 0
 
 config MM_DUMP_ON_FAILURE
 	bool "Dump heap info on allocation failure"
