@@ -213,7 +213,7 @@ int stm32_bringup(void)
 
 #ifdef CONFIG_SENSORS_QENCODER
 #ifdef CONFIG_STM32H7_TIM1_QE
-  ret = stm32h7_qencoder_initialize("/dev/qe0", 1);
+  ret = stm32_qencoder_initialize("/dev/qe0", 1);
   if (ret < 0)
     {
       syslog(LOG_ERR,
@@ -224,7 +224,7 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_STM32H7_TIM3_QE
-  ret = stm32h7_qencoder_initialize("/dev/qe2", 3);
+  ret = stm32_qencoder_initialize("/dev/qe2", 3);
   if (ret < 0)
     {
       syslog(LOG_ERR,
@@ -235,7 +235,7 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_STM32H7_TIM4_QE
-  ret = stm32h7_qencoder_initialize("/dev/qe3", 4);
+  ret = stm32_qencoder_initialize("/dev/qe3", 4);
   if (ret < 0)
     {
       syslog(LOG_ERR,

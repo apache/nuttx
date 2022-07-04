@@ -767,7 +767,7 @@ static int adc_timinit(struct stm32_dev_s *priv)
    *   position.
    */
 
-  ainfo("Initializing timers extsel = 0x%08x\n", priv->extsel);
+  ainfo("Initializing timers extsel = 0x%08lx\n", priv->extsel);
 
   adc_modifyreg(priv, STM32_ADC_CFGR_OFFSET,
                 ADC_CFGR_EXTEN_MASK | ADC_CFGR_EXTSEL_MASK,
@@ -1478,17 +1478,17 @@ static int adc_setup(struct adc_dev_s *dev)
 
   leave_critical_section(flags);
 
-  ainfo("ISR:   0x%08x CR:    0x%08x CFGR:  0x%08x CFGR2: 0x%08x\n",
+  ainfo("ISR:   0x%08lx CR:    0x%08x CFGR:  0x%08lx CFGR2: 0x%08lx\n",
         adc_getreg(priv, STM32_ADC_ISR_OFFSET),
         adc_getreg(priv, STM32_ADC_CR_OFFSET),
         adc_getreg(priv, STM32_ADC_CFGR_OFFSET),
         adc_getreg(priv, STM32_ADC_CFGR2_OFFSET));
-  ainfo("SQR1:  0x%08x SQR2:  0x%08x SQR3:  0x%08x SQR4:  0x%08x\n",
+  ainfo("SQR1:  0x%08lx SQR2:  0x%08lx SQR3:  0x%08lx SQR4:  0x%08lx\n",
         adc_getreg(priv, STM32_ADC_SQR1_OFFSET),
         adc_getreg(priv, STM32_ADC_SQR2_OFFSET),
         adc_getreg(priv, STM32_ADC_SQR3_OFFSET),
         adc_getreg(priv, STM32_ADC_SQR4_OFFSET));
-  ainfo("CCR:   0x%08x\n", adc_getregm(priv, STM32_ADC_CCR_OFFSET));
+  ainfo("CCR:   0x%08lx\n", adc_getregm(priv, STM32_ADC_CCR_OFFSET));
 
   /* Enable the ADC interrupt */
 
@@ -1854,7 +1854,7 @@ static int adc_interrupt(struct adc_dev_s *dev, uint32_t adcisr)
       value  = adc_getreg(priv, STM32_ADC_DR_OFFSET);
       value &= ADC_DR_MASK;
 
-      awarn("WARNING: Analog Watchdog, Value (0x%03x) out of range!\n",
+      awarn("WARNING: Analog Watchdog, Value (0x%03lx) out of range!\n",
             value);
 
       /* Stop ADC conversions to avoid continuous interrupts */

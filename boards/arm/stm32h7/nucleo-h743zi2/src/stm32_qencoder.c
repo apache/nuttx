@@ -48,7 +48,7 @@
  *
  ****************************************************************************/
 
-int stm32h7_qencoder_initialize(const char *devpath, int timer)
+int stm32_qencoder_initialize(const char *devpath, int timer)
 {
   int ret = 0;
 

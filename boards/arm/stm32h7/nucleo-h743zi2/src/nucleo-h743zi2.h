@@ -214,7 +214,7 @@ int stm32_pwm_setup(void);
 #endif
 
 #ifdef CONFIG_SENSORS_QENCODER
-int stm32h7_qencoder_initialize(const char *devpath, int timer);
+int stm32_qencoder_initialize(const char *devpath, int timer);
 #endif
 
 #endif /* __BOARDS_ARM_STM32H7_NUCLEO_H743ZI2_SRC_NUCLEO_H743ZI2_H */
