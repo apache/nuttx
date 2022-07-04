@@ -101,6 +101,35 @@
                            GPIO_PUSHPULL|GPIO_PORTG|GPIO_PIN7)
 #endif
 
+/* GPIO pins used by the GPIO Subsystem */
+
+#define BOARD_NGPIOIN     1 /* Amount of GPIO Input pins */
+#define BOARD_NGPIOOUT    8 /* Amount of GPIO Output pins */
+#define BOARD_NGPIOINT    1 /* Amount of GPIO Input w/ Interruption pins */
+
+/* Example, used free Ports on the board */
+
+#define GPIO_IN1          (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTE | GPIO_PIN2)
+#define GPIO_OUT1         (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                           GPIO_OUTPUT_SET | GPIO_PORTE | GPIO_PIN4)
+#define GPIO_OUT2         (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                           GPIO_OUTPUT_SET | GPIO_PORTE | GPIO_PIN5)
+#define GPIO_OUT3         (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                           GPIO_OUTPUT_SET | GPIO_PORTE | GPIO_PIN6)
+#define GPIO_OUT4         (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                           GPIO_OUTPUT_SET | GPIO_PORTA| GPIO_PIN5)
+#define GPIO_OUT5         (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                           GPIO_OUTPUT_SET | GPIO_PORTF | GPIO_PIN3)
+#define GPIO_INT1         (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTE | GPIO_PIN3)
+
+/* PWM */
+
+#if defined(CONFIG_STM32H7_TIM1_PWM)
+# define NUCLEOH743ZI2_PWMTIMER 1
+#else
+# define NUCLEOH743ZI2_PWMTIMER 3
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -135,6 +164,30 @@ void weak_function stm32_usbinitialize(void);
 #endif
 
 /****************************************************************************
+ * Name: stm32_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ADC
+int stm32_adc_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_gpio_initialize
+ *
+ * Description:
+ *   Initialize GPIO-Driver.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_DEV_GPIO) && !defined(CONFIG_GPIO_LOWER_HALF)
+int stm32_gpio_initialize(void);
+#endif
+
+/****************************************************************************
  * Name: stm32_usbhost_initialize
  *
  * Description:
@@ -146,6 +199,22 @@ void weak_function stm32_usbinitialize(void);
 
 #if defined(CONFIG_STM32H7_OTGFS) && defined(CONFIG_USBHOST)
 int stm32_usbhost_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
+#endif
+
+#ifdef CONFIG_SENSORS_QENCODER
+int stm32h7_qencoder_initialize(const char *devpath, int timer);
 #endif
 
 #endif /* __BOARDS_ARM_STM32H7_NUCLEO_H743ZI2_SRC_NUCLEO_H743ZI2_H */
