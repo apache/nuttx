@@ -352,10 +352,17 @@ static void arm_dump_stack(const char *tag, uint32_t sp,
   else
     {
       _alert("ERROR: %s Stack pointer is not within the stack\n", tag);
-
       if (force)
         {
-          arm_stackdump(base, top);
+#ifdef CONFIG_STACK_COLORATION
+          uint32_t remain;
+
+          remain = size - arm_stack_check((FAR void *)(uintptr_t)base, size);
+          base  += remain;
+          size  -= remain;
+#endif
+
+          arm_stackdump(base, base + size);
         }
     }
 }

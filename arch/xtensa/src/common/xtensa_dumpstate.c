@@ -281,14 +281,16 @@ static void xtensa_dump_stack(const char *tag, uint32_t sp,
                               uint32_t base, uint32_t size, bool force)
 {
   uint32_t top = base + size;
+#ifdef CONFIG_STACK_COLORATION
+  uint32_t used = xtensa_stack_check((uintptr_t)base, size);
+#endif
 
   _alert("%s Stack:\n", tag);
   _alert("sp:     %08" PRIx32 "\n", sp);
   _alert("  base: %08" PRIx32 "\n", base);
   _alert("  size: %08" PRIx32 "\n", size);
 #ifdef CONFIG_STACK_COLORATION
-  _alert("  used: %08" PRIx32 "\n", xtensa_stack_check((uintptr_t)base,
-                                                       size));
+  _alert("  used: %08" PRIx32 "\n", used);
 #endif
 
   if (sp >= base && sp < top)
@@ -301,7 +303,12 @@ static void xtensa_dump_stack(const char *tag, uint32_t sp,
 
       if (force)
         {
-          xtensa_stackdump(base, top);
+#ifdef CONFIG_STACK_COLORATION
+          base += size - used;
+          size = used;
+#endif
+
+          xtensa_stackdump(base, base + size);
         }
     }
 }
