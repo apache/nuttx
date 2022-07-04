@@ -1478,7 +1478,7 @@ static int adc_setup(struct adc_dev_s *dev)
 
   leave_critical_section(flags);
 
-  ainfo("ISR:   0x%08lx CR:    0x%08x CFGR:  0x%08lx CFGR2: 0x%08lx\n",
+  ainfo("ISR:   0x%08lx CR:    0x%08lx CFGR:  0x%08lx CFGR2: 0x%08lx\n",
         adc_getreg(priv, STM32_ADC_ISR_OFFSET),
         adc_getreg(priv, STM32_ADC_CR_OFFSET),
         adc_getreg(priv, STM32_ADC_CFGR_OFFSET),
