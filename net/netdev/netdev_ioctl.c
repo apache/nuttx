@@ -1931,7 +1931,7 @@ int netdev_ifdown(FAR struct net_driver_s *dev)
             {
               /* Mark the interface as down */
 
-              dev->d_flags &= ~IFF_UP;
+              dev->d_flags &= ~(IFF_UP | IFF_RUNNING);
 
               /* Update the driver status */
 
