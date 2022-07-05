@@ -72,3 +72,9 @@ ifeq ($(CONFIG_XTENSA_SEMIHOSTING_HOSTFS),y)
   CMN_ASRCS += xtensa_simcall.S
   CMN_CSRCS += xtensa_hostfs.c
 endif
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+  CMN_UASRCS += xtensa_signal_handler.S
+  CMN_ASRCS  += xtensa_dispatch_syscall.S
+  CMN_CSRCS  += xtensa_signal_dispatch.c xtensa_task_start.c xtensa_pthread_start.c
+endif
