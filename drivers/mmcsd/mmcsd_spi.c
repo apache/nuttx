@@ -190,6 +190,8 @@ static ssize_t   mmcsd_write(FAR struct inode *inode,
 #endif
 static int       mmcsd_geometry(FAR struct inode *inode,
                     struct geometry *geometry);
+static int       mmcsd_ioctl(FAR struct inode *inode, int cmd,
+                    unsigned long arg);
 
 /* Initialization ***********************************************************/
 
@@ -215,7 +217,7 @@ static const struct block_operations g_bops =
   NULL,           /* write    */
 #endif
   mmcsd_geometry, /* geometry */
-  NULL            /* ioctl    */
+  mmcsd_ioctl,    /* ioctl    */
 };
 
 /* A slot structure allocated for each configured slot */
@@ -1602,6 +1604,20 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
   finfo("geo_sectorsize:    %" PRIi16 "\n", geometry->geo_sectorsize);
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: mmcsd_ioctl
+ *
+ * Description: Return device geometry
+ *
+ ****************************************************************************/
+
+static int mmcsd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
+{
+  fwarn("Not implement, cmd:%d, arg=0x%" PRIx32 "\n", cmd, arg);
+
+  return -ENOTTY;
 }
 
 /****************************************************************************
