@@ -41,6 +41,7 @@
 #include "arm_internal.h"
 #include "arm_internal.h"
 #include "stm32wl5_mpuinit.h"
+#include "stm32wl5_ipcc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -69,7 +70,11 @@
 
 /* Set the range of SRAM2 as well, requires a second memory region */
 
-#define SRAM2_START  STM32WL5_SRAM2_BASE
+#ifdef CONFIG_IPCC
+#  define SRAM2_START  IPCC_END
+#else
+#  define SRAM2_START  STM32WL5_SRAM2_BASE
+#endif
 #define SRAM2_END    (SRAM2_START + STM32WL5_SRAM2_SIZE)
 
 /* Some sanity checking.  If multiple memory regions are defined, verify

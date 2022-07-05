@@ -33,3 +33,7 @@ CHIP_CSRCS += stm32wl5_serial.c stm32wl5_start.c stm32wl5_waste.c stm32wl5_uid.c
 CHIP_CSRCS += stm32wl5_lse.c stm32wl5_lsi.c stm32wl5_idle.c
 CHIP_CSRCS += stm32wl5_pwr.c stm32wl5_tim.c stm32wl5_flash.c stm32wl5_timerisr.c
 CHIP_CSRCS += stm32wl5_spi.c
+
+CSRCS-$(CONFIG_STM32WL5_IPCC) = stm32wl5_ipcc.c
+
+CHIP_CSRCS += $(CSRCS-y)
