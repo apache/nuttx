@@ -201,6 +201,17 @@ config STM32WL5_SPI1
 	depends on STM32WL5_HAVE_SPI1
 	select STM32WL5_SPI
 
+comment "AHB3 Peripherals"
+
+config STM32WL5_IPCC
+	bool "IPCC"
+	select IPCC
+	default n
+	---help---
+		IPCC - Inter Processor Communication Controller. A very simple
+		character device stream driver to exchange data between
+		CM0 and CM4.
+
 endmenu # STM32WL5 Peripheral Support
 
 
@@ -299,5 +310,100 @@ config STM32WL5_SPI2S2_DMA_BUFFER
 		Add a properly aligned DMA buffer for RX and TX DMA for SPI2S2.
 
 endmenu # SPI Configuration
+
+menu "IPCC Configuration"
+	depends on STM32WL5_IPCC
+
+config STM32WL5_IPCC_CHAN1_RX_SIZE
+	int "Channel 1 RX size"
+	default 256
+	---help---
+		Size of the receive buffer. Another CPU will write to this
+		buffer and currently running CPU will read from it.
+
+config STM32WL5_IPCC_CHAN1_TX_SIZE
+	int "Channel 1 TX size"
+	default 256
+	---help---
+		Size of the send buffer. Another CPU will read from this
+		buffer and currently running CPU will write to it.
+
+config STM32WL5_IPCC_CHAN2
+	bool "Enable channel 2"
+	default n
+
+if STM32WL5_IPCC_CHAN2
+
+config STM32WL5_IPCC_CHAN2_RX_SIZE
+	int "Channel 2 RX size"
+	default 256
+
+config STM32WL5_IPCC_CHAN2_TX_SIZE
+	int "Channel 2 TX size"
+	default 256
+
+config STM32WL5_IPCC_CHAN3
+	bool "Enable channel 3"
+	default n
+
+if STM32WL5_IPCC_CHAN3
+
+config STM32WL5_IPCC_CHAN3_RX_SIZE
+	int "Channel 3 RX size"
+	default 256
+
+config STM32WL5_IPCC_CHAN3_TX_SIZE
+	int "Channel 3 TX size"
+	default 256
+
+config STM32WL5_IPCC_CHAN4
+	bool "Enable channel 4"
+	default n
+
+if STM32WL5_IPCC_CHAN4
+
+config STM32WL5_IPCC_CHAN4_RX_SIZE
+	int "Channel 4 RX size"
+	default 256
+
+config STM32WL5_IPCC_CHAN4_TX_SIZE
+	int "Channel 4 TX size"
+	default 256
+
+config STM32WL5_IPCC_CHAN5
+	bool "Enable channel 5"
+	default n
+
+if STM32WL5_IPCC_CHAN5
+
+config STM32WL5_IPCC_CHAN5_RX_SIZE
+	int "Channel 5 RX size"
+	default 256
+
+config STM32WL5_IPCC_CHAN5_TX_SIZE
+	int "Channel 5 TX size"
+	default 256
+
+config STM32WL5_IPCC_CHAN6
+	bool "Enable channel 6"
+	default n
+
+if STM32WL5_IPCC_CHAN6
+
+config STM32WL5_IPCC_CHAN6_RX_SIZE
+	int "Channel 6 RX size"
+	default 256
+
+config STM32WL5_IPCC_CHAN6_TX_SIZE
+	int "Channel 6 TX size"
+	default 256
+
+endif # STM32WL5_IPCC_CHAN2
+endif # STM32WL5_IPCC_CHAN3
+endif # STM32WL5_IPCC_CHAN4
+endif # STM32WL5_IPCC_CHAN5
+endif # STM32WL5_IPCC_CHAN6
+
+endmenu # IPCC Configuration
 
 endif # ARCH_CHIP_STM32WL5

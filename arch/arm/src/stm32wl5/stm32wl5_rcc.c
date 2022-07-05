@@ -294,6 +294,12 @@ static inline void stm32wl5_rcc_enableahb3(void)
   regval |= RCC_AHB3ENR_FLASHEN;
 #endif
 
+#ifdef CONFIG_STM32WL5_IPCC
+  /* IPCC interface clock enable */
+
+  regval |= RCC_AHB3ENR_IPCCEN;
+#endif
+
   putreg32(regval, STM32WL5_RCC_AHB3ENR);   /* Enable peripherals */
 }
 
