@@ -917,7 +917,7 @@ config ARCH_TRUSTZONE_BOTH
 endchoice # TrustZone Configuration
 
 config ARM_THUMB
-	bool
+	bool "Thumb Mode"
 	default n
 
 config ARM_HAVE_WFE_SEV
