@@ -985,7 +985,11 @@ int bcmf_sdio_thread(int argc, char **argv)
               /* Turn off clock request. */
 
               timeout = UINT_MAX;
-              bcmf_sdio_bus_lowpower(sbus, true);
+              if (priv->bc_bfwload == true)
+                {
+                  bcmf_sdio_bus_lowpower(sbus, true);
+                }
+
               continue;
             }
           else if (ret < 0)
