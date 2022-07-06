@@ -843,7 +843,7 @@ int cs35l41b_is_dsp_processing(FAR struct cs35l41b_dev_s *priv)
         }
     }
 
-  nxsig_usleep(1000 * 10);
+  up_udelay(1000 * 10);
 
   times = CHECK_DSP_PROCESS_TIMES;
 

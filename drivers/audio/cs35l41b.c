@@ -96,8 +96,9 @@
 
 #define CS35L41B_GPIO_WAKE_UP()          do {                              \
                                               CS35L41B_WAKE_UP_PIN_HIGH(); \
-                                              nxsig_usleep(1000);          \
+                                              cs35l41b_usleep(1000);       \
                                               CS35L41B_WAKE_UP_PIN_LOW();  \
+                                              cs35l41b_usleep(1000);       \
                                           } while(0)
 
 /* Maximum amount of times to poll for ACK to DSP Mailbox Command */
@@ -2079,6 +2080,10 @@ static int cs35l41_hibernate(FAR struct cs35l41b_dev_s *priv)
         }
     }
 
+  /* wait cs35l41b hibernate stable */
+
+  cs35l41b_usleep(1000 * 15);
+
   return OK;
 }
 
@@ -2157,7 +2162,7 @@ static int cs35l41_wake(FAR struct cs35l41b_dev_s *priv)
               return ERROR;
             }
 
-          nxsig_usleep(1000 * 2);
+          cs35l41b_usleep(1000 * 2);
         }
       while (retval != CS35L41_DSP_MBOX_STATUS_PAUSED && --timeout);
 
@@ -2341,7 +2346,7 @@ static int cs35l41_power_down(FAR struct cs35l41b_dev_s *priv)
           return ERROR;
         }
 
-      nxsig_usleep(1000 * 2);
+      cs35l41b_usleep(1000 * 2);
 
       for (i = 0; i < 5; i++)
         {
@@ -2362,7 +2367,7 @@ static int cs35l41_power_down(FAR struct cs35l41b_dev_s *priv)
 
           /* wait for at least 2ms */
 
-          nxsig_usleep(1000 * 2);
+          cs35l41b_usleep(1000 * 2);
         }
 
       if (i == 5)
@@ -2465,7 +2470,7 @@ static int cs35l41_power_down(FAR struct cs35l41b_dev_s *priv)
 
       /* wait for at least 1ms */
 
-      nxsig_usleep(1000 * 2);
+      cs35l41b_usleep(1000 * 2);
     }
 
   if (i == 100)
@@ -2601,7 +2606,7 @@ static int cs35l41_power_up(FAR struct cs35l41b_dev_s *priv)
 
   /* wait for 1ms */
 
-  nxsig_usleep(1000 * 1);
+  cs35l41b_usleep(1000 * 1);
 
   /* if dsp is not booted, then power up is finished */
 
@@ -2700,7 +2705,7 @@ static int cs35l41_power_up(FAR struct cs35l41b_dev_s *priv)
 
       /* wait for 1ms */
 
-      nxsig_usleep(1000 * 1);
+      cs35l41b_usleep(1000 * 1);
 
       if (regval & IRQ1_IRQ1_EINT_2_DSP_VIRTUAL2_MBOX_WR_EINT1_BITMASK)
         {
@@ -2877,7 +2882,7 @@ static int cs35l41b_check_id(FAR struct cs35l41b_dev_s *priv)
 
       /* wait for 10ms */
 
-      nxsig_usleep(1000 * CS35L41_POLL_OTP_BOOT_DONE_MS);
+      cs35l41b_usleep(1000 * CS35L41_POLL_OTP_BOOT_DONE_MS);
     }
 
   /* DEVID */
@@ -2926,9 +2931,9 @@ static int cs35l41b_reset(FAR struct cs35l41b_dev_s *priv, bool hw_reset)
   if (hw_reset)
     {
       priv->lower->reset_en(false);
-      nxsig_usleep(2000);
+      cs35l41b_usleep(2000);
       priv->lower->reset_en(true);
-      nxsig_usleep(1000);
+      cs35l41b_usleep(1000);
     }
 
   if (cs35l41b_check_id(priv) != OK)
@@ -3320,7 +3325,7 @@ static int cs35l41b_send_acked_mbox_cmd(FAR struct cs35l41b_dev_s *priv,
           break;
         }
 
-      nxsig_usleep(1000 * 2);
+      cs35l41b_usleep(1000 * 2);
     }
 
   if (i >= CS35L41_POLL_ACKED_MBOX_CMD_MAX)
@@ -3436,7 +3441,7 @@ int cs35l41b_start_tuning_switch(FAR struct cs35l41b_dev_s *priv)
           break;
         }
 
-      nxsig_usleep(1000 * 1);
+      cs35l41b_usleep(1000 * 1);
     }
 
   if (i == 100)
@@ -3454,7 +3459,7 @@ int cs35l41b_start_tuning_switch(FAR struct cs35l41b_dev_s *priv)
       goto out;
     }
 
-  nxsig_usleep(1000 * 10);
+  cs35l41b_usleep(1000 * 10);
 
   /* The Host sends a CSPL_STOP_PRE_REINIT.
    * This puts the FW into a state ready to accept a new
@@ -3523,7 +3528,7 @@ int cs35l41b_finish_tuning_switch(FAR struct cs35l41b_dev_s *priv)
       goto out;
     }
 
-  nxsig_usleep(1000 * 1);
+  cs35l41b_usleep(1000 * 1);
 
   /* The Host sends a RESUME command and
    * the FW starts to process and output the new audio
@@ -3945,6 +3950,39 @@ int cs35l41b_write_register(FAR struct cs35l41b_dev_s *priv,
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: cs35l41b_usleep
+ *
+ * Description:
+ *   cs35l41b usleep
+ *
+ ****************************************************************************/
+
+int cs35l41b_usleep(int usec)
+{
+  struct timespec rqtp;
+  struct timespec rmtp;
+  int ret;
+
+  rqtp.tv_sec  = 0;
+  rqtp.tv_nsec = usec * 1000;
+
+  while (1)
+    {
+      ret = nxsig_nanosleep(&rqtp, &rmtp);
+      if (ret < 0)
+        {
+          rqtp.tv_nsec = rmtp.tv_nsec;
+        }
+      else
+        {
+          break;
+        }
+    }
+
+  return 0;
 }
 
 /****************************************************************************

@@ -1080,6 +1080,7 @@ struct cs35l41b_dev_s
  * Public Function Prototypes
  ****************************************************************************/
 
+int cs35l41b_usleep(int usec);
 int cs35l41b_read_register(FAR struct cs35l41b_dev_s *priv,
                            uint32_t *regval, uint32_t regaddr);
 int cs35l41b_write_register(FAR struct cs35l41b_dev_s *priv,
