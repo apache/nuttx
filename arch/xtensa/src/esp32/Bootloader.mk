@@ -18,18 +18,18 @@
 #
 ############################################################################
 
+.PHONY: bootloader clean_bootloader
+
 ifeq ($(CONFIG_ESP32_BOOTLOADER_BUILD_FROM_SOURCE),y)
 
 CHIPDIR            = $(TOPDIR)/arch/xtensa/src/chip
 
-BOOTLOADER_SRCDIR  = $(CHIPDIR)/esp-nuttx-bootloader
+BOOTLOADER_DIR     = $(CHIPDIR)/bootloader
+BOOTLOADER_SRCDIR  = $(BOOTLOADER_DIR)/esp-nuttx-bootloader
 BOOTLOADER_VERSION = main
 BOOTLOADER_URL     = https://github.com/espressif/esp-nuttx-bootloader
 BOOTLOADER_OUTDIR  = out
-BOOTLOADER_CONFIG  = $(CHIPDIR)/bootloader.conf
-
-$(BOOTLOADER_SRCDIR):
-	$(Q) git clone $(BOOTLOADER_URL) $(BOOTLOADER_SRCDIR) -b $(BOOTLOADER_VERSION)
+BOOTLOADER_CONFIG  = $(BOOTLOADER_DIR)/bootloader.conf
 
 # Helpers for creating the configuration file
 
@@ -108,6 +108,9 @@ ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
 BOOTLOADER_BIN        = $(TOPDIR)/mcuboot-esp32.bin
 BOOTLOADER_SIGNED_BIN = $(TOPDIR)/mcuboot-esp32.signed.bin
 
+$(BOOTLOADER_SRCDIR):
+	$(Q) git clone $(BOOTLOADER_URL) $(BOOTLOADER_SRCDIR) -b $(BOOTLOADER_VERSION)
+
 $(BOOTLOADER_BIN): $(BOOTLOADER_CONFIG)
 	$(Q) echo "Building Bootloader"
 	$(Q) $(BOOTLOADER_SRCDIR)/build_mcuboot.sh -c esp32 -s -f $(BOOTLOADER_CONFIG)
@@ -145,9 +148,16 @@ clean_bootloader:
 
 else ifeq ($(CONFIG_ESP32_APP_FORMAT_LEGACY),y)
 
+$(BOOTLOADER_SRCDIR):
+	$(Q) git clone $(BOOTLOADER_URL) $(BOOTLOADER_SRCDIR) -b $(BOOTLOADER_VERSION)
+	$(Q) git -C $(BOOTLOADER_SRCDIR) submodule update --init esp-idf
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+	$(Q) git -C $(BOOTLOADER_SRCDIR)/esp-idf apply -v $(BOOTLOADER_DIR)/0001-esp32-Connect-Xtensa-Instruction-RAM1-to-Cache.patch
+endif
+
 bootloader: $(BOOTLOADER_SRCDIR) $(BOOTLOADER_CONFIG)
 	$(Q) echo "Building Bootloader binaries"
-	$(Q) $(BOOTLOADER_SRCDIR)/build_idfboot.sh -c esp32 -s -f $(BOOTLOADER_CONFIG)
+	$(Q) $(BOOTLOADER_SRCDIR)/build_idfboot.sh -c esp32 -f $(BOOTLOADER_CONFIG)
 	$(call COPYFILE,$(BOOTLOADER_SRCDIR)/$(BOOTLOADER_OUTDIR)/bootloader-esp32.bin,$(TOPDIR))
 	$(call COPYFILE,$(BOOTLOADER_SRCDIR)/$(BOOTLOADER_OUTDIR)/partition-table-esp32.bin,$(TOPDIR))
 
