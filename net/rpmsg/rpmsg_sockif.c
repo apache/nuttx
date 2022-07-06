@@ -862,27 +862,28 @@ static int rpmsg_socket_poll(FAR struct socket *psock,
         {
           if (!conn->ept.rdev)
             {
-              ret = -ECONNRESET;
-              goto errout;
+              eventset |= POLLHUP;
             }
-
-          rpmsg_socket_lock(&conn->sendlock);
-
-          if (rpmsg_socket_get_space(conn) > 0)
+          else
             {
-              eventset |= (fds->events & POLLOUT);
+              rpmsg_socket_lock(&conn->sendlock);
+
+              if (rpmsg_socket_get_space(conn) > 0)
+                {
+                  eventset |= (fds->events & POLLOUT);
+                }
+
+              rpmsg_socket_unlock(&conn->sendlock);
+
+              rpmsg_socket_lock(&conn->recvlock);
+
+              if (!circbuf_is_empty(&conn->recvbuf))
+                {
+                  eventset |= (fds->events & POLLIN);
+                }
+
+              rpmsg_socket_unlock(&conn->recvlock);
             }
-
-          rpmsg_socket_unlock(&conn->sendlock);
-
-          rpmsg_socket_lock(&conn->recvlock);
-
-          if (!circbuf_is_empty(&conn->recvbuf))
-            {
-              eventset |= (fds->events & POLLIN);
-            }
-
-          rpmsg_socket_unlock(&conn->recvlock);
         }
       else if (!_SS_ISCONNECTED(conn->sconn.s_flags) &&
                _SS_ISNONBLOCK(conn->sconn.s_flags))
@@ -891,8 +892,7 @@ static int rpmsg_socket_poll(FAR struct socket *psock,
         }
       else
         {
-          ret = -EPERM;
-          goto errout;
+          eventset |= POLLERR;
         }
 
       if (eventset)
