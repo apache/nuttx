@@ -26,10 +26,12 @@
 *.sym
 *.wsp
 *.ddc
+*.dds
 *~
 .depend
 /.config
-/.config.old
+/.config.*
+/.config-*
 /.config\ *
 /.cproject
 /.gdbinit

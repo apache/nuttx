@@ -74,6 +74,10 @@
 #define HAS_WHITE false
 #endif /* CONFIG_WS2812_HAS_WHITE */
 
+#if defined(CONFIG_ADC) && defined(CONFIG_RP2040_ADC)
+#include "rp2040_adc.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -461,6 +465,47 @@ int rp2040_bringup(void)
                       CONFIG_WS2812_LED_COUNT,
                       HAS_WHITE);
 #endif
+
+#if defined(CONFIG_ADC) && defined(CONFIG_RP2040_ADC)
+
+# ifdef CONFIG_RPC2040_ADC_CHANNEL0
+#   define ADC_0 true
+# else
+#   define ADC_0 false
+# endif
+
+# ifdef CONFIG_RPC2040_ADC_CHANNEL1
+#   define ADC_1 true
+# else
+#   define ADC_1 false
+# endif
+
+# ifdef CONFIG_RPC2040_ADC_CHANNEL2
+#   define ADC_2 true
+# else
+#   define ADC_2 false
+# endif
+
+# ifdef CONFIG_RPC2040_ADC_CHANNEL3
+#   define ADC_3 true
+# else
+#   define ADC_3 false
+# endif
+
+# ifdef CONFIG_RPC2040_ADC_TEMPERATURE
+#   define ADC_TEMP true
+# else
+#   define ADC_TEMP false
+# endif
+
+  ret = rp2040_adc_setup("/dev/adc0", ADC_0, ADC_1, ADC_2, ADC_3, ADC_TEMP);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "Failed to initialize ADC Driver: %d\n", ret);
+      return ret;
+    }
+
+#endif /* defined(CONFIG_ADC) && defined(CONFIG_RP2040_ADC) */
 
   return ret;
 }

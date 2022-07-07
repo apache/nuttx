@@ -1,0 +1,54 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_RASPBERRYPI_PICO
+
+config RP2040_ADC
+	bool "Enable ADC Support"
+	default n
+	---help---
+		If y, the RP2040 ADC code will be built.  For ADC device driver 
+		support you must also select "Analog-to-Digital Conversion"
+		under the "Device Driver/Analog Device Support" menu.
+
+		If the ADC device driver is not built, basic functions
+		to programatically access the ADC ports will be added.
+
+if RP2040_ADC && ADC
+
+	config RPC2040_ADC_CHANNEL0
+		bool "Read ADC channel 0"
+		default n
+		---help---
+			If y, then ADC0 will be read.
+
+	config RPC2040_ADC_CHANNEL1
+		bool "Read ADC channel 1"
+		default n
+		---help---
+			If y, then ADC1 will be read.
+
+	config RPC2040_ADC_CHANNEL2
+		bool "Read ADC channel 2"
+		default n
+		---help---
+			If y, then ADC2 will be read.
+
+		config RPC2040_ADC_CHANNEL3
+		bool "Read ADC channel 3"
+		default n
+		---help---
+			If y, then ADC3 will be read.
+
+		config RPC2040_ADC_TEMPERATURE
+		bool "Read ADC chip temperature channel"
+		default n
+		---help---
+			If y, then the ADC chip temperature
+			will be read.
+	
+	endif
+
+endif
