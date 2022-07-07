@@ -141,6 +141,7 @@ endif
 
 ifeq ($(CONFIG_I2C_STWLC38),y)
 CSRCS += polaris.c
+CSRCS += polaris_nvm.c
 endif
 
 ifeq ($(CONFIG_I2C_CPS4019),y)

@@ -47,7 +47,6 @@
 #include <nuttx/wqueue.h>
 
 #include "polaris.h"
-#include "polaris_nvm.c"
 #include "polaris_reg.h"
 
 /****************************************************************************
@@ -420,11 +419,14 @@ static int polaris_nvm_write_bulk(FAR struct stwlc38_dev_s *priv,
   return OK;
 }
 
-static int polaris_nvm_write(FAR struct stwlc38_dev_s *priv)
+static int polaris_nvm_write(FAR struct stwlc38_dev_s *priv,
+                             struct polaris_chip_info *head_info)
 {
   int err = 0;
   uint8_t reg_value = 0;
   uint8_t count = 5;
+  uint8_t *patch_data = NULL;
+  uint8_t *cfg_data = NULL;
 
   /* check if OP MODE = DC POWER */
 
@@ -481,14 +483,39 @@ static int polaris_nvm_write(FAR struct stwlc38_dev_s *priv)
         }
     }
 
+  patch_data = kmm_zalloc(head_info->patch_size);
+  if (NULL == patch_data)
+    {
+      err = -ENOMEM;
+      return err;
+    }
+
+  cfg_data = kmm_zalloc(head_info->config_size);
+  if (NULL == cfg_data)
+    {
+      kmm_free(patch_data);
+      err = -ENOMEM;
+      return err;
+    }
+
+  if (get_fw_data(cfg_data, patch_data))
+    {
+      kmm_free(patch_data);
+      kmm_free(cfg_data);
+      err = -ENODATA;
+      return err;
+    }
+
   batinfo("[WLC] RRAM Programming to write FW_data.. \n");
-  err = polaris_nvm_write_bulk(priv, patch_data, NVM_PATCH_SIZE,
+  err = polaris_nvm_write_bulk(priv, patch_data, head_info->patch_size,
                                NVM_PATCH_START_SECTOR_INDEX);
+  kmm_free(patch_data);
   if (err != OK) return err;
 
   batinfo("[WLC] RRAM Programming to write cfg_data.. \n");
-  err = polaris_nvm_write_bulk(priv, cfg_data, NVM_CFG_SIZE,
+  err = polaris_nvm_write_bulk(priv, cfg_data, head_info->config_size,
                                NVM_CFG_START_SECTOR_INDEX);
+  kmm_free(cfg_data);
   if (err != OK) return err;
 
   /* system reset */
@@ -509,7 +536,6 @@ static int polaris_nvm_write(FAR struct stwlc38_dev_s *priv)
   /* the reset need 500ms or so, for this workaround, setup 1000ms */
 
   usleep(AFTER_SYS_RESET_SLEEP_MS * 1000);
-
   return OK;
 }
 
@@ -519,6 +545,7 @@ static ssize_t nvm_program_show(FAR struct stwlc38_dev_s *priv)
   int config_id_mismatch = 0;
   int patch_id_mismatch = 0;
   struct polaris_chip_info chip_info;
+  struct polaris_chip_info fw_head_info;
   batinfo("[WLC] NVM Programming started\n");
 
   if (get_polaris_chip_info(priv, &chip_info) < OK)
@@ -527,10 +554,17 @@ static ssize_t nvm_program_show(FAR struct stwlc38_dev_s *priv)
       goto exit_0;
     }
 
+  memset(&fw_head_info, 0, sizeof(fw_head_info));
+  if (get_fw_head_info(&fw_head_info) < OK)
+    {
+      err = E_BUS_R;
+      goto exit_0;
+    }
+
   /* determine what has to be programmed depending on version ids */
 
   batinfo("[WLC] Cut Id: %02X\n", chip_info.cut_id);
-  if (chip_info.cut_id != NVM_TARGET_CUT_ID)
+  if (chip_info.cut_id != fw_head_info.cut_id)
     {
       batinfo("[WLC] HW cut id mismatch with Target cut id, \
               NVM programming aborted\n");
@@ -538,17 +572,17 @@ static ssize_t nvm_program_show(FAR struct stwlc38_dev_s *priv)
       goto exit_0;
     }
 
-  if (chip_info.config_id != NVM_CFG_VERSION_ID)
+  if (chip_info.config_id != fw_head_info.config_id)
     {
       batinfo("[WLC] Config ID mismatch - running|header: [%04X|%04X]\n", \
-              chip_info.config_id, NVM_CFG_VERSION_ID);
+              chip_info.config_id, fw_head_info.config_id);
       config_id_mismatch = 1;
     }
 
-  if (chip_info.nvm_patch_id != NVM_PATCH_VERSION_ID)
+  if (chip_info.nvm_patch_id != fw_head_info.nvm_patch_id)
     {
       batinfo("[WLC] Patch ID mismatch - running|header: [%04X|%04X]\n", \
-              chip_info.nvm_patch_id, NVM_PATCH_VERSION_ID);
+              chip_info.nvm_patch_id, fw_head_info.nvm_patch_id);
       patch_id_mismatch = 1;
     }
 
@@ -565,7 +599,7 @@ static ssize_t nvm_program_show(FAR struct stwlc38_dev_s *priv)
    * in case one of the two needs to be programmed
    **************************************************************************/
 
-  if ((err = polaris_nvm_write(priv)) != OK)
+  if ((err = polaris_nvm_write(priv, &fw_head_info)) != OK)
     {
       err = E_NVM_WRITE;
       baterr("NVM program err\n");
@@ -582,8 +616,8 @@ static ssize_t nvm_program_show(FAR struct stwlc38_dev_s *priv)
       goto exit_0;
     }
 
-  if ((chip_info.config_id == NVM_CFG_VERSION_ID)
-      && (chip_info.nvm_patch_id == NVM_PATCH_VERSION_ID))
+  if ((chip_info.config_id == fw_head_info.config_id)
+      && (chip_info.nvm_patch_id == fw_head_info.nvm_patch_id))
     {
       batinfo("[WLC] NVM patch and cfg id is OK\n");
       batinfo("[WLC] NVM Programming is successful\n");
@@ -591,9 +625,9 @@ static ssize_t nvm_program_show(FAR struct stwlc38_dev_s *priv)
   else
     {
       err = E_NVM_DATA_MISMATCH;
-      if (chip_info.config_id != NVM_CFG_VERSION_ID)
+      if (chip_info.config_id != fw_head_info.config_id)
           batinfo("[WLC] Config Id mismatch after NVM programming\n");
-      if (chip_info.nvm_patch_id != NVM_PATCH_VERSION_ID)
+      if (chip_info.nvm_patch_id != fw_head_info.nvm_patch_id)
           batinfo("[WLC] Patch Id mismatch after NVM programming\n");
       baterr(" NVM Program fail\n");
     }

@@ -83,6 +83,8 @@ struct polaris_chip_info
   uint16_t config_id;
   uint16_t pe_id;
   uint8_t cut_id;
+  uint16_t config_size;
+  uint16_t patch_size;
 };
 
 struct rx_int_state_s
@@ -128,6 +130,9 @@ enum rx_sleep_state_e
 #define WLC_HANDSHAKE_OK          0x01
 
 #define ST_IIC_RETRY_NUM          3
+
+int get_fw_head_info(struct polaris_chip_info *head_info);
+int get_fw_data(uint8_t *cfg_data, uint8_t *patch_data);
 
 #endif /* __POLARIS_H */
 
