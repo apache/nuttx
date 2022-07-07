@@ -565,7 +565,10 @@ static int fatfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   else
     {
       FAR struct inode *drv = g_drv[fs->pdrv].drv;
-      ret = drv->u.i_bops->ioctl(drv, cmd, arg);
+      if (drv->u.i_bops->ioctl)
+        {
+          ret = drv->u.i_bops->ioctl(drv, cmd, arg);
+        }
     }
 
   fatfs_semgive(fs);
@@ -1615,10 +1618,13 @@ DRESULT disk_ioctl(BYTE pdrv, BYTE cmd, void *buff)
     {
       case CTRL_SYNC:
         {
-          ret = drv->u.i_bops->ioctl(drv, BIOC_FLUSH, 0);
-          if (ret == -ENOTTY)
+          if (drv->u.i_bops->ioctl)
             {
-              ret = 0;
+              ret = drv->u.i_bops->ioctl(drv, BIOC_FLUSH, 0);
+              if (ret == -ENOTTY)
+                {
+                  ret = 0;
+                }
             }
         }
         break;
