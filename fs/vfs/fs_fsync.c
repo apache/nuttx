@@ -32,6 +32,7 @@
 #include <nuttx/sched.h>
 #include <nuttx/cancelpt.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/fs/ioctl.h>
 
 #include "inode/inode.h"
 
@@ -53,7 +54,7 @@
 
 int file_fsync(FAR struct file *filep)
 {
-  struct inode *inode;
+  FAR struct inode *inode;
 
   /* Is this inode a registered mountpoint? Does it support the
    * sync operations may be relevant to device drivers but only
@@ -61,15 +62,21 @@ int file_fsync(FAR struct file *filep)
    */
 
   inode = filep->f_inode;
-  if (!inode || !INODE_IS_MOUNTPT(inode) ||
-      !inode->u.i_mops || !inode->u.i_mops->sync)
+  if (inode != NULL)
     {
-      return -EINVAL;
+      if (INODE_IS_MOUNTPT(inode) && inode->u.i_mops->sync)
+        {
+          /* Yes, then tell the mountpoint to sync this file */
+
+          return inode->u.i_mops->sync(filep);
+        }
+      else if (inode->u.i_ops->ioctl)
+        {
+          return inode->u.i_ops->ioctl(filep, BIOC_FLUSH, 0);
+        }
     }
 
-  /* Yes, then tell the mountpoint to sync this file */
-
-  return inode->u.i_mops->sync(filep);
+  return -EINVAL;
 }
 
 /****************************************************************************
