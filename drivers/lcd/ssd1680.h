@@ -170,7 +170,7 @@
 #  define SSD1680_DEV_NATIVE_XRES 128
 #  define SSD1680_DEV_NATIVE_YRES 296
 #else
-#  error "Unknown resulution"
+#  error "Unknown resolution"
 #endif
 
 /* SSD1680 memory write algorithm */

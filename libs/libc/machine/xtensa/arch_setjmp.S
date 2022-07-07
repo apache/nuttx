@@ -72,8 +72,8 @@ setjmp:
 # if XCHAL_HAVE_XEA3
 /*
   a2 points to the jmp_buf structure of 68 bytes length:
-  8 * 4 to save the regester save area of setjmp that contains the callers resgisters
-  8 * 4 to save the caller's register save area which is pottentally
+  8 * 4 to save the register save area of setjmp that contains the callers registers
+  8 * 4 to save the caller's register save area which is potentially
   clobbered by an alloca() in the caller
 */
 

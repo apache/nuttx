@@ -4,7 +4,7 @@
 #
 
 config AUDIO_SRC
-	bool "Audio Samplerate Convertor Library"
+	bool "Audio Samplerate Converter Library"
 	default n
 	---help---
 		Enable build for various SRC functions

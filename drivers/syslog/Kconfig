@@ -283,8 +283,8 @@ config SYSLOG_RPMSG_OVERWRITE
 	bool "SYSLOG RPMSG overwrite"
 	default n
 	---help---
-		Allow syslog rpmsg overwrite, maybe caused syslog lost.
-		Set 'n' if you don't want lost logs, but may harmful to preformance.
+		Allow syslog rpmsg overwrite, may cause syslog to lose some logs.
+		Set 'n' if you don't want lost logs, but may harm performance.
 
 endif # SYSLOG_RPMSG
 

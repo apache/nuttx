@@ -324,7 +324,7 @@
 
 /* Auto-negotiation next page advertisement */
 
-#define MII_NPADVERTISE_CODE         0x07ff    /* Bits 0-10: message/un-formated code field */
+#define MII_NPADVERTISE_CODE         0x07ff    /* Bits 0-10: message/un-formatted code field */
 #define MII_NPADVERTISE_TOGGLE       (1 << 11) /* Bit 11: Toggle */
 #define MII_NPADVERTISE_ACK2         (1 << 12) /* Bit 12: Acknowledgement 2 */
 #define MII_NPADVERTISE_MSGPAGE      (1 << 13) /* Bit 13: Message page */

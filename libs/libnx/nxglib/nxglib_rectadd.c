@@ -34,7 +34,7 @@
  * Name: nxgl_rectadd
  *
  * Description:
- *   Return the rectangle that contains exactly two other rectanges.
+ *   Return the rectangle that contains exactly two other rectangles.
  *
  ****************************************************************************/
 

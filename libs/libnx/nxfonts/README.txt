@@ -17,7 +17,7 @@ Installing New Fonts
     1. Locate a font in BDF format,
     2. Use the bdf-converter program to convert the BDF font to the NuttX
        font format.  This will result in a C header file containing
-       defintions.  That header file should be installed at, for example,
+       definitions.  That header file should be installed at, for example,
        graphics/nxfonts/nxfonts_myfont.h.
 
   Create a new NuttX configuration variable.  For example, suppose

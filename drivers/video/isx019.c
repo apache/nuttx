@@ -2842,7 +2842,7 @@ static double calc_iso(double gain)
    * calculate 10^z.
    */
 
-  /*  Devide z into integer and other parts.
+  /*  Divide z into integer and other parts.
    *  z =  log10(E) (k * ln2 + r)
    *  (k : integer, r < 0.5 * ln2)
    *

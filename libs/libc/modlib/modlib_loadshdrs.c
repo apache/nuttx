@@ -74,7 +74,7 @@ int modlib_loadshdrs(FAR struct mod_loadinfo_s *loadinfo)
              (size_t)loadinfo->ehdr.e_shnum;
   if (loadinfo->ehdr.e_shoff + shdrsize > loadinfo->filelen)
     {
-      berr("ERROR: Insufficent space in file for section header table\n");
+      berr("ERROR: Insufficient space in file for section header table\n");
       return -ESPIPE;
     }
 

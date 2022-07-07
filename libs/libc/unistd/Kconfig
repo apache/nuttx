@@ -23,7 +23,7 @@ config LIBC_EXECFUNCS
 		functions are essentially just wrapper functions that (1) call the
 		non-standard binfmt function 'exec', and then (2) exit(0).  Since
 		the new thread will be terminated by the exec[l|v] call, it really
-		served no purpose other than to suport Unix compatility.
+		served no purpose other than to support Unix compatibility.
 
 		The posix_spawn() functions do not have this inefficiency.
 

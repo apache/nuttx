@@ -104,7 +104,7 @@
  *     is defined in the configuration, then this may be a relative path
  *     from the current working directory.  Otherwise, path must be the
  *     absolute path to the program.
- *   ... - A list of the string arguments to be recevied by the
+ *   ... - A list of the string arguments to be received by the
  *     program.  Zero indicates the end of the list.
  *
  * Returned Value:

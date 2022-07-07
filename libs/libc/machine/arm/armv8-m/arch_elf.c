@@ -480,7 +480,7 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
         if (offset < (int32_t)0xfffff800 || offset >= (int32_t)0x0800)
           {
             berr("ERROR: JUMP11 [%" PRId32 "] "
-                 "relocation out of range, branch taget=%08lx\n",
+                 "relocation out of range, branch target=%08lx\n",
                  ELF32_R_TYPE(rel->r_info), offset);
 
             return -EINVAL;

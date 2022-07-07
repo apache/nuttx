@@ -423,7 +423,7 @@ config SAMV7_AFEC_DMASAMPLES
 	default 2
 	depends on SAMV7_AFEC_DMA
 	---help---
-		Number of DMA samples to be transfered. Number of samples less than
+		Number of DMA samples to be transferred. Number of samples less than
 		2 might be inneficient.
 
 choice
@@ -496,7 +496,7 @@ config SAMV7_AFEC_DMASAMPLES
 	default 2
 	depends on SAMV7_AFEC_DMA
 	---help---
-		Number of DMA samples to be transfered. Number of samples less than
+		Number of DMA samples to be transferred. Number of samples less than
 		2 might be inneficient.
 
 choice

@@ -1285,7 +1285,7 @@ static int format_scan_result_to_wapi(struct iwreq *req, int result_cnt)
 
   DEBUGASSERT(j == result_cnt);
 
-  /* sort the vaild list according the rssi */
+  /* sort the valid list according the rssi */
 
   qsort(rssi_list, result_cnt, sizeof(uint8_t), rssi_compare);
 

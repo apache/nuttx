@@ -48,7 +48,7 @@
  *   resulting string into the array pointed to by s1. The transformation is
  *   such that if the strcmp() function is applied to the two transformed
  *   strings, it returns a value greater than, equal to, or less than zero,
- *   correspoinding to the result of a <<strcoll>> function applied to the
+ *   corresponding to the result of a <<strcoll>> function applied to the
  *   same two original strings.
  *   With a C locale, this function just copies.
  *

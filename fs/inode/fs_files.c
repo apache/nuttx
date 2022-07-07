@@ -199,7 +199,7 @@ int files_allocate(FAR struct inode *inode, int oflags, off_t pos,
       return ret;
     }
 
-  /* Calcuate minfd whether is in list->fl_files.
+  /* Calculate minfd whether is in list->fl_files.
    * if not, allocate a new filechunk.
    */
 

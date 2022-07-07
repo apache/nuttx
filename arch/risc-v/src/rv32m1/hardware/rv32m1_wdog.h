@@ -62,7 +62,7 @@
 
 #define WDOG_CS_WIN              (1 << 15) /* Bit15: Window */
 #define WDOG_CS_FLG              (1 << 14) /* Bit14: Interrupt Flag */
-#define WDOG_CS_CMD32EN          (1 << 13) /* Bit13: suport 32bit command */
+#define WDOG_CS_CMD32EN          (1 << 13) /* Bit13: support 32bit command */
 #define WDOG_CS_PRES             (1 << 12) /* Bit12: Prescaler, '1' enables 256 prescaler */
 #define WDOG_CS_ULK              (1 << 11) /* Bit11: Unlock status */
 #define WDOG_CS_RCS              (1 << 10) /* Bit10: Reconfiguration Success */

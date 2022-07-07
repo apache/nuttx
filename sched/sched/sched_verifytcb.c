@@ -69,11 +69,11 @@ bool nxsched_verify_tcb(FAR struct tcb_s *tcb)
    */
 
   irqstate_t flags;
-  bool vaild;
+  bool valid;
 
   flags = enter_critical_section();
-  vaild = tcb == g_pidhash[PIDHASH(tcb->pid)];
+  valid = tcb == g_pidhash[PIDHASH(tcb->pid)];
   leave_critical_section(flags);
 
-  return vaild;
+  return valid;
 }

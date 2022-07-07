@@ -1858,7 +1858,7 @@ config DEBUG_TCBINFO
 	bool "Enable TCBinfo struct for debug"
 	default n
 	---help---
-		Enables tcbinfo struct for debugger infomation.
+		Enables tcbinfo struct for debugger information.
 		Selecting this option will enable g_tcbinfo in arch and
 		procfs.
 
