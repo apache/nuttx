@@ -41,6 +41,10 @@ ifeq ($(CONFIG_ESP32S3_SPI),y)
 CSRCS += esp32s3_board_spi.c
 endif
 
+ifeq ($(CONFIG_LCD_ST7735),y)
+CSRCS += esp32s3_st7735.c
+endif
+
 SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32s3.template.ld
 SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32s3_out.ld
 

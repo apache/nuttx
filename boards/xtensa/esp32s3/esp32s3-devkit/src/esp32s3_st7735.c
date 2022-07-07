@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32s3/esp32s3-devkit/src/esp32s3-devkit.h
+ * boards/xtensa/esp32s3/esp32s3-devkit/src/esp32s3_st7735.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,108 +18,116 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_XTENSA_ESP32S3_ESP32S3_DEVKIT_SRC_ESP32S3_DEVKIT_H
-#define __BOARDS_XTENSA_ESP32S3_ESP32S3_DEVKIT_SRC_ESP32S3_DEVKIT_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
-#include <stdint.h>
+
+#include <stdio.h>
+#include <stdbool.h>
+#include <debug.h>
+#include <errno.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
+#include <nuttx/spi/spi.h>
+#include <nuttx/lcd/lcd.h>
+#include <nuttx/lcd/st7735.h>
+
+#include "esp32s3_spi.h"
+#include "esp32s3_gpio.h"
+#include "esp32s3-devkit.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* ESP32-S3-DEVKIT GPIOs ****************************************************/
-
-/* LCD pins, i.e. used by ST7735 */
-
-#define GPIO_LCD_DC         14
-#define GPIO_LCD_RST        9
-
-/* BOOT Button */
-
-#define BUTTON_BOOT  0
+#define LCD_SPI_PORTNO     2
 
 /****************************************************************************
- * Public Types
+ * Private Data
+ ****************************************************************************/
+
+static struct spi_dev_s *g_spidev;
+static struct lcd_dev_s *g_lcd = NULL;
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: esp32s3_bringup
+ * Name:  board_lcd_initialize
  *
  * Description:
- *   Perform architecture-specific initialization
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_BOARDCTL=y :
- *     Called from the NSH library via board_app_initialize()
+ *   Initialize the LCD video hardware.  The initial state of the LCD is
+ *   fully initialized, display memory cleared, and the LCD ready to use, but
+ *   with the power setting at 0 (full off).
  *
  ****************************************************************************/
 
-int esp32s3_bringup(void);
+int board_lcd_initialize(void)
+{
+  g_spidev = esp32s3_spibus_initialize(LCD_SPI_PORTNO);
+  if (!g_spidev)
+    {
+      lcderr("ERROR: Failed to initialize SPI port %d\n", LCD_SPI_PORTNO);
+      return -ENODEV;
+    }
+
+  /* Data/Control PIN */
+
+  esp32s3_configgpio(GPIO_LCD_DC, OUTPUT);
+  esp32s3_gpiowrite(GPIO_LCD_DC, true);
+
+  /* Reset device */
+
+  esp32s3_configgpio(GPIO_LCD_RST, OUTPUT);
+  esp32s3_gpiowrite(GPIO_LCD_RST, false);
+  usleep(10000);
+  esp32s3_gpiowrite(GPIO_LCD_RST, true);
+  usleep(100000);
+
+  return OK;
+}
 
 /****************************************************************************
- * Name: board_spiflash_init
+ * Name:  board_lcd_getdev
  *
  * Description:
- *   Initialize the SPIFLASH and register the MTD device.
+ *   Return a a reference to the LCD object for the specified LCD.  This
+ *   allows support for multiple LCD devices.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32S3_SPIFLASH
-int board_spiflash_init(void);
-#endif
+struct lcd_dev_s *board_lcd_getdev(int devno)
+{
+  g_lcd = st7735_lcdinitialize(g_spidev);
+  if (!g_lcd)
+    {
+      lcderr("ERROR: Failed to bind SPI port %d to LCD %d\n", LCD_SPI_PORTNO,
+      devno);
+    }
+  else
+    {
+      lcdinfo("SPI port %d bound to LCD %d\n", LCD_SPI_PORTNO, devno);
+      return g_lcd;
+    }
+
+  return NULL;
+}
 
 /****************************************************************************
- * Name: board_i2c_init
+ * Name:  board_lcd_uninitialize
  *
  * Description:
- *   Configure the I2C driver.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned
- *   to indicate the nature of any failure.
+ *   Uninitialize the LCD support
  *
  ****************************************************************************/
 
-#ifdef CONFIG_I2C_DRIVER
-int board_i2c_init(void);
-#endif
+void board_lcd_uninitialize(void)
+{
+  /* Turn the display off */
 
-/****************************************************************************
- * Name: board_bmp180_initialize
- *
- * Description:
- *   Initialize and register the BMP180 Pressure Sensor driver.
- *
- * Input Parameters:
- *   devno - The device number, used to build the device path as /dev/pressN
- *   busno - The I2C bus number
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SENSORS_BMP180
-int board_bmp180_initialize(int devno, int busno);
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_XTENSA_ESP32S3_ESP32S3_DEVKIT_SRC_ESP32S3_DEVKIT_H */
+  g_lcd->setpower(g_lcd, 0);
+}
