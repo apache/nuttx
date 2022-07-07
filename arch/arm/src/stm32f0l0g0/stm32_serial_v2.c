@@ -52,13 +52,6 @@
 
 #include <arch/board/board.h>
 
-#ifdef CONFIG_STM32F0L0G0_USART3
-#  error not supported yet
-#endif
-#ifdef CONFIG_STM32F0L0G0_USART4
-#  error not supported yet
-#endif
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -349,9 +342,113 @@ static struct up_dev_s g_usart2priv =
 };
 #endif
 
-/* TODO: USART3 */
+/* This describes the state of the STM32 USART3 port. */
 
-/* TODO: USART4 */
+#ifdef CONFIG_STM32F0L0G0_USART3
+static struct up_dev_s g_usart3priv =
+{
+  .dev =
+    {
+#if CONSOLE_USART == 3
+      .isconsole = true,
+#endif
+      .recv      =
+      {
+        .size    = CONFIG_USART3_RXBUFSIZE,
+        .buffer  = g_usart3rxbuffer,
+      },
+      .xmit      =
+      {
+        .size    = CONFIG_USART3_TXBUFSIZE,
+        .buffer  = g_usart3txbuffer,
+      },
+      .ops       = &g_uart_ops,
+      .priv      = &g_usart3priv,
+    },
+
+  .irq           = STM32_IRQ_USART3,
+  .rxftcfg       = 0,           /* No FIFO */
+  .parity        = CONFIG_USART3_PARITY,
+  .bits          = CONFIG_USART3_BITS,
+  .stopbits2     = CONFIG_USART3_2STOP,
+  .baud          = CONFIG_USART3_BAUD,
+  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .usartbase     = STM32_USART3_BASE,
+  .tx_gpio       = GPIO_USART3_TX,
+  .rx_gpio       = GPIO_USART3_RX,
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART3_OFLOWCONTROL)
+  .oflow         = true,
+  .cts_gpio      = GPIO_USART3_CTS,
+#endif
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART3_IFLOWCONTROL)
+  .iflow         = true,
+  .rts_gpio      = GPIO_USART3_RTS,
+#endif
+
+#ifdef CONFIG_USART3_RS485
+  .rs485_dir_gpio = GPIO_USART3_RS485_DIR,
+#  if (CONFIG_USART3_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#  else
+  .rs485_dir_polarity = true,
+#  endif
+#endif
+};
+#endif
+
+/* This describes the state of the STM32 USART4 port. */
+
+#ifdef CONFIG_STM32F0L0G0_USART4
+static struct up_dev_s g_usart4priv =
+{
+  .dev =
+    {
+#if CONSOLE_USART == 4
+      .isconsole = true,
+#endif
+      .recv      =
+      {
+        .size    = CONFIG_USART4_RXBUFSIZE,
+        .buffer  = g_usart4rxbuffer,
+      },
+      .xmit      =
+      {
+        .size    = CONFIG_USART4_TXBUFSIZE,
+        .buffer  = g_usart4txbuffer,
+      },
+      .ops       = &g_uart_ops,
+      .priv      = &g_usart4priv,
+    },
+
+  .irq           = STM32_IRQ_USART4,
+  .rxftcfg       = 0,           /* No FIFO */
+  .parity        = CONFIG_USART4_PARITY,
+  .bits          = CONFIG_USART4_BITS,
+  .stopbits2     = CONFIG_USART4_2STOP,
+  .baud          = CONFIG_USART4_BAUD,
+  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .usartbase     = STM32_USART4_BASE,
+  .tx_gpio       = GPIO_USART4_TX,
+  .rx_gpio       = GPIO_USART4_RX,
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART4_OFLOWCONTROL)
+  .oflow         = true,
+  .cts_gpio      = GPIO_USART4_CTS,
+#endif
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART4_IFLOWCONTROL)
+  .iflow         = true,
+  .rts_gpio      = GPIO_USART4_RTS,
+#endif
+
+#ifdef CONFIG_USART4_RS485
+  .rs485_dir_gpio = GPIO_USART4_RS485_DIR,
+#  if (CONFIG_USART4_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#  else
+  .rs485_dir_polarity = true,
+#  endif
+#endif
+};
+#endif
 
 /* This table lets us iterate over the configured USARTs */
 
