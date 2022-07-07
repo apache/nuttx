@@ -88,6 +88,7 @@ struct stwlc38_dev_s
   bool rx_vout_on_int_flag;                 /* vout on Interrupt flag */
   bool rx_vout_on_int_update_flag;          /* vout on Interrupt update flag */
   bool rx_vout_on_int_exp_flag;             /* vout on Interrupt exp flag */
+  bool detect_state;
 };
 
 /****************************************************************************
@@ -111,7 +112,9 @@ static int stwlc38_operate(FAR struct battery_charger_dev_s *dev,
 static int stwlc38_chipid(FAR struct battery_charger_dev_s *dev,
                            unsigned int *value);
 static int stwlc38_get_det_state(FAR struct stwlc38_dev_s *priv,
-                          FAR int *status);
+                                FAR int *status);
+static int stwlc38_detect_state(FAR struct battery_charger_dev_s *dev,
+                                FAR int *status);
 static int stwlc38_get_voltage(FAR struct battery_charger_dev_s *dev,
                                 int *value);
 static int stwlc38_voltage_info(FAR struct battery_charger_dev_s *dev,
@@ -714,7 +717,7 @@ static void detect_worker(FAR void *arg)
   int charger_is_exit;
   int ret;
 
-  ret = stwlc38_state(&priv->dev, &charger_is_exit);
+  ret = stwlc38_detect_state(&priv->dev, &charger_is_exit);
   if (ret == OK)
     {
       if (priv->rx_vout_on_int_exp_flag)
@@ -727,6 +730,7 @@ static void detect_worker(FAR void *arg)
         {
           syslog(LOG_INFO, "rx wireless detect pin:%d\n", charger_is_exit);
           priv->batt_state_flag = charger_is_exit;
+          priv->detect_state = charger_is_exit;
           battery_charger_changed(&priv->dev, BATTERY_STATE_CHANGED);
         }
 
@@ -938,8 +942,7 @@ static void stwlc38_vout_on_int_worker(FAR void *arg)
     }
 }
 
-static int stwlc38_get_det_state(FAR struct stwlc38_dev_s *priv,
-                          FAR int *status)
+static int stwlc38_get_det_state(FAR struct stwlc38_dev_s *priv, FAR int *status)
 {
   bool wpc_det = 0;
   int  ret;
@@ -960,6 +963,16 @@ static int stwlc38_get_det_state(FAR struct stwlc38_dev_s *priv,
 }
 
 static int stwlc38_state(FAR struct battery_charger_dev_s *dev,
+                          FAR int *status)
+{
+  FAR struct stwlc38_dev_s *priv = (FAR struct stwlc38_dev_s *)dev;
+
+  *status = priv->detect_state;
+
+  return OK;
+}
+
+static int stwlc38_detect_state(FAR struct battery_charger_dev_s *dev,
                           FAR int *status)
 {
   FAR struct stwlc38_dev_s *priv = (FAR struct stwlc38_dev_s *)dev;
@@ -1356,6 +1369,7 @@ FAR struct battery_charger_dev_s *
 {
   FAR struct stwlc38_dev_s *priv;
   struct polaris_chip_info chip_info;
+  uint8_t reg_value = 0;
   int ret;
 
   /* Initialize the STWLC38 device structure */
@@ -1380,6 +1394,7 @@ FAR struct battery_charger_dev_s *
       priv->rx_vout_on_int_flag = false;
       priv->rx_vout_on_int_update_flag = false;
       priv->rx_vout_on_int_exp_flag = false;
+      priv->detect_state = false;
     }
   else
     {
@@ -1426,7 +1441,20 @@ FAR struct battery_charger_dev_s *
       baterr("en wpc ldo output err:%d\n", ret);
     }
 
-  work_queue(LPWORK, &priv->detect_work, detect_worker, priv, 0);
+  ret = fw_i2c_read(priv, FWREG_OP_MODE_ADDR, &reg_value, 1);
+  if (ret != OK)
+    {
+      baterr("read op mode err:%d\n", ret);
+    }
+
+  if (reg_value == FW_OP_MODE_RX)
+    {
+      work_queue(LPWORK, &priv->detect_work, detect_worker, priv, 0);
+    }
+  else
+    {
+      priv->detect_work_exit = DETECT_WORK_NO_EXIST;
+    }
 
   return (FAR struct battery_charger_dev_s *)priv;
 }
