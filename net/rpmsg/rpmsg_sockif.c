@@ -216,7 +216,7 @@ static void rpmsg_socket_pollnotify(FAR struct rpmsg_socket_conn_s *conn,
 
       if (fds)
         {
-          fds->revents |= (fds->events & eventset);
+          fds->revents |= ((fds->events | POLLERR | POLLHUP) & eventset);
 
           if (fds->revents != 0)
             {
