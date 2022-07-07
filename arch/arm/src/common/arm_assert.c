@@ -202,10 +202,7 @@ static void arm_dump_task(struct tcb_s *tcb, void *arg)
 #endif
          "   %7lu"
 #ifdef CONFIG_STACK_COLORATION
-         "   %7lu"
-#endif
-#ifdef CONFIG_STACK_COLORATION
-         "   %3" PRId32 ".%1" PRId32 "%%%c"
+         "   %7lu   %3" PRId32 ".%1" PRId32 "%%%c"
 #endif
 #ifdef CONFIG_SCHED_CPULOAD
          "   %3" PRId32 ".%01" PRId32 "%%"
@@ -218,8 +215,6 @@ static void arm_dump_task(struct tcb_s *tcb, void *arg)
          , (unsigned long)tcb->adj_stack_size
 #ifdef CONFIG_STACK_COLORATION
          , (unsigned long)up_check_tcbstack(tcb)
-#endif
-#ifdef CONFIG_STACK_COLORATION
          , stack_filled / 10, stack_filled % 10
          , (stack_filled >= 10 * 80 ? '!' : ' ')
 #endif
@@ -275,12 +270,9 @@ static void arm_showtasks(void)
 #ifdef CONFIG_SMP
          "   CPU"
 #endif
-#ifdef CONFIG_STACK_COLORATION
-         "      USED"
-#endif
          "     STACK"
 #ifdef CONFIG_STACK_COLORATION
-         "   FILLED "
+         "      USED   FILLED "
 #endif
 #ifdef CONFIG_SCHED_CPULOAD
          "      CPU"
@@ -292,12 +284,9 @@ static void arm_showtasks(void)
 #  ifdef CONFIG_SMP
          "  ----"
 #  endif
-#  ifdef CONFIG_STACK_COLORATION
-         "   %7lu"
-#  endif
          "   %7lu"
 #  ifdef CONFIG_STACK_COLORATION
-         "   %3" PRId32 ".%1" PRId32 "%%%c"
+         "   %7lu   %3" PRId32 ".%1" PRId32 "%%%c"
 #  endif
 #  ifdef CONFIG_SCHED_CPULOAD
          "     ----"
@@ -306,11 +295,9 @@ static void arm_showtasks(void)
          "   irq"
 #  endif
          "\n"
-#  ifdef CONFIG_STACK_COLORATION
-         , (unsigned long)stack_used
-#  endif
          , (unsigned long)(CONFIG_ARCH_INTERRUPTSTACK & ~7)
 #  ifdef CONFIG_STACK_COLORATION
+         , (unsigned long)stack_used
          , stack_filled / 10, stack_filled % 10,
          (stack_filled >= 10 * 80 ? '!' : ' ')
 #  endif
