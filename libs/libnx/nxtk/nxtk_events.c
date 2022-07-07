@@ -228,7 +228,7 @@ static void nxtk_mousein(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
 
   /* The fwrect and tbrect boxes are both in absolute display coordinates. So
    * the easiest thing to do is to restore the mouse position to absolute
-   * display coordiantes before making the comparisons and adjustments.
+   * display coordinates before making the comparisons and adjustments.
    */
 
   nxgl_vectoradd(&abspos, pos, &fwnd->wnd.bounds.pt1);

@@ -121,7 +121,7 @@
 #define MCP23X17_IOCON_ODR              (1 << 2) /* Config INT pin as open-drain */
 #define MCP23X17_IOCON_HAEN             (1 << 3) /* HW Address enable bit */
 #define MCP23X17_IOCON_DISSLW           (1 << 4) /* Disable Slew Rate for SDA output */
-#define MCP23X17_IOCON_SEQOP            (1 << 5) /* Disable Sequencial Operation */
+#define MCP23X17_IOCON_SEQOP            (1 << 5) /* Disable Sequential Operation */
 #define MCP23X17_IOCON_MIRROR           (1 << 6) /* Mirror INT pins */
 #define MCP23X17_IOCON_BANK             (1 << 7) /* Configure how to address register */
 

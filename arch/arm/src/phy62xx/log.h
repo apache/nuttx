@@ -104,7 +104,7 @@ extern "C"
 #define LOG_LEVEL_NONE  0 /* no log output */
 #define LOG_LEVEL_ERROR 1 /* only log error */
 #define LOG_LEVEL_DEBUG 2 /* output debug info and error info */
-#define LOG_LEVEL_LOG   3 /* output all infomation */
+#define LOG_LEVEL_LOG   3 /* output all information */
 
 #define LOG_INIT()                  {hal_uart_init(115200, P9, P10, NULL);}
 

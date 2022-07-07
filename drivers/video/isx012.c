@@ -2952,7 +2952,7 @@ int isx012_initialize(void)
   int ret;
   FAR struct isx012_dev_s *priv = &g_isx012_private;
 
-  /* Regiser image sensor operations variable */
+  /* Register image sensor operations variable */
 
   ret = imgsensor_register(&g_isx012_ops);
   if (ret != OK)

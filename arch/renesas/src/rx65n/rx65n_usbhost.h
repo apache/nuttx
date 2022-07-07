@@ -117,7 +117,7 @@
 #endif
 
 #if CONFIG_RX65N_USBHOST_NTDS < 2
-#  error "Insufficent TDs"
+#  error "Insufficient TDs"
 #endif
 
 /* Derived size of user transfer descriptor (TD) memory. */

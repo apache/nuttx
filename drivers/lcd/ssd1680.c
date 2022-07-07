@@ -662,14 +662,14 @@ static int ssd1680_configuredisplay(struct ssd1680_dev_s *priv)
   ssd1680_snd_cmd_with_data1(priv,
       SSD1680_DATA_MODE, SSD1680_VAL_DATA_MODE);
 
-  /* Step 7: Set ram X start/end postion 00 FF */
+  /* Step 7: Set ram X start/end position 00 FF */
 
   lcdinfo("Set ram X start/end position (0x%02x): 0, %d\n",
       SSD1680_SET_RAMXPOS, (SSD1680_DEV_X_ROUND_UP >> 3)-1);
   ssd1680_snd_cmd_with_data2(priv, SSD1680_SET_RAMXPOS,
       0x00, (SSD1680_DEV_X_ROUND_UP >> 3)-1);
 
-  /* Step 8: Set ram Y start/end postion */
+  /* Step 8: Set ram Y start/end position */
 
   lcdinfo("Set ram Y start/end position (0x%02x): 0, %d\n",
       SSD1680_SET_RAMYPOS, SSD1680_DEV_NATIVE_YRES - 1);
@@ -913,7 +913,7 @@ static int ssd1680_busy_wait(FAR struct ssd1680_dev_s *priv)
 
   if (max_wait_time == 0)
     {
-      lcderr("Timout. Ignoring Busy state... "
+      lcderr("Timeout. Ignoring Busy state... "
              "Display is probably not ready\n");
       return ERROR;
     }

@@ -767,7 +767,7 @@ static int w5500_read16_atomic(FAR struct w5500_driver_s *self,
   return -EIO;
 }
 
-/* Ethernet frame tranmission buffer management *****************************/
+/* Ethernet frame transmission buffer management ****************************/
 
 /****************************************************************************
  * Name: w5500_txbuf_reset
@@ -1397,7 +1397,7 @@ static void w5500_receive(FAR struct w5500_driver_s *self)
                      self->sk_dev.d_len);
         }
 
-      /* Acknowledge data receiption to W5500 */
+      /* Acknowledge data reception to W5500 */
 
       w5500_write16(self,
                     W5500_BSB_SOCKET_REGS(0),

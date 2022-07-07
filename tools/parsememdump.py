@@ -101,7 +101,7 @@ if __name__ == "__main__":
         nargs=1,
     )
 
-    parser.add_argument("-o", "--output", help="output file,defult output shell")
+    parser.add_argument("-o", "--output", help="output file,default output shell")
 
     args = parser.parse_args()
     dump_file = open("%s" % args.file[0], "r")

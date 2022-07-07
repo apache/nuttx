@@ -72,7 +72,7 @@ mpfs_global_pointer:
  *   mtvec, global pointer and the stack (per hart) for the OpenSBI.
  *   mpfs_global_pointer is used to store the real __global_pointer$ as
  *   seen in the .map file.  Loading gp, _global_pointer$ would default to
- *   mv gp, gp -instruction which isn't what we want. External libraties seem
+ *   mv gp, gp -instruction which isn't what we want. External libraries seem
  *   to link relative to gp. When trapping from the kernel, the gp has been
  *   utilized for other purposes, so we need to save and restore gp at all
  *   times.

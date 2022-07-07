@@ -220,7 +220,7 @@ static inline int16_t ds18b20_rawtemp(FAR const uint8_t *spad)
  * Name: ds18b20_tempdata
  *
  * Description:
- *   Helper for converting temperatur data from raw sensor data
+ *   Helper for converting temperature data from raw sensor data
  *
  * Return:
  *   Temperature data
@@ -418,7 +418,7 @@ static int ds18b20_read_spad(FAR struct ds18b20_dev_s *dev,
        * a buffer overflow later.
        */
 
-      swarn("WARNING: Sensor responsed unknown resolution: %d\n", reg->res);
+      swarn("WARNING: Sensor responded unknown resolution: %d\n", reg->res);
       reg->res = DS18B20_RES_CONV(DS18B20_RESMAX);
     }
 
