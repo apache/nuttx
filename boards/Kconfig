@@ -1344,6 +1344,14 @@ config ARCH_BOARD_NUCLEO_F446RE
 		This is a minimal configuration that supports low-level test of the
 		Nucleo F446RE in the NuttX source tree.
 
+
+config ARCH_BOARD_STM32G071B_DISCO
+	bool "STM32G071 STM32G071B-DISO "
+	depends on ARCH_CHIP_STM32G071RB
+	select ARCH_HAVE_LEDS
+	---help---
+		The STM32G071B-DISCO board based on the STM32G071RB MCU
+
 config ARCH_BOARD_NUCLEO_G070RB
 	bool "STM32G070 Nucleo G070RB"
 	depends on ARCH_CHIP_STM32G070RB
@@ -2586,6 +2594,7 @@ config ARCH_BOARD
 	default "nucleo-f446re"            if ARCH_BOARD_NUCLEO_F446RE
 	default "nucleo-f410rb"            if ARCH_BOARD_NUCLEO_F410RB
 	default "nucleo-f412zg"            if ARCH_BOARD_NUCLEO_F412ZG
+	default "stm32g071b-disco"         if ARCH_BOARD_STM32G071B_DISCO
 	default "nucleo-g070rb"            if ARCH_BOARD_NUCLEO_G070RB
 	default "nucleo-g071rb"            if ARCH_BOARD_NUCLEO_G071RB
 	default "nucleo-h743zi"            if ARCH_BOARD_NUCLEO_H743ZI
