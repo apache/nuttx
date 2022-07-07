@@ -70,6 +70,10 @@ ifeq ($(CONFIG_WS2812),y)
 CHIP_CSRCS += rp2040_ws2812.c
 endif
 
+ifeq ($(CONFIG_ADC),y)
+CHIP_CSRCS += rp2040_adc.c
+endif
+
 ifeq ($(CONFIG_RP2040_FLASH_BOOT),y)
 ifneq ($(PICO_SDK_PATH),)
 include chip/boot2/Make.defs

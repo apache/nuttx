@@ -92,4 +92,4 @@ int rp2040_ws2812_release(FAR void * driver);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_RP2040_RP2040_I2C_H */
+#endif /* __ARCH_ARM_SRC_RP2040_RP2040_WS2812_H */
