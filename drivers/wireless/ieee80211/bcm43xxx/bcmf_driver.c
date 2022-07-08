@@ -789,11 +789,6 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
           continue;
         }
 
-      if (bss->ctl_ch == 0)
-        {
-          continue;
-        }
-
       ie_offset = 0;
       ie_buffer = (FAR uint8_t *)bss + bss->ie_offset;
 
@@ -819,6 +814,16 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
 
           switch (ie_buffer[ie_offset])
             {
+              case WLAN_EID_DS_PARAMS:
+                {
+                  if (bss->ctl_ch == 0)
+                    {
+                      bss->ctl_ch = ie_buffer[ie_offset + 2];
+                    }
+
+                  break;
+                }
+
               case WLAN_EID_RSN:
                 {
                   FAR wpa_rsn_t *rsn = (FAR wpa_rsn_t *)
