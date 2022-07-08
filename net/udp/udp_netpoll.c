@@ -132,23 +132,24 @@ static uint16_t udp_poll_eventhandler(FAR struct net_driver_s *dev,
 
 int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 {
-  FAR struct udp_conn_s *conn = psock->s_conn;
+  FAR struct udp_conn_s *conn;
   FAR struct udp_poll_s *info;
   FAR struct devif_callback_s *cb;
   int ret = OK;
 
-  /* Sanity check */
-
-#ifdef CONFIG_DEBUG_FEATURES
-  if (conn == NULL || fds == NULL)
-    {
-      return -EINVAL;
-    }
-#endif
-
-  /* Some of the  following must be atomic */
+  /* Some of the following must be atomic */
 
   net_lock();
+
+  conn = psock->s_conn;
+
+  /* Sanity check */
+
+  if (conn == NULL || fds == NULL)
+    {
+      ret = -EINVAL;
+      goto errout_with_lock;
+    }
 
   /* Find a container to hold the poll information */
 
@@ -257,22 +258,27 @@ errout_with_lock:
 
 int udp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
 {
-  FAR struct udp_conn_s *conn = psock->s_conn;
+  FAR struct udp_conn_s *conn;
   FAR struct udp_poll_s *info;
+
+  /* Some of the following must be atomic */
+
+  net_lock();
+
+  conn = psock->s_conn;
 
   /* Sanity check */
 
-#ifdef CONFIG_DEBUG_FEATURES
   if (!conn || !fds->priv)
     {
+      net_unlock();
       return -EINVAL;
     }
-#endif
 
   /* Recover the socket descriptor poll state info from the poll structure */
 
   info = (FAR struct udp_poll_s *)fds->priv;
-  DEBUGASSERT(info != NULL && info->fds != NULL && info->cb != NULL);
+  DEBUGASSERT(info->fds != NULL && info->cb != NULL);
   if (info != NULL)
     {
       /* Release the callback */
@@ -287,6 +293,8 @@ int udp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
 
       info->conn = NULL;
     }
+
+  net_unlock();
 
   return OK;
 }
