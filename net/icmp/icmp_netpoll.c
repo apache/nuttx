@@ -142,16 +142,24 @@ static uint16_t icmp_poll_eventhandler(FAR struct net_driver_s *dev,
 
 int icmp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 {
-  FAR struct icmp_conn_s *conn = psock->s_conn;
+  FAR struct icmp_conn_s *conn;
   FAR struct icmp_poll_s *info;
   FAR struct devif_callback_s *cb;
   int ret = OK;
 
-  DEBUGASSERT(conn != NULL && fds != NULL);
-
-  /* Some of the  following must be atomic */
+  /* Some of the following must be atomic */
 
   net_lock();
+
+  conn = psock->s_conn;
+
+  /* Sanity check */
+
+  if (!conn || !fds)
+    {
+      ret = -EINVAL;
+      goto errout_with_lock;
+    }
 
   /* Find a container to hold the poll information */
 
@@ -250,15 +258,24 @@ int icmp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
   FAR struct icmp_conn_s *conn;
   FAR struct icmp_poll_s *info;
 
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL &&
-              fds != NULL && fds->priv != NULL);
+  /* Some of the following must be atomic */
+
+  net_lock();
 
   conn = psock->s_conn;
+
+  /* Sanity check */
+
+  if (!conn || !fds->priv)
+    {
+      net_unlock();
+      return -EINVAL;
+    }
 
   /* Recover the socket descriptor poll state info from the poll structure */
 
   info = (FAR struct icmp_poll_s *)fds->priv;
-  DEBUGASSERT(info != NULL && info->fds != NULL && info->cb != NULL);
+  DEBUGASSERT(info->fds != NULL && info->cb != NULL);
 
   if (info != NULL)
     {
@@ -274,6 +291,8 @@ int icmp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
 
       info->psock = NULL;
     }
+
+  net_unlock();
 
   return OK;
 }
