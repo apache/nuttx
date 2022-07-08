@@ -108,12 +108,6 @@ int nx_unlink(FAR const char *pathname)
 
     {
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-      ret = inode_semtake();
-      if (ret < 0)
-        {
-          goto errout_with_inode;
-        }
-
       /* Refuse to unlink the inode if it has children.  I.e., if it is
        * functioning as a directory and the directory is not empty.
        */
@@ -121,7 +115,7 @@ int nx_unlink(FAR const char *pathname)
       if (inode->i_child != NULL)
         {
           ret = -ENOTEMPTY;
-          goto errout_with_sem;
+          goto errout_with_inode;
         }
 
       /* Notify the driver that it has been unlinked.  If there are no
@@ -136,7 +130,7 @@ int nx_unlink(FAR const char *pathname)
           ret = inode->u.i_ops->unlink(inode);
           if (ret < 0)
             {
-              goto errout_with_sem;
+              goto errout_with_inode;
             }
         }
 #ifndef CONFIG_DISABLE_MOUNTPOINT
@@ -147,7 +141,7 @@ int nx_unlink(FAR const char *pathname)
           ret = inode->u.i_bops->unlink(inode);
           if (ret < 0)
             {
-              goto errout_with_sem;
+              goto errout_with_inode;
             }
         }
 #endif
@@ -165,7 +159,7 @@ int nx_unlink(FAR const char *pathname)
       else
         {
           ret = -ENXIO;
-          goto errout_with_sem;
+          goto errout_with_inode;
         }
 
       /* Remove the old inode.  Because we hold a reference count on the
@@ -174,6 +168,12 @@ int nx_unlink(FAR const char *pathname)
        * when inode_release() is called below).  inode_remove() will
        * return -EBUSY to indicate that the inode was not deleted now.
        */
+
+      ret = inode_semtake();
+      if (ret < 0)
+        {
+          goto errout_with_inode;
+        }
 
       ret = inode_remove(pathname);
       inode_semgive();
@@ -191,10 +191,6 @@ int nx_unlink(FAR const char *pathname)
   RELEASE_SEARCH(&desc);
   return OK;
 
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-errout_with_sem:
-  inode_semgive();
-#endif
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS)
 errout_with_inode:
   inode_release(inode);
