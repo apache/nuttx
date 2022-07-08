@@ -58,10 +58,6 @@ static void tcp_close_work(FAR void *param)
   /* Stop the network monitor for all sockets */
 
   tcp_stop_monitor(conn, TCP_CLOSE);
-
-  /* Discard our reference to the connection */
-
-  conn->crefs = 0;
   tcp_free(conn);
 
   net_unlock();
@@ -360,6 +356,7 @@ int tcp_close(FAR struct socket *psock)
   /* Perform the disconnection now */
 
   tcp_unlisten(conn); /* No longer accepting connections */
+  conn->crefs = 0;    /* Discard our reference to the connection */
 
   /* Break any current connections and close the socket */
 
