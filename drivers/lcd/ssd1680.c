@@ -328,8 +328,6 @@ static const uint8_t ssd1680_lut[] =
  *   col     - Starting column to write to (range: 0 <= col <= xres-npixels)
  *   buffer  - The buffer containing the run to be written to the LCD
  *   npixels - The number of pixels to write to the LCD.
- *             If npixels = 0 then do redraw e-ink screen. If range:
- *               0 < npixels <= xres-col then update displays memory
  *
  ****************************************************************************/
 
@@ -735,7 +733,17 @@ static int ssd1680_configuredisplay(struct ssd1680_dev_s *priv)
 static int ssd1680_update_all_and_redraw(struct ssd1680_dev_s *priv)
 {
   int row;
-  for (row = 0; row < SSD1680_DEV_FB_YRES; row++)
+#if defined(CONFIG_LCD_PORTRAIT) || defined(CONFIG_LCD_RPORTRAIT)
+  const int row_incr = 1;
+#else
+#  if SSD1680_DEV_BPP == 1
+  const int row_incr = 8;
+#  else
+  const int row_incr = 4;
+#  endif
+#endif
+
+  for (row = 0; row < SSD1680_DEV_FB_YRES; row += row_incr)
     {
       ssd1680_update_row(priv, row);
     }
@@ -989,19 +997,21 @@ static void ssd1680_snd_cmd_with_data(FAR struct ssd1680_dev_s *priv,
 
 #if !defined(CONFIG_LCD_PORTRAIT) && !defined(CONFIG_LCD_RPORTRAIT)
 
-#if SSD1680_DEV_BPP == 1
 static void ssd1680_snd_cmd_with_data_bitstrip(
     FAR struct ssd1680_dev_s *priv, uint8_t cmd, const uint8_t *dta,
     int nopix, int strip_len)
+#  if SSD1680_DEV_BPP == 1
 {
   int i;
   int j;
   uint8_t bytes[8];
   uint8_t val;
+#    if defined(CONFIG_LCD_LANDSCAPE)
+  const int offset = (SSD1680_DEV_ROWSIZE * SSD1680_PDV -
+                      SSD1680_DEV_NATIVE_YRES) % SSD1680_PDV;
 
-#if defined(CONFIG_LCD_LANDSCAPE)
   dta += (strip_len - 1);
-#endif
+#    endif
 
   ssd1680_select(priv, true);
   ssd1680_cmddata(priv, true);
@@ -1011,7 +1021,21 @@ static void ssd1680_snd_cmd_with_data_bitstrip(
     {
       for (j = 0; j < 8; j++)
         {
+#    if defined(CONFIG_LCD_LANDSCAPE)
+          if (offset == 0)
+            {
+              bytes[j] = *(dta + j * strip_len);
+            }
+          else
+            {
+              bytes[j] = (*(dta + j * strip_len)) >> offset;
+
+              bytes[j] |= ((*(dta + j * strip_len - 1)) << (8 - offset)
+                           & (0xff << (8 - offset)));
+            }
+#    else
           bytes[j] = *(dta + j * strip_len);
+#    endif
         }
 
       for (i = 0; i < 8; i++)
@@ -1019,13 +1043,13 @@ static void ssd1680_snd_cmd_with_data_bitstrip(
           val = 0;
           for (j = 0; j < 8; j++)
             {
-#if defined(CONFIG_LCD_LANDSCAPE)
+#    if defined(CONFIG_LCD_LANDSCAPE)
               val |= ((bytes[j] << (7 - j)) & (1 << (7 - j)));
               bytes[j] = bytes[j] >> 1;
-#elif
+#    else
               val |= ((bytes[j] >> j) & (1 << (7 - j)));
               bytes[j] = bytes[j] << 1;
-#endif
+#    endif
             }
 
           SPI_SEND(priv->spi, val);
@@ -1036,19 +1060,16 @@ static void ssd1680_snd_cmd_with_data_bitstrip(
             }
         }
 
-#if defined(CONFIG_LCD_LANDSCAPE)
+#    if defined(CONFIG_LCD_LANDSCAPE)
       dta--;
-#elif
+#    else
       dta++;
-#endif
+#    endif
     }
 
   ssd1680_select(priv, false);
 }
-#else
-static void ssd1680_snd_cmd_with_data_even_bits_bitstrip(
-    FAR struct ssd1680_dev_s *priv, uint8_t cmd, const uint8_t *dta,
-    int nopix, int strip_len)
+#  else
 {
   int i;
   int j;
@@ -1056,9 +1077,9 @@ static void ssd1680_snd_cmd_with_data_even_bits_bitstrip(
   uint16_t tmp[8];
   uint8_t val;
 
-#if defined(CONFIG_LCD_LANDSCAPE)
+#    if defined(CONFIG_LCD_LANDSCAPE)
   dta += (strip_len - 1);
-#endif
+#    endif
 
   ssd1680_select(priv, true);
   ssd1680_cmddata(priv, true);
@@ -1068,13 +1089,13 @@ static void ssd1680_snd_cmd_with_data_even_bits_bitstrip(
     {
       for (j = 0; j < 8; j++)
         {
-#if defined(CONFIG_LCD_LANDSCAPE)
+#    if defined(CONFIG_LCD_LANDSCAPE)
           tmp = *(dta + j * strip_len)
               + ((*(dta + j * strip_len + 1)) << 8);
-#else
+#    else
           tmp = *(dta + j * strip_len + 1)
               + ((*(dta + j * strip_len)) << 8);
-#endif
+#    endif
           rows[j] =
                  (tmp & 0x01)       | ((tmp >> 1) & 0x02)
               | ((tmp >> 2) & 0x04) | ((tmp >> 3) & 0x08)
@@ -1087,13 +1108,13 @@ static void ssd1680_snd_cmd_with_data_even_bits_bitstrip(
           val = 0;
           for (j = 0; j < 8; j++)
             {
-#if defined(CONFIG_LCD_LANDSCAPE)
+#    if defined(CONFIG_LCD_LANDSCAPE)
               val |= ((rows[j] << (7 - j)) & (1 << (7 - j)));
               rows[j] = rows[j] >> 1;
-#elif
+#    else
               val |= ((rows[j] >> (j)) & (1 << (7 - j)));
               rows[j] = rows[j] << 1;
-#endif
+#    endif
             }
 
           SPI_SEND(priv->spi, val);
@@ -1104,11 +1125,11 @@ static void ssd1680_snd_cmd_with_data_even_bits_bitstrip(
             }
         }
 
-#if defined(CONFIG_LCD_LANDSCAPE)
+#    if defined(CONFIG_LCD_LANDSCAPE)
       dta--;
-#elif
+#    else
       dta++;
-#endif
+#    endif
     }
 
   ssd1680_select(priv, false);
@@ -1152,7 +1173,7 @@ static void ssd1680_snd_cmd_with_data_odd_bits_bitstrip(
 #if defined(CONFIG_LCD_LANDSCAPE)
               val |= ((rows[j] << (7 - j)) & (1 << (7 - j)));
               rows[j] = rows[j] >> 2;
-#elif
+#else
               val |= ((rows[j] >> (j)) & (1 << (7 - j)));
               rows[j] = rows[j] << 2;
 #endif
@@ -1168,14 +1189,14 @@ static void ssd1680_snd_cmd_with_data_odd_bits_bitstrip(
 
 #if defined(CONFIG_LCD_LANDSCAPE)
       dta--;
-#elif
+#else
       dta++;
 #endif
     }
 
   ssd1680_select(priv, false);
 }
-#endif
+#  endif
 #endif
 
 #if SSD1680_DEV_BPP == 2
@@ -1314,6 +1335,7 @@ static FAR void *bitscpy_ds(FAR void *dest, int dest_offset,
   FAR unsigned char *pout = (FAR unsigned char *)dest;
   FAR unsigned char *pin  = (FAR unsigned char *)src;
   uint8_t val;
+  uint8_t mask;
 
   /* Copy block of bytes */
 
@@ -1331,11 +1353,15 @@ static FAR void *bitscpy_ds(FAR void *dest, int dest_offset,
         }
       else
         {
-          *pout &= (~(0xff >> dest_offset));
+          mask = 0xff >> dest_offset;
+          *pout &= ~mask;
           *pout |= (val >> dest_offset);
+
           pout++;
-          *pout &= ~(0xff << (8 - dest_offset));
-          *pout |= (val << (8 - dest_offset));
+
+          mask = (0xff << (8 - dest_offset)) & 0xff;
+          *pout &= ~mask;
+          *pout |= (val << (8 - dest_offset)); /* no need to & mask */
         }
 
       nbits -= 8;
@@ -1349,18 +1375,22 @@ static FAR void *bitscpy_ds(FAR void *dest, int dest_offset,
 
       if (nbits + dest_offset <= 8)
         {
-          *pout &= (~((0xff << (8 - nbits)) >> dest_offset));
-          *pout |= (val & (0xff << (8 - nbits)) >> dest_offset);
+          mask = ((0xff << (8 - nbits)) & 0xff) >> dest_offset;
+          *pout &= ~mask;
+          *pout |= ((val >> dest_offset) & mask);
         }
       else
         {
-          *pout &= (~(0xff >> dest_offset));
+          mask = 0xff >> dest_offset;
+          *pout &= ~mask;
           *pout |= (val >> dest_offset);
-          pout++;
 
+          pout++;
           nbits -= (8 - dest_offset);
-          *pout &= ~(0xff << (8 - nbits));
-          *pout |= ((val << (8 - dest_offset)) & (0xff << (8 - nbits)));
+
+          mask = 0xff << (8 - nbits);
+          *pout &= ~mask;
+          *pout |= ((val << (8 - dest_offset)) & mask);
         }
     }
 
