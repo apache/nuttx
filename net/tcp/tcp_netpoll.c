@@ -198,24 +198,25 @@ static uint16_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
 
 int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 {
-  FAR struct tcp_conn_s *conn = psock->s_conn;
+  FAR struct tcp_conn_s *conn;
   FAR struct tcp_poll_s *info;
   FAR struct devif_callback_s *cb;
   bool nonblock_conn;
   int ret = OK;
 
-  /* Sanity check */
-
-#ifdef CONFIG_DEBUG_FEATURES
-  if (!conn || !fds)
-    {
-      return -EINVAL;
-    }
-#endif
-
-  /* Some of the  following must be atomic */
+  /* Some of the following must be atomic */
 
   net_lock();
+
+  conn = psock->s_conn;
+
+  /* Sanity check */
+
+  if (!conn || !fds)
+    {
+      ret = -EINVAL;
+      goto errout_with_lock;
+    }
 
   /* Non-blocking connection ? */
 
@@ -382,22 +383,27 @@ errout_with_lock:
 
 int tcp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
 {
-  FAR struct tcp_conn_s *conn = psock->s_conn;
+  FAR struct tcp_conn_s *conn;
   FAR struct tcp_poll_s *info;
+
+  /* Some of the following must be atomic */
+
+  net_lock();
+
+  conn = psock->s_conn;
 
   /* Sanity check */
 
-#ifdef CONFIG_DEBUG_FEATURES
   if (!conn || !fds->priv)
     {
+      net_unlock();
       return -EINVAL;
     }
-#endif
 
   /* Recover the socket descriptor poll state info from the poll structure */
 
   info = (FAR struct tcp_poll_s *)fds->priv;
-  DEBUGASSERT(info != NULL && info->fds != NULL && info->cb != NULL);
+  DEBUGASSERT(info->fds != NULL && info->cb != NULL);
   if (info != NULL)
     {
       /* Release the callback */
@@ -412,6 +418,8 @@ int tcp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
 
       info->conn = NULL;
     }
+
+  net_unlock();
 
   return OK;
 }
