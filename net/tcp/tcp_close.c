@@ -58,7 +58,6 @@ static void tcp_close_work(FAR void *param)
   /* Stop the network monitor for all sockets */
 
   tcp_stop_monitor(conn, TCP_CLOSE);
-  conn->crefs = 0;
   tcp_free(conn);
 
   net_unlock();
