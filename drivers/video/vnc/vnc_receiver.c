@@ -321,8 +321,22 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                   /* Inject the key press/release event into NX */
 
                   keyevent = (FAR struct rfb_keyevent_s *)session->inbuf;
+#ifdef CONFIG_VNCSERVER_KBD
+                  /* If uinput like virtual keyboard enabled, pass keycode to
+                  * keyboard driver.
+                  *
+                  * This driver cannot be used with NX now,
+                  * if vnc server works with NX, should not enable
+                  * CONFIG_VNCSERVER_KBD.
+                  */
+
+                  session->kbdout(&session->kbd, keyevent->down,
+                                  (FAR const uint8_t *)keyevent->key);
+
+#else
                   vnc_key_map(session, rfb_getbe32(keyevent->key),
                               (bool)keyevent->down);
+#endif
                 }
             }
             break;

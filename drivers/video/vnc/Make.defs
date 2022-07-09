@@ -27,6 +27,10 @@ ifeq ($(CONFIG_VNCSERVER_TOUCH),y)
 CSRCS += vnc_touch.c
 endif
 
+ifeq ($(CONFIG_VNCSERVER_KBD),y)
+CSRCS += vnc_kbd.c
+endif
+
 DEPPATH += --dep-path video/vnc
 CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)video$(DELIM)vnc}
 VPATH += :video/vnc
