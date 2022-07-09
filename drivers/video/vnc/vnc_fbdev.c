@@ -601,19 +601,41 @@ int up_fbinitialize(int display)
 {
   int ret;
   FAR struct vnc_session_s *session;
-#ifdef CONFIG_VNCSERVER_TOUCH
+#if defined (CONFIG_VNCSERVER_TOUCH) || defined (CONFIG_VNCSERVER_KBD)
   char devname[NAME_MAX];
 #endif
 
   DEBUGASSERT(display >= 0 && display < RFB_MAX_DISPLAYS);
 
+  /* Start the VNC server kernel thread. */
+
+  ret = vnc_start_server(display);
+
+  if (ret < 0)
+    {
+      gerr("ERROR: vnc_start_server() failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Wait for the VNC server to be ready */
+
+  ret = vnc_wait_start(display);
+
+  if (ret < 0)
+    {
+      gerr("ERROR: wait for vnc server start failed: %d\n", ret);
+      return ret;
+    }
+
   /* Save the input callout function information in the session structure. */
 
   session           = g_vnc_sessions[display];
+  session->arg      = session;
+
 #ifdef CONFIG_VNCSERVER_TOUCH
 
-  ret = snprintf(devname, NAME_MAX, CONFIG_VNCSERVER_TOUCH_DEVNAME "%d",
-                 display);
+  ret = snprintf(devname, sizeof(devname),
+                 CONFIG_VNCSERVER_TOUCH_DEVNAME "%d", display);
 
   if (ret < 0)
     {
@@ -631,28 +653,26 @@ int up_fbinitialize(int display)
 
   session->mouseout = vnc_touch_event;
 #endif
-  session->arg      = session;
 
-  /* Start the VNC server kernel thread. */
-
-  ret = vnc_start_server(display);
+#ifdef CONFIG_VNCSERVER_KBD
+  ret = snprintf(devname, sizeof(devname),
+                 CONFIG_VNCSERVER_KBD_DEVNAME "%d", display);
   if (ret < 0)
     {
-      gerr("ERROR: vnc_start_server() failed: %d\n", ret);
-#ifdef CONFIG_VNCSERVER_TOUCH
-      vnc_touch_unregister(session, devname);
-#endif
+      gerr("ERROR: Format vnc keyboard driver path failed.\n");
       return ret;
     }
 
-  /* Wait for the VNC server to be ready */
-
-  ret = vnc_wait_start(display);
+  ret = vnc_kbd_register(devname, session);
 
   if (ret < 0)
     {
-      gerr("ERROR: wait for vnc server start failed: %d\n", ret);
+      gerr("ERROR: Initial vnc keyboard driver failed.\n");
+      return ret;
     }
+
+  session->kbdout = vnc_kbd_event;
+#endif
 
   return ret;
 }
@@ -831,7 +851,7 @@ FAR struct fb_vtable_s *up_fbgetvplane(int display, int vplane)
 void up_fbuninitialize(int display)
 {
   FAR struct vnc_session_s *session;
-#ifdef CONFIG_VNCSERVER_TOUCH
+#if defined(CONFIG_VNCSERVER_TOUCH) || defined (CONFIG_VNCSERVER_KBD)
   int ret;
   char devname[NAME_MAX];
 #endif
@@ -844,8 +864,8 @@ void up_fbuninitialize(int display)
   if (session != NULL)
     {
 #ifdef CONFIG_VNCSERVER_TOUCH
-      ret = snprintf(devname, NAME_MAX, CONFIG_VNCSERVER_TOUCH_DEVNAME "%d",
-                    display);
+      ret = snprintf(devname, sizeof(devname),
+                     CONFIG_VNCSERVER_TOUCH_DEVNAME "%d", display);
 
       if (ret < 0)
         {
@@ -854,6 +874,18 @@ void up_fbuninitialize(int display)
         }
 
       vnc_touch_unregister(session, devname);
+#endif
+
+#ifdef CONFIG_VNCSERVER_KBD
+      ret = snprintf(devname, sizeof(devname),
+                     CONFIG_VNCSERVER_KBD_DEVNAME "%d", display);
+      if (ret < 0)
+        {
+          gerr("ERROR: Format vnc keyboard driver path failed.\n");
+          return;
+        }
+
+      vnc_kbd_unregister(session, devname);
 #endif
     }
 }
