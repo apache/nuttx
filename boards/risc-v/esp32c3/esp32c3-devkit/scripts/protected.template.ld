@@ -22,8 +22,12 @@
  * This file describes the memory layout (memory blocks) as virtual
  * memory addresses.
  *
+ * kernel-space.ld and user-space.ld contain output sections to link compiler
+ * output into these memory blocks for the Kernel and User images,
+ * respectively.
+ *
  * NOTE: That this is not the actual linker script but rather a "template"
- * for the esp32c3_out.ld script.  This template script is passed through
+ * for the esp32c3_out.ld script. This template script is passed through
  * the C preprocessor to include selected configuration options.
  *
  ****************************************************************************/
@@ -66,7 +70,8 @@ MEMORY
 
   /* Flash mapped instruction data. */
 
-  /* The 0x20 offset is a convenience for the app binary image generation.
+  /* The 0x20 offset for the KIROM region is a convenience for the Kernel
+   * binary image generation in Espressif Application Image format.
    * Flash cache has 64KB pages. The .bin file which is flashed to the chip
    * has a 0x18 byte file header, and each segment has a 0x08 byte segment
    * header. Setting this offset makes it simple to meet the flash cache MMU's
@@ -83,11 +88,13 @@ MEMORY
 
   /* Flash mapped constant data */
 
-  /* The 0x20 offset is a convenience for the app binary image generation.
-   * Flash cache has 64KB pages. The .bin file which is flashed to the chip
-   * has a 0x18 byte file header, and each segment has a 0x08 byte segment
-   * header. Setting this offset makes it simple to meet the flash cache MMU's
-   * constraint that (paddr % 64KB == vaddr % 64KB).
+  /* See KIROM region documentation above for the meaning of the 0x20 offset.
+   *
+   * The 0x18 offset for the UDROM region is a convenience for the User
+   * binary image generation following a custom image format, which defines
+   * a "metadata" output section containing some information that the Kernel
+   * needs for properly configuring the External Flash MMU when loading the
+   * User application image.
    */
 
   KDROM (R)  :      org = 0x3c000020, len = 0x80000 - 0x20
