@@ -321,7 +321,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                   /* Inject the key press/release event into NX */
 
                   keyevent = (FAR struct rfb_keyevent_s *)session->inbuf;
-                  vnc_key_map(session, rfb_getbe16(keyevent->key),
+                  vnc_key_map(session, rfb_getbe32(keyevent->key),
                               (bool)keyevent->down);
                 }
             }

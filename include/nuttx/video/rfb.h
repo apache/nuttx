@@ -411,7 +411,7 @@ struct rfb_keyevent_s
   uint8_t msgtype;               /* U8  Message type */
   uint8_t down;                  /* U8  Down flag */
   uint8_t padding[2];
-  uint8_t key[2];                /* U16 Key */
+  uint8_t key[4];                /* U16 Key */
 };
 
 /* "The interpretation of keysyms is a complex area. In order to be as
