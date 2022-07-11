@@ -287,6 +287,12 @@
                                            * OUT: Partition information structure
                                            *      populated with data from the block
                                            *      device partition */
+#define BIOC_BLKSSZGET  _BIOC(0x000f)     /* Get block device sector size.
+                                           * IN:  Pointer to writable instance
+                                           *      of sector size in which
+                                           *      to return sector size.
+                                           * OUT: Data return in user-provided
+                                           *      buffer. */
 
 /* NuttX MTD driver ioctl definitions ***************************************/
 
