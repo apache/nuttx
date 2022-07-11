@@ -110,6 +110,18 @@ int file_vioctl(FAR struct file *filep, int req, va_list ap)
             ret = inode_getpath(inode, (FAR char *)(uintptr_t)arg);
           }
         break;
+
+      case BIOC_BLKSSZGET:
+        if (inode->u.i_ops != NULL && inode->u.i_ops->ioctl != NULL)
+          {
+            struct geometry geo;
+            ret = inode->u.i_ops->ioctl(filep, BIOC_GEOMETRY,
+                                        (unsigned long)&geo);
+            if (ret >= 0)
+              {
+                *(FAR blksize_t *)(uintptr_t)arg = geo.geo_sectorsize;
+              }
+          }
     }
 
   return ret;
