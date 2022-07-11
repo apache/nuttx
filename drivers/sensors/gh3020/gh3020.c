@@ -121,6 +121,7 @@ struct gh3020_dev_s
 
   struct gh3020_sensor_s sensor[GH3020_SENSOR_NUM];
   uint64_t timestamp;                    /* Current timestamp (us) */
+  uint64_t timestamp_last;               /* Last timestamp (us) */
   struct work_s work_intrpt;             /* Interrupt worker */
   struct work_s work_poll;               /* Polling worker */
 
@@ -757,6 +758,9 @@ static void gh3020_extract_frame(FAR struct gh3020_dev_s *priv, uint8_t idx,
 
 static void gh3020_push_data(FAR struct gh3020_dev_s *priv)
 {
+  uint64_t ts_interval;
+  int32_t ts_jitter;
+  bool ts_abnormal;
   uint8_t idx;
   uint8_t j;
 
@@ -776,6 +780,26 @@ static void gh3020_push_data(FAR struct gh3020_dev_s *priv)
                                              priv->ppgdata[idx],
                                              sizeof(struct sensor_ppgq)
                                              * priv->ppgdatacnt[idx]);
+
+          ts_interval = priv->timestamp - priv->timestamp_last;
+          if (priv->batch > 0)
+            {
+              ts_jitter = abs((int32_t)ts_interval - (int32_t)priv->batch);
+              ts_abnormal = (ts_jitter > (priv->batch >> 3)) ? true : false;
+            }
+          else
+            {
+              ts_jitter = abs((int32_t)ts_interval -
+                              (int32_t)priv->interval);
+              ts_abnormal = (ts_jitter > (priv->interval >> 3)) ?
+                            true : false;
+            }
+
+          if (ts_abnormal)
+            {
+              syslog(LOG_INFO, "[gh3020] push ppg%u ts intvl %llu\n",
+                     gh3020_node_name_list[idx], ts_interval);
+            }
         }
     }
 
@@ -1640,6 +1664,7 @@ static int gh3020_interrupt_handler(FAR struct ioexpander_dev_s *dev,
 
   /* Get the timestamp */
 
+  priv->timestamp_last = priv->timestamp;
   priv->timestamp = sensor_get_timestamp();
 
   /* Task the worker with retrieving the latest sensor data. We should not do
@@ -1735,6 +1760,7 @@ static void gh3020_worker_poll(FAR void *arg)
 
   /* Get timestamp and arrange next worker immediately once enter polling. */
 
+  priv->timestamp_last = priv->timestamp;
   priv->timestamp = sensor_get_timestamp();
   if (priv->activated > 0)
     {
@@ -2411,6 +2437,7 @@ int gh3020_register(int devno, FAR const struct gh3020_config_s *config)
       priv->sensor[idx].lower.nbuffer = GH3020_BATCH_NUMBER;
       priv->sensor[idx].dev = priv;
       priv->sensor[idx].interval = GH3020_INTVL_DFT;
+      priv->sensor[idx].batch = GH3020_INTVL_DFT;
       priv->sensor[idx].current = GH3020_CURRENT_DFT;
       priv->sensor[idx].chidx = (uint8_t)idx;
     }
