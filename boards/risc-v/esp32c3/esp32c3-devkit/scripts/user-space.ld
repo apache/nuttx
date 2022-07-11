@@ -30,7 +30,7 @@ SECTIONS
 
     LONG(ADDR(.userspace))
     LONG(LOADADDR(.userspace))
-    LONG(SIZEOF(.userspace) + SIZEOF(.flash.rodata))
+    LONG(SIZEOF(.userspace) + SIZEOF(.rodata))
 
     /* IROM metadata:
      * - Destination address (VMA) for IROM region
@@ -38,9 +38,9 @@ SECTIONS
      * - Size of IROM region
      */
 
-    LONG(ADDR(.flash.text))
-    LONG(LOADADDR(.flash.text))
-    LONG(SIZEOF(.flash.text))
+    LONG(ADDR(.text))
+    LONG(LOADADDR(.text))
+    LONG(SIZEOF(.text))
   } >metadata
 
   /* section info */
@@ -58,13 +58,20 @@ SECTIONS
   __ld_udram_size = LENGTH(UDRAM);
   __ld_udram_end = ORIGIN(UDRAM) + LENGTH(UDRAM);
 
-  _eronly = LOADADDR(.dram0.data);
+  _eronly = LOADADDR(.data);
 
   .userspace : {
     *(.userspace)
   } >UDROM AT>ROM
 
-  .flash.rodata :
+  /* Output sections for the Userspace image are given standard names, so
+   * instead of the Espressif-usual ".flash.text" we name it as ".text".
+   * The motivation is to ease debugging with GDB when loading symbols from
+   * both Kernel and User images since GDB's "add-symbol-file" command
+   * expects to find a .text section at the provided offset.
+   */
+
+  .rodata :
   {
     _srodata = ABSOLUTE(.);
 
@@ -142,7 +149,7 @@ SECTIONS
 
   /* Shared RAM */
 
-  .dram0.bss (NOLOAD) :
+  .bss (NOLOAD) :
   {
     . = ALIGN (8);
     _sbss = ABSOLUTE(.);
@@ -175,7 +182,7 @@ SECTIONS
     *(.noinit.*)
   } >UDRAM
 
-  .dram0.data :
+  .data :
   {
     _sdata = ABSOLUTE(.);
     *(.data)
@@ -197,10 +204,10 @@ SECTIONS
 
   .flash_text_dummy (NOLOAD) : ALIGN(0x00010000)
   {
-    . = SIZEOF(.userspace) + SIZEOF(.flash.rodata);
+    . = SIZEOF(.userspace) + SIZEOF(.rodata);
   } >UIROM
 
-  .flash.text : ALIGN(0x00010000)
+  .text : ALIGN(0x00010000)
   {
     _stext = .;
 
