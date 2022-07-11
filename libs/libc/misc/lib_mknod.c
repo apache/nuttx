@@ -55,7 +55,8 @@
  *
  * Input Parameters:
  *   pathname - The full path to node.
- *   mode     - File type and permission
+ *   mode     - File type and permission.
+ *   dev      - Ignored.
  *
  * Returned Value:
  *   0 is returned on success; otherwise, -1 is returned with errno set
@@ -66,6 +67,8 @@
 int mknod(FAR const char *path, mode_t mode, dev_t dev)
 {
   int ret = -1;
+
+  UNUSED(dev);
 
   switch (mode & S_IFMT)
     {

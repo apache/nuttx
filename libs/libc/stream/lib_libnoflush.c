@@ -52,5 +52,6 @@
 
 int lib_noflush(FAR struct lib_outstream_s *this)
 {
+  UNUSED(this);
   return OK;
 }

@@ -182,7 +182,8 @@ errout:
  *      task_restart() would still be an issue.
  *
  * Input Parameters:
- *   Standard task start-up parameters
+ *   argc, argv - Ignored. The task's start-up parameters are passed via the
+ *     semaphore-protected global structure g_spawn_parms.
  *
  * Returned Value:
  *   Standard task return value.
@@ -197,6 +198,9 @@ static int nxtask_spawn_proxy(int argc, FAR char *argv[])
    * if the file_actions parameter to task_spawn[p] was non-NULL and/or the
    * option to change the signal mask was selected.
    */
+
+  UNUSED(argc);
+  UNUSED(argv);
 
   DEBUGASSERT(g_spawn_parms.file_actions ||
               (g_spawn_parms.attr &&

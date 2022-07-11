@@ -366,6 +366,9 @@ static int do_glob(FAR char *buf, size_t pos, int type, FAR char *pat,
 
 static int ignore_err(FAR const char *path, int err)
 {
+  UNUSED(path);
+  UNUSED(err);
+
   return 0;
 }
 

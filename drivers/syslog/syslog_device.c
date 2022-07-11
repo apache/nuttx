@@ -658,6 +658,8 @@ static int syslog_dev_flush(FAR struct syslog_channel_s *channel)
    */
 
   file_fsync(&syslog_dev->sl_file);
+#else
+  UNUSED(channel);
 #endif
 
   return OK;
