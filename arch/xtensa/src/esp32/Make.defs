@@ -58,8 +58,6 @@ endif
 CHIP_CSRCS += esp32_pm.c
 endif
 
-CHIP_CSRCS += esp32_rtc.c
-
 ifeq ($(CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP),y)
 CHIP_CSRCS += esp32_imm.c
 endif
@@ -177,8 +175,11 @@ ifeq ($(CONFIG_ESP32_AES_ACCELERATOR),y)
 CHIP_CSRCS += esp32_aes.c
 endif
 
+ifeq ($(CONFIG_ESP32_RTC),y)
+CHIP_CSRCS += esp32_rtc.c
 ifeq ($(CONFIG_RTC_DRIVER),y)
 CHIP_CSRCS += esp32_rtc_lowerhalf.c
+endif
 endif
 
 ifeq ($(CONFIG_ESP32_WIRELESS),y)
