@@ -75,6 +75,8 @@ int pthread_barrier_init(FAR pthread_barrier_t *barrier,
 {
   int ret = OK;
 
+  UNUSED(attr);
+
   if (!barrier || count == 0)
     {
       ret = EINVAL;

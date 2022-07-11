@@ -58,6 +58,8 @@ int settimeofday(FAR const struct timeval *tv, FAR struct timezone *tz)
 {
   struct timespec ts;
 
+  UNUSED(tz);
+
 #ifdef CONFIG_DEBUG_FEATURES
   if (!tv || tv->tv_usec >= USEC_PER_SEC)
     {

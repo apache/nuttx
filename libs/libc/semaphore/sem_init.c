@@ -61,6 +61,8 @@
 
 int nxsem_init(FAR sem_t *sem, int pshared, unsigned int value)
 {
+  UNUSED(pshared);
+
   /* Verify that a semaphore was provided and the count is within the valid
    * range.
    */

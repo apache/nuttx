@@ -90,7 +90,7 @@ void nxsched_resume_scheduler(FAR struct tcb_s *tcb)
 
   if (tcb->irqcount > 0)
     {
-      /* Do notihing here
+      /* Do nothing here
        * NOTE: spin_setbit() is done in nxsched_add_readytorun()
        * and nxsched_remove_readytorun()
        */

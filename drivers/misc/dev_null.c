@@ -74,6 +74,10 @@ static const struct file_operations devnull_fops =
 static ssize_t devnull_read(FAR struct file *filep, FAR char *buffer,
                             size_t len)
 {
+  UNUSED(filep);
+  UNUSED(buffer);
+  UNUSED(len);
+
   return 0; /* Return EOF */
 }
 
@@ -84,6 +88,9 @@ static ssize_t devnull_read(FAR struct file *filep, FAR char *buffer,
 static ssize_t devnull_write(FAR struct file *filep, FAR const char *buffer,
                              size_t len)
 {
+  UNUSED(filep);
+  UNUSED(buffer);
+
   return len; /* Say that everything was written */
 }
 
@@ -94,6 +101,8 @@ static ssize_t devnull_write(FAR struct file *filep, FAR const char *buffer,
 static int devnull_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup)
 {
+  UNUSED(filep);
+
   if (setup)
     {
       fds->revents |= (fds->events & (POLLIN | POLLOUT));

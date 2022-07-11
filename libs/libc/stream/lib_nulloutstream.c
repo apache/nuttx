@@ -34,6 +34,7 @@
 
 static void nulloutstream_putc(FAR struct lib_outstream_s *this, int ch)
 {
+  UNUSED(ch);
   DEBUGASSERT(this);
   this->nput++;
 }

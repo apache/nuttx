@@ -34,5 +34,9 @@ int pthread_atfork(CODE void (*prepare)(void),
 {
   /* fork isn't supported yet, so the dummy implementation is enough. */
 
+  UNUSED(prepare);
+  UNUSED(parent);
+  UNUSED(child);
+
   return 0;
 }
