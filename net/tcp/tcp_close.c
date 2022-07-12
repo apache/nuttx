@@ -49,16 +49,20 @@
 
 static void tcp_close_work(FAR void *param)
 {
-  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)param;
+  FAR struct tcp_conn_s *conn;
 
   net_lock();
 
-  tcp_callback_free(conn, conn->clscb);
+  conn = (FAR struct tcp_conn_s *)param;
+  if (conn && conn->crefs == 0)
+    {
+      tcp_callback_free(conn, conn->clscb);
 
-  /* Stop the network monitor for all sockets */
+      /* Stop the network monitor for all sockets */
 
-  tcp_stop_monitor(conn, TCP_CLOSE);
-  tcp_free(conn);
+      tcp_stop_monitor(conn, TCP_CLOSE);
+      tcp_free(conn);
+    }
 
   net_unlock();
 }

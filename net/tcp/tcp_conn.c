@@ -769,6 +769,10 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 
   DEBUGASSERT(conn->crefs == 0);
 
+  /* Cancel the close work */
+
+  work_cancel(LPWORK, &conn->clswork);
+
   tcp_stop_timer(conn);
 
   /* Free remaining callbacks, actually there should be only the send
