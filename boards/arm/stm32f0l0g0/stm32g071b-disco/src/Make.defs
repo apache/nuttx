@@ -43,6 +43,10 @@ ifeq ($(CONFIG_LCD_SSD1306),y)
 CSRCS += stm32_lcd_ssd1306.c
 endif
 
+ifeq ($(CONFIG_SENSORS_INA226),y)
+CSRCS += stm32_ina226.c
+endif
+
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)

@@ -114,4 +114,16 @@ void stm32_spidev_initialize(void);
 int stm32_djoy_initialization(void);
 #endif
 
+/****************************************************************************
+ * Name: stm32_ina226_initialization
+ *
+ * Description:
+ *   Initialize and configure the INA226
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_INA226
+int stm32_ina226_initialization(void);
+#endif
+
 #endif /* __BOARDS_ARM_STM32F0L0G0_STM32G071B_DISCO_SRC_STM32G071B_DISCO_H */
