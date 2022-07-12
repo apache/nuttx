@@ -268,6 +268,26 @@ static int blocks_entry(FAR const char *mountpoint,
                 statbuf->f_blocks - statbuf->f_bavail, statbuf->f_bavail,
                 mountpoint);
 #else
+#  if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+  if (statbuf->f_blocks > ULONG_MAX)
+    {
+      fwarn("Detected unsigned overflow in 'Blocks', upper word = %lu\n",
+            (uint32_t)(statbuf->f_blocks >> 32));
+    }
+
+  if ((statbuf->f_blocks - statbuf->f_bavail) > ULONG_MAX)
+    {
+      fwarn("Detected unsigned overflow in 'Used', upper word = %lu\n",
+            (uint32_t)((statbuf->f_blocks - statbuf->f_bavail) >> 32));
+    }
+
+  if (statbuf->f_bavail > ULONG_MAX)
+    {
+      fwarn("Detected unsigned overflow in 'Avail', upper word = %lu\n",
+            (uint32_t)(statbuf->f_bavail >> 32));
+    }
+
+#  endif
   mount_sprintf(info, "%6zu %10" PRIu32 " %10" PRIu32
                 "  %10" PRIu32 " %s\n",
                 statbuf->f_bsize, (uint32_t)statbuf->f_blocks,
