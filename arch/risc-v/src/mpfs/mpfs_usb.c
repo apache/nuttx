@@ -1005,6 +1005,7 @@ static int mpfs_req_read(struct mpfs_usbdev_s *priv,
                          struct mpfs_ep_s *privep, uint16_t recvsize)
 {
   struct mpfs_req_s *privreq;
+  uint16_t reg;
   int epno;
 
   DEBUGASSERT(priv && privep);
@@ -1012,6 +1013,8 @@ static int mpfs_req_read(struct mpfs_usbdev_s *priv,
   /* Check the request from the head of the endpoint request queue */
 
   epno = USB_EPNO(privep->ep.eplog);
+
+  reg = getreg16(MPFS_USB_ENDPOINT(epno) + MPFS_USB_ENDPOINT_RX_CSR_OFFSET);
 
   uint16_t count = getreg16(MPFS_USB_ENDPOINT(epno) +
                             MPFS_USB_ENDPOINT_RX_COUNT_OFFSET);
@@ -1026,10 +1029,8 @@ static int mpfs_req_read(struct mpfs_usbdev_s *priv,
       if (privreq == NULL)
         {
           /* When no read requests are pending no EP descriptors are set to
-           * ready. This is fatal at the moment!
+           * ready.
            */
-
-          usbtrace(TRACE_DEVERROR(MPFS_TRACEERR_EPOUTQEMPTY), epno);
 
           privep->epstate = USB_EPSTATE_RXSTOPPED;
           return OK;
@@ -1060,7 +1061,8 @@ static int mpfs_req_read(struct mpfs_usbdev_s *priv,
           privreq = NULL;
         }
 
-      if ((privreq->inflight) && (count != 0))
+      if ((privreq->inflight > 0) && (count != 0) &&
+          (reg & RXCSRL_REG_EPN_RX_PKT_RDY_MASK) != 0)
         {
           /* Update the total number of bytes transferred */
 
