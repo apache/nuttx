@@ -523,17 +523,7 @@ static int esp32s3_spi_lock(struct spi_dev_s *dev, bool lock)
 #ifdef CONFIG_ESP32S3_SPI2_DMA
 static int esp32s3_spi_sem_waitdone(struct esp32s3_spi_priv_s *priv)
 {
-  int ret;
-  struct timespec abstime;
-
-  clock_gettime(CLOCK_REALTIME, &abstime);
-
-  abstime.tv_sec += 10;
-  abstime.tv_nsec += 0;
-
-  ret = nxsem_timedwait_uninterruptible(&priv->sem_isr, &abstime);
-
-  return ret;
+  return nxsem_tickwait_uninterruptible(&priv->sem_isr, SEC2TICK(10));
 }
 #endif
 
@@ -864,27 +854,33 @@ static void esp32s3_spi_dma_exchange(struct esp32s3_spi_priv_s *priv,
       tp = rp;
     }
 
-  esp32s3_spi_clr_regbits(SPI_DMA_INT_RAW_REG(2), SPI_TRANS_DONE_INT_RAW_M);
+  esp32s3_spi_set_regbits(SPI_DMA_INT_CLR_REG(priv->config->id),
+                          SPI_TRANS_DONE_INT_RAW_M);
 
-  esp32s3_spi_set_regbits(SPI_DMA_INT_ENA_REG(2), SPI_TRANS_DONE_INT_ENA_M);
+  esp32s3_spi_set_regbits(SPI_DMA_INT_ENA_REG(priv->config->id),
+                          SPI_TRANS_DONE_INT_ENA_M);
 
   while (bytes != 0)
     {
       /* Reset SPI DMA TX FIFO */
 
-      esp32s3_spi_set_regbits(SPI_DMA_CONF_REG(2), SPI_DMA_RESET_MASK);
-      esp32s3_spi_clr_regbits(SPI_DMA_CONF_REG(2), SPI_DMA_RESET_MASK);
+      esp32s3_spi_set_regbits(SPI_DMA_CONF_REG(priv->config->id),
+                              SPI_DMA_RESET_MASK);
+      esp32s3_spi_clr_regbits(SPI_DMA_CONF_REG(priv->config->id),
+                              SPI_DMA_RESET_MASK);
 
       /* Enable SPI DMA TX */
 
-      esp32s3_spi_set_regbits(SPI_DMA_CONF_REG(2), SPI_DMA_TX_ENA_M);
+      esp32s3_spi_set_regbits(SPI_DMA_CONF_REG(priv->config->id),
+                              SPI_DMA_TX_ENA_M);
 
       n = esp32s3_dma_setup(channel, true, dma_txdesc, SPI_DMA_DESC_NUM,
                             tp, bytes);
       esp32s3_dma_enable(channel, true);
 
-      putreg32((n * 8 - 1), SPI_MS_DLEN_REG(2));
-      esp32s3_spi_set_regbits(SPI_USER_REG(2), SPI_USR_MOSI_M);
+      putreg32((n * 8 - 1), SPI_MS_DLEN_REG(priv->config->id));
+      esp32s3_spi_set_regbits(SPI_USER_REG(priv->config->id),
+                              SPI_USR_MOSI_M);
 
       tp += n;
 
@@ -892,38 +888,43 @@ static void esp32s3_spi_dma_exchange(struct esp32s3_spi_priv_s *priv,
         {
           /* Enable SPI DMA RX */
 
-          esp32s3_spi_set_regbits(SPI_DMA_CONF_REG(2), SPI_DMA_RX_ENA_M);
+          esp32s3_spi_set_regbits(SPI_DMA_CONF_REG(priv->config->id),
+                                                   SPI_DMA_RX_ENA_M);
 
           esp32s3_dma_setup(channel, false, dma_rxdesc, SPI_DMA_DESC_NUM,
                             rp, bytes);
           esp32s3_dma_enable(channel, false);
 
-          esp32s3_spi_set_regbits(SPI_USER_REG(2), SPI_USR_MISO_M);
+          esp32s3_spi_set_regbits(SPI_USER_REG(priv->config->id),
+                                  SPI_USR_MISO_M);
 
           rp += n;
         }
       else
         {
-          esp32s3_spi_clr_regbits(SPI_USER_REG(2), SPI_USR_MISO_M);
+          esp32s3_spi_clr_regbits(SPI_USER_REG(priv->config->id),
+                                  SPI_USR_MISO_M);
         }
 
       /* Trigger start of user-defined transaction for master. */
 
-      esp32s3_spi_set_regbits(SPI_CMD_REG(2), SPI_UPDATE_M);
+      esp32s3_spi_set_regbits(SPI_CMD_REG(priv->config->id),
+                              SPI_UPDATE_M);
 
-      while ((getreg32(SPI_CMD_REG(2)) & SPI_UPDATE_M) != 0)
+      while ((getreg32(SPI_CMD_REG(priv->config->id)) & SPI_UPDATE_M) != 0)
         {
           ;
         }
 
-      esp32s3_spi_set_regbits(SPI_CMD_REG(2), SPI_USR_M);
+      esp32s3_spi_set_regbits(SPI_CMD_REG(priv->config->id), SPI_USR_M);
 
       esp32s3_spi_sem_waitdone(priv);
 
       bytes -= n;
     }
 
-  esp32s3_spi_clr_regbits(SPI_DMA_INT_ENA_REG(2), SPI_TRANS_DONE_INT_ENA_M);
+  esp32s3_spi_clr_regbits(SPI_DMA_INT_ENA_REG(priv->config->id),
+                          SPI_TRANS_DONE_INT_ENA_M);
 }
 #endif
 
@@ -1305,7 +1306,7 @@ void esp32s3_spi_dma_init(struct spi_dev_s *dev)
   /* Disable segment transaction mode for SPI Master */
 
   putreg32((SPI_SLV_RX_SEG_TRANS_CLR_EN_M | SPI_SLV_TX_SEG_TRANS_CLR_EN_M),
-           SPI_DMA_CONF_REG(2));
+           SPI_DMA_CONF_REG(priv->config->id));
 }
 #endif
 
@@ -1461,7 +1462,10 @@ static int esp32s3_spi_interrupt(int irq, void *context, void *arg)
 {
   struct esp32s3_spi_priv_s *priv = (struct esp32s3_spi_priv_s *)arg;
 
-  esp32s3_spi_clr_regbits(SPI_DMA_INT_RAW_REG(2), SPI_TRANS_DONE_INT_RAW_M);
+  /* Write 1 to clear interrupt bit */
+
+  esp32s3_spi_set_regbits(SPI_DMA_INT_CLR_REG(priv->config->id),
+                          SPI_TRANS_DONE_INT_RAW_M);
   nxsem_post(&priv->sem_isr);
 
   return 0;
