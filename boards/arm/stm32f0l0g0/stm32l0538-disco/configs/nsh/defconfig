@@ -5,7 +5,6 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
-# CONFIG_LIBC_LONG_LONG is not set
 CONFIG_ARCH="arm"
 CONFIG_ARCH_BOARD="stm32l0538-disco"
 CONFIG_ARCH_BOARD_STM32L0538_DISCO=y

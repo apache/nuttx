@@ -6,7 +6,6 @@
 # modifications.
 #
 # CONFIG_EXAMPLES_NXLINES_DEFAULT_COLORS is not set
-# CONFIG_LIBC_LONG_LONG is not set
 # CONFIG_NSH_ARGCAT is not set
 # CONFIG_NX_DISABLE_1BPP is not set
 CONFIG_ARCH="arm"
