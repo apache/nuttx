@@ -48,14 +48,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_LIBC_LONG_LONG is not a valid selection of the compiler does not
- * support long long types.
- */
-
-#ifndef CONFIG_HAVE_LONG_LONG
-#  undef CONFIG_LIBC_LONG_LONG
-#endif
-
 /* Next flags are to use with `base'. Unused fields are reserved. */
 
 #define XTOA_PREFIX  0x0100    /* Put prefix for octal or hex */
@@ -67,7 +59,7 @@
 
 /* Internal function for use from `printf'. */
 
-#ifdef CONFIG_LIBC_LONG_LONG
+#ifdef CONFIG_HAVE_LONG_LONG
 FAR char *__ultoa_invert(unsigned long long val, FAR char *str, int base);
 #else
 FAR char *__ultoa_invert(unsigned long val, FAR char *str, int base);
