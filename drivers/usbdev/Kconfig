@@ -799,6 +799,20 @@ config USBMSC_NRDREQS
 	---help---
 		The number of write/read requests that can be in flight
 
+config USBMSC_WRMULTIPLE
+	bool "Write multiple blocks at once if possible"
+	default n
+	---help---
+		Store multiple blocks and write them in a single request.  This
+		speeds up the writing significantly with eMMC devices, for example,
+		because writing 512 bytes may be as fast as writing the complete
+		SUPER_PAGE_SIZE (see extended CSD [225] bits 0-3), which may be up
+		to 64Kb.  Real-life example with different block sizes, using the
+		dd command with argument bs=512, bs=8k (USBMSC_NWRREQS = 4, and 16):
+		512b: 470 kb/s, 8k: 5.3 Mb/s.  This is more than a tenfold increase
+		in the throughput.  Without this option enabled, the block driver's
+		block size is always used, which is usually 512 bytes.
+
 config USBMSC_BULKINREQLEN
 	int "Bulk IN request size"
 	default 512 if USBDEV_DUALSPEED
