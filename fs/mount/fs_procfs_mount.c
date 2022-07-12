@@ -362,14 +362,14 @@ static int usage_entry(FAR const char *mountpoint,
 
   /* Generate usage list one line at a time */
 
-#ifdef CONFIG_HAVE_LONG_LONG
+#ifdef CONFIG_LIBC_LONG_LONG
   mount_sprintf(info, "  %-10s %6llu%c %8llu%c  %8llu%c %s\n", fstype,
                 size, sizelabel, used, usedlabel, free, freelabel,
                 mountpoint);
 #else
-  mount_sprintf(info, "  %-10s %6ld%c %8ld%c  %8ld%c %s\n", fstype,
-                size, sizelabel, used, usedlabel, free, freelabel,
-                mountpoint);
+  mount_sprintf(info, "  %-10s %6lu%c %8lu%c  %8lu%c %s\n", fstype,
+                (uint32_t)size, sizelabel, (uint32_t)used, usedlabel,
+                (uint32_t)free, freelabel, mountpoint);
 #endif
 
   return (info->totalsize >= info->buflen) ? 1 : 0;
