@@ -101,6 +101,7 @@ struct mount_info_s
 
 /* Helpers */
 
+printflike(2, 3)
 static void    mount_sprintf(FAR struct mount_info_s *info,
                  FAR const char *fmt, ...);
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_MOUNT
