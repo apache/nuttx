@@ -89,6 +89,18 @@ int stm32_bringup(void)
   board_lcd_initialize();
 #endif
 
+#ifdef CONFIG_SENSORS_INA226
+  /* Initialize and register the INA226 */
+
+  ret = stm32_ina226_initialization();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the INA226 drivers: %d\n", ret);
+      return ret;
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }
