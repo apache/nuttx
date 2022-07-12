@@ -248,6 +248,10 @@ static int blocks_entry(FAR const char *mountpoint,
 
   if (!info->header)
     {
+#if defined(CONFIG_HAVE_LONG_LONG) && !defined(CONFIG_LIBC_LONG_LONG)
+      finfo("long long is enabled, but libc does not support it;\n"
+            "blockcounts may be truncated\n");
+#endif
       mount_sprintf(info,
                     "  Block    Number\n");
       mount_sprintf(info,
@@ -257,11 +261,19 @@ static int blocks_entry(FAR const char *mountpoint,
 
   /* Generate blocks list one line at a time */
 
+#ifdef CONFIG_LIBC_LONG_LONG
   mount_sprintf(info, "%6zu %10" PRIuOFF " %10" PRIuOFF
                 "  %10" PRIuOFF " %s\n",
                 statbuf->f_bsize, statbuf->f_blocks,
                 statbuf->f_blocks - statbuf->f_bavail, statbuf->f_bavail,
                 mountpoint);
+#else
+  mount_sprintf(info, "%6zu %10" PRIu32 " %10" PRIu32
+                "  %10" PRIu32 " %s\n",
+                statbuf->f_bsize, (uint32_t)statbuf->f_blocks,
+                (uint32_t)(statbuf->f_blocks - statbuf->f_bavail),
+                (uint32_t)statbuf->f_bavail, mountpoint);
+#endif /* CONFIG_LIBC_LONG_LONG */
 
   return (info->totalsize >= info->buflen) ? 1 : 0;
 }
