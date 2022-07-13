@@ -327,7 +327,7 @@ static void board_foc_trace(struct foc_dev_s *dev, int type, bool state)
       default:
         {
           mtrerr("board_foc_trace type=%d not supported!\n", type);
-          DEBUGASSERT(0);
+          DEBUGPANIC();
         }
     }
 }
