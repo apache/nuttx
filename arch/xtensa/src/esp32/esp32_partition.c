@@ -650,7 +650,7 @@ int esp32_partition_init(void)
       ret = register_mtddriver(path, mtd_part, 0777, NULL);
       if (ret < 0)
         {
-          ferr("ERROR: Failed to regitser MTD @ %s\n", path);
+          ferr("ERROR: Failed to register MTD @ %s\n", path);
           kmm_free(mtd_priv);
           ret = -1;
           goto errout_with_mtd;

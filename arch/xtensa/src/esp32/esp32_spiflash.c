@@ -681,7 +681,7 @@ static void IRAM_ATTR esp32_set_write_opt(struct esp32_spiflash_s *priv)
  * Name: esp32_read_status
  *
  * Description:
- *   Read SPI Flash status regitser value.
+ *   Read SPI Flash status register value.
  *
  * Input Parameters:
  *   spi    - ESP32 SPI Flash chip data
@@ -772,7 +772,7 @@ static int IRAM_ATTR esp32_wait_idle(struct esp32_spiflash_s *priv)
  * Name: esp32_read_highstatus
  *
  * Description:
- *   Read SPI Flash high status regitser value.
+ *   Read SPI Flash high status register value.
  *
  * Input Parameters:
  *   spi    - ESP32 SPI Flash chip data
@@ -809,7 +809,7 @@ static int esp32_read_highstatus(struct esp32_spiflash_s *priv,
  * Name: esp32_write_status
  *
  * Description:
- *   Write status value to SPI Flash status regitser.
+ *   Write status value to SPI Flash status register.
  *
  * Input Parameters:
  *   spi    - ESP32 SPI Flash chip data
