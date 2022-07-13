@@ -565,7 +565,7 @@ int bcmf_core_upload_firmware(FAR struct bcmf_sdio_dev_s *sbus)
 #endif
 
       default:
-        DEBUGASSERT(false);
+        DEBUGPANIC();
     }
 
   nxsig_usleep(50 * 1000);
@@ -668,7 +668,7 @@ int bcmf_core_upload_firmware(FAR struct bcmf_sdio_dev_s *sbus)
 #endif
 
       default:
-        DEBUGASSERT(false);
+        DEBUGPANIC();
     }
 
   return OK;

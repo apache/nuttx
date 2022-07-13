@@ -1165,7 +1165,7 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (ret < 0)
         {
-          DEBUGASSERT(false);
+          DEBUGPANIC();
           goto return_with_irqdisabled;
         }
       else if (sval > 0)
@@ -1406,7 +1406,7 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
           sval = 0;
           if (nxsem_get_value(&fifo->rx_sem, &sval) < 0)
             {
-              DEBUGASSERT(false);
+              DEBUGPANIC();
 #ifdef CONFIG_CAN_ERRORS
               /* Report unspecified error */
 
