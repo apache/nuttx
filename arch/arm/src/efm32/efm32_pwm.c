@@ -396,7 +396,7 @@ static int pwm_timer(struct efm32_pwmtimer_s *priv,
       break;
 
     default:
-      DEBUGASSERT(false);
+      DEBUGPANIC();
     }
 
   pwm_putreg(priv, EFM32_TIMER_ROUTE_OFFSET, regval);
@@ -618,7 +618,7 @@ static int pwm_setup(struct pwm_lowerhalf_s *dev)
       break;
 
     default:
-      DEBUGASSERT(false);
+      DEBUGPANIC();
       break;
     }
 

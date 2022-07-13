@@ -1607,7 +1607,7 @@ static int spi_pm_prepare(struct pm_callback_s *cb, int domain,
 
         if (nxsem_get_value(&priv->exclsem, &sval) < 0)
           {
-            DEBUGASSERT(false);
+            DEBUGPANIC();
             return -EINVAL;
           }
 
@@ -1623,7 +1623,7 @@ static int spi_pm_prepare(struct pm_callback_s *cb, int domain,
         break;
 
       default:
-        DEBUGASSERT(0);
+        DEBUGPANIC();
         break;
     }
 

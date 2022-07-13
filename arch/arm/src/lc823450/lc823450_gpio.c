@@ -325,7 +325,7 @@ int lc823450_gpio_config(uint16_t gpiocfg)
                 pupd = IOEX_PUPD_PULLDOWN;
                 break;
               default:
-                DEBUGASSERT(0);
+                DEBUGPANIC();
                 return -EINVAL;
             }
         }
@@ -467,7 +467,7 @@ bool lc823450_gpio_read(uint16_t gpiocfg)
 #endif /* CONFIG_IOEX */
   else
     {
-      DEBUGASSERT(0);
+      DEBUGPANIC();
     }
 
   return value;

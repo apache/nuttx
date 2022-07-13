@@ -354,7 +354,7 @@ static int nrf52_i2c_transfer(struct i2c_master_s *dev,
                 {
                   /* Not supported */
 
-                  DEBUGASSERT(0);
+                  DEBUGPANIC();
                 }
             }
 #endif

@@ -493,7 +493,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
           break;
 
         default:
-          DEBUGASSERT(false);
+          DEBUGPANIC();
           return;
         }
 

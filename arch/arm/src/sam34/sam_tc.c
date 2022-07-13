@@ -634,7 +634,7 @@ void sam_tcinitialize(const char *devpath, int irq)
 #endif
 
     default:
-      DEBUGASSERT(0);
+      DEBUGPANIC();
     }
 
   priv->ops = &g_tcops;

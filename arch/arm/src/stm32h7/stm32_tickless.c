@@ -528,7 +528,7 @@ void up_timer_initialize(void)
 #endif
 
       default:
-        DEBUGASSERT(0);
+        DEBUGPANIC();
     }
 
   /* Get the TC frequency that corresponds to the requested resolution */
@@ -547,7 +547,7 @@ void up_timer_initialize(void)
   if (g_tickless.tch == NULL)
     {
       tmrerr("ERROR: Failed to allocate TIM%d\n", g_tickless.timer);
-      DEBUGASSERT(0);
+      DEBUGPANIC();
     }
 
   STM32_TIM_SETCLOCK(g_tickless.tch, g_tickless.frequency);

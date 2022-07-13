@@ -1660,7 +1660,7 @@ static int stm32_foc_adc_handler(int irq, void *context, void *arg)
               ret = foc_dev->adc_isr(dev);
               if (ret < 0)
                 {
-                  DEBUGASSERT(0);
+                  DEBUGPANIC();
                 }
             }
 

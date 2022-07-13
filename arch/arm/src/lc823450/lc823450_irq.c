@@ -719,7 +719,7 @@ void arm_ack_irq(int irq)
     {
       /* IRQ should be handled on CPU0 */
 
-      DEBUGASSERT(false);
+      DEBUGPANIC();
     }
 #endif
 }

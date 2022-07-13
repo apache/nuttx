@@ -2556,7 +2556,7 @@ static void stm32wb_serial_pmnotify(struct pm_callback_s *cb, int domain,
         break;
 
       default:
-        DEBUGASSERT(0);
+        DEBUGPANIC();
         break;
     }
 }
@@ -2657,7 +2657,7 @@ static int stm32wb_serial_pmprepare(struct pm_callback_s *cb, int domain,
         break;
 
       default:
-        DEBUGASSERT(0);
+        DEBUGPANIC();
         break;
     }
 

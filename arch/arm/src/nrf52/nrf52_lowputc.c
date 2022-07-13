@@ -212,7 +212,7 @@ static void nrf52_setbaud(uintptr_t base, const struct uart_config_s *config)
 
       default:
         {
-          DEBUGASSERT(0);
+          DEBUGPANIC();
           break;
         }
     }

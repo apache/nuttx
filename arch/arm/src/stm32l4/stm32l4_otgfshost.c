@@ -1570,7 +1570,7 @@ static void stm32l4_transfer_start(struct stm32l4_usbhost_s *priv,
           break;
 
         default:
-          DEBUGASSERT(false);
+          DEBUGPANIC();
           return;
         }
 

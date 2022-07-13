@@ -945,7 +945,7 @@ static void esp_set_isr(int32_t n, void *f, void *arg)
   adapter = kmm_malloc(sizeof(struct irq_adpt));
   if (!adapter)
     {
-      DEBUGASSERT(0);
+      DEBUGPANIC();
     }
 
   adapter->func = f;
@@ -954,7 +954,7 @@ static void esp_set_isr(int32_t n, void *f, void *arg)
   ret = irq_attach(n + ESP32C3_IRQ_FIRSTPERIPH, esp_int_adpt_cb, adapter);
   if (ret != OK)
     {
-      DEBUGASSERT(0);
+      DEBUGPANIC();
     }
 
   g_wifi_irq_bind = true;
@@ -1870,7 +1870,7 @@ static uint32_t esp_queue_msg_waiting(void *queue)
 
 static void *esp_event_group_create(void)
 {
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return NULL;
 }
@@ -1885,7 +1885,7 @@ static void *esp_event_group_create(void)
 
 static void esp_event_group_delete(void *event)
 {
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 }
 
 /****************************************************************************
@@ -1898,7 +1898,7 @@ static void esp_event_group_delete(void *event)
 
 static uint32_t esp_event_group_set_bits(void *event, uint32_t bits)
 {
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return false;
 }
@@ -1913,7 +1913,7 @@ static uint32_t esp_event_group_set_bits(void *event, uint32_t bits)
 
 static uint32_t esp_event_group_clear_bits(void *event, uint32_t bits)
 {
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return false;
 }
@@ -1932,7 +1932,7 @@ static uint32_t esp_event_group_wait_bits(void *event,
                                           int wait_for_all_bits,
                                           uint32_t block_time_tick)
 {
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return false;
 }
@@ -2945,7 +2945,7 @@ static int esp_nvs_set_i8(uint32_t handle,
 #ifdef CONFIG_ESP32C3_WIFI_SAVE_PARAM
   return esp_nvs_set_blob(handle, key, &value, sizeof(int8_t));
 #else
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return -1;
 #endif
@@ -2976,7 +2976,7 @@ static int esp_nvs_get_i8(uint32_t handle,
 
   return esp_nvs_get_blob(handle, key, out_value, &len);
 #else
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return -1;
 #endif
@@ -3005,7 +3005,7 @@ static int esp_nvs_set_u8(uint32_t handle,
 #ifdef CONFIG_ESP32C3_WIFI_SAVE_PARAM
   return esp_nvs_set_blob(handle, key, &value, sizeof(uint8_t));
 #else
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return -1;
 #endif
@@ -3036,7 +3036,7 @@ static int esp_nvs_get_u8(uint32_t handle,
 
   return esp_nvs_get_blob(handle, key, out_value, &len);
 #else
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return -1;
 #endif
@@ -3065,7 +3065,7 @@ static int esp_nvs_set_u16(uint32_t handle,
 #ifdef CONFIG_ESP32C3_WIFI_SAVE_PARAM
   return esp_nvs_set_blob(handle, key, &value, sizeof(uint16_t));
 #else
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return -1;
 #endif
@@ -3096,7 +3096,7 @@ static int esp_nvs_get_u16(uint32_t handle,
 
   return esp_nvs_get_blob(handle, key, out_value, &len);
 #else
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return -1;
 #endif
@@ -3149,7 +3149,7 @@ static int esp_nvs_open(const char *name,
 
   return 0;
 #else
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return -1;
 #endif
@@ -3177,7 +3177,7 @@ static void esp_nvs_close(uint32_t handle)
   kmm_free(nvs_adpt->index_name);
   kmm_free(nvs_adpt);
 #else
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 #endif
 }
 
@@ -3263,7 +3263,7 @@ static int esp_nvs_set_blob(uint32_t handle,
 
   return 0;
 #else
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return -1;
 #endif
@@ -3337,7 +3337,7 @@ static int esp_nvs_get_blob(uint32_t handle,
 
   return 0;
 #else
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return -1;
 #endif
@@ -3385,7 +3385,7 @@ static int esp_nvs_erase_key(uint32_t handle, const char *key)
 
   return 0;
 #else
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return -1;
 #endif

@@ -291,7 +291,7 @@ static int set_gpioint_config(int slot, uint32_t gpiocfg)
       val |= (INT_ROUTE_PMU_LATCH << shift);
       break;
     default:
-      DEBUGASSERT(0);
+      DEBUGPANIC();
       break;
     }
 

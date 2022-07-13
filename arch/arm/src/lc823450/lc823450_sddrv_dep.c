@@ -110,7 +110,7 @@ static int _get_ch_from_cfg(struct sddrcfg_s *cfg)
         break;
 
       default:
-        DEBUGASSERT(false);
+        DEBUGPANIC();
     }
 
   return ch;

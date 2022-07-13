@@ -564,7 +564,7 @@ static xcpt_t sam34_capture(struct watchdog_lowerhalf_s *lower,
   return oldhandler;
 
 #endif
-  DEBUGASSERT(0);
+  DEBUGPANIC();
   return NULL;
 }
 

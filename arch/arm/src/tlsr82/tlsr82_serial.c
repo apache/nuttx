@@ -665,7 +665,7 @@ static void uart_dma_send(uart_priv_t *priv, char *buf, size_t len)
 
   if (len + DMA_HEAD_LEN > priv->txdmasize)
     {
-      DEBUGASSERT(false);
+      DEBUGPANIC();
       return;
     }
 

@@ -1567,7 +1567,7 @@ static void stm32_transfer_start(struct stm32_usbhost_s *priv, int chidx)
           break;
 
         default:
-          DEBUGASSERT(false);
+          DEBUGPANIC();
           return;
         }
 

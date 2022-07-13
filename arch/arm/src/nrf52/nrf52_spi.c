@@ -850,7 +850,7 @@ static void nrf52_spi_setmode(struct spi_dev_s *dev,
 
           default:
             {
-              DEBUGASSERT(0);
+              DEBUGPANIC();
               return;
             }
         }
