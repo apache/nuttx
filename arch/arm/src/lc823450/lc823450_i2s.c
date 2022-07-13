@@ -275,7 +275,7 @@ static void _setup_audio_pll(uint32_t freq)
         break;
 
       default:
-        DEBUGASSERT(false);
+        DEBUGPANIC();
     }
 
   /* Set divider */
@@ -369,7 +369,7 @@ static void lc823450_i2s_setchannel(char id, uint8_t ch)
         break;
 
       default:
-        DEBUGASSERT(false);
+        DEBUGPANIC();
         break;
     }
 

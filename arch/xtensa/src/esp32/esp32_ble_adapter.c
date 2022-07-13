@@ -1923,7 +1923,7 @@ static void btdm_sleep_enter_phase1_wrapper(uint32_t lpcycles)
   else
     {
       wlerr("timer start failed");
-      DEBUGASSERT(0);
+      DEBUGPANIC();
     }
 }
 
@@ -1952,7 +1952,7 @@ static void btdm_sleep_enter_phase2_wrapper(void)
         }
       else
         {
-          DEBUGASSERT(0);
+          DEBUGPANIC();
         }
 
       if (g_lp_stat.pm_lock_released == false)
@@ -1988,7 +1988,7 @@ static void btdm_sleep_exit_phase3_wrapper(void)
   if (btdm_sleep_clock_sync())
     {
       wlerr("sleep eco state err\n");
-      DEBUGASSERT(0);
+      DEBUGPANIC();
     }
 
   if (btdm_controller_get_sleep_mode() == ESP_BT_SLEEP_MODE_1)
@@ -2464,7 +2464,7 @@ int esp32_bt_controller_deinit(void)
     }
   else
     {
-      DEBUGASSERT(0);
+      DEBUGPANIC();
     }
 
 #ifdef CONFIG_PM
@@ -2540,7 +2540,7 @@ int esp32_bt_controller_disable(void)
     }
   else
     {
-      DEBUGASSERT(0);
+      DEBUGPANIC();
     }
 #endif
 

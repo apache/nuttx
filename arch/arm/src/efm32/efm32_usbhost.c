@@ -1645,7 +1645,7 @@ static void efm32_transfer_start(struct efm32_usbhost_s *priv, int chidx)
           break;
 
         default:
-          DEBUGASSERT(false);
+          DEBUGPANIC();
           return;
         }
 

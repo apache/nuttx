@@ -697,7 +697,7 @@ int lc823450_mtd_initialize(uint32_t devno)
                 PRIuOFF " nblocks=%" PRIuOFF "\n", __func__,
                 partinfo[i].startblock, partinfo[i].nblocks);
           mtd_semgive(&g_sem);
-          DEBUGASSERT(0);
+          DEBUGPANIC();
           return -EIO;
         }
 
@@ -707,7 +707,7 @@ int lc823450_mtd_initialize(uint32_t devno)
           finfo("%s(): mmcl_initialize part%d failed: %d\n",
                 __func__, partno, ret);
           mtd_semgive(&g_sem);
-          DEBUGASSERT(0);
+          DEBUGPANIC();
           return ret;
         }
     }

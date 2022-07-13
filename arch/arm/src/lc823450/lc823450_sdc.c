@@ -272,7 +272,7 @@ int lc823450_sdc_initialize(uint32_t ch)
 #endif
 
       default:
-        DEBUGASSERT(false);
+        DEBUGPANIC();
     }
 
   mcinfo("++++ start\n");

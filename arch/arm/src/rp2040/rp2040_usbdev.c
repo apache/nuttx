@@ -825,7 +825,7 @@ static void rp2040_handle_zlp(struct rp2040_usbdev_s *priv)
         break;
 
       default:
-        DEBUGASSERT(0);
+        DEBUGPANIC();
     }
 
   usbtrace(TRACE_INTDECODE(RP2040_TRACEINTID_HANDLEZLP), privep->ep.eplog);

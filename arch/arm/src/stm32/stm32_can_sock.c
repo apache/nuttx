@@ -1294,7 +1294,7 @@ errout:
     }
   else
     {
-      DEBUGASSERT(0);
+      DEBUGPANIC();
     }
 
   return ret;
@@ -1361,7 +1361,7 @@ static int stm32can_rxinterrupt(struct stm32_can_s *priv, int rxmb)
     }
   else
     {
-      DEBUGASSERT(0);
+      DEBUGPANIC();
     }
 
   return OK;

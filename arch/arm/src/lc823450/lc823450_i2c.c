@@ -1108,7 +1108,7 @@ struct i2c_master_s *lc823450_i2cbus_initialize(int port)
         break;
 #endif
     default:
-      DEBUGASSERT(false);
+      DEBUGPANIC();
       return NULL;
     }
 
@@ -1180,7 +1180,7 @@ int lc823450_i2cbus_uninitialize(struct i2c_master_s *dev)
 
   if (-1 == port)
     {
-      DEBUGASSERT(0);
+      DEBUGPANIC();
       return -EFAULT;
     }
 

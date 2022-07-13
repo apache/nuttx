@@ -2919,7 +2919,7 @@ static int stm32l4_i2c_pm_prepare(struct pm_callback_s *cb, int domain,
 
       if (nxsem_get_value(&priv->sem_excl, &sval) < 0)
         {
-          DEBUGASSERT(false);
+          DEBUGPANIC();
           return -EINVAL;
         }
 
