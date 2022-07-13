@@ -4394,7 +4394,7 @@ static int esp_freq_to_channel(int freq)
  * Name: esp_dport_access_reg_read
  *
  * Description:
- *   Read regitser value safely in SMP
+ *   Read register value safely in SMP
  *
  * Input Parameters:
  *   reg - Register address

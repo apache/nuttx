@@ -109,7 +109,7 @@ struct esp32_spislv_config_s
   uint32_t rst_bit;           /* I2C reset bit */
 
   bool use_dma;               /* Use DMA */
-  uint8_t dma_chan_s;         /* DMA channel regitser shift */
+  uint8_t dma_chan_s;         /* DMA channel register shift */
   uint8_t dma_chan;           /* DMA channel */
   uint32_t dma_clk_bit;       /* DMA clock enable bit */
   uint32_t dma_rst_bit;       /* DMA reset bit */
@@ -789,7 +789,7 @@ static int esp32_spislv_interrupt(int irq, void *context, void *arg)
 
   if (!priv->dma_chan)
     {
-      /** With DMA, software should copy data from regitser
+      /** With DMA, software should copy data from register
        *  to receive buffer
        */
 
