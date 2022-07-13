@@ -1516,7 +1516,7 @@ static void mac802154_rxdatareq(FAR struct ieee802154_privmac_s *priv,
             }
           else
             {
-              DEBUGASSERT(false);
+              DEBUGPANIC();
             }
         }
 
@@ -1578,7 +1578,7 @@ static void mac802154_rxdatareq(FAR struct ieee802154_privmac_s *priv,
     }
   else
     {
-      DEBUGASSERT(false);
+      DEBUGPANIC();
     }
 
   /* Set the destination addr mode inside the frame control field */
