@@ -18,12 +18,12 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_DMA_H
+#define __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_DMA_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
-
-#ifndef __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_DMA_H
-#define __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_DMA_H
 
 #include <nuttx/config.h>
 #include <stdbool.h>

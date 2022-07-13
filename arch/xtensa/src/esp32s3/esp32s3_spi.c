@@ -855,7 +855,7 @@ static void esp32s3_spi_dma_exchange(struct esp32s3_spi_priv_s *priv,
     }
 
   esp32s3_spi_set_regbits(SPI_DMA_INT_CLR_REG(priv->config->id),
-                          SPI_TRANS_DONE_INT_RAW_M);
+                          SPI_TRANS_DONE_INT_CLR_M);
 
   esp32s3_spi_set_regbits(SPI_DMA_INT_ENA_REG(priv->config->id),
                           SPI_TRANS_DONE_INT_ENA_M);
@@ -889,7 +889,7 @@ static void esp32s3_spi_dma_exchange(struct esp32s3_spi_priv_s *priv,
           /* Enable SPI DMA RX */
 
           esp32s3_spi_set_regbits(SPI_DMA_CONF_REG(priv->config->id),
-                                                   SPI_DMA_RX_ENA_M);
+                                  SPI_DMA_RX_ENA_M);
 
           esp32s3_dma_setup(channel, false, dma_rxdesc, SPI_DMA_DESC_NUM,
                             rp, bytes);
@@ -1465,7 +1465,7 @@ static int esp32s3_spi_interrupt(int irq, void *context, void *arg)
   /* Write 1 to clear interrupt bit */
 
   esp32s3_spi_set_regbits(SPI_DMA_INT_CLR_REG(priv->config->id),
-                          SPI_TRANS_DONE_INT_RAW_M);
+                          SPI_TRANS_DONE_INT_CLR_M);
   nxsem_post(&priv->sem_isr);
 
   return 0;
