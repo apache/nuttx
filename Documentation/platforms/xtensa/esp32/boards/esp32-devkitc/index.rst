@@ -115,6 +115,28 @@ nsh
 Basic NuttShell configuration (console enabled in UART0, exposed via
 USB connection by means of CP2102 converter, at 115200 bps).
 
+knsh
+----
+
+This is identical to the nsh configuration except that (1) NuttX
+is built as PROTECTED mode, monolithic module and the user applications
+are built separately and, as a consequence, (2) some features that are
+only available in the FLAT build are disabled.
+
+Protected Mode support for ESP32 relies on the PID Controller peripheral
+for implementing isolation between Kernel and Userspace.
+
+By working together with the MMU and Static MPUs of the ESP32, the PID
+Controller is able to restrict the application access to peripherals, on-chip
+memories (Internal ROM and Internal SRAM) and off-chip memories (External
+Flash and PSRAM).
+
+.. warning::
+    * The PID Controller driver is in **EXPERIMENTAL** state, so please
+      consider the Protected Mode feature for ESP32 a **Proof-of-Concept**.
+    * The PID Controller **does not** prevent the application from accessing
+      CPU System Registers.
+
 wapi
 ----
 
