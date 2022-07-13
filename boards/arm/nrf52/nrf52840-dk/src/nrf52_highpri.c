@@ -115,7 +115,7 @@ void timer_handler(void)
   ret = NRF52_TIM_CHECKINT(g_highpri.dev, NRF52_TIM_CC0);
   if (ret != 1)
     {
-      DEBUGASSERT(0);
+      DEBUGPANIC();
     }
 
   /* Increment the count associated with the current basepri */
