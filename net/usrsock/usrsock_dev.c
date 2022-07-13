@@ -985,7 +985,7 @@ static int usrsockdev_close(FAR struct file *filep)
           if (ret != -ETIMEDOUT && ret != -EINTR)
             {
               ninfo("net_timedwait errno: %d\n", ret);
-              DEBUGASSERT(false);
+              DEBUGPANIC();
             }
         }
       else
