@@ -97,7 +97,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
     {
       /* There must have been an integer overflow */
 
-      DEBUGASSERT(false);
+      DEBUGPANIC();
       return NULL;
     }
 
