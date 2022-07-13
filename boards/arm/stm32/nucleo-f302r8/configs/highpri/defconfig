@@ -6,6 +6,7 @@
 # modifications.
 #
 # CONFIG_DEV_NULL is not set
+# CONFIG_LIBC_LONG_LONG is not set
 CONFIG_ARCH="arm"
 CONFIG_ARCH_BOARD="nucleo-f302r8"
 CONFIG_ARCH_BOARD_NUCLEO_F302R8=y

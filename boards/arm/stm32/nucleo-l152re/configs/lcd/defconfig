@@ -5,6 +5,7 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
+# CONFIG_LIBC_LONG_LONG is not set
 # CONFIG_NSH_ARGCAT is not set
 # CONFIG_NX_DISABLE_16BPP is not set
 CONFIG_ARCH="arm"

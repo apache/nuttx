@@ -6,6 +6,7 @@
 # modifications.
 #
 # CONFIG_FS_PROCFS_EXCLUDE_ENVIRON is not set
+# CONFIG_LIBC_LONG_LONG is not set
 # CONFIG_MMCSD_HAVE_CARDDETECT is not set
 # CONFIG_MMCSD_HAVE_WRITEPROTECT is not set
 # CONFIG_NSH_ARGCAT is not set
