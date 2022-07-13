@@ -320,6 +320,7 @@ struct imxrt_driver_s
   uint8_t  rxtail;             /* The next RX descriptor to use */
   uint8_t  phyaddr;            /* Selected PHY address */
   struct wdog_s txtimeout;     /* TX timeout timer */
+  uint32_t ints;               /* Enabled interrupts */
   struct work_s irqwork;       /* For deferring interrupt work to the work queue */
   struct work_s pollwork;      /* For deferring poll work to the work queue */
   struct enet_desc_s *txdesc;  /* A pointer to the list of TX descriptor */
@@ -362,6 +363,11 @@ static inline uint32_t imxrt_enet_getreg32(FAR struct imxrt_driver_s *priv,
                                            uint32_t offset);
 static inline void imxrt_enet_putreg32(FAR struct imxrt_driver_s *priv,
                                        uint32_t value, uint32_t offset);
+
+static inline void imxrt_enet_modifyreg32(FAR struct imxrt_driver_s *priv,
+                                          unsigned int offset,
+                                          uint32_t clearbits,
+                                          uint32_t setbits);
 
 #ifndef IMXRT_BUFFERS_SWAP
 #  define imxrt_swap32(value) (value)
@@ -459,6 +465,31 @@ static inline uint32_t
 imxrt_enet_getreg32(FAR struct imxrt_driver_s *priv, uint32_t offset)
 {
   return getreg32(priv->base + offset);
+}
+
+/****************************************************************************
+ * Name: imxrt_enet_putreg32
+ *
+ * Description:
+ *   Atomically modify the specified bits in a memory mapped register
+ *
+ * Input Parameters:
+ *   priv      - private SPI device structure
+ *   offset    - offset to the register of interest
+ *   clearbits - the 32-bit value to be written as 0s
+ *   setbits   - the 32-bit value to be written as 1s
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void imxrt_enet_modifyreg32(FAR struct imxrt_driver_s *priv,
+                                          unsigned int offset,
+                                          uint32_t clearbits,
+                                          uint32_t setbits)
+{
+  modifyreg32(priv->base + offset, clearbits, setbits);
 }
 
 /****************************************************************************
@@ -585,8 +616,6 @@ static bool imxrt_txringfull(struct imxrt_driver_s *priv)
 static int imxrt_transmit(struct imxrt_driver_s *priv)
 {
   struct enet_desc_s *txdesc;
-  irqstate_t flags;
-  uint32_t regval;
   uint8_t *buf;
 
   /* Since this can be called from imxrt_receive, it is possible that
@@ -636,9 +665,6 @@ static int imxrt_transmit(struct imxrt_driver_s *priv)
   txdesc->status1 |= (TXDESC_R | TXDESC_L | TXDESC_TC);
 
   buf = (uint8_t *)imxrt_swap32((uint32_t)priv->dev.d_buf);
-  if (priv->rxdesc[priv->rxtail].data == buf)
-    {
-      struct enet_desc_s *rxdesc = &priv->rxdesc[priv->rxtail];
 
       /* Data was written into the RX buffer, so swap the TX and RX buffers */
 
@@ -653,24 +679,20 @@ static int imxrt_transmit(struct imxrt_driver_s *priv)
 
   /* Make the following operations atomic */
 
-  flags = spin_lock_irqsave(NULL);
+  /* Start the TX transfer (if it was not already waiting for buffers) */
+
+  imxrt_enet_putreg32(priv, ENET_TDAR, IMXRT_ENET_TDAR_OFFSET);
 
   /* Enable TX interrupts */
 
-  regval  = imxrt_enet_getreg32(priv, IMXRT_ENET_EIMR_OFFSET);
-  regval |= TX_INTERRUPTS;
-  imxrt_enet_putreg32(priv, regval, IMXRT_ENET_EIMR_OFFSET);
+  priv->ints |= TX_INTERRUPTS;
+  imxrt_enet_modifyreg32(priv, IMXRT_ENET_EIMR_OFFSET, 0, TX_INTERRUPTS);
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
   wd_start(&priv->txtimeout, IMXRT_TXTIMEOUT,
            imxrt_txtimeout_expiry, (wdparm_t)priv);
 
-  /* Start the TX transfer (if it was not already waiting for buffers) */
-
-  imxrt_enet_putreg32(priv, ENET_TDAR, IMXRT_ENET_TDAR_OFFSET);
-
-  spin_unlock_irqrestore(NULL, flags);
   return OK;
 }
 
@@ -1004,7 +1026,6 @@ static void imxrt_receive(struct imxrt_driver_s *priv)
 static void imxrt_txdone(struct imxrt_driver_s *priv)
 {
   struct enet_desc_s *txdesc;
-  uint32_t regval;
   bool txdone;
 
   /* We are here because a transmission completed, so the watchdog can be
@@ -1055,9 +1076,9 @@ static void imxrt_txdone(struct imxrt_driver_s *priv)
 
       wd_cancel(&priv->txtimeout);
 
-      regval  = imxrt_enet_getreg32(priv, IMXRT_ENET_EIMR_OFFSET);
-      regval &= ~TX_INTERRUPTS;
-      imxrt_enet_putreg32(priv, regval, IMXRT_ENET_EIMR_OFFSET);
+      priv->ints &= ~TX_INTERRUPTS;
+      imxrt_enet_modifyreg32(priv, IMXRT_ENET_EIMR_OFFSET, TX_INTERRUPTS,
+                             priv->ints);
     }
 
   /* There should be space for a new TX in any event.  Poll the network for
@@ -1099,8 +1120,7 @@ static void imxrt_enet_interrupt_work(void *arg)
 
   /* Get the set of unmasked, pending interrupt. */
 
-  pending = imxrt_enet_getreg32(priv, IMXRT_ENET_EIR_OFFSET) &
-            imxrt_enet_getreg32(priv, IMXRT_ENET_EIMR_OFFSET);
+  pending = imxrt_enet_getreg32(priv, IMXRT_ENET_EIR_OFFSET) & priv->ints;
 
   /* Clear the pending interrupts */
 
@@ -1114,8 +1134,7 @@ static void imxrt_enet_interrupt_work(void *arg)
 
       NETDEV_ERRORS(&priv->dev);
 
-      nerr("ERROR: Network interface error occurred (0x%08" PRIX32 ")\n",
-           (pending & ERROR_INTERRUPTS));
+      nerr("pending %" PRIx32 " ints %" PRIx32 "\n", pending, priv->ints);
     }
 
   if (pending & CRITICAL_ERROR)
@@ -1179,10 +1198,7 @@ static void imxrt_enet_interrupt_work(void *arg)
 
   /* Re-enable Ethernet interrupts */
 
-#if 0
-  up_enable_irq(IMXRT_IRQ_EMACTMR);
-#endif
-  up_enable_irq(IMXRT_ENET_IRQ);
+  imxrt_enet_putreg32(priv, priv->ints, IMXRT_ENET_EIMR_OFFSET);
 }
 
 /****************************************************************************
@@ -1215,7 +1231,7 @@ static int imxrt_enet_interrupt(int irq, void *context, void *arg)
    * condition here.
    */
 
-  up_disable_irq(IMXRT_ENET_IRQ);
+  imxrt_enet_putreg32(priv, 0, IMXRT_ENET_EIMR_OFFSET);
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
@@ -1290,7 +1306,8 @@ static void imxrt_txtimeout_expiry(wdparm_t arg)
    * condition with interrupt work that is already queued and in progress.
    */
 
-  up_disable_irq(IMXRT_ENET_IRQ);
+  imxrt_enet_putreg32(priv, 0, IMXRT_ENET_EIMR_OFFSET);
+  priv->ints = 0;
 
   /* Schedule to perform the TX timeout processing on the worker thread,
    * canceling any pending interrupt work.
@@ -1400,26 +1417,25 @@ static int imxrt_ifup_action(struct net_driver_s *dev, bool resetphy)
 
   imxrt_enet_putreg32(priv, ENET_RDAR, IMXRT_ENET_RDAR_OFFSET);
 
+  imxrt_enet_putreg32(priv, 0, IMXRT_ENET_EIMR_OFFSET);
+
   /* Clear all pending ENET interrupt */
 
-  imxrt_enet_putreg32(priv, RX_INTERRUPTS | ERROR_INTERRUPTS | TX_INTERRUPTS,
-                 IMXRT_ENET_EIR_OFFSET);
+  imxrt_enet_putreg32(priv, 0xffffffff, IMXRT_ENET_EIR_OFFSET);
+
+  /* Mark the interrupt "up" and enable interrupts at the NVIC */
+
+  up_enable_irq(IMXRT_ENET_IRQ);
+
+  priv->bifup = true;
 
   /* Enable RX and error interrupts at the controller (TX interrupts are
    * still disabled).
    */
 
-  imxrt_enet_putreg32(priv, RX_INTERRUPTS | ERROR_INTERRUPTS,
-                      IMXRT_ENET_EIMR_OFFSET);
-
-  /* Mark the interrupt "up" and enable interrupts at the NVIC */
-
-  priv->bifup = true;
-
-#if 0
-  up_enable_irq(IMXRT_IRQ_EMACTMR);
-#endif
-  up_enable_irq(IMXRT_ENET_IRQ);
+  priv->ints = RX_INTERRUPTS | ERROR_INTERRUPTS;
+  imxrt_enet_modifyreg32(priv, IMXRT_ENET_EIMR_OFFSET, TX_INTERRUPTS,
+                         priv->ints);
 
   return OK;
 }
@@ -1480,8 +1496,9 @@ static int imxrt_ifdown(struct net_driver_s *dev)
 
   flags = enter_critical_section();
 
+  priv->ints = 0;
+  imxrt_enet_putreg32(priv, priv->ints, IMXRT_ENET_EIMR_OFFSET);
   up_disable_irq(IMXRT_ENET_IRQ);
-  imxrt_enet_putreg32(priv, 0, IMXRT_ENET_EIMR_OFFSET);
 
   /* Cancel the TX timeout timers */
 
