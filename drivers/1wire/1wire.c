@@ -155,7 +155,7 @@ static int onewire_pm_prepare(FAR struct pm_callback_s *cb, int domain,
 
       if (nxsem_get_value(&master->devsem.sem, &sval) < 0)
         {
-          DEBUGASSERT(false);
+          DEBUGPANIC();
           return -EINVAL;
         }
 

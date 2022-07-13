@@ -1408,7 +1408,7 @@ static void cdcecm_mkepdesc(int epidx,
         break;
 
       default:
-        DEBUGASSERT(false);
+        DEBUGPANIC();
     }
 }
 

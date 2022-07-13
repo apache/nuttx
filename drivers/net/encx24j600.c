@@ -1760,7 +1760,7 @@ static void enc_rxabtif(FAR struct enc_driver_s *priv)
       descr = (FAR struct enc_descr_s *)sq_next(descr);
     }
 
-  DEBUGASSERT(false);
+  DEBUGPANIC();
 #endif
 
   descr = (FAR struct enc_descr_s *)sq_peek(&priv->rxqueue);

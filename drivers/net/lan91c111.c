@@ -785,7 +785,7 @@ static void lan91c111_txdone(FAR struct net_driver_s *dev)
     }
   else
     {
-      DEBUGASSERT(0);
+      DEBUGPANIC();
     }
 }
 
