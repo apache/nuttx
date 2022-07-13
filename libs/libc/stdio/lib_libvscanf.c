@@ -42,6 +42,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* CONFIG_LIBC_LONG_LONG is not a valid selection of the compiler does not
+ * support long long types.
+ */
+
+#ifndef CONFIG_HAVE_LONG_LONG
+#  undef CONFIG_LIBC_LONG_LONG
+#endif
+
 #define MAXLN   128
 
 #define HH_MOD -2
@@ -207,7 +215,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
   int base = 10;
   char tmp[MAXLN];
 
-#ifdef CONFIG_HAVE_LONG_LONG
+#ifdef CONFIG_LIBC_LONG_LONG
   FAR unsigned long long *plonglong = NULL;
 #endif
   FAR unsigned long *plong = NULL;
@@ -309,7 +317,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
               else if (fmt_char(fmt) == 'j')
                 {
                   /* Same as long long if available. Otherwise, long. */
-#ifdef CONFIG_HAVE_LONG_LONG
+#ifdef CONFIG_LIBC_LONG_LONG
                   modifier = LL_MOD;
 #else
                   modifier = L_MOD;
@@ -561,7 +569,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                       *plong = 0;
                       break;
 
-#ifdef CONFIG_HAVE_LONG_LONG
+#ifdef CONFIG_LIBC_LONG_LONG
                     case LL_MOD:
                       plonglong = va_arg(ap, FAR unsigned long long *);
                       *plonglong = 0;
@@ -588,7 +596,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                   bool stopconv;
                   int errsave;
                   unsigned long tmplong = 0;
-#ifdef CONFIG_HAVE_LONG_LONG
+#ifdef CONFIG_LIBC_LONG_LONG
                   unsigned long long tmplonglong = 0;
 #endif
                   /* Copy the real string into a temporary working buffer. */
@@ -807,7 +815,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
 
                   switch (modifier)
                     {
-#ifndef CONFIG_HAVE_LONG_LONG
+#ifndef CONFIG_LIBC_LONG_LONG
                     case LL_MOD:
 #endif
                     case HH_MOD:
@@ -824,7 +832,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                         }
                       break;
 
-#ifdef CONFIG_HAVE_LONG_LONG
+#ifdef CONFIG_LIBC_LONG_LONG
                     case LL_MOD:
                       if (sign)
                         {
@@ -870,7 +878,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                           *pint = (unsigned int)tmplong;
                           break;
 
-#ifndef CONFIG_HAVE_LONG_LONG
+#ifndef CONFIG_LIBC_LONG_LONG
                         case L_MOD:
 #endif
                         default:
@@ -878,7 +886,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                           *plong = tmplong;
                           break;
 
-#ifdef CONFIG_HAVE_LONG_LONG
+#ifdef CONFIG_LIBC_LONG_LONG
                         case LL_MOD:
                           linfo("Return %lld to %p\n", tmplonglong,
                                 plonglong);
@@ -1133,7 +1141,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                       *plong = (unsigned long)nchars;
                       break;
 
-#ifdef CONFIG_HAVE_LONG_LONG
+#ifdef CONFIG_LIBC_LONG_LONG
                     case LL_MOD:
                       plonglong = va_arg(ap, FAR unsigned long long *);
                       *plonglong = (unsigned long long)nchars;
