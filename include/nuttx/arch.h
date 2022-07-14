@@ -2552,7 +2552,8 @@ int up_putc(int ch);
  *
  ****************************************************************************/
 
-void up_puts(FAR const char *str);
+#define up_puts(str) up_nputs(str, ~((size_t)0))
+void up_nputs(FAR const char *str, size_t len);
 
 /****************************************************************************
  * Name: arch_sporadic_*

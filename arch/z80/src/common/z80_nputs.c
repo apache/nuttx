@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/arm_puts.c
+ * arch/z80/src/common/z80_nputs.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,23 +25,33 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 
-#include "arm_internal.h"
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_puts
+ * Name: up_nputs
  *
  * Description:
  *   This is a low-level helper function used to support debug.
  *
  ****************************************************************************/
 
-void up_puts(const char *str)
+void up_nputs(const char *str, size_t len)
 {
-  while (*str)
+  while (*str && len-- > 0)
     {
       up_putc(*str++);
     }

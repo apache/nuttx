@@ -26,7 +26,7 @@ CMN_CSRCS += z16_stackdump.c z16_copystate.c
 CMN_CSRCS += z16_mdelay.c z16_udelay.c z16_createstack.c z16_registerdump.c
 CMN_CSRCS += z16_unblocktask.c z16_doirq.c z16_releasepending.c z16_usestack.c
 CMN_CSRCS += z16_exit.c z16_releasestack.c z16_stackframe.c z16_idle.c
-CMN_CSRCS += z16_reprioritizertr.c z16_puts.c
+CMN_CSRCS += z16_reprioritizertr.c z16_nputs.c
 
 CHIP_SSRCS = z16f_lowuart.S z16f_saveusercontext.S z16f_restoreusercontext.S
 CHIP_CSRCS = z16f_clkinit.c z16f_sysexec.c z16f_irq.c z16f_serial.c
