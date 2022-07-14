@@ -156,12 +156,12 @@ ssize_t up_check_tcbstack_remain(FAR struct tcb_s *tcb)
 
 size_t up_check_stack(void)
 {
-  return up_check_tcbstack(this_task());
+  return up_check_tcbstack(running_task());
 }
 
 ssize_t up_check_stack_remain(void)
 {
-  return up_check_tcbstack_remain(this_task());
+  return up_check_tcbstack_remain(running_task());
 }
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
