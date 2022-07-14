@@ -797,26 +797,65 @@ config SAMV7_USBHOSTHS
 	depends on SAMV7_HAVE_USBHS
 	select USBHOST
 
-config SAMV7_USART0
+menuconfig SAMV7_USART0
 	bool "USART 0"
 	default n
 	depends on SAMV7_HAVE_USART0
 	select USART0_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
-config SAMV7_USART1
+if SAMV7_USART0
+
+config SAMV7_USART0_RS485MODE
+	bool "RS-485 on USART0"
+	default n
+	---help---
+		Enable RS-485 interface on USART0. Please note that the pin is set
+		to logical 1 before the serial driver is opened. Board specific
+		logic is required to set the pin to logical 0 before the driver is
+		opened for the first time.
+
+endif
+
+menuconfig SAMV7_USART1
 	bool "USART 1"
 	default n
 	depends on SAMV7_HAVE_USART1
 	select USART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
-config SAMV7_USART2
+if SAMV7_USART1
+
+config SAMV7_USART1_RS485MODE
+	bool "RS-485 on USART1"
+	default n
+	---help---
+		Enable RS-485 interface on USART1. Please note that the pin is set
+		to logical 1 before the serial driver is opened. Board specific
+		logic is required to set the pin to logical 0 before the driver is
+		opened for the first time.
+
+endif
+
+menuconfig SAMV7_USART2
 	bool "USART 2"
 	default n
 	depends on SAMV7_HAVE_USART2
 	select USART2_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
+
+if SAMV7_USART2
+
+config SAMV7_USART2_RS485MODE
+	bool "RS-485 on USART2"
+	default n
+	---help---
+		Enable RS-485 interface on USART2. Please note that the pin is set
+		to logical 1 before the serial driver is opened. Board specific
+		logic is required to set the pin to logical 0 before the driver is
+		opened for the first time.
+
+endif
 
 config SAMV7_WDT
 	bool "Watchdog Timer (WDT)"
