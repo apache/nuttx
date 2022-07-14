@@ -131,7 +131,7 @@ typedef int16_t      gid_t;
 
 /* dev_t is used for device IDs */
 
-typedef uint16_t     dev_t;
+typedef uint32_t     dev_t;
 
 /* ino_t is used for file serial numbers */
 
