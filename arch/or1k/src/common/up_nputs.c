@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/or1k/src/common/up_puts.c
+ * arch/or1k/src/common/up_nputs.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,23 +25,21 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 
-#include "up_internal.h"
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_puts
+ * Name: up_nputs
  *
  * Description:
  *   This is a low-level helper function used to support debug.
  *
  ****************************************************************************/
 
-void up_puts(const char *str)
+void up_nputs(const char *str, size_t len)
 {
-  while (*str)
+  while (*str && len-- > 0)
     {
       up_putc(*str++);
     }
