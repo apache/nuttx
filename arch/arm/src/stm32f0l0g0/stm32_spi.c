@@ -285,7 +285,7 @@ static struct stm32_spidev_s g_spi1dev =
 #ifdef CONFIG_STM32F0L0G0_SPI_INTERRUPTS
   .spiirq   = STM32_IRQ_SPI1,
 #endif
-#ifdef CONFIG_STM32F0L0G0_SPI_DMA
+#ifdef CONFIG_STM32F0L0G0_SPI1_DMA
   /* lines must be configured in board.h */
 
   .rxch     = DMACHAN_SPI1_RX,
@@ -340,7 +340,7 @@ static struct stm32_spidev_s g_spi2dev =
 #ifdef CONFIG_STM32F0L0G0_SPI_INTERRUPTS
   .spiirq   = STM32_IRQ_SPI2,
 #endif
-#ifdef CONFIG_STM32F0L0G0_SPI_DMA
+#ifdef CONFIG_STM32F0L0G0_SPI2_DMA
   .rxch     = DMACHAN_SPI2_RX,
   .txch     = DMACHAN_SPI2_TX,
 #endif
@@ -1407,6 +1407,17 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 {
   struct stm32_spidev_s *priv = (struct stm32_spidev_s *)dev;
 
+  if ((priv->rxdma == NULL) || (priv->txdma == NULL) ||
+      up_interrupt_context())
+    {
+      /* Invalid DMA channels, or interrupt context, fall
+       * back to non-DMA method.
+       */
+
+      spi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
+      return;
+    }
+
 #ifdef CONFIG_STM32F0L0G0_DMACAPABLE
   if ((txbuffer &&
       !stm32_dmacapable((uintptr_t)txbuffer, nwords, priv->txccr)) ||
@@ -1724,32 +1735,43 @@ static void spi_bus_initialize(struct stm32_spidev_s *priv)
   nxsem_init(&priv->exclsem, 0, 1);
 
 #ifdef CONFIG_STM32F0L0G0_SPI_DMA
-  /* Initialize the SPI semaphores that is used to wait for DMA completion */
+  if (priv->rxch && priv->txch)
+    {
+      /* Initialize the SPI semaphores that is used to wait for DMA
+       * completion
+       */
 
-  nxsem_init(&priv->rxsem, 0, 0);
-  nxsem_init(&priv->txsem, 0, 0);
+      nxsem_init(&priv->rxsem, 0, 0);
+      nxsem_init(&priv->txsem, 0, 0);
 
-  /* These semaphores are used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
+      /* These semaphores are used for signaling and, hence, should not have
+       * priority inheritance enabled.
+       */
 
-  nxsem_set_protocol(&priv->rxsem, SEM_PRIO_NONE);
-  nxsem_set_protocol(&priv->txsem, SEM_PRIO_NONE);
+      nxsem_set_protocol(&priv->rxsem, SEM_PRIO_NONE);
+      nxsem_set_protocol(&priv->txsem, SEM_PRIO_NONE);
 
-  /* Get DMA channels.  NOTE: stm32_dmachannel() will always assign the DMA
-   * channel.  If the channel is not available, then stm32_dmachannel() will
-   * block and wait until the channel becomes available.  WARNING: If you
-   * have another device sharing a DMA channel with SPI and the code never
-   * releases that channel, then the call to stm32_dmachannel()  will hang
-   * forever in this function!  Don't let your design do that!
-   */
+      /* Get DMA channels.  NOTE: stm32_dmachannel() will always assign the
+       * DMA channel. If the channel is not available, then
+       * stm32_dmachannel() will block and wait until the channel becomes
+       * available. WARNING: If you have another device sharing a DMA channel
+       * with SPI and the code never releases that channel, then the call to
+       * stm32_dmachannel() will hang forever in this function!
+       * Don't let your design do that!
+       */
 
-  priv->rxdma = stm32_dmachannel(priv->rxch);
-  priv->txdma = stm32_dmachannel(priv->txch);
-  DEBUGASSERT(priv->rxdma && priv->txdma);
+      priv->rxdma = stm32_dmachannel(priv->rxch);
+      priv->txdma = stm32_dmachannel(priv->txch);
+      DEBUGASSERT(priv->rxdma && priv->txdma);
 
-  spi_modifycr(STM32_SPI_CR2_OFFSET, priv,
-               SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN, 0);
+      spi_modifycr(STM32_SPI_CR2_OFFSET, priv,
+                   SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN, 0);
+    }
+  else
+    {
+      priv->rxdma = NULL;
+      priv->txdma = NULL;
+    }
 #endif
 
   /* Enable spi */
