@@ -46,7 +46,11 @@
 
 #include "arm_internal.h"
 #include "sam_config.h"
+
 #include "hardware/sam_uart.h"
+#include "hardware/sam_pinmap.h"
+#include "sam_gpio.h"
+#include "sam_serial.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -328,6 +332,12 @@ struct sam_dev_s
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
   bool     flowc;               /* input flow control (RTS) enabled */
 #endif
+
+  bool     has_rs485;           /* True if RS-485 mode is enabled */
+
+#ifdef SERIAL_HAVE_RS485
+  uint32_t rs485_dir_gpio;      /* RS-485 RTS pin */
+#endif
 };
 
 /****************************************************************************
@@ -417,6 +427,7 @@ static struct sam_dev_s g_uart0priv =
   .parity         = CONFIG_UART0_PARITY,
   .bits           = CONFIG_UART0_BITS,
   .stopbits2      = CONFIG_UART0_2STOP,
+  .has_rs485      = false,
 };
 
 static uart_dev_t g_uart0port =
@@ -447,6 +458,7 @@ static struct sam_dev_s g_uart1priv =
   .parity         = CONFIG_UART1_PARITY,
   .bits           = CONFIG_UART1_BITS,
   .stopbits2      = CONFIG_UART1_2STOP,
+  .has_rs485      = false,
 };
 
 static uart_dev_t g_uart1port =
@@ -477,6 +489,7 @@ static struct sam_dev_s g_uart2priv =
   .parity         = CONFIG_UART2_PARITY,
   .bits           = CONFIG_UART2_BITS,
   .stopbits2      = CONFIG_UART2_2STOP,
+  .has_rs485      = false,
 };
 
 static uart_dev_t g_uart2port =
@@ -507,6 +520,7 @@ static struct sam_dev_s g_uart3priv =
   .parity         = CONFIG_UART3_PARITY,
   .bits           = CONFIG_UART3_BITS,
   .stopbits2      = CONFIG_UART3_2STOP,
+  .has_rs485      = false,
 };
 
 static uart_dev_t g_uart3port =
@@ -537,6 +551,7 @@ static struct sam_dev_s g_uart4priv =
   .parity         = CONFIG_UART4_PARITY,
   .bits           = CONFIG_UART4_BITS,
   .stopbits2      = CONFIG_UART4_2STOP,
+  .has_rs485      = false,
 };
 
 static uart_dev_t g_uart4port =
@@ -569,6 +584,12 @@ static struct sam_dev_s g_usart0priv =
   .stopbits2      = CONFIG_USART0_2STOP,
 #if defined(CONFIG_USART0_OFLOWCONTROL) || defined(CONFIG_USART0_IFLOWCONTROL)
   .flowc          = true,
+#endif
+#ifdef CONFIG_SAMV7_USART0_RS485MODE
+  .has_rs485      = true,
+  .rs485_dir_gpio = GPIO_USART0_RTS,
+#else
+  .has_rs485      = false,
 #endif
 };
 
@@ -603,6 +624,12 @@ static struct sam_dev_s g_usart1priv =
 #if defined(CONFIG_USART1_OFLOWCONTROL) || defined(CONFIG_USART1_IFLOWCONTROL)
   .flowc          = true,
 #endif
+#ifdef CONFIG_SAMV7_USART1_RS485MODE
+  .has_rs485      = true,
+  .rs485_dir_gpio = GPIO_USART1_RTS,
+#else
+  .has_rs485      = false,
+#endif
 };
 
 static uart_dev_t g_usart1port =
@@ -635,6 +662,12 @@ static struct sam_dev_s g_usart2priv =
   .stopbits2      = CONFIG_USART2_2STOP,
 #if defined(CONFIG_USART2_OFLOWCONTROL) || defined(CONFIG_USART2_IFLOWCONTROL)
   .flowc          = true,
+#endif
+#ifdef CONFIG_SAMV7_USART2_RS485MODE
+  .has_rs485      = true,
+  .rs485_dir_gpio = GPIO_USART2_RTS,
+#else
+  .has_rs485      = false,
 #endif
 };
 
@@ -879,6 +912,17 @@ static int sam_setup(struct uart_dev_s *dev)
   /* Enable receiver & transmitter */
 
   sam_serialout(priv, SAM_UART_CR_OFFSET, (UART_CR_RXEN | UART_CR_TXEN));
+
+#ifdef SERIAL_HAVE_RS485
+  if (priv->has_rs485)
+    {
+      sam_configgpio(priv->rs485_dir_gpio);
+
+      regval = sam_serialin(priv, SAM_UART_MR_OFFSET);
+      regval |= UART_MR_MODE_RS485;
+      sam_serialout(priv, SAM_UART_MR_OFFSET, regval);
+    }
+#endif
 #endif
 
   return OK;
@@ -896,12 +940,28 @@ static int sam_setup(struct uart_dev_s *dev)
 static void sam_shutdown(struct uart_dev_s *dev)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
+  uint32_t regval;
 
   /* Reset and disable receiver and transmitter */
 
   sam_serialout(priv, SAM_UART_CR_OFFSET,
                 (UART_CR_RSTRX | UART_CR_RSTTX | UART_CR_RXDIS |
                  UART_CR_TXDIS));
+
+  /* Set mode back to normal */
+
+  regval = sam_serialin(priv, SAM_UART_MR_OFFSET);
+  regval &= ~(UART_MR_MODE_MASK);
+  sam_serialout(priv, SAM_UART_MR_OFFSET, regval);
+
+#ifdef SERIAL_HAVE_RS485
+  if (priv->has_rs485)
+    {
+      /* Force RTS pin to get low if RS-485 mode is enabled */
+
+      sam_serialout(priv, SAM_UART_CR_OFFSET, UART_CR_RTSEN);
+    }
+#endif
 
   /* Disable all interrupts */
 
