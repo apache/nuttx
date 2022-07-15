@@ -75,18 +75,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define STM32_ADC1_OFFSET           0x0000
-#define STM32_ADC2_OFFSET           0x0100
-#define STM32_ADC3_OFFSET           0x0000
-#define STM32_ADC4_OFFSET           0x0100
 #define STM32_ADCCMN_OFFSET         0x0300
 
-#define STM32_ADC1_BASE             (STM32_ADC1_OFFSET+STM32_ADC12_BASE)   /* ADC1 Master ADC */
-#define STM32_ADC2_BASE             (STM32_ADC2_OFFSET+STM32_ADC12_BASE)   /* ADC2 Slave ADC */
-#define STM32_ADC3_BASE             (STM32_ADC3_OFFSET+STM32_ADC34_BASE)   /* ADC3 Master ADC */
-#define STM32_ADC4_BASE             (STM32_ADC4_OFFSET+STM32_ADC34_BASE)   /* ADC4 Slave ADC */
-#define STM32_ADC12CMN_BASE         (STM32_ADCCMN_OFFSET+STM32_ADC12_BASE) /* ADC1, ADC2 common */
-#define STM32_ADC34CMN_BASE         (STM32_ADCCMN_OFFSET+STM32_ADC34_BASE) /* ADC3, ADC4 common */
+/* ADC1, ADC2 common - ADC2 not present on STM32 M0/M0+ devices */
+
+#define STM32_ADC12CMN_BASE         (STM32_ADCCMN_OFFSET+STM32_ADC1_BASE)
 
 /* Register Offsets *********************************************************/
 

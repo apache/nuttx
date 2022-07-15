@@ -86,7 +86,7 @@
 
 #define STM32_SYSCFG_BASE    0x40010000     /* 0x40010000-0x400103ff SYSCFG */
                                             /* EXTI ??? */
-#define STM32_ADC1_BASE      0x40012400     /* 0x40012400-0x400127ff ADC 1 */
+#define STM32_ADC1_BASE      0x40012400     /* 0x40012400-0x400127ff ADC1 */
 #define STM32_TIM1_BASE      0x40012c00     /* 0x40012c00-0x40012fff TIM1 */
 #define STM32_SPI1_BASE      0x40013000     /* 0x40013000-0x400133ff SPI1 */
 #define STM32_USART1_BASE    0x40013800     /* 0x40013800-0x40013bff USART1 */
