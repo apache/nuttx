@@ -20,6 +20,10 @@
 
 ifeq ($(CONFIG_ARCH_BOARD_COMMON),y)
 
+ifeq ($(CONFIG_LCD_SSD1306),y)
+  CSRCS += stm32_ssd1306.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)
