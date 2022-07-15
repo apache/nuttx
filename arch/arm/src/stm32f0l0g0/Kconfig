@@ -1272,36 +1272,6 @@ config STM32F0L0G0_SPI2
 	select SPI
 	select STM32F0L0G0_SPI
 
-config STM32F0L0G0_SPI1_DMA
-	bool "SPI1 DMA"
-	default n
-	depends on STM32F0L0G0_SPI1 && STM32F0L0G0_SPI_DMA
-	---help---
-		Use DMA to improve SPI1 transfer performance.
-
-config STM32F0L0G0_SPI2_DMA
-	bool "SPI2 DMA"
-	default n
-	depends on STM32F0L0G0_SPI2 && STM32F0L0G0_SPI_DMA
-	---help---
-		Use DMA to improve SPI2 transfer performance.
-
-config STM32F0L0G0_SPI1_COMMTYPE
-	int "SPI1 Operation mode"
-	default 0
-	range 0 3
-	depends on STM32F0L0G0_SPI1
-	---help---
-		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
-
-config STM32F0L0G0_SPI2_COMMTYPE
-	int "SPI2 Operation mode"
-	default 0
-	range 0 3
-	depends on STM32F0L0G0_SPI2
-	---help---
-		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
-
 config STM32F0L0G0_SYSCFG
 	bool "SYSCFG"
 	default y
@@ -2736,6 +2706,22 @@ config STM32F0L0G0_SPI2_DMA
 	depends on STM32F0L0G0_SPI2 && STM32F0L0G0_SPI_DMA
 	---help---
 		Use DMA to improve SPI2 transfer performance.
+
+config STM32F0L0G0_SPI1_COMMTYPE
+	int "SPI1 Operation mode"
+	default 0
+	range 0 3
+	depends on STM32F0L0G0_SPI1
+	---help---
+		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
+
+config STM32F0L0G0_SPI2_COMMTYPE
+	int "SPI2 Operation mode"
+	default 0
+	range 0 3
+	depends on STM32F0L0G0_SPI2
+	---help---
+		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
 
 endmenu # SPI Configuration
 
