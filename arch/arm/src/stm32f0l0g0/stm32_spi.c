@@ -126,6 +126,18 @@
 #define SPI_TXDMA16NULL_CONFIG    (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_16BITS             |DMA_CCR_DIR)
 #define SPI_TXDMA8NULL_CONFIG     (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_8BITS              |DMA_CCR_DIR)
 
+/* SPI clocks */
+
+#if defined(CONFIG_STM32F0L0G0_STM32F0) || defined(CONFIG_STM32F0L0G0_STM32L0)
+#  define SPI1_PCLK_FREQUENCY STM32_PCLK2_FREQUENCY
+#  define SPI2_PCLK_FREQUENCY STM32_PCLK1_FREQUENCY
+#elif defined(CONFIG_STM32F0L0G0_STM32G0)
+#  define SPI1_PCLK_FREQUENCY STM32_PCLK1_FREQUENCY
+#  define SPI2_PCLK_FREQUENCY STM32_PCLK1_FREQUENCY
+#else
+#  error Unsupported family
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -281,7 +293,7 @@ static struct stm32_spidev_s g_spi1dev =
       &g_spi1ops
     },
   .spibase  = STM32_SPI1_BASE,
-  .spiclock = STM32_PCLK2_FREQUENCY,
+  .spiclock = SPI1_PCLK_FREQUENCY,
 #ifdef CONFIG_STM32F0L0G0_SPI_INTERRUPTS
   .spiirq   = STM32_IRQ_SPI1,
 #endif
@@ -336,7 +348,7 @@ static struct stm32_spidev_s g_spi2dev =
       &g_spi2ops
     },
   .spibase  = STM32_SPI2_BASE,
-  .spiclock = STM32_PCLK1_FREQUENCY,
+  .spiclock = SPI1_PCLK_FREQUENCY,
 #ifdef CONFIG_STM32F0L0G0_SPI_INTERRUPTS
   .spiirq   = STM32_IRQ_SPI2,
 #endif
