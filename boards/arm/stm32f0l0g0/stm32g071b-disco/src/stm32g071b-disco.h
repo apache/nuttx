@@ -57,6 +57,17 @@
 #define GPIO_JOY_UP      (GPIO_INPUT | GPIO_PULLDOWN | GPIO_EXTI | \
                           GPIO_PORTC | GPIO_PIN4)
 
+/* OLED definitions *********************************************************/
+
+#define GPIO_SSD1306_CS    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_HIGH | \
+                            GPIO_OUTPUT_SET | GPIO_PORTA | GPIO_PIN3)
+
+#define GPIO_SSD1306_CMD   (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_HIGH | \
+                            GPIO_OUTPUT_SET | GPIO_PORTA | GPIO_PIN7)
+
+#define GPIO_SSD1306_RST   (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_HIGH | \
+                            GPIO_OUTPUT_SET | GPIO_PORTA | GPIO_PIN6)
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -80,6 +91,16 @@
  ****************************************************************************/
 
 int stm32_bringup(void);
+
+/****************************************************************************
+ * Name: stm32_spidev_initialize
+ *
+ * Description:
+ *   Called to configure SPI chip select GPIO pins.
+ *
+ ****************************************************************************/
+
+void stm32_spidev_initialize(void);
 
 /****************************************************************************
  * Name: stm32_djoy_initialization

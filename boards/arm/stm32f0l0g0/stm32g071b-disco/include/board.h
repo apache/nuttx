@@ -171,7 +171,7 @@
  *   SPI1_SCK  - PA1
  */
 
-#undef  GPIO_SPI1_MISO                  /* Not used */
+#define GPIO_SPI1_MISO 0                /* Not used - simplex tx */
 #define GPIO_SPI1_MOSI GPIO_SPI1_MOSI_1 /* PA2 */
 #define GPIO_SPI1_SCK  GPIO_SPI1_SCK_1  /* PA1 */
 

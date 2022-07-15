@@ -31,8 +31,16 @@ ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += stm32_appinit.c
 endif
 
+ifeq ($(CONFIG_SPI),y)
+CSRCS += stm32_spi.c
+endif
+
 ifeq ($(CONFIG_INPUT_DJOYSTICK),y)
 CSRCS += stm32_djoystick.c
+endif
+
+ifeq ($(CONFIG_LCD_SSD1306),y)
+CSRCS += stm32_lcd_ssd1306.c
 endif
 
 DEPPATH += --dep-path board

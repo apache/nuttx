@@ -83,6 +83,12 @@ int stm32_bringup(void)
   syslog(LOG_INFO, "Successfully registered the joystick driver\n");
 #endif
 
+#ifdef CONFIG_LCD_SSD1306_SPI
+  /* NOTE: SSD1315Z is compatible with the SSD1306 driver */
+
+  board_lcd_initialize();
+#endif
+
   UNUSED(ret);
   return OK;
 }
