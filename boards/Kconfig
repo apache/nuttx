@@ -3545,6 +3545,9 @@ endif
 if ARCH_CHIP_STM32
 source "boards/arm/stm32/common/Kconfig"
 endif
+if ARCH_CHIP_STM32F0L0G0
+source "boards/arm/stm32f0l0g0/common/Kconfig"
+endif
 if ARCH_CHIP_RP2040
 source "boards/arm/rp2040/common/Kconfig"
 endif

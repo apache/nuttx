@@ -1,5 +1,5 @@
-############################################################################
-# boards/arm/stm32f0l0g0/nucleo-f072rb/src/Makefile
+#############################################################################
+# boards/arm/stm32f0l0g0/common/src/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -16,24 +16,12 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 #
-############################################################################
+#############################################################################
 
-include $(TOPDIR)/Make.defs
+ifeq ($(CONFIG_ARCH_BOARD_COMMON),y)
 
-CSRCS = stm32_boot.c stm32_bringup.c
+DEPPATH += --dep-path src
+VPATH += :src
+CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)
 
-ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS += stm32_autoleds.c
-else
-CSRCS += stm32_userleds.c
 endif
-
-ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS += stm32_buttons.c
-endif
-
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += stm32_appinit.c
-endif
-
-include $(TOPDIR)/boards/Board.mk

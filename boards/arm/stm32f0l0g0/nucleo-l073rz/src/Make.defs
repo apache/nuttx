@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32f0l0g0/stm32l0538-disco/src/Makefile
+# boards/arm/stm32f0l0g0/nucleo-l073rz/src/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -32,8 +32,26 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += stm32_buttons.c
 endif
 
+ifeq ($(CONFIG_STM32F0L0G0_SPI),y)
+CSRCS += stm32_spi.c
+endif
+
 ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += stm32_appinit.c
 endif
 
-include $(TOPDIR)/boards/Board.mk
+ifeq ($(CONFIG_WL_NRF24L01),y)
+CSRCS += stm32_nrf24l01.c
+endif
+
+ifeq ($(CONFIG_LPWAN_SX127X),y)
+CSRCS += stm32_sx127x.c
+endif
+
+ifeq ($(CONFIG_CL_MFRC522),y)
+CSRCS += stm32_mfrc522.c
+endif
+
+DEPPATH += --dep-path board
+VPATH += :board
+CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)
