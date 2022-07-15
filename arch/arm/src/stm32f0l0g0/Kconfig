@@ -1407,15 +1407,19 @@ endmenu
 
 config STM32F0L0G0_COMP
 	bool
+	default n
 
 config STM32F0L0G0_ADC
 	bool
+	default n
 
 config STM32F0L0G0_DAC
 	bool
+	default n
 
 config STM32F0L0G0_DMA
 	bool
+	default n
 
 config STM32F0L0G0_SPI
 	bool
@@ -1426,24 +1430,31 @@ config STM32F0L0G0_SPI_DMA
 
 config STM32F0L0G0_I2C
 	bool
+	default n
 
 config STM32F0L0G0_CAN
 	bool
+	default n
 
 config STM32F0L0G0_PWM
 	bool
+	default n
 
 config STM32F0L0G0_USART
 	bool
+	default n
 
 config STM32F0L0G0_TIM
 	bool
+	default n
 
 config STM32F0L0G0_SERIALDRIVER
 	bool
+	default n
 
 config STM32F0L0G0_1WIREDRIVER
 	bool
+	default n
 
 menu "Timer Configuration"
 
