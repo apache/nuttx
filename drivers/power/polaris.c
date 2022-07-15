@@ -202,7 +202,7 @@ static int wlc_i2c_read(FAR struct stwlc38_dev_s *priv, uint8_t *cmd,
     printk(KERN_CONT "%02X ", read_data[i]);
 #endif
 
-  return OK;
+  return (err >= 0) ? OK : err;
 }
 
 static int wlc_i2c_write(FAR struct stwlc38_dev_s *priv,
