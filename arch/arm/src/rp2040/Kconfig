@@ -118,8 +118,12 @@ config RP2040_SPI_DRIVER
 endif
 
 config RP2040_I2C
-	bool "I2C"
+	bool "I2C Master"
 	select I2C
+	---help---
+		Build in support for I2C master mode.
+
+		Note: Do not configure the same port as both master and slave.
 
 if RP2040_I2C
 
@@ -138,6 +142,86 @@ config RP2040_I2C_DRIVER
 		used to perform I2C bus transfers from applications.  The intent of
 		this driver is to support I2C testing.  It is not suitable for use
 		in any real driver application.
+
+endif
+
+config RP2040_I2C_SLAVE
+	bool "I2C Slave"
+	select I2C_SLAVE
+	---help---
+		Build in support for I2C slave mode.
+
+		Note: Do not configure the same port as both master and slave.
+
+if RP2040_I2C_SLAVE
+
+config RP2040_I2C0_SLAVE
+	bool "I2C0"
+
+if RP2040_I2C0_SLAVE
+
+config RP2040_I2C0_SLAVE_SDA
+	int "GPIO pin number for SDA (data) line"
+	default 4
+	---help---
+		This pin must be one of: 0, 4, 8, 12, 16, 20, 24, or 28
+
+config RP2040_I2C0_SLAVE_SCL
+	int "GPIO pin number for SCL (clock) line"
+	default 5
+	---help---
+		This pin must be one of: 1, 5, 9, 13, 17, 21, 25, or 29
+
+config RP2040_I2C0_SLAVE_ADDRESS
+	int "Slave Address (in decimal)"
+	default 42
+	---help---
+		This is the default address of this device on the I2C bus.
+		It should be the canonical address (not the shifted address)
+		in the range 8-119 for 7-bit mode and in the range 0-1023
+		for 10-bit mode.
+
+config RP2040_I2C0_SLAVE_10BIT
+	bool "Enable 10-bit slave address"
+	default n
+	---help---
+		Set to enable 10-bit mode addressing.
+
+endif
+
+config RP2040_I2C1_SLAVE
+	bool "I2C1"
+
+if RP2040_I2C1_SLAVE
+
+config RP2040_I2C1_SLAVE_SDA
+	int "GPIO pin number for SDA (data) line"
+	default 6
+	---help---
+		This pin must be one of: 2, 6, 10, 14, 18, 22, or 26
+
+config RP2040_I2C1_SLAVE_SCL
+	int "GPIO pin number for SCL (clock) line"
+	default 7
+	---help---
+		This pin must be one of: 3, 7, 11, 15, 19, 23, or 27
+
+config RP2040_I2C1_SLAVE_ADDRESS
+	int "Slave Address (in decimal)"
+	default 42
+	---help---
+		This is the default address of this device on the I2C bus.
+		It should be the canonical address (not the shifted address)
+		in the range 8-119 for 7-bit mode and in the range 0-1023
+		for 10-bit mode.
+
+config RP2040_I2C1_SLAVE_10BIT
+	bool "Enable 10-bit slave address"
+	default n
+	---help---
+		Set to enable 10-bit mode addressing.
+
+endif
 
 endif
 

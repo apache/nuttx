@@ -57,6 +57,10 @@ ifeq ($(CONFIG_RP2040_I2C),y)
 CHIP_CSRCS += rp2040_i2c.c
 endif
 
+ifeq ($(CONFIG_RP2040_I2C_SLAVE),y)
+CHIP_CSRCS += rp2040_i2c_slave.c
+endif
+
 ifeq ($(CONFIG_RP2040_I2S),y)
 CHIP_CSRCS += rp2040_i2s.c
 CHIP_CSRCS += rp2040_i2s_pio.c
