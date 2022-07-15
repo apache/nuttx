@@ -229,6 +229,13 @@ static uint32_t    spi_send(struct spi_dev_s *dev, uint32_t wd);
 static void        spi_exchange(struct spi_dev_s *dev,
                                 const void *txbuffer, void *rxbuffer,
                                 size_t nwords);
+
+#ifdef CONFIG_STM32F0L0G0_SPI_DMA
+static void spi_exchange_nodma(struct spi_dev_s *dev,
+                               const void *txbuffer, void *rxbuffer,
+                               size_t nwords);
+#endif
+
 #ifdef CONFIG_SPI_TRIGGER
 static int         spi_trigger(struct spi_dev_s *dev);
 #endif
@@ -1306,7 +1313,6 @@ static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_STM32F0L0G0_SPI_DMA) || defined(CONFIG_STM32F0L0G0_DMACAPABLE)
 #if !defined(CONFIG_STM32F0L0G0_SPI_DMA)
 static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                          void *rxbuffer, size_t nwords)
@@ -1390,7 +1396,6 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
         }
     }
 }
-#endif /* !CONFIG_STM32F0L0G0_SPI_DMA || CONFIG_STM32F0L0G0_DMACAPABLE */
 
 /****************************************************************************
  * Name: spi_exchange (with DMA capability)
@@ -1418,6 +1423,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                          void *rxbuffer, size_t nwords)
 {
   struct stm32_spidev_s *priv = (struct stm32_spidev_s *)dev;
+  int ret = OK;
 
   if ((priv->rxdma == NULL) || (priv->txdma == NULL) ||
       up_interrupt_context())
