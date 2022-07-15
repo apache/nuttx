@@ -1257,6 +1257,10 @@ config STM32F7_SPI
 	bool
 	default n
 
+config STM32F7_SPI_DMA
+	bool
+	default n
+
 config STM32F7_TIM
 	bool
 	default n
@@ -2278,12 +2282,6 @@ config STM32F7_SPI_INTERRUPTS
 		poll-waiting is recommended if the interrupt rate would be to high in
 		the interrupt driven case.
 
-config STM32F7_SPI_DMA
-	bool "SPI DMA"
-	default n
-	---help---
-		Use DMA to improve SPI transfer performance.  Cannot be used with STM32F7_SPI_INTERRUPT.
-
 config STM32F7_SPI_DMATHRESHOLD
 	int "SPI DMA threshold"
 	default 4
@@ -2296,9 +2294,10 @@ config STM32F7_SPI_DMATHRESHOLD
 config STM32F7_SPI1_DMA
 	bool "SPI1 DMA"
 	default n
-	depends on STM32F7_SPI1 && STM32F7_SPI_DMA
+	depends on STM32F7_SPI1 && !STM32F7_SPI_INTERRUPT
+	select STM32F7_SPI_DMA
 	---help---
-		Use DMA to improve SPI1 transfer performance.
+		Use DMA to improve SPI1 transfer performance.  Cannot be used with STM32F7_SPI_INTERRUPT.
 
 config STM32F7_SPI1_DMA_BUFFER
 	int "SPI1 DMA buffer size"
@@ -2310,9 +2309,10 @@ config STM32F7_SPI1_DMA_BUFFER
 config STM32F7_SPI2_DMA
 	bool "SPI2 DMA"
 	default n
-	depends on STM32F7_SPI2 && STM32F7_SPI_DMA
+	depends on STM32F7_SPI2 && !STM32F7_SPI_INTERRUPT
+	select STM32F7_SPI_DMA
 	---help---
-		Use DMA to improve SPI2 transfer performance.
+		Use DMA to improve SPI2 transfer performance.  Cannot be used with STM32F7_SPI_INTERRUPT.
 
 config STM32F7_SPI2_DMA_BUFFER
 	int "SPI2 DMA buffer size"
@@ -2324,9 +2324,10 @@ config STM32F7_SPI2_DMA_BUFFER
 config STM32F7_SPI3_DMA
 	bool "SPI3 DMA"
 	default n
-	depends on STM32F7_SPI3 && STM32F7_SPI_DMA
+	depends on STM32F7_SPI3 && !STM32F7_SPI_INTERRUPT
+	select STM32F7_SPI_DMA
 	---help---
-		Use DMA to improve SPI3 transfer performance.
+		Use DMA to improve SPI3 transfer performance.  Cannot be used with STM32F7_SPI_INTERRUPT.
 
 config STM32F7_SPI3_DMA_BUFFER
 	int "SPI3 DMA buffer size"
@@ -2338,9 +2339,10 @@ config STM32F7_SPI3_DMA_BUFFER
 config STM32F7_SPI4_DMA
 	bool "SPI4 DMA"
 	default n
-	depends on STM32F7_SPI4 && STM32F7_SPI_DMA
+	depends on STM32F7_SPI4 && !STM32F7_SPI_INTERRUPT
+	select STM32F7_SPI_DMA
 	---help---
-		Use DMA to improve SPI4 transfer performance.
+		Use DMA to improve SPI4 transfer performance.  Cannot be used with STM32F7_SPI_INTERRUPT.
 
 config STM32F7_SPI4_DMA_BUFFER
 	int "SPI4 DMA buffer size"
@@ -2352,9 +2354,10 @@ config STM32F7_SPI4_DMA_BUFFER
 config STM32F7_SPI5_DMA
 	bool "SPI5 DMA"
 	default n
-	depends on STM32F7_SPI5 && STM32F7_SPI_DMA
+	depends on STM32F7_SPI5 && !STM32F7_SPI_INTERRUPT
+	select STM32F7_SPI_DMA
 	---help---
-		Use DMA to improve SPI5 transfer performance.
+		Use DMA to improve SPI5 transfer performance.  Cannot be used with STM32F7_SPI_INTERRUPT.
 
 config STM32F7_SPI5_DMA_BUFFER
 	int "SPI5 DMA buffer size"
@@ -2366,9 +2369,10 @@ config STM32F7_SPI5_DMA_BUFFER
 config STM32F7_SPI6_DMA
 	bool "SPI6 DMA"
 	default n
-	depends on STM32F7_SPI6 && STM32F7_SPI_DMA
+	depends on STM32F7_SPI6 && !STM32F7_SPI_INTERRUPT
+	select STM32F7_SPI_DMA
 	---help---
-		Use DMA to improve SPI6 transfer performance.
+		Use DMA to improve SPI6 transfer performance.  Cannot be used with STM32F7_SPI_INTERRUPT.
 
 config STM32F7_SPI6_DMA_BUFFER
 	int "SPI6 DMA buffer size"
