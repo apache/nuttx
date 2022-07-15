@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32f0l0g0/b-l072z-lrwan1/src/Makefile
+# boards/arm/stm32f0l0g0/stm32g071b-disco/src/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -22,34 +22,19 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = stm32_boot.c stm32_bringup.c
 
-ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS += stm32_autoleds.c
-else
+# no auto leds
+ifeq ($(CONFIG_USERLED),y)
 CSRCS += stm32_userleds.c
-endif
-
-ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS += stm32_buttons.c
-endif
-
-ifeq ($(CONFIG_STM32F0L0G0_SPI),y)
-CSRCS += stm32_spi.c
 endif
 
 ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += stm32_appinit.c
 endif
 
-ifeq ($(CONFIG_LPWAN_SX127X),y)
-CSRCS += stm32_sx127x.c
+ifeq ($(CONFIG_INPUT_DJOYSTICK),y)
+CSRCS += stm32_djoystick.c
 endif
 
-ifeq ($(CONFIG_ADC),y)
-CSRCS += stm32_adc.c
-endif
-
-ifeq ($(CONFIG_LCD_SSD1306),y)
-CSRCS += stm32_ssd1306.c
-endif
-
-include $(TOPDIR)/boards/Board.mk
+DEPPATH += --dep-path board
+VPATH += :board
+CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)
