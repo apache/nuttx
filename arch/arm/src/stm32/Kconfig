@@ -3406,6 +3406,11 @@ config STM32_SPI_DMA
 	bool
 	default n
 
+config STM32_I2S
+	bool
+	default n
+	select STM32_SPI_DMA
+
 config STM32_I2C
 	bool
 	default n
