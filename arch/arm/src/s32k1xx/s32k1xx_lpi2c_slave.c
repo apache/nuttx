@@ -102,8 +102,8 @@ struct s32k1xx_lpi2c_slave_priv_s
   int write_buflen;            /* Write buffer size */
   int write_bufindex;          /* Write buffer index */
 
-  int (*callback)(void *arg); /* Callback function when data has been received */
-  void *callback_arg;         /* Argument of callback function */
+  i2c_slave_callback_t *callback; /* Callback function when data has been received */
+  void *callback_arg;             /* Argument of callback function */
 
   int refs; /* Reference count */
 };
@@ -137,7 +137,7 @@ static int s32k1xx_lpi2c_write(struct i2c_slave_s *dev,
 static int s32k1xx_lpi2c_read(struct i2c_slave_s *dev,
                               uint8_t *buffer, int buflen);
 static int s32k1xx_lpi2c_registercallback(struct i2c_slave_s *dev,
-                                          int (*callback)(void *arg),
+                                          i2c_slave_callback_t *callback,
                                           void *arg);
 
 /****************************************************************************
@@ -427,7 +427,8 @@ static int s32k1xx_lpi2c_slave_isr_process(
 
       if ((priv->read_bufindex > 0) && (priv->callback != NULL))
         {
-          priv->callback(priv->callback_arg);
+          priv->callback(priv->callback_arg, priv->read_bufindex);
+          priv->read_bufindex = 0;
         }
     }
 
@@ -793,7 +794,8 @@ static int s32k1xx_lpi2c_read(struct i2c_slave_s *dev,
  ****************************************************************************/
 
 static int s32k1xx_lpi2c_registercallback(struct i2c_slave_s *dev,
-  int (*callback)(void *arg), void *arg)
+                                          i2c_slave_callback_t *callback,
+                                          void *arg)
 {
   struct s32k1xx_lpi2c_slave_priv_s *priv;
   irqstate_t flags;
