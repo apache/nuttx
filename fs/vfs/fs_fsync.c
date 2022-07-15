@@ -55,6 +55,7 @@
 int file_fsync(FAR struct file *filep)
 {
   FAR struct inode *inode;
+  int ret;
 
   /* Is this inode a registered mountpoint? Does it support the
    * sync operations may be relevant to device drivers but only
@@ -72,7 +73,8 @@ int file_fsync(FAR struct file *filep)
         }
       else if (inode->u.i_ops->ioctl)
         {
-          return inode->u.i_ops->ioctl(filep, BIOC_FLUSH, 0);
+          ret = inode->u.i_ops->ioctl(filep, BIOC_FLUSH, 0);
+          return ret >= 0 ? 0 : ret;
         }
     }
 
