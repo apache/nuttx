@@ -130,6 +130,14 @@
  * Private Types
  ****************************************************************************/
 
+enum spi_config_e
+{
+  FULL_DUPLEX = 0,
+  SIMPLEX_TX,
+  SIMPLEX_RX,
+  HALF_DUPLEX
+};
+
 struct stm32_spidev_s
 {
   struct spi_dev_s spidev;       /* Externally visible part of the SPI interface */
@@ -163,6 +171,7 @@ struct stm32_spidev_s
 #ifdef CONFIG_PM
   struct pm_callback_s pm_cb;    /* PM callbacks */
 #endif
+  enum spi_config_e config;      /* full/half duplex, simplex transmit/read only */
 };
 
 /****************************************************************************
@@ -179,6 +188,9 @@ static inline uint16_t spi_readword(struct stm32_spidev_s *priv);
 static inline void spi_writeword(struct stm32_spidev_s *priv,
                                  uint16_t byte);
 static inline bool spi_16bitmode(struct stm32_spidev_s *priv);
+
+static void spi_modifycr(uint32_t addr, struct stm32_spidev_s *priv,
+                         uint16_t setbits, uint16_t clrbits);
 
 /* DMA support */
 
@@ -453,6 +465,20 @@ static inline void spi_putreg8(struct stm32_spidev_s *priv,
 
 static inline uint16_t spi_readword(struct stm32_spidev_s *priv)
 {
+  /* Can't receive in tx only mode */
+
+  if (priv->config == SIMPLEX_TX)
+    {
+      return 0;
+    }
+
+  if (priv->config == HALF_DUPLEX)
+    {
+      /* Disable output for half-duplex mode */
+
+      spi_modifycr(STM32_SPI_CR1_OFFSET, priv, 0, SPI_CR1_BIDIOE);
+    }
+
   /* Wait until the receive buffer is not empty */
 
   while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_RXNE) == 0);
@@ -478,6 +504,20 @@ static inline uint16_t spi_readword(struct stm32_spidev_s *priv)
 
 static inline uint8_t spi_readbyte(struct stm32_spidev_s *priv)
 {
+  /* Can't receive in tx only mode */
+
+  if (priv->config == SIMPLEX_TX)
+    {
+      return 0;
+    }
+
+  if (priv->config == HALF_DUPLEX)
+    {
+      /* Disable output for half-duplex mode */
+
+      spi_modifycr(STM32_SPI_CR1_OFFSET, priv, 0, SPI_CR1_BIDIOE);
+    }
+
   /* Wait until the receive buffer is not empty */
 
   while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_RXNE) == 0);
@@ -505,6 +545,20 @@ static inline uint8_t spi_readbyte(struct stm32_spidev_s *priv)
 static inline void spi_writeword(struct stm32_spidev_s *priv,
                                  uint16_t word)
 {
+  /* Can't transmit in rx only mode */
+
+  if (priv->config == SIMPLEX_RX)
+    {
+      return;
+    }
+
+  if (priv->config == HALF_DUPLEX)
+    {
+      /* Enable output for half-duplex mode */
+
+      spi_modifycr(STM32_SPI_CR1_OFFSET, priv, SPI_CR1_BIDIOE, 0);
+    }
+
   /* Wait until the transmit buffer is empty */
 
   while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_TXE) == 0)
@@ -1681,9 +1735,30 @@ static void spi_bus_initialize(struct stm32_spidev_s *priv)
    */
 
   clrbits = SPI_CR1_CPHA | SPI_CR1_CPOL | SPI_CR1_BR_MASK |
-            SPI_CR1_LSBFIRST | SPI_CR1_RXONLY | SPI_CR1_BIDIOE |
-            SPI_CR1_BIDIMODE;
+            SPI_CR1_LSBFIRST;
   setbits = SPI_CR1_MSTR | SPI_CR1_SSI | SPI_CR1_SSM;
+
+  switch (priv->config)
+    {
+      default:
+      case FULL_DUPLEX:
+        clrbits |= SPI_CR1_BIDIOE | SPI_CR1_BIDIMODE | SPI_CR1_RXONLY;
+        setbits |= 0;
+        break;
+      case SIMPLEX_TX:
+        clrbits |= SPI_CR1_BIDIOE | SPI_CR1_BIDIMODE | SPI_CR1_RXONLY;
+        setbits |= 0;
+        break;
+      case SIMPLEX_RX:
+        clrbits |= SPI_CR1_BIDIOE | SPI_CR1_BIDIMODE;
+        setbits |= SPI_CR1_RXONLY;
+        break;
+      case HALF_DUPLEX:
+        clrbits |= SPI_CR1_BIDIOE | SPI_CR1_RXONLY;
+        setbits |= SPI_CR1_BIDIMODE;
+        break;
+    }
+
   spi_modifycr(STM32_SPI_CR1_OFFSET, priv, setbits, clrbits);
 
   clrbits = SPI_CR2_DS_MASK;
@@ -1701,9 +1776,30 @@ static void spi_bus_initialize(struct stm32_spidev_s *priv)
    */
 
   clrbits = SPI_CR1_CPHA | SPI_CR1_CPOL | SPI_CR1_BR_MASK |
-            SPI_CR1_LSBFIRST | SPI_CR1_RXONLY | SPI_CR1_DFF |
-            SPI_CR1_BIDIOE | SPI_CR1_BIDIMODE;
+            SPI_CR1_LSBFIRST | SPI_CR1_DFF;
   setbits = SPI_CR1_MSTR | SPI_CR1_SSI | SPI_CR1_SSM;
+
+  switch (priv->config)
+    {
+      default:
+      case FULL_DUPLEX:
+        clrbits |= SPI_CR1_BIDIOE | SPI_CR1_BIDIMODE | SPI_CR1_RXONLY;
+        setbits |= 0;
+        break;
+      case SIMPLEX_TX:
+        clrbits |= SPI_CR1_BIDIOE | SPI_CR1_BIDIMODE | SPI_CR1_RXONLY;
+        setbits |= 0;
+        break;
+      case SIMPLEX_RX:
+        clrbits |= SPI_CR1_BIDIOE | SPI_CR1_BIDIMODE;
+        setbits |= SPI_CR1_RXONLY;
+        break;
+      case HALF_DUPLEX:
+        clrbits |= SPI_CR1_BIDIOE | SPI_CR1_RXONLY;
+        setbits |= SPI_CR1_BIDIMODE;
+        break;
+    }
+
   spi_modifycr(STM32_SPI_CR1_OFFSET, priv, setbits, clrbits);
 #endif
 
@@ -1803,13 +1899,12 @@ struct spi_dev_s *stm32_spibus_initialize(int bus)
           /* Configure SPI1 pins: SCK, MISO, and MOSI */
 
           stm32_configgpio(GPIO_SPI1_SCK);
-          stm32_configgpio(GPIO_SPI1_MISO);
           stm32_configgpio(GPIO_SPI1_MOSI);
 
-          /* Set up default configuration: Master, 8-bit, etc. */
-
-          spi_bus_initialize(priv);
-          priv->initialized = true;
+          if (priv->config == FULL_DUPLEX || priv->config == SIMPLEX_RX)
+            {
+              stm32_configgpio(GPIO_SPI1_MISO);
+            }
         }
     }
   else
@@ -1828,21 +1923,39 @@ struct spi_dev_s *stm32_spibus_initialize(int bus)
           /* Configure SPI2 pins: SCK, MISO, and MOSI */
 
           stm32_configgpio(GPIO_SPI2_SCK);
-          stm32_configgpio(GPIO_SPI2_MISO);
           stm32_configgpio(GPIO_SPI2_MOSI);
 
-          /* Set up default configuration: Master, 8-bit, etc. */
-
-          spi_bus_initialize(priv);
-          priv->initialized = true;
+          if (priv->config == FULL_DUPLEX || priv->config == SIMPLEX_RX)
+            {
+              stm32_configgpio(GPIO_SPI2_MISO);
+            }
         }
     }
   else
 #endif
     {
       spierr("ERROR: Unsupported SPI bus: %d\n", bus);
+      priv = NULL;
+      goto errout;
     }
 
+#ifdef CONFIG_STM32L4_SPI_DMA
+  /* SPI DMA supported only for full-duplex mode */
+
+  if (priv->rxch && priv->txch && priv->config != FULL_DUPLEX)
+    {
+      priv = NULL;
+      spierr("ERROR: SPI DMA supported only for full duplex mode\n");
+      goto errout;
+    }
+#endif
+
+  /* Set up default configuration: Master, 8-bit, etc. */
+
+  spi_bus_initialize(priv);
+  priv->initialized = true;
+
+errout:
   leave_critical_section(flags);
   return (struct spi_dev_s *)priv;
 }

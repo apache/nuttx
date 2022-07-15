@@ -1320,6 +1320,22 @@ config STM32F0L0G0_SPI6
 	select SPI
 	select STM32F0L0G0_SPI
 
+config STM32F0L0G0_SPI1_COMMTYPE
+	int "SPI1 Operation mode"
+	default 0
+	range 0 3
+	depends on STM32F0L0G0_SPI1
+	---help---
+		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
+
+config STM32F0L0G0_SPI2_COMMTYPE
+	int "SPI2 Operation mode"
+	default 0
+	range 0 3
+	depends on STM32F0L0G0_SPI2
+	---help---
+		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
+
 config STM32F0L0G0_SYSCFG
 	bool "SYSCFG"
 	default y
