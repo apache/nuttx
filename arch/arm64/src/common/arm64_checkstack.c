@@ -73,7 +73,7 @@ static size_t do_stackcheck(void *stackbase, size_t nbytes)
 {
   uintptr_t start;
   uintptr_t end;
-  uint64_t *ptr;
+  uint32_t *ptr;
   size_t mark;
 
   if (nbytes == 0)
@@ -96,7 +96,7 @@ static size_t do_stackcheck(void *stackbase, size_t nbytes)
    * that does not have the magic value is the high water mark.
    */
 
-  for (ptr = (uint64_t *)start, mark = (nbytes >> 2);
+  for (ptr = (uint32_t *)start, mark = (nbytes >> 2);
        *ptr == STACK_COLOR && mark > 0;
        ptr++, mark--);
 
