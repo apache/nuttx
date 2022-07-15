@@ -49,7 +49,7 @@ CSRCS += stm32_adc.c
 endif
 
 ifeq ($(CONFIG_LCD_SSD1306),y)
-CSRCS += stm32_ssd1306.c
+CSRCS += stm32_lcd_ssd1306.c
 endif
 
 DEPPATH += --dep-path board

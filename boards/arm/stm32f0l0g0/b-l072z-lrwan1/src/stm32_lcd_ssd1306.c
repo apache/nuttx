@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32f0l0g0/b-l072z-lrwan1/src/stm32_ssd1306.c
+ * boards/arm/stm32f0l0g0/b-l072z-lrwan1/src/stm32_lcd_ssd1306.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -29,27 +29,11 @@
 #include <nuttx/board.h>
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/ssd1306.h>
-#include <nuttx/i2c/i2c_master.h>
 
 #include "stm32.h"
 #include "b-l072z-lrwan1.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Configuration ************************************************************/
-
-#ifndef CONFIG_LCD_MAXPOWER
-#  define CONFIG_LCD_MAXPOWER 1
-#endif
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-struct i2c_master_s *g_i2c;
-struct lcd_dev_s    *g_lcddev;
+#include "stm32_ssd1306.h"
 
 /****************************************************************************
  * Public Functions
@@ -61,13 +45,13 @@ struct lcd_dev_s    *g_lcddev;
 
 int board_lcd_initialize(void)
 {
-  /* Initialize I2C */
+  int ret;
 
-  g_i2c = stm32_i2cbus_initialize(OLED_I2C_PORT);
-  if (!g_i2c)
+  ret = board_ssd1306_initialize(OLED_I2C_PORT);
+  if (ret < 0)
     {
-      lcderr("ERROR: Failed to initialize I2C port %d\n", OLED_I2C_PORT);
-      return -ENODEV;
+      lcderr("ERROR: Failed to initialize SSD1306\n");
+      return ret;
     }
 
   return OK;
@@ -79,24 +63,7 @@ int board_lcd_initialize(void)
 
 struct lcd_dev_s *board_lcd_getdev(int devno)
 {
-  /* Bind the I2C port to the OLED */
-
-  g_lcddev = ssd1306_initialize(g_i2c, NULL, devno);
-  if (!g_lcddev)
-    {
-      lcderr("ERROR: Failed to bind I2C port 1 to OLED %d\n", devno);
-    }
-  else
-    {
-      lcdinfo("Bound I2C port %d to OLED %d\n", OLED_I2C_PORT, devno);
-
-      /* And turn the OLED on */
-
-      g_lcddev->setpower(g_lcddev, CONFIG_LCD_MAXPOWER);
-      return g_lcddev;
-    }
-
-  return NULL;
+  return board_ssd1306_getdev();
 }
 
 /****************************************************************************
