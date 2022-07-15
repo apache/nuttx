@@ -3380,21 +3380,27 @@ endmenu
 
 config STM32_ADC
 	bool
+	default n
 
 config STM32_SDADC
 	bool
+	default n
 
 config STM32_DAC
 	bool
+	default n
 
 config STM32_DMA
 	bool
+	default n
 
 config STM32_DMAMUX
 	bool
+	default n
 
 config STM32_SPI
 	bool
+	default n
 
 config STM32_SPI_DMA
 	bool
@@ -3402,12 +3408,15 @@ config STM32_SPI_DMA
 
 config STM32_I2C
 	bool
+	default n
 
 config STM32_CAN
 	bool
+	default n
 
 config STM32_FDCAN
 	bool
+	default n
 
 config STM32_TIM
 	bool
