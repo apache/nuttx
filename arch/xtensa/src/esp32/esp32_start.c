@@ -91,7 +91,7 @@ extern uint32_t _image_drom_size;
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32_APP_FORMAT_MCUBOOT
-extern int ets_printf(const char *fmt, ...);
+extern int ets_printf(const char *fmt, ...) printflike(1, 2);
 extern void cache_read_enable(int cpu);
 extern void cache_read_disable(int cpu);
 extern void cache_flush(int cpu);
