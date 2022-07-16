@@ -41,15 +41,6 @@
 #define GPT_LBA_TO_BLOCK(lba, blk)      ((le64toh(lba) * 512 + (blk) -1) / (blk))
 #define GPT_MIN(x, y)                   (((x) < (y)) ? (x) : (y))
 
-/* Helper macro for printing lba addresses according to the  sys/types.h */
-#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
-#define PRIxLBA PRIx64
-#define PRIdLBA PRId64
-#else
-#define PRIxLBA PRIx32
-#define PRIdLBA PRId32
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -296,7 +287,7 @@ static int gpt_header_is_valid(FAR struct partition_state_s *state,
 
   if (le64toh(gpt->my_lba) != lba)
     {
-      ferr("GPT: my_lba incorrect: %" PRIx64 " != %" PRIxLBA "\n",
+      ferr("GPT: my_lba incorrect: %" PRIx64 " != %" PRIxOFF "\n",
            le64toh(gpt->my_lba), lba);
       return -EINVAL;
     }
@@ -306,14 +297,14 @@ static int gpt_header_is_valid(FAR struct partition_state_s *state,
   lastlba = gpt_last_lba(state);
   if (le64toh(gpt->first_usable_lba) > lastlba)
     {
-      ferr("GPT: first_usable_lba incorrect: %" PRId64 " > %" PRIdLBA "\n",
+      ferr("GPT: first_usable_lba incorrect: %" PRId64 " > %" PRIdOFF "\n",
            le64toh(gpt->first_usable_lba), lastlba);
       return -EINVAL;
     }
 
   if (le64toh(gpt->last_usable_lba) > lastlba)
     {
-      ferr("GPT: last_usable_lba incorrect: %" PRId64 " > %" PRIdLBA "\n",
+      ferr("GPT: last_usable_lba incorrect: %" PRId64 " > %" PRIdOFF "\n",
            le64toh(gpt->last_usable_lba), lastlba);
       return -EINVAL;
     }
