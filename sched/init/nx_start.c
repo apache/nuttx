@@ -502,6 +502,12 @@ void nx_start(void)
   iob_initialize();
 #endif
 
+#ifdef CONFIG_MM_HEALTH_CHECK
+  /* Initialize the memory health checks. */
+
+  mm_check_init();
+#endif
+
   /* Initialize the logic that determine unique process IDs. */
 
   g_npidhash = 4;
