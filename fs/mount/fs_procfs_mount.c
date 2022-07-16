@@ -283,15 +283,9 @@ static int usage_entry(FAR const char *mountpoint,
 {
   FAR struct mount_info_s *info = (FAR struct mount_info_s *)arg;
   FAR const char *fstype;
-#ifdef CONFIG_HAVE_LONG_LONG
-  uint64_t size;
-  uint64_t used;
-  uint64_t free;
-#else
-  uint32_t size;
-  uint32_t used;
-  uint32_t free;
-#endif
+  fsblkcnt_t size;
+  fsblkcnt_t used;
+  fsblkcnt_t free;
   int which;
   char sizelabel;
   char freelabel;
@@ -316,15 +310,9 @@ static int usage_entry(FAR const char *mountpoint,
 
   fstype = fs_gettype(statbuf);
 
-#ifdef CONFIG_HAVE_LONG_LONG
-  size = (uint64_t)statbuf->f_bsize * statbuf->f_blocks;
-  free = (uint64_t)statbuf->f_bsize * statbuf->f_bavail;
-  used = (uint64_t)size - free;
-#else
   size = statbuf->f_bsize * statbuf->f_blocks;
   free = statbuf->f_bsize * statbuf->f_bavail;
   used = size - free;
-#endif
 
   /* Find the label for size */
 
@@ -361,15 +349,9 @@ static int usage_entry(FAR const char *mountpoint,
 
   /* Generate usage list one line at a time */
 
-#ifdef CONFIG_HAVE_LONG_LONG
-  mount_sprintf(info, "  %-10s %6llu%c %8llu%c  %8llu%c %s\n", fstype,
-                size, sizelabel, used, usedlabel, free, freelabel,
-                mountpoint);
-#else
-  mount_sprintf(info, "  %-10s %6ld%c %8ld%c  %8ld%c %s\n", fstype,
-                size, sizelabel, used, usedlabel, free, freelabel,
-                mountpoint);
-#endif
+  mount_sprintf(info,
+    "  %-10s %" PRIuOFF "%c %8" PRIuOFF "%c  %8" PRIuOFF "%c %s\n",
+    fstype, size, sizelabel, used, usedlabel, free, freelabel, mountpoint);
 
   return (info->totalsize >= info->buflen) ? 1 : 0;
 }
