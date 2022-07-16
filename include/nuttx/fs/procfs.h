@@ -219,7 +219,7 @@ size_t procfs_memcpy(FAR const char *src, size_t srclen,
  ****************************************************************************/
 
 int procfs_snprintf(FAR char *buf, size_t size,
-                    FAR const IPTR char *format, ...);
+                    FAR const IPTR char *format, ...) printflike(3, 4);
 
 /****************************************************************************
  * Name: procfs_register

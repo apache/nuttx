@@ -1092,19 +1092,19 @@ void lib_dumpvbuffer(FAR const char *msg, FAR const struct iovec *iov,
 
 #ifndef CONFIG_CPP_HAVE_VARARGS
 #ifdef CONFIG_DEBUG_ALERT
-void _alert(const char *format, ...);
+void _alert(const char *format, ...) sysloglike(1, 2);
 #endif
 
 #ifdef CONFIG_DEBUG_ERROR
-void _err(const char *format, ...);
+void _err(const char *format, ...) sysloglike(1, 2);
 #endif
 
 #ifdef CONFIG_DEBUG_WARN
-void _warn(const char *format, ...);
+void _warn(const char *format, ...) sysloglike(1, 2);
 #endif
 
 #ifdef CONFIG_DEBUG_INFO
-void _info(const char *format, ...);
+void _info(const char *format, ...) sysloglike(1, 2);
 #endif
 #endif /* CONFIG_CPP_HAVE_VARARGS */
 

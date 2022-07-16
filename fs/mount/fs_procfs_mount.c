@@ -102,7 +102,7 @@ struct mount_info_s
 /* Helpers */
 
 static void    mount_sprintf(FAR struct mount_info_s *info,
-                 FAR const char *fmt, ...);
+                 FAR const char *fmt, ...) printflike(2, 3);
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_MOUNT
 static int     mount_entry(FAR const char *mountpoint,
                  FAR struct statfs *statbuf, FAR void *arg);
@@ -256,7 +256,7 @@ static int blocks_entry(FAR const char *mountpoint,
 
   /* Generate blocks list one line at a time */
 
-  mount_sprintf(info, "%6lu %10" PRIuOFF " %10" PRIuOFF
+  mount_sprintf(info, "%6zu %10" PRIuOFF " %10" PRIuOFF
                 "  %10" PRIuOFF " %s\n",
                 statbuf->f_bsize, statbuf->f_blocks,
                 statbuf->f_blocks - statbuf->f_bavail, statbuf->f_bavail,
