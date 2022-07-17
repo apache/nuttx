@@ -45,6 +45,10 @@ ifeq ($(CONFIG_LCD_LPM013M091A),y)
   CSRCS += lpm013m091a.c
 endif
 
+ifeq ($(CONFIG_LCD_APA102),y)
+  CSRCS += apa102.c
+endif
+
 ifeq ($(CONFIG_LCD_P14201),y)
   CSRCS += p14201.c
 endif
