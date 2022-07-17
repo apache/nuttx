@@ -100,6 +100,30 @@ config LCD_MAXPOWER
 
 comment "Graphic LCD Devices"
 
+config LCD_APA102
+	bool "APA102 RGB LED MATRIX as LCD"
+	depends on SPI
+	default n
+
+if LCD_APA102
+	config LCD_APA102_XRES
+		int "APA102 X Resolution"
+		default 16
+		---help---
+			Specifies the X resolution of the LCD.
+
+	config LCD_APA102_YRES
+		int "APA102 Y Resolution"
+		default 16
+		---help---
+			Specifies the Y resolution of the LCD.
+
+	config LCD_APA102_FREQUENCY
+		int "SPI Frequency"
+		default 1000000
+
+endif # LCD_APA102
+
 config LCD_P14201
 	bool "Rit P1402 series display"
 	default n

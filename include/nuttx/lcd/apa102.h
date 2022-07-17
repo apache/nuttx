@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/leds/apa102.h
+ * include/nuttx/lcd/apa102.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,48 +18,39 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_LEDS_APA102_H
-#define __INCLUDE_NUTTX_LEDS_APA102_H
+#ifndef __INCLUDE_NUTTX_LCD_APA102_H
+#define __INCLUDE_NUTTX_LCD_APA102_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/fs/ioctl.h>
 
 /* Configuration
- * CONFIG_SPI         - Enables support for SPI drivers
- * CONFIG_LEDS_APA102 - Enables support for the APA102 driver
+ * CONFIG_SPI - Enables support for SPI drivers
+ * CONFIG_LCD_APA102 - Enables support for the APA102 driver
  */
+
+#if defined(CONFIG_SPI) && defined(CONFIG_LCD_APA102)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* SPI definitions */
+/* Some important "colors" */
 
-#define APA102_SPI_MAXFREQUENCY    (100000) /* Default 4MHz */
+#define APA102_BLACK         0
+#define APA102_WHITE         1
 
-/* APA102 register addresses */
+/* Only two power settings are supported: */
 
-#define APA102_START_FRAME         0x00000000
-#define APA102_HEADER_FRAME        0xe1
-#define APA102_END_FRAME           0x00
+#define APA102_POWER_OFF     0
+#define APA102_POWER_ON      1
 
 /****************************************************************************
  * Public Types
- ****************************************************************************/
-
-struct apa102_ledstrip_s
-{
-  uint8_t bright;
-  uint8_t blue;
-  uint8_t green;
-  uint8_t red;
-};
-
-/****************************************************************************
- * Public Function Prototypes
  ****************************************************************************/
 
 #ifdef __cplusplus
@@ -71,26 +62,28 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: apa102_register
+ * Name: apa102_initialize
  *
  * Description:
- *   Register the APA102 device as 'devpath'
+ *   Initialize the APA102 device as a LCD interface.
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/leddrv0".
- *   spi     - An instance of the SPI interface to use to communicate
- *             with the APA102.
+ *   spi   - An instance of the SPI interface to use to communicate
+ *           with the APA102.
+ *   devno - Device number to identify current display.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int apa102_register(FAR const char *devpath, FAR struct spi_dev_s *spi);
+FAR struct lcd_dev_s *apa102_initialize(FAR struct spi_dev_s *spi,
+                                        unsigned int devno);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_LEDS_APA102_H */
+#endif /* CONFIG_SPI && CONFIG_APA102 */
+#endif /* __INCLUDE_NUTTX_LCD_APA102_H */
