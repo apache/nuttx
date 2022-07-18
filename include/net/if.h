@@ -59,7 +59,6 @@
 
 /* Interface flag helpers */
 
-#define IFF_SET_DOWN(f)        do { (f) |= IFF_DOWN; } while (0)
 #define IFF_SET_UP(f)          do { (f) |= IFF_UP; } while (0)
 #define IFF_SET_RUNNING(f)     do { (f) |= IFF_RUNNING; } while (0)
 #define IFF_SET_BOUND(f)       do { (f) |= IFF_BOUND; } while (0)
@@ -69,7 +68,6 @@
 #define IFF_SET_MULTICAST(f)   do { (f) |= IFF_MULTICAST; } while (0)
 #define IFF_SET_BROADCAST(f)   do { (f) |= IFF_BROADCAST; } while (0)
 
-#define IFF_CLR_DOWN(f)        do { (f) &= ~IFF_DOWN; } while (0)
 #define IFF_CLR_UP(f)          do { (f) &= ~IFF_UP; } while (0)
 #define IFF_CLR_RUNNING(f)     do { (f) &= ~IFF_RUNNING; } while (0)
 #define IFF_CLR_BOUND(f)       do { (f) &= ~IFF_BOUND; } while (0)
@@ -79,7 +77,6 @@
 #define IFF_CLR_MULTICAST(f)   do { (f) &= ~IFF_MULTICAST; } while (0)
 #define IFF_CLR_BROADCAST(f)   do { (f) &= ~IFF_BROADCAST; } while (0)
 
-#define IFF_IS_DOWN(f)        (((f) & IFF_DOWN) != 0)
 #define IFF_IS_UP(f)          (((f) & IFF_UP) != 0)
 #define IFF_IS_RUNNING(f)     (((f) & IFF_RUNNING) != 0)
 #define IFF_IS_BOUND(f)       (((f) & IFF_BOUND) != 0)
