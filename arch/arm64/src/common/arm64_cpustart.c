@@ -155,7 +155,7 @@ static void arm64_start_cpu(int cpu_num, char *stack, int stack_sz,
 
   if (pcsi_cpu_on(cpu_mpid, (uint64_t)&__start))
     {
-      sinfo("Failed to boot secondary CPU core %d (MPID:%#llx)\n", cpu_num,
+      sinfo("Failed to boot secondary CPU core %d (MPID:%#lx)\n", cpu_num,
             cpu_mpid);
       return;
     }
@@ -167,7 +167,7 @@ static void arm64_start_cpu(int cpu_num, char *stack, int stack_sz,
       SP_WFE();
     }
 
-  sinfo("Secondary CPU core %d (MPID:%#llx) is up\n", cpu_num, cpu_mpid);
+  sinfo("Secondary CPU core %d (MPID:%#lx) is up\n", cpu_num, cpu_mpid);
 }
 
 /****************************************************************************
