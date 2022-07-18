@@ -471,7 +471,7 @@ config ESP32_UART2
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config ESP32_WIRELESS
-	bool "Wireless"
+	bool
 	default n
 	select NET
 	select ARCH_PHY_INTERRUPT

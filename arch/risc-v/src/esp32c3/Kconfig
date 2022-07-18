@@ -112,7 +112,7 @@ choice ESP32C3_FLASH_FREQ
 	default ESP32C3_FLASH_FREQ_40M
 	---help---
 		SPI FLASH frequency
-		
+
 config ESP32C3_FLASH_FREQ_80M
 	bool "80 MHz"
 
@@ -333,7 +333,7 @@ config ESP32C3_ADC1
 	select ESP32C3_ADC
 
 config ESP32C3_WIRELESS
-	bool "Wireless"
+	bool
 	default n
 	select NET
 	select ARCH_PHY_INTERRUPT
