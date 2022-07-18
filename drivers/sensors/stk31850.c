@@ -57,7 +57,7 @@
 #define STK31850_FREQ_SET           20            /* ALS frequency set. */
 #define STK31850_GAIN_SET_MAX       3             /* Gain setting index max. */
 #define STK31850_WAIT_COUNT         5             /* Data read wait count. */
-#define STK31850_WAIT_TIME          5             /* Wait for data ready(ms). */
+#define STK31850_WAIT_TIME          5000          /* Wait for data ready(us). */
 
 /* FIFO mode. */
 
@@ -287,6 +287,7 @@ struct stk31850_dev_s
   float last_lux;                                 /* Last light data. */
   float last_ir;                                  /* Last ir data. */
   uint8_t gain_idx;                               /* Gain set index. */
+  uint8_t wait_cnt;                               /* worker wait times */
 };
 
 /****************************************************************************
@@ -324,6 +325,7 @@ static int stk31850_setspec(FAR struct stk31850_dev_s *priv);
 static int stk31850_checkgain(FAR struct stk31850_dev_s *priv,
                               uint16_t data_f, uint16_t data_c);
 static int stk31850_setstate(FAR struct stk31850_dev_s *priv, uint8_t value);
+static bool stk31850_check_dataready(FAR struct stk31850_dev_s *priv);
 static int stk31850_readlux(FAR struct stk31850_dev_s *priv,
                             FAR float *lux, FAR float *ir);
 
@@ -1216,6 +1218,37 @@ static int stk31850_setstate(FAR struct stk31850_dev_s *priv, uint8_t value)
 }
 
 /****************************************************************************
+ * Name: stk31850_check_dataready
+ *
+ * Description:
+ *   Check if the data is ready (ADC conversion compeleted).
+ *
+ * Input Parameters:
+ *   priv  - Device struct.
+ *
+ * Returned Value:
+ *   True - Data is ready. False - Data is not ready, or failed to check.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static bool stk31850_check_dataready(FAR struct stk31850_dev_s *priv)
+{
+  stk31850_flag_t reg_flag;
+  int ret;
+
+  ret = stk31850_i2c_read(priv, STK31850_FLAG, (FAR uint8_t *)&reg_flag);
+  if (ret < 0)
+    {
+      return false;
+    }
+
+  return (reg_flag.flg_als_dr == 1);
+}
+
+/****************************************************************************
  * Name: stk31850_readlux
  *
  * Description:
@@ -1237,34 +1270,9 @@ static int stk31850_setstate(FAR struct stk31850_dev_s *priv, uint8_t value)
 static int stk31850_readlux(FAR struct stk31850_dev_s *priv,
                             FAR float *lux, FAR float *ir)
 {
-  stk31850_flag_t reg_flag;
   uint16_t value_f;
   uint16_t value_c;
-  uint8_t count;
   int ret;
-
-  for (count = 0; count < STK31850_WAIT_COUNT; count++)
-    {
-      ret = stk31850_i2c_read(priv, STK31850_FLAG,
-                              (FAR uint8_t *)&reg_flag);
-      if (ret < 0)
-        {
-          return ret;
-        }
-
-      if (reg_flag.flg_als_dr != 0)
-        {
-          break;
-        }
-
-      up_mdelay(STK31850_WAIT_TIME);
-    }
-
-  if (count == STK31850_WAIT_COUNT)
-    {
-      snerr("stk31850 rd data fail\n");
-      return -ETIME;
-    }
 
   ret = stk31850_i2c_readword(priv, STK31850_DATA1_ALS_F_REG, &value_f);
   if (ret < 0)
@@ -1488,25 +1496,47 @@ static void stk31850_worker(FAR void *arg)
 
   DEBUGASSERT(priv != NULL);
 
-  /* Get the timestamp. */
+  /* Get the timestamp if this is not a repeat worker. */
 
-  light.timestamp = sensor_get_timestamp();
-
-  /* Read out the latest sensor data */
-
-  if (stk31850_readlux(priv, &light.light, &light.ir) == 0)
+  if (priv->wait_cnt == 0)
     {
-      /* push data to upper half driver */
-
-      priv->lower.push_event(priv->lower.priv, &light, sizeof(light));
+      light.timestamp = sensor_get_timestamp();
     }
 
-  /* Set next task */
+  /* If data is ready or time is out, try to read out and push it. */
 
-  if (priv->activated)
+  if (stk31850_check_dataready(priv) ||
+      priv->wait_cnt >= STK31850_WAIT_COUNT)
     {
-      work_queue(HPWORK, &priv->work, stk31850_worker, priv,
-                 priv->interval / USEC_PER_TICK);
+      priv->wait_cnt = 0;
+      if (stk31850_readlux(priv, &light.light, &light.ir) == 0)
+        {
+          priv->lower.push_event(priv->lower.priv, &light, sizeof(light));
+        }
+
+      /* Set next worker for reading */
+
+      if (priv->activated)
+        {
+          work_queue(HPWORK, &priv->work, stk31850_worker, priv,
+                     priv->interval / USEC_PER_TICK);
+        }
+    }
+
+  /* If data is not ready, wait several times till time is out. */
+
+  else
+    {
+      priv->wait_cnt++;
+      if (priv->activated)
+        {
+          work_queue(HPWORK, &priv->work, stk31850_worker, priv,
+                     STK31850_WAIT_TIME / USEC_PER_TICK);
+        }
+      else
+        {
+          priv->wait_cnt = 0;
+        }
     }
 }
 
