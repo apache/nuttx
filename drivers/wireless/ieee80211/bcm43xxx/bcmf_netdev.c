@@ -1010,7 +1010,7 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)dev->d_private;
   int ret;
 
-  if (!priv->bc_bifup)
+  if (!priv->bc_bifup && (cmd != SIOCSIWPTAPRIO && cmd != SIOCGIWPTAPRIO))
     {
       wlerr("ERROR: invalid state "
             "(IFF_DOWN, unable to execute command: %x)\n", cmd);

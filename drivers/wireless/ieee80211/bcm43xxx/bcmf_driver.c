@@ -1202,6 +1202,10 @@ FAR struct bcmf_dev_s *bcmf_allocate_device(void)
 
   priv->scan_status = BCMF_SCAN_DISABLED;
 
+  /* Init default PTA priority threshold */
+
+  priv->pta_priority_th = IW_PTA_PRIORITY_WLAN_MAXIMIZED;
+
   return priv;
 
 exit_free_priv:
@@ -2271,7 +2275,12 @@ int bcmf_wl_set_pta_priority(FAR struct bcmf_dev_s *priv, uint32_t prio)
       return -EINVAL;
     }
 
-  if (priv->pta_priority == prio)
+  if (prio > priv->pta_priority_th)
+    {
+      prio = priv->pta_priority_th;
+    }
+
+  if (priv->pta_priority == prio || !priv->bc_bifup)
     {
       return OK;
     }
@@ -2291,12 +2300,27 @@ int bcmf_wl_set_pta_priority(FAR struct bcmf_dev_s *priv, uint32_t prio)
 
 int bcmf_wl_set_pta(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 {
+  uint32_t prio = iwr->u.param.value;
+
   if (bcmf_wl_get_interface(priv, iwr) < 0)
     {
       return -EINVAL;
     }
 
-  return bcmf_wl_set_pta_priority(priv, iwr->u.param.value);
+  priv->pta_priority_th = prio;
+
+  if (!IFF_IS_RUNNING(priv->bc_dev.d_flags) ||
+      bcmf_wl_get_channel(priv, CHIP_STA_INTERFACE) > 14)
+    {
+      prio = IW_PTA_PRIORITY_COEX_MAXIMIZED;
+    }
+
+  if (prio > IW_PTA_PRIORITY_BALANCED)
+    {
+      prio = IW_PTA_PRIORITY_BALANCED;
+    }
+
+  return bcmf_wl_set_pta_priority(priv, prio);
 }
 
 #endif

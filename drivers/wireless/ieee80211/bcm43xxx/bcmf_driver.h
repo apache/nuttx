@@ -104,7 +104,11 @@ struct bcmf_dev_s
   sclock_t      lp_ticks;       /* Ticks of last tx time */
 #endif
 #ifdef CONFIG_IEEE80211_BROADCOM_PTA_PRIORITY
-  int pta_priority; /* Current priority of Packet Traffic Arbitration */
+  int pta_priority;    /* Current priority of Packet Traffic Arbitration */
+  int pta_priority_th; /* PTA WIFI threshold.
+                        * Cannot be directly set to the WLAN_MAX in some special scenarios,
+                        * otherwise the bluetooth experience will be affected.
+                        */
 #endif
 };
 
