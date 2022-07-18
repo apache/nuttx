@@ -365,8 +365,6 @@ config ESP32C3_RSA_ACCELERATOR
 config ESP32C3_WIFI
 	bool "Wi-Fi"
 	default n
-	select NET
-	select ARCH_PHY_INTERRUPT
 	select ESP32C3_WIRELESS
 	---help---
 		Enable Wi-Fi support
