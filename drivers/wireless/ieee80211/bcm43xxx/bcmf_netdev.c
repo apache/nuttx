@@ -858,7 +858,6 @@ static void bcmf_lowpower_ifdown_work(FAR void *arg)
       if (priv->bc_bifup)
         {
           syslog(LOG_WARNING, "--- [wifi] power off by 10m timeout ---\n");
-          extern void netdev_ifdown(FAR struct net_driver_s *dev);
           netdev_ifdown(&priv->bc_dev);
         }
     }
