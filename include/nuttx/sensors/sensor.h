@@ -406,12 +406,8 @@ enum sensor_gps_vendor_type
   SENSOR_GPS_VENDOR_BREAM,
 };
 
-struct sensor_gps_vendor_brm
+struct sensor_gps_vendor_bream
 {
-  float hspeed_err;         /* Horizontal speed error RMS (m/s) */
-  float vspeed_err;         /* Vertical speed error RMS (m/s) */
-  float env_range_resid;    /* Environment RangeResid (meters) */
-  float altitude_err;       /* Altitude error RMS (meters) */
   int32_t lat;              /* Latitude. Unit is degree */
   int32_t lon;              /* Longitude. Unit is degree */
   int32_t hmsl;             /* Height above mean sea level */
@@ -459,12 +455,17 @@ struct sensor_gps           /* Type: Gps */
 
   float course;
 
+  float hspeed_err;         /* Horizontal speed error RMS (m/s) */
+  float vspeed_err;         /* Vertical speed error RMS (m/s) */
+  float env_range_resid;    /* Environment RangeResid (meters) */
+  float altitude_err;       /* Altitude error RMS (meters) */
+
   uint32_t satellites_used; /* Number of satellites used */
 
   enum sensor_gps_vendor_type vendor;
   union
   {
-    struct sensor_gps_vendor_brm brm;
+    struct sensor_gps_vendor_bream bream;
   };
 };
 
