@@ -26,6 +26,7 @@
 #include <ctype.h>
 #include <debug.h>
 #include <endian.h>
+#include <inttypes.h>
 
 #include <nuttx/kmalloc.h>
 
