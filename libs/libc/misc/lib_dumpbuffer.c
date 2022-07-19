@@ -33,6 +33,27 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: lib_dumphandler
+ *
+ * Description:
+ *  Do a pretty buffer dump with handler output.
+ *
+ ****************************************************************************/
+
+void lib_dumphandler(FAR const char *msg, FAR const uint8_t *buffer,
+                     unsigned int buflen, lib_dump_handler_t handler,
+                     FAR void *arg)
+{
+  struct iovec buf =
+    {
+      .iov_base = (FAR char *)buffer,
+      .iov_len = buflen,
+    };
+
+  lib_dumpvhandler(msg, &buf, 1, handler, arg);
+}
+
+/****************************************************************************
  * Name: lib_dumpbuffer
  *
  * Description:
@@ -53,4 +74,24 @@ void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
     };
 
   lib_dumpvbuffer(msg, &buf, 1);
+}
+
+/****************************************************************************
+ * Name: lib_dumpfile
+ *
+ * Description:
+ *  Do a pretty buffer dump with fd output.
+ *
+ ****************************************************************************/
+
+void lib_dumpfile(int fd, FAR const char *msg, FAR const uint8_t *buffer,
+                  unsigned int buflen)
+{
+  struct iovec buf =
+    {
+      .iov_base = (FAR char *)buffer,
+      .iov_len = buflen,
+    };
+
+  lib_dumpvfile(fd, msg, &buf, 1);
 }
