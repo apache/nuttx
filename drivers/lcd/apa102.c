@@ -159,6 +159,10 @@ struct apa102_dev_s
 static int apa102_putrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
                          fb_coord_t col, FAR const uint8_t *buffer,
                          size_t npixels);
+static int apa102_putarea(FAR struct lcd_dev_s *dev,
+                          fb_coord_t row_start, fb_coord_t row_end,
+                          fb_coord_t col_start, fb_coord_t col_end,
+                          FAR const uint8_t *buffer);
 static int apa102_getrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
                          fb_coord_t col, FAR uint8_t *buffer,
                          size_t npixels);
@@ -215,7 +219,7 @@ static const struct fb_videoinfo_s g_videoinfo =
 static const struct lcd_planeinfo_s g_planeinfo =
 {
   apa102_putrun,              /* Put a run into LCD memory */
-  NULL,                       /* No putarea function */
+  apa102_putarea,             /* Put a run into LCD memory */
   apa102_getrun,              /* Get a run from LCD memory */
   NULL,                       /* No getarea function */
   NULL,                       /* No redraw function */
@@ -348,6 +352,47 @@ static inline void apa102_write32(FAR struct apa102_dev_s *priv,
 }
 
 /****************************************************************************
+ * Name: apa102_refresh
+ *
+ * Description:
+ *   Send converted framebuffer to the APA102 LED Matrix
+ *
+ ****************************************************************************/
+
+static inline void apa102_refresh(FAR struct apa102_dev_s *priv)
+{
+  int i;
+
+  /* Confirm that SPI is configured correctly */
+
+  apa102_configspi(priv->spi);
+
+  /* Send a start of frame */
+
+  apa102_write32(priv, APA102_START_FRAME);
+
+  /* Send all LEDs values in the matrix */
+
+  for (i = 0; i < (APA102_XRES * APA102_YRES); i++)
+    {
+      uint32_t *led = (uint32_t *) &priv->fb[i];
+
+      /* Then transfer 4 bytes per LED */
+
+      apa102_write32(priv, (uint32_t) (*led | APA102_HEADER_FRAME));
+    }
+
+  /* Send an end of frame */
+
+  apa102_write32(priv, APA102_END_FRAME);
+
+  for (i = 0; i < (1 + APA102_XRES * APA102_YRES / 32); i++)
+    {
+      apa102_write32(priv, 0);
+    }
+}
+
+/****************************************************************************
  * Name:  apa102_putrun
  *
  * Description:
@@ -401,33 +446,58 @@ static int apa102_putrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
       priv->fb[(row * APA102_XRES) + col + i] = rgb565_apa102(*ptr++);
     }
 
-  /* Confirm that SPI is configured correctly */
+  /* Update the display with converted data */
 
-  apa102_configspi(priv->spi);
+  apa102_refresh(priv);
 
-  /* Send a start of frame */
+  return OK;
+}
 
-  apa102_write32(priv, APA102_START_FRAME);
+/****************************************************************************
+ * Name:  apa102_putarea
+ *
+ * Description:
+ *   This method can be used to write a partial area to the LCD:
+ *
+ *   dev       - The lcd device
+ *   row_start - Starting row to write to (range: 0 <= row < yres)
+ *   row_end   - Ending row to write to (range: row_start <= row < yres)
+ *   col_start - Starting column to write to (range: 0 <= col <= xres)
+ *   col_end   - Ending column to write to
+ *               (range: col_start <= col_end < xres)
+ *   buffer    - The buffer containing the area to be written to the LCD
+ *
+ ****************************************************************************/
 
-  /* Send all LEDs values in the matrix */
+static int apa102_putarea(FAR struct lcd_dev_s *dev,
+                          fb_coord_t row_start, fb_coord_t row_end,
+                          fb_coord_t col_start, fb_coord_t col_end,
+                          FAR const uint8_t *buffer)
+{
+  FAR struct apa102_dev_s *priv = (FAR struct apa102_dev_s *)dev;
+  FAR uint16_t *src = (FAR uint16_t *)buffer;
+  int i;
+  int j;
 
-  for (i = 0; i < (APA102_XRES * APA102_YRES); i++)
+  ginfo("row_start: %d row_end: %d col_start: %d col_end: %d\n",
+         row_start, row_end, col_start, col_end);
+
+  DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
+
+  /* Convert RGB565 to APA102 LED values */
+
+  for (i = row_start; i <= row_end; i++)
     {
-      uint32_t *led = (uint32_t *) &priv->fb[i];
-
-      /* Then transfer 4 bytes per LED */
-
-      apa102_write32(priv, (uint32_t) (*led | APA102_HEADER_FRAME));
+      for (j = col_start; j <= col_end; j++)
+        {
+          priv->fb[(i * APA102_XRES) + j] =
+            rgb565_apa102(*(src + (i * APA102_XRES) + j));
+        }
     }
 
-  /* Send an end of frame */
+  /* Update the display with converted data */
 
-  apa102_write32(priv, APA102_END_FRAME);
-
-  for (i = 0; i < (1 + APA102_XRES * APA102_YRES / 32); i++)
-    {
-      apa102_write32(priv, 0);
-    }
+  apa102_refresh(priv);
 
   return OK;
 }
@@ -611,27 +681,9 @@ static inline void up_clear(FAR struct apa102_dev_s  *priv)
 
   memset(priv->fb, APA102_BLACK, 4 * APA102_FBSIZE);
 
-  /* Send a start of frame */
+  /* Update the display with framebuffer data */
 
-  apa102_write32(priv, APA102_START_FRAME);
-
-  /* Clear all LEDs values in the matrix */
-
-  for (i = 0; i < (APA102_XRES * APA102_YRES); i++)
-    {
-      /* Then transfer 4 bytes per LED */
-
-      apa102_write32(priv, (uint32_t) (APA102_BLACK | APA102_HEADER_FRAME));
-    }
-
-  /* Send an end of frame */
-
-  apa102_write32(priv, APA102_END_FRAME);
-
-  for (i = 0; i < (1 + APA102_XRES * APA102_YRES / 32); i++)
-    {
-      apa102_write32(priv, 0);
-    }
+  apa102_refresh(priv);
 }
 
 /****************************************************************************
