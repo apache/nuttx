@@ -196,7 +196,7 @@ menuconfig NET_SLIP
 
 if NET_SLIP
 
-config SLIP_NINTERFACES
+config NET_SLIP_NINTERFACES
 	int "Number of SLIP interfaces"
 	default 1
 	---help---
@@ -204,14 +204,17 @@ config SLIP_NINTERFACES
 		interfaces to support.
 		Default: 1
 
-config SLIP_STACKSIZE
-	int "SLIP stack size"
+config NET_SLIP_STACKSIZE
+	int "SLIP per-thread stack size"
 	default DEFAULT_TASK_STACKSIZE
 	---help---
 		Select the stack size of the SLIP RX and TX tasks.
 
-config SLIP_DEFPRIO
-	int "SLIP priority"
+		SLIP starts two dedicated threads per interface
+		to handle network events, enabling high performance.
+
+config NET_SLIP_DEFPRIO
+	int "SLIP threads priority"
 	default 128
 	---help---
 		The priority of the SLIP RX and TX tasks. Default: 128
