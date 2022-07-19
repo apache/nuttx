@@ -1071,6 +1071,26 @@ extern "C"
 {
 #endif
 
+/* Type of the call out function pointer provided to
+ * lib_dumphandler() or lib_dumpvhandler()
+ */
+
+typedef CODE void (*lib_dump_handler_t)(FAR void *arg,
+                                        FAR const char *fmt, ...)
+                  printflike(2, 3);
+
+/* Dump a buffer of data with handler */
+
+void lib_dumphandler(FAR const char *msg, FAR const uint8_t *buffer,
+                     unsigned int buflen, lib_dump_handler_t handler,
+                     FAR void *arg);
+
+/* Do a pretty buffer dump from multiple buffers with handler. */
+
+void lib_dumpvhandler(FAR const char *msg, FAR const struct iovec *iov,
+                      int iovcnt, lib_dump_handler_t handler,
+                      FAR void *arg);
+
 /* Dump a buffer of data */
 
 void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
@@ -1080,6 +1100,16 @@ void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
 
 void lib_dumpvbuffer(FAR const char *msg, FAR const struct iovec *iov,
                      int iovcnt);
+
+/* Dump a buffer of data with fd */
+
+void lib_dumpfile(int fd, FAR const char *msg, FAR const uint8_t *buffer,
+                  unsigned int buflen);
+
+/* Do a pretty buffer dump from multiple buffers with fd. */
+
+void lib_dumpvfile(int fd, FAR const char *msg, FAR const struct iovec *iov,
+                   int iovcnt);
 
 /* The system logging interfaces are normally accessed via the macros
  * provided above.  If the cross-compiler's C pre-processor supports a
