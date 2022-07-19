@@ -2032,6 +2032,13 @@ config ARCH_BOARD_STM32F769I_DISCO
 		MCU. The STM32F769NIH6 is a 216MHz Cortex-M7 with 2048Kb Flash
 		memory and 512Kb SRAM.
 
+config ARCH_BOARD_STEVAL_ETH001V1
+	bool "STMicro STEVAL-ETH001V1 board"
+	depends on ARCH_CHIP_STM32F767ZI
+	---help---
+		The STMicro STEVAL-ETH001V1 servo drive evaluation board featuring
+		the STM32F767ZI MCU.
+
 config ARCH_BOARD_STM32H747I_DISCO
 	bool "STMicro STM32H747I-DISCO board"
 	depends on ARCH_CHIP_STM32H747XI
@@ -2734,6 +2741,7 @@ config ARCH_BOARD
 	default "stm32f429i-disco"         if ARCH_BOARD_STM32F429I_DISCO
 	default "stm32f746g-disco"         if ARCH_BOARD_STM32F746G_DISCO
 	default "stm32f769i-disco"         if ARCH_BOARD_STM32F769I_DISCO
+	default "steval-eth001v1"          if ARCH_BOARD_STEVAL_ETH001V1
 	default "stm32h747i-disco"         if ARCH_BOARD_STM32H747I_DISCO
 	default "stm32f746-ws"             if ARCH_BOARD_STM32F746_WS
 	default "b-g474e-dpow1"            if ARCH_BOARD_B_G474E_DPOW1
@@ -3154,6 +3162,9 @@ source "boards/arm/stm32f7/stm32f746g-disco/Kconfig"
 endif
 if ARCH_BOARD_STM32F769I_DISCO
 source "boards/arm/stm32f7/stm32f769i-disco/Kconfig"
+endif
+if ARCH_BOARD_STEVAL_ETH001V1
+source "boards/arm/stm32f7/steval-eth001v1/Kconfig"
 endif
 if ARCH_BOARD_STM32H747I_DISCO
 source "boards/arm/stm32h7/stm32h747i-disco/Kconfig"
