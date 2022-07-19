@@ -24,11 +24,14 @@
 
 #include <fcntl.h>
 #include <poll.h>
+#include <stdio.h>
+#include <sys/time.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/mm/circbuf.h>
+#include <nuttx/net/snoop.h>
 
 #include <nuttx/wireless/bluetooth/bt_hci.h>
 #include <nuttx/wireless/bluetooth/bt_uart.h>
@@ -76,6 +79,10 @@ struct bt_uart_bridge_s
   sem_t                          sendlock;
 
   struct file                    filep;
+#ifdef CONFIG_BLUETOOTH_UART_BRIDGE_BTSNOOP
+  struct snoop_s                 snoop;
+#endif /* CONFIG_BLUETOOTH_UART_BRIDGE_BTSNOOP */
+
   char                           tmpbuf[1024];
 };
 
@@ -275,6 +282,12 @@ static ssize_t bt_uart_bridge_read(FAR struct file *filep,
           goto err;
         }
 
+#ifdef CONFIG_BLUETOOTH_UART_BRIDGE_BTSNOOP
+      snoop_dump(&bridge->snoop, bridge->tmpbuf,
+                 H4_HEADER_SIZE + hdrlen + pktlen,
+                 0, SNOOP_DIRECTION_FLAG_RECV);
+#endif /* CONFIG_BLUETOOTH_UART_BRIDGE_BTSNOOP */
+
       ret += H4_HEADER_SIZE + hdrlen;
       for (i = 0; i < BT_UART_FILTER_TYPE_COUNT; i++)
         {
@@ -365,6 +378,11 @@ static ssize_t bt_uart_bridge_write(FAR struct file *filep,
         {
           goto out;
         }
+
+#ifdef CONFIG_BLUETOOTH_UART_BRIDGE_BTSNOOP
+      snoop_dump(&bridge->snoop, device->sendbuf,
+                 pktlen, 0, SNOOP_DIRECTION_FLAG_SENT);
+#endif /* CONFIG_BLUETOOTH_UART_BRIDGE_BTSNOOP */
 
       /* Got the full packet, check and send out */
 
@@ -485,6 +503,15 @@ int bt_uart_bridge_register(const char *hciname,
           goto err_device;
         }
     }
+
+#ifdef CONFIG_BLUETOOTH_UART_BRIDGE_BTSNOOP
+  char snoop_file[128];
+  snprintf(snoop_file, sizeof(snoop_file),
+           CONFIG_BLUETOOTH_UART_BRIDGE_BTSNOOP_PATH "btsnoop-%d.log",
+           time (NULL));
+
+  snoop_open(&bridge->snoop, snoop_file, SNOOP_DATALINK_HCI_UART, true);
+#endif /* CONFIG_BLUETOOTH_UART_BRIDGE_BTSNOOP */
 
   return OK;
 

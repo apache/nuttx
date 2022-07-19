@@ -69,4 +69,18 @@ config BLUETOOTH_NULL
 		loop" and nothing more:  It is a just a bit-bucket for outgoing
 		packets; it generates no incoming packets.
 
+config BLUETOOTH_UART_BRIDGE_BTSNOOP
+	bool "Bluetooth uart bridge btsnoop support"
+	default n
+	depends on BLUETOOTH_UART_BRIDGE
+	---help---
+		Enable Bluetooth hci btsnoop log
+
+config BLUETOOTH_UART_BRIDGE_BTSNOOP_PATH
+	string "Bluetooth uart bridge btsnoop file path"
+	default "/log/"
+	depends on BLUETOOTH_UART_BRIDGE_BTSNOOP
+	---help---
+		Bluetooth hci dump file path
+
 endif # DRIVERS_BLUETOOTH
