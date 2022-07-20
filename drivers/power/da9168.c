@@ -41,6 +41,7 @@
 #include <nuttx/ioexpander/ioexpander.h>
 #include <nuttx/power/battery_charger.h>
 #include <nuttx/power/battery_ioctl.h>
+#include <nuttx/wqueue.h>
 #include "da9168.h"
 
 /****************************************************************************
@@ -95,6 +96,10 @@ struct da9168_dev_s
   uint8_t addr;                      /* I2C address */
   uint32_t frequency;                /* I2C frequency */
   int pin;                           /* Interrupt pin */
+  struct work_s work;                /* Interrupt handler worker */
+  bool vindpm_int_flag;              /* vindpm interrupt flag */
+  bool vbus_uv_int_flag;             /* vbus uv interrupt flag */
+  uint8_t vindpm_int_count;          /* vindpm interrupt count */
 };
 
 /****************************************************************************
@@ -170,6 +175,15 @@ static int da9168_input_current(FAR struct battery_charger_dev_s *dev,
                                 int value);
 static int da9168_operate(FAR struct battery_charger_dev_s *dev,
                           uintptr_t param);
+static int da9168_get_protocol(FAR struct battery_charger_dev_s *dev,
+                           int *value);
+static int da9168_chipid(FAR struct battery_charger_dev_s *dev,
+                           unsigned int *value);
+static int da9168_get_voltage(FAR struct battery_charger_dev_s *dev,
+                                int *value);
+static int da9168_voltage_info(FAR struct battery_charger_dev_s *dev,
+                                int *value);
+static void da9168_worker(FAR void *arg);
 
 /****************************************************************************
  * Private Data
@@ -184,6 +198,10 @@ static const struct battery_charger_operations_s g_da9168ops =
   da9168_current,
   da9168_input_current,
   da9168_operate,
+  da9168_chipid,
+  da9168_get_voltage,
+  da9168_voltage_info,
+  da9168_get_protocol,
 };
 
 #ifdef CONFIG_DEBUG_DA9168
@@ -1117,6 +1135,57 @@ static int da9168_health(FAR struct battery_charger_dev_s *dev,
 }
 
 /****************************************************************************
+ * Name: da9168_worker
+ *
+ * Description:
+ *   Handle the da9168 vindpm interrput.
+ *
+ * Input Parameters:
+ *   arg    - Device struct.
+ *
+ * Returned Value:
+ *   none.
+ *
+ * Assumptions/Limitations:
+ *   none.
+ *
+ ****************************************************************************/
+
+static void da9168_worker(FAR void *arg)
+{
+  int ret;
+  uint8_t regval;
+
+  FAR struct da9168_dev_s *priv = arg;
+  ret = da9168_getreg8(priv, DA9168_PMC_EVENT_00, &regval);
+  if (ret < 0)
+    {
+      baterr("get event _00 reg err\n");
+    }
+  else
+    {
+      if ((regval&DA9168_E_VBUS_VINDPM_MASK) >> DA9168_E_VBUS_VINDPM_SHIFT)
+        {
+          priv->vindpm_int_count++;
+          priv->vindpm_int_flag = true;
+        }
+    }
+
+  ret = da9168_getreg8(priv, DA9168_PMC_EVENT_01, &regval);
+  if (ret < 0)
+    {
+      baterr("get event _01 reg err\n");
+    }
+  else
+    {
+      if ((regval & DA9168_E_VBUS_UV_MASK) >> DA9168_E_VBUS_UV_SHIFT)
+        {
+          priv->vbus_uv_int_flag = true;
+        }
+    }
+}
+
+/****************************************************************************
  * Name: da9168_interrupt_handler
  *
  * Description:
@@ -1139,7 +1208,12 @@ static int da9168_health(FAR struct battery_charger_dev_s *dev,
 static int da9168_interrupt_handler(FAR struct ioexpander_dev_s *dev,
                                     ioe_pinset_t pinset, FAR void *arg)
 {
-  batinfo("da9168 interrput handler\n");
+  FAR struct da9168_dev_s *priv = arg;
+
+  DEBUGASSERT(priv != NULL);
+
+  work_queue(LPWORK, &priv->work, da9168_worker, priv, 0);
+
   return OK;
 }
 
@@ -1572,6 +1646,38 @@ static inline int da9168_setcurr(FAR struct da9168_dev_s *priv,
 }
 
 /****************************************************************************
+ * Name: da9168_get_protocol
+ *
+ * Description:
+ *   Return true if the battery is online
+ *
+ ****************************************************************************/
+
+static int da9168_get_protocol(FAR struct battery_charger_dev_s *dev,
+                                                                int *value)
+{
+  int temp_val = 0;
+  FAR struct da9168_dev_s *priv = (FAR struct da9168_dev_s *)dev;
+
+  if (priv->vindpm_int_flag || priv->vbus_uv_int_flag)
+    {
+      temp_val |= DA9168_VINDPM_INT_FLAG;
+      temp_val |= (priv->vindpm_int_count << 1);
+      temp_val |= DA9168_VBUS_UV_INT_FLAG;
+      priv->vindpm_int_flag = false;
+      priv->vindpm_int_count = 0;
+      priv->vbus_uv_int_flag = false;
+    }
+  else
+    {
+      temp_val = 0;
+    }
+
+  *value =  temp_val;
+  return 0;
+}
+
+/****************************************************************************
  * Name: da9168_online
  *
  * Description:
@@ -1585,6 +1691,24 @@ static int da9168_online(FAR struct battery_charger_dev_s *dev,
   /* There is no concept of online/offline in this driver */
 
   *status = true;
+  return OK;
+}
+
+static int da9168_chipid(FAR struct battery_charger_dev_s *dev,
+                           unsigned int *value)
+{
+  return OK;
+}
+
+static int da9168_get_voltage(FAR struct battery_charger_dev_s *dev,
+                                int *value)
+{
+  return OK;
+}
+
+static int da9168_voltage_info(FAR struct battery_charger_dev_s *dev,
+                                int *value)
+{
   return OK;
 }
 
@@ -1817,6 +1941,17 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
       return ret;
     }
 
+  /* enable vin_dpm interrput event */
+
+  ret = da9168_enable_interrput(priv, DA9168_PMC_MASK_00,
+                                DA9168_M_VBUS_VINDPM_MASK,
+                                DA9168_M_VBUS_VINDPM_SHIFT, false);
+  if (ret < 0)
+    {
+      baterr("da9168 en interrput err:%d\n", ret);
+      return ret;
+    }
+
   /* enable vus_uv interrput event */
 
   ret = da9168_enable_interrput(priv, DA9168_PMC_MASK_01,
@@ -1918,6 +2053,9 @@ FAR struct battery_charger_dev_s *
   priv->frequency = frequency;
   priv->ioe       = dev;
   priv->pin       = int_pin;
+  priv->vindpm_int_flag = false;
+  priv->vbus_uv_int_flag = false;
+  priv->vindpm_int_count = 0;
 
   /* Reset the DA9168 */
 
@@ -1984,7 +2122,7 @@ FAR struct battery_charger_dev_s *
     }
 
   ret = IOEXP_SETOPTION(priv->ioe, priv->pin,
-                        IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
+           IOEXPANDER_OPTION_INTCFG, (void *)IOEXPANDER_VAL_FALLING);
   if (ret < 0)
     {
       baterr("set option err:%d\n", ret);

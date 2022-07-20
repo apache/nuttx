@@ -707,4 +707,7 @@ FAR struct da9168_ic_state_s
   uint8_t bat_fault;
 };
 
+#define DA9168_VINDPM_INT_FLAG    (1<<0)
+#define DA9168_VBUS_UV_INT_FLAG   (1<<9)
+
 #endif/* __DA9168_H */
