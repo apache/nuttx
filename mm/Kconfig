@@ -165,18 +165,18 @@ config MM_SHM
 		Build in support for the shared memory interfaces shmget(), shmat(),
 		shmctl(), and shmdt().
 
-config MM_FILL_ALLOCATIONS
-	bool "Fill allocations with debug value"
-	default n
-	---help---
-		Fill all malloc() allocations with 0xAA. This helps
-		detecting uninitialized variable errors.
-
 config MM_CIRCBUF
 	bool "Circular buffer support"
 	default n
 	---help---
 		Build in support for the circular buffer management.
+
+config MM_MEMPOOL
+	bool "Enable memory buffer pool"
+	default n
+	---help---
+		Memory buffer pool support. Such pools are mostly used
+		for guaranteed, deadlock-free memory allocations.
 
 config MM_KASAN
 	bool "Kernel Address Sanitizer"
@@ -185,6 +185,13 @@ config MM_KASAN
 		KASan is a fast compiler-based tool for detecting memory
 		bugs in native code. After turn on this option, Please
 		add -fsanitize=kernel-address to CFLAGS/CXXFLAGS too.
+
+config MM_FILL_ALLOCATIONS
+	bool "Fill allocations with debug value"
+	default n
+	---help---
+		Fill all malloc() allocations with 0xAA. This helps
+		detecting uninitialized variable errors.
 
 config MM_BACKTRACE
 	int "The depth of backtrace"
