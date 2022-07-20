@@ -443,7 +443,15 @@ static int apa102_putrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
     {
       uint16_t *ptr = (uint16_t *)buffer;
 
-      priv->fb[(row * APA102_XRES) + col + i] = rgb565_apa102(*ptr++);
+      if (row % 2 == 0)
+        {
+          priv->fb[(row * APA102_XRES) + col + i] = rgb565_apa102(*ptr++);
+        }
+      else
+        {
+          priv->fb[(row * APA102_XRES) + APA102_XRES - col - i - 1] =
+            rgb565_apa102(*ptr++);
+        }
     }
 
   /* Update the display with converted data */
@@ -490,8 +498,16 @@ static int apa102_putarea(FAR struct lcd_dev_s *dev,
     {
       for (j = col_start; j <= col_end; j++)
         {
-          priv->fb[(i * APA102_XRES) + j] =
-            rgb565_apa102(*(src + (i * APA102_XRES) + j));
+          if (i % 2 == 0)
+            {
+              priv->fb[(i * APA102_XRES) + j] =
+                rgb565_apa102(*(src + (i * APA102_XRES) + j));
+            }
+          else
+            {
+              priv->fb[(i * APA102_XRES) + APA102_XRES - j - 1] =
+                rgb565_apa102(*(src + (i * APA102_XRES) + j));
+            }
         }
     }
 
