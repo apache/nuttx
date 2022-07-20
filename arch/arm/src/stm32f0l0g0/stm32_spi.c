@@ -510,45 +510,6 @@ static inline uint16_t spi_readword(struct stm32_spidev_s *priv)
 }
 
 /****************************************************************************
- * Name: spi_readbyte
- *
- * Description:
- *   Read one byte from SPI
- *
- * Input Parameters:
- *   priv - Device-specific state data
- *
- * Returned Value:
- *   Byte as read
- *
- ****************************************************************************/
-
-static inline uint8_t spi_readbyte(struct stm32_spidev_s *priv)
-{
-  /* Can't receive in tx only mode */
-
-  if (priv->config == SIMPLEX_TX)
-    {
-      return 0;
-    }
-
-  if (priv->config == HALF_DUPLEX)
-    {
-      /* Disable output for half-duplex mode */
-
-      spi_modifycr(STM32_SPI_CR1_OFFSET, priv, 0, SPI_CR1_BIDIOE);
-    }
-
-  /* Wait until the receive buffer is not empty */
-
-  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_RXNE) == 0);
-
-  /* Then return the received byte */
-
-  return spi_getreg8(priv, STM32_SPI_DR_OFFSET);
-}
-
-/****************************************************************************
  * Name: spi_writeword
  *
  * Description:
