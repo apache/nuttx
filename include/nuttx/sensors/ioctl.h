@@ -94,7 +94,6 @@
 
 /* IOCTL commands unique to the MS58XX */
 
-#define SNIOC_MEASURE              _SNIOC(0x0025) /* Arg: None */
 #define SNIOC_TEMPERATURE          _SNIOC(0x0026) /* Arg: int32_t* pointer */
 #define SNIOC_PRESSURE             _SNIOC(0x0027) /* Arg: int32_t* pointer */
 #define SNIOC_RESET                _SNIOC(0x0028) /* Arg: None */
@@ -147,17 +146,15 @@
 
 /* IOCTL commands unique to the LSM6DSL */
 
-#define SNIOC_START                _SNIOC(0x0042) /* Arg: None */
-#define SNIOC_STOP                 _SNIOC(0x0043) /* Arg: None */
 #define SNIOC_LSM6DSLSENSORREAD    _SNIOC(0x0046) /* Arg: file *filep, FAR char *buffer,size_t buflen */
-#define SNIOC_START_SELFTEST       _SNIOC(0x0047) /* Arg: file *filep, FAR char *buffer,size_t mode */
+
+/* SNIOC_START_SELFTEST */                        /* Arg: file *filep, FAR char *buffer,size_t mode */
 
 /* IOCTL commands unique to the LSM303AGR */
 
-#define SNIOC_START                _SNIOC(0x0049) /* Arg: None */
-#define SNIOC_STOP                 _SNIOC(0x0050) /* Arg: None */
 #define SNIOC_LSM303AGRSENSORREAD  _SNIOC(0x0051) /* Arg: file *filep, FAR char *buffer,size_t buflen */
-#define SNIOC_START_SELFTEST       _SNIOC(0x0052) /* Arg: file *filep, FAR char *buffer,size_t mode */
+
+/* SNIOC_START_SELFTEST */                        /* Arg: file *filep, FAR char *buffer,size_t mode */
 
 /* IOCTL commands unique to the MLX90614 */
 
@@ -172,7 +169,8 @@
 /* SNIOC_STOP */                                  /* Arg: None */
 
 /* SNIOC_READ_CONVERT_DATA */                     /* Arg: struct scd30_conv_data_s* */
-#define SNIOC_SET_INTERVAL         _SNIOC(0x0054) /* Arg: uint16_t value (seconds) */
+
+/* SNIOC_SET_INTERVAL */                          /* Arg: uint16_t value (seconds) */
 #define SNIOC_SET_TEMP_OFFSET      _SNIOC(0x0055) /* Arg: uint16_t value (0.01 Kelvin) */
 #define SNIOC_SET_PRESSURE_COMP    _SNIOC(0x0056) /* Arg: uint16_t value (mbar) */
 #define SNIOC_SET_ALTITUDE_COMP    _SNIOC(0x0057) /* Arg: uint16_t value (meters) */
