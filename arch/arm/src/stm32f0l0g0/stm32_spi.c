@@ -325,6 +325,7 @@ static struct stm32_spidev_s g_spi1dev =
 #ifdef CONFIG_PM
   .pm_cb.prepare = spi_pm_prepare,
 #endif
+  .config   = CONFIG_STM32F0L0G0_SPI1_COMMTYPE,
 };
 #endif
 
@@ -378,6 +379,7 @@ static struct stm32_spidev_s g_spi2dev =
 #ifdef CONFIG_PM
   .pm_cb.prepare = spi_pm_prepare,
 #endif
+  .config   = CONFIG_STM32F0L0G0_SPI2_COMMTYPE,
 };
 #endif
 
@@ -1979,7 +1981,7 @@ struct spi_dev_s *stm32_spibus_initialize(int bus)
       goto errout;
     }
 
-#ifdef CONFIG_STM32L4_SPI_DMA
+#ifdef CONFIG_STM32F0L0G0_SPI_DMA
   /* SPI DMA supported only for full-duplex mode */
 
   if (priv->rxch && priv->txch && priv->config != FULL_DUPLEX)
