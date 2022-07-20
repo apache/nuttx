@@ -32,14 +32,14 @@
 	.type	memset, %function
 memset:
 #ifdef __ARM_FEATURE_MVE
-	vmov.u8	q0, #0
-	vadd.u8	q0, q0, r1
+	vdup.8	q0, r1
 	mov	r3, lr
 	mov	r1, r0
-	dlstp.8	lr, r2
+	wlstp.8	lr, r2, 2f
 1:
 	vstrb.8	q0, [r1], #16
 	letp	lr, 1b
+2:
 	bx	r3
 #else
 	push	{r4, r5, r6}

@@ -94,12 +94,13 @@ memcpy:
 	@ r2: len
 #ifdef __ARM_FEATURE_MVE
 	mov	r3, lr
-	dlstp.8	lr, r2
+	wlstp.8	lr, r2, 2f
 	mov	r2, r0
-.Lloop:
-	vldrb.u8	q0, [r1], #16
+1:
+	vldrb.8	q0, [r1], #16
 	vstrb.8	q0, [r2], #16
-	letp	lr, .Lloop
+	letp	lr, 1b
+2:
 	bx	r3
 #else
 #ifdef __ARM_FEATURE_UNALIGNED
