@@ -122,7 +122,7 @@
 
 /* Timing */
 
-#define HSMCI_CMDTIMEOUT         (100000)
+#define HSMCI_CMDTIMEOUT         (0x7fffffff)
 #define HSMCI_LONGTIMEOUT        (0x7fffffff)
 
 /* Big DTIMER setting */
