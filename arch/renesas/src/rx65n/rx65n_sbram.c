@@ -671,7 +671,6 @@ int rx65n_sbraminitialize(char *devpath, int *sizes)
 {
   int i;
   int fcnt;
-  char path[32];
   char devname[32];
 
   int ret = OK;
@@ -682,7 +681,7 @@ int rx65n_sbraminitialize(char *devpath, int *sizes)
     }
 
   i = strlen(devpath);
-  if (i == 0 || i > sizeof(path) + 3)
+  if (i == 0 || i > sizeof(devname) - 3)
     {
       return -EINVAL;
     }
@@ -703,12 +702,9 @@ int rx65n_sbraminitialize(char *devpath, int *sizes)
 
   fcnt = rx65n_sbram_probe(sizes, g_sbram);
 
-  strncpy(path, devpath, sizeof(path));
-  strcat(path, "%d");
-
   for (i = 0; i < fcnt && ret >= OK; i++)
     {
-      snprintf(devname, sizeof(devname), path, i);
+      snprintf(devname, sizeof(devname), "%s%d", devpath, i);
       ret = register_driver(devname, &rx65n_sbram_fops, 0666, &g_sbram[i]);
     }
 
