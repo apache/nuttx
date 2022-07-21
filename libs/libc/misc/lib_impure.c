@@ -25,6 +25,7 @@
 #if defined(__has_include)
 #  if __has_include(<reent.h>)
 
+#define const
 #include <reent.h>
 
 /****************************************************************************
@@ -44,9 +45,9 @@
  ****************************************************************************/
 
 #ifdef _REENT_SMALL
-extern const struct __sFILE_fake __sf_fake_stdin _ATTRIBUTE((weak));
-extern const struct __sFILE_fake __sf_fake_stdout _ATTRIBUTE((weak));
-extern const struct __sFILE_fake __sf_fake_stderr _ATTRIBUTE((weak));
+extern struct __sFILE_fake __sf_fake_stdin _ATTRIBUTE((weak));
+extern struct __sFILE_fake __sf_fake_stdout _ATTRIBUTE((weak));
+extern struct __sFILE_fake __sf_fake_stderr _ATTRIBUTE((weak));
 #endif
 
 static struct _reent __ATTRIBUTE_IMPURE_DATA__
@@ -59,13 +60,8 @@ extern struct _reent reent_data __attribute__((alias("impure_data")));
 struct _reent *__ATTRIBUTE_IMPURE_PTR__
 _impure_ptr = &impure_data;
 
-#ifdef CONFIG_ARCH_XTENSA
 struct _reent *__ATTRIBUTE_IMPURE_PTR__
 _global_impure_ptr = &impure_data;
-#else
-struct _reent *const __ATTRIBUTE_IMPURE_PTR__
-_global_impure_ptr = &impure_data;
-#endif
 
 #  endif /* __has_include(<reent.h>) */
 #endif /* defined(__has_include) */
