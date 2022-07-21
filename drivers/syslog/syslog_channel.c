@@ -218,9 +218,14 @@ static ssize_t syslog_default_write(FAR struct syslog_channel_s *channel,
 {
 #if defined(CONFIG_ARCH_LOWPUTC)
   static sem_t sem = SEM_INITIALIZER(1);
+  size_t nwritten;
 
   nxsem_wait(&sem);
-  up_puts(buffer);
+  for (nwritten = 0; nwritten < buflen; nwritten++)
+    {
+      up_putc(buffer[nwritten]);
+    }
+
   nxsem_post(&sem);
 #endif
 
