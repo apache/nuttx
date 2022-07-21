@@ -242,7 +242,7 @@ static inline void rptun_update_rx(FAR struct rptun_priv_s *priv)
       return;
     }
 
-  if (rpmsg_virtio_get_role(rvdev) == RPMSG_MASTER)
+  if (rpmsg_virtio_get_role(rvdev) == RPMSG_HOST)
     {
       priv->headrx = rvq->vq_ring.used->idx;
     }
@@ -262,7 +262,7 @@ static inline bool rptun_available_rx(FAR struct rptun_priv_s *priv)
       return false;
     }
 
-  if (rpmsg_virtio_get_role(rvdev) == RPMSG_MASTER)
+  if (rpmsg_virtio_get_role(rvdev) == RPMSG_HOST)
     {
       return priv->headrx != rvq->vq_used_cons_idx;
     }
@@ -709,8 +709,8 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
           rsc->rpmsg_vring1.da = da1;
 
           shbuf   = (FAR char *)rsc + tbsz + v0sz + v1sz;
-          shbufsz = rsc->config.txbuf_size * rsc->rpmsg_vring0.num +
-                    rsc->config.rxbuf_size * rsc->rpmsg_vring1.num;
+          shbufsz = rsc->config.r2h_buf_size * rsc->rpmsg_vring0.num +
+                    rsc->config.h2r_buf_size * rsc->rpmsg_vring1.num;
 
           rpmsg_virtio_init_shm_pool(&priv->pooltx, shbuf, shbufsz);
         }
@@ -719,17 +719,17 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
           da0 = rsc->rpmsg_vring0.da;
           shbuf = (FAR char *)remoteproc_mmap(rproc, NULL, &da0,
                                               v0sz, 0, NULL) + v0sz;
-          shbufsz = rsc->config.rxbuf_size * rsc->rpmsg_vring0.num;
+          shbufsz = rsc->config.r2h_buf_size * rsc->rpmsg_vring0.num;
           rpmsg_virtio_init_shm_pool(&priv->poolrx, shbuf, shbufsz);
 
           da1 = rsc->rpmsg_vring1.da;
           shbuf = (FAR char *)remoteproc_mmap(rproc, NULL, &da1,
                                               v1sz, 0, NULL) + v1sz;
-          shbufsz = rsc->config.txbuf_size * rsc->rpmsg_vring1.num;
+          shbufsz = rsc->config.h2r_buf_size * rsc->rpmsg_vring1.num;
           rpmsg_virtio_init_shm_pool(&priv->pooltx, shbuf, shbufsz);
         }
 
-      role = RPMSG_MASTER;
+      role = RPMSG_HOST;
     }
 
   /* Remote proc create */
@@ -742,9 +742,16 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
 
   if (priv->poolrx.base)
     {
-      ret = rpmsg_init_vdev_ext(&priv->rvdev, vdev, rptun_ns_bind,
-                                metal_io_get_region(),
-                                &priv->pooltx, &priv->poolrx);
+      struct rpmsg_virtio_config config =
+        {
+          RPMSG_BUFFER_SIZE,
+          RPMSG_BUFFER_SIZE,
+        };
+
+      ret = rpmsg_init_vdev_with_config(&priv->rvdev, vdev, rptun_ns_bind,
+                                        metal_io_get_region(),
+                                        &priv->pooltx, &priv->poolrx,
+                                        &config);
     }
   else
     {
@@ -1327,7 +1334,7 @@ int rptun_buffer_nused(FAR struct rpmsg_virtio_device *rvdev, bool rx)
   FAR struct virtqueue *vq = rx ? rvdev->rvq : rvdev->svq;
   uint16_t nused = vq->vq_ring.avail->idx - vq->vq_ring.used->idx;
 
-  if ((rpmsg_virtio_get_role(rvdev) == RPMSG_MASTER) ^ rx)
+  if ((rpmsg_virtio_get_role(rvdev) == RPMSG_HOST) ^ rx)
     {
       return nused;
     }
