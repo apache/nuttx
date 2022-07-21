@@ -1805,7 +1805,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   regaddr = spi_regaddr(spics, SAM_SPI_RDR_OFFSET);
   memaddr = (uintptr_t)rxbuffer;
 
-  ret = sam_dmarxsetup(spics->rxdma, regaddr, memaddr, nwords);
+  ret = sam_dmarxsetup(spics->rxdma, regaddr, memaddr, nbytes);
   if (ret < 0)
     {
       dmaerr("ERROR: sam_dmarxsetup failed: %d\n", ret);
@@ -1819,7 +1819,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   regaddr = spi_regaddr(spics, SAM_SPI_TDR_OFFSET);
   memaddr = (uintptr_t)txbuffer;
 
-  ret = sam_dmatxsetup(spics->txdma, regaddr, memaddr, nwords);
+  ret = sam_dmatxsetup(spics->txdma, regaddr, memaddr, nbytes);
   if (ret < 0)
     {
       dmaerr("ERROR: sam_dmatxsetup failed: %d\n", ret);
