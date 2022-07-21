@@ -186,7 +186,8 @@ static void st7789_setarea(FAR struct st7789_dev_s *dev,
                            uint16_t x1, uint16_t y1);
 static void st7789_bpp(FAR struct st7789_dev_s *dev, int bpp);
 static void st7789_wrram(FAR struct st7789_dev_s *dev,
-                         FAR const uint16_t *buff, size_t size);
+                         FAR const uint16_t *buff, size_t size, size_t skip,
+                         size_t count);
 #ifndef CONFIG_LCD_NOGETRUN
 static void st7789_rdram(FAR struct st7789_dev_s *dev,
                          FAR uint16_t *buff, size_t size);
@@ -441,17 +442,26 @@ static void st7789_bpp(FAR struct st7789_dev_s *dev, int bpp)
  * Name: st7789_wrram
  *
  * Description:
- *   Write to the driver's RAM.
+ *   Write to the driver's RAM. It is possible to write multiples of size
+ *   while skipping some values.
  *
  ****************************************************************************/
 
 static void st7789_wrram(FAR struct st7789_dev_s *dev,
-                         FAR const uint16_t *buff, size_t size)
+                         FAR const uint16_t *buff, size_t size, size_t skip,
+                         size_t count)
 {
+  size_t i;
+
   st7789_sendcmd(dev, ST7789_RAMWR);
 
   st7789_select(dev->spi, ST7789_BYTESPP * 8);
-  SPI_SNDBLOCK(dev->spi, buff, size);
+
+  for (i = 0; i < count; i++)
+    {
+      SPI_SNDBLOCK(dev->spi, buff + (i * (size + skip)), size);
+    }
+
   st7789_deselect(dev->spi);
 }
 
@@ -526,7 +536,7 @@ static int st7789_putrun(FAR struct lcd_dev_s *dev,
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
   st7789_setarea(priv, col, row, col + npixels - 1, row);
-  st7789_wrram(priv, src, npixels);
+  st7789_wrram(priv, src, npixels, 0, 1);
 
   return OK;
 }
@@ -554,6 +564,7 @@ static int st7789_putarea(FAR struct lcd_dev_s *dev,
 {
   FAR struct st7789_dev_s *priv = (FAR struct st7789_dev_s *)dev;
   FAR const uint16_t *src = (FAR const uint16_t *)buffer;
+  fb_coord_t bsiz = col_end - col_start + 1;
 
   ginfo("row_start: %d row_end: %d col_start: %d col_end: %d\n",
          row_start, row_end, col_start, col_end);
@@ -561,8 +572,8 @@ static int st7789_putarea(FAR struct lcd_dev_s *dev,
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
   st7789_setarea(priv, col_start, row_start, col_end, row_end);
-  st7789_wrram(priv, src,
-               (row_end - row_start + 1) * (col_end - col_start + 1));
+  st7789_wrram(priv, src + (ST7789_XRES * row_start) + col_start,
+               bsiz, ST7789_XRES - bsiz, row_end - row_start + 1);
 
   return OK;
 }
