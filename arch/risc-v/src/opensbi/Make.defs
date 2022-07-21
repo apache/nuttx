@@ -37,10 +37,10 @@ INCLUDES  += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)opensbi$(DELIM)open
 SBI_DIR   := opensbi
 
 OPENSBI_UNPACK  = opensbi-3rdparty
-OPENSBI_COMMIT  = 4998a712b2ab504eff306110879ee05af6050177
-OPENSBI_URL     = https://github.com/riscv-software-src/opensbi/tarball
+OPENSBI_COMMIT  = 19b05a2fd4fd04329d26f73a73e179631d7ae44c
+OPENSBI_URL     = https://github.com/tiiuae/opensbi/tarball
 OPENSBI_TARBALL = opensbi.tar.gz
-OPENSBI_DIR     = riscv-software-src-opensbi-4998a71
+OPENSBI_DIR     = tiiuae-opensbi-19b05a2
 
 $(OPENSBI_TARBALL):
 	$(call DOWNLOAD,$(OPENSBI_URL),$(OPENSBI_COMMIT),opensbi/$(OPENSBI_TARBALL))
