@@ -108,6 +108,8 @@ struct aw86225_dev_s
   FAR struct aw86225_patterns_s *patterns;
   struct wdog_s wdog;
   struct work_s worker;
+
+  clock_t timestamp;                         /* timestamp of last vibration */
 };
 
 /****************************************************************************
@@ -706,7 +708,15 @@ static int aw86225_play_go(FAR struct aw86225_dev_s *priv, bool flag)
 
   /* go bit need 2ms to change state */
 
-  usleep(AW86225_GO_DELAY);
+  clock_t now = clock_systime_ticks();
+  clock_t diff = now - priv->timestamp;
+  diff = TICK2USEC(diff);
+  if (diff < AW86225_GO_DELAY)
+    {
+      usleep(AW86225_GO_DELAY - diff + 1);
+    }
+
+  priv->timestamp = now;
 
   return OK;
 }
