@@ -90,7 +90,7 @@ enum proc_node_e
 #ifdef CONFIG_SCHED_CRITMONITOR
   PROC_CRITMON,                       /* Critical section monitor */
 #endif
-#ifdef CONFIG_DEBUG_MM
+#ifdef CONFIG_MM_BACKTRACE
   PROC_HEAP,                          /* Task heap info */
 #endif
   PROC_STACK,                         /* Task stack info */
@@ -279,7 +279,7 @@ static const struct proc_node_s g_critmon =
 };
 #endif
 
-#ifdef CONFIG_DEBUG_MM
+#ifdef CONFIG_MM_BACKTRACE
 static const struct proc_node_s g_heap =
 {
   "heap",         "heap",   (uint8_t)PROC_HEAP,          DTYPE_FILE        /* Task heap info */
@@ -326,7 +326,7 @@ static FAR const struct proc_node_s * const g_nodeinfo[] =
 #ifdef CONFIG_SCHED_CRITMONITOR
   &g_critmon,      /* Critical section Monitor */
 #endif
-#ifdef CONFIG_DEBUG_MM
+#ifdef CONFIG_MM_BACKTRACE
   &g_heap,         /* Task heap info */
 #endif
   &g_stack,        /* Task stack info */
@@ -352,7 +352,7 @@ static const struct proc_node_s * const g_level0info[] =
 #ifdef CONFIG_SCHED_CRITMONITOR
   &g_critmon,      /* Critical section monitor */
 #endif
-#ifdef CONFIG_DEBUG_MM
+#ifdef CONFIG_MM_BACKTRACE
   &g_heap,         /* Task heap info */
 #endif
   &g_stack,        /* Task stack info */

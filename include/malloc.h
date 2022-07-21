@@ -52,7 +52,7 @@ struct mallinfo
                  * by free (not in use) chunks. */
 };
 
-#ifdef CONFIG_DEBUG_MM
+#ifdef CONFIG_MM_BACKTRACE
 struct mallinfo_task
 {
   pid_t pid;    /* The pid of task */
@@ -72,7 +72,7 @@ extern "C"
 
 struct mallinfo mallinfo(void);
 size_t malloc_size(FAR void *ptr);
-#ifdef CONFIG_DEBUG_MM
+#ifdef CONFIG_MM_BACKTRACE
 struct mallinfo_task mallinfo_task(pid_t pid);
 #endif
 
