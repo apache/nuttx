@@ -748,6 +748,30 @@ struct sensor_ops_s
   CODE int (*set_calibvalue)(FAR struct sensor_lowerhalf_s *lower,
                              unsigned long arg);
 
+/****************************************************************************
+   * Name: calibrate
+   *
+   * This operation can trigger the calibration operation, and if the
+   * calibration operation is short-lived, the calibration result value can
+   * be obtained at the same time, the calibration value to be written in or
+   * the non-volatile memory of the sensor or dedicated registers. When the
+   * upper-level application calibration is completed, the current
+   * calibration value of the sensor needs to be obtained and backed up,
+   * so that the last calibration value can be directly obtained after
+   * power-on.
+   *
+   * Input Parameters:
+   *   lower      - The instance of lower half sensor driver.
+   *   arg        - The parameters associated with calibration value.
+   *
+   * Returned Value:
+   *   Zero (OK) on success; a negated errno value on failure.
+   *
+   **************************************************************************/
+
+  CODE int (*calibrate)(FAR struct sensor_lowerhalf_s *lower,
+                        unsigned long arg);
+
   /**************************************************************************
    * Name: control
    *

@@ -470,6 +470,18 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      case SNIOC_CALIBRATE:
+        {
+          if (lower->ops->calibrate == NULL)
+            {
+              ret = -ENOTSUP;
+              break;
+            }
+
+          ret = lower->ops->calibrate(lower, arg);
+        }
+        break;
+
       case SNIOC_GET_NEVENTBUF:
         {
           *val = lower->buffer_number + lower->batch_number;
