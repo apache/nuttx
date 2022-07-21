@@ -79,7 +79,9 @@ struct lcd_planeinfo_s
    *  col_start - Starting column to write to (range: 0 <= col <= xres)
    *  col_end   - Ending column to write to
    *              (range: col_start <= col_end < xres)
-   *  buffer    - The buffer containing the area to be written to the LCD
+   *  buffer    - The buffer containing the complete frame to be written to
+   *              the display (the correct rows and columns have to be
+   *              selected from it)
    *
    * NOTE: this operation may not be supported by the device, in which case
    * the callback pointer will be NULL. In that case, putrun() should be
