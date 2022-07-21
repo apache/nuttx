@@ -21,7 +21,7 @@
 # Add the string C files to the build
 
 CSRCS += lib_ffs.c lib_ffsl.c lib_ffsll.c lib_fls.c lib_flsl.c
-CSRCS += lib_flsll.c lib_isbasedigit.c lib_memccpy.c lib_memrchr.c
+CSRCS += lib_flsll.c lib_isbasedigit.c lib_memccpy.c lib_memrchr.c lib_memmem.c
 CSRCS += lib_popcount.c lib_popcountl.c lib_popcountll.c
 CSRCS += lib_skipspace.c lib_stpcpy.c lib_stpncpy.c lib_strcasecmp.c
 CSRCS += lib_strcat.c lib_strcspn.c lib_strchrnul.c lib_strdup.c
