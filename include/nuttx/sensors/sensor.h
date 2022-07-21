@@ -811,16 +811,13 @@ struct sensor_lowerhalf_s
    * is too small, the event will be overwrite before application read them.
    * So, it's recommended to set according to sensor odr. If odr is low, you
    * can set to one. If odr is high, you can set to two or three.
+   *
+   * If device support batch mode, the number of events that hardware fifo
+   * hold maximum number of samples, must be aligned with size of
+   * struct sensor_event_xxx.
    */
 
   uint32_t buffer_number;
-
-  /* The number of events that hardware fifo hold maximum number of samples,
-   * must be aligned with size of struct sensor_event_xxx.
-   * If sensor don't hardware fifo, you don't need to care about fifo_size.
-   */
-
-  uint32_t batch_number;
 
   /* The uncalibrated use to describe whether the sensor event is
    * uncalibrated. True is uncalibrated data, false is calibrated data,
