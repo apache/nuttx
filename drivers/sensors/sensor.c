@@ -207,17 +207,6 @@ static int sensor_open(FAR struct file *filep)
       ret = -EMFILE;
       goto err;
     }
-  else if (tmp == 1)
-    {
-      /* Initialize sensor buffer */
-
-      ret = circbuf_init(&upper->buffer, NULL, lower->buffer_number *
-                         upper->esize);
-      if (ret < 0)
-        {
-          goto err;
-        }
-    }
 
   upper->crefs = tmp;
 err:
@@ -330,19 +319,6 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
         }
 
       ret = circbuf_read(&upper->buffer, buffer, len);
-
-      /* Release some buffer space when current mode isn't batch mode
-       * and last mode is batch mode, and the number of bytes available
-       * in buffer is less than the number of bytes origin.
-       */
-
-      uint32_t buffer_size = lower->buffer_number * upper->esize;
-      if (upper->latency == 0 &&
-          circbuf_size(&upper->buffer) > buffer_size &&
-          circbuf_used(&upper->buffer) <= buffer_size)
-        {
-          ret = circbuf_resize(&upper->buffer, buffer_size);
-        }
     }
 
 out:
@@ -393,8 +369,6 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                 {
                   upper->interval = 0;
                   upper->latency = 0;
-                  ret = circbuf_resize(&upper->buffer, lower->buffer_number *
-                                                       upper->esize);
                 }
             }
         }
@@ -444,17 +418,6 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           if (ret >= 0)
             {
               upper->latency = *val;
-              if (*val != 0)
-                {
-                  /* Adjust length of buffer in batch mode */
-
-                  uint32_t buffer_size = (ROUNDUP(*val, upper->interval) /
-                                         upper->interval +
-                                         lower->buffer_number) *
-                                         upper->esize;
-
-                  ret = circbuf_resize(&upper->buffer, buffer_size);
-                }
             }
         }
         break;
@@ -497,16 +460,19 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_GET_NEVENTBUF:
         {
-          *val = lower->buffer_number + lower->batch_number;
+          *val = lower->buffer_number;
         }
         break;
 
       case SNIOC_SET_BUFFER_NUMBER:
         {
-          if (arg != 0)
+          if (!circbuf_is_init(&upper->buffer))
             {
               lower->buffer_number = arg;
-              ret = circbuf_resize(&upper->buffer, arg * upper->esize);
+            }
+          else
+            {
+              ret = -EBUSY;
             }
         }
         break;
@@ -617,6 +583,7 @@ static ssize_t sensor_push_event(FAR void *priv, FAR const void *data,
                                  size_t bytes)
 {
   FAR struct sensor_upperhalf_s *upper = priv;
+  FAR struct sensor_lowerhalf_s *lower = upper->lower;
   int semcount;
   int ret;
 
@@ -629,6 +596,19 @@ static ssize_t sensor_push_event(FAR void *priv, FAR const void *data,
   if (ret < 0)
     {
       return ret;
+    }
+
+  if (!circbuf_is_init(&upper->buffer))
+    {
+      /* Initialize sensor buffer when data is first generated */
+
+      ret = circbuf_init(&upper->buffer, NULL, lower->buffer_number *
+                         upper->esize);
+      if (ret < 0)
+        {
+          nxsem_post(&upper->exclsem);
+          return ret;
+        }
     }
 
   circbuf_overwrite(&upper->buffer, data, bytes);
