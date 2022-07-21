@@ -228,6 +228,21 @@ size_t circbuf_space(FAR struct circbuf_s *circ)
 }
 
 /****************************************************************************
+ * Name: circbuf_is_init
+ *
+ * Description:
+ *   Return true if the circular buffer had been initialized.
+ *
+ * Input Parameters:
+ *   circ  - Address of the circular buffer to be used.
+ ****************************************************************************/
+
+bool circbuf_is_init(FAR struct circbuf_s *circ)
+{
+  return !!circ->base;
+}
+
+/****************************************************************************
  * Name: circbuf_is_empty
  *
  * Description:
