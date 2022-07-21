@@ -271,9 +271,26 @@
 
 #define SENSOR_TYPE_GPS_SATELLITE                   30
 
+/* Wake gesture
+ * A sensor enabling waking up the device based on a device specific
+ * motion. 0: the device should sleep, 1: the device should wake up.
+ * Other values ​​are uncalibrated values ​​reported by the driver to
+ * uncalibrated topics.
+ */
+
+#define SENSOR_TYPE_WAKE_GESTURE                    31
+
+/* CAP (Capacitive proximity sensor)
+ * The purpose of the proximity sensing interface is to detect when a
+ * conductive object (usually a body part i.e. finger, palm, face, etc.)
+ * is in the proximity of the system.
+ */
+
+#define SENSOR_TYPE_CAP                             32
+
 /* The total number of sensor */
 
-#define SENSOR_TYPE_COUNT                           31
+#define SENSOR_TYPE_COUNT                           33
 
 /****************************************************************************
  * Inline Functions
@@ -542,6 +559,24 @@ struct sensor_event_gps_satellite
     uint32_t snr;
   }
   info[4];
+};
+
+struct sensor_event_wake_gesture     /* Type: Wake gesture */
+{
+  uint64_t timestamp;                /* Units is microseconds */
+
+  /* wake gesture event, 0: sleep, 1: wake,
+   * others: Uncalibrated status value.
+   */
+
+  uint32_t event;
+};
+
+struct sensor_event_cap     /* Type: Capacitance */
+{
+  uint64_t timestamp;       /* Unit is microseconds */
+  int32_t status;           /* Detection status */
+  int32_t rawdata[4];       /* in SI units pF */
 };
 
 /* The sensor lower half driver interface */
