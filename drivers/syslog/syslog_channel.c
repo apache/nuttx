@@ -217,7 +217,7 @@ static ssize_t syslog_default_write(FAR struct syslog_channel_s *channel,
                                     FAR const char *buffer, size_t buflen)
 {
 #if defined(CONFIG_ARCH_LOWPUTC)
-  up_puts(buffer);
+  up_nputs(buffer, buflen);
 #endif
 
   UNUSED(channel);
