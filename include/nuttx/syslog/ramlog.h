@@ -66,10 +66,6 @@
  * CONFIG_RAMLOG_BUFSIZE - Size of the console RAM log.  Default: 1024
  */
 
-#if defined(CONFIG_RAMLOG_SYSLOG) && !defined(CONFIG_SYSLOG_DEVPATH)
-#  define CONFIG_SYSLOG_DEVPATH "/dev/kmsg"
-#endif
-
 #ifndef CONFIG_RAMLOG_NPOLLWAITERS
 #  define CONFIG_RAMLOG_NPOLLWAITERS 4
 #endif

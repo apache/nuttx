@@ -188,7 +188,8 @@ comment "SYSLOG channels"
 
 config SYSLOG_DEVPATH
 	string "System log device"
-	default "/dev/ttyS1"
+	default "/dev/kmsg" if CONFIG_RAMLOG_SYSLOG
+	default "/dev/ttyS1" if !CONFIG_RAMLOG_SYSLOG
 	---help---
 		The full path to the system logging device.  For the RAMLOG SYSLOG device,
 		this is normally "/dev/kmsg".  For character SYSLOG devices, it should be
