@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/x86_64/src/common/up_nputs.c
+ * arch/xtensa/src/common/xtensa_puts.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,33 +25,23 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#include "xtensa.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_nputs
+ * Name: up_puts
  *
  * Description:
  *   This is a low-level helper function used to support debug.
  *
  ****************************************************************************/
 
-void up_nputs(const char *str, size_t len)
+void up_puts(const char *str)
 {
-  while (*str && len-- > 0)
+  while (*str)
     {
       up_putc(*str++);
     }

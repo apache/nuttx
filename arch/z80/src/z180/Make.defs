@@ -30,7 +30,7 @@ CMN_CSRCS  = z80_allocateheap.c z80_assert.c z80_blocktask.c z80_createstack.c
 CMN_CSRCS += z80_doirq.c z80_exit.c z80_idle.c z80_initialize.c
 CMN_CSRCS += z80_interruptcontext.c z80_mdelay.c z80_releasepending.c
 CMN_CSRCS += z80_releasestack.c z80_stackframe.c z80_reprioritizertr.c
-CMN_CSRCS += z80_unblocktask.c z80_udelay.c z80_usestack.c z80_nputs.c
+CMN_CSRCS += z80_unblocktask.c z80_udelay.c z80_usestack.c z80_puts.c
 
 CHIP_ASRCS  = z180_restoreusercontext.asm z180_saveusercontext.asm
 CHIP_ASRCS += z180_vectcommon.asm
