@@ -305,4 +305,14 @@
 
 #define SNIOC_SET_CALIBVALUE       _SNIOC(0x0087)
 
+/* Command:      SNIOC_CALIBRATE
+ * Description:  Trigger calibration and obtain calibration value.
+ * Argument:     A argument of calibration value for sensor.
+ * Note:         If getting calibvalue is failed, return errno, otherwise,
+ *               return OK.
+ *               This cmd is handled by sensor_ops_s::get_calibvalue.
+ */
+
+#define SNIOC_CALIBRATE            _SNIOC(0x0088)
+
 #endif /* __INCLUDE_NUTTX_SENSORS_IOCTL_H */
