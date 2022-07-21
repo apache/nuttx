@@ -1773,6 +1773,55 @@ config IMXRT_EDMA_EDBG
 
 endmenu # eDMA Global Configuration
 
+menu "LPSPI Configuration"
+	depends on IMXRT_LPSPI
+
+config IMXRT_LPSPI_DMA
+	bool "LPSPI DMA"
+	depends on IMXRT_EDMA
+	default n
+	---help---
+		Use DMA to improve LPSPI transfer performance.
+
+config IMXRT_LPSPI_DMATHRESHOLD
+	int "LPSPI DMA threshold"
+	default 4
+	depends on IMXRT_LPSPI_DMA
+	---help---
+		When SPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.
+
+config IMXRT_LPSPI1_DMA
+	bool "LPSPI1 DMA"
+	default n
+	depends on IMXRT_LPSPI1 && IMXRT_LPSPI_DMA
+	---help---
+		Use DMA to improve LPSPI1 transfer performance.
+
+config IMXRT_LPSPI2_DMA
+	bool "LPSPI2 DMA"
+	default n
+	depends on IMXRT_LPSPI2 && IMXRT_LPSPI_DMA
+	---help---
+		Use DMA to improve LPSPI2 transfer performance.
+
+config IMXRT_LPSPI3_DMA
+	bool "LPSPI3 DMA"
+	default n
+	depends on IMXRT_LPSPI3 && IMXRT_LPSPI_DMA
+	---help---
+		Use DMA to improve LPSPI3 transfer performance.
+
+config IMXRT_LPSPI4_DMA
+	bool "LPSPI4 DMA"
+	default n
+	depends on IMXRT_LPSPI4 && IMXRT_LPSPI_DMA
+	---help---
+		Use DMA to improve SPI4 transfer performance.
+
+endmenu # LPSPI Configuration
+
 if PM
 
 config IMXRT_PM_SERIAL_ACTIVITY
