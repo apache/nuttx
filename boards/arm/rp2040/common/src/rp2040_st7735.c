@@ -45,11 +45,11 @@
 #define LCD_SPI_PORTNO 1
 
 #if LCD_SPI_PORTNO
-#define LCD_DC         CONFIG_RP2040_SPI1_GPIO
+#define LCD_DC         CONFIG_RP2040_SPI1_RX_GPIO
 #define LCD_RST        10
 #define LCD_BL         11
 #else
-#define LCD_DC         CONFIG_RP2040_SPI0_GPIO
+#define LCD_DC         CONFIG_RP2040_SPI0_RX_GPIO
 #endif
 
 /****************************************************************************

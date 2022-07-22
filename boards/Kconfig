@@ -1494,6 +1494,13 @@ config ARCH_BOARD_ADAFRUIT_KB2040
 		This is a port to the Adafruit KB2040 board.
 		Support is derived from Raspberry Pi Pico support.
 
+config ARCH_BOARD_ADAFRUIT_QT_PY_RP2040
+	bool "Adafruit QT Py RP2040 board"
+	depends on ARCH_CHIP_RP2040
+	---help---
+		This is a port to the Adafruit QT Py RP2040 board.
+		Support is derived from Raspberry Pi Pico support.
+
 config ARCH_BOARD_RX65N
 	bool "RX65N renesas board"
 	depends on ARCH_CHIP_R5F565NEDDFC
@@ -2645,6 +2652,7 @@ config ARCH_BOARD
 	default "pimoroni-tiny2040"        if ARCH_BOARD_PIMORONI_TINY2040
 	default "adafruit-feather-rp2040"  if ARCH_BOARD_ADAFRUIT_FEATHER_RP2040
 	default "adafruit-kb2040"          if ARCH_BOARD_ADAFRUIT_KB2040
+	default "adafruit-qt-py-rp2040"    if ARCH_BOARD_ADAFRUIT_QT_PY_RP2040
 	default "rx65n"                    if ARCH_BOARD_RX65N
 	default "rx65n-rsk1mb"             if ARCH_BOARD_RX65N_RSK1MB
 	default "rx65n-rsk2mb"             if ARCH_BOARD_RX65N_RSK2MB
@@ -2988,6 +2996,9 @@ source "boards/arm/rp2040/adafruit-feather-rp2040/Kconfig"
 endif
 if ARCH_BOARD_ADAFRUIT_KB2040
 source "boards/arm/rp2040/adafruit-kb2040/Kconfig"
+endif
+if ARCH_BOARD_ADAFRUIT_QT_PY_RP2040
+source "boards/arm/rp2040/adafruit-qt-py-rp2040/Kconfig"
 endif
 if ARCH_BOARD_ARDUINO_DUE
 source "boards/arm/sam34/arduino-due/Kconfig"

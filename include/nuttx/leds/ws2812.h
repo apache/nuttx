@@ -88,17 +88,12 @@ struct ws2812_dev_s
                         FAR char        *data,
                         size_t           len);
 
+  void                  *private;    /* Private data for opened device */
   uint32_t               clock;
   sem_t                  exclsem;
   int                    port;
   uint16_t               nleds;
   bool                   has_white;
-
-  /* --------------------------------------------------------
-   * Other fields must be set to zero.
-   */
-
-  void     *private;    /* Private data for opened device */
 };
 
 #endif

@@ -667,7 +667,7 @@ int ws2812_leds_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
       return -ENOMEM;
     }
 
-  priv->nleds = nleds;
+  priv->nleds  = nleds;
   priv->tx_buf = (FAR uint8_t *)kmm_zalloc(TXBUFF_SIZE(priv->nleds));
   if (!priv->tx_buf)
     {

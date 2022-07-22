@@ -48,6 +48,7 @@ struct instance
   FAR uint8_t          *pixels;       /* Buffer to hold pixels             */
   size_t                open_count;   /* Number of opens on this instance. */
   clock_t               last_dma;     /* when last DMA completed.          */
+  int                   power_pin;    /* pin for ws2812 power              */
 };
 
 /****************************************************************************
@@ -168,21 +169,21 @@ static int my_open(FAR struct file *filep)
 {
   FAR struct inode         *inode     = filep->f_inode;
   FAR struct ws2812_dev_s  *dev_data  = inode->i_private;
-  FAR struct instance      *priv;
+  FAR struct instance      *priv      = (FAR struct instance *)
+                                                  dev_data->private;
   rp2040_pio_sm_config      config;
   int                       divisor;
   int                       ret;
 
   nxsem_wait(&dev_data->exclsem);
 
-  if (dev_data->private != NULL)
+  priv->open_count += 1;
+
+  if (priv->pixels != NULL)
     {
       /* We've already been initialized.  Keep on truckin' */
 
       ledinfo("rp2040_ws2812 re-open dev: 0x%08lX\n", (uint32_t) dev_data);
-
-      priv     = (FAR struct instance *) dev_data->private;
-      priv->open_count += 1;
 
       ret = OK;
       goto post_and_return;
@@ -190,34 +191,17 @@ static int my_open(FAR struct file *filep)
 
   ledinfo("rp2040_ws2812 open dev: 0x%08lX\n", (uint32_t) dev_data);
 
-  /* Allocate struct holding out persistent data */
-
-  priv = kmm_zalloc(sizeof(struct instance));
-
-  if (priv == NULL)
-    {
-      lederr("rp2040_ws2812 open: out of memory\n");
-
-      ret = -ENOMEM;
-      goto post_and_return;
-    }
-
-  priv->open_count = 1;
-
   /* Allocate the pixel buffer */
 
-  priv->pixels    = kmm_zalloc(4 * dev_data->nleds);
+  priv->pixels = kmm_zalloc(4 * dev_data->nleds);
 
   if (priv->pixels == NULL)
     {
-      kmm_free(priv);
       lederr("rp2040_ws2812 open: out of memory\n");
 
       ret = -ENOMEM;
       goto post_and_return;
     }
-
-  dev_data->private = priv;
 
   /* ==== Load the pio program ==== */
 
@@ -253,9 +237,6 @@ static int my_open(FAR struct file *filep)
   if (priv->pio >= RP2040_PIO_NUM)
     {
       kmm_free(priv->pixels);
-
-      dev_data->private = NULL;
-      kmm_free(priv);
 
       ret = -ENOMEM;
       goto post_and_return;
@@ -329,6 +310,15 @@ static int my_open(FAR struct file *filep)
 
   rp2040_pio_sm_set_enabled(priv->pio, priv->pio_sm, true);
 
+  /* Turn on the power pin if any */
+
+  if (priv->power_pin >= 0)
+    {
+      rp2040_gpio_init(priv->power_pin);
+      rp2040_gpio_setdir(priv->power_pin, true);
+      rp2040_gpio_put(priv->power_pin, true);
+    }
+
   ret = OK;
 
 post_and_return:
@@ -362,6 +352,11 @@ static int my_close(FAR struct file *filep)
   ledinfo("rp2040_ws2812 close dev: 0x%08lX\n", (uint32_t) dev_data);
 
   priv->open_count -= 1;
+
+  if (priv->open_count == 0  &&  priv->power_pin >= 0)
+    {
+      rp2040_gpio_put(priv->power_pin, false);
+    }
 
   nxsem_post(&dev_data->exclsem);
 
@@ -538,6 +533,7 @@ static ssize_t my_read(FAR struct file *filep,
  * Input Parameters:
  *   Path to the ws2812 device  (e.g. "/dev/leds0")
  *   Port number for the ws2812 chain
+ *   Pin for ws2812 power
  *   The number of pixels in the chain
  *   Whether ws2812s have white LEDs
  *
@@ -548,16 +544,31 @@ static ssize_t my_read(FAR struct file *filep,
 
 FAR void * rp2040_ws2812_setup(FAR const char *path,
                                int             port,
+                               int             power_pin,
                                uint16_t        pixel_count,
                                bool            has_white)
 {
   FAR struct ws2812_dev_s * dev_data;
+  FAR struct instance     * priv;
   int err;
 
   dev_data = kmm_zalloc(sizeof(struct ws2812_dev_s));
 
   if (dev_data == NULL)
     {
+      set_errno(ENOMEM);
+      return NULL;
+    }
+
+  /* Allocate struct holding out persistent data */
+
+  priv = kmm_zalloc(sizeof(struct instance));
+
+  if (priv == NULL)
+    {
+      lederr("rp2040_ws2812 open: out of memory\n");
+
+      kmm_free(dev_data);
       set_errno(ENOMEM);
       return NULL;
     }
@@ -569,8 +580,11 @@ FAR void * rp2040_ws2812_setup(FAR const char *path,
   dev_data->port      = port;
   dev_data->nleds     = pixel_count;
   dev_data->clock     = CONFIG_WS2812_FREQUENCY;
+  dev_data->private   = priv;
 
   nxsem_init(&dev_data->exclsem, 0, 1);
+
+  priv->power_pin     = power_pin;
 
   ledinfo("register dev_data: 0x%08lX\n", (uint32_t) dev_data);
 
