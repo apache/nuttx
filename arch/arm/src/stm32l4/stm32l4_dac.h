@@ -78,6 +78,65 @@
 #  undef CONFIG_STM32L4_TIM17_DAC
 #endif
 
+/* Low-level ops helpers ****************************************************/
+
+#define DAC_ENABLE(dac,d)                            \
+        (dac)->llops->enable(dac,d)
+#define DAC_WRITE_DRO(dac,d)                         \
+        (dac)->llops->write_dro(dac,d)
+#define DAC_START_DMA(dac)                           \
+        (dac)->llops->start_dma(dac)
+#define DAC_STOP_DMA(dac)                            \
+        (dac)->llops->stop_dma(dac)
+#define DAC_DUMP_REGS(dac)                           \
+        (dac)->llops->dump_regs(dac)
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32L4_DAC_LL_OPS
+
+/* This structure provides the publicly visible representation of the
+ * "lower-half" DAC driver structure.
+ */
+
+struct stm32_dac_dev_s
+{
+  /* Publicly visible portion of the "lower-half" ADC driver structure */
+
+  const struct stm32_dac_ops_s *llops;
+
+  /* Require cast-compatibility with private "lower-half" ADC structure */
+};
+
+/* Low-level operations for DAC */
+
+struct stm32_dac_ops_s
+{
+  /* Enable / Disable DAC */
+
+  void (*enable)(struct stm32_dac_dev_s *dev, bool enabled);
+
+  /* Write DRO */
+
+  void (*write_dro)(struct stm32_dac_dev_s *dev, uint16_t data);
+
+  /* Start DMA */
+
+  void (*start_dma)(struct stm32_dac_dev_s *dev);
+
+  /* Stop DMA */
+
+  void (*stop_dma)(struct stm32_dac_dev_s *dev);
+
+  /* Dump DAC regs */
+
+  void (*dump_regs)(struct stm32_dac_dev_s *dev);
+};
+
+#endif /* CONFIG_STM32L4_DAC_LL_OPS */
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
