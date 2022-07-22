@@ -65,7 +65,7 @@ static void rptun_dump_buffer(FAR struct rpmsg_virtio_device *rvdev,
 
   for (i = 0; i < num; i++)
     {
-      if ((rpmsg_virtio_get_role(rvdev) == RPMSG_MASTER) ^ rx)
+      if ((rpmsg_virtio_get_role(rvdev) == RPMSG_HOST) ^ rx)
         {
           desc_idx = (vq->vq_ring.used->idx + i) & (vq->vq_nentries - 1);
           desc_idx = vq->vq_ring.avail->ring[desc_idx];
@@ -107,7 +107,7 @@ void rptun_dump(FAR struct rpmsg_virtio_device *rvdev)
 
   metal_log(METAL_LOG_EMERGENCY,
             "Dump rpmsg info between cpu (master: %s)%s <==> %s:\n",
-            rpmsg_virtio_get_role(rvdev) == RPMSG_MASTER ? "yes" : "no",
+            rpmsg_virtio_get_role(rvdev) == RPMSG_HOST ? "yes" : "no",
             CONFIG_RPTUN_LOCAL_CPUNAME, rpmsg_get_cpuname(rdev));
 
   metal_log(METAL_LOG_EMERGENCY, "rpmsg vq RX:\n");
