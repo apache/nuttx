@@ -198,7 +198,7 @@
 /* Parameter_n Register (REG_D1055_1040) */
 
                                                     /* Bits 0-29: Reserved */
-#define VIRTWRAPPER_REG_D_REG_GCR_SHIFT       (30)  /* Bits 30-31: GCR REgister Of REG_PROT (REG_GCR) */
+#define VIRTWRAPPER_REG_D_REG_GCR_SHIFT       (30)  /* Bits 30-31: GCR Register Of REG_PROT (REG_GCR) */
 #define VIRTWRAPPER_REG_D_REG_GCR_MASK        (0x03 << VIRTWRAPPER_REG_D_REG_GCR_SHIFT)
 
 #endif /* __ARCH_ARM_SRC_S32K3XX_HARDWARE_S32K3XX_VIRTWRAPPER_H */

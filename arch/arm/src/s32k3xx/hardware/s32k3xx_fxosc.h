@@ -72,7 +72,7 @@
                                               /* Bits 8-15: Reserved */
 #define FXOSC_CTRL_EOCV_SHIFT       (16)      /* Bits 16-23: End of count value (EOCV) */
 #define FXOSC_CTRL_EOCV_MASK        (0xff << FXOSC_CTRL_EOCV_SHIFT)
-#define FXOSC_CTRL_EOCV(n)          ((n << FXOSC_CTRL_EOCV_SHIFT) & FXOSC_CTRL_EOCV_MASK)
+#define FXOSC_CTRL_EOCV(n)          (((n) << FXOSC_CTRL_EOCV_SHIFT) & FXOSC_CTRL_EOCV_MASK)
 #define FXOSC_CTRL_COMP_EN          (1 << 24) /* Bit 24: Comparator enable (COMP_EN) */
 #  define FXOSC_CTRL_COMP_DIS       (0 << 24) /*         Comparator disable */
                                               /* Bits 25-30: Reserved */

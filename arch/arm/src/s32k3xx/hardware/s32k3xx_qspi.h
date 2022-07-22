@@ -403,7 +403,7 @@
 
 #define QSPI_LUTKEY_KEY_SHIFT             (0)       /* Bits 0-31: Key to lock or unlock the LUT (KEY) */
 #define QSPI_LUTKEY_KEY_MASK              (0xffffffff << QSPI_LUTKEY_KEY_SHIFT)
-#define QSPI_LUTKEY_KEY                   (0x5AF05AF0UL)
+#define QSPI_LUTKEY_KEY                   (0x5AF05AF0ul)
 
 /* LUT Lock Configuration Register (LKCR) */
 
@@ -447,59 +447,58 @@
 
 typedef enum
 {
-    QSPI_SIDE_A1    = 0x00u,  /* Serial flash connected on side A1    */
-    QSPI_SIDE_A2    = 0x01u,  /* Serial flash connected on side A2    */
-    QSPI_SIDE_B1    = 0x02u,  /* Serial flash connected on side B1    */
-    QSPI_SIDE_B2    = 0x03u,  /* Serial flash connected on side B2    */
+  QSPI_SIDE_A1    = 0x00u,  /* Serial flash connected on side A1 */
+  QSPI_SIDE_A2    = 0x01u,  /* Serial flash connected on side A2 */
+  QSPI_SIDE_B1    = 0x02u,  /* Serial flash connected on side B1 */
+  QSPI_SIDE_B2    = 0x03u,  /* Serial flash connected on side B2 */
 } s32k3xx_qspi_connectiontype;
 
 /* flash operation type */
 
 typedef enum
 {
-    QSPI_OP_TYPE_CMD          = 0x00u,  /* Simple command                              */
-    QSPI_OP_TYPE_WRITE_REG    = 0x01u,  /* Write value in external flash register      */
-    QSPI_OP_TYPE_RMW_REG      = 0x02u,  /* RMW command on external flash register      */
-    QSPI_OP_TYPE_READ_REG     = 0x03u,  /* Read external flash register until expected value is read    */
-    QSPI_OP_TYPE_QSPI_CFG     = 0x04u,  /* Re-configure QSPI controller                */
+  QSPI_OP_TYPE_CMD          = 0x00u,  /* Simple command                         */
+  QSPI_OP_TYPE_WRITE_REG    = 0x01u,  /* Write value in external flash register */
+  QSPI_OP_TYPE_RMW_REG      = 0x02u,  /* RMW command on external flash register */
+  QSPI_OP_TYPE_READ_REG     = 0x03u,  /* Read external flash register until expected value is read */
+  QSPI_OP_TYPE_QSPI_CFG     = 0x04u,  /* Re-configure QSPI controller           */
 } s32k3xx_qspi_optype;
 
 /* Lut commands */
 
 typedef enum
 {
-    QSPI_LUT_INSTR_STOP            = (0U << 10U),    /* End of sequence                           */
-    QSPI_LUT_INSTR_CMD             = (1U << 10U),    /* Command                                   */
-    QSPI_LUT_INSTR_ADDR            = (2U << 10U),    /* Address                                   */
-    QSPI_LUT_INSTR_DUMMY           = (3U << 10U),    /* Dummy cycles                              */
-    QSPI_LUT_INSTR_MODE            = (4U << 10U),    /* 8-bit mode                                */
-    QSPI_LUT_INSTR_MODE2           = (5U << 10U),    /* 2-bit mode                                */
-    QSPI_LUT_INSTR_MODE4           = (6U << 10U),    /* 4-bit mode                                */
-    QSPI_LUT_INSTR_READ            = (7U << 10U),    /* Read data                                 */
-    QSPI_LUT_INSTR_WRITE           = (8U << 10U),    /* Write data                                */
-    QSPI_LUT_INSTR_JMP_ON_CS       = (9U << 10U),    /* Jump on chip select deassert and stop     */
-    QSPI_LUT_INSTR_ADDR_DDR        = (10U << 10U),   /* Address - DDR mode                        */
-    QSPI_LUT_INSTR_MODE_DDR        = (11U << 10U),   /* 8-bit mode - DDR mode                     */
-    QSPI_LUT_INSTR_MODE2_DDR       = (12U << 10U),   /* 2-bit mode - DDR mode                     */
-    QSPI_LUT_INSTR_MODE4_DDR       = (13U << 10U),   /* 4-bit mode - DDR mode                     */
-    QSPI_LUT_INSTR_READ_DDR        = (14U << 10U),   /* Read data - DDR mode                      */
-    QSPI_LUT_INSTR_WRITE_DDR       = (15U << 10U),   /* Write data - DDR mode                     */
-    QSPI_LUT_INSTR_DATA_LEARN      = (16U << 10U),   /* Data learning pattern                     */
-    QSPI_LUT_INSTR_CMD_DDR         = (17U << 10U),   /* Command - DDR mode                        */
-    QSPI_LUT_INSTR_CADDR           = (18U << 10U),   /* Column address                            */
-    QSPI_LUT_INSTR_CADDR_DDR       = (19U << 10U),   /* Column address - DDR mode                 */
-    QSPI_LUT_INSTR_JMP_TO_SEQ      = (20U << 10U),   /* Jump on chip select deassert and continue */
+  QSPI_LUT_INSTR_STOP            = (0u << 10u),    /* End of sequence                           */
+  QSPI_LUT_INSTR_CMD             = (1u << 10u),    /* Command                                   */
+  QSPI_LUT_INSTR_ADDR            = (2u << 10u),    /* Address                                   */
+  QSPI_LUT_INSTR_DUMMY           = (3u << 10u),    /* Dummy cycles                              */
+  QSPI_LUT_INSTR_MODE            = (4u << 10u),    /* 8-bit mode                                */
+  QSPI_LUT_INSTR_MODE2           = (5u << 10u),    /* 2-bit mode                                */
+  QSPI_LUT_INSTR_MODE4           = (6u << 10u),    /* 4-bit mode                                */
+  QSPI_LUT_INSTR_READ            = (7u << 10u),    /* Read data                                 */
+  QSPI_LUT_INSTR_WRITE           = (8u << 10u),    /* Write data                                */
+  QSPI_LUT_INSTR_JMP_ON_CS       = (9u << 10u),    /* Jump on chip select deassert and stop     */
+  QSPI_LUT_INSTR_ADDR_DDR        = (10u << 10u),   /* Address - DDR mode                        */
+  QSPI_LUT_INSTR_MODE_DDR        = (11u << 10u),   /* 8-bit mode - DDR mode                     */
+  QSPI_LUT_INSTR_MODE2_DDR       = (12u << 10u),   /* 2-bit mode - DDR mode                     */
+  QSPI_LUT_INSTR_MODE4_DDR       = (13u << 10u),   /* 4-bit mode - DDR mode                     */
+  QSPI_LUT_INSTR_READ_DDR        = (14u << 10u),   /* Read data - DDR mode                      */
+  QSPI_LUT_INSTR_WRITE_DDR       = (15u << 10u),   /* Write data - DDR mode                     */
+  QSPI_LUT_INSTR_DATA_LEARN      = (16u << 10u),   /* Data learning pattern                     */
+  QSPI_LUT_INSTR_CMD_DDR         = (17u << 10u),   /* Command - DDR mode                        */
+  QSPI_LUT_INSTR_CADDR           = (18u << 10u),   /* Column address                            */
+  QSPI_LUT_INSTR_CADDR_DDR       = (19u << 10u),   /* Column address - DDR mode                 */
+  QSPI_LUT_INSTR_JMP_TO_SEQ      = (20u << 10u),   /* Jump on chip select deassert and continue */
 } s32k3xx_qspi_lutcommandstype;
 
 /* Lut pad options */
 
 typedef enum
 {
-    QSPI_LUT_PADS_1              = (0U << 8U),    /* 1 Pad      */
-    QSPI_LUT_PADS_2              = (1U << 8U),    /* 2 Pads     */
-    QSPI_LUT_PADS_4              = (2U << 8U),    /* 4 Pads     */
-    QSPI_LUT_PADS_8              = (3U << 8U),    /* 8 Pads     */
+  QSPI_LUT_PADS_1              = (0u << 8u),    /* 1 Pad */
+  QSPI_LUT_PADS_2              = (1u << 8u),    /* 2 Pads */
+  QSPI_LUT_PADS_4              = (2u << 8u),    /* 4 Pads */
+  QSPI_LUT_PADS_8              = (3u << 8u),    /* 8 Pads */
 } s32k3xx_qspi_lutpadstype;
 
 #endif /* __ARCH_ARM_SRC_S32K3XX_HARDWARE_S32K3XX_QSPI_H */
-

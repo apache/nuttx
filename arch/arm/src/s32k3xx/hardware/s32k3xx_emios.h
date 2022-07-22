@@ -132,32 +132,32 @@
 
 /* Output Update Disable Register (OUDIS) */
 
-#define EMIOS_OUDIS_OU0              (1 << 0)  /* Bit 0: Channel 0 Output Update Disable (OU0) */
-#define EMIOS_OUDIS_OU1              (1 << 1)  /* Bit 1: Channel 1 Output Update Disable (OU1) */
-#define EMIOS_OUDIS_OU2              (1 << 2)  /* Bit 2: Channel 2 Output Update Disable (OU2) */
-#define EMIOS_OUDIS_OU3              (1 << 3)  /* Bit 3: Channel 3 Output Update Disable (OU3) */
-#define EMIOS_OUDIS_OU4              (1 << 4)  /* Bit 4: Channel 4 Output Update Disable (OU4) */
-#define EMIOS_OUDIS_OU5              (1 << 5)  /* Bit 5: Channel 5 Output Update Disable (OU5) */
-#define EMIOS_OUDIS_OU6              (1 << 6)  /* Bit 6: Channel 6 Output Update Disable (OU6) */
-#define EMIOS_OUDIS_OU7              (1 << 7)  /* Bit 7: Channel 7 Output Update Disable (OU7) */
-#define EMIOS_OUDIS_OU8              (1 << 8)  /* Bit 8: Channel 8 Output Update Disable (OU8) */
-#define EMIOS_OUDIS_OU9              (1 << 9)  /* Bit 9: Channel 9 Output Update Disable (OU9) */
-#define EMIOS_OUDIS_OU10             (1 << 10) /* Bit 10: Channel 10 Output Update Disable (OU10) */
-#define EMIOS_OUDIS_OU11             (1 << 11) /* Bit 11: Channel 11 Output Update Disable (OU11) */
-#define EMIOS_OUDIS_OU12             (1 << 12) /* Bit 12: Channel 12 Output Update Disable (OU12) */
-#define EMIOS_OUDIS_OU13             (1 << 13) /* Bit 13: Channel 13 Output Update Disable (OU13) */
-#define EMIOS_OUDIS_OU14             (1 << 14) /* Bit 14: Channel 14 Output Update Disable (OU14) */
-#define EMIOS_OUDIS_OU15             (1 << 15) /* Bit 15: Channel 15 Output Update Disable (OU15) */
-#define EMIOS_OUDIS_OU16             (1 << 16) /* Bit 16: Channel 16 Output Update Disable (OU16) */
-#define EMIOS_OUDIS_OU17             (1 << 17) /* Bit 17: Channel 17 Output Update Disable (OU17) */
-#define EMIOS_OUDIS_OU18             (1 << 18) /* Bit 18: Channel 18 Output Update Disable (OU18) */
-#define EMIOS_OUDIS_OU19             (1 << 19) /* Bit 19: Channel 19 Output Update Disable (OU19) */
-#define EMIOS_OUDIS_OU20             (1 << 20) /* Bit 20: Channel 20 Output Update Disable (OU20) */
-#define EMIOS_OUDIS_OU21             (1 << 21) /* Bit 21: Channel 21 Output Update Disable (OU21) */
-#define EMIOS_OUDIS_OU22             (1 << 22) /* Bit 22: Channel 22 Output Update Disable (OU22) */
-#define EMIOS_OUDIS_OU23             (1 << 23) /* Bit 23: Channel 23 Output Update Disable (OU23) */
-#define EMIOS_OUDIS_OU(n)            (1 << n)  /* Bit n: Channel n Output Update Disable (OU23) */
-                                               /* Bits 24-31: Reserved */
+#define EMIOS_OUDIS_OU0              (1 << 0)   /* Bit 0: Channel 0 Output Update Disable (OU0) */
+#define EMIOS_OUDIS_OU1              (1 << 1)   /* Bit 1: Channel 1 Output Update Disable (OU1) */
+#define EMIOS_OUDIS_OU2              (1 << 2)   /* Bit 2: Channel 2 Output Update Disable (OU2) */
+#define EMIOS_OUDIS_OU3              (1 << 3)   /* Bit 3: Channel 3 Output Update Disable (OU3) */
+#define EMIOS_OUDIS_OU4              (1 << 4)   /* Bit 4: Channel 4 Output Update Disable (OU4) */
+#define EMIOS_OUDIS_OU5              (1 << 5)   /* Bit 5: Channel 5 Output Update Disable (OU5) */
+#define EMIOS_OUDIS_OU6              (1 << 6)   /* Bit 6: Channel 6 Output Update Disable (OU6) */
+#define EMIOS_OUDIS_OU7              (1 << 7)   /* Bit 7: Channel 7 Output Update Disable (OU7) */
+#define EMIOS_OUDIS_OU8              (1 << 8)   /* Bit 8: Channel 8 Output Update Disable (OU8) */
+#define EMIOS_OUDIS_OU9              (1 << 9)   /* Bit 9: Channel 9 Output Update Disable (OU9) */
+#define EMIOS_OUDIS_OU10             (1 << 10)  /* Bit 10: Channel 10 Output Update Disable (OU10) */
+#define EMIOS_OUDIS_OU11             (1 << 11)  /* Bit 11: Channel 11 Output Update Disable (OU11) */
+#define EMIOS_OUDIS_OU12             (1 << 12)  /* Bit 12: Channel 12 Output Update Disable (OU12) */
+#define EMIOS_OUDIS_OU13             (1 << 13)  /* Bit 13: Channel 13 Output Update Disable (OU13) */
+#define EMIOS_OUDIS_OU14             (1 << 14)  /* Bit 14: Channel 14 Output Update Disable (OU14) */
+#define EMIOS_OUDIS_OU15             (1 << 15)  /* Bit 15: Channel 15 Output Update Disable (OU15) */
+#define EMIOS_OUDIS_OU16             (1 << 16)  /* Bit 16: Channel 16 Output Update Disable (OU16) */
+#define EMIOS_OUDIS_OU17             (1 << 17)  /* Bit 17: Channel 17 Output Update Disable (OU17) */
+#define EMIOS_OUDIS_OU18             (1 << 18)  /* Bit 18: Channel 18 Output Update Disable (OU18) */
+#define EMIOS_OUDIS_OU19             (1 << 19)  /* Bit 19: Channel 19 Output Update Disable (OU19) */
+#define EMIOS_OUDIS_OU20             (1 << 20)  /* Bit 20: Channel 20 Output Update Disable (OU20) */
+#define EMIOS_OUDIS_OU21             (1 << 21)  /* Bit 21: Channel 21 Output Update Disable (OU21) */
+#define EMIOS_OUDIS_OU22             (1 << 22)  /* Bit 22: Channel 22 Output Update Disable (OU22) */
+#define EMIOS_OUDIS_OU23             (1 << 23)  /* Bit 23: Channel 23 Output Update Disable (OU23) */
+#define EMIOS_OUDIS_OU(n)            (1 << (n)) /* Bit n: Channel n Output Update Disable (OU23) */
+                                                /* Bits 24-31: Reserved */
 
 /* Disable Channel Register (UCDIS) */
 
@@ -191,14 +191,14 @@
 
 #define EMIOS_A_SHIFT                (0)       /* Bits 0-15: A */
 #define EMIOS_A_MASK                 (0xffff << EMIOS_A_SHIFT)
-#define EMIOS_A(n)                   ((n << EMIOS_A_SHIFT) & EMIOS_A_MASK)
+#define EMIOS_A(n)                   (((n) << EMIOS_A_SHIFT) & EMIOS_A_MASK)
                                                /* Bits 16-31: Reserved */
 
 /* UC B n (Bn) */
 
 #define EMIOS_B_SHIFT                (0)       /* Bits 0-15: B */
 #define EMIOS_B_MASK                 (0xffff << EMIOS_B_SHIFT)
-#define EMIOS_B(n)                   ((n << EMIOS_B_SHIFT) & EMIOS_B_MASK)
+#define EMIOS_B(n)                   (((n) << EMIOS_B_SHIFT) & EMIOS_B_MASK)
                                                /* Bits 16-31: Reserved */
 
 /* UC Counter n (CNTn) */
@@ -314,7 +314,7 @@
                                                /* Bit 15: Reserved */
 #define EMIOS_C2_UCEXTPRE_SHIFT      (16)      /* Bits 16-19: Extended Prescaler (UCEXTPRE) */ 
 #define EMIOS_C2_UCEXTPRE_MASK       (0x0f << EMIOS_C2_UCEXTPRE_SHIFT)
-#define EMIOS_C2_UCEXTPRE(n)         ((n << EMIOS_C2_UCEXTPRE_SHIFT) & EMIOS_C2_UCEXTPRE_MASK)
+#define EMIOS_C2_UCEXTPRE(n)         (((n) << EMIOS_C2_UCEXTPRE_SHIFT) & EMIOS_C2_UCEXTPRE_MASK)
                                                /* Bits 20-31: Reserved */
 
 #endif /* __ARCH_ARM_SRC_S32K3XX_HARDWARE_S32K3XX_EMIOS_H */
