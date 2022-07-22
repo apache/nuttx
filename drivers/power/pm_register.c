@@ -56,8 +56,6 @@
 
 int pm_register(FAR struct pm_callback_s *callbacks)
 {
-  irqstate_t flags;
-
   DEBUGASSERT(callbacks);
 
   /* Add the new entry to the end of the list of registered callbacks */
