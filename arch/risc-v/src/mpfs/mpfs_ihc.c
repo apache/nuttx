@@ -819,8 +819,8 @@ mpfs_rptun_get_resource(struct rptun_dev_s *dev)
       rsc->rpmsg_vring1.num         = VRING_NR;
       rsc->rpmsg_vring1.da          = VRING1_DESCRIPTORS;
       rsc->rpmsg_vring0.notifyid    = 1;
-      rsc->config.rxbuf_size        = VRING_SIZE;
-      rsc->config.txbuf_size        = VRING_SIZE;
+      rsc->config.r2h_buf_size      = VRING_SIZE;
+      rsc->config.h2r_buf_size      = VRING_SIZE;
     }
 
   return &priv->shmem->rsc;
