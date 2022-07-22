@@ -248,6 +248,14 @@ config ARCH_CHIP_S32K1XX
 	---help---
 		NPX S32K1XX architectures (ARM Cortex-M0+ and Cortex-M4F).
 
+config ARCH_CHIP_S32K3XX
+	bool "NXP S32K3XX"
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_RAMFUNCS
+	select ARM_HAVE_MPU_UNIFIED
+	---help---
+		NPX S32K3XX architectures (ARM Cortex-M7).
+
 config ARCH_CHIP_SAMA5
 	bool "Atmel SAMA5"
 	select ARCH_CORTEXA5
@@ -873,6 +881,7 @@ config ARCH_CHIP
 	default "nuc1xx"	if ARCH_CHIP_NUC1XX
 	default "rp2040"	if ARCH_CHIP_RP2040
 	default "s32k1xx"	if ARCH_CHIP_S32K1XX
+	default "s32k3xx"	if ARCH_CHIP_S32K3XX
 	default "sama5"		if ARCH_CHIP_SAMA5
 	default "samd2l2"	if ARCH_CHIP_SAMD2X || ARCH_CHIP_SAML2X
 	default "samd5e5"	if ARCH_CHIP_SAMD5X || ARCH_CHIP_SAME5X
@@ -1219,6 +1228,9 @@ source "arch/arm/src/lpc54xx/Kconfig"
 endif
 if ARCH_CHIP_S32K1XX
 source "arch/arm/src/s32k1xx/Kconfig"
+endif
+if ARCH_CHIP_S32K3XX
+source arch/arm/src/s32k3xx/Kconfig
 endif
 if ARCH_CHIP_MAX326XX
 source "arch/arm/src/max326xx/Kconfig"
