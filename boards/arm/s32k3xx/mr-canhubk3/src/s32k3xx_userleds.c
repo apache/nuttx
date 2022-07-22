@@ -65,21 +65,22 @@ void board_userled(int led, bool ledon)
 {
   uint32_t ledcfg;
 
-  if (led == BOARD_LED_R)
+  switch (ledcfg)
     {
-      ledcfg = GPIO_LED_R;
-    }
-  else if (led == BOARD_LED_G)
-    {
-      ledcfg = GPIO_LED_G;
-    }
-  else if (led == BOARD_LED_B)
-    {
-      ledcfg = GPIO_LED_B;
-    }
-  else
-    {
-      return;
+      case BOARD_LED_R:
+        ledcfg = GPIO_LED_R;
+        break;
+
+      case BOARD_LED_G:
+        ledcfg = GPIO_LED_G;
+        break;
+
+      case BOARD_LED_B:
+        ledcfg = GPIO_LED_B;
+        break;
+
+      default:
+        return;
     }
 
   /* Invert output, an output of '0' illuminates the LED */

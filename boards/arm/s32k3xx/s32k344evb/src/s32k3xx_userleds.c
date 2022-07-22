@@ -70,33 +70,34 @@ void board_userled(int led, bool ledon)
 {
   uint32_t ledcfg;
 
-  if (led == BOARD_LED0_R)
+  switch (ledcfg)
     {
-      ledcfg = GPIO_LED0_R;
-    }
-  else if (led == BOARD_LED0_G)
-    {
-      ledcfg = GPIO_LED0_G;
-    }
-  else if (led == BOARD_LED0_B)
-    {
-      ledcfg = GPIO_LED0_B;
-    }
-  else if (led == BOARD_LED1_R)
-    {
-      ledcfg = GPIO_LED1_R;
-    }
-  else if (led == BOARD_LED1_G)
-    {
-      ledcfg = GPIO_LED1_G;
-    }
-  else if (led == BOARD_LED1_B)
-    {
-      ledcfg = GPIO_LED1_B;
-    }
-  else
-    {
-      return;
+      case BOARD_LED0_R:
+        ledcfg = GPIO_LED0_R;
+        break;
+
+      case BOARD_LED0_G:
+        ledcfg = GPIO_LED0_G;
+        break;
+
+      case BOARD_LED0_B:
+        ledcfg = GPIO_LED0_B;
+        break;
+
+      case BOARD_LED1_R:
+        ledcfg = GPIO_LED1_R;
+        break;
+
+      case BOARD_LED1_G:
+        ledcfg = GPIO_LED1_G;
+        break;
+
+      case BOARD_LED1_B:
+        ledcfg = GPIO_LED1_B;
+        break;
+
+      default:
+        return;
     }
 
   /* An output of '1' illuminates the LED */
