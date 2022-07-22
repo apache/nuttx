@@ -238,7 +238,18 @@ static uint32_t nxsched_cpu_scheduler(int cpu, uint32_t ticks,
     {
       /* Apply the keep alive hack */
 
-      return KEEP_ALIVE_TICKS;
+      /* The idle task always lies at the end of the task list,
+       * idle task no need time slice.
+       */
+
+      if (ntcb->flink != NULL)
+        {
+          return KEEP_ALIVE_TICKS;
+        }
+      else
+        {
+          return UINT32_MAX - 1;
+        }
     }
 #endif
 
