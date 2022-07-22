@@ -5473,6 +5473,12 @@ config STM32L4_DAC2_OUTPUT_ADC
 	---help---
 		Route DAC2 output to ADC input instead of external pin.
 
+config STM32L4_DAC_LL_OPS
+	bool "DAC low-level operations"
+	default n
+	---help---
+		Enable low-level DAC ops.
+
 endmenu
 
 menu "DFSDM Configuration"
