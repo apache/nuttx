@@ -484,7 +484,7 @@ ssize_t rpmsgfs_client_read(FAR void *handle, int fd,
 
 out:
   nxsem_destroy(&cookie.sem);
-  return read.iov_len ? read.iov_len : ret;
+  return read.iov_len > 0 ? read.iov_len : ret;
 }
 
 ssize_t rpmsgfs_client_write(FAR void *handle, int fd,
