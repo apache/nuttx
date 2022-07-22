@@ -1566,16 +1566,6 @@ config ARCH_BOARD_S32K144EVB
 		This options selects support for NuttX on the NXP S32K144EVB board
 		featuring the S32K144 Cortex-M4F.
 
-config ARCH_BOARD_UCANS32K146
-	bool "NXP UCANS32K146"
-	depends on ARCH_CHIP_S32K146
-	select ARCH_HAVE_LEDS
-	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS
-	---help---
-		This options selects support for NuttX on the NXP UCANS32K board
-		featuring the S32K146 Cortex-M4F.
-
 config ARCH_BOARD_S32K146EVB
 	bool "NXP S32K146EVB"
 	depends on ARCH_CHIP_S32K146
@@ -1584,6 +1574,16 @@ config ARCH_BOARD_S32K146EVB
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		This options selects support for NuttX on the NXP S32K146EVB board
+		featuring the S32K146 Cortex-M4F.
+
+config ARCH_BOARD_UCANS32K146
+	bool "NXP UCANS32K146"
+	depends on ARCH_CHIP_S32K146
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on the NXP UCANS32K1 board
 		featuring the S32K146 Cortex-M4F.
 
 config ARCH_BOARD_S32K148EVB
@@ -1596,6 +1596,16 @@ config ARCH_BOARD_S32K148EVB
 		This options selects support for NuttX on the NXP S32K148EVB board
 		featuring the S32K148 Cortex-M4F.
 
+config ARCH_BOARD_S32K344EVB
+	bool "NXP S32K344EVB"
+	depends on ARCH_CHIP_S32K344
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on the NXP S32K344EVB board
+		featuring the S32K344 Cortex-M7.
+
 config ARCH_BOARD_SABRE_6QUAD
 	bool "NXP/Freescale i.MX6 Sabre-6Quad board"
 	depends on ARCH_CHIP_IMX6_6QUAD
@@ -1605,7 +1615,6 @@ config ARCH_BOARD_SABRE_6QUAD
 	---help---
 		This options selects support for NuttX on the NXP/Freescale Sabre
 		board featuring the iMX 6Quad CPU.
-
 
 config ARCH_BOARD_QEMU_A53
 	bool "Qemu A53 board"
@@ -2651,11 +2660,12 @@ config ARCH_BOARD
 	default "rx65n-grrose"             if ARCH_BOARD_RX65N_GRROSE
 	default "s32k118evb"               if ARCH_BOARD_S32K118EVB
 	default "s32k144evb"               if ARCH_BOARD_S32K144EVB
+	default "s32k146evb"               if ARCH_BOARD_S32K146EVB
 	default "ucans32k146"              if ARCH_BOARD_UCANS32K146
+	default "s32k148evb"               if ARCH_BOARD_S32K148EVB
+	default "s32k344evb"               if ARCH_BOARD_S32K344EVB
 	default "rv32m1-vega"              if ARCH_BOARD_RV32M1_VEGA
 	default "rv-virt"                  if ARCH_BOARD_QEMU_RV_VIRT
-	default "s32k146evb"               if ARCH_BOARD_S32K146EVB
-	default "s32k148evb"               if ARCH_BOARD_S32K148EVB
 	default "sabre-6quad"              if ARCH_BOARD_SABRE_6QUAD
 	default "qemu-a53"                 if ARCH_BOARD_QEMU_A53
 	default "sama5d2-xult"             if ARCH_BOARD_SAMA5D2_XULT
@@ -2818,14 +2828,17 @@ endif
 if ARCH_BOARD_S32K144EVB
 source "boards/arm/s32k1xx/s32k144evb/Kconfig"
 endif
-if ARCH_BOARD_UCANS32K146
-source "boards/arm/s32k1xx/ucans32k146/Kconfig"
-endif
 if ARCH_BOARD_S32K146EVB
 source "boards/arm/s32k1xx/s32k146evb/Kconfig"
 endif
+if ARCH_BOARD_UCANS32K146
+source "boards/arm/s32k1xx/ucans32k146/Kconfig"
+endif
 if ARCH_BOARD_S32K148EVB
 source "boards/arm/s32k1xx/s32k148evb/Kconfig"
+endif
+if ARCH_BOARD_S32K344EVB
+source "boards/arm/s32k3xx/s32k344evb/Kconfig"
 endif
 if ARCH_BOARD_SABRE_6QUAD
 source "boards/arm/imx6/sabre-6quad/Kconfig"
