@@ -268,6 +268,32 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 void can_poll(FAR struct net_driver_s *dev, FAR struct can_conn_s *conn);
 
 /****************************************************************************
+ * Name: psock_can_cansend
+ *
+ * Description:
+ *   psock_can_cansend() returns a value indicating if a write to the socket
+ *   would block.  It is still possible that the write may block if another
+ *   write occurs first.
+ *
+ * Input Parameters:
+ *   psock    An instance of the internal socket structure.
+ *
+ * Returned Value:
+ *   OK
+ *     At least one byte of data could be successfully written.
+ *   -EWOULDBLOCK
+ *     There is no room in the output buffer.
+ *   -EBADF
+ *     An invalid descriptor was specified.
+ *
+ * Assumptions:
+ *   None
+ *
+ ****************************************************************************/
+
+int psock_can_cansend(FAR struct socket *psock);
+
+/****************************************************************************
  * Name: can_sendmsg
  *
  * Description:
