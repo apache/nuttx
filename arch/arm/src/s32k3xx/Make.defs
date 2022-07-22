@@ -1,0 +1,82 @@
+############################################################################
+# arch/arm/src/s32k3xx/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# Copyright 2022 NXP
+
+# Common ARM and Cortex-M7 files
+
+include armv7-m/Make.defs
+
+# Required S32K3 files
+
+CHIP_ASRCS += startup.S
+
+CHIP_CSRCS  = s32k3xx_irq.c s32k3xx_clrpend.c s32k3xx_flashboot.c
+CHIP_CSRCS += s32k3xx_start.c s32k3xx_lowputc.c s32k3xx_clockconfig.c
+CHIP_CSRCS += s32k3xx_periphclocks.c s32k3xx_pin.c s32k3xx_pingpio.c
+CHIP_CSRCS += s32k3xx_idle.c s32k3xx_allocateheap.c
+
+# Configuration-dependent S32K3 files
+
+ifneq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += s32k3xx_timerisr.c
+endif
+
+ifeq ($(CONFIG_S32K3XX_LPUART),y)
+CHIP_CSRCS += s32k3xx_serial.c
+endif
+
+ifeq ($(CONFIG_S32K3XX_GPIOIRQ),y)
+CHIP_CSRCS += s32k3xx_pinirq.c
+endif
+
+ifeq ($(CONFIG_S32K3XX_EDMA),y)
+CHIP_CSRCS += s32k3xx_pindma.c
+CHIP_CSRCS += s32k3xx_edma.c
+endif
+
+ifeq ($(CONFIG_S32K3XX_LPI2C),y)
+CHIP_CSRCS += s32k3xx_lpi2c.c
+endif
+
+ifeq ($(CONFIG_S32K3XX_LPSPI),y)
+CHIP_CSRCS += s32k3xx_lpspi.c
+endif
+
+ifeq ($(CONFIG_S32K3XX_ENET),y)
+CHIP_CSRCS += s32k3xx_emac.c
+endif
+
+ifeq ($(CONFIG_S32K3XX_FLEXCAN),y)
+CHIP_CSRCS += s32k3xx_flexcan.c
+endif
+
+ifeq ($(CONFIG_S32K3XX_FS26),y)
+CHIP_CSRCS += s32k3xx_fs26.c
+endif
+
+ifeq ($(CONFIG_S32K3XX_QSPI),y)
+CHIP_CSRCS += s32k3xx_qspi.c
+endif
+
+# Make sure that the S32K3 common directory in included in the VPATH
+
+VPATH += chip/common
+VPATH += chip/s32k3xx
