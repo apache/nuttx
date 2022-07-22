@@ -92,10 +92,7 @@ void pm_initialize(void)
 #endif
       pm_set_governor(i, gov);
 
-      nxsem_init(&g_pmglobals.domain[i].sem, 0, 1);
-
-      g_pmglobals.domain[i].holder = INVALID_PROCESS_ID;
-      g_pmglobals.domain[i].count  = 0;
+      nxrmutex_init(&g_pmglobals.domain[i].lock);
     }
 }
 
