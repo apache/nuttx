@@ -161,7 +161,7 @@ int can_input(struct net_driver_s *dev)
     {
       conn = can_nextconn(conn);
 
-      if (conn && (conn->dev == 0x0 || dev == conn->dev))
+      if (conn && (conn->dev == NULL || dev == conn->dev))
         {
           uint16_t flags;
 

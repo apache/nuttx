@@ -101,9 +101,9 @@
 
 #define MX25R_JEDEC_MANUFACTURER         0xc2  /* Macronix manufacturer ID */
 #ifdef CONFIG_MX25RXX_LXX
-#define MX25R_JEDEC_MEMORY_TYPE          0x20  /* MX25Lx memory type */
+#  define MX25R_JEDEC_MEMORY_TYPE          0x20  /* MX25Lx memory type */
 #else
-#define MX25R_JEDEC_MEMORY_TYPE          0x28  /* MX25Rx memory type */
+#  define MX25R_JEDEC_MEMORY_TYPE          0x28  /* MX25Rx memory type */
 #endif
 #define MX25R_JEDEC_MX25R6435F_CAPACITY  0x17  /* MX25R6435F memory capacity */
 #define MX25R_JEDEC_MX25R8035F_CAPACITY  0x14  /* MX25R8035F memory capacity */
@@ -118,9 +118,9 @@
 #define MX25R6435F_PAGE_SIZE        (256)
 
 #ifdef CONFIG_MX25RXX_PAGE128
-#define MX25R6435F_PAGE_SHIFT       (7)
+#  define MX25R6435F_PAGE_SHIFT       (7)
 #else
-#define MX25R6435F_PAGE_SHIFT       (8)
+#  define MX25R6435F_PAGE_SHIFT       (8)
 #endif
 
 /* Status register bit definitions */

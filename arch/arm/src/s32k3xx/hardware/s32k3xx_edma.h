@@ -1311,13 +1311,13 @@ uintptr_t const S32K3XX_EDMA_TCD[S32K3XX_EDMA_NCHANNELS] =
 
 #define EDMA_TCD_ATTR_DSIZE_SHIFT         (0)       /* Bits 0-2: Destination Data Transfer Size (DSIZE) */
 #define EDMA_TCD_ATTR_DSIZE_MASK          (0x07 << EDMA_TCD_ATTR_DSIZE_SHIFT)
-#define EDMA_TCD_ATTR_DSIZE(n)            ((n << EDMA_TCD_ATTR_DSIZE_SHIFT) & EDMA_TCD_ATTR_DSIZE_MASK)
+#define EDMA_TCD_ATTR_DSIZE(n)            (((n) << EDMA_TCD_ATTR_DSIZE_SHIFT) & EDMA_TCD_ATTR_DSIZE_MASK)
 #define EDMA_TCD_ATTR_DMOD_SHIFT          (3)       /* Bits 3-7: Destination Address Modulo (DMOD) */
 #define EDMA_TCD_ATTR_DMOD_MASK           (0x1f << EDMA_TCD_ATTR_DMOD_SHIFT)
-#define EDMA_TCD_ATTR_DMOD(n)             ((n << EDMA_TCD_ATTR_DMOD_SHIFT) & EDMA_TCD_ATTR_DMOD_MASK)
+#define EDMA_TCD_ATTR_DMOD(n)             (((n) << EDMA_TCD_ATTR_DMOD_SHIFT) & EDMA_TCD_ATTR_DMOD_MASK)
 #define EDMA_TCD_ATTR_SSIZE_SHIFT         (8)       /* Bits 8-10: Source Data Transfer Size (SSIZE) */
 #define EDMA_TCD_ATTR_SSIZE_MASK          (0x07 << EDMA_TCD_ATTR_SSIZE_SHIFT)
-#define EDMA_TCD_ATTR_SSIZE(n)            ((n << EDMA_TCD_ATTR_SSIZE_SHIFT) & EDMA_TCD_ATTR_SSIZE_MASK)
+#define EDMA_TCD_ATTR_SSIZE(n)            (((n) << EDMA_TCD_ATTR_SSIZE_SHIFT) & EDMA_TCD_ATTR_SSIZE_MASK)
 #  define EDMA_TCD_ATTR_SSIZE_8BIT        (0x00 << EDMA_TCD_ATTR_SSIZE_SHIFT) /* 8-bit */
 #  define EDMA_TCD_ATTR_SSIZE_16BIT       (0x01 << EDMA_TCD_ATTR_SSIZE_SHIFT) /* 16-bit */
 #  define EDMA_TCD_ATTR_SSIZE_32BIT       (0x02 << EDMA_TCD_ATTR_SSIZE_SHIFT) /* 32-bit */
@@ -1328,7 +1328,7 @@ uintptr_t const S32K3XX_EDMA_TCD[S32K3XX_EDMA_NCHANNELS] =
 
 #define EDMA_TCD_ATTR_SMOD_SHIFT          (11)      /* Bits 11-15: Source Address Modulo (SMOD) */
 #define EDMA_TCD_ATTR_SMOD_MASK           (0x1f << EDMA_TCD_ATTR_SMOD_SHIFT)
-#define EDMA_TCD_ATTR_SMOD(n)             ((n << EDMA_TCD_ATTR_SMOD_SHIFT) & EDMA_TCD_ATTR_SMOD_MASK)
+#define EDMA_TCD_ATTR_SMOD(n)             (((n) << EDMA_TCD_ATTR_SMOD_SHIFT) & EDMA_TCD_ATTR_SMOD_MASK)
 
 /* TCDn Transfer Size (TCDn_NBYTES) */
 
@@ -1364,7 +1364,7 @@ uintptr_t const S32K3XX_EDMA_TCD[S32K3XX_EDMA_NCHANNELS] =
 #define EDMA_TCD_CITER_MASK_ELINK         (0x01ff << EDMA_TCD_CITER_SHIFT)
 #define EDMA_TCD_CITER_LINKCH_SHIFT       (9)       /* Bits 9-13: Minor Loop Link Channel Number (LINKCH) */
 #define EDMA_TCD_CITER_LINKCH_MASK        (0x1f << EDMA_TCD_CITER_LINKCH_SHIFT)
-#define EDMA_TCD_CITER_LINKCH(n)          ((n << EDMA_TCD_CITER_LINKCH_SHIFT) & EDMA_TCD_CITER_LINKCH_SHIFT)
+#define EDMA_TCD_CITER_LINKCH(n)          (((n) << EDMA_TCD_CITER_LINKCH_SHIFT) & EDMA_TCD_CITER_LINKCH_SHIFT)
 #define EDMA_TCD_CITER_ELINK              (1 << 15) /* Bit 15: Enable Link (ELINK) */
 
 /* TCDn Last Destination Address Adjustment / Scatter Gather Address Register
@@ -1386,7 +1386,7 @@ uintptr_t const S32K3XX_EDMA_TCD[S32K3XX_EDMA_NCHANNELS] =
 #define EDMA_TCD_CSR_ESDA                 (1 << 7)  /* Bit 7: Enable Store Destination Address (ESDA) */
 #define EDMA_TCD_CSR_MAJORLINKCH_SHIFT    (8)       /* Bits 8-12: Major Loop Link Channel Number (MAJORLINKCH) */
 #define EDMA_TCD_CSR_MAJORLINKCH_MASK     (0x1f << EDMA_TCD_CSR_MAJORLINKCH_SHIFT)
-#define EDMA_TCD_CSR_MAJORLINKCH(n)       ((n << EDMA_TCD_CSR_MAJORLINKCH_SHIFT) & EDMA_TCD_CSR_MAJORLINKCH_MASK)
+#define EDMA_TCD_CSR_MAJORLINKCH(n)       (((n) << EDMA_TCD_CSR_MAJORLINKCH_SHIFT) & EDMA_TCD_CSR_MAJORLINKCH_MASK)
                                                     /* Bit 13: Reserved */
 #define EDMA_TCD_CSR_BWC_SHIFT            (14)      /* Bits 14-15: Bandwidth Control (BWC) */
 #define EDMA_TCD_CSR_BWC_MASK             (0x03 << EDMA_TCD_CSR_BWC_SHIFT)
@@ -1402,7 +1402,7 @@ uintptr_t const S32K3XX_EDMA_TCD[S32K3XX_EDMA_NCHANNELS] =
 #define EDMA_TCD_BITER_MASK_ELINK         (0x01ff << EDMA_TCD_BITER_SHIFT)
 #define EDMA_TCD_BITER_LINKCH_SHIFT       (9)       /* Bits 9-13: Link Channel Number (LINKCH) */
 #define EDMA_TCD_BITER_LINKCH_MASK        (0x1f << EDMA_TCD_BITER_LINKCH_SHIFT)
-#define EDMA_TCD_BITER_LINKCH(n)          ((n << EDMA_TCD_BITER_LINKCH_SHIFT) & EDMA_TCD_BITER_LINKCH_MASK)
+#define EDMA_TCD_BITER_LINKCH(n)          (((n) << EDMA_TCD_BITER_LINKCH_SHIFT) & EDMA_TCD_BITER_LINKCH_MASK)
 #define EDMA_TCD_BITER_ELINK              (1 << 15) /* Bit 15: Enable Link (ELINK) */
 
 /****************************************************************************
