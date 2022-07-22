@@ -62,10 +62,10 @@ struct pm_greedy_governor_s
 
 /* PM governor methods */
 
-static void             greedy_governor_statechanged(int domain,
-                                                enum pm_state_e newstate);
-static enum pm_state_e  greedy_governor_checkstate(int domain);
-static void             greedy_governor_activity(int domain, int count);
+static void greedy_governor_statechanged(int domain,
+                                         enum pm_state_e newstate);
+static enum pm_state_e greedy_governor_checkstate(int domain);
+static void greedy_governor_activity(int domain, int count);
 
 /****************************************************************************
  * Private Data
@@ -73,9 +73,12 @@ static void             greedy_governor_activity(int domain, int count);
 
 static const struct pm_governor_s g_greedy_governor_ops =
 {
-  .statechanged = greedy_governor_statechanged, /* statechanged */
-  .checkstate   = greedy_governor_checkstate,   /* checkstate */
-  .activity     = greedy_governor_activity,     /* activity */
+  NULL,                         /* initialize */
+  NULL,                         /* deinitialize */
+  greedy_governor_statechanged, /* statechanged */
+  greedy_governor_checkstate,   /* checkstate */
+  greedy_governor_activity,     /* activity */
+  NULL                          /* priv */
 };
 
 static struct pm_greedy_governor_s g_pm_greedy_governor;

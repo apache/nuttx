@@ -89,13 +89,11 @@
  * own, custom idle loop to support board-specific IDLE time power management
  */
 
-#define PM_WAKELOCK_INITIALIZER(name, domain, state) {name, domain, state}
-
 #define PM_WAKELOCK_DECLARE(var, name, domain, state) \
-      struct pm_wakelock_s var = PM_WAKELOCK_INITIALIZER(name, domain, state)
+      struct pm_wakelock_s var = {name, domain, state}
 
 #define PM_WAKELOCK_DECLARE_STATIC(var, name, domain, state) \
-static struct pm_wakelock_s var = PM_WAKELOCK_INITIALIZER(name, domain, state)
+static struct pm_wakelock_s var = {name, domain, state}
 
 /****************************************************************************
  * Public Types
@@ -803,7 +801,6 @@ void pm_auto_updatestate(int domain);
  * avoid so much conditional compilation in driver code when PM is disabled:
  */
 
-#  define PM_WAKELOCK_INITIALIZER(n,d,s)      {0}
 #  define PM_WAKELOCK_DECLARE(v,n,d,s)
 #  define PM_WAKELOCK_DECLARE_STATIC(v,n,d,s)
 #  define pm_initialize()

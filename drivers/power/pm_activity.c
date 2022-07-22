@@ -81,8 +81,8 @@ static void pm_wakelock_stats(FAR struct pm_wakelock_s *wakelock, bool stay)
     }
 }
 #else
-#define pm_wakelock_stats_rm(w)
-#define pm_wakelock_stats(w, s)
+#  define pm_wakelock_stats_rm(w)
+#  define pm_wakelock_stats(w, s)
 #endif
 
 /****************************************************************************

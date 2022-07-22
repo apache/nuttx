@@ -194,7 +194,7 @@ static void pm_stats(FAR struct pm_domain_s *dom, int curstate, int newstate)
   clock_systime_timespec(&dom->start);
 }
 #else
-#define pm_stats(dom, curstate, newstate)
+#  define pm_stats(dom, curstate, newstate)
 #endif
 
 /****************************************************************************
