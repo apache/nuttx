@@ -1620,6 +1620,16 @@ config ARCH_BOARD_S32K344EVB
 		This options selects support for NuttX on the NXP S32K344EVB board
 		featuring the S32K344 Cortex-M7.
 
+config ARCH_BOARD_MR_CANHUBK3
+	bool "NXP MR-CANHUBK3"
+	depends on ARCH_CHIP_S32K344
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on the NXP MR-CANHUBK3 board
+		featuring the S32K344 Cortex-M7.
+
 config ARCH_BOARD_SABRE_6QUAD
 	bool "NXP/Freescale i.MX6 Sabre-6Quad board"
 	depends on ARCH_CHIP_IMX6_6QUAD
@@ -2680,6 +2690,7 @@ config ARCH_BOARD
 	default "ucans32k146"              if ARCH_BOARD_UCANS32K146
 	default "s32k148evb"               if ARCH_BOARD_S32K148EVB
 	default "s32k344evb"               if ARCH_BOARD_S32K344EVB
+	default "mr-canhubk3"              if ARCH_BOARD_MR_CANHUBK3
 	default "rv32m1-vega"              if ARCH_BOARD_RV32M1_VEGA
 	default "rv-virt"                  if ARCH_BOARD_QEMU_RV_VIRT
 	default "sabre-6quad"              if ARCH_BOARD_SABRE_6QUAD
@@ -2855,6 +2866,9 @@ source "boards/arm/s32k1xx/s32k148evb/Kconfig"
 endif
 if ARCH_BOARD_S32K344EVB
 source "boards/arm/s32k3xx/s32k344evb/Kconfig"
+endif
+if ARCH_BOARD_MR_CANHUBK3
+source "boards/arm/s32k3xx/mr-canhubk3/Kconfig"
 endif
 if ARCH_BOARD_SABRE_6QUAD
 source "boards/arm/imx6/sabre-6quad/Kconfig"
