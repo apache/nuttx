@@ -79,13 +79,9 @@ struct pm_domain_s
 
   FAR const struct pm_governor_s *governor;
 
-  /* This semaphore manages mutually exclusive access to the domain state.
-   * It must be initialized to the value 1.
-   */
+  /* Recursive lock for race condition */
 
-  sem_t sem;
-  pid_t holder;
-  unsigned int count;
+  rmutex_t lock;
 };
 
 /* This structure encapsulates all of the global data used by the PM system */
