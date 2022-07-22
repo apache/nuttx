@@ -80,12 +80,12 @@ int local_fifo_read(FAR struct file *filep, FAR uint8_t *buf,
         {
           ret = (int)nread;
 
-          if (nread == -EINTR)
+          if (ret == -EINTR)
             {
               ninfo("Ignoring signal\n");
               continue;
             }
-          else if (nread == -EAGAIN)
+          else if (ret == -EAGAIN)
             {
               goto errout;
             }
