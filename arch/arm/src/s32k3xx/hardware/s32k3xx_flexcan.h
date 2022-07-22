@@ -2669,7 +2669,7 @@
                                                 /* Bit 13: Reserved */
 #define CAN_CTRL1_ERRMSK              (1 << 14) /* Bit 14: Error Interrupt Mask (ERRMSK) */
 #define CAN_CTRL1_BOFFMSK             (1 << 15) /* Bit 15: Bus Off Interrupt Mask (BOFFMSK) */
-#define CAN_CTRL1_TIMINGMSK           (0xFFFF << 16)
+#define CAN_CTRL1_TIMINGMSK           (0xffff << 16)
 #define CAN_CTRL1_PSEG2_SHIFT         (16)      /* Bits 16-18: Phase Segment 2 (PSEG2) */
 #define CAN_CTRL1_PSEG2_MASK          (0x07 << CAN_CTRL1_PSEG2_SHIFT)
 #define CAN_CTRL1_PSEG2(x)            (((x) << CAN_CTRL1_PSEG2_SHIFT) & CAN_CTRL1_PSEG2_MASK)
@@ -3121,10 +3121,10 @@
 /* CAN MB TX codes */
 #define CAN_TXMB_INACTIVE             0x8       /* MB is not active. */
 #define CAN_TXMB_ABORT                0x9       /* MB is aborted. */
-#define CAN_TXMB_DATAORREMOTE         0xC       /* MB is a TX Data Frame(when MB RTR = 0) or */
+#define CAN_TXMB_DATAORREMOTE         0xc       /* MB is a TX Data Frame(when MB RTR = 0) or */
                                                 /* MB is a TX Remote Request Frame (when MB RTR = 1). */
-#define CAN_TXMB_TANSWER              0xE       /* MB is a TX Response Request Frame from */
+#define CAN_TXMB_TANSWER              0xe       /* MB is a TX Response Request Frame from */
                                                 /* an incoming Remote Request Frame. */
-#define CAN_TXMB_NOTUSED              0xF       /* Not used.*/
+#define CAN_TXMB_NOTUSED              0xf       /* Not used.*/
 
 #endif /* __ARCH_ARM_SRC_S32K3XX_HARDWARE_S32K3XX_CAN_H */

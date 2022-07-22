@@ -31,7 +31,7 @@
 
 #define FS26_M_FS           (1 << 31)  /* Bit 31: Main or Fail-safe register selection (M/FS) */
 #define FS26_REG_ADDR_SHIFT (25)       /* Bits 25-31: Register Address + M/FS */
-#define FS26_REG_ADDR_MASK  (0x7F << FS26_REG_ADDR_SHIFT)
+#define FS26_REG_ADDR_MASK  (0x7f << FS26_REG_ADDR_SHIFT)
 #define FS26_REG_ADDR(n)    (((n) << FS26_REG_ADDR_SHIFT) & FS26_REG_ADDR_MASK)
 #define FS26_RW             (1 << 24)  /* Bit 24: Read/Write (reading Bit 24 = 0) */
 
@@ -49,17 +49,17 @@
 /* FS26 Data encoding********************************************************/
 
 #define FS26_DATA_LSB_SHIFT (8)   /* Bits 8-15: DATA_LSB */
-#define FS26_DATA_LSB_MASK  (0xFF << FS26_DATA_LSB_SHIFT)
+#define FS26_DATA_LSB_MASK  (0xff << FS26_DATA_LSB_SHIFT)
 #define FS26_DATA_LSB(n)    (((n) << FS26_DATA_LSB_SHIFT) & FS26_DATA_LSB_MASK)
 #define FS26_DATA_MSB_SHIFT (16)  /* Bits 16-23: DATA_MSB */
-#define FS26_DATA_MSB_MASK  (0xFF << FS26_DATA_MSB_SHIFT)
+#define FS26_DATA_MSB_MASK  (0xff << FS26_DATA_MSB_SHIFT)
 #define FS26_DATA_MSB(n)    (((n) << FS26_DATA_MSB_SHIFT) & FS26_DATA_MSB_MASK)
 #define FS26_DATA_SHIFT     (8)   /* Bits 8-23: DATA_MSB */
-#define FS26_DATA_MASK      (0xFFFF << FS26_DATA_SHIFT)
+#define FS26_DATA_MASK      (0xffff << FS26_DATA_SHIFT)
 #define FS26_SET_DATA(n)    (((n) << FS26_DATA_SHIFT) & FS26_DATA_MASK)
 #define FS26_GET_DATA(n)    (((n) & FS26_DATA_MASK) >> FS26_DATA_SHIFT)
 #define FS26_CRC_SHIFT      (0)   /* Bits 0-7: CRC */
-#define FS26_CRC_MASK       (0xFF << FS26_CRC_SHIFT)
+#define FS26_CRC_MASK       (0xff << FS26_CRC_SHIFT)
 #define FS26_CRC(n)         (((n) << FS26_CRC_SHIFT) & FS26_CRC_MASK)
 
 /* FS26 SPI register map */
@@ -74,12 +74,12 @@
 #define FS26_M_VSUP_FLG  (0x7)  /* */
 #define FS26_M_VSUP_MSK  (0x8)  /* */
 #define FS26_M_WIO_FLG   (0x9)  /* */
-#define FS26_M_WIO_MSK   (0xA)  /* */
-#define FS26_M_COM_FLG   (0xB)  /* */
-#define FS26_M_COM_MSK   (0xC)  /* */
-#define FS26_M_SYS_CFG   (0xD)  /* */
-#define FS26_M_TSD_CFG   (0xE)  /* */
-#define FS26_M_REG_CFG   (0xF)  /* */
+#define FS26_M_WIO_MSK   (0xa)  /* */
+#define FS26_M_COM_FLG   (0xb)  /* */
+#define FS26_M_COM_MSK   (0xc)  /* */
+#define FS26_M_SYS_CFG   (0xd)  /* */
+#define FS26_M_TSD_CFG   (0xe)  /* */
+#define FS26_M_REG_CFG   (0xf)  /* */
 #define FS26_M_WIO_CFG   (0x10) /* */
 #define FS26_M_REG_CTRL1 (0x11) /* */
 #define FS26_M_REG_CTRL2 (0x12) /* */
@@ -102,12 +102,12 @@
 #define FS26_FS_I_SAFE_INPUTS             (0x47) /* */
 #define FS26_FS_I_NOT_SAFE_INPUTS         (0x48) /* */
 #define FS26_FS_I_FSSM                    (0x49) /* */
-#define FS26_FS_I_NOT_FSSM                (0x4A) /* */
-#define FS26_FS_WDW_DURATION              (0x4B) /* */
-#define FS26_FS_NOT_WDW_DURATION          (0x4C) /* */
-#define FS26_FS_WD_ANSWER                 (0x4D) /* */
-#define FS26_FS_WD_TOKEN                  (0x4E) /* */
-#define FS26_FS_ABIST_ON_DEMAND           (0x4F) /* */
+#define FS26_FS_I_NOT_FSSM                (0x4a) /* */
+#define FS26_FS_WDW_DURATION              (0x4b) /* */
+#define FS26_FS_NOT_WDW_DURATION          (0x4c) /* */
+#define FS26_FS_WD_ANSWER                 (0x4d) /* */
+#define FS26_FS_WD_TOKEN                  (0x4e) /* */
+#define FS26_FS_ABIST_ON_DEMAND           (0x4f) /* */
 #define FS26_FS_OVUV_REG_STATUS           (0x50) /* */
 #define FS26_FS_RELEASE_FS0B_FS1B         (0x51) /* */
 #define FS26_FS_SAFE_IOS_1                (0x52) /* */
@@ -243,11 +243,11 @@
 
 #define WD_RFR_CNT_SHIFT             (8) /* Reflect the value of the Watchdog Refresh Counter */
 #define WD_RFR_CNT_MASK              (0x7 << WD_RFR_CNT_SHIFT)
-#define WD_RFR_CNT(n)                (n & (0x7 << WD_RFR_CNT_SHIFT))
+#define WD_RFR_CNT(n)                ((n) & (0x7 << WD_RFR_CNT_SHIFT))
 
 #define WD_ERR_CNT_SHIFT             (0) /* Reflect the value of the Watchdog Error Counter */
-#define WD_ERR_CNT_MASK              (0xF << WD_ERR_CNT_SHIFT)
-#define WD_ERR_CNT(n)                ((n & (0x7 << WD_RFR_CNT_SHIFT)) > 11) ? (11) : ((n & (0x7 << WD_RFR_CNT_SHIFT)))
+#define WD_ERR_CNT_MASK              (0xf << WD_ERR_CNT_SHIFT)
+#define WD_ERR_CNT(n)                (((n) & (0x7 << WD_RFR_CNT_SHIFT)) > 11) ? (11) : (((n) & (0x7 << WD_RFR_CNT_SHIFT)))
 
 /* FS26_FS_I_SAFE_INPUTS register */
 
@@ -349,13 +349,13 @@
 #define DIS8S                     DIS8S_MASK
 
 #define FLT_ERR_CNT_SHIFT             (0) /* Reflect the value of the Watchdog Error Counter */
-#define FLT_ERR_CNT_MASK              (0xF << FLT_ERR_CNT_SHIFT)
+#define FLT_ERR_CNT_MASK              (0xf << FLT_ERR_CNT_SHIFT)
 #define FLT_ERR_CNT(n)                ((n & (0x7 << FLT_ERR_CNT_SHIFT)) > 12) ? (12) : ((n & (0x7 << FLT_ERR_CNT_SHIFT)))
 
 /* FS26_FS_WDW_DURATION register */
 
 #define WDW_PERIOD_SHIFT               (12) /* Watchdog window period */
-#define WDW_PERIOD_MASK                (0xF << WDW_PERIOD_SHIFT)
+#define WDW_PERIOD_MASK                (0xf << WDW_PERIOD_SHIFT)
 #  define WDW_PERIOD_DISABLE           (0x0 << WDW_PERIOD_SHIFT)
 #  define WDW_PERIOD_1MS               (0x1 << WDW_PERIOD_SHIFT)
 #  define WDW_PERIOD_2MS               (0x2 << WDW_PERIOD_SHIFT)
@@ -366,12 +366,12 @@
 #  define WDW_PERIOD_12MS              (0x7 << WDW_PERIOD_SHIFT)
 #  define WDW_PERIOD_16MS              (0x8 << WDW_PERIOD_SHIFT)
 #  define WDW_PERIOD_24MS              (0x9 << WDW_PERIOD_SHIFT)
-#  define WDW_PERIOD_32MS              (0xA << WDW_PERIOD_SHIFT)
-#  define WDW_PERIOD_64MS              (0xB << WDW_PERIOD_SHIFT)
-#  define WDW_PERIOD_128MS             (0xC << WDW_PERIOD_SHIFT)
-#  define WDW_PERIOD_256MS             (0xD << WDW_PERIOD_SHIFT)
-#  define WDW_PERIOD_512MS             (0xE << WDW_PERIOD_SHIFT)
-#  define WDW_PERIOD_1024MS            (0xF << WDW_PERIOD_SHIFT)
+#  define WDW_PERIOD_32MS              (0xa << WDW_PERIOD_SHIFT)
+#  define WDW_PERIOD_64MS              (0xb << WDW_PERIOD_SHIFT)
+#  define WDW_PERIOD_128MS             (0xc << WDW_PERIOD_SHIFT)
+#  define WDW_PERIOD_256MS             (0xd << WDW_PERIOD_SHIFT)
+#  define WDW_PERIOD_512MS             (0xe << WDW_PERIOD_SHIFT)
+#  define WDW_PERIOD_1024MS            (0xf << WDW_PERIOD_SHIFT)
 
 #define WDW_DC_SHIFT                   (6) /* Watchdog window duty cycle */
 #define WDW_DC_MASK                    (0x7 << WDW_DC_SHIFT)
@@ -382,7 +382,7 @@
 #  define WDW_DC_68_31                 (0x4 << WDW_PERIOD_SHIFT)
 
 #define WDW_RECOVERY_SHIFT               (0) /* Watchdog window period */
-#define WDW_RECOVERY_MASK                (0xF << WDW_RECOVERY_SHIFT)
+#define WDW_RECOVERY_MASK                (0xf << WDW_RECOVERY_SHIFT)
 #  define WDW_RECOVERY_DISABLE           (0x0 << WDW_RECOVERY_SHIFT)
 #  define WDW_RECOVERY_1MS               (0x1 << WDW_RECOVERY_SHIFT)
 #  define WDW_RECOVERY_2MS               (0x2 << WDW_RECOVERY_SHIFT)
@@ -393,12 +393,12 @@
 #  define WDW_RECOVERY_12MS              (0x7 << WDW_RECOVERY_SHIFT)
 #  define WDW_RECOVERY_16MS              (0x8 << WDW_RECOVERY_SHIFT)
 #  define WDW_RECOVERY_24MS              (0x9 << WDW_RECOVERY_SHIFT)
-#  define WDW_RECOVERY_32MS              (0xA << WDW_RECOVERY_SHIFT)
-#  define WDW_RECOVERY_64MS              (0xB << WDW_RECOVERY_SHIFT)
-#  define WDW_RECOVERY_128MS             (0xC << WDW_RECOVERY_SHIFT)
-#  define WDW_RECOVERY_256MS             (0xD << WDW_RECOVERY_SHIFT)
-#  define WDW_RECOVERY_512MS             (0xE << WDW_RECOVERY_SHIFT)
-#  define WDW_RECOVERY_1024MS            (0xF << WDW_RECOVERY_SHIFT)
+#  define WDW_RECOVERY_32MS              (0xa << WDW_RECOVERY_SHIFT)
+#  define WDW_RECOVERY_64MS              (0xb << WDW_RECOVERY_SHIFT)
+#  define WDW_RECOVERY_128MS             (0xc << WDW_RECOVERY_SHIFT)
+#  define WDW_RECOVERY_256MS             (0xd << WDW_RECOVERY_SHIFT)
+#  define WDW_RECOVERY_512MS             (0xe << WDW_RECOVERY_SHIFT)
+#  define WDW_RECOVERY_1024MS            (0xf << WDW_RECOVERY_SHIFT)
 
 /* FS26_FS_DIAG_SAFETY1 register */
 
@@ -465,14 +465,14 @@
 #define REG_CORRUPT                     REG_CORRUPT_MASK
 
 #define FS_STATES_SHIFT               (0) /* LBIST STATUS */
-#define FS_STATES_MASK                (0x1F << FS_STATES_SHIFT)
+#define FS_STATES_MASK                (0x1f << FS_STATES_SHIFT)
 #define FS_STATES                     FS_STATES_MASK
 #  define FS_STATES_DEBUG_ENTRY       (0x4 << FS_STATES_SHIFT)
 #  define FS_STATES_ENABLE_MON        (0x6 << FS_STATES_SHIFT)
 #  define FS_STATES_RSTB_RELEASE      (0x8 << FS_STATES_SHIFT)
 #  define FS_STATES_INIT_FS           (0x9 << FS_STATES_SHIFT)
-#  define FS_STATES_SAFETY_OUT_NOT    (0xA << FS_STATES_SHIFT)
-#  define FS_STATES_NORMAL            (0xB << FS_STATES_SHIFT)
+#  define FS_STATES_SAFETY_OUT_NOT    (0xa << FS_STATES_SHIFT)
+#  define FS_STATES_NORMAL            (0xb << FS_STATES_SHIFT)
 
 /* FS26_FS_GRL_FLAGS register */
 
