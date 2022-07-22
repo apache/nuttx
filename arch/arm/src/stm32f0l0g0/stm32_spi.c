@@ -184,6 +184,8 @@ struct stm32_spidev_s
   struct pm_callback_s pm_cb;    /* PM callbacks */
 #endif
   enum spi_config_e config;      /* full/half duplex, simplex transmit/read only */
+  bool              rx_now;      /* Half duplex only: receiving data now */
+  bool              rx_mode;     /* Half duplex only: SPI_CR1_BIDIOE bit status */
 };
 
 /****************************************************************************
@@ -196,6 +198,7 @@ static inline uint16_t spi_getreg(struct stm32_spidev_s *priv,
                                   uint8_t offset);
 static inline void spi_putreg(struct stm32_spidev_s *priv,
                               uint8_t offset, uint16_t value);
+static inline void spi_rx_mode(struct stm32_spidev_s *priv, bool enable);
 static inline uint16_t spi_readword(struct stm32_spidev_s *priv);
 static inline void spi_writeword(struct stm32_spidev_s *priv,
                                  uint16_t byte);
@@ -431,6 +434,62 @@ static inline void spi_putreg(struct stm32_spidev_s *priv,
 }
 
 /****************************************************************************
+ * Name: spi_rx_mode
+ *
+ * Description:
+ *   Activate SPI RX or SPI TX for the half-duplex mode
+ *
+ ****************************************************************************/
+
+static inline void spi_rx_mode(struct stm32_spidev_s *priv, bool enable)
+{
+  if (enable)
+    {
+      /* Enable RX */
+
+      if (!priv->rx_mode)
+        {
+          /* Disable SPI */
+
+          spi_modifycr(STM32_SPI_CR1_OFFSET, priv, 0, SPI_CR1_SPE);
+
+          /* Disable output for half-duplex mode - SPI starts to
+           * automatically output clocks.
+           */
+
+          spi_modifycr(STM32_SPI_CR1_OFFSET, priv, 0, SPI_CR1_BIDIOE);
+
+          /* Enable SPI */
+
+          spi_modifycr(STM32_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
+
+          priv->rx_mode = true;
+        }
+    }
+  else
+    {
+      /* Enable TX */
+
+      if (priv->rx_mode)
+        {
+          /* Disable SPI */
+
+          spi_modifycr(STM32_SPI_CR1_OFFSET, priv, 0, SPI_CR1_SPE);
+
+          /* Enable TX output */
+
+          spi_modifycr(STM32_SPI_CR1_OFFSET, priv, SPI_CR1_BIDIOE, 0);
+
+          /* Enable SPI */
+
+          spi_modifycr(STM32_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
+
+          priv->rx_mode = false;
+        }
+    }
+}
+
+/****************************************************************************
  * Name: spi_getreg8
  *
  * Description:
@@ -495,14 +554,17 @@ static inline uint16_t spi_readword(struct stm32_spidev_s *priv)
 
   if (priv->config == HALF_DUPLEX)
     {
-      /* Disable output for half-duplex mode */
-
-      spi_modifycr(STM32_SPI_CR1_OFFSET, priv, 0, SPI_CR1_BIDIOE);
+      spi_rx_mode(priv, true);
     }
 
   /* Wait until the receive buffer is not empty */
 
   while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_RXNE) == 0);
+
+  if (priv->config == HALF_DUPLEX)
+    {
+      spi_rx_mode(priv, false);
+    }
 
   /* Then return the received byte */
 
@@ -536,9 +598,7 @@ static inline void spi_writeword(struct stm32_spidev_s *priv,
 
   if (priv->config == HALF_DUPLEX)
     {
-      /* Enable output for half-duplex mode */
-
-      spi_modifycr(STM32_SPI_CR1_OFFSET, priv, SPI_CR1_BIDIOE, 0);
+      spi_rx_mode(priv, false);
     }
 
   /* Wait until the transmit buffer is empty */
@@ -575,6 +635,13 @@ static inline void spi_writeword(struct stm32_spidev_s *priv,
 #endif
     {
       spi_putreg(priv, STM32_SPI_DR_OFFSET, word);
+    }
+
+  if (priv->config == HALF_DUPLEX)
+    {
+      /* Wait for data transfer to be completed */
+
+      while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_BSY) != 0);
     }
 }
 
@@ -1289,12 +1356,32 @@ static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
 {
   struct stm32_spidev_s *priv = (struct stm32_spidev_s *)dev;
   uint32_t regval;
-  uint32_t ret;
+  uint32_t ret = 0;
 
   DEBUGASSERT(priv && priv->spibase);
 
-  spi_writeword(priv, (uint16_t)(wd & 0xffff));
-  ret = (uint32_t)spi_readword(priv);
+  if (priv->config != HALF_DUPLEX)
+    {
+      spi_writeword(priv, (uint16_t)(wd & 0xffff));
+      ret = (uint32_t)spi_readword(priv);
+    }
+  else
+    {
+      /* In half duplex we must send data and receive data in separate
+       * spi_send() calls.
+       */
+
+      if (!priv->rx_now)
+        {
+          spi_writeword(priv, (uint16_t)(wd & 0xffff));
+        }
+      else
+        {
+          ret = (uint32_t)spi_readword(priv);
+
+          priv->rx_now = false;
+        }
+    }
 
   /* Check and clear any error flags (Reading from the SR clears the error
    * flags)
@@ -1361,10 +1448,12 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
           if (src)
             {
               word = *src++;
+              priv->rx_now = false;
             }
           else
             {
               word = 0xffff;
+              priv->rx_now = true;
             }
 
           /* Exchange one word */
@@ -1394,10 +1483,12 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
           if (src)
             {
               word = *src++;
+              priv->rx_now = false;
             }
           else
             {
               word = 0xff;
+              priv->rx_now = true;
             }
 
           /* Exchange one word */
@@ -1746,8 +1837,9 @@ static void spi_bus_initialize(struct stm32_spidev_s *priv)
         setbits |= SPI_CR1_RXONLY;
         break;
       case HALF_DUPLEX:
-        clrbits |= SPI_CR1_BIDIOE | SPI_CR1_RXONLY;
-        setbits |= SPI_CR1_BIDIMODE;
+        clrbits |= SPI_CR1_RXONLY;
+        setbits |= SPI_CR1_BIDIOE | SPI_CR1_BIDIMODE; /* TX mode */
+        priv->rx_mode = false;
         break;
     }
 
@@ -1787,8 +1879,9 @@ static void spi_bus_initialize(struct stm32_spidev_s *priv)
         setbits |= SPI_CR1_RXONLY;
         break;
       case HALF_DUPLEX:
-        clrbits |= SPI_CR1_BIDIOE | SPI_CR1_RXONLY;
-        setbits |= SPI_CR1_BIDIMODE;
+        clrbits |= SPI_CR1_RXONLY;
+        setbits |= SPI_CR1_BIDIOE | SPI_CR1_BIDIMODE; /* TX mode */
+        priv->rx_mode = false;
         break;
     }
 
