@@ -83,20 +83,20 @@
 #define QSPI_LUT_SHARE_TYPE1 2U /* Shared Lut                     */
 #define QSPI_LUT_SHARE_TYPE2 3U /* Shared Lut                     */
 
-#define QSPI_LUT_CMD_STOP      0U ///< End of sequence
-#define QSPI_LUT_CMD_CMD       1U ///< Command
-#define QSPI_LUT_CMD_ADDR      2U ///< Address
-#define QSPI_LUT_CMD_DUMMY     3U ///< Dummy cycles
-#define QSPI_LUT_CMD_MODE      4U ///< 8-bit mode
-#define QSPI_LUT_CMD_MODE2     5U ///< 2-bit mode
-#define QSPI_LUT_CMD_MODE4     6U ///< 4-bit mode
-#define QSPI_LUT_CMD_READ      7U ///< Read data
-#define QSPI_LUT_CMD_WRITE     8U ///< Write data
-#define QSPI_LUT_CMD_JMP_ON_CS 9U ///< Jump on chip select deassert
+#define QSPI_LUT_CMD_STOP      0U /* End of sequence */
+#define QSPI_LUT_CMD_CMD       1U /* Command */
+#define QSPI_LUT_CMD_ADDR      2U /* Address */
+#define QSPI_LUT_CMD_DUMMY     3U /* Dummy cycles */
+#define QSPI_LUT_CMD_MODE      4U /* 8-bit mode */
+#define QSPI_LUT_CMD_MODE2     5U /* 2-bit mode */
+#define QSPI_LUT_CMD_MODE4     6U /* 4-bit mode */
+#define QSPI_LUT_CMD_READ      7U /* Read data */
+#define QSPI_LUT_CMD_WRITE     8U /* Write data */
+#define QSPI_LUT_CMD_JMP_ON_CS 9U /* Jump on chip select deassert */
 
-#define QSPI_TRANSFER_TYPE_SYNC      0U ///< Synchronous transfer using polling
-#define QSPI_TRANSFER_TYPE_ASYNC_INT 1U ///< Interrupt-based asynchronous transfer
-#define QSPI_TRANSFER_TYPE_ASYNC_DMA 2U ///< DMA-based asynchronous transfer
+#define QSPI_TRANSFER_TYPE_SYNC      0U /* Synchronous transfer using polling */
+#define QSPI_TRANSFER_TYPE_ASYNC_INT 1U /* Interrupt-based asynchronous transfer */
+#define QSPI_TRANSFER_TYPE_ASYNC_DMA 2U /* DMA-based asynchronous transfer */
 
 #define QSPI_RX_BUF_SIZE             128U
 
