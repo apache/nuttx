@@ -487,15 +487,15 @@ struct i2c_slave_s * rp2040_i2c0_slave_initialize
 {
   rp2040_i2c_slave_t *priv = &i2c0_slave_dev;
 
-  rp2040_gpio_set_function(CONFIG_RP2040_I2C0_SLAVE_SDA,
+  rp2040_gpio_set_function(CONFIG_RP2040_I2C0_SDA_GPIO,
                            RP2040_GPIO_FUNC_I2C);
 
-  rp2040_gpio_set_pulls(CONFIG_RP2040_I2C0_SLAVE_SDA, true, false);
+  rp2040_gpio_set_pulls(CONFIG_RP2040_I2C0_SDA_GPIO, true, false);
 
-  rp2040_gpio_set_function(CONFIG_RP2040_I2C0_SLAVE_SCL,
+  rp2040_gpio_set_function(CONFIG_RP2040_I2C0_SCL_GPIO,
                            RP2040_GPIO_FUNC_I2C);
 
-  rp2040_gpio_set_pulls(CONFIG_RP2040_I2C0_SLAVE_SCL, true, false);
+  rp2040_gpio_set_pulls(CONFIG_RP2040_I2C0_SCL_GPIO, true, false);
 
   priv->rx_buffer  = rx_buffer;
   priv->rx_buf_ptr = rx_buffer;
@@ -552,15 +552,15 @@ struct i2c_slave_s * rp2040_i2c1_slave_initialize
 {
   rp2040_i2c_slave_t *priv = &i2c1_slave_dev;
 
-  rp2040_gpio_set_function(CONFIG_RP2040_I2C1_SLAVE_SDA,
+  rp2040_gpio_set_function(CONFIG_RP2040_I2C1_SDA_GPIO,
                            RP2040_GPIO_FUNC_I2C);
 
-  rp2040_gpio_set_pulls(CONFIG_RP2040_I2C1_SLAVE_SDA, true, false);
+  rp2040_gpio_set_pulls(CONFIG_RP2040_I2C1_SDA_GPIO, true, false);
 
-  rp2040_gpio_set_function(CONFIG_RP2040_I2C1_SLAVE_SCL,
+  rp2040_gpio_set_function(CONFIG_RP2040_I2C1_SCL_GPIO,
                            RP2040_GPIO_FUNC_I2C);
 
-  rp2040_gpio_set_pulls(CONFIG_RP2040_I2C1_SLAVE_SCL, true, false);
+  rp2040_gpio_set_pulls(CONFIG_RP2040_I2C1_SCL_GPIO, true, false);
 
   priv->rx_buffer  = rx_buffer;
   priv->rx_buf_ptr = rx_buffer;

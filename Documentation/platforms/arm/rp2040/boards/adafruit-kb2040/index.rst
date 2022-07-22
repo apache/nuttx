@@ -50,9 +50,10 @@ A ws2812 (NeoPixel) smart RGB LED controlled by GPIO17.
 
 Pin Mapping
 ===========
+Pads numbered anticlockwise from USB connector.
 
 ===== ========== ==========
-Pin   Signal     Notes
+Pad   Signal     Notes
 ===== ========== ==========
 1     D+         Alternate USB data connection.
 2     GPIO0      Default TX for UART0 serial console

@@ -74,7 +74,7 @@ void rp2040_spi0select(struct spi_dev_s *dev, uint32_t devid,
   spiinfo("devid: %d CS: %s\n", (int)devid,
           selected ? "assert" : "de-assert");
 
-  rp2040_gpio_put(CONFIG_RP2040_SPI0_GPIO + 1, !selected);
+  rp2040_gpio_put(CONFIG_RP2040_SPI0_CS_GPIO, !selected);
 }
 
 uint8_t rp2040_spi0status(struct spi_dev_s *dev, uint32_t devid)
@@ -97,7 +97,7 @@ int rp2040_spi0cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
        *  data bits are data or a command.
        */
 
-      rp2040_gpio_put(CONFIG_RP2040_SPI0_GPIO, !cmd);
+      rp2040_gpio_put(CONFIG_RP2040_SPI0_RX_GPIO, !cmd);
 
       return OK;
     }
@@ -115,7 +115,7 @@ void rp2040_spi1select(struct spi_dev_s *dev, uint32_t devid,
   spiinfo("devid: %d CS: %s\n", (int)devid,
           selected ? "assert" : "de-assert");
 
-  rp2040_gpio_put(CONFIG_RP2040_SPI1_GPIO + 1, !selected);
+  rp2040_gpio_put(CONFIG_RP2040_SPI1_CS_GPIO, !selected);
 }
 
 uint8_t rp2040_spi1status(struct spi_dev_s *dev, uint32_t devid)
@@ -138,7 +138,7 @@ int rp2040_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
        *  data bits are data or a command.
        */
 
-      rp2040_gpio_put(CONFIG_RP2040_SPI1_GPIO, !cmd);
+      rp2040_gpio_put(CONFIG_RP2040_SPI1_RX_GPIO, !cmd);
 
       return OK;
     }

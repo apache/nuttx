@@ -539,6 +539,7 @@ int rp2040_bringup(void)
 #if defined(CONFIG_RP2040_BOARD_HAS_WS2812) && defined(CONFIG_WS2812)
   rp2040_ws2812_setup("/dev/leds0",
                       CONFIG_RP2040_WS2812_GPIO_PIN,
+                      CONFIG_RP2040_WS2812_PWR_GPIO,
                       CONFIG_WS2812_LED_COUNT,
                       HAS_WHITE);
 #endif

@@ -53,6 +53,7 @@ extern "C"
  * Input Parameters:
  *   Path to the ws2812 device  (e.g. "/dev/leds0")
  *   Port number for the ws2812 chain
+ *   Pin for ws2812 power
  *   The number of pixels in the chain
  *   Whether ws2812s have white LEDs
  *
@@ -63,6 +64,7 @@ extern "C"
 
 FAR void * rp2040_ws2812_setup(FAR const char *path,
                                int             port,
+                               int             power_pin,
                                uint16_t        pixel_count,
                                bool            has_white);
 

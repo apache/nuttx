@@ -46,9 +46,10 @@ on the RP2040.
 
 Pin Mapping
 ===========
+Pads numbered anticlockwise from USB connector.
 
 ===== ========== ==========
-Pin   Signal     Notes
+Pad   Signal     Notes
 ===== ========== ==========
 1     GPIO0      Default TX for UART0 serial console
 2     GPIO1      Default RX for UART1 serial console

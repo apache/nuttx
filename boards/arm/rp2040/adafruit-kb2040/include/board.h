@@ -62,10 +62,11 @@
 
 /* GPIO definitions *********************************************************/
 
-#undef BOARD_GPIO_LED_PIN
-#define BOARD_NGPIOOUT           1
-#define BOARD_NGPIOIN            1
-#define BOARD_NGPIOINT           1
+#undef  BOARD_GPIO_LED_PIN
+#define BOARD_GPIO_WS2812_PWR_PIN 11
+#define BOARD_NGPIOOUT             1
+#define BOARD_NGPIOIN              1
+#define BOARD_NGPIOINT             1
 
 /****************************************************************************
  * Public Types
