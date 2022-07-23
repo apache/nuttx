@@ -121,5 +121,17 @@ int board_i2c_init(void);
 int board_bmp180_initialize(int devno, int busno);
 #endif
 
+/****************************************************************************
+ * Name: esp32s3_djoy_initialize
+ *
+ * Description:
+ *   Initialize and register the discrete joystick driver
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_INPUT_DJOYSTICK
+int esp32s3_djoy_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_XTENSA_ESP32S3_ESP32S3_DEVKIT_SRC_ESP32S3_DEVKIT_H */
