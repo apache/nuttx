@@ -1425,6 +1425,13 @@ config ARCH_BOARD_NUCLEO_L476RG
 	---help---
 		STMicro Nucleo L476RG board based on the STMicro STM32L476RGT6 MCU.
 
+config ARCH_BOARD_STEVAL_STLCS01V1
+	bool "STEVAL-STLCS01V1 (SensorTile)"
+	depends on ARCH_CHIP_STM32L476JG
+	select ARCH_HAVE_LEDS
+	---help---
+		STMicro STEVAL-STLCS01V1 (SensorTile) based on the STMicro STM32L476JG MCU.
+
 config ARCH_BOARD_NUCLEO_L552ZE
 	bool "STM32L552 Nucleo L552ZE"
 	depends on ARCH_CHIP_STM32L552ZE
@@ -2620,6 +2627,7 @@ config ARCH_BOARD
 	default "nucleo-l432kc"            if ARCH_BOARD_NUCLEO_L432KC
 	default "nucleo-l452re"            if ARCH_BOARD_NUCLEO_L452RE
 	default "nucleo-l476rg"            if ARCH_BOARD_NUCLEO_L476RG
+	default "steval-stlcs01v1"         if ARCH_BOARD_STEVAL_STLCS01V1
 	default "nucleo-l496zg"            if ARCH_BOARD_NUCLEO_L496ZG
 	default "nucleo-l552ze"            if ARCH_BOARD_NUCLEO_L552ZE
 	default "nucleo-wb55rg"            if ARCH_BOARD_NUCLEO_WB55RG
@@ -3143,6 +3151,9 @@ source "boards/arm/stm32l4/nucleo-l452re/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_L476RG
 source "boards/arm/stm32l4/nucleo-l476rg/Kconfig"
+endif
+if ARCH_BOARD_STEVAL_STLCS01V1
+source "boards/arm/stm32l4/steval-stlcs01v1/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_L496ZG
 source "boards/arm/stm32l4/nucleo-l496zg/Kconfig"
