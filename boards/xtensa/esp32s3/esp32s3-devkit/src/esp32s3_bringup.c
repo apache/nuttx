@@ -166,6 +166,14 @@ int esp32s3_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_INPUT_DJOYSTICK
+  ret = esp32s3_djoy_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "Failed to register djoystick driver: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_ESP32S3_SPIFLASH
   ret = board_spiflash_init();
   if (ret)
