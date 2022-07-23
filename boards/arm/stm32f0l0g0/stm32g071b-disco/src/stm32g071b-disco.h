@@ -68,6 +68,38 @@
 #define GPIO_SSD1306_RST   (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_HIGH | \
                             GPIO_OUTPUT_SET | GPIO_PORTA | GPIO_PIN6)
 
+/* GPIO definitions *********************************************************/
+
+/* IN1  - STLK_ON    - PA11
+ * IN2  - SMPS_ON    - PA12
+ *
+ * OUT1 - ENCC1      - PB10
+ * OUT2 - ENCC1      - PB11
+ * OUT3 - RD_CC1     - PB12
+ * OUT4 - EN_SMPS    - PA0
+ *
+ * INT1 - Door sense - PC8
+ */
+
+#define BOARD_NGPIOIN     (2)   /* GPIO input pins */
+#define BOARD_NGPIOOUT    (4)   /* GPIO input with interrupts */
+#define BOARD_NGPIOINT    (1)   /* GPIO output pins */
+
+#define GPIO_IN1          (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTA | GPIO_PIN11)
+#define GPIO_IN2          (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTA | GPIO_PIN12)
+
+#define GPIO_OUT1         (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_HIGH | \
+                           GPIO_OUTPUT_CLEAR | GPIO_PORTB | GPIO_PIN10)
+#define GPIO_OUT2         (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_HIGH | \
+                           GPIO_OUTPUT_CLEAR | GPIO_PORTB | GPIO_PIN11)
+#define GPIO_OUT3         (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_HIGH | \
+                           GPIO_OUTPUT_CLEAR | GPIO_PORTB | GPIO_PIN12)
+#define GPIO_OUT4         (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_HIGH | \
+                           GPIO_OUTPUT_CLEAR | GPIO_PORTA | GPIO_PIN0)
+
+#define GPIO_INT1         (GPIO_INPUT | GPIO_PULLUP | GPIO_EXTI |  \
+                           GPIO_PORTC | GPIO_PIN8)
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -124,6 +156,18 @@ int stm32_djoy_initialization(void);
 
 #ifdef CONFIG_SENSORS_INA226
 int stm32_ina226_initialization(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_gpio_initialize
+ *
+ * Description:
+ *   Initialize GPIO drivers
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_GPIO
+int stm32_gpio_initialize(void);
 #endif
 
 #endif /* __BOARDS_ARM_STM32F0L0G0_STM32G071B_DISCO_SRC_STM32G071B_DISCO_H */
