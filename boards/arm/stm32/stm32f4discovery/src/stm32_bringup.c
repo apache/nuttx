@@ -382,6 +382,14 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_INPUT_DJOYSTICK
+  ret = stm32_djoy_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "Failed to register djoystick driver: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_INPUT_NUNCHUCK
   /* Register the Nunchuck driver */
 
