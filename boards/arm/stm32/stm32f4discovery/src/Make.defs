@@ -175,6 +175,10 @@ ifeq ($(CONFIG_LCD_ST7789),y)
 CSRCS += stm32_st7789.c
 endif
 
+ifeq ($(CONFIG_INPUT_DJOYSTICK),y)
+  CSRCS += stm32_djoystick.c
+endif
+
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)
