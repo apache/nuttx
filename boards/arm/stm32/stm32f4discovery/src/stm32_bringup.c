@@ -54,6 +54,10 @@
 #  include <nuttx/usb/rndis.h>
 #endif
 
+#ifdef CONFIG_SENSORS_APDS9960
+#include "stm32_apds9960.h"
+#endif
+
 #include "stm32f4discovery.h"
 
 /* Conditional logic in stm32f4discovery.h will determine if certain features
@@ -417,6 +421,17 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_APDS9960
+  /* Register the APDS-9960 gesture sensor */
+
+  ret = board_apds9960_initialize(0, 1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_apds9960_initialize() failed: %d\n",
+             ret);
     }
 #endif
 
