@@ -105,8 +105,8 @@ void pm_initialize(void)
 #  else
           pm_staytimeout(i, state, CONFIG_PM_GOVERNOR_EXPLICIT_RELAX);
 #  endif
-#endif
         }
+#endif
     }
 }
 
