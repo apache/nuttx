@@ -123,6 +123,10 @@ CSRCS += stm32_ssd1289.c
 endif
 endif
 
+ifeq ($(CONFIG_LCD_APA102),y)
+CSRCS += stm32_apa102.c
+endif
+
 ifeq ($(CONFIG_LCD_SSD1351),y)
 CSRCS += stm32_ssd1351.c
 endif
