@@ -362,6 +362,13 @@ static void arm_dump_stack(const char *tag, uint32_t sp,
           size  -= remain;
 #endif
 
+#if CONFIG_ARCH_STACKDUMP_MAX_LENGTH > 0
+          if (size > CONFIG_ARCH_STACKDUMP_MAX_LENGTH)
+            {
+              size = CONFIG_ARCH_STACKDUMP_MAX_LENGTH;
+            }
+#endif
+
           arm_stackdump(base, base + size);
         }
     }

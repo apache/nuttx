@@ -339,6 +339,13 @@ static void riscv_dump_stack(const char *tag, uintptr_t sp,
           size  -= remain;
 #endif
 
+#if CONFIG_ARCH_STACKDUMP_MAX_LENGTH > 0
+          if (size > CONFIG_ARCH_STACKDUMP_MAX_LENGTH)
+            {
+              size = CONFIG_ARCH_STACKDUMP_MAX_LENGTH;
+            }
+#endif
+
           riscv_stackdump(base, base + size);
         }
     }
