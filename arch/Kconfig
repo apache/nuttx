@@ -837,6 +837,11 @@ config ARCH_STACKDUMP
 	---help---
 		Enable to do stack dumps after assertions
 
+config ARCH_STACKDUMP_MAX_LENGTH
+	int "The maximum length for dump stack on assertions"
+	depends on ARCH_STACKDUMP
+	default 0
+
 config DUMP_ON_EXIT
 	bool "Dump all tasks state on exit"
 	default n
