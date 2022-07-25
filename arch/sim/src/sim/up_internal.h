@@ -361,6 +361,7 @@ int sim_spi_uninitialize(struct spi_dev_s *dev);
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
+size_t sim_stack_check(void *alloc, size_t size);
 void up_stack_color(void *stackbase, size_t nbytes);
 #endif
 

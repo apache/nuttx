@@ -352,6 +352,7 @@ void arm64_usbuninitialize(void);
 /* Debug */
 
 #ifdef CONFIG_STACK_COLORATION
+size_t arm64_stack_check(void *stackbase, size_t nbytes);
 void arm64_stack_color(void *stackbase, size_t nbytes);
 #endif
 

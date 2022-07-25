@@ -42,14 +42,16 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static size_t do_stackcheck(uintptr_t alloc, size_t size);
-
 /****************************************************************************
  * Private Function
  ****************************************************************************/
 
 /****************************************************************************
- * Name: do_stackcheck
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: or1k_stack_check
  *
  * Description:
  *   Determine (approximately) how much stack has been used be searching the
@@ -65,7 +67,7 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size);
  *
  ****************************************************************************/
 
-static size_t do_stackcheck(uintptr_t alloc, size_t size)
+size_t or1k_stack_check(uintptr_t alloc, size_t size)
 {
   uintptr_t start;
   uintptr_t end;
@@ -96,10 +98,6 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size)
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Name: up_check_stack and friends
  *
  * Description:
@@ -117,7 +115,8 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size)
 
 size_t up_check_tcbstack(struct tcb_s *tcb)
 {
-  return do_stackcheck((uintptr_t)tcb->stack_base_ptr, tcb->adj_stack_size);
+  return or1k_stack_check((uintptr_t)tcb->stack_base_ptr,
+                          tcb->adj_stack_size);
 }
 
 ssize_t up_check_tcbstack_remain(struct tcb_s *tcb)
@@ -138,8 +137,8 @@ ssize_t up_check_stack_remain(void)
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 size_t up_check_intstack(void)
 {
-  return do_stackcheck((uintptr_t)&g_intstackalloc,
-                       (CONFIG_ARCH_INTERRUPTSTACK & ~3));
+  return or1k_stack_check((uintptr_t)&g_intstackalloc,
+                          (CONFIG_ARCH_INTERRUPTSTACK & ~3));
 }
 
 size_t up_check_intstack_remain(void)
