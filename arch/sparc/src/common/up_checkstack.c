@@ -44,7 +44,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: do_stackcheck
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: sparc_stack_check
  *
  * Description:
  *   Determine (approximately) how much stack has been used by searching the
@@ -60,7 +64,7 @@
  *
  ****************************************************************************/
 
-static size_t do_stackcheck(void *stackbase, size_t nbytes)
+size_t sparc_stack_check(void *stackbase, size_t nbytes)
 {
   uintptr_t start;
   uintptr_t end;
@@ -136,10 +140,6 @@ static size_t do_stackcheck(void *stackbase, size_t nbytes)
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Name: up_stack_color
  *
  * Description:
@@ -200,7 +200,7 @@ void up_stack_color(void *stackbase, size_t nbytes)
 
 size_t up_check_tcbstack(struct tcb_s *tcb)
 {
-  return do_stackcheck(tcb->stack_base_ptr, tcb->adj_stack_size);
+  return sparc_stack_check(tcb->stack_base_ptr, tcb->adj_stack_size);
 }
 
 ssize_t up_check_tcbstack_remain(struct tcb_s *tcb)
@@ -221,8 +221,8 @@ ssize_t up_check_stack_remain(void)
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 size_t up_check_intstack(void)
 {
-  return do_stackcheck((uintptr_t)&g_intstackalloc,
-                       STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
+  return sparc_stack_check((uintptr_t)&g_intstackalloc,
+                           STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
 }
 
 size_t up_check_intstack_remain(void)

@@ -329,6 +329,7 @@ void up_usbuninitialize(void);
 
 /* Debug ********************************************************************/
 #ifdef CONFIG_STACK_COLORATION
+size_t or1k_stack_check(uintptr_t alloc, size_t size);
 void up_stack_color(void *stackbase, size_t nbytes);
 #endif
 

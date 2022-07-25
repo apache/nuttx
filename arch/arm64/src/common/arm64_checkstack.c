@@ -46,14 +46,16 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static size_t do_stackcheck(void *stackbase, size_t nbytes);
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: do_stackcheck
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: arm64_stack_check
  *
  * Description:
  *   Determine (approximately) how much stack has been used by searching the
@@ -69,7 +71,7 @@ static size_t do_stackcheck(void *stackbase, size_t nbytes);
  *
  ****************************************************************************/
 
-static size_t do_stackcheck(void *stackbase, size_t nbytes)
+size_t arm64_stack_check(void *stackbase, size_t nbytes)
 {
   uintptr_t start;
   uintptr_t end;
@@ -145,10 +147,6 @@ static size_t do_stackcheck(void *stackbase, size_t nbytes)
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Name: arm64_stack_color
  *
  * Description:
@@ -200,7 +198,7 @@ void arm64_stack_color(void *stackbase, size_t nbytes)
 
 size_t up_check_tcbstack(struct tcb_s *tcb)
 {
-  return do_stackcheck(tcb->stack_base_ptr, tcb->adj_stack_size);
+  return arm64_stack_check(tcb->stack_base_ptr, tcb->adj_stack_size);
 }
 
 ssize_t up_check_tcbstack_remain(struct tcb_s *tcb)
@@ -222,11 +220,11 @@ ssize_t up_check_stack_remain(void)
 size_t up_check_intstack(void)
 {
 #ifdef CONFIG_SMP
-  return do_stackcheck((void *)arm64_intstack_alloc(),
-                        STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
+  return arm64_stack_check((void *)arm64_intstack_alloc(),
+                           STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
 #else
-  return do_stackcheck((void *)&g_interrupt_stack,
-                        STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
+  return arm64_stack_check((void *)&g_interrupt_stack,
+                           STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
 #endif
 }
 

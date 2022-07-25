@@ -172,5 +172,9 @@ void up_usbuninitialize(void);
 # define up_usbuninitialize()
 #endif
 
+#ifdef CONFIG_STACK_COLORATION
+size_t avr_stack_check(uintptr_t alloc, size_t size);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_AVR_SRC_COMMON_UP_INTERNAL_H */

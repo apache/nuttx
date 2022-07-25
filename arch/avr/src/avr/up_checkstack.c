@@ -45,10 +45,12 @@
  * Private Functions
  ****************************************************************************/
 
-static size_t do_stackcheck(uintptr_t alloc, size_t size);
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
- * Name: do_stackcheck
+ * Name: avr_stack_check
  *
  * Description:
  *   Determine (approximately) how much stack has been used be searching the
@@ -64,7 +66,7 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size);
  *
  ****************************************************************************/
 
-static size_t do_stackcheck(uintptr_t alloc, size_t size)
+size_t avr_stack_check(uintptr_t alloc, size_t size)
 {
   FAR uint8_t *ptr;
   size_t mark;
@@ -125,10 +127,6 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size)
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Name: up_check_stack and friends
  *
  * Description:
@@ -146,7 +144,8 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size)
 
 size_t up_check_tcbstack(FAR struct tcb_s *tcb)
 {
-  return do_stackcheck((uintptr_t)tcb->stack_base_ptr, tcb->adj_stack_size);
+  return avr_stack_check((uintptr_t)tcb->stack_base_ptr,
+                         tcb->adj_stack_size);
 }
 
 ssize_t up_check_tcbstack_remain(FAR struct tcb_s *tcb)
@@ -168,7 +167,7 @@ ssize_t up_check_stack_remain(void)
 size_t up_check_intstack(void)
 {
   uintptr_t start = (uintptr_t)g_intstackalloc;
-  return do_stackcheck(start, CONFIG_ARCH_INTERRUPTSTACK & ~3);
+  return avr_stack_check(start, CONFIG_ARCH_INTERRUPTSTACK & ~3);
 }
 
 size_t up_check_intstack_remain(void)
