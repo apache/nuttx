@@ -408,8 +408,6 @@ enum sensor_gps_vendor_type
 
 struct sensor_gps_vendor_bream
 {
-  int32_t lat;              /* Latitude. Unit is degree */
-  int32_t lon;              /* Longitude. Unit is degree */
   int32_t hmsl;             /* Height above mean sea level */
   int32_t gspeed;           /* Ground speed (two-dimensional) */
   uint32_t sacc;            /* Reserved. Speed accuracy estimate */
