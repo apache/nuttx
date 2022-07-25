@@ -171,11 +171,11 @@
 
 #define QSPICR_IDATSZ_SHIFT            (0)       /* Bits 0-15: IP data transfer size (IDATSZ) */
 #define QSPICR_IDATSZ_MASK             (0xffff << QSPICR_IDATSZ_SHIFT)
-#define QSPICR_IDATSZ(n)               ((n << QSPICR_IDATSZ_SHIFT) & QSPICR_IDATSZ_MASK)
+#define QSPICR_IDATSZ(n)               (((n) << QSPICR_IDATSZ_SHIFT) & QSPICR_IDATSZ_MASK)
                                                     /* Bits 16-23: Reserved */
 #define QSPICR_SEQID_SHIFT             (24)         /* Bits 24-27: Points to a sequence in the LUT (SEQID) */
 #define QSPICR_SEQID_MASK              (0x0f << QSPICR_SEQID_SHIFT)
-#define QSPICR_SEQID(n)                ((n << QSPICR_SEQID_SHIFT) & QSPICR_SEQID_MASK)
+#define QSPICR_SEQID(n)                (((n) << QSPICR_SEQID_SHIFT) & QSPICR_SEQID_MASK)
                                                     /* Bits 28-31: Reserved */
 
 /* Flash Memory Configuration Register (FLSHCR) */
@@ -185,18 +185,18 @@
 #define QSPI_FLSHCR_TCSS(n)               (n & QSPI_FLSHCR_TCSS_MASK)
 #define QSPI_FLSHCR_TCSH_SHIFT            (8)       /* Bits 8-11: Serial flash memory CS hold time (TCSH) */
 #define QSPI_FLSHCR_TCSH_MASK             (0x0f << QSPI_FLSHCR_TCSH_SHIFT)
-#define QSPI_FLSHCR_TCSH(n)               ((n << QSPI_FLSHCR_TCSH_SHIFT) & QSPI_FLSHCR_TCSH_MASK)
+#define QSPI_FLSHCR_TCSH(n)               (((n) << QSPI_FLSHCR_TCSH_SHIFT) & QSPI_FLSHCR_TCSH_MASK)
                                                     /* Bits 12-31: Reserved */
 
 /* Buffer n Configuration Register (BUFnCR) */
 
 #define QSPI_BUFCR_MSTRID_SHIFT           (0)       /* Bits 0-3: Master ID (MSTRID) */
 #define QSPI_BUFCR_MSTRID_MASK            (0x0f << QSPI_BUFCR_MSTRID_SHIFT)
-#define QSPI_BUFCR_MSTRID(n)              ((n << QSPI_BUFCR_MSTRID_SHIFT) & QSPI_BUFCR_MSTRID_MASK)
+#define QSPI_BUFCR_MSTRID(n)              (((n) << QSPI_BUFCR_MSTRID_SHIFT) & QSPI_BUFCR_MSTRID_MASK)
                                                     /* Bits 4-7: Reserved */
 #define QSPI_BUFCR_ADATSZ_SHIFT           (8)       /* Bits 8-13: AHB data transfer size (ADATSZ) */
 #define QSPI_BUFCR_ADATSZ_MASK            (0x3f << QSPI_BUFCR_ADATSZ_SHIFT)
-#define QSPI_BUFCR_ADATSZ(n)              ((n << QSPI_BUFCR_ADATSZ_SHIFT) & QSPI_BUFCR_ADATSZ_MASK)
+#define QSPI_BUFCR_ADATSZ(n)              (((n) << QSPI_BUFCR_ADATSZ_SHIFT) & QSPI_BUFCR_ADATSZ_MASK)
                                                     /* Bits 14-31: Reserved */
 #define QSPI_BUF3CR_ALLMST                (1 << 31) /* Bit 31: All master enable (ALLMST) */
 
@@ -235,10 +235,10 @@
 
 #define QSPI_DLLCRA_SLV_DLY_COARSE_SHIFT  (8)       /* Bits 8-11: Delay elements in each delay tap (SLV_DLY_COARSE) */
 #define QSPI_DLLCRA_SLV_DLY_COARSE_MASK   (0x0f << QSPI_DLLCRA_SLV_DLY_COARSE_SHIFT)
-#define QSPI_DLLCRA_SLV_DLY_COARSE(n)     ((n << QSPI_DLLCRA_SLV_DLY_COARSE_SHIFT) & QSPI_DLLCRA_SLV_DLY_COARSE_MASK)
+#define QSPI_DLLCRA_SLV_DLY_COARSE(n)     (((n) << QSPI_DLLCRA_SLV_DLY_COARSE_SHIFT) & QSPI_DLLCRA_SLV_DLY_COARSE_MASK)
 #define QSPI_DLLCRA_SLV_DLY_OFFSET_SHIFT  (12)      /* Bits 12-14: T/16 offset delay elements in incoming DQS (SLV_DLY_OFFSET) */
 #define QSPI_DLLCRA_SLV_DLY_OFFSET_MASK   (0x07 << QSPI_DLLCRA_SLV_DLY_OFFSET_SHIFT)
-#define QSPI_DLLCRA_SLV_DLY(n)     ((n << QSPI_DLLCRA_SLV_DLY_OFFSET_SHIFT) & QSPI_DLLCRA_SLV_DLY_OFFSET_MASK)
+#define QSPI_DLLCRA_SLV_DLY(n)     (((n) << QSPI_DLLCRA_SLV_DLY_OFFSET_SHIFT) & QSPI_DLLCRA_SLV_DLY_OFFSET_MASK)
                                                     /* Bit 15: Reserved */
 #define QSPI_DLLCRA_SLV_FINE_OFFSET_SHIFT (16)      /* Bits 16-19: Fine offset delay elements in incoming DQS (SLV_FINE_OFFSET) */
 #define QSPI_DLLCRA_SLV_FINE_OFFSET_MASK  (0x0f << QSPI_DLLCRA_SLV_FINE_OFFSET_SHIFT)
@@ -259,7 +259,7 @@
                                                     /* Bits 7-23: Reserved */
 #define QSPI_SMPR_DLLFSMPFA_SHIFT         (24)      /* Bits 24-26: Selects the nth tap provided by slave delay chain for flash memory A (DLLFSMPFA) */
 #define QSPI_SMPR_DLLFSMPFA_MASK          (0x07 << QSPI_SMPR_DLLFSMPFA_SHIFT)
-#define QSPI_SMPR_DLLFSMPFA(n)            ((n << QSPI_SMPR_DLLFSMPFA_SHIFT) & QSPI_SMPR_DLLFSMPFA_MASK)
+#define QSPI_SMPR_DLLFSMPFA(n)            (((n) << QSPI_SMPR_DLLFSMPFA_SHIFT) & QSPI_SMPR_DLLFSMPFA_MASK)
                                                     /* Bits 27-31: Reserved */
 
 /* RX Buffer Status Register (RBSR) */
@@ -274,7 +274,7 @@
 
 #define QSPI_RBCT_WMRK_SHIFT              (0)       /* Bits 0-6: RX buffer watermark (WMRK) */
 #define QSPI_RBCT_WMRK_MASK               (0x7f << QSPI_RBCT_WMRK_SHIFT)
-#define QSPI_RBCT_WMRK(n)                 ((n << QSPI_RBCT_WMRK_SHIFT) & QSPI_RBCT_WMRK_MASK)
+#define QSPI_RBCT_WMRK(n)                 (((n) << QSPI_RBCT_WMRK_SHIFT) & QSPI_RBCT_WMRK_MASK)
                                                     /* Bit 7: Reserved */
 #define QSPI_RBCT_RXBRD                   (1 << 8)  /* Bit 8: RX buffer readout (RXBRD) */
 #  define QSPI_RBCT_RXBRD_AHB             (0 << 8)  /*        RX buffer content is read using the AHB bus registers */
@@ -307,7 +307,7 @@
 
 #define QSPI_TBCT_WMRK_SHIFT              (0)       /* Bits 0-4: Watermark for TX buffer (WMRK) */
 #define QSPI_TBCT_WMRK_MASK               (0x1f << QSPI_TBCT_WMRK_SHIFT)
-#define QSPI_TBCT_WMRK(n)                 ((n << QSPI_TBCT_WMRK_SHIFT) & QSPI_TBCT_WMRK_MASK)
+#define QSPI_TBCT_WMRK(n)                 (((n) << QSPI_TBCT_WMRK_SHIFT) & QSPI_TBCT_WMRK_MASK)
                                                     /* Bits 5-31: Reserved */
 
 /* Status Register (SR) */
@@ -392,7 +392,7 @@
                                                     /* Bits 0-9: Reserved */
 #define QSPI_SFAD_TPAD_SHIFT              (10)      /* Bits 10-31: Top address for serial flash memory An/Bn (TPADAn/TPADBn) */
 #define QSPI_SFAD_TPAD_MASK               (0x3fffff << QSPI_SFAD_TPAD_SHIFT)
-#define QSPI_SFAD_TPAD(n)                 ((n << QSPI_SFAD_TPAD_SHIFT) & QSPI_SFAD_TPAD_MASK)
+#define QSPI_SFAD_TPAD(n)                 (((n) << QSPI_SFAD_TPAD_SHIFT) & QSPI_SFAD_TPAD_MASK)
 
 /* RX Buffer Data Register (RBDRn, n=0,...,63) */
 
@@ -415,7 +415,7 @@
 
 #define QSPI_LUT_OPRND0_SHIFT             (0)       /* Bits 0-7: Operand for INSTR0 (OPRND0) */
 #define QSPI_LUT_OPRND0_MASK              (0xff << QSPI_LUT_OPRND0_SHIFT)
-#define QSPI_LUT_OPRND0(n)                ((n << QSPI_LUT_OPRND0_SHIFT) & QSPI_LUT_OPRND0_MASK)
+#define QSPI_LUT_OPRND0(n)                (((n) << QSPI_LUT_OPRND0_SHIFT) & QSPI_LUT_OPRND0_MASK)
 #define QSPI_LUT_PAD0_SHIFT               (8)       /* Bits 8-9: Pad information for INSTR0 (PAD0) */
 #define QSPI_LUT_PAD0_MASK                (0x03 << QSPI_LUT_PAD0_SHIFT)
 #  define QSPI_LUT_PAD0_1                 (0x00 << QSPI_LUT_PAD0_SHIFT) /* 1 Pad */ 
@@ -424,11 +424,11 @@
 
 #define QSPI_LUT_INSTR0_SHIFT             (10)      /* Bits 10-15: Instruction 0 (INSTR0) */
 #define QSPI_LUT_INSTR0_MASK              (0x3f << QSPI_LUT_INSTR0_SHIFT)
-#define QSPI_LUT_INSTR0(n)                ((n << QSPI_LUT_INSTR0_SHIFT) & QSPI_LUT_INSTR0_MASK)
+#define QSPI_LUT_INSTR0(n)                (((n) << QSPI_LUT_INSTR0_SHIFT) & QSPI_LUT_INSTR0_MASK)
 
 #define QSPI_LUT_OPRND1_SHIFT             (16)       /* Bits 16-23: Operand for INSTR1 (OPRND1) */
 #define QSPI_LUT_OPRND1_MASK              (0xff << QSPI_LUT_OPRND1_SHIFT)
-#define QSPI_LUT_OPRND1(n)                ((n << QSPI_LUT_OPRND1_SHIFT) & QSPI_LUT_OPRND1_MASK)
+#define QSPI_LUT_OPRND1(n)                (((n) << QSPI_LUT_OPRND1_SHIFT) & QSPI_LUT_OPRND1_MASK)
 #define QSPI_LUT_PAD1_SHIFT               (24)       /* Bits 24-25: Pad information for INSTR1 (PAD1) */
 #define QSPI_LUT_PAD1_MASK                (0x03 << QSPI_LUT_PAD1_SHIFT)
 #  define QSPI_LUT_PAD1_1                 (0x00 << QSPI_LUT_PAD1_SHIFT) /* 1 Pad */ 
@@ -437,7 +437,7 @@
 
 #define QSPI_LUT_INSTR1_SHIFT             (26)      /* Bits 26-31: Instruction 1 (INSTR1) */
 #define QSPI_LUT_INSTR1_MASK              (0x3f << QSPI_LUT_INSTR1_SHIFT)
-#define QSPI_LUT_INSTR1(n)                ((n << QSPI_LUT_INSTR1_SHIFT) & QSPI_LUT_INSTR1_MASK)
+#define QSPI_LUT_INSTR1(n)                (((n) << QSPI_LUT_INSTR1_SHIFT) & QSPI_LUT_INSTR1_MASK)
 
 /* External Memory Base Address */
 

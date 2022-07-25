@@ -91,7 +91,7 @@
                                           /* Bits 2-7: Reserved */
 #define STM_CR_CPS_SHIFT        (8)       /* Bits 8-15: Counter Prescaler (CPS) */
 #define STM_CR_CPS_MASK         (0xff << STM_CR_CPS_SHIFT)
-#define STM_CR_CPS(n)           ((n << STM_CR_CPS_SHIFT) & STM_CR_CPS_MASK)
+#define STM_CR_CPS(n)           (((n) << STM_CR_CPS_SHIFT) & STM_CR_CPS_MASK)
                                           /* Bits 16-31: Reserved */
 
 /* Count Register (CNT) */
