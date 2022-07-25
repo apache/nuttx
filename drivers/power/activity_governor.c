@@ -508,7 +508,7 @@ static enum pm_state_e governor_checkstate(int domain)
 
   for (index = 0; index < pdomstate->recommended; index++)
     {
-      if (dq_count(&pdom->wakelock[index]) != 0)
+      if (!dq_empty(&pdom->wakelock[index]))
         {
           pdomstate->recommended = index;
           break;
@@ -567,7 +567,7 @@ static void governor_timer(int domain)
   pdomstate = &g_pm_activity_governor.domain_states[domain];
   state     = pdom->state;
 
-  if (state < PM_SLEEP && !dq_count(&pdom->wakelock[state]))
+  if (state < PM_SLEEP && dq_empty(&pdom->wakelock[state]))
     {
       sclock_t delay = pmtick[state] +
                        pdomstate->btime -
