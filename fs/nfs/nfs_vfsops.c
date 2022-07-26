@@ -140,7 +140,8 @@ static int     nfs_truncate(FAR struct file *filep, off_t length);
 static int     nfs_opendir(FAR struct inode *mountpt,
                    FAR const char *relpath, FAR struct fs_dirent_s *dir);
 static int     nfs_readdir(FAR struct inode *mountpt,
-                           FAR struct fs_dirent_s *dir);
+                           FAR struct fs_dirent_s *dir,
+                           FAR struct dirent *entry);
 static int     nfs_rewinddir(FAR struct inode *mountpt,
                    FAR struct fs_dirent_s *dir);
 static void    nfs_decode_args(FAR struct nfs_mount_parameters *nprmt,
@@ -1478,7 +1479,8 @@ errout_with_semaphore:
  ****************************************************************************/
 
 static int nfs_readdir(FAR struct inode *mountpt,
-                       FAR struct fs_dirent_s *dir)
+                       FAR struct fs_dirent_s *dir,
+                       FAR struct dirent *entry)
 {
   FAR struct nfsmount *nmp;
   struct file_handle fhandle;
@@ -1658,12 +1660,12 @@ next_entry:
       length = NAME_MAX;
     }
 
-  memcpy(dir->fd_dir.d_name, name, length);
-  dir->fd_dir.d_name[length] = '\0';
-  finfo("name: \"%s\"\n", dir->fd_dir.d_name);
+  memcpy(entry->d_name, name, length);
+  entry->d_name[length] = '\0';
+  finfo("name: \"%s\"\n", entry->d_name);
 
-  if (strcmp(dir->fd_dir.d_name, ".") == 0 ||
-      strcmp(dir->fd_dir.d_name, "..") == 0)
+  if (strcmp(entry->d_name, ".") == 0 ||
+      strcmp(entry->d_name, "..") == 0)
     {
       goto next_entry; /* Skip . and .. */
     }
@@ -1675,7 +1677,7 @@ next_entry:
   fhandle.length = (uint32_t)dir->u.nfs.nfs_fhsize;
   memcpy(&fhandle.handle, dir->u.nfs.nfs_fhandle, fhandle.length);
 
-  ret = nfs_lookup(nmp, dir->fd_dir.d_name, &fhandle, &obj_attributes, NULL);
+  ret = nfs_lookup(nmp, entry->d_name, &fhandle, &obj_attributes, NULL);
   if (ret != OK)
     {
       ferr("ERROR: nfs_lookup failed: %d\n", ret);
@@ -1692,35 +1694,35 @@ next_entry:
       break;
 
     case NFSOCK:       /* Socket */
-      dir->fd_dir.d_type = DTYPE_SOCK;
+      entry->d_type = DTYPE_SOCK;
       break;
 
     case NFLNK:        /* Symbolic link */
-      dir->fd_dir.d_type = DTYPE_LINK;
+      entry->d_type = DTYPE_LINK;
       break;
 
     case NFREG:        /* Regular file */
-      dir->fd_dir.d_type = DTYPE_FILE;
+      entry->d_type = DTYPE_FILE;
       break;
 
     case NFDIR:        /* Directory */
-      dir->fd_dir.d_type = DTYPE_DIRECTORY;
+      entry->d_type = DTYPE_DIRECTORY;
       break;
 
     case NFBLK:        /* Block special device file */
-      dir->fd_dir.d_type = DTYPE_BLK;
+      entry->d_type = DTYPE_BLK;
       break;
 
     case NFFIFO:       /* Named FIFO */
-      dir->fd_dir.d_type = DTYPE_FIFO;
+      entry->d_type = DTYPE_FIFO;
       break;
 
     case NFCHR:        /* Character special device file */
-      dir->fd_dir.d_type = DTYPE_CHR;
+      entry->d_type = DTYPE_CHR;
       break;
     }
 
-  finfo("type: %d->%d\n", (int)tmp, dir->fd_dir.d_type);
+  finfo("type: %d->%d\n", (int)tmp, entry->d_type);
 
 errout_with_semaphore:
   nfs_semgive(nmp);

@@ -136,7 +136,8 @@ static int  tmpfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 static int  tmpfs_closedir(FAR struct inode *mountpt,
               FAR struct fs_dirent_s *dir);
 static int  tmpfs_readdir(FAR struct inode *mountpt,
-              FAR struct fs_dirent_s *dir);
+              FAR struct fs_dirent_s *dir,
+              FAR struct dirent *entry);
 static int  tmpfs_rewinddir(FAR struct inode *mountpt,
               FAR struct fs_dirent_s *dir);
 static int  tmpfs_bind(FAR struct inode *blkdriver, FAR const void *data,
@@ -1880,7 +1881,8 @@ static int tmpfs_closedir(FAR struct inode *mountpt,
  ****************************************************************************/
 
 static int tmpfs_readdir(FAR struct inode *mountpt,
-                         FAR struct fs_dirent_s *dir)
+                         FAR struct fs_dirent_s *dir,
+                         FAR struct dirent *entry)
 {
   FAR struct tmpfs_directory_s *tdo;
   unsigned int index;
@@ -1923,18 +1925,18 @@ static int tmpfs_readdir(FAR struct inode *mountpt,
         {
           /* A directory */
 
-           dir->fd_dir.d_type = DTYPE_DIRECTORY;
+           entry->d_type = DTYPE_DIRECTORY;
         }
       else /* to->to_type == TMPFS_REGULAR) */
         {
           /* A regular file */
 
-           dir->fd_dir.d_type = DTYPE_FILE;
+           entry->d_type = DTYPE_FILE;
         }
 
       /* Copy the entry name */
 
-      strlcpy(dir->fd_dir.d_name, tde->tde_name, sizeof(dir->fd_dir.d_name));
+      strlcpy(entry->d_name, tde->tde_name, sizeof(entry->d_name));
 
       /* Save the index for next time */
 

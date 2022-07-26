@@ -110,7 +110,8 @@ static int     userfs_opendir(FAR struct inode *mountpt,
 static int     userfs_closedir(FAR struct inode *mountpt,
                  FAR struct fs_dirent_s *dir);
 static int     userfs_readdir(FAR struct inode *mountpt,
-                 FAR struct fs_dirent_s *dir);
+                 FAR struct fs_dirent_s *dir,
+                 FAR struct dirent *entry);
 static int     userfs_rewinddir(FAR struct inode *mountpt,
                  FAR struct fs_dirent_s *dir);
 
@@ -1236,7 +1237,8 @@ static int userfs_closedir(FAR struct inode *mountpt,
  ****************************************************************************/
 
 static int userfs_readdir(FAR struct inode *mountpt,
-                          FAR struct fs_dirent_s *dir)
+                          FAR struct fs_dirent_s *dir,
+                          FAR struct dirent *entry)
 {
   FAR struct userfs_state_s *priv;
   FAR struct userfs_readdir_request_s *req;
@@ -1302,7 +1304,7 @@ static int userfs_readdir(FAR struct inode *mountpt,
   /* Return the dirent */
 
   DEBUGASSERT(dir != NULL);
-  memcpy(&dir->fd_dir, &resp->entry, sizeof(struct dirent));
+  memcpy(entry, &resp->entry, sizeof(struct dirent));
   return resp->ret;
 }
 

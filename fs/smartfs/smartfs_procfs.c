@@ -118,7 +118,8 @@ static int      smartfs_dup(FAR const struct file *oldp,
 static int      smartfs_opendir(const char *relpath,
                   FAR struct fs_dirent_s *dir);
 static int      smartfs_closedir(FAR struct fs_dirent_s *dir);
-static int      smartfs_readdir(FAR struct fs_dirent_s *dir);
+static int      smartfs_readdir(FAR struct fs_dirent_s *dir,
+                                FAR struct dirent *entry);
 static int      smartfs_rewinddir(FAR struct fs_dirent_s *dir);
 
 static int      smartfs_stat(FAR const char *relpath, FAR struct stat *buf);
@@ -601,7 +602,8 @@ static int smartfs_closedir(FAR struct fs_dirent_s *dir)
  *
  ****************************************************************************/
 
-static int smartfs_readdir(struct fs_dirent_s *dir)
+static int smartfs_readdir(FAR struct fs_dirent_s *dir,
+                           FAR struct dirent *entry)
 {
   FAR struct smartfs_level1_s *level1;
   int ret;
@@ -640,9 +642,9 @@ static int smartfs_readdir(struct fs_dirent_s *dir)
               return -ENOENT;
             }
 
-          dir->fd_dir.d_type = DTYPE_DIRECTORY;
-          strlcpy(dir->fd_dir.d_name, level1->mount->fs_blkdriver->i_name,
-                  sizeof(dir->fd_dir.d_name));
+          entry->d_type = DTYPE_DIRECTORY;
+          strlcpy(entry->d_name, level1->mount->fs_blkdriver->i_name,
+                  sizeof(entry->d_name));
 
           /* Advance to next entry */
 
@@ -653,17 +655,17 @@ static int smartfs_readdir(struct fs_dirent_s *dir)
         {
           /* Listing the contents of a specific mount */
 
-          dir->fd_dir.d_type = g_direntry[level1->base.index].type;
-          strlcpy(dir->fd_dir.d_name, g_direntry[level1->base.index++].name,
-                  sizeof(dir->fd_dir.d_name));
+          entry->d_type = g_direntry[level1->base.index].type;
+          strlcpy(entry->d_name, g_direntry[level1->base.index++].name,
+                  sizeof(entry->d_name));
         }
       else if (level1->base.level == 3)
         {
           /* Listing the contents of a specific entry */
 
-          dir->fd_dir.d_type = g_direntry[level1->base.index].type;
-          strlcpy(dir->fd_dir.d_name, g_direntry[level1->direntry].name,
-                  sizeof(dir->fd_dir.d_name));
+          entry->d_type = g_direntry[level1->base.index].type;
+          strlcpy(entry->d_name, g_direntry[level1->direntry].name,
+                  sizeof(entry->d_name));
           level1->base.index++;
         }
 

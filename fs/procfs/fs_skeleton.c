@@ -102,7 +102,8 @@ static int     skel_dup(FAR const struct file *oldp,
 static int     skel_opendir(FAR const char *relpath,
                  FAR struct fs_dirent_s *dir);
 static int     skel_closedir(FAR struct fs_dirent_s *dir);
-static int     skel_readdir(FAR struct fs_dirent_s *dir);
+static int     skel_readdir(FAR struct fs_dirent_s *dir,
+                            FAR struct dirent *entry);
 static int     skel_rewinddir(FAR struct fs_dirent_s *dir);
 
 static int     skel_stat(FAR const char *relpath, FAR struct stat *buf);
@@ -399,7 +400,8 @@ static int skel_closedir(FAR struct fs_dirent_s *dir)
  *
  ****************************************************************************/
 
-static int skel_readdir(FAR struct fs_dirent_s *dir)
+static int skel_readdir(FAR struct fs_dirent_s *dir,
+                        FAR struct dirent *entry)
 {
   FAR struct skel_level1_s *level1;
   char  filename[16];
@@ -439,8 +441,8 @@ static int skel_readdir(FAR struct fs_dirent_s *dir)
 
       /* TODO:  Specify the type of entry */
 
-      dir->fd_dir.d_type = DTYPE_FILE;
-      strlcpy(dir->fd_dir.d_name, filename, sizeof(dir->fd_dir.d_name));
+      entry->d_type = DTYPE_FILE;
+      strlcpy(entry->d_name, filename, sizeof(entry->d_name));
 
       /* Set up the next directory entry offset.  NOTE that we could use the
        * standard f_pos instead of our own private index.
