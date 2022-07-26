@@ -65,7 +65,8 @@ static int     binfs_fstat(FAR const struct file *filep,
 static int     binfs_opendir(struct inode *mountpt, const char *relpath,
                              struct fs_dirent_s *dir);
 static int     binfs_readdir(FAR struct inode *mountpt,
-                             FAR struct fs_dirent_s *dir);
+                             FAR struct fs_dirent_s *dir,
+                             FAR struct dirent *entry);
 static int     binfs_rewinddir(FAR struct inode *mountpt,
                                FAR struct fs_dirent_s *dir);
 
@@ -301,7 +302,9 @@ static int binfs_opendir(struct inode *mountpt, const char *relpath,
  *
  ****************************************************************************/
 
-static int binfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
+static int binfs_readdir(FAR struct inode *mountpt,
+                         FAR struct fs_dirent_s *dir,
+                         FAR struct dirent *entry)
 {
   FAR const char *name;
   unsigned int index;
@@ -325,8 +328,8 @@ static int binfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
       /* Save the filename and file type */
 
       finfo("Entry %d: \"%s\"\n", index, name);
-      dir->fd_dir.d_type = DTYPE_FILE;
-      strlcpy(dir->fd_dir.d_name, name, sizeof(dir->fd_dir.d_name));
+      entry->d_type = DTYPE_FILE;
+      strlcpy(entry->d_name, name, sizeof(entry->d_name));
 
       /* The application list is terminated by an entry with a NULL name.
        * Therefore, there is at least one more entry in the list.

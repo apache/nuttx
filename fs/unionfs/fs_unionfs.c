@@ -163,7 +163,8 @@ static int     unionfs_opendir(struct inode *mountpt, const char *relpath,
 static int     unionfs_closedir(FAR struct inode *mountpt,
                  FAR struct fs_dirent_s *dir);
 static int     unionfs_readdir(FAR struct inode *mountpt,
-                 FAR struct fs_dirent_s *dir);
+                 FAR struct fs_dirent_s *dir,
+                 FAR struct dirent *entry);
 static int     unionfs_rewinddir(FAR struct inode *mountpt,
                  FAR struct fs_dirent_s *dir);
 
@@ -1669,7 +1670,9 @@ static int unionfs_closedir(FAR struct inode *mountpt,
  * Name: unionfs_readdir
  ****************************************************************************/
 
-static int unionfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
+static int unionfs_readdir(FAR struct inode *mountpt,
+                           FAR struct fs_dirent_s *dir,
+                           FAR struct dirent *entry)
 {
   FAR struct unionfs_inode_s *ui;
   FAR struct unionfs_mountpt_s *um;
@@ -1718,11 +1721,11 @@ static int unionfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
        * directories.
        */
 
-      strlcpy(dir->fd_dir.d_name, um->um_prefix, sizeof(dir->fd_dir.d_name));
+      strlcpy(entry->d_name, um->um_prefix, sizeof(entry->d_name));
 
       /* Describe this as a read only directory */
 
-      dir->fd_dir.d_type = DTYPE_DIRECTORY;
+      entry->d_type = DTYPE_DIRECTORY;
 
       /* Increment the index to file system 2 (maybe) */
 
@@ -1760,7 +1763,7 @@ static int unionfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
         {
           /* Read the directory entry */
 
-          ret = ops->readdir(um->um_node, fu->fu_lower[fu->fu_ndx]);
+          ret = ops->readdir(um->um_node, fu->fu_lower[fu->fu_ndx], entry);
 
           /* Did the read operation fail because we reached the end of the
            * directory?  In that case, the error would be -ENOENT.  If we
@@ -1792,12 +1795,12 @@ static int unionfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
                    * be multiple directories.
                    */
 
-                  strlcpy(dir->fd_dir.d_name, um->um_prefix,
-                          sizeof(dir->fd_dir.d_name));
+                  strlcpy(entry->d_name, um->um_prefix,
+                          sizeof(entry->d_name));
 
                   /* Describe this as a read only directory */
 
-                  dir->fd_dir.d_type = DTYPE_DIRECTORY;
+                  entry->d_type = DTYPE_DIRECTORY;
 
                   /* Mark the end of the directory listing */
 
@@ -1869,7 +1872,7 @@ static int unionfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
                   /* Then try the read operation again */
 
-                  ret = ops->readdir(um->um_node, fu->fu_lower[1]);
+                  ret = ops->readdir(um->um_node, fu->fu_lower[1], entry);
                 }
             }
 
@@ -1887,8 +1890,7 @@ static int unionfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
                * is not a duplicate.
                */
 
-              relpath = unionfs_relpath(fu->fu_relpath,
-                                        fu->fu_lower[1]->fd_dir.d_name);
+              relpath = unionfs_relpath(fu->fu_relpath, entry->d_name);
               if (relpath)
                 {
                   int tmp;
@@ -1915,13 +1917,6 @@ static int unionfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
             }
         }
       while (duplicate);
-
-      /* Copy the return information into the dirent structure that the
-       * application will see.
-       */
-
-      memcpy(&dir->fd_dir, &fu->fu_lower[fu->fu_ndx]->fd_dir,
-             sizeof(struct dirent));
     }
 
   return ret;

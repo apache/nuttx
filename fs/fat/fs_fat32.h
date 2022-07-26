@@ -1054,8 +1054,9 @@ EXTERN int    fat_allocatedirentry(struct fat_mountpt_s *fs,
                                    struct fat_dirinfo_s *dirinfo);
 EXTERN int    fat_freedirentry(struct fat_mountpt_s *fs,
                                struct fat_dirseq_s *seq);
-EXTERN int    fat_dirname2path(struct fat_mountpt_s *fs,
-                               struct fs_dirent_s *dir);
+EXTERN int    fat_dirname2path(FAR struct fat_mountpt_s *fs,
+                               FAR struct fs_dirent_s *dir,
+                               FAR struct dirent *entry);
 
 /* File creation and removal helpers */
 

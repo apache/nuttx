@@ -99,7 +99,8 @@ static int cxd56_powermgr_procfs_dup(const struct file *oldp,
 static int cxd56_powermgr_procfs_opendir(const char *relpath,
                                          struct fs_dirent_s *dir);
 static int cxd56_powermgr_procfs_closedir(struct fs_dirent_s *dir);
-static int cxd56_powermgr_procfs_readdir(struct fs_dirent_s *dir);
+static int cxd56_powermgr_procfs_readdir(struct fs_dirent_s *dir,
+                                         struct dirent *entry);
 static int cxd56_powermgr_procfs_rewinddir(struct fs_dirent_s *dir);
 static int cxd56_powermgr_procfs_stat(const char *relpath,
                                       struct stat *buf);
@@ -749,7 +750,8 @@ static int cxd56_powermgr_procfs_closedir(struct fs_dirent_s *dir)
  *
  ****************************************************************************/
 
-static int cxd56_powermgr_procfs_readdir(struct fs_dirent_s *dir)
+static int cxd56_powermgr_procfs_readdir(struct fs_dirent_s *dir,
+                                         struct dirent *entry)
 {
   struct cxd56_powermgr_procfs_dir_s *procfs;
 
@@ -765,9 +767,9 @@ static int cxd56_powermgr_procfs_readdir(struct fs_dirent_s *dir)
       return -ENOENT;
     }
 
-  dir->fd_dir.d_type = DTYPE_FILE;
-  strncpy(dir->fd_dir.d_name, g_powermg_procfs_dir[procfs->index],
-            strlen(g_powermg_procfs_dir[procfs->index])+1);
+  entry->d_type = DTYPE_FILE;
+  strncpy(entry->d_name, g_powermg_procfs_dir[procfs->index],
+          strlen(g_powermg_procfs_dir[procfs->index])+1);
   procfs->index++;
 
   return OK;

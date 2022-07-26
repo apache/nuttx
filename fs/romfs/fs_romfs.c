@@ -66,7 +66,8 @@ static int     romfs_opendir(FAR struct inode *mountpt,
                              FAR const char *relpath,
                              FAR struct fs_dirent_s *dir);
 static int     romfs_readdir(FAR struct inode *mountpt,
-                             FAR struct fs_dirent_s *dir);
+                             FAR struct fs_dirent_s *dir,
+                             FAR struct dirent *entry);
 static int     romfs_rewinddir(FAR struct inode *mountpt,
                                FAR struct fs_dirent_s *dir);
 
@@ -811,7 +812,8 @@ errout_with_semaphore:
  ****************************************************************************/
 
 static int romfs_readdir(FAR struct inode *mountpt,
-                         FAR struct fs_dirent_s *dir)
+                         FAR struct fs_dirent_s *dir,
+                         FAR struct dirent *entry)
 {
   FAR struct romfs_mountpt_s *rm;
 #ifndef CONFIG_FS_ROMFS_CACHE_NODE
@@ -870,8 +872,8 @@ static int romfs_readdir(FAR struct inode *mountpt,
 
 #ifdef CONFIG_FS_ROMFS_CACHE_NODE
       next = (*dir->u.romfs.fr_currnode)->rn_next;
-      strlcpy(dir->fd_dir.d_name, (*dir->u.romfs.fr_currnode)->rn_name,
-              sizeof(dir->fd_dir.d_name));
+      strlcpy(entry->d_name, (*dir->u.romfs.fr_currnode)->rn_name,
+              sizeof(entry->d_name));
       dir->u.romfs.fr_currnode++;
 #else
       /* Parse the directory entry */
@@ -887,7 +889,7 @@ static int romfs_readdir(FAR struct inode *mountpt,
       /* Save the filename */
 
       ret = romfs_parsefilename(rm, dir->u.romfs.fr_curroffset,
-                                dir->fd_dir.d_name);
+                                entry->d_name);
       if (ret < 0)
         {
           ferr("ERROR: romfs_parsefilename failed: %d\n", ret);
@@ -903,17 +905,17 @@ static int romfs_readdir(FAR struct inode *mountpt,
 
       if (IS_DIRECTORY(next))
         {
-          dir->fd_dir.d_type = DTYPE_DIRECTORY;
+          entry->d_type = DTYPE_DIRECTORY;
           break;
         }
       else if (IS_FILE(next))
         {
-          dir->fd_dir.d_type = DTYPE_FILE;
+          entry->d_type = DTYPE_FILE;
           break;
         }
       else if (IS_SOFTLINK(next))
         {
-          dir->fd_dir.d_type = DTYPE_LINK;
+          entry->d_type = DTYPE_LINK;
           break;
         }
     }

@@ -83,7 +83,8 @@ static int     hostfs_opendir(FAR struct inode *mountpt,
 static int     hostfs_closedir(FAR struct inode *mountpt,
                         FAR struct fs_dirent_s *dir);
 static int     hostfs_readdir(FAR struct inode *mountpt,
-                        FAR struct fs_dirent_s *dir);
+                        FAR struct fs_dirent_s *dir,
+                        FAR struct dirent *entry);
 static int     hostfs_rewinddir(FAR struct inode *mountpt,
                         FAR struct fs_dirent_s *dir);
 
@@ -917,7 +918,8 @@ static int hostfs_closedir(FAR struct inode *mountpt,
  ****************************************************************************/
 
 static int hostfs_readdir(FAR struct inode *mountpt,
-                          FAR struct fs_dirent_s *dir)
+                          FAR struct fs_dirent_s *dir,
+                          FAR struct dirent *entry)
 {
   FAR struct hostfs_mountpt_s *fs;
   int ret;
@@ -940,7 +942,7 @@ static int hostfs_readdir(FAR struct inode *mountpt,
 
   /* Call the host OS's readdir function */
 
-  ret = host_readdir(dir->u.hostfs.fs_dir, &dir->fd_dir);
+  ret = host_readdir(dir->u.hostfs.fs_dir, entry);
 
   hostfs_semgive(fs);
   return ret;

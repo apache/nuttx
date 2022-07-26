@@ -73,7 +73,8 @@ static int     smartfs_opendir(FAR struct inode *mountpt,
                         FAR const char *relpath,
                         FAR struct fs_dirent_s *dir);
 static int     smartfs_readdir(FAR struct inode *mountpt,
-                        FAR struct fs_dirent_s *dir);
+                        FAR struct fs_dirent_s *dir,
+                        FAR struct dirent *dentry);
 static int     smartfs_rewinddir(FAR struct inode *mountpt,
                        FAR struct fs_dirent_s *dir);
 
@@ -1252,7 +1253,9 @@ errout_with_semaphore:
  *
  ****************************************************************************/
 
-static int smartfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
+static int smartfs_readdir(FAR struct inode *mountpt,
+                           FAR struct fs_dirent_s *dir,
+                           FAR struct dirent *dentry)
 {
   struct smartfs_mountpt_s *fs;
   int                   ret;
@@ -1325,17 +1328,16 @@ static int smartfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
           if ((entry->flags & SMARTFS_DIRENT_TYPE) ==
               SMARTFS_DIRENT_TYPE_DIR)
             {
-              dir->fd_dir.d_type = DTYPE_DIRECTORY;
+              dentry->d_type = DTYPE_DIRECTORY;
             }
           else
             {
-              dir->fd_dir.d_type = DTYPE_FILE;
+              dentry->d_type = DTYPE_FILE;
             }
 
           /* Copy the entry name to dirent */
 
-          strlcpy(dir->fd_dir.d_name, entry->name,
-                  sizeof(dir->fd_dir.d_name));
+          strlcpy(dentry->d_name, entry->name, sizeof(dentry->d_name));
 
           /* Now advance to the next entry */
 

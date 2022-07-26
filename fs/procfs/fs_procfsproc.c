@@ -225,7 +225,8 @@ static int     proc_dup(FAR const struct file *oldp,
 static int     proc_opendir(const char *relpath,
                  FAR struct fs_dirent_s *dir);
 static int     proc_closedir(FAR struct fs_dirent_s *dir);
-static int     proc_readdir(FAR struct fs_dirent_s *dir);
+static int     proc_readdir(FAR struct fs_dirent_s *dir,
+                            FAR struct dirent *entry);
 static int     proc_rewinddir(FAR struct fs_dirent_s *dir);
 
 static int     proc_stat(FAR const char *relpath, FAR struct stat *buf);
@@ -1920,7 +1921,8 @@ static int proc_closedir(FAR struct fs_dirent_s *dir)
  *
  ****************************************************************************/
 
-static int proc_readdir(struct fs_dirent_s *dir)
+static int proc_readdir(FAR struct fs_dirent_s *dir,
+                        FAR struct dirent *entry)
 {
   FAR struct proc_dir_s *procdir;
   FAR const struct proc_node_s *node = NULL;
@@ -1984,8 +1986,8 @@ static int proc_readdir(struct fs_dirent_s *dir)
 
       /* Save the filename and file type */
 
-      dir->fd_dir.d_type = node->dtype;
-      strlcpy(dir->fd_dir.d_name, node->name, sizeof(dir->fd_dir.d_name));
+      entry->d_type = node->dtype;
+      strlcpy(entry->d_name, node->name, sizeof(entry->d_name));
 
       /* Set up the next directory entry offset.  NOTE that we could use the
        * standard f_pos instead of our own private index.

@@ -26,7 +26,6 @@
 
 #include <stdint.h>
 #include <string.h>
-#include <dirent.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -97,10 +96,12 @@ errout:
  *
  ****************************************************************************/
 
-int nxffs_readdir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
+int nxffs_readdir(FAR struct inode *mountpt,
+                  FAR struct fs_dirent_s *dir,
+                  FAR struct dirent *dentry)
 {
   FAR struct nxffs_volume_s *volume;
-  FAR struct nxffs_entry_s entry;
+  struct nxffs_entry_s entry;
   off_t offset;
   int ret;
 
@@ -132,8 +133,8 @@ int nxffs_readdir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
       /* Return the filename and file type */
 
       finfo("Offset %jd: \"%s\"\n", (intmax_t)entry.hoffset, entry.name);
-      dir->fd_dir.d_type = DTYPE_FILE;
-      strlcpy(dir->fd_dir.d_name, entry.name, sizeof(dir->fd_dir.d_name));
+      dentry->d_type = DTYPE_FILE;
+      strlcpy(dentry->d_name, entry.name, sizeof(dentry->d_name));
 
       /* Discard this entry and set the next offset. */
 

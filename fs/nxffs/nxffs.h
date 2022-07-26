@@ -1109,7 +1109,9 @@ int nxffs_truncate(FAR struct file *filep, off_t length);
 
 int nxffs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
                   FAR struct fs_dirent_s *dir);
-int nxffs_readdir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir);
+int nxffs_readdir(FAR struct inode *mountpt,
+                  FAR struct fs_dirent_s *dir,
+                  FAR struct dirent *entry);
 int nxffs_rewinddir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir);
 
 int nxffs_bind(FAR struct inode *blkdriver, FAR const void *data,

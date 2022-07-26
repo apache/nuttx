@@ -97,7 +97,8 @@ static int     littlefs_opendir(FAR struct inode *mountpt,
 static int     littlefs_closedir(FAR struct inode *mountpt,
                                  FAR struct fs_dirent_s *dir);
 static int     littlefs_readdir(FAR struct inode *mountpt,
-                                FAR struct fs_dirent_s *dir);
+                                FAR struct fs_dirent_s *dir,
+                                FAR struct dirent *entry);
 static int     littlefs_rewinddir(FAR struct inode *mountpt,
                                   FAR struct fs_dirent_s *dir);
 
@@ -820,7 +821,8 @@ static int littlefs_closedir(FAR struct inode *mountpt,
  ****************************************************************************/
 
 static int littlefs_readdir(FAR struct inode *mountpt,
-                            FAR struct fs_dirent_s *dir)
+                            FAR struct fs_dirent_s *dir,
+                            FAR struct dirent *entry)
 {
   FAR struct littlefs_mountpt_s *fs;
   FAR struct lfs_dir *priv;
@@ -845,14 +847,14 @@ static int littlefs_readdir(FAR struct inode *mountpt,
     {
       if (info.type == LFS_TYPE_REG)
         {
-          dir->fd_dir.d_type = DTYPE_FILE;
+          entry->d_type = DTYPE_FILE;
         }
       else
         {
-          dir->fd_dir.d_type = DTYPE_DIRECTORY;
+          entry->d_type = DTYPE_DIRECTORY;
         }
 
-      strlcpy(dir->fd_dir.d_name, info.name, sizeof(dir->fd_dir.d_name));
+      strlcpy(entry->d_name, info.name, sizeof(entry->d_name));
     }
   else if (ret == 0)
     {
