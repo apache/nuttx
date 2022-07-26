@@ -101,7 +101,8 @@ static int  spiffs_opendir(FAR struct inode *mountpt,
 static int  spiffs_closedir(FAR struct inode *mountpt,
               FAR struct fs_dirent_s *dir);
 static int  spiffs_readdir(FAR struct inode *mountpt,
-              FAR struct fs_dirent_s *dir);
+              FAR struct fs_dirent_s *dir,
+              FAR struct dirent *dentry);
 static int  spiffs_rewinddir(FAR struct inode *mountpt,
               FAR struct fs_dirent_s *dir);
 static int  spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
@@ -258,11 +259,7 @@ static int spiffs_readdir_callback(FAR struct spiffs_s *fs,
                                 SPIFFS_PH_FLAG_NDXDELE)) ==
       (SPIFFS_PH_FLAG_DELET | SPIFFS_PH_FLAG_NDXDELE))
     {
-      FAR struct fs_dirent_s *dir = (FAR struct fs_dirent_s *)user_var;
-      FAR struct dirent *entryp;
-
-      DEBUGASSERT(dir != NULL);
-      entryp = &dir->fd_dir;
+      FAR struct dirent *entryp = user_var;
 
 #ifdef CONFIG_SPIFFS_LEADING_SLASH
       /* Skip the leading '/'. */
@@ -1265,7 +1262,7 @@ static int spiffs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
  ****************************************************************************/
 
 static int spiffs_closedir(FAR struct inode *mountpt,
-                          FAR struct fs_dirent_s *dir)
+                           FAR struct fs_dirent_s *dir)
 {
   finfo("mountpt=%p dir=%p\n",  mountpt, dir);
   DEBUGASSERT(mountpt != NULL && dir != NULL);
@@ -1280,7 +1277,8 @@ static int spiffs_closedir(FAR struct inode *mountpt,
  ****************************************************************************/
 
 static int spiffs_readdir(FAR struct inode *mountpt,
-                         FAR struct fs_dirent_s *dir)
+                          FAR struct fs_dirent_s *dir,
+                          FAR struct dirent *dentry)
 {
   FAR struct spiffs_s *fs;
   int16_t blkndx;
@@ -1303,7 +1301,7 @@ static int spiffs_readdir(FAR struct inode *mountpt,
 
   ret = spiffs_foreach_objlu(fs, dir->u.spiffs.block, dir->u.spiffs.entry,
                              SPIFFS_VIS_NO_WRAP, 0, spiffs_readdir_callback,
-                             NULL, dir, &blkndx, &entry);
+                             NULL, dentry, &blkndx, &entry);
   if (ret >= 0)
     {
       dir->u.spiffs.block = blkndx;

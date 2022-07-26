@@ -69,7 +69,8 @@ static int     fat_truncate(FAR struct file *filep, off_t length);
 static int     fat_opendir(FAR struct inode *mountpt,
                  FAR const char *relpath, FAR struct fs_dirent_s *dir);
 static int     fat_readdir(FAR struct inode *mountpt,
-                 FAR struct fs_dirent_s *dir);
+                 FAR struct fs_dirent_s *dir,
+                 FAR struct dirent *entry);
 static int     fat_rewinddir(FAR struct inode *mountpt,
                  FAR struct fs_dirent_s *dir);
 
@@ -1892,7 +1893,8 @@ errout_with_semaphore:
  ****************************************************************************/
 
 static int fat_readdir(FAR struct inode *mountpt,
-                       FAR struct fs_dirent_s *dir)
+                       FAR struct fs_dirent_s *dir,
+                       FAR struct dirent *entry)
 {
   FAR struct fat_mountpt_s *fs;
   unsigned int dirindex;
@@ -1928,7 +1930,7 @@ static int fat_readdir(FAR struct inode *mountpt,
 
   /* Read the next directory entry */
 
-  dir->fd_dir.d_name[0] = '\0';
+  entry->d_name[0] = '\0';
   found = false;
 
   while (dir->u.fat.fd_currsector && !found)
@@ -1974,7 +1976,7 @@ static int fat_readdir(FAR struct inode *mountpt,
            * several directory entries.
            */
 
-          ret = fat_dirname2path(fs, dir);
+          ret = fat_dirname2path(fs, dir, entry);
           if (ret == OK)
             {
               /* The name was successfully extracted.  Re-read the
@@ -2005,11 +2007,11 @@ static int fat_readdir(FAR struct inode *mountpt,
 
               if ((attribute & FATATTR_DIRECTORY) == 0)
                 {
-                  dir->fd_dir.d_type = DTYPE_FILE;
+                  entry->d_type = DTYPE_FILE;
                 }
               else
                 {
-                  dir->fd_dir.d_type = DTYPE_DIRECTORY;
+                  entry->d_type = DTYPE_DIRECTORY;
                 }
 
               /* Mark the entry found.  We will set up the next directory

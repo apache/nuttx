@@ -133,7 +133,8 @@ static int     part_procfs_dup(FAR const struct file *oldp,
 static int     part_procfs_opendir(const char *relpath,
                  FAR struct fs_dirent_s *dir);
 static int     part_procfs_closedir(FAR struct fs_dirent_s *dir);
-static int     part_procfs_readdir(FAR struct fs_dirent_s *dir);
+static int     part_procfs_readdir(FAR struct fs_dirent_s *dir,
+                                   FAR struct dirent *entry);
 static int     part_procfs_rewinddir(FAR struct fs_dirent_s *dir);
 #endif
 

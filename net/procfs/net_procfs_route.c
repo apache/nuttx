@@ -161,7 +161,8 @@ static int     route_dup(FAR const struct file *oldp,
 static int     route_opendir(const char *relpath,
                  FAR struct fs_dirent_s *dir);
 static int     route_closedir(FAR struct fs_dirent_s *dir);
-static int     route_readdir(FAR struct fs_dirent_s *dir);
+static int     route_readdir(FAR struct fs_dirent_s *dir,
+                             FAR struct dirent *entry);
 static int     route_rewinddir(FAR struct fs_dirent_s *dir);
 
 static int     route_stat(FAR const char *relpath, FAR struct stat *buf);
@@ -685,7 +686,8 @@ static int route_closedir(FAR struct fs_dirent_s *dir)
  *
  ****************************************************************************/
 
-static int route_readdir(struct fs_dirent_s *dir)
+static int route_readdir(FAR struct fs_dirent_s *dir,
+                         FAR struct dirent *entry)
 {
   FAR struct route_dir_s *level2;
   FAR const char *dname;
@@ -722,8 +724,8 @@ static int route_readdir(struct fs_dirent_s *dir)
 
   /* Save the filename and file type */
 
-  dir->fd_dir.d_type = DTYPE_FILE;
-  strncpy(dir->fd_dir.d_name, dname, NAME_MAX + 1);
+  entry->d_type = DTYPE_FILE;
+  strncpy(entry->d_name, dname, NAME_MAX + 1);
 
   /* Set up the next directory entry offset.  NOTE that we could use the
    * standard f_pos instead of our own private index.

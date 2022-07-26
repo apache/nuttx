@@ -75,7 +75,7 @@ struct procfs_operations
   int     (*opendir)(FAR const char *relpath,
                      FAR struct fs_dirent_s *dir);
   int     (*closedir)(FAR struct fs_dirent_s *dir);
-  int     (*readdir)(FAR struct fs_dirent_s *dir);
+  int     (*readdir)(FAR struct fs_dirent_s *dir, FAR struct dirent *entry);
   int     (*rewinddir)(FAR struct fs_dirent_s *dir);
 
   /* Operations on paths */

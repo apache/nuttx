@@ -144,7 +144,8 @@ static int      cromfs_fstat(FAR const struct file *filep,
 static int      cromfs_opendir(FAR struct inode *mountpt,
                   FAR const char *relpath, FAR struct fs_dirent_s *dir);
 static int      cromfs_readdir(FAR struct inode *mountpt,
-                  FAR struct fs_dirent_s *dir);
+                  FAR struct fs_dirent_s *dir,
+                  FAR struct dirent *entry);
 static int      cromfs_rewinddir(FAR struct inode *mountpt,
                   FAR struct fs_dirent_s *dir);
 
@@ -1230,7 +1231,9 @@ static int cromfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
  *
  ****************************************************************************/
 
-static int cromfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
+static int cromfs_readdir(FAR struct inode *mountpt,
+                          FAR struct fs_dirent_s *dir,
+                          FAR struct dirent *entry)
 {
   FAR const struct cromfs_volume_s *fs;
   FAR const struct cromfs_node_s *node;
@@ -1289,53 +1292,53 @@ static int cromfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
   name = (FAR char *)cromfs_offset2addr(fs, node->cn_name);
   finfo("Entry %" PRIu32 ": %s\n", offset, name);
-  strlcpy(dir->fd_dir.d_name, name, sizeof(dir->fd_dir.d_name));
+  strlcpy(entry->d_name, name, sizeof(entry->d_name));
 
   switch (node->cn_mode & S_IFMT)
     {
       case S_IFDIR:  /* Directory */
-        dir->fd_dir.d_type = DTYPE_DIRECTORY;
+        entry->d_type = DTYPE_DIRECTORY;
         break;
 
       case S_IFREG:  /* Regular file */
-        dir->fd_dir.d_type = DTYPE_FILE;
+        entry->d_type = DTYPE_FILE;
         break;
 
       case S_IFIFO:  /* FIFO */
-        dir->fd_dir.d_type = DTYPE_FIFO;
+        entry->d_type = DTYPE_FIFO;
         break;
 
       case S_IFCHR:  /* Character driver */
-        dir->fd_dir.d_type = DTYPE_CHR;
+        entry->d_type = DTYPE_CHR;
         break;
 
       case S_IFBLK:  /* Block driver */
-        dir->fd_dir.d_type = DTYPE_BLK;
+        entry->d_type = DTYPE_BLK;
         break;
 
       case S_IFMQ:   /* Message queue */
-        dir->fd_dir.d_type = DTYPE_MQ;
+        entry->d_type = DTYPE_MQ;
         break;
 
       case S_IFSEM:  /* Semaphore */
-        dir->fd_dir.d_type = DTYPE_SEM;
+        entry->d_type = DTYPE_SEM;
         break;
 
       case S_IFSHM:  /* Shared memory */
-        dir->fd_dir.d_type = DTYPE_SHM;
+        entry->d_type = DTYPE_SHM;
         break;
 
       case S_IFMTD:  /* MTD driver */
-        dir->fd_dir.d_type = DTYPE_MTD;
+        entry->d_type = DTYPE_MTD;
         break;
 
       case S_IFSOCK: /* Socket */
-        dir->fd_dir.d_type = DTYPE_SOCK;
+        entry->d_type = DTYPE_SOCK;
         break;
 
       default:
         DEBUGPANIC();
-        dir->fd_dir.d_type = DTYPE_UNKNOWN;
+        entry->d_type = DTYPE_UNKNOWN;
         break;
     }
 

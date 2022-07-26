@@ -33,6 +33,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <time.h>
+#include <dirent.h>
 
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
@@ -309,7 +310,7 @@ struct mountpt_operations
   int     (*closedir)(FAR struct inode *mountpt,
             FAR struct fs_dirent_s *dir);
   int     (*readdir)(FAR struct inode *mountpt,
-            FAR struct fs_dirent_s *dir);
+            FAR struct fs_dirent_s *dir, FAR struct dirent *entry);
   int     (*rewinddir)(FAR struct inode *mountpt,
             FAR struct fs_dirent_s *dir);
 

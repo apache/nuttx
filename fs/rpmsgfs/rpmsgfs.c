@@ -113,7 +113,8 @@ static int     rpmsgfs_opendir(FAR struct inode *mountpt,
 static int     rpmsgfs_closedir(FAR struct inode *mountpt,
                                 FAR struct fs_dirent_s *dir);
 static int     rpmsgfs_readdir(FAR struct inode *mountpt,
-                               FAR struct fs_dirent_s *dir);
+                               FAR struct fs_dirent_s *dir,
+                               FAR struct dirent *entry);
 static int     rpmsgfs_rewinddir(FAR struct inode *mountpt,
                                  FAR struct fs_dirent_s *dir);
 
@@ -970,7 +971,8 @@ static int rpmsgfs_closedir(FAR struct inode *mountpt,
  ****************************************************************************/
 
 static int rpmsgfs_readdir(FAR struct inode *mountpt,
-                           FAR struct fs_dirent_s *dir)
+                           FAR struct fs_dirent_s *dir,
+                           FAR struct dirent *entry)
 {
   FAR struct rpmsgfs_mountpt_s *fs;
   int ret;
@@ -994,7 +996,7 @@ static int rpmsgfs_readdir(FAR struct inode *mountpt,
   /* Call the host OS's readdir function */
 
   ret = rpmsgfs_client_readdir(fs->handle,
-                               dir->u.rpmsgfs.fs_dir, &dir->fd_dir);
+                               dir->u.rpmsgfs.fs_dir, entry);
 
   rpmsgfs_semgive(fs);
   return ret;

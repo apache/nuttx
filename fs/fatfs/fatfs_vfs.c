@@ -107,7 +107,8 @@ static int     fatfs_opendir(FAR struct inode *mountpt,
 static int     fatfs_closedir(FAR struct inode *mountpt,
                               FAR struct fs_dirent_s *dir);
 static int     fatfs_readdir(FAR struct inode *mountpt,
-                             FAR struct fs_dirent_s *dir);
+                             FAR struct fs_dirent_s *dir,
+                             FAR struct dirent *entry);
 static int     fatfs_rewinddir(FAR struct inode *mountpt,
                                FAR struct fs_dirent_s *dir);
 
@@ -921,7 +922,8 @@ static int fatfs_closedir(FAR struct inode *mountpt,
  ****************************************************************************/
 
 static int fatfs_readdir(FAR struct inode *mountpt,
-                         FAR struct fs_dirent_s *dir)
+                         FAR struct fs_dirent_s *dir,
+                         FAR struct dirent *entry)
 {
   FAR struct fatfs_mountpt_s *fs;
   FAR DIR *dp;
@@ -952,14 +954,14 @@ static int fatfs_readdir(FAR struct inode *mountpt,
 
   if (fno.fattrib & AM_DIR)
     {
-      dir->fd_dir.d_type = DTYPE_DIRECTORY;
+      entry->d_type = DTYPE_DIRECTORY;
     }
   else
     {
-      dir->fd_dir.d_type = DTYPE_FILE;
+      entry->d_type = DTYPE_FILE;
     }
 
-  strlcpy(dir->fd_dir.d_name, fno.fname, sizeof(dir->fd_dir.d_name));
+  strlcpy(entry->d_name, fno.fname, sizeof(entry->d_name));
 
 errsem:
   fatfs_semgive(fs);

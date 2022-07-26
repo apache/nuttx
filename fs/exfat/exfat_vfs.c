@@ -100,7 +100,8 @@ static int     exfatfs_opendir(FAR struct inode *mountpt,
 static int     exfatfs_closedir(FAR struct inode *mountpt,
                                 FAR struct fs_dirent_s *dir);
 static int     exfatfs_readdir(FAR struct inode *mountpt,
-                               FAR struct fs_dirent_s *dir);
+                               FAR struct fs_dirent_s *dir,
+                               FAR struct dirent *entry);
 static int     exfatfs_rewinddir(FAR struct inode *mountpt,
                                  FAR struct fs_dirent_s *dir);
 
@@ -920,7 +921,8 @@ static int exfatfs_closedir(FAR struct inode *mountpt,
  ****************************************************************************/
 
 static int exfatfs_readdir(FAR struct inode *mountpt,
-                           FAR struct fs_dirent_s *dir)
+                           FAR struct fs_dirent_s *dir,
+                           FAR struct dirent *entry)
 {
   FAR struct exfatfs_mountpt_s *fs;
   FAR struct exfatfs_dir_s *priv;
@@ -944,14 +946,14 @@ static int exfatfs_readdir(FAR struct inode *mountpt,
     {
       if (priv->entry->attrib == EXFAT_ATTRIB_DIR)
         {
-          dir->fd_dir.d_type = DTYPE_DIRECTORY;
+          entry->d_type = DTYPE_DIRECTORY;
         }
       else
         {
-          dir->fd_dir.d_type = DTYPE_FILE;
+          entry->d_type = DTYPE_FILE;
         }
 
-      strlcpy(dir->fd_dir.d_name, priv->entry->name, sizeof(dir->fd_dir.d_name));
+      strlcpy(entry->d_name, priv->entry->name, sizeof(entry->d_name));
       node = priv->entry;
       priv->entry = exfat_readdir(&priv->it);
       exfatfs_release_node(&fs->ef, node);

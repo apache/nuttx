@@ -206,6 +206,7 @@ static off_t seek_mountptdir(FAR struct file *filep, off_t offset)
 {
   FAR struct fs_dirent_s *dir = filep->f_priv;
   FAR struct inode *inode = dir->fd_root;
+  struct dirent entry;
   off_t pos;
 
   /* Determine a starting point for the seek. If the seek
@@ -239,7 +240,7 @@ static off_t seek_mountptdir(FAR struct file *filep, off_t offset)
     {
       int ret;
 
-      ret = inode->u.i_mops->readdir(inode, dir);
+      ret = inode->u.i_mops->readdir(inode, dir, &entry);
       if (ret < 0)
         {
           return ret;
@@ -258,7 +259,8 @@ static off_t seek_mountptdir(FAR struct file *filep, off_t offset)
  * Name: read_pseudodir
  ****************************************************************************/
 
-static int read_pseudodir(FAR struct fs_dirent_s *dir)
+static int read_pseudodir(FAR struct fs_dirent_s *dir,
+                          FAR struct dirent *entry)
 {
   FAR struct inode *prev;
 
@@ -275,51 +277,51 @@ static int read_pseudodir(FAR struct fs_dirent_s *dir)
 
   /* Copy the inode name into the dirent structure */
 
-  strlcpy(dir->fd_dir.d_name, dir->u.pseudo.fd_next->i_name,
-          sizeof(dir->fd_dir.d_name));
+  strlcpy(entry->d_name, dir->u.pseudo.fd_next->i_name,
+          sizeof(entry->d_name));
 
   /* If the node has file operations, we will say that it is a file. */
 
-  dir->fd_dir.d_type = DTYPE_UNKNOWN;
+  entry->d_type = DTYPE_UNKNOWN;
   if (dir->u.pseudo.fd_next->u.i_ops != NULL)
     {
 #ifndef CONFIG_DISABLE_MOUNTPOINT
       if (INODE_IS_BLOCK(dir->u.pseudo.fd_next))
         {
-           dir->fd_dir.d_type = DTYPE_BLK;
+          entry->d_type = DTYPE_BLK;
         }
       else if (INODE_IS_MTD(dir->u.pseudo.fd_next))
         {
-           dir->fd_dir.d_type = DTYPE_MTD;
+          entry->d_type = DTYPE_MTD;
         }
       else if (INODE_IS_MOUNTPT(dir->u.pseudo.fd_next))
         {
-           dir->fd_dir.d_type = DTYPE_DIRECTORY;
+          entry->d_type = DTYPE_DIRECTORY;
         }
       else
 #endif
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
       if (INODE_IS_SOFTLINK(dir->u.pseudo.fd_next))
         {
-           dir->fd_dir.d_type = DTYPE_LINK;
+          entry->d_type = DTYPE_LINK;
         }
       else
 #endif
       if (INODE_IS_DRIVER(dir->u.pseudo.fd_next))
         {
-           dir->fd_dir.d_type = DTYPE_CHR;
+          entry->d_type = DTYPE_CHR;
         }
       else if (INODE_IS_NAMEDSEM(dir->u.pseudo.fd_next))
         {
-           dir->fd_dir.d_type = DTYPE_SEM;
+          entry->d_type = DTYPE_SEM;
         }
       else if (INODE_IS_MQUEUE(dir->u.pseudo.fd_next))
         {
-           dir->fd_dir.d_type = DTYPE_MQ;
+          entry->d_type = DTYPE_MQ;
         }
       else if (INODE_IS_SHM(dir->u.pseudo.fd_next))
         {
-           dir->fd_dir.d_type = DTYPE_SHM;
+          entry->d_type = DTYPE_SHM;
         }
     }
 
@@ -331,7 +333,7 @@ static int read_pseudodir(FAR struct fs_dirent_s *dir)
   if (dir->u.pseudo.fd_next->i_child != NULL ||
       dir->u.pseudo.fd_next->u.i_ops == NULL)
     {
-      dir->fd_dir.d_type = DTYPE_DIRECTORY;
+      entry->d_type = DTYPE_DIRECTORY;
     }
 
   /* Now get the inode to visit next time that readdir() is called */
@@ -431,14 +433,15 @@ static ssize_t dir_read(FAR struct file *filep, FAR char *buffer,
 #ifndef CONFIG_DISABLE_MOUNTPOINT
   if (INODE_IS_MOUNTPT(inode))
     {
-      ret = inode->u.i_mops->readdir(inode, dir);
+      ret = inode->u.i_mops->readdir(inode, dir,
+                                     (FAR struct dirent *)buffer);
     }
   else
 #endif
     {
       /* The node is part of the root pseudo file system */
 
-      ret = read_pseudodir(dir);
+      ret = read_pseudodir(dir, (FAR struct dirent *)buffer);
     }
 
   /* ret < 0 is an error. Special case: ret = -ENOENT is end of file */
@@ -454,8 +457,7 @@ static ssize_t dir_read(FAR struct file *filep, FAR char *buffer,
     }
 
   filep->f_pos++;
-  memcpy(buffer, &dir->fd_dir, sizeof(dir->fd_dir));
-  return sizeof(dir->fd_dir);
+  return sizeof(struct dirent);
 }
 
 static off_t dir_seek(FAR struct file *filep, off_t offset, int whence)

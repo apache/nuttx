@@ -327,12 +327,6 @@ struct fs_dirent_s
 #endif
 #endif /* !CONFIG_DISABLE_MOUNTPOINT */
   } u;
-
-  /* In any event, this the actual struct dirent that is returned by
-   * readdir
-   */
-
-  struct dirent fd_dir;              /* Populated when readdir is called */
 };
 
 /****************************************************************************

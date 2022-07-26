@@ -106,7 +106,8 @@ static int     pm_dup(FAR const struct file *oldp,
 static int     pm_opendir(FAR const char *relpath,
                           FAR struct fs_dirent_s *dir);
 static int     pm_closedir(FAR struct fs_dirent_s *dir);
-static int     pm_readdir(FAR struct fs_dirent_s *dir);
+static int     pm_readdir(FAR struct fs_dirent_s *dir,
+                          FAR struct dirent *entry);
 static int     pm_rewinddir(FAR struct fs_dirent_s *dir);
 
 static int     pm_stat(FAR const char *relpath, FAR struct stat *buf);
@@ -490,7 +491,8 @@ static int pm_closedir(FAR struct fs_dirent_s *dir)
  *
  ****************************************************************************/
 
-static int pm_readdir(FAR struct fs_dirent_s *dir)
+static int pm_readdir(FAR struct fs_dirent_s *dir,
+                      FAR struct dirent *entry)
 {
   FAR struct procfs_dir_priv_s *level1;
   int index;
@@ -514,8 +516,8 @@ static int pm_readdir(FAR struct fs_dirent_s *dir)
   domain = index / ARRAY_SIZE(g_pm_files);
   fpos   = index % ARRAY_SIZE(g_pm_files);
 
-  dir->fd_dir.d_type = DTYPE_FILE;
-  snprintf(dir->fd_dir.d_name, NAME_MAX + 1, "%s%d",
+  entry->d_type = DTYPE_FILE;
+  snprintf(entry->d_name, NAME_MAX + 1, "%s%d",
            g_pm_files[fpos].name, domain);
 
   level1->index++;
