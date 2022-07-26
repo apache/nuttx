@@ -9,7 +9,6 @@ config ARMV7A_MEMCHR
 	select MACHINE_OPTS_ARMV7A
 	select LIBC_ARCH_MEMCHR
 	depends on ARCH_TOOLCHAIN_GNU
-	depends on ARM_THUMB
 	---help---
 		Enable optimized ARMv7-A specific memchr() library function
 
@@ -17,7 +16,6 @@ config ARMV7A_MEMCPY
 	bool "Enable optimized memcpy() for ARMv7-A"
 	select LIBC_ARCH_MEMCPY
 	depends on ARCH_TOOLCHAIN_GNU
-	depends on ARM_THUMB
 	---help---
 		Enable optimized ARMv7-A specific memcpy() library function
 
@@ -27,7 +25,6 @@ config ARMV7A_MEMMOVE
 	select MACHINE_OPTS_ARMV7A
 	select LIBC_ARCH_MEMMOVE
 	depends on ARCH_TOOLCHAIN_GNU
-	depends on ARM_THUMB
 	---help---
 		Enable optimized ARMv7-A specific memmove() library function
 
@@ -55,7 +52,6 @@ config ARMV7A_STRLEN
 	select MACHINE_OPTS_ARMV7A
 	select LIBC_ARCH_STRLEN
 	depends on ARCH_TOOLCHAIN_GNU
-	depends on ARM_THUMB
 	---help---
 		Enable optimized ARMv7-A specific strlen() library function
 
