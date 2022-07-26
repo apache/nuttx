@@ -514,20 +514,30 @@ static void arm64_assert(void)
 
   if (CURRENT_REGS || (running_task())->flink == NULL)
     {
+ #if CONFIG_BOARD_RESET_ON_ASSERT >= 1
+      board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
+#endif
+
       /* Disable interrupts on this CPU */
 
       up_irq_save();
 
-      for (; ; )
-        {
 #ifdef CONFIG_SMP
-          /* Try (again) to stop activity on other CPUs */
+      /* Try (again) to stop activity on other CPUs */
 
-          spin_trylock(&g_cpu_irqlock);
+      spin_trylock(&g_cpu_irqlock);
 #endif
 
+      for (; ; )
+        {
           up_mdelay(250);
         }
+    }
+  else
+    {
+#if CONFIG_BOARD_RESET_ON_ASSERT >= 2
+      board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
+#endif
     }
 }
 
