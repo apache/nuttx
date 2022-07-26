@@ -298,18 +298,20 @@ static void _up_assert(int errorcode)
 
   if (up_interrupt_context() || sched_idletask())
     {
+#if CONFIG_BOARD_RESET_ON_ASSERT >= 1
+      board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
+#endif
+
       up_irq_save();
+
+#ifdef CONFIG_SMP
+      /* Try (again) to stop activity on other CPUs */
+
+      spin_trylock(&g_cpu_irqlock);
+#endif
+
       for (; ; )
         {
-#ifdef CONFIG_SMP
-          /* Try (again) to stop activity on other CPUs */
-
-          spin_trylock(&g_cpu_irqlock);
-#endif
-
-#if CONFIG_BOARD_RESET_ON_ASSERT >= 1
-          board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
-#endif
         }
     }
   else
@@ -317,7 +319,6 @@ static void _up_assert(int errorcode)
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 2
       board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
 #endif
-      exit(errorcode);
     }
 }
 

@@ -456,21 +456,22 @@ static void arm_assert(void)
 
   if (CURRENT_REGS || (running_task())->flink == NULL)
     {
+#if CONFIG_BOARD_RESET_ON_ASSERT >= 1
+      board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
+#endif
+
       /* Disable interrupts on this CPU */
 
       up_irq_save();
 
+#ifdef CONFIG_SMP
+      /* Try (again) to stop activity on other CPUs */
+
+      spin_trylock(&g_cpu_irqlock);
+#endif
+
       for (; ; )
         {
-#ifdef CONFIG_SMP
-          /* Try (again) to stop activity on other CPUs */
-
-          spin_trylock(&g_cpu_irqlock);
-#endif
-
-#if CONFIG_BOARD_RESET_ON_ASSERT >= 1
-          board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
-#endif
 #ifdef CONFIG_ARCH_LEDS
           /* FLASH LEDs a 2Hz */
 
