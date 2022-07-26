@@ -148,13 +148,6 @@
 #define INODE_SET_SOFTLINK(i) INODE_SET_TYPE(i,FSNODEFLAG_TYPE_SOFTLINK)
 #define INODE_SET_SOCKET(i)   INODE_SET_TYPE(i,FSNODEFLAG_TYPE_SOCKET)
 
-/* Mountpoint fd_flags values */
-
-#define DIRENTFLAGS_PSEUDONODE 1
-
-#define DIRENT_SETPSEUDONODE(f) do (f) |= DIRENTFLAGS_PSEUDONODE; while (0)
-#define DIRENT_ISPSEUDONODE(f) (((f) & DIRENTFLAGS_PSEUDONODE) != 0)
-
 /* The status change flags.
  * These should be or-ed together to figure out what want to change.
  */

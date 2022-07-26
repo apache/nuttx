@@ -941,8 +941,6 @@ static int littlefs_opendir(FAR struct inode *mountpt,
       goto errout;
     }
 
-  dir->fd_position = lfs_dir_tell(&fs->lfs, priv);
-
   littlefs_semgive(fs);
   dir->u.littlefs = priv;
   return OK;
@@ -1019,7 +1017,6 @@ static int littlefs_readdir(FAR struct inode *mountpt,
   ret = littlefs_convert_result(lfs_dir_read(&fs->lfs, priv, &info));
   if (ret > 0)
     {
-      dir->fd_position = lfs_dir_tell(&fs->lfs, priv);
       if (info.type == LFS_TYPE_REG)
         {
           dir->fd_dir.d_type = DTYPE_FILE;
@@ -1068,10 +1065,6 @@ static int littlefs_rewinddir(FAR struct inode *mountpt,
     }
 
   ret = littlefs_convert_result(lfs_dir_rewind(&fs->lfs, priv));
-  if (ret >= 0)
-    {
-      dir->fd_position = lfs_dir_tell(&fs->lfs, priv);
-    }
 
   littlefs_semgive(fs);
   return ret;

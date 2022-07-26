@@ -116,24 +116,7 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
 
       return block_proxy(filep, path, oflags);
     }
-  else
 #endif
-
-  /* Verify that the inode is either a "normal" character driver or a
-   * mountpoint.  We specifically "special" inodes (semaphores, message
-   * queues, shared memory).
-   */
-
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-  if ((!INODE_IS_DRIVER(inode) && !INODE_IS_MOUNTPT(inode)) ||
-      !inode->u.i_ops)
-#else
-  if (!INODE_IS_DRIVER(inode) || !inode->u.i_ops)
-#endif
-    {
-      ret = -ENXIO;
-      goto errout_with_inode;
-    }
 
   /* Make sure that the inode supports the requested access */
 
@@ -155,19 +138,29 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
    * because it may also be closed that many times.
    */
 
-  ret = OK;
-  if (inode->u.i_ops->open)
+  if (oflags & O_DIRECTORY)
     {
+      ret = dir_allocate(filep, desc.relpath);
+    }
 #ifndef CONFIG_DISABLE_MOUNTPOINT
-      if (INODE_IS_MOUNTPT(inode))
+  else if (INODE_IS_MOUNTPT(inode))
+    {
+      if (inode->u.i_mops->open != NULL)
         {
           ret = inode->u.i_mops->open(filep, desc.relpath, oflags, mode);
         }
-      else
+    }
 #endif
+  else if (INODE_IS_DRIVER(inode))
+    {
+      if (inode->u.i_ops->open != NULL)
         {
           ret = inode->u.i_ops->open(filep);
         }
+    }
+  else
+    {
+      ret = -ENXIO;
     }
 
   if (ret < 0)
@@ -232,6 +225,16 @@ static int nx_vopen(FAR const char *path, int oflags, va_list ap)
 
 int inode_checkflags(FAR struct inode *inode, int oflags)
 {
+  if (INODE_IS_PSEUDODIR(inode))
+    {
+      return OK;
+    }
+
+  if (inode->u.i_ops == NULL)
+    {
+      return -ENXIO;
+    }
+
   if (((oflags & O_RDOK) != 0 && !inode->u.i_ops->read) ||
       ((oflags & O_WROK) != 0 && !inode->u.i_ops->write))
     {

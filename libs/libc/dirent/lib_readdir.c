@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/dirent/lib_telldir.c
+ * libs/libc/dirent/lib_readdir.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,8 +23,8 @@
  ****************************************************************************/
 
 #include <dirent.h>
-#include <unistd.h>
 #include <errno.h>
+#include <unistd.h>
 
 /****************************************************************************
  * Private Functions
@@ -35,32 +35,41 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: telldir
+ * Name: readdir
  *
  * Description:
- *   The telldir() function returns the current location
- *   associated with the directory stream dirp.
+ *   The readdir() function returns a pointer to a dirent structure
+ *   representing the next directory entry in the directory stream pointed
+ *   to by dir.  It returns NULL on reaching the end-of-file or if an error
+ *   occurred.
  *
  * Input Parameters:
- *   dirp -- An instance of type DIR created by a previous
- *     call to opendir();
+ *   dirp -- An instance of type DIR created by a previous call to opendir();
  *
  * Returned Value:
- *   On success, the telldir() function returns the current
- *   location in the directory stream.  On error, -1 is
- *   returned, and errno is set appropriately.
+ *   The readdir() function returns a pointer to a dirent structure, or NULL
+ *   if an error occurs or end-of-file is reached.  On error, errno is set
+ *   appropriately.
  *
- *   EBADF - Invalid directory stream descriptor dir
+ *   EBADF   - Invalid directory stream descriptor dir
  *
  ****************************************************************************/
 
-off_t telldir(FAR DIR *dirp)
+FAR struct dirent *readdir(DIR *dirp)
 {
-  if (dirp)
+  int ret;
+
+  if (!dirp)
     {
-      return lseek(dirp->fd, 0, SEEK_CUR);
+      set_errno(EBADF);
+      return NULL;
     }
 
-  set_errno(EBADF);
-  return -1;
+  ret = read(dirp->fd, &dirp->entry, sizeof(struct dirent));
+  if (ret <= 0)
+    {
+      return NULL;
+    }
+
+  return &dirp->entry;
 }

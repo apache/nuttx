@@ -25,7 +25,6 @@ CSRCS = fs_initialize.c
 include inode/Make.defs
 include vfs/Make.defs
 include driver/Make.defs
-include dirent/Make.defs
 include aio/Make.defs
 include mmap/Make.defs
 

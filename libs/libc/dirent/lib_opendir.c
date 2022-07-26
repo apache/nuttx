@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/dirent/lib_telldir.c
+ * libs/libc/dirent/lib_opendir.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,8 +23,11 @@
  ****************************************************************************/
 
 #include <dirent.h>
-#include <unistd.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <string.h>
+
+#include "libc.h"
 
 /****************************************************************************
  * Private Functions
@@ -35,32 +38,50 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: telldir
+ * Name: opendir
  *
  * Description:
- *   The telldir() function returns the current location
- *   associated with the directory stream dirp.
+ *   The  opendir() function opens a directory stream corresponding to the
+ *   directory name, and returns a pointer to the directory stream. The
+ *   stream is positioned at the first entry in the directory.
  *
  * Input Parameters:
- *   dirp -- An instance of type DIR created by a previous
- *     call to opendir();
+ *   path -- the directory to open
  *
  * Returned Value:
- *   On success, the telldir() function returns the current
- *   location in the directory stream.  On error, -1 is
- *   returned, and errno is set appropriately.
+ *   The opendir() function returns a pointer to the directory stream.  On
+ *   error, NULL is returned, and errno is set appropriately.
  *
- *   EBADF - Invalid directory stream descriptor dir
+ *   EACCES  - Permission denied.
+ *   EMFILE  - Too many file descriptors in use by process.
+ *   ENFILE  - Too many files are currently open in the
+ *             system.
+ *   ENOENT  - Directory does not exist, or name is an empty
+ *             string.
+ *   ENOMEM  - Insufficient memory to complete the operation.
+ *   ENOTDIR - 'path' is not a directory.
  *
  ****************************************************************************/
 
-off_t telldir(FAR DIR *dirp)
+FAR DIR *opendir(FAR const char *path)
 {
-  if (dirp)
+  FAR DIR *dir;
+  int fd;
+
+  dir = lib_malloc(sizeof(*dir));
+  if (dir == NULL)
     {
-      return lseek(dirp->fd, 0, SEEK_CUR);
+      set_errno(ENOMEM);
+      return NULL;
     }
 
-  set_errno(EBADF);
-  return -1;
+  fd = open(path, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+  if (fd < 0)
+    {
+      lib_free(dir);
+      return NULL;
+    }
+
+  dir->fd = fd;
+  return dir;
 }

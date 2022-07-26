@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/dirent/lib_telldir.c
+ * libs/libc/dirent/lib_seekdir.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,8 +23,8 @@
  ****************************************************************************/
 
 #include <dirent.h>
-#include <unistd.h>
 #include <errno.h>
+#include <unistd.h>
 
 /****************************************************************************
  * Private Functions
@@ -35,32 +35,31 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: telldir
+ * Name: seekdir
  *
  * Description:
- *   The telldir() function returns the current location
- *   associated with the directory stream dirp.
+ *   The seekdir() function sets the location in the directory stream from
+ *   which the next readdir() call will start.  seekdir() should be used with
+ *   an offset returned by telldir().
  *
  * Input Parameters:
  *   dirp -- An instance of type DIR created by a previous
  *     call to opendir();
+ *   offset -- offset to seek to
  *
  * Returned Value:
- *   On success, the telldir() function returns the current
- *   location in the directory stream.  On error, -1 is
- *   returned, and errno is set appropriately.
- *
- *   EBADF - Invalid directory stream descriptor dir
+ *   None
  *
  ****************************************************************************/
 
-off_t telldir(FAR DIR *dirp)
+void seekdir(FAR DIR *dirp, off_t offset)
 {
   if (dirp)
     {
-      return lseek(dirp->fd, 0, SEEK_CUR);
+      lseek(dirp->fd, offset, SEEK_SET);
     }
-
-  set_errno(EBADF);
-  return -1;
+  else
+    {
+      set_errno(EBADF);
+    }
 }
