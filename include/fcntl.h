@@ -52,6 +52,7 @@
 #define O_TEXT      (1 << 8)        /* Open the file in text (translated) mode. */
 #define O_DIRECT    (1 << 9)        /* Avoid caching, write directly to hardware */
 #define O_CLOEXEC   (1 << 10)       /* Close on execute */
+#define O_DIRECTORY (1 << 11)       /* Must be a directory */
 
 /* Unsupported, but required open flags */
 

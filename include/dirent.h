@@ -114,7 +114,11 @@ struct dirent
   char     d_name[NAME_MAX + 1];  /* File name */
 };
 
-typedef void DIR;
+typedef struct
+{
+  int fd;
+  struct dirent entry;
+} DIR;
 
 /****************************************************************************
  * Public Data

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/dirent/lib_telldir.c
+ * libs/libc/dirent/lib_rewinddir.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,8 +23,8 @@
  ****************************************************************************/
 
 #include <dirent.h>
-#include <unistd.h>
 #include <errno.h>
+#include <unistd.h>
 
 /****************************************************************************
  * Private Functions
@@ -35,32 +35,29 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: telldir
+ * Name: rewinddir
  *
  * Description:
- *   The telldir() function returns the current location
- *   associated with the directory stream dirp.
+ *   The  rewinddir() function resets the position of the
+ *   directory stream dir to the beginning of the directory.
  *
  * Input Parameters:
  *   dirp -- An instance of type DIR created by a previous
  *     call to opendir();
  *
  * Returned Value:
- *   On success, the telldir() function returns the current
- *   location in the directory stream.  On error, -1 is
- *   returned, and errno is set appropriately.
- *
- *   EBADF - Invalid directory stream descriptor dir
+ *   None
  *
  ****************************************************************************/
 
-off_t telldir(FAR DIR *dirp)
+void rewinddir(FAR DIR *dirp)
 {
   if (dirp != NULL)
     {
-      return lseek(dirp->fd, 0, SEEK_CUR);
+      lseek(dirp->fd, 0, SEEK_SET);
     }
-
-  set_errno(EBADF);
-  return -1;
+  else
+    {
+      set_errno(EBADF);
+    }
 }

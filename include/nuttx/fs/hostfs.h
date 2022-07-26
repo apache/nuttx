@@ -85,6 +85,7 @@
 #define NUTTX_O_BINARY          (1 << 8)  /* Open the file in binary mode. */
 #define NUTTX_O_DIRECT          (1 << 9)  /* Avoid caching, write directly to hardware */
 #define NUTTX_O_CLOEXEC         (1 << 10) /* Close on execute */
+#define NUTTX_O_DIRECTORY       (1 << 11) /* Must be a directory */
 
 #define NUTTX_O_RDWR            (NUTTX_O_RDONLY | NUTTX_O_WRONLY)
 
