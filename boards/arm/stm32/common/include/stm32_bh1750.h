@@ -59,7 +59,7 @@ extern "C"
  * Name: board_bh1750_initialize
  *
  * Description:
- *   Initialize and register the MPL115A Pressure Sensor driver.
+ *   Initialize and register the BH1750FVI Ambient Light driver.
  *
  * Input Parameters:
  *   devno - The device number, used to build the device path as /dev/lightN
