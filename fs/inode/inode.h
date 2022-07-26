@@ -419,6 +419,16 @@ int foreach_inode(foreach_inode_t handler, FAR void *arg);
 int files_allocate(FAR struct inode *inode, int oflags, off_t pos,
                    FAR void *priv, int minfd);
 
+/****************************************************************************
+ * Name: dir_allocate
+ *
+ * Description:
+ *   Allocate a directory instance and bind it to f_priv of filep.
+ *
+ ****************************************************************************/
+
+int dir_allocate(FAR struct file *filep, FAR const char *relpath);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

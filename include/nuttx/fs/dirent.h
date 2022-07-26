@@ -259,16 +259,6 @@ struct fs_dirent_s
 
   struct inode *fd_root;
 
-  /* At present, only mountpoints require special handling flags */
-
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-  unsigned int fd_flags;
-#endif
-
-  /* This keeps track of the current directory position for telldir */
-
-  off_t fd_position;
-
   /* Retained control information depends on the type of file system that
    * provides the mountpoint.  Ideally this information should
    * be hidden behind an opaque, file-system-dependent void *, but we put

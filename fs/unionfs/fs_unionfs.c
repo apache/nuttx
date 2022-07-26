@@ -1920,7 +1920,6 @@ static int unionfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
        * application will see.
        */
 
-      dir->fd_position = fu->fu_lower[fu->fu_ndx]->fd_position;
       memcpy(&dir->fd_dir, &fu->fu_lower[fu->fu_ndx]->fd_dir,
              sizeof(struct dirent));
     }
@@ -1976,7 +1975,6 @@ static int unionfs_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir)
       if (ops->rewinddir != NULL)
         {
           ret = ops->rewinddir(um->um_node, fu->fu_lower[fu->fu_ndx]);
-          dir->fd_position = fu->fu_lower[fu->fu_ndx]->fd_position;
         }
     }
 
