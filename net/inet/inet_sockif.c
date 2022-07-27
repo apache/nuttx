@@ -722,15 +722,21 @@ static int inet_connect(FAR struct socket *psock,
 #if defined(CONFIG_NET_TCP) && defined(NET_TCP_HAVE_STACK)
       case SOCK_STREAM:
         {
-          FAR struct socket_conn_s *conn = psock->s_conn;
+          FAR struct tcp_conn_s *conn = psock->s_conn;
 
           /* Verify that the socket is not already connected */
 
-          if (_SS_ISCONNECTED(conn->s_flags))
+          if (_SS_ISCONNECTED(conn->sconn.s_flags))
             {
               return -EISCONN;
             }
-
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+          if (conn->domain != addr->sa_family)
+            {
+              nerr("TCP: conn's domain must be the same as addr's family!\n");
+              return -EPROTOTYPE;
+            }
+#endif
           /* It's not ... Connect the TCP/IP socket */
 
           return psock_tcp_connect(psock, addr);
@@ -756,6 +762,13 @@ static int inet_connect(FAR struct socket *psock,
           /* Perform the connect/disconnect operation */
 
           conn = (FAR struct udp_conn_s *)psock->s_conn;
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+          if (conn->domain != addr->sa_family)
+            {
+              nerr("UDP: conn's domain must be the same as addr's family!\n");
+              return -EPROTOTYPE;
+            }
+#endif
           ret  = udp_connect(conn, addr);
           if (ret < 0 || addr == NULL)
             {
