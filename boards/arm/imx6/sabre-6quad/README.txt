@@ -913,7 +913,7 @@ Configuration sub-directories
     $ make V=1 -j7
     $ make export V=1
     $ cd ../apps
-    $ ./tools/mkimport.sh -x ../nuttx/nuttx-export-*.zip
+    $ ./tools/mkimport.sh -z -x ../nuttx/nuttx-export-*.tar.gz
     $ make import V=1
     $ cd ../nuttx
     $ qemu-system-arm -semihosting -M sabrelite -m 1024 -smp 4 -nographic -kernel ./nuttx
@@ -950,7 +950,7 @@ Configuration sub-directories
     $ make
     $ make export
     $ cd ../apps
-    $ ./tools/mkimport.sh -x ../nuttx/nuttx-export-*.zip
+    $ ./tools/mkimport.sh -z -x ../nuttx/nuttx-export-*.tar.gz
     $ make import
     $ cd ../nuttx
     $ qemu-system-arm -semihosting -M sabrelite -m 1024 -smp 4 -nographic -kernel ./nuttx
