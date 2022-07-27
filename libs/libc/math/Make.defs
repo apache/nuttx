@@ -60,43 +60,43 @@ CSRCS += __cos.c __sin.c lib_gamma.c lib_lgamma.c
 # Use the C versions of some functions only if architecture specific
 # optimized versions are not provided.
 
-ifneq ($(LIBM_ARCH_CEIL),y)
+ifneq ($(CONFIG_LIBM_ARCH_CEIL),y)
 CSRCS += lib_ceil.c
 endif
 
-ifneq ($(LIBM_ARCH_FLOOR),y)
+ifneq ($(CONFIG_LIBM_ARCH_FLOOR),y)
 CSRCS += lib_floor.c
 endif
 
-ifneq ($(LIBM_ARCH_RINT),y)
+ifneq ($(CONFIG_LIBM_ARCH_RINT),y)
 CSRCS += lib_rint.c
 endif
 
-ifneq ($(LIBM_ARCH_ROUND),y)
+ifneq ($(CONFIG_LIBM_ARCH_ROUND),y)
 CSRCS += lib_round.c
 endif
 
-ifneq ($(LIBM_ARCH_TRUNC),y)
+ifneq ($(CONFIG_LIBM_ARCH_TRUNC),y)
 CSRCS += lib_trunc.c
 endif
 
-ifneq ($(LIBM_ARCH_CEILF),y)
+ifneq ($(CONFIG_LIBM_ARCH_CEILF),y)
 CSRCS += lib_ceilf.c
 endif
 
-ifneq ($(LIBM_ARCH_FLOORF),y)
+ifneq ($(CONFIG_LIBM_ARCH_FLOORF),y)
 CSRCS += lib_floorf.c
 endif
 
-ifneq ($(LIBM_ARCH_RINTF),y)
+ifneq ($(CONFIG_LIBM_ARCH_RINTF),y)
 CSRCS += lib_rintf.c
 endif
 
-ifneq ($(LIBM_ARCH_ROUNDF),y)
+ifneq ($(CONFIG_LIBM_ARCH_ROUNDF),y)
 CSRCS += lib_roundf.c
 endif
 
-ifneq ($(LIBM_ARCH_TRUNCF),y)
+ifneq ($(CONFIG_LIBM_ARCH_TRUNCF),y)
 CSRCS += lib_truncf.c
 endif
 
