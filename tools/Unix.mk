@@ -127,7 +127,7 @@ LINKLIBS = $(patsubst staging/%,%,$(NUTTXLIBS))
 # Export tool definitions
 
 MKEXPORT= tools/mkexport.sh
-MKEXPORT_ARGS = -t "$(TOPDIR)" -b "$(BOARD_DIR)"
+MKEXPORT_ARGS = -z -t "$(TOPDIR)" -b "$(BOARD_DIR)"
 
 ifneq ($(CONFIG_BUILD_FLAT),y)
 MKEXPORT_ARGS += -u
