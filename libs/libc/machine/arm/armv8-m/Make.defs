@@ -24,51 +24,51 @@ endif
 
 ifeq ($(CONFIG_ARMV8M_LIBM),y)
 
-ifeq ($(LIBM_ARCH_CEIL),y)
+ifeq ($(CONFIG_LIBM_ARCH_CEIL),y)
 CSRCS += arch_ceil.c
 endif
 
-ifeq ($(LIBM_ARCH_CEILF),y)
+ifeq ($(CONFIG_LIBM_ARCH_CEILF),y)
 CSRCS += arch_ceilf.c
 endif
 
-ifeq ($(LIBM_ARCH_FLOOR),y)
+ifeq ($(CONFIG_LIBM_ARCH_FLOOR),y)
 CSRCS += arch_floor.c
 endif
 
-ifeq ($(LIBM_ARCH_FLOORF),y)
+ifeq ($(CONFIG_LIBM_ARCH_FLOORF),y)
 CSRCS += arch_floorf.c
 endif
 
-ifeq ($(LIBM_ARCH_NEARBYINT),y)
+ifeq ($(CONFIG_LIBM_ARCH_NEARBYINT),y)
 CSRCS += arch_nearbyint.c
 endif
 
-ifeq ($(LIBM_ARCH_NEARBYINTF),y)
+ifeq ($(CONFIG_LIBM_ARCH_NEARBYINTF),y)
 CSRCS += arch_nearbyintf.c
 endif
 
-ifeq ($(LIBM_ARCH_RINTF),y)
+ifeq ($(CONFIG_LIBM_ARCH_RINTF),y)
 CSRCS += arch_rintf.c
 endif
 
-ifeq ($(LIBM_ARCH_ROUNDF),y)
+ifeq ($(CONFIG_LIBM_ARCH_ROUNDF),y)
 CSRCS += arch_roundf.c
 endif
 
-ifeq ($(LIBM_ARCH_TRUNCF),y)
+ifeq ($(CONFIG_LIBM_ARCH_TRUNCF),y)
 CSRCS += arch_truncf.c
 endif
 
-ifeq ($(LIBM_ARCH_RINT),y)
+ifeq ($(CONFIG_LIBM_ARCH_RINT),y)
 CSRCS += arch_rint.c
 endif
 
-ifeq ($(LIBM_ARCH_ROUND),y)
+ifeq ($(CONFIG_LIBM_ARCH_ROUND),y)
 CSRCS += arch_round.c
 endif
 
-ifeq ($(LIBM_ARCH_TRUNC),y)
+ifeq ($(CONFIG_LIBM_ARCH_TRUNC),y)
 CSRCS += arch_trunc.c
 endif
 
