@@ -356,7 +356,8 @@ int syslog_rpmsg_flush(FAR struct syslog_channel_s *channel)
 
   flags = enter_critical_section();
 
-  if (priv->head - priv->flush > priv->size)
+  if (priv->head > priv->flush &&
+      priv->head - priv->flush > priv->size)
     {
       priv->flush = priv->tail;
     }
