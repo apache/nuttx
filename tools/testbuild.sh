@@ -177,9 +177,42 @@ blacklist=`grep "^-" $testfile || true`
 
 cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
 
+function exportandimport {
+  # Do nothing until we finish to build the nuttx
+  if [ ! -f nuttx ]; then
+    return $fail
+  fi
+
+  # If CONFIG_BUILD_KERNEL=y does not exist in .config, do nothing
+  if ! grep CONFIG_BUILD_KERNEL=y .config 1>/dev/null; then
+    return $fail
+  fi
+
+  if ! ${MAKE} export ${JOPTION} 1>/dev/null; then
+    fail=1
+    return $fail
+  fi
+
+  pushd ../apps/
+
+  if ! ./tools/mkimport.sh -z -x ../nuttx/nuttx-export-*.tar.gz 1>/dev/null; then
+    fail=1
+    popd
+    return $fail
+  fi
+
+  if ! ${MAKE} import ${JOPTION} 1>/dev/null; then
+    fail=1
+  fi
+  popd
+  return $fail
+}
+
 function makefunc {
   if ! ${MAKE} ${MAKE_FLAGS} "${EXTRA_FLAGS}" ${JOPTION} $@ 1>/dev/null; then
     fail=1
+  else
+    exportandimport
   fi
 
   return $fail
