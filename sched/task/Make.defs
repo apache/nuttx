@@ -26,7 +26,7 @@ CSRCS += task_cancelpt.c task_terminate.c task_gettid.c exit.c
 CSRCS += task_tls_alloc.c
 
 ifeq ($(CONFIG_SCHED_HAVE_PARENT),y)
-CSRCS += task_getppid.c
+CSRCS += task_getppid.c task_reparent.c
 endif
 
 ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
