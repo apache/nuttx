@@ -441,6 +441,43 @@ FAR struct battery_charger_dev_s *
 #endif
 
 /****************************************************************************
+ * Name: plug_in_initialize
+ *
+ * Description:
+ *   Initialize plug in charger driver and return an instance of
+ *   the lower-half interface that may be used with
+ *   battery_charger_register().
+ *
+ * This is for:
+ *   PLUG_IN
+ *
+ *   This driver requires:
+ *
+ *   CONFIG_BATTERY_CHARGER - Upper half battery charger driver support
+ *
+ * Input Parameters:
+ *   rpmsg_dev - An instance of rpmsg io interface to use to communicate with
+ *               the plug in
+ *
+ * Returned Value:
+ *   A pointer to the initialized battery driver instance.  A NULL pointer
+ *   is returned on a failure to initialize the plug in lower half.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_PLUG_IN)
+
+struct plug_in_lower_s
+{
+  uint32_t detect_pin;
+};
+
+FAR struct battery_charger_dev_s *
+  plug_in_initialize(FAR struct plug_in_lower_s *lower,
+                     FAR struct ioexpander_dev_s *io_dev);
+#endif
+
+/****************************************************************************
  * Name: cps4019_initialize
  *
  * Description:

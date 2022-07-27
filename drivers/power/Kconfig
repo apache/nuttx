@@ -422,6 +422,14 @@ config STWLC38
 	depends on BATTERY_CHARGER
 	---help---
 		The STWLC38 are wireless rx for power supply.
+
+config PLUG_IN
+	bool "PLUG_IN Battery charger support"
+	default n
+	depends on BATTERY_CHARGER
+	---help---
+		The plug in for power supply.
+
 config CPS4019
 	bool "CPS4019 Battery charger support"
 	default n

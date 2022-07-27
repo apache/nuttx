@@ -144,6 +144,10 @@ CSRCS += polaris.c
 CSRCS += polaris_nvm.c
 endif
 
+ifeq ($(CONFIG_PLUG_IN),y)
+CSRCS += plug_in.c
+endif
+
 ifeq ($(CONFIG_I2C_CPS4019),y)
 CSRCS += cps4019_ctl.c
 endif
