@@ -1,6 +1,7 @@
-/*	$OpenBSD: siphash.c,v 1.5 2018/01/05 19:05:09 mikeb Exp $ */
-
-/*-
+/****************************************************************************
+ * crypto/siphash.c
+ * $OpenBSD: siphash.c,v 1.5 2018/01/05 19:05:09 mikeb Exp $
+ *
  * Copyright (c) 2013 Andre Oppermann <andre@FreeBSD.org>
  * All rights reserved.
  *
@@ -27,11 +28,11 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- */
+ ****************************************************************************/
 
-/*
- * SipHash is a family of PRFs SipHash-c-d where the integer parameters c and d
- * are the number of compression rounds and the number of finalization rounds.
+/* SipHash is a family of PRFs SipHash-c-d where the integer parameters
+ * c and d are the number of compression rounds and the number of
+ * finalization rounds.
  * A compression round is identical to a finalization round and this round
  * function is called SipRound.  Given a 128-bit key k and a (possibly empty)
  * byte string m, SipHash-c-d returns a 64-bit value SipHash-c-d(k; m).
@@ -43,139 +44,154 @@
  * https://131002.net/siphash/
  */
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <sys/param.h>
 #include <sys/systm.h>
 
 #include <crypto/siphash.h>
 
-static void	SipHash_CRounds(SIPHASH_CTX *, int);
-static void	SipHash_Rounds(SIPHASH_CTX *, int);
+static void	siphash_crounds(FAR SIPHASH_CTX *, int);
+static void	siphash_rounds(FAR SIPHASH_CTX *, int);
 
-void
-SipHash_Init(SIPHASH_CTX *ctx, const SIPHASH_KEY *key)
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+void siphash_init(FAR SIPHASH_CTX *ctx, FAR const SIPHASH_KEY *key)
 {
-	uint64_t k0, k1;
+  uint64_t k0, k1;
 
-	k0 = lemtoh64(&key->k0);
-	k1 = lemtoh64(&key->k1);
+  k0 = lemtoh64(&key->k0);
+  k1 = lemtoh64(&key->k1);
 
-	ctx->v[0] = 0x736f6d6570736575ULL ^ k0;
-	ctx->v[1] = 0x646f72616e646f6dULL ^ k1;
-	ctx->v[2] = 0x6c7967656e657261ULL ^ k0;
-	ctx->v[3] = 0x7465646279746573ULL ^ k1;
+  ctx->v[0] = 0x736f6d6570736575ull ^ k0;
+  ctx->v[1] = 0x646f72616e646f6dull ^ k1;
+  ctx->v[2] = 0x6c7967656e657261ull ^ k0;
+  ctx->v[3] = 0x7465646279746573ull ^ k1;
 
-	memset(ctx->buf, 0, sizeof(ctx->buf));
-	ctx->bytes = 0;
+  memset(ctx->buf, 0, sizeof(ctx->buf));
+  ctx->bytes = 0;
 }
 
-void
-SipHash_Update(SIPHASH_CTX *ctx, int rc, int rf, const void *src, size_t len)
+void siphash_update(FAR SIPHASH_CTX *ctx,
+                    int rc, int rf,
+                    FAR const void *src, size_t len)
 {
-	const uint8_t *ptr = src;
-	size_t left, used;
+  FAR const uint8_t *ptr = src;
+  size_t left;
+  size_t used;
 
-	if (len == 0)
-		return;
+  if (len == 0)
+    return;
 
-	used = ctx->bytes % sizeof(ctx->buf);
-	ctx->bytes += len;
+  used = ctx->bytes % sizeof(ctx->buf);
+  ctx->bytes += len;
 
-	if (used > 0) {
-		left = sizeof(ctx->buf) - used;
+  if (used > 0)
+    {
+      left = sizeof(ctx->buf) - used;
 
-		if (len >= left) {
-			memcpy(&ctx->buf[used], ptr, left);
-			SipHash_CRounds(ctx, rc);
-			len -= left;
-			ptr += left;
-		} else {
-			memcpy(&ctx->buf[used], ptr, len);
-			return;
-		}
-	}
+      if (len >= left)
+        {
+          memcpy(&ctx->buf[used], ptr, left);
+          siphash_crounds(ctx, rc);
+          len -= left;
+          ptr += left;
+        }
+      else
+        {
+          memcpy(&ctx->buf[used], ptr, len);
+          return;
+        }
+    }
 
-	while (len >= sizeof(ctx->buf)) {
-		memcpy(ctx->buf, ptr, sizeof(ctx->buf));
-		SipHash_CRounds(ctx, rc);
-		len -= sizeof(ctx->buf);
-		ptr += sizeof(ctx->buf);
-	}
+  while (len >= sizeof(ctx->buf))
+    {
+      memcpy(ctx->buf, ptr, sizeof(ctx->buf));
+      siphash_crounds(ctx, rc);
+      len -= sizeof(ctx->buf);
+      ptr += sizeof(ctx->buf);
+    }
 
-	if (len > 0)
-		memcpy(ctx->buf, ptr, len);
+  if (len > 0)
+    {
+      memcpy(ctx->buf, ptr, len);
+    }
 }
 
-void
-SipHash_Final(void *dst, SIPHASH_CTX *ctx, int rc, int rf)
+void siphash_final(FAR void *dst, FAR SIPHASH_CTX *ctx, int rc, int rf)
 {
-	uint64_t r;
+  uint64_t r;
 
-	htolem64(&r, SipHash_End(ctx, rc, rf));
-	memcpy(dst, &r, sizeof r);
+  htolem64(&r, siphash_end(ctx, rc, rf));
+  memcpy(dst, &r, sizeof r);
 }
 
-uint64_t
-SipHash_End(SIPHASH_CTX *ctx, int rc, int rf)
+uint64_t siphash_end(FAR SIPHASH_CTX *ctx, int rc, int rf)
 {
-	uint64_t r;
-	size_t left, used;
+  uint64_t r;
+  size_t left;
+  size_t used;
 
-	used = ctx->bytes % sizeof(ctx->buf);
-	left = sizeof(ctx->buf) - used;
-	memset(&ctx->buf[used], 0, left - 1);
-	ctx->buf[7] = ctx->bytes;
+  used = ctx->bytes % sizeof(ctx->buf);
+  left = sizeof(ctx->buf) - used;
+  memset(&ctx->buf[used], 0, left - 1);
+  ctx->buf[7] = ctx->bytes;
 
-	SipHash_CRounds(ctx, rc);
-	ctx->v[2] ^= 0xff;
-	SipHash_Rounds(ctx, rf);
+  siphash_crounds(ctx, rc);
+  ctx->v[2] ^= 0xff;
+  siphash_rounds(ctx, rf);
 
-	r = (ctx->v[0] ^ ctx->v[1]) ^ (ctx->v[2] ^ ctx->v[3]);
-	explicit_bzero(ctx, sizeof(*ctx));
-	return (r);
+  r = (ctx->v[0] ^ ctx->v[1]) ^ (ctx->v[2] ^ ctx->v[3]);
+  explicit_bzero(ctx, sizeof(*ctx));
+  return (r);
 }
 
-uint64_t
-SipHash(const SIPHASH_KEY *key, int rc, int rf, const void *src, size_t len)
+uint64_t siphash(FAR const SIPHASH_KEY *key,
+                 int rc, int rf,
+                 FAR const void *src, size_t len)
 {
-	SIPHASH_CTX ctx;
+  SIPHASH_CTX ctx;
 
-	SipHash_Init(&ctx, key);
-	SipHash_Update(&ctx, rc, rf, src, len);
-	return (SipHash_End(&ctx, rc, rf));
+  siphash_init(&ctx, key);
+  siphash_update(&ctx, rc, rf, src, len);
+  return (siphash_end(&ctx, rc, rf));
 }
 
 #define SIP_ROTL(x, b) ((x) << (b)) | ( (x) >> (64 - (b)))
 
-static void
-SipHash_Rounds(SIPHASH_CTX *ctx, int rounds)
+static void siphash_rounds(FAR SIPHASH_CTX *ctx, int rounds)
 {
-	while (rounds--) {
-		ctx->v[0] += ctx->v[1];
-		ctx->v[2] += ctx->v[3];
-		ctx->v[1] = SIP_ROTL(ctx->v[1], 13);
-		ctx->v[3] = SIP_ROTL(ctx->v[3], 16);
+  while (rounds--)
+    {
+      ctx->v[0] += ctx->v[1];
+      ctx->v[2] += ctx->v[3];
+      ctx->v[1] = SIP_ROTL(ctx->v[1], 13);
+      ctx->v[3] = SIP_ROTL(ctx->v[3], 16);
 
-		ctx->v[1] ^= ctx->v[0];
-		ctx->v[3] ^= ctx->v[2];
-		ctx->v[0] = SIP_ROTL(ctx->v[0], 32);
+      ctx->v[1] ^= ctx->v[0];
+      ctx->v[3] ^= ctx->v[2];
+      ctx->v[0] = SIP_ROTL(ctx->v[0], 32);
 
-		ctx->v[2] += ctx->v[1];
-		ctx->v[0] += ctx->v[3];
-		ctx->v[1] = SIP_ROTL(ctx->v[1], 17);
-		ctx->v[3] = SIP_ROTL(ctx->v[3], 21);
+      ctx->v[2] += ctx->v[1];
+      ctx->v[0] += ctx->v[3];
+      ctx->v[1] = SIP_ROTL(ctx->v[1], 17);
+      ctx->v[3] = SIP_ROTL(ctx->v[3], 21);
 
-		ctx->v[1] ^= ctx->v[2];
-		ctx->v[3] ^= ctx->v[0];
-		ctx->v[2] = SIP_ROTL(ctx->v[2], 32);
-	}
+      ctx->v[1] ^= ctx->v[2];
+      ctx->v[3] ^= ctx->v[0];
+      ctx->v[2] = SIP_ROTL(ctx->v[2], 32);
+    }
 }
 
-static void
-SipHash_CRounds(SIPHASH_CTX *ctx, int rounds)
+static void siphash_crounds(FAR SIPHASH_CTX *ctx, int rounds)
 {
-	uint64_t m = lemtoh64((uint64_t *)ctx->buf);
+  uint64_t m = lemtoh64((uint64_t *)ctx->buf);
 
-	ctx->v[3] ^= m;
-	SipHash_Rounds(ctx, rounds);
-	ctx->v[0] ^= m;
+  ctx->v[3] ^= m;
+  siphash_rounds(ctx, rounds);
+  ctx->v[0] ^= m;
 }
