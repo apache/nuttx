@@ -34,7 +34,7 @@
 #define STM32WB_IPCC_C2CR_OFFSET      0x0010  /* CPU2 control register */
 #define STM32WB_IPCC_C2MR_OFFSET      0x0014  /* CPU2 mask register */
 #define STM32WB_IPCC_C2SCR_OFFSET     0x0018  /* CPU2 status set/clear register */
-#define STM32WB_IPCC_C2TOC1SR_OFFSET  0x001c  /* CPU2 to CPU2 status register */
+#define STM32WB_IPCC_C2TOC1SR_OFFSET  0x001c  /* CPU2 to CPU1 status register */
 
 /* Register Addresses *******************************************************/
 

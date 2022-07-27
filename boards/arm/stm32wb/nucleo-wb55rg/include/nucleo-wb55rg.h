@@ -69,6 +69,12 @@
 #  define MSI_CLOCK_CONFIG              1 /* MSI @ 4MHz autotrimmed via LSE */
 #endif
 
+#if 0
+#  define STM32WB_BOARD_RFWKP_USEHSE    1 /* CPU2 use HSE/1024 on RF wakeup */
+#elif 1
+#  define STM32WB_BOARD_RFWKP_USELSE    1 /* CPU2 use LSE on RF wakeup */
+#endif
+
 #if defined(HSI_CLOCK_CONFIG)
 
 #define STM32WB_BOARD_USEHSI            1

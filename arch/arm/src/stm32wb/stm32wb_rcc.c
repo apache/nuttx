@@ -810,6 +810,17 @@ static void stm32wb_stdclockconfig(void)
       putreg32(regval, STM32WB_RCC_CR);
 #  endif
 #endif /* STM32WB_USE_LSE */
+
+      /* Select CPU2 RF wakeup clock source, no clock if not set */
+
+      regval  = getreg32(STM32WB_RCC_CSR);
+      regval &= ~RCC_CSR_RFWKPSEL_MASK;
+#if defined(STM32WB_BOARD_RFWKP_USELSE)
+      regval |= RCC_CSR_RFWKPSEL_LSE;
+#elif defined(STM32WB_BOARD_RFWKP_USEHSE)
+      regval |= RCC_CSR_RFWKPSEL_HSE;
+#endif
+      putreg32(regval, STM32WB_RCC_CSR);
     }
 }
 #endif

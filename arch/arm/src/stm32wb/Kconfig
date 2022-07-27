@@ -941,4 +941,236 @@ config STM32WB_SPI_DMA
 
 endmenu
 
+config STM32WB_MBOX
+	bool
+	default n
+	select STM32WB_IPCC
+
+menuconfig STM32WB_BLE
+	bool "BLE"
+	default n
+	select STM32WB_MBOX
+	---help---
+		Enable BLE support.
+
+if STM32WB_BLE
+
+config STM32WB_BLE_C2HOST
+	bool "Enable CPU2 HOST stack"
+	default y
+
+config STM32WB_BLE_MAX_CONN
+	int "Maximum BLE simultaneous connections"
+	range 1 8
+	default 2
+
+config STM32WB_BLE_GATT_MAX_ATTR_NUM
+	int "GATT attributes max count"
+	range 9 255
+	default 64
+
+config STM32WB_BLE_GATT_MAX_SVC_NUM
+	int "GATT services max count"
+	range 2 64
+	default 8
+
+config STM32WB_BLE_GATT_ATTR_BUF_SIZE
+	int "GATT attributes storage buf size"
+	default 1344
+	---help---
+		Size of the storage area for attribute values. Hardcoded in CPU2 firmware.
+
+config STM32WB_BLE_DLE
+	bool "Support Data Length Extension (DLE)"
+	default y
+
+config STM32WB_BLE_MAX_ATT_MTU
+	int "Maximum supported attribute MTU"
+	range 23 512
+	default 156
+
+config STM32WB_BLE_SLAVE_SCA
+	int "Sleep clock accuracy in slave mode [PPM]"
+	default 500
+	---help---
+		Sleep clock accuracy (ppm value) in slave mode.
+
+choice 
+	prompt "Sleep clock accuracy in master mode"
+	default STM32WB_BLE_MASTER_SCA_0
+	---help---
+		Sleep clock accuracy in master mode.
+
+config STM32WB_BLE_MASTER_SCA_0
+	bool "251-500 ppm"
+
+config STM32WB_BLE_MASTER_SCA_1
+	bool "151-250 ppm"
+
+config STM32WB_BLE_MASTER_SCA_2
+	bool "101-150 ppm"
+
+config STM32WB_BLE_MASTER_SCA_3
+	bool "76-100 ppm"
+
+config STM32WB_BLE_MASTER_SCA_4
+	bool "51-75 ppm"
+
+config STM32WB_BLE_MASTER_SCA_5
+	bool "31-50 ppm"
+
+config STM32WB_BLE_MASTER_SCA_6
+	bool "21-30 ppm"
+
+config STM32WB_BLE_MASTER_SCA_7
+	bool "0-20 ppm"
+
+endchoice # Sleep clock accuracy in master mode
+
+config STM32WB_BLE_MASTER_SCA
+	int
+	default 7 if STM32WB_BLE_MASTER_SCA_7
+	default 6 if STM32WB_BLE_MASTER_SCA_6
+	default 5 if STM32WB_BLE_MASTER_SCA_5
+	default 4 if STM32WB_BLE_MASTER_SCA_4
+	default 3 if STM32WB_BLE_MASTER_SCA_3
+	default 2 if STM32WB_BLE_MASTER_SCA_2
+	default 1 if STM32WB_BLE_MASTER_SCA_1
+	default 0
+
+choice 
+	prompt "Low speed clock source"
+	default STM32WB_BLE_LS_CLK_SRC_LSE
+	---help---
+		Low speed 32 kHz clock source.
+
+config STM32WB_BLE_LS_CLK_SRC_LSE
+	bool "LSE"
+
+config STM32WB_BLE_LS_CLK_SRC_HSE
+	bool "HSE"
+
+endchoice # Low speed clock source
+
+config STM32WB_BLE_LS_CLK_SRC
+	int
+	default 1 if STM32WB_BLE_LS_CLKSRC_HSE
+	default 0
+
+config STM32WB_BLE_MAX_CONN_EVT_LENGTH
+	hex "Max connection event length"
+	default 0xffffffff
+	---help---
+		Maximum duration of a slave connection event in units of 625/256us (~2.44us).
+
+config STM32WB_BLE_HSE_STARTUP
+	hex "HSE startup time"
+	default 0x148
+	---help---
+		HSE startup time in units of 625/256us (~2.44us).
+
+config STM32WB_BLE_VITERBI
+	bool "Enable Viterbi algorithm"
+	default y
+	---help---
+		Enable Viterbi algorithm implementation
+
+config STM32WB_BLE_MAX_INITOR_COC_NUM
+	int "Max number of connection-oriented channels"
+	range 0 64
+	default 32
+	---help---
+		Maximum number of connection-oriented channels in initiator mode.
+
+config STM32WB_BLE_SVC_CHANGED_CHAR
+	bool "Enable service changed characteristic"
+	default n
+
+config STM32WB_BLE_WRITABLE_DEVICE_NAME
+	bool "Writable device name"
+	default y
+
+config STM32WB_BLE_CHAN_SEL_ALG2
+	bool "Enable channel selection algorithm 2"
+	default n
+
+choice 
+	prompt "Power class"
+	default STM32WB_BLE_POWER_CLASS_2_3
+
+config STM32WB_BLE_POWER_CLASS_2_3
+	bool "Power Class 2-3"
+
+config STM32WB_BLE_POWER_CLASS_1
+	bool "Power Class 1"
+
+endchoice # Power class
+
+config STM32WB_BLE_MIN_TX_POWER
+	int "Minimum transmit power [dBm]"
+	range -127 20
+	default 0
+
+config STM32WB_BLE_MAX_TX_POWER
+	int "Maximum transmit power [dBm]"
+	range -127 20
+	default 0
+
+choice 
+	prompt "AGC RSSI model"
+	default STM32WB_BLE_AGC_RSSI_LEGACY
+
+config STM32WB_BLE_AGC_RSSI_LEGACY
+	bool "AGC RSSI Legacy"
+
+config STM32WB_BLE_AGC_RSSI_IMPROVED
+	bool "AGC RSSI Improved"
+
+endchoice # AGC RSSI model
+
+config STM32WB_BLE_ADVERTISING
+	bool "Support advertising"
+	default y
+
+config STM32WB_BLE_SCANNING
+	bool "Support scanning"
+	default y
+
+config STM32WB_BLE_LE_2M_PHY
+	bool "Support LE 2M PHY"
+	default y
+
+config STM32WB_BLE_LE_CODED_PHY
+	bool "Support LE Coded PHY"
+	default y if STM32WB_STM32WB15 || STM32WB_STM32WB35 || STM32WB_STM32WB55
+	default n
+	depends on STM32WB_STM32WB15 || STM32WB_STM32WB35 || STM32WB_STM32WB55
+
+config STM32WB_BLE_TTY_NAME
+	string "BLE TTY device name"
+	default "/dev/ttyHCI0"
+	depends on UART_BTH4
+
+config STM32WB_BLE_FICR_STATIC_ADDR
+	bool "Configure factory generated static random address"
+	default n
+
+config STM32WB_BLE_PUB_ADDR
+	hex "Configure BT public address"
+	default 0x0000000000
+
+endif # STM32WB_BLE
+
+if STM32WB_MBOX
+
+config STM32WB_MBOX_TX_CMD_QUEUE_LEN
+	int "Mailbox TX command queue length"
+	default 2
+
+config STM32WB_MBOX_RX_EVT_QUEUE_LEN
+	int "Mailbox RX event queue length"
+	default 5
+
+endif # STM32WB_MBOX
+
 endif # ARCH_CHIP_STM32WB
