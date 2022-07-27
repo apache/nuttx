@@ -81,10 +81,6 @@ ifeq ($(CONFIG_STM32WB_PWR),y)
 CHIP_CSRCS += stm32wb_exti_pwr.c
 endif
 
-ifeq ($(CONFIG_STM32WB_IPCC),y)
-CHIP_CSRCS += stm32wb_ipcc.c
-endif
-
 ifeq ($(CONFIG_STM32WB_RTC),y)
 ifeq ($(CONFIG_RTC_ALARM),y)
 CHIP_CSRCS += stm32wb_exti_alarm.c
@@ -95,6 +91,18 @@ endif
 ifeq ($(CONFIG_RTC_DRIVER),y)
 CHIP_CSRCS += stm32wb_rtc.c stm32wb_rtc_lowerhalf.c
 endif
+endif
+
+ifeq ($(CONFIG_STM32WB_IPCC),y)
+CHIP_CSRCS += stm32wb_ipcc.c
+endif
+
+ifeq ($(CONFIG_STM32WB_MBOX),y)
+CHIP_CSRCS += stm32wb_mbox.c
+endif
+
+ifeq ($(CONFIG_STM32WB_BLE),y)
+CHIP_CSRCS += stm32wb_blehci.c
 endif
 
 ifeq ($(CONFIG_DEBUG_FEATURES),y)

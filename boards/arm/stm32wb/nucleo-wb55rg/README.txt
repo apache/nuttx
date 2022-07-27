@@ -26,6 +26,8 @@ Status
     supported - GPIO, EXTI, DMA, timers, flash, PWR, RTC, USART/LPUART, SPI,
     IPCC. SRAM2 heap allocation works. Builtin apps work and ostest passed.
 
+  July 2022: Added BLE support with mailbox IPC driver.
+
 LEDs
 ====
 
@@ -60,3 +62,8 @@ Configurations
 
     Configures the NuttShell (nsh) located at examples/nsh.  This
     configuration is focused on low level, command-line driver testing.
+
+  ble:
+
+    Besides the NuttShell this configuration also enables BLE support.
+    It includes btsak application for testing BLE applications.

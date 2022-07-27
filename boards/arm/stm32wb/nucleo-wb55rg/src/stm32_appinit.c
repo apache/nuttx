@@ -43,6 +43,12 @@
 #  include "stm32wb_rtc.h"
 #endif
 
+#ifdef CONFIG_STM32WB_BLE
+#  include "stm32wb_blehci.h"
+#endif
+
+#include "nucleo-wb55rg.h"
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -50,6 +56,20 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: arm_netinitialize
+ *
+ * Description:
+ *   Dummy function expected to start-up logic.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
+void arm_netinitialize(void)
+{
+}
+#endif
 
 /****************************************************************************
  * Name: board_app_initialize
@@ -133,6 +153,12 @@ int board_app_initialize(uintptr_t arg)
              ret);
       return ret;
     }
+#endif
+
+#ifdef CONFIG_STM32WB_BLE
+  /* Initialize and register BLE HCI driver */
+
+  stm32wb_blehci_initialize();
 #endif
 
   return ret;
