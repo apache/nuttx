@@ -29,6 +29,14 @@
 #include <nuttx/time.h>
 
 /****************************************************************************
+ * Pre-processor definitions
+ ****************************************************************************/
+
+#ifndef ARRAY_SIZE
+#  define ARRAY_SIZE(x)         (sizeof(x) / sizeof((x)[0]))
+#endif
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -72,6 +80,13 @@ static const char * const g_mon_name[12] =
 FAR char *asctime_r(FAR const struct tm *tp, FAR char *buf)
 {
   char tmp[128];
+
+  if (tp == NULL ||
+      tp->tm_wday >= ARRAY_SIZE(g_wday_name) ||
+      tp->tm_mon >= ARRAY_SIZE(g_mon_name))
+    {
+      return NULL;
+    }
 
   snprintf(tmp, sizeof(tmp), "%.3s %.3s%3d %.2d:%.2d:%.2d %d\n",
            g_wday_name[tp->tm_wday], g_mon_name[tp->tm_mon],
