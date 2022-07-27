@@ -1,6 +1,7 @@
-/*	$OpenBSD: rijndael.h,v 1.13 2008/06/09 07:49:45 djm Exp $ */
-
-/**
+/****************************************************************************
+ * include/crypto/rijndael.h
+ * $OpenBSD: rijndael.h,v 1.13 2008/06/09 07:49:45 djm Exp $
+ *
  * rijndael-alg-fst.h
  *
  * @version 3.0 (December 2000)
@@ -24,35 +25,42 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-#ifndef __RIJNDAEL_H
-#define __RIJNDAEL_H
+ ****************************************************************************/
 
-#define AES_MAXKEYBITS	(256)
-#define AES_MAXKEYBYTES	(AES_MAXKEYBITS/8)
+#ifndef __INCLUDE_CRYPTO_RIJNDAEL_H
+#define __INCLUDE_CRYPTO_RIJNDAEL_H
+
+#define AES_MAXKEYBITS  (256)
+#define AES_MAXKEYBYTES (AES_MAXKEYBITS / 8)
+
 /* for 256-bit keys, fewer for less */
-#define AES_MAXROUNDS	14
 
-typedef unsigned char	u8;
-typedef unsigned short	u16;
-typedef unsigned int	u32;
+#define AES_MAXROUNDS 14
 
 /*  The structure for key information */
-typedef struct {
-	int	enc_only;		/* context contains only encrypt schedule */
-	int	Nr;			/* key-length-dependent number of rounds */
-	u32	ek[4*(AES_MAXROUNDS + 1)];	/* encrypt key schedule */
-	u32	dk[4*(AES_MAXROUNDS + 1)];	/* decrypt key schedule */
+
+typedef struct
+{
+  int enc_only;                         /* context contains only encrypt schedule */
+  int nr;                               /* key-length-dependent number of rounds */
+  uint32_t ek[4 * (AES_MAXROUNDS + 1)]; /* encrypt key schedule */
+  uint32_t dk[4 * (AES_MAXROUNDS + 1)]; /* decrypt key schedule */
 } rijndael_ctx;
 
-int	 rijndael_set_key(rijndael_ctx *, const u_char *, int);
-int	 rijndael_set_key_enc_only(rijndael_ctx *, const u_char *, int);
-void	 rijndael_decrypt(rijndael_ctx *, const u_char *, u_char *);
-void	 rijndael_encrypt(rijndael_ctx *, const u_char *, u_char *);
+int rijndael_set_key(FAR rijndael_ctx *, FAR const u_char *, int);
+int rijndael_set_key_enc_only(FAR rijndael_ctx *, FAR const u_char *, int);
+void rijndael_decrypt(FAR rijndael_ctx *, FAR const u_char *, FAR u_char *);
+void rijndael_encrypt(FAR rijndael_ctx *, FAR const u_char *, FAR u_char *);
 
-int	rijndaelKeySetupEnc(unsigned int [], const unsigned char [], int);
-int	rijndaelKeySetupDec(unsigned int [], const unsigned char [], int);
-void	rijndaelEncrypt(const unsigned int [], int, const unsigned char [],
-	    unsigned char []);
+int rijndael_keysetupenc(unsigned int [],
+                         const unsigned char [],
+                         int);
+int rijndael_keysetupdec(unsigned int [],
+                         const unsigned char [],
+                         int);
+void rijndael_encrypt1(const unsigned int [],
+                       int,
+                       const unsigned char [],
+                       unsigned char []);
 
-#endif /* __RIJNDAEL_H */
+#endif /* __INCLUDE_CRYPTO_RIJNDAEL_H */

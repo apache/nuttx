@@ -1,6 +1,7 @@
-/*	$OpenBSD: cmac.h,v 1.3 2017/05/02 17:07:06 mikeb Exp $	*/
-
-/*-
+/****************************************************************************
+ * include/crypto/cmac.h
+ * $OpenBSD: cmac.h,v 1.3 2017/05/02 17:07:06 mikeb Exp $
+ *
  * Copyright (c) 2008 Damien Bergamini <damien.bergamini@free.fr>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -14,28 +15,26 @@
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- */
+ *
+ ****************************************************************************/
 
-#ifndef _CMAC_H_
-#define _CMAC_H_
+#ifndef __INCLUDE_CRYPTO_CMAC_H_
+#define __INCLUDE_CRYPTO_CMAC_H_
 
 #define AES_CMAC_KEY_LENGTH	16
 #define AES_CMAC_DIGEST_LENGTH	16
 
-typedef struct _AES_CMAC_CTX {
-	AES_CTX		aesctx;
-	u_int8_t	X[16];
-	u_int8_t	M_last[16];
-	u_int		M_n;
+typedef struct _AES_CMAC_CTX
+{
+  AES_CTX aesctx;
+  u_int8_t X[16];
+  u_int8_t m_last[16];
+  u_int m_n;
 } AES_CMAC_CTX;
 
-__BEGIN_DECLS
-void	 AES_CMAC_Init(AES_CMAC_CTX *);
-void	 AES_CMAC_SetKey(AES_CMAC_CTX *, const u_int8_t [AES_CMAC_KEY_LENGTH]);
-void	 AES_CMAC_Update(AES_CMAC_CTX *, const u_int8_t *, u_int)
-		__attribute__((__bounded__(__string__,2,3)));
-void	 AES_CMAC_Final(u_int8_t [AES_CMAC_DIGEST_LENGTH], AES_CMAC_CTX *)
-		__attribute__((__bounded__(__minbytes__,1,AES_CMAC_DIGEST_LENGTH)));
-__END_DECLS
+void aes_cmac_init(FAR AES_CMAC_CTX *);
+void aes_cmac_setkey(FAR AES_CMAC_CTX *, FAR const u_int8_t *);
+void aes_cmac_update(FAR AES_CMAC_CTX *, FAR const u_int8_t *, u_int);
+void aes_cmac_final(FAR u_int8_t *, FAR AES_CMAC_CTX *);
 
-#endif /* _CMAC_H_ */
+#endif /* __INCLUDE_CRYPTO_CMAC_H_ */
