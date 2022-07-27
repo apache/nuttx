@@ -274,6 +274,39 @@ static inline void xtensa_registerdump(uintptr_t *regs)
 }
 
 /****************************************************************************
+ * Name: xtensa_dump_stack
+ ****************************************************************************/
+
+static void xtensa_dump_stack(const char *tag, uint32_t sp,
+                              uint32_t base, uint32_t size, bool force)
+{
+  uint32_t top = base + size;
+
+  _alert("%s Stack:\n", tag);
+  _alert("sp:     %08" PRIx32 "\n", sp);
+  _alert("  base: %08" PRIx32 "\n", base);
+  _alert("  size: %08" PRIx32 "\n", size);
+#ifdef CONFIG_STACK_COLORATION
+  _alert("  used: %08" PRIx32 "\n", xtensa_stack_check((uintptr_t)base,
+                                                       size));
+#endif
+
+  if (sp >= base && sp < top)
+    {
+      xtensa_stackdump(sp, top);
+    }
+  else
+    {
+      _alert("ERROR: %s Stack pointer is not within the stack\n", tag);
+
+      if (force)
+        {
+          xtensa_stackdump(base, top);
+        }
+    }
+}
+
+/****************************************************************************
  * Name: xtensa_dumpstate
  ****************************************************************************/
 
@@ -281,12 +314,6 @@ void xtensa_dumpstate(void)
 {
   struct tcb_s *rtcb = running_task();
   uint32_t sp = up_getsp();
-  uint32_t ustackbase;
-  uint32_t ustacksize;
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
-  uint32_t istackbase;
-  uint32_t istacksize;
-#endif
 
 #ifdef CONFIG_SMP
   /* Show the CPU number */
@@ -316,88 +343,30 @@ void xtensa_dumpstate(void)
   sched_dumpstack(rtcb->pid);
 #endif
 
-  /* Get the limits on the user stack memory */
-
-  ustackbase = (uint32_t)rtcb->stack_base_ptr;
-  ustacksize = (uint32_t)rtcb->adj_stack_size;
-
-  /* Get the limits on the interrupt stack memory */
+  /* Dump the irq stack */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
-#ifdef CONFIG_SMP
-  istackbase = (uint32_t)xtensa_intstack_alloc();
-#else
-  istackbase = (uint32_t)&g_intstackalloc;
-#endif
-  istacksize = INTSTACK_SIZE;
-
-  /* Show interrupt stack info */
-
-  _alert("sp:     %08x\n", sp);
-  _alert("IRQ stack:\n");
-  _alert("  base: %08x\n", istackbase);
-  _alert("  size: %08x\n", istacksize);
-#ifdef CONFIG_STACK_COLORATION
-  _alert("  used: %08x\n", up_check_intstack());
-#endif
-
-  /* Does the current stack pointer lie within the interrupt
-   * stack?
-   */
-
-  if (sp >= istackbase && sp < istackbase + istacksize)
-    {
-      /* Yes.. dump the interrupt stack */
-
-      xtensa_stackdump(sp, istackbase + istacksize);
-    }
-  else if (CURRENT_REGS)
-    {
-      _alert("ERROR: Stack pointer is not within the interrupt stack\n");
-      xtensa_stackdump(istackbase, istackbase + istacksize);
-    }
-
-  /* Extract the user stack pointer if we are in an interrupt handler.
-   * If we are not in an interrupt handler.  Then sp is the user stack
-   * pointer (and the above range check should have failed).
-   */
+  xtensa_dump_stack("IRQ", sp,
+#  ifdef CONFIG_SMP
+                    (uint32_t)xtensa_intstack_alloc(),
+#  else
+                    (uint32_t)&g_intstackalloc,
+#  endif
+                    INTSTACK_SIZE,
+                    !!CURRENT_REGS);
 
   if (CURRENT_REGS)
     {
       sp = CURRENT_REGS[REG_A1];
-      _alert("sp:     %08x\n", sp);
     }
-
-  /* Show user stack info */
-
-  _alert("User stack:\n");
-  _alert("  base: %08x\n", ustackbase);
-  _alert("  size: %08x\n", ustacksize);
-#ifdef CONFIG_STACK_COLORATION
-  _alert("  used: %08x\n", up_check_tcbstack(rtcb));
-#endif
-#else
-  _alert("sp:         %08x\n", sp);
-  _alert("stack base: %08x\n", ustackbase);
-  _alert("stack size: %08x\n", ustacksize);
-#ifdef CONFIG_STACK_COLORATION
-  _alert("stack used: %08x\n", up_check_tcbstack(rtcb));
-#endif
 #endif
 
-  /* Dump the user stack if the stack pointer lies within the allocated user
-   * stack memory.
-   */
+  /* Dump the user stack */
 
-  if (sp >= ustackbase && sp < ustackbase + ustacksize)
-    {
-      xtensa_stackdump(sp, ustackbase + ustacksize);
-    }
-  else
-    {
-      _alert("ERROR: Stack pointer is not within allocated stack\n");
-      xtensa_stackdump(ustackbase, ustackbase + ustacksize);
-    }
+  xtensa_dump_stack("User", sp,
+                    (uint32_t)rtcb->stack_base_ptr,
+                    (uint32_t)rtcb->adj_stack_size,
+                    true);
 
   /* Dump the state of all tasks (if available) */
 
