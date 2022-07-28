@@ -39,6 +39,32 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
+/* Define default values to silent compiler warning about undefined macro */
+
+#ifndef CONFIG_ARCH_BOARD_FLASH_CPU1_PROG_SIZE
+#define CONFIG_ARCH_BOARD_FLASH_CPU1_PROG_SIZE 0
+#endif
+
+#ifndef CONFIG_ARCH_BOARD_FLASH_CPU2_PROG_SIZE
+#define CONFIG_ARCH_BOARD_FLASH_CPU2_PROG_SIZE 0
+#endif
+
+#ifndef CONFIG_ARCH_BOARD_FLASH_PART1_SIZE
+#define CONFIG_ARCH_BOARD_FLASH_PART1_SIZE 0
+#endif
+
+#ifndef CONFIG_ARCH_BOARD_FLASH_PART2_SIZE
+#define CONFIG_ARCH_BOARD_FLASH_PART2_SIZE 0
+#endif
+
+#ifndef CONFIG_ARCH_BOARD_FLASH_PART3_SIZE
+#define CONFIG_ARCH_BOARD_FLASH_PART3_SIZE 0
+#endif
+
+#ifndef CONFIG_ARCH_BOARD_FLASH_PART4_SIZE
+#define CONFIG_ARCH_BOARD_FLASH_PART4_SIZE 0
+#endif
+
 #if (CONFIG_ARCH_BOARD_FLASH_CPU1_PROG_SIZE + \
      CONFIG_ARCH_BOARD_FLASH_CPU2_PROG_SIZE + \
      CONFIG_ARCH_BOARD_FLASH_PART1_SIZE + \
@@ -140,6 +166,12 @@ int stm32wl5_flash_init(void)
   int ret;
   int i;
 
+  /* Silent compiler warning in case these filesystems are not enabled */
+
+  UNUSED(nxf_minor);
+  UNUSED(smart_minor);
+  UNUSED(mtdconfig_minor);
+
   /* create an instance of the stm32 flash program memory device driver */
 
   if ((mtd = progmem_initialize()) == NULL)
@@ -164,6 +196,12 @@ int stm32wl5_flash_init(void)
       const char *name;
       const char *mnt;
       const char *fs;
+
+      /* Silent compiler warning in case where only non mountable
+       * partitions are defined.
+       */
+
+      UNUSED(mnt);
 
       size = part_table[i].size;
       name = part_table[i].name;
