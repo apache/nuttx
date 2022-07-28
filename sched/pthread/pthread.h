@@ -53,6 +53,7 @@ struct join_s
   uint8_t        crefs;          /* Reference count */
   bool           detached;       /* true: pthread_detached'ed */
   bool           terminated;     /* true: detach'ed+exit'ed */
+  uint8_t        reserved;       /* Reserved for aligned */
   pthread_t      thread;         /* Includes pid */
   sem_t          exit_sem;       /* Implements join */
   sem_t          data_sem;       /* Implements join */

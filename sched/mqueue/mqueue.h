@@ -65,11 +65,7 @@ struct mqueue_msg_s
   struct list_node node;   /* Link node to message */
   uint8_t type;            /* (Used to manage allocations) */
   uint8_t priority;        /* Priority of message */
-#if MQ_MAX_BYTES < 256
-  uint8_t msglen;          /* Message data length */
-#else
   uint16_t msglen;         /* Message data length */
-#endif
   char mail[MQ_MAX_BYTES]; /* Message data */
 };
 

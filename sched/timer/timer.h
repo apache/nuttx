@@ -53,6 +53,7 @@ struct posix_timer_s
   clockid_t        pt_clock;       /* Specifies the clock to use as the timing base. */
   uint8_t          pt_flags;       /* See PT_FLAGS_* definitions */
   uint8_t          pt_crefs;       /* Reference count */
+  uint8_t          reserved;       /* Reserved for aligned */
   pid_t            pt_owner;       /* Creator of timer */
   int              pt_delay;       /* If non-zero, used to reset repetitive timers */
   struct wdog_s    pt_wdog;        /* The watchdog that provides the timing */
