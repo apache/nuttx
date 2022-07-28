@@ -402,4 +402,13 @@ config AUDIO_CS35L41B_DEBUG
   depends on  AUDIO_CS35L41B
   default n
 
+config AUDIO_FS1818U
+	bool "Audio FS1818U chip"
+	default n
+
+config AUDIO_FS1818U_DEBUG
+  bool "Audio FS1818U chip debug"
+  depends on AUDIO_FS1818U
+  default n
+
 endif # DRIVERS_AUDIO

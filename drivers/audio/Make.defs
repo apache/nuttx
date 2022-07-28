@@ -99,6 +99,10 @@ ifeq ($(CONFIG_AUDIO_CS35L41B_DEBUG), y)
 CSRCS += cs35l41b_debug.c
 endif
 
+ifeq ($(CONFIG_AUDIO_FS1818U), y)
+CSRCS += fs1818.c
+endif
+
 # Include Audio driver support
 
 DEPPATH += --dep-path audio
