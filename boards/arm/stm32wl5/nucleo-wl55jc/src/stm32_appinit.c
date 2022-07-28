@@ -48,6 +48,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Define proc mountpoint in case procfs is used but nsh is not */
+
+#ifndef CONFIG_NSH_PROC_MOUNTPOINT
+#define CONFIG_NSH_PROC_MOUNTPOINT "/proc"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
