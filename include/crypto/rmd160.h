@@ -28,6 +28,12 @@
 #ifndef __INCLUDE_CRYPTO_RMD160_H
 #define __INCLUDE_CRYPTO_RMD160_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <sys/types.h>
+
 #define RMD160_BLOCK_LENGTH  64
 #define RMD160_DIGEST_LENGTH 20
 

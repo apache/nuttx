@@ -38,6 +38,12 @@
 #ifndef __INCLUDE_CRYPTO_SHA2_H
 #define __INCLUDE_CRYPTO_SHA2_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <sys/types.h>
+
 /* SHA-256/384/512 Various Length Definitions */
 
 #define SHA256_BLOCK_LENGTH         64

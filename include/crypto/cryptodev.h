@@ -55,8 +55,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/ioccom.h>
-#include <sys/task.h>
+#include <sys/types.h>
 
 /* Some initial values */
 
@@ -173,7 +172,6 @@ struct cryptodesc
 
 struct cryptop
 {
-  struct task crp_task;
   uint64_t crp_sid;  /* Session ID */
   int crp_ilen;      /* Input data total length */
   int crp_olen;      /* Result total length */
@@ -202,6 +200,7 @@ struct cryptop
   CODE int (*crp_callback)(FAR struct cryptop *); /* Callback function */
 
   caddr_t crp_mac;
+  caddr_t crp_dst;
 };
 
 #define CRYPTO_BUF_IOV 0x1
@@ -245,8 +244,6 @@ struct crypt_kop
 
 struct cryptkop
 {
-  struct task krp_task;
-
   u_int krp_op;        /* ie. CRK_MOD_EXP or other */
   u_int krp_status;    /* return status */
   u_short krp_iparams; /* # of input parameters */
@@ -322,21 +319,18 @@ struct crypt_op
  * Please use F_SETFD against the cloned descriptor.
  */
 
-#define CRIOGET       _IOWR('c', 100, uint32_t)
+#define CRIOGET                 100
 
 /* the following are done against the cloned descriptor */
-#define CIOCGSESSION  _IOWR('c', 101, struct session_op)
-#define CIOCFSESSION  _IOW('c', 102, uint32_t)
-#define CIOCCRYPT     _IOWR('c', 103, struct crypt_op)
-#define CIOCKEY       _IOWR('c', 104, struct crypt_kop)
 
-#define CIOCASYMFEAT  _IOR('c', 105, uint32_t)
+#define CIOCGSESSION            101
+#define CIOCFSESSION            102
+#define CIOCCRYPT               103
+#define CIOCKEY                 104
+#define CIOCASYMFEAT            105
 
-#ifdef _KERNEL
 int crypto_newsession(FAR uint64_t *, FAR struct cryptoini *, int);
 int crypto_freesession(uint64_t);
-int crypto_dispatch(FAR struct cryptop *);
-int crypto_kdispatch(FAR struct cryptkop *);
 int crypto_register(uint32_t, FAR int *,
                     CODE int (*)(uint32_t *, struct cryptoini *),
                     CODE int (*)(uint64_t),
@@ -346,17 +340,8 @@ int crypto_unregister(uint32_t, int);
 int crypto_get_driverid(uint8_t);
 int crypto_invoke(FAR struct cryptop *);
 int crypto_kinvoke(FAR struct cryptkop *);
-void crypto_done(FAR struct cryptop *);
-void crypto_kdone(FAR struct cryptkop *);
 int crypto_getfeat(FAR int *);
-
-void cuio_copydata(FAR struct uio *, int, int, caddr_t);
-void cuio_copyback(FAR struct uio *, int, int, const void *);
-int cuio_getptr(FAR struct uio *, int, FAR int *);
-int cuio_apply(FAR struct uio *, int, int,
-               CODE int (*f)(caddr_t, caddr_t, unsigned int), caddr_t);
 
 FAR struct cryptop *crypto_getreq(int);
 void crypto_freereq(FAR struct cryptop *);
-#endif /* _KERNEL */
 #endif /* __INCLUDE_CRYPTO_CRYPTODEV_H */

@@ -53,12 +53,11 @@
  * Included Files
  ****************************************************************************/
 
+#include <errno.h>
+#include <string.h>
+#include <strings.h>
 #include <sys/param.h>
-#include <sys/systm.h>
-#include <sys/errno.h>
 #include <sys/time.h>
-#include <sys/kernel.h>
-#include <machine/cpu.h>
 
 #include <crypto/md5.h>
 #include <crypto/sha1.h>
@@ -117,9 +116,6 @@ int rmd160update_int(FAR void *, FAR const uint8_t *, uint16_t);
 int sha256update_int(FAR void *, FAR const uint8_t *, uint16_t);
 int sha384update_int(FAR void *, FAR const uint8_t *, uint16_t);
 int sha512update_int(FAR void *, FAR const uint8_t *, uint16_t);
-
-uint32_t deflate_compress(FAR uint8_t *, uint32_t, FAR uint8_t **);
-uint32_t deflate_decompress(FAR uint8_t *, uint32_t, FAR uint8_t **);
 
 struct aes_ctr_ctx
 {
@@ -335,15 +331,6 @@ const struct auth_hash auth_hash_chacha20_poly1305 =
   chacha20_poly1305_init, chacha20_poly1305_setkey,
   chacha20_poly1305_reinit, chacha20_poly1305_update,
   chacha20_poly1305_final
-};
-
-/* Compression instance */
-
-const struct comp_algo comp_algo_deflate =
-{
-  CRYPTO_DEFLATE_COMP, "Deflate",
-  90, deflate_compress,
-  deflate_decompress
 };
 
 /* Encryption wrapper routines. */
@@ -632,29 +619,4 @@ int sha512update_int(FAR void *ctx, FAR const uint8_t *buf, uint16_t len)
 {
   sha512update(ctx, buf, len);
   return 0;
-}
-
-uint32_t deflate_global(FAR uint8_t *, uint32_t, int, FAR uint8_t **);
-
-struct deflate_buf
-{
-  FAR uint8_t *out;
-  uint32_t size;
-  int flag;
-};
-
-/* And compression */
-
-uint32_t deflate_compress(FAR uint8_t *data,
-                          uint32_t size,
-                          FAR uint8_t **out)
-{
-  return deflate_global(data, size, 0, out);
-}
-
-uint32_t deflate_decompress(FAR uint8_t *data,
-                            uint32_t size,
-                            FAR uint8_t **out)
-{
-  return deflate_global(data, size, 1, out);
 }

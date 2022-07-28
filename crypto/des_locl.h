@@ -59,7 +59,6 @@
  ****************************************************************************/
 
 #include <sys/types.h>
-#include <sys/systm.h>
 
 typedef unsigned char des_cblock[8];
 typedef struct des_ks_struct

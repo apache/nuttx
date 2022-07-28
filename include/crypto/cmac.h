@@ -21,6 +21,12 @@
 #ifndef __INCLUDE_CRYPTO_CMAC_H_
 #define __INCLUDE_CRYPTO_CMAC_H_
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <sys/types.h>
+
 #define AES_CMAC_KEY_LENGTH	16
 #define AES_CMAC_DIGEST_LENGTH	16
 

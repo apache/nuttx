@@ -32,7 +32,6 @@
  ****************************************************************************/
 
 #include <sys/param.h>
-#include <sys/systm.h>
 
 #include <crypto/rijndael.h>
 
