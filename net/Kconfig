@@ -142,6 +142,13 @@ config NET_ETHERNET
 		no need to define anything special in the configuration file to use
 		Ethernet -- it is the default).
 
+config NET_CELLULAR
+	bool "Cellular Link support"
+	default n
+	---help---
+		Add support for the cellular network device. Unlike Ethernet, cellular
+		network transmit pure IP packets.
+
 config NET_LOOPBACK
 	bool "Local loopback"
 	select ARCH_HAVE_NETDEV_STATISTICS

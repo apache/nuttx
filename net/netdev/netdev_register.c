@@ -58,6 +58,7 @@
 #define NETDEV_WPAN_FORMAT  "wpan%d"
 #define NETDEV_WWAN_FORMAT  "wwan%d"
 #define NETDEV_CAN_FORMAT   "can%d"
+#define NETDEV_CELL_FORMAT  "cell%d"
 
 #if defined(CONFIG_DRIVERS_IEEE80211) /* Usually also has CONFIG_NET_ETHERNET */
 #  define NETDEV_DEFAULT_FORMAT NETDEV_WLAN_FORMAT
@@ -343,6 +344,15 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
             pktsize  = 1200;
             devfmt   = NETDEV_WWAN_FORMAT;
             flags    = IFF_BROADCAST | IFF_NOARP | IFF_MULTICAST;
+            break;
+#endif
+
+#ifdef CONFIG_NET_CELLULAR
+          case NET_LL_CELL:
+            llhdrlen = 0;
+            pktsize  = CONFIG_NET_ETH_PKTSIZE;
+            devfmt   = NETDEV_CELL_FORMAT;
+            flags    = IFF_NOARP;
             break;
 #endif
 
