@@ -28,6 +28,12 @@
 #include <nuttx/config.h>
 #include <hardware/s32k1xx_memorymap.h>
 
+#if defined(CONFIG_ARCH_CHIP_S32K11X)
+#  error "Sorry no s32k11x_dmamux.h - Please author one"
+#elif defined(CONFIG_ARCH_CHIP_S32K14X)
+#  include <hardware/s32k146_dmamux.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -46,7 +52,7 @@
 
 /* DMAMUX Register Addresses ************************************************/
 
-#define S32K1XX_DMAMUX_CHCFG(n)         (S32K1XX_DMAMUX_BASE + S32K1XX_DMAMUX_CHCFG_OFFSET(n)) n=1..15 */
+#define S32K1XX_DMAMUX_CHCFG(n)         (S32K1XX_DMAMUX_BASE + S32K1XX_DMAMUX_CHCFG_OFFSET(n)) /* n=1..15 */
 
 /* DMAMUX Register Bitfield Definitions *************************************/
 
