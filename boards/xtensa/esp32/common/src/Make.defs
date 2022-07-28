@@ -57,7 +57,7 @@ ifeq ($(CONFIG_SENSORS_BMP180),y)
 endif
 
 ifeq ($(CONFIG_SENSORS_BMP280),y)
-CSRCS += esp32_bmp280.c
+  CSRCS += esp32_bmp280.c
 endif
 
 ifeq ($(CONFIG_SENSORS_SHT3X),y)
@@ -82,6 +82,10 @@ endif
 
 ifeq ($(CONFIG_LCD_ILI9341),y)
   CSRCS += esp32_ili9341.c
+endif
+
+ifeq ($(CONFIG_LCD_ST7789),y)
+  CSRCS += esp32_st7789.c
 endif
 
 ifeq ($(CONFIG_LCD_SSD1306_I2C),y)
