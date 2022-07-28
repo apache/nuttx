@@ -109,10 +109,12 @@ static const struct part_table part_table[] =
   },
 
 #if CONFIG_ARCH_BOARD_FLASH_CPU2_PROG_SIZE > 0
+  {
     .size   = CONFIG_ARCH_BOARD_FLASH_CPU2_PROG_SIZE,
     .name   = "cpu2-progmem",
     .mnt    = NULL,
     .fs     = "rawfs"
+  },
 #endif
 
   {
