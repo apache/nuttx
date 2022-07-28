@@ -510,6 +510,16 @@ int battery_monitor_changed(FAR struct battery_monitor_dev_s *dev,
   FAR struct battery_monitor_priv_s *priv;
   int ret;
 
+  /* Event happen too early? */
+
+  if (list_is_clear(&dev->flist))
+    {
+      /* Yes, record it and return directly */
+
+      dev->mask |= mask;
+      return 0;
+    }
+
   ret = nxsem_wait_uninterruptible(&dev->batsem);
   if (ret < 0)
     {
