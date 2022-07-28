@@ -263,6 +263,21 @@ static int cs35l41b_stop(FAR struct audio_lowerhalf_s *dev);
 static int cs35l41b_ioctl(FAR struct audio_lowerhalf_s *dev,
                           int cmd, unsigned long arg);
 
+#ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+static CODE int cs35l41b_pause(FAR struct audio_lowerhalf_s *dev, FAR void *session);
+#else
+  CODE int cs35l41b_pause(FAR struct audio_lowerhalf_s *dev);
+#endif
+
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+  CODE int cs35l41b_resume(FAR struct audio_lowerhalf_s *dev, FAR void *session);
+#else
+  CODE int cs35l41b_resume(FAR struct audio_lowerhalf_s *dev);
+#endif
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -277,6 +292,8 @@ static const struct audio_ops_s g_audioops =
   .stop           = cs35l41b_stop,
 #endif
   .ioctl          = cs35l41b_ioctl,
+  .pause          = cs35l41b_pause,
+  .resume         = cs35l41b_resume,
 };
 
 static const uint32_t g_cs35l41_revb2_errata_patch[] =
@@ -968,6 +985,123 @@ static int cs35l41b_get_mode_handler(FAR struct cs35l41b_dev_s *priv,
  *
  ****************************************************************************/
 
+#ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+static CODE int cs35l41b_pause(FAR struct audio_lowerhalf_s *dev, FAR void *session)
+#else
+  CODE int cs35l41b_pause(FAR struct audio_lowerhalf_s *dev)
+#endif
+{
+  FAR struct cs35l41b_dev_s *priv = (FAR struct cs35l41b_dev_s *)dev;
+
+  audinfo("cs35l41b pause!\n");
+
+  /* if cs35l41b is already not running, return immediately */
+
+  if (!priv->is_running)
+    {
+      return OK;
+    }
+
+  /* check event is happened */
+
+  if (priv->event_flags && priv->is_running)
+    {
+      nxsem_wait_uninterruptible(&priv->pendsem);
+      priv->event_flags = 0;
+      priv->is_running = false;
+
+      return ERROR;
+    }
+
+#ifdef CONFIG_AUDIO_CS35L41B_DEBUG
+  cs35l41b_dump_registers(priv, 0);
+#endif
+
+  if (cs35l41b_mute(priv, true) == ERROR)
+    {
+      auderr("dsp mute failed\n");
+      return ERROR;
+    }
+
+  if (cs35l41b_power(priv, POWER_DOWN) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (priv->mode != CS35L41_ASP_MODE)
+    {
+      if (cs35l41b_power(priv, POWER_HIBERNATE) == ERROR)
+        {
+          auderr("power hibernate error!\n");
+          return ERROR;
+        }
+    }
+
+  priv->is_running = false;
+
+  return OK;
+}
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+  CODE int cs35l41b_resume(FAR struct audio_lowerhalf_s *dev, FAR void *session)
+#else
+  CODE int cs35l41b_resume(FAR struct audio_lowerhalf_s *dev)
+#endif
+{
+  FAR struct cs35l41b_dev_s *priv = (FAR struct cs35l41b_dev_s *)dev;
+
+  if (!priv->initialize)
+    {
+      return -EBUSY;
+    }
+
+  if (priv->mode != CS35L41_ASP_MODE)
+    {
+      if (cs35l41b_power(priv, POWER_WAKEUP) == ERROR)
+        {
+          auderr("power wake up failed!\n");
+          return ERROR;
+        }
+    }
+
+  if (cs35l41b_output_configuration(priv) == ERROR)
+    {
+      auderr("output configuration failed!\n");
+      return ERROR;
+    }
+
+  if (cs35l41b_power(priv, POWER_UP) == ERROR)
+    {
+      auderr("power process failed\n");
+      return ERROR;
+    }
+
+  if (priv->mode != CS35L41_ASP_MODE)
+    {
+      if (cs35l41b_tune_change_params(priv) == ERROR)
+        {
+          auderr("tune change params failed!\n");
+          return ERROR;
+        }
+    }
+
+  if (cs35l41b_mute(priv, false) == ERROR)
+    {
+      auderr("dsp mute failed\n");
+      return ERROR;
+    }
+
+#ifdef CONFIG_AUDIO_CS35L41B_DEBUG
+  cs35l41b_dump_registers(priv, 0);
+#endif
+
+  priv->is_running = true;
+
+  return OK;
+}
+#endif
+
 static int cs35l41b_ioctl(FAR struct audio_lowerhalf_s *dev,
                           int cmd, unsigned long arg)
 {
@@ -1409,6 +1543,13 @@ static int cs35l41b_stop(FAR struct audio_lowerhalf_s *dev)
   FAR struct cs35l41b_dev_s *priv = (FAR struct cs35l41b_dev_s *)dev;
 
   audinfo("cs35l41b stop!\n");
+
+  /* if cs35l41b is already not running, return immediately */
+
+  if (!priv->is_running)
+    {
+      return OK;
+    }
 
   /* check event is happened */
 
