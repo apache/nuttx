@@ -33,6 +33,12 @@
 #ifndef __INCLUDE_CRYPTO_BLF_H
 #define __INCLUDE_CRYPTO_BLF_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <sys/types.h>
+
 /* Schneier states the maximum key length to be 56 bytes.
  * The way how the subkeys are initialized by the key up
  * to (N+2)*4 i.e. 72 bytes are utilized.

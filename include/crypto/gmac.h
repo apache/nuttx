@@ -24,6 +24,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <sys/types.h>
 #include <crypto/aes.h>
 
 #define GMAC_BLOCK_LEN 16

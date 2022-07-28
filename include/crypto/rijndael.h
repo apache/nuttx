@@ -30,6 +30,12 @@
 #ifndef __INCLUDE_CRYPTO_RIJNDAEL_H
 #define __INCLUDE_CRYPTO_RIJNDAEL_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <sys/types.h>
+
 #define AES_MAXKEYBITS  (256)
 #define AES_MAXKEYBYTES (AES_MAXKEYBITS / 8)
 

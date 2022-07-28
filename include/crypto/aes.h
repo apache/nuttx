@@ -29,6 +29,12 @@
 #ifndef __INCLUDE_CRYPTO_AES_H
 #define __INCLUDE_CRYPTO_AES_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <sys/types.h>
+
 #ifndef AES_MAXROUNDS
 #  define AES_MAXROUNDS (14)
 #endif

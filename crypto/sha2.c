@@ -38,8 +38,9 @@
  * Included Files
  ****************************************************************************/
 
+#include <endian.h>
+#include <string.h>
 #include <sys/time.h>
-#include <sys/systm.h>
 #include <crypto/sha2.h>
 
 /* UNROLLED TRANSFORM LOOP NOTE:

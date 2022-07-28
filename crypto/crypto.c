@@ -26,31 +26,36 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/param.h>
-#include <sys/systm.h>
-#include <sys/malloc.h>
-#include <sys/proc.h>
-#include <sys/pool.h>
+#include <nuttx/config.h>
 
+#include <sys/types.h>
+#include <stdbool.h>
+#include <string.h>
+#include <poll.h>
+#include <debug.h>
+#include <errno.h>
 #include <crypto/cryptodev.h>
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-void crypto_init(void);
+#include <nuttx/fs/fs.h>
+#include <nuttx/mutex.h>
+#include <nuttx/kmalloc.h>
+#include <nuttx/crypto/crypto.h>
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-FAR static struct cryptocap *crypto_drivers = NULL;
+FAR struct cryptocap *crypto_drivers = NULL;
 int crypto_drivers_num = 0;
 
-struct pool cryptop_pool;
-struct pool cryptodesc_pool;
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
-FAR struct taskq *crypto_taskq;
+static mutex_t g_crypto_lock = NXMUTEX_INITIALIZER;
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /* Create a new session. */
 
@@ -65,14 +70,13 @@ int crypto_newsession(FAR uint64_t *sid,
   FAR struct cryptoini *cr;
   int turn = 0;
   int err;
-  int s;
 
   if (crypto_drivers == NULL)
     {
-      return EINVAL;
+      return -EINVAL;
     }
 
-  s = splvm();
+  nxmutex_lock(&g_crypto_lock);
 
   /* The algorithm we use here is pretty stupid; just use the
    * first driver that supports all the algorithms we need. Do
@@ -196,8 +200,8 @@ int crypto_newsession(FAR uint64_t *sid,
 
   if (hid == -1)
     {
-      splx(s);
-      return EINVAL;
+      nxmutex_unlock(&g_crypto_lock);
+      return -EINVAL;
     }
 
   /* Call the driver initialization routine. */
@@ -212,7 +216,7 @@ int crypto_newsession(FAR uint64_t *sid,
       crypto_drivers[hid].cc_sessions++;
     }
 
-  splx(s);
+  nxmutex_unlock(&g_crypto_lock);
   return err;
 }
 
@@ -223,12 +227,11 @@ int crypto_newsession(FAR uint64_t *sid,
 int crypto_freesession(uint64_t sid)
 {
   int err = 0;
-  int s;
   uint32_t hid;
 
   if (crypto_drivers == NULL)
     {
-      return EINVAL;
+      return -EINVAL;
     }
 
   /* Determine two IDs. */
@@ -237,10 +240,10 @@ int crypto_freesession(uint64_t sid)
 
   if (hid >= crypto_drivers_num)
     {
-      return ENOENT;
+      return -ENOENT;
     }
 
-  s = splvm();
+  nxmutex_lock(&g_crypto_lock);
 
   if (crypto_drivers[hid].cc_sessions)
     {
@@ -264,7 +267,7 @@ int crypto_freesession(uint64_t sid)
       explicit_bzero(&crypto_drivers[hid], sizeof(struct cryptocap));
     }
 
-  splx(s);
+  nxmutex_unlock(&g_crypto_lock);
   return err;
 }
 
@@ -274,19 +277,18 @@ int crypto_get_driverid(uint8_t flags)
 {
   FAR struct cryptocap *newdrv;
   int i;
-  int s;
 
-  s = splvm();
+  nxmutex_lock(&g_crypto_lock);
 
   if (crypto_drivers_num == 0)
     {
       crypto_drivers_num = CRYPTO_DRIVERS_INITIAL;
-      crypto_drivers = mallocarray(crypto_drivers_num,
-          sizeof(struct cryptocap), M_CRYPTO_DATA, M_NOWAIT);
+      crypto_drivers = kmm_calloc(crypto_drivers_num,
+          sizeof(struct cryptocap));
       if (crypto_drivers == NULL)
         {
           crypto_drivers_num = 0;
-          splx(s);
+          nxmutex_unlock(&g_crypto_lock);
           return -1;
         }
 
@@ -302,7 +304,7 @@ int crypto_get_driverid(uint8_t flags)
         {
           crypto_drivers[i].cc_sessions = 1; /* Mark */
           crypto_drivers[i].cc_flags = flags;
-          splx(s);
+          nxmutex_unlock(&g_crypto_lock);
           return i;
         }
     }
@@ -313,15 +315,15 @@ int crypto_get_driverid(uint8_t flags)
     {
       if (crypto_drivers_num >= CRYPTO_DRIVERS_MAX)
         {
-          splx(s);
+          nxmutex_unlock(&g_crypto_lock);
           return -1;
         }
 
-      newdrv = mallocarray(crypto_drivers_num,
-          2 * sizeof(struct cryptocap), M_CRYPTO_DATA, M_NOWAIT);
+      newdrv = kmm_calloc(crypto_drivers_num * 2,
+                          sizeof(struct cryptocap));
       if (newdrv == NULL)
         {
-          splx(s);
+          nxmutex_unlock(&g_crypto_lock);
           return -1;
         }
 
@@ -334,15 +336,15 @@ int crypto_get_driverid(uint8_t flags)
       newdrv[i].cc_flags = flags;
       crypto_drivers_num *= 2;
 
-      free(crypto_drivers, M_CRYPTO_DATA, 0);
+      kmm_free(crypto_drivers);
       crypto_drivers = newdrv;
-      splx(s);
+      nxmutex_unlock(&g_crypto_lock);
       return i;
     }
 
   /* Shouldn't really get here... */
 
-  splx(s);
+  nxmutex_unlock(&g_crypto_lock);
   return -1;
 }
 
@@ -353,16 +355,15 @@ int crypto_get_driverid(uint8_t flags)
 int crypto_kregister(uint32_t driverid, FAR int *kalg,
                      CODE int (*kprocess)(FAR struct cryptkop *))
 {
-  int s;
   int i;
 
   if (driverid >= crypto_drivers_num || kalg  == NULL ||
       crypto_drivers == NULL)
     {
-      return EINVAL;
+      return -EINVAL;
     }
 
-  s = splvm();
+  nxmutex_lock(&g_crypto_lock);
 
   for (i = 0; i <= CRK_ALGORITHM_MAX; i++)
     {
@@ -376,7 +377,7 @@ int crypto_kregister(uint32_t driverid, FAR int *kalg,
 
   crypto_drivers[driverid].cc_kprocess = kprocess;
 
-  splx(s);
+  nxmutex_unlock(&g_crypto_lock);
   return 0;
 }
 
@@ -388,16 +389,15 @@ int crypto_register(uint32_t driverid, FAR int *alg,
                     CODE int (*freeses)(uint64_t),
                     CODE int (*process)(FAR struct cryptop *))
 {
-  int s;
   int i;
 
   if (driverid >= crypto_drivers_num || alg == NULL ||
       crypto_drivers == NULL)
     {
-      return EINVAL;
+      return -EINVAL;
     }
 
-  s = splvm();
+  nxmutex_lock(&g_crypto_lock);
 
   for (i = 0; i <= CRYPTO_ALGORITHM_MAX; i++)
     {
@@ -414,7 +414,7 @@ int crypto_register(uint32_t driverid, FAR int *alg,
   crypto_drivers[driverid].cc_freesession = freeses;
   crypto_drivers[driverid].cc_sessions = 0; /* Unmark */
 
-  splx(s);
+  nxmutex_unlock(&g_crypto_lock);
 
   return 0;
 }
@@ -428,10 +428,9 @@ int crypto_register(uint32_t driverid, FAR int *alg,
 int crypto_unregister(uint32_t driverid, int alg)
 {
   int i = CRYPTO_ALGORITHM_MAX + 1;
-  int s;
   uint32_t ses;
 
-  s = splvm();
+  nxmutex_lock(&g_crypto_lock);
 
   /* Sanity checks. */
 
@@ -440,8 +439,8 @@ int crypto_unregister(uint32_t driverid, int alg)
       alg != CRYPTO_ALGORITHM_MAX + 1) ||
       crypto_drivers[driverid].cc_alg[alg] == 0)
     {
-      splx(s);
-      return EINVAL;
+      nxmutex_unlock(&g_crypto_lock);
+      return -EINVAL;
     }
 
   if (alg != CRYPTO_ALGORITHM_MAX + 1)
@@ -476,39 +475,7 @@ int crypto_unregister(uint32_t driverid, int alg)
         }
     }
 
-  splx(s);
-  return 0;
-}
-
-/* Add crypto request to a queue, to be processed by a kernel thread. */
-
-int crypto_dispatch(FAR struct cryptop *crp)
-{
-  if (crypto_taskq && !(crp->crp_flags & CRYPTO_F_NOQUEUE))
-    {
-      task_set(&crp->crp_task, (void (*))crypto_invoke, crp, NULL);
-      task_add(crypto_taskq, &crp->crp_task);
-    }
-  else
-    {
-      crypto_invoke(crp);
-    }
-
-  return 0;
-}
-
-int crypto_kdispatch(FAR struct cryptkop *krp)
-{
-  if (crypto_taskq)
-    {
-      task_set(&krp->krp_task, (void (*))crypto_kinvoke, krp, NULL);
-      task_add(crypto_taskq, &krp->krp_task);
-    }
-  else
-    {
-      crypto_kinvoke(krp);
-    }
-
+  nxmutex_unlock(&g_crypto_lock);
   return 0;
 }
 
@@ -519,16 +486,15 @@ int crypto_kinvoke(FAR struct cryptkop *krp)
   extern int cryptodevallowsoft;
   uint32_t hid;
   int error;
-  int s;
 
   /* Sanity checks. */
 
-  if (krp == NULL || krp->krp_callback == NULL)
+  if (krp == NULL)
     {
-      return EINVAL;
+      return -EINVAL;
     }
 
-  s = splvm();
+  nxmutex_lock(&g_crypto_lock);
   for (hid = 0; hid < crypto_drivers_num; hid++)
     {
       if ((crypto_drivers[hid].cc_flags & CRYPTOCAP_F_SOFTWARE) &&
@@ -553,9 +519,8 @@ int crypto_kinvoke(FAR struct cryptkop *krp)
 
   if (hid == crypto_drivers_num)
     {
-      krp->krp_status = ENODEV;
-      crypto_kdone(krp);
-      splx(s);
+      krp->krp_status = -ENODEV;
+      nxmutex_unlock(&g_crypto_lock);
       return 0;
     }
 
@@ -567,10 +532,9 @@ int crypto_kinvoke(FAR struct cryptkop *krp)
   if (error)
     {
       krp->krp_status = error;
-      crypto_kdone(krp);
     }
 
-  splx(s);
+  nxmutex_unlock(&g_crypto_lock);
   return 0;
 }
 
@@ -582,21 +546,19 @@ int crypto_invoke(FAR struct cryptop *crp)
   uint64_t nid;
   uint32_t hid;
   int error;
-  int s;
 
   /* Sanity checks. */
 
-  if (crp == NULL || crp->crp_callback == NULL)
+  if (crp == NULL)
     {
-      return EINVAL;
+      return -EINVAL;
     }
 
-  s = splvm();
+  nxmutex_lock(&g_crypto_lock);
   if (crp->crp_desc == NULL || crypto_drivers == NULL)
     {
-      crp->crp_etype = EINVAL;
-      crypto_done(crp);
-      splx(s);
+      crp->crp_etype = -EINVAL;
+      nxmutex_unlock(&g_crypto_lock);
       return 0;
     }
 
@@ -623,7 +585,7 @@ int crypto_invoke(FAR struct cryptop *crp)
   error = crypto_drivers[hid].cc_process(crp);
   if (error)
     {
-      if (error == ERESTART)
+      if (error == -ERESTART)
         {
           /* Unregister driver and migrate session. */
 
@@ -636,7 +598,7 @@ int crypto_invoke(FAR struct cryptop *crp)
         }
     }
 
-  splx(s);
+  nxmutex_unlock(&g_crypto_lock);
   return 0;
 
 migrate:
@@ -653,9 +615,8 @@ migrate:
       crp->crp_sid = nid;
     }
 
-  crp->crp_etype = EAGAIN;
-  crypto_done(crp);
-  splx(s);
+  crp->crp_etype = -EAGAIN;
+  nxmutex_unlock(&g_crypto_lock);
   return 0;
 }
 
@@ -664,23 +625,22 @@ migrate:
 void crypto_freereq(FAR struct cryptop *crp)
 {
   FAR struct cryptodesc *crd;
-  int s;
 
   if (crp == NULL)
     {
       return;
     }
 
-  s = splvm();
+  nxmutex_lock(&g_crypto_lock);
 
   while ((crd = crp->crp_desc) != NULL)
     {
       crp->crp_desc = crd->crd_next;
-      pool_put(&cryptodesc_pool, crd);
+      kmm_free(crd);
     }
 
-  pool_put(&cryptop_pool, crp);
-  splx(s);
+  kmm_free(crp);
+  nxmutex_unlock(&g_crypto_lock);
 }
 
 /* Acquire a set of crypto descriptors. */
@@ -689,14 +649,13 @@ FAR struct cryptop *crypto_getreq(int num)
 {
   FAR struct cryptodesc *crd;
   FAR struct cryptop *crp;
-  int s;
 
-  s = splvm();
+  nxmutex_lock(&g_crypto_lock);
 
-  crp = pool_get(&cryptop_pool, PR_NOWAIT);
+  crp = kmm_malloc(sizeof(struct cryptop));
   if (crp == NULL)
     {
-      splx(s);
+      nxmutex_unlock(&g_crypto_lock);
       return NULL;
     }
 
@@ -704,58 +663,20 @@ FAR struct cryptop *crypto_getreq(int num)
 
   while (num--)
     {
-      crd = pool_get(&cryptodesc_pool, PR_NOWAIT);
+      crd = kmm_calloc(1, sizeof(struct cryptodesc));
       if (crd == NULL)
         {
-          splx(s);
+          nxmutex_unlock(&g_crypto_lock);
           crypto_freereq(crp);
           return NULL;
         }
 
-      bzero(crd, sizeof(struct cryptodesc));
       crd->crd_next = crp->crp_desc;
       crp->crp_desc = crd;
     }
 
-  splx(s);
+  nxmutex_unlock(&g_crypto_lock);
   return crp;
-}
-
-void crypto_init(void)
-{
-  crypto_taskq = taskq_create("crypto", 1, IPL_HIGH);
-
-  pool_init(&cryptop_pool, sizeof(struct cryptop), 0, 0,
-            0, "cryptop", NULL);
-  pool_init(&cryptodesc_pool, sizeof(struct cryptodesc), 0, 0,
-            0, "cryptodesc", NULL);
-}
-
-/* Invoke the callback on behalf of the driver. */
-
-void crypto_done(FAR struct cryptop *crp)
-{
-  crp->crp_flags |= CRYPTO_F_DONE;
-  if (crp->crp_flags & CRYPTO_F_NOQUEUE)
-    {
-      /* not from the crypto queue, wakeup the userland process */
-
-      crp->crp_callback(crp);
-    }
-  else
-    {
-      task_set(&crp->crp_task, (void (*))crp->crp_callback,
-          crp, NULL);
-      task_add(crypto_taskq, &crp->crp_task);
-    }
-}
-
-/* Invoke the callback on behalf of the driver. */
-
-void crypto_kdone(FAR struct cryptkop *krp)
-{
-  task_set(&krp->krp_task, (void (*))krp->krp_callback, krp, NULL);
-  task_add(crypto_taskq, &krp->krp_task);
 }
 
 int crypto_getfeat(FAR int *featp)
@@ -797,4 +718,23 @@ int crypto_getfeat(FAR int *featp)
 out:
   *featp = feat;
   return 0;
+}
+
+int up_cryptoinitialize(void)
+{
+#ifdef CONFIG_CRYPTO_ALGTEST
+  int ret = crypto_test();
+  if (ret)
+    {
+      crypterr("ERROR: crypto test failed\n");
+    }
+  else
+    {
+      cryptinfo("crypto test OK\n");
+    }
+
+  return ret;
+#else
+  return OK;
+#endif
 }

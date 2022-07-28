@@ -12,7 +12,6 @@
  ****************************************************************************/
 
 #include <sys/types.h>
-#include <sys/systm.h>
 
 #include <crypto/poly1305.h>
 

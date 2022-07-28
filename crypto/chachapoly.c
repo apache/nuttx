@@ -21,9 +21,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <endian.h>
 #include <sys/param.h>
-#include <sys/systm.h>
-#include <lib/libkern/libkern.h>
 
 #include <crypto/poly1305.h>
 #include <crypto/chachapoly.h>

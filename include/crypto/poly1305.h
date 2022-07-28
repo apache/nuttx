@@ -11,6 +11,12 @@
 #ifndef __INCLUDE_CRYPTO_POLY1305_H
 #define __INCLUDE_CRYPTO_POLY1305_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <sys/types.h>
+
 #define poly1305_block_size 16
 
 typedef struct poly1305_state

@@ -26,8 +26,9 @@
  * Included Files
  ****************************************************************************/
 
+#include <string.h>
+#include <strings.h>
 #include <sys/param.h>
-#include <sys/systm.h>
 
 #include <crypto/md5.h>
 #include <crypto/sha1.h>

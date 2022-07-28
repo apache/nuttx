@@ -28,9 +28,9 @@
  * Included Files
  ****************************************************************************/
 
+#include <endian.h>
+#include <strings.h>
 #include <sys/param.h>
-#include <sys/systm.h>
-
 #include <crypto/aes.h>
 #include <crypto/gmac.h>
 

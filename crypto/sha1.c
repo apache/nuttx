@@ -20,8 +20,9 @@
  * Included Files
  ****************************************************************************/
 
+#include <endian.h>
+#include <string.h>
 #include <sys/param.h>
-#include <sys/systm.h>
 
 #include <crypto/sha1.h>
 

@@ -31,9 +31,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <string.h>
 #include <sys/types.h>
-#include <sys/systm.h>
-#include <sys/stdint.h>
 #include <crypto/aes.h>
 
 /****************************************************************************

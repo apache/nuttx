@@ -11,7 +11,8 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/systm.h>
+#include <string.h>
+#include <sys/types.h>
 
 typedef struct
 {

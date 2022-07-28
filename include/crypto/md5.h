@@ -18,6 +18,12 @@
 #ifndef __INCLUDE_CRYPTO_MD5_H
 #define __INCLUDE_CRYPTO_MD5_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <sys/types.h>
+
 #define MD5_BLOCK_LENGTH    64
 #define MD5_DIGEST_LENGTH   16
 

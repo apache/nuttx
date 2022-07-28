@@ -35,8 +35,8 @@
  ****************************************************************************/
 
 #include <sys/param.h>
-#include <sys/systm.h>
-#include <sys/endian.h>
+#include <endian.h>
+#include <string.h>
 #include <crypto/rmd160.h>
 
 #define PUT_64BIT_LE(cp, value) \

@@ -20,6 +20,12 @@
 #ifndef __INCLUDE_CRYPTO_KEY_WRAP_H_
 #define __INCLUDE_CRYPTO_KEY_WRAP_H_
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <sys/types.h>
+
 typedef struct _aes_key_wrap_ctx
 {
   AES_CTX ctx;

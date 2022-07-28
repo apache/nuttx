@@ -26,8 +26,11 @@
  * Included Files
  ****************************************************************************/
 
+#include <string.h>
+#include <strings.h>
+#include <stdlib.h>
+#include <nuttx/clock.h>
 #include <sys/types.h>
-#include <sys/systm.h>
 #include <sys/time.h>
 
 #include <crypto/idgen.h>
@@ -119,7 +122,8 @@ static void idgen32_rekey(FAR struct idgen32_ctx *ctx)
   ctx->id32_hibit ^= 0x80000000;
   ctx->id32_offset = arc4random();
   arc4random_buf(ctx->id32_key, sizeof(ctx->id32_key));
-  ctx->id32_rekey_time = getuptime() + IDGEN32_REKEY_TIME;
+  ctx->id32_rekey_time = TICK2SEC(clock_systime_ticks()) +
+                         IDGEN32_REKEY_TIME;
 }
 
 /****************************************************************************
@@ -142,7 +146,7 @@ uint32_t idgen32(FAR struct idgen32_ctx *ctx)
       /* Rekey a little early to avoid "card counting" attack */
 
       if (ctx->id32_counter > IDGEN32_REKEY_LIMIT ||
-          ctx->id32_rekey_time < getuptime())
+          ctx->id32_rekey_time < TICK2SEC(clock_systime_ticks()))
         {
           idgen32_rekey(ctx);
         }

@@ -51,6 +51,12 @@
 #ifndef __INCLUDE_CRYPTO_SIPHASH_H_
 #define __INCLUDE_CRYPTO_SIPHASH_H_
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <sys/types.h>
+
 #define SIPHASH_BLOCK_LENGTH  8
 #define SIPHASH_KEY_LENGTH    16
 #define SIPHASH_DIGEST_LENGTH 8

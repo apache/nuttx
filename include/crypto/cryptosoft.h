@@ -30,6 +30,9 @@
  * Included Files
  ****************************************************************************/
 
+#include <sys/queue.h>
+#include <crypto/cryptodev.h>
+
 /* Software session entry */
 
 struct swcr_data
@@ -70,15 +73,14 @@ struct swcr_data
   struct swcr_data *sw_next;
 };
 
-#ifdef _KERNEL
 extern const uint8_t hmac_ipad_buffer[HMAC_MAX_BLOCK_LEN];
 extern const uint8_t hmac_opad_buffer[HMAC_MAX_BLOCK_LEN];
 
-int swcr_encdec(FAR struct cryptodesc *,
-                FAR struct swcr_data *, caddr_t, int);
+int swcr_encdec(FAR struct cryptop *, FAR struct cryptodesc *,
+                FAR struct swcr_data *, caddr_t);
 int swcr_authcompute(FAR struct cryptop *, FAR struct cryptodesc *,
                      FAR struct swcr_data *,
-                     caddr_t, int);
+                     caddr_t);
 int swcr_authenc(FAR struct cryptop *);
 int swcr_compdec(FAR struct cryptodesc *, FAR struct swcr_data *,
                  caddr_t, int);
@@ -86,6 +88,5 @@ int swcr_process(FAR struct cryptop *);
 int swcr_newsession(FAR uint32_t *, FAR struct cryptoini *);
 int swcr_freesession(uint64_t);
 void swcr_init(void);
-#endif /* _KERNEL */
 
 #endif /* __INCLUDE_CRYPTO_CRYPTOSOFT_H */
