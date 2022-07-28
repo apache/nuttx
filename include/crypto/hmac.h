@@ -21,6 +21,12 @@
 #ifndef __INCLUDE_CRYPTO_HMAC_H_
 #define __INCLUDE_CRYPTO_HMAC_H_
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <sys/types.h>
+
 typedef struct _HMAC_MD5_CTX
 {
   MD5_CTX ctx;

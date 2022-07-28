@@ -6681,3 +6681,1139 @@ include/sys/queue.h
  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  SUCH DAMAGE.
+
+include/crypto/cryptodev.h
+====================
+  $OpenBSD: cryptodev.h,v 1.58 2013/10/31 10:32:38 mikeb Exp $
+  The author of this code is Angelos D. Keromytis (angelos@cis.upenn.edu)
+ *
+  This code was written by Angelos D. Keromytis in Athens, Greece, in
+  February 2000. Network Security Technologies Inc. (NSTI) kindly
+  supported the development of this code.
+ *
+  Copyright (c) 2000 Angelos D. Keromytis
+ *
+Permission to use, copy, and modify this software with or without fee
+is hereby granted, provided that this entire notice is included in
+all source code copies of any software which is or includes a copy or
+modification of this software.
+ *
+THIS SOFTWARE IS BEING PROVIDED "AS IS", WITHOUT ANY EXPRESS OR
+IMPLIED WARRANTY. IN PARTICULAR, NONE OF THE AUTHORS MAKES ANY
+REPRESENTATION OR WARRANTY OF ANY KIND CONCERNING THE
+MERCHANTABILITY OF THIS SOFTWARE OR ITS FITNESS FOR ANY PARTICULAR
+PURPOSE.
+
+Copyright (c) 2001 Theo de Raadt
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Effort sponsored in part by the Defense Advanced Research Projects
+Agency (DARPA) and Air Force Research Laboratory, Air Force
+Materiel Command, USAF, under agreement number F30602-01-2-0537.
+
+include/crypto/blf.h
+====================
+   $OpenBSD: blf.h,v 1.7 2021/11/29 01:04:45 djm Exp $
+
+   Blowfish - a fast block cipher designed by Bruce Schneier
+
+   Copyright 1997 Niels Provos <provos@physnet.uni-hamburg.de>
+   All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+ 3. The name of the author may not be used to endorse or promote products
+    derived from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAG
+
+include/crypto/cast.h
+====================
+   $OpenBSD: cast.h,v 1.2 2002/03/14 01:26:51 millert Exp $
+
+ CAST-128 in C
+ Written by Steve Reid <sreid@sea-to-sky.net>
+ 100% Public Domain - no warranty
+ Released 1997.10.11
+
+include/crypto/chachapoly.h
+====================
+   $OpenBSD: chachapoly.h,v 1.4 2020/07/22 13:54:30 tobhe Exp $
+   Copyright (c) 2015 Mike Belopuhov
+
+ Permission to use, copy, modify, and distribute this software for any
+ purpose with or without fee is hereby granted, provided that the above
+ copyright notice and this permission notice appear in all copies.
+
+ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+include/crypto/cryptosoft.h
+====================
+  $OpenBSD: cryptosoft.h,v 1.14 2012/12/07 17:03:22 mikeb Exp $
+
+  The author of this code is Angelos D. Keromytis (angelos@cis.upenn.edu)
+
+  This code was written by Angelos D. Keromytis in Athens, Greece, in
+  February 2000. Network Security Technologies Inc. (NSTI) kindly
+  supported the development of this code.
+
+  Copyright (c) 2000 Angelos D. Keromytis
+
+Permission to use, copy, and modify this software with or without fee
+is hereby granted, provided that this entire notice is included in
+all source code copies of any software which is or includes a copy or
+modification of this software.
+
+THIS SOFTWARE IS BEING PROVIDED "AS IS", WITHOUT ANY EXPRESS OR
+IMPLIED WARRANTY. IN PARTICULAR, NONE OF THE AUTHORS MAKES ANY
+REPRESENTATION OR WARRANTY OF ANY KIND CONCERNING THE
+MERCHANTABILITY OF THIS SOFTWARE OR ITS FITNESS FOR ANY PARTICULAR
+PURPOSE.
+
+ include/crypto/gmac.h
+====================
+   $OpenBSD: gmac.h,v 1.6 2017/05/02 11:44:32 mikeb Exp $
+
+   Copyright (c) 2010 Mike Belopuhov
+
+ Permission to use, copy, modify, and distribute this software for any
+ purpose with or without fee is hereby granted, provided that the above
+ copyright notice and this permission notice appear in all copies.
+
+ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+ include/crypto/md5.h
+====================
+   $OpenBSD: md5.h,v 1.3 2014/11/16 17:39:09 tedu Exp $
+
+ This code implements the MD5 message-digest algorithm.
+ The algorithm is due to Ron Rivest.  This code was
+ written by Colin Plumb in 1993, no copyright is claimed.
+ This code is in the public domain; do with it what you wish.
+
+ Equivalent code is available from RSA Data Security, Inc.
+ This code has been tested against that, and is equivalent,
+ except that you don't need to include two pages of legalese
+ with every copy.
+
+include/crypto/poly1305.h
+====================
+   $OpenBSD: poly1305.h,v 1.2 2020/07/22 13:54:30 tobhe Exp $
+
+   Public Domain poly1305 from Andrew Moon
+
+ poly1305 implementation using 32 bit 32 bit = 64 bit multiplication
+ and 64 bit addition from https://github.com/floodyberry/poly1305-donna
+
+include/crypto/rijndael.h
+====================
+   $OpenBSD: rijndael.h,v 1.13 2008/06/09 07:49:45 djm Exp $
+
+   rijndael-alg-fst.h
+
+   @version 3.0 (December 2000)
+
+ Optimised ANSI C code for the Rijndael cipher (now AES)
+
+ @author Vincent Rijmen <vincent.rijmen@esat.kuleuven.ac.be>
+ @author Antoon Bosselaers <antoon.bosselaers@esat.kuleuven.ac.be>
+ @author Paulo Barreto <paulo.barreto@terra.com.br>
+
+ This code is hereby placed in the public domain.
+
+ THIS SOFTWARE IS PROVIDED BY THE AUTHORS ''AS IS'' AND ANY EXPRESS
+ OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHORS OR CONTRIBUTORS BE
+ LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+ BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+include/crypto/rmd160.h
+====================
+   $OpenBSD: rmd160.h,v 1.5 2009/07/05 19:33:46 millert Exp $
+
+   Copyright (c) 2001 Markus Friedl.  All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+
+ THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+include/crypto/sha1.h
+====================
+    $OpenBSD: sha1.h,v 1.6 2014/11/16 17:39:09 tedu Exp $
+ SHA-1 in C
+ By Steve Reid <steve@edmweb.com>
+ 100% Public Domain
+
+include/crypto/sha2.h
+====================
+   $OpenBSD: sha2.h,v 1.5 2014/11/16 17:39:09 tedu Exp $
+
+   FILE: sha2.h
+   AUTHOR: Aaron D. Gifford <me@aarongifford.com>
+
+   Copyright (c) 2000-2001, Aaron D. Gifford
+   All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+ 3. Neither the name of the copyright holder nor the names of contributors
+    may be used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTOR(S) ``AS IS'' AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTOR(S) BE LIABLE
+ FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ SUCH DAMAGE.
+
+ $From: sha2.h,v 1.1 2001/11/08 00:02:01 adg Exp adg $
+
+include/crypto/xform.h
+====================
+   $OpenBSD: xform.h,v 1.32 2021/10/22 12:30:53 bluhm Exp $
+
+   The author of this code is Angelos D. Keromytis (angelos@cis.upenn.edu)
+
+   This code was written by Angelos D. Keromytis in Athens, Greece, in
+   February 2000. Network Security Technologies Inc. (NSTI) kindly
+   supported the development of this code.
+
+   Copyright (c) 2000 Angelos D. Keromytis
+
+ Permission to use, copy, and modify this software with or without fee
+ is hereby granted, provided that this entire notice is included in
+ all source code copies of any software which is or includes a copy or
+ modification of this software.
+
+ THIS SOFTWARE IS BEING PROVIDED "AS IS", WITHOUT ANY EXPRESS OR
+ IMPLIED WARRANTY. IN PARTICULAR, NONE OF THE AUTHORS MAKES ANY
+ REPRESENTATION OR WARRANTY OF ANY KIND CONCERNING THE
+ MERCHANTABILITY OF THIS SOFTWARE OR ITS FITNESS FOR ANY PARTICULAR
+ PURPOSE.
+
+crypto/blf.c
+====================
+   $OpenBSD: blf.c,v 1.8 2021/11/29 01:04:45 djm Exp $ *
+
+   Blowfish block cipher for OpenBSD
+   Copyright 1997 Niels Provos <provos@physnet.uni-hamburg.de>
+   All rights reserved.
+
+   Implementation advice by David Mazieres <dm@lcs.mit.edu>.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+ 3. The name of the author may not be used to endorse or promote products
+    derived from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+crypto/cast.c
+====================
+   $OpenBSD: cast.c,v 1.4 2012/04/25 04:12:27 matthew Exp $
+
+ CAST-128 in C
+ Written by Steve Reid <sreid@sea-to-sky.net>
+ 100% Public Domain - no warranty
+ Released 1997.10.11
+
+crypto/castsb.h
+====================
+   $OpenBSD: castsb.h,v 1.1 2000/02/28 23:13:04 deraadt Exp $
+
+ CAST-128 in C
+ Written by Steve Reid <sreid@sea-to-sky.net>
+ 100% Public Domain - no warranty
+ Released 1997.10.11
+
+crypto/chacha_private.h
+====================
+   $OpenBSD: chacha_private.h,v 1.4 2020/07/22 13:54:30 tobhe Exp $
+
+ chacha-merged.c version 20080118
+ D. J. Bernstein
+ Public domain.
+
+crypto/chachapoly.c
+====================
+   $OpenBSD: chachapoly.c,v 1.6 2020/07/22 13:54:30 tobhe Exp $
+
+   Copyright (c) 2015 Mike Belopuhov
+
+ Permission to use, copy, modify, and distribute this software for any
+ purpose with or without fee is hereby granted, provided that the above
+ copyright notice and this permission notice appear in all copies.
+
+ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+crypto/crypto.c
+====================
+   $OpenBSD: crypto.c,v 1.65 2014/07/13 23:24:47 deraadt Exp  $
+   The author of this code is Angelos D. Keromytis (angelos@cis.upenn.edu)
+
+This code was written by Angelos D. Keromytis in Athens, Greece, in
+February 2000. Network Security Technologies Inc. (NSTI) kindly
+supported the development of this code.
+
+Copyright (c) 2000, 2001 Angelos D. Keromytis
+
+Permission to use, copy, and modify this software with or without fee
+is hereby granted, provided that this entire notice is included in
+all source code copies of any software which is or includes a copy or
+modification of this software.
+
+THIS SOFTWARE IS BEING PROVIDED "AS IS", WITHOUT ANY EXPRESS OR
+IMPLIED WARRANTY. IN PARTICULAR, NONE OF THE AUTHORS MAKES ANY
+REPRESENTATION OR WARRANTY OF ANY KIND CONCERNING THE
+MERCHANTABILITY OF THIS SOFTWARE OR ITS FITNESS FOR ANY PARTICULAR
+PURPOSE.
+
+crypto/cryptodev.c
+====================
+   $OpenBSD: cryptodev.c,v 1.82 2014/08/18 05:11:03 dlg Exp $
+   Copyright (c) 2001 Theo de Raadt
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ 1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+ THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+ Effort sponsored in part by the Defense Advanced Research Projects
+ Agency (DARPA) and Air Force Research Laboratory, Air Force
+ Materiel Command, USAF, under agreement number F30602-01-2-0537.
+
+crypto/cryptosoft.c
+====================
+   $OpenBSD: cryptosoft.c,v 1.71 2014/07/13 23:24:47 deraadt Exp $
+   The author of this code is Angelos D. Keromytis (angelos@cis.upenn.edu)
+
+This code was written by Angelos D. Keromytis in Athens, Greece, in
+February 2000. Network Security Technologies Inc. (NSTI) kindly
+supported the development of this code.
+
+Copyright (c) 2000, 2001 Angelos D. Keromytis
+
+Permission to use, copy, and modify this software with or without fee
+is hereby granted, provided that this entire notice is included in
+all source code copies of any software which is or includes a copy or
+modification of this software.
+
+THIS SOFTWARE IS BEING PROVIDED "AS IS", WITHOUT ANY EXPRESS OR
+IMPLIED WARRANTY. IN PARTICULAR, NONE OF THE AUTHORS MAKES ANY
+REPRESENTATION OR WARRANTY OF ANY KIND CONCERNING THE
+MERCHANTABILITY OF THIS SOFTWARE OR ITS FITNESS FOR ANY PARTICULAR
+PURPOSE.
+
+crypto/des_locl.h
+====================
+ $OpenBSD: des_locl.h,v 1.7 2015/12/10 21:00:51 naddy Exp $
+
+ lib/des/des_locl.h
+ Copyright (C) 1995 Eric Young (eay@mincom.oz.au)
+ All rights reserved.
+
+ This file is part of an SSL implementation written
+ by Eric Young (eay@mincom.oz.au).
+ The implementation was written so as to conform with Netscapes SSL
+ specification.  This library and applications are
+ FREE FOR COMMERCIAL AND NON-COMMERCIAL USE
+ as long as the following conditions are aheared to.
+
+ Copyright remains Eric Young's, and as such any Copyright notices in
+ the code are not to be removed.  If this code is used in a product,
+ Eric Young should be given attribution as the author of the parts used.
+ This can be in the form of a textual message at program startup or
+ in documentation (online or textual) provided with the package.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ 1. Redistributions of source code must retain the copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+ 3. All advertising materials mentioning features or use of this software
+    must display the following acknowledgement:
+    This product includes software developed by
+    Eric Young (eay@mincom.oz.au)
+
+ THIS SOFTWARE IS PROVIDED BY ERIC YOUNG ``AS IS'' AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ SUCH DAMAGE.
+
+ The licence and distribution terms for any publically available version or
+ derivative of this code cannot be changed.
+ i.e. this code cannot simply be
+ copied and put under another distribution licence
+ [including the GNU Public Licence.]
+
+crypto/ecb_enc.c
+====================
+ $OpenBSD: ecb_enc.c,v 1.6 2015/12/10 21:00:51 naddy Exp $
+ lib/des/ecb_enc.c
+ Copyright (C) 1995 Eric Young (eay@mincom.oz.au)
+ All rights reserved.
+
+ This file is part of an SSL implementation written
+ by Eric Young (eay@mincom.oz.au).
+ The implementation was written so as to conform with Netscapes SSL
+ specification.  This library and applications are
+ FREE FOR COMMERCIAL AND NON-COMMERCIAL USE
+ as long as the following conditions are aheared to.
+
+ Copyright remains Eric Young's, and as such any Copyright notices in
+ the code are not to be removed.  If this code is used in a product,
+ Eric Young should be given attribution as the author of the parts used.
+ This can be in the form of a textual message at program startup or
+ in documentation (online or textual) provided with the package.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ 1. Redistributions of source code must retain the copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+ 3. All advertising materials mentioning features or use of this software
+    must display the following acknowledgement:
+    This product includes software developed by
+    Eric Young (eay@mincom.oz.au)
+
+ THIS SOFTWARE IS PROVIDED BY ERIC YOUNG ``AS IS'' AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ SUCH DAMAGE.
+
+ The licence and distribution terms for any publically available version or
+ derivative of this code cannot be changed.
+ i.e. this code cannot simply be
+ copied and put under another distribution licence
+ [including the GNU Public Licence.]
+
+crypto/ecb3_enc.c
+====================
+   $OpenBSD: ecb3_enc.c,v 1.3 2013/11/18 18:49:53 brad Exp $
+   lib/des/ecb3_enc.c
+   Copyright (C) 1995 Eric Young (eay@mincom.oz.au)
+   All rights reserved.
+
+ This file is part of an SSL implementation written
+ by Eric Young (eay@mincom.oz.au).
+ The implementation was written so as to conform with Netscapes SSL
+ specification.  This library and applications are
+ FREE FOR COMMERCIAL AND NON-COMMERCIAL USE
+ as long as the following conditions are aheared to.
+
+ Copyright remains Eric Young's, and as such any Copyright notices in
+ the code are not to be removed.  If this code is used in a product,
+ Eric Young should be given attribution as the author of the parts used.
+ This can be in the form of a textual message at program startup or
+ in documentation (online or textual) provided with the package.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ 1. Redistributions of source code must retain the copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+ 3. All advertising materials mentioning features or use of this software
+    must display the following acknowledgement:
+    This product includes software developed
+    by Eric Young (eay@mincom.oz.au)
+ *
+ THIS SOFTWARE IS PROVIDED BY ERIC YOUNG ``AS IS'' AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ SUCH DAMAGE.
+
+ The licence and distribution terms for any publically available version or
+ derivative of this code cannot be changed.
+ i.e. this code cannot simply be
+ copied and put under another distribution licence
+ [including the GNU Public Licence.]
+
+crypto/gmac.c
+====================
+   $OpenBSD: gmac.c,v 1.10 2017/05/02 11:44:32 mikeb Exp $
+
+   Copyright (c) 2010 Mike Belopuhov
+
+ Permission to use, copy, modify, and distribute this software for any
+ purpose with or without fee is hereby granted, provided that the above
+ copyright notice and this permission notice appear in all copies.
+
+ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+ This code implements the Message Authentication part of the
+ Galois/Counter Mode (as being described in the RFC 4543) using
+ the AES cipher.  FIPS SP 800-38D describes the algorithm details.
+
+crypto/md5.c
+====================
+   $OpenBSD: md5.c,v 1.4 2014/12/28 10:04:35 tedu Exp $
+
+ This code implements the MD5 message-digest algorithm.
+ The algorithm is due to Ron Rivest. This code was
+ written by Colin Plumb in 1993, no copyright is claimed.
+ This code is in the public domain; do with it what you wish.
+
+ Equivalent code is available from RSA Data Security, Inc.
+ This code has been tested against that, and is equivalent,
+ except that you don't need to include two pages of legalese
+ with every copy.
+
+ To compute the message digest of a chunk of bytes, declare an
+ MD5Context structure, pass it to MD5Init, call MD5Update as
+ needed on buffers full of bytes, and then call MD5Final, which
+ will fill a supplied 16-byte array with the digest.
+
+crypto/podd.h
+====================
+   $OpenBSD: podd.h,v 1.1 2000/02/28 23:13:05 deraadt Exp $
+   lib/des/podd.h
+   Copyright (C) 1995 Eric Young (eay@mincom.oz.au)
+   All rights reserved.
+
+ This file is part of an SSL implementation written
+ by Eric Young (eay@mincom.oz.au).
+ The implementation was written so as to conform with Netscapes SSL
+ specification.  This library and applications are
+ FREE FOR COMMERCIAL AND NON-COMMERCIAL USE
+ as long as the following conditions are aheared to.
+
+ Copyright remains Eric Young's, and as such any Copyright notices in
+ the code are not to be removed.  If this code is used in a product,
+ Eric Young should be given attribution as the author of the parts used.
+ This can be in the form of a textual message at program startup or
+ in documentation (online or textual) provided with the package.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ 1. Redistributions of source code must retain the copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+ 3. All advertising materials mentioning features or use of this software
+    must display the following acknowledgement:
+    This product includes software developed
+    by Eric Young (eay@mincom.oz.au)
+
+ THIS SOFTWARE IS PROVIDED BY ERIC YOUNG ``AS IS'' AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ SUCH DAMAGE.
+
+ The licence and distribution terms for any publically available version or
+ derivative of this code cannot be changed.
+ i.e. this code cannot simply be
+ copied and put under another distribution licence
+ [including the GNU Public Licence.]
+
+crypto/poly1305.c
+====================
+   $OpenBSD: poly1305.c,v 1.2 2020/07/22 13:54:30 tobhe Exp $
+
+ Public Domain poly1305 from Andrew Moon
+ Based on poly1305-donna.c, poly1305-donna-32.h and poly1305-donna.h from:
+ https://github.com/floodyberry/poly1305-donna
+
+crypto/random_pool.c
+====================
+ Licensed to the Apache Software Foundation (ASF) under one or more
+ contributor license agreements.  See the NOTICE file distributed with
+ this work for additional information regarding copyright ownership.  The
+ ASF licenses this file to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance with the
+ License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ License for the specific language governing permissions and limitations
+ under the License.
+
+ crypto/rijndael.c
+====================
+   $OpenBSD: rijndael.c,v 1.20 2014/11/17 12:27:47 mikeb Exp $
+
+   rijndael-alg-fst.c
+
+   @version 3.0 (December 2000)
+
+   Optimised ANSI C code for the Rijndael cipher (now AES)
+
+   @author Vincent Rijmen <vincent.rijmen@esat.kuleuven.ac.be>
+   @author Antoon Bosselaers <antoon.bosselaers@esat.kuleuven.ac.be>
+   @author Paulo Barreto <paulo.barreto@terra.com.br>
+
+ This code is hereby placed in the public domain.
+
+ THIS SOFTWARE IS PROVIDED BY THE AUTHORS ''AS IS'' AND ANY EXPRESS
+ OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHORS OR CONTRIBUTORS BE
+ LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+ BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+ crypto/rmd160.c
+====================
+ $OpenBSD: rmd160.c,v 1.5 2011/01/11 15:42:05 deraadt Exp $
+
+ Copyright (c) 2001 Markus Friedl.  All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+
+ THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+ Preneel, Bosselaers, Dobbertin,
+ "The Cryptographic Hash Function RIPEMD-160",
+ RSA Laboratories, CryptoBytes, Volume 3, Number 2, Autumn 1997,
+ ftp://ftp.rsasecurity.com/pub/cryptobytes/crypto3n2.pdf
+
+crypto/set_key.c
+====================
+   $OpenBSD: set_key.c,v 1.5 2021/03/12 10:22:46 jsg Exp $
+   lib/des/set_key.c
+   Copyright (C) 1995 Eric Young (eay@mincom.oz.au)
+   All rights reserved.
+
+ This file is part of an SSL implementation written
+ by Eric Young (eay@mincom.oz.au).
+ The implementation was written so as to conform with Netscapes SSL
+ specification.  This library and applications are
+ FREE FOR COMMERCIAL AND NON-COMMERCIAL USE
+ as long as the following conditions are aheared to.
+
+ Copyright remains Eric Young's, and as such any Copyright notices in
+ the code are not to be removed.  If this code is used in a product,
+ Eric Young should be given attribution as the author of the parts used.
+ This can be in the form of a textual message at program startup or
+ in documentation (online or textual) provided with the package.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ 1. Redistributions of source code must retain the copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+ 3. All advertising materials mentioning features or use of this software
+    must display the following acknowledgement:
+    This product includes software developed by
+    Eric Young (eay@mincom.oz.au)
+
+ THIS SOFTWARE IS PROVIDED BY ERIC YOUNG ``AS IS'' AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ SUCH DAMAGE.
+
+ The licence and distribution terms for any publically available version or
+ derivative of this code cannot be changed.
+ i.e. this code cannot simply be
+ copied and put under another distribution licence
+ [including the GNU Public Licence.]
+
+ set_key.c v 1.4 eay 24/9/91
+ 1.4 Speed up by 400% :-)
+ 1.3 added register declarations.
+ 1.2 unrolled make_key_sched a bit more
+ 1.1 added norm_expand_bits
+ 1.0 First working version
+
+crypto/sha1.c
+====================
+   $OpenBSD: sha1.c,v 1.11 2014/12/28 10:04:35 tedu Exp $
+
+   SHA-1 in C
+   By Steve Reid <steve@edmweb.com>
+   100% Public Domain
+
+crypto/sha2.c
+====================
+   $OpenBSD: sha2.c,v 1.19 2021/03/12 10:22:46 jsg Exp $
+   FILE: sha2.c
+   AUTHOR: Aaron D. Gifford <me@aarongifford.com>
+
+   Copyright (c) 2000-2001, Aaron D. Gifford
+   All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+ 3. Neither the name of the copyright holder nor the names of contributors
+    may be used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTOR(S) ``AS IS'' AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTOR(S) BE LIABLE
+ FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ SUCH DAMAGE.
+
+ $From: sha2.c,v 1.1 2001/11/08 00:01:51 adg Exp adg $
+
+crypto/sk.h
+====================
+   $OpenBSD: sk.h,v 1.2 2002/10/27 13:24:26 miod Exp $
+   lib/des/sk.h
+   Copyright (C) 1995 Eric Young (eay@mincom.oz.au)
+   All rights reserved.
+
+ This file is part of an SSL implementation written
+ by Eric Young (eay@mincom.oz.au).
+ The implementation was written so as to conform with Netscapes SSL
+ specification.  This library and applications are
+ FREE FOR COMMERCIAL AND NON-COMMERCIAL USE
+ as long as the following conditions are aheared to.
+
+ Copyright remains Eric Young's, and as such any Copyright notices in
+ the code are not to be removed.  If this code is used in a product,
+ Eric Young should be given attribution as the author of the parts used.
+ This can be in the form of a textual message at program startup or
+ in documentation (online or textual) provided with the package.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ 1. Redistributions of source code must retain the copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+ 3. All advertising materials mentioning features or use of this software
+    must display the following acknowledgement:
+    This product includes software developed
+    by Eric Young (eay@mincom.oz.au)
+
+ THIS SOFTWARE IS PROVIDED BY ERIC YOUNG ``AS IS'' AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ FOR ANY DIRECT, INDIRECT, INCIDENTAl,  SPECIAl,
+ EXEMPLARY, OR CONSEQUENTIAL
+ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ SUCH DAMAGE.
+
+ The licence and distribution terms for any publically
+ available version or derivative of this code cannot be changed.
+ i.e. this code cannot simply be
+ copied and put under another distribution licence
+ [including the GNU Public Licence.]
+
+crypto/spr.h
+====================
+   $OpenBSD: spr.h,v 1.2 2002/10/27 13:24:26 miod Exp $
+   lib/des/spr.h
+   Copyright (C) 1995 Eric Young (eay@mincom.oz.au)
+   All rights reserved.
+
+ This file is part of an SSL implementation written
+ by Eric Young (eay@mincom.oz.au).
+ The implementation was written so as to conform with Netscapes SSL
+ specification.  This library and applications are
+ FREE FOR COMMERCIAL AND NON-COMMERCIAL USE
+ as long as the following conditions are aheared to.
+
+ Copyright remains Eric Young's, and as such any Copyright notices in
+ the code are not to be removed.  If this code is used in a product,
+ Eric Young should be given attribution as the author of the parts used.
+ This can be in the form of a textual message at program startup or
+ in documentation (online or textual) provided with the package.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ 1. Redistributions of source code must retain the copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+ 3. All advertising materials mentioning features or use of this software
+    must display the following acknowledgement:
+    This product includes software developed
+    by Eric Young (eay@mincom.oz.au)
+
+ THIS SOFTWARE IS PROVIDED BY ERIC YOUNG ``AS IS'' AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ SUCH DAMAGE.
+
+ The licence and distribution terms for any publically available version or
+ derivative of this code cannot be changed.
+ i.e. this code cannot simply be
+ copied and put under another distribution licence
+ [including the GNU Public Licence.]
+
+crypto/xform.c
+====================
+   $OpenBSD: xform.c,v 1.61 2021/10/22 12:30:53 bluhm Exp $
+
+ The authors of this code are John Ioannidis (ji@tla.org),
+ Angelos D. Keromytis (kermit@csd.uch.gr),
+ Niels Provos (provos@physnet.uni-hamburg.de),
+ Damien Miller (djm@mindrot.org) and
+ Mike Belopuhov (mikeb@openbsd.org).
+
+ This code was written by John Ioannidis for BSD/OS in Athens, Greece,
+ in November 1995.
+
+ Ported to OpenBSD and NetBSD, with additional transforms,
+ in December 1996,
+ by Angelos D. Keromytis.
+
+ Additional transforms and features in 1997 and 1998 by
+ Angelos D. Keromytis and Niels Provos.
+
+ Additional features in 1999 by Angelos D. Keromytis.
+
+ AES XTS implementation in 2008 by Damien Miller
+
+ AES-GCM-16 and Chacha20-Poly1305 AEAD modes by Mike Belopuhov.
+
+ Copyright (C) 1995, 1996, 1997, 1998, 1999 by John Ioannidis,
+ Angelos D. Keromytis and Niels Provos.
+
+ Copyright (C) 2001, Angelos D. Keromytis.
+
+ Copyright (C) 2008, Damien Miller
+
+ Copyright (C) 2010, 2015, Mike Belopuhov
+
+ Permission to use, copy, and modify this software with or without fee
+ is hereby granted, provided that this entire notice is included in
+ all copies of any software which is or includes a copy or
+ modification of this software.
+ You may use this code under the GNU public license if you so wish. Please
+ contribute changes back to the authors under this freer than GPL license
+ so that we may further the use of strong encryption without limitations to
+ all.
+
+ THIS SOFTWARE IS BEING PROVIDED "AS IS", WITHOUT ANY EXPRESS OR
+ IMPLIED WARRANTY. IN PARTICULAR, NONE OF THE AUTHORS MAKES ANY
+ REPRESENTATION OR WARRANTY OF ANY KIND CONCERNING THE
+ MERCHANTABILIT
+
+crypto/key_wrap.c
+include/crypto/key_wrap.h
+=========================
+   $OpenBSD: key_wrap.c,v 1.5 2017/05/02 17:07:06 mikeb Exp $
+   $OpenBSD: key_wrap.h,v 1.5 2017/05/02 17:07:06 mikeb Exp $
+
+   Copyright (c) 2008 Damien Bergamini <damien.bergamini@free.fr>
+
+Permission to use, copy, modify, and distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+crypto/cmac.c
+include/crypto/cmac.h
+=====================
+   $OpenBSD: cmac.c,v 1.3 2017/05/02 17:07:06 mikeb Exp $
+   $OpenBSD: cmac.h,v 1.3 2017/05/02 17:07:06 mikeb Exp $
+
+   Copyright (c) 2008 Damien Bergamini <damien.bergamini@free.fr>
+
+Permission to use, copy, modify, and distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+crypto/siphash.c
+include/crypto/siphash.h
+========================
+   $OpenBSD: siphash.c,v 1.5 2018/01/05 19:05:09 mikeb Exp $
+   $OpenBSD: siphash.h,v 1.5 2018/01/05 19:05:09 mikeb Exp $
+
+   Copyright (c) 2013 Andre Oppermann <andre@FreeBSD.org>
+   All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+3. The name of the author may not be used to endorse or promote
+   products derived from this software without specific prior written
+   permission.
+ *
+THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+crypto/hmac.c
+include/crypto/hmac.h
+======================
+   $OpenBSD: hmac.c,v 1.4 2016/09/19 18:09:40 tedu Exp $
+   $OpenBSD: hmac.h,v 1.4 2016/09/19 18:09:40 tedu Exp $
+
+   Copyright (c) 2008 Damien Bergamini <damien.bergamini@free.fr>
+
+Permission to use, copy, modify, and distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+crypto/idgen.c
+include/crypto/idgen.h
+======================
+   $OpenBSD: idgen.c,v 1.8 2020/07/22 13:54:30 tobhe Exp $
+   $OpenBSD: idgen.h,v 1.8 2020/07/22 13:54:30 tobhe Exp $
+
+   Copyright (c) 2008 Damien Miller <djm@mindrot.org>
+
+Permission to use, copy, modify, and distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.

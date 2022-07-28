@@ -61,6 +61,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <strings.h>
+
 #include "des_locl.h"
 #include "podd.h"
 #include "sk.h"

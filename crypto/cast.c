@@ -12,9 +12,10 @@
  * Included Files
  ****************************************************************************/
 
+#include <string.h>
 #include <sys/types.h>
-#include <sys/systm.h>
 #include <crypto/cast.h>
+
 #include "castsb.h"
 
 /* Macros to access 8-bit bytes out of a 32-bit word */

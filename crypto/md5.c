@@ -22,8 +22,9 @@
  * Included Files
  ****************************************************************************/
 
+#include <endian.h>
+#include <string.h>
 #include <sys/param.h>
-#include <sys/systm.h>
 #include <crypto/md5.h>
 
 #define PUT_64BIT_LE(cp, value)           \

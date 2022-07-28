@@ -29,6 +29,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <sys/types.h>
 #include <crypto/md5.h>
 #include <crypto/sha1.h>
 #include <crypto/rmd160.h>
@@ -115,7 +116,5 @@ extern const struct auth_hash auth_hash_gmac_aes_128;
 extern const struct auth_hash auth_hash_gmac_aes_192;
 extern const struct auth_hash auth_hash_gmac_aes_256;
 extern const struct auth_hash auth_hash_chacha20_poly1305;
-
-extern const struct comp_algo comp_algo_deflate;
 
 #endif /* __INCLUDE_CRYPTO_XFORM_H */
