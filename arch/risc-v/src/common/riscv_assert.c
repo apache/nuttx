@@ -66,6 +66,12 @@
 #ifdef CONFIG_ARCH_STACKDUMP
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static uint8_t s_last_regs[XCPTCONTEXT_SIZE];
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -342,7 +348,8 @@ static void riscv_dumpstate(void)
     }
   else
     {
-      up_saveusercontext(rtcb->xcp.regs);
+      up_saveusercontext(s_last_regs);
+      rtcb->xcp.regs = (uint32_t *)s_last_regs;
     }
 
   /* Dump the registers (if available) */
