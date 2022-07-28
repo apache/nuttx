@@ -36,6 +36,9 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_LIBC_INLINE_QUEUE
+static inline
+#endif
 void dq_addlast(FAR dq_entry_t *node, dq_queue_t *queue)
 {
   node->flink = NULL;

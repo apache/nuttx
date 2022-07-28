@@ -36,6 +36,9 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_LIBC_INLINE_QUEUE
+static inline
+#endif
 void sq_addafter(FAR sq_entry_t *prev, FAR sq_entry_t *node,
                  sq_queue_t *queue)
 {

@@ -36,6 +36,9 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_LIBC_INLINE_QUEUE
+static inline
+#endif
 void sq_rem(FAR sq_entry_t *node, sq_queue_t *queue)
 {
   if (queue->head && node)

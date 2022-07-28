@@ -1,0 +1,10 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config LIBC_INLINE_QUEUE
+	bool "Inline queue list to improve the performance"
+	default n
+	---help---
+		Inline queue list to improve the performance

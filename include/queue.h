@@ -111,6 +111,63 @@ struct dq_queue_s
 };
 typedef struct dq_queue_s dq_queue_t;
 
+#ifdef CONFIG_LIBC_INLINE_QUEUE
+static inline void sq_addfirst(FAR sq_entry_t *node, FAR sq_queue_t *queue);
+static inline void dq_addfirst(FAR dq_entry_t *node, FAR dq_queue_t *queue);
+static inline void sq_addlast(FAR sq_entry_t *node, FAR sq_queue_t *queue);
+static inline void dq_addlast(FAR dq_entry_t *node, FAR dq_queue_t *queue);
+static inline void sq_addafter(FAR sq_entry_t *prev, FAR sq_entry_t *node,
+                               FAR sq_queue_t *queue);
+static inline void dq_addafter(FAR dq_entry_t *prev, FAR dq_entry_t *node,
+                               FAR dq_queue_t *queue);
+static inline void dq_addbefore(FAR dq_entry_t *next, FAR dq_entry_t *node,
+                                FAR dq_queue_t *queue);
+
+/* Combine queues */
+
+static inline void sq_cat(FAR sq_queue_t *queue1, FAR sq_queue_t *queue2);
+static inline void dq_cat(FAR dq_queue_t *queue1, FAR dq_queue_t *queue2);
+
+/* Remove nodes from queues */
+
+static inline FAR  sq_entry_t *sq_remafter(FAR sq_entry_t *node,
+                                           FAR sq_queue_t *queue);
+static inline void sq_rem(FAR sq_entry_t *node, FAR sq_queue_t *queue);
+static inline void dq_rem(FAR dq_entry_t *node, FAR dq_queue_t *queue);
+static inline FAR  sq_entry_t *sq_remlast(FAR sq_queue_t *queue);
+static inline FAR  dq_entry_t *dq_remlast(FAR dq_queue_t *queue);
+static inline FAR  sq_entry_t *sq_remfirst(FAR sq_queue_t *queue);
+static inline FAR  dq_entry_t *dq_remfirst(FAR dq_queue_t *queue);
+
+/* Count nodes in queues */
+
+static inline size_t sq_count(FAR sq_queue_t *queue);
+static inline size_t dq_count(FAR dq_queue_t *queue);
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+# include "../libs/libc/queue/dq_addafter.c"
+# include "../libs/libc/queue/dq_addbefore.c"
+# include "../libs/libc/queue/dq_addfirst.c"
+# include "../libs/libc/queue/dq_addlast.c"
+# include "../libs/libc/queue/dq_cat.c"
+# include "../libs/libc/queue/dq_count.c"
+# include "../libs/libc/queue/dq_rem.c"
+# include "../libs/libc/queue/dq_remfirst.c"
+# include "../libs/libc/queue/dq_remlast.c"
+# include "../libs/libc/queue/sq_addafter.c"
+# include "../libs/libc/queue/sq_addfirst.c"
+# include "../libs/libc/queue/sq_addlast.c"
+# include "../libs/libc/queue/sq_cat.c"
+# include "../libs/libc/queue/sq_count.c"
+# include "../libs/libc/queue/sq_remafter.c"
+# include "../libs/libc/queue/sq_rem.c"
+# include "../libs/libc/queue/sq_remfirst.c"
+# include "../libs/libc/queue/sq_remlast.c"
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -125,6 +182,7 @@ extern "C"
 
 /* Add nodes to queues */
 
+#ifndef CONFIG_LIBC_INLINE_QUEUE
 void sq_addfirst(FAR sq_entry_t *node, FAR sq_queue_t *queue);
 void dq_addfirst(FAR dq_entry_t *node, FAR dq_queue_t *queue);
 void sq_addlast(FAR sq_entry_t *node, FAR sq_queue_t *queue);
@@ -155,6 +213,7 @@ FAR  dq_entry_t *dq_remfirst(FAR dq_queue_t *queue);
 
 size_t sq_count(FAR sq_queue_t *queue);
 size_t dq_count(FAR dq_queue_t *queue);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

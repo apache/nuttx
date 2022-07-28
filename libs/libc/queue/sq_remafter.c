@@ -37,6 +37,9 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_LIBC_INLINE_QUEUE
+static inline
+#endif
 FAR sq_entry_t *sq_remafter(FAR sq_entry_t *node, sq_queue_t *queue)
 {
   FAR sq_entry_t *ret = node->flink;

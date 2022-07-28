@@ -39,6 +39,9 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_LIBC_INLINE_QUEUE
+static inline
+#endif
 size_t dq_count(FAR dq_queue_t *queue)
 {
   FAR dq_entry_t *node;

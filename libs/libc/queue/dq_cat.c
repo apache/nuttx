@@ -37,6 +37,9 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_LIBC_INLINE_QUEUE
+static inline
+#endif
 void dq_cat(FAR dq_queue_t *queue1, FAR dq_queue_t *queue2)
 {
   DEBUGASSERT(queue1 != NULL && queue2 != NULL);
