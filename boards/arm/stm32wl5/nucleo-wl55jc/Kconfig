@@ -46,6 +46,19 @@ comment "FLASH partitioning and mounting requires !DISABLE_MOUNTPOINT"
 
 if ARCH_BOARD_FLASH_MOUNT
 
+config ARCH_BOARD_FLASH_BL_PROG_SIZE
+	int "Size reserved for bootloader program code"
+	default 0
+	---help---
+		How much memory to reserve for bootloader program code.
+		If you are using bootloader in your application, specify
+		max size of bootloader partition. This memory will be
+		reserved at the beginning of flash, and CPU1 progmem will
+		be right after bootloader.
+
+		If you don't use bootloader and just want to run program
+		directly after reset, set this to 0.
+
 config ARCH_BOARD_FLASH_CPU1_PROG_SIZE
 	int "Size reserved for CPU1 program code"
 	default 127

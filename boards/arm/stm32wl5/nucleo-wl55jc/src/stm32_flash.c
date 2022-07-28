@@ -41,6 +41,10 @@
 
 /* Define default values to silent compiler warning about undefined macro */
 
+#ifndef CONFIG_ARCH_BOARD_FLASH_BL_PROG_SIZE
+#define CONFIG_ARCH_BOARD_FLASH_BL_PROG_SIZE 0
+#endif
+
 #ifndef CONFIG_ARCH_BOARD_FLASH_CPU1_PROG_SIZE
 #define CONFIG_ARCH_BOARD_FLASH_CPU1_PROG_SIZE 0
 #endif
@@ -65,7 +69,8 @@
 #define CONFIG_ARCH_BOARD_FLASH_PART4_SIZE 0
 #endif
 
-#if (CONFIG_ARCH_BOARD_FLASH_CPU1_PROG_SIZE + \
+#if (CONFIG_ARCH_BOARD_FLASH_BL_PROG_SIZE + \
+     CONFIG_ARCH_BOARD_FLASH_CPU1_PROG_SIZE + \
      CONFIG_ARCH_BOARD_FLASH_CPU2_PROG_SIZE + \
      CONFIG_ARCH_BOARD_FLASH_PART1_SIZE + \
      CONFIG_ARCH_BOARD_FLASH_PART2_SIZE + \
@@ -74,7 +79,8 @@
 #   error "Sum of all flash pertitions cannot be bigger than 128"
 #endif
 
-#if (CONFIG_ARCH_BOARD_FLASH_CPU1_PROG_SIZE + \
+#if (CONFIG_ARCH_BOARD_FLASH_BL_PROG_SIZE + \
+     CONFIG_ARCH_BOARD_FLASH_CPU1_PROG_SIZE + \
      CONFIG_ARCH_BOARD_FLASH_CPU2_PROG_SIZE + \
      CONFIG_ARCH_BOARD_FLASH_PART1_SIZE + \
      CONFIG_ARCH_BOARD_FLASH_PART2_SIZE + \
@@ -101,6 +107,15 @@ struct part_table
 
 static const struct part_table part_table[] =
 {
+#if CONFIG_ARCH_BOARD_FLASH_BL_PROG_SIZE > 0
+  {
+    .size   = CONFIG_ARCH_BOARD_FLASH_BL_PROG_SIZE,
+    .name   = "bl-progmem",
+    .mnt    = NULL,
+    .fs     = "rawfs"
+  },
+#endif
+
   {
     .size   = CONFIG_ARCH_BOARD_FLASH_CPU1_PROG_SIZE,
     .name   = "cpu1-progmem",
