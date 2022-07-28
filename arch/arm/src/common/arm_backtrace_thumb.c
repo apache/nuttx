@@ -504,10 +504,10 @@ int up_backtrace(struct tcb_s *tcb,
 #endif
           if (ret < size)
             {
-              sp = (void *)CURRENT_REGS[REG_SP];
+              sp = (void *)rtcb->xcp.regs[REG_SP];
               ret += backtrace_push(rtcb->stack_base_ptr +
                                     rtcb->adj_stack_size, &sp,
-                                    (void *)CURRENT_REGS[REG_PC],
+                                    (void *)rtcb->xcp.regs[REG_PC],
                                     &buffer[ret], size - ret, &skip);
             }
         }
