@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/common/src/esp32_board_spi.c
+ * boards/xtensa/esp32/common/src/esp32_st7789.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,128 +24,123 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
+#include <stdio.h>
 #include <stdbool.h>
 #include <debug.h>
+#include <errno.h>
 
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
+#include <nuttx/lcd/lcd.h>
+#include <nuttx/lcd/st7789.h>
+
 #include <arch/board/board.h>
 
+#include "esp32_spi.h"
 #include "esp32_gpio.h"
 
 /****************************************************************************
- * Private Functions
+ * Pre-processor Definitions
  ****************************************************************************/
+
+#ifndef CONFIG_SPI_CMDDATA
+#  error "The ST7789 driver requires CONFIG_SPI_CMDATA in the config"
+#endif
+
+#ifndef CONFIG_ESP32_SPI_SWCS
+#  error "The ST7789 driver requires CONFIG_ESP32_SPI_SWCS in the config"
+#endif
 
 /****************************************************************************
- * Name: spi_status
+ * Private Data
  ****************************************************************************/
 
-static inline uint8_t spi_status(struct spi_dev_s *dev, uint32_t devid)
-{
-  uint8_t status = 0;
-
-#ifdef CONFIG_MMCSD_SPI
-  if (devid == SPIDEV_MMCSD(0))
-    {
-       status |= SPI_STATUS_PRESENT;
-    }
-#endif
-
-#if defined(CONFIG_LCD_ILI9341) || defined(CONFIG_LCD_SSD1680)
-  if (devid == SPIDEV_DISPLAY(0))
-    {
-       status |= SPI_STATUS_PRESENT;
-    }
-#endif
-
-  return status;
-}
-
-/****************************************************************************
- * Name: spi_cmddata
- ****************************************************************************/
-
-#ifdef CONFIG_SPI_CMDDATA
-
-static inline int spi_cmddata(struct spi_dev_s *dev, uint32_t devid,
-                              bool cmd)
-{
-#if defined(CONFIG_LCD_ILI9341) || defined(CONFIG_LCD_SSD1680) || defined(CONFIG_LCD_ST7789) 
-  if (devid == SPIDEV_DISPLAY(0))
-    {
-      /*  This is the Data/Command control pad which determines whether the
-       *  data bits are data or a command.
-       */
-
-      esp32_gpiowrite(DISPLAY_DC, !cmd);
-      return OK;
-    }
-#endif
-
-  return -ENODEV;
-}
-
-#endif
+static struct spi_dev_s *g_spidev;
+static struct lcd_dev_s *g_lcd = NULL;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32_spi2_status
+ * Name:  board_lcd_initialize
+ *
+ * Description:
+ *   Initialize the LCD video hardware.  The initial state of the LCD is
+ *   fully initialized, display memory cleared, and the LCD ready to use, but
+ *   with the power setting at 0 (full off).
+ *
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32_SPI2
-
-uint8_t esp32_spi2_status(struct spi_dev_s *dev, uint32_t devid)
+int board_lcd_initialize(void)
 {
-  return spi_status(dev, devid);
-}
+  g_spidev = esp32_spibus_initialize(DISPLAY_SPI);
+  if (!g_spidev)
+    {
+      lcderr("ERROR: Failed to initialize SPI port %d\n", DISPLAY_SPI);
+      return -ENODEV;
+    }
 
-#endif
+  /* SPI RX is not used. Same pin is used as LCD Data/Command control */
+
+  esp32_configgpio(DISPLAY_DC, OUTPUT);
+  esp32_gpiowrite(DISPLAY_DC, true);
+
+  /* Pull LCD_RESET high */
+
+  esp32_configgpio(DISPLAY_RST, OUTPUT);
+  esp32_gpiowrite(DISPLAY_RST, false);
+  up_mdelay(1);
+  esp32_gpiowrite(DISPLAY_RST, true);
+  up_mdelay(10);
+
+  /* Set full brightness */
+
+  esp32_configgpio(DISPLAY_BCKL, OUTPUT);
+  esp32_gpiowrite(DISPLAY_BCKL, true);
+
+  lcdinfo("LCD successfully initialized");
+
+  return OK;
+}
 
 /****************************************************************************
- * Name: esp32_spi2_cmddata
+ * Name:  board_lcd_getdev
+ *
+ * Description:
+ *   Return a a reference to the LCD object for the specified LCD.  This
+ *   allows support for multiple LCD devices.
+ *
  ****************************************************************************/
 
-#if defined(CONFIG_ESP32_SPI2) && defined(CONFIG_SPI_CMDDATA)
-
-int esp32_spi2_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
+FAR struct lcd_dev_s *board_lcd_getdev(int devno)
 {
-  spiinfo("devid: %" PRIu32 " CMD: %s\n", devid, cmd ? "command" :
-          "data");
+  g_lcd = st7789_lcdinitialize(g_spidev);
+  if (g_lcd == NULL)
+    {
+      lcderr("ERROR: Failed to bind SPI port %d to LCD %d\n", DISPLAY_SPI,
+      devno);
 
-  return spi_cmddata(dev, devid, cmd);
+      return NULL;
+    }
+
+  lcdinfo("SPI port %d bound to LCD %d\n", DISPLAY_SPI, devno);
+
+  return g_lcd;
 }
-
-#endif
 
 /****************************************************************************
- * Name: esp32_spi3_status
+ * Name:  board_lcd_uninitialize
+ *
+ * Description:
+ *   Uninitialize the LCD support
+ *
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32_SPI3
-
-uint8_t esp32_spi3_status(struct spi_dev_s *dev, uint32_t devid)
+void board_lcd_uninitialize(void)
 {
-  return spi_status(dev, devid);
+  /* Turn the display off */
+
+  g_lcd->setpower(g_lcd, 0);
 }
-
-#endif
-
-/****************************************************************************
- * Name: esp32_spi3_cmddata
- ****************************************************************************/
-
-#if defined(CONFIG_ESP32_SPI3) && defined(CONFIG_SPI_CMDDATA)
-
-int esp32_spi3_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
-{
-  spiinfo("devid: %" PRIu32 " CMD: %s\n", devid, cmd ? "command" :
-          "data");
-
-  return spi_cmddata(dev, devid, cmd);
-}
-
-#endif

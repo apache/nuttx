@@ -285,6 +285,17 @@ config ARCH_BOARD_TTGO_T5V2_ESP32
 		Display resolution 128/296. More info:
 		https://github.com/Xinyuan-LilyGO/LilyGo-T5-Epaper-Series
 
+config ARCH_BOARD_TTGO_T_DISPLAY_ESP32
+	bool "TTGO T-Display ESP32 v1.1"
+	depends on ARCH_CHIP_ESP32WROOM32 || ARCH_CHIP_ESP32WROOM32_8MB || ARCH_CHIP_ESP32WROOM32_16MB || ARCH_CHIP_ESP32WROVER || ARCH_CHIP_ESP32SOLO1
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESP32_GPIO_IRQ
+	---help---
+		TTGO-T-DISPLAY-ESP32 is an ESP32 with a TFT Display.
+		This port is for board version 1.1, more info:
+		https://github.com/Xinyuan-LilyGO/TTGO-T-Display
+
 config ARCH_BOARD_ESP32C3_DEVKIT
 	bool "Espressif ESP32-C3 DevKit"
 	depends on ARCH_CHIP_ESP32C3MINI1 || ARCH_CHIP_ESP32C3WROOM02
@@ -2777,6 +2788,7 @@ config ARCH_BOARD
 	default "tm4c1294-launchpad"       if ARCH_BOARD_TM4C1294_LAUNCHPAD
 	default "tms570ls31x-usb-kit"      if ARCH_BOARD_TMS570LS31X_USB_KIT
 	default "ttgo_lora_esp32"          if ARCH_BOARD_TTGO_LORA_ESP32
+	default "ttgo_t_display_esp32"     if ARCH_BOARD_TTGO_T_DISPLAY_ESP32
 	default "twr-k60n512"              if ARCH_BOARD_TWR_K60N512
 	default "twr-k64f120m"             if ARCH_BOARD_TWR_K64F120M
 	default "u-blox-c027"              if ARCH_BOARD_U_BLOX_C027
@@ -3549,6 +3561,9 @@ source "boards/xtensa/esp32/esp32-wrover-kit/Kconfig"
 endif
 if ARCH_BOARD_TTGO_LORA_ESP32
 source "boards/xtensa/esp32/ttgo_lora_esp32/Kconfig"
+endif
+if ARCH_BOARD_TTGO_T_DISPLAY_ESP32
+source "boards/xtensa/esp32/ttgo_t_display_esp32/Kconfig"
 endif
 if ARCH_BOARD_Z16F2800100ZCOG
 source "boards/z16/z16f/z16f2800100zcog/Kconfig"
