@@ -165,6 +165,15 @@ struct can_ioctl_data_s
   uint16_t data_samplep; /* Data phase sample point % */
 };
 
+/* Structure passed to get or set the cellular network device features */
+
+struct cell_ioctl_data_s
+{
+  uint8_t mdp_chnidx;  /* MDP(Multi Data Path) channel idx bound to this network device */
+  uint8_t sim_id;      /* Sim ID in dual sim system */
+  uint8_t cell_id;     /* Cell Identification in mobile phone networks */
+};
+
 /* There are two forms of the I/F request structure.
  * One for IPv6 and one for IPv4.
  * Notice that they are (and must be) cast compatible and really different
@@ -190,6 +199,7 @@ struct lifreq
     struct mii_ioctl_notify_s llfru_mii_notify;         /* PHY event notification */
     struct mii_ioctl_data_s   lifru_mii_data;           /* MII request data */
     struct can_ioctl_data_s   lifru_can_data;           /* CAN bitrate request data */
+    struct cell_ioctl_data_s  lifru_cell_data;          /* Cellular network data */
   } lifr_ifru;
 };
 
@@ -242,6 +252,7 @@ struct ifreq
     struct mii_ioctl_notify_s ifru_mii_notify;          /* PHY event notification */
     struct mii_ioctl_data_s   ifru_mii_data;            /* MII request data */
     struct can_ioctl_data_s   ifru_can_data;            /* CAN bitrate request data */
+    struct cell_ioctl_data_s  lifru_cell_data;          /* Cellular network data */
   } ifr_ifru;
 };
 

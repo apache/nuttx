@@ -115,6 +115,10 @@
 #define SIOCGCANBITRATE  _SIOC(0x002C)  /* Get bitrate from a CAN controller */
 #define SIOCSCANBITRATE  _SIOC(0x002D)  /* Set bitrate of a CAN controller */
 
+/* Cellular net driver ******************************************************/
+
+#define SIOCSCELLNETDEV  _SIOC(0x0030)  /* Set cellular Netowrk Interface */
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
