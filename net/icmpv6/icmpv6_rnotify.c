@@ -58,22 +58,22 @@
 static struct icmpv6_rnotify_s *g_icmpv6_rwaiters;
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
  * Name: icmpv6_setaddresses
  *
  * Description:
- *   We successfully obtained the Router Advertisement.  See the new IPv6
+ *   We successfully obtained the Router Advertisement.  Set the new IPv6
  *   addresses in the driver structure.
  *
  ****************************************************************************/
 
-static void icmpv6_setaddresses(FAR struct net_driver_s *dev,
-                                const net_ipv6addr_t draddr,
-                                const net_ipv6addr_t prefix,
-                                unsigned int preflen)
+void icmpv6_setaddresses(FAR struct net_driver_s *dev,
+                         const net_ipv6addr_t draddr,
+                         const net_ipv6addr_t prefix,
+                         unsigned int preflen)
 {
   unsigned int i;
 
@@ -138,10 +138,6 @@ static void icmpv6_setaddresses(FAR struct net_driver_s *dev,
 
   net_unlock();
 }
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Name: icmpv6_rwait_setup
@@ -287,9 +283,7 @@ int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify, unsigned int timeout)
  *
  ****************************************************************************/
 
-void icmpv6_rnotify(FAR struct net_driver_s *dev,
-                    const net_ipv6addr_t draddr, const net_ipv6addr_t prefix,
-                    unsigned int preflen)
+void icmpv6_rnotify(FAR struct net_driver_s *dev)
 {
   FAR struct icmpv6_rnotify_s *curr;
 
@@ -307,10 +301,6 @@ void icmpv6_rnotify(FAR struct net_driver_s *dev,
       if (curr->rn_result != OK &&
           strncmp(curr->rn_ifname, dev->d_ifname, IFNAMSIZ) == 0)
         {
-          /* Yes.. Set the new network addresses. */
-
-          icmpv6_setaddresses(dev, draddr, prefix, preflen);
-
           /* And signal the waiting, returning success */
 
           curr->rn_result = OK;
