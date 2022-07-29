@@ -171,8 +171,8 @@ struct stm32wb_mbox_shared_buffer_s
 struct stm32wb_mbox_channel_s
 {
   uint8_t                     ch_num;
-  stm32wb_mbox_list_t         msg_buf_queue;
-  struct stm32wb_mbox_cmd_s   *msg_buf;
+  stm32wb_mbox_list_t         cmd_buf_queue;
+  struct stm32wb_mbox_cmd_s   *cmd_buf;
   bool                        ack_ready;
 };
 
@@ -433,12 +433,12 @@ static int stm32wb_mbox_txdata(struct stm32wb_mbox_channel_s *chan,
    * none of other waiting commands and none of unprocessed ack responses.
    */
 
-  if (stm32wb_mbox_list_is_empty(&chan->msg_buf_queue) &&
+  if (stm32wb_mbox_list_is_empty(&chan->cmd_buf_queue) &&
       !stm32wb_ipcc_txactive(chan->ch_num) && !chan->ack_ready)
     {
       /* Channel is ready, copy command into transmission buffer */
 
-      pkt_buf = chan->msg_buf;
+      pkt_buf = chan->cmd_buf;
     }
   else
     {
@@ -458,13 +458,13 @@ static int stm32wb_mbox_txdata(struct stm32wb_mbox_channel_s *chan,
   pkt_buf->type = type;
   memcpy(&pkt_buf->cmd_hdr, data, len);
 
-  if (pkt_buf == chan->msg_buf)
+  if (pkt_buf == chan->cmd_buf)
     {
       /* Command is ready in mailbox buffer, start transmission now */
 
       stm32wb_ipcc_settxactive(chan->ch_num);
 
-      if (!stm32wb_mbox_list_is_empty(&chan->msg_buf_queue) ||
+      if (!stm32wb_mbox_list_is_empty(&chan->cmd_buf_queue) ||
           chan->ch_num == STM32WB_MBOX_SYSCMD_CHANNEL)
         {
           /* There are more commands awaiting, so unmask interrupt to get
@@ -480,7 +480,7 @@ static int stm32wb_mbox_txdata(struct stm32wb_mbox_channel_s *chan,
       /* Command is in temp buffer, push it into queue */
 
       flags = enter_critical_section();
-      stm32wb_mbox_list_add_tail(&chan->msg_buf_queue, &pkt_buf->list_hdr);
+      stm32wb_mbox_list_add_tail(&chan->cmd_buf_queue, &pkt_buf->list_hdr);
       leave_critical_section(flags);
 
       /* Unmask interrupt to get notified when channel gets free */
@@ -504,20 +504,20 @@ static bool stm32wb_mbox_txnext(struct stm32wb_mbox_channel_s *chan)
   struct stm32wb_mbox_cmd_s *pkt_buf;
 
   pkt_buf = (struct stm32wb_mbox_cmd_s *)
-            stm32wb_mbox_list_remove_head(&chan->msg_buf_queue);
+            stm32wb_mbox_list_remove_head(&chan->cmd_buf_queue);
 
   if (pkt_buf != NULL)
     {
-      chan->msg_buf->type = pkt_buf->type;
+      chan->cmd_buf->type = pkt_buf->type;
 
       if (chan->ch_num == STM32WB_MBOX_BLEACL_CHANNEL)
         {
-          memcpy(&chan->msg_buf->acl_hdr, &pkt_buf->acl_hdr,
+          memcpy(&chan->cmd_buf->acl_hdr, &pkt_buf->acl_hdr,
                  sizeof(pkt_buf->acl_hdr) + pkt_buf->acl_hdr.len);
         }
       else
         {
-          memcpy(&chan->msg_buf->cmd_hdr, &pkt_buf->cmd_hdr,
+          memcpy(&chan->cmd_buf->cmd_hdr, &pkt_buf->cmd_hdr,
                  sizeof(pkt_buf->cmd_hdr) + pkt_buf->cmd_hdr.param_len);
         }
 
@@ -525,7 +525,7 @@ static bool stm32wb_mbox_txnext(struct stm32wb_mbox_channel_s *chan)
 
       stm32wb_ipcc_settxactive(chan->ch_num);
 
-      if (!stm32wb_mbox_list_is_empty(&chan->msg_buf_queue))
+      if (!stm32wb_mbox_list_is_empty(&chan->cmd_buf_queue))
         {
           /* Unmask TXF interrupt to get notified when completed */
 
@@ -597,7 +597,7 @@ static void stm32wb_mbox_acksyscmd(void)
    * processed command but without a list header.
    */
 
-  evt = (struct stm32wb_mbox_evt_s *)(&g_syscmd_channel.msg_buf);
+  evt = (struct stm32wb_mbox_evt_s *)(&g_syscmd_channel.cmd_buf);
   evt->type = STM32WB_MBOX_SYSACK;
 
   receive_evt_handler(evt);
@@ -661,24 +661,24 @@ void stm32wb_mboxinitialize(stm32wb_mbox_evt_handler_t evt_handler)
   /* Init system channel data */
 
   g_syscmd_channel.ch_num =  STM32WB_MBOX_SYSCMD_CHANNEL;
-  g_syscmd_channel.msg_buf = (struct stm32wb_mbox_cmd_s *)
+  g_syscmd_channel.cmd_buf = (struct stm32wb_mbox_cmd_s *)
                               stm32wb_mbox_shared.sys_cmd_buffer;
-  stm32wb_mbox_list_initialize(&g_syscmd_channel.msg_buf_queue);
+  stm32wb_mbox_list_initialize(&g_syscmd_channel.cmd_buf_queue);
 
 #ifdef CONFIG_STM32WB_BLE
   /* Init BLE command channel data */
 
   g_blecmd_channel.ch_num =  STM32WB_MBOX_BLECMD_CHANNEL;
-  g_blecmd_channel.msg_buf = (struct stm32wb_mbox_cmd_s *)
+  g_blecmd_channel.cmd_buf = (struct stm32wb_mbox_cmd_s *)
                              stm32wb_mbox_shared.ble_cmd_buffer;
-  stm32wb_mbox_list_initialize(&g_blecmd_channel.msg_buf_queue);
+  stm32wb_mbox_list_initialize(&g_blecmd_channel.cmd_buf_queue);
 
   /* Init BLE ACL channel data */
 
   g_bleacl_channel.ch_num =  STM32WB_MBOX_BLEACL_CHANNEL;
-  g_bleacl_channel.msg_buf = (struct stm32wb_mbox_cmd_s *)
+  g_bleacl_channel.cmd_buf = (struct stm32wb_mbox_cmd_s *)
                              stm32wb_mbox_shared.ble_cmd_buffer;
-  stm32wb_mbox_list_initialize(&g_bleacl_channel.msg_buf_queue);
+  stm32wb_mbox_list_initialize(&g_bleacl_channel.cmd_buf_queue);
 #endif
 
   /* Init local (not shared) queues */
