@@ -2985,7 +2985,10 @@ static int bmi270_fifo_xl_enable(FAR struct bmi270_dev_s *priv,
       reg.fifo_gyr_en = BMI270_DISABLE;
       bmi270_spi_write(priv, BMI270_FIFO_CONFIG_1, (FAR uint8_t *)&reg);
       reg.fifo_gyr_en = BMI270_ENABLE;
-      bmi270_xl_enable(priv, BMI270_ENABLE);
+      if (priv->dev[BMI270_XL_IDX].activated)
+        {
+          bmi270_xl_enable(priv, BMI270_ENABLE);
+        }
 
       if (priv->dev[BMI270_GY_IDX].activated)
         {
@@ -3032,7 +3035,11 @@ static int bmi270_fifo_gy_enable(FAR struct bmi270_dev_s *priv,
       reg.fifo_gyr_en = BMI270_DISABLE;
       bmi270_spi_write(priv, BMI270_FIFO_CONFIG_1, (FAR uint8_t *)&reg);
       reg.fifo_acc_en = BMI270_ENABLE;
-      bmi270_gy_enable(priv, BMI270_ENABLE);
+      if (priv->dev[BMI270_GY_IDX].activated)
+        {
+          bmi270_gy_enable(priv, BMI270_ENABLE);
+        }
+
       if (priv->dev[BMI270_XL_IDX].activated)
         {
           bmi270_xl_enable(priv, BMI270_ENABLE);
