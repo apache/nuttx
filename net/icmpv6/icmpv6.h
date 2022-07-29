@@ -425,6 +425,24 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev);
 #endif
 
 /****************************************************************************
+ * Name: icmpv6_setaddresses
+ *
+ * Description:
+ *   We successfully obtained the Router Advertisement.  Set the new IPv6
+ *   addresses in the driver structure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ICMPv6_AUTOCONF
+void icmpv6_setaddresses(FAR struct net_driver_s *dev,
+                         const net_ipv6addr_t draddr,
+                         const net_ipv6addr_t prefix,
+                         unsigned int preflen);
+#else
+#  define icmpv6_setaddresses(d,d,p,p) (0)
+#endif
+
+/****************************************************************************
  * Name: icmpv6_rwait_setup
  *
  * Description:
@@ -502,12 +520,9 @@ int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify, unsigned int timeout);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
-void icmpv6_rnotify(FAR struct net_driver_s *dev,
-                    const net_ipv6addr_t draddr,
-                    const net_ipv6addr_t prefix,
-                    unsigned int preflen);
+void icmpv6_rnotify(FAR struct net_driver_s *dev);
 #else
-#  define icmpv6_rnotify(d,p,l)
+#  define icmpv6_rnotify(d) (0)
 #endif
 
 /****************************************************************************
