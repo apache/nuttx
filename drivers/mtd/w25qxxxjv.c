@@ -34,6 +34,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <inttypes.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
@@ -1006,8 +1007,8 @@ static int w25qxxxjv_write_page(struct w25qxxxjv_dev_s *priv,
 
       if (ret < 0)
         {
-          ferr("ERROR: QSPI_MEMORY failed writing address=%06jx\n",
-               (uintmax_t)address);
+          ferr("ERROR: QSPI_MEMORY failed writing address=%06"PRIxOFF"\n",
+               address);
           return ret;
         }
 
