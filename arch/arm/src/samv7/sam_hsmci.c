@@ -120,10 +120,10 @@
 #undef  HSCMI_NORXDMA              /* Define to disable RX DMA */
 #define HSCMI_NOTXDMA            1 /* Define to disable TX DMA */
 
-/* Timing */
+/* Timing : 100mS short timeout, 2 seconds for long one */
 
-#define HSMCI_CMDTIMEOUT         (0x7fffffff)
-#define HSMCI_LONGTIMEOUT        (0x7fffffff)
+#define HSMCI_CMDTIMEOUT         MSEC2TICK(100)
+#define HSMCI_LONGTIMEOUT        MSEC2TICK(2000)
 
 /* Big DTIMER setting */
 
@@ -2387,6 +2387,7 @@ static int sam_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   uint32_t sr;
   uint32_t pending;
+  clock_t  watchtime;
   int32_t  timeout;
 
   switch (cmd & MMCSD_RESPONSE_MASK)
@@ -2414,6 +2415,7 @@ static int sam_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
 
   /* Then wait for the response (or timeout) */
 
+  watchtime = clock_systime_ticks();
   for (; ; )
     {
       /* Did a Command-Response sequence termination event occur? */
@@ -2463,7 +2465,7 @@ static int sam_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
               return OK;
             }
        }
-      else if (--timeout <= 0)
+      else if (clock_systime_ticks() - watchtime > timeout)
         {
           mcerr("ERROR: Timeout cmd: %08" PRIx32 " events: %08" PRIx32
                 " SR: %08" PRIx32 "\n",
@@ -3135,7 +3137,7 @@ static int sam_dmasendsetup(struct sdio_dev_s *dev,
   sam_dmastart(priv->dma, sam_dmacallback, priv);
 
   /* Configure transfer-related interrupts.  Transfer interrupts are not
-   * enabled until after the transfer is start with an SD command (i.e.,
+   * enabled until after the transfer is started with an SD command (i.e.,
    * at the beginning of sam_eventwait().
    */
 
