@@ -304,11 +304,6 @@ struct tcp_conn_s
   FAR struct devif_callback_s *connevents;
   FAR struct devif_callback_s *connevents_tail;
 
-  /* Reference to TCP close callback instance */
-
-  FAR struct devif_callback_s *clscb;
-  struct work_s                clswork;
-
 #if defined(CONFIG_NET_TCP_WRITE_BUFFERS)
   /* Callback instance for TCP send() */
 
