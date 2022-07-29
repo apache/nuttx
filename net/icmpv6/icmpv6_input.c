@@ -394,10 +394,14 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
 
                     if ((prefixopt->flags & ICMPv6_PRFX_FLAG_A) != 0)
                       {
+                        /* Yes.. Set the new network addresses. */
+
+                        icmpv6_setaddresses(dev, ipv6->srcipaddr,
+                                    prefixopt->prefix, prefixopt->preflen);
+
                         /* Notify any waiting threads */
 
-                        icmpv6_rnotify(dev, ipv6->srcipaddr,
-                                    prefixopt->prefix, prefixopt->preflen);
+                        icmpv6_rnotify(dev);
                         prefix = true;
                       }
                   }
