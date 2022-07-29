@@ -512,13 +512,13 @@ static bool stm32wb_mbox_txnext(struct stm32wb_mbox_channel_s *chan)
 
       if (chan->ch_num == STM32WB_MBOX_BLEACL_CHANNEL)
         {
-          memcpy(chan->msg_buf, &pkt_buf->acl_hdr,
-                 pkt_buf->acl_hdr.len);
+          memcpy(&chan->msg_buf->acl_hdr, &pkt_buf->acl_hdr,
+                 sizeof(pkt_buf->acl_hdr) + pkt_buf->acl_hdr.len);
         }
       else
         {
-          memcpy(chan->msg_buf, &pkt_buf->cmd_hdr,
-                 pkt_buf->cmd_hdr.param_len);
+          memcpy(&chan->msg_buf->cmd_hdr, &pkt_buf->cmd_hdr,
+                 sizeof(pkt_buf->cmd_hdr) + pkt_buf->cmd_hdr.param_len);
         }
 
       /* Start transmission */
