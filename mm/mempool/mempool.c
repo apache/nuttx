@@ -53,6 +53,7 @@ static inline void mempool_add_list(FAR sq_queue_t *list, FAR void *base,
  *
  * Input Parameters:
  *   pool       - Address of the memory pool to be used.
+ *   name       - The name of memory pool.
  *   bsize      - The block size of memory blocks in pool.
  *   ninitial   - The initial count of memory blocks in pool.
  *   nexpand    - The increment count of memory blocks in pool.
@@ -66,8 +67,9 @@ static inline void mempool_add_list(FAR sq_queue_t *list, FAR void *base,
  *
  ****************************************************************************/
 
-int mempool_init(FAR struct mempool_s *pool, size_t bsize, size_t ninitial,
-                 size_t nexpand, size_t ninterrupt)
+int mempool_init(FAR struct mempool_s *pool, FAR const char *name,
+                 size_t bsize, size_t ninitial, size_t nexpand,
+                 size_t ninterrupt)
 {
   size_t count = ninitial + ninterrupt;
 
@@ -101,6 +103,10 @@ int mempool_init(FAR struct mempool_s *pool, size_t bsize, size_t ninitial,
 
   nxsem_init(&pool->wait, 0, 0);
   nxsem_set_protocol(&pool->wait, SEM_PRIO_NONE);
+
+#ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL
+  mempool_procfs_register(&pool->procfs, name);
+#endif
 
   return 0;
 }
@@ -228,6 +234,51 @@ void mempool_free(FAR struct mempool_s *pool, FAR void *blk)
 }
 
 /****************************************************************************
+ * Name: mempool_info
+ *
+ * Description:
+ *   mempool_info returns a copy of updated current mempool information.
+ *
+ * Input Parameters:
+ *   pool    - Address of the memory pool to be used.
+ *   info    - The pointer of mempoolinfo.
+ *
+ * Returned Value:
+ *   OK on success; A negated errno value on any failure.
+ ****************************************************************************/
+
+int mempool_info(FAR struct mempool_s *pool, FAR struct mempoolinfo_s *info)
+{
+  irqstate_t flags;
+
+  if (pool == NULL || info == NULL)
+    {
+      return -EINVAL;
+    }
+
+  flags = spin_lock_irqsave(&pool->lock);
+  info->ordblks = sq_count(&pool->list);
+  info->iordblks = sq_count(&pool->ilist);
+  info->aordblks = pool->nused;
+  info->arena = (pool->nused + info->ordblks + info->iordblks) * pool->bsize;
+  spin_unlock_irqrestore(&pool->lock, flags);
+  info->sizeblks = pool->bsize;
+  if (pool->nexpand == 0)
+    {
+      int semcount;
+
+      nxsem_get_value(&pool->wait, &semcount);
+      info->nwaiter = -semcount;
+    }
+  else
+    {
+      info->nwaiter = 0;
+    }
+
+  return 0;
+}
+
+/****************************************************************************
  * Name: mempool_deinit
  *
  * Description:
@@ -250,6 +301,10 @@ int mempool_deinit(FAR struct mempool_s *pool)
     {
       return -EBUSY;
     }
+
+#ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL
+  mempool_procfs_unregister(&pool->procfs);
+#endif
 
   while ((blk = sq_remfirst(&pool->elist)) != NULL)
     {

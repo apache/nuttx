@@ -21,7 +21,18 @@
 # Memory buffer pool management
 
 ifeq ($(CONFIG_MM_MEMPOOL),y)
+
 CSRCS += mempool.c
+
+ifeq ($(CONFIG_FS_PROCFS),y)
+
+ifneq ($(CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL),y)
+
+CSRCS += mempool_procfs.c
+
+endif
+
+endif
 
 # Add the memory buffer pool directory to the build
 

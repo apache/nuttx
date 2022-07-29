@@ -178,6 +178,11 @@ config MM_MEMPOOL
 		Memory buffer pool support. Such pools are mostly used
 		for guaranteed, deadlock-free memory allocations.
 
+config FS_PROCFS_EXCLUDE_MEMPOOL
+	bool "Exclude mempool"
+	default n
+	depends on FS_PROCFS
+
 config MM_KASAN
 	bool "Kernel Address Sanitizer"
 	default n
