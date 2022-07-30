@@ -5242,11 +5242,65 @@ endmenu
 menu "ADC Configuration"
 	depends on STM32F7_ADC
 
+config STM32F7_ADC1_RESOLUTION
+	int "ADC1 resolution"
+	depends on STM32F7_ADC1
+	default 0
+	range 0 3
+	---help---
+		ADC1 resolution. 0 - 12 bit, 1 - 10 bit, 2 - 8 bit, 3 - 6 bit
+
+config STM32F7_ADC2_RESOLUTION
+	int "ADC2 resolution"
+	depends on STM32F7_ADC2
+	default 0
+	range 0 3
+	---help---
+		ADC2 resolution. 0 - 12 bit, 1 - 10 bit, 2 - 8 bit, 3 - 6 bit
+
+config STM32F7_ADC3_RESOLUTION
+	int "ADC3 resolution"
+	depends on STM32F7_ADC3
+	default 0
+	range 0 3
+	---help---
+		ADC3 resolution. 0 - 12 bit, 1 - 10 bit, 2 - 8 bit, 3 - 6 bit
+
+config STM32F7_ADC_MAX_SAMPLES
+	int "The maximum number of channels that can be sampled"
+	default 16
+	---help---
+		The maximum number of samples which can be handled without
+		overrun depends on various factors. This is the user's
+		responsibility to correctly select this value.
+		Since the interface to update the sampling time is available
+		for all supported devices, the user can change the default
+		values in the board initialization logic and avoid ADC overrun.
+
 config STM32F7_ADC_NO_STARTUP_CONV
 	bool "Do not start conversion when opening ADC device"
 	default n
 	---help---
 		Do not start conversion when opening ADC device.
+
+config STM32F7_ADC_NOIRQ
+	bool "Do not use default ADC interrupts"
+	default n
+	---help---
+		Do not use default ADC interrupts handlers.
+
+config STM32F7_ADC_LL_OPS
+	bool "ADC low-level operations"
+	default n
+	---help---
+		Enable low-level ADC ops.
+
+config STM32F7_ADC_CHANGE_SAMPLETIME
+	bool "ADC sample time configuration"
+	default n
+	depends on STM32F7_ADC_LL_OPS
+	---help---
+		Enable ADC sample time configuration (SMPRx registers).
 
 config STM32F7_ADC1_DMA
 	bool "ADC1 DMA"
@@ -5257,6 +5311,30 @@ config STM32F7_ADC1_DMA
 		DMA transfer, which is necessary if multiple channels are read
 		or if very high trigger frequencies are used.
 
+config STM32F7_ADC1_SCAN
+	bool "ADC1 scan mode"
+	depends on STM32F7_ADC1
+	default y if STM32F7_ADC1_DMA
+	default n
+
+config STM32F7_ADC1_DMA_CFG
+	int "ADC1 DMA configuration"
+	depends on STM32F7_ADC1_DMA
+	range 0 1
+	default 0
+	---help---
+		0 - ADC1 DMA in One Shot Mode, 1 - ADC1 DMA in Circular Mode
+
+config STM32F7_ADC1_ANIOC_TRIGGER
+	int "ADC1 software trigger (ANIOC_TRIGGER) configuration"
+	depends on STM32F7_ADC1
+	range 1 3
+	default 3
+	---help---
+		1 - ANIOC_TRIGGER only starts regular conversion
+		2 - ANIOC_TRIGGER only starts injected conversion
+		3 - ANIOC_TRIGGER starts both regular and injected conversions
+
 config STM32F7_ADC2_DMA
 	bool "ADC2 DMA"
 	depends on STM32F7_ADC2 && STM32F7_HAVE_ADC2_DMA
@@ -5266,6 +5344,30 @@ config STM32F7_ADC2_DMA
 		DMA transfer, which is necessary if multiple channels are read
 		or if very high trigger frequencies are used.
 
+config STM32F7_ADC2_SCAN
+	bool "ADC2 scan mode"
+	depends on STM32F7_ADC2
+	default y if STM32F7_ADC2_DMA
+	default n
+
+config STM32F7_ADC2_DMA_CFG
+	int "ADC2 DMA configuration"
+	depends on STM32F7_ADC2_DMA
+	range 0 1
+	default 0
+	---help---
+		0 - ADC2 DMA in One Shot Mode, 1 - ADC2 DMA in Circular Mode
+
+config STM32F7_ADC2_ANIOC_TRIGGER
+	int "ADC2 software trigger (ANIOC_TRIGGER) configuration"
+	depends on STM32F7_ADC2
+	range 1 3
+	default 3
+	---help---
+		1 - ANIOC_TRIGGER only starts regular conversion
+		2 - ANIOC_TRIGGER only starts injected conversion
+		3 - ANIOC_TRIGGER starts both regular and injected conversions
+
 config STM32F7_ADC3_DMA
 	bool "ADC3 DMA"
 	depends on STM32F7_ADC3 && STM32F7_HAVE_ADC3_DMA
@@ -5274,6 +5376,96 @@ config STM32F7_ADC3_DMA
 		If DMA is selected, then the ADC may be configured to support
 		DMA transfer, which is necessary if multiple channels are read
 		or if very high trigger frequencies are used.
+
+config STM32F7_ADC3_SCAN
+	bool "ADC3 scan mode"
+	depends on STM32F7_ADC3
+	default y if STM32F7_ADC3_DMA
+	default n
+
+config STM32F7_ADC3_DMA_CFG
+	int "ADC3 DMA configuration"
+	depends on STM32F7_ADC3_DMA
+	range 0 1
+	default 0
+	---help---
+		0 - ADC3 DMA in One Shot Mode, 1 - ADC3 DMA in Circular Mode
+
+config STM32F7_ADC3_ANIOC_TRIGGER
+	int "ADC3 software trigger (ANIOC_TRIGGER) configuration"
+	depends on STM32F7_ADC3
+	range 1 3
+	default 3
+	---help---
+		1 - ANIOC_TRIGGER only starts regular conversion
+		2 - ANIOC_TRIGGER only starts injected conversion
+		3 - ANIOC_TRIGGER starts both regular and injected conversions
+
+config STM32F7_ADC1_INJECTED_CHAN
+	int "ADC1 injected channels"
+	depends on STM32F7_ADC1
+	range 0 4
+	default 0
+	---help---
+		Support for ADC1 injected channels.
+
+config STM32F7_ADC2_INJECTED_CHAN
+	int "ADC2 injected channels"
+	depends on STM32F7_ADC2
+	range 0 4
+	default 0
+	---help---
+		Support for ADC2 injected channels.
+
+config STM32F7_ADC3_INJECTED_CHAN
+	int "ADC3 injected channels"
+	depends on STM32F7_ADC3
+	range 0 4
+	default 0
+	---help---
+		Support for ADC3 injected channels.
+
+config STM32F7_ADC1_EXTSEL
+	bool "ADC1 external trigger for regular group"
+	depends on STM32F7_ADC1 && !STM32F7_HAVE_ADC1_TIMER
+	default n
+	---help---
+		Enable EXTSEL for ADC1.
+
+config STM32F7_ADC2_EXTSEL
+	bool "ADC2 external trigger for regular group"
+	depends on STM32F7_ADC2 && !STM32F7_HAVE_ADC2_TIMER
+	default n
+	---help---
+		Enable EXTSEL for ADC2.
+
+config STM32F7_ADC3_EXTSEL
+	bool "ADC3 external trigger for regular group"
+	depends on STM32F7_ADC3 && !STM32F7_HAVE_ADC3_TIMER
+	default n
+	---help---
+		Enable EXTSEL for ADC3.
+
+config STM32F7_ADC1_JEXTSEL
+	bool "ADC1 external trigger for injected group"
+	depends on STM32F7_ADC1
+	default n
+	---help---
+		Enable JEXTSEL for ADC1.
+
+config STM32F7_ADC2_JEXTSEL
+	bool "ADC2 external trigger for injected group"
+	depends on STM32F7_ADC2
+	default n
+	---help---
+		Enable JEXTSEL for ADC2.
+
+config STM32F7_ADC3_JEXTSEL
+	bool "ADC3 external trigger for injected group"
+	depends on STM32F7_ADC3
+	default n
+	---help---
+		Enable JEXTSEL for ADC3.
 
 endmenu # "ADC Configuration"
 
