@@ -168,7 +168,7 @@
 /* Reserved for Bluetooth network devices (see bt_ioctls.h) */
 
 #define WL_BLUETOOTHFIRST     (WL_NETFIRST + WL_NNETCMDS)
-#define WL_BLUETOOTHCMDS      (26)
+#define WL_BLUETOOTHCMDS      (28)
 #define WL_IBLUETOOTHCMD(cmd) (_WLIOCVALID(cmd) && \
                               _IOC_NR(cmd) >= WL_BLUETOOTHFIRST && \
                               _IOC_NR(cmd) < (WL_BLUETOOTHFIRST + WL_BLUETOOTHCMDS))
