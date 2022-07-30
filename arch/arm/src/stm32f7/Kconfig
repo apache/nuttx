@@ -7063,4 +7063,163 @@ endchoice # SAI2 synchronization enable
 
 endmenu
 
+menuconfig STM32F7_FOC
+	bool "STM32 lower-half FOC support"
+	default n
+	select ARCH_IRQPRIO
+	select STM32F7_PWM_MULTICHAN
+	select STM32F7_PWM_LL_OPS
+	select STM32F7_ADC_LL_OPS
+	select STM32F7_ADC_CHANGE_SAMPLETIME
+	select STM32F7_ADC_NO_STARTUP_CONV
+
+if STM32F7_FOC
+
+config STM32F7_FOC_FOC0
+	bool "FOC0 device (TIM1 for PWM modulation)"
+	default n
+	select STM32F7_FOC_USE_TIM1
+	---help---
+		Enable support for FOC0 device that uses TIM1 for PWM modulation
+
+config STM32F7_FOC_FOC1
+	bool "FOC1 device (TIM8 for PWM modulation)"
+	default n
+	select STM32F7_FOC_USE_TIM8
+	---help---
+		Enable support for FOC1 device that uses TIM8 for PWM modulation
+
+choice
+	prompt "FOC ADC trigger selection"
+	default STM32F7_FOC_ADC_TRGO
+
+config STM32F7_FOC_ADC_CCR4
+	bool "FOC uses CCR4 as ADC trigger"
+	---help---
+		This option uses the software frequency prescaler and is
+		not possible for 4-phase output.
+
+config STM32F7_FOC_ADC_TRGO
+	bool "FOC uses TRGO as ADC trigger"
+	depends on !STM32F7_FOC_FOC1
+	select STM32F7_PWM_TRGO
+	---help---
+		This option allows you to use higher PWM frequency and works for 4-phase output.
+		It is not possible for ADC IPv1 if FOC1 enabled (no T8TRGO in JEXTSEL).
+
+endchoice # "FOC ADC trigger selection"
+
+if STM32F7_FOC_FOC0
+
+choice
+	prompt "FOC0 device ADC selection"
+	default STM32F7_FOC_FOC0_ADC1
+
+config STM32F7_FOC_FOC0_ADC1
+	bool "FOC0 uses ADC1"
+	select STM32F7_FOC_USE_ADC1
+
+config STM32F7_FOC_FOC0_ADC2
+	bool "FOC0 uses ADC2"
+	select STM32F7_FOC_USE_ADC2
+
+config STM32F7_FOC_FOC0_ADC3
+	bool "FOC0 uses ADC3"
+	select STM32F7_FOC_USE_ADC3
+
+endchoice # "FOC0 device ADC selection"
+
+endif # STM32F7_FOC_FOC0
+
+if STM32F7_FOC_FOC1
+
+choice
+	prompt "FOC1 device ADC selection"
+	default STM32F7_FOC_FOC1_ADC2
+
+config STM32F7_FOC_FOC1_ADC1
+	bool "FOC1 uses ADC1"
+	select STM32F7_FOC_USE_ADC1
+
+config STM32F7_FOC_FOC1_ADC2
+	bool "FOC1 uses ADC2"
+	select STM32F7_FOC_USE_ADC2
+
+config STM32F7_FOC_FOC1_ADC3
+	bool "FOC1 uses ADC3"
+	select STM32F7_FOC_USE_ADC3
+
+endchoice # "FOC0 device ADC selection"
+
+endif # STM32F7_FOC_FOC1
+
+config STM32F7_FOC_HAS_PWM_COMPLEMENTARY
+	bool "FOC PWM has complementary outputs"
+	default n
+	---help---
+		Enable complementary outputs for the FOC PWM (sometimes called 6-PWM mode)
+
+# hidden variables and automatic configuration
+
+config STM32F7_FOC_USE_TIM1
+	bool
+	default n
+	select STM32F7_TIM1
+	select STM32F7_TIM1_PWM
+	select STM32F7_TIM1_CHANNEL1
+	select STM32F7_TIM1_CHANNEL2
+	select STM32F7_TIM1_CHANNEL3
+	select STM32F7_TIM1_CHANNEL4 if STM32F7_FOC_ADC_CCR4
+	select STM32F7_TIM1_CH1OUT
+	select STM32F7_TIM1_CH2OUT
+	select STM32F7_TIM1_CH3OUT
+	select STM32F7_TIM1_CH4OUT if STM32F7_FOC_ADC_CCR4
+	select STM32F7_TIM1_CH1NOUT if STM32F7_FOC_HAS_PWM_COMPLEMENTARY
+	select STM32F7_TIM1_CH2NOUT if STM32F7_FOC_HAS_PWM_COMPLEMENTARY
+	select STM32F7_TIM1_CH3NOUT if STM32F7_FOC_HAS_PWM_COMPLEMENTARY
+	---help---
+		The TIM1 generates PWM for the FOC
+
+config STM32F7_FOC_USE_TIM8
+	bool
+	default n
+	select STM32F7_TIM8
+	select STM32F7_TIM8_PWM
+	select STM32F7_TIM8_CHANNEL1
+	select STM32F7_TIM8_CHANNEL2
+	select STM32F7_TIM8_CHANNEL3
+	select STM32F7_TIM8_CHANNEL4 if STM32F7_FOC_ADC_CCR4
+	select STM32F7_TIM8_CH1OUT
+	select STM32F7_TIM8_CH2OUT
+	select STM32F7_TIM8_CH3OUT
+	select STM32F7_TIM8_CH4OUT if STM32F7_FOC_ADC_CCR4
+	select STM32F7_TIM8_CH1NOUT if STM32F7_FOC_HAS_PWM_COMPLEMENTARY
+	select STM32F7_TIM8_CH2NOUT if STM32F7_FOC_HAS_PWM_COMPLEMENTARY
+	select STM32F7_TIM8_CH3NOUT if STM32F7_FOC_HAS_PWM_COMPLEMENTARY
+	---help---
+		The TIM8 generates PWM for the FOC
+
+config STM32F7_FOC_USE_ADC1
+	bool
+	default n
+	select STM32F7_ADC1
+	select STM32F7_ADC1_SCAN
+	select STM32F7_ADC1_JEXTSEL
+
+config STM32F7_FOC_USE_ADC2
+	bool
+	default n
+	select STM32F7_ADC2
+	select STM32F7_ADC2_SCAN
+	select STM32F7_ADC2_JEXTSEL
+
+config STM32F7_FOC_USE_ADC3
+	bool
+	default n
+	select STM32F7_ADC3
+	select STM32F7_ADC3_SCAN
+	select STM32F7_ADC3_JEXTSEL
+
+endif #STM32F7_FOC
+
 endif # ARCH_CHIP_STM32F7

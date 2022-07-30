@@ -166,3 +166,7 @@ endif
 ifeq ($(CONFIG_STM32F7_PWM),y)
 CHIP_CSRCS += stm32_pwm.c
 endif
+
+ifeq ($(CONFIG_STM32F7_FOC),y)
+CHIP_CSRCS += stm32_foc.c
+endif
