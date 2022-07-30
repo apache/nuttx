@@ -44,6 +44,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* HCI event header fields helpers */
+
+#define STM32WB_BLEHCI_CCEVT_OPCODE(e)  (*(uint16_t *)((uint8_t *)(e) + 3))
+#define STM32WB_BLEHCI_CCEVT_STATUS(e)  (*((uint8_t *)(e) + 5))
+
+#define STM32WB_BLEHCI_CSEVT_OPCODE(e)  (*(uint16_t *)((uint8_t *)(e) + 4))
+#define STM32WB_BLEHCI_CSEVT_STATUS(e)  (*((uint8_t *)(e) + 2))
+
+/* BLE init configuration params */
+
 #define STM32WB_BLE_PREP_WRITE_NUM \
   STM32WB_MBOX_DEFAULT_BLE_PREP_WRITE_NUM(CONFIG_STM32WB_BLE_MAX_ATT_MTU)
 
@@ -145,8 +155,18 @@ static int stm32wb_blehci_driversend(struct bt_driver_s *btdev,
 
   if (type == BT_CMD || type == BT_ACL_OUT)
     {
-      wlinfo("passing type %s to mailbox driver\n",
-             (type == BT_CMD) ? "CMD" : "ACL");
+      if (type == BT_CMD)
+        {
+          wlinfo("passing CMD 0x%04x (len: %u) to mailbox driver\n",
+                 ((struct bt_hci_cmd_hdr_s *)data)->opcode,
+                 ((struct bt_hci_cmd_hdr_s *)data)->param_len);
+        }
+      else
+        {
+          wlinfo("passing ACL (handle: 0x%04x, len: %u) to mailbox driver\n",
+                 ((struct bt_hci_acl_hdr_s *)data)->handle,
+                 ((struct bt_hci_acl_hdr_s *)data)->len);
+        }
 
       /* Ensure non-concurrent access */
 
@@ -185,31 +205,58 @@ static int stm32wb_blehci_rxevt(struct stm32wb_mbox_evt_s *evt)
         len = sizeof(evt->evt_hdr) + evt->evt_hdr.len;
         if (evt->evt_hdr.evt == BT_HCI_EVT_CMD_COMPLETE)
           {
-            wlinfo("received CMD_COMPLETE from mailbox "
-                   "(opcode: 0x%x, status: 0x%x)\n",
-                   *(uint16_t *)((uint8_t *)&evt->evt_hdr + 3),
-                   *((uint8_t *)&evt->evt_hdr + 5));
+            wlinfo("received command COMPLETE event from mailbox "
+                   "(opcode: 0x%04x, status: %u)\n",
+                   STM32WB_BLEHCI_CCEVT_OPCODE(&evt->evt_hdr),
+                   STM32WB_BLEHCI_CCEVT_STATUS(&evt->evt_hdr));
+          }
+        else if (evt->evt_hdr.evt == BT_HCI_EVT_CMD_STATUS)
+          {
+            wlinfo("received command STATUS event from mailbox "
+                   "(opcode: 0x%04x, status: %u)\n",
+                   STM32WB_BLEHCI_CSEVT_OPCODE(&evt->evt_hdr),
+                   STM32WB_BLEHCI_CSEVT_STATUS(&evt->evt_hdr));
+
+#ifdef CONFIG_NIMBLE
+            /* During initialisation NimBLE host stack sends unsupported
+             * 'Set Event Mask Page' HCI command, and a failing response
+             * causes the stack initialisation to fail.  As a workaround
+             * with minimal impact we shim the response as succeeded.
+             */
+
+            if (STM32WB_BLEHCI_CSEVT_STATUS(&evt->evt_hdr) != 0 &&
+                (STM32WB_BLEHCI_CSEVT_OPCODE(&evt->evt_hdr) ==
+                 BT_OP(BT_OGF_BASEBAND, 0x0063)))
+              {
+                wlwarn("suppress FAILED command STATUS event from mailbox, "
+                       "(opcode: 0x%04x, status: %u) \n",
+                       STM32WB_BLEHCI_CSEVT_OPCODE(&evt->evt_hdr),
+                       STM32WB_BLEHCI_CSEVT_STATUS(&evt->evt_hdr));
+
+                /* Suppress status field error value */
+
+                STM32WB_BLEHCI_CSEVT_STATUS(&evt->evt_hdr) = 0;
+              }
+#endif
           }
         else
           {
-            wlinfo("received HCI EVT from mailbox "
-                   "(evt: %d, len: %zu)\n", evt->evt_hdr.evt, len);
+            wlinfo("received HCI EVT 0x%02x from mailbox (len: %u)\n",
+                   evt->evt_hdr.evt, evt->evt_hdr.len);
           }
 
         bt_netdev_receive(&g_blehci_driver, BT_EVT, &evt->evt_hdr, len);
         break;
 
       case STM32WB_MBOX_HCIACL:
-        wlinfo("received HCI ACL from mailbox (handle: %d)\n",
-               evt->acl_hdr.handle);
         len = sizeof(evt->acl_hdr) + evt->acl_hdr.len;
-
+        wlinfo("received HCI ACL from mailbox (handle: 0x%04x, len: %u)\n",
+               evt->acl_hdr.handle, evt->acl_hdr.len);
         bt_netdev_receive(&g_blehci_driver, BT_ACL_IN, &evt->acl_hdr, len);
         break;
 
       case STM32WB_MBOX_SYSEVT:
-        wlinfo("received SYS event from mailbox (evt: %d)\n",
-               evt->evt_hdr.evt);
+        wlinfo("received SYS EVT 0x%02x from mailbox\n", evt->evt_hdr.evt);
         if (evt->evt_hdr.evt == STM32WB_SHCI_ASYNC_EVT &&
             *(uint16_t *)(&evt->evt_hdr + 1) == STM32WB_SHCI_ASYNC_EVT_C2RDY)
           {
