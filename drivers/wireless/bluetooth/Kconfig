@@ -76,11 +76,4 @@ config BLUETOOTH_UART_BRIDGE_BTSNOOP
 	---help---
 		Enable Bluetooth hci btsnoop log
 
-config BLUETOOTH_UART_BRIDGE_BTSNOOP_PATH
-	string "Bluetooth uart bridge btsnoop file path"
-	default "/log/"
-	depends on BLUETOOTH_UART_BRIDGE_BTSNOOP
-	---help---
-		Bluetooth hci dump file path
-
 endif # DRIVERS_BLUETOOTH

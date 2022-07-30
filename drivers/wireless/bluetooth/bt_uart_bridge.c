@@ -35,6 +35,7 @@
 
 #include <nuttx/wireless/bluetooth/bt_hci.h>
 #include <nuttx/wireless/bluetooth/bt_uart.h>
+#include <nuttx/wireless/bluetooth/bt_ioctl.h>
 
 #include "bt_uart_filter.h"
 
@@ -80,7 +81,7 @@ struct bt_uart_bridge_s
 
   struct file                    filep;
 #ifdef CONFIG_BLUETOOTH_UART_BRIDGE_BTSNOOP
-  struct snoop_s                 snoop;
+  FAR struct snoop_s            *snoop;
 #endif /* CONFIG_BLUETOOTH_UART_BRIDGE_BTSNOOP */
 
   char                           tmpbuf[1024];
@@ -283,7 +284,7 @@ static ssize_t bt_uart_bridge_read(FAR struct file *filep,
         }
 
 #ifdef CONFIG_BLUETOOTH_UART_BRIDGE_BTSNOOP
-      snoop_dump(&bridge->snoop, bridge->tmpbuf,
+      snoop_dump(bridge->snoop, bridge->tmpbuf,
                  H4_HEADER_SIZE + hdrlen + pktlen,
                  0, SNOOP_DIRECTION_FLAG_RECV);
 #endif /* CONFIG_BLUETOOTH_UART_BRIDGE_BTSNOOP */
@@ -380,7 +381,7 @@ static ssize_t bt_uart_bridge_write(FAR struct file *filep,
         }
 
 #ifdef CONFIG_BLUETOOTH_UART_BRIDGE_BTSNOOP
-      snoop_dump(&bridge->snoop, device->sendbuf,
+      snoop_dump(bridge->snoop, device->sendbuf,
                  pktlen, 0, SNOOP_DIRECTION_FLAG_SENT);
 #endif /* CONFIG_BLUETOOTH_UART_BRIDGE_BTSNOOP */
 
@@ -418,8 +419,50 @@ static int bt_uart_bridge_ioctl(FAR struct file *filep,
   FAR struct inode *inode = filep->f_inode;
   FAR struct bt_uart_bridge_device_s *device = inode->i_private;
   FAR struct bt_uart_bridge_s *bridge = device->bridge;
+  int ret;
 
-  return file_ioctl(&bridge->filep, cmd, arg);
+  switch (cmd)
+    {
+#ifdef CONFIG_BLUETOOTH_UART_BRIDGE_BTSNOOP
+      case SIOCBTSNOOPOPEN:
+        {
+          FAR const char *filename = (FAR const char *)((uintptr_t)arg);
+          FAR struct snoop_s *snoop = (FAR struct snoop_s *)
+                                      kmm_zalloc(sizeof(struct snoop_s));
+          if (!snoop)
+            {
+              return -ENOMEM;
+            }
+
+          ret = snoop_open(snoop, filename, SNOOP_DATALINK_HCI_UART, true);
+          if (ret == OK)
+            {
+              bridge->snoop = snoop;
+            }
+          else
+            {
+              kmm_free(snoop);
+            }
+          break;
+        }
+
+      case SIOCBTSNOOPCLOSE:
+        {
+          ret = snoop_close(bridge->snoop);
+          kmm_free(bridge->snoop);
+          bridge->snoop = NULL;
+        }
+#endif /* CONFIG_BLUETOOTH_UART_BRIDGE_BTSNOOP */
+
+      /* hci ioctl operation */
+
+      default:
+        {
+          ret = file_ioctl(&bridge->filep, cmd, arg);
+        }
+    }
+
+  return ret;
 }
 
 static int bt_uart_bridge_poll(FAR struct file *filep,
@@ -503,15 +546,6 @@ int bt_uart_bridge_register(const char *hciname,
           goto err_device;
         }
     }
-
-#ifdef CONFIG_BLUETOOTH_UART_BRIDGE_BTSNOOP
-  char snoop_file[128];
-  snprintf(snoop_file, sizeof(snoop_file),
-           CONFIG_BLUETOOTH_UART_BRIDGE_BTSNOOP_PATH "btsnoop-%d.log",
-           time (NULL));
-
-  snoop_open(&bridge->snoop, snoop_file, SNOOP_DATALINK_HCI_UART, true);
-#endif /* CONFIG_BLUETOOTH_UART_BRIDGE_BTSNOOP */
 
   return OK;
 
