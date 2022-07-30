@@ -67,3 +67,11 @@ Configurations
 
     Besides the NuttShell this configuration also enables BLE support.
     It includes btsak application for testing BLE applications.
+
+  nimble:
+
+    Besides the NuttShell it includes nimble example application which
+    uses NimBLE host stack.
+
+      nsh> ifup bnep0
+      nsh> nimble
