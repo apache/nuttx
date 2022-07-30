@@ -957,7 +957,11 @@ if STM32WB_BLE
 
 config STM32WB_BLE_C2HOST
 	bool "Enable CPU2 HOST stack"
-	default y
+	default n
+	---help---
+		The full stack version of CPU2 firmware allows to enable CPU2 HOST stack and
+		control it using vendor ACL protocol. However, it is not expected to enable
+		this option in the current implementation.
 
 config STM32WB_BLE_MAX_CONN
 	int "Maximum BLE simultaneous connections"
