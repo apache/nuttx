@@ -65,6 +65,30 @@
 
 int stm32_bringup(void);
 
+/****************************************************************************
+ * Name: stm32_foc_setup
+ *
+ * Description:
+ *  Initialize FOC peripheral for the board.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32F7_FOC
+int stm32_foc_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ADC
+int stm32_adc_setup(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 
 #endif /* __BOARDS_ARM_STM32F7_STEVAL_ETH001V1_SRC_STEVAL_ETH001V1_H */
