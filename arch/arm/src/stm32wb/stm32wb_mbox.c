@@ -677,7 +677,7 @@ void stm32wb_mboxinitialize(stm32wb_mbox_evt_handler_t evt_handler)
 
   g_bleacl_channel.ch_num =  STM32WB_MBOX_BLEACL_CHANNEL;
   g_bleacl_channel.cmd_buf = (struct stm32wb_mbox_cmd_s *)
-                             stm32wb_mbox_shared.ble_cmd_buffer;
+                             stm32wb_mbox_shared.ble_acl_buffer;
   stm32wb_mbox_list_initialize(&g_bleacl_channel.cmd_buf_queue);
 #endif
 
