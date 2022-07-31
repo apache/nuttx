@@ -45,8 +45,7 @@ struct axp202_dev_s
 {
   /* The common part of the battery driver visible to the upper-half driver */
 
-  FAR const struct battery_charger_operations_s *ops; /* Battery operations */
-  sem_t batsem;                                       /* Enforce mutually exclusive access */
+  struct battery_charger_dev_s dev; /* Battery operations */
 
   /* Data fields specific to the lower half axp202 driver follow */
 
@@ -680,7 +679,7 @@ axp202_initialize(FAR struct i2c_master_s *i2c, uint8_t addr,
     {
       /* Initialize the axp202 device structure */
 
-      priv->ops       = &g_axp202ops;
+      priv->dev.ops   = &g_axp202ops;
       priv->i2c       = i2c;
       priv->addr      = addr;
       priv->frequency = frequency;
