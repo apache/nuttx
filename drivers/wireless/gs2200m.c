@@ -2113,6 +2113,34 @@ static enum pkt_type_e gs2200m_activate_wrx(FAR struct gs2200m_dev_s *dev,
 }
 
 /****************************************************************************
+ * Name: gs2200m_powersave_wrx
+ * NOTE: See 9.1.1 Active Radio Receive
+ ****************************************************************************/
+
+static enum pkt_type_e gs2200m_powersave_wrx(FAR struct gs2200m_dev_s *dev,
+                                             uint8_t on)
+{
+  char cmd[30];
+
+  snprintf(cmd, sizeof(cmd), "AT+WRXPS=%d\r\n", on);
+  return gs2200m_send_cmd2(dev, cmd);
+}
+
+/****************************************************************************
+ * Name: gs2200m_syncloss
+ * NOTE: See 5.1.4 Sync loss interval
+ ****************************************************************************/
+
+static enum pkt_type_e gs2200m_syncloss(FAR struct gs2200m_dev_s *dev,
+                                            int val)
+{
+  char cmd[30];
+
+  snprintf(cmd, sizeof(cmd), "AT+WSYNCINTRL=%d\r\n", val);
+  return gs2200m_send_cmd2(dev, cmd);
+}
+
+/****************************************************************************
  * Name: gs2200m_set_gpio
  * NOTE: See 10.3 GPIO Commands
  ****************************************************************************/
@@ -2666,6 +2694,11 @@ static int gs2200m_ioctl_assoc_sta(FAR struct gs2200m_dev_s *dev,
     }
 
   dev->disassociate_flag = false;
+
+  /* Sync lost time interval */
+
+  t = gs2200m_syncloss(dev, CONFIG_WL_GS2200M_SYNC_INTERVAL);
+  ASSERT(TYPE_OK == t);
 
   return OK;
 }
@@ -3409,6 +3442,11 @@ static int gs2200m_start(FAR struct gs2200m_dev_s *dev)
   /* Activate RX */
 
   t = gs2200m_activate_wrx(dev, 1);
+  ASSERT(TYPE_OK == t);
+
+  /* Power save disable */
+
+  t = gs2200m_powersave_wrx(dev, 0);
   ASSERT(TYPE_OK == t);
 
   /* Set Bulk Data mode */
