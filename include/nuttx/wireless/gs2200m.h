@@ -58,6 +58,8 @@ extern "C"
 #define GS2200M_IOC_IFREQ    _WLCIOC(GS2200M_FIRST + 7)
 #define GS2200M_IOC_NAME     _WLCIOC(GS2200M_FIRST + 8)
 
+#define DISASSOCIATION_CID  ('x')
+
 /* NOTE: do not forget to update include/nuttx/wireless/ioctl.h */
 
 struct gs2200m_connect_msg
