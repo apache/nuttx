@@ -27,22 +27,6 @@
 
 #include "arch/rx65n/iodefine.h"
 
-#ifndef TRUE
-#define TRUE (1)
-#else
-#if (1 != TRUE)
-#error "TRUE is not defined by 1."
-#endif
-#endif
-
-#ifndef FALSE
-#define FALSE (0)
-#else
-#if (0 != FALSE)
-#error "FALSE is not defined by 0."
-#endif
-#endif
-
 #ifndef __TYPEDEF__
 
 /* Status list definition */

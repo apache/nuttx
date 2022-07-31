@@ -128,18 +128,6 @@ typedef uint8           halDataAlign_t; /* !< Used for byte alignment */
  *   ------------------------------------------------------------------------
  */
 
-#ifndef TRUE
-    #define TRUE 1
-#endif
-
-#ifndef FALSE
-    #define FALSE 0
-#endif
-
-#ifndef NULL
-    #define NULL 0
-#endif
-
 #define HAL_WAIT_CONDITION(condition)  {while(!(condition)){}}
 
 #define HAL_WAIT_CONDITION_TIMEOUT(condition, timeout)  {\

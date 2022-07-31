@@ -41,10 +41,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef NULL
-#  define NULL        ((void * ) 0)
-#endif
-
 #define TRUE_T        (1)       /* true */
 #define FALSE_T       (0)       /* false */
 
