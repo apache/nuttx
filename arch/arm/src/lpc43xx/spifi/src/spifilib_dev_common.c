@@ -39,10 +39,6 @@
  * Private types
  ****************************************************************************/
 
-#ifndef NULL
-#define NULL 0L
-#endif
-
 /* Declare the version numbers */
 
 #define LIBRARY_VERSION_MAJOR (1)
