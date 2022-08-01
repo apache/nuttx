@@ -1,0 +1,81 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "Power Supply Support"
+
+config DRIVERS_POWERLED
+	bool "High Power LED driver"
+	default n
+	---help---
+		Enables building of an powerled upper half driver.
+
+menuconfig DRIVERS_SMPS
+	bool "Switched-Mode Power Supply (SMPS)"
+	default n
+	---help---
+		Enables building of an SMPS upper half driver.
+
+if DRIVERS_SMPS
+
+config SMPS_HAVE_OUTPUT_VOLTAGE
+	bool "Have Output Voltage"
+	default n
+
+config SMPS_HAVE_OUTPUT_CURRENT
+	bool "Have Output Current"
+	default n
+
+config SMPS_HAVE_OUTPUT_POWER
+	bool "Have Output Power"
+	default n
+
+config SMPS_HAVE_INPUT_VOLTAGE
+	bool "Have Input Voltage"
+	default n
+
+config SMPS_HAVE_INPUT_CURRENT
+	bool "Have Input Current"
+	default n
+
+config SMPS_HAVE_INPUT_POWER
+	bool "Have Input Power"
+	default n
+
+config SMPS_HAVE_EFFICIENCY
+	bool "Have Power Efficiency"
+	default n
+
+endif
+
+config REGULATOR
+	bool "Regulator core driver support"
+	default n
+	---help---
+		The regulator core driver implements the uper layer framework that the lower
+		layer driver can register with, and the common regulator APIs that are easy
+		for other drivers to call for the control of their power supply.
+
+if REGULATOR
+
+config REGULATOR_GPIO
+	bool "Regulator gpio driver support"
+	default n
+	---help---
+		The regulator gpio driver implements the lower regulator ops that use gpio to
+		control to regulator.
+
+config REGULATOR_RPMSG
+	bool "Regulator rpmsg driver support"
+	depends on RPTUN
+	default n
+	---help---
+		The rpmsg regulator driver implements the common regulator APIs, inside which
+		the regulator operations are sent from the client to the remote device via
+		the rpmsg channel. The remote device(namely server) is responsible for
+		the parse and the completion.
+
+endif
+
+endmenu

@@ -214,7 +214,6 @@ comment "Power Management Options"
 menuconfig CXD56_PM
 	bool "Power Management"
 	default y
-	select POWER
 
 if CXD56_PM
 
