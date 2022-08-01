@@ -1580,6 +1580,14 @@ config ARCH_BOARD_S32K144EVB
 		This options selects support for NuttX on the NXP S32K144EVB board
 		featuring the S32K144 Cortex-M4F.
 
+config ARCH_BOARD_RDDRONE_BMS772
+	bool "NXP RDDRONE-BMS772"
+	depends on ARCH_CHIP_S32K144
+	select ARCH_HAVE_LEDS
+	---help---
+		This options selects support for NuttX on the NXP RDDRONE-BMS772
+		board featuring the S32K144 Cortex-M4F.
+
 config ARCH_BOARD_S32K146EVB
 	bool "NXP S32K146EVB"
 	depends on ARCH_CHIP_S32K146
@@ -2693,6 +2701,7 @@ config ARCH_BOARD
 	default "rx65n-grrose"             if ARCH_BOARD_RX65N_GRROSE
 	default "s32k118evb"               if ARCH_BOARD_S32K118EVB
 	default "s32k144evb"               if ARCH_BOARD_S32K144EVB
+	default "rddrone-bms772"           if ARCH_BOARD_RDDRONE_BMS772
 	default "s32k146evb"               if ARCH_BOARD_S32K146EVB
 	default "ucans32k146"              if ARCH_BOARD_UCANS32K146
 	default "s32k148evb"               if ARCH_BOARD_S32K148EVB
@@ -2862,6 +2871,9 @@ source "boards/arm/s32k1xx/s32k118evb/Kconfig"
 endif
 if ARCH_BOARD_S32K144EVB
 source "boards/arm/s32k1xx/s32k144evb/Kconfig"
+endif
+if ARCH_BOARD_RDDRONE_BMS772
+source "boards/arm/s32k1xx/rddrone-bms772/Kconfig"
 endif
 if ARCH_BOARD_S32K146EVB
 source "boards/arm/s32k1xx/s32k146evb/Kconfig"
