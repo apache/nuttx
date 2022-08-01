@@ -40,6 +40,16 @@ config ALLOW_GPL_COMPONENTS
 		NOTE: Please check that the license for each enabled
 		component matches your project license.
 
+config ALLOW_MIT_COMPONENTS
+	bool "Use components that have MIT licenses"
+	default n
+	---help---
+		When this option is enabled the project will allow the use
+		of components that have MIT licenses.
+
+		NOTE: Please check that the license for each enabled
+		component matches your project license.
+
 config ALLOW_BSDNORDIC_COMPONENTS
 	bool "Use components that have 5-Clause Nordic licenses"
 	depends on ARCH_CHIP_NRF52
