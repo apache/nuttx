@@ -1,0 +1,156 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "Battery Management Support"
+
+config BATTERY_CHARGER
+	bool "Battery Charger support"
+	default n
+
+config BQ2425X
+	bool "BQ2425X Battery charger support"
+	default n
+	select I2C
+	select I2C_BQ2425X
+	depends on BATTERY_CHARGER
+	depends on ALLOW_BSD_COMPONENTS
+	---help---
+		The BQ24250/BQ24251 are battery charger for lithium-ion batteries.
+
+config I2C_BQ2425X
+	bool
+
+config BQ2429X
+	bool "BQ2429X Battery charger support"
+	default n
+	select I2C
+	select I2C_BQ2429X
+	depends on BATTERY_CHARGER
+	---help---
+		The BQ24296/BQ24297/BQ24296M are battery charger for lithium-ion batteries.
+
+config I2C_BQ2429X
+	bool
+
+if BQ2429X
+
+config DEBUG_BQ2429X
+	bool "BQ2429X Debug Features"
+	default n
+	---help---
+		Enable BQ2429X battery management debug features.
+
+endif # BQ2429X
+
+config AXP202
+	bool "AXP202 Battery charger support"
+	default n
+	select I2C
+	select I2C_AXP202
+	depends on BATTERY_CHARGER
+	---help---
+		axp202 are battery charger for lithium-ion batteries.
+
+config I2C_AXP202
+	bool
+
+config AXP202_DC2_VOLTAGE
+	int "AXP202 DC2 output voltage"
+	default 0
+	depends on AXP202
+	---help---
+		AXP202 DC2 output voltage. 0 is disable, enable range: [700, 2275] mV.
+
+config AXP202_DC3_VOLTAGE
+	int "AXP202 DC3 output voltage"
+	default 3300
+	depends on AXP202
+	---help---
+		AXP202 DC3 output voltage. 0 is disable, enable range: [700, 3500] mV.
+
+config AXP202_LDO2_VOLTAGE
+	int "AXP202 LDO2 output voltage"
+	default 0
+	depends on AXP202
+	---help---
+		AXP202 LDO2 output voltage. 0 is disable, enable range: [1800, 3300] mV.
+
+config AXP202_LDO3_VOLTAGE
+	int "AXP202 LDO3 output voltage"
+	default 0
+	depends on AXP202
+	---help---
+		Enable LDO3 output voltage. 0 is disable, enable range: [700, 2275] mV.
+
+config AXP202_LDO4_VOLTAGE
+	int "AXP202 LDO4 output voltage"
+	default 0
+	depends on AXP202
+	---help---
+		Enable LDO4 output voltage. 0 is disable, other value:
+			1250 1300 1400 1500 1600 1700 1800 1900
+			2000 2500 2700 2800 3000 3100 3200 3300 mV.
+
+config MCP73871
+	bool "Microchip MCP73871 Battery charger support"
+	default n
+	depends on BATTERY_CHARGER
+	---help---
+		A simple driver to report MCP73871 status.
+
+config BATTERY_GAUGE
+	bool "Battery Fuel Gauge support"
+	default n
+
+config MAX1704X
+	bool "MAX1704X Battery fuel gauge support"
+	default n
+	select I2C
+	select I2C_MAX1704X
+	depends on BATTERY_GAUGE
+	---help---
+		The MAX17040/MAX17041 are ultra-compact, low-cost, host-side fuel-gauge
+		systems for lithium-ion (Li+) batteries in handheld and portable equipment.
+		The MAX17040 is configured to operate with a single lithium cell and the
+		MAX17041 is configured for a dual-cell 2S pack.
+
+config I2C_MAX1704X
+	bool
+
+config BQ27426
+	bool "BQ27426 Battery fuel gauge support"
+	default n
+	select I2C
+	depends on BATTERY_GAUGE
+	---help---
+		The bq27426 battery fuel gauge accurately predicts the battery capacity and other
+		operational characteristics of a single, Li-based, rechargeable cell.
+		It can be interrogated by a system processor to provide cell information,
+		such as state-of-charge (SOC).
+
+config BATTERY_MONITOR
+	bool "Battery Monitor/Management support"
+	default n
+
+config BQ769X0
+	bool "BQ769X0 Battery monitor support"
+	default n
+	select I2C
+	select I2C_BQ769X0
+	depends on BATTERY_MONITOR
+	---help---
+		The BQ76920/BQ76930/BQ76940 provide monitoring, balancing, and
+		protection features for up to 15 cells in series.
+
+config I2C_BQ769X0
+	bool
+
+if BQ769X0
+	config BQ769X0_USE_INTERNAL_TS
+		bool "Use internal temperature sensor on BQ769X0"
+		default n
+endif
+
+endmenu

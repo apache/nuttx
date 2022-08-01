@@ -1,0 +1,88 @@
+############################################################################
+# drivers/power/battery/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# Add battery charger drivers
+
+ifeq ($(CONFIG_BATTERY_CHARGER),y)
+
+CSRCS += battery_charger.c
+
+# Add the MCP73871 battery charger driver
+
+ifeq ($(CONFIG_MCP73871),y)
+CSRCS += mcp73871.c
+endif
+
+# Add the BQ2425x I2C-based battery charger driver
+
+ifeq ($(CONFIG_I2C_BQ2425X),y)
+CSRCS += bq2425x.c
+endif
+
+# Add the BQ2429x I2C-based battery charger driver
+
+ifeq ($(CONFIG_I2C_BQ2429X),y)
+CSRCS += bq2429x.c
+endif
+
+# Add the axp202 I2C-based battery charger driver
+
+ifeq ($(CONFIG_I2C_AXP202),y)
+CSRCS += axp202.c
+endif
+
+endif
+
+# Add battery gauge drivers
+
+ifeq ($(CONFIG_BATTERY_GAUGE),y)
+
+CSRCS += battery_gauge.c
+
+# Add the MAX1704x I2C-based battery gauge driver
+
+ifeq ($(CONFIG_I2C_MAX1704X),y)
+CSRCS += max1704x.c
+endif
+
+# Add the bq27426 I2C-based battery gauge driver
+
+ifeq ($(CONFIG_BQ27426),y)
+CSRCS += bq27426.c
+endif
+
+endif
+
+# Add battery monitor drivers
+
+ifeq ($(CONFIG_BATTERY_MONITOR),y)
+
+CSRCS += battery_monitor.c
+
+# Add the BQ769x0 I2C-based battery monitor driver
+
+ifeq ($(CONFIG_I2C_BQ769X0),y)
+CSRCS += bq769x0.c
+endif
+
+endif
+
+DEPPATH += --dep-path power/battery
+VPATH += power/battery

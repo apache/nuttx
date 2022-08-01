@@ -1,5 +1,5 @@
 ############################################################################
-# drivers/power/Make.defs
+# drivers/power/supply/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,6 +18,26 @@
 #
 ############################################################################
 
-include power/pm/Make.defs
-include power/battery/Make.defs
-include power/supply/Make.defs
+ifeq ($(CONFIG_DRIVERS_POWERLED),y)
+CSRCS += powerled.c
+endif
+
+ifeq ($(CONFIG_DRIVERS_SMPS),y)
+CSRCS += smps.c
+endif
+
+ifeq ($(CONFIG_REGULATOR), y)
+CSRCS += regulator.c
+
+ifeq ($(CONFIG_REGULATOR_GPIO), y)
+CSRCS += regulator_gpio.c
+endif
+
+ifeq ($(CONFIG_REGULATOR_RPMSG), y)
+CSRCS += regulator_rpmsg.c
+endif
+
+endif
+
+DEPPATH += --dep-path power/supply
+VPATH += power/supply
