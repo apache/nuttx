@@ -36,6 +36,23 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: inet_ntoa_r
+ *
+ * Description:
+ *   The inet_ntoa_r() function converts the Internet host address given in
+ *   network byte order to a string in standard numbers-and-dots notation.
+ *
+ ****************************************************************************/
+
+FAR char *inet_ntoa_r(struct in_addr in, FAR char *buf, size_t bufflen)
+{
+  FAR unsigned char *ptr = (FAR unsigned char *)&in.s_addr;
+  snprintf(buf, bufflen, "%u.%u.%u.%u",
+           ptr[0], ptr[1], ptr[2], ptr[3]);
+  return buf;
+}
+
+/****************************************************************************
  * Name: inet_ntoa
  *
  * Description:
@@ -48,11 +65,8 @@
 
 FAR char *inet_ntoa(struct in_addr in)
 {
-  static char buffer[INET_ADDRSTRLEN + 2];
-  FAR unsigned char *ptr = (FAR unsigned char *)&in.s_addr;
-  snprintf(buffer, INET_ADDRSTRLEN + 2, "%u.%u.%u.%u",
-           ptr[0], ptr[1], ptr[2], ptr[3]);
-  return buffer;
+  static char buffer[INET_ADDRSTRLEN];
+  return inet_ntoa_r(in, buffer, sizeof(buffer));
 }
 
 #endif /* CONFIG_NET_IPv4 || CONFIG_LIBC_IPv4_ADDRCONV */

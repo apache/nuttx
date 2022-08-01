@@ -194,9 +194,13 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
 #if defined(CONFIG_NET_ETHERNET) || defined(CONFIG_DRIVERS_IEEE80211)
       case NET_LL_ETHERNET:
       case NET_LL_IEEE80211:
-        len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                        "%s\tLink encap:Ethernet HWaddr %s",
-                        dev->d_ifname, ether_ntoa(&dev->d_mac.ether));
+        {
+          char hwaddr[20];
+          len += snprintf(&netfile->line[len], NET_LINELEN - len,
+                          "%s\tLink encap:Ethernet HWaddr %s",
+                          dev->d_ifname,
+                          ether_ntoa_r(&dev->d_mac.ether, hwaddr));
+        }
         break;
 #endif
 
@@ -258,6 +262,7 @@ static int netprocfs_inet4addresses(FAR struct netprocfs_file_s *netfile)
   FAR struct net_driver_s *dev;
   struct in_addr addr;
   int len = 0;
+  char inetaddr[INET_ADDRSTRLEN];
 
   DEBUGASSERT(netfile != NULL && netfile->dev != NULL);
   dev = netfile->dev;
@@ -266,13 +271,15 @@ static int netprocfs_inet4addresses(FAR struct netprocfs_file_s *netfile)
 
   addr.s_addr = dev->d_ipaddr;
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                  "\tinet addr:%s ", inet_ntoa(addr));
+                  "\tinet addr:%s ", inet_ntoa_r(addr, inetaddr,
+                                                 sizeof(inetaddr)));
 
   /* Show the IPv4 default router address */
 
   addr.s_addr = dev->d_draddr;
   len += snprintf(&netfile->line[len], NET_LINELEN - len,
-                  "DRaddr:%s ", inet_ntoa(addr));
+                  "DRaddr:%s ", inet_ntoa_r(addr, inetaddr,
+                                            sizeof(inetaddr)));
 
   /* Show the IPv4 network mask */
 
@@ -283,7 +290,7 @@ static int netprocfs_inet4addresses(FAR struct netprocfs_file_s *netfile)
 #else
                   "Mask:%s\n\n",  /* Double space at end of device description */
 #endif
-                  inet_ntoa(addr));
+                  inet_ntoa_r(addr, inetaddr, sizeof(inetaddr)));
 
   return len;
 }

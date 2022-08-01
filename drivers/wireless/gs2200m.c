@@ -2022,7 +2022,10 @@ static enum pkt_type_e gs2200m_send_bulk(FAR struct gs2200m_dev_s *dev,
     }
   else
     {
-      wlinfo("** addr=%s port=%d\n", inet_ntoa(msg->addr.sin_addr),
+      char inetaddr[INET_ADDRSTRLEN];
+
+      wlinfo("** addr=%s port=%d\n",
+             inet_ntoa_r(msg->addr.sin_addr, inetaddr, sizeof(inetaddr)),
              NTOHS(msg->addr.sin_port));
 
       /* NOTE: See 7.5.3.2 Bulk Data Handling for UDP
@@ -2031,7 +2034,8 @@ static enum pkt_type_e gs2200m_send_bulk(FAR struct gs2200m_dev_s *dev,
 
       snprintf(cmd, sizeof(cmd), "%cY%c%s:%d:%s",
                ASCII_ESC, msg->cid,
-               inet_ntoa(msg->addr.sin_addr), NTOHS(msg->addr.sin_port),
+               inet_ntoa_r(msg->addr.sin_addr, inetaddr, sizeof(inetaddr)),
+               NTOHS(msg->addr.sin_port),
                digits);
     }
 
@@ -2937,12 +2941,16 @@ static int gs2200m_ioctl_ifreq(FAR struct gs2200m_dev_s *dev,
 
   if (false == getreq && OK == ret)
     {
+      char inetaddr[INET_ADDRSTRLEN];
       memcpy(&in[0], &dev->net_dev.d_ipaddr, sizeof(in[0]));
       memcpy(&in[1], &dev->net_dev.d_netmask, sizeof(in[1]));
       memcpy(&in[2], &dev->net_dev.d_draddr, sizeof(in[2]));
-      strncpy(addr[0], inet_ntoa(in[0]), sizeof(addr[0]));
-      strncpy(addr[1], inet_ntoa(in[1]), sizeof(addr[1]));
-      strncpy(addr[2], inet_ntoa(in[2]), sizeof(addr[2]));
+      strncpy(addr[0], inet_ntoa_r(in[0], inetaddr, sizeof(inetaddr)),
+              sizeof(addr[0]));
+      strncpy(addr[1], inet_ntoa_r(in[1], inetaddr, sizeof(inetaddr)),
+              sizeof(addr[1]));
+      strncpy(addr[2], inet_ntoa_r(in[2], inetaddr, sizeof(inetaddr)),
+              sizeof(addr[2]));
 
       gs2200m_set_addresses(dev, addr[0], addr[1], addr[2]);
     }
