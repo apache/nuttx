@@ -23,8 +23,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/arch.h>
 #include <nuttx/board.h>
-
+#include <arch/board/board.h>
 #include "s32k146evb.h"
 
 /****************************************************************************
@@ -44,6 +45,10 @@
 
 void s32k1xx_board_initialize(void)
 {
+#ifdef CONFIG_SEGGER_SYSVIEW
+  up_perf_init((void *)S32K146EVB_RUN_SYSCLK_FREQUENCY);
+#endif
+
 #ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected */
 
