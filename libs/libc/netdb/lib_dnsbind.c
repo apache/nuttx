@@ -61,7 +61,7 @@
  *
  ****************************************************************************/
 
-int dns_bind(void)
+int dns_bind(sa_family_t family)
 {
   struct timeval tv;
   int sd;
@@ -77,7 +77,7 @@ int dns_bind(void)
 
   /* Create a new socket */
 
-  sd = socket(PF_INET, SOCK_DGRAM, 0);
+  sd = socket(family, SOCK_DGRAM, 0);
   if (sd < 0)
     {
       ret = -get_errno();
