@@ -105,6 +105,7 @@
      do \
        { \
          FAR struct mm_allocnode_s *tmp = (FAR struct mm_allocnode_s *)(ptr); \
+         kasan_unpoison(tmp, SIZEOF_MM_ALLOCNODE); \
          tmp->pid = getpid(); \
          if ((heap)->mm_procfs.backtrace) \
            { \
@@ -115,6 +116,7 @@
            { \
              tmp->backtrace[0] = 0; \
            } \
+         kasan_poison(tmp, SIZEOF_MM_ALLOCNODE); \
        } \
      while (0)
 #else
