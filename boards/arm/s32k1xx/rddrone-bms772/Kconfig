@@ -30,19 +30,18 @@ depends on PM
 menu "PM configuration for PM_STANDBY mode"
 
 choice
-	prompt "MCU power mode"
+	prompt "MCU power mode during PM_STANDBY"
 	default VLPR_STANDBY
 
 config RUN_STANDBY
-	bool "RUN mode"
+	bool "MCU in RUN mode during PM_STANDBY"
 	---help---
-		The MCU should be in RUN mode in the PM_STANDBY mode
+		The MCU should remain in RUN mode during PM_STANDBY
 
 config VLPR_STANDBY
-	bool "VLPR mode"
+	bool "MCU in VLPR mode during PM_STANDBY"
 	---help---
-		The MCU should be in VLPR (very low power run) mode in the PM_STANDBY
-		mode
+		The MCU should enter VLPR (very low power run) mode during PM_STANDBY
 
 endchoice # MCU power mode
 
@@ -106,19 +105,18 @@ endmenu # PM configuration for PM_STANDBY mode
 menu "PM configuration for PM_SLEEP mode"
 
 choice
-	prompt "MCU power mode"
+	prompt "MCU power mode during PM_SLEEP"
 	default VLPR_SLEEP
 
 config RUN_SLEEP
-	bool "RUN mode"
+	bool "MCU in RUN mode during PM_SLEEP"
 	---help---
-		The MCU should be in RUN mode in the PM_SLEEP mode
+		The MCU should remain in RUN mode during PM_SLEEP
 
 config VLPR_SLEEP
-	bool "VLPR mode"
+	bool "MCU in VLPR mode during PM_STANDBY"
 	---help---
-		The MCU should be in VLPR (very low power run) mode in the PM_SLEEP
-		mode
+		The MCU should enter VLPR (very low power run) mode during PM_SLEEP
 
 endchoice # MCU power mode
 
