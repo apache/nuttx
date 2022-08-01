@@ -947,8 +947,8 @@ struct sensor_lowerhalf_s
  *   priv   - Upper half driver handle
  ****************************************************************************/
 
-  void (*sensor_lock)(void * priv);
-  void (*sensor_unlock)(void * priv);
+  CODE void (*sensor_lock)(FAR void * priv);
+  CODE void (*sensor_unlock)(FAR void * priv);
 
   /* The private opaque pointer to be passed to upper-layer during callback */
 
