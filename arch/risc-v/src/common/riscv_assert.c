@@ -334,12 +334,6 @@ static void riscv_dumpstate(void)
   uintptr_t kstackbase = 0;
 #endif
 
-  /* Show back trace */
-
-#ifdef CONFIG_SCHED_BACKTRACE
-  sched_dumpstack(rtcb->pid);
-#endif
-
   /* Update the xcp context */
 
   if (CURRENT_REGS)
@@ -351,6 +345,12 @@ static void riscv_dumpstate(void)
       up_saveusercontext(s_last_regs);
       rtcb->xcp.regs = (uint32_t *)s_last_regs;
     }
+
+  /* Show back trace */
+
+#ifdef CONFIG_SCHED_BACKTRACE
+  sched_dumpstack(rtcb->pid);
+#endif
 
   /* Dump the registers (if available) */
 

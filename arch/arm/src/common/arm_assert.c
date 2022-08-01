@@ -378,12 +378,6 @@ static void arm_dumpstate(void)
   struct tcb_s *rtcb = running_task();
   uint32_t sp = up_getsp();
 
-  /* Show back trace */
-
-#ifdef CONFIG_SCHED_BACKTRACE
-  sched_dumpstack(rtcb->pid);
-#endif
-
   /* Update the xcp context */
 
   if (CURRENT_REGS)
@@ -395,6 +389,12 @@ static void arm_dumpstate(void)
       up_saveusercontext(s_last_regs);
       rtcb->xcp.regs = (uint32_t *)s_last_regs;
     }
+
+  /* Show back trace */
+
+#ifdef CONFIG_SCHED_BACKTRACE
+  sched_dumpstack(rtcb->pid);
+#endif
 
   /* Dump the registers */
 
