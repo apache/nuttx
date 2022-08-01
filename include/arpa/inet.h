@@ -50,6 +50,7 @@ in_addr_t   inet_addr(FAR const char *cp);
 in_addr_t   inet_network(FAR const char *cp);
 
 FAR char   *inet_ntoa(struct in_addr in);
+FAR char   *inet_ntoa_r(struct in_addr in, FAR char *buf, size_t bufflen);
 in_addr_t   inet_lnaof(struct in_addr in);
 in_addr_t   inet_netof(struct in_addr in);
 
