@@ -80,4 +80,8 @@ ifeq ($(CONFIG_NUCLEOL432KC_SPWM),y)
 CSRCS += stm32_spwm.c
 endif
 
+ifeq ($(CONFIG_NUCLEOL432KC_DAC_WGEN),y)
+CSRCS += stm32_dac_wgen.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

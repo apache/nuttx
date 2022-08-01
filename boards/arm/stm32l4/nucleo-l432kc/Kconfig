@@ -141,4 +141,21 @@ config NUCLEOL432KC_SPWM_PHASE_NUM
 
 endif
 
+menuconfig NUCLEOL432KC_DAC_WGEN
+	depends on (STM32L4_DAC_LL_OPS) && (STM32L4_DAC1_DMA) && (STM32L4_TIM2_DAC)
+	bool "Sinusoidal DAC wave generator example"
+	default n
+
+if NUCLEOL432KC_DAC_WGEN
+
+config NUCLEOL432KC_DAC_WGEN_SAMPLES
+	int "Sine samples"
+	default 40
+
+config NUCLEOL432KC_SPWM_FREQ
+	int "Waveform frequency in Hz"
+	default 50
+
+endif
+
 endif # ARCH_BOARD_NUCLEO_L432KC
