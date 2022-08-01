@@ -61,6 +61,14 @@
 
 #define ADC1_DMA_CHAN DMACHAN_ADC1_1
 
+/* Analog pin selections ****************************************************/
+
+/* DAC
+ * Default is PA4 (same as ADC, do not use both at the same time)
+ */
+
+#define GPIO_DAC1_OUT            GPIO_DAC1_OUT_1
+
 /* Alternate function pin selections ****************************************/
 
 /* USART1:
