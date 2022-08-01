@@ -777,6 +777,7 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
     }
 
   rptun_update_rx(priv);
+  rptun_pm_action(priv, false);
 
   /* Register callback to mbox for receiving remote message */
 
