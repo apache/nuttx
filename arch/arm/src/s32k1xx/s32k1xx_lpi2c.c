@@ -47,6 +47,7 @@
 #include "hardware/s32k1xx_pinmux.h"
 #include "s32k1xx_lpi2c.h"
 #include "s32k1xx_periphclocks.h"
+#include "s32k1xx_pin.h"
 
 #include <arch/board/board.h>
 
@@ -1615,8 +1616,7 @@ static int s32k1xx_lpi2c_transfer(struct i2c_master_s *dev,
 #ifdef CONFIG_I2C_RESET
 static int s32k1xx_lpi2c_reset(struct i2c_master_s *dev)
 {
-  struct s32k1xx_lpi2c_priv_s *priv =
-    (struct s32k1xx_lpi2c_priv_s *)dev;
+  struct s32k1xx_lpi2c_priv_s *priv = (struct s32k1xx_lpi2c_priv_s *)dev;
   unsigned int clock_count;
   unsigned int stretch_count;
   uint32_t scl_gpio;
@@ -1658,12 +1658,12 @@ static int s32k1xx_lpi2c_reset(struct i2c_master_s *dev)
 
   /* Let SDA go high */
 
-  s32k1xx_gpio_write(sda_gpio, 1);
+  s32k1xx_gpiowrite(sda_gpio, 1);
 
   /* Clock the bus until any slaves currently driving it let it go. */
 
   clock_count = 0;
-  while (!s32k1xx_gpio_read(sda_gpio))
+  while (!s32k1xx_gpioread(sda_gpio))
     {
       /* Give up if we have tried too hard */
 
@@ -1678,7 +1678,7 @@ static int s32k1xx_lpi2c_reset(struct i2c_master_s *dev)
        */
 
       stretch_count = 0;
-      while (!s32k1xx_gpio_read(scl_gpio))
+      while (!s32k1xx_gpioread(scl_gpio))
         {
           /* Give up if we have tried too hard */
 
@@ -1692,12 +1692,12 @@ static int s32k1xx_lpi2c_reset(struct i2c_master_s *dev)
 
       /* Drive SCL low */
 
-      s32k1xx_gpio_write(scl_gpio, 0);
+      s32k1xx_gpiowrite(scl_gpio, 0);
       up_udelay(10);
 
       /* Drive SCL high again */
 
-      s32k1xx_gpio_write(scl_gpio, 1);
+      s32k1xx_gpiowrite(scl_gpio, 1);
       up_udelay(10);
     }
 
@@ -1705,13 +1705,13 @@ static int s32k1xx_lpi2c_reset(struct i2c_master_s *dev)
    * state machines.
    */
 
-  s32k1xx_gpio_write(sda_gpio, 0);
+  s32k1xx_gpiowrite(sda_gpio, 0);
   up_udelay(10);
-  s32k1xx_gpio_write(scl_gpio, 0);
+  s32k1xx_gpiowrite(scl_gpio, 0);
   up_udelay(10);
-  s32k1xx_gpio_write(scl_gpio, 1);
+  s32k1xx_gpiowrite(scl_gpio, 1);
   up_udelay(10);
-  s32k1xx_gpio_write(sda_gpio, 1);
+  s32k1xx_gpiowrite(sda_gpio, 1);
   up_udelay(10);
 
   /* Revert the GPIO configuration. */
