@@ -1373,5 +1373,5 @@ void sensor_rpmsg_unregister(FAR struct sensor_lowerhalf_s *lower)
 int sensor_rpmsg_initialize(void)
 {
   return rpmsg_register_callback(NULL, sensor_rpmsg_device_created,
-                                 NULL, NULL);
+                                 NULL, NULL, NULL);
 }
