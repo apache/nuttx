@@ -50,6 +50,7 @@
 
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 #include <errno.h>
 #include <debug.h>
 #include <assert.h>
@@ -85,7 +86,6 @@
 
 struct dns_query_s
 {
-  int sd;                         /* DNS server socket */
   int result;                     /* Explanation of the failure */
   FAR const char *hostname;       /* Hostname to lookup */
   FAR union dns_addr_u *addr;     /* Location to return host address */
@@ -583,6 +583,13 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
   int retries;
   int ret;
 
+  int sd = dns_bind(addr->sa_family);
+  if (sd < 0)
+    {
+      query->result = sd;
+      return 0;
+    }
+
   /* Loop while receive timeout errors occur and there are remaining
    * retries.
    */
@@ -592,7 +599,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
 #ifdef CONFIG_NET_IPv6
       /* Send the IPv6 query */
 
-      ret = dns_send_query(query->sd, query->hostname,
+      ret = dns_send_query(sd, query->hostname,
                           (FAR union dns_addr_u *)addr,
                            DNS_RECTYPE_AAAA, &qinfo);
       if (ret < 0)
@@ -604,7 +611,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
         {
           /* Obtain the IPv6 response */
 
-          ret = dns_recv_response(query->sd, &query->addr[next],
+          ret = dns_recv_response(sd, &query->addr[next],
                                   *query->naddr - next, &qinfo);
           if (ret >= 0)
             {
@@ -621,7 +628,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
 #ifdef CONFIG_NET_IPv4
       /* Send the IPv4 query */
 
-      ret = dns_send_query(query->sd, query->hostname,
+      ret = dns_send_query(sd, query->hostname,
                            (FAR union dns_addr_u *)addr,
                            DNS_RECTYPE_A, &qinfo);
       if (ret < 0)
@@ -633,7 +640,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
         {
           /* Obtain the IPv4 response */
 
-          ret = dns_recv_response(query->sd, &query->addr[next],
+          ret = dns_recv_response(sd, &query->addr[next],
                                   *query->naddr - next, &qinfo);
           if (ret >= 0)
             {
@@ -659,6 +666,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
            */
 
           *query->naddr = next;
+          close(sd);
           return 1;
         }
       else if (query->result != -EAGAIN)
@@ -667,6 +675,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
         }
     }
 
+  close(sd);
   return 0;
 }
 
@@ -682,7 +691,6 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
  *   return its IP address in 'ipaddr'
  *
  * Input Parameters:
- *   sd       - The socket descriptor previously initialized by dsn_bind().
  *   hostname - The hostname string to be resolved.
  *   addr     - The location to return the IP addresses associated with the
  *     hostname.
@@ -695,7 +703,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
  *
  ****************************************************************************/
 
-int dns_query(int sd, FAR const char *hostname, FAR union dns_addr_u *addr,
+int dns_query(FAR const char *hostname, FAR union dns_addr_u *addr,
               FAR int *naddr)
 {
   FAR struct dns_query_s query;
@@ -703,7 +711,6 @@ int dns_query(int sd, FAR const char *hostname, FAR union dns_addr_u *addr,
 
   /* Set up the query info structure */
 
-  query.sd       = sd;
   query.result   = -EADDRNOTAVAIL;
   query.hostname = hostname;
   query.addr     = addr;
