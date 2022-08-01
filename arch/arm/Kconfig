@@ -245,6 +245,7 @@ config ARCH_CHIP_S32K1XX
 	select ARCH_HAVE_MPU
 	select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_RAMFUNCS
+	select ARCH_HAVE_I2CRESET
 	---help---
 		NPX S32K1XX architectures (ARM Cortex-M0+ and Cortex-M4F).
 
