@@ -1,0 +1,105 @@
+From c3949d3b4a8883ec54f5db9ae55acac5ada75b81 Mon Sep 17 00:00:00 2001
+From: Chao An <anchao@pinecone.net>
+Date: Mon, 10 Dec 2018 16:26:39 +0800
+Subject: [PATCH 03/12] Negotiate individual buffer size dynamically
+
+If slave support VIRTIO_RPMSG_F_BUFSZ(0x04) feature, master
+determine the buffer size from config space(first 8 bytes),
+otherwise the default size(512 bytes) will be used.
+
+Signed-off-by: Chao An <anchao@pinecone.net>
+Signed-off-by: ligd <liguiding1@xiaomi.com>
+---
+ lib/include/openamp/remoteproc.h   | 17 +++++++++++++++++
+ lib/include/openamp/rpmsg_virtio.h |  4 +++-
+ lib/rpmsg/rpmsg_virtio.c           | 10 +++++++++-
+ 3 files changed, 29 insertions(+), 2 deletions(-)
+
+diff --git a/lib/include/openamp/remoteproc.h open-amp/lib/include/openamp/remoteproc.h
+index 41f5d57..e9111ff 100644
+--- a/lib/include/openamp/remoteproc.h
++++ open-amp/lib/include/openamp/remoteproc.h
+@@ -303,6 +303,23 @@ struct fw_rsc_vdev {
+ 	struct fw_rsc_vdev_vring vring[0];
+ } METAL_PACKED_END;
+ 
++/**
++ * struct fw_rsc_config - configuration space declaration
++ * @h2r_buf_size: the size of the buffer used to send data from host to remote
++ * @r2h_buf_size: the size of the buffer used to send data from remote to host
++ * @reserved: reserved (must be zero)
++ *
++ * This structure immediately follow fw_rsc_vdev to provide the config info.
++ */
++METAL_PACKED_BEGIN
++struct fw_rsc_config {
++	/* The individual buffer size(if VIRTIO_RPMSG_F_BUFSZ) */
++	uint32_t h2r_buf_size;
++	uint32_t r2h_buf_size;
++	uint32_t reserved[14]; /* Reserve for the future use */
++	/* Put the customize config here */
++} METAL_PACKED_END;
++
+ /**
+  * struct fw_rsc_vendor - remote processor vendor specific resource
+  * @len: length of the resource
+diff --git a/lib/include/openamp/rpmsg_virtio.h open-amp/lib/include/openamp/rpmsg_virtio.h
+index 255396c..aaba7e1 100644
+--- a/lib/include/openamp/rpmsg_virtio.h
++++ open-amp/lib/include/openamp/rpmsg_virtio.h
+@@ -16,6 +16,7 @@
+ #include <metal/mutex.h>
+ #include <openamp/rpmsg.h>
+ #include <openamp/virtio.h>
++#include <openamp/remoteproc.h>
+ 
+ #if defined __cplusplus
+ extern "C" {
+@@ -29,6 +30,7 @@ extern "C" {
+ /* The feature bitmap for virtio rpmsg */
+ #define VIRTIO_RPMSG_F_NS	0 /* RP supports name service notifications */
+ #define VIRTIO_RPMSG_F_ACK	1 /* RP supports name service acknowledge */
++#define VIRTIO_RPMSG_F_BUFSZ	2 /* RP supports buffer size negotiation */
+ 
+ /**
+  * struct rpmsg_virtio_shm_pool - shared memory pool used for rpmsg buffers
+@@ -68,7 +70,7 @@ struct rpmsg_virtio_config {
+  */
+ struct rpmsg_virtio_device {
+ 	struct rpmsg_device rdev;
+-	struct rpmsg_virtio_config config;
++	struct fw_rsc_config config;
+ 	struct virtio_device *vdev;
+ 	struct virtqueue *rvq;
+ 	struct virtqueue *svq;
+diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
+index 0868f71..186f23f 100644
+--- a/lib/rpmsg/rpmsg_virtio.c
++++ open-amp/lib/rpmsg/rpmsg_virtio.c
+@@ -674,7 +674,8 @@ int rpmsg_init_vdev_with_config(struct rpmsg_virtio_device *rvdev,
+ 		if (config == NULL) {
+ 			return RPMSG_ERR_PARAM;
+ 		}
+-		rvdev->config = *config;
++		rvdev->config.h2r_buf_size = config->h2r_buf_size;
++		rvdev->config.r2h_buf_size = config->r2h_buf_size;
+ 	}
+ #else /*!VIRTIO_DEVICE_ONLY*/
+ 	/* Ignore passed config in the virtio-device-only configuration. */
+@@ -692,6 +693,13 @@ int rpmsg_init_vdev_with_config(struct rpmsg_virtio_device *rvdev,
+ 	rdev->support_ns = !!(vdev->features & (1 << VIRTIO_RPMSG_F_NS));
+ 	rdev->support_ack = !!(vdev->features & (1 << VIRTIO_RPMSG_F_ACK));
+ 
++	if (vdev->features & (1 << VIRTIO_RPMSG_F_BUFSZ)) {
++		rpmsg_virtio_read_config(rvdev,
++			0,
++			&rvdev->config,
++			sizeof(rvdev->config));
++	}
++
+ #ifndef VIRTIO_DEVICE_ONLY
+ 	if (role == RPMSG_HOST) {
+ 		/*
+-- 
+2.25.1
+
