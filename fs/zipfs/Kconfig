@@ -1,0 +1,18 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config FS_ZIPFS
+	bool "ZIPFS File System"
+	default n
+
+if FS_ZIPFS
+
+config ZIPFS_SEEK_BUFSIZE
+	int "zipfs seek buffer size"
+	default 256
+	---help---
+		this option will influences seek speed
+
+endif # FS_ZIPFS
