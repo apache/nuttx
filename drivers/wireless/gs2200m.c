@@ -375,7 +375,7 @@ static bool _enable_cid(uint32_t *cid_bits, char cid, bool on)
 
 static bool _cid_is_set(uint32_t *cid_bits, char cid)
 {
-  uint16_t mask = 1 << _cid_to_uint8(cid);
+  uint32_t mask = 1 << _cid_to_uint8(cid);
 
   if (*cid_bits & mask)
     {
@@ -602,7 +602,7 @@ static void _remove_and_free_pkt(FAR struct gs2200m_dev_s *dev, uint8_t c)
 static void _remove_all_pkt(FAR struct gs2200m_dev_s *dev, uint8_t c)
 {
   FAR struct pkt_dat_s *pkt_dat;
-  uint16_t mask;
+  uint32_t mask;
 
   mask = 1 << c;
   ASSERT(0 == (dev->valid_cid_bits & mask));
