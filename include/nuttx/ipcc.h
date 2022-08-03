@@ -114,8 +114,10 @@ struct ipcc_ops_s
    *
    **************************************************************************/
 
+#ifdef CONFIG_IPCC_BUFFERED
   CODE ssize_t (*buffer_data)(FAR struct ipcc_lower_s *ipcc,
                               FAR struct circbuf_s *rxbuf);
+#endif
 
   /**************************************************************************
    * Name: write_notify
@@ -133,7 +135,9 @@ struct ipcc_ops_s
    *
    **************************************************************************/
 
+#ifdef CONFIG_IPCC_BUFFERED
   CODE ssize_t (*write_notify)(FAR struct ipcc_lower_s *ipcc);
+#endif
 
   /**************************************************************************
    * Name: cleanup
