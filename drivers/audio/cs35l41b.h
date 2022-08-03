@@ -989,6 +989,8 @@
 
 #define CS35L41_ERR_RLS_SPEAKER_SAFE_MODE_MASK            (0x0000007e)
 
+#define CS35L41_VBRP_CONFIG_REG                           (0x00006404)
+
 #define CS35L41_STATE_UNCONFIGURED                        (0)
 #define CS35L41_STATE_CONFIGURED                          (1)
 #define CS35L41_STATE_STANDBY                             (2)

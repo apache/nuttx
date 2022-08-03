@@ -3248,6 +3248,15 @@ static int cs35l41b_output_configuration(FAR struct cs35l41b_dev_s *priv)
       return ERROR;
     }
 
+  /* set VPBR configuration */
+
+  if (cs35l41b_write_register(priv,
+                              CS35L41_VBRP_CONFIG_REG,
+                              0x02005607) == ERROR)
+    {
+      return ERROR;
+    }
+
   return OK;
 }
 
