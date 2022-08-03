@@ -133,6 +133,16 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#if defined(CONFIG_ARCH_BOARD_IPCC)
+  /* Register IPCC driver */
+
+  ret = ipcc_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: ipcc_init() failed\n");
+    }
+#endif
+
 #if defined(CONFIG_ARCH_BOARD_ENABLE_CPU2)
   /* Start second CPU */
 

@@ -38,10 +38,14 @@ ifeq ($(CONFIG_SPI_DRIVER),y)
   CSRCS += stm32_spi.c
 endif
 
+CSRCS-$(CONFIG_ARCH_BOARD_IPCC) = stm32_ipcc.c
+
 ifeq ($(CONFIG_VIDEO_FB),y)
 ifeq ($(CONFIG_LCD_SSD1680),y)
   CSRCS += stm32_ssd1680.c
 endif
 endif
+
+CSRCS += $(CSRCS-y)
 
 include $(TOPDIR)/boards/Board.mk
