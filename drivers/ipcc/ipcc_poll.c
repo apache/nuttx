@@ -132,6 +132,8 @@ int ipcc_poll(FAR struct file *filep, FAR struct pollfd *fds,
   /* Should immediately notify on any of the requested events?  */
 
   eventset = 0;
+
+#ifdef CONFIG_IPCC_BUFFERED
   if (circbuf_used(&priv->ipcc->rxbuf) > 0)
     {
       eventset |= (fds->events & POLLIN);
@@ -141,6 +143,7 @@ int ipcc_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       eventset |= (fds->events & POLLOUT);
     }
+#endif
 
   if (eventset)
     {
