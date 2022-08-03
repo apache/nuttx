@@ -17,6 +17,13 @@ config ARCH_BOARD_NUCLEO_WL55JC_DEMO_LED_IRQ
 comment "[demo] LED on button interrupt requires NSH_ARCHINIT"
 	depends on !NSH_ARCHINIT || !ARCH_BUTTONS
 
+config ARCH_BOARD_ENABLE_CPU2
+	bool "Enable CPU2 on startup"
+	default n
+	---help---
+		When enabled, CPU2 (cortex-m0) will be started up. CPU2
+		will be booted after all initialization on CPU1 is done.
+
 menuconfig ARCH_BOARD_FLASH_MOUNT
 	bool "Enable FLASH partitioning and mounting"
 	depends on !DISABLE_MOUNTPOINT

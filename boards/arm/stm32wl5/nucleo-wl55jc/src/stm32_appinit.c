@@ -39,6 +39,7 @@
 
 #include <stm32wl5.h>
 #include <stm32wl5_uart.h>
+#include <stm32wl5_pwr.h>
 
 #include <arch/board/board.h>
 
@@ -130,6 +131,12 @@ int board_app_initialize(uintptr_t arg)
     {
       syslog(LOG_ERR, "ERROR: stm32wl5_flash_init() failed: %d\n", ret);
     }
+#endif
+
+#if defined(CONFIG_ARCH_BOARD_ENABLE_CPU2)
+  /* Start second CPU */
+
+  stm32wl5_pwr_boot_c2();
 #endif
 
   return ret;
