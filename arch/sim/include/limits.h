@@ -38,7 +38,7 @@
 
 #ifdef __CHAR_UNSIGNED__
 #  define CHAR_MIN   0
-#d  efine CHAR_MAX   UCHAR_MAX
+#  define CHAR_MAX   UCHAR_MAX
 #else
 #  define CHAR_MIN   SCHAR_MIN
 #  define CHAR_MAX   SCHAR_MAX
