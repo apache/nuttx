@@ -155,7 +155,8 @@ void board_leds_initialize(void);
 
 int stm32wl5_flash_init(void);
 
-/* Name: stm32wl5_spidev_initialize
+/****************************************************************************
+ * Name: stm32wl5_spidev_initialize
  *
  * Description:
  *   Initialize SPIs
@@ -163,5 +164,15 @@ int stm32wl5_flash_init(void);
  ****************************************************************************/
 
 void stm32wl5_spidev_initialize(void);
+
+/****************************************************************************
+ * Name: ipcc_init
+ *
+ * Description:
+ *   Initializes configured IPCC channels.
+ *
+ ****************************************************************************/
+
+int ipcc_init(void);
 
 #endif /* __BOARDS_ARM_STM32WL5_NUCLEO_WL55JC_SRC_NUCLEO_WL55JC_H */
