@@ -116,6 +116,13 @@ uint8_t stm32_spi2status(struct spi_dev_s *dev, uint32_t devid);
 int stm32_spi2cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
+#ifdef CONFIG_STM32F0L0G0_SPI3
+void stm32_spi3select(struct spi_dev_s *dev, uint32_t devid,
+                      bool selected);
+uint8_t stm32_spi3status(struct spi_dev_s *dev, uint32_t devid);
+int stm32_spi3cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
+#endif
+
 /****************************************************************************
  * Name: stm32_spi1/2/...register
  *
@@ -144,6 +151,11 @@ int stm32_spi1register(struct spi_dev_s *dev, spi_mediachange_t callback,
 
 #ifdef CONFIG_STM32F0L0G0_SPI2
 int stm32_spi2register(struct spi_dev_s *dev, spi_mediachange_t callback,
+                       void *arg);
+#endif
+
+#ifdef CONFIG_STM32F0L0G0_SPI3
+int stm32_spi3register(struct spi_dev_s *dev, spi_mediachange_t callback,
                        void *arg);
 #endif
 #endif
