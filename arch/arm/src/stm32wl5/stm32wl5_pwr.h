@@ -68,6 +68,17 @@ extern "C"
 
 bool stm32wl5_pwr_enablebkp(bool writable);
 
+/****************************************************************************
+ * Name: stm32wl5_pwr_boot_c2
+ *
+ * Description:
+ *   Boots up CPU2 (cortex-m0) after reset or wakeup from stop or standby
+ *   modes.
+ *
+ ****************************************************************************/
+
+void stm32wl5_pwr_boot_c2(void);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
