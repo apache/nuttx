@@ -7,7 +7,6 @@
 #
 # CONFIG_ARCH_LEDS is not set
 # CONFIG_ARCH_RAMFUNCS is not set
-# CONFIG_FS_LARGEFILE is not set
 # CONFIG_LIBC_LONG_LONG is not set
 # CONFIG_NSH_ARGCAT is not set
 # CONFIG_NSH_CMDOPT_HEXDUMP is not set
