@@ -65,7 +65,11 @@ endif
 
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
   ifeq ($(CONFIG_FRAME_POINTER),y)
-    CMN_CSRCS += arm_backtrace_fp.c
+    ifeq ($(CONFIG_ARM_THUMB),y)
+      CMN_CSRCS += arm_backtrace_thumb.c
+    else
+      CMN_CSRCS += arm_backtrace_fp.c
+    endif
   else
     CMN_CSRCS += arm_backtrace_thumb.c
   endif
