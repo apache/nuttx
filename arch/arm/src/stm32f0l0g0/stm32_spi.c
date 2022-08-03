@@ -134,6 +134,7 @@
 #elif defined(CONFIG_STM32F0L0G0_STM32G0)
 #  define SPI1_PCLK_FREQUENCY STM32_PCLK1_FREQUENCY
 #  define SPI2_PCLK_FREQUENCY STM32_PCLK1_FREQUENCY
+#  define SPI3_PCLK_FREQUENCY STM32_PCLK1_FREQUENCY
 #else
 #  error Unsupported family
 #endif
@@ -383,6 +384,60 @@ static struct stm32_spidev_s g_spi2dev =
   .pm_cb.prepare = spi_pm_prepare,
 #endif
   .config   = CONFIG_STM32F0L0G0_SPI2_COMMTYPE,
+};
+#endif
+
+#ifdef CONFIG_STM32F0L0G0_SPI3
+static const struct spi_ops_s g_spi3ops =
+{
+  .lock              = spi_lock,
+  .select            = stm32_spi3select,
+  .setfrequency      = spi_setfrequency,
+  .setmode           = spi_setmode,
+  .setbits           = spi_setbits,
+#ifdef CONFIG_SPI_HWFEATURES
+  .hwfeatures        = spi_hwfeatures,
+#endif
+  .status            = stm32_spi3status,
+#ifdef CONFIG_SPI_CMDDATA
+  .cmddata           = stm32_spi3cmddata,
+#endif
+  .send              = spi_send,
+#ifdef CONFIG_SPI_EXCHANGE
+  .exchange          = spi_exchange,
+#else
+  .sndblock          = spi_sndblock,
+  .recvblock         = spi_recvblock,
+#endif
+#ifdef CONFIG_SPI_TRIGGER
+  .trigger           = spi_trigger,
+#endif
+#ifdef CONFIG_SPI_CALLBACK
+  .registercallback  = stm32_spi3register,  /* provided externally */
+#else
+  .registercallback  = 0,  /* not implemented */
+#endif
+};
+
+static struct stm32_spidev_s g_spi3dev =
+{
+  .spidev   =
+    {
+      &g_spi3ops
+    },
+  .spibase  = STM32_SPI3_BASE,
+  .spiclock = SPI1_PCLK_FREQUENCY,
+#ifdef CONFIG_STM32F0L0G0_SPI_INTERRUPTS
+  .spiirq   = STM32_IRQ_SPI3,
+#endif
+#ifdef CONFIG_STM32F0L0G0_SPI3_DMA
+  .rxch     = DMACHAN_SPI3_RX,
+  .txch     = DMACHAN_SPI3_TX,
+#endif
+#ifdef CONFIG_PM
+  .pm_cb.prepare = spi_pm_prepare,
+#endif
+  .config   = CONFIG_STM32F0L0G0_SPI3_COMMTYPE,
 };
 #endif
 
@@ -2024,6 +2079,30 @@ struct spi_dev_s *stm32_spibus_initialize(int bus)
           if (priv->config == FULL_DUPLEX || priv->config == SIMPLEX_RX)
             {
               stm32_configgpio(GPIO_SPI2_MISO);
+            }
+        }
+    }
+  else
+#endif
+#ifdef CONFIG_STM32F0L0G0_SPI3
+  if (bus == 3)
+    {
+      /* Select SPI3 */
+
+      priv = &g_spi3dev;
+
+      /* Only configure if the bus is not already configured */
+
+      if (!priv->initialized)
+        {
+          /* Configure SPI3 pins: SCK, MISO, and MOSI */
+
+          stm32_configgpio(GPIO_SPI3_SCK);
+          stm32_configgpio(GPIO_SPI3_MOSI);
+
+          if (priv->config == FULL_DUPLEX || priv->config == SIMPLEX_RX)
+            {
+              stm32_configgpio(GPIO_SPI3_MISO);
             }
         }
     }
