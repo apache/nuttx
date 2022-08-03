@@ -590,12 +590,15 @@ static void mpfs_write_tx_fifo(const void *in_data, uint32_t length,
 
   /* Poll mode: wait for fifo empty first */
 
-  do
+  if (epno > EP0)
     {
-      tx_csr = getreg16(MPFS_USB_ENDPOINT(epno) +
-                        MPFS_USB_ENDPOINT_TX_CSR_OFFSET);
+      do
+        {
+          tx_csr = getreg16(MPFS_USB_ENDPOINT(epno) +
+                            MPFS_USB_ENDPOINT_TX_CSR_OFFSET);
+        }
+      while (tx_csr & TXCSRL_REG_EPN_TX_FIFO_NE_MASK);
     }
-  while (tx_csr & TXCSRL_REG_EPN_TX_FIFO_NE_MASK);
 
   /* Send 32-bit words first */
 
@@ -1156,8 +1159,6 @@ static void mpfs_ep_set_fifo_size(uint8_t epno, uint8_t in,
 
   if (in)
     {
-      i |= (1 << 4); /* Double buffering */
-
       mpfs_putreg8(i, MPFS_USB_TX_FIFO_SIZE);
     }
   else
@@ -1240,7 +1241,13 @@ static int mpfs_ep_configure_internal(struct mpfs_ep_s *privep,
 
       mpfs_ep_set_fifo_size(epno, 0, maxpacket);
 
-      mpfs_putreg16(desc->addr, MPFS_USB_TX_FIFO_ADDR);
+      /* Give EP0 64 bytes (8*8) and configure 512 bytes for TX fifo.
+       * This is a pointer to internal RAM where the data should be
+       * stored.  It must not overlap with other EPs or it will cause
+       * corruption.  One unit is 8 bytes, so 8 is 8*8 = 64 bytes.
+       */
+
+      mpfs_putreg16(8 + (64 * epno * 2), MPFS_USB_TX_FIFO_ADDR);
 
       /* Disable double buffering */
 
@@ -1280,7 +1287,10 @@ static int mpfs_ep_configure_internal(struct mpfs_ep_s *privep,
                        RXCSRL_REG_EPN_RX_PKT_RDY_MASK);
 
       mpfs_ep_set_fifo_size(epno, dirin, maxpacket);
-      mpfs_putreg16(desc->addr, MPFS_USB_RX_FIFO_ADDR);
+
+      /* Give EP0 64 bytes (8*8) and configure 512 bytes for RX fifo */
+
+      mpfs_putreg16(8 + 64 + (64 * epno * 2), MPFS_USB_RX_FIFO_ADDR);
 
       /* Disable double buffering for RX, will run into trouble with it.
        * The host will send faster than we can handle and all packets
