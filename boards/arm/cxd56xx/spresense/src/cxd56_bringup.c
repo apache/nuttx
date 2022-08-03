@@ -248,6 +248,12 @@ int cxd56_bringup(void)
 #endif
 
 #ifndef CONFIG_CXD56_SUBCORE
+  /* Set the special pins for the host interface to GPIO mode because
+   * their mode is automatically changed by latching the SYSTEM0/1 pins.
+   */
+
+  CXD56_PIN_CONFIGS(PINCONFS_SPI2A_GPIO);
+
   /* Initialize CPU clock to max frequency */
 
   board_clock_initialize();
