@@ -151,7 +151,7 @@ ifeq ($(CONFIG_STM32L4_LPTIM),y)
 CHIP_CSRCS += stm32l4_lptim.c
 endif
 
-ifeq ($(CONFIG_PWM),y)
+ifeq ($(CONFIG_STM32L4_PWM),y)
 CHIP_CSRCS += stm32l4_pwm.c
 endif
 
