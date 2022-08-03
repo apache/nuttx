@@ -1439,6 +1439,7 @@ config STM32F0L0G0_CAN
 config STM32F0L0G0_PWM
 	bool
 	default n
+	select ARCH_HAVE_PWM_PULSECOUNT
 
 config STM32F0L0G0_USART
 	bool
@@ -1462,9 +1463,7 @@ config STM32F0L0G0_TIM1_PWM
 	bool "TIM1 PWM"
 	default n
 	depends on STM32F0L0G0_TIM1
-	select PWM
 	select STM32F0L0G0_PWM
-	select ARCH_HAVE_PWM_PULSECOUNT
 	---help---
 		Reserve timer 1 for use by PWM
 
@@ -1639,9 +1638,7 @@ config STM32F0L0G0_TIM2_PWM
 	bool "TIM2 PWM"
 	default n
 	depends on STM32F0L0G0_TIM2
-	select PWM
 	select STM32F0L0G0_PWM
-	select ARCH_HAVE_PWM_PULSECOUNT
 	---help---
 		Reserve timer 2 for use by PWM
 
@@ -1795,9 +1792,7 @@ config STM32F0L0G0_TIM3_PWM
 	bool "TIM3 PWM"
 	default n
 	depends on STM32F0L0G0_TIM3
-	select PWM
 	select STM32F0L0G0_PWM
-	select ARCH_HAVE_PWM_PULSECOUNT
 	---help---
 		Reserve timer 3 for use by PWM
 
@@ -1951,7 +1946,6 @@ config STM32F0L0G0_TIM14_PWM
 	bool "TIM14 PWM"
 	default n
 	depends on STM32F0L0G0_TIM14
-	select PWM
 	select STM32F0L0G0_PWM
 	---help---
 		Reserve timer 14 for use by PWM
@@ -2015,7 +2009,6 @@ config STM32F0L0G0_TIM15_PWM
 	bool "TIM15 PWM"
 	default n
 	depends on STM32F0L0G0_TIM15
-	select PWM
 	select STM32F0L0G0_PWM
 	---help---
 		Reserve timer 15 for use by PWM
@@ -2109,7 +2102,6 @@ config STM32F0L0G0_TIM16_PWM
 	bool "TIM16 PWM"
 	default n
 	depends on STM32F0L0G0_TIM16
-	select PWM
 	select STM32F0L0G0_PWM
 	---help---
 		Reserve timer 16 for use by PWM
@@ -2180,7 +2172,6 @@ config STM32F0L0G0_TIM17_PWM
 	bool "TIM17 PWM"
 	default n
 	depends on STM32F0L0G0_TIM17
-	select PWM
 	select STM32F0L0G0_PWM
 	---help---
 		Reserve timer 17 for use by PWM
@@ -2250,9 +2241,8 @@ endif # STM32F0L0G0_TIM17_PWM
 config STM32F0L0G0_PWM_MULTICHAN
 	bool "PWM Multiple Output Channels"
 	default n
-	depends on STM32F0L0G0_TIM1_PWM || STM32F0L0G0_TIM2_PWM || STM32F0L0G0_TIM3_PWM || STM32F0L0G0_TIM15_PWM
+	depends on STM32F0L0G0_PWM
 	select ARCH_HAVE_PWM_MULTICHAN
-	select PWM_MULTICHAN
 	---help---
 		Specifies that the PWM driver supports multiple output channels per timer.
 

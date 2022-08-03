@@ -1216,6 +1216,11 @@ config STM32L4_SPI
 	bool
 	default n
 
+config STM32L4_PWM
+	bool
+	default n
+	select ARCH_HAVE_PWM_PULSECOUNT
+
 config STM32L4_USART
 	bool
 	default n
@@ -2044,8 +2049,7 @@ config STM32L4_TIM1_PWM
 	bool "TIM1 PWM"
 	default n
 	depends on STM32L4_TIM1
-	select PWM
-	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32L4_PWM
 	---help---
 		Reserve timer 1 for use by PWM
 
@@ -2284,8 +2288,7 @@ config STM32L4_TIM2_PWM
 	bool "TIM2 PWM"
 	default n
 	depends on STM32L4_TIM2
-	select PWM
-	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32L4_PWM
 	---help---
 		Reserve timer 2 for use by PWM
 
@@ -2464,8 +2467,7 @@ config STM32L4_TIM3_PWM
 	bool "TIM3 PWM"
 	default n
 	depends on STM32L4_TIM3
-	select PWM
-	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32L4_PWM
 	---help---
 		Reserve timer 3 for use by PWM
 
@@ -2644,8 +2646,7 @@ config STM32L4_TIM4_PWM
 	bool "TIM4 PWM"
 	default n
 	depends on STM32L4_TIM4
-	select PWM
-	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32L4_PWM
 	---help---
 		Reserve timer 4 for use by PWM
 
@@ -2824,8 +2825,7 @@ config STM32L4_TIM5_PWM
 	bool "TIM5 PWM"
 	default n
 	depends on STM32L4_TIM5
-	select PWM
-	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32L4_PWM
 	---help---
 		Reserve timer 5 for use by PWM
 
@@ -3004,8 +3004,7 @@ config STM32L4_TIM8_PWM
 	bool "TIM8 PWM"
 	default n
 	depends on STM32L4_TIM8
-	select PWM
-	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32L4_PWM
 	---help---
 		Reserve timer 8 for use by PWM
 
@@ -3244,7 +3243,7 @@ config STM32L4_TIM15_PWM
 	bool "TIM15 PWM"
 	default n
 	depends on STM32L4_TIM15
-	select PWM
+	select STM32L4_PWM
 	---help---
 		Reserve timer 15 for use by PWM
 
@@ -3390,7 +3389,7 @@ config STM32L4_TIM16_PWM
 	bool "TIM16 PWM"
 	default n
 	depends on STM32L4_TIM16
-	select PWM
+	select STM32L4_PWM
 	---help---
 		Reserve timer 16 for use by PWM
 
@@ -3491,7 +3490,7 @@ config STM32L4_TIM17_PWM
 	bool "TIM17 PWM"
 	default n
 	depends on STM32L4_TIM17
-	select PWM
+	select STM32L4_PWM
 	---help---
 		Reserve timer 17 for use by PWM
 
@@ -3709,7 +3708,7 @@ endif # STM32L4_LPTIM2_PWM
 config STM32L4_PWM_MULTICHAN
 	bool "PWM Multiple Output Channels"
 	default n
-	depends on STM32L4_TIM1_PWM || STM32L4_TIM2_PWM || STM32L4_TIM3_PWM || STM32L4_TIM4_PWM || STM32L4_TIM5_PWM || STM32L4_TIM8_PWM || STM32L4_TIM15_PWM || STM32L4_TIM16_PWM || STM32L4_TIM17_PWM || STM32L4_LPTIM1_PWM || STM32L4_LPTIM2_PWM
+	depends on STM32L4_PWM
 	select ARCH_HAVE_PWM_MULTICHAN
 	---help---
 		Specifies that the PWM driver supports multiple output

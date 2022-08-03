@@ -1265,6 +1265,11 @@ config STM32F7_TIM
 	bool
 	default n
 
+config STM32F7_PWM
+	bool
+	default n
+	select ARCH_HAVE_PWM_PULSECOUNT
+
 config STM32F7_USART
 	bool
 	default n
@@ -2695,7 +2700,7 @@ config STM32F7_TIM1_PWM
 	bool "TIM1 PWM"
 	default n
 	depends on STM32F7_TIM1
-	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32F7_PWM
 	---help---
 		Reserve timer 1 for use by PWM
 
@@ -2834,7 +2839,7 @@ config STM32F7_TIM2_PWM
 	bool "TIM2 PWM"
 	default n
 	depends on STM32F7_TIM2
-	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32F7_PWM
 	---help---
 		Reserve timer 2 for use by PWM
 
@@ -2973,7 +2978,7 @@ config STM32F7_TIM3_PWM
 	bool "TIM3 PWM"
 	default n
 	depends on STM32F7_TIM3
-	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32F7_PWM
 	---help---
 		Reserve timer 3 for use by PWM
 
@@ -3112,7 +3117,7 @@ config STM32F7_TIM4_PWM
 	bool "TIM4 PWM"
 	default n
 	depends on STM32F7_TIM4
-	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32F7_PWM
 	---help---
 		Reserve timer 4 for use by PWM
 
@@ -3251,7 +3256,7 @@ config STM32F7_TIM5_PWM
 	bool "TIM5 PWM"
 	default n
 	depends on STM32F7_TIM5
-	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32F7_PWM
 	---help---
 		Reserve timer 5 for use by PWM
 
@@ -3390,7 +3395,7 @@ config STM32F7_TIM8_PWM
 	bool "TIM8 PWM"
 	default n
 	depends on STM32F7_TIM8
-	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32F7_PWM
 	---help---
 		Reserve timer 8 for use by PWM
 
@@ -3529,7 +3534,7 @@ config STM32F7_TIM9_PWM
 	bool "TIM9 PWM"
 	default n
 	depends on STM32F7_TIM9
-	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32F7_PWM
 	---help---
 		Reserve timer 9 for use by PWM
 
@@ -3661,7 +3666,7 @@ config STM32F7_TIM10_PWM
 	bool "TIM10 PWM"
 	default n
 	depends on STM32F7_TIM10
-	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32F7_PWM
 	---help---
 		Reserve timer 10 for use by PWM
 
@@ -3793,7 +3798,7 @@ config STM32F7_TIM11_PWM
 	bool "TIM11 PWM"
 	default n
 	depends on STM32F7_TIM11
-	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32F7_PWM
 	---help---
 		Reserve timer 11 for use by PWM
 
@@ -3925,7 +3930,7 @@ config STM32F7_TIM12_PWM
 	bool "TIM12 PWM"
 	default n
 	depends on STM32F7_TIM12
-	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32F7_PWM
 	---help---
 		Reserve timer 12 for use by PWM
 
@@ -4057,7 +4062,7 @@ config STM32F7_TIM13_PWM
 	bool "TIM13 PWM"
 	default n
 	depends on STM32F7_TIM13
-	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32F7_PWM
 	---help---
 		Reserve timer 13 for use by PWM
 
@@ -4189,7 +4194,7 @@ config STM32F7_TIM14_PWM
 	bool "TIM14 PWM"
 	default n
 	depends on STM32F7_TIM14
-	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32F7_PWM
 	---help---
 		Reserve timer 14 for use by PWM
 
@@ -4320,7 +4325,7 @@ endif # STM32F7_TIM14_PWM
 config STM32F7_PWM_MULTICHAN
 	bool "PWM Multiple Output Channels"
 	default n
-	depends on STM32F7_TIM1_PWM || STM32F7_TIM2_PWM || STM32F7_TIM3_PWM || STM32F7_TIM4_PWM || STM32F7_TIM5_PWM || STM32F7_TIM8_PWM || STM32F7_TIM9_PWM || STM32F7_TIM10_PWM || STM32F7_TIM11_PWM || STM32F7_TIM12_PWM || STM32F7_TIM13_PWM || STM32F7_TIM14_PWM
+	depends on STM32F7_PWM
 	select ARCH_HAVE_PWM_MULTICHAN
 	---help---
 		Specifies that the PWM driver supports multiple output
