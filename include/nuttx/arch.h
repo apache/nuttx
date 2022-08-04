@@ -1840,6 +1840,7 @@ int up_tls_size(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_THREAD_LOCAL
+struct tls_info_s;
 void up_tls_initialize(FAR struct tls_info_s *info);
 #else
 #define up_tls_initialize(x)
