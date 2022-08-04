@@ -511,6 +511,8 @@ static void btnet_hci_received(FAR struct bt_buf_s *buf, FAR void *context)
   frame      = buf->frame;
   buf->frame = NULL;
 
+  net_lock();
+
   /* Ignore the frame if the network is not up */
 
   priv = (FAR struct btnet_driver_s *)context;
@@ -555,8 +557,6 @@ static void btnet_hci_received(FAR struct bt_buf_s *buf, FAR void *context)
   meta.bm_proto = BTPROTO_HCI;
 
   /* Transfer the frame to the network logic */
-
-  net_lock();
 
 #ifdef CONFIG_NET_BLUETOOTH
   /* Invoke the PF_BLUETOOTH tap first.  If the frame matches
