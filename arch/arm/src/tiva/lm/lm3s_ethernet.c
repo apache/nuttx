@@ -199,7 +199,8 @@ struct tiva_driver_s
 
 /* A single packet buffer is used */
 
-static uint8_t g_pktbuf[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
+static uint8_t g_pktbuf[TIVA_NETHCONTROLLERS]
+                       [MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
 
 /* Ethernet peripheral state */
 
@@ -1605,20 +1606,20 @@ static inline int tiva_ethinitialize(int intf)
   /* Initialize the driver structure */
 
   memset(priv, 0, sizeof(struct tiva_driver_s));
-  priv->ld_dev.d_buf     = g_pktbuf;      /* Single packet buffer */
-  priv->ld_dev.d_ifup    = tiva_ifup;     /* I/F down callback */
-  priv->ld_dev.d_ifdown  = tiva_ifdown;   /* I/F up (new IP address) callback */
-  priv->ld_dev.d_txavail = tiva_txavail;  /* New TX data callback */
+  priv->ld_dev.d_buf     = g_pktbuf[intf]; /* Single packet buffer */
+  priv->ld_dev.d_ifup    = tiva_ifup;      /* I/F down callback */
+  priv->ld_dev.d_ifdown  = tiva_ifdown;    /* I/F up (new IP address) callback */
+  priv->ld_dev.d_txavail = tiva_txavail;   /* New TX data callback */
 #ifdef CONFIG_NET_MCASTGROUP
-  priv->ld_dev.d_addmac  = tiva_addmac;   /* Add multicast MAC address */
-  priv->ld_dev.d_rmmac   = tiva_rmmac;    /* Remove multicast MAC address */
+  priv->ld_dev.d_addmac  = tiva_addmac;    /* Add multicast MAC address */
+  priv->ld_dev.d_rmmac   = tiva_rmmac;     /* Remove multicast MAC address */
 #endif
-  priv->ld_dev.d_private = priv;          /* Used to recover private state from dev */
+  priv->ld_dev.d_private = priv;           /* Used to recover private state from dev */
 
 #if TIVA_NETHCONTROLLERS > 1
 # error "A mechanism to associate base address an IRQ with an interface is needed"
-  priv->ld_base          = ??;            /* Ethernet controller base address */
-  priv->ld_irq           = ??;            /* Ethernet controller IRQ number */
+  priv->ld_base          = ??;             /* Ethernet controller base address */
+  priv->ld_irq           = ??;             /* Ethernet controller IRQ number */
 #endif
 
 #ifdef CONFIG_TIVA_BOARDMAC

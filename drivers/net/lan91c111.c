@@ -81,12 +81,12 @@
 
 struct lan91c111_driver_s
 {
-  uintptr_t base;                         /* Base address */
-  int       irq;                          /* IRQ number */
-  uint16_t  bank;                         /* Current bank */
-  struct work_s irqwork;                  /* For deferring interrupt work to the work queue */
-  struct work_s pollwork;                 /* For deferring poll work to the work queue */
-  uint8_t pktbuf[MAX_NETDEV_PKTSIZE + 4]; /* +4 due to getregs32/putregs32 */
+  uintptr_t base;                                     /* Base address */
+  int       irq;                                      /* IRQ number */
+  struct work_s irqwork;                              /* For deferring interrupt work to the work queue */
+  struct work_s pollwork;                             /* For deferring poll work to the work queue */
+  uint16_t  bank;                                     /* Current bank */
+  uint16_t  pktbuf[(MAX_NETDEV_PKTSIZE + 4 + 1) / 2]; /* +4 due to getregs32/putregs32 */
 
   /* This holds the information visible to the NuttX network */
 
@@ -1493,18 +1493,18 @@ int lan91c111_initialize(uintptr_t base, int irq)
 
   /* Initialize the driver structure */
 
-  dev->d_buf     = priv->pktbuf;      /* Single packet buffer */
-  dev->d_ifup    = lan91c111_ifup;    /* I/F up (new IP address) callback */
-  dev->d_ifdown  = lan91c111_ifdown;  /* I/F down callback */
-  dev->d_txavail = lan91c111_txavail; /* New TX data callback */
+  dev->d_buf     = (FAR uint8_t *)priv->pktbuf; /* Single packet buffer */
+  dev->d_ifup    = lan91c111_ifup;              /* I/F up (new IP address) callback */
+  dev->d_ifdown  = lan91c111_ifdown;            /* I/F down callback */
+  dev->d_txavail = lan91c111_txavail;           /* New TX data callback */
 #ifdef CONFIG_NET_MCASTGROUP
-  dev->d_addmac  = lan91c111_addmac;  /* Add multicast MAC address */
-  dev->d_rmmac   = lan91c111_rmmac;   /* Remove multicast MAC address */
+  dev->d_addmac  = lan91c111_addmac;            /* Add multicast MAC address */
+  dev->d_rmmac   = lan91c111_rmmac;             /* Remove multicast MAC address */
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
-  dev->d_ioctl   = lan91c111_ioctl;   /* Handle network IOCTL commands */
+  dev->d_ioctl   = lan91c111_ioctl;             /* Handle network IOCTL commands */
 #endif
-  dev->d_private = priv;              /* Used to recover private state from dev */
+  dev->d_private = priv;                        /* Used to recover private state from dev */
 
   /* Put the interface in the down state. This usually amounts to resetting
    * the device and/or calling lan91c111_ifdown().

@@ -210,7 +210,8 @@ struct gmac_txdesc_s
 #endif
 };
 
-static uint8_t g_pktbuf[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
+static uint8_t g_pktbuf[MPFS_NETHERNET]
+                       [MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
 
 #if defined(CONFIG_MPFS_GMAC_PREALLOCATE)
 static uint8_t g_txbuffer[CONFIG_MPFS_ETHMAC_NTXBUFFERS * GMAC_TX_UNITSIZE]
@@ -3554,7 +3555,7 @@ int mpfs_ethinitialize(int intf)
   /* Initialize the driver structure */
 
   memset(priv, 0, sizeof(struct mpfs_ethmac_s));
-  priv->dev.d_buf     = g_pktbuf;       /* Single packet buffer */
+  priv->dev.d_buf     = g_pktbuf[intf]; /* Single packet buffer */
   priv->dev.d_ifup    = mpfs_ifup;      /* I/F up (new IP address) callback */
   priv->dev.d_ifdown  = mpfs_ifdown;    /* I/F down callback */
   priv->dev.d_txavail = mpfs_txavail;   /* New TX data callback */

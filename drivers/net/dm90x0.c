@@ -273,6 +273,10 @@
 
 #define DM6X_TXTIMEOUT (60*CLK_TCK)
 
+/* Packet buffer size */
+
+#define PKTBUF_SIZE (MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE)
+
 /* This is a helper pointer for accessing the contents of Ethernet header */
 
 #define BUF ((FAR struct eth_hdr_s *)priv->dm_dev.d_buf)
@@ -323,7 +327,7 @@ struct dm9x_driver_s
 
 /* A single packet buffer is used */
 
-static uint8_t g_pktbuf[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
+static uint16_t g_pktbuf[CONFIG_DM9X_NINTERFACES][(PKTBUF_SIZE + 1) / 2];
 
 /* At present, only a single DM90x0 device is supported. */
 
@@ -1866,15 +1870,15 @@ int dm9x_initialize(void)
   /* Initialize the driver structure */
 
   memset(g_dm9x, 0, CONFIG_DM9X_NINTERFACES*sizeof(struct dm9x_driver_s));
-  g_dm9x[0].dm_dev.d_buf     = g_pktbuf;      /* Single packet buffer */
-  g_dm9x[0].dm_dev.d_ifup    = dm9x_ifup;     /* I/F down callback */
-  g_dm9x[0].dm_dev.d_ifdown  = dm9x_ifdown;   /* I/F up (new IP address) callback */
-  g_dm9x[0].dm_dev.d_txavail = dm9x_txavail;  /* New TX data callback */
+  g_dm9x[0].dm_dev.d_buf     = (FAR uint8_t *)g_pktbuf[0]; /* Single packet buffer */
+  g_dm9x[0].dm_dev.d_ifup    = dm9x_ifup;                  /* I/F down callback */
+  g_dm9x[0].dm_dev.d_ifdown  = dm9x_ifdown;                /* I/F up (new IP address) callback */
+  g_dm9x[0].dm_dev.d_txavail = dm9x_txavail;               /* New TX data callback */
 #ifdef CONFIG_NET_MCASTGROUP
-  g_dm9x[0].dm_dev.d_addmac  = dm9x_addmac;   /* Add multicast MAC address */
-  g_dm9x[0].dm_dev.d_rmmac   = dm9x_rmmac;    /* Remove multicast MAC address */
+  g_dm9x[0].dm_dev.d_addmac  = dm9x_addmac;                /* Add multicast MAC address */
+  g_dm9x[0].dm_dev.d_rmmac   = dm9x_rmmac;                 /* Remove multicast MAC address */
 #endif
-  g_dm9x[0].dm_dev.d_private = g_dm9x;        /* Used to recover private state from dev */
+  g_dm9x[0].dm_dev.d_private = g_dm9x;                     /* Used to recover private state from dev */
 
   /* Read the MAC address */
 
