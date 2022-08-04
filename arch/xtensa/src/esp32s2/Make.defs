@@ -49,6 +49,10 @@ ifeq ($(CONFIG_ESP32S2_I2C),y)
 CHIP_CSRCS += esp32s2_i2c.c
 endif
 
+ifeq ($(CONFIG_ESP32S2_SPI),y)
+CHIP_CSRCS += esp32s2_spi.c
+endif
+
 ifeq ($(CONFIG_ESP32S2_TIMER),y)
 CHIP_CSRCS += esp32s2_tim.c
 ifeq ($(CONFIG_TIMER),y)

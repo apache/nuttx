@@ -33,7 +33,7 @@
 
 /* SPI_CMD_REG register */
 
-#define SPI_CMD_REG (DR_REG_SPI_BASE + 0x0)
+#define SPI_CMD_REG(i) (REG_SPI_BASE(i) + 0x0)
 
 /* SPI_USR : R/W; bitpos: [24]; default: 0;
  * User define command enable.  An operation will be triggered when the bit
@@ -57,7 +57,7 @@
 
 /* SPI_ADDR_REG register */
 
-#define SPI_ADDR_REG (DR_REG_SPI_BASE + 0x4)
+#define SPI_ADDR_REG(i)    (REG_SPI_BASE(i) + 0x4)
 
 /* SPI_USR_ADDR_VALUE : R/W; bitpos: [31:0]; default: 0;
  * [31:8]:address to slave, [7:0]:Reserved.
@@ -70,7 +70,7 @@
 
 /* SPI_CTRL_REG register */
 
-#define SPI_CTRL_REG (DR_REG_SPI_BASE + 0x8)
+#define SPI_CTRL_REG(i)       (REG_SPI_BASE(i) + 0x8)
 
 /* SPI_WR_BIT_ORDER : R/W; bitpos: [26]; default: 0;
  * In command address write-data (MOSI) phases 1: LSB firs 0: MSB first
@@ -225,7 +225,7 @@
 
 /* SPI_CTRL1_REG register */
 
-#define SPI_CTRL1_REG (DR_REG_SPI_BASE + 0xc)
+#define SPI_CTRL1_REG(i)     (REG_SPI_BASE(i) + 0xc)
 
 /* SPI_CS_HOLD_DELAY : R/W; bitpos: [19:14]; default: 1;
  * SPI cs signal is delayed by spi clock cycles.
@@ -280,7 +280,7 @@
 
 /* SPI_CTRL2_REG register */
 
-#define SPI_CTRL2_REG (DR_REG_SPI_BASE + 0x10)
+#define SPI_CTRL2_REG(i)    (REG_SPI_BASE(i) + 0x10)
 
 /* SPI_CS_DELAY_NUM : R/W; bitpos: [30:29]; default: 0;
  * spi_cs signal is delayed by system clock cycles
@@ -325,7 +325,7 @@
 
 /* SPI_CLOCK_REG register */
 
-#define SPI_CLOCK_REG (DR_REG_SPI_BASE + 0x14)
+#define SPI_CLOCK_REG(i)      (REG_SPI_BASE(i) + 0x14)
 
 /* SPI_CLK_EQU_SYSCLK : R/W; bitpos: [31]; default: 1;
  * In the master mode 1: spi_clk is eqaul to system 0: spi_clk is divided
@@ -378,7 +378,7 @@
 
 /* SPI_USER_REG register */
 
-#define SPI_USER_REG (DR_REG_SPI_BASE + 0x18)
+#define SPI_USER_REG(i)    (REG_SPI_BASE(i) + 0x18)
 
 /* SPI_USR_COMMAND : R/W; bitpos: [31]; default: 1;
  * This bit enable the command phase of an operation.
@@ -649,7 +649,7 @@
 
 /* SPI_USER1_REG register */
 
-#define SPI_USER1_REG (DR_REG_SPI_BASE + 0x1c)
+#define SPI_USER1_REG(i)       (REG_SPI_BASE(i) + 0x1c)
 
 /* SPI_USR_ADDR_BITLEN : R/W; bitpos: [31:27]; default: 23;
  * The length in bits of address phase. The register value shall be
@@ -673,7 +673,7 @@
 
 /* SPI_USER2_REG register */
 
-#define SPI_USER2_REG (DR_REG_SPI_BASE + 0x20)
+#define SPI_USER2_REG(i)          (REG_SPI_BASE(i) + 0x20)
 
 /* SPI_USR_COMMAND_BITLEN : R/W; bitpos: [31:28]; default: 7;
  * The length in bits of command phase. The register value shall be
@@ -696,7 +696,7 @@
 
 /* SPI_MOSI_DLEN_REG register */
 
-#define SPI_MOSI_DLEN_REG (DR_REG_SPI_BASE + 0x24)
+#define SPI_MOSI_DLEN_REG(i)     (REG_SPI_BASE(i) + 0x24)
 
 /* SPI_USR_MOSI_DBITLEN : R/W; bitpos: [22:0]; default: 0;
  * The length in bits of write-data. The register value shall be (bit_num-1).
@@ -709,7 +709,7 @@
 
 /* SPI_MISO_DLEN_REG register */
 
-#define SPI_MISO_DLEN_REG (DR_REG_SPI_BASE + 0x28)
+#define SPI_MISO_DLEN_REG(i)    (REG_SPI_BASE(i) + 0x28)
 
 /* SPI_USR_MISO_DBITLEN : R/W; bitpos: [22:0]; default: 0;
  * The length in bits of  read-data. The register value shall be (bit_num-1).
@@ -722,7 +722,7 @@
 
 /* SPI_SLV_WR_STATUS_REG register */
 
-#define SPI_SLV_WR_STATUS_REG (DR_REG_SPI_BASE + 0x2c)
+#define SPI_SLV_WR_STATUS_REG(i) (REG_SPI_BASE(i) + 0x2c)
 
 /* SPI_OPI_MODE : R/W; bitpos: [1]; default: 0;
  * Just for master mode. 1: spi controller is in OPI mode (all in 8-b-m). 0:
@@ -746,7 +746,7 @@
 
 /* SPI_MISC_REG register */
 
-#define SPI_MISC_REG (DR_REG_SPI_BASE + 0x30)
+#define SPI_MISC_REG(i)          (REG_SPI_BASE(i) + 0x30)
 
 /* SPI_QUAD_DIN_PIN_SWAP : R/W; bitpos: [31]; default: 0;
  * 1:  spi quad input swap enable  0:  spi quad input swap disable
@@ -917,7 +917,7 @@
 
 /* SPI_SLAVE_REG register */
 
-#define SPI_SLAVE_REG (DR_REG_SPI_BASE + 0x34)
+#define SPI_SLAVE_REG(i)  (REG_SPI_BASE(i) + 0x34)
 
 /* SPI_SOFT_RESET : R/W; bitpos: [31]; default: 0;
  * Software reset enable, reset the spi clock line cs line and data lines.
@@ -1031,7 +1031,7 @@
 
 /* SPI_SLAVE1_REG register */
 
-#define SPI_SLAVE1_REG (DR_REG_SPI_BASE + 0x38)
+#define SPI_SLAVE1_REG(i)    (REG_SPI_BASE(i) + 0x38)
 
 /* SPI_SLV_LAST_ADDR : R/W; bitpos: [31:24]; default: 0;
  * In the slave mode it is the value of address.
@@ -1083,7 +1083,7 @@
 
 /* SPI_SLAVE2_REG register */
 
-#define SPI_SLAVE2_REG (DR_REG_SPI_BASE + 0x3c)
+#define SPI_SLAVE2_REG(i)      (REG_SPI_BASE(i) + 0x3c)
 
 /* SPI_SLV_RD_DMA_DONE : R/W; bitpos: [8]; default: 0;
  * The interrupt raw bit for the completion of Rd-DMA operation in the slave
@@ -1097,7 +1097,7 @@
 
 /* SPI_SLV_WRBUF_DLEN_REG register */
 
-#define SPI_SLV_WRBUF_DLEN_REG (DR_REG_SPI_BASE + 0x40)
+#define SPI_SLV_WRBUF_DLEN_REG(i)  (REG_SPI_BASE(i) + 0x40)
 
 /* SPI_CONF_BASE_BITLEN : R/W; bitpos: [31:25]; default: 108;
  * The basic spi_clk cycles of CONF state. The real cycle length of CONF
@@ -1122,7 +1122,7 @@
 
 /* SPI_SLV_RDBUF_DLEN_REG register */
 
-#define SPI_SLV_RDBUF_DLEN_REG (DR_REG_SPI_BASE + 0x44)
+#define SPI_SLV_RDBUF_DLEN_REG(i)  (REG_SPI_BASE(i) + 0x44)
 
 /* SPI_SEG_MAGIC_ERR : R/W; bitpos: [25]; default: 0;
  * 1: The recent magic value in CONF buffer is not right in master DMA
@@ -1156,7 +1156,7 @@
 
 /* SPI_SLV_RD_BYTE_REG register */
 
-#define SPI_SLV_RD_BYTE_REG (DR_REG_SPI_BASE + 0x48)
+#define SPI_SLV_RD_BYTE_REG(i)    (REG_SPI_BASE(i) + 0x48)
 
 /* SPI_USR_CONF : R/W; bitpos: [31]; default: 0;
  * 1: Enable the DMA CONF phase of current seg-trans operation, which means
@@ -1230,7 +1230,7 @@
 
 /* SPI_FSM_REG register */
 
-#define SPI_FSM_REG (DR_REG_SPI_BASE + 0x50)
+#define SPI_FSM_REG(i)          (REG_SPI_BASE(i) + 0x50)
 
 /* SPI_MST_DMA_RD_BYTELEN : R/W; bitpos: [31:12]; default: 0;
  * Define the master DMA read byte length in non seg-trans or seg-trans
@@ -1255,7 +1255,7 @@
 
 /* SPI_HOLD_REG register */
 
-#define SPI_HOLD_REG (DR_REG_SPI_BASE + 0x54)
+#define SPI_HOLD_REG(i)           (REG_SPI_BASE(i) + 0x54)
 
 /* SPI_DMA_SEG_TRANS_DONE : R/W; bitpos: [7]; default: 0;
  * 1:  spi master DMA full-duplex/half-duplex seg-trans ends or slave
@@ -1311,7 +1311,7 @@
 
 /* SPI_DMA_CONF_REG register */
 
-#define SPI_DMA_CONF_REG (DR_REG_SPI_BASE + 0x58)
+#define SPI_DMA_CONF_REG(i)    (REG_SPI_BASE(i) + 0x58)
 
 /* SPI_EXT_MEM_BK_SIZE : R/W; bitpos: [27:26]; default: 0;
  * Select the external memory block size.
@@ -1552,7 +1552,7 @@
 
 /* SPI_DMA_OUT_LINK_REG register */
 
-#define SPI_DMA_OUT_LINK_REG (DR_REG_SPI_BASE + 0x5c)
+#define SPI_DMA_OUT_LINK_REG(i)  (REG_SPI_BASE(i) + 0x5c)
 
 /* SPI_DMA_TX_ENA : R/W; bitpos: [31]; default: 0;
  * spi dma write data status bit.
@@ -1601,7 +1601,7 @@
 
 /* SPI_DMA_IN_LINK_REG register */
 
-#define SPI_DMA_IN_LINK_REG (DR_REG_SPI_BASE + 0x60)
+#define SPI_DMA_IN_LINK_REG(i)   (REG_SPI_BASE(i) + 0x60)
 
 /* SPI_DMA_RX_ENA : R/W; bitpos: [31]; default: 0;
  * spi dma read data status bit.
@@ -1660,7 +1660,7 @@
 
 /* SPI_DMA_INT_ENA_REG register */
 
-#define SPI_DMA_INT_ENA_REG (DR_REG_SPI_BASE + 0x64)
+#define SPI_DMA_INT_ENA_REG(i)       (REG_SPI_BASE(i) + 0x64)
 
 /* SPI_OUT_TOTAL_EOF_INT_ENA : R/W; bitpos: [8]; default: 0;
  * The enable bit for sending all the packets to host done.
@@ -1745,7 +1745,7 @@
 
 /* SPI_DMA_INT_RAW_REG register */
 
-#define SPI_DMA_INT_RAW_REG (DR_REG_SPI_BASE + 0x68)
+#define SPI_DMA_INT_RAW_REG(i)       (REG_SPI_BASE(i) + 0x68)
 
 /* SPI_OUT_TOTAL_EOF_INT_RAW : RO; bitpos: [8]; default: 0;
  * The raw bit for sending all the packets to host done.
@@ -1830,7 +1830,7 @@
 
 /* SPI_DMA_INT_ST_REG register */
 
-#define SPI_DMA_INT_ST_REG (DR_REG_SPI_BASE + 0x6c)
+#define SPI_DMA_INT_ST_REG(i)       (REG_SPI_BASE(i) + 0x6c)
 
 /* SPI_OUT_TOTAL_EOF_INT_ST : RO; bitpos: [8]; default: 0;
  * The status bit for sending all the packets to host done.
@@ -1915,7 +1915,7 @@
 
 /* SPI_DMA_INT_CLR_REG register */
 
-#define SPI_DMA_INT_CLR_REG (DR_REG_SPI_BASE + 0x70)
+#define SPI_DMA_INT_CLR_REG(i)       (REG_SPI_BASE(i) + 0x70)
 
 /* SPI_OUT_TOTAL_EOF_INT_CLR : R/W; bitpos: [8]; default: 0;
  * The clear bit for sending all the packets to host done.
@@ -2000,7 +2000,7 @@
 
 /* SPI_IN_ERR_EOF_DES_ADDR_REG register */
 
-#define SPI_IN_ERR_EOF_DES_ADDR_REG (DR_REG_SPI_BASE + 0x74)
+#define SPI_IN_ERR_EOF_DES_ADDR_REG(i)   (REG_SPI_BASE(i) + 0x74)
 
 /* SPI_DMA_IN_ERR_EOF_DES_ADDR : RO; bitpos: [31:0]; default: 0;
  * The inlink descriptor address when spi dma produce receiving error.
@@ -2013,7 +2013,7 @@
 
 /* SPI_IN_SUC_EOF_DES_ADDR_REG register */
 
-#define SPI_IN_SUC_EOF_DES_ADDR_REG (DR_REG_SPI_BASE + 0x78)
+#define SPI_IN_SUC_EOF_DES_ADDR_REG(i) (REG_SPI_BASE(i) + 0x78)
 
 /* SPI_DMA_IN_SUC_EOF_DES_ADDR : RO; bitpos: [31:0]; default: 0;
  * The last inlink descriptor address when spi dma produce from_suc_eof.
@@ -2026,7 +2026,7 @@
 
 /* SPI_INLINK_DSCR_REG register */
 
-#define SPI_INLINK_DSCR_REG (DR_REG_SPI_BASE + 0x7c)
+#define SPI_INLINK_DSCR_REG(i)         (REG_SPI_BASE(i) + 0x7c)
 
 /* SPI_DMA_INLINK_DSCR : RO; bitpos: [31:0]; default: 0;
  * The content of current in descriptor pointer.
@@ -2039,7 +2039,7 @@
 
 /* SPI_INLINK_DSCR_BF0_REG register */
 
-#define SPI_INLINK_DSCR_BF0_REG (DR_REG_SPI_BASE + 0x80)
+#define SPI_INLINK_DSCR_BF0_REG(i)       (REG_SPI_BASE(i) + 0x80)
 
 /* SPI_DMA_INLINK_DSCR_BF0 : RO; bitpos: [31:0]; default: 0;
  * The content of next in descriptor pointer.
@@ -2052,7 +2052,7 @@
 
 /* SPI_INLINK_DSCR_BF1_REG register */
 
-#define SPI_INLINK_DSCR_BF1_REG (DR_REG_SPI_BASE + 0x84)
+#define SPI_INLINK_DSCR_BF1_REG(i)       (REG_SPI_BASE(i) + 0x84)
 
 /* SPI_DMA_INLINK_DSCR_BF1 : RO; bitpos: [31:0]; default: 0;
  * The content of current in descriptor data buffer pointer.
@@ -2065,7 +2065,7 @@
 
 /* SPI_OUT_EOF_BFR_DES_ADDR_REG register */
 
-#define SPI_OUT_EOF_BFR_DES_ADDR_REG (DR_REG_SPI_BASE + 0x88)
+#define SPI_OUT_EOF_BFR_DES_ADDR_REG(i)    (REG_SPI_BASE(i) + 0x88)
 
 /* SPI_DMA_OUT_EOF_BFR_DES_ADDR : RO; bitpos: [31:0]; default: 0;
  * The address of buffer relative to the outlink descriptor that produce eof.
@@ -2078,7 +2078,7 @@
 
 /* SPI_OUT_EOF_DES_ADDR_REG register */
 
-#define SPI_OUT_EOF_DES_ADDR_REG (DR_REG_SPI_BASE + 0x8c)
+#define SPI_OUT_EOF_DES_ADDR_REG(i)     (REG_SPI_BASE(i) + 0x8c)
 
 /* SPI_DMA_OUT_EOF_DES_ADDR : RO; bitpos: [31:0]; default: 0;
  * The last outlink descriptor address when spi dma produce to_eof.
@@ -2091,7 +2091,7 @@
 
 /* SPI_OUTLINK_DSCR_REG register */
 
-#define SPI_OUTLINK_DSCR_REG (DR_REG_SPI_BASE + 0x90)
+#define SPI_OUTLINK_DSCR_REG(i)     (REG_SPI_BASE(i) + 0x90)
 
 /* SPI_DMA_OUTLINK_DSCR : RO; bitpos: [31:0]; default: 0;
  * The content of current out descriptor pointer.
@@ -2104,7 +2104,7 @@
 
 /* SPI_OUTLINK_DSCR_BF0_REG register */
 
-#define SPI_OUTLINK_DSCR_BF0_REG (DR_REG_SPI_BASE + 0x94)
+#define SPI_OUTLINK_DSCR_BF0_REG(i)       (REG_SPI_BASE(i) + 0x94)
 
 /* SPI_DMA_OUTLINK_DSCR_BF0 : RO; bitpos: [31:0]; default: 0;
  * The content of next out descriptor pointer.
@@ -2117,7 +2117,7 @@
 
 /* SPI_OUTLINK_DSCR_BF1_REG register */
 
-#define SPI_OUTLINK_DSCR_BF1_REG (DR_REG_SPI_BASE + 0x98)
+#define SPI_OUTLINK_DSCR_BF1_REG(i)       (REG_SPI_BASE(i) + 0x98)
 
 /* SPI_DMA_OUTLINK_DSCR_BF1 : RO; bitpos: [31:0]; default: 0;
  * The content of current out descriptor data buffer pointer.
@@ -2130,7 +2130,7 @@
 
 /* SPI_DMA_OUTSTATUS_REG register */
 
-#define SPI_DMA_OUTSTATUS_REG (DR_REG_SPI_BASE + 0x9c)
+#define SPI_DMA_OUTSTATUS_REG(i)       (REG_SPI_BASE(i) + 0x9c)
 
 /* SPI_DMA_OUTFIFO_EMPTY : RO; bitpos: [31]; default: 1;
  * SPI dma outfifo is empty.
@@ -2188,7 +2188,7 @@
 
 /* SPI_DMA_INSTATUS_REG register */
 
-#define SPI_DMA_INSTATUS_REG (DR_REG_SPI_BASE + 0xa0)
+#define SPI_DMA_INSTATUS_REG(i)       (REG_SPI_BASE(i) + 0xa0)
 
 /* SPI_DMA_INFIFO_EMPTY : RO; bitpos: [31]; default: 1;
  * SPI dma infifo is empty.
@@ -2246,7 +2246,7 @@
 
 /* SPI_W0_REG register */
 
-#define SPI_W0_REG (DR_REG_SPI_BASE + 0xa4)
+#define SPI_W0_REG(i)      (REG_SPI_BASE(i) + 0xa4)
 
 /* SPI_BUF0 : R/W; bitpos: [31:0]; default: 0;
  * data buffer
@@ -2259,7 +2259,7 @@
 
 /* SPI_W1_REG register */
 
-#define SPI_W1_REG (DR_REG_SPI_BASE + 0xa8)
+#define SPI_W1_REG(i)      (REG_SPI_BASE(i) + 0xa8)
 
 /* SPI_BUF1 : R/W; bitpos: [31:0]; default: 0;
  * data buffer
@@ -2272,7 +2272,7 @@
 
 /* SPI_W2_REG register */
 
-#define SPI_W2_REG (DR_REG_SPI_BASE + 0xac)
+#define SPI_W2_REG(i)      (REG_SPI_BASE(i) + 0xac)
 
 /* SPI_BUF2 : R/W; bitpos: [31:0]; default: 0;
  * data buffer
@@ -2285,7 +2285,7 @@
 
 /* SPI_W3_REG register */
 
-#define SPI_W3_REG (DR_REG_SPI_BASE + 0xb0)
+#define SPI_W3_REG(i)      (REG_SPI_BASE(i) + 0xb0)
 
 /* SPI_BUF3 : R/W; bitpos: [31:0]; default: 0;
  * data buffer
@@ -2298,7 +2298,7 @@
 
 /* SPI_W4_REG register */
 
-#define SPI_W4_REG (DR_REG_SPI_BASE + 0xb4)
+#define SPI_W4_REG(i)      (REG_SPI_BASE(i) + 0xb4)
 
 /* SPI_BUF4 : R/W; bitpos: [31:0]; default: 0;
  * data buffer
@@ -2311,7 +2311,7 @@
 
 /* SPI_W5_REG register */
 
-#define SPI_W5_REG (DR_REG_SPI_BASE + 0xb8)
+#define SPI_W5_REG(i)      (REG_SPI_BASE(i) + 0xb8)
 
 /* SPI_BUF5 : R/W; bitpos: [31:0]; default: 0;
  * data buffer
@@ -2324,7 +2324,7 @@
 
 /* SPI_W6_REG register */
 
-#define SPI_W6_REG (DR_REG_SPI_BASE + 0xbc)
+#define SPI_W6_REG(i)      (REG_SPI_BASE(i) + 0xbc)
 
 /* SPI_BUF6 : R/W; bitpos: [31:0]; default: 0;
  * data buffer
@@ -2337,7 +2337,7 @@
 
 /* SPI_W7_REG register */
 
-#define SPI_W7_REG (DR_REG_SPI_BASE + 0xc0)
+#define SPI_W7_REG(i)      (REG_SPI_BASE(i) + 0xc0)
 
 /* SPI_BUF7 : R/W; bitpos: [31:0]; default: 0;
  * data buffer
@@ -2350,7 +2350,7 @@
 
 /* SPI_W8_REG register */
 
-#define SPI_W8_REG (DR_REG_SPI_BASE + 0xc4)
+#define SPI_W8_REG(i)      (REG_SPI_BASE(i) + 0xc4)
 
 /* SPI_BUF8 : R/W; bitpos: [31:0]; default: 0;
  * data buffer
@@ -2363,7 +2363,7 @@
 
 /* SPI_W9_REG register */
 
-#define SPI_W9_REG (DR_REG_SPI_BASE + 0xc8)
+#define SPI_W9_REG(i)      (REG_SPI_BASE(i) + 0xc8)
 
 /* SPI_BUF9 : R/W; bitpos: [31:0]; default: 0;
  * data buffer
@@ -2376,7 +2376,7 @@
 
 /* SPI_W10_REG register */
 
-#define SPI_W10_REG (DR_REG_SPI_BASE + 0xcc)
+#define SPI_W10_REG(i)      (REG_SPI_BASE(i) + 0xcc)
 
 /* SPI_BUF10 : R/W; bitpos: [31:0]; default: 0;
  * data buffer
@@ -2389,7 +2389,7 @@
 
 /* SPI_W11_REG register */
 
-#define SPI_W11_REG (DR_REG_SPI_BASE + 0xd0)
+#define SPI_W11_REG(i)      (REG_SPI_BASE(i) + 0xd0)
 
 /* SPI_BUF11 : R/W; bitpos: [31:0]; default: 0;
  * data buffer
@@ -2402,7 +2402,7 @@
 
 /* SPI_W12_REG register */
 
-#define SPI_W12_REG (DR_REG_SPI_BASE + 0xd4)
+#define SPI_W12_REG(i)      (REG_SPI_BASE(i) + 0xd4)
 
 /* SPI_BUF12 : R/W; bitpos: [31:0]; default: 0;
  * data buffer
@@ -2415,7 +2415,7 @@
 
 /* SPI_W13_REG register */
 
-#define SPI_W13_REG (DR_REG_SPI_BASE + 0xd8)
+#define SPI_W13_REG(i)      (REG_SPI_BASE(i) + 0xd8)
 
 /* SPI_BUF13 : R/W; bitpos: [31:0]; default: 0;
  * data buffer
@@ -2428,7 +2428,7 @@
 
 /* SPI_W14_REG register */
 
-#define SPI_W14_REG (DR_REG_SPI_BASE + 0xdc)
+#define SPI_W14_REG(i)      (REG_SPI_BASE(i) + 0xdc)
 
 /* SPI_BUF14 : R/W; bitpos: [31:0]; default: 0;
  * data buffer
@@ -2441,7 +2441,7 @@
 
 /* SPI_W15_REG register */
 
-#define SPI_W15_REG (DR_REG_SPI_BASE + 0xe0)
+#define SPI_W15_REG(i)      (REG_SPI_BASE(i) + 0xe0)
 
 /* SPI_BUF15 : R/W; bitpos: [31:0]; default: 0;
  * data buffer
@@ -2454,7 +2454,7 @@
 
 /* SPI_W16_REG register */
 
-#define SPI_W16_REG (DR_REG_SPI_BASE + 0xe4)
+#define SPI_W16_REG(i)      (REG_SPI_BASE(i) + 0xe4)
 
 /* SPI_BUF16 : R/W; bitpos: [31:0]; default: 0;
  * data buffer
@@ -2467,7 +2467,7 @@
 
 /* SPI_W17_REG register */
 
-#define SPI_W17_REG (DR_REG_SPI_BASE + 0xe8)
+#define SPI_W17_REG(i)      (REG_SPI_BASE(i) + 0xe8)
 
 /* SPI_BUF17 : R/W; bitpos: [31:0]; default: 0;
  * data buffer
@@ -2480,7 +2480,7 @@
 
 /* SPI_DIN_MODE_REG register */
 
-#define SPI_DIN_MODE_REG (DR_REG_SPI_BASE + 0xec)
+#define SPI_DIN_MODE_REG(i)          (REG_SPI_BASE(i) + 0xec)
 
 /* SPI_TIMING_CLK_ENA : R/W; bitpos: [24]; default: 0;
  * 1:enable hclk in spi_timing.v.  0: disable it.
@@ -2597,7 +2597,7 @@
 
 /* SPI_DIN_NUM_REG register */
 
-#define SPI_DIN_NUM_REG (DR_REG_SPI_BASE + 0xf0)
+#define SPI_DIN_NUM_REG(i)     (REG_SPI_BASE(i) + 0xf0)
 
 /* SPI_DIN7_NUM : R/W; bitpos: [15:14]; default: 0;
  * the input signals are delayed by system clock cycles, 0: delayed by 1
@@ -2681,7 +2681,7 @@
 
 /* SPI_DOUT_MODE_REG register */
 
-#define SPI_DOUT_MODE_REG (DR_REG_SPI_BASE + 0xf4)
+#define SPI_DOUT_MODE_REG(i)     (REG_SPI_BASE(i) + 0xf4)
 
 /* SPI_DOUT7_MODE : R/W; bitpos: [23:21]; default: 0;
  * Configure the output signal delay mode. 0: without delayed, 1: with the
@@ -2789,7 +2789,7 @@
 
 /* SPI_DOUT_NUM_REG register */
 
-#define SPI_DOUT_NUM_REG (DR_REG_SPI_BASE + 0xf8)
+#define SPI_DOUT_NUM_REG(i)     (REG_SPI_BASE(i) + 0xf8)
 
 /* SPI_DOUT7_NUM : R/W; bitpos: [15:14]; default: 0;
  * the output signals are delayed by system clock cycles, 0: delayed by 1
@@ -2873,7 +2873,7 @@
 
 /* SPI_LCD_CTRL_REG register */
 
-#define SPI_LCD_CTRL_REG (DR_REG_SPI_BASE + 0xfc)
+#define SPI_LCD_CTRL_REG(i)     (REG_SPI_BASE(i) + 0xfc)
 
 /* SPI_LCD_SRGB_MODE_EN : R/W; bitpos: [31]; default: 0;
  * 1: Enable LCD mode output vsync, hsync, de. 0: Disable.
@@ -2913,7 +2913,7 @@
 
 /* SPI_LCD_CTRL1_REG register */
 
-#define SPI_LCD_CTRL1_REG (DR_REG_SPI_BASE + 0x100)
+#define SPI_LCD_CTRL1_REG(i)       (REG_SPI_BASE(i) + 0x100)
 
 /* SPI_LCD_HT_WIDTH : R/W; bitpos: [31:20]; default: 0;
  * It is the horizontal total width of a frame.
@@ -2944,7 +2944,7 @@
 
 /* SPI_LCD_CTRL2_REG register */
 
-#define SPI_LCD_CTRL2_REG (DR_REG_SPI_BASE + 0x104)
+#define SPI_LCD_CTRL2_REG(i)      (REG_SPI_BASE(i) + 0x104)
 
 /* SPI_LCD_HSYNC_POSITION : R/W; bitpos: [31:24]; default: 0;
  * It is the position of spi_hsync_out active pulse in a line.
@@ -3002,7 +3002,7 @@
 
 /* SPI_LCD_D_MODE_REG register */
 
-#define SPI_LCD_D_MODE_REG (DR_REG_SPI_BASE + 0x108)
+#define SPI_LCD_D_MODE_REG(i)      (REG_SPI_BASE(i) + 0x108)
 
 /* SPI_D_VSYNC_MODE : R/W; bitpos: [14:12]; default: 0;
  * Configure the output  spi_vsync delay mode. 0: without delayed, 1: with
@@ -3071,7 +3071,7 @@
 
 /* SPI_LCD_D_NUM_REG register */
 
-#define SPI_LCD_D_NUM_REG (DR_REG_SPI_BASE + 0x10c)
+#define SPI_LCD_D_NUM_REG(i)      (REG_SPI_BASE(i) + 0x10c)
 
 /* SPI_D_VSYNC_NUM : R/W; bitpos: [9:8]; default: 0;
  * the output spi_vsync is delayed by system clock cycles, 0: delayed by 1
@@ -3125,7 +3125,7 @@
 
 /* SPI_REG_DATE_REG register */
 
-#define SPI_REG_DATE_REG (DR_REG_SPI_BASE + 0x3fc)
+#define SPI_REG_DATE_REG(i) (REG_SPI_BASE(i) + 0x3fc)
 
 /* SPI_DATE : RW; bitpos: [27:0]; default: 26222993;
  * SPI register version.
