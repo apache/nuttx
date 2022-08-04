@@ -68,7 +68,7 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_DEBUG_PWM_INFO
-#  define pwm_dumpgpio(p,m) stm32_dumpgpio(p,m)
+#  define pwm_dumpgpio(p,m) lpc17_40_dumpgpio(p,m)
 #else
 #  define pwm_dumpgpio(p,m)
 #endif

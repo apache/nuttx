@@ -95,6 +95,10 @@
 # error "Both chrdev CAN or SocketCAN have been enabled"
 #endif
 
+#if !defined(CHRDEV_CAN) && !defined(SOCKET_CAN)
+# error "No upper CAN driver enabled"
+#endif
+
 #if defined(CHRDEV_CAN)
 #define lpc17_40_can_s can_dev_s
 #endif
