@@ -33,6 +33,57 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* PLL0CLK = CCLK * CCLK divider */
+
+#define LPC17_40_PWM_CLOCK (LPC17_40_CCLK * BOARD_CCLKCFG_DIVIDER)
+
+#ifdef CONFIG_LPC17_40_PWM1_CHANNEL1
+#  define LPC17_40_PWM1_CHANNEL1 1
+#else
+#define LPC17_40_PWM1_CHANNEL1 0
+#endif
+
+#ifdef CONFIG_LPC17_40_PWM1_CHANNEL2
+#define LPC17_40_PWM1_CHANNEL2 1
+#else
+#define LPC17_40_PWM1_CHANNEL2 0
+#endif
+
+#ifdef CONFIG_LPC17_40_PWM1_CHANNEL3
+#define LPC17_40_PWM1_CHANNEL3 1
+#else
+#define LPC17_40_PWM1_CHANNEL3 0
+#endif
+
+#ifdef CONFIG_LPC17_40_PWM1_CHANNEL4
+#define LPC17_40_PWM1_CHANNEL4 1
+#else
+#define LPC17_40_PWM1_CHANNEL4 0
+#endif
+
+#ifdef CONFIG_LPC17_40_PWM1_CHANNEL5
+#define LPC17_40_PWM1_CHANNEL5 1
+#else
+#define LPC17_40_PWM1_CHANNEL5 0
+#endif
+
+#ifdef CONFIG_LPC17_40_PWM1_CHANNEL6
+#define LPC17_40_PWM1_CHANNEL6 1
+#else
+#define LPC17_40_PWM1_CHANNEL6 0
+#endif
+
+#define LPC17_40_PWM1_NCHANNELS (LPC17_40_PWM1_CHANNEL1 + \
+                                 LPC17_40_PWM1_CHANNEL2 + \
+                                 LPC17_40_PWM1_CHANNEL3 + \
+                                 LPC17_40_PWM1_CHANNEL4 + \
+                                 LPC17_40_PWM1_CHANNEL5 + \
+                                 LPC17_40_PWM1_CHANNEL6)
+
+#if CONFIG_PWM_NCHANNELS > LPC17_40_PWM1_NCHANNELS
+#  error "PWM subystem has more channels then physical channels enabled"
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

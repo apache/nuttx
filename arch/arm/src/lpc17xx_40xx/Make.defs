@@ -80,7 +80,7 @@ CHIP_CSRCS += lpc17_40_ethernet.c
 endif
 endif
 
-ifeq ($(CONFIG_CAN),y)
+ifeq ($(CONFIG_LPC17_40_CAN),y)
 CHIP_CSRCS += lpc17_40_can.c
 endif
 

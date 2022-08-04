@@ -3357,7 +3357,9 @@ void arm_usbinitialize(void)
 #ifndef CONFIG_LPC17_40_USBDEV_NOVBUS
   lpc17_40_configgpio(GPIO_USB_VBUS);    /* VBUS status input */
 #endif
+#ifndef CONFIG_LPC17_40_USBDEV_NOSOFTCONNECT
   lpc17_40_configgpio(GPIO_USB_CONNECT); /* SoftConnect control signal */
+#endif
 #ifndef CONFIG_LPC17_40_USBDEV_NOLED
   lpc17_40_configgpio(GPIO_USB_UPLED);   /* GoodLink LED control signal */
 #endif
