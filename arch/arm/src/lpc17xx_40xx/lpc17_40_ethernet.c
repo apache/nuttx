@@ -308,7 +308,7 @@ struct lpc17_40_driver_s
 
 /* A single packet buffer per interface is used */
 
-static uint8_t g_pktbuf[PKTBUF_SIZE * CONFIG_LPC17_40_NINTERFACES];
+static uint8_t g_pktbuf[CONFIG_LPC17_40_NINTERFACES][PKTBUF_SIZE];
 
 /* Array of ethernet driver status structures */
 
@@ -3149,7 +3149,6 @@ static inline int lpc17_40_ethinitialize(int intf)
 #endif
 {
   struct lpc17_40_driver_s *priv;
-  uint8_t *pktbuf;
   uint32_t regval;
   int ret;
   int i;
@@ -3172,14 +3171,10 @@ static inline int lpc17_40_ethinitialize(int intf)
 
   lpc17_40_showpins();
 
-  /* Select the packet buffer */
-
-  pktbuf = &g_pktbuf[PKTBUF_SIZE * intf];
-
   /* Initialize the driver structure */
 
   memset(priv, 0, sizeof(struct lpc17_40_driver_s));
-  priv->lp_dev.d_buf     = pktbuf;             /* Single packet buffer */
+  priv->lp_dev.d_buf     = g_pktbuf[intf];     /* Single packet buffer */
   priv->lp_dev.d_ifup    = lpc17_40_ifup;      /* I/F down callback */
   priv->lp_dev.d_ifdown  = lpc17_40_ifdown;    /* I/F up (new IP address) callback */
   priv->lp_dev.d_txavail = lpc17_40_txavail;   /* New TX data callback */

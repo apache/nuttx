@@ -85,6 +85,10 @@
 
 #define FTMAC100_TXTIMEOUT (60*CLK_TCK)
 
+/* Packet buffer size */
+
+#define PKTBUF_SIZE (MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE)
+
 /* This is a helper pointer for accessing the contents of the Ethernet
  * header.
  */
@@ -171,7 +175,8 @@ struct ftmac100_driver_s
 
 /* A single packet buffer is used */
 
-static uint8_t g_pktbuf[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
+static uint16_t g_pktbuf[CONFIG_FTMAC100_NINTERFACES]
+                        [(PKTBUF_SIZE + 1) / 2];
 
 /* Driver state structure. */
 
@@ -1488,15 +1493,15 @@ int ftmac100_initialize(int intf)
   /* Initialize the driver structure */
 
   memset(priv, 0, sizeof(struct ftmac100_driver_s));
-  priv->ft_dev.d_buf     = g_pktbuf;          /* Single packet buffer */
-  priv->ft_dev.d_ifup    = ftmac100_ifup;     /* I/F up (new IP address) callback */
-  priv->ft_dev.d_ifdown  = ftmac100_ifdown;   /* I/F down callback */
-  priv->ft_dev.d_txavail = ftmac100_txavail;  /* New TX data callback */
+  priv->ft_dev.d_buf     = (FAR uint8_t *)g_pktbuf[intf]; /* Single packet buffer */
+  priv->ft_dev.d_ifup    = ftmac100_ifup;                 /* I/F up (new IP address) callback */
+  priv->ft_dev.d_ifdown  = ftmac100_ifdown;               /* I/F down callback */
+  priv->ft_dev.d_txavail = ftmac100_txavail;              /* New TX data callback */
 #ifdef CONFIG_NET_MCASTGROUP
-  priv->ft_dev.d_addmac  = ftmac100_addmac;   /* Add multicast MAC address */
-  priv->ft_dev.d_rmmac   = ftmac100_rmmac;    /* Remove multicast MAC address */
+  priv->ft_dev.d_addmac  = ftmac100_addmac;               /* Add multicast MAC address */
+  priv->ft_dev.d_rmmac   = ftmac100_rmmac;                /* Remove multicast MAC address */
 #endif
-  priv->ft_dev.d_private = g_ftmac100;        /* Used to recover private state from dev */
+  priv->ft_dev.d_private = g_ftmac100;                    /* Used to recover private state from dev */
   priv->iobase           = CONFIG_FTMAC100_BASE;
 
   /* Put the interface in the down state.  This usually amounts to resetting

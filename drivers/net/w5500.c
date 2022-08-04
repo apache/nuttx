@@ -80,7 +80,7 @@
  */
 
 #ifndef CONFIG_NET_W5500_NINTERFACES
-# define CONFIG_NET_W5500_NINTERFACES 1
+#  define CONFIG_NET_W5500_NINTERFACES 1
 #endif
 
 /* TX timeout = 1 minute
@@ -89,9 +89,13 @@
 
 #define W5500_TXTIMEOUT (60 * CLK_TCK)
 
+/* Packet buffer size */
+
+#define PKTBUF_SIZE (MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE)
+
 /* This is a helper pointer for accessing the contents of Ethernet header */
 
-#define ETH_HDR ((FAR struct eth_hdr_s *)self->sk_dev.d_buf)
+#define BUF ((FAR struct eth_hdr_s *)self->w_dev.d_buf)
 
 /* Number of Ethernet frame transmission buffers maintained in W5500's 16 KiB
  * Tx RAM.  A maximum size is conservatively assumed per Ethernet frame in
@@ -357,10 +361,10 @@
 
 struct w5500_driver_s
 {
-  bool sk_bifup;               /* true:ifup false:ifdown */
-  struct wdog_s sk_txtimeout;  /* TX timeout timer */
-  struct work_s sk_irqwork;    /* For deferring interrupt work to the work queue */
-  struct work_s sk_pollwork;   /* For deferring poll work to the work queue */
+  bool w_bifup;               /* true:ifup false:ifdown */
+  struct wdog_s w_txtimeout;  /* TX timeout timer */
+  struct work_s w_irqwork;    /* For deferring interrupt work to the work queue */
+  struct work_s w_pollwork;   /* For deferring poll work to the work queue */
 
   /* Ethernet frame transmission buffer management */
 
@@ -375,30 +379,17 @@ struct w5500_driver_s
 
   /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s sk_dev;  /* Interface understood by the network */
+  struct net_driver_s w_dev;  /* Interface understood by the network */
 };
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* These statically allocated structures would mean that only a single
- * instance of the device could be supported.  In order to support multiple
- * devices instances, this data would have to be allocated dynamically.
- */
+/* A single packet buffer is used */
 
-/* A single packet buffer per device is used in this example.  There might
- * be multiple packet buffers in a more complex, pipelined design.  Many
- * contemporary Ethernet interfaces, for example,  use multiple, linked DMA
- * descriptors in rings to implement such a pipeline.  This example assumes
- * much simpler hardware that simply handles one packet at a time.
- *
- * NOTE that if CONFIG_NET_W5500_NINTERFACES were greater than 1, you would
- * need a minimum on one packet buffer per instance.  Much better to be
- * allocated dynamically in cases where more than one are needed.
- */
-
-static uint8_t g_pktbuf[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
+static uint16_t g_pktbuf[CONFIG_NET_W5500_NINTERFACES]
+                        [(PKTBUF_SIZE + 1) / 2];
 
 /* Driver state structure */
 
@@ -415,7 +406,7 @@ static int  w5500_txpoll(FAR struct net_driver_s *dev);
 
 /* Interrupt handling */
 
-static void w5500_reply(struct w5500_driver_s *priv);
+static void w5500_reply(FAR struct w5500_driver_s *priv);
 static void w5500_receive(FAR struct w5500_driver_s *priv);
 static void w5500_txdone(FAR struct w5500_driver_s *priv);
 
@@ -554,7 +545,7 @@ static void w5500_unlock(FAR struct w5500_driver_s *self)
 static void w5500_read(FAR struct w5500_driver_s *self,
                        uint8_t                   block_select_bits,
                        uint16_t                  offset,
-                       void                      *buffer,
+                       FAR void                  *buffer,
                        uint16_t                  len)
 {
   uint8_t addr_cntl[3];
@@ -588,7 +579,7 @@ static void w5500_read(FAR struct w5500_driver_s *self,
 static void w5500_write(FAR struct w5500_driver_s *self,
                         uint8_t                   block_select_bits,
                         off_t                     offset,
-                        const void                *data,
+                        FAR const void            *data,
                         size_t                    len)
 {
   uint8_t addr_cntl[3];
@@ -862,11 +853,11 @@ static uint16_t w5500_txbuf_copy(FAR struct w5500_driver_s *self)
   w5500_write(self,
               W5500_BSB_SOCKET_TX_BUFFER(0),
               offset,
-              self->sk_dev.d_buf,
-              self->sk_dev.d_len);
+              self->w_dev.d_buf,
+              self->w_dev.d_len);
 
   self->txbuf_wrptr = (self->txbuf_wrptr + 1) % (NUM_TXBUFS + 1);
-  self->txbuf_offset[self->txbuf_wrptr] = offset + self->sk_dev.d_len;
+  self->txbuf_offset[self->txbuf_wrptr] = offset + self->w_dev.d_len;
 
   return self->txbuf_offset[self->txbuf_wrptr];
 }
@@ -920,7 +911,7 @@ static bool w5500_txbuf_next(FAR struct w5500_driver_s *self)
 
   /* (Re-)start the TX timeout watchdog timer */
 
-  wd_start(&self->sk_txtimeout,
+  wd_start(&self->w_txtimeout,
            W5500_TXTIMEOUT,
            w5500_txtimeout_expiry,
            (wdparm_t)self);
@@ -943,7 +934,7 @@ static void w5500_fence(FAR struct w5500_driver_s *self)
 {
   self->lower->enable(self->lower, false);
   w5500_reset(self, true);  /* Reset and keep reset asserted */
-  self->sk_bifup = false;
+  self->w_bifup = false;
 }
 
 /****************************************************************************
@@ -976,8 +967,8 @@ static int w5500_unfence(FAR struct w5500_driver_s *self)
   w5500_write(self,
               W5500_BSB_COMMON_REGS,
               W5500_SHAR0, /* Source Hardware Address Register */
-              self->sk_dev.d_mac.ether.ether_addr_octet,
-              sizeof(self->sk_dev.d_mac.ether.ether_addr_octet));
+              self->w_dev.d_mac.ether.ether_addr_octet,
+              sizeof(self->w_dev.d_mac.ether.ether_addr_octet));
 
   /* Configure socket 0 for raw MAC access with MAC filtering enabled. */
 
@@ -1116,13 +1107,13 @@ static void w5500_transmit(FAR struct w5500_driver_s *self)
   if (!w5500_txbuf_numfree(self))
     {
       ninfo("Dropping Tx packet due to no buffer available.\n");
-      NETDEV_TXERRORS(self->sk_dev);
+      NETDEV_TXERRORS(self->w_dev);
       return;
     }
 
   /* Increment statistics */
 
-  NETDEV_TXPACKETS(self->sk_dev);
+  NETDEV_TXPACKETS(self->w_dev);
 
   /* Copy packet data to TX buffer */
 
@@ -1158,12 +1149,12 @@ static void w5500_transmit(FAR struct w5500_driver_s *self)
 
       /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-      wd_start(&self->sk_txtimeout, W5500_TXTIMEOUT,
+      wd_start(&self->w_txtimeout, W5500_TXTIMEOUT,
                w5500_txtimeout_expiry, (wdparm_t)self);
     }
 
 #ifdef CONFIG_DEBUG_NET_INFO
-  ninfodumpbuffer("Transmitted:", self->sk_dev.d_buf, self->sk_dev.d_len);
+  ninfodumpbuffer("Transmitted:", self->w_dev.d_buf, self->w_dev.d_len);
 #endif
 }
 
@@ -1199,23 +1190,23 @@ static int w5500_txpoll(FAR struct net_driver_s *dev)
    * the field d_len is set to a value > 0.
    */
 
-  if (self->sk_dev.d_len > 0)
+  if (self->w_dev.d_len > 0)
     {
       /* Look up the destination MAC address and add it to the Ethernet
        * header.
        */
 
 #ifdef CONFIG_NET_IPv4
-      if (IFF_IS_IPv4(self->sk_dev.d_flags))
+      if (IFF_IS_IPv4(self->w_dev.d_flags))
         {
-          arp_out(&self->sk_dev);
+          arp_out(&self->w_dev);
         }
 #endif /* CONFIG_NET_IPv4 */
 
 #ifdef CONFIG_NET_IPv6
-      if (IFF_IS_IPv6(self->sk_dev.d_flags))
+      if (IFF_IS_IPv6(self->w_dev.d_flags))
         {
-          neighbor_out(&self->sk_dev);
+          neighbor_out(&self->w_dev);
         }
 #endif /* CONFIG_NET_IPv6 */
 
@@ -1224,7 +1215,7 @@ static int w5500_txpoll(FAR struct net_driver_s *dev)
        * don't attempt to put it on the wire.
        */
 
-      if (!devif_loopback(&self->sk_dev))
+      if (!devif_loopback(&self->w_dev))
         {
           /* Send the packet */
 
@@ -1267,27 +1258,27 @@ static int w5500_txpoll(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void w5500_reply(struct w5500_driver_s *self)
+static void w5500_reply(FAR struct w5500_driver_s *self)
 {
   /* If the packet dispatch resulted in data that should be sent out on the
    * network, the field d_len will set to a value > 0.
    */
 
-  if (self->sk_dev.d_len > 0)
+  if (self->w_dev.d_len > 0)
     {
       /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv4
-      if (IFF_IS_IPv4(self->sk_dev.d_flags))
+      if (IFF_IS_IPv4(self->w_dev.d_flags))
         {
-          arp_out(&self->sk_dev);
+          arp_out(&self->w_dev);
         }
 #endif
 
 #ifdef CONFIG_NET_IPv6
-      if (IFF_IS_IPv6(self->sk_dev.d_flags))
+      if (IFF_IS_IPv6(self->w_dev.d_flags))
         {
-          neighbor_out(&self->sk_dev);
+          neighbor_out(&self->w_dev);
         }
 #endif
 
@@ -1382,19 +1373,19 @@ static void w5500_receive(FAR struct w5500_driver_s *self)
                 s0_rx_rsr);
         }
 
-      self->sk_dev.d_len = pktlen - sizeof(pktlen);
+      self->w_dev.d_len = pktlen - sizeof(pktlen);
 
-      /* Copy the data data from the hardware to priv->sk_dev.d_buf.  Set
-       * amount of data in priv->sk_dev.d_len
+      /* Copy the data data from the hardware to priv->w_dev.d_buf.  Set
+       * amount of data in priv->w_dev.d_len
        */
 
-      if (self->sk_dev.d_len <= CONFIG_NET_ETH_PKTSIZE)
+      if (self->w_dev.d_len <= CONFIG_NET_ETH_PKTSIZE)
         {
           w5500_read(self,
                      W5500_BSB_SOCKET_RX_BUFFER(0),
                      s0_rx_rd + sizeof(pktlen),
-                     self->sk_dev.d_buf,
-                     self->sk_dev.d_len);
+                     self->w_dev.d_buf,
+                     self->w_dev.d_len);
         }
 
       /* Acknowledge data reception to W5500 */
@@ -1411,41 +1402,41 @@ static void w5500_receive(FAR struct w5500_driver_s *self)
 
       /* Check for errors and update statistics */
 
-      if (self->sk_dev.d_len > CONFIG_NET_ETH_PKTSIZE ||
-          self->sk_dev.d_len < ETH_HDRLEN)
+      if (self->w_dev.d_len > CONFIG_NET_ETH_PKTSIZE ||
+          self->w_dev.d_len < ETH_HDRLEN)
         {
-          nerr("Bad packet size dropped (%"PRIu16")\n", self->sk_dev.d_len);
-          self->sk_dev.d_len = 0;
+          nerr("Bad packet size dropped (%"PRIu16")\n", self->w_dev.d_len);
+          self->w_dev.d_len = 0;
           NETDEV_RXERRORS(&priv->dev);
           continue;
         }
 
 #ifdef CONFIG_DEBUG_NET_INFO
       ninfodumpbuffer("Received Packet:",
-                      self->sk_dev.d_buf,
-                      self->sk_dev.d_len);
+                      self->w_dev.d_buf,
+                      self->w_dev.d_len);
 #endif
 
 #ifdef CONFIG_NET_PKT
       /* When packet sockets are enabled, feed the frame into the tap */
 
-      pkt_input(&self->sk_dev);
+      pkt_input(&self->w_dev);
 #endif
 
 #ifdef CONFIG_NET_IPv4
       /* Check for an IPv4 packet */
 
-      if (ETH_HDR->type == HTONS(ETHTYPE_IP))
+      if (BUF->type == HTONS(ETHTYPE_IP))
         {
           ninfo("IPv4 frame\n");
-          NETDEV_RXIPV4(&self->sk_dev);
+          NETDEV_RXIPV4(&self->w_dev);
 
           /* Handle ARP on input, then dispatch IPv4 packet to the network
            * layer.
            */
 
-          arp_ipin(&self->sk_dev);
-          ipv4_input(&self->sk_dev);
+          arp_ipin(&self->w_dev);
+          ipv4_input(&self->w_dev);
 
           /* Check for a reply to the IPv4 packet */
 
@@ -1456,14 +1447,14 @@ static void w5500_receive(FAR struct w5500_driver_s *self)
 #ifdef CONFIG_NET_IPv6
       /* Check for an IPv6 packet */
 
-      if (ETH_HDR->type == HTONS(ETHTYPE_IP6))
+      if (BUF->type == HTONS(ETHTYPE_IP6))
         {
           ninfo("IPv6 frame\n");
-          NETDEV_RXIPV6(&self->sk_dev);
+          NETDEV_RXIPV6(&self->w_dev);
 
           /* Dispatch IPv6 packet to the network layer */
 
-          ipv6_input(&self->sk_dev);
+          ipv6_input(&self->w_dev);
 
           /* Check for a reply to the IPv6 packet */
 
@@ -1474,21 +1465,21 @@ static void w5500_receive(FAR struct w5500_driver_s *self)
 #ifdef CONFIG_NET_ARP
       /* Check for an ARP packet */
 
-      if (ETH_HDR->type == HTONS(ETHTYPE_ARP))
+      if (BUF->type == HTONS(ETHTYPE_ARP))
         {
           ninfo("ARP frame\n");
 
           /* Dispatch ARP packet to the network layer */
 
-          arp_arpin(&self->sk_dev);
-          NETDEV_RXARP(&self->sk_dev);
+          arp_arpin(&self->w_dev);
+          NETDEV_RXARP(&self->w_dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a value
            * > 0.
            */
 
-          if (self->sk_dev.d_len > 0)
+          if (self->w_dev.d_len > 0)
             {
               w5500_transmit(self);
             }
@@ -1498,7 +1489,7 @@ static void w5500_receive(FAR struct w5500_driver_s *self)
         {
           ninfo("Dropped frame\n");
 
-          NETDEV_RXDROPPED(&self->sk_dev);
+          NETDEV_RXDROPPED(&self->w_dev);
         }
     }
   while (true); /* While there are more packets to be processed */
@@ -1530,7 +1521,7 @@ static void w5500_txdone(FAR struct w5500_driver_s *self)
 {
   /* Check for errors and update statistics */
 
-  NETDEV_TXDONE(self->sk_dev);
+  NETDEV_TXDONE(self->w_dev);
 
   /* Check if there are pending transmissions. */
 
@@ -1542,7 +1533,7 @@ static void w5500_txdone(FAR struct w5500_driver_s *self)
        * and disable further Tx interrupts.
        */
 
-      wd_cancel(&self->sk_txtimeout);
+      wd_cancel(&self->w_txtimeout);
 
       /* And disable further TX interrupts. */
 
@@ -1553,7 +1544,7 @@ static void w5500_txdone(FAR struct w5500_driver_s *self)
 
   /* In any event, poll the network for new TX data */
 
-  devif_poll(&self->sk_dev, w5500_txpoll);
+  devif_poll(&self->w_dev, w5500_txpoll);
 }
 
 /****************************************************************************
@@ -1710,7 +1701,7 @@ static int w5500_interrupt(int irq, FAR void *context, FAR void *arg)
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
-  work_queue(ETHWORK, &self->sk_irqwork, w5500_interrupt_work, self, 0);
+  work_queue(ETHWORK, &self->w_irqwork, w5500_interrupt_work, self, 0);
   return OK;
 }
 
@@ -1742,7 +1733,7 @@ static void w5500_txtimeout_work(FAR void *arg)
 
   /* Increment statistics and dump debug info */
 
-  NETDEV_TXTIMEOUTS(self->sk_dev);
+  NETDEV_TXTIMEOUTS(self->w_dev);
 
   /* Then reset the hardware */
 
@@ -1752,7 +1743,7 @@ static void w5500_txtimeout_work(FAR void *arg)
 
       /* Then poll the network for new XMIT data */
 
-      devif_poll(&self->sk_dev, w5500_txpoll);
+      devif_poll(&self->w_dev, w5500_txpoll);
     }
 
   net_unlock();
@@ -1790,7 +1781,7 @@ static void w5500_txtimeout_expiry(wdparm_t arg)
 
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
-  work_queue(ETHWORK, &self->sk_irqwork, w5500_txtimeout_work, self, 0);
+  work_queue(ETHWORK, &self->w_irqwork, w5500_txtimeout_work, self, 0);
 }
 
 /****************************************************************************
@@ -1848,7 +1839,7 @@ static int w5500_ifup(FAR struct net_driver_s *dev)
 
   /* Enable the Ethernet interrupt */
 
-  self->sk_bifup = true;
+  self->w_bifup = true;
   self->lower->enable(self->lower, true);
 
   return OK;
@@ -1884,7 +1875,7 @@ static int w5500_ifdown(FAR struct net_driver_s *dev)
 
   /* Cancel the TX timeout timer */
 
-  wd_cancel(&self->sk_txtimeout);
+  wd_cancel(&self->w_txtimeout);
 
   /* Put the EMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the w5500_ifup() always
@@ -1895,7 +1886,7 @@ static int w5500_ifdown(FAR struct net_driver_s *dev)
 
   /* Mark the device "down" */
 
-  self->sk_bifup = false;
+  self->w_bifup = false;
   leave_critical_section(flags);
   return OK;
 }
@@ -1931,13 +1922,13 @@ static void w5500_txavail_work(FAR void *arg)
 
   /* Ignore the notification if the interface is not yet up */
 
-  if (priv->sk_bifup)
+  if (priv->w_bifup)
     {
       /* Check if there is room in the hardware to hold another packet. */
 
       /* If so, then poll the network for new XMIT data */
 
-      devif_poll(&priv->sk_dev, w5500_txpoll);
+      devif_poll(&priv->w_dev, w5500_txpoll);
     }
 
   net_unlock();
@@ -1972,11 +1963,11 @@ static int w5500_txavail(FAR struct net_driver_s *dev)
    * availability action.
    */
 
-  if (work_available(&priv->sk_pollwork))
+  if (work_available(&priv->w_pollwork))
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(ETHWORK, &priv->sk_pollwork, w5500_txavail_work, priv, 0);
+      work_queue(ETHWORK, &priv->w_pollwork, w5500_txavail_work, priv, 0);
     }
 
   return OK;
@@ -2131,11 +2122,10 @@ static void w5500_ipv6multicast(FAR struct w5500_driver_s *priv)
 
 #ifdef CONFIG_NETDEV_IOCTL
 static int w5500_ioctl(FAR struct net_driver_s *dev, int cmd,
-                      unsigned long arg)
+                       unsigned long arg)
 {
   FAR struct w5500_driver_s *priv =
     (FAR struct w5500_driver_s *)dev->d_private;
-  int ret;
 
   /* Decode and dispatch the driver-specific IOCTL command */
 
@@ -2200,30 +2190,30 @@ int w5500_initialize(FAR struct spi_dev_s *spi_dev,
   /* Initialize the driver structure */
 
   memset(self, 0, sizeof(struct w5500_driver_s));
-  self->sk_dev.d_buf     = g_pktbuf;       /* Single packet buffer */
-  self->sk_dev.d_ifup    = w5500_ifup;     /* I/F up (new IP address) callback */
-  self->sk_dev.d_ifdown  = w5500_ifdown;   /* I/F down callback */
-  self->sk_dev.d_txavail = w5500_txavail;  /* New TX data callback */
+  self->w_dev.d_buf     = (FAR uint8_t *)g_pktbuf[devno]; /* Single packet buffer */
+  self->w_dev.d_ifup    = w5500_ifup;                     /* I/F up (new IP address) callback */
+  self->w_dev.d_ifdown  = w5500_ifdown;                   /* I/F down callback */
+  self->w_dev.d_txavail = w5500_txavail;                  /* New TX data callback */
 #ifdef CONFIG_NET_MCASTGROUP
-  self->sk_dev.d_addmac  = w5500_addmac;   /* Add multicast MAC address */
-  self->sk_dev.d_rmmac   = w5500_rmmac;    /* Remove multicast MAC address */
+  self->w_dev.d_addmac  = w5500_addmac;                   /* Add multicast MAC address */
+  self->w_dev.d_rmmac   = w5500_rmmac;                    /* Remove multicast MAC address */
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
-  self->sk_dev.d_ioctl   = w5500_ioctl;    /* Handle network IOCTL commands */
+  self->w_dev.d_ioctl   = w5500_ioctl;                    /* Handle network IOCTL commands */
 #endif
-  self->sk_dev.d_private = g_w5500;        /* Used to recover private state from dev */
-  self->spi_dev          = spi_dev;        /* SPI hardware interconnect */
-  self->lower            = lower;          /* Low-level MCU specific support */
+  self->w_dev.d_private = g_w5500;                        /* Used to recover private state from dev */
+  self->spi_dev         = spi_dev;                        /* SPI hardware interconnect */
+  self->lower           = lower;                          /* Low-level MCU specific support */
 
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling w5500_ifdown().
    */
 
-  w5500_ifdown(&self->sk_dev);
+  w5500_ifdown(&self->w_dev);
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  netdev_register(&self->sk_dev, NET_LL_ETHERNET);
+  netdev_register(&self->w_dev, NET_LL_ETHERNET);
   return OK;
 }
 

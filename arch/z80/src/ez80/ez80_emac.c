@@ -378,17 +378,17 @@ static int  ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv);
 /* Multi-cast filtering */
 
 #ifdef CONFIG_EZ80_MCFILTER
-static void ez80emac_machash(FAR uint8_t *mac, int *ndx, int *bitno)
+static void ez80emac_machash(FAR uint8_t *mac, FAR int *ndx, FAR int *bitno);
 #endif
 
 /* TX/RX logic */
 
-static int  ez80emac_transmit(struct ez80emac_driver_s *priv);
-static int  ez80emac_txpoll(struct net_driver_s *dev);
+static int  ez80emac_transmit(FAR struct ez80emac_driver_s *priv);
+static int  ez80emac_txpoll(FAR struct net_driver_s *dev);
 
 static inline FAR struct ez80emac_desc_s *ez80emac_rwp(void);
 static inline FAR struct ez80emac_desc_s *ez80emac_rrp(void);
-static int  ez80emac_receive(struct ez80emac_driver_s *priv);
+static int  ez80emac_receive(FAR struct ez80emac_driver_s *priv);
 
 /* Interrupt handling */
 
@@ -411,16 +411,16 @@ static void ez80emac_txtimeout_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
-static int  ez80emac_ifup(struct net_driver_s *dev);
-static int  ez80emac_ifdown(struct net_driver_s *dev);
+static int  ez80emac_ifup(FAR struct net_driver_s *dev);
+static int  ez80emac_ifdown(FAR struct net_driver_s *dev);
 
 static void ez80emac_txavail_work(FAR void *arg);
-static int  ez80emac_txavail(struct net_driver_s *dev);
+static int  ez80emac_txavail(FAR struct net_driver_s *dev);
 
 #ifdef CONFIG_NET_MCASTGROUP
-static int ez80emac_addmac(struct net_driver_s *dev,
+static int ez80emac_addmac(FAR struct net_driver_s *dev,
              FAR const uint8_t *mac);
-static int ez80emac_rmmac(struct net_driver_s *dev,
+static int ez80emac_rmmac(FAR struct net_driver_s *dev,
              FAR const uint8_t *mac);
 #endif
 
@@ -944,7 +944,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_EZ80_MCFILTER
-static void ez80emac_machash(FAR uint8_t *mac, int *ndx, int *bitno)
+static void ez80emac_machash(FAR uint8_t *mac, FAR int *ndx, FAR int *bitno)
 {
   uint32_t hash;
   uint32_t crc32;
@@ -1021,14 +1021,14 @@ static void ez80emac_machash(FAR uint8_t *mac, int *ndx, int *bitno)
  *
  ****************************************************************************/
 
-static int ez80emac_transmit(struct ez80emac_driver_s *priv)
+static int ez80emac_transmit(FAR struct ez80emac_driver_s *priv)
 {
   FAR struct ez80emac_desc_s *txdesc;
   FAR struct ez80emac_desc_s *txnext;
-  uint8_t   *psrc;
-  uint8_t   *pdest;
-  uint24_t   len;
-  irqstate_t flags;
+  FAR uint8_t *psrc;
+  FAR uint8_t *pdest;
+  uint24_t     len;
+  irqstate_t   flags;
 
   /* Careful:  This function can be called from outside of the interrupt
    * handler and, therefore, may be suspended when debug output is generated!
@@ -1057,11 +1057,11 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
   txdesc = priv->txnext;
 
   len    = EMAC_PKTBUF_ALIGN(priv->dev.d_len + SIZEOF_EMACSDESC);
-  txnext = (FAR struct ez80emac_desc_s *)((uint8_t *)txdesc + len);
+  txnext = (FAR struct ez80emac_desc_s *)((FAR uint8_t *)txdesc + len);
 
   /* Handle wraparound to the beginning of the TX region */
 
-  if ((uint8_t *)txnext + SIZEOF_EMACSDESC >= (uint8_t *)priv->rxstart)
+  if ((uint8_t *)txnext + SIZEOF_EMACSDESC >= (FAR uint8_t *)priv->rxstart)
     {
       txnext = (FAR struct ez80emac_desc_s *)
         ((FAR uint8_t *)priv->txstart +
@@ -1078,8 +1078,8 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
    */
 
   psrc            = priv->dev.d_buf;
-  pdest           = (uint8_t *)txdesc + SIZEOF_EMACSDESC;
-  len             = (uint8_t *)priv->rxstart - pdest;
+  pdest           = (FAR uint8_t *)txdesc + SIZEOF_EMACSDESC;
+  len             = (FAR uint8_t *)priv->rxstart - pdest;
   if (len >= priv->dev.d_len)
     {
       /* The entire packet will fit into the EMAC SRAM without wrapping */
@@ -1264,15 +1264,15 @@ static inline FAR struct ez80emac_desc_s *ez80emac_rrp(void)
  *
  ****************************************************************************/
 
-static int ez80emac_receive(struct ez80emac_driver_s *priv)
+static int ez80emac_receive(FAR struct ez80emac_driver_s *priv)
 {
   FAR struct ez80emac_desc_s *rxdesc = priv->rxnext;
   FAR struct ez80emac_desc_s *rwp;
-  uint8_t *psrc;
-  uint8_t *pdest;
-  int     pktlen;
-  int     npackets;
-  uint8_t pktgood;
+  FAR uint8_t *psrc;
+  FAR uint8_t *pdest;
+  int          pktlen;
+  int          npackets;
+  uint8_t      pktgood;
 
   /* The RRP register points to where the next Receive packet is read from.
    * The read-only EMAC Receive Write Pointer (RWP) register reports the
@@ -2080,7 +2080,7 @@ static int ez80emac_ifup(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static int ez80emac_ifdown(struct net_driver_s *dev)
+static int ez80emac_ifdown(FAR struct net_driver_s *dev)
 {
   FAR struct ez80emac_driver_s *priv =
     (FAR struct ez80emac_driver_s *)dev->d_private;
@@ -2205,7 +2205,8 @@ static int ez80emac_txavail(FAR struct net_driver_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_MCASTGROUP
-static int ez80emac_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
+static int ez80emac_addmac(FAR struct net_driver_s *dev,
+                           FAR const uint8_t *mac)
 {
   FAR struct ez80emac_driver_s *priv =
     (FAR struct ez80emac_driver_s *)dev->d_private;
@@ -2237,7 +2238,8 @@ static int ez80emac_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_MCASTGROUP
-static int ez80emac_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
+static int ez80emac_rmmac(FAR struct net_driver_s *dev,
+                          FAR const uint8_t *mac)
 {
   FAR struct ez80emac_driver_s *priv =
     (FAR struct ez80emac_driver_s *)dev->d_private;
@@ -2266,7 +2268,7 @@ static int ez80emac_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 
 static int ez80_emacinitialize(void)
 {
-  struct ez80emac_driver_s *priv = &g_emac;
+  FAR struct ez80emac_driver_s *priv = &g_emac;
   uint24_t addr;
   uint8_t regval;
   int ret;
@@ -2494,7 +2496,7 @@ errout:
 
 int up_netinitialize(void)
 {
-  struct ez80emac_driver_s *priv = &g_emac;
+  FAR struct ez80emac_driver_s *priv = &g_emac;
   int ret;
 
   /* Disable all interrupts */

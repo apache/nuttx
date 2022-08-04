@@ -260,7 +260,7 @@ menuconfig ENCX24J600
 
 if ENCX24J600
 
-config ENC28J60_NINTERFACES
+config ENCX24J600_NINTERFACES
 	int "Number of physical ENCX24J600"
 	default 1
 	range 1 1
