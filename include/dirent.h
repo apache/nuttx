@@ -154,6 +154,8 @@ int        scandir(FAR const char *path, FAR struct dirent ***namelist,
 int        alphasort(FAR const struct dirent **a,
                      FAR const struct dirent **b);
 
+int        dirfd(FAR DIR *dirp);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
