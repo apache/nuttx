@@ -81,6 +81,7 @@ struct rptun_priv_s
 #endif
 #ifdef CONFIG_RPTUN_PM
   struct pm_wakelock_s         wakelock;
+  bool                         stay;
   uint16_t                     headrx;
 #endif
 #ifdef CONFIG_RPTUN_PING
@@ -208,24 +209,27 @@ static rmutex_t g_rptun_lockpriv = NXRMUTEX_INITIALIZER;
  ****************************************************************************/
 
 #ifdef CONFIG_RPTUN_PM
+
+#define rptun_pm_action_auto(priv, timeout) \
+        pm_wakelock_staytimeout(&priv->wakelock, timeout)
+
 static inline void rptun_pm_action(FAR struct rptun_priv_s *priv,
                                    bool stay)
 {
   irqstate_t flags;
-  int count;
 
   flags = enter_critical_section();
 
-  count = pm_wakelock_staycount(&priv->wakelock);
-
-  if (stay && count == 0)
+  if (stay && !priv->stay)
     {
       pm_wakelock_stay(&priv->wakelock);
+      priv->stay = true;
     }
 
-  if (!stay && count > 0 && !rptun_buffer_nused(&priv->rvdev, false))
+  if (!stay && priv->stay && !rptun_buffer_nused(&priv->rvdev, false))
     {
       pm_wakelock_relax(&priv->wakelock);
+      priv->stay = false;
     }
 
   leave_critical_section(flags);
@@ -272,6 +276,7 @@ static inline bool rptun_available_rx(FAR struct rptun_priv_s *priv)
 }
 
 #else
+#  define rptun_pm_action_auto(priv, timeout)
 #  define rptun_pm_action(priv, stay)
 #  define rptun_update_rx(priv)
 #  define rptun_available_rx(priv) true
@@ -447,12 +452,19 @@ static int rptun_notify(FAR struct remoteproc *rproc, uint32_t id)
 {
   FAR struct rptun_priv_s *priv = rproc->priv;
   FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
-  FAR struct virtqueue *vq = rvdev->svq;
+  FAR struct virtqueue *svq = rvdev->svq;
+  FAR struct virtqueue *rvq = rvdev->rvq;
 
-  if (rvdev->vdev && vq &&
-      rvdev->vdev->vrings_info[vq->vq_queue_index].notifyid == id)
+  if (rvdev->vdev && svq &&
+      rvdev->vdev->vrings_info[svq->vq_queue_index].notifyid == id)
     {
       rptun_pm_action(priv, true);
+    }
+
+  if (rvdev->vdev && rvq &&
+      rvdev->vdev->vrings_info[rvq->vq_queue_index].notifyid == id)
+    {
+      rptun_pm_action_auto(priv, 10);
     }
 
   RPTUN_NOTIFY(priv->dev, id);
