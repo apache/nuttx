@@ -362,6 +362,7 @@ unsigned int alarm(unsigned int seconds);
 /* Working directory operations */
 
 int     chdir(FAR const char *path);
+int     fchdir(int fd);
 FAR char *getcwd(FAR char *buf, size_t size);
 
 /* File path operations */

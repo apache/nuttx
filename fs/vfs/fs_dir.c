@@ -29,6 +29,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/fs/ioctl.h>
 
 #include "inode/inode.h"
 
@@ -51,10 +52,12 @@ struct fs_pseudodir_s
  * Private Functions Prototypes
  ****************************************************************************/
 
+static int     dir_open(FAR struct file *filep);
 static int     dir_close(FAR struct file *filep);
 static ssize_t dir_read(FAR struct file *filep, FAR char *buffer,
                         size_t buflen);
 static off_t   dir_seek(FAR struct file *filep, off_t offset, int whence);
+static int     dir_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -62,12 +65,12 @@ static off_t   dir_seek(FAR struct file *filep, off_t offset, int whence);
 
 static const struct file_operations g_dir_fileops =
 {
-  NULL,       /* open */
+  dir_open,   /* open */
   dir_close,  /* close */
   dir_read,   /* read */
   NULL,       /* write */
   dir_seek,   /* seek */
-  NULL,       /* ioctl */
+  dir_ioctl,  /* ioctl */
   NULL,       /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   NULL,       /* unlink */
@@ -391,10 +394,18 @@ static int read_pseudodir(FAR struct fs_dirent_s *dir,
   return 0;
 }
 
+static int dir_open(FAR struct file *filep)
+{
+  FAR struct fs_dirent_s *dir = filep->f_priv;
+
+  return dir_allocate(filep, dir->fd_path);
+}
+
 static int dir_close(FAR struct file *filep)
 {
   FAR struct fs_dirent_s *dir = filep->f_priv;
   FAR struct inode *inode = dir->fd_root;
+  FAR char *relpath = dir->fd_path;
   int ret = 0;
 
   /* This is the 'root' inode of the directory. This means different
@@ -440,6 +451,7 @@ static int dir_close(FAR struct file *filep)
   /* Release our references on the contained 'root' inode */
 
   inode_release(inode);
+  kmm_free(relpath);
   return ret;
 }
 
@@ -533,6 +545,20 @@ static off_t dir_seek(FAR struct file *filep, off_t offset, int whence)
   return pos;
 }
 
+static int dir_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+{
+  FAR struct fs_dirent_s *dir = filep->f_priv;
+  int ret = -ENOTTY;
+
+  if (cmd == FIOC_FILEPATH)
+    {
+      strcpy((FAR char *)(uintptr_t)arg, dir->fd_path);
+      ret = OK;
+    }
+
+  return ret;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -574,6 +600,7 @@ int dir_allocate(FAR struct file *filep, FAR const char *relpath)
         }
     }
 
+  dir->fd_path = strdup(relpath);
   filep->f_inode  = &g_dir_inode;
   filep->f_priv   = dir;
   inode_addref(&g_dir_inode);

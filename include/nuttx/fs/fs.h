@@ -191,6 +191,10 @@ struct fs_dirent_s
    */
 
   FAR struct inode *fd_root;
+
+  /* The path name of current directory for FIOC_FILEPATH */
+
+  FAR char *fd_path;
 };
 
 /* This structure is provided by devices when they are registered with the
