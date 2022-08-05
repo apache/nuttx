@@ -40,7 +40,6 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/fat.h>
-#include <nuttx/fs/dirent.h>
 
 #include "inode/inode.h"
 #include "fs_fat32.h"
@@ -67,7 +66,9 @@ static int     fat_fstat(FAR const struct file *filep,
 static int     fat_truncate(FAR struct file *filep, off_t length);
 
 static int     fat_opendir(FAR struct inode *mountpt,
-                 FAR const char *relpath, FAR struct fs_dirent_s *dir);
+                 FAR const char *relpath, FAR struct fs_dirent_s **dir);
+static int     fat_closedir(FAR struct inode *mountpt,
+                 FAR struct fs_dirent_s *dir);
 static int     fat_readdir(FAR struct inode *mountpt,
                  FAR struct fs_dirent_s *dir,
                  FAR struct dirent *entry);
@@ -122,7 +123,7 @@ const struct mountpt_operations fat_operations =
   fat_truncate,      /* truncate */
 
   fat_opendir,       /* opendir */
-  NULL,              /* closedir */
+  fat_closedir,      /* closedir */
   fat_readdir,       /* readdir */
   fat_rewinddir,     /* rewinddir */
 
@@ -1569,8 +1570,9 @@ errout_with_semaphore:
  ****************************************************************************/
 
 static int fat_opendir(FAR struct inode *mountpt, FAR const char *relpath,
-                       FAR struct fs_dirent_s *dir)
+                       FAR struct fs_dirent_s **dir)
 {
+  FAR struct fat_dirent_s *fdir;
   FAR struct fat_mountpt_s *fs;
   FAR struct fat_dirinfo_s  dirinfo;
   uint8_t *direntry;
@@ -1584,12 +1586,18 @@ static int fat_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
   fs = mountpt->i_private;
 
+  fdir = kmm_zalloc(sizeof(struct fat_dirent_s));
+  if (fdir == NULL)
+    {
+      return -ENOMEM;
+    }
+
   /* Make sure that the mount is still healthy */
 
   ret = fat_semtake(fs);
   if (ret < 0)
     {
-      return ret;
+      goto errout_with_fdir;
     }
 
   ret = fat_checkmount(fs);
@@ -1614,10 +1622,10 @@ static int fat_opendir(FAR struct inode *mountpt, FAR const char *relpath,
        * fat_finddirentry() above.
        */
 
-      dir->u.fat.fd_startcluster = dirinfo.dir.fd_startcluster;
-      dir->u.fat.fd_currcluster  = dirinfo.dir.fd_currcluster;
-      dir->u.fat.fd_currsector   = dirinfo.dir.fd_currsector;
-      dir->u.fat.fd_index        = dirinfo.dir.fd_index;
+      fdir->dir.fd_startcluster = dirinfo.dir.fd_startcluster;
+      fdir->dir.fd_currcluster  = dirinfo.dir.fd_currcluster;
+      fdir->dir.fd_currsector   = dirinfo.dir.fd_currsector;
+      fdir->dir.fd_index        = dirinfo.dir.fd_index;
     }
   else
     {
@@ -1638,21 +1646,41 @@ static int fat_opendir(FAR struct inode *mountpt, FAR const char *relpath,
         {
           /* The entry is a directory (but not the root directory) */
 
-          dir->u.fat.fd_startcluster =
+          fdir->dir.fd_startcluster =
               ((uint32_t)DIR_GETFSTCLUSTHI(direntry) << 16) |
                          DIR_GETFSTCLUSTLO(direntry);
-          dir->u.fat.fd_currcluster  = dir->u.fat.fd_startcluster;
-          dir->u.fat.fd_currsector   = fat_cluster2sector(fs,
-                                         dir->u.fat.fd_currcluster);
-          dir->u.fat.fd_index        = 2;
+          fdir->dir.fd_currcluster  = fdir->dir.fd_startcluster;
+          fdir->dir.fd_currsector   = fat_cluster2sector(fs,
+                                      fdir->dir.fd_currcluster);
+          fdir->dir.fd_index        = 2;
         }
     }
 
-  ret = OK;
+  *dir = (FAR struct fs_dirent_s *)fdir;
+  fat_semgive(fs);
+  return OK;
 
 errout_with_semaphore:
   fat_semgive(fs);
+
+errout_with_fdir:
+  kmm_free(fdir);
   return ret;
+}
+
+/****************************************************************************
+ * Name: fat_closedir
+ *
+ * Description: Close directory
+ *
+ ****************************************************************************/
+
+static int fat_closedir(FAR struct inode *mountpt,
+                        FAR struct fs_dirent_s *dir)
+{
+  DEBUGASSERT(dir);
+  kmm_free(dir);
+  return 0;
 }
 
 /****************************************************************************
@@ -1882,6 +1910,7 @@ static int fat_readdir(FAR struct inode *mountpt,
                        FAR struct fs_dirent_s *dir,
                        FAR struct dirent *entry)
 {
+  FAR struct fat_dirent_s *fdir;
   FAR struct fat_mountpt_s *fs;
   unsigned int dirindex;
   FAR uint8_t *direntry;
@@ -1897,6 +1926,7 @@ static int fat_readdir(FAR struct inode *mountpt,
   /* Recover our private data from the inode instance */
 
   fs = mountpt->i_private;
+  fdir = (FAR struct fat_dirent_s *)dir;
 
   /* Make sure that the mount is still healthy.
    * REVISIT: What if a forced unmount was done since opendir() was called?
@@ -1919,9 +1949,9 @@ static int fat_readdir(FAR struct inode *mountpt,
   entry->d_name[0] = '\0';
   found = false;
 
-  while (dir->u.fat.fd_currsector && !found)
+  while (fdir->dir.fd_currsector && !found)
     {
-      ret = fat_fscacheread(fs, dir->u.fat.fd_currsector);
+      ret = fat_fscacheread(fs, fdir->dir.fd_currsector);
       if (ret < 0)
         {
           goto errout_with_semaphore;
@@ -1929,7 +1959,7 @@ static int fat_readdir(FAR struct inode *mountpt,
 
       /* Get a reference to the current directory entry */
 
-      dirindex = (dir->u.fat.fd_index & DIRSEC_NDXMASK(fs)) * DIR_SIZE;
+      dirindex = (fdir->dir.fd_index & DIRSEC_NDXMASK(fs)) * DIR_SIZE;
       direntry = &fs->fs_buffer[dirindex];
 
       /* Has it reached to end of the directory */
@@ -1981,8 +2011,8 @@ static int fat_readdir(FAR struct inode *mountpt,
                * entry.
                */
 
-              dirindex = (dir->u.fat.fd_index & DIRSEC_NDXMASK(fs)) *
-                          DIR_SIZE;
+              dirindex = (fdir->dir.fd_index & DIRSEC_NDXMASK(fs)) *
+                         DIR_SIZE;
               direntry = &fs->fs_buffer[dirindex];
 
               /* Then re-read the attributes from the short file name entry */
@@ -2010,7 +2040,7 @@ static int fat_readdir(FAR struct inode *mountpt,
 
       /* Set up the next directory index */
 
-      if (fat_nextdirentry(fs, &dir->u.fat) != OK)
+      if (fat_nextdirentry(fs, &fdir->dir) != OK)
         {
           ret = -ENOENT;
           goto errout_with_semaphore;
@@ -2035,6 +2065,7 @@ errout_with_semaphore:
 static int fat_rewinddir(FAR struct inode *mountpt,
                          FAR struct fs_dirent_s *dir)
 {
+  FAR struct fat_dirent_s *fdir;
   FAR struct fat_mountpt_s *fs;
   int ret;
 
@@ -2045,6 +2076,7 @@ static int fat_rewinddir(FAR struct inode *mountpt,
   /* Recover our private data from the inode instance */
 
   fs = mountpt->i_private;
+  fdir = (FAR struct fat_dirent_s *)dir;
 
   /* Make sure that the mount is still healthy
    * REVISIT: What if a forced unmount was done since opendir() was called?
@@ -2067,22 +2099,22 @@ static int fat_rewinddir(FAR struct inode *mountpt,
    */
 
   if (fs->fs_type != FSTYPE_FAT32 &&
-      dir->u.fat.fd_startcluster == 0)
+      fdir->dir.fd_startcluster == 0)
     {
       /* Handle the FAT12/16 root directory */
 
-      dir->u.fat.fd_currcluster  = 0;
-      dir->u.fat.fd_currsector   = fs->fs_rootbase;
-      dir->u.fat.fd_index        = 0;
+      fdir->dir.fd_currcluster  = 0;
+      fdir->dir.fd_currsector   = fs->fs_rootbase;
+      fdir->dir.fd_index        = 0;
     }
   else if (fs->fs_type == FSTYPE_FAT32 &&
-           dir->u.fat.fd_startcluster == fs->fs_rootbase)
+           fdir->dir.fd_startcluster == fs->fs_rootbase)
     {
       /* Handle the FAT32 root directory */
 
-      dir->u.fat.fd_currcluster = dir->u.fat.fd_startcluster;
-      dir->u.fat.fd_currsector  = fat_cluster2sector(fs, fs->fs_rootbase);
-      dir->u.fat.fd_index       = 0;
+      fdir->dir.fd_currcluster = fdir->dir.fd_startcluster;
+      fdir->dir.fd_currsector  = fat_cluster2sector(fs, fs->fs_rootbase);
+      fdir->dir.fd_index       = 0;
     }
 
   /* This is not the root directory.  Here the fd_index is set to 2, skipping
@@ -2091,10 +2123,10 @@ static int fat_rewinddir(FAR struct inode *mountpt,
 
   else
     {
-      dir->u.fat.fd_currcluster  = dir->u.fat.fd_startcluster;
-      dir->u.fat.fd_currsector   = fat_cluster2sector(fs,
-                                     dir->u.fat.fd_currcluster);
-      dir->u.fat.fd_index        = 2;
+      fdir->dir.fd_currcluster  = fdir->dir.fd_startcluster;
+      fdir->dir.fd_currsector   = fat_cluster2sector(fs,
+                                  fdir->dir.fd_currcluster);
+      fdir->dir.fd_index        = 2;
     }
 
   fat_semgive(fs);

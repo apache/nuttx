@@ -65,7 +65,6 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/fs/dirent.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/nfs.h>
 #include <nuttx/net/netconfig.h>
@@ -85,6 +84,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define DIRENT_NFS_MAXHANDLE    64 /* Maximum length of an NFSv3 file handle */
+#define DIRENT_NFS_VERFLEN      8  /* Length of the copy verifier */
+
 /* include/nuttx/fs/dirent.h has its own version of these lengths.  They must
  * match the NFS versions.
  */
@@ -98,6 +100,19 @@
 #endif
 
 #define CH_STAT_SIZE            (1 << 7)
+
+/****************************************************************************
+ * Private Type
+ ****************************************************************************/
+
+struct nfs_dir_s
+{
+  struct fs_dirent_s nfs_base;                /* VFS diretory structure */
+  uint8_t  nfs_fhsize;                        /* Length of the file handle */
+  uint8_t  nfs_fhandle[DIRENT_NFS_MAXHANDLE]; /* File handle (max size allocated) */
+  uint8_t  nfs_verifier[DIRENT_NFS_VERFLEN];  /* Cookie verifier */
+  uint32_t nfs_cookie[2];                     /* Cookie */
+};
 
 /****************************************************************************
  * Private Data
@@ -138,7 +153,9 @@ static int     nfs_fchstat(FAR const struct file *filep,
                    FAR const struct stat *buf, int flags);
 static int     nfs_truncate(FAR struct file *filep, off_t length);
 static int     nfs_opendir(FAR struct inode *mountpt,
-                   FAR const char *relpath, FAR struct fs_dirent_s *dir);
+                   FAR const char *relpath, FAR struct fs_dirent_s **dir);
+static int     nfs_closedir(FAR struct inode *mountpt,
+                   FAR struct fs_dirent_s *dir);
 static int     nfs_readdir(FAR struct inode *mountpt,
                            FAR struct fs_dirent_s *dir,
                            FAR struct dirent *entry);
@@ -192,7 +209,7 @@ const struct mountpt_operations nfs_operations =
   nfs_truncate,                 /* truncate */
 
   nfs_opendir,                  /* opendir */
-  NULL,                         /* closedir */
+  nfs_closedir,                 /* closedir */
   nfs_readdir,                  /* readdir */
   nfs_rewinddir,                /* rewinddir */
 
@@ -1407,10 +1424,11 @@ static int nfs_truncate(FAR struct file *filep, off_t length)
  ****************************************************************************/
 
 static int nfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
-                       FAR struct fs_dirent_s *dir)
+                       FAR struct fs_dirent_s **dir)
 {
   FAR struct nfsmount *nmp;
-  FAR struct file_handle fhandle;
+  FAR struct nfs_dir_s *ndir;
+  struct file_handle fhandle;
   struct nfs_fattr obj_attributes;
   uint32_t objtype;
   int ret;
@@ -1424,15 +1442,16 @@ static int nfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   /* Recover our private data from the inode instance */
 
   nmp = mountpt->i_private;
-
-  /* Initialize the NFS-specific portions of dirent structure to zero */
-
-  memset(&dir->u.nfs, 0, sizeof(struct nfsdir_s));
+  ndir = kmm_zalloc(sizeof(*ndir));
+  if (ndir == NULL)
+    {
+      return -ENOMEM;
+    }
 
   ret = nfs_semtake(nmp);
   if (ret < 0)
     {
-      return ret;
+      goto errout_with_ndir;
     }
 
   /* Find the NFS node associate with the path */
@@ -1458,14 +1477,38 @@ static int nfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
    * used later when readdir() is called.
    */
 
-  dir->u.nfs.nfs_fhsize = (uint8_t)fhandle.length;
+  ndir->nfs_fhsize = (uint8_t)fhandle.length;
   DEBUGASSERT(fhandle.length <= DIRENT_NFS_MAXHANDLE);
 
-  memcpy(dir->u.nfs.nfs_fhandle, &fhandle.handle, fhandle.length);
+  memcpy(ndir->nfs_fhandle, &fhandle.handle, fhandle.length);
+  *dir = &ndir->nfs_base;
+  nfs_semgive(nmp);
+  return 0;
 
 errout_with_semaphore:
   nfs_semgive(nmp);
+errout_with_ndir:
+  kmm_free(ndir);
   return ret;
+}
+
+/****************************************************************************
+ * Name: nfs_closedir
+ *
+ * Description:
+ *   Close directory
+ *
+ * Returned Value:
+ *   0 on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int nfs_closedir(FAR struct inode *mountpt,
+                        FAR struct fs_dirent_s *dir)
+{
+  DEBUGASSERT(dir);
+  kmm_free(dir);
+  return 0;
 }
 
 /****************************************************************************
@@ -1483,6 +1526,7 @@ static int nfs_readdir(FAR struct inode *mountpt,
                        FAR struct dirent *entry)
 {
   FAR struct nfsmount *nmp;
+  FAR struct nfs_dir_s *ndir;
   struct file_handle fhandle;
   struct nfs_fattr obj_attributes;
   uint32_t readsize;
@@ -1502,6 +1546,7 @@ static int nfs_readdir(FAR struct inode *mountpt,
   /* Recover our private data from the inode instance */
 
   nmp = mountpt->i_private;
+  ndir = (FAR struct nfs_dir_s *)dir;
 
   ret = nfs_semtake(nmp);
   if (ret < 0)
@@ -1519,21 +1564,21 @@ read_dir:
 
   /* Copy the variable length, directory file handle */
 
-  *ptr++  = txdr_unsigned((uint32_t)dir->u.nfs.nfs_fhsize);
+  *ptr++  = txdr_unsigned((uint32_t)ndir->nfs_fhsize);
   reqlen += sizeof(uint32_t);
 
-  memcpy(ptr, dir->u.nfs.nfs_fhandle, dir->u.nfs.nfs_fhsize);
-  reqlen += uint32_alignup(dir->u.nfs.nfs_fhsize);
-  ptr    += uint32_increment(dir->u.nfs.nfs_fhsize);
+  memcpy(ptr, ndir->nfs_fhandle, ndir->nfs_fhsize);
+  reqlen += uint32_alignup(ndir->nfs_fhsize);
+  ptr    += uint32_increment(ndir->nfs_fhsize);
 
   /* Cookie and cookie verifier */
 
-  ptr[0] = dir->u.nfs.nfs_cookie[0];
-  ptr[1] = dir->u.nfs.nfs_cookie[1];
+  ptr[0] = ndir->nfs_cookie[0];
+  ptr[1] = ndir->nfs_cookie[1];
   ptr    += 2;
   reqlen += 2*sizeof(uint32_t);
 
-  memcpy(ptr, dir->u.nfs.nfs_verifier, DIRENT_NFS_VERFLEN);
+  memcpy(ptr, ndir->nfs_verifier, DIRENT_NFS_VERFLEN);
   ptr    += uint32_increment(DIRENT_NFS_VERFLEN);
   reqlen += DIRENT_NFS_VERFLEN;
 
@@ -1588,7 +1633,7 @@ read_dir:
 
   /* Save the verification cookie */
 
-  memcpy(dir->u.nfs.nfs_verifier, ptr, DIRENT_NFS_VERFLEN);
+  memcpy(ndir->nfs_verifier, ptr, DIRENT_NFS_VERFLEN);
   ptr += uint32_increment(DIRENT_NFS_VERFLEN);
 
 next_entry:
@@ -1650,8 +1695,8 @@ next_entry:
 
   /* Save the cookie and increment the pointer to the next entry */
 
-  dir->u.nfs.nfs_cookie[0] = *ptr++;
-  dir->u.nfs.nfs_cookie[1] = *ptr++;
+  ndir->nfs_cookie[0] = *ptr++;
+  ndir->nfs_cookie[1] = *ptr++;
 
   /* Return the name of the node to the caller */
 
@@ -1674,8 +1719,8 @@ next_entry:
    * the file type.
    */
 
-  fhandle.length = (uint32_t)dir->u.nfs.nfs_fhsize;
-  memcpy(&fhandle.handle, dir->u.nfs.nfs_fhandle, fhandle.length);
+  fhandle.length = (uint32_t)ndir->nfs_fhsize;
+  memcpy(&fhandle.handle, ndir->nfs_fhandle, fhandle.length);
 
   ret = nfs_lookup(nmp, entry->d_name, &fhandle, &obj_attributes, NULL);
   if (ret != OK)
@@ -1744,19 +1789,23 @@ errout_with_semaphore:
 static int nfs_rewinddir(FAR struct inode *mountpt,
                          FAR struct fs_dirent_s *dir)
 {
+  FAR struct nfs_dir_s *ndir;
+
   finfo("Entry\n");
 
   /* Sanity checks */
 
   DEBUGASSERT(mountpt != NULL && dir != NULL);
 
+  ndir = (FAR struct nfs_dir_s *)dir;
+
   /* Reset the NFS-specific portions of dirent structure, retaining only the
    * file handle.
    */
 
-  memset(&dir->u.nfs.nfs_verifier, 0, DIRENT_NFS_VERFLEN);
-  dir->u.nfs.nfs_cookie[0] = 0;
-  dir->u.nfs.nfs_cookie[1] = 0;
+  memset(&ndir->nfs_verifier, 0, DIRENT_NFS_VERFLEN);
+  ndir->nfs_cookie[0] = 0;
+  ndir->nfs_cookie[1] = 0;
   return OK;
 }
 

@@ -42,7 +42,6 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
-#include <nuttx/fs/dirent.h>
 
 #include <arch/irq.h>
 
@@ -100,7 +99,7 @@ static int     skel_dup(FAR const struct file *oldp,
                  FAR struct file *newp);
 
 static int     skel_opendir(FAR const char *relpath,
-                 FAR struct fs_dirent_s *dir);
+                 FAR struct fs_dirent_s **dir);
 static int     skel_closedir(FAR struct fs_dirent_s *dir);
 static int     skel_readdir(FAR struct fs_dirent_s *dir,
                             FAR struct dirent *entry);
@@ -338,12 +337,13 @@ static int skel_dup(FAR const struct file *oldp, FAR struct file *newp)
  *
  ****************************************************************************/
 
-static int skel_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
+static int skel_opendir(FAR const char *relpath,
+                        FAR struct fs_dirent_s **dir)
 {
   FAR struct skel_level1_s *level1;
 
   finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
-  DEBUGASSERT(relpath && dir && !dir->u.procfs);
+  DEBUGASSERT(relpath);
 
   /* The path refers to the 1st level sbdirectory.  Allocate the level1
    * dirent structure.
@@ -366,7 +366,7 @@ static int skel_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
   level1->base.nentries = 0;
   level1->base.index    = 0;
 
-  dir->u.procfs = (FAR void *) level1;
+  *dir = (FAR struct fs_dirent_s *)level1;
   return OK;
 }
 
@@ -379,17 +379,8 @@ static int skel_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
 
 static int skel_closedir(FAR struct fs_dirent_s *dir)
 {
-  FAR struct skel_level1_s *priv;
-
-  DEBUGASSERT(dir && dir->u.procfs);
-  priv = dir->u.procfs;
-
-  if (priv)
-    {
-      kmm_free(priv);
-    }
-
-  dir->u.procfs = NULL;
+  DEBUGASSERT(dir);
+  kmm_free(dir);
   return OK;
 }
 
@@ -404,12 +395,12 @@ static int skel_readdir(FAR struct fs_dirent_s *dir,
                         FAR struct dirent *entry)
 {
   FAR struct skel_level1_s *level1;
-  char  filename[16];
+  char filename[16];
   int index;
   int ret;
 
-  DEBUGASSERT(dir && dir->u.procfs);
-  level1 = dir->u.procfs;
+  DEBUGASSERT(dir);
+  level1 = (FAR struct skel_level1_s *)dir;
 
   /* TODO:  Perform device specific readdir function here.  This may
    *        or may not involve validating the nentries variable
@@ -466,8 +457,8 @@ static int skel_rewinddir(FAR struct fs_dirent_s *dir)
 {
   FAR struct skel_level1_s *priv;
 
-  DEBUGASSERT(dir && dir->u.procfs);
-  priv = dir->u.procfs;
+  DEBUGASSERT(dir);
+  priv = (FAR struct skel_level1_s *)dir;
 
   priv->base.index = 0;
   return OK;
