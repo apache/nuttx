@@ -967,34 +967,24 @@
 
 /* Analog ENET PLL Control Register */
 
-#define CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_SHIFT      (0)       /* Bits 0-1:    Controls the frequency of the ethernet0 reference clock */
-#define CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_MASK       (0x3 << CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_SHIFT)
-#  define CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_25MHZ    ((uint32_t)(0) << CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_SHIFT)
-#  define CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_50MHZ    ((uint32_t)(1) << CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_SHIFT)
-#  define CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_100MHZ   ((uint32_t)(2) << CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_SHIFT)
-#  define CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_125MHZ   ((uint32_t)(3) << CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_SHIFT)
-#define CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_SHIFT      (2)       /* Bits 0-1:    Controls the frequency of the ethernet1 reference clock */
+#define CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_SHIFT      (0)       /* Bits 0-1:    Controls the frequency of the ethernet0 reference clock */
 #define CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_MASK       (0x3 << CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_SHIFT)
 #  define CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_25MHZ    ((uint32_t)(0) << CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_SHIFT)
 #  define CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_50MHZ    ((uint32_t)(1) << CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_SHIFT)
 #  define CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_100MHZ   ((uint32_t)(2) << CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_SHIFT)
 #  define CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_125MHZ   ((uint32_t)(3) << CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_SHIFT)
-                                                                  /* Bits 4-11:  Reserved */
-#define CCM_ANALOG_PLL_ENET_POWERDOWN                   (1 << 12) /* Bit 12:     Powers down the PLL */
-#define CCM_ANALOG_PLL_ENET_ENET1_125M_EN               (1 << 13) /* Bit 13:     Enable the PLL providing the ENET1 125 MHz reference clock */
-#define CCM_ANALOG_PLL_ENET_BYPASS_CLK_SRC_SHIFT       (14)       /* Bits 14-15: Determines the bypass source */
+                                                                 /* Bits 2-11:  Reserved */
+#define CCM_ANALOG_PLL_ENET_POWERDOWN                  (1 << 12) /* Bit 12:     Powers down the PLL */
+#define CCM_ANALOG_PLL_ENET_ENABLE                     (1 << 13) /* Bit 13:     Enable the PLL providing the ENET1 125 MHz reference clock */
+#define CCM_ANALOG_PLL_ENET_BYPASS_CLK_SRC_SHIFT       (14)      /* Bits 14-15: Determines the bypass source */
 #define CCM_ANALOG_PLL_ENET_BYPASS_CLK_SRC_MASK        (0x3 << CCM_ANALOG_PLL_ENET_BYPASS_CLK_SRC_SHIFT)
 #  define CCM_ANALOG_PLL_ENET_BYPASS_CLK_SRC_REF_24M   ((uint32_t)(0) << CCM_ANALOG_PLL_ENET_BYPASS_CLK_SRC_SHIFT) /* Select 24Mhz Osc as source */
 #  define CCM_ANALOG_PLL_ENET_BYPASS_CLK_SRC_CLK1      ((uint32_t)(1) << CCM_ANALOG_PLL_ENET_BYPASS_CLK_SRC_SHIFT) /* Select the CLK1_N / CLK1_P as source */
 
 #define CCM_ANALOG_PLL_ENET_BYPASS                     (1 << 16)  /* Bit 16:     Bypass the PLL */
-                                                                  /* Bit 17:     Reserved */
-#define CCM_ANALOG_PLL_ENET_PFD_OFFSET_EN              (1 << 18)  /* Bit 18:     Enables an offset in the phase frequency detector */
-#define CCM_ANALOG_PLL_ENET_ENABLE_125M                (1 << 19)  /* Bit 19:     */
-#define CCM_ANALOG_PLL_ENET_ENET2_125M_EN              (1 << 20)  /* Bit 20:     Enable the PLL providing the ENET2 125 MHz reference clock */
+                                                                  /* Bits 17-20:     Reserved */
 #define CCM_ANALOG_PLL_ENET_ENET_25M_REF_EN            (1 << 21)  /* Bit 21:     Enable the PLL providing ENET 25 MHz reference clock */
-#define CCM_ANALOG_PLL_ENET_ENET_500M_REF_EN           (1 << 22)  /* Bit 22:     Enable the PLL providing NET 500 MHz reference clock */
-
+                                                                  /* Bits 22-30:     Reserved */
 #define CCM_ANALOG_PLL_ENET_LOCK                       (1 << 31)  /* Bit 31:     PLL is currently locked */
 
 /* 480MHz Clock (PLL3) Phase Fractional Divider Control Register */
