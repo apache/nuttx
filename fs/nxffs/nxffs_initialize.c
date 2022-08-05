@@ -66,7 +66,7 @@ const struct mountpt_operations nxffs_operations =
 #endif
 
   nxffs_opendir,     /* opendir */
-  NULL,              /* closedir */
+  nxffs_closedir,    /* closedir */
   nxffs_readdir,     /* readdir */
   nxffs_rewinddir,   /* rewinddir */
 

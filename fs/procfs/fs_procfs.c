@@ -45,7 +45,6 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
-#include <nuttx/fs/dirent.h>
 
 #include "mount/mount.h"
 
@@ -224,7 +223,7 @@ static int     procfs_fstat(FAR const struct file *filep,
                  FAR struct stat *buf);
 
 static int     procfs_opendir(FAR struct inode *mountpt, const char *relpath,
-                 FAR struct fs_dirent_s *dir);
+                 FAR struct fs_dirent_s **dir);
 static int     procfs_closedir(FAR struct inode *mountpt,
                  FAR struct fs_dirent_s *dir);
 static int     procfs_readdir(FAR struct inode *mountpt,
@@ -551,14 +550,12 @@ static int procfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
  ****************************************************************************/
 
 static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
-                          FAR struct fs_dirent_s *dir)
+                          FAR struct fs_dirent_s **dir)
 {
   FAR struct procfs_level0_s *level0;
-  FAR struct procfs_dir_priv_s *dirpriv;
-  FAR void *priv = NULL;
 
   finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
-  DEBUGASSERT(mountpt && relpath && dir && !dir->u.procfs);
+  DEBUGASSERT(mountpt && dir && relpath);
 
   /* The relative must be either:
    *
@@ -601,7 +598,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
       level0->lastlen = 0;
       level0->base.procfsentry = NULL;
 
-      priv = (FAR void *)level0;
+      *dir = (FAR struct fs_dirent_s *)level0;
     }
   else
     {
@@ -619,7 +616,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
             {
               /* Match found!  Call the handler's opendir routine.  If
                * successful, this opendir routine will create an entry
-               * derived from struct procfs_dir_priv_s as dir->u.procfs.
+               * derived from struct procfs_dir_priv_s as dir.
                */
 
               DEBUGASSERT(g_procfs_entries[x].ops != NULL &&
@@ -629,11 +626,13 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
               if (ret == OK)
                 {
-                  DEBUGASSERT(dir->u.procfs);
+                  FAR struct procfs_dir_priv_s *dirpriv;
+
+                  DEBUGASSERT(*dir);
 
                   /* Set the procfs_entry handler */
 
-                  dirpriv = (FAR struct procfs_dir_priv_s *)dir->u.procfs;
+                  dirpriv = (FAR struct procfs_dir_priv_s *)(*dir);
                   dirpriv->procfsentry = &g_procfs_entries[x];
                 }
 
@@ -671,7 +670,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
               level1->lastlen = 0;
               level1->base.procfsentry = NULL;
 
-              priv = (FAR void *)level1;
+              *dir = (FAR struct fs_dirent_s *)level1;
               break;
             }
         }
@@ -682,7 +681,6 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
         }
     }
 
-  dir->u.procfs = priv;
   return OK;
 }
 
@@ -696,17 +694,8 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 static int procfs_closedir(FAR struct inode *mountpt,
                            FAR struct fs_dirent_s *dir)
 {
-  FAR struct procfs_dir_priv_s *priv;
-
-  DEBUGASSERT(mountpt && dir && dir->u.procfs);
-  priv = dir->u.procfs;
-
-  if (priv)
-    {
-      kmm_free(priv);
-    }
-
-  dir->u.procfs = NULL;
+  DEBUGASSERT(mountpt && dir);
+  kmm_free(dir);
   return OK;
 }
 
@@ -730,8 +719,8 @@ static int procfs_readdir(FAR struct inode *mountpt,
   pid_t pid;
   int ret = -ENOENT;
 
-  DEBUGASSERT(mountpt && dir && dir->u.procfs);
-  priv = dir->u.procfs;
+  DEBUGASSERT(mountpt && dir);
+  priv = (FAR struct procfs_dir_priv_s *)dir;
 
   /* Are we reading the 1st directory level with dynamic PID and static
    * entries?
@@ -953,8 +942,8 @@ static int procfs_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir)
 {
   FAR struct procfs_dir_priv_s *priv;
 
-  DEBUGASSERT(mountpt && dir && dir->u.procfs);
-  priv = dir->u.procfs;
+  DEBUGASSERT(mountpt && dir);
+  priv = (FAR struct procfs_dir_priv_s *)dir;
 
   if (priv->level > 0 && priv->procfsentry == NULL)
     {

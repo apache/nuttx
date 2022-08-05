@@ -42,7 +42,6 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
-#include <nuttx/fs/dirent.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mtd/smart.h>
 
@@ -116,7 +115,7 @@ static int      smartfs_dup(FAR const struct file *oldp,
                  FAR struct file *newp);
 
 static int      smartfs_opendir(const char *relpath,
-                  FAR struct fs_dirent_s *dir);
+                  FAR struct fs_dirent_s **dir);
 static int      smartfs_closedir(FAR struct fs_dirent_s *dir);
 static int      smartfs_readdir(FAR struct fs_dirent_s *dir,
                                 FAR struct dirent *entry);
@@ -535,13 +534,13 @@ static int smartfs_dup(FAR const struct file *oldp, FAR struct file *newp)
  ****************************************************************************/
 
 static int smartfs_opendir(FAR const char *relpath,
-                           FAR struct fs_dirent_s *dir)
+                           FAR struct fs_dirent_s **dir)
 {
   FAR struct smartfs_level1_s *level1;
   int        ret;
 
   finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
-  DEBUGASSERT(relpath && dir && !dir->u.procfs);
+  DEBUGASSERT(relpath);
 
   /* The path refers to the 1st level subdirectory.  Allocate the level1
    * dirent structure.
@@ -562,7 +561,7 @@ static int smartfs_opendir(FAR const char *relpath,
 
   if (ret == OK)
     {
-      dir->u.procfs = (FAR void *) level1;
+      *dir = (FAR struct fs_dirent_s *)level1;
     }
   else
     {
@@ -581,17 +580,8 @@ static int smartfs_opendir(FAR const char *relpath,
 
 static int smartfs_closedir(FAR struct fs_dirent_s *dir)
 {
-  FAR struct smartfs_level1_s *priv;
-
-  DEBUGASSERT(dir && dir->u.procfs);
-  priv = dir->u.procfs;
-
-  if (priv)
-    {
-      kmm_free(priv);
-    }
-
-  dir->u.procfs = NULL;
+  DEBUGASSERT(dir);
+  kmm_free(dir);
   return OK;
 }
 
@@ -609,8 +599,8 @@ static int smartfs_readdir(FAR struct fs_dirent_s *dir,
   int ret;
   int index;
 
-  DEBUGASSERT(dir && dir->u.procfs);
-  level1 = dir->u.procfs;
+  DEBUGASSERT(dir);
+  level1 = (FAR struct smartfs_level1_s *)dir;
 
   /* Have we reached the end of the directory */
 
@@ -690,8 +680,8 @@ static int smartfs_rewinddir(struct fs_dirent_s *dir)
 {
   FAR struct smartfs_level1_s *priv;
 
-  DEBUGASSERT(dir && dir->u.procfs);
-  priv = dir->u.procfs;
+  DEBUGASSERT(dir);
+  priv = (FAR struct smartfs_level1_s *)dir;
 
   priv->base.index = 0;
   return OK;

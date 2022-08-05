@@ -51,7 +51,6 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/fs/dirent.h>
 #include <nuttx/mm/mm.h>
 
 #if defined(CONFIG_SCHED_CPULOAD) || defined(CONFIG_SCHED_CRITMONITOR)
@@ -223,7 +222,7 @@ static int     proc_dup(FAR const struct file *oldp,
                  FAR struct file *newp);
 
 static int     proc_opendir(const char *relpath,
-                 FAR struct fs_dirent_s *dir);
+                 FAR struct fs_dirent_s **dir);
 static int     proc_closedir(FAR struct fs_dirent_s *dir);
 static int     proc_readdir(FAR struct fs_dirent_s *dir,
                             FAR struct dirent *entry);
@@ -1771,7 +1770,8 @@ static int proc_dup(FAR const struct file *oldp, FAR struct file *newp)
  *
  ****************************************************************************/
 
-static int proc_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
+static int proc_opendir(FAR const char *relpath,
+                        FAR struct fs_dirent_s **dir)
 {
   FAR struct proc_dir_s *procdir;
   FAR const struct proc_node_s *node;
@@ -1781,7 +1781,7 @@ static int proc_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
   pid_t pid;
 
   finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
-  DEBUGASSERT(relpath != NULL && dir != NULL && dir->u.procfs == NULL);
+  DEBUGASSERT(relpath != NULL);
 
   /* The relative must be either:
    *
@@ -1887,7 +1887,7 @@ static int proc_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
     }
 
   procdir->pid  = pid;
-  dir->u.procfs = (FAR void *)procdir;
+  *dir = (FAR struct fs_dirent_s *)procdir;
   return OK;
 }
 
@@ -1900,17 +1900,8 @@ static int proc_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
 
 static int proc_closedir(FAR struct fs_dirent_s *dir)
 {
-  FAR struct proc_dir_s *priv;
-
-  DEBUGASSERT(dir != NULL && dir->u.procfs != NULL);
-  priv = dir->u.procfs;
-
-  if (priv)
-    {
-      kmm_free(priv);
-    }
-
-  dir->u.procfs = NULL;
+  DEBUGASSERT(dir != NULL);
+  kmm_free(dir);
   return OK;
 }
 
@@ -1931,8 +1922,8 @@ static int proc_readdir(FAR struct fs_dirent_s *dir,
   pid_t pid;
   int ret;
 
-  DEBUGASSERT(dir != NULL && dir->u.procfs != NULL);
-  procdir = dir->u.procfs;
+  DEBUGASSERT(dir != NULL);
+  procdir = (FAR struct proc_dir_s *)dir;
 
   /* Have we reached the end of the directory */
 
@@ -2011,8 +2002,8 @@ static int proc_rewinddir(struct fs_dirent_s *dir)
 {
   FAR struct proc_dir_s *priv;
 
-  DEBUGASSERT(dir != NULL && dir->u.procfs != NULL);
-  priv = dir->u.procfs;
+  DEBUGASSERT(dir != NULL);
+  priv = (FAR struct proc_dir_s *)dir;
 
   priv->base.index = 0;
   return OK;
