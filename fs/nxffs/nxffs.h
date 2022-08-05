@@ -1108,7 +1108,9 @@ int nxffs_truncate(FAR struct file *filep, off_t length);
 #endif
 
 int nxffs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
-                  FAR struct fs_dirent_s *dir);
+                  FAR struct fs_dirent_s **dir);
+int nxffs_closedir(FAR struct inode *mountpt,
+                   FAR struct fs_dirent_s *dir);
 int nxffs_readdir(FAR struct inode *mountpt,
                   FAR struct fs_dirent_s *dir,
                   FAR struct dirent *entry);

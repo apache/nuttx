@@ -41,7 +41,6 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
-#include <nuttx/fs/dirent.h>
 
 #include "route/route.h"
 
@@ -159,7 +158,7 @@ static int     route_dup(FAR const struct file *oldp,
                  FAR struct file *newp);
 
 static int     route_opendir(const char *relpath,
-                 FAR struct fs_dirent_s *dir);
+                 FAR struct fs_dirent_s **dir);
 static int     route_closedir(FAR struct fs_dirent_s *dir);
 static int     route_readdir(FAR struct fs_dirent_s *dir,
                              FAR struct dirent *entry);
@@ -610,12 +609,12 @@ static int route_dup(FAR const struct file *oldp, FAR struct file *newp)
  ****************************************************************************/
 
 static int route_opendir(FAR const char *relpath,
-                         FAR struct fs_dirent_s *dir)
+                         FAR struct fs_dirent_s **dir)
 {
   FAR struct route_dir_s *level2;
 
   finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
-  DEBUGASSERT(relpath && dir && !dir->u.procfs);
+  DEBUGASSERT(relpath);
 
   /* Check the relative path */
 
@@ -652,7 +651,7 @@ static int route_opendir(FAR const char *relpath,
   level2->base.nentries    = 2;
   level2->name             = "";
   level2->node             = PROC_ROUTE;
-  dir->u.procfs            = (FAR void *)level2;
+  *dir                     = (FAR struct fs_dirent_s *)level2;
   return OK;
 }
 
@@ -665,17 +664,8 @@ static int route_opendir(FAR const char *relpath,
 
 static int route_closedir(FAR struct fs_dirent_s *dir)
 {
-  FAR struct route_dir_s *priv;
-
-  DEBUGASSERT(dir && dir->u.procfs);
-  priv = dir->u.procfs;
-
-  if (priv != NULL)
-    {
-      kmm_free(priv);
-    }
-
-  dir->u.procfs = NULL;
+  DEBUGASSERT(dir);
+  kmm_free(dir);
   return OK;
 }
 
@@ -693,8 +683,8 @@ static int route_readdir(FAR struct fs_dirent_s *dir,
   FAR const char *dname;
   unsigned int index;
 
-  DEBUGASSERT(dir != NULL && dir->u.procfs != NULL);
-  level2 = dir->u.procfs;
+  DEBUGASSERT(dir != NULL);
+  level2 = (FAR struct route_dir_s *)dir;
 
   /* The index determines which entry to return */
 
@@ -746,8 +736,8 @@ static int route_rewinddir(struct fs_dirent_s *dir)
 {
   FAR struct route_dir_s *priv;
 
-  DEBUGASSERT(dir && dir->u.procfs);
-  priv = dir->u.procfs;
+  DEBUGASSERT(dir);
+  priv = (FAR struct route_dir_s *)dir;
 
   priv->base.index = 0;
   return OK;

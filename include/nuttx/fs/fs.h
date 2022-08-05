@@ -174,8 +174,24 @@ struct inode;
 struct stat;
 struct statfs;
 struct pollfd;
-struct fs_dirent_s;
 struct mtd_dev_s;
+
+/* The internal representation of type DIR is just a container for an inode
+ * reference, and the path of directory.
+ */
+
+struct fs_dirent_s
+{
+  /* This is the node that was opened by opendir.  The type of the inode
+   * determines the way that the readdir() operations are performed. For the
+   * pseudo root pseudo-file system, it is also used to support rewind.
+   *
+   * We hold a reference on this inode so we know that it will persist until
+   * closedir() is called (although inodes linked to this inode may change).
+   */
+
+  FAR struct inode *fd_root;
+};
 
 /* This structure is provided by devices when they are registered with the
  * system.  It is used to call back to perform device specific operations.
@@ -306,7 +322,7 @@ struct mountpt_operations
   /* Directory operations */
 
   int     (*opendir)(FAR struct inode *mountpt, FAR const char *relpath,
-            FAR struct fs_dirent_s *dir);
+            FAR struct fs_dirent_s **dir);
   int     (*closedir)(FAR struct inode *mountpt,
             FAR struct fs_dirent_s *dir);
   int     (*readdir)(FAR struct inode *mountpt,

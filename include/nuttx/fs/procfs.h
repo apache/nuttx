@@ -73,7 +73,7 @@ struct procfs_operations
   /* Directory operations */
 
   int     (*opendir)(FAR const char *relpath,
-                     FAR struct fs_dirent_s *dir);
+                     FAR struct fs_dirent_s **dir);
   int     (*closedir)(FAR struct fs_dirent_s *dir);
   int     (*readdir)(FAR struct fs_dirent_s *dir, FAR struct dirent *entry);
   int     (*rewinddir)(FAR struct fs_dirent_s *dir);
@@ -119,6 +119,7 @@ struct procfs_file_s
 
 struct procfs_dir_priv_s
 {
+  struct fs_dirent_s dir;                       /* VFS directory structure */
   uint8_t level;                                /* Directory level.  Currently 0 or 1 */
   uint16_t index;                               /* Index to the next directory entry */
   uint16_t nentries;                            /* Number of directory entries */

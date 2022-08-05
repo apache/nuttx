@@ -29,9 +29,23 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/fs/dirent.h>
 
 #include "inode/inode.h"
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* For the root pseudo-file system, we need retain only the 'next' inode
+ * need for the next readdir() operation. We hold a reference on this
+ * inode so we know that it will persist until closedir is called.
+ */
+
+struct fs_pseudodir_s
+{
+  struct fs_dirent_s dir;
+  FAR struct inode *next;
+};
 
 /****************************************************************************
  * Private Functions Prototypes
@@ -91,8 +105,10 @@ static struct inode g_dir_inode =
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
 static int open_mountpoint(FAR struct inode *inode, FAR const char *relpath,
-                           FAR struct fs_dirent_s *dir)
+                           FAR struct fs_dirent_s **dir)
 {
+  int ret;
+
   /* The inode itself as the 'root' of mounted volume. The actually
    * directory is at relpath into the mounted filesystem.
    *
@@ -105,9 +121,13 @@ static int open_mountpoint(FAR struct inode *inode, FAR const char *relpath,
       return -ENOSYS;
     }
 
-  dir->fd_root = inode;
+  ret = inode->u.i_mops->opendir(inode, relpath, dir);
+  if (ret >= 0)
+    {
+      (*dir)->fd_root = inode;
+    }
 
-  return inode->u.i_mops->opendir(inode, relpath, dir);
+  return ret;
 }
 #endif
 
@@ -123,16 +143,26 @@ static int open_mountpoint(FAR struct inode *inode, FAR const char *relpath,
  *   dir -- the dirent structure to be initialized
  *
  * Returned Value:
- *   None
+ *   On success, 0 is returned; Otherwise, a negative errno is returned.
  *
  ****************************************************************************/
 
-static void open_pseudodir(FAR struct inode *inode,
-                           FAR struct fs_dirent_s *dir)
+static int open_pseudodir(FAR struct inode *inode,
+                          FAR struct fs_dirent_s **dir)
 {
-  dir->fd_root          = inode;          /* Save the inode where we start */
-  dir->u.pseudo.fd_next = inode->i_child; /* The next node for readdir */
+  FAR struct fs_pseudodir_s *pdir;
+
+  pdir = kmm_zalloc(sizeof(*pdir));
+  if (pdir == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  *dir              = &pdir->dir;
+  pdir->dir.fd_root = inode;          /* Save the inode where we start */
+  pdir->next        = inode->i_child; /* This next node for readdir */
   inode_addref(inode->i_child);
+  return 0;
 }
 
 /****************************************************************************
@@ -141,7 +171,7 @@ static void open_pseudodir(FAR struct inode *inode,
 
 static off_t seek_pseudodir(FAR struct file *filep, off_t offset)
 {
-  FAR struct fs_dirent_s *dir = filep->f_priv;
+  FAR struct fs_pseudodir_s *pdir = filep->f_priv;
   FAR struct inode *curr;
   FAR struct inode *prev;
   off_t pos;
@@ -155,12 +185,12 @@ static off_t seek_pseudodir(FAR struct file *filep, off_t offset)
   if (offset < filep->f_pos)
     {
       pos  = 0;
-      curr = dir->fd_root->i_child;
+      curr = pdir->dir.fd_root->i_child;
     }
   else
     {
       pos  = filep->f_pos;
-      curr = dir->u.pseudo.fd_next;
+      curr = pdir->next;
     }
 
   /* Traverse the peer list starting at the 'root' of the
@@ -175,11 +205,11 @@ static off_t seek_pseudodir(FAR struct file *filep, off_t offset)
 
   /* Now get the inode to vist next time that readdir() is called */
 
-  prev = dir->u.pseudo.fd_next;
+  prev = pdir->next;
 
   /* The next node to visit (might be null) */
 
-  dir->u.pseudo.fd_next = curr;
+  pdir->next = curr;
   if (curr != NULL)
     {
       /* Increment the reference count on this next node */
@@ -262,11 +292,12 @@ static off_t seek_mountptdir(FAR struct file *filep, off_t offset)
 static int read_pseudodir(FAR struct fs_dirent_s *dir,
                           FAR struct dirent *entry)
 {
+  FAR struct fs_pseudodir_s *pdir = (FAR struct fs_pseudodir_s *)dir;
   FAR struct inode *prev;
 
   /* Check if we are at the end of the list */
 
-  if (dir->u.pseudo.fd_next == NULL)
+  if (pdir->next == NULL)
     {
       /* End of file and error conditions are not distinguishable with
        * readdir. Here we return -ENOENT to signal the end of the directory.
@@ -277,49 +308,48 @@ static int read_pseudodir(FAR struct fs_dirent_s *dir,
 
   /* Copy the inode name into the dirent structure */
 
-  strlcpy(entry->d_name, dir->u.pseudo.fd_next->i_name,
-          sizeof(entry->d_name));
+  strlcpy(entry->d_name, pdir->next->i_name, sizeof(entry->d_name));
 
   /* If the node has file operations, we will say that it is a file. */
 
   entry->d_type = DTYPE_UNKNOWN;
-  if (dir->u.pseudo.fd_next->u.i_ops != NULL)
+  if (pdir->next->u.i_ops != NULL)
     {
 #ifndef CONFIG_DISABLE_MOUNTPOINT
-      if (INODE_IS_BLOCK(dir->u.pseudo.fd_next))
+      if (INODE_IS_BLOCK(pdir->next))
         {
           entry->d_type = DTYPE_BLK;
         }
-      else if (INODE_IS_MTD(dir->u.pseudo.fd_next))
+      else if (INODE_IS_MTD(pdir->next))
         {
           entry->d_type = DTYPE_MTD;
         }
-      else if (INODE_IS_MOUNTPT(dir->u.pseudo.fd_next))
+      else if (INODE_IS_MOUNTPT(pdir->next))
         {
           entry->d_type = DTYPE_DIRECTORY;
         }
       else
 #endif
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
-      if (INODE_IS_SOFTLINK(dir->u.pseudo.fd_next))
+      if (INODE_IS_SOFTLINK(pdir->next))
         {
           entry->d_type = DTYPE_LINK;
         }
       else
 #endif
-      if (INODE_IS_DRIVER(dir->u.pseudo.fd_next))
+      if (INODE_IS_DRIVER(pdir->next))
         {
           entry->d_type = DTYPE_CHR;
         }
-      else if (INODE_IS_NAMEDSEM(dir->u.pseudo.fd_next))
+      else if (INODE_IS_NAMEDSEM(pdir->next))
         {
           entry->d_type = DTYPE_SEM;
         }
-      else if (INODE_IS_MQUEUE(dir->u.pseudo.fd_next))
+      else if (INODE_IS_MQUEUE(pdir->next))
         {
           entry->d_type = DTYPE_MQ;
         }
-      else if (INODE_IS_SHM(dir->u.pseudo.fd_next))
+      else if (INODE_IS_SHM(pdir->next))
         {
           entry->d_type = DTYPE_SHM;
         }
@@ -330,8 +360,8 @@ static int read_pseudodir(FAR struct fs_dirent_s *dir,
    * be both!
    */
 
-  if (dir->u.pseudo.fd_next->i_child != NULL ||
-      dir->u.pseudo.fd_next->u.i_ops == NULL)
+  if (pdir->next->i_child != NULL ||
+      pdir->next->u.i_ops == NULL)
     {
       entry->d_type = DTYPE_DIRECTORY;
     }
@@ -340,14 +370,14 @@ static int read_pseudodir(FAR struct fs_dirent_s *dir,
 
   inode_semtake();
 
-  prev                  = dir->u.pseudo.fd_next;
-  dir->u.pseudo.fd_next = prev->i_peer; /* The next node to visit */
+  prev       = pdir->next;
+  pdir->next = prev->i_peer; /* The next node to visit */
 
-  if (dir->u.pseudo.fd_next != NULL)
+  if (pdir->next != NULL)
     {
       /* Increment the reference count on this next node */
 
-      dir->u.pseudo.fd_next->i_crefs++;
+      pdir->next->i_crefs++;
     }
 
   inode_semgive();
@@ -390,13 +420,15 @@ static int dir_close(FAR struct file *filep)
   else
 #endif
     {
+      FAR struct fs_pseudodir_s *pdir = filep->f_priv;
+
       /* The node is part of the root pseudo file system, release
        * our contained reference to the 'next' inode.
        */
 
-      if (dir->u.pseudo.fd_next != NULL)
+      if (pdir->next != NULL)
         {
-          inode_release(dir->u.pseudo.fd_next);
+          inode_release(pdir->next);
         }
 
       /* Then release the container */
@@ -516,13 +548,7 @@ int dir_allocate(FAR struct file *filep, FAR const char *relpath)
 {
   FAR struct fs_dirent_s *dir;
   FAR struct inode *inode = filep->f_inode;
-  int ret = 0;
-
-  dir = kmm_zalloc(sizeof(struct fs_dirent_s));
-  if (dir == NULL)
-    {
-      return -ENOMEM;
-    }
+  int ret;
 
   /* Is this a node in the pseudo filesystem? Or a mountpoint? */
 
@@ -531,25 +557,24 @@ int dir_allocate(FAR struct file *filep, FAR const char *relpath)
     {
       /* Open the directory at the relative path */
 
-      ret = open_mountpoint(inode, relpath, dir);
+      ret = open_mountpoint(inode, relpath, &dir);
       if (ret < 0)
         {
-          goto errout_with_direntry;
+          return ret;
         }
     }
   else
 #endif
     {
-      open_pseudodir(inode, dir);
+      ret = open_pseudodir(inode, &dir);
+      if (ret < 0)
+        {
+          return ret;
+        }
     }
 
   filep->f_inode  = &g_dir_inode;
   filep->f_priv   = dir;
   inode_addref(&g_dir_inode);
-
-  return ret;
-
-errout_with_direntry:
-  kmm_free(dir);
   return ret;
 }

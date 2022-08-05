@@ -37,7 +37,6 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/fs/dirent.h>
 #include <nuttx/mtd/mtd.h>
 
 #include "fs_romfs.h"

@@ -32,9 +32,19 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/mtd/mtd.h>
-#include <nuttx/fs/dirent.h>
+#include <nuttx/kmalloc.h>
 
 #include "nxffs.h"
+
+/****************************************************************************
+ * Private Type
+ ****************************************************************************/
+
+struct nxffs_dir_s
+{
+  struct fs_dirent_s base;
+  off_t offset;
+};
 
 /****************************************************************************
  * Public Functions
@@ -49,9 +59,10 @@
  ****************************************************************************/
 
 int nxffs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
-                  FAR struct fs_dirent_s *dir)
+                  FAR struct fs_dirent_s **dir)
 {
-  struct nxffs_volume_s *volume;
+  FAR struct nxffs_volume_s *volume;
+  FAR struct nxffs_dir_s *ndir;
   int ret;
 
   finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
@@ -63,10 +74,16 @@ int nxffs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   /* Recover the file system state from the NuttX inode instance */
 
   volume = mountpt->i_private;
+  ndir = kmm_zalloc(sizeof(*ndir));
+  if (ndir == NULL)
+    {
+      return -ENOMEM;
+    }
+
   ret = nxsem_wait(&volume->exclsem);
   if (ret < 0)
     {
-      goto errout;
+      goto errout_with_ndir;
     }
 
   /* The requested directory must be the volume-relative "root" directory */
@@ -79,14 +96,33 @@ int nxffs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
   /* Set the offset to the offset to the first valid inode */
 
-  dir->u.nxffs.nx_offset = volume->inoffset;
-  ret = OK;
+  ndir->offset = volume->inoffset;
+  nxsem_post(&volume->exclsem);
+  *dir = &ndir->base;
+  return 0;
 
 errout_with_semaphore:
   nxsem_post(&volume->exclsem);
 
-errout:
+errout_with_ndir:
+  kmm_free(ndir);
   return ret;
+}
+
+/****************************************************************************
+ * Name: nxffs_closedir
+ *
+ * Description:
+ *   Close directory
+ *
+ ****************************************************************************/
+
+int nxffs_closedir(FAR struct inode *mountpt,
+                   FAR struct fs_dirent_s *dir)
+{
+  DEBUGASSERT(dir);
+  kmm_free(dir);
+  return 0;
 }
 
 /****************************************************************************
@@ -101,6 +137,7 @@ int nxffs_readdir(FAR struct inode *mountpt,
                   FAR struct dirent *dentry)
 {
   FAR struct nxffs_volume_s *volume;
+  FAR struct nxffs_dir_s *ndir;
   struct nxffs_entry_s entry;
   off_t offset;
   int ret;
@@ -112,6 +149,7 @@ int nxffs_readdir(FAR struct inode *mountpt,
   /* Recover the file system state from the NuttX inode instance */
 
   volume = mountpt->i_private;
+  ndir = (FAR struct nxffs_dir_s *)dir;
   ret = nxsem_wait(&volume->exclsem);
   if (ret < 0)
     {
@@ -120,7 +158,7 @@ int nxffs_readdir(FAR struct inode *mountpt,
 
   /* Read the next inode header from the offset */
 
-  offset = dir->u.nxffs.nx_offset;
+  offset = ndir->offset;
   ret = nxffs_nextentry(volume, offset, &entry);
 
   /* If the read was successful, then handle the reported inode.  Note
@@ -138,7 +176,7 @@ int nxffs_readdir(FAR struct inode *mountpt,
 
       /* Discard this entry and set the next offset. */
 
-      dir->u.nxffs.nx_offset = nxffs_inodeend(volume, &entry);
+      ndir->offset = nxffs_inodeend(volume, &entry);
       nxffs_freeentry(&entry);
       ret = OK;
     }
@@ -179,7 +217,7 @@ int nxffs_rewinddir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
 
   /* Reset the offset to the FLASH offset to the first valid inode */
 
-  dir->u.nxffs.nx_offset = volume->inoffset;
+  ((FAR struct nxffs_dir_s *)dir)->offset = volume->inoffset;
   ret = OK;
 
   nxsem_post(&volume->exclsem);

@@ -24,7 +24,6 @@
 
 #include <nuttx/config.h>
 #include <nuttx/fs/procfs.h>
-#include <nuttx/fs/dirent.h>
 #include <nuttx/kmalloc.h>
 
 #include <sys/stat.h>
@@ -97,7 +96,7 @@ static ssize_t cxd56_powermgr_procfs_read(FAR struct file *filep,
 static int cxd56_powermgr_procfs_dup(FAR const struct file *oldp,
                                      FAR struct file *newp);
 static int cxd56_powermgr_procfs_opendir(FAR const char *relpath,
-                                         FAR struct fs_dirent_s *dir);
+                                         FAR struct fs_dirent_s **dir);
 static int cxd56_powermgr_procfs_closedir(FAR struct fs_dirent_s *dir);
 static int cxd56_powermgr_procfs_readdir(FAR struct fs_dirent_s *dir,
                                          FAR struct dirent *entry);
@@ -678,7 +677,7 @@ static int cxd56_powermgr_procfs_stat(FAR const char *relpath,
  ****************************************************************************/
 
 static int cxd56_powermgr_procfs_opendir(FAR const char *relpath,
-                                         FAR struct fs_dirent_s *dir)
+                                         FAR struct fs_dirent_s **dir)
 {
   FAR struct cxd56_powermgr_procfs_dir_s *procfs;
   int ret;
@@ -711,7 +710,7 @@ static int cxd56_powermgr_procfs_opendir(FAR const char *relpath,
     }
 
   procfs->index = 0;
-  dir->u.procfs = (FAR void *)procfs;
+  *dir = (FAR struct fs_dirent_s *)procfs;
 
   return OK;
 }
@@ -726,19 +725,10 @@ static int cxd56_powermgr_procfs_opendir(FAR const char *relpath,
 
 static int cxd56_powermgr_procfs_closedir(FAR struct fs_dirent_s *dir)
 {
-  FAR struct smartfs_level1_s *priv;
-
   pminfo("Closedir\n");
 
-  DEBUGASSERT(dir && dir->u.procfs);
-  priv = dir->u.procfs;
-
-  if (priv)
-    {
-      kmm_free(priv);
-    }
-
-  dir->u.procfs = NULL;
+  DEBUGASSERT(dir);
+  kmm_free(dir);
   return OK;
 }
 
@@ -755,9 +745,9 @@ static int cxd56_powermgr_procfs_readdir(FAR struct fs_dirent_s *dir,
 {
   FAR struct cxd56_powermgr_procfs_dir_s *procfs;
 
-  DEBUGASSERT(dir && dir->u.procfs);
+  DEBUGASSERT(dir);
 
-  procfs = (FAR struct cxd56_powermgr_procfs_dir_s *)dir->u.procfs;
+  procfs = (FAR struct cxd56_powermgr_procfs_dir_s *)dir;
 
   pminfo("Readdir %d\n", procfs->index);
 
@@ -787,9 +777,9 @@ static int cxd56_powermgr_procfs_rewinddir(FAR struct fs_dirent_s *dir)
 {
   FAR struct cxd56_powermgr_procfs_dir_s *procfs;
 
-  DEBUGASSERT(dir && dir->u.procfs);
+  DEBUGASSERT(dir);
 
-  procfs = (FAR struct cxd56_powermgr_procfs_dir_s *)dir->u.procfs;
+  procfs = (FAR struct cxd56_powermgr_procfs_dir_s *)dir;
   pminfo("Rewind %d\n", procfs->index);
   procfs->index = 0;
 

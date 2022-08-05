@@ -43,7 +43,6 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/userfs.h>
-#include <nuttx/fs/dirent.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/net/net.h>
 #include <nuttx/semaphore.h>
@@ -57,6 +56,12 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+struct userfs_dir_s
+{
+  struct fs_dirent_s base;
+  FAR void *dir;
+};
 
 /* This structure holds the internal state of the UserFS proxy */
 
@@ -106,7 +111,7 @@ static int     userfs_fstat(FAR const struct file *filep,
 static int     userfs_truncate(FAR struct file *filep, off_t length);
 
 static int     userfs_opendir(FAR struct inode *mountpt,
-                 FAR const char *relpath, FAR struct fs_dirent_s *dir);
+                 FAR const char *relpath, FAR struct fs_dirent_s **dir);
 static int     userfs_closedir(FAR struct inode *mountpt,
                  FAR struct fs_dirent_s *dir);
 static int     userfs_readdir(FAR struct inode *mountpt,
@@ -1071,8 +1076,9 @@ static int userfs_truncate(FAR struct file *filep, off_t length)
  ****************************************************************************/
 
 static int userfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
-                          FAR struct fs_dirent_s *dir)
+                          FAR struct fs_dirent_s **dir)
 {
+  FAR struct userfs_dir_s *udir;
   FAR struct userfs_state_s *priv;
   FAR struct userfs_opendir_request_s *req;
   FAR struct userfs_opendir_response_s *resp;
@@ -1150,7 +1156,14 @@ static int userfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   /* Save the opaque dir reference in struct fs_dirent_s */
 
   DEBUGASSERT(dir != NULL);
-  dir->u.userfs.fs_dir = resp->dir;
+  udir = kmm_zalloc(sizeof(struct userfs_dir_s));
+  if (udir == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  udir->dir = resp->dir;
+  *dir = (FAR struct fs_dirent_s *)udir;
   return resp->ret;
 }
 
@@ -1165,6 +1178,7 @@ static int userfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 static int userfs_closedir(FAR struct inode *mountpt,
                            FAR struct fs_dirent_s *dir)
 {
+  FAR struct userfs_dir_s *udir;
   FAR struct userfs_state_s *priv;
   FAR struct userfs_closedir_request_s *req;
   FAR struct userfs_closedir_response_s *resp;
@@ -1175,6 +1189,7 @@ static int userfs_closedir(FAR struct inode *mountpt,
   DEBUGASSERT(mountpt != NULL &&
               mountpt->i_private != NULL);
   priv = mountpt->i_private;
+  udir = (FAR struct userfs_dir_s *)dir;
 
   /* Get exclusive access */
 
@@ -1188,7 +1203,7 @@ static int userfs_closedir(FAR struct inode *mountpt,
 
   req      = (FAR struct userfs_closedir_request_s *)priv->iobuffer;
   req->req = USERFS_REQ_CLOSEDIR;
-  req->dir = dir->u.userfs.fs_dir;
+  req->dir = udir->dir;
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        sizeof(struct userfs_closedir_request_s), 0,
@@ -1226,6 +1241,7 @@ static int userfs_closedir(FAR struct inode *mountpt,
       return -EIO;
     }
 
+  kmm_free(udir);
   return resp->ret;
 }
 
@@ -1240,6 +1256,7 @@ static int userfs_readdir(FAR struct inode *mountpt,
                           FAR struct fs_dirent_s *dir,
                           FAR struct dirent *entry)
 {
+  FAR struct userfs_dir_s *udir;
   FAR struct userfs_state_s *priv;
   FAR struct userfs_readdir_request_s *req;
   FAR struct userfs_readdir_response_s *resp;
@@ -1250,6 +1267,7 @@ static int userfs_readdir(FAR struct inode *mountpt,
   DEBUGASSERT(mountpt != NULL &&
               mountpt->i_private != NULL);
   priv = mountpt->i_private;
+  udir = (FAR struct userfs_dir_s *)dir;
 
   /* Get exclusive access */
 
@@ -1263,7 +1281,7 @@ static int userfs_readdir(FAR struct inode *mountpt,
 
   req      = (FAR struct userfs_readdir_request_s *)priv->iobuffer;
   req->req = USERFS_REQ_READDIR;
-  req->dir = dir->u.userfs.fs_dir;
+  req->dir = udir->dir;
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        sizeof(struct userfs_readdir_request_s), 0,
@@ -1318,6 +1336,7 @@ static int userfs_readdir(FAR struct inode *mountpt,
 static int userfs_rewinddir(FAR struct inode *mountpt,
                             FAR struct fs_dirent_s *dir)
 {
+  FAR struct userfs_dir_s *udir;
   FAR struct userfs_state_s *priv;
   FAR struct userfs_rewinddir_request_s *req;
   FAR struct userfs_rewinddir_response_s *resp;
@@ -1328,6 +1347,7 @@ static int userfs_rewinddir(FAR struct inode *mountpt,
   DEBUGASSERT(mountpt != NULL &&
               mountpt->i_private != NULL);
   priv = mountpt->i_private;
+  udir = (FAR struct userfs_dir_s *)dir;
 
   /* Get exclusive access */
 
@@ -1341,7 +1361,7 @@ static int userfs_rewinddir(FAR struct inode *mountpt,
 
   req      = (FAR struct userfs_rewinddir_request_s *)priv->iobuffer;
   req->req = USERFS_REQ_REWINDDIR;
-  req->dir = dir->u.userfs.fs_dir;
+  req->dir = udir->dir;
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        sizeof(struct userfs_rewinddir_request_s), 0,

@@ -29,10 +29,8 @@
 #include <assert.h>
 #include <debug.h>
 #include <errno.h>
-#include <dirent.h>
 
 #include <nuttx/nuttx.h>
-#include <nuttx/fs/dirent.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
 #include <nuttx/kmalloc.h>
@@ -104,7 +102,7 @@ static int     pm_dup(FAR const struct file *oldp,
                       FAR struct file *newp);
 
 static int     pm_opendir(FAR const char *relpath,
-                          FAR struct fs_dirent_s *dir);
+                          FAR struct fs_dirent_s **dir);
 static int     pm_closedir(FAR struct fs_dirent_s *dir);
 static int     pm_readdir(FAR struct fs_dirent_s *dir,
                           FAR struct dirent *entry);
@@ -437,12 +435,12 @@ static int pm_dup(FAR const struct file *oldp, FAR struct file *newp)
  *
  ****************************************************************************/
 
-static int pm_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
+static int pm_opendir(FAR const char *relpath, FAR struct fs_dirent_s **dir)
 {
   FAR struct procfs_dir_priv_s *level1;
 
   finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
-  DEBUGASSERT(relpath && dir && !dir->u.procfs);
+  DEBUGASSERT(relpath);
 
   /* Assume that path refers to the 1st level subdirectory.  Allocate the
    * level1 the dirent structure before checking.
@@ -460,7 +458,7 @@ static int pm_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
   level1->level    = 1;
   level1->nentries = CONFIG_PM_NDOMAINS * ARRAY_SIZE(g_pm_files);
 
-  dir->u.procfs = (FAR void *)level1;
+  *dir = (FAR struct fs_dirent_s *)level1;
   return OK;
 }
 
@@ -473,14 +471,8 @@ static int pm_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
 
 static int pm_closedir(FAR struct fs_dirent_s *dir)
 {
-  FAR struct procfs_dir_priv_s *level1;
-
-  DEBUGASSERT(dir && dir->u.procfs);
-  level1 = dir->u.procfs;
-
-  kmm_free(level1);
-
-  dir->u.procfs = NULL;
+  DEBUGASSERT(dir);
+  kmm_free(dir);
   return OK;
 }
 
@@ -499,8 +491,8 @@ static int pm_readdir(FAR struct fs_dirent_s *dir,
   int domain;
   int fpos;
 
-  DEBUGASSERT(dir && dir->u.procfs);
-  level1 = dir->u.procfs;
+  DEBUGASSERT(dir);
+  level1 = (FAR struct procfs_dir_priv_s *)dir;
 
   index = level1->index;
   if (index >= level1->nentries)
@@ -535,8 +527,8 @@ static int pm_rewinddir(FAR struct fs_dirent_s *dir)
 {
   FAR struct procfs_dir_priv_s *level1;
 
-  DEBUGASSERT(dir && dir->u.procfs);
-  level1 = dir->u.procfs;
+  DEBUGASSERT(dir);
+  level1 = (FAR struct procfs_dir_priv_s *)dir;
 
   level1->index = 0;
   return OK;

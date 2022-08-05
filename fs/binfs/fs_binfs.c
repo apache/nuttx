@@ -38,13 +38,22 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/binfs.h>
-#include <nuttx/fs/dirent.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/lib/builtin.h>
 
 #include "inode/inode.h"
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_BINFS)
+
+/****************************************************************************
+ * Private Type
+ ****************************************************************************/
+
+struct binfs_dir_s
+{
+  struct fs_dirent_s base; /* VFS directory structure */
+  unsigned int index;      /* Index to the next named entry point */
+};
 
 /****************************************************************************
  * Private Function Prototypes
@@ -63,7 +72,9 @@ static int     binfs_fstat(FAR const struct file *filep,
                            FAR struct stat *buf);
 
 static int     binfs_opendir(struct inode *mountpt, const char *relpath,
-                             struct fs_dirent_s *dir);
+                             struct fs_dirent_s **dir);
+static int     binfs_closedir(FAR struct inode *mountpt,
+                              FAR struct fs_dirent_s *dir);
 static int     binfs_readdir(FAR struct inode *mountpt,
                              FAR struct fs_dirent_s *dir,
                              FAR struct dirent *entry);
@@ -105,7 +116,7 @@ const struct mountpt_operations binfs_operations =
   NULL,              /* truncate */
 
   binfs_opendir,     /* opendir */
-  NULL,              /* closedir */
+  binfs_closedir,    /* closedir */
   binfs_readdir,     /* readdir */
   binfs_rewinddir,   /* rewinddir */
 
@@ -278,8 +289,10 @@ static int binfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
  ****************************************************************************/
 
 static int binfs_opendir(struct inode *mountpt, const char *relpath,
-                         struct fs_dirent_s *dir)
+                         struct fs_dirent_s **dir)
 {
+  FAR struct binfs_dir_s *bdir;
+
   finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
 
   /* The requested directory must be the volume-relative "root" directory */
@@ -289,10 +302,33 @@ static int binfs_opendir(struct inode *mountpt, const char *relpath,
       return -ENOENT;
     }
 
+  bdir = kmm_zalloc(sizeof(*bdir));
+  if (bdir == NULL)
+    {
+      return -ENOMEM;
+    }
+
   /* Set the index to the first entry */
 
-  dir->u.binfs.fb_index = 0;
+  bdir->index = 0;
+  *dir = (FAR struct fs_dirent_s *)bdir;
   return OK;
+}
+
+/****************************************************************************
+ * Name: binfs_closedir
+ *
+ * Description:
+ *   Close a directory
+ *
+ ****************************************************************************/
+
+static int binfs_closedir(FAR struct inode *mountpt,
+                          FAR struct fs_dirent_s *dir)
+{
+  DEBUGASSERT(dir);
+  kmm_free(dir);
+  return 0;
 }
 
 /****************************************************************************
@@ -306,13 +342,15 @@ static int binfs_readdir(FAR struct inode *mountpt,
                          FAR struct fs_dirent_s *dir,
                          FAR struct dirent *entry)
 {
+  FAR struct binfs_dir_s *bdir;
   FAR const char *name;
   unsigned int index;
   int ret;
 
   /* Have we reached the end of the directory */
 
-  index = dir->u.binfs.fb_index;
+  bdir = (FAR struct binfs_dir_s *)dir;
+  index = bdir->index;
   name = builtin_getname(index);
   if (name == NULL)
     {
@@ -338,10 +376,10 @@ static int binfs_readdir(FAR struct inode *mountpt,
       index++;
 
       /* Set up the next directory entry offset.  NOTE that we could use the
-       * standard f_pos instead of our own private fb_index.
+       * standard f_pos instead of our own private index.
        */
 
-      dir->u.binfs.fb_index = index;
+      bdir->index = index;
       ret = OK;
     }
 
@@ -359,7 +397,7 @@ static int binfs_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir)
 {
   finfo("Entry\n");
 
-  dir->u.binfs.fb_index = 0;
+  ((FAR struct binfs_dir_s *)dir)->index = 0;
   return OK;
 }
 

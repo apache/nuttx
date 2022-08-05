@@ -1964,6 +1964,7 @@ static inline int fat_getlfname(FAR struct fat_mountpt_s *fs,
                                 FAR struct fs_dirent_s *dir,
                                 FAR struct dirent *entry)
 {
+  FAR struct fat_dirent_s *fdir;
   FAR uint8_t *direntry;
   lfnchar  lfname[LDIR_MAXLFNCHARS];
   uint16_t diroffset;
@@ -1977,7 +1978,8 @@ static inline int fat_getlfname(FAR struct fat_mountpt_s *fs,
 
   /* Get a reference to the current directory entry */
 
-  diroffset = (dir->u.fat.fd_index & DIRSEC_NDXMASK(fs)) * DIR_SIZE;
+  fdir = (FAR struct fat_dirent_s *)dir;
+  diroffset = (fdir->dir.fd_index & DIRSEC_NDXMASK(fs)) * DIR_SIZE;
   direntry  = &fs->fs_buffer[diroffset];
 
   /* Get the starting sequence number */
@@ -2103,14 +2105,14 @@ static inline int fat_getlfname(FAR struct fat_mountpt_s *fs,
 
       /* Read next directory entry */
 
-      if (fat_nextdirentry(fs, &dir->u.fat) != OK)
+      if (fat_nextdirentry(fs, &fdir->dir) != OK)
         {
           return -ENOENT;
         }
 
       /* Make sure that the directory sector into the sector cache */
 
-      ret = fat_fscacheread(fs, dir->u.fat.fd_currsector);
+      ret = fat_fscacheread(fs, fdir->dir.fd_currsector);
       if (ret < 0)
         {
           return ret;
@@ -2118,7 +2120,7 @@ static inline int fat_getlfname(FAR struct fat_mountpt_s *fs,
 
       /* Get a reference to the current directory entry */
 
-      diroffset = (dir->u.fat.fd_index & DIRSEC_NDXMASK(fs)) * DIR_SIZE;
+      diroffset = (fdir->dir.fd_index & DIRSEC_NDXMASK(fs)) * DIR_SIZE;
       direntry  = &fs->fs_buffer[diroffset];
 
       /* Get the next expected sequence number. */
@@ -2942,6 +2944,7 @@ int fat_dirname2path(FAR struct fat_mountpt_s *fs,
                      FAR struct fs_dirent_s *dir,
                      FAR struct dirent *entry)
 {
+  FAR struct fat_dirent_s *fdir;
   uint16_t diroffset;
   FAR uint8_t *direntry;
 #ifdef CONFIG_FAT_LFN
@@ -2950,7 +2953,8 @@ int fat_dirname2path(FAR struct fat_mountpt_s *fs,
 
   /* Get a reference to the current directory entry */
 
-  diroffset = (dir->u.fat.fd_index & DIRSEC_NDXMASK(fs)) * DIR_SIZE;
+  fdir = (FAR struct fat_dirent_s *)dir;
+  diroffset = (fdir->dir.fd_index & DIRSEC_NDXMASK(fs)) * DIR_SIZE;
   direntry = &fs->fs_buffer[diroffset];
 
   /* Does this entry refer to the last entry of a long file name? */

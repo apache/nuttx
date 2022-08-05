@@ -31,7 +31,6 @@
 #include <debug.h>
 #include <assert.h>
 
-#include <nuttx/fs/dirent.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/kmalloc.h>
@@ -57,6 +56,12 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+struct fatfs_dir_s
+{
+  struct fs_dirent_s base;
+  DIR dir;
+};
 
 struct fatfs_file_s
 {
@@ -103,7 +108,7 @@ static int     fatfs_truncate(FAR struct file *filep, off_t length);
 
 static int     fatfs_opendir(FAR struct inode *mountpt,
                              FAR const char *relpath,
-                             FAR struct fs_dirent_s *dir);
+                             FAR struct fs_dirent_s **dir);
 static int     fatfs_closedir(FAR struct inode *mountpt,
                               FAR struct fs_dirent_s *dir);
 static int     fatfs_readdir(FAR struct inode *mountpt,
@@ -838,11 +843,11 @@ errsem:
 
 static int fatfs_opendir(FAR struct inode *mountpt,
                          FAR const char *relpath,
-                         FAR struct fs_dirent_s *dir)
+                         FAR struct fs_dirent_s **dir)
 {
   FAR struct fatfs_mountpt_s *fs;
   char path[strlen(relpath) + 3];
-  FAR DIR *dp;
+  FAR struct fatfs_dir_s *fdir;
   int ret;
 
   /* Recover our private data from the inode instance */
@@ -851,8 +856,8 @@ static int fatfs_opendir(FAR struct inode *mountpt,
 
   /* Allocate memory for the open directory */
 
-  dp = kmm_malloc(sizeof(*dp));
-  if (dp == NULL)
+  fdir = kmm_malloc(sizeof(*fdir));
+  if (fdir == NULL)
     {
       return -ENOMEM;
     }
@@ -860,23 +865,23 @@ static int fatfs_opendir(FAR struct inode *mountpt,
   ret = fatfs_semtake(fs);
   if (ret < 0)
     {
-      kmm_free(dp);
+      kmm_free(fdir);
       return ret;
     }
 
   path[0] = '0' + fs->pdrv;
   path[1] = ':';
   path[2] = '\0';
-  ret = fatfs_convert_result(f_opendir(dp, strcat(path, relpath)));
+  ret = fatfs_convert_result(f_opendir(&fdir->dir, strcat(path, relpath)));
   if (ret >= 0)
     {
-      dir->u.fatfs = dp;
+      *dir = &fdir->base;
     }
 
   fatfs_semgive(fs);
   if (ret < 0)
     {
-      kmm_free(dp);
+      kmm_free(fdir);
     }
 
   return ret;
@@ -893,22 +898,24 @@ static int fatfs_closedir(FAR struct inode *mountpt,
                           FAR struct fs_dirent_s *dir)
 {
   FAR struct fatfs_mountpt_s *fs;
+  FAR struct fatfs_dir_s *fdir;
   int ret;
 
   /* Recover our private data from the inode instance */
 
   fs = mountpt->i_private;
+  fdir = (FAR struct fatfs_dir_s *)dir;
   ret = fatfs_semtake(fs);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = fatfs_convert_result(f_closedir(dir->u.fatfs));
+  ret = fatfs_convert_result(f_closedir(&fdir->dir));
   fatfs_semgive(fs);
   if (ret >= 0)
     {
-      kmm_free(dir->u.fatfs);
+      kmm_free(fdir);
     }
 
   return ret;
@@ -926,13 +933,13 @@ static int fatfs_readdir(FAR struct inode *mountpt,
                          FAR struct dirent *entry)
 {
   FAR struct fatfs_mountpt_s *fs;
-  FAR DIR *dp;
+  FAR struct fatfs_dir_s *fdir;
   FILINFO fno;
   int ret;
 
   /* Recover our private data from the inode instance */
 
-  dp = dir->u.fatfs;
+  fdir = (FAR struct fatfs_dir_s *)dir;
   fs = mountpt->i_private;
   ret = fatfs_semtake(fs);
   if (ret < 0)
@@ -940,7 +947,7 @@ static int fatfs_readdir(FAR struct inode *mountpt,
       return ret;
     }
 
-  ret = fatfs_convert_result(f_readdir(dp, &fno));
+  ret = fatfs_convert_result(f_readdir(&fdir->dir, &fno));
   if (ret < 0)
     {
       goto errsem;
@@ -979,8 +986,10 @@ static int fatfs_rewinddir(FAR struct inode *mountpt,
                            FAR struct fs_dirent_s *dir)
 {
   FAR struct fatfs_mountpt_s *fs;
+  FAR struct fatfs_dir_s *fdir;
   int ret;
 
+  fdir = (FAR struct fatfs_dir_s *)dir;
   fs = mountpt->i_private;
   ret = fatfs_semtake(fs);
   if (ret < 0)
@@ -988,7 +997,7 @@ static int fatfs_rewinddir(FAR struct inode *mountpt,
       return ret;
     }
 
-  ret = fatfs_convert_result(f_rewinddir(dir->u.fatfs));
+  ret = fatfs_convert_result(f_rewinddir(&fdir->dir));
   fatfs_semgive(fs);
   return ret;
 }

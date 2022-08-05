@@ -33,7 +33,6 @@
 #include <time.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/fs/dirent.h>
 #include <nuttx/semaphore.h>
 
 /****************************************************************************
@@ -950,6 +949,20 @@ typedef uint16_t lfnchar;
 typedef uint8_t lfnchar;
 #  endif
 #endif
+
+struct fs_fatdir_s
+{
+  off_t        fd_startcluster;    /* Start cluster number of the directory */
+  off_t        fd_currcluster;     /* Current cluster number being read */
+  off_t        fd_currsector;      /* Current sector being read */
+  unsigned int fd_index;           /* Current index of the directory entry to read */
+};
+
+struct fat_dirent_s
+{
+  struct fs_dirent_s base;
+  struct fs_fatdir_s dir;
+};
 
 /* This structure is used internally for describing directory entries */
 

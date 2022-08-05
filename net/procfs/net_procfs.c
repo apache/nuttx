@@ -40,7 +40,6 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
-#include <nuttx/fs/dirent.h>
 #include <nuttx/net/netdev.h>
 
 #include "netdev/netdev.h"
@@ -91,7 +90,7 @@ static int     netprocfs_dup(FAR const struct file *oldp,
                  FAR struct file *newp);
 
 static int     netprocfs_opendir(FAR const char *relpath,
-                 FAR struct fs_dirent_s *dir);
+                 FAR struct fs_dirent_s **dir);
 static int     netprocfs_closedir(FAR struct fs_dirent_s *dir);
 static int     netprocfs_readdir(FAR struct fs_dirent_s *dir,
                                  FAR struct dirent *entry);
@@ -380,14 +379,14 @@ static int netprocfs_dup(FAR const struct file *oldp, FAR struct file *newp)
  ****************************************************************************/
 
 static int netprocfs_opendir(FAR const char *relpath,
-                             FAR struct fs_dirent_s *dir)
+                             FAR struct fs_dirent_s **dir)
 {
   FAR struct netprocfs_level1_s *level1;
   int ndevs;
   int ret;
 
   finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
-  DEBUGASSERT(relpath && dir && !dir->u.procfs);
+  DEBUGASSERT(relpath && dir);
 
   /* "net" and "net/route" are the only values of relpath that are
    * directories.
@@ -449,7 +448,7 @@ static int netprocfs_opendir(FAR const char *relpath,
       goto errout_with_alloc;
     }
 
-  dir->u.procfs = (FAR void *)level1;
+  *dir = (FAR struct fs_dirent_s *)level1;
   return OK;
 
 errout_with_alloc:
@@ -466,17 +465,8 @@ errout_with_alloc:
 
 static int netprocfs_closedir(FAR struct fs_dirent_s *dir)
 {
-  FAR struct netprocfs_level1_s *priv;
-
-  DEBUGASSERT(dir && dir->u.procfs);
-  priv = dir->u.procfs;
-
-  if (priv)
-    {
-      kmm_free(priv);
-    }
-
-  dir->u.procfs = NULL;
+  DEBUGASSERT(dir);
+  kmm_free(dir);
   return OK;
 }
 
@@ -495,8 +485,8 @@ static int netprocfs_readdir(FAR struct fs_dirent_s *dir,
   int index;
   int ret;
 
-  DEBUGASSERT(dir && dir->u.procfs);
-  level1 = dir->u.procfs;
+  DEBUGASSERT(dir);
+  level1 = (FAR struct netprocfs_level1_s *)dir;
   DEBUGASSERT(level1->base.level > 0);
 
   /* Are we searching this directory?  Or is it just an intermediate on the
@@ -630,8 +620,8 @@ static int netprocfs_rewinddir(FAR struct fs_dirent_s *dir)
 {
   FAR struct netprocfs_level1_s *priv;
 
-  DEBUGASSERT(dir && dir->u.procfs);
-  priv = dir->u.procfs;
+  DEBUGASSERT(dir);
+  priv = (FAR struct netprocfs_level1_s *)dir;
 
   priv->base.index = 0;
   return OK;
