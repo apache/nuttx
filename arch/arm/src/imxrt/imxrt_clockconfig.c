@@ -358,8 +358,8 @@ static void imxrt_pllsetup(void)
 
   /* Init ENET PLL6 */
 
-  reg = CCM_ANALOG_PLL_ENET_ENET0_DIV_SELECT_50MHZ |
-        CCM_ANALOG_PLL_ENET_ENET1_125M_EN          |
+  reg = CCM_ANALOG_PLL_ENET_ENET1_DIV_SELECT_50MHZ |
+        CCM_ANALOG_PLL_ENET_ENABLE                 |
         CCM_ANALOG_PLL_ENET_ENET_25M_REF_EN        |
         CCM_ANALOG_PLL_ENET_ENET_500M_REF_EN;
 
