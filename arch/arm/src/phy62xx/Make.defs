@@ -20,18 +20,12 @@
 
 include armv6-m/Make.defs
 
-CMN_ASRCS := $(filter-out arm_exception.S,$(CMN_ASRCS))
-
 CMN_ASRCS += phy62xx_exception.S phy62xx_start.S
 
-CHIP_CSRCS  = start.c gpio.c irq.c timer.c uart.c pwrmgr.c idle.c my_printf.c
-#CHIP_CSRCS  = start.c gpio.c irq.c timer.c clock.c uart.c pwrmgr.c idle.c my_printf.c flash.c
+CHIP_CSRCS  = start.c irq.c timer.c idle.c
 CHIP_CSRCS += jump_table.c
 CHIP_CSRCS += pplus_mtd_flash.c
 ifeq ($(CONFIG_PHY6222_BLE),y)
-#CHIP_CSRCS += phy62xx_ble.c phy62xx_ble_hcitl.c 
-#CHIP_CSRCS += phy62xx_ble_patch.c phy62xx_ble_hci_event_patch.c rf_phy_driver.c
-#CHIP_CSRCS += phy62xx_ble.c phy62xx_ble_patch.c rf_phy_driver.c
 CHIP_CSRCS += phy62xx_ble.c
 endif
 
@@ -55,11 +49,8 @@ endif
 
 INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)include)
 INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)ble)
-#INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)ble$(DELIM)controller)
-#INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)ble$(DELIM)hci)
-#INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)ble$(DELIM)include)
-#INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)osal$(DELIM)include)
 
+CFLAGS += -ffunction-sections
 CFLAGS += -DCFG_CP
 CFLAGS += -DPHY_MCU_TYPE=MCU_BUMBEE_M0
 CFLAGS += -DHOST_CONFIG=4 
@@ -73,53 +64,39 @@ CFLAGS += -DUSE_SYS_TICK
 CFLAGS += -DHUGE_MODE=0 
 CFLAGS += -DMAX_NUM_LL_CONN=1
 CFLAGS += -DUSE_ROMSYM_ALIAS
-#CFLAGS += -Wimplicit-function-declaration
 CFLAGS += -Wno-unused-but-set-variable
 CFLAGS += -DEXTERN_BLE_FUNC=0
 LDFLAGS += "$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)bb_rom_sym_m0.gdbsym"
 
-.buildlib:
-	$(Q) if [ -d ../../../../phy62xxble ]; then \
-		echo "##############build lib internally##############"; \
-		make -C ../../../../phy62xxble; \
-	 else \
-		if [ ! -f libphy62xxble.a ]; then \
-			echo "############download lib form server############"; \
-			curl -L -o libphy62xxble.a http://www.phyplusinc.com/phyplus/libphy62xxble.a; \
-			mkdir -p ../../../staging; \
-			cp -a libphy62xxble.a ../../../staging; \
-		 else \
-			echo "############file exist############"; \
-		fi \
-	fi
-
-context:: .buildlib
-
 ifndef CONFIG_PHY6222_SDK
 EXTRA_LIBPATHS += -L$(TOPDIR)/arch/arm/src/chip
-EXTRA_LIBS += -lphy62xxble
 CHIP_CSRCS += flash.c
-CHIP_CSRCS += clock.c 
+CHIP_CSRCS += clock.c
+CHIP_CSRCS += gpio.c
+CHIP_CSRCS += pwrmgr.c
+CHIP_CSRCS += uart.c
+CHIP_CSRCS += my_printf.c
+CHIP_CSRCS += phy6222_patch.c
 else
-EXTRA_LIBPATHS += -L$(TOPDIR)/../apps/phy6222/bbb_sdk/lib
+EXTRA_LIBPATHS += -L$(TOPDIR)/../apps/vendor/phyplus/phy6222_sdk/lib
+ifdef CONFIG_PHYAPP_SBPADVSCAN
+EXTRA_LIBS += -lphy6222_rf_advscan
+else
 EXTRA_LIBS += -lphy6222_rf
+endif
 EXTRA_LIBS += -lphy6222_sec_boot
 EXTRA_LIBS += -lphy6222_host
 endif
 
 ifdef CONFIG_PHY6222_PHY_MESH
-EXTRA_LIBPATHS += -L$(TOPDIR)/../apps/phy6222/bbb_sdk/components/ethermind/lib/meshlibs/phyos/armgcc/
+EXTRA_LIBPATHS += -L$(TOPDIR)/../apps/vendor/phyplus/phy6222_sdk/components/ethermind/lib/meshlibs/phyos/armgcc/
 EXTRA_LIBS += -lethermind_mesh_core
 EXTRA_LIBS += -lethermind_mesh_models
 EXTRA_LIBS += -lethermind_utils
-#LDLIBPATH += $(APPDIR)/phy6222/bbb_sdk/components/ethermind/lib/meshlibs/phyos/armgcc/
-#LDLIBS += -lethermind_mesh_core
-#LDLIBS += -lethermind_mesh_models
-#LDLIBS += -lethermind_utils
 endif
 
 ifdef CONFIG_MIJIA_APIS
-EXTRA_LIBPATHS += -L$(TOPDIR)/../apps/phy6222/bbb_sdk/components/xiaomi/libs/mesh_auth/debug/
-EXTRA_LIBS += -lmesh-auth-cortex-m0plus-debug
+EXTRA_LIBPATHS += -L$(TOPDIR)/../apps/vendor/phyplus/phy6222_sdk/components/xiaomi/libs/mesh_auth/debug/
+EXTRA_LIBS += $(TOPDIR)/../apps/vendor/phyplus/phy6222_sdk/components/xiaomi/libs/mesh_auth/debug/mesh-auth-cortex-m0plus-debug.a
 endif
 
