@@ -481,6 +481,10 @@ int board_audio_initialize_driver(int minor)
       return -ENODEV;
     }
 
+#ifndef CONFIG_AUDIO_FORMAT_PCM
+  pcm = cxd56;
+#else
+
   /* Initialize a PCM decoder with the CXD56 instance. */
 
   pcm = pcm_decode_initialize(cxd56);
@@ -490,6 +494,8 @@ int board_audio_initialize_driver(int minor)
 
       return -ENODEV;
     }
+
+#endif
 
   /* Create a device name */
 
