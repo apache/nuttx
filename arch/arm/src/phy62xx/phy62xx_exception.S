@@ -1,22 +1,3 @@
-/***************************************************************************
- * arch/arm/src/phy62xx/phy62xx_exception.S
- *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.  The
- * ASF licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the
- * License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
- * License for the specific language governing permissions and limitations
- * under the License.
- *
- ***************************************************************************/
 
 /****************************************************************************
  * Included Files
@@ -31,8 +12,8 @@
  * Public Symbols
  ****************************************************************************/
 
-	.globl		exception_common
-	.file		"arm_exception.S"
+	.globl		exception_phy
+	.file		"phy62xx_exception.S"
 
 /****************************************************************************
  * .text
@@ -60,21 +41,21 @@
 	.align	2
 	.code	16
 	.thumb_func
-	.type	exception_common, function
-exception_common:
+	.type	exception_phy, function
+exception_phy:
 
 	/* Complete the context save */
+	.extern exception_common
 
 	pop		{r4}
 	pop		{r1}
 
-	/* Jump to exception_origin in arm_exception.S */
+	/* Jump to exception_common in arm_exception.S */
 
-	b		exception_origin
+	b		exception_common
 
-	.size	exception_common, .-exception_common
+	.size	exception_phy, .-exception_phy
 
+	.end
 
-#define exception_common exception_origin
-#include "arm_exception.S"
 
