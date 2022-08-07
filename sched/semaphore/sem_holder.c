@@ -989,7 +989,7 @@ void nxsem_release_holder(FAR sem_t *sem)
 
   if (total == 1)
     {
-      /* If the sempahore has only one holder, we can decrement the counts
+      /* If the semaphore has only one holder, we can decrement the counts
        * simply.
        */
 

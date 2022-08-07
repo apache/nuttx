@@ -152,7 +152,7 @@
  * PA1 - Button 2
  * PC6 - Button 3
  *
- * Buttons need to be pulled up internaly by chip,
+ * Buttons need to be pulled up internally by chip,
  * and button press will pull pin down to LOW level.
  */
 

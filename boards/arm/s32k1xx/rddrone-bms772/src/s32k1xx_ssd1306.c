@@ -78,7 +78,7 @@ int board_lcd_initialize(void)
       return -ENODEV;
     }
 
-  lcdinfo("Succesfully initialized SSD1306 on LPI2C0\n");
+  lcdinfo("Successfully initialized SSD1306 on LPI2C0\n");
 
   return ret;
 }

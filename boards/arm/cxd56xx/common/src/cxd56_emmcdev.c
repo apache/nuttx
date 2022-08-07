@@ -65,7 +65,7 @@ int board_emmc_initialize(void)
       return -ENODEV;
     }
 
-  /* Initialize the eMMC deivce */
+  /* Initialize the eMMC device */
 
   ret = cxd56_emmcinitialize();
   if (ret < 0)
@@ -74,7 +74,7 @@ int board_emmc_initialize(void)
       return -ENODEV;
     }
 
-  /* Mount the eMMC deivce */
+  /* Mount the eMMC device */
 
   ret = nx_mount("/dev/emmc0", "/mnt/emmc", "vfat", 0, NULL);
   if (ret < 0)

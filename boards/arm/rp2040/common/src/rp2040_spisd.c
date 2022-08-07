@@ -59,7 +59,7 @@ int board_spisd_initialize(int minor, int bus)
   int ret;
   struct spi_dev_s *spi;
 
-  /* Initialize spi deivce */
+  /* Initialize spi device */
 
   spi = rp2040_spibus_initialize(bus);
   if (!spi)

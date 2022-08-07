@@ -375,7 +375,7 @@ int board_altmdm_initialize(const char *devpath)
 
   if (!g_devhandle)
     {
-      /* Initialize spi deivce */
+      /* Initialize spi device */
 
       spi = cxd56_spibus_initialize(SPI_CH);
       if (!spi)

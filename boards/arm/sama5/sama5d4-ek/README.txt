@@ -2572,7 +2572,7 @@ I2C Tool
     o The I2C dev command may have bad side effects on your I2C devices.
       Use only at your own risk.
 
-    As an example, the I2C dev comman can be used to list all devices
+    As an example, the I2C dev command can be used to list all devices
     responding on TWI0 (the default) like this:
 
       nsh> i2c dev 0x03 0x77
