@@ -32,8 +32,6 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_LIBC_ERR
-
 /* Print "pid: ", FORMAT, ": ", the standard error string for errno,
  * and a newline, on stderr.
  */
@@ -53,5 +51,4 @@ void verr(int status, FAR const char *fmt, va_list ap) printflike(2, 0);
 void errx(int status, FAR const char *fmt, ...) printflike(2, 3);
 void verrx(int status, FAR const char *, va_list ap) printflike(2, 0);
 
-#endif /* CONFIG_LIBC_ERR */
 #endif /* __INCLUDE_ERR_H */
