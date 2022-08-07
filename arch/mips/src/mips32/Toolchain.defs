@@ -245,14 +245,14 @@ endif
 # Optimization of unused sections
 
 ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
-  LDFLAGS          += --gc-sections
+  LDFLAGS          += -Wl,--gc-sections
   ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
 endif
 
 # Debug link map
 
 ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
-  LDFLAGS += --cref -Map=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
+  LDFLAGS += -Wl,--cref -Wl,-Map=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
 endif
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
@@ -280,7 +280,7 @@ LDFLAGS += -nostdlib
 CC = $(CROSSDEV)gcc
 CXX = $(CROSSDEV)g++
 CPP = $(CROSSDEV)gcc -E -P -x c
-LD = $(CROSSDEV)ld
+LD = $(CROSSDEV)gcc
 STRIP = $(CROSSDEV)strip --strip-unneeded
 AR = $(CROSSDEV)ar rcs
 NM = $(CROSSDEV)nm
