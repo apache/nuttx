@@ -212,7 +212,7 @@ static void board_foc_trace(struct foc_dev_s *dev, int type, bool state);
  * Private Data
  ****************************************************************************/
 
-/* OPAMP confuguration:
+/* OPAMP configuration:
  *   - connected with ADC through output pin (OPAINTOEN=0)
  *   - Current U+ - OPAMP1_VINP0 (PA1)
  *   - Current U- - OPAMP1_VINP0 (PA3)

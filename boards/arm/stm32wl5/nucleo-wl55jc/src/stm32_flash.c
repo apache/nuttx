@@ -228,7 +228,7 @@ int stm32wl5_flash_init(void)
       finfo("[%s] creating partition, size: %d, fs: %s, offset: %d\n",
             name, size, fs, offset);
 
-      /* create mtd parition */
+      /* create mtd partition */
 
       mtd_part = mtd_partition(mtd, offset, size);
 
@@ -313,7 +313,7 @@ int stm32wl5_flash_init(void)
               ferr("[%s]ERROR: nx_mount failed: %d\n", name, ret);
               if (ret == ENODEV)
                 {
-                  syslog(LOG_INFO, "[%s] mtd, smartfs seems unformated. "
+                  syslog(LOG_INFO, "[%s] mtd, smartfs seems unformatted. "
                          "Did you run 'mksmartfs %s'?\n", name, src);
                 }
 

@@ -19,7 +19,7 @@ config XX3803_WDG_TIMEOUT
 
 if XX3803_WDG
 config XX3803_WDG_THREAD
-	bool "Watchdog Deamon Thread"
+	bool "Watchdog Daemon Thread"
 
 if XX3803_WDG_THREAD
 config XX3803_WDG_THREAD_NAME

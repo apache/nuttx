@@ -67,7 +67,7 @@
  * Private Data
  ****************************************************************************/
 
-/* FOC ADC configration:
+/* FOC ADC configuration:
  *    - Current Phase V    -> ADC1 INJ1 -> ADC1_IN0  (PA0)
  *    - Current Phase U    -> ADC1 INJ2 -> ADC1_IN11 (PC1)
  *    - Current Phase W    -> ADC1 INJ3 -> ADC1_IN10 (PC0)

@@ -138,7 +138,7 @@ config ARCH_BOARD_FLASH_PART1_FS_SMARTFS
 		when flashing new software, unless you exceeded reserved
 		memory for program code.
 
-		Smartfs uses quite substential ammount of FLASH data to
+		Smartfs uses quite substential amount of FLASH data to
 		get to workable state and mount. Looks like 8 page sizes
 		is absolute minimum (so a 16KiB!).
 

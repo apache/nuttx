@@ -25,7 +25,7 @@ README
   script; /etc/passwd is a the password file.  It supports a single user:
 
     USERNAME:  admin
-    PASSWORD:  Adminstrator
+    PASSWORD:  Administrator
 
     nsh> cat /etc/passwd
     admin:8Tv+Hbmr3pLddSjtzL0kwC:0:0:/

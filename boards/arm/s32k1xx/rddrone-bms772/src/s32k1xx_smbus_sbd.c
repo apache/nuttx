@@ -383,7 +383,7 @@ static ssize_t smbus_sbd_write(struct file *filep, const char *buffer,
  *   arg    - Pointer to the SMBus Smart Battery Data slave device struct
  *
  * Returned Value:
- *   OK if a new write buffer was succesfully registered in response to the
+ *   OK if a new write buffer was successfully registered in response to the
  *   received command; A negated errno value is returned on any failure.
  *
  ****************************************************************************/

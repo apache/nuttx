@@ -137,7 +137,7 @@ struct nrf52_radio_pktcfg_s
   uint8_t pl_len;               /* Preamble length */
   uint8_t term_len;             /* TERM length */
   bool    crcinc;               /* LENGTH includes CRC */
-  bool    endian;               /* On air endianess of packet:
+  bool    endian;               /* On air endianness of packet:
                                  * 0 - little
                                  * 1 - big
                                  */

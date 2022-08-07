@@ -55,7 +55,7 @@ Getting Started
    Configuring NuttX and compile:
    $ ./tools/configure.sh -l qemu-a53:nsh_smp
    $ make
-   Runing with qemu
+   Running with qemu
    $ qemu-system-aarch64 -cpu cortex-a53 -smp 4 -nographic \
       -machine virt,virtualization=on,gic-version=3 \
       -net none -chardev stdio,id=con,mux=on -serial chardev:con \
@@ -98,7 +98,7 @@ Status
   Running ostest seem PASSED.
 
 2.qemu-a53 board configuration support: qemu-a53 board can configuring
-  and compiling, And runing with qemu-system-aarch64
+  and compiling, And running with qemu-system-aarch64
   at Ubuntu 18.04.
 3.FPU support for armv8-a: FPU context switching in NEON/floating-point
   TRAP was supported.  FPU registers saving at vfork and independent
@@ -196,7 +196,7 @@ the content of FP registers used for floating point argument passing
 into the va_list object in case there were actual float arguments from
 the caller. But In practice this is almost never the case. 
 Seeing the save_count/restore_count at the g_cpu_fpu_ctx, which will
-be increase when saving/restoring FPU context. After runing ostest,
+be increase when saving/restoring FPU context. After running ostest,
 we can see the count with GDB:
    
 (gdb) p g_cpu_fpu_ctx
@@ -218,7 +218,7 @@ index c58fb45512..acac6febaa
  VPATH += :syslog
 +syslog/lib_syslog.c_CFLAGS += -mgeneral-regs-only
    
-    With the option to make NuttX and booting. After runing ostest, see 
+    With the option to make NuttX and booting. After running ostest, see 
 the count with GDB again:
 
 (gdb) p g_cpu_fpu_ctx
@@ -240,7 +240,7 @@ Add the option to your code maybe increase FPU performance
 handling for this case, it will inc/dec at enter/leave exception. If the
 exception_depth > 1, that means an exception occurring when another exception
 is executing, the present implement is to switch FPU context to idle thread,
-it will handle most case for calling printf-like rountine at IRQ routine.
+it will handle most case for calling printf-like routine at IRQ routine.
     But in fact, this case will make uncertainty interrupt processing time sine
 it's uncertainty for trap exception handling. It would be best to add
 "-mgeneral-regs-only" option to compile the IRQ code avoiding accessing FP

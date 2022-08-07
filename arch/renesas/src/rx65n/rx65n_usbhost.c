@@ -5034,7 +5034,7 @@ static inline void rx65n_usbhost_edfree(struct rx65n_usbhost_ed_s *ed)
 static struct rx65n_usbhost_gtd_s *rx65n_usbhost_tdalloc(uint8_t ep_num)
 {
   /* Currently each TD would associate with one EP. So the ep_numb is
-   * passed to tdalloc fucntion and it would return the TD with this,
+   * passed to tdalloc function and it would return the TD with this,
    * there is no need to free this
    */
 
@@ -5686,7 +5686,7 @@ static int rx65n_usbhost_enqueuetd(struct rx65n_usbhost_s *priv,
   /* Allocate a TD from the free list */
 
   /* Currently each TD would associate with one EP. So the epnumb
-   * is passed to tdalloc fucntion and it would return the TD with
+   * is passed to tdalloc function and it would return the TD with
    * this, there is no need to free this - there is no need
    */
 
