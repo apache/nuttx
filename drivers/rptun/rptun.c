@@ -453,7 +453,6 @@ static int rptun_notify(FAR struct remoteproc *rproc, uint32_t id)
   FAR struct rptun_priv_s *priv = rproc->priv;
   FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
   FAR struct virtqueue *svq = rvdev->svq;
-  FAR struct virtqueue *rvq = rvdev->rvq;
 
   if (rvdev->vdev && svq &&
       rvdev->vdev->vrings_info[svq->vq_queue_index].notifyid == id)
@@ -461,11 +460,7 @@ static int rptun_notify(FAR struct remoteproc *rproc, uint32_t id)
       rptun_pm_action(priv, true);
     }
 
-  if (rvdev->vdev && rvq &&
-      rvdev->vdev->vrings_info[rvq->vq_queue_index].notifyid == id)
-    {
-      rptun_pm_action_auto(priv, 10);
-    }
+  rptun_pm_action_auto(priv, 100);
 
   RPTUN_NOTIFY(priv->dev, id);
   return 0;
