@@ -29,6 +29,22 @@
 #include <nuttx/compiler.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Append _func suffix to avoid the penitential symbol collision */
+
+#define warn   warn_func
+#define vwarn  vwarn_func
+#define warnx  warnx_func
+#define vwarnx vwarnx_func
+
+#define err    err_func
+#define verr   verr_func
+#define errx   errx_func
+#define verrx  verrx_func
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
