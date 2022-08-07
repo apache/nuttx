@@ -96,6 +96,8 @@
 #define F_SETOWN    13 /* Set pid that will receive SIGIO and SIGURG signals for fd */
 #define F_SETSIG    14 /* Set the signal to be sent */
 #define F_GETPATH   15 /* Get the path of the file descriptor(BSD/macOS) */
+#define F_ADD_SEALS 16 /* Add the bit-mask argument arg to the set of seals of the inode */
+#define F_GET_SEALS 17 /* Get (as the function result) the current set of seals of the inode */
 
 /* For posix fcntl() and lockf() */
 
@@ -115,6 +117,14 @@
 #define DN_DELETE   3  /* A file was unlinked */
 #define DN_RENAME   4  /* A file was renamed */
 #define DN_ATTRIB   5  /* Attributes of a file were changed */
+
+/* Types of seals */
+
+#define F_SEAL_SEAL         0x0001 /* Prevent further seals from being set */
+#define F_SEAL_SHRINK       0x0002 /* Prevent file from shrinking */
+#define F_SEAL_GROW         0x0004 /* Prevent file from growing */
+#define F_SEAL_WRITE        0x0008 /* Prevent writes */
+#define F_SEAL_FUTURE_WRITE 0x0010 /* Prevent future writes while mapped */
 
 /* int creat(const char *path, mode_t mode);
  *
