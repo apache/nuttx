@@ -211,6 +211,11 @@ static int lcdfb_updateearea(FAR struct fb_vtable_s *vtable,
           unsigned int pixperbyte = 8 / pinfo->bpp;
           startx &= ~(pixperbyte - 1);
         }
+
+      /* Get the starting position in the framebuffer */
+
+      run  = priv->fbmem + starty * priv->stride;
+      run += (startx * pinfo->bpp + 7) >> 3;
     }
 
   if (pinfo->putarea != NULL)
@@ -225,7 +230,8 @@ static int lcdfb_updateearea(FAR struct fb_vtable_s *vtable,
        * - apply DMA channel to transfer data to driver memory.
        */
 
-      ret = pinfo->putarea(pinfo->dev, starty, endy, startx, endx, run);
+      ret = pinfo->putarea(pinfo->dev, starty, endy, startx, endx,
+                           run, priv->stride);
       if (ret < 0)
         {
           lcderr("Failed to update area");
@@ -235,11 +241,6 @@ static int lcdfb_updateearea(FAR struct fb_vtable_s *vtable,
   else
     {
       width = endx - startx + 1;
-
-      /* Get the starting position in the framebuffer */
-
-      run  = priv->fbmem + starty * priv->stride;
-      run += (startx * pinfo->bpp + 7) >> 3;
 
       for (row = starty; row <= endy; row++)
         {
