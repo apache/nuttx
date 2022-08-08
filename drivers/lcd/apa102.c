@@ -505,12 +505,14 @@ static int apa102_putarea(FAR struct lcd_dev_s *dev,
           if (i % 2 == 0)
             {
               priv->fb[(i * APA102_XRES) + j] =
-                rgb565_apa102(*(src + (i * APA102_XRES) + j));
+                rgb565_apa102(*(src + ((i - row_start) * APA102_XRES) +
+                              (j - col_start)));
             }
           else
             {
               priv->fb[(i * APA102_XRES) + APA102_XRES - j - 1] =
-                rgb565_apa102(*(src + (i * APA102_XRES) + j));
+                rgb565_apa102(*(src + ((i - row_start) * APA102_XRES) +
+                              (j - col_start)));
             }
         }
     }
