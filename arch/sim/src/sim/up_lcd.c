@@ -104,9 +104,10 @@ struct sim_dev_s
 
 static int sim_putrun(struct lcd_dev_s *dev, fb_coord_t row, fb_coord_t col,
                       const uint8_t *buffer, size_t npixels);
-static int sim_putarea(struct lcd_dev_s *dev, fb_coord_t row_start,
-                       fb_coord_t row_end, fb_coord_t col_start,
-                       fb_coord_t col_end, const uint8_t *buffer);
+static int sim_putarea(struct lcd_dev_s *dev,
+                       fb_coord_t row_start, fb_coord_t row_end,
+                       fb_coord_t col_start, fb_coord_t col_end,
+                       const uint8_t *buffer, fb_coord_t stride);
 static int sim_getrun(struct lcd_dev_s *dev, fb_coord_t row, fb_coord_t col,
                       uint8_t *buffer, size_t npixels);
 
@@ -252,12 +253,17 @@ static int sim_putrun(struct lcd_dev_s *dev, fb_coord_t row, fb_coord_t col,
  *   col_end   - Ending column to write to
  *               (range: col_start <= col_end < xres)
  *   buffer    - The buffer containing the area to be written to the LCD
+ *   stride    - Length of a line in bytes. This parameter may be necessary
+ *               to allow the LCD driver to calculate the offset for partial
+ *               writes when the buffer needs to be splited for row-by-row
+ *               writing.
  *
  ****************************************************************************/
 
 static int sim_putarea(struct lcd_dev_s *dev, fb_coord_t row_start,
                        fb_coord_t row_end, fb_coord_t col_start,
-                       fb_coord_t col_end, const uint8_t *buffer)
+                       fb_coord_t col_end, const uint8_t *buffer,
+                       fb_coord_t stride)
 {
   fb_coord_t row;
   size_t rows;
