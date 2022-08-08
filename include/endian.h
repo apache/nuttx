@@ -137,4 +137,17 @@
 #    define le64toh(n)        (n)
 #  endif
 #endif
+
+/* OpenBSD style */
+
+#define betoh16               be16toh
+#define letoh16               le16toh
+#define betoh32               be32toh
+#define letoh32               le32toh
+
+#ifdef CONFIG_HAVE_LONG_LONG
+#define betoh64               be64toh
+#define letoh64               le64toh
+#endif
+
 #endif /* __INCLUDE_ENDIAN_H */
