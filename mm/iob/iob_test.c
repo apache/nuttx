@@ -96,7 +96,7 @@ int main(int argc, char **argv)
   int i;
 
   iob_initialize();
-  iob = iob_alloc(false, IOBUSER_UNITTEST);
+  iob = iob_alloc(false);
 
   for (i = 0; i < 4096; i++)
     {
@@ -105,11 +105,11 @@ int main(int argc, char **argv)
 
   memset(buffer2, 0xff, 4096);
 
-  iob_copyin(iob, buffer2, 47, 0, false, IOBUSER_UNITTEST);
+  iob_copyin(iob, buffer2, 47, 0, false);
   printf("Copy IN: 47, offset 0\n");
   dump_chain(iob);
 
-  iob_copyin(iob, buffer1, 4096, 47, false, IOBUSER_UNITTEST);
+  iob_copyin(iob, buffer1, 4096, 47, false);
   printf("Copy IN: 4096, offset 47\n");
   dump_chain(iob);
 
@@ -121,11 +121,11 @@ int main(int argc, char **argv)
       fprintf(stderr, "Buffer1 does not match buffer2\n");
     }
 
-  iob = iob_trimhead(iob, 47, IOBUSER_UNITTEST);
+  iob = iob_trimhead(iob, 47);
   printf("Trim: 47 from the beginning of the list\n");
   dump_chain(iob);
 
-  iob = iob_trimtail(iob, 493, IOBUSER_UNITTEST);
+  iob = iob_trimtail(iob, 493);
   printf("Trim: 493 from the end of the list\n");
   dump_chain(iob);
 
@@ -137,7 +137,7 @@ int main(int argc, char **argv)
       fprintf(stderr, "Buffer1 does not match buffer2\n");
     }
 
-  iob = iob_trimhead(iob, 1362, IOBUSER_UNITTEST);
+  iob = iob_trimhead(iob, 1362);
   printf("Trim: 1362 from the beginning of the list\n");
   dump_chain(iob);
 
@@ -149,7 +149,7 @@ int main(int argc, char **argv)
       fprintf(stderr, "Buffer1 does not match buffer2\n");
     }
 
-  iob = iob_pack(iob, IOBUSER_UNITTEST);
+  iob = iob_pack(iob);
   printf("Packed\n");
   dump_chain(iob);
 
@@ -161,7 +161,7 @@ int main(int argc, char **argv)
       fprintf(stderr, "Buffer1 does not match buffer2\n");
     }
 
-  while (iob) iob = iob_free(iob, IOBUSER_UNITTEST);
+  while (iob) iob = iob_free(iob);
   return EXIT_SUCCESS;
 }
 

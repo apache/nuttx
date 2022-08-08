@@ -242,7 +242,7 @@ void mac802154_createdatareq(FAR struct ieee802154_privmac_s *priv,
 
   /* Allocate an IOB to put the frame in */
 
-  iob = iob_alloc(false, IOBUSER_WIRELESS_MAC802154);
+  iob = iob_alloc(false);
   DEBUGASSERT(iob != NULL);
 
   iob->io_flink  = NULL;
@@ -417,8 +417,7 @@ static void mac802154_notify_worker(FAR void *arg)
 
           if (dispose)
             {
-              iob_free(primitive->u.dataind.frame,
-                       IOBUSER_WIRELESS_MAC802154);
+              iob_free(primitive->u.dataind.frame);
               ieee802154_primitive_free(primitive);
             }
         }
@@ -751,7 +750,7 @@ static void mac802154_purge_worker(FAR void *arg)
 
           /* Free the IOB, the notification, and the tx descriptor */
 
-          iob_free(txdesc->frame, IOBUSER_WIRELESS_MAC802154);
+          iob_free(txdesc->frame);
           ieee802154_primitive_free((FAR struct ieee802154_primitive_s *)
                                     txdesc->conf);
           mac802154_txdesc_free(priv, txdesc);
@@ -992,7 +991,7 @@ static void mac802154_txdone_worker(FAR void *arg)
 
       /* Free the IOB and the tx descriptor */
 
-      iob_free(txdesc->frame, IOBUSER_WIRELESS_MAC802154);
+      iob_free(txdesc->frame);
       mac802154_txdesc_free(priv, txdesc);
     }
 
@@ -1533,7 +1532,7 @@ static void mac802154_rxdatareq(FAR struct ieee802154_privmac_s *priv,
 
   /* Allocate an IOB to put the frame in */
 
-  iob = iob_alloc(false, IOBUSER_WIRELESS_MAC802154);
+  iob = iob_alloc(false);
   DEBUGASSERT(iob != NULL);
 
   iob->io_flink  = NULL;

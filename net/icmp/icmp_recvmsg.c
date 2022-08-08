@@ -307,7 +307,7 @@ out:
 
       /* And free the I/O buffer chain */
 
-      iob_free_chain(iob, IOBUSER_NET_SOCK_ICMP);
+      iob_free_chain(iob);
     }
 
   return ret;
@@ -492,7 +492,7 @@ errout:
           conn->nreqs = 0;
           conn->dev   = NULL;
 
-          iob_free_queue(&conn->readahead, IOBUSER_NET_SOCK_ICMP);
+          iob_free_queue(&conn->readahead);
         }
     }
 

@@ -208,7 +208,7 @@ void syslogstream_create(FAR struct lib_syslogstream_s *stream)
 #ifdef CONFIG_SYSLOG_BUFFER
   /* Allocate an IOB */
 
-  iob                  = iob_tryalloc(true, IOBUSER_SYSLOG);
+  iob                  = iob_tryalloc(true);
   stream->iob          = iob;
 
   if (iob != NULL)
@@ -252,7 +252,7 @@ void syslogstream_destroy(FAR struct lib_syslogstream_s *stream)
 
       /* Free the IOB */
 
-      iob_free(stream->iob, IOBUSER_SYSLOG);
+      iob_free(stream->iob);
       stream->iob = NULL;
     }
 }

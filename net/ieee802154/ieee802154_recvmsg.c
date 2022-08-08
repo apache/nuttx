@@ -183,7 +183,7 @@ static ssize_t
 
       /* Free both the IOB and the container */
 
-      iob_free(iob, IOBUSER_NET_SOCK_IEEE802154);
+      iob_free(iob);
       ieee802154_container_free(container);
     }
 
