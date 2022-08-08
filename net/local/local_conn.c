@@ -130,6 +130,12 @@ FAR struct local_conn_s *local_alloc(void)
 
 #endif
 
+      /* This semaphore is used for sending safely in multithread.
+       * Make sure data will not be garbled when multi-thread sends.
+       */
+
+      nxsem_init(&conn->lc_sendsem, 0, 1);
+
       /* Add the connection structure to the list of listeners */
 
       net_lock();
@@ -209,6 +215,10 @@ void local_free(FAR struct local_conn_s *conn)
   nxsem_destroy(&conn->lc_waitsem);
   nxsem_destroy(&conn->lc_donesem);
 #endif
+
+  /* Destory sem associated with the connection */
+
+  nxsem_destroy(&conn->lc_sendsem);
 
   /* And free the connection structure */
 
