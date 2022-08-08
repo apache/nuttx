@@ -45,7 +45,7 @@
  * Some special sensor whose event size is not fixed or dynamically change,
  * are called sensor of custom type. You should treat its events as byte
  * streams and use sensor_custom_register to register character device
- * with specific path, ex: "/dev/sensor/custom_dummy".
+ * with specific path, ex: "/dev/uorb/custom_dummy".
  */
 
 #define SENSOR_TYPE_CUSTOM                          0
@@ -1070,7 +1070,7 @@ int sensor_register(FAR struct sensor_lowerhalf_s *dev, int devno);
  *   dev   - A pointer to an instance of lower half sensor driver. This
  *           instance is bound to the sensor driver and must persist as long
  *           as the driver persists.
- *   path  - The user specifies path of device. ex: /dev/sensor/xxx.
+ *   path  - The user specifies path of device. ex: /dev/uorb/xxx.
  *   esize - The element size of intermediate circular buffer.
  *
  * Returned Value:
@@ -1109,7 +1109,7 @@ void sensor_unregister(FAR struct sensor_lowerhalf_s *dev, int devno);
  *   dev   - A pointer to an instance of lower half sensor driver. This
  *           instance is bound to the sensor driver and must persists as long
  *           as the driver persists.
- *   path  - The user specifies path of device, ex: /dev/sensor/xxx
+ *   path  - The user specifies path of device, ex: /dev/uorb/xxx
  ****************************************************************************/
 
 void sensor_custom_unregister(FAR struct sensor_lowerhalf_s *dev,
@@ -1137,7 +1137,7 @@ int usensor_initialize(void);
  *
  * Input Parameters:
  *   lower - The instance of lower half sensor driver.
- *   path  - The path of character node, ex: /dev/sensor/xxx.
+ *   path  - The path of character node, ex: /dev/uorb/xxx.
  *
  * Returned Value:
  *   The takeover rpmsg lowerhalf returned on success, NULL on failure.
