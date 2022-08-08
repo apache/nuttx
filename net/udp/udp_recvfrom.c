@@ -262,7 +262,7 @@ out:
 
       /* And free the I/O buffer chain */
 
-      iob_free_chain(iob, IOBUSER_NET_UDP_READAHEAD);
+      iob_free_chain(iob);
     }
 }
 

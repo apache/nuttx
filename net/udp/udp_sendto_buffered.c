@@ -749,8 +749,8 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
       if (nonblock)
         {
-          ret = iob_trycopyin(wrb->wb_iob, (FAR uint8_t *)buf, len, 0, false,
-                              IOBUSER_NET_SOCK_UDP);
+          ret = iob_trycopyin(wrb->wb_iob, (FAR uint8_t *)buf,
+                              len, 0, false);
         }
       else
         {
@@ -763,8 +763,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
            */
 
           blresult = net_breaklock(&count);
-          ret = iob_copyin(wrb->wb_iob, (FAR uint8_t *)buf, len, 0, false,
-                           IOBUSER_NET_SOCK_UDP);
+          ret = iob_copyin(wrb->wb_iob, (FAR uint8_t *)buf, len, 0, false);
           if (blresult >= 0)
             {
               net_restorelock(count);

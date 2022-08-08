@@ -42,7 +42,7 @@
  *
  ****************************************************************************/
 
-void iob_free_chain(FAR struct iob_s *iob, enum iob_user_e producerid)
+void iob_free_chain(FAR struct iob_s *iob)
 {
   FAR struct iob_s *next;
 
@@ -50,6 +50,6 @@ void iob_free_chain(FAR struct iob_s *iob, enum iob_user_e producerid)
 
   for (; iob; iob = next)
     {
-      next = iob_free(iob, producerid);
+      next = iob_free(iob);
     }
 }

@@ -694,7 +694,7 @@ static void spirit_free_txhead(FAR struct spirit_driver_s *priv)
 
   /* Free the IOB contained in the metadata container */
 
-  iob_free(pktmeta->pm_iob, IOBUSER_WIRELESS_PACKETRADIO);
+  iob_free(pktmeta->pm_iob);
 
   /* Then free the meta data container itself */
 
@@ -1152,7 +1152,7 @@ static void spirit_interrupt_work(FAR void *arg)
 
       if (priv->rxbuffer != NULL)
         {
-          iob_free(priv->rxbuffer, IOBUSER_WIRELESS_PACKETRADIO);
+          iob_free(priv->rxbuffer);
           priv->rxbuffer = NULL;
         }
 #endif
@@ -1306,7 +1306,7 @@ static void spirit_interrupt_work(FAR void *arg)
 
       if (priv->rxbuffer == NULL)
         {
-          priv->rxbuffer = iob_alloc(false, IOBUSER_WIRELESS_PACKETRADIO);
+          priv->rxbuffer = iob_alloc(false);
         }
 
       if (priv->rxbuffer != NULL)
@@ -1381,7 +1381,7 @@ static void spirit_interrupt_work(FAR void *arg)
             {
               /* Allocate an I/O buffer to hold the received packet. */
 
-              iob = iob_alloc(false, IOBUSER_WIRELESS_PACKETRADIO);
+              iob = iob_alloc(false);
             }
 
           if (iob == NULL)
@@ -1423,7 +1423,7 @@ static void spirit_interrupt_work(FAR void *arg)
                 {
                   wlerr("ERROR: Failed to allocate metadata... dropping\n");
                   NETDEV_RXDROPPED(&priv->radio.r_dev);
-                  iob_free(iob, IOBUSER_WIRELESS_PACKETRADIO);
+                  iob_free(iob);
                 }
               else
                 {
@@ -1504,7 +1504,7 @@ static void spirit_interrupt_work(FAR void *arg)
         {
           /* If not, then allocate one now. */
 
-          priv->rxbuffer = iob_alloc(false, IOBUSER_WIRELESS_PACKETRADIO);
+          priv->rxbuffer = iob_alloc(false);
           iob            = priv->rxbuffer;
           offset         = 0;
         }
@@ -1532,7 +1532,7 @@ static void spirit_interrupt_work(FAR void *arg)
               /* Free the IOB */
 
               priv->rxbuffer = NULL;
-              iob_free(iob, IOBUSER_WIRELESS_PACKETRADIO);
+              iob_free(iob);
             }
           else
             {
@@ -1594,7 +1594,7 @@ static void spirit_interrupt_work(FAR void *arg)
 
       if (priv->rxbuffer != NULL)
         {
-          iob_free(priv->rxbuffer, IOBUSER_WIRELESS_PACKETRADIO);
+          iob_free(priv->rxbuffer);
           priv->rxbuffer = NULL;
         }
 #endif
@@ -2289,7 +2289,7 @@ static int spirit_req_data(FAR struct radio_driver_s *netdev,
         {
           wlerr("ERROR: Failed to allocate metadata... dropping\n");
           NETDEV_RXDROPPED(&priv->radio.r_dev);
-          iob_free(iob, IOBUSER_WIRELESS_PACKETRADIO);
+          iob_free(iob);
           continue;
         }
 

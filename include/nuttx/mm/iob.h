@@ -138,85 +138,12 @@ struct iob_queue_s
 };
 #endif /* CONFIG_IOB_NCHAINS > 0 */
 
-/* NOTE: When you change any logic here, you must change the logic in
- * fs/procfs/fs_procfsiobinfo.c as it depends on having matching sequential
- * logic.
- */
-
-enum iob_user_e
+struct iob_stats_s
 {
-  IOBUSER_UNKNOWN = -1,
-#ifdef CONFIG_SYSLOG_BUFFER
-  IOBUSER_SYSLOG,
-#endif
-#ifdef CONFIG_IOB_UNITTEST
-  IOBUSER_UNITTEST,
-#endif
-#ifdef CONFIG_NET_6LOWPAN
-  IOBUSER_NET_6LOWPAN,
-#endif
-#ifdef CONFIG_NET_ICMP_SOCKET
-  IOBUSER_NET_SOCK_ICMP,
-#endif
-#ifdef CONFIG_NET_ICMPv6_SOCKET
-  IOBUSER_NET_SOCK_ICMPv6,
-#endif
-#ifdef CONFIG_NET_UDP
-  IOBUSER_NET_SOCK_UDP,
-#endif
-#ifdef CONFIG_NET_TCP
-  IOBUSER_NET_SOCK_TCP,
-#endif
-#ifdef CONFIG_NET_IEEE802154
-  IOBUSER_NET_SOCK_IEEE802154,
-#endif
-#ifdef CONFIG_NET_BLUETOOTH
-  IOBUSER_NET_SOCK_BLUETOOTH,
-#endif
-#if defined(CONFIG_NET_UDP) && !defined(NET_UDP_NO_STACK)
-  IOBUSER_NET_UDP_READAHEAD,
-#endif
-#ifdef CONFIG_NET_UDP_WRITE_BUFFERS
-  IOBUSER_NET_UDP_WRITEBUFFER,
-#endif
-#if defined(CONFIG_NET_TCP) && !defined(NET_TCP_NO_STACK)
-  IOBUSER_NET_TCP_READAHEAD,
-#endif
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-  IOBUSER_NET_TCP_WRITEBUFFER,
-#endif
-#ifdef CONFIG_NET_IPFORWARD
-  IOBUSER_NET_IPFORWARD,
-#endif
-#ifdef CONFIG_WIRELESS_IEEE802154
-  IOBUSER_WIRELESS_RAD802154,
-#endif
-#ifdef CONFIG_IEEE802154_MAC
-  IOBUSER_WIRELESS_MAC802154,
-#endif
-#ifdef CONFIG_IEEE802154_MACDEV
-  IOBUSER_WIRELESS_MAC802154_CHARDEV,
-#endif
-#ifdef CONFIG_IEEE802154_NETDEV
-  IOBUSER_WIRELESS_MAC802154_NETDEV,
-#endif
- #ifdef CONFIG_WL_SPIRIT
-  IOBUSER_WIRELESS_PACKETRADIO,
-#endif
-#ifdef CONFIG_WIRELESS_BLUETOOTH
-  IOBUSER_WIRELESS_BLUETOOTH,
-#endif
-#ifdef CONFIG_NET_CAN
-  IOBUSER_NET_CAN_READAHEAD,
-#endif
-  IOBUSER_GLOBAL,
-  IOBUSER_NENTRIES /* MUST BE LAST ENTRY */
-};
-
-struct iob_userstats_s
-{
-  int totalconsumed;
-  int totalproduced;
+  int ntotal;
+  int nfree;
+  int nwait;
+  int nthrottle;
 };
 
 /****************************************************************************
@@ -243,12 +170,10 @@ void iob_initialize(void);
  * Input Parameters:
  *   throttled  - An indication of the IOB allocation is "throttled"
  *   timeout    - Timeout value in milliseconds.
- *   consumerid - id representing who is consuming the IOB
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_timedalloc(bool throttled, unsigned int timeout,
-                                 enum iob_user_e consumerid);
+FAR struct iob_s *iob_timedalloc(bool throttled, unsigned int timeout);
 
 /****************************************************************************
  * Name: iob_alloc
@@ -259,7 +184,7 @@ FAR struct iob_s *iob_timedalloc(bool throttled, unsigned int timeout,
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_alloc(bool throttled, enum iob_user_e consumerid);
+FAR struct iob_s *iob_alloc(bool throttled);
 
 /****************************************************************************
  * Name: iob_tryalloc
@@ -270,7 +195,7 @@ FAR struct iob_s *iob_alloc(bool throttled, enum iob_user_e consumerid);
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_tryalloc(bool throttled, enum iob_user_e consumerid);
+FAR struct iob_s *iob_tryalloc(bool throttled);
 
 /****************************************************************************
  * Name: iob_navail
@@ -301,8 +226,7 @@ int iob_qentry_navail(void);
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_free(FAR struct iob_s *iob,
-                           enum iob_user_e producerid);
+FAR struct iob_s *iob_free(FAR struct iob_s *iob);
 
 /****************************************************************************
  * Name: iob_notifier_setup
@@ -366,7 +290,7 @@ void iob_notifier_teardown(int key);
  *
  ****************************************************************************/
 
-void iob_free_chain(FAR struct iob_s *iob, enum iob_user_e producerid);
+void iob_free_chain(FAR struct iob_s *iob);
 
 /****************************************************************************
  * Name: iob_add_queue
@@ -437,8 +361,7 @@ FAR struct iob_s *iob_peek_queue(FAR struct iob_queue_s *iobq);
  ****************************************************************************/
 
 #if CONFIG_IOB_NCHAINS > 0
-void iob_free_queue(FAR struct iob_queue_s *qhead,
-                    enum iob_user_e producerid);
+void iob_free_queue(FAR struct iob_queue_s *qhead);
 #endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
@@ -451,8 +374,7 @@ void iob_free_queue(FAR struct iob_queue_s *qhead,
 
 #if CONFIG_IOB_NCHAINS > 0
 void iob_free_queue_qentry(FAR struct iob_s *iob,
-                           FAR struct iob_queue_s *iobq,
-                           enum iob_user_e producerid);
+                           FAR struct iob_queue_s *iobq);
 #endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
@@ -477,8 +399,7 @@ unsigned int iob_get_queue_size(FAR struct iob_queue_s *queue);
  ****************************************************************************/
 
 int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
-               unsigned int len, unsigned int offset, bool throttled,
-               enum iob_user_e consumerid);
+               unsigned int len, unsigned int offset, bool throttled);
 
 /****************************************************************************
  * Name: iob_trycopyin
@@ -491,8 +412,7 @@ int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
  ****************************************************************************/
 
 int iob_trycopyin(FAR struct iob_s *iob, FAR const uint8_t *src,
-                  unsigned int len, unsigned int offset, bool throttled,
-                  enum iob_user_e consumerid);
+                  unsigned int len, unsigned int offset, bool throttled);
 
 /****************************************************************************
  * Name: iob_copyout
@@ -525,8 +445,8 @@ unsigned int iob_tailroom(FAR struct iob_s *iob);
  *
  ****************************************************************************/
 
-int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2, bool throttled,
-              enum iob_user_e consumerid);
+int iob_clone(FAR struct iob_s *iob1,
+              FAR struct iob_s *iob2, bool throttled);
 
 /****************************************************************************
  * Name: iob_concat
@@ -547,8 +467,7 @@ void iob_concat(FAR struct iob_s *iob1, FAR struct iob_s *iob2);
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen,
-                               enum iob_user_e producerid);
+FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen);
 
 /****************************************************************************
  * Name: iob_trimhead_queue
@@ -568,8 +487,7 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen,
 
 #if CONFIG_IOB_NCHAINS > 0
 FAR struct iob_s *iob_trimhead_queue(FAR struct iob_queue_s *qhead,
-                                     unsigned int trimlen,
-                                     enum iob_user_e producerid);
+                                     unsigned int trimlen);
 #endif
 
 /****************************************************************************
@@ -582,8 +500,7 @@ FAR struct iob_s *iob_trimhead_queue(FAR struct iob_queue_s *qhead,
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen,
-                               enum iob_user_e producerid);
+FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen);
 
 /****************************************************************************
  * Name: iob_pack
@@ -595,8 +512,7 @@ FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen,
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_pack(FAR struct iob_s *iob,
-                           enum iob_user_e producerid);
+FAR struct iob_s *iob_pack(FAR struct iob_s *iob);
 
 /****************************************************************************
  * Name: iob_contig
@@ -607,8 +523,7 @@ FAR struct iob_s *iob_pack(FAR struct iob_s *iob,
  *
  ****************************************************************************/
 
-int iob_contig(FAR struct iob_s *iob, unsigned int len,
-               enum iob_user_e producerid);
+int iob_contig(FAR struct iob_s *iob, unsigned int len);
 
 /****************************************************************************
  * Name: iob_dump
@@ -642,7 +557,7 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS) && \
     !defined(CONFIG_FS_PROCFS_EXCLUDE_IOBINFO)
-FAR struct iob_userstats_s * iob_getuserstats(enum iob_user_e userid);
+void iob_getstats(FAR struct iob_stats_s *stats);
 #endif
 
 #endif /* CONFIG_MM_IOB */

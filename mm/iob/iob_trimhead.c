@@ -44,8 +44,7 @@
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen,
-                               enum iob_user_e producerid)
+FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
 {
   unsigned int pktlen;
 
@@ -92,7 +91,7 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen,
               /* Free this entry and set the next I/O buffer as the head */
 
               iobinfo("iob=%p: Freeing\n", iob);
-              iob_free(iob, producerid);
+              iob_free(iob);
               iob = next;
             }
           else

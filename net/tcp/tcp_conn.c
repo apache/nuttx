@@ -794,7 +794,7 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 
   /* Release any read-ahead buffers attached to the connection */
 
-  iob_free_chain(conn->readahead, IOBUSER_NET_TCP_READAHEAD);
+  iob_free_chain(conn->readahead);
   conn->readahead = NULL;
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS

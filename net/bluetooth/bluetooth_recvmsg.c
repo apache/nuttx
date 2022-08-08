@@ -183,7 +183,7 @@ static ssize_t
 
       /* Free both the IOB and the container */
 
-      iob_free(iob, IOBUSER_NET_SOCK_BLUETOOTH);
+      iob_free(iob);
       bluetooth_container_free(container);
     }
 

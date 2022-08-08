@@ -1117,13 +1117,13 @@ static int macnet_req_data(FAR struct radio_driver_s *netdev,
         {
           wlerr("ERROR: mac802154_req_data failed: %d\n", ret);
 
-          iob_free(iob, IOBUSER_WIRELESS_MAC802154_NETDEV);
+          iob_free(iob);
           for (iob = framelist; iob != NULL; iob = framelist)
             {
               /* Remove the IOB from the queue and free */
 
               framelist = iob->io_flink;
-              iob_free(iob, IOBUSER_WIRELESS_MAC802154_NETDEV);
+              iob_free(iob);
             }
 
           NETDEV_TXERRORS(&priv->md_dev.r_dev);

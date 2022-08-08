@@ -195,7 +195,7 @@ uint16_t can_datahandler(FAR struct can_conn_s *conn, FAR uint8_t *buffer,
    * packet.
    */
 
-  iob = iob_tryalloc(true, IOBUSER_NET_CAN_READAHEAD);
+  iob = iob_tryalloc(true);
   if (iob == NULL)
     {
       nerr("ERROR: Failed to create new I/O buffer chain\n");
@@ -204,8 +204,7 @@ uint16_t can_datahandler(FAR struct can_conn_s *conn, FAR uint8_t *buffer,
 
   /* Copy the new appdata into the I/O buffer chain (without waiting) */
 
-  ret = iob_trycopyin(iob, buffer, buflen, 0, true,
-                      IOBUSER_NET_CAN_READAHEAD);
+  ret = iob_trycopyin(iob, buffer, buflen, 0, true);
   if (ret < 0)
     {
       /* On a failure, iob_copyin return a negated error value but does
@@ -213,7 +212,7 @@ uint16_t can_datahandler(FAR struct can_conn_s *conn, FAR uint8_t *buffer,
        */
 
       nerr("ERROR: Failed to add data to the I/O buffer chain: %d\n", ret);
-      iob_free_chain(iob, IOBUSER_NET_CAN_READAHEAD);
+      iob_free_chain(iob);
       return 0;
     }
 
@@ -225,7 +224,7 @@ uint16_t can_datahandler(FAR struct can_conn_s *conn, FAR uint8_t *buffer,
   if (ret < 0)
     {
       nerr("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);
-      iob_free_chain(iob, IOBUSER_NET_CAN_READAHEAD);
+      iob_free_chain(iob);
       return 0;
     }
 

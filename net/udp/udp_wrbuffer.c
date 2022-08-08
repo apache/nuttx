@@ -144,7 +144,7 @@ FAR struct udp_wrbuffer_s *udp_wrbuffer_alloc(void)
 
   /* Now get the first I/O buffer for the write buffer structure */
 
-  wrb->wb_iob = net_ioballoc(false, IOBUSER_NET_UDP_WRITEBUFFER);
+  wrb->wb_iob = net_ioballoc(false);
   if (!wrb->wb_iob)
     {
       nerr("ERROR: Failed to allocate I/O buffer\n");
@@ -202,8 +202,7 @@ FAR struct udp_wrbuffer_s *udp_wrbuffer_timedalloc(unsigned int timeout)
 
   /* Now get the first I/O buffer for the write buffer structure */
 
-  wrb->wb_iob = net_iobtimedalloc(true, timeout,
-                                  IOBUSER_NET_UDP_WRITEBUFFER);
+  wrb->wb_iob = net_iobtimedalloc(true, timeout);
 
   /* Did we get an IOB?  We should always get one except under some really
    * weird error conditions.
@@ -264,7 +263,7 @@ FAR struct udp_wrbuffer_s *udp_wrbuffer_tryalloc(void)
 
   /* Now get the first I/O buffer for the write buffer structure */
 
-  wrb->wb_iob = iob_tryalloc(false, IOBUSER_NET_UDP_WRITEBUFFER);
+  wrb->wb_iob = iob_tryalloc(false);
   if (!wrb->wb_iob)
     {
       nerr("ERROR: Failed to allocate I/O buffer\n");
@@ -298,7 +297,7 @@ void udp_wrbuffer_release(FAR struct udp_wrbuffer_s *wrb)
 
   if (wrb->wb_iob)
     {
-      iob_free_chain(wrb->wb_iob, IOBUSER_NET_UDP_WRITEBUFFER);
+      iob_free_chain(wrb->wb_iob);
     }
 
   /* Then free the write buffer structure */

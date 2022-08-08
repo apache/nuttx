@@ -54,8 +54,7 @@
  *
  ****************************************************************************/
 
-int iob_contig(FAR struct iob_s *iob, unsigned int len,
-               enum iob_user_e producerid)
+int iob_contig(FAR struct iob_s *iob, unsigned int len)
 {
   FAR struct iob_s *next;
   unsigned int ncopy;
@@ -120,7 +119,7 @@ int iob_contig(FAR struct iob_s *iob, unsigned int len,
 
           if (next->io_len == 0)
             {
-              iob->io_flink = iob_free(next, producerid);
+              iob->io_flink = iob_free(next);
             }
         }
       while (len > iob->io_len);

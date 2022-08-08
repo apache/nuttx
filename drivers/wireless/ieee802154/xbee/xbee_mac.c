@@ -404,7 +404,7 @@ int xbee_req_data(XBEEHANDLE xbee,
   while (!priv->txdone);
 
   nxsem_post(&priv->tx_sem);
-  iob_free(frame, IOBUSER_WIRELESS_RAD802154);
+  iob_free(frame);
   return OK;
 }
 

@@ -52,8 +52,7 @@
 
 static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
                                unsigned int len, unsigned int offset,
-                               bool throttled, bool can_block,
-                               enum iob_user_e consumerid)
+                               bool throttled, bool can_block)
 {
   FAR struct iob_s *head = iob;
   FAR struct iob_s *next;
@@ -177,11 +176,11 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
 
           if (can_block)
             {
-              next = iob_alloc(throttled, consumerid);
+              next = iob_alloc(throttled);
             }
           else
             {
-              next = iob_tryalloc(throttled, consumerid);
+              next = iob_tryalloc(throttled);
             }
 
           if (next == NULL)
@@ -217,11 +216,9 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
  ****************************************************************************/
 
 int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
-               unsigned int len, unsigned int offset, bool throttled,
-               enum iob_user_e consumerid)
+               unsigned int len, unsigned int offset, bool throttled)
 {
-  return iob_copyin_internal(iob, src, len, offset,
-                             throttled, true, consumerid);
+  return iob_copyin_internal(iob, src, len, offset, throttled, true);
 }
 
 /****************************************************************************
@@ -235,9 +232,7 @@ int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
  ****************************************************************************/
 
 int iob_trycopyin(FAR struct iob_s *iob, FAR const uint8_t *src,
-                  unsigned int len, unsigned int offset, bool throttled,
-                  enum iob_user_e consumerid)
+                  unsigned int len, unsigned int offset, bool throttled)
 {
-  return iob_copyin_internal(iob, src, len, offset, throttled, false,
-                             consumerid);
+  return iob_copyin_internal(iob, src, len, offset, throttled, false);
 }
