@@ -299,9 +299,6 @@ void up_invalidate_dcache(uintptr_t start, uintptr_t end)
  * Description:
  *   Invalidate the entire contents of D cache.
  *
- *   NOTE: This function forces L1 and L2 cache operations to be atomic
- *   by disabling interrupts.
- *
  * Input Parameters:
  *   None
  *
