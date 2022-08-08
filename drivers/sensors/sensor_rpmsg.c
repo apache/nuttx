@@ -1273,7 +1273,7 @@ static void sensor_rpmsg_device_created(FAR struct rpmsg_device *rdev,
  *
  * Input Parameters:
  *   lower - The instance of lower half sensor driver.
- *   path  - The path of character node, ex: /dev/sensor/xxx.
+ *   path  - The path of character node, ex: /dev/uorb/xxx.
  *
  * Returned Value:
  *   The takeover rpmsg lowerhalf returned on success, NULL on failure.
