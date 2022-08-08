@@ -48,17 +48,6 @@
 #define LOCAL_NPOLLWAITERS 2
 #define LOCAL_NCONTROLFDS  4
 
-/* Packet format in FIFO:
- *
- * 1. Sync bytes (7 at most)
- * 2. End/Start byte
- * 3. 16-bit packet length (in host order)
- * 4. Packet data (in host order)
- */
-
-#define LOCAL_SYNC_BYTE   0x42     /* Byte in sync sequence */
-#define LOCAL_END_BYTE    0xbd     /* End of sync sequence */
-
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
