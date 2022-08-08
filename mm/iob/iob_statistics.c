@@ -24,76 +24,16 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <stdio.h>
-#include <string.h>
-#include <assert.h>
-#include <debug.h>
-
 #include <nuttx/mm/iob.h>
+
+#include "iob.h"
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS) && \
     !defined(CONFIG_FS_PROCFS_EXCLUDE_IOBINFO)
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-struct iob_userstats_s g_iobuserstats[IOBUSER_NENTRIES];
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: iob_stats_onalloc
- *
- * Description:
- *   An IOB has just been allocated for the consumer. This is a hook for the
- *   IOB statistics to be updated when /proc/iobinfo is enabled.
- *
- * Input Parameters:
- *   consumerid - id representing who is consuming the IOB
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void iob_stats_onalloc(enum iob_user_e consumerid)
-{
-  DEBUGASSERT(consumerid < IOBUSER_NENTRIES);
-  g_iobuserstats[consumerid].totalconsumed++;
-
-  /* Increment the global statistic as well */
-
-  g_iobuserstats[IOBUSER_GLOBAL].totalconsumed++;
-}
-
-/****************************************************************************
- * Name: iob_stats_onfree
- *
- * Description:
- *   An IOB has just been freed by the producer. This is a hook for the
- *   IOB statistics to be updated when /proc/iobinfo is enabled.
- *
- * Input Parameters:
- *   consumerid - id representing who is consuming the IOB
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void iob_stats_onfree(enum iob_user_e producerid)
-{
-  DEBUGASSERT(producerid < IOBUSER_NENTRIES);
-  g_iobuserstats[producerid].totalproduced++;
-
-  /* Increment the global statistic as well */
-
-  g_iobuserstats[IOBUSER_GLOBAL].totalproduced++;
-}
 
 /****************************************************************************
  * Name: iob_getuserstats
@@ -103,17 +43,39 @@ void iob_stats_onfree(enum iob_user_e producerid)
  *   consumer/producer
  *
  * Input Parameters:
- *   userid - id representing the IOB producer/consumer
+ *   stats - point to IOB usage statistics
  *
  * Returned Value:
  *   None.
  *
  ****************************************************************************/
 
-FAR struct iob_userstats_s * iob_getuserstats(enum iob_user_e userid)
+void iob_getstats(FAR struct iob_stats_s *stats)
 {
-  DEBUGASSERT(userid < IOBUSER_NENTRIES);
-  return &g_iobuserstats[userid];
+  stats->ntotal = CONFIG_IOB_NBUFFERS;
+
+  nxsem_get_value(&g_iob_sem, &stats->nfree);
+  if (stats->nfree < 0)
+    {
+      stats->nwait = -stats->nfree;
+      stats->nfree = 0;
+    }
+  else
+    {
+      stats->nwait = 0;
+    }
+
+#if CONFIG_IOB_THROTTLE > 0
+  nxsem_get_value(&g_throttle_sem, &stats->nthrottle);
+  if (stats->nthrottle < 0)
+    {
+      stats->nthrottle = -stats->nthrottle;
+    }
+  else
+#endif
+    {
+      stats->nthrottle = 0;
+    }
 }
 
 #endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS &&

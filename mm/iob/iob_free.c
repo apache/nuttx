@@ -71,8 +71,7 @@
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_free(FAR struct iob_s *iob,
-                           enum iob_user_e producerid)
+FAR struct iob_s *iob_free(FAR struct iob_s *iob)
 {
   FAR struct iob_s *next = iob->io_flink;
   irqstate_t flags;
@@ -146,11 +145,6 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob,
 
   nxsem_post(&g_iob_sem);
   DEBUGASSERT(g_iob_sem.semcount <= CONFIG_IOB_NBUFFERS);
-
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS) && \
-    defined(CONFIG_MM_IOB) && !defined(CONFIG_FS_PROCFS_EXCLUDE_IOBINFO)
-  iob_stats_onfree(producerid);
-#endif
 
 #if CONFIG_IOB_THROTTLE > 0
   nxsem_post(&g_throttle_sem);

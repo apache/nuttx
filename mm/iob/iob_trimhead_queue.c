@@ -55,8 +55,7 @@
  ****************************************************************************/
 
 FAR struct iob_s *iob_trimhead_queue(FAR struct iob_queue_s *qhead,
-                                     unsigned int trimlen,
-                                     enum iob_user_e producerid)
+                                     unsigned int trimlen)
 {
   FAR struct iob_qentry_s *qentry;
   FAR struct iob_s *iob = NULL;
@@ -73,7 +72,7 @@ FAR struct iob_s *iob_trimhead_queue(FAR struct iob_queue_s *qhead,
         {
           /* Trim the I/Buffer chain and update the queue head */
 
-          iob = iob_trimhead(iob, trimlen, producerid);
+          iob = iob_trimhead(iob, trimlen);
           qentry->qe_head = iob;
         }
     }

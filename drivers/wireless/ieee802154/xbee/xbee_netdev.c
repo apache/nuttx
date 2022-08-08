@@ -1116,13 +1116,13 @@ static int xbeenet_req_data(FAR struct radio_driver_s *netdev,
         {
           wlerr("ERROR: xbeemac_req_data failed: %d\n", ret);
 
-          iob_free(iob, IOBUSER_WIRELESS_RAD802154);
+          iob_free(iob);
           for (iob = framelist; iob != NULL; iob = framelist)
             {
               /* Remove the IOB from the queue and free */
 
               framelist = iob->io_flink;
-              iob_free(iob, IOBUSER_WIRELESS_RAD802154);
+              iob_free(iob);
             }
 
           NETDEV_TXERRORS(&priv->xd_dev.r_dev);

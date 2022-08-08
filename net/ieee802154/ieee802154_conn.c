@@ -176,7 +176,7 @@ void ieee802154_conn_free(FAR struct ieee802154_conn_s *conn)
 
       if (container->ic_iob)
         {
-          iob_free(container->ic_iob, IOBUSER_NET_SOCK_IEEE802154);
+          iob_free(container->ic_iob);
         }
 
       /* And free the container itself */
