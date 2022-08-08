@@ -47,7 +47,7 @@
 /* Device naming ************************************************************/
 
 #define ROUND_DOWN(x, y)    (((x) / (y)) * (y))
-#define DEVNAME_FMT         "/dev/sensor/sensor_%s%s%d"
+#define DEVNAME_FMT         "/dev/uorb/sensor_%s%s%d"
 #define DEVNAME_UNCAL       "_uncal"
 #define TIMING_BUF_ESIZE    (sizeof(unsigned long))
 
@@ -1126,7 +1126,7 @@ int sensor_register(FAR struct sensor_lowerhalf_s *lower, int devno)
  *   dev   - A pointer to an instance of lower half sensor driver. This
  *           instance is bound to the sensor driver and must persists as long
  *           as the driver persists.
- *   path  - The user specifies path of device. ex: /dev/sensor/xxx.
+ *   path  - The user specifies path of device. ex: /dev/uorb/xxx.
  *   esize - The element size of intermediate circular buffer.
  *
  * Returned Value:
@@ -1255,7 +1255,7 @@ void sensor_unregister(FAR struct sensor_lowerhalf_s *lower, int devno)
  *   dev   - A pointer to an instance of lower half sensor driver. This
  *           instance is bound to the sensor driver and must persists as long
  *           as the driver persists.
- *   path  - The user specifies path of device, ex: /dev/sensor/xxx
+ *   path  - The user specifies path of device, ex: /dev/uorb/xxx
  ****************************************************************************/
 
 void sensor_custom_unregister(FAR struct sensor_lowerhalf_s *lower,

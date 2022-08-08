@@ -40,7 +40,7 @@ extern "C"
  * Name: fakesensor_init
  *
  * Description:
- *   This function generates a sensor node under /dev/sensor/. And then
+ *   This function generates a sensor node under /dev/uorb/. And then
  *   report the data from csv file.
  *
  * Input Parameters:
