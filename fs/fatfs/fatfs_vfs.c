@@ -1632,10 +1632,11 @@ DRESULT disk_ioctl(BYTE pdrv, BYTE cmd, void *buff)
           if (drv->u.i_bops->ioctl)
             {
               ret = drv->u.i_bops->ioctl(drv, BIOC_FLUSH, 0);
-              if (ret == -ENOTTY)
-                {
-                  ret = 0;
-                }
+            }
+
+          if (ret == -ENOTTY)
+            {
+              ret = 0;
             }
         }
         break;
