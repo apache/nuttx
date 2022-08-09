@@ -32,6 +32,20 @@ config IOB_BUFSIZE
 		chain.  This setting determines the data payload each preallocated
 		I/O buffer.
 
+config IOB_HEADSIZE
+	int "Head size of each I/O buffer"
+	default 0
+	---help---
+		This setting determines the reserved size in front of the payload
+		buffer in each I/O buffer.
+
+config IOB_ALIGNMENT
+	int "Alignment size of each I/O buffer"
+	default 1
+	---help---
+		The member io_head of all I/O buffers is aligned to the value
+		specified by this configuration.
+
 config IOB_NCHAINS
 	int "Number of pre-allocated I/O buffer chain heads"
 	default 0 if !NET_READAHEAD
