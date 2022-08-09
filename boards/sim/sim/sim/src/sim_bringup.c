@@ -35,6 +35,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/nxffs.h>
 #include <nuttx/fs/rpmsgfs.h>
+#include <nuttx/drivers/rpmsgdev.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/spi/spi_transfer.h>
 #include <nuttx/rc/lirc_dev.h>
@@ -455,6 +456,11 @@ int sim_bringup(void)
 
 #if defined(CONFIG_FS_RPMSGFS) && defined(CONFIG_SIM_RPTUN_MASTER)
   rpmsgfs_server_init();
+#endif
+
+#ifdef CONFIG_DEV_RPMSG
+  rpmsgdev_register("server", "/dev/console", "/dev/server-console");
+  rpmsgdev_register("server", "/dev/null", "/dev/server-null");
 #endif
 #endif
 

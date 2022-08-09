@@ -24,6 +24,7 @@
 
 #include <nuttx/crypto/crypto.h>
 #include <nuttx/drivers/drivers.h>
+#include <nuttx/drivers/rpmsgdev.h>
 #include <nuttx/fs/loop.h>
 #include <nuttx/input/uinput.h>
 #include <nuttx/net/loopback.h>
@@ -151,5 +152,9 @@ void drivers_initialize(void)
 
 #ifdef CONFIG_SENSORS_RPMSG
   sensor_rpmsg_initialize();
+#endif
+
+#ifdef CONFIG_DEV_RPMSG_SERVER
+  rpmsgdev_server_init();
 #endif
 }
