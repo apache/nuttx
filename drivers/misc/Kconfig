@@ -15,6 +15,16 @@ config DEV_ZERO
 	bool "Enable /dev/zero"
 	default n
 
+config DEV_RPMSG
+	bool "RPMSG Device Client Support"
+	default n
+	depends on RPTUN
+
+config DEV_RPMSG_SERVER
+	bool "RPMSG Device Server Support"
+	default n
+	depends on RPTUN
+
 config DRVR_MKRD
 	bool "RAM disk wrapper (mkrd)"
 	default n
