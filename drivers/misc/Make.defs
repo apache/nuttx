@@ -47,6 +47,14 @@ else ifeq ($(CONFIG_DRVR_READAHEAD),y)
   CSRCS += rwbuffer.c
 endif
 
+ifeq ($(CONFIG_DEV_RPMSG),y)
+  CSRCS += rpmsgdev.c
+endif
+
+ifeq ($(CONFIG_DEV_RPMSG_SERVER),y)
+  CSRCS += rpmsgdev_server.c
+endif
+
 # Include build support
 
 DEPPATH += --dep-path misc
