@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include "rpmsgfs/rpmsgfs.h"
 #include "inode/inode.h"
 #include "aio/aio.h"
 
@@ -51,5 +52,9 @@ void fs_initialize(void)
 
   aio_initialize();
 
+#endif
+
+#ifdef CONFIG_FS_RPMSGFS_SERVER
+  rpmsgfs_server_init();
 #endif
 }

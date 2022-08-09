@@ -245,4 +245,10 @@ int       rpmsgfs_client_stat(FAR void *handle, FAR const char *path,
 int       rpmsgfs_client_chstat(FAR void *handle, FAR const char *path,
                                 FAR const struct stat *buf, int flags);
 
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+int       rpmsgfs_server_init(void);
+
 #endif /* __FS_RPMSGFS_RPMSGFS_H */

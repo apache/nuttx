@@ -26,3 +26,7 @@ VPATH += :rpmsgfs
 ifeq ($(CONFIG_FS_RPMSGFS),y)
 CSRCS += rpmsgfs.c rpmsgfs_client.c rpmsgfs_server.c
 endif
+
+ifeq ($(CONFIG_FS_RPMSGFS_SERVER),y)
+CSRCS += rpmsgfs_server.c
+endif

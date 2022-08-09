@@ -34,7 +34,6 @@
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/nxffs.h>
-#include <nuttx/fs/rpmsgfs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/spi/spi_transfer.h>
 #include <nuttx/rc/lirc_dev.h>
@@ -446,10 +445,6 @@ int sim_bringup(void)
   up_rptun_init("server-proxy", "proxy", true);
 #else
   up_rptun_init("server-proxy", "server", false);
-#endif
-
-#if defined(CONFIG_FS_RPMSGFS) && defined(CONFIG_SIM_RPTUN_MASTER)
-  rpmsgfs_server_init();
 #endif
 #endif
 
