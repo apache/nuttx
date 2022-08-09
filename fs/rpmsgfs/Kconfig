@@ -10,3 +10,10 @@ config FS_RPMSGFS
 	---help---
 		Use rpmsg file system to mount remote directories to local.
 		This the method for user to use remote file like own core.
+
+config FS_RPMSGFS_SERVER
+	bool "RPMSG File Server"
+	default n
+	depends on RPTUN
+	---help---
+		Initialize rpmsg file system server automatically.
