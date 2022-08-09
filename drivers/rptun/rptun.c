@@ -386,6 +386,7 @@ static int rptun_callback(FAR void *arg, uint32_t vqid)
   FAR struct rptun_priv_s *priv = arg;
   FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
   FAR struct virtio_device *vdev = rvdev->vdev;
+  FAR struct virtqueue *svq = rvdev->svq;
   FAR struct virtqueue *rvq = rvdev->rvq;
 
   if (vqid == RPTUN_NOTIFY_ALL ||
@@ -393,6 +394,12 @@ static int rptun_callback(FAR void *arg, uint32_t vqid)
     {
       rptun_update_rx(priv);
       rptun_wakeup_rx(priv);
+    }
+
+ if (vqid == RPTUN_NOTIFY_ALL ||
+     vqid == vdev->vrings_info[svq->vq_queue_index].notifyid)
+    {
+      rptun_wakeup_tx(priv);
     }
 
   return OK;
