@@ -39,7 +39,6 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/fs/rpmsgfs.h>
 
 #include "rpmsgfs.h"
 

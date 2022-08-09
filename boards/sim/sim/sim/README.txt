@@ -1059,7 +1059,7 @@ rpserver
 
   3.RpmsgFS
     Source:
-      include/nuttx/fs/rpmsgfs.h
+      fs/rpmsgfs/rpmsgfs.h
       fs/rpmsgfs/rpmsgfs.c
       fs/rpmsgfs/rpmsgfs_client.c
       fs/rpmsgfs/rpmsgfs_server.c
