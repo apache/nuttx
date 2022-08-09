@@ -38,13 +38,6 @@
 #  define NULL ((FAR void *)0)
 #endif
 
-#define ROUNDUP(x, y)   (((x) + (y) - 1) / (y) * (y))
-
-/* Fix the I/O Buffer size with specified alignment size */
-
-#define IOB_BUF_ALIGN_SIZE ROUNDUP(CONFIG_IOB_BUFSIZE + \
-                          CONFIG_IOB_HEADER_SIZE, CONFIG_IOB_ALIGNMENT)
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -55,11 +48,6 @@ static struct iob_s        g_iob_pool[CONFIG_IOB_NBUFFERS];
 #if CONFIG_IOB_NCHAINS > 0
 static struct iob_qentry_s g_iob_qpool[CONFIG_IOB_NCHAINS];
 #endif
-
-/* memory prepared for I/O buffers */
-
-static uint8_t g_iob_buffer[CONFIG_IOB_NBUFFERS * IOB_BUF_ALIGN_SIZE]
-                           aligned_data(CONFIG_IOB_ALIGNMENT);
 
 /****************************************************************************
  * Public Data
@@ -121,11 +109,6 @@ void iob_initialize(void)
   for (i = 0; i < CONFIG_IOB_NBUFFERS; i++)
     {
       FAR struct iob_s *iob = &g_iob_pool[i];
-
-      /* Reserve the pad size for each I/O buffer */
-
-      iob->io_data = g_iob_buffer + i * IOB_BUF_ALIGN_SIZE +
-                                    CONFIG_IOB_HEADER_SIZE;
 
       /* Add the pre-allocate I/O buffer to the head of the free list */
 
