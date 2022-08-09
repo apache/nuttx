@@ -27,11 +27,11 @@
 ifeq ($(CONFIG_MPFS_OPENSBI),y)
 define POSTBUILD
 	$(Q) echo "SBI: Creating nuttx.sbi file"
-	$(Q) $(OBJCOPY) -O binary -j .text.sbi -j .ddrstorage $(BIN) nuttx.sbi
+	$(Q) $(OBJCOPY) -O binary -j .text.sbi $(BIN) nuttx.sbi
 	$(Q) ([ $$? -eq 0 ] && echo "Done.")
 	$(Q) echo nuttx.sbi >> nuttx.manifest
 	$(Q) echo "SBI: Removing unnecessary sections from nuttx binary"
-	$(Q) $(OBJCOPY) -O binary -R .text.sbi -R .l2_scratchpad -R .ddrstorage $(BIN) nuttx.bin
+	$(Q) $(OBJCOPY) -O binary -R .text.sbi -R .l2_scratchpad $(BIN) nuttx.bin
 	$(Q) ([ $$? -eq 0 ] && echo "Done.")
 endef
 endif

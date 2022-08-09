@@ -59,14 +59,6 @@
 #define MPFS_PMP_DEFAULT_ADDR      0xfffffffff
 #define MPFS_PMP_DEFAULT_PERM      0x000000009f
 
-/* The following define is not accessible with assember.  Make sure it's in
- * sync with the assembler usage in mpfs_opensbi_utils.S.
- */
-
-#if SBI_PLATFORM_DEFAULT_HART_STACK_SIZE != 8192
-#  error "Fix define in file mpfs_opensbi_utils.S"
-#endif
-
 #define MPFS_SYSREG_SOFT_RESET_CR     (MPFS_SYSREG_BASE + \
                                        MPFS_SYSREG_SOFT_RESET_CR_OFFSET)
 #define MPFS_SYSREG_SUBBLK_CLOCK_CR   (MPFS_SYSREG_BASE + \
@@ -232,14 +224,8 @@ static const struct sbi_platform platform =
 
 /* This must go into l2_scratchpad region, starting at 0x0a000000. */
 
-static sbi_scratch_holder_t g_scratches[MPFS_MAX_NUM_HARTS] \
+sbi_scratch_holder_t g_scratches[MPFS_MAX_NUM_HARTS] \
                __attribute__((section(".l2_scratchpad")));
-
-/* These stacks are used in the mpfs_opensbi_utils.S */
-
-uint8_t g_hart_stacks[SBI_PLATFORM_DEFAULT_HART_STACK_SIZE * \
-                      MPFS_HART_COUNT] \
-                      __attribute__((section(".ddrstorage"), aligned(16)));
 
 static const uint64_t sbi_entrypoints[] =
 {
