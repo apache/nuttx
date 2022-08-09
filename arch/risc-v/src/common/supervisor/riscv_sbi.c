@@ -19,6 +19,18 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* SBI Extension IDs */
+
+#define SBI_EXT_TIME            0x54494D45
+
+/* SBI function IDs for TIME extension */
+
+#define SBI_EXT_TIME_SET_TIMER  0x0
+
+/****************************************************************************
  * Included Files
  ****************************************************************************/
 
@@ -33,24 +45,30 @@
  * Private Functions
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_RV64
-static inline uint64_t rdtime(void)
+static inline uintptr_t sbi_ecall(unsigned int extid, unsigned int fid,
+                                  uintptr_t parm0, uintptr_t parm1,
+                                  uintptr_t parm2, uintptr_t parm3,
+                                  uintptr_t parm4, uintptr_t parm5)
 {
-  uint32_t hi;
-  uint32_t lo;
+  register long r0 asm("a0") = (long)(parm0);
+  register long r1 asm("a1") = (long)(parm1);
+  register long r2 asm("a2") = (long)(parm2);
+  register long r3 asm("a3") = (long)(parm3);
+  register long r4 asm("a4") = (long)(parm4);
+  register long r5 asm("a5") = (long)(parm5);
+  register long r6 asm("a6") = (long)(fid);
+  register long r7 asm("a7") = (long)(extid);
 
-  do
-    {
-      hi = READ_CSR(timeh);
-      lo = READ_CSR(time);
-    }
-  while (hi != READ_CSR(timeh));
+  asm volatile
+    (
+     "ecall"
+     : "+r"(r0), "+r"(r1)
+     : "r"(r2), "r"(r3), "r"(r4), "r"(r5), "r"(r6), "r"(r7)
+     : "memory"
+     );
 
-  return (((uint64_t) hi) << 32) | lo;
+  return r1;
 }
-#else
-#define rdtime() READ_CSR(time)
-#endif /* CONFIG_ARCH_RV64 */
 
 /****************************************************************************
  * Public Functions
@@ -69,8 +87,12 @@ static inline uint64_t rdtime(void)
 
 void riscv_sbi_set_timer(uint64_t stime_value)
 {
-#if 0
-#error "Missing functionality..."
+#ifdef CONFIG_ARCH_RV64
+  sbi_ecall(SBI_EXT_TIME, SBI_EXT_TIME_SET_TIMER, stime_value, 0, 0, 0, 0,
+            0);
+#else
+  sbi_ecall(SBI_EXT_TIME, SBI_EXT_TIME_SET_TIMER, stime_value,
+            stime_value >> 32, 0, 0, 0, 0);
 #endif
 }
 
@@ -87,5 +109,19 @@ void riscv_sbi_set_timer(uint64_t stime_value)
 
 uint64_t riscv_sbi_get_time(void)
 {
-  return rdtime();
+#ifdef CONFIG_ARCH_RV64
+  return READ_CSR(time);
+#else
+  uint32_t hi;
+  uint32_t lo;
+
+  do
+    {
+      hi = READ_CSR(timeh);
+      lo = READ_CSR(time);
+    }
+  while (hi != READ_CSR(timeh));
+
+  return (((uint64_t) hi) << 32) | lo;
+#endif
 }
