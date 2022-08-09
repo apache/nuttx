@@ -106,6 +106,7 @@ struct aw86225_dev_s
   uint8_t state;
   uint8_t pattern_play_cnt;
   FAR struct aw86225_patterns_s *patterns;
+  bool patterns_reload;                      /* Patterns changed */
   struct wdog_s wdog;
   struct work_s worker;
 
@@ -1865,8 +1866,24 @@ static int aw86225_excute_patterns(FAR struct aw86225_dev_s *priv,
       return ret;
     }
 
-  wd_start(&priv->wdog, MSEC2TICK(patterns->pattern[0].duration),
-           wdog_timer_cb, (wdparm_t)priv);
+  if (patterns->repeatable && patterns->count == 1)
+    {
+      /* let aw86225 handle same repeatable pattern */
+
+      ret = aw86225_set_mainloop(priv, 0xf);
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
+  else
+    {
+      /* start wdtimer to loop all patterns */
+
+      mtrinfo("start wdtimer.\n");
+      wd_start(&priv->wdog, MSEC2TICK(patterns->pattern[0].duration),
+               wdog_timer_cb, (wdparm_t)priv);
+    }
 
   return ret;
 }
@@ -1991,6 +2008,19 @@ static int aw86225_start(FAR struct motor_lowerhalf_s *dev)
 
   DEBUGASSERT(dev != NULL);
 
+  if (priv->patterns_reload && priv->patterns)
+    {
+      /* start excution of patterns before set go bit. */
+
+      ret = aw86225_excute_patterns(priv, priv->patterns);
+      if (ret < 0)
+        {
+          merr("failed to excute patterns\n");
+          return ret;
+        }
+      priv->patterns_reload = false;
+    }
+
   ret = aw86225_play_go(priv, true);
   if (ret == 0)
     {
@@ -2011,18 +2041,23 @@ static int aw86225_start(FAR struct motor_lowerhalf_s *dev)
 static int aw86225_setparam(FAR struct motor_lowerhalf_s *dev,
                             FAR struct motor_params_s *param)
 {
-  int ret = -EINVAL;
+  int ret = 0;
   FAR struct aw86225_dev_s *priv = (FAR struct aw86225_dev_s *)dev;
-  FAR struct aw86225_patterns_s *patterns = (FAR struct aw86225_patterns_s *)
-                                             param->privdata;
+  FAR struct aw86225_patterns_s *patterns = NULL;
 
   DEBUGASSERT(dev != NULL && param != NULL);
 
-  if (priv->lower.opmode == MOTOR_OPMODE_PATTERN)
+  priv->pattern_index = 0;
+  priv->patterns_reload = priv->lower.opmode == MOTOR_OPMODE_PATTERN;
+  if (priv->patterns_reload)
     {
-      ret = aw86225_excute_patterns(priv, patterns);
+      /* any param changed in PATTERN mode requires setting up aw86225 again */
+
+      patterns = (FAR struct aw86225_patterns_s *)param->privdata;
     }
-  else if (priv->lower.opmode == MOTOR_OPMODE_FORCE)
+  priv->patterns = patterns;
+
+  if (priv->lower.opmode == MOTOR_OPMODE_FORCE)
     {
       ret = aw86225_continus_work(priv, param->force);
     }
