@@ -80,12 +80,17 @@ uintptr_t               g_kernel_pgt_pbase = PGT_L1_PBASE;
 static void map_region(uintptr_t paddr, uintptr_t vaddr, size_t size,
                        uint32_t mmuflags)
 {
+  uintptr_t offset;
   uintptr_t l3base;
   uintptr_t end_vaddr;
 
-  /* Start index for the L3 table, kernel flash is always first */
+  /* Start offset for the L3 table, kernel flash is always first */
 
-  l3base = PGT_L3_PBASE + ((paddr - KFLASH_START) / RV_MMU_PAGE_ENTRIES);
+  offset = ((paddr - KFLASH_START) / RV_MMU_L2_PAGE_SIZE) * RV_MMU_PAGE_SIZE;
+
+  /* L3 base address per 2MiB boundary */
+
+  l3base = PGT_L3_PBASE + offset;
 
   /* Map the region to the L3 table as a whole */
 
