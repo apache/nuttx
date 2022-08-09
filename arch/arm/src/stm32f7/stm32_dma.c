@@ -237,12 +237,12 @@ static inline void dmast_putreg(struct stm32_dma_s *dmast, uint32_t offset,
  *
  ****************************************************************************/
 
-static int stm32_dmatake(FAR struct stm32_dma_s *dmast)
+static int stm32_dmatake(struct stm32_dma_s *dmast)
 {
   return nxsem_wait_uninterruptible(&dmast->sem);
 }
 
-static inline void stm32_dmagive(FAR struct stm32_dma_s *dmast)
+static inline void stm32_dmagive(struct stm32_dma_s *dmast)
 {
   nxsem_post(&dmast->sem);
 }
@@ -256,8 +256,8 @@ static inline void stm32_dmagive(FAR struct stm32_dma_s *dmast)
  *
  ****************************************************************************/
 
-static inline FAR struct stm32_dma_s *stm32_dmastream(unsigned int stream,
-                                                    unsigned int controller)
+static inline struct stm32_dma_s *stm32_dmastream(unsigned int stream,
+                                                  unsigned int controller)
 {
   int index;
 
@@ -286,7 +286,7 @@ static inline FAR struct stm32_dma_s *stm32_dmastream(unsigned int stream,
  *
  ****************************************************************************/
 
-static inline FAR struct stm32_dma_s *stm32_dmamap(unsigned long dmamap)
+static inline struct stm32_dma_s *stm32_dmamap(unsigned long dmamap)
 {
   /* Extract the DMA controller number from the bit encoded value */
 
@@ -348,7 +348,7 @@ static void stm32_dmastreamdisable(struct stm32_dma_s *dmast)
  *
  ****************************************************************************/
 
-static int stm32_dmainterrupt(int irq, void *context, FAR void *arg)
+static int stm32_dmainterrupt(int irq, void *context, void *arg)
 {
   struct stm32_dma_s *dmast;
   uint32_t status;
@@ -513,7 +513,7 @@ void weak_function arm_dma_initialize(void)
 
 DMA_HANDLE stm32_dmachannel(unsigned int dmamap)
 {
-  FAR struct stm32_dma_s *dmast;
+  struct stm32_dma_s *dmast;
   int ret;
 
   /* Get the stream index from the bit-encoded channel value */

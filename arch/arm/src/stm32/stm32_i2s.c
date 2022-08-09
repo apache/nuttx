@@ -531,7 +531,7 @@ static bool i2s_checkreg(struct stm32_i2s_s *priv, bool wr, uint16_t regval,
  *
  ****************************************************************************/
 
-static inline uint16_t i2s_getreg(FAR struct stm32_i2s_s *priv,
+static inline uint16_t i2s_getreg(struct stm32_i2s_s *priv,
                                   uint8_t offset)
 {
   uint32_t regaddr = priv->base + offset;
@@ -563,7 +563,7 @@ static inline uint16_t i2s_getreg(FAR struct stm32_i2s_s *priv,
  *
  ****************************************************************************/
 
-static inline void i2s_putreg(FAR struct stm32_i2s_s *priv, uint8_t offset,
+static inline void i2s_putreg(struct stm32_i2s_s *priv, uint8_t offset,
                               uint16_t regval)
 {
   uint32_t regaddr = priv->base + offset;
@@ -2565,9 +2565,9 @@ static void i2s3_configure(struct stm32_i2s_s *priv)
  *
  ****************************************************************************/
 
-FAR struct i2s_dev_s *stm32_i2sbus_initialize(int port)
+struct i2s_dev_s *stm32_i2sbus_initialize(int port)
 {
-  FAR struct stm32_i2s_s *priv = NULL;
+  struct stm32_i2s_s *priv = NULL;
   irqstate_t flags;
   int ret;
 

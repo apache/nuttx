@@ -580,7 +580,7 @@ static void   khci_ep0outcomplete(struct khci_usbdev_s *priv);
 static void   khci_ep0incomplete(struct khci_usbdev_s *priv);
 static void   khci_ep0transfer(struct khci_usbdev_s *priv,
                 uint16_t ustat);
-static int    khci_interrupt(int irq, void *context, FAR void *arg);
+static int    khci_interrupt(int irq, void *context, void *arg);
 
 /* Endpoint helpers *********************************************************/
 
@@ -2876,7 +2876,7 @@ static void khci_ep0transfer(struct khci_usbdev_s *priv, uint16_t ustat)
  * Name: khci_interrupt
  ****************************************************************************/
 
-static int khci_interrupt(int irq, void *context, FAR void *arg)
+static int khci_interrupt(int irq, void *context, void *arg)
 {
   uint16_t usbir;
   uint32_t regval;

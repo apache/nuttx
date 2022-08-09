@@ -91,10 +91,10 @@
 
 struct stm32f4_dev_s
 {
-  struct mio283qt9a_lcd_s dev;      /* The externally visible part of the driver */
-  bool                   grammode;  /* true=Writing to GRAM (16-bit write vs 8-bit) */
-  bool                   firstread; /* First GRAM read? */
-  FAR struct lcd_dev_s  *drvr;      /* The saved instance of the LCD driver */
+  struct mio283qt9a_lcd_s dev;       /* The externally visible part of the driver */
+  bool                    grammode;  /* true=Writing to GRAM (16-bit write vs 8-bit) */
+  bool                    firstread; /* First GRAM read? */
+  struct lcd_dev_s       *drvr;      /* The saved instance of the LCD driver */
 };
 
 /****************************************************************************
@@ -103,14 +103,14 @@ struct stm32f4_dev_s
 
 /* Low Level LCD access */
 
-static void stm32_select(FAR struct mio283qt9a_lcd_s *dev);
-static void stm32_deselect(FAR struct mio283qt9a_lcd_s *dev);
-static void stm32_index(FAR struct mio283qt9a_lcd_s *dev, uint8_t index);
+static void stm32_select(struct mio283qt9a_lcd_s *dev);
+static void stm32_deselect(struct mio283qt9a_lcd_s *dev);
+static void stm32_index(struct mio283qt9a_lcd_s *dev, uint8_t index);
 #if !defined(CONFIG_MIO283QT2_WRONLY) && !defined(CONFIG_LCD_NOGETRUN)
-static uint16_t stm32_read(FAR struct mio283qt9a_lcd_s *dev);
+static uint16_t stm32_read(struct mio283qt9a_lcd_s *dev);
 #endif
-static void stm32_write(FAR struct mio283qt9a_lcd_s *dev, uint16_t data);
-static void stm32_backlight(FAR struct mio283qt9a_lcd_s *dev, int power);
+static void stm32_write(struct mio283qt9a_lcd_s *dev, uint16_t data);
+static void stm32_backlight(struct mio283qt9a_lcd_s *dev, int power);
 
 /****************************************************************************
  * Private Data
@@ -196,7 +196,7 @@ static inline void stm32_data(void)
  *
  ****************************************************************************/
 
-static void stm32_select(FAR struct mio283qt9a_lcd_s *dev)
+static void stm32_select(struct mio283qt9a_lcd_s *dev)
 {
   /* CS low selects */
 
@@ -211,7 +211,7 @@ static void stm32_select(FAR struct mio283qt9a_lcd_s *dev)
  *
  ****************************************************************************/
 
-static void stm32_deselect(FAR struct mio283qt9a_lcd_s *dev)
+static void stm32_deselect(struct mio283qt9a_lcd_s *dev)
 {
   /* CS high de-selects */
 
@@ -226,9 +226,9 @@ static void stm32_deselect(FAR struct mio283qt9a_lcd_s *dev)
  *
  ****************************************************************************/
 
-static void stm32_index(FAR struct mio283qt9a_lcd_s *dev, uint8_t index)
+static void stm32_index(struct mio283qt9a_lcd_s *dev, uint8_t index)
 {
-  FAR struct stm32f4_dev_s *priv = (FAR struct stm32f4_dev_s *)dev;
+  struct stm32f4_dev_s *priv = (struct stm32f4_dev_s *)dev;
 
   /* Setup to write in command mode (vs data mode) */
 
@@ -271,9 +271,9 @@ static void stm32_index(FAR struct mio283qt9a_lcd_s *dev, uint8_t index)
  ****************************************************************************/
 
 #if !defined(CONFIG_MIO283QT2_WRONLY) && !defined(CONFIG_LCD_NOGETRUN)
-static uint16_t stm32_read(FAR struct mio283qt9a_lcd_s *dev)
+static uint16_t stm32_read(struct mio283qt9a_lcd_s *dev)
 {
-  FAR struct stm32f4_dev_s *priv = (FAR struct stm32f4_dev_s *)dev;
+  struct stm32f4_dev_s *priv = (struct stm32f4_dev_s *)dev;
   uint32_t  * volatile portsetreset = (uint32_t *) STM32_GPIOE_BSRR;
   uint32_t  * volatile portmode = (uint32_t *) STM32_GPIOE_MODER;
   uint32_t  * volatile portinput = (uint32_t *) STM32_GPIOE_IDR;
@@ -347,9 +347,9 @@ static uint16_t stm32_read(FAR struct mio283qt9a_lcd_s *dev)
  *
  ****************************************************************************/
 
-static void stm32_write(FAR struct mio283qt9a_lcd_s *dev, uint16_t data)
+static void stm32_write(struct mio283qt9a_lcd_s *dev, uint16_t data)
 {
-  FAR struct stm32f4_dev_s *priv = (FAR struct stm32f4_dev_s *)dev;
+  struct stm32f4_dev_s *priv = (struct stm32f4_dev_s *)dev;
 
   /* Write the data register to the 8-bit GPIO pin bus.  We are violating the
    * datasheet here a little by driving the WR pin low at the same time as
@@ -386,7 +386,7 @@ static void stm32_write(FAR struct mio283qt9a_lcd_s *dev, uint16_t data)
  *
  ****************************************************************************/
 
-static void stm32_backlight(FAR struct mio283qt9a_lcd_s *dev, int power)
+static void stm32_backlight(struct mio283qt9a_lcd_s *dev, int power)
 {
   /* For now, we just control the backlight as a discrete.  Pulse width
    * modulation would be required to vary the backlight level.  A low value
@@ -503,7 +503,7 @@ int board_lcd_initialize(void)
  *
  ****************************************************************************/
 
-FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
+struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
   DEBUGASSERT(lcddev == 0);
   return g_stm32f4_lcd.drvr;

@@ -169,6 +169,10 @@ config SAMA5_HAVE_VDEC
 	bool
 	default n
 
+config SAMA5_HAVE_RSTC_EXTRST
+	bool
+	default n
+
 # Summary configurations
 
 config SAMA5_FLEXCOM
@@ -228,6 +232,7 @@ config ARCH_CHIP_SAMA5D3
 	select SAMA5_HAVE_USART1
 	select SAMA5_HAVE_USART2
 	select SAMA5_HAVE_USART3
+	select SAMA5_HAVE_RSTC_EXTRST
 
 config ARCH_CHIP_SAMA5D4
 	bool
@@ -756,6 +761,28 @@ config SAMA5_VDEC
 
 endmenu # SAMA5 Peripheral Support
 
+config SAMA5_SYSTEMRESET
+	bool "Enable System Reset"
+	select ARCH_HAVE_RESET
+	---help---
+		Enable up_systemreset
+
+if SAMA5_SYSTEMRESET && SAMA5_HAVE_RSTC_EXTRST
+
+config SAMA5_EXTRESET_ERST
+	int "Drive External nRST duration"
+	default 0
+	range 0 16
+	---help---
+		Define if the external reset (nRST) will be generated in up_systemreset
+		and for how long:
+
+		- A value of 0 will not drive the external reset
+		- A value of 1-16 will drive the external reset for 2^SAMA5_EXTRESET_ERST
+		  slow clock cycles.
+
+endif # SAMA5_SYSTEMRESET
+
 config SAMA5_PIO_IRQ
 	bool "PIO pin interrupts"
 	---help---
@@ -804,7 +831,7 @@ config SAMA5_FLEXCOM0_SPI
 	bool "SPI"
 	select SAMA5_FLEXCOM_SPI
 
-config SAMA5_FLEXCOM0_SPI
+config SAMA5_FLEXCOM0_TWI
 	bool "TWI"
 	select SAMA5_FLEXCOM_TWI
 
@@ -825,7 +852,7 @@ config SAMA5_FLEXCOM1_SPI
 	bool "SPI"
 	select SAMA5_FLEXCOM_SPI
 
-config SAMA5_FLEXCOM1_SPI
+config SAMA5_FLEXCOM1_TWI
 	bool "TWI"
 	select SAMA5_FLEXCOM_TWI
 
@@ -846,7 +873,7 @@ config SAMA5_FLEXCOM2_SPI
 	bool "SPI"
 	select SAMA5_FLEXCOM_SPI
 
-config SAMA5_FLEXCOM2_SPI
+config SAMA5_FLEXCOM2_TWI
 	bool "TWI"
 	select SAMA5_FLEXCOM_TWI
 
@@ -867,7 +894,7 @@ config SAMA5_FLEXCOM3_SPI
 	select USART3_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
-config SAMA5_FLEXCOM3_SPI
+config SAMA5_FLEXCOM3_TWI
 	bool "TWI"
 	select SAMA5_FLEXCOM_TWI
 
@@ -888,7 +915,7 @@ config SAMA5_FLEXCOM4_SPI
 	bool "SPI"
 	select SAMA5_FLEXCOM_SPI
 
-config SAMA5_FLEXCOM4_SPI
+config SAMA5_FLEXCOM4_TWI
 	bool "TWI"
 	select SAMA5_FLEXCOM_TWI
 

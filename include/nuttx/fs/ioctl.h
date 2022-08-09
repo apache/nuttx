@@ -56,7 +56,7 @@
 #define _AUDIOIOCBASE   (0x1000) /* Audio ioctl commands */
 #define _LCDIOCBASE     (0x1100) /* LCD character driver ioctl commands */
 #define _SLCDIOCBASE    (0x1200) /* Segment LCD ioctl commands */
-                                 /* 0x1300: Not used */
+#define _CAPIOCBASE     (0x1300) /* Capture ioctl commands */
 #define _WLCIOCBASE     (0x1400) /* Wireless modules ioctl character driver commands */
 #define _CFGDIOCBASE    (0x1500) /* Config Data device (app config) ioctl commands */
 #define _TCIOCBASE      (0x1600) /* Timer ioctl commands */
@@ -180,6 +180,9 @@
 #define FIOC_NOTIFY     _FIOC(0x000e)     /* IN:  Pointer to struct automount_notify_s
                                            *      holding automount notification
                                            *      configuration
+                                           * OUT: None
+                                           */
+#define FIOC_TRUNCATE   _FIOC(0x0010)     /* IN:  Length of the file after truncate
                                            * OUT: None
                                            */
 
@@ -327,6 +330,11 @@
 
 #define _PWMIOCVALID(c)   (_IOC_TYPE(c)==_PWMIOCBASE)
 #define _PWMIOC(nr)       _IOC(_PWMIOCBASE,nr)
+
+/* NuttX Capture ioctl definitions (see nuttx/timers/capture.h) *************/
+
+#define _CAPIOCVALID(c)   (_IOC_TYPE(c)==_CAPIOCBASE)
+#define _CAPIOC(nr)       _IOC(_CAPIOCBASE,nr)
 
 /* NuttX USB CDC/ACM serial driver ioctl definitions ************************/
 

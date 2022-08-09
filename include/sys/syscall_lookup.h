@@ -25,7 +25,6 @@
  */
 
 SYSCALL_LOOKUP1(_exit,                     1)
-SYSCALL_LOOKUP(exit,                       1)
 SYSCALL_LOOKUP(getpid,                     0)
 SYSCALL_LOOKUP(gettid,                     0)
 
@@ -370,6 +369,7 @@ SYSCALL_LOOKUP(munmap,                     2)
   SYSCALL_LOOKUP(sendmsg,                  3)
   SYSCALL_LOOKUP(setsockopt,               5)
   SYSCALL_LOOKUP(socket,                   3)
+  SYSCALL_LOOKUP(socketpair,               4)
 #endif
 
 /* The following is defined only if CONFIG_TASK_NAME_SIZE > 0 */

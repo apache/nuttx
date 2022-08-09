@@ -59,9 +59,9 @@
  *
  ****************************************************************************/
 
-int xmc4_max6675initialize(FAR const char *devpath)
+int xmc4_max6675initialize(const char *devpath)
 {
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
   int ret;
 
   spi = xmc4_spibus_initialize(MAX6675_SPI_PORTNO);

@@ -24,7 +24,7 @@ CMN_CSRCS += arm_allocateheap.c arm_assert.c arm_blocktask.c
 CMN_CSRCS += arm_createstack.c arm_exit.c arm_fullcontextrestore.c
 CMN_CSRCS += arm_initialize.c arm_lowputs.c
 CMN_CSRCS += arm_modifyreg16.c arm_modifyreg32.c
-CMN_CSRCS += arm_modifyreg8.c arm_puts.c arm_releasepending.c
+CMN_CSRCS += arm_modifyreg8.c arm_nputs.c arm_releasepending.c
 CMN_CSRCS += arm_releasestack.c arm_reprioritizertr.c arm_saveusercontext.c
 CMN_CSRCS += arm_stackframe.c arm_switchcontext.c
 CMN_CSRCS += arm_vfork.c arm_unblocktask.c arm_usestack.c
@@ -65,7 +65,11 @@ endif
 
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
   ifeq ($(CONFIG_FRAME_POINTER),y)
-    CMN_CSRCS += arm_backtrace_fp.c
+    ifeq ($(CONFIG_ARM_THUMB),y)
+      CMN_CSRCS += arm_backtrace_thumb.c
+    else
+      CMN_CSRCS += arm_backtrace_fp.c
+    endif
   else
     CMN_CSRCS += arm_backtrace_thumb.c
   endif

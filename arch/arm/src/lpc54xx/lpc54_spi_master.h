@@ -95,7 +95,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *lpc54_spibus_initialize(int port);
+struct spi_dev_s *lpc54_spibus_initialize(int port);
 
 /****************************************************************************
  * Name:  lpc54_spiN_select, lpc54_spiN_status, and lpc54_spiN_cmddata
@@ -114,102 +114,102 @@ FAR struct spi_dev_s *lpc54_spibus_initialize(int port);
  ****************************************************************************/
 
 #ifdef CONFIG_LPC54_SPI0_MASTER
-void  lpc54_spi0_select(FAR struct spi_dev_s *dev,
+void  lpc54_spi0_select(struct spi_dev_s *dev,
                         uint32_t devid, bool selected);
-uint8_t lpc54_spi0_status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t lpc54_spi0_status(struct spi_dev_s *dev, uint32_t devid);
 
 #ifdef CONFIG_SPI_CMDDATA
-int lpc54_spi0_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int lpc54_spi0_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_LPC54_SPI1_MASTER
-void  lpc54_spi1_select(FAR struct spi_dev_s *dev,
+void  lpc54_spi1_select(struct spi_dev_s *dev,
                         uint32_t devid, bool selected);
-uint8_t lpc54_spi1_status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t lpc54_spi1_status(struct spi_dev_s *dev, uint32_t devid);
 
 #ifdef CONFIG_SPI_CMDDATA
-int lpc54_spi1_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int lpc54_spi1_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_LPC54_SPI2_MASTER
-void  lpc54_spi2_select(FAR struct spi_dev_s *dev,
+void  lpc54_spi2_select(struct spi_dev_s *dev,
                         uint32_t devid, bool selected);
-uint8_t lpc54_spi2_status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t lpc54_spi2_status(struct spi_dev_s *dev, uint32_t devid);
 
 #ifdef CONFIG_SPI_CMDDATA
-int lpc54_spi2_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int lpc54_spi2_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_LPC54_SPI3_MASTER
-void  lpc54_spi3_select(FAR struct spi_dev_s *dev,
+void  lpc54_spi3_select(struct spi_dev_s *dev,
                         uint32_t devid, bool selected);
-uint8_t lpc54_spi3_status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t lpc54_spi3_status(struct spi_dev_s *dev, uint32_t devid);
 
 #ifdef CONFIG_SPI_CMDDATA
-int lpc54_spi3_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int lpc54_spi3_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_LPC54_SPI4_MASTER
-void  lpc54_spi4_select(FAR struct spi_dev_s *dev,
+void  lpc54_spi4_select(struct spi_dev_s *dev,
                         uint32_t devid, bool selected);
-uint8_t lpc54_spi4_status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t lpc54_spi4_status(struct spi_dev_s *dev, uint32_t devid);
 
 #ifdef CONFIG_SPI_CMDDATA
-int lpc54_spi4_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int lpc54_spi4_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_LPC54_SPI5_MASTER
-void  lpc54_spi5_select(FAR struct spi_dev_s *dev,
+void  lpc54_spi5_select(struct spi_dev_s *dev,
                         uint32_t devid, bool selected);
-uint8_t lpc54_spi5_status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t lpc54_spi5_status(struct spi_dev_s *dev, uint32_t devid);
 
 #ifdef CONFIG_SPI_CMDDATA
-int lpc54_spi5_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int lpc54_spi5_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_LPC54_SPI6_MASTER
-void  lpc54_spi6_select(FAR struct spi_dev_s *dev,
+void  lpc54_spi6_select(struct spi_dev_s *dev,
                         uint32_t devid, bool selected);
-uint8_t lpc54_spi6_status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t lpc54_spi6_status(struct spi_dev_s *dev, uint32_t devid);
 
 #ifdef CONFIG_SPI_CMDDATA
-int lpc54_spi6_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int lpc54_spi6_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_LPC54_SPI7_MASTER
-void  lpc54_spi7_select(FAR struct spi_dev_s *dev,
+void  lpc54_spi7_select(struct spi_dev_s *dev,
                         uint32_t devid, bool selected);
-uint8_t lpc54_spi7_status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t lpc54_spi7_status(struct spi_dev_s *dev, uint32_t devid);
 
 #ifdef CONFIG_SPI_CMDDATA
-int lpc54_spi7_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int lpc54_spi7_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_LPC54_SPI8_MASTER
-void  lpc54_spi8_select(FAR struct spi_dev_s *dev,
+void  lpc54_spi8_select(struct spi_dev_s *dev,
                         uint32_t devid, bool selected);
-uint8_t lpc54_spi8_status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t lpc54_spi8_status(struct spi_dev_s *dev, uint32_t devid);
 
 #ifdef CONFIG_SPI_CMDDATA
-int lpc54_spi8_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int lpc54_spi8_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_LPC54_SPI9_MASTER
-void  lpc54_spi9_select(FAR struct spi_dev_s *dev,
+void  lpc54_spi9_select(struct spi_dev_s *dev,
                         uint32_t devid, bool selected);
-uint8_t lpc54_spi9_status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t lpc54_spi9_status(struct spi_dev_s *dev, uint32_t devid);
 
 #ifdef CONFIG_SPI_CMDDATA
-int lpc54_spi9_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int lpc54_spi9_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
@@ -236,43 +236,43 @@ int lpc54_spi9_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 
 #ifdef CONFIG_SPI_CALLBACK
 #ifdef CONFIG_LPC54_SPI0_MASTER
-int lpc54_spi0_register(FAR struct spi_dev_s *dev,
+int lpc54_spi0_register(struct spi_dev_s *dev,
                         spi_mediachange_t callback, void *arg);
 #endif
 #ifdef CONFIG_LPC54_SPI1_MASTER
-int lpc54_spi1_register(FAR struct spi_dev_s *dev,
+int lpc54_spi1_register(struct spi_dev_s *dev,
                         spi_mediachange_t callback, void *arg);
 #endif
 #ifdef CONFIG_LPC54_SPI2_MASTER
-int lpc54_spi2_register(FAR struct spi_dev_s *dev,
+int lpc54_spi2_register(struct spi_dev_s *dev,
                         spi_mediachange_t callback, void *arg);
 #endif
 #ifdef CONFIG_LPC54_SPI3_MASTER
-int lpc54_spi3_register(FAR struct spi_dev_s *dev,
+int lpc54_spi3_register(struct spi_dev_s *dev,
                         spi_mediachange_t callback, void *arg);
 #endif
 #ifdef CONFIG_LPC54_SPI4_MASTER
-int lpc54_spi4_register(FAR struct spi_dev_s *dev,
+int lpc54_spi4_register(struct spi_dev_s *dev,
                         spi_mediachange_t callback, void *arg);
 #endif
 #ifdef CONFIG_LPC54_SPI5_MASTER
-int lpc54_spi5_register(FAR struct spi_dev_s *dev,
+int lpc54_spi5_register(struct spi_dev_s *dev,
                         spi_mediachange_t callback, void *arg);
 #endif
 #ifdef CONFIG_LPC54_SPI6_MASTER
-int lpc54_spi6_register(FAR struct spi_dev_s *dev,
+int lpc54_spi6_register(struct spi_dev_s *dev,
                         spi_mediachange_t callback, void *arg);
 #endif
 #ifdef CONFIG_LPC54_SPI7_MASTER
-int lpc54_spi7_register(FAR struct spi_dev_s *dev,
+int lpc54_spi7_register(struct spi_dev_s *dev,
                         spi_mediachange_t callback, void *arg);
 #endif
 #ifdef CONFIG_LPC54_SPI8_MASTER
-int lpc54_spi8_register(FAR struct spi_dev_s *dev,
+int lpc54_spi8_register(struct spi_dev_s *dev,
                         spi_mediachange_t callback, void *arg);
 #endif
 #ifdef CONFIG_LPC54_SPI9_MASTER
-int lpc54_spi9_register(FAR struct spi_dev_s *dev,
+int lpc54_spi9_register(struct spi_dev_s *dev,
                         spi_mediachange_t callback, void *arg);
 #endif
 #endif /* CONFIG_SPI_CALLBACK */

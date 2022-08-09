@@ -59,7 +59,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int lpc43_usbpullup(FAR struct usbdev_s *dev,  bool enable);
+int lpc43_usbpullup(struct usbdev_s *dev,  bool enable);
 
 /****************************************************************************
  * Name:  lpc43_usbsuspend
@@ -72,7 +72,7 @@ int lpc43_usbpullup(FAR struct usbdev_s *dev,  bool enable);
  *
  ****************************************************************************/
 
-void lpc43_usbsuspend(FAR struct usbdev_s *dev, bool resume);
+void lpc43_usbsuspend(struct usbdev_s *dev, bool resume);
 
 #undef EXTERN
 #if defined(__cplusplus)

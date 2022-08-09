@@ -26,7 +26,7 @@
 #include <fcntl.h>
 #include <nuttx/serial/serial.h>
 #include <nuttx/net/netdev.h>
-#include <../../../../net/netdev/netdev.h>
+#include <nuttx/net/netdev/netdev.h>
 #include "amebaz_hci_board.h"
 
 /****************************************************************************
@@ -57,7 +57,7 @@ struct bt_hci_evt_hdr
  * Public Functions
  ****************************************************************************/
 
-static int hci_recv(FAR struct file *filep, FAR uint8_t *buf, size_t count)
+static int hci_recv(struct file *filep, uint8_t *buf, size_t count)
 {
   ssize_t ret;
   ssize_t nread = 0;
@@ -82,7 +82,7 @@ static int hci_recv(FAR struct file *filep, FAR uint8_t *buf, size_t count)
   return nread;
 }
 
-static int hci_send(FAR struct file *filep, FAR uint8_t *buf, size_t count)
+static int hci_send(struct file *filep, uint8_t *buf, size_t count)
 {
   ssize_t ret;
   ssize_t nwritten = 0;
@@ -108,7 +108,7 @@ static int hci_send(FAR struct file *filep, FAR uint8_t *buf, size_t count)
 }
 
 #ifdef HCI_START_IQK
-static int hci_do_iqk(FAR struct file *filep)
+static int hci_do_iqk(struct file *filep)
 {
   /* OpCode: 0xfd4a, h4 data_len: Cmd(8), Event(7) */
 
@@ -173,7 +173,7 @@ static int hci_do_iqk(FAR struct file *filep)
 }
 
 #endif
-static int hci_check_local_ver(FAR struct file *filep)
+static int hci_check_local_ver(struct file *filep)
 {
   /* OpCode: 0x1001, h4 buf_len: Cmd(1+3=4), Event(1+14=15) */
 
@@ -215,7 +215,7 @@ static int hci_check_local_ver(FAR struct file *filep)
   return 0;
 }
 
-static int hci_check_local_rom_ver(FAR struct file *filep)
+static int hci_check_local_rom_ver(struct file *filep)
 {
   /* OpCode: 0xfc6d, h4 buf_len: Cmd(1+3=4), Event(1+7=8) */
 
@@ -255,7 +255,7 @@ static int hci_check_local_rom_ver(FAR struct file *filep)
   return 0;
 }
 
-static int hci_update_baudrate(FAR struct file *filep)
+static int hci_update_baudrate(struct file *filep)
 {
   /* OpCode: 0xfc17, h4 buf_len: Cmd(1+7=8), Event(1+6=7) */
 
@@ -300,11 +300,11 @@ static int hci_update_baudrate(FAR struct file *filep)
   return file_ioctl(filep, TCSETS, (unsigned long)&toptions);
 }
 
-static int hci_load_firmware(FAR struct file *filep)
+static int hci_load_firmware(struct file *filep)
 {
   int header_size = HCI_H4_HDR_SIZE + HCI_CMD_HDR_SIZE;
   uint8_t command[AMEBAZ_COMMAND_FRAGMENT_SIZE + header_size];
-  FAR struct net_driver_s *drv;
+  struct net_driver_s *drv;
   int buffer_size;
   uint8_t *addr;
   int i;
@@ -354,7 +354,7 @@ static int hci_load_firmware(FAR struct file *filep)
   return OK;
 }
 
-static int hci_update_efuse_iqk(FAR struct file *filep)
+static int hci_update_efuse_iqk(struct file *filep)
 {
   /* OpCode: 0xfd91, h4 buf_len: Cmd(1+15=16), Event(1+6=7) */
 
@@ -383,10 +383,10 @@ static int hci_update_efuse_iqk(FAR struct file *filep)
   return 0;
 }
 
-static int hci_open(FAR struct file *filep)
+static int hci_open(struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR hci_dev_t *dev = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  hci_dev_t *dev = inode->i_private;
   int ret;
   ret = file_open(&dev->filep,
                   CONFIG_AMEBA_HCI_DEV_NAME, O_RDWR);
@@ -448,44 +448,44 @@ bail:
   return ret;
 }
 
-static int hci_close(FAR struct file *filep)
+static int hci_close(struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR hci_dev_t *dev = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  hci_dev_t *dev = inode->i_private;
 
   /* FIXME: BT PowerOff */
 
   return file_close(&dev->filep);
 }
 
-static ssize_t hci_read(FAR struct file *filep,
-                        FAR char *buffer, size_t buflen)
+static ssize_t hci_read(struct file *filep,
+                        char *buffer, size_t buflen)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR hci_dev_t *dev = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  hci_dev_t *dev = inode->i_private;
   return file_read(&dev->filep, buffer, buflen);
 }
 
-static ssize_t hci_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t hci_write(struct file *filep, const char *buffer,
                          size_t buflen)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR hci_dev_t *dev = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  hci_dev_t *dev = inode->i_private;
   return file_write(&dev->filep, buffer, buflen);
 }
 
-static int hci_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int hci_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR hci_dev_t *dev = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  hci_dev_t *dev = inode->i_private;
   return file_ioctl(&dev->filep, cmd, arg);
 }
 
-static int hci_poll(FAR struct file *filep,
-                    FAR struct pollfd *fds, bool setup)
+static int hci_poll(struct file *filep,
+                    struct pollfd *fds, bool setup)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR hci_dev_t *dev = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  hci_dev_t *dev = inode->i_private;
   return file_poll(&dev->filep, fds, setup);
 }
 
@@ -502,7 +502,7 @@ static hci_dev_t g_hcidev =
     },
 };
 
-int amebaz_bt_hci_uart_register(FAR const char *path)
+int amebaz_bt_hci_uart_register(const char *path)
 {
   return register_driver(path, &g_hcidev.i_ops, 0666, &g_hcidev);
 }

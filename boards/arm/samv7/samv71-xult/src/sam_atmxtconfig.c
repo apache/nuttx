@@ -233,7 +233,7 @@ const struct atmxt_config_s g_atmxt_config[] =
     .addr   = 0x0000,
     .id     = 0x00,
     .nbytes = 0x00,
-    .bytes  = (FAR uint8_t *)0
+    .bytes  = (uint8_t *)0
   }
 };
 

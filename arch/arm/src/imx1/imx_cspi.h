@@ -186,7 +186,7 @@ struct spi_dev_s; /* Forward reference */
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *imx_spibus_initialize(int port);
+struct spi_dev_s *imx_spibus_initialize(int port);
 
 /****************************************************************************
  * The external functions, imx_spiselect, imx_spistatus, and imx_cmddaa must
@@ -212,10 +212,10 @@ FAR struct spi_dev_s *imx_spibus_initialize(int port);
  *
  ****************************************************************************/
 
-void imx_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
-uint8_t imx_spistatus(FAR struct spi_dev_s *dev, uint32_t devid);
+void imx_spiselect(struct spi_dev_s *dev, uint32_t devid, bool selected);
+uint8_t imx_spistatus(struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int imx_spicmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int imx_spicmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 #undef EXTERN

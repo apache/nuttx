@@ -161,13 +161,14 @@ SECTIONS
     KEEP(*(.eh_frame))
     . = (. + 7) & ~ 3;
 
-    /* C++ constructor and destructor tables: */
+    /* C++ constructor and destructor tables:
+     * RISC-V GCC is configured with --enable-initfini-array so it emits an
+     * .init_array section instead.
+     */
 
     _sinit = ABSOLUTE(.);
-    KEEP (*crtbegin.o(.ctors))
-    KEEP (*(EXCLUDE_FILE (*crtend.o) .ctors))
-    KEEP (*(SORT(.ctors.*)))
-    KEEP (*(.ctors))
+    KEEP (*(EXCLUDE_FILE (*crtend.* *crtbegin.*) .init_array.*))
+    KEEP (*(EXCLUDE_FILE (*crtend.* *crtbegin.*) .init_array))
     _einit = ABSOLUTE(.);
     KEEP (*crtbegin.o(.dtors))
     KEEP (*(EXCLUDE_FILE (*crtend.o) .dtors))

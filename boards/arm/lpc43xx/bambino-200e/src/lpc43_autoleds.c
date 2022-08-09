@@ -79,7 +79,7 @@
  ****************************************************************************/
 
 #ifdef LED_VERBOSE
-static void led_dumppins(FAR const char *msg)
+static void led_dumppins(const char *msg)
 {
   lpc43_pin_dump(PINCONFIG_LED1, msg);
   lpc43_gpio_dump(GPIO_LED2, msg);

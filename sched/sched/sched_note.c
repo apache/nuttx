@@ -41,18 +41,6 @@
 #include "sched/sched.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* CONFIG_LIBC_LONG_LONG is not a valid selection of the compiler does not
- * support long long types.
- */
-
-#ifndef CONFIG_HAVE_LONG_LONG
-#  undef CONFIG_LIBC_LONG_LONG
-#endif
-
-/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -90,13 +78,12 @@ struct note_startalloc_s
 #ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
 static struct note_filter_s g_note_filter =
 {
-  .mode =
-    {
-      .flag = CONFIG_SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE,
+  {
+     CONFIG_SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE
 #ifdef CONFIG_SMP
-      .cpuset = CONFIG_SCHED_INSTRUMENTATION_CPUSET,
+     , CONFIG_SCHED_INSTRUMENTATION_CPUSET
 #endif
-    }
+  }
 };
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
@@ -483,7 +470,7 @@ void sched_note_start(FAR struct tcb_s *tcb)
   namelen = strlen(tcb->name);
 
   DEBUGASSERT(namelen <= CONFIG_TASK_NAME_SIZE);
-  strlcpy(note.nsa_name, tcb->name, CONFIG_TASK_NAME_SIZE + 1);
+  strlcpy(note.nsa_name, tcb->name, sizeof(note.nsa_name));
 
   length = SIZEOF_NOTE_START(namelen + 1);
 #else
@@ -965,7 +952,7 @@ void sched_note_vbprintf(uintptr_t ip, uint8_t event,
       short s;
       int i;
       long l;
-#ifdef CONFIG_LIBC_LONG_LONG
+#ifdef CONFIG_HAVE_LONG_LONG
       long long ll;
 #endif
       intmax_t im;
@@ -1041,7 +1028,7 @@ void sched_note_vbprintf(uintptr_t ip, uint8_t event,
               var->im = va_arg(va, intmax_t);
               next += sizeof(var->im);
             }
-#ifdef CONFIG_LIBC_LONG_LONG
+#ifdef CONFIG_HAVE_LONG_LONG
           else if (*(fmt - 2) == 'l' && *(fmt - 3) == 'l')
             {
               if (next + sizeof(var->ll) > length)

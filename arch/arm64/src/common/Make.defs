@@ -1,0 +1,97 @@
+############################################################################
+# arch/arm64/src/common/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# The vector table is the "head" object, i.e., the one that must forced into
+# the link in order to draw in all of the other components
+
+HEAD_ASRC  = arm64_head.S
+
+ifeq ($(CONFIG_BUILD_KERNEL),y)
+crt0$(OBJEXT): crt0.c
+	$(CC) $(CFLAGS) -c common$(DELIM)crt0.c -o crt0$(OBJEXT)
+
+STARTUP_OBJS = crt0$(OBJEXT)
+endif
+
+# Force the start-up logic to be at the beginning of the .text to simplify
+# debug.
+
+# Common assembly language files
+CMN_ASRCS  = arm64_vector_table.S arm64_vectors.S arm64_smccc.S
+CMN_ASRCS += arm64_cpu_idle.S arm64_vfork_func.S
+
+ifeq ($(CONFIG_ARCH_HAVE_TESTSET),y)
+CMN_ASRCS += arm64_testset.S
+endif
+
+# Common C source files ( OS call up_xxx)
+CMN_CSRCS =  arm64_initialize.c arm64_initialstate.c arm64_boot.c
+CMN_CSRCS += arm64_nputs.c arm64_idle.c arm64_copystate.c
+CMN_CSRCS += arm64_createstack.c arm64_releasestack.c arm64_stackframe.c arm64_usestack.c
+CMN_CSRCS += arm64_task_sched.c arm64_exit.c arm64_vfork.c arm64_reprioritizertr.c
+CMN_CSRCS += arm64_releasepending.c arm64_unblocktask.c arm64_blocktask.c
+CMN_CSRCS += arm64_assert.c arm64_schedulesigaction.c arm64_backtrace.c
+CMN_CSRCS += arm64_sigdeliver.c
+
+# Common C source files ( hardware BSP )
+CMN_CSRCS += arm64_mmu.c arm64_arch_timer.c arm64_cache.c
+CMN_CSRCS += arm64_doirq.c arm64_gicv3.c arm64_fatal.c
+CMN_CSRCS += arm64_syscall.c arm64_cpu_psci.c
+
+# Use common heap allocation for now (may need to be customized later)
+CMN_CSRCS += arm64_allocateheap.c
+
+ifeq ($(CONFIG_SMP),y)
+CMN_CSRCS += arm64_cpuidlestack.c arm64_cpustart.c arm64_cpuindex.c
+CMN_CSRCS += arm64_cpupause.c
+endif
+
+ifeq ($(CONFIG_BUILD_KERNEL),y)
+CMN_CSRCS += arm64_task_start.c arm64_pthread_start.c arm64_signal_dispatch.c
+endif
+
+ifeq ($(CONFIG_ARCH_ADDRENV),y)
+CMN_CSRCS += arm64_addrenv.c arm64_addrenv_utils.c arm64_pgalloc.c
+ifeq ($(CONFIG_ARCH_STACK_DYNAMIC),y)
+CMN_CSRCS += arm64_addrenv_ustack.c
+endif
+ifeq ($(CONFIG_ARCH_KERNEL_STACK),y)
+CMN_CSRCS += arm64_addrenv_kstack.c
+endif
+ifeq ($(CONFIG_MM_SHM),y)
+CMN_CSRCS += arm64_addrenv_shm.c
+endif
+endif
+
+ifeq ($(CONFIG_MM_PGALLOC),y)
+CMN_CSRCS += arm64_physpgaddr.c
+ifeq ($(CONFIG_ARCH_PGPOOL_MAPPING),y)
+CMN_CSRCS += arm64_virtpgaddr.c
+endif
+endif
+
+ifeq ($(CONFIG_ARCH_FPU),y)
+CMN_CSRCS += arm64_fpu.c
+CMN_ASRCS += arm64_fpu_func.S
+endif
+
+ifeq ($(CONFIG_STACK_COLORATION),y)
+CMN_CSRCS += arm64_checkstack.c
+endif

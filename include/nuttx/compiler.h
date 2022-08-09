@@ -772,6 +772,8 @@
 #  define NEAR
 #  define DSEG
 #  define CODE
+#  define IOBJ
+#  define IPTR
 
 #  undef  CONFIG_SMALL_MEMORY
 #  undef  CONFIG_LONG_IS_NOT_INT

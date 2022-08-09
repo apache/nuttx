@@ -126,7 +126,7 @@
  * Public Types
  ****************************************************************************/
 
-typedef FAR void *DMACH_HANDLE;
+typedef void *DMACH_HANDLE;
 typedef void (*edma_callback_t)(DMACH_HANDLE handle,
                                 void *arg, bool done, int result);
 

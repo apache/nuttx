@@ -177,7 +177,7 @@ static int nsh_waiter(int argc, char *argv[])
 #ifdef HAVE_MMCSD
 static int nsh_sdinitialize(void)
 {
-  FAR struct spi_dev_s *ssp;
+  struct spi_dev_s *ssp;
   int ret;
 
   /* Enable power to the SD/MMC via a GPIO. LOW enables SD/MMC. */
@@ -314,7 +314,7 @@ static int nsh_usbhostinitialize(void)
 
       ret = kthread_create("usbhost", CONFIG_LPC1766STK_USBHOST_PRIO,
                            CONFIG_LPC1766STK_USBHOST_STACKSIZE,
-                           (main_t)nsh_waiter, (FAR char * const *)NULL);
+                           (main_t)nsh_waiter, (char * const *)NULL);
       return ret < 0 ? -ENOEXEC : OK;
     }
 

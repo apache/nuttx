@@ -311,6 +311,7 @@ void up_usbuninitialize(void);
 #endif
 
 #ifdef CONFIG_STACK_COLORATION
+size_t ceva_stack_check(uintptr_t alloc, size_t size);
 void up_stack_color(void *stackbase, size_t nbytes);
 #endif
 

@@ -46,6 +46,10 @@ $(BOOT_STAGE2).bin: %.bin: %.elf
 	$(OBJCOPY) -Obinary $< $@
 
 $(BOOT_STAGE2).elf: $(BOOT2SRC)
+	$(Q) touch $(PICO_SDK_PATH)/src/common/pico_base/include/pico/version.h
+	$(Q) touch $(PICO_SDK_PATH)/src/common/pico_base/include/pico/config_autogen.h
 	$(CC) -nostdlib $(ARCHSCRIPT) $(BOOT2CFLAGS) -o $@ $<
+	$(DELFILE) $(PICO_SDK_PATH)/src/common/pico_base/include/pico/version.h
+	$(DELFILE) $(PICO_SDK_PATH)/src/common/pico_base/include/pico/config_autogen.h
 
 EXTRADELFILE = $(BOOT_STAGE2).*

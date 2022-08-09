@@ -253,7 +253,7 @@ static int sensor_update_interval(FAR struct file *filep,
           min_interval != upper->state.min_interval)
         {
           unsigned long expected_interval = min_interval;
-          ret = lower->ops->set_interval(filep, lower, &min_interval);
+          ret = lower->ops->set_interval(lower, filep, &min_interval);
           if (ret < 0)
             {
               return ret;
@@ -273,7 +273,7 @@ static int sensor_update_interval(FAR struct file *filep,
           (min_latency != upper->state.min_latency ||
           (min_interval != upper->state.min_interval && min_latency)))
         {
-          ret = lower->ops->batch(filep, lower, &min_latency);
+          ret = lower->ops->batch(lower, filep, &min_latency);
           if (ret >= 0)
             {
               upper->state.min_latency = min_latency;
@@ -340,7 +340,7 @@ update:
 
   if (lower->ops->batch)
     {
-      ret = lower->ops->batch(filep, lower, &min_latency);
+      ret = lower->ops->batch(lower, filep, &min_latency);
       if (ret < 0)
         {
           return ret;
@@ -564,7 +564,7 @@ static int sensor_open(FAR struct file *filep)
 
   if (lower->ops->open)
     {
-      ret = lower->ops->open(filep, lower);
+      ret = lower->ops->open(lower, filep);
       if (ret < 0)
         {
           goto errout_with_user;
@@ -575,7 +575,7 @@ static int sensor_open(FAR struct file *filep)
     {
       if (upper->state.nsubscribers == 0 && lower->ops->activate)
         {
-          ret = lower->ops->activate(filep, lower, true);
+          ret = lower->ops->activate(lower, filep, true);
           if (ret < 0)
             {
               goto errout_with_open;
@@ -621,7 +621,7 @@ static int sensor_open(FAR struct file *filep)
 errout_with_open:
   if (lower->ops->close)
     {
-      lower->ops->close(filep, lower);
+      lower->ops->close(lower, filep);
     }
 
 errout_with_user:
@@ -642,7 +642,7 @@ static int sensor_close(FAR struct file *filep)
   nxrmutex_lock(&upper->lock);
   if (lower->ops->close)
     {
-      ret = lower->ops->close(filep, lower);
+      ret = lower->ops->close(lower, filep);
       if (ret < 0)
         {
           nxrmutex_unlock(&upper->lock);
@@ -655,7 +655,7 @@ static int sensor_close(FAR struct file *filep)
       upper->state.nsubscribers--;
       if (upper->state.nsubscribers == 0 && lower->ops->activate)
         {
-          lower->ops->activate(filep, lower, false);
+          lower->ops->activate(lower, filep, false);
         }
     }
 
@@ -712,7 +712,7 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
           goto out;
         }
 
-        ret = lower->ops->fetch(filep, lower, buffer, len);
+        ret = lower->ops->fetch(lower, filep, buffer, len);
     }
   else if (circbuf_is_empty(&upper->buffer))
     {
@@ -806,7 +806,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               break;
             }
 
-          ret = lower->ops->selftest(filep, lower, arg);
+          ret = lower->ops->selftest(lower, filep, arg);
         }
         break;
 
@@ -818,7 +818,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               break;
             }
 
-          ret = lower->ops->set_calibvalue(filep, lower, arg);
+          ret = lower->ops->set_calibvalue(lower, filep, arg);
         }
         break;
 
@@ -830,7 +830,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               break;
             }
 
-          ret = lower->ops->calibrate(filep, lower, arg);
+          ret = lower->ops->calibrate(lower, filep, arg);
         }
         break;
 
@@ -879,7 +879,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         if (lower->ops->control)
           {
-            ret = lower->ops->control(filep, lower, cmd, arg);
+            ret = lower->ops->control(lower, filep, cmd, arg);
           }
         else
           {

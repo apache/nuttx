@@ -37,14 +37,6 @@
 #include "kasan/kasan.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef NULL
-#  define NULL ((void *)0)
-#endif
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -83,7 +75,7 @@ static void mm_free_delaylist(FAR struct mm_heap_s *heap)
 #endif
 }
 
-#ifdef CONFIG_DEBUG_MM
+#if CONFIG_MM_BACKTRACE >= 0
 void mm_dump_handler(FAR struct tcb_s *tcb, FAR void *arg)
 {
   struct mallinfo_task info;
@@ -237,7 +229,6 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
       /* Handle the case of an exact size match */
 
       node->preceding |= MM_ALLOC_BIT;
-      MM_ADD_BACKTRACE(heap, node);
       ret = (FAR void *)((FAR char *)node + SIZEOF_MM_ALLOCNODE);
     }
 
@@ -246,6 +237,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
   if (ret)
     {
+      MM_ADD_BACKTRACE(heap, node);
       kasan_unpoison(ret, mm_malloc_size(ret));
 #ifdef CONFIG_MM_FILL_ALLOCATIONS
       memset(ret, 0xaa, alignsize - SIZEOF_MM_ALLOCNODE);
@@ -257,15 +249,23 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 #ifdef CONFIG_DEBUG_MM
   else
     {
+#ifdef CONFIG_MM_DUMP_ON_FAILURE
       struct mallinfo minfo;
+#endif
 
       mwarn("WARNING: Allocation failed, size %zu\n", alignsize);
+#ifdef CONFIG_MM_DUMP_ON_FAILURE
       mm_mallinfo(heap, &minfo);
       mwarn("Total:%d, used:%d, free:%d, largest:%d, nused:%d, nfree:%d\n",
-             minfo.arena, minfo.uordblks, minfo.fordblks,
-             minfo.mxordblk, minfo.aordblks, minfo.ordblks);
+            minfo.arena, minfo.uordblks, minfo.fordblks,
+            minfo.mxordblk, minfo.aordblks, minfo.ordblks);
+#  if CONFIG_MM_BACKTRACE >= 0
       nxsched_foreach(mm_dump_handler, heap);
-      DEBUGASSERT(false);
+#  endif
+#endif
+#ifdef CONFIG_MM_PANIC_ON_FAILURE
+      PANIC();
+#endif
     }
 #endif
 

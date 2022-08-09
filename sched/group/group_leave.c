@@ -130,6 +130,7 @@ static inline void group_release(FAR struct task_group_s *group)
 {
 #ifdef CONFIG_ARCH_ADDRENV
   save_addrenv_t oldenv;
+  int i;
 #endif
 
 #if CONFIG_TLS_TASK_NELEM > 0
@@ -247,7 +248,13 @@ static inline void group_release(FAR struct task_group_s *group)
 
   /* Mark no address environment */
 
-  g_pid_current = INVALID_PROCESS_ID;
+  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+    {
+      if (group == g_group_current[i])
+        {
+          g_group_current[i] = NULL;
+        }
+    }
 
   /* Restore the previous addrenv */
 

@@ -76,7 +76,7 @@
 #ifdef CONFIG_LPC43_SPIFI
 static int nsh_spifi_initialize(void)
 {
-  FAR struct mtd_dev_s *mtd;
+  struct mtd_dev_s *mtd;
   int ret;
 
   /* Initialize the SPIFI interface and create the MTD driver instance */

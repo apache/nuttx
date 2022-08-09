@@ -365,6 +365,8 @@ FAR char *strerror(int errnum)
         }
     }
   while (ndxlow <= ndxhi);
+#else
+  UNUSED(errnum);
 #endif
   return "Unknown error";
 }

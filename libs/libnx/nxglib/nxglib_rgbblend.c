@@ -47,7 +47,7 @@
  *   implementation of anti-aliasing without transparency.
  *
  * Input Parameters:
- *   component1 - The semi-transparent, forground 8-bit color component
+ *   component1 - The semi-transparent, foreground 8-bit color component
  *   component2 - The opaque, background color component
  *   frac1  - The fractional amount of component1 to blend into component2
  *
@@ -114,7 +114,7 @@ static uint8_t nxglib_blend_component(uint8_t component1, uint8_t component2,
  *   implementation of anti-aliasing without transparency.
  *
  * Input Parameters:
- *   color1 - The semi-transparent, forground color
+ *   color1 - The semi-transparent, foreground color
  *   color2 - The opaque, background color
  *   frac1  - The fractional amount of color1 to blend into color2
  *

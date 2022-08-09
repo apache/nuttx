@@ -22,7 +22,7 @@ include ${TOPDIR}/.config
 include ${TOPDIR}/tools/Config.mk
 include ${TOPDIR}/arch/arm/src/armv8-m/Toolchain.defs
 
-ARCHSCRIPT = $(BOARD_DIR)$(DELIM)scripts$(DELIM)tfm-ns.ld
+ARCHSCRIPT = $(BOARD_DIR)$(DELIM)scripts$(DELIM)flash.ld
 
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
 

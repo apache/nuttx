@@ -43,7 +43,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: do_stackcheck
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: arm_stack_check
  *
  * Description:
  *   Determine (approximately) how much stack has been used by searching the
@@ -59,7 +63,7 @@
  *
  ****************************************************************************/
 
-static size_t do_stackcheck(void *stackbase, size_t nbytes)
+size_t arm_stack_check(void *stackbase, size_t nbytes)
 {
   uintptr_t start;
   uintptr_t end;
@@ -135,10 +139,6 @@ static size_t do_stackcheck(void *stackbase, size_t nbytes)
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Name: arm_stack_color
  *
  * Description:
@@ -199,7 +199,29 @@ void arm_stack_color(void *stackbase, size_t nbytes)
 
 size_t up_check_tcbstack(struct tcb_s *tcb)
 {
-  return do_stackcheck(tcb->stack_base_ptr, tcb->adj_stack_size);
+  size_t size;
+
+#ifdef CONFIG_ARCH_ADDRENV
+  save_addrenv_t oldenv;
+  bool saved = false;
+
+  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
+    {
+      up_addrenv_select(&tcb->group->tg_addrenv, &oldenv);
+      saved = true;
+    }
+#endif
+
+  size = arm_stack_check(tcb->stack_base_ptr, tcb->adj_stack_size);
+
+#ifdef CONFIG_ARCH_ADDRENV
+  if (saved)
+    {
+      up_addrenv_restore(&oldenv);
+    }
+#endif
+
+  return size;
 }
 
 ssize_t up_check_tcbstack_remain(struct tcb_s *tcb)
@@ -209,23 +231,23 @@ ssize_t up_check_tcbstack_remain(struct tcb_s *tcb)
 
 size_t up_check_stack(void)
 {
-  return up_check_tcbstack(this_task());
+  return up_check_tcbstack(running_task());
 }
 
 ssize_t up_check_stack_remain(void)
 {
-  return up_check_tcbstack_remain(this_task());
+  return up_check_tcbstack_remain(running_task());
 }
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 size_t up_check_intstack(void)
 {
 #ifdef CONFIG_SMP
-  return do_stackcheck((void *)arm_intstack_alloc(),
-                        STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
+  return arm_stack_check((void *)arm_intstack_alloc(),
+                         STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
 #else
-  return do_stackcheck((void *)&g_intstackalloc,
-                        STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
+  return arm_stack_check((void *)&g_intstackalloc,
+                         STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
 #endif
 }
 

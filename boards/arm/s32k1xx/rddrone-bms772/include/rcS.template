@@ -1,0 +1,7 @@
+# Initialize the RDDRONE-BMS772 BMS application
+echo "Available memory after board initialization:"
+"free"
+echo "Bring up can0 interface:"
+"ifup" "can0"
+echo "RDDRONE-BMS772: Starting BMS application"
+"bms"

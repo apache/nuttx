@@ -68,7 +68,7 @@
 int stm32_bringup(void)
 {
 #ifdef HAVE_I2C_DRIVER
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
 #endif
   int ret;
 

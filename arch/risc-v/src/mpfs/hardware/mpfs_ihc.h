@@ -28,45 +28,89 @@
 #define MPFS_NUM_HARTS               5
 #define UNDEFINED_HART_ID            99
 
+#define LIBERO_SETTING_CONTEXT_A_HART_EN ((CONFIG_MPFS_IHC_LINUX_ON_HART4 << 4) | \
+                                          (CONFIG_MPFS_IHC_LINUX_ON_HART3 << 3) | \
+                                          (CONFIG_MPFS_IHC_LINUX_ON_HART2 << 2) | \
+                                          (CONFIG_MPFS_IHC_LINUX_ON_HART1 << 1))
+
+#define LIBERO_SETTING_CONTEXT_B_HART_EN ((CONFIG_MPFS_IHC_NUTTX_ON_HART4 << 4) | \
+                                          (CONFIG_MPFS_IHC_NUTTX_ON_HART3 << 3) | \
+                                          (CONFIG_MPFS_IHC_NUTTX_ON_HART2 << 2) | \
+                                          (CONFIG_MPFS_IHC_NUTTX_ON_HART1 << 1))
+
+#if (LIBERO_SETTING_CONTEXT_A_HART_EN & LIBERO_SETTING_CONTEXT_B_HART_EN)
+#  error Harts misconfigured. Cannot use the same harts.
+#endif
+
+/* Contex A and B hart ID's used in this system. Context A is the master. */
+
+#if CONFIG_MPFS_IHC_LINUX_ON_HART1 == 1
+#define CONTEXTA_HARTID 0x01
+#elif CONFIG_MPFS_IHC_LINUX_ON_HART2 == 1
+#define CONTEXTA_HARTID 0x02
+#elif CONFIG_MPFS_IHC_LINUX_ON_HART3 == 1
+#define CONTEXTA_HARTID 0x03
+#elif CONFIG_MPFS_IHC_LINUX_ON_HART4 == 1
+#define CONTEXTA_HARTID 0x04
+#else
+#  error Context A is required
+#endif
+
+#if CONFIG_MPFS_IHC_NUTTX_ON_HART1 == 1
+#define CONTEXTB_HARTID 0x01
+#elif CONFIG_MPFS_IHC_NUTTX_ON_HART2 == 1
+#define CONTEXTB_HARTID 0x02
+#elif CONFIG_MPFS_IHC_NUTTX_ON_HART3 == 1
+#define CONTEXTB_HARTID 0x03
+#elif CONFIG_MPFS_IHC_NUTTX_ON_HART4 == 1
+#define CONTEXTB_HARTID 0x04
+#else
+#  error Context B is required
+#endif
+
+#if (CONTEXTA_HARTID == CONTEXTB_HARTID)
+#  error Context A cannot be the same as Context B
+#endif
+
 /* My Hart 0 */
 
-#define IHC_LOCAL_H0_REMOTE_H1       0x50000000
-#define IHC_LOCAL_H0_REMOTE_H2       0x50000100
-#define IHC_LOCAL_H0_REMOTE_H3       0x50000200
-#define IHC_LOCAL_H0_REMOTE_H4       0x50000300
-#define IHCIA_LOCAL_H0               0x50000400
+#define IHC_LOCAL_H0_REMOTE_H1       0x50000000UL
+#define IHC_LOCAL_H0_REMOTE_H2       0x50000100UL
+#define IHC_LOCAL_H0_REMOTE_H3       0x50000200UL
+#define IHC_LOCAL_H0_REMOTE_H4       0x50000300UL
+#define IHCIA_LOCAL_H0               0x50000400UL
 
-/* My Hart 0 */
+/* My Hart 1 */
 
-#define IHC_LOCAL_H1_REMOTE_H0       0x50000500
-#define IHC_LOCAL_H1_REMOTE_H2       0x50000600
-#define IHC_LOCAL_H1_REMOTE_H3       0x50000700
-#define IHC_LOCAL_H1_REMOTE_H4       0x50000800
-#define IHCIA_LOCAL_H1               0x50000900
+#define IHC_LOCAL_H1_REMOTE_H0       0x50000500UL
+#define IHC_LOCAL_H1_REMOTE_H2       0x50000600UL
+#define IHC_LOCAL_H1_REMOTE_H3       0x50000700UL
+#define IHC_LOCAL_H1_REMOTE_H4       0x50000800UL
+#define IHCIA_LOCAL_H1               0x50000900UL
 
-/* My Hart 0 */
+/* My Hart 2 */
 
-#define IHC_LOCAL_H2_REMOTE_H0       0x50000a00
-#define IHC_LsOCAL_H2_REMOTE_H1      0x50000b00
-#define IHC_LOCAL_H2_REMOTE_H3       0x50000c00
-#define IHC_LOCAL_H2_REMOTE_H4       0x50000d00
-#define IHCIA_LOCAL_H2               0x50000e00
+#define IHC_LOCAL_H2_REMOTE_H0       0x50000a00UL
+#define IHC_LOCAL_H2_REMOTE_H1       0x50000b00UL
+#define IHC_LOCAL_H2_REMOTE_H3       0x50000c00UL
+#define IHC_LOCAL_H2_REMOTE_H4       0x50000d00UL
+#define IHCIA_LOCAL_H2               0x50000e00UL
 
-/* My Hart 0 */
+/* My Hart 3 */
 
-#define IHC_LOCAL_H3_REMOTE_H0       0x50000f00
-#define IHC_LOCAL_H3_REMOTE_H1       0x50001000
-#define IHC_LOCAL_H3_REMOTE_H2       0x50001100
-#define IHC_LOCAL_H3_REMOTE_H4       0x50001200
-#define IHCIA_LOCAL_H3               0x50001300
+#define IHC_LOCAL_H3_REMOTE_H0       0x50000f00UL
+#define IHC_LOCAL_H3_REMOTE_H1       0x50001000UL
+#define IHC_LOCAL_H3_REMOTE_H2       0x50001100UL
+#define IHC_LOCAL_H3_REMOTE_H4       0x50001200UL
+#define IHCIA_LOCAL_H3               0x50001300UL
 
-/* My Hart 0 */
+/* My Hart 4 */
 
-#define IHC_LOCAL_H4_REMOTE_H0       0x50001400
-#define IHC_LOCAL_H4_REMOTE_H1       0x50001500
-#define IHC_LOCAL_H4_REMOTE_H2       0x50001600
-#define IHC_LOCAL_H4_REMOTE_H3       0x50001700
-#define IHCIA_LOCAL_H4               0x50001800
+#define IHC_LOCAL_H4_REMOTE_H0       0x50001400UL
+#define IHC_LOCAL_H4_REMOTE_H1       0x50001500UL
+#define IHC_LOCAL_H4_REMOTE_H2       0x50001600UL
+#define IHC_LOCAL_H4_REMOTE_H3       0x50001700UL
+#define IHCIA_LOCAL_H4               0x50001800UL
 
 #define MPFS_IHC_VERSION_OFFSET      0x00
 #define MPFS_IHC_CTRL_OFFSET         0x04
@@ -79,17 +123,21 @@
 #define MPFS_IHC_INT_EN_OFFSET       0x04
 #define MPFS_IHC_MSG_AVAIL_OFFSET    0x08
 
-#define MPFS_LOCAL_REMOTE_OFFSET(l, r) (0x500 * l + 0x100 * r)
+#define MPFS_LOCAL_REMOTE_OFFSET(l, r) (0x500 * (l) + 0x100 * (r))
 
-#define MPFS_IHC_VERSION(l, r)      (IHC_LOCAL_H0_REMOTE_H1 + MPFS_IHC_VERSION_OFFSET + MPFS_LOCAL_REMOTE_OFFSET(l, r))
-#define MPFS_IHC_CTRL(l, r)         (IHC_LOCAL_H0_REMOTE_H1 + MPFS_IHC_CTRL_OFFSET + MPFS_LOCAL_REMOTE_OFFSET(l, r))
-#define MPFS_IHC_LOCAL_HARTID(l, r) (IHC_LOCAL_H0_REMOTE_H1 + MPFS_IHC_LOCAL_HARTID_OFFSET + MPFS_LOCAL_REMOTE_OFFSET(l, r))
-#define MPFS_IHC_MSG_SIZE(l, r)     (IHC_LOCAL_H0_REMOTE_H1 + MPFS_IHC_MSG_SIZE_OFFSET + MPFS_LOCAL_REMOTE_OFFSET(l, r))
-#define MPFS_IHC_MSG_IN(l, r)       (IHC_LOCAL_H0_REMOTE_H1 + MPFS_IHC_MSG_IN_OFFSET + MPFS_LOCAL_REMOTE_OFFSET(l, r))
-#define MPFS_IHC_MSG_OUT(l, r)      (IHC_LOCAL_H0_REMOTE_H1 + MPFS_IHC_MSG_OUT_OFFSET + MPFS_LOCAL_REMOTE_OFFSET(l, r))
+/* The registers don't go linearly in all cases, use a fixup */
 
-#define MPFS_IHC_INT_EN(l)          (IHCIA_LOCAL_H0 + MPFS_IHC_INT_EN_OFFSET + 0x500 * l)
-#define MPFS_IHC_MSG_AVAIL(l)       (IHCIA_LOCAL_H0 + MPFS_IHC_MSG_AVAIL_OFFSET + 0x500 * l)
+#define MPFS_L_R_FIXUP(l, r)        ((((l) > 0 && (l) < 4) && ((l) < (r))) ? -0x100 : 0)
+
+#define MPFS_IHC_VERSION(l, r)      (IHC_LOCAL_H0_REMOTE_H1 + MPFS_IHC_VERSION_OFFSET + MPFS_LOCAL_REMOTE_OFFSET(l, r) + MPFS_L_R_FIXUP(l, r))
+#define MPFS_IHC_CTRL(l, r)         (IHC_LOCAL_H0_REMOTE_H1 + MPFS_IHC_CTRL_OFFSET + MPFS_LOCAL_REMOTE_OFFSET(l, r) + MPFS_L_R_FIXUP(l, r))
+#define MPFS_IHC_LOCAL_HARTID(l, r) (IHC_LOCAL_H0_REMOTE_H1 + MPFS_IHC_LOCAL_HARTID_OFFSET + MPFS_LOCAL_REMOTE_OFFSET(l, r) + MPFS_L_R_FIXUP(l, r))
+#define MPFS_IHC_MSG_SIZE(l, r)     (IHC_LOCAL_H0_REMOTE_H1 + MPFS_IHC_MSG_SIZE_OFFSET + MPFS_LOCAL_REMOTE_OFFSET(l, r) + MPFS_L_R_FIXUP(l, r))
+#define MPFS_IHC_MSG_IN(l, r)       (IHC_LOCAL_H0_REMOTE_H1 + MPFS_IHC_MSG_IN_OFFSET + MPFS_LOCAL_REMOTE_OFFSET(l, r) + MPFS_L_R_FIXUP(l, r))
+#define MPFS_IHC_MSG_OUT(l, r)      (IHC_LOCAL_H0_REMOTE_H1 + MPFS_IHC_MSG_OUT_OFFSET + MPFS_LOCAL_REMOTE_OFFSET(l, r) + MPFS_L_R_FIXUP(l, r))
+
+#define MPFS_IHC_INT_EN(l)          (IHCIA_LOCAL_H0 + MPFS_IHC_INT_EN_OFFSET + 0x500 * (l))
+#define MPFS_IHC_MSG_AVAIL(l)       (IHCIA_LOCAL_H0 + MPFS_IHC_MSG_AVAIL_OFFSET + 0x500 * (l))
 
 /* Hart mask defines */
 
@@ -116,26 +164,16 @@
 
 #define HSS_REMOTE_HARTS_MASK 	(HART1_MASK | HART2_MASK | HART3_MASK | HART4_MASK)
 
-/* Contex A and B hart ID's used in this system. Context A is the master. */
-
-#define CONTEXTA_HARTID         0x01
-#define CONTEXTB_HARTID         0x04
-
 /* Define which harts are connected via comms channels to a particular hart
  * user defined.
  */
 
 #define IHCIA_H0_REMOTE_HARTS	((~HSS_HART_MASK) & HSS_REMOTE_HARTS_MASK)
 
-/* HSS and Context B connected */
-
-#define IHCIA_H1_REMOTE_HARTS	(HSS_HART_MASK | (HART4_MASK))
-#define IHCIA_H2_REMOTE_HARTS	(HSS_HART_MASK)
-#define IHCIA_H3_REMOTE_HARTS	(HSS_HART_MASK)
-
-/* HSS and Context A connected */
-
-#define IHCIA_H4_REMOTE_HARTS	(HSS_HART_MASK | (HART1_MASK))
+#define IHCIA_H1_REMOTE_HARTS	(HSS_HART_MASK | (1 << CONTEXTA_HARTID))
+#define IHCIA_H2_REMOTE_HARTS	(HSS_HART_MASK | (1 << CONTEXTA_HARTID))
+#define IHCIA_H3_REMOTE_HARTS	(HSS_HART_MASK | (1 << CONTEXTA_HARTID))
+#define IHCIA_H4_REMOTE_HARTS	(HSS_HART_MASK | (1 << CONTEXTA_HARTID))
 
 #define HSS_HART_DEFAULT_INT_EN (0 << 0)
 
@@ -156,24 +194,67 @@
 
 /* Connected to all harts */
 
-#define IHCIA_H0_REMOTE_HARTS_INTS     HSS_HART_DEFAULT_INT_EN
+#define IHCIA_H0_REMOTE_HARTS_INTS  HSS_HART_DEFAULT_INT_EN
 
 /* HSS and Context B connected */
 
-#define IHCIA_H1_REMOTE_HARTS_INTS    (HSS_HART_MP_INT_EN  | \
-                                       HSS_HART_ACK_INT_EN | \
-                                       HART4_MP_INT_EN     | \
-                                       HART4_ACK_INT_EN)
+#define IHCIA_CONTEXTA_INTS        (HSS_HART_MP_INT_EN           | \
+                                    HSS_HART_ACK_INT_EN          | \
+                                    (1 << (CONTEXTB_HARTID * 2)) | \
+                                    (1 << (CONTEXTB_HARTID * 2 + 1)))
 
-#define IHCIA_H2_REMOTE_HARTS_INTS     HSS_HART_DEFAULT_INT_EN
-#define IHCIA_H3_REMOTE_HARTS_INTS     HSS_HART_DEFAULT_INT_EN
+#define IHCIA_CONTEXTB_INTS        (HSS_HART_MP_INT_EN           | \
+                                    HSS_HART_ACK_INT_EN          | \
+                                    (1 << (CONTEXTA_HARTID * 2)) | \
+                                    (1 << (CONTEXTA_HARTID * 2 + 1)))
 
-/* HSS and Context A connected */
+/* Context B interrupts */
 
-#define IHCIA_H4_REMOTE_HARTS_INTS    (HSS_HART_MP_INT_EN  | \
-                                       HSS_HART_ACK_INT_EN | \
-                                       HART1_MP_INT_EN     | \
-                                       HART1_ACK_INT_EN)
+#if CONTEXTB_HARTID == 1
+#define IHCIA_H1_REMOTE_HARTS_INTS  IHCIA_CONTEXTB_INTS
+#else
+#define IHCIA_H1_REMOTE_HARTS_INTS  HSS_HART_DEFAULT_INT_EN
+#endif
+
+#if CONTEXTB_HARTID == 2
+#define IHCIA_H2_REMOTE_HARTS_INTS  IHCIA_CONTEXTB_INTS
+#else
+#define IHCIA_H2_REMOTE_HARTS_INTS  HSS_HART_DEFAULT_INT_EN
+#endif
+
+#if CONTEXTB_HARTID == 3
+#define IHCIA_H3_REMOTE_HARTS_INTS  IHCIA_CONTEXTB_INTS
+#else
+#define IHCIA_H3_REMOTE_HARTS_INTS  HSS_HART_DEFAULT_INT_EN
+#endif
+
+#if CONTEXTB_HARTID == 4
+#define IHCIA_H4_REMOTE_HARTS_INTS  IHCIA_CONTEXTB_INTS
+#else
+#define IHCIA_H4_REMOTE_HARTS_INTS  HSS_HART_DEFAULT_INT_EN
+#endif
+
+/* Context A interrupts */
+
+#if CONTEXTA_HARTID == 1
+#undef IHCIA_H1_REMOTE_HARTS_INTS
+#define IHCIA_H1_REMOTE_HARTS_INTS  IHCIA_CONTEXTA_INTS
+#endif
+
+#if CONTEXTA_HARTID == 2
+#undef IHCIA_H2_REMOTE_HARTS_INTS
+#define IHCIA_H2_REMOTE_HARTS_INTS  IHCIA_CONTEXTA_INTS
+#endif
+
+#if CONTEXTA_HARTID == 3
+#undef IHCIA_H3_REMOTE_HARTS_INTS
+#define IHCIA_H3_REMOTE_HARTS_INTS  IHCIA_CONTEXTA_INTS
+#endif
+
+#if CONTEXTA_HARTID == 4
+#undef IHCIA_H4_REMOTE_HARTS_INTS
+#define IHCIA_H4_REMOTE_HARTS_INTS  IHCIA_CONTEXTA_INTS
+#endif
 
 /* MiV-IHCC register bit definitions */
 
@@ -191,62 +272,23 @@
 #define MPIE_MASK              (1 << 2)
 #define ACK_INT_MASK           (1 << 3)
 
-#define IHC_MAX_MESSAGE_SIZE    4
+#define IHC_MAX_MESSAGE_SIZE    2
 
-#define LIBERO_SETTING_CONTEXT_A_HART_EN    0x0000000eul  /* Harts 1 to 3 */
-#define LIBERO_SETTING_CONTEXT_B_HART_EN    0x00000010ul  /* Hart 4 */
+#define SBI_EXT_IHC_CTX_INIT    0
+#define SBI_EXT_IHC_SEND        1
+#define SBI_EXT_IHC_RECEIVE     2
 
-typedef union ihca_ip_int_en_t_
+enum ihc_channel_e
 {
-  uint32_t int_en;
-  struct
-  {
-    uint32_t mp_h0_en  : 1;
-    uint32_t ack_h0_en : 1;
-    uint32_t mp_h1_en  : 1;
-    uint32_t ack_h1_en : 1;
-    uint32_t mp_h2_en  : 1;
-    uint32_t ack_h2_en : 1;
-    uint32_t mp_h3_en  : 1;
-    uint32_t ack_h3_en : 1;
-    uint32_t mp_h4_en  : 1;
-    uint32_t ack_h4_en : 1;
-    uint32_t reserved  : 22;
-  } bitfield;
-} ihca_ip_int_en_t;
+  IHC_CHANNEL_TO_HART0    = 0x00, /* Your hart to hart 0 */
+  IHC_CHANNEL_TO_HART1    = 0x01, /* Your hart to hart 1 */
+  IHC_CHANNEL_TO_HART2    = 0x02, /* Your hart to hart 2 */
+  IHC_CHANNEL_TO_HART3    = 0x03, /* Your hart to hart 3 */
+  IHC_CHANNEL_TO_HART4    = 0x04, /* Your hart to hart 4 */
+  IHC_CHANNEL_TO_CONTEXTA = 0x05, /* Your hart to context A */
+  IHC_CHANNEL_TO_CONTEXTB = 0x06, /* Your hart to context B */
+};
 
-typedef union ihca_ip_msg_avail_stat_t_
-{
-  uint32_t msg_avail;
-  struct
-  {
-    uint32_t mp_h0    : 1;
-    uint32_t ack_h0   : 1;
-    uint32_t mp_h1    : 1;
-    uint32_t ack_h1   : 1;
-    uint32_t mp_h2    : 1;
-    uint32_t ack_h2   : 1;
-    uint32_t mp_h3    : 1;
-    uint32_t ack_h3   : 1;
-    uint32_t mp_h4    : 1;
-    uint32_t ack_h4   : 1;
-    uint32_t reserved : 22;
-  } bitfield;
-} ihca_ip_msg_avail_stat_t;
-
-typedef union
-{
-  uint32_t ctl_reg;
-  struct
-    {
-      uint32_t rpm        :1; /* Remote message present */
-      uint32_t mp         :1; /* Message present */
-      uint32_t mpie       :1; /* Message present interrupt enable */
-      uint32_t ack        :1;
-      uint32_t clr_ack    :1;
-      uint32_t ackie      :1; /* Ack interrupt enable */
-      uint32_t reserved   :26;
-    } bitfield;
-} miv_ihcc_ctl_reg_t;
+typedef enum ihc_channel_e ihc_channel_t;
 
 #endif /* __ARCH_RISCV_SRC_MPFS_HARDWARE_MPFS_IHC_H */

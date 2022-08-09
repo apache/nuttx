@@ -222,7 +222,7 @@
  *
  ****************************************************************************/
 
-FAR struct i2c_master_s *lpc31_i2cbus_initialize(int port);
+struct i2c_master_s *lpc31_i2cbus_initialize(int port);
 
 /****************************************************************************
  * Name: lpc31_i2cbus_uninitialize
@@ -239,6 +239,6 @@ FAR struct i2c_master_s *lpc31_i2cbus_initialize(int port);
  *
  ****************************************************************************/
 
-int lpc31_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
+int lpc31_i2cbus_uninitialize(struct i2c_master_s *dev);
 
 #endif /* __ARCH_ARM_SRC_LPC31XX_LPC31_I2C_H */

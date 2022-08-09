@@ -300,7 +300,7 @@ static int pwm_config(struct tlsr82_pwmtimer_s *priv,
 
   if (priv == NULL || info == NULL)
     {
-      pwmerr("priv or info is null, priv=0x%p info=0x%p\n", priv, info);
+      pwmerr("priv or info is null, priv=%p info=%p\n", priv, info);
       return -EINVAL;
     }
 

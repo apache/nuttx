@@ -18,8 +18,14 @@
 #
 #############################################################################
 
+ifeq ($(CONFIG_ARCH_BOARD_COMMON),y)
+
 ifeq ($(CONFIG_RP2040_I2C_DRIVER),y)
 CSRCS += rp2040_i2cdev.c
+endif
+
+ifeq ($(CONFIG_RP2040_PWM),y)
+CSRCS += rp2040_pwmdev.c
 endif
 
 ifeq ($(CONFIG_RP2040_SPI_DRIVER),y)
@@ -73,3 +79,5 @@ endif
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)
+
+endif

@@ -48,8 +48,8 @@
  * Private Data
  ****************************************************************************/
 
-FAR struct i2c_master_s *g_i2c;
-FAR struct lcd_dev_s    *g_lcddev;
+struct i2c_master_s *g_i2c;
+struct lcd_dev_s    *g_lcddev;
 
 /****************************************************************************
  * Public Functions
@@ -77,7 +77,7 @@ int board_lcd_initialize(void)
  * Name: board_lcd_getdev
  ****************************************************************************/
 
-FAR struct lcd_dev_s *board_lcd_getdev(int devno)
+struct lcd_dev_s *board_lcd_getdev(int devno)
 {
   /* Bind the I2C port to the OLED */
 

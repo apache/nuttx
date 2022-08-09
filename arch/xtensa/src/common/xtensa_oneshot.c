@@ -32,7 +32,6 @@
 #include "xtensa_counter.h"
 #include "xtensa.h"
 
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -161,10 +160,10 @@ static int xtensa_oneshot_interrupt(int irq, void *context, void *arg)
 
   DEBUGASSERT(lower != NULL);
 
-  if (lower->callback)
+  if (lower->callback != NULL)
     {
-      callback       = lower->callback;
-      cbarg          = lower->arg;
+      callback        = lower->callback;
+      cbarg           = lower->arg;
       lower->callback = NULL;
       lower->arg      = NULL;
 
@@ -186,7 +185,7 @@ xtensa_oneshot_initialize(uint32_t irq, uint32_t freq)
   struct xoneshot_lowerhalf_s *lower =
       (struct xoneshot_lowerhalf_s *)kmm_zalloc(sizeof(*lower));
 
-  if (!lower)
+  if (lower == NULL)
     {
       return NULL;
     }

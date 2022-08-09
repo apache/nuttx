@@ -133,10 +133,10 @@ static ssize_t filemtd_write(FAR struct file_dev_s *priv, size_t offset,
                              FAR const void *src, size_t len)
 {
   FAR const uint8_t *pin  = (FAR const uint8_t *)src;
-  FAR uint8_t       *pout;
+  FAR uint8_t       *pout = NULL;
   char               buf[128];
   int                buflen;
-  int                remain;
+  int                remain = 0;
   uint8_t            oldvalue;
   uint8_t            srcvalue;
   uint8_t            newvalue;
@@ -154,7 +154,7 @@ static ssize_t filemtd_write(FAR struct file_dev_s *priv, size_t offset,
 
           file_seek(&priv->mtdfile, seekpos, SEEK_SET);
           buflen = file_read(&priv->mtdfile, buf, MIN(len, sizeof(buf)));
-          pout   = (FAR uint8_t *) buf;
+          pout   = (FAR uint8_t *)buf;
           remain = buflen;
         }
 
@@ -620,11 +620,10 @@ FAR struct mtd_dev_s *blockmtd_initialize(FAR const char *path,
 
 void blockmtd_teardown(FAR struct mtd_dev_s *dev)
 {
-  FAR struct file_dev_s *priv;
+  FAR struct file_dev_s *priv = (FAR struct file_dev_s *)dev;
 
   /* Close the enclosed file */
 
-  priv = (FAR struct file_dev_s *) dev;
   file_close(&priv->mtdfile);
 
 #ifdef CONFIG_MTD_REGISTRATION
@@ -706,7 +705,7 @@ void filemtd_teardown(FAR struct mtd_dev_s *dev)
 
 bool filemtd_isfilemtd(FAR struct mtd_dev_s *dev)
 {
-  FAR struct file_dev_s *priv = (FAR struct file_dev_s *) dev;
+  FAR struct file_dev_s *priv = (FAR struct file_dev_s *)dev;
 
   return (priv->mtd.erase == filemtd_erase);
 }

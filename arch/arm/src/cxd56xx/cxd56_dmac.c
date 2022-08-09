@@ -235,11 +235,11 @@ typedef struct
 
 static int open_channels = 0;
 
-static int intr_handler_admac0(int irq, FAR void *context, FAR void *arg);
-static int intr_handler_admac1(int irq, FAR void *context, FAR void *arg);
-static int intr_handler_idmac(int irq, FAR void *context, FAR void *arg);
-static int intr_handler_skdmac0(int irq, FAR void *context, FAR void *arg);
-static int intr_handler_skdmac1(int irq, FAR void *context, FAR void *arg);
+static int intr_handler_admac0(int irq, void *context, void *arg);
+static int intr_handler_admac1(int irq, void *context, void *arg);
+static int intr_handler_idmac(int irq, void *context, void *arg);
+static int intr_handler_skdmac0(int irq, void *context, void *arg);
+static int intr_handler_skdmac1(int irq, void *context, void *arg);
 static uint32_t irq_map[] =
 {
   CXD56_IRQ_APP_DMAC0,
@@ -253,7 +253,7 @@ static uint32_t irq_map[] =
   CXD56_IRQ_SKDMAC_1,
 };
 
-static int (*intc_handler[])(int irq, FAR void *context, FAR void *arg) =
+static int (*intc_handler[])(int irq, void *context, void *arg) =
 {
   intr_handler_admac0,
   intr_handler_admac1,
@@ -420,19 +420,19 @@ static void _dmac_intc_handler(int ch)
     }
 }
 
-static int intr_handler_admac0(int irq, FAR void *context, FAR void *arg)
+static int intr_handler_admac0(int irq, void *context, void *arg)
 {
   _dmac_intc_handler(0);
   return OK;
 }
 
-static int intr_handler_admac1(int irq, FAR void *context, FAR void *arg)
+static int intr_handler_admac1(int irq, void *context, void *arg)
 {
   _dmac_intc_handler(1);
   return OK;
 }
 
-static int intr_handler_idmac(int irq, FAR void *context, FAR void *arg)
+static int intr_handler_idmac(int irq, void *context, void *arg)
 {
   struct dmac_register_map *dev = get_device(2); /* XXX */
   uint32_t stat = dev->intstatus & 0x1f;
@@ -449,13 +449,13 @@ static int intr_handler_idmac(int irq, FAR void *context, FAR void *arg)
   return OK;
 }
 
-static int intr_handler_skdmac0(int irq, FAR void *context, FAR void *arg)
+static int intr_handler_skdmac0(int irq, void *context, void *arg)
 {
   _dmac_intc_handler(7);
   return OK;
 }
 
-static int intr_handler_skdmac1(int irq, FAR void *context, FAR void *arg)
+static int intr_handler_skdmac1(int irq, void *context, void *arg)
 {
   _dmac_intc_handler(8);
   return OK;

@@ -215,10 +215,10 @@ struct stm32_chan_s
   uint16_t          buflen;    /* Buffer length (at start of transfer) */
   volatile uint16_t xfrd;      /* Bytes transferred (at end of transfer) */
   volatile uint16_t inflight;  /* Number of Tx bytes "in-flight" */
-  FAR uint8_t      *buffer;    /* Transfer buffer pointer */
+  uint8_t          *buffer;    /* Transfer buffer pointer */
 #ifdef CONFIG_USBHOST_ASYNCH
   usbhost_asynch_t  callback;  /* Transfer complete callback */
-  FAR void         *arg;       /* Argument that accompanies the callback */
+  void             *arg;       /* Argument that accompanies the callback */
 #endif
 };
 
@@ -307,169 +307,169 @@ static inline uint16_t stm32_getle16(const uint8_t *val);
 
 /* Channel management *******************************************************/
 
-static int stm32_chan_alloc(FAR struct stm32_usbhost_s *priv);
-static inline void stm32_chan_free(FAR struct stm32_usbhost_s *priv,
+static int stm32_chan_alloc(struct stm32_usbhost_s *priv);
+static inline void stm32_chan_free(struct stm32_usbhost_s *priv,
                                    int chidx);
-static inline void stm32_chan_freeall(FAR struct stm32_usbhost_s *priv);
-static void stm32_chan_configure(FAR struct stm32_usbhost_s *priv,
+static inline void stm32_chan_freeall(struct stm32_usbhost_s *priv);
+static void stm32_chan_configure(struct stm32_usbhost_s *priv,
                                  int chidx);
-static void stm32_chan_halt(FAR struct stm32_usbhost_s *priv, int chidx,
+static void stm32_chan_halt(struct stm32_usbhost_s *priv, int chidx,
                             enum stm32_chreason_e chreason);
-static int stm32_chan_waitsetup(FAR struct stm32_usbhost_s *priv,
-                                FAR struct stm32_chan_s *chan);
+static int stm32_chan_waitsetup(struct stm32_usbhost_s *priv,
+                                struct stm32_chan_s *chan);
 #ifdef CONFIG_USBHOST_ASYNCH
-static int stm32_chan_asynchsetup(FAR struct stm32_usbhost_s *priv,
-                                  FAR struct stm32_chan_s *chan,
-                                  usbhost_asynch_t callback, FAR void *arg);
+static int stm32_chan_asynchsetup(struct stm32_usbhost_s *priv,
+                                  struct stm32_chan_s *chan,
+                                  usbhost_asynch_t callback, void *arg);
 #endif
-static int stm32_chan_wait(FAR struct stm32_usbhost_s *priv,
-                           FAR struct stm32_chan_s *chan);
-static void stm32_chan_wakeup(FAR struct stm32_usbhost_s *priv,
-                              FAR struct stm32_chan_s *chan);
-static int stm32_ctrlchan_alloc(FAR struct stm32_usbhost_s *priv,
+static int stm32_chan_wait(struct stm32_usbhost_s *priv,
+                           struct stm32_chan_s *chan);
+static void stm32_chan_wakeup(struct stm32_usbhost_s *priv,
+                              struct stm32_chan_s *chan);
+static int stm32_ctrlchan_alloc(struct stm32_usbhost_s *priv,
                                 uint8_t epno, uint8_t funcaddr,
                                 uint8_t speed,
-                                FAR struct stm32_ctrlinfo_s *ctrlep);
-static int stm32_ctrlep_alloc(FAR struct stm32_usbhost_s *priv,
-                              FAR const struct usbhost_epdesc_s *epdesc,
-                              FAR usbhost_ep_t *ep);
-static int stm32_xfrep_alloc(FAR struct stm32_usbhost_s *priv,
-                              FAR const struct usbhost_epdesc_s *epdesc,
-                              FAR usbhost_ep_t *ep);
+                                struct stm32_ctrlinfo_s *ctrlep);
+static int stm32_ctrlep_alloc(struct stm32_usbhost_s *priv,
+                              const struct usbhost_epdesc_s *epdesc,
+                              usbhost_ep_t *ep);
+static int stm32_xfrep_alloc(struct stm32_usbhost_s *priv,
+                             const struct usbhost_epdesc_s *epdesc,
+                             usbhost_ep_t *ep);
 
 /* Control/data transfer logic **********************************************/
 
-static void stm32_transfer_start(FAR struct stm32_usbhost_s *priv,
+static void stm32_transfer_start(struct stm32_usbhost_s *priv,
                                  int chidx);
 #if 0 /* Not used */
 static inline uint16_t stm32_getframe(void);
 #endif
-static int stm32_ctrl_sendsetup(FAR struct stm32_usbhost_s *priv,
-                                FAR struct stm32_ctrlinfo_s *ep0,
-                                FAR const struct usb_ctrlreq_s *req);
-static int stm32_ctrl_senddata(FAR struct stm32_usbhost_s *priv,
-                               FAR struct stm32_ctrlinfo_s *ep0,
-                               FAR uint8_t *buffer, unsigned int buflen);
-static int stm32_ctrl_recvdata(FAR struct stm32_usbhost_s *priv,
-                               FAR struct stm32_ctrlinfo_s *ep0,
-                               FAR uint8_t *buffer, unsigned int buflen);
-static int stm32_in_setup(FAR struct stm32_usbhost_s *priv, int chidx);
-static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
-                                 FAR uint8_t *buffer, size_t buflen);
+static int stm32_ctrl_sendsetup(struct stm32_usbhost_s *priv,
+                                struct stm32_ctrlinfo_s *ep0,
+                                const struct usb_ctrlreq_s *req);
+static int stm32_ctrl_senddata(struct stm32_usbhost_s *priv,
+                               struct stm32_ctrlinfo_s *ep0,
+                               uint8_t *buffer, unsigned int buflen);
+static int stm32_ctrl_recvdata(struct stm32_usbhost_s *priv,
+                               struct stm32_ctrlinfo_s *ep0,
+                               uint8_t *buffer, unsigned int buflen);
+static int stm32_in_setup(struct stm32_usbhost_s *priv, int chidx);
+static ssize_t stm32_in_transfer(struct stm32_usbhost_s *priv, int chidx,
+                                 uint8_t *buffer, size_t buflen);
 #ifdef CONFIG_USBHOST_ASYNCH
-static void stm32_in_next(FAR struct stm32_usbhost_s *priv,
-                          FAR struct stm32_chan_s *chan);
-static int stm32_in_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
-                           FAR uint8_t *buffer, size_t buflen,
-                           usbhost_asynch_t callback, FAR void *arg);
+static void stm32_in_next(struct stm32_usbhost_s *priv,
+                          struct stm32_chan_s *chan);
+static int stm32_in_asynch(struct stm32_usbhost_s *priv, int chidx,
+                           uint8_t *buffer, size_t buflen,
+                           usbhost_asynch_t callback, void *arg);
 #endif
-static int stm32_out_setup(FAR struct stm32_usbhost_s *priv, int chidx);
-static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv,
-                                  int chidx, FAR uint8_t *buffer,
+static int stm32_out_setup(struct stm32_usbhost_s *priv, int chidx);
+static ssize_t stm32_out_transfer(struct stm32_usbhost_s *priv,
+                                  int chidx, uint8_t *buffer,
                                   size_t buflen);
 #ifdef CONFIG_USBHOST_ASYNCH
-static void stm32_out_next(FAR struct stm32_usbhost_s *priv,
-                           FAR struct stm32_chan_s *chan);
-static int stm32_out_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
-                            FAR uint8_t *buffer, size_t buflen,
-                            usbhost_asynch_t callback, FAR void *arg);
+static void stm32_out_next(struct stm32_usbhost_s *priv,
+                           struct stm32_chan_s *chan);
+static int stm32_out_asynch(struct stm32_usbhost_s *priv, int chidx,
+                            uint8_t *buffer, size_t buflen,
+                            usbhost_asynch_t callback, void *arg);
 #endif
 
 /* Interrupt handling *******************************************************/
 
 /* Lower level interrupt handlers */
 
-static void stm32_gint_wrpacket(FAR struct stm32_usbhost_s *priv,
-                                FAR uint8_t *buffer, int chidx, int buflen);
-static inline void stm32_gint_hcinisr(FAR struct stm32_usbhost_s *priv,
+static void stm32_gint_wrpacket(struct stm32_usbhost_s *priv,
+                                uint8_t *buffer, int chidx, int buflen);
+static inline void stm32_gint_hcinisr(struct stm32_usbhost_s *priv,
                                       int chidx);
-static inline void stm32_gint_hcoutisr(FAR struct stm32_usbhost_s *priv,
+static inline void stm32_gint_hcoutisr(struct stm32_usbhost_s *priv,
                                        int chidx);
-static void stm32_gint_connected(FAR struct stm32_usbhost_s *priv);
-static void stm32_gint_disconnected(FAR struct stm32_usbhost_s *priv);
+static void stm32_gint_connected(struct stm32_usbhost_s *priv);
+static void stm32_gint_disconnected(struct stm32_usbhost_s *priv);
 
 /* Second level interrupt handlers */
 
 #ifdef CONFIG_STM32H7_OTG_SOFINTR
-static inline void stm32_gint_sofisr(FAR struct stm32_usbhost_s *priv);
+static inline void stm32_gint_sofisr(struct stm32_usbhost_s *priv);
 #endif
-static inline void stm32_gint_rxflvlisr(FAR struct stm32_usbhost_s *priv);
-static inline void stm32_gint_nptxfeisr(FAR struct stm32_usbhost_s *priv);
-static inline void stm32_gint_ptxfeisr(FAR struct stm32_usbhost_s *priv);
-static inline void stm32_gint_hcisr(FAR struct stm32_usbhost_s *priv);
-static inline void stm32_gint_hprtisr(FAR struct stm32_usbhost_s *priv);
-static inline void stm32_gint_discisr(FAR struct stm32_usbhost_s *priv);
-static inline void stm32_gint_ipxfrisr(FAR struct stm32_usbhost_s *priv);
+static inline void stm32_gint_rxflvlisr(struct stm32_usbhost_s *priv);
+static inline void stm32_gint_nptxfeisr(struct stm32_usbhost_s *priv);
+static inline void stm32_gint_ptxfeisr(struct stm32_usbhost_s *priv);
+static inline void stm32_gint_hcisr(struct stm32_usbhost_s *priv);
+static inline void stm32_gint_hprtisr(struct stm32_usbhost_s *priv);
+static inline void stm32_gint_discisr(struct stm32_usbhost_s *priv);
+static inline void stm32_gint_ipxfrisr(struct stm32_usbhost_s *priv);
 
 /* First level, global interrupt handler */
 
-static int stm32_gint_isr(int irq, FAR void *context, FAR void *arg);
+static int stm32_gint_isr(int irq, void *context, void *arg);
 
 /* Interrupt controls */
 
 static void stm32_gint_enable(void);
 static void stm32_gint_disable(void);
 static inline void stm32_hostinit_enable(void);
-static void stm32_txfe_enable(FAR struct stm32_usbhost_s *priv, int chidx);
+static void stm32_txfe_enable(struct stm32_usbhost_s *priv, int chidx);
 
 /* USB host controller operations *******************************************/
 
-static int stm32_wait(FAR struct usbhost_connection_s *conn,
-                      FAR struct usbhost_hubport_s **hport);
-static int stm32_rh_enumerate(FAR struct stm32_usbhost_s *priv,
-                              FAR struct usbhost_connection_s *conn,
-                              FAR struct usbhost_hubport_s *hport);
-static int stm32_enumerate(FAR struct usbhost_connection_s *conn,
-                           FAR struct usbhost_hubport_s *hport);
+static int stm32_wait(struct usbhost_connection_s *conn,
+                      struct usbhost_hubport_s **hport);
+static int stm32_rh_enumerate(struct stm32_usbhost_s *priv,
+                              struct usbhost_connection_s *conn,
+                              struct usbhost_hubport_s *hport);
+static int stm32_enumerate(struct usbhost_connection_s *conn,
+                           struct usbhost_hubport_s *hport);
 
-static int stm32_ep0configure(FAR struct usbhost_driver_s *drvr,
+static int stm32_ep0configure(struct usbhost_driver_s *drvr,
                               usbhost_ep_t ep0, uint8_t funcaddr,
                               uint8_t speed, uint16_t maxpacketsize);
-static int stm32_epalloc(FAR struct usbhost_driver_s *drvr,
-                         FAR const FAR struct usbhost_epdesc_s *epdesc,
-                         FAR usbhost_ep_t *ep);
-static int stm32_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
-static int stm32_alloc(FAR struct usbhost_driver_s *drvr,
-                       FAR uint8_t **buffer, FAR size_t *maxlen);
-static int stm32_free(FAR struct usbhost_driver_s *drvr,
-                      FAR uint8_t *buffer);
-static int stm32_ioalloc(FAR struct usbhost_driver_s *drvr,
-                         FAR uint8_t **buffer, size_t buflen);
-static int stm32_iofree(FAR struct usbhost_driver_s *drvr,
-                        FAR uint8_t *buffer);
-static int stm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+static int stm32_epalloc(struct usbhost_driver_s *drvr,
+                         const struct usbhost_epdesc_s *epdesc,
+                         usbhost_ep_t *ep);
+static int stm32_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep);
+static int stm32_alloc(struct usbhost_driver_s *drvr,
+                       uint8_t **buffer, size_t *maxlen);
+static int stm32_free(struct usbhost_driver_s *drvr,
+                      uint8_t *buffer);
+static int stm32_ioalloc(struct usbhost_driver_s *drvr,
+                         uint8_t **buffer, size_t buflen);
+static int stm32_iofree(struct usbhost_driver_s *drvr,
+                        uint8_t *buffer);
+static int stm32_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                         const struct usb_ctrlreq_s *req,
-                        FAR uint8_t *buffer);
-static int stm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-                         FAR const struct usb_ctrlreq_s *req,
-                         FAR const uint8_t *buffer);
-static ssize_t stm32_transfer(FAR struct usbhost_driver_s *drvr,
-                              usbhost_ep_t ep, FAR uint8_t *buffer,
+                        uint8_t *buffer);
+static int stm32_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+                         const struct usb_ctrlreq_s *req,
+                         const uint8_t *buffer);
+static ssize_t stm32_transfer(struct usbhost_driver_s *drvr,
+                              usbhost_ep_t ep, uint8_t *buffer,
                               size_t buflen);
 #ifdef CONFIG_USBHOST_ASYNCH
-static int stm32_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-                        FAR uint8_t *buffer, size_t buflen,
-                        usbhost_asynch_t callback, FAR void *arg);
+static int stm32_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+                        uint8_t *buffer, size_t buflen,
+                        usbhost_asynch_t callback, void *arg);
 #endif
-static int stm32_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
+static int stm32_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 #ifdef CONFIG_USBHOST_HUB
-static int stm32_connect(FAR struct usbhost_driver_s *drvr,
-                         FAR struct usbhost_hubport_s *hport,
+static int stm32_connect(struct usbhost_driver_s *drvr,
+                         struct usbhost_hubport_s *hport,
                          bool connected);
 #endif
-static void stm32_disconnect(FAR struct usbhost_driver_s *drvr,
-                             FAR struct usbhost_hubport_s *hport);
+static void stm32_disconnect(struct usbhost_driver_s *drvr,
+                             struct usbhost_hubport_s *hport);
 
 /* Initialization ***********************************************************/
 
-static void stm32_portreset(FAR struct stm32_usbhost_s *priv);
+static void stm32_portreset(struct stm32_usbhost_s *priv);
 static void stm32_flush_txfifos(uint32_t txfnum);
 static void stm32_flush_rxfifo(void);
-static void stm32_vbusdrive(FAR struct stm32_usbhost_s *priv, bool state);
-static void stm32_host_initialize(FAR struct stm32_usbhost_s *priv);
+static void stm32_vbusdrive(struct stm32_usbhost_s *priv, bool state);
+static void stm32_host_initialize(struct stm32_usbhost_s *priv);
 
-static inline void stm32_sw_initialize(FAR struct stm32_usbhost_s *priv);
-static inline int stm32_hw_initialize(FAR struct stm32_usbhost_s *priv);
+static inline void stm32_sw_initialize(struct stm32_usbhost_s *priv);
+static inline int stm32_hw_initialize(struct stm32_usbhost_s *priv);
 
 /****************************************************************************
  * Private Data
@@ -699,7 +699,7 @@ static inline uint16_t stm32_getle16(const uint8_t *val)
  *
  ****************************************************************************/
 
-static int stm32_chan_alloc(FAR struct stm32_usbhost_s *priv)
+static int stm32_chan_alloc(struct stm32_usbhost_s *priv)
 {
   int chidx;
 
@@ -731,7 +731,7 @@ static int stm32_chan_alloc(FAR struct stm32_usbhost_s *priv)
  *
  ****************************************************************************/
 
-static void stm32_chan_free(FAR struct stm32_usbhost_s *priv, int chidx)
+static void stm32_chan_free(struct stm32_usbhost_s *priv, int chidx)
 {
   DEBUGASSERT((unsigned)chidx < STM32_NHOST_CHANNELS);
 
@@ -752,7 +752,7 @@ static void stm32_chan_free(FAR struct stm32_usbhost_s *priv, int chidx)
  *
  ****************************************************************************/
 
-static inline void stm32_chan_freeall(FAR struct stm32_usbhost_s *priv)
+static inline void stm32_chan_freeall(struct stm32_usbhost_s *priv)
 {
   uint8_t chidx;
 
@@ -774,9 +774,9 @@ static inline void stm32_chan_freeall(FAR struct stm32_usbhost_s *priv)
  *
  ****************************************************************************/
 
-static void stm32_chan_configure(FAR struct stm32_usbhost_s *priv, int chidx)
+static void stm32_chan_configure(struct stm32_usbhost_s *priv, int chidx)
 {
-  FAR struct stm32_chan_s *chan = &priv->chan[chidx];
+  struct stm32_chan_s *chan = &priv->chan[chidx];
   uint32_t regval;
 
   /* Clear any old pending interrupts for this host channel. */
@@ -932,7 +932,7 @@ static void stm32_chan_configure(FAR struct stm32_usbhost_s *priv, int chidx)
  *
  ****************************************************************************/
 
-static void stm32_chan_halt(FAR struct stm32_usbhost_s *priv, int chidx,
+static void stm32_chan_halt(struct stm32_usbhost_s *priv, int chidx,
                             enum stm32_chreason_e chreason)
 {
   uint32_t hcchar;
@@ -1023,8 +1023,8 @@ static void stm32_chan_halt(FAR struct stm32_usbhost_s *priv, int chidx,
  *
  ****************************************************************************/
 
-static int stm32_chan_waitsetup(FAR struct stm32_usbhost_s *priv,
-                                FAR struct stm32_chan_s *chan)
+static int stm32_chan_waitsetup(struct stm32_usbhost_s *priv,
+                                struct stm32_chan_s *chan)
 {
   irqstate_t flags = enter_critical_section();
   int        ret   = -ENODEV;
@@ -1066,9 +1066,9 @@ static int stm32_chan_waitsetup(FAR struct stm32_usbhost_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
-static int stm32_chan_asynchsetup(FAR struct stm32_usbhost_s *priv,
-                                  FAR struct stm32_chan_s *chan,
-                                  usbhost_asynch_t callback, FAR void *arg)
+static int stm32_chan_asynchsetup(struct stm32_usbhost_s *priv,
+                                  struct stm32_chan_s *chan,
+                                  usbhost_asynch_t callback, void *arg)
 {
   irqstate_t flags = enter_critical_section();
   int        ret   = -ENODEV;
@@ -1104,8 +1104,8 @@ static int stm32_chan_asynchsetup(FAR struct stm32_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static int stm32_chan_wait(FAR struct stm32_usbhost_s *priv,
-                           FAR struct stm32_chan_s *chan)
+static int stm32_chan_wait(struct stm32_usbhost_s *priv,
+                           struct stm32_chan_s *chan)
 {
   irqstate_t flags;
   int ret;
@@ -1155,8 +1155,8 @@ static int stm32_chan_wait(FAR struct stm32_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static void stm32_chan_wakeup(FAR struct stm32_usbhost_s *priv,
-                              FAR struct stm32_chan_s *chan)
+static void stm32_chan_wakeup(struct stm32_usbhost_s *priv,
+                              struct stm32_chan_s *chan)
 {
   /* Is the transfer complete? */
 
@@ -1211,12 +1211,12 @@ static void stm32_chan_wakeup(FAR struct stm32_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static int stm32_ctrlchan_alloc(FAR struct stm32_usbhost_s *priv,
+static int stm32_ctrlchan_alloc(struct stm32_usbhost_s *priv,
                                 uint8_t epno, uint8_t funcaddr,
                                 uint8_t speed,
-                                FAR struct stm32_ctrlinfo_s *ctrlep)
+                                struct stm32_ctrlinfo_s *ctrlep)
 {
-  FAR struct stm32_chan_s *chan;
+  struct stm32_chan_s *chan;
   int inndx;
   int outndx;
 
@@ -1290,12 +1290,12 @@ static int stm32_ctrlchan_alloc(FAR struct stm32_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static int stm32_ctrlep_alloc(FAR struct stm32_usbhost_s *priv,
-                              FAR const struct usbhost_epdesc_s *epdesc,
-                              FAR usbhost_ep_t *ep)
+static int stm32_ctrlep_alloc(struct stm32_usbhost_s *priv,
+                              const struct usbhost_epdesc_s *epdesc,
+                              usbhost_ep_t *ep)
 {
-  FAR struct usbhost_hubport_s *hport;
-  FAR struct stm32_ctrlinfo_s *ctrlep;
+  struct usbhost_hubport_s *hport;
+  struct stm32_ctrlinfo_s *ctrlep;
   int ret;
 
   /* Sanity check.  NOTE that this method should only be called if a device
@@ -1307,7 +1307,7 @@ static int stm32_ctrlep_alloc(FAR struct stm32_usbhost_s *priv,
 
   /* Allocate a container for the control endpoint */
 
-  ctrlep = (FAR struct stm32_ctrlinfo_s *)
+  ctrlep = (struct stm32_ctrlinfo_s *)
     kmm_malloc(sizeof(struct stm32_ctrlinfo_s));
   if (ctrlep == NULL)
     {
@@ -1353,12 +1353,12 @@ static int stm32_ctrlep_alloc(FAR struct stm32_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static int stm32_xfrep_alloc(FAR struct stm32_usbhost_s *priv,
-                              FAR const struct usbhost_epdesc_s *epdesc,
-                              FAR usbhost_ep_t *ep)
+static int stm32_xfrep_alloc(struct stm32_usbhost_s *priv,
+                             const struct usbhost_epdesc_s *epdesc,
+                             usbhost_ep_t *ep)
 {
   struct usbhost_hubport_s *hport;
-  FAR struct stm32_chan_s *chan;
+  struct stm32_chan_s *chan;
   int chidx;
 
   /* Sanity check.  NOTE that this method should only be called if a device
@@ -1412,9 +1412,9 @@ static int stm32_xfrep_alloc(FAR struct stm32_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static void stm32_transfer_start(FAR struct stm32_usbhost_s *priv, int chidx)
+static void stm32_transfer_start(struct stm32_usbhost_s *priv, int chidx)
 {
-  FAR struct stm32_chan_s *chan;
+  struct stm32_chan_s *chan;
   uint32_t regval;
   unsigned int npackets;
   unsigned int maxpacket;
@@ -1556,7 +1556,7 @@ static void stm32_transfer_start(FAR struct stm32_usbhost_s *priv, int chidx)
           break;
 
         default:
-          DEBUGASSERT(false);
+          DEBUGPANIC();
           return;
         }
 
@@ -1623,11 +1623,11 @@ static inline uint16_t stm32_getframe(void)
  *
  ****************************************************************************/
 
-static int stm32_ctrl_sendsetup(FAR struct stm32_usbhost_s *priv,
-                                FAR struct stm32_ctrlinfo_s *ep0,
-                                FAR const struct usb_ctrlreq_s *req)
+static int stm32_ctrl_sendsetup(struct stm32_usbhost_s *priv,
+                                struct stm32_ctrlinfo_s *ep0,
+                                const struct usb_ctrlreq_s *req)
 {
-  FAR struct stm32_chan_s *chan;
+  struct stm32_chan_s *chan;
   clock_t start;
   clock_t elapsed;
   int ret;
@@ -1642,7 +1642,7 @@ static int stm32_ctrl_sendsetup(FAR struct stm32_usbhost_s *priv,
       /* Send the  SETUP packet */
 
       chan->pid    = OTG_PID_SETUP;
-      chan->buffer = (FAR uint8_t *)req;
+      chan->buffer = (uint8_t *)req;
       chan->buflen = USB_SIZEOF_CTRLREQ;
       chan->xfrd   = 0;
 
@@ -1700,11 +1700,11 @@ static int stm32_ctrl_sendsetup(FAR struct stm32_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static int stm32_ctrl_senddata(FAR struct stm32_usbhost_s *priv,
-                               FAR struct stm32_ctrlinfo_s *ep0,
-                               FAR uint8_t *buffer, unsigned int buflen)
+static int stm32_ctrl_senddata(struct stm32_usbhost_s *priv,
+                               struct stm32_ctrlinfo_s *ep0,
+                               uint8_t *buffer, unsigned int buflen)
 {
-  FAR struct stm32_chan_s *chan = &priv->chan[ep0->outndx];
+  struct stm32_chan_s *chan = &priv->chan[ep0->outndx];
   int ret;
 
   /* Save buffer information */
@@ -1753,11 +1753,11 @@ static int stm32_ctrl_senddata(FAR struct stm32_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static int stm32_ctrl_recvdata(FAR struct stm32_usbhost_s *priv,
-                               FAR struct stm32_ctrlinfo_s *ep0,
-                               FAR uint8_t *buffer, unsigned int buflen)
+static int stm32_ctrl_recvdata(struct stm32_usbhost_s *priv,
+                               struct stm32_ctrlinfo_s *ep0,
+                               uint8_t *buffer, unsigned int buflen)
 {
-  FAR struct stm32_chan_s *chan = &priv->chan[ep0->inndx];
+  struct stm32_chan_s *chan = &priv->chan[ep0->inndx];
   int ret;
 
   /* Save buffer information */
@@ -1793,9 +1793,9 @@ static int stm32_ctrl_recvdata(FAR struct stm32_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static int stm32_in_setup(FAR struct stm32_usbhost_s *priv, int chidx)
+static int stm32_in_setup(struct stm32_usbhost_s *priv, int chidx)
 {
-  FAR struct stm32_chan_s *chan;
+  struct stm32_chan_s *chan;
 
   /* Set up for the transfer based on the direction and the endpoint type */
 
@@ -1854,10 +1854,10 @@ static int stm32_in_setup(FAR struct stm32_usbhost_s *priv, int chidx)
  *
  ****************************************************************************/
 
-static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
-                                 FAR uint8_t *buffer, size_t buflen)
+static ssize_t stm32_in_transfer(struct stm32_usbhost_s *priv, int chidx,
+                                 uint8_t *buffer, size_t buflen)
 {
-  FAR struct stm32_chan_s *chan;
+  struct stm32_chan_s *chan;
   clock_t start;
   ssize_t xfrd;
   int ret;
@@ -2042,11 +2042,11 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
-static void stm32_in_next(FAR struct stm32_usbhost_s *priv,
-                          FAR struct stm32_chan_s *chan)
+static void stm32_in_next(struct stm32_usbhost_s *priv,
+                          struct stm32_chan_s *chan)
 {
   usbhost_asynch_t callback;
-  FAR void *arg;
+  void *arg;
   ssize_t nbytes;
   int result;
   int ret;
@@ -2107,11 +2107,11 @@ static void stm32_in_next(FAR struct stm32_usbhost_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
-static int stm32_in_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
-                           FAR uint8_t *buffer, size_t buflen,
-                           usbhost_asynch_t callback, FAR void *arg)
+static int stm32_in_asynch(struct stm32_usbhost_s *priv, int chidx,
+                           uint8_t *buffer, size_t buflen,
+                           usbhost_asynch_t callback, void *arg)
 {
-  FAR struct stm32_chan_s *chan;
+  struct stm32_chan_s *chan;
   int ret;
 
   /* Set up for the transfer BEFORE starting the first transfer */
@@ -2150,9 +2150,9 @@ static int stm32_in_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
  *
  ****************************************************************************/
 
-static int stm32_out_setup(FAR struct stm32_usbhost_s *priv, int chidx)
+static int stm32_out_setup(struct stm32_usbhost_s *priv, int chidx)
 {
-  FAR struct stm32_chan_s *chan;
+  struct stm32_chan_s *chan;
 
   /* Set up for the transfer based on the direction and the endpoint type */
 
@@ -2215,11 +2215,11 @@ static int stm32_out_setup(FAR struct stm32_usbhost_s *priv, int chidx)
  *
  ****************************************************************************/
 
-static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv,
-                                  int chidx, FAR uint8_t *buffer,
+static ssize_t stm32_out_transfer(struct stm32_usbhost_s *priv,
+                                  int chidx, uint8_t *buffer,
                                   size_t buflen)
 {
-  FAR struct stm32_chan_s *chan;
+  struct stm32_chan_s *chan;
   clock_t start;
   clock_t elapsed;
   size_t xfrlen;
@@ -2332,11 +2332,11 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
-static void stm32_out_next(FAR struct stm32_usbhost_s *priv,
-                           FAR struct stm32_chan_s *chan)
+static void stm32_out_next(struct stm32_usbhost_s *priv,
+                           struct stm32_chan_s *chan)
 {
   usbhost_asynch_t callback;
-  FAR void *arg;
+  void *arg;
   ssize_t nbytes;
   int result;
   int ret;
@@ -2397,11 +2397,11 @@ static void stm32_out_next(FAR struct stm32_usbhost_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
-static int stm32_out_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
-                            FAR uint8_t *buffer, size_t buflen,
-                            usbhost_asynch_t callback, FAR void *arg)
+static int stm32_out_asynch(struct stm32_usbhost_s *priv, int chidx,
+                            uint8_t *buffer, size_t buflen,
+                            usbhost_asynch_t callback, void *arg)
 {
-  FAR struct stm32_chan_s *chan;
+  struct stm32_chan_s *chan;
   int ret;
 
   /* Set up for the transfer BEFORE starting the first transfer */
@@ -2441,10 +2441,10 @@ static int stm32_out_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
  *
  ****************************************************************************/
 
-static void stm32_gint_wrpacket(FAR struct stm32_usbhost_s *priv,
-                                FAR uint8_t *buffer, int chidx, int buflen)
+static void stm32_gint_wrpacket(struct stm32_usbhost_s *priv,
+                                uint8_t *buffer, int chidx, int buflen)
 {
-  FAR uint32_t *src;
+  uint32_t *src;
   uint32_t fifo;
   int buflen32;
 
@@ -2460,7 +2460,7 @@ static void stm32_gint_wrpacket(FAR struct stm32_usbhost_s *priv,
 
   /* Transfer all of the data into the Tx FIFO */
 
-  src = (FAR uint32_t *)buffer;
+  src = (uint32_t *)buffer;
   for (; buflen32 > 0; buflen32--)
     {
       uint32_t data = *src++;
@@ -2491,10 +2491,10 @@ static void stm32_gint_wrpacket(FAR struct stm32_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static inline void stm32_gint_hcinisr(FAR struct stm32_usbhost_s *priv,
+static inline void stm32_gint_hcinisr(struct stm32_usbhost_s *priv,
                                       int chidx)
 {
-  FAR struct stm32_chan_s *chan = &priv->chan[chidx];
+  struct stm32_chan_s *chan = &priv->chan[chidx];
   uint32_t regval;
   uint32_t pending;
 
@@ -2745,10 +2745,10 @@ static inline void stm32_gint_hcinisr(FAR struct stm32_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static inline void stm32_gint_hcoutisr(FAR struct stm32_usbhost_s *priv,
+static inline void stm32_gint_hcoutisr(struct stm32_usbhost_s *priv,
                                        int chidx)
 {
-  FAR struct stm32_chan_s *chan = &priv->chan[chidx];
+  struct stm32_chan_s *chan = &priv->chan[chidx];
   uint32_t regval;
   uint32_t pending;
 
@@ -2960,7 +2960,7 @@ static inline void stm32_gint_hcoutisr(FAR struct stm32_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static void stm32_gint_connected(FAR struct stm32_usbhost_s *priv)
+static void stm32_gint_connected(struct stm32_usbhost_s *priv)
 {
   /* We we previously disconnected? */
 
@@ -2992,7 +2992,7 @@ static void stm32_gint_connected(FAR struct stm32_usbhost_s *priv)
  *
  ****************************************************************************/
 
-static void stm32_gint_disconnected(FAR struct stm32_usbhost_s *priv)
+static void stm32_gint_disconnected(struct stm32_usbhost_s *priv)
 {
   /* Were we previously connected? */
 
@@ -3041,7 +3041,7 @@ static void stm32_gint_disconnected(FAR struct stm32_usbhost_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32H7_OTG_SOFINTR
-static inline void stm32_gint_sofisr(FAR struct stm32_usbhost_s *priv)
+static inline void stm32_gint_sofisr(struct stm32_usbhost_s *priv)
 {
   /* Handle SOF interrupt */
 
@@ -3061,9 +3061,9 @@ static inline void stm32_gint_sofisr(FAR struct stm32_usbhost_s *priv)
  *
  ****************************************************************************/
 
-static inline void stm32_gint_rxflvlisr(FAR struct stm32_usbhost_s *priv)
+static inline void stm32_gint_rxflvlisr(struct stm32_usbhost_s *priv)
 {
-  FAR uint32_t *dest;
+  uint32_t *dest;
   uint32_t grxsts;
   uint32_t intmsk;
   uint32_t hcchar;
@@ -3106,7 +3106,7 @@ static inline void stm32_gint_rxflvlisr(FAR struct stm32_usbhost_s *priv)
           {
             /* Transfer the packet from the Rx FIFO into the user buffer */
 
-            dest   = (FAR uint32_t *)priv->chan[chidx].buffer;
+            dest   = (uint32_t *)priv->chan[chidx].buffer;
             fifo   = STM32_OTG_DFIFO_HCH(0);
             bcnt32 = (bcnt + 3) >> 2;
 
@@ -3162,9 +3162,9 @@ static inline void stm32_gint_rxflvlisr(FAR struct stm32_usbhost_s *priv)
  *
  ****************************************************************************/
 
-static inline void stm32_gint_nptxfeisr(FAR struct stm32_usbhost_s *priv)
+static inline void stm32_gint_nptxfeisr(struct stm32_usbhost_s *priv)
 {
-  FAR struct stm32_chan_s *chan;
+  struct stm32_chan_s *chan;
   uint32_t     regval;
   unsigned int wrsize;
   unsigned int avail;
@@ -3252,9 +3252,9 @@ static inline void stm32_gint_nptxfeisr(FAR struct stm32_usbhost_s *priv)
  *
  ****************************************************************************/
 
-static inline void stm32_gint_ptxfeisr(FAR struct stm32_usbhost_s *priv)
+static inline void stm32_gint_ptxfeisr(struct stm32_usbhost_s *priv)
 {
-  FAR struct stm32_chan_s *chan;
+  struct stm32_chan_s *chan;
   uint32_t     regval;
   unsigned int wrsize;
   unsigned int avail;
@@ -3342,7 +3342,7 @@ static inline void stm32_gint_ptxfeisr(FAR struct stm32_usbhost_s *priv)
  *
  ****************************************************************************/
 
-static inline void stm32_gint_hcisr(FAR struct stm32_usbhost_s *priv)
+static inline void stm32_gint_hcisr(struct stm32_usbhost_s *priv)
 {
   uint32_t haint;
   uint32_t hcchar;
@@ -3390,7 +3390,7 @@ static inline void stm32_gint_hcisr(FAR struct stm32_usbhost_s *priv)
  *
  ****************************************************************************/
 
-static inline void stm32_gint_hprtisr(FAR struct stm32_usbhost_s *priv)
+static inline void stm32_gint_hprtisr(struct stm32_usbhost_s *priv)
 {
   uint32_t hprt;
   uint32_t newhprt;
@@ -3523,7 +3523,7 @@ static inline void stm32_gint_hprtisr(FAR struct stm32_usbhost_s *priv)
  *
  ****************************************************************************/
 
-static inline void stm32_gint_discisr(FAR struct stm32_usbhost_s *priv)
+static inline void stm32_gint_discisr(struct stm32_usbhost_s *priv)
 {
   /* Handle the disconnection event */
 
@@ -3542,7 +3542,7 @@ static inline void stm32_gint_discisr(FAR struct stm32_usbhost_s *priv)
  *
  ****************************************************************************/
 
-static inline void stm32_gint_ipxfrisr(FAR struct stm32_usbhost_s *priv)
+static inline void stm32_gint_ipxfrisr(struct stm32_usbhost_s *priv)
 {
   uint32_t regval;
 
@@ -3567,7 +3567,7 @@ static inline void stm32_gint_ipxfrisr(FAR struct stm32_usbhost_s *priv)
  *
  ****************************************************************************/
 
-static int stm32_gint_isr(int irq, FAR void *context, FAR void *arg)
+static int stm32_gint_isr(int irq, void *context, void *arg)
 {
   /* At present, there is only support for a single OTG host. Hence it is
    * pre-allocated as g_usbhost.  However, in most code, the private data
@@ -3576,7 +3576,7 @@ static int stm32_gint_isr(int irq, FAR void *context, FAR void *arg)
    * devices.
    */
 
-  FAR struct stm32_usbhost_s *priv = &g_usbhost;
+  struct stm32_usbhost_s *priv = &g_usbhost;
   uint32_t pending;
 
   /* If OTG were supported, we would need to check if we are in host or
@@ -3806,9 +3806,9 @@ static inline void stm32_hostinit_enable(void)
  *
  ****************************************************************************/
 
-static void stm32_txfe_enable(FAR struct stm32_usbhost_s *priv, int chidx)
+static void stm32_txfe_enable(struct stm32_usbhost_s *priv, int chidx)
 {
-  FAR struct stm32_chan_s *chan = &priv->chan[chidx];
+  struct stm32_chan_s *chan = &priv->chan[chidx];
   irqstate_t flags;
   uint32_t regval;
 
@@ -3866,10 +3866,10 @@ static void stm32_txfe_enable(FAR struct stm32_usbhost_s *priv, int chidx)
  *
  ****************************************************************************/
 
-static int stm32_wait(FAR struct usbhost_connection_s *conn,
-                      FAR struct usbhost_hubport_s **hport)
+static int stm32_wait(struct usbhost_connection_s *conn,
+                      struct usbhost_hubport_s **hport)
 {
-  FAR struct stm32_usbhost_s *priv = &g_usbhost;
+  struct stm32_usbhost_s *priv = &g_usbhost;
   struct usbhost_hubport_s *connport;
   irqstate_t flags;
   int ret;
@@ -3960,9 +3960,9 @@ static int stm32_wait(FAR struct usbhost_connection_s *conn,
  *
  ****************************************************************************/
 
-static int stm32_rh_enumerate(FAR struct stm32_usbhost_s *priv,
-                              FAR struct usbhost_connection_s *conn,
-                              FAR struct usbhost_hubport_s *hport)
+static int stm32_rh_enumerate(struct stm32_usbhost_s *priv,
+                              struct usbhost_connection_s *conn,
+                              struct usbhost_hubport_s *hport)
 {
   uint32_t regval;
   int ret;
@@ -4017,10 +4017,10 @@ static int stm32_rh_enumerate(FAR struct stm32_usbhost_s *priv,
   return ret;
 }
 
-static int stm32_enumerate(FAR struct usbhost_connection_s *conn,
-                           FAR struct usbhost_hubport_s *hport)
+static int stm32_enumerate(struct usbhost_connection_s *conn,
+                           struct usbhost_hubport_s *hport)
 {
-  FAR struct stm32_usbhost_s *priv = &g_usbhost;
+  struct stm32_usbhost_s *priv = &g_usbhost;
   int ret;
 
   DEBUGASSERT(hport);
@@ -4091,14 +4091,14 @@ static int stm32_enumerate(FAR struct usbhost_connection_s *conn,
  *
  ****************************************************************************/
 
-static int stm32_ep0configure(FAR struct usbhost_driver_s *drvr,
+static int stm32_ep0configure(struct usbhost_driver_s *drvr,
                               usbhost_ep_t ep0,
                               uint8_t funcaddr, uint8_t speed,
                               uint16_t maxpacketsize)
 {
-  FAR struct stm32_usbhost_s *priv = (FAR struct stm32_usbhost_s *)drvr;
-  FAR struct stm32_ctrlinfo_s *ep0info = (FAR struct stm32_ctrlinfo_s *)ep0;
-  FAR struct stm32_chan_s *chan;
+  struct stm32_usbhost_s *priv = (struct stm32_usbhost_s *)drvr;
+  struct stm32_ctrlinfo_s *ep0info = (struct stm32_ctrlinfo_s *)ep0;
+  struct stm32_chan_s *chan;
   int ret;
 
   DEBUGASSERT(drvr != NULL && ep0info != NULL && funcaddr < 128 &&
@@ -4156,11 +4156,11 @@ static int stm32_ep0configure(FAR struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-static int stm32_epalloc(FAR struct usbhost_driver_s *drvr,
-                         FAR const struct usbhost_epdesc_s *epdesc,
-                         FAR usbhost_ep_t *ep)
+static int stm32_epalloc(struct usbhost_driver_s *drvr,
+                         const struct usbhost_epdesc_s *epdesc,
+                         usbhost_ep_t *ep)
 {
-  FAR struct stm32_usbhost_s *priv = (FAR struct stm32_usbhost_s *)drvr;
+  struct stm32_usbhost_s *priv = (struct stm32_usbhost_s *)drvr;
   int ret;
 
   /* Sanity check.  NOTE that this method should only be called if a device
@@ -4218,9 +4218,9 @@ static int stm32_epalloc(FAR struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-static int stm32_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
+static int stm32_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
-  FAR struct stm32_usbhost_s *priv = (FAR struct stm32_usbhost_s *)drvr;
+  struct stm32_usbhost_s *priv = (struct stm32_usbhost_s *)drvr;
   int ret;
 
   DEBUGASSERT(priv);
@@ -4244,8 +4244,8 @@ static int stm32_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
     {
       /* Halt both control channel and mark the channels available */
 
-      FAR struct stm32_ctrlinfo_s *ctrlep =
-        (FAR struct stm32_ctrlinfo_s *)ep;
+      struct stm32_ctrlinfo_s *ctrlep =
+        (struct stm32_ctrlinfo_s *)ep;
 
       stm32_chan_free(priv, ctrlep->inndx);
       stm32_chan_free(priv, ctrlep->outndx);
@@ -4292,16 +4292,16 @@ static int stm32_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  *
  ****************************************************************************/
 
-static int stm32_alloc(FAR struct usbhost_driver_s *drvr,
-                       FAR uint8_t **buffer, FAR size_t *maxlen)
+static int stm32_alloc(struct usbhost_driver_s *drvr,
+                       uint8_t **buffer, size_t *maxlen)
 {
-  FAR uint8_t *alloc;
+  uint8_t *alloc;
 
   DEBUGASSERT(drvr && buffer && maxlen);
 
   /* There is no special memory requirement for the STM32. */
 
-  alloc = (FAR uint8_t *)kmm_malloc(CONFIG_STM32H7_OTG_DESCSIZE);
+  alloc = (uint8_t *)kmm_malloc(CONFIG_STM32H7_OTG_DESCSIZE);
   if (!alloc)
     {
       return -ENOMEM;
@@ -4338,7 +4338,7 @@ static int stm32_alloc(FAR struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-static int stm32_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
+static int stm32_free(struct usbhost_driver_s *drvr, uint8_t *buffer)
 {
   /* There is no special memory requirement */
 
@@ -4376,16 +4376,16 @@ static int stm32_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
  *
  ****************************************************************************/
 
-static int stm32_ioalloc(FAR struct usbhost_driver_s *drvr,
-                         FAR uint8_t **buffer, size_t buflen)
+static int stm32_ioalloc(struct usbhost_driver_s *drvr,
+                         uint8_t **buffer, size_t buflen)
 {
-  FAR uint8_t *alloc;
+  uint8_t *alloc;
 
   DEBUGASSERT(drvr && buffer && buflen > 0);
 
   /* There is no special memory requirement */
 
-  alloc = (FAR uint8_t *)kmm_malloc(buflen);
+  alloc = (uint8_t *)kmm_malloc(buflen);
   if (!alloc)
     {
       return -ENOMEM;
@@ -4420,8 +4420,8 @@ static int stm32_ioalloc(FAR struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-static int stm32_iofree(FAR struct usbhost_driver_s *drvr,
-                        FAR uint8_t *buffer)
+static int stm32_iofree(struct usbhost_driver_s *drvr,
+                        uint8_t *buffer)
 {
   /* There is no special memory requirement */
 
@@ -4467,12 +4467,12 @@ static int stm32_iofree(FAR struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-static int stm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-                        FAR const struct usb_ctrlreq_s *req,
-                        FAR uint8_t *buffer)
+static int stm32_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+                        const struct usb_ctrlreq_s *req,
+                        uint8_t *buffer)
 {
-  FAR struct stm32_usbhost_s *priv = (FAR struct stm32_usbhost_s *)drvr;
-  FAR struct stm32_ctrlinfo_s *ep0info = (FAR struct stm32_ctrlinfo_s *)ep0;
+  struct stm32_usbhost_s *priv = (struct stm32_usbhost_s *)drvr;
+  struct stm32_ctrlinfo_s *ep0info = (struct stm32_ctrlinfo_s *)ep0;
   uint16_t buflen;
   clock_t start;
   clock_t elapsed;
@@ -4554,12 +4554,12 @@ static int stm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   return -ETIMEDOUT;
 }
 
-static int stm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-                         FAR const struct usb_ctrlreq_s *req,
-                         FAR const uint8_t *buffer)
+static int stm32_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+                         const struct usb_ctrlreq_s *req,
+                         const uint8_t *buffer)
 {
-  FAR struct stm32_usbhost_s *priv = (FAR struct stm32_usbhost_s *)drvr;
-  FAR struct stm32_ctrlinfo_s *ep0info = (FAR struct stm32_ctrlinfo_s *)ep0;
+  struct stm32_usbhost_s *priv = (struct stm32_usbhost_s *)drvr;
+  struct stm32_ctrlinfo_s *ep0info = (struct stm32_ctrlinfo_s *)ep0;
   uint16_t buflen;
   clock_t start;
   clock_t elapsed;
@@ -4609,7 +4609,7 @@ static int stm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
               /* Start DATA out transfer (only one DATA packet) */
 
               priv->chan[ep0info->outndx].outdata1 = true;
-              ret = stm32_ctrl_senddata(priv, ep0info, (FAR uint8_t *)buffer,
+              ret = stm32_ctrl_senddata(priv, ep0info, (uint8_t *)buffer,
                                         buflen);
               if (ret < 0)
                 {
@@ -4685,11 +4685,11 @@ static int stm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  *
  ****************************************************************************/
 
-static ssize_t stm32_transfer(FAR struct usbhost_driver_s *drvr,
-                              usbhost_ep_t ep, FAR uint8_t *buffer,
+static ssize_t stm32_transfer(struct usbhost_driver_s *drvr,
+                              usbhost_ep_t ep, uint8_t *buffer,
                               size_t buflen)
 {
-  FAR struct stm32_usbhost_s *priv = (FAR struct stm32_usbhost_s *)drvr;
+  struct stm32_usbhost_s *priv = (struct stm32_usbhost_s *)drvr;
   unsigned int chidx = (unsigned int)ep;
   ssize_t nbytes;
   int ret;
@@ -4758,11 +4758,11 @@ static ssize_t stm32_transfer(FAR struct usbhost_driver_s *drvr,
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
-static int stm32_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-                        FAR uint8_t *buffer, size_t buflen,
-                        usbhost_asynch_t callback, FAR void *arg)
+static int stm32_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+                        uint8_t *buffer, size_t buflen,
+                        usbhost_asynch_t callback, void *arg)
 {
-  FAR struct stm32_usbhost_s *priv = (FAR struct stm32_usbhost_s *)drvr;
+  struct stm32_usbhost_s *priv = (struct stm32_usbhost_s *)drvr;
   unsigned int chidx = (unsigned int)ep;
   int ret;
 
@@ -4813,10 +4813,10 @@ static int stm32_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
  *
  ****************************************************************************/
 
-static int stm32_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
+static int stm32_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
-  FAR struct stm32_usbhost_s *priv = (FAR struct stm32_usbhost_s *)drvr;
-  FAR struct stm32_chan_s *chan;
+  struct stm32_usbhost_s *priv = (struct stm32_usbhost_s *)drvr;
+  struct stm32_chan_s *chan;
   unsigned int chidx = (unsigned int)ep;
   irqstate_t flags;
 
@@ -4860,7 +4860,7 @@ static int stm32_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   else if (chan->callback)
     {
       usbhost_asynch_t callback;
-      FAR void *arg;
+      void *arg;
 
       /* Extract the callback information */
 
@@ -4903,11 +4903,11 @@ static int stm32_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_HUB
-static int stm32_connect(FAR struct usbhost_driver_s *drvr,
-                         FAR struct usbhost_hubport_s *hport,
+static int stm32_connect(struct usbhost_driver_s *drvr,
+                         struct usbhost_hubport_s *hport,
                          bool connected)
 {
-  FAR struct stm32_usbhost_s *priv = (FAR struct stm32_usbhost_s *)drvr;
+  struct stm32_usbhost_s *priv = (struct stm32_usbhost_s *)drvr;
   irqstate_t flags;
 
   DEBUGASSERT(priv != NULL && hport != NULL);
@@ -4959,8 +4959,8 @@ static int stm32_connect(FAR struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-static void stm32_disconnect(FAR struct usbhost_driver_s *drvr,
-                             FAR struct usbhost_hubport_s *hport)
+static void stm32_disconnect(struct usbhost_driver_s *drvr,
+                             struct usbhost_hubport_s *hport)
 {
   DEBUGASSERT(hport != NULL);
   hport->devclass = NULL;
@@ -4986,7 +4986,7 @@ static void stm32_disconnect(FAR struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-static void stm32_portreset(FAR struct stm32_usbhost_s *priv)
+static void stm32_portreset(struct stm32_usbhost_s *priv)
 {
   uint32_t regval;
 
@@ -5098,7 +5098,7 @@ static void stm32_flush_rxfifo(void)
  *
  ****************************************************************************/
 
-static void stm32_vbusdrive(FAR struct stm32_usbhost_s *priv, bool state)
+static void stm32_vbusdrive(struct stm32_usbhost_s *priv, bool state)
 {
   uint32_t regval;
 
@@ -5144,7 +5144,7 @@ static void stm32_vbusdrive(FAR struct stm32_usbhost_s *priv, bool state)
  *
  ****************************************************************************/
 
-static void stm32_host_initialize(FAR struct stm32_usbhost_s *priv)
+static void stm32_host_initialize(struct stm32_usbhost_s *priv)
 {
   uint32_t regval;
   uint32_t offset;
@@ -5237,10 +5237,10 @@ static void stm32_host_initialize(FAR struct stm32_usbhost_s *priv)
  *
  ****************************************************************************/
 
-static inline void stm32_sw_initialize(FAR struct stm32_usbhost_s *priv)
+static inline void stm32_sw_initialize(struct stm32_usbhost_s *priv)
 {
-  FAR struct usbhost_driver_s *drvr;
-  FAR struct usbhost_hubport_s *hport;
+  struct usbhost_driver_s *drvr;
+  struct usbhost_hubport_s *hport;
   int i;
 
   /* Initialize the device operations */
@@ -5304,7 +5304,7 @@ static inline void stm32_sw_initialize(FAR struct stm32_usbhost_s *priv)
 
   for (i = 0; i < STM32_MAX_TX_FIFOS; i++)
     {
-      FAR struct stm32_chan_s *chan = &priv->chan[i];
+      struct stm32_chan_s *chan = &priv->chan[i];
 
       chan->chidx = i;
 
@@ -5331,7 +5331,7 @@ static inline void stm32_sw_initialize(FAR struct stm32_usbhost_s *priv)
  *
  ****************************************************************************/
 
-static inline int stm32_hw_initialize(FAR struct stm32_usbhost_s *priv)
+static inline int stm32_hw_initialize(struct stm32_usbhost_s *priv)
 {
   uint32_t regval;
   unsigned long timeout;
@@ -5427,7 +5427,7 @@ static inline int stm32_hw_initialize(FAR struct stm32_usbhost_s *priv)
  *
  ****************************************************************************/
 
-FAR struct usbhost_connection_s *stm32_otgfshost_initialize(int controller)
+struct usbhost_connection_s *stm32_otgfshost_initialize(int controller)
 {
   /* At present, there is only support for a single OTG FS host. Hence it is
    * pre-allocated as g_usbhost.  However, in most code, the private data
@@ -5436,7 +5436,7 @@ FAR struct usbhost_connection_s *stm32_otgfshost_initialize(int controller)
    * devices.
    */
 
-  FAR struct stm32_usbhost_s *priv = &g_usbhost;
+  struct stm32_usbhost_s *priv = &g_usbhost;
   uint32_t regval;
 
   /* Sanity checks */

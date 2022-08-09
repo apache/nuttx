@@ -170,7 +170,7 @@ void lpc31_clockconfig(void);
  ****************************************************************************/
 
 struct spi_dev_s; /* Forward reference */
-FAR struct spi_dev_s *lpc31_spibus_initialize(int port);
+struct spi_dev_s *lpc31_spibus_initialize(int port);
 
 /****************************************************************************
  * Name:  lpc31_spiselect and lpc31_spistatus
@@ -202,11 +202,11 @@ FAR struct spi_dev_s *lpc31_spibus_initialize(int port);
  *
  ****************************************************************************/
 
-void  lpc31_spiselect(FAR struct spi_dev_s *dev,
+void  lpc31_spiselect(struct spi_dev_s *dev,
                       uint32_t devid, bool selected);
-uint8_t lpc31_spistatus(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t lpc31_spistatus(struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int lpc31_spicmddata(FAR struct spi_dev_s *dev,
+int lpc31_spicmddata(struct spi_dev_s *dev,
                      uint32_t devid, bool cmd);
 #endif
 
@@ -224,7 +224,7 @@ int lpc31_spicmddata(FAR struct spi_dev_s *dev,
 
 #if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBDEV)
 struct usbdev_s;
-int lpc31_usbpullup(FAR struct usbdev_s *dev,  bool enable);
+int lpc31_usbpullup(struct usbdev_s *dev,  bool enable);
 #endif
 
 /****************************************************************************
@@ -240,7 +240,7 @@ int lpc31_usbpullup(FAR struct usbdev_s *dev,  bool enable);
 
 #if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBDEV)
 struct usbdev_s;
-void lpc31_usbsuspend(FAR struct usbdev_s *dev, bool resume);
+void lpc31_usbsuspend(struct usbdev_s *dev, bool resume);
 #endif
 
 /****************************************************************************
@@ -270,7 +270,7 @@ void lpc31_usbsuspend(FAR struct usbdev_s *dev, bool resume);
 
 #if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBHOST)
 struct usbhost_connection_s;
-FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller);
+struct usbhost_connection_s *lpc31_ehci_initialize(int controller);
 #endif
 
 /****************************************************************************
@@ -311,7 +311,7 @@ void lpc31_usbhost_vbusdrive(int rhport, bool enable);
  ****************************************************************************/
 
 struct sdio_dev_s; /* See include/nuttx/sdio.h */
-FAR struct sdio_dev_s *sdio_initialize(int slotno);
+struct sdio_dev_s *sdio_initialize(int slotno);
 
 /****************************************************************************
  * Name: sdio_mediachange
@@ -332,7 +332,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno);
  *
  ****************************************************************************/
 
-void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot);
+void sdio_mediachange(struct sdio_dev_s *dev, bool cardinslot);
 
 /****************************************************************************
  * Name: sdio_wrprotect
@@ -350,7 +350,7 @@ void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot);
  *
  ****************************************************************************/
 
-void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect);
+void sdio_wrprotect(struct sdio_dev_s *dev, bool wrprotect);
 
 #undef EXTERN
 #if defined(__cplusplus)

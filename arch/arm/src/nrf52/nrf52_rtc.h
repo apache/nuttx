@@ -99,43 +99,41 @@ struct nrf52_rtc_ops_s
 {
   /* RTC tasks */
 
-  CODE int (*start)(FAR struct nrf52_rtc_dev_s *dev);
-  CODE int (*stop)(FAR struct nrf52_rtc_dev_s *dev);
-  CODE int (*clear)(FAR struct nrf52_rtc_dev_s *dev);
-  CODE int (*trgovrflw)(FAR struct nrf52_rtc_dev_s *dev);
+  int (*start)(struct nrf52_rtc_dev_s *dev);
+  int (*stop)(struct nrf52_rtc_dev_s *dev);
+  int (*clear)(struct nrf52_rtc_dev_s *dev);
+  int (*trgovrflw)(struct nrf52_rtc_dev_s *dev);
 
   /* RTC operations */
 
-  CODE int (*getcounter)(FAR struct nrf52_rtc_dev_s *dev, FAR uint32_t *cc);
-  CODE int (*setcc)(FAR struct nrf52_rtc_dev_s *dev, uint8_t i, uint32_t cc);
-  CODE int (*getcc)(FAR struct nrf52_rtc_dev_s *dev, uint8_t i,
-                    FAR uint32_t *cc);
-  CODE int (*setpre)(FAR struct nrf52_rtc_dev_s *dev, uint16_t pre);
+  int (*getcounter)(struct nrf52_rtc_dev_s *dev, uint32_t *cc);
+  int (*setcc)(struct nrf52_rtc_dev_s *dev, uint8_t i, uint32_t cc);
+  int (*getcc)(struct nrf52_rtc_dev_s *dev, uint8_t i, uint32_t *cc);
+  int (*setpre)(struct nrf52_rtc_dev_s *dev, uint16_t pre);
 
   /* RTC interrupts */
 
-  CODE int (*setisr)(FAR struct nrf52_rtc_dev_s *dev, xcpt_t handler,
-                     FAR void * arg);
-  CODE int (*enableint)(FAR struct nrf52_rtc_dev_s *dev, uint8_t source);
-  CODE int (*disableint)(FAR struct nrf52_rtc_dev_s *dev, uint8_t source);
-  CODE int (*checkint)(FAR struct nrf52_rtc_dev_s *dev, uint8_t source);
-  CODE int (*ackint)(FAR struct nrf52_rtc_dev_s *dev, uint8_t source);
+  int (*setisr)(struct nrf52_rtc_dev_s *dev, xcpt_t handler, void *arg);
+  int (*enableint)(struct nrf52_rtc_dev_s *dev, uint8_t source);
+  int (*disableint)(struct nrf52_rtc_dev_s *dev, uint8_t source);
+  int (*checkint)(struct nrf52_rtc_dev_s *dev, uint8_t source);
+  int (*ackint)(struct nrf52_rtc_dev_s *dev, uint8_t source);
 
   /* RTC events */
 
-  CODE int (*enableevt)(FAR struct nrf52_rtc_dev_s *dev, uint8_t evt);
-  CODE int (*disableevt)(FAR struct nrf52_rtc_dev_s *dev, uint8_t evt);
+  int (*enableevt)(struct nrf52_rtc_dev_s *dev, uint8_t evt);
+  int (*disableevt)(struct nrf52_rtc_dev_s *dev, uint8_t evt);
 
   /* Utility */
 
-  CODE uint32_t (*getbase)(FAR struct nrf52_rtc_dev_s *dev);
+  uint32_t (*getbase)(struct nrf52_rtc_dev_s *dev);
 };
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-FAR struct nrf52_rtc_dev_s *nrf52_rtc_init(int rtc);
-int nrf52_rtc_deinit(FAR struct nrf52_rtc_dev_s *dev);
+struct nrf52_rtc_dev_s *nrf52_rtc_init(int rtc);
+int nrf52_rtc_deinit(struct nrf52_rtc_dev_s *dev);
 
 #endif /* __ARCH_ARM_SRC_NRF52_NRF52_RTC_H */

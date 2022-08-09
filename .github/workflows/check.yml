@@ -21,13 +21,16 @@ concurrency:
   group: check-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   check:
     runs-on: ubuntu-18.04
 
     steps:
       - name: Checkout nuttx repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: apache/incubator-nuttx
           path: nuttx

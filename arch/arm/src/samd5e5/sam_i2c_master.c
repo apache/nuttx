@@ -221,7 +221,7 @@ static inline void i2c_putrel(struct sam_i2c_dev_s *priv,
 static int i2c_wait_for_bus(struct sam_i2c_dev_s *priv, unsigned int size);
 
 static void i2c_wakeup(struct sam_i2c_dev_s *priv, int result);
-static int i2c_interrupt(int irq, FAR void *context, void *arg);
+static int i2c_interrupt(int irq, void *context, void *arg);
 
 static void i2c_startread(struct sam_i2c_dev_s *priv, struct i2c_msg_s *msg);
 static void i2c_startwrite(struct sam_i2c_dev_s *priv,
@@ -229,8 +229,8 @@ static void i2c_startwrite(struct sam_i2c_dev_s *priv,
 static void i2c_startmessage(struct sam_i2c_dev_s *priv,
                              struct i2c_msg_s *msg);
 
-static int sam_i2c_transfer(FAR struct i2c_master_s *dev,
-                            FAR struct i2c_msg_s *msgs, int count);
+static int sam_i2c_transfer(struct i2c_master_s *dev,
+                            struct i2c_msg_s *msgs, int count);
 
 /* Initialization */
 
@@ -700,7 +700,7 @@ static void i2c_wakeup(struct sam_i2c_dev_s *priv, int result)
  *
  ****************************************************************************/
 
-static int i2c_interrupt(int irq, FAR void *context, FAR void *arg)
+static int i2c_interrupt(int irq, void *context, void *arg)
 {
   struct sam_i2c_dev_s *priv = (struct sam_i2c_dev_s *)arg;
   struct i2c_msg_s *msg;
@@ -977,8 +977,8 @@ static void i2c_startmessage(struct sam_i2c_dev_s *priv,
  *
  ****************************************************************************/
 
-static int sam_i2c_transfer(FAR struct i2c_master_s *dev,
-                            FAR struct i2c_msg_s *msgs, int count)
+static int sam_i2c_transfer(struct i2c_master_s *dev,
+                            struct i2c_msg_s *msgs, int count)
 {
   struct sam_i2c_dev_s *priv = (struct sam_i2c_dev_s *)dev;
   irqstate_t flags;
@@ -1469,7 +1469,7 @@ struct i2c_master_s *sam_i2c_master_initialize(int bus)
  *
  ****************************************************************************/
 
-int sam_i2c_uninitialize(FAR struct i2c_master_s *dev)
+int sam_i2c_uninitialize(struct i2c_master_s *dev)
 {
   struct sam_i2c_dev_s *priv = (struct sam_i2c_dev_s *)dev;
 
@@ -1500,7 +1500,7 @@ int sam_i2c_uninitialize(FAR struct i2c_master_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
-int sam_i2c_reset(FAR struct i2c_master_s *dev)
+int sam_i2c_reset(struct i2c_master_s *dev)
 {
   struct sam_i2c_dev_s *priv = (struct sam_i2c_dev_s *)dev;
   int ret;

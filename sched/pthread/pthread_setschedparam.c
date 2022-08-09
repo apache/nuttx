@@ -91,7 +91,7 @@ int pthread_setschedparam(pthread_t thread, int policy,
 {
   int ret;
 
-  sinfo("thread ID=%d policy=%d param=0x%p\n", thread, policy, param);
+  sinfo("thread ID=%d policy=%d param=%p\n", thread, policy, param);
 
   /* Let nxsched_set_scheduler do all of the work */
 

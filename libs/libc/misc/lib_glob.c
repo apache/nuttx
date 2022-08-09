@@ -43,7 +43,7 @@
 struct match_s
 {
   FAR struct match_s *next;
-  char name[];
+  char name[1];
 };
 
 /****************************************************************************
@@ -71,8 +71,8 @@ static int sort(FAR const void *a, FAR const void *b);
 static int append(FAR struct match_s **tail, FAR const char *name,
                   size_t len, int mark)
 {
-  FAR struct match_s *new = lib_malloc(sizeof(struct match_s) + len + 2);
-  if (!new)
+  FAR struct match_s *new = lib_malloc(sizeof(struct match_s) + len + 1);
+  if (new == NULL)
     {
       return -1;
     }
@@ -83,7 +83,7 @@ static int append(FAR struct match_s **tail, FAR const char *name,
   if (mark && len && name[len - 1] != '/')
     {
       new->name[len] = '/';
-      new->name[len + 1] = 0;
+      new->name[len + 1] = '\0';
     }
 
   *tail = new;
@@ -366,6 +366,9 @@ static int do_glob(FAR char *buf, size_t pos, int type, FAR char *pat,
 
 static int ignore_err(FAR const char *path, int err)
 {
+  UNUSED(path);
+  UNUSED(err);
+
   return 0;
 }
 
@@ -405,17 +408,16 @@ int glob(FAR const char *pat, int flags,
          CODE int (*errfunc)(FAR const char *path, int err),
          FAR glob_t *g)
 {
-  struct match_s head =
-    {
-      .next = NULL
-    };
-
+  struct match_s head;
   FAR struct match_s *tail = &head;
   size_t cnt;
   size_t i;
   size_t offs = (flags & GLOB_DOOFFS) ? g->gl_offs : 0;
   int error = 0;
   char buf[PATH_MAX];
+
+  head.next = NULL;
+  head.name[0] = '\0';
 
   if (!errfunc)
     {

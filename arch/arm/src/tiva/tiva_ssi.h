@@ -64,7 +64,7 @@ extern "C"
  ****************************************************************************/
 
 struct spi_dev_s;
-FAR struct spi_dev_s *tiva_ssibus_initialize(int port);
+struct spi_dev_s *tiva_ssibus_initialize(int port);
 
 /****************************************************************************
  * The external functions, tiva_ssiselect, tiva_ssistatus, and
@@ -94,11 +94,11 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port);
  ****************************************************************************/
 
 struct spi_dev_s;
-void tiva_ssiselect(FAR struct spi_dev_s *dev, uint32_t devid,
+void tiva_ssiselect(struct spi_dev_s *dev, uint32_t devid,
                     bool selected);
-uint8_t tiva_ssistatus(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t tiva_ssistatus(struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int tiva_ssicmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int tiva_ssicmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 #if defined(__cplusplus)

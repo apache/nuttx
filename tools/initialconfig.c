@@ -389,8 +389,7 @@ static bool test_dirpath(const char *filepath)
 static int foreach_dirent(const char *dirpath, direntcb_t cb, void *arg)
 {
   DIR *dirp;
-  struct dirent *result;
-  struct dirent entry;
+  struct dirent *entry;
   int ret;
 
   dirp = opendir(dirpath);
@@ -403,29 +402,37 @@ static int foreach_dirent(const char *dirpath, direntcb_t cb, void *arg)
 
   for (; ; )
     {
-      ret = readdir_r(dirp, &entry, &result);
-      if (ret != 0)
+      /* To distinguish between end of stream and error, set
+       * errno to 0 and verify whether its value changed if
+       * readdir returned NULL.
+       */
+
+      errno = 0;
+
+      entry = readdir(dirp);
+      if (entry == NULL && errno != 0)
         {
           fprintf(stderr,
-                  "ERROR: Failed to reed directory '%s' entry: %s\n",
-                  dirpath, strerror(ret));
+                  "ERROR: Failed to read directory '%s' entry: %s\n",
+                  dirpath, strerror(errno));
            closedir(dirp);
            exit(EXIT_FAILURE);
         }
 
-      if (result == NULL)
+      if (entry == NULL)
         {
           break;
         }
 
       /* Skip over the . and .. hard links */
 
-      if (strcmp(entry.d_name, ".") == 0 || strcmp(entry.d_name, "..") == 0)
+      if (strcmp(entry->d_name, ".") == 0 ||
+          strcmp(entry->d_name, "..") == 0)
         {
           continue;
         }
 
-      ret = cb(dirpath, &entry, arg);
+      ret = cb(dirpath, entry, arg);
       if (ret != 0)
         {
           break;
@@ -447,6 +454,7 @@ static int foreach_dirent(const char *dirpath, direntcb_t cb, void *arg)
 static int enum_architectures(const char *dirpath, struct dirent *entry,
                               void *arg)
 {
+  int ret;
   char *archpath;
   char *testpath;
 
@@ -454,16 +462,46 @@ static int enum_architectures(const char *dirpath, struct dirent *entry,
    * directory, and a src/ directory.
    */
 
-  asprintf(&archpath, "%s%c%s", dirpath, g_delim, entry->d_name);
-  asprintf(&testpath, "%s%cKconfig", archpath, g_delim);
+  ret = asprintf(&archpath, "%s%c%s", dirpath, g_delim, entry->d_name);
+  if (ret < 0)
+    {
+      fprintf(stderr,
+              "ERROR: asprintf() failed to archpath\n");
+      return ret;
+    }
+
+  ret = asprintf(&testpath, "%s%cKconfig", archpath, g_delim);
+  if (ret < 0)
+    {
+      fprintf(stderr,
+              "ERROR: asprintf() failed to testpath\n");
+      return ret;
+    }
+
   if (test_filepath(testpath))
     {
       free(testpath);
-      asprintf(&testpath, "%s%cinclude", archpath, g_delim);
+
+      ret = asprintf(&testpath, "%s%cinclude", archpath, g_delim);
+      if (ret < 0)
+        {
+          fprintf(stderr,
+                  "ERROR: asprintf() failed to testpath/include\n");
+          return ret;
+        }
+
       if (test_dirpath(testpath))
         {
           free(testpath);
-          asprintf(&testpath, "%s%csrc", archpath, g_delim);
+
+          ret = asprintf(&testpath, "%s%csrc", archpath, g_delim);
+          if (ret < 0)
+            {
+              fprintf(stderr,
+                      "ERROR: asprintf() failed to testpath/src\n");
+              return ret;
+            }
+
           if (test_dirpath(testpath))
             {
               if (g_narch >= MAX_ARCHITECTURES)
@@ -494,17 +532,39 @@ static int enum_architectures(const char *dirpath, struct dirent *entry,
 
 static int enum_mcus(const char *dirpath, struct dirent *entry, void *arg)
 {
+  int ret;
   char *mcupath;
   char *testpath;
 
   /* All MCU directories should contain a Kconfig and a Make.defs file. */
 
-  asprintf(&mcupath, "%s%c%s", dirpath, g_delim, entry->d_name);
-  asprintf(&testpath, "%s%cKconfig", mcupath, g_delim);
+  ret = asprintf(&mcupath, "%s%c%s", dirpath, g_delim, entry->d_name);
+  if (ret < 0)
+    {
+      fprintf(stderr,
+              "ERROR: asprintf() failed to mcupath\n");
+      return ret;
+    }
+
+  ret = asprintf(&testpath, "%s%cKconfig", mcupath, g_delim);
+  if (ret < 0)
+    {
+      fprintf(stderr,
+              "ERROR: asprintf() failed to archpath/Kconfig\n");
+      return ret;
+    }
+
   if (test_filepath(testpath))
     {
       free(testpath);
-      asprintf(&testpath, "%s%cMake.defs", mcupath, g_delim);
+      ret = asprintf(&testpath, "%s%cMake.defs", mcupath, g_delim);
+      if (ret < 0)
+        {
+          fprintf(stderr,
+                  "ERROR: asprintf() failed to testpath/Make.defs\n");
+          return ret;
+        }
+
       if (test_filepath(testpath))
         {
           if (g_nmcu >= MAX_MCUS)
@@ -542,8 +602,15 @@ static int enum_board_configurations(const char *dirpath,
 
   /* All board directories should contain a defconfig file. */
 
-  asprintf(&configpath, "%s%c%s%cdefconfig",
-           dirpath, g_delim, entry->d_name, g_delim);
+  ret = asprintf(&configpath, "%s%c%s%cdefconfig",
+                 dirpath, g_delim, entry->d_name, g_delim);
+  if (ret < 0)
+    {
+      fprintf(stderr,
+              "ERROR: asprintf() failed to configpath\n");
+      return ret;
+    }
+
   if (test_filepath(configpath))
     {
       /* We don't want all board configurations, we only want the name of
@@ -554,7 +621,14 @@ static int enum_board_configurations(const char *dirpath,
        * Where xxxx is the selected MCU name.
        */
 
-      asprintf(&varvalue, "\"%s\"", g_selected_mcu);
+      ret = asprintf(&varvalue, "\"%s\"", g_selected_mcu);
+      if (ret < 0)
+        {
+          fprintf(stderr,
+                  "ERROR: asprintf() failed to varvalue\n");
+          return ret;
+        }
+
       if (check_variable(configpath, "CONFIG_ARCH_CHIP", varvalue))
         {
           /* Found it... add the board name to the list of boards for the
@@ -611,6 +685,7 @@ static int enum_board_configurations(const char *dirpath,
 
 static int enum_boards(const char *dirpath, struct dirent *entry, void *arg)
 {
+  int ret = 0;
   char *boardpath;
   char *testpath;
 
@@ -618,16 +693,44 @@ static int enum_boards(const char *dirpath, struct dirent *entry, void *arg)
    * directory, and a src/ directory.
    */
 
-  asprintf(&boardpath, "%s%c%s", dirpath, g_delim, entry->d_name);
-  asprintf(&testpath, "%s%cKconfig", boardpath, g_delim);
+  ret = asprintf(&boardpath, "%s%c%s", dirpath, g_delim, entry->d_name);
+  if (ret < 0)
+    {
+      fprintf(stderr,
+              "ERROR: asprintf() failed to boardpath\n");
+      return ret;
+    }
+
+  ret = asprintf(&testpath, "%s%cKconfig", boardpath, g_delim);
+  if (ret < 0)
+    {
+      fprintf(stderr,
+              "ERROR: asprintf() failed to testpath\n");
+      return ret;
+    }
+
   if (test_filepath(testpath))
     {
       free(testpath);
-      asprintf(&testpath, "%s%cinclude", boardpath, g_delim);
+      ret = asprintf(&testpath, "%s%cinclude", boardpath, g_delim);
+      if (ret < 0)
+        {
+          fprintf(stderr,
+                  "ERROR: asprintf() failed to testpath\n");
+          return ret;
+        }
+
       if (test_dirpath(testpath))
         {
           free(testpath);
-          asprintf(&testpath, "%s%csrc", boardpath, g_delim);
+          ret = asprintf(&testpath, "%s%csrc", boardpath, g_delim);
+          if (ret < 0)
+            {
+              fprintf(stderr,
+                      "ERROR: asprintf() failed to archpath\n");
+              return ret;
+            }
+
           if (test_dirpath(testpath))
             {
               /* Enumerate the board configurations */
@@ -791,6 +894,7 @@ static void create_config(void)
 
 int main(int argc, char **argv)
 {
+  int ret;
   char *archpath;
 
   /* Enumerate all of the architectures */
@@ -806,8 +910,15 @@ int main(int argc, char **argv)
   /* Enumerate the MCUs for the selected architecture */
 
   g_nmcu = 0;
-  asprintf(&archpath, "%s%c%s%csrc",
-           g_archdir, g_delim, g_selected_arch, g_delim);
+  ret = asprintf(&archpath, "%s%c%s%csrc",
+                 g_archdir, g_delim, g_selected_arch, g_delim);
+  if (ret < 0)
+    {
+      fprintf(stderr,
+              "ERROR: asprintf() failed to archpath/src\n");
+      return ret;
+    }
+
   foreach_dirent(archpath, enum_mcus, NULL);
 
   /* Select an MCU */

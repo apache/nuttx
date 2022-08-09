@@ -24,6 +24,15 @@ config NETDEV_CAN_BITRATE_IOCTL
 	---help---
 		Enable support for ioctl() commands to change CAN bitrate
 
+config NETDEV_CAN_FILTER_IOCTL
+	bool "Enable CAN filter ioctl()"
+	default n
+	select NETDEV_IOCTL
+	depends on NET_CAN
+	---help---
+		Enable support for ioctl() commands to add/remove CAN hardware-level
+		filters (NOTE: Not supported by all drivers)
+
 config NETDEV_WIRELESS_IOCTL
 	bool "Enable Wireless ioctl()"
 	default n

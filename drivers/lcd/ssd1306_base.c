@@ -139,10 +139,12 @@
 
 /* LCD Data Transfer Methods */
 
-static int ssd1306_putrun(fb_coord_t row, fb_coord_t col,
-                          FAR const uint8_t *buffer, size_t npixels);
-static int ssd1306_getrun(fb_coord_t row, fb_coord_t col,
-                          FAR uint8_t *buffer, size_t npixels);
+static int ssd1306_putrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
+                          fb_coord_t col, FAR const uint8_t *buffer,
+                          size_t npixels);
+static int ssd1306_getrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
+                          fb_coord_t col, FAR uint8_t *buffer,
+                          size_t npixels);
 
 /* LCD Configuration */
 
@@ -180,19 +182,6 @@ static int  ssd1306_redrawfb(struct ssd1306_dev_s *priv);
  * Private Data
  ****************************************************************************/
 
-/* This is working memory allocated by the LCD driver for each LCD device
- * and for each color plane.  This memory will hold one raster line of data.
- * The size of the allocated run buffer must therefore be at least
- * (bpp * xres / 8).  Actual alignment of the buffer must conform to the
- * bitwidth of the underlying pixel type.
- *
- * If there are multiple planes, they may share the same working buffer
- * because different planes will not be operate on concurrently.  However,
- * if there are multiple LCD devices, they must each have unique run buffers.
- */
-
-static uint8_t g_runbuffer[SSD1306_DEV_ROWSIZE];
-
 /* This structure describes the overall LCD video controller */
 
 static const struct fb_videoinfo_s g_videoinfo =
@@ -201,16 +190,6 @@ static const struct fb_videoinfo_s g_videoinfo =
   .xres    = SSD1306_DEV_XRES,      /* Horizontal resolution in pixel columns */
   .yres    = SSD1306_DEV_YRES,      /* Vertical resolution in pixel rows */
   .nplanes = 1,                     /* Number of color planes supported */
-};
-
-/* This is the standard, NuttX Plane information object */
-
-static const struct lcd_planeinfo_s g_planeinfo =
-{
-  .putrun = ssd1306_putrun,             /* Put a run into LCD memory */
-  .getrun = ssd1306_getrun,             /* Get a run from LCD memory */
-  .buffer = (FAR uint8_t *)g_runbuffer, /* Run scratch buffer */
-  .bpp    = SSD1306_DEV_BPP,            /* Bits-per-pixel */
 };
 
 /* This is the outside visible interface for the OLED driver */
@@ -238,7 +217,7 @@ static const struct lcd_dev_s g_oleddev_dev =
  * for now.
  */
 
-static struct ssd1306_dev_s g_oleddev;
+static struct ssd1306_dev_s g_oleddev[CONFIG_SSD1306_NUMDEVS];
 
 /****************************************************************************
  * Private Functions
@@ -260,11 +239,11 @@ static struct ssd1306_dev_s g_oleddev;
  ****************************************************************************/
 
 #if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
-static int ssd1306_putrun(fb_coord_t row, fb_coord_t col,
-                          FAR const uint8_t *buffer,
+static int ssd1306_putrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
+                          fb_coord_t col, FAR const uint8_t *buffer,
                           size_t npixels)
 {
-  FAR struct ssd1306_dev_s *priv = (FAR struct ssd1306_dev_s *)&g_oleddev;
+  FAR struct ssd1306_dev_s *priv = (FAR struct ssd1306_dev_s *)dev;
   FAR uint8_t *fbptr;
   FAR uint8_t *ptr;
   uint8_t devcol;
@@ -489,10 +468,11 @@ static int ssd1306_putrun(fb_coord_t row, fb_coord_t col,
  ****************************************************************************/
 
 #if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
-static int ssd1306_getrun(fb_coord_t row, fb_coord_t col,
-                          FAR uint8_t *buffer, size_t npixels)
+static int ssd1306_getrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
+                          fb_coord_t col, FAR uint8_t *buffer,
+                          size_t npixels)
 {
-  FAR struct ssd1306_dev_s *priv = &g_oleddev;
+  FAR struct ssd1306_dev_s *priv = (FAR struct ssd1306_dev_s *)dev;
   FAR uint8_t *fbptr;
   uint8_t page;
   uint8_t fbmask;
@@ -664,10 +644,19 @@ static int ssd1306_getplaneinfo(FAR struct lcd_dev_s *dev,
                                 unsigned int planeno,
                                 FAR struct lcd_planeinfo_s *pinfo)
 {
+  FAR struct ssd1306_dev_s *priv = (FAR struct ssd1306_dev_s *)dev;
+
   DEBUGASSERT(pinfo && planeno == 0);
 
-  lcdinfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
-  memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
+  lcdinfo("planeno: %d bpp: %d\n", planeno, SSD1306_DEV_BPP);
+
+  memset(pinfo, 0, sizeof(struct lcd_planeinfo_s));
+  pinfo->putrun = ssd1306_putrun;
+  pinfo->getrun = ssd1306_getrun;
+  pinfo->bpp    = SSD1306_DEV_BPP;
+  pinfo->buffer = (FAR uint8_t *)priv->runbuffer;
+  pinfo->dev    = dev;
+
   return OK;
 }
 
@@ -755,6 +744,13 @@ static int ssd1306_setpower(FAR struct lcd_dev_s *dev, int power)
 
       priv->on = false;
 
+#ifdef CONFIG_SSD1306_POWEROFF_RECONFIGURE
+
+      /* Display is not configured anymore. */
+
+      priv->is_conf = false;
+#else
+
       /* Try turn off power completely */
 
       if (priv->board_priv && priv->board_priv->set_vcc)
@@ -768,6 +764,7 @@ static int ssd1306_setpower(FAR struct lcd_dev_s *dev, int power)
               priv->is_conf = false;
             }
         }
+#endif
     }
   else
     {
@@ -1426,12 +1423,13 @@ FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_master_s *dev,
                           unsigned int devno)
 #endif
 {
-  FAR struct ssd1306_dev_s *priv = &g_oleddev;
+  FAR struct ssd1306_dev_s *priv = &g_oleddev[devno];
 
   priv->dev = g_oleddev_dev;
 
-  DEBUGASSERT(dev && devno == 0);
+  DEBUGASSERT(dev && devno < CONFIG_SSD1306_NUMDEVS);
 
+  priv->devno = (uint8_t)devno;
   priv->on = false;
   priv->is_conf = false;
 

@@ -53,6 +53,13 @@ config PWM_NCHANNELS
 endif # PWM_MULTICHAN
 endif # PWM
 
+config CAPTURE
+	bool "Capture Driver Support"
+	default n
+	---help---
+		This selection enables building of the "upper-half" Capture driver.
+		See include/nuttx/timers/capture.h for further Capture driver information.
+
 config TIMER
 	bool "Timer Support"
 	default n

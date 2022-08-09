@@ -52,7 +52,7 @@ static inline uint8_t spi_status(struct spi_dev_s *dev, uint32_t devid)
     }
 #endif
 
-#ifdef CONFIG_LCD_ILI9341
+#if defined(CONFIG_LCD_ILI9341) || defined(CONFIG_LCD_SSD1680)
   if (devid == SPIDEV_DISPLAY(0))
     {
        status |= SPI_STATUS_PRESENT;
@@ -71,7 +71,7 @@ static inline uint8_t spi_status(struct spi_dev_s *dev, uint32_t devid)
 static inline int spi_cmddata(struct spi_dev_s *dev, uint32_t devid,
                               bool cmd)
 {
-#ifdef CONFIG_LCD_ILI9341
+#if defined(CONFIG_LCD_ILI9341) || defined(CONFIG_LCD_SSD1680)
   if (devid == SPIDEV_DISPLAY(0))
     {
       /*  This is the Data/Command control pad which determines whether the
@@ -79,7 +79,6 @@ static inline int spi_cmddata(struct spi_dev_s *dev, uint32_t devid,
        */
 
       esp32_gpiowrite(DISPLAY_DC, !cmd);
-
       return OK;
     }
 #endif

@@ -124,10 +124,6 @@ void rx65n_cmtw0_create(uint32_t txpoll_time, uint32_t txtimeout_time)
   MPC.PE7PFS.BYTE = 0x1du;
   PORTE.PMR.BYTE |= 0x80u;
 
-  /* Attach the IRQ for poll expiry */
-
-  irq_attach(RX65N_INTB170_IRQ, (xcpt_t)rx65n_poll_expiry, NULL);
-
   /* Attach the IRQ for tx timeout */
 
   irq_attach(RX65N_INTB171_IRQ, (xcpt_t)rx65n_txtimeout_expiry, NULL);

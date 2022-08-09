@@ -32,7 +32,7 @@
 #elif defined(CONFIG_ARCH_CHIP_RV32M1_ZERORISCY)
 #  error "rv32m1 zero-riscy is to be continued..."
 #else
-#  error "Unspported rv32m1 cortex-m cores"
+#  error "Unsupported rv32m1 cortex-m cores"
 #endif
 
 #endif /* _ARCH_RISCV_SRC_RV32M1_CHIP_RV32M1_SCG_H */

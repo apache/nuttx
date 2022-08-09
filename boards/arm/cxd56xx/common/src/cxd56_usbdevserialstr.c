@@ -36,7 +36,7 @@
 
 static char g_serialstr[CONFIG_BOARDCTL_UNIQUEID_SIZE * 2 + 1];
 
-FAR const char *board_usbdev_serialstr(void)
+const char *board_usbdev_serialstr(void)
 {
   uint8_t uid[CONFIG_BOARDCTL_UNIQUEID_SIZE];
 

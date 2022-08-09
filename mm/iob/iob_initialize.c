@@ -34,10 +34,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef NULL
-#  define NULL ((FAR void *)0)
-#endif
-
 #define ROUNDUP(x, y)   (((x) + (y) - 1) / (y) * (y))
 
 /* Fix the I/O Buffer size with specified alignment size */

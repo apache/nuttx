@@ -47,10 +47,10 @@
  * Name: up_textheap_memalign()
  ****************************************************************************/
 
-FAR void *up_textheap_memalign(size_t align, size_t size)
+void *up_textheap_memalign(size_t align, size_t size)
 {
-  FAR void *ret;
-  ret = (FAR void *)kmm_malloc(size);
+  void *ret;
+  ret = (void *)kmm_malloc(size);
 
 #ifdef CONFIG_CXD56_USE_SYSBUS
   if (ret)
@@ -75,7 +75,7 @@ FAR void *up_textheap_memalign(size_t align, size_t size)
  * Name: up_textheap_free()
  ****************************************************************************/
 
-void up_textheap_free(FAR void *p)
+void up_textheap_free(void *p)
 {
 #ifdef CONFIG_CXD56_USE_SYSBUS
   if (p)
@@ -94,4 +94,22 @@ void up_textheap_free(FAR void *p)
 #endif
 
   kmm_free(p);
+}
+
+/****************************************************************************
+ * Name: up_textheap_heapmember()
+ ****************************************************************************/
+
+bool up_textheap_heapmember(void *p)
+{
+  if (p == NULL)
+    {
+      return false;
+    }
+
+#ifdef CONFIG_CXD56_USE_SYSBUS
+  p += SYSBUS_ADDRESS_OFFSET;
+#endif
+
+  return kmm_heapmember(p);
 }

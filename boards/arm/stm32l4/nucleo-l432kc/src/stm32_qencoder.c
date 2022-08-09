@@ -48,7 +48,7 @@
  *
  ****************************************************************************/
 
-int stm32l4_qencoder_initialize(FAR const char *devpath, int timer)
+int stm32l4_qencoder_initialize(const char *devpath, int timer)
 {
   int ret;
 

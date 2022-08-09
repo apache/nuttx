@@ -92,7 +92,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *lpc43_sspbus_initialize(int port);
+struct spi_dev_s *lpc43_sspbus_initialize(int port);
 
 /****************************************************************************
  * Name:  lpc43_ssp0/1select, lpc43_ssp0/1status, and lpc43_ssp0/1cmddata
@@ -111,20 +111,20 @@ FAR struct spi_dev_s *lpc43_sspbus_initialize(int port);
  ****************************************************************************/
 
 #ifdef CONFIG_LPC43_SSP0
-void  lpc43_ssp0select(FAR struct spi_dev_s *dev,
+void  lpc43_ssp0select(struct spi_dev_s *dev,
                        uint32_t devid, bool selected);
-uint8_t lpc43_ssp0status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t lpc43_ssp0status(struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int lpc43_ssp0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int lpc43_ssp0cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_LPC43_SSP1
-void  lpc43_ssp1select(FAR struct spi_dev_s *dev,
+void  lpc43_ssp1select(struct spi_dev_s *dev,
                        uint32_t devid, bool selected);
-uint8_t lpc43_ssp1status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t lpc43_ssp1status(struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int lpc43_ssp1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int lpc43_ssp1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
@@ -145,7 +145,7 @@ int lpc43_ssp1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
  ****************************************************************************/
 
 #if defined(CONFIG_LPC43_SSP0) || defined(CONFIG_LPC43_SSP1)
-void ssp_flush(FAR struct spi_dev_s *dev);
+void ssp_flush(struct spi_dev_s *dev);
 #endif
 
 /****************************************************************************
@@ -170,13 +170,13 @@ void ssp_flush(FAR struct spi_dev_s *dev);
 
 #ifdef CONFIG_SPI_CALLBACK
 #ifdef CONFIG_LPC43_SSP0
-int lpc43_ssp0register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
-                       FAR void *arg);
+int lpc43_ssp0register(struct spi_dev_s *dev, spi_mediachange_t callback,
+                       void *arg);
 #endif
 
 #ifdef CONFIG_LPC43_SSP1
-int lpc43_ssp1register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
-                       FAR void *arg);
+int lpc43_ssp1register(struct spi_dev_s *dev, spi_mediachange_t callback,
+                       void *arg);
 #endif
 #endif
 

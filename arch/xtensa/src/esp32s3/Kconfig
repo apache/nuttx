@@ -14,6 +14,7 @@ choice
 config ARCH_CHIP_ESP32S3WROOM1
 	bool "ESP32-S3-WROOM-1"
 	select ESP32S3_FLASH_4M
+	select ARCH_HAVE_I2CRESET
 	---help---
 		Generic module with an embedded ESP32-S3.
 
@@ -21,12 +22,14 @@ config ARCH_CHIP_ESP32S3WROOM2
 	bool "ESP32-S3-WROOM-2"
 	select ESP32S3_FLASH_16M
 	select ESP32S3_PSRAM_8M
+	select ARCH_HAVE_I2CRESET
 	---help---
 		Generic module with an embedded ESP32-S3.
 
 config ARCH_CHIP_ESP32S3MINI1
 	bool "ESP32-S3-MINI-1"
 	select ESP32S3_FLASH_8M
+	select ARCH_HAVE_I2CRESET
 	---help---
 		Generic module with an embedded ESP32-S3.
 
@@ -55,7 +58,7 @@ config ESP32S3_DEFAULT_CPU_FREQ_MHZ
 	default 160 if ESP32S3_DEFAULT_CPU_FREQ_160
 	default 240 if ESP32S3_DEFAULT_CPU_FREQ_240
 
-menu "Cache config"
+menu "Cache configuration"
 
 choice
 	prompt "Instruction cache size"
@@ -306,9 +309,38 @@ config ESP32S3_TIMER
 	bool
 	default n
 
+config ESP32S3_I2C
+	bool
+	default n
+
+config ESP32S3_SPI
+	bool
+	default n
+
 config ESP32S3_WDT
 	bool
 	default n
+
+config ESP32S3_SPIRAM
+	bool "SPI RAM Support"
+	default n
+
+config ESP32S3_SPI2
+	bool "SPI 2"
+	default n
+	select ESP32S3_SPI
+	select SPI
+
+config ESP32S3_SPI3
+	bool "SPI 3"
+	default n
+	select ESP32S3_SPI
+	select SPI
+
+config ESP32S3_DMA
+	bool "General DMA (GDMA)"
+	default n
+	select ARCH_DMA
 
 config ESP32S3_UART0
 	bool "UART 0"
@@ -329,6 +361,24 @@ config ESP32S3_UART2
 	default n
 	select ESP32S3_UART
 	select UART2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config ESP32S3_I2C0
+	bool "I2C 0"
+	default n
+	select ESP32S3_I2C
+	select I2C
+
+config ESP32S3_I2C1
+	bool "I2C 1"
+	default n
+	select ESP32S3_I2C
+	select I2C
+
+config ESP32S3_USBSERIAL
+	bool "USB-Serial Driver"
+	default n
+	select OTHER_UART_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config ESP32S3_TIMER0
@@ -386,7 +436,221 @@ config ESP32S3_RWDT
 		to have the RTC module reset, please, use the Timers' Module WDTs.
 		They will only reset Main System.
 
+config ESP32S3_RT_TIMER
+	bool "Real-Time Timer"
+	default n
+	---help---
+		Real-Time Timer is relying upon the Systimer 1.
+
 endmenu # ESP32-S3 Peripheral Selection
+
+menu "SPI RAM Configuration"
+	depends on ESP32S3_SPIRAM
+
+choice ESP32S3_SPIRAM_MODE
+	prompt "Mode (QUAD/OCT) of SPI RAM chip"
+	default ESP32S3_SPIRAM_MODE_QUAD
+
+config ESP32S3_SPIRAM_MODE_QUAD
+	bool "Quad Mode PSRAM"
+
+config ESP32S3_SPIRAM_MODE_OCT
+	bool "Octal Mode PSRAM"
+
+endchoice # ESP32S3_SPIRAM_MODE
+
+config ESP32S3_DEFAULT_PSRAM_CLK_IO
+	int "PSRAM CLK pin"
+	default 30
+
+config ESP32S3_DEFAULT_PSRAM_CS_IO
+	int "PSRAM CS pin"
+	default 26
+
+choice ESP32S3_SPIRAM_TYPE
+	prompt "Type of SPI RAM chip in use"
+	default ESP32S3_SPIRAM_TYPE_AUTO
+
+config ESP32S3_SPIRAM_TYPE_AUTO
+	bool "Auto-detect"
+
+config ESP32S3_SPIRAM_TYPE_ESPPSRAM16
+	bool "ESP-PSRAM16 or APS1604"
+
+config ESP32S3_SPIRAM_TYPE_ESPPSRAM32
+	bool "ESP-PSRAM32 or IS25WP032"
+
+config ESP32S3_SPIRAM_TYPE_ESPPSRAM64
+	bool "ESP-PSRAM64, LY68L6400 or APS6408"
+
+endchoice # ESP32S3_SPIRAM_TYPE
+
+config ESP32S3_SPIRAM_SIZE
+	int
+	default -1 if ESP32S3_SPIRAM_TYPE_AUTO
+	default 2097152 if ESP32S3_SPIRAM_TYPE_ESPPSRAM16
+	default 4194304 if ESP32S3_SPIRAM_TYPE_ESPPSRAM32
+	default 8388608 if ESP32S3_SPIRAM_TYPE_ESPPSRAM64
+	default 16777216 if ESP32S3_SPIRAM_TYPE_ESPPSRAM128
+	default 33554432 if ESP32S3_SPIRAM_TYPE_ESPPSRAM256
+	default 0
+
+config ESP32S3_SPIRAM_FETCH_INSTRUCTIONS
+	bool "Cache fetch instructions from SPI RAM"
+	default n
+	---help---
+		If enabled, instruction in flash will be copied into SPIRAM.
+		If ESP32S3_SPIRAM_RODATA is also enabled, you can run the instruction
+		when erasing or programming the flash.
+
+config ESP32S3_SPIRAM_RODATA
+	bool "Cache load read only data from SPI RAM"
+	default n
+	---help---
+		If enabled, rodata in flash will be copied into SPIRAM.
+		If ESP32S3_SPIRAM_FETCH_INSTRUCTIONS is also enabled,
+		you can run the instruction when erasing or programming the
+		flash.
+
+choice ESP32S3_SPIRAM_SPEED
+	prompt "Set RAM clock speed"
+	default ESP32S3_SPIRAM_SPEED_40M
+	---help---
+		Select the speed for the SPI RAM chip.
+
+config ESP32S3_SPIRAM_SPEED_40M
+	bool "40MHz clock speed"
+
+config ESP32S3_SPIRAM_SPEED_80M
+	bool "80MHz clock speed"
+
+config ESP32S3_SPIRAM_SPEED_120M
+	bool "120MHz clock speed"
+
+endchoice # ESP32S3_SPIRAM_SPEED
+
+config ESP32S3_SPIRAM_SPEED
+	int
+	default 120 if ESP32S3_SPIRAM_SPEED_120M
+	default 80 if ESP32S3_SPIRAM_SPEED_80M
+	default 40 if ESP32S3_SPIRAM_SPEED_40M
+
+config ESP32S3_SPIRAM_BOOT_INIT
+	bool "Initialize SPI RAM during startup"
+	depends on ESP32S3_SPIRAM
+	default y
+	---help---
+		If this is enabled, the SPI RAM will be enabled during initial
+		boot. Unless you have specific requirements, you'll want to leave
+		this enabled so memory allocated during boot-up can also be
+		placed in SPI RAM.
+
+config ESP32S3_SPIRAM_IGNORE_NOTFOUND
+	bool "Ignore PSRAM when not found"
+	default n
+	depends on ESP32S3_SPIRAM_BOOT_INIT && !BOOT_SDRAM_DATA
+	---help---
+		Normally, if psram initialization is enabled during compile time
+		but not found at runtime, it is seen as an error making the CPU
+		panic. If this is enabled, booting will complete but no PSRAM
+		will be available.
+
+endmenu # SPI RAM Configuration
+
+config ESP32S3_GPIO_IRQ
+	bool "GPIO pin interrupts"
+	default n
+	---help---
+		Enable support for interrupting GPIO pins.
+
+menu "SPI configuration"
+	depends on ESP32S3_SPI
+
+config ESP32S3_SPI_SWCS
+	bool "SPI software CS"
+	default n
+	---help---
+		Use SPI software CS.
+
+config ESP32S3_SPI_UDCS
+	bool "User defined CS"
+	default n
+	depends on ESP32S3_SPI_SWCS
+	---help---
+		Use user-defined CS.
+
+if ESP32S3_SPI2
+
+config ESP32S3_SPI2_DMA
+	bool "SPI2 use GDMA"
+	default n
+	depends on ESP32S3_DMA
+	---help---
+		Enable support for transfers using the GDMA engine.
+
+config ESP32S3_SPI2_DMADESC_NUM
+	int "SPI2 Master GDMA maximum number of descriptors"
+	default 2
+	depends on ESP32S3_SPI2_DMA
+	---help---
+		Configure the maximum number of out-link/in-link descriptors to
+		be chained for a GDMA transfer.
+
+config ESP32S3_SPI2_DMATHRESHOLD
+	int "SPI2 Master GDMA threshold"
+	default 64
+	depends on ESP32S3_SPI2_DMA
+	---help---
+		When SPI GDMA is enabled, GDMA transfers whose size are below the
+		defined threshold will be performed by polling logic.
+
+config ESP32S3_SPI2_CSPIN
+	int "SPI2 CS Pin"
+	default 10
+	range 0 48
+
+config ESP32S3_SPI2_CLKPIN
+	int "SPI2 CLK Pin"
+	default 12
+	range 0 48
+
+config ESP32S3_SPI2_MOSIPIN
+	int "SPI2 MOSI Pin"
+	default 11
+	range 0 48
+
+config ESP32S3_SPI2_MISOPIN
+	int "SPI2 MISO Pin"
+	default 13
+	range 0 48
+
+endif # ESP32S3_SPI2
+
+if ESP32S3_SPI3
+
+config ESP32S3_SPI3_CSPIN
+	int "SPI3 CS Pin"
+	default 10
+	range 0 48
+
+config ESP32S3_SPI3_CLKPIN
+	int "SPI3 CLK Pin"
+	default 6
+	range 0 48
+
+config ESP32S3_SPI3_MOSIPIN
+	int "SPI3 MOSI Pin"
+	default 7
+	range 0 48
+
+config ESP32S3_SPI3_MISOPIN
+	int "SPI3 MISO Pin"
+	default 2
+	range 0 48
+
+endif # ESP32S3_SPI3
+
+endmenu # SPI configuration
 
 menu "UART Configuration"
 	depends on ESP32S3_UART
@@ -471,6 +735,47 @@ endif # ESP32S3_UART2
 
 endmenu # UART Configuration
 
+menu "I2C Configuration"
+	depends on ESP32S3_I2C
+
+if ESP32S3_I2C0
+
+config ESP32S3_I2C0_SCLPIN
+	int "I2C0 SCL Pin"
+	default 2
+	range 0 48
+
+config ESP32S3_I2C0_SDAPIN
+	int "I2C0 SDA Pin"
+	default 1
+	range 0 48
+
+endif # ESP32S3_I2C0
+
+if ESP32S3_I2C1
+
+config ESP32S3_I2C1_SCLPIN
+	int "I2C1 SCL Pin"
+	default 5
+	range 0 48
+
+config ESP32S3_I2C1_SDAPIN
+	int "I2C1 SDA Pin"
+	default 4
+	range 0 48
+
+endif # ESP32S3_I2C1
+
+config ESP32S3_I2CTIMEOSEC
+	int "Timeout seconds"
+	default 0
+
+config ESP32S3_I2CTIMEOMS
+	int "Timeout milliseconds"
+	default 500
+
+endmenu # I2C Configuration
+
 menu "Timer/Counter Configuration"
 	depends on ESP32S3_TIMER
 
@@ -489,6 +794,66 @@ config ESP32S3_FREERUN
 		support a free-running timer.
 
 endmenu # Timer/Counter Configuration
+
+menu "Real-Time Timer Configuration"
+	depends on ESP32S3_RT_TIMER
+
+config ESP32S3_RT_TIMER_TASK_NAME
+	string "Real-Time Timer task name"
+	default "rt_timer"
+
+config ESP32S3_RT_TIMER_TASK_PRIORITY
+	int "Real-Time Timer task priority"
+	default 223
+	---help---
+		Priority level of the RT Timer task.
+		Must be lower than the SCHED_HPWORKPRIORITY.
+
+config ESP32S3_RT_TIMER_TASK_STACK_SIZE
+	int "Real-Time Timer task stack size"
+	default 2048
+
+endmenu # Real-Time Timer Configuration
+
+config ESP32S3_TICKLESS
+	bool "Enable Tickless OS"
+	default n
+	select ARCH_HAVE_TICKLESS
+	select SCHED_TICKLESS
+
+config ESP32S3_SPIFLASH
+	bool "SPI Flash MTD Partition"
+	default n
+
+menu "SPI Flash configuration"
+	depends on ESP32S3_SPIFLASH
+
+comment "General storage MTD configuration"
+
+config ESP32S3_MTD
+	bool "MTD driver"
+	default y
+	select MTD
+	select MTD_BYTE_WRITE
+	select MTD_PARTITION
+	---help---
+		Initialize an MTD driver for the ESP32-S3 SPI Flash, which will
+		add an entry at /dev for application access from userspace.
+
+config ESP32S3_SPIFLASH_MTD_BLKSIZE
+	int "Storage MTD block size"
+	default 256
+	depends on ESP32S3_MTD
+
+config ESP32S3_STORAGE_MTD_DEBUG
+	bool "Storage MTD Debug"
+	default n
+	depends on ESP32S3_MTD && DEBUG_FS_INFO
+	---help---
+		If this option is enabled, Storage MTD driver read and write functions
+		will output input parameters and return values (if applicable).
+
+endmenu # SPI Flash configuration
 
 menu "Application Image Configuration"
 

@@ -115,7 +115,7 @@ int clock_timekeeping_get_wall_time(FAR struct timespec *ts)
  * Name: clock_timekeeping_set_wall_time
  ****************************************************************************/
 
-int clock_timekeeping_set_wall_time(FAR struct timespec *ts)
+int clock_timekeeping_set_wall_time(FAR const struct timespec *ts)
 {
   irqstate_t flags;
   uint64_t counter;

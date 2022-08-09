@@ -87,22 +87,22 @@ struct nrf52_i2c_priv_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static inline void nrf52_i2c_putreg(FAR struct nrf52_i2c_priv_s *priv,
+static inline void nrf52_i2c_putreg(struct nrf52_i2c_priv_s *priv,
                                     uint32_t offset,
                                     uint32_t value);
-static inline uint32_t nrf52_i2c_getreg(FAR struct nrf52_i2c_priv_s *priv,
+static inline uint32_t nrf52_i2c_getreg(struct nrf52_i2c_priv_s *priv,
                                         uint32_t offset);
-static int nrf52_i2c_transfer(FAR struct i2c_master_s *dev,
-                              FAR struct i2c_msg_s *msgs,
+static int nrf52_i2c_transfer(struct i2c_master_s *dev,
+                              struct i2c_msg_s *msgs,
                               int count);
 #ifdef CONFIG_I2C_RESET
-static int nrf52_i2c_reset(FAR struct i2c_master_s *dev);
+static int nrf52_i2c_reset(struct i2c_master_s *dev);
 #endif
 #ifndef CONFIG_I2C_POLLED
-static int nrf52_i2c_isr(int irq, void *context, FAR void *arg);
+static int nrf52_i2c_isr(int irq, void *context, void *arg);
 #endif
-static int nrf52_i2c_deinit(FAR struct nrf52_i2c_priv_s *priv);
-static int nrf52_i2c_init(FAR struct nrf52_i2c_priv_s *priv);
+static int nrf52_i2c_deinit(struct nrf52_i2c_priv_s *priv);
+static int nrf52_i2c_init(struct nrf52_i2c_priv_s *priv);
 
 /****************************************************************************
  * Private Data
@@ -177,7 +177,7 @@ static struct nrf52_i2c_priv_s g_nrf52_i2c1_priv =
  *
  ****************************************************************************/
 
-static inline void nrf52_i2c_putreg(FAR struct nrf52_i2c_priv_s *priv,
+static inline void nrf52_i2c_putreg(struct nrf52_i2c_priv_s *priv,
                                     uint32_t offset,
                                     uint32_t value)
 {
@@ -192,7 +192,7 @@ static inline void nrf52_i2c_putreg(FAR struct nrf52_i2c_priv_s *priv,
  *
  ****************************************************************************/
 
-static inline uint32_t nrf52_i2c_getreg(FAR struct nrf52_i2c_priv_s *priv,
+static inline uint32_t nrf52_i2c_getreg(struct nrf52_i2c_priv_s *priv,
                                         uint32_t offset)
 {
   return getreg32(priv->base + offset);
@@ -206,11 +206,11 @@ static inline uint32_t nrf52_i2c_getreg(FAR struct nrf52_i2c_priv_s *priv,
  *
  ****************************************************************************/
 
-static int nrf52_i2c_transfer(FAR struct i2c_master_s *dev,
-                              FAR struct i2c_msg_s *msgs,
+static int nrf52_i2c_transfer(struct i2c_master_s *dev,
+                              struct i2c_msg_s *msgs,
                               int count)
 {
-  FAR struct nrf52_i2c_priv_s *priv = (FAR struct nrf52_i2c_priv_s *)dev;
+  struct nrf52_i2c_priv_s *priv = (struct nrf52_i2c_priv_s *)dev;
   uint32_t regval = 0;
   int      ret = OK;
 #ifndef CONFIG_NRF52_I2C_MASTER_DISABLE_NOSTART
@@ -354,7 +354,7 @@ static int nrf52_i2c_transfer(FAR struct i2c_master_s *dev,
                 {
                   /* Not supported */
 
-                  DEBUGASSERT(0);
+                  DEBUGPANIC();
                 }
             }
 #endif
@@ -535,7 +535,7 @@ errout:
  ****************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
-static int nrf52_i2c_reset(FAR struct i2c_master_s *dev)
+static int nrf52_i2c_reset(struct i2c_master_s *dev)
 {
 #error not implemented
 }
@@ -550,9 +550,9 @@ static int nrf52_i2c_reset(FAR struct i2c_master_s *dev)
  ****************************************************************************/
 
 #ifndef CONFIG_I2C_POLLED
-static int nrf52_i2c_isr(int irq, void *context, FAR void *arg)
+static int nrf52_i2c_isr(int irq, void *context, void *arg)
 {
-  FAR struct nrf52_i2c_priv_s *priv = (FAR struct nrf52_i2c_priv_s *)arg;
+  struct nrf52_i2c_priv_s *priv = (struct nrf52_i2c_priv_s *)arg;
 
   /* Reset I2C status */
 
@@ -637,7 +637,7 @@ static int nrf52_i2c_isr(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static int nrf52_i2c_init(FAR struct nrf52_i2c_priv_s *priv)
+static int nrf52_i2c_init(struct nrf52_i2c_priv_s *priv)
 {
   uint32_t regval = 0;
   int pin         = 0;
@@ -702,7 +702,7 @@ static int nrf52_i2c_init(FAR struct nrf52_i2c_priv_s *priv)
  *
  ****************************************************************************/
 
-static int nrf52_i2c_sem_init(FAR struct nrf52_i2c_priv_s *priv)
+static int nrf52_i2c_sem_init(struct nrf52_i2c_priv_s *priv)
 {
   /* Initialize semaphores */
 
@@ -728,7 +728,7 @@ static int nrf52_i2c_sem_init(FAR struct nrf52_i2c_priv_s *priv)
  *
  ****************************************************************************/
 
-static int nrf52_i2c_sem_destroy(FAR struct nrf52_i2c_priv_s *priv)
+static int nrf52_i2c_sem_destroy(struct nrf52_i2c_priv_s *priv)
 {
   /* Release unused resources */
 
@@ -748,7 +748,7 @@ static int nrf52_i2c_sem_destroy(FAR struct nrf52_i2c_priv_s *priv)
  *
  ****************************************************************************/
 
-static int nrf52_i2c_deinit(FAR struct nrf52_i2c_priv_s *priv)
+static int nrf52_i2c_deinit(struct nrf52_i2c_priv_s *priv)
 {
   /* Disable TWI interface */
 
@@ -786,9 +786,9 @@ static int nrf52_i2c_deinit(FAR struct nrf52_i2c_priv_s *priv)
  *
  ****************************************************************************/
 
-FAR struct i2c_master_s *nrf52_i2cbus_initialize(int port)
+struct i2c_master_s *nrf52_i2cbus_initialize(int port)
 {
-  FAR struct nrf52_i2c_priv_s *priv = NULL;
+  struct nrf52_i2c_priv_s *priv = NULL;
   irqstate_t flags;
 
   i2cinfo("I2C INITIALIZE port=%d\n", port);
@@ -800,7 +800,7 @@ FAR struct i2c_master_s *nrf52_i2cbus_initialize(int port)
 #ifdef CONFIG_NRF52_I2C0_MASTER
       case 0:
         {
-          priv = (FAR struct nrf52_i2c_priv_s *)&g_nrf52_i2c0_priv;
+          priv = (struct nrf52_i2c_priv_s *)&g_nrf52_i2c0_priv;
           break;
         }
 #endif
@@ -808,7 +808,7 @@ FAR struct i2c_master_s *nrf52_i2cbus_initialize(int port)
 #ifdef CONFIG_NRF52_I2C1_MASTER
       case 1:
         {
-          priv = (FAR struct nrf52_i2c_priv_s *)&g_nrf52_i2c1_priv;
+          priv = (struct nrf52_i2c_priv_s *)&g_nrf52_i2c1_priv;
           break;
         }
 #endif
@@ -849,9 +849,9 @@ FAR struct i2c_master_s *nrf52_i2cbus_initialize(int port)
  *
  ****************************************************************************/
 
-int nrf52_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
+int nrf52_i2cbus_uninitialize(struct i2c_master_s *dev)
 {
-  FAR struct nrf52_i2c_priv_s *priv = (struct nrf52_i2c_priv_s *)dev;
+  struct nrf52_i2c_priv_s *priv = (struct nrf52_i2c_priv_s *)dev;
   irqstate_t flags;
 
   DEBUGASSERT(dev);

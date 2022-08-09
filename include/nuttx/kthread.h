@@ -27,7 +27,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sched.h>
+#include <nuttx/sched.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -48,47 +48,6 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Name: nxtask_create
- *
- * Description:
- *   This function creates and activates a new user task with a specified
- *   priority and returns its system-assigned ID.
- *
- *   The entry address entry is the address of the "main" function of the
- *   task.  This function will be called once the C environment has been
- *   set up.  The specified function will be called with four arguments.
- *   Should the specified routine return, a call to exit() will
- *   automatically be made.
- *
- *   Note that four (and only four) arguments must be passed for the spawned
- *   functions.
- *
- *   nxtask_create() is identical to the function task_create(), differing
- *   only in its return value:  This function does not modify the errno
- *   variable.  This is a non-standard, internal OS function and is not
- *   intended for use by application logic.  Applications should use
- *   task_create().
- *
- * Input Parameters:
- *   name       - Name of the new task
- *   priority   - Priority of the new task
- *   stack_size - size (in bytes) of the stack needed
- *   entry      - Entry point of a new task
- *   arg        - A pointer to an array of input parameters.  The array
- *                should be terminated with a NULL argv[] value. If no
- *                parameters are required, argv may be NULL.
- *
- * Returned Value:
- *   Returns the positive, non-zero process ID of the new task or a negated
- *   errno value to indicate the nature of any failure.  If memory is
- *   insufficient or the task cannot be created -ENOMEM will be returned.
- *
- ****************************************************************************/
-
-int nxtask_create(FAR const char *name, int priority,
-                  int stack_size, main_t entry, FAR char * const argv[]);
 
 /****************************************************************************
  * Name: kthread_create_with_stack

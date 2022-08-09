@@ -110,8 +110,7 @@ config SYSLOG_TIMESTAMP_REALTIME
 	depends on SYSLOG_TIMESTAMP
 	---help---
 		Use wall-clock (CLOCK_REALTIME) for timestamp.  By default,
-		CLOCK_MONOTONIC, if enabled, will be used or the system timer
-		is not.
+		CLOCK_MONOTONIC will be used.
 
 config SYSLOG_TIMESTAMP_FORMATTED
 	bool "Formatted syslog time"
@@ -131,7 +130,7 @@ config SYSLOG_TIMESTAMP_LOCALTIME
 
 config SYSLOG_TIMESTAMP_FORMAT
 	string "Time format"
-	default "%e/%m/%y %H:%M:%S"
+	default "%d/%m/%y %H:%M:%S"
 	depends on SYSLOG_TIMESTAMP_FORMATTED
 	---help---
 		Formatter string for syslog timestamp printing.
@@ -139,7 +138,8 @@ config SYSLOG_TIMESTAMP_FORMAT
 
 config SYSLOG_TIMESTAMP_FORMAT_MICROSECOND
 	bool "Append microseconds after seconds"
-	default SYSLOG_TIMESTAMP_FORMAT = "%e/%m/%y %H:%M:%S"
+	default y
+	depends on SYSLOG_TIMESTAMP_FORMAT = "%d/%m/%y %H:%M:%S"
 
 config SYSLOG_TIMESTAMP_BUFFER
 	int "Formatted timestamp buffer size"
@@ -188,7 +188,8 @@ comment "SYSLOG channels"
 
 config SYSLOG_DEVPATH
 	string "System log device"
-	default "/dev/ttyS1"
+	default "/dev/kmsg" if CONFIG_RAMLOG_SYSLOG
+	default "/dev/ttyS1" if !CONFIG_RAMLOG_SYSLOG
 	---help---
 		The full path to the system logging device.  For the RAMLOG SYSLOG device,
 		this is normally "/dev/kmsg".  For character SYSLOG devices, it should be

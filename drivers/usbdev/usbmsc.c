@@ -1514,7 +1514,12 @@ int usbmsc_bindlun(FAR void *handle, FAR const char *drvrpath,
 
   if (!priv->iobuffer)
     {
+#ifdef CONFIG_USBMSC_WRMULTIPLE
+      priv->iobuffer = (FAR uint8_t *)kmm_malloc(geo.geo_sectorsize *
+                                                 CONFIG_USBMSC_NWRREQS);
+#else
       priv->iobuffer = (FAR uint8_t *)kmm_malloc(geo.geo_sectorsize);
+#endif
       if (!priv->iobuffer)
         {
           usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_ALLOCIOBUFFER),
@@ -1522,7 +1527,11 @@ int usbmsc_bindlun(FAR void *handle, FAR const char *drvrpath,
           return -ENOMEM;
         }
 
+#ifdef CONFIG_USBMSC_WRMULTIPLE
+      priv->iosize = geo.geo_sectorsize * CONFIG_USBMSC_NWRREQS;
+#else
       priv->iosize = geo.geo_sectorsize;
+#endif
     }
   else if (priv->iosize < geo.geo_sectorsize)
     {

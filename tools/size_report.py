@@ -292,7 +292,7 @@ def do_simple_name_matching(elf, symbol_dict, processed):
                 # an actual address
                 elif "DW_AT_low_pc" in die.attributes:
                     # DW_AT_low_pc == 0 is a weak function
-                    # which has been overriden
+                    # which has been overridden
                     if die.attributes["DW_AT_low_pc"].value != 0:
                         sym_name = die.get_full_path()
 

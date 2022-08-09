@@ -236,7 +236,7 @@ static uint32_t lpc54_emc_modeoffset(uint32_t addrmap)
  *
  ****************************************************************************/
 
-void lpc54_emc_initialize(FAR const struct emc_config_s *config)
+void lpc54_emc_initialize(const struct emc_config_s *config)
 {
   uint32_t regval;
 
@@ -290,11 +290,11 @@ void lpc54_emc_initialize(FAR const struct emc_config_s *config)
 
 #ifdef CONFIG_LPC54_EMC_DYNAMIC
 void lpc54_emc_sdram_initialize(
-                        FAR const struct emc_dynamic_timing_config_s *timing,
-                        FAR const struct emc_dynamic_chip_config_s *chconfig,
+                        const struct emc_dynamic_timing_config_s *timing,
+                        const struct emc_dynamic_chip_config_s *chconfig,
                         unsigned int nchips)
 {
-  FAR const struct emc_dynamic_chip_config_s *config;
+  const struct emc_dynamic_chip_config_s *config;
   uintptr_t addr;
   uint32_t regval;
   uint32_t offset;
@@ -491,11 +491,11 @@ void lpc54_emc_sdram_initialize(
  ****************************************************************************/
 
 #ifdef CONFIG_LPC54_EMC_STATIC
-void lpc54_emc_sram_initialize(FAR uint32_t *extwait,
-                    FAR const struct emc_static_chip_config_s *statconfig,
+void lpc54_emc_sram_initialize(uint32_t *extwait,
+                    const struct emc_static_chip_config_s *statconfig,
                      uint32_t nchips)
 {
-  FAR const struct emc_static_chip_config_s *config;
+  const struct emc_static_chip_config_s *config;
   uint32_t regval;
   unsigned int i;
 

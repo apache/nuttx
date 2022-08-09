@@ -69,7 +69,7 @@
  *
  ****************************************************************************/
 
-void sam_udp_suspend(FAR struct usbdev_s *dev, bool resume)
+void sam_udp_suspend(struct usbdev_s *dev, bool resume)
 {
   uinfo("resume: %d\n", resume);
 }

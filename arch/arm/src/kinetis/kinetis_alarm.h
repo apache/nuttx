@@ -39,7 +39,7 @@
 
 /* The form of an alarm callback */
 
-typedef CODE void (*alarmcb_t)(void);
+typedef void (*alarmcb_t)(void);
 
 /* These features are in KinetisK 1st generation
  * Time Alarm Interrupt
@@ -54,8 +54,8 @@ enum alm_id_e
 {
   /* Used for indexing - must be sequential */
 
-  RTC_ALARMA = 0,     /* RTC ALARM A */
-  RTC_ALARMM,         /* FUT: RTC Monotonic */
+  RTC_ALARMA = 0,    /* RTC ALARM A */
+  RTC_ALARMM,        /* FUT: RTC Monotonic */
   RTC_ALARM_LAST
 };
 
@@ -63,10 +63,10 @@ enum alm_id_e
 
 struct alm_setalarm_s
 {
-  int as_id;          /* enum alm_id_e */
-  struct tm as_time;  /* Alarm expiration time */
-  alarmcb_t as_cb;    /* Callback (if non-NULL) */
-  FAR void *as_arg;   /* Argument for callback */
+  int as_id;         /* enum alm_id_e */
+  struct tm as_time; /* Alarm expiration time */
+  alarmcb_t as_cb;   /* Callback (if non-NULL) */
+  void *as_arg;      /* Argument for callback */
 };
 
 /****************************************************************************
@@ -97,7 +97,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int kinetis_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback);
+int kinetis_rtc_setalarm(const struct timespec *tp, alarmcb_t callback);
 
 /****************************************************************************
  * Name: kinetis_rtc_rdalarm
@@ -113,7 +113,7 @@ int kinetis_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback);
  *
  ****************************************************************************/
 
-int kinetis_rtc_rdalarm(FAR struct timespec *tp);
+int kinetis_rtc_rdalarm(struct timespec *tp);
 
 /****************************************************************************
  * Name: kinetis_rtc_cancelalarm
@@ -153,7 +153,7 @@ int kinetis_rtc_cancelalarm(void);
  *
  ****************************************************************************/
 
-FAR struct rtc_lowerhalf_s *kinetis_rtc_lowerhalf(void);
+struct rtc_lowerhalf_s *kinetis_rtc_lowerhalf(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

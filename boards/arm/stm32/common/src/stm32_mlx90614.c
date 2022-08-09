@@ -61,7 +61,7 @@
 
 int board_mlx90614_initialize(int devno, int busno)
 {
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
   char devpath[12];
   int ret;
 
@@ -76,13 +76,13 @@ int board_mlx90614_initialize(int devno, int busno)
       return -ENODEV;
     }
 
-  /* Then register the light sensor */
+  /* Then register the Infrared Thermometer sensor */
 
   snprintf(devpath, 12, "/dev/therm%d", devno);
   ret = mlx90614_register(devpath, i2c, MLX90614_ADDRESS);
   if (ret < 0)
     {
-      snerr("ERROR: Error registering BM180\n");
+      snerr("ERROR: Error registering MLX90614\n");
     }
 
   return ret;

@@ -381,7 +381,7 @@ static int rpmsgfs_read_handler(FAR struct rpmsg_endpoint *ept,
   while (read < msg->count)
     {
       rsp = rpmsg_get_tx_payload_buffer(ept, &space, true);
-      if (!rsp)
+      if (rsp == NULL)
         {
           return -ENOMEM;
         }

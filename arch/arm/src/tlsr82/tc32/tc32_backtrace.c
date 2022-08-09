@@ -112,7 +112,7 @@ static int getlroffset(uint8_t *lr)
  *   pc    - Program counter address
  *
  * Returned Value:
- *   A boolean value: true the counter is vaild
+ *   A boolean value: true the counter is valid
  *
  ****************************************************************************/
 

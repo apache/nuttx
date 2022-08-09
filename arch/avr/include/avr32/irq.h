@@ -156,6 +156,21 @@ static inline uint32_t avr32_evba(void)
   return evba;
 }
 
+/* Return the current value of the stack pointer */
+
+static inline uint32_t up_getsp(void)
+{
+  uint32_t retval;
+  __asm__ __volatile__
+    (
+      "mov\t%0,sp\n\t"
+      : "=r" (retval)
+      :
+    );
+
+  return retval;
+}
+
 /* Return the current interrupt enable state and disable all interrupts */
 
 static inline irqstate_t up_irq_save(void)

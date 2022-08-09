@@ -79,7 +79,7 @@ config SAMA5D27_SDMMC0_MOUNT_FSTYPE
 	default "vfat"
 	depends on SAMA5_SDMMC0
 
-config SAMA5_SDMMC1_WIDTH_D1_D8
+config SAMA5_SDMMC0_WIDTH_D1_D8
 	bool "SDMMC0 data bus width 8 bits"
 	default y
 	depends on SAMA5_SDMMC0
@@ -126,9 +126,5 @@ config SAMA5_SDMMC1_WIDTH_D1_D4
 	bool "SDMMC1 data bus width 4 bits"
 	default y
 	depends on SAMA5_SDMMC1
-
-config SAMA5_SYSTEMRESET
-	bool "Enable system reset - this will enable the nsh reboot command"
-	select BOARDCTL_RESET
 
 endif # ARCH_BOARD_SAMA5D2_XULT

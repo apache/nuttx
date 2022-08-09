@@ -76,7 +76,7 @@ static struct sam_hsmci_state_s g_hsmci;
  *
  ****************************************************************************/
 
-static int sam_hsmci_cardetect(int irq, void *regs, FAR void *arg)
+static int sam_hsmci_cardetect(int irq, void *regs, void *arg)
 {
   bool inserted;
 

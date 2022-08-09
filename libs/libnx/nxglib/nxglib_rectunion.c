@@ -34,7 +34,7 @@
  * Name: nxgl_rectunion
  *
  * Description:
- *   Given two rectanges, src1 and src2, return the larger rectangle that
+ *   Given two rectangles, src1 and src2, return the larger rectangle that
  *   contains both, dest.
  *
  ****************************************************************************/

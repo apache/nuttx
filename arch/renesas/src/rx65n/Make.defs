@@ -22,7 +22,7 @@ HEAD_ASRC  = rx65n_head.S
 
 CMN_CSRCS  = up_allocateheap.c up_assert.c up_blocktask.c
 CMN_CSRCS += up_createstack.c up_doirq.c up_exit.c up_idle.c up_initialize.c
-CMN_CSRCS += up_lowputs.c up_mdelay.c up_puts.c
+CMN_CSRCS += up_lowputs.c up_mdelay.c up_nputs.c
 CMN_CSRCS += up_releasepending.c up_releasestack.c up_reprioritizertr.c
 CMN_CSRCS += up_stackframe.c up_udelay.c up_unblocktask.c up_usestack.c
 

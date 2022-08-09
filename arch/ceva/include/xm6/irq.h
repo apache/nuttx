@@ -221,6 +221,15 @@ static inline void setmoda(uint32_t moda)
   __asm__ __volatile__("nop #0x04\nnop\nmovp %0.ui, moda.ui" : : "r"(moda));
 }
 
+/* Return the current value of the stack pointer */
+
+static inline uint32_t up_getsp(void)
+{
+  uint32_t sp;
+  __asm__ __volatile__("mov sp.ui, %0.ui" : "=r"(sp));
+  return sp;
+}
+
 static inline void up_irq_disable(void)
 {
   setmoda(REG_MODA_DISABLE);
@@ -241,17 +250,6 @@ static inline void up_irq_enable(void)
 static inline void up_irq_restore(irqstate_t flags)
 {
   setmoda(flags);
-}
-
-/****************************************************************************
- * Name: up_getsp
- ****************************************************************************/
-
-static inline uint32_t up_getsp(void)
-{
-  uint32_t sp;
-  __asm__ __volatile__("mov sp.ui, %0.ui" : "=r"(sp));
-  return sp;
 }
 
 #endif /* __ASSEMBLY__ */

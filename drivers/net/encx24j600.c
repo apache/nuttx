@@ -158,6 +158,10 @@
 
 #define ENC_NTXDESCR ((PKTMEM_RX_START - PKTMEM_START) / PKTMEM_ALIGNED_BUFSIZE)
 
+/* Packet buffer size */
+
+#define PKTBUF_SIZE (MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE)
+
 /* This is a helper pointer for accessing the contents of Ethernet header */
 
 #define BUF ((FAR struct eth_hdr_s *)priv->dev.d_buf)
@@ -253,7 +257,8 @@ struct enc_driver_s
 
 /* A single packet buffer is used */
 
-static uint8_t g_pktbuf[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
+static uint16_t g_pktbuf[CONFIG_ENCX24J600_NINTERFACES]
+                        [(PKTBUF_SIZE + 1) / 2];
 
 /* Driver status structure */
 
@@ -1760,7 +1765,7 @@ static void enc_rxabtif(FAR struct enc_driver_s *priv)
       descr = (FAR struct enc_descr_s *)sq_next(descr);
     }
 
-  DEBUGASSERT(false);
+  DEBUGPANIC();
 #endif
 
   descr = (FAR struct enc_descr_s *)sq_peek(&priv->rxqueue);
@@ -2711,17 +2716,17 @@ int enc_initialize(FAR struct spi_dev_s *spi,
   memset(g_encx24j600, 0,
          CONFIG_ENCX24J600_NINTERFACES * sizeof(struct enc_driver_s));
 
-  priv->dev.d_buf     = g_pktbuf;     /* Single packet buffer */
-  priv->dev.d_ifup    = enc_ifup;     /* I/F up (new IP address) callback */
-  priv->dev.d_ifdown  = enc_ifdown;   /* I/F down callback */
-  priv->dev.d_txavail = enc_txavail;  /* New TX data callback */
+  priv->dev.d_buf     = (FAR uint8_t *)g_pktbuf[devno]; /* Single packet buffer */
+  priv->dev.d_ifup    = enc_ifup;                       /* I/F up (new IP address) callback */
+  priv->dev.d_ifdown  = enc_ifdown;                     /* I/F down callback */
+  priv->dev.d_txavail = enc_txavail;                    /* New TX data callback */
 #ifdef CONFIG_NET_MCASTGROUP
-  priv->dev.d_addmac  = enc_addmac;   /* Add multicast MAC address */
-  priv->dev.d_rmmac   = enc_rmmac;    /* Remove multicast MAC address */
+  priv->dev.d_addmac  = enc_addmac;                     /* Add multicast MAC address */
+  priv->dev.d_rmmac   = enc_rmmac;                      /* Remove multicast MAC address */
 #endif
-  priv->dev.d_private = priv;         /* Used to recover private state from dev */
-  priv->spi           = spi;          /* Save the SPI instance */
-  priv->lower         = lower;        /* Save the low-level MCU interface */
+  priv->dev.d_private = priv;                           /* Used to recover private state from dev */
+  priv->spi           = spi;                            /* Save the SPI instance */
+  priv->lower         = lower;                          /* Save the low-level MCU interface */
 
   /* The interface should be in the down state.  However, this function is
    * called too early in initialization to perform the ENCX24J600 reset in

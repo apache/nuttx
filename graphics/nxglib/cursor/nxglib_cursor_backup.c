@@ -68,7 +68,7 @@ void NXGL_FUNCNAME(nxglib_cursor_backup, NXGLIB_SUFFIX)
   FAR uint8_t *fbmem;
   FAR const uint8_t *sline;
   FAR uint8_t *dline;
-  FAR const FAR NXGL_PIXEL_T *src;
+  FAR const NXGL_PIXEL_T *src;
   FAR FAR NXGL_PIXEL_T *dest;
   nxgl_coord_t width;
   nxgl_coord_t height;

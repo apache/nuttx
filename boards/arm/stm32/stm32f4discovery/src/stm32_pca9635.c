@@ -62,7 +62,7 @@
 
 int stm32_pca9635_initialize(void)
 {
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
   int ret;
 
   /* Get the I2C driver that interfaces with the pca9635

@@ -56,7 +56,7 @@ struct viewtool_ft80xlower_s
   /* Extensions for the viewtool board */
 
   xcpt_t handler;
-  FAR void *arg;
+  void *arg;
 };
 
 /****************************************************************************
@@ -79,19 +79,19 @@ struct viewtool_ft80xlower_s
  *   destroy - The driver has been unlinked. Cleanup as necessary.
  */
 
-static int  ft80x_attach(FAR const struct ft80x_config_s *lower, xcpt_t isr,
-                         FAR void *arg);
-static void ft80x_enable(FAR const struct ft80x_config_s *lower,
+static int  ft80x_attach(const struct ft80x_config_s *lower, xcpt_t isr,
+                         void *arg);
+static void ft80x_enable(const struct ft80x_config_s *lower,
                          bool enable);
-static void ft80x_clear(FAR const struct ft80x_config_s *lower);
+static void ft80x_clear(const struct ft80x_config_s *lower);
 
-static void ft80x_pwrdown(FAR const struct ft80x_config_s *lower,
+static void ft80x_pwrdown(const struct ft80x_config_s *lower,
                           bool pwrdown);
 #ifdef CONFIG_LCD_FT80X_AUDIO_MCUSHUTDOWN
-static void ft80x_audio(FAR const struct ft80x_config_s *lower, bool enable);
+static void ft80x_audio(const struct ft80x_config_s *lower, bool enable);
 #endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static void ft80x_destroy(FAR const struct ft80x_config_s *lower);
+static void ft80x_destroy(const struct ft80x_config_s *lower);
 #endif
 
 /****************************************************************************
@@ -150,11 +150,11 @@ static struct viewtool_ft80xlower_s g_ft80xlower =
  *
  ****************************************************************************/
 
-static int ft80x_attach(FAR const struct ft80x_config_s *lower, xcpt_t isr,
-                        FAR void *arg)
+static int ft80x_attach(const struct ft80x_config_s *lower, xcpt_t isr,
+                        void *arg)
 {
-  FAR struct viewtool_ft80xlower_s *priv =
-    (FAR struct viewtool_ft80xlower_s *)lower;
+  struct viewtool_ft80xlower_s *priv =
+    (struct viewtool_ft80xlower_s *)lower;
 
   if (isr)
     {
@@ -177,11 +177,11 @@ static int ft80x_attach(FAR const struct ft80x_config_s *lower, xcpt_t isr,
   return OK;
 }
 
-static void ft80x_enable(FAR const struct ft80x_config_s *lower,
+static void ft80x_enable(const struct ft80x_config_s *lower,
                          bool enable)
 {
-  FAR struct viewtool_ft80xlower_s *priv =
-    (FAR struct viewtool_ft80xlower_s *)lower;
+  struct viewtool_ft80xlower_s *priv =
+    (struct viewtool_ft80xlower_s *)lower;
   irqstate_t flags;
 
   /* Attach and enable, or detach and disable.  Enabling and disabling GPIO
@@ -212,12 +212,12 @@ static void ft80x_enable(FAR const struct ft80x_config_s *lower,
   leave_critical_section(flags);
 }
 
-static void ft80x_clear(FAR const struct ft80x_config_s *lower)
+static void ft80x_clear(const struct ft80x_config_s *lower)
 {
   /* Does nothing */
 }
 
-static void ft80x_pwrdown(FAR const struct ft80x_config_s *lower,
+static void ft80x_pwrdown(const struct ft80x_config_s *lower,
                           bool pwrdown)
 {
   /* Powerdown pin is active low.  Hence, it is really a power up pin. */
@@ -226,14 +226,14 @@ static void ft80x_pwrdown(FAR const struct ft80x_config_s *lower,
 }
 
 #ifdef CONFIG_LCD_FT80X_AUDIO_MCUSHUTDOWN
-static void ft80x_audio(FAR const struct ft80x_config_s *lower, bool enable)
+static void ft80x_audio(const struct ft80x_config_s *lower, bool enable)
 {
   /* Does nothing */
 }
 #endif
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static void ft80x_destroy(FAR const struct ft80x_config_s *lower)
+static void ft80x_destroy(const struct ft80x_config_s *lower)
 {
   /* Does nothing */
 }
@@ -261,7 +261,7 @@ static void ft80x_destroy(FAR const struct ft80x_config_s *lower)
 
 int stm32_ft80x_setup(void)
 {
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
   int ret;
 
   /* Configure the FT80x interrupt pin as an input and powerdown pin as an

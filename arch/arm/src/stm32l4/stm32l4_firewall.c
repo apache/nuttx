@@ -37,7 +37,7 @@
  * Public Functions
  ****************************************************************************/
 
-int stm32l4_firewallsetup(FAR struct stm32l4_firewall_t *setup)
+int stm32l4_firewallsetup(struct stm32l4_firewall_t *setup)
 {
   uint32_t reg;
 

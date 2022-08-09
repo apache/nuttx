@@ -43,7 +43,7 @@
 int board_lt1pa01_initialize(int bus)
 {
   int ret;
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
 
   sninfo("Initializing LT1PA01...\n");
 

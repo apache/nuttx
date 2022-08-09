@@ -27,10 +27,10 @@
  *
  *   void up_timer_initialize(void): Initializes the timer facilities.
  *     Called early in the initialization sequence (by up_initialize()).
- *   int up_timer_gettime(FAR struct timespec *ts):  Returns the current
+ *   int up_timer_gettime(struct timespec *ts):  Returns the current
  *     time from the platform specific time source.
  *   int up_timer_cancel(void):  Cancels the interval timer.
- *   int up_timer_start(FAR const struct timespec *ts): Start (or re-starts)
+ *   int up_timer_start(const struct timespec *ts): Start (or re-starts)
  *     the interval timer.
  *
  * The RTOS will provide the following interfaces for use by the platform-
@@ -139,7 +139,7 @@ static struct stm32l4_tickless_s g_tickless;
  *
  ****************************************************************************/
 
-static void stm32l4_oneshot_handler(FAR void *arg)
+static void stm32l4_oneshot_handler(void *arg)
 {
   tmrinfo("Expired...\n");
   nxsched_timer_expiration();
@@ -235,7 +235,7 @@ void up_timer_initialize(void)
  *   up_timer_initialize() was called).  This function is functionally
  *   equivalent to:
  *
- *      int clock_gettime(clockid_t clockid, FAR struct timespec *ts);
+ *      int clock_gettime(clockid_t clockid, struct timespec *ts);
  *
  *   when clockid is CLOCK_MONOTONIC.
  *
@@ -260,7 +260,7 @@ void up_timer_initialize(void)
  *
  ****************************************************************************/
 
-int up_timer_gettime(FAR struct timespec *ts)
+int up_timer_gettime(struct timespec *ts)
 {
   return stm32l4_freerun_counter(&g_tickless.freerun, ts);
 }
@@ -301,7 +301,7 @@ int up_timer_gettime(FAR struct timespec *ts)
  *
  ****************************************************************************/
 
-int up_timer_cancel(FAR struct timespec *ts)
+int up_timer_cancel(struct timespec *ts)
 {
   return stm32l4_oneshot_cancel(&g_tickless.oneshot, ts);
 }
@@ -331,7 +331,7 @@ int up_timer_cancel(FAR struct timespec *ts)
  *
  ****************************************************************************/
 
-int up_timer_start(FAR const struct timespec *ts)
+int up_timer_start(const struct timespec *ts)
 {
   return stm32l4_oneshot_start(&g_tickless.oneshot,
                                stm32l4_oneshot_handler, NULL, ts);

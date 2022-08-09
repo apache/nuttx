@@ -59,7 +59,7 @@ extern "C"
  ****************************************************************************/
 
 #if defined(CONFIG_SENSORS_BM1383GLV) || defined(CONFIG_SENSORS_BM1383GLV_SCU)
-int board_bm1383glv_initialize(FAR const char *devpath, int bus);
+int board_bm1383glv_initialize(const char *devpath, int bus);
 #endif
 
 #undef EXTERN

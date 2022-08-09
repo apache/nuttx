@@ -53,7 +53,7 @@
 static long host_call(unsigned int nbr, void *parm, size_t size)
 {
 #ifdef CONFIG_ARM_SEMIHOSTING_HOSTFS_CACHE_COHERENCE
-  up_clean_dcache(parm, parm + size);
+  up_clean_dcache((uintptr_t)parm, (uintptr_t)parm + size);
 #endif
 
   long ret = smh_call(nbr, parm);
@@ -124,7 +124,7 @@ int host_open(const char *pathname, int flags, int mode)
   };
 
 #ifdef CONFIG_ARM_SEMIHOSTING_HOSTFS_CACHE_COHERENCE
-  up_clean_dcache(pathname, pathname + open.len + 1);
+  up_clean_dcache((uintptr_t)pathname, (uintptr_t)pathname + open.len + 1);
 #endif
 
   return host_call(HOST_OPEN, &open, sizeof(open));
@@ -153,7 +153,7 @@ ssize_t host_read(int fd, void *buf, size_t count)
   ssize_t ret;
 
 #ifdef CONFIG_ARM_SEMIHOSTING_HOSTFS_CACHE_COHERENCE
-  up_invalidate_dcache(buf, buf + count);
+  up_invalidate_dcache((uintptr_t)buf, (uintptr_t)buf + count);
 #endif
 
   ret = host_call(HOST_READ, &read, sizeof(read));
@@ -178,7 +178,7 @@ ssize_t host_write(int fd, const void *buf, size_t count)
   ssize_t ret;
 
 #ifdef CONFIG_ARM_SEMIHOSTING_HOSTFS_CACHE_COHERENCE
-  up_clean_dcache(buf, buf + count);
+  up_clean_dcache((uintptr_t)buf, (uintptr_t)buf + count);
 #endif
 
   ret = host_call(HOST_WRITE, &write, sizeof(write));
@@ -290,7 +290,7 @@ int host_unlink(const char *pathname)
   };
 
 #ifdef CONFIG_ARM_SEMIHOSTING_HOSTFS_CACHE_COHERENCE
-  up_clean_dcache(pathname, pathname +
+  up_clean_dcache((uintptr_t)pathname, (uintptr_t)pathname +
                   remove.pathname_len + 1);
 #endif
 
@@ -324,8 +324,10 @@ int host_rename(const char *oldpath, const char *newpath)
   };
 
 #ifdef CONFIG_ARM_SEMIHOSTING_HOSTFS_CACHE_COHERENCE
-  up_clean_dcache(oldpath, oldpath + rename.oldpath_len + 1);
-  up_clean_dcache(newpath, newpath + rename.newpath_len + 1);
+  up_clean_dcache((uintptr_t)oldpath,
+                  (uintptr_t)oldpath + rename.oldpath_len + 1);
+  up_clean_dcache((uintptr_t)newpath,
+                  (uintptr_t)newpath + rename.newpath_len + 1);
 #endif
 
   return host_call(HOST_RENAME, &rename, sizeof(rename));

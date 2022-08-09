@@ -93,7 +93,7 @@ void __start(void) noinstrument_function;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _start
+ * Name: __start
  *
  * Description:
  *   This is the reset entry point.

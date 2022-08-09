@@ -27,8 +27,6 @@
 
 #include <syscall.h>
 
-#include "arm_internal.h"
-
 #ifdef CONFIG_ARM_SEMIHOSTING_SYSLOG
 
 /****************************************************************************
@@ -54,15 +52,25 @@ int up_putc(int ch)
 }
 
 /****************************************************************************
- * Name: up_puts
+ * Name: up_nputs
  *
  * Description:
  *   Output a string on the console
  *
  ****************************************************************************/
 
-void up_puts(const char *str)
+void up_nputs(const char *str, size_t len)
 {
-  smh_call(SEMI_SYSLOG_WRITE0, (char *)str);
+  if (len == ~((size_t)0))
+    {
+      smh_call(SEMI_SYSLOG_WRITE0, (char *)str);
+    }
+  else
+    {
+      while (len-- > 0)
+        {
+          up_putc(*str++);
+        }
+    }
 }
 #endif

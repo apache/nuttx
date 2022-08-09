@@ -84,10 +84,10 @@ int board_app_initialize(uintptr_t arg)
 {
   int ret;
 #ifdef CONFIG_STM32_I2C1
-  FAR struct i2c_master_s *i2c1;
+  struct i2c_master_s *i2c1;
 #endif
 #ifdef CONFIG_STM32_I2C2
-  FAR struct i2c_master_s *i2c2;
+  struct i2c_master_s *i2c2;
 #endif
 
 #ifdef CONFIG_STM32_I2C1

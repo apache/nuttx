@@ -771,7 +771,7 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 
   /* Cancel the close work */
 
-  work_cancel(LPWORK, &conn->clswork);
+  work_cancel(LPWORK, &conn->work);
 
   tcp_stop_timer(conn);
 

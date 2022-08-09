@@ -106,12 +106,51 @@ config WS2812
 	---help---
 		Enable support for the Worldsemi WS2812 LED driver which commonly
 		found in LED strips.
-		NOTE: This device is a one wire device and has no CS or RESET
-		line it must have exclusive use of the bus!
+		NOTE: Depening on the board slected this device may require
+		exclusive use of an SPI bus as ws2812 LEDs have no CS or
+		RESET line.
+
+# NOTE: Once the older SPI driver is migrated to the new model
+#       we should remove the "select SPI" in the above config.
+
+config WS2812_NON_SPI_DRIVER
+	bool "Support the new non-SPI WS2812 driver."
+	default n
+	depends on WS2812
+	---help---
+		The original driver used SPI hardware to clock bits to the
+		pixels.  The driver is being re-designed to support other
+		implementations.  Selecting this option builds the new
+		model driver.
+
+config WS2812_LED_COUNT
+	int "Number of ws2812s connected."
+	default 1
+	range 1 65535
+	depends on WS2812
+	---help---
+		The number of ws2812s chained to this port.  Although the 
+		driver allows up to 65,535 ws2812s the practical limit will
+		depend on processor speed and other resources.
+
+config WS2812_HAS_WHITE
+	bool "ws2812s have white LED."
+	default n
+	depends on WS2812
+	---help---
+		Some ws2812 work-alike chips have a white LED in addition
+		to the standard red, green, and blue LEDs.  This option
+		enables support for such chips.  Note that the driver does
+		not support chains with a mix of RGB and RGBW pixels.
 
 config WS2812_FREQUENCY
-	int "WS2812 LED Driver SPI Frequency"
-	default 8000000
+	int "WS2812 Bit Frequency (Hz)"
+	default 800000
 	depends on WS2812
-
+	---help---
+		This is should be set to the bit frequency of the
+		ws2812s being used.  Newer chips use an 800 kHz
+		bit frequency (the default); although, some older
+		chips run at 400 kHz.
+		
 endmenu # LED Support

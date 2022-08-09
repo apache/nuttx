@@ -40,6 +40,7 @@
 #include "chip.h"
 #include "xtensa.h"
 
+#include "hardware/esp32s3_pinmap.h"
 #include "hardware/esp32s3_system.h"
 #include "hardware/esp32s3_uart.h"
 #include "hardware/esp32s3_soc.h"
@@ -49,6 +50,10 @@
 #include "esp32s3_gpio.h"
 
 #include "esp32s3_lowputc.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Types
@@ -138,6 +143,59 @@ struct esp32s3_uart_s g_uart1_config =
 
 #endif /* CONFIG_ESP32S3_UART1 */
 #endif /* HAVE_UART_DEVICE */
+
+/****************************************************************************
+ * Name: uart_is_iomux
+ *
+ * Description:
+ *   Check if the selected UART pins can use IOMUX directly. Otherwise, UART
+ *   signals will be routed via GPIO Matrix.
+ *
+ * Input Parameters:
+ *   priv          - Pointer to the private driver struct.
+ *
+ * Returned Value:
+ *   True if can use IOMUX or false if can't.
+ *
+ ****************************************************************************/
+
+static inline bool uart_is_iomux(const struct esp32s3_uart_s *priv)
+{
+  bool mapped = false;
+
+  if (priv->id == 0)
+    {
+      if (priv->txpin == UART0_IOMUX_TXPIN
+          && priv->rxpin == UART0_IOMUX_RXPIN
+#ifdef CONFIG_UART0_IFLOWCONTROL
+          && priv->rtspin == UART0_IOMUX_RTSPIN
+#endif
+#ifdef CONFIG_UART0_OFLOWCONTROL
+          && priv->ctspin == UART0_IOMUX_CTSPIN
+#endif
+      )
+        {
+          mapped = true;
+        }
+    }
+  else if (priv->id == 1)
+    {
+      if (priv->txpin == UART1_IOMUX_TXPIN
+          && priv->rxpin == UART1_IOMUX_RXPIN
+#ifdef CONFIG_UART1_IFLOWCONTROL
+          && priv->rtspin == UART1_IOMUX_RTSPIN
+#endif
+#ifdef CONFIG_UART1_OFLOWCONTROL
+          && priv->ctspin == UART1_IOMUX_CTSPIN
+#endif
+      )
+        {
+          mapped = true;
+        }
+    }
+
+  return mapped;
+}
 
 /****************************************************************************
  * Public Functions
@@ -737,28 +795,54 @@ void esp32s3_lowputc_config_pins(const struct esp32s3_uart_s *priv)
 {
   /* Configure the pins */
 
-  esp32s3_gpio_matrix_out(priv->txpin, priv->txsig, 0, 0);
-  esp32s3_configgpio(priv->txpin, OUTPUT_FUNCTION_2);
+  if (uart_is_iomux(priv))
+    {
+      esp32s3_configgpio(priv->txpin, OUTPUT_FUNCTION_1);
+      esp32s3_gpio_matrix_out(priv->txpin, SIG_GPIO_OUT_IDX, 0, 0);
 
-  esp32s3_configgpio(priv->rxpin, INPUT_FUNCTION_2);
-  esp32s3_gpio_matrix_in(priv->rxpin, priv->rxsig, 0);
+      esp32s3_configgpio(priv->rxpin, INPUT_FUNCTION_1);
+      esp32s3_gpio_matrix_out(priv->rxpin, SIG_GPIO_OUT_IDX, 0, 0);
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-  if (priv->iflow)
-    {
-      esp32s3_configgpio(priv->rtspin, OUTPUT_FUNCTION_1);
-      esp32s3_gpio_matrix_out(priv->rtspin, priv->rtssig,
-                              0, 0);
-    }
+      if (priv->iflow)
+        {
+          esp32s3_configgpio(priv->rtspin, OUTPUT_FUNCTION_3);
+          esp32s3_gpio_matrix_out(priv->rtspin, SIG_GPIO_OUT_IDX, 0, 0);
+        }
 
 #endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-  if (priv->oflow)
-    {
-      esp32s3_configgpio(priv->ctspin, INPUT_FUNCTION_1);
-      esp32s3_gpio_matrix_in(priv->ctspin, priv->ctssig, 0);
-    }
+      if (priv->oflow)
+        {
+          esp32s3_configgpio(priv->ctspin, INPUT_FUNCTION_3);
+          esp32s3_gpio_matrix_out(priv->ctspin, SIG_GPIO_OUT_IDX, 0, 0);
+        }
 #endif
+    }
+  else
+    {
+      esp32s3_configgpio(priv->txpin, OUTPUT_FUNCTION_2);
+      esp32s3_gpio_matrix_out(priv->txpin, priv->txsig, 0, 0);
+
+      esp32s3_configgpio(priv->rxpin, INPUT_FUNCTION_2);
+      esp32s3_gpio_matrix_in(priv->rxpin, priv->rxsig, 0);
+
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+      if (priv->iflow)
+        {
+          esp32s3_configgpio(priv->rtspin, OUTPUT_FUNCTION_2);
+          esp32s3_gpio_matrix_out(priv->rtspin, priv->rtssig, 0, 0);
+        }
+
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+      if (priv->oflow)
+        {
+          esp32s3_configgpio(priv->ctspin, INPUT_FUNCTION_2);
+          esp32s3_gpio_matrix_in(priv->ctspin, priv->ctssig, 0);
+        }
+#endif
+    }
 }
 
 /****************************************************************************
@@ -812,9 +896,6 @@ void up_lowputc(char ch)
   /* Then send the character */
 
   esp32s3_lowputc_send_byte(priv, ch);
-
-#elif defined (CONFIG_ESP32S3_USBSERIAL)
-  esp32s3_usbserial_write(ch);
 #endif /* CONSOLE_UART */
 }
 

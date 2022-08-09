@@ -27,9 +27,6 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <stdbool.h>
-
-#include "chip.h"
 
 /****************************************************************************
  * Public Function Prototypes
@@ -64,6 +61,27 @@ extern "C"
  ****************************************************************************/
 
 int mpfs_ihc_init(void);
+
+/****************************************************************************
+ * Name: mpfs_ihc_sbi_ecall_handler
+ *
+ * Description:
+ *   This is sbi_platform_operations / vendor_ext_provider ecall handler.
+ *   Related Linux ecalls end up here.
+ *
+ * Input Parameters:
+ *   funcid          - SBI_EXT_IHC_CTX_INIT, SBI_EXT_IHC_SEND or
+ *                     SBI_EXT_IHC_RECEIVE.  Others are invalid.
+ *   remote_channel  - The remote we're communicating with
+ *   message_ptr     - Local storage for data exchange
+ *
+ * Returned Value:
+ *   OK on success, a negated error code otherwise
+ *
+ ****************************************************************************/
+
+int mpfs_ihc_sbi_ecall_handler(unsigned long funcid, uint32_t remote_channel,
+                               uint32_t *message_ptr);
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -604,7 +604,7 @@ struct sam_pipe_s
 
 #ifdef CONFIG_USBHOST_ASYNCH
   usbhost_asynch_t callback;   /* Transfer complete callback */
-  FAR void *arg;               /* Argument that accompanies the callback */
+  void *arg;                   /* Argument that accompanies the callback */
 #endif
 
 #ifdef HPL_USB_HOST      /* from: Atmel Start hpl_usb_host.h */
@@ -848,152 +848,152 @@ static inline uint16_t sam_getle16(const uint8_t *val);
 
 /* Pipe management */
 
-static int sam_pipe_alloc(FAR struct sam_usbhost_s *priv);
-static inline void sam_pipe_free(FAR struct sam_usbhost_s *priv,
+static int sam_pipe_alloc(struct sam_usbhost_s *priv);
+static inline void sam_pipe_free(struct sam_usbhost_s *priv,
               int idx);
-static void sam_pipe_configure(FAR struct sam_usbhost_s *priv, int idx);
-static int sam_pipe_waitsetup(FAR struct sam_usbhost_s *priv,
-              FAR struct sam_pipe_s *pipe);
+static void sam_pipe_configure(struct sam_usbhost_s *priv, int idx);
+static int sam_pipe_waitsetup(struct sam_usbhost_s *priv,
+              struct sam_pipe_s *pipe);
 #ifdef CONFIG_USBHOST_ASYNCH
-static int sam_pipe_asynchsetup(FAR struct sam_usbhost_s *priv,
-                                FAR struct sam_pipe_s *pipe,
-                                usbhost_asynch_t callback, FAR void *arg);
+static int sam_pipe_asynchsetup(struct sam_usbhost_s *priv,
+                                struct sam_pipe_s *pipe,
+                                usbhost_asynch_t callback, void *arg);
 #endif
-static int sam_pipe_wait(FAR struct sam_usbhost_s *priv,
-              FAR struct sam_pipe_s *pipe);
-static void sam_pipe_wakeup(FAR struct sam_usbhost_s *priv,
-              FAR struct sam_pipe_s *pipe);
-static int sam_ctrlep_alloc(FAR struct sam_usbhost_s *priv,
-                            FAR const struct usbhost_epdesc_s *epdesc,
-                            FAR usbhost_ep_t *ep);
-static int sam_xfrep_alloc(FAR struct sam_usbhost_s *priv,
-                           FAR const struct usbhost_epdesc_s *epdesc,
-                           FAR usbhost_ep_t *ep);
+static int sam_pipe_wait(struct sam_usbhost_s *priv,
+              struct sam_pipe_s *pipe);
+static void sam_pipe_wakeup(struct sam_usbhost_s *priv,
+              struct sam_pipe_s *pipe);
+static int sam_ctrlep_alloc(struct sam_usbhost_s *priv,
+                            const struct usbhost_epdesc_s *epdesc,
+                            usbhost_ep_t *ep);
+static int sam_xfrep_alloc(struct sam_usbhost_s *priv,
+                           const struct usbhost_epdesc_s *epdesc,
+                           usbhost_ep_t *ep);
 
 /* Control/data transfer logic */
 
-static void sam_transfer_terminate(FAR struct sam_usbhost_s *priv,
-              FAR struct sam_pipe_s *pipe, int result);
-static void sam_transfer_abort(FAR struct sam_usbhost_s *priv,
-              FAR struct sam_pipe_s *pipe, int result);
+static void sam_transfer_terminate(struct sam_usbhost_s *priv,
+              struct sam_pipe_s *pipe, int result);
+static void sam_transfer_abort(struct sam_usbhost_s *priv,
+              struct sam_pipe_s *pipe, int result);
 
 /* OUT transfers */
 
-static void sam_send_continue(FAR struct sam_usbhost_s *priv,
-                              FAR struct sam_pipe_s *pipe);
-static void sam_send_start(FAR struct sam_usbhost_s *priv,
-                           FAR struct sam_pipe_s *pipe);
-static ssize_t sam_out_transfer(FAR struct sam_usbhost_s *priv,
-                                FAR struct sam_pipe_s *pipe,
-                                FAR uint8_t *buffer,
+static void sam_send_continue(struct sam_usbhost_s *priv,
+                              struct sam_pipe_s *pipe);
+static void sam_send_start(struct sam_usbhost_s *priv,
+                           struct sam_pipe_s *pipe);
+static ssize_t sam_out_transfer(struct sam_usbhost_s *priv,
+                                struct sam_pipe_s *pipe,
+                                uint8_t *buffer,
                                 size_t buflen);
 #ifdef CONFIG_USBHOST_ASYNCH
-static void sam_out_next(FAR struct sam_usbhost_s *priv,
-                         FAR struct sam_pipe_s *pipe);
-static int  sam_out_asynch(FAR struct sam_usbhost_s *priv,
-                           FAR struct sam_pipe_s *pipe,
-                           FAR uint8_t *buffer, size_t buflen,
-                           usbhost_asynch_t callback, FAR void *arg);
+static void sam_out_next(struct sam_usbhost_s *priv,
+                         struct sam_pipe_s *pipe);
+static int  sam_out_asynch(struct sam_usbhost_s *priv,
+                           struct sam_pipe_s *pipe,
+                           uint8_t *buffer, size_t buflen,
+                           usbhost_asynch_t callback, void *arg);
 #endif
 
 /* Control transfers */
 
-static int  sam_ctrl_sendsetup(FAR struct sam_usbhost_s *priv,
-                               FAR struct sam_pipe_s *pipe,
-                               FAR const struct usb_ctrlreq_s *req);
-static int  sam_ctrl_senddata(FAR struct sam_usbhost_s *priv,
-                              FAR struct sam_pipe_s *pipe,
-                              FAR uint8_t *buffer, unsigned int buflen);
-static int  sam_ctrl_recvdata(FAR struct sam_usbhost_s *priv,
-                              FAR struct sam_pipe_s *pipe,
-                              FAR uint8_t *buffer, unsigned int buflen);
-static int  sam_in_setup(FAR struct sam_usbhost_s *priv,
-                         FAR struct sam_pipe_s *pipe);
-static int  sam_out_setup(FAR struct sam_usbhost_s *priv,
-                          FAR struct sam_pipe_s *pipe);
+static int  sam_ctrl_sendsetup(struct sam_usbhost_s *priv,
+                               struct sam_pipe_s *pipe,
+                               const struct usb_ctrlreq_s *req);
+static int  sam_ctrl_senddata(struct sam_usbhost_s *priv,
+                              struct sam_pipe_s *pipe,
+                              uint8_t *buffer, unsigned int buflen);
+static int  sam_ctrl_recvdata(struct sam_usbhost_s *priv,
+                              struct sam_pipe_s *pipe,
+                              uint8_t *buffer, unsigned int buflen);
+static int  sam_in_setup(struct sam_usbhost_s *priv,
+                         struct sam_pipe_s *pipe);
+static int  sam_out_setup(struct sam_usbhost_s *priv,
+                          struct sam_pipe_s *pipe);
 
 /* IN transfers */
 
-static void sam_recv_continue(FAR struct sam_usbhost_s *priv,
-                              FAR struct sam_pipe_s *pipe);
-static void sam_recv_restart(FAR struct sam_usbhost_s *priv,
-                             FAR struct sam_pipe_s *pipe);
-static void sam_recv_start(FAR struct sam_usbhost_s *priv,
-                           FAR struct sam_pipe_s *pipe);
-static ssize_t sam_in_transfer(FAR struct sam_usbhost_s *priv,
-                               FAR struct sam_pipe_s *pipe,
-                               FAR uint8_t *buffer,
+static void sam_recv_continue(struct sam_usbhost_s *priv,
+                              struct sam_pipe_s *pipe);
+static void sam_recv_restart(struct sam_usbhost_s *priv,
+                             struct sam_pipe_s *pipe);
+static void sam_recv_start(struct sam_usbhost_s *priv,
+                           struct sam_pipe_s *pipe);
+static ssize_t sam_in_transfer(struct sam_usbhost_s *priv,
+                               struct sam_pipe_s *pipe,
+                               uint8_t *buffer,
                                size_t buflen);
 #ifdef CONFIG_USBHOST_ASYNCH
-static void sam_in_next(FAR struct sam_usbhost_s *priv,
-                        FAR struct sam_pipe_s *pipe);
-static int  sam_in_asynch(FAR struct sam_usbhost_s *priv,
-                          FAR struct sam_pipe_s *pipe,
-                          FAR uint8_t *buffer, size_t buflen,
-                          usbhost_asynch_t callback, FAR void *arg);
+static void sam_in_next(struct sam_usbhost_s *priv,
+                        struct sam_pipe_s *pipe);
+static int  sam_in_asynch(struct sam_usbhost_s *priv,
+                          struct sam_pipe_s *pipe,
+                          uint8_t *buffer, size_t buflen,
+                          usbhost_asynch_t callback, void *arg);
 #endif
 
 /* Interrupt handling */
 
 /* Lower level interrupt handlers */
 
-static void sam_gint_connected(FAR struct sam_usbhost_s *priv);
-static void sam_gint_disconnected(FAR struct sam_usbhost_s *priv);
+static void sam_gint_connected(struct sam_usbhost_s *priv);
+static void sam_gint_disconnected(struct sam_usbhost_s *priv);
 
 static void sam_pipe_interrupt(struct sam_usbhost_s *priv, int idx);
 static int  sam_usbhost_interrupt(int irq, void *context, void *arg);
 
 /* USB host controller operations */
 
-static int sam_wait(FAR struct usbhost_connection_s *conn,
-                    FAR struct usbhost_hubport_s **hport);
-static int sam_rh_enumerate(FAR struct sam_usbhost_s *priv,
-                            FAR struct usbhost_connection_s *conn,
-                            FAR struct usbhost_hubport_s *hport);
-static int sam_enumerate(FAR struct usbhost_connection_s *conn,
-                         FAR struct usbhost_hubport_s *hport);
-static int sam_ep0configure(FAR struct usbhost_driver_s *drvr,
+static int sam_wait(struct usbhost_connection_s *conn,
+                    struct usbhost_hubport_s **hport);
+static int sam_rh_enumerate(struct sam_usbhost_s *priv,
+                            struct usbhost_connection_s *conn,
+                            struct usbhost_hubport_s *hport);
+static int sam_enumerate(struct usbhost_connection_s *conn,
+                         struct usbhost_hubport_s *hport);
+static int sam_ep0configure(struct usbhost_driver_s *drvr,
                             usbhost_ep_t ep0, uint8_t funcaddr,
                             uint8_t speed,
                             uint16_t maxpacketsize);
-static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
-                       FAR const FAR struct usbhost_epdesc_s *epdesc,
-                       FAR usbhost_ep_t *ep);
-static int sam_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
-static int sam_alloc(FAR struct usbhost_driver_s *drvr,
-                     FAR uint8_t **buffer, FAR size_t *maxlen);
-static int sam_free(FAR struct usbhost_driver_s *drvr,
-                    FAR uint8_t *buffer);
-static int sam_ioalloc(FAR struct usbhost_driver_s *drvr,
-                       FAR uint8_t **buffer, size_t buflen);
-static int sam_iofree(FAR struct usbhost_driver_s *drvr,
-                      FAR uint8_t *buffer);
-static int sam_ctrlin(FAR struct usbhost_driver_s *drvr,
+static int sam_epalloc(struct usbhost_driver_s *drvr,
+                       const struct usbhost_epdesc_s *epdesc,
+                       usbhost_ep_t *ep);
+static int sam_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep);
+static int sam_alloc(struct usbhost_driver_s *drvr,
+                     uint8_t **buffer, size_t *maxlen);
+static int sam_free(struct usbhost_driver_s *drvr,
+                    uint8_t *buffer);
+static int sam_ioalloc(struct usbhost_driver_s *drvr,
+                       uint8_t **buffer, size_t buflen);
+static int sam_iofree(struct usbhost_driver_s *drvr,
+                      uint8_t *buffer);
+static int sam_ctrlin(struct usbhost_driver_s *drvr,
                       usbhost_ep_t ep0,
                       const struct usb_ctrlreq_s *req,
-                      FAR uint8_t *buffer);
-static int sam_ctrlout(FAR struct usbhost_driver_s *drvr,
+                      uint8_t *buffer);
+static int sam_ctrlout(struct usbhost_driver_s *drvr,
                        usbhost_ep_t ep0,
-                       FAR const struct usb_ctrlreq_s *req,
-                       FAR const uint8_t *buffer);
-static ssize_t sam_transfer(FAR struct usbhost_driver_s *drvr,
+                       const struct usb_ctrlreq_s *req,
+                       const uint8_t *buffer);
+static ssize_t sam_transfer(struct usbhost_driver_s *drvr,
                             usbhost_ep_t ep,
-                            FAR uint8_t *buffer, size_t buflen);
+                            uint8_t *buffer, size_t buflen);
 #ifdef CONFIG_USBHOST_ASYNCH
-static int sam_asynch(FAR struct usbhost_driver_s *drvr,
+static int sam_asynch(struct usbhost_driver_s *drvr,
                       usbhost_ep_t ep,
-                      FAR uint8_t *buffer, size_t buflen,
-                      usbhost_asynch_t callback, FAR void *arg);
+                      uint8_t *buffer, size_t buflen,
+                      usbhost_asynch_t callback, void *arg);
 #endif
-static int sam_cancel(FAR struct usbhost_driver_s *drvr,
+static int sam_cancel(struct usbhost_driver_s *drvr,
                       usbhost_ep_t ep);
 #ifdef CONFIG_USBHOST_HUB
-static int sam_connect(FAR struct usbhost_driver_s *drvr,
-                       FAR struct usbhost_hubport_s *hport,
+static int sam_connect(struct usbhost_driver_s *drvr,
+                       struct usbhost_hubport_s *hport,
                        bool connected);
 #endif
-static void sam_disconnect(FAR struct usbhost_driver_s *drvr,
-                           FAR struct usbhost_hubport_s *hport);
+static void sam_disconnect(struct usbhost_driver_s *drvr,
+                           struct usbhost_hubport_s *hport);
 
 static void sam_hostreset(struct sam_usbhost_s *priv);
 static void sam_add_sof_user(struct sam_usbhost_s *priv);
@@ -4683,7 +4683,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
   return OK;
 }
 
-void sam_usb_suspend(FAR struct usbdev_s *dev, bool resume)
+void sam_usb_suspend(struct usbdev_s *dev, bool resume)
 {
 }
 
@@ -4793,7 +4793,7 @@ static void sam_add_sof_user(struct sam_usbhost_s *priv)
  *
  ****************************************************************************/
 
-static int sam_pipe_alloc(FAR struct sam_usbhost_s *priv)
+static int sam_pipe_alloc(struct sam_usbhost_s *priv)
 {
   int idx;
 
@@ -4825,9 +4825,9 @@ static int sam_pipe_alloc(FAR struct sam_usbhost_s *priv)
  *
  ****************************************************************************/
 
-static void sam_pipe_free(FAR struct sam_usbhost_s *priv, int idx)
+static void sam_pipe_free(struct sam_usbhost_s *priv, int idx)
 {
-  FAR struct sam_pipe_s *pipe = &priv->pipelist[idx];
+  struct sam_pipe_s *pipe = &priv->pipelist[idx];
 
   uinfo("pipe%d\n", idx);
   DEBUGASSERT((unsigned)idx < SAM_USB_NENDPOINTS);
@@ -4888,9 +4888,9 @@ int8_t sam_get_psize(uint16_t size)
  *
  ****************************************************************************/
 
-static void sam_pipe_configure(FAR struct sam_usbhost_s *priv, int idx)
+static void sam_pipe_configure(struct sam_usbhost_s *priv, int idx)
 {
-  FAR struct sam_pipe_s *pipe = &priv->pipelist[idx];
+  struct sam_pipe_s *pipe = &priv->pipelist[idx];
 
   /* Clear any old pending interrupts for this host pipe. */
 
@@ -5026,8 +5026,8 @@ static void sam_pipe_configure(FAR struct sam_usbhost_s *priv, int idx)
  *
  ****************************************************************************/
 
-static int sam_pipe_waitsetup(FAR struct sam_usbhost_s *priv,
-                              FAR struct sam_pipe_s *pipe)
+static int sam_pipe_waitsetup(struct sam_usbhost_s *priv,
+                              struct sam_pipe_s *pipe)
 {
   irqstate_t flags = enter_critical_section();
   int        ret   = -ENODEV;
@@ -5071,9 +5071,9 @@ static int sam_pipe_waitsetup(FAR struct sam_usbhost_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
-static int sam_pipe_asynchsetup(FAR struct sam_usbhost_s *priv,
-                                FAR struct sam_pipe_s *pipe,
-                                usbhost_asynch_t callback, FAR void *arg)
+static int sam_pipe_asynchsetup(struct sam_usbhost_s *priv,
+                                struct sam_pipe_s *pipe,
+                                usbhost_asynch_t callback, void *arg)
 {
   irqstate_t flags = enter_critical_section();
   int ret = -ENODEV;
@@ -5106,8 +5106,8 @@ static int sam_pipe_asynchsetup(FAR struct sam_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static int sam_pipe_wait(FAR struct sam_usbhost_s *priv,
-                         FAR struct sam_pipe_s *pipe)
+static int sam_pipe_wait(struct sam_usbhost_s *priv,
+                         struct sam_pipe_s *pipe)
 {
   irqstate_t flags;
   int ret;
@@ -5163,8 +5163,8 @@ static int sam_pipe_wait(FAR struct sam_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static void sam_pipe_wakeup(FAR struct sam_usbhost_s *priv,
-                            FAR struct sam_pipe_s *pipe)
+static void sam_pipe_wakeup(struct sam_usbhost_s *priv,
+                            struct sam_pipe_s *pipe)
 {
   /* Is the transfer complete? */
 
@@ -5232,12 +5232,12 @@ static void sam_pipe_wakeup(FAR struct sam_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static int sam_ctrlep_alloc(FAR struct sam_usbhost_s *priv,
-                            FAR const struct usbhost_epdesc_s *epdesc,
-                            FAR usbhost_ep_t *ep)
+static int sam_ctrlep_alloc(struct sam_usbhost_s *priv,
+                            const struct usbhost_epdesc_s *epdesc,
+                            usbhost_ep_t *ep)
 {
-  FAR struct usbhost_hubport_s *hport;
-  FAR struct sam_pipe_s *pipe;
+  struct usbhost_hubport_s *hport;
+  struct sam_pipe_s *pipe;
   int idx;
 
   /* Sanity check.  NOTE that this method should only be called if
@@ -5296,12 +5296,12 @@ static int sam_ctrlep_alloc(FAR struct sam_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static int sam_xfrep_alloc(FAR struct sam_usbhost_s *priv,
-                           FAR const struct usbhost_epdesc_s *epdesc,
-                           FAR usbhost_ep_t *ep)
+static int sam_xfrep_alloc(struct sam_usbhost_s *priv,
+                           const struct usbhost_epdesc_s *epdesc,
+                           usbhost_ep_t *ep)
 {
   struct usbhost_hubport_s *hport;
-  FAR struct sam_pipe_s *pipe;
+  struct sam_pipe_s *pipe;
   int idx;
 
   /* Sanity check.  NOTE that this method should only be called if a device
@@ -5366,8 +5366,8 @@ static int sam_xfrep_alloc(FAR struct sam_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static void sam_transfer_terminate(FAR struct sam_usbhost_s *priv,
-                                   FAR struct sam_pipe_s *pipe,
+static void sam_transfer_terminate(struct sam_usbhost_s *priv,
+                                   struct sam_pipe_s *pipe,
                                    int result)
 {
   /* Wake up any waiters for the end of transfer event */
@@ -5429,8 +5429,8 @@ static void sam_transfer_terminate(FAR struct sam_usbhost_s *priv,
     }
 }
 
-static void sam_transfer_abort(FAR struct sam_usbhost_s *priv,
-                               FAR struct sam_pipe_s *pipe,
+static void sam_transfer_abort(struct sam_usbhost_s *priv,
+                               struct sam_pipe_s *pipe,
                                int code)
 {
   /* Stop transfer */
@@ -5463,8 +5463,8 @@ static void sam_transfer_abort(FAR struct sam_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static void sam_send_continue(FAR struct sam_usbhost_s *priv,
-                              FAR struct sam_pipe_s *pipe)
+static void sam_send_continue(struct sam_usbhost_s *priv,
+                              struct sam_pipe_s *pipe)
 {
   uint8_t * src;
   uint32_t size;
@@ -5583,8 +5583,8 @@ static void sam_send_continue(FAR struct sam_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static void sam_send_start(FAR struct sam_usbhost_s *priv,
-                           FAR struct sam_pipe_s *pipe)
+static void sam_send_start(struct sam_usbhost_s *priv,
+                           struct sam_pipe_s *pipe)
 {
   /* Set up the initial state of the transfer */
 
@@ -5671,9 +5671,9 @@ static void sam_send_start(FAR struct sam_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static ssize_t sam_out_transfer(FAR struct sam_usbhost_s *priv,
-                                FAR struct sam_pipe_s *pipe,
-                                FAR uint8_t *buffer, size_t buflen)
+static ssize_t sam_out_transfer(struct sam_usbhost_s *priv,
+                                struct sam_pipe_s *pipe,
+                                uint8_t *buffer, size_t buflen)
 {
   clock_t start;
   clock_t elapsed;
@@ -5785,11 +5785,11 @@ static ssize_t sam_out_transfer(FAR struct sam_usbhost_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
-static void sam_out_next(FAR struct sam_usbhost_s *priv,
-                         FAR struct sam_pipe_s *pipe)
+static void sam_out_next(struct sam_usbhost_s *priv,
+                         struct sam_pipe_s *pipe)
 {
   usbhost_asynch_t callback;
-  FAR void *arg;
+  void *arg;
   ssize_t nbytes;
   int result;
   int ret;
@@ -5853,10 +5853,10 @@ static void sam_out_next(FAR struct sam_usbhost_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
-static int sam_out_asynch(FAR struct sam_usbhost_s *priv,
-                          FAR struct sam_pipe_s *pipe,
-                          FAR uint8_t *buffer, size_t buflen,
-                          usbhost_asynch_t callback, FAR void *arg)
+static int sam_out_asynch(struct sam_usbhost_s *priv,
+                          struct sam_pipe_s *pipe,
+                          uint8_t *buffer, size_t buflen,
+                          usbhost_asynch_t callback, void *arg)
 {
   int ret;
 
@@ -5903,9 +5903,9 @@ static int sam_out_asynch(FAR struct sam_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static int sam_ctrl_sendsetup(FAR struct sam_usbhost_s *priv,
-                              FAR struct sam_pipe_s *pipe,
-                              FAR const struct usb_ctrlreq_s *req)
+static int sam_ctrl_sendsetup(struct sam_usbhost_s *priv,
+                              struct sam_pipe_s *pipe,
+                              const struct usb_ctrlreq_s *req)
 {
   clock_t start;
   clock_t elapsed;
@@ -5919,7 +5919,7 @@ static int sam_ctrl_sendsetup(FAR struct sam_usbhost_s *priv,
     {
       /* Send the SETUP packet */
 
-      pipe->data = (FAR uint8_t *)req;
+      pipe->data = (uint8_t *)req;
       pipe->size = USB_SIZEOF_CTRLREQ;
       pipe->count = 0;
       pipe->result = EBUSY;
@@ -6022,9 +6022,9 @@ static int sam_ctrl_sendsetup(FAR struct sam_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static int sam_ctrl_senddata(FAR struct sam_usbhost_s *priv,
-                             FAR struct sam_pipe_s *pipe,
-                             FAR uint8_t *buffer, unsigned int buflen)
+static int sam_ctrl_senddata(struct sam_usbhost_s *priv,
+                             struct sam_pipe_s *pipe,
+                             uint8_t *buffer, unsigned int buflen)
 {
   int ret;
 
@@ -6069,9 +6069,9 @@ static int sam_ctrl_senddata(FAR struct sam_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static int sam_ctrl_recvdata(FAR struct sam_usbhost_s *priv,
-                             FAR struct sam_pipe_s *pipe,
-                             FAR uint8_t *buffer, unsigned int buflen)
+static int sam_ctrl_recvdata(struct sam_usbhost_s *priv,
+                             struct sam_pipe_s *pipe,
+                             uint8_t *buffer, unsigned int buflen)
 {
   int ret;
 
@@ -6124,8 +6124,8 @@ static int sam_ctrl_recvdata(FAR struct sam_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static int sam_in_setup(FAR struct sam_usbhost_s *priv,
-                        FAR struct sam_pipe_s *pipe)
+static int sam_in_setup(struct sam_usbhost_s *priv,
+                        struct sam_pipe_s *pipe)
 {
   uinfo("pipe%d\n", pipe->idx);
 
@@ -6180,8 +6180,8 @@ static int sam_in_setup(FAR struct sam_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static int sam_out_setup(FAR struct sam_usbhost_s *priv,
-                         FAR struct sam_pipe_s *pipe)
+static int sam_out_setup(struct sam_usbhost_s *priv,
+                         struct sam_pipe_s *pipe)
 {
   /* Set up for the transfer based on the direction and the endpoint type */
 
@@ -6241,8 +6241,8 @@ static int sam_out_setup(FAR struct sam_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static void sam_recv_continue(FAR struct sam_usbhost_s *priv,
-                              FAR struct sam_pipe_s *pipe)
+static void sam_recv_continue(struct sam_usbhost_s *priv,
+                              struct sam_pipe_s *pipe)
 {
   uint8_t *src;
   uint8_t *dst;
@@ -6328,8 +6328,8 @@ static void sam_recv_continue(FAR struct sam_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static void sam_recv_restart(FAR struct sam_usbhost_s *priv,
-                             FAR struct sam_pipe_s *pipe)
+static void sam_recv_restart(struct sam_usbhost_s *priv,
+                             struct sam_pipe_s *pipe)
 {
   /* Send the IN token. */
 
@@ -6375,8 +6375,8 @@ static void sam_recv_restart(FAR struct sam_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static void sam_recv_start(FAR struct sam_usbhost_s *priv,
-                           FAR struct sam_pipe_s *pipe)
+static void sam_recv_start(struct sam_usbhost_s *priv,
+                           struct sam_pipe_s *pipe)
 {
   /* Set up the initial state of the transfer */
 
@@ -6407,9 +6407,9 @@ static void sam_recv_start(FAR struct sam_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static ssize_t sam_in_transfer(FAR struct sam_usbhost_s *priv,
-                               FAR struct sam_pipe_s *pipe,
-                               FAR uint8_t *buffer, size_t buflen)
+static ssize_t sam_in_transfer(struct sam_usbhost_s *priv,
+                               struct sam_pipe_s *pipe,
+                               uint8_t *buffer, size_t buflen)
 {
   clock_t start;
   ssize_t xfrd;
@@ -6584,11 +6584,11 @@ static ssize_t sam_in_transfer(FAR struct sam_usbhost_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
-static void sam_in_next(FAR struct sam_usbhost_s *priv,
-                        FAR struct sam_pipe_s *pipe)
+static void sam_in_next(struct sam_usbhost_s *priv,
+                        struct sam_pipe_s *pipe)
 {
   usbhost_asynch_t callback;
-  FAR void *arg;
+  void *arg;
   ssize_t nbytes;
   int result;
   int ret;
@@ -6654,10 +6654,10 @@ static void sam_in_next(FAR struct sam_usbhost_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
-static int sam_in_asynch(FAR struct sam_usbhost_s *priv,
-                         FAR struct sam_pipe_s *pipe,
-                         FAR uint8_t *buffer, size_t buflen,
-                         usbhost_asynch_t callback, FAR void *arg)
+static int sam_in_asynch(struct sam_usbhost_s *priv,
+                         struct sam_pipe_s *pipe,
+                         uint8_t *buffer, size_t buflen,
+                         usbhost_asynch_t callback, void *arg)
 {
   int ret;
 
@@ -6699,7 +6699,7 @@ static int sam_in_asynch(FAR struct sam_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static void sam_gint_connected(FAR struct sam_usbhost_s *priv)
+static void sam_gint_connected(struct sam_usbhost_s *priv)
 {
   /* We we previously disconnected? */
 
@@ -6731,7 +6731,7 @@ static void sam_gint_connected(FAR struct sam_usbhost_s *priv)
  *
  ****************************************************************************/
 
-static void sam_gint_disconnected(FAR struct sam_usbhost_s *priv)
+static void sam_gint_disconnected(struct sam_usbhost_s *priv)
 {
   /* Were we previously connected? */
 
@@ -6802,10 +6802,10 @@ static void sam_gint_disconnected(FAR struct sam_usbhost_s *priv)
  *
  ****************************************************************************/
 
-static int sam_wait(FAR struct usbhost_connection_s *conn,
-                    FAR struct usbhost_hubport_s **hport)
+static int sam_wait(struct usbhost_connection_s *conn,
+                    struct usbhost_hubport_s **hport)
 {
-  FAR struct sam_usbhost_s *priv = &g_usbhost;
+  struct sam_usbhost_s *priv = &g_usbhost;
   struct usbhost_hubport_s *connport;
   irqstate_t flags;
 
@@ -6892,9 +6892,9 @@ static int sam_wait(FAR struct usbhost_connection_s *conn,
  *
  ****************************************************************************/
 
-static int sam_rh_enumerate(FAR struct sam_usbhost_s *priv,
-                            FAR struct usbhost_connection_s *conn,
-                            FAR struct usbhost_hubport_s *hport)
+static int sam_rh_enumerate(struct sam_usbhost_s *priv,
+                            struct usbhost_connection_s *conn,
+                            struct usbhost_hubport_s *hport)
 {
   uint32_t regval;
   int ret;
@@ -6951,10 +6951,10 @@ static int sam_rh_enumerate(FAR struct sam_usbhost_s *priv,
   return ret;
 }
 
-static int sam_enumerate(FAR struct usbhost_connection_s *conn,
-                         FAR struct usbhost_hubport_s *hport)
+static int sam_enumerate(struct usbhost_connection_s *conn,
+                         struct usbhost_hubport_s *hport)
 {
-  FAR struct sam_usbhost_s *priv = &g_usbhost;
+  struct sam_usbhost_s *priv = &g_usbhost;
   int ret;
 
   uinfo("ENTRY\n");
@@ -7026,14 +7026,14 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn,
  *
  ****************************************************************************/
 
-static int sam_ep0configure(FAR struct usbhost_driver_s *drvr,
+static int sam_ep0configure(struct usbhost_driver_s *drvr,
                             usbhost_ep_t ep0,
                             uint8_t funcaddr,
                             uint8_t speed,
                             uint16_t maxpacketsize)
 {
-  FAR struct sam_usbhost_s *priv = (FAR struct sam_usbhost_s *)drvr;
-  FAR struct sam_pipe_s *pipe;
+  struct sam_usbhost_s *priv = (struct sam_usbhost_s *)drvr;
+  struct sam_pipe_s *pipe;
 
   uinfo("funcaddr=%d speed=%d maxpacketsize=%d\n",
                   funcaddr, speed, maxpacketsize);
@@ -7081,11 +7081,11 @@ static int sam_ep0configure(FAR struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
-                       FAR const struct usbhost_epdesc_s *epdesc,
-                       FAR usbhost_ep_t *ep)
+static int sam_epalloc(struct usbhost_driver_s *drvr,
+                       const struct usbhost_epdesc_s *epdesc,
+                       usbhost_ep_t *ep)
 {
-  FAR struct sam_usbhost_s *priv = (FAR struct sam_usbhost_s *)drvr;
+  struct sam_usbhost_s *priv = (struct sam_usbhost_s *)drvr;
   int ret;
 
   uwarn("addr=%d in=%d xfrtype=%d interval=%d mxpacketsize=%d\n",
@@ -7143,9 +7143,9 @@ static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-static int sam_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
+static int sam_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
-  FAR struct sam_usbhost_s *priv = (FAR struct sam_usbhost_s *)drvr;
+  struct sam_usbhost_s *priv = (struct sam_usbhost_s *)drvr;
 
   DEBUGASSERT(priv);
 
@@ -7197,17 +7197,17 @@ static int sam_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  *
  ****************************************************************************/
 
-static int sam_alloc(FAR struct usbhost_driver_s *drvr,
-                     FAR uint8_t **buffer, FAR size_t *maxlen)
+static int sam_alloc(struct usbhost_driver_s *drvr,
+                     uint8_t **buffer, size_t *maxlen)
 {
-  FAR uint8_t *alloc;
+  uint8_t *alloc;
 
   uinfo("ENTRY\n");
   DEBUGASSERT(drvr && buffer && maxlen);
 
   /* There is no special memory requirement for the SAM. */
 
-  alloc = (FAR uint8_t *)kmm_malloc(CONFIG_SAM_DESCSIZE);
+  alloc = (uint8_t *)kmm_malloc(CONFIG_SAM_DESCSIZE);
   if (!alloc)
     {
       return -ENOMEM;
@@ -7244,7 +7244,7 @@ static int sam_alloc(FAR struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-static int sam_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
+static int sam_free(struct usbhost_driver_s *drvr, uint8_t *buffer)
 {
   /* There is no special memory requirement */
 
@@ -7284,17 +7284,17 @@ static int sam_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
  *
  ****************************************************************************/
 
-static int sam_ioalloc(FAR struct usbhost_driver_s *drvr,
-                         FAR uint8_t **buffer, size_t buflen)
+static int sam_ioalloc(struct usbhost_driver_s *drvr,
+                       uint8_t **buffer, size_t buflen)
 {
-  FAR uint8_t *alloc;
+  uint8_t *alloc;
 
   uinfo("ENTRY\n");
   DEBUGASSERT(drvr && buffer && buflen > 0);
 
   /* There is no special memory requirement */
 
-  alloc = (FAR uint8_t *)kmm_malloc(buflen);
+  alloc = (uint8_t *)kmm_malloc(buflen);
   if (!alloc)
     {
       return -ENOMEM;
@@ -7329,7 +7329,7 @@ static int sam_ioalloc(FAR struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-static int sam_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
+static int sam_iofree(struct usbhost_driver_s *drvr, uint8_t *buffer)
 {
   /* There is no special memory requirement */
 
@@ -7377,12 +7377,12 @@ static int sam_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
  *
  ****************************************************************************/
 
-static int sam_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-                      FAR const struct usb_ctrlreq_s *req,
-                      FAR uint8_t *buffer)
+static int sam_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+                      const struct usb_ctrlreq_s *req,
+                      uint8_t *buffer)
 {
-  FAR struct sam_usbhost_s *priv = (FAR struct sam_usbhost_s *)drvr;
-  FAR struct sam_pipe_s *pipe;
+  struct sam_usbhost_s *priv = (struct sam_usbhost_s *)drvr;
+  struct sam_pipe_s *pipe;
   uint16_t buflen;
   clock_t start;
   clock_t elapsed;
@@ -7469,12 +7469,12 @@ static int sam_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   return -ETIMEDOUT;
 }
 
-static int sam_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-                       FAR const struct usb_ctrlreq_s *req,
-                       FAR const uint8_t *buffer)
+static int sam_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+                       const struct usb_ctrlreq_s *req,
+                       const uint8_t *buffer)
 {
-  FAR struct sam_usbhost_s *priv = (FAR struct sam_usbhost_s *)drvr;
-  FAR struct sam_pipe_s *pipe;
+  struct sam_usbhost_s *priv = (struct sam_usbhost_s *)drvr;
+  struct sam_pipe_s *pipe;
   uint16_t buflen;
   clock_t start;
   clock_t elapsed;
@@ -7525,7 +7525,7 @@ static int sam_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
               /* Start DATA out transfer (only one DATA packet) */
 
               ret = sam_ctrl_senddata(priv, pipe,
-                                     (FAR uint8_t *)buffer, buflen);
+                                     (uint8_t *)buffer, buflen);
               if (ret < 0)
                 {
                   usbhost_trace1(SAM_TRACE1_SENDDATA_FAIL, -ret);
@@ -7603,17 +7603,17 @@ static int sam_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  *
  ****************************************************************************/
 
-static ssize_t sam_transfer(FAR struct usbhost_driver_s *drvr,
+static ssize_t sam_transfer(struct usbhost_driver_s *drvr,
                             usbhost_ep_t ep,
-                            FAR uint8_t *buffer,
+                            uint8_t *buffer,
                             size_t buflen)
 {
-  FAR struct sam_usbhost_s *priv = (FAR struct sam_usbhost_s *)drvr;
-  FAR struct sam_pipe_s *pipe;
+  struct sam_usbhost_s *priv = (struct sam_usbhost_s *)drvr;
+  struct sam_pipe_s *pipe;
   unsigned int idx = (unsigned int)ep;
   ssize_t nbytes;
 
-  uwarn("pipe%d buffer:0x%p buflen:%d\n",  idx, buffer, buflen);
+  uwarn("pipe%d buffer:%p buflen:%d\n",  idx, buffer, buflen);
 
   DEBUGASSERT(priv && buffer && idx < SAM_USB_NENDPOINTS && buflen > 0);
   pipe = &priv->pipelist[idx];
@@ -7676,12 +7676,12 @@ static ssize_t sam_transfer(FAR struct usbhost_driver_s *drvr,
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
-static int sam_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-                        FAR uint8_t *buffer, size_t buflen,
-                        usbhost_asynch_t callback, FAR void *arg)
+static int sam_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+                      uint8_t *buffer, size_t buflen,
+                      usbhost_asynch_t callback, void *arg)
 {
-  FAR struct sam_usbhost_s *priv = (FAR struct sam_usbhost_s *)drvr;
-  FAR struct sam_pipe_s *pipe;
+  struct sam_usbhost_s *priv = (struct sam_usbhost_s *)drvr;
+  struct sam_pipe_s *pipe;
   unsigned int idx = (unsigned int)ep;
   int ret;
 
@@ -7731,10 +7731,10 @@ static int sam_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
  *
  ****************************************************************************/
 
-static int sam_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
+static int sam_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
-  FAR struct sam_usbhost_s *priv = (FAR struct sam_usbhost_s *)drvr;
-  FAR struct sam_pipe_s *pipe;
+  struct sam_usbhost_s *priv = (struct sam_usbhost_s *)drvr;
+  struct sam_pipe_s *pipe;
   unsigned int idx = (unsigned int)ep;
   irqstate_t flags;
 
@@ -7778,7 +7778,7 @@ static int sam_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   else if (pipe->callback)
     {
       usbhost_asynch_t callback;
-      FAR void *arg;
+      void *arg;
 
       /* Extract the callback information */
 
@@ -7821,11 +7821,11 @@ static int sam_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_HUB
-static int sam_connect(FAR struct usbhost_driver_s *drvr,
-                         FAR struct usbhost_hubport_s *hport,
-                         bool connected)
+static int sam_connect(struct usbhost_driver_s *drvr,
+                       struct usbhost_hubport_s *hport,
+                       bool connected)
 {
-  FAR struct sam_usbhost_s *priv = (FAR struct sam_usbhost_s *)drvr;
+  struct sam_usbhost_s *priv = (struct sam_usbhost_s *)drvr;
   irqstate_t flags;
 
   DEBUGASSERT(priv != NULL && hport != NULL);
@@ -7877,8 +7877,8 @@ static int sam_connect(FAR struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-static void sam_disconnect(FAR struct usbhost_driver_s *drvr,
-                           FAR struct usbhost_hubport_s *hport)
+static void sam_disconnect(struct usbhost_driver_s *drvr,
+                           struct usbhost_hubport_s *hport)
 {
   DEBUGASSERT(hport != NULL);
   hport->devclass = NULL;
@@ -7900,7 +7900,7 @@ static void sam_disconnect(FAR struct usbhost_driver_s *drvr,
 
 static void sam_reset_pipes(struct sam_usbhost_s *priv, bool warm_reset)
 {
-  FAR struct sam_pipe_s *pipe;
+  struct sam_pipe_s *pipe;
   uint8_t i;
 
   /* Reset pipes */
@@ -8014,7 +8014,7 @@ static void sam_pipeset_reset(struct sam_usbhost_s *priv, uint16_t epset)
  *
  ****************************************************************************/
 
-static void sam_vbusdrive(FAR struct sam_usbhost_s *priv, bool state)
+static void sam_vbusdrive(struct sam_usbhost_s *priv, bool state)
 {
   /* Enable/disable the external charge pump */
 
@@ -8033,7 +8033,7 @@ static void sam_vbusdrive(FAR struct sam_usbhost_s *priv, bool state)
 
 static void sam_pipe_interrupt(struct sam_usbhost_s *priv, int idx)
 {
-  FAR struct sam_pipe_s *pipe;
+  struct sam_pipe_s *pipe;
   uint8_t pipisr;
   uint8_t pipimr;
 
@@ -8472,7 +8472,7 @@ static void sam_hostreset(struct sam_usbhost_s *priv)
  *
  ****************************************************************************/
 
-static void sam_host_initialize(FAR struct sam_usbhost_s *priv)
+static void sam_host_initialize(struct sam_usbhost_s *priv)
 {
   /* Drive Vbus +5V (the smoke test). Should be done elsewhere in OTG mode. */
 
@@ -8499,10 +8499,10 @@ static void sam_host_initialize(FAR struct sam_usbhost_s *priv)
  *
  ****************************************************************************/
 
-static inline void sam_sw_initialize(FAR struct sam_usbhost_s *priv)
+static inline void sam_sw_initialize(struct sam_usbhost_s *priv)
 {
-  FAR struct usbhost_driver_s *drvr;
-  FAR struct usbhost_hubport_s *hport;
+  struct usbhost_driver_s *drvr;
+  struct usbhost_hubport_s *hport;
   int epno;
 
   /* Initialize the device state structure.  NOTE: many fields
@@ -8600,7 +8600,7 @@ static inline void sam_sw_initialize(FAR struct sam_usbhost_s *priv)
  *
  ****************************************************************************/
 
-static inline int sam_hw_initialize(FAR struct sam_usbhost_s *priv)
+static inline int sam_hw_initialize(struct sam_usbhost_s *priv)
 {
   uint16_t regval;
   uint32_t padcalib;
@@ -8718,7 +8718,7 @@ static inline int sam_hw_initialize(FAR struct sam_usbhost_s *priv)
  *
  ****************************************************************************/
 
-FAR struct usbhost_connection_s *sam_usbhost_initialize(int controller)
+struct usbhost_connection_s *sam_usbhost_initialize(int controller)
 {
   /* At present, there is only support for a single OTG FS host. Hence it is
    * pre-allocated as g_usbhost.  However, in most code, the private data
@@ -8727,7 +8727,7 @@ FAR struct usbhost_connection_s *sam_usbhost_initialize(int controller)
    * future support for multiple devices.
    */
 
-  FAR struct sam_usbhost_s *priv = &g_usbhost;
+  struct sam_usbhost_s *priv = &g_usbhost;
 
   /* Sanity checks */
 

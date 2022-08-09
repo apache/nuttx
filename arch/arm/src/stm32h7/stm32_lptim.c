@@ -51,29 +51,29 @@
 
 /* Low-power timer methods */
 
-static void stm32_lptim_setcfgr(FAR struct stm32_lptim_dev_s *dev,
+static void stm32_lptim_setcfgr(struct stm32_lptim_dev_s *dev,
                                 uint32_t regval);
-static void stm32_lptim_setperiod(FAR struct stm32_lptim_dev_s *dev,
+static void stm32_lptim_setperiod(struct stm32_lptim_dev_s *dev,
                                 uint32_t period);
-static void stm32_lptim_setcompare(FAR struct stm32_lptim_dev_s *dev,
+static void stm32_lptim_setcompare(struct stm32_lptim_dev_s *dev,
                                 uint32_t cmp);
-static uint32_t stm32_lptim_getcounter(FAR struct stm32_lptim_dev_s *dev);
-static int  stm32_lptim_setinput(FAR struct stm32_lptim_dev_s *dev,
+static uint32_t stm32_lptim_getcounter(struct stm32_lptim_dev_s *dev);
+static int  stm32_lptim_setinput(struct stm32_lptim_dev_s *dev,
                                 uint32_t input, uint32_t mux);
-static void stm32_lptim_enable(FAR struct stm32_lptim_dev_s *dev, bool on);
-static void stm32_lptim_start(FAR struct stm32_lptim_dev_s *dev,
+static void stm32_lptim_enable(struct stm32_lptim_dev_s *dev, bool on);
+static void stm32_lptim_start(struct stm32_lptim_dev_s *dev,
                                  stm32_lptim_start_mode_t mode);
-static void stm32_lptim_resetcounter(FAR struct stm32_lptim_dev_s *dev);
-static void stm32_lptim_enablerar(FAR struct stm32_lptim_dev_s *dev,
+static void stm32_lptim_resetcounter(struct stm32_lptim_dev_s *dev);
+static void stm32_lptim_enablerar(struct stm32_lptim_dev_s *dev,
                                   bool on);
 
-static int  stm32_lptim_setisr(FAR struct stm32_lptim_dev_s *dev,
+static int  stm32_lptim_setisr(struct stm32_lptim_dev_s *dev,
                                xcpt_t handler, void *arg, int source);
-static void stm32_lptim_enableint(FAR struct stm32_lptim_dev_s *dev,
+static void stm32_lptim_enableint(struct stm32_lptim_dev_s *dev,
                                   int source);
-static void stm32_lptim_disableint(FAR struct stm32_lptim_dev_s *dev,
+static void stm32_lptim_disableint(struct stm32_lptim_dev_s *dev,
                                  int source);
-static void stm32_lptim_ackint(FAR struct stm32_lptim_dev_s *dev,
+static void stm32_lptim_ackint(struct stm32_lptim_dev_s *dev,
                                int source);
 
 /****************************************************************************
@@ -144,7 +144,7 @@ struct stm32_lptim_dev_s stm32_lptim5_priv =
 /* Get a 32-bit register value by offset.
  */
 
-static inline uint32_t stm32_getreg32(FAR struct stm32_lptim_dev_s *dev,
+static inline uint32_t stm32_getreg32(struct stm32_lptim_dev_s *dev,
                                       uint8_t offset)
 {
   return getreg32(dev->base + offset);
@@ -153,31 +153,31 @@ static inline uint32_t stm32_getreg32(FAR struct stm32_lptim_dev_s *dev,
 /* Put a 32-bit register value by offset.
  */
 
-static inline void stm32_putreg32(FAR struct stm32_lptim_dev_s *dev,
+static inline void stm32_putreg32(struct stm32_lptim_dev_s *dev,
                                   uint8_t offset, uint32_t value)
 {
   putreg32(value, dev->base + offset);
 }
 
-static void stm32_lptim_setcfgr(FAR struct stm32_lptim_dev_s *dev,
+static void stm32_lptim_setcfgr(struct stm32_lptim_dev_s *dev,
                                 uint32_t regval)
 {
   stm32_putreg32(dev, STM32_LPTIM_CFGR_OFFSET, regval);
 }
 
-static void stm32_lptim_setperiod(FAR struct stm32_lptim_dev_s *dev,
+static void stm32_lptim_setperiod(struct stm32_lptim_dev_s *dev,
                                   uint32_t period)
 {
   stm32_putreg32(dev, STM32_LPTIM_ARR_OFFSET, period);
 }
 
-static void stm32_lptim_setcompare(FAR struct stm32_lptim_dev_s *dev,
+static void stm32_lptim_setcompare(struct stm32_lptim_dev_s *dev,
                                    uint32_t cmp)
 {
   stm32_putreg32(dev, STM32_LPTIM_CMP_OFFSET, cmp);
 }
 
-static uint32_t stm32_lptim_getcounter(FAR struct stm32_lptim_dev_s *dev)
+static uint32_t stm32_lptim_getcounter(struct stm32_lptim_dev_s *dev)
 {
   /* For a reliable LPTIM_CNT register read access, two consecutive
    *  read accesses must be performed and compared
@@ -198,7 +198,7 @@ static uint32_t stm32_lptim_getcounter(FAR struct stm32_lptim_dev_s *dev)
   return cnt1;
 }
 
-static int stm32_lptim_setinput(FAR struct stm32_lptim_dev_s *dev,
+static int stm32_lptim_setinput(struct stm32_lptim_dev_s *dev,
                                 uint32_t input, uint32_t mux)
 {
   switch (dev->base)
@@ -232,7 +232,7 @@ static int stm32_lptim_setinput(FAR struct stm32_lptim_dev_s *dev,
   return OK;
 }
 
-static void stm32_lptim_enable(FAR struct stm32_lptim_dev_s *dev, bool on)
+static void stm32_lptim_enable(struct stm32_lptim_dev_s *dev, bool on)
 {
   uint32_t val = stm32_getreg32(dev, STM32_LPTIM_CR_OFFSET);
 
@@ -248,7 +248,7 @@ static void stm32_lptim_enable(FAR struct stm32_lptim_dev_s *dev, bool on)
   stm32_putreg32(dev, STM32_LPTIM_CR_OFFSET, val);
 }
 
-static void stm32_lptim_start(FAR struct stm32_lptim_dev_s *dev,
+static void stm32_lptim_start(struct stm32_lptim_dev_s *dev,
                               stm32_lptim_start_mode_t mode)
 {
   uint32_t val = stm32_getreg32(dev, STM32_LPTIM_CR_OFFSET);
@@ -266,14 +266,14 @@ static void stm32_lptim_start(FAR struct stm32_lptim_dev_s *dev,
   stm32_putreg32(dev, STM32_LPTIM_CR_OFFSET, val);
 }
 
-static void stm32_lptim_resetcounter(FAR struct stm32_lptim_dev_s *dev)
+static void stm32_lptim_resetcounter(struct stm32_lptim_dev_s *dev)
 {
   uint32_t val = stm32_getreg32(dev, STM32_LPTIM_CR_OFFSET);
   val |= LPTIM_CR_COUNTRST;
   stm32_putreg32(dev, STM32_LPTIM_CR_OFFSET, val);
 }
 
-static void stm32_lptim_enablerar(FAR struct stm32_lptim_dev_s *dev, bool on)
+static void stm32_lptim_enablerar(struct stm32_lptim_dev_s *dev, bool on)
 {
   uint32_t val = stm32_getreg32(dev, STM32_LPTIM_CR_OFFSET);
 
@@ -289,7 +289,7 @@ static void stm32_lptim_enablerar(FAR struct stm32_lptim_dev_s *dev, bool on)
   stm32_putreg32(dev, STM32_LPTIM_CR_OFFSET, val);
 }
 
-static int stm32_lptim_setisr(FAR struct stm32_lptim_dev_s *dev,
+static int stm32_lptim_setisr(struct stm32_lptim_dev_s *dev,
                               xcpt_t handler, void *arg, int source)
 {
   int vectorno;
@@ -352,7 +352,7 @@ static int stm32_lptim_setisr(FAR struct stm32_lptim_dev_s *dev,
   return OK;
 }
 
-static void stm32_lptim_enableint(FAR struct stm32_lptim_dev_s *dev,
+static void stm32_lptim_enableint(struct stm32_lptim_dev_s *dev,
                                   int source)
 {
   DEBUGASSERT(dev != NULL);
@@ -362,7 +362,7 @@ static void stm32_lptim_enableint(FAR struct stm32_lptim_dev_s *dev,
   stm32_putreg32(dev, STM32_LPTIM_IER_OFFSET, val);
 }
 
-static void stm32_lptim_disableint(FAR struct stm32_lptim_dev_s *dev,
+static void stm32_lptim_disableint(struct stm32_lptim_dev_s *dev,
                                    int source)
 {
   DEBUGASSERT(dev != NULL);
@@ -372,7 +372,7 @@ static void stm32_lptim_disableint(FAR struct stm32_lptim_dev_s *dev,
   stm32_putreg32(dev, STM32_LPTIM_IER_OFFSET, val);
 }
 
-static void stm32_lptim_ackint(FAR struct stm32_lptim_dev_s *dev, int source)
+static void stm32_lptim_ackint(struct stm32_lptim_dev_s *dev, int source)
 {
   stm32_putreg32(dev, STM32_LPTIM_ICR_OFFSET, source);
 }
@@ -381,7 +381,7 @@ static void stm32_lptim_ackint(FAR struct stm32_lptim_dev_s *dev, int source)
  * Public Functions
  ****************************************************************************/
 
-FAR struct stm32_lptim_dev_s *stm32_lptim_init(int lptimer)
+struct stm32_lptim_dev_s *stm32_lptim_init(int lptimer)
 {
   struct stm32_lptim_dev_s *dev = NULL;
 
@@ -426,7 +426,7 @@ FAR struct stm32_lptim_dev_s *stm32_lptim_init(int lptimer)
   return dev;
 }
 
-int stm32_lptim_deinit(FAR struct stm32_lptim_dev_s * dev)
+int stm32_lptim_deinit(struct stm32_lptim_dev_s * dev)
 {
   DEBUGASSERT(dev != NULL);
 

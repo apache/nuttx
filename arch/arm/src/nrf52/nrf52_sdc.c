@@ -121,9 +121,9 @@ begin_packed_struct struct sdc_hci_cmd_le_set_random_address_s
  ****************************************************************************/
 
 uint8_t sdc_hci_cmd_vs_zephyr_write_bd_addr(
-  FAR const struct sdc_hci_cmd_vs_zephyr_write_bd_addr_s *p_params);
+  const struct sdc_hci_cmd_vs_zephyr_write_bd_addr_s *p_params);
 uint8_t sdc_hci_cmd_le_set_random_address(
-  FAR const struct sdc_hci_cmd_le_set_random_address_s *p_params);
+  const struct sdc_hci_cmd_le_set_random_address_s *p_params);
 
 /****************************************************************************
  * Private Function Prototypes
@@ -132,18 +132,18 @@ uint8_t sdc_hci_cmd_le_set_random_address(
 static void mpsl_assert_handler(const char *const file, const uint32_t line);
 static void sdc_fault_handler(const char *file, const uint32_t line);
 
-static int bt_open(FAR struct bt_driver_s *btdev);
-static int bt_hci_send(FAR struct bt_driver_s *btdev,
+static int bt_open(struct bt_driver_s *btdev);
+static int bt_hci_send(struct bt_driver_s *btdev,
                        enum bt_buf_type_e type,
-                       FAR void *data, size_t len);
+                       void *data, size_t len);
 
 static void on_hci(void);
 static void on_hci_worker(void *arg);
 
 static void low_prio_worker(void *arg);
 
-static int swi_isr(int irq, FAR void *context, FAR void *arg);
-static int power_clock_isr(int irq, FAR void *context, FAR void *arg);
+static int swi_isr(int irq, void *context, void *arg);
+static int power_clock_isr(int irq, void *context, void *arg);
 
 static void rng_handler(void);
 static void rtc0_handler(void);
@@ -180,7 +180,7 @@ static struct nrf52_sdc_dev_s g_sdc_dev;
  * Name: bt_open
  ****************************************************************************/
 
-static int bt_open(FAR struct bt_driver_s *btdev)
+static int bt_open(struct bt_driver_s *btdev)
 {
   return 0;
 }
@@ -189,9 +189,9 @@ static int bt_open(FAR struct bt_driver_s *btdev)
  * Name: bt_open
  ****************************************************************************/
 
-static int bt_hci_send(FAR struct bt_driver_s *btdev,
+static int bt_hci_send(struct bt_driver_s *btdev,
                        enum bt_buf_type_e type,
-                       FAR void *data, size_t len)
+                       void *data, size_t len)
 {
   int ret = -EIO;
 
@@ -356,7 +356,7 @@ static void on_hci(void)
  * Name: swi_isr
  ****************************************************************************/
 
-static int swi_isr(int irq, FAR void *context, FAR void *arg)
+static int swi_isr(int irq, void *context, void *arg)
 {
   work_queue(LPWORK, &g_sdc_dev.work, low_prio_worker, NULL, 0);
 
@@ -376,7 +376,7 @@ static void rng_handler(void)
  * Name: power_clock_isr
  ****************************************************************************/
 
-static int power_clock_isr(int irq, FAR void *context, FAR void *arg)
+static int power_clock_isr(int irq, void *context, void *arg)
 {
   MPSL_IRQ_CLOCK_HANDLER();
 

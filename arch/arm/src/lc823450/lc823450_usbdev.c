@@ -168,7 +168,7 @@ int lc823450_usbpullup(struct usbdev_s *dev, bool enable);
 static void subintr_usbdev(void);
 static void subintr_ep0(void);
 static void subintr_ep(uint8_t epnum);
-static int lc823450_usbinterrupt(int irq, void *context, FAR void *arg);
+static int lc823450_usbinterrupt(int irq, void *context, void *arg);
 #if defined(CONFIG_BATTERY) && defined(CONFIG_USBDEV_CHARGER)
 static void usb_reset_work_func(void *arg);
 #endif
@@ -401,7 +401,7 @@ static int lc823450_epconfigure(struct usbdev_ep_s *ep,
       priv->eplist[epnum].ep.maxpacket = GETUINT16(desc->mxpacketsize);
     }
 
-  DPRINTF("epnum = %d, ep = 0x%p, max = %d, speed = 0x%x, in = 0x%x\n",
+  DPRINTF("epnum = %d, ep = %p, max = %d, speed = 0x%x, in = 0x%x\n",
           epnum, ep, priv->eplist[epnum].ep.maxpacket,
           priv->usbdev.speed, priv->eplist[epnum].in);
 
@@ -1377,7 +1377,7 @@ static void subintr_ep(uint8_t epnum)
  *
  ****************************************************************************/
 
-static int lc823450_usbinterrupt(int irq, void *context, FAR void *arg)
+static int lc823450_usbinterrupt(int irq, void *context, void *arg)
 {
   uint32_t disr;
   int i;

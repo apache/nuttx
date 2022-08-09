@@ -1,0 +1,39 @@
+############################################################################
+# arch/arm/src/stm32wl5/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# The start-up, "head", file.  Only common vectors are support so there
+# isn't one.
+
+# Common ARM and Cortex-M4 files (copied from stm32/Make.defs)
+
+include armv7-m/Make.defs
+
+# Required STM32WL5 files
+
+CHIP_CSRCS  = stm32wl5_allocateheap.c stm32wl5_exti_gpio.c stm32wl5_gpio.c
+CHIP_CSRCS += stm32wl5_irq.c stm32wl5_lowputc.c stm32wl5_rcc.c
+CHIP_CSRCS += stm32wl5_serial.c stm32wl5_start.c stm32wl5_waste.c stm32wl5_uid.c
+CHIP_CSRCS += stm32wl5_lse.c stm32wl5_lsi.c stm32wl5_idle.c
+CHIP_CSRCS += stm32wl5_pwr.c stm32wl5_tim.c stm32wl5_flash.c stm32wl5_timerisr.c
+CHIP_CSRCS += stm32wl5_spi.c
+
+CSRCS-$(CONFIG_STM32WL5_IPCC) = stm32wl5_ipcc.c
+
+CHIP_CSRCS += $(CSRCS-y)

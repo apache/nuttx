@@ -272,7 +272,7 @@ static void rpmsgfs_mkpath(FAR struct rpmsgfs_mountpt_s *fs,
           break;
         }
 
-      usleep(RPMSGFS_RETRY_DELAY_MS * 1000);
+      usleep(RPMSGFS_RETRY_DELAY_MS * USEC_PER_MSEC);
       fs->timeout -= RPMSGFS_RETRY_DELAY_MS;
     }
 }
@@ -528,21 +528,7 @@ static ssize_t rpmsgfs_write(FAR struct file *filep, const char *buffer,
   FAR struct rpmsgfs_ofile_s *hf;
   ssize_t ret;
 
-  /* Sanity checks.  I have seen the following assertion misfire if
-   * CONFIG_DEBUG_MM is enabled while re-directing output to a
-   * file.  In this case, the debug output can get generated while
-   * the file is being opened,  FAT data structures are being allocated,
-   * and things are generally in a perverse state.
-   */
-
-#ifdef CONFIG_DEBUG_MM
-  if (filep->f_priv == NULL || filep->f_inode == NULL)
-    {
-      return -ENXIO;
-    }
-#else
   DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
-#endif
 
   /* Recover our private data from the struct file instance */
 
@@ -1088,6 +1074,10 @@ static int rpmsgfs_bind(FAR struct inode *blkdriver, FAR const void *data,
       return -ENOMEM;
     }
 
+  /* Set timeout default value */
+
+  fs->timeout = INT_MAX;
+
   ptr = strtok_r(options, ",", &saveptr);
   while (ptr != NULL)
     {
@@ -1129,7 +1119,6 @@ static int rpmsgfs_bind(FAR struct inode *blkdriver, FAR const void *data,
    */
 
   fs->fs_head = NULL;
-  fs->timeout = INT32_MAX;
 
   /* Now perform the mount.  */
 

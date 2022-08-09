@@ -32,7 +32,7 @@
 #include "amebaz_driver.h"
 #include "amebaz_wlan.h"
 
-int   amebaz_netdev_register(FAR struct amebaz_dev_s *priv);
-void  amebaz_netdev_notify_receive(FAR struct amebaz_dev_s *priv,
+int   amebaz_netdev_register(struct amebaz_dev_s *priv);
+void  amebaz_netdev_notify_receive(struct amebaz_dev_s *priv,
                                            int index, unsigned int len);
 #endif /* __ARCH_ARM_SRC_RTL8720C_AMEBAZ_NETDEV_H */

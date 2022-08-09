@@ -34,3 +34,7 @@ CHIP_ASRCS += litex_cache.S
 ifeq ($(CONFIG_LITEX_SDIO),y)
 CHIP_CSRCS += litex_sdio.c
 endif
+
+ifeq ($(CONFIG_LITEX_ETHMAC),y)
+CHIP_CSRCS += litex_emac.c
+endif

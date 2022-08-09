@@ -55,5 +55,7 @@ int initgroups(FAR const char *user, gid_t group)
    * Thus, just ignore this request silently and report success.
    */
 
+  UNUSED(user);
+  UNUSED(group);
   return 0;
 }

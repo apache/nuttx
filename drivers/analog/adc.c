@@ -148,14 +148,14 @@ static int adc_open(FAR struct file *filep)
                   /* Finally, Enable the ADC RX interrupt */
 
                   dev->ad_ops->ao_rxint(dev, true);
-
-                  /* Save the new open count on success */
-
-                  dev->ad_ocount = tmp;
                 }
 
               leave_critical_section(flags);
             }
+
+          /* Save the new open count on success */
+
+          dev->ad_ocount = tmp;
         }
 
       nxsem_post(&dev->ad_closesem);

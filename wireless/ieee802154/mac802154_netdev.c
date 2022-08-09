@@ -1334,7 +1334,6 @@ int mac802154netdev_register(MACHANDLE mac)
    * it up
    */
 
-  dev->d_flags = IFF_DOWN;
   return macnet_ifdown(&priv->md_dev.r_dev);
 
 errout:

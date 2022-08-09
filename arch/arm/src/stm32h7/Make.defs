@@ -35,10 +35,10 @@ CHIP_CSRCS += stm32_allocateheap.c stm32_exti_gpio.c stm32_gpio.c stm32_irq.c
 CHIP_CSRCS += stm32_start.c stm32_rcc.c stm32_lowputc.c stm32_serial.c
 CHIP_CSRCS += stm32_uid.c
 
-ifneq ($(CONFIG_SCHED_TICKLESS),y)
-CHIP_CSRCS += stm32_timerisr.c
-else
+ifeq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += stm32_tickless.c
+else
+CHIP_CSRCS += stm32_timerisr.c
 endif
 
 ifeq ($(CONFIG_STM32H7_ONESHOT),y)
@@ -55,6 +55,10 @@ endif
 
 ifeq ($(CONFIG_STM32H7_ADC),y)
 CHIP_CSRCS += stm32_adc.c
+endif
+
+ifeq ($(CONFIG_STM32H7_FDCAN),y)
+CHIP_CSRCS += stm32_fdcan_sock.c
 endif
 
 ifeq ($(CONFIG_STM32H7_BBSRAM),y)

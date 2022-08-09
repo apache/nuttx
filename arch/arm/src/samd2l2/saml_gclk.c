@@ -88,7 +88,7 @@ static void sam_gclck_waitsyncbusy(uint8_t gclk)
  *
  ****************************************************************************/
 
-void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
+void sam_gclk_config(const struct sam_gclkconfig_s *config)
 {
   irqstate_t flags;
   uintptr_t regaddr;

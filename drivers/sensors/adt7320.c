@@ -88,7 +88,6 @@ static int adt7320_readtemp(FAR struct adt7320_dev_s *priv, FAR b16_t *temp);
 /* Character driver methods */
 
 static int adt7320_open(FAR struct file *filep);
-static int adt7320_close(FAR struct file *filep);
 static ssize_t adt7320_read(FAR struct file *filep, FAR char *buffer,
                             size_t buflen);
 static ssize_t adt7320_write(FAR struct file *filep, FAR const char *buffer,
@@ -102,7 +101,7 @@ static int adt7320_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 static const struct file_operations g_adt7320fops =
 {
   adt7320_open,    /* open */
-  adt7320_close,   /* close */
+  NULL,            /* close */
   adt7320_read,    /* read */
   adt7320_write,   /* write */
   NULL,            /* seek */
@@ -333,19 +332,6 @@ static int adt7320_open(FAR struct file *filep)
       return -ENODEV;
     }
 
-  return OK;
-}
-
-/****************************************************************************
- * Name: adt7320_close
- *
- * Description:
- *   This routine is called when the ADT7320 device is closed.
- *
- ****************************************************************************/
-
-static int adt7320_close(FAR struct file *filep)
-{
   return OK;
 }
 

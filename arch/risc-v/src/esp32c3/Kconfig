@@ -112,7 +112,7 @@ choice ESP32C3_FLASH_FREQ
 	default ESP32C3_FLASH_FREQ_40M
 	---help---
 		SPI FLASH frequency
-		
+
 config ESP32C3_FLASH_FREQ_80M
 	bool "80 MHz"
 
@@ -156,6 +156,13 @@ config ESP32C3_CPU_FREQ_MHZ
 	default 80 if ESP32C3_CPU_FREQ_80
 	default 160 if ESP32C3_CPU_FREQ_160
 
+config ESP32C3_REGION_PROTECTION
+	bool "Enable region protection"
+	default y
+	select ARCH_USE_MPU
+	---help---
+		Configure the MPU to disable access to invalid memory regions.
+
 config ESP32C3_RT_TIMER
 	bool "Real-time Timer"
 	default n
@@ -167,11 +174,6 @@ config ESP32C3_RTC_HEAP
 	bool "Use the RTC memory as a separate heap"
 	select ARCH_HAVE_EXTRA_HEAPS
 	default n
-
-config ESP32C3_WIRELESS
-	bool
-	default n
-	select ESP32C3_RT_TIMER
 
 config ESP32C3_EXCEPTION_ENABLE_CACHE
 	bool
@@ -331,7 +333,7 @@ config ESP32C3_ADC1
 	select ESP32C3_ADC
 
 config ESP32C3_WIRELESS
-	bool "Wireless"
+	bool
 	default n
 	select NET
 	select ARCH_PHY_INTERRUPT
@@ -363,8 +365,6 @@ config ESP32C3_RSA_ACCELERATOR
 config ESP32C3_WIFI
 	bool "Wi-Fi"
 	default n
-	select NET
-	select ARCH_PHY_INTERRUPT
 	select ESP32C3_WIRELESS
 	---help---
 		Enable Wi-Fi support
@@ -1149,6 +1149,16 @@ config ESP32C3_PARTITION_TABLE_OFFSET
 	hex "Partition Table offset"
 	default 0x8000
 	depends on ESP32C3_APP_FORMAT_LEGACY
+
+if BUILD_PROTECTED
+
+config ESP32C3_USER_IMAGE_OFFSET
+	hex "User image offset"
+	default 0x90000
+	---help---
+		Offset in SPI Flash for flashing the User application firmware image.
+
+endif
 
 source "arch/risc-v/src/esp32c3/Kconfig.security"
 

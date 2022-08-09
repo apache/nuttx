@@ -1,9 +1,5 @@
 /****************************************************************************
-<<<<<<< HEAD:include/nuttx/ioexpander/ioe_dummy.h
- * include/nuttx/ioexpander/ioe_dummy.h
-=======
  * arch/sparc/src/bm3803/chip.h
->>>>>>> mirtos/master:arch/sparc/src/bm3803/chip.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,31 +18,13 @@
  *
  ****************************************************************************/
 
-<<<<<<< HEAD:include/nuttx/ioexpander/ioe_dummy.h
-#ifndef __INCLUDE_NUTTX_IOEXPANDER_IOE_DUMMY_H
-#define __INCLUDE_NUTTX_IOEXPANDER_IOE_DUMMY_H
-=======
 #ifndef __ARCH_SPARC_SRC_BM3803_CHIP_H
 #define __ARCH_SPARC_SRC_BM3803_CHIP_H
->>>>>>> mirtos/master:arch/sparc/src/bm3803/chip.h
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-<<<<<<< HEAD:include/nuttx/ioexpander/ioe_dummy.h
-#include <nuttx/ioexpander/ioexpander.h>
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef CONFIG_IOEXPANDER_DUMMY
-FAR struct ioexpander_dev_s *ioe_dummy_initialize(void);
-#endif
-
-#endif /* __INCLUDE_NUTTX_IOEXPANDER_IOE_DUMMY_H */
-=======
 #include <nuttx/config.h>
 
 /* Include only the memory map.  Other chip hardware files should then
@@ -68,4 +46,3 @@ FAR struct ioexpander_dev_s *ioe_dummy_initialize(void);
 
 #endif /* __ARCH_SPARC_SRC_BM3803_CHIP_H */
 
->>>>>>> mirtos/master:arch/sparc/src/bm3803/chip.h

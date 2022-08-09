@@ -161,7 +161,7 @@ void apb_free(FAR struct ap_buffer_s *apb)
 
 void apb_reference(FAR struct ap_buffer_s *apb)
 {
-  /* Do we need any thread protection here?  Almost certaily... */
+  /* Do we need any thread protection here?  Almost certainly... */
 
   apb_semtake(apb);
   apb->crefs++;

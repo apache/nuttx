@@ -408,9 +408,11 @@ static void ssd1351_write(FAR struct ssd1351_dev_s *priv, uint8_t cmd,
 
 /* LCD Data Transfer Methods */
 
-static int ssd1351_putrun(fb_coord_t row, fb_coord_t col,
+static int ssd1351_putrun(FAR struct lcd_dev_s *dev,
+                          fb_coord_t row, fb_coord_t col,
                           FAR const uint8_t *buffer, size_t npixels);
-static int ssd1351_getrun(fb_coord_t row, fb_coord_t col,
+static int ssd1351_getrun(FAR struct lcd_dev_s *dev,
+                          fb_coord_t row, fb_coord_t col,
                           FAR uint8_t *buffer, size_t npixels);
 
 /* LCD Configuration */
@@ -690,6 +692,7 @@ static void ssd1351_setcursor(FAR struct ssd1351_dev_s *priv, uint8_t col,
  *   This method can be used to write a partial raster line to the LCD:
  *
  * Input Parameters:
+ *   dev     - The lcd device
  *   row     - Starting row to write to (range: 0 <= row < yres)
  *   col     - Starting column to write to (range: 0 <= col <= xres-npixels
  *   buffer  - The buffer containing the run to be written to the LCD
@@ -698,10 +701,11 @@ static void ssd1351_setcursor(FAR struct ssd1351_dev_s *priv, uint8_t col,
  *
  ****************************************************************************/
 
-static int ssd1351_putrun(fb_coord_t row, fb_coord_t col,
+static int ssd1351_putrun(FAR struct lcd_dev_s *dev,
+                          fb_coord_t row, fb_coord_t col,
                           FAR const uint8_t *buffer, size_t npixels)
 {
-  FAR struct ssd1351_dev_s *priv = &g_lcddev;
+  FAR struct ssd1351_dev_s *priv = (FAR struct ssd1351_dev_s *)dev;
 
   /* Sanity check */
 
@@ -736,6 +740,7 @@ static int ssd1351_putrun(fb_coord_t row, fb_coord_t col,
  *   This method can be used to read a partial raster line from the LCD.
  *
  * Input Parameters:
+ *   dev     - The lcd device
  *   row     - Starting row to read from (range: 0 <= row < yres)
  *   col     - Starting column to read from (range: 0 <= col <= xres-npixels)
  *   buffer  - The buffer in which to return the run read from the LCD
@@ -744,11 +749,12 @@ static int ssd1351_putrun(fb_coord_t row, fb_coord_t col,
  *
  ****************************************************************************/
 
-static int ssd1351_getrun(fb_coord_t row, fb_coord_t col,
+static int ssd1351_getrun(FAR struct lcd_dev_s *dev,
+                          fb_coord_t row, fb_coord_t col,
                           FAR uint8_t *buffer, size_t npixels)
 {
 #if defined(CONFIG_SSD1351_PARALLEL8BIT) && !defined(CONFIG_LCD_NOGETRUN)
-  FAR struct ssd1351_dev_s *priv = &g_lcddev;
+  FAR struct ssd1351_dev_s *priv = (FAR struct ssd1351_dev_s *)dev;
 
   /* Sanity check */
 
@@ -822,6 +828,7 @@ static int ssd1351_getplaneinfo(FAR struct lcd_dev_s *dev,
   pinfo->getrun = ssd1351_getrun;
   pinfo->buffer = (uint8_t *)priv->runbuffer;
   pinfo->bpp    = SSD1351_BPP;
+  pinfo->dev    = dev;
 
   ginfo("planeno: %u bpp: %u\n", planeno, pinfo->bpp);
   return OK;

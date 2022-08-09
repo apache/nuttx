@@ -125,7 +125,7 @@
 int board_app_initialize(uintptr_t arg)
 {
 #ifdef NSH_HAVEMMCSD
-  FAR struct spi_dev_s *ssp;
+  struct spi_dev_s *ssp;
 #endif
   int ret;
 

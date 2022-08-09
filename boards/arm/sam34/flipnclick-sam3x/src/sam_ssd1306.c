@@ -84,10 +84,10 @@
  *
  ****************************************************************************/
 
-FAR struct lcd_dev_s *sam_graphics_setup(unsigned int devno)
+struct lcd_dev_s *sam_graphics_setup(unsigned int devno)
 {
-  FAR struct spi_dev_s *spi;
-  FAR struct lcd_dev_s *dev;
+  struct spi_dev_s *spi;
+  struct lcd_dev_s *dev;
 
   /* Configure the OLED GPIOs. This initial configuration is RESET low,
    * putting the OLED into reset state.
@@ -151,7 +151,7 @@ FAR struct lcd_dev_s *sam_graphics_setup(unsigned int devno)
  ****************************************************************************/
 
 #ifdef CONFIG_NXSTART_EXTERNINIT
-FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
+struct lcd_dev_s *board_graphics_setup(unsigned int devno)
 {
   return sam_graphics_setup(devno);
 }

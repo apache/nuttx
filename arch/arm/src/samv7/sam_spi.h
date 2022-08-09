@@ -159,7 +159,7 @@ struct spi_slave_ctrlr_s; /* Forward reference */
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *sam_spibus_initialize(int port);
+struct spi_dev_s *sam_spibus_initialize(int port);
 
 /****************************************************************************
  * Name: sam_spi_slave_initialize
@@ -176,7 +176,7 @@ FAR struct spi_dev_s *sam_spibus_initialize(int port);
  *
  ****************************************************************************/
 
-FAR struct spi_slave_ctrlr_s *sam_spi_slave_initialize(int port);
+struct spi_slave_ctrlr_s *sam_spi_slave_initialize(int port);
 
 /****************************************************************************
  * Name:  sam_spi[0|1]select, sam_spi[0|1]status, and sam_spi[0|1]cmddata
@@ -262,10 +262,10 @@ void sam_spi1select(uint32_t devid, bool selected);
  ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_SPI0
-uint8_t sam_spi0status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t sam_spi0status(struct spi_dev_s *dev, uint32_t devid);
 #endif
 #ifdef CONFIG_SAMV7_SPI1
-uint8_t sam_spi1status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t sam_spi1status(struct spi_dev_s *dev, uint32_t devid);
 #endif
 
 /****************************************************************************
@@ -294,10 +294,10 @@ uint8_t sam_spi1status(FAR struct spi_dev_s *dev, uint32_t devid);
 
 #ifdef CONFIG_SPI_CMDDATA
 #ifdef CONFIG_SAMV7_SPI0_MASTER
-int sam_spi0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int sam_spi0cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #ifdef CONFIG_SAMV7_SPI1_MASTER
-int sam_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int sam_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif /* CONFIG_SPI_CMDDATA */
 

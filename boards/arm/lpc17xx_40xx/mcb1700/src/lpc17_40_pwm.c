@@ -45,9 +45,9 @@
 
 #ifdef CONFIG_PWM
 
-FAR struct pwm_lowerhalf_s *lpc17_40_pwminitialize(int timer);
-FAR struct pwm_lowerhalf_s *lpc17_40_mcpwminitialize(int timer);
-FAR struct pwm_lowerhalf_s *lpc17_40_timerinitialize(int timer);
+struct pwm_lowerhalf_s *lpc17_40_pwminitialize(int timer);
+struct pwm_lowerhalf_s *lpc17_40_mcpwminitialize(int timer);
+struct pwm_lowerhalf_s *lpc17_40_timerinitialize(int timer);
 
 /****************************************************************************
  * Public Functions

@@ -549,7 +549,7 @@ static int  max3421e_ep0configure(FAR struct usbhost_driver_s *drvr,
               usbhost_ep_t ep0, uint8_t funcaddr, uint8_t speed,
               uint16_t maxpacketsize);
 static int  max3421e_epalloc(FAR struct usbhost_driver_s *drvr,
-              FAR const FAR struct usbhost_epdesc_s *epdesc,
+              FAR const struct usbhost_epdesc_s *epdesc,
               FAR usbhost_ep_t *ep);
 static int  max3421e_epfree(FAR struct usbhost_driver_s *drvr,
               usbhost_ep_t ep);

@@ -68,7 +68,6 @@ endif
 LDFLAGS += -nostdlib
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  LDFLAGS          += -g
   ARCHOPTIMIZATION += -g
 endif
 

@@ -59,8 +59,6 @@ struct lcddev_dev_s
 
 /* Character driver methods */
 
-static int lcddev_open(FAR struct file *filep);
-static int lcddev_close(FAR struct file *filep);
 static int lcddev_ioctl(FAR struct file *filep, int cmd,
                         unsigned long arg);
 
@@ -70,8 +68,8 @@ static int lcddev_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations lcddev_fops =
 {
-  lcddev_open,  /* open */
-  lcddev_close, /* close */
+  NULL,         /* open */
+  NULL,         /* close */
   NULL,         /* read */
   NULL,         /* write */
   NULL,         /* seek */
@@ -85,28 +83,6 @@ static const struct file_operations lcddev_fops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: lcddev_open
- ****************************************************************************/
-
-static int lcddev_open(FAR struct file *filep)
-{
-  /* Nothing to do */
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: lcddev_close
- ****************************************************************************/
-
-static int lcddev_close(FAR struct file *filep)
-{
-  /* Nothing to do */
-
-  return OK;
-}
 
 /****************************************************************************
  * Name: lcddev_ioctl
@@ -126,16 +102,18 @@ static int lcddev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         FAR struct lcddev_run_s *lcd_run =
             (FAR struct lcddev_run_s *)arg;
 
-        ret = priv->planeinfo.getrun(lcd_run->row, lcd_run->col,
-                                     lcd_run->data, lcd_run->npixels);
+        ret = priv->planeinfo.getrun(priv->lcd_ptr, lcd_run->row,
+                                     lcd_run->col, lcd_run->data,
+                                     lcd_run->npixels);
       }
       break;
     case LCDDEVIO_PUTRUN:
       {
-        const FAR struct lcddev_run_s *lcd_run =
-            (const FAR struct lcddev_run_s *)arg;
+        FAR const struct lcddev_run_s *lcd_run =
+            (FAR const struct lcddev_run_s *)arg;
 
-        ret = priv->planeinfo.putrun(lcd_run->row, lcd_run->col,
+        ret = priv->planeinfo.putrun(priv->lcd_ptr,
+                                     lcd_run->row, lcd_run->col,
                                      lcd_run->data, lcd_run->npixels);
       }
       break;
@@ -146,7 +124,8 @@ static int lcddev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         if (priv->planeinfo.getarea)
           {
-            ret = priv->planeinfo.getarea(lcd_area->row_start,
+            ret = priv->planeinfo.getarea(priv->lcd_ptr,
+                                          lcd_area->row_start,
                                           lcd_area->row_end,
                                           lcd_area->col_start,
                                           lcd_area->col_end,
@@ -162,7 +141,8 @@ static int lcddev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
             for (row = lcd_area->row_start; row <= lcd_area->row_end; row++)
               {
-                ret = priv->planeinfo.getrun(row, lcd_area->col_start, buf,
+                ret = priv->planeinfo.getrun(priv->lcd_ptr, row,
+                                             lcd_area->col_start, buf,
                                              npixels);
                 if (ret < 0)
                   {
@@ -176,12 +156,13 @@ static int lcddev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
     case LCDDEVIO_PUTAREA:
       {
-        const FAR struct lcddev_area_s *lcd_area =
-            (const FAR struct lcddev_area_s *)arg;
+        FAR const struct lcddev_area_s *lcd_area =
+            (FAR const struct lcddev_area_s *)arg;
 
         if (priv->planeinfo.putarea)
           {
-            ret = priv->planeinfo.putarea(lcd_area->row_start,
+            ret = priv->planeinfo.putarea(priv->lcd_ptr,
+                                          lcd_area->row_start,
                                           lcd_area->row_end,
                                           lcd_area->col_start,
                                           lcd_area->col_end,
@@ -197,7 +178,8 @@ static int lcddev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
             for (row = lcd_area->row_start; row <= lcd_area->row_end; row++)
               {
-                ret = priv->planeinfo.putrun(row, lcd_area->col_start, buf,
+                ret = priv->planeinfo.putrun(priv->lcd_ptr, row,
+                                             lcd_area->col_start, buf,
                                              npixels);
                 if (ret < 0)
                   {

@@ -92,25 +92,6 @@ g_intstacktop:
  ****************************************************************************/
 
 /****************************************************************************
- * Macro extract_msb - return the input with only the highest bit set.
- *
- * Entry Conditions/Side Effects:
- *   Input  : "ain"  - Input value, clobbered.
- *   Output : "aout" - Output value, has only one bit set, MSB of "ain".
- *
- * The two arguments must be different AR registers.
- *
- ****************************************************************************/
-
-	.macro	extract_msb	aout ain
-1:
-	addi	\aout, \ain, -1				/* aout = ain - 1 */
-	and		\ain, \ain, \aout			/* ain  = ain & aout */
-	bnez	\ain, 1b					    /* Repeat until ain == 0 */
-	addi	\aout, \aout, 1				/* Return aout + 1 */
-	.endm
-
-/****************************************************************************
  * Macro dispatch_c_isr level mask tmp
  *
  * Description:
@@ -129,9 +110,8 @@ g_intstacktop:
  *   a12   - register save area
  *
  * Exit Conditions:
- *   This macro will use registers a0 and a2-a5 and a12.
- *   a1  - May point to the new thread's SP
- *   a12 - Points to the register save area (which may not be on the stack).
+ *   This macro will use registers a2, a3 and a4.
+ *   a2 - Points to the, possbily, new register save area.
  *
  ****************************************************************************/
 
@@ -150,81 +130,32 @@ g_intstacktop:
 
 	ps_setup	\level \tmp
 
-#ifdef __XTENSA_CALL0_ABI__
-	/* Get mask of pending, enabled interrupts at this level into a2. */
+	/* Get the mask of pending, enabled interrupts at this level. */
 
-	rsr		a2, INTENABLE
-	rsr		a3, INTERRUPT
-	movi	a4, \mask
-	and		a2, a2, a3
-	and		a2, a2, a4				/* a2 = Set of pending, enabled interrupts for this level */
-	beqz	a2, 1f						/* Nothing to do */
+	rsr    ARG1, INTENABLE
+	rsr    a3, INTERRUPT
+	movi   a4, \mask
+	and    ARG1, ARG1, a3
+	and    ARG1, ARG1, a4           /* Set of pending, enabled interrupts for this level */
+	beqz   ARG1, 1f                 /* Nothing to do */
 
-	/* Call xtensa_int_decode passing the address of the register save area
-	 * as a parameter (A3).
+	/* Link the pre-exception frame for debugging. At this point, a12 points to the
+	 * allocated and filled exception stack frame (old value of SP in case of
+	 * an interrupt stack).
 	 */
 
-		          						  /* Argument 1: Set of CPU interrupt to dispatch */
-	mov		a3, a12					    /* Argument 2: Top of stack = register save area */
-	call0	xtensa_int_decode	  /* Call xtensa_int_decode */
+	exception_backtrace a12 \level
 
-	/* On return from xtensa_int_decode, a2 will contain the address of the new
-	 * register save area.  Usually this would be the same as the current SP.
-	 * But in the event of a context switch, a2 will instead refer to the TCB
-	 * register save area.  This may or may not reside on a stack.
+		          					    /* Argument 1: Set of CPU interrupt to dispatch */
+	mov     ARG2, a12					/* Argument 2: Top of stack = register save area */
+	CALL    xtensa_int_decode
+
+	/* xtensa_int_decode returns the address of the new register save area.
+	 * Usually this would be the same as the current SP. But in the event of
+	 * a context switch, it will instead refer to the TCB register save area.
 	 */
 
-	mov		a12, a2						/* Switch to the save area of the new thread */
-
-#else
-	/* Get mask of pending, enabled interrupts at this level into a6. */
-
-	rsr		a6, INTENABLE
-	rsr		a2, INTERRUPT
-	movi	a3, \mask
-	and		a6, a6, a2
-	and		a6, a6, a3				/* a6 = Set of pending, enabled interrupts for this level */
-	beqz	a6, 1f						/* Nothing to do */
-
-	/* At this point, the exception frame should have been allocated and filled,
-	 * and current sp points to the interrupt stack (if enabled). Copy the
-	 * pre-exception's base save area below the current SP. We saved the SP in A12
-	 * before getting here.
-	 */
-
-#ifdef CONFIG_XTENSA_INTBACKTRACE
-	l32i a3, a12, (4 * REG_A0)        /* Copy pre-exception a0 (return address) */
-	s32e a3, sp, -16
-	l32i a3, a12, (4 * REG_A1)        /* Copy pre-exception a1 (stack pointer) */
-	s32e a3, sp, -12
-
-	/* Backtracing only needs a0 and a1, no need to create full base save area.
-	 * Also need to change current frame's return address to point to pre-exception's
-	 * last run instruction.
-	 */
-
-	rsr a0, EPC_1 + \level - 1  /* return address */
-	movi a4, 0xc0000000         /* constant with top 2 bits set (call size) */
-	or a0, a0, a4               /* set top 2 bits */
-	addx2 a0, a4, a0            /* clear top bit -- simulating call4 size   */
-#endif
-
-	/* Call xtensa_int_decode passing the address of the register save area
-	 * as a parameter (A7).
-	 */
-
-										        /* Argument 1: Set of CPU interrupt to dispatch */
-	mov		a7, a12					  	/* Argument 2: Top of stack = register save area */
-	call4	xtensa_int_decode		/* Call xtensa_int_decode */
-
-	/* On return from xtensa_int_decode, a6 will contain the address of the new
-	 * register save area.  Usually this would be the same as the current SP.
-	 * But in the event of a context switch, a6 will instead refer to the TCB
-	 * register save area.  This may or may not reside on a stack.
-	 */
-
-	mov		a12, a6						/* Switch to the save area of the new thread */
-#endif
+	mov		a2, RETVAL
 
 #if CONFIG_ARCH_INTERRUPTSTACK < 15
 	addi	sp, sp, XCPTCONTEXT_SIZE
@@ -251,66 +182,49 @@ g_intstacktop:
 
 _xtensa_level1_handler:
 
-	mov		a0, sp							              /* Save SP in A0 */
-	addi	sp, sp, -XCPTCONTEXT_SIZE   /* Allocate interrupt stack frame */
-	s32i	a0, sp, (4 * REG_A1)			        /* Save pre-interrupt SP */
-	rsr		a0, PS						                /* Save interruptee's PS */
-	s32i	a0, sp, (4 * REG_PS)
-	rsr		a0, EPC_1						              /* Save interruptee's PC */
-	s32i	a0, sp, (4 * REG_PC)
-	rsr		a0, EXCSAVE_1					            /* Save interruptee's a0 */
-	s32i	a0, sp, (4 * REG_A0)
+	/* Create an interrupt frame and save minimal context. */
 
-	/* Save rest of interrupt context. */
+	exception_entry 1
 
-	s32i	a2, sp, (4 * REG_A2)
-	s32i	a3, sp, (4 * REG_A3)
-	call0	_xtensa_context_save			/* Save full register state */
+	/* Save the rest of the state context. */
 
-  /* Save current SP before (possibly) overwriting it, it's the register save
-   * area. This value will be used later by dispatch_c_isr to retrieve the
-   * register save area.
-   */
+	call0	_xtensa_context_save
 
-  mov  a12, sp
+	/* Save current SP before (possibly) overwriting it, it's the register save
+	 * area. This value will be used later by dispatch_c_isr to retrieve the
+	 * register save area.
+	 */
 
-  /* Switch to an interrupt stack if we have one */
+	mov  a12, sp
+
+	/* Switch to an interrupt stack if we have one */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
-  setintstack a13 a14
+	setintstack a13 a14
 #endif
 
 	/* Decode and dispatch the interrupt.  In the event of an interrupt
 	 * level context dispatch_c_isr() will (1) switch stacks to the new
 	 * thread's and (2) provide the address of the register state save
-	 * area in a12.  NOTE that the state save area may or may not lie
-	 * in the new thread's stack.
+	 * area in a2.
 	 */
 
 	dispatch_c_isr	1 XCHAL_INTLEVEL1_MASK a0
 
 	/* Restore registers in preparation to return from interrupt */
 
-	mov		a2, a12							      /* a2 = address of new state save area */
-	call0	_xtensa_context_restore		/* (preserves a2) */
+	call0   _xtensa_context_restore     /* Preserves a2 */
 
 	/* Restore only level-specific regs (the rest were already restored) */
 
-	l32i	a0, a2, (4 * REG_PS)			/* Retrieve interruptee's PS */
-	wsr		a0, PS
-	l32i	a0, a2, (4 * REG_PC)			/* Retrieve interruptee's PC */
-	wsr		a0, EPC_1
-	l32i	a0, a2, (4 * REG_A0)			/* Retrieve interruptee's A0 */
-	l32i  sp, a2, (4 * REG_A1)      /* Retrieve interrupt stack frame */
-	l32i	a2, a2, (4 * REG_A2)			/* Retrieve interruptee's A2 */
-	rsync								          	/* Ensure PS and EPC written */
+	exception_exit 1
 
 	/* Return from exception. RFE returns from either the UserExceptionVector
 	 * or the KernelExceptionVector.  RFE sets PS.EXCM back to 0, and then
 	 * jumps to the address in EPC[1]. PS.UM and PS.WOE are left unchanged.
 	 */
 
-	rfe										          /* And return from "exception" */
+	rfe
 
 /****************************************************************************
  * MEDIUM PRIORITY (LEVEL 2+) INTERRUPT LOW LEVEL HANDLERS.
@@ -346,21 +260,13 @@ _xtensa_level1_handler:
 
 _xtensa_level2_handler:
 
-	mov		a0, sp							/* Save SP in A0 */
-	addi	sp, sp, -XCPTCONTEXT_SIZE	/* Allocate interrupt stack frame */
-	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
-	rsr		a0, EPS_2						/* Save interruptee's PS */
-	s32i	a0, sp, (4 * REG_PS)
-	rsr		a0, EPC_2						/* Save interruptee's PC */
-	s32i	a0, sp, (4 * REG_PC)
-	rsr		a0, EXCSAVE_2					/* Save interruptee's a0 */
-	s32i	a0, sp, (4 * REG_A0)
+	/* Create an interrupt frame and save minimal context. */
 
-	/* Save rest of interrupt context. */
+	exception_entry 2
 
-	s32i	a2, sp, (4 * REG_A2)
-	s32i	a3, sp, (4 * REG_A3)
-	call0	_xtensa_context_save			/* Save full register state */
+	/* Save the rest of the state context. */
+
+	call0	_xtensa_context_save
 
 	/* Save current SP before (possibly) overwriting it, it's the register save
 	 * area. This value will be used later by dispatch_c_isr to retrieve the
@@ -378,29 +284,20 @@ _xtensa_level2_handler:
 	/* Decode and dispatch the interrupt.  In the event of an interrupt
 	 * level context dispatch_c_isr() will (1) switch stacks to the new
 	 * thread's and (2) provide the address of the register state save
-	 * area in a12.  NOTE that the state save area may or may not lie
-	 * in the new thread's stack.
+	 * area in a2.
 	 */
 
 	dispatch_c_isr	2 XCHAL_INTLEVEL2_MASK a0
 
 	/* Restore registers in preparation to return from interrupt */
 
-	mov		a2, a12							/* a2 = address of new state save area */
-	call0	_xtensa_context_restore			/* (preserves a2) */
+	call0	_xtensa_context_restore			/* Preserves a2 */
 
 	/* Restore only level-specific regs (the rest were already restored) */
 
-	l32i	a0, a2, (4 * REG_PS)			/* Retrieve interruptee's PS */
-	wsr		a0, EPS_2
-	l32i	a0, a2, (4 * REG_PC)			/* Retrieve interruptee's PC */
-	wsr		a0, EPC_2
-	l32i	a0, a2, (4 * REG_A0)			/* Retrieve interruptee's A0 */
-	l32i	sp, a2, (4 * REG_A1)			/* Remove interrupt stack frame */
-	l32i	a2, a2, (4 * REG_A2)			/* Retrieve interruptee's A2 */
-	rsync									/* Ensure EPS and EPC written */
+	exception_exit 2
 
-	/* Return from interrupt.  RFI  restores the PS from EPS_2 and jumps to
+	/* Return from interrupt.  RFI restores the PS from EPS_2 and jumps to
 	 * the address in EPC_2.
 	 */
 
@@ -416,21 +313,13 @@ _xtensa_level2_handler:
 
 _xtensa_level3_handler:
 
-	mov		a0, sp							/* Save SP in A0 */
-	addi	sp, sp, -XCPTCONTEXT_SIZE	/* Allocate interrupt stack frame */
-	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
-	rsr		a0, EPS_3						/* Save interruptee's PS */
-	s32i	a0, sp, (4 * REG_PS)
-	rsr		a0, EPC_3						/* Save interruptee's PC */
-	s32i	a0, sp, (4 * REG_PC)
-	rsr		a0, EXCSAVE_3					/* Save interruptee's a0 */
-	s32i	a0, sp, (4 * REG_A0)
+	/* Create an interrupt frame and save minimal context. */
 
-	/* Save rest of interrupt context. */
+	exception_entry 3
 
-	s32i	a2, sp, (4 * REG_A2)
-	s32i	a3, sp, (4 * REG_A3)
-	call0	_xtensa_context_save			/* Save full register state */
+	/* Save the rest of the state context. */
+
+	call0	_xtensa_context_save
 
 	/* Save current SP before (possibly) overwriting it, it's the register save
 	 * area. This value will be used later by dispatch_c_isr to retrieve the
@@ -448,29 +337,20 @@ _xtensa_level3_handler:
 	/* Decode and dispatch the interrupt.  In the event of an interrupt
 	 * level context dispatch_c_isr() will (1) switch stacks to the new
 	 * thread's and (2) provide the address of the register state save
-	 * area in a12.  NOTE that the state save area may or may not lie
-	 * in the new thread's stack.
+	 * area in a2.
 	 */
 
 	dispatch_c_isr	3 XCHAL_INTLEVEL3_MASK a0
 
 	/* Restore registers in preparation to return from interrupt */
 
-	mov		a2, a12							/* a2 = address of new state save area */
-	call0	_xtensa_context_restore			/* (preserves a2) */
+	call0	_xtensa_context_restore			/* Preserves a2 */
 
 	/* Restore only level-specific regs (the rest were already restored) */
 
-	l32i	a0, a2, (4 * REG_PS)			/* Retrieve interruptee's PS */
-	wsr		a0, EPS_3
-	l32i	a0, a2, (4 * REG_PC)			/* Retrieve interruptee's PC */
-	wsr		a0, EPC_3
-	l32i	a0, a2, (4 * REG_A0)			/* Retrieve interruptee's A0 */
-	l32i	sp, a2, (4 * REG_A1)			/* Remove interrupt stack frame */
-	l32i	a2, a2, (4 * REG_A2)			/* Retrieve interruptee's A2 */
-	rsync									/* Ensure EPS and EPC written */
+	exception_exit 3
 
-	/* Return from interrupt.  RFI  restores the PS from EPS_3 and jumps to
+	/* Return from interrupt.  RFI restores the PS from EPS_3 and jumps to
 	 * the address in EPC_3.
 	 */
 
@@ -486,21 +366,13 @@ _xtensa_level3_handler:
 
 _xtensa_level4_handler:
 
-	mov		a0, sp							/* Save SP in A0 */
-	addi	sp, sp, -XCPTCONTEXT_SIZE	/* Allocate interrupt stack frame */
-	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
-	rsr		a0, EPS_4						/* Save interruptee's PS */
-	s32i	a0, sp, (4 * REG_PS)
-	rsr		a0, EPC_4						/* Save interruptee's PC */
-	s32i	a0, sp, (4 * REG_PC)
-	rsr		a0, EXCSAVE_4					/* Save interruptee's a0 */
-	s32i	a0, sp, (4 * REG_A0)
+	/* Create an interrupt frame and save minimal context. */
 
-	/* Save rest of interrupt context. */
+	exception_entry 4
 
-	s32i	a2, sp, (4 * REG_A2)
-	s32i	a3, sp, (4 * REG_A3)
-	call0	_xtensa_context_save			/* Save full register state */
+	/* Save the rest of the state context. */
+
+	call0	_xtensa_context_save
 
 	/* Save current SP before (possibly) overwriting it, it's the register save
 	 * area. This value will be used later by dispatch_c_isr to retrieve the
@@ -518,29 +390,20 @@ _xtensa_level4_handler:
 	/* Decode and dispatch the interrupt.  In the event of an interrupt
 	 * level context dispatch_c_isr() will (1) switch stacks to the new
 	 * thread's and (2) provide the address of the register state save
-	 * area in a12.  NOTE that the state save area may or may not lie
-	 * in the new thread's stack.
+	 * area in a2.
 	 */
 
 	dispatch_c_isr	4 XCHAL_INTLEVEL4_MASK a0
 
 	/* Restore registers in preparation to return from interrupt */
 
-	mov		a2, a12							/* a2 = address of new state save area */
-	call0	_xtensa_context_restore			/* (presevers a2) */
+	call0	_xtensa_context_restore			/* Preserves a2 */
 
 	/* Restore only level-specific regs (the rest were already restored) */
 
-	l32i	a0, a2, (4 * REG_PS)			/* Retrieve interruptee's PS */
-	wsr		a0, EPS_4
-	l32i	a0, a2, (4 * REG_PC)			/* Retrieve interruptee's PC */
-	wsr		a0, EPC_4
-	l32i	a0, a2, (4 * REG_A0)			/* Retrieve interruptee's A0 */
-	l32i	sp, a2, (4 * REG_A1)			/* Remove interrupt stack frame */
-	l32i	a2, a2, (4 * REG_A2)			/* Retrieve interruptee's A2 */
-	rsync									/* Ensure EPS and EPC written */
+	exception_exit 4
 
-	/* Return from interrupt.  RFI  restores the PS from EPS_4 and jumps to
+	/* Return from interrupt.  RFI restores the PS from EPS_4 and jumps to
 	 * the address in EPC_4.
 	 */
 
@@ -556,21 +419,13 @@ _xtensa_level4_handler:
 
 _xtensa_level5_handler:
 
-	mov		a0, sp							/* Save SP in A0 */
-	addi	sp, sp, -XCPTCONTEXT_SIZE	/* Allocate interrupt stack frame */
-	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
-	rsr		a0, EPS_5						/* Save interruptee's PS */
-	s32i	a0, sp, (4 * REG_PS)
-	rsr		a0, EPC_5						/* Save interruptee's PC */
-	s32i	a0, sp, (4 * REG_PC)
-	rsr		a0, EXCSAVE_5					/* Save interruptee's a0 */
-	s32i	a0, sp, (4 * REG_A0)
+	/* Create an interrupt frame and save minimal context. */
 
-	/* Save rest of interrupt context. */
+	exception_entry 5
 
-	s32i	a2, sp, (4 * REG_A2)
-	s32i	a3, sp, (4 * REG_A3)
-	call0	_xtensa_context_save			/* Save full register state */
+	/* Save the rest of the state context. */
+
+	call0	_xtensa_context_save
 
 	/* Save current SP before (possibly) overwriting it, it's the register save
 	 * area. This value will be used later by dispatch_c_isr to retrieve the
@@ -588,29 +443,20 @@ _xtensa_level5_handler:
 	/* Decode and dispatch the interrupt.  In the event of an interrupt
 	 * level context dispatch_c_isr() will (1) switch stacks to the new
 	 * thread's and (2) provide the address of the register state save
-	 * area in a12.  NOTE that the state save area may or may not lie
-	 * in the new thread's stack.
+	 * area in a2.
 	 */
 
 	dispatch_c_isr	5 XCHAL_INTLEVEL5_MASK a0
 
 	/* Restore registers in preparation to return from interrupt */
 
-	mov		a2, a12							/* a2 = address of new state save area */
-	call0	_xtensa_context_restore			/* (preserves a2) */
+	call0	_xtensa_context_restore			/* Preserves a2 */
 
 	/* Restore only level-specific regs (the rest were already restored) */
 
-	l32i	a0, a2, (4 * REG_PS)			/* Retrieve interruptee's PS */
-	wsr		a0, EPS_5
-	l32i	a0, a2, (4 * REG_PC)			/* Retrieve interruptee's PC */
-	wsr		a0, EPC_5
-	l32i	a0, a2, (4 * REG_A0)			/* Retrieve interruptee's A0 */
-	l32i	sp, a2, (4 * REG_A1)			/* Remove interrupt stack frame */
-	l32i	a2, a2, (4 * REG_A2)			/* Retrieve interruptee's A2 */
-	rsync									/* Ensure EPS and EPC written */
+	exception_exit 5
 
-	/* Return from interrupt.  RFI  restores the PS from EPS_5 and jumps to
+	/* Return from interrupt.  RFI restores the PS from EPS_5 and jumps to
 	 * the address in EPC_5.
 	 */
 
@@ -626,21 +472,13 @@ _xtensa_level5_handler:
 
 _xtensa_level6_handler:
 
-	mov		a0, sp							/* Save SP in A0 */
-	addi	sp, sp, -XCPTCONTEXT_SIZE	/* Allocate interrupt stack frame */
-	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
-	rsr		a0, EPS_6						/* Save interruptee's PS */
-	s32i	a0, sp, (4 * REG_PS)
-	rsr		a0, EPC_6						/* Save interruptee's PC */
-	s32i	a0, sp, (4 * REG_PC)
-	rsr		a0, EXCSAVE_6					/* Save interruptee's a0 */
-	s32i	a0, sp, (4 * REG_A0)
+	/* Create an interrupt frame and save minimal context. */
 
-	/* Save rest of interrupt context. */
+	exception_entry 6
 
-	s32i	a2, sp, (4 * REG_A2)
-	s32i	a3, sp, (4 * REG_A3)
-	call0	_xtensa_context_save			/* Save full register state */
+	/* Save the rest of the state context. */
+
+	call0	_xtensa_context_save
 
 	/* Save current SP before (possibly) overwriting it, it's the register save
 	 * area. This value will be used later by dispatch_c_isr to retrieve the
@@ -658,35 +496,75 @@ _xtensa_level6_handler:
 	/* Decode and dispatch the interrupt.  In the event of an interrupt
 	 * level context dispatch_c_isr() will (1) switch stacks to the new
 	 * thread's and (2) provide the address of the register state save
-	 * area in a12.  NOTE that the state save area may or may not lie
-	 * in the new thread's stack.
+	 * area in a2.
 	 */
 
 	dispatch_c_isr	6 XCHAL_INTLEVEL6_MASK a0
 
 	/* Restore registers in preparation to return from interrupt */
 
-	mov		a2, a12							/* a2 = address of new state save area */
-	call0	_xtensa_context_restore			/* (preserves a2) */
+	call0	_xtensa_context_restore			/* Preserves a2 */
 
 	/* Restore only level-specific regs (the rest were already restored) */
 
-	l32i	a0, a2, (4 * REG_PS)			/* Retrieve interruptee's PS */
-	wsr		a0, EPS_6
-	l32i	a0, a2, (4 * REG_PC)			/* Retrieve interruptee's PC */
-	wsr		a0, EPC_6
-	l32i	a0, a2, (4 * REG_A0)			/* Retrieve interruptee's A0 */
-	l32i	sp, a2, (4 * REG_A1)			/* Remove interrupt stack frame */
-	l32i	a2, a2, (4 * REG_A2)			/* Retrieve interruptee's A2 */
-	rsync									/* Ensure EPS and EPC written */
+	exception_exit 6
 
-	/* Return from interrupt.  RFI  restores the PS from EPS_6 and jumps to
+	/* Return from interrupt.  RFI restores the PS from EPS_6 and jumps to
 	 * the address in EPC_6.
 	 */
 
 	rfi		6
 
 #endif /* XCHAL_EXCM_LEVEL >= 6 */
+
+#if XCHAL_HAVE_NMI
+	.section HANDLER_SECTION, "ax"
+	.type	_xtensa_nmi_handler, @function
+	.global	_xtensa_nmi_handler
+	.align	4
+
+_xtensa_nmi_handler:
+	/* For now, just panic */
+
+	exception_entry XCHAL_NMILEVEL
+
+	movi	a2, XTENSA_NMI_EXCEPTION		/* Argument 1: Error code */
+	call0	_xtensa_panic					/* Does not return */
+
+	.size	_xtensa_nmi_handler, . -_xtensa_nmi_handler
+
+#endif /* XCHAL_HAVE_NMI */
+
+#if XCHAL_HAVE_DEBUG
+	.section HANDLER_SECTION, "ax"
+	.type	_xtensa_debug_handler, @function
+	.global	_xtensa_debug_handler
+	.align	4
+
+_xtensa_debug_handler:
+
+	exception_entry XCHAL_DEBUGLEVEL
+
+	movi	a2, XTENSA_DEBUG_EXCEPTION		/* Argument 1: Error code */
+	call0	_xtensa_panic					/* Does not return */
+
+	.size	_xtensa_debug_handler, . -_xtensa_debug_handler
+
+#endif /* XCHAL_HAVE_DEBUG */
+
+	.section HANDLER_SECTION, "ax"
+	.type	_xtensa_kernel_handler, @function
+	.global	_xtensa_kernel_handler
+	.align	4
+
+_xtensa_kernel_handler:
+
+	exception_entry 1
+
+	movi	a2, XTENSA_KERNEL_EXCEPTION		/* Argument 1: Error code */
+	call0	_xtensa_panic					/* Does not return */
+
+	.size	_xtensa_kernel_handler, . -_xtensa_kernel_handler
 
 /****************************************************************************
  * HIGH PRIORITY (LEVEL > XCHAL_EXCM_LEVEL) LOW-LEVEL HANDLERS
@@ -735,15 +613,9 @@ _xtensa_level2_handler:
 #if 1
 	/* For now, just panic */
 
-	mov		a0, sp							/* Save SP in A0 */
-	addi	sp, sp, -XCPTCONTEXT_SIZE	/* Allocate interrupt stack frame */
-	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
-	rsr		a0, EPS_2						/* Save interruptee's PS */
-	s32i	a0, sp, (4 * REG_PS)
-	rsr		a0, EPC_2						/* Save interruptee's PC */
-	s32i	a0, sp, (4 * REG_PC)
-	rsr		a0, EXCSAVE_2					/* Save interruptee's a0 */
-	s32i	a0, sp, (4 * REG_A0)
+	/* Create an interrupt frame and save minimal context. */
+
+	exception_entry 2
 
 	s32i	a2, sp, (4 * REG_A2)
 	movi	a2, XTENSA_LEVEL2_EXCEPTION	/* Address of state save on stack */
@@ -769,15 +641,9 @@ _xtensa_level3_handler:
 #if 1
 	/* For now, just panic */
 
-	mov		a0, sp							/* Save SP in A0 */
-	addi	sp, sp, -XCPTCONTEXT_SIZE	/* Allocate interrupt stack frame */
-	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
-	rsr		a0, EPS_3						/* Save interruptee's PS */
-	s32i	a0, sp, (4 * REG_PS)
-	rsr		a0, EPC_3						/* Save interruptee's PC */
-	s32i	a0, sp, (4 * REG_PC)
-	rsr		a0, EXCSAVE_3					/* Save interruptee's a0 */
-	s32i	a0, sp, (4 * REG_A0)
+	/* Create an interrupt frame and save minimal context. */
+
+	exception_entry 3
 
 	s32i	a2, sp, (4 * REG_A2)
 	movi	a2, XTENSA_LEVEL3_EXCEPTION	/* Address of state save on stack */
@@ -805,15 +671,9 @@ _xtensa_level4_handler:
 #if 1
 	/* For now, just panic */
 
-	mov		a0, sp							/* Save SP in A0 */
-	addi	sp, sp, -XCPTCONTEXT_SIZE	/* Allocate interrupt stack frame */
-	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
-	rsr		a0, EPS_4						/* Save interruptee's PS */
-	s32i	a0, sp, (4 * REG_PS)
-	rsr		a0, EPC_4						/* Save interruptee's PC */
-	s32i	a0, sp, (4 * REG_PC)
-	rsr		a0, EXCSAVE_4					/* Save interruptee's a0 */
-	s32i	a0, sp, (4 * REG_A0)
+	/* Create an interrupt frame and save minimal context. */
+
+	exception_entry 4
 
 	s32i	a2, sp, (4 * REG_A2)
 	movi	a2, XTENSA_LEVEL4_EXCEPTION	/* Address of state save on stack */
@@ -841,15 +701,9 @@ _xtensa_level5_handler:
 #if 1
 	/* For now, just panic */
 
-	mov		a0, sp							/* Save SP in A0 */
-	addi	sp, sp, -XCPTCONTEXT_SIZE	/* Allocate interrupt stack frame */
-	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
-	rsr		a0, EPS_5						/* Save interruptee's PS */
-	s32i	a0, sp, (4 * REG_PS)
-	rsr		a0, EPC_5						/* Save interruptee's PC */
-	s32i	a0, sp, (4 * REG_PC)
-	rsr		a0, EXCSAVE_5					/* Save interruptee's a0 */
-	s32i	a0, sp, (4 * REG_A0)
+	/* Create an interrupt frame and save minimal context. */
+
+	exception_entry 5
 
 	s32i	a2, sp, (4 * REG_A2)
 	movi	a2, XTENSA_LEVEL5_EXCEPTION	/* Address of state save on stack */
@@ -877,15 +731,9 @@ _xtensa_level6_handler:
 #if 1
 	/* For now, just panic */
 
-	mov		a0, sp							/* Save SP in A0 */
-	addi	sp, sp, -XCPTCONTEXT_SIZE	/* Allocate interrupt stack frame */
-	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
-	rsr		a0, EPS_6						/* Save interruptee's PS */
-	s32i	a0, sp, (4 * REG_PS)
-	rsr		a0, EPC_6						/* Save interruptee's PC */
-	s32i	a0, sp, (4 * REG_PC)
-	rsr		a0, EXCSAVE_6					/* Save interruptee's a0 */
-	s32i	a0, sp, (4 * REG_A0)
+	/* Create an interrupt frame and save minimal context. */
+
+	exception_entry 6
 
 	s32i	a2, sp, (4 * REG_A2)
 	movi	a2, XTENSA_LEVEL6_EXCEPTION	/* Address of state save on stack */

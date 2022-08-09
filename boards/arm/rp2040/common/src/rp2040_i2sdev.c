@@ -52,9 +52,9 @@
 
 int board_i2sdev_initialize(int port)
 {
-  FAR struct audio_lowerhalf_s *audio_i2s;
-  FAR struct audio_lowerhalf_s *pcm;
-  FAR struct i2s_dev_s *i2s;
+  struct audio_lowerhalf_s *audio_i2s;
+  struct audio_lowerhalf_s *pcm;
+  struct i2s_dev_s *i2s;
   char devname[12];
   int ret;
 

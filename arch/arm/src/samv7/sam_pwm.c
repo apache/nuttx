@@ -53,14 +53,14 @@
 #ifdef CONFIG_SAMV7_PWM
 
 #ifdef CONFIG_PWM_NCHANNELS
-# define PWM_NCHANNELS CONFIG_PWM_NCHANNELS
+#  define PWM_NCHANNELS  CONFIG_PWM_NCHANNELS
 #else
-# define PWM_NCHANNELS 1
+#  define PWM_NCHANNELS  1
 #endif
 
-#define CHANNEL_OFFSET 0x20
-#define CLK_FREQ  BOARD_MCK_FREQUENCY
-#define PWM_RES 65535
+#define CHANNEL_OFFSET   0x20
+#define CLK_FREQ         BOARD_MCK_FREQUENCY
+#define PWM_RES          65535
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -73,27 +73,25 @@
 struct sam_pwm_channel_s
 {
   uint8_t channel;            /* Number of PWM module */
-  bool used;                  /* True if the module is used */
-  uint32_t pin;               /* PWM output pin */
+  gpio_pinset_t pin;          /* PWM output pin */
 };
 
 struct sam_pwm_s
 {
   const struct pwm_ops_s *ops;    /* PWM operations */
-  FAR const struct sam_pwm_channel_s *channels;
+  const struct sam_pwm_channel_s *channels;
   uint8_t channels_num;           /* Number of channels */
-  uint32_t frequency;             /* PWM frequency */
-  uint32_t base;                  /* Base address of peripheral register */
+  uintptr_t base;                 /* Base address of peripheral register */
 };
 
 /* PWM driver methods */
 
-static int pwm_setup(FAR struct pwm_lowerhalf_s *dev);
-static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev);
-static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
-                     FAR const struct pwm_info_s *info);
-static int pwm_stop(FAR struct pwm_lowerhalf_s *dev);
-static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
+static int pwm_setup(struct pwm_lowerhalf_s *dev);
+static int pwm_shutdown(struct pwm_lowerhalf_s *dev);
+static int pwm_start(struct pwm_lowerhalf_s *dev,
+                     const struct pwm_info_s *info);
+static int pwm_stop(struct pwm_lowerhalf_s *dev);
+static int pwm_ioctl(struct pwm_lowerhalf_s *dev,
                      int cmd, unsigned long arg);
 
 /****************************************************************************
@@ -116,28 +114,24 @@ static struct sam_pwm_channel_s g_pwm0_channels[] =
 #ifdef CONFIG_SAMV7_PWM0_CH0
   {
     .channel = 0,
-    .used    = true,
     .pin     = GPIO_PWMC0_H0,
   },
 #endif
 #ifdef CONFIG_SAMV7_PWM0_CH1
   {
     .channel = 1,
-    .used    = true,
     .pin     = GPIO_PWMC0_H1,
   },
 #endif
 #ifdef CONFIG_SAMV7_PWM0_CH2
   {
     .channel = 2,
-    .used    = true,
     .pin     = GPIO_PWMC0_H2,
   },
 #endif
 #ifdef CONFIG_SAMV7_PWM0_CH3
   {
     .channel = 3,
-    .used    = true,
     .pin     = GPIO_PWMC0_H3,
   },
 #endif
@@ -147,8 +141,7 @@ static struct sam_pwm_s g_pwm0 =
 {
   .ops = &g_pwmops,
   .channels = g_pwm0_channels,
-  .channels_num = 4,
-  .frequency = 0,
+  .channels_num = PWM0_NCHANNELS,
   .base = SAM_PWM0_BASE,
 };
 #endif /* CONFIG_SAMV7_PWM0 */
@@ -160,28 +153,24 @@ static struct sam_pwm_channel_s g_pwm1_channels[] =
 #ifdef CONFIG_SAMV7_PWM1_CH0
   {
     .channel = 0,
-    .used    = true,
     .pin     = GPIO_PWMC1_H0
   },
 #endif
 #ifdef CONFIG_SAMV7_PWM1_CH1
   {
     .channel = 1,
-    .used    = true,
     .pin     = GPIO_PWMC1_H1
   },
 #endif
 #ifdef CONFIG_SAMV7_PWM1_CH2
   {
     .channel = 2,
-    .used    = true,
     .pin     = GPIO_PWMC1_H2
   },
 #endif
 #ifdef CONFIG_SAMV7_PWM1_CH3
   {
     .channel = 3,
-    .used    = true,
     .pin     = GPIO_PWMC1_H3
   },
 #endif
@@ -191,8 +180,7 @@ static struct sam_pwm_s g_pwm1 =
 {
   .ops = &g_pwmops,
   .channels = g_pwm1_channels,
-  .channels_num = 4,
-  .frequency = 0,
+  .channels_num = PWM1_NCHANNELS,
   .base = SAM_PWM1_BASE,
 };
 
@@ -202,67 +190,61 @@ static struct sam_pwm_s g_pwm1 =
  * Private Function Prototypes
  ****************************************************************************/
 
-static void pwm_putreg(FAR struct sam_pwm_s *priv, uint32_t offset,
+static void pwm_putreg(struct sam_pwm_s *priv, uint32_t offset,
                        uint32_t value);
-static uint32_t pwm_getreg(FAR struct sam_pwm_s *priv, uint32_t offset);
+static uint32_t pwm_getreg(struct sam_pwm_s *priv, uint32_t offset);
 
 /* Helper functions */
 
-static int pwm_set_output(FAR struct pwm_lowerhalf_s *dev, uint8_t channel,
+static void pwm_set_output(struct pwm_lowerhalf_s *dev, uint8_t channel,
                            ub16_t duty);
-static int pwm_change_freq(FAR struct pwm_lowerhalf_s *dev,
-                     FAR const struct pwm_info_s *info, uint8_t channel);
+static void pwm_set_freq(struct pwm_lowerhalf_s *dev, uint8_t channel,
+                         uint32_t frequency);
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static void pwm_putreg(FAR struct sam_pwm_s *priv, uint32_t offset,
+static void pwm_putreg(struct sam_pwm_s *priv, uint32_t offset,
                        uint32_t value)
 {
   putreg32(value, priv->base + offset);
 }
 
-static uint32_t pwm_getreg(FAR struct sam_pwm_s *priv, uint32_t offset)
+static uint32_t pwm_getreg(struct sam_pwm_s *priv, uint32_t offset)
 {
   return getreg32(priv->base + offset);
 }
 
 /****************************************************************************
- * Name: pwm_change_freq
+ * Name: pwm_set_freq
  *
  * Description:
  *   Set timer frequency and change registers value to respect that
  *   frequency.
  *
  * Input Parameters:
- *   dev  - A reference to the lower half PWM driver state structure
- *   info - A reference to the characteristics of the pulsed output
+ *   dev       - A reference to the lower half PWM driver state structure
+ *   channel   - Channel to by updated
+ *   frequency - New frequency
  *
  * Returned Value:
- *   Zero on success; a negated errno value on failure
+ *   None
  *
  ****************************************************************************/
 
-static int pwm_change_freq(FAR struct pwm_lowerhalf_s *dev,
-                     FAR const struct pwm_info_s *info, uint8_t channel)
+static void pwm_set_freq(struct pwm_lowerhalf_s *dev, uint8_t channel,
+                         uint32_t frequency)
 {
-  FAR struct sam_pwm_s *priv = (FAR struct sam_pwm_s *)dev;
-#ifdef CONFIG_PWM_MULTICHAN
-  uint8_t shift = info->channels[channel].channel - 1;
-#else
-  uint8_t shift = priv->channels[0].channel;
-#endif
+  struct sam_pwm_s *priv = (struct sam_pwm_s *)dev;
   uint32_t regval;
-  uint32_t olddiv = pwm_getreg(priv, SAMV7_PWM_CPRDX
-                               + (shift * CHANNEL_OFFSET));
-  uint32_t newdiv = (uint32_t)((float)CLK_FREQ / info->frequency + 0.5f);
+  uint32_t newdiv = (CLK_FREQ + (frequency / 2)) / frequency - 1;
   uint32_t prescale = 0;
 
   while (newdiv > PWM_RES && prescale < 11)
     {
       newdiv = newdiv >> 1;
-      prescale = prescale + 1;
+      prescale++;
     }
 
   if (newdiv > PWM_RES)
@@ -274,19 +256,26 @@ static int pwm_change_freq(FAR struct pwm_lowerhalf_s *dev,
       newdiv = 2;
     }
 
-  regval = pwm_getreg(priv, SAMV7_PWM_CMRX + (shift * CHANNEL_OFFSET));
+  regval = pwm_getreg(priv, SAMV7_PWM_CMRX + (channel * CHANNEL_OFFSET));
+  regval &= ~CMR_CPRE_MASK;
   regval |= CMR_CPRE_SEL(prescale);
-  pwm_putreg(priv, SAMV7_PWM_CMRX + (shift * CHANNEL_OFFSET), regval);
 
-  pwm_putreg(priv, SAMV7_PWM_CPRDUPDX + (shift * CHANNEL_OFFSET),
-             newdiv - 1);
+  if (pwm_getreg(priv, SAMV7_PWM_SR) & CHID_SEL(1 << channel))
+    {
+      pwm_putreg(priv, SAMV7_PWM_CMUPDX + (channel * CHANNEL_OFFSET),
+                 regval);
 
-  regval = pwm_getreg(priv, SAMV7_PWM_CDTYX + (shift * CHANNEL_OFFSET));
-  regval = regval * newdiv / olddiv;
-  pwm_putreg(priv, SAMV7_PWM_CDTYUPDX + (shift * CHANNEL_OFFSET),
-             regval);
+      pwm_putreg(priv, SAMV7_PWM_CPRDUPDX + (channel * CHANNEL_OFFSET),
+                 CPRD_CPRD_SEL(newdiv));
+    }
+  else
+    {
+      pwm_putreg(priv, SAMV7_PWM_CMRX + (channel * CHANNEL_OFFSET),
+                 regval);
 
-  return OK;
+      pwm_putreg(priv, SAMV7_PWM_CPRDX + (channel * CHANNEL_OFFSET),
+                 CPRD_CPRD_SEL(newdiv));
+    }
 }
 
 /****************************************************************************
@@ -301,37 +290,43 @@ static int pwm_change_freq(FAR struct pwm_lowerhalf_s *dev,
  *   duty    - New duty
  *
  * Returned Value:
- *   Zero on success; a negated errno value on failure
+ *   None
  *
  ****************************************************************************/
 
-static int pwm_set_output(FAR struct pwm_lowerhalf_s *dev, uint8_t channel,
+static void pwm_set_output(struct pwm_lowerhalf_s *dev, uint8_t channel,
                            ub16_t duty)
 {
-  FAR struct sam_pwm_s *priv = (FAR struct sam_pwm_s *)dev;
+  struct sam_pwm_s *priv = (struct sam_pwm_s *)dev;
   uint16_t period;
   uint16_t width;
   uint16_t regval;
-  double duty_pct;
-  uint8_t shift = channel;  /* Shift submodle offset addresses */
 
   /* Get the period value */
 
-  period = pwm_getreg(priv, SAMV7_PWM_CPRDX + (shift * CHANNEL_OFFSET));
+  period = pwm_getreg(priv, SAMV7_PWM_CPRDX + (channel * CHANNEL_OFFSET));
 
   /* Compute PWM width (count value to set PWM low) */
 
-  duty_pct = (duty / 65536.0) * 100;
-  width = (uint16_t)(((uint16_t)duty_pct * period) / 100);
+  width = b16toi(duty * period + b16HALF);
 
   /* Update duty cycle */
 
-  pwm_putreg(priv, SAMV7_PWM_CDTYUPDX + (shift * CHANNEL_OFFSET), width);
+  if (pwm_getreg(priv, SAMV7_PWM_SR) & CHID_SEL(1 << channel))
+    {
+      pwm_putreg(priv, SAMV7_PWM_CDTYUPDX + (channel * CHANNEL_OFFSET),
+                 width);
+    }
+  else
+    {
+      pwm_putreg(priv, SAMV7_PWM_CDTYX + (channel * CHANNEL_OFFSET),
+                 width);
+    }
 
-  regval = CHID_SEL(1 << shift);
+  /* Enable the channel */
+
+  regval = CHID_SEL(1 << channel);
   pwm_putreg(priv, SAMV7_PWM_ENA, regval);
-
-  return OK;
 }
 
 /****************************************************************************
@@ -350,10 +345,11 @@ static int pwm_set_output(FAR struct pwm_lowerhalf_s *dev, uint8_t channel,
  *
  ****************************************************************************/
 
-static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
+static int pwm_setup(struct pwm_lowerhalf_s *dev)
 {
-  FAR struct sam_pwm_s *priv = (FAR struct sam_pwm_s *)dev;
-  uint32_t pin = 0;
+  struct sam_pwm_s *priv = (struct sam_pwm_s *)dev;
+  gpio_pinset_t pin = 0;
+  uint8_t channel;
   uint32_t regval;
 
   /* Unlock User Interface */
@@ -368,13 +364,6 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
 
   for (int i = 0; i < priv->channels_num; i++)
     {
-      /* Configure the channel only if is set to be used */
-
-      if (priv->channels[i].used != 1)
-        {
-          continue;
-        }
-
       pin = priv->channels[i].pin;
 
       if (pin != 0)
@@ -382,39 +371,28 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
           sam_configgpio(pin);
         }
 
-      sam_configgpio(pin);
+      channel = priv->channels[i].channel;
 
       regval = CMR_CPOL | CMR_DPOLI;
-      pwm_putreg(priv, SAMV7_PWM_CMRX + (i * CHANNEL_OFFSET), regval);
+      pwm_putreg(priv, SAMV7_PWM_CMRX + (channel * CHANNEL_OFFSET), regval);
 
-      /* Set duty cycle register */
+      /* Reset duty cycle register */
 
-      pwm_putreg(priv, SAMV7_PWM_CDTYX + (i * CHANNEL_OFFSET), 0);
+      pwm_putreg(priv, SAMV7_PWM_CDTYX + (channel * CHANNEL_OFFSET), 0);
 
-      /* Set period register with default period */
+      /* Reset period register */
 
-      regval = 0x82b8;
-      pwm_putreg(priv, SAMV7_PWM_CPRDX + (i * CHANNEL_OFFSET), regval);
+      pwm_putreg(priv, SAMV7_PWM_CPRDX + (channel * CHANNEL_OFFSET), 0);
 
       /* Reset Dead Time Register */
 
-      pwm_putreg(priv, SAMV7_PWM_DTX + (i * CHANNEL_OFFSET), 0);
+      pwm_putreg(priv, SAMV7_PWM_DTX + (channel * CHANNEL_OFFSET), 0);
 
       /* Fault protection registers */
 
       pwm_putreg(priv, SAMV7_PWM_FPV1, 0);
       pwm_putreg(priv, SAMV7_PWM_FPV2, 0);
       pwm_putreg(priv, SAMV7_PWM_FPE, 0);
-
-      /* Enable the channel */
-
-      regval = CHID_SEL(1 << i);
-      pwm_putreg(priv, SAMV7_PWM_ENA, regval);
-
-      /* Set synchronous output */
-
-      regval = SCM_SYNC_SEL(1 << i);
-      pwm_putreg(priv, SAMV7_PWM_SCM, regval);
     }
 
   return OK;
@@ -436,9 +414,9 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
+static int pwm_shutdown(struct pwm_lowerhalf_s *dev)
 {
-  FAR struct sam_pwm_s *priv = (FAR struct sam_pwm_s *)dev;
+  struct sam_pwm_s *priv = (struct sam_pwm_s *)dev;
   uint32_t regval;
 
   /* Disable all channels and interrupts */
@@ -448,28 +426,6 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
 
   regval = IR1_CHID_SEL(CHID_MASK);
   pwm_putreg(priv, SAMV7_PWM_IDR1, regval);
-
-  for (int i = 0; i < priv->channels_num; i++)
-    {
-      /* Skip modules that are not used */
-
-      if (priv->channels[i].used != 1)
-        {
-          continue;
-        }
-
-      /* Reset period register */
-
-      pwm_putreg(priv, SAMV7_PWM_CPRDX + (i * CHANNEL_OFFSET), 0);
-
-      /* Reset duty cycle register */
-
-      pwm_putreg(priv, SAMV7_PWM_CDTYX + (i * CHANNEL_OFFSET), 0);
-
-      /* Reset Dead Time Register */
-
-      pwm_putreg(priv, SAMV7_PWM_DTX + (i * CHANNEL_OFFSET), 0);
-    }
 
   return OK;
 }
@@ -489,75 +445,43 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
-                     FAR const struct pwm_info_s *info)
+static int pwm_start(struct pwm_lowerhalf_s *dev,
+                     const struct pwm_info_s *info)
 {
-  FAR struct sam_pwm_s *priv = (FAR struct sam_pwm_s *)dev;
-  int ret = OK;
+  struct sam_pwm_s *priv = (struct sam_pwm_s *)dev;
 
-  /* Change frequency only if it is needed */
-
-  if (info->frequency != priv->frequency)
-    {
+#ifdef CONFIG_PWM_MULTICHAN
       for (int i = 0; i < PWM_NCHANNELS; i++)
         {
-#ifdef CONFIG_PWM_MULTICHAN
+          int8_t index = info->channels[i].channel;
+
           /* Break the loop if all following channels are not configured */
 
-          if (info->channels[i].channel == -1)
+          if (index == -1)
             {
               break;
             }
 
           /* Configure the module freq only if is set to be used */
 
-          if (info->channels[i].channel != 0)
+          if (index > 0 && (index - 1) < priv->channels_num)
             {
-              ret = pwm_change_freq(dev, info, i);
+              /* Set the frequency and enable PWM output for each channel */
+
+              pwm_set_freq(dev, priv->channels[index - 1].channel,
+                           info->frequency);
+              pwm_set_output(dev, priv->channels[index - 1].channel,
+                             info->channels[i].duty);
             }
+        }
 #else
-          ret = pwm_change_freq(dev, info, i);
+      /* Set the frequency and enable PWM output just for first channel */
+
+      pwm_set_freq(dev, priv->channels[0].channel, info->frequency);
+      pwm_set_output(dev, priv->channels[0].channel, info->duty);
 #endif
-        }
 
-      /* Save current frequency */
-
-      if (ret == OK)
-        {
-          priv->frequency = info->frequency;
-        }
-    }
-
-#ifdef CONFIG_PWM_MULTICHAN
-  for (int i = 0; ret == OK && i < PWM_NCHANNELS; i++)
-    {
-      /* Break the loop if all following channels are not configured */
-
-      if (info->channels[i].channel == -1)
-        {
-          break;
-        }
-
-      /* Enable PWM output for each channel */
-
-      if (info->channels[i].channel != 0)
-        {
-          ret = pwm_set_output(dev, info->channels[i].channel - 1,
-                                    info->channels[i].duty);
-        }
-    }
-#else
-  /* Enable PWM output just for first channel */
-
-  ret = pwm_set_output(dev, priv->channels[0].channel, info->duty);
-
-#endif /* CONFIG_PWM_MULTICHAN */
-
-  /* Set sychnronous outputs */
-
-  pwm_putreg(priv, SAMV7_PWM_SCUC, SCUC_UPDULOCK);
-
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -579,34 +503,21 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
  *
  ****************************************************************************/
 
-static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
+static int pwm_stop(struct pwm_lowerhalf_s *dev)
 {
-  FAR struct sam_pwm_s *priv = (FAR struct sam_pwm_s *)dev;
-  uint8_t shift;
+  struct sam_pwm_s *priv = (struct sam_pwm_s *)dev;
   uint32_t regval;
 
 #ifdef CONFIG_PWM_MULTICHAN
   for (int i = 0; i < priv->channels_num; i++)
     {
-      /* Skip settings if channel is not configured */
-
-      if (!priv->channels[i].used)
-        {
-          continue;
-        }
-
-      shift = priv->channels[i].channel - 1;
-
-      regval = CHID_SEL(1 << shift);
+      regval = CHID_SEL(1 << priv->channels[i].channel);
       pwm_putreg(priv, SAMV7_PWM_DIS, regval);
     }
 
 #else
-    shift = priv->channels[0].channel;
-
-    regval = CHID_SEL(1 << shift);
-    pwm_putreg(priv, SAMV7_PWM_DIS, regval);
-
+  regval = CHID_SEL(1 << priv->channels[0].channel);
+  pwm_putreg(priv, SAMV7_PWM_DIS, regval);
 #endif /* CONFIG_PWM_MULTICHAN */
 
   return OK;
@@ -628,7 +539,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd,
+static int pwm_ioctl(struct pwm_lowerhalf_s *dev, int cmd,
                      unsigned long arg)
 {
   return -ENOTTY;
@@ -653,9 +564,9 @@ static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd,
  *
  ****************************************************************************/
 
-FAR struct pwm_lowerhalf_s *sam_pwminitialize(int pwm)
+struct pwm_lowerhalf_s *sam_pwminitialize(int pwm)
 {
-  FAR struct sam_pwm_s *priv;
+  struct sam_pwm_s *priv;
 
   pwminfo("Initializing pwm %d\n", pwm);
 
@@ -678,6 +589,6 @@ FAR struct pwm_lowerhalf_s *sam_pwminitialize(int pwm)
       return NULL;
   }
 
-  return (FAR struct pwm_lowerhalf_s *)priv;
+  return (struct pwm_lowerhalf_s *)priv;
 }
 #endif /* CONFIG_SAMV7_PWM */

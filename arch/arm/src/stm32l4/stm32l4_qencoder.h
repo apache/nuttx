@@ -121,7 +121,7 @@
  *
  ****************************************************************************/
 
-int stm32l4_qeinitialize(FAR const char *devpath, int tim);
+int stm32l4_qeinitialize(const char *devpath, int tim);
 
 #endif /* CONFIG_SENSORS_QENCODER */
 #endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_QENCODER_H */

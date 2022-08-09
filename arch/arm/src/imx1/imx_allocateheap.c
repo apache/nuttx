@@ -55,10 +55,10 @@
  *
  ****************************************************************************/
 
-void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
+void up_allocate_heap(void **heap_start, size_t *heap_size)
 {
   board_autoled_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void *)g_idle_topstack;
+  *heap_start = (void *)g_idle_topstack;
   *heap_size  = (IMX_SDRAM_VSECTION + CONFIG_RAM_SIZE) - g_idle_topstack;
 }
 
@@ -83,14 +83,14 @@ void arm_addregion(void)
   uint32_t start = CONFIG_RAM_VSTART + 0x1000;
   uint32_t end   = (CONFIG_RAM_NUTTXENTRY & 0xffff0000);
 
-  kmm_addregion((FAR void *)start, end - start);
+  kmm_addregion((void *)start, end - start);
 #endif
 #endif
 
   /* Check for any additional memory regions */
 
 #if defined(CONFIG_HEAP2_BASE) && defined(CONFIG_HEAP2_SIZE)
-  kmm_addregion((FAR void *)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
+  kmm_addregion((void *)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
 #endif
 }
 #endif

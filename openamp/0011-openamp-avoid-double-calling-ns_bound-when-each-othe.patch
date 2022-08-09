@@ -1,0 +1,55 @@
+From 8405b71cb738096a223c5f7ca02b9fa0de5ae0d6 Mon Sep 17 00:00:00 2001
+From: Jiuzhu Dong <dongjiuzhu1@xiaomi.com>
+Date: Mon, 11 Apr 2022 13:31:35 +0800
+Subject: [PATCH 11/12] openamp: avoid double calling ns_bound when each other
+ calls create_ept
+
+VELAPLATFO-1522
+
+Change-Id: I78c027e3fcaf54126b75358b91b557e477955964
+Signed-off-by: Jiuzhu Dong <dongjiuzhu1@xiaomi.com>
+---
+ lib/rpmsg/rpmsg_virtio.c | 17 +++++++++++------
+ 1 file changed, 11 insertions(+), 6 deletions(-)
+
+diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
+index e55e135..cd3a13d 100644
+--- a/lib/rpmsg/rpmsg_virtio.c
++++ open-amp/lib/rpmsg/rpmsg_virtio.c
+@@ -594,7 +594,7 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
+ 			metal_mutex_release(&rdev->lock);
+ 			if (rdev->ns_bind_cb)
+ 				rdev->ns_bind_cb(rdev, name, dest);
+-		} else {
++		} else if (_ept->dest_addr == RPMSG_ADDR_ANY) {
+ 			_ept->dest_addr = dest;
+ 			metal_mutex_release(&rdev->lock);
+ 			if (_ept->name[0] && rdev->support_ack)
+@@ -603,14 +603,19 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
+ 			if (_ept->ns_bound_cb)
+ 				_ept->ns_bound_cb(_ept);
+ 		}
++		else
++			metal_mutex_release(&rdev->lock);
+ 	} else { /* RPMSG_NS_CREATE_ACK */
+ 		/* save the received destination address */
+-		if (_ept)
++		if (_ept && _ept->dest_addr == RPMSG_ADDR_ANY) {
+ 			_ept->dest_addr = dest;
+-		metal_mutex_release(&rdev->lock);
+-		/* notify application that the endpoint has been bound */
+-		if (_ept && _ept->ns_bound_cb)
+-			_ept->ns_bound_cb(_ept);
++			metal_mutex_release(&rdev->lock);
++			/* notify application that the endpoint has been bound */
++			if (_ept->ns_bound_cb)
++				_ept->ns_bound_cb(_ept);
++		}
++		else
++			metal_mutex_release(&rdev->lock);
+ 	}
+ 
+ 	return RPMSG_SUCCESS;
+-- 
+2.25.1
+

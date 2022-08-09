@@ -109,7 +109,7 @@
 typedef int16_t      nuttx_blksize_t;
 typedef int16_t      nuttx_gid_t;
 typedef int16_t      nuttx_uid_t;
-typedef uint16_t     nuttx_dev_t;
+typedef uint32_t     nuttx_dev_t;
 typedef uint16_t     nuttx_ino_t;
 typedef uint16_t     nuttx_nlink_t;
 #ifdef CONFIG_FS_LARGEFILE

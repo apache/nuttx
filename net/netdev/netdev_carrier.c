@@ -60,7 +60,7 @@
 
 int netdev_carrier_on(FAR struct net_driver_s *dev)
 {
-  if (dev)
+  if (dev && !IFF_IS_RUNNING(dev->d_flags))
     {
       if (!IFF_IS_RUNNING(dev->d_flags))
         {
@@ -91,7 +91,7 @@ int netdev_carrier_on(FAR struct net_driver_s *dev)
 
 int netdev_carrier_off(FAR struct net_driver_s *dev)
 {
-  if (dev)
+  if (dev && IFF_IS_RUNNING(dev->d_flags))
     {
       if (IFF_IS_RUNNING(dev->d_flags))
         {

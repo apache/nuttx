@@ -47,7 +47,7 @@
  * Name: stm32_bh1750initialize
  *
  * Description:
- *   Initialize and register the MPL115A Pressure Sensor driver.
+ *   Initialize and register the BH1750FVI Ambient Light driver.
  *
  * Input Parameters:
  *   devno - The device number, used to build the device path as /dev/lightN
@@ -60,7 +60,7 @@
 
 int board_bh1750_initialize(int devno, int busno)
 {
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
   int ret;
 
   sninfo("Initializing BH1750FVI!\n");
@@ -79,7 +79,7 @@ int board_bh1750_initialize(int devno, int busno)
   ret = bh1750fvi_register(devpath, i2c, BH1750FVI_I2C_ADDR);
   if (ret < 0)
     {
-      snerr("ERROR: Error registering BM180\n");
+      snerr("ERROR: Error registering BH1750FVI\n");
     }
 
   return ret;

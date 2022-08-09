@@ -799,6 +799,20 @@ config USBMSC_NRDREQS
 	---help---
 		The number of write/read requests that can be in flight
 
+config USBMSC_WRMULTIPLE
+	bool "Write multiple blocks at once if possible"
+	default n
+	---help---
+		Store multiple blocks and write them in a single request.  This
+		speeds up the writing significantly with eMMC devices, for example,
+		because writing 512 bytes may be as fast as writing the complete
+		SUPER_PAGE_SIZE (see extended CSD [225] bits 0-3), which may be up
+		to 64Kb.  Real-life example with different block sizes, using the
+		dd command with argument bs=512, bs=8k (USBMSC_NWRREQS = 4, and 16):
+		512b: 470 kb/s, 8k: 5.3 Mb/s.  This is more than a tenfold increase
+		in the throughput.  Without this option enabled, the block driver's
+		block size is always used, which is usually 512 bytes.
+
 config USBMSC_BULKINREQLEN
 	int "Bulk IN request size"
 	default 512 if USBDEV_DUALSPEED
@@ -823,6 +837,20 @@ config USBMSC_BULKOUTREQLEN
 		Therefore, there is no benefit in increasing the size of this buffer
 		beyond the maximum size of one packet.  Default:  512 or 64 bytes
 		(depending upon if dual speed operation is supported or not).
+
+if USBMSC_COMPOSITE
+
+config USBMSC_IFNOBASE
+	int "Mass storage interface number"
+	default 0
+	---help---
+		With composite USB drivers, the interface is not guaranteed to be zero
+		but rather, may vary according to the order in which the devices are
+		declared in the board_composite_connect() -function. This function may
+		be found in the corresponding board file. This index number may need to
+		be adjusted to match the proper interface number.
+
+endif
 
 if !USBMSC_COMPOSITE
 

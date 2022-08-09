@@ -507,6 +507,22 @@ static inline void __setsr(irqstate_t sr)
   __asm__ __volatile__ ("ldc %0, sr" : : "r" (sr));
 }
 
+/* Return the current value of the stack pointer */
+
+static inline uint32_t up_getsp(void)
+{
+  uint32_t sp;
+
+  __asm__ __volatile__
+    (
+      "mov   r15, %0\n\t"
+      : "=&z" (sp)
+      :
+      : "memory"
+    );
+  return sp;
+}
+
 /* Return the current interrupt enable state and disable interrupts */
 
 static inline irqstate_t up_irq_save(void)

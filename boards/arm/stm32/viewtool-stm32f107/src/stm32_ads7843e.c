@@ -97,11 +97,11 @@ struct viewtool_tscinfo_s
  *   pendown - Return the state of the pen down GPIO input
  */
 
-static int  tsc_attach(FAR struct ads7843e_config_s *state, xcpt_t isr);
-static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable);
-static void tsc_clear(FAR struct ads7843e_config_s *state);
-static bool tsc_busy(FAR struct ads7843e_config_s *state);
-static bool tsc_pendown(FAR struct ads7843e_config_s *state);
+static int  tsc_attach(struct ads7843e_config_s *state, xcpt_t isr);
+static void tsc_enable(struct ads7843e_config_s *state, bool enable);
+static void tsc_clear(struct ads7843e_config_s *state);
+static bool tsc_busy(struct ads7843e_config_s *state);
+static bool tsc_pendown(struct ads7843e_config_s *state);
 
 /****************************************************************************
  * Private Data
@@ -149,10 +149,10 @@ static struct viewtool_tscinfo_s g_tscinfo =
  *
  ****************************************************************************/
 
-static int tsc_attach(FAR struct ads7843e_config_s *state, xcpt_t isr)
+static int tsc_attach(struct ads7843e_config_s *state, xcpt_t isr)
 {
-  FAR struct viewtool_tscinfo_s *priv =
-                                (FAR struct viewtool_tscinfo_s *)state;
+  struct viewtool_tscinfo_s *priv =
+                                (struct viewtool_tscinfo_s *)state;
 
   if (isr)
     {
@@ -173,10 +173,10 @@ static int tsc_attach(FAR struct ads7843e_config_s *state, xcpt_t isr)
   return OK;
 }
 
-static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
+static void tsc_enable(struct ads7843e_config_s *state, bool enable)
 {
-  FAR struct viewtool_tscinfo_s *priv =
-                                (FAR struct viewtool_tscinfo_s *)state;
+  struct viewtool_tscinfo_s *priv =
+                                (struct viewtool_tscinfo_s *)state;
   irqstate_t flags;
 
   /* Attach and enable, or detach and disable.  Enabling and disabling GPIO
@@ -207,17 +207,17 @@ static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
   leave_critical_section(flags);
 }
 
-static void tsc_clear(FAR struct ads7843e_config_s *state)
+static void tsc_clear(struct ads7843e_config_s *state)
 {
   /* Does nothing */
 }
 
-static bool tsc_busy(FAR struct ads7843e_config_s *state)
+static bool tsc_busy(struct ads7843e_config_s *state)
 {
   return false; /* The BUSY signal is not connected */
 }
 
-static bool tsc_pendown(FAR struct ads7843e_config_s *state)
+static bool tsc_pendown(struct ads7843e_config_s *state)
 {
   /* The /PENIRQ value is active low */
 
@@ -249,7 +249,7 @@ static bool tsc_pendown(FAR struct ads7843e_config_s *state)
 
 int stm32_tsc_setup(int minor)
 {
-  FAR struct spi_dev_s *dev;
+  struct spi_dev_s *dev;
   int ret;
 
   iinfo("minor %d\n", minor);

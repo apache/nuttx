@@ -203,9 +203,7 @@ typedef enum
  * Private Function Prototypes
  ****************************************************************************/
 
-static int keypad_open(struct file *filep);
-static int keypad_close(struct file *filep);
-static ssize_t keypad_read(struct file *filep, FAR char *buf, size_t buflen);
+static ssize_t keypad_read(struct file *filep, char *buf, size_t buflen);
 
 /****************************************************************************
  * Private Data
@@ -253,15 +251,15 @@ static const unsigned char g_kdbus[128] =
 
 static const struct file_operations g_keypadops =
 {
-  keypad_open,                  /* open */
-  keypad_close,                 /* close */
-  keypad_read,                  /* read */
-  NULL,                         /* write */
-  NULL,                         /* seek */
-  NULL,                         /* ioctl */
-  NULL                          /* poll */
+  NULL,         /* open */
+  NULL,         /* close */
+  keypad_read,  /* read */
+  NULL,         /* write */
+  NULL,         /* seek */
+  NULL,         /* ioctl */
+  NULL          /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL                        /* unlink */
+  , NULL        /* unlink */
 #endif
 };
 
@@ -269,17 +267,7 @@ static const struct file_operations g_keypadops =
  * Private Functions
  ****************************************************************************/
 
-static int keypad_open(struct file *filep)
-{
-  return OK;
-}
-
-static int keypad_close(struct file *filep)
-{
-  return OK;
-}
-
-static ssize_t keypad_read(struct file *filep, FAR char *buf, size_t buflen)
+static ssize_t keypad_read(struct file *filep, char *buf, size_t buflen)
 {
   uint_fast8_t keycode = 0;
   uint_fast8_t scancode = 0;

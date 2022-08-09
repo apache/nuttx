@@ -80,14 +80,14 @@
 static inline unsigned int wdt_prescaletoptv(unsigned int prescale);
 
 static int     wdt_setusec(uint32_t usec);
-static int     wdt_interrupt(int irq, void *context, FAR void *arg);
+static int     wdt_interrupt(int irq, void *context, void *arg);
 
 static int     wdt_open(struct file *filep);
 static int     wdt_close(struct file *filep);
 static ssize_t wdt_read(struct file *filep, char *buffer, size_t buflen);
 static ssize_t wdt_write(struct file *filep, const char *buffer,
                          size_t buflen);
-static int     wdt_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int     wdt_ioctl(struct file *filep, int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -220,7 +220,7 @@ static int wdt_setusec(uint32_t usec)
  * Name: wdt_interrupt
  ****************************************************************************/
 
-static int wdt_interrupt(int irq, void *context, FAR void *arg)
+static int wdt_interrupt(int irq, void *context, void *arg)
 {
   wdinfo("expired\n");
 
@@ -281,7 +281,7 @@ static ssize_t wdt_write(struct file *filep, const char *buffer,
  * Name: wdt_ioctl
  ****************************************************************************/
 
-static int wdt_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int wdt_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
   wdinfo("ioctl Call: cmd=0x%x arg=0x%lx", cmd, arg);
 

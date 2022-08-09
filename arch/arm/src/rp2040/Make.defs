@@ -49,8 +49,16 @@ ifeq ($(CONFIG_RP2040_SPI),y)
 CHIP_CSRCS += rp2040_spi.c
 endif
 
+ifeq ($(CONFIG_RP2040_PWM),y)
+CHIP_CSRCS += rp2040_pwm.c
+endif
+
 ifeq ($(CONFIG_RP2040_I2C),y)
 CHIP_CSRCS += rp2040_i2c.c
+endif
+
+ifeq ($(CONFIG_RP2040_I2C_SLAVE),y)
+CHIP_CSRCS += rp2040_i2c_slave.c
 endif
 
 ifeq ($(CONFIG_RP2040_I2S),y)
@@ -60,6 +68,14 @@ endif
 
 ifeq ($(CONFIG_USBDEV),y)
 CHIP_CSRCS += rp2040_usbdev.c
+endif
+
+ifeq ($(CONFIG_WS2812),y)
+CHIP_CSRCS += rp2040_ws2812.c
+endif
+
+ifeq ($(CONFIG_ADC),y)
+CHIP_CSRCS += rp2040_adc.c
 endif
 
 ifeq ($(CONFIG_RP2040_FLASH_BOOT),y)

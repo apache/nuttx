@@ -208,7 +208,7 @@ static int ioe_dummy_direction(FAR struct ioexpander_dev_s *dev,
     {
       /* Configure pin as input. */
 
-      priv->inpins |= (1 << pin);
+      priv->inpins |= ((ioe_pinset_t)1 << pin);
     }
   else /* if (direction == IOEXPANDER_DIRECTION_OUT) */
     {
@@ -219,7 +219,7 @@ static int ioe_dummy_direction(FAR struct ioexpander_dev_s *dev,
        * put a glitch on the output.
        */
 
-      priv->inpins &= ~(1 << pin);
+      priv->inpins &= ~((ioe_pinset_t)1 << pin);
     }
 
   return OK;
@@ -266,11 +266,11 @@ static int ioe_dummy_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
     {
       if ((uintptr_t)value == IOEXPANDER_VAL_INVERT)
         {
-          priv->invert |= (1 << pin);
+          priv->invert |= ((ioe_pinset_t)1 << pin);
         }
       else
         {
-          priv->invert &= ~(1 << pin);
+          priv->invert &= ~((ioe_pinset_t)1 << pin);
         }
     }
 
@@ -362,13 +362,13 @@ static int ioe_dummy_writepin(FAR struct ioexpander_dev_s *dev,
    * defined as outputs by the Configuration Register.
    */
 
-  if (value && (priv->invert & (1 << pin)) == 0)
+  if (value == (((priv->invert >> pin) & 1) == 0))
     {
-      priv->outval |= (1 << pin);
+      priv->outval |= ((ioe_pinset_t)1 << pin);
     }
   else
     {
-      priv->outval &= ~(1 << pin);
+      priv->outval &= ~((ioe_pinset_t)1 << pin);
     }
 
   return OK;
@@ -394,11 +394,10 @@ static int ioe_dummy_writepin(FAR struct ioexpander_dev_s *dev,
  ****************************************************************************/
 
 static int ioe_dummy_readpin(FAR struct ioexpander_dev_s *dev,
-                            uint8_t pin, FAR bool *value)
+                             uint8_t pin, FAR bool *value)
 {
   FAR struct ioe_dummy_dev_s *priv = (FAR struct ioe_dummy_dev_s *)dev;
   ioe_pinset_t inval;
-  bool retval;
 
   DEBUGASSERT(priv != NULL && pin < CONFIG_IOEXPANDER_NPINS &&
               value != NULL);
@@ -407,7 +406,7 @@ static int ioe_dummy_readpin(FAR struct ioexpander_dev_s *dev,
 
   /* Is this an output pin? */
 
-  if ((priv->inpins & (1 << pin)) != 0)
+  if (((priv->inpins >> pin) & 1) != 0)
     {
       inval = priv->inval;
     }
@@ -418,8 +417,8 @@ static int ioe_dummy_readpin(FAR struct ioexpander_dev_s *dev,
 
   /* Return 0 or 1 to indicate the state of pin */
 
-  retval = (((inval >> pin) & 1) != 0);
-  *value = ((priv->invert & (1 << pin)) != 0) ? !retval : retval;
+  *value = ((((inval ^ priv->invert) >> pin) & 1) != 0);
+
   return OK;
 }
 
@@ -459,13 +458,13 @@ static int ioe_dummy_multiwritepin(FAR struct ioexpander_dev_s *dev,
       pin = pins[i];
       DEBUGASSERT(pin < CONFIG_IOEXPANDER_NPINS);
 
-      if (values[i] && (priv->invert & (1 << pin)) == 0)
+      if (values[i] == (((priv->invert >> pin) & 1) == 0))
         {
-          priv->outval |= (1 << pin);
+          priv->outval |= ((ioe_pinset_t)1 << pin);
         }
       else
         {
-          priv->outval &= ~(1 << pin);
+          priv->outval &= ~((ioe_pinset_t)1 << pin);
         }
     }
 
@@ -498,7 +497,6 @@ static int ioe_dummy_multireadpin(FAR struct ioexpander_dev_s *dev,
   FAR struct ioe_dummy_dev_s *priv = (FAR struct ioe_dummy_dev_s *)dev;
   ioe_pinset_t inval;
   uint8_t pin;
-  bool pinval;
   int i;
 
   gpioinfo("count=%d\n", count);
@@ -513,7 +511,7 @@ static int ioe_dummy_multireadpin(FAR struct ioexpander_dev_s *dev,
 
       /* Is this an output pin? */
 
-      if ((priv->inpins & (1 << pin)) != 0)
+      if (((priv->inpins >> pin) & 1) != 0)
         {
           inval = priv->inval;
         }
@@ -522,8 +520,7 @@ static int ioe_dummy_multireadpin(FAR struct ioexpander_dev_s *dev,
           inval = priv->outval;
         }
 
-      pinval    = ((inval & (1 << pin)) != 0);
-      values[i] = ((priv->invert & (1 << pin)) != 0) ? !pinval : pinval;
+      values[i] = ((((inval ^ priv->invert) >> pin) & 1) != 0);
     }
 
   return OK;
@@ -677,11 +674,7 @@ static ioe_pinset_t ioe_dummy_int_update(FAR struct ioe_dummy_dev_s *priv)
     {
       /* Get the value of the pin (accounting for inversion) */
 
-      pinval = ((input & 1) != 0);
-      if ((priv->invert & (1 << pin)) != 0)
-        {
-          pinval = !pinval;
-        }
+      pinval = ((((input ^ priv->invert) >> pin) & 1) != 0);
 
       if (IOE_DUMMY_INT_DISABLED(priv, pin))
         {
@@ -700,7 +693,7 @@ static ioe_pinset_t ioe_dummy_int_update(FAR struct ioe_dummy_dev_s *priv)
               if ((!pinval && IOE_DUMMY_EDGE_FALLING(priv, pin)) ||
                   (pinval && IOE_DUMMY_EDGE_RISING(priv, pin)))
                 {
-                  intstat |= 1 << pin;
+                  intstat |= ((ioe_pinset_t)1 << pin);
                 }
             }
         }
@@ -711,7 +704,7 @@ static ioe_pinset_t ioe_dummy_int_update(FAR struct ioe_dummy_dev_s *priv)
           if ((pinval  && IOE_DUMMY_LEVEL_HIGH(priv, pin)) ||
               (!pinval && IOE_DUMMY_LEVEL_LOW(priv, pin)))
             {
-              intstat |= 1 << pin;
+              intstat |= ((ioe_pinset_t)1 << pin);
             }
         }
 
@@ -762,8 +755,7 @@ static void ioe_dummy_interrupt_work(void *arg)
                 {
                   /* Yes.. perform the callback */
 
-                  priv->cb[i].cbfunc(&priv->dev, match,
-                                     priv->cb[i].cbarg);
+                  priv->cb[i].cbfunc(&priv->dev, match, priv->cb[i].cbarg);
                 }
             }
         }

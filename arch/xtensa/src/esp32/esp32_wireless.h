@@ -27,6 +27,10 @@
 
 #include <nuttx/config.h>
 
+#include "xtensa_attr.h"
+
+#include "espidf_wifi.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -39,9 +43,28 @@
 #define CONFIG_MAC_BB_PD                                0
 #define SOC_COEX_HW_PTI                                 0
 
+#define MAC_LEN                                       (6)
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp_read_mac
+ *
+ * Description:
+ *   Read MAC address from efuse
+ *
+ * Input Parameters:
+ *   mac  - MAC address buffer pointer
+ *   type - MAC address type
+ *
+ * Returned Value:
+ *   0 if success or -1 if fail
+ *
+ ****************************************************************************/
+
+int32_t esp_read_mac(uint8_t *mac, esp_mac_type_t type);
 
 /****************************************************************************
  * Name: esp32_phy_enable
@@ -106,5 +129,73 @@ void esp32_phy_enable_clock(void);
  ****************************************************************************/
 
 void esp32_phy_disable_clock(void);
+
+/****************************************************************************
+ * Functions needed by libphy.a
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp_dport_access_reg_read
+ *
+ * Description:
+ *   Read register value safely in SMP
+ *
+ * Input Parameters:
+ *   reg - Register address
+ *
+ * Returned Value:
+ *   Register value
+ *
+ ****************************************************************************/
+
+uint32_t IRAM_ATTR esp_dport_access_reg_read(uint32_t reg);
+
+/****************************************************************************
+ * Name: phy_enter_critical
+ *
+ * Description:
+ *   Enter critical state
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   CPU PS value
+ *
+ ****************************************************************************/
+
+uint32_t IRAM_ATTR phy_enter_critical(void);
+
+/****************************************************************************
+ * Name: phy_exit_critical
+ *
+ * Description:
+ *   Exit from critical state
+ *
+ * Input Parameters:
+ *   level - CPU PS value
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void IRAM_ATTR phy_exit_critical(uint32_t level);
+
+/****************************************************************************
+ * Name: phy_printf
+ *
+ * Description:
+ *   Output format string and its arguments
+ *
+ * Input Parameters:
+ *   format - format string
+ *
+ * Returned Value:
+ *   0
+ *
+ ****************************************************************************/
+
+int phy_printf(const char *format, ...) printflike(1, 2);
 
 #endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_WIRELESS_H */

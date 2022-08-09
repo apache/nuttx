@@ -25,7 +25,7 @@ include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
 
 # Setup for the kind of memory that we are executing from
 
-ifeq ($(CONFIG_CXD56_USE_SYSBUS), y)
+ifeq ($(CONFIG_CXD56_USE_SYSBUS),y)
   LDSCRIPT = ramconfig-new.ld
 else
   LDSCRIPT = ramconfig.ld

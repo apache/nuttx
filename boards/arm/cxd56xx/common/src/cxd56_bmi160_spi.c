@@ -43,7 +43,7 @@
 int board_bmi160_initialize(int bus)
 {
   int ret;
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
 
   sninfo("Initializing BMI160..\n");
 

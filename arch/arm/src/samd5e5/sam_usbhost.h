@@ -257,7 +257,7 @@ int samd_usbhost_initialize(void);
  ****************************************************************************/
 
 struct usbhost_connection_s;
-FAR struct usbhost_connection_s *sam_usbhost_initialize(int controller);
+struct usbhost_connection_s *sam_usbhost_initialize(int controller);
 
 /****************************************************************************
  * Name: sam_usbhost_vbusdrive

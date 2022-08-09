@@ -91,20 +91,20 @@
 
 static void     stmpe811_notify(FAR struct stmpe811_dev_s *priv);
 static int      stmpe811_sample(FAR struct stmpe811_dev_s *priv,
-                  FAR struct stmpe811_sample_s *sample);
+                                FAR struct stmpe811_sample_s *sample);
 static inline int stmpe811_waitsample(FAR struct stmpe811_dev_s *priv,
-                  FAR struct stmpe811_sample_s *sample);
+                                      FAR struct stmpe811_sample_s *sample);
 
 /* Character driver methods */
 
 static int      stmpe811_open(FAR struct file *filep);
 static int      stmpe811_close(FAR struct file *filep);
 static ssize_t  stmpe811_read(FAR struct file *filep, FAR char *buffer,
-                  size_t len);
+                              size_t len);
 static int      stmpe811_ioctl(FAR struct file *filep, int cmd,
-                  unsigned long arg);
+                               unsigned long arg);
 static int      stmpe811_poll(FAR struct file *filep, struct pollfd *fds,
-                  bool setup);
+                              bool setup);
 
 /* Initialization logic */
 
@@ -886,7 +886,7 @@ int stmpe811_register(STMPE811_HANDLE handle, int minor)
 
   /* Register the character driver */
 
-  snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
+  snprintf(devname, sizeof(devname), DEV_FORMAT, minor);
   ret = register_driver(devname, &g_stmpe811fops, 0666, priv);
   if (ret < 0)
     {

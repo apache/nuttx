@@ -48,7 +48,7 @@ int h_errno;
  * Public Functions
  ****************************************************************************/
 
-bool convert_hostent(const FAR struct hostent_s *in,
+bool convert_hostent(FAR const struct hostent_s *in,
                      int type, FAR struct hostent *out)
 {
   int i;

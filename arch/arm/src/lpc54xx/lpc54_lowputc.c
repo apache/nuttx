@@ -278,7 +278,7 @@ static const struct uart_config_s g_console_config =
 
 #ifdef HAVE_USART_DEVICE
 static void lpc54_setbaud(uintptr_t base,
-                          FAR const struct uart_config_s *config)
+                          const struct uart_config_s *config)
 {
   uint32_t bestdiff = (uint32_t)-1;
   uint32_t bestosr  = 15;
@@ -669,7 +669,7 @@ void lpc54_lowsetup(void)
 
 #ifdef HAVE_USART_DEVICE
 void lpc54_usart_configure(uintptr_t base,
-                           FAR const struct uart_config_s *config)
+                           const struct uart_config_s *config)
 {
   uint32_t regval;
 

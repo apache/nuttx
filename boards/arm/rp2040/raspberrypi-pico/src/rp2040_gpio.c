@@ -77,19 +77,19 @@ struct rp2040gpint_dev_s
  ****************************************************************************/
 
 #if BOARD_NGPIOOUT > 0
-static int gpout_read(FAR struct gpio_dev_s *dev, FAR bool *value);
-static int gpout_write(FAR struct gpio_dev_s *dev, bool value);
+static int gpout_read(struct gpio_dev_s *dev, bool *value);
+static int gpout_write(struct gpio_dev_s *dev, bool value);
 #endif
 
 #if BOARD_NGPIOIN > 0
-static int gpin_read(FAR struct gpio_dev_s *dev, FAR bool *value);
+static int gpin_read(struct gpio_dev_s *dev, bool *value);
 #endif
 
 #if BOARD_NGPIOINT > 0
-static int gpint_read(FAR struct gpio_dev_s *dev, FAR bool *value);
-static int gpint_attach(FAR struct gpio_dev_s *dev,
+static int gpint_read(struct gpio_dev_s *dev, bool *value);
+static int gpint_attach(struct gpio_dev_s *dev,
                         pin_interrupt_t callback);
-static int gpint_enable(FAR struct gpio_dev_s *dev, bool enable);
+static int gpint_enable(struct gpio_dev_s *dev, bool enable);
 #endif
 
 /****************************************************************************
@@ -162,10 +162,10 @@ static struct rp2040gpint_dev_s g_gpint[BOARD_NGPIOINT];
  ****************************************************************************/
 
 #if BOARD_NGPIOOUT > 0
-static int gpout_read(FAR struct gpio_dev_s *dev, FAR bool *value)
+static int gpout_read(struct gpio_dev_s *dev, bool *value)
 {
-  FAR struct rp2040gpio_dev_s *rp2040gpio =
-    (FAR struct rp2040gpio_dev_s *)dev;
+  struct rp2040gpio_dev_s *rp2040gpio =
+    (struct rp2040gpio_dev_s *)dev;
 
   DEBUGASSERT(rp2040gpio != NULL && value != NULL);
   DEBUGASSERT(rp2040gpio->id < BOARD_NGPIOOUT);
@@ -179,10 +179,10 @@ static int gpout_read(FAR struct gpio_dev_s *dev, FAR bool *value)
  * Name: gpout_write
  ****************************************************************************/
 
-static int gpout_write(FAR struct gpio_dev_s *dev, bool value)
+static int gpout_write(struct gpio_dev_s *dev, bool value)
 {
-  FAR struct rp2040gpio_dev_s *rp2040gpio =
-    (FAR struct rp2040gpio_dev_s *)dev;
+  struct rp2040gpio_dev_s *rp2040gpio =
+    (struct rp2040gpio_dev_s *)dev;
 
   DEBUGASSERT(rp2040gpio != NULL);
   DEBUGASSERT(rp2040gpio->id < BOARD_NGPIOOUT);
@@ -198,10 +198,10 @@ static int gpout_write(FAR struct gpio_dev_s *dev, bool value)
  ****************************************************************************/
 
 #if BOARD_NGPIOIN > 0
-static int gpin_read(FAR struct gpio_dev_s *dev, FAR bool *value)
+static int gpin_read(struct gpio_dev_s *dev, bool *value)
 {
-  FAR struct rp2040gpio_dev_s *rp2040gpio =
-    (FAR struct rp2040gpio_dev_s *)dev;
+  struct rp2040gpio_dev_s *rp2040gpio =
+    (struct rp2040gpio_dev_s *)dev;
 
   DEBUGASSERT(rp2040gpio != NULL && value != NULL);
   DEBUGASSERT(rp2040gpio->id < BOARD_NGPIOIN);
@@ -219,8 +219,8 @@ static int gpin_read(FAR struct gpio_dev_s *dev, FAR bool *value)
 #if BOARD_NGPIOINT > 0
 static int rp2040gpio_interrupt(int irq, void *context, void *arg)
 {
-  FAR struct rp2040gpint_dev_s *rp2040gpint =
-    (FAR struct rp2040gpint_dev_s *)arg;
+  struct rp2040gpint_dev_s *rp2040gpint =
+    (struct rp2040gpint_dev_s *)arg;
 
   DEBUGASSERT(rp2040gpint != NULL && rp2040gpint->callback != NULL);
   gpioinfo("Interrupt! callback=%p\n", rp2040gpint->callback);
@@ -234,10 +234,10 @@ static int rp2040gpio_interrupt(int irq, void *context, void *arg)
  * Name: gpint_read
  ****************************************************************************/
 
-static int gpint_read(FAR struct gpio_dev_s *dev, FAR bool *value)
+static int gpint_read(struct gpio_dev_s *dev, bool *value)
 {
-  FAR struct rp2040gpint_dev_s *rp2040gpint =
-    (FAR struct rp2040gpint_dev_s *)dev;
+  struct rp2040gpint_dev_s *rp2040gpint =
+    (struct rp2040gpint_dev_s *)dev;
 
   DEBUGASSERT(rp2040gpint != NULL && value != NULL);
   DEBUGASSERT(rp2040gpint->rp2040gpio.id < BOARD_NGPIOINT);
@@ -251,11 +251,11 @@ static int gpint_read(FAR struct gpio_dev_s *dev, FAR bool *value)
  * Name: gpint_attach
  ****************************************************************************/
 
-static int gpint_attach(FAR struct gpio_dev_s *dev,
+static int gpint_attach(struct gpio_dev_s *dev,
                         pin_interrupt_t callback)
 {
-  FAR struct rp2040gpint_dev_s *rp2040gpint =
-    (FAR struct rp2040gpint_dev_s *)dev;
+  struct rp2040gpint_dev_s *rp2040gpint =
+    (struct rp2040gpint_dev_s *)dev;
   int irq = g_gpiointinputs[rp2040gpint->rp2040gpio.id];
   int ret;
 
@@ -283,10 +283,10 @@ static int gpint_attach(FAR struct gpio_dev_s *dev,
  * Name: gpint_enable
  ****************************************************************************/
 
-static int gpint_enable(FAR struct gpio_dev_s *dev, bool enable)
+static int gpint_enable(struct gpio_dev_s *dev, bool enable)
 {
-  FAR struct rp2040gpint_dev_s *rp2040gpint =
-    (FAR struct rp2040gpint_dev_s *)dev;
+  struct rp2040gpint_dev_s *rp2040gpint =
+    (struct rp2040gpint_dev_s *)dev;
   int irq = g_gpiointinputs[rp2040gpint->rp2040gpio.id];
 
   if (enable)

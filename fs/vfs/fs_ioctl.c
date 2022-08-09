@@ -111,17 +111,19 @@ int file_vioctl(FAR struct file *filep, int req, va_list ap)
           }
         break;
 
+#ifndef CONFIG_DISABLE_MOUNTPOINT
       case BIOC_BLKSSZGET:
         if (inode->u.i_ops != NULL && inode->u.i_ops->ioctl != NULL)
           {
             struct geometry geo;
             ret = inode->u.i_ops->ioctl(filep, BIOC_GEOMETRY,
-                                        (unsigned long)&geo);
+                                        (unsigned long)(uintptr_t)&geo);
             if (ret >= 0)
               {
                 *(FAR blksize_t *)(uintptr_t)arg = geo.geo_sectorsize;
               }
           }
+#endif
     }
 
   return ret;

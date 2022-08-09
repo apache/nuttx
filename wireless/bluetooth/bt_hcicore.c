@@ -1741,15 +1741,6 @@ int bt_hci_cmd_send(uint16_t opcode, FAR struct bt_buf_s *buf)
           return -ENOBUFS;
         }
     }
-  else
-    {
-      /* We manage the refcount the same for supplied and created
-       * buffers so increment the supplied count so we can manage
-       * it as-if we created it.
-       */
-
-      bt_buf_addref(buf);
-    }
 
   wlinfo("opcode %04x len %u\n", opcode, buf->len);
 
@@ -1792,10 +1783,6 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
           wlerr("ERROR:  Failed to create buffer\n");
           return -ENOBUFS;
         }
-    }
-  else
-    {
-      bt_buf_addref(buf);
     }
 
   wlinfo("opcode %04x len %u\n", opcode, buf->len);
@@ -1861,7 +1848,6 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
       bt_buf_release(buf->u.hci.sync);
     }
 
-  bt_buf_release(buf);
   return ret;
 }
 

@@ -74,16 +74,16 @@ struct dvfs_file_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     dvfs_open(FAR struct file *filep, FAR const char *relpath,
+static int     dvfs_open(struct file *filep, const char *relpath,
                          int oflags, mode_t mode);
-static int     dvfs_close(FAR struct file *filep);
-static ssize_t dvfs_read(FAR struct file *filep, FAR char *buffer,
+static int     dvfs_close(struct file *filep);
+static ssize_t dvfs_read(struct file *filep, char *buffer,
                          size_t buflen);
-static ssize_t dvfs_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t dvfs_write(struct file *filep, const char *buffer,
                           size_t buflen);
-static int     dvfs_dup(FAR const struct file *oldp,
-                        FAR struct file *newp);
-static int     dvfs_stat(FAR const char *relpath, FAR struct stat *buf);
+static int     dvfs_dup(const struct file *oldp,
+                        struct file *newp);
+static int     dvfs_stat(const char *relpath, struct stat *buf);
 
 /****************************************************************************
  * Private Data
@@ -126,16 +126,16 @@ extern uint32_t g_dvfs_freq_stat[3];
  * Name: dvfs_open
  ****************************************************************************/
 
-static int dvfs_open(FAR struct file *filep, FAR const char *relpath,
+static int dvfs_open(struct file *filep, const char *relpath,
                     int oflags, mode_t mode)
 {
-  FAR struct dvfs_file_s *priv;
+  struct dvfs_file_s *priv;
 
   finfo("Open '%s'\n", relpath);
 
   /* Allocate a container to hold the task and attribute selection */
 
-  priv = (FAR struct dvfs_file_s *)kmm_zalloc(sizeof(struct dvfs_file_s));
+  priv = (struct dvfs_file_s *)kmm_zalloc(sizeof(struct dvfs_file_s));
   if (!priv)
     {
       ferr("ERROR: Failed to allocate file attributes\n");
@@ -144,7 +144,7 @@ static int dvfs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Save the index as the open-specific state in filep->f_priv */
 
-  filep->f_priv = (FAR void *)priv;
+  filep->f_priv = (void *)priv;
   return OK;
 }
 
@@ -152,13 +152,13 @@ static int dvfs_open(FAR struct file *filep, FAR const char *relpath,
  * Name: dvfs_close
  ****************************************************************************/
 
-static int dvfs_close(FAR struct file *filep)
+static int dvfs_close(struct file *filep)
 {
-  FAR struct dvfs_file_s *priv;
+  struct dvfs_file_s *priv;
 
   /* Recover our private data from the struct file instance */
 
-  priv = (FAR struct dvfs_file_s *)filep->f_priv;
+  priv = (struct dvfs_file_s *)filep->f_priv;
   DEBUGASSERT(priv);
 
   /* Release the file attributes structure */
@@ -172,10 +172,10 @@ static int dvfs_close(FAR struct file *filep)
  * Name: dvfs_read
  ****************************************************************************/
 
-static ssize_t dvfs_read(FAR struct file *filep, FAR char *buffer,
+static ssize_t dvfs_read(struct file *filep, char *buffer,
                          size_t buflen)
 {
-  FAR struct dvfs_file_s *priv;
+  struct dvfs_file_s *priv;
   size_t linesize;
   size_t copysize;
   size_t remaining;
@@ -186,7 +186,7 @@ static ssize_t dvfs_read(FAR struct file *filep, FAR char *buffer,
 
   finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
-  priv = (FAR struct dvfs_file_s *)filep->f_priv;
+  priv = (struct dvfs_file_s *)filep->f_priv;
   DEBUGASSERT(priv);
 
   remaining = buflen;
@@ -262,7 +262,7 @@ static ssize_t dvfs_read(FAR struct file *filep, FAR char *buffer,
  * Name: procfs_write
  ****************************************************************************/
 
-static ssize_t dvfs_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t dvfs_write(struct file *filep, const char *buffer,
                           size_t buflen)
 {
   char line[DVFS_LINELEN];
@@ -306,21 +306,21 @@ static ssize_t dvfs_write(FAR struct file *filep, FAR const char *buffer,
  * Name: dvfs_dup
  ****************************************************************************/
 
-static int dvfs_dup(FAR const struct file *oldp, FAR struct file *newp)
+static int dvfs_dup(const struct file *oldp, struct file *newp)
 {
-  FAR struct dvfs_file_s *oldpriv;
-  FAR struct dvfs_file_s *newpriv;
+  struct dvfs_file_s *oldpriv;
+  struct dvfs_file_s *newpriv;
 
   finfo("Dup %p->%p\n", oldp, newp);
 
   /* Recover our private data from the old struct file instance */
 
-  oldpriv = (FAR struct dvfs_file_s *)oldp->f_priv;
+  oldpriv = (struct dvfs_file_s *)oldp->f_priv;
   DEBUGASSERT(oldpriv);
 
   /* Allocate a new container to hold the task and attribute selection */
 
-  newpriv = (FAR struct dvfs_file_s *)kmm_zalloc(sizeof(struct dvfs_file_s));
+  newpriv = (struct dvfs_file_s *)kmm_zalloc(sizeof(struct dvfs_file_s));
   if (!newpriv)
     {
       ferr("ERROR: Failed to allocate file attributes\n");
@@ -333,7 +333,7 @@ static int dvfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Save the new attributes in the new file structure */
 
-  newp->f_priv = (FAR void *)newpriv;
+  newp->f_priv = (void *)newpriv;
   return OK;
 }
 

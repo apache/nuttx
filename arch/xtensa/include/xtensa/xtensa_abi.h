@@ -112,9 +112,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* MACROS TO HANDLE ABI SPECIFICS OF FUNCTION ENTRY AND RETURN
+/* MACROS TO HANDLE ABI SPECIFICS OF FUNCTION CALL, ENTRY AND RETURN
  *
  * Convenient where the frame size requirements are the same for both ABIs.
+ *   CALL, ARGx are used to make a call to a C function.
  *   ENTRY(sz), RET(sz) are for framed functions (have locals or make calls).
  *   ENTRY0,    RET0    are for frameless functions (no locals, no calls).
  *
@@ -149,6 +150,15 @@
 #  define RET(sz)       ret1    sz
 #  define RET0          ret
 
+#  define CALL          call0
+#  define ARG1          a2
+#  define ARG2          a3
+#  define ARG3          a4
+#  define ARG4          a5
+#  define ARG5          a6
+#  define ARG6          a7
+#  define RETVAL        a2
+
 #else
   /* Windowed */
 
@@ -157,11 +167,29 @@
 #  define RET(sz)       retw
 #  define RET0          retw
 
+/* These macros are used only in assembly code when calling C functions
+ * with CALL4.  This is to help refactor common code with the CALL0 ABI.
+ * call0 can still be used to call assembly function not conforming to the
+ * windowed ABI.
+ */
+
+#  define CALL          call4
+#  define ARG1          a6
+#  define ARG2          a7
+#  define ARG3          a8
+#  define ARG4          a9
+#  define ARG5          a10
+#  define ARG6          a11
+#  define RETVAL        a6
+
 #endif
 
-/* Index into stack frame (skipping over saved A0) */
+/* Index into stack frame.
+ * For CALL0 ABI the argument "n" should be greater than 0 to avoid
+ * corrupting the saved A0 if ENTRY was used.
+ */
 
-#define LOCAL_OFFSET(n) ((n) << 2)  /* n = 1 .. ((size >> 2) - 1) */
+#define LOCAL_OFFSET(n) ((n) << 2)  /* n = 0/1 .. ((size >> 2) - 1) */
 
 #endif /* __ASSEMBLY_ */
 

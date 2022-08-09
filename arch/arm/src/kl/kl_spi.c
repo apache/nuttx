@@ -67,26 +67,26 @@ struct kl_spidev_s
 
 /* Helpers */
 
-static inline uint8_t spi_getreg(FAR struct kl_spidev_s *priv,
+static inline uint8_t spi_getreg(struct kl_spidev_s *priv,
                                  uint8_t offset);
-static inline void spi_putreg(FAR struct kl_spidev_s *priv, uint8_t offset,
+static inline void spi_putreg(struct kl_spidev_s *priv, uint8_t offset,
                               uint8_t value);
 
 /* SPI methods */
 
-static int      spi_lock(FAR struct spi_dev_s *dev, bool lock);
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+static int      spi_lock(struct spi_dev_s *dev, bool lock);
+static uint32_t spi_setfrequency(struct spi_dev_s *dev,
                                  uint32_t frequency);
-static void     spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
-static void     spi_setbits(FAR struct spi_dev_s *dev, int nbits);
-static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd);
-static void     spi_exchange(FAR struct spi_dev_s *dev,
-                             FAR const void *txbuffer, FAR void *rxbuffer,
+static void     spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode);
+static void     spi_setbits(struct spi_dev_s *dev, int nbits);
+static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd);
+static void     spi_exchange(struct spi_dev_s *dev,
+                             const void *txbuffer, void *rxbuffer,
                              size_t nwords);
 #ifndef CONFIG_SPI_EXCHANGE
-static void     spi_sndblock(FAR struct spi_dev_s *dev,
-                             FAR const void *txbuffer, size_t nwords);
-static void     spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
+static void     spi_sndblock(struct spi_dev_s *dev,
+                             const void *txbuffer, size_t nwords);
+static void     spi_recvblock(struct spi_dev_s *dev, void *rxbuffer,
                               size_t nwords);
 #endif
 
@@ -180,7 +180,7 @@ static struct kl_spidev_s g_spi1dev =
  *
  ****************************************************************************/
 
-static inline uint8_t spi_getreg(FAR struct kl_spidev_s *priv,
+static inline uint8_t spi_getreg(struct kl_spidev_s *priv,
                                  uint8_t offset)
 {
   return getreg8(priv->spibase + offset);
@@ -202,7 +202,7 @@ static inline uint8_t spi_getreg(FAR struct kl_spidev_s *priv,
  *
  ****************************************************************************/
 
-static inline void spi_putreg(FAR struct kl_spidev_s *priv, uint8_t offset,
+static inline void spi_putreg(struct kl_spidev_s *priv, uint8_t offset,
                               uint8_t value)
 {
   putreg8(value, priv->spibase + offset);
@@ -229,9 +229,9 @@ static inline void spi_putreg(FAR struct kl_spidev_s *priv, uint8_t offset,
  *
  ****************************************************************************/
 
-static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
+static int spi_lock(struct spi_dev_s *dev, bool lock)
 {
-  FAR struct kl_spidev_s *priv = (FAR struct kl_spidev_s *)dev;
+  struct kl_spidev_s *priv = (struct kl_spidev_s *)dev;
   int ret;
 
   if (lock)
@@ -261,10 +261,10 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+static uint32_t spi_setfrequency(struct spi_dev_s *dev,
                                  uint32_t frequency)
 {
-  FAR struct kl_spidev_s *priv = (FAR struct kl_spidev_s *)dev;
+  struct kl_spidev_s *priv = (struct kl_spidev_s *)dev;
   uint32_t divisor;
   uint32_t actual;
   unsigned int spr;
@@ -358,9 +358,9 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
  *
  ****************************************************************************/
 
-static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
+static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 {
-  FAR struct kl_spidev_s *priv = (FAR struct kl_spidev_s *)dev;
+  struct kl_spidev_s *priv = (struct kl_spidev_s *)dev;
   uint8_t regval;
 
   spiinfo("mode=%d\n", mode);
@@ -419,7 +419,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
  *
  ****************************************************************************/
 
-static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
+static void spi_setbits(struct spi_dev_s *dev, int nbits)
 {
   /* Only 8-bit mode is supported */
 
@@ -442,9 +442,9 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
  *
  ****************************************************************************/
 
-static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
+static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
 {
-  FAR struct kl_spidev_s *priv = (FAR struct kl_spidev_s *)dev;
+  struct kl_spidev_s *priv = (struct kl_spidev_s *)dev;
 
   /* Make sure that the transmit buffer is empty */
 
@@ -487,12 +487,12 @@ static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
  *
  ****************************************************************************/
 
-static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
-                         FAR void *rxbuffer, size_t nwords)
+static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+                         void *rxbuffer, size_t nwords)
 {
-  FAR struct kl_spidev_s *priv = (FAR struct kl_spidev_s *)dev;
-  FAR uint8_t *rxptr = (FAR uint8_t *)rxbuffer;
-  FAR uint8_t *txptr = (FAR uint8_t *)txbuffer;
+  struct kl_spidev_s *priv = (struct kl_spidev_s *)dev;
+  uint8_t *rxptr = (uint8_t *)rxbuffer;
+  uint8_t *txptr = (uint8_t *)txbuffer;
   uint8_t data;
 
   spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
@@ -559,7 +559,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
  ****************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
+static void spi_sndblock(struct spi_dev_s *dev, const void *txbuffer,
                          size_t nwords)
 {
   spiinfo("txbuffer=%p nwords=%d\n", txbuffer, nwords);
@@ -588,7 +588,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
  ****************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
+static void spi_recvblock(struct spi_dev_s *dev, void *rxbuffer,
                           size_t nwords)
 {
   spiinfo("rxbuffer=%p nwords=%d\n", rxbuffer, nwords);
@@ -614,9 +614,9 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *kl_spibus_initialize(int port)
+struct spi_dev_s *kl_spibus_initialize(int port)
 {
-  FAR struct kl_spidev_s *priv;
+  struct kl_spidev_s *priv;
   uint32_t regval;
 
   /* Configure multiplexed pins as connected on the board.  Chip select pins
@@ -687,7 +687,7 @@ FAR struct spi_dev_s *kl_spibus_initialize(int port)
 
   /* Select a default frequency of approx. 400KHz */
 
-  spi_setfrequency((FAR struct spi_dev_s *)priv, 400000);
+  spi_setfrequency((struct spi_dev_s *)priv, 400000);
 
   /* Initialize the SPI semaphore that enforces mutually exclusive access */
 

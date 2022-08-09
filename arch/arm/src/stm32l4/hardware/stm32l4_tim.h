@@ -362,14 +362,14 @@
 #define ATIM_CR2_OIS3               (1 << 12) /* Bit 12: Output Idle state 3 (OC3 output) */
 #define ATIM_CR2_OIS3N              (1 << 13) /* Bit 13: Output Idle state 3 (OC3N output) */
 #define ATIM_CR2_OIS4               (1 << 14) /* Bit 14: Output Idle state 4 (OC4 output) */
-#define ATIM_CR2_OIS5               (1 << 16) /* Bit 16: OOutput Idle state 5 (OC5 output) */
+#define ATIM_CR2_OIS5               (1 << 16) /* Bit 16: Output Idle state 5 (OC5 output) */
 #define ATIM_CR2_OIS6               (1 << 18) /* Bit 18: Output Idle state 6 (OC6 output) */
 #define ATIM_CR2_MMS2_SHIFT         (20)      /* Bits 20-23: Master Mode Selection 2 */
 #define ATIM_CR2_MMS2_MASK          (15 << ATIM_CR2_MMS2_SHIFT)
 #  define ATIM_CR2_MMS2_RESET       (0 << ATIM_CR2_MMS2_SHIFT)  /* 0000: Reset - TIMx_EGR UG bit is TRG9 */
 #  define ATIM_CR2_MMS2_ENABLE      (1 << ATIM_CR2_MMS2_SHIFT)  /* 0001: Enable - CNT_EN is TRGO2 */
-#  define ATIM_CR2_MMS2_UPDATE      (2 << ATIM_CR2_MMS2_SHIFT)  /* 0010: Update event is TRGH0*/
-#  define ATIM_CR2_MMS2_COMPP       (3 << ATIM_CR2_MMS2_SHIFT)  /* 0010: Compare Pulse - CC1IF flag */
+#  define ATIM_CR2_MMS2_UPDATE      (2 << ATIM_CR2_MMS2_SHIFT)  /* 0010: Update event is TRGO2 */
+#  define ATIM_CR2_MMS2_COMPP       (3 << ATIM_CR2_MMS2_SHIFT)  /* 0011: Compare Pulse - CC1IF flag */
 #  define ATIM_CR2_MMS2_OC1REF      (4 << ATIM_CR2_MMS2_SHIFT)  /* 0100: Compare OC1REF is TRGO2 */
 #  define ATIM_CR2_MMS2_OC2REF      (5 << ATIM_CR2_MMS2_SHIFT)  /* 0101: Compare OC2REF is TRGO2 */
 #  define ATIM_CR2_MMS2_OC3REF      (6 << ATIM_CR2_MMS2_SHIFT)  /* 0110: Compare OC3REF is TRGO2 */
@@ -498,7 +498,7 @@
 #define ATIM_CCMR1_OC1M_SHIFT     (4)       /* Bits 6-4: Output Compare 1 Mode */
 #define ATIM_CCMR1_OC1M_MASK      (7 << ATIM_CCMR1_OC1M_SHIFT)
                                             /* (See common (unshifted) bit field definitions below) */
-#define ATIM_CCMR1_OC1CE          (1 << 7)  /* Bit 7: Output Compare 1Clear Enable */
+#define ATIM_CCMR1_OC1CE          (1 << 7)  /* Bit 7: Output Compare 1 Clear Enable */
 #define ATIM_CCMR1_CC2S_SHIFT     (8)       /* Bits 8-9: Capture/Compare 2 Selection */
 #define ATIM_CCMR1_CC2S_MASK      (3 << ATIM_CCMR1_CC2S_SHIFT)
                                             /* (See common (unshifted) bit field definitions below) */
@@ -528,6 +528,8 @@
 #define ATIM_CCMR_MODE_OCREFHI    (5)       /* 101: OCxREF forced high */
 #define ATIM_CCMR_MODE_PWM1       (6)       /* 110: PWM mode 1 */
 #define ATIM_CCMR_MODE_PWM2       (7)       /* 111: PWM mode 2 */
+#define ATIM_CCMR_MODE_OPM1       (8)       /* 1000: OPM mode 1 */
+#define ATIM_CCMR_MODE_OPM2       (9)       /* 1001: OPM mode 2 */
 #define ATIM_CCMR_MODE_COMBINED1  (12)      /* 1100: Combined PWM mode 1 */
 #define ATIM_CCMR_MODE_COMBINED2  (13)      /* 1101: Combined PWM mode 2 */
 #define ATIM_CCMR_MODE_ASYMMETRIC1 (14)     /* 1110: Asymmetric PWM mode 1 */
@@ -705,8 +707,8 @@
 #  define ATIM_BDTR_BKF_FCKINT8   (3 << ATIM_BDTR_BKF_SHIFT)   /* 0011: fSAMPLING=fCK_INT, N=8 */
 #  define ATIM_BDTR_BKF_FDTSd26   (4 << ATIM_BDTR_BKF_SHIFT)   /* 0100: fSAMPLING=fDTS/2, N=6 */
 #  define ATIM_BDTR_BKF_FDTSd28   (5 << ATIM_BDTR_BKF_SHIFT)   /* 0101: fSAMPLING=fDTS/2, N=8 */
-#  define ATIM_BDTR_BKF_FDTSd36   (6 << ATIM_BDTR_BKF_SHIFT)   /* 0110: fSAMPLING=fDTS/4, N=6 */
-#  define ATIM_BDTR_BKF_FDTSd38   (7 << ATIM_BDTR_BKF_SHIFT)   /* 0111: fSAMPLING=fDTS/4, N=8 */
+#  define ATIM_BDTR_BKF_FDTSd46   (6 << ATIM_BDTR_BKF_SHIFT)   /* 0110: fSAMPLING=fDTS/4, N=6 */
+#  define ATIM_BDTR_BKF_FDTSd48   (7 << ATIM_BDTR_BKF_SHIFT)   /* 0111: fSAMPLING=fDTS/4, N=8 */
 #  define ATIM_BDTR_BKF_FDTSd86   (8 << ATIM_BDTR_BKF_SHIFT)   /* 1000: fSAMPLING=fDTS/8, N=6 */
 #  define ATIM_BDTR_BKF_FDTSd88   (9 << ATIM_BDTR_BKF_SHIFT)   /* 1001: fSAMPLING=fDTS/8, N=8 */
 #  define ATIM_BDTR_BKF_FDTSd165  (10 << ATIM_BDTR_BKF_SHIFT)  /* 1010: fSAMPLING=fDTS/16, N=5 */
@@ -724,8 +726,8 @@
 #  define ATIM_BDTR_BK2F_FCKINT8  (3 << ATIM_BDTR_BK2F_SHIFT)  /* 0011: fSAMPLING=fCK_INT, N=8 */
 #  define ATIM_BDTR_BK2F_FDTSd26  (4 << ATIM_BDTR_BK2F_SHIFT)  /* 0100: fSAMPLING=fDTS/2, N=6 */
 #  define ATIM_BDTR_BK2F_FDTSd28  (5 << ATIM_BDTR_BK2F_SHIFT)  /* 0101: fSAMPLING=fDTS/2, N=8 */
-#  define ATIM_BDTR_BK2F_FDTSd36  (6 << ATIM_BDTR_BK2F_SHIFT)  /* 0110: fSAMPLING=fDTS/4, N=6 */
-#  define ATIM_BDTR_BK2F_FDTSd38  (7 << ATIM_BDTR_BK2F_SHIFT)  /* 0111: fSAMPLING=fDTS/4, N=8 */
+#  define ATIM_BDTR_BK2F_FDTSd46  (6 << ATIM_BDTR_BK2F_SHIFT)  /* 0110: fSAMPLING=fDTS/4, N=6 */
+#  define ATIM_BDTR_BK2F_FDTSd48  (7 << ATIM_BDTR_BK2F_SHIFT)  /* 0111: fSAMPLING=fDTS/4, N=8 */
 #  define ATIM_BDTR_BK2F_FDTSd86  (8 << ATIM_BDTR_BK2F_SHIFT)  /* 1000: fSAMPLING=fDTS/8, N=6 */
 #  define ATIM_BDTR_BK2F_FDTSd88  (9 << ATIM_BDTR_BK2F_SHIFT)  /* 1001: fSAMPLING=fDTS/8, N=8 */
 #  define ATIM_BDTR_BK2F_FDTSd165 (10 << ATIM_BDTR_BK2F_SHIFT) /* 1010: fSAMPLING=fDTS/16, N=5 */
@@ -735,8 +737,8 @@
 #  define ATIM_BDTR_BK2F_FDTSd326 (14 << ATIM_BDTR_BK2F_SHIFT) /* 1110: fSAMPLING=fDTS/32, N=6 */
 #  define ATIM_BDTR_BK2F_FDTSd328 (15 << ATIM_BDTR_BK2F_SHIFT) /* 1111: fSAMPLING=fDTS/32, N=8 */
 
-#define ATIM_BDTR_BK2E            (1 << 24)  /* Bit 24: Break 2 enable */
-#define ATIM_BDTR_BK2P            (1 << 1525 /* Bit 25:Break 2 polarity */
+#define ATIM_BDTR_BK2E            (1 << 24) /* Bit 24: Break 2 enable */
+#define ATIM_BDTR_BK2P            (1 << 25) /* Bit 25: Break 2 polarity */
 
 /* DMA control register */
 
@@ -823,8 +825,8 @@
 #  define GTIM_SMCR_FCKINT8       (3 << GTIM_SMCR_ETF_SHIFT)  /* 0011: fSAMPLING=fCK_INT, N=8 */
 #  define GTIM_SMCR_FDTSd26       (4 << GTIM_SMCR_ETF_SHIFT)  /* 0100: fSAMPLING=fDTS/2, N=6 */
 #  define GTIM_SMCR_FDTSd28       (5 << GTIM_SMCR_ETF_SHIFT)  /* 0101: fSAMPLING=fDTS/2, N=8 */
-#  define GTIM_SMCR_FDTSd36       (6 << GTIM_SMCR_ETF_SHIFT)  /* 0110: fSAMPLING=fDTS/4, N=6 */
-#  define GTIM_SMCR_FDTSd38       (7 << GTIM_SMCR_ETF_SHIFT)  /* 0111: fSAMPLING=fDTS/4, N=8 */
+#  define GTIM_SMCR_FDTSd46       (6 << GTIM_SMCR_ETF_SHIFT)  /* 0110: fSAMPLING=fDTS/4, N=6 */
+#  define GTIM_SMCR_FDTSd48       (7 << GTIM_SMCR_ETF_SHIFT)  /* 0111: fSAMPLING=fDTS/4, N=8 */
 #  define GTIM_SMCR_FDTSd86       (8 << GTIM_SMCR_ETF_SHIFT)  /* 1000: fSAMPLING=fDTS/8, N=6 */
 #  define GTIM_SMCR_FDTSd88       (9 << GTIM_SMCR_ETF_SHIFT)  /* 1001: fSAMPLING=fDTS/8, N=8 */
 #  define GTIM_SMCR_FDTSd165      (10 << GTIM_SMCR_ETF_SHIFT) /* 1010: fSAMPLING=fDTS/16, N=5 */
@@ -1073,8 +1075,8 @@
 #  define GTIM_BDTR_BKF_FCKINT8   (3 << GTIM_BDTR_BKF_SHIFT)   /* 0011: fSAMPLING=fCK_INT, N=8 */
 #  define GTIM_BDTR_BKF_FDTSd26   (4 << GTIM_BDTR_BKF_SHIFT)   /* 0100: fSAMPLING=fDTS/2, N=6 */
 #  define GTIM_BDTR_BKF_FDTSd28   (5 << GTIM_BDTR_BKF_SHIFT)   /* 0101: fSAMPLING=fDTS/2, N=8 */
-#  define GTIM_BDTR_BKF_FDTSd36   (6 << GTIM_BDTR_BKF_SHIFT)   /* 0110: fSAMPLING=fDTS/4, N=6 */
-#  define GTIM_BDTR_BKF_FDTSd38   (7 << GTIM_BDTR_BKF_SHIFT)   /* 0111: fSAMPLING=fDTS/4, N=8 */
+#  define GTIM_BDTR_BKF_FDTSd46   (6 << GTIM_BDTR_BKF_SHIFT)   /* 0110: fSAMPLING=fDTS/4, N=6 */
+#  define GTIM_BDTR_BKF_FDTSd48   (7 << GTIM_BDTR_BKF_SHIFT)   /* 0111: fSAMPLING=fDTS/4, N=8 */
 #  define GTIM_BDTR_BKF_FDTSd86   (8 << GTIM_BDTR_BKF_SHIFT)   /* 1000: fSAMPLING=fDTS/8, N=6 */
 #  define GTIM_BDTR_BKF_FDTSd88   (9 << GTIM_BDTR_BKF_SHIFT)   /* 1001: fSAMPLING=fDTS/8, N=8 */
 #  define GTIM_BDTR_BKF_FDTSd165  (10 << GTIM_BDTR_BKF_SHIFT)  /* 1010: fSAMPLING=fDTS/16, N=5 */

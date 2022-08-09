@@ -530,6 +530,16 @@ config ARCH_CHIP_STM32G071RB
 	select STM32F0L0G0_STM32G0
 	depends on ARCH_CHIP_STM32G0
 
+config ARCH_CHIP_STM32L053C8
+	bool "STM32L053C8"
+	select ARCH_CHIP_STM32L053XX
+	depends on ARCH_CHIP_STM32L0
+
+config ARCH_CHIP_STM32L053R8
+	bool "STM32L053R8"
+	select ARCH_CHIP_STM32L053XX
+	depends on ARCH_CHIP_STM32L0
+
 config ARCH_CHIP_STM32L071K8
 	bool "STM32L071K8"
 	select ARCH_CHIP_STM32L071XX
@@ -793,6 +803,8 @@ config STM32F0L0G0_STM32F0
 config STM32F0L0G0_STM32G0
 	bool
 	default n
+	select STM32F0L0G0_HAVE_USART3
+	select STM32F0L0G0_HAVE_USART4
 	select STM32F0L0G0_HAVE_DMAMUX
 	select STM32F0L0G0_HAVE_IP_USART_V2
 	select STM32F0L0G0_HAVE_IP_EXTI_V2
@@ -846,8 +858,7 @@ config STM32F0L0G0_VALUELINE
 	bool
 	default n
 	select STM32F0L0G0_HAVE_USART5
-	select STM32F0L0G0_HAVE_SPI2 if STM32F0L0G0_HIGHDENSITY
-	select STM32F0L0G0_HAVE_SPI3 if STM32F0L0G0_HIGHDENSITY
+	select STM32F0L0G0_HAVE_SPI2
 
 config STM32F0L0G0_ACCESSLINE
 	bool
@@ -855,7 +866,6 @@ config STM32F0L0G0_ACCESSLINE
 	select STM32F0L0G0_HAVE_USART5
 	select STM32F0L0G0_HAVE_CAN1
 	select STM32F0L0G0_HAVE_SPI2
-	select STM32F0L0G0_HAVE_SPI3
 
 config STM32F0L0G0_LOWVOLTLINE
 	bool
@@ -863,7 +873,6 @@ config STM32F0L0G0_LOWVOLTLINE
 	select STM32F0L0G0_HAVE_USART5
 	select STM32F0L0G0_HAVE_CAN1
 	select STM32F0L0G0_HAVE_SPI2
-	select STM32F0L0G0_HAVE_SPI3
 
 config STM32F0L0G0_USBLINE
 	bool
@@ -871,12 +880,15 @@ config STM32F0L0G0_USBLINE
 	select STM32F0L0G0_HAVE_HSI48
 	select STM32F0L0G0_HAVE_CAN1
 	select STM32F0L0G0_HAVE_SPI2
-	select STM32F0L0G0_HAVE_SPI3
 	select STM32F0L0G0_HAVE_USBDEV
 
 config STM32F0L0G0_ENERGYLITE
 	bool
 	default n
+
+config ARCH_CHIP_STM32L053XX
+	bool
+	select STM32F0L0G0_STM32L0
 
 config ARCH_CHIP_STM32L071XX
 	bool
@@ -1082,18 +1094,6 @@ config STM32F0L0G0_HAVE_SPI3
 	bool
 	default n
 
-config STM32F0L0G0_HAVE_SPI4
-	bool
-	default n
-
-config STM32F0L0G0_HAVE_SPI5
-	bool
-	default n
-
-config STM32F0L0G0_HAVE_SPI6
-	bool
-	default n
-
 config STM32F0L0G0_HAVE_SAIPLL
 	bool
 	default n
@@ -1283,27 +1283,6 @@ config STM32F0L0G0_SPI3
 	select SPI
 	select STM32F0L0G0_SPI
 
-config STM32F0L0G0_SPI4
-	bool "SPI4"
-	default n
-	depends on STM32F0L0G0_HAVE_SPI4
-	select SPI
-	select STM32F0L0G0_SPI
-
-config STM32F0L0G0_SPI5
-	bool "SPI5"
-	default n
-	depends on STM32F0L0G0_HAVE_SPI5
-	select SPI
-	select STM32F0L0G0_SPI
-
-config STM32F0L0G0_SPI6
-	bool "SPI6"
-	default n
-	depends on STM32F0L0G0_HAVE_SPI6
-	select SPI
-	select STM32F0L0G0_SPI
-
 config STM32F0L0G0_SYSCFG
 	bool "SYSCFG"
 	default y
@@ -1439,39 +1418,55 @@ endmenu
 
 config STM32F0L0G0_COMP
 	bool
+	default n
 
 config STM32F0L0G0_ADC
 	bool
+	default n
 
 config STM32F0L0G0_DAC
 	bool
+	default n
 
 config STM32F0L0G0_DMA
 	bool
+	default n
 
 config STM32F0L0G0_SPI
 	bool
 
+config STM32F0L0G0_SPI_DMA
+	bool
+	default n
+
 config STM32F0L0G0_I2C
 	bool
+	default n
 
 config STM32F0L0G0_CAN
 	bool
+	default n
 
 config STM32F0L0G0_PWM
 	bool
+	default n
+	select ARCH_HAVE_PWM_PULSECOUNT
 
 config STM32F0L0G0_USART
 	bool
+	default n
 
 config STM32F0L0G0_TIM
 	bool
+	default n
 
 config STM32F0L0G0_SERIALDRIVER
 	bool
+	default n
 
 config STM32F0L0G0_1WIREDRIVER
 	bool
+	default n
 
 menu "Timer Configuration"
 
@@ -1479,9 +1474,7 @@ config STM32F0L0G0_TIM1_PWM
 	bool "TIM1 PWM"
 	default n
 	depends on STM32F0L0G0_TIM1
-	select PWM
 	select STM32F0L0G0_PWM
-	select ARCH_HAVE_PWM_PULSECOUNT
 	---help---
 		Reserve timer 1 for use by PWM
 
@@ -1656,9 +1649,7 @@ config STM32F0L0G0_TIM2_PWM
 	bool "TIM2 PWM"
 	default n
 	depends on STM32F0L0G0_TIM2
-	select PWM
 	select STM32F0L0G0_PWM
-	select ARCH_HAVE_PWM_PULSECOUNT
 	---help---
 		Reserve timer 2 for use by PWM
 
@@ -1812,9 +1803,7 @@ config STM32F0L0G0_TIM3_PWM
 	bool "TIM3 PWM"
 	default n
 	depends on STM32F0L0G0_TIM3
-	select PWM
 	select STM32F0L0G0_PWM
-	select ARCH_HAVE_PWM_PULSECOUNT
 	---help---
 		Reserve timer 3 for use by PWM
 
@@ -1968,7 +1957,6 @@ config STM32F0L0G0_TIM14_PWM
 	bool "TIM14 PWM"
 	default n
 	depends on STM32F0L0G0_TIM14
-	select PWM
 	select STM32F0L0G0_PWM
 	---help---
 		Reserve timer 14 for use by PWM
@@ -2032,7 +2020,6 @@ config STM32F0L0G0_TIM15_PWM
 	bool "TIM15 PWM"
 	default n
 	depends on STM32F0L0G0_TIM15
-	select PWM
 	select STM32F0L0G0_PWM
 	---help---
 		Reserve timer 15 for use by PWM
@@ -2126,7 +2113,6 @@ config STM32F0L0G0_TIM16_PWM
 	bool "TIM16 PWM"
 	default n
 	depends on STM32F0L0G0_TIM16
-	select PWM
 	select STM32F0L0G0_PWM
 	---help---
 		Reserve timer 16 for use by PWM
@@ -2197,7 +2183,6 @@ config STM32F0L0G0_TIM17_PWM
 	bool "TIM17 PWM"
 	default n
 	depends on STM32F0L0G0_TIM17
-	select PWM
 	select STM32F0L0G0_PWM
 	---help---
 		Reserve timer 17 for use by PWM
@@ -2267,9 +2252,8 @@ endif # STM32F0L0G0_TIM17_PWM
 config STM32F0L0G0_PWM_MULTICHAN
 	bool "PWM Multiple Output Channels"
 	default n
-	depends on STM32F0L0G0_TIM1_PWM || STM32F0L0G0_TIM2_PWM || STM32F0L0G0_TIM3_PWM || STM32F0L0G0_TIM15_PWM
+	depends on STM32F0L0G0_PWM
 	select ARCH_HAVE_PWM_MULTICHAN
-	select PWM_MULTICHAN
 	---help---
 		Specifies that the PWM driver supports multiple output channels per timer.
 
@@ -2719,25 +2703,53 @@ config STM32F0L0G0_SPI_INTERRUPTS
 		poll-waiting is recommended if the interrupt rate would be to high in
 		the interrupt driven case.
 
-config STM32F0L0G0_SPI_DMA
-	bool "SPI DMA"
-	default n
-	---help---
-		Use DMA to improve SPI transfer performance.  Cannot be used with STM32F0L0G0_SPI_INTERRUPT.
-
 config STM32F0L0G0_SPI1_DMA
 	bool "SPI1 DMA"
 	default n
-	depends on STM32F0L0G0_SPI1 && STM32F0L0G0_SPI_DMA
+	depends on STM32F0L0G0_SPI1 && !STM32F0L0G0_SPI_INTERRUPTS
+	select STM32F0L0G0_SPI_DMA
 	---help---
-		Use DMA to improve SPI1 transfer performance.
+		Use DMA to improve SPI1 transfer performance.  Cannot be used with STM32F0L0G0_SPI_INTERRUPT.
 
 config STM32F0L0G0_SPI2_DMA
 	bool "SPI2 DMA"
 	default n
-	depends on STM32F0L0G0_SPI2 && STM32F0L0G0_SPI_DMA
+	depends on STM32F0L0G0_SPI2 && !STM32F0L0G0_SPI_INTERRUPTS
+	select STM32F0L0G0_SPI_DMA
 	---help---
-		Use DMA to improve SPI2 transfer performance.
+		Use DMA to improve SPI2 transfer performance.  Cannot be used with STM32F0L0G0_SPI_INTERRUPT.
+
+config STM32F0L0G0_SPI3_DMA
+	bool "SPI3 DMA"
+	default n
+	depends on STM32F0L0G0_SPI3 && !STM32F0L0G0_SPI_INTERRUPTS
+	select STM32F0L0G0_SPI_DMA
+	---help---
+		Use DMA to improve SPI3 transfer performance.  Cannot be used with STM32F0L0G0_SPI_INTERRUPT.
+
+config STM32F0L0G0_SPI1_COMMTYPE
+	int "SPI1 Operation mode"
+	default 0
+	range 0 3
+	depends on STM32F0L0G0_SPI1
+	---help---
+		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
+
+config STM32F0L0G0_SPI2_COMMTYPE
+	int "SPI2 Operation mode"
+	default 0
+	range 0 3
+	depends on STM32F0L0G0_SPI2
+	---help---
+		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
+
+config STM32F0L0G0_SPI3_COMMTYPE
+	int "SPI3 Operation mode"
+	default 0
+	range 0 3
+	depends on STM32F0L0G0_SPI3
+	---help---
+		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
 
 endmenu # SPI Configuration
 

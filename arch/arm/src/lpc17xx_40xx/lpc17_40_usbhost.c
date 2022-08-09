@@ -339,7 +339,7 @@ static int lpc17_40_ctrltd(struct lpc17_40_usbhost_s *priv,
 
 /* Interrupt handling *******************************************************/
 
-static int lpc17_40_usbinterrupt(int irq, void *context, FAR void *arg);
+static int lpc17_40_usbinterrupt(int irq, void *context, void *arg);
 
 /* USB host controller operations *******************************************/
 
@@ -386,16 +386,16 @@ static ssize_t lpc17_40_transfer(struct usbhost_driver_s *drvr,
 #ifdef CONFIG_USBHOST_ASYNCH
 static void lpc17_40_asynch_completion(struct lpc17_40_usbhost_s *priv,
                                        struct lpc17_40_ed_s *ed);
-static int lpc17_40_asynch(FAR struct usbhost_driver_s *drvr,
-                           usbhost_ep_t ep, FAR uint8_t *buffer,
+static int lpc17_40_asynch(struct usbhost_driver_s *drvr,
+                           usbhost_ep_t ep, uint8_t *buffer,
                            size_t buflen, usbhost_asynch_t callback,
-                           FAR void *arg);
+                           void *arg);
 #endif
-static int lpc17_40_cancel(FAR struct usbhost_driver_s *drvr,
+static int lpc17_40_cancel(struct usbhost_driver_s *drvr,
                            usbhost_ep_t ep);
 #ifdef CONFIG_USBHOST_HUB
-static int lpc17_40_connect(FAR struct usbhost_driver_s *drvr,
-                            FAR struct usbhost_hubport_s *hport,
+static int lpc17_40_connect(struct usbhost_driver_s *drvr,
+                            struct usbhost_hubport_s *hport,
                             bool connected);
 #endif
 static void lpc17_40_disconnect(struct usbhost_driver_s *drvr,
@@ -1322,9 +1322,9 @@ static inline int lpc17_40_reminted(struct lpc17_40_usbhost_s *priv,
   struct lpc17_40_ed_s *head;
   struct lpc17_40_ed_s *curr;
   struct lpc17_40_ed_s *prev;
-  unsigned int       interval;
-  unsigned int       offset;
-  uint32_t           regval;
+  unsigned int          interval;
+  unsigned int          offset;
+  uint32_t              regval;
 
   /* Disable periodic list processing.  Does this take effect immediately?
    * Or at the next SOF... need to check.
@@ -1680,7 +1680,7 @@ errout_with_xfrinfo:
  *
  ****************************************************************************/
 
-static int lpc17_40_usbinterrupt(int irq, void *context, FAR void *arg)
+static int lpc17_40_usbinterrupt(int irq, void *context, void *arg)
 {
   struct lpc17_40_usbhost_s *priv = &g_usbhost;
   struct lpc17_40_ed_s *ed;
@@ -2141,8 +2141,8 @@ static int lpc17_40_rh_enumerate(struct usbhost_connection_s *conn,
   return OK;
 }
 
-static int lpc17_40_enumerate(FAR struct usbhost_connection_s *conn,
-                           FAR struct usbhost_hubport_s *hport)
+static int lpc17_40_enumerate(struct usbhost_connection_s *conn,
+                              struct usbhost_hubport_s *hport)
 {
   int ret;
 
@@ -2435,7 +2435,7 @@ static int lpc17_40_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
   struct lpc17_40_usbhost_s *priv = (struct lpc17_40_usbhost_s *)drvr;
   struct lpc17_40_ed_s      *ed   = (struct lpc17_40_ed_s *)ep;
-  int                     ret;
+  int                        ret;
 
   /* There should not be any pending, real TDs linked to this ED */
 
@@ -3452,7 +3452,7 @@ errout_with_sem:
  *
  ****************************************************************************/
 
-static int lpc17_40_cancel(FAR struct usbhost_driver_s *drvr,
+static int lpc17_40_cancel(struct usbhost_driver_s *drvr,
                            usbhost_ep_t ep)
 {
 #ifdef CONFIG_USBHOST_ASYNCH
@@ -3607,8 +3607,8 @@ static int lpc17_40_cancel(FAR struct usbhost_driver_s *drvr,
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_HUB
-static int lpc17_40_connect(FAR struct usbhost_driver_s *drvr,
-                            FAR struct usbhost_hubport_s *hport,
+static int lpc17_40_connect(struct usbhost_driver_s *drvr,
+                            struct usbhost_hubport_s *hport,
                             bool connected)
 {
   struct lpc17_40_usbhost_s *priv = (struct lpc17_40_usbhost_s *)drvr;

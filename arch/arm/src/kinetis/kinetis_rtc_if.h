@@ -76,8 +76,8 @@ extern "C"
  ****************************************************************************/
 
 #ifdef CONFIG_KINETIS_HAVE_RTC_SUBSECONDS
-int kinetis_rtc_getdatetime_with_subseconds(FAR struct tm *tp,
-                                            FAR long *nsec);
+int kinetis_rtc_getdatetime_with_subseconds(struct tm *tp,
+                                            long *nsec);
 #endif
 
 /****************************************************************************
@@ -98,7 +98,7 @@ int kinetis_rtc_getdatetime_with_subseconds(FAR struct tm *tp,
 
 #ifdef CONFIG_RTC_DATETIME
 struct tm;
-int kinetis_rtc_setdatetime(FAR const struct tm *tp);
+int kinetis_rtc_setdatetime(const struct tm *tp);
 #endif
 
 /****************************************************************************
@@ -124,7 +124,7 @@ int kinetis_rtc_setdatetime(FAR const struct tm *tp);
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_DRIVER
-FAR struct rtc_lowerhalf_s *kinetis_rtc_lowerhalf(void);
+struct rtc_lowerhalf_s *kinetis_rtc_lowerhalf(void);
 #endif
 
 #undef EXTERN

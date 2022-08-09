@@ -185,22 +185,22 @@ static void gh3x2x_factest_start(uint32_t channelmode, uint32_t current);
 
 /* Sensor ops functions */
 
-static int gh3020_activate(FAR struct file *filep,
-                           FAR struct sensor_lowerhalf_s *lower,
+static int gh3020_activate(FAR struct sensor_lowerhalf_s *lower,
+                           FAR struct file *filep,
                            bool enable);
-static int gh3020_set_interval(FAR struct file *filep,
-                               FAR struct sensor_lowerhalf_s *lower,
+static int gh3020_set_interval(FAR struct sensor_lowerhalf_s *lower,
+                               FAR struct file *filep,
                                FAR unsigned long *period_us);
-static int gh3020_batch(FAR struct file *filep,
-                        FAR struct sensor_lowerhalf_s *lower,
+static int gh3020_batch(FAR struct sensor_lowerhalf_s *lower,
+                        FAR struct file *filep,
                         FAR unsigned long *latency_us);
 #ifdef CONFIG_FACTEST_SENSORS_GH3020
-static int gh3020_selftest(FAR struct file *filep,
-                           FAR struct sensor_lowerhalf_s *lower,
+static int gh3020_selftest(FAR struct sensor_lowerhalf_s *lower,
+                           FAR struct file *filep,
                            unsigned long arg);
 #endif
-static int gh3020_control(FAR struct file *filep,
-                          FAR struct sensor_lowerhalf_s *lower, int cmd,
+static int gh3020_control(FAR struct sensor_lowerhalf_s *lower,
+                          FAR struct file *filep, int cmd,
                           unsigned long arg);
 
 /* Sensor interrupt/polling functions */
@@ -1289,8 +1289,8 @@ static void gh3x2x_factest_start(uint32_t channelmode, uint32_t current)
  *   sensor, it will disable sense path and stop convert.
  *
  * Input Parameters:
- *   filep  - The pointer of file, represents each user using the sensor.
  *   lower  - The instance of lower half sensor driver.
+ *   filep  - The pointer of file, represents each user using the sensor.
  *   enable - true(enable) and false(disable).
  *
  * Returned Value:
@@ -1301,8 +1301,9 @@ static void gh3x2x_factest_start(uint32_t channelmode, uint32_t current)
  *
  ****************************************************************************/
 
-static int gh3020_activate(FAR struct file *filep,
-                           FAR struct sensor_lowerhalf_s *lower, bool enable)
+static int gh3020_activate(FAR struct sensor_lowerhalf_s *lower,
+                           FAR struct file *filep,
+                           bool enable)
 {
   FAR struct gh3020_sensor_s *sensor = (FAR struct gh3020_sensor_s *)lower;
   FAR struct gh3020_dev_s *priv;
@@ -1474,8 +1475,8 @@ static int gh3020_activate(FAR struct file *filep,
  *
  ****************************************************************************/
 
-static int gh3020_batch(FAR struct file *filep,
-                        FAR struct sensor_lowerhalf_s *lower,
+static int gh3020_batch(FAR struct sensor_lowerhalf_s *lower,
+                        FAR struct file *filep,
                         FAR unsigned long *latency_us)
 {
   FAR struct gh3020_sensor_s *sensor = (FAR struct gh3020_sensor_s *)lower;
@@ -1546,8 +1547,8 @@ static int gh3020_batch(FAR struct file *filep,
  *   new interval will take effect when activating or reading FIFO.
  *
  * Input Parameters:
- *   filep     - The pointer of file, represents each user using the sensor.
  *   lower     - The instance of lower half sensor driver.
+ *   filep     - The pointer of file, represents each user using the sensor.
  *   period_us - The time between report data, in us. It may by overwrite
  *               by lower half driver.
  *
@@ -1559,8 +1560,8 @@ static int gh3020_batch(FAR struct file *filep,
  *
  ****************************************************************************/
 
-static int gh3020_set_interval(FAR struct file *filep,
-                               FAR struct sensor_lowerhalf_s *lower,
+static int gh3020_set_interval(FAR struct sensor_lowerhalf_s *lower,
+                               FAR struct file *filep,
                                FAR unsigned long *period_us)
 {
   FAR struct gh3020_sensor_s *sensor = (FAR struct gh3020_sensor_s *)lower;
@@ -1622,8 +1623,8 @@ static int gh3020_set_interval(FAR struct file *filep,
  *   Selftest of PPG sensor, i.e. the selftest of GH3020.
  *
  * Input Parameters:
- *   filep - The pointer of file, represents each user using the sensor.
  *   lower - The instance of lower half sensor driver.
+ *   filep - The pointer of file, represents each user using the sensor.
  *   arg   - The parameters associated with cmd.
  *
  * Returned Value:
@@ -1635,8 +1636,8 @@ static int gh3020_set_interval(FAR struct file *filep,
  ****************************************************************************/
 
 #ifdef CONFIG_FACTEST_SENSORS_GH3020
-static int gh3020_selftest(FAR struct file *filep,
-                           FAR struct sensor_lowerhalf_s *lower,
+static int gh3020_selftest(FAR struct sensor_lowerhalf_s *lower,
+                           FAR struct file *filep,
                            unsigned long arg)
 {
   FAR struct gh3020_dev_s *priv = (FAR struct gh3020_dev_s *)lower;
@@ -1679,8 +1680,8 @@ static int gh3020_selftest(FAR struct file *filep,
  *   etc, which are all parsed and implemented by lower half driver.
  *
  * Input Parameters:
- *   filep - The pointer of file, represents each user using the sensor.
  *   lower - The instance of lower half sensor driver.
+ *   filep - The pointer of file, represents each user using the sensor.
  *   cmd   - The special cmd for sensor.
  *   arg   - The parameters associated with cmd.
  *
@@ -1692,8 +1693,8 @@ static int gh3020_selftest(FAR struct file *filep,
  *
  ****************************************************************************/
 
-static int gh3020_control(FAR struct file *filep,
-                          FAR struct sensor_lowerhalf_s *lower, int cmd,
+static int gh3020_control(FAR struct sensor_lowerhalf_s *lower,
+                          FAR struct file *filep, int cmd,
                           unsigned long arg)
 {
   FAR struct gh3020_sensor_s *sensor = (FAR struct gh3020_sensor_s *)lower;

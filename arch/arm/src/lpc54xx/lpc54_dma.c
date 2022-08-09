@@ -128,7 +128,7 @@ static void lpc54_dma_dispatch(int ch, int result)
  *
  ****************************************************************************/
 
-static int lpc54_dma_interrupt(int irq, FAR void *context, FAR void *arg)
+static int lpc54_dma_interrupt(int irq, void *context, void *arg)
 {
   uint32_t pending;
   uint32_t bitmask;

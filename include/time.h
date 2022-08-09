@@ -140,8 +140,8 @@ struct tm
 
 struct itimerspec
 {
+  struct timespec it_interval; /* Thereafter */
   struct timespec it_value;    /* First time */
-  struct timespec it_interval; /* and thereafter */
 };
 
 /* forward reference (defined in signal.h) */

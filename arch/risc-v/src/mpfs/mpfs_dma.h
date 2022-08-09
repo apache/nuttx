@@ -44,7 +44,7 @@ struct mpfs_dma_channel_config
 {
   uint64_t src_addr;        /* source address */
   uint64_t dest_addr;       /* destination address */
-  uint64_t num_bytes;       /* Number of bytes to be transfered. (Base-2) */
+  uint64_t num_bytes;       /* Number of bytes to be transferred. (Base-2) */
   uint8_t  enable_done_int; /* enable transfer complete interrupt */
   uint8_t  enable_err_int;  /* enable transfer error interrupt */
   uint8_t  repeat;          /* repeat the transaction */

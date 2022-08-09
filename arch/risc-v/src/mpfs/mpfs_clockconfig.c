@@ -570,8 +570,6 @@ static void mpfs_sgmii_setup(void)
           putreg32(0x7f, MPFS_CFG_DDR_SGMII_PHY_DYN_CNTL);
         }
     }
-
-  mpfs_pll_config();
 }
 
 /****************************************************************************

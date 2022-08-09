@@ -219,7 +219,7 @@ static int tca9548a_select_channel(FAR struct tca9548a_dev_s *priv,
  *   attached to the virtual i2c_master ".transfer()" pointer. This way every
  *   time an I2C message is sent it is called and it starts sending a command
  *   to TCA9548A setup the right channel defined to this i2c_master. All the
- *   expected messages are then transfered to the I2C device connected the
+ *   expected messages are then transferred to the I2C device connected the
  *   this selected channel.
  *
  * Input Parameters:

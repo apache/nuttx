@@ -113,6 +113,7 @@ define MKIMAGE
 		exit 1; \
 	fi
 	esptool.py -c esp32s3 elf2image $(ESPTOOL_FLASH_OPTS) -o nuttx.bin nuttx
+	$(Q) echo nuttx.bin >> nuttx.manifest
 	$(Q) echo "Generated: nuttx.bin (ESP32-S3 compatible)"
 endef
 

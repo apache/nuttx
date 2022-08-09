@@ -34,6 +34,7 @@ $(BOOTLOADER_SRCDIR):
 # Helpers for creating the configuration file
 
 cfg_en  = echo "$(1)=$(if $(CONFIG_ESP32C3_APP_FORMAT_MCUBOOT),1,y)";
+cfg_dis = echo "$(1)=$(if $(CONFIG_ESP32C3_APP_FORMAT_MCUBOOT),0,n)";
 cfg_val = echo "$(1)=$(2)";
 
 # Commands for colored and formatted output
@@ -96,6 +97,7 @@ ifeq ($(CONFIG_ESP32C3_APP_FORMAT_MCUBOOT),y)
 	} >> $(BOOTLOADER_CONFIG)
 else ifeq ($(CONFIG_ESP32C3_APP_FORMAT_LEGACY),y)
 	$(Q) { \
+		$(call cfg_dis,CONFIG_BOOTLOADER_REGION_PROTECTION_ENABLE) \
 		$(call cfg_en,CONFIG_PARTITION_TABLE_CUSTOM) \
 		$(call cfg_val,CONFIG_PARTITION_TABLE_CUSTOM_FILENAME,\"partitions.csv\") \
 		$(call cfg_val,CONFIG_PARTITION_TABLE_OFFSET,$(CONFIG_ESP32C3_PARTITION_TABLE_OFFSET)) \

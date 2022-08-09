@@ -25,10 +25,14 @@ include $(TOPDIR)/arch/risc-v/src/common/Toolchain.defs
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3_out.ld
 
-ifeq ($(CONFIG_ESP32C3_APP_FORMAT_MCUBOOT),y)
-  ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3_mcuboot.ld
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+  ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)kernel-space.ld
 else
-  ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3.ld
+  ifeq ($(CONFIG_ESP32C3_APP_FORMAT_MCUBOOT),y)
+    ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3_mcuboot.ld
+  else
+    ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3.ld
+  endif
 endif
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3_rom.ld

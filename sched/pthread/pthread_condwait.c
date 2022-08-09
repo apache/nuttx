@@ -59,7 +59,7 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
   int status;
   int ret;
 
-  sinfo("cond=0x%p mutex=0x%p\n", cond, mutex);
+  sinfo("cond=%p mutex=%p\n", cond, mutex);
 
   /* pthread_cond_wait() is a cancellation point */
 

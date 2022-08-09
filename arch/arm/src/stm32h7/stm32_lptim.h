@@ -67,25 +67,25 @@ struct stm32_lptim_dev_s
 
 struct stm32_lptim_ops_s
 {
-  void (*setcfgr)(FAR struct stm32_lptim_dev_s *dev, uint32_t regval);
-  void (*setperiod)(FAR struct stm32_lptim_dev_s *dev, uint32_t period);
-  void (*setcompare)(FAR struct stm32_lptim_dev_s *dev, uint32_t cmp);
-  uint32_t (*getcounter)(FAR struct stm32_lptim_dev_s *dev);
-  int  (*setinput)(FAR struct stm32_lptim_dev_s *dev, uint32_t input,
+  void (*setcfgr)(struct stm32_lptim_dev_s *dev, uint32_t regval);
+  void (*setperiod)(struct stm32_lptim_dev_s *dev, uint32_t period);
+  void (*setcompare)(struct stm32_lptim_dev_s *dev, uint32_t cmp);
+  uint32_t (*getcounter)(struct stm32_lptim_dev_s *dev);
+  int  (*setinput)(struct stm32_lptim_dev_s *dev, uint32_t input,
                    uint32_t mux);
-  void (*enable)(FAR struct stm32_lptim_dev_s *dev, bool on);
-  void (*start)(FAR struct stm32_lptim_dev_s *dev,
+  void (*enable)(struct stm32_lptim_dev_s *dev, bool on);
+  void (*start)(struct stm32_lptim_dev_s *dev,
                 stm32_lptim_start_mode_t mode);
-  void (*resetcounter)(FAR struct stm32_lptim_dev_s *dev);
-  void (*enablerar)(FAR struct stm32_lptim_dev_s *dev, bool on);
+  void (*resetcounter)(struct stm32_lptim_dev_s *dev);
+  void (*enablerar)(struct stm32_lptim_dev_s *dev, bool on);
 
   /* Low-power timer interrupts */
 
-  int  (*setisr)(FAR struct stm32_lptim_dev_s *dev, xcpt_t handler,
+  int  (*setisr)(struct stm32_lptim_dev_s *dev, xcpt_t handler,
                  void *arg, int source);
-  void (*enableint)(FAR struct stm32_lptim_dev_s *dev, int source);
-  void (*disableint)(FAR struct stm32_lptim_dev_s *dev, int source);
-  void (*ackint)(FAR struct stm32_lptim_dev_s *dev, int source);
+  void (*enableint)(struct stm32_lptim_dev_s *dev, int source);
+  void (*disableint)(struct stm32_lptim_dev_s *dev, int source);
+  void (*ackint)(struct stm32_lptim_dev_s *dev, int source);
 };
 
 /****************************************************************************
@@ -94,11 +94,11 @@ struct stm32_lptim_ops_s
 
 /* Power-up low power timer and get its structure */
 
-FAR struct stm32_lptim_dev_s *stm32_lptim_init(int lptimer);
+struct stm32_lptim_dev_s *stm32_lptim_init(int lptimer);
 
 /* Power-down low power timer, mark it as unused */
 
-int stm32_lptim_deinit(FAR struct stm32_lptim_dev_s *dev);
+int stm32_lptim_deinit(struct stm32_lptim_dev_s *dev);
 
 #undef EXTERN
 #if defined(__cplusplus)

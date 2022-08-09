@@ -63,7 +63,7 @@ static void  *g_callback_arg;
  *
  ****************************************************************************/
 
-static int stm32_exti_pvd_isr(int irq, void *context, FAR void *arg)
+static int stm32_exti_pvd_isr(int irq, void *context, void *arg)
 {
   int ret = OK;
 

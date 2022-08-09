@@ -136,11 +136,11 @@
 
 struct lt1pa01_dev_s
 {
-  FAR struct i2c_master_s *i2c; /* I2C interface */
-  uint8_t addr;                 /* I2C address */
-  int port;                     /* I2C port */
-  struct seq_s *seq;            /* Sequencer instance */
-  int minor;                    /* Minor device number */
+  struct i2c_master_s *i2c; /* I2C interface */
+  uint8_t addr;             /* I2C address */
+  int port;                 /* I2C port */
+  struct seq_s *seq;        /* Sequencer instance */
+  int minor;                /* Minor device number */
 };
 
 /****************************************************************************
@@ -149,19 +149,19 @@ struct lt1pa01_dev_s
 
 /* Character driver methods */
 
-static int lt1pa01_open_als(FAR struct file *filep);
-static int lt1pa01_open_prox(FAR struct file *filep);
-static int lt1pa01_close_als(FAR struct file *filep);
-static int lt1pa01_close_prox(FAR struct file *filep);
-static ssize_t lt1pa01_read_als(FAR struct file *filep, FAR char *buffer,
+static int lt1pa01_open_als(struct file *filep);
+static int lt1pa01_open_prox(struct file *filep);
+static int lt1pa01_close_als(struct file *filep);
+static int lt1pa01_close_prox(struct file *filep);
+static ssize_t lt1pa01_read_als(struct file *filep, char *buffer,
                                 size_t buflen);
-static ssize_t lt1pa01_read_prox(FAR struct file *filep, FAR char *buffer,
+static ssize_t lt1pa01_read_prox(struct file *filep, char *buffer,
                                  size_t buflen);
-static ssize_t lt1pa01_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t lt1pa01_write(struct file *filep, const char *buffer,
                              size_t buflen);
-static int lt1pa01_ioctl_als(FAR struct file *filep, int cmd,
+static int lt1pa01_ioctl_als(struct file *filep, int cmd,
                              unsigned long arg);
-static int lt1pa01_ioctl_prox(FAR struct file *filep, int cmd,
+static int lt1pa01_ioctl_prox(struct file *filep, int cmd,
                               unsigned long arg);
 
 /****************************************************************************
@@ -251,7 +251,7 @@ static uint8_t g_prox_hthreshold = LT1PA01_PROX_INT_TH_DEFAULT;
  *
  ****************************************************************************/
 
-static uint8_t lt1pa01_getreg8(FAR struct lt1pa01_dev_s *priv,
+static uint8_t lt1pa01_getreg8(struct lt1pa01_dev_s *priv,
                                uint8_t regaddr)
 {
   uint8_t regval = 0;
@@ -275,7 +275,7 @@ static uint8_t lt1pa01_getreg8(FAR struct lt1pa01_dev_s *priv,
  *
  ****************************************************************************/
 
-static void lt1pa01_putreg8(FAR struct lt1pa01_dev_s *priv,
+static void lt1pa01_putreg8(struct lt1pa01_dev_s *priv,
                             uint8_t regaddr, uint8_t regval)
 {
   uint16_t inst[2];
@@ -296,7 +296,7 @@ static void lt1pa01_putreg8(FAR struct lt1pa01_dev_s *priv,
  *
  ****************************************************************************/
 
-static int lt1pa01_checkid(FAR struct lt1pa01_dev_s *priv)
+static int lt1pa01_checkid(struct lt1pa01_dev_s *priv)
 {
   uint8_t id;
 
@@ -324,7 +324,7 @@ static int lt1pa01_checkid(FAR struct lt1pa01_dev_s *priv)
  *
  ****************************************************************************/
 
-static int lt1pa01als_seqinit(FAR struct lt1pa01_dev_s *priv)
+static int lt1pa01als_seqinit(struct lt1pa01_dev_s *priv)
 {
   DEBUGASSERT(g_als_seq == NULL);
 
@@ -363,7 +363,7 @@ static int lt1pa01als_seqinit(FAR struct lt1pa01_dev_s *priv)
  *
  ****************************************************************************/
 
-static int lt1pa01prox_seqinit(FAR struct lt1pa01_dev_s *priv)
+static int lt1pa01prox_seqinit(struct lt1pa01_dev_s *priv)
 {
   DEBUGASSERT(g_prox_seq == NULL);
 
@@ -402,10 +402,10 @@ static int lt1pa01prox_seqinit(FAR struct lt1pa01_dev_s *priv)
  *
  ****************************************************************************/
 
-static int lt1pa01_open_als(FAR struct file *filep)
+static int lt1pa01_open_als(struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct lt1pa01_dev_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct lt1pa01_dev_s *priv = inode->i_private;
   uint8_t val;
 
   if (g_als_refcnt == 0)
@@ -444,11 +444,11 @@ static int lt1pa01_open_als(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static int lt1pa01_open_prox(FAR struct file *filep)
+static int lt1pa01_open_prox(struct file *filep)
 {
 #ifndef CONFIG_LT1PA01_PROXIMITY_INTERRUPT
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct lt1pa01_dev_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct lt1pa01_dev_s *priv = inode->i_private;
   uint8_t val;
 
   if (g_prox_refcnt == 0)
@@ -487,10 +487,10 @@ static int lt1pa01_open_prox(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static int lt1pa01_close_als(FAR struct file *filep)
+static int lt1pa01_close_als(struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct lt1pa01_dev_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct lt1pa01_dev_s *priv = inode->i_private;
   uint8_t val;
 
   g_als_refcnt--;
@@ -525,11 +525,11 @@ static int lt1pa01_close_als(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static int lt1pa01_close_prox(FAR struct file *filep)
+static int lt1pa01_close_prox(struct file *filep)
 {
 #ifndef CONFIG_LT1PA01_PROXIMITY_INTERRUPT
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct lt1pa01_dev_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct lt1pa01_dev_s *priv = inode->i_private;
 
   g_prox_refcnt--;
 
@@ -557,11 +557,11 @@ static int lt1pa01_close_prox(FAR struct file *filep)
  * Name: lt1pa01_read_als
  ****************************************************************************/
 
-static ssize_t lt1pa01_read_als(FAR struct file *filep, FAR char *buffer,
+static ssize_t lt1pa01_read_als(struct file *filep, char *buffer,
                                 size_t len)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct lt1pa01_dev_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct lt1pa01_dev_s *priv = inode->i_private;
 
   len = len / LT1PA01_ALS_BYTESPERSAMPLE * LT1PA01_ALS_BYTESPERSAMPLE;
   len = seq_read(priv->seq, priv->minor, buffer, len);
@@ -573,11 +573,11 @@ static ssize_t lt1pa01_read_als(FAR struct file *filep, FAR char *buffer,
  * Name: lt1pa01_read_prox
  ****************************************************************************/
 
-static ssize_t lt1pa01_read_prox(FAR struct file *filep, FAR char *buffer,
+static ssize_t lt1pa01_read_prox(struct file *filep, char *buffer,
                                  size_t len)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct lt1pa01_dev_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct lt1pa01_dev_s *priv = inode->i_private;
 
   len = len / LT1PA01_PROX_BYTESPERSAMPLE * LT1PA01_PROX_BYTESPERSAMPLE;
 
@@ -585,7 +585,7 @@ static ssize_t lt1pa01_read_prox(FAR struct file *filep, FAR char *buffer,
   if (len)
     {
       len = LT1PA01_PROX_BYTESPERSAMPLE;
-      *(FAR uint8_t *)buffer = lt1pa01_getreg8(priv, LT1PA01_PROX_DATA);
+      *(uint8_t *)buffer = lt1pa01_getreg8(priv, LT1PA01_PROX_DATA);
     }
 #else
   len = seq_read(priv->seq, priv->minor, buffer, len);
@@ -598,7 +598,7 @@ static ssize_t lt1pa01_read_prox(FAR struct file *filep, FAR char *buffer,
  * Name: lt1pa01_write
  ****************************************************************************/
 
-static ssize_t lt1pa01_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t lt1pa01_write(struct file *filep, const char *buffer,
                              size_t buflen)
 {
   return -ENOSYS;
@@ -608,11 +608,11 @@ static ssize_t lt1pa01_write(FAR struct file *filep, FAR const char *buffer,
  * Name: lt1pa01_ioctl_als
  ****************************************************************************/
 
-static int lt1pa01_ioctl_als(FAR struct file *filep, int cmd,
+static int lt1pa01_ioctl_als(struct file *filep, int cmd,
                              unsigned long arg)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct lt1pa01_dev_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct lt1pa01_dev_s *priv = inode->i_private;
   int ret = OK;
 
   switch (cmd)
@@ -641,11 +641,11 @@ static int lt1pa01_ioctl_als(FAR struct file *filep, int cmd,
  * Name: lt1pa01_ioctl_prox
  ****************************************************************************/
 
-static int lt1pa01_ioctl_prox(FAR struct file *filep, int cmd,
+static int lt1pa01_ioctl_prox(struct file *filep, int cmd,
                               unsigned long arg)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct lt1pa01_dev_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct lt1pa01_dev_s *priv = inode->i_private;
   int ret = OK;
 
   switch (cmd)
@@ -694,8 +694,8 @@ static int lt1pa01_ioctl_prox(FAR struct file *filep, int cmd,
 
       case SNIOC_GETINTSTATUS:
         {
-          FAR uint8_t intstatus = lt1pa01_getreg8(priv, LT1PA01_INTCONFIG);
-          *(FAR uint8_t *)(uintptr_t)arg = intstatus;
+          uint8_t intstatus = lt1pa01_getreg8(priv, LT1PA01_INTCONFIG);
+          *(uint8_t *)(uintptr_t)arg = intstatus;
           sninfo("Get proximity IntStatus 0x%02x\n", intstatus);
         }
         break;
@@ -746,10 +746,10 @@ static int lt1pa01_ioctl_prox(FAR struct file *filep, int cmd,
  *
  ****************************************************************************/
 
-int lt1pa01_init(FAR struct i2c_master_s *i2c, int port)
+int lt1pa01_init(struct i2c_master_s *i2c, int port)
 {
-  FAR struct lt1pa01_dev_s tmp;
-  FAR struct lt1pa01_dev_s *priv = &tmp;
+  struct lt1pa01_dev_s tmp;
+  struct lt1pa01_dev_s *priv = &tmp;
   int ret;
 
   /* Setup temporary device structure for initialization */
@@ -796,16 +796,16 @@ int lt1pa01_init(FAR struct i2c_master_s *i2c, int port)
  *
  ****************************************************************************/
 
-int lt1pa01als_register(FAR const char *devpath, int minor,
-                        FAR struct i2c_master_s *i2c, int port)
+int lt1pa01als_register(const char *devpath, int minor,
+                        struct i2c_master_s *i2c, int port)
 {
-  FAR struct lt1pa01_dev_s *priv;
+  struct lt1pa01_dev_s *priv;
   char path[16];
   int ret;
 
   /* Initialize the LT1PA01 device structure */
 
-  priv = (FAR struct lt1pa01_dev_s *)
+  priv = (struct lt1pa01_dev_s *)
     kmm_malloc(sizeof(struct lt1pa01_dev_s));
   if (!priv)
     {
@@ -850,16 +850,16 @@ int lt1pa01als_register(FAR const char *devpath, int minor,
  *
  ****************************************************************************/
 
-int lt1pa01prox_register(FAR const char *devpath, int minor,
-                         FAR struct i2c_master_s *i2c, int port)
+int lt1pa01prox_register(const char *devpath, int minor,
+                         struct i2c_master_s *i2c, int port)
 {
-  FAR struct lt1pa01_dev_s *priv;
+  struct lt1pa01_dev_s *priv;
   char path[16];
   int ret;
 
   /* Initialize the LT1PA01 device structure */
 
-  priv = (FAR struct lt1pa01_dev_s *)
+  priv = (struct lt1pa01_dev_s *)
     kmm_malloc(sizeof(struct lt1pa01_dev_s));
   if (!priv)
     {

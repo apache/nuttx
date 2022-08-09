@@ -230,7 +230,7 @@ FAR DIR *opendir(FAR const char *path)
     {
       /* Insufficient memory to complete the operation. */
 
-      ret = ENOMEM;
+      ret = -ENOMEM;
       goto errout_with_inode;
     }
 
@@ -301,6 +301,6 @@ errout_with_inode:
 
 errout_with_search:
   RELEASE_SEARCH(&desc);
-  set_errno(ret);
+  set_errno(-ret);
   return NULL;
 }

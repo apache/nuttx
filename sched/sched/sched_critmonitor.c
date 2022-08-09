@@ -141,7 +141,7 @@ void nxsched_critmon_preemption(FAR struct tcb_s *tcb, bool state)
       /* Disabling.. Save the thread start time */
 
       tcb->premp_start   = up_perf_gettime();
-      g_premp_start[cpu] = up_perf_gettime();
+      g_premp_start[cpu] = tcb->premp_start;
     }
   else
     {
@@ -189,7 +189,7 @@ void nxsched_critmon_csection(FAR struct tcb_s *tcb, bool state)
       /* Entering... Save the start time. */
 
       tcb->crit_start   = up_perf_gettime();
-      g_crit_start[cpu] = up_perf_gettime();
+      g_crit_start[cpu] = tcb->crit_start;
     }
   else
     {

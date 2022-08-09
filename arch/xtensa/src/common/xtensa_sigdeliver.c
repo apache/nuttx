@@ -46,7 +46,7 @@
  *
  * Description:
  *   This is the a signal handling trampoline.  When a signal action was
- *   posted.  The task context was mucked with and forced to branch to this
+ *   posted, the task context was mucked with and forced to branch to this
  *   location with interrupts disabled.
  *
  ****************************************************************************/
@@ -139,42 +139,7 @@ void xtensa_sig_deliver(void)
 
   rtcb->xcp.sigdeliver = NULL;  /* Allows next handler to be scheduled */
 
-  /* Issue:
-   *
-   * Task1 --> process
-   *       --> xtensa_context_save(S1)
-   *       --> s32i a0, a2, (4 * REG_A0)
-   *       --> rtcb->xcp.regs[REG_A0] = A0
-   *
-   * Task preemption
-   *
-   * Task2 --> Post signal to Task1
-   *       --> Wake up Task1
-   *
-   * Task1 --> xtensa_sig_deliver
-   *       --> up_irq_enable()
-   *       --> Task preemption
-   *
-   * Task preemption --> xtensa_context_save
-   *                 --> rtcb->xcp.regs[REG_A0] = A0 of "xtensa_sig_deliver"
-   *                     = _xtensa_sig_trampoline + 6
-   *                     = "j 1b"
-   *
-   * Process ...
-   *
-   * Task1 --> xtensa_sig_deliver
-   *       --> xtensa_context_restore
-   *       --> xtensa_context_save(S1)
-   *       --> l32i a0, a2, (4 * REG_A0)
-   *       --> a0 = "j 1b"
-   *       --> ret
-   *       --> run "j 1b"
-   */
-
-  rtcb->xcp.regs[REG_A0] = regs[REG_A0];
-
   /* Then restore the correct state for this thread of execution.
-   * NOTE: The co-processor state should already be correct.
    */
 
   board_autoled_off(LED_SIGNAL);

@@ -85,33 +85,18 @@
 #define GPIO_SPI_CS    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
                         GPIO_OUTPUT_SET)
 
-#define GPIO_SPI1_CS0   (GPIO_SPI_CS | GPIO_PORTA | GPIO_PIN15)
-#define GPIO_SPI1_CS1   (GPIO_SPI_CS | GPIO_PORTC | GPIO_PIN15)
-#define GPIO_SPI1_CS2   (GPIO_SPI_CS | GPIO_PORTC | GPIO_PIN14)
-#define GPIO_SPI1_CS3   (GPIO_SPI_CS | GPIO_PORTC | GPIO_PIN2)
-#define GPIO_SPI2_CS0   (GPIO_SPI_CS | GPIO_PORTD | GPIO_PIN7)
-#define GPIO_SPI2_CS1   (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN1)
-#define GPIO_SPI2_CS2   (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN2)
-#define GPIO_SPI2_CS3   (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN3)
-#define GPIO_SPI3_CS0   (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN4)
-#define GPIO_SPI3_CS1   (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN5)
-#define GPIO_SPI3_CS2   (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN6)
-#define GPIO_SPI3_CS3   (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN7)
-
-/* Logical SPI Chip Selects used to index */
-
-#define NUCLEO_SPI_BUS1_CS0  0
-#define NUCLEO_SPI_BUS1_CS1  1
-#define NUCLEO_SPI_BUS1_CS2  2
-#define NUCLEO_SPI_BUS1_CS3  3
-#define NUCLEO_SPI_BUS2_CS0  4
-#define NUCLEO_SPI_BUS2_CS1  5
-#define NUCLEO_SPI_BUS2_CS2  6
-#define NUCLEO_SPI_BUS2_CS3  7
-#define NUCLEO_SPI_BUS3_CS0  8
-#define NUCLEO_SPI_BUS3_CS1  9
-#define NUCLEO_SPI_BUS3_CS2  10
-#define NUCLEO_SPI_BUS3_CS3  11
+#define GPIO_SPI1_CS0  (GPIO_SPI_CS | GPIO_PORTA | GPIO_PIN15)
+#define GPIO_SPI1_CS1  (GPIO_SPI_CS | GPIO_PORTC | GPIO_PIN15)
+#define GPIO_SPI1_CS2  (GPIO_SPI_CS | GPIO_PORTC | GPIO_PIN14)
+#define GPIO_SPI1_CS3  (GPIO_SPI_CS | GPIO_PORTC | GPIO_PIN2)
+#define GPIO_SPI2_CS0  (GPIO_SPI_CS | GPIO_PORTD | GPIO_PIN7)
+#define GPIO_SPI2_CS1  (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN1)
+#define GPIO_SPI2_CS2  (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN2)
+#define GPIO_SPI2_CS3  (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN3)
+#define GPIO_SPI3_CS0  (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN4)
+#define GPIO_SPI3_CS1  (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN5)
+#define GPIO_SPI3_CS2  (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN6)
+#define GPIO_SPI3_CS3  (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN7)
 
 #if defined(CONFIG_STM32F7_SDMMC1) || defined(CONFIG_STM32F7_SDMMC2)
 # define HAVE_SDIO
@@ -300,7 +285,7 @@ int stm32_bbsram_int(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_QENCODER
-int stm32f7_qencoder_initialize(FAR const char *devpath, int timer);
+int stm32f7_qencoder_initialize(const char *devpath, int timer);
 #endif
 
 #endif /* __ASSEMBLY__ */

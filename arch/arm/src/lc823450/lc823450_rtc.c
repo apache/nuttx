@@ -226,7 +226,7 @@ static void rtc_pmnotify(struct pm_callback_s *cb, enum pm_state_e pmstate)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int rtc_interrupt(int irq, void *context, FAR void *arg)
+static int rtc_interrupt(int irq, void *context, void *arg)
 {
   struct tm tm;
   up_rtc_getdatetime(&tm);
@@ -282,7 +282,7 @@ static int rtc_interrupt(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static int up_rtc_getdatetime_main(FAR struct tm *tp)
+static int up_rtc_getdatetime_main(struct tm *tp)
 {
 #ifdef CONFIG_RTC_DIV
   tp->tm_sec  = getreg8(RTC_SEC);
@@ -452,7 +452,7 @@ int up_rtc_initialize(void)
   return OK;
 }
 
-int up_rtc_getdatetime(FAR struct tm *tp)
+int up_rtc_getdatetime(struct tm *tp)
 {
   struct tm tm1;
   struct tm tm2;
@@ -508,7 +508,7 @@ int up_rtc_getdatetime(FAR struct tm *tp)
  *
  ****************************************************************************/
 
-int up_rtc_settime(FAR const struct timespec *ts)
+int up_rtc_settime(const struct timespec *ts)
 {
   struct tm *tp;
 
@@ -579,7 +579,7 @@ int up_rtc_settime(FAR const struct timespec *ts)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-int up_rtc_setalarm(FAR const struct timespec *ts, alarmcb_t callback)
+int up_rtc_setalarm(const struct timespec *ts, alarmcb_t callback)
 {
   struct tm *tp;
 
@@ -654,7 +654,7 @@ int up_rtc_cancelalarm(void)
  *
  ****************************************************************************/
 
-int up_rtc_getrawtime(FAR struct timespec *ts)
+int up_rtc_getrawtime(struct timespec *ts)
 {
   struct tm tm;
   struct timespec now;

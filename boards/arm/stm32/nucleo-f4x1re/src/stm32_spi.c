@@ -79,6 +79,11 @@ void weak_function stm32_spidev_initialize(void)
       spierr("ERROR: FAILED to initialize SPI port 1\n");
     }
 
+#ifdef CONFIG_LCD_SSD1306_SPI
+  stm32_configgpio(GPIO_SSD1306_CS);    /* SSD1306 chip select */
+  stm32_configgpio(GPIO_SSD1306_CMD);   /* SSD1306 data/!command */
+#endif
+
 #ifdef CONFIG_CAN_MCP2515
   stm32_configgpio(GPIO_MCP2515_CS);    /* MCP2515 chip select */
 #endif
@@ -122,11 +127,18 @@ void weak_function stm32_spidev_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_SPI1
-void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
+void stm32_spi1select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" :
           "de-assert");
+
+#if defined(CONFIG_LCD_SSD1306_SPI)
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      stm32_gpiowrite(GPIO_SSD1306_CS, !selected);
+    }
+#endif
 
 #if defined(CONFIG_CAN_MCP2515)
   if (devid == SPIDEV_CANBUS(0))
@@ -143,35 +155,35 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
 #endif
 }
 
-uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t stm32_spi1status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_STM32_SPI2
-void stm32_spi2select(FAR struct spi_dev_s *dev, uint32_t devid,
+void stm32_spi2select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" :
           "de-assert");
 }
 
-uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t stm32_spi2status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_STM32_SPI3
-void stm32_spi3select(FAR struct spi_dev_s *dev, uint32_t devid,
+void stm32_spi3select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" :
           "de-assert");
 }
 
-uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t stm32_spi3status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
@@ -202,21 +214,28 @@ uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
 
 #ifdef CONFIG_SPI_CMDDATA
 #ifdef CONFIG_STM32_SPI1
-int stm32_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int stm32_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
+#if defined(CONFIG_LCD_SSD1306_SPI)
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      stm32_gpiowrite(GPIO_SSD1306_CMD, !cmd);
+    }
+#endif
+
   return OK;
 }
 #endif
 
 #ifdef CONFIG_STM32_SPI2
-int stm32_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int stm32_spi2cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return OK;
 }
 #endif
 
 #ifdef CONFIG_STM32_SPI3
-int stm32_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int stm32_spi3cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return OK;
 }

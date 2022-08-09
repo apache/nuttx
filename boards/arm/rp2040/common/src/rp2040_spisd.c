@@ -57,7 +57,7 @@
 int board_spisd_initialize(int minor, int bus)
 {
   int ret;
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
 
   /* Initialize spi deivce */
 
@@ -73,14 +73,14 @@ int board_spisd_initialize(int minor, int bus)
 #ifdef CONFIG_RP2040_SPI0
   if (bus == 0)
     {
-      rp2040_gpio_set_pulls(CONFIG_RP2040_SPI0_GPIO, true, false);
+      rp2040_gpio_set_pulls(CONFIG_RP2040_SPI0_RX_GPIO, true, false);
     }
 #endif
 
 #ifdef CONFIG_RP2040_SPI1
   if (bus == 1)
     {
-      rp2040_gpio_set_pulls(CONFIG_RP2040_SPI1_GPIO, true, false);
+      rp2040_gpio_set_pulls(CONFIG_RP2040_SPI1_RX_GPIO, true, false);
     }
 #endif
 
@@ -119,7 +119,7 @@ int board_spisd_initialize(int minor, int bus)
  *
  ****************************************************************************/
 
-uint8_t board_spisd_status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t board_spisd_status(struct spi_dev_s *dev, uint32_t devid)
 {
   uint8_t ret = 0;
 

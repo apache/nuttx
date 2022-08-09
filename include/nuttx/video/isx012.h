@@ -25,6 +25,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -49,7 +51,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-int isx012_initialize(FAR struct i2c_master_s *i2c);
+int isx012_initialize(void);
 int isx012_uninitialize(void);
 
 #undef EXTERN

@@ -6,7 +6,7 @@ The i.MX RT series of chips from NXP Semiconductors is based around an ARM Corte
 at 500 MHz, 600 MHz or 1 GHz based on particular MCUs
 
 Supported MCUs
-=============
+==============
 
 The following list includes MCUs from i.MX RT series and indicates whether they are supported in NuttX
 
@@ -45,7 +45,7 @@ CONFIG_SCHED_TICKLESS_ALARM option. CONFIG_USEC_PER_TICK option determines the r
 of time reported by :c:func:`clock_systime_ticks()` and the resolution of times that can be set
 for certain delays including watchdog timers and delayed work. It is important that value set in
 CONFIG_USEC_PER_TICK represents the frequency of GPT timer that runs the tickless mode. Clock
-source of the timer is 16.6 MHz, which is then devided by the prescaler value from 1 to 4096.
+source of the timer is 16.6 MHz, which is then divided by the prescaler value from 1 to 4096.
 Possible values for CONFIG_USEC_PER_TICK are 10 or 100 for example.
 
 Peripheral Support

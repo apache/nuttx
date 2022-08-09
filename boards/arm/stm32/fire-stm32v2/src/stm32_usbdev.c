@@ -78,7 +78,7 @@ void stm32_usbinitialize(void)
  *
  ****************************************************************************/
 
-int stm32_usbpullup(FAR struct usbdev_s *dev, bool enable)
+int stm32_usbpullup(struct usbdev_s *dev, bool enable)
 {
   usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
 #if 0 /* REVISIT */
@@ -99,7 +99,7 @@ int stm32_usbpullup(FAR struct usbdev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
+void stm32_usbsuspend(struct usbdev_s *dev, bool resume)
 {
   uinfo("resume: %d\n", resume);
 }

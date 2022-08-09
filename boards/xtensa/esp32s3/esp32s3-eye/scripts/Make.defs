@@ -1,0 +1,57 @@
+############################################################################
+# boards/xtensa/esp32s3/esp32s3-eye/scripts/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+include $(TOPDIR)/.config
+include $(TOPDIR)/tools/Config.mk
+include $(TOPDIR)/tools/esp32s3/Config.mk
+include $(TOPDIR)/arch/xtensa/src/lx7/Toolchain.defs
+
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s3_out.ld
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s3.ld
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s3_rom.ld
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s3_peripherals.ld
+
+ifneq ($(CONFIG_DEBUG_NOOPT),y)
+  ARCHOPTIMIZATION += -fno-strength-reduce
+endif
+
+ARCHPICFLAGS = -fpic
+
+CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
+CXXFLAGS := $(ARCHCXXFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
+CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+AFLAGS := $(CFLAGS) -D__ASSEMBLY__
+
+# Loadable module definitions
+
+CMODULEFLAGS = $(CFLAGS) -mtext-section-literals
+
+LDMODULEFLAGS = -r -e module_initialize
+LDMODULEFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
+
+# ELF module definitions
+
+CELFFLAGS = $(CFLAGS) -mtext-section-literals
+CXXELFFLAGS = $(CXXFLAGS) -mtext-section-literals
+
+LDELFFLAGS = -r -e main
+LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/binfmt/libelf/gnu-elf.ld)

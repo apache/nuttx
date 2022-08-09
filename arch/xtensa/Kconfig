@@ -14,6 +14,7 @@ config ARCH_CHIP_ESP32
 	select ARCH_FAMILY_LX6
 	select XTENSA_HAVE_INTERRUPTS
 	select ARCH_HAVE_FPU
+	select ARCH_HAVE_MPU
 	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_TEXT_HEAP
 	select ARCH_HAVE_SDRAM
@@ -21,18 +22,18 @@ config ARCH_CHIP_ESP32
 	select ARCH_HAVE_BOOTLOADER
 	select ARCH_HAVE_TESTSET
 	select ARCH_VECNOTIRQ
-	select LIBC_ARCH_MEMCPY
-	select LIBC_ARCH_MEMCHR
-	select LIBC_ARCH_MEMCMP
-	select LIBC_ARCH_MEMMOVE
-	select LIBC_ARCH_MEMSET
-	select LIBC_ARCH_STRCHR
-	select LIBC_ARCH_STRCMP
-	select LIBC_ARCH_STRCPY
-	select LIBC_ARCH_STRLCPY
-	select LIBC_ARCH_STRNCPY
-	select LIBC_ARCH_STRLEN
-	select LIBC_ARCH_STRNLEN
+	select LIBC_ARCH_MEMCPY if BUILD_FLAT
+	select LIBC_ARCH_MEMCHR if BUILD_FLAT
+	select LIBC_ARCH_MEMCMP if BUILD_FLAT
+	select LIBC_ARCH_MEMMOVE if BUILD_FLAT
+	select LIBC_ARCH_MEMSET if BUILD_FLAT
+	select LIBC_ARCH_STRCHR if BUILD_FLAT
+	select LIBC_ARCH_STRCMP if BUILD_FLAT
+	select LIBC_ARCH_STRCPY if BUILD_FLAT
+	select LIBC_ARCH_STRLCPY if BUILD_FLAT
+	select LIBC_ARCH_STRNCPY if BUILD_FLAT
+	select LIBC_ARCH_STRLEN if BUILD_FLAT
+	select LIBC_ARCH_STRNLEN if BUILD_FLAT
 	---help---
 		The ESP32 is a dual-core system from Espressif with two Harvard
 		architecture Xtensa LX6 CPUs. All embedded memory, external memory
@@ -52,10 +53,10 @@ config ARCH_CHIP_ESP32S2
 	select ARCH_HAVE_TEXT_HEAP
 	select ARCH_HAVE_SDRAM
 	select ARCH_HAVE_RESET
-	select ARCH_HAVE_TESTSET
 	select ARCH_HAVE_BOOTLOADER
 	select ARCH_HAVE_TESTSET
 	select ARCH_VECNOTIRQ
+	select LIBC_ARCH_ATOMIC
 	select LIBC_ARCH_MEMCPY
 	select LIBC_ARCH_MEMCHR
 	select LIBC_ARCH_MEMCMP
@@ -125,6 +126,10 @@ config XTENSA_HAVE_ICACHE_LOCK
 	default n
 
 config XTENSA_HAVE_DCACHE_LOCK
+	bool
+	default n
+
+config XTENSA_HAVE_EXCEPTION_HOOKS
 	bool
 	default n
 
@@ -250,6 +255,7 @@ config XTENSA_INTBACKTRACE
 
 config XTENSA_IMEM_USE_SEPARATE_HEAP
 	bool "Use a separate heap for internal memory"
+	select ARCH_HAVE_EXTRA_HEAPS
 	default n
 	---help---
 		This is a separate internal heap that's used by drivers when certain operations

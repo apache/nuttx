@@ -86,18 +86,18 @@ struct dummy_dev_s
 
 static const struct lirc_ops_s g_dummy_ops =
 {
-  .driver_type        = LIRC_DRIVER_IR_RAW,
-  .open               = dummy_open,
-  .close              = dummy_close,
-  .s_tx_mask          = dummy_s_tx_mask,
-  .s_tx_carrier       = dummy_s_tx_carrier,
-  .s_tx_duty_cycle    = dummy_s_tx_duty_cycle,
-  .s_rx_carrier_range = dummy_s_rx_carrier_range,
-  .tx_ir              = dummy_tx_ir,
-  .tx_scancode        = dummy_tx_scancode,
-  .s_learning_mode    = dummy_s_learning_mode,
-  .s_carrier_report   = dummy_s_carrier_report,
-  .s_timeout          = dummy_s_timeout,
+  LIRC_DRIVER_IR_RAW,           /* driver_type */
+  dummy_open,                   /* open */
+  dummy_close,                  /* close */
+  dummy_s_tx_mask,              /* s_tx_mask */
+  dummy_s_tx_carrier,           /* s_tx_carrier */
+  dummy_s_tx_duty_cycle,        /* s_tx_duty_cycle */
+  dummy_s_rx_carrier_range,     /* s_rx_carrier_range */
+  dummy_tx_ir,                  /* tx_ir */
+  dummy_tx_scancode,            /* tx_scancode */
+  dummy_s_learning_mode,        /* s_learning_mode */
+  dummy_s_carrier_report,       /* s_carrier_report */
+  dummy_s_timeout               /* s_timeout */
 };
 
 /****************************************************************************

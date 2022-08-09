@@ -64,7 +64,7 @@ static void   *g_button_arg;
  *
  ****************************************************************************/
 
-static int board_button_interrupt(int irq, FAR void *context, FAR void *arg)
+static int board_button_interrupt(int irq, void *context, void *arg)
 {
   /* Acknowledge the button interrupt */
 
@@ -151,7 +151,7 @@ uint32_t board_buttons(void)
  ****************************************************************************/
 
 #if defined(CONFIG_LPC54_GPIOIRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
-int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
+int board_button_irq(int id, xcpt_t irqhandler, void *arg)
 {
   int ret = -EINVAL;
 

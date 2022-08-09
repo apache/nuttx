@@ -2144,7 +2144,7 @@ struct stm32_adc_dev_s
 {
   /* Publicly visible portion of the "lower-half" ADC driver structure */
 
-  FAR const struct stm32_adc_ops_s *llops;
+  const struct stm32_adc_ops_s *llops;
 
   /* Require cast-compatibility with private "lower-half" ADC structure */
 };
@@ -2155,80 +2155,80 @@ struct stm32_adc_ops_s
 {
   /* Low-level ADC setup */
 
-  int (*setup)(FAR struct stm32_adc_dev_s *dev);
+  int (*setup)(struct stm32_adc_dev_s *dev);
 
   /* Low-level ADC shutdown */
 
-  void (*shutdown)(FAR struct stm32_adc_dev_s *dev);
+  void (*shutdown)(struct stm32_adc_dev_s *dev);
 
   /* Acknowledge interrupts */
 
-  void (*int_ack)(FAR struct stm32_adc_dev_s *dev, uint32_t source);
+  void (*int_ack)(struct stm32_adc_dev_s *dev, uint32_t source);
 
   /* Get pending interrupts */
 
-  uint32_t (*int_get)(FAR struct stm32_adc_dev_s *dev);
+  uint32_t (*int_get)(struct stm32_adc_dev_s *dev);
 
   /* Enable interrupts */
 
-  void (*int_en)(FAR struct stm32_adc_dev_s *dev, uint32_t source);
+  void (*int_en)(struct stm32_adc_dev_s *dev, uint32_t source);
 
   /* Disable interrupts */
 
-  void (*int_dis)(FAR struct stm32_adc_dev_s *dev, uint32_t source);
+  void (*int_dis)(struct stm32_adc_dev_s *dev, uint32_t source);
 
   /* Get current ADC data register */
 
-  uint32_t (*val_get)(FAR struct stm32_adc_dev_s *dev);
+  uint32_t (*val_get)(struct stm32_adc_dev_s *dev);
 
   /* Register buffer for ADC DMA transfer */
 
-  int (*regbuf_reg)(FAR struct stm32_adc_dev_s *dev,
+  int (*regbuf_reg)(struct stm32_adc_dev_s *dev,
                     uint16_t *buffer, uint8_t len);
 
   /* Start/stop regular conversion */
 
-  void (*reg_startconv)(FAR struct stm32_adc_dev_s *dev, bool state);
+  void (*reg_startconv)(struct stm32_adc_dev_s *dev, bool state);
 
   /* Set offset for channel */
 
-  int (*offset_set)(FAR struct stm32_adc_dev_s *dev, uint8_t ch, uint8_t i,
+  int (*offset_set)(struct stm32_adc_dev_s *dev, uint8_t ch, uint8_t i,
                     uint16_t offset);
 
 #ifdef ADC_HAVE_EXTCFG
   /* Configure the ADC external trigger for regular conversion */
 
-  void (*extcfg_set)(FAR struct stm32_adc_dev_s *dev, uint32_t extcfg);
+  void (*extcfg_set)(struct stm32_adc_dev_s *dev, uint32_t extcfg);
 #endif
 
 #ifdef ADC_HAVE_JEXTCFG
   /* Configure the ADC external trigger for injected conversion */
 
-  void (*jextcfg_set)(FAR struct stm32_adc_dev_s *dev, uint32_t jextcfg);
+  void (*jextcfg_set)(struct stm32_adc_dev_s *dev, uint32_t jextcfg);
 #endif
 
 #ifdef ADC_HAVE_INJECTED
   /* Get current ADC injected data register */
 
-  uint32_t (*inj_get)(FAR struct stm32_adc_dev_s *dev, uint8_t chan);
+  uint32_t (*inj_get)(struct stm32_adc_dev_s *dev, uint8_t chan);
 
   /* Start/stop injected conversion */
 
-  void (*inj_startconv)(FAR struct stm32_adc_dev_s *dev, bool state);
+  void (*inj_startconv)(struct stm32_adc_dev_s *dev, bool state);
 #endif
 
 #ifdef CONFIG_STM32_ADC_CHANGE_SAMPLETIME
   /* Set ADC sample time */
 
-  void (*stime_set)(FAR struct stm32_adc_dev_s *dev,
-                    FAR struct adc_sample_time_s *time_samples);
+  void (*stime_set)(struct stm32_adc_dev_s *dev,
+                    struct adc_sample_time_s *time_samples);
 
   /* Write ADC sample time */
 
-  void (*stime_write)(FAR struct stm32_adc_dev_s *dev);
+  void (*stime_write)(struct stm32_adc_dev_s *dev);
 #endif
 
-  void (*dump_regs)(FAR struct stm32_adc_dev_s *dev);
+  void (*dump_regs)(struct stm32_adc_dev_s *dev);
 };
 
 #endif /* CONFIG_STM32_ADC_LL_OPS */
@@ -2263,7 +2263,7 @@ extern "C"
  ****************************************************************************/
 
 struct adc_dev_s;
-struct adc_dev_s *stm32_adcinitialize(int intf, FAR const uint8_t *chanlist,
+struct adc_dev_s *stm32_adcinitialize(int intf, const uint8_t *chanlist,
                                       int channels);
 
 #undef EXTERN

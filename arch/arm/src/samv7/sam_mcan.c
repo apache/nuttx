@@ -202,7 +202,7 @@
 
 #  define MCAN0_RXFIFO0_BYTES \
      MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN0_RXFIFO0_SIZE * \
-                   MCAN0_RXFIFO0_ELEMENT_SIZE + 8)
+                   (MCAN0_RXFIFO0_ELEMENT_SIZE + 8))
 #  define MCAN0_RXFIFO0_WORDS (MCAN0_RXFIFO0_BYTES >> 2)
 
 /* MCAN0 RX FIFO1 element size */
@@ -245,7 +245,7 @@
 
 #  define MCAN0_RXFIFO1_BYTES \
      MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN0_RXFIFO1_SIZE * \
-                   MCAN0_RXFIFO1_ELEMENT_SIZE + 8)
+                   (MCAN0_RXFIFO1_ELEMENT_SIZE + 8))
 #  define MCAN0_RXFIFO1_WORDS (MCAN0_RXFIFO1_BYTES >> 2)
 
 /* MCAN0 Filters */
@@ -314,7 +314,7 @@
 
 #  define MCAN0_DEDICATED_RXBUFFER_BYTES \
      MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN0_DEDICATED_RXBUFFER_SIZE * \
-                   MCAN0_RXBUFFER_ELEMENT_SIZE + 8)
+                   (MCAN0_RXBUFFER_ELEMENT_SIZE + 8))
 #  define MCAN0_DEDICATED_RXBUFFER_WORDS \
      (MCAN0_DEDICATED_RXBUFFER_BYTES >> 2)
 
@@ -354,7 +354,7 @@
 
 #  define MCAN0_DEDICATED_TXBUFFER_BYTES \
      MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN0_DEDICATED_TXBUFFER_SIZE * \
-                   MCAN0_TXBUFFER_ELEMENT_SIZE + 8)
+                   (MCAN0_TXBUFFER_ELEMENT_SIZE + 8))
 #  define MCAN0_DEDICATED_TXBUFFER_WORDS \
      (MCAN0_DEDICATED_TXBUFFER_BYTES >> 2)
 
@@ -384,7 +384,7 @@
 
 #  define MCAN0_TXFIFIOQ_BYTES \
      MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN0_TXFIFOQ_SIZE *  \
-                   MCAN0_TXBUFFER_ELEMENT_SIZE + 8)
+                   (MCAN0_TXBUFFER_ELEMENT_SIZE + 8))
 #  define MCAN0_TXFIFIOQ_WORDS (MCAN0_TXFIFIOQ_BYTES >> 2)
 
 /* MCAN0 Message RAM */
@@ -487,7 +487,7 @@
 
 #  define MCAN1_RXFIFO0_BYTES \
      MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN1_RXFIFO0_SIZE * \
-                   MCAN1_RXFIFO0_ELEMENT_SIZE + 8)
+                   (MCAN1_RXFIFO0_ELEMENT_SIZE + 8))
 #  define MCAN1_RXFIFO0_WORDS (MCAN1_RXFIFO0_BYTES >> 2)
 
 /* MCAN1 RX FIFO1 element size */
@@ -530,7 +530,7 @@
 
 #  define MCAN1_RXFIFO1_BYTES \
      MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN1_RXFIFO1_SIZE * \
-                   MCAN1_RXFIFO1_ELEMENT_SIZE + 8)
+                   (MCAN1_RXFIFO1_ELEMENT_SIZE + 8))
 #  define MCAN1_RXFIFO1_WORDS (MCAN1_RXFIFO1_BYTES >> 2)
 
 /* MCAN1 Filters */
@@ -599,7 +599,7 @@
 
 #  define MCAN1_DEDICATED_RXBUFFER_BYTES \
      MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN1_DEDICATED_RXBUFFER_SIZE * \
-                   MCAN1_RXBUFFER_ELEMENT_SIZE + 8)
+                   (MCAN1_RXBUFFER_ELEMENT_SIZE + 8))
 #  define MCAN1_DEDICATED_RXBUFFER_WORDS \
      (MCAN1_DEDICATED_RXBUFFER_BYTES >> 2)
 
@@ -639,7 +639,7 @@
 
 #  define MCAN1_DEDICATED_TXBUFFER_BYTES \
      MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN1_DEDICATED_TXBUFFER_SIZE * \
-                   MCAN1_TXBUFFER_ELEMENT_SIZE + 8)
+                   (MCAN1_TXBUFFER_ELEMENT_SIZE + 8))
 #  define MCAN1_DEDICATED_TXBUFFER_WORDS \
      (MCAN1_DEDICATED_TXBUFFER_BYTES >> 2)
 
@@ -669,7 +669,7 @@
 
 #  define MCAN1_TXFIFIOQ_BYTES \
      MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN1_TXFIFOQ_SIZE *  \
-                   MCAN1_TXBUFFER_ELEMENT_SIZE + 8)
+                   (MCAN1_TXBUFFER_ELEMENT_SIZE + 8))
 #  define MCAN1_TXFIFIOQ_WORDS (MCAN1_TXFIFIOQ_BYTES >> 2)
 
 /* MCAN1 Message RAM */
@@ -777,7 +777,8 @@
                             MCAN_INT_TEFL)
 #define MCAN_TXDEDBUF_INTS MCAN_TXCOMMON_INTS
 
-#define MCAN_TXERR_INTS    (MCAN_INT_TEFL | MCAN_INT_PEA | MCAN_INT_PED)
+#define MCAN_TXERR_INTS    (MCAN_INT_TEFL | MCAN_INT_PEA | MCAN_INT_PED | \
+                            MCAN_INT_ACKE)
 
 /* Common-, TX- and RX-Error-Mask */
 
@@ -915,70 +916,70 @@ struct sam_mcan_s
 
 /* MCAN Register access */
 
-static uint32_t mcan_getreg(FAR struct sam_mcan_s *priv, int offset);
-static void mcan_putreg(FAR struct sam_mcan_s *priv, int offset,
+static uint32_t mcan_getreg(struct sam_mcan_s *priv, int offset);
+static void mcan_putreg(struct sam_mcan_s *priv, int offset,
               uint32_t regval);
 #ifdef CONFIG_SAMV7_MCAN_REGDEBUG
-static void mcan_dumpregs(FAR struct sam_mcan_s *priv, FAR const char *msg);
+static void mcan_dumpregs(struct sam_mcan_s *priv, const char *msg);
 #else
 #  define mcan_dumpregs(priv,msg)
 #endif
 
 /* Semaphore helpers */
 
-static int mcan_dev_lock(FAR struct sam_mcan_s *priv);
-static int mcan_dev_lock_noncancelable(FAR struct sam_mcan_s *priv);
+static int mcan_dev_lock(struct sam_mcan_s *priv);
+static int mcan_dev_lock_noncancelable(struct sam_mcan_s *priv);
 #define mcan_dev_unlock(priv) nxsem_post(&priv->locksem)
 
-static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv);
-static void mcan_buffer_release(FAR struct sam_mcan_s *priv);
+static void mcan_buffer_reserve(struct sam_mcan_s *priv);
+static void mcan_buffer_release(struct sam_mcan_s *priv);
 
 /* MCAN helpers */
 
-static uint8_t mcan_dlc2bytes(FAR struct sam_mcan_s *priv, uint8_t dlc);
+static uint8_t mcan_dlc2bytes(struct sam_mcan_s *priv, uint8_t dlc);
 #if 0 /* Not used */
-static uint8_t mcan_bytes2dlc(FAR struct sam_mcan_s *priv, uint8_t nbytes);
+static uint8_t mcan_bytes2dlc(struct sam_mcan_s *priv, uint8_t nbytes);
 #endif
 
 #ifdef CONFIG_CAN_EXTID
-static int mcan_add_extfilter(FAR struct sam_mcan_s *priv,
-              FAR struct canioc_extfilter_s *extconfig);
-static int mcan_del_extfilter(FAR struct sam_mcan_s *priv, int ndx);
+static int mcan_add_extfilter(struct sam_mcan_s *priv,
+              struct canioc_extfilter_s *extconfig);
+static int mcan_del_extfilter(struct sam_mcan_s *priv, int ndx);
 #endif
-static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv,
-              FAR struct canioc_stdfilter_s *stdconfig);
-static int mcan_del_stdfilter(FAR struct sam_mcan_s *priv, int ndx);
+static int mcan_add_stdfilter(struct sam_mcan_s *priv,
+              struct canioc_stdfilter_s *stdconfig);
+static int mcan_del_stdfilter(struct sam_mcan_s *priv, int ndx);
 
 /* CAN driver methods */
 
-static void mcan_reset(FAR struct can_dev_s *dev);
-static int  mcan_setup(FAR struct can_dev_s *dev);
-static void mcan_shutdown(FAR struct can_dev_s *dev);
-static void mcan_rxint(FAR struct can_dev_s *dev, bool enable);
-static void mcan_txint(FAR struct can_dev_s *dev, bool enable);
-static int  mcan_ioctl(FAR struct can_dev_s *dev, int cmd,
+static void mcan_reset(struct can_dev_s *dev);
+static int  mcan_setup(struct can_dev_s *dev);
+static void mcan_shutdown(struct can_dev_s *dev);
+static void mcan_rxint(struct can_dev_s *dev, bool enable);
+static void mcan_txint(struct can_dev_s *dev, bool enable);
+static int  mcan_ioctl(struct can_dev_s *dev, int cmd,
               unsigned long arg);
-static int  mcan_remoterequest(FAR struct can_dev_s *dev, uint16_t id);
-static int  mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg);
-static bool mcan_txready(FAR struct can_dev_s *dev);
-static bool mcan_txempty(FAR struct can_dev_s *dev);
+static int  mcan_remoterequest(struct can_dev_s *dev, uint16_t id);
+static int  mcan_send(struct can_dev_s *dev, struct can_msg_s *msg);
+static bool mcan_txready(struct can_dev_s *dev);
+static bool mcan_txempty(struct can_dev_s *dev);
 
 /* MCAN interrupt handling */
 
 #if 0 /* Not Used */
-static bool mcan_dedicated_rxbuffer_available(FAR struct sam_mcan_s *priv,
+static bool mcan_dedicated_rxbuffer_available(struct sam_mcan_s *priv,
               int bufndx);
 #endif
 #ifdef CONFIG_CAN_ERRORS
-static void mcan_error(FAR struct can_dev_s *dev, uint32_t status);
+static void mcan_error(struct can_dev_s *dev, uint32_t status);
 #endif
-static void mcan_receive(FAR struct can_dev_s *dev,
-              FAR uint32_t *rxbuffer, unsigned long nwords);
-static int  mcan_interrupt(int irq, void *context, FAR void *arg);
+static void mcan_receive(struct can_dev_s *dev,
+              uint32_t *rxbuffer, unsigned long nwords);
+static int  mcan_interrupt(int irq, void *context, void *arg);
 
 /* Hardware initialization */
 
-static int  mcan_hw_initialize(FAR struct sam_mcan_s *priv);
+static int  mcan_hw_initialize(struct sam_mcan_s *priv);
 
 /****************************************************************************
  * Private Data
@@ -1192,9 +1193,9 @@ static struct can_dev_s g_mcan1dev;
  ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_MCAN_REGDEBUG
-static uint32_t mcan_getreg(FAR struct sam_mcan_s *priv, int offset)
+static uint32_t mcan_getreg(struct sam_mcan_s *priv, int offset)
 {
-  FAR const struct sam_config_s *config = priv->config;
+  const struct sam_config_s *config = priv->config;
   uintptr_t regaddr;
   uint32_t regval;
 
@@ -1247,9 +1248,9 @@ static uint32_t mcan_getreg(FAR struct sam_mcan_s *priv, int offset)
 }
 
 #else
-static uint32_t mcan_getreg(FAR struct sam_mcan_s *priv, int offset)
+static uint32_t mcan_getreg(struct sam_mcan_s *priv, int offset)
 {
-  FAR const struct sam_config_s *config = priv->config;
+  const struct sam_config_s *config = priv->config;
   return getreg32(config->base + offset);
 }
 
@@ -1272,10 +1273,10 @@ static uint32_t mcan_getreg(FAR struct sam_mcan_s *priv, int offset)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_MCAN_REGDEBUG
-static void mcan_putreg(FAR struct sam_mcan_s *priv, int offset,
+static void mcan_putreg(struct sam_mcan_s *priv, int offset,
                         uint32_t regval)
 {
-  FAR const struct sam_config_s *config = priv->config;
+  const struct sam_config_s *config = priv->config;
   uintptr_t regaddr = config->base + offset;
 
   /* Show the register value being written */
@@ -1288,10 +1289,10 @@ static void mcan_putreg(FAR struct sam_mcan_s *priv, int offset,
 }
 
 #else
-static void mcan_putreg(FAR struct sam_mcan_s *priv, int offset,
+static void mcan_putreg(struct sam_mcan_s *priv, int offset,
                         uint32_t regval)
 {
-  FAR const struct sam_config_s *config = priv->config;
+  const struct sam_config_s *config = priv->config;
   putreg32(regval, config->base + offset);
 }
 
@@ -1312,9 +1313,9 @@ static void mcan_putreg(FAR struct sam_mcan_s *priv, int offset,
  ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_MCAN_REGDEBUG
-static void mcan_dumpregs(FAR struct sam_mcan_s *priv, FAR const char *msg)
+static void mcan_dumpregs(struct sam_mcan_s *priv, const char *msg)
 {
-  FAR const struct sam_config_s *config = priv->config;
+  const struct sam_config_s *config = priv->config;
 
   caninfo("MCAN%d Registers: %s\n", config->port, msg);
   caninfo("  Base: %08x\n", config->base);
@@ -1403,7 +1404,7 @@ static void mcan_dumpregs(FAR struct sam_mcan_s *priv, FAR const char *msg)
  *
  ****************************************************************************/
 
-static int mcan_dev_lock(FAR struct sam_mcan_s *priv)
+static int mcan_dev_lock(struct sam_mcan_s *priv)
 {
   return nxsem_wait_uninterruptible(&priv->locksem);
 }
@@ -1418,7 +1419,7 @@ static int mcan_dev_lock(FAR struct sam_mcan_s *priv)
  *
  ****************************************************************************/
 
-static int mcan_dev_lock_noncancelable(FAR struct sam_mcan_s *priv)
+static int mcan_dev_lock_noncancelable(struct sam_mcan_s *priv)
 {
   int result;
   int ret = OK;
@@ -1463,7 +1464,7 @@ static int mcan_dev_lock_noncancelable(FAR struct sam_mcan_s *priv)
  *
  ****************************************************************************/
 
-static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
+static void mcan_buffer_reserve(struct sam_mcan_s *priv)
 {
   irqstate_t flags;
   uint32_t txfqs1;
@@ -1628,7 +1629,7 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
  *
  ****************************************************************************/
 
-static void mcan_buffer_release(FAR struct sam_mcan_s *priv)
+static void mcan_buffer_release(struct sam_mcan_s *priv)
 {
   int sval;
 
@@ -1671,7 +1672,7 @@ static void mcan_buffer_release(FAR struct sam_mcan_s *priv)
  *
  ****************************************************************************/
 
-static uint8_t mcan_dlc2bytes(FAR struct sam_mcan_s *priv, uint8_t dlc)
+static uint8_t mcan_dlc2bytes(struct sam_mcan_s *priv, uint8_t dlc)
 {
   if (dlc > 8)
     {
@@ -1728,7 +1729,7 @@ static uint8_t mcan_dlc2bytes(FAR struct sam_mcan_s *priv, uint8_t dlc)
  ****************************************************************************/
 
 #if 0 /* Not used */
-static uint8_t mcan_bytes2dlc(FAR struct sam_mcan_s *priv, uint8_t nbytes)
+static uint8_t mcan_bytes2dlc(struct sam_mcan_s *priv, uint8_t nbytes)
 {
   if (nbytes <= 8)
     {
@@ -1793,11 +1794,11 @@ static uint8_t mcan_bytes2dlc(FAR struct sam_mcan_s *priv, uint8_t nbytes)
  ****************************************************************************/
 
 #ifdef CONFIG_CAN_EXTID
-static int mcan_add_extfilter(FAR struct sam_mcan_s *priv,
-                              FAR struct canioc_extfilter_s *extconfig)
+static int mcan_add_extfilter(struct sam_mcan_s *priv,
+                              struct canioc_extfilter_s *extconfig)
 {
-  FAR const struct sam_config_s *config;
-  FAR uint32_t *extfilter;
+  const struct sam_config_s *config;
+  uint32_t *extfilter;
   uint32_t regval;
   int word;
   int bit;
@@ -1946,10 +1947,10 @@ static int mcan_add_extfilter(FAR struct sam_mcan_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_CAN_EXTID
-static int mcan_del_extfilter(FAR struct sam_mcan_s *priv, int ndx)
+static int mcan_del_extfilter(struct sam_mcan_s *priv, int ndx)
 {
-  FAR const struct sam_config_s *config;
-  FAR uint32_t *extfilter;
+  const struct sam_config_s *config;
+  uint32_t *extfilter;
   uint32_t regval;
   int word;
   int bit;
@@ -2064,11 +2065,11 @@ static int mcan_del_extfilter(FAR struct sam_mcan_s *priv, int ndx)
  *
  ****************************************************************************/
 
-static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv,
-                              FAR struct canioc_stdfilter_s *stdconfig)
+static int mcan_add_stdfilter(struct sam_mcan_s *priv,
+                              struct canioc_stdfilter_s *stdconfig)
 {
-  FAR const struct sam_config_s *config;
-  FAR uint32_t *stdfilter;
+  const struct sam_config_s *config;
+  uint32_t *stdfilter;
   uint32_t regval;
   int word;
   int bit;
@@ -2211,10 +2212,10 @@ static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv,
  *
  ****************************************************************************/
 
-static int mcan_del_stdfilter(FAR struct sam_mcan_s *priv, int ndx)
+static int mcan_del_stdfilter(struct sam_mcan_s *priv, int ndx)
 {
-  FAR const struct sam_config_s *config;
-  FAR uint32_t *stdfilter;
+  const struct sam_config_s *config;
+  uint32_t *stdfilter;
   uint32_t regval;
   int word;
   int bit;
@@ -2341,7 +2342,7 @@ static int mcan_del_stdfilter(FAR struct sam_mcan_s *priv, int ndx)
  *
  ****************************************************************************/
 
-static int mcan_start_busoff_recovery_sequence(FAR struct sam_mcan_s *priv)
+static int mcan_start_busoff_recovery_sequence(struct sam_mcan_s *priv)
 {
   uint32_t regval;
   int ret;
@@ -2390,10 +2391,10 @@ static int mcan_start_busoff_recovery_sequence(FAR struct sam_mcan_s *priv)
  *
  ****************************************************************************/
 
-static void mcan_reset(FAR struct can_dev_s *dev)
+static void mcan_reset(struct can_dev_s *dev)
 {
-  FAR struct sam_mcan_s *priv;
-  FAR const struct sam_config_s *config;
+  struct sam_mcan_s *priv;
+  const struct sam_config_s *config;
 
   DEBUGASSERT(dev);
   priv = dev->cd_priv;
@@ -2446,10 +2447,10 @@ static void mcan_reset(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static int mcan_setup(FAR struct can_dev_s *dev)
+static int mcan_setup(struct can_dev_s *dev)
 {
-  FAR struct sam_mcan_s *priv;
-  FAR const struct sam_config_s *config;
+  struct sam_mcan_s *priv;
+  const struct sam_config_s *config;
   int ret;
 
   DEBUGASSERT(dev);
@@ -2530,10 +2531,10 @@ static int mcan_setup(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static void mcan_shutdown(FAR struct can_dev_s *dev)
+static void mcan_shutdown(struct can_dev_s *dev)
 {
-  FAR struct sam_mcan_s *priv;
-  FAR const struct sam_config_s *config;
+  struct sam_mcan_s *priv;
+  const struct sam_config_s *config;
 
   DEBUGASSERT(dev);
   priv = dev->cd_priv;
@@ -2582,9 +2583,9 @@ static void mcan_shutdown(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static void mcan_rxint(FAR struct can_dev_s *dev, bool enable)
+static void mcan_rxint(struct can_dev_s *dev, bool enable)
 {
-  FAR struct sam_mcan_s *priv = dev->cd_priv;
+  struct sam_mcan_s *priv = dev->cd_priv;
   irqstate_t flags;
   uint32_t regval;
 
@@ -2624,9 +2625,9 @@ static void mcan_rxint(FAR struct can_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static void mcan_txint(FAR struct can_dev_s *dev, bool enable)
+static void mcan_txint(struct can_dev_s *dev, bool enable)
 {
-  FAR struct sam_mcan_s *priv = dev->cd_priv;
+  struct sam_mcan_s *priv = dev->cd_priv;
   irqstate_t flags;
   uint32_t regval;
 
@@ -2666,9 +2667,9 @@ static void mcan_txint(FAR struct can_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
+static int mcan_ioctl(struct can_dev_s *dev, int cmd, unsigned long arg)
 {
-  FAR struct sam_mcan_s *priv;
+  struct sam_mcan_s *priv;
   int ret = -ENOTTY;
 
   caninfo("cmd=%04x arg=%lu\n", cmd, arg);
@@ -2693,8 +2694,8 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
 
       case CANIOC_GET_BITTIMING:
         {
-          FAR struct canioc_bittiming_s *bt =
-            (FAR struct canioc_bittiming_s *)arg;
+          struct canioc_bittiming_s *bt =
+            (struct canioc_bittiming_s *)arg;
           uint32_t regval;
           uint32_t brp;
 
@@ -2754,8 +2755,8 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
 
       case CANIOC_SET_BITTIMING:
         {
-          FAR const struct canioc_bittiming_s *bt =
-            (FAR const struct canioc_bittiming_s *)arg;
+          const struct canioc_bittiming_s *bt =
+            (const struct canioc_bittiming_s *)arg;
           irqstate_t flags;
           uint32_t brp;
           uint32_t tseg1;
@@ -2847,7 +2848,7 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
           DEBUGASSERT(arg != 0);
 
           ret = mcan_add_extfilter(priv,
-                                   (FAR struct canioc_extfilter_s *)arg);
+                                   (struct canioc_extfilter_s *)arg);
         }
         break;
 
@@ -2883,7 +2884,7 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
           DEBUGASSERT(arg != 0);
 
           ret = mcan_add_stdfilter(priv,
-                                   (FAR struct canioc_stdfilter_s *)arg);
+                                   (struct canioc_stdfilter_s *)arg);
         }
         break;
 
@@ -2943,7 +2944,7 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int mcan_remoterequest(FAR struct can_dev_s *dev, uint16_t id)
+static int mcan_remoterequest(struct can_dev_s *dev, uint16_t id)
 {
   /* REVISIT:  Remote request not implemented */
 
@@ -2973,13 +2974,13 @@ static int mcan_remoterequest(FAR struct can_dev_s *dev, uint16_t id)
  *
  ****************************************************************************/
 
-static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
+static int mcan_send(struct can_dev_s *dev, struct can_msg_s *msg)
 {
-  FAR struct sam_mcan_s *priv;
-  FAR const struct sam_config_s *config;
-  FAR uint32_t *txbuffer = 0;
-  FAR const uint8_t *src;
-  FAR uint8_t *dest;
+  struct sam_mcan_s *priv;
+  const struct sam_config_s *config;
+  uint32_t *txbuffer = 0;
+  const uint8_t *src;
+  uint8_t *dest;
   uint32_t regval;
   unsigned int msglen;
   unsigned int ndx;
@@ -3098,7 +3099,7 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 
   /* Followed by the amount of data corresponding to the DLC (T2..) */
 
-  dest   = (FAR uint8_t *)&txbuffer[2];
+  dest   = (uint8_t *)&txbuffer[2];
   src    = msg->cm_data;
   nbytes = mcan_dlc2bytes(priv, msg->cm_hdr.ch_dlc);
 
@@ -3153,9 +3154,9 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
  *
  ****************************************************************************/
 
-static bool mcan_txready(FAR struct can_dev_s *dev)
+static bool mcan_txready(struct can_dev_s *dev)
 {
-  FAR struct sam_mcan_s *priv = dev->cd_priv;
+  struct sam_mcan_s *priv = dev->cd_priv;
   uint32_t regval;
   bool notfull;
 #ifdef CONFIG_DEBUG_FEATURES
@@ -3212,9 +3213,9 @@ static bool mcan_txready(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static bool mcan_txempty(FAR struct can_dev_s *dev)
+static bool mcan_txempty(struct can_dev_s *dev)
 {
-  FAR struct sam_mcan_s *priv = dev->cd_priv;
+  struct sam_mcan_s *priv = dev->cd_priv;
   uint32_t regval;
 #ifdef CONFIG_SAMV7_MCAN_QUEUE_MODE
   int sval;
@@ -3289,7 +3290,7 @@ static bool mcan_txempty(FAR struct can_dev_s *dev)
  ****************************************************************************/
 
 #if 0 /* Not Used */
-bool mcan_dedicated_rxbuffer_available(FAR struct sam_mcan_s *priv,
+bool mcan_dedicated_rxbuffer_available(struct sam_mcan_s *priv,
                                        int bufndx)
 {
   if (bufndx < 32)
@@ -3323,9 +3324,9 @@ bool mcan_dedicated_rxbuffer_available(FAR struct sam_mcan_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_CAN_ERRORS
-static void mcan_error(FAR struct can_dev_s *dev, uint32_t status)
+static void mcan_error(struct can_dev_s *dev, uint32_t status)
 {
-  FAR struct sam_mcan_s *priv = dev->cd_priv;
+  struct sam_mcan_s *priv = dev->cd_priv;
   struct can_hdr_s hdr;
   uint32_t psr;
   uint16_t errbits;
@@ -3501,7 +3502,7 @@ static void mcan_error(FAR struct can_dev_s *dev, uint32_t status)
  *
  ****************************************************************************/
 
-static void mcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
+static void mcan_receive(struct can_dev_s *dev, uint32_t *rxbuffer,
                          unsigned long nwords)
 {
   struct can_hdr_s hdr;
@@ -3580,7 +3581,7 @@ static void mcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
 
   /* And provide the CAN message to the upper half logic */
 
-  ret = can_receive(dev, &hdr, (FAR uint8_t *)rxbuffer);
+  ret = can_receive(dev, &hdr, (uint8_t *)rxbuffer);
   if (ret < 0)
     {
       canerr("ERROR: can_receive failed: %d\n", ret);
@@ -3601,11 +3602,11 @@ static void mcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
  *
  ****************************************************************************/
 
-static int mcan_interrupt(int irq, void *context, FAR void *arg)
+static int mcan_interrupt(int irq, void *context, void *arg)
 {
-  FAR struct can_dev_s *dev = (FAR struct can_dev_s *)arg;
-  FAR struct sam_mcan_s *priv;
-  FAR const struct sam_config_s *config;
+  struct can_dev_s *dev = (struct can_dev_s *)arg;
+  struct sam_mcan_s *priv;
+  const struct sam_config_s *config;
   uint32_t ir;
   uint32_t ie;
   uint32_t pending;
@@ -3951,8 +3952,8 @@ static int mcan_interrupt(int irq, void *context, FAR void *arg)
 
 static int mcan_hw_initialize(struct sam_mcan_s *priv)
 {
-  FAR const struct sam_config_s *config = priv->config;
-  FAR uint32_t *msgram;
+  const struct sam_config_s *config = priv->config;
+  uint32_t *msgram;
   uint32_t regval;
   uint32_t cntr;
   uint32_t cmr = 0;
@@ -4270,11 +4271,11 @@ static int mcan_hw_initialize(struct sam_mcan_s *priv)
  *
  ****************************************************************************/
 
-FAR struct can_dev_s *sam_mcan_initialize(int port)
+struct can_dev_s *sam_mcan_initialize(int port)
 {
-  FAR struct can_dev_s *dev;
-  FAR struct sam_mcan_s *priv;
-  FAR const struct sam_config_s *config;
+  struct can_dev_s *dev;
+  struct sam_mcan_s *priv;
+  const struct sam_config_s *config;
   uint32_t regval;
 
   caninfo("MCAN%d\n", port);
@@ -4380,7 +4381,7 @@ FAR struct can_dev_s *sam_mcan_initialize(int port)
       nxsem_init(&priv->txfsem, 0, config->ntxfifoq);
 
       dev->cd_ops  = &g_mcanops;
-      dev->cd_priv = (FAR void *)priv;
+      dev->cd_priv = (void *)priv;
 
       /* And put the hardware in the initial state */
 

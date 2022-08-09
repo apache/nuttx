@@ -130,52 +130,50 @@ static bool syslog_rpmsg_transfer(FAR struct syslog_rpmsg_s *priv, bool wait)
   size_t off;
   size_t len_end;
 
-again:
-  msg = rpmsg_get_tx_payload_buffer(&priv->ept, &space, wait);
-  if (!msg)
+  do
     {
-      return false;
+      msg = rpmsg_get_tx_payload_buffer(&priv->ept, &space, wait);
+      if (!msg)
+        {
+          return false;
+        }
+
+      memset(msg, 0, sizeof(*msg));
+
+      flags = enter_critical_section();
+
+      space  -= sizeof(*msg);
+      len     = SYSLOG_RPMSG_COUNT(priv);
+      off     = SYSLOG_RPMSG_TAILOFF(priv);
+      len_end = priv->size - off;
+
+      if (len > space)
+        {
+          len = space;
+        }
+
+      if (len > len_end)
+        {
+          memcpy(msg->data, &priv->buffer[off], len_end);
+          memcpy(msg->data + len_end, priv->buffer, len - len_end);
+          memset(&priv->buffer[off], 0, len_end);
+          memset(priv->buffer, 0, len - len_end);
+        }
+      else
+        {
+          memcpy(msg->data, &priv->buffer[off], len);
+          memset(&priv->buffer[off], 0, len);
+        }
+
+      msg->count          = len;
+      priv->tail         += len;
+      msg->header.command = SYSLOG_RPMSG_TRANSFER;
+      rpmsg_send_nocopy(&priv->ept, msg, sizeof(*msg) + len);
+      len                 = SYSLOG_RPMSG_COUNT(priv);
+
+      leave_critical_section(flags);
     }
-
-  memset(msg, 0, sizeof(*msg));
-
-  flags = enter_critical_section();
-
-  space  -= sizeof(*msg);
-  len     = SYSLOG_RPMSG_COUNT(priv);
-  off     = SYSLOG_RPMSG_TAILOFF(priv);
-  len_end = priv->size - off;
-
-  if (len > space)
-    {
-      len = space;
-    }
-
-  if (len > len_end)
-    {
-      memcpy(msg->data, &priv->buffer[off], len_end);
-      memcpy(msg->data + len_end, priv->buffer, len - len_end);
-      memset(&priv->buffer[off], 0, len_end);
-      memset(priv->buffer, 0, len - len_end);
-    }
-  else
-    {
-      memcpy(msg->data, &priv->buffer[off], len);
-      memset(&priv->buffer[off], 0, len);
-    }
-
-  msg->count          = len;
-  priv->tail         += len;
-  msg->header.command = SYSLOG_RPMSG_TRANSFER;
-  rpmsg_send_nocopy(&priv->ept, msg, sizeof(*msg) + len);
-  len                 = SYSLOG_RPMSG_COUNT(priv);
-
-  leave_critical_section(flags);
-
-  if (len > 0)
-    {
-      goto again;
-    }
+  while (len > 0);
 
   return true;
 }

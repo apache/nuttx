@@ -52,7 +52,7 @@
  *
  ****************************************************************************/
 
-void imxrt_usdhc_set_sdio_card_isr(FAR struct sdio_dev_s *dev,
+void imxrt_usdhc_set_sdio_card_isr(struct sdio_dev_s *dev,
                                    int (*func)(void *), void *arg);
 
 /****************************************************************************
@@ -70,6 +70,6 @@ void imxrt_usdhc_set_sdio_card_isr(FAR struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
-FAR struct sdio_dev_s *imxrt_usdhc_initialize(int slotno);
+struct sdio_dev_s *imxrt_usdhc_initialize(int slotno);
 
 #endif /* __ARCH_ARM_SRC_IMXRT_IMXRT_USDHC_H */

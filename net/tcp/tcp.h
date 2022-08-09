@@ -37,10 +37,6 @@
 #include <nuttx/net/net.h>
 #include <nuttx/wqueue.h>
 
-#ifdef CONFIG_NET_TCP_NOTIFIER
-#  include <nuttx/wqueue.h>
-#endif
-
 #if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
 
 /****************************************************************************
@@ -303,11 +299,6 @@ struct tcp_conn_s
 
   FAR struct devif_callback_s *connevents;
   FAR struct devif_callback_s *connevents_tail;
-
-  /* Reference to TCP close callback instance */
-
-  FAR struct devif_callback_s *clscb;
-  struct work_s                clswork;
 
 #if defined(CONFIG_NET_TCP_WRITE_BUFFERS)
   /* Callback instance for TCP send() */

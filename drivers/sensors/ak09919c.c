@@ -226,14 +226,14 @@ static int ak09919c_verifyparam(FAR struct ak09919c_magdata_s *magdata,
 
 /* Sensor ops functions. */
 
-static int ak09919c_activate(FAR struct file *filep,
-                             FAR struct sensor_lowerhalf_s *lower,
+static int ak09919c_activate(FAR struct sensor_lowerhalf_s *lower,
+                             FAR struct file *filep,
                              bool enable);
-static int ak09919c_set_interval(FAR struct file *filp,
-                                 FAR struct sensor_lowerhalf_s *lower,
+static int ak09919c_set_interval(FAR struct sensor_lowerhalf_s *lower,
+                                 FAR struct file *filp,
                                  FAR unsigned long *interval_us);
-static int ak09919c_selftest(FAR struct file *filep,
-                             FAR struct sensor_lowerhalf_s *lower,
+static int ak09919c_selftest(FAR struct sensor_lowerhalf_s *lower,
+                             FAR struct file *filep,
                              unsigned long arg);
 
 /* Sensor poll functions. */
@@ -956,8 +956,8 @@ static int ak09919c_checkdev(FAR struct ak09919c_dev_s *priv)
  *   Set ODR
  *
  * Input Parameters
- *   filep       - The pointer of file, represents each user using the sensor.
  *   lower       - The instance of lower half sensor driver.
+ *   filep       - The pointer of file, represents each user using the sensor.
  *   interval_us - Sample interval.
  *
  * Returned Value
@@ -969,8 +969,8 @@ static int ak09919c_checkdev(FAR struct ak09919c_dev_s *priv)
  *
  ****************************************************************************/
 
-static int ak09919c_set_interval(FAR struct file *filp,
-                                 FAR struct sensor_lowerhalf_s *lower,
+static int ak09919c_set_interval(FAR struct sensor_lowerhalf_s *lower,
+                                 FAR struct file *filp,
                                  FAR unsigned long *interval_us)
 {
   FAR struct ak09919c_dev_s *priv = (FAR struct ak09919c_dev_s *)lower;
@@ -997,8 +997,8 @@ static int ak09919c_set_interval(FAR struct file *filp,
  *   Enable or disable sensor device.
  *
  * Input Parameters
- *   filep  - The pointer of file, represents each user using the sensor.
  *   lower  - The instance of lower half sensor driver.
+ *   filep  - The pointer of file, represents each user using the sensor.
  *   enable - true(enable) and false(disable).
  *
  * Returned Value
@@ -1010,8 +1010,8 @@ static int ak09919c_set_interval(FAR struct file *filp,
  *
  ****************************************************************************/
 
-static int ak09919c_activate(FAR struct file *filep,
-                             FAR struct sensor_lowerhalf_s *lower,
+static int ak09919c_activate(FAR struct sensor_lowerhalf_s *lower,
+                             FAR struct file *filep,
                              bool enable)
 {
   FAR struct ak09919c_dev_s *priv = (FAR struct ak09919c_dev_s *)lower;
@@ -1044,8 +1044,8 @@ static int ak09919c_activate(FAR struct file *filep,
  *   and device functional inspection.
  *
  * Input Parameters:
- *   filep - The pointer of file, represents each user using the sensor.
  *   lower - The instance of lower half sensor driver.
+ *   filep - The pointer of file, represents each user using the sensor.
  *   arg   - The parameters associated with cmd.
  *
  * Returned Value:
@@ -1057,8 +1057,8 @@ static int ak09919c_activate(FAR struct file *filep,
  *
  ****************************************************************************/
 
-static int ak09919c_selftest(FAR struct file *filep,
-                             FAR struct sensor_lowerhalf_s *lower,
+static int ak09919c_selftest(FAR struct sensor_lowerhalf_s *lower,
+                             FAR struct file *filep,
                              unsigned long arg)
 {
   FAR struct ak09919c_dev_s *priv = (FAR struct ak09919c_dev_s *)lower;

@@ -38,20 +38,20 @@
  * and a newline, on stderr.
  */
 
-void warn(FAR const char *fmt, ...);
-void vwarn(FAR const char *fmt, va_list ap);
+void warn(FAR const char *fmt, ...) printflike(1, 2);
+void vwarn(FAR const char *fmt, va_list ap) printflike(1, 0);
 
 /* Likewise, but without ": " and the standard error string.  */
 
-void warnx(FAR const char *fmt, ...);
-void vwarnx(FAR const char *fmt, va_list ap);
+void warnx(FAR const char *fmt, ...) printflike(1, 2);
+void vwarnx(FAR const char *fmt, va_list ap) printflike(1, 0);
 
 /* Likewise, and then exit with STATUS.  */
 
-void err(int status, FAR const char *fmt, ...);
-void verr(int status, FAR const char *fmt, va_list ap);
-void errx(int status, FAR const char *fmt, ...);
-void verrx(int status, FAR const char *, va_list ap);
+void err(int status, FAR const char *fmt, ...) printflike(2, 3);
+void verr(int status, FAR const char *fmt, va_list ap) printflike(2, 0);
+void errx(int status, FAR const char *fmt, ...) printflike(2, 3);
+void verrx(int status, FAR const char *, va_list ap) printflike(2, 0);
 
 #endif /* CONFIG_LIBC_ERR */
 #endif /* __INCLUDE_ERR_H */

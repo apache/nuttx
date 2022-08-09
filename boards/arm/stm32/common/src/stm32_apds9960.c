@@ -51,16 +51,16 @@ struct stm32_apds9960config_s
 
   /* Additional private definitions only known to this driver */
 
-  FAR void *arg;  /* Argument to pass to the interrupt handler */
-  FAR xcpt_t isr; /* ISR Handler */
+  void *arg;  /* Argument to pass to the interrupt handler */
+  xcpt_t isr; /* ISR Handler */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  apds9960_irq_attach(FAR struct apds9960_config_s *state,
-                                xcpt_t isr, FAR void *arg);
+static int  apds9960_irq_attach(struct apds9960_config_s *state,
+                                xcpt_t isr, void *arg);
 
 /****************************************************************************
  * Private Data
@@ -90,8 +90,8 @@ static struct stm32_apds9960config_s g_apds9960config =
 
 /* Attach the APDS-9960 interrupt handler to the GPIO interrupt */
 
-static int apds9960_irq_attach(FAR struct apds9960_config_s *state,
-                               xcpt_t isr, FAR void *arg)
+static int apds9960_irq_attach(struct apds9960_config_s *state,
+                               xcpt_t isr, void *arg)
 {
   irqstate_t flags;
 
@@ -129,7 +129,7 @@ static int apds9960_irq_attach(FAR struct apds9960_config_s *state,
 
 int board_apds9960_initialize(int devno, int busno)
 {
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
   char devpath[12];
   int ret;
 

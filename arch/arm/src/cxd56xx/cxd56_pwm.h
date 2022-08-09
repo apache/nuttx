@@ -77,7 +77,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct pwm_lowerhalf_s *cxd56_pwminitialize(uint32_t channel);
+struct pwm_lowerhalf_s *cxd56_pwminitialize(uint32_t channel);
 
 #undef EXTERN
 #if defined(__cplusplus)

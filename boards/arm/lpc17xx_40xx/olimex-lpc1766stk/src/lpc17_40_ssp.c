@@ -81,7 +81,7 @@
 struct lpc17_40_mediachange_s
 {
   spi_mediachange_t callback; /* The media change callback */
-  FAR void          *arg;     /* Callback argument */
+  void              *arg;     /* Callback argument */
 };
 #endif
 
@@ -154,7 +154,7 @@ static void ssp_cdirqsetup(int irq, xcpt_t irqhandler)
 
 #if 0 /* ifdef HAVE_SPI_CALLBACK */
 #ifdef CONFIG_LPC17_40_SSP0
-static int ssp0_cdinterrupt(int irq, FAR void *context)
+static int ssp0_cdinterrupt(int irq, void *context)
 {
   /* Invoke the media change callback */
 
@@ -168,7 +168,7 @@ static int ssp0_cdinterrupt(int irq, FAR void *context)
 #endif
 
 #ifdef CONFIG_LPC17_40_SSP1
-static int ssp1_cdinterrupt(int irq, FAR void *context)
+static int ssp1_cdinterrupt(int irq, void *context)
 {
   /* Invoke the media change callback */
 
@@ -258,7 +258,7 @@ void weak_function lpc1766stk_sspdev_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_LPC17_40_SSP0
-void  lpc17_40_ssp0select(FAR struct spi_dev_s *dev, uint32_t devid,
+void  lpc17_40_ssp0select(struct spi_dev_s *dev, uint32_t devid,
                           bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
@@ -273,7 +273,7 @@ void  lpc17_40_ssp0select(FAR struct spi_dev_s *dev, uint32_t devid,
     }
 }
 
-uint8_t lpc17_40_ssp0status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t lpc17_40_ssp0status(struct spi_dev_s *dev, uint32_t devid)
 {
   spiinfo("Returning nothing\n");
   return 0;
@@ -281,7 +281,7 @@ uint8_t lpc17_40_ssp0status(FAR struct spi_dev_s *dev, uint32_t devid)
 #endif
 
 #ifdef CONFIG_LPC17_40_SSP1
-void  lpc17_40_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid,
+void  lpc17_40_ssp1select(struct spi_dev_s *dev, uint32_t devid,
                           bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
@@ -296,7 +296,7 @@ void  lpc17_40_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid,
     }
 }
 
-uint8_t lpc17_40_ssp1status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t lpc17_40_ssp1status(struct spi_dev_s *dev, uint32_t devid)
 {
   spiinfo("Returning SPI_STATUS_PRESENT\n");
   return SPI_STATUS_PRESENT;
@@ -329,7 +329,7 @@ uint8_t lpc17_40_ssp1status(FAR struct spi_dev_s *dev, uint32_t devid)
    * would be configured.
    */
 
-int lpc17_40_ssp0register(FAR struct spi_dev_s *dev,
+int lpc17_40_ssp0register(struct spi_dev_s *dev,
                           spi_mediachange_t callback,
                           void *arg)
 {
@@ -348,7 +348,7 @@ int lpc17_40_ssp0register(FAR struct spi_dev_s *dev,
 #endif
 
 #ifdef CONFIG_LPC17_40_SSP1
-int lpc17_40_ssp1register(FAR struct spi_dev_s *dev,
+int lpc17_40_ssp1register(struct spi_dev_s *dev,
                           spi_mediachange_t callback,
                           void *arg)
 {

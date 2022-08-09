@@ -135,7 +135,7 @@ int getnameinfo(FAR const struct sockaddr *addr, socklen_t addrlen,
                 break;
 
               default:
-                DEBUGASSERT(0);
+                DEBUGPANIC();
             }
 
           /* Fall-back to numeric for the host name. */
@@ -154,7 +154,7 @@ int getnameinfo(FAR const struct sockaddr *addr, socklen_t addrlen,
                 return EAI_OVERFLOW;
 
               default:
-                DEBUGASSERT(0);
+                DEBUGPANIC();
             }
         }
     }

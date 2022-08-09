@@ -88,6 +88,15 @@ RUN mkdir gcc-arm-none-eabi && \
   | tar -C gcc-arm-none-eabi --strip-components 1 -xj
 
 ###############################################################################
+# Build image for tool required by ARM64 builds
+###############################################################################
+FROM nuttx-toolchain-base AS nuttx-toolchain-arm64
+# Download the latest ARM64 GCC toolchain prebuilt by ARM
+RUN mkdir gcc-aarch64-none-elf && \
+  curl -s -L  "https://developer.arm.com/-/media/Files/downloads/gnu/11.2-2022.02/binrel/gcc-arm-11.2-2022.02-x86_64-aarch64-none-elf.tar.xz" \
+  | tar -C gcc-aarch64-none-elf --strip-components 1 -xJ
+
+###############################################################################
 # Build image for tool required by Pinguino builds
 ###############################################################################
 FROM nuttx-toolchain-base AS nuttx-toolchain-pinguino
@@ -273,6 +282,10 @@ ENV PATH="/tools/rust/cargo/bin:$PATH"
 COPY --from=nuttx-toolchain-arm /tools/gcc-arm-none-eabi/ gcc-arm-none-eabi/
 ENV PATH="/tools/gcc-arm-none-eabi/bin:$PATH"
 
+# ARM64 toolchain
+COPY --from=nuttx-toolchain-arm64 /tools/gcc-aarch64-none-elf/ gcc-aarch64-none-elf/
+ENV PATH="/tools/gcc-aarch64-none-elf/bin:$PATH"
+
 # MIPS toolchain
 COPY --from=nuttx-toolchain-pinguino /tools/pinguino-compilers/p32/ pinguino-compilers/p32/
 ENV PATH="/tools/pinguino-compilers/p32/bin:$PATH"
@@ -318,6 +331,8 @@ RUN mkdir -p /tools/ccache/bin && \
   ln -sf `which ccache` /tools/ccache/bin/g++ && \
   ln -sf `which ccache` /tools/ccache/bin/arm-none-eabi-gcc && \
   ln -sf `which ccache` /tools/ccache/bin/arm-none-eabi-g++ && \
+  ln -sf `which ccache` /tools/ccache/bin/aarch64-none-elf-gcc && \
+  ln -sf `which ccache` /tools/ccache/bin/aarch64-none-elf-g++ && \
   ln -sf `which ccache` /tools/ccache/bin/p32-gcc && \
   ln -sf `which ccache` /tools/ccache/bin/riscv64-unknown-elf-gcc && \
   ln -sf `which ccache` /tools/ccache/bin/riscv64-unknown-elf-g++ && \

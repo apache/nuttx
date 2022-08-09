@@ -52,7 +52,7 @@
  *
  ****************************************************************************/
 
-bool up_checkarch(FAR const Elf32_Ehdr *ehdr)
+bool up_checkarch(const Elf32_Ehdr *ehdr)
 {
   /* Make sure it's an ARM executable */
 
@@ -111,8 +111,7 @@ bool up_checkarch(FAR const Elf32_Ehdr *ehdr)
  *
  ****************************************************************************/
 
-int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
-                uintptr_t addr)
+int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr)
 {
   int32_t offset;
   uint32_t upper_insn;
@@ -481,7 +480,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
         if (offset < (int32_t)0xfffff800 || offset >= (int32_t)0x0800)
           {
             berr("ERROR: JUMP11 [%" PRId32 "] "
-                 "relocation out of range, branch taget=%08lx\n",
+                 "relocation out of range, branch target=%08lx\n",
                  ELF32_R_TYPE(rel->r_info), offset);
 
             return -EINVAL;
@@ -503,7 +502,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
   return OK;
 }
 
-int up_relocateadd(FAR const Elf32_Rela *rel, FAR const Elf32_Sym *sym,
+int up_relocateadd(const Elf32_Rela *rel, const Elf32_Sym *sym,
                    uintptr_t addr)
 {
   berr("ERROR: RELA relocation not supported\n");

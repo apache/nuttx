@@ -379,7 +379,7 @@ struct lpc43_ehci_trace_s
   uint16_t id;
   bool fmt2;
 #endif
-  FAR const char *string;
+  const char *string;
 };
 
 #endif /* HAVE_USBHOST_TRACE */
@@ -482,7 +482,7 @@ static ssize_t lpc43_transfer_wait(struct lpc43_epinfo_s *epinfo);
 #ifdef CONFIG_USBHOST_ASYNCH
 static inline int lpc43_ioc_async_setup(struct lpc43_rhport_s *rhport,
          struct lpc43_epinfo_s *epinfo, usbhost_asynch_t callback,
-         FAR void *arg);
+         void *arg);
 static void lpc43_asynch_completion(struct lpc43_epinfo_s *epinfo);
 #endif
 
@@ -501,50 +501,51 @@ static inline void lpc43_ioc_bottomhalf(void);
 static inline void lpc43_portsc_bottomhalf(void);
 static inline void lpc43_syserr_bottomhalf(void);
 static inline void lpc43_async_advance_bottomhalf(void);
-static void lpc43_ehci_bottomhalf(FAR void *arg);
-static int lpc43_ehci_interrupt(int irq, FAR void *context, FAR void *arg);
+static void lpc43_ehci_bottomhalf(void *arg);
+static int lpc43_ehci_interrupt(int irq, void *context, void *arg);
 
 /* USB Host Controller Operations *******************************************/
 
-static int lpc43_wait(FAR struct usbhost_connection_s *conn,
-         FAR struct usbhost_hubport_s **hport);
-static int lpc43_rh_enumerate(FAR struct usbhost_connection_s *conn,
-         FAR struct usbhost_hubport_s *hport);
-static int lpc43_enumerate(FAR struct usbhost_connection_s *conn,
-         FAR struct usbhost_hubport_s *hport);
+static int lpc43_wait(struct usbhost_connection_s *conn,
+         struct usbhost_hubport_s **hport);
+static int lpc43_rh_enumerate(struct usbhost_connection_s *conn,
+         struct usbhost_hubport_s *hport);
+static int lpc43_enumerate(struct usbhost_connection_s *conn,
+         struct usbhost_hubport_s *hport);
 
-static int lpc43_ep0configure(FAR struct usbhost_driver_s *drvr,
+static int lpc43_ep0configure(struct usbhost_driver_s *drvr,
          usbhost_ep_t ep0, uint8_t funcaddr, uint8_t speed,
          uint16_t maxpacketsize);
-static int lpc43_epalloc(FAR struct usbhost_driver_s *drvr,
-         const FAR struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep);
-static int lpc43_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
-static int lpc43_alloc(FAR struct usbhost_driver_s *drvr,
-         FAR uint8_t **buffer, FAR size_t *maxlen);
-static int lpc43_free(FAR struct usbhost_driver_s *drvr,
-         FAR uint8_t *buffer);
-static int lpc43_ioalloc(FAR struct usbhost_driver_s *drvr,
-         FAR uint8_t **buffer, size_t buflen);
-static int lpc43_iofree(FAR struct usbhost_driver_s *drvr,
-         FAR uint8_t *buffer);
-static int lpc43_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-         FAR const struct usb_ctrlreq_s *req, FAR uint8_t *buffer);
-static int lpc43_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-         FAR const struct usb_ctrlreq_s *req, FAR const uint8_t *buffer);
-static ssize_t lpc43_transfer(FAR struct usbhost_driver_s *drvr,
-         usbhost_ep_t ep, FAR uint8_t *buffer, size_t buflen);
+static int lpc43_epalloc(struct usbhost_driver_s *drvr,
+                         const struct usbhost_epdesc_s *epdesc,
+                         usbhost_ep_t *ep);
+static int lpc43_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep);
+static int lpc43_alloc(struct usbhost_driver_s *drvr,
+         uint8_t **buffer, size_t *maxlen);
+static int lpc43_free(struct usbhost_driver_s *drvr,
+         uint8_t *buffer);
+static int lpc43_ioalloc(struct usbhost_driver_s *drvr,
+         uint8_t **buffer, size_t buflen);
+static int lpc43_iofree(struct usbhost_driver_s *drvr,
+         uint8_t *buffer);
+static int lpc43_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+         const struct usb_ctrlreq_s *req, uint8_t *buffer);
+static int lpc43_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+         const struct usb_ctrlreq_s *req, const uint8_t *buffer);
+static ssize_t lpc43_transfer(struct usbhost_driver_s *drvr,
+         usbhost_ep_t ep, uint8_t *buffer, size_t buflen);
 #ifdef CONFIG_USBHOST_ASYNCH
-static int lpc43_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-         FAR uint8_t *buffer, size_t buflen, usbhost_asynch_t callback,
-         FAR void *arg);
+static int lpc43_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+         uint8_t *buffer, size_t buflen, usbhost_asynch_t callback,
+         void *arg);
 #endif
-static int lpc43_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
+static int lpc43_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 #ifdef CONFIG_USBHOST_HUB
-static int lpc43_connect(FAR struct usbhost_driver_s *drvr,
-         FAR struct usbhost_hubport_s *hport, bool connected);
+static int lpc43_connect(struct usbhost_driver_s *drvr,
+         struct usbhost_hubport_s *hport, bool connected);
 #endif
-static void lpc43_disconnect(FAR struct usbhost_driver_s *drvr,
-                             FAR struct usbhost_hubport_s *hport);
+static void lpc43_disconnect(struct usbhost_driver_s *drvr,
+                             struct usbhost_hubport_s *hport);
 
 /* Initialization ***********************************************************/
 
@@ -2513,7 +2514,7 @@ static ssize_t lpc43_transfer_wait(struct lpc43_epinfo_s *epinfo)
 static inline int lpc43_ioc_async_setup(struct lpc43_rhport_s *rhport,
                                         struct lpc43_epinfo_s *epinfo,
                                         usbhost_asynch_t callback,
-                                        FAR void *arg)
+                                        void *arg)
 {
   irqstate_t flags;
   int ret = -ENODEV;
@@ -3154,7 +3155,7 @@ static inline void lpc43_async_advance_bottomhalf(void)
  *
  ****************************************************************************/
 
-static void lpc43_ehci_bottomhalf(FAR void *arg)
+static void lpc43_ehci_bottomhalf(void *arg)
 {
   uint32_t pending = (uint32_t)arg;
 
@@ -3290,7 +3291,7 @@ static void lpc43_ehci_bottomhalf(FAR void *arg)
  *
  ****************************************************************************/
 
-static int lpc43_ehci_interrupt(int irq, FAR void *context, FAR void *arg)
+static int lpc43_ehci_interrupt(int irq, void *context, void *arg)
 {
   uint32_t usbsts;
   uint32_t pending;
@@ -3322,7 +3323,7 @@ static int lpc43_ehci_interrupt(int irq, FAR void *context, FAR void *arg)
 
       DEBUGASSERT(work_available(&g_ehci.work));
       DEBUGVERIFY(work_queue(HPWORK, &g_ehci.work, lpc43_ehci_bottomhalf,
-                            (FAR void *)pending, 0));
+                            (void *)pending, 0));
 
       /* Disable further EHCI interrupts so that we do not overrun the work
        * queue.
@@ -3365,8 +3366,8 @@ static int lpc43_ehci_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static int lpc43_wait(FAR struct usbhost_connection_s *conn,
-                      FAR struct usbhost_hubport_s **hport)
+static int lpc43_wait(struct usbhost_connection_s *conn,
+                      struct usbhost_hubport_s **hport)
 {
   irqstate_t flags;
   int rhpndx;
@@ -3468,8 +3469,8 @@ static int lpc43_wait(FAR struct usbhost_connection_s *conn,
  *
  ****************************************************************************/
 
-static int lpc43_rh_enumerate(FAR struct usbhost_connection_s *conn,
-                              FAR struct usbhost_hubport_s *hport)
+static int lpc43_rh_enumerate(struct usbhost_connection_s *conn,
+                              struct usbhost_hubport_s *hport)
 {
   struct lpc43_rhport_s *rhport;
   volatile uint32_t *regaddr;
@@ -3710,8 +3711,8 @@ static int lpc43_rh_enumerate(FAR struct usbhost_connection_s *conn,
   return OK;
 }
 
-static int lpc43_enumerate(FAR struct usbhost_connection_s *conn,
-                           FAR struct usbhost_hubport_s *hport)
+static int lpc43_enumerate(struct usbhost_connection_s *conn,
+                           struct usbhost_hubport_s *hport)
 {
   int ret;
 
@@ -3780,7 +3781,7 @@ static int lpc43_enumerate(FAR struct usbhost_connection_s *conn,
  *
  ****************************************************************************/
 
-static int lpc43_ep0configure(FAR struct usbhost_driver_s *drvr,
+static int lpc43_ep0configure(struct usbhost_driver_s *drvr,
                               usbhost_ep_t ep0, uint8_t funcaddr,
                               uint8_t speed, uint16_t maxpacketsize)
 {
@@ -3828,8 +3829,8 @@ static int lpc43_ep0configure(FAR struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-static int lpc43_epalloc(FAR struct usbhost_driver_s *drvr,
-                         const FAR struct usbhost_epdesc_s *epdesc,
+static int lpc43_epalloc(struct usbhost_driver_s *drvr,
+                         const struct usbhost_epdesc_s *epdesc,
                          usbhost_ep_t *ep)
 {
   struct lpc43_epinfo_s *epinfo;
@@ -3914,7 +3915,7 @@ static int lpc43_epalloc(FAR struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-static int lpc43_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
+static int lpc43_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
   struct lpc43_epinfo_s *epinfo = (struct lpc43_epinfo_s *)ep;
 
@@ -3961,15 +3962,15 @@ static int lpc43_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  *
  ****************************************************************************/
 
-static int lpc43_alloc(FAR struct usbhost_driver_s *drvr,
-                     FAR uint8_t **buffer, FAR size_t *maxlen)
+static int lpc43_alloc(struct usbhost_driver_s *drvr,
+                       uint8_t **buffer, size_t *maxlen)
 {
   int ret = -ENOMEM;
   DEBUGASSERT(drvr && buffer && maxlen);
 
   /* There is no special requirements for transfer/descriptor buffers. */
 
-  *buffer = (FAR uint8_t *)kmm_malloc(CONFIG_LPC43_EHCI_BUFSIZE);
+  *buffer = (uint8_t *)kmm_malloc(CONFIG_LPC43_EHCI_BUFSIZE);
   if (*buffer)
     {
       *maxlen = CONFIG_LPC43_EHCI_BUFSIZE;
@@ -4003,7 +4004,7 @@ static int lpc43_alloc(FAR struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-static int lpc43_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
+static int lpc43_free(struct usbhost_driver_s *drvr, uint8_t *buffer)
 {
   DEBUGASSERT(drvr && buffer);
 
@@ -4044,8 +4045,8 @@ static int lpc43_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
  *
  ****************************************************************************/
 
-static int lpc43_ioalloc(FAR struct usbhost_driver_s *drvr,
-                         FAR uint8_t **buffer, size_t buflen)
+static int lpc43_ioalloc(struct usbhost_driver_s *drvr,
+                         uint8_t **buffer, size_t buflen)
 {
   DEBUGASSERT(drvr && buffer && buflen > 0);
 
@@ -4054,7 +4055,7 @@ static int lpc43_ioalloc(FAR struct usbhost_driver_s *drvr,
    * buffering).
    */
 
-  *buffer = (FAR uint8_t *)kumm_malloc(buflen);
+  *buffer = (uint8_t *)kumm_malloc(buflen);
   return *buffer ? OK : -ENOMEM;
 }
 
@@ -4081,8 +4082,8 @@ static int lpc43_ioalloc(FAR struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-static int lpc43_iofree(FAR struct usbhost_driver_s *drvr,
-                        FAR uint8_t *buffer)
+static int lpc43_iofree(struct usbhost_driver_s *drvr,
+                        uint8_t *buffer)
 {
   DEBUGASSERT(drvr && buffer);
 
@@ -4128,9 +4129,9 @@ static int lpc43_iofree(FAR struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-static int lpc43_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-                        FAR const struct usb_ctrlreq_s *req,
-                        FAR uint8_t *buffer)
+static int lpc43_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+                        const struct usb_ctrlreq_s *req,
+                        uint8_t *buffer)
 {
   struct lpc43_rhport_s *rhport = (struct lpc43_rhport_s *)drvr;
   struct lpc43_epinfo_s *ep0info = (struct lpc43_epinfo_s *)ep0;
@@ -4194,9 +4195,9 @@ errout_with_sem:
   return ret;
 }
 
-static int lpc43_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-                         FAR const struct usb_ctrlreq_s *req,
-                         FAR const uint8_t *buffer)
+static int lpc43_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+                         const struct usb_ctrlreq_s *req,
+                         const uint8_t *buffer)
 {
   /* lpc43_ctrlin can handle both directions.  We just need to work around
    * the differences in the function signatures.
@@ -4244,8 +4245,8 @@ static int lpc43_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  *
  ****************************************************************************/
 
-static ssize_t lpc43_transfer(FAR struct usbhost_driver_s *drvr,
-                              usbhost_ep_t ep, FAR uint8_t *buffer,
+static ssize_t lpc43_transfer(struct usbhost_driver_s *drvr,
+                              usbhost_ep_t ep, uint8_t *buffer,
                               size_t buflen)
 {
   struct lpc43_rhport_s *rhport = (struct lpc43_rhport_s *)drvr;
@@ -4356,9 +4357,9 @@ errout_with_sem:
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
-static int lpc43_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-                        FAR uint8_t *buffer, size_t buflen,
-                        usbhost_asynch_t callback, FAR void *arg)
+static int lpc43_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+                        uint8_t *buffer, size_t buflen,
+                        usbhost_asynch_t callback, void *arg)
 {
   struct lpc43_rhport_s *rhport = (struct lpc43_rhport_s *)drvr;
   struct lpc43_epinfo_s *epinfo = (struct lpc43_epinfo_s *)ep;
@@ -4450,7 +4451,7 @@ errout_with_sem:
  *
  ****************************************************************************/
 
-static int lpc43_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
+static int lpc43_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
   struct lpc43_epinfo_s *epinfo = (struct lpc43_epinfo_s *)ep;
   struct lpc43_qh_s *qh;
@@ -4655,8 +4656,8 @@ errout_with_sem:
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_HUB
-static int lpc43_connect(FAR struct usbhost_driver_s *drvr,
-                         FAR struct usbhost_hubport_s *hport,
+static int lpc43_connect(struct usbhost_driver_s *drvr,
+                         struct usbhost_hubport_s *hport,
                          bool connected)
 {
   irqstate_t flags;
@@ -4710,8 +4711,8 @@ static int lpc43_connect(FAR struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-static void lpc43_disconnect(FAR struct usbhost_driver_s *drvr,
-                             FAR struct usbhost_hubport_s *hport)
+static void lpc43_disconnect(struct usbhost_driver_s *drvr,
+                             struct usbhost_hubport_s *hport)
 {
   DEBUGASSERT(hport != NULL);
   hport->devclass = NULL;
@@ -4865,9 +4866,9 @@ static int lpc43_reset(void)
  *
  ****************************************************************************/
 
-FAR struct usbhost_connection_s *lpc43_ehci_initialize(int controller)
+struct usbhost_connection_s *lpc43_ehci_initialize(int controller)
 {
-  FAR struct usbhost_hubport_s *hport;
+  struct usbhost_hubport_s *hport;
   uint32_t regval;
 #if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_INFO)
   uint16_t regval16;
@@ -5333,7 +5334,7 @@ FAR struct usbhost_connection_s *lpc43_ehci_initialize(int controller)
  ****************************************************************************/
 
 #ifdef HAVE_USBHOST_TRACE
-FAR const char *usbhost_trformat1(uint16_t id)
+const char *usbhost_trformat1(uint16_t id)
 {
   int ndx = TRACE1_INDEX(id);
 
@@ -5345,7 +5346,7 @@ FAR const char *usbhost_trformat1(uint16_t id)
   return NULL;
 }
 
-FAR const char *usbhost_trformat2(uint16_t id)
+const char *usbhost_trformat2(uint16_t id)
 {
   int ndx = TRACE2_INDEX(id);
 

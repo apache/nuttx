@@ -1,0 +1,442 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_NUCLEO_WL55JC
+
+config ARCH_BOARD_NUCLEO_WL55JC_DEMO_LED_IRQ
+	bool "[demo] LED on button interrupt"
+	depends on ARCH_BUTTONS
+	depends on NSH_ARCHINIT
+	---help---
+		When enabled, pressing B3 button will toggle red LED.
+		This options is mostly for demo purposes of how one
+		can install GPIO interrupt.
+
+comment "[demo] LED on button interrupt requires NSH_ARCHINIT"
+	depends on !NSH_ARCHINIT || !ARCH_BUTTONS
+
+menuconfig ARCH_BOARD_FLASH_MOUNT
+	bool "Enable FLASH partitioning and mounting"
+	depends on !DISABLE_MOUNTPOINT
+	select MTD
+	select MTD_PROGMEM
+	select MTD_PARTITION
+	select MTD_PARTITION_NAMES
+	select FS_PROCFS
+	default n
+	---help---
+		When enabled, you will be able to configure partition table
+		for onboard FLASH memory to create and mount flash filesystems.
+		All partition sizes are specified in PAGE_SIZE size. On
+		STM32WL5 page size is always 2048.
+
+		On STM32WL55JC there are 128 pages of flash memory. Size of
+		all configured partitions shall not exceed 128. In fact, it
+		should be equal to 128 or else you will simply have unused
+		space on flash. Even if you want some raw flash access you
+		should specify this partition in table and select fs_raw.
+
+		By default there are only 4 partitions defined, if you need
+		more, you can define more in Kconfig and stm32_flash.c files.
+
+comment "FLASH partitioning and mounting requires !DISABLE_MOUNTPOINT"
+	depends on DISABLE_MOUNTPOINT
+
+if ARCH_BOARD_FLASH_MOUNT
+
+config ARCH_BOARD_FLASH_BL_PROG_SIZE
+	int "Size reserved for bootloader program code"
+	default 0
+	---help---
+		How much memory to reserve for bootloader program code.
+		If you are using bootloader in your application, specify
+		max size of bootloader partition. This memory will be
+		reserved at the beginning of flash, and CPU1 progmem will
+		be right after bootloader.
+
+		If you don't use bootloader and just want to run program
+		directly after reset, set this to 0.
+
+config ARCH_BOARD_FLASH_CPU1_PROG_SIZE
+	int "Size reserved for CPU1 program code"
+	default 127
+	---help---
+		How much memory to reserve for CPU1 program code. This should
+		specified as other partitions will be created at offset to
+		this partition.
+
+config ARCH_BOARD_FLASH_CPU2_PROG_SIZE
+	int "Size reserved for CPU2 program code"
+	default 0
+	---help---
+		How much memory to reserve for CPU2 program code. If you use
+		dual CPU you should specify how much memory you want to
+		reserve for code for second CPU. User partition will be
+		created at this offset. If you don't use CPU2, set this to 0.
+
+config ARCH_BOARD_FLASH_PART1_SIZE
+	int "Size of user partition 1"
+	default 1
+	---help---
+		Size of partition specified in PAGE_SIZE. Page size on
+		stm32wl5xxx is always 2048.
+
+config ARCH_BOARD_FLASH_PART1_NAME
+	string "Name of user partition 1"
+	default "part1"
+	---help---
+		MTD partition name, this can be later read by MTD API,
+		or it can also be read from /proc/partitions to easily
+		identify partitions.
+
+config ARCH_BOARD_FLASH_PART1_MNT
+	string "Mount point for user partition 1"
+	default "/mnt/part1"
+	---help---
+		Directory where filesystem should be mounted.
+
+		Note: not all filesystems can be mounted. rawfs and
+		mtdconfig for example cannot be mounted. In that case
+		this config will be ignored.
+
+config ARCH_BOARD_FLASH_PART1_FS
+	string
+	default "rawfs" if ARCH_BOARD_FLASH_PART1_FS_RAWFS
+	default "nxffs" if ARCH_BOARD_FLASH_PART1_FS_NXFFS
+	default "smartfs" if ARCH_BOARD_FLASH_PART1_FS_SMARTFS
+	default "mtdconfig" if ARCH_BOARD_FLASH_PART1_FS_MTDCONFIG
+
+choice
+	prompt "Filesystem of user partition 1"
+	default ARCH_BOARD_FLASH_PART1_FS_RAW
+
+config ARCH_BOARD_FLASH_PART1_FS_RAWFS
+	bool "rawfs"
+	---help---
+		Raw block device /dev/mtdblockN will be available to use
+		with standard open(2)/fopen(3) functions.
+
+config ARCH_BOARD_FLASH_PART1_FS_NXFFS
+	select FS_NXFFS
+	bool "nxffs"
+	---help---
+		Partition will be used as nxffs. Only one nxffs partition
+		can be enabled at one given time!
+
+config ARCH_BOARD_FLASH_PART1_FS_SMARTFS
+	select FS_SMARTFS
+	select MTD_SMART
+	bool "smartfs"
+	---help---
+		Partition will be used as smartfs. After first flash, you
+		will have to format partition with "mksmartfs /dev/smartN"
+		command. This has to be done only once unless you change
+		partition table that would affect offsets and/or sizes.
+		Programmers (like openocd) should not touch this memory
+		when flashing new software, unless you exceeded reserved
+		memory for program code.
+
+		Smartfs uses quite substential ammount of FLASH data to
+		get to workable state and mount. Looks like 8 page sizes
+		is absolute minimum (so a 16KiB!).
+
+config ARCH_BOARD_FLASH_PART1_FS_MTDCONFIG
+	select MTD_CONFIG
+	bool "mtdconfig"
+	---help---
+		Purpose build filesystem to hold application's configuration.
+		It's not a filesystem per se, as it cannot be mounted and
+		setting and retrieving configuration is done via ioctl(2)
+		calls.
+
+endchoice # Filesystem of user partition 1
+
+config ARCH_BOARD_FLASH_PART2_SIZE
+	int "Size of user partition 2"
+	default 0
+
+if ARCH_BOARD_FLASH_PART2_SIZE > 0
+
+config ARCH_BOARD_FLASH_PART2_NAME
+	string "Name of user partition 2"
+	default "part2"
+
+config ARCH_BOARD_FLASH_PART2_MNT
+	string "Mount point for user partition 2"
+	default "/mnt/part2"
+
+config ARCH_BOARD_FLASH_PART2_FS
+	string
+	default "rawfs" if ARCH_BOARD_FLASH_PART2_FS_RAWFS
+	default "nxffs" if ARCH_BOARD_FLASH_PART2_FS_NXFFS
+	default "smartfs" if ARCH_BOARD_FLASH_PART2_FS_SMARTFS
+	default "mtdconfig" if ARCH_BOARD_FLASH_PART2_FS_MTDCONFIG
+
+choice
+	prompt "Filesystem of user partition 2"
+	default ARCH_BOARD_FLASH_PART2_FS_RAW
+
+config ARCH_BOARD_FLASH_PART2_FS_RAWFS
+	bool "rawfs"
+
+config ARCH_BOARD_FLASH_PART2_FS_NXFFS
+	select FS_NXFFS
+	bool "nxffs"
+
+config ARCH_BOARD_FLASH_PART2_FS_SMARTFS
+	select FS_SMARTFS
+	select MTD_SMART
+	bool "smartfs"
+
+config ARCH_BOARD_FLASH_PART2_FS_MTDCONFIG
+	select MTD_CONFIG
+	bool "mtdconfig"
+
+endchoice # Filesystem of user partition 2
+
+config ARCH_BOARD_FLASH_PART3_SIZE
+	int "Size of user partition 3"
+	default 0
+
+if ARCH_BOARD_FLASH_PART3_SIZE > 0
+
+config ARCH_BOARD_FLASH_PART3_NAME
+	string "Name of user partition 3"
+	default "part3"
+
+config ARCH_BOARD_FLASH_PART3_MNT
+	string "Mount point for user partition 3"
+	default "/mnt/part3"
+
+config ARCH_BOARD_FLASH_PART3_FS
+	string
+	default "rawfs" if ARCH_BOARD_FLASH_PART3_FS_RAWFS
+	default "nxffs" if ARCH_BOARD_FLASH_PART3_FS_NXFFS
+	default "smartfs" if ARCH_BOARD_FLASH_PART3_FS_SMARTFS
+	default "mtdconfig" if ARCH_BOARD_FLASH_PART3_FS_MTDCONFIG
+
+choice
+	prompt "Filesystem of user partition 3"
+	default ARCH_BOARD_FLASH_PART3_FS_RAW
+
+config ARCH_BOARD_FLASH_PART3_FS_RAWFS
+	bool "rawfs"
+
+config ARCH_BOARD_FLASH_PART3_FS_NXFFS
+	select FS_NXFFS
+	bool "nxffs"
+
+config ARCH_BOARD_FLASH_PART3_FS_SMARTFS
+	select FS_SMARTFS
+	select MTD_SMART
+	bool "smartfs"
+
+config ARCH_BOARD_FLASH_PART3_FS_MTDCONFIG
+	select MTD_CONFIG
+	bool "mtdconfig"
+
+endchoice # Filesystem of user partition 3
+
+config ARCH_BOARD_FLASH_PART4_SIZE
+	int "Size of user partition 4"
+	default 0
+
+if ARCH_BOARD_FLASH_PART4_SIZE > 0
+
+config ARCH_BOARD_FLASH_PART4_NAME
+	string "Name of user partition 4"
+	default "part4"
+
+config ARCH_BOARD_FLASH_PART4_MNT
+	string "Mount point for user partition 4"
+	default "/mnt/part4"
+
+config ARCH_BOARD_FLASH_PART4_FS
+	string
+	default "rawfs" if ARCH_BOARD_FLASH_PART4_FS_RAWFS
+	default "nxffs" if ARCH_BOARD_FLASH_PART4_FS_NXFFS
+	default "smartfs" if ARCH_BOARD_FLASH_PART4_FS_SMARTFS
+	default "mtdconfig" if ARCH_BOARD_FLASH_PART4_FS_MTDCONFIG
+
+choice
+	prompt "Filesystem of user partition 4"
+	default ARCH_BOARD_FLASH_PART4_FS_RAW
+
+config ARCH_BOARD_FLASH_PART4_FS_RAWFS
+	bool "rawfs"
+
+config ARCH_BOARD_FLASH_PART4_FS_NXFFS
+	select FS_NXFFS
+	bool "nxffs"
+
+config ARCH_BOARD_FLASH_PART4_FS_SMARTFS
+	select FS_SMARTFS
+	select MTD_SMART
+	bool "smartfs"
+
+config ARCH_BOARD_FLASH_PART4_FS_MTDCONFIG
+	select MTD_CONFIG
+	bool "mtdconfig"
+
+endchoice # Filesystem of user partition 4
+
+endif # ARCH_BOARD_FLASH_PART2_SIZE > 0
+endif # ARCH_BOARD_FLASH_PART3_SIZE > 0
+endif # ARCH_BOARD_FLASH_PART4_SIZE > 0
+
+endif # ARCH_BOARD_FLASH_MOUNT
+
+if LCD_SSD1680 && ARCH_BOARD_NUCLEO_WL55JC
+
+menu "E-ink SSD1680 pins config"
+
+choice
+	prompt "Port that handles Chip Select line (output)"
+	default SSD1680_GPIO_CS_PORTA if ARCH_BOARD_NUCLEO_WL55JC
+
+config SSD1680_GPIO_CS_DISABLED
+	bool "Not available"
+
+config SSD1680_GPIO_CS_PORTA
+	bool "Port A"
+
+config SSD1680_GPIO_CS_PORTB
+	bool "Port B"
+
+config SSD1680_GPIO_CS_PORTC
+	bool "Port C"
+
+config SSD1680_GPIO_CS_PORTD
+	bool "Port D"
+
+endchoice
+
+if SSD1680_GPIO_CS_PORTA || SSD1680_GPIO_CS_PORTB || SSD1680_GPIO_CS_PORTC || SSD1680_GPIO_CS_PORTD
+config SSD1680_GPIO_PIN_CS
+	int "Pin that select the chip on SPI bus (output)"
+	default "4" if ARCH_BOARD_NUCLEO_WL55JC
+	range 0 15
+endif #SSD1680_GPIO_CS_PORTA || SSD1680_GPIO_CS_PORTB || SSD1680_GPIO_CS_PORTC || SSD1680_GPIO_CS_PORTD
+
+choice
+	prompt "Port that handles Data/!Command line"
+	default SSD1680_GPIO_DTA_CMD_PORTA if ARCH_BOARD_NUCLEO_WL55JC
+
+config SSD1680_GPIO_DTA_CMD_DISABLED
+	bool "Not available"
+
+config SSD1680_GPIO_DTA_CMD_PORTA
+	bool "Port A"
+
+config SSD1680_GPIO_DTA_CMD_PORTB
+	bool "Port B"
+
+config SSD1680_GPIO_DTA_CMD_PORTC
+	bool "Port C"
+
+config SSD1680_GPIO_DTA_CMD_PORTD
+	bool "Port D"
+
+endchoice
+
+if SSD1680_GPIO_DTA_CMD_PORTA || SSD1680_GPIO_DTA_CMD_PORTB || SSD1680_GPIO_DTA_CMD_PORTC || SSD1680_GPIO_DTA_CMD_PORTD
+config SSD1680_GPIO_PIN_DTA_CMD
+	int "Pin that switch between command and data on 4-wire SPI bus"
+	default "9" if ARCH_BOARD_NUCLEO_WL55JC
+	range 0 15
+endif #SSD1680_GPIO_DTA_CMD_PORTA || SSD1680_GPIO_DTA_CMD_PORTB || SSD1680_GPIO_DTA_CMD_PORTC || SSD1680_GPIO_DTA_CMD_PORTD
+
+choice
+	prompt "Port that handles reset line (output)"
+	default SSD1680_GPIO_RST_PORTC if ARCH_BOARD_NUCLEO_WL55JC
+
+config SSD1680_GPIO_RST_DISABLED
+	bool "Not available"
+
+config SSD1680_GPIO_RST_PORTA
+	bool "Port A"
+
+config SSD1680_GPIO_RST_PORTB
+	bool "Port B"
+
+config SSD1680_GPIO_RST_PORTC
+	bool "Port C"
+
+config SSD1680_GPIO_RST_PORTD
+	bool "Port D"
+endchoice
+
+if SSD1680_GPIO_RST_PORTA || SSD1680_GPIO_RST_PORTB || SSD1680_GPIO_RST_PORTC || SSD1680_GPIO_RST_PORTD
+config SSD1680_GPIO_PIN_RST
+	int "Pin that handles the reset line (output)"
+	default "2" if ARCH_BOARD_NUCLEO_WL55JC
+	range 0 15
+endif #SSD1680_GPIO_RST_PORTA || SSD1680_GPIO_RST_PORTB || SSD1680_GPIO_RST_PORTC || SSD1680_GPIO_RST_PORTD
+
+choice
+	prompt "Port that handles busy line (input)"
+	default SSD1680_GPIO_BUSY_PORTC if ARCH_BOARD_NUCLEO_WL55JC
+
+config SSD1680_GPIO_BUSY_DISABLED
+	bool "Not available"
+
+config SSD1680_GPIO_BUSY_PORTA
+	bool "Port A"
+
+config SSD1680_GPIO_BUSY_PORTB
+	bool "Port B"
+
+config SSD1680_GPIO_BUSY_PORTC
+	bool "Port C"
+
+config SSD1680_GPIO_BUSY_PORTD
+	bool "Port D"
+
+endchoice
+
+if SSD1680_GPIO_BUSY_PORTA || SSD1680_GPIO_BUSY_PORTB || SSD1680_GPIO_BUSY_PORTC || SSD1680_GPIO_BUSY_PORTD
+config SSD1680_GPIO_PIN_BUSY
+	int "Pin that handles the busy line (input)"
+	default "1" if ARCH_BOARD_NUCLEO_WL55JC
+	range 0 15
+endif #SSD1680_GPIO_BUSY_PORTA || SSD1680_GPIO_BUSY_PORTB || SSD1680_GPIO_BUSY_PORTC || SSD1680_GPIO_BUSY_PORTD
+
+choice
+	prompt "Port that handles power line"
+	default SSD1680_GPIO_PWR_DISABLED if ARCH_BOARD_NUCLEO_WL55JC
+
+config SSD1680_GPIO_PWR_DISABLED
+	bool "Not available"
+
+config SSD1680_GPIO_PWR_PORTA
+	bool "Port A"
+
+config SSD1680_GPIO_PWR_PORTB
+	bool "Port B"
+
+config SSD1680_GPIO_PWR_PORTC
+	bool "Port C"
+
+config SSD1680_GPIO_PWR_PORTD
+	bool "Port D"
+
+endchoice
+
+if SSD1680_GPIO_PWR_PORTA || SSD1680_GPIO_PWR_PORTB || SSD1680_GPIO_PWR_PORTC || SSD1680_GPIO_PWR_PORTD
+config SSD1680_GPIO_PIN_PWR
+	int "Pin that handles the pwr on/off line (output)"
+	range 0 31
+endif #SSD1680_GPIO_PWR_PORTA || SSD1680_GPIO_PWR_PORTB || SSD1680_GPIO_PWR_PORTC || SSD1680_GPIO_PWR_PORTD
+
+
+config SSD1680_SPI_BUS
+	int "Spi bus no"
+	range 1 2
+	default "1"
+endmenu
+
+endif #LCD_SSD1680
+
+endif # ARCH_BOARD_NUCLEO_WL55JC

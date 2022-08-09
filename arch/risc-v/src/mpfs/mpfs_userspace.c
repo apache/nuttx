@@ -41,17 +41,20 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define PMP_UFLASH_FLAGS    (PMPCFG_A_NAPOT | PMPCFG_X | PMPCFG_R)
-#define PMP_USRAM_FLAGS     (PMPCFG_A_NAPOT | PMPCFG_W | PMPCFG_R)
-
 /* Physical and virtual addresses to page tables (vaddr = paddr mapping) */
 
-#define PGT_L1_PBASE        (uint64_t)&m_l1_pgtable
-#define PGT_L2_PBASE        (uint64_t)&m_l2_pgtable
-#define PGT_L3_PBASE        (uint64_t)&m_l3_pgtable
-#define PGT_L1_VBASE        PGT_L1_PBASE
-#define PGT_L2_VBASE        PGT_L2_PBASE
-#define PGT_L3_VBASE        PGT_L3_PBASE
+#define PGT_L1_PBASE    (uint64_t)&m_l1_pgtable
+#define PGT_L2_PBASE    (uint64_t)&m_l2_pgtable
+#define PGT_L3_ROMPBASE (uint64_t)&m_l3_romtbl
+#define PGT_L3_RAMPBASE (uint64_t)&m_l3_ramtbl
+#define PGT_L1_VBASE    PGT_L1_PBASE
+#define PGT_L2_VBASE    PGT_L2_PBASE
+#define PGT_L3_ROMVBASE PGT_L3_ROMPBASE
+#define PGT_L3_RAMVBASE PGT_L3_RAMPBASE
+
+#define PGT_L1_SIZE     (512)  /* Enough to map 512 GiB */
+#define PGT_L2_SIZE     (512)  /* Enough to map 1 GiB */
+#define PGT_L3_SIZE     (512)  /* Enough to map 2 MiB */
 
 /****************************************************************************
  * Private Functions
@@ -80,6 +83,24 @@ static void configure_mpu(void);
 static void configure_mmu(void);
 
 /****************************************************************************
+ * Name: map_region
+ *
+ * Description:
+ *   Map a region of physical memory to the L3 page table
+ *
+ * Input Parameters:
+ *   l3base - L3 page table physical base address
+ *   paddr - Beginning of the physical address mapping
+ *   vaddr - Beginning of the virtual address mapping
+ *   size - Size of the region in bytes
+ *   mmuflags - The MMU flags to use in the mapping
+ *
+ ****************************************************************************/
+
+static void map_region(uintptr_t l3base, uintptr_t paddr, uintptr_t vaddr,
+                       size_t size, uint32_t mmuflags);
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -92,9 +113,13 @@ static void configure_mmu(void);
 
 /* L1-L3 tables must be in memory always for this to work */
 
-static uint64_t             m_l1_pgtable[512] locate_data(".pgtables");
-static uint64_t             m_l2_pgtable[512] locate_data(".pgtables");
-static uint64_t             m_l3_pgtable[512] locate_data(".pgtables");
+static uint64_t         m_l1_pgtable[PGT_L1_SIZE] locate_data(".pgtables");
+static uint64_t         m_l2_pgtable[PGT_L2_SIZE] locate_data(".pgtables");
+
+/* Allocate separate tables for ROM/RAM mappings */
+
+static uint64_t         m_l3_romtbl[PGT_L3_SIZE]  locate_data(".pgtables");
+static uint64_t         m_l3_ramtbl[PGT_L3_SIZE]  locate_data(".pgtables");
 
 /****************************************************************************
  * Public Functions
@@ -162,68 +187,10 @@ void mpfs_userspace(void)
 
 static void configure_mpu(void)
 {
-  /* Configure the PMP to permit user-space access to its ROM and RAM.
-   *
-   * Note: PMP by default revokes access, thus if different privilege modes
-   * are in use, the user space _must_ be granted access here, otherwise
-   * an exception will fire when the user space task is started.
-   *
-   * Note: according to the Polarfire reference manual, address bits [1:0]
-   * are not considered (due to 4 octet alignment), so strictly they don't
-   * have to be cleared here.
-   *
-   * Note: do not trust the stext / etc sections to be correctly aligned
-   * here, they should be but it is simpler and safer to handle the user
-   * region as a whole
-   *
-   * Access is currently granted by simply adding each userspace memory area
-   * to PMP, without further granularity.
-   *
-   * "RX" for the user progmem
-   * "RW" for the user RAM area
-   *
-   */
+  /* Open everything for PMP */
 
-  int ret;
-  int idx;
-
-  /* First, test access to user flash */
-
-  ret = riscv_check_pmp_access(PMP_UFLASH_FLAGS, UFLASH_START, UFLASH_SIZE);
-
-  /* No access or partial access means we must crash */
-
-  DEBUGASSERT(ret != PMP_ACCESS_DENIED);
-
-  if (ret == PMP_ACCESS_OFF)
-    {
-      idx = riscv_next_free_pmp_region();
-      DEBUGASSERT(idx >= 0);
-      riscv_config_pmp_region(idx, PMP_UFLASH_FLAGS, UFLASH_START,
-                              UFLASH_SIZE);
-    }
-
-  /* Then, test access to user RAM */
-
-  ret = riscv_check_pmp_access(PMP_USRAM_FLAGS, USRAM_START, USRAM_SIZE);
-  DEBUGASSERT(ret != PMP_ACCESS_DENIED);
-  if (ret == PMP_ACCESS_OFF)
-    {
-      idx = riscv_next_free_pmp_region();
-      DEBUGASSERT(idx >= 0);
-      riscv_config_pmp_region(idx, PMP_USRAM_FLAGS, USRAM_START, USRAM_SIZE);
-    }
-
-  /* The supervisor must have access to the page tables */
-
-  ret = riscv_check_pmp_access(PMP_USRAM_FLAGS, KSRAM_START, KSRAM_SIZE);
-  DEBUGASSERT(ret != PMP_ACCESS_DENIED);
-  if (ret == PMP_ACCESS_OFF)
-    {
-      idx = riscv_next_free_pmp_region();
-      DEBUGASSERT(idx >= 0);
-      riscv_config_pmp_region(idx, PMP_USRAM_FLAGS, KSRAM_START, KSRAM_SIZE);
-    }
+  WRITE_CSR(pmpaddr0, UINT64_C(~0));
+  WRITE_CSR(pmpcfg0, (PMPCFG_A_NAPOT | PMPCFG_R | PMPCFG_W | PMPCFG_X));
 }
 
 /****************************************************************************
@@ -241,22 +208,56 @@ static void configure_mmu(void)
 
   /* Setup the L3 references for executable memory */
 
-  mmu_ln_map_region(3, PGT_L3_VBASE, UFLASH_START, UFLASH_START,
-                    UFLASH_SIZE, MMU_UTEXT_FLAGS);
+  map_region(PGT_L3_ROMPBASE, UFLASH_START, UFLASH_START, UFLASH_SIZE,
+             MMU_UTEXT_FLAGS);
 
   /* Setup the L3 references for data memory */
 
-  mmu_ln_map_region(3, PGT_L3_VBASE, USRAM_START, USRAM_START,
-                    USRAM_SIZE, MMU_UDATA_FLAGS);
+  map_region(PGT_L3_RAMPBASE, USRAM_START, USRAM_START, USRAM_SIZE,
+             MMU_UDATA_FLAGS);
 
-  /* Setup the L2 and L1 references */
+  /* Connect the L1 and L2 page tables */
 
-  mmu_ln_setentry(2, PGT_L2_VBASE, PGT_L3_PBASE, UFLASH_START, PTE_G);
   mmu_ln_setentry(1, PGT_L1_VBASE, PGT_L2_PBASE, UFLASH_START, PTE_G);
 
   /* Enable MMU */
 
   mmu_enable(PGT_L1_PBASE, 0);
+}
+
+/****************************************************************************
+ * Name: map_region
+ *
+ * Description:
+ *   Map a region of physical memory to the L3 page table
+ *
+ * Input Parameters:
+ *   l3base - L3 page table physical base address
+ *   paddr - Beginning of the physical address mapping
+ *   vaddr - Beginning of the virtual address mapping
+ *   size - Size of the region in bytes
+ *   mmuflags - The MMU flags to use in the mapping
+ *
+ ****************************************************************************/
+
+static void map_region(uintptr_t l3base, uintptr_t paddr, uintptr_t vaddr,
+                       size_t size, uint32_t mmuflags)
+{
+  uintptr_t end_vaddr;
+
+  /* Map the region to the L3 table as a whole */
+
+  mmu_ln_map_region(3, l3base, paddr, vaddr, size, mmuflags);
+
+  /* Connect to L2 table */
+
+  end_vaddr = vaddr + size;
+  while (vaddr < end_vaddr)
+    {
+      mmu_ln_setentry(2, PGT_L2_VBASE, l3base, vaddr, PTE_G);
+      l3base += RV_MMU_L3_PAGE_SIZE;
+      vaddr += RV_MMU_L2_PAGE_SIZE;
+    }
 }
 
 #endif /* CONFIG_BUILD_PROTECTED */

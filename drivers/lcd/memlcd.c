@@ -139,9 +139,11 @@ static void memlcd_deselect(FAR struct spi_dev_s *spi);
 
 /* lcd data transfer methods */
 
-static int memlcd_putrun(fb_coord_t row, fb_coord_t col,
+static int memlcd_putrun(FAR struct lcd_dev_s *dev,
+                         fb_coord_t row, fb_coord_t col,
                          FAR const uint8_t * buffer, size_t npixels);
-static int memlcd_getrun(fb_coord_t row, fb_coord_t col,
+static int memlcd_getrun(FAR struct lcd_dev_s *dev,
+                         fb_coord_t row, fb_coord_t col,
                          FAR uint8_t * buffer, size_t npixels);
 
 /* lcd configuration */
@@ -383,6 +385,7 @@ static int memlcd_extcominisr(int irq, FAR void *context, void *arg)
  *   This method can be used to write a partial raster line to the LCD.
  *
  * Input Parameters:
+ *   dev     - The lcd device
  *   row     - Starting row to write to (range: 0 <= row < yres)
  *   col     - Starting column to write to (range: 0 <= col <= xres-npixels)
  *   buffer  - The buffer containing the run to be written to the LCD
@@ -391,10 +394,11 @@ static int memlcd_extcominisr(int irq, FAR void *context, void *arg)
  *
  ****************************************************************************/
 
-static int memlcd_putrun(fb_coord_t row, fb_coord_t col,
+static int memlcd_putrun(FAR struct lcd_dev_s *dev,
+                         fb_coord_t row, fb_coord_t col,
                          FAR const uint8_t * buffer, size_t npixels)
 {
-  FAR struct memlcd_dev_s *mlcd = (FAR struct memlcd_dev_s *)&g_memlcddev;
+  FAR struct memlcd_dev_s *mlcd = (FAR struct memlcd_dev_s *)dev;
   uint16_t cmd;
   uint8_t *p;
   uint8_t *pfb;
@@ -475,6 +479,7 @@ static int memlcd_putrun(fb_coord_t row, fb_coord_t col,
  * Description:
  *   This method can be used to read a partial raster line from the LCD.
  *
+ *  dev     - The lcd device
  *  row     - Starting row to read from (range: 0 <= row < yres)
  *  col     - Starting column to read read (range: 0 <= col <= xres-npixels)
  *  buffer  - The buffer in which to return the run read from the LCD
@@ -483,10 +488,11 @@ static int memlcd_putrun(fb_coord_t row, fb_coord_t col,
  *
  ****************************************************************************/
 
-static int memlcd_getrun(fb_coord_t row, fb_coord_t col,
+static int memlcd_getrun(FAR struct lcd_dev_s *dev,
+                         fb_coord_t row, fb_coord_t col,
                          FAR uint8_t * buffer, size_t npixels)
 {
-  FAR struct memlcd_dev_s *mlcd = (FAR struct memlcd_dev_s *)&g_memlcddev;
+  FAR struct memlcd_dev_s *mlcd = (FAR struct memlcd_dev_s *)dev;
   uint8_t *p;
   uint8_t *pfb;
   uint8_t usrmask;
@@ -574,6 +580,7 @@ static int memlcd_getplaneinfo(FAR struct lcd_dev_s *dev,
   DEBUGASSERT(pinfo && planeno == 0);
   lcdinfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
+  pinfo->dev = dev;
   return OK;
 }
 

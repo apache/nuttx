@@ -208,10 +208,12 @@ static void st7735_fill(FAR struct st7735_dev_s *dev, uint16_t color);
 
 /* LCD Data Transfer Methods */
 
-static int st7735_putrun(fb_coord_t row, fb_coord_t col,
+static int st7735_putrun(FAR struct lcd_dev_s *dev,
+                         fb_coord_t row, fb_coord_t col,
                          FAR const uint8_t *buffer, size_t npixels);
 #ifndef CONFIG_LCD_NOGETRUN
-static int st7735_getrun(fb_coord_t row, fb_coord_t col,
+static int st7735_getrun(FAR struct lcd_dev_s *dev,
+                         fb_coord_t row, fb_coord_t col,
                          FAR uint8_t *buffer, size_t npixels);
 #endif
 
@@ -520,6 +522,7 @@ static void st7735_fill(FAR struct st7735_dev_s *dev, uint16_t color)
  * Description:
  *   This method can be used to write a partial raster line to the LCD:
  *
+ *   dev     - The lcd device
  *   row     - Starting row to write to (range: 0 <= row < yres)
  *   col     - Starting column to write to (range: 0 <= col <= xres-npixels)
  *   buffer  - The buffer containing the run to be written to the LCD
@@ -528,10 +531,11 @@ static void st7735_fill(FAR struct st7735_dev_s *dev, uint16_t color)
  *
  ****************************************************************************/
 
-static int st7735_putrun(fb_coord_t row, fb_coord_t col,
+static int st7735_putrun(FAR struct lcd_dev_s *dev,
+                         fb_coord_t row, fb_coord_t col,
                          FAR const uint8_t *buffer, size_t npixels)
 {
-  FAR struct st7735_dev_s *priv = &g_lcddev;
+  FAR struct st7735_dev_s *priv = (FAR struct st7735_dev_s *)dev;
   FAR const uint16_t *src = (FAR const uint16_t *)buffer;
 
   ginfo("row: %d col: %d npixels: %d\n", row, col, npixels);
@@ -558,10 +562,11 @@ static int st7735_putrun(fb_coord_t row, fb_coord_t col,
  ****************************************************************************/
 
 #ifndef CONFIG_LCD_NOGETRUN
-static int st7735_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
-                         size_t npixels)
+static int st7735_getrun(FAR struct lcd_dev_s *dev,
+                         fb_coord_t row, fb_coord_t col,
+                         FAR uint8_t *buffer, size_t npixels)
 {
-  FAR struct st7735_dev_s *priv = &g_lcddev;
+  FAR struct st7735_dev_s *priv = (FAR struct st7735_dev_s *)dev;
   FAR uint16_t *dest = (FAR uint16_t *)buffer;
 
   ginfo("row: %d col: %d npixels: %d\n", row, col, npixels);
@@ -619,6 +624,7 @@ static int st7735_getplaneinfo(FAR struct lcd_dev_s *dev,
 #endif
   pinfo->buffer = (FAR uint8_t *)priv->runbuffer; /* Run scratch buffer */
   pinfo->bpp    = priv->bpp;                      /* Bits-per-pixel */
+  pinfo->dev    = dev;                            /* The lcd device */
   return OK;
 }
 

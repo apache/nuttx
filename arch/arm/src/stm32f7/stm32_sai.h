@@ -69,6 +69,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
+typedef uint32_t (*stm32_sai_sampleratecb_t)(struct i2s_dev_s *dev,
+                                             uint32_t rate);
+
 /****************************************************************************
  * Name: stm32_sai_initialize
  *
@@ -83,7 +86,8 @@ extern "C"
  *
  ****************************************************************************/
 
-struct i2s_dev_s *stm32_sai_initialize(int intf);
+struct i2s_dev_s *stm32_sai_initialize(int intf,
+                  stm32_sai_sampleratecb_t sampleratecb);
 
 #undef EXTERN
 #ifdef __cplusplus

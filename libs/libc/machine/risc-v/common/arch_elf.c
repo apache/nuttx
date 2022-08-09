@@ -202,7 +202,7 @@ static void _calc_imm(long offset, long *imm_hi, long *imm_lo)
  *
  ****************************************************************************/
 
-bool up_checkarch(FAR const Elf_Ehdr *ehdr)
+bool up_checkarch(const Elf_Ehdr *ehdr)
 {
   /* Make sure it's an RISCV executable */
 
@@ -270,14 +270,13 @@ bool up_checkarch(FAR const Elf_Ehdr *ehdr)
  *
  ****************************************************************************/
 
-int up_relocate(FAR const Elf_Rel *rel, FAR const Elf_Sym *sym,
-                uintptr_t addr)
+int up_relocate(const Elf_Rel *rel, const Elf_Sym *sym, uintptr_t addr)
 {
   berr("Not implemented\n");
   return -ENOSYS;
 }
 
-int up_relocateadd(FAR const Elf_Rela *rel, FAR const Elf_Sym *sym,
+int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
                    uintptr_t addr)
 {
   long offset;

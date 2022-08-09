@@ -25,7 +25,7 @@
  * Included Files
  ****************************************************************************/
 
-#include "riscv_internal.h"
+#include "riscv_common_memorymap.h"
 #include "hardware/fe310_memorymap.h"
 #include "hardware/fe310_uart.h"
 #include "hardware/fe310_clint.h"

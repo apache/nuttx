@@ -59,7 +59,7 @@
 
 int board_mpl115a_initialize(int devno, int busno)
 {
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
   char devpath[12];
   int ret;
 

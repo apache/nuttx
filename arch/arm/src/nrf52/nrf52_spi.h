@@ -48,7 +48,7 @@
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *nrf52_spibus_initialize(int port);
+struct spi_dev_s *nrf52_spibus_initialize(int port);
 
 /****************************************************************************
  * Name:  nrf52_spi0/1/...select and nrf52_spi0/1/...status
@@ -81,31 +81,31 @@ FAR struct spi_dev_s *nrf52_spibus_initialize(int port);
  ****************************************************************************/
 
 #ifdef CONFIG_NRF52_SPI0_MASTER
-void nrf52_spi0select(FAR struct spi_dev_s *dev, uint32_t devid,
+void nrf52_spi0select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected);
-uint8_t nrf52_spi0status(FAR struct spi_dev_s *dev, uint32_t devid);
-int nrf52_spi0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+uint8_t nrf52_spi0status(struct spi_dev_s *dev, uint32_t devid);
+int nrf52_spi0cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 #ifdef CONFIG_NRF52_SPI1_MASTER
-void nrf52_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
+void nrf52_spi1select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected);
-uint8_t nrf52_spi1status(FAR struct spi_dev_s *dev, uint32_t devid);
-int nrf52_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+uint8_t nrf52_spi1status(struct spi_dev_s *dev, uint32_t devid);
+int nrf52_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 #ifdef CONFIG_NRF52_SPI2_MASTER
-void nrf52_spi2select(FAR struct spi_dev_s *dev, uint32_t devid,
+void nrf52_spi2select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected);
-uint8_t nrf52_spi2status(FAR struct spi_dev_s *dev, uint32_t devid);
-int nrf52_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+uint8_t nrf52_spi2status(struct spi_dev_s *dev, uint32_t devid);
+int nrf52_spi2cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 #ifdef CONFIG_NRF52_SPI3_MASTER
-void nrf52_spi3select(FAR struct spi_dev_s *dev, uint32_t devid,
+void nrf52_spi3select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected);
-uint8_t nrf52_spi3status(FAR struct spi_dev_s *dev, uint32_t devid);
-int nrf52_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+uint8_t nrf52_spi3status(struct spi_dev_s *dev, uint32_t devid);
+int nrf52_spi3cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 /****************************************************************************
@@ -130,23 +130,23 @@ int nrf52_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 
 #ifdef CONFIG_SPI_CALLBACK
 #ifdef CONFIG_NRF52_SPI0_MASTER
-int nrf52_spi0register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
-                       FAR void *arg);
+int nrf52_spi0register(struct spi_dev_s *dev, spi_mediachange_t callback,
+                       void *arg);
 #endif
 
 #ifdef CONFIG_NRF52_SPI1_MASTER
-int nrf52_spi1register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
-                       FAR void *arg);
+int nrf52_spi1register(struct spi_dev_s *dev, spi_mediachange_t callback,
+                       void *arg);
 #endif
 
 #ifdef CONFIG_NRF52_SPI2_MASTER
-int nrf52_spi2register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
-                       FAR void *arg);
+int nrf52_spi2register(struct spi_dev_s *dev, spi_mediachange_t callback,
+                       void *arg);
 #endif
 
 #ifdef CONFIG_NRF52_SPI3_MASTER
-int nrf52_spi3register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
-                       FAR void *arg);
+int nrf52_spi3register(struct spi_dev_s *dev, spi_mediachange_t callback,
+                       void *arg);
 #endif
 #endif
 

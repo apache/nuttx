@@ -380,7 +380,7 @@ int stm32l4_mmcsd_initialize(int minor);
  ****************************************************************************/
 
 #ifdef CONFIG_TIMER
-int board_timer_driver_initialize(FAR const char *devpath, int timer);
+int board_timer_driver_initialize(const char *devpath, int timer);
 #endif
 
 /****************************************************************************
@@ -392,7 +392,7 @@ int board_timer_driver_initialize(FAR const char *devpath, int timer);
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_QENCODER
-int stm32l4_qencoder_initialize(FAR const char *devpath, int timer);
+int stm32l4_qencoder_initialize(const char *devpath, int timer);
 #endif
 
 /****************************************************************************
@@ -416,7 +416,7 @@ int stm32l4_cc1101_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_AS726X
-int stm32_as726xinitialize(FAR const char *devpath);
+int stm32_as726xinitialize(const char *devpath);
 #endif
 
 /****************************************************************************
@@ -428,7 +428,7 @@ int stm32_as726xinitialize(FAR const char *devpath);
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_BMP180
-int stm32_bmp180initialize(FAR const char *devpath);
+int stm32_bmp180initialize(const char *devpath);
 #endif
 
 #endif /* __BOARDS_ARM_STM32L4_NUCLEO_L476RG_SRC_NUCLEO_L476RG_H */

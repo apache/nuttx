@@ -706,7 +706,6 @@ out:
 
 static int net_rpmsg_drv_ifup(FAR struct net_driver_s *dev)
 {
-  FAR struct net_rpmsg_drv_s *priv = dev->d_private;
   struct net_rpmsg_ifup_s msg =
   {
   };

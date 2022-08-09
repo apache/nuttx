@@ -55,9 +55,10 @@
 void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *iob,
                     unsigned int len, unsigned int offset)
 {
-  if (!(dev && len > 0 && len < NETDEV_PKTSIZE(dev)))
+  if (dev == NULL || len == 0 || len >= NETDEV_PKTSIZE(dev))
     {
-      nerr("devif_iob_send error, %p, send len: %d\n", dev, len);
+      nerr("devif_iob_send error, %p, send len: %u, pkt len: %u\n",
+                                          dev, len, NETDEV_PKTSIZE(dev));
       return;
     }
 

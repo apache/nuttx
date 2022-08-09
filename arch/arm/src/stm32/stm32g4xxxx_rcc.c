@@ -497,7 +497,7 @@ static inline void rcc_enableapb1(void)
   regval |= RCC_APB1ENR1_I2C2EN;
 #endif
 
-#if defined(CONFIG_STM32_USB)
+#if defined(CONFIG_STM32_USB) || defined(CONFIG_STM32_USBFS)
   regval |= RCC_APB1ENR1_USBEN;
 #endif
 

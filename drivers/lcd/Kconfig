@@ -100,6 +100,30 @@ config LCD_MAXPOWER
 
 comment "Graphic LCD Devices"
 
+config LCD_APA102
+	bool "APA102 RGB LED MATRIX as LCD"
+	depends on SPI
+	default n
+
+if LCD_APA102
+	config LCD_APA102_XRES
+		int "APA102 X Resolution"
+		default 16
+		---help---
+			Specifies the X resolution of the LCD.
+
+	config LCD_APA102_YRES
+		int "APA102 Y Resolution"
+		default 16
+		---help---
+			Specifies the Y resolution of the LCD.
+
+	config LCD_APA102_FREQUENCY
+		int "SPI Frequency"
+		default 1000000
+
+endif # LCD_APA102
+
 config LCD_P14201
 	bool "Rit P1402 series display"
 	default n
@@ -323,10 +347,50 @@ config LCD_HILETGO
 		LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.
 		LCD_MAXPOWER should be 1:  0=off, 1=on
 
+config LCD_SSD1306_CUSTOM
+	bool "Custom SSD1306-controlled OLED Display Module"
+	default n
+	select LCD_SSD1306
+	---help---
+		Custom OLED Display Module,
+		controlled by the Solomon Tech SSD1306 LCD controller.
+
+if LCD_SSD1306_CUSTOM
+
+config LCD_SSD1306_CUSTOM_DEV_NATIVE_XRES 
+	int "Custom LCD native X-resolution"
+	default 128
+
+config LCD_SSD1306_CUSTOM_DEV_NATIVE_YRES 
+	int "Custom LCD native Y-resolution"
+	default 32
+
+config LCD_SSD1306_CUSTOM_DEV_XOFFSET 
+	int "Custom LCD X-offset"
+	default 0
+
+config LCD_SSD1306_CUSTOM_DEV_PAGES 
+	int "Custom LCD number of pages"
+	default 4
+
+config LCD_SSD1306_CUSTOM_DEV_CMNPAD 
+	int "Custom LCD COM configuration (cmnpad)"
+	default 2
+
+endif # LCD_SSD1306_CUSTOM
+
 config LCD_SSD1306
 	bool
 
 if LCD_SSD1306
+
+config SSD1306_NUMDEVS
+	int "Number of SSD1306 displays"
+	range 1 256
+	default 1
+	---help---
+		Specifies the number of SSD1306 devices present on the respective board.
+		Currently only multiple displays of the same type are supported.
 
 choice
 	prompt "SSD1306 Interface"
@@ -383,6 +447,12 @@ config SSD1306_I2CFREQ
 		I2C Frequency to communicate with SSD1306
 
 endif # LCD_SSD1306_I2C
+
+config SSD1306_POWEROFF_RECONFIGURE
+	bool "Reconfigure SSD1306 after power off"
+	default n
+	---help---
+		Forces a (re)configuration of the SSD1306 after calling power off.
 
 config LCD_SSD1351
 	bool "SSD1351 OLED Display Module"
@@ -1470,6 +1540,54 @@ config LCD_FT80X_AUDIO_GPIO
 		output.
 
 endif # LCD_FT80X
+
+config LCD_SSD1680
+	bool "SSD1680 E-PAPER Single Chip Driver"
+	default n
+	select SPI_CMDDATA
+	---help---
+		e-paper Display Module based on SSD1680 controller.
+
+		Required SPI driver settings:
+		SPI_CMDDATA - Include support for cmd/data selection.
+
+
+if LCD_SSD1680
+
+choice
+	prompt "Display type and size"
+	default LCD_SSD1680_2_90
+
+config LCD_SSD1680_2_13_V2
+	bool "2.13 inch 122/250 mono v2"
+
+config LCD_SSD1680_2_13_RED
+	bool "2.13 inch 122/250 tri color (red)"
+
+config LCD_SSD1680_2_90
+	bool "2.9 inch 128/296 mono"
+
+config LCD_SSD1680_2_90_RED
+	bool "2.9 inch 128/296 tri color (red)"
+
+endchoice # Display size
+
+config SSD1680_SPIMODE
+	int "SSD1680 SPI Mode"
+	default 0
+	range 0 3
+	---help---
+		Selects the SPI mode used with the SSD1680 device
+
+config SSD1680_FREQUENCY
+	int "SSD1680 SPI Frequency"
+	default 5000000
+	range 100000 20000000
+	---help---
+		Selects the SPI bus frequency used with the SSD1680 device. 
+		Max for read mode is 2.5 MHz, for write mode is 20 HHz
+endif # LCD_SSD1680
+
 
 endmenu # LCD Driver selection
 endif # LCD

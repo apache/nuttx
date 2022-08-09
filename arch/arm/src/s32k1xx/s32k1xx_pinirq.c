@@ -106,7 +106,7 @@ static struct s32k1xx_pinirq_s g_porteisrs[32];
  ****************************************************************************/
 
 #ifdef HAVE_PORTINTS
-static int s32k1xx_portinterrupt(int irq, FAR void *context,
+static int s32k1xx_portinterrupt(int irq, void *context,
                                  uintptr_t addr,
                                  struct s32k1xx_pinirq_s *isrtab)
 {
@@ -167,7 +167,7 @@ static int s32k1xx_portinterrupt(int irq, FAR void *context,
  ****************************************************************************/
 
 #ifdef CONFIG_S32K1XX_PORTAINTS
-static int s32k1xx_portainterrupt(int irq, FAR void *context, FAR void *arg)
+static int s32k1xx_portainterrupt(int irq, void *context, void *arg)
 {
   return s32k1xx_portinterrupt(irq, context, S32K1XX_PORTA_ISFR,
                                g_portaisrs);
@@ -175,7 +175,7 @@ static int s32k1xx_portainterrupt(int irq, FAR void *context, FAR void *arg)
 #endif
 
 #ifdef CONFIG_S32K1XX_PORTBINTS
-static int s32k1xx_portbinterrupt(int irq, FAR void *context, FAR void *arg)
+static int s32k1xx_portbinterrupt(int irq, void *context, void *arg)
 {
   return s32k1xx_portinterrupt(irq, context, S32K1XX_PORTB_ISFR,
                                g_portbisrs);
@@ -183,7 +183,7 @@ static int s32k1xx_portbinterrupt(int irq, FAR void *context, FAR void *arg)
 #endif
 
 #ifdef CONFIG_S32K1XX_PORTCINTS
-static int s32k1xx_portcinterrupt(int irq, FAR void *context, FAR void *arg)
+static int s32k1xx_portcinterrupt(int irq, void *context, void *arg)
 {
   return s32k1xx_portinterrupt(irq, context, S32K1XX_PORTC_ISFR,
                                g_portcisrs);
@@ -191,7 +191,7 @@ static int s32k1xx_portcinterrupt(int irq, FAR void *context, FAR void *arg)
 #endif
 
 #ifdef CONFIG_S32K1XX_PORTDINTS
-static int s32k1xx_portdinterrupt(int irq, FAR void *context, FAR void *arg)
+static int s32k1xx_portdinterrupt(int irq, void *context, void *arg)
 {
   return s32k1xx_portinterrupt(irq, context, S32K1XX_PORTD_ISFR,
                                g_portdisrs);
@@ -199,7 +199,7 @@ static int s32k1xx_portdinterrupt(int irq, FAR void *context, FAR void *arg)
 #endif
 
 #ifdef CONFIG_S32K1XX_PORTEINTS
-static int s32k1xx_porteinterrupt(int irq, FAR void *context, FAR void *arg)
+static int s32k1xx_porteinterrupt(int irq, void *context, void *arg)
 {
   return s32k1xx_portinterrupt(irq, context, S32K1XX_PORTE_ISFR,
                                g_porteisrs);

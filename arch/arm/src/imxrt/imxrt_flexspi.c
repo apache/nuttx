@@ -79,7 +79,7 @@ struct imxrt_flexspidev_s
 
 static int imxrt_flexspi_lock(struct flexspi_dev_s *dev, bool lock);
 static int imxrt_flexspi_transfer_blocking(struct flexspi_dev_s *dev,
-                                      FAR struct flexspi_transfer_s *xfer);
+                                      struct flexspi_transfer_s *xfer);
 static void imxrt_flexspi_software_reset(struct flexspi_dev_s *dev);
 static void imxrt_flexspi_update_lut(struct flexspi_dev_s *dev,
                                      uint32_t index,

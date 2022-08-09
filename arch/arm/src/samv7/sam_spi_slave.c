@@ -136,7 +136,7 @@ static void     spi_semtake_noncancelable(struct sam_spidev_s *priv);
 
 /* Interrupt Handling */
 
-static int      spi_interrupt(int irq, void *context, FAR void *arg);
+static int      spi_interrupt(int irq, void *context, void *arg);
 
 /* SPI Helpers */
 
@@ -154,7 +154,7 @@ static void     spi_bind(struct spi_slave_ctrlr_s *ctrlr,
                          int nbits);
 static void     spi_unbind(struct spi_slave_ctrlr_s *ctrlr);
 static int      spi_enqueue(struct spi_slave_ctrlr_s *ctrlr,
-                            FAR const void *data, size_t len);
+                            const void *data, size_t len);
 static bool     spi_qfull(struct spi_slave_ctrlr_s *ctrlr);
 static void     spi_qflush(struct spi_slave_ctrlr_s *ctrlr);
 
@@ -399,7 +399,7 @@ static void spi_semtake_noncancelable(struct sam_spidev_s *priv)
  *
  ****************************************************************************/
 
-static int spi_interrupt(int irq, void *context, FAR void *arg)
+static int spi_interrupt(int irq, void *context, void *arg)
 {
   struct sam_spidev_s *priv = (struct sam_spidev_s *)arg;
   uint32_t sr;
@@ -773,7 +773,7 @@ static void spi_bind(struct spi_slave_ctrlr_s *ctrlr,
   struct sam_spidev_s *priv = (struct sam_spidev_s *)ctrlr;
   uint32_t regval;
   int ret;
-  FAR const void *data;
+  const void *data;
 
   spiinfo("dev=%p mode=%d nbits=%d\n", sdv, mode, nbits);
 
@@ -940,7 +940,7 @@ static void spi_unbind(struct spi_slave_ctrlr_s *ctrlr)
  ****************************************************************************/
 
 static int spi_enqueue(struct spi_slave_ctrlr_s *ctrlr,
-                       FAR const void *data, size_t len)
+                       const void *data, size_t len)
 {
   struct sam_spidev_s *priv = (struct sam_spidev_s *)ctrlr;
   irqstate_t flags;

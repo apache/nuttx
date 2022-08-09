@@ -34,6 +34,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <inttypes.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
@@ -172,6 +173,12 @@
 #define STATUS_SRP_MASK      (1 << 7) /* Bit 7: Status register protect 0 */
 #define STATUS_SRP_UNLOCKED  (0 << 7) /*   see blow for details           */
 #define STATUS_SRP_LOCKED    (1 << 7) /*   see blow for details           */
+
+/* Status register 2 bit definitions                                      */
+
+#define STATUS2_QE_MASK      (1 << 1) /* Bit 1: Quad Enable (QE)          */
+#define STATUS2_QE_DISABLED  (0 << 1) /*  0 = Standard/Dual SPI modes     */
+#define STATUS2_QE_ENABLED   (1 << 1) /*  1 = Standard/Dual/Quad modes    */
 
 /* Some chips have four protect bits                                      */
 
@@ -353,6 +360,7 @@ static void w25qxxxjv_write_volcfg(FAR struct w25qxxxjv_dev_s *priv);
 #endif
 static void w25qxxxjv_write_enable(FAR struct w25qxxxjv_dev_s *priv);
 static void w25qxxxjv_write_disable(FAR struct w25qxxxjv_dev_s *priv);
+static void w25qxxxjv_quad_enable(FAR struct w25qxxxjv_dev_s *priv);
 
 static int  w25qxxxjv_readid(FAR struct w25qxxxjv_dev_s *priv);
 static int  w25qxxxjv_protect(FAR struct w25qxxxjv_dev_s *priv,
@@ -592,6 +600,29 @@ static void w25qxxxjv_write_disable(FAR struct w25qxxxjv_dev_s *priv)
       status = w25qxxxjv_read_status(priv);
     }
   while ((status & STATUS_WEL_MASK) != STATUS_WEL_DISABLED);
+}
+
+/****************************************************************************
+ * Name:  w25qxxxjv_quad_enable
+ ****************************************************************************/
+
+static void w25qxxxjv_quad_enable(FAR struct w25qxxxjv_dev_s *priv)
+{
+  w25qxxxjv_command_read(priv->qspi, W25QXXXJV_READ_STATUS_2,
+                         (FAR void *)priv->cmdbuf, 1);
+
+  if ((priv->cmdbuf[0] & STATUS2_QE_MASK) != STATUS2_QE_ENABLED)
+    {
+      w25qxxxjv_write_enable(priv);
+
+      priv->cmdbuf[0] &= ~STATUS2_QE_MASK;
+      priv->cmdbuf[1] |= STATUS2_QE_ENABLED;
+
+      w25qxxxjv_command_write(priv->qspi, W25QXXXJV_WRITE_STATUS_2,
+                              (FAR const void *)priv->cmdbuf, 1);
+
+      w25qxxxjv_write_disable(priv);
+    }
 }
 
 /****************************************************************************
@@ -976,7 +1007,7 @@ static int w25qxxxjv_write_page(struct w25qxxxjv_dev_s *priv,
 
       if (ret < 0)
         {
-          ferr("ERROR: QSPI_MEMORY failed writing address=%06x\n",
+          ferr("ERROR: QSPI_MEMORY failed writing address=%06"PRIxOFF"\n",
                address);
           return ret;
         }
@@ -1582,6 +1613,10 @@ FAR struct mtd_dev_s *w25qxxxjv_initialize(FAR struct qspi_dev_s *qspi,
               ferr("ERROR: Sector unprotect failed\n");
             }
         }
+
+      /* Enable Quad SPI mode, if not already enabled. */
+
+      w25qxxxjv_quad_enable(priv);
 
 #ifdef CONFIG_W25QXXXJV_SECTOR512  /* Simulate a 512 byte sector */
       /* Allocate a buffer for the erase block cache */

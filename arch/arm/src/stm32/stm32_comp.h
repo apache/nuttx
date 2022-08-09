@@ -76,7 +76,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct comp_dev_s *stm32_compinitialize(int intf);
+struct comp_dev_s *stm32_compinitialize(int intf);
 
 #undef EXTERN
 #ifdef __cplusplus

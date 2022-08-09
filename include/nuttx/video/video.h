@@ -172,6 +172,24 @@ extern "C"
 
 #define V4SIOC_S_EXT_CTRLS_SCENE      _VIDIOC(0x001a)
 
+/* Query device capability
+ * Address pointing to struct v4l2_capability
+ */
+
+#define VIDIOC_QUERYCAP               _VIDIOC(0x001b)
+
+/* Set clip
+ * Address pointing to struct v4l2_selection
+ */
+
+#define VIDIOC_S_SELECTION            _VIDIOC(0x001c)
+
+/* Get clip
+ * Address pointing to struct v4l2_selection
+ */
+
+#define VIDIOC_G_SELECTION            _VIDIOC(0x001d)
+
 #define VIDEO_HSIZE_QVGA        (320)   /* QVGA    horizontal size */
 #define VIDEO_VSIZE_QVGA        (240)   /* QVGA    vertical   size */
 #define VIDEO_HSIZE_VGA         (640)   /* VGA     horizontal size */
@@ -237,6 +255,53 @@ extern "C"
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* V4L2 device capabilities for VIDIOC_QUERYCAP.
+ * Currently, only member "driver" is supported.
+ */
+
+struct v4l2_capability
+{
+  uint8_t  driver[16];   /* name of driver module(e.g. "bttv" */
+  uint8_t  card[32];     /* name of the card(e.g. "Yoyodyne TV/FM" */
+  uint8_t  bus_info[32]; /* name of the bus(e.g. "PCI:0000:05:06.0" */
+  uint32_t version;      /* version number of the driver */
+  uint32_t capabilities; /* Available capabilities of the physical device */
+  uint32_t device_caps;  /* Device capabilities of the opened device */
+};
+
+/* Rectangle information */
+
+struct v4l2_rect
+{
+  /* Horizontal offset of the top, left corner of the rectangle, in pixels. */
+
+  int32_t left;
+
+  /* Vertical offset of the top, left corner of the rectangle, in pixels. */
+
+  int32_t top;
+
+  /* Width of the rectangle, in pixels. */
+
+  uint32_t width;
+
+  /* Height of the rectangle, in pixels. */
+
+  uint32_t height;
+};
+
+/* V4L2 selection info for VIDIOC_S_SELECTION and VIDIOC_G_SELECTION.
+ * Currently, only member type and r are supported.
+ */
+
+struct v4l2_selection
+{
+  uint32_t type;       /* Buffer type */
+  uint32_t target;
+  uint32_t flags;
+  struct v4l2_rect r;  /* The selection rectangle. */
+};
 
 /* Buffer type.
  *  Currently, support only V4L2_BUF_TYPE_VIDEO_CAPTURE and

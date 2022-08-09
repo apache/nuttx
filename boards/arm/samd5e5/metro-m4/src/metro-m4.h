@@ -143,7 +143,7 @@ void sam_automount_event(bool inserted);
 #endif
 
 #ifdef CONFIG_SAMD5E5_SERCOM5_ISI2C
-FAR struct i2c_master_s *g_i2c5_dev;
+struct i2c_master_s *g_i2c5_dev;
 int metro_m4_i2cdev_initialize(void);
 #endif
 
@@ -152,7 +152,7 @@ int sam_smartfs_initialize(void);
 #endif
 
 #ifdef CONFIG_BQ27426
-int sam_bq27426_initialize(FAR const char *devname);
+int sam_bq27426_initialize(const char *devname);
 #endif
 
 #ifdef CONFIG_DEV_GPIO

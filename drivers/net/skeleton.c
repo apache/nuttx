@@ -80,6 +80,10 @@
 
 #define SKELETON_TXTIMEOUT (60*CLK_TCK)
 
+/* Packet buffer size */
+
+#define PKTBUF_SIZE (MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE)
+
 /* This is a helper pointer for accessing the contents of Ethernet header */
 
 #define BUF ((FAR struct eth_hdr_s *)priv->sk_dev.d_buf)
@@ -124,7 +128,7 @@ struct skel_driver_s
  * allocated dynamically in cases where more than one are needed.
  */
 
-static uint8_t g_pktbuf[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
+static uint16_t g_pktbuf[CONFIG_SKELETON_NINTERFACES][(PKTBUF_SIZE + 1) / 2];
 
 /* Driver state structure */
 
@@ -1070,18 +1074,18 @@ int skel_initialize(int intf)
   /* Initialize the driver structure */
 
   memset(priv, 0, sizeof(struct skel_driver_s));
-  priv->sk_dev.d_buf     = g_pktbuf;      /* Single packet buffer */
-  priv->sk_dev.d_ifup    = skel_ifup;     /* I/F up (new IP address) callback */
-  priv->sk_dev.d_ifdown  = skel_ifdown;   /* I/F down callback */
-  priv->sk_dev.d_txavail = skel_txavail;  /* New TX data callback */
+  priv->sk_dev.d_buf     = (FAR uint8_t *)g_pktbuf[intf]; /* Single packet buffer */
+  priv->sk_dev.d_ifup    = skel_ifup;                     /* I/F up (new IP address) callback */
+  priv->sk_dev.d_ifdown  = skel_ifdown;                   /* I/F down callback */
+  priv->sk_dev.d_txavail = skel_txavail;                  /* New TX data callback */
 #ifdef CONFIG_NET_MCASTGROUP
-  priv->sk_dev.d_addmac  = skel_addmac;   /* Add multicast MAC address */
-  priv->sk_dev.d_rmmac   = skel_rmmac;    /* Remove multicast MAC address */
+  priv->sk_dev.d_addmac  = skel_addmac;                   /* Add multicast MAC address */
+  priv->sk_dev.d_rmmac   = skel_rmmac;                    /* Remove multicast MAC address */
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
-  priv->sk_dev.d_ioctl   = skel_ioctl;    /* Handle network IOCTL commands */
+  priv->sk_dev.d_ioctl   = skel_ioctl;                    /* Handle network IOCTL commands */
 #endif
-  priv->sk_dev.d_private = g_skel;        /* Used to recover private state from dev */
+  priv->sk_dev.d_private = g_skel;                        /* Used to recover private state from dev */
 
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling skel_ifdown().

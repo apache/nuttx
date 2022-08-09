@@ -1037,14 +1037,34 @@ static int esp32c3_i2c_transfer(struct i2c_master_s *dev,
 
       esp32c3_i2c_init_clock(priv, msgs[i].frequency);
 
-      /* Reset I2C trace logic */
+#ifndef CONFIG_I2C_POLLED
+      if ((msgs[i].flags & I2C_M_NOSTART) != 0)
+        {
+          esp32c3_i2c_traceevent(priv, I2CEVENT_SENDBYTE, priv->bytes,
+                                 getreg32(I2C_SR_REG(priv->id)));
+          esp32c3_i2c_senddata(priv);
 
-      esp32c3_i2c_tracereset(priv);
+          if (priv->bytes == msgs[i].length)
+            {
+              priv->i2cstate = I2CSTATE_STOP;
+              if ((msgs[i].flags & I2C_M_NOSTOP) != 0)
+                {
+                  priv->i2cstate = I2CSTATE_FINISH;
+                }
+            }
+        }
+      else
+#endif
+        {
+          /* Reset I2C trace logic */
 
-      esp32c3_i2c_traceevent(priv, I2CEVENT_SENDADDR, msgs[i].addr,
-                             getreg32(I2C_SR_REG(priv->id)));
+          esp32c3_i2c_tracereset(priv);
 
-      esp32c3_i2c_sendstart(priv);
+          esp32c3_i2c_traceevent(priv, I2CEVENT_SENDADDR, msgs[i].addr,
+                                 getreg32(I2C_SR_REG(priv->id)));
+
+          esp32c3_i2c_sendstart(priv);
+        }
 
 #ifndef CONFIG_I2C_POLLED
       if (esp32c3_i2c_sem_waitdone(priv) < 0)
@@ -1454,6 +1474,12 @@ static inline void esp32c3_i2c_process(struct esp32c3_i2c_priv_s *priv,
               if (priv->bytes == msg->length)
                 {
                   priv->i2cstate = I2CSTATE_STOP;
+#ifndef CONFIG_I2C_POLLED
+                  if ((msg->flags & I2C_M_NOSTOP) != 0)
+                    {
+                      priv->i2cstate = I2CSTATE_FINISH;
+                    }
+#endif
                 }
             }
         }

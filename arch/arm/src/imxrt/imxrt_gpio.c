@@ -570,7 +570,7 @@ static int imxrt_gpio_configinput(gpio_pinset_t pinset)
 {
   int port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   int pin  = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
-  FAR const uint8_t *table;
+  const uint8_t *table;
   iomux_pinset_t ioset;
   uintptr_t regaddr;
   unsigned int index;

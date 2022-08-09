@@ -57,7 +57,7 @@ struct stm32_hall3ph_cfg_s
  *
  ****************************************************************************/
 
-int stm32_hall3ph_initialize(FAR const char *devpath,
-                             FAR struct stm32_hall3ph_cfg_s *cfg);
+int stm32_hall3ph_initialize(const char *devpath,
+                             struct stm32_hall3ph_cfg_s *cfg);
 
 #endif /* __ARCH_ARM_SRC_STM32_STM32_HALL3PH_H */

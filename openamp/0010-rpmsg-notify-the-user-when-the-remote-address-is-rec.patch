@@ -1,0 +1,71 @@
+From 442ccb015805eb5f7d700f80db9893d319ce5781 Mon Sep 17 00:00:00 2001
+From: ligd <liguiding1@xiaomi.com>
+Date: Tue, 19 Oct 2021 19:45:14 +0800
+Subject: [PATCH 10/12] rpmsg: notify the user when the remote address is
+ received
+
+Change-Id: I2f0601fb38944e0cfb8888aa397740161b159e40
+Signed-off-by: ligd <liguiding1@xiaomi.com>
+---
+ lib/include/openamp/rpmsg.h | 4 ++++
+ lib/rpmsg/rpmsg_virtio.c    | 9 +++++++--
+ 2 files changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/lib/include/openamp/rpmsg.h open-amp/lib/include/openamp/rpmsg.h
+index 6f546e5..10d4f5b 100644
+--- a/lib/include/openamp/rpmsg.h
++++ open-amp/lib/include/openamp/rpmsg.h
+@@ -57,6 +57,7 @@ struct rpmsg_device;
+ /* Returns positive value on success or negative error value on failure */
+ typedef int (*rpmsg_ept_cb)(struct rpmsg_endpoint *ept, void *data,
+ 			    size_t len, uint32_t src, void *priv);
++typedef void (*rpmsg_ns_bound_cb)(struct rpmsg_endpoint *ept);
+ typedef void (*rpmsg_ns_unbind_cb)(struct rpmsg_endpoint *ept);
+ typedef void (*rpmsg_ns_bind_cb)(struct rpmsg_device *rdev,
+ 				 const char *name, uint32_t dest);
+@@ -69,6 +70,8 @@ typedef void (*rpmsg_ns_bind_cb)(struct rpmsg_device *rdev,
+  * @dest_addr: address of the default remote endpoint binded.
+  * @cb: user rx callback, return value of this callback is reserved
+  *      for future use, for now, only allow RPMSG_SUCCESS as return value.
++ * @ns_bound_cb: end point service bound callback, called when remote
++ *                ept address is received.
+  * @ns_unbind_cb: end point service unbind callback, called when remote
+  *                ept is destroyed.
+  * @node: end point node.
+@@ -83,6 +86,7 @@ struct rpmsg_endpoint {
+ 	uint32_t addr;
+ 	uint32_t dest_addr;
+ 	rpmsg_ept_cb cb;
++	rpmsg_ns_bound_cb ns_bound_cb;
+ 	rpmsg_ns_unbind_cb ns_unbind_cb;
+ 	struct metal_list node;
+ 	void *priv;
+diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
+index 4f26b01..e55e135 100644
+--- a/lib/rpmsg/rpmsg_virtio.c
++++ open-amp/lib/rpmsg/rpmsg_virtio.c
+@@ -598,14 +598,19 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
+ 			_ept->dest_addr = dest;
+ 			metal_mutex_release(&rdev->lock);
+ 			if (_ept->name[0] && rdev->support_ack)
+-				rpmsg_send_ns_message(_ept,
+-						      RPMSG_NS_CREATE_ACK);
++				rpmsg_send_ns_message(_ept, RPMSG_NS_CREATE_ACK);
++			/* notify application that the endpoint has been bound */
++			if (_ept->ns_bound_cb)
++				_ept->ns_bound_cb(_ept);
+ 		}
+ 	} else { /* RPMSG_NS_CREATE_ACK */
+ 		/* save the received destination address */
+ 		if (_ept)
+ 			_ept->dest_addr = dest;
+ 		metal_mutex_release(&rdev->lock);
++		/* notify application that the endpoint has been bound */
++		if (_ept && _ept->ns_bound_cb)
++			_ept->ns_bound_cb(_ept);
+ 	}
+ 
+ 	return RPMSG_SUCCESS;
+-- 
+2.25.1
+

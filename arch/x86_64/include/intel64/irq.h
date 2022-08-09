@@ -29,12 +29,13 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #  include <stdbool.h>
 #  include <arch/arch.h>
 #  include <time.h>
-#  include <nuttx/config.h>
 #endif
 
 /****************************************************************************
@@ -192,6 +193,195 @@ struct xcptcontext
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
+
+static inline void setgdt(void *gdt, int size)
+{
+  struct gdt_ptr_s gdt_ptr;
+  gdt_ptr.limit = size;
+  gdt_ptr.base = (uintptr_t)gdt;
+
+  asm volatile ("lgdt %0"::"m"(gdt_ptr):"memory");
+}
+
+static inline void setidt(void *idt, int size)
+{
+  struct idt_ptr_s idt_ptr;
+  idt_ptr.limit = size;
+  idt_ptr.base = (uintptr_t)idt;
+
+  asm volatile ("lidt %0"::"m"(idt_ptr):"memory");
+}
+
+static inline uint64_t rdtsc(void)
+{
+  uint32_t lo;
+  uint32_t hi;
+
+  asm volatile("rdtscp" : "=a" (lo), "=d" (hi)::"memory");
+  return (uint64_t)lo | (((uint64_t)hi) << 32);
+}
+
+static inline uint64_t _rdtsc(void)
+{
+  uint32_t lo;
+  uint32_t hi;
+
+  asm volatile("rdtsc" : "=a" (lo), "=d" (hi)::"memory");
+  return (uint64_t)lo | (((uint64_t)hi) << 32);
+}
+
+static inline void set_pcid(uint64_t pcid)
+{
+    if (pcid < 4095)
+      {
+        asm volatile("mov %%cr3, %%rbx; andq $-4096, %%rbx; or %0, "
+                     "%%rbx; mov %%rbx, %%cr3;"
+                     ::"g"(pcid):"memory", "rbx", "rax");
+      }
+}
+
+static inline unsigned long read_msr(unsigned int msr)
+{
+  uint32_t low;
+  uint32_t high;
+
+  asm volatile("rdmsr" : "=a" (low), "=d" (high) : "c" (msr));
+  return low | ((unsigned long)high << 32);
+}
+
+static inline void write_msr(unsigned int msr, unsigned long val)
+{
+  asm volatile("wrmsr"
+    : /* no output */
+    : "c" (msr), "a" (val), "d" (val >> 32)
+    : "memory");
+}
+
+static inline uint64_t read_fsbase(void)
+{
+    uint64_t val;
+  asm volatile("rdfsbase %0"
+    : "=r" (val)
+    : /* no output */
+    : "memory");
+
+    return val;
+}
+
+static inline void write_fsbase(unsigned long val)
+{
+  asm volatile("wrfsbase %0"
+    : /* no output */
+    : "r" (val)
+    : "memory");
+}
+
+static inline uint64_t read_gsbase(void)
+{
+    uint64_t val;
+  asm volatile("rdgsbase %0"
+    : "=r" (val)
+    : /* no output */
+    : "memory");
+
+    return val;
+}
+
+static inline void write_gsbase(unsigned long val)
+{
+  asm volatile("wrgsbase %0"
+    : /* no output */
+    : "r" (val)
+    : "memory");
+}
+
+/* Return stack pointer */
+
+static inline uint64_t up_getsp(void)
+{
+  uint64_t regval;
+
+  asm volatile(
+    "\tmovq %%rsp, %0\n"
+    : "=rm" (regval)
+    :
+    : "memory");
+  return regval;
+}
+
+/* Get segment registers */
+
+static inline uint32_t up_getds(void)
+{
+  uint32_t regval;
+
+  asm volatile(
+    "\tmov %%ds, %0\n"
+    : "=rm" (regval)
+    :
+    : "memory");
+  return regval;
+}
+
+static inline uint32_t up_getcs(void)
+{
+  uint32_t regval;
+
+  asm volatile(
+    "\tmov %%cs, %0\n"
+    : "=rm" (regval)
+    :
+    : "memory");
+  return regval;
+}
+
+static inline uint32_t up_getss(void)
+{
+  uint32_t regval;
+
+  asm volatile(
+    "\tmov %%ss, %0\n"
+    : "=rm" (regval)
+    :
+    : "memory");
+  return regval;
+}
+
+static inline uint32_t up_getes(void)
+{
+  uint32_t regval;
+
+  asm volatile(
+    "\tmov %%es, %0\n"
+    : "=rm" (regval)
+    :
+    : "memory");
+  return regval;
+}
+
+static inline uint32_t up_getfs(void)
+{
+  uint32_t regval;
+
+  asm volatile(
+    "\tmov %%fs, %0\n"
+    : "=rm" (regval)
+    :
+    : "memory");
+  return regval;
+}
+
+static inline uint32_t up_getgs(void)
+{
+  uint32_t regval;
+
+  asm volatile(
+    "\tmov %%gs, %0\n"
+    : "=rm" (regval)
+    :
+    : "memory");
+  return regval;
+}
 
 /* Name: up_irq_save, up_irq_restore, and friends.
  *

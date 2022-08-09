@@ -1,0 +1,49 @@
+############################################################################
+# libs/libxx/stdex.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+###########################################################################
+
+ETL_VERSION=20.32.1
+
+$(ETL_VERSION).tar.gz:
+	$(Q) curl -O -L https://github.com/ETLCPP/etl/archive/refs/tags/$(ETL_VERSION).tar.gz
+
+etl: $(ETL_VERSION).tar.gz
+	$(Q) tar -xf $(ETL_VERSION).tar.gz
+	$(Q) $(DELFILE) $(ETL_VERSION).tar.gz
+	$(Q) mv etl-$(ETL_VERSION) etl
+	$(Q) touch $@
+ifeq ($(CONFIG_ARCH_ARMV5M), y)
+	$(Q) cp $(CURDIR)/etl/include/etl/profiles/armv5_no_stl.h $(CURDIR)/etl/include/etl/etl_profile.h
+else ifeq ($(CONFIG_ARCH_ARMV6M), y)
+	$(Q) cp $(CURDIR)/etl/include/etl/profiles/armv6_no_stl.h $(CURDIR)/etl/include/etl/etl_profile.h
+else ifeq ($(CONFIG_ARCH_ARMV7M), y)
+	$(Q) cp $(CURDIR)/etl/include/etl/profiles/armv7_no_stl.h $(CURDIR)/etl/include/etl/etl_profile.h
+else
+	$(Q) cp $(CURDIR)/etl/include/etl/profiles/gcc_generic_no_stl.h $(CURDIR)/etl/include/etl/etl_profile.h
+endif
+
+$(TOPDIR)/include/etl: etl
+	$(Q) $(DIRLINK) $(CURDIR)/etl/include $(TOPDIR)/include/etl
+
+context:: $(TOPDIR)/include/etl
+
+distclean::
+	$(Q) $(DELFILE) $(ETL_VERSION).tar.gz
+	$(Q) $(DIRUNLINK) $(TOPDIR)/include/etl
+	$(call DELDIR, etl)

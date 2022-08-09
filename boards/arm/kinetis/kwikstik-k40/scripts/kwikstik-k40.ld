@@ -86,6 +86,18 @@ SECTIONS
         __exidx_end = ABSOLUTE(.);
     } > progflash
 
+    .tdata : {
+        _stdata = ABSOLUTE(.);
+        *(.tdata .tdata.* .gnu.linkonce.td.*);
+        _etdata = ABSOLUTE(.);
+    } > progflash
+
+    .tbss : {
+        _stbss = ABSOLUTE(.);
+        *(.tbss .tbss.* .gnu.linkonce.tb.* .tcommon);
+        _etbss = ABSOLUTE(.);
+    } > progflash
+
     .data : {
         _sdata = ABSOLUTE(.);
         *(.data .data.*)

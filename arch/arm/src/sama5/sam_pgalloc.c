@@ -91,11 +91,11 @@
  *
  ****************************************************************************/
 
-void up_allocate_pgheap(FAR void **heap_start, size_t *heap_size)
+void up_allocate_pgheap(void **heap_start, size_t *heap_size)
 {
   DEBUGASSERT(heap_start && heap_size);
 
-  *heap_start = (FAR void *)((uintptr_t)SAM_DDRCS_PSECTION +
+  *heap_start = (void *)((uintptr_t)SAM_DDRCS_PSECTION +
                              CONFIG_SAMA5_DDRCS_PGHEAP_OFFSET);
   *heap_size  = CONFIG_SAMA5_DDRCS_PGHEAP_SIZE;
 }

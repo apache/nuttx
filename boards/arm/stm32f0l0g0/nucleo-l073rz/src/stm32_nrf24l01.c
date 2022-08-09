@@ -48,7 +48,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int nrf24l01_irq_attach(xcpt_t isr, FAR void *arg);
+static int nrf24l01_irq_attach(xcpt_t isr, void *arg);
 static void nrf24l01_chip_enable(bool enable);
 
 /****************************************************************************
@@ -62,13 +62,13 @@ static struct nrf24l01_config_s nrf_cfg =
 };
 
 static xcpt_t g_isr;
-static FAR void *g_arg;
+static void *g_arg;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static int nrf24l01_irq_attach(xcpt_t isr, FAR void *arg)
+static int nrf24l01_irq_attach(xcpt_t isr, void *arg)
 {
   wlinfo("Attach IRQ\n");
   g_isr = isr;
@@ -89,7 +89,7 @@ static void nrf24l01_chip_enable(bool enable)
 
 int stm32_wlinitialize(void)
 {
-  FAR struct spi_dev_s *spidev;
+  struct spi_dev_s *spidev;
   int ret = OK;
 
   syslog(LOG_INFO, "Register the nRF24L01 module\n");

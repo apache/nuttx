@@ -195,7 +195,7 @@ efm32_get_descriptor(struct dma_channel_s *dmach, bool alt)
  *
  ****************************************************************************/
 
-static int efm32_dmac_interrupt(int irq, void *context, FAR void *arg)
+static int efm32_dmac_interrupt(int irq, void *context, void *arg)
 {
   struct dma_channel_s *dmach;
   unsigned int chndx;

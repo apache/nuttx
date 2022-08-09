@@ -57,7 +57,7 @@
 #define SAM_HSMCI_IDR_OFFSET          0x0048 /* Interrupt Disable Register */
 #define SAM_HSMCI_IMR_OFFSET          0x004c /* Interrupt Mask Register */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
 #  define SAM_HSMCI_DMA_OFFSET        0x0050 /* DMA Configuration Register */
 #endif
 
@@ -90,7 +90,7 @@
 #define SAM_HSMCI_IDR                 (SAM_HSMCI_BASE+SAM_HSMCI_IDR_OFFSET)
 #define SAM_HSMCI_IMR                 (SAM_HSMCI_BASE+SAM_HSMCI_IMR_OFFSET)
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
 #  define SAM_HSMCI_DMA               (SAM_HSMCI_BASE+SAM_HSMCI_DMA_OFFSET)
 #endif
 
@@ -140,7 +140,7 @@
 #  define HSMCI_MR_PDCMODE            (1 << 15) /* Bit 15: PDC-oriented Mode */
 #endif
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
 #  define HSMCI_MR_BLKLEN_SHIFT       (16)      /* Bits 16-31: Data Block Length */
 #  define HSMCI_MR_BLKLEN_MASK        (0xffff << HSMCI_MR_BLKLEN_SHIFT)
 #endif
@@ -297,7 +297,7 @@
 #define HSMCI_INT_DTOE                (1 << 22) /* Bit 22: Data Time-out Error */
 #define HSMCI_INT_CSTOE               (1 << 23) /* Bit 23: Completion Signal Time-out Error */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
 #  define HSMCI_INT_BLKOVRE           (1 << 24) /* Bit 24: DMA Block Overrun Error */
 #  define HSMCI_INT_DMADONE           (1 << 25) /* Bit 25: DMA Transfer done */
 #endif
@@ -311,7 +311,7 @@
 
 /* HSMCI DMA Configuration Register */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
 #  define HSMCI_DMA_OFFSET_SHIFT      (0)       /* Bits 0-1: DMA Write Buffer Offset */
 #  define HSMCI_DMA_OFFSET_MASK       (3 << HSMCI_DMA_OFFSET_SHIFT)
 #  define HSMCI_DMA_CHKSIZE           (1 << 4)  /* Bit 4:  DMA Channel Read and Write Chunk Size */

@@ -109,8 +109,8 @@ int up_cpu_paused(int cpu)
   sched_note_cpu_paused(tcb);
 #endif
 
-  /* Copy the CURRENT_REGS into the OLD TCB (otcb).  The co-processor state
-   * will be saved as part of the return from xtensa_irq_dispatch().
+  /* Save the current context at CURRENT_REGS into the TCB at the head
+   * of the assigned task list for this CPU.
    */
 
   xtensa_savestate(tcb->xcp.regs);

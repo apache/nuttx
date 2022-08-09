@@ -600,8 +600,8 @@ int devif_loopback(FAR struct net_driver_s *dev);
  *
  ****************************************************************************/
 
-void netdev_ifup(FAR struct net_driver_s *dev);
-void netdev_ifdown(FAR struct net_driver_s *dev);
+int netdev_ifup(FAR struct net_driver_s *dev);
+int netdev_ifdown(FAR struct net_driver_s *dev);
 
 /****************************************************************************
  * Carrier detection

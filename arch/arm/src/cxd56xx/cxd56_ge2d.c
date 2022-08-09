@@ -46,16 +46,14 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int ge2d_open(FAR struct file *filep);
-static int ge2d_close(FAR struct file *filep);
-static ssize_t ge2d_read(FAR struct file *filep, FAR char *buffer,
+static ssize_t ge2d_read(struct file *filep, char *buffer,
                          size_t len);
-static ssize_t ge2d_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t ge2d_write(struct file *filep, const char *buffer,
                           size_t len);
-static int ge2d_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int ge2d_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int ge2d_semtake(sem_t *id);
 static void ge2d_semgive(sem_t *id);
-static int ge2d_irqhandler(int irq, FAR void *context, FAR void *arg);
+static int ge2d_irqhandler(int irq, void *context, void *arg);
 
 /****************************************************************************
  * Private Data
@@ -63,12 +61,9 @@ static int ge2d_irqhandler(int irq, FAR void *context, FAR void *arg);
 
 static const struct file_operations g_ge2dfops =
 {
-  .open  = ge2d_open,
-  .close = ge2d_close,
   .read  = ge2d_read,
   .write = ge2d_write,
-  .seek  = NULL,
-  .ioctl = ge2d_ioctl,
+  .ioctl = ge2d_ioctl
 };
 
 static sem_t g_wait;
@@ -97,29 +92,11 @@ static void ge2d_semgive(sem_t *id)
 }
 
 /****************************************************************************
- * Name: ge2d_open
- ****************************************************************************/
-
-static int ge2d_open(FAR struct file *filep)
-{
-  return 0;
-}
-
-/****************************************************************************
- * Name: ge2d_close
- ****************************************************************************/
-
-static int ge2d_close(FAR struct file *filep)
-{
-  return 0;
-}
-
-/****************************************************************************
  * Name: ge2d_read
  ****************************************************************************/
 
-static ssize_t ge2d_read(FAR struct file *filep,
-                         FAR char *buffer,
+static ssize_t ge2d_read(struct file *filep,
+                         char *buffer,
                          size_t len)
 {
   return 0;
@@ -129,8 +106,7 @@ static ssize_t ge2d_read(FAR struct file *filep,
  * Name: ge2d_write
  ****************************************************************************/
 
-static ssize_t ge2d_write(FAR struct file *filep,
-                          FAR const char *buffer,
+static ssize_t ge2d_write(struct file *filep, const char *buffer,
                           size_t len)
 {
   uint32_t bits;
@@ -181,7 +157,7 @@ static ssize_t ge2d_write(FAR struct file *filep,
  * Name: ge2d_ioctl
  ****************************************************************************/
 
-static int ge2d_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int ge2d_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
   int ret = -ENOTTY;
 
@@ -204,7 +180,7 @@ static int ge2d_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: ge2d_irqhandler
  ****************************************************************************/
 
-static int ge2d_irqhandler(int irq, FAR void *context, FAR void *arg)
+static int ge2d_irqhandler(int irq, void *context, void *arg)
 {
   uint32_t stat;
 
@@ -226,7 +202,7 @@ static int ge2d_irqhandler(int irq, FAR void *context, FAR void *arg)
  * Name: cxd56_ge2dinitialize
  ****************************************************************************/
 
-int cxd56_ge2dinitialize(FAR const char *devname)
+int cxd56_ge2dinitialize(const char *devname)
 {
   int ret;
 
@@ -256,7 +232,7 @@ int cxd56_ge2dinitialize(FAR const char *devname)
  * Name: cxd56_ge2duninitialize
  ****************************************************************************/
 
-void cxd56_ge2duninitialize(FAR const char *devname)
+void cxd56_ge2duninitialize(const char *devname)
 {
   up_disable_irq(CXD56_IRQ_GE2D);
   irq_detach(CXD56_IRQ_GE2D);

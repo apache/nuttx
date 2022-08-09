@@ -47,18 +47,18 @@ struct stm32_lowerhalf_s
    * half callback structure:
    */
 
-  FAR const struct hall3_ops_s *ops;  /* Lower half callback structure */
-  struct stm32_hall3ph_cfg_s    cfg;  /* Configuration */
+  const struct hall3_ops_s  *ops; /* Lower half callback structure */
+  struct stm32_hall3ph_cfg_s cfg; /* Configuration */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-int stm32_hall3ph_setup(FAR struct hall3_lowerhalf_s *lower);
-int stm32_hall3ph_shutdown(FAR struct hall3_lowerhalf_s *lower);
-int stm32_hall3ph_position(FAR struct hall3_lowerhalf_s *lower,
-                           FAR uint8_t *pos);
+int stm32_hall3ph_setup(struct hall3_lowerhalf_s *lower);
+int stm32_hall3ph_shutdown(struct hall3_lowerhalf_s *lower);
+int stm32_hall3ph_position(struct hall3_lowerhalf_s *lower,
+                           uint8_t *pos);
 
 /****************************************************************************
  * Private Data
@@ -83,9 +83,9 @@ struct hall3_ops_s g_hall3ph_ops =
  *
  ****************************************************************************/
 
-int stm32_hall3ph_setup(FAR struct hall3_lowerhalf_s *lower)
+int stm32_hall3ph_setup(struct hall3_lowerhalf_s *lower)
 {
-  FAR struct stm32_lowerhalf_s *priv = (FAR struct stm32_lowerhalf_s *)lower;
+  struct stm32_lowerhalf_s *priv = (struct stm32_lowerhalf_s *)lower;
 
   DEBUGASSERT(priv);
 
@@ -106,9 +106,9 @@ int stm32_hall3ph_setup(FAR struct hall3_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-int stm32_hall3ph_shutdown(FAR struct hall3_lowerhalf_s *lower)
+int stm32_hall3ph_shutdown(struct hall3_lowerhalf_s *lower)
 {
-  FAR struct stm32_lowerhalf_s *priv = (FAR struct stm32_lowerhalf_s *)lower;
+  struct stm32_lowerhalf_s *priv = (struct stm32_lowerhalf_s *)lower;
 
   DEBUGASSERT(priv);
 
@@ -129,15 +129,15 @@ int stm32_hall3ph_shutdown(FAR struct hall3_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-int stm32_hall3ph_position(FAR struct hall3_lowerhalf_s *lower,
-                           FAR uint8_t *pos)
+int stm32_hall3ph_position(struct hall3_lowerhalf_s *lower,
+                           uint8_t *pos)
 {
-  FAR struct stm32_lowerhalf_s *priv = (FAR struct stm32_lowerhalf_s *)lower;
-  uint8_t                       ha   = 0;
-  uint8_t                       hb   = 0;
-  uint8_t                       hc   = 0;
-  uint8_t                       i    = 0;
-  uint8_t                       thr  = (priv->cfg.samples / 2);
+  struct stm32_lowerhalf_s *priv = (struct stm32_lowerhalf_s *)lower;
+  uint8_t                   ha   = 0;
+  uint8_t                   hb   = 0;
+  uint8_t                   hc   = 0;
+  uint8_t                   i    = 0;
+  uint8_t                   thr  = (priv->cfg.samples / 2);
 
   DEBUGASSERT(priv);
 
@@ -171,15 +171,15 @@ int stm32_hall3ph_position(FAR struct hall3_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-int stm32_hall3ph_initialize(FAR const char *devpath,
-                             FAR struct stm32_hall3ph_cfg_s *cfg)
+int stm32_hall3ph_initialize(const char *devpath,
+                             struct stm32_hall3ph_cfg_s *cfg)
 {
-  FAR struct stm32_lowerhalf_s *priv = NULL;
-  int                           ret  = OK;
+  struct stm32_lowerhalf_s *priv = NULL;
+  int                       ret  = OK;
 
   /* Allocate the lower-half data structure */
 
-  priv = (FAR struct stm32_lowerhalf_s *)
+  priv = (struct stm32_lowerhalf_s *)
          kmm_zalloc(sizeof(struct stm32_lowerhalf_s));
   if (priv == NULL)
     {
@@ -198,7 +198,7 @@ int stm32_hall3ph_initialize(FAR const char *devpath,
 
   /* Initialize a Hall effect sensor interface. */
 
-  ret = hall3_register(devpath, (FAR struct hall3_lowerhalf_s *)priv);
+  ret = hall3_register(devpath, (struct hall3_lowerhalf_s *)priv);
   if (ret < 0)
     {
       snerr("ERROR: hall3ph_register failed: %d\n", ret);

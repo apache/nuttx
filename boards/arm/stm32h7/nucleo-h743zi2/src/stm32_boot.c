@@ -51,7 +51,7 @@
 void stm32_boardinitialize(void)
 {
 #ifdef CONFIG_SCHED_IRQMONITOR
-  up_perf_init((FAR void *)STM32_SYSCLK_FREQUENCY);
+  up_perf_init((void *)STM32_SYSCLK_FREQUENCY);
 #endif
 
 #ifdef CONFIG_ARCH_LEDS

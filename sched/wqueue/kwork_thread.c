@@ -80,7 +80,7 @@
 struct hp_wqueue_s g_hpwork =
 {
   {},
-  NXSEM_INITIALIZER(0, SEM_PRIO_NONE),
+  NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
 };
 
 #endif /* CONFIG_SCHED_HPWORK */
@@ -91,7 +91,7 @@ struct hp_wqueue_s g_hpwork =
 struct lp_wqueue_s g_lpwork =
 {
   {},
-  NXSEM_INITIALIZER(0, SEM_PRIO_NONE),
+  NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
 };
 
 #endif /* CONFIG_SCHED_LPWORK */

@@ -70,7 +70,7 @@ int board_ssd1306_initialize(int busno);
  *
  ****************************************************************************/
 
-FAR struct lcd_dev_s *board_ssd1306_getdev(void);
+struct lcd_dev_s *board_ssd1306_getdev(void);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -116,7 +116,7 @@ int board_app_initialize(uintptr_t arg)
   int ret;
 
 #ifdef NSH_HAVE_MMCSD
-  FAR struct sdio_dev_s *sdio;
+  struct sdio_dev_s *sdio;
 
   /* Mount the SDIO-based MMC/SD block driver */
 

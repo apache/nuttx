@@ -90,7 +90,7 @@ volatile bool g_rtc_enabled = false;
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int lpc54_rtc_interrupt(int irq, void *context, FAR void *arg)
+static int lpc54_rtc_interrupt(int irq, void *context, void *arg)
 {
   uint32_t status = getreg16(LPC54_RTC_CTRL);
 
@@ -191,7 +191,7 @@ time_t up_rtc_time(void)
  *
  ****************************************************************************/
 
-int up_rtc_settime(FAR const struct timespec *tp)
+int up_rtc_settime(const struct timespec *tp)
 {
   irqstate_t flags;
   uint32_t regval;
@@ -245,7 +245,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-int lpc54_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
+int lpc54_rtc_setalarm(const struct timespec *tp, alarmcb_t callback)
 {
   irqstate_t flags;
   uint32_t regval;
@@ -304,7 +304,7 @@ int lpc54_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-int lpc54_rtc_rdalarm(FAR struct tm *time)
+int lpc54_rtc_rdalarm(struct tm *time)
 {
   uint32_t match;
 

@@ -318,7 +318,7 @@ static const uint8_t g_gpio7_padmux[IMX_GPIO_NPINS] =
   IMX_PADMUX_INVALID,                /* GPIO6 Pin 31 */
 };
 
-static FAR const uint8_t *g_gpio_padmux[IMX_GPIO_NPORTS + 1] =
+static const uint8_t *g_gpio_padmux[IMX_GPIO_NPORTS + 1] =
 {
   g_gpio1_padmux,                    /* GPIO1 */
   g_gpio2_padmux,                    /* GPIO2 */
@@ -399,7 +399,7 @@ static int imx_gpio_configinput(gpio_pinset_t pinset)
 {
   int port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   int pin  = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
-  FAR const uint8_t *table;
+  const uint8_t *table;
   iomux_pinset_t ioset;
   uintptr_t regaddr;
   unsigned int index;

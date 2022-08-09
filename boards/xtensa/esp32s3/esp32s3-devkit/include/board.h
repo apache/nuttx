@@ -31,37 +31,10 @@
 
 #define BOARD_XTAL_FREQUENCY    40000000
 
-/* Clock reconfiguration is currently disabled, so the CPU will be running
- * at the XTAL frequency or at two times the XTAL frequency, depending upon
- * how we load the code:
- *
- * - If we load the code into FLASH at address 0x1000 where it is started by
- *   the second level bootloader, then the frequency is the crystal
- *   frequency.
- * - If we load the code into IRAM after the second level bootloader has run
- *   this frequency will be  twice the crystal frequency.
- *
- * Don't ask me for an explanation.
- */
-
-/* Note: The bootloader (esp-idf bootloader.bin) configures:
- *
- * - CPU frequency to 80MHz
- *
- * Reference:
- *     https://github.com/espressif/esp-idf/blob
- *           /ebf7e811b12e3c1e347340e5b9ec014e9c6319ba/components
- *           /bootloader_support/src/bootloader_clock_init.c#L26-L27
- */
-
-#ifdef CONFIG_ESP32S3_RUN_IRAM
-#  define BOARD_CLOCK_FREQUENCY (2 * BOARD_XTAL_FREQUENCY)
-#else
 #ifdef CONFIG_ESP32S3_DEFAULT_CPU_FREQ_MHZ
 #  define BOARD_CLOCK_FREQUENCY (CONFIG_ESP32S3_DEFAULT_CPU_FREQ_MHZ * 1000000)
 #else
 #  define BOARD_CLOCK_FREQUENCY 80000000
-#endif
 #endif
 
 /* LED definitions **********************************************************/

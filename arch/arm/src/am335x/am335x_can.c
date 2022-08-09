@@ -126,20 +126,20 @@ static void can_putreg(struct up_dev_s *priv, int offset, uint32_t value);
 
 /* CAN methods */
 
-static void can_reset(FAR struct can_dev_s *dev);
-static int can_setup(FAR struct can_dev_s *dev);
-static void can_shutdown(FAR struct can_dev_s *dev);
-static void can_rxint(FAR struct can_dev_s *dev, bool enable);
-static void can_txint(FAR struct can_dev_s *dev, bool enable);
-static int can_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg);
-static int can_remoterequest(FAR struct can_dev_s *dev, uint16_t id);
-static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg);
-static bool candev_txready(FAR struct can_dev_s *dev);
-static bool candev_txempty(FAR struct can_dev_s *dev);
+static void can_reset(struct can_dev_s *dev);
+static int can_setup(struct can_dev_s *dev);
+static void can_shutdown(struct can_dev_s *dev);
+static void can_rxint(struct can_dev_s *dev, bool enable);
+static void can_txint(struct can_dev_s *dev, bool enable);
+static int can_ioctl(struct can_dev_s *dev, int cmd, unsigned long arg);
+static int can_remoterequest(struct can_dev_s *dev, uint16_t id);
+static int can_send(struct can_dev_s *dev, struct can_msg_s *msg);
+static bool candev_txready(struct can_dev_s *dev);
+static bool candev_txempty(struct can_dev_s *dev);
 
 /* CAN interrupts */
 
-static int can_interrupt(int irq, FAR void *context, FAR void *arg);
+static int can_interrupt(int irq, void *context, void *arg);
 
 /* Message Processing */
 
@@ -357,9 +357,9 @@ static void can_putreg(struct up_dev_s *priv, int offset, uint32_t value)
  *
  ****************************************************************************/
 
-static void can_reset(FAR struct can_dev_s *dev)
+static void can_reset(struct can_dev_s *dev)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->cd_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->cd_priv;
 
   caninfo("CAN%d reset\n", priv->port);
 
@@ -387,9 +387,9 @@ static void can_reset(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static int can_setup(FAR struct can_dev_s *dev)
+static int can_setup(struct can_dev_s *dev)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *) dev->cd_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->cd_priv;
   uint32_t regval;
   uint8_t i;
   int ret = ERROR;
@@ -415,7 +415,7 @@ static int can_setup(FAR struct can_dev_s *dev)
     {
     }
 
-  ret = irq_attach(priv->irq, can_interrupt, (FAR void *)dev);
+  ret = irq_attach(priv->irq, can_interrupt, (void *)dev);
   if (ret == OK)
     {
       up_enable_irq(priv->irq);
@@ -445,9 +445,9 @@ static int can_setup(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static void can_shutdown(FAR struct can_dev_s *dev)
+static void can_shutdown(struct can_dev_s *dev)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *) dev->cd_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->cd_priv;
   uint32_t regval;
 
   caninfo("CAN%d\n", priv->port);
@@ -488,9 +488,9 @@ static void can_shutdown(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static void can_rxint(FAR struct can_dev_s *dev, bool enable)
+static void can_rxint(struct can_dev_s *dev, bool enable)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *) dev->cd_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->cd_priv;
 
   if (enable == true)
     {
@@ -520,7 +520,7 @@ static void can_rxint(FAR struct can_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static void can_txint(FAR struct can_dev_s *dev, bool enable)
+static void can_txint(struct can_dev_s *dev, bool enable)
 {
   /* The TX interrupt is automatically enabled in can_send within a
    * message object.
@@ -541,7 +541,7 @@ static void can_txint(FAR struct can_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static int can_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
+static int can_ioctl(struct can_dev_s *dev, int cmd, unsigned long arg)
 {
   caninfo("Fix me:Not Implemented\n");
   return 0;
@@ -561,7 +561,7 @@ static int can_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int can_remoterequest(FAR struct can_dev_s *dev, uint16_t id)
+static int can_remoterequest(struct can_dev_s *dev, uint16_t id)
 {
   caninfo("Fix me:Not Implemented\n");
   return 0;
@@ -590,9 +590,9 @@ static int can_remoterequest(FAR struct can_dev_s *dev, uint16_t id)
  *
  ****************************************************************************/
 
-static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
+static int can_send(struct can_dev_s *dev, struct can_msg_s *msg)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *) dev->cd_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->cd_priv;
   uint32_t regval;
   uint32_t num;
   uint32_t id;
@@ -686,9 +686,9 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
  *
  ****************************************************************************/
 
-static bool candev_txready(FAR struct can_dev_s *dev)
+static bool candev_txready(struct can_dev_s *dev)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *) dev->cd_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->cd_priv;
 
   if (can_getreg(priv, AM335X_DCAN_TXRQ34_OFFSET) != 0xffffffff)
     {
@@ -721,9 +721,9 @@ static bool candev_txready(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static bool candev_txempty(FAR struct can_dev_s *dev)
+static bool candev_txempty(struct can_dev_s *dev)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *) dev->cd_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->cd_priv;
   return (!((can_getreg(priv, AM335X_DCAN_TXRQ_X_OFFSET)) & 0xffff));
 }
 
@@ -744,10 +744,10 @@ static bool candev_txempty(FAR struct can_dev_s *dev)
  *
  ****************************************************************************/
 
-static int can_interrupt(int irq, FAR void *context, FAR void *arg)
+static int can_interrupt(int irq, void *context, void *arg)
 {
-  struct can_dev_s *dev = (FAR struct can_dev_s *)arg;
-  FAR struct up_dev_s *priv;
+  struct can_dev_s *dev = (struct can_dev_s *)arg;
+  struct up_dev_s *priv;
   uint32_t regval = 0;
 
   DEBUGASSERT(dev != NULL && dev->cd_priv != NULL);
@@ -1070,9 +1070,9 @@ static int can_bittiming(struct up_dev_s *priv)
  *
  ****************************************************************************/
 
-FAR struct can_dev_s *am335x_can_initialize(int port)
+struct can_dev_s *am335x_can_initialize(int port)
 {
-  FAR struct can_dev_s *candev;
+  struct can_dev_s *candev;
   irqstate_t flags;
 
   syslog(LOG_DEBUG, "CAN%d\n", port);
@@ -1116,7 +1116,7 @@ FAR struct can_dev_s *am335x_can_initialize(int port)
   return candev;
 }
 
-void am335x_can_uninitialize(FAR struct can_dev_s *dev)
+void am335x_can_uninitialize(struct can_dev_s *dev)
 {
   irqstate_t flags;
 

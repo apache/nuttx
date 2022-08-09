@@ -272,76 +272,76 @@ static void kinetis_endtransfer(struct kinetis_dev_s *priv,
 
 /* Interrupt Handling *******************************************************/
 
-static int  kinetis_interrupt(int irq, void *context, FAR void *arg);
+static int  kinetis_interrupt(int irq, void *context, void *arg);
 
 /* SDIO interface methods ***************************************************/
 
 /* Mutual exclusion */
 
 #ifdef CONFIG_SDIO_MUXBUS
-static int kinetis_lock(FAR struct sdio_dev_s *dev, bool lock);
+static int kinetis_lock(struct sdio_dev_s *dev, bool lock);
 #endif
 
 /* Initialization/setup */
 
-static void kinetis_reset(FAR struct sdio_dev_s *dev);
-static sdio_capset_t kinetis_capabilities(FAR struct sdio_dev_s *dev);
-static sdio_statset_t kinetis_status(FAR struct sdio_dev_s *dev);
-static void kinetis_widebus(FAR struct sdio_dev_s *dev, bool enable);
+static void kinetis_reset(struct sdio_dev_s *dev);
+static sdio_capset_t kinetis_capabilities(struct sdio_dev_s *dev);
+static sdio_statset_t kinetis_status(struct sdio_dev_s *dev);
+static void kinetis_widebus(struct sdio_dev_s *dev, bool enable);
 #ifdef CONFIG_KINETIS_SDHC_ABSFREQ
-static void kinetis_frequency(FAR struct sdio_dev_s *dev,
+static void kinetis_frequency(struct sdio_dev_s *dev,
               uint32_t frequency);
 #endif
-static void kinetis_clock(FAR struct sdio_dev_s *dev,
+static void kinetis_clock(struct sdio_dev_s *dev,
               enum sdio_clock_e rate);
-static int  kinetis_attach(FAR struct sdio_dev_s *dev);
+static int  kinetis_attach(struct sdio_dev_s *dev);
 
 /* Command/Status/Data Transfer */
 
-static int  kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int  kinetis_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t arg);
 
 #ifdef CONFIG_SDIO_BLOCKSETUP
-static void  kinetis_blocksetup(FAR struct sdio_dev_s *dev,
+static void  kinetis_blocksetup(struct sdio_dev_s *dev,
               unsigned int blocksize, unsigned int nblocks);
 #endif
 
 #ifndef CONFIG_KINETIS_SDHC_DMA
-static int  kinetis_recvsetup(FAR struct sdio_dev_s *dev,
-              FAR uint8_t *buffer, size_t nbytes);
-static int  kinetis_sendsetup(FAR struct sdio_dev_s *dev,
-              FAR const uint8_t *buffer, size_t nbytes);
+static int  kinetis_recvsetup(struct sdio_dev_s *dev,
+              uint8_t *buffer, size_t nbytes);
+static int  kinetis_sendsetup(struct sdio_dev_s *dev,
+              const uint8_t *buffer, size_t nbytes);
 #endif
 
-static int  kinetis_cancel(FAR struct sdio_dev_s *dev);
+static int  kinetis_cancel(struct sdio_dev_s *dev);
 
-static int  kinetis_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd);
-static int  kinetis_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int  kinetis_waitresponse(struct sdio_dev_s *dev, uint32_t cmd);
+static int  kinetis_recvshortcrc(struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t *rshort);
-static int  kinetis_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int  kinetis_recvlong(struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t rlong[4]);
-static int  kinetis_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int  kinetis_recvshort(struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t *rshort);
-static int  kinetis_recvnotimpl(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int  kinetis_recvnotimpl(struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t *rnotimpl);
 
 /* EVENT handler */
 
-static void kinetis_waitenable(FAR struct sdio_dev_s *dev,
+static void kinetis_waitenable(struct sdio_dev_s *dev,
               sdio_eventset_t eventset, uint32_t timeout);
-static sdio_eventset_t kinetis_eventwait(FAR struct sdio_dev_s *dev);
-static void kinetis_callbackenable(FAR struct sdio_dev_s *dev,
+static sdio_eventset_t kinetis_eventwait(struct sdio_dev_s *dev);
+static void kinetis_callbackenable(struct sdio_dev_s *dev,
               sdio_eventset_t eventset);
-static int  kinetis_registercallback(FAR struct sdio_dev_s *dev,
+static int  kinetis_registercallback(struct sdio_dev_s *dev,
               worker_t callback, void *arg);
 
 /* DMA */
 
 #ifdef CONFIG_KINETIS_SDHC_DMA
-static int  kinetis_dmarecvsetup(FAR struct sdio_dev_s *dev,
-              FAR uint8_t *buffer, size_t buflen);
-static int  kinetis_dmasendsetup(FAR struct sdio_dev_s *dev,
-              FAR const uint8_t *buffer, size_t buflen);
+static int  kinetis_dmarecvsetup(struct sdio_dev_s *dev,
+              uint8_t *buffer, size_t buflen);
+static int  kinetis_dmasendsetup(struct sdio_dev_s *dev,
+              const uint8_t *buffer, size_t buflen);
 #endif
 
 /* Initialization/uninitialization/reset ************************************/
@@ -1071,7 +1071,7 @@ static void kinetis_endtransfer(struct kinetis_dev_s *priv,
  *
  ****************************************************************************/
 
-static int kinetis_interrupt(int irq, void *context, FAR void *arg)
+static int kinetis_interrupt(int irq, void *context, void *arg)
 {
   struct kinetis_dev_s *priv = &g_sdhcdev;
   uint32_t enabled;
@@ -1218,7 +1218,7 @@ static int kinetis_interrupt(int irq, void *context, FAR void *arg)
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_MUXBUS
-static int kinetis_lock(FAR struct sdio_dev_s *dev, bool lock)
+static int kinetis_lock(struct sdio_dev_s *dev, bool lock)
 {
   /* Single SDIO instance so there is only one possibility.  The multiplex
    * bus is part of board support package.
@@ -1243,9 +1243,9 @@ static int kinetis_lock(FAR struct sdio_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
-static void kinetis_reset(FAR struct sdio_dev_s *dev)
+static void kinetis_reset(struct sdio_dev_s *dev)
 {
-  FAR struct kinetis_dev_s *priv = (FAR struct kinetis_dev_s *)dev;
+  struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
   uint32_t regval;
 
   /* Disable all interrupts so that nothing interferes with the following. */
@@ -1318,7 +1318,7 @@ static void kinetis_reset(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static sdio_capset_t kinetis_capabilities(FAR struct sdio_dev_s *dev)
+static sdio_capset_t kinetis_capabilities(struct sdio_dev_s *dev)
 {
   sdio_capset_t caps = 0;
 
@@ -1347,7 +1347,7 @@ static sdio_capset_t kinetis_capabilities(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static sdio_statset_t kinetis_status(FAR struct sdio_dev_s *dev)
+static sdio_statset_t kinetis_status(struct sdio_dev_s *dev)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
   return priv->cdstatus;
@@ -1370,7 +1370,7 @@ static sdio_statset_t kinetis_status(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static void kinetis_widebus(FAR struct sdio_dev_s *dev, bool wide)
+static void kinetis_widebus(struct sdio_dev_s *dev, bool wide)
 {
   uint32_t regval;
 
@@ -1406,7 +1406,7 @@ static void kinetis_widebus(FAR struct sdio_dev_s *dev, bool wide)
  ****************************************************************************/
 
 #ifdef CONFIG_KINETIS_SDHC_ABSFREQ
-static void kinetis_frequency(FAR struct sdio_dev_s *dev, uint32_t frequency)
+static void kinetis_frequency(struct sdio_dev_s *dev, uint32_t frequency)
 {
   uint32_t sdclkfs;
   uint32_t prescaled;
@@ -1542,7 +1542,7 @@ static void kinetis_frequency(FAR struct sdio_dev_s *dev, uint32_t frequency)
  ****************************************************************************/
 
 #ifdef CONFIG_KINETIS_SDHC_ABSFREQ
-static void kinetis_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
+static void kinetis_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
 {
   uint32_t frequency;
   uint32_t regval;
@@ -1600,7 +1600,7 @@ static void kinetis_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
   kinetis_frequency(dev, frequency);
 }
 #else
-static void kinetis_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
+static void kinetis_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
 {
   uint32_t regval;
 
@@ -1705,7 +1705,7 @@ static void kinetis_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
  *
  ****************************************************************************/
 
-static int kinetis_attach(FAR struct sdio_dev_s *dev)
+static int kinetis_attach(struct sdio_dev_s *dev)
 {
   int ret;
 
@@ -1747,7 +1747,7 @@ static int kinetis_attach(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static int kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int kinetis_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
                            uint32_t arg)
 {
   clock_t timeout;
@@ -1913,9 +1913,9 @@ static int kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_BLOCKSETUP
-static void kinetis_blocksetup(FAR struct sdio_dev_s *dev,
-                             unsigned int blocksize,
-                             unsigned int nblocks)
+static void kinetis_blocksetup(struct sdio_dev_s *dev,
+                               unsigned int blocksize,
+                               unsigned int nblocks)
 {
   uint32_t regval;
 
@@ -1953,7 +1953,7 @@ static void kinetis_blocksetup(FAR struct sdio_dev_s *dev,
  ****************************************************************************/
 
 #ifndef CONFIG_KINETIS_SDHC_DMA
-static int kinetis_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
+static int kinetis_recvsetup(struct sdio_dev_s *dev, uint8_t *buffer,
                              size_t nbytes)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
@@ -2006,8 +2006,8 @@ static int kinetis_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
  ****************************************************************************/
 
 #ifndef CONFIG_KINETIS_SDHC_DMA
-static int kinetis_sendsetup(FAR struct sdio_dev_s *dev,
-                             FAR const uint8_t *buffer, size_t nbytes)
+static int kinetis_sendsetup(struct sdio_dev_s *dev,
+                             const uint8_t *buffer, size_t nbytes)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
 
@@ -2054,7 +2054,7 @@ static int kinetis_sendsetup(FAR struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
-static int kinetis_cancel(FAR struct sdio_dev_s *dev)
+static int kinetis_cancel(struct sdio_dev_s *dev)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
 #ifdef CONFIG_KINETIS_SDHC_DMA
@@ -2110,7 +2110,7 @@ static int kinetis_cancel(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static int kinetis_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
+static int kinetis_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
 {
   clock_t timeout;
   clock_t start;
@@ -2207,7 +2207,7 @@ static int kinetis_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
  *
  ****************************************************************************/
 
-static int kinetis_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int kinetis_recvshortcrc(struct sdio_dev_s *dev, uint32_t cmd,
                                 uint32_t *rshort)
 {
   uint32_t regval;
@@ -2278,7 +2278,7 @@ static int kinetis_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
   return ret;
 }
 
-static int kinetis_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int kinetis_recvlong(struct sdio_dev_s *dev, uint32_t cmd,
                             uint32_t rlong[4])
 {
   uint32_t regval;
@@ -2344,7 +2344,7 @@ static int kinetis_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
   return ret;
 }
 
-static int kinetis_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int kinetis_recvshort(struct sdio_dev_s *dev, uint32_t cmd,
                              uint32_t *rshort)
 {
   uint32_t regval;
@@ -2395,7 +2395,7 @@ static int kinetis_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
 
 /* MMC responses not supported */
 
-static int kinetis_recvnotimpl(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int kinetis_recvnotimpl(struct sdio_dev_s *dev, uint32_t cmd,
                                uint32_t *rnotimpl)
 {
   /* Just return an error */
@@ -2427,8 +2427,8 @@ static int kinetis_recvnotimpl(FAR struct sdio_dev_s *dev, uint32_t cmd,
  *
  ****************************************************************************/
 
-static void kinetis_waitenable(FAR struct sdio_dev_s *dev,
-                             sdio_eventset_t eventset, uint32_t timeout)
+static void kinetis_waitenable(struct sdio_dev_s *dev,
+                               sdio_eventset_t eventset, uint32_t timeout)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
   uint32_t waitints;
@@ -2506,7 +2506,7 @@ static void kinetis_waitenable(FAR struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
-static sdio_eventset_t kinetis_eventwait(FAR struct sdio_dev_s *dev)
+static sdio_eventset_t kinetis_eventwait(struct sdio_dev_s *dev)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
   sdio_eventset_t wkupevent = 0;
@@ -2593,8 +2593,8 @@ static sdio_eventset_t kinetis_eventwait(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static void kinetis_callbackenable(FAR struct sdio_dev_s *dev,
-                                 sdio_eventset_t eventset)
+static void kinetis_callbackenable(struct sdio_dev_s *dev,
+                                   sdio_eventset_t eventset)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
 
@@ -2627,8 +2627,8 @@ static void kinetis_callbackenable(FAR struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
-static int kinetis_registercallback(FAR struct sdio_dev_s *dev,
-                                  worker_t callback, void *arg)
+static int kinetis_registercallback(struct sdio_dev_s *dev,
+                                    worker_t callback, void *arg)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
 
@@ -2663,8 +2663,8 @@ static int kinetis_registercallback(FAR struct sdio_dev_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_KINETIS_SDHC_DMA
-static int kinetis_dmarecvsetup(FAR struct sdio_dev_s *dev,
-                                FAR uint8_t *buffer, size_t buflen)
+static int kinetis_dmarecvsetup(struct sdio_dev_s *dev,
+                                uint8_t *buffer, size_t buflen)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
 
@@ -2723,8 +2723,8 @@ static int kinetis_dmarecvsetup(FAR struct sdio_dev_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_KINETIS_SDHC_DMA
-static int kinetis_dmasendsetup(FAR struct sdio_dev_s *dev,
-                              FAR const uint8_t *buffer, size_t buflen)
+static int kinetis_dmasendsetup(struct sdio_dev_s *dev,
+                                const uint8_t *buffer, size_t buflen)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
 
@@ -2863,7 +2863,7 @@ static void kinetis_callback(void *arg)
  *
  ****************************************************************************/
 
-FAR struct sdio_dev_s *sdhc_initialize(int slotno)
+struct sdio_dev_s *sdhc_initialize(int slotno)
 {
   uint32_t regval;
 
@@ -2972,7 +2972,7 @@ FAR struct sdio_dev_s *sdhc_initialize(int slotno)
  *
  ****************************************************************************/
 
-void sdhc_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
+void sdhc_mediachange(struct sdio_dev_s *dev, bool cardinslot)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
   sdio_statset_t cdstatus;
@@ -3019,7 +3019,7 @@ void sdhc_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
  *
  ****************************************************************************/
 
-void sdhc_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
+void sdhc_wrprotect(struct sdio_dev_s *dev, bool wrprotect)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
   irqstate_t flags;

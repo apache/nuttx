@@ -511,7 +511,7 @@ int bl602_bringup(void)
   ret = register_mtddriver(path, mtd_part, 0777, NULL);
   if (ret < 0)
     {
-      syslog(LOG_DEBUG, "ERROR: Failed to regitser MTD: %d\n", ret);
+      syslog(LOG_DEBUG, "ERROR: Failed to register MTD: %d\n", ret);
       return -1;
     }
 

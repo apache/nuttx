@@ -72,18 +72,18 @@
 
 struct lpc43_lowerhalf_s
 {
-  FAR const struct timer_ops_s  *ops;  /* Lower half operations */
+  const struct timer_ops_s *ops; /* Lower half operations */
 
   /* Private data */
 
-  uint32_t base;            /* Base address of the timer */
-  tccb_t   callback;        /* Current user interrupt callback */
-  FAR void *arg;            /* Argument passed to the callback function */
-  uint32_t timeout;         /* The current timeout value (us) */
-  uint32_t adjustment;      /* time lost due to clock resolution truncation (us) */
-  uint32_t clkticks;        /* actual clock ticks for current interval */
-  bool     started;         /* The timer has been started */
-  uint16_t tmrid;           /* Timer id */
+  uint32_t base;       /* Base address of the timer */
+  tccb_t   callback;   /* Current user interrupt callback */
+  void     *arg;       /* Argument passed to the callback function */
+  uint32_t timeout;    /* The current timeout value (us) */
+  uint32_t adjustment; /* time lost due to clock resolution truncation (us) */
+  uint32_t clkticks;   /* actual clock ticks for current interval */
+  bool     started;    /* The timer has been started */
+  uint16_t tmrid;      /* Timer id */
 };
 
 /****************************************************************************
@@ -102,19 +102,19 @@ static void     lpc43_putreg(uint32_t val, uint32_t addr);
 
 /* Interrupt handling *******************************************************/
 
-static int      lpc43_interrupt(int irq, FAR void *context, FAR void *arg);
+static int      lpc43_interrupt(int irq, void *context, void *arg);
 
 /* "Lower half" driver methods **********************************************/
 
-static int      lpc43_start(FAR struct timer_lowerhalf_s *lower);
-static int      lpc43_stop(FAR struct timer_lowerhalf_s *lower);
-static int      lpc43_getstatus(FAR struct timer_lowerhalf_s *lower,
-                  FAR struct timer_status_s *status);
-static int      lpc43_settimeout(FAR struct timer_lowerhalf_s *lower,
+static int      lpc43_start(struct timer_lowerhalf_s *lower);
+static int      lpc43_stop(struct timer_lowerhalf_s *lower);
+static int      lpc43_getstatus(struct timer_lowerhalf_s *lower,
+                  struct timer_status_s *status);
+static int      lpc43_settimeout(struct timer_lowerhalf_s *lower,
                   uint32_t timeout);
-static void     lpc43_setcallback(FAR struct timer_lowerhalf_s *lower,
-                  tccb_t callback, FAR void *arg);
-static int      lpc43_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
+static void     lpc43_setcallback(struct timer_lowerhalf_s *lower,
+                  tccb_t callback, void *arg);
+static int      lpc43_ioctl(struct timer_lowerhalf_s *lower, int cmd,
                   unsigned long arg);
 
 /****************************************************************************
@@ -325,10 +325,10 @@ void tmr_clk_disable(uint16_t tmrid)
  *
  ****************************************************************************/
 
-static int lpc43_interrupt(int irq, FAR void *context, FAR void *arg)
+static int lpc43_interrupt(int irq, void *context, void *arg)
 {
   uint8_t chan_int = 0x0f;
-  FAR struct lpc43_lowerhalf_s *priv = &g_tmrdevs[irq - LPC43M4_IRQ_TIMER0];
+  struct lpc43_lowerhalf_s *priv = &g_tmrdevs[irq - LPC43M4_IRQ_TIMER0];
 
   tmrinfo("Entry\n");
   DEBUGASSERT((irq >= LPC43M4_IRQ_TIMER0) && (irq <= LPC43M4_IRQ_TIMER3));
@@ -368,7 +368,7 @@ static int lpc43_interrupt(int irq, FAR void *context, FAR void *arg)
         {
           /* No callback or the callback returned false.. stop the timer */
 
-          lpc43_stop((FAR struct timer_lowerhalf_s *)priv);
+          lpc43_stop((struct timer_lowerhalf_s *)priv);
           tmrinfo("Stopped\n");
         }
 
@@ -395,9 +395,9 @@ static int lpc43_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static int lpc43_start(FAR struct timer_lowerhalf_s *lower)
+static int lpc43_start(struct timer_lowerhalf_s *lower)
 {
-  FAR struct lpc43_lowerhalf_s *priv = (FAR struct lpc43_lowerhalf_s *)lower;
+  struct lpc43_lowerhalf_s *priv = (struct lpc43_lowerhalf_s *)lower;
   uint32_t presc_val;
 
   tmrinfo("Entry\n");
@@ -459,9 +459,9 @@ static int lpc43_start(FAR struct timer_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int lpc43_stop(FAR struct timer_lowerhalf_s *lower)
+static int lpc43_stop(struct timer_lowerhalf_s *lower)
 {
-  FAR struct lpc43_lowerhalf_s *priv = (FAR struct lpc43_lowerhalf_s *)lower;
+  struct lpc43_lowerhalf_s *priv = (struct lpc43_lowerhalf_s *)lower;
   tmrinfo("Entry\n");
   DEBUGASSERT(priv);
 
@@ -503,10 +503,10 @@ static int lpc43_stop(FAR struct timer_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int lpc43_getstatus(FAR struct timer_lowerhalf_s *lower,
-                           FAR struct timer_status_s *status)
+static int lpc43_getstatus(struct timer_lowerhalf_s *lower,
+                           struct timer_status_s *status)
 {
-  FAR struct lpc43_lowerhalf_s *priv = (FAR struct lpc43_lowerhalf_s *)lower;
+  struct lpc43_lowerhalf_s *priv = (struct lpc43_lowerhalf_s *)lower;
   uint32_t elapsed;
 
   tmrinfo("Entry\n");
@@ -559,10 +559,10 @@ static int lpc43_getstatus(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int lpc43_settimeout(FAR struct timer_lowerhalf_s *lower,
+static int lpc43_settimeout(struct timer_lowerhalf_s *lower,
                             uint32_t timeout)
 {
-  FAR struct lpc43_lowerhalf_s *priv = (FAR struct lpc43_lowerhalf_s *)lower;
+  struct lpc43_lowerhalf_s *priv = (struct lpc43_lowerhalf_s *)lower;
 
   DEBUGASSERT(priv);
 
@@ -624,10 +624,10 @@ static int lpc43_settimeout(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static void lpc43_setcallback(FAR struct timer_lowerhalf_s *lower,
-                               tccb_t callback, FAR void *arg)
+static void lpc43_setcallback(struct timer_lowerhalf_s *lower,
+                              tccb_t callback, void *arg)
 {
-  FAR struct lpc43_lowerhalf_s *priv = (FAR struct lpc43_lowerhalf_s *)lower;
+  struct lpc43_lowerhalf_s *priv = (struct lpc43_lowerhalf_s *)lower;
   irqstate_t flags;
 
   flags = enter_critical_section();
@@ -663,10 +663,10 @@ static void lpc43_setcallback(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int lpc43_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
-                    unsigned long arg)
+static int lpc43_ioctl(struct timer_lowerhalf_s *lower, int cmd,
+                       unsigned long arg)
 {
-  FAR struct lpc43_lowerhalf_s *priv = (FAR struct lpc43_lowerhalf_s *)lower;
+  struct lpc43_lowerhalf_s *priv = (struct lpc43_lowerhalf_s *)lower;
   int ret = -ENOTTY;
 
   DEBUGASSERT(priv);
@@ -696,9 +696,9 @@ static int lpc43_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
  *
  ****************************************************************************/
 
-void lpc43_tmrinitialize(FAR const char *devpath, int irq)
+void lpc43_tmrinitialize(const char *devpath, int irq)
 {
-  FAR struct lpc43_lowerhalf_s *priv = &g_tmrdevs[irq - LPC43M4_IRQ_TIMER0];
+  struct lpc43_lowerhalf_s *priv = &g_tmrdevs[irq - LPC43M4_IRQ_TIMER0];
 
   tmrinfo("Entry: devpath=%s\n", devpath);
   DEBUGASSERT((irq >= LPC43M4_IRQ_TIMER0) && (irq <= LPC43M4_IRQ_TIMER3));
@@ -743,7 +743,7 @@ void lpc43_tmrinitialize(FAR const char *devpath, int irq)
 #endif
 
     default:
-      DEBUGASSERT(0);
+      DEBUGPANIC();
     }
 
   priv->ops = &g_tmrops;
@@ -756,7 +756,7 @@ void lpc43_tmrinitialize(FAR const char *devpath, int irq)
 
   /* Register the timer driver as /dev/timerX */
 
-  timer_register(devpath, (FAR struct timer_lowerhalf_s *)priv);
+  timer_register(devpath, (struct timer_lowerhalf_s *)priv);
 }
 
 #endif /* CONFIG_TIMER && CONFIG_LPC43_TMRx */

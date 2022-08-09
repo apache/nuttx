@@ -30,6 +30,8 @@
 #include <sys/boardctl.h>
 #include <stdbool.h>
 
+#include "board_lcdpins.h"
+
 #include "cxd56_clock.h"
 #include "cxd56_power.h"
 #include "cxd56_flash.h"
@@ -59,9 +61,15 @@
 #include "cxd56_kx022.h"
 #include "cxd56_lt1pa01.h"
 #include "cxd56_rpr0521rs.h"
+#include "cxd56_scd41.h"
 #include "cxd56_sensors.h"
 
-#include "cxd56_isx012.h"
+#ifdef CONFIG_VIDEO_ISX012
+#  include "cxd56_isx012.h"
+#endif /* CONFIG_VIDEO_ISX012 */
+#ifdef CONFIG_VIDEO_ISX019
+#  include "cxd56_isx019.h"
+#endif /* CONFIG_VIDEO_ISX019 */
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -212,9 +220,6 @@ enum board_power_device
 
 #if defined(CONFIG_LCD_ON_MAIN_BOARD) /* Display connected to main board. */
 
-#define DISPLAY_RST     PIN_I2S0_BCK
-#define DISPLAY_DC      PIN_I2S0_LRCK
-
 #define DISPLAY_SPI     5
 
 #define DISPLAY_DMA_TXCH       (4)
@@ -226,9 +231,6 @@ enum board_power_device
 
 #else /* Display is connected through extension board. */
 
-#define DISPLAY_RST     PIN_SPI2_MISO
-#define DISPLAY_DC      PIN_PWM2
-
 #define DISPLAY_SPI     4
 
 #define DISPLAY_DMA_TXCH       (2)
@@ -239,6 +241,9 @@ enum board_power_device
 #define DISPLAY_DMA_RX_MAXSIZE (192000)
 
 #endif
+
+#define DISPLAY_RST     ILI934X_RST_PIN
+#define DISPLAY_DC      ILI934X_DC_PIN
 
 /* Sensor device bus definitions ********************************************/
 
@@ -260,6 +265,10 @@ enum board_power_device
  */
 
 #define BOARDIOC_USBDEV_SETNOTIFYSIG      (BOARDIOC_USER+0x0001)
+
+/* Set callback function pointer for notify SDCard state change *************/
+
+#define BOARDIOC_SDCARD_SETNOTIFYCB       (BOARDIOC_USER+0x0002)
 
 /* Altair modem device pin definitions **************************************/
 

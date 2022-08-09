@@ -44,10 +44,10 @@
  *
  *   void up_timer_initialize(void): Initializes the timer facilities.
  *     Called early in the initialization sequence (by up_initialize()).
- *   int up_timer_gettime(FAR struct timespec *ts):  Returns the current
+ *   int up_timer_gettime(struct timespec *ts):  Returns the current
  *     time from the platform specific time source.
  *   int up_timer_cancel(void):  Cancels the interval timer.
- *   int up_timer_start(FAR const struct timespec *ts): Start (or re-starts)
+ *   int up_timer_start(const struct timespec *ts): Start (or re-starts)
  *     the interval timer.
  *
  * The RTOS will provide the following interfaces for use by the platform-
@@ -119,13 +119,13 @@
 
 struct stm32_tickless_s
 {
-  uint8_t timer;                   /* The timer/counter in use */
-  uint8_t channel;                 /* The timer channel to use for intervals */
-  FAR struct stm32_tim_dev_s *tch; /* Handle returned by stm32_tim_init() */
+  uint8_t timer;               /* The timer/counter in use */
+  uint8_t channel;             /* The timer channel to use for intervals */
+  struct stm32_tim_dev_s *tch; /* Handle returned by stm32_tim_init() */
   uint32_t frequency;
-  uint32_t overflow;               /* Timer counter overflow */
-  volatile bool pending;           /* True: pending task */
-  uint32_t period;                 /* Interval period */
+  uint32_t overflow;           /* Timer counter overflow */
+  volatile bool pending;       /* True: pending task */
+  uint32_t period;             /* Interval period */
   uint32_t base;
 };
 
@@ -441,7 +441,7 @@ void up_timer_initialize(void)
 
         /* Basic timers not supported by this implementation */
 
-        DEBUGASSERT(0);
+        DEBUGPANIC();
         break;
 #endif
 
@@ -450,7 +450,7 @@ void up_timer_initialize(void)
 
         /* Basic timers not supported by this implementation */
 
-        DEBUGASSERT(0);
+        DEBUGPANIC();
         break;
 #endif
 
@@ -511,7 +511,7 @@ void up_timer_initialize(void)
 #endif
 
       default:
-        DEBUGASSERT(0);
+        DEBUGPANIC();
     }
 
   /* Get the TC frequency that corresponds to the requested resolution */
@@ -530,7 +530,7 @@ void up_timer_initialize(void)
   if (!g_tickless.tch)
     {
       tmrerr("ERROR: Failed to allocate TIM%d\n", g_tickless.timer);
-      DEBUGASSERT(0);
+      DEBUGPANIC();
     }
 
   STM32_TIM_SETCLOCK(g_tickless.tch, g_tickless.frequency);
@@ -579,7 +579,7 @@ void up_timer_initialize(void)
  *   up_timer_initialize() was called).  This function is functionally
  *   equivalent to:
  *
- *      int clock_gettime(clockid_t clockid, FAR struct timespec *ts);
+ *      int clock_gettime(clockid_t clockid, struct timespec *ts);
  *
  *   when clockid is CLOCK_MONOTONIC.
  *
@@ -604,7 +604,7 @@ void up_timer_initialize(void)
  *
  ****************************************************************************/
 
-int up_timer_gettime(FAR struct timespec *ts)
+int up_timer_gettime(struct timespec *ts)
 {
   uint64_t usec;
   uint32_t counter;
@@ -698,7 +698,7 @@ int up_timer_gettime(FAR struct timespec *ts)
  *
  ****************************************************************************/
 
-int up_timer_getcounter(FAR uint64_t *cycles)
+int up_timer_getcounter(uint64_t *cycles)
 {
   *cycles = (uint64_t)STM32_TIM_GETCOUNTER(g_tickless.tch);
   return OK;
@@ -718,7 +718,7 @@ int up_timer_getcounter(FAR uint64_t *cycles)
  *
  ****************************************************************************/
 
-void up_timer_getmask(FAR uint64_t *mask)
+void up_timer_getmask(uint64_t *mask)
 {
   DEBUGASSERT(mask != NULL);
 #ifdef HAVE_32BIT_TICKLESS
@@ -766,7 +766,7 @@ void up_timer_getmask(FAR uint64_t *mask)
  *
  ****************************************************************************/
 
-int up_timer_cancel(FAR struct timespec *ts)
+int up_timer_cancel(struct timespec *ts)
 {
   irqstate_t flags;
   uint64_t usec;
@@ -894,7 +894,7 @@ int up_timer_cancel(FAR struct timespec *ts)
  *
  ****************************************************************************/
 
-int up_timer_start(FAR const struct timespec *ts)
+int up_timer_start(const struct timespec *ts)
 {
   uint64_t usec;
   uint64_t period;

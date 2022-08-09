@@ -282,7 +282,7 @@ config SIM_FBWIDTH
 	int "Display width"
 	default 320
 	---help---
-		Simulated width of the display.  Default: 320 or 240
+		Simulated width of the display.  Default: 320
 
 config SIM_FBBPP
 	int "Pixel depth in bits"
@@ -368,14 +368,6 @@ endif # if INPUT
 
 endmenu
 
-config SIM_TCNWAITERS
-	bool "Maximum number poll() waiters"
-	default 4
-	depends on SIM_TOUCHSCREEN
-	---help---
-		The maximum number of threads that can be waiting on poll() for a
-		touchscreen event. Default: 4
-
 config SIM_HCISOCKET
 	bool "Attach Host Bluetooth"
 	default false
@@ -385,6 +377,14 @@ config SIM_HCISOCKET
 		target via HCI_CHANNEL_USER. This gives NuttX full
 		control of the device, but is abstracted from the
 		physical interface which is still handled by Linux.
+
+config SIM_HCISOCKET_DEVID
+	int "Bluetooth Device ID"
+	default 0
+	depends on SIM_HCISOCKET
+	---help---
+		Attached the local bluetooth device use specific
+		Bluetooth HCI number id.
 
 config SIM_I2CBUS
 	bool "Simulated I2C Bus"

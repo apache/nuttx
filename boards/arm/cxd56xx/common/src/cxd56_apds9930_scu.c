@@ -43,7 +43,7 @@
 int board_apds9930_initialize(int bus)
 {
   int ret;
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
 
   sninfo("Initializing APDS9930...\n");
 

@@ -26,7 +26,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/irq.h>
 
 #ifdef CONFIG_ARCH_CHIP_RV32M1_RI5CY
 #  include "rv32m1ri5cy_irq.h"

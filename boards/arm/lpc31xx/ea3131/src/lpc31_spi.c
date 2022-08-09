@@ -88,7 +88,7 @@ void weak_function lpc31_spidev_initialize(void)
  *
  ****************************************************************************/
 
-void lpc31_spiselect(FAR struct spi_dev_s *dev,
+void lpc31_spiselect(struct spi_dev_s *dev,
                      uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
@@ -97,7 +97,7 @@ void lpc31_spiselect(FAR struct spi_dev_s *dev,
 #warning "Missing logic"
 }
 
-uint8_t lpc31_spistatus(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t lpc31_spistatus(struct spi_dev_s *dev, uint32_t devid)
 {
   return SPI_STATUS_PRESENT;
 }

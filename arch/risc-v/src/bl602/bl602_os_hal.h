@@ -50,7 +50,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-void bl_os_printf(const char *__fmt, ...);
+void bl_os_printf(const char *__fmt, ...) printflike(1, 2);
 
 void bl_os_assert_func(const char *file,
                        int line,
@@ -175,7 +175,7 @@ void bl_os_log_write(uint32_t level,
                      const char *file,
                      int line,
                      const char *format,
-                     ...);
+                     ...) printflike(5, 6);
 
   #undef EXTERN
   #if defined(__cplusplus)

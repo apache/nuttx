@@ -167,7 +167,7 @@ void weak_function lpc43_sspdev_initialize(void);
  *
  ****************************************************************************/
 
-int lpc43_max31855initialize(FAR const char *devpath, int bus,
+int lpc43_max31855initialize(const char *devpath, int bus,
                              uint16_t devid);
 
 /****************************************************************************

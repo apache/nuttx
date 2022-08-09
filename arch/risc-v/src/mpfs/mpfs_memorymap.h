@@ -25,7 +25,7 @@
  * Included Files
  ****************************************************************************/
 
-#include "riscv_internal.h"
+#include "riscv_common_memorymap.h"
 #include "hardware/mpfs_clint.h"
 #include "hardware/mpfs_memorymap.h"
 #include "hardware/mpfs_plic.h"

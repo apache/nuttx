@@ -76,7 +76,7 @@ int pthread_mutex_consistent(FAR pthread_mutex_t *mutex)
   int ret = EINVAL;
   int status;
 
-  sinfo("mutex=0x%p\n", mutex);
+  sinfo("mutex=%p\n", mutex);
   DEBUGASSERT(mutex != NULL);
 
   if (mutex != NULL)

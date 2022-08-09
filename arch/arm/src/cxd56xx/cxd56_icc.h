@@ -38,9 +38,9 @@
 #define CXD56_PROTO_SIG      15 /* Inter-CPU Comm signal */
 
 typedef int (*cxd56_icchandler_t)(int cpuid, int protoid, uint32_t pdata,
-                                  uint32_t data, FAR void *userdata);
+                                  uint32_t data, void *userdata);
 typedef int (*cxd56_iccsighandler_t)(int8_t signo, uint16_t sigdata,
-                                     uint32_t data, FAR void *userdata);
+                                     uint32_t data, void *userdata);
 
 struct cxd56_iccmsg_s
 {
@@ -65,16 +65,16 @@ int cxd56_iccinitmsg(int cpuid);
 void cxd56_iccuninit(int protoid);
 void cxd56_iccuninitmsg(int cpuid);
 int cxd56_iccregisterhandler(int protoid, cxd56_icchandler_t handler,
-                             FAR void *data);
+                             void *data);
 int cxd56_iccregistersighandler(int cpuid, cxd56_iccsighandler_t handler,
-                                FAR void *data);
-int cxd56_iccsend(int protoid, FAR iccmsg_t *msg, int32_t ms);
-int cxd56_iccrecv(int protoid, FAR iccmsg_t *msg, int32_t ms);
-int cxd56_iccsendmsg(FAR iccmsg_t *msg, int32_t ms);
-int cxd56_iccrecvmsg(FAR iccmsg_t *msg, int32_t ms);
+                                void *data);
+int cxd56_iccsend(int protoid, iccmsg_t *msg, int32_t ms);
+int cxd56_iccrecv(int protoid, iccmsg_t *msg, int32_t ms);
+int cxd56_iccsendmsg(iccmsg_t *msg, int32_t ms);
+int cxd56_iccrecvmsg(iccmsg_t *msg, int32_t ms);
 int cxd56_iccsignal(int8_t cpuid, int8_t signo, int16_t sigdata,
                     uint32_t data);
-int cxd56_iccnotify(int cpuid, int signo, FAR void *sigdata);
+int cxd56_iccnotify(int cpuid, int signo, void *sigdata);
 
 void cxd56_iccinitialize(void);
 

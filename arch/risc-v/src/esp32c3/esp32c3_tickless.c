@@ -597,7 +597,7 @@ void IRAM_ATTR up_step_idletime(uint32_t us)
   step_counter = USEC_2_CTICK((uint64_t)us) + up_tmr_getcounter();
   if (step_counter > alarm_value)
     {
-      DEBUGASSERT(0);
+      DEBUGPANIC();
     }
 
   up_tmr_counter_advance(step_counter);

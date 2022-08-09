@@ -383,7 +383,7 @@
 
 struct sam_adc_s
 {
-  FAR const struct adc_callback_s *cb;
+  const struct adc_callback_s *cb;
   sem_t exclsem;         /* Supports exclusive access to the ADC interface */
   bool initialized;      /* The ADC driver is already initialized */
   uint32_t frequency;    /* ADC clock frequency */
@@ -439,7 +439,7 @@ static bool sam_adc_checkreg(struct sam_adc_s *priv, bool wr,
 #ifdef CONFIG_SAMA5_ADC_DMA
 static void sam_adc_dmadone(void *arg);
 static void sam_adc_dmacallback(DMA_HANDLE handle, void *arg, int result);
-static int  sam_adc_dmasetup(struct sam_adc_s *priv, FAR uint8_t *buffer,
+static int  sam_adc_dmasetup(struct sam_adc_s *priv, uint8_t *buffer,
                              size_t buflen);
 static void sam_adc_dmastart(struct sam_adc_s *priv);
 #endif
@@ -448,13 +448,13 @@ static void sam_adc_dmastart(struct sam_adc_s *priv);
 
 static void sam_adc_endconversion(void *arg);
 #endif
-static int  sam_adc_interrupt(int irq, void *context, FAR void *arg);
+static int  sam_adc_interrupt(int irq, void *context, void *arg);
 
 /* ADC methods */
 
 #ifdef SAMA5_ADC_HAVE_CHANNELS
-static int  sam_adc_bind(FAR struct adc_dev_s *dev,
-                         FAR const struct adc_callback_s *callback);
+static int  sam_adc_bind(struct adc_dev_s *dev,
+                         const struct adc_callback_s *callback);
 static void sam_adc_reset(struct adc_dev_s *dev);
 static int  sam_adc_setup(struct adc_dev_s *dev);
 static void sam_adc_shutdown(struct adc_dev_s *dev);
@@ -653,7 +653,7 @@ static void sam_adc_dmadone(void *arg)
        * any good reason to support the ping-poing buffers at all.
        */
 
-      sam_adc_dmasetup(priv, (FAR uint8_t *)next,
+      sam_adc_dmasetup(priv, (uint8_t *)next,
                        SAMA5_ADC_SAMPLES * sizeof(uint16_t));
 
       /* Invalidate the DMA buffer so that we are guaranteed to reload the
@@ -708,7 +708,7 @@ static void sam_adc_dmastart(struct sam_adc_s *priv)
   if (priv->ready && priv->enabled)
     {
       priv->odd = false;  /* Start with the even buffer */
-      sam_adc_dmasetup(priv, (FAR uint8_t *)priv->evenbuf,
+      sam_adc_dmasetup(priv, (uint8_t *)priv->evenbuf,
                        SAMA5_ADC_SAMPLES * sizeof(uint16_t));
     }
 }
@@ -797,7 +797,7 @@ static void sam_adc_dmacallback(DMA_HANDLE handle, void *arg, int result)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_ADC_DMA
-static int sam_adc_dmasetup(FAR struct sam_adc_s *priv, FAR uint8_t *buffer,
+static int sam_adc_dmasetup(struct sam_adc_s *priv, uint8_t *buffer,
                             size_t buflen)
 {
   uint32_t paddr;
@@ -914,7 +914,7 @@ static void sam_adc_endconversion(void *arg)
  *
  ****************************************************************************/
 
-static int sam_adc_interrupt(int irq, void *context, FAR void *arg)
+static int sam_adc_interrupt(int irq, void *context, void *arg)
 {
   struct sam_adc_s *priv = &g_adcpriv;
   uint32_t isr;
@@ -997,8 +997,8 @@ static int sam_adc_interrupt(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static int sam_adc_bind(FAR struct adc_dev_s *dev,
-                        FAR const struct adc_callback_s *callback)
+static int sam_adc_bind(struct adc_dev_s *dev,
+                        const struct adc_callback_s *callback)
 {
   struct sam_adc_s *priv = (struct sam_adc_s *)dev->ad_priv;
 
@@ -2169,7 +2169,7 @@ struct adc_dev_s *sam_adc_initialize(void)
  *
  ****************************************************************************/
 
-int sam_adc_lock(FAR struct sam_adc_s *priv)
+int sam_adc_lock(struct sam_adc_s *priv)
 {
   ainfo("Locking\n");
   return nxsem_wait_uninterruptible(&priv->exclsem);
@@ -2183,7 +2183,7 @@ int sam_adc_lock(FAR struct sam_adc_s *priv)
  *
  ****************************************************************************/
 
-void sam_adc_unlock(FAR struct sam_adc_s *priv)
+void sam_adc_unlock(struct sam_adc_s *priv)
 {
   ainfo("Unlocking\n");
   nxsem_post(&priv->exclsem);

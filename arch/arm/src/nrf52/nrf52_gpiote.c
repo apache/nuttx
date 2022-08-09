@@ -53,8 +53,8 @@
 
 struct nrf52_gpiote_callback_s
 {
-  xcpt_t     callback;
-  FAR void  *arg;
+  xcpt_t callback;
+  void  *arg;
 };
 
 /****************************************************************************
@@ -115,7 +115,7 @@ static inline uint32_t nrf52_gpiote_getreg(uint32_t offset)
  *
  ****************************************************************************/
 
-static int nrf52_gpiote_isr(int irq, FAR void *context, FAR void *arg)
+static int nrf52_gpiote_isr(int irq, void *context, void *arg)
 {
   uint32_t regval = 0;
   int      ret    = OK;
@@ -140,7 +140,7 @@ static int nrf52_gpiote_isr(int irq, FAR void *context, FAR void *arg)
               /* Execute callback */
 
               xcpt_t callback = g_gpiote_ch_callbacks[i].callback;
-              FAR void *cbarg = g_gpiote_ch_callbacks[i].arg;
+              void *cbarg = g_gpiote_ch_callbacks[i].arg;
               ret = callback(irq, context, cbarg);
 
               /* Clear event */
@@ -197,7 +197,7 @@ static int nrf52_gpiote_isr(int irq, FAR void *context, FAR void *arg)
                   /* Run callback */
 
                   xcpt_t callback = g_gpiote_pin_callbacks[i][j].callback;
-                  FAR void *cbarg = g_gpiote_pin_callbacks[i][j].arg;
+                  void *cbarg = g_gpiote_pin_callbacks[i][j].arg;
 
                   ret = callback(irq, context, cbarg);
 
@@ -212,7 +212,7 @@ static int nrf52_gpiote_isr(int irq, FAR void *context, FAR void *arg)
           if (g_gpiote_port_callback[i].callback)
             {
               xcpt_t callback = g_gpiote_port_callback[i].callback;
-              FAR void *cbarg = g_gpiote_port_callback[i].arg;
+              void *cbarg = g_gpiote_port_callback[i].arg;
 
               ret = callback(irq, context, cbarg);
             }
@@ -252,7 +252,7 @@ static int nrf52_gpiote_isr(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-void nrf52_gpiote_set_pin_event(uint32_t pinset, xcpt_t func, FAR void *arg)
+void nrf52_gpiote_set_pin_event(uint32_t pinset, xcpt_t func, void *arg)
 {
   int        pin    = 0;
   int        port   = 0;
@@ -291,7 +291,7 @@ void nrf52_gpiote_set_pin_event(uint32_t pinset, xcpt_t func, FAR void *arg)
  *
  ****************************************************************************/
 
-void nrf52_gpiote_set_port_event(uint32_t pinset, xcpt_t func, FAR void *arg)
+void nrf52_gpiote_set_port_event(uint32_t pinset, xcpt_t func, void *arg)
 {
   int        port   = 0;
   irqstate_t flags;
@@ -364,7 +364,7 @@ void nrf52_gpiote_set_port_event(uint32_t pinset, xcpt_t func, FAR void *arg)
 
 void nrf52_gpiote_set_ch_event(uint32_t pinset, int channel,
                                bool risingedge, bool fallingedge,
-                               xcpt_t func, FAR void *arg)
+                               xcpt_t func, void *arg)
 {
   int        pin    = 0;
 #ifdef CONFIG_NRF52_HAVE_PORT1

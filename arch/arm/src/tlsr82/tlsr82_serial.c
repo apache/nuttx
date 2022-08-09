@@ -665,12 +665,12 @@ static void uart_dma_send(uart_priv_t *priv, char *buf, size_t len)
 
   if (len + DMA_HEAD_LEN > priv->txdmasize)
     {
-      DEBUGASSERT(false);
+      DEBUGPANIC();
       return;
     }
 
   /* Copy the driver buffer to dma buffer, this is necessary because
-   * the first 4 bytes of the buffer must be the transfered size, which
+   * the first 4 bytes of the buffer must be the transferred size, which
    * is telin dma peripheral required.
    * NOTE: the memcpy better be ramcode.
    */

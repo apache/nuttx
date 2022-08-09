@@ -418,10 +418,10 @@ static inline void imxrt_chgbits(uint32_t mask, uint32_t val, uint32_t addr);
 
 /* Request queue operations *************************************************/
 
-static FAR struct imxrt_req_s *imxrt_rqdequeue(
-    FAR struct imxrt_ep_s *privep);
-static bool       imxrt_rqenqueue(FAR struct imxrt_ep_s *privep,
-                    FAR struct imxrt_req_s *req);
+static struct imxrt_req_s *imxrt_rqdequeue(
+    struct imxrt_ep_s *privep);
+static bool       imxrt_rqenqueue(struct imxrt_ep_s *privep,
+                    struct imxrt_req_s *req);
 
 /* Low level data transfers and request operations **************************/
 
@@ -465,35 +465,35 @@ static void        imxrt_ep0nak(struct imxrt_usbdev_s *priv, uint8_t epphy);
 static bool        imxrt_epcomplete(struct imxrt_usbdev_s *priv,
                                     uint8_t epphy);
 
-static int         imxrt_usbinterrupt(int irq, FAR void *context,
-                                      FAR void *arg);
+static int         imxrt_usbinterrupt(int irq, void *context,
+                                      void *arg);
 
 /* Endpoint operations ******************************************************/
 
 /* USB device controller operations *****************************************/
 
-static int         imxrt_epconfigure(FAR struct usbdev_ep_s *ep,
+static int         imxrt_epconfigure(struct usbdev_ep_s *ep,
                      const struct usb_epdesc_s *desc, bool last);
-static int         imxrt_epdisable(FAR struct usbdev_ep_s *ep);
-static FAR struct usbdev_req_s *imxrt_epallocreq(FAR struct usbdev_ep_s *ep);
-static void        imxrt_epfreereq(FAR struct usbdev_ep_s *ep,
-                     FAR struct usbdev_req_s *);
+static int         imxrt_epdisable(struct usbdev_ep_s *ep);
+static struct usbdev_req_s *imxrt_epallocreq(struct usbdev_ep_s *ep);
+static void        imxrt_epfreereq(struct usbdev_ep_s *ep,
+                     struct usbdev_req_s *);
 #ifdef CONFIG_USBDEV_DMA
-static void       *imxrt_epallocbuffer(FAR struct usbdev_ep_s *ep,
+static void       *imxrt_epallocbuffer(struct usbdev_ep_s *ep,
                      uint16_t bytes);
-static void        imxrt_epfreebuffer(FAR struct usbdev_ep_s *ep,
-                     FAR void *buf);
+static void        imxrt_epfreebuffer(struct usbdev_ep_s *ep,
+                     void *buf);
 #endif
-static int         imxrt_epsubmit(FAR struct usbdev_ep_s *ep,
+static int         imxrt_epsubmit(struct usbdev_ep_s *ep,
                      struct usbdev_req_s *req);
-static int         imxrt_epcancel(FAR struct usbdev_ep_s *ep,
+static int         imxrt_epcancel(struct usbdev_ep_s *ep,
                      struct usbdev_req_s *req);
-static int         imxrt_epstall(FAR struct usbdev_ep_s *ep, bool resume);
+static int         imxrt_epstall(struct usbdev_ep_s *ep, bool resume);
 
-static FAR struct usbdev_ep_s *imxrt_allocep(FAR struct usbdev_s *dev,
+static struct usbdev_ep_s *imxrt_allocep(struct usbdev_s *dev,
                      uint8_t epno, bool in, uint8_t eptype);
-static void        imxrt_freeep(FAR struct usbdev_s *dev,
-                                FAR struct usbdev_ep_s *ep);
+static void        imxrt_freeep(struct usbdev_s *dev,
+                                struct usbdev_ep_s *ep);
 static int         imxrt_getframe(struct usbdev_s *dev);
 static int         imxrt_wakeup(struct usbdev_s *dev);
 static int         imxrt_selfpowered(struct usbdev_s *dev, bool selfpowered);
@@ -686,9 +686,9 @@ static inline void imxrt_chgbits(uint32_t mask, uint32_t val, uint32_t addr)
  *
  ****************************************************************************/
 
-static FAR struct imxrt_req_s *imxrt_rqdequeue(FAR struct imxrt_ep_s *privep)
+static struct imxrt_req_s *imxrt_rqdequeue(struct imxrt_ep_s *privep)
 {
-  FAR struct imxrt_req_s *ret = privep->head;
+  struct imxrt_req_s *ret = privep->head;
 
   if (ret)
     {
@@ -712,8 +712,8 @@ static FAR struct imxrt_req_s *imxrt_rqdequeue(FAR struct imxrt_ep_s *privep)
  *
  ****************************************************************************/
 
-static bool imxrt_rqenqueue(FAR struct imxrt_ep_s *privep,
-                            FAR struct imxrt_req_s *req)
+static bool imxrt_rqenqueue(struct imxrt_ep_s *privep,
+                            struct imxrt_req_s *req)
 {
   bool is_empty = !privep->head;
 
@@ -1905,7 +1905,7 @@ bool imxrt_epcomplete(struct imxrt_usbdev_s *priv, uint8_t epphy)
  *
  ****************************************************************************/
 
-static int imxrt_usbinterrupt(int irq, FAR void *context, FAR void *arg)
+static int imxrt_usbinterrupt(int irq, void *context, void *arg)
 {
   struct imxrt_usbdev_s *priv = &g_usbdev;
   uint32_t disr;
@@ -2114,11 +2114,11 @@ static int imxrt_usbinterrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static int imxrt_epconfigure(FAR struct usbdev_ep_s *ep,
-                               FAR const struct usb_epdesc_s *desc,
-                               bool last)
+static int imxrt_epconfigure(struct usbdev_ep_s *ep,
+                             const struct usb_epdesc_s *desc,
+                             bool last)
 {
-  FAR struct imxrt_ep_s *privep = (FAR struct imxrt_ep_s *)ep;
+  struct imxrt_ep_s *privep = (struct imxrt_ep_s *)ep;
   struct imxrt_dqh_s *dqh = &g_qh[privep->epphy];
 
   usbtrace(TRACE_EPCONFIGURE, privep->epphy);
@@ -2219,9 +2219,9 @@ static int imxrt_epconfigure(FAR struct usbdev_ep_s *ep,
  *
  ****************************************************************************/
 
-static int imxrt_epdisable(FAR struct usbdev_ep_s *ep)
+static int imxrt_epdisable(struct usbdev_ep_s *ep)
 {
-  FAR struct imxrt_ep_s *privep = (FAR struct imxrt_ep_s *)ep;
+  struct imxrt_ep_s *privep = (struct imxrt_ep_s *)ep;
   irqstate_t flags;
 
 #ifdef CONFIG_DEBUG_FEATURES
@@ -2267,9 +2267,9 @@ static int imxrt_epdisable(FAR struct usbdev_ep_s *ep)
  *
  ****************************************************************************/
 
-static FAR struct usbdev_req_s *imxrt_epallocreq(FAR struct usbdev_ep_s *ep)
+static struct usbdev_req_s *imxrt_epallocreq(struct usbdev_ep_s *ep)
 {
-  FAR struct imxrt_req_s *privreq;
+  struct imxrt_req_s *privreq;
 
 #ifdef CONFIG_DEBUG_FEATURES
   if (!ep)
@@ -2279,9 +2279,9 @@ static FAR struct usbdev_req_s *imxrt_epallocreq(FAR struct usbdev_ep_s *ep)
     }
 #endif
 
-  usbtrace(TRACE_EPALLOCREQ, ((FAR struct imxrt_ep_s *)ep)->epphy);
+  usbtrace(TRACE_EPALLOCREQ, ((struct imxrt_ep_s *)ep)->epphy);
 
-  privreq = (FAR struct imxrt_req_s *)kmm_malloc(sizeof(struct imxrt_req_s));
+  privreq = (struct imxrt_req_s *)kmm_malloc(sizeof(struct imxrt_req_s));
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(IMXRT_TRACEERR_ALLOCFAIL), 0);
@@ -2300,10 +2300,10 @@ static FAR struct usbdev_req_s *imxrt_epallocreq(FAR struct usbdev_ep_s *ep)
  *
  ****************************************************************************/
 
-static void imxrt_epfreereq(FAR struct usbdev_ep_s *ep,
-                            FAR struct usbdev_req_s *req)
+static void imxrt_epfreereq(struct usbdev_ep_s *ep,
+                            struct usbdev_req_s *req)
 {
-  FAR struct imxrt_req_s *privreq = (FAR struct imxrt_req_s *)req;
+  struct imxrt_req_s *privreq = (struct imxrt_req_s *)req;
 
 #ifdef CONFIG_DEBUG_FEATURES
   if (!ep || !req)
@@ -2313,7 +2313,7 @@ static void imxrt_epfreereq(FAR struct usbdev_ep_s *ep,
     }
 #endif
 
-  usbtrace(TRACE_EPFREEREQ, ((FAR struct imxrt_ep_s *)ep)->epphy);
+  usbtrace(TRACE_EPFREEREQ, ((struct imxrt_ep_s *)ep)->epphy);
   kmm_free(privreq);
 }
 
@@ -2326,13 +2326,13 @@ static void imxrt_epfreereq(FAR struct usbdev_ep_s *ep,
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DMA
-static void *imxrt_epallocbuffer(FAR struct usbdev_ep_s *ep, uint16_t bytes)
+static void *imxrt_epallocbuffer(struct usbdev_ep_s *ep, uint16_t bytes)
 {
   /* The USB peripheral DMA is very forgiving, as the dTD allows the buffer
    * to start at any address. Hence, no need for alignment.
    */
 
-  FAR struct imxrt_ep_s *privep = (FAR struct imxrt_ep_s *)ep;
+  struct imxrt_ep_s *privep = (struct imxrt_ep_s *)ep;
   UNUSED(privep);
 
   usbtrace(TRACE_EPALLOCBUFFER, privep->epphy);
@@ -2353,9 +2353,9 @@ static void *imxrt_epallocbuffer(FAR struct usbdev_ep_s *ep, uint16_t bytes)
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DMA
-static void imxrt_epfreebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf)
+static void imxrt_epfreebuffer(struct usbdev_ep_s *ep, void *buf)
 {
-  FAR struct imxrt_ep_s *privep = (FAR struct imxrt_ep_s *)ep;
+  struct imxrt_ep_s *privep = (struct imxrt_ep_s *)ep;
   UNUSED(privep);
 
   usbtrace(TRACE_EPFREEBUFFER, privep->epphy);
@@ -2376,12 +2376,12 @@ static void imxrt_epfreebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf)
  *
  ****************************************************************************/
 
-static int imxrt_epsubmit(FAR struct usbdev_ep_s *ep,
-                          FAR struct usbdev_req_s *req)
+static int imxrt_epsubmit(struct usbdev_ep_s *ep,
+                          struct usbdev_req_s *req)
 {
-  FAR struct imxrt_req_s *privreq = (FAR struct imxrt_req_s *)req;
-  FAR struct imxrt_ep_s *privep = (FAR struct imxrt_ep_s *)ep;
-  FAR struct imxrt_usbdev_s *priv;
+  struct imxrt_req_s *privreq = (struct imxrt_req_s *)req;
+  struct imxrt_ep_s *privep = (struct imxrt_ep_s *)ep;
+  struct imxrt_usbdev_s *priv;
   irqstate_t flags;
   int ret = OK;
 
@@ -2451,10 +2451,10 @@ static int imxrt_epsubmit(FAR struct usbdev_ep_s *ep,
  *
  ****************************************************************************/
 
-static int imxrt_epcancel(FAR struct usbdev_ep_s *ep,
-                          FAR struct usbdev_req_s *req)
+static int imxrt_epcancel(struct usbdev_ep_s *ep,
+                          struct usbdev_req_s *req)
 {
-  FAR struct imxrt_ep_s *privep = (FAR struct imxrt_ep_s *)ep;
+  struct imxrt_ep_s *privep = (struct imxrt_ep_s *)ep;
   irqstate_t flags;
 
 #ifdef CONFIG_DEBUG_FEATURES
@@ -2488,9 +2488,9 @@ static int imxrt_epcancel(FAR struct usbdev_ep_s *ep,
  *
  ****************************************************************************/
 
-static int imxrt_epstall(FAR struct usbdev_ep_s *ep, bool resume)
+static int imxrt_epstall(struct usbdev_ep_s *ep, bool resume)
 {
-  FAR struct imxrt_ep_s *privep = (FAR struct imxrt_ep_s *)ep;
+  struct imxrt_ep_s *privep = (struct imxrt_ep_s *)ep;
   irqstate_t flags;
 
   /* STALL or RESUME the endpoint */
@@ -2543,11 +2543,11 @@ static int imxrt_epstall(FAR struct usbdev_ep_s *ep, bool resume)
  *
  ****************************************************************************/
 
-static FAR struct usbdev_ep_s *imxrt_allocep(FAR struct usbdev_s *dev,
-                                             uint8_t eplog,
-                                             bool in, uint8_t eptype)
+static struct usbdev_ep_s *imxrt_allocep(struct usbdev_s *dev,
+                                         uint8_t eplog,
+                                         bool in, uint8_t eptype)
 {
-  FAR struct imxrt_usbdev_s *priv = (FAR struct imxrt_usbdev_s *)dev;
+  struct imxrt_usbdev_s *priv = (struct imxrt_usbdev_s *)dev;
   uint32_t epset = IMXRT_EPALLSET & ~IMXRT_EPCTRLSET;
   irqstate_t flags;
   int epndx = 0;
@@ -2667,11 +2667,11 @@ static FAR struct usbdev_ep_s *imxrt_allocep(FAR struct usbdev_s *dev,
  *
  ****************************************************************************/
 
-static void imxrt_freeep(FAR struct usbdev_s *dev,
-                         FAR struct usbdev_ep_s *ep)
+static void imxrt_freeep(struct usbdev_s *dev,
+                         struct usbdev_ep_s *ep)
 {
-  FAR struct imxrt_usbdev_s *priv = (FAR struct imxrt_usbdev_s *)dev;
-  FAR struct imxrt_ep_s *privep = (FAR struct imxrt_ep_s *)ep;
+  struct imxrt_usbdev_s *priv = (struct imxrt_usbdev_s *)dev;
+  struct imxrt_ep_s *privep = (struct imxrt_ep_s *)ep;
   irqstate_t flags;
 
   usbtrace(TRACE_DEVFREEEP, (uint16_t)privep->epphy);
@@ -2697,7 +2697,7 @@ static void imxrt_freeep(FAR struct usbdev_s *dev,
 static int imxrt_getframe(struct usbdev_s *dev)
 {
 #ifdef CONFIG_IMXRT_USBDEV_FRAME_INTERRUPT
-  FAR struct imxrt_usbdev_s *priv = (FAR struct imxrt_usbdev_s *)dev;
+  struct imxrt_usbdev_s *priv = (struct imxrt_usbdev_s *)dev;
 
   /* Return last valid value of SOF read by the interrupt handler */
 
@@ -2746,7 +2746,7 @@ static int imxrt_wakeup(struct usbdev_s *dev)
 
 static int imxrt_selfpowered(struct usbdev_s *dev, bool selfpowered)
 {
-  FAR struct imxrt_usbdev_s *priv = (FAR struct imxrt_usbdev_s *)dev;
+  struct imxrt_usbdev_s *priv = (struct imxrt_usbdev_s *)dev;
 
   usbtrace(TRACE_DEVSELFPOWERED, (uint16_t)selfpowered);
 
