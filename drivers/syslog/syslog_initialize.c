@@ -91,6 +91,10 @@ int syslog_initialize(void)
   syslog_rpmsg_init();
 #endif
 
+#ifdef CONFIG_SYSLOG_RPMSG_SERVER
+  syslog_rpmsg_server_init();
+#endif
+
   return ret;
 }
 
