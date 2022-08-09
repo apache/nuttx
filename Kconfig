@@ -853,6 +853,12 @@ config DEBUG_LIB_INFO
 	---help---
 		Enable C library informational output to SYSLOG.
 
+config DEBUG_SYS_QUEUE
+	bool "Queue Debug option"
+	default n
+	---help---
+		Enable sys queue debug.
+
 endif # DEBUG_LIB
 
 config DEBUG_MM
