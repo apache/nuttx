@@ -90,13 +90,17 @@ uint64_t *arm64_doirq(int irq, uint64_t * regs)
 
       group_addrenv(NULL);
 #endif
+
+      /* Restore the cpu lock */
+
+      restore_critical_section();
+      regs = (uint64_t *)CURRENT_REGS;
     }
 
   /* Set CURRENT_REGS to NULL to indicate that we are no longer in an
    * interrupt handler.
    */
 
-  regs         = (uint64_t *)CURRENT_REGS;
   CURRENT_REGS = NULL;
 
   return regs;
