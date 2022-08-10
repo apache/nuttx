@@ -37,6 +37,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/mtd/mtd.h>
+#include <nuttx/mtd/configdata.h>
 #include <nuttx/fs/nxffs.h>
 #ifdef CONFIG_BCH
 #include <nuttx/drivers/drivers.h>
@@ -499,6 +500,36 @@ static int init_storage_partition(void)
       ferr("ERROR: Failed to setup spiffs\n");
       return ret;
     }
+
+#elif defined (CONFIG_ESP32C3_SPIFLASH_MTD_CONFIG)
+
+#if defined (CONFIG_TESTING_MTD_CONFIG_FAIL_SAFE)
+
+  /* To test power-loss resilient kv system,
+   * we write possible power-loss flash layout into flash
+   * then start kv system to see if it recovers.
+   * To do so, we need a mtd driver so that test code can
+   * write into flash.
+   */
+
+  const char *path = CONFIG_TESTING_MTD_CONFIG_FAIL_SAFE_MOUNTPT_NAME;
+  ret = register_mtddriver(path, mtd, 0777, NULL);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to register MTD: %d\n", ret);
+      return ret;
+    }
+
+#else
+
+  ret = mtdconfig_register(mtd);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to setup mtd config\n");
+      return ret;
+    }
+
+#endif
 
 #else
 

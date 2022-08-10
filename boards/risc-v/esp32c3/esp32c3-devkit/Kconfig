@@ -109,6 +109,9 @@ choice ESP32C3_SPIFLASH_FS
 		bool "LittleFS"
 		select FS_LITTLEFS
 
+	config ESP32C3_SPIFLASH_MTD_CONFIG
+		bool "Non-volatile storage"
+
 endchoice
 
 config ESP32C3_SPIFLASH_FS_MOUNT_PT
