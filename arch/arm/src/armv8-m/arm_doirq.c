@@ -77,9 +77,16 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 
   if (regs == NULL)
     {
-      /* Update the return regs and restore the CURRENT_REGS to NULL. */
+      /* Restore the cpu lock */
 
-      regs         = (uint32_t *)CURRENT_REGS;
+      if (regs != CURRENT_REGS)
+        {
+          restore_critical_section();
+          regs = (uint32_t *)CURRENT_REGS;
+        }
+
+      /* Update the CURRENT_REGS to NULL. */
+
       CURRENT_REGS = NULL;
     }
 #endif
