@@ -22,6 +22,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/clk/clk_provider.h>
 #include <nuttx/crypto/crypto.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/drivers/rpmsgdev.h>
@@ -82,6 +83,10 @@ void drivers_initialize(void)
 
 #if defined(CONFIG_DRIVER_NOTE)
   note_register();      /* Non-standard /dev/note */
+#endif
+
+#if defined(CONFIG_CLK_RPMSG)
+  clk_rpmsg_server_initialize();
 #endif
 
   /* Initialize the serial device driver */
