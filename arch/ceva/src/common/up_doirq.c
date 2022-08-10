@@ -76,7 +76,11 @@ uint32_t *up_doirq(int irq, uint32_t *regs)
        * a context switch occurred during interrupt processing.
        */
 
-      regs = CURRENT_REGS;
+      if (regs != CURRENT_REGS)
+        {
+          restore_critical_section();
+          regs = CURRENT_REGS;
+        }
 
       /* Restore the previous value of CURRENT_REGS.  NULL would indicate
        * that we are no longer in an interrupt handler.

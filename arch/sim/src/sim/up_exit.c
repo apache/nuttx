@@ -76,6 +76,10 @@ void up_exit(int status)
 
   nxsched_resume_scheduler(tcb);
 
+  /* Restore the cpu lock */
+
+  restore_critical_section();
+
   /* Then switch contexts */
 
   longjmp(tcb->xcp.regs, 1);

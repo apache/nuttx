@@ -93,6 +93,10 @@ void up_release_pending(void)
 
           nxsched_resume_scheduler(rtcb);
 
+          /* Restore the cpu lock */
+
+          restore_critical_section();
+
           /* Then switch contexts */
 
           longjmp(rtcb->xcp.regs, 1);

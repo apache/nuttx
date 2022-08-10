@@ -89,11 +89,18 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
     }
 #endif
 
+  /* Restore the cpu lock */
+
+  if (regs != CURRENT_REGS)
+    {
+      restore_critical_section();
+      regs = (uint32_t *)CURRENT_REGS;
+    }
+
   /* Set CURRENT_REGS to NULL to indicate that we are no longer in an
    * interrupt handler.
    */
 
-  regs         = (uint32_t *)CURRENT_REGS;
   CURRENT_REGS = NULL;
 #endif
 
