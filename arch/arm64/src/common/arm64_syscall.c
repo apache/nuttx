@@ -202,6 +202,13 @@ uint64_t *arm64_syscall_switch(uint64_t * regs)
         break;
     }
 
+  /* Restore the cpu lock */
+
+  if ((uint64_t *)f_regs != ret_regs)
+    {
+      restore_critical_section();
+    }
+
   return ret_regs;
 }
 

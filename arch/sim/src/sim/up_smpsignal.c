@@ -199,6 +199,10 @@ int up_cpu_paused(int cpu)
 
   nxsched_resume_scheduler(tcb);
 
+  /* Restore the cpu lock */
+
+  restore_critical_section();
+
   /* Then switch contexts.  Any necessary address environment changes
    * will be made when the interrupt returns.
    */

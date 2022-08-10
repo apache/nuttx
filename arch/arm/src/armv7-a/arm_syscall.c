@@ -555,7 +555,13 @@ uint32_t *arm_syscall(uint32_t *regs)
     }
 #endif
 
-  regs = (uint32_t *)CURRENT_REGS;
+  /* Restore the cpu lock */
+
+  if (regs != CURRENT_REGS)
+    {
+      restore_critical_section();
+      regs = (uint32_t *)CURRENT_REGS;
+    }
 
   /* Report what happened */
 
