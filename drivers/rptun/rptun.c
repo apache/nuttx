@@ -56,7 +56,7 @@
 
 #define RPTUNIOC_NONE               0
 
-#define RPTUN_TIMEOUT_MS            100
+#define RPTUN_TIMEOUT_MS            20
 
 /****************************************************************************
  * Private Types
