@@ -192,6 +192,15 @@ config MTD_CONFIG_NAME_LEN
 	---help---
 		Sets the maximum length of config item names.
 
+config MTD_CONFIG_FAIL_SAFE
+	bool "Enable Fail Safe MTD Config"
+	default n
+	depends on MTD_BYTE_WRITE
+	---help---
+		Enable the new storage layout to support the resilient to power loss.
+		This replaces the drivers/mtd/mtd_config, which
+		is resilient to power loss.
+
 endif # MTD_CONFIG
 
 comment "MTD Device Drivers"
