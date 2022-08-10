@@ -1839,6 +1839,18 @@ static int da9168_operate(FAR struct battery_charger_dev_s *dev,
 
       break;
 
+      case BATIO_OPRTN_CUTOFF_CURRENT:
+        {
+          batinfo("BATIO_OPRTN_CUTOFF_CURRENT\n");
+          ret = da9168_set_iterm_curr(priv, value, TRUE);
+          if (ret < 0)
+            {
+              baterr("da9168 set iterm cur err:%d\n", ret);
+            }
+        }
+
+        break;
+
       default:
         baterr("Unsupported otp:%d\n", msg->operate_type);
         ret = -EINVAL;
