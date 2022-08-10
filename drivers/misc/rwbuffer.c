@@ -71,18 +71,20 @@ static ssize_t rwb_read_(FAR struct rwbuffer_s *rwb, off_t startblock,
  * Name: rwb_semtake
  ****************************************************************************/
 
-#if defined(CONFIG_DRVR_WRITEBUFFER) && CONFIG_DRVR_WRDELAY != 0
+#if defined(CONFIG_DRVR_WRITEBUFFER)
 static int rwb_semtake(FAR sem_t *sem)
 {
   return nxsem_wait_uninterruptible(sem);
 }
+#else
+# define rwb_semtake(s) OK
 #endif
 
 /****************************************************************************
  * Name: rwb_forcetake
  ****************************************************************************/
 
-#if defined(CONFIG_DRVR_WRITEBUFFER) && CONFIG_DRVR_WRDELAY != 0
+#if defined(CONFIG_DRVR_WRITEBUFFER)
 static int rwb_forcetake(FAR sem_t *sem)
 {
   int result;
@@ -106,13 +108,19 @@ static int rwb_forcetake(FAR sem_t *sem)
 
   return ret;
 }
+#else
+# define rwb_forcetake(s) OK
 #endif
 
 /****************************************************************************
  * Name: rwb_semgive
  ****************************************************************************/
 
-#define rwb_semgive(s) nxsem_post(s)
+#if defined(CONFIG_DRVR_WRITEBUFFER)
+# define rwb_semgive(s) nxsem_post(s)
+#else
+# define rwb_semgive(s)
+#endif
 
 /****************************************************************************
  * Name: rwb_overlap
