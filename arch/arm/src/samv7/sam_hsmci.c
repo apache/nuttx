@@ -118,7 +118,7 @@
  */
 
 #undef  HSCMI_NORXDMA              /* Define to disable RX DMA */
-#define HSCMI_NOTXDMA            1 /* Define to disable TX DMA */
+#undef  HSCMI_NOTXDMA              /* Define to disable TX DMA */
 
 /* Timing */
 
@@ -204,7 +204,7 @@
   (HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | HSMCI_INT_DTOE | \
    HSMCI_INT_DCRCE)
 
-#define HSMCI_DATA_DMASEND_ERRORS \
+#define HSMCI_DATA_SEND_ERRORS \
   (HSMCI_INT_UNRE  | HSMCI_INT_CSTOE | HSMCI_INT_DTOE    | HSMCI_INT_DCRCE)
 
 /* Data transfer status and interrupt mask bits.
@@ -228,7 +228,7 @@
 #define HSMCI_DMARECV_INTS \
   (HSMCI_DATA_RECV_ERRORS | HSMCI_INT_XFRDONE /* | HSMCI_INT_DMADONE */)
 #define HSMCI_DMASEND_INTS \
-  (HSMCI_DATA_DMASEND_ERRORS | HSMCI_INT_XFRDONE /* | HSMCI_INT_DMADONE */)
+  (HSMCI_DATA_SEND_ERRORS | HSMCI_INT_XFRDONE /* | HSMCI_INT_DMADONE */)
 
 /* Event waiting interrupt mask bits.
  *
@@ -1741,6 +1741,7 @@ static sdio_capset_t sam_capabilities(struct sdio_dev_s *dev)
 #ifdef CONFIG_SAMV7_HSMCI_DMA
   caps |= SDIO_CAPS_DMASUPPORTED;
 #endif
+  caps |= SDIO_CAPS_DMABEFOREWRITE;
 
   return caps;
 }
@@ -2242,7 +2243,7 @@ static int sam_sendsetup(struct sdio_dev_s *dev,
       /* Check the HSMCI status */
 
       sr = sam_getreg(priv, SAM_HSMCI_SR_OFFSET);
-      if ((sr & HSMCI_DATA_DMASEND_ERRORS) != 0)
+      if ((sr & HSMCI_DATA_SEND_ERRORS) != 0)
         {
           /* Some fatal error has occurred */
 
@@ -2553,7 +2554,7 @@ static int sam_recvshort(struct sdio_dev_s *dev,
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R3_RESPONSE &&
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R7_RESPONSE)
     {
-      mcerr("ERROR: Wrong response CMD=%08x\n", cmd);
+      mcerr("ERROR: Wrong response CMD=%08" PRIx32 "\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2604,7 +2605,7 @@ static int sam_recvlong(struct sdio_dev_s *dev, uint32_t cmd,
 
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R2_RESPONSE)
     {
-      mcerr("ERROR: Wrong response CMD=%08x\n", cmd);
+      mcerr("ERROR: Wrong response CMD=%08" PRIx32 "\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2737,16 +2738,7 @@ static void sam_waitenable(struct sdio_dev_s *dev,
           return;
         }
 
-      /* Start the watchdog timer.  I am not sure why this is, but I am
-       * currently seeing some additional delays when DMA is used.
-       */
-
-      if (priv->txbusy)
-        {
-          /* TX transfers can be VERY long in the worst case */
-
-          timeout = MAX(5000, timeout);
-        }
+      /* Start the watchdog timer */
 
       delay = MSEC2TICK(timeout);
       ret   = wd_start(&priv->waitwdog, delay,
@@ -2980,7 +2972,7 @@ static int sam_dmarecvsetup(struct sdio_dev_s *dev, uint8_t *buffer,
 
   DEBUGASSERT(nblocks > 0 && blocksize > 0 && (blocksize & 3) == 0);
 
-  /* Physical address of the HSCMI source register, either the TDR (for
+  /* Physical address of the HSCMI source register, either the RDR (for
    * single transfers) or the first FIFO register, and the physical address
    * of the buffer in RAM.
    */
@@ -3135,7 +3127,7 @@ static int sam_dmasendsetup(struct sdio_dev_s *dev,
   sam_dmastart(priv->dma, sam_dmacallback, priv);
 
   /* Configure transfer-related interrupts.  Transfer interrupts are not
-   * enabled until after the transfer is start with an SD command (i.e.,
+   * enabled until after the transfer is started with an SD command (i.e.,
    * at the beginning of sam_eventwait().
    */
 

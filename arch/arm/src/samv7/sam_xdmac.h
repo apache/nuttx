@@ -228,7 +228,7 @@ extern "C"
  * Name: sam_destaddr
  *
  * Description:
- *   Returns the pointer to the destionation address, i.e the last address
+ *   Returns the pointer to the destination address, i.e the last address
  *   data were written by DMA.
  *
  * Assumptions:
