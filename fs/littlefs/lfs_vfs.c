@@ -1419,6 +1419,7 @@ static int littlefs_stat(FAR struct inode *mountpt, FAR const char *relpath,
       return ret;
     }
 
+  info.size = 0;
   ret = lfs_stat(&fs->lfs, relpath, &info);
   littlefs_semgive(fs);
 
