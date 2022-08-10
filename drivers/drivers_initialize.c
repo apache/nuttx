@@ -33,6 +33,7 @@
 #include <nuttx/net/telnet.h>
 #include <nuttx/note/note_driver.h>
 #include <nuttx/power/pm.h>
+#include <nuttx/power/regulator.h>
 #include <nuttx/sensors/sensor.h>
 #include <nuttx/serial/pty.h>
 #include <nuttx/syslog/syslog.h>
@@ -87,6 +88,10 @@ void drivers_initialize(void)
 
 #if defined(CONFIG_CLK_RPMSG)
   clk_rpmsg_server_initialize();
+#endif
+
+#if defined(CONFIG_REGULATOR_RPMSG)
+  regulator_rpmsg_server_init();
 #endif
 
   /* Initialize the serial device driver */
