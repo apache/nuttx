@@ -1538,11 +1538,35 @@ config SIG_TTIN
 		information about how this interacts with the terminal driver, see Access
 		to the Controlling Terminal.
 
+config SIG_FPE
+	int "SIGFPE"
+	default 16
+	---help---
+		The SIGFPE is issued when fatal arithmetic operation errors occur.
+		It includes not only floating-point operation errors, but also all other
+		arithmetic errors such as overflow and divisor zero.
+
+config SIG_ILL
+	int "SIGILL"
+	default 17
+	---help---
+		The SIGILL executed an illegal instruction. It is usually because of an
+		error in the executable file itself or an attempt to execute a data segment.
+		This signal may also be generated when the stack overflows.
+
+config SIG_SEGA
+	int "SIGSEGA"
+	default 18
+	---help---
+		The SIGSEGA is sent when an attempt is made to access memory that is
+		not allocated to itself, or to write data to a memory address that does
+		not have write permission, or to illegally use the memory address signal.
+
 comment "Non-standard Signal Numbers"
 
 config SIG_SIGCONDTIMEDOUT
 	int "SIGCONDTIMEDOUT"
-	default 16
+	default 19
 	depends on !DISABLE_PTHREAD
 	---help---
 		This non-standard signal number is used the implementation of
@@ -1550,7 +1574,7 @@ config SIG_SIGCONDTIMEDOUT
 
 config SIG_SIGWORK
 	int "SIGWORK"
-	default 17
+	default 20
 	depends on SCHED_WORKQUEUE || LIBC_USRWORK
 	---help---
 		SIGWORK is a non-standard signal used to wake up various internal

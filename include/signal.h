@@ -226,11 +226,29 @@
 #  define SIGTTIN       CONFIG_SIG_TTIN
 #endif
 
+#ifndef CONFIG_SIG_FPE
+#  define SIGFPE        16
+#else
+#  define SIGFPE       CONFIG_SIG_FPE
+#endif
+
+#ifndef CONFIG_SIG_ILL
+#  define SIGILL        17
+#else
+#  define SIGILL       CONFIG_SIG_ILL
+#endif
+
+#ifndef CONFIG_SIG_SEGV
+#  define SIGSEGV       18
+#else
+#  define SIGSEGV       CONFIG_SIG_SEGV
+#endif
+
 /* The following are non-standard signal definitions */
 
 #ifndef CONFIG_DISABLE_PTHREAD
 #  ifndef CONFIG_SIG_SIGCONDTIMEDOUT
-#    define SIGCONDTIMEDOUT 16  /* Used in the implementation of pthread_cond_timedwait */
+#    define SIGCONDTIMEDOUT 19  /* Used in the implementation of pthread_cond_timedwait */
 #  else
 #    define SIGCONDTIMEDOUT CONFIG_SIG_SIGCONDTIMEDOUT
 #  endif
@@ -240,7 +258,7 @@
 
 #if defined(CONFIG_SCHED_WORKQUEUE) || defined(CONFIG_PAGING)
 #  ifndef CONFIG_SIG_SIGWORK
-#    define SIGWORK     17  /* Used to wake up the work queue */
+#    define SIGWORK     20  /* Used to wake up the work queue */
 #  else
 #    define SIGWORK     CONFIG_SIG_SIGWORK
 #  endif
