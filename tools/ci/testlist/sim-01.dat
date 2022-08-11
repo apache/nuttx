@@ -18,7 +18,8 @@
 -Darwin,sim:linuxspi
 
 # macOS doesn't have X11
--Darwin,sim:lvgl
+-Darwin,sim:lvgl_fb
+-Darwin,sim:lvgl_lcd
 -Darwin,sim:nsh2
 -Darwin,sim:nx11
 -Darwin,sim:nxlines
