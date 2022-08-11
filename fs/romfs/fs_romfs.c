@@ -204,8 +204,6 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
   ret = romfs_finddirentry(rm, &nodeinfo, relpath);
   if (ret < 0)
     {
-      ferr("ERROR: Failed to find directory directory entry for '%s': %d\n",
-           relpath, ret);
       goto errout_with_semaphore;
     }
 
