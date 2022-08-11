@@ -67,14 +67,6 @@ int dns_bind(sa_family_t family)
   int sd;
   int ret;
 
-  /* Has the DNS client been properly initialized? */
-
-  if (!dns_initialize())
-    {
-      nerr("ERROR: DNS client has not been initialized\n");
-      return -EDESTADDRREQ;
-    }
-
   /* Create a new socket */
 
   sd = socket(family, SOCK_DGRAM, 0);

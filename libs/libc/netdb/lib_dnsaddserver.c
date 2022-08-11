@@ -45,8 +45,41 @@
 #ifndef CONFIG_NETDB_RESOLVCONF
 /* The DNS server addresses */
 
-union dns_addr_u g_dns_servers[CONFIG_NETDB_DNSSERVER_NAMESERVERS];
-uint8_t g_dns_nservers;    /* Number of currently configured nameservers */
+union dns_addr_u g_dns_servers[CONFIG_NETDB_DNSSERVER_NAMESERVERS] =
+  {
+#if defined(CONFIG_NETDB_DNSSERVER_IPv4)
+    {
+      .ipv4.sin_family      = AF_INET,
+      .ipv4.sin_port        = HTONS(DNS_DEFAULT_PORT),
+      .ipv4.sin_addr.s_addr = HTONL(CONFIG_NETDB_DNSSERVER_IPv4ADDR),
+    }
+#elif defined(CONFIG_NETDB_DNSSERVER_IPv6)
+    {
+      .ipv6.sin6_family               = AF_INET6,
+      .ipv6.sin6_port                 = HTONS(DNS_DEFAULT_PORT),
+      .ipv6.sin6_addr.in6_u.u6_addr16 =
+        {
+          HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_1),
+          HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_2),
+          HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_3),
+          HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_4),
+          HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_5),
+          HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_6),
+          HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_7),
+          HTONS(CONFIG_NETDB_DNSSERVER_IPv6ADDR_8)
+        }
+    }
+#endif
+  };
+
+/* Number of currently configured nameservers */
+
+#if defined(CONFIG_NETDB_DNSSERVER_IPv4) || defined(CONFIG_NETDB_DNSSERVER_IPv6)
+uint8_t g_dns_nservers = 1;
+#else
+uint8_t g_dns_nservers;
+#endif
+
 #endif
 
 /****************************************************************************
