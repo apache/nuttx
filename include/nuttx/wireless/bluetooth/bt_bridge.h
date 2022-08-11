@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/bluetooth/bt_uart_filter.h
+ * include/nuttx/wireless/bluetooth/bt_bridge.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,45 +18,29 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVER_WIRELESS_BLUETOOTH_BT_UART_FILTER_H
-#define __DRIVER_WIRELESS_BLUETOOTH_BT_UART_FILTER_H
+#ifndef __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_BRIDGE_H
+#define __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_BRIDGE_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <stdint.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define BT_UART_FILTER_CONN_COUNT   4
-#define BT_UART_FILTER_OPCODE_COUNT 16
-
-#define BT_UART_FILTER_TYPE_BT      0
-#define BT_UART_FILTER_TYPE_BLE     1
-#define BT_UART_FILTER_TYPE_COUNT   2
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-struct bt_uart_filter_s
-{
-  int      type;
-  uint16_t opcode[BT_UART_FILTER_OPCODE_COUNT];
-  uint16_t handle[BT_UART_FILTER_CONN_COUNT];
-};
+#include <nuttx/wireless/bluetooth/bt_driver.h>
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-void bt_uart_filter_init(FAR struct bt_uart_filter_s *filter, int type);
-bool bt_uart_filter_forward_send(FAR struct bt_uart_filter_s *filter,
-                                 FAR char *buffer, size_t buflen);
-bool bt_uart_filter_forward_recv(FAR struct bt_uart_filter_s *filter,
-                                 FAR char *buffer, size_t buflen);
+/****************************************************************************
+ * Name: bt_bridge_register
+ *
+ * Description:
+ *   Register the Bluetooth BT/BLE dual mode bridge driver
+ *
+ ****************************************************************************/
 
-#endif /* __DRIVER_WIRELESS_BLUETOOTH_BT_UART_FILTER_H */
+int bt_bridge_register(FAR struct bt_driver_s *hcidrv,
+                       FAR struct bt_driver_s **btdrv,
+                       FAR struct bt_driver_s **bledrv);
+
+#endif /* __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_BRIDGE_H */

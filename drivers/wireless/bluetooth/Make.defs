@@ -40,9 +40,8 @@ CSRCS += bt_uart_bcm4343x.c
 endif
 endif
 
-ifeq ($(CONFIG_BLUETOOTH_UART_BRIDGE),y)
-CSRCS += bt_uart_bridge.c
-CSRCS += bt_uart_filter.c
+ifeq ($(CONFIG_BLUETOOTH_BRIDGE),y)
+CSRCS += bt_bridge.c
 endif
 
 ifeq ($(CONFIG_BLUETOOTH_NULL),y)
