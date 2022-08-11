@@ -86,6 +86,11 @@ struct bt_driver_s
                       enum bt_buf_type_e type,
                       FAR void *data, size_t len);
 
+  /* Lower-half logic may support platform-specific ioctl commands */
+
+  CODE int (*ioctl)(FAR struct bt_driver_s *btdev, int cmd,
+                    unsigned long arg);
+
   /* Filled by register function, shouldn't be touched by bt_driver_s */
 
   FAR void *priv;
