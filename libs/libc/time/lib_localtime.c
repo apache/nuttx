@@ -1768,7 +1768,7 @@ static FAR struct tm *gmtsub(FAR const time_t *timep,
   if (!g_gmt_isset)
     {
 #ifndef __KERNEL__
-      if (up_interrupt_context())
+      if (up_interrupt_context() || sched_idletask())
         {
           return NULL;
         }
@@ -2486,7 +2486,7 @@ void tzset(void)
   FAR const char *name;
 
 #ifndef __KERNEL__
-  if (up_interrupt_context())
+  if (up_interrupt_context() || sched_idletask())
     {
       return;
     }
