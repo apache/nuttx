@@ -60,7 +60,8 @@ int file_vioctl(FAR struct file *filep, int req, va_list ap)
 
   /* Does the driver support the ioctl method? */
 
-  if (inode->u.i_ops != NULL && inode->u.i_ops->ioctl != NULL)
+  if (INODE_IS_DRIVER(inode) && inode->u.i_ops != NULL &&
+      inode->u.i_ops->ioctl != NULL)
     {
       /* Yes on both accounts.  Let the driver perform the ioctl command */
 
