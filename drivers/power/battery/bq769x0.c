@@ -40,7 +40,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <crc8.h>
+#include <nuttx/crc8.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
 #include <nuttx/i2c/i2c_master.h>

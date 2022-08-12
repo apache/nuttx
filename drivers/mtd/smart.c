@@ -37,12 +37,11 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
-
-#include <crc8.h>
-#include <crc16.h>
-#include <crc32.h>
 #include <debug.h>
 
+#include <nuttx/crc8.h>
+#include <nuttx/crc16.h>
+#include <nuttx/crc32.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>

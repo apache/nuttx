@@ -28,9 +28,9 @@
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
-#include <crc32.h>
 #include <debug.h>
 
+#include <nuttx/crc32.h>
 #include <nuttx/kmalloc.h>
 
 #include "nxffs.h"

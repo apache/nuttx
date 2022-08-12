@@ -22,12 +22,12 @@
  * Included Files
  ****************************************************************************/
 
-#include <crc32.h>
 #include <ctype.h>
 #include <debug.h>
 #include <endian.h>
 #include <inttypes.h>
 
+#include <nuttx/crc32.h>
 #include <nuttx/kmalloc.h>
 
 #include "partition.h"

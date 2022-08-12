@@ -28,11 +28,11 @@
 #include <string.h>
 #include <fcntl.h>
 #include <time.h>
-#include <crc32.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/crc32.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/mtd/mtd.h>

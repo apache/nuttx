@@ -40,8 +40,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <nuttx/fs/fs.h>
-
-#include <crc32.h>
+#include <nuttx/crc32.h>
 
 #include "stm32_bbsram.h"
 #include "chip.h"

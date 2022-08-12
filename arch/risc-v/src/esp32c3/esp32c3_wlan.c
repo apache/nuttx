@@ -30,7 +30,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
-#include <crc64.h>
+#include <nuttx/crc64.h>
 #include <arpa/inet.h>
 
 #include <nuttx/nuttx.h>
