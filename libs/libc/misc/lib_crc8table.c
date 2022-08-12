@@ -24,7 +24,8 @@
 
 #include <sys/types.h>
 #include <stdint.h>
-#include <crc8.h>
+
+#include <nuttx/crc8.h>
 
 /****************************************************************************
  * Public Functions

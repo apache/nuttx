@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/crc16.h
+ * include/nuttx/crc32.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_CRC16_H
-#define __INCLUDE_CRC16_H
+#ifndef __INCLUDE_NUTTX_CRC32_H
+#define __INCLUDE_NUTTX_CRC32_H
 
 /****************************************************************************
  * Included Files
@@ -41,28 +41,28 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: crc16part
+ * Name: crc32part
  *
  * Description:
  *   Continue CRC calculation on a part of the buffer.
  *
  ****************************************************************************/
 
-uint16_t crc16part(FAR const uint8_t *src, size_t len, uint16_t crc16val);
+uint32_t crc32part(FAR const uint8_t *src, size_t len, uint32_t crc32val);
 
 /****************************************************************************
- * Name: crc16
+ * Name: crc32
  *
  * Description:
- *   Return a 16-bit CRC of the contents of the 'src' buffer, length 'len'
+ *   Return a 32-bit CRC of the contents of the 'src' buffer, length 'len'
  *
  ****************************************************************************/
 
-uint16_t crc16(FAR const uint8_t *src, size_t len);
+uint32_t crc32(FAR const uint8_t *src, size_t len);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __INCLUDE_CRC16_H */
+#endif /* __INCLUDE_NUTTX_CRC32_H */

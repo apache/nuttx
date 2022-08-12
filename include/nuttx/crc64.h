@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/crc64.h
+ * include/nuttx/crc64.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_CRC64_H
-#define __INCLUDE_CRC64_H
+#ifndef __INCLUDE_NUTTX_CRC64_H
+#define __INCLUDE_NUTTX_CRC64_H
 
 /****************************************************************************
  * Included Files
@@ -91,4 +91,4 @@ uint64_t crc64(FAR const uint8_t *src, size_t len);
 #endif
 
 #endif /* CONFIG_HAVE_LONG_LONG */
-#endif /* __INCLUDE_CRC64_H */
+#endif /* __INCLUDE_NUTTX_CRC64_H */

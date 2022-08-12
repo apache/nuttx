@@ -44,7 +44,7 @@
 #include <nuttx/net/mii.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
-#include <crc64.h>
+#include <nuttx/crc64.h>
 
 #if defined(CONFIG_NET_PKT)
 #  include <nuttx/net/pkt.h>
