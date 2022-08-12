@@ -575,6 +575,10 @@ static int fatfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           ret = drv->u.i_bops->ioctl(drv, cmd, arg);
         }
+      else
+        {
+          ret = -ENOTTY;
+        }
     }
 
   fatfs_semgive(fs);
