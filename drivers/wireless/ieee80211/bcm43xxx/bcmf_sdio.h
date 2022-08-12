@@ -103,36 +103,9 @@ struct bcmf_sdio_dev_s
   bool    flow_ctrl;               /* Current flow control status */
 
   sem_t queue_mutex;               /* Lock for TX/RX/free queues */
-  struct list_node free_queue;     /* Queue of available frames */
   struct list_node tx_queue;       /* Queue of frames to transmit */
   struct list_node rx_queue;       /* Queue of frames used to receive */
   volatile int tx_queue_count;     /* Count of items in TX queue */
-};
-
-/* Structure used to manage SDIO frames */
-
-struct bcmf_sdio_frame
-{
-  struct bcmf_frame_s header;
-  bool                tx;
-  struct list_node    list_entry;
-  uint8_t             pad[CONFIG_IEEE80211_BROADCOM_DMABUF_ALIGNMENT -
-                          FIRST_WORD_SIZE]
-  aligned_data(CONFIG_IEEE80211_BROADCOM_DMABUF_ALIGNMENT);
-
-  /* pad[] array is used and aligned in order to make the following data[]
-   * buffer aligned beginning from the offset of 4 bytes to the address
-   * boundary for SDIO DMA transfers.
-   * The first 4 bytes of data[] buffer are not directly used in DMA
-   * transfers. Instead, they are used as the initial phase just to get
-   * the length of the remaining long data to be read. Thus only
-   * the remaining part of data[] buffer beginning from the offset of 4 bytes
-   * is required to be aligned to the address boundary set by
-   * CONFIG_IEEE80211_BROADCOM_SDIO_DMA_BUF_ALIGNMENT parameter.
-   */
-
-  uint8_t             data[HEADER_SIZE + MAX_NETDEV_PKTSIZE +
-                           CONFIG_NET_GUARDSIZE];
 };
 
 /****************************************************************************
@@ -159,11 +132,5 @@ int bcmf_read_reg(FAR struct bcmf_sdio_dev_s *sbus, uint8_t function,
 
 int bcmf_write_reg(FAR struct bcmf_sdio_dev_s *sbus, uint8_t function,
                    uint32_t address, uint8_t reg);
-
-struct bcmf_sdio_frame *bcmf_sdio_allocate_frame(FAR struct bcmf_dev_s *priv,
-                                                 bool block, bool tx);
-
-void bcmf_sdio_free_frame(FAR struct bcmf_dev_s *priv,
-                          struct bcmf_sdio_frame *sframe);
 
 #endif /* __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_SDIO_H */

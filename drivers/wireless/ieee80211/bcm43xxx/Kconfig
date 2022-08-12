@@ -34,6 +34,12 @@ config IEEE80211_BROADCOM_BCM43455
 	default n
 	select IEEE80211_BROADCOM_HAVE_CLM
 
+config IEEE80211_INFINEON_CYW43439
+	bool "Infineon 43439 chip support"
+	depends on IEEE80211_BROADCOM_FULLMAC
+	default n
+	select IEEE80211_BROADCOM_HAVE_CLM
+
 config IEEE80211_BROADCOM_FWFILES
 	bool "Firmware files"
 	default y
@@ -118,8 +124,25 @@ config IEEE80211_BROADCOM_FULLMAC_SDIO
 		This selection enables support for broadcom
 		FullMAC-compliant devices using SDIO bus.
 
+config IEEE80211_BROADCOM_FULLMAC_GSPI
+	bool "Broadcom FullMAC driver on gSPI bus"
+	select IEEE80211_BROADCOM_FULLMAC
+	default n
+	---help---
+		This selection enables support for broadcom
+		FullMAC-compliant devices using SDIO bus.
+
+config IEEE80211_BROADCOM_FULLMAC_GSPI_MAX_FRAME
+	int "Broadcom FullMAC driver on gSPI bus"
+	default 2048
+	depends on IEEE80211_BROADCOM_FULLMAC_GSPI
+	---help---
+		This is the maximum frame size for data transfers
+		with the chip.
+
 config IEEE80211_BROADCOM_SCHED_PRIORITY
 	int "Broadcom BCMF daemon thread schedule priority"
+	depends on IEEE80211_BROADCOM_FULLMAC
 	default SCHED_HPWORKPRIORITY if SCHED_HPWORK
 	default 255
 	---help---
@@ -128,18 +151,21 @@ config IEEE80211_BROADCOM_SCHED_PRIORITY
 
 config IEEE80211_BROADCOM_SCAN_RESULT_ENTRIES
 	int "Broadcom BCMF escan result entries"
+	depends on IEEE80211_BROADCOM_FULLMAC
 	default 10
 	---help---
 		This parameter should be set the bcmf escan result buffer entries
 
 config IEEE80211_BROADCOM_LOWPOWER
 	bool "Broadcom BCMF lower power"
+	depends on IEEE80211_BROADCOM_FULLMAC
 	default n
 	---help---
 		This parameter should be enable the bcmf lower power mode
 
 config IEEE80211_BROADCOM_DEFAULT_COUNTRY
 	string "Broadcom BCMF default country code"
+	depends on IEEE80211_BROADCOM_FULLMAC
 	default ""
 	---help---
 		This parameter should be set the default country code

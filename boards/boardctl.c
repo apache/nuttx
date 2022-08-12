@@ -383,7 +383,7 @@ int boardctl(unsigned int cmd, uintptr_t arg)
 
 #ifdef CONFIG_PM
       /* CMD:           BOARDIOC_PM_CONTROL
-       * DESCRIPTION:   anage power state transition and query
+       * DESCRIPTION:   manage power state transition and query
        * ARG:           A pointer to an instance of struct boardioc_pm_ctrl_s
        * CONFIGURATION: CONFIG_PM
        * DEPENDENCIES:  None

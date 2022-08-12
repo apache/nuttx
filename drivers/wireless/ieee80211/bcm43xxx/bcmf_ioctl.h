@@ -762,6 +762,7 @@ typedef struct wlc_iov_trx_s
 #define IOVAR_STR_AMPDU_RX_FACTOR        "ampdu_rx_factor"
 #define IOVAR_STR_MIMO_BW_CAP            "mimo_bw_cap"
 #define IOVAR_STR_CLMLOAD                "clmload"
+#define IOVAR_STR_CLVER                  "clmver"
 #define IOVAR_STR_JOIN                   "join"
 
 #define WLC_IOCTL_MAGIC                    ( 0x14e46c77 )

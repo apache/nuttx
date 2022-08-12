@@ -114,15 +114,6 @@ static bool brcm_chip_sr_capable(FAR struct bcmf_sdio_dev_s *sbus);
  * Private Data
  ****************************************************************************/
 
-/* Buffer pool for SDIO bus interface
- * This pool is shared between all driver devices
- */
-
-static struct bcmf_sdio_frame
-  g_pktframes[CONFIG_IEEE80211_BROADCOM_FRAME_POOL_SIZE];
-
-/* TODO free_queue should be static */
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -833,16 +824,10 @@ int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
 
   list_initialize(&sbus->tx_queue);
   list_initialize(&sbus->rx_queue);
-  list_initialize(&sbus->free_queue);
 
   /* Setup free buffer list */
 
-  /* FIXME this should be static to driver */
-
-  for (ret = 0; ret < CONFIG_IEEE80211_BROADCOM_FRAME_POOL_SIZE; ret++)
-    {
-      list_add_tail(&sbus->free_queue, &g_pktframes[ret].list_entry);
-    }
+  bcmf_initialize_interface_frames();
 
   /* Init thread semaphore */
 
@@ -1047,74 +1032,4 @@ int bcmf_sdio_thread(int argc, char **argv)
 
   wlinfo("Exit\n");
   return 0;
-}
-
-struct bcmf_sdio_frame *bcmf_sdio_allocate_frame(FAR struct bcmf_dev_s *priv,
-                                                 bool block, bool tx)
-{
-  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
-  struct bcmf_sdio_frame *sframe;
-
-  while (1)
-    {
-      if (nxsem_wait_uninterruptible(&sbus->queue_mutex) < 0)
-        {
-          DEBUGPANIC();
-        }
-
-      if (!tx ||
-          sbus->tx_queue_count <
-            CONFIG_IEEE80211_BROADCOM_FRAME_POOL_SIZE / 2)
-        {
-          if ((sframe = list_remove_head_type(&sbus->free_queue,
-                                         struct bcmf_sdio_frame,
-                                         list_entry)) != NULL)
-            {
-              if (tx)
-                {
-                  sbus->tx_queue_count++;
-                }
-
-              nxsem_post(&sbus->queue_mutex);
-              break;
-            }
-        }
-
-      nxsem_post(&sbus->queue_mutex);
-
-      if (!block)
-        {
-          wlinfo("No avail buffer\n");
-          return NULL;
-        }
-
-      nxsig_usleep(10 * 1000);
-    }
-
-  sframe->header.len  = HEADER_SIZE + MAX_NETDEV_PKTSIZE +
-                        CONFIG_NET_GUARDSIZE;
-  sframe->header.base = sframe->data;
-  sframe->header.data = sframe->data;
-  sframe->tx          = tx;
-  return sframe;
-}
-
-void bcmf_sdio_free_frame(FAR struct bcmf_dev_s *priv,
-                          struct bcmf_sdio_frame *sframe)
-{
-  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
-
-  if (nxsem_wait_uninterruptible(&sbus->queue_mutex) < 0)
-    {
-      DEBUGPANIC();
-    }
-
-  list_add_head(&sbus->free_queue, &sframe->list_entry);
-
-  if (sframe->tx)
-    {
-      sbus->tx_queue_count--;
-    }
-
-  nxsem_post(&sbus->queue_mutex);
 }

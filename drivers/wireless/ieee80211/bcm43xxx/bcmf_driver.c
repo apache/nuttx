@@ -47,7 +47,7 @@
 #include "bcmf_ioctl.h"
 #include "bcmf_utils.h"
 #include "bcmf_netdev.h"
-#include "bcmf_sdio.h"
+#include "bcmf_core.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -148,6 +148,10 @@ static int bcmf_wl_get_interface(FAR struct bcmf_dev_s *priv,
  * Private Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: bcmf_wl_channel_to_frequency
+ ****************************************************************************/
+
 static int bcmf_wl_channel_to_frequency(int chan)
 {
   if (chan <= 0)
@@ -173,6 +177,10 @@ static int bcmf_wl_channel_to_frequency(int chan)
 
   return 0; /* not supported */
 }
+
+/****************************************************************************
+ * Name: bcmf_allocate_device
+ ****************************************************************************/
 
 FAR struct bcmf_dev_s *bcmf_allocate_device(void)
 {
@@ -232,12 +240,20 @@ exit_free_priv:
   return NULL;
 }
 
+/****************************************************************************
+ * Name: bcmf_free_device
+ ****************************************************************************/
+
 void bcmf_free_device(FAR struct bcmf_dev_s *priv)
 {
-  /* TODO deinitialize device structures */
+  /* ## TODO ## deinitialize device structures */
 
   kmm_free(priv);
 }
+
+/****************************************************************************
+ * Name: bcmf_wl_set_mac_address
+ ****************************************************************************/
 
 int bcmf_wl_set_mac_address(FAR struct bcmf_dev_s *priv, struct ifreq *req)
 {
@@ -263,6 +279,10 @@ int bcmf_wl_set_mac_address(FAR struct bcmf_dev_s *priv, struct ifreq *req)
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: bcmf_driver_download_clm
+ ****************************************************************************/
 
 #ifdef CONFIG_IEEE80211_BROADCOM_HAVE_CLM
 #ifdef CONFIG_IEEE80211_BROADCOM_FWFILES
@@ -356,10 +376,10 @@ errout_with_file:
 #else
 int bcmf_driver_download_clm(FAR struct bcmf_dev_s *priv)
 {
-  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
-  FAR uint8_t *srcbuff = sbus->chip->clm_blob_image;
+  FAR bcmf_interface_dev_t *ibus = (FAR bcmf_interface_dev_t *)priv->bus;
+  FAR uint8_t *srcbuff = ibus->chip->clm_blob_image;
   FAR uint8_t *downloadbuff;
-  unsigned int datalen = *sbus->chip->clm_blob_image_size;
+  unsigned int datalen = *ibus->chip->clm_blob_image_size;
   uint16_t dl_flag;
   int ret = 0;
 
@@ -426,6 +446,10 @@ int bcmf_driver_download_clm(FAR struct bcmf_dev_s *priv)
 #endif
 #endif /* CONFIG_IEEE80211_BROADCOM_HAVE_CLM */
 
+/****************************************************************************
+ * Name: bcmf_wl_active
+ ****************************************************************************/
+
 int bcmf_wl_active(FAR struct bcmf_dev_s *priv, bool active)
 {
   int interface = CHIP_STA_INTERFACE;
@@ -434,11 +458,15 @@ int bcmf_wl_active(FAR struct bcmf_dev_s *priv, bool active)
   uint32_t value;
   int ret;
 
-  ret = bcmf_bus_sdio_active(priv, active);
+  ninfo("Entered\n");
+
+  ret = bcmf_bus_interface_active(priv, active);
   if (ret != OK || !active)
     {
       return ret;
     }
+
+  ninfo("Interface activated\n");
 
 #ifdef CONFIG_IEEE80211_BROADCOM_HAVE_CLM
   /* Download CLM blob if needed */
@@ -539,11 +567,15 @@ int bcmf_wl_active(FAR struct bcmf_dev_s *priv, bool active)
 errout_in_sdio_active:
   if (ret != OK)
     {
-      bcmf_bus_sdio_active(priv, false);
+      bcmf_bus_interface_active(priv, false);
     }
 
   return ret;
 }
+
+/****************************************************************************
+ * Name: bcmf_driver_initialize
+ ****************************************************************************/
 
 int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
 {
@@ -592,20 +624,33 @@ int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
   return bcmf_netdev_register(priv);
 }
 
+/****************************************************************************
+ * Name: bcmf_wl_default_event_handler
+ ****************************************************************************/
+
 void bcmf_wl_default_event_handler(FAR struct bcmf_dev_s *priv,
                                    struct bcmf_event_s *event,
                                    unsigned int len)
 {
-  wlinfo("Got event %" PRId32 " from <%s>\n",
+  wlinfo("Unhandled event %" PRId32 " from <%s>\n",
          bcmf_getle32(&event->type),
          event->src_name);
 }
+
+/****************************************************************************
+ * Name: bcmf_wl_radio_event_handler
+ ****************************************************************************/
 
 void bcmf_wl_radio_event_handler(FAR struct bcmf_dev_s *priv,
                                  struct bcmf_event_s *event,
                                  unsigned int len)
 {
+  wlinfo("Unhandled radio event from <%s>\n", event->src_name);
 }
+
+/****************************************************************************
+ * Name: bcmf_wl_auth_event_handler
+ ****************************************************************************/
 
 void bcmf_wl_auth_event_handler(FAR struct bcmf_dev_s *priv,
                                 struct bcmf_event_s *event,
@@ -642,6 +687,10 @@ void bcmf_wl_auth_event_handler(FAR struct bcmf_dev_s *priv,
     }
 }
 
+/****************************************************************************
+ * Name: bcmf_wl_scan_event_handler
+ ****************************************************************************/
+
 /* bcmf_wl_scan_event_handler must run at high priority else
  * race condition may occur on priv->scan_result field
  */
@@ -668,6 +717,8 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
       wlinfo("Got Unexpected scan event\n");
       goto exit_invalid_frame;
     }
+
+  wlinfo("Scan event from <%s>\n", event->src_name);
 
   status = bcmf_getle32(&event->status);
   escan_result_len = bcmf_getle32(&event->len);
@@ -809,6 +860,10 @@ exit_invalid_frame:
   bcmf_hexdump((FAR uint8_t *)event, event_len, (unsigned long)event);
 }
 
+/****************************************************************************
+ * Name: bcmf_wl_scan_format_results
+ ****************************************************************************/
+
 static int bcmf_wl_scan_format_results(FAR struct bcmf_dev_s *priv,
                                        FAR struct iwreq *iwr)
 {
@@ -926,6 +981,10 @@ static int bcmf_wl_scan_format_results(FAR struct bcmf_dev_s *priv,
   return OK;
 }
 
+/****************************************************************************
+ * Name: bcmf_wl_scan_timeout
+ ****************************************************************************/
+
 void bcmf_wl_scan_timeout(wdparm_t arg)
 {
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
@@ -944,6 +1003,10 @@ void bcmf_wl_scan_timeout(wdparm_t arg)
   nxsem_post(&priv->control_mutex);
 }
 
+/****************************************************************************
+ * Name: bcmf_wl_get_interface
+ ****************************************************************************/
+
 int bcmf_wl_get_interface(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 {
   /* TODO resolve interface using iwr->ifr_name */
@@ -954,6 +1017,15 @@ int bcmf_wl_get_interface(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: bcmf_sdio_initialize
+ *
+ * Description:
+ *   Initialize the drive with a SDIO connection.
+ ****************************************************************************/
+
+#if defined(CONFIG_IEEE80211_BROADCOM_FULLMAC_SDIO)
 
 int bcmf_sdio_initialize(int minor, FAR struct sdio_dev_s *dev)
 {
@@ -986,6 +1058,54 @@ exit_free_device:
   return ret;
 }
 
+#endif
+
+/****************************************************************************
+ * Name: gspi_initialize
+ *
+ * Description:
+ *   Initialize the drive with a gSPI connection.
+ ****************************************************************************/
+
+#if defined(CONFIG_IEEE80211_BROADCOM_FULLMAC_GSPI)
+
+int gspi_initialize(FAR struct gspi_dev_s *gspi)
+{
+  int ret;
+  FAR struct bcmf_dev_s *priv;
+
+  ninfo("entered.\n");
+
+  priv = bcmf_allocate_device();
+  if (!priv)
+    {
+      return -ENOMEM;
+    }
+
+  /* Init sdio bus */
+
+  ret = bcmf_bus_gspi_initialize(priv, gspi);
+  if (ret != OK)
+    {
+      ret = -EIO;
+      goto exit_free_device;
+    }
+
+  /* Bus initialized, register network driver */
+
+  return bcmf_driver_initialize(priv);
+
+exit_free_device:
+  bcmf_free_device(priv);
+  return ret;
+}
+
+#endif
+
+/****************************************************************************
+ * Name: bcmf_wl_enable
+ ****************************************************************************/
+
 int bcmf_wl_enable(FAR struct bcmf_dev_s *priv, bool enable)
 {
   int ret;
@@ -1008,6 +1128,13 @@ int bcmf_wl_enable(FAR struct bcmf_dev_s *priv, bool enable)
 
   return ret;
 }
+
+/****************************************************************************
+ * Name: bcmf_wl_start_scan
+ *
+ * Description:
+ *   Start a WiFi scan.
+ ****************************************************************************/
 
 int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 {
@@ -1130,10 +1257,19 @@ exit_sem_post:
   priv->scan_status = BCMF_SCAN_DISABLED;
   nxsem_post(&priv->control_mutex);
 
+  wlinfo("scan complete\n");
+
 exit_failed:
   wlinfo("Failed\n");
   return ret;
 }
+
+/****************************************************************************
+ * Name: bcmf_wl_get_scan_results
+ *
+ * Description:
+ *   Get the results of a WiFi scan.
+ ****************************************************************************/
 
 int bcmf_wl_get_scan_results(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 {
@@ -1188,6 +1324,13 @@ exit_failed:
 
   return ret;
 }
+
+/****************************************************************************
+ * Name: bcmf_wl_set_auth_param
+ *
+ * Description:
+ *   Set the authorization parameters for the device
+ ****************************************************************************/
 
 int bcmf_wl_set_auth_param(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 {
@@ -1322,6 +1465,13 @@ int bcmf_wl_set_auth_param(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
   return ret;
 }
 
+/****************************************************************************
+ * Name: bcmf_wl_set_mode
+ *
+ * Description:
+ *   Set the mode for the device
+ ****************************************************************************/
+
 int bcmf_wl_set_mode(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 {
   uint32_t out_len;
@@ -1341,6 +1491,13 @@ int bcmf_wl_set_mode(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
   return bcmf_cdc_ioctl(priv, interface, true,
                         WLC_SET_INFRA, (uint8_t *)&value, &out_len);
 }
+
+/****************************************************************************
+ * Name: bcmf_wl_get_mode
+ *
+ * Description:
+ *   Get the mode for the device
+ ****************************************************************************/
 
 int bcmf_wl_get_mode(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 {
@@ -1386,6 +1543,13 @@ int bcmf_wl_get_mode(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
   return ret;
 }
 
+/****************************************************************************
+ * Name: bcmf_wl_set_bssid
+ *
+ * Description:
+ *   Set the bssid for the device
+ ****************************************************************************/
+
 int bcmf_wl_set_bssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 {
   uint32_t out_len;
@@ -1423,6 +1587,13 @@ int bcmf_wl_set_bssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
   return ret;
 }
 
+/****************************************************************************
+ * Name: bcmf_wl_get_bssid
+ *
+ * Description:
+ *   Get the bssid for the device
+ ****************************************************************************/
+
 int bcmf_wl_get_bssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 {
   uint32_t out_len;
@@ -1441,6 +1612,13 @@ int bcmf_wl_get_bssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
   return bcmf_cdc_ioctl(priv, interface, false, WLC_GET_BSSID,
                         (uint8_t *)iwr->u.ap_addr.sa_data, &out_len);
 }
+
+/****************************************************************************
+ * Name: bcmf_wl_get_channel
+ *
+ * Description:
+ *   Get the channel for the device
+ ****************************************************************************/
 
 int bcmf_wl_get_channel(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 {
@@ -1467,6 +1645,13 @@ int bcmf_wl_get_channel(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
   return ret;
 }
 
+/****************************************************************************
+ * Name: bcmf_wl_get_rate
+ *
+ * Description:
+ *   Get the data rate for the device
+ ****************************************************************************/
+
 int bcmf_wl_get_rate(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 {
   uint32_t out_len;
@@ -1492,6 +1677,13 @@ int bcmf_wl_get_rate(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
   return ret;
 }
+
+/****************************************************************************
+ * Name: bcmf_wl_get_txpower
+ *
+ * Description:
+ *   Get the tranmit power for the device
+ ****************************************************************************/
 
 int bcmf_wl_get_txpower(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 {
@@ -1531,6 +1723,13 @@ int bcmf_wl_get_txpower(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
   return ret;
 }
 
+/****************************************************************************
+ * Name: bcmf_wl_get_iwrange
+ *
+ * Description:
+ *   Get the iwrange for the device
+ ****************************************************************************/
+
 int bcmf_wl_get_iwrange(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 {
   struct iw_range *range;
@@ -1568,6 +1767,13 @@ int bcmf_wl_get_iwrange(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
   return OK;
 }
 
+/****************************************************************************
+ * Name: bcmf_wl_get_rssi
+ *
+ * Description:
+ *   Get the RSSI for the device
+ ****************************************************************************/
+
 int bcmf_wl_get_rssi(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 {
   wl_sta_rssi_t rssi;
@@ -1594,6 +1800,13 @@ int bcmf_wl_get_rssi(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
   return ret;
 }
+
+/****************************************************************************
+ * Name: bcmf_wl_set_encode_ext
+ *
+ * Description:
+ *   Set the encoding scheme for a device based on iwreq structure.
+ ****************************************************************************/
 
 int bcmf_wl_set_encode_ext(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 {
@@ -1633,6 +1846,13 @@ int bcmf_wl_set_encode_ext(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
   return bcmf_cdc_ioctl(priv, interface, true,
                         WLC_SET_WSEC_PMK, (uint8_t *)&psk, &out_len);
 }
+
+/****************************************************************************
+ * Name: bcmf_wl_set_ssid
+ *
+ * Description:
+ *   Get the SSID for a device based on iwreq structure.
+ ****************************************************************************/
 
 int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 {
@@ -1698,6 +1918,13 @@ int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
   return OK;
 }
 
+/****************************************************************************
+ * Name: bcmf_wl_get_ssid
+ *
+ * Description:
+ *   Get the SSID for a device.
+ ****************************************************************************/
+
 int bcmf_wl_get_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 {
   uint32_t out_len;
@@ -1727,6 +1954,13 @@ int bcmf_wl_get_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
   return ret;
 }
 
+/****************************************************************************
+ * Name: bcmf_wl_set_country_code
+ *
+ * Description:
+ *   Set a new country code.
+ ****************************************************************************/
+
 int bcmf_wl_set_country_code(FAR struct bcmf_dev_s *priv,
                              int interface, FAR void *code)
 {
@@ -1750,6 +1984,13 @@ int bcmf_wl_set_country_code(FAR struct bcmf_dev_s *priv,
                                 &out_len);
 }
 
+/****************************************************************************
+ * Name: bcmf_wl_set_country
+ *
+ * Description:
+ *   Set a new country code based on data in an iwreq structure.
+ ****************************************************************************/
+
 int bcmf_wl_set_country(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr)
 {
   int interface;
@@ -1763,6 +2004,13 @@ int bcmf_wl_set_country(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr)
 
   return bcmf_wl_set_country_code(priv, interface, iwr->u.data.pointer);
 }
+
+/****************************************************************************
+ * Name: bcmf_wl_get_country
+ *
+ * Description:
+ *   Get the current country code.
+ ****************************************************************************/
 
 int bcmf_wl_get_country(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr)
 {
@@ -1794,6 +2042,10 @@ int bcmf_wl_get_country(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr)
 
   return ret;
 }
+
+/****************************************************************************
+ * Name: bcmf_wl_set_dtim
+ ****************************************************************************/
 
 #ifdef CONFIG_IEEE80211_BROADCOM_LOWPOWER
 

@@ -108,7 +108,10 @@ void arp_arpin(FAR struct net_driver_s *dev)
   switch (arp->ah_opcode)
     {
       case HTONS(ARP_REQUEST):
-        ninfo("ARP request for IP %04lx\n", (unsigned long)ipaddr);
+        ninfo("ARP request for IP %ld.%ld.%ld.%ld\n", ip4_addr1(ipaddr),
+                                                      ip4_addr2(ipaddr),
+                                                      ip4_addr3(ipaddr),
+                                                      ip4_addr4(ipaddr));
 
         /* ARP request. If it asked for our address, we send out a reply. */
 

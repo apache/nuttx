@@ -260,7 +260,10 @@ void arp_out(FAR struct net_driver_s *dev)
   ret = arp_find(ipaddr, &ethaddr);
   if (ret < 0)
     {
-      ninfo("ARP request for IP %08lx\n", (unsigned long)ipaddr);
+      ninfo("ARP request for IP %ld.%ld.%ld.%ld\n", ip4_addr1(ipaddr),
+                                                    ip4_addr2(ipaddr),
+                                                    ip4_addr3(ipaddr),
+                                                    ip4_addr4(ipaddr));
 
       /* The destination address was not in our ARP table, so we overwrite
        * the IP packet with an ARP request.

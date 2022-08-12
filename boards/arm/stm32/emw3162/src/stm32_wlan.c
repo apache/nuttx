@@ -26,7 +26,7 @@
 
 #include <debug.h>
 
-#include <nuttx/wireless/ieee80211/bcmf_sdio.h>
+#include <nuttx/wireless/ieee80211/bcmf_interface.h>
 #include <nuttx/wireless/ieee80211/bcmf_board.h>
 
 #include <arch/board/board.h>

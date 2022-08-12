@@ -709,6 +709,14 @@ int dns_query(FAR const char *hostname, FAR union dns_addr_u *addr,
   FAR struct dns_query_s query;
   int ret;
 
+  /* Has the DNS client been properly initialized? */
+
+  if (!dns_initialize())
+    {
+      nerr("ERROR: DNS client has not been initialized\n");
+      return -EDESTADDRREQ;
+    }
+
   /* Set up the query info structure */
 
   query.result   = -EADDRNOTAVAIL;

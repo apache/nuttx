@@ -47,6 +47,7 @@
 #define SDIO_DEVICE_ID_BROADCOM_43362        43362
 #define SDIO_DEVICE_ID_BROADCOM_43430        43430
 #define SDIO_DEVICE_ID_BROADCOM_43455        0x4345
+#define SDIO_DEVICE_ID_INFINEON_CYW43439     43439
 
 /* Core reg address translation.
  * Both macro's returns a 32 bits byte address on the backplane bus.
@@ -89,7 +90,8 @@ enum
   SDIOD_CORE_ID,
 #if defined(CONFIG_IEEE80211_BROADCOM_BCM4301X) || \
     defined(CONFIG_IEEE80211_BROADCOM_BCM43362) || \
-    defined(CONFIG_IEEE80211_BROADCOM_BCM43438)
+    defined(CONFIG_IEEE80211_BROADCOM_BCM43438) || \
+    defined(CONFIG_IEEE80211_INFINEON_CYW43439)
   WLAN_ARMCM3_CORE_ID,
   SOCSRAM_CORE_ID,
 #endif

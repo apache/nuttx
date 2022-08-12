@@ -685,6 +685,8 @@ config RP2040_BOARD_HAS_WS2812
 	bool "Has ws2812 pixels"
 	default n
 	depends on WS2812
+  select WS2812_NON_SPI_DRIVER
 	---help---
 		See the Board Selection menu to configure the pins used
 		by ws2812.
+		

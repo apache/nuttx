@@ -106,7 +106,7 @@ config WS2812
 	---help---
 		Enable support for the Worldsemi WS2812 LED driver which commonly
 		found in LED strips.
-		NOTE: Depening on the board slected this device may require
+		NOTE: Depending on the board selected, this device may require
 		exclusive use of an SPI bus as ws2812 LEDs have no CS or
 		RESET line.
 

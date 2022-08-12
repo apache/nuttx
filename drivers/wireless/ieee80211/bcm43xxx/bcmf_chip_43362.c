@@ -25,7 +25,7 @@
 #include <nuttx/config.h>
 #include <stdint.h>
 
-#include "bcmf_sdio.h"
+#include "bcmf_interface.h"
 
 /****************************************************************************
  * Pre-processor Definitions
