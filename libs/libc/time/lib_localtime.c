@@ -326,8 +326,8 @@ static int g_lcl_isset;
 static int g_gmt_isset;
 static FAR struct state_s *g_lcl_ptr;
 static FAR struct state_s *g_gmt_ptr;
-static mutex_t g_lcl_lock = NXMUTEX_INITIALIZER;
-static mutex_t g_gmt_lock = NXMUTEX_INITIALIZER;
+static rmutex_t g_lcl_lock = NXRMUTEX_INITIALIZER;
+static rmutex_t g_gmt_lock = NXRMUTEX_INITIALIZER;
 
 /* Section 4.12.3 of X3.159-1989 requires that
  *    Except for the strftime function, these functions [asctime,
@@ -1775,7 +1775,8 @@ static FAR struct tm *gmtsub(FAR const time_t *timep,
         }
 #endif
 
-      nxmutex_lock(&g_gmt_lock);
+      nxrmutex_lock(&g_gmt_lock);
+
       if (!g_gmt_isset)
         {
           g_gmt_ptr = lib_malloc(sizeof *g_gmt_ptr);
@@ -1786,7 +1787,7 @@ static FAR struct tm *gmtsub(FAR const time_t *timep,
             }
         }
 
-      nxmutex_unlock(&g_gmt_lock);
+      nxrmutex_unlock(&g_gmt_lock);
     }
 
   tmp->tm_zone = GMT;
@@ -2493,7 +2494,8 @@ void tzset(void)
     }
 #endif
 
-  nxmutex_lock(&g_lcl_lock);
+  nxrmutex_lock(&g_lcl_lock);
+
   name = getenv("TZ");
   if (name == NULL)
     {
@@ -2545,7 +2547,7 @@ void tzset(void)
 tzname:
   settzname();
 out:
-  nxmutex_unlock(&g_lcl_lock);
+  nxrmutex_unlock(&g_lcl_lock);
 }
 
 FAR struct tm *localtime(FAR const time_t *timep)
