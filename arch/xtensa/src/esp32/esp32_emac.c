@@ -37,7 +37,7 @@
 #include <arpa/inet.h>
 #include <net/if.h>
 
-#include <crc8.h>
+#include <nuttx/crc8.h>
 #include <nuttx/wdog.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>

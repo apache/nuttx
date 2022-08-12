@@ -26,7 +26,8 @@
 
 #include <sys/types.h>
 #include <stdint.h>
-#include <crc64.h>
+
+#include <nuttx/crc64.h>
 
 #ifdef CONFIG_HAVE_LONG_LONG
 

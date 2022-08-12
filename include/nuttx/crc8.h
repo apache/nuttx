@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/crc32.h
+ * include/nuttx/crc8.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_CRC32_H
-#define __INCLUDE_CRC32_H
+#ifndef __INCLUDE_NUTTX_CRC8_H
+#define __INCLUDE_NUTTX_CRC8_H
 
 /****************************************************************************
  * Included Files
@@ -41,28 +41,64 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: crc32part
+ * Name: crc8part
  *
  * Description:
- *   Continue CRC calculation on a part of the buffer.
+ *   Continue CRC calculation on a part of the buffer using the polynomial
+ *   x^8+x^6+x^3+x^2+1 (Koopman, et al. "0xA6" poly).
  *
  ****************************************************************************/
 
-uint32_t crc32part(FAR const uint8_t *src, size_t len, uint32_t crc32val);
+uint8_t crc8part(FAR const uint8_t *src, size_t len, uint8_t crc8val);
 
 /****************************************************************************
- * Name: crc32
+ * Name: crc8
  *
  * Description:
- *   Return a 32-bit CRC of the contents of the 'src' buffer, length 'len'
+ *   Return an 8-bit CRC of the contents of the 'src' buffer, length 'len'
+ *   using the polynomial x^8+x^6+x^3+x^2+1 (Koopman, et al. "0xA6" poly).
  *
  ****************************************************************************/
 
-uint32_t crc32(FAR const uint8_t *src, size_t len);
+uint8_t crc8(FAR const uint8_t *src, size_t len);
+
+/****************************************************************************
+ * Name: crc8table
+ *
+ * Description:
+ *   Return a 8-bit CRC of the contents of the 'src' buffer, length 'len'
+ *   using a CRC with crc table used for calculation.
+ *
+ ****************************************************************************/
+
+uint8_t crc8table(const uint8_t table[256], const uint8_t *src,
+                  size_t len, uint8_t crc8val);
+
+/****************************************************************************
+ * Name: crc8ccitt
+ *
+ * Description:
+ *   Return an 8-bit CRC of the contents of the 'src' buffer, length 'len'
+ *   using the polynomial x^8+x^2+x^1+1 (aka "0x07" poly).
+ *
+ ****************************************************************************/
+
+uint8_t crc8ccitt(FAR const uint8_t *src, size_t len);
+
+/****************************************************************************
+ * Name: crc8part
+ *
+ * Description:
+ *   Continue CRC calculation on a part of the buffer using the polynomial
+ *   x^8+x^2+x^1+1 (aka "0x07" poly).
+ *
+ ****************************************************************************/
+
+uint8_t crc8ccittpart(FAR const uint8_t *src, size_t len, uint8_t crc8val);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __INCLUDE_CRC32_H */
+#endif /* __INCLUDE_NUTTX_CRC8_H */

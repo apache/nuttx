@@ -27,8 +27,8 @@
 #include <string.h>
 #include <debug.h>
 #include <errno.h>
-#include <crc32.h>
 
+#include <nuttx/crc32.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mtd/mtd.h>

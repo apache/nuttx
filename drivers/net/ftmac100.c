@@ -33,10 +33,10 @@
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
-#include <crc32.h>
 
 #include <arpa/inet.h>
 
+#include <nuttx/crc32.h>
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>

@@ -40,8 +40,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <nuttx/fs/fs.h>
-
-#include <crc32.h>
+#include <nuttx/crc32.h>
 
 #include "rx65n_sbram.h"
 #include "chip.h"
