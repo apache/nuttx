@@ -256,7 +256,8 @@
 
 #define BUF ((struct eth_hdr_s *)priv->dev.d_buf)
 
-#define IMX_BUF_SIZE  ENET_ALIGN_UP(CONFIG_NET_ETH_PKTSIZE)
+#define IMX_BUF_SIZE  ENET_ALIGN_UP(CONFIG_NET_ETH_PKTSIZE + \
+                                    CONFIG_NET_GUARDSIZE)
 
 /****************************************************************************
  * Private Types
@@ -2244,11 +2245,13 @@ static inline int imx_initphy(struct imx_driver_s *priv, bool renogphy)
 
 #ifdef CONFIG_IMX_ENETUSEMII
   rcr = ENET_RCR_CRCFWD |
-        CONFIG_NET_ETH_PKTSIZE << ENET_RCR_MAX_FL_SHIFT |
+        (CONFIG_NET_ETH_PKTSIZE + CONFIG_NET_GUARDSIZE)
+          << ENET_RCR_MAX_FL_SHIFT |
         ENET_RCR_MII_MODE;
 #else
   rcr = ENET_RCR_RMII_MODE | ENET_RCR_CRCFWD |
-        CONFIG_NET_ETH_PKTSIZE << ENET_RCR_MAX_FL_SHIFT |
+        (CONFIG_NET_ETH_PKTSIZE + CONFIG_NET_GUARDSIZE)
+          << ENET_RCR_MAX_FL_SHIFT |
         ENET_RCR_MII_MODE;
 #endif
   tcr = 0;
