@@ -112,30 +112,6 @@
 #  error "Need at least one RX buffer"
 #endif
 
-#define NENET_NBUFFERS \
-  (CONFIG_IMX_ENET_NTXBUFFERS + CONFIG_IMX_ENET_NRXBUFFERS)
-
-/* Normally you would clean the cache after writing new values to the DMA
- * memory so assure that the dirty cache lines are flushed to memory
- * before the DMA occurs.  And you would invalid the cache after a data is
- * received via DMA so that you fetch the actual content of the data from
- * the cache.
- *
- * These conditions are not fully supported here.  If the write-throuch
- * D-Cache is enabled, however, then many of these issues go away:  The
- * cache clean operation does nothing (because there are not dirty cache
- * lines) and the cache invalid operation is innocuous (because there are
- * never dirty cache lines to be lost; valid data will always be reloaded).
- *
- * At present, we simply insist that write through cache be enabled.
- */
-
-#if 0
-#if defined(CONFIG_ARMV7M_DCACHE) && !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
-#  error Write back D-Cache not yet supported
-#endif
-#endif
-
 /* Align assuming that the D-Cache is enabled (probably 32-bytes).
  *
  * REVISIT: The size of descriptors and buffers must also be in even units
@@ -149,6 +125,14 @@
 #define ENET_ALIGN        32 /* TODO */
 #define ENET_ALIGN_MASK   (ENET_ALIGN - 1)
 #define ENET_ALIGN_UP(n)  (((n) + ENET_ALIGN_MASK) & ~ENET_ALIGN_MASK)
+
+#define DESC_SIZE           sizeof(struct enet_desc_s)
+#define DESC_PADSIZE        ENET_ALIGN_UP(DESC_SIZE)
+
+#define ALIGNED_BUFSIZE     ENET_ALIGN_UP(CONFIG_NET_ETH_PKTSIZE + \
+                                      CONFIG_NET_GUARDSIZE)
+#define NENET_NBUFFERS \
+  (CONFIG_IMX_ENET_NTXBUFFERS + CONFIG_IMX_ENET_NRXBUFFERS)
 
 /* TX timeout = 1 minute */
 
@@ -256,9 +240,6 @@
 
 #define BUF ((struct eth_hdr_s *)priv->dev.d_buf)
 
-#define IMX_BUF_SIZE  ENET_ALIGN_UP(CONFIG_NET_ETH_PKTSIZE + \
-                                    CONFIG_NET_GUARDSIZE)
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -290,27 +271,31 @@ struct imx_driver_s
   struct net_driver_s dev;     /* Interface understood by the network */
 };
 
+/* This union type forces the allocated size of TX&RX descriptors to be
+ * padded to a exact multiple of the Cortex-M7 D-Cache line size.
+ */
+
+union enet_desc_u
+{
+  uint8_t             pad[DESC_PADSIZE];
+  struct enet_desc_s  desc;
+};
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
 static struct imx_driver_s g_enet[CONFIG_IMX_ENET_NETHIFS];
 
-/* The DMA descriptors.  A unaligned uint8_t is used to allocate the
- * memory; 16 is added to assure that we can meet the descriptor alignment
- * requirements.
- */
+/* The DMA descriptors */
 
-static uint8_t g_desc_pool[NENET_NBUFFERS * sizeof(struct enet_desc_s)]
-               aligned_data(ENET_ALIGN);
+static union enet_desc_u g_desc_pool[NENET_NBUFFERS]
+                                     aligned_data(ENET_ALIGN);
 
-/* The DMA buffers.  Again, A unaligned uint8_t is used to allocate the
- * memory; 16 is added to assure that we can meet the descriptor alignment
- * requirements.
- */
+/* The DMA buffers */
 
-static uint8_t g_buffer_pool[NENET_NBUFFERS * IMX_BUF_SIZE]
-               aligned_data(ENET_ALIGN);
+static uint8_t g_buffer_pool[NENET_NBUFFERS][ALIGNED_BUFSIZE]
+                             aligned_data(ENET_ALIGN);
 
 /****************************************************************************
  * Private Function Prototypes
@@ -641,20 +626,32 @@ static int imx_transmit(struct imx_driver_s *priv)
   txdesc->status1 |= (TXDESC_R | TXDESC_L | TXDESC_TC);
 
   buf = (uint8_t *)imx_swap32((uint32_t)priv->dev.d_buf);
-  if (priv->rxdesc[priv->rxtail].data == buf)
-    {
-      struct enet_desc_s *rxdesc = &priv->rxdesc[priv->rxtail];
 
+  struct enet_desc_s *rxdesc = &priv->rxdesc[priv->rxtail];
+
+  up_invalidate_dcache((uintptr_t)rxdesc,
+                       (uintptr_t)rxdesc + sizeof(struct enet_desc_s));
+
+  if (rxdesc->data == buf)
+    {
       /* Data was written into the RX buffer, so swap the TX and RX buffers */
 
       DEBUGASSERT((rxdesc->status1 & RXDESC_E) == 0);
       rxdesc->data = txdesc->data;
       txdesc->data = buf;
+      up_clean_dcache((uintptr_t)rxdesc,
+                      (uintptr_t)rxdesc + sizeof(struct enet_desc_s));
     }
   else
     {
       DEBUGASSERT(txdesc->data == buf);
     }
+
+  up_clean_dcache((uintptr_t)txdesc,
+                  (uintptr_t)txdesc + sizeof(struct enet_desc_s));
+
+  up_clean_dcache((uintptr_t)priv->dev.d_buf,
+                  (uintptr_t)priv->dev.d_buf + priv->dev.d_len);
 
   /* Start the TX transfer (if it was not already waiting for buffers) */
 
@@ -975,6 +972,9 @@ static void imx_receive(struct imx_driver_s *priv)
           priv->dev.d_buf = (uint8_t *)
             imx_swap32((uint32_t)priv->txdesc[priv->txhead].data);
           rxdesc->status1 |= RXDESC_E;
+
+          up_clean_dcache((uintptr_t)rxdesc,
+                          (uintptr_t)rxdesc + sizeof(struct enet_desc_s));
 
           /* Update the index to the next descriptor */
 
@@ -1380,7 +1380,7 @@ static int imx_ifup_action(struct net_driver_s *dev, bool resetphy)
 
   /* Set the RX buffer size */
 
-  imx_enet_putreg32(priv, IMX_BUF_SIZE, IMX_ENET_MRBR_OFFSET);
+  imx_enet_putreg32(priv, ALIGNED_BUFSIZE, IMX_ENET_MRBR_OFFSET);
 
   /* Point to the start of the circular RX buffer descriptor queue */
 
@@ -2411,13 +2411,11 @@ static void imx_initbuffers(struct imx_driver_s *priv)
 
   /* Get an aligned TX descriptor (array) address */
 
-  addr         = (uintptr_t)g_desc_pool;
-  priv->txdesc = (struct enet_desc_s *)addr;
+  priv->txdesc = &g_desc_pool[0].desc;
 
   /* Get an aligned RX descriptor (array) address */
 
-  addr        +=  CONFIG_IMX_ENET_NTXBUFFERS * sizeof(struct enet_desc_s);
-  priv->rxdesc = (struct enet_desc_s *)addr;
+  priv->rxdesc = &g_desc_pool[CONFIG_IMX_ENET_NTXBUFFERS].desc;
 
   /* Get the beginning of the first aligned buffer */
 
@@ -2433,7 +2431,7 @@ static void imx_initbuffers(struct imx_driver_s *priv)
 #ifdef CONFIG_IMX_ENETENHANCEDBD
       priv->txdesc[i].status2 = TXDESC_IINS | TXDESC_PINS;
 #endif
-      addr                   += IMX_BUF_SIZE;
+      addr                   += ALIGNED_BUFSIZE;
     }
 
   /* Then fill in the RX descriptors */
@@ -2447,13 +2445,16 @@ static void imx_initbuffers(struct imx_driver_s *priv)
       priv->rxdesc[i].bdu     = 0;
       priv->rxdesc[i].status2 = RXDESC_INT;
 #endif
-      addr                   += IMX_BUF_SIZE;
+      addr                   += ALIGNED_BUFSIZE;
     }
 
   /* Set the wrap bit in the last descriptors to form a ring */
 
   priv->txdesc[CONFIG_IMX_ENET_NTXBUFFERS - 1].status1 |= TXDESC_W;
   priv->rxdesc[CONFIG_IMX_ENET_NRXBUFFERS - 1].status1 |= RXDESC_W;
+
+  up_clean_dcache((uintptr_t)g_desc_pool,
+                  (uintptr_t)g_desc_pool + sizeof(g_desc_pool));
 
   /* We start with RX descriptor 0 and with no TX descriptors in use */
 
