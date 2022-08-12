@@ -92,7 +92,7 @@ int nxsched_select_cpu(cpu_set_t affinity)
               DEBUGASSERT(rtcb->sched_priority == 0);
               return i;
             }
-          else if (rtcb->sched_priority < minprio)
+          else if (rtcb->sched_priority <= minprio)
             {
               DEBUGASSERT(rtcb->sched_priority > 0);
               minprio = rtcb->sched_priority;
