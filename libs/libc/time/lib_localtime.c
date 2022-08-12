@@ -58,6 +58,7 @@
 #include <fcntl.h>
 #include <assert.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include <nuttx/fs/fs.h>
 
@@ -301,6 +302,12 @@ struct rule_s
   int_fast32_t r_time;        /* transition time of rule */
 };
 
+struct rsem_s
+{
+  sem_t   lock;               /* Manages exclusive access to file operations */
+  pid_t   holder;             /* The current holder of the semaphore */
+};
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -324,8 +331,17 @@ static int g_lcl_isset;
 static int g_gmt_isset;
 static FAR struct state_s *g_lcl_ptr;
 static FAR struct state_s *g_gmt_ptr;
-static sem_t g_lcl_sem = SEM_INITIALIZER(1);
-static sem_t g_gmt_sem = SEM_INITIALIZER(1);
+static struct rsem_s g_lcl_sem =
+{
+  SEM_INITIALIZER(1),
+  INVALID_PROCESS_ID,
+};
+
+static struct rsem_s g_gmt_sem =
+{
+  SEM_INITIALIZER(1),
+  INVALID_PROCESS_ID,
+};
 
 /* Section 4.12.3 of X3.159-1989 requires that
  *    Except for the strftime function, these functions [asctime,
@@ -417,26 +433,41 @@ static int  tzparse(FAR const char *name, FAR struct state_s *sp,
  * Private Functions
  ****************************************************************************/
 
-static void tz_semtake(FAR sem_t *sem)
+static int tz_semtake(FAR struct rsem_s *sem)
 {
-  int errcode = 0;
-  int ret;
+  pid_t pid = gettid();
 
-  do
+  if (pid == sem->holder)
     {
-      ret = _SEM_WAIT(sem);
-      if (ret < 0)
-        {
-          errcode = _SEM_ERRNO(ret);
-          DEBUGASSERT(errcode == EINTR || errcode == ECANCELED);
-        }
+      return -EAGAIN;
     }
-  while (ret < 0 && errcode == EINTR);
+  else
+    {
+      int errcode = 0;
+      int ret;
+
+      do
+        {
+          ret = _SEM_WAIT(&sem->lock);
+          if (ret < 0)
+            {
+              errcode = _SEM_ERRNO(ret);
+              DEBUGASSERT(errcode == EINTR || errcode == ECANCELED);
+            }
+        }
+      while (ret < 0 && errcode == EINTR);
+
+      sem->holder = pid;
+    }
+
+  return 0;
 }
 
-static void tz_semgive(FAR sem_t *sem)
+static void tz_semgive(FAR struct rsem_s *sem)
 {
-  DEBUGVERIFY(_SEM_POST(sem));
+  DEBUGASSERT(sem->holder == gettid());
+  sem->holder = INVALID_PROCESS_ID;
+  DEBUGVERIFY(_SEM_POST(&sem->lock));
 }
 
 static int_fast32_t detzcode(FAR const char *codep)
@@ -1826,7 +1857,11 @@ static FAR struct tm *gmtsub(FAR const time_t *timep,
         }
 #endif
 
-      tz_semtake(&g_gmt_sem);
+      if (tz_semtake(&g_gmt_sem) < 0)
+        {
+          return NULL;
+        }
+
       if (!g_gmt_isset)
         {
           g_gmt_ptr = lib_malloc(sizeof *g_gmt_ptr);
@@ -2544,7 +2579,11 @@ void tzset(void)
     }
 #endif
 
-  tz_semtake(&g_lcl_sem);
+  if (tz_semtake(&g_lcl_sem) < 0)
+    {
+      return;
+    }
+
   name = getenv("TZ");
   if (name == NULL)
     {
