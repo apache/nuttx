@@ -140,6 +140,10 @@
 
 /* OpenBSD style */
 
+#define swap16                __swap_uint16
+#define swap32                __swap_uint32
+#define swap64                __swap_uint64
+
 #define betoh16               be16toh
 #define letoh16               le16toh
 #define betoh32               be32toh
