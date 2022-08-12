@@ -42,6 +42,14 @@
 #define IOB_BUFFER_SIZE   (IOB_ALIGN_SIZE * CONFIG_IOB_NBUFFERS + \
                            CONFIG_IOB_ALIGNMENT - 1)
 
+/* Improve Flexibility */
+
+#ifdef CONFIG_IOB_SECTION
+#  define IOB_SECTION     locate_data(CONFIG_IOB_SECTION)
+#else
+#  define IOB_SECTION
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -51,7 +59,7 @@
  * to the CONFIG_IOB_ALIGNMENT memory boundary.
  */
 
-static uint8_t g_iob_buffer[IOB_BUFFER_SIZE];
+static uint8_t g_iob_buffer[IOB_BUFFER_SIZE] IOB_SECTION;
 
 #if CONFIG_IOB_NCHAINS > 0
 /* This is a pool of pre-allocated iob_qentry_s buffers */
