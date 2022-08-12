@@ -635,6 +635,10 @@ static int rpmsgfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   /* Call our internal routine to perform the ioctl */
 
   ret = rpmsgfs_client_ioctl(fs->handle, hf->fd, cmd, arg);
+  if (ret == 0 && (cmd == FIONBIO || cmd == FIOCLEX || cmd == FIONCLEX))
+    {
+      ret = -ENOTTY;
+    }
 
   nxmutex_unlock(&fs->fs_lock);
   return ret;
