@@ -78,10 +78,10 @@
  * Reset: low signal >50us
  */
 
-#if CONFIG_WS2812_FREQUENCY >= 360000 && CONFIG_WS2812_FREQUENCY <= 500000
+#if CONFIG_WS2812_FREQUENCY >= 3600000 && CONFIG_WS2812_FREQUENCY <= 5000000
 #  define WS2812_ZERO_BYTE  0b01000000 /* 200ns at 5 MHz, 278ns at 3.6 MHz */
 #  define WS2812_ONE_BYTE   0b01110000 /* 600ns at 5 MHz, 833ns at 3.6 MHz */
-#elif CONFIG_WS2812_FREQUENCY >= 590000 && CONFIG_WS2812_FREQUENCY <= 900000
+#elif CONFIG_WS2812_FREQUENCY >= 5900000 && CONFIG_WS2812_FREQUENCY <= 9000000
 #  define WS2812_ZERO_BYTE  0b01100000 /* 222ns at 9 MHz, 339ns at 5.9 MHz */
 #  define WS2812_ONE_BYTE   0b01111100 /* 556ns at 9 MHz, 847ns at 5.9 MHz */
 #else
@@ -93,7 +93,7 @@
  * Aiming for 60 us, safely above the 50us required.
  */
 
-#define WS2812_RST_CYCLES (CONFIG_WS2812_FREQUENCY * 60 / 100000 / 8)
+#define WS2812_RST_CYCLES (CONFIG_WS2812_FREQUENCY * 60 / 1000000 / 8)
 
 #define WS2812_BYTES_PER_LED  (8 * 3)
 
@@ -389,7 +389,7 @@ static inline void ws2812_configspi(FAR struct spi_dev_s *spi)
   SPI_SETMODE(spi, SPIDEV_MODE3);
   SPI_SETBITS(spi, 8);
   SPI_HWFEATURES(spi, 0);
-  SPI_SETFREQUENCY(spi, 10 * CONFIG_WS2812_FREQUENCY);
+  SPI_SETFREQUENCY(spi, CONFIG_WS2812_FREQUENCY);
 }
 
 /****************************************************************************
