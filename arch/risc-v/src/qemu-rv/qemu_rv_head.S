@@ -52,13 +52,21 @@ __start:
   j    2f
 1:
 
-  /* In case of single CPU config, stop here */
+  /* Load the number of CPUs that the kernel supports */
 
-#if !defined(CONFIG_SMP) || (CONFIG_SMP_NCPUS == 1)
-  csrw mie, zero
-  wfi
+#ifdef CONFIG_SMP
+  li   t1, CONFIG_SMP_NCPUS
+#else
+  li   t1, 1
 #endif
 
+  /* If a0 (mhartid) >= t1 (the number of CPUs), stop here */
+
+  blt  a0, t1, 3f
+  csrw mie, zero
+  wfi
+
+3:
   /* To get g_cpu_basestack[mhartid], must get g_cpu_basestack first */
 
   la   t0, g_cpu_basestack
