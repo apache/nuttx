@@ -80,7 +80,7 @@ static struct sam_hsmci_state_s g_hsmci;
  ****************************************************************************/
 
 #ifdef CONFIG_MMCSD_HAVE_CARDDETECT
-static int sam_hsmci_cardetect_int(int irq, void *regs, FAR void *arg)
+static int sam_hsmci_cardetect_int(int irq, void *regs, void *arg)
 {
   bool inserted;
 

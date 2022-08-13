@@ -718,7 +718,7 @@ Configuration sub-directories
     running application "adc" in NuttShell.
 
     The ADC is triggered by Timer/counter at 1 kHz frequency and uses
-    DMA to transfer samples. Number of transfered samples can be set
+    DMA to transfer samples. Number of transferred samples can be set
     by configuring CONFIG_SAMV7_AFEC_DMASAMPLES.
 
   nsh:

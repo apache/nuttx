@@ -56,7 +56,7 @@
 
 void sam_pmic_initialize(void)
 {
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
   struct i2c_config_s config;
   uint8_t buffer[2];
 

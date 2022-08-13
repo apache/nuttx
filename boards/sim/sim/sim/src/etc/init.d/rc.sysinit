@@ -17,3 +17,20 @@
  * under the License.
  *
  ****************************************************************************/
+
+#include <nuttx/config.h>
+
+#define CONCAT_(x, y) x##y
+#define CONCAT(x, y)  CONCAT_(x, y)
+
+#ifdef CONFIG_NSH_ROMFSETC
+#ifdef CONFIG_FS_FAT
+
+/* Create a RAMDISK and mount it at /tmp */
+
+mkrd -m CONFIG_NSH_FATDEVNO -s CONFIG_NSH_FATSECTSIZE CONFIG_NSH_FATNSECTORS
+mkfatfs CONCAT(/dev/ram, CONFIG_NSH_FATDEVNO)
+mount -t vfat CONCAT(/dev/ram, CONFIG_NSH_FATDEVNO) CONFIG_NSH_FATMOUNTPT
+
+#endif /* CONFIG_FS_FAT */
+#endif /* CONFIG_NSH_ROMFSETC */

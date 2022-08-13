@@ -259,10 +259,17 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       netdev_txnotify_dev(dev);
 
       /* Wait for the send to complete or an error to occur.
-       * net_lockedwait will also terminate if a signal is received.
+       * net_timedwait will also terminate if a signal is received.
        */
 
-      ret = net_lockedwait(&state.snd_sem);
+      if (_SS_ISNONBLOCK(conn->sconn.s_flags) || (flags & MSG_DONTWAIT) != 0)
+        {
+          ret = net_timedwait(&state.snd_sem, 0);
+        }
+      else
+        {
+          ret = net_timedwait(&state.snd_sem, UINT_MAX);
+        }
 
       /* Make sure that no further events are processed */
 
@@ -294,6 +301,43 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   /* Return the number of bytes actually sent */
 
   return state.snd_sent;
+}
+
+/****************************************************************************
+ * Name: psock_can_cansend
+ *
+ * Description:
+ *   psock_can_cansend() returns a value indicating if a write to the socket
+ *   would block.  No space in the buffer is actually reserved, so it is
+ *   possible that the write may still block if the buffer is filled by
+ *   another means.
+ *
+ * Input Parameters:
+ *   psock    An instance of the internal socket structure.
+ *
+ * Returned Value:
+ *   OK
+ *     At least one byte of data could be successfully written.
+ *   -EWOULDBLOCK
+ *     There is no room in the output buffer.
+ *   -EBADF
+ *     An invalid descriptor was specified.
+ *
+ ****************************************************************************/
+
+int psock_can_cansend(FAR struct socket *psock)
+{
+  /* Verify that we received a valid socket */
+
+  if (psock == NULL || psock->s_conn == NULL)
+    {
+      nerr("ERROR: Invalid socket\n");
+      return -EBADF;
+    }
+
+  /* TODO Query CAN driver mailboxes to see if there's mailbox available */
+
+  return OK;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_CAN */

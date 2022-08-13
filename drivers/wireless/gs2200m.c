@@ -76,7 +76,7 @@
 
 #define MAX_PKT_LEN  1500
 #define MAX_PAYLOAD  (MAX_PKT_LEN - BULK_CMD_HDR_SIZE_WITH_GUARD)
-#define MAX_NOTIF_Q  16
+#define MAX_NOTIF_Q  18 /* for 16 sockets and disasso event + dummy */
 
 #define WR_REQ       0x01
 #define RD_REQ       0x02
@@ -169,7 +169,7 @@ struct notif_q_s
   uint8_t  rpos;
   uint8_t  wpos;
   uint8_t  count;
-  uint16_t inuse;
+  uint32_t inuse;
   char     cids[MAX_NOTIF_Q];
 };
 
@@ -184,8 +184,8 @@ struct gs2200m_dev_s
   bool                 int_enabled;
   dq_queue_t           pkt_q[16];
   uint16_t             pkt_q_cnt[16];
-  uint16_t             valid_cid_bits;
-  uint16_t             aip_cid_bits;
+  uint32_t             valid_cid_bits;
+  uint32_t             aip_cid_bits;
   uint32_t             total_bulk;
   uint8_t              tx_buff[MAX_PKT_LEN];
   struct net_driver_s  net_dev;
@@ -201,8 +201,6 @@ struct gs2200m_dev_s
 
 /* Character driver methods */
 
-static int     gs2200m_open(FAR struct file *filep);
-static int     gs2200m_close(FAR struct file *filep);
 static ssize_t gs2200m_read(FAR struct file *filep, FAR char *buff,
                             size_t len);
 static ssize_t gs2200m_write(FAR struct file *filep, FAR const char *buff,
@@ -227,8 +225,8 @@ static void _remove_all_pkt(FAR struct gs2200m_dev_s *dev, uint8_t c);
 
 static const struct file_operations g_gs2200m_fops =
 {
-  gs2200m_open,  /* open */
-  gs2200m_close, /* close */
+  NULL,          /* open */
+  NULL,          /* close */
   gs2200m_read,  /* read */
   gs2200m_write, /* write */
   NULL,          /* seek */
@@ -299,6 +297,10 @@ static uint8_t _cid_to_uint8(char c)
     {
       ret = (c - 'a') + 10;
     }
+  else if (c == DISASSOCIATION_CID)
+    {
+      ret = 16;
+    }
   else
     {
       ret = 0xff;
@@ -336,9 +338,9 @@ static uint16_t _to_uint16(char *str)
  * Name: _enable_cid
  ****************************************************************************/
 
-static bool _enable_cid(uint16_t *cid_bits, char cid, bool on)
+static bool _enable_cid(uint32_t *cid_bits, char cid, bool on)
 {
-  uint16_t mask = 1 << _cid_to_uint8(cid);
+  uint32_t mask = 1 << _cid_to_uint8(cid);
   bool     ret  = true;
 
   if (on)
@@ -371,9 +373,9 @@ static bool _enable_cid(uint16_t *cid_bits, char cid, bool on)
  * Name: _cid_is_set
  ****************************************************************************/
 
-static bool _cid_is_set(uint16_t *cid_bits, char cid)
+static bool _cid_is_set(uint32_t *cid_bits, char cid)
 {
-  uint16_t mask = 1 << _cid_to_uint8(cid);
+  uint32_t mask = 1 << _cid_to_uint8(cid);
 
   if (*cid_bits & mask)
     {
@@ -600,7 +602,7 @@ static void _remove_and_free_pkt(FAR struct gs2200m_dev_s *dev, uint8_t c)
 static void _remove_all_pkt(FAR struct gs2200m_dev_s *dev, uint8_t c)
 {
   FAR struct pkt_dat_s *pkt_dat;
-  uint16_t mask;
+  uint32_t mask;
 
   mask = 1 << c;
   ASSERT(0 == (dev->valid_cid_bits & mask));
@@ -707,24 +709,6 @@ static int gs2200m_lock(FAR struct gs2200m_dev_s *dev)
 static void gs2200m_unlock(FAR struct gs2200m_dev_s *dev)
 {
   nxsem_post(&dev->dev_sem);
-}
-
-/****************************************************************************
- * Name: gs2200m_open
- ****************************************************************************/
-
-static int gs2200m_open(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
- * Name: gs2200m_close
- ****************************************************************************/
-
-static int gs2200m_close(FAR struct file *filep)
-{
-  return OK;
 }
 
 /****************************************************************************
@@ -2038,7 +2022,10 @@ static enum pkt_type_e gs2200m_send_bulk(FAR struct gs2200m_dev_s *dev,
     }
   else
     {
-      wlinfo("** addr=%s port=%d\n", inet_ntoa(msg->addr.sin_addr),
+      char inetaddr[INET_ADDRSTRLEN];
+
+      wlinfo("** addr=%s port=%d\n",
+             inet_ntoa_r(msg->addr.sin_addr, inetaddr, sizeof(inetaddr)),
              NTOHS(msg->addr.sin_port));
 
       /* NOTE: See 7.5.3.2 Bulk Data Handling for UDP
@@ -2047,7 +2034,8 @@ static enum pkt_type_e gs2200m_send_bulk(FAR struct gs2200m_dev_s *dev,
 
       snprintf(cmd, sizeof(cmd), "%cY%c%s:%d:%s",
                ASCII_ESC, msg->cid,
-               inet_ntoa(msg->addr.sin_addr), NTOHS(msg->addr.sin_port),
+               inet_ntoa_r(msg->addr.sin_addr, inetaddr, sizeof(inetaddr)),
+               NTOHS(msg->addr.sin_port),
                digits);
     }
 
@@ -2129,6 +2117,34 @@ static enum pkt_type_e gs2200m_activate_wrx(FAR struct gs2200m_dev_s *dev,
 }
 
 /****************************************************************************
+ * Name: gs2200m_powersave_wrx
+ * NOTE: See 9.1.1 Active Radio Receive
+ ****************************************************************************/
+
+static enum pkt_type_e gs2200m_powersave_wrx(FAR struct gs2200m_dev_s *dev,
+                                             uint8_t on)
+{
+  char cmd[30];
+
+  snprintf(cmd, sizeof(cmd), "AT+WRXPS=%d\r\n", on);
+  return gs2200m_send_cmd2(dev, cmd);
+}
+
+/****************************************************************************
+ * Name: gs2200m_syncloss
+ * NOTE: See 5.1.4 Sync loss interval
+ ****************************************************************************/
+
+static enum pkt_type_e gs2200m_syncloss(FAR struct gs2200m_dev_s *dev,
+                                            int val)
+{
+  char cmd[30];
+
+  snprintf(cmd, sizeof(cmd), "AT+WSYNCINTRL=%d\r\n", val);
+  return gs2200m_send_cmd2(dev, cmd);
+}
+
+/****************************************************************************
  * Name: gs2200m_set_gpio
  * NOTE: See 10.3 GPIO Commands
  ****************************************************************************/
@@ -2159,6 +2175,16 @@ static enum pkt_type_e gs2200m_set_loglevel(FAR struct gs2200m_dev_s *dev,
   return gs2200m_send_cmd2(dev, cmd);
 }
 #endif
+
+/****************************************************************************
+ * Name: gs2200m_closeallsock
+ * NOTE: See 7.1.5 Closing All Connections
+ ****************************************************************************/
+
+static void gs2200m_closeallsock(FAR struct gs2200m_dev_s *dev)
+{
+  gs2200m_send_cmd2(dev, "AT+NCLOSEALL\r\n");
+}
 
 /****************************************************************************
  * Name: gs2200m_get_version
@@ -2673,6 +2699,11 @@ static int gs2200m_ioctl_assoc_sta(FAR struct gs2200m_dev_s *dev,
 
   dev->disassociate_flag = false;
 
+  /* Sync lost time interval */
+
+  t = gs2200m_syncloss(dev, CONFIG_WL_GS2200M_SYNC_INTERVAL);
+  ASSERT(TYPE_OK == t);
+
   return OK;
 }
 
@@ -2910,12 +2941,16 @@ static int gs2200m_ioctl_ifreq(FAR struct gs2200m_dev_s *dev,
 
   if (false == getreq && OK == ret)
     {
+      char inetaddr[INET_ADDRSTRLEN];
       memcpy(&in[0], &dev->net_dev.d_ipaddr, sizeof(in[0]));
       memcpy(&in[1], &dev->net_dev.d_netmask, sizeof(in[1]));
       memcpy(&in[2], &dev->net_dev.d_draddr, sizeof(in[2]));
-      strncpy(addr[0], inet_ntoa(in[0]), sizeof(addr[0]));
-      strncpy(addr[1], inet_ntoa(in[1]), sizeof(addr[1]));
-      strncpy(addr[2], inet_ntoa(in[2]), sizeof(addr[2]));
+      strncpy(addr[0], inet_ntoa_r(in[0], inetaddr, sizeof(inetaddr)),
+              sizeof(addr[0]));
+      strncpy(addr[1], inet_ntoa_r(in[1], inetaddr, sizeof(inetaddr)),
+              sizeof(addr[1]));
+      strncpy(addr[2], inet_ntoa_r(in[2], inetaddr, sizeof(inetaddr)),
+              sizeof(addr[2]));
 
       gs2200m_set_addresses(dev, addr[0], addr[1], addr[2]);
     }
@@ -3233,6 +3268,9 @@ repeat:
       wlwarn("=== recover DISASSOCIATE\n");
       dev->disassociate_flag = false;
 
+      gs2200m_closeallsock(dev);
+      _notif_q_push(dev, DISASSOCIATION_CID);
+
       goto errout;
     }
 
@@ -3412,6 +3450,11 @@ static int gs2200m_start(FAR struct gs2200m_dev_s *dev)
   /* Activate RX */
 
   t = gs2200m_activate_wrx(dev, 1);
+  ASSERT(TYPE_OK == t);
+
+  /* Power save disable */
+
+  t = gs2200m_powersave_wrx(dev, 0);
   ASSERT(TYPE_OK == t);
 
   /* Set Bulk Data mode */

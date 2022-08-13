@@ -382,7 +382,7 @@ void tc_coreclk_configure(int tc, int coregen, bool wrlock)
  *
  ****************************************************************************/
 
-static int tc_interrupt(int irq, void *context, FAR void *arg)
+static int tc_interrupt(int irq, void *context, void *arg)
 {
   struct sam_tc_dev_s *priv = (struct sam_tc_dev_s *)arg;
   uint8_t flags;
@@ -729,7 +729,7 @@ TC_HANDLE sam_tc_allocate(int tc, int frequency)
 
   /* Return an opaque reference to the tc */
 
-  tmrinfo("Returning 0x%p\n", priv);
+  tmrinfo("Returning %p\n", priv);
   return (TC_HANDLE)priv;
 }
 

@@ -26,6 +26,12 @@
 #define __ARCH_XTENSA_INCLUDE_ESP32S3_IRQ_H
 
 /****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
@@ -309,19 +315,20 @@
 
 #define ESP32S3_NIRQ_PERIPH                             ESP32S3_NPERIPHERALS
 
-/* Second level GPIO interrupts.  GPIO interrupts are decoded and dispatched
- * as a second level of decoding:  The first level dispatches to the GPIO
- * interrupt handler.  The second to the decoded GPIO interrupt handler.
+#ifdef CONFIG_ESP32S3_GPIO_IRQ
+
+/* Second level GPIO interrupts. GPIO interrupts are decoded and dispatched
+ * as a second level of decoding: The first level dispatches to the GPIO
+ * interrupt handler. The second to the decoded GPIO interrupt handler.
  */
 
-#ifdef CONFIG_ESP32S3_GPIO_IRQ
-#  define ESP32S3_NIRQ_GPIO           40
-#  define ESP32S3_FIRST_GPIOIRQ       (XTENSA_NIRQ_INTERNAL + ESP32S3_NIRQ_PERIPH)
-#  define ESP32S3_LAST_GPIOIRQ        (ESP32S3_FIRST_GPIOIRQ + ESP32S3_NIRQ_GPIO - 1)
-#  define ESP32S3_PIN2IRQ(p)          ((p) + ESP32S3_FIRST_GPIOIRQ)
-#  define ESP32S3_IRQ2PIN(i)          ((i) - ESP32S3_FIRST_GPIOIRQ)
+#  define ESP32S3_NIRQ_GPIO             49
+#  define ESP32S3_FIRST_GPIOIRQ         (XTENSA_NIRQ_INTERNAL + ESP32S3_NIRQ_PERIPH)
+#  define ESP32S3_LAST_GPIOIRQ          (ESP32S3_FIRST_GPIOIRQ + ESP32S3_NIRQ_GPIO - 1)
+#  define ESP32S3_PIN2IRQ(p)            ((p) + ESP32S3_FIRST_GPIOIRQ)
+#  define ESP32S3_IRQ2PIN(i)            ((i) - ESP32S3_FIRST_GPIOIRQ)
 #else
-#  define ESP32S3_NIRQ_GPIO           0
+#  define ESP32S3_NIRQ_GPIO             0
 #endif
 
 /* Total number of interrupts */

@@ -254,7 +254,7 @@ void up_initialize(void)
   audio_register("pcm0c", sim_audio_initialize(false));
 #endif
 
-  kthread_create("loop_task", SCHED_PRIORITY_MIN,
+  kthread_create("loop_task", SCHED_PRIORITY_MAX,
                  CONFIG_DEFAULT_TASK_STACKSIZE,
                  up_loop_task, NULL);
 }

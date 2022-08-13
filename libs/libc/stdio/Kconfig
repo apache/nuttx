@@ -53,7 +53,7 @@ config NUNGET_CHARS
 
 config LIBC_FLOATINGPOINT
 	bool "Enable floating point in printf"
-	default n
+	default !DEFAULT_SMALL && ARCH_FPU
 	---help---
 		By default, floating point support in printf, sscanf, etc. is
 		disabled.  This option will enable floating point support.

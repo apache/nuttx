@@ -340,7 +340,7 @@ static inline int fat_parsesfname(FAR const char **path,
   enum fat_case_e extcase  = FATCASE_UNKNOWN;
 #endif
 #endif
-  const FAR char *node = *path;
+  FAR const char *node = *path;
   int endndx;
   uint8_t ch;
   int ndx = 0;
@@ -2430,6 +2430,7 @@ static int fat_putlfname(FAR struct fat_mountpt_s *fs,
       LDIR_PUTATTRIBUTES(direntry, LDDIR_LFNATTR);
       LDIR_PUTNTRES(direntry, 0);
       LDIR_PUTCHECKSUM(direntry, checksum);
+      LDIR_PUTFSTCLUSTLO(direntry, 0);
       fs->fs_dirty = true;
 
       /* Read next directory entry */

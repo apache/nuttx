@@ -33,7 +33,7 @@
  * input of all frames into the network, (2) queuing of all output frames,
  * and all network housekeeping such as periodic polling.
  *
- * Interrupt handling is verify brief since it only schedules the interrupt
+ * Interrupt handling is very brief since it only schedules the interrupt
  * work to occur on the HP work queue.  Several things are done for the
  * interrupt handling, but the primary things are:  (1) receipt of incoming
  * packets, and (2) handling of the completion of TX transfers.
@@ -81,9 +81,9 @@
  *                                      size
  *
  * Another consideration is the nature of the GPIO interrupts.  For STM32,
- * for example, disabling the Spirit interrupt tears down the the entire
+ * for example, disabling the Spirit interrupt tears down the entire
  * interrupt setup so, for example, any interrupts that are received while
- * interrupts are disable, aka torn down, will be lost.  Hence, it may be
+ * interrupts are disabled, aka torn down, will be lost.  Hence, it may be
  * necessary to process pending interrupts whenever interrupts are re-
  * enabled.
  */

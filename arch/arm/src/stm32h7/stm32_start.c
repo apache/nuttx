@@ -163,7 +163,7 @@ static inline void stm32_tcmenable(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _start
+ * Name: __start
  *
  * Description:
  *   This is the reset entry point.

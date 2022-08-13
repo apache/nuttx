@@ -45,7 +45,8 @@
     !defined(CONFIG_LCD_UG2864HSWEG01) && \
     !defined(CONFIG_LCD_UG2832HSWEG04) && \
     !defined(CONFIG_LCD_DD12864WO4A) && \
-    !defined(CONFIG_LCD_HILETGO)
+    !defined(CONFIG_LCD_HILETGO) && \
+    !defined(CONFIG_LCD_SSD1306_CUSTOM)
 #  error "Unknown and unsupported SSD1306 LCD"
 #endif
 
@@ -167,6 +168,13 @@
 #  define SSD1306_DEV_PAGES       8    /* 8 pages */
 #  define SSD1306_DEV_CMNPAD      0x10 /* COM configuration */
 #  define IS_SSD1309              1    /* SSD1309 based LCD. */
+#elif defined(CONFIG_LCD_SSD1306_CUSTOM)
+#  define SSD1306_DEV_NATIVE_XRES CONFIG_LCD_SSD1306_CUSTOM_DEV_NATIVE_XRES /* Only 128 of 131 columns used */
+#  define SSD1306_DEV_NATIVE_YRES CONFIG_LCD_SSD1306_CUSTOM_DEV_NATIVE_YRES /* 4 pages each 8 rows */
+#  define SSD1306_DEV_XOFFSET     CONFIG_LCD_SSD1306_CUSTOM_DEV_XOFFSET     /* Offset to logical column 0 */
+#  define SSD1306_DEV_PAGES       CONFIG_LCD_SSD1306_CUSTOM_DEV_PAGES       /* 4 pages */
+#  define SSD1306_DEV_CMNPAD      CONFIG_LCD_SSD1306_CUSTOM_DEV_CMNPAD      /* COM configuration */
+#  undef IS_SSD1309
 #endif
 
 #if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
@@ -242,6 +250,14 @@
 #    undef  SSD1306_DEV_REVERSEX
 #    define SSD1306_DEV_REVERSEY  1
 #  endif
+#elif defined(CONFIG_LCD_SSD1306_CUSTOM)
+#  if defined(CONFIG_LCD_LANDSCAPE)
+#    define SSD1306_DEV_REVERSEX  1
+#    undef  SSD1306_DEV_REVERSEY
+#  elif defined(CONFIG_LCD_RLANDSCAPE)
+#    undef  SSD1306_DEV_REVERSEX
+#    define SSD1306_DEV_REVERSEY  1
+#  endif
 #endif
 
 /* Bit helpers */
@@ -267,6 +283,7 @@ struct ssd1306_dev_s
   FAR struct i2c_master_s  *i2c;   /* Cached I2C device reference */
   uint8_t                addr;     /* 7-bit I2C address */
 #endif
+  uint8_t                devno;    /* LCD device instance */
   uint8_t                contrast; /* Current contrast setting */
   bool                   on;       /* true: display is on */
   bool                   is_conf;  /* true: display had been configured */
@@ -280,6 +297,7 @@ struct ssd1306_dev_s
    */
 
   uint8_t fb[SSD1306_DEV_FBSIZE];
+  uint8_t runbuffer[SSD1306_DEV_ROWSIZE];
 };
 
 /****************************************************************************

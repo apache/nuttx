@@ -84,12 +84,25 @@ static
                   uint16_t regaddr);
 static void     wm8994_writereg(FAR struct wm8994_dev_s *priv,
                   uint16_t regaddr, uint16_t regval);
-static void     wm8994_takesem(sem_t *sem);
+static int      wm8994_takesem(FAR sem_t *sem);
 #define         wm8994_givesem(s) nxsem_post(s)
 
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
 static inline uint16_t wm8994_scalevolume(uint16_t volume, b16_t scale);
+static void     wm8994_setvolume(FAR struct wm8994_dev_s *priv,
+                 uint16_t volume, bool mute);
 #endif
+#ifndef CONFIG_AUDIO_EXCLUDE_TONE
+static void     wm8994_setbass(FAR struct wm8994_dev_s *priv, uint8_t bass);
+static void     wm8994_settreble(FAR struct wm8994_dev_s *priv,
+                  uint8_t treble);
+#endif
+
+static void     wm8994_setdatawidth(FAR struct wm8994_dev_s *priv);
+static void     wm8994_setbitrate(FAR struct wm8994_dev_s *priv);
+
+static void     wm8994_setdatawidth(FAR struct wm8994_dev_s *priv);
+static void     wm8994_setbitrate(FAR struct wm8994_dev_s *priv);
 
 /* Audio lower half methods (and close friends) */
 
@@ -165,7 +178,6 @@ static void    *wm8994_workerthread(pthread_addr_t pvarg);
 /* Initialization */
 
 static void     wm8994_audio_output(FAR struct wm8994_dev_s *priv);
-static void     wm8994_audio_input(FAR struct wm8994_dev_s *priv);
 #if 0 /* Not used */
 static void     wm8994_audio_input(FAR struct wm8994_dev_s *priv);
 #endif
@@ -328,7 +340,7 @@ static void wm8994_writereg(FAR struct wm8994_dev_s *priv, uint16_t regaddr,
        * completed.
        */
 
-      ret = i2c_write(priv->i2c, &config, data, 3);
+      ret = i2c_write(priv->i2c, &config, data, 4);
       if (ret < 0)
         {
 #ifdef CONFIG_I2C_RESET
@@ -365,6 +377,72 @@ static void wm8994_writereg(FAR struct wm8994_dev_s *priv, uint16_t regaddr,
     }
 }
 
+/****************************************************************************
+ * Name: wm8994_setsamplefreq
+ *
+ * Description:
+ *  Sets the sample frequency for AIF1
+ *
+ ****************************************************************************/
+
+static void wm8994_setsamplefreq(FAR struct wm8994_dev_s *priv)
+{
+  uint16_t regval;
+
+  /* Table 106 in WM8994 manual */
+
+  switch (priv->samprate)
+    {
+    case 8000:
+      regval = WM8994_AIF1_SR_8K;
+      break;
+    case 11025:
+      regval = WM8994_AIF1_SR_11K;
+      break;
+    case 12000:
+      regval = WM8994_AIF1_SR_12K;
+      break;
+    case 16000:
+      regval = WM8994_AIF1_SR_16K;
+      break;
+    case 22050:
+      regval = WM8994_AIF1_SR_22K;
+      break;
+    case 24000:
+      regval = WM8994_AIF1_SR_24K;
+      break;
+    case 32000:
+      regval = WM8994_AIF1_SR_32K;
+      break;
+    case 44100:
+      regval = WM8994_AIF1_SR_44K;
+      break;
+    case 48000:
+      regval = WM8994_AIF1_SR_48K;
+      break;
+
+      /* If these frequencies should be added, the sample rate
+       * would need to be changed to 32 bit throughout the code
+       */
+
+#if 0
+    case 88200:
+      regval = WM8994_AIF1_SR_88K;
+      break;
+    case 96000:
+      regval = WM8994_AIF1_SR_96K;
+      break;
+#endif
+    default:
+      regval = WM8994_AIF1_SR_11K; /* 11025 as default */
+    }
+
+  /* AIF1CLK / fs ratio = 256 */
+
+  regval |= WM8994_AIF1CLK_RATE_3;
+  wm8994_writereg(priv, WM8994_AIF1_RATE, regval);
+}
+
 /* Name: wm8994_takesem
  *
  * Description:
@@ -373,16 +451,9 @@ static void wm8994_writereg(FAR struct wm8994_dev_s *priv, uint16_t regaddr,
  *
  */
 
-static void wm8994_takesem(sem_t *sem)
+static int wm8994_takesem(FAR sem_t *sem)
 {
-  int ret;
-
-  do
-    {
-      ret = nxsem_wait(sem);
-      DEBUGASSERT(ret == 0 || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  return nxsem_wait_uninterruptible(sem);
 }
 
 /* Name: wm8994_scalevolume
@@ -400,61 +471,192 @@ static inline uint16_t wm8994_scalevolume(uint16_t volume, b16_t scale)
 }
 #endif
 
+/****************************************************************************
+ * Name: wm8994_setvolume
+ *
+ * Description:
+ *   Set the right and left volume values in the WM8994 device based on the
+ *   current volume and balance settings.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
+static void wm8994_setvolume(FAR struct wm8994_dev_s *priv, uint16_t volume,
+                             bool mute)
+{
+  uint32_t leftlevel;
+  uint32_t rightlevel;
+  uint16_t regval;
+
+  audinfo("volume=%u mute=%u\n", volume, mute);
+
+#ifndef CONFIG_AUDIO_EXCLUDE_BALANCE
+  /* Calculate the left channel volume level {0..1000} */
+
+  if (priv->balance <= (b16HALF - 1))
+    {
+      leftlevel = volume;
+    }
+  else if (priv->balance == b16ONE)
+    {
+      leftlevel = 0;
+    }
+  else
+    {
+      /* Note: b16ONE - balance goes from 0 to 0.5.
+       * Hence need to multiply volume by 2!
+       */
+
+      leftlevel = wm8994_scalevolume(2 * volume,
+                                     b16ONE - (b16_t)priv->balance);
+    }
+
+  /* Calculate the right channel volume level {0..1000} */
+
+  if (priv->balance >= (b16HALF - 1))
+    {
+      rightlevel = volume;
+    }
+  else if (priv->balance == 0)
+    {
+      rightlevel = 0;
+    }
+  else
+    {
+      /* Note: b16ONE - balance goes from 0 to 0.5.
+       * Hence need to multiply volume by 2!
+       */
+
+      rightlevel = wm8994_scalevolume(2 * volume,
+                                      (b16_t)priv->balance);
+    }
+#else
+  leftlevel  = priv->volume;
+  rightlevel = priv->volume;
+#endif
+
+  /* Set the volume */
+
+  regval = WM8994_HPOUT1_VU_ENABLED | WM8994_HPOUT1L_VOL(leftlevel);
+  if (!mute)
+    {
+      regval |= WM8994_HPOUT1L_MUTE_N_NO;
+    }
+  wm8994_writereg(priv, WM8994_LEFT_OUTPUT_VOL, regval);
+  wm8994_writereg(priv, WM8994_SPEAKER_VOL_LEFT, regval);
+
+  regval = WM8994_HPOUT1_VU_ENABLED | WM8994_HPOUT1R_VOL(rightlevel);
+  if (!mute)
+    {
+      regval |= WM8994_HPOUT1R_MUTE_N_NO;
+    }
+  wm8994_writereg(priv, WM8994_RIGHT_OUTPUT_VOL, regval);
+  wm8994_writereg(priv, WM8994_SPEAKER_VOL_RIGHT, regval);
+
+  /* Remember the volume level and mute settings */
+
+  priv->volume = volume;
+  priv->mute   = mute;
+}
+#endif /* CONFIG_AUDIO_EXCLUDE_VOLUME */
+
+/****************************************************************************
+ * Name: wm8994_setbass
+ *
+ * Description:
+ *   Set the bass level.
+ *
+ *   The level and range are in whole percentage levels (0-100).
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_AUDIO_EXCLUDE_TONE
+static void wm8994_setbass(FAR struct wm8994_dev_s *priv, uint8_t bass)
+{
+  audinfo("bass=%u\n", bass);
+#warning Missing logic
+}
+#endif /* CONFIG_AUDIO_EXCLUDE_TONE */
+
+/****************************************************************************
+ * Name: wm8994_settreble
+ *
+ * Description:
+ *   Set the treble level .
+ *
+ *   The level and range are in whole percentage levels (0-100).
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_AUDIO_EXCLUDE_TONE
+static void wm8994_settreble(FAR struct wm8994_dev_s *priv, uint8_t treble)
+{
+  audinfo("treble=%u\n", treble);
+#warning Missing logic
+}
+#endif /* CONFIG_AUDIO_EXCLUDE_TONE */
+
+/****************************************************************************
+ * Name: wm8994_setdatawidth
+ *
+ * Description:
+ *   Set the 8- or 16-bit data modes
+ *
+ ****************************************************************************/
+
+static void wm8994_setdatawidth(FAR struct wm8994_dev_s *priv)
+{
+  /* TODO */
+
+  return;
+}
+
 /* Name: wm8994_setbitrate
  *
  * Description:
- *   Program the FLL to achieve the requested bitrate (fout).  Given:
+ *   Enter callback function to let the board set
+ *   the I2S Frequency appropriately.
  *
- *     samprate  - Samples per second
- *     nchannels - Number of channels of data
- *     bpsamp    - Bits per sample
- *
- *   Then
- *     fout = samprate * nchannels * bpsamp
- *
- *   For example:
- *     samplerate = 11,025 samples/sec
- *     nchannels  = 1
- *     bpsamp     = 16     bits
- *
- *   Then
- *     fout = 11025 samples/sec * 1 * 16 bits/sample = 176.4 bits/sec
- *
- *   The clocking is configured like this:
- *     MCLK   is the FLL source clock
- *     Fref   is the scaled down version of MCLK
- *     Fvco   is the output frequency from the FLL
- *     Fout   is the final output from the FLL that drives the SYSCLK
- *     SYSCLK can be divided down to generate the BCLK
- *
- *   The FLL output frequency is generated at that fout by:
- *
- *     Fout = (Fvco / FLL_OUTDIV)
- *
- *   The FLL operating frequency is set according to:
- *
- *     Fvco = Fref * N.K * FLL_RATIO
- *
- *   Where Fref is the input frequency frequency as determined by
- *   FLL_CLK_REF_DIV. Fvco must be in the range of 90-100MHz.
- *
- *   As an example:
- *     FLL_CLK_REF_DIV = 16
- *     FLL_OUTDIV = 8
- *     N.K = 187.25
- *     FLL_RATIO=16
- *     Fref =32,768
- *
- *     Fvco = 32,768 * 187.25 / 16 = 383,488 Hz
- *     Fout = 383,488 / 8 = 47,936 Hz (approx. 48Khz)
- *
+ * TODO: Currently the FLL is not used as in the current application
+ * the WM8994 will operate in Slave mode. Code snippet
+ * may be helpful to generalize this code to multiple
+ * outputs and other I2S frame formats.
  */
 
 static void wm8994_setbitrate(FAR struct wm8994_dev_s *priv)
 {
+  uint32_t fout;
+  unsigned int framelen;
+
   DEBUGASSERT(priv && priv->lower);
 
-  /* TODO */
+  /* First calculate the desired bitrate (fout).  This is based on
+   *
+   * 1. The I2S frame length (in bits)
+   * 2. The number of frames per second = nchannels * samplerate
+   *
+   */
+
+  framelen = (priv->bpsamp == 8) ? WM8994_FRAMELEN8 : WM8994_FRAMELEN16;
+  fout = (uint32_t)priv->samprate * (uint32_t)priv->nchannels * framelen;
+
+  audinfo("sample rate=%u nchannels=%u bpsamp=%u framelen=%d fout=%lu\n",
+          priv->samprate, priv->nchannels, priv->bpsamp, framelen,
+          (unsigned long)fout);
+
+  /* The WM8994 does have an internal FLL
+   * However, for the application here, the STM32 I2S PLL is used
+   * Only way to achieve right clock rate is by setting the
+   * SAI clock accordingly (for STM32F746G Discovery)
+   *
+   * TODO: Generalize.
+   */
+
+  wm8994_setsamplefreq(priv);
+
+  I2S_RXSAMPLERATE(priv->i2s, priv->samprate);
+
+  return;
 }
 
 /* Name: wm8994_getcaps
@@ -471,7 +673,158 @@ static int wm8994_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
   DEBUGASSERT(caps && caps->ac_len >= sizeof(struct audio_caps_s));
   audinfo("type=%d ac_type=%d\n", type, caps->ac_type);
-  return 0;
+
+  /* Fill in the caller's structure based on requested info */
+
+  caps->ac_format.hw  = 0;
+  caps->ac_controls.w = 0;
+
+  switch (caps->ac_type)
+    {
+      /* Caller is querying for the types of units we support */
+
+      case AUDIO_TYPE_QUERY:
+
+        /* Provide our overall capabilities.  The interfacing software
+         * must then call us back for specific info for each capability.
+         */
+
+        caps->ac_channels = 2;       /* Stereo output */
+
+        switch (caps->ac_subtype)
+          {
+            case AUDIO_TYPE_QUERY:
+
+              /* We don't decode any formats!  Only something above us in
+               * the audio stream can perform decoding on our behalf.
+               */
+
+              /* The types of audio units we implement */
+
+              caps->ac_controls.b[0] =
+                AUDIO_TYPE_OUTPUT | AUDIO_TYPE_FEATURE |
+                AUDIO_TYPE_PROCESSING;
+
+              break;
+
+            case AUDIO_FMT_MIDI:
+
+              /* We only support Format 0 */
+
+              caps->ac_controls.b[0] = AUDIO_SUBFMT_END;
+              break;
+
+            default:
+              caps->ac_controls.b[0] = AUDIO_SUBFMT_END;
+              break;
+          }
+
+        break;
+
+      /* Provide capabilities of our OUTPUT unit */
+
+      case AUDIO_TYPE_OUTPUT:
+
+        caps->ac_channels = 2;
+
+        switch (caps->ac_subtype)
+          {
+            case AUDIO_TYPE_QUERY:
+
+              /* Report the Sample rates we support */
+
+              caps->ac_controls.b[0] =
+                AUDIO_SAMP_RATE_8K | AUDIO_SAMP_RATE_11K |
+                AUDIO_SAMP_RATE_16K | AUDIO_SAMP_RATE_22K |
+                AUDIO_SAMP_RATE_32K | AUDIO_SAMP_RATE_44K |
+                AUDIO_SAMP_RATE_48K;
+              break;
+
+            case AUDIO_FMT_MP3:
+            case AUDIO_FMT_WMA:
+            case AUDIO_FMT_PCM:
+              break;
+
+            default:
+              break;
+          }
+
+        break;
+
+      /* Provide capabilities of our FEATURE units */
+
+      case AUDIO_TYPE_FEATURE:
+
+        /* If the sub-type is UNDEF,
+         * then report the Feature Units we support
+         */
+
+        if (caps->ac_subtype == AUDIO_FU_UNDEF)
+          {
+            /* Fill in the ac_controls section with
+             * the Feature Units we have
+             */
+
+            caps->ac_controls.b[0] = AUDIO_FU_VOLUME | AUDIO_FU_BASS |
+                                     AUDIO_FU_TREBLE;
+            caps->ac_controls.b[1] = AUDIO_FU_BALANCE >> 8;
+          }
+        else
+          {
+            /* TODO:  Do we need to provide specific info for the Feature
+             * Units, such as volume setting ranges, etc.?
+             */
+          }
+
+        break;
+
+      /* Provide capabilities of our PROCESSING unit */
+
+      case AUDIO_TYPE_PROCESSING:
+
+        switch (caps->ac_subtype)
+          {
+            case AUDIO_PU_UNDEF:
+
+              /* Provide the type of Processing Units we support */
+
+              caps->ac_controls.b[0] = AUDIO_PU_STEREO_EXTENDER;
+              break;
+
+            case AUDIO_PU_STEREO_EXTENDER:
+
+              /* Provide capabilities of our Stereo Extender */
+
+              caps->ac_controls.b[0] =
+                AUDIO_STEXT_ENABLE | AUDIO_STEXT_WIDTH;
+              break;
+
+            default:
+
+              /* Other types of processing uint we don't support */
+
+              break;
+          }
+
+        break;
+
+      /* All others we don't support */
+
+      default:
+
+        /* Zero out the fields to indicate no support */
+
+        caps->ac_subtype = 0;
+        caps->ac_channels = 0;
+
+        break;
+    }
+
+  /* Return the length of the audio_caps_s struct for validation of
+   * proper Audio device type.
+   */
+
+  return caps->ac_len;
 }
 
 /* Name: wm8994_configure
@@ -496,7 +849,158 @@ static int wm8994_configure(FAR struct audio_lowerhalf_s *dev,
   DEBUGASSERT(priv != NULL && caps != NULL);
   audinfo("ac_type: %d\n", caps->ac_type);
 
-  /* TODO */
+  /* Process the configure operation */
+
+  switch (caps->ac_type)
+    {
+    case AUDIO_TYPE_FEATURE:
+      audinfo("  AUDIO_TYPE_FEATURE\n");
+
+      /* Process based on Feature Unit */
+
+      switch (caps->ac_format.hw)
+        {
+#ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
+        case AUDIO_FU_VOLUME:
+          {
+            /* Set the volume */
+
+            uint16_t volume = caps->ac_controls.hw[0];
+            audinfo("    Volume: %d\n", volume);
+
+            if (volume >= 0 && volume <= 1000)
+              {
+                /* Scale the volume setting to the range {0.. 63} */
+
+                wm8994_setvolume(priv, (63 * volume / 1000), priv->mute);
+              }
+            else
+              {
+                ret = -EDOM;
+              }
+          }
+          break;
+#endif /* CONFIG_AUDIO_EXCLUDE_VOLUME */
+
+#ifndef CONFIG_AUDIO_EXCLUDE_BALANCE
+        case AUDIO_FU_BALANCE:
+          {
+            /* Set the balance.  The percentage level (0-100) is in the
+             * ac_controls.b[0] parameter.
+             */
+
+            uint16_t balance = caps->ac_controls.hw[0];
+            audinfo("    Balance: %d\n", balance);
+
+            if (balance >= 0 && balance <= 1000)
+              {
+                /* Scale the volume setting to the range {0.. 63} */
+
+                priv->balance = (balance * (b16ONE - 1)) / 1000;
+                wm8994_setvolume(priv, priv->volume, priv->mute);
+              }
+            else
+              {
+                ret = -EDOM;
+              }
+          }
+          break;
+#endif /* CONFIG_AUDIO_EXCLUDE_BALANCE */
+
+#ifndef CONFIG_AUDIO_EXCLUDE_TONE
+        case AUDIO_FU_BASS:
+          {
+            /* Set the bass.  The percentage level (0-100) is in the
+             * ac_controls.b[0] parameter.
+             */
+
+            uint8_t bass = caps->ac_controls.b[0];
+            audinfo("    Bass: %d\n", bass);
+
+            if (bass <= 100)
+              {
+                wm8994_setbass(priv, bass);
+              }
+            else
+              {
+                ret = -EDOM;
+              }
+          }
+          break;
+
+        case AUDIO_FU_TREBLE:
+          {
+            /* Set the treble.  The percentage level (0-100) is in the
+             * ac_controls.b[0] parameter.
+             */
+
+            uint8_t treble = caps->ac_controls.b[0];
+            audinfo("    Treble: %d\n", treble);
+
+            if (treble <= 100)
+              {
+                wm8994_settreble(priv, treble);
+              }
+            else
+              {
+                ret = -EDOM;
+              }
+          }
+          break;
+#endif /* CONFIG_AUDIO_EXCLUDE_TONE */
+
+        default:
+          auderr("    ERROR: Unrecognized feature unit\n");
+          ret = -ENOTTY;
+          break;
+        }
+        break;
+
+    case AUDIO_TYPE_OUTPUT:
+      {
+        audinfo("  AUDIO_TYPE_OUTPUT:\n");
+        audinfo("    Number of channels: %u\n", caps->ac_channels);
+        audinfo("    Sample rate:        %u\n", caps->ac_controls.hw[0]);
+        audinfo("    Sample width:       %u\n", caps->ac_controls.b[2]);
+
+        /* Verify that all of the requested values are supported */
+
+        ret = -ERANGE;
+        if (caps->ac_channels != 1 && caps->ac_channels != 2)
+          {
+            auderr("ERROR: Unsupported number of channels: %d\n",
+                   caps->ac_channels);
+            break;
+          }
+
+        if (caps->ac_controls.b[2] != 8 && caps->ac_controls.b[2] != 16)
+          {
+            auderr("ERROR: Unsupported bits per sample: %d\n",
+                   caps->ac_controls.b[2]);
+            break;
+          }
+
+        /* Save the current stream configuration */
+
+        priv->samprate  = caps->ac_controls.hw[0];
+        priv->nchannels = caps->ac_channels;
+        priv->bpsamp    = caps->ac_controls.b[2];
+
+        /* Reconfigure the FLL to support the resulting number or channels,
+         * bits per sample, and bitrate.
+         */
+
+        wm8994_setdatawidth(priv);
+        wm8994_setbitrate(priv);
+
+        wm8994_clock_analysis(&priv->dev, "AUDIO_TYPE_OUTPUT");
+        ret = OK;
+      }
+      break;
+
+    case AUDIO_TYPE_PROCESSING:
+      break;
+    }
 
   return ret;
 }
@@ -682,7 +1186,12 @@ static int wm8994_sendbuffer(FAR struct wm8994_dev_s *priv)
    * only while accessing 'inflight'.
    */
 
-  wm8994_takesem(&priv->pendsem);
+  ret = wm8994_takesem(&priv->pendsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   while (priv->inflight < CONFIG_WM8994_INFLIGHT &&
          dq_peek(&priv->pendq) != NULL && !priv->paused)
     {
@@ -935,7 +1444,12 @@ static int wm8994_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
 
   /* Add the new buffer to the tail of pending audio buffers */
 
-  wm8994_takesem(&priv->pendsem);
+  ret = wm8994_takesem(&priv->pendsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   apb->flags |= AUDIO_APB_OUTPUT_ENQUEUED;
   dq_addlast(&apb->dq_entry, &priv->pendq);
   wm8994_givesem(&priv->pendsem);
@@ -985,6 +1499,7 @@ static int wm8994_cancelbuffer(FAR struct audio_lowerhalf_s *dev,
 static int wm8994_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
                         unsigned long arg)
 {
+  int ret = OK;
 #ifdef CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS
   FAR struct ap_buffer_info_s *bufinfo;
 #endif
@@ -1022,11 +1537,12 @@ static int wm8994_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
 #endif
 
       default:
+        ret = -ENOTTY;
         audinfo("Ignored\n");
         break;
     }
 
-  return OK;
+  return ret;
 }
 
 /* Name: wm8994_reserve
@@ -1231,6 +1747,7 @@ static void *wm8994_workerthread(pthread_addr_t pvarg)
 #ifdef WM8994_USE_FFLOCK_INT
   WM8994_ENABLE(priv->lower);
 #endif
+  wm8994_setvolume(priv, priv->volume, false);
 
   /* Loop as long as we are supposed to be running and as long as we have
    * buffers in-flight.
@@ -1374,24 +1891,335 @@ static void *wm8994_workerthread(pthread_addr_t pvarg)
 
 static void wm8994_audio_output(FAR struct wm8994_dev_s *priv)
 {
-  /* TODO */
-}
+  uint16_t regval;
+  uint16_t cold_startup = 1;
 
-/* Name: wm8994_audio_input
- *
- * Description:
- *   Initialize and configure the WM8994 device as an audio input device.
- *
- * Input Parameters:
- *   priv - A reference to the driver state structure
- *
- * Returned Value:
- *   None.  No failures are detected.
- *
- */
+  /* Do not change! Currently only headphones are supported! */
 
-static void wm8994_audio_input(FAR struct wm8994_dev_s *priv)
-{
+  uint16_t hp_out = 1;
+  uint16_t spk_out = 0;
+
+  /* Bias Control.
+   */
+
+  regval = WM8994_STARTUP_BIAS_ENA |
+    WM8994_VMID_BUF_ENA |
+    WM8994_VMID_RAMP_SOFT_FAST_START;
+  wm8994_writereg(priv, WM8994_ANTI_POP2, regval);
+
+  /* VMID Control */
+
+  regval = WM8994_BIAS_ENA |
+    WM8994_VMID_SEL_2X40K;
+  wm8994_writereg(priv, WM8994_PM1, regval);
+
+  up_mdelay(40);
+
+  /* Path configuration for output
+   *
+   * Currently the DAC1 is used and configured for AIF1 Timeslot 0
+   * DAC2 and AIF1 Timeslot 1 remain unused
+  */
+
+  /* Enable DAC1 (Left), Enable DAC1 (Right)
+   * Enable AIF1DAC1L (Left) input path (AIF1, TS0)
+   * Enable AIF1DAC1R (Right) input path (AIF1, TS0)
+   */
+
+  regval = WM8994_AIF1DAC1L_ENA |
+    WM8994_AIF1DAC1R_ENA |
+    WM8994_DAC1L_ENA |
+    WM8994_DAC1R_ENA;
+  wm8994_writereg(priv, WM8994_PM5, regval);
+
+  /* Enable the AIF1 Timeslot 0 (Left) to DAC 1 (Left) mixer path */
+
+  regval = WM8994_AIF1DAC1L_TO_DAC1L_ENA;
+  wm8994_writereg(priv, WM8994_DAC1_LEFT_MIXER_ROUTING, regval);
+
+  /* Enable the AIF1 Timeslot 0 (Right) to DAC 1 (Right) mixer path */
+
+  regval = WM8994_AIF1DAC1R_TO_DAC1R_ENA;
+  wm8994_writereg(priv, WM8994_DAC1_RIGHT_MIXER_ROUTING, regval);
+
+  /* Disable the AIF1 Timeslot 1 (Left) to DAC 2 (Left) mixer path */
+
+  regval = 0x0000;
+  wm8994_writereg(priv, WM8994_DAC2_LEFT_MIXER_ROUTING, regval);
+
+  /* Disable the AIF1 Timeslot 1 (Right) to DAC 2 (Right) mixer path */
+
+  regval = 0x0000;
+  wm8994_writereg(priv, WM8994_DAC2_RIGHT_MIXER_ROUTING, regval);
+
+  /* Clock Rates 1.
+   *
+   * Contains settings the control the sample rate.
+   *
+   * Note:
+   * The AIF clock is directly related to the MCLK signal
+   * which is set to fs*256.
+   * As long as DAC_OSR128 is left off, according to
+   * Table 48, a constant AIFnCLK / Fs ratio of
+   * 256 works from 8kHz to 48kHz.
+   */
+
+  wm8994_setbitrate(priv);
+
+  /* AIF1 Word Length = 16-bits, AIF1 Format = I2S (Default Register Value) */
+
+  regval = WM8994_AIF1ADCR_SRC |
+    WM8994_AIF1_FMT_I2S;
+  wm8994_writereg(priv, WM8994_AIF1_CTL1, regval);
+
+  /* Slave mode */
+
+  regval = 0x0000;
+  wm8994_writereg(priv, WM8994_AIF1_MASTER_SLAVE, regval);
+
+  /* Enable the DSP processing clock for AIF1, Enable the core clock */
+
+  regval = WM8994_SYSDSPCLK_ENA |
+    WM8994_AIF1DSPCLK_ENA;
+  wm8994_writereg(priv, WM8994_CLK1, regval);
+
+  /* Enable AIF1 Clock, AIF1 Clock Source = MCLK1 pin */
+
+  regval = WM8994_AIF1CLK_ENA;
+  wm8994_writereg(priv, WM8994_AIF1_CLK1, regval);
+
+  /* Select DAC1 (Left) to Left Headphone Output */
+
+  regval = WM8994_DAC1L_TO_HPOUT1L;
+  wm8994_writereg(priv, WM8994_OUTPUT_MIXER1, regval);
+
+  /* Select DAC1 (Right) to Right Headphone Output */
+
+  regval = WM8994_DAC1R_TO_HPOUT1R;
+  wm8994_writereg(priv, WM8994_OUTPUT_MIXER2, regval);
+
+  /* Startup sequence for Headphone */
+
+  if (cold_startup)
+    {
+      regval = WM8994_WSEQ_ENA |
+               WM8994_WSEQ_START |
+               (0x0 << WM8994_WSEQ_START_INDEX_SHIFT);  /* Start Index = 0 */
+      wm8994_writereg(priv, WM8994_WR_CTL_SEQ1, regval);
+      up_mdelay(20);
+
+      /* Wait until sequencer indicates that sequence is completed */
+
+      regval = wm8994_readreg(priv, WM8994_WR_CTL_SEQ2);
+      while (regval & WM8994_WSEQ_BUSY)
+        {
+          regval = wm8994_readreg(priv, WM8994_WR_CTL_SEQ2);
+          up_mdelay(20);
+        }
+
+      /* TODO: Manage cold/warm start correctly */
+
+      cold_startup = 0;
+    }
+  else /* Headphone Warm Start-Up */
+    {
+      regval = WM8994_WSEQ_ENA |
+               WM8994_WSEQ_START |
+               (0x8 << WM8994_WSEQ_START_INDEX_SHIFT);  /* Start Index = 8 */
+      wm8994_writereg(priv, WM8994_WR_CTL_SEQ1, regval);
+      up_mdelay(20);
+
+      /* Wait until sequencer indicates that sequence is completed */
+
+      regval = wm8994_readreg(priv, WM8994_WR_CTL_SEQ2);
+      while (regval & WM8994_WSEQ_BUSY)
+        {
+          regval = wm8994_readreg(priv, WM8994_WR_CTL_SEQ2);
+          up_mdelay(20);
+        }
+    }
+
+  /* Soft un-Mute the AIF1 Timeslot 0 DAC1 path L&R */
+
+  regval = 0x0000;
+  wm8994_writereg(priv, WM8994_AIF1_DAC1_FILTERS1, regval);
+
+  /* Enable SPKRVOL PGA, Enable SPKMIXR, Enable SPKLVOL PGA, Enable SPKMIXL */
+
+  regval = WM8994_SPKRVOL_ENA |
+    WM8994_SPKLVOL_ENA;
+  wm8994_writereg(priv, WM8994_PM3, regval);
+
+  /* Left Speaker Mixer Volume = 0dB */
+
+  regval = 0x0000;
+  wm8994_writereg(priv, WM8994_SPKMIXL_ATT, regval);
+
+  /* Speaker output mode = Class D,
+   * Right Speaker Mixer Volume = 0dB
+   */
+
+  regval = 0x0000;
+  wm8994_writereg(priv, WM8994_SPKMIXR_ATT, regval);
+
+  if (spk_out)
+    {
+      /* Unmute DAC2 (Left) to Left Speaker Mixer (SPKMIXL) path,
+       * Unmute DAC2 (Right) to Right Speaker Mixer (SPKMIXR) path
+       */
+
+      regval = WM8994_DAC2L_TO_SPKMIXL |
+               WM8994_DAC2R_TO_SPKMIXR;
+      wm8994_writereg(priv, WM8994_SPEAKER_MIXER, regval);
+
+      /* Enable bias generator, Enable VMID, Enable SPKOUTL, Enable SPKOUTR */
+
+      regval = WM8994_SPKOUTR_ENA |
+               WM8994_SPKOUTL_ENA |
+               WM8994_BIAS_ENA |
+               WM8994_VMID_SEL_2X40K;
+      wm8994_writereg(priv, WM8994_PM1, regval);
+
+      /* Enable Class W, Class W Envelope Tracking = AIF1 Timeslot 0 */
+
+      regval = wm8994_readreg(priv, WM8994_CLASS_W_1);
+      regval |= WM8994_CP_DYN_PWR;
+      wm8994_writereg(priv, WM8994_CLASS_W_1, regval);
+    }
+
+  /* Enable normal bias generator, Enable VMID */
+
+  regval =  WM8994_BIAS_ENA |
+            WM8994_VMID_SEL_2X40K;
+
+  /* Enable speaker */
+
+  if (spk_out)
+    {
+      regval |= WM8994_SPKOUTR_ENA |
+                WM8994_SPKOUTL_ENA;
+    }
+
+  /* Enable HPOUT1 (Left) and
+   * Enable HPOUT1 (Right) input stages
+   */
+
+  if (hp_out)
+    {
+      regval |= WM8994_HPOUT1L_ENA |
+                WM8994_HPOUT1R_ENA;
+    }
+
+  wm8994_writereg(priv, WM8994_PM1, regval);
+
+  /* Enable HPOUT1 (Left) and HPOUT1 (Right) intermediate stages */
+
+  regval = WM8994_HPOUT1L_DLY |
+    WM8994_HPOUT1R_DLY;
+  wm8994_writereg(priv, WM8994_ANA_HP1, regval);
+
+  /* Enable Charge Pump
+   * Note: The STM32Cube_FW_F7_V1.16.0 BSP driver included the
+   * number 9F25h as write value for this register. This is the
+   * default value + CP_ENA set.
+   */
+
+  regval = wm8994_readreg(priv, WM8994_CHARGE_PUMP1);
+  regval |= WM8994_CP_ENA;
+  wm8994_writereg(priv, WM8994_CHARGE_PUMP1, regval);
+
+  /* Add Delay */
+
+  up_mdelay(15);
+
+  /* Select DAC1 (Left) to Left Headphone Output PGA (HPOUT1LVOL) path */
+
+  regval = WM8994_DAC1L_TO_MIXOUTL;
+  wm8994_writereg(priv, WM8994_OUTPUT_MIXER1, regval);
+
+  /* Select DAC1 (Right) to Right Headphone Output PGA (HPOUT1RVOL) path */
+
+  regval = WM8994_DAC1R_TO_MIXOUTR;
+  wm8994_writereg(priv, WM8994_OUTPUT_MIXER2, regval);
+
+  /* Enable Left Output Mixer (MIXOUTL),
+   * Enable Right Output Mixer (MIXOUTR),
+   * Enable SPKOUTL and SPKOUTR
+   */
+
+  regval =
+    WM8994_MIXOUTL_ENA |
+    WM8994_MIXOUTR_ENA;
+  if (spk_out)
+    {
+      regval |= WM8994_SPKLVOL_ENA |
+                WM8994_SPKRVOL_ENA;
+    }
+  wm8994_writereg(priv, WM8994_PM3, regval);
+
+  /* Enable DC Servo and trigger start-up mode on left and right channels */
+
+  regval = WM8994_DCS_TRIG_STARTUP_1 |
+    WM8994_DCS_TRIG_STARTUP_0 |
+    WM8994_DCS_ENA_CHAN_1 |
+    WM8994_DCS_ENA_CHAN_0;
+  wm8994_writereg(priv, WM8994_DC_SERVO1, regval);
+
+  /* Add Delay */
+
+  up_mdelay(257);
+
+  /* Enable HPOUT1 (Left) and HPOUT1 (Right) intermediate and output stages.
+   * Remove clamps
+   */
+
+  regval = WM8994_HPOUT1L_RMV_SHORT |
+    WM8994_HPOUT1L_OUTP |
+    WM8994_HPOUT1L_DLY |
+    WM8994_HPOUT1R_RMV_SHORT |
+    WM8994_HPOUT1R_OUTP |
+    WM8994_HPOUT1R_DLY;
+  wm8994_writereg(priv, WM8994_ANA_HP1, regval);
+
+  /* Set DAC 1 (Left) to volume 0xC0 */
+
+  if (hp_out)
+    {
+      regval = (0xc0 << WM8994_DAC1L_VOL_SHIFT);
+      wm8994_writereg(priv, WM8994_DAC1_LEFT_VOL, regval);
+
+      /* Set DAC 1 (Right) to volume 0xC0 */
+
+      regval = (0xc0 << WM8994_DAC1R_VOL_SHIFT);
+      wm8994_writereg(priv, WM8994_DAC1_RIGHT_VOL, regval);
+
+      /* Unmute the AIF1 Timeslot 0 DAC path */
+
+      regval = WM8994_AIF1DAC1_UNMUTE_RAMP;
+      wm8994_writereg(priv, WM8994_AIF1_DAC1_FILTERS1, regval);
+    }
+
+  if (spk_out)
+    {
+      /* Set DAC 2 (Left) to volume 0xC0 */
+
+      regval = (0xc0 << WM8994_DAC2L_VOL_SHIFT);
+      wm8994_writereg(priv, WM8994_DAC2_LEFT_VOL, regval);
+
+      /* Set DAC 2 (Right) to volume 0xC0 */
+
+      regval = (0xc0 << WM8994_DAC2R_VOL_SHIFT);
+      wm8994_writereg(priv, WM8994_DAC2_RIGHT_VOL, regval);
+
+      /* Unmute the AIF1 Timeslot 1 DAC2 path */
+
+      regval = WM8994_AIF1DAC2_UNMUTE_RAMP;
+      wm8994_writereg(priv, WM8994_AIF1_DAC2_FILTERS1, regval);
+    }
+
+  /* Volume Control */
+
+  wm8994_setvolume(priv, CONFIG_WM8994_INITVOLUME, true);
 }
 
 /* Name: wm8994_audio_input
@@ -1484,7 +2312,7 @@ static void wm8994_hw_reset(FAR struct wm8994_dev_s *priv)
   priv->nchannels  = WM8994_DEFAULT_NCHANNELS;
   priv->bpsamp     = WM8994_DEFAULT_BPSAMP;
 #if !defined(CONFIG_AUDIO_EXCLUDE_VOLUME) && !defined(CONFIG_AUDIO_EXCLUDE_BALANCE)
-  priv->balance    = b16HALF;            /* Center balance */
+  priv->balance    = b16HALF - 1;            /* Center balance */
 #endif
 
   /* Software reset.  This puts all WM8994 registers back in their
@@ -1497,13 +2325,22 @@ static void wm8994_hw_reset(FAR struct wm8994_dev_s *priv)
 
   /* wm8994 Errata Work-Arounds */
 
-  /* copy code from STM32Cube_FW_F7_V1.15.0 */
+  /* Note: Initially from STM32Cube_FW_F7_V1.15.0.
+   * The write to 0x56 comes from Linux (drivers/mfd/wm8994-core.c),
+   * where it is found for wm8994_revc_patch. Neither
+   * register 0x56 nor 0x817 is documented.
+   */
 
   wm8994_writereg(priv, 0x102, 0x0003);
+  wm8994_writereg(priv, 0x56, 0x0003);
   wm8994_writereg(priv, 0x817, 0x0000);
   wm8994_writereg(priv, 0x102, 0x0000);
-  uint16_t regval;
 
+  /* TODO: This code was left in here as reference for
+   * enabling input functionality and multiple outputs
+   * Currently not used
+   */
+#if 0
   /* regval=0x006c */
 
   regval = WM8994_VMID_RAMP_SOFT_FAST_START | WM8994_VMID_BUF_ENA
@@ -1913,6 +2750,10 @@ static void wm8994_hw_reset(FAR struct wm8994_dev_s *priv)
         wm8994_writereg(priv, 0x410, regval); /* 0x410 = 0x1800 */
     }
   }
+#endif
+  /* Configure the WM8994 hardware as an audio output device */
+
+  wm8994_audio_output(priv);
 
   /* Configure interrupts */
 

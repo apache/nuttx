@@ -108,7 +108,7 @@ void weak_function zkit_sspdev_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_LPC17_40_SSP1
-void  lpc17_40_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid,
+void  lpc17_40_ssp1select(struct spi_dev_s *dev, uint32_t devid,
                           bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
@@ -120,7 +120,7 @@ void  lpc17_40_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid,
   ssp_dumpgpio("lpc17_40_ssp1select() Exit");
 }
 
-uint8_t lpc17_40_ssp1status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t lpc17_40_ssp1status(struct spi_dev_s *dev, uint32_t devid)
 {
   spiinfo("Returning SPI_STATUS_PRESENT\n");
   return SPI_STATUS_PRESENT;
@@ -134,8 +134,8 @@ uint8_t lpc17_40_ssp1status(FAR struct spi_dev_s *dev, uint32_t devid)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
-int weak_function lpc17_40_ssp1cmddata(FAR struct spi_dev_s *dev,
-                                    uint32_t devid, bool cmd)
+int weak_function lpc17_40_ssp1cmddata(struct spi_dev_s *dev,
+                                       uint32_t devid, bool cmd)
 {
   return OK;
 }
@@ -144,7 +144,7 @@ int weak_function lpc17_40_ssp1cmddata(FAR struct spi_dev_s *dev,
 #endif /* CONFIG_LPC17_40_SSP1 */
 
 #ifdef CONFIG_LPC17_40_SSP0
-void  lpc17_40_ssp0select(FAR struct spi_dev_s *dev, uint32_t devid,
+void  lpc17_40_ssp0select(struct spi_dev_s *dev, uint32_t devid,
                           bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
@@ -163,7 +163,7 @@ void  lpc17_40_ssp0select(FAR struct spi_dev_s *dev, uint32_t devid,
   ssp_dumpgpio("lpc17_40_ssp0select() Exit");
 }
 
-uint8_t lpc17_40_ssp0status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t lpc17_40_ssp0status(struct spi_dev_s *dev, uint32_t devid)
 {
   if (devid == SPIDEV_DISPLAY(0))
     {

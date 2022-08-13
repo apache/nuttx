@@ -283,24 +283,26 @@ static void stm3220g_writereg(uint8_t regaddr, uint16_t regval);
 static uint16_t stm3220g_readreg(uint8_t regaddr);
 static inline void stm3220g_gramselect(void);
 static inline void stm3220g_writegram(uint16_t rgbval);
-static void stm3220g_readnosetup(FAR uint16_t *accum);
-static uint16_t stm3220g_readnoshift(FAR uint16_t *accum);
+static void stm3220g_readnosetup(uint16_t *accum);
+static uint16_t stm3220g_readnoshift(uint16_t *accum);
 static void stm3220g_setcursor(uint16_t col, uint16_t row);
 
 /* LCD Data Transfer Methods */
 
-static int stm3220g_putrun(fb_coord_t row, fb_coord_t col,
-                           FAR const uint8_t *buffer, size_t npixels);
-static int stm3220g_getrun(fb_coord_t row, fb_coord_t col,
-                           FAR uint8_t *buffer, size_t npixels);
+static int stm3220g_putrun(struct lcd_dev_s *dev,
+                           fb_coord_t row, fb_coord_t col,
+                           const uint8_t *buffer, size_t npixels);
+static int stm3220g_getrun(struct lcd_dev_s *dev,
+                           fb_coord_t row, fb_coord_t col,
+                           uint8_t *buffer, size_t npixels);
 
 /* LCD Configuration */
 
-static int stm3220g_getvideoinfo(FAR struct lcd_dev_s *dev,
-             FAR struct fb_videoinfo_s *vinfo);
-static int stm3220g_getplaneinfo(FAR struct lcd_dev_s *dev,
+static int stm3220g_getvideoinfo(struct lcd_dev_s *dev,
+                                 struct fb_videoinfo_s *vinfo);
+static int stm3220g_getplaneinfo(struct lcd_dev_s *dev,
                                  unsigned int planeno,
-                                 FAR struct lcd_planeinfo_s *pinfo);
+                                 struct lcd_planeinfo_s *pinfo);
 
 /* LCD RGB Mapping */
 
@@ -463,7 +465,7 @@ static inline void stm3220g_writegram(uint16_t rgbval)
  *
  ****************************************************************************/
 
-static void stm3220g_readnosetup(FAR uint16_t *accum)
+static void stm3220g_readnosetup(uint16_t *accum)
 {
   /* Read-ahead one pixel */
 
@@ -482,7 +484,7 @@ static void stm3220g_readnosetup(FAR uint16_t *accum)
  *
  ****************************************************************************/
 
-static uint16_t stm3220g_readnoshift(FAR uint16_t *accum)
+static uint16_t stm3220g_readnoshift(uint16_t *accum)
 {
   /* Read the value (GRAM register already selected) */
 
@@ -516,8 +518,8 @@ static void stm3220g_setcursor(uint16_t col, uint16_t row)
  ****************************************************************************/
 
 #if 0 /* Sometimes useful */
-static void stm3220g_dumprun(FAR const char *msg,
-                             FAR uint16_t *run, size_t npixels)
+static void stm3220g_dumprun(const char *msg,
+                             uint16_t *run, size_t npixels)
 {
   int i;
   int j;
@@ -543,6 +545,7 @@ static void stm3220g_dumprun(FAR const char *msg,
  * Description:
  *   This method can be used to write a partial raster line to the LCD:
  *
+ *   dev     - The LCD device
  *   row     - Starting row to write to (range: 0 <= row < yres)
  *   col     - Starting column to write to (range: 0 <= col <= xres-npixels)
  *   buffer  - The buffer containing the run to be written to the LCD
@@ -551,12 +554,11 @@ static void stm3220g_dumprun(FAR const char *msg,
  *
  ****************************************************************************/
 
-static int stm3220g_putrun(fb_coord_t row,
-                           fb_coord_t col,
-                           FAR const uint8_t *buffer,
-                           size_t npixels)
+static int stm3220g_putrun(struct lcd_dev_s *dev,
+                           fb_coord_t row, fb_coord_t col,
+                           const uint8_t *buffer, size_t npixels)
 {
-  FAR const uint16_t *src = (FAR const uint16_t *)buffer;
+  const uint16_t *src = (const uint16_t *)buffer;
   int i;
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
@@ -665,6 +667,7 @@ static int stm3220g_putrun(fb_coord_t row,
  * Description:
  *   This method can be used to read a partial raster line from the LCD:
  *
+ *  dev     - The LCD device
  *  row     - Starting row to read from (range: 0 <= row < yres)
  *  col     - Starting column to read read (range: 0 <= col <= xres-npixels)
  *  buffer  - The buffer in which to return the run read from the LCD
@@ -673,12 +676,13 @@ static int stm3220g_putrun(fb_coord_t row,
  *
  ****************************************************************************/
 
-static int stm3220g_getrun(fb_coord_t row, fb_coord_t col,
-                           FAR uint8_t *buffer, size_t npixels)
+static int stm3220g_getrun(struct lcd_dev_s *dev,
+                           fb_coord_t row, fb_coord_t col,
+                           uint8_t *buffer, size_t npixels)
 {
-  FAR uint16_t *dest = (FAR uint16_t *)buffer;
-  void (*readsetup)(FAR uint16_t *accum);
-  uint16_t (*readgram)(FAR uint16_t *accum);
+  uint16_t *dest = (uint16_t *)buffer;
+  void (*readsetup)(uint16_t *accum);
+  uint16_t (*readgram)(uint16_t *accum);
   uint16_t accum;
   int i;
 
@@ -812,8 +816,8 @@ static int stm3220g_getrun(fb_coord_t row, fb_coord_t col,
  *
  ****************************************************************************/
 
-static int stm3220g_getvideoinfo(FAR struct lcd_dev_s *dev,
-                                 FAR struct fb_videoinfo_s *vinfo)
+static int stm3220g_getvideoinfo(struct lcd_dev_s *dev,
+                                 struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
   lcdinfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
@@ -831,13 +835,14 @@ static int stm3220g_getvideoinfo(FAR struct lcd_dev_s *dev,
  *
  ****************************************************************************/
 
-static int stm3220g_getplaneinfo(FAR struct lcd_dev_s *dev,
+static int stm3220g_getplaneinfo(struct lcd_dev_s *dev,
                                  unsigned int planeno,
-                                 FAR struct lcd_planeinfo_s *pinfo)
+                                 struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(dev && pinfo && planeno == 0);
   lcdinfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
   memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
+  pinfo->dev = dev;
   return OK;
 }
 
@@ -1165,7 +1170,7 @@ int board_lcd_initialize(void)
  *
  ****************************************************************************/
 
-FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
+struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
   DEBUGASSERT(lcddev == 0);
   return &g_lcddev.dev;

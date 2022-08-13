@@ -116,7 +116,8 @@ struct misoc_net_driver_s
 
 /* A single packet buffer is used */
 
-static uint8_t g_pktbuf[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
+static uint8_t g_pktbuf[CONFIG_MISOC_NET_NINTERFACES]
+                       [MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
 
 /* Driver state structure */
 
@@ -1092,7 +1093,7 @@ int misoc_net_initialize(int intf)
   priv->tx_buf  = priv->tx0_buf;
   priv->tx_slot = 0;
 
-  priv->misoc_net_dev.d_buf     = g_pktbuf;           /* Single packet buffer */
+  priv->misoc_net_dev.d_buf     = g_pktbuf[intf];     /* Single packet buffer */
   priv->misoc_net_dev.d_ifup    = misoc_net_ifup;     /* I/F up (new IP address) callback */
   priv->misoc_net_dev.d_ifdown  = misoc_net_ifdown;   /* I/F down callback */
   priv->misoc_net_dev.d_txavail = misoc_net_txavail;  /* New TX data callback */

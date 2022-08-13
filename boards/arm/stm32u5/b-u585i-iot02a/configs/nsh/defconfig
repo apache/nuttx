@@ -5,13 +5,13 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
+# CONFIG_ARCH_LEDS is not set
 # CONFIG_NSH_ARGCAT is not set
 # CONFIG_NSH_CMDPARMS is not set
 # CONFIG_STANDARD_SERIAL is not set
 CONFIG_ARCH="arm"
 CONFIG_ARCH_BOARD="b-u585i-iot02a"
 CONFIG_ARCH_BOARD_B_U585I_IOT02A=y
-CONFIG_ARCH_BOARD_STM32U5_CUSTOM_CLOCKCONFIG=y
 CONFIG_ARCH_CHIP="stm32u5"
 CONFIG_ARCH_CHIP_STM32U585AI=y
 CONFIG_ARCH_CHIP_STM32U5=y

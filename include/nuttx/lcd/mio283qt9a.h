@@ -110,7 +110,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  mio283qt2_lcdinitialize
+ * Name:  mio283qt9a_lcdinitialize
  *
  * Description:
  *   Initialize the LCD video hardware. The initial state of the LCD is fully
@@ -119,11 +119,11 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct lcd_dev_s *mio283qt2_lcdinitialize(
+FAR struct lcd_dev_s *mio283qt9a_lcdinitialize(
                                           FAR struct mio283qt9a_lcd_s *lcd);
 
 /****************************************************************************
- * Name:  mio283qt2_clear
+ * Name:  mio283qt9a_clear
  *
  * Description:
  *   This is a non-standard LCD interface.  Because of the various rotations,
@@ -133,7 +133,7 @@ FAR struct lcd_dev_s *mio283qt2_lcdinitialize(
  *
  ****************************************************************************/
 
-void mio283qt2_clear(FAR struct lcd_dev_s *dev, uint16_t color);
+void mio283qt9a_clear(FAR struct lcd_dev_s *dev, uint16_t color);
 
 #undef EXTERN
 #ifdef __cplusplus

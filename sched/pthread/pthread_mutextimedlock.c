@@ -81,7 +81,7 @@ int pthread_mutex_timedlock(FAR pthread_mutex_t *mutex,
   pid_t mypid = getpid();
   int ret = EINVAL;
 
-  sinfo("mutex=0x%p\n", mutex);
+  sinfo("mutex=%p\n", mutex);
   DEBUGASSERT(mutex != NULL);
 
   if (mutex != NULL)

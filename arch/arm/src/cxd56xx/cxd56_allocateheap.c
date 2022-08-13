@@ -82,7 +82,7 @@ extern char __stack[];
  ****************************************************************************/
 
 #ifdef CONFIG_HEAP_COLORATION
-static inline void up_heap_color(FAR void *start, size_t size)
+static inline void up_heap_color(void *start, size_t size)
 {
   memset(start, HEAP_COLOR, size);
 }
@@ -109,12 +109,12 @@ static inline void up_heap_color(FAR void *start, size_t size)
  *
  ****************************************************************************/
 
-void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
+void up_allocate_heap(void **heap_start, size_t *heap_size)
 {
   /* Start with the first SRAM region */
 
   board_autoled_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void *)g_idle_topstack;
+  *heap_start = (void *)g_idle_topstack;
   *heap_size = (uint32_t)&__stack - g_idle_topstack;
 
   /* Colorize the heap for debug */

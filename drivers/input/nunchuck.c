@@ -97,16 +97,16 @@ static inline int nunchuck_takesem(sem_t *sem);
 static int     nunchuck_open(FAR struct file *filep);
 static int     nunchuck_close(FAR struct file *filep);
 static ssize_t nunchuck_read(FAR struct file *filep, FAR char *buffer,
-                         size_t buflen);
+                             size_t buflen);
 static int     nunchuck_ioctl(FAR struct file *filep, int cmd,
-                          unsigned long arg);
+                              unsigned long arg);
 
 /* I2C Helpers */
 
 static int     nunchuck_i2c_read(FAR struct nunchuck_dev_s *priv,
-                 FAR uint8_t *regval, int len);
+                                 FAR uint8_t *regval, int len);
 static int     nunchuck_i2c_write(FAR struct nunchuck_dev_s *priv,
-                 uint8_t const *data, int len);
+                                  uint8_t const *data, int len);
 static int     nunchuck_sample(FAR struct nunchuck_dev_s *priv,
                                FAR struct nunchuck_sample_s *buffer);
 

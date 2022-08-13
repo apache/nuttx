@@ -101,23 +101,26 @@ static void audio_i2s_callback(struct i2s_dev_s *dev,
 
 static const struct audio_ops_s g_audio_i2s_ops =
 {
-  .getcaps       = audio_i2s_getcaps,
-  .configure     = audio_i2s_configure,
-  .shutdown      = audio_i2s_shutdown,
-  .start         = audio_i2s_start,
+  audio_i2s_getcaps,       /* getcaps        */
+  audio_i2s_configure,     /* configure      */
+  audio_i2s_shutdown,      /* shutdown       */
+  audio_i2s_start,         /* start          */
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
-  .stop          = audio_i2s_stop,
+  audio_i2s_stop,          /* stop           */
 #endif
 #ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
-  .pause         = audio_i2s_pause,
-  .resume        = audio_i2s_resume,
+  audio_i2s_pause,         /* pause          */
+  audio_i2s_resume,        /* resume         */
 #endif
-  .allocbuffer   = audio_i2s_allocbuffer,
-  .freebuffer    = audio_i2s_freebuffer,
-  .enqueuebuffer = audio_i2s_enqueuebuffer,
-  .ioctl         = audio_i2s_ioctl,
-  .reserve       = audio_i2s_reserve,
-  .release       = audio_i2s_release,
+  audio_i2s_allocbuffer,   /* allocbuffer    */
+  audio_i2s_freebuffer,    /* freebuffer     */
+  audio_i2s_enqueuebuffer, /* enqueue_buffer */
+  NULL,                    /* cancel_buffer  */
+  audio_i2s_ioctl,         /* ioctl          */
+  NULL,                    /* read           */
+  NULL,                    /* write          */
+  audio_i2s_reserve,       /* reserve        */
+  audio_i2s_release        /* release        */
 };
 
 /****************************************************************************

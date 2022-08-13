@@ -95,32 +95,32 @@ static uint32_t    spi_getreg(uint32_t address);
 #  define spi_getreg(a)   getreg32(a)
 #endif
 
-static inline void spi_drive_cs(FAR struct lpc31_spidev_s *priv,
+static inline void spi_drive_cs(struct lpc31_spidev_s *priv,
                                 uint8_t slave, uint8_t val);
-static inline void spi_select_slave(FAR struct lpc31_spidev_s *priv,
+static inline void spi_select_slave(struct lpc31_spidev_s *priv,
                                     uint8_t slave);
-static inline uint32_t spi_readword(FAR struct lpc31_spidev_s *priv);
-static inline void spi_writeword(FAR struct lpc31_spidev_s *priv,
+static inline uint32_t spi_readword(struct lpc31_spidev_s *priv);
+static inline void spi_writeword(struct lpc31_spidev_s *priv,
                                  uint32_t word);
 
-static int         spi_lock(FAR struct spi_dev_s *dev, bool lock);
-static void        spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
+static int         spi_lock(struct spi_dev_s *dev, bool lock);
+static void        spi_select(struct spi_dev_s *dev, uint32_t devid,
                               bool selected);
-static uint32_t    spi_setfrequency(FAR struct spi_dev_s *dev,
+static uint32_t    spi_setfrequency(struct spi_dev_s *dev,
                                     uint32_t frequency);
-static void        spi_setmode(FAR struct spi_dev_s *dev,
+static void        spi_setmode(struct spi_dev_s *dev,
                                enum spi_mode_e mode);
-static void        spi_setbits(FAR struct spi_dev_s *dev, int nbits);
-static uint8_t     spi_status(FAR struct spi_dev_s *dev, uint32_t devid);
-static uint32_t    spi_send(FAR struct spi_dev_s *dev, uint32_t word);
-static void        spi_exchange(FAR struct spi_dev_s *dev,
-                                FAR const void *txbuffer, FAR void *rxbuffer,
+static void        spi_setbits(struct spi_dev_s *dev, int nbits);
+static uint8_t     spi_status(struct spi_dev_s *dev, uint32_t devid);
+static uint32_t    spi_send(struct spi_dev_s *dev, uint32_t word);
+static void        spi_exchange(struct spi_dev_s *dev,
+                                const void *txbuffer, void *rxbuffer,
                                 size_t nwords);
 #ifndef CONFIG_SPI_EXCHANGE
-static void        spi_sndblock(FAR struct spi_dev_s *dev,
-                                FAR const void *txbuffer, size_t nwords);
-static void        spi_recvblock(FAR struct spi_dev_s *dev,
-                                 FAR void *rxbuffer, size_t nwords);
+static void        spi_sndblock(struct spi_dev_s *dev,
+                                const void *txbuffer, size_t nwords);
+static void        spi_recvblock(struct spi_dev_s *dev,
+                                 void *rxbuffer, size_t nwords);
 #endif
 
 /****************************************************************************
@@ -285,7 +285,7 @@ static uint32_t spi_getreg(uint32_t address)
  *
  ****************************************************************************/
 
-static inline void spi_drive_cs(FAR struct lpc31_spidev_s *priv,
+static inline void spi_drive_cs(struct lpc31_spidev_s *priv,
                                 uint8_t slave, uint8_t val)
 {
   switch (slave)
@@ -352,7 +352,7 @@ static inline void spi_drive_cs(FAR struct lpc31_spidev_s *priv,
  *
  ****************************************************************************/
 
-static inline void spi_select_slave(FAR struct lpc31_spidev_s *priv,
+static inline void spi_select_slave(struct lpc31_spidev_s *priv,
                                     uint8_t slave)
 {
   switch (slave)
@@ -391,7 +391,7 @@ static inline void spi_select_slave(FAR struct lpc31_spidev_s *priv,
  *
  ****************************************************************************/
 
-static inline uint32_t spi_readword(FAR struct lpc31_spidev_s *priv)
+static inline uint32_t spi_readword(struct lpc31_spidev_s *priv)
 {
   /* Wait until the RX FIFO is not empty */
 
@@ -417,7 +417,7 @@ static inline uint32_t spi_readword(FAR struct lpc31_spidev_s *priv)
  *
  ****************************************************************************/
 
-static inline void spi_writeword(FAR struct lpc31_spidev_s *priv,
+static inline void spi_writeword(struct lpc31_spidev_s *priv,
                                  uint32_t word)
 {
   /* Wait until the TX FIFO is not full */
@@ -450,9 +450,9 @@ static inline void spi_writeword(FAR struct lpc31_spidev_s *priv,
  *
  ****************************************************************************/
 
-static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
+static int spi_lock(struct spi_dev_s *dev, bool lock)
 {
-  FAR struct lpc31_spidev_s *priv = (FAR struct lpc31_spidev_s *)dev;
+  struct lpc31_spidev_s *priv = (struct lpc31_spidev_s *)dev;
   int ret;
 
   if (lock)
@@ -485,7 +485,7 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
-static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
+static void spi_select(struct spi_dev_s *dev, uint32_t devid,
                        bool selected)
 {
   struct lpc31_spidev_s *priv = (struct lpc31_spidev_s *) dev;
@@ -559,10 +559,10 @@ static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
  *
  ****************************************************************************/
 
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+static uint32_t spi_setfrequency(struct spi_dev_s *dev,
                                  uint32_t frequency)
 {
-  FAR struct lpc31_spidev_s *priv = (FAR struct lpc31_spidev_s *)dev;
+  struct lpc31_spidev_s *priv = (struct lpc31_spidev_s *)dev;
   uint32_t spi_clk;
   uint32_t div;
   uint32_t div1;
@@ -619,9 +619,9 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
  *
  ****************************************************************************/
 
-static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
+static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 {
-  FAR struct lpc31_spidev_s *priv = (FAR struct lpc31_spidev_s *)dev;
+  struct lpc31_spidev_s *priv = (struct lpc31_spidev_s *)dev;
   uint16_t setbits;
   uint16_t clrbits;
 
@@ -677,9 +677,9 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
  *
  ****************************************************************************/
 
-static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
+static void spi_setbits(struct spi_dev_s *dev, int nbits)
 {
-  FAR struct lpc31_spidev_s *priv = (FAR struct lpc31_spidev_s *)dev;
+  struct lpc31_spidev_s *priv = (struct lpc31_spidev_s *)dev;
 
   /* Has the number of bits changed? */
 
@@ -706,7 +706,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
  *
  ****************************************************************************/
 
-static uint8_t spi_status(FAR struct spi_dev_s *dev, uint32_t devid)
+static uint8_t spi_status(struct spi_dev_s *dev, uint32_t devid)
 {
   /* FIXME: is there anyway to determine this
    *        it should probably be board dependent anyway
@@ -731,9 +731,9 @@ static uint8_t spi_status(FAR struct spi_dev_s *dev, uint32_t devid)
  *
  ****************************************************************************/
 
-static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t word)
+static uint32_t spi_send(struct spi_dev_s *dev, uint32_t word)
 {
-  FAR struct lpc31_spidev_s *priv = (FAR struct lpc31_spidev_s *)dev;
+  struct lpc31_spidev_s *priv = (struct lpc31_spidev_s *)dev;
   DEBUGASSERT(priv);
 
   spi_writeword(priv, word);
@@ -761,10 +761,10 @@ static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t word)
  *
  ****************************************************************************/
 
-static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
-                         FAR void *rxbuffer, size_t nwords)
+static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+                         void *rxbuffer, size_t nwords)
 {
-  FAR struct lpc31_spidev_s *priv = (FAR struct lpc31_spidev_s *)dev;
+  struct lpc31_spidev_s *priv = (struct lpc31_spidev_s *)dev;
   unsigned int maxtx;
   unsigned int ntx;
 
@@ -877,8 +877,8 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
  ****************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_sndblock(FAR struct spi_dev_s *dev,
-                         FAR const void *txbuffer, size_t nwords)
+static void spi_sndblock(struct spi_dev_s *dev,
+                         const void *txbuffer, size_t nwords)
 {
   return spi_exchange(dev, txbuffer, NULL, nwords);
 }
@@ -905,7 +905,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev,
  ****************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
+static void spi_recvblock(struct spi_dev_s *dev, void *rxbuffer,
                           size_t nwords)
 {
   return spi_exchange(dev, NULL, rxbuffer, nwords);
@@ -930,9 +930,9 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *lpc31_spibus_initialize(int port)
+struct spi_dev_s *lpc31_spibus_initialize(int port)
 {
-  FAR struct lpc31_spidev_s *priv = &g_spidev;
+  struct lpc31_spidev_s *priv = &g_spidev;
 
   /* Only the SPI0 interface is supported */
 
@@ -992,5 +992,5 @@ FAR struct spi_dev_s *lpc31_spibus_initialize(int port)
   priv->frequency = 0;
   spi_setfrequency(&priv->spidev, 400000);
 
-  return (FAR struct spi_dev_s *)priv;
+  return (struct spi_dev_s *)priv;
 }

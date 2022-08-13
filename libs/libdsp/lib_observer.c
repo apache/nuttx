@@ -263,8 +263,8 @@ void motor_aobserver_smo(FAR struct motor_aobserver_f32_s *o,
   /* Configure low pass filters
    *
    * We tune low-pass filters to achieve cutoff frequency equal to
-   * input singal frequency. This gives us constant phase shift between
-   * input and outpu signals equals to:
+   * input signal frequency. This gives us constant phase shift between
+   * input and output signals equals to:
    *
    *   phi = -arctan(f_in/f_c) = -arctan(1) = -45deg = -PI/4
    *

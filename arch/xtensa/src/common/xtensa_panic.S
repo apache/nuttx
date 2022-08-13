@@ -62,6 +62,7 @@
 
 #include <arch/irq.h>
 #include <arch/xtensa/core.h>
+#include <arch/xtensa/xtensa_abi.h>
 #include <arch/xtensa/xtensa_specregs.h>
 
 #include "xtensa_macros.S"
@@ -108,9 +109,14 @@ _xtensa_panic:
 	 * stack.
 	 */
 
-	s32i	a2, sp, (4 * REG_A2)
-	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
+
+	/* Save exception cause and vaddr into the user frame */
+
+	rsr		a0, EXCCAUSE
+	s32i	a0, sp, (4 * REG_EXCCAUSE)
+	rsr		a0, EXCVADDR
+	s32i	a0, sp, (4 * REG_EXCVADDR)
 
 	/* Dispatch the sycall as with other interrupts. */
 
@@ -122,30 +128,18 @@ _xtensa_panic:
 	setintstack a13 a14
 #endif
 
-	/* Save exc cause and vaddr into exception frame */
-
-	rsr		a0, EXCCAUSE
-	s32i	a0, sp, (4 * REG_EXCCAUSE)
-	rsr		a0, EXCVADDR
-	s32i	a0, sp, (4 * REG_EXCVADDR)
-
 	/* Set up PS for C, re-enable hi-pri interrupts, and clear EXCM. */
 
-  ps_setup XCHAL_EXCM_LEVEL a0
+	ps_setup XCHAL_EXCM_LEVEL a0
 
-	/* Call C panic handler:  Arg1 (A2) = Exception code; Arg 2 (A3) = start
-	 * of the register save area.
+	/* Call C panic handler: 
+	 *  Arg1 = Exception code.
+	 *  Arg2 = Start of the register save area.
 	 */
 
-#ifdef __XTENSA_CALL0_ABI__
-	rsr		a2, EXCSAVE_1
-	mov		a3, a12
-	call0	xtensa_panic					/* Call xtensa_panic. Should not return */
-#else
-	rsr		a6, EXCSAVE_1
-	mov		a7, a12
-	call4	xtensa_panic					/* Call xtensa_panic. Should not return */
-#endif
+	rsr		ARG1, EXCSAVE_1
+	mov		ARG2, a12
+	CALL	xtensa_panic					/* Call xtensa_panic. Should not return */
 
 1:	j		1b								/* loop infinitely */
 	retw

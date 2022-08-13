@@ -58,7 +58,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int board_gauge_initialize(FAR const char *devpath);
+int board_gauge_initialize(const char *devpath);
 
 /****************************************************************************
  * Name: board_gauge_uninitialize
@@ -68,7 +68,7 @@ int board_gauge_initialize(FAR const char *devpath);
  *
  ****************************************************************************/
 
-int board_gauge_uninitialize(FAR const char *devpath);
+int board_gauge_uninitialize(const char *devpath);
 
 #undef EXTERN
 #if defined(__cplusplus)

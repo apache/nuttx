@@ -93,47 +93,83 @@
  * Private Data
  ****************************************************************************/
 
-/* Indexed by NUCLEO_SPI_BUSx_CSx */
-
-static const uint32_t g_spigpio[] =
+#if defined(CONFIG_STM32F4_SPI1)
+static const uint32_t g_spi1gpio[] =
 {
 #if defined(GPIO_SPI1_CS0)
-    GPIO_SPI1_CS0,
+  GPIO_SPI1_CS0,
+#else
+  0,
 #endif
 #if defined(GPIO_SPI1_CS1)
-    GPIO_SPI1_CS1,
+  GPIO_SPI1_CS1,
+#else
+  0,
 #endif
 #if defined(GPIO_SPI1_CS2)
-    GPIO_SPI1_CS2,
+  GPIO_SPI1_CS2,
+#else
+  0,
 #endif
 #if defined(GPIO_SPI1_CS3)
-    GPIO_SPI1_CS3,
-#endif
-#if defined(GPIO_SPI2_CS0)
-    GPIO_SPI2_CS0,
-#endif
-#if defined(GPIO_SPI2_CS1)
-    GPIO_SPI2_CS1,
-#endif
-#if defined(GPIO_SPI2_CS2)
-    GPIO_SPI2_CS2,
-#endif
-#if defined(GPIO_SPI2_CS3)
-    GPIO_SPI2_CS3,
-#endif
-#if defined(GPIO_SPI3_CS0)
-    GPIO_SPI3_CS0,
-#endif
-#if defined(GPIO_SPI3_CS1)
-    GPIO_SPI3_CS1,
-#endif
-#if defined(GPIO_SPI3_CS2)
-    GPIO_SPI3_CS2,
-#endif
-#if defined(GPIO_SPI3_CS3)
-    GPIO_SPI3_CS3,
+  GPIO_SPI1_CS3
+#else
+  0
 #endif
 };
+#endif
+
+#if defined(CONFIG_STM32F4_SPI2)
+static const uint32_t g_spi2gpio[] =
+{
+#if defined(GPIO_SPI2_CS0)
+  GPIO_SPI2_CS0,
+#else
+  0,
+#endif
+#if defined(GPIO_SPI2_CS1)
+  GPIO_SPI2_CS1,
+#else
+  0,
+#endif
+#if defined(GPIO_SPI2_CS2)
+  GPIO_SPI2_CS2,
+#else
+  0,
+#endif
+#if defined(GPIO_SPI2_CS3)
+  GPIO_SPI2_CS3
+#else
+  0
+#endif
+};
+#endif
+
+#if defined(CONFIG_STM32F4_SPI3)
+static const uint32_t g_spi3gpio[] =
+{
+#if defined(GPIO_SPI3_CS0)
+  GPIO_SPI3_CS0,
+#else
+  0,
+#endif
+#if defined(GPIO_SPI3_CS1)
+  GPIO_SPI3_CS1,
+#else
+  0,
+#endif
+#if defined(GPIO_SPI3_CS2)
+  GPIO_SPI3_CS2,
+#else
+  0,
+#endif
+#if defined(GPIO_SPI3_CS3)
+  GPIO_SPI3_CS3
+#else
+  0
+#endif
+};
+#endif
 
 #if defined(CONFIG_NUCLEO_SPI_TEST)
 #  if defined(CONFIG_STM32F4_SPI1)
@@ -161,22 +197,45 @@ struct spi_dev_s *spi3;
 
 void weak_function stm32_spidev_initialize(void)
 {
-  int i;
-
   /* Configure SPI CS GPIO for output */
 
-  for (i = 0; i < ARRAYSIZE(g_spigpio); i++)
+#if defined(CONFIG_STM32F4_SPI1)
+  for (int i = 0; i < ARRAYSIZE(g_spi1gpio); i++)
     {
-      stm32_configgpio(g_spigpio[i]);
+      if (g_spi1gpio[i] != 0)
+        {
+          stm32_configgpio(g_spi1gpio[i]);
+        }
     }
+#endif
+
+#if defined(CONFIG_STM32F4_SPI2)
+  for (int i = 0; i < ARRAYSIZE(g_spi2gpio); i++)
+    {
+      if (g_spi2gpio[i] != 0)
+        {
+          stm32_configgpio(g_spi2gpio[i]);
+        }
+    }
+#endif
+
+#if defined(CONFIG_STM32F4_SPI3)
+  for (int i = 0; i < ARRAYSIZE(g_spi3gpio); i++)
+    {
+      if (g_spi3gpio[i] != 0)
+        {
+          stm32_configgpio(g_spi3gpio[i]);
+        }
+    }
+#endif
 }
 
 /****************************************************************************
- * Name:  stm32_spi1/2/3/4/5select and stm32_spi1/2/3/4/5status
+ * Name:  stm32_spi1/2/3/4/5/6select and stm32_spi1/2/3/4/5/6status
  *
  * Description:
- *   The external functions, stm32_spi1/2/3select and
- *   stm32_spi1/2/3status must be provided by board-specific logic.
+ *   The external functions, stm32_spi1/2/3/4/5/6select and
+ *   stm32_spi1/2/3/4/5/6status must be provided by board-specific logic.
  *   They are implementations of the select and status methods of
  *   the SPI interface defined by struct spi_ops_s
  *   (see include/nuttx/spi/spi.h). All other methods
@@ -185,7 +244,7 @@ void weak_function stm32_spidev_initialize(void)
  *
  *   1. Provide logic in stm32_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide stm32_spi1/2/3select() and stm32_spi1/2/3status()
+ *   2. Provide stm32_spi1/2/3/4/5/6select() and stm32_spi1/2/3/4/5/6status()
  *      functions in your board-specific logic. These functions will
  *      perform chip selection and status operations using GPIOs in
  *      the way your board is configured.
@@ -199,121 +258,112 @@ void weak_function stm32_spidev_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32F4_SPI1
-void stm32_spi1select(FAR struct spi_dev_s *dev,
-                      uint32_t devid,
-                      bool selected)
+void stm32_spi1select(struct spi_dev_s *dev,
+                      uint32_t devid, bool selected)
 {
-  spiinfo("devid: %d CS: %s\n",
-            (int)devid, selected ? "assert" : "de-assert");
+  uint32_t index = SPIDEVID_INDEX(devid);
 
-  stm32_gpiowrite(g_spigpio[devid], !selected);
+  spiinfo("devid: %d CS: %s\n",
+          (int)devid, selected ? "assert" : "de-assert");
+
+  if (g_spi1gpio[index] != 0)
+    {
+      stm32_gpiowrite(g_spi1gpio[index], !selected);
+    }
 }
 
-uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t stm32_spi1status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_STM32F4_SPI2
-void stm32_spi2select(FAR struct spi_dev_s *dev,
-                      uint32_t devid,
-                      bool selected)
+void stm32_spi2select(struct spi_dev_s *dev,
+                      uint32_t devid, bool selected)
 {
-  spiinfo("devid: %d CS: %s\n",
-            (int)devid, selected ? "assert" : "de-assert");
+  uint32_t index = SPIDEVID_INDEX(devid);
 
-  stm32_gpiowrite(g_spigpio[devid], !selected);
+  spiinfo("devid: %d CS: %s\n",
+          (int)devid, selected ? "assert" : "de-assert");
+
+  if (g_spi2gpio[index] != 0)
+    {
+      stm32_gpiowrite(g_spi2gpio[index], !selected);
+    }
 }
 
-uint8_t stm32_spi2status(FAR struct spi_dev_s *dev,
-                         uint32_t devid)
+uint8_t stm32_spi2status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_STM32F4_SPI3
-void stm32_spi3select(FAR struct spi_dev_s *dev,
-                      uint32_t devid,
-                      bool selected)
+void stm32_spi3select(struct spi_dev_s *dev,
+                      uint32_t devid, bool selected)
 {
-  spiinfo("devid: %d CS: %s\n",
-            (int)devid, selected ? "assert" : "de-assert");
+  uint32_t index = SPIDEVID_INDEX(devid);
 
-  stm32_gpiowrite(g_spigpio[devid], !selected);
+  spiinfo("devid: %d CS: %s\n",
+          (int)devid, selected ? "assert" : "de-assert");
+
+  if (g_spi3gpio[index] != 0)
+    {
+      stm32_gpiowrite(g_spi3gpio[index], !selected);
+    }
 }
 
-uint8_t stm32_spi3status(FAR struct spi_dev_s *dev,
-                         uint32_t devid)
+uint8_t stm32_spi3status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_STM32F4_SPI4
-#  ifndef NUCLEO_SPI_BUS4_CS0
-#    error "NUCLEO_SPI_BUS4_CSn Are not defined"
-#  endif
-
-void stm32_spi4select(FAR struct spi_dev_s *dev,
-                      uint32_t devid,
-                      bool selected)
+void stm32_spi4select(struct spi_dev_s *dev,
+                      uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n",
-            (int)devid, selected ? "assert" : "de-assert");
-  stm32_gpiowrite(g_spigpio[devid], !selected);
+          (int)devid, selected ? "assert" : "de-assert");
 }
 
-uint8_t stm32_spi4status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t stm32_spi4status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_STM32F4_SPI5
-#  ifndef NUCLEO_SPI_BUS5_CS0
-#    error "NUCLEO_SPI_BUS4_CSn Are not defined"
-#  endif
-
-void stm32_spi5select(FAR struct spi_dev_s *dev,
-                      uint32_t devid,
-                      bool selected)
+void stm32_spi5select(struct spi_dev_s *dev,
+                      uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n",
-            (int)devid, selected ? "assert" : "de-assert");
-
-  stm32_gpiowrite(g_spigpio[devid], !selected);
+          (int)devid, selected ? "assert" : "de-assert");
 }
 
-uint8_t stm32_spi5status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t stm32_spi5status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_STM32F4_SPI6
-#  ifndef NUCLEO_SPI_BUS6_CS
-#    error "NUCLEO_SPI_BUS4_CSn Are not defined"
-#  endif
-void stm32_spi5select(FAR struct spi_dev_s *dev,
-                      uint32_t devid,
-                      bool selected)
+void stm32_spi6select(struct spi_dev_s *dev,
+                      uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n",
-            (int)devid, selected ? "assert" : "de-assert");
-
-  stm32_gpiowrite(g_spigpio[devid], !selected);
+          (int)devid, selected ? "assert" : "de-assert");
 }
 
-uint8_t stm32_spi5status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t stm32_spi6status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 /****************************************************************************
- * Name: stm32_spi1cmddata
+ * Name: stm32_spi1/2/3/4/5/6cmddata
  *
  * Description:
  *   Set or clear the SH1101A A0 or SD1306 D/C n bit to select data (true)
@@ -337,42 +387,42 @@ uint8_t stm32_spi5status(FAR struct spi_dev_s *dev, uint32_t devid)
 
 #ifdef CONFIG_SPI_CMDDATA
 #ifdef CONFIG_STM32F4_SPI1
-int stm32_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int stm32_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
 }
 #endif
 
 #ifdef CONFIG_STM32F4_SPI2
-int stm32_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int stm32_spi2cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
 }
 #endif
 
 #ifdef CONFIG_STM32F4_SPI3
-int stm32_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int stm32_spi3cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
 }
 #endif
 
 #ifdef CONFIG_STM32F4_SPI4
-int stm32_spi4cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int stm32_spi4cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
 }
 #endif
 
 #ifdef CONFIG_STM32F4_SPI5
-int stm32_spi5cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int stm32_spi5cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
 }
 #endif
 
 #ifdef CONFIG_STM32F4_SPI6
-int stm32_spi5cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int stm32_spi6cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
 }

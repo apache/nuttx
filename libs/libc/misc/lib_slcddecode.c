@@ -240,7 +240,7 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
       return slcd_reget(state, pch, parg);
     }
 
-  /* If the next character is a hexidecimal value (with lower case
+  /* If the next character is a hexadecimal value (with lower case
    * alphabetic characters), then we are parsing a 5-byte sequence.
    */
 
@@ -271,7 +271,7 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
     }
   else
     {
-      /* Save the first character of the two byte hexidecimal number */
+      /* Save the first character of the two byte hexadecimal number */
 
       state->buf[NDX_COUNTH] = (uint8_t)ch;
       state->nch = NCH_COUNTH;
@@ -288,7 +288,7 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
           return slcd_reget(state, pch, parg);
         }
 
-      /* We expect the next character to be the second byte of hexidecimal
+      /* We expect the next character to be the second byte of hexadecimal
        * count value.
        */
 
@@ -304,7 +304,7 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
           return slcd_reget(state, pch, parg);
         }
 
-      /* Save the second character of the two byte hexidecimal number */
+      /* Save the second character of the two byte hexadecimal number */
 
       state->buf[NDX_COUNTL] = (uint8_t)ch;
       state->nch = NCH_COUNTL;

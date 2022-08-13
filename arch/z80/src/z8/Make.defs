@@ -25,7 +25,7 @@ CMN_CSRCS += z80_releasestack.c z80_interruptcontext.c z80_blocktask.c
 CMN_CSRCS += z80_unblocktask.c z80_exit.c z80_releasepending.c
 CMN_CSRCS += z80_reprioritizertr.c z80_idle.c z80_assert.c z80_doirq.c
 CMN_CSRCS += z80_mdelay.c z80_stackframe.c z80_udelay.c z80_usestack.c
-CMN_CSRCS += z80_puts.c
+CMN_CSRCS += z80_nputs.c
 
 CHIP_SSRCS  = z8_vector.S z8_saveusercontext.S z8_restorecontext.S
 CHIP_CSRCS  = z8_initialstate.c z8_irq.c z8_saveirqcontext.c

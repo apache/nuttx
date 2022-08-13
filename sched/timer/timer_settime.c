@@ -306,18 +306,18 @@ int timer_settime(timer_t timerid, int flags,
       goto errout;
     }
 
-  /* If the time is in the past or now, then set up the next interval
-   * instead (assuming a repetitive timer).
+  /* If the specified time has already passed, the function shall succeed
+   * and the expiration notification shall be made.
    */
 
-  if (delay <= 0)
+  if (delay < 0)
     {
-      delay = timer->pt_delay;
+      delay = 0;
     }
 
   /* Then start the watchdog */
 
-  if (delay > 0)
+  if (delay >= 0)
     {
       ret = wd_start(&timer->pt_wdog, delay, timer_timeout, (wdparm_t)timer);
       if (ret < 0)

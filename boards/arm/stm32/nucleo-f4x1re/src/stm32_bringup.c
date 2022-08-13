@@ -107,6 +107,18 @@ int stm32_bringup(void)
       return -ENODEV;
     }
 
+#if defined(CONFIG_LCD_SSD1306_SPI) && !defined(CONFIG_VIDEO_FB)
+  board_lcd_initialize();
+#endif
+
+#ifdef CONFIG_VIDEO_FB
+  ret = fb_register(0, 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: fb_register() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_CAN_MCP2515
 #ifdef CONFIG_STM32_SPI1
   stm32_configgpio(GPIO_MCP2515_CS);    /* MEMS chip select */

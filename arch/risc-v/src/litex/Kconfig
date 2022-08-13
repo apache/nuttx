@@ -62,4 +62,24 @@ config LITEX_SD4BIT_FREQ
 		Frequency to use for transferring data to/from an SD card using all four data lines.
 
 endif
+
+config LITEX_ETHMAC
+	bool "ETHMAC"
+	default n
+	select ARCH_HAVE_PHY
+	select ARCH_HAVE_NETDEV_STATISTICS
+	select NET
+	select NETDEVICES
+
 endmenu
+
+menu "LITEX EMAC device driver options"
+	depends on LITEX_ETHMAC
+
+config LITEX_EMAC_PHYADDR
+	int "PHY address"
+	default 1
+	---help---
+		The 5-bit address of the PHY on the board.  Default: 1
+
+endmenu # PHY interface

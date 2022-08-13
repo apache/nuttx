@@ -152,7 +152,7 @@ int board_nandflash_config(int cs)
 #ifdef HAVE_NAND
 int sam_nand_automount(int minor)
 {
-  FAR struct mtd_dev_s *mtd;
+  struct mtd_dev_s *mtd;
   static bool initialized = false;
   int ret;
 

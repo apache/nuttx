@@ -122,7 +122,7 @@ extern int imxrt_setup_overcurrent(xcpt_t handler, void *arg);
 
 #if defined(CONFIG_IMXRT_USBOTG) && defined(CONFIG_USBHOST)
 struct usbhost_connection_s;
-FAR struct usbhost_connection_s *imxrt_ehci_initialize(int controller);
+struct usbhost_connection_s *imxrt_ehci_initialize(int controller);
 #endif
 
 #undef EXTERN

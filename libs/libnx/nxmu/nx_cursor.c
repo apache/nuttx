@@ -188,7 +188,7 @@ int nxcursor_setposition(NXHANDLE hnd, FAR const struct nxgl_point_s *pos)
  *   CAUTION:  The current cursor position is not updated until the display
  *   is actually changed.  Due to asynchronies caused by queue, the new
  *   current cursor position may not match the cursor position set until
- *   the client and server are syncrhonized.
+ *   the client and server are synchronized.
  *
  * Input Parameters:
  *   hnd - The server handle returned by nx_connect()

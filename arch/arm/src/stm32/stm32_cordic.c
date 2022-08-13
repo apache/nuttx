@@ -55,9 +55,9 @@
 
 struct stm32_cordic_s
 {
-  FAR const struct cordic_ops_s  *ops;   /* Lower half operations */
-  uint32_t                        base;  /* The base address of the CORDIC */
-  bool                            inuse; /* True: driver is in-use */
+  const struct cordic_ops_s *ops;   /* Lower half operations */
+  uint32_t                   base;  /* The base address of the CORDIC */
+  bool                       inuse; /* True: driver is in-use */
 };
 
 /****************************************************************************
@@ -66,14 +66,14 @@ struct stm32_cordic_s
 
 /* Register access */
 
-static uint32_t cordic_getreg(FAR struct stm32_cordic_s *priv, int offset);
-static void cordic_putreg(FAR struct stm32_cordic_s *priv, int offset,
+static uint32_t cordic_getreg(struct stm32_cordic_s *priv, int offset);
+static void cordic_putreg(struct stm32_cordic_s *priv, int offset,
                           uint32_t value);
 
 /* Ops */
 
-int cordic_calc(FAR struct cordic_lowerhalf_s *lower,
-                FAR struct cordic_calc_s *calc);
+int cordic_calc(struct cordic_lowerhalf_s *lower,
+                struct cordic_calc_s *calc);
 
 /****************************************************************************
  * Private Data
@@ -103,7 +103,7 @@ struct stm32_cordic_s g_stm32_cordic_dev =
  * Name: cordic_getreg
  ****************************************************************************/
 
-static uint32_t cordic_getreg(FAR struct stm32_cordic_s *priv, int offset)
+static uint32_t cordic_getreg(struct stm32_cordic_s *priv, int offset)
 {
   return getreg32(priv->base + offset);
 }
@@ -112,7 +112,7 @@ static uint32_t cordic_getreg(FAR struct stm32_cordic_s *priv, int offset)
  * Name: cordic_putreg
  ****************************************************************************/
 
-static void cordic_putreg(FAR struct stm32_cordic_s *priv, int offset,
+static void cordic_putreg(struct stm32_cordic_s *priv, int offset,
                           uint32_t value)
 {
   putreg32(value, priv->base + offset);
@@ -122,14 +122,14 @@ static void cordic_putreg(FAR struct stm32_cordic_s *priv, int offset,
  * Name: cordic_calc
  ****************************************************************************/
 
-int cordic_calc(FAR struct cordic_lowerhalf_s *lower,
-                FAR struct cordic_calc_s *calc)
+int cordic_calc(struct cordic_lowerhalf_s *lower,
+                struct cordic_calc_s *calc)
 {
-  FAR struct stm32_cordic_s *priv     = (FAR struct stm32_cordic_s *)lower;
-  int                        ret      = OK;
-  uint32_t                   csr      = 0;
-  bool                       arg2_inc = false;
-  uint8_t                    scale    = 0;
+  struct stm32_cordic_s *priv     = (struct stm32_cordic_s *)lower;
+  int                    ret      = OK;
+  uint32_t               csr      = 0;
+  bool                   arg2_inc = false;
+  uint8_t                scale    = 0;
 
   DEBUGASSERT(lower);
   DEBUGASSERT(calc);
@@ -306,9 +306,9 @@ errout:
  *
  ****************************************************************************/
 
-FAR struct cordic_lowerhalf_s *stm32_cordicinitialize(void)
+struct cordic_lowerhalf_s *stm32_cordicinitialize(void)
 {
-  FAR struct cordic_lowerhalf_s *lower = NULL;
+  struct cordic_lowerhalf_s *lower = NULL;
 
   if (g_stm32_cordic_dev.inuse == true)
     {
@@ -319,7 +319,7 @@ FAR struct cordic_lowerhalf_s *stm32_cordicinitialize(void)
 
   /* Get lower-half device */
 
-  lower = (FAR struct cordic_lowerhalf_s *) &g_stm32_cordic_dev;
+  lower = (struct cordic_lowerhalf_s *) &g_stm32_cordic_dev;
 
   /* The driver is now in-use */
 

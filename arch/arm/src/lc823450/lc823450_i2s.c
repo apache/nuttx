@@ -275,7 +275,7 @@ static void _setup_audio_pll(uint32_t freq)
         break;
 
       default:
-        DEBUGASSERT(false);
+        DEBUGPANIC();
     }
 
   /* Set divider */
@@ -310,7 +310,7 @@ static void _setup_audio_pll(uint32_t freq)
  * Name: _i2s_semtake
  ****************************************************************************/
 
-static int _i2s_semtake(FAR sem_t *sem)
+static int _i2s_semtake(sem_t *sem)
 {
   return nxsem_wait_uninterruptible(sem);
 }
@@ -369,7 +369,7 @@ static void lc823450_i2s_setchannel(char id, uint8_t ch)
         break;
 
       default:
-        DEBUGASSERT(false);
+        DEBUGPANIC();
         break;
     }
 
@@ -405,7 +405,7 @@ static void _setup_tx_threshold(uint32_t tx_th)
 static int lc823450_i2s_ioctl(struct i2s_dev_s *dev, int cmd,
                               unsigned long arg)
 {
-  FAR const struct audio_caps_desc_s *cap_desc;
+  const struct audio_caps_desc_s *cap_desc;
   uint32_t tx_th;
   uint32_t rate[2];
   uint8_t  ch[2];
@@ -414,7 +414,7 @@ static int lc823450_i2s_ioctl(struct i2s_dev_s *dev, int cmd,
   switch (cmd)
     {
       case AUDIOIOC_CONFIGURE:
-        cap_desc = (FAR const struct audio_caps_desc_s *)((uintptr_t)arg);
+        cap_desc = (const struct audio_caps_desc_s *)((uintptr_t)arg);
         DEBUGASSERT(NULL != cap_desc);
 
         tx_th   = cap_desc->caps.ac_controls.w >> 24;
@@ -617,7 +617,7 @@ static uint32_t lc823450_i2s_txdatawidth(struct i2s_dev_s *dev, int bits)
  * Name: _i2s_isr
  ****************************************************************************/
 
-static int _i2s_isr(int irq, FAR void *context, FAR void *arg)
+static int _i2s_isr(int irq, void *context, void *arg)
 {
   uint32_t status = getreg32(ABUFSTS1);
   uint32_t irqen0 = getreg32(ABUFIRQEN0);
@@ -1008,9 +1008,9 @@ static int lc823450_i2s_configure(void)
  * Name: lc823450_i2sdev_initialize
  ****************************************************************************/
 
-FAR struct i2s_dev_s *lc823450_i2sdev_initialize(void)
+struct i2s_dev_s *lc823450_i2sdev_initialize(void)
 {
-  FAR struct lc823450_i2s_s *priv = NULL;
+  struct lc823450_i2s_s *priv = NULL;
 
   /* The support STM32 parts have only a single I2S port */
 

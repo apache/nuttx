@@ -61,10 +61,10 @@
 
 struct lpc17_40_lowerhalf_s
 {
-  FAR const struct watchdog_ops_s  *ops; /* Lower half operations */
-  uint32_t timeout;                      /* The (actual) selected timeout */
-  uint32_t lastreset;                    /* The last reset time */
-  bool     started;                      /* true: The watchdog timer has been started */
+  const struct watchdog_ops_s *ops; /* Lower half operations */
+  uint32_t timeout;                 /* The (actual) selected timeout */
+  uint32_t lastreset;               /* The last reset time */
+  bool     started;                 /* true: The watchdog timer has been started */
 };
 
 /****************************************************************************
@@ -73,12 +73,12 @@ struct lpc17_40_lowerhalf_s
 
 /* "Lower half" driver methods **********************************************/
 
-static int      lpc17_40_start(FAR struct watchdog_lowerhalf_s *lower);
-static int      lpc17_40_stop(FAR struct watchdog_lowerhalf_s *lower);
-static int      lpc17_40_keepalive(FAR struct watchdog_lowerhalf_s *lower);
-static int      lpc17_40_getstatus(FAR struct watchdog_lowerhalf_s *lower,
-                  FAR struct watchdog_status_s *status);
-static int      lpc17_40_settimeout(FAR struct watchdog_lowerhalf_s *lower,
+static int      lpc17_40_start(struct watchdog_lowerhalf_s *lower);
+static int      lpc17_40_stop(struct watchdog_lowerhalf_s *lower);
+static int      lpc17_40_keepalive(struct watchdog_lowerhalf_s *lower);
+static int      lpc17_40_getstatus(struct watchdog_lowerhalf_s *lower,
+                  struct watchdog_status_s *status);
+static int      lpc17_40_settimeout(struct watchdog_lowerhalf_s *lower,
                   uint32_t timeout);
 
 /****************************************************************************
@@ -121,10 +121,10 @@ static struct lpc17_40_lowerhalf_s g_wdgdev;
  *
  ****************************************************************************/
 
-static int lpc17_40_start(FAR struct watchdog_lowerhalf_s *lower)
+static int lpc17_40_start(struct watchdog_lowerhalf_s *lower)
 {
-  FAR struct lpc17_40_lowerhalf_s *priv =
-      (FAR struct lpc17_40_lowerhalf_s *)lower;
+  struct lpc17_40_lowerhalf_s *priv =
+      (struct lpc17_40_lowerhalf_s *)lower;
   irqstate_t flags;
   uint32_t wdmod;
 
@@ -167,7 +167,7 @@ static int lpc17_40_start(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int lpc17_40_stop(FAR struct watchdog_lowerhalf_s *lower)
+static int lpc17_40_stop(struct watchdog_lowerhalf_s *lower)
 {
   /* There is no way to disable WDT once it has been started. */
 
@@ -191,10 +191,10 @@ static int lpc17_40_stop(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int lpc17_40_keepalive(FAR struct watchdog_lowerhalf_s *lower)
+static int lpc17_40_keepalive(struct watchdog_lowerhalf_s *lower)
 {
-  FAR struct lpc17_40_lowerhalf_s *priv =
-      (FAR struct lpc17_40_lowerhalf_s *)lower;
+  struct lpc17_40_lowerhalf_s *priv =
+      (struct lpc17_40_lowerhalf_s *)lower;
   irqstate_t flags;
 
   /* Reload the WDT. */
@@ -224,11 +224,11 @@ static int lpc17_40_keepalive(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int lpc17_40_getstatus(FAR struct watchdog_lowerhalf_s *lower,
-                              FAR struct watchdog_status_s *status)
+static int lpc17_40_getstatus(struct watchdog_lowerhalf_s *lower,
+                              struct watchdog_status_s *status)
 {
-  FAR struct lpc17_40_lowerhalf_s *priv =
-      (FAR struct lpc17_40_lowerhalf_s *)lower;
+  struct lpc17_40_lowerhalf_s *priv =
+      (struct lpc17_40_lowerhalf_s *)lower;
   uint32_t ticks;
   uint32_t elapsed;
 
@@ -279,11 +279,11 @@ static int lpc17_40_getstatus(FAR struct watchdog_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int lpc17_40_settimeout(FAR struct watchdog_lowerhalf_s *lower,
+static int lpc17_40_settimeout(struct watchdog_lowerhalf_s *lower,
                                uint32_t timeout)
 {
-  FAR struct lpc17_40_lowerhalf_s *priv =
-      (FAR struct lpc17_40_lowerhalf_s *)lower;
+  struct lpc17_40_lowerhalf_s *priv =
+      (struct lpc17_40_lowerhalf_s *)lower;
   uint64_t wdt_clk;
   uint64_t wdtc;
 
@@ -331,9 +331,9 @@ static int lpc17_40_settimeout(FAR struct watchdog_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-void lpc17_40_wdtinitialize(FAR const char *devpath)
+void lpc17_40_wdtinitialize(const char *devpath)
 {
-  FAR struct lpc17_40_lowerhalf_s *priv = &g_wdgdev;
+  struct lpc17_40_lowerhalf_s *priv = &g_wdgdev;
 
   /* Initialize the driver state structure. */
 
@@ -346,12 +346,12 @@ void lpc17_40_wdtinitialize(FAR const char *devpath)
    * yet.
    */
 
-  lpc17_40_settimeout((FAR struct watchdog_lowerhalf_s *)priv,
+  lpc17_40_settimeout((struct watchdog_lowerhalf_s *)priv,
                       LPC17_40_WDT_DEFTIMEOUT);
 
   /* Register the watchdog driver as devpath. */
 
-  watchdog_register(devpath, (FAR struct watchdog_lowerhalf_s *)priv);
+  watchdog_register(devpath, (struct watchdog_lowerhalf_s *)priv);
 }
 
 #endif /* CONFIG_WATCHDOG && CONFIG_LPC17_40_WDT */

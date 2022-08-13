@@ -20,3 +20,5 @@
 # Sparc-gaisler-elf toolchain doesn't provide macOS binaries
 /sparc
 -xx3823:nsh
+
+/arm64

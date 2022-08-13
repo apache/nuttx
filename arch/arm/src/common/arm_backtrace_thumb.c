@@ -127,7 +127,7 @@ static int getlroffset(uint8_t *lr)
  *   pc    - Program counter address
  *
  * Returned Value:
- *   A boolean value: true the counter is vaild
+ *   A boolean value: true the counter is valid
  *
  ****************************************************************************/
 
@@ -228,11 +228,14 @@ static void *backtrace_push_internal(void **psp, void **ppc)
 
           found = true;
         }
-      else
+
+      ins32  = ins16 << 16;
+      ins32 |= *(uint16_t *)(pc - i + 2);
+      if (INSTR_IS(ins32, T_STMDB))
         {
-          ins32  = ins16 << 16;
-          ins32 |= *(uint16_t *)(base + 2);
-          if (INSTR_IS(ins32, T_STMDB))
+          frame = __builtin_popcount(ins32 & 0xfff) + 1;
+          ins16 = *(uint16_t *)(pc - i - 2);
+          if (INSTR_IS(ins16, T_PUSH_LO))
             {
               frame = __builtin_popcount(ins32 & 0xfff) + 1;
               ins16 = *(uint16_t *)(base - 2);

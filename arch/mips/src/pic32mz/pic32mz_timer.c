@@ -133,7 +133,7 @@ static inline void pic32mz_putreg(struct pic32mz_timer_dev_s *dev,
 static inline bool pic32mz_timer_mode32(struct pic32mz_timer_dev_s *dev);
 static inline uint32_t pic32mz_timer_oddoffset(uint32_t evenoffset);
 static inline uint32_t
-  pic32mz_timer_nextirq(struct pic32mz_timer_dev_s *dev);
+pic32mz_timer_nextirq(struct pic32mz_timer_dev_s *dev);
 
 static void pic32mz_timer_stopinidle(struct pic32mz_timer_dev_s *dev,
                                     bool stop);
@@ -588,7 +588,7 @@ static inline uint32_t pic32mz_timer_oddoffset(uint32_t evenoffset)
  ****************************************************************************/
 
 static inline uint32_t
-  pic32mz_timer_nextirq(struct pic32mz_timer_dev_s *dev)
+pic32mz_timer_nextirq(struct pic32mz_timer_dev_s *dev)
 {
   uint32_t irq;
 

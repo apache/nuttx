@@ -72,12 +72,12 @@
 
 struct kl_pwmtimer_s
 {
-  FAR const struct pwm_ops_s *ops;     /* PWM operations */
-  uint8_t                     tpmid;   /* Timer/PWM Module ID {0,..,2} */
-  uint8_t                     channel; /* Timer/PWM Module channel: {0,..5} */
-  uint32_t                    base;    /* The base address of the timer */
-  uint32_t                    pincfg;  /* Output pin configuration */
-  uint32_t                    pclk;    /* The frequency of the peripheral clock */
+  const struct pwm_ops_s *ops;     /* PWM operations */
+  uint8_t                 tpmid;   /* Timer/PWM Module ID {0,..,2} */
+  uint8_t                 channel; /* Timer/PWM Module channel: {0,..5} */
+  uint32_t                base;    /* The base address of the timer */
+  uint32_t                pincfg;  /* Output pin configuration */
+  uint32_t                pclk;    /* The frequency of the peripheral clock */
 };
 
 /****************************************************************************
@@ -91,26 +91,26 @@ static void pwm_putreg(struct kl_pwmtimer_s *priv, int offset,
                        uint32_t value);
 
 #ifdef CONFIG_DEBUG_PWM_INFO
-static void pwm_dumpregs(struct kl_pwmtimer_s *priv, FAR const char *msg);
+static void pwm_dumpregs(struct kl_pwmtimer_s *priv, const char *msg);
 #else
 #  define pwm_dumpregs(priv,msg)
 #endif
 
 /* Timer management */
 
-static int pwm_timer(FAR struct kl_pwmtimer_s *priv,
-                     FAR const struct pwm_info_s *info);
+static int pwm_timer(struct kl_pwmtimer_s *priv,
+                     const struct pwm_info_s *info);
 
 /* PWM driver methods */
 
-static int pwm_setup(FAR struct pwm_lowerhalf_s *dev);
-static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev);
+static int pwm_setup(struct pwm_lowerhalf_s *dev);
+static int pwm_shutdown(struct pwm_lowerhalf_s *dev);
 
-static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
-                     FAR const struct pwm_info_s *info);
+static int pwm_start(struct pwm_lowerhalf_s *dev,
+                     const struct pwm_info_s *info);
 
-static int pwm_stop(FAR struct pwm_lowerhalf_s *dev);
-static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
+static int pwm_stop(struct pwm_lowerhalf_s *dev);
+static int pwm_ioctl(struct pwm_lowerhalf_s *dev,
                      int cmd, unsigned long arg);
 
 /****************************************************************************
@@ -226,7 +226,7 @@ static void pwm_putreg(struct kl_pwmtimer_s *priv, int offset,
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_PWM_INFO
-static void pwm_dumpregs(struct kl_pwmtimer_s *priv, FAR const char *msg)
+static void pwm_dumpregs(struct kl_pwmtimer_s *priv, const char *msg)
 {
   int nchannels = (priv->tpmid == 0) ? 6 : 2;
 
@@ -307,8 +307,8 @@ static void pwm_dumpregs(struct kl_pwmtimer_s *priv, FAR const char *msg)
  *
  ****************************************************************************/
 
-static int pwm_timer(FAR struct kl_pwmtimer_s *priv,
-                     FAR const struct pwm_info_s *info)
+static int pwm_timer(struct kl_pwmtimer_s *priv,
+                     const struct pwm_info_s *info)
 {
   /* Calculated values */
 
@@ -495,10 +495,10 @@ static int pwm_timer(FAR struct kl_pwmtimer_s *priv,
  *
  ****************************************************************************/
 
-static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
+static int pwm_setup(struct pwm_lowerhalf_s *dev)
 {
   uint32_t regval;
-  FAR struct kl_pwmtimer_s *priv = (FAR struct kl_pwmtimer_s *)dev;
+  struct kl_pwmtimer_s *priv = (struct kl_pwmtimer_s *)dev;
 
   /* Enable access to TPM modules */
 
@@ -532,9 +532,9 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
+static int pwm_shutdown(struct pwm_lowerhalf_s *dev)
 {
-  FAR struct kl_pwmtimer_s *priv = (FAR struct kl_pwmtimer_s *)dev;
+  struct kl_pwmtimer_s *priv = (struct kl_pwmtimer_s *)dev;
   uint32_t pincfg;
 
   pwminfo("TPM%d pincfg: %08" PRIx32 "\n", priv->tpmid, priv->pincfg);
@@ -566,10 +566,10 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
-                     FAR const struct pwm_info_s *info)
+static int pwm_start(struct pwm_lowerhalf_s *dev,
+                     const struct pwm_info_s *info)
 {
-  FAR struct kl_pwmtimer_s *priv = (FAR struct kl_pwmtimer_s *)dev;
+  struct kl_pwmtimer_s *priv = (struct kl_pwmtimer_s *)dev;
   return pwm_timer(priv, info);
 }
 
@@ -592,9 +592,9 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
  *
  ****************************************************************************/
 
-static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
+static int pwm_stop(struct pwm_lowerhalf_s *dev)
 {
-  FAR struct kl_pwmtimer_s *priv = (FAR struct kl_pwmtimer_s *)dev;
+  struct kl_pwmtimer_s *priv = (struct kl_pwmtimer_s *)dev;
   irqstate_t flags;
 
   pwminfo("TPM%d\n", priv->tpmid);
@@ -666,11 +666,11 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd,
+static int pwm_ioctl(struct pwm_lowerhalf_s *dev, int cmd,
                      unsigned long arg)
 {
 #ifdef CONFIG_DEBUG_PWM_INFO
-  FAR struct kl_pwmtimer_s *priv = (FAR struct kl_pwmtimer_s *)dev;
+  struct kl_pwmtimer_s *priv = (struct kl_pwmtimer_s *)dev;
 
   /* There are no platform-specific ioctl commands */
 
@@ -698,9 +698,9 @@ static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd,
  *
  ****************************************************************************/
 
-FAR struct pwm_lowerhalf_s *kl_pwminitialize(int timer)
+struct pwm_lowerhalf_s *kl_pwminitialize(int timer)
 {
-  FAR struct kl_pwmtimer_s *lower;
+  struct kl_pwmtimer_s *lower;
 
   pwminfo("TPM%d\n", timer);
 
@@ -732,7 +732,7 @@ FAR struct pwm_lowerhalf_s *kl_pwminitialize(int timer)
         return NULL;
     }
 
-  return (FAR struct pwm_lowerhalf_s *)lower;
+  return (struct pwm_lowerhalf_s *)lower;
 }
 
 #endif /* CONFIG_KL_TPMn_PWM, n = 0,...,2 */

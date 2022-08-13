@@ -60,8 +60,6 @@ static inline void apa102_write32(FAR struct apa102_dev_s *priv,
 
 /* Character driver methods */
 
-static int     apa102_open(FAR struct file *filep);
-static int     apa102_close(FAR struct file *filep);
 static ssize_t apa102_read(FAR struct file *filep, FAR char *buffer,
                             size_t buflen);
 static ssize_t apa102_write(FAR struct file *filep, FAR const char *buffer,
@@ -73,8 +71,8 @@ static ssize_t apa102_write(FAR struct file *filep, FAR const char *buffer,
 
 static const struct file_operations g_apa102fops =
 {
-  apa102_open,   /* open */
-  apa102_close,  /* close */
+  NULL,          /* open */
+  NULL,          /* close */
   apa102_read,   /* read */
   apa102_write,  /* write */
   NULL,          /* seek */
@@ -139,32 +137,6 @@ static inline void apa102_write32(FAR struct apa102_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: apa102_open
- *
- * Description:
- *   This function is called whenever the APA102 device is opened.
- *
- ****************************************************************************/
-
-static int apa102_open(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
- * Name: apa102_close
- *
- * Description:
- *   This routine is called when the APA102 device is closed.
- *
- ****************************************************************************/
-
-static int apa102_close(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
  * Name: apa102_read
  ****************************************************************************/
 
@@ -179,7 +151,7 @@ static ssize_t apa102_read(FAR struct file *filep, FAR char *buffer,
  ****************************************************************************/
 
 static ssize_t apa102_write(FAR struct file *filep, FAR const char *buffer,
-                          size_t buflen)
+                            size_t buflen)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct apa102_dev_s *priv = inode->i_private;

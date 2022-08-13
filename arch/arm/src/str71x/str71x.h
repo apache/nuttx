@@ -156,6 +156,6 @@ struct spi_dev_s; /* Forward reference */
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *str71_spibus_initialize(int port);
+struct spi_dev_s *str71_spibus_initialize(int port);
 
 #endif /* __ARCH_ARM_SRC_STR71X_STR71X_H */

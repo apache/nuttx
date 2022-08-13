@@ -46,7 +46,6 @@
 #include <nuttx/list.h>
 
 #include <arch/board/board.h>
-
 #include "hardware/mpfs_sysreg.h"
 #include "hardware/mpfs_ihc.h"
 #include "riscv_internal.h"
@@ -75,7 +74,7 @@
 
 /* rptun initialization names */
 
-#define MPFS_RPTUN_CPU_NAME      "mpfs-hart4"
+#define MPFS_RPTUN_CPU_NAME      "mpfs-ihc"
 #define MPFS_RPTUN_SHMEM_NAME    "mpfs-shmem"
 
 /* Vring configuration parameters */
@@ -115,20 +114,28 @@ struct mpfs_rptun_dev_s
   char                       shmemname[RPMSG_NAME_SIZE + 1];
 };
 
-typedef enum
-{
-  IHC_CHANNEL_TO_HART0    = 0x00, /* Your hart to hart 0 */
-  IHC_CHANNEL_TO_HART1    = 0x01, /* Your hart to hart 1 */
-  IHC_CHANNEL_TO_HART2    = 0x02, /* Your hart to hart 2 */
-  IHC_CHANNEL_TO_HART3    = 0x03, /* Your hart to hart 3 */
-  IHC_CHANNEL_TO_HART4    = 0x04, /* Your hart to hart 4 */
-  IHC_CHANNEL_TO_CONTEXTA = 0x05, /* Your hart to context A */
-  IHC_CHANNEL_TO_CONTEXTB = 0x06, /* Your hart to context B */
-} ihc_channel_t;
-
-struct mpfs_queue_table
+struct mpfs_queue_table_s
 {
   void *data;
+};
+
+enum mpfs_irq_type_e
+{
+  MP_IRQ  = 0x0,
+  ACK_IRQ = 0x1,
+};
+
+struct mpfs_ihc_msg_s
+{
+  uint32_t msg[IHC_MAX_MESSAGE_SIZE];
+};
+
+/* Used to store information for the remote via ecall (eg. Linux) */
+
+struct ihc_sbi_rx_msg_s
+{
+  uint8_t irq_type;
+  struct mpfs_ihc_msg_s ihc_msg;
 };
 
 /****************************************************************************
@@ -158,13 +165,14 @@ static int mpfs_rptun_register_callback(struct rptun_dev_s *dev,
  * combination with u-boot / Linux kernel will not boot if this NuttX image
  * is small.  In the linker script we KEEP the filler_area section so that no
  * compiler will optimize it away.  This will be removed once the root cause
- * has been found out.
+ * has been found out.  This is not needed if NuttX is the bootloader, not
+ * HSS.
  */
 
 uint8_t unused_filler[0x80000] __attribute__((section(".filler_area")));
 
 static struct rpmsg_endpoint        g_mpgs_echo_ping_ept;
-static struct mpfs_queue_table      g_mpfs_virtqueue_table[VRINGS];
+static struct mpfs_queue_table_s    g_mpfs_virtqueue_table[VRINGS];
 static struct mpfs_rptun_shmem_s    g_shmem;
 static struct rpmsg_device         *g_mpfs_rpmsg_device;
 static struct rpmsg_virtio_device  *g_mpfs_virtio_device;
@@ -176,6 +184,8 @@ static struct list_node g_dev_list = LIST_INITIAL_VALUE(g_dev_list);
 static uint32_t g_connected_hart_ints;
 static uint32_t g_connected_harts;
 static int      g_vq_idx;
+static int      g_plic_irq;
+static bool     g_rptun_initialized;
 
 const uint32_t ihcia_remote_harts[MPFS_NUM_HARTS] =
 {
@@ -221,6 +231,9 @@ static const struct rptun_ops_s g_mpfs_rptun_ops =
  *   acking to a message or not.
  *
  * Input Parameters:
+ *   mhartid - My hart id.  If remote owns multiple harts, this is the
+ *             mhartid base on the context, not necessarily the actual
+ *             mhartid.
  *   is_ack  - Boolean that is set true if an ack has been found
  *
  * Returned Value:
@@ -228,9 +241,9 @@ static const struct rptun_ops_s g_mpfs_rptun_ops =
  *
  ****************************************************************************/
 
-static uint32_t mpfs_ihc_parse_incoming_hartid(bool *is_ack)
+static uint32_t mpfs_ihc_parse_incoming_hartid(uint32_t mhartid,
+                                               bool *is_ack)
 {
-  uint32_t mhartid        = riscv_mhartid();
   uint32_t hart_id        = 0;
   uint32_t return_hart_id = UNDEFINED_HART_ID;
   uint32_t msg_avail      = getreg32(MPFS_IHC_MSG_AVAIL(mhartid));
@@ -331,236 +344,6 @@ static uint32_t mpfs_ihc_context_to_remote_hart_id(ihc_channel_t channel)
 }
 
 /****************************************************************************
- * Name: mpfs_ihc_rx_handler
- *
- * Description:
- *   This handles the received information and either lets the vq to proceed
- *   via posting g_mpfs_ack_sig, or lets the mpfs_rptun_thread() run as it
- *   waits for the g_mpfs_rx_sig.  virtqueue_notification() cannot be called
- *   from the interrupt context, thus the thread that will perform it.
- *
- * Input Parameters:
- *   message   - Pointer to the incoming message
- *   is_ack    - Boolean indicating whether an ack is received
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void mpfs_ihc_rx_handler(uint32_t *message, bool is_ack)
-{
-  if (is_ack)
-    {
-      /* Received the ack */
-
-      nxsem_post(&g_mpfs_ack_sig);
-    }
-  else
-    {
-      g_vq_idx = (message[0] >> 16);
-
-      DEBUGASSERT(g_vq_idx < VRINGS);
-
-      nxsem_post(&g_mpfs_rx_sig);
-    }
-}
-
-/****************************************************************************
- * Name: mpfs_ihc_rx_message
- *
- * Description:
- *   This function determines the remote hart id with the provided context
- *   handle.
- *
- * Input Parameters:
- *   channel  - Enum that describes the channel used.
- *   is_ack   - Boolean indicating an ack message
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void mpfs_ihc_rx_message(ihc_channel_t channel, bool is_ack)
-{
-  uint64_t mhartid  = riscv_mhartid();
-  uint32_t rhartid  = mpfs_ihc_context_to_remote_hart_id(channel);
-  uint32_t ctrl_reg = getreg32(MPFS_IHC_CTRL(mhartid, rhartid));
-
-  if (is_ack)
-    {
-      mpfs_ihc_rx_handler((uint32_t *)MPFS_IHC_MSG_IN(mhartid, rhartid),
-                          is_ack);
-    }
-  else if (MP_MESSAGE_PRESENT == (ctrl_reg & MP_MASK))
-    {
-      /* Check if we have a message */
-
-      mpfs_ihc_rx_handler((uint32_t *)MPFS_IHC_MSG_IN(mhartid, rhartid),
-                          is_ack);
-
-      /* Set MP to 0. Note this generates an interrupt on the other hart
-       * if it has RMPIE bit set in the control register
-       */
-
-      volatile uint32_t temp = getreg32(MPFS_IHC_CTRL(mhartid, rhartid)) &
-                                        ~MP_MASK;
-
-      /* Check if ACKIE_EN is set */
-
-      if (temp & ACKIE_EN)
-        {
-          temp |= ACK_INT;
-        }
-
-      putreg32(temp, MPFS_IHC_CTRL(mhartid, rhartid));
-    }
-}
-
-/****************************************************************************
- * Name: mpfs_ihc_message_present_isr
- *
- * Description:
- *   This is called from the interrupt handler. This figures out the actions
- *   based on the information retieved from the subsequent functions.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void mpfs_ihc_message_present_isr(void)
-{
-  uint64_t mhartid = riscv_mhartid();
-  bool is_ack;
-
-  /* Check all our channels */
-
-  uint32_t origin_hart = mpfs_ihc_parse_incoming_hartid(&is_ack);
-
-  if (origin_hart != UNDEFINED_HART_ID)
-    {
-      /* This is used to declare the master is up and running */
-
-      g_shmem.master_up = true;
-
-      /* Process incoming packet */
-
-      mpfs_ihc_rx_message(origin_hart, is_ack);
-
-      if (is_ack)
-        {
-          /* Clear the ack */
-
-          modifyreg32(MPFS_IHC_CTRL(mhartid, origin_hart),
-                      ACK_CLR, 0);
-        }
-    }
-}
-
-/****************************************************************************
- * Name: mpfs_ihc_interrupt
- *
- * Description:
- *   This is the interrupt handler.
- *
- * Input Parameters:
- *   irq      - unused
- *   context  - context, unused
- *   arg      - private data pointer, unused
- *
- * Returned Value:
- *   OK always
- *
- ****************************************************************************/
-
-static int mpfs_ihc_interrupt(int irq, void *context, void *arg)
-{
-  /* The 1st proper interrupt indicates the master is up */
-
-  if (!g_shmem.master_up)
-    {
-      g_shmem.rsc.rpmsg_vdev.status |= VIRTIO_CONFIG_STATUS_DRIVER_OK;
-    }
-
-  mpfs_ihc_message_present_isr();
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: mpfs_ihc_local_context_init
- *
- * Description:
- *   This initializes the local context by zeroing the CTRL register and
- *   applying proper values for the g_connected_harts and
- *   g_connected_hart_ints globals. These globals are used to map the harts
- *   and contexts properly.
- *
- * Input Parameters:
- *   hart_to_configure   - Hart to be configured
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void mpfs_ihc_local_context_init(uint32_t hart_to_configure)
-{
-  uint32_t rhartid = 0;
-
-  DEBUGASSERT(hart_to_configure < MPFS_NUM_HARTS);
-
-  /* Configure the base addresses in this hart context */
-
-  while (rhartid < MPFS_NUM_HARTS)
-    {
-      if (rhartid != hart_to_configure)
-        {
-          putreg32(0, MPFS_IHC_CTRL(hart_to_configure, rhartid));
-        }
-
-      rhartid++;
-    }
-
-  putreg32(0, MPFS_IHC_INT_EN(hart_to_configure));
-
-  g_connected_harts     = ihcia_remote_harts[hart_to_configure];
-  g_connected_hart_ints = ihcia_remote_hart_ints[hart_to_configure];
-}
-
-/****************************************************************************
- * Name: mpfs_ihc_local_remote_config
- *
- * Description:
- *   This enables the required interrupts via two registers.
- *
- * Input Parameters:
- *   hart_to_configure   - Hart to be configured
- *   rhartid             - The associated remote hart id
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void mpfs_ihc_local_remote_config(uint32_t hart_to_configure,
-                                         uint32_t rhartid)
-{
-  /* Set-up enables in concentrator */
-
-  putreg32(ihcia_remote_hart_ints[hart_to_configure],
-           MPFS_IHC_INT_EN(hart_to_configure));
-
-  modifyreg32(MPFS_IHC_CTRL(hart_to_configure, rhartid), 0, MPIE_EN |
-                            ACKIE_EN);
-}
-
-/****************************************************************************
  * Name: mpfs_ihc_context_to_local_hart_id
  *
  * Description:
@@ -620,6 +403,357 @@ static uint32_t mpfs_ihc_context_to_local_hart_id(ihc_channel_t channel)
   DEBUGASSERT(hart < MPFS_NUM_HARTS);
 
   return hart;
+}
+
+/****************************************************************************
+ * Name: mpfs_ihc_rx_handler
+ *
+ * Description:
+ *   This handles the received information and either lets the vq to proceed
+ *   via posting g_mpfs_ack_sig, or lets the mpfs_rptun_thread() run as it
+ *   waits for the g_mpfs_rx_sig.  virtqueue_notification() cannot be called
+ *   from the interrupt context, thus the thread that will perform it.
+ *
+ * Input Parameters:
+ *   message   - Pointer to the incoming message
+ *   is_ack    - Boolean indicating whether an ack is received
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void mpfs_ihc_rx_handler(uint32_t *message, bool is_ack)
+{
+  if (is_ack)
+    {
+      /* Received the ack */
+
+      nxsem_post(&g_mpfs_ack_sig);
+    }
+  else
+    {
+      g_vq_idx = (message[0] >> 16);
+
+      DEBUGASSERT(g_vq_idx < VRINGS);
+
+      nxsem_post(&g_mpfs_rx_sig);
+    }
+}
+
+/****************************************************************************
+ * Name: mpfs_ihc_message_present_handler
+ *
+ * Description:
+ *   This function fills up a structure that gets into the remote end, such
+ *   as Linux kernel.  The structure may contain data from the
+ *   MPFS_IHC_MSG_IN -register, or in case of an ack, just the irq_type.
+ *
+ * Input Parameters:
+ *   message  - Pointer for storing data, must not be NULL
+ *   mhartid  - The primary hart id of a set of hartids.  Not necessarily
+ *              the absolute mhartid if multiple harts are incorporated
+ *              within the remote (eg. Linux kernel used on 2 harts).
+ *   rhartid  - Remote hart id
+ *   is_ack   - Boolean indicating an ack message
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void mpfs_ihc_message_present_handler(uint32_t *message,
+                                             uint32_t mhartid,
+                                             uint32_t rhartid,
+                                             bool is_ack)
+{
+  struct ihc_sbi_rx_msg_s *msg;
+  uintptr_t message_ihc     = (uintptr_t)MPFS_IHC_MSG_IN(mhartid, rhartid);
+  uint32_t message_size_ihc = getreg32(MPFS_IHC_MSG_SIZE(mhartid, rhartid));
+
+  msg = (struct ihc_sbi_rx_msg_s *)message;
+
+  if (is_ack)
+    {
+      msg->irq_type = ACK_IRQ;
+
+      /* msg->ihc_msg content doesn't matter here */
+    }
+  else
+    {
+      msg->irq_type = MP_IRQ;
+      msg->ihc_msg = *(struct mpfs_ihc_msg_s *)message_ihc;
+    }
+
+    DEBUGASSERT(sizeof(msg->ihc_msg) >= message_size_ihc);
+}
+
+/****************************************************************************
+ * Name: mpfs_ihc_rx_message
+ *
+ * Description:
+ *   This function determines the remote hart id with the provided context
+ *   handle.
+ *
+ * Input Parameters:
+ *   channel  - Enum that describes the channel used.
+ *   mhartid  - Context hart id, not necessarily the absolute mhartid but
+ *              rather, the primary hartid of the set of harts.
+ *   is_ack   - Boolean indicating an ack message
+ *   msg      - For storing data, could be NULL
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void mpfs_ihc_rx_message(ihc_channel_t channel, uint32_t mhartid,
+                                bool is_ack, uint32_t *msg)
+{
+  uint32_t rhartid  = mpfs_ihc_context_to_remote_hart_id(channel);
+  uint32_t ctrl_reg = getreg32(MPFS_IHC_CTRL(mhartid, rhartid));
+
+  if (is_ack)
+    {
+      if (mhartid == CONTEXTB_HARTID)
+        {
+          uintptr_t msg_in = MPFS_IHC_MSG_IN(mhartid, rhartid);
+          DEBUGASSERT(msg == NULL);
+          mpfs_ihc_rx_handler((uint32_t *)msg_in, is_ack);
+        }
+      else
+        {
+          /* This path is meant for the OpenSBI vendor extension only */
+
+          DEBUGASSERT(msg != NULL);
+          mpfs_ihc_message_present_handler(msg, mhartid, rhartid, is_ack);
+        }
+    }
+  else if (MP_MESSAGE_PRESENT == (ctrl_reg & MP_MASK))
+    {
+      /* Check if we have a message */
+
+      if (mhartid == CONTEXTB_HARTID)
+        {
+          uintptr_t msg_in = MPFS_IHC_MSG_IN(mhartid, rhartid);
+          DEBUGASSERT(msg == NULL);
+          mpfs_ihc_rx_handler((uint32_t *)msg_in, is_ack);
+        }
+      else
+        {
+          /* This path is meant for the OpenSBI vendor extension only */
+
+          DEBUGASSERT(msg != NULL);
+          mpfs_ihc_message_present_handler(msg, mhartid, rhartid, is_ack);
+        }
+
+      /* Set MP to 0. Note this generates an interrupt on the other hart
+       * if it has RMPIE bit set in the control register
+       */
+
+      volatile uint32_t temp = getreg32(MPFS_IHC_CTRL(mhartid, rhartid)) &
+                                        ~MP_MASK;
+
+      /* Check if ACKIE_EN is set */
+
+      if (temp & ACKIE_EN)
+        {
+          temp |= ACK_INT;
+        }
+
+      putreg32(temp, MPFS_IHC_CTRL(mhartid, rhartid));
+    }
+}
+
+/****************************************************************************
+ * Name: mpfs_ihc_message_present_isr
+ *
+ * Description:
+ *   This is called from the interrupt handler. This figures out the actions
+ *   based on the information retieved from the subsequent functions.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void mpfs_ihc_message_present_isr(void)
+{
+  uint64_t mhartid = riscv_mhartid();
+  bool is_ack;
+
+  /* Check all our channels */
+
+  uint32_t origin_hart = mpfs_ihc_parse_incoming_hartid(mhartid, &is_ack);
+
+  if (origin_hart != UNDEFINED_HART_ID)
+    {
+      /* If autostart is false, we delay the ack until rptun is up.  Note
+       * that the master will keep sending the irq if no ack is received.
+       */
+
+      if (!g_rptun_initialized)
+        {
+          return;
+        }
+
+      /* This is used to declare the master is up and running */
+
+      g_shmem.master_up = true;
+
+      /* Process incoming packet */
+
+      mpfs_ihc_rx_message(origin_hart, mhartid, is_ack, NULL);
+
+      if (is_ack)
+        {
+          /* Clear the ack */
+
+          modifyreg32(MPFS_IHC_CTRL(mhartid, origin_hart),
+                      ACK_CLR, 0);
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: mpfs_ihc_interrupt
+ *
+ * Description:
+ *   This is the interrupt handler.
+ *
+ * Input Parameters:
+ *   irq      - unused
+ *   context  - context, unused
+ *   arg      - private data pointer, unused
+ *
+ * Returned Value:
+ *   OK always
+ *
+ ****************************************************************************/
+
+static int mpfs_ihc_interrupt(int irq, void *context, void *arg)
+{
+  /* The 1st proper interrupt indicates the master is up */
+
+  if (!g_shmem.master_up)
+    {
+      g_shmem.rsc.rpmsg_vdev.status |= VIRTIO_CONFIG_STATUS_DRIVER_OK;
+    }
+
+  mpfs_ihc_message_present_isr();
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: mpfs_ihc_sbi_message_present_indirect_isr
+ *
+ * Description:
+ *   This is used by OpenSBI.  This is handled as an OpenSBI extension.
+ *   The S-mode kernel uses this in its extended OpenSBI vendor call.
+ *
+ * Input Parameters:
+ *   channel   - Enum that describes the channel used.
+ *   msg       - The msg pointer from sbi_trap_regs->a1 register for data
+ *               exchange.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MPFS_OPENSBI
+void mpfs_ihc_sbi_message_present_indirect_isr(ihc_channel_t channel,
+                                               uint32_t *msg)
+{
+  bool is_ack;
+  uint32_t mhartid     = mpfs_ihc_context_to_local_hart_id(channel);
+  uint32_t origin_hart = mpfs_ihc_parse_incoming_hartid(mhartid, &is_ack);
+
+  if (origin_hart != UNDEFINED_HART_ID)
+    {
+      /* Process incoming packet */
+
+      mpfs_ihc_rx_message(origin_hart, mhartid, is_ack, msg);
+
+      if (is_ack)
+        {
+          /* Clear the ack */
+
+          modifyreg32(MPFS_IHC_CTRL(mhartid, origin_hart), ACK_CLR, 0);
+        }
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: mpfs_ihc_local_context_init
+ *
+ * Description:
+ *   This initializes the local context by zeroing the CTRL register and
+ *   applying proper values for the g_connected_harts and
+ *   g_connected_hart_ints globals. These globals are used to map the harts
+ *   and contexts properly.
+ *
+ * Input Parameters:
+ *   hart_to_configure   - Hart to be configured
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void mpfs_ihc_local_context_init(uint32_t hart_to_configure)
+{
+  uint32_t rhartid = 0;
+
+  DEBUGASSERT(hart_to_configure < MPFS_NUM_HARTS);
+
+  while (rhartid < MPFS_NUM_HARTS)
+    {
+      putreg32(0, MPFS_IHC_CTRL(hart_to_configure, rhartid));
+      rhartid++;
+    }
+
+#ifdef CONFIG_MPFS_OPENSBI
+  /* With OpenSBI we act the opposite direction */
+
+  g_connected_harts     = (HSS_HART_MASK | (1 << CONTEXTB_HARTID));
+  g_connected_hart_ints = IHCIA_CONTEXTA_INTS;
+#else
+  g_connected_harts     = ihcia_remote_harts[hart_to_configure];
+  g_connected_hart_ints = ihcia_remote_hart_ints[hart_to_configure];
+#endif
+}
+
+/****************************************************************************
+ * Name: mpfs_ihc_local_remote_config
+ *
+ * Description:
+ *   This enables the required interrupts via two registers.
+ *
+ * Input Parameters:
+ *   hart_to_configure   - Hart to be configured
+ *   rhartid             - The associated remote hart id
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void mpfs_ihc_local_remote_config(uint32_t hart_to_configure,
+                                         uint32_t rhartid)
+{
+  /* Set-up enables in concentrator */
+
+  putreg32(ihcia_remote_hart_ints[hart_to_configure],
+           MPFS_IHC_INT_EN(hart_to_configure));
+
+  modifyreg32(MPFS_IHC_CTRL(hart_to_configure, rhartid), 0, MPIE_EN |
+                            ACKIE_EN);
 }
 
 /****************************************************************************
@@ -683,7 +817,12 @@ static int mpfs_ihc_tx_message(ihc_channel_t channel, uint32_t *message)
 
       /* Wait for the ACK to arrive to maintain the logic */
 
-      nxsem_wait_uninterruptible(&g_mpfs_ack_sig);
+      if (mhartid == CONTEXTB_HARTID)
+        {
+          /* Only applicable for the CONTEXTB_HART */
+
+          nxsem_wait_uninterruptible(&g_mpfs_ack_sig);
+        }
     }
 
   return OK;
@@ -823,6 +962,12 @@ mpfs_rptun_get_resource(struct rptun_dev_s *dev)
       rsc->config.h2r_buf_size      = VRING_SIZE;
     }
 
+  /* It might be tempting to set this at mpfs_rptun_start(), but it's only
+   * called if we're the bus master.
+   */
+
+  g_rptun_initialized = true;
+
   return &priv->shmem->rsc;
 }
 
@@ -831,19 +976,20 @@ mpfs_rptun_get_resource(struct rptun_dev_s *dev)
  *
  * Description:
  *   Checks whether the rptun needs to autostart without explicit user
- *   start command.
+ *   start command.  Currently autostart is false, which means that the user
+ *   must start the service explicitly, eg.  rptun start /dev/rptun/mpfs-ihc
  *
  * Input Parameters:
  *   dev   - Rptun device.
  *
  * Returned Value:
- *   Always true
+ *   Always false
  *
  ****************************************************************************/
 
 static bool mpfs_rptun_is_autostart(struct rptun_dev_s *dev)
 {
-  return true;
+  return false;
 }
 
 /****************************************************************************
@@ -1124,14 +1270,14 @@ static void mpfs_rpmsg_device_created(struct rpmsg_device *rdev, void *priv_)
 
 static int mpfs_rptun_thread(int argc, char *argv[])
 {
-  struct mpfs_queue_table *info;
+  struct mpfs_queue_table_s *info;
 
   while (1)
     {
-      nxsem_wait(&g_mpfs_rx_sig);
-
       info = &g_mpfs_virtqueue_table[g_vq_idx];
       virtqueue_notification((struct virtqueue *)info->data);
+
+      nxsem_wait(&g_mpfs_rx_sig);
     }
 
   return 0;
@@ -1140,6 +1286,66 @@ static int mpfs_rptun_thread(int argc, char *argv[])
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: mpfs_ihc_sbi_ecall_handler
+ *
+ * Description:
+ *   This is sbi_platform_operations / vendor_ext_provider ecall handler.
+ *   Related Linux ecalls end up here.
+ *
+ * Input Parameters:
+ *   funcid          - SBI_EXT_IHC_CTX_INIT, SBI_EXT_IHC_SEND or
+ *                     SBI_EXT_IHC_RECEIVE.  Others are invalid.
+ *   remote_channel  - The remote we're communicating with
+ *   message_ptr     - Local storage for data exchange
+ *
+ * Returned Value:
+ *   OK on success, a negated error code otherwise
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MPFS_OPENSBI
+int mpfs_ihc_sbi_ecall_handler(unsigned long funcid, uint32_t remote_channel,
+                               uint32_t *message_ptr)
+{
+  uint32_t mhartid;
+  uint32_t rhartid;
+  int result = OK;
+
+  /* Check the channel is bound to a valid context */
+
+  if ((remote_channel < IHC_CHANNEL_TO_CONTEXTA) ||
+      (remote_channel > IHC_CHANNEL_TO_CONTEXTB))
+    {
+      return -EINVAL;
+    }
+
+  switch (funcid)
+    {
+      case SBI_EXT_IHC_CTX_INIT:
+        mhartid = mpfs_ihc_context_to_local_hart_id(remote_channel);
+        rhartid = mpfs_ihc_context_to_remote_hart_id(remote_channel);
+        mpfs_ihc_local_context_init(mhartid);
+        mpfs_ihc_local_remote_config(mhartid, rhartid);
+        break;
+
+      case SBI_EXT_IHC_SEND:
+        result = mpfs_ihc_tx_message(remote_channel, message_ptr);
+        break;
+
+      case SBI_EXT_IHC_RECEIVE:
+        mpfs_ihc_sbi_message_present_indirect_isr(remote_channel,
+                                                  message_ptr);
+        break;
+
+      default:
+        result = -ENOTSUP;
+  }
+
+  return result;
+}
+#endif
 
 /****************************************************************************
  * Name: mpfs_ihc_init
@@ -1174,6 +1380,18 @@ int mpfs_ihc_init(void)
   rhartid = CONTEXTA_HARTID;
 #endif
 
+#if CONTEXTB_HARTID == 1
+  g_plic_irq = MPFS_IRQ_FABRIC_F2H_62;
+#elif CONTEXTB_HARTID == 2
+  g_plic_irq = MPFS_IRQ_FABRIC_F2H_61;
+#elif CONTEXTB_HARTID == 3
+  g_plic_irq = MPFS_IRQ_FABRIC_F2H_60;
+#elif CONTEXTB_HARTID == 4
+  g_plic_irq = MPFS_IRQ_FABRIC_F2H_59;
+#else
+#  error Misconfiguration
+#endif
+
   /* Initialize IHC FPGA module registers to a known state */
 
   mpfs_ihc_local_context_init(mhartid);
@@ -1181,10 +1399,10 @@ int mpfs_ihc_init(void)
 
   /* Attach and enable the applicable irq */
 
-  ret = irq_attach(MPFS_IRQ_FABRIC_F2H_59, mpfs_ihc_interrupt, NULL);
+  ret = irq_attach(g_plic_irq, mpfs_ihc_interrupt, NULL);
   if (ret == OK)
     {
-      up_enable_irq(MPFS_IRQ_FABRIC_F2H_59);
+      up_enable_irq(g_plic_irq);
     }
   else
     {
@@ -1230,7 +1448,7 @@ int mpfs_ihc_init(void)
 
 init_error:
 
-  up_disable_irq(MPFS_IRQ_FABRIC_F2H_59);
+  up_disable_irq(g_plic_irq);
   return ret;
 }
 

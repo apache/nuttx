@@ -64,6 +64,24 @@
 #define HEAP_BASE  ((uintptr_t)&_ebss+CONFIG_IDLETHREAD_STACKSIZE)
 
 /****************************************************************************
+ * Private Function prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: showprogress
+ *
+ * Description:
+ *   Print a character on the UART to show boot status.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_FEATURES
+#  define showprogress(c) arm_lowputc(c)
+#else
+#  define showprogress(c)
+#endif
+
+/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -144,7 +162,7 @@ static inline void stm32_tcmenable(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _start
+ * Name: __start
  *
  * Description:
  *   This is the reset entry point.
@@ -206,6 +224,7 @@ void __start(void)
   stm32_clockconfig();
   arm_fpuconfig();
   stm32_lowsetup();
+  showprogress('A');
 
   /* Enable/disable tightly coupled memories */
 
@@ -214,11 +233,13 @@ void __start(void)
   /* Initialize onboard resources */
 
   stm32_boardinitialize();
+  showprogress('B');
 
   /* Enable I- and D-Caches */
 
   up_enable_icache();
   up_enable_dcache();
+  showprogress('C');
 
 #ifdef CONFIG_ARMV7M_ITMSYSLOG
   /* Perform ARMv7-M ITM SYSLOG initialization */
@@ -231,6 +252,7 @@ void __start(void)
 #ifdef USE_EARLYSERIALINIT
   arm_earlyserialinit();
 #endif
+  showprogress('D');
 
   /* For the case of the separate user-/kernel-space build, perform whatever
    * platform specific initialization of the user memory is required.
@@ -241,8 +263,12 @@ void __start(void)
 #ifdef CONFIG_BUILD_PROTECTED
   stm32_userspace();
 #endif
+  showprogress('E');
 
   /* Then start NuttX */
+
+  showprogress('\r');
+  showprogress('\n');
 
   nx_start();
 

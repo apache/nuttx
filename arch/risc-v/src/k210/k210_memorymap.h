@@ -25,7 +25,7 @@
  * Included Files
  ****************************************************************************/
 
-#include "riscv_internal.h"
+#include "riscv_common_memorymap.h"
 #include "hardware/k210_memorymap.h"
 #include "hardware/k210_uart.h"
 #include "hardware/k210_clint.h"

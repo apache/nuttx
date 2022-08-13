@@ -136,10 +136,6 @@ static int t67xx_reset(FAR struct t67xx_dev_s *priv);
 
 /* Character driver methods */
 
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static int     t67xx_open(FAR struct file *filep);
-static int     t67xx_close(FAR struct file *filep);
-#endif
 static ssize_t t67xx_read(FAR struct file *filep, FAR char *buffer,
                           size_t buflen);
 static ssize_t t67xx_write(FAR struct file *filep, FAR const char *buffer,
@@ -153,13 +149,8 @@ static int     t67xx_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations g_t67xxfops =
 {
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  t67xx_open,     /* open */
-  t67xx_close,    /* close */
-#else
   NULL,           /* open */
   NULL,           /* close */
-#endif
   t67xx_read,     /* read */
   t67xx_write,    /* write */
   NULL,           /* seek */
@@ -566,44 +557,6 @@ static int t67xx_reset(FAR struct t67xx_dev_s *priv)
 
   return ret;
 }
-
-/****************************************************************************
- * Name: t67xx_open
- *
- * Description:
- *   This function is called whenever the T67XX device is opened.
- *
- ****************************************************************************/
-
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static int t67xx_open(FAR struct file *filep)
-{
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct t67xx_dev_s *priv = inode->i_private;
-
-  UNUSED(priv);
-  return OK;
-}
-#endif
-
-/****************************************************************************
- * Name: t67xx_close
- *
- * Description:
- *   This routine is called when the T67XX device is closed.
- *
- ****************************************************************************/
-
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static int t67xx_close(FAR struct file *filep)
-{
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct t67xx_dev_s *priv = inode->i_private;
-
-  UNUSED(priv);
-  return OK;
-}
-#endif
 
 /****************************************************************************
  * Name: t67xx_read

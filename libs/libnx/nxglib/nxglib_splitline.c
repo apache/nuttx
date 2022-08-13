@@ -71,7 +71,7 @@ static b16_t nxgl_interpolate(b16_t x, b16_t dy, b16_t dxdy)
  *   2. If x1 == x2 then the line is vertical and also better represented
  *      as a rectangle.
  *   3. If the width of the line is 1, then there are no triangles at the
- *      top and bottome (this may also be the case if the width is narrow
+ *      top and bottom (this may also be the case if the width is narrow
  *      and the line is near vertical).
  *   4. If the line is oriented is certain angles, it may consist only of
  *      the upper and lower triangles with no trapezoid in between.  In

@@ -100,9 +100,9 @@ static struct lcd_dev_s *g_lcd = NULL;
  *
  ****************************************************************************/
 
-static void cxd56_ili93404ws_select(FAR struct ili9340_lcd_s *lcd)
+static void cxd56_ili93404ws_select(struct ili9340_lcd_s *lcd)
 {
-  FAR struct ili93404ws_lcd_s *priv = (FAR struct ili93404ws_lcd_s *)lcd;
+  struct ili93404ws_lcd_s *priv = (struct ili93404ws_lcd_s *)lcd;
 
   SPI_LOCK(priv->spi, true);
   SPI_SELECT(priv->spi, SPIDEV_DISPLAY(0), true);
@@ -121,9 +121,9 @@ static void cxd56_ili93404ws_select(FAR struct ili9340_lcd_s *lcd)
  *
  ****************************************************************************/
 
-static void cxd56_ili93404ws_deselect(FAR struct ili9340_lcd_s *lcd)
+static void cxd56_ili93404ws_deselect(struct ili9340_lcd_s *lcd)
 {
-  FAR struct ili93404ws_lcd_s *priv = (FAR struct ili93404ws_lcd_s *)lcd;
+  struct ili93404ws_lcd_s *priv = (struct ili93404ws_lcd_s *)lcd;
 
   SPI_SELECT(priv->spi, SPIDEV_DISPLAY(0), false);
   SPI_LOCK(priv->spi, false);
@@ -144,7 +144,7 @@ static void cxd56_ili93404ws_deselect(FAR struct ili9340_lcd_s *lcd)
  *
  ****************************************************************************/
 
-static int cxd56_ili93404ws_backlight(FAR struct ili9340_lcd_s *lcd,
+static int cxd56_ili93404ws_backlight(struct ili9340_lcd_s *lcd,
                                       int level)
 {
   if (level > 0)
@@ -176,10 +176,10 @@ static int cxd56_ili93404ws_backlight(FAR struct ili9340_lcd_s *lcd,
  *
  ****************************************************************************/
 
-static int cxd56_ili93404ws_sendcmd(FAR struct ili9340_lcd_s *lcd,
+static int cxd56_ili93404ws_sendcmd(struct ili9340_lcd_s *lcd,
                                     const uint8_t cmd)
 {
-  FAR struct ili93404ws_lcd_s *priv = (FAR struct ili93404ws_lcd_s *)lcd;
+  struct ili93404ws_lcd_s *priv = (struct ili93404ws_lcd_s *)lcd;
 
   lcdinfo("%02x\n", cmd);
 
@@ -212,10 +212,10 @@ static int cxd56_ili93404ws_sendcmd(FAR struct ili9340_lcd_s *lcd,
  *
  ****************************************************************************/
 
-static int cxd56_ili93404ws_sendparam(FAR struct ili9340_lcd_s *lcd,
+static int cxd56_ili93404ws_sendparam(struct ili9340_lcd_s *lcd,
                                       const uint8_t param)
 {
-  FAR struct ili93404ws_lcd_s *priv = (FAR struct ili93404ws_lcd_s *)lcd;
+  struct ili93404ws_lcd_s *priv = (struct ili93404ws_lcd_s *)lcd;
 
   cxd56_gpio_write(DISPLAY_DC, true);  /* Indicate DATA */
   SPI_SEND(priv->spi, param);
@@ -239,10 +239,10 @@ static int cxd56_ili93404ws_sendparam(FAR struct ili9340_lcd_s *lcd,
  *
  ****************************************************************************/
 
-static int cxd56_ili93404ws_sendgram(FAR struct ili9340_lcd_s *lcd,
+static int cxd56_ili93404ws_sendgram(struct ili9340_lcd_s *lcd,
                                      const uint16_t *wd, uint32_t nwords)
 {
-  FAR struct ili93404ws_lcd_s *priv = (FAR struct ili93404ws_lcd_s *)lcd;
+  struct ili93404ws_lcd_s *priv = (struct ili93404ws_lcd_s *)lcd;
 
   lcdinfo("lcd:%p, wd=%p, nwords=%" PRId32 "\n", lcd, wd, nwords);
 
@@ -267,10 +267,10 @@ static int cxd56_ili93404ws_sendgram(FAR struct ili9340_lcd_s *lcd,
  *
  ****************************************************************************/
 
-static int cxd56_ili93404ws_recvparam(FAR struct ili9340_lcd_s *lcd,
+static int cxd56_ili93404ws_recvparam(struct ili9340_lcd_s *lcd,
                                         uint8_t *param)
 {
-  FAR struct ili93404ws_lcd_s *priv = (FAR struct ili93404ws_lcd_s *)lcd;
+  struct ili93404ws_lcd_s *priv = (struct ili93404ws_lcd_s *)lcd;
 
   cxd56_gpio_write(DISPLAY_DC, true);  /* Indicate DATA */
   *param = (uint8_t)(SPI_SEND(priv->spi, param) & 0xff);
@@ -294,7 +294,7 @@ static int cxd56_ili93404ws_recvparam(FAR struct ili9340_lcd_s *lcd,
  *
  ****************************************************************************/
 
-static int cxd56_ili93404ws_recvgram(FAR struct ili9340_lcd_s *lcd,
+static int cxd56_ili93404ws_recvgram(struct ili9340_lcd_s *lcd,
                                      uint16_t *wd, uint32_t nwords)
 {
   lcdinfo("wd=%p, nwords=%" PRId32 "\n", wd, nwords);
@@ -318,8 +318,8 @@ static int cxd56_ili93404ws_recvgram(FAR struct ili9340_lcd_s *lcd,
 
 int board_lcd_initialize(void)
 {
-  FAR struct ili93404ws_lcd_s *priv = &g_lcddev;
-  FAR struct spi_dev_s *spi;
+  struct ili93404ws_lcd_s *priv = &g_lcddev;
+  struct spi_dev_s *spi;
 #if defined(CONFIG_CXD56_DMAC)
   DMA_HANDLE            hdl;
   dma_config_t          conf;
@@ -403,7 +403,7 @@ int board_lcd_initialize(void)
  *
  ****************************************************************************/
 
-FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
+struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
   if (lcddev == 0)
     {

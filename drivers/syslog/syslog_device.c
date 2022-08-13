@@ -54,8 +54,6 @@
  */
 
 #define SYSLOG_OFLAGS (O_WRONLY | O_CREAT | O_APPEND)
-#define syslog_dev_takesem(s) nxrmutex_lock(&(s)->sl_lock)
-#define syslog_dev_givesem(s) nxrmutex_unlock(&(s)->sl_lock)
 
 /****************************************************************************
  * Private Types
@@ -119,6 +117,41 @@ static const uint8_t g_syscrlf[2] =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: syslog_dev_takesem
+ ****************************************************************************/
+
+static inline int syslog_dev_takesem(FAR struct syslog_dev_s *syslog_dev)
+{
+  /* Does this thread already hold the lock?  That could happen if
+   * we were called recursively, i.e., if the logic kicked off by
+   * file_write() where to generate more debug output.  Return an
+   * error in that case.
+   */
+
+  if (nxrmutex_is_hold(&syslog_dev->sl_lock))
+    {
+      /* Return an error (instead of deadlocking) */
+
+      return -EWOULDBLOCK;
+    }
+
+  /* Either the lock is available or is currently held by another
+   * thread.  Wait for it to become available.
+   */
+
+  return nxrmutex_lock(&syslog_dev->sl_lock);
+}
+
+/****************************************************************************
+ * Name: syslog_dev_givesem
+ ****************************************************************************/
+
+static inline void syslog_dev_givesem(FAR struct syslog_dev_s *syslog_dev)
+{
+  nxrmutex_unlock(&syslog_dev->sl_lock);
+}
 
 /****************************************************************************
  * Name: syslog_dev_open
@@ -625,6 +658,8 @@ static int syslog_dev_flush(FAR struct syslog_channel_s *channel)
    */
 
   file_fsync(&syslog_dev->sl_file);
+#else
+  UNUSED(channel);
 #endif
 
   return OK;

@@ -29,13 +29,19 @@ CMN_ASRCS += riscv_vectors.S riscv_exception_common.S riscv_mhartid.S
 CMN_CSRCS += riscv_initialize.c riscv_swint.c riscv_mtimer.c
 CMN_CSRCS += riscv_allocateheap.c riscv_createstack.c riscv_exit.c
 CMN_CSRCS += riscv_assert.c riscv_blocktask.c riscv_copystate.c riscv_initialstate.c
-CMN_CSRCS += riscv_modifyreg32.c riscv_mdelay.c riscv_puts.c
+CMN_CSRCS += riscv_modifyreg32.c riscv_nputs.c
 CMN_CSRCS += riscv_releasepending.c riscv_reprioritizertr.c
 CMN_CSRCS += riscv_releasestack.c riscv_stackframe.c riscv_schedulesigaction.c
 CMN_CSRCS += riscv_sigdeliver.c riscv_unblocktask.c riscv_usestack.c
 CMN_CSRCS += riscv_idle.c riscv_tcbinfo.c riscv_cpuidlestack.c
 CMN_CSRCS += riscv_exception.c riscv_getnewintctx.c riscv_doirq.c
 CMN_CSRCS += riscv_saveusercontext.c
+
+ifneq ($(CONFIG_ALARM_ARCH),y)
+  ifneq ($(CONFIG_TIMER_ARCH),y)
+    CMN_CSRCS += riscv_mdelay.c riscv_udelay.c
+  endif
+endif
 
 ifeq ($(CONFIG_SMP),y)
 CMN_CSRCS += riscv_cpuindex.c riscv_cpupause.c riscv_cpustart.c

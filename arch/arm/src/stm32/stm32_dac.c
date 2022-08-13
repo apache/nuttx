@@ -592,39 +592,39 @@ struct stm32_chan_s
 /* DAC Register access */
 
 #ifdef HAVE_TIMER
-static uint32_t tim_getreg(FAR struct stm32_chan_s *chan, int offset);
-static void     tim_putreg(FAR struct stm32_chan_s *chan, int offset,
+static uint32_t tim_getreg(struct stm32_chan_s *chan, int offset);
+static void     tim_putreg(struct stm32_chan_s *chan, int offset,
                            uint32_t value);
-static void     tim_modifyreg(FAR struct stm32_chan_s *chan, int offset,
+static void     tim_modifyreg(struct stm32_chan_s *chan, int offset,
                               uint32_t clearbits, uint32_t setbits);
 #endif
 
 /* Interrupt handler */
 
 #if 0 /* defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX) */
-static int  dac_interrupt(int irq, FAR void *context, FAR void *arg);
+static int  dac_interrupt(int irq, void *context, void *arg);
 #endif
 
 /* DAC methods */
 
-static void dac_reset(FAR struct dac_dev_s *dev);
-static int  dac_setup(FAR struct dac_dev_s *dev);
-static void dac_shutdown(FAR struct dac_dev_s *dev);
-static void dac_txint(FAR struct dac_dev_s *dev, bool enable);
-static int  dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg);
-static int  dac_ioctl(FAR struct dac_dev_s *dev, int cmd, unsigned long arg);
+static void dac_reset(struct dac_dev_s *dev);
+static int  dac_setup(struct dac_dev_s *dev);
+static void dac_shutdown(struct dac_dev_s *dev);
+static void dac_txint(struct dac_dev_s *dev, bool enable);
+static int  dac_send(struct dac_dev_s *dev, struct dac_msg_s *msg);
+static int  dac_ioctl(struct dac_dev_s *dev, int cmd, unsigned long arg);
 
 /* Initialization */
 
 #ifdef HAVE_DMA
 #  ifdef HAVE_TIMER
-static int  dac_timinit(FAR struct stm32_chan_s *chan);
+static int  dac_timinit(struct stm32_chan_s *chan);
 #  endif
-static int  dma_remap(FAR struct stm32_chan_s *chan);
-static void dma_bufferinit(FAR struct stm32_chan_s *chan, uint16_t *buffer,
+static int  dma_remap(struct stm32_chan_s *chan);
+static void dma_bufferinit(struct stm32_chan_s *chan, uint16_t *buffer,
                            uint16_t len);
 #endif
-static int  dac_chaninit(FAR struct stm32_chan_s *chan);
+static int  dac_chaninit(struct stm32_chan_s *chan);
 static int  dac_blockinit(void);
 
 /****************************************************************************
@@ -870,7 +870,7 @@ static struct stm32_dac_s g_dacblock;
  *
  ****************************************************************************/
 
-static inline void stm32_dac_modify_cr(FAR struct stm32_chan_s *chan,
+static inline void stm32_dac_modify_cr(struct stm32_chan_s *chan,
                                        uint32_t clearbits, uint32_t setbits)
 {
   unsigned int shift;
@@ -905,7 +905,7 @@ static inline void stm32_dac_modify_cr(FAR struct stm32_chan_s *chan,
  *
  ****************************************************************************/
 
-static uint32_t tim_getreg(FAR struct stm32_chan_s *chan, int offset)
+static uint32_t tim_getreg(struct stm32_chan_s *chan, int offset)
 {
   return getreg32(chan->tbase + offset);
 }
@@ -925,7 +925,7 @@ static uint32_t tim_getreg(FAR struct stm32_chan_s *chan, int offset)
  *
  ****************************************************************************/
 
-static void tim_putreg(FAR struct stm32_chan_s *chan, int offset,
+static void tim_putreg(struct stm32_chan_s *chan, int offset,
                        uint32_t value)
 {
   putreg32(value, chan->tbase + offset);
@@ -948,7 +948,7 @@ static void tim_putreg(FAR struct stm32_chan_s *chan, int offset,
  *
  ****************************************************************************/
 
-static void tim_modifyreg(FAR struct stm32_chan_s *chan, int offset,
+static void tim_modifyreg(struct stm32_chan_s *chan, int offset,
                           uint32_t clearbits, uint32_t setbits)
 {
   modifyreg32(chan->tbase + offset, clearbits, setbits);
@@ -970,7 +970,7 @@ static void tim_modifyreg(FAR struct stm32_chan_s *chan, int offset,
  ****************************************************************************/
 
 #if 0 /* defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX) */
-static int dac_interrupt(int irq, FAR void *context, FAR void *arg)
+static int dac_interrupt(int irq, void *context, void *arg)
 {
 #warning "Missing logic"
   return OK;
@@ -993,7 +993,7 @@ static int dac_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static void dac_reset(FAR struct dac_dev_s *dev)
+static void dac_reset(struct dac_dev_s *dev)
 {
   irqstate_t flags;
 
@@ -1024,7 +1024,7 @@ static void dac_reset(FAR struct dac_dev_s *dev)
  *
  ****************************************************************************/
 
-static int dac_setup(FAR struct dac_dev_s *dev)
+static int dac_setup(struct dac_dev_s *dev)
 {
 #warning "Missing logic"
   return OK;
@@ -1044,7 +1044,7 @@ static int dac_setup(FAR struct dac_dev_s *dev)
  *
  ****************************************************************************/
 
-static void dac_shutdown(FAR struct dac_dev_s *dev)
+static void dac_shutdown(struct dac_dev_s *dev)
 {
 #warning "Missing logic"
 }
@@ -1062,7 +1062,7 @@ static void dac_shutdown(FAR struct dac_dev_s *dev)
  *
  ****************************************************************************/
 
-static void dac_txint(FAR struct dac_dev_s *dev, bool enable)
+static void dac_txint(struct dac_dev_s *dev, bool enable)
 {
 #warning "Missing logic"
 }
@@ -1081,7 +1081,7 @@ static void dac_txint(FAR struct dac_dev_s *dev, bool enable)
  ****************************************************************************/
 
 #ifdef HAVE_DMA
-static void dac_dmatxcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
+static void dac_dmatxcallback(DMA_HANDLE handle, uint8_t isr, void *arg)
 {
 }
 #endif
@@ -1099,9 +1099,9 @@ static void dac_dmatxcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
  *
  ****************************************************************************/
 
-static int dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
+static int dac_send(struct dac_dev_s *dev, struct dac_msg_s *msg)
 {
-  FAR struct stm32_chan_s *chan = dev->ad_priv;
+  struct stm32_chan_s *chan = dev->ad_priv;
 
   /* Enable DAC Channel */
 
@@ -1200,9 +1200,9 @@ static int dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
  *
  ****************************************************************************/
 
-static int dac_ioctl(FAR struct dac_dev_s *dev, int cmd, unsigned long arg)
+static int dac_ioctl(struct dac_dev_s *dev, int cmd, unsigned long arg)
 {
-  FAR struct stm32_chan_s *chan = dev->ad_priv;
+  struct stm32_chan_s *chan = dev->ad_priv;
   int ret = OK;
 
   switch (cmd)
@@ -1239,7 +1239,7 @@ static int dac_ioctl(FAR struct dac_dev_s *dev, int cmd, unsigned long arg)
  * Name: dma_bufferinit
  ****************************************************************************/
 
-static void dma_bufferinit(FAR struct stm32_chan_s *chan, uint16_t *buffer,
+static void dma_bufferinit(struct stm32_chan_s *chan, uint16_t *buffer,
                            uint16_t len)
 {
   memcpy(chan->dmabuffer, buffer, len);
@@ -1249,7 +1249,7 @@ static void dma_bufferinit(FAR struct stm32_chan_s *chan, uint16_t *buffer,
  * Name: dma_remap
  ****************************************************************************/
 
-static int dma_remap(FAR struct stm32_chan_s *chan)
+static int dma_remap(struct stm32_chan_s *chan)
 {
 #if defined(CONFIG_STM32_STM32F33XX) || defined(CONFIG_STM32_STM32F30XX) || \
     defined(CONFIG_STM32_STM32F37XX)
@@ -1330,7 +1330,7 @@ static int dma_remap(FAR struct stm32_chan_s *chan)
  ****************************************************************************/
 
 #ifdef HAVE_TIMER
-static int dac_timinit(FAR struct stm32_chan_s *chan)
+static int dac_timinit(struct stm32_chan_s *chan)
 {
   uint32_t pclk;
   uint32_t prescaler;
@@ -1499,7 +1499,7 @@ static int dac_timinit(FAR struct stm32_chan_s *chan)
  *
  ****************************************************************************/
 
-static int dac_chaninit(FAR struct stm32_chan_s *chan)
+static int dac_chaninit(struct stm32_chan_s *chan)
 {
   uint16_t clearbits;
   uint16_t setbits;
@@ -1719,10 +1719,10 @@ static int dac_blockinit(void)
  *
  ****************************************************************************/
 
-FAR struct dac_dev_s *stm32_dacinitialize(int intf)
+struct dac_dev_s *stm32_dacinitialize(int intf)
 {
-  FAR struct dac_dev_s    *dev;
-  FAR struct stm32_chan_s *chan;
+  struct dac_dev_s    *dev;
+  struct stm32_chan_s *chan;
   int ret;
 
 #ifdef CONFIG_STM32_DAC1CH1

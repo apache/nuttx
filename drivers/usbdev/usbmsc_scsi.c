@@ -2444,8 +2444,24 @@ static int usbmsc_cmdwritestate(FAR struct usbmsc_dev_s *priv)
           src  = &req->buf[xfrd - priv->nreqbytes];
           dest = &priv->iobuffer[priv->nsectbytes];
 
-          nbytes = MIN(lun->sectorsize - priv->nsectbytes, priv->nreqbytes);
+#ifdef CONFIG_USBMSC_WRMULTIPLE
+          /* nbytes may end up being zero, after which the loop no longer
+           * proceeds but will be stuck forever.  Make sure nbytes isn't
+           * zero.
+           */
 
+          if (lun->sectorsize > priv->nsectbytes)
+            {
+              nbytes = MIN(lun->sectorsize - priv->nsectbytes,
+                           priv->nreqbytes);
+            }
+          else
+            {
+              nbytes = priv->nreqbytes;
+            }
+#else
+          nbytes = MIN(lun->sectorsize - priv->nsectbytes, priv->nreqbytes);
+#endif
           /* Copy the data from the sector buffer to the USB request and
            * update counts
            */
@@ -2454,9 +2470,34 @@ static int usbmsc_cmdwritestate(FAR struct usbmsc_dev_s *priv)
           priv->nsectbytes += nbytes;
           priv->nreqbytes  -= nbytes;
 
+#ifdef CONFIG_USBMSC_WRMULTIPLE
+          uint32_t nrbufs = MIN(priv->u.xfrlen, CONFIG_USBMSC_NWRREQS);
+
           /* Is the I/O buffer full? */
 
-          if (priv->nsectbytes >= lun->sectorsize)
+          if ((priv->nsectbytes >= lun->sectorsize * priv->u.xfrlen) ||
+              (priv->nsectbytes >= lun->sectorsize * CONFIG_USBMSC_NWRREQS))
+            {
+              /* Yes.. Write next sectors */
+
+              nwritten = USBMSC_DRVR_WRITE(lun, priv->iobuffer,
+                                           priv->sector, nrbufs);
+              if (nwritten < 0)
+                {
+                  usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDWRITEWRITEFAIL),
+                           -nwritten);
+                  lun->sd     = SCSI_KCQME_WRITEFAULTAUTOREALLOCFAILED;
+                  lun->sdinfo = priv->sector;
+                  goto errout;
+                }
+
+              priv->nsectbytes = 0;
+              priv->residue   -= lun->sectorsize * nrbufs;
+              priv->u.xfrlen  -= nrbufs;
+              priv->sector    += nrbufs;
+            }
+#else
+          if ((priv->nsectbytes >= lun->sectorsize))
             {
               /* Yes.. Write the next sector */
 
@@ -2476,6 +2517,7 @@ static int usbmsc_cmdwritestate(FAR struct usbmsc_dev_s *priv)
               priv->u.xfrlen--;
               priv->sector++;
             }
+#endif
         }
 
       /* In either case, we are finished with this read request and can

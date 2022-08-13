@@ -94,7 +94,7 @@ static struct dma_channel_s g_dmach[RP2040_DMA_NCHANNELS];
  *
  ****************************************************************************/
 
-static int rp2040_dmac_interrupt(int irq, void *context, FAR void *arg)
+static int rp2040_dmac_interrupt(int irq, void *context, void *arg)
 {
   struct dma_channel_s *dmach;
   int result = OK;
@@ -372,7 +372,7 @@ void rp2040_rxdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
  * Name: rp2040_txdmasetup
  *
  * Description:
- *   Configure an TX (memory-to-memory) DMA before starting the transfer.
+ *   Configure an TX (memory-to-peripheral) DMA before starting the transfer.
  *
  * Input Parameters:
  *   paddr  - Peripheral address (destination)

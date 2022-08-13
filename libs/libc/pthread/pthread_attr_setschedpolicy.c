@@ -55,7 +55,7 @@ int pthread_attr_setschedpolicy(FAR pthread_attr_t *attr, int policy)
 {
   int ret;
 
-  linfo("attr=0x%p policy=%d\n", attr, policy);
+  linfo("attr=%p policy=%d\n", attr, policy);
 
   if (!attr ||
       (policy != SCHED_FIFO

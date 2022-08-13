@@ -102,7 +102,7 @@ struct s32k1xx_lpi2c_slave_priv_s
   int write_buflen;            /* Write buffer size */
   int write_bufindex;          /* Write buffer index */
 
-  int (*callback)(FAR void *arg); /* Callback function when data has been received */
+  i2c_slave_callback_t *callback; /* Callback function when data has been received */
   void *callback_arg;             /* Argument of callback function */
 
   int refs; /* Reference count */
@@ -113,32 +113,32 @@ struct s32k1xx_lpi2c_slave_priv_s
  ****************************************************************************/
 
 static inline uint32_t s32k1xx_lpi2c_slave_getreg(
-  FAR struct s32k1xx_lpi2c_slave_priv_s *priv, uint16_t offset);
+  struct s32k1xx_lpi2c_slave_priv_s *priv, uint16_t offset);
 static inline void s32k1xx_lpi2c_slave_putreg(
-  FAR struct s32k1xx_lpi2c_slave_priv_s *priv, uint16_t offset,
+  struct s32k1xx_lpi2c_slave_priv_s *priv, uint16_t offset,
   uint32_t value);
 static inline void s32k1xx_lpi2c_slave_modifyreg(
-  FAR struct s32k1xx_lpi2c_slave_priv_s *priv, uint16_t offset,
+  struct s32k1xx_lpi2c_slave_priv_s *priv, uint16_t offset,
   uint32_t clearbits, uint32_t setbits);
 
 static int s32k1xx_lpi2c_slave_isr_process(
-  FAR struct s32k1xx_lpi2c_slave_priv_s *priv);
-static int s32k1xx_lpi2c_slave_isr(int irq, void *context, FAR void *arg);
+  struct s32k1xx_lpi2c_slave_priv_s *priv);
+static int s32k1xx_lpi2c_slave_isr(int irq, void *context, void *arg);
 
 static int s32k1xx_lpi2c_slave_init(
-  FAR struct s32k1xx_lpi2c_slave_priv_s *priv);
+  struct s32k1xx_lpi2c_slave_priv_s *priv);
 static int s32k1xx_lpi2c_slave_deinit(
-  FAR struct s32k1xx_lpi2c_slave_priv_s *priv);
+  struct s32k1xx_lpi2c_slave_priv_s *priv);
 
-static int s32k1xx_lpi2c_setownaddress(FAR struct i2c_slave_s *dev, int addr,
+static int s32k1xx_lpi2c_setownaddress(struct i2c_slave_s *dev, int addr,
                                        int nbits);
-static int s32k1xx_lpi2c_write(FAR struct i2c_slave_s *dev,
-                               FAR const uint8_t *buffer, int buflen);
-static int s32k1xx_lpi2c_read(FAR struct i2c_slave_s *dev,
-                              FAR uint8_t *buffer, int buflen);
-static int s32k1xx_lpi2c_registercallback(FAR struct i2c_slave_s *dev,
-                                          int (*callback)(FAR void *arg),
-                                          FAR void *arg);
+static int s32k1xx_lpi2c_write(struct i2c_slave_s *dev,
+                               const uint8_t *buffer, int buflen);
+static int s32k1xx_lpi2c_read(struct i2c_slave_s *dev,
+                              uint8_t *buffer, int buflen);
+static int s32k1xx_lpi2c_registercallback(struct i2c_slave_s *dev,
+                                          i2c_slave_callback_t *callback,
+                                          void *arg);
 
 /****************************************************************************
  * Private Data
@@ -249,7 +249,7 @@ static struct s32k1xx_lpi2c_slave_priv_s s32k1xx_lpi2c1s_priv =
  ****************************************************************************/
 
 static inline uint32_t s32k1xx_lpi2c_slave_getreg(
-  FAR struct s32k1xx_lpi2c_slave_priv_s *priv, uint16_t offset)
+  struct s32k1xx_lpi2c_slave_priv_s *priv, uint16_t offset)
 {
   return getreg32(priv->config->base + offset);
 }
@@ -269,7 +269,7 @@ static inline uint32_t s32k1xx_lpi2c_slave_getreg(
  ****************************************************************************/
 
 static inline void s32k1xx_lpi2c_slave_putreg(
-  FAR struct s32k1xx_lpi2c_slave_priv_s *priv, uint16_t offset,
+  struct s32k1xx_lpi2c_slave_priv_s *priv, uint16_t offset,
   uint32_t value)
 {
   putreg32(value, priv->config->base + offset);
@@ -291,7 +291,7 @@ static inline void s32k1xx_lpi2c_slave_putreg(
  ****************************************************************************/
 
 static inline void s32k1xx_lpi2c_slave_modifyreg(
-  FAR struct s32k1xx_lpi2c_slave_priv_s *priv, uint16_t offset,
+  struct s32k1xx_lpi2c_slave_priv_s *priv, uint16_t offset,
   uint32_t clearbits, uint32_t setbits)
 {
   modifyreg32(priv->config->base + offset, clearbits, setbits);
@@ -315,7 +315,7 @@ static inline void s32k1xx_lpi2c_slave_modifyreg(
  ****************************************************************************/
 
 static int s32k1xx_lpi2c_slave_isr_process(
-  FAR struct s32k1xx_lpi2c_slave_priv_s *priv)
+  struct s32k1xx_lpi2c_slave_priv_s *priv)
 {
   uint32_t status = s32k1xx_lpi2c_slave_getreg(priv,
                                                S32K1XX_LPI2C_SSR_OFFSET);
@@ -427,7 +427,8 @@ static int s32k1xx_lpi2c_slave_isr_process(
 
       if ((priv->read_bufindex > 0) && (priv->callback != NULL))
         {
-          priv->callback(priv->callback_arg);
+          priv->callback(priv->callback_arg, priv->read_bufindex);
+          priv->read_bufindex = 0;
         }
     }
 
@@ -468,7 +469,7 @@ static int s32k1xx_lpi2c_slave_isr_process(
  *
  ****************************************************************************/
 
-static int s32k1xx_lpi2c_slave_isr(int irq, void *context, FAR void *arg)
+static int s32k1xx_lpi2c_slave_isr(int irq, void *context, void *arg)
 {
   struct s32k1xx_lpi2c_slave_priv_s *priv =
     (struct s32k1xx_lpi2c_slave_priv_s *)arg;
@@ -494,7 +495,7 @@ static int s32k1xx_lpi2c_slave_isr(int irq, void *context, FAR void *arg)
  ****************************************************************************/
 
 static int s32k1xx_lpi2c_slave_init(
-  FAR struct s32k1xx_lpi2c_slave_priv_s *priv)
+  struct s32k1xx_lpi2c_slave_priv_s *priv)
 {
   int ret;
 
@@ -590,7 +591,7 @@ static int s32k1xx_lpi2c_slave_init(
  ****************************************************************************/
 
 static int s32k1xx_lpi2c_slave_deinit(
-  FAR struct s32k1xx_lpi2c_slave_priv_s *priv)
+  struct s32k1xx_lpi2c_slave_priv_s *priv)
 {
   int ret;
 
@@ -642,14 +643,14 @@ static int s32k1xx_lpi2c_slave_deinit(
  *
  ****************************************************************************/
 
-static int s32k1xx_lpi2c_setownaddress(FAR struct i2c_slave_s *dev, int addr,
+static int s32k1xx_lpi2c_setownaddress(struct i2c_slave_s *dev, int addr,
                                        int nbits)
 {
-  FAR struct s32k1xx_lpi2c_slave_priv_s *priv;
+  struct s32k1xx_lpi2c_slave_priv_s *priv;
   irqstate_t flags;
 
   DEBUGASSERT(dev);
-  priv = (FAR struct s32k1xx_lpi2c_slave_priv_s *)dev;
+  priv = (struct s32k1xx_lpi2c_slave_priv_s *)dev;
 
   flags = enter_critical_section();
 
@@ -715,14 +716,14 @@ static int s32k1xx_lpi2c_setownaddress(FAR struct i2c_slave_s *dev, int addr,
  *
  ****************************************************************************/
 
-static int s32k1xx_lpi2c_write(FAR struct i2c_slave_s *dev,
-                               FAR const uint8_t *buffer, int buflen)
+static int s32k1xx_lpi2c_write(struct i2c_slave_s *dev,
+                               const uint8_t *buffer, int buflen)
 {
-  FAR struct s32k1xx_lpi2c_slave_priv_s *priv;
+  struct s32k1xx_lpi2c_slave_priv_s *priv;
   irqstate_t flags;
 
   DEBUGASSERT(dev);
-  priv = (FAR struct s32k1xx_lpi2c_slave_priv_s *)dev;
+  priv = (struct s32k1xx_lpi2c_slave_priv_s *)dev;
 
   flags = enter_critical_section();
 
@@ -754,14 +755,14 @@ static int s32k1xx_lpi2c_write(FAR struct i2c_slave_s *dev,
  *
  ****************************************************************************/
 
-static int s32k1xx_lpi2c_read(FAR struct i2c_slave_s *dev,
-                              FAR uint8_t *buffer, int buflen)
+static int s32k1xx_lpi2c_read(struct i2c_slave_s *dev,
+                              uint8_t *buffer, int buflen)
 {
-  FAR struct s32k1xx_lpi2c_slave_priv_s *priv;
+  struct s32k1xx_lpi2c_slave_priv_s *priv;
   irqstate_t flags;
 
   DEBUGASSERT(dev);
-  priv = (FAR struct s32k1xx_lpi2c_slave_priv_s *)dev;
+  priv = (struct s32k1xx_lpi2c_slave_priv_s *)dev;
 
   flags = enter_critical_section();
 
@@ -792,14 +793,15 @@ static int s32k1xx_lpi2c_read(FAR struct i2c_slave_s *dev,
  *
  ****************************************************************************/
 
-static int s32k1xx_lpi2c_registercallback(FAR struct i2c_slave_s *dev,
-  int (*callback)(FAR void *arg), FAR void *arg)
+static int s32k1xx_lpi2c_registercallback(struct i2c_slave_s *dev,
+                                          i2c_slave_callback_t *callback,
+                                          void *arg)
 {
-  FAR struct s32k1xx_lpi2c_slave_priv_s *priv;
+  struct s32k1xx_lpi2c_slave_priv_s *priv;
   irqstate_t flags;
 
   DEBUGASSERT(dev);
-  priv = (FAR struct s32k1xx_lpi2c_slave_priv_s *)dev;
+  priv = (struct s32k1xx_lpi2c_slave_priv_s *)dev;
 
   flags = enter_critical_section();
 
@@ -833,7 +835,7 @@ static int s32k1xx_lpi2c_registercallback(FAR struct i2c_slave_s *dev,
  *
  ****************************************************************************/
 
-FAR struct i2c_slave_s *s32k1xx_i2cbus_slave_initialize(int port)
+struct i2c_slave_s *s32k1xx_i2cbus_slave_initialize(int port)
 {
   struct s32k1xx_lpi2c_slave_priv_s *priv;
   irqstate_t flags;
@@ -892,9 +894,9 @@ FAR struct i2c_slave_s *s32k1xx_i2cbus_slave_initialize(int port)
  *
  ****************************************************************************/
 
-int s32k1xx_i2cbus_slave_uninitialize(FAR struct i2c_slave_s *dev)
+int s32k1xx_i2cbus_slave_uninitialize(struct i2c_slave_s *dev)
 {
-  FAR struct s32k1xx_lpi2c_slave_priv_s *priv =
+  struct s32k1xx_lpi2c_slave_priv_s *priv =
     (struct s32k1xx_lpi2c_slave_priv_s *)dev;
   irqstate_t flags;
 

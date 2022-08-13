@@ -89,7 +89,8 @@ struct emac_driver_s
 
 /* A single packet buffer is used */
 
-static uint8_t g_pktbuf[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
+static uint8_t g_pktbuf[CONFIG_HCS12_NINTERFACES]
+                       [MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
 
 /* Driver state structure */
 
@@ -693,7 +694,7 @@ int emac_initialize(int intf)
 
   /* Get the interface structure associated with this interface number. */
 
-  DEBUGASSERT(inf <  CONFIG_HCS12_NINTERFACES);
+  DEBUGASSERT(inf < CONFIG_HCS12_NINTERFACES);
   priv = &g_emac[intf];
 
   /* Check if a Ethernet chip is recognized at its I/O base */
@@ -710,7 +711,7 @@ int emac_initialize(int intf)
   /* Initialize the driver structure */
 
   memset(priv, 0, sizeof(struct emac_driver_s));
-  priv->d_dev.d_buf     = g_pktbuf;      /* Single packet buffer */
+  priv->d_dev.d_buf     = g_pktbuf[inf]; /* Single packet buffer */
   priv->d_dev.d_ifup    = emac_ifup;     /* I/F down callback */
   priv->d_dev.d_ifdown  = emac_ifdown;   /* I/F up (new IP address) callback */
   priv->d_dev.d_txavail = emac_txavail;  /* New TX data callback */

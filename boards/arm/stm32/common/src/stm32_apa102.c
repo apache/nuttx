@@ -81,7 +81,7 @@
 
 int board_apa102_initialize(int devno, int spino)
 {
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
   char devpath[13];
   int ret;
 

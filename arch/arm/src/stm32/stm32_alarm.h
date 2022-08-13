@@ -39,7 +39,7 @@
 
 /* The form of an alarm callback */
 
-typedef CODE void (*alarmcb_t)(void);
+typedef void (*alarmcb_t)(void);
 
 /****************************************************************************
  * Public Function Prototypes
@@ -70,7 +70,7 @@ extern "C"
  ****************************************************************************/
 
 struct timespec;
-int stm32_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback);
+int stm32_rtc_setalarm(const struct timespec *tp, alarmcb_t callback);
 
 /****************************************************************************
  * Name: stm32_rtc_cancelalarm

@@ -298,7 +298,7 @@ static const struct can_ops_s g_mcp2515ops =
   mcp2515_remoterequest, /* co_remoterequest */
   mcp2515_send,          /* co_send */
   mcp2515_txready,       /* co_txready */
-  mcp2515_txempty,       /* co_txempty */
+  mcp2515_txempty        /* co_txempty */
 };
 
 /****************************************************************************

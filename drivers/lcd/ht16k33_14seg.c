@@ -137,8 +137,6 @@ static void ht16k33_clear_display(FAR struct ht16k33_dev_s *priv);
 
 /* Character driver methods */
 
-static int     ht16k33_open(FAR struct file *filep);
-static int     ht16k33_close(FAR struct file *filep);
 static ssize_t ht16k33_read(FAR struct file *filep, FAR char *buffer,
                             size_t buflen);
 static ssize_t ht16k33_write(FAR struct file *filep, FAR const char *buffer,
@@ -146,7 +144,7 @@ static ssize_t ht16k33_write(FAR struct file *filep, FAR const char *buffer,
 static off_t   ht16k33_seek(FAR struct file *filep, off_t offset,
                             int whence);
 static int     ht16k33_ioctl(FAR struct file *filep, int cmd,
-                            unsigned long arg);
+                             unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -154,8 +152,8 @@ static int     ht16k33_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations g_ht16k33fops =
 {
-  ht16k33_open,   /* open */
-  ht16k33_close,  /* close */
+  NULL,           /* open */
+  NULL,           /* close */
   ht16k33_read,   /* read */
   ht16k33_write,  /* write */
   ht16k33_seek,   /* seek */
@@ -774,37 +772,11 @@ static void lcd_init(FAR struct ht16k33_dev_s *priv)
  ****************************************************************************/
 
 static void lcd_curpos_to_fpos(FAR struct ht16k33_dev_s *priv,
-                              uint8_t row, uint8_t col, FAR off_t *fpos)
+                               uint8_t row, uint8_t col, FAR off_t *fpos)
 {
   /* the logical file position is the linear position plus any synthetic LF */
 
   *fpos = (row * HT16K33_MAX_COL) + col + row;
-}
-
-/****************************************************************************
- * Name: ht16k33_open
- *
- * Description:
- *   This function is called whenever the HT16K33 device is opened.
- *
- ****************************************************************************/
-
-static int ht16k33_open(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
- * Name: ht16k33_close
- *
- * Description:
- *   This routine is called when the LM-75 device is closed.
- *
- ****************************************************************************/
-
-static int ht16k33_close(FAR struct file *filep)
-{
-  return OK;
 }
 
 /****************************************************************************
@@ -822,7 +794,7 @@ static ssize_t ht16k33_read(FAR struct file *filep, FAR char *buffer,
  ****************************************************************************/
 
 static ssize_t ht16k33_write(FAR struct file *filep, FAR const char *buffer,
-                            size_t buflen)
+                             size_t buflen)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct ht16k33_dev_s *priv = inode->i_private;
@@ -1031,7 +1003,7 @@ static off_t ht16k33_seek(FAR struct file *filep, off_t offset, int whence)
  ****************************************************************************/
 
 static int ht16k33_ioctl(FAR struct file *filep, int cmd,
-                             unsigned long arg)
+                         unsigned long arg)
 {
   switch (cmd)
     {
@@ -1155,7 +1127,7 @@ int ht16k33_register(int devno, FAR struct i2c_master_s *i2c)
 
   /* Create the character device name */
 
-  snprintf(devname, DEVNAME_FMTLEN, DEVNAME_FMT, devno);
+  snprintf(devname, sizeof(devname), DEVNAME_FMT, devno);
 
   /* Register the driver */
 

@@ -127,7 +127,7 @@ static void up_lcdsetvcomfreq(unsigned int freq)
   STM32_TIM_SETPERIOD(tim, TIMER_FREQ / freq);
 }
 
-static FAR struct memlcd_priv_s memlcd_priv =
+static struct memlcd_priv_s memlcd_priv =
 {
   .attachirq   = up_lcdirqattach,
   .dispcontrol = up_lcddispcontrol,
@@ -151,7 +151,7 @@ static FAR struct memlcd_priv_s memlcd_priv =
  *
  ****************************************************************************/
 
-FAR int board_lcd_initialize(void)
+int board_lcd_initialize(void)
 {
   lcdinfo("Initializing lcd\n");
 
@@ -189,7 +189,7 @@ FAR int board_lcd_initialize(void)
  *
  ****************************************************************************/
 
-FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
+struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
   DEBUGASSERT(lcddev == 0);
   return l_lcddev;

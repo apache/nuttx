@@ -291,7 +291,7 @@ static int set_gpioint_config(int slot, uint32_t gpiocfg)
       val |= (INT_ROUTE_PMU_LATCH << shift);
       break;
     default:
-      DEBUGASSERT(0);
+      DEBUGPANIC();
       break;
     }
 
@@ -332,7 +332,7 @@ static bool enabled_irq(int irq)
   return ((val & (1 << (irq - CXD56_IRQ_EXTINT))) != 0);
 }
 
-static int gpioint_handler(int irq, FAR void *context, FAR void *arg)
+static int gpioint_handler(int irq, void *context, void *arg)
 {
   uint32_t val;
   uint32_t shift;
@@ -404,7 +404,7 @@ static int gpioint_handler(int irq, FAR void *context, FAR void *arg)
  ****************************************************************************/
 
 int cxd56_gpioint_config(uint32_t pin, uint32_t gpiocfg, xcpt_t isr,
-                         FAR void *arg)
+                         void *arg)
 {
   int slot;
   int irq;

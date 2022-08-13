@@ -25,16 +25,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define major(x) \
-        ((unsigned)((((x) >> 31 >> 1) & 0xfffff000) | \
-                    (((x) >> 8) & 0x00000fff)))
-#define minor(x) \
-        ((unsigned)((((x) >> 12) & 0xffffff00) | ((x) & 0x000000ff)))
-
-#define makedev(x,y) ( \
-        (((x) & 0xfffff000ull) << 32) | \
-        (((x) & 0x00000fffull) << 8)  | \
-        (((y) & 0xffffff00ull) << 12) | \
-        (((y) & 0x000000ffull)))
+#define major(x)          ((int)(0x00ff & ((x) >> 8)))
+#define minor(x)          ((int)(0xffff00ff & (x)))
+#define makedev(maj, min) ((0xff00 & ((maj) << 8)) | (0xffff00ff & (min)))
 
 #endif /* __INCLUDE_SYS_SYSMACROS_H */

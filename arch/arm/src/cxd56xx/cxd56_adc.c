@@ -165,7 +165,7 @@ typedef enum adc_ch
 struct cxd56adc_dev_s
 {
   adc_ch_t         ch;            /* adc channel number */
-  FAR struct seq_s *seq;          /* sequencer */
+  struct seq_s     *seq;          /* sequencer */
   uint8_t          freq;          /* coefficient of adc sampling frequency */
   uint16_t         fsize;         /* SCU FIFO size */
   uint16_t         ofst;          /* offset */
@@ -184,11 +184,11 @@ struct cxd56adc_dev_s
 
 /* Character driver methods */
 
-static int cxd56_adc_open(FAR struct file *filep);
-static int cxd56_adc_close(FAR struct file *filep);
-static ssize_t cxd56_adc_read(FAR struct file *filep, FAR char *buffer,
+static int cxd56_adc_open(struct file *filep);
+static int cxd56_adc_close(struct file *filep);
+static ssize_t cxd56_adc_read(struct file *filep, char *buffer,
                               size_t len);
-static int cxd56_adc_ioctl(FAR struct file *filep, int cmd,
+static int cxd56_adc_ioctl(struct file *filep, int cmd,
                            unsigned long arg);
 
 /****************************************************************************
@@ -324,7 +324,7 @@ static bool adc_active[CH_MAX] =
  *
  ****************************************************************************/
 
-static int set_ofstgain(FAR struct cxd56adc_dev_s *priv)
+static int set_ofstgain(struct cxd56adc_dev_s *priv)
 {
   int ret = OK;
   uint32_t addr;
@@ -370,7 +370,7 @@ static int set_ofstgain(FAR struct cxd56adc_dev_s *priv)
  *
  ****************************************************************************/
 
-static int adc_start(adc_ch_t ch, uint8_t freq, FAR struct seq_s *seq,
+static int adc_start(adc_ch_t ch, uint8_t freq, struct seq_s *seq,
         int fsize, int fifomode,
         struct scufifo_wm_s *wm,
         struct math_filter_s *filter,
@@ -619,7 +619,7 @@ static int adc_start(adc_ch_t ch, uint8_t freq, FAR struct seq_s *seq,
  *
  ****************************************************************************/
 
-static int adc_stop(adc_ch_t ch, FAR struct seq_s *seq)
+static int adc_stop(adc_ch_t ch, struct seq_s *seq)
 {
   uint32_t *addr;
   uint32_t val;
@@ -706,10 +706,10 @@ static bool adc_validcheck(int cmd)
  *
  ****************************************************************************/
 
-static int cxd56_adc_open(FAR struct file *filep)
+static int cxd56_adc_open(struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct cxd56adc_dev_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct cxd56adc_dev_s *priv = inode->i_private;
   int ret = OK;
   int type;
 
@@ -770,10 +770,10 @@ static int cxd56_adc_open(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static int cxd56_adc_close(FAR struct file *filep)
+static int cxd56_adc_close(struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct cxd56adc_dev_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct cxd56adc_dev_s *priv = inode->i_private;
 
   DEBUGASSERT(priv != NULL);
   DEBUGASSERT(priv->seq != NULL);
@@ -828,11 +828,11 @@ static int cxd56_adc_close(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static ssize_t cxd56_adc_read(FAR struct file *filep, FAR char *buffer,
+static ssize_t cxd56_adc_read(struct file *filep, char *buffer,
                               size_t len)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct cxd56adc_dev_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct cxd56adc_dev_s *priv = inode->i_private;
   int ret = OK;
 
   DEBUGASSERT(priv != NULL);
@@ -853,11 +853,11 @@ static ssize_t cxd56_adc_read(FAR struct file *filep, FAR char *buffer,
  *
  ****************************************************************************/
 
-static int cxd56_adc_ioctl(FAR struct file *filep, int cmd,
+static int cxd56_adc_ioctl(struct file *filep, int cmd,
                            unsigned long arg)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct cxd56adc_dev_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct cxd56adc_dev_s *priv = inode->i_private;
   int ret = OK;
   DEBUGASSERT(priv != NULL);
   DEBUGASSERT(priv->seq != NULL);

@@ -69,7 +69,7 @@ extern "C"
  ****************************************************************************/
 
 #ifdef CONFIG_SAM34_WDT
-void sam_wdtinitialize(FAR const char *devpath);
+void sam_wdtinitialize(const char *devpath);
 #endif
 
 #undef EXTERN

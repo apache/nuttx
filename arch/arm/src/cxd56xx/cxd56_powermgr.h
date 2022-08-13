@@ -323,7 +323,7 @@ void *cxd56_pm_register_callback(uint32_t target,
                                  cxd56_pm_callback callback);
 void cxd56_pm_unregister_callback(void *handle);
 int cxd56_pm_fifo_handlear(int cpuid, uint32_t data[2]);
-int cxd56_pm_main_task(int argc, FAR char *argv[]);
+int cxd56_pm_main_task(int argc, char *argv[]);
 int cxd56_pm_initialize(void);
 int cxd56_pm_bootup(void);
 uint32_t cxd56_pm_getclock(uint32_t target);

@@ -278,6 +278,55 @@
 #  define RCC_CFGR1_MCOPRE_DIV8           (3 << RCC_CFGR1_MCOPRE_SHIFT) /* 011: division by 8 */
 #  define RCC_CFGR1_MCOPRE_DIV16          (4 << RCC_CFGR1_MCOPRE_SHIFT) /* 100: division by 16 */
 
+/* RCC clock configuration register 2 */
+
+#define RCC_CFGR2_HPRE_SHIFT              (0)       /* Bits 0-3: AHB prescaler */
+#define RCC_CFGR2_HPRE_MASK               (0xf << RCC_CFGR2_HPRE_SHIFT)
+#  define RCC_CFGR2_HPRE_SYSCLK           ( 0 << RCC_CFGR2_HPRE_SHIFT) /* 0xxx: SYSCLK not divided */
+#  define RCC_CFGR2_HPRE_SYSCLK_DIV2      ( 8 << RCC_CFGR2_HPRE_SHIFT) /* 1000: SYSCLK divided by 2 */
+#  define RCC_CFGR2_HPRE_SYSCLK_DIV4      ( 9 << RCC_CFGR2_HPRE_SHIFT) /* 1001: SYSCLK divided by 4 */
+#  define RCC_CFGR2_HPRE_SYSCLK_DIV8      (10 << RCC_CFGR2_HPRE_SHIFT) /* 1010: SYSCLK divided by 8 */
+#  define RCC_CFGR2_HPRE_SYSCLK_DIV16     (11 << RCC_CFGR2_HPRE_SHIFT) /* 1011: SYSCLK divided by 16 */
+#  define RCC_CFGR2_HPRE_SYSCLK_DIV64     (12 << RCC_CFGR2_HPRE_SHIFT) /* 1100: SYSCLK divided by 64 */
+#  define RCC_CFGR2_HPRE_SYSCLK_DIV128    (13 << RCC_CFGR2_HPRE_SHIFT) /* 1101: SYSCLK divided by 128 */
+#  define RCC_CFGR2_HPRE_SYSCLK_DIV256    (14 << RCC_CFGR2_HPRE_SHIFT) /* 1110: SYSCLK divided by 256 */
+#  define RCC_CFGR2_HPRE_SYSCLK_DIV512    (15 << RCC_CFGR2_HPRE_SHIFT) /* 1111: SYSCLK divided by 512 */
+
+#define RCC_CFGR2_PPRE1_SHIFT             (4)       /* Bits 4-6: APB1 prescaler */
+#define RCC_CFGR2_PPRE1_MASK              (0x7 << RCC_CFGR2_HPRE_SHIFT)
+#  define RCC_CFGR2_PPRE1_HCLK            (0 << RCC_CFGR2_HPRE_SHIFT) /* 0xxx: HCLK not divided */
+#  define RCC_CFGR2_PPRE1_HCLK_DIV2       (4 << RCC_CFGR2_HPRE_SHIFT) /* 1000: HCLK divided by 2 */
+#  define RCC_CFGR2_PPRE1_HCLK_DIV4       (5 << RCC_CFGR2_HPRE_SHIFT) /* 1001: HCLK divided by 4 */
+#  define RCC_CFGR2_PPRE1_HCLK_DIV8       (6 << RCC_CFGR2_HPRE_SHIFT) /* 1010: HCLK divided by 8 */
+#  define RCC_CFGR2_PPRE1_HCLK_DIV16      (7 << RCC_CFGR2_HPRE_SHIFT) /* 1011: HCLK divided by 16 */
+
+#define RCC_CFGR2_PPRE2_SHIFT             (8)       /* Bits 8-10: APB2 prescaler */
+#define RCC_CFGR2_PPRE2_MASK              (0x7 << RCC_CFGR2_PPRE2_SHIFT)
+#  define RCC_CFGR2_PPRE2_HCLK            (0 << RCC_CFGR2_PPRE2_SHIFT) /* 0xxx: HCLK not divided */
+#  define RCC_CFGR2_PPRE2_HCLK_DIV2       (4 << RCC_CFGR2_PPRE2_SHIFT) /* 1000: HCLK divided by 2 */
+#  define RCC_CFGR2_PPRE2_HCLK_DIV4       (5 << RCC_CFGR2_PPRE2_SHIFT) /* 1001: HCLK divided by 4 */
+#  define RCC_CFGR2_PPRE2_HCLK_DIV8       (6 << RCC_CFGR2_PPRE2_SHIFT) /* 1010: HCLK divided by 8 */
+#  define RCC_CFGR2_PPRE2_HCLK_DIV16      (7 << RCC_CFGR2_PPRE2_SHIFT) /* 1011: HCLK divided by 16 */
+
+#define RCC_CFGR2_AHB1DIS                 (1 << 16) /* Bit 16: AHB1 clock disable */
+#define RCC_CFGR2_AHB2DIS1                (1 << 17) /* Bit 17: AHB2_1 clock disable */
+#define RCC_CFGR2_AHB2DIS2                (1 << 18) /* Bit 18: AHB2_2 clock disable */
+#define RCC_CFGR2_APB1DIS                 (1 << 19) /* Bit 19: APB1 clock disable */
+#define RCC_CFGR2_APB2DIS                 (1 << 20) /* Bit 20: APB2 clock disable */
+
+/* RCC clock configuration register 3 */
+
+#define RCC_CFGR3_PPRE3_SHIFT             (4)       /* Bits 4-6: APB3 prescaler */
+#define RCC_CFGR3_PPRE3_MASK              (0x7 << RCC_CFGR3_PPRE3_SHIFT)
+#  define RCC_CFGR3_PPRE3_HCLK            (0 << RCC_CFGR3_PPRE3_SHIFT) /* 0xxx: HCLK not divided */
+#  define RCC_CFGR3_PPRE3_HCLK_DIV2       (4 << RCC_CFGR3_PPRE3_SHIFT) /* 1000: HCLK divided by 2 */
+#  define RCC_CFGR3_PPRE3_HCLK_DIV4       (5 << RCC_CFGR3_PPRE3_SHIFT) /* 1001: HCLK divided by 4 */
+#  define RCC_CFGR3_PPRE3_HCLK_DIV8       (6 << RCC_CFGR3_PPRE3_SHIFT) /* 1010: HCLK divided by 8 */
+#  define RCC_CFGR3_PPRE3_HCLK_DIV16      (7 << RCC_CFGR3_PPRE3_SHIFT) /* 1011: HCLK divided by 16 */
+
+#define RCC_CFGR3_AHB3DIS                 (1 << 16) /* Bit 16: AHB3 clock disable */
+#define RCC_CFGR3_APB3DIS                 (1 << 17) /* Bit 17: APB3 clock disable */
+
 /* RCC PLL1 configuration register */
 
 #define RCC_PLL1CFGR_PLL1SRC_SHIFT        (0)                               /* Bits 0-1: PLL1 entry clock source */

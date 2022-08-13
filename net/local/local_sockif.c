@@ -724,7 +724,7 @@ static int local_ioctl(FAR struct socket *psock, int cmd,
             ret = file_ioctl(&conn->lc_infile, cmd, arg);
           }
 
-        if (conn->lc_outfile.f_inode != NULL)
+        if (ret >= 0 && conn->lc_outfile.f_inode != NULL)
           {
             ret = file_ioctl(&conn->lc_outfile, cmd, arg);
           }

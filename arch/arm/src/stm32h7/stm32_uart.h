@@ -493,7 +493,7 @@ void stm32_serial_dma_poll(void);
  *
  ****************************************************************************/
 
-FAR uart_dev_t *stm32_serial_get_uart(int uart_num);
+uart_dev_t *stm32_serial_get_uart(int uart_num);
 
 #undef EXTERN
 #if defined(__cplusplus)

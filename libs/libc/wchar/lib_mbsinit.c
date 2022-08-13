@@ -38,5 +38,5 @@
 
 int mbsinit(FAR const mbstate_t *st)
 {
-  return !st || !*(FAR uint32_t *)st;
+  return st == NULL || !*(FAR uint32_t *)st;
 }

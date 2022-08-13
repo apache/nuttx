@@ -135,8 +135,8 @@ ARM architecture:
 .. tip::
   There are hints on how to get the latest tool chains for most supported
   architectures in the Apache NuttX CI helper
-  `script <https://github.com/apache/incubator-nuttx-testing/blob/master/cibuild.sh>`_
-  and Docker `container <https://github.com/apache/incubator-nuttx-testing/blob/master/docker/linux/Dockerfile>`_
+  `script <https://github.com/apache/incubator-nuttx/tree/master/tools/ci/cibuild.sh>`_
+  and Docker `container <https://github.com/apache/incubator-nuttx/tree/master/tools/ci/docker/linux/Dockerfile>`_
   
 .. todo::
   Required toolchain should be part of each arch documentation (see `relevant issue <https://github.com/apache/incubator-nuttx/issues/2409>`_).
@@ -152,8 +152,8 @@ Apache NuttX is actively developed on GitHub. There are two main repositories, `
   
     .. code-block:: console
 
-       $ mkdir nuttx
-       $ cd nuttx
+       $ mkdir nuttxspace
+       $ cd nuttxspace
        $ git clone https://github.com/apache/incubator-nuttx.git nuttx
        $ git clone https://github.com/apache/incubator-nuttx-apps apps
 
@@ -161,8 +161,8 @@ Apache NuttX is actively developed on GitHub. There are two main repositories, `
 
     .. code-block:: console
 
-       $ mkdir nuttx
-       $ cd nuttx
+       $ mkdir nuttxspace
+       $ cd nuttxspace
        $ curl -L https://github.com/apache/incubator-nuttx/tarball/master -o nuttx.tar.gz 
        $ curl -L https://github.com/apache/incubator-nuttx-apps/tarball/master -o apps.tar.gz
        $ tar zxf nuttx.tar.gz --one-top-level=nuttx --strip-components 1
@@ -178,8 +178,8 @@ Apache NuttX is actively developed on GitHub. There are two main repositories, `
 
     .. code-block:: console
     
-       $ mkdir nuttx
-       $ cd nuttx
+       $ mkdir nuttxspace
+       $ cd nuttxspace
        $ curl -L https://www.apache.org/dyn/closer.lua/incubator/nuttx/10.1.0/apache-nuttx-10.1.0-incubating.tar.gz?action=download -o nuttx.tar.gz 
        $ curl -L https://www.apache.org/dyn/closer.lua/incubator/nuttx/10.1.0/apache-nuttx-apps-10.1.0-incubating.tar.gz?action=download -o apps.tar.gz
        $ tar zxf nuttx.tar.gz

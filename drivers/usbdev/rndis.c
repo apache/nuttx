@@ -1067,8 +1067,6 @@ static int rndis_transmit(FAR struct rndis_dev_s *priv)
 
 static int rndis_ifup(FAR struct net_driver_s *dev)
 {
-  FAR struct rndis_dev_s *priv = (FAR struct rndis_dev_s *)dev->d_private;
-
   return OK;
 }
 
@@ -1082,8 +1080,6 @@ static int rndis_ifup(FAR struct net_driver_s *dev)
 
 static int rndis_ifdown(FAR struct net_driver_s *dev)
 {
-  FAR struct rndis_dev_s *priv = (FAR struct rndis_dev_s *)dev->d_private;
-
   return OK;
 }
 

@@ -26,10 +26,19 @@ ifeq ($(CONFIG_SEGGER_RTT),y)
 
   CFLAGS += -Wno-shadow -Wno-array-bounds
 
+  ifneq ($(CONFIG_SEGGER_RTT_SECTION),"")
+    CFLAGS += ${shell $(DEFINE) "$(CC)" SEGGER_RTT_SECTION=CONFIG_SEGGER_RTT_SECTION}
+  endif
+
+  ifneq ($(CONFIG_SEGGER_RTT_BUFFER_SECTION),"")
+    CFLAGS += ${shell $(DEFINE) "$(CC)" SEGGER_RTT_BUFFER_SECTION=CONFIG_SEGGER_RTT_BUFFER_SECTION}
+  endif
+
   CFLAGS += ${shell $(INCDIR) "$(CC)" segger$(DELIM)config}
   CFLAGS += ${shell $(INCDIR) "$(CC)" segger$(DELIM)RTT$(DELIM)RTT}
 
   ifeq ($(CONFIG_ARCH_ARMV7M),y)
+    AFLAGS += ${shell $(INCDIR) "$(CC)" segger$(DELIM)config}
     ASRCS += segger/RTT/RTT/SEGGER_RTT_ASM_ARMv7M.S
   endif
 

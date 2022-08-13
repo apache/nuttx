@@ -91,19 +91,19 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int spi_lock(FAR struct spi_dev_s *dev, bool lock);
-static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
+static int spi_lock(struct spi_dev_s *dev, bool lock);
+static void spi_select(struct spi_dev_s *dev, uint32_t devid,
                        bool selected);
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+static uint32_t spi_setfrequency(struct spi_dev_s *dev,
                                  uint32_t frequency);
-static uint8_t spi_status(FAR struct spi_dev_s *dev, uint32_t devid);
+static uint8_t spi_status(struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-static int spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+static int spi_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
-static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t ch);
-static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
+static uint32_t spi_send(struct spi_dev_s *dev, uint32_t ch);
+static void spi_sndblock(struct spi_dev_s *dev, const void *buffer,
                          size_t nwords);
-static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
+static void spi_recvblock(struct spi_dev_s *dev, void *buffer,
                           size_t nwords);
 
 /****************************************************************************
@@ -161,7 +161,7 @@ static sem_t g_exclsem = SEM_INITIALIZER(1);  /* For mutually exclusive access *
  *
  ****************************************************************************/
 
-static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
+static int spi_lock(struct spi_dev_s *dev, bool lock)
 {
   int ret;
 
@@ -195,7 +195,7 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
-static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
+static void spi_select(struct spi_dev_s *dev, uint32_t devid,
                        bool selected)
 {
   uint32_t bit = 1 << 20;
@@ -252,7 +252,7 @@ static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
  *
  ****************************************************************************/
 
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+static uint32_t spi_setfrequency(struct spi_dev_s *dev,
                                  uint32_t frequency)
 {
   uint32_t divisor = LPC214X_PCLKFREQ / frequency;
@@ -289,7 +289,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
  *
  ****************************************************************************/
 
-static uint8_t spi_status(FAR struct spi_dev_s *dev, uint32_t devid)
+static uint8_t spi_status(struct spi_dev_s *dev, uint32_t devid)
 {
   /* I don't think there is anyway to determine these things on the
    * mcu123.com board.
@@ -324,7 +324,7 @@ static uint8_t spi_status(FAR struct spi_dev_s *dev, uint32_t devid)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
-static int spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+static int spi_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
 #  error "spi_cmddata not implemented"
   return -ENOSYS;
@@ -347,7 +347,7 @@ static int spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
  *
  ****************************************************************************/
 
-static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
+static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
 {
   register uint16_t regval;
 
@@ -390,10 +390,10 @@ static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
  *
  ****************************************************************************/
 
-static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
+static void spi_sndblock(struct spi_dev_s *dev, const void *buffer,
                          size_t nwords)
 {
-  FAR const uint8_t *ptr = (FAR const uint8_t *)buffer;
+  const uint8_t *ptr = (const uint8_t *)buffer;
   uint8_t sr;
 
   /* Loop while there are bytes remaining to be sent */
@@ -464,10 +464,10 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
  *
  ****************************************************************************/
 
-static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
+static void spi_recvblock(struct spi_dev_s *dev, void *buffer,
                           size_t nwords)
 {
-  FAR uint8_t *ptr = (FAR uint8_t *)buffer;
+  uint8_t *ptr = (uint8_t *)buffer;
   uint32_t rxpending = 0;
 
   /* While there is remaining to be sent
@@ -521,7 +521,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *lpc214x_spibus_initialize(int port)
+struct spi_dev_s *lpc214x_spibus_initialize(int port)
 {
   uint32_t regval32;
   uint8_t regval8;

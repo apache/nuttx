@@ -32,14 +32,13 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/fs/fs.h>
-
 #ifdef CONFIG_USBMONITOR
 #  include <nuttx/usb/usbmonitor.h>
 #endif
 
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/drivers/ramdisk.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/fs/nxffs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/video/fb.h>
@@ -91,9 +90,42 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define ARRAY_SIZE(x)   (sizeof(x) / sizeof((x)[0]))
+
 #define NSECTORS(n) \
   (((n)+CONFIG_SAMV71XULT_ROMFS_ROMDISK_SECTSIZE-1) / \
    CONFIG_SAMV71XULT_ROMFS_ROMDISK_SECTSIZE)
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#if defined(CONFIG_SAMV7_PROGMEM_OTA_PARTITION)
+static struct mtd_partition_s g_mtd_partition_table[] =
+{
+  {
+    .offset  = CONFIG_SAMV7_OTA_PRIMARY_SLOT_OFFSET,
+    .size    = CONFIG_SAMV7_OTA_SLOT_SIZE,
+    .devpath = CONFIG_SAMV7_OTA_PRIMARY_SLOT_DEVPATH
+  },
+  {
+    .offset  = CONFIG_SAMV7_OTA_SECONDARY_SLOT_OFFSET,
+    .size    = CONFIG_SAMV7_OTA_SLOT_SIZE,
+    .devpath = CONFIG_SAMV7_OTA_SECONDARY_SLOT_DEVPATH
+  },
+  {
+    .offset  = CONFIG_SAMV7_OTA_SCRATCH_OFFSET,
+    .size    = CONFIG_SAMV7_OTA_SCRATCH_SIZE,
+    .devpath = CONFIG_SAMV7_OTA_SCRATCH_DEVPATH
+  }
+};
+
+static const size_t g_mtd_partition_table_size =
+    ARRAY_SIZE(g_mtd_partition_table);
+#else
+#  define g_mtd_partition_table         NULL
+#  define g_mtd_partition_table_size    0
+#endif /* CONFIG_SAMV7_PROGMEM_OTA_PARTITION */
 
 /****************************************************************************
  * Private Functions
@@ -110,7 +142,7 @@
 #ifdef HAVE_I2CTOOL
 static void sam_i2c_register(int bus)
 {
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
   int ret;
 
   i2c = sam_i2cbus_initialize(bus);
@@ -171,13 +203,13 @@ static void sam_i2ctool(void)
 int sam_bringup(void)
 {
 #ifdef HAVE_S25FL1
-  FAR struct qspi_dev_s *qspi;
+  struct qspi_dev_s *qspi;
 #endif
 #if defined(HAVE_S25FL1)
-  FAR struct mtd_dev_s *mtd;
+  struct mtd_dev_s *mtd;
 #endif
 #if defined(HAVE_RTC_DSXXXX) || defined(HAVE_RTC_PCF85263)
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
 #endif
 #if defined(HAVE_S25FL1_CHARDEV)
 #if defined(CONFIG_BCH)
@@ -453,7 +485,8 @@ int sam_bringup(void)
 #ifdef HAVE_PROGMEM_CHARDEV
   /* Initialize the SAMV71 FLASH programming memory library */
 
-  ret = board_progmem_init(PROGMEM_MTD_MINOR);
+  ret = board_progmem_init(PROGMEM_MTD_MINOR, g_mtd_partition_table,
+                           g_mtd_partition_table_size);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize progmem: %d\n", ret);

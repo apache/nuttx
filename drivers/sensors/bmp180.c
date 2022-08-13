@@ -131,8 +131,6 @@ static int bmp180_getpressure(FAR struct bmp180_dev_s *priv);
 
 /* Character driver methods */
 
-static int bmp180_open(FAR struct file *filep);
-static int bmp180_close(FAR struct file *filep);
 static ssize_t bmp180_read(FAR struct file *filep, FAR char *buffer,
                            size_t buflen);
 static ssize_t bmp180_write(FAR struct file *filep, FAR const char *buffer,
@@ -144,8 +142,8 @@ static ssize_t bmp180_write(FAR struct file *filep, FAR const char *buffer,
 
 static const struct file_operations g_bmp180fops =
 {
-  bmp180_open,                  /* open */
-  bmp180_close,                 /* close */
+  NULL,                         /* open */
+  NULL,                         /* close */
   bmp180_read,                  /* read */
   bmp180_write,                 /* write */
   NULL,                         /* seek */
@@ -498,32 +496,6 @@ static int bmp180_getpressure(FAR struct bmp180_dev_s *priv)
 
   sninfo("Compressed pressure = %" PRId32 "\n", press);
   return press;
-}
-
-/****************************************************************************
- * Name: bmp180_open
- *
- * Description:
- *   This function is called whenever the BMP1801 device is opened.
- *
- ****************************************************************************/
-
-static int bmp180_open(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
- * Name: bmp180_close
- *
- * Description:
- *   This routine is called when the BMP180 device is closed.
- *
- ****************************************************************************/
-
-static int bmp180_close(FAR struct file *filep)
-{
-  return OK;
 }
 
 /****************************************************************************

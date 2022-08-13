@@ -71,7 +71,7 @@ extern "C"
 #define kumm_initialize(h,s)     umm_initialize(h,s)
 #define kumm_addregion(h,s)      umm_addregion(h,s)
 
-#define kumm_calloc(n,s)         calloc(n,s);
+#define kumm_calloc(n,s)         calloc(n,s)
 #define kumm_malloc(s)           malloc(s)
 #define kumm_malloc_size(p)      malloc_size(p)
 #define kumm_zalloc(s)           zalloc(s)
@@ -91,7 +91,7 @@ extern "C"
 #  define kmm_initialize(h,s)    /* Initialization done by kumm_initialize */
 #  define kmm_addregion(h,s)     umm_addregion(h,s)
 
-#  define kmm_calloc(n,s)        calloc(n,s);
+#  define kmm_calloc(n,s)        calloc(n,s)
 #  define kmm_malloc(s)          malloc(s)
 #  define kmm_malloc_size(p)     malloc_size(p)
 #  define kmm_zalloc(s)          zalloc(s)
@@ -99,6 +99,7 @@ extern "C"
 #  define kmm_memalign(a,s)      memalign(a,s)
 #  define kmm_free(p)            free(p)
 #  define kmm_mallinfo()         mallinfo()
+#  define kmm_heapmember(p)      umm_heapmember(p)
 
 #else
 /* Otherwise, the kernel-space allocators are declared in

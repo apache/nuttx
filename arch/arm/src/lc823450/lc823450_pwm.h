@@ -88,7 +88,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-EXTERN FAR struct pwm_lowerhalf_s *lc823450_pwminitialize(int timer);
+EXTERN struct pwm_lowerhalf_s *lc823450_pwminitialize(int timer);
 
 #undef EXTERN
 #if defined(__cplusplus)

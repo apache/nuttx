@@ -65,16 +65,14 @@ struct veml6070_dev_s
 /* I2C Helpers */
 
 static int     veml6070_read8(FAR struct veml6070_dev_s *priv, int offset,
-                 FAR uint8_t *regval);
+                              FAR uint8_t *regval);
 static int     veml6070_write8(FAR struct veml6070_dev_s *priv,
-                 uint8_t regval);
+                               uint8_t regval);
 
 /* Character driver methods */
 
-static int     veml6070_open(FAR struct file *filep);
-static int     veml6070_close(FAR struct file *filep);
 static ssize_t veml6070_read(FAR struct file *filep, FAR char *buffer,
-                 size_t buflen);
+                             size_t buflen);
 static ssize_t veml6070_write(FAR struct file *filep,
                  FAR const char *buffer, size_t buflen);
 
@@ -84,8 +82,8 @@ static ssize_t veml6070_write(FAR struct file *filep,
 
 static const struct file_operations g_veml6070_fops =
 {
-  veml6070_open,   /* open */
-  veml6070_close,  /* close */
+  NULL,            /* open */
+  NULL,            /* close */
   veml6070_read,   /* read */
   veml6070_write,  /* write */
   NULL,            /* seek */
@@ -168,32 +166,6 @@ static int veml6070_write8(FAR struct veml6070_dev_s *priv, uint8_t regval)
     }
 
   return ret;
-}
-
-/****************************************************************************
- * Name: veml6070_open
- *
- * Description:
- *   This function is called whenever the VEML6070 device is opened.
- *
- ****************************************************************************/
-
-static int veml6070_open(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
- * Name: veml6070_close
- *
- * Description:
- *   This routine is called when the VEML6070 device is closed.
- *
- ****************************************************************************/
-
-static int veml6070_close(FAR struct file *filep)
-{
-  return OK;
 }
 
 /****************************************************************************

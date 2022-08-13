@@ -349,7 +349,7 @@ static inline void nxtask_exitwakeup(FAR struct tcb_s *tcb, int status)
            *  Hmmm.. what do we return to the others?
            */
 
-          if (group->tg_statloc)
+          if (group->tg_statloc != NULL)
             {
               *group->tg_statloc = status << 8;
             }

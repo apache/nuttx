@@ -93,16 +93,16 @@ struct sam_chan_s
 
 /* Interrupt handler */
 
-static int  dac_interrupt(int irq, FAR void *context, FAR void *arg);
+static int  dac_interrupt(int irq, void *context, void *arg);
 
 /* DAC methods */
 
-static void dac_reset(FAR struct dac_dev_s *dev);
-static int  dac_setup(FAR struct dac_dev_s *dev);
-static void dac_shutdown(FAR struct dac_dev_s *dev);
-static void dac_txint(FAR struct dac_dev_s *dev, bool enable);
-static int  dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg);
-static int  dac_ioctl(FAR struct dac_dev_s *dev, int cmd, unsigned long arg);
+static void dac_reset(struct dac_dev_s *dev);
+static int  dac_setup(struct dac_dev_s *dev);
+static void dac_shutdown(struct dac_dev_s *dev);
+static void dac_txint(struct dac_dev_s *dev, bool enable);
+static int  dac_send(struct dac_dev_s *dev, struct dac_msg_s *msg);
+static int  dac_ioctl(struct dac_dev_s *dev, int cmd, unsigned long arg);
 
 /* Initialization */
 
@@ -111,7 +111,7 @@ static int  dac_timer_init(struct sam_dac_s *priv, uint32_t freq_required,
                            int channel);
 static void dac_timer_free(struct sam_dac_s *priv);
 #endif
-static int  dac_channel_init(FAR struct sam_chan_s *chan);
+static int  dac_channel_init(struct sam_chan_s *chan);
 static int  dac_module_init(void);
 
 /****************************************************************************
@@ -187,7 +187,7 @@ static struct sam_dac_s g_dacmodule;
  *
  ****************************************************************************/
 
-static int dac_interrupt(int irq, FAR void *context, FAR void *arg)
+static int dac_interrupt(int irq, void *context, void *arg)
 {
 #ifdef CONFIG_SAMV7_DAC1
   uint32_t status;
@@ -221,7 +221,7 @@ static int dac_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static void dac_reset(FAR struct dac_dev_s *dev)
+static void dac_reset(struct dac_dev_s *dev)
 {
   irqstate_t flags;
 
@@ -252,7 +252,7 @@ static void dac_reset(FAR struct dac_dev_s *dev)
  *
  ****************************************************************************/
 
-static int dac_setup(FAR struct dac_dev_s *dev)
+static int dac_setup(struct dac_dev_s *dev)
 {
 #warning "Missing logic"
   return OK;
@@ -272,7 +272,7 @@ static int dac_setup(FAR struct dac_dev_s *dev)
  *
  ****************************************************************************/
 
-static void dac_shutdown(FAR struct dac_dev_s *dev)
+static void dac_shutdown(struct dac_dev_s *dev)
 {
 #warning "Missing logic"
 }
@@ -290,9 +290,9 @@ static void dac_shutdown(FAR struct dac_dev_s *dev)
  *
  ****************************************************************************/
 
-static void dac_txint(FAR struct dac_dev_s *dev, bool enable)
+static void dac_txint(struct dac_dev_s *dev, bool enable)
 {
-  FAR struct sam_chan_s *chan;
+  struct sam_chan_s *chan;
 
   chan = dev->ad_priv;
   if (enable)
@@ -318,9 +318,9 @@ static void dac_txint(FAR struct dac_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static int dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
+static int dac_send(struct dac_dev_s *dev, struct dac_msg_s *msg)
 {
-  FAR struct sam_chan_s *chan = dev->ad_priv;
+  struct sam_chan_s *chan = dev->ad_priv;
 
   /* Interrupt based transfer */
 
@@ -342,7 +342,7 @@ static int dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
  *
  ****************************************************************************/
 
-static int dac_ioctl(FAR struct dac_dev_s *dev, int cmd, unsigned long arg)
+static int dac_ioctl(struct dac_dev_s *dev, int cmd, unsigned long arg)
 {
   return -ENOTTY;
 }
@@ -457,7 +457,7 @@ static void dac_timer_free(struct sam_dac_s *priv)
  *
  ****************************************************************************/
 
-static int dac_channel_init(FAR struct sam_chan_s *chan)
+static int dac_channel_init(struct sam_chan_s *chan)
 {
   /* Is the selected channel already in-use? */
 
@@ -592,10 +592,10 @@ static int dac_module_init(void)
  *
  ****************************************************************************/
 
-FAR struct dac_dev_s *sam_dac_initialize(int intf)
+struct dac_dev_s *sam_dac_initialize(int intf)
 {
-  FAR struct dac_dev_s *dev;
-  FAR struct sam_chan_s *chan;
+  struct dac_dev_s *dev;
+  struct sam_chan_s *chan;
   int ret;
 
 #ifdef CONFIG_SAMV7_DAC0

@@ -433,7 +433,7 @@ int __ramfunc__ msc_load_write_data(uint32_t *data, uint32_t num_words,
 
           /* Gecko does not have auto-increment of ADDR. */
 
-          DEBUGASSERT(0);
+          DEBUGPANIC();
 #else
 
           /* Requires a system core clock at 14MHz or higher */

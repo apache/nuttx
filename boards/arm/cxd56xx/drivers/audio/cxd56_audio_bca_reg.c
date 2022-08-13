@@ -522,7 +522,7 @@ void cxd56_audio_bca_reg_en_fmt16(cxd56_audio_dma_t handle, uint8_t ch_num)
 }
 
 void cxd56_audio_bca_reg_get_dma_mstate(cxd56_audio_dma_t handle,
-                                        FAR cxd56_audio_dma_mstate_t *state)
+                                        cxd56_audio_dma_mstate_t *state)
 {
   BCA_REG_ID reg_id_start;
   BCA_REG_ID reg_id_error;

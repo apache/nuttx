@@ -1563,19 +1563,19 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
 
                     found |= (USBHOST_CTRLIF_FOUND | USBHOST_INTIN_FOUND);
 
-                    /* Save the bulk OUT endpoint information */
+                    /* Save the interrupt IN endpoint information */
 
                     iindesc.hport        = hport;
                     iindesc.addr         = epdesc->addr &
                                            USB_EP_ADDR_NUMBER_MASK;
-                    iindesc.in           = false;
+                    iindesc.in           = true;
                     iindesc.xfrtype      = USB_EP_ATTR_XFER_INT;
                     iindesc.interval     = epdesc->interval;
                     iindesc.mxpacketsize =
                       usbhost_getle16(epdesc->mxpacketsize);
 
                     uinfo("Interrupt IN EP addr:%d mxpacketsize:%d\n",
-                          boutdesc.addr, boutdesc.mxpacketsize);
+                          iindesc.addr, iindesc.mxpacketsize);
 #else
                     found |= USBHOST_CTRLIF_FOUND;
 #endif

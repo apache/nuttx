@@ -140,8 +140,6 @@ static int ms58xx_measure(FAR struct ms58xx_dev_s *priv);
 
 /* Character Driver Methods */
 
-static int     ms58xx_open(FAR struct file *filep);
-static int     ms58xx_close(FAR struct file *filep);
 static ssize_t ms58xx_read(FAR struct file *filep, FAR char *buffer,
                            size_t buflen);
 static ssize_t ms58xx_write(FAR struct file *filep, FAR const char *buffer,
@@ -155,8 +153,8 @@ static int     ms58xx_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations g_fops =
 {
-  ms58xx_open,     /* open */
-  ms58xx_close,    /* close */
+  NULL,            /* open */
+  NULL,            /* close */
   ms58xx_read,     /* read */
   ms58xx_write,    /* write */
   NULL,            /* seek */
@@ -752,32 +750,6 @@ static int ms58xx_measure(FAR struct ms58xx_dev_s *priv)
   priv->temp = temp;
   priv->press = press;
   return ret;
-}
-
-/****************************************************************************
- * Name: ms58xx_open
- *
- * Description:
- *   This method is called when the device is opened.
- *
- ****************************************************************************/
-
-static int ms58xx_open(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
- * Name: ms58xx_close
- *
- * Description:
- *   This method is called when the device is closed.
- *
- ****************************************************************************/
-
-static int ms58xx_close(FAR struct file *filep)
-{
-  return OK;
 }
 
 /****************************************************************************

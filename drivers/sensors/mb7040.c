@@ -68,8 +68,6 @@ static int mb7040_changeaddr(FAR struct mb7040_dev_s *priv, uint8_t addr);
 
 /* Character Driver Methods */
 
-static int     mb7040_open(FAR struct file *filep);
-static int     mb7040_close(FAR struct file *filep);
 static ssize_t mb7040_read(FAR struct file *filep, FAR char *buffer,
                            size_t buflen);
 static ssize_t mb7040_write(FAR struct file *filep, FAR const char *buffer,
@@ -83,8 +81,8 @@ static int     mb7040_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations g_fops =
 {
-  mb7040_open,     /* open */
-  mb7040_close,    /* close */
+  NULL,            /* open */
+  NULL,            /* close */
   mb7040_read,     /* read */
   mb7040_write,    /* write */
   NULL,            /* seek */
@@ -213,32 +211,6 @@ static int mb7040_changeaddr(FAR struct mb7040_dev_s *priv, uint8_t addr)
 
   priv->addr = addr;
   return ret;
-}
-
-/****************************************************************************
- * Name: mb7040_open
- *
- * Description:
- *   This method is called when the device is opened.
- *
- ****************************************************************************/
-
-static int mb7040_open(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
- * Name: mb7040_close
- *
- * Description:
- *   This method is called when the device is closed.
- *
- ****************************************************************************/
-
-static int mb7040_close(FAR struct file *filep)
-{
-  return OK;
 }
 
 /****************************************************************************

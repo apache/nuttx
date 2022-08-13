@@ -53,7 +53,7 @@
 #ifdef CONFIG_I2C_DRIVER
 static void imxrt_i2c_register(int bus)
 {
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
   int ret;
 
   i2c = imxrt_i2cbus_initialize(bus);

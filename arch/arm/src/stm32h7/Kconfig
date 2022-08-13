@@ -17,6 +17,8 @@ config ARCH_CHIP_STM32H743AG
 	select STM32H7_STM32H7X3XX
 	select STM32H7_FLASH_CONFIG_G
 	select STM32H7_IO_CONFIG_A
+	select STM32H7_HAVE_FDCAN1
+	select STM32H7_HAVE_FDCAN2
 	---help---
 		STM32 H7 Cortex M7, 1024 Kb FLASH, 1024K Kb SRAM,
 		UFBGA169
@@ -35,6 +37,8 @@ config ARCH_CHIP_STM32H743BG
 	select STM32H7_STM32H7X3XX
 	select STM32H7_FLASH_CONFIG_G
 	select STM32H7_IO_CONFIG_B
+	select STM32H7_HAVE_FDCAN1
+	select STM32H7_HAVE_FDCAN2
 	---help---
 		STM32 H7 Cortex M7, 1024 Kb FLASH, 1024K Kb SRAM,
 		LQFP208
@@ -44,6 +48,8 @@ config ARCH_CHIP_STM32H743BI
 	select STM32H7_STM32H7X3XX
 	select STM32H7_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_B
+	select STM32H7_HAVE_FDCAN1
+	select STM32H7_HAVE_FDCAN2
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		LQFP208
@@ -53,6 +59,8 @@ config ARCH_CHIP_STM32H743IG
 	select STM32H7_STM32H7X3XX
 	select STM32H7_FLASH_CONFIG_G
 	select STM32H7_IO_CONFIG_I
+	select STM32H7_HAVE_FDCAN1
+	select STM32H7_HAVE_FDCAN2
 	---help---
 		STM32 H7 Cortex M7, 1024 Kb FLASH, 1024K Kb SRAM,
 		LQFP176 or UFBGA176
@@ -62,6 +70,8 @@ config ARCH_CHIP_STM32H743II
 	select STM32H7_STM32H7X3XX
 	select STM32H7_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_I
+	select STM32H7_HAVE_FDCAN1
+	select STM32H7_HAVE_FDCAN2
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		LQFP176 or UFBGA176
@@ -71,6 +81,8 @@ config ARCH_CHIP_STM32H743VG
 	select STM32H7_STM32H7X3XX
 	select STM32H7_FLASH_CONFIG_G
 	select STM32H7_IO_CONFIG_V
+	select STM32H7_HAVE_FDCAN1
+	select STM32H7_HAVE_FDCAN2
 	---help---
 		STM32 H7 Cortex M7, 1024 Kb FLASH, 1024K Kb SRAM,
 		LQFP100 or TFBGA100
@@ -80,6 +92,8 @@ config ARCH_CHIP_STM32H743VI
 	select STM32H7_STM32H7X3XX
 	select STM32H7_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_V
+	select STM32H7_HAVE_FDCAN1
+	select STM32H7_HAVE_FDCAN2
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		LQFP100 or TFBGA100
@@ -89,6 +103,8 @@ config ARCH_CHIP_STM32H743XG
 	select STM32H7_STM32H7X3XX
 	select STM32H7_FLASH_CONFIG_G
 	select STM32H7_IO_CONFIG_X
+	select STM32H7_HAVE_FDCAN1
+	select STM32H7_HAVE_FDCAN2
 	---help---
 		STM32 H7 Cortex M7, 1024 Kb FLASH, 1024K Kb SRAM,
 		TFBGA240
@@ -98,6 +114,8 @@ config ARCH_CHIP_STM32H743XI
 	select STM32H7_STM32H7X3XX
 	select STM32H7_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_X
+	select STM32H7_HAVE_FDCAN1
+	select STM32H7_HAVE_FDCAN2
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		TFBGA240
@@ -107,6 +125,8 @@ config ARCH_CHIP_STM32H743ZG
 	select STM32H7_STM32H7X3XX
 	select STM32H7_FLASH_CONFIG_G
 	select STM32H7_IO_CONFIG_Z
+	select STM32H7_HAVE_FDCAN1
+	select STM32H7_HAVE_FDCAN2
 	---help---
 		STM32 H7 Cortex M7, 1024 Kb FLASH, 1024K Kb SRAM,
 		LQFP144
@@ -116,6 +136,8 @@ config ARCH_CHIP_STM32H743ZI
 	select STM32H7_STM32H7X3XX
 	select STM32H7_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_Z
+	select STM32H7_HAVE_FDCAN1
+	select STM32H7_HAVE_FDCAN2
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		LQFP144
@@ -125,6 +147,8 @@ config ARCH_CHIP_STM32H747XI
 	select STM32H7_STM32H7X7XX
 	select STM32H7_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_X
+	select STM32H7_HAVE_FDCAN1
+	select STM32H7_HAVE_FDCAN2
 	---help---
 		Dual core STM32 H7 Cortex M7+M4, 2048 Kb FLASH, 1024K Kb SRAM
 		TFBGA240
@@ -134,6 +158,8 @@ config ARCH_CHIP_STM32H753AI
 	select STM32H7_STM32H7X3XX
 	select STM32H7_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_A
+	select STM32H7_HAVE_FDCAN1
+	select STM32H7_HAVE_FDCAN2
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, UFBGA169
@@ -152,6 +178,8 @@ config ARCH_CHIP_STM32H753II
 	select STM32H7_STM32H7X3XX
 	select STM32H7_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_I
+	select STM32H7_HAVE_FDCAN1
+	select STM32H7_HAVE_FDCAN2
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, LQFP176/UFBGA176
@@ -161,6 +189,8 @@ config ARCH_CHIP_STM32H753VI
 	select STM32H7_STM32H7X3XX
 	select STM32H7_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_V
+	select STM32H7_HAVE_FDCAN1
+	select STM32H7_HAVE_FDCAN2
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, LQFP100/TFBGA100
@@ -179,6 +209,8 @@ config ARCH_CHIP_STM32H753ZI
 	select STM32H7_STM32H7X3XX
 	select STM32H7_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_Z
+	select STM32H7_HAVE_FDCAN1
+	select STM32H7_HAVE_FDCAN2
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, LQFP144
@@ -365,6 +397,14 @@ config STM32H7_HAVE_SPI6
 	bool
 	default n
 
+config STM32H7_HAVE_FDCAN1
+	bool
+	default n
+
+config STM32H7_HAVE_FDCAN2
+	bool
+	default n
+
 # These "hidden" settings are the OR of individual peripheral selections
 # indicating that the general capability is required.
 
@@ -372,8 +412,11 @@ config STM32H7_ADC
 	bool
 	default n
 
-config STM32H7_CAN
+config STM32H7_FDCAN
 	bool
+	select NET_CAN_HAVE_CANFD
+	select NET_CAN_EXTID
+	select NET_CAN_HAVE_TX_DEADLINE
 	default n
 
 config STM32H7_DAC
@@ -397,6 +440,10 @@ config STM32H7_SDMMC
 	default n
 
 config STM32H7_SPI
+	bool
+	default n
+
+config STM32H7_SPI_DMA
 	bool
 	default n
 
@@ -428,6 +475,7 @@ config STM32H7_PWR
 config STM32H7_PWM
 	bool
 	default n
+	select ARCH_HAVE_PWM_PULSECOUNT
 
 config STM32H7_USART
 	bool
@@ -565,6 +613,18 @@ config STM32H7_WWDG
 	bool "WWDG"
 	default n
 	select WATCHDOG
+
+config STM32H7_FDCAN1
+	bool "FDCAN1"
+	select STM32H7_FDCAN
+	default n
+	depends on STM32H7_HAVE_FDCAN1
+
+config STM32H7_FDCAN2
+	bool "FDCAN2"
+	select STM32H7_FDCAN
+	default n
+	depends on STM32H7_HAVE_FDCAN2
 
 menu "STM32H7 I2C Selection"
 
@@ -899,12 +959,6 @@ config STM32H7_SPI_INTERRUPTS
 		poll-waiting is recommended if the interrupt rate would be to high in
 		the interrupt driven case.
 
-config STM32H7_SPI_DMA
-	bool "SPI DMA"
-	default n
-	---help---
-		Use DMA to improve SPI transfer performance.  Cannot be used with STM32H7_SPI_INTERRUPT.
-
 config STM32H7_SPI_DMATHRESHOLD
 	int "SPI DMA threshold"
 	default 4
@@ -917,9 +971,10 @@ config STM32H7_SPI_DMATHRESHOLD
 config STM32H7_SPI1_DMA
 	bool "SPI1 DMA"
 	default n
-	depends on STM32H7_SPI1 && STM32H7_SPI_DMA
+	depends on STM32H7_SPI1 && !STM32H7_SPI_INTERRUPT
+	select STM32H7_SPI_DMA
 	---help---
-		Use DMA to improve SPI1 transfer performance.
+		Use DMA to improve SPI1 transfer performance.  Cannot be used with STM32H7_SPI_INTERRUPT
 
 config STM32H7_SPI1_DMA_BUFFER
 	int "SPI1 DMA buffer size"
@@ -939,9 +994,10 @@ config STM32H7_SPI1_COMMTYPE
 config STM32H7_SPI2_DMA
 	bool "SPI2 DMA"
 	default n
-	depends on STM32H7_SPI2 && STM32H7_SPI_DMA
+	depends on STM32H7_SPI2 && !STM32H7_SPI_INTERRUPT
+	select STM32H7_SPI_DMA
 	---help---
-		Use DMA to improve SPI2 transfer performance.
+		Use DMA to improve SPI2 transfer performance.  Cannot be used with STM32H7_SPI_INTERRUPT
 
 config STM32H7_SPI2_DMA_BUFFER
 	int "SPI2 DMA buffer size"
@@ -961,9 +1017,10 @@ config STM32H7_SPI2_COMMTYPE
 config STM32H7_SPI3_DMA
 	bool "SPI3 DMA"
 	default n
-	depends on STM32H7_SPI3 && STM32H7_SPI_DMA
+	depends on STM32H7_SPI3 && !STM32H7_SPI_INTERRUPT
+	select STM32H7_SPI_DMA
 	---help---
-		Use DMA to improve SPI3 transfer performance.
+		Use DMA to improve SPI3 transfer performance.  Cannot be used with STM32H7_SPI_INTERRUPT
 
 config STM32H7_SPI3_DMA_BUFFER
 	int "SPI3 DMA buffer size"
@@ -983,9 +1040,10 @@ config STM32H7_SPI3_COMMTYPE
 config STM32H7_SPI4_DMA
 	bool "SPI4 DMA"
 	default n
-	depends on STM32H7_SPI4 && STM32H7_SPI_DMA
+	depends on STM32H7_SPI4 && !STM32H7_SPI_INTERRUPT
+	select STM32H7_SPI_DMA
 	---help---
-		Use DMA to improve SPI4 transfer performance.
+		Use DMA to improve SPI4 transfer performance.  Cannot be used with STM32H7_SPI_INTERRUPT
 
 config STM32H7_SPI4_DMA_BUFFER
 	int "SPI4 DMA buffer size"
@@ -1005,9 +1063,10 @@ config STM32H7_SPI4_COMMTYPE
 config STM32H7_SPI5_DMA
 	bool "SPI5 DMA"
 	default n
-	depends on STM32H7_SPI5 && STM32H7_SPI_DMA
+	depends on STM32H7_SPI5 && !STM32H7_SPI_INTERRUPT
+	select STM32H7_SPI_DMA
 	---help---
-		Use DMA to improve SPI5 transfer performance.
+		Use DMA to improve SPI5 transfer performance.  Cannot be used with STM32H7_SPI_INTERRUPT
 
 config STM32H7_SPI5_DMA_BUFFER
 	int "SPI5 DMA buffer size"
@@ -1027,9 +1086,10 @@ config STM32H7_SPI5_COMMTYPE
 config STM32H7_SPI6_DMA
 	bool "SPI6 DMA"
 	default n
-	depends on STM32H7_SPI6 && STM32H7_SPI_DMA
+	depends on STM32H7_SPI6 && !STM32H7_SPI_INTERRUPT
+	select STM32H7_SPI_DMA
 	---help---
-		Use DMA to improve SPI6 transfer performance.
+		Use DMA to improve SPI6 transfer performance.  Cannot be used with STM32H7_SPI_INTERRUPT
 
 config STM32H7_SPI6_DMA_BUFFER
 	int "SPI6 DMA buffer size"
@@ -1832,7 +1892,7 @@ config STM32H7_DMACAPABLE_ASSUME_CACHE_ALIGNED
 		This option configures the stm32_dmacapable to not disqualify
 		DMA operations on memory that is not dcache aligned based solely
 		on the starting address and byte count.
-		
+
 		Use this when ALL buffer extents are known to be aligned, but the
 		the count does not use the complete buffer.
 
@@ -1887,7 +1947,6 @@ config STM32H7_TIM1_PWM
 	bool "TIM1 PWM"
 	default n
 	depends on STM32H7_TIM1
-	select ARCH_HAVE_PWM_PULSECOUNT
 	select STM32H7_PWM
 	---help---
 		Reserve timer 1 for use by PWM
@@ -2170,7 +2229,6 @@ config STM32H7_TIM2_PWM
 	bool "TIM2 PWM"
 	default n
 	depends on STM32H7_TIM2
-	select ARCH_HAVE_PWM_PULSECOUNT
 	select STM32H7_PWM
 	---help---
 		Reserve timer 2 for use by PWM
@@ -2350,7 +2408,6 @@ config STM32H7_TIM3_PWM
 	bool "TIM3 PWM"
 	default n
 	depends on STM32H7_TIM3
-	select ARCH_HAVE_PWM_PULSECOUNT
 	select STM32H7_PWM
 	---help---
 		Reserve timer 3 for use by PWM
@@ -2530,7 +2587,6 @@ config STM32H7_TIM4_PWM
 	bool "TIM4 PWM"
 	default n
 	depends on STM32H7_TIM4
-	select ARCH_HAVE_PWM_PULSECOUNT
 	select STM32H7_PWM
 	---help---
 		Reserve timer 4 for use by PWM
@@ -2710,7 +2766,6 @@ config STM32H7_TIM5_PWM
 	bool "TIM5 PWM"
 	default n
 	depends on STM32H7_TIM5
-	select ARCH_HAVE_PWM_PULSECOUNT
 	select STM32H7_PWM
 	---help---
 		Reserve timer 5 for use by PWM
@@ -2890,7 +2945,6 @@ config STM32H7_TIM8_PWM
 	bool "TIM8 PWM"
 	default n
 	depends on STM32H7_TIM8
-	select ARCH_HAVE_PWM_PULSECOUNT
 	select STM32H7_PWM
 	---help---
 		Reserve timer 8 for use by PWM
@@ -3173,7 +3227,6 @@ config STM32H7_TIM12_PWM
 	bool "TIM12 PWM"
 	default n
 	depends on STM32H7_TIM12
-	select ARCH_HAVE_PWM_PULSECOUNT
 	select STM32H7_PWM
 	---help---
 		Reserve timer 12 for use by PWM
@@ -3280,7 +3333,6 @@ config STM32H7_TIM13_PWM
 	bool "TIM13 PWM"
 	default n
 	depends on STM32H7_TIM13
-	select ARCH_HAVE_PWM_PULSECOUNT
 	select STM32H7_PWM
 	---help---
 		Reserve timer 13 for use by PWM
@@ -3354,7 +3406,6 @@ config STM32H7_TIM14_PWM
 	bool "TIM14 PWM"
 	default n
 	depends on STM32H7_TIM14
-	select ARCH_HAVE_PWM_PULSECOUNT
 	select STM32H7_PWM
 	---help---
 		Reserve timer 14 for use by PWM
@@ -3760,7 +3811,7 @@ endif # STM32H7_TIM17_PWM
 config STM32H7_PWM_MULTICHAN
 	bool "PWM Multiple Output Channels"
 	default n
-	depends on STM32H7_TIM1_PWM || STM32H7_TIM2_PWM || STM32H7_TIM3_PWM || STM32H7_TIM4_PWM || STM32H7_TIM5_PWM || STM32H7_TIM8_PWM || STM32H7_TIM12_PWM || STM32H7_TIM15_PWM
+	depends on STM32H7_PWM
 	select ARCH_HAVE_PWM_MULTICHAN
 	---help---
 		Specifies that the PWM driver supports multiple output
@@ -5326,6 +5377,114 @@ config STM32H7_QENCODER_SAMPLE_EVENT_8
 
 endchoice
 
-endmenu
+endmenu # QEncoder Driver
+
+menu "FDCAN Driver Configuration"
+	depends on STM32H7_FDCAN1 || STM32H7_FDCAN2
+
+menu "FDCAN1 Configuration"
+	depends on STM32H7_FDCAN1
+
+config FDCAN1_BITRATE
+	int "CAN bitrate"
+	depends on !NET_CAN_CANFD
+	default 1000000
+
+config FDCAN1_ARBI_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 1000000
+
+config FDCAN1_DATA_BITRATE
+	int "CAN FD Data phase bitrate"
+	depends on NET_CAN_CANFD
+	default 4000000
+
+endmenu # STM32H7_FDCAN1
+
+menu "FDCAN2 Configuration"
+	depends on STM32H7_FDCAN2
+
+config FDCAN2_BITRATE
+	int "CAN bitrate"
+	depends on !NET_CAN_CANFD
+	default 1000000
+
+config FDCAN2_ARBI_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 1000000
+
+config FDCAN2_DATA_BITRATE
+	int "CAN FD Data phase bitrate"
+	depends on NET_CAN_CANFD
+	default 4000000
+
+endmenu # STM32H7_FDCAN2
+
+config STM32H7_FDCAN_REGDEBUG
+	bool "Enable register dump debugging"
+	depends on DEBUG_CAN_INFO
+	depends on DEBUG_NET_INFO
+	default n
+	---help---
+		Output detailed register-level CAN device debug information.
+		Requires also CONFIG_DEBUG_CAN_INFO and CONFIG_DEBUG_NET_INFO.
+
+config STM32H7_FDCAN_LOOPBACK
+	bool "Enable FDCAN loopback mode"
+	default n
+	---help---
+		Enable the FDCAN local loopback mode for testing purposes.
+		Requires a further choice of internal or external loopback mode.
+
+		TODO: Enable separately for FDCAN1 and FDCAN2
+
+choice
+	prompt "FDCAN Loopback Mode"
+	depends on STM32H7_FDCAN_LOOPBACK
+	default STM32H7_FDCAN_LOOPBACK_INTERNAL
+
+config STM32H7_FDCAN_LOOPBACK_INTERNAL
+	bool "Internal loopback mode"
+	---help---
+		Enable internal loopback mode, where both Tx and Rx are
+		disconnected from the CAN bus.  This can be used for a "Hot Selftest",
+		meaning the FDCAN can be used without affecting a running CAN bus.
+
+		All transmitted frames are treated as received frames and processed
+		accordingly.
+
+config STM32H7_FDCAN_LOOPBACK_EXTERNAL
+	bool "External loopback mode"
+	---help---
+		Enable external loopback mode, where the Rx pin is disconnected from
+		the CAN bus but the Tx pin remains connected.
+
+		All transmitted frames are treated as received frames and processed
+		accordingly.
+
+endchoice # CAN Loopback Mode
+
+choice
+	prompt "FDCAN WorkQueue Selection"
+	default STM32H7_FDCAN_LPWORK
+
+config STM32H7_FDCAN_LPWORK
+	bool "Use LP work queue"
+	---help---
+		Use the low-priority (LP) work queue for reception and transmission
+		of new frames and for processing of transmission timeouts.
+
+config STM32H7_FDCAN_HPWORK
+	bool "Use HP work queue"
+	---help---
+		Use the high-priority (HP) work queue for reception and transmission
+		of new frames and for processing of transmission timeouts.
+
+endchoice
+
+endmenu # FDCAN Driver
+
 
 endif # ARCH_CHIP_STM32H7

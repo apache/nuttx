@@ -76,7 +76,7 @@
 
 int board_ina219_initialize(int devno, int busno)
 {
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
   char devpath[12];
   int ret;
 
@@ -97,7 +97,7 @@ int board_ina219_initialize(int devno, int busno)
   ret = ina219_register(devpath, i2c, 0x40, 100000, 0x00);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Error registering hih6130\n");
+      syslog(LOG_ERR, "ERROR: Error registering INA219\n");
     }
 
   return ret;

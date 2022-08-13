@@ -69,7 +69,7 @@ extern "C"
  *
  ****************************************************************************/
 
-void sam_rttinitialize(FAR const char *devpath);
+void sam_rttinitialize(const char *devpath);
 
 #endif // CONFIG_SAM34_RTT
 

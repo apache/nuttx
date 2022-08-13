@@ -22,6 +22,20 @@ config ARCH_ARM
 	---help---
 		The ARM architectures
 
+config ARCH_ARM64
+	bool "ARM64"
+	select ARCH_HAVE_BACKTRACE
+	select ARCH_HAVE_INTERRUPTSTACK
+	select ARCH_HAVE_VFORK
+	select ARCH_HAVE_STACKCHECK
+	select ARCH_HAVE_CUSTOMOPT
+	select ARCH_HAVE_STDARG_H
+	select ARCH_HAVE_SYSCALL_HOOKS
+	select ARCH_HAVE_RDWR_MEM_CPU_RUN
+	select ARCH_HAVE_THREAD_LOCAL
+	---help---
+		The ARM64 architectures
+
 config ARCH_AVR
 	bool "AVR"
 	select ARCH_NOINTC
@@ -147,6 +161,7 @@ endchoice
 config ARCH
 	string
 	default "arm"     if ARCH_ARM
+	default "arm64"   if ARCH_ARM64
 	default "avr"     if ARCH_AVR
 	default "hc"      if ARCH_HC
 	default "mips"    if ARCH_MIPS
@@ -162,6 +177,7 @@ config ARCH
 	default "sparc"   if ARCH_SPARC
 
 source "arch/arm/Kconfig"
+source "arch/arm64/Kconfig"
 source "arch/avr/Kconfig"
 source "arch/hc/Kconfig"
 source "arch/mips/Kconfig"
@@ -821,6 +837,18 @@ config ARCH_STACKDUMP
 	---help---
 		Enable to do stack dumps after assertions
 
+config ARCH_STACKDUMP_MAX_LENGTH
+	int "The maximum length for dump stack on assertions"
+	depends on ARCH_STACKDUMP
+	default 0
+
+config DUMP_ON_EXIT
+	bool "Dump all tasks state on exit"
+	default n
+	depends on DEBUG_SCHED_INFO
+	---help---
+		Dump all tasks state on exit()
+
 config ARCH_USBDUMP
 	bool "Dump USB trace data"
 	default n
@@ -942,7 +970,6 @@ menu "Bring-Up Options"
 config SUPPRESS_CLOCK_CONFIG
 	bool "Suppress clock configuration"
 	default n
-	depends on ARCH_XTENSA
 	---help---
 		Do not configure clocking.  Instead relies on the reset clock
 		configuration (or clock configuration provided by a bootloader).
@@ -972,13 +999,6 @@ config SUPPRESS_UART_CONFIG
 		Do not re-configure the serial console UART from its start-up state.
 		This is useful when a boot loader has already initialized the serial
 		port.
-
-config DUMP_ON_EXIT
-	bool "Dump task state"
-	default n
-	depends on DEBUG_SCHED_INFO
-	---help---
-		Dump task state on exit()
 
 endmenu # Bring-Up Options
 

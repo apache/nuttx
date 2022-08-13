@@ -137,7 +137,7 @@ struct hrt_s
 static dq_queue_t hrt_timer_queue;
 static void hrt_queue_refresh(void);
 static void hrt_usleep_setup(void);
-static int hrt_interrupt(int irq, FAR void *context, FAR void *arg);
+static int hrt_interrupt(int irq, void *context, void *arg);
 static void hrt_usleep_add(struct hrt_s *phrt);
 #endif
 
@@ -266,7 +266,7 @@ static void hrt_usleep_setup(void)
  ****************************************************************************/
 
 #ifdef CONFIG_HRT_TIMER
-static int hrt_interrupt(int irq, FAR void *context, FAR void *arg)
+static int hrt_interrupt(int irq, void *context, void *arg)
 {
   /* Disable MTM2-Ch0 */
 
@@ -333,7 +333,7 @@ static void hrt_usleep_add(struct hrt_s *phrt)
  ****************************************************************************/
 
 #ifdef CONFIG_PROFILE
-int up_proftimerisr(int irq, uint32_t *regs, FAR void *arg)
+int up_proftimerisr(int irq, uint32_t *regs, void *arg)
 {
   putreg32(1 << 1, MT30STS);
   if (profile_en)
@@ -358,7 +358,7 @@ int up_proftimerisr(int irq, uint32_t *regs, FAR void *arg)
  * Name:  up_timerisr
  ****************************************************************************/
 
-int up_timerisr(int irq, uint32_t *regs, FAR void *arg)
+int up_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Process timer interrupt */
 
@@ -688,7 +688,7 @@ void lc823450_mtm_stop_oneshot(void)
  *
  ****************************************************************************/
 
-int up_rtc_gettime(FAR struct timespec *tp)
+int up_rtc_gettime(struct timespec *tp)
 {
   uint64_t secs;
   uint64_t nsecs;

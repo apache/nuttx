@@ -180,7 +180,7 @@
 #define MCAN_CCCR_FDBS             (1 << 13) /* Bit 13: CAN FD Bit Rate Switching */
 #define MCAN_CCCR_EFBI             (1 << 13) /* Bit 13: Edge Filtering during Bus Integration */
 #define MCAN_CCCR_TXP              (1 << 14) /* Bit 14: Transmit Pause */
-#define MCAN_CCCR_NISO             (1 << 15) /* Bit 15: Non-ISO Operation (Bosch FD)*/
+#define MCAN_CCCR_NISO             (1 << 15) /* Bit 15: Non-ISO Operation (Bosch FD) */
 
 /* Bit Timing and Prescaler Register (rev A) */
 
@@ -341,7 +341,7 @@
 #define MCAN_INT_STE               (1 << 31) /* Bit 31: Stuff Error (rev A) */
 
 #define MCAN_REVA_INT_ALL          (0xffcfffff)
-#define MCAN_REVB_INT_ALL         (0x3fcfffff)
+#define MCAN_REVB_INT_ALL          (0x3fcfffff)
 
 /* Interrupt Line Enable Register */
 

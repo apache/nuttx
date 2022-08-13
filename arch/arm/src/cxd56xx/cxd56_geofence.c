@@ -58,8 +58,8 @@
 
 struct cxd56_geofence_dev_s
 {
-  sem_t              devsem;
-  FAR struct pollfd *fds[CONFIG_GEOFENCE_NPOLLWAITERS];
+  sem_t          devsem;
+  struct pollfd *fds[CONFIG_GEOFENCE_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -68,16 +68,14 @@ struct cxd56_geofence_dev_s
 
 /* file operation functions */
 
-static int cxd56_geofence_open(FAR struct file *filep);
-static int cxd56_geofence_close(FAR struct file *filep);
-static ssize_t cxd56_geofence_read(FAR struct file *filep,
-                                   FAR char *buffer,
+static ssize_t cxd56_geofence_read(struct file *filep,
+                                   char *buffer,
                                    size_t len);
-static int cxd56_geofence_ioctl(FAR struct file *filep,
+static int cxd56_geofence_ioctl(struct file *filep,
                                 int cmd,
                                 unsigned long arg);
-static int cxd56_geofence_poll(FAR struct file *filep,
-                               FAR struct pollfd *fds,
+static int cxd56_geofence_poll(struct file *filep,
+                               struct pollfd *fds,
                                bool setup);
 
 /* ioctl command functions */
@@ -101,8 +99,8 @@ static int cxd56_geofence_set_mode(unsigned long arg);
 
 static const struct file_operations g_geofencefops =
 {
-  cxd56_geofence_open,  /* open */
-  cxd56_geofence_close, /* close */
+  NULL,                 /* open */
+  NULL,                 /* close */
   cxd56_geofence_read,  /* read */
   NULL,                 /* write */
   NULL,                 /* seek */
@@ -115,7 +113,7 @@ static const struct file_operations g_geofencefops =
 
 /* ioctl command list */
 
-FAR static int (*g_cmdlist[CXD56_GEOFENCE_IOCTL_MAX])(unsigned long) =
+static int (*g_cmdlist[CXD56_GEOFENCE_IOCTL_MAX])(unsigned long) =
 {
   NULL,              /* CXD56_GEOFENCE_IOCTL_INVAL = 0 */
   cxd56_geofence_start,
@@ -193,15 +191,15 @@ static int cxd56_geofence_stop(unsigned long arg)
 
 static int cxd56_geofence_add_region(unsigned long arg)
 {
-  int                                    ret;
-  FAR struct cxd56_geofence_region_s *reg_data;
+  int                             ret;
+  struct cxd56_geofence_region_s *reg_data;
 
   if (!arg)
     {
       return -EINVAL;
     }
 
-  reg_data = (FAR struct cxd56_geofence_region_s *)arg;
+  reg_data = (struct cxd56_geofence_region_s *)arg;
 
   ret = fw_gd_geoaddregion(reg_data->id,
                         reg_data->latitude,
@@ -228,15 +226,15 @@ static int cxd56_geofence_add_region(unsigned long arg)
 
 static int cxd56_geofence_modify_region(unsigned long arg)
 {
-  int                                    ret;
-  FAR struct cxd56_geofence_region_s *reg_data;
+  int                             ret;
+  struct cxd56_geofence_region_s *reg_data;
 
   if (!arg)
     {
       return -EINVAL;
     }
 
-  reg_data = (FAR struct cxd56_geofence_region_s *)arg;
+  reg_data = (struct cxd56_geofence_region_s *)arg;
 
   ret = fw_gd_geomodifyregion(reg_data->id, reg_data->latitude,
                            reg_data->longitude, reg_data->radius);
@@ -261,8 +259,8 @@ static int cxd56_geofence_modify_region(unsigned long arg)
 
 static int cxd56_geofence_delete_region(unsigned long arg)
 {
-  int         ret;
-  FAR uint8_t id;
+  int     ret;
+  uint8_t id;
 
   if (UINT8_MAX < arg)
     {
@@ -316,15 +314,15 @@ static int cxd56_geofence_delete_all_region(unsigned long arg)
 
 static int cxd56_geofence_get_region_data(unsigned long arg)
 {
-  int                                    ret;
-  FAR struct cxd56_geofence_region_s *reg_data;
+  int                             ret;
+  struct cxd56_geofence_region_s *reg_data;
 
   if (!arg)
     {
       return -EINVAL;
     }
 
-  reg_data = (FAR struct cxd56_geofence_region_s *)arg;
+  reg_data = (struct cxd56_geofence_region_s *)arg;
 
   ret = fw_gd_geogetregiondata(reg_data->id, &reg_data->latitude,
                             &reg_data->longitude, &reg_data->radius);
@@ -401,14 +399,14 @@ static int cxd56_geofence_get_all_status(unsigned long arg)
 static int cxd56_geofence_set_mode(unsigned long arg)
 {
   int                                   ret;
-  FAR struct cxd56_geofence_mode_s *mode;
+  struct cxd56_geofence_mode_s *mode;
 
   if (!arg)
     {
       return -EINVAL;
     }
 
-  mode = (FAR struct cxd56_geofence_mode_s *)arg;
+  mode = (struct cxd56_geofence_mode_s *)arg;
 
   ret = fw_gd_geosetopmode(mode->deadzone, mode->dwell_detecttime);
 
@@ -431,10 +429,10 @@ static int cxd56_geofence_set_mode(unsigned long arg)
  *
  ****************************************************************************/
 
-static void cxd56_geofence_sighandler(uint32_t data, FAR void *userdata)
+static void cxd56_geofence_sighandler(uint32_t data, void *userdata)
 {
-  FAR struct cxd56_geofence_dev_s *priv =
-    (FAR struct cxd56_geofence_dev_s *)userdata;
+  struct cxd56_geofence_dev_s *priv =
+    (struct cxd56_geofence_dev_s *)userdata;
   int i;
   int ret;
 
@@ -471,49 +469,7 @@ static void cxd56_geofence_sighandler(uint32_t data, FAR void *userdata)
  *
  ****************************************************************************/
 
-static int cxd56_geofence_initialize(FAR struct cxd56_geofence_dev_s *dev)
-{
-  int32_t ret = 0;
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: cxd56_geofence_open
- *
- * Description:
- *   Standard character driver open method.
- *
- * Input Parameters:
- *   filep - File structure pointer
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-static int cxd56_geofence_open(FAR struct file *filep)
-{
-  int32_t ret = 0;
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: cxd56_geofence_close
- *
- * Description:
- *   Standard character driver close method.
- *
- * Input Parameters:
- *   filep - File structure pointer
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-static int cxd56_geofence_close(FAR struct file *filep)
+static int cxd56_geofence_initialize(struct cxd56_geofence_dev_s *dev)
 {
   int32_t ret = 0;
 
@@ -536,7 +492,7 @@ static int cxd56_geofence_close(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static ssize_t cxd56_geofence_read(FAR struct file *filep, FAR char *buffer,
+static ssize_t cxd56_geofence_read(struct file *filep, char *buffer,
                                    size_t len)
 {
   int32_t ret = 0;
@@ -579,7 +535,7 @@ static ssize_t cxd56_geofence_read(FAR struct file *filep, FAR char *buffer,
  *
  ****************************************************************************/
 
-static int cxd56_geofence_ioctl(FAR struct file *filep, int cmd,
+static int cxd56_geofence_ioctl(struct file *filep, int cmd,
                                 unsigned long arg)
 {
   if (cmd <= CXD56_GEOFENCE_IOCTL_INVAL || cmd >= CXD56_GEOFENCE_IOCTL_MAX)
@@ -606,17 +562,17 @@ static int cxd56_geofence_ioctl(FAR struct file *filep, int cmd,
  *
  ****************************************************************************/
 
-static int cxd56_geofence_poll(FAR struct file *filep,
-                               FAR struct pollfd *fds,
+static int cxd56_geofence_poll(struct file *filep,
+                               struct pollfd *fds,
                                bool setup)
 {
-  FAR struct inode *               inode;
-  FAR struct cxd56_geofence_dev_s *priv;
-  int                              ret = OK;
-  int                              i;
+  struct inode *               inode;
+  struct cxd56_geofence_dev_s *priv;
+  int                          ret = OK;
+  int                          i;
 
   inode = filep->f_inode;
-  priv  = (FAR struct cxd56_geofence_dev_s *)inode->i_private;
+  priv  = (struct cxd56_geofence_dev_s *)inode->i_private;
 
   ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
@@ -687,12 +643,12 @@ errout:
  *
  ****************************************************************************/
 
-static int cxd56_geofence_register(FAR const char *devpath)
+static int cxd56_geofence_register(const char *devpath)
 {
-  FAR struct cxd56_geofence_dev_s *priv;
-  int                              ret;
+  struct cxd56_geofence_dev_s *priv;
+  int                          ret;
 
-  priv = (FAR struct cxd56_geofence_dev_s *)kmm_malloc(
+  priv = (struct cxd56_geofence_dev_s *)kmm_malloc(
     sizeof(struct cxd56_geofence_dev_s));
   if (!priv)
     {
@@ -752,7 +708,7 @@ static int cxd56_geofence_register(FAR const char *devpath)
  *
  ****************************************************************************/
 
-int cxd56_geofenceinitialize(FAR const char *devpath)
+int cxd56_geofenceinitialize(const char *devpath)
 {
   int ret;
 

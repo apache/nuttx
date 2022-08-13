@@ -155,7 +155,7 @@ static const uint32_t g_pinlist[ADC1_NCHANNELS] =
 int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat,
                                  uint32_t *vext)
 {
-  FAR struct file filestruct;
+  struct file filestruct;
   ssize_t nbytes;
   struct adc_msg_s sample[ADC1_NCHANNELS] =
     {

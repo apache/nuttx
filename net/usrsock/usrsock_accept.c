@@ -343,7 +343,7 @@ int usrsock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
               else
                 {
                   nerr("net_timedwait errno: %d\n", ret);
-                  DEBUGASSERT(false);
+                  DEBUGPANIC();
                 }
             }
 

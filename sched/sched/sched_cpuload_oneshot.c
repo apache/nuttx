@@ -239,8 +239,8 @@ static void nxsched_oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
 }
 
 #ifdef CONFIG_PM
-static void nxsched_oneshot_pmnotify(struct pm_callback_s *cb, int domain,
-                                     enum pm_state_e pmstate)
+static void nxsched_oneshot_pmnotify(FAR struct pm_callback_s *cb,
+                                     int domain, enum pm_state_e pmstate)
 {
   if (domain == PM_IDLE_DOMAIN)
     {

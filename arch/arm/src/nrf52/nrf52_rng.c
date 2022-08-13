@@ -49,10 +49,10 @@
  ****************************************************************************/
 
 static int nrf52_rng_initialize(void);
-static int nrf52_rng_irqhandler(int irq, void *context, FAR void *arg);
-static ssize_t nrf52_rng_read(FAR struct file *filep, FAR char *buffer,
+static int nrf52_rng_irqhandler(int irq, void *context, void *arg);
+static ssize_t nrf52_rng_read(struct file *filep, char *buffer,
                               size_t buflen);
-static int nrf52_rng_open(FAR struct file *filep);
+static int nrf52_rng_open(struct file *filep);
 
 /****************************************************************************
  * Private Types
@@ -148,9 +148,9 @@ static int nrf52_rng_initialize(void)
   return OK;
 }
 
-static int nrf52_rng_irqhandler(int irq, FAR void *context, FAR void *arg)
+static int nrf52_rng_irqhandler(int irq, void *context, void *arg)
 {
-  FAR struct rng_dev_s *priv = (struct rng_dev_s *) &g_rngdev;
+  struct rng_dev_s *priv = (struct rng_dev_s *) &g_rngdev;
   uint8_t *addr;
 
   if (getreg32(NRF52_RNG_EVENTS_RDY) == RNG_INT_RDY)
@@ -177,7 +177,7 @@ static int nrf52_rng_irqhandler(int irq, FAR void *context, FAR void *arg)
  * Name: nrf52_rng_open
  ****************************************************************************/
 
-static int nrf52_rng_open(FAR struct file *filep)
+static int nrf52_rng_open(struct file *filep)
 {
   /* O_NONBLOCK is not supported */
 
@@ -194,10 +194,10 @@ static int nrf52_rng_open(FAR struct file *filep)
  * Name: nrf52_rng_read
  ****************************************************************************/
 
-static ssize_t nrf52_rng_read(FAR struct file *filep, FAR char *buffer,
+static ssize_t nrf52_rng_read(struct file *filep, char *buffer,
                               size_t buflen)
 {
-  FAR struct rng_dev_s *priv = (struct rng_dev_s *)&g_rngdev;
+  struct rng_dev_s *priv = (struct rng_dev_s *)&g_rngdev;
   ssize_t read_len;
 
   if (nxsem_wait(&priv->excl_sem) != OK)

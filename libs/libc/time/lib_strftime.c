@@ -99,6 +99,8 @@ static const char * const g_monthname[12] =
  *   ter,  and  terminated  by  a  conversion  specifier  character, and are
  *   replaced in s as follows:
  *
+ *   %a     The abbreviated weekday name according to the current locale.
+ *   %A     The full weekday name according to the current locale.
  *   %b     The abbreviated month name according to the current locale.
  *   %B     The full month name according to the current locale.
  *   %C     The century number (year/100) as a 2-digit integer. (SU)
@@ -218,16 +220,6 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
                    str = g_monthname[tm->tm_mon];
                    len = snprintf(dest, chleft, "%s", str);
                  }
-             }
-             break;
-
-           /* %y: The year as a decimal number without a century
-            * (range 00 to 99).
-            */
-
-           case 'y':
-             {
-               len = snprintf(dest, chleft, "%02d", tm->tm_year % 100);
              }
              break;
 
@@ -403,6 +395,16 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
              {
                *dest = '\t';
                len   = 1;
+             }
+             break;
+
+           /* %y: The year as a decimal number without a century
+            * (range 00 to 99).
+            */
+
+           case 'y':
+             {
+               len = snprintf(dest, chleft, "%02d", tm->tm_year % 100);
              }
              break;
 

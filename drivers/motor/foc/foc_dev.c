@@ -88,7 +88,7 @@ static const struct file_operations g_foc_fops =
 
 static struct foc_callbacks_s g_foc_callbacks =
 {
-  .notifier = foc_notifier,
+  foc_notifier
 };
 
 /****************************************************************************
@@ -760,7 +760,7 @@ static int foc_notifier(FAR struct foc_dev_s *dev,
         {
           /* This is a critical fault */
 
-          DEBUGASSERT(0);
+          DEBUGPANIC();
 
           /* Set timeout fault if not in debug mode */
 

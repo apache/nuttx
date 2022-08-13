@@ -407,7 +407,7 @@ static int msa301_sensor_stop(FAR struct msa301_dev_s *priv)
 
   msa301_set_powermode(priv, MSA301_SUSPENDMODE);
 
-  sninfo("Stoping....");
+  sninfo("Stopping....");
 
   return OK;
 }

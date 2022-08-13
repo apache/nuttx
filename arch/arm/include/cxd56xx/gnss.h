@@ -699,11 +699,11 @@ struct cxd56_gnss_ope_mode_param_s
 
 struct cxd56_gnss_orbital_param_s
 {
-  uint32_t      type; /* One of #CXD56_GNSS_DATA_GPS,
-                       *   #CXD56_GNSS_DATA_GLONASS or
-                       *   #CXD56_GNSS_DATA_QZSSL1CA.
-                       */
-  FAR uint32_t *data; /* Address pointing to almanac or ephemeris data buffer */
+  uint32_t  type; /* One of #CXD56_GNSS_DATA_GPS,
+                   *   #CXD56_GNSS_DATA_GLONASS or
+                   *   #CXD56_GNSS_DATA_QZSSL1CA.
+                   */
+  uint32_t *data; /* Address pointing to almanac or ephemeris data buffer */
 };
 
 /* date and time */
@@ -736,9 +736,9 @@ struct cxd56_gnss_orthogonal_position_s
 
 struct cxd56_gnss_cep_data_s
 {
-  FAR uint32_t *data;
-  uint32_t      size;
-  uint32_t      counter;
+  uint32_t *data;
+  uint32_t  size;
+  uint32_t  counter;
 };
 
 /* CEP age info */
@@ -753,24 +753,24 @@ struct cxd56_gnss_cep_age_s
 
 struct cxd56_gnss_agps_acquist_s
 {
-  FAR uint8_t *data; /* Address pointing to aquist data buffer */
-  uint16_t     size; /* Aquist data size */
+  uint8_t *data; /* Address pointing to aquist data buffer */
+  uint16_t size; /* Aquist data size */
 };
 
 /* tow assist data and size for AGPS */
 
 struct cxd56_gnss_agps_tow_assist_s
 {
-  FAR uint8_t *data; /* Address pointing to tow assist data buffer */
-  uint16_t     size; /* assist data size */
+  uint8_t *data; /* Address pointing to tow assist data buffer */
+  uint16_t size; /* assist data size */
 };
 
 /* utc model data and size for AGPS */
 
 struct cxd56_gnss_agps_utc_model_s
 {
-  FAR uint8_t *data; /* Address pointing to utc model data buffer */
-  uint16_t     size; /* utc model data size */
+  uint8_t *data; /* Address pointing to utc model data buffer */
+  uint16_t size; /* utc model data size */
 };
 
 /* Time from frame start[sec]. */
@@ -833,21 +833,21 @@ struct cxd56_gnss_test_result_s
 
 struct cxd56_gnss_signal_setting_s
 {
-  int       fd;      /* The descriptor for signal handler */
-  uint8_t   enable;  /* 1 when set this setting, 0 is clear */
-  uint8_t   gnsssig; /* GNSS signal as CXD56_GNSS_SIG_GNSS, _AGPS, etc. */
-  int       signo;   /* system signal number to notify read completion */
-  FAR void *data;    /* user data */
+  int     fd;      /* The descriptor for signal handler */
+  uint8_t enable;  /* 1 when set this setting, 0 is clear */
+  uint8_t gnsssig; /* GNSS signal as CXD56_GNSS_SIG_GNSS, _AGPS, etc. */
+  int     signo;   /* system signal number to notify read completion */
+  void   *data;    /* user data */
 };
 
 /* Information for use after being signaled to read data asynchronously */
 
 struct cxd56_gnss_signal_info_s
 {
-  int       fd;      /* The file descriptor to use in signal handler */
-  uint8_t   gnsssig; /* GNSS signal as CXD56_GNSS_SIG_GNSS, _AGPS, etc. */
-  int       signo;   /* system signal number to notify read completion */
-  FAR void *data;    /* user data */
+  int     fd;      /* The file descriptor to use in signal handler */
+  uint8_t gnsssig; /* GNSS signal as CXD56_GNSS_SIG_GNSS, _AGPS, etc. */
+  int     signo;   /* system signal number to notify read completion */
+  void   *data;    /* user data */
 };
 
 /* PVTLOG setting Parameter.

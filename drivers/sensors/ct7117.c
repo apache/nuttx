@@ -144,14 +144,14 @@ static int ct7117_findodr(FAR unsigned long *expect_period_us);
 
 /* Sensor ops functions. */
 
-static int ct7117_activate(FAR struct file *filep,
-                           FAR struct sensor_lowerhalf_s *lower,
+static int ct7117_activate(FAR struct sensor_lowerhalf_s *lower,
+                           FAR struct file *filep,
                            bool enable);
-static int ct7117_set_interval(FAR struct file *filep,
-                               FAR struct sensor_lowerhalf_s *lower,
+static int ct7117_set_interval(FAR struct sensor_lowerhalf_s *lower,
+                               FAR struct file *filep,
                                FAR unsigned long *interval_us);
-static int ct7117_selftest(FAR struct file *filep,
-                           FAR struct sensor_lowerhalf_s *lower,
+static int ct7117_selftest(FAR struct sensor_lowerhalf_s *lower,
+                           FAR struct file *filep,
                            unsigned long arg);
 
 /* Sensor poll functions. */
@@ -559,8 +559,8 @@ static int ct7117_findodr(FAR unsigned long *expect_period_us)
  *   Set ODR
  *
  * Input Parameters
- *   filep       - The pointer of file, represents each user using the sensor.
  *   lower       - The instance of lower half sensor driver.
+ *   filep       - The pointer of file, represents each user using the sensor.
  *   interval_us - Sample interval.
  *
  * Returned Value
@@ -572,8 +572,8 @@ static int ct7117_findodr(FAR unsigned long *expect_period_us)
  *
  ****************************************************************************/
 
-static int ct7117_set_interval(FAR struct file *filep,
-                               FAR struct sensor_lowerhalf_s *lower,
+static int ct7117_set_interval(FAR struct sensor_lowerhalf_s *lower,
+                               FAR struct file *filep,
                                FAR unsigned long *interval_us)
 {
   FAR struct ct7117_dev_s *priv = (FAR struct ct7117_dev_s *)lower;
@@ -612,8 +612,8 @@ static int ct7117_set_interval(FAR struct file *filep,
  *   Enable or disable sensor device
  *
  * Input Parameters
- *   filep  - The pointer of file, represents each user using the sensor.
  *   lower  - The instance of lower half sensor driver.
+ *   filep  - The pointer of file, represents each user using the sensor.
  *   enable - True(enable) and false(disable).
  *
  * Returned Value
@@ -625,8 +625,8 @@ static int ct7117_set_interval(FAR struct file *filep,
  *
  ****************************************************************************/
 
-static int ct7117_activate(FAR struct file *filep,
-                           FAR struct sensor_lowerhalf_s *lower,
+static int ct7117_activate(FAR struct sensor_lowerhalf_s *lower,
+                           FAR struct file *filep,
                            bool enable)
 {
   FAR struct ct7117_dev_s *priv = (FAR struct ct7117_dev_s *)lower;
@@ -660,8 +660,8 @@ static int ct7117_activate(FAR struct file *filep,
  *   and device functional inspection.
  *
  * Input Parameters:
- *   filep - The pointer of file, represents each user using the sensor.
  *   lower - The instance of lower half sensor driver.
+ *   filep - The pointer of file, represents each user using the sensor.
  *   arg   - The parameters associated with cmd.
  *
  * Returned Value:
@@ -673,8 +673,8 @@ static int ct7117_activate(FAR struct file *filep,
  *
  ****************************************************************************/
 
-static int ct7117_selftest(FAR struct file *filep,
-                           FAR struct sensor_lowerhalf_s *lower,
+static int ct7117_selftest(FAR struct sensor_lowerhalf_s *lower,
+                           FAR struct file *filep,
                            unsigned long arg)
 {
   FAR struct ct7117_dev_s *priv = (FAR struct ct7117_dev_s *)lower;

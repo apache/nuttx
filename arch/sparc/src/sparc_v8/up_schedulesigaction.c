@@ -75,7 +75,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 {
   irqstate_t flags;
 
-  sinfo("tcb=0x%p sigdeliver=0x%p\n", tcb, sigdeliver);
+  sinfo("tcb=%p sigdeliver=%p\n", tcb, sigdeliver);
 
   /* Make sure that interrupts are disabled */
 
@@ -89,7 +89,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
        * being delivered to the currently executing task.
        */
 
-      sinfo("rtcb=0x%p g_current_regs=0x%p\n",
+      sinfo("rtcb=%p g_current_regs=%p\n",
             this_task(), g_current_regs);
 
       if (tcb == this_task())

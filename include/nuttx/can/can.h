@@ -498,6 +498,9 @@ struct can_rxfifo_s
 
   sem_t         rx_sem;
 
+#ifdef CONFIG_CAN_ERRORS
+  bool          rx_overflow;             /* Indicates the RX FIFO overflow event */
+#endif
   uint8_t       rx_head;                 /* Index to the head [IN] in the circular buffer */
   uint8_t       rx_tail;                 /* Index to the tail [OUT] in the circular buffer */
                                          /* Circular buffer of CAN messages */
@@ -606,12 +609,13 @@ struct can_reader_s
 
 struct can_dev_s
 {
+  uint8_t              cd_crefs;         /* References counts on number of opens */
   uint8_t              cd_npendrtr;      /* Number of pending RTR messages */
   volatile uint8_t     cd_ntxwaiters;    /* Number of threads waiting to enqueue a message */
-  struct list_node     cd_readers;       /* List of readers */
 #ifdef CONFIG_CAN_ERRORS
   uint8_t              cd_error;         /* Flags to indicate internal device errors */
 #endif
+  struct list_node     cd_readers;       /* List of readers */
   sem_t                cd_closesem;      /* Locks out new opens while close is in progress */
   sem_t                cd_pollsem;       /* Manages exclusive access to cd_fds[] */
   struct can_txfifo_s  cd_xmit;          /* Describes transmit FIFO */

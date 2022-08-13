@@ -22,10 +22,10 @@ config FS_PROCFS_REGISTER
 		system.
 
 config FS_PROCFS_MAX_TASKS
-	int "The maxinum number of active tasks for procfs snapshot"
+	int "The maximum number of active tasks for procfs snapshot"
 	default 128
 	---help---
-		The maxinum number of active tasks for procfs snapshot.
+		The maximum number of active tasks for procfs snapshot.
 
 menu "Exclude individual procfs entries"
 

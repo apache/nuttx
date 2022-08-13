@@ -62,6 +62,7 @@
 
 #include <arch/irq.h>
 #include <arch/xtensa/core.h>
+#include <arch/xtensa/xtensa_abi.h>
 #include <arch/xtensa/xtensa_specregs.h>
 
 #include "xtensa_macros.S"
@@ -144,18 +145,9 @@ _xtensa_user_handler:
 	/* Handle all other exceptions. All can have user-defined handlers. */
 	/* NOTE: we'll stay on the user stack for exception handling. */
 
-	/* Allocate exception frame and save minimal context. */
+	/* Create interrupt frame and save minimal context. */
 
-	mov		a0, sp							/* Save SP in A0 */
-	addi	sp, sp, -XCPTCONTEXT_SIZE	/* Allocate interrupt stack frame */
-	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
-	rsr		a0, PS							/* Save interruptee's PS */
-	s32i	a0, sp, (4 * REG_PS)
-	rsr		a0, EPC_1						/* Save interruptee's PC */
-	s32i	a0, sp, (4 * REG_PC)
-	rsr		a0, EXCSAVE_1					/* Save interruptee's a0 */
-	s32i	a0, sp, (4 * REG_A0)
-	s32i	a2, sp, (4 * REG_A2)
+	exception_entry 1
 
 	/* Save EXCCAUSE and EXCVADDR into the user frame */
 
@@ -166,13 +158,11 @@ _xtensa_user_handler:
 
 	/* Save rest of interrupt context. */
 
-	s32i	a2, sp, (4 * REG_A2)
-	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Save current SP before (possibly) overwriting it,
-	* it's the register save area.
-	*/
+	 * it's the register save area.
+	 */
 
 	mov	a12, sp
 
@@ -182,64 +172,34 @@ _xtensa_user_handler:
 	setintstack a13 a14
 #endif
 
-	/* Save exc cause and vaddr into exception frame */
-
-	rsr		a0, EXCCAUSE
-	s32i	a0, sp, (4 * REG_EXCCAUSE)
-	rsr		a0, EXCVADDR
-	s32i	a0, sp, (4 * REG_EXCVADDR)
-
 	/* Set up PS for C, re-enable hi-pri interrupts, and clear EXCM. */
 
 	ps_setup	1 a0
 
-	/* Create pseudo base save area. At this point, a12 points to the
+	/* Link the pre-exception frame for debugging. At this point, a12 points to the
 	 * allocated and filled exception stack frame (old value of SP in case of
 	 * an interrupt stack).
 	 */
 
-#ifdef CONFIG_XTENSA_INTBACKTRACE
-	l32i    a3, a12, (4 * REG_A0)     /* Copy pre-exception a0 (return address) */
-	s32e    a3, sp, -16
-	l32i    a3, a12, (4 * REG_A1)     /* Copy pre-exception a1 (stack pointer) */
-	s32e    a3, sp, -12
-
-	rsr     a0, EPC_1                /* return address for debug backtrace */
-	movi    a4, 0xc0000000           /* constant with top 2 bits set (call size) */
-	or      a0, a0, a4               /* set top 2 bits */
-	addx2   a0, a4, a0               /* clear top bit -- thus simulating call4 size */
-#endif
+	exception_backtrace a12 1
 
 	/* Call xtensa_user, passing both the EXCCAUSE and a pointer to the
 	 * beginning of the register save area.
 	 */
 
-#ifdef __XTENSA_CALL0_ABI__
-	rsr		a2, EXCCAUSE					/* Argument 1 (a2) = EXCCAUSE */
-	mov		a3, a12							/* Argument 2 (a3) = pointer to register save area */
-	calx0	xtensa_user						/* Call xtensa_user */
-#else
-	rsr		a6, EXCCAUSE					/* Argument 1 (a6) = EXCCAUSE */
-	mov		a7, a12							/* Argument 2 (a7) = pointer to register save area */
-	call4	xtensa_user						/* Call xtensa_user */
-	mov		a12, a6
-#endif
+	rsr		ARG1, EXCCAUSE					/* Argument 1 = EXCCAUSE */
+	mov		ARG2, a12						/* Argument 2 = pointer to register save area */
+	CALL	xtensa_user						/* Call xtensa_user */
+
+	mov		a2, RETVAL							/* a2 = address of new state save area */
 
 	/* Restore registers in preparation to return from interrupt */
 
-	mov		a2, a12							/* a2 = address of new state save area */
 	call0	_xtensa_context_restore			/* (Preserves a2) */
 
 	/* Restore only level-specific regs (the rest were already restored) */
 
-	l32i	a0, a2, (4 * REG_PS)			/* Retrieve interruptee's PS */
-	wsr		a0, PS
-	l32i	a0, a2, (4 * REG_PC)			/* Retrieve interruptee's PC */
-	wsr		a0, EPC_1
-	l32i	a0, a2, (4 * REG_A0)			/* Retrieve interruptee's A0 */
-	l32i	sp, a2, (4 * REG_A1)			/* Remove interrupt stack frame */
-	l32i	a2, a2, (4 * REG_A2)			/* Retrieve interruptee's A2 */
-	rsync									/* Ensure PS and EPC written */
+	exception_exit 1
 
 	/* Return from exception. RFE returns from either the UserExceptionVector
 	 * or the KernelExceptionVector.  RFE sets PS.EXCM back to 0, and then
@@ -267,26 +227,19 @@ _xtensa_user_handler:
 
 _xtensa_syscall_handler:
 
-	/* Allocate stack frame and save A0, A1, and PS */
+	/* Create interrupt frame and save minimal context. */
 
-	mov		a0, sp							/* Save SP in A0 */
-	addi	sp, sp, -XCPTCONTEXT_SIZE	/* Allocate interrupt stack frame */
-	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
-	rsr		a0, PS							/* Save interruptee's PS */
-	s32i	a0, sp, (4 * REG_PS)
-	rsr		a0, EXCSAVE_1					/* Save interruptee's a0 */
-	s32i	a0, sp, (4 * REG_A0)
+	exception_entry 1
 
-	/* Save EPC */
+	/* Save rest of interrupt context. */
 
-#if XCHAL_HAVE_LOOPS != 0
-	/* Save A2 and A3 now to give us some registers to work with.  A0, A2
-	 * and A3 are now available.
+	call0	_xtensa_context_save
+
+	/* Save EPC (note that this will overwrite the PC saved by the exception
+	 * entry with the correct value skipping the syscall instruction.)
 	 */
 
-	s32i	a2, sp, (4 * REG_A2)			/* Save interruptee's A2 */
-	s32i	a3, sp, (4 * REG_A3)			/* Save interruptee's A3 */
-
+#if XCHAL_HAVE_LOOPS != 0
 	/* Get the interruptee's PC and skip over the 'syscall' instruction.
 	 * If it's at the end of a zero-overhead loop and it's not on the last
 	 * iteration, decrement loop counter and skip to beginning of loop.
@@ -317,16 +270,9 @@ _xtensa_syscall_handler:
 
 	wsr		a0, EPC_1						/* Update PC */
 	s32i	a0, sp, (4 * REG_PC)
-
-	s32i	a2, sp, (4 * REG_A2)			/* Save interruptee's A2 */
-	s32i	a3, sp, (4 * REG_A3)			/* Save interruptee's A3 */
 #endif
 
-	/* Save rest of interrupt context. */
-
-	call0	_xtensa_context_save			/* Save full register state */
-
-	/* Dispatch the sycall as with other interrupts. */
+	/* Dispatch the syscall as with other interrupts. */
 
 	mov		a12, sp							/* a12 = address of register save area */
 
@@ -340,30 +286,16 @@ _xtensa_syscall_handler:
 
 	ps_setup	1 a0
 
-#ifdef __XTENSA_CALL0_ABI__
-	movi	a2, XTENSA_IRQ_SYSCALL			/* Argument 1: IRQ number */
-	mov		a3, a12							/* Argument 2: Top of stack = register save area */
-	call0	xtensa_irq_dispatch				/* Call xtensa_int_decode */
+	movi	ARG1, XTENSA_IRQ_SYSCALL			/* Argument 1: IRQ number */
+	mov		ARG2, a12							/* Argument 2: Top of stack = register save area */
+	CALL	xtensa_irq_dispatch					/* Call xtensa_int_decode */
 
-	/* On return from xtensa_irq_dispatch, A2 will contain the address of the new
-	 * register save area.  Usually this would be the same as the current SP.
-	 * But in the event of a context switch, A2 will instead refer to the TCB
-	 * register save area.
+	/* xtensa_irq_dispatch returns the address of the new register save area.
+	 * Usually this would be the same as the current SP. But in the event of
+	 * a context switch, it will instead refer to the TCB register save area.
 	 */
 
-#else
-	movi	a6, XTENSA_IRQ_SYSCALL			/* Argument 1: IRQ number */
-	mov		a7, a12							/* Argument 2: Top of stack = register save area */
-	call4	xtensa_irq_dispatch				/* Call xtensa_int_decode */
-
-	/* On return from xtensa_irq_dispatch, A6 will contain the address of the new
-	 * register save area.  Usually this would be the same as the current SP.
-	 * But in the event of a context switch, A6 will instead refer to the TCB
-	 * register save area.
-	 */
-
-	mov		a2, a6							/* Switch to the new register save area */
-#endif
+	mov		a2, RETVAL							/* Switch to the new register save area */
 
 	/* Restore registers in preparation to return from interrupt */
 
@@ -371,14 +303,7 @@ _xtensa_syscall_handler:
 
 	/* Restore only level-specific regs (the rest were already restored) */
 
-	l32i	a0, a2, (4 * REG_PS)			/* Retrieve interruptee's PS */
-	wsr		a0, PS
-	l32i	a0, a2, (4 * REG_PC)			/* Retrieve interruptee's PC */
-	wsr		a0, EPC_1
-	l32i	a0, a2, (4 * REG_A0)			/* Retrieve interruptee's A0 */
-	l32i	sp, a2, (4 * REG_A1)			/* Remove interrupt stack frame */
-	l32i	a2, a2, (4 * REG_A2)			/* Retrieve interruptee's A2 */
-	rsync									/* Ensure PS and EPC written */
+	exception_exit 1
 
 	/* Return from exception. RFE returns from either the UserExceptionVector
 	 * or the KernelExceptionVector.  RFE sets PS.EXCM back to 0, and then
@@ -448,11 +373,10 @@ _xtensa_coproc_handler:
 	s32i	a0, sp, (4 * REG_PC)
 	rsr		a0, EXCSAVE_1					/* Save interruptee's a0 */
 	s32i	a0, sp, (4 * REG_A0)
+	s32i	a2, sp, (4 * REG_A2)
 
 	/* Save rest of interrupt context. */
 
-	s32i	a2, sp, (4 * REG_A2)
-	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Switch to an interrupt stack if we have one */
@@ -470,26 +394,15 @@ _xtensa_coproc_handler:
 
 	/* Set up PS for C, re-enable hi-pri interrupts, and clear EXCM. */
 
-#ifdef __XTENSA_CALL0_ABI__
-	movi	a0, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM
-#else
-	movi	a0, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE
-#endif
-	wsr		a0, PS
+	ps_setup	1 a0
 
 	/* Call xtensa_user_panic, passing both the EXCCAUSE and a pointer to the
 	 * beginning of the register save area.
 	 */
 
-#ifdef __XTENSA_CALL0_ABI__
-	rsr		a2, EXCCAUSE					/* Argument 1 (a2) = EXCCAUSE */
-	mov		a3, sp							/* Argument 2 (a2) = pointer to register save area */
-	calx0	xtensa_user_panic				/* Call xtensa_user_panic */
-#else
-	rsr		a6, EXCCAUSE					/* Argument 1 (a2) = EXCCAUSE */
-	mov		a7, sp							/* Argument 2 (a2) = pointer to register save area */
-	call4	xtensa_user_panic				/* Call xtensa_user_panic */
-#endif
+	rsr		ARG1, EXCCAUSE					/* Argument 1 = EXCCAUSE */
+	mov		ARG2, sp						/* Argument 2 = pointer to register save area */
+	CALL	xtensa_user_panic				/* Call xtensa_user_panic */
 
 	/* xtensa_user_panic should not return */
 

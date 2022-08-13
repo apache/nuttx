@@ -228,7 +228,7 @@
  * header
  */
 
-#define BUF ((FAR struct eth_hdr_s *)priv->dev.d_buf)
+#define BUF ((struct eth_hdr_s *)priv->dev.d_buf)
 
 /****************************************************************************
  * Private Types
@@ -354,12 +354,12 @@ static int  sam_recvframe(struct sam_emac_s *priv);
 static void sam_receive(struct sam_emac_s *priv);
 static void sam_txdone(struct sam_emac_s *priv);
 
-static void sam_interrupt_work(FAR void *arg);
-static int  sam_emac_interrupt(int irq, void *context, FAR void *arg);
+static void sam_interrupt_work(void *arg);
+static int  sam_emac_interrupt(int irq, void *context, void *arg);
 
 /* Watchdog timer expirations */
 
-static void sam_txtimeout_work(FAR void *arg);
+static void sam_txtimeout_work(void *arg);
 static void sam_txtimeout_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
@@ -367,7 +367,7 @@ static void sam_txtimeout_expiry(wdparm_t arg);
 static int  sam_ifup(struct net_driver_s *dev);
 static int  sam_ifdown(struct net_driver_s *dev);
 
-static void sam_txavail_work(FAR void *arg);
+static void sam_txavail_work(void *arg);
 static int  sam_txavail(struct net_driver_s *dev);
 
 #if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
@@ -1416,9 +1416,9 @@ static void sam_txdone(struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-static void sam_interrupt_work(FAR void *arg)
+static void sam_interrupt_work(void *arg)
 {
-  FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)arg;
+  struct sam_emac_s *priv = (struct sam_emac_s *)arg;
   uint32_t isr;
   uint32_t rsr;
   uint32_t tsr;
@@ -1612,7 +1612,7 @@ static void sam_interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int sam_emac_interrupt(int irq, void *context, FAR void *arg)
+static int sam_emac_interrupt(int irq, void *context, void *arg)
 {
   struct sam_emac_s *priv = &g_emac;
 
@@ -1667,9 +1667,9 @@ static int sam_emac_interrupt(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static void sam_txtimeout_work(FAR void *arg)
+static void sam_txtimeout_work(void *arg)
 {
-  FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)arg;
+  struct sam_emac_s *priv = (struct sam_emac_s *)arg;
 
   nerr("ERROR: Timeout!\n");
 
@@ -1707,7 +1707,7 @@ static void sam_txtimeout_work(FAR void *arg)
 
 static void sam_txtimeout_expiry(wdparm_t arg)
 {
-  FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)arg;
+  struct sam_emac_s *priv = (struct sam_emac_s *)arg;
 
   /* Disable further Ethernet interrupts.  This will prevent some race
    * conditions with interrupt work.  There is still a potential race
@@ -1859,9 +1859,9 @@ static int sam_ifdown(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void sam_txavail_work(FAR void *arg)
+static void sam_txavail_work(void *arg)
 {
-  FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)arg;
+  struct sam_emac_s *priv = (struct sam_emac_s *)arg;
 
   ninfo("ifup: %d\n", priv->ifup);
 
@@ -1899,7 +1899,7 @@ static void sam_txavail_work(FAR void *arg)
 
 static int sam_txavail(struct net_driver_s *dev)
 {
-  FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)dev->d_private;
+  struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
 
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx

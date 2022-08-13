@@ -78,7 +78,7 @@ void imx_lowsetup(void);
 
 #ifdef IMX_HAVE_UART
 int imx_uart_configure(uint32_t base,
-                       FAR const struct uart_config_s *config);
+                       const struct uart_config_s *config);
 #endif
 
 /****************************************************************************

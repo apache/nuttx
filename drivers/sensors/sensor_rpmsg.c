@@ -49,8 +49,8 @@
 #define SENSOR_RPMSG_IOCTL_ACK     8
 
 #define SENSOR_RPMSG_FUNCTION(name, cmd, arg1, arg2, size, wait) \
-static int sensor_rpmsg_##name(FAR struct file *filep, \
-                               FAR struct sensor_lowerhalf_s *lower, \
+static int sensor_rpmsg_##name(FAR struct sensor_lowerhalf_s *lower, \
+                               FAR struct file *filep, \
                                unsigned long arg1) \
 { \
   FAR struct sensor_rpmsg_dev_s *dev = lower->priv; \
@@ -59,7 +59,7 @@ static int sensor_rpmsg_##name(FAR struct file *filep, \
 \
   if (drv->ops->name) \
     { \
-      return drv->ops->name(filep, drv, arg2); \
+      return drv->ops->name(drv, filep, arg2); \
     } \
   else if (!(filep->f_oflags & SENSOR_REMOTE)) \
     { \
@@ -191,30 +191,30 @@ struct sensor_rpmsg_ioctl_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int sensor_rpmsg_open(FAR struct file *filep,
-                             FAR struct sensor_lowerhalf_s *lower);
-static int sensor_rpmsg_close(FAR struct file *filep,
-                              FAR struct sensor_lowerhalf_s *lower);
-static int sensor_rpmsg_activate(FAR struct file *filep,
-                                 FAR struct sensor_lowerhalf_s *lower,
+static int sensor_rpmsg_open(FAR struct sensor_lowerhalf_s *lower,
+                             FAR struct file *filep);
+static int sensor_rpmsg_close(FAR struct sensor_lowerhalf_s *lower,
+                              FAR struct file *filep);
+static int sensor_rpmsg_activate(FAR struct sensor_lowerhalf_s *lower,
+                                 FAR struct file *filep,
                                  bool enable);
-static int sensor_rpmsg_set_interval(FAR struct file *filep,
-                                     FAR struct sensor_lowerhalf_s *lower,
+static int sensor_rpmsg_set_interval(FAR struct sensor_lowerhalf_s *lower,
+                                     FAR struct file *filep,
                                      FAR unsigned long *period_us);
-static int sensor_rpmsg_batch(FAR struct file *filep,
-                              FAR struct sensor_lowerhalf_s *lower,
+static int sensor_rpmsg_batch(FAR struct sensor_lowerhalf_s *lower,
+                              FAR struct file *filep,
                               FAR unsigned long *latency_us);
-static int sensor_rpmsg_selftest(FAR struct file *filep,
-                                 FAR struct sensor_lowerhalf_s *lower,
+static int sensor_rpmsg_selftest(FAR struct sensor_lowerhalf_s *lower,
+                                 FAR struct file *filep,
                                  unsigned long arg);
-static int sensor_rpmsg_set_calibvalue(FAR struct file *filep,
-                                  FAR struct sensor_lowerhalf_s *lower,
+static int sensor_rpmsg_set_calibvalue(FAR struct sensor_lowerhalf_s *lower,
+                                       FAR struct file *filep,
+                                       unsigned long arg);
+static int sensor_rpmsg_calibrate(FAR struct sensor_lowerhalf_s *lower,
+                                  FAR struct file *filep,
                                   unsigned long arg);
-static int sensor_rpmsg_calibrate(FAR struct file *filep,
-                                  FAR struct sensor_lowerhalf_s *lower,
-                                  unsigned long arg);
-static int sensor_rpmsg_control(FAR struct file *filep,
-                                FAR struct sensor_lowerhalf_s *lower,
+static int sensor_rpmsg_control(FAR struct sensor_lowerhalf_s *lower,
+                                FAR struct file *filep,
                                 int cmd, unsigned long arg);
 static int sensor_rpmsg_adv_handler(FAR struct rpmsg_endpoint *ept,
                                     FAR void *data, size_t len,
@@ -565,8 +565,8 @@ static void sensor_rpmsg_free_stub(FAR struct sensor_rpmsg_stub_s *stub)
   kmm_free(stub);
 }
 
-static int sensor_rpmsg_open(FAR struct file *filep,
-                             FAR struct sensor_lowerhalf_s *lower)
+static int sensor_rpmsg_open(FAR struct sensor_lowerhalf_s *lower,
+                             FAR struct file *filep)
 {
   FAR struct sensor_rpmsg_dev_s *dev = lower->priv;
   FAR struct sensor_lowerhalf_s *drv = dev->drv;
@@ -574,7 +574,7 @@ static int sensor_rpmsg_open(FAR struct file *filep,
 
   if (drv->ops->open)
     {
-      ret = drv->ops->open(filep, drv);
+      ret = drv->ops->open(drv, filep);
       if (ret < 0)
         {
           return ret;
@@ -607,8 +607,8 @@ static int sensor_rpmsg_open(FAR struct file *filep,
   return 0;
 }
 
-static int sensor_rpmsg_close(FAR struct file *filep,
-                              FAR struct sensor_lowerhalf_s *lower)
+static int sensor_rpmsg_close(FAR struct sensor_lowerhalf_s *lower,
+                              FAR struct file *filep)
 {
   FAR struct sensor_rpmsg_dev_s *dev = lower->priv;
   FAR struct sensor_lowerhalf_s *drv = dev->drv;
@@ -620,7 +620,7 @@ static int sensor_rpmsg_close(FAR struct file *filep,
 
   if (drv->ops->close)
     {
-      ret = drv->ops->close(filep, drv);
+      ret = drv->ops->close(drv, filep);
     }
 
   if (filep->f_oflags & SENSOR_REMOTE)
@@ -663,16 +663,16 @@ static int sensor_rpmsg_close(FAR struct file *filep,
   return ret;
 }
 
-static int sensor_rpmsg_activate(FAR struct file *filep,
-                                  FAR struct sensor_lowerhalf_s *lower,
-                                  bool enable)
+static int sensor_rpmsg_activate(FAR struct sensor_lowerhalf_s *lower,
+                                 FAR struct file *filep,
+                                 bool enable)
 {
   FAR struct sensor_rpmsg_dev_s *dev = lower->priv;
   FAR struct sensor_lowerhalf_s *drv = dev->drv;
 
   if (drv->ops->activate)
     {
-      return drv->ops->activate(filep, drv, enable);
+      return drv->ops->activate(drv, filep, enable);
     }
 
   return 0;
@@ -686,8 +686,8 @@ SENSOR_RPMSG_FUNCTION(set_calibvalue, SNIOC_SET_CALIBVALUE,
                       arg, arg, 256, true)
 SENSOR_RPMSG_FUNCTION(calibrate, SNIOC_CALIBRATE, arg, arg, 256, true)
 
-static int sensor_rpmsg_control(FAR struct file *filep,
-                                FAR struct sensor_lowerhalf_s *lower,
+static int sensor_rpmsg_control(FAR struct sensor_lowerhalf_s *lower,
+                                FAR struct file *filep,
                                 int cmd, unsigned long arg)
 {
   FAR struct sensor_rpmsg_dev_s *dev = lower->priv;
@@ -696,7 +696,7 @@ static int sensor_rpmsg_control(FAR struct file *filep,
 
   if (drv->ops->control)
     {
-      return drv->ops->control(filep, drv, cmd, arg);
+      return drv->ops->control(drv, filep, cmd, arg);
     }
   else if (!(filep->f_oflags & SENSOR_REMOTE) && _SNIOCVALID(cmd))
     {

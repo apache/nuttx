@@ -33,14 +33,14 @@
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-typedef CODE void (*alm_callback_t)(FAR void *arg, unsigned int alarmid);
+typedef void (*alm_callback_t)(void *arg, unsigned int alarmid);
 
 /* These features are the same than in STM32F4 and STM32L4 */
 
 enum alm_id_e
 {
-  RTC_ALARMA = 0,               /* RTC ALARM A */
-  RTC_ALARMB,                   /* RTC ALARM B */
+  RTC_ALARMA = 0,           /* RTC ALARM A */
+  RTC_ALARMB,               /* RTC ALARM B */
   RTC_ALARM_LAST
 };
 
@@ -48,23 +48,23 @@ enum alm_id_e
 
 struct alm_setalarm_s
 {
-  int as_id;                    /* enum alm_id_e */
-  struct tm as_time;            /* Alarm expiration time */
-  alm_callback_t as_cb;         /* Callback (if non-NULL) */
-  FAR void *as_arg;             /* Argument for callback */
+  int as_id;                /* enum alm_id_e */
+  struct tm as_time;        /* Alarm expiration time */
+  alm_callback_t as_cb;     /* Callback (if non-NULL) */
+  void *as_arg;             /* Argument for callback */
 };
 
 /* Structure used to pass parameters to query an alarm */
 
 struct alm_rdalarm_s
 {
-  int ar_id;                    /* enum alm_id_e */
-  FAR struct rtc_time *ar_time; /* Argument for storing ALARM RTC time */
+  int ar_id;                /* enum alm_id_e */
+  struct rtc_time *ar_time; /* Argument for storing ALARM RTC time */
 };
 #endif
 
 #ifdef CONFIG_RTC_PERIODIC
-typedef CODE int (*wakeupcb_t)(void);
+typedef int (*wakeupcb_t)(void);
 #endif
 
 /****************************************************************************
@@ -86,7 +86,7 @@ typedef CODE int (*wakeupcb_t)(void);
  *
  ****************************************************************************/
 
-int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo);
+int stm32_rtc_setalarm(struct alm_setalarm_s *alminfo);
 
 /****************************************************************************
  * Name: stm32_rtc_rdalarm
@@ -102,7 +102,7 @@ int stm32_rtc_setalarm(FAR struct alm_setalarm_s *alminfo);
  *
  ****************************************************************************/
 
-int stm32_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo);
+int stm32_rtc_rdalarm(struct alm_rdalarm_s *alminfo);
 
 /****************************************************************************
  * Name: stm32_rtc_cancelalarm
@@ -137,7 +137,7 @@ int stm32_rtc_cancelalarm(enum alm_id_e alarmid);
  *
  ****************************************************************************/
 
-int stm32_rtc_setperiodic(FAR const struct timespec *period,
+int stm32_rtc_setperiodic(const struct timespec *period,
                           wakeupcb_t callback);
 
 /****************************************************************************

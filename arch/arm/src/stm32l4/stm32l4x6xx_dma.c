@@ -204,12 +204,12 @@ static inline void dmachan_putreg(struct stm32l4_dma_s *dmach,
  *
  ****************************************************************************/
 
-static int stm32l4_dmatake(FAR struct stm32l4_dma_s *dmach)
+static int stm32l4_dmatake(struct stm32l4_dma_s *dmach)
 {
   return nxsem_wait_uninterruptible(&dmach->sem);
 }
 
-static inline void stm32l4_dmagive(FAR struct stm32l4_dma_s *dmach)
+static inline void stm32l4_dmagive(struct stm32l4_dma_s *dmach)
 {
   nxsem_post(&dmach->sem);
 }
@@ -250,7 +250,7 @@ static void stm32l4_dmachandisable(struct stm32l4_dma_s *dmach)
  *
  ****************************************************************************/
 
-static int stm32l4_dmainterrupt(int irq, void *context, FAR void *arg)
+static int stm32l4_dmainterrupt(int irq, void *context, void *arg)
 {
   struct stm32l4_dma_s *dmach;
   uint32_t isr;

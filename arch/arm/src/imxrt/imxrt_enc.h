@@ -60,6 +60,6 @@
  *
  ****************************************************************************/
 
-int imxrt_qeinitialize(FAR const char *devpath, int enc);
+int imxrt_qeinitialize(const char *devpath, int enc);
 
 #endif /* __ARCH_ARM_SRC_IMXRT_IMXRT_ENC_H */

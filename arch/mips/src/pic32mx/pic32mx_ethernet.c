@@ -369,7 +369,7 @@ static void pic32mx_freebuffer(struct pic32mx_driver_s *priv,
 static inline void pic32mx_txdescinit(struct pic32mx_driver_s *priv);
 static inline void pic32mx_rxdescinit(struct pic32mx_driver_s *priv);
 static inline struct pic32mx_txdesc_s *
-  pic32mx_txdesc(struct pic32mx_driver_s *priv);
+pic32mx_txdesc(struct pic32mx_driver_s *priv);
 static inline void pic32mx_txnext(struct pic32mx_driver_s *priv);
 static inline void pic32mx_rxreturn(struct pic32mx_rxdesc_s *rxdesc);
 static struct pic32mx_rxdesc_s *
@@ -847,7 +847,7 @@ static inline void pic32mx_rxdescinit(struct pic32mx_driver_s *priv)
  ****************************************************************************/
 
 static inline struct pic32mx_txdesc_s *
-  pic32mx_txdesc(struct pic32mx_driver_s *priv)
+pic32mx_txdesc(struct pic32mx_driver_s *priv)
 {
   struct pic32mx_txdesc_s *txdesc;
 

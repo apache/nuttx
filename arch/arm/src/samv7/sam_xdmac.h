@@ -31,6 +31,8 @@
 
 #include "chip.h"
 
+#include "hardware/sam_xdmac.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -152,7 +154,7 @@
  * Public Types
  ****************************************************************************/
 
-typedef FAR void *DMA_HANDLE;
+typedef void *DMA_HANDLE;
 typedef void (*dma_callback_t)(DMA_HANDLE handle, void *arg, int result);
 
 /* The following is used for sampling DMA registers when CONFIG DEBUG_DMA is
@@ -221,6 +223,20 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: sam_destaddr
+ *
+ * Description:
+ *   Returns the pointer to the destionation address, i.e the last address
+ *   data were written by DMA.
+ *
+ * Assumptions:
+ *   - DMA handle allocated by sam_dmachannel()
+ *
+ ****************************************************************************/
+
+size_t sam_destaddr(DMA_HANDLE handle);
 
 /****************************************************************************
  * Name: sam_dmachannel
@@ -303,6 +319,43 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr,
 
 int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr,
                    uint32_t maddr, size_t nbytes);
+
+/****************************************************************************
+ * Name: sam_dmarxsetup_circular
+ *
+ * Description:
+ *   Configure DMA for receipt of two circular buffers for peripheral to
+ *   memory transfer. Function sam_dmastart_circular() needs to be called
+ *   to start the transfer. Only peripheral to memory transfer is currently
+ *   supported.
+ *
+ * Input Parameters:
+ *   handle - DMA handler
+ *   descr - array with DMA descriptors
+ *   maddr - array of memory addresses (i.e. destination addresses)
+ *   paddr - peripheral address (i.e. source address)
+ *   nbytes - number of bytes to transfer
+ *   ndescrs - number of descriptors (i.e. the lenght of descr array)
+ *
+ ****************************************************************************/
+
+int sam_dmarxsetup_circular(DMA_HANDLE handle,
+                            struct chnext_view1_s *descr[],
+                            uint32_t maddr[],
+                            uint32_t paddr,
+                            size_t nbytes,
+                            uint8_t ndescrs);
+
+/****************************************************************************
+ * Name: sam_dmastart_circular
+ *
+ * Description:
+ *   Start the DMA transfer with circular buffers.
+ *
+ ****************************************************************************/
+
+int sam_dmastart_circular(DMA_HANDLE handle, dma_callback_t callback,
+                          void *arg);
 
 /****************************************************************************
  * Name: sam_dmastart

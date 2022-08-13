@@ -194,11 +194,11 @@ enum converter_mode_e
 
 struct smps_lower_dev_s
 {
-  FAR struct hrtim_dev_s     *hrtim; /* PWM generation */
-  FAR struct stm32_adc_dev_s *adc;   /* input and output voltage sense */
-  FAR struct comp_dev_s      *comp;  /* not used in this demo - only as reference */
-  FAR struct dac_dev_s       *dac;   /* not used in this demo - only as reference */
-  FAR struct opamp_dev_s     *opamp; /* not used in this demo - only as reference */
+  struct hrtim_dev_s     *hrtim; /* PWM generation */
+  struct stm32_adc_dev_s *adc;   /* input and output voltage sense */
+  struct comp_dev_s      *comp;  /* not used in this demo - only as reference */
+  struct dac_dev_s       *dac;   /* not used in this demo - only as reference */
+  struct opamp_dev_s     *opamp; /* not used in this demo - only as reference */
 };
 
 /* Private data for smps */
@@ -219,24 +219,24 @@ struct smps_priv_s
  * Private Function Protototypes
  ****************************************************************************/
 
-static int smps_setup(FAR struct smps_dev_s *dev);
-static int smps_shutdown(FAR struct smps_dev_s *dev);
-static int smps_start(FAR struct smps_dev_s *dev);
-static int smps_stop(FAR struct smps_dev_s *dev);
-static int smps_params_set(FAR struct smps_dev_s *dev,
-                           FAR struct smps_params_s *param);
-static int smps_mode_set(FAR struct smps_dev_s *dev, uint8_t mode);
-static int smps_limits_set(FAR struct smps_dev_s *dev,
-                           FAR struct smps_limits_s *limits);
-static int smps_state_get(FAR struct smps_dev_s *dev,
-                          FAR struct smps_state_s *state);
-static int smps_fault_set(FAR struct smps_dev_s *dev, uint8_t fault);
-static int smps_fault_get(FAR struct smps_dev_s *dev,
-                              FAR uint8_t *fault);
-static int smps_fault_clean(FAR struct smps_dev_s *dev,
-                                uint8_t fault);
-static int smps_ioctl(FAR struct smps_dev_s *dev, int cmd,
-                          unsigned long arg);
+static int smps_setup(struct smps_dev_s *dev);
+static int smps_shutdown(struct smps_dev_s *dev);
+static int smps_start(struct smps_dev_s *dev);
+static int smps_stop(struct smps_dev_s *dev);
+static int smps_params_set(struct smps_dev_s *dev,
+                           struct smps_params_s *param);
+static int smps_mode_set(struct smps_dev_s *dev, uint8_t mode);
+static int smps_limits_set(struct smps_dev_s *dev,
+                           struct smps_limits_s *limits);
+static int smps_state_get(struct smps_dev_s *dev,
+                          struct smps_state_s *state);
+static int smps_fault_set(struct smps_dev_s *dev, uint8_t fault);
+static int smps_fault_get(struct smps_dev_s *dev,
+                          uint8_t *fault);
+static int smps_fault_clean(struct smps_dev_s *dev,
+                            uint8_t fault);
+static int smps_ioctl(struct smps_dev_s *dev, int cmd,
+                      unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -315,10 +315,10 @@ static const uint32_t g_adc1pins[ADC1_NCHANNELS] =
  * Private Functions
  ****************************************************************************/
 
-static int smps_shutdown(FAR struct smps_dev_s *dev)
+static int smps_shutdown(struct smps_dev_s *dev)
 {
-  FAR struct smps_s      *smps = (FAR struct smps_s *)dev->priv;
-  FAR struct smps_priv_s *priv = (struct smps_priv_s *)smps->priv;
+  struct smps_s      *smps = (struct smps_s *)dev->priv;
+  struct smps_priv_s *priv = (struct smps_priv_s *)smps->priv;
 
   /* Stop smps if running */
 
@@ -344,15 +344,15 @@ static int smps_shutdown(FAR struct smps_dev_s *dev)
  *
  ****************************************************************************/
 
-static int smps_setup(FAR struct smps_dev_s *dev)
+static int smps_setup(struct smps_dev_s *dev)
 {
-  FAR struct smps_lower_dev_s *lower = dev->lower;
-  FAR struct smps_s           *smps  = (FAR struct smps_s *)dev->priv;
-  FAR struct hrtim_dev_s      *hrtim = NULL;
-  FAR struct stm32_adc_dev_s  *adc   = NULL;
-  FAR struct smps_priv_s      *priv;
-  struct adc_channel_s         channels[ADC1_NCHANNELS];
-  struct adc_sample_time_s     stime;
+  struct smps_lower_dev_s *lower = dev->lower;
+  struct smps_s           *smps  = (struct smps_s *)dev->priv;
+  struct hrtim_dev_s      *hrtim = NULL;
+  struct stm32_adc_dev_s  *adc   = NULL;
+  struct smps_priv_s      *priv;
+  struct adc_channel_s     channels[ADC1_NCHANNELS];
+  struct adc_sample_time_s stime;
   int ret = OK;
   int i   = 0;
 
@@ -404,13 +404,13 @@ errout:
   return ret;
 }
 
-static int smps_start(FAR struct smps_dev_s *dev)
+static int smps_start(struct smps_dev_s *dev)
 {
-  FAR struct smps_lower_dev_s *lower = dev->lower;
-  FAR struct smps_s           *smps  = (FAR struct smps_s *)dev->priv;
-  FAR struct smps_priv_s      *priv  = (struct smps_priv_s *)smps->priv;
-  FAR struct hrtim_dev_s      *hrtim = lower->hrtim;
-  FAR struct stm32_adc_dev_s  *adc   = lower->adc;
+  struct smps_lower_dev_s *lower = dev->lower;
+  struct smps_s           *smps  = (struct smps_s *)dev->priv;
+  struct smps_priv_s      *priv  = (struct smps_priv_s *)smps->priv;
+  struct hrtim_dev_s      *hrtim = lower->hrtim;
+  struct stm32_adc_dev_s  *adc   = lower->adc;
   volatile uint64_t per = 0;
   uint64_t fclk = 0;
   int ret = OK;
@@ -522,13 +522,13 @@ errout:
   return ret;
 }
 
-static int smps_stop(FAR struct smps_dev_s *dev)
+static int smps_stop(struct smps_dev_s *dev)
 {
-  FAR struct smps_lower_dev_s *lower = dev->lower;
-  FAR struct smps_s           *smps  = (FAR struct smps_s *)dev->priv;
-  FAR struct smps_priv_s      *priv  = (struct smps_priv_s *)smps->priv;
-  FAR struct hrtim_dev_s      *hrtim = lower->hrtim;
-  FAR struct stm32_adc_dev_s  *adc   = lower->adc;
+  struct smps_lower_dev_s *lower = dev->lower;
+  struct smps_s           *smps  = (struct smps_s *)dev->priv;
+  struct smps_priv_s      *priv  = (struct smps_priv_s *)smps->priv;
+  struct hrtim_dev_s      *hrtim = lower->hrtim;
+  struct stm32_adc_dev_s  *adc   = lower->adc;
 
   /* Disable HRTIM outputs */
 
@@ -553,10 +553,10 @@ static int smps_stop(FAR struct smps_dev_s *dev)
   return OK;
 }
 
-static int smps_params_set(FAR struct smps_dev_s *dev,
-                           FAR struct smps_params_s *param)
+static int smps_params_set(struct smps_dev_s *dev,
+                           struct smps_params_s *param)
 {
-  FAR struct smps_s *smps = (FAR struct smps_s *)dev->priv;
+  struct smps_s *smps = (struct smps_s *)dev->priv;
   int ret = OK;
 
   /* Only output voltage */
@@ -578,9 +578,9 @@ static int smps_params_set(FAR struct smps_dev_s *dev,
   return ret;
 }
 
-static int smps_mode_set(FAR struct smps_dev_s *dev, uint8_t mode)
+static int smps_mode_set(struct smps_dev_s *dev, uint8_t mode)
 {
-  FAR struct smps_s *smps = (FAR struct smps_s *)dev->priv;
+  struct smps_s *smps = (struct smps_s *)dev->priv;
   int ret = OK;
 
   /* Only constant voltage mode supported */
@@ -600,10 +600,10 @@ errout:
   return ret;
 }
 
-static int smps_limits_set(FAR struct smps_dev_s *dev,
-                           FAR struct smps_limits_s *limits)
+static int smps_limits_set(struct smps_dev_s *dev,
+                           struct smps_limits_s *limits)
 {
-  FAR struct smps_s *smps = (FAR struct smps_s *)dev->priv;
+  struct smps_s *smps = (struct smps_s *)dev->priv;
   int ret = OK;
 
   /* Some assertions */
@@ -676,10 +676,10 @@ errout:
   return ret;
 }
 
-static int smps_state_get(FAR struct smps_dev_s *dev,
-                          FAR struct smps_state_s *state)
+static int smps_state_get(struct smps_dev_s *dev,
+                          struct smps_state_s *state)
 {
-  FAR struct smps_s *smps = (FAR struct smps_s *)dev->priv;
+  struct smps_s *smps = (struct smps_s *)dev->priv;
 
   /* Copy localy stored feedbacks data to status structure */
 
@@ -693,22 +693,22 @@ static int smps_state_get(FAR struct smps_dev_s *dev,
   return OK;
 }
 
-static int smps_fault_set(FAR struct smps_dev_s *dev, uint8_t fault)
+static int smps_fault_set(struct smps_dev_s *dev, uint8_t fault)
 {
   return OK;
 }
 
-static int smps_fault_get(FAR struct smps_dev_s *dev, FAR uint8_t *fault)
+static int smps_fault_get(struct smps_dev_s *dev, uint8_t *fault)
 {
   return OK;
 }
 
-static int smps_fault_clean(FAR struct smps_dev_s *dev, uint8_t fault)
+static int smps_fault_clean(struct smps_dev_s *dev, uint8_t fault)
 {
   return OK;
 }
 
-static int smps_ioctl(FAR struct smps_dev_s *dev, int cmd, unsigned long arg)
+static int smps_ioctl(struct smps_dev_s *dev, int cmd, unsigned long arg)
 {
   return OK;
 }
@@ -717,7 +717,7 @@ static int smps_ioctl(FAR struct smps_dev_s *dev, int cmd, unsigned long arg)
  * Name: smps_controller
  ****************************************************************************/
 
-static float smps_controller(FAR struct smps_priv_s *priv, float err)
+static float smps_controller(struct smps_priv_s *priv, float err)
 {
   float out = 0.0;
 
@@ -738,7 +738,7 @@ static void smps_duty_set(struct smps_priv_s *priv,
                           struct smps_lower_dev_s *lower,
                           float out)
 {
-  FAR struct hrtim_dev_s *hrtim = lower->hrtim;
+  struct hrtim_dev_s *hrtim = lower->hrtim;
   uint8_t mode = priv->conv_mode;
   uint16_t cmp = 0;
   float duty = 0.0;
@@ -842,7 +842,7 @@ static void smps_conv_mode_set(struct smps_priv_s *priv,
                                struct smps_lower_dev_s *lower,
                                uint8_t mode)
 {
-  FAR struct hrtim_dev_s *hrtim = lower->hrtim;
+  struct hrtim_dev_s *hrtim = lower->hrtim;
 
   /* Disable all outputs */
 
@@ -948,11 +948,11 @@ static void smps_conv_mode_set(struct smps_priv_s *priv,
 
 static void adc12_handler(void)
 {
-  FAR struct smps_dev_s       *dev   = &g_smps_dev;
-  FAR struct smps_s           *smps  = (FAR struct smps_s *)dev->priv;
-  FAR struct smps_priv_s      *priv  = (struct smps_priv_s *)smps->priv;
-  FAR struct smps_lower_dev_s *lower = dev->lower;
-  FAR struct stm32_adc_dev_s  *adc   = lower->adc;
+  struct smps_dev_s       *dev   = &g_smps_dev;
+  struct smps_s           *smps  = (struct smps_s *)dev->priv;
+  struct smps_priv_s      *priv  = (struct smps_priv_s *)smps->priv;
+  struct smps_lower_dev_s *lower = dev->lower;
+  struct stm32_adc_dev_s  *adc   = lower->adc;
   uint32_t pending;
   float ref = ADC_REF_VOLTAGE;
   float bit = ADC_VAL_MAX;
@@ -1052,12 +1052,12 @@ static void adc12_handler(void)
 
 int stm32_smps_setup(void)
 {
-  FAR struct smps_lower_dev_s *lower = &g_smps_lower;
-  FAR struct smps_dev_s *smps        = &g_smps_dev;
-  FAR struct hrtim_dev_s *hrtim      = NULL;
-  FAR struct adc_dev_s *adc          = NULL;
-  static bool initialized            = false;
-  int ret                            = OK;
+  struct smps_lower_dev_s *lower = &g_smps_lower;
+  struct smps_dev_s *smps        = &g_smps_dev;
+  struct hrtim_dev_s *hrtim      = NULL;
+  struct adc_dev_s *adc          = NULL;
+  static bool initialized        = false;
+  int ret                        = OK;
   int i;
 
   /* Initialize only once */

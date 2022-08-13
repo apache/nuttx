@@ -652,19 +652,20 @@
 # define DIR_PUTFILESIZE(p,v)      fat_putuint32(UBYTE_PTR(p,DIR_FILESIZE),v)
 
 # ifdef CONFIG_FAT_LFN
-#  define LDIR_PUTWCHAR1(p)        fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR1_5),v)
-#  define LDIR_PUTWCHAR2(p)        fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR1_5+2),v)
-#  define LDIR_PUTWCHAR3(p)        fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR1_5+4),v)
-#  define LDIR_PUTWCHAR4(p)        fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR1_5+6),v)
-#  define LDIR_PUTWCHAR5(p)        fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR1_5+8),v)
-#  define LDIR_PUTWCHAR6(p)        fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR6_11),v)
-#  define LDIR_PUTWCHAR7(p)        fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+2),v)
-#  define LDIR_PUTWCHAR8(p)        fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+4),v)
-#  define LDIR_PUTWCHAR9(p)        fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+6),v)
-#  define LDIR_PUTWCHAR10(p)       fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+8),v)
-#  define LDIR_PUTWCHAR11(p)       fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+10),v)
-#  define LDIR_PUTWCHAR12(p)       fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR12_13),v)
-#  define LDIR_PUTWCHAR13(p)       fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR12_13+2),v)
+#  define LDIR_PUTWCHAR1(p,v)      fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR1_5),v)
+#  define LDIR_PUTWCHAR2(p,v)      fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR1_5+2),v)
+#  define LDIR_PUTWCHAR3(p,v)      fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR1_5+4),v)
+#  define LDIR_PUTWCHAR4(p,v)      fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR1_5+6),v)
+#  define LDIR_PUTWCHAR5(p,v)      fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR1_5+8),v)
+#  define LDIR_PUTWCHAR6(p,v)      fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR6_11),v)
+#  define LDIR_PUTWCHAR7(p,v)      fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+2),v)
+#  define LDIR_PUTWCHAR8(p,v)      fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+4),v)
+#  define LDIR_PUTWCHAR9(p,v)      fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+6),v)
+#  define LDIR_PUTWCHAR10(p,v)     fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+8),v)
+#  define LDIR_PUTWCHAR11(p,v)     fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR6_11+10),v)
+#  define LDIR_PUTWCHAR12(p,v)     fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR12_13),v)
+#  define LDIR_PUTWCHAR13(p,v)     fat_putuint16(UBYTE_PTR(p,LDIR_WCHAR12_13+2),v)
+#  define LDIR_PUTFSTCLUSTLO(p,v)  fat_putuint16(UBYTE_PTR(p,LDIR_FSTCLUSTLO),v)
 # endif
 
 # define FSI_PUTLEADSIG(p,v)       fat_putuint32(UBYTE_PTR(p,FSI_LEADSIG),v)
@@ -807,6 +808,7 @@
 #  define LDIR_PUTWCHAR11(p,v)     UINT16_PUT(p,LDIR_WCHAR6_11+10,v)
 #  define LDIR_PUTWCHAR12(p,v)     UINT16_PUT(p,LDIR_WCHAR12_13,v)
 #  define LDIR_PUTWCHAR13(p,v)     UINT16_PUT(p,LDIR_WCHAR12_13+2,v)
+#  define LDIR_PUTFSTCLUSTLO(p,v)  UINT16_PUT(p,LDIR_FSTCLUSTLO,v)
 # endif
 
 # define FSI_PUTLEADSIG(p,v)       UINT32_PUT(p,FSI_LEADSIG,v)

@@ -256,22 +256,22 @@ static int pat9126ja_initchip(FAR struct pat9126ja_dev_s *priv);
 
 /* Sensor ops functions */
 
-static int pat9126ja_activate(FAR struct file *filep,
-                              FAR struct sensor_lowerhalf_s *lower,
+static int pat9126ja_activate(FAR struct sensor_lowerhalf_s *lower,
+                              FAR struct file *filep,
                               bool enable);
 #ifdef CONFIG_FACTEST_SENSORS_PAT9126JA
-static int pat9126ja_selftest(FAR struct file *filep,
-                              FAR struct sensor_lowerhalf_s *lower,
+static int pat9126ja_selftest(FAR struct sensor_lowerhalf_s *lower,
+                              FAR struct file *filep,
                               unsigned long arg);
-static int pat9126ja_calibrate(FAR struct file *filep,
-                               FAR struct sensor_lowerhalf_s *lower,
+static int pat9126ja_calibrate(FAR struct sensor_lowerhalf_s *lower,
+                               FAR struct file *filep,
                                unsigned long arg);
-static int pat9126ja_control(FAR struct file *filep,
-                             FAR struct sensor_lowerhalf_s *lower,
+static int pat9126ja_control(FAR struct sensor_lowerhalf_s *lower,
+                             FAR struct file *filep,
                              int cmd, unsigned long arg);
 #endif
-static int pat9126ja_set_calibvalue(FAR struct file *filep,
-                                    FAR struct sensor_lowerhalf_s *lower,
+static int pat9126ja_set_calibvalue(FAR struct sensor_lowerhalf_s *lower,
+                                    FAR struct file *filep,
                                     unsigned long arg);
 
 /* Sensor interrupt functions */
@@ -932,8 +932,8 @@ static int pat9126ja_initchip(FAR struct pat9126ja_dev_s *priv)
  *   sensor, it will disable sense path and stop convert.
  *
  * Input Parameters:
- *   filep  - The pointer of file, represents each user using the sensor.
  *   lower  - The instance of lower half sensor driver.
+ *   filep  - The pointer of file, represents each user using the sensor.
  *   enable - true(enable) and false(disable).
  *
  * Returned Value:
@@ -945,8 +945,8 @@ static int pat9126ja_initchip(FAR struct pat9126ja_dev_s *priv)
  *
  ****************************************************************************/
 
-static int pat9126ja_activate(FAR struct file *filep,
-                              FAR struct sensor_lowerhalf_s *lower,
+static int pat9126ja_activate(FAR struct sensor_lowerhalf_s *lower,
+                              FAR struct file *filep,
                               bool enable)
 {
   FAR struct pat9126ja_dev_s *priv = (FAR struct pat9126ja_dev_s *)lower;
@@ -1015,8 +1015,8 @@ static int pat9126ja_activate(FAR struct file *filep,
  *   and device functional inspection.
  *
  * Input Parameters:
- *   filep - The pointer of file, represents each user using the sensor.
  *   lower - The instance of lower half sensor driver.
+ *   filep - The pointer of file, represents each user using the sensor.
  *   arg   - The parameters associated with cmd.
  *
  * Returned Value:
@@ -1028,8 +1028,8 @@ static int pat9126ja_activate(FAR struct file *filep,
  *
  ****************************************************************************/
 #ifdef CONFIG_FACTEST_SENSORS_PAT9126JA
-static int pat9126ja_selftest(FAR struct file *filep,
-                              FAR struct sensor_lowerhalf_s *lower,
+static int pat9126ja_selftest(FAR struct sensor_lowerhalf_s *lower,
+                              FAR struct file *filep,
                               unsigned long arg)
 {
   FAR struct pat9126ja_dev_s *priv = (FAR struct pat9126ja_dev_s *)lower;
@@ -1068,8 +1068,8 @@ static int pat9126ja_selftest(FAR struct file *filep,
  *   before.
  *
  * Input Parameters:
- *   filep - The pointer of file, represents each user using the sensor.
  *   lower - The instance of lower half sensor driver.
+ *   filep - The pointer of file, represents each user using the sensor.
  *   arg   - The parameters associated with calibration value.
  *
  * Returned Value:
@@ -1081,8 +1081,8 @@ static int pat9126ja_selftest(FAR struct file *filep,
  *
  ****************************************************************************/
 
-static int pat9126ja_set_calibvalue(FAR struct file *filep,
-                                    FAR struct sensor_lowerhalf_s *lower,
+static int pat9126ja_set_calibvalue(FAR struct sensor_lowerhalf_s *lower,
+                                    FAR struct file *filep,
                                     unsigned long arg)
 {
   FAR struct pat9126ja_dev_s *priv = (FAR struct pat9126ja_dev_s *)lower;
@@ -1131,8 +1131,8 @@ static int pat9126ja_set_calibvalue(FAR struct file *filep,
  ****************************************************************************/
 
 #ifdef CONFIG_FACTEST_SENSORS_PAT9126JA
-static int pat9126ja_calibrate(FAR struct file *filep,
-                               FAR struct sensor_lowerhalf_s *lower,
+static int pat9126ja_calibrate(FAR struct sensor_lowerhalf_s *lower,
+                               FAR struct file *filep,
                                unsigned long arg)
 {
   FAR struct pat9126ja_dev_s *priv = (FAR struct pat9126ja_dev_s *)lower;
@@ -1154,8 +1154,8 @@ static int pat9126ja_calibrate(FAR struct file *filep,
  *   etc, which are all parsed and implemented by lower half driver.
  *
  * Input Parameters:
- *   filep      - The pointer of file, represents each user using the sensor.
  *   lower      - The instance of lower half sensor driver.
+ *   filep      - The pointer of file, represents each user using the sensor.
  *   cmd        - The special cmd for sensor.
  *   arg        - The parameters associated with cmd.
  *
@@ -1169,8 +1169,8 @@ static int pat9126ja_calibrate(FAR struct file *filep,
  *
  ****************************************************************************/
 #ifdef CONFIG_FACTEST_SENSORS_PAT9126JA
-static int pat9126ja_control(FAR struct file *filep,
-                             FAR struct sensor_lowerhalf_s *lower,
+static int pat9126ja_control(FAR struct sensor_lowerhalf_s *lower,
+                             FAR struct file *filep,
                              int cmd, unsigned long arg)
 {
   FAR struct pat9126ja_dev_s *priv = (FAR struct pat9126ja_dev_s *)lower;

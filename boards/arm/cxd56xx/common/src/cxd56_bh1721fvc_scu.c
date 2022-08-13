@@ -40,10 +40,10 @@
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_BH1721FVC_SCU
-int board_bh1721fvc_initialize(FAR const char *devpath, int bus)
+int board_bh1721fvc_initialize(const char *devpath, int bus)
 {
   int ret;
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
 
   sninfo("Initializing BH1721FVC...\n");
 

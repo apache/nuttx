@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/samv7/same70-qmtech/src/Makefile
+# boards/arm/samv7/same70-qmtech/src/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -52,6 +52,10 @@ endif
 
 ifneq (,$(findstring y,$(CONFIG_SAMV7_DAC0) $(CONFIG_SAMV7_DAC1)))
 CSRCS += sam_dac.c
+endif
+
+ifeq ($(CONFIG_DEV_GPIO),y)
+CSRCS += sam_gpio.c
 endif
 
 .PHONY = context distclean

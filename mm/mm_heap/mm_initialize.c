@@ -220,7 +220,7 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
 #  if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   heap->mm_procfs.name = name;
   heap->mm_procfs.heap = heap;
-#    if defined (CONFIG_DEBUG_MM) && defined(CONFIG_MM_BACKTRACE_DEFAULT)
+#    ifdef CONFIG_MM_BACKTRACE_DEFAULT
   heap->mm_procfs.backtrace = true;
 #    endif
 #  endif

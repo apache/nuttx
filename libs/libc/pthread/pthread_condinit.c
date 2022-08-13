@@ -54,7 +54,7 @@ int pthread_cond_init(FAR pthread_cond_t *cond,
 {
   int ret = OK;
 
-  sinfo("cond=0x%p attr=0x%p\n", cond, attr);
+  sinfo("cond=%p attr=%p\n", cond, attr);
 
   if (cond == NULL)
     {

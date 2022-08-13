@@ -423,7 +423,7 @@ config SAMV7_AFEC_DMASAMPLES
 	default 2
 	depends on SAMV7_AFEC_DMA
 	---help---
-		Number of DMA samples to be transfered. Number of samples less than
+		Number of DMA samples to be transferred. Number of samples less than
 		2 might be inneficient.
 
 choice
@@ -496,7 +496,7 @@ config SAMV7_AFEC_DMASAMPLES
 	default 2
 	depends on SAMV7_AFEC_DMA
 	---help---
-		Number of DMA samples to be transfered. Number of samples less than
+		Number of DMA samples to be transferred. Number of samples less than
 		2 might be inneficient.
 
 choice
@@ -797,26 +797,65 @@ config SAMV7_USBHOSTHS
 	depends on SAMV7_HAVE_USBHS
 	select USBHOST
 
-config SAMV7_USART0
+menuconfig SAMV7_USART0
 	bool "USART 0"
 	default n
 	depends on SAMV7_HAVE_USART0
 	select USART0_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
-config SAMV7_USART1
+if SAMV7_USART0
+
+config SAMV7_USART0_RS485MODE
+	bool "RS-485 on USART0"
+	default n
+	---help---
+		Enable RS-485 interface on USART0. Please note that the pin is set
+		to logical 1 before the serial driver is opened. Board specific
+		logic is required to set the pin to logical 0 before the driver is
+		opened for the first time.
+
+endif
+
+menuconfig SAMV7_USART1
 	bool "USART 1"
 	default n
 	depends on SAMV7_HAVE_USART1
 	select USART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
-config SAMV7_USART2
+if SAMV7_USART1
+
+config SAMV7_USART1_RS485MODE
+	bool "RS-485 on USART1"
+	default n
+	---help---
+		Enable RS-485 interface on USART1. Please note that the pin is set
+		to logical 1 before the serial driver is opened. Board specific
+		logic is required to set the pin to logical 0 before the driver is
+		opened for the first time.
+
+endif
+
+menuconfig SAMV7_USART2
 	bool "USART 2"
 	default n
 	depends on SAMV7_HAVE_USART2
 	select USART2_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
+
+if SAMV7_USART2
+
+config SAMV7_USART2_RS485MODE
+	bool "RS-485 on USART2"
+	default n
+	---help---
+		Enable RS-485 interface on USART2. Please note that the pin is set
+		to logical 1 before the serial driver is opened. Board specific
+		logic is required to set the pin to logical 0 before the driver is
+		opened for the first time.
+
+endif
 
 config SAMV7_WDT
 	bool "Watchdog Timer (WDT)"
@@ -1067,6 +1106,33 @@ config SAMV7_SDRAMHEAP
 		this requires also that MM_REGIONS be incremented to support another memory region.
 
 endmenu # SDRAM Configuration
+
+menu "Serial Driver Configuration"
+	depends on SAMV7_HAVE_USART0 || SAMV7_HAVE_USART1 || SAMV7_HAVE_USART2
+
+config SAMV7_SERIAL_RXDMA_BUFFER
+	int "Rx DMA buffer size"
+	default 128
+	range 32 4096
+	depends on SAMV7_HAVE_USART0 || SAMV7_HAVE_USART1 || SAMV7_HAVE_USART2
+	---help---
+		The DMA buffer size when using RX DMA to emulate a FIFO.
+
+config SAMV7_SERIAL_DMA_TIMEOUT
+	int "Rx DMA timeout"
+	default 30
+	range 0 131071
+	depends on SAMV7_HAVE_USART0 || SAMV7_HAVE_USART1 || SAMV7_HAVE_USART2
+	---help---
+		USART support timeout interrupt for idle bus. This ensures the reception of bytes
+		that did not filled the entire RX buffer. This option can be turn off by setting
+		timeout to zero but then some other polling is required. This is not supported for
+		UART, only for USART driver. SAMV7_SERIAL_DMA_TIMEOUT is in bit times and the delay
+		is in seconds.
+
+		The delay is calculated as: Delay = SAMV7_SERIAL_DMA_TIMEOUT * bit_period
+
+endmenu
 
 menu "SPI Device Driver Configuration"
 	depends on SAMV7_SPI

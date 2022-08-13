@@ -67,6 +67,14 @@ const uintptr_t g_idle_topstack = (uintptr_t)(&_ebss) +
  * Public Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: ____tc32_start
+ *
+ * Description:
+ *   This is the reset entry point.
+ *
+ ****************************************************************************/
+
 void __tc32_start(void)
 {
   tlsr82_cpu_wakeup_init(LDO_MODE, EXTERNAL_XTAL_24M);

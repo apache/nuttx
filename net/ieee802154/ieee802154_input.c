@@ -136,6 +136,8 @@ static int ieee802154_queue_frame(FAR struct ieee802154_conn_s *conn,
       conn->rxtail->ic_flink = container;
     }
 
+  conn->rxtail = container;
+
 #if CONFIG_NET_IEEE802154_BACKLOG > 0
   /* If incrementing the count would exceed the maximum backlog value, then
    * delete the oldest frame from the head of the RX queue.

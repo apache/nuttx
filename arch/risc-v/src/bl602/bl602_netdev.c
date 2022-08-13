@@ -840,8 +840,10 @@ int bl602_net_notify(uint32_t event, uint8_t *data, int len, void *opaque)
 
 static int bl602_net_ifup(struct net_driver_s *dev)
 {
+#ifdef CONFIG_NET_ICMPv6
   struct bl602_net_driver_s *priv =
     (struct bl602_net_driver_s *)dev->d_private;
+#endif
 
 #ifdef CONFIG_NET_IPv4
   ninfo("Bringing up: %ld.%ld.%ld.%ld\n",
@@ -1283,7 +1285,7 @@ static int format_scan_result_to_wapi(struct iwreq *req, int result_cnt)
 
   DEBUGASSERT(j == result_cnt);
 
-  /* sort the vaild list according the rssi */
+  /* sort the valid list according the rssi */
 
   qsort(rssi_list, result_cnt, sizeof(uint8_t), rssi_compare);
 

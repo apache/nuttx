@@ -194,9 +194,9 @@ static inline void spi_reset_regbits(struct esp32_spiflash_s *priv,
 /* Misc. helpers */
 
 static inline void IRAM_ATTR
-  esp32_spiflash_opstart(struct spiflash_cachestate_s *state);
+esp32_spiflash_opstart(struct spiflash_cachestate_s *state);
 static inline void IRAM_ATTR
-  esp32_spiflash_opdone(const struct spiflash_cachestate_s *state);
+esp32_spiflash_opdone(const struct spiflash_cachestate_s *state);
 
 static bool IRAM_ATTR spiflash_pagecached(uint32_t phypage);
 static void IRAM_ATTR spiflash_flushmapped(size_t start, size_t size);
@@ -408,7 +408,7 @@ static inline void spi_reset_regbits(struct esp32_spiflash_s *priv,
  ****************************************************************************/
 
 static inline void IRAM_ATTR
-  esp32_spiflash_opstart(struct spiflash_cachestate_s *state)
+esp32_spiflash_opstart(struct spiflash_cachestate_s *state)
 {
   state->flags = enter_critical_section();
 
@@ -681,7 +681,7 @@ static void IRAM_ATTR esp32_set_write_opt(struct esp32_spiflash_s *priv)
  * Name: esp32_read_status
  *
  * Description:
- *   Read SPI Flash status regitser value.
+ *   Read SPI Flash status register value.
  *
  * Input Parameters:
  *   spi    - ESP32 SPI Flash chip data
@@ -772,7 +772,7 @@ static int IRAM_ATTR esp32_wait_idle(struct esp32_spiflash_s *priv)
  * Name: esp32_read_highstatus
  *
  * Description:
- *   Read SPI Flash high status regitser value.
+ *   Read SPI Flash high status register value.
  *
  * Input Parameters:
  *   spi    - ESP32 SPI Flash chip data
@@ -809,7 +809,7 @@ static int esp32_read_highstatus(struct esp32_spiflash_s *priv,
  * Name: esp32_write_status
  *
  * Description:
- *   Write status value to SPI Flash status regitser.
+ *   Write status value to SPI Flash status register.
  *
  * Input Parameters:
  *   spi    - ESP32 SPI Flash chip data

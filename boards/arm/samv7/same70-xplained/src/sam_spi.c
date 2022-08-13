@@ -203,14 +203,14 @@ void sam_spi1select(uint32_t devid, bool selected)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_SPI0_MASTER
-uint8_t sam_spi0status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t sam_spi0status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_SAMV7_SPI1_MASTER
-uint8_t sam_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t sam_spi1status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }

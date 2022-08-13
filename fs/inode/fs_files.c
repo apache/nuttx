@@ -71,6 +71,11 @@ static int files_extend(FAR struct filelist *list, size_t row)
       return 0;
     }
 
+  if (row * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK > OPEN_MAX)
+    {
+      return -EMFILE;
+    }
+
   tmp = kmm_realloc(list->fl_files, sizeof(FAR struct file *) * row);
   DEBUGASSERT(tmp);
   if (tmp == NULL)
@@ -194,7 +199,7 @@ int files_allocate(FAR struct inode *inode, int oflags, off_t pos,
       return ret;
     }
 
-  /* Calcuate minfd whether is in list->fl_files.
+  /* Calculate minfd whether is in list->fl_files.
    * if not, allocate a new filechunk.
    */
 

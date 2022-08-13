@@ -52,6 +52,21 @@
  * Public Data
  ****************************************************************************/
 
+  .section .rodata, "a"
+
+  /* Offset to CP n save area in thread's CP save area. */
+
+  .global	_xtensa_coproc_saoffsets
+  .type		_xtensa_coproc_saoffsets, @object
+  .align	16                      /* Minimize crossing cache boundaries */
+
+_xtensa_coproc_saoffsets:
+
+  .word	XTENSA_CP0_SA, XTENSA_CP1_SA, XTENSA_CP2_SA, XTENSA_CP3_SA
+  .word	XTENSA_CP4_SA, XTENSA_CP5_SA, XTENSA_CP6_SA, XTENSA_CP7_SA
+
+  .size	_xtensa_coproc_saoffsets, . - _xtensa_coproc_saoffsets
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -103,7 +118,7 @@
 	bbci.l		a2,  0,   2f				/* CP 0 not enabled */
 	l32i		a14, a13, 0				/* a14 = _xtensa_coproc_saoffsets[0] */
 	add		a3,  a14, a3				/* a3 = save area for CP 0 */
-	xchal_cp0_store	a3,  a4,  a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	xchal_cp0_store	a3,  a4,  a5, a6, a7
 2:
 #endif
 
@@ -111,7 +126,7 @@
 	bbci.l		a2,  1,   2f				/* CP 1 not enabled */
 	l32i		a14, a13, 4				/* a14 = _xtensa_coproc_saoffsets[1] */
 	add		a3,  a14, a3				/* a3 = save area for CP 1 */
-	xchal_cp1_store	a3,  a4,  a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	xchal_cp1_store	a3,  a4,  a5, a6, a7
 2:
 #endif
 
@@ -119,7 +134,7 @@
 	bbci.l		a2,  2,   2f
 	l32i		a14, a13, 8
 	add		a3,  a14, a3
-	xchal_cp2_store	a3,  a4,  a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	xchal_cp2_store	a3,  a4,  a5, a6, a7
 2:
 #endif
 
@@ -127,7 +142,7 @@
 	bbci.l		a2,  3,   2f
 	l32i		a14, a13, 12
 	add		a3,  a14, a3
-	xchal_cp3_store	a3,  a4,  a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	xchal_cp3_store	a3,  a4,  a5, a6, a7
 2:
 #endif
 
@@ -135,7 +150,7 @@
 	bbci.l		a2,  4,   2f
 	l32i		a14, a13, 16
 	add		a3,  a14, a3
-	xchal_cp4_store	a3,  a4,  a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	xchal_cp4_store	a3,  a4,  a5, a6, a7
 2:
 #endif
 
@@ -143,7 +158,7 @@
 	bbci.l		a2,  5,   2f
 	l32i		a14, a13, 20
 	add		a3,  a14, a3
-	xchal_cp5_store	a3,  a4,  a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	xchal_cp5_store	a3,  a4,  a5, a6, a7
 2:
 #endif
 
@@ -151,7 +166,7 @@
 	bbci.l		a2,  6,   2f
 	l32i		a14, a13, 24
 	add		a3,  a14, a3
-	xchal_cp6_store	a3,  a4,  a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	xchal_cp6_store	a3,  a4,  a5, a6, a7
 2:
 #endif
 
@@ -159,7 +174,7 @@
 	bbci.l		a2,  7,   2f
 	l32i		a14, a13, 28
 	add		a3,  a14, a3
-	xchal_cp7_store	a3,  a4,  a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	xchal_cp7_store	a3,  a4,  a5, a6, a7
 2:
 #endif
 
@@ -212,7 +227,7 @@ Ldone1:
 	bbci.l		a8,  0,   2f			/* CP 0 not enabled */
 	l32i		a14, a13, 0			/* a14 = _xtensa_coproc_saoffsets[0] */
 	add		a3,  a14, a3			/* a3 = save area for CP 0 */
-	xchal_cp0_load	a3,  a4,  a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	xchal_cp0_load	a3,  a4,  a5, a6, a7
 2:
 #endif
 
@@ -220,7 +235,7 @@ Ldone1:
 	bbci.l		a8,  1,   2f			/* CP 1 not enabled */
 	l32i		a14, a13, 4			/* a14 = _xtensa_coproc_saoffsets[1] */
 	add		a3,  a14, a3			/* a3 = save area for CP 1 */
-	xchal_cp1_load	a3,  a4,  a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	xchal_cp1_load	a3,  a4,  a5, a6, a7
 2:
 #endif
 
@@ -228,7 +243,7 @@ Ldone1:
 	bbci.l		a8,  2,   2f
 	l32i		a14, a13, 8
 	add		a3,  a14, a3
-	xchal_cp2_load	a3,  a4,  a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	xchal_cp2_load	a3,  a4,  a5, a6, a7
 2:
 #endif
 
@@ -236,7 +251,7 @@ Ldone1:
 	bbci.l		a8,  3,   2f
 	l32i		a14, a13, 12
 	add		a3,  a14, a3
-	xchal_cp3_load	a3,  a4,  a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	xchal_cp3_load	a3,  a4,  a5, a6, a7
 2:
 #endif
 
@@ -244,7 +259,7 @@ Ldone1:
 	bbci.l		a8,  4,   2f
 	l32i		a14, a13, 16
 	add		a3,  a14, a3
-	xchal_cp4_load	a3,  a4,  a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	xchal_cp4_load	a3,  a4,  a5, a6, a7
 2:
 #endif
 
@@ -252,7 +267,7 @@ Ldone1:
 	bbci.l		a8,  5,   2f
 	l32i		a14, a13, 20
 	add		a3,  a14, a3
-	xchal_cp5_load	a3,  a4,  a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	xchal_cp5_load	a3,  a4,  a5, a6, a7
 2:
 #endif
 
@@ -260,7 +275,7 @@ Ldone1:
 	bbci.l		a8,  6,   2f
 	l32i		a14, a13, 24
 	add		a3,  a14, a3
-	xchal_cp6_load	a3,  a4,  a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	xchal_cp6_load	a3,  a4,  a5, a6, a7
 2:
 #endif
 
@@ -268,7 +283,7 @@ Ldone1:
 	bbci.l		a8,  7,   2f
 	l32i		a14, a13, 28
 	add		a3,  a14, a3
-	xchal_cp7_load	a3,  a4,  a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	xchal_cp7_load	a3,  a4,  a5, a6, a7
 2:
 #endif
 	/* Ensure wsr.CPENABLE has completed. */

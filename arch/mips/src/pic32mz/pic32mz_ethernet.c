@@ -919,7 +919,7 @@ static inline void pic32mz_rxdescinit(struct pic32mz_driver_s *priv)
  ****************************************************************************/
 
 static inline struct pic32mz_txdesc_s *
-  pic32mz_txdesc(struct pic32mz_driver_s *priv)
+pic32mz_txdesc(struct pic32mz_driver_s *priv)
 {
   struct pic32mz_txdesc_s *txdesc;
 

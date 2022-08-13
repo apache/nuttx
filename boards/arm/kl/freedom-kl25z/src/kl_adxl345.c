@@ -85,9 +85,9 @@ struct kl_adxl345config_s
 
   /* Additional private definitions only known to this driver */
 
-  ADXL345_HANDLE handle;      /* The ADXL345 driver handle */
-  adxl345_handler_t handler;  /* The ADXL345 interrupt handler */
-  FAR void *arg;              /* Argument to pass to the interrupt handler */
+  ADXL345_HANDLE handle;     /* The ADXL345 driver handle */
+  adxl345_handler_t handler; /* The ADXL345 interrupt handler */
+  void *arg;                 /* Argument to pass to the interrupt handler */
 };
 
 /****************************************************************************
@@ -103,10 +103,10 @@ struct kl_adxl345config_s
  *   clear   - Acknowledge/clear any pending GPIO interrupt
  */
 
-static int  adxl345_attach(FAR struct adxl345_config_s *state,
-                           adxl345_handler_t handler, FAR void *arg);
-static void adxl345_enable(FAR struct adxl345_config_s *state, bool enable);
-static void adxl345_clear(FAR struct adxl345_config_s *state);
+static int  adxl345_attach(struct adxl345_config_s *state,
+                           adxl345_handler_t handler, void *arg);
+static void adxl345_enable(struct adxl345_config_s *state, bool enable);
+static void adxl345_clear(struct adxl345_config_s *state);
 
 /****************************************************************************
  * Private Data
@@ -143,7 +143,7 @@ static struct kl_adxl345config_s g_adxl345config =
 
 /* This is the ADXL345 Interrupt handler */
 
-int adxl345_interrupt(int irq, FAR void *context)
+int adxl345_interrupt(int irq, void *context)
 {
   /* Verify that we have a handler attached */
 
@@ -166,11 +166,11 @@ int adxl345_interrupt(int irq, FAR void *context)
  *   clear   - Acknowledge/clear any pending GPIO interrupt
  */
 
-static int adxl345_attach(FAR struct adxl345_config_s *state,
-                           adxl345_handler_t handler, FAR void *arg)
+static int adxl345_attach(struct adxl345_config_s *state,
+                          adxl345_handler_t handler, void *arg)
 {
-  FAR struct kl_adxl345config_s *priv =
-      (FAR struct kl_adxl345config_s *)state;
+  struct kl_adxl345config_s *priv =
+      (struct kl_adxl345config_s *)state;
 
   sninfo("Saving handler %p\n", handler);
   DEBUGASSERT(priv);
@@ -184,10 +184,10 @@ static int adxl345_attach(FAR struct adxl345_config_s *state,
   return OK;
 }
 
-static void adxl345_enable(FAR struct adxl345_config_s *state, bool enable)
+static void adxl345_enable(struct adxl345_config_s *state, bool enable)
 {
-  FAR struct kl_adxl345config_s *priv =
-     (FAR struct kl_adxl345config_s *)state;
+  struct kl_adxl345config_s *priv =
+     (struct kl_adxl345config_s *)state;
   irqstate_t flags;
 
   /* Attach and enable, or detach and disable.  Enabling and disabling GPIO
@@ -215,7 +215,7 @@ static void adxl345_enable(FAR struct adxl345_config_s *state, bool enable)
   leave_critical_section(flags);
 }
 
-static void adxl345_clear(FAR struct adxl345_config_s *state)
+static void adxl345_clear(struct adxl345_config_s *state)
 {
   /* Does nothing */
 }
@@ -244,7 +244,7 @@ static void adxl345_clear(FAR struct adxl345_config_s *state)
 
 int adxl345_archinitialize(int minor)
 {
-  FAR struct spi_dev_s *dev;
+  struct spi_dev_s *dev;
   int ret;
 
   sninfo("minor %d\n", minor);
@@ -274,7 +274,7 @@ int adxl345_archinitialize(int minor)
 
       g_adxl345config.handle =
         adxl345_instantiate(dev,
-                           (FAR struct adxl345_config_s *)&g_adxl345config);
+                           (struct adxl345_config_s *)&g_adxl345config);
       if (!g_adxl345config.handle)
         {
           snerr("ERROR: Failed to instantiate the ADXL345 driver\n");

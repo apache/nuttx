@@ -53,7 +53,8 @@
 
 /* Interval [a,b). Either a must be 80 or b must be c0, lower 3 bits clear. */
 
-#define R(a, b)   ((uint32_t)(((a) == 0x80 ? 0x40u - (b) : 0u - (a)) << 23))
+#define R(a, b)   ((uint32_t)((uint32_t)((a) == 0x80 ? 0x40u - (b) : \
+                                                       0u - (a)) << 23))
 
 #define C(x)      ((x) < 2 ? -1 : (R(0x80, 0xc0) | (x)))
 #define D(x)      C((x) + 16)
@@ -67,6 +68,14 @@
                    | (R(0x80, 0xc0) >> 6) \
                    | (R(0x80, 0xc0) >> 12) \
                    | (x))
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* This definition of g_bittab refer to link:
+ * https://en.wikipedia.org/wiki/UTF-8 [Codepage layout].
+ */
 
 static const uint32_t g_bittab[] =
 {

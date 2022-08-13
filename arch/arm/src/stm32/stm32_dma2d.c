@@ -187,24 +187,24 @@ static const uintptr_t stm32_cmar_layer_t[DMA2D_NLAYERS - 1] =
 /* Private functions */
 
 static void stm32_dma2d_control(uint32_t setbits, uint32_t clrbits);
-static int stm32_dma2dirq(int irq, void *context, FAR void *arg);
+static int stm32_dma2dirq(int irq, void *context, void *arg);
 static int stm32_dma2d_waitforirq(void);
 static int stm32_dma2d_start(void);
 #ifdef CONFIG_STM32_FB_CMAP
 static int stm32_dma2d_loadclut(uintptr_t reg);
 #endif
 static uint32_t stm32_dma2d_memaddress(
-                                   FAR struct stm32_dma2d_overlay_s *oinfo,
+                                   struct stm32_dma2d_overlay_s *oinfo,
                                    uint32_t xpos, uint32_t ypos);
 static uint32_t stm32_dma2d_lineoffset(
-                                   FAR struct stm32_dma2d_overlay_s *oinfo,
-                                   FAR const struct fb_area_s *area);
-static void stm32_dma2d_lfifo(FAR struct stm32_dma2d_overlay_s *oinfo,
+                                   struct stm32_dma2d_overlay_s *oinfo,
+                                   const struct fb_area_s *area);
+static void stm32_dma2d_lfifo(struct stm32_dma2d_overlay_s *oinfo,
                               int lid,
                               uint32_t xpos, uint32_t ypos,
-                              FAR const struct fb_area_s *area);
+                              const struct fb_area_s *area);
 static void stm32_dma2d_lcolor(int lid, uint32_t argb);
-static void stm32_dma2d_llnr(FAR const struct fb_area_s *area);
+static void stm32_dma2d_llnr(const struct fb_area_s *area);
 static int stm32_dma2d_loutpfc(uint8_t fmt);
 static void stm32_dma2d_lpfc(int lid, uint32_t blendmode, uint8_t alpha,
                              uint8_t fmt);
@@ -212,21 +212,21 @@ static void stm32_dma2d_lpfc(int lid, uint32_t blendmode, uint8_t alpha,
 /* Public Functions */
 
 #ifdef CONFIG_STM32_FB_CMAP
-static int stm32_dma2d_setclut(FAR const struct fb_cmap_s *cmap);
+static int stm32_dma2d_setclut(const struct fb_cmap_s *cmap);
 #endif
-static int stm32_dma2d_fillcolor(FAR struct stm32_dma2d_overlay_s *oinfo,
-                                 FAR const struct fb_area_s *area,
+static int stm32_dma2d_fillcolor(struct stm32_dma2d_overlay_s *oinfo,
+                                 const struct fb_area_s *area,
                                  uint32_t argb);
-static int stm32_dma2d_blit(FAR struct stm32_dma2d_overlay_s *doverlay,
+static int stm32_dma2d_blit(struct stm32_dma2d_overlay_s *doverlay,
                             uint32_t destxpos, uint32_t destypos,
-                            FAR struct stm32_dma2d_overlay_s *soverlay,
-                            FAR const struct fb_area_s *sarea);
-static int stm32_dma2d_blend(FAR struct stm32_dma2d_overlay_s *doverlay,
+                            struct stm32_dma2d_overlay_s *soverlay,
+                            const struct fb_area_s *sarea);
+static int stm32_dma2d_blend(struct stm32_dma2d_overlay_s *doverlay,
                              uint32_t destxpos, uint32_t destypos,
-                             FAR struct stm32_dma2d_overlay_s *foverlay,
+                             struct stm32_dma2d_overlay_s *foverlay,
                              uint32_t forexpos, uint32_t foreypos,
-                             FAR struct stm32_dma2d_overlay_s *boverlay,
-                             FAR const struct fb_area_s *barea);
+                             struct stm32_dma2d_overlay_s *boverlay,
+                             const struct fb_area_s *barea);
 
 /****************************************************************************
  * Private Data
@@ -325,11 +325,11 @@ static void stm32_dma2d_control(uint32_t setbits, uint32_t clrbits)
  *
  ****************************************************************************/
 
-static int stm32_dma2dirq(int irq, void *context, FAR void *arg)
+static int stm32_dma2dirq(int irq, void *context, void *arg)
 {
   int ret;
   uint32_t regval = getreg32(STM32_DMA2D_ISR);
-  FAR struct stm32_interrupt_s *priv = &g_interrupt;
+  struct stm32_interrupt_s *priv = &g_interrupt;
 
   reginfo("irq = %d, regval = %08x\n", irq, regval);
 
@@ -430,7 +430,7 @@ static int stm32_dma2dirq(int irq, void *context, FAR void *arg)
 static int stm32_dma2d_waitforirq(void)
 {
   int ret;
-  FAR struct stm32_interrupt_s *priv = &g_interrupt;
+  struct stm32_interrupt_s *priv = &g_interrupt;
 
   ret = nxsem_wait(priv->sem);
 
@@ -527,11 +527,11 @@ static int stm32_dma2d_start(void)
  ****************************************************************************/
 
 static uint32_t stm32_dma2d_memaddress(
-                                   FAR struct stm32_dma2d_overlay_s *oinfo,
+                                   struct stm32_dma2d_overlay_s *oinfo,
                                    uint32_t xpos, uint32_t ypos)
 {
   uint32_t offset;
-  FAR struct fb_overlayinfo_s *poverlay = oinfo->oinfo;
+  struct fb_overlayinfo_s *poverlay = oinfo->oinfo;
 
   offset = xpos * DMA2D_PF_BYPP(poverlay->bpp) + poverlay->stride * ypos;
 
@@ -555,8 +555,8 @@ static uint32_t stm32_dma2d_memaddress(
  ****************************************************************************/
 
 static uint32_t stm32_dma2d_lineoffset(
-                                   FAR struct stm32_dma2d_overlay_s *oinfo,
-                                   FAR const struct fb_area_s *area)
+                                   struct stm32_dma2d_overlay_s *oinfo,
+                                   const struct fb_area_s *area)
 {
   uint32_t loffset;
 
@@ -581,9 +581,9 @@ static uint32_t stm32_dma2d_lineoffset(
  *
  ****************************************************************************/
 
-static void stm32_dma2d_lfifo(FAR struct stm32_dma2d_overlay_s *oinfo,
+static void stm32_dma2d_lfifo(struct stm32_dma2d_overlay_s *oinfo,
                               int lid, uint32_t xpos, uint32_t ypos,
-                              FAR const struct fb_area_s *area)
+                              const struct fb_area_s *area)
 {
   lcdinfo("oinfo=%p, lid=%d, xpos=%" PRId32 ", ypos=%" PRId32 ", area=%p\n",
            oinfo, lid, xpos, ypos, area);
@@ -622,7 +622,7 @@ static void stm32_dma2d_lcolor(int lid, uint32_t argb)
  *
  ****************************************************************************/
 
-static void stm32_dma2d_llnr(FAR const struct fb_area_s *area)
+static void stm32_dma2d_llnr(const struct fb_area_s *area)
 {
   uint32_t nlrreg;
 
@@ -683,7 +683,7 @@ static void stm32_dma2d_lpfc(int lid, uint32_t blendmode, uint8_t alpha,
 #ifdef CONFIG_STM32_FB_CMAP
   if (fmt == DMA2D_PF_L8)
     {
-      FAR struct stm32_dma2d_s * layer = &g_dma2ddev;
+      struct stm32_dma2d_s * layer = &g_dma2ddev;
 
       /* Load CLUT automatically */
 
@@ -744,10 +744,10 @@ static void stm32_dma2d_lpfc(int lid, uint32_t blendmode, uint8_t alpha,
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_FB_CMAP
-static int stm32_dma2d_setclut(FAR const struct fb_cmap_s *cmap)
+static int stm32_dma2d_setclut(const struct fb_cmap_s *cmap)
 {
   int n;
-  FAR struct stm32_dma2d_s * priv = &g_dma2ddev;
+  struct stm32_dma2d_s * priv = &g_dma2ddev;
 
   lcdinfo("cmap=%p\n", cmap);
 
@@ -812,12 +812,12 @@ static int stm32_dma2d_setclut(FAR const struct fb_cmap_s *cmap)
  *
  ****************************************************************************/
 
-static int stm32_dma2d_fillcolor(FAR struct stm32_dma2d_overlay_s *oinfo,
-                                 FAR const struct fb_area_s *area,
+static int stm32_dma2d_fillcolor(struct stm32_dma2d_overlay_s *oinfo,
+                                 const struct fb_area_s *area,
                                  uint32_t argb)
 {
   int ret;
-  FAR struct stm32_dma2d_s * priv = &g_dma2ddev;
+  struct stm32_dma2d_s * priv = &g_dma2ddev;
   DEBUGASSERT(oinfo != NULL && oinfo->oinfo != NULL && area != NULL);
 
   lcdinfo("oinfo=%p, argb=%08" PRIx32 "\n", oinfo, argb);
@@ -893,14 +893,14 @@ static int stm32_dma2d_fillcolor(FAR struct stm32_dma2d_overlay_s *oinfo,
  *
  ****************************************************************************/
 
-static int stm32_dma2d_blit(FAR struct stm32_dma2d_overlay_s *doverlay,
+static int stm32_dma2d_blit(struct stm32_dma2d_overlay_s *doverlay,
                             uint32_t destxpos, uint32_t destypos,
-                            FAR struct stm32_dma2d_overlay_s *soverlay,
-                            FAR const struct fb_area_s *sarea)
+                            struct stm32_dma2d_overlay_s *soverlay,
+                            const struct fb_area_s *sarea)
 {
   int        ret;
   uint32_t  mode;
-  FAR struct stm32_dma2d_s * priv = &g_dma2ddev;
+  struct stm32_dma2d_s * priv = &g_dma2ddev;
 
   lcdinfo("doverlay=%p, destxpos=%" PRId32 ", destypos=%" PRId32
           ", soverlay=%p, sarea=%p\n",
@@ -991,15 +991,15 @@ static int stm32_dma2d_blit(FAR struct stm32_dma2d_overlay_s *doverlay,
  *
  ****************************************************************************/
 
-static int stm32_dma2d_blend(FAR struct stm32_dma2d_overlay_s *doverlay,
+static int stm32_dma2d_blend(struct stm32_dma2d_overlay_s *doverlay,
                              uint32_t destxpos, uint32_t destypos,
-                             FAR struct stm32_dma2d_overlay_s *foverlay,
+                             struct stm32_dma2d_overlay_s *foverlay,
                              uint32_t forexpos, uint32_t foreypos,
-                             FAR struct stm32_dma2d_overlay_s *boverlay,
-                             FAR const struct fb_area_s *barea)
+                             struct stm32_dma2d_overlay_s *boverlay,
+                             const struct fb_area_s *barea)
 {
-  int          ret;
-  FAR struct stm32_dma2d_s * priv = &g_dma2ddev;
+  int    ret;
+  struct stm32_dma2d_s * priv = &g_dma2ddev;
 
   lcdinfo("doverlay=%p, destxpos=%" PRId32 ", destypos=%" PRId32 ", "
           "foverlay=%p, forexpos=%" PRId32 ", foreypos=%" PRId32 ", "
@@ -1176,7 +1176,7 @@ void stm32_dma2duninitialize(void)
  *
  ****************************************************************************/
 
-FAR struct dma2d_layer_s *stm32_dma2ddev(void)
+struct dma2d_layer_s *stm32_dma2ddev(void)
 {
   return &g_dma2ddev.dma2d;
 }

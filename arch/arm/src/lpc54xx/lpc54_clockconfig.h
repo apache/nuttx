@@ -128,7 +128,7 @@ extern "C"
  *
  ****************************************************************************/
 
-void lpc54_clockconfig(FAR const struct pll_setup_s *pllsetup);
+void lpc54_clockconfig(const struct pll_setup_s *pllsetup);
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -15,6 +15,7 @@ config ARCH_CHIP_ESP32S2WROVER
 	bool "ESP32-S2-WROVER"
 	select ESP32S2_FLASH_4M
 	select ESP32S2_PSRAM_2M
+	select ARCH_HAVE_I2CRESET
 	---help---
 		Generic module with an embedded ESP32-S2
 
@@ -232,6 +233,10 @@ config ESP32S2_UART
 	bool
 	default n
 
+config ESP32S2_I2C
+	bool
+	default n
+
 config ESP32S2_TIMER
 	bool
 	default n
@@ -320,6 +325,18 @@ config ESP32S2_UART1
 	select UART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
+config ESP32S2_I2C0
+	bool "I2C 0"
+	default n
+	select ESP32S2_I2C
+	select I2C
+
+config ESP32S2_I2C1
+	bool "I2C 1"
+	default n
+	select ESP32S2_I2C
+	select I2C
+
 config ESP32S2_RT_TIMER
 	bool "Real-time Timer"
 	select ESP32S2_TIMER
@@ -400,6 +417,47 @@ config ESP32S2_UART1_CTSPIN
 endif # ESP32S2_UART1
 
 endmenu # UART Configuration
+
+menu "I2C Configuration"
+	depends on ESP32S2_I2C
+
+if ESP32S2_I2C0
+
+config ESP32S2_I2C0_SCLPIN
+	int "I2C0 SCL Pin"
+	default 19
+	range 0 46
+
+config ESP32S2_I2C0_SDAPIN
+	int "I2C0 SDA Pin"
+	default 18
+	range 0 46
+
+endif # ESP32S2_I2C0
+
+if ESP32S2_I2C1
+
+config ESP32S2_I2C1_SCLPIN
+	int "I2C1 SCL Pin"
+	default 6
+	range 0 46
+
+config ESP32S2_I2C1_SDAPIN
+	int "I2C1 SDA Pin"
+	default 7
+	range 0 46
+
+endif # ESP32S2_I2C1
+
+config ESP32S2_I2CTIMEOSEC
+	int "Timeout seconds"
+	default 0
+
+config ESP32S2_I2CTIMEOMS
+	int "Timeout milliseconds"
+	default 500
+
+endmenu # I2C Configuration
 
 menu "SPI Flash Configuration"
 	depends on ESP32S2_SPIFLASH

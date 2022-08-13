@@ -58,7 +58,7 @@ static void log_separate(FAR const char *log_file)
 {
   struct file fp;
 
-  if (file_open(&fp, log_file, O_WRONLY) < 0)
+  if (file_open(&fp, log_file, (O_WRONLY | O_APPEND)) < 0)
     {
       return;
     }

@@ -59,11 +59,11 @@ static uint32_t g_lednum;
 
 static const struct userled_lowerhalf_s g_userled_lower =
 {
-  .ll_supported = userled_supported,
-  .ll_setled    = userled_setled,
-  .ll_setall    = userled_setall,
+  userled_supported,    /* ll_supported */
+  userled_setled,       /* ll_setled */
+  userled_setall        /* ll_setall */
 #ifdef CONFIG_USERLED_LOWER_READSTATE
-  .ll_getall    = userled_getall,
+  , userled_getall      /* ll_getall */
 #endif
 };
 

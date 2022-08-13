@@ -64,7 +64,7 @@ struct viewtool_max3421elower_s
   /* Extensions for the viewtool board */
 
   xcpt_t handler;
-  FAR void *arg;
+  void *arg;
 };
 
 /****************************************************************************
@@ -83,13 +83,13 @@ struct viewtool_max3421elower_s
  *   acknowledge - Acknowledge/clear any pending GPIO interrupt as necessary.
  */
 
-static int max3421e_attach(FAR const struct max3421e_lowerhalf_s *lower,
-                           xcpt_t isr, FAR void *arg);
-static void max3421e_enable(FAR const struct max3421e_lowerhalf_s *lower,
+static int max3421e_attach(const struct max3421e_lowerhalf_s *lower,
+                           xcpt_t isr, void *arg);
+static void max3421e_enable(const struct max3421e_lowerhalf_s *lower,
                             bool enable);
 static void max3421e_acknowledge
-                           (FAR const struct max3421e_lowerhalf_s *lower);
-static void max3421e_power(FAR const struct max3421e_lowerhalf_s *lower,
+                           (const struct max3421e_lowerhalf_s *lower);
+static void max3421e_power(const struct max3421e_lowerhalf_s *lower,
                            bool enable);
 
 /****************************************************************************
@@ -123,7 +123,7 @@ static struct viewtool_max3421elower_s g_max3421e_lower =
   },
 };
 
-static FAR struct usbhost_connection_s *g_usbconn;
+static struct usbhost_connection_s *g_usbconn;
 
 /****************************************************************************
  * Private Functions
@@ -144,11 +144,11 @@ static FAR struct usbhost_connection_s *g_usbconn;
  *
  ****************************************************************************/
 
-static int max3421e_attach(FAR const struct max3421e_lowerhalf_s *lower,
-                           xcpt_t isr, FAR void *arg)
+static int max3421e_attach(const struct max3421e_lowerhalf_s *lower,
+                           xcpt_t isr, void *arg)
 {
-  FAR struct viewtool_max3421elower_s *priv =
-    (FAR struct viewtool_max3421elower_s *)lower;
+  struct viewtool_max3421elower_s *priv =
+    (struct viewtool_max3421elower_s *)lower;
 
   if (isr != NULL)
     {
@@ -171,11 +171,11 @@ static int max3421e_attach(FAR const struct max3421e_lowerhalf_s *lower,
   return OK;
 }
 
-static void max3421e_enable(FAR const struct max3421e_lowerhalf_s *lower,
+static void max3421e_enable(const struct max3421e_lowerhalf_s *lower,
                             bool enable)
 {
-  FAR struct viewtool_max3421elower_s *priv =
-    (FAR struct viewtool_max3421elower_s *)lower;
+  struct viewtool_max3421elower_s *priv =
+    (struct viewtool_max3421elower_s *)lower;
   irqstate_t flags;
 
   uinfo("enable=%u handler=%p\n", enable, priv->handler);
@@ -212,12 +212,12 @@ static void max3421e_enable(FAR const struct max3421e_lowerhalf_s *lower,
 }
 
 static void max3421e_acknowledge
-            (FAR const struct max3421e_lowerhalf_s *lower)
+            (const struct max3421e_lowerhalf_s *lower)
 {
   /* Does nothing */
 }
 
-static void max3421e_power(FAR const struct max3421e_lowerhalf_s *lower,
+static void max3421e_power(const struct max3421e_lowerhalf_s *lower,
                            bool enable)
 {
   /* We currently have no control over VBUS power */
@@ -234,9 +234,9 @@ static void max3421e_power(FAR const struct max3421e_lowerhalf_s *lower,
  *   Wait for USB devices to be connected.
  ****************************************************************************/
 
-static int usbhost_detect(int argc, FAR char *argv[])
+static int usbhost_detect(int argc, char *argv[])
 {
-  FAR struct usbhost_hubport_s *hport;
+  struct usbhost_hubport_s *hport;
 
   uinfo("Starting USB detect thread\n");
 
@@ -275,7 +275,7 @@ static int usbhost_detect(int argc, FAR char *argv[])
 
 int stm32_max3421e_setup(void)
 {
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
   int ret;
 
   /* Configure the MAX3421E interrupt pin as an input and the reset and power

@@ -229,7 +229,7 @@ struct usbhost_cdcmbim_s
 
   bool                    bifup;        /* true:ifup false:ifdown */
   struct net_driver_s     netdev;       /* Interface understood by the network */
-  uint8_t                 txpktbuf[MAX_NETDEV_PKTSIZE];
+  uint16_t                txpktbuf[(MAX_NETDEV_PKTSIZE + 1) / 2];
 };
 
 /****************************************************************************
@@ -2331,7 +2331,7 @@ static int cdcmbim_txpoll(struct net_driver_s *dev)
    * the field d_len is set to a value > 0.
    */
 
-  DEBUGASSERT(priv->netdev.d_buf == priv->txpktbuf);
+  DEBUGASSERT(priv->netdev.d_buf == (FAR uint8_t *)priv->txpktbuf);
 
   usbhost_takesem(&priv->exclsem);
 
@@ -2460,7 +2460,7 @@ static void cdcmbim_txavail_work(void *arg)
 
   net_lock();
 
-  priv->netdev.d_buf = priv->txpktbuf;
+  priv->netdev.d_buf = (FAR uint8_t *)priv->txpktbuf;
 
   if (priv->bifup)
     {

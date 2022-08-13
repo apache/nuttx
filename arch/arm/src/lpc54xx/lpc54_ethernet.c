@@ -251,8 +251,8 @@
  * header.
  */
 
-#define ETHBUF       ((FAR struct eth_hdr_s *)priv->eth_dev.d_buf)
-#define ETH8021QWBUF ((FAR struct eth_8021qhdr_s *)priv->eth_dev.d_buf)
+#define ETHBUF       ((struct eth_hdr_s *)priv->eth_dev.d_buf)
+#define ETH8021QWBUF ((struct eth_8021qhdr_s *)priv->eth_dev.d_buf)
 
 /****************************************************************************
  * Private Types

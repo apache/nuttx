@@ -75,7 +75,7 @@ static int  eoss3_setup(struct uart_dev_s *dev);
 static void eoss3_shutdown(struct uart_dev_s *dev);
 static int  eoss3_attach(struct uart_dev_s *dev);
 static void eoss3_detach(struct uart_dev_s *dev);
-static int  eoss3_interrupt(int irq, void *context, FAR void *arg);
+static int  eoss3_interrupt(int irq, void *context, void *arg);
 static int  eoss3_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  eoss3_receive(struct uart_dev_s *dev, unsigned int *status);
 static void eoss3_rxint(struct uart_dev_s *dev, bool enable);
@@ -192,7 +192,7 @@ static void eoss3_tx_work(void *arg)
   if (dev->xmit.head != dev->xmit.tail)
     {
       work_queue(HPWORK, &priv->work, eoss3_tx_work,
-                 (FAR void *)arg, 0);
+                 (void *)arg, 0);
     }
 
   leave_critical_section(flags);
@@ -318,7 +318,7 @@ static void eoss3_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int eoss3_interrupt(int irq, void *context, FAR void *arg)
+static int eoss3_interrupt(int irq, void *context, void *arg)
 {
   struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   uint32_t status;
@@ -490,7 +490,7 @@ static void eoss3_txint(struct uart_dev_s *dev, bool enable)
       if (work_available(&priv->work))
         {
           work_queue(HPWORK, &priv->work, eoss3_tx_work,
-                     (FAR void *)dev, 0);
+                     (void *)dev, 0);
         }
     }
 }

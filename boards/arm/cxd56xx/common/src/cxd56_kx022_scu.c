@@ -46,11 +46,11 @@
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_KX022_SCU
-int board_kx022_initialize(FAR const char *devpath, int bus)
+int board_kx022_initialize(const char *devpath, int bus)
 {
   int fifoid = 0;
   int ret;
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
 
   sninfo("Initializing KX022...\n");
 

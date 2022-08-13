@@ -98,6 +98,10 @@
 #  define USE_PLL3
 #endif
 
+#if defined(STM32_BOARD_USEHSI) && !defined(STM32_BOARD_HSIDIV)
+#error When HSI is used, you have to define STM32_BOARD_HSIDIV in board/include/board.h
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -432,13 +436,15 @@ static inline void rcc_enableapb1(void)
   regval |= RCC_APB1LENR_I2C3EN;
 #endif
 
-  /* TODO: ... */
-
   putreg32(regval, STM32_RCC_APB1LENR);   /* Enable APB1L peripherals */
 
   regval = getreg32(STM32_RCC_APB1HENR);
 
-  /* TODO: ... */
+#ifdef CONFIG_STM32H7_FDCAN
+  /* FDCAN clock enable */
+
+  regval |= RCC_APB1HENR_FDCANEN;
+#endif
 
   putreg32(regval, STM32_RCC_APB1HENR);   /* Enable APB1H peripherals */
 }
@@ -598,6 +604,11 @@ void stm32_stdclockconfig(void)
 
   regval  = getreg32(STM32_RCC_CR);
   regval |= RCC_CR_HSION;           /* Enable HSI */
+
+  /* Set HSI predivider to board specific value */
+
+  regval |= STM32_BOARD_HSIDIV;
+
   putreg32(regval, STM32_RCC_CR);
 
   /* Wait until the HSI is ready (or until a timeout elapsed) */

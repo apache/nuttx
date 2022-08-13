@@ -401,7 +401,7 @@ int lutimens(FAR const char *path, const struct timespec times[2])
  *   inode   - The inode of interest
  *   buf     - The caller provide location in which to apply information
  *             about the inode.
- *   flags   - The vaild field in buf
+ *   flags   - The valid field in buf
  *   resolve - Whether to resolve the symbolic link
  *
  * Returned Value:

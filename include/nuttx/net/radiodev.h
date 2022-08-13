@@ -62,32 +62,31 @@ struct radiodev_properties_s
  * The radio network driver does not use the d_buf packet buffer directly.
  * Rather, it uses a list smaller frame buffers.
  *
- *   - Outgoing frame data is provided in an IOB in the via the
- *     r_req_data() interface method each time that the radio needs to
- *     send more data.  The length of the frame is provided in the io_len
- *     field of the IOB.
+ *   - Outgoing frame data is provided in an IOB via the r_req_data()
+ *     interface method each time that the radio needs to send more data.
+ *     The length of the frame is provided in the io_len field of the IOB.
  *
  *     Outgoing frames are generated when the radio network driver calls
  *     the devif_poll(), sixlowpan_input(), or ieee802154_input()
  *     interfaces.  In each case, the radio driver must provide a working
  *     buffer in the d_buf pointer.  A special form of the packet buffer
- *     must be used, struct sixlowpan_reassbuf_s.  This special for
+ *     must be used, struct sixlowpan_reassbuf_s.  This special form
  *     includes appended data for managing reassembly of packets.
  *
  *   - Received frames are provided by radio network driver to the network
- *     via an IOB parameter in the sixlowpan_input() pr ieee802154_input()
- *     interface.  The length of the frame is io_len.
+ *     via an IOB parameter in the sixlowpan_input() or ieee802154_input()
+ *     interfaces.  The length of the frame is io_len.
  *
  *     Again, the radio network driver must provide an instance of struct
  *     sixlowpan_reassbuf_s as the packet buffer in the d_buf field.  This
- *     driver-provided data will only be used if the the receive frames are
+ *     driver-provided data will only be used if the receive frames are
  *     not fragmented.
  *
- *   - Received 6LoWPAN frames and will be uncompressed and possibly
- *     reassembled in resassembled the d_buf;  d_len will hold the size of
- *     the reassembled packet.
+ *   - Received 6LoWPAN frames will be uncompressed and possibly
+ *     reassembled in the d_buf; d_len will hold the size of the
+ *     reassembled packet.
  *
- *     For fagemented frames, d_buf provided by radio driver will not be
+ *     For fragmented frames, d_buf provided by radio driver will not be
  *     used.  6LoWPAN must handle multiple reassemblies from different
  *     sources simultaneously.  To support this, 6LoWPAN will allocate a
  *     unique reassembly buffer for each active reassembly, based on the
@@ -104,10 +103,10 @@ struct radiodev_properties_s
  * structure.  In general, all fields must be set to NULL.  In addition:
  *
  * 1. On a TX poll, the radio network driver should provide its driver
- *    structure along is (single) reassemby buffer provided at d_buf.
- *    During the course of the poll, the networking layer may generate
- *    outgoing frames.  These frames will by provided to the radio network
- *    driver via the req_data() method.
+ *    structure along with its (single) reassembly buffer provided at
+ *    d_buf.  During the course of the poll, the networking layer may
+ *    generate outgoing frames.  These frames will by provided to the
+ *    radio network driver via the req_data() method.
  *
  *    After sending each frame through the radio, the MAC driver must
  *    return the frame to the pool of free IOBs using the iob_free().
@@ -128,7 +127,7 @@ struct radiodev_properties_s
  *    CONFIG_NET_6LOWPAN_PKTSIZE, plus CONFIG_NET_GUARDSIZE and some
  *    additional overhead for reassembly state data.
  *
- *    The radio network driver should then inform the network of the recipt
+ *    The radio network driver should then inform the network of the receipt
  *    of a frame by calling sixlowpan_input() or ieee802154_input().  That
  *    single frame (or, perhaps, list of frames) should be provided as
  *    second argument of that call.
@@ -154,11 +153,11 @@ struct radio_driver_s
 #ifdef CONFIG_WIRELESS_IEEE802154
   /* The msdu_handle is basically an id for the frame.  The standard just
    * says that the next highest layer should determine it.  It is used in
-   * three places
+   * three places:
    *
    * 1. When you do that data request
    * 2. When the transmission is complete, the conf_data is called with
-   *    that handle so that the user can be notified of the frames success/
+   *    that handle so that the user can be notified of the frame's success/
    *    failure
    * 3. For a req_purge, to basically "cancel" the transaction.  This is
    *    often particularly useful on a coordinator that has indirect data
@@ -179,12 +178,12 @@ struct radio_driver_s
    *   Calculate the MAC header length given the frame meta-data.
    *
    * Input Parameters:
-   *   netdev    - The networkd device that will mediate the MAC interface
+   *   netdev    - The network device that will mediate the MAC interface
    *   meta      - Obfuscated metadata structure needed to recreate the
    *               radio MAC header
    *
    * Returned Value:
-   *   A non-negative MAC headeer length is returned on success; a negated
+   *   A non-negative MAC header length is returned on success; a negated
    *   errno value is returned on any failure.
    *
    **************************************************************************/

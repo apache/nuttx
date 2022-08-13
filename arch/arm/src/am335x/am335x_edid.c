@@ -83,7 +83,7 @@
  ****************************************************************************/
 
 static uint32_t
-  am335x_videomode_vrefresh(FAR const struct videomode_s *videomode)
+am335x_videomode_vrefresh(const struct videomode_s *videomode)
 {
   uint32_t refresh;
 
@@ -114,7 +114,7 @@ static uint32_t
  ****************************************************************************/
 
 static bool
-  am335x_videomode_valid(FAR const struct videomode_s *videomode)
+am335x_videomode_valid(const struct videomode_s *videomode)
 {
   size_t fbstride;
   size_t fbsize;
@@ -218,9 +218,9 @@ static bool
  ****************************************************************************/
 
 static const struct videomode_s *
-  am335x_lcd_pickmode(FAR struct edid_info_s *ei)
+am335x_lcd_pickmode(struct edid_info_s *ei)
 {
-  FAR const struct videomode_s *videomode;
+  const struct videomode_s *videomode;
   int n;
 
   /* Get standard VGA as default */
@@ -281,8 +281,8 @@ static const struct videomode_s *
  *
  ****************************************************************************/
 
-void am335x_lcd_videomode(FAR const struct videomode_s *videomode,
-                          FAR struct am335x_panel_info_s *panel)
+void am335x_lcd_videomode(const struct videomode_s *videomode,
+                          struct am335x_panel_info_s *panel)
 {
   lcdinfo("Detected videomode: %dx%d @ %" PRId32 "KHz\n",
           videomode->hdisplay, videomode->vdisplay,
@@ -354,11 +354,11 @@ void am335x_lcd_videomode(FAR const struct videomode_s *videomode,
  *
  ****************************************************************************/
 
-void am335x_lcd_edid(FAR const uint8_t *edid, size_t edid_len,
-                     FAR struct am335x_panel_info_s *panel,
-                     FAR const struct videomode_s **selected)
+void am335x_lcd_edid(const uint8_t *edid, size_t edid_len,
+                     struct am335x_panel_info_s *panel,
+                     const struct videomode_s **selected)
 {
-  FAR const struct videomode_s *videomode = NULL;
+  const struct videomode_s *videomode = NULL;
   struct edid_info_s ei;
 
   /* Do we have EDID data? */

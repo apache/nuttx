@@ -1323,7 +1323,7 @@ config SIG_PREALLOC_IRQ_ACTIONS
 		The number of pre-allocated irq action structures.
 
 config SIG_EVTHREAD
-	bool "Support SIGEV_THHREAD"
+	bool "Support SIGEV_THREAD"
 	default n
 	depends on !BUILD_KERNEL && SCHED_WORKQUEUE
 	select LIBC_USRWORK if BUILD_PROTECTED
@@ -1340,7 +1340,7 @@ config SIG_EVTHREAD_HPWORK
 	default n
 	depends on SIG_EVTHREAD && SCHED_HPWORK
 	---help---
-		if selected, SIGEV_THHREAD will use the high priority work queue.
+		if selected, SIGEV_THREAD will use the high priority work queue.
 		If not, it will use the low priority work queue (if available).
 
 		REVISIT:  This solution is non-optimal.  Some notifications should

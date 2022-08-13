@@ -68,11 +68,11 @@
 
 struct bh1721fvc_dev_s
 {
-  FAR struct i2c_master_s *i2c; /* I2C interface */
-  uint8_t addr;                 /* I2C address */
-  int port;                     /* I2C port */
-  struct seq_s *seq;            /* Sequencer instance */
-  int minor;                    /* Minor device number */
+  struct i2c_master_s *i2c; /* I2C interface */
+  uint8_t addr;             /* I2C address */
+  int port;                 /* I2C port */
+  struct seq_s *seq;        /* Sequencer instance */
+  int minor;                /* Minor device number */
 };
 
 /****************************************************************************
@@ -81,15 +81,15 @@ struct bh1721fvc_dev_s
 
 /* Character driver methods */
 
-static int bh1721fvc_open(FAR struct file *filep);
-static int bh1721fvc_close(FAR struct file *filep);
-static ssize_t bh1721fvc_read(FAR struct file *filep,
-                              FAR char *buffer,
+static int bh1721fvc_open(struct file *filep);
+static int bh1721fvc_close(struct file *filep);
+static ssize_t bh1721fvc_read(struct file *filep,
+                              char *buffer,
                               size_t buflen);
-static ssize_t bh1721fvc_write(FAR struct file *filep,
-                               FAR const char *buffer,
+static ssize_t bh1721fvc_write(struct file *filep,
+                               const char *buffer,
                                size_t buflen);
-static int bh1721fvc_ioctl(FAR struct file *filep,
+static int bh1721fvc_ioctl(struct file *filep,
                            int cmd,
                            unsigned long arg);
 
@@ -138,7 +138,7 @@ static struct seq_s *g_seq = NULL;
  *
  ****************************************************************************/
 
-static void bh1721fvc_writeopecode(FAR struct bh1721fvc_dev_s *priv,
+static void bh1721fvc_writeopecode(struct bh1721fvc_dev_s *priv,
                                    uint8_t opecode)
 {
   uint16_t inst = SCU_INST_SEND(opecode) | SCU_INST_LAST;
@@ -156,7 +156,7 @@ static void bh1721fvc_writeopecode(FAR struct bh1721fvc_dev_s *priv,
  *
  ****************************************************************************/
 
-static int bh1721fvc_seqinit(FAR struct bh1721fvc_dev_s *priv)
+static int bh1721fvc_seqinit(struct bh1721fvc_dev_s *priv)
 {
   DEBUGASSERT(g_seq == NULL);
 
@@ -194,10 +194,10 @@ static int bh1721fvc_seqinit(FAR struct bh1721fvc_dev_s *priv)
  *
  ****************************************************************************/
 
-static int bh1721fvc_open(FAR struct file *filep)
+static int bh1721fvc_open(struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct bh1721fvc_dev_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct bh1721fvc_dev_s *priv = inode->i_private;
 
   if (g_refcnt == 0)
     {
@@ -226,10 +226,10 @@ static int bh1721fvc_open(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static int bh1721fvc_close(FAR struct file *filep)
+static int bh1721fvc_close(struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct bh1721fvc_dev_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct bh1721fvc_dev_s *priv = inode->i_private;
 
   g_refcnt--;
 
@@ -254,11 +254,11 @@ static int bh1721fvc_close(FAR struct file *filep)
  * Name: bh1721fvc_read
  ****************************************************************************/
 
-static ssize_t bh1721fvc_read(FAR struct file *filep, FAR char *buffer,
+static ssize_t bh1721fvc_read(struct file *filep, char *buffer,
                               size_t len)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct bh1721fvc_dev_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct bh1721fvc_dev_s *priv = inode->i_private;
 
   len = len / BH1721FVC_BYTESPERSAMPLE * BH1721FVC_BYTESPERSAMPLE;
   len = seq_read(priv->seq, priv->minor, buffer, len);
@@ -270,8 +270,8 @@ static ssize_t bh1721fvc_read(FAR struct file *filep, FAR char *buffer,
  * Name: bh1721fvc_write
  ****************************************************************************/
 
-static ssize_t bh1721fvc_write(FAR struct file *filep,
-                               FAR const char *buffer,
+static ssize_t bh1721fvc_write(struct file *filep,
+                               const char *buffer,
                                size_t buflen)
 {
   return -ENOSYS;
@@ -281,11 +281,11 @@ static ssize_t bh1721fvc_write(FAR struct file *filep,
  * Name: bh1721fvc_ioctl
  ****************************************************************************/
 
-static int bh1721fvc_ioctl(FAR struct file *filep, int cmd,
+static int bh1721fvc_ioctl(struct file *filep, int cmd,
                            unsigned long arg)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct bh1721fvc_dev_s *priv = inode->i_private;
+  struct inode *inode = filep->f_inode;
+  struct bh1721fvc_dev_s *priv = inode->i_private;
   int ret = OK;
 
   switch (cmd)
@@ -330,7 +330,7 @@ static int bh1721fvc_ioctl(FAR struct file *filep, int cmd,
  *
  ****************************************************************************/
 
-int bh1721fvc_init(FAR struct i2c_master_s *i2c, int port)
+int bh1721fvc_init(struct i2c_master_s *i2c, int port)
 {
   return OK;
 }
@@ -354,16 +354,16 @@ int bh1721fvc_init(FAR struct i2c_master_s *i2c, int port)
  *
  ****************************************************************************/
 
-int bh1721fvc_register(FAR const char *devpath, int minor,
-                       FAR struct i2c_master_s *i2c, int port)
+int bh1721fvc_register(const char *devpath, int minor,
+                       struct i2c_master_s *i2c, int port)
 {
-  FAR struct bh1721fvc_dev_s *priv;
+  struct bh1721fvc_dev_s *priv;
   char path[16];
   int ret;
 
   /* Initialize the BH1721FVC device structure */
 
-  priv = (FAR struct bh1721fvc_dev_s *)
+  priv = (struct bh1721fvc_dev_s *)
     kmm_malloc(sizeof(struct bh1721fvc_dev_s));
   if (!priv)
     {

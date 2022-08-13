@@ -177,13 +177,13 @@ static inline void sam_chan_putreg(struct sam_chan_s *chan,
 
 static int sam_tc_interrupt(struct sam_tc_s *tc);
 #ifdef CONFIG_SAMA5_TC0
-static int sam_tc012_interrupt(int irq, void *context, FAR void *arg);
+static int sam_tc012_interrupt(int irq, void *context, void *arg);
 #endif
 #ifdef CONFIG_SAMA5_TC1
-static int sam_tc345_interrupt(int irq, void *context, FAR void *arg);
+static int sam_tc345_interrupt(int irq, void *context, void *arg);
 #endif
 #ifdef CONFIG_SAMA5_TC2
-static int sam_tc678_interrupt(int irq, void *context, FAR void *arg);
+static int sam_tc678_interrupt(int irq, void *context, void *arg);
 #endif
 
 /* Initialization ***********************************************************/
@@ -777,14 +777,14 @@ static int sam_tc012_interrupt(int irq, void *context, void *arg)
 #endif
 
 #ifdef CONFIG_SAMA5_TC1
-static int sam_tc345_interrupt(int irq, void *context, FAR void *arg)
+static int sam_tc345_interrupt(int irq, void *context, void *arg)
 {
   return sam_tc_interrupt(&g_tc345);
 }
 #endif
 
 #ifdef CONFIG_SAMA5_TC2
-static int sam_tc678_interrupt(int irq, void *context, FAR void *arg)
+static int sam_tc678_interrupt(int irq, void *context, void *arg)
 {
   return sam_tc_interrupt(&g_tc678);
 }

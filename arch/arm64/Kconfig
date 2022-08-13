@@ -1,0 +1,78 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_ARM64
+comment "ARM64 Options"
+
+choice
+	prompt "ARM64 chip selection"
+	default ARCH_CHIP_QEMU
+
+config ARCH_CHIP_QEMU
+	bool "QEMU virt platform (cortex-a53)"
+	select ARCH_CORTEX_A53
+	select ARCH_HAVE_ADDRENV
+	select ARCH_NEED_ADDRENV_MAPPING
+	---help---
+		QEMU virt platform (cortex-a53)
+
+endchoice
+
+config ARCH_ARMV8A
+	bool
+	default n
+
+config ARCH_ARMV8R
+	bool
+	default n
+
+config ARCH_CORTEX_A53
+	bool
+	default n
+	select ARCH_ARMV8A
+	select ARM_HAVE_NEON
+	select ARCH_HAVE_TRUSTZONE
+	select ARCH_DCACHE
+	select ARCH_ICACHE
+	select ARCH_HAVE_MMU
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_TESTSET
+
+config ARCH_CORTEX_R82
+	bool
+	default n
+	select ARCH_ARMV8R
+	select ARCH_DCACHE
+	select ARCH_ICACHE
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_TESTSET
+
+config ARCH_FAMILY
+	string
+	default "armv8-a"   if ARCH_ARMV8A
+	default "armv8-r"   if ARCH_ARMV8R
+
+config ARCH_CHIP
+	string
+	default "qemu"      if ARCH_CHIP_QEMU
+
+config ARCH_HAVE_TRUSTZONE
+	bool
+	default n
+	---help---
+		Automatically selected to indicate that the ARM CPU supports
+		TrustZone.
+
+config ARM_HAVE_NEON
+	bool
+	default n
+	---help---
+		Decide whether support NEON instruction
+
+if ARCH_CHIP_QEMU
+source "arch/arm64/src/qemu/Kconfig"
+endif
+
+endif # ARCH_ARM64

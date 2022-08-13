@@ -1,0 +1,80 @@
+############################################################################
+# nuttx/arch/xtensa/src/common/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# The start-up, "head", file.  May be either a .S or a .c file.
+
+HEAD_ASRC  = xtensa_vectors.S xtensa_window_vector.S xtensa_windowspill.S
+HEAD_ASRC += xtensa_int_handlers.S xtensa_user_handler.S
+
+# Common Xtensa files (arch/xtensa/src/common)
+
+CMN_ASRCS  = xtensa_context.S xtensa_cpuint.S xtensa_panic.S
+
+CMN_CSRCS  = xtensa_assert.c xtensa_blocktask.c
+CMN_CSRCS += xtensa_cpenable.c xtensa_createstack.c xtensa_exit.c
+CMN_CSRCS += xtensa_initialize.c xtensa_initialstate.c
+CMN_CSRCS += xtensa_irqdispatch.c xtensa_lowputs.c xtensa_mdelay.c
+CMN_CSRCS += xtensa_modifyreg8.c xtensa_modifyreg16.c xtensa_modifyreg32.c
+CMN_CSRCS += xtensa_nputs.c xtensa_releasepending.c xtensa_releasestack.c
+CMN_CSRCS += xtensa_reprioritizertr.c xtensa_schedsigaction.c
+CMN_CSRCS += xtensa_sigdeliver.c xtensa_stackframe.c xtensa_udelay.c
+CMN_CSRCS += xtensa_unblocktask.c xtensa_usestack.c xtensa_swint.c
+CMN_CSRCS += xtensa_saveusercontext.c
+
+# Configuration-dependent common Xtensa files
+
+ifeq ($(CONFIG_DEBUG_TCBINFO),y)
+  CMN_CSRCS += xtensa_tcbinfo.c
+endif
+
+ifeq ($(CONFIG_DEBUG_ALERT),y)
+  CMN_CSRCS += xtensa_dumpstate.c
+endif
+
+ifeq ($(CONFIG_ARCH_FPU),y)
+  CMN_CSRCS += xtensa_fpucmp.c
+endif
+
+ifeq ($(CONFIG_SCHED_BACKTRACE),y)
+  CMN_CSRCS += xtensa_backtrace.c
+endif
+
+ifeq ($(CONFIG_SPINLOCK),y)
+  CMN_CSRCS += xtensa_testset.c
+endif
+
+ifeq ($(CONFIG_SMP),y)
+  CMN_CSRCS += xtensa_cpupause.c
+endif
+
+ifeq ($(CONFIG_STACK_COLORATION),y)
+  CMN_CSRCS += xtensa_checkstack.c
+endif
+
+ifeq ($(CONFIG_XTENSA_SEMIHOSTING_HOSTFS),y)
+  CMN_ASRCS += xtensa_simcall.S
+  CMN_CSRCS += xtensa_hostfs.c
+endif
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+  CMN_UASRCS += xtensa_signal_handler.S
+  CMN_ASRCS  += xtensa_dispatch_syscall.S
+  CMN_CSRCS  += xtensa_signal_dispatch.c xtensa_task_start.c xtensa_pthread_start.c
+endif

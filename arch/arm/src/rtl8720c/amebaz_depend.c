@@ -595,11 +595,11 @@ int rtw_get_random_bytes(void *dst, uint32_t size)
 
 /* Thread Wrapper Start */
 
-static int nuttx_task_hook(int argc, FAR char *argv[])
+static int nuttx_task_hook(int argc, char *argv[])
 {
   struct task_struct *task;
   struct nthread_wrapper *wrap;
-  task = (FAR struct task_struct *)
+  task = (struct task_struct *)
          ((uintptr_t)strtoul(argv[1], NULL, 0));
   if (!task || !task->priv)
     {

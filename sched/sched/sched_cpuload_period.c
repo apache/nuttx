@@ -200,7 +200,7 @@ static bool nxsched_period_callback(FAR uint32_t *next_interval_us,
 }
 
 #ifdef CONFIG_PM
-static void nxsched_period_pmnotify(struct pm_callback_s *cb, int domain,
+static void nxsched_period_pmnotify(FAR struct pm_callback_s *cb, int domain,
                                     enum pm_state_e pmstate)
 {
   if (domain == PM_IDLE_DOMAIN)

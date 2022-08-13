@@ -85,7 +85,7 @@
 /* This is where the LPC43xx address where random-access reads begin */
 
 #define SPIFI_BASE \
-       (FAR uint8_t *)(LPC43_SPIFI_DATA_BASE + CONFIG_SPIFI_OFFSET)
+       (uint8_t *)(LPC43_SPIFI_DATA_BASE + CONFIG_SPIFI_OFFSET)
 
 /* Check if we are using a hard-coded block size */
 
@@ -273,9 +273,9 @@ struct lpc43_dev_s
 {
   struct mtd_dev_s mtd;             /* MTD interface */
 #ifndef CONFIG_SPIFI_LIBRARY
-  FAR struct spifi_driver_s *spifi; /* Pointer to ROM driver table */
+  struct spifi_driver_s *spifi;     /* Pointer to ROM driver table */
 #endif
-  FAR struct spifi_dev_s rom;       /* Needed for communication with ROM driver */
+  struct spifi_dev_s rom;           /* Needed for communication with ROM driver */
   struct spifi_operands_s operands; /* Needed for program and erase ROM calls */
   uint16_t nblocks;                 /* Number of blocks of size blksize */
 #ifndef CONFIG_SPIFI_BLKSIZE
@@ -286,7 +286,7 @@ struct lpc43_dev_s
 #if defined(CONFIG_SPIFI_SECTOR512) && !defined(CONFIG_SPIFI_READONLY)
   uint8_t flags;                    /* Buffered sector flags */
   uint16_t blkno;                   /* Erase block number in the cache */
-  FAR uint8_t *cache;               /* Allocated sector data */
+  uint8_t *cache;                   /* Allocated sector data */
 #endif
 };
 
@@ -296,40 +296,40 @@ struct lpc43_dev_s
 
 /* Helpers */
 
-static void lpc43_blockerase(FAR struct lpc43_dev_s *priv, off_t offset);
-static inline int lpc43_chiperase(FAR struct lpc43_dev_s *priv);
-static inline void lpc43_pageread(FAR struct lpc43_dev_s *priv,
-                                  FAR uint8_t *dest, FAR const uint8_t *src,
+static void lpc43_blockerase(struct lpc43_dev_s *priv, off_t offset);
+static inline int lpc43_chiperase(struct lpc43_dev_s *priv);
+static inline void lpc43_pageread(struct lpc43_dev_s *priv,
+                                  uint8_t *dest, const uint8_t *src,
                                   size_t nbytes);
 #ifndef CONFIG_SPIFI_READONLY
 #ifdef CONFIG_SPIFI_VERIFY
-static int lpc43_verify(FAR struct lpc43_dev_s *priv, FAR uint8_t *dest,
-                        FAR const uint8_t *src, size_t nbytes);
+static int lpc43_verify(struct lpc43_dev_s *priv, uint8_t *dest,
+                        const uint8_t *src, size_t nbytes);
 #endif
-static int lpc43_pagewrite(FAR struct lpc43_dev_s *priv, FAR uint8_t *dest,
-                           FAR const uint8_t *src, size_t nbytes);
+static int lpc43_pagewrite(struct lpc43_dev_s *priv, uint8_t *dest,
+                           const uint8_t *src, size_t nbytes);
 #ifdef CONFIG_SPIFI_SECTOR512
 static void lpc43_cacheflush(struct lpc43_dev_s *priv);
-static FAR uint8_t *lpc43_cacheread(struct lpc43_dev_s *priv, off_t sector);
+static uint8_t *lpc43_cacheread(struct lpc43_dev_s *priv, off_t sector);
 static void lpc43_cacheerase(struct lpc43_dev_s *priv, off_t sector);
-static void lpc43_cachewrite(FAR struct lpc43_dev_s *priv,
-                             FAR const uint8_t *buffer,
+static void lpc43_cachewrite(struct lpc43_dev_s *priv,
+                             const uint8_t *buffer,
                              off_t sector, size_t nsectors);
 #endif
 #endif
 
 /* MTD driver methods */
 
-static int lpc43_erase(FAR struct mtd_dev_s *dev,
+static int lpc43_erase(struct mtd_dev_s *dev,
                        off_t startblock, size_t nblocks);
-static ssize_t lpc43_bread(FAR struct mtd_dev_s *dev, off_t startblock,
-                           size_t nblocks, FAR uint8_t *buf);
-static ssize_t lpc43_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
-                            size_t nblocks, FAR const uint8_t *buf);
-static ssize_t lpc43_read(FAR struct mtd_dev_s *dev,
+static ssize_t lpc43_bread(struct mtd_dev_s *dev, off_t startblock,
+                           size_t nblocks, uint8_t *buf);
+static ssize_t lpc43_bwrite(struct mtd_dev_s *dev, off_t startblock,
+                            size_t nblocks, const uint8_t *buf);
+static ssize_t lpc43_read(struct mtd_dev_s *dev,
                           off_t offset, size_t nbytes,
-                          FAR uint8_t *buffer);
-static int lpc43_ioctl(FAR struct mtd_dev_s *dev,
+                          uint8_t *buffer);
+static int lpc43_ioctl(struct mtd_dev_s *dev,
                        int cmd, unsigned long arg);
 
 /* Initialization */
@@ -340,7 +340,7 @@ static inline void lpc43_idiv_clkconfig(void);
 
 static inline void lpc43_spifi_clkconfig(void);
 static inline void lpc43_spifi_pinconfig(void);
-static inline int lpc43_rominit(FAR struct lpc43_dev_s *priv);
+static inline int lpc43_rominit(struct lpc43_dev_s *priv);
 
 /****************************************************************************
  * Private Data
@@ -422,8 +422,8 @@ static inline int lpc43_chiperase(struct lpc43_dev_s *priv)
  ****************************************************************************/
 
 #if !defined(CONFIG_SPIFI_READONLY) && defined(CONFIG_SPIFI_VERIFY)
-static int lpc43_verify(FAR struct lpc43_dev_s *priv, FAR uint8_t *dest,
-                        FAR const uint8_t *src, size_t nbytes)
+static int lpc43_verify(struct lpc43_dev_s *priv, uint8_t *dest,
+                        const uint8_t *src, size_t nbytes)
 {
   return memcmp(src, dest, nbytes) != 0 ? -EIO : OK;
 }
@@ -434,8 +434,8 @@ static int lpc43_verify(FAR struct lpc43_dev_s *priv, FAR uint8_t *dest,
  ****************************************************************************/
 
 #ifndef CONFIG_SPIFI_READONLY
-static int lpc43_pagewrite(FAR struct lpc43_dev_s *priv, FAR uint8_t *dest,
-                           FAR const uint8_t *src, size_t nbytes)
+static int lpc43_pagewrite(struct lpc43_dev_s *priv, uint8_t *dest,
+                           const uint8_t *src, size_t nbytes)
 {
   int result;
 
@@ -482,8 +482,8 @@ static int lpc43_pagewrite(FAR struct lpc43_dev_s *priv, FAR uint8_t *dest,
  * Name: lpc43_pageread
  ****************************************************************************/
 
-static inline void lpc43_pageread(FAR struct lpc43_dev_s *priv,
-                                  FAR uint8_t *dest, FAR const uint8_t *src,
+static inline void lpc43_pageread(struct lpc43_dev_s *priv,
+                                  uint8_t *dest, const uint8_t *src,
                                   size_t nbytes)
 {
   finfo("src=%p dest=%p length=%d\n", src, dest, nbytes);
@@ -497,7 +497,7 @@ static inline void lpc43_pageread(FAR struct lpc43_dev_s *priv,
 #if defined(CONFIG_SPIFI_SECTOR512) && !defined(CONFIG_SPIFI_READONLY)
 static void lpc43_cacheflush(struct lpc43_dev_s *priv)
 {
-  FAR uint8_t *dest;
+  uint8_t *dest;
   int ret;
 
   /* If the cached is dirty (meaning that it no longer matches the old
@@ -533,9 +533,9 @@ static void lpc43_cacheflush(struct lpc43_dev_s *priv)
  ****************************************************************************/
 
 #if defined(CONFIG_SPIFI_SECTOR512) && !defined(CONFIG_SPIFI_READONLY)
-static FAR uint8_t *lpc43_cacheread(struct lpc43_dev_s *priv, off_t sector)
+static uint8_t *lpc43_cacheread(struct lpc43_dev_s *priv, off_t sector)
 {
-  FAR const uint8_t *src;
+  const uint8_t *src;
   off_t blkno;
   int   index;
 
@@ -594,7 +594,7 @@ static FAR uint8_t *lpc43_cacheread(struct lpc43_dev_s *priv, off_t sector)
 #if defined(CONFIG_SPIFI_SECTOR512) && !defined(CONFIG_SPIFI_READONLY)
 static void lpc43_cacheerase(struct lpc43_dev_s *priv, off_t sector)
 {
-  FAR uint8_t *dest;
+  uint8_t *dest;
 
   /* First, make sure that the erase block containing the 512 byte sector is
    * in the cache.
@@ -631,11 +631,11 @@ static void lpc43_cacheerase(struct lpc43_dev_s *priv, off_t sector)
  ****************************************************************************/
 
 #if defined(CONFIG_SPIFI_SECTOR512) && !defined(CONFIG_SPIFI_READONLY)
-static void lpc43_cachewrite(FAR struct lpc43_dev_s *priv,
-                             FAR const uint8_t *buffer,
+static void lpc43_cachewrite(struct lpc43_dev_s *priv,
+                             const uint8_t *buffer,
                              off_t sector, size_t nsectors)
 {
-  FAR uint8_t *dest;
+  uint8_t *dest;
 
   for (; nsectors > 0; nsectors--)
     {
@@ -683,13 +683,13 @@ static void lpc43_cachewrite(FAR struct lpc43_dev_s *priv,
  * Name: lpc43_erase
  ****************************************************************************/
 
-static int lpc43_erase(FAR struct mtd_dev_s *dev,
+static int lpc43_erase(struct mtd_dev_s *dev,
                        off_t startblock, size_t nblocks)
 {
 #ifdef CONFIG_SPIFI_READONLY
   return -EACESS
 #else
-  FAR struct lpc43_dev_s *priv = (FAR struct lpc43_dev_s *)dev;
+  struct lpc43_dev_s *priv = (struct lpc43_dev_s *)dev;
   size_t blocksleft = nblocks;
 
   finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
@@ -720,9 +720,9 @@ static int lpc43_erase(FAR struct mtd_dev_s *dev,
  * Name: lpc43_bread
  ****************************************************************************/
 
-static ssize_t lpc43_bread(FAR struct mtd_dev_s *dev,
+static ssize_t lpc43_bread(struct mtd_dev_s *dev,
                            off_t startblock, size_t nblocks,
-                           FAR uint8_t *buffer)
+                           uint8_t *buffer)
 {
 #ifdef CONFIG_SPIFI_SECTOR512
   ssize_t nbytes;
@@ -743,7 +743,7 @@ static ssize_t lpc43_bread(FAR struct mtd_dev_s *dev,
 
   return (int)nbytes;
 #else
-  FAR struct lpc43_dev_s *priv = (FAR struct lpc43_dev_s *)dev;
+  struct lpc43_dev_s *priv = (struct lpc43_dev_s *)dev;
   ssize_t nbytes;
 
   finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
@@ -768,9 +768,9 @@ static ssize_t lpc43_bread(FAR struct mtd_dev_s *dev,
  * Name: lpc43_bwrite
  ****************************************************************************/
 
-static ssize_t lpc43_bwrite(FAR struct mtd_dev_s *dev,
+static ssize_t lpc43_bwrite(struct mtd_dev_s *dev,
                             off_t startblock, size_t nblocks,
-                            FAR const uint8_t *buffer)
+                            const uint8_t *buffer)
 {
 #if defined(CONFIG_SPIFI_READONLY)
 
@@ -778,7 +778,7 @@ static ssize_t lpc43_bwrite(FAR struct mtd_dev_s *dev,
 
 #elif defined(CONFIG_SPIFI_SECTOR512)
 
-  FAR struct lpc43_dev_s *priv = (FAR struct lpc43_dev_s *)dev;
+  struct lpc43_dev_s *priv = (struct lpc43_dev_s *)dev;
 
   finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
@@ -789,8 +789,8 @@ static ssize_t lpc43_bwrite(FAR struct mtd_dev_s *dev,
 
 #else
 
-  FAR struct lpc43_dev_s *priv = (FAR struct lpc43_dev_s *)dev;
-  FAR uint8_t *dest;
+  struct lpc43_dev_s *priv = (struct lpc43_dev_s *)dev;
+  uint8_t *dest;
   int ret;
 
   finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
@@ -818,12 +818,12 @@ static ssize_t lpc43_bwrite(FAR struct mtd_dev_s *dev,
  * Name: lpc43_read
  ****************************************************************************/
 
-static ssize_t lpc43_read(FAR struct mtd_dev_s *dev,
+static ssize_t lpc43_read(struct mtd_dev_s *dev,
                           off_t offset, size_t nbytes,
-                          FAR uint8_t *buffer)
+                          uint8_t *buffer)
 {
-  FAR struct lpc43_dev_s *priv = (FAR struct lpc43_dev_s *)dev;
-  FAR const uint8_t *src;
+  struct lpc43_dev_s *priv = (struct lpc43_dev_s *)dev;
+  const uint8_t *src;
 
   finfo("offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
 
@@ -843,9 +843,9 @@ static ssize_t lpc43_read(FAR struct mtd_dev_s *dev,
  * Name: lpc43_ioctl
  ****************************************************************************/
 
-static int lpc43_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
+static int lpc43_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg)
 {
-  FAR struct lpc43_dev_s *priv = (FAR struct lpc43_dev_s *)dev;
+  struct lpc43_dev_s *priv = (struct lpc43_dev_s *)dev;
   int ret = -EINVAL; /* Assume good command with bad parameters */
 
   finfo("cmd: %d\n", cmd);
@@ -854,8 +854,8 @@ static int lpc43_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
     {
       case MTDIOC_GEOMETRY:
         {
-          FAR struct mtd_geometry_s *geo =
-                             (FAR struct mtd_geometry_s *)((uintptr_t)arg);
+          struct mtd_geometry_s *geo =
+                             (struct mtd_geometry_s *)((uintptr_t)arg);
           if (geo)
             {
               /* Populate the geometry structure with information need to
@@ -888,8 +888,8 @@ static int lpc43_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 
       case BIOC_PARTINFO:
         {
-          FAR struct partition_info_s *info =
-            (FAR struct partition_info_s *)arg;
+          struct partition_info_s *info =
+            (struct partition_info_s *)arg;
           if (info != NULL)
             {
 #ifdef CONFIG_SPIFI_SECTOR512
@@ -917,7 +917,7 @@ static int lpc43_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 
       case MTDIOC_ERASESTATE:
         {
-          FAR uint8_t *result = (FAR uint8_t *)arg;
+          uint8_t *result = (uint8_t *)arg;
           *result = SPIFI_ERASED_STATE;
 
           ret = OK;
@@ -1025,10 +1025,10 @@ static inline void lpc43_spifi_pinconfig(void)
  *
  ****************************************************************************/
 
-static inline int lpc43_rominit(FAR struct lpc43_dev_s *priv)
+static inline int lpc43_rominit(struct lpc43_dev_s *priv)
 {
 #ifndef CONFIG_SPIFI_BLKSIZE
-  FAR struct spfi_desc_s *desc;
+  struct spfi_desc_s *desc;
   uint16_t sectors;
   uint8_t log2;
 #endif
@@ -1179,11 +1179,11 @@ static inline int lpc43_rominit(FAR struct lpc43_dev_s *priv)
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *lpc43_spifi_initialize(void)
+struct mtd_dev_s *lpc43_spifi_initialize(void)
 {
   /* At present, only a single instance of the SPIFI driver is supported */
 
-  FAR struct lpc43_dev_s *priv = &g_spifi;
+  struct lpc43_dev_s *priv = &g_spifi;
   irqstate_t flags;
   int ret;
 
@@ -1236,7 +1236,7 @@ FAR struct mtd_dev_s *lpc43_spifi_initialize(void)
 
   /* Allocate a buffer for the erase block cache */
 
-  priv->cache = (FAR uint8_t *)kmm_malloc(SPIFI_BLKSIZE);
+  priv->cache = (uint8_t *)kmm_malloc(SPIFI_BLKSIZE);
   if (!priv->cache)
     {
       /* Allocation failed!
@@ -1251,7 +1251,7 @@ FAR struct mtd_dev_s *lpc43_spifi_initialize(void)
   /* Return the implementation-specific state structure as the MTD device */
 
   finfo("Return %p\n", priv);
-  return (FAR struct mtd_dev_s *)priv;
+  return (struct mtd_dev_s *)priv;
 }
 
 /****************************************************************************

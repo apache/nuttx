@@ -134,7 +134,7 @@ struct procfs_meminfo_entry_s
   FAR const char *name;
   FAR struct mm_heap_s *heap;
   struct procfs_meminfo_entry_s *next;
-#if defined(CONFIG_DEBUG_MM)
+#if CONFIG_MM_BACKTRACE >= 0
 
   /* This is dynamic control flag whether to turn on backtrace in the heap,
    * you can set it by /proc/memdump.
@@ -208,7 +208,7 @@ size_t procfs_memcpy(FAR const char *src, size_t srclen,
  * Description:
  *   This function is same with snprintf, except return values.
  *   If buf has no enough space and output was truncated due to size limit,
- *   snprintf:        return formated string len.
+ *   snprintf:        return formatted string len.
  *   procfs_snprintf: return string len which has written to buf.
  *
  * Input Parameters:
@@ -220,7 +220,7 @@ size_t procfs_memcpy(FAR const char *src, size_t srclen,
  ****************************************************************************/
 
 int procfs_snprintf(FAR char *buf, size_t size,
-                    FAR const IPTR char *format, ...);
+                    FAR const IPTR char *format, ...) printflike(3, 4);
 
 /****************************************************************************
  * Name: procfs_register

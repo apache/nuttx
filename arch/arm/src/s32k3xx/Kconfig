@@ -1,0 +1,1586 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_S32K3XX
+
+# Chip Selection
+
+choice
+	prompt "S32K3XX Chip Selection"
+	default ARCH_CHIP_S32K344
+
+#config ARCH_CHIP_S32K311
+#	bool "S32K311"
+#	select ARCH_FAMILY_S32K3XX_BASE
+#	select S32K3XX_HAVE_I3C0
+#	---help---
+#		Single Cortex-M7 @ 120 MHz, 1 MB Flash, 128 KB SRAM
+
+#config ARCH_CHIP_S32K312
+#	bool "S32K312"
+#	select ARCH_FAMILY_S32K3X2
+#	select S32K3XX_HAVE_FLEXCAN4
+#	select S32K3XX_HAVE_FLEXCAN5
+#	select S32K3XX_HAVE_LPUART4
+#	select S32K3XX_HAVE_LPUART5
+#	select S32K3XX_HAVE_LPUART6
+#	select S32K3XX_HAVE_LPUART7
+#	---help---
+#		Single Cortex-M7 @ 120 MHz, 2 MB Flash, 192 KB SRAM
+
+config ARCH_CHIP_S32K314
+	bool "S32K314"
+	select ARCH_FAMILY_S32K3X4
+	---help---
+		Single Cortex-M7 @ 160 MHz, 4 MB Flash, 512 KB SRAM
+
+#config ARCH_CHIP_S32K322
+#	bool "S32K322"
+#	select ARCH_FAMILY_S32K3X2
+#	select S32K3XX_HAVE_ENET
+#	select S32K3XX_HAVE_QSPI
+#	select S32K3XX_HAVE_SAI0
+#	select S32K3XX_HAVE_SAI1
+#	---help---
+#		Single Cortex-M7 @ 160 MHz, 2 MB Flash, 256 KB SRAM
+
+config ARCH_CHIP_S32K324
+	bool "S32K324"
+	select ARCH_FAMILY_S32K3X4
+	---help---
+		Dual Cortex-M7 @ 160 MHz, 4 MB Flash, 512 KB SRAM
+
+#config ARCH_CHIP_S32K341
+#	bool "S32K341"
+#	select ARCH_FAMILY_S32K3XX_BASE
+#	select S32K3XX_HAVE_ENET
+#	select S32K3XX_HAVE_FLEXCAN3
+#	select S32K3XX_HAVE_I3C0
+#	select S32K3XX_HAVE_QSPI
+#	select S32K3XX_HAVE_SAI0
+#	select S32K3XX_HAVE_SAI1
+#	---help---
+#		Lock-Step Cortex-M7 @ 160 MHz, 1 MB Flash, 256 KB SRAM
+
+#config ARCH_CHIP_S32K342
+#	bool "S32K342"
+#	select ARCH_FAMILY_S32K3X2
+#	select S32K3XX_HAVE_ENET
+#	select S32k3XX_HAVE_QSPI
+#	select S32K3XX_HAVE_SAI0
+#	select S32K3XX_HAVE_SAI1
+#	---help---
+#		Lock-Step Cortex-M7 @ 160 MHz, 2 MB Flash, 256 KB SRAM
+
+config ARCH_CHIP_S32K344
+	bool "S32K344"
+	select ARCH_FAMILY_S32K3X4
+	---help---
+		Lock-Step Cortex-M7 @ 160 MHz, 4 MB Flash, 512 KB SRAM
+
+#config ARCH_CHIP_S32K328
+#	bool "S32K328"
+#	select ARCH_FAMILY_S32K3X8
+#	---help---
+#		Dual Cortex-M7 @ 160 MHz, 8 MB Flash, 1152 KB SRAM
+
+#config ARCH_CHIP_S32K338
+#	bool "S32K338"
+#	select ARCH_FAMILY_S32K3X8
+#	---help---
+#		Triple Cortex-M7 @ 240 MHz, 8 MB Flash, 1152 KB SRAM
+
+#config ARCH_CHIP_S32K348
+#	bool "S32K348"
+#	select ARCH_FAMILY_S32K3X8
+#	---help---
+#		Lock-Step Cortex-M7 @ 160 MHz, 8 MB Flash, 1152 KB SRAM
+
+#config ARCH_CHIP_S32K358
+#	bool "S32K358"
+#	select ARCH_FAMILY_S32K3X8
+#	---help---
+#		Lock-Step Cortex-M7 + Single Cortex-M7 @ 240 MHz, 8 MB Flash, 1152 KB SRAM
+
+endchoice # S32K3XX Chip Selection
+
+# Chip Family
+
+config ARCH_FAMILY_S32K3X2
+	bool
+	select ARCH_FAMILY_S32K3XX_BASE
+	select S32K3XX_HAVE_FLEXCAN3
+	select S32K3XX_HAVE_I3C0
+
+config ARCH_FAMILY_S32K3X4
+	bool
+	select ARCH_FAMILY_S32K3XX_BASE
+	select S32K3XX_HAVE_EMIOS2
+	select S32K3XX_HAVE_ENET
+	select S32K3XX_HAVE_FLEXCAN3
+	select S32K3XX_HAVE_FLEXCAN4
+	select S32K3XX_HAVE_FLEXCAN5
+	select S32K3XX_HAVE_LPSPI4
+	select S32K3XX_HAVE_LPSPI5
+	select S32K3XX_HAVE_LPUART4
+	select S32K3XX_HAVE_LPUART5
+	select S32K3XX_HAVE_LPUART6
+	select S32K3XX_HAVE_LPUART7
+	select S32K3XX_HAVE_LPUART8
+	select S32K3XX_HAVE_LPUART9
+	select S32K3XX_HAVE_LPUART10
+	select S32K3XX_HAVE_LPUART11
+	select S32K3XX_HAVE_LPUART12
+	select S32K3XX_HAVE_LPUART13
+	select S32K3XX_HAVE_LPUART14
+	select S32K3XX_HAVE_LPUART15
+	select S32K3XX_HAVE_QSPI
+	select S32K3XX_HAVE_SAI0
+	select S32K3XX_HAVE_SAI1
+
+config ARCH_FAMILY_S32K3X8
+	bool
+	select ARCH_FAMILY_S32K3XX_BASE
+	select S32K3XX_HAVE_EMIOS2
+	select S32K3XX_HAVE_ENET
+	select S32K3XX_HAVE_FLEXCAN3
+	select S32K3XX_HAVE_FLEXCAN4
+	select S32K3XX_HAVE_FLEXCAN5
+	select S32K3XX_HAVE_FLEXCAN6
+	select S32K3XX_HAVE_FLEXCAN7
+	select S32K3XX_HAVE_I3C0
+	select S32K3XX_HAVE_LPSPI4
+	select S32K3XX_HAVE_LPSPI5
+	select S32K3XX_HAVE_LPUART4
+	select S32K3XX_HAVE_LPUART5
+	select S32K3XX_HAVE_LPUART6
+	select S32K3XX_HAVE_LPUART7
+	select S32K3XX_HAVE_LPUART8
+	select S32K3XX_HAVE_LPUART9
+	select S32K3XX_HAVE_LPUART10
+	select S32K3XX_HAVE_LPUART11
+	select S32K3XX_HAVE_LPUART12
+	select S32K3XX_HAVE_LPUART13
+	select S32K3XX_HAVE_LPUART14
+	select S32K3XX_HAVE_LPUART15
+	select S32K3XX_HAVE_QSPI
+	select S32K3XX_HAVE_SAI0
+	select S32K3XX_HAVE_SAI1
+	select S32k3XX_HAVE_SDHC
+
+config ARCH_FAMILY_S32K3XX_BASE
+	bool
+	select ARCH_CORTEXM7
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_FETCHADD
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+
+# Chip Capabilities
+
+config S32K3XX_HAVE_EMIOS2
+	bool
+	default n
+
+config S32K3XX_HAVE_ENET
+	bool
+	default n
+	select ARCH_HAVE_PHY
+	select ARCH_PHY_INTERRUPT
+	select ARCH_HAVE_NETDEV_STATISTICS
+
+config S32K3XX_HAVE_FLEXCAN3
+	bool
+	default n
+
+config S32K3XX_HAVE_FLEXCAN4
+	bool
+	default n
+
+config S32K3XX_HAVE_FLEXCAN5
+	bool
+	default n
+
+config S32K3XX_HAVE_FLEXCAN6
+	bool
+	default n
+
+config S32K3XX_HAVE_FLEXCAN7
+	bool
+	default n
+
+config S32K3XX_HAVE_I3C0
+	bool
+	default n
+
+config S32K3XX_HAVE_LPSPI4
+	bool
+	default n
+
+config S32K3XX_HAVE_LPSPI5
+	bool
+	default n
+
+config S32K3XX_HAVE_LPUART4
+	bool
+	default n
+
+config S32K3XX_HAVE_LPUART5
+	bool
+	default n
+
+config S32K3XX_HAVE_LPUART6
+	bool
+	default n
+
+config S32K3XX_HAVE_LPUART7
+	bool
+	default n
+
+config S32K3XX_HAVE_LPUART8
+	bool
+	default n
+
+config S32K3XX_HAVE_LPUART9
+	bool
+	default n
+
+config S32K3XX_HAVE_LPUART10
+	bool
+	default n
+
+config S32K3XX_HAVE_LPUART11
+	bool
+	default n
+
+config S32K3XX_HAVE_LPUART12
+	bool
+	default n
+
+config S32K3XX_HAVE_LPUART13
+	bool
+	default n
+
+config S32K3XX_HAVE_LPUART14
+	bool
+	default n
+
+config S32K3XX_HAVE_LPUART15
+	bool
+	default n
+
+config S32K3XX_HAVE_QSPI
+	bool
+	default n
+
+config S32K3XX_HAVE_SAI0
+	bool
+	default n
+
+config S32K3XX_HAVE_SAI1
+	bool
+	default n
+
+config S32K3XX_HAVE_SDHC
+	bool
+	default n
+	select ARCH_HAVE_SDIO
+
+
+menu "S32K3XX Heap Configuration"
+
+config S32K3XX_DTCM_HEAP
+	bool "Add DTCM to heap"
+	---help---
+		Select to add the entire DTCM to the heap
+
+endmenu  # S32K3XX Heap Configuration
+
+# Peripheral Group Selections
+
+config S32K3XX_EMIOS
+	bool
+	default n
+
+config S32K3XX_FLEXCAN
+	bool
+	default n
+	select NET_CAN_HAVE_CANFD
+	select NET_CAN_HAVE_TX_DEADLINE
+
+config S32K3XX_LPI2C
+	bool
+	default n
+
+config S32K3XX_LPSPI
+	bool
+	default n
+	select SPI
+
+config S32K3XX_LPUART
+	bool
+	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+# Peripheral Selection
+
+menu "S32K3XX Peripheral Selection"
+
+config S32K3XX_EDMA
+	bool "eDMA"
+	select ARCH_DMA
+	default n
+	---help---
+		Support DMA
+
+menu "eMIOS"
+
+config S32K3XX_EMIOS0
+	bool "eMIOS0"
+	default n
+	select S32K3XX_EMIOS
+
+config S32K3XX_EMIOS1
+	bool "eMIOS1"
+	default n
+	select S32K3XX_EMIOS
+
+config S32K3XX_EMIOS2
+	bool "eMIOS2"
+	default n
+	select S32K3XX_EMIOS
+	depends on S32K3XX_HAVE_EMIOS2
+
+endmenu # eMIOS
+
+config S32K3XX_ENET
+	bool "Ethernet"
+	default n
+	depends on S32K3XX_HAVE_ENET
+
+
+config S32K3XX_QSPI
+	bool "QSPI Flash"
+	default n
+	depends on S32K3XX_HAVE_QSPI
+	
+menu "FlexCAN"
+
+config S32K3XX_FLEXCAN0
+	bool "FlexCAN0"
+	default n
+	select S32K3XX_FLEXCAN
+
+config S32K3XX_FLEXCAN1
+	bool "FlexCAN1"
+	default n
+	select S32K3XX_FLEXCAN
+
+config S32K3XX_FLEXCAN2
+	bool "FlexCAN2"
+	default n
+	select S32K3XX_FLEXCAN
+
+config S32K3XX_FLEXCAN3
+	bool "FlexCAN3"
+	default n
+	select S32K3XX_FLEXCAN
+	depends on S32K3XX_HAVE_FLEXCAN3
+
+config S32K3XX_FLEXCAN4
+	bool "FlexCAN4"
+	default n
+	select S32K3XX_FLEXCAN
+	depends on S32K3XX_HAVE_FLEXCAN4
+
+config S32K3XX_FLEXCAN5
+	bool "FlexCAN5"
+	default n
+	select S32K3XX_FLEXCAN
+	depends on S32K3XX_HAVE_FLEXCAN5
+
+config S32K3XX_FLEXCAN6
+	bool "FlexCAN6"
+	default n
+	select S32K3XX_FLEXCAN
+	depends on S32K3XX_HAVE_FLEXCAN6
+
+config S32K3XX_FLEXCAN7
+	bool "FlexCAN7"
+	default n
+	select S32K3XX_FLEXCAN
+	depends on S32K3XX_HAVE_FLEXCAN7
+
+endmenu # FlexCAN
+
+menu "LPI2C"
+
+config S32K3XX_LPI2C0
+	bool "LPI2C0"
+	default n
+	select S32K3XX_LPI2C
+
+config S32K3XX_LPI2C1
+	bool "LPI2C1"
+	default n
+	select S32K3XX_LPI2C
+
+endmenu # LPI2C
+
+menu "LPSPI"
+
+config S32K3XX_LPSPI0
+	bool "LPSPI0"
+	default n
+	select S32K3XX_LPSPI
+
+config S32K3XX_LPSPI1
+	bool "LPSPI1"
+	default n
+	select S32K3XX_LPSPI
+
+config S32K3XX_LPSPI2
+	bool "LPSPI2"
+	default n
+	select S32K3XX_LPSPI
+
+config S32K3XX_LPSPI3
+	bool "LPSPI3"
+	default n
+	select S32K3XX_LPSPI
+
+config S32K3XX_LPSPI4
+	bool "LPSPI4"
+	default n
+	select S32K3XX_LPSPI
+	depends on S32K3XX_HAVE_LPSPI4
+
+config S32K3XX_LPSPI5
+	bool "LPSPI5"
+	default n
+	select S32K3XX_LPSPI
+	depends on S32K3XX_HAVE_LPSPI5
+
+endmenu # LPSPI
+
+menu "LPUART"
+
+config S32K3XX_LPUART0
+	bool "LPUART0"
+	default n
+	select S32K3XX_LPUART
+	select LPUART0_SERIALDRIVER
+
+config S32K3XX_LPUART1
+	bool "LPUART1"
+	default n
+	select S32K3XX_LPUART
+	select LPUART1_SERIALDRIVER
+
+config S32K3XX_LPUART2
+	bool "LPUART2"
+	default n
+	select S32K3XX_LPUART
+	select LPUART2_SERIALDRIVER
+
+config S32K3XX_LPUART3
+	bool "LPUART3"
+	default n
+	select S32K3XX_LPUART
+	select LPUART3_SERIALDRIVER
+
+config S32K3XX_LPUART4
+	bool "LPUART4"
+	default n
+	select S32K3XX_LPUART
+	select LPUART4_SERIALDRIVER
+	depends on S32K3XX_HAVE_LPUART4
+
+config S32K3XX_LPUART5
+	bool "LPUART5"
+	default n
+	select S32K3XX_LPUART
+	select LPUART5_SERIALDRIVER
+	depends on S32K3XX_HAVE_LPUART5
+
+config S32K3XX_LPUART6
+	bool "LPUART6"
+	default n
+	select S32K3XX_LPUART
+	select LPUART6_SERIALDRIVER
+	depends on S32K3XX_HAVE_LPUART6
+
+config S32K3XX_LPUART7
+	bool "LPUART7"
+	default n
+	select S32K3XX_LPUART
+	select LPUART7_SERIALDRIVER
+	depends on S32K3XX_HAVE_LPUART7
+
+config S32K3XX_LPUART8
+	bool "LPUART8"
+	default n
+	select S32K3XX_LPUART
+	select LPUART8_SERIALDRIVER
+	depends on S32K3XX_HAVE_LPUART8
+
+config S32K3XX_LPUART9
+	bool "LPUART9"
+	default n
+	select S32K3XX_LPUART
+	select LPUART9_SERIALDRIVER
+	depends on S32K3XX_HAVE_LPUART9
+
+config S32K3XX_LPUART10
+	bool "LPUART10"
+	default n
+	select S32K3XX_LPUART
+	select LPUART10_SERIALDRIVER
+	depends on S32K3XX_HAVE_LPUART10
+
+config S32K3XX_LPUART11
+	bool "LPUART11"
+	default n
+	select S32K3XX_LPUART
+	select LPUART11_SERIALDRIVER
+	depends on S32K3XX_HAVE_LPUART11
+
+config S32K3XX_LPUART12
+	bool "LPUART12"
+	default n
+	select S32K3XX_LPUART
+	select LPUART12_SERIALDRIVER
+	depends on S32K3XX_HAVE_LPUART12
+
+config S32K3XX_LPUART13
+	bool "LPUART13"
+	default n
+	select S32K3XX_LPUART
+	select LPUART13_SERIALDRIVER
+	depends on S32K3XX_HAVE_LPUART13
+
+config S32K3XX_LPUART14
+	bool "LPUART14"
+	default n
+	select S32K3XX_LPUART
+	select LPUART14_SERIALDRIVER
+	depends on S32K3XX_HAVE_LPUART14
+
+config S32K3XX_LPUART15
+	bool "LPUART15"
+	default n
+	select S32K3XX_LPUART
+	select LPUART15_SERIALDRIVER
+	depends on S32K3XX_HAVE_LPUART15
+
+endmenu # LPUART
+
+config S32K3XX_RTC
+	bool "RTC"
+	default n
+	
+config S32K3XX_FS26
+	bool "FS26 SBC Disable watchdog"
+	default n
+	---help---
+		Disables the FS26 watchdog so that the S32K3XX MCU does not get resetted.
+		Engineering development purpose only, not for use in production.
+		Please refer to the FS26 Datasheet.
+
+endmenu # S32K3XX Peripheral Selection
+
+menu "S32K3XX eMIOS PWM Configuration"
+	depends on S32K3XX_FTM
+
+config S32K3XX_EMIOS0_CH0_PWM
+	bool "eMIOS0 Channel 0 PWM"
+	default n
+	depends on S32K3XX_EMIOS0
+
+config S32K3XX_EMIOS0_CH1_PWM
+	bool "eMIOS0 Channel 1 PWM"
+	default n
+	depends on S32K3XX_EMIOS0
+
+config S32K3XX_EMIOS0_CH2_PWM
+	bool "eMIOS0 Channel 2 PWM"
+	default n
+	depends on S32K3XX_EMIOS0
+
+config S32K3XX_EMIOS0_CH3_PWM
+	bool "eMIOS0 Channel 3 PWM"
+	default n
+	depends on S32K3XX_EMIOS0
+
+config S32K3XX_EMIOS0_CH4_PWM
+	bool "eMIOS0 Channel 4 PWM"
+	default n
+	depends on S32K3XX_EMIOS0
+
+config S32K3XX_EMIOS0_CH5_PWM
+	bool "eMIOS0 Channel 5 PWM"
+	default n
+	depends on S32K3XX_EMIOS0
+
+config S32K3XX_EMIOS0_CH6_PWM
+	bool "eMIOS0 Channel 6 PWM"
+	default n
+	depends on S32K3XX_EMIOS0
+
+config S32K3XX_EMIOS0_CH7_PWM
+	bool "eMIOS0 Channel 7 PWM"
+	default n
+	depends on S32K3XX_EMIOS0
+
+config S32K3XX_EMIOS0_CH8_PWM
+	bool "eMIOS0 Channel 8 PWM"
+	default n
+	depends on S32K3XX_EMIOS0
+
+config S32K3XX_EMIOS0_CH9_PWM
+	bool "eMIOS0 Channel 9 PWM"
+	default n
+	depends on S32K3XX_EMIOS0
+
+config S32K3XX_EMIOS0_CH10_PWM
+	bool "eMIOS0 Channel 10 PWM"
+	default n
+	depends on S32K3XX_EMIOS0
+
+config S32K3XX_EMIOS0_CH11_PWM
+	bool "eMIOS0 Channel 11 PWM"
+	default n
+	depends on S32K3XX_EMIOS0
+
+config S32K3XX_EMIOS0_CH12_PWM
+	bool "eMIOS0 Channel 12 PWM"
+	default n
+	depends on S32K3XX_EMIOS0
+
+config S32K3XX_EMIOS0_CH13_PWM
+	bool "eMIOS0 Channel 13 PWM"
+	default n
+	depends on S32K3XX_EMIOS0
+
+config S32K3XX_EMIOS0_CH14_PWM
+	bool "eMIOS0 Channel 14 PWM"
+	default n
+	depends on S32K3XX_EMIOS0
+
+config S32K3XX_EMIOS0_CH15_PWM
+	bool "eMIOS0 Channel 15 PWM"
+	default n
+	depends on S32K3XX_EMIOS0
+
+config S32K3XX_EMIOS0_CH16_PWM
+	bool "eMIOS0 Channel 16 PWM"
+	default n
+	depends on S32K3XX_EMIOS0
+
+config S32K3XX_EMIOS0_CH17_PWM
+	bool "eMIOS0 Channel 17 PWM"
+	default n
+	depends on S32K3XX_EMIOS0
+
+config S32K3XX_EMIOS0_CH18_PWM
+	bool "eMIOS0 Channel 18 PWM"
+	default n
+	depends on S32K3XX_EMIOS0
+
+config S32K3XX_EMIOS0_CH19_PWM
+	bool "eMIOS0 Channel 19 PWM"
+	default n
+	depends on S32K3XX_EMIOS0
+
+config S32K3XX_EMIOS0_CH20_PWM
+	bool "eMIOS0 Channel 20 PWM"
+	default n
+	depends on S32K3XX_EMIOS0
+
+config S32K3XX_EMIOS0_CH21_PWM
+	bool "eMIOS0 Channel 21 PWM"
+	default n
+	depends on S32K3XX_EMIOS0
+
+config S32K3XX_EMIOS0_CH22_PWM
+	bool "eMIOS0 Channel 22 PWM"
+	default n
+	depends on S32K3XX_EMIOS0
+
+config S32K3XX_EMIOS0_CH23_PWM
+	bool "eMIOS0 Channel 23 PWM"
+	default n
+	depends on S32K3XX_EMIOS0
+
+config S32K3XX_EMIOS1_CH0_PWM
+	bool "eMIOS1 Channel 0 PWM"
+	default n
+	depends on S32K3XX_EMIOS1
+
+config S32K3XX_EMIOS1_CH1_PWM
+	bool "eMIOS1 Channel 1 PWM"
+	default n
+	depends on S32K3XX_EMIOS1
+
+config S32K3XX_EMIOS1_CH2_PWM
+	bool "eMIOS1 Channel 2 PWM"
+	default n
+	depends on S32K3XX_EMIOS1
+
+config S32K3XX_EMIOS1_CH3_PWM
+	bool "eMIOS1 Channel 3 PWM"
+	default n
+	depends on S32K3XX_EMIOS1
+
+config S32K3XX_EMIOS1_CH4_PWM
+	bool "eMIOS1 Channel 4 PWM"
+	default n
+	depends on S32K3XX_EMIOS1
+
+config S32K3XX_EMIOS1_CH5_PWM
+	bool "eMIOS1 Channel 5 PWM"
+	default n
+	depends on S32K3XX_EMIOS1
+
+config S32K3XX_EMIOS1_CH6_PWM
+	bool "eMIOS1 Channel 6 PWM"
+	default n
+	depends on S32K3XX_EMIOS1
+
+config S32K3XX_EMIOS1_CH7_PWM
+	bool "eMIOS1 Channel 7 PWM"
+	default n
+	depends on S32K3XX_EMIOS1
+
+config S32K3XX_EMIOS1_CH8_PWM
+	bool "eMIOS1 Channel 8 PWM"
+	default n
+	depends on S32K3XX_EMIOS1
+
+config S32K3XX_EMIOS1_CH9_PWM
+	bool "eMIOS1 Channel 9 PWM"
+	default n
+	depends on S32K3XX_EMIOS1
+
+config S32K3XX_EMIOS1_CH10_PWM
+	bool "eMIOS1 Channel 10 PWM"
+	default n
+	depends on S32K3XX_EMIOS1
+
+config S32K3XX_EMIOS1_CH11_PWM
+	bool "eMIOS1 Channel 11 PWM"
+	default n
+	depends on S32K3XX_EMIOS1
+
+config S32K3XX_EMIOS1_CH12_PWM
+	bool "eMIOS1 Channel 12 PWM"
+	default n
+	depends on S32K3XX_EMIOS1
+
+config S32K3XX_EMIOS1_CH13_PWM
+	bool "eMIOS1 Channel 13 PWM"
+	default n
+	depends on S32K3XX_EMIOS1
+
+config S32K3XX_EMIOS1_CH14_PWM
+	bool "eMIOS1 Channel 14 PWM"
+	default n
+	depends on S32K3XX_EMIOS1
+
+config S32K3XX_EMIOS1_CH15_PWM
+	bool "eMIOS1 Channel 15 PWM"
+	default n
+	depends on S32K3XX_EMIOS1
+
+config S32K3XX_EMIOS1_CH16_PWM
+	bool "eMIOS1 Channel 16 PWM"
+	default n
+	depends on S32K3XX_EMIOS1
+
+config S32K3XX_EMIOS1_CH17_PWM
+	bool "eMIOS1 Channel 17 PWM"
+	default n
+	depends on S32K3XX_EMIOS1
+
+config S32K3XX_EMIOS1_CH18_PWM
+	bool "eMIOS1 Channel 18 PWM"
+	default n
+	depends on S32K3XX_EMIOS1
+
+config S32K3XX_EMIOS1_CH19_PWM
+	bool "eMIOS1 Channel 19 PWM"
+	default n
+	depends on S32K3XX_EMIOS1
+
+config S32K3XX_EMIOS1_CH20_PWM
+	bool "eMIOS1 Channel 20 PWM"
+	default n
+	depends on S32K3XX_EMIOS1
+
+config S32K3XX_EMIOS1_CH21_PWM
+	bool "eMIOS1 Channel 21 PWM"
+	default n
+	depends on S32K3XX_EMIOS1
+
+config S32K3XX_EMIOS1_CH22_PWM
+	bool "eMIOS1 Channel 22 PWM"
+	default n
+	depends on S32K3XX_EMIOS1
+
+config S32K3XX_EMIOS1_CH23_PWM
+	bool "eMIOS1 Channel 23 PWM"
+	default n
+	depends on S32K3XX_EMIOS1
+
+config S32K3XX_EMIOS2_CH0_PWM
+	bool "eMIOS2 Channel 0 PWM"
+	default n
+	depends on S32K3XX_EMIOS2
+
+config S32K3XX_EMIOS2_CH1_PWM
+	bool "eMIOS2 Channel 1 PWM"
+	default n
+	depends on S32K3XX_EMIOS2
+
+config S32K3XX_EMIOS2_CH2_PWM
+	bool "eMIOS2 Channel 2 PWM"
+	default n
+	depends on S32K3XX_EMIOS2
+
+config S32K3XX_EMIOS2_CH3_PWM
+	bool "eMIOS2 Channel 3 PWM"
+	default n
+	depends on S32K3XX_EMIOS2
+
+config S32K3XX_EMIOS2_CH4_PWM
+	bool "eMIOS2 Channel 4 PWM"
+	default n
+	depends on S32K3XX_EMIOS2
+
+config S32K3XX_EMIOS2_CH5_PWM
+	bool "eMIOS2 Channel 5 PWM"
+	default n
+	depends on S32K3XX_EMIOS2
+
+config S32K3XX_EMIOS2_CH6_PWM
+	bool "eMIOS2 Channel 6 PWM"
+	default n
+	depends on S32K3XX_EMIOS2
+
+config S32K3XX_EMIOS2_CH7_PWM
+	bool "eMIOS2 Channel 7 PWM"
+	default n
+	depends on S32K3XX_EMIOS2
+
+config S32K3XX_EMIOS2_CH8_PWM
+	bool "eMIOS2 Channel 8 PWM"
+	default n
+	depends on S32K3XX_EMIOS2
+
+config S32K3XX_EMIOS2_CH9_PWM
+	bool "eMIOS2 Channel 9 PWM"
+	default n
+	depends on S32K3XX_EMIOS2
+
+config S32K3XX_EMIOS2_CH10_PWM
+	bool "eMIOS2 Channel 10 PWM"
+	default n
+	depends on S32K3XX_EMIOS2
+
+config S32K3XX_EMIOS2_CH11_PWM
+	bool "eMIOS2 Channel 11 PWM"
+	default n
+	depends on S32K3XX_EMIOS2
+
+config S32K3XX_EMIOS2_CH12_PWM
+	bool "eMIOS2 Channel 12 PWM"
+	default n
+	depends on S32K3XX_EMIOS2
+
+config S32K3XX_EMIOS2_CH13_PWM
+	bool "eMIOS2 Channel 13 PWM"
+	default n
+	depends on S32K3XX_EMIOS2
+
+config S32K3XX_EMIOS2_CH14_PWM
+	bool "eMIOS2 Channel 14 PWM"
+	default n
+	depends on S32K3XX_EMIOS2
+
+config S32K3XX_EMIOS2_CH15_PWM
+	bool "eMIOS2 Channel 15 PWM"
+	default n
+	depends on S32K3XX_EMIOS2
+
+config S32K3XX_EMIOS2_CH16_PWM
+	bool "eMIOS2 Channel 16 PWM"
+	default n
+	depends on S32K3XX_EMIOS2
+
+config S32K3XX_EMIOS2_CH17_PWM
+	bool "eMIOS2 Channel 17 PWM"
+	default n
+	depends on S32K3XX_EMIOS2
+
+config S32K3XX_EMIOS2_CH18_PWM
+	bool "eMIOS2 Channel 18 PWM"
+	default n
+	depends on S32K3XX_EMIOS2
+
+config S32K3XX_EMIOS2_CH19_PWM
+	bool "eMIOS2 Channel 19 PWM"
+	default n
+	depends on S32K3XX_EMIOS2
+
+config S32K3XX_EMIOS2_CH20_PWM
+	bool "eMIOS2 Channel 20 PWM"
+	default n
+	depends on S32K3XX_EMIOS2
+
+config S32K3XX_EMIOS2_CH21_PWM
+	bool "eMIOS2 Channel 21 PWM"
+	default n
+	depends on S32K3XX_EMIOS2
+
+config S32K3XX_EMIOS2_CH22_PWM
+	bool "eMIOS2 Channel 22 PWM"
+	default n
+	depends on S32K3XX_EMIOS2
+
+config S32K3XX_EMIOS2_CH23_PWM
+	bool "eMIOS2 Channel 23 PWM"
+	default n
+	depends on S32K3XX_EMIOS2
+
+endmenu # S32K3XX eMIOS PWM Configuration
+
+config S32K3XX_SWT_DISABLE
+	bool "Disable software watchdog timer on reset"
+	default y
+
+menu "S32K3XX GPIO Interrupt Configuration"
+
+config S32K3XX_GPIOIRQ
+	bool "GPIO pin interrupts"
+	---help---
+		Enable support for interrupting GPIO pins
+
+if S32K3XX_GPIOIRQ
+
+config S32K3XX_EIRQINTS
+	bool "EIRQ interrupts"
+	---help---
+		Enable support for EIRQ interrupts
+
+config S32K3XX_WKPUINTS
+	bool "WKPU interrupts"
+	---help---
+		Enable support for WKPU interrupts
+
+endif # S32K3XX_GPIOIRQ
+
+endmenu # S32K3XX GPIO Interrupt Configuration
+
+menu "eDMA Configuration"
+	depends on S32K3XX_EDMA
+
+config S32K3XX_EDMA_NTCD
+	int "Number of transfer descriptors"
+	default 32
+	---help---
+		Number of pre-allocated transfer descriptors.  Needed for scatter-
+		gather DMA.  Make to be set to zero to disable in-memory TCDs in
+		which case only the TCD channel registers will be used and scatter-
+		will not be supported.
+
+config S32K3XX_EDMA_ELINK
+	bool "Channeling Linking"
+	default y
+	---help---
+		This option enables optional minor or major loop channel linking:
+
+		Minor loop channel linking:  As the channel completes the minor
+		loop, this flag enables linking to another channel. The link target
+		channel initiates a channel service request via an internal
+		mechanism that sets the TCDn_CSR[START] bit of the specified
+		channel.
+
+		If minor loop channel linking is disabled, this link mechanism is
+		suppressed in favor of the major loop channel linking.
+
+		Major loop channel linking:  As the channel completes the minor
+		loop, this option enables the linking to another channel. The link
+		target channel initiates a channel service request via an internal
+		mechanism that sets the TCDn_CSR[START] bit of the linked channel.
+
+config S32K3XX_EDMA_ERCA
+	bool "Round Robin Channel Arbitration"
+	default y
+	---help---
+		Normally, a fixed priority arbitration is used for channel
+		selection.  If this option is selected, round robin arbitration is
+		used for channel selection.
+
+config S32K3XX_EDMA_HOE
+	bool "Halt On Error"
+	default y
+	---help---
+		Any error causes the HALT bit to set. Subsequently, all service
+		requests are ignored until the HALT bit is cleared.
+
+config S32K3XX_EDMA_CLM
+	bool "Continuous Link Mode"
+	default n
+	---help---
+		By default, A minor loop channel link made to itself goes through
+		channel arbitration before being activated again.  If this option is
+		selected, a minor loop channel link made to itself does not go
+		through channel arbitration before being activated again. Upon minor
+		loop completion, the channel activates again if that channel has a
+		minor loop channel link enabled and the link channel is itself. This
+		effectively applies the minor loop offsets and restarts the next
+		minor loop.
+
+config S32K3XX_EDMA_EMLIM
+	bool "Minor Loop Mapping"
+	default n
+	---help---
+		Normally TCD word 2 is a 32-bit NBYTES field.  When this option is
+		enabled, TCD word 2 is redefined to include individual enable fields,
+		an offset field, and the NBYTES field.  The individual enable fields
+		allow the minor loop offset to be applied to the source address, the
+		destination address, or both. The NBYTES field is reduced when either
+		offset is enabled.
+
+config S32K3XX_EDMA_EDBG
+	bool "Enable Debug"
+	default n
+	---help---
+		When in debug mode, the DMA stalls the start of a new channel. Executing
+		channels are allowed to complete. Channel execution resumes when the
+		system exits debug mode or the EDBG bit is cleared
+
+endmenu # eDMA Global Configuration
+
+menu "LPSPI Configuration"
+	depends on S32K3XX_LPSPI
+	
+config S32K3XX_LPSPI_DWORD
+	bool "DWORD up to 64 bit transfer support"
+	default n
+	
+config S32K3XX_LPSPI_DMA
+	bool "SPI DMA"
+	depends on S32K3XX_EDMA
+	default n
+	---help---
+		Use DMA to improve SPI transfer performance.
+
+config S32K3XX_LPSPI0_DMA
+	bool "LPSPI0 DMA"
+	default n
+	depends on S32K3XX_LPSPI0 && S32K3XX_LPSPI_DMA
+	---help---
+		Use DMA to improve LPSPI0 transfer performance.
+
+config S32K3XX_LPSPI1_DMA
+	bool "LPSPI1 DMA"
+	default n
+	depends on S32K3XX_LPSPI1 && S32K3XX_LPSPI_DMA
+	---help---
+		Use DMA to improve LPSPI1 transfer performance.
+
+config S32K3XX_LPSPI2_DMA
+	bool "LPSPI2 DMA"
+	default n
+	depends on S32K3XX_LPSPI2 && S32K3XX_LPSPI_DMA
+	---help---
+		Use DMA to improve LPSPI2 transfer performance.
+
+config S32K3XX_LPSPI3_DMA
+	bool "LPSPI3 DMA"
+	default n
+	depends on S32K3XX_LPSPI3 && S32K3XX_LPSPI_DMA
+	---help---
+		Use DMA to improve LPSPI3 transfer performance.
+
+config S32K3XX_LPSPI4_DMA
+	bool "LPSPI4 DMA"
+	default n
+	depends on S32K3XX_LPSPI4 && S32K3XX_LPSPI_DMA
+	---help---
+		Use DMA to improve LPSPI4 transfer performance.
+		
+
+config S32K3XX_LPSPI5_DMA
+	bool "LPSPI5 DMA"
+	default n
+	depends on S32K3XX_LPSPI5 && S32K3XX_LPSPI_DMA
+	---help---
+		Use DMA to improve LPSPI5 transfer performance.
+
+
+config S32K3XX_LPSPI_DMATHRESHOLD
+	int "SPI DMA threshold"
+	default 4
+	depends on KINETIS_SPI_DMA
+	---help---
+		When SPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.
+	
+config S32K3XX_LPSPI0_PINCFG
+	int "LPSPI0 input & data pin config"
+	depends on S32K3XX_LPSPI0
+	default 0
+	---help---
+		Configures which pins are used for input and output data during serial transfers. 
+		0 - SIN is used for input data and SOUT is used for output data
+		1 - SIN is used for both input and output data, only half-duplex serial transfers are supported
+		2 - SOUT is used for both input and output data, only half-duplex serial transfers are supported
+		3 - SOUT is used for input data and SIN is used for output data
+
+config S32K3XX_LPSPI1_PINCFG
+	int "LPSPI1 input & data pin config"
+	depends on S32K3XX_LPSPI1
+	default 0
+	---help---
+		Configures which pins are used for input and output data during serial transfers. 
+		0 - SIN is used for input data and SOUT is used for output data
+		1 - SIN is used for both input and output data, only half-duplex serial transfers are supported
+		2 - SOUT is used for both input and output data, only half-duplex serial transfers are supported
+		3 - SOUT is used for input data and SIN is used for output data
+
+config S32K3XX_LPSPI2_PINCFG
+	int "LPSPI2 input & data pin config"
+	depends on S32K3XX_LPSPI2
+	default 0
+	---help---
+		Configures which pins are used for input and output data during serial transfers. 
+		0 - SIN is used for input data and SOUT is used for output data
+		1 - SIN is used for both input and output data, only half-duplex serial transfers are supported
+		2 - SOUT is used for both input and output data, only half-duplex serial transfers are supported
+		3 - SOUT is used for input data and SIN is used for output data
+
+config S32K3XX_LPSPI3_PINCFG
+	int "LPSPI3 input & data pin config"
+	depends on S32K3XX_LPSPI3
+	default 0
+	---help---
+		Configures which pins are used for input and output data during serial transfers. 
+		0 - SIN is used for input data and SOUT is used for output data
+		1 - SIN is used for both input and output data, only half-duplex serial transfers are supported
+		2 - SOUT is used for both input and output data, only half-duplex serial transfers are supported
+		3 - SOUT is used for input data and SIN is used for output data
+
+config S32K3XX_LPSPI4_PINCFG
+	int "LPSPI4 input & data pin config"
+	depends on S32K3XX_LPSPI4
+	default 0
+	---help---
+		Configures which pins are used for input and output data during serial transfers. 
+		0 - SIN is used for input data and SOUT is used for output data
+		1 - SIN is used for both input and output data, only half-duplex serial transfers are supported
+		2 - SOUT is used for both input and output data, only half-duplex serial transfers are supported
+		3 - SOUT is used for input data and SIN is used for output data
+
+config S32K3XX_LPSPI5_PINCFG
+	int "LPSPI5 input & data pin config"
+	depends on S32K3XX_LPSPI5
+	default 0
+	---help---
+		Configures which pins are used for input and output data during serial transfers. 
+		0 - SIN is used for input data and SOUT is used for output data
+		1 - SIN is used for both input and output data, only half-duplex serial transfers are supported
+		2 - SOUT is used for both input and output data, only half-duplex serial transfers are supported
+		3 - SOUT is used for input data and SIN is used for output data
+	
+endmenu # LPSPI Configuration
+
+menu "LPI2C0 Configuration"
+	depends on S32K3XX_LPI2C0
+
+config LPI2C0_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config LPI2C0_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config LPI2C0_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endmenu # LPI2C0 Configuration
+
+menu "LPI2C1 Configuration"
+	depends on S32K3XX_LPI2C1
+
+config LPI2C1_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config LPI2C1_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config LPI2C1_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endmenu # LPI2C1 Configuration
+
+
+menu "LPUART Configuration"
+	depends on S32K3XX_LPUART
+	
+config S32K3XX_LPUART_INVERT
+	bool "Signal Invert Support"
+	default n
+		
+config S32K3XX_LPUART_SINGLEWIRE
+	bool "Signal Wire Support"
+	default n
+	
+endmenu
+
+menu "Ethernet Configuration"
+	depends on S32K3XX_ENET
+
+config S32K3XX_ENET_NRXBUFFERS
+	int "Number Rx buffers"
+	default 6
+
+config S32K3XX_ENET_NTXBUFFERS
+	int "Number Tx buffers"
+	default 2
+
+config S32K3XX_ENET_ENHANCEDBD
+	bool # not optional
+	default n
+
+config S32K3XX_ENET_NETHIFS
+	int  # Not optional
+	default 1
+
+config S32K3XX_ENET_PHYINIT
+	bool "Board-specific PHY Initialization"
+	default n
+	---help---
+		Some boards require specialized initialization of the PHY before it
+		can be used.  This may include such things as configuring GPIOs,
+		resetting the PHY, etc.  If CONFIG_S32K3XX_ENET_PHYINIT is defined in
+		the configuration then the board specific logic must provide
+		imxrt_phy_boardinitialize();  The i.MXRT ENET driver will call this
+		function one time before it first uses the PHY.
+
+endmenu # S32K3XX_ENET
+
+menu "FlexCAN0 Configuration"
+	depends on S32K3XX_FLEXCAN0
+
+config FLEXCAN0_BITRATE
+	int "CAN bitrate"
+	depends on !NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN0_SAMPLEP
+	int "CAN sample point"
+	depends on !NET_CAN_CANFD
+	default 80
+
+config FLEXCAN0_ARBI_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN0_ARBI_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 80
+
+config FLEXCAN0_DATA_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 4000000
+
+config FLEXCAN0_DATA_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 90
+
+endmenu # FlexCAN0 Configuration
+
+menu "FlexCAN1 Configuration"
+	depends on S32K3XX_FLEXCAN1
+
+config FLEXCAN1_BITRATE
+	int "CAN bitrate"
+	depends on !NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN1_SAMPLEP
+	int "CAN sample point"
+	depends on !NET_CAN_CANFD
+	default 80
+
+config FLEXCAN1_ARBI_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN1_ARBI_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 80
+
+config FLEXCAN1_DATA_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 4000000
+
+config FLEXCAN1_DATA_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 90
+
+endmenu # FlexCAN1 Configuration
+
+menu "FlexCAN2 Configuration"
+	depends on S32K3XX_FLEXCAN2
+
+config FLEXCAN2_BITRATE
+	int "CAN bitrate"
+	depends on !NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN2_SAMPLEP
+	int "CAN sample point"
+	depends on !NET_CAN_CANFD
+	default 80
+
+config FLEXCAN2_ARBI_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN2_ARBI_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 80
+
+config FLEXCAN2_DATA_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 4000000
+
+config FLEXCAN2_DATA_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 90
+
+endmenu # FlexCAN2 Configuration
+
+menu "FlexCAN3 Configuration"
+	depends on S32K3XX_FLEXCAN3
+
+config FLEXCAN3_BITRATE
+	int "CAN bitrate"
+	depends on !NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN3_SAMPLEP
+	int "CAN sample point"
+	depends on !NET_CAN_CANFD
+	default 80
+
+config FLEXCAN3_ARBI_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN3_ARBI_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 80
+
+config FLEXCAN3_DATA_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 4000000
+
+config FLEXCAN3_DATA_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 90
+
+endmenu # FlexCAN3 Configuration
+
+menu "FlexCAN4 Configuration"
+	depends on S32K3XX_FLEXCAN4
+
+config FLEXCAN4_BITRATE
+	int "CAN bitrate"
+	depends on !NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN4_SAMPLEP
+	int "CAN sample point"
+	depends on !NET_CAN_CANFD
+	default 80
+
+config FLEXCAN4_ARBI_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN4_ARBI_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 80
+
+config FLEXCAN4_DATA_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 4000000
+
+config FLEXCAN4_DATA_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 90
+
+endmenu # FlexCAN4 Configuration
+
+menu "FlexCAN5 Configuration"
+	depends on S32K3XX_FLEXCAN5
+
+config FLEXCAN5_BITRATE
+	int "CAN bitrate"
+	depends on !NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN5_SAMPLEP
+	int "CAN sample point"
+	depends on !NET_CAN_CANFD
+	default 80
+
+config FLEXCAN5_ARBI_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN5_ARBI_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 80
+
+config FLEXCAN5_DATA_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 4000000
+
+config FLEXCAN5_DATA_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 90
+
+endmenu # FlexCAN5 Configuration
+
+menu "FlexCAN6 Configuration"
+	depends on S32K3XX_FLEXCAN6
+
+config FLEXCAN6_BITRATE
+	int "CAN bitrate"
+	depends on !NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN6_SAMPLEP
+	int "CAN sample point"
+	depends on !NET_CAN_CANFD
+	default 80
+
+config FLEXCAN6_ARBI_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN6_ARBI_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 80
+
+config FLEXCAN6_DATA_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 4000000
+
+config FLEXCAN6_DATA_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 90
+
+endmenu # FlexCAN6 Configuration
+
+menu "FlexCAN7 Configuration"
+	depends on S32K3XX_FLEXCAN7
+
+config FLEXCAN7_BITRATE
+	int "CAN bitrate"
+	depends on !NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN7_SAMPLEP
+	int "CAN sample point"
+	depends on !NET_CAN_CANFD
+	default 80
+
+config FLEXCAN7_ARBI_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 1000000
+
+config FLEXCAN7_ARBI_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 80
+
+config FLEXCAN7_DATA_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 4000000
+
+config FLEXCAN7_DATA_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 90
+
+endmenu # FlexCAN7 Configuration
+
+menu "QSPI Configuration"
+	depends on S32K3XX_QSPI
+
+config S32K3XX_QSPI_INTERRUPTS
+	bool "QSPI interrupt"
+	default n
+
+config S32K3XX_QSPI_DMA
+	bool "QSPI DMA"
+	default n
+
+endmenu # FlexCAN0 Configuration
+
+menu "FS26 Configuration"
+	depends on S32K3XX_FS26
+
+config FS26_SPI_FREQUENCY
+	int "FS26 Spi frequency"
+	default 100000
+
+endmenu
+
+endif # ARCH_CHIP_S32K3XX

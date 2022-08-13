@@ -59,7 +59,7 @@ struct mallinfo kmm_mallinfo(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_MM
+#if CONFIG_MM_BACKTRACE >= 0
 struct mallinfo_task kmm_mallinfo_task(pid_t pid)
 {
   struct mallinfo_task info;

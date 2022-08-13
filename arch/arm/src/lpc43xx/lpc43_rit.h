@@ -43,9 +43,9 @@
  * Public Functions Prototypes
  ****************************************************************************/
 
-int up_alarm_cancel(FAR struct timespec *ts);
-int up_alarm_start(FAR const struct timespec *ts);
-int up_timer_cancel(FAR struct timespec *ts);
-int up_timer_start(FAR const struct timespec *ts);
+int up_alarm_cancel(struct timespec *ts);
+int up_alarm_start(const struct timespec *ts);
+int up_timer_cancel(struct timespec *ts);
+int up_timer_start(const struct timespec *ts);
 
 #endif /* __ARCH_ARM_SRC_LPC43XX_LPC43_RIT_H */

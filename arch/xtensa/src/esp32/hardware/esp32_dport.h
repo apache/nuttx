@@ -1099,7 +1099,8 @@
 #define DPORT_SPI_DMA_CLK_EN   (BIT(22))
 #define DPORT_I2S1_CLK_EN   (BIT(21))
 #define DPORT_PWM1_CLK_EN   (BIT(20))
-#define DPORT_CAN_CLK_EN   (BIT(19))
+#define DPORT_TWAI_CLK_EN  (BIT(19))
+#define DPORT_CAN_CLK_EN   DPORT_TWAI_CLK_EN
 #define DPORT_I2C_EXT1_CLK_EN   (BIT(18))
 #define DPORT_PWM0_CLK_EN   (BIT(17))
 #define DPORT_SPI_CLK_EN   (BIT(16))
@@ -1134,7 +1135,8 @@
 #define DPORT_SPI_DMA_RST   (BIT(22))
 #define DPORT_I2S1_RST   (BIT(21))
 #define DPORT_PWM1_RST   (BIT(20))
-#define DPORT_CAN_RST   (BIT(19))
+#define DPORT_TWAI_RST   (BIT(19))
+#define DPORT_CAN_RST    DPORT_CAN_RST
 #define DPORT_I2C_EXT1_RST   (BIT(18))
 #define DPORT_PWM0_RST   (BIT(17))
 #define DPORT_SPI_RST   (BIT(16))
@@ -4391,11 +4393,11 @@
 #define DPORT_DATE_S  0
 #define DPORT_DPORT_DATE_VERSION 0x1605190
 
-/* SPI Flash MMU table regitser base address for PRO CPU */
+/* SPI Flash MMU table register base address for PRO CPU */
 
 #define DPORT_PRO_FLASH_MMU_TABLE_REG       (DR_REG_DPORT_BASE + 0x10000)
 
-/* SPI Flash MMU table regitser base address for APP CPU */
+/* SPI Flash MMU table register base address for APP CPU */
 
 #define DPORT_APP_FLASH_MMU_TABLE_REG       (DR_REG_DPORT_BASE + 0x12000)
 

@@ -276,6 +276,22 @@ config ARCH_CHIP_STM32L475VC
 	---help---
 		STM32 L4 Cortex M4, 256Kb FLASH, 96+32 Kb SRAM, LQFP64
 
+config ARCH_CHIP_STM32L476JG
+	bool "STM32L476JG"
+	select STM32L4_STM32L476XX
+	select STM32L4_FLASH_CONFIG_G
+	select STM32L4_IO_CONFIG_J
+	---help---
+		STM32 L4 Cortex M4, 1024Kb FLASH, 96+32 Kb SRAM
+
+config ARCH_CHIP_STM32L476JE
+	bool "STM32L476JE"
+	select STM32L4_STM32L476XX
+	select STM32L4_FLASH_CONFIG_E
+	select STM32L4_IO_CONFIG_J
+	---help---
+		STM32 L4 Cortex M4, 512Kb FLASH, 96+32 Kb SRAM
+
 config ARCH_CHIP_STM32L476RG
 	bool "STM32L476RG"
 	select STM32L4_STM32L476XX
@@ -1200,6 +1216,11 @@ config STM32L4_SPI
 	bool
 	default n
 
+config STM32L4_PWM
+	bool
+	default n
+	select ARCH_HAVE_PWM_PULSECOUNT
+
 config STM32L4_USART
 	bool
 	default n
@@ -1771,7 +1792,7 @@ config STM32L4_FLASH_PREFETCH
 config STM32L4_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW
 	bool "Workaround for FLASH data cache corruption"
 	default n
-	depends on STM32L4_STM32L475XX || STM32L4_STM32L476XX || STM32L4_STM32L486XX || STM32L4_STM32L496XX || STM32L4_STM32L4A6XX
+	depends on STM32L4_STM32L4X5 || STM32L4_STM32L4X6 || STM32L4_STM32L4XR
 	---help---
 		Enable the workaround to fix flash data cache corruption when reading
 		from one flash bank while writing on other flash bank.  See your STM32
@@ -2028,8 +2049,7 @@ config STM32L4_TIM1_PWM
 	bool "TIM1 PWM"
 	default n
 	depends on STM32L4_TIM1
-	select PWM
-	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32L4_PWM
 	---help---
 		Reserve timer 1 for use by PWM
 
@@ -2268,8 +2288,7 @@ config STM32L4_TIM2_PWM
 	bool "TIM2 PWM"
 	default n
 	depends on STM32L4_TIM2
-	select PWM
-	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32L4_PWM
 	---help---
 		Reserve timer 2 for use by PWM
 
@@ -2448,8 +2467,7 @@ config STM32L4_TIM3_PWM
 	bool "TIM3 PWM"
 	default n
 	depends on STM32L4_TIM3
-	select PWM
-	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32L4_PWM
 	---help---
 		Reserve timer 3 for use by PWM
 
@@ -2628,8 +2646,7 @@ config STM32L4_TIM4_PWM
 	bool "TIM4 PWM"
 	default n
 	depends on STM32L4_TIM4
-	select PWM
-	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32L4_PWM
 	---help---
 		Reserve timer 4 for use by PWM
 
@@ -2808,8 +2825,7 @@ config STM32L4_TIM5_PWM
 	bool "TIM5 PWM"
 	default n
 	depends on STM32L4_TIM5
-	select PWM
-	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32L4_PWM
 	---help---
 		Reserve timer 5 for use by PWM
 
@@ -2988,8 +3004,7 @@ config STM32L4_TIM8_PWM
 	bool "TIM8 PWM"
 	default n
 	depends on STM32L4_TIM8
-	select PWM
-	select ARCH_HAVE_PWM_PULSECOUNT
+	select STM32L4_PWM
 	---help---
 		Reserve timer 8 for use by PWM
 
@@ -3228,7 +3243,7 @@ config STM32L4_TIM15_PWM
 	bool "TIM15 PWM"
 	default n
 	depends on STM32L4_TIM15
-	select PWM
+	select STM32L4_PWM
 	---help---
 		Reserve timer 15 for use by PWM
 
@@ -3374,7 +3389,7 @@ config STM32L4_TIM16_PWM
 	bool "TIM16 PWM"
 	default n
 	depends on STM32L4_TIM16
-	select PWM
+	select STM32L4_PWM
 	---help---
 		Reserve timer 16 for use by PWM
 
@@ -3475,7 +3490,7 @@ config STM32L4_TIM17_PWM
 	bool "TIM17 PWM"
 	default n
 	depends on STM32L4_TIM17
-	select PWM
+	select STM32L4_PWM
 	---help---
 		Reserve timer 17 for use by PWM
 
@@ -3693,7 +3708,7 @@ endif # STM32L4_LPTIM2_PWM
 config STM32L4_PWM_MULTICHAN
 	bool "PWM Multiple Output Channels"
 	default n
-	depends on STM32L4_TIM1_PWM || STM32L4_TIM2_PWM || STM32L4_TIM3_PWM || STM32L4_TIM4_PWM || STM32L4_TIM5_PWM || STM32L4_TIM8_PWM || STM32L4_TIM15_PWM || STM32L4_TIM16_PWM || STM32L4_TIM17_PWM || STM32L4_LPTIM1_PWM || STM32L4_LPTIM2_PWM
+	depends on STM32L4_PWM
 	select ARCH_HAVE_PWM_MULTICHAN
 	---help---
 		Specifies that the PWM driver supports multiple output
@@ -5456,6 +5471,12 @@ config STM32L4_DAC2_OUTPUT_ADC
 	default n
 	---help---
 		Route DAC2 output to ADC input instead of external pin.
+
+config STM32L4_DAC_LL_OPS
+	bool "DAC low-level operations"
+	default n
+	---help---
+		Enable low-level DAC ops.
 
 endmenu
 

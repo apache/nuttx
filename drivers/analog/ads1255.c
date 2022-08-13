@@ -116,16 +116,16 @@
 
 struct ads1255_dev_s
 {
-  FAR const struct adc_callback_s *cb;
   FAR struct spi_dev_s *spi;      /* Cached SPI device reference */
-  struct work_s work;
-  uint8_t channel;
-  uint32_t sps;
-  uint8_t pga;
-  uint8_t buf;
-  const uint8_t *mux;
-  int irq;
   int devno;
+  const uint8_t *mux;
+  uint16_t sps;
+  uint8_t channel;
+  uint8_t pga;
+  int irq;
+  FAR const struct adc_callback_s *cb;
+  struct work_s work;
+  bool buf;
 };
 
 /****************************************************************************
@@ -156,29 +156,27 @@ static int  adc_interrupt(int irq, void *context, FAR void *arg);
 
 static const struct adc_ops_s g_adcops =
 {
-  .ao_bind     = adc_bind,      /* ao_bind */
-  .ao_reset    = adc_reset,     /* ao_reset */
-  .ao_setup    = adc_setup,     /* ao_setup */
-  .ao_shutdown = adc_shutdown,  /* ao_shutdown */
-  .ao_rxint    = adc_rxint,     /* ao_rxint */
-  .ao_ioctl    = adc_ioctl      /* ao_read */
+  adc_bind,      /* ao_bind */
+  adc_reset,     /* ao_reset */
+  adc_setup,     /* ao_setup */
+  adc_shutdown,  /* ao_shutdown */
+  adc_rxint,     /* ao_rxint */
+  adc_ioctl      /* ao_read */
 };
 
 static struct ads1255_dev_s g_adcpriv =
 {
-  .mux  = (const uint8_t [])
+  NULL, 0, (const uint8_t [])
   {
     CONFIG_ADS1255_MUX, 0
   },
-  .sps     = CONFIG_ADS1255_SPS,
-  .channel = 0,
-  .irq     = CONFIG_ADS1255_IRQ,
+  CONFIG_ADS1255_SPS, 0, 0, CONFIG_ADS1255_IRQ
 };
 
 static struct adc_dev_s g_adcdev =
 {
-  .ad_ops  = &g_adcops,
-  .ad_priv = &g_adcpriv,
+  &g_adcops,    /* ad_ops */
+  &g_adcpriv    /* ad_priv */
 };
 
 /****************************************************************************
@@ -187,13 +185,13 @@ static struct adc_dev_s g_adcdev =
 
 static uint8_t getspsreg(uint16_t sps)
 {
-  static const unsigned short sps_tab[] =
+  static const uint16_t sps_tab[] =
   {
       3,     7,     12,    20,    27,    40,    55,    80,
     300,   750,   1500,  3000,  5000, 10000, 20000, 65535,
   };
 
-  static const unsigned char sps_reg[] =
+  static const uint8_t sps_reg[] =
   {
     0x03,  0x13,  0x23,  0x33,  0x43,  0x53,  0x63,  0x72,
     0x82,  0x92,  0xa1,  0xb0,  0xc0,  0xd0,  0xe0,  0xf0,
@@ -522,7 +520,6 @@ FAR struct adc_dev_s *up_ads1255initialize(FAR struct spi_dev_s *spi,
 
   /* Driver state data */
 
-  priv->cb       = NULL;
   priv->spi      = spi;
   priv->devno    = devno;
   return &g_adcdev;

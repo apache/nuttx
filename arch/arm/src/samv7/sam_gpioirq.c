@@ -181,35 +181,35 @@ static int sam_gpiointerrupt(uint32_t base, int irq0, void *context)
 }
 
 #ifdef CONFIG_SAMV7_GPIOA_IRQ
-static int sam_gpioainterrupt(int irq, void *context, FAR void *arg)
+static int sam_gpioainterrupt(int irq, void *context, void *arg)
 {
   return sam_gpiointerrupt(SAM_PIOA_BASE, SAM_IRQ_PA0, context);
 }
 #endif
 
 #ifdef CONFIG_SAMV7_GPIOB_IRQ
-static int sam_gpiobinterrupt(int irq, void *context, FAR void *arg)
+static int sam_gpiobinterrupt(int irq, void *context, void *arg)
 {
   return sam_gpiointerrupt(SAM_PIOB_BASE, SAM_IRQ_PB0, context);
 }
 #endif
 
 #ifdef CONFIG_SAMV7_GPIOC_IRQ
-static int sam_gpiocinterrupt(int irq, void *context, FAR void *arg)
+static int sam_gpiocinterrupt(int irq, void *context, void *arg)
 {
   return sam_gpiointerrupt(SAM_PIOC_BASE, SAM_IRQ_PC0, context);
 }
 #endif
 
 #ifdef CONFIG_SAMV7_GPIOD_IRQ
-static int sam_gpiodinterrupt(int irq, void *context, FAR void *arg)
+static int sam_gpiodinterrupt(int irq, void *context, void *arg)
 {
   return sam_gpiointerrupt(SAM_PIOD_BASE, SAM_IRQ_PD0, context);
 }
 #endif
 
 #ifdef CONFIG_SAMV7_GPIOE_IRQ
-static int sam_gpioeinterrupt(int irq, void *context, FAR void *arg)
+static int sam_gpioeinterrupt(int irq, void *context, void *arg)
 {
   return sam_gpiointerrupt(SAM_PIOE_BASE, SAM_IRQ_PE0, context);
 }

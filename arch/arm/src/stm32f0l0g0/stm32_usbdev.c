@@ -440,7 +440,7 @@ static void   stm32_ep0in(struct stm32_usbdev_s *priv);
 static inline void
               stm32_ep0done(struct stm32_usbdev_s *priv, uint16_t istr);
 static void   stm32_lptransfer(struct stm32_usbdev_s *priv);
-static int    stm32_usb_interrupt(int irq, void *context, FAR void *arg);
+static int    stm32_usb_interrupt(int irq, void *context, void *arg);
 
 /* Endpoint helpers *********************************************************/
 
@@ -2398,7 +2398,7 @@ static void stm32_lptransfer(struct stm32_usbdev_s *priv)
  * Name: stm32_usb_interrupt
  ****************************************************************************/
 
-static int stm32_usb_interrupt(int irq, void *context, FAR void *arg)
+static int stm32_usb_interrupt(int irq, void *context, void *arg)
 {
   struct stm32_usbdev_s *priv = (struct stm32_usbdev_s *)arg;
   uint16_t istr;

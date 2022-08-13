@@ -29,7 +29,7 @@
  ****************************************************************************/
 
 void weak_function
-__aeabi_memmove(FAR void *dest, FAR const void *src, size_t n)
+__aeabi_memmove(void *dest, const void *src, size_t n)
 {
   memmove(dest, src, n);
 }

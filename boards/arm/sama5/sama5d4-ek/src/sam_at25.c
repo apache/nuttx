@@ -58,8 +58,8 @@
 
 int sam_at25_automount(int minor)
 {
-  FAR struct spi_dev_s *spi;
-  FAR struct mtd_dev_s *mtd;
+  struct spi_dev_s *spi;
+  struct mtd_dev_s *mtd;
 #ifdef CONFIG_SAMA5D4EK_AT25_CHARDEV
 #if defined(CONFIG_BCH)
   char blockdev[18];

@@ -298,15 +298,11 @@ static uart_dev_t g_uart3port =
 {
   .recv      =
   {
-    .head = 0,
-    .tail = 0,
     .size    = CONFIG_UART3_RXBUFSIZE,
     .buffer  = g_uart3rxbuffer,
   },
   .xmit      =
   {
-    .head = 0,
-    .tail = 0,
     .size    = CONFIG_UART3_TXBUFSIZE,
     .buffer  = g_uart3txbuffer,
   },

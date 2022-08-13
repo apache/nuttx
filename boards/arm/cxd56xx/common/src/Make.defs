@@ -18,13 +18,15 @@
 #
 ############################################################################
 
+ifeq ($(CONFIG_ARCH_BOARD_COMMON),y)
+
 CSRCS += cxd56_boot.c
 
-ifeq ($(CONFIG_AUDIO_CXD56), y)
+ifeq ($(CONFIG_AUDIO_CXD56),y)
 CSRCS += cxd56_audio.c
 endif
 
-ifeq ($(CONFIG_CXD56_AUDIO), y)
+ifeq ($(CONFIG_CXD56_AUDIO),y)
 CSRCS += cxd56_audio.c
 endif
 
@@ -108,6 +110,10 @@ ifeq ($(CONFIG_SENSORS_RPR0521RS_SCU),y)
 CSRCS += cxd56_rpr0521rs_scu.c
 endif
 
+ifeq ($(CONFIG_SENSORS_SCD41),y)
+CSRCS += cxd56_scd41_i2c.c
+endif
+
 ifeq ($(CONFIG_NETDEVICES),y)
 CSRCS += cxd56_netinit.c
 endif
@@ -148,6 +154,10 @@ ifeq ($(CONFIG_VIDEO_ISX012),y)
 CSRCS += cxd56_isx012.c
 endif
 
+ifeq ($(CONFIG_VIDEO_ISX019),y)
+CSRCS += cxd56_isx019.c
+endif
+
 ifeq ($(CONFIG_CXD56_IMAGEPROC),y)
   CSRCS += cxd56_imageproc.c
 endif
@@ -171,3 +181,5 @@ endif
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)
+
+endif

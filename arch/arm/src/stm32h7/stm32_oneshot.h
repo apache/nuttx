@@ -77,7 +77,7 @@ struct stm32_oneshot_s
   uint8_t cbndx;                      /* Timer callback handler index */
 #endif
   volatile bool running;              /* True: the timer is running */
-  FAR struct stm32_tim_dev_s *tch;    /* Pointer returned by
+  struct stm32_tim_dev_s *tch;        /* Pointer returned by
                                        * stm32_tim_init() */
   volatile oneshot_handler_t handler; /* Oneshot expiration callback */
   volatile void *arg;                 /* The argument that will accompany

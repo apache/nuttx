@@ -56,12 +56,12 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  sysctl_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int  sysctl_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  sysctl_semtake(sem_t *semid);
 static void sysctl_semgive(sem_t *semid);
 static int  sysctl_rxhandler(int cpuid, int protoid,
                              uint32_t pdata, uint32_t data,
-                             FAR void *userdata);
+                             void *userdata);
 
 /****************************************************************************
  * Private Data
@@ -73,14 +73,14 @@ static int g_errcode = 0;
 
 static const struct file_operations g_sysctlfops =
 {
-  .ioctl = sysctl_ioctl,
+  .ioctl = sysctl_ioctl
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static int sysctl_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int sysctl_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
   int ret = OK;
 
@@ -108,7 +108,7 @@ static void sysctl_semgive(sem_t *semid)
 
 static int sysctl_rxhandler(int cpuid, int protoid,
                             uint32_t pdata, uint32_t data,
-                            FAR void *userdata)
+                            void *userdata)
 {
   DEBUGASSERT(cpuid == 0);
   DEBUGASSERT(protoid == CXD56_PROTO_SYSCTL);

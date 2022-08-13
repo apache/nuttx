@@ -32,8 +32,6 @@
  * CONFIG_LEDS_APA102 - Enables support for the APA102 driver
  */
 
-#if defined(CONFIG_SPI) && defined(CONFIG_LEDS_APA102)
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -95,5 +93,4 @@ int apa102_register(FAR const char *devpath, FAR struct spi_dev_s *spi);
 }
 #endif
 
-#endif /* CONFIG_SPI && CONFIG_LEDS_APA102 */
 #endif /* __INCLUDE_NUTTX_LEDS_APA102_H */

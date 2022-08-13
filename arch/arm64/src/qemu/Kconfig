@@ -1,0 +1,30 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_QEMU
+
+menu "Qemu Virt Chip Selection"
+
+choice
+	prompt "Qemu Core Configuration"
+	default ARCH_CHIP_QEMU_A53
+
+config ARCH_CHIP_QEMU_A53
+	bool "Qemu virtual Processor (cortex-a53)"
+	select ARCH_HAVE_MULTICPU
+	select ARMV8A_HAVE_GICv3
+
+endchoice # Qemu Chip Selection
+
+endmenu # "Qemu Chip Selection"
+
+menu "Qemu Peripheral Selection"
+config QEMU_UART_PL011
+	bool "UART"
+	default n
+	select UART1_SERIALDRIVER
+endmenu # Qemu Peripheral Selection
+
+endif # ARCH_CHIP_QEMU

@@ -18,7 +18,7 @@ config WL_SPIRIT_SPIFREQUENCY
 	default 10000000
 	---help---
 		Frequency at which to operate the SPI interface to the Spirit part.
-		The default is the absolution maximum and you may likely have to
+		The default is the absolute maximum and you may likely have to
 		reduce this for your board.
 
 config WL_SPIRIT_REGDEBUG

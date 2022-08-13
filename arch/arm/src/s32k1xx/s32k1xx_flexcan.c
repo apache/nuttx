@@ -491,8 +491,8 @@ uint32_t s32k1xx_bitratetotimeseg(struct flexcan_timeseg *timeseg,
 
 /* Common TX logic */
 
-static bool s32k1xx_txringfull(FAR struct s32k1xx_driver_s *priv);
-static int  s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv);
+static bool s32k1xx_txringfull(struct s32k1xx_driver_s *priv);
+static int  s32k1xx_transmit(struct s32k1xx_driver_s *priv);
 static int  s32k1xx_txpoll(struct net_driver_s *dev);
 
 /* Helper functions */
@@ -508,17 +508,17 @@ static uint32_t s32k1xx_waitesr2_change(uint32_t base,
 
 /* Interrupt handling */
 
-static void s32k1xx_receive(FAR struct s32k1xx_driver_s *priv,
+static void s32k1xx_receive(struct s32k1xx_driver_s *priv,
                             uint32_t flags);
-static void s32k1xx_txdone_work(FAR void *arg);
-static void s32k1xx_txdone(FAR struct s32k1xx_driver_s *priv);
+static void s32k1xx_txdone_work(void *arg);
+static void s32k1xx_txdone(struct s32k1xx_driver_s *priv);
 
-static int  s32k1xx_flexcan_interrupt(int irq, FAR void *context,
-                                      FAR void *arg);
+static int  s32k1xx_flexcan_interrupt(int irq, void *context,
+                                      void *arg);
 
 /* Watchdog timer expirations */
 #ifdef TX_TIMEOUT_WQ
-static void s32k1xx_txtimeout_work(FAR void *arg);
+static void s32k1xx_txtimeout_work(void *arg);
 static void s32k1xx_txtimeout_expiry(wdparm_t arg);
 #endif
 
@@ -527,7 +527,7 @@ static void s32k1xx_txtimeout_expiry(wdparm_t arg);
 static int  s32k1xx_ifup(struct net_driver_s *dev);
 static int  s32k1xx_ifdown(struct net_driver_s *dev);
 
-static void s32k1xx_txavail_work(FAR void *arg);
+static void s32k1xx_txavail_work(void *arg);
 static int  s32k1xx_txavail(struct net_driver_s *dev);
 
 #ifdef CONFIG_NETDEV_IOCTL
@@ -559,7 +559,7 @@ static void s32k1xx_reset(struct s32k1xx_driver_s *priv);
  *
  ****************************************************************************/
 
-static bool s32k1xx_txringfull(FAR struct s32k1xx_driver_s *priv)
+static bool s32k1xx_txringfull(struct s32k1xx_driver_s *priv)
 {
   uint32_t mbi = 0;
 
@@ -596,7 +596,7 @@ static bool s32k1xx_txringfull(FAR struct s32k1xx_driver_s *priv)
  *
  ****************************************************************************/
 
-static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
+static int s32k1xx_transmit(struct s32k1xx_driver_s *priv)
 {
   /* Attempt to write frame */
 
@@ -787,8 +787,8 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
 
 static int s32k1xx_txpoll(struct net_driver_s *dev)
 {
-  FAR struct s32k1xx_driver_s *priv =
-    (FAR struct s32k1xx_driver_s *)dev->d_private;
+  struct s32k1xx_driver_s *priv =
+    (struct s32k1xx_driver_s *)dev->d_private;
 
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
@@ -844,7 +844,7 @@ static int s32k1xx_txpoll(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void s32k1xx_receive(FAR struct s32k1xx_driver_s *priv,
+static void s32k1xx_receive(struct s32k1xx_driver_s *priv,
                             uint32_t flags)
 {
   uint32_t mb_index;
@@ -983,7 +983,7 @@ static void s32k1xx_receive(FAR struct s32k1xx_driver_s *priv,
  *
  ****************************************************************************/
 
-static void s32k1xx_txdone(FAR struct s32k1xx_driver_s *priv)
+static void s32k1xx_txdone(struct s32k1xx_driver_s *priv)
 {
   uint32_t flags;
   uint32_t mbi;
@@ -1038,9 +1038,9 @@ static void s32k1xx_txdone(FAR struct s32k1xx_driver_s *priv)
  *
  ****************************************************************************/
 
-static void s32k1xx_txdone_work(FAR void *arg)
+static void s32k1xx_txdone_work(void *arg)
 {
-  FAR struct s32k1xx_driver_s *priv = (FAR struct s32k1xx_driver_s *)arg;
+  struct s32k1xx_driver_s *priv = (struct s32k1xx_driver_s *)arg;
 
   s32k1xx_txdone(priv);
 
@@ -1073,10 +1073,10 @@ static void s32k1xx_txdone_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int s32k1xx_flexcan_interrupt(int irq, FAR void *context,
-                                     FAR void *arg)
+static int s32k1xx_flexcan_interrupt(int irq, void *context,
+                                     void *arg)
 {
-  FAR struct s32k1xx_driver_s *priv = (struct s32k1xx_driver_s *)arg;
+  struct s32k1xx_driver_s *priv = (struct s32k1xx_driver_s *)arg;
 
   if (irq == priv->config->mb_irq)
     {
@@ -1129,9 +1129,9 @@ static int s32k1xx_flexcan_interrupt(int irq, FAR void *context,
  ****************************************************************************/
 #ifdef TX_TIMEOUT_WQ
 
-static void s32k1xx_txtimeout_work(FAR void *arg)
+static void s32k1xx_txtimeout_work(void *arg)
 {
-  FAR struct s32k1xx_driver_s *priv = (FAR struct s32k1xx_driver_s *)arg;
+  struct s32k1xx_driver_s *priv = (struct s32k1xx_driver_s *)arg;
   uint32_t flags;
   uint32_t mbi;
   uint32_t mb_bit;
@@ -1189,7 +1189,7 @@ static void s32k1xx_txtimeout_work(FAR void *arg)
 
 static void s32k1xx_txtimeout_expiry(wdparm_t arg)
 {
-  FAR struct s32k1xx_driver_s *priv = (FAR struct s32k1xx_driver_s *)arg;
+  struct s32k1xx_driver_s *priv = (struct s32k1xx_driver_s *)arg;
 
   /* Schedule to perform the TX timeout processing on the worker thread
    */
@@ -1306,8 +1306,8 @@ static uint32_t s32k1xx_waitfreezeack_change(uint32_t base,
 
 static int s32k1xx_ifup(struct net_driver_s *dev)
 {
-  FAR struct s32k1xx_driver_s *priv =
-    (FAR struct s32k1xx_driver_s *)dev->d_private;
+  struct s32k1xx_driver_s *priv =
+    (struct s32k1xx_driver_s *)dev->d_private;
 
   if (!s32k1xx_initialize(priv))
     {
@@ -1359,8 +1359,8 @@ static int s32k1xx_ifup(struct net_driver_s *dev)
 
 static int s32k1xx_ifdown(struct net_driver_s *dev)
 {
-  FAR struct s32k1xx_driver_s *priv =
-    (FAR struct s32k1xx_driver_s *)dev->d_private;
+  struct s32k1xx_driver_s *priv =
+    (struct s32k1xx_driver_s *)dev->d_private;
 
   s32k1xx_reset(priv);
 
@@ -1385,9 +1385,9 @@ static int s32k1xx_ifdown(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void s32k1xx_txavail_work(FAR void *arg)
+static void s32k1xx_txavail_work(void *arg)
 {
-  FAR struct s32k1xx_driver_s *priv = (FAR struct s32k1xx_driver_s *)arg;
+  struct s32k1xx_driver_s *priv = (struct s32k1xx_driver_s *)arg;
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -1434,8 +1434,8 @@ static void s32k1xx_txavail_work(FAR void *arg)
 
 static int s32k1xx_txavail(struct net_driver_s *dev)
 {
-  FAR struct s32k1xx_driver_s *priv =
-    (FAR struct s32k1xx_driver_s *)dev->d_private;
+  struct s32k1xx_driver_s *priv =
+    (struct s32k1xx_driver_s *)dev->d_private;
 
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
@@ -1474,8 +1474,8 @@ static int s32k1xx_txavail(struct net_driver_s *dev)
 static int s32k1xx_ioctl(struct net_driver_s *dev, int cmd,
                          unsigned long arg)
 {
-  FAR struct s32k1xx_driver_s *priv =
-      (FAR struct s32k1xx_driver_s *)dev->d_private;
+  struct s32k1xx_driver_s *priv =
+      (struct s32k1xx_driver_s *)dev->d_private;
 
   int ret;
 

@@ -51,7 +51,7 @@ void lc823450_dvfs_enter_idle(void);
 void lc823450_dvfs_exit_idle(int irq);
 int  lc823450_dvfs_set_freq(int freq);
 void lc823450_dvfs_tick_callback(void);
-int lc823450_dvfs_oneshot(int irq, uint32_t *regs, FAR void *arg);
+int lc823450_dvfs_oneshot(int irq, uint32_t *regs, void *arg);
 
 int  dvfs_procfs_register(void);
 

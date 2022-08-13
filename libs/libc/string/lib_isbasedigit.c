@@ -43,7 +43,7 @@
  *
  * Description:
  *   Given an ASCII character, ch, and a base (1-36) do two
- *   things:  1) Determine if ch is a valid charcter, and 2)
+ *   things:  1) Determine if ch is a valid character, and 2)
  *   convert ch to its binary value.
  *
  ****************************************************************************/

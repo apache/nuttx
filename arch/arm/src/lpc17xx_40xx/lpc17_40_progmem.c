@@ -67,13 +67,13 @@ static uint32_t lpc17_40_iap_copy_ram_to_flash(void *flash,
  *
  ****************************************************************************/
 
-static void lpc17_40_iap(FAR void *in, FAR void *out)
+static void lpc17_40_iap(void *in, void *out)
 {
   irqstate_t flags;
 
   flags = enter_critical_section();
 
-  ((void (*)(FAR void *, FAR void *))LPC17_40_IAP_ENTRY_ADDR)(in, out);
+  ((void (*)(void *, void *))LPC17_40_IAP_ENTRY_ADDR)(in, out);
 
   leave_critical_section(flags);
 }
@@ -421,7 +421,7 @@ ssize_t up_progmem_ispageerased(size_t page)
  *
  ****************************************************************************/
 
-ssize_t up_progmem_write(size_t addr, FAR const void *buf, size_t count)
+ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
 {
   size_t page;
   uint32_t rc;

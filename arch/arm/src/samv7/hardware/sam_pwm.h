@@ -95,10 +95,10 @@
 #define CLK_DIVA_SHIFT             (0)    /* Bits: 0-7  CLKA Divide Factor */
 #define CLK_DIVA_MASK              (0xff << CLK_DIVA_SHIFT)
 #  define CLK_DIVA_SEL(n)          ((uint32_t)(n) << CLK_DIVA_SHIFT)
-#  define CLK_DIVA_CLKA_POFF       (0 << CLK_DIVA_SHIFT)  /* CLKA clock is trned off */
+#  define CLK_DIVA_CLKA_POFF       (0 << CLK_DIVA_SHIFT)  /* CLKA clock is turned off */
 #  define CLK_DIVA_PREA            (1 << CLK_DIVA_SHIFT)  /* CLKA clock is selected by PREA */
 
-#define CLK_PREA_SHIFT             (8)    /* Bits: 8-11  CLKA Souce Clock Selection */
+#define CLK_PREA_SHIFT             (8)    /* Bits: 8-11  CLKA Source Clock Selection */
 #define CLK_PREA_MASK              (0x7 << CLK_PREA_SHIFT)
 #  define CLK_PREA_SEL(n)          ((uint32_t)(n) << CLK_PREA_SHIFT)
 #  define CLK_PREA_CLK             (0 << CLK_PREA_SHIFT)  /* Peripheral Clock */
@@ -116,10 +116,10 @@
 #define CLK_DIVB_SHIFT             (16)   /* Bits: 16-23  CLKB Divide Factor */
 #define CLK_DIVB_MASK              (0xff << CLK_DIVB_SHIFT)
 #  define CLK_DIVB_SEL(n)          ((uint32_t)(n) << CLK_DIVB_SHIFT)
-#  define CLK_DIVB_CLKB_POFF       (0 << CLK_DIVB_SHIFT)  /* CLKB clock is trned off */
+#  define CLK_DIVB_CLKB_POFF       (0 << CLK_DIVB_SHIFT)  /* CLKB clock is turned off */
 #  define CLK_DIVB_PREB            (1 << CLK_DIVB_SHIFT)  /* CLKB clock is selected by PREB */
 
-#define CLK_PREB_SHIFT             (24)    /* Bits: 24-27  CLKA Souce Clock Selection */
+#define CLK_PREB_SHIFT             (24)    /* Bits: 24-27  CLKB Source Clock Selection */
 #define CLK_PREB_MASK              (0x7 << CLK_PREB_SHIFT)
 #  define CLK_PREB_CLK             (0 << CLK_PREB_SHIFT)  /* Peripheral Clock */
 #  define CLK_PREB_CLK_DIV2        (1 << CLK_PREB_SHIFT)  /* Peripheral Clock/2 */
@@ -172,7 +172,7 @@
 /* DMA Register */
 
 #define DMAR_DMADUTY_SHIFT        (0)    /* Bits: 0-23  Duty Cycle Holding Register */
-#define DMAR_DMADUTY_MAS          (0xfffff << DMAR_DMADUTY_SHIFT)
+#define DMAR_DMADUTY_MASK         (0xffff << DMAR_DMADUTY_SHIFT)
 #  define DMAR_DMADUTY_SEL(n)     ((uint32_t)(n) << DMAR_DMADUTY_SHIFT)
 
 /* Sync Channels Update Control Register */
@@ -267,7 +267,7 @@
 
 /* Event Line Mode Register */
 
-#define ELMR_CSEL_SHIFT        (0)    /* Bits: 0-7  Comparision Selecrion */
+#define ELMR_CSEL_SHIFT        (0)    /* Bits: 0-7  Comparison Selection */
 #define ELMR_CSEL_MASK         (0xff << ELMR_CSEL_SHIFT)
 #  define ELMR_CSEL_SEL(n)     ((uint32_t)(n) << ELMR_CSEL_SHIFT)
 
@@ -382,7 +382,7 @@
 #define CMR_UPDS               (1 << 11)  /* Bit 11: Update Selection */
 #define CMR_DPOLI              (1 << 12)  /* Bit 12: Disable Polarity Inverted */
 #define CMR_TCTS               (1 << 13)  /* Bit 13: Timer Counter Trigger Selection */
-#define CMR_DTE                (1 << 16)  /* Bit 16: Dead Time Generaton Enable */
+#define CMR_DTE                (1 << 16)  /* Bit 16: Dead Time Generation Enable */
 #define CMR_DTHI               (1 << 17)  /* Bit 17: Dead Time PWMH output Inverted */
 #define CMR_DTLI               (1 << 18)  /* Bit 18: Dead Time PWML output Inverted */
 #define CMR_PPM                (1 << 19)  /* Bit 19: Push Pull Mode */

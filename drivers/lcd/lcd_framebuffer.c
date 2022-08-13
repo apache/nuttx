@@ -105,6 +105,8 @@ static int lcdfb_setcursor(FAR struct fb_vtable_s *vtable,
              FAR struct fb_setcursor_s *settings);
 #endif
 
+static int lcdfb_setpower(FAR struct fb_vtable_s *vtable, FAR int power);
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -162,75 +164,99 @@ static int lcdfb_updateearea(FAR struct fb_vtable_s *vtable,
 {
   FAR struct lcdfb_dev_s *priv = (FAR struct lcdfb_dev_s *)vtable;
   FAR struct lcd_planeinfo_s *pinfo = &priv->pinfo;
-  FAR uint8_t *run;
+  FAR uint8_t *run = priv->fbmem;
   fb_coord_t row;
-  fb_coord_t startx;
-  fb_coord_t endx;
-  fb_coord_t width;
-  fb_coord_t starty;
-  fb_coord_t endy;
+  fb_coord_t startx = 0;
+  fb_coord_t endx = priv->xres - 1;
+  fb_coord_t width = priv->xres;
+  fb_coord_t starty = 0;
+  fb_coord_t endy = priv->yres - 1;
   int ret;
 
-  DEBUGASSERT(area != NULL);
-  DEBUGASSERT(area->w >= 1);
-  DEBUGASSERT(area->h >= 1);
-
-  /* Clip to fit in the framebuffer */
-
-  startx = area->x;
-  if (startx < 0)
+  if (area != NULL)
     {
-      startx = 0;
-    }
+      /* Clip to fit in the framebuffer */
 
-  endx = startx + area->w - 1;
-  if (endx >= priv->xres)
-    {
-      endx = priv->xres - 1;
-    }
-
-  starty = area->y;
-  if (starty < 0)
-    {
-      starty = 0;
-    }
-
-  endy = starty + area->h - 1;
-  if (endy >= priv->yres)
-    {
-      endy = priv->yres - 1;
-    }
-
-  /* If the display uses a value of BPP < 8, then we may have to extend the
-   * rectangle on the left so that it is byte aligned.  Works for BPP={1,2,4}
-   */
-
-  if (pinfo->bpp < 8)
-    {
-      unsigned int pixperbyte = 8 / pinfo->bpp;
-      startx &= ~(pixperbyte - 1);
-    }
-
-  width = endx - startx + 1;
-
-  /* Get the starting position in the framebuffer */
-
-  run  = priv->fbmem + starty * priv->stride;
-  run += (startx * pinfo->bpp + 7) >> 3;
-
-  for (row = starty; row <= endy; row++)
-    {
-      /* REVISIT: Some LCD hardware certain alignment requirements on DMA
-       * memory.
-       */
-
-      ret = pinfo->putrun(row, startx, run, width);
-      if (ret < 0)
+      startx = area->x;
+      if (startx < 0)
         {
-          return ret;
+          startx = 0;
         }
 
-      run += priv->stride;
+      endx = startx + area->w - 1;
+      if (endx >= priv->xres)
+        {
+          endx = priv->xres - 1;
+        }
+
+      starty = area->y;
+      if (starty < 0)
+        {
+          starty = 0;
+        }
+
+      endy = starty + area->h - 1;
+      if (endy >= priv->yres)
+        {
+          endy = priv->yres - 1;
+        }
+
+      /* If the display uses a value of BPP < 8, then we may have to extend
+       * the rectangle on the left so that it is byte aligned.  Works for
+       * BPP={1,2,4}
+       */
+
+      if (pinfo->bpp < 8)
+        {
+          unsigned int pixperbyte = 8 / pinfo->bpp;
+          startx &= ~(pixperbyte - 1);
+        }
+    }
+
+  if (pinfo->putarea != NULL)
+    {
+      /* Each Driver's callback function putarea may be optimized by checking
+       * if it is a full screen/full row mode or not.
+       * In case of full screen/row mode the memory layout of drivers memory
+       * and data provided to putarea function may be (or not, it depends of
+       * display and driver implementation) identical.
+       * Identical memory layout let us to use:
+       * - memcopy (if there is shadow buffer in driver implementation)
+       * - apply DMA channel to transfer data to driver memory.
+       */
+
+      ret = pinfo->putarea(pinfo->dev, starty, endy, startx, endx, run);
+      if (ret < 0)
+        {
+          lcderr("Failed to update area");
+          return ret;
+        }
+    }
+  else
+    {
+      width = endx - startx + 1;
+
+      /* Get the starting position in the framebuffer */
+
+      run  = priv->fbmem + starty * priv->stride;
+      run += (startx * pinfo->bpp + 7) >> 3;
+
+      for (row = starty; row <= endy; row++)
+        {
+          ret = pinfo->putrun(pinfo->dev, row, startx, run, width);
+          if (ret < 0)
+            {
+              lcderr("Failed to update row");
+              return ret;
+            }
+
+          run += priv->stride;
+        }
+    }
+
+  if (pinfo->redraw != NULL)
+    {
+      pinfo->redraw(pinfo->dev);
     }
 
   return OK;
@@ -437,6 +463,35 @@ static int lcdfb_setcursor(FAR struct fb_vtable_s *vtable,
 #endif
 
 /****************************************************************************
+ * Name: lcdfb_setpower
+ ****************************************************************************/
+
+static int lcdfb_setpower(FAR struct fb_vtable_s *vtable, FAR int power)
+{
+  int ret = -EINVAL;
+  FAR struct lcdfb_dev_s *priv;
+  FAR struct lcd_dev_s *lcd;
+
+  DEBUGASSERT(vtable != NULL);
+
+  priv = (FAR struct lcdfb_dev_s *)vtable;
+
+  if (priv != NULL)
+    {
+      lcd = priv->lcd;
+      DEBUGASSERT(lcd->setpower != NULL);
+
+      ret = lcd->setpower(lcd, power);
+      if (ret < 0)
+        {
+          lcderr("ERROR: LCD setpower() failed: %d\n", ret);
+        }
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -491,6 +546,7 @@ int up_fbinitialize(int display)
   priv->vtable.setcursor    = lcdfb_setcursor,
 #endif
   priv->vtable.updatearea   = lcdfb_updateearea,
+  priv->vtable.setpower     = lcdfb_setpower,
 
 #ifdef CONFIG_LCD_EXTERNINIT
   /* Use external graphics driver initialization */

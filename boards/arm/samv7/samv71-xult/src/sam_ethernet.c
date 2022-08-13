@@ -282,7 +282,7 @@ int sam_emac0_setmac(void)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_GPIOA_IRQ
-int arch_phy_irq(FAR const char *intf, xcpt_t handler, void *arg,
+int arch_phy_irq(const char *intf, xcpt_t handler, void *arg,
                  phy_enable_t *enable)
 {
   irqstate_t flags;

@@ -136,6 +136,14 @@ config SENSORS_AS5048B
 	---help---
 		Enable driver support for the AMS AS5048B magnetic rotary encoder.
 
+config SENSORS_AS5048A
+	bool "AMS AS5048A Magnetic Rotary Encoder support"
+	default n
+	select SPI
+	select SENSORS_QENCODER
+	---help---
+		Enable driver support for the AMS AS5048A magnetic rotary encoder.
+
 config SENSORS_AS726X
 	bool "AMS AS726X Spetral sensor support"
 	default n
@@ -672,11 +680,11 @@ config INA219_I2C_FREQUENCY
 	depends on SENSORS_INA219
 
 config SENSORS_INA226
-	bool "INA226 current and voltage monitor"
+	bool "INA226/INA230 current and voltage monitor"
 	default n
 	select I2C
 	---help---
-		Enable driver support for the Texas Instruments INA226 power monitor.
+		Enable driver support for the Texas Instruments INA226/INA230 power monitor.
 
 config INA226_I2C_FREQUENCY
 	int "INA226 I2C frequency"
@@ -911,6 +919,52 @@ config MPU60X0_EXTI
 		to the sampling rate chosen during operation.
 		Default:  No interrupts or blocking, i.e. user-driven sampling.
 
+config MPU60X0_EXT_SYNC_SET
+	int "MPU60x0 frame sync bit position"
+	default 0
+	---help---
+		EXT_SYNC_SET[2..0]
+		EXT_SYNC_SET: frame sync bit position
+		(see datasheet, it's ... complicated)
+
+config MPU60X0_DLPF_CFG
+	int "MPU60x0 digital low-pass filter bandwidth"
+	default 1
+	---help---
+		DLPF_CFG[2..0]
+		DLPF_CFG: digital low-pass filter bandwidth
+		(see datasheet, it's ... complicated)
+
+config MPU60X0_GYRO_FS_SEL
+	int "MPU60x0 Gyro FS_SEL"
+	default 2
+	---help---
+		Sets the @fs_sel bit in GYRO_CONFIG to the value provided. Per 
+		the	datasheet, the meaning of @fs_sel is as follows:
+		GYRO_CONFIG(0x1b) :   XG_ST YG_ST ZG_ST FS_SEL1 FS_SEL0 x  x  x
+		XG_ST, YG_ST, ZG_ST  :  self-test (unsupported in this driver)
+				1 -> activate self-test on X, Y, and/or Z gyros
+		FS_SEL[10] : full-scale range select
+				0 -> ±  250 deg/sec
+				1 -> ±  500 deg/sec
+				2 -> ± 1000 deg/sec
+				3 -> ± 2000 deg/sec
+
+config MPU60X0_ACCEL_AFS_SEL
+	int "MPU60x0 Accelerometer AFS_SEL"
+	default 2
+	---help---
+		Sets the @afs_sel bit in ACCEL_CONFIG to the value provided. Per
+		the datasheet, the meaning of @afs_sel is as follows:
+		ACCEL_CONFIG(0x1c) :   XA_ST YA_ST ZA_ST AFS_SEL1 AFS_SEL0 x  x  x
+		XA_ST, YA_ST, ZA_ST  :  self-test (unsupported in this driver)
+				1 -> activate self-test on X, Y, and/or Z accelerometers
+		AFS_SEL[10] : full-scale range select
+				0 -> ±  2 g
+				1 -> ±  4 g
+				2 -> ±  8 g
+				3 -> ± 16 g
+
 endif # SENSORS_MPU60X0
 
 config SENSORS_MAX44009
@@ -1053,6 +1107,37 @@ config SCD30_DEBUG
 		Enables debug features for the SCD30
 
 endif # SENSORS_SCD30
+
+config SENSORS_SCD41
+	bool "Sensirion SCD41 CO2, humidity and temperature sensor"
+	default n
+	---help---
+		Enable driver support for the Sensirion SCD41 CO₂, humidity and
+		temperature sensor.
+
+if SENSORS_SCD41
+
+config SCD41_I2C
+	bool "Sensirion SCD41 I2C mode"
+	default y
+	select I2C
+
+config SCD41_I2C_FREQUENCY
+	int "SCD41 I2C frequency"
+	default 100000
+	range 1 100000
+	depends on SCD41_I2C
+	---help---
+		I2C frequency for SCD41. Note, maximum supported frequency for
+		this sensor is 100kHz.
+
+config SCD41_DEBUG
+	bool "Debug support for the SCD41"
+	default n
+	---help---
+		Enables debug features for the SCD41
+
+endif # SENSORS_SCD41
 
 config SENSORS_SGP30
 	bool "Sensirion SGP30 Gas Platform sensor"

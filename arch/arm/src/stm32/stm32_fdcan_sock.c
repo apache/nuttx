@@ -544,8 +544,8 @@ struct stm32_fdcan_s
 
   /* A pointers to the list of TX/RX descriptors */
 
-  FAR struct can_frame *txdesc;
-  FAR struct can_frame *rxdesc;
+  struct can_frame *txdesc;
+  struct can_frame *rxdesc;
 
   /* TX/RX pool */
 
@@ -564,17 +564,17 @@ struct stm32_fdcan_s
 
 /* FDCAN Register access */
 
-static uint32_t fdcan_getreg(FAR struct stm32_fdcan_s *priv, int offset);
-static void fdcan_putreg(FAR struct stm32_fdcan_s *priv, int offset,
+static uint32_t fdcan_getreg(struct stm32_fdcan_s *priv, int offset);
+static void fdcan_putreg(struct stm32_fdcan_s *priv, int offset,
                          uint32_t regval);
 #ifdef CONFIG_STM32_FDCAN_REGDEBUG
-static void fdcan_dumpregs(FAR struct stm32_fdcan_s *priv,
-                           FAR const char *msg);
-static void fdcan_dumprxregs(FAR struct stm32_fdcan_s *priv,
-                             FAR const char *msg);
-static void fdcan_dumptxregs(FAR struct stm32_fdcan_s *priv,
-                             FAR const char *msg);
-static void fdcan_dumpramlayout(FAR struct stm32_fdcan_s *priv);
+static void fdcan_dumpregs(struct stm32_fdcan_s *priv,
+                           const char *msg);
+static void fdcan_dumprxregs(struct stm32_fdcan_s *priv,
+                             const char *msg);
+static void fdcan_dumptxregs(struct stm32_fdcan_s *priv,
+                             const char *msg);
+static void fdcan_dumpramlayout(struct stm32_fdcan_s *priv);
 #else
 #  define fdcan_dumpregs(priv,msg)
 #  define fdcan_dumprxregs(priv,msg)
@@ -584,68 +584,68 @@ static void fdcan_dumpramlayout(FAR struct stm32_fdcan_s *priv);
 
 /* CAN interrupt enable functions */
 
-static void fdcan_rx0int(FAR struct stm32_fdcan_s *priv, bool enable);
-static void fdcan_rx1int(FAR struct stm32_fdcan_s *priv, bool enable);
-static void fdcan_txint(FAR struct stm32_fdcan_s *priv, bool enable);
+static void fdcan_rx0int(struct stm32_fdcan_s *priv, bool enable);
+static void fdcan_rx1int(struct stm32_fdcan_s *priv, bool enable);
+static void fdcan_txint(struct stm32_fdcan_s *priv, bool enable);
 #ifdef CONFIG_NET_CAN_ERRORS
-static void fdcan_errint(FAR struct stm32_fdcan_s *priv, bool enable);
+static void fdcan_errint(struct stm32_fdcan_s *priv, bool enable);
 #endif
 
 /* Common TX logic */
 
-static int  fdcan_send(FAR struct stm32_fdcan_s *priv);
-static bool fdcan_txready(FAR struct stm32_fdcan_s *priv);
+static int  fdcan_send(struct stm32_fdcan_s *priv);
+static bool fdcan_txready(struct stm32_fdcan_s *priv);
 static int  fdcan_txpoll(struct net_driver_s *dev);
 
 /* CAN RX interrupt handling */
 
-static void fdcan_rx0interrupt_work(FAR void *arg);
-static void fdcan_rx1interrupt_work(FAR void *arg);
+static void fdcan_rx0interrupt_work(void *arg);
+static void fdcan_rx1interrupt_work(void *arg);
 
 /* CAN TX interrupt handling */
 
-static void fdcan_txdone_work(FAR void *arg);
-static void fdcan_txdone(FAR struct stm32_fdcan_s *priv);
+static void fdcan_txdone_work(void *arg);
+static void fdcan_txdone(struct stm32_fdcan_s *priv);
 
 #ifdef CONFIG_NET_CAN_ERRORS
 /* CAN errors interrupt handling */
 
-static void fdcan_error_work(FAR void *arg);
+static void fdcan_error_work(void *arg);
 #endif
 
 /* FDCAN interrupt handling */
 
 #ifdef CONFIG_NET_CAN_ERRORS
-static void fdcan_error(FAR struct stm32_fdcan_s *priv, uint32_t status);
+static void fdcan_error(struct stm32_fdcan_s *priv, uint32_t status);
 #endif
-static void fdcan_receive(FAR struct stm32_fdcan_s *priv,
-                          FAR volatile uint32_t *rxbuffer,
+static void fdcan_receive(struct stm32_fdcan_s *priv,
+                          volatile uint32_t *rxbuffer,
                           unsigned long nwords);
-static int  fdcan_interrupt(int irq, void *context, FAR void *arg);
+static int  fdcan_interrupt(int irq, void *context, void *arg);
 
 /* Initialization */
 
-static void fdcan_reset(FAR struct stm32_fdcan_s *priv);
-static int  fdcan_setup(FAR struct stm32_fdcan_s *priv);
-static void fdcan_shutdown(FAR struct stm32_fdcan_s *priv);
+static void fdcan_reset(struct stm32_fdcan_s *priv);
+static int  fdcan_setup(struct stm32_fdcan_s *priv);
+static void fdcan_shutdown(struct stm32_fdcan_s *priv);
 
 /* FDCAN helpers */
 
 #if 0 /* not used for now */
 static int
-fdcan_start_busoff_recovery_sequence(FAR struct stm32_fdcan_s *priv);
+fdcan_start_busoff_recovery_sequence(struct stm32_fdcan_s *priv);
 #endif
 
 /* Hardware initialization */
 
-static int  fdcan_hw_initialize(FAR struct stm32_fdcan_s *priv);
+static int  fdcan_hw_initialize(struct stm32_fdcan_s *priv);
 
 /* NuttX callback functions */
 
 static int  fdcan_ifup(struct net_driver_s *dev);
 static int  fdcan_ifdown(struct net_driver_s *dev);
 
-static void fdcan_txavail_work(FAR void *arg);
+static void fdcan_txavail_work(void *arg);
 static int  fdcan_txavail(struct net_driver_s *dev);
 
 #ifdef CONFIG_NETDEV_IOCTL
@@ -880,11 +880,11 @@ static struct stm32_fdcan_s g_fdcan3priv;
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_FDCAN_REGDEBUG
-static uint32_t fdcan_getreg(FAR struct stm32_fdcan_s *priv, int offset)
+static uint32_t fdcan_getreg(struct stm32_fdcan_s *priv, int offset)
 {
-  FAR const struct stm32_config_s *config  = priv->config;
-  uintptr_t                        regaddr = 0;
-  uint32_t                         regval  = 0;
+  const struct stm32_config_s *config  = priv->config;
+  uintptr_t                    regaddr = 0;
+  uint32_t                     regval  = 0;
 
   /* Read the value from the register */
 
@@ -935,9 +935,9 @@ static uint32_t fdcan_getreg(FAR struct stm32_fdcan_s *priv, int offset)
 }
 
 #else
-static uint32_t fdcan_getreg(FAR struct stm32_fdcan_s *priv, int offset)
+static uint32_t fdcan_getreg(struct stm32_fdcan_s *priv, int offset)
 {
-  FAR const struct stm32_config_s *config = priv->config;
+  const struct stm32_config_s *config = priv->config;
   return getreg32(config->base + offset);
 }
 
@@ -960,10 +960,10 @@ static uint32_t fdcan_getreg(FAR struct stm32_fdcan_s *priv, int offset)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_FDCAN_REGDEBUG
-static void fdcan_putreg(FAR struct stm32_fdcan_s *priv, int offset,
+static void fdcan_putreg(struct stm32_fdcan_s *priv, int offset,
                          uint32_t regval)
 {
-  FAR const struct stm32_config_s *config = priv->config;
+  const struct stm32_config_s *config = priv->config;
   uintptr_t regaddr = config->base + offset;
 
   /* Show the register value being written */
@@ -976,10 +976,10 @@ static void fdcan_putreg(FAR struct stm32_fdcan_s *priv, int offset,
 }
 
 #else
-static void fdcan_putreg(FAR struct stm32_fdcan_s *priv, int offset,
+static void fdcan_putreg(struct stm32_fdcan_s *priv, int offset,
                          uint32_t regval)
 {
-  FAR const struct stm32_config_s *config = priv->config;
+  const struct stm32_config_s *config = priv->config;
   putreg32(regval, config->base + offset);
 }
 
@@ -1000,10 +1000,10 @@ static void fdcan_putreg(FAR struct stm32_fdcan_s *priv, int offset,
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_FDCAN_REGDEBUG
-static void fdcan_dumpregs(FAR struct stm32_fdcan_s *priv,
-                           FAR const char *msg)
+static void fdcan_dumpregs(struct stm32_fdcan_s *priv,
+                           const char *msg)
 {
-  FAR const struct stm32_config_s *config = priv->config;
+  const struct stm32_config_s *config = priv->config;
 
   ninfo("CAN%d Control and Status Registers: %s\n", config->port, msg);
   ninfo("  Base:  %08" PRIx32 "\n", config->base);
@@ -1046,10 +1046,10 @@ static void fdcan_dumpregs(FAR struct stm32_fdcan_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_FDCAN_REGDEBUG
-static void fdcan_dumprxregs(FAR struct stm32_fdcan_s *priv,
-                             FAR const char *msg)
+static void fdcan_dumprxregs(struct stm32_fdcan_s *priv,
+                             const char *msg)
 {
-  FAR const struct stm32_config_s *config = priv->config;
+  const struct stm32_config_s *config = priv->config;
 
   ninfo("CAN%d Rx Registers: %s\n", config->port, msg);
   ninfo("  Base:  %08" PRIx32 "\n", config->base);
@@ -1089,10 +1089,10 @@ static void fdcan_dumprxregs(FAR struct stm32_fdcan_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_FDCAN_REGDEBUG
-static void fdcan_dumptxregs(FAR struct stm32_fdcan_s *priv,
-                             FAR const char *msg)
+static void fdcan_dumptxregs(struct stm32_fdcan_s *priv,
+                             const char *msg)
 {
-  FAR const struct stm32_config_s *config = priv->config;
+  const struct stm32_config_s *config = priv->config;
 
   ninfo("CAN%d Tx Registers: %s\n", config->port, msg);
   ninfo("  Base:  %08" PRIx32 "\n", config->base);
@@ -1138,9 +1138,9 @@ static void fdcan_dumptxregs(FAR struct stm32_fdcan_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_FDCAN_REGDEBUG
-static void fdcan_dumpramlayout(FAR struct stm32_fdcan_s *priv)
+static void fdcan_dumpramlayout(struct stm32_fdcan_s *priv)
 {
-  FAR const struct stm32_config_s *config = priv->config;
+  const struct stm32_config_s *config = priv->config;
 
   ninfo(" ******* FDCAN%d Message RAM layout *******\n", config->port);
   ninfo("                Start     # Elmnt  Elmnt size (words)\n");
@@ -1214,7 +1214,7 @@ static void fdcan_dumpramlayout(FAR struct stm32_fdcan_s *priv)
 
 #if 0 /* not used for now */
 static int
-fdcan_start_busoff_recovery_sequence(FAR struct stm32_fdcan_s *priv)
+fdcan_start_busoff_recovery_sequence(struct stm32_fdcan_s *priv)
 {
   uint32_t regval = 0;
 
@@ -1253,11 +1253,11 @@ fdcan_start_busoff_recovery_sequence(FAR struct stm32_fdcan_s *priv)
  *
  ****************************************************************************/
 
-static void fdcan_reset(FAR struct stm32_fdcan_s *priv)
+static void fdcan_reset(struct stm32_fdcan_s *priv)
 {
-  FAR const struct stm32_config_s *config = NULL;
-  uint32_t                         regval = 0;
-  irqstate_t                       flags;
+  const struct stm32_config_s *config = NULL;
+  uint32_t                     regval = 0;
+  irqstate_t                   flags;
 
   DEBUGASSERT(priv);
   config = priv->config;
@@ -1317,10 +1317,10 @@ static void fdcan_reset(FAR struct stm32_fdcan_s *priv)
  *
  ****************************************************************************/
 
-static int fdcan_setup(FAR struct stm32_fdcan_s *priv)
+static int fdcan_setup(struct stm32_fdcan_s *priv)
 {
-  FAR const struct stm32_config_s *config = NULL;
-  int                              ret    = 0;
+  const struct stm32_config_s *config = NULL;
+  int                          ret    = 0;
 
   DEBUGASSERT(priv);
   config = priv->config;
@@ -1385,10 +1385,10 @@ static int fdcan_setup(FAR struct stm32_fdcan_s *priv)
  *
  ****************************************************************************/
 
-static void fdcan_shutdown(FAR struct stm32_fdcan_s *priv)
+static void fdcan_shutdown(struct stm32_fdcan_s *priv)
 {
-  FAR const struct stm32_config_s *config = NULL;
-  uint32_t                         regval = 0;
+  const struct stm32_config_s *config = NULL;
+  uint32_t                     regval = 0;
 
   DEBUGASSERT(priv);
   config = priv->config;
@@ -1442,9 +1442,9 @@ static void fdcan_shutdown(FAR struct stm32_fdcan_s *priv)
  *
  ****************************************************************************/
 
-static void fdcan_rx0int(FAR struct stm32_fdcan_s *priv, bool enable)
+static void fdcan_rx0int(struct stm32_fdcan_s *priv, bool enable)
 {
-  FAR const struct stm32_config_s *config = NULL;
+  const struct stm32_config_s *config = NULL;
   uint32_t regval = 0;
 
   DEBUGASSERT(priv);
@@ -1483,9 +1483,9 @@ static void fdcan_rx0int(FAR struct stm32_fdcan_s *priv, bool enable)
  *
  ****************************************************************************/
 
-static void fdcan_rx1int(FAR struct stm32_fdcan_s *priv, bool enable)
+static void fdcan_rx1int(struct stm32_fdcan_s *priv, bool enable)
 {
-  FAR const struct stm32_config_s *config = NULL;
+  const struct stm32_config_s *config = NULL;
   uint32_t regval = 0;
 
   DEBUGASSERT(priv);
@@ -1524,9 +1524,9 @@ static void fdcan_rx1int(FAR struct stm32_fdcan_s *priv, bool enable)
  *
  ****************************************************************************/
 
-static void fdcan_txint(FAR struct stm32_fdcan_s *priv, bool enable)
+static void fdcan_txint(struct stm32_fdcan_s *priv, bool enable)
 {
-  FAR const struct stm32_config_s *config = NULL;
+  const struct stm32_config_s *config = NULL;
   uint32_t regval = 0;
 
   DEBUGASSERT(priv);
@@ -1566,9 +1566,9 @@ static void fdcan_txint(FAR struct stm32_fdcan_s *priv, bool enable)
  *
  ****************************************************************************/
 
-static void fdcan_errint(FAR struct stm32_fdcan_s *priv, bool enable)
+static void fdcan_errint(struct stm32_fdcan_s *priv, bool enable)
 {
-  FAR const struct stm32_config_s *config = NULL;
+  const struct stm32_config_s *config = NULL;
   uint32_t regval = 0;
 
   DEBUGASSERT(priv);
@@ -1616,17 +1616,17 @@ static void fdcan_errint(FAR struct stm32_fdcan_s *priv, bool enable)
  *
  ****************************************************************************/
 
-static int fdcan_send(FAR struct stm32_fdcan_s *priv)
+static int fdcan_send(struct stm32_fdcan_s *priv)
 {
-  FAR const struct stm32_config_s *config     = NULL;
-  FAR volatile uint32_t           *txbuffer   = NULL;
-  FAR const uint8_t               *src        = NULL;
-  FAR uint32_t                    *dest       = NULL;
-  uint32_t                         regval     = 0;
-  unsigned int                     ndx        = 0;
-  unsigned int                     nbytes     = 0;
-  uint32_t                         wordbuffer = 0;
-  unsigned int                     i          = 0;
+  const struct stm32_config_s *config     = NULL;
+  volatile uint32_t           *txbuffer   = NULL;
+  const uint8_t               *src        = NULL;
+  uint32_t                    *dest       = NULL;
+  uint32_t                     regval     = 0;
+  unsigned int                 ndx        = 0;
+  unsigned int                 nbytes     = 0;
+  uint32_t                     wordbuffer = 0;
+  unsigned int                 i          = 0;
 
   DEBUGASSERT(priv);
   config = priv->config;
@@ -1777,7 +1777,7 @@ static int fdcan_send(FAR struct stm32_fdcan_s *priv)
     }
 #endif
 
-  dest   = (FAR uint32_t *)&txbuffer[2];
+  dest   = (uint32_t *)&txbuffer[2];
 
   /* Writes must be word length */
 
@@ -1821,7 +1821,7 @@ static int fdcan_send(FAR struct stm32_fdcan_s *priv)
  *
  ****************************************************************************/
 
-static bool fdcan_txready(FAR struct stm32_fdcan_s *priv)
+static bool fdcan_txready(struct stm32_fdcan_s *priv)
 {
   uint32_t regval  = 0;
   bool     notfull = false;
@@ -1844,13 +1844,13 @@ static bool fdcan_txready(FAR struct stm32_fdcan_s *priv)
  *
  ****************************************************************************/
 
-static void fdcan_rx0interrupt_work(FAR void *arg)
+static void fdcan_rx0interrupt_work(void *arg)
 {
-  FAR struct stm32_fdcan_s        *priv   = (FAR struct stm32_fdcan_s *)arg;
-  FAR const struct stm32_config_s *config = NULL;
-  uint32_t                         regval = 0;
-  unsigned int                     nelem  = 0;
-  unsigned int                     ndx    = 0;
+  struct stm32_fdcan_s        *priv   = (struct stm32_fdcan_s *)arg;
+  const struct stm32_config_s *config = NULL;
+  uint32_t                     regval = 0;
+  unsigned int                 nelem  = 0;
+  unsigned int                 ndx    = 0;
 
   DEBUGASSERT(priv);
   config = priv->config;
@@ -1906,13 +1906,13 @@ static void fdcan_rx0interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void fdcan_rx1interrupt_work(FAR void *arg)
+static void fdcan_rx1interrupt_work(void *arg)
 {
-  FAR struct stm32_fdcan_s        *priv   = (FAR struct stm32_fdcan_s *)arg;
-  FAR const struct stm32_config_s *config = NULL;
-  uint32_t                         regval = 0;
-  unsigned int                     nelem  = 0;
-  unsigned int                     ndx    = 0;
+  struct stm32_fdcan_s        *priv   = (struct stm32_fdcan_s *)arg;
+  const struct stm32_config_s *config = NULL;
+  uint32_t                     regval = 0;
+  unsigned int                 nelem  = 0;
+  unsigned int                 ndx    = 0;
 
   DEBUGASSERT(priv);
   config = priv->config;
@@ -1970,9 +1970,9 @@ static void fdcan_rx1interrupt_work(FAR void *arg)
  * Name: fdcan_txdone_work
  ****************************************************************************/
 
-static void fdcan_txdone_work(FAR void *arg)
+static void fdcan_txdone_work(void *arg)
 {
-  FAR struct stm32_fdcan_s *priv = (FAR struct stm32_fdcan_s *)arg;
+  struct stm32_fdcan_s *priv = (struct stm32_fdcan_s *)arg;
 
   fdcan_txdone(priv);
 
@@ -1989,11 +1989,11 @@ static void fdcan_txdone_work(FAR void *arg)
  * Name: fdcan_txdone
  ****************************************************************************/
 
-static void fdcan_txdone(FAR struct stm32_fdcan_s *priv)
+static void fdcan_txdone(struct stm32_fdcan_s *priv)
 {
-  FAR const struct stm32_config_s *config = NULL;
-  unsigned int                     ndx    = 0;
-  uint32_t                         regval = 0;
+  const struct stm32_config_s *config = NULL;
+  unsigned int                 ndx    = 0;
+  uint32_t                     regval = 0;
 
   DEBUGASSERT(priv);
   config = priv->config;
@@ -2036,13 +2036,13 @@ static void fdcan_txdone(FAR struct stm32_fdcan_s *priv)
  * Name: fdcan_error_work
  ****************************************************************************/
 
-static void fdcan_error_work(FAR void *arg)
+static void fdcan_error_work(void *arg)
 {
-  FAR struct stm32_fdcan_s *priv    = (FAR struct stm32_fdcan_s *)arg;
-  uint32_t                  pending = 0;
-  uint32_t                  ir      = 0;
-  uint32_t                  ie      = 0;
-  uint32_t                  psr     = 0;
+  struct stm32_fdcan_s *priv    = (struct stm32_fdcan_s *)arg;
+  uint32_t              pending = 0;
+  uint32_t              ir      = 0;
+  uint32_t              ie      = 0;
+  uint32_t              psr     = 0;
 
   /* Get the set of pending interrupts. */
 
@@ -2144,7 +2144,7 @@ static void fdcan_error_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void fdcan_error(FAR struct stm32_fdcan_s *priv, uint32_t status)
+static void fdcan_error(struct stm32_fdcan_s *priv, uint32_t status)
 {
   struct can_frame *frame   = (struct can_frame *)priv->rxdesc;
   uint32_t          psr     = 0;
@@ -2412,8 +2412,8 @@ static void fdcan_error(FAR struct stm32_fdcan_s *priv, uint32_t status)
  *
  ****************************************************************************/
 
-static void fdcan_receive(FAR struct stm32_fdcan_s *priv,
-                          FAR volatile uint32_t *rxbuffer,
+static void fdcan_receive(struct stm32_fdcan_s *priv,
+                          volatile uint32_t *rxbuffer,
                           unsigned long nwords)
 {
   fdcan_dumprxregs(dev->cd_priv, "Before receive");
@@ -2496,7 +2496,7 @@ static void fdcan_receive(FAR struct stm32_fdcan_s *priv,
   else
 #endif
     {
-      FAR struct can_frame *frame  = (struct can_frame *)priv->rxdesc;
+      struct can_frame *frame  = (struct can_frame *)priv->rxdesc;
 
       /* Format the CAN header */
 
@@ -2583,10 +2583,10 @@ static void fdcan_receive(FAR struct stm32_fdcan_s *priv,
  *
  ****************************************************************************/
 
-static int fdcan_interrupt(int irq, void *context, FAR void *arg)
+static int fdcan_interrupt(int irq, void *context, void *arg)
 {
-  FAR struct stm32_fdcan_s *priv    = (FAR struct stm32_fdcan_s *)arg;
-  uint32_t                  pending = 0;
+  struct stm32_fdcan_s *priv    = (struct stm32_fdcan_s *)arg;
+  uint32_t              pending = 0;
 
   DEBUGASSERT(priv != NULL);
 
@@ -2669,10 +2669,10 @@ static int fdcan_interrupt(int irq, void *context, FAR void *arg)
 
 static int fdcan_hw_initialize(struct stm32_fdcan_s *priv)
 {
-  FAR const struct stm32_config_s *config = NULL;
-  FAR volatile uint32_t           *msgram = NULL;
-  uint32_t                         regval = 0;
-  uint32_t                         cntr   = 0;
+  const struct stm32_config_s *config = NULL;
+  volatile uint32_t           *msgram = NULL;
+  uint32_t                     regval = 0;
+  uint32_t                     cntr   = 0;
 
   DEBUGASSERT(priv);
   config = priv->config;
@@ -2939,9 +2939,9 @@ static int fdcan_hw_initialize(struct stm32_fdcan_s *priv)
 
 static int fdcan_ifup(struct net_driver_s *dev)
 {
-  FAR struct stm32_fdcan_s *priv =
-    (FAR struct stm32_fdcan_s *)dev->d_private;
-  FAR const struct stm32_config_s *config = NULL;
+  struct stm32_fdcan_s *priv =
+    (struct stm32_fdcan_s *)dev->d_private;
+  const struct stm32_config_s *config = NULL;
 
   DEBUGASSERT(priv);
   config = priv->config;
@@ -2993,8 +2993,8 @@ static int fdcan_ifup(struct net_driver_s *dev)
 
 static int fdcan_ifdown(struct net_driver_s *dev)
 {
-  FAR struct stm32_fdcan_s *priv =
-    (FAR struct stm32_fdcan_s *)dev->d_private;
+  struct stm32_fdcan_s *priv =
+    (struct stm32_fdcan_s *)dev->d_private;
 
   /* Disable CAN interrupts */
 
@@ -3034,8 +3034,8 @@ static int fdcan_ifdown(struct net_driver_s *dev)
 
 static int fdcan_txpoll(struct net_driver_s *dev)
 {
-  FAR struct stm32_fdcan_s *priv =
-    (FAR struct stm32_fdcan_s *)dev->d_private;
+  struct stm32_fdcan_s *priv =
+    (struct stm32_fdcan_s *)dev->d_private;
 
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
@@ -3086,9 +3086,9 @@ static int fdcan_txpoll(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void fdcan_txavail_work(FAR void *arg)
+static void fdcan_txavail_work(void *arg)
 {
-  FAR struct stm32_fdcan_s *priv = (FAR struct stm32_fdcan_s *)arg;
+  struct stm32_fdcan_s *priv = (struct stm32_fdcan_s *)arg;
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -3133,8 +3133,8 @@ static void fdcan_txavail_work(FAR void *arg)
 
 static int fdcan_txavail(struct net_driver_s *dev)
 {
-  FAR struct stm32_fdcan_s *priv =
-    (FAR struct stm32_fdcan_s *)dev->d_private;
+  struct stm32_fdcan_s *priv =
+    (struct stm32_fdcan_s *)dev->d_private;
 
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
@@ -3173,8 +3173,8 @@ static int fdcan_txavail(struct net_driver_s *dev)
 static int  fdcan_netdev_ioctl(struct net_driver_s *dev, int cmd,
                                unsigned long arg);
 {
-  FAR struct stm32_fdcan_s *priv =
-    (FAR struct stm32_fdcan_s *)dev->d_private;
+  struct stm32_fdcan_s *priv =
+    (struct stm32_fdcan_s *)dev->d_private;
   int                       ret  = OK;
 
   DEBUGASSERT(priv);
@@ -3212,9 +3212,9 @@ static int  fdcan_netdev_ioctl(struct net_driver_s *dev, int cmd,
 
 int stm32_fdcansockinitialize(int port)
 {
-  FAR struct stm32_fdcan_s        *priv   = NULL;
-  FAR const struct stm32_config_s *config = NULL;
-  int                              ret    = OK;
+  struct stm32_fdcan_s        *priv   = NULL;
+  const struct stm32_config_s *config = NULL;
+  int                          ret    = OK;
 
   ninfo("FDCAN%d\n", port);
 
@@ -3293,3 +3293,28 @@ int stm32_fdcansockinitialize(int port)
 errout:
   return ret;
 }
+
+/****************************************************************************
+ * Name: arm_netinitialize
+ *
+ * Description:
+ *   Initialize the CAN device interfaces.  If there is more than one device
+ *   interface in the chip, then board-specific logic will have to provide
+ *   this function to determine which, if any, CAN interfaces should be
+ *   initialized.
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_NETDEV_LATEINIT)
+void arm_netinitialize(void)
+{
+#ifdef CONFIG_STM32_CAN1
+  stm32_fdcansockinitialize(0);
+#endif
+
+#ifdef CONFIG_STM32_CAN2
+  stm32_fdcansockinitialize(1);
+#endif
+}
+#endif
+

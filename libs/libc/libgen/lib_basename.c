@@ -88,7 +88,7 @@ FAR char *basename(FAR char *path)
     }
 
   /* Get the address of the last '/' which is not at the end of the path and,
-   * therefor, must be just before the beginning of the filename component.
+   * therefore, must be just before the beginning of the filename component.
    */
 
   p = strrchr(path, '/');

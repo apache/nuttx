@@ -104,6 +104,12 @@ ifeq ($(CONFIG_PWM),y)
   TMRVPATH = :timers
 endif
 
+ifeq ($(CONFIG_CAPTURE),y)
+  CSRCS += capture.c
+  TMRDEPPATH = --dep-path timers
+  TMRVPATH = :timers
+endif
+
 # Include timer build support (if any were selected)
 
 DEPPATH += $(TMRDEPPATH)

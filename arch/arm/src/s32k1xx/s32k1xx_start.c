@@ -175,7 +175,7 @@ static inline void s32k1xx_mpu_config(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _start
+ * Name: __start
  *
  * Description:
  *   This is the reset entry point.

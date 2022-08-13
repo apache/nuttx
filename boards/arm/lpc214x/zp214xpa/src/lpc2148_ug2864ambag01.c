@@ -98,10 +98,10 @@
  *
  ****************************************************************************/
 
-FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
+struct lcd_dev_s *board_graphics_setup(unsigned int devno)
 {
-  FAR struct spi_dev_s *spi;
-  FAR struct lcd_dev_s *dev;
+  struct spi_dev_s *spi;
+  struct lcd_dev_s *dev;
   uint32_t regval32;
   uint32_t bits32;
 

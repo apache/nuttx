@@ -67,7 +67,7 @@
 
 volatile static spinlock_t g_core1_boot;
 
-extern int arm_pause_handler(int irq, void *c, FAR void *arg);
+extern int arm_pause_handler(int irq, void *c, void *arg);
 
 /****************************************************************************
  * Private Functions

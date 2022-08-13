@@ -610,7 +610,7 @@ int tlsr82_gpiounconfig(gpio_cfg_t cfg)
 {
   gpio_cfg_t pinset;
 
-  /* Get the pin infomation in cfg */
+  /* Get the pin information in cfg */
 
   pinset = GPIO_CFG2PIN(cfg);
 

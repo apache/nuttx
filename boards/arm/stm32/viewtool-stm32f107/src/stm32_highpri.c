@@ -87,7 +87,7 @@
 
 struct highpri_s
 {
-  FAR struct stm32_tim_dev_s *dev;  /* TIM6 driver instance */
+  struct stm32_tim_dev_s *dev;  /* TIM6 driver instance */
   volatile uint64_t basepri[16];
   volatile uint64_t handler;
   volatile uint64_t thread;
@@ -152,7 +152,7 @@ void tim6_handler(void)
 
 int highpri_main(int argc, char *argv[])
 {
-  FAR struct stm32_tim_dev_s *dev;
+  struct stm32_tim_dev_s *dev;
   uint64_t basepri[16];
   uint64_t handler;
   uint64_t thread;

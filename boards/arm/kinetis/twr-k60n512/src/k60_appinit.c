@@ -106,8 +106,8 @@
 #ifdef NSH_HAVEMMCSD
 struct kinetis_nsh_s
 {
-  FAR struct sdio_dev_s *sdhc; /* SDIO driver handle */
-  bool inserted;               /* True: card is inserted */
+  struct sdio_dev_s *sdhc; /* SDIO driver handle */
+  bool inserted;           /* True: card is inserted */
 };
 #endif
 
@@ -167,7 +167,7 @@ static void kinetis_mediachange(void)
  ****************************************************************************/
 
 #ifdef NSH_HAVEMMCSD
-static int kinetis_cdinterrupt(int irq, FAR void *context)
+static int kinetis_cdinterrupt(int irq, void *context)
 {
   /* All of the work is done by kinetis_mediachange() */
 

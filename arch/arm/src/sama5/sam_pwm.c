@@ -298,20 +298,20 @@ struct sam_pwm_s
 /* Register access */
 
 #ifdef CONFIG_SAMA5_PWM_REGDEBUG
-static bool pwm_checkreg(FAR struct sam_pwm_s *chan,
+static bool pwm_checkreg(struct sam_pwm_s *chan,
                          bool wr, uint32_t regval,
                          uintptr_t regaddr);
 #else
 # define pwm_checkreg(chan,wr,regval,regaddr) (false)
 #endif
 
-static uint32_t pwm_getreg(FAR struct sam_pwm_chan_s *chan, int offset);
-static void pwm_putreg(FAR struct sam_pwm_chan_s *chan,
+static uint32_t pwm_getreg(struct sam_pwm_chan_s *chan, int offset);
+static void pwm_putreg(struct sam_pwm_chan_s *chan,
                        int offset, uint32_t regval);
 
 #ifdef CONFIG_DEBUG_PWM_INFO
-static void pwm_dumpregs(FAR struct sam_pwm_chan_s *chan,
-                         FAR const char *msg);
+static void pwm_dumpregs(struct sam_pwm_chan_s *chan,
+                         const char *msg);
 #else
 #  define pwm_dumpregs(chan,msg)
 #endif
@@ -319,17 +319,17 @@ static void pwm_dumpregs(FAR struct sam_pwm_chan_s *chan,
 /* PWM Interrupts */
 
 #ifdef PWM_INTERRUPTS
-static int pwm_interrupt(int irq, void *context, FAR void *arg);
+static int pwm_interrupt(int irq, void *context, void *arg);
 #endif
 
 /* PWM driver methods */
 
-static int pwm_setup(FAR struct pwm_lowerhalf_s *dev);
-static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev);
-static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
-                     FAR const struct pwm_info_s *info);
-static int pwm_stop(FAR struct pwm_lowerhalf_s *dev);
-static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
+static int pwm_setup(struct pwm_lowerhalf_s *dev);
+static int pwm_shutdown(struct pwm_lowerhalf_s *dev);
+static int pwm_start(struct pwm_lowerhalf_s *dev,
+                     const struct pwm_info_s *info);
+static int pwm_stop(struct pwm_lowerhalf_s *dev);
+static int pwm_ioctl(struct pwm_lowerhalf_s *dev,
                      int cmd, unsigned long arg);
 
 /* Initialization */
@@ -339,7 +339,7 @@ static unsigned int pwm_clk_divider(uint32_t mck, uint32_t fclk,
                                     unsigned int prelog2);
 static uint32_t pwm_clk_frequency(uint32_t mck, unsigned int prelog2,
                                   unsigned int div);
-static void pwm_resetpins(FAR struct sam_pwm_chan_s *chan);
+static void pwm_resetpins(struct sam_pwm_chan_s *chan);
 
 /****************************************************************************
  * Private Data
@@ -529,7 +529,7 @@ static struct sam_pwm_chan_s g_pwm_chan3 =
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_PWM_REGDEBUG
-static bool pwm_checkreg(FAR struct sam_pwm_s *pwm, bool wr, uint32_t regval,
+static bool pwm_checkreg(struct sam_pwm_s *pwm, bool wr, uint32_t regval,
                          uintptr_t regaddr)
 {
   if (wr      == pwm->wr &&      /* Same kind of access? */
@@ -753,7 +753,7 @@ static void pwm_chan_putreg(struct sam_pwm_chan_s *chan, int offset,
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_PWM_INFO
-static void pwm_dumpregs(struct sam_pwm_chan_s *chan, FAR const char *msg)
+static void pwm_dumpregs(struct sam_pwm_chan_s *chan, const char *msg)
 {
   pwminfo("PWM: %s\n", msg);
   pwminfo("   CLK: %08x    SR: %08x  IMR1: %08x  ISR1: %08x\n",
@@ -826,7 +826,7 @@ static void pwm_dumpregs(struct sam_pwm_chan_s *chan, FAR const char *msg)
  ****************************************************************************/
 
 #ifdef PWM_INTERRUPTS
-static int pwm_interrupt(int irq, void *context, FAR void *arg)
+static int pwm_interrupt(int irq, void *context, void *arg)
 {
   /* No PWM interrupts are used in the current design */
 
@@ -852,9 +852,9 @@ static int pwm_interrupt(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
+static int pwm_setup(struct pwm_lowerhalf_s *dev)
 {
-  FAR struct sam_pwm_chan_s *chan = (FAR struct sam_pwm_chan_s *)dev;
+  struct sam_pwm_chan_s *chan = (struct sam_pwm_chan_s *)dev;
 
   pwminfo("Channel %d: H=%08x L=%08x FI=%08x\n",
           chan->channel, chan->ohpincfg, chan->olpincfg, chan->fipincfg);
@@ -895,9 +895,9 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
+static int pwm_shutdown(struct pwm_lowerhalf_s *dev)
 {
-  FAR struct sam_pwm_chan_s *chan = (FAR struct sam_pwm_chan_s *)dev;
+  struct sam_pwm_chan_s *chan = (struct sam_pwm_chan_s *)dev;
 
   pwminfo("Channel %d\n", chan->channel);
 
@@ -926,10 +926,10 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
-                     FAR const struct pwm_info_s *info)
+static int pwm_start(struct pwm_lowerhalf_s *dev,
+                     const struct pwm_info_s *info)
 {
-  FAR struct sam_pwm_chan_s *chan = (FAR struct sam_pwm_chan_s *)dev;
+  struct sam_pwm_chan_s *chan = (struct sam_pwm_chan_s *)dev;
 #if defined(CONFIG_SAMA5_PWM_CLKA) || defined(CONFIG_SAMA5_PWM_CLKB)
   unsigned int prelog2;
   unsigned int div;
@@ -1057,9 +1057,9 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
  *
  ****************************************************************************/
 
-static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
+static int pwm_stop(struct pwm_lowerhalf_s *dev)
 {
-  FAR struct sam_pwm_chan_s *chan = (FAR struct sam_pwm_chan_s *)dev;
+  struct sam_pwm_chan_s *chan = (struct sam_pwm_chan_s *)dev;
 
   pwminfo("Channel %d\n", chan->channel);
 
@@ -1091,11 +1091,11 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
+static int pwm_ioctl(struct pwm_lowerhalf_s *dev,
                      int cmd, unsigned long arg)
 {
 #ifdef CONFIG_DEBUG_PWM_INFO
-  FAR struct sam_pwm_chan_s *chan = (FAR struct sam_pwm_chan_s *)dev;
+  struct sam_pwm_chan_s *chan = (struct sam_pwm_chan_s *)dev;
 
   /* There are no platform-specific ioctl commands */
 
@@ -1259,7 +1259,7 @@ static uint32_t pwm_clk_frequency(uint32_t mck, unsigned int prelog2,
  *
  ****************************************************************************/
 
-static void pwm_resetpins(FAR struct sam_pwm_chan_s *chan)
+static void pwm_resetpins(struct sam_pwm_chan_s *chan)
 {
   if (chan->ohpincfg)
     {
@@ -1296,9 +1296,9 @@ static void pwm_resetpins(FAR struct sam_pwm_chan_s *chan)
  *
  ****************************************************************************/
 
-FAR struct pwm_lowerhalf_s *sam_pwminitialize(int channel)
+struct pwm_lowerhalf_s *sam_pwminitialize(int channel)
 {
-  FAR struct sam_pwm_chan_s *chan;
+  struct sam_pwm_chan_s *chan;
   uint32_t regval;
 
   pwminfo("Channel %d\n", channel);
@@ -1428,7 +1428,7 @@ FAR struct pwm_lowerhalf_s *sam_pwminitialize(int channel)
 
   /* Return the lower-half driver instance for this channel */
 
-  return (FAR struct pwm_lowerhalf_s *)chan;
+  return (struct pwm_lowerhalf_s *)chan;
 }
 
 #endif /* CONFIG_SAMA5_PWM */

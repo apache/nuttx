@@ -251,29 +251,29 @@ static int  ssi_transfer(struct tiva_ssidev_s *priv, const void *txbuffer,
 
 #ifndef CONFIG_SSI_POLLWAIT
 static inline struct tiva_ssidev_s *ssi_mapirq(int irq);
-static int  ssi_interrupt(int irq, void *context, FAR void *arg);
+static int  ssi_interrupt(int irq, void *context, void *arg);
 #endif
 
 /* SPI methods */
 
-static int  ssi_lock(FAR struct spi_dev_s *dev, bool lock);
+static int  ssi_lock(struct spi_dev_s *dev, bool lock);
 static uint32_t ssi_setfrequencyinternal(struct tiva_ssidev_s *priv,
               uint32_t frequency);
-static uint32_t ssi_setfrequency(FAR struct spi_dev_s *dev,
+static uint32_t ssi_setfrequency(struct spi_dev_s *dev,
               uint32_t frequency);
 static void ssi_setmodeinternal(struct tiva_ssidev_s *priv,
               enum spi_mode_e mode);
-static void ssi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
+static void ssi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode);
 static void ssi_setbitsinternal(struct tiva_ssidev_s *priv, int nbits);
-static void ssi_setbits(FAR struct spi_dev_s *dev, int nbits);
-static uint32_t ssi_send(FAR struct spi_dev_s *dev, uint32_t wd);
+static void ssi_setbits(struct spi_dev_s *dev, int nbits);
+static uint32_t ssi_send(struct spi_dev_s *dev, uint32_t wd);
 #ifdef CONFIG_SPI_EXCHANGE
-static void ssi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
-                         FAR void *rxbuffer, size_t nwords);
+static void ssi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+                         void *rxbuffer, size_t nwords);
 #else
-static void ssi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
+static void ssi_sndblock(struct spi_dev_s *dev, const void *buffer,
               size_t nwords);
-static void ssi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
+static void ssi_recvblock(struct spi_dev_s *dev, void *buffer,
               size_t nwords);
 #endif
 
@@ -989,7 +989,7 @@ static inline struct tiva_ssidev_s *ssi_mapirq(int irq)
  ****************************************************************************/
 
 #ifndef CONFIG_SSI_POLLWAIT
-static int ssi_interrupt(int irq, void *context, FAR void *arg)
+static int ssi_interrupt(int irq, void *context, void *arg)
 {
   struct tiva_ssidev_s *priv = ssi_mapirq(irq);
   uint32_t regval;
@@ -1066,9 +1066,9 @@ static int ssi_interrupt(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static int ssi_lock(FAR struct spi_dev_s *dev, bool lock)
+static int ssi_lock(struct spi_dev_s *dev, bool lock)
 {
-  FAR struct tiva_ssidev_s *priv = (FAR struct tiva_ssidev_s *)dev;
+  struct tiva_ssidev_s *priv = (struct tiva_ssidev_s *)dev;
   int ret;
 
   if (lock)
@@ -1197,7 +1197,7 @@ static uint32_t ssi_setfrequencyinternal(struct tiva_ssidev_s *priv,
   return priv->actual;
 }
 
-static uint32_t ssi_setfrequency(FAR struct spi_dev_s *dev,
+static uint32_t ssi_setfrequency(struct spi_dev_s *dev,
                                  uint32_t frequency)
 {
   struct tiva_ssidev_s *priv = (struct tiva_ssidev_s *)dev;
@@ -1283,7 +1283,7 @@ static void ssi_setmodeinternal(struct tiva_ssidev_s *priv,
     }
 }
 
-static void ssi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
+static void ssi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 {
   struct tiva_ssidev_s *priv = (struct tiva_ssidev_s *)dev;
   uint32_t enable;
@@ -1333,7 +1333,7 @@ static void ssi_setbitsinternal(struct tiva_ssidev_s *priv, int nbits)
     }
 }
 
-static void ssi_setbits(FAR struct spi_dev_s *dev, int nbits)
+static void ssi_setbits(struct spi_dev_s *dev, int nbits)
 {
   struct tiva_ssidev_s *priv = (struct tiva_ssidev_s *)dev;
   uint32_t enable;
@@ -1363,7 +1363,7 @@ static void ssi_setbits(FAR struct spi_dev_s *dev, int nbits)
  *
  ****************************************************************************/
 
-static uint32_t ssi_send(FAR struct spi_dev_s *dev, uint32_t wd)
+static uint32_t ssi_send(struct spi_dev_s *dev, uint32_t wd)
 {
   struct tiva_ssidev_s *priv = (struct tiva_ssidev_s *)dev;
   uint32_t response = 0;
@@ -1394,8 +1394,8 @@ static uint32_t ssi_send(FAR struct spi_dev_s *dev, uint32_t wd)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_EXCHANGE
-static void ssi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
-                         FAR void *rxbuffer, size_t nwords)
+static void ssi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+                         void *rxbuffer, size_t nwords)
 {
   struct tiva_ssidev_s *priv = (struct tiva_ssidev_s *)dev;
   ssi_transfer(priv, txbuffer, rxbuffer, nwords);
@@ -1423,7 +1423,7 @@ static void ssi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
  ****************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void ssi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
+static void ssi_sndblock(struct spi_dev_s *dev, const void *buffer,
                          size_t nwords)
 {
   struct tiva_ssidev_s *priv = (struct tiva_ssidev_s *)dev;
@@ -1452,7 +1452,7 @@ static void ssi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
  ****************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void ssi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
+static void ssi_recvblock(struct spi_dev_s *dev, void *buffer,
                           size_t nwords)
 {
   struct tiva_ssidev_s *priv = (struct tiva_ssidev_s *)dev;
@@ -1486,7 +1486,7 @@ static void ssi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
+struct spi_dev_s *tiva_ssibus_initialize(int port)
 {
   struct tiva_ssidev_s *priv;
   irqstate_t flags;
@@ -1693,7 +1693,7 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
 #endif /* CONFIG_SSI_POLLWAIT */
 
   leave_critical_section(flags);
-  return (FAR struct spi_dev_s *)priv;
+  return (struct spi_dev_s *)priv;
 }
 
 #endif /* NSSI_ENABLED > 0 */

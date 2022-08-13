@@ -66,16 +66,16 @@ size_t wcrtomb(FAR char *s, wchar_t wc, FAR mbstate_t *ps)
       *s = 0x80 | (wc & 0x3f);
       return 2;
     }
-  else if ((unsigned)wc < 0xd800 || (unsigned)wc - 0xe000 < 0x2000)
+  else if ((unsigned)wc < 0xd800 || (unsigned)wc <= 0xffff)
     {
       *s++ = 0xe0 | (wc >> 12);
       *s++ = 0x80 | ((wc >> 6) & 0x3f);
       *s = 0x80 | (wc & 0x3f);
       return 3;
     }
-  else if ((unsigned)wc - 0x10000 < 0x100000)
+  else if ((unsigned long)wc < 0x110000)
     {
-      *s++ = 0xf0 | (wc >> 18);
+      *s++ = 0xf0 | ((unsigned long)wc >> 18);
       *s++ = 0x80 | ((wc >> 12) & 0x3f);
       *s++ = 0x80 | ((wc >> 6) & 0x3f);
       *s = 0x80 | (wc & 0x3f);

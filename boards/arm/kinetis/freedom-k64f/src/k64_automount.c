@@ -40,18 +40,6 @@
 #ifdef HAVE_AUTOMOUNTER
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef NULL
-#  define NULL (FAR void *)0
-#endif
-
-#ifndef OK
-#  define OK 0
-#endif
-
-/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -59,10 +47,10 @@
 
 struct k64_automount_state_s
 {
-  volatile automount_handler_t handler;    /* Upper half handler */
-  FAR void *arg;                           /* Handler argument */
-  bool enable;                             /* Fake interrupt enable */
-  bool pending;                            /* Set if there an event while disabled */
+  volatile automount_handler_t handler; /* Upper half handler */
+  void *arg;                            /* Handler argument */
+  bool enable;                          /* Fake interrupt enable */
+  bool pending;                         /* Set if there an event while disabled */
 };
 
 /* This structure represents the static configuration of an automounter */
@@ -73,19 +61,19 @@ struct k64_automount_config_s
    * struct automount_lower_s to struct k64_automount_config_s
    */
 
-  struct automount_lower_s lower;          /* Publicly visible part */
-  FAR struct k64_automount_state_s *state; /* Changeable state */
+  struct automount_lower_s lower;      /* Publicly visible part */
+  struct k64_automount_state_s *state; /* Changeable state */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  k64_attach(FAR const struct automount_lower_s *lower,
-                       automount_handler_t isr, FAR void *arg);
-static void k64_enable(FAR const struct automount_lower_s *lower,
+static int  k64_attach(const struct automount_lower_s *lower,
+                       automount_handler_t isr, void *arg);
+static void k64_enable(const struct automount_lower_s *lower,
                        bool enable);
-static bool k64_inserted(FAR const struct automount_lower_s *lower);
+static bool k64_inserted(const struct automount_lower_s *lower);
 
 /****************************************************************************
  * Private Data
@@ -128,15 +116,15 @@ static const struct k64_automount_config_s g_sdhc_config =
  *
  ****************************************************************************/
 
-static int k64_attach(FAR const struct automount_lower_s *lower,
-                      automount_handler_t isr, FAR void *arg)
+static int k64_attach(const struct automount_lower_s *lower,
+                      automount_handler_t isr, void *arg)
 {
-  FAR const struct k64_automount_config_s *config;
-  FAR struct k64_automount_state_s *state;
+  const struct k64_automount_config_s *config;
+  struct k64_automount_state_s *state;
 
   /* Recover references to our structure */
 
-  config = (FAR struct k64_automount_config_s *)lower;
+  config = (struct k64_automount_config_s *)lower;
   DEBUGASSERT(config != NULL && config->state != NULL);
 
   state = config->state;
@@ -167,16 +155,16 @@ static int k64_attach(FAR const struct automount_lower_s *lower,
  *
  ****************************************************************************/
 
-static void k64_enable(FAR const struct automount_lower_s *lower,
+static void k64_enable(const struct automount_lower_s *lower,
                        bool enable)
 {
-  FAR const struct k64_automount_config_s *config;
-  FAR struct k64_automount_state_s *state;
+  const struct k64_automount_config_s *config;
+  struct k64_automount_state_s *state;
   irqstate_t flags;
 
   /* Recover references to our structure */
 
-  config = (FAR struct k64_automount_config_s *)lower;
+  config = (struct k64_automount_config_s *)lower;
   DEBUGASSERT(config != NULL && config->state != NULL);
 
   state = config->state;
@@ -218,7 +206,7 @@ static void k64_enable(FAR const struct automount_lower_s *lower,
  *
  ****************************************************************************/
 
-static bool k64_inserted(FAR const struct automount_lower_s *lower)
+static bool k64_inserted(const struct automount_lower_s *lower)
 {
   return k64_cardinserted();
 }
@@ -243,7 +231,7 @@ static bool k64_inserted(FAR const struct automount_lower_s *lower)
 
 void k64_automount_initialize(void)
 {
-  FAR void *handle;
+  void *handle;
 
   finfo("Initializing automounter(s)\n");
 
@@ -283,8 +271,8 @@ void k64_automount_initialize(void)
 
 void k64_automount_event(bool inserted)
 {
-  FAR const struct k64_automount_config_s *config = &g_sdhc_config;
-  FAR struct k64_automount_state_s *state = &g_sdhc_state;
+  const struct k64_automount_config_s *config = &g_sdhc_config;
+  struct k64_automount_state_s *state = &g_sdhc_state;
 
   /* Is the auto-mounter interrupt attached? */
 

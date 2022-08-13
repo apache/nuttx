@@ -1,5 +1,6 @@
 /****************************************************************************
  * boards/arm/stm32h7/nucleo-h743zi2/include/board.h
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -241,6 +242,10 @@
 
 #define STM32_RCC_D3CCIPR_ADCSEL     RCC_D3CCIPR_ADCSEL_PLL2
 
+/* FDCAN 1 2 clock source - HSE (TODO: Not the best choice for this board?) */
+
+#define STM32_RCC_D2CCIP1R_FDCANSEL  RCC_D2CCIP1R_FDCANSEL_HSE   /* FDCAN 1 2 clock source */
+
 /* FLASH wait states
  *
  *  ------------ ---------- -----------
@@ -387,6 +392,16 @@
 #define GPIO_TIM1_CH3OUT  GPIO_TIM1_CH3OUT_2  /* PE13 - D3 */
 #define GPIO_TIM1_CH3NOUT GPIO_TIM1_CH3NOUT_3 /* PE12 - D39 */
 #define GPIO_TIM1_CH4OUT  GPIO_TIM1_CH4OUT_2  /* PE14 - D38 */
+
+/* FDCAN1 */
+
+#define GPIO_CAN1_RX GPIO_CAN1_RX_3 /* PD0 */
+#define GPIO_CAN1_TX GPIO_CAN1_TX_3 /* PD1 */
+
+/* FDCAN2 */
+
+#define GPIO_CAN2_RX GPIO_CAN2_RX_2 /* PB5 - D11 */
+#define GPIO_CAN2_TX GPIO_CAN2_TX_2 /* PB6 - D1 */
 
 /* DMA **********************************************************************/
 

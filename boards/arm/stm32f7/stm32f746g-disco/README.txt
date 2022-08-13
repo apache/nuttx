@@ -408,7 +408,7 @@ STM32F746G-DISCO-specific Configuration Options
     CONFIG_STM32F7_SPI_INTERRUPTS - Select to enable interrupt driven SPI
       support. Non-interrupt-driven, poll-waiting is recommended if the
       interrupt rate would be to high in the interrupt driven case.
-    CONFIG_STM32F7_SPI_DMA - Use DMA to improve SPI transfer performance.
+    CONFIG_STM32F7_SPIx_DMA - Use DMA to improve SPIx transfer performance.
       Cannot be used with CONFIG_STM32F7_SPI_INTERRUPT.
 
   STM32F746G-DISCO DMA Configuration

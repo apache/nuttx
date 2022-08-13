@@ -115,6 +115,28 @@ nsh
 Basic NuttShell configuration (console enabled in UART0, exposed via
 USB connection by means of CP2102 converter, at 115200 bps).
 
+knsh
+----
+
+This is identical to the nsh configuration except that (1) NuttX
+is built as PROTECTED mode, monolithic module and the user applications
+are built separately and, as a consequence, (2) some features that are
+only available in the FLAT build are disabled.
+
+Protected Mode support for ESP32 relies on the PID Controller peripheral
+for implementing isolation between Kernel and Userspace.
+
+By working together with the MMU and Static MPUs of the ESP32, the PID
+Controller is able to restrict the application access to peripherals, on-chip
+memories (Internal ROM and Internal SRAM) and off-chip memories (External
+Flash and PSRAM).
+
+.. warning::
+    * The PID Controller driver is in **EXPERIMENTAL** state, so please
+      consider the Protected Mode feature for ESP32 a **Proof-of-Concept**.
+    * The PID Controller **does not** prevent the application from accessing
+      CPU System Registers.
+
 wapi
 ----
 
@@ -314,3 +336,46 @@ To test it, just run the following::
   nsh> wdog -d /dev/watchdogx
 
 Where x in the watchdog instance.
+
+wamr_wasi_debug
+---------------
+
+This config is an example to use wasm-micro-runtime.
+It can run both of wasm bytecode and AoT compiled modules.
+
+This example uses littlefs on ESP32's SPI flash to store wasm modules.
+
+1. Create a littlefs image which contains wasm modules.
+
+   https://github.com/jrast/littlefs-python/blob/master/examples/mkfsimg.py
+   is used in the following example::
+
+      % python3 mkfsimg.py \
+        --img-filename ..../littlefs.bin \
+        --img-size 3080192 \
+        --block-size 4096 \
+        --prog-size 256 \
+        --read-size 256 \
+        ..../wasm_binary_directory
+
+2. Write the NuttX image and the filesystem to ESP32::
+
+      % esptool.py \
+        --chip esp32 \
+        --port /dev/tty.SLAB_USBtoUART \
+        --baud 921600 \
+        write_flash \
+        0x1000 ..../bootloader-esp32.bin \
+        0x8000 ..../partition-table-esp32.bin \
+        0x10000 nuttx.bin \
+        0x180000 ..../littlefs.bin
+
+3. Mount the filesystem and run a wasm module on it::
+
+      nsh> mount -t littlefs /dev/esp32flash /mnt
+      nsh> iwasm /mnt/....
+
+efuse
+-----
+
+A config with EFUSE enabled.

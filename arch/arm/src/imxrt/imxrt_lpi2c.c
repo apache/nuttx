@@ -218,64 +218,64 @@ struct imxrt_lpi2c_priv_s
  ****************************************************************************/
 
 static inline uint32_t
-  imxrt_lpi2c_getreg(FAR struct imxrt_lpi2c_priv_s *priv, uint16_t offset);
-static inline void imxrt_lpi2c_putreg(FAR struct imxrt_lpi2c_priv_s *priv,
+imxrt_lpi2c_getreg(struct imxrt_lpi2c_priv_s *priv, uint16_t offset);
+static inline void imxrt_lpi2c_putreg(struct imxrt_lpi2c_priv_s *priv,
                                       uint16_t offset, uint32_t value);
-static inline void imxrt_lpi2c_modifyreg(FAR struct imxrt_lpi2c_priv_s *priv,
+static inline void imxrt_lpi2c_modifyreg(struct imxrt_lpi2c_priv_s *priv,
                                          uint16_t offset, uint32_t clearbits,
                                          uint32_t setbits);
-static inline int imxrt_lpi2c_sem_wait(FAR struct imxrt_lpi2c_priv_s *priv);
+static inline int imxrt_lpi2c_sem_wait(struct imxrt_lpi2c_priv_s *priv);
 #ifdef CONFIG_I2C_RESET
 static int
-  imxrt_lpi2c_sem_wait_noncancelable(FAR struct imxrt_lpi2c_priv_s *priv);
+imxrt_lpi2c_sem_wait_noncancelable(struct imxrt_lpi2c_priv_s *priv);
 #endif
 
 #ifdef CONFIG_IMXRT_LPI2C_DYNTIMEO
-static useconds_t imxrt_lpi2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs);
+static uint32_t imxrt_lpi2c_toticks(int msgc, struct i2c_msg_s *msgs);
 #endif /* CONFIG_IMXRT_LPI2C_DYNTIMEO */
 
 static inline int
-  imxrt_lpi2c_sem_waitdone(FAR struct imxrt_lpi2c_priv_s *priv);
+imxrt_lpi2c_sem_waitdone(struct imxrt_lpi2c_priv_s *priv);
 static inline void
-  imxrt_lpi2c_sem_waitstop(FAR struct imxrt_lpi2c_priv_s *priv);
+imxrt_lpi2c_sem_waitstop(struct imxrt_lpi2c_priv_s *priv);
 static inline void
-  imxrt_lpi2c_sem_post(FAR struct imxrt_lpi2c_priv_s *priv);
+imxrt_lpi2c_sem_post(struct imxrt_lpi2c_priv_s *priv);
 static inline void
-  imxrt_lpi2c_sem_init(FAR struct imxrt_lpi2c_priv_s *priv);
+imxrt_lpi2c_sem_init(struct imxrt_lpi2c_priv_s *priv);
 static inline void
-  imxrt_lpi2c_sem_destroy(FAR struct imxrt_lpi2c_priv_s *priv);
+imxrt_lpi2c_sem_destroy(struct imxrt_lpi2c_priv_s *priv);
 
 #ifdef CONFIG_I2C_TRACE
-static void imxrt_lpi2c_tracereset(FAR struct imxrt_lpi2c_priv_s *priv);
-static void imxrt_lpi2c_tracenew(FAR struct imxrt_lpi2c_priv_s *priv,
+static void imxrt_lpi2c_tracereset(struct imxrt_lpi2c_priv_s *priv);
+static void imxrt_lpi2c_tracenew(struct imxrt_lpi2c_priv_s *priv,
                                  uint32_t status);
-static void imxrt_lpi2c_traceevent(FAR struct imxrt_lpi2c_priv_s *priv,
+static void imxrt_lpi2c_traceevent(struct imxrt_lpi2c_priv_s *priv,
                                    enum imxrt_trace_e event, uint32_t parm);
-static void imxrt_lpi2c_tracedump(FAR struct imxrt_lpi2c_priv_s *priv);
+static void imxrt_lpi2c_tracedump(struct imxrt_lpi2c_priv_s *priv);
 #endif /* CONFIG_I2C_TRACE */
 
-static void imxrt_lpi2c_setclock(FAR struct imxrt_lpi2c_priv_s *priv,
+static void imxrt_lpi2c_setclock(struct imxrt_lpi2c_priv_s *priv,
                                uint32_t frequency);
-static inline void imxrt_lpi2c_sendstart(FAR struct imxrt_lpi2c_priv_s *priv,
+static inline void imxrt_lpi2c_sendstart(struct imxrt_lpi2c_priv_s *priv,
                                          uint8_t address);
-static inline void imxrt_lpi2c_sendstop(FAR struct imxrt_lpi2c_priv_s *priv);
+static inline void imxrt_lpi2c_sendstop(struct imxrt_lpi2c_priv_s *priv);
 static inline uint32_t
-  imxrt_lpi2c_getstatus(FAR struct imxrt_lpi2c_priv_s *priv);
+imxrt_lpi2c_getstatus(struct imxrt_lpi2c_priv_s *priv);
 
 static int imxrt_lpi2c_isr_process(struct imxrt_lpi2c_priv_s * priv);
 
 #ifndef CONFIG_I2C_POLLED
-static int imxrt_lpi2c_isr(int irq, void *context, FAR void *arg);
+static int imxrt_lpi2c_isr(int irq, void *context, void *arg);
 #endif /* !CONFIG_I2C_POLLED */
 
 void imxrt_lpi2c_clock_enable (uint32_t base);
 void imxrt_lpi2c_clock_disable (uint32_t base);
-static int imxrt_lpi2c_init(FAR struct imxrt_lpi2c_priv_s *priv);
-static int imxrt_lpi2c_deinit(FAR struct imxrt_lpi2c_priv_s *priv);
-static int imxrt_lpi2c_transfer(FAR struct i2c_master_s *dev,
-                                FAR struct i2c_msg_s *msgs, int count);
+static int imxrt_lpi2c_init(struct imxrt_lpi2c_priv_s *priv);
+static int imxrt_lpi2c_deinit(struct imxrt_lpi2c_priv_s *priv);
+static int imxrt_lpi2c_transfer(struct i2c_master_s *dev,
+                                struct i2c_msg_s *msgs, int count);
 #ifdef CONFIG_I2C_RESET
-static int imxrt_lpi2c_reset(FAR struct i2c_master_s *dev);
+static int imxrt_lpi2c_reset(struct i2c_master_s *dev);
 #endif
 
 /****************************************************************************
@@ -475,7 +475,7 @@ static struct imxrt_lpi2c_priv_s imxrt_lpi2c4_priv =
  ****************************************************************************/
 
 static inline uint32_t
-  imxrt_lpi2c_getreg(FAR struct imxrt_lpi2c_priv_s *priv, uint16_t offset)
+imxrt_lpi2c_getreg(struct imxrt_lpi2c_priv_s *priv, uint16_t offset)
 {
   return getreg32(priv->config->base + offset);
 }
@@ -488,7 +488,7 @@ static inline uint32_t
  *
  ****************************************************************************/
 
-static inline void imxrt_lpi2c_putreg(FAR struct imxrt_lpi2c_priv_s *priv,
+static inline void imxrt_lpi2c_putreg(struct imxrt_lpi2c_priv_s *priv,
                                       uint16_t offset, uint32_t value)
 {
   putreg32(value, priv->config->base + offset);
@@ -502,7 +502,7 @@ static inline void imxrt_lpi2c_putreg(FAR struct imxrt_lpi2c_priv_s *priv,
  *
  ****************************************************************************/
 
-static inline void imxrt_lpi2c_modifyreg(FAR struct imxrt_lpi2c_priv_s *priv,
+static inline void imxrt_lpi2c_modifyreg(struct imxrt_lpi2c_priv_s *priv,
                                          uint16_t offset, uint32_t clearbits,
                                          uint32_t setbits)
 {
@@ -518,7 +518,7 @@ static inline void imxrt_lpi2c_modifyreg(FAR struct imxrt_lpi2c_priv_s *priv,
  *
  ****************************************************************************/
 
-static inline int imxrt_lpi2c_sem_wait(FAR struct imxrt_lpi2c_priv_s *priv)
+static inline int imxrt_lpi2c_sem_wait(struct imxrt_lpi2c_priv_s *priv)
 {
   return nxsem_wait(&priv->sem_excl);
 }
@@ -533,14 +533,14 @@ static inline int imxrt_lpi2c_sem_wait(FAR struct imxrt_lpi2c_priv_s *priv)
 
 #ifdef CONFIG_I2C_RESET
 static int
-  imxrt_lpi2c_sem_wait_noncancelable(FAR struct imxrt_lpi2c_priv_s *priv)
+imxrt_lpi2c_sem_wait_noncancelable(struct imxrt_lpi2c_priv_s *priv)
 {
   return nxsem_wait_uninterruptible(&priv->sem_excl);
 }
 #endif
 
 /****************************************************************************
- * Name: imxrt_lpi2c_tousecs
+ * Name: imxrt_lpi2c_toticks
  *
  * Description:
  *   Return a micro-second delay based on the number of bytes left to be
@@ -549,7 +549,7 @@ static int
  ****************************************************************************/
 
 #ifdef CONFIG_IMXRT_LPI2C_DYNTIMEO
-static useconds_t imxrt_lpi2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs)
+static uint32_t imxrt_lpi2c_toticks(int msgc, struct i2c_msg_s *msgs)
 {
   size_t bytecount = 0;
   int i;
@@ -565,7 +565,7 @@ static useconds_t imxrt_lpi2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs)
    * factor.
    */
 
-  return (useconds_t)(CONFIG_IMXRT_LPI2C_DYNTIMEO_USECPERBYTE * bytecount);
+  return USEC2TICK(CONFIG_IMXRT_LPI2C_DYNTIMEO_USECPERBYTE * bytecount);
 }
 #endif
 
@@ -579,7 +579,7 @@ static useconds_t imxrt_lpi2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs)
 
 #ifndef CONFIG_I2C_POLLED
 static inline int
-  imxrt_lpi2c_sem_waitdone(FAR struct imxrt_lpi2c_priv_s *priv)
+imxrt_lpi2c_sem_waitdone(struct imxrt_lpi2c_priv_s *priv)
 {
   irqstate_t flags;
   uint32_t regval;
@@ -624,7 +624,7 @@ static inline int
 
 #ifdef CONFIG_IMXRT_LPI2C_DYNTIMEO
       ret = nxsem_tickwait_uninterruptible(&priv->sem_isr,
-                     USEC2TICK(imxrt_lpi2c_tousecs(priv->msgc, priv->msgv)));
+                       imxrt_lpi2c_toticks(priv->msgc, priv->msgv));
 #else
       ret = nxsem_tickwait_uninterruptible(&priv->sem_isr,
                                            CONFIG_IMXRT_LPI2C_TIMEOTICKS);
@@ -669,7 +669,7 @@ static inline int
 }
 #else
 static inline int
-  imxrt_lpi2c_sem_waitdone(FAR struct imxrt_lpi2c_priv_s *priv)
+imxrt_lpi2c_sem_waitdone(struct imxrt_lpi2c_priv_s *priv)
 {
   clock_t timeout;
   clock_t start;
@@ -679,7 +679,7 @@ static inline int
   /* Get the timeout value */
 
 #ifdef CONFIG_IMXRT_LPI2C_DYNTIMEO
-  timeout = USEC2TICK(imxrt_lpi2c_tousecs(priv->msgc, priv->msgv));
+  timeout = imxrt_lpi2c_toticks(priv->msgc, priv->msgv);
 #else
   timeout = CONFIG_IMXRT_LPI2C_TIMEOTICKS;
 #endif
@@ -729,7 +729,7 @@ static inline int
  ****************************************************************************/
 
 static inline void
-  imxrt_lpi2c_sem_waitstop(FAR struct imxrt_lpi2c_priv_s *priv)
+imxrt_lpi2c_sem_waitstop(struct imxrt_lpi2c_priv_s *priv)
 {
   clock_t start;
   clock_t elapsed;
@@ -830,7 +830,7 @@ static inline void imxrt_lpi2c_sem_post(struct imxrt_lpi2c_priv_s *priv)
  *
  ****************************************************************************/
 
-static inline void imxrt_lpi2c_sem_init(FAR struct imxrt_lpi2c_priv_s *priv)
+static inline void imxrt_lpi2c_sem_init(struct imxrt_lpi2c_priv_s *priv)
 {
   nxsem_init(&priv->sem_excl, 0, 1);
 
@@ -853,7 +853,7 @@ static inline void imxrt_lpi2c_sem_init(FAR struct imxrt_lpi2c_priv_s *priv)
  ****************************************************************************/
 
 static inline void
-  imxrt_lpi2c_sem_destroy(FAR struct imxrt_lpi2c_priv_s *priv)
+imxrt_lpi2c_sem_destroy(struct imxrt_lpi2c_priv_s *priv)
 {
   nxsem_destroy(&priv->sem_excl);
 #ifndef CONFIG_I2C_POLLED
@@ -870,7 +870,7 @@ static inline void
  ****************************************************************************/
 
 #ifdef CONFIG_I2C_TRACE
-static void imxrt_lpi2c_traceclear(FAR struct imxrt_lpi2c_priv_s *priv)
+static void imxrt_lpi2c_traceclear(struct imxrt_lpi2c_priv_s *priv)
 {
   struct imxrt_trace_s *trace = &priv->trace[priv->tndx];
 
@@ -881,7 +881,7 @@ static void imxrt_lpi2c_traceclear(FAR struct imxrt_lpi2c_priv_s *priv)
   trace->time   = 0;              /* Time of first status or event */
 }
 
-static void imxrt_lpi2c_tracereset(FAR struct imxrt_lpi2c_priv_s *priv)
+static void imxrt_lpi2c_tracereset(struct imxrt_lpi2c_priv_s *priv)
 {
   /* Reset the trace info for a new data collection */
 
@@ -890,7 +890,7 @@ static void imxrt_lpi2c_tracereset(FAR struct imxrt_lpi2c_priv_s *priv)
   imxrt_lpi2c_traceclear(priv);
 }
 
-static void imxrt_lpi2c_tracenew(FAR struct imxrt_lpi2c_priv_s *priv,
+static void imxrt_lpi2c_tracenew(struct imxrt_lpi2c_priv_s *priv,
                                  uint32_t status)
 {
   struct imxrt_trace_s *trace = &priv->trace[priv->tndx];
@@ -930,8 +930,8 @@ static void imxrt_lpi2c_tracenew(FAR struct imxrt_lpi2c_priv_s *priv,
     }
 }
 
-static void imxrt_lpi2c_traceevent(FAR struct imxrt_lpi2c_priv_s *priv,
-                                 enum imxrt_trace_e event, uint32_t parm)
+static void imxrt_lpi2c_traceevent(struct imxrt_lpi2c_priv_s *priv,
+                                   enum imxrt_trace_e event, uint32_t parm)
 {
   struct imxrt_trace_s *trace;
 
@@ -957,7 +957,7 @@ static void imxrt_lpi2c_traceevent(FAR struct imxrt_lpi2c_priv_s *priv,
     }
 }
 
-static void imxrt_lpi2c_tracedump(FAR struct imxrt_lpi2c_priv_s *priv)
+static void imxrt_lpi2c_tracedump(struct imxrt_lpi2c_priv_s *priv)
 {
   struct imxrt_trace_s *trace;
   int i;
@@ -986,7 +986,7 @@ static void imxrt_lpi2c_tracedump(FAR struct imxrt_lpi2c_priv_s *priv)
  *
  ****************************************************************************/
 
-static void imxrt_lpi2c_setclock(FAR struct imxrt_lpi2c_priv_s *priv,
+static void imxrt_lpi2c_setclock(struct imxrt_lpi2c_priv_s *priv,
                                  uint32_t frequency)
 {
   uint32_t src_freq = 0;
@@ -1147,7 +1147,7 @@ static void imxrt_lpi2c_setclock(FAR struct imxrt_lpi2c_priv_s *priv,
  *
  ****************************************************************************/
 
-static inline void imxrt_lpi2c_sendstart(FAR struct imxrt_lpi2c_priv_s *priv,
+static inline void imxrt_lpi2c_sendstart(struct imxrt_lpi2c_priv_s *priv,
                                          uint8_t address)
 {
   uint32_t txcount = 0;
@@ -1187,7 +1187,7 @@ static inline void imxrt_lpi2c_sendstart(FAR struct imxrt_lpi2c_priv_s *priv,
     }
 
   imxrt_lpi2c_putreg(priv, IMXRT_LPI2C_MTDR_OFFSET,
-                    (LPI2C_MTDR_CMD_START | LPI2C_MTDR_DATA(addr)));
+                     (LPI2C_MTDR_CMD_START | LPI2C_MTDR_DATA(addr)));
 }
 
 /****************************************************************************
@@ -1198,7 +1198,7 @@ static inline void imxrt_lpi2c_sendstart(FAR struct imxrt_lpi2c_priv_s *priv,
  *
  ****************************************************************************/
 
-static inline void imxrt_lpi2c_sendstop(FAR struct imxrt_lpi2c_priv_s *priv)
+static inline void imxrt_lpi2c_sendstop(struct imxrt_lpi2c_priv_s *priv)
 {
   imxrt_lpi2c_putreg(priv, IMXRT_LPI2C_MTDR_OFFSET, LPI2C_MTDR_CMD_STOP);
 }
@@ -1212,7 +1212,7 @@ static inline void imxrt_lpi2c_sendstop(FAR struct imxrt_lpi2c_priv_s *priv)
  ****************************************************************************/
 
 static inline uint32_t
-  imxrt_lpi2c_getstatus(FAR struct imxrt_lpi2c_priv_s *priv)
+imxrt_lpi2c_getstatus(struct imxrt_lpi2c_priv_s *priv)
 {
   return imxrt_lpi2c_getreg(priv, IMXRT_LPI2C_MSR_OFFSET);
 }
@@ -1443,7 +1443,7 @@ static int imxrt_lpi2c_isr_process(struct imxrt_lpi2c_priv_s *priv)
  ****************************************************************************/
 
 #ifndef CONFIG_I2C_POLLED
-static int imxrt_lpi2c_isr(int irq, void *context, FAR void *arg)
+static int imxrt_lpi2c_isr(int irq, void *context, void *arg)
 {
   struct imxrt_lpi2c_priv_s *priv = (struct imxrt_lpi2c_priv_s *)arg;
 
@@ -1516,7 +1516,7 @@ void imxrt_lpi2c_clock_disable (uint32_t base)
  *
  ****************************************************************************/
 
-static int imxrt_lpi2c_init(FAR struct imxrt_lpi2c_priv_s *priv)
+static int imxrt_lpi2c_init(struct imxrt_lpi2c_priv_s *priv)
 {
   /* Power-up and configure GPIOs */
 
@@ -1562,9 +1562,9 @@ static int imxrt_lpi2c_init(FAR struct imxrt_lpi2c_priv_s *priv)
   /* Set scl, sda glitch filters and busy idle */
 
   imxrt_lpi2c_putreg(priv, IMXRT_LPI2C_MCFGR2_OFFSET,
-                    LPI2C_MCFG2_BUSIDLE(priv->config->busy_idle) |
-                    LPI2C_MCFG2_FILTSCL_CYCLES(priv->config->filtscl) |
-                    LPI2C_MCFG2_FILTSDA_CYCLES(priv->config->filtsda));
+                     LPI2C_MCFG2_BUSIDLE(priv->config->busy_idle) |
+                     LPI2C_MCFG2_FILTSCL_CYCLES(priv->config->filtscl) |
+                     LPI2C_MCFG2_FILTSDA_CYCLES(priv->config->filtsda));
 
   /* Set pin low cycles to 0 (disable) */
 
@@ -1592,7 +1592,7 @@ static int imxrt_lpi2c_init(FAR struct imxrt_lpi2c_priv_s *priv)
  *
  ****************************************************************************/
 
-static int imxrt_lpi2c_deinit(FAR struct imxrt_lpi2c_priv_s *priv)
+static int imxrt_lpi2c_deinit(struct imxrt_lpi2c_priv_s *priv)
 {
   /* Disable I2C */
 
@@ -1629,10 +1629,10 @@ static int imxrt_lpi2c_deinit(FAR struct imxrt_lpi2c_priv_s *priv)
  *
  ****************************************************************************/
 
-static int imxrt_lpi2c_transfer(FAR struct i2c_master_s *dev,
-                                FAR struct i2c_msg_s *msgs, int count)
+static int imxrt_lpi2c_transfer(struct i2c_master_s *dev,
+                                struct i2c_msg_s *msgs, int count)
 {
-  FAR struct imxrt_lpi2c_priv_s *priv = (struct imxrt_lpi2c_priv_s *)dev;
+  struct imxrt_lpi2c_priv_s *priv = (struct imxrt_lpi2c_priv_s *)dev;
   int ret;
 
   DEBUGASSERT(count > 0);
@@ -1744,9 +1744,9 @@ static int imxrt_lpi2c_transfer(FAR struct i2c_master_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
-static int imxrt_lpi2c_reset(FAR struct i2c_master_s *dev)
+static int imxrt_lpi2c_reset(struct i2c_master_s *dev)
 {
-  FAR struct imxrt_lpi2c_priv_s *priv = (FAR struct imxrt_lpi2c_priv_s *)dev;
+  struct imxrt_lpi2c_priv_s *priv = (struct imxrt_lpi2c_priv_s *)dev;
   unsigned int clock_count;
   unsigned int stretch_count;
   uint32_t scl_gpio;
@@ -1877,7 +1877,7 @@ out:
  *
  ****************************************************************************/
 
-FAR struct i2c_master_s *imxrt_i2cbus_initialize(int port)
+struct i2c_master_s *imxrt_i2cbus_initialize(int port)
 {
   struct imxrt_lpi2c_priv_s * priv = NULL;
   irqstate_t flags;
@@ -1935,9 +1935,9 @@ FAR struct i2c_master_s *imxrt_i2cbus_initialize(int port)
  *
  ****************************************************************************/
 
-int imxrt_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
+int imxrt_i2cbus_uninitialize(struct i2c_master_s *dev)
 {
-  FAR struct imxrt_lpi2c_priv_s *priv = (struct imxrt_lpi2c_priv_s *)dev;
+  struct imxrt_lpi2c_priv_s *priv = (struct imxrt_lpi2c_priv_s *)dev;
   irqstate_t flags;
 
   DEBUGASSERT(dev);

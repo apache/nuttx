@@ -55,7 +55,7 @@ int mpfs_board_usb_init(void)
 
   mpfs_usbinitialize();
 
-#ifdef CONFIG_CDCACM
+#if defined(CONFIG_CDCACM) && !defined(CONFIG_CDCACM_COMPOSITE)
   ret = cdcacm_initialize(0, NULL);
   if (ret != OK)
     {
@@ -64,6 +64,25 @@ int mpfs_board_usb_init(void)
              ret);
     }
 #endif
+
+#ifdef CONFIG_USBDEV_COMPOSITE
+#ifndef CONFIG_BOARDCTL_USBDEVCTRL
+
+  ret = board_composite_initialize(0);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "Failed to initialize composite: %d\n", ret);
+      return ret;
+    }
+
+  if (board_composite_connect(0, 0) == NULL)
+    {
+      syslog(LOG_ERR, "Failed to connect composite: %d\n", ret);
+      return ret;
+    }
+
+#endif /* !CONFIG_BOARDCTL_USBDEVCTRL */
+#endif /* CONFIG_USBDEV_COMPOSITE */
 
 #ifdef CONFIG_USBMONITOR
   /* Start the USB Monitor */

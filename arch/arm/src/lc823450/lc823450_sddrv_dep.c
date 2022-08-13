@@ -110,7 +110,7 @@ static int _get_ch_from_cfg(struct sddrcfg_s *cfg)
         break;
 
       default:
-        DEBUGASSERT(false);
+        DEBUGPANIC();
     }
 
   return ch;
@@ -132,7 +132,7 @@ static void dma_callback(DMA_HANDLE hdma, void *arg, int result)
  * Name: _sddep_semtake
  ****************************************************************************/
 
-static int _sddep_semtake(FAR sem_t *sem)
+static int _sddep_semtake(sem_t *sem)
 {
   return nxsem_wait_uninterruptible(sem);
 }

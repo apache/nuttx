@@ -56,7 +56,7 @@
  * Private Functions
  ****************************************************************************/
 
-static int sam_ac_isr(int irq, FAR void *context, FAR void *arg)
+static int sam_ac_isr(int irq, void *context, void *arg)
 {
   return OK;
 }

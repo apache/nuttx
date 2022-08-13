@@ -29,6 +29,10 @@ libcxx-$(LIBCXX_VERSION).src.tar.xz:
 #	$(Q) mv libcxx-$(LIBCXX_VERSION).src libcxx
 #	$(Q) patch -p0 < 0001-Remove-the-locale-fallback-for-NuttX.patch
 #	$(Q) patch -p0 < 0001-libc-avoid-the-waring-__EXCEPTIONS-is-not-defined-ev.patch
+#	$(Q) patch -p1 < 0001-libcxx-Rename-PS-macro-to-avoid-clashing-with-Xtensa.patch
+#ifeq ($(CONFIG_LIBC_ARCH_ATOMIC),y)
+#	$(Q) patch -p1 < 0002-Omit-atomic_-un-signed_lock_free-if-unsupported.patch
+#endif
 #	$(Q) touch $@
 
 $(TOPDIR)/include/libcxx: libcxx

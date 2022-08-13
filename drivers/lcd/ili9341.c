@@ -366,16 +366,6 @@ struct ili9341_dev_s
 
   FAR struct ili9341_lcd_s *lcd;
 
-  /* Driver specific putrun function */
-
-  int (*putrun)(fb_coord_t row, fb_coord_t col,
-                FAR const uint8_t * buffer, size_t npixels);
-#ifndef CONFIG_LCD_NOGETRUN
-  /* Driver specific getrun function */
-
-  int (*getrun)(fb_coord_t row, fb_coord_t col,
-                FAR uint8_t * buffer, size_t npixels);
-#endif
   /* Run buffer for the device */
 
   uint16_t *runbuffer;
@@ -408,35 +398,13 @@ static inline uint16_t ili9341_getyres(FAR struct ili9341_dev_s *dev);
 
 /* lcd data transfer methods */
 
-static int ili9341_putrun(int devno, fb_coord_t row, fb_coord_t col,
-                         FAR const uint8_t * buffer, size_t npixels);
+static int ili9341_putrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
+                          fb_coord_t col,
+                          FAR const uint8_t * buffer, size_t npixels);
 #ifndef CONFIG_LCD_NOGETRUN
-static int ili9341_getrun(int devno, fb_coord_t row, fb_coord_t col,
-                         FAR uint8_t * buffer, size_t npixels);
-#endif
-
-/* Definition of the public visible getrun / putrun methods
- * each for a single LCD driver
- */
-
-#ifdef CONFIG_LCD_ILI9341_IFACE0
-static int ili9341_putrun0(fb_coord_t row, fb_coord_t col,
-                           FAR const uint8_t *buffer, size_t npixsels);
-#endif
-#ifdef CONFIG_LCD_ILI9341_IFACE1
-static int ili9341_putrun1(fb_coord_t row, fb_coord_t col,
-                            FAR const uint8_t * buffer, size_t npixsels);
-#endif
-
-#ifndef CONFIG_LCD_NOGETRUN
-# ifdef CONFIG_LCD_ILI9341_IFACE0
-static int ili9341_getrun0(fb_coord_t row, fb_coord_t col,
-                            FAR uint8_t * buffer, size_t npixsels);
-# endif
-# ifdef CONFIG_LCD_ILI9341_IFACE1
-static int ili9341_getrun1(fb_coord_t row, fb_coord_t col,
-                            FAR uint8_t * buffer, size_t npixsels);
-# endif
+static int ili9341_getrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
+                          fb_coord_t col, FAR uint8_t * buffer,
+                          size_t npixels);
 #endif
 
 /* lcd configuration */
@@ -472,10 +440,6 @@ static struct ili9341_dev_s g_lcddev[CONFIG_LCD_ILI9341_NINTERFACES] =
 #ifdef CONFIG_LCD_ILI9341_IFACE0
   {
     .lcd              = 0,
-    .putrun           = ili9341_putrun0,
-# ifndef CONFIG_LCD_NOGETRUN
-    .getrun           = ili9341_getrun0,
-# endif
     .runbuffer        = g_runbuffer0,
     .orient           = ILI9341_IFACE0_ORIENT,
     .pxfmt            = ILI9341_IFACE0_PXFMT,
@@ -486,10 +450,6 @@ static struct ili9341_dev_s g_lcddev[CONFIG_LCD_ILI9341_NINTERFACES] =
 #ifdef CONFIG_LCD_ILI9341_IFACE1
   {
     .lcd              = 0,
-    .putrun           = ili9341_putrun1,
-# ifndef CONFIG_LCD_NOGETRUN
-    .getrun           = ili9341_getrun1,
-# endif
     .runbuffer        = g_runbuffer1,
     .orient           = ILI9341_IFACE1_ORIENT,
     .pxfmt            = ILI9341_IFACE1_PXFMT,
@@ -600,7 +560,7 @@ static void ili9341_selectarea(FAR struct ili9341_lcd_s *lcd,
  *   Write a partial raster line to the LCD.
  *
  * Input Parameters:
- *   devno   - Number of lcd device
+ *   lcd_dev - The lcd device
  *   row     - Starting row to write to (range: 0 <= row < yres)
  *   col     - Starting column to write to (range: 0 <= col <= xres-npixels)
  *   buffer  - The buffer containing the run to be written to the LCD
@@ -614,10 +574,11 @@ static void ili9341_selectarea(FAR struct ili9341_lcd_s *lcd,
  *
  ****************************************************************************/
 
-static int ili9341_putrun(int devno, fb_coord_t row, fb_coord_t col,
-                            FAR const uint8_t * buffer, size_t npixels)
+static int ili9341_putrun(FAR struct lcd_dev_s *lcd_dev, fb_coord_t row,
+                          fb_coord_t col,
+                          FAR const uint8_t * buffer, size_t npixels)
 {
-  FAR struct ili9341_dev_s *dev = &g_lcddev[devno];
+  FAR struct ili9341_dev_s *dev = (FAR struct ili9341_dev_s *)lcd_dev;
   FAR struct ili9341_lcd_s *lcd = dev->lcd;
   FAR const uint16_t *src = (FAR const uint16_t *)buffer;
 
@@ -660,7 +621,7 @@ static int ili9341_putrun(int devno, fb_coord_t row, fb_coord_t col,
  *   Read a partial raster line from the LCD.
  *
  * Input Parameters:
- *   devno   - Number of the lcd device
+ *   lcd_dev - The lcd device
  *   row     - Starting row to read from (range: 0 <= row < yres)
  *   col     - Starting column to read read (range: 0 <= col <= xres-npixels)
  *   buffer  - The buffer in which to return the run read from the LCD
@@ -675,10 +636,11 @@ static int ili9341_putrun(int devno, fb_coord_t row, fb_coord_t col,
  ****************************************************************************/
 
 # ifndef CONFIG_LCD_NOGETRUN
-static int ili9341_getrun(int devno, fb_coord_t row, fb_coord_t col,
-                            FAR uint8_t * buffer, size_t npixels)
+static int ili9341_getrun(FAR struct lcd_dev_s *lcd_dev, fb_coord_t row,
+                          fb_coord_t col, FAR uint8_t * buffer,
+                          size_t npixels)
 {
-  FAR struct ili9341_dev_s *dev = &g_lcddev[devno];
+  FAR struct ili9341_dev_s *dev = (FAR struct ili9341_dev_s *)lcd_dev;
   FAR struct ili9341_lcd_s *lcd = dev->lcd;
   FAR uint16_t *dest = (FAR uint16_t *)buffer;
 
@@ -814,80 +776,6 @@ static int ili9341_hwinitialize(FAR struct ili9341_dev_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  ili9341_putrunx
- *
- * Description:
- *   Write a partial raster line to the LCD.
- *
- * Input Parameters:
- *   row     - Starting row to write to (range: 0 <= row < yres)
- *   col     - Starting column to write to (range: 0 <= col <= xres-npixels)
- *   buffer  - The buffer containing the run to be written to the LCD
- *   npixels - The number of pixels to write to the
- *             (range: 0 < npixels <= xres-col)
- *
- * Returned Value:
- *
- *   On success - OK
- *   On error   - -EINVAL
- *
- ****************************************************************************/
-
-#ifdef CONFIG_LCD_ILI9341_IFACE0
-static int ili9341_putrun0(fb_coord_t row, fb_coord_t col,
-                            FAR const uint8_t * buffer, size_t npixels)
-{
-  return ili9341_putrun(0, row, col, buffer, npixels);
-}
-#endif
-
-#ifdef CONFIG_LCD_ILI9341_IFACE1
-static int ili9341_putrun1(fb_coord_t row, fb_coord_t col,
-                            FAR const uint8_t * buffer, size_t npixels)
-{
-  return ili9341_putrun(1, row, col, buffer, npixels);
-}
-#endif
-
-/****************************************************************************
- * Name:  ili9341_getrunx
- *
- * Description:
- *   Read a partial raster line from the LCD.
- *
- * Input Parameters:
- *   row     - Starting row to read from (range: 0 <= row < yres)
- *   col     - Starting column to read from (range: 0 <= col <= xres-npixels)
- *   buffer  - The buffer containing the run to be written to the LCD
- *   npixels - The number of pixels to read from the
- *             (range: 0 < npixels <= xres-col)
- *
- * Returned Value:
- *
- *   On success - OK
- *   On error   - -EINVAL
- *
- ****************************************************************************/
-
-#ifndef CONFIG_LCD_NOGETRUN
-# ifdef CONFIG_LCD_ILI9341_IFACE0
-static int ili9341_getrun0(fb_coord_t row, fb_coord_t col,
-                            FAR uint8_t * buffer, size_t npixels)
-{
-  return ili9341_getrun(0, row, col, buffer, npixels);
-}
-# endif
-
-# ifdef CONFIG_LCD_ILI9341_IFACE1
-static int ili9341_getrun1(fb_coord_t row, fb_coord_t col,
-                            FAR uint8_t * buffer, size_t npixels)
-{
-  return ili9341_getrun(1, row, col, buffer, npixels);
-}
-# endif
-#endif
-
-/****************************************************************************
  * Name:  ili9341_getvideoinfo
  *
  * Description:
@@ -951,12 +839,13 @@ static int ili9341_getplaneinfo(FAR struct lcd_dev_s *dev,
     {
       FAR struct ili9341_dev_s *priv = (FAR struct ili9341_dev_s *)dev;
 
-      pinfo->putrun = priv->putrun;
+      pinfo->putrun = ili9341_putrun;
 #ifndef CONFIG_LCD_NOGETRUN
-      pinfo->getrun = priv->getrun;
+      pinfo->getrun = ili9341_getrun;
 #endif
       pinfo->bpp    = priv->bpp;
       pinfo->buffer = (FAR uint8_t *)priv->runbuffer;  /* Run scratch buffer */
+      pinfo->dev    = dev;
 
       lcdinfo("planeno: %d bpp: %d\n", planeno, pinfo->bpp);
 

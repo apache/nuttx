@@ -25,10 +25,4 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <sys/types.h>
-#include <stdint.h>
-
-#include <arch/irq.h>
-
 #endif /* __ARCH_RISCV_INCLUDE_C906_CHIP_H */

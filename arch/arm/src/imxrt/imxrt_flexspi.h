@@ -485,16 +485,16 @@ struct flexspi_device_config_s
 struct flexspi_dev_s;
 struct flexspi_ops_s
 {
-  CODE int (*lock)(FAR struct flexspi_dev_s *dev, bool lock);
-  CODE int (*transfer_blocking)(FAR struct flexspi_dev_s *dev,
-                                FAR struct flexspi_transfer_s *xfer);
-  CODE void (*software_reset)(FAR struct flexspi_dev_s *dev);
-  CODE void (*update_lut)(FAR struct flexspi_dev_s *dev,
-                          uint32_t index, const uint32_t *cmd,
-                          uint32_t count);
-  CODE void (*set_device_config)(FAR struct flexspi_dev_s *dev,
-                                 FAR struct flexspi_device_config_s *config,
-                                 enum flexspi_port_e port);
+  int (*lock)(struct flexspi_dev_s *dev, bool lock);
+  int (*transfer_blocking)(struct flexspi_dev_s *dev,
+                           struct flexspi_transfer_s *xfer);
+  void (*software_reset)(struct flexspi_dev_s *dev);
+  void (*update_lut)(struct flexspi_dev_s *dev,
+                     uint32_t index, const uint32_t *cmd,
+                     uint32_t count);
+  void (*set_device_config)(struct flexspi_dev_s *dev,
+                            struct flexspi_device_config_s *config,
+                            enum flexspi_port_e port);
 };
 
 /* FlexSPI private data.  This structure only defines the initial fields of
@@ -504,7 +504,7 @@ struct flexspi_ops_s
 
 struct flexspi_dev_s
 {
-  FAR const struct flexspi_ops_s *ops;
+  const struct flexspi_ops_s *ops;
 };
 
 /****************************************************************************
@@ -545,7 +545,7 @@ extern "C"
  ****************************************************************************/
 
 struct flexspi_dev_s;
-FAR struct flexspi_dev_s *imxrt_flexspi_initialize(int intf);
+struct flexspi_dev_s *imxrt_flexspi_initialize(int intf);
 
 #undef EXTERN
 #if defined(__cplusplus)

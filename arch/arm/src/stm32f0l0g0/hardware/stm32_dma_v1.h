@@ -536,6 +536,9 @@
 #  define DMACHAN_USART5_TX_1     DMACHAN_SETTING(STM32_DMA1_CHAN7, 13)
 #  define DMACHAN_USART5_TX_2     DMACHAN_SETTING(STM32_DMA1_CHAN3, 13)
 
+#elif defined(CONFIG_ARCH_CHIP_STM32G0)
+/* This family uses a DMAMUX */
+
 #else
 #  error "Unknown DMA channel assignments"
 #endif

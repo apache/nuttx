@@ -1299,7 +1299,7 @@
 #define UART_HIGHPULSE_REG (DR_REG_UART_BASE + 0x2c)
 
 /* UART_HIGHPULSE_MIN_CNT : RO; bitpos: [11:0]; default: 4095;
- * This register stores  the value of the maxinum duration time for the high
+ * This register stores  the value of the maximum duration time for the high
  * level pulse. It is used in baud rate-detect process.
  */
 

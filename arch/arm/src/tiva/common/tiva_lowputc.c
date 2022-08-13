@@ -261,6 +261,13 @@ void tiva_lowsetup(void)
 
   tiva_configgpio(GPIO_UART0_RX);
   tiva_configgpio(GPIO_UART0_TX);
+
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART0_IFLOWCONTROL)
+  tiva_configgpio(GPIO_UART0_RTS);
+#endif
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART0_OFLOWCONTROL)
+  tiva_configgpio(GPIO_UART0_CTS);
+#endif
 #endif
 
 #ifdef CONFIG_TIVA_UART1
@@ -269,6 +276,13 @@ void tiva_lowsetup(void)
 
   tiva_configgpio(GPIO_UART1_RX);
   tiva_configgpio(GPIO_UART1_TX);
+
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART1_IFLOWCONTROL)
+  tiva_configgpio(GPIO_UART1_RTS);
+#endif
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART1_OFLOWCONTROL)
+  tiva_configgpio(GPIO_UART1_CTS);
+#endif
 #endif
 
 #ifdef CONFIG_TIVA_UART2
@@ -277,6 +291,13 @@ void tiva_lowsetup(void)
 
   tiva_configgpio(GPIO_UART2_RX);
   tiva_configgpio(GPIO_UART2_TX);
+
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART2_IFLOWCONTROL)
+  tiva_configgpio(GPIO_UART2_RTS);
+#endif
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART2_OFLOWCONTROL)
+  tiva_configgpio(GPIO_UART2_CTS);
+#endif
 #endif
 
 #ifdef CONFIG_TIVA_UART3
@@ -285,6 +306,13 @@ void tiva_lowsetup(void)
 
   tiva_configgpio(GPIO_UART3_RX);
   tiva_configgpio(GPIO_UART3_TX);
+
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART3_IFLOWCONTROL)
+  tiva_configgpio(GPIO_UART3_RTS);
+#endif
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART3_OFLOWCONTROL)
+  tiva_configgpio(GPIO_UART3_CTS);
+#endif
 #endif
 
 #ifdef CONFIG_TIVA_UART4
@@ -293,6 +321,13 @@ void tiva_lowsetup(void)
 
   tiva_configgpio(GPIO_UART4_RX);
   tiva_configgpio(GPIO_UART4_TX);
+
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART4_IFLOWCONTROL)
+  tiva_configgpio(GPIO_UART4_RTS);
+#endif
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART4_OFLOWCONTROL)
+  tiva_configgpio(GPIO_UART4_CTS);
+#endif
 #endif
 
 #ifdef CONFIG_TIVA_UART5
@@ -301,6 +336,13 @@ void tiva_lowsetup(void)
 
   tiva_configgpio(GPIO_UART5_RX);
   tiva_configgpio(GPIO_UART5_TX);
+
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART5_IFLOWCONTROL)
+  tiva_configgpio(GPIO_UART5_RTS);
+#endif
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART5_OFLOWCONTROL)
+  tiva_configgpio(GPIO_UART5_CTS);
+#endif
 #endif
 
 #ifdef CONFIG_TIVA_UART6
@@ -309,6 +351,13 @@ void tiva_lowsetup(void)
 
   tiva_configgpio(GPIO_UART6_RX);
   tiva_configgpio(GPIO_UART6_TX);
+
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART6_IFLOWCONTROL)
+  tiva_configgpio(GPIO_UART6_RTS);
+#endif
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART6_OFLOWCONTROL)
+  tiva_configgpio(GPIO_UART6_CTS);
+#endif
 #endif
 
 #ifdef CONFIG_TIVA_UART7
@@ -317,6 +366,13 @@ void tiva_lowsetup(void)
 
   tiva_configgpio(GPIO_UART7_RX);
   tiva_configgpio(GPIO_UART7_TX);
+
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_UART7_IFLOWCONTROL)
+  tiva_configgpio(GPIO_UART7_RTS);
+#endif
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_UART7_OFLOWCONTROL)
+  tiva_configgpio(GPIO_UART7_CTS);
+#endif
 #endif
 
   /* Enable the selected console device */

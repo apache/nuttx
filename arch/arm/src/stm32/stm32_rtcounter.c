@@ -264,8 +264,8 @@ static inline void stm32_rtc_wait4rsf(void)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_HIRES
-static void stm32_rtc_breakout(FAR const struct timespec *tp,
-                               FAR struct rtc_regvals_s *regvals)
+static void stm32_rtc_breakout(const struct timespec *tp,
+                               struct rtc_regvals_s *regvals)
 {
   uint64_t frac;
   uint32_t cnt;
@@ -287,8 +287,8 @@ static void stm32_rtc_breakout(FAR const struct timespec *tp,
   regvals->ovf  = ovf;
 }
 #else
-static inline void stm32_rtc_breakout(FAR const struct timespec *tp,
-                                      FAR struct rtc_regvals_s *regvals)
+static inline void stm32_rtc_breakout(const struct timespec *tp,
+                                      struct rtc_regvals_s *regvals)
 {
   /* The low-res timer is easy... tv_sec holds exactly the value needed
    * by the CNTH/CNTL registers.
@@ -315,7 +315,7 @@ static inline void stm32_rtc_breakout(FAR const struct timespec *tp,
  ****************************************************************************/
 
 #if defined(CONFIG_RTC_HIRES) || defined(CONFIG_RTC_ALARM)
-static int stm32_rtc_interrupt(int irq, void *context, FAR void *arg)
+static int stm32_rtc_interrupt(int irq, void *context, void *arg)
 {
   uint16_t source = getreg16(STM32_RTC_CRL);
 
@@ -550,7 +550,7 @@ time_t up_rtc_time(void)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_HIRES
-int up_rtc_gettime(FAR struct timespec *tp)
+int up_rtc_gettime(struct timespec *tp)
 {
   irqstate_t flags;
   uint32_t ls;
@@ -627,7 +627,7 @@ int up_rtc_gettime(FAR struct timespec *tp)
  *
  ****************************************************************************/
 
-int up_rtc_settime(FAR const struct timespec *tp)
+int up_rtc_settime(const struct timespec *tp)
 {
   struct rtc_regvals_s regvals;
   irqstate_t flags;
@@ -682,7 +682,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-int stm32_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
+int stm32_rtc_setalarm(const struct timespec *tp, alarmcb_t callback)
 {
   struct rtc_regvals_s regvals;
   irqstate_t flags;

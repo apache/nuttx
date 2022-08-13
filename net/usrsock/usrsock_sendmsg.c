@@ -324,7 +324,7 @@ ssize_t usrsock_sendmsg(FAR struct socket *psock,
               else
                 {
                   nerr("net_timedwait errno: %zd\n", ret);
-                  DEBUGASSERT(false);
+                  DEBUGPANIC();
                 }
             }
 

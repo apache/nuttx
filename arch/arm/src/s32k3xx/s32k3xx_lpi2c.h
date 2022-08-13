@@ -1,0 +1,71 @@
+/****************************************************************************
+ * arch/arm/src/s32k3xx/s32k3xx_lpi2c.h
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/* Copyright 2022 NXP */
+
+#ifndef __ARCH_ARM_SRC_S32K3XX_S32K3XX_LPI2C_H
+#define __ARCH_ARM_SRC_S32K3XX_S32K3XX_LPI2C_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/i2c/i2c_master.h>
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: s32k3xx_i2cbus_initialize
+ *
+ * Description:
+ *   Initialize the selected I2C port and return a unique instance of struct
+ *   i2c_master_s.  This function may be called to obtain multiple instances
+ *   of the interface.
+ *
+ * Input Parameters:
+ *   Port number (for hardware that has multiple I2C interfaces)
+ *
+ * Returned Value:
+ *   Valid I2C device structure reference on success; a NULL on failure
+ *
+ ****************************************************************************/
+
+struct i2c_master_s *s32k3xx_i2cbus_initialize(int port);
+
+/****************************************************************************
+ * Name: s32k3xx_i2cbus_uninitialize
+ *
+ * Description:
+ *   Uninitialize the selected I2C port and power down the device.
+ *
+ * Input Parameters:
+ *   Device structure as returned by the s32k3xx_i2cbus_initialize()
+ *
+ * Returned Value:
+ *   OK on success, ERROR on internal reference count mismatch or dev points
+ *   to invalid hardware device.
+ *
+ ****************************************************************************/
+
+int s32k3xx_i2cbus_uninitialize(struct i2c_master_s *dev);
+
+#endif /* __ARCH_ARM_SRC_S32K3XX_S32K3XX_LPI2C_H */

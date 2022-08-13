@@ -1,0 +1,182 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_RDDRONE_BMS772
+
+config S32K1XX_NRSTCHECK_PROCFS
+	bool "RDDRONE-BMS772 nRST Check PROCFS entry"
+	default n
+	depends on FS_PROCFS
+	select FS_PROCFS_REGISTER
+	---help---
+		Self-test to check that the MCU reset pin is connected to an
+		external pull-up resistor (or an IC that pulls the pin high).
+		The input logic level is registered as a PROCFS entry.
+
+config SMBUS_SBD
+	bool "SMBus Smart Battery Data slave"
+	default n
+	depends on I2C_SLAVE
+	---help---
+		Simple SMBus/I2C slave providing battery management data,
+		specifically implementing a subset of the Smart Battery Data
+		Specification, Revision 1.1
+
+menu "RDDRONE-BMS772 PM configuration"
+depends on PM
+
+menu "PM configuration for PM_STANDBY mode"
+
+choice
+	prompt "MCU power mode during PM_STANDBY"
+	default VLPR_STANDBY
+
+config RUN_STANDBY
+	bool "MCU in RUN mode during PM_STANDBY"
+	---help---
+		The MCU should remain in RUN mode during PM_STANDBY
+
+config VLPR_STANDBY
+	bool "MCU in VLPR mode during PM_STANDBY"
+	---help---
+		The MCU should enter VLPR (very low power run) mode during PM_STANDBY
+
+endchoice # MCU power mode
+
+menuconfig PM_SPI_STANDBY
+	bool "Enable SPI in PM_STANDBY mode"
+	default n
+	depends on SPI
+	---help---
+		Enable PM configuration for SPI
+
+if PM_SPI_STANDBY
+
+config PM_SPI0_STANDBY
+	bool "Enable LPSPI0 in PM_STANDBY mode"
+	default n
+	depends on S32K1XX_LPSPI0
+
+config PM_SPI1_STANDBY
+	bool "Enable LPSPI1 in PM_STANDBY mode"
+	default n
+	depends on S32K1XX_LPSPI1
+
+endif # PM_SPI_STANDBY
+
+menuconfig PM_SERIAL_STANDBY
+	bool "Enable serial in PM_STANDBY mode"
+	default n
+	depends on SERIAL
+	---help---
+		Enable PM configuration for SERIAL
+
+if PM_SERIAL_STANDBY
+
+config PM_CONSOLE_STANDBY
+	bool "Enable serial console in PM_STANDBY"
+	default n
+	depends on SERIAL_CONSOLE
+	select PM_SERIAL0_STANDBY if LPUART0_SERIAL_CONSOLE
+	select PM_SERIAL1_STANDBY if LPUART1_SERIAL_CONSOLE
+	select PM_SERIAL2_STANDBY if LPUART2_SERIAL_CONSOLE
+
+config PM_SERIAL0_STANDBY
+	bool "Enable LPUART0 in PM_STANDBY mode"
+	default n
+	depends on S32K1XX_LPUART0
+
+config PM_SERIAL1_STANDBY
+	bool "Enable LPUART1 in PM_STANDBY mode"
+	default n
+	depends on S32K1XX_LPUART1
+
+config PM_SERIAL2_STANDBY
+	bool "Enable LPUART2 in PM_STANDBY mode"
+	default n
+	depends on S32K1XX_LPUART2
+
+endif # PM_SERIAL_STANDBY
+
+endmenu # PM configuration for PM_STANDBY mode
+
+menu "PM configuration for PM_SLEEP mode"
+
+choice
+	prompt "MCU power mode during PM_SLEEP"
+	default VLPR_SLEEP
+
+config RUN_SLEEP
+	bool "MCU in RUN mode during PM_SLEEP"
+	---help---
+		The MCU should remain in RUN mode during PM_SLEEP
+
+config VLPR_SLEEP
+	bool "MCU in VLPR mode during PM_STANDBY"
+	---help---
+		The MCU should enter VLPR (very low power run) mode during PM_SLEEP
+
+endchoice # MCU power mode
+
+menuconfig PM_SPI_SLEEP
+	bool "Enable SPI in PM_SLEEP mode"
+	default n
+	depends on SPI
+	---help---
+		Enable PM configuration for SPI
+
+if PM_SPI_SLEEP
+
+menuconfig PM_SPI0_SLEEP
+	bool "Enable LPSPI0 in PM_SLEEP"
+	default n
+	depends on S32K1XX_LPSPI0
+
+menuconfig PM_SPI1_SLEEP
+	bool "Enable LPSPI1 in PM_SLEEP"
+	default n
+	depends on S32K1XX_LPSPI1
+
+endif # PM_SPI_SLEEP
+
+menuconfig PM_SERIAL_SLEEP
+	bool "Enable serial in PM_SLEEP mode"
+	default n
+	depends on SERIAL
+	---help---
+		Enable PM configuration for SERIAL
+
+if PM_SERIAL_SLEEP
+
+config PM_CONSOLE_SLEEP
+	bool "Enable serial console in PM_SLEEP"
+	default n
+	depends on SERIAL_CONSOLE
+	select PM_SERIAL0_SLEEP if LPUART0_SERIAL_CONSOLE
+	select PM_SERIAL1_SLEEP if LPUART1_SERIAL_CONSOLE
+	select PM_SERIAL2_SLEEP if LPUART2_SERIAL_CONSOLE
+
+config PM_SERIAL0_SLEEP
+	bool "Enable LPUART0 in PM_SLEEP mode"
+	default n
+	depends on S32K1XX_LPUART0
+
+config PM_SERIAL1_SLEEP
+	bool "Enable LPUART1 in PM_SLEEP mode"
+	default n
+	depends on S32K1XX_LPUART1
+
+config PM_SERIAL2_SLEEP
+	bool "Enable LPUART2 in PM_SLEEP mode"
+	default n
+	depends on S32K1XX_LPUART2
+
+endif # PM_SERIAL_SLEEP
+
+endmenu # PM configuration for PM_SLEEP mode
+
+endmenu # RDDRONE-BMS772 PM configuration
+
+endif # ARCH_BOARD_RDDRONE_BMS772

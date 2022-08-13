@@ -343,7 +343,7 @@ ssize_t usrsock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
               else
                 {
                   nerr("net_timedwait errno: %zd\n", ret);
-                  DEBUGASSERT(false);
+                  DEBUGPANIC();
                 }
             }
 

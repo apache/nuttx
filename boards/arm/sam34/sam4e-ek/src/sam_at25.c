@@ -58,8 +58,8 @@
 
 int sam_at25_automount(int minor)
 {
-  FAR struct spi_dev_s *spi;
-  FAR struct mtd_dev_s *mtd;
+  struct spi_dev_s *spi;
+  struct mtd_dev_s *mtd;
   static bool initialized = false;
   int ret;
 

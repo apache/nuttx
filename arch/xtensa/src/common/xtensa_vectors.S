@@ -43,6 +43,7 @@
 #include <arch/xtensa/xtensa_abi.h>
 #include <arch/xtensa/xtensa_specregs.h>
 
+#include "xtensa_macros.S"
 #include "xtensa.h"
 
 /****************************************************************************
@@ -182,39 +183,16 @@ _xtensa_level6_vector:
 	.begin		literal_prefix .nmi_vector
 	.section	.nmi_vector.text, "ax"
 	.global		_xtensa_nmi_vector
+	.global		_xtensa_nmi_handler
 	.type		_xtensa_nmi_vector, @function
 	.align		4
 
 _xtensa_nmi_vector:
+	wsr 	a0, EXCSAVE + XCHAL_NMILEVEL	/* Preserve a0 */
+	call0	_xtensa_nmi_handler
 
-#if 1
-	/* For now, just panic */
-
-	wsr		a0, EXCSAVE + XCHAL_NMILEVEL	/* Preserve a0 */
-
-	mov		a0, sp							/* sp == a1 */
-	addi	sp, sp, -XCPTCONTEXT_SIZE	/* Allocate interrupt stack frame */
-	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
-	rsr		a0, EPS + XCHAL_NMILEVEL		/* Save interruptee's PS */
-	s32i	a0, sp, (4 * REG_PS)
-	rsr		a0, EPC_2						/* Save interruptee's PC */
-	s32i	a0, sp, (4 * REG_PC)
-	rsr		a0, EXCSAVE + XCHAL_NMILEVEL	/* Save interruptee's a0 */
-	s32i	a0, sp, (4 * REG_A0)
-
-	s32i	a2, sp, (4 * REG_A2)
-	movi	a2, XTENSA_NMI_EXCEPTION		/* Argument 1: Error code */
-	call0	_xtensa_panic					/* Does not return */
-
-#else
-	/* Add high priority non-maskable interrupt (NMI) handler code here. */
-
-	rfi		XCHAL_NMILEVEL
-
-#endif
-
-	.size		_xtensa_nmi_vector, . - _xtensa_nmi_vector
-	.end		literal_prefix
+	.size	_xtensa_nmi_vector, . - _xtensa_nmi_vector
+	.end	literal_prefix
 
 #endif /* XCHAL_HAVE_NMI */
 
@@ -230,24 +208,15 @@ _xtensa_nmi_vector:
 	.begin		literal_prefix .debug_exception_vector
 	.section	.debug_exception_vector.text, "ax"
 	.global		_debug_exception_vector
+	.global		_xtensa_debug_handler
+	.type		_debug_exception_vector, @function
 	.align		4
 
 _debug_exception_vector:
-	wsr		a0, EXCSAVE + XCHAL_DEBUGLEVEL   /* Preserve a0 */
-	mov		a0, sp							/* sp == a1 */
-	addi	sp, sp, -XCPTCONTEXT_SIZE	/* Allocate interrupt stack frame */
-	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
-	rsr		a0, EPS + XCHAL_DEBUGLEVEL		/* Save interruptee's PS */
-	s32i	a0, sp, (4 * REG_PS)
-	rsr		a0, EPC + XCHAL_DEBUGLEVEL		/* Save interruptee's PC */
-	s32i	a0, sp, (4 * REG_PC)
-	rsr		a0, EXCSAVE + XCHAL_DEBUGLEVEL	/* Save interruptee's a0 */
-	s32i	a0, sp, (4 * REG_A0)
+	wsr 	a0, EXCSAVE + XCHAL_DEBUGLEVEL	/* Preserve a0 */
+	call0	_xtensa_debug_handler
 
-	s32i	a2, sp, (4 * REG_A2)
-	movi	a2, XTENSA_DEBUG_EXCEPTION		/* Argument 1: Error code */
-	call0	_xtensa_panic					/* Does not return */
-
+	.size	_debug_exception_vector, . - _debug_exception_vector
 	.end	literal_prefix
 
 #endif /* XCHAL_HAVE_DEBUG */
@@ -272,6 +241,12 @@ _double_exception_vector:
 #if XCHAL_HAVE_DEBUG
 	break	1, 4							/* Unhandled double exception */
 #endif
+
+	/* Can't use excetpion_entry because there is no relationship between EPC1
+	 * DEPC and the current level.  This can be handled by a separate ifeq
+	 * block in the macro, however this part is not used, so let's not add
+	 * this special case until we have an application for it.
+	 */
 
 	wsr		a0, EXCSAVE_1		/* Preserve a0 */
 
@@ -309,6 +284,8 @@ _double_exception_vector:
 	.begin		literal_prefix .kernel_exception_vector
 	.section	.kernel_exception_vector.text, "ax"
 	.global		_kernel_exception_vector
+	.global		_xtensa_kernel_handler
+	.type		_kernel_exception_vector, @function
 	.align		4
 
 _kernel_exception_vector:
@@ -318,21 +295,9 @@ _kernel_exception_vector:
 #endif
 
 	wsr		a0, EXCSAVE_1					/* Preserve a0 */
+	call0	_xtensa_kernel_handler
 
-	mov		a0, sp							/* sp == a1 */
-	addi	sp, sp, -XCPTCONTEXT_SIZE	/* Allocate interrupt stack frame */
-	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
-	rsr		a0, PS							/* Save interruptee's PS */
-	s32i	a0, sp, (4 * REG_PS)
-	rsr		a0, EPC_1						/* Save interruptee's PC */
-	s32i	a0, sp, (4 * REG_PC)
-	rsr		a0, EXCSAVE_1					/* Save interruptee's a0 */
-	s32i	a0, sp, (4 * REG_A0)
-
-	s32i	a2, sp, (4 * REG_A2)
-	movi	a2, XTENSA_KERNEL_EXCEPTION		/* Argument 1: Error code */
-	call0	_xtensa_panic					/* Does not return */
-
+	.size	_kernel_exception_vector, . - _kernel_exception_vector
 	.end	literal_prefix
 
 /****************************************************************************

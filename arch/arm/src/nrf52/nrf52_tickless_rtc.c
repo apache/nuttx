@@ -79,10 +79,10 @@
 
 struct nrf52_tickless_dev_s
 {
-  FAR struct nrf52_rtc_dev_s *rtc;  /* nrf52 RTC driver */
-  uint32_t periods;                 /* how many times the timer overflowed */
-  bool alarm_set;                   /* is the alarm set? */
-  struct timespec alarm;            /* absolute time of alarm */
+  struct nrf52_rtc_dev_s *rtc; /* nrf52 RTC driver */
+  uint32_t periods;            /* how many times the timer overflowed */
+  bool alarm_set;              /* is the alarm set? */
+  struct timespec alarm;       /* absolute time of alarm */
 };
 
 /****************************************************************************
@@ -237,7 +237,7 @@ static int rtc_handler(int irq, void *context, void *arg)
  * Name: up_alarm_cancel
  ****************************************************************************/
 
-int up_alarm_cancel(FAR struct timespec *ts)
+int up_alarm_cancel(struct timespec *ts)
 {
   if (g_tickless_dev.alarm_set)
     {
@@ -263,7 +263,7 @@ int up_alarm_cancel(FAR struct timespec *ts)
  * Name: up_alarm_start
  ****************************************************************************/
 
-int up_alarm_start(FAR const struct timespec *ts)
+int up_alarm_start(const struct timespec *ts)
 {
   irqstate_t flags;
   flags = enter_critical_section();
@@ -284,7 +284,7 @@ int up_alarm_start(FAR const struct timespec *ts)
  * Name: up_timer_gettime
  ****************************************************************************/
 
-int up_timer_gettime(FAR struct timespec *ts)
+int up_timer_gettime(struct timespec *ts)
 {
   uint32_t counter;
   irqstate_t flags;

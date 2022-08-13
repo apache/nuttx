@@ -63,8 +63,6 @@ uint8_t esp32c3_spi2_status(struct spi_dev_s *dev, uint32_t devid)
 
 int esp32c3_spi2_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
-#if defined(CONFIG_LCD_ST7735) || defined(CONFIG_LCD_ST7789) || \
-    defined(CONFIG_LCD_GC9A01)
   if (devid == SPIDEV_DISPLAY(0))
     {
       /*  This is the Data/Command control pad which determines whether the
@@ -76,7 +74,6 @@ int esp32c3_spi2_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
       return OK;
     }
 
-#endif
   spiinfo("devid: %" PRIu32 " CMD: %s\n", devid, cmd ? "command" :
           "data");
 

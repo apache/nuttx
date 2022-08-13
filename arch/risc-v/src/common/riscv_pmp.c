@@ -58,7 +58,7 @@
 #define BLOCK_ALIGN_MASK        (MIN_BLOCK_SIZE - 1)
 
 #define PMP_CFG_BITS_CNT        (8)
-#define PMP_CFG_FLAG_MASK       (0xFF)
+#define PMP_CFG_FLAG_MASK       ((uintptr_t)0xFF)
 
 #define PMP_CFG_CNT_IN_REG      (PMP_XLEN / PMP_CFG_BITS_CNT)
 

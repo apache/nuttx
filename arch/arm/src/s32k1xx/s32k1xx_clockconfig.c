@@ -1875,7 +1875,7 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
             {
               /* error */
 
-              DEBUGASSERT(false);
+              DEBUGPANIC();
             }
           }
 
@@ -1885,7 +1885,7 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
           {
             /* error */
 
-            DEBUGASSERT(false);
+            DEBUGPANIC();
           }
 
           /* calculate the new clock ticks */
@@ -2014,7 +2014,7 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
             {
               /* error */
 
-              DEBUGASSERT(false);
+              DEBUGPANIC();
             }
           }
 
@@ -2024,7 +2024,7 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
           {
             /* error */
 
-            DEBUGASSERT(false);
+            DEBUGPANIC();
           }
 
 #endif /* CONFIG_RUN_STANDBY */
@@ -2212,7 +2212,7 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
             {
               /* error */
 
-              DEBUGASSERT(false);
+              DEBUGPANIC();
             }
           }
 
@@ -2222,7 +2222,7 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
           {
             /* error */
 
-            DEBUGASSERT(false);
+            DEBUGPANIC();
           }
 
 #endif /* CONFIG_RUN_SLEEP */

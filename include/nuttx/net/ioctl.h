@@ -112,8 +112,12 @@
 
 /* SocketCAN ****************************************************************/
 
-#define SIOCGCANBITRATE  _SIOC(0x002C)  /* Get bitrate from a CAN controller */
-#define SIOCSCANBITRATE  _SIOC(0x002D)  /* Set bitrate of a CAN controller */
+#define SIOCGCANBITRATE    _SIOC(0x002C)  /* Get bitrate from a CAN controller */
+#define SIOCSCANBITRATE    _SIOC(0x002D)  /* Set bitrate of a CAN controller */
+#define SIOCACANEXTFILTER  _SIOC(0x002E)  /* Add hardware-level exteneded ID filter */
+#define SIOCDCANEXTFILTER  _SIOC(0x002F)  /* Delete hardware-level exteneded ID filter */
+#define SIOCACANSTDFILTER  _SIOC(0x0030)  /* Add hardware-level standard ID filter */
+#define SIOCDCANSTDFILTER  _SIOC(0x0031)  /* Delete hardware-level standard ID filter */
 
 /* Cellular net driver ******************************************************/
 

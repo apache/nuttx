@@ -58,7 +58,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int board_charger_initialize(FAR const char *devpath);
+int board_charger_initialize(const char *devpath);
 
 /****************************************************************************
  * Name: board_charger_uninitialize
@@ -68,7 +68,7 @@ int board_charger_initialize(FAR const char *devpath);
  *
  ****************************************************************************/
 
-int board_charger_uninitialize(FAR const char *devpath);
+int board_charger_uninitialize(const char *devpath);
 
 #undef EXTERN
 #if defined(__cplusplus)

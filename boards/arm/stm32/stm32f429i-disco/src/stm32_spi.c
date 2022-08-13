@@ -45,7 +45,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_SPI5
-FAR struct spi_dev_s *g_spidev5 = NULL;
+struct spi_dev_s *g_spidev5 = NULL;
 #endif
 
 /****************************************************************************
@@ -101,7 +101,7 @@ void weak_function stm32_spidev_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_SPI1
-void stm32_spi1select(FAR struct spi_dev_s *dev,
+void stm32_spi1select(struct spi_dev_s *dev,
                       uint32_t devid,
                       bool selected)
 {
@@ -109,14 +109,14 @@ void stm32_spi1select(FAR struct spi_dev_s *dev,
           (int)devid, selected ? "assert" : "de-assert");
 }
 
-uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t stm32_spi1status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_STM32_SPI2
-void stm32_spi2select(FAR struct spi_dev_s *dev,
+void stm32_spi2select(struct spi_dev_s *dev,
                       uint32_t devid,
                       bool selected)
 {
@@ -124,28 +124,28 @@ void stm32_spi2select(FAR struct spi_dev_s *dev,
          (int)devid, selected ? "assert" : "de-assert");
 }
 
-uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t stm32_spi2status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_STM32_SPI3
-void stm32_spi3select(FAR struct spi_dev_s *dev,
+void stm32_spi3select(struct spi_dev_s *dev,
                       uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n",
           (int)devid, selected ? "assert" : "de-assert");
 }
 
-uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t stm32_spi3status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_STM32_SPI4
-void stm32_spi4select(FAR struct spi_dev_s *dev,
+void stm32_spi4select(struct spi_dev_s *dev,
                       uint32_t devid, bool selected)
 {
 #if defined(CONFIG_MTD_SST25XX)
@@ -156,14 +156,14 @@ void stm32_spi4select(FAR struct spi_dev_s *dev,
 #endif
 }
 
-uint8_t stm32_spi4status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t stm32_spi4status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 #ifdef CONFIG_STM32_SPI5
-void stm32_spi5select(FAR struct spi_dev_s *dev,
+void stm32_spi5select(struct spi_dev_s *dev,
                       uint32_t devid, bool selected)
 {
   spiinfo("devid: %d CS: %s\n",
@@ -182,7 +182,7 @@ void stm32_spi5select(FAR struct spi_dev_s *dev,
     }
 }
 
-uint8_t stm32_spi5status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t stm32_spi5status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
@@ -213,35 +213,35 @@ uint8_t stm32_spi5status(FAR struct spi_dev_s *dev, uint32_t devid)
 
 #ifdef CONFIG_SPI_CMDDATA
 #ifdef CONFIG_STM32_SPI1
-int stm32_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int stm32_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
 }
 #endif
 
 #ifdef CONFIG_STM32_SPI2
-int stm32_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int stm32_spi2cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
 }
 #endif
 
 #ifdef CONFIG_STM32_SPI3
-int stm32_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int stm32_spi3cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
 }
 #endif
 
 #ifdef CONFIG_STM32_SPI4
-int stm32_spi4cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int stm32_spi4cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
 }
 #endif
 
 #ifdef CONFIG_STM32_SPI5
-int stm32_spi5cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int stm32_spi5cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
 #if defined(CONFIG_STM32F429I_DISCO_ILI9341)
   if (devid == SPIDEV_DISPLAY(0))
@@ -284,7 +284,7 @@ int stm32_spi5cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_SPI5
-FAR struct spi_dev_s *stm32_spi5initialize(void)
+struct spi_dev_s *stm32_spi5initialize(void)
 {
   if (!g_spidev5)
     {

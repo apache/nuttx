@@ -69,6 +69,9 @@ ifeq ($(CONFIG_USBDEV),y)
 ifeq ($(CONFIG_STM32_USB),y)
 CHIP_CSRCS += stm32_usbdev.c
 endif
+ifeq ($(CONFIG_STM32_USBFS),y)
+CHIP_CSRCS += stm32_usbfs.c
+endif
 ifeq ($(CONFIG_STM32_OTGFS),y)
 CHIP_CSRCS += stm32_otgfsdev.c
 endif
@@ -170,6 +173,10 @@ endif
 
 ifeq ($(CONFIG_STM32_PWM),y)
 CHIP_CSRCS += stm32_pwm.c
+endif
+
+ifeq ($(CONFIG_STM32_CAP),y)
+CHIP_CSRCS += stm32_capture_lowerhalf.c
 endif
 
 ifeq ($(CONFIG_SENSORS_QENCODER),y)

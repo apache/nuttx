@@ -619,7 +619,7 @@ int hal_uart_send_byte(UART_INDEX_e uart_index, unsigned char data)
   return PPlus_SUCCESS;
 }
 
-static int pplus_uart_interrupt(int irq, void *context, FAR void *arg);
+static int pplus_uart_interrupt(int irq, void *context, void *arg);
 
 static int pplus_uart_setup(struct uart_dev_s *dev)
 {
@@ -735,7 +735,7 @@ static void pplus_uart_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int pplus_uart_interrupt(int irq, void *context, FAR void *arg)
+static int pplus_uart_interrupt(int irq, void *context, void *arg)
 {
   struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   uart_Ctx_t *priv = (uart_Ctx_t *)(dev->priv);
@@ -1185,7 +1185,7 @@ void h4uart_tx_irq(void *arg)
     }
 }
 
-static int h4uart_interrupt(int irq, void *context, FAR void *arg)
+static int h4uart_interrupt(int irq, void *context, void *arg)
 {
   AP_UART_TypeDef *preg = AP_UART1;
 

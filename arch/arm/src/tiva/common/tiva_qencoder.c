@@ -86,20 +86,20 @@ static inline void tiva_qe_putreg(struct tiva_qe_s *qe, unsigned int offset,
 static inline uint32_t tiva_qe_getreg(struct tiva_qe_s *qe,
                                       unsigned int offset);
 
-static int tiva_qe_setup(FAR struct qe_lowerhalf_s *lower);
-static int tiva_qe_shutdown(FAR struct qe_lowerhalf_s *lower);
-static int tiva_qe_position(FAR struct qe_lowerhalf_s *lower,
-                            FAR int32_t *pos);
-static int tiva_qe_reset(FAR struct qe_lowerhalf_s *lower);
-static int tiva_qe_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
+static int tiva_qe_setup(struct qe_lowerhalf_s *lower);
+static int tiva_qe_shutdown(struct qe_lowerhalf_s *lower);
+static int tiva_qe_position(struct qe_lowerhalf_s *lower,
+                            int32_t *pos);
+static int tiva_qe_reset(struct qe_lowerhalf_s *lower);
+static int tiva_qe_ioctl(struct qe_lowerhalf_s *lower, int cmd,
                          unsigned long arg);
 
 static int tiva_qe_direction(struct tiva_qe_s *qe, unsigned long *dir);
 static int tiva_qe_velocity(struct tiva_qe_s *qe, unsigned long *vel);
 static int tiva_qe_resetatppr(struct tiva_qe_s *qe, unsigned long ppr);
-static int tiva_qe_resetatmaxpos(FAR struct tiva_qe_s *qe,
+static int tiva_qe_resetatmaxpos(struct tiva_qe_s *qe,
                                  unsigned long offs);
-static int tiva_qe_resetatindex(FAR struct tiva_qe_s *qe);
+static int tiva_qe_resetatindex(struct tiva_qe_s *qe);
 
 /****************************************************************************
  * Private Data
@@ -193,10 +193,10 @@ static inline void tiva_qe_putreg(struct tiva_qe_s *qe, unsigned int offset,
  *
  ****************************************************************************/
 
-static int tiva_qe_setup(FAR struct qe_lowerhalf_s *lower)
+static int tiva_qe_setup(struct qe_lowerhalf_s *lower)
 {
   uint32_t ctlreg = 0;
-  FAR struct tiva_qe_s *qe = (FAR struct tiva_qe_s *)lower;
+  struct tiva_qe_s *qe = (struct tiva_qe_s *)lower;
   int ret;
 
   sninfo("setup QEI %d\n", qe->id);
@@ -304,9 +304,9 @@ static int tiva_qe_setup(FAR struct qe_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int tiva_qe_shutdown(FAR struct qe_lowerhalf_s *lower)
+static int tiva_qe_shutdown(struct qe_lowerhalf_s *lower)
 {
-  FAR struct tiva_qe_s *qe = (FAR struct tiva_qe_s *)lower;
+  struct tiva_qe_s *qe = (struct tiva_qe_s *)lower;
 
   sninfo("shutdown QEI %d\n", qe->id);
 
@@ -331,9 +331,9 @@ static int tiva_qe_shutdown(FAR struct qe_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int tiva_qe_reset(FAR struct qe_lowerhalf_s *lower)
+static int tiva_qe_reset(struct qe_lowerhalf_s *lower)
 {
-  FAR struct tiva_qe_s *qe = (FAR struct tiva_qe_s *)lower;
+  struct tiva_qe_s *qe = (struct tiva_qe_s *)lower;
 
   sninfo("reset QEI %d\n", qe->id);
 
@@ -357,10 +357,10 @@ static int tiva_qe_reset(FAR struct qe_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int tiva_qe_position(FAR struct qe_lowerhalf_s *lower,
-                            FAR int32_t *pos)
+static int tiva_qe_position(struct qe_lowerhalf_s *lower,
+                            int32_t *pos)
 {
-  FAR struct tiva_qe_s *qe = (FAR struct tiva_qe_s *)lower;
+  struct tiva_qe_s *qe = (struct tiva_qe_s *)lower;
 
   sninfo("get position of QEI %d\n", qe->id);
 
@@ -385,10 +385,10 @@ static int tiva_qe_position(FAR struct qe_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int tiva_qe_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
+static int tiva_qe_ioctl(struct qe_lowerhalf_s *lower, int cmd,
                          unsigned long arg)
 {
-  FAR struct tiva_qe_s *qe = (FAR struct tiva_qe_s *)lower;
+  struct tiva_qe_s *qe = (struct tiva_qe_s *)lower;
 
   sninfo("ioctl QEI %d\n", qe->id);
 
@@ -437,7 +437,7 @@ static int tiva_qe_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
  *
  ****************************************************************************/
 
-static int tiva_qe_direction(FAR struct tiva_qe_s *qe, unsigned long *dir)
+static int tiva_qe_direction(struct tiva_qe_s *qe, unsigned long *dir)
 {
   sninfo("get direction of QEI %d\n", qe->id);
 
@@ -467,7 +467,7 @@ static int tiva_qe_direction(FAR struct tiva_qe_s *qe, unsigned long *dir)
  *
  ****************************************************************************/
 
-static int tiva_qe_velocity(FAR struct tiva_qe_s *qe, unsigned long *vel)
+static int tiva_qe_velocity(struct tiva_qe_s *qe, unsigned long *vel)
 {
   sninfo("get direction of QEI %d\n", qe->id);
 
@@ -494,7 +494,7 @@ static int tiva_qe_velocity(FAR struct tiva_qe_s *qe, unsigned long *vel)
  *
  ****************************************************************************/
 
-static int tiva_qe_resetatppr(FAR struct tiva_qe_s *qe, unsigned long ppr)
+static int tiva_qe_resetatppr(struct tiva_qe_s *qe, unsigned long ppr)
 {
   /* maxpos is 4 times of ppr since we set capture mode as PHA_AND_PHB */
 
@@ -517,17 +517,17 @@ static int tiva_qe_resetatppr(FAR struct tiva_qe_s *qe, unsigned long ppr)
  *
  ****************************************************************************/
 
-static int tiva_qe_resetatmaxpos(FAR struct tiva_qe_s *qe,
+static int tiva_qe_resetatmaxpos(struct tiva_qe_s *qe,
                                  unsigned long maxpos)
 {
   sninfo("set maxpos reset mode and maxpos value of QEI %d\n", qe->id);
 
-  FAR struct qe_lowerhalf_s *lower;
+  struct qe_lowerhalf_s *lower;
   uint32_t ctlreg = 0;
 
   /* Disable the QEI */
 
-  lower = (FAR struct qe_lowerhalf_s *)qe;
+  lower = (struct qe_lowerhalf_s *)qe;
   tiva_qe_shutdown(lower);
 
   qe->maxpos = maxpos;
@@ -566,16 +566,16 @@ static int tiva_qe_resetatmaxpos(FAR struct tiva_qe_s *qe,
  *
  ****************************************************************************/
 
-static int tiva_qe_resetatindex(FAR struct tiva_qe_s *qe)
+static int tiva_qe_resetatindex(struct tiva_qe_s *qe)
 {
   sninfo("set index reset mode of QEI %d\n", qe->id);
 
-  FAR struct qe_lowerhalf_s *lower;
+  struct qe_lowerhalf_s *lower;
   uint32_t ctlreg = 0;
 
   /* Disable the QEI */
 
-  lower = (FAR struct qe_lowerhalf_s *)qe;
+  lower = (struct qe_lowerhalf_s *)qe;
   tiva_qe_shutdown(lower);
 
   /* Set reset mode as INDEX */
@@ -610,10 +610,10 @@ static int tiva_qe_resetatindex(FAR struct tiva_qe_s *qe)
  *
  ****************************************************************************/
 
-FAR struct qe_lowerhalf_s *tiva_qei_initialize(int id)
+struct qe_lowerhalf_s *tiva_qei_initialize(int id)
 {
-  FAR struct tiva_qe_s *qe;
-  FAR struct qe_lowerhalf_s *lower;
+  struct tiva_qe_s *qe;
+  struct qe_lowerhalf_s *lower;
 
   switch (id)
     {
@@ -641,7 +641,7 @@ FAR struct qe_lowerhalf_s *tiva_qei_initialize(int id)
 
   /* Make sure that the QEI enable bit has been cleared */
 
-  lower = (FAR struct qe_lowerhalf_s *)qe;
+  lower = (struct qe_lowerhalf_s *)qe;
   tiva_qe_shutdown(lower);
 
   return lower;

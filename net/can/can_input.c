@@ -155,48 +155,44 @@ int can_input(struct net_driver_s *dev)
 {
   FAR struct can_conn_s *conn = NULL;
   int ret = OK;
+  uint16_t buflen = dev->d_len;
 
   do
     {
-      /* FIXME Support for multiple sockets??? */
-
       conn = can_nextconn(conn);
-    }
-  while (conn && conn->dev != 0 && dev != conn->dev);
 
-  if (conn)
-    {
-      uint16_t flags;
-
-      /* Setup for the application callback */
-
-      dev->d_appdata = dev->d_buf;
-      dev->d_sndlen  = 0;
-
-      /* Perform the application callback */
-
-      flags = can_callback(dev, conn, CAN_NEWDATA);
-
-      /* If the operation was successful, the CAN_NEWDATA flag is removed
-       * and thus the packet can be deleted (OK will be returned).
-       */
-
-      if ((flags & CAN_NEWDATA) != 0)
+      if (conn && (conn->dev == NULL || dev == conn->dev))
         {
-          /* No.. the packet was not processed now.  Return -EAGAIN so
-           * that the driver may retry again later.  We still need to
-           * set d_len to zero so that the driver is aware that there
-           * is nothing to be sent.
+          uint16_t flags;
+
+          /* Setup for the application callback */
+
+          dev->d_appdata = dev->d_buf;
+          dev->d_sndlen  = 0;
+          dev->d_len     = buflen;
+
+          /* Perform the application callback */
+
+          flags = can_callback(dev, conn, CAN_NEWDATA);
+
+          /* If the operation was successful, the CAN_NEWDATA flag is removed
+           * and thus the packet can be deleted (OK will be returned).
            */
 
-           nwarn("WARNING: Packet not processed\n");
-           ret = -EAGAIN;
+          if ((flags & CAN_NEWDATA) != 0)
+            {
+              /* No.. the packet was not processed now.  Return -EAGAIN so
+               * that the driver may retry again later.  We still need to
+               * set d_len to zero so that the driver is aware that there
+               * is nothing to be sent.
+               */
+
+               nwarn("WARNING: Packet not processed\n");
+               ret = -EAGAIN;
+            }
         }
     }
-  else
-    {
-      ninfo("No CAN listener\n");
-    }
+  while (conn);
 
   return ret;
 }

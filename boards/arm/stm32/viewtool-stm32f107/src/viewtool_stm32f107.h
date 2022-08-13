@@ -461,7 +461,7 @@ int stm32_can_setup(void);
  ****************************************************************************/
 
 #if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_MPL115A) && defined(CONFIG_STM32_SPI3)
-int stm32_mpl115ainitialize(FAR const char *devpath);
+int stm32_mpl115ainitialize(const char *devpath);
 #endif
 
 /****************************************************************************

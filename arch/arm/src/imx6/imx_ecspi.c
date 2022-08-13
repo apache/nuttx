@@ -114,13 +114,12 @@
 
 /* Per SPI callouts to board-specific logic */
 
-typedef CODE void (*imx_select_t)(FAR struct spi_dev_s *dev,
-                                  uint32_t devid, bool selected);
-typedef CODE uint8_t (*imx_status_t)(FAR struct spi_dev_s *dev,
-                                     uint32_t devid);
+typedef void (*imx_select_t)(struct spi_dev_s *dev,
+                             uint32_t devid, bool selected);
+typedef uint8_t (*imx_status_t)(struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-typedef CODE int (*imx_cmddata_t)(FAR struct spi_dev_s *dev,
-                                  uint32_t devid, bool cmd);
+typedef int (*imx_cmddata_t)(struct spi_dev_s *dev,
+                             uint32_t devid, bool cmd);
 #endif
 
 struct imx_spidev_s
@@ -201,33 +200,33 @@ static int    spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
 /* Interrupt handling */
 
 #ifndef CONFIG_SPI_POLLWAIT
-static int    spi_interrupt(int irq, void *context, FAR void *arg);
+static int    spi_interrupt(int irq, void *context, void *arg);
 #endif
 
 /* SPI methods */
 
-static int    spi_lock(FAR struct spi_dev_s *dev, bool lock);
-static void   spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
+static int    spi_lock(struct spi_dev_s *dev, bool lock);
+static void   spi_select(struct spi_dev_s *dev, uint32_t devid,
                          bool selected);
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+static uint32_t spi_setfrequency(struct spi_dev_s *dev,
                                  uint32_t frequency);
-static void   spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
-static void   spi_setbits(FAR struct spi_dev_s *dev, int nbits);
-static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd);
-static uint8_t spi_status(FAR struct spi_dev_s *dev, uint32_t devid);
+static void   spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode);
+static void   spi_setbits(struct spi_dev_s *dev, int nbits);
+static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd);
+static uint8_t spi_status(struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-static int spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid,
+static int spi_cmddata(struct spi_dev_s *dev, uint32_t devid,
                        bool cmd);
 #endif
 #ifdef CONFIG_SPI_EXCHANGE
-static void   spi_exchange(FAR struct spi_dev_s *dev,
-                           FAR const void *txbuffer,
-                           FAR void *rxbuffer, size_t nwords);
+static void   spi_exchange(struct spi_dev_s *dev,
+                           const void *txbuffer,
+                           void *rxbuffer, size_t nwords);
 #else
-static void   spi_sndblock(FAR struct spi_dev_s *dev,
-                           FAR const void *buffer, size_t nwords);
-static void   spi_recvblock(FAR struct spi_dev_s *dev,
-                            FAR void *buffer, size_t nwords);
+static void   spi_sndblock(struct spi_dev_s *dev,
+                           const void *buffer, size_t nwords);
+static void   spi_recvblock(struct spi_dev_s *dev,
+                            void *buffer, size_t nwords);
 #endif
 
 /****************************************************************************
@@ -718,7 +717,7 @@ static int spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
  ****************************************************************************/
 
 #ifndef CONFIG_SPI_POLLWAIT
-static int spi_interrupt(int irq, void *context, FAR void *arg)
+static int spi_interrupt(int irq, void *context, void *arg)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)arg;
   int ntxd;
@@ -771,7 +770,7 @@ static int spi_interrupt(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
+static int spi_lock(struct spi_dev_s *dev, bool lock)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
   int ret;
@@ -807,7 +806,7 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
-static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
+static void spi_select(struct spi_dev_s *dev, uint32_t devid,
                        bool selected)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
@@ -831,7 +830,7 @@ static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
  *
  ****************************************************************************/
 
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+static uint32_t spi_setfrequency(struct spi_dev_s *dev,
                                  uint32_t frequency)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
@@ -915,7 +914,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
  *
  ****************************************************************************/
 
-static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
+static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
   if (priv && mode != priv->mode)
@@ -971,7 +970,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
  *
  ****************************************************************************/
 
-static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
+static void spi_setbits(struct spi_dev_s *dev, int nbits)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
   if (priv && nbits != priv->nbits && nbits > 0 && nbits <= 16)
@@ -1000,7 +999,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
  *
  ****************************************************************************/
 
-static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
+static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
   uint32_t response = 0;
@@ -1024,7 +1023,7 @@ static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
  *
  ****************************************************************************/
 
-static uint8_t spi_status(FAR struct spi_dev_s *dev, uint32_t devid)
+static uint8_t spi_status(struct spi_dev_s *dev, uint32_t devid)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
   uint8_t ret = 0;
@@ -1064,7 +1063,7 @@ static uint8_t spi_status(FAR struct spi_dev_s *dev, uint32_t devid)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
-static int spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid,
+static int spi_cmddata(struct spi_dev_s *dev, uint32_t devid,
                        bool cmd)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
@@ -1103,8 +1102,8 @@ static int spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid,
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_EXCHANGE
-static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
-                         FAR void *rxbuffer, size_t nwords)
+static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+                         void *rxbuffer, size_t nwords)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
   spi_transfer(priv, txbuffer, rxbuffer, nwords);
@@ -1132,7 +1131,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
  ****************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
+static void spi_sndblock(struct spi_dev_s *dev, const void *buffer,
                          size_t nwords)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
@@ -1161,7 +1160,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
  ****************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
+static void spi_recvblock(struct spi_dev_s *dev, void *buffer,
                           size_t nwords)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
@@ -1195,7 +1194,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *imx_spibus_initialize(int port)
+struct spi_dev_s *imx_spibus_initialize(int port)
 {
   struct imx_spidev_s *priv;
   uint8_t regval;
@@ -1312,7 +1311,7 @@ FAR struct spi_dev_s *imx_spibus_initialize(int port)
 
   /* Set the initial clock frequency for identification mode < 400kHz */
 
-  spi_setfrequency((FAR struct spi_dev_s *)priv, 400000);
+  spi_setfrequency((struct spi_dev_s *)priv, 400000);
 
   /* Enable interrupts on data ready (and certain error conditions */
 
@@ -1352,7 +1351,7 @@ FAR struct spi_dev_s *imx_spibus_initialize(int port)
 #ifndef CONFIG_SPI_POLLWAIT
   up_enable_irq(priv->irq);
 #endif
-  return (FAR struct spi_dev_s *)priv;
+  return (struct spi_dev_s *)priv;
 }
 
 #endif /* NSPIS > 0 */

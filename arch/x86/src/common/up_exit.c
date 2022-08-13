@@ -61,9 +61,9 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DUMP_ON_EXIT
-static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
+static void _up_dumponexit(struct tcb_s *tcb, void *arg)
 {
-  FAR struct filelist *filelist;
+  struct filelist *filelist;
   int i;
   int j;
 

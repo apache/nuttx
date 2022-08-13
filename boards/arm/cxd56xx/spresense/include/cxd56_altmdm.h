@@ -56,7 +56,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int board_altmdm_initialize(FAR const char *devpath);
+int board_altmdm_initialize(const char *devpath);
 
 /****************************************************************************
  * Name: board_altmdm_uninitialize

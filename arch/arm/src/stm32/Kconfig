@@ -1191,6 +1191,7 @@ config ARCH_CHIP_STM32G474R
 	select STM32_STM32G47XX
 	select STM32_STM32G4XXR
 	select STM32_STM32G474R
+	select STM32_HAVE_USBFS
 
 config ARCH_CHIP_STM32G474Q
 	bool "STM32G474Q"
@@ -2206,6 +2207,10 @@ config STM32_HAVE_UCPD
 	default n
 
 config STM32_HAVE_USBDEV
+	bool
+	default n
+
+config STM32_HAVE_USBFS
 	bool
 	default n
 
@@ -3322,6 +3327,12 @@ config STM32_USB
 	depends on STM32_HAVE_USBDEV
 	select USBDEV
 
+config STM32_USBFS
+	bool "USB Full Speed Device"
+	default n
+	depends on STM32_HAVE_USBFS
+	select USBDEV
+
 config STM32_UCPD
 	bool "UCPD (USB Type C Power Delivery)"
 	default n
@@ -3369,36 +3380,59 @@ endmenu
 
 config STM32_ADC
 	bool
+	default n
 
 config STM32_SDADC
 	bool
+	default n
 
 config STM32_DAC
 	bool
+	default n
 
 config STM32_DMA
 	bool
+	default n
 
 config STM32_DMAMUX
 	bool
+	default n
 
 config STM32_SPI
 	bool
+	default n
+
+config STM32_SPI_DMA
+	bool
+	default n
+
+config STM32_I2S
+	bool
+	default n
+	select STM32_SPI_DMA
 
 config STM32_I2C
 	bool
+	default n
 
 config STM32_CAN
 	bool
+	default n
 
 config STM32_FDCAN
 	bool
+	default n
 
 config STM32_TIM
 	bool
 	default n
 
 config STM32_PWM
+	bool
+	default n
+	select ARCH_HAVE_PWM_PULSECOUNT
+
+config STM32_CAP
 	bool
 	default n
 
@@ -3812,7 +3846,6 @@ config STM32_TIM1_PWM
 	bool "TIM1 PWM"
 	default n
 	depends on STM32_TIM1
-	select ARCH_HAVE_PWM_PULSECOUNT
 	select STM32_PWM
 	---help---
 		Reserve timer 1 for use by PWM
@@ -4102,7 +4135,6 @@ config STM32_TIM2_PWM
 	bool "TIM2 PWM"
 	default n
 	depends on STM32_TIM2
-	select ARCH_HAVE_PWM_PULSECOUNT
 	select STM32_PWM
 	---help---
 		Reserve timer 2 for use by PWM
@@ -4287,7 +4319,6 @@ config STM32_TIM3_PWM
 	bool "TIM3 PWM"
 	default n
 	depends on STM32_TIM3
-	select ARCH_HAVE_PWM_PULSECOUNT
 	select STM32_PWM
 	---help---
 		Reserve timer 3 for use by PWM
@@ -4472,7 +4503,6 @@ config STM32_TIM4_PWM
 	bool "TIM4 PWM"
 	default n
 	depends on STM32_TIM4
-	select ARCH_HAVE_PWM_PULSECOUNT
 	select STM32_PWM
 	---help---
 		Reserve timer 4 for use by PWM
@@ -4657,7 +4687,6 @@ config STM32_TIM5_PWM
 	bool "TIM5 PWM"
 	default n
 	depends on STM32_TIM5
-	select ARCH_HAVE_PWM_PULSECOUNT
 	select STM32_PWM
 	---help---
 		Reserve timer 5 for use by PWM
@@ -4842,7 +4871,6 @@ config STM32_TIM8_PWM
 	bool "TIM8 PWM"
 	default n
 	depends on STM32_TIM8
-	select ARCH_HAVE_PWM_PULSECOUNT
 	select STM32_PWM
 	---help---
 		Reserve timer 8 for use by PWM
@@ -5132,7 +5160,6 @@ config STM32_TIM9_PWM
 	bool "TIM9 PWM"
 	default n
 	depends on STM32_TIM9
-	select ARCH_HAVE_PWM_PULSECOUNT
 	select STM32_PWM
 	---help---
 		Reserve timer 9 for use by PWM
@@ -5242,7 +5269,6 @@ config STM32_TIM10_PWM
 	bool "TIM10 PWM"
 	default n
 	depends on STM32_TIM10
-	select ARCH_HAVE_PWM_PULSECOUNT
 	select STM32_PWM
 	---help---
 		Reserve timer 10 for use by PWM
@@ -5318,7 +5344,6 @@ config STM32_TIM11_PWM
 	bool "TIM11 PWM"
 	default n
 	depends on STM32_TIM11
-	select ARCH_HAVE_PWM_PULSECOUNT
 	select STM32_PWM
 	---help---
 		Reserve timer 11 for use by PWM
@@ -5394,7 +5419,6 @@ config STM32_TIM12_PWM
 	bool "TIM12 PWM"
 	default n
 	depends on STM32_TIM12
-	select ARCH_HAVE_PWM_PULSECOUNT
 	select STM32_PWM
 	---help---
 		Reserve timer 12 for use by PWM
@@ -5504,7 +5528,6 @@ config STM32_TIM13_PWM
 	bool "TIM13 PWM"
 	default n
 	depends on STM32_TIM13
-	select ARCH_HAVE_PWM_PULSECOUNT
 	select STM32_PWM
 	---help---
 		Reserve timer 13 for use by PWM
@@ -5580,7 +5603,6 @@ config STM32_TIM14_PWM
 	bool "TIM14 PWM"
 	default n
 	depends on STM32_TIM14
-	select ARCH_HAVE_PWM_PULSECOUNT
 	select STM32_PWM
 	---help---
 		Reserve timer 14 for use by PWM
@@ -5991,7 +6013,7 @@ endif # STM32_TIM17_PWM
 config STM32_PWM_MULTICHAN
 	bool "PWM Multiple Output Channels"
 	default n
-	depends on STM32_TIM1_PWM || STM32_TIM2_PWM || STM32_TIM3_PWM || STM32_TIM4_PWM || STM32_TIM5_PWM || STM32_TIM8_PWM || STM32_TIM9_PWM || STM32_TIM10_PWM || STM32_TIM11_PWM || STM32_TIM12_PWM || STM32_TIM13_PWM || STM32_TIM14_PWM || STM32_TIM15_PWM || STM32_TIM16_PWM || STM32_TIM17_PWM
+	depends on STM32_PWM
 	select ARCH_HAVE_PWM_MULTICHAN
 	---help---
 		Specifies that the PWM driver supports multiple output
@@ -6754,121 +6776,349 @@ config STM32_TIM1_CAP
 	bool "TIM1 Capture"
 	default n
 	depends on STM32_TIM1
+	select STM32_CAP
 	---help---
 		Reserve timer 1 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
 
+if STM32_TIM1_CAP
+
+config STM32_TIM1_CHANNEL
+	int "TIM1 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM1 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config STM32_TIM1_CLOCK
+	int "TIM1 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # STM32_TIM1_CAP
+
 config STM32_TIM2_CAP
 	bool "TIM2 Capture"
 	default n
 	depends on STM32_TIM2
+	select STM32_CAP
 	---help---
 		Reserve timer 2 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
 
+if STM32_TIM2_CAP
+
+config STM32_TIM2_CHANNEL
+	int "TIM2 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM2 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config STM32_TIM2_CLOCK
+	int "TIM2 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # STM32_TIM2_CAP
+
 config STM32_TIM3_CAP
 	bool "TIM3 Capture"
 	default n
 	depends on STM32_TIM3
+	select STM32_CAP
 	---help---
 		Reserve timer 3 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
 
+if STM32_TIM3_CAP
+
+config STM32_TIM3_CHANNEL
+	int "TIM3 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM3 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config STM32_TIM3_CLOCK
+	int "TIM3 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # STM32_TIM3_CAP
+
 config STM32_TIM4_CAP
 	bool "TIM4 Capture"
 	default n
 	depends on STM32_TIM4
+	select STM32_CAP
 	---help---
 		Reserve timer 4 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
 
+if STM32_TIM4_CAP
+
+config STM32_TIM4_CHANNEL
+	int "TIM4 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM4 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config STM32_TIM4_CLOCK
+	int "TIM4 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # STM32_TIM4_CAP
+
 config STM32_TIM5_CAP
 	bool "TIM5 Capture"
 	default n
 	depends on STM32_TIM5
+	select STM32_CAP
 	---help---
 		Reserve timer 5 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
 
+if STM32_TIM5_CAP
+
+config STM32_TIM5_CHANNEL
+	int "TIM5 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM5 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config STM32_TIM5_CLOCK
+	int "TIM5 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # STM32_TIM5_CAP
+
 config STM32_TIM8_CAP
 	bool "TIM8 Capture"
 	default n
 	depends on STM32_TIM8
+	select STM32_CAP
 	---help---
 		Reserve timer 8 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
 
+if STM32_TIM8_CAP
+
+config STM32_TIM8_CHANNEL
+	int "TIM8 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM8 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config STM32_TIM8_CLOCK
+	int "TIM8 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # STM32_TIM8_CAP
+
 config STM32_TIM9_CAP
 	bool "TIM9 Capture"
 	default n
 	depends on STM32_TIM9
+	select STM32_CAP
 	---help---
 		Reserve timer 9 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
 
+if STM32_TIM9_CAP
+
+config STM32_TIM9_CHANNEL
+	int "TIM9 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM9 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config STM32_TIM9_CLOCK
+	int "TIM9 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # STM32_TIM9_CAP
+
 config STM32_TIM10_CAP
 	bool "TIM10 Capture"
 	default n
 	depends on STM32_TIM10
+	select STM32_CAP
 	---help---
 		Reserve timer 10 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
 
+if STM32_TIM10_CAP
+
+config STM32_TIM10_CHANNEL
+	int "TIM10 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM10 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config STM32_TIM10_CLOCK
+	int "TIM10 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # STM32_TIM10_CAP
+
 config STM32_TIM11_CAP
 	bool "TIM11 Capture"
 	default n
 	depends on STM32_TIM11
+	select STM32_CAP
 	---help---
 		Reserve timer 11 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
 
+if STM32_TIM11_CAP
+
+config STM32_TIM11_CHANNEL
+	int "TIM11 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM11 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config STM32_TIM11_CLOCK
+	int "TIM11 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # STM32_TIM11_CAP
+
 config STM32_TIM12_CAP
 	bool "TIM12 Capture"
 	default n
 	depends on STM32_TIM12
+	select STM32_CAP
 	---help---
 		Reserve timer 12 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
 
+if STM32_TIM12_CAP
+
+config STM32_TIM12_CHANNEL
+	int "TIM12 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM12 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config STM32_TIM12_CLOCK
+	int "TIM12 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # STM32_TIM12_CAP
+
 config STM32_TIM13_CAP
 	bool "TIM13 Capture"
 	default n
 	depends on STM32_TIM13
+	select STM32_CAP
 	---help---
 		Reserve timer 13 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
 
+if STM32_TIM13_CAP
+
+config STM32_TIM13_CHANNEL
+	int "TIM13 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM13 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config STM32_TIM13_CLOCK
+	int "TIM13 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # STM32_TIM13_CAP
+
 config STM32_TIM14_CAP
 	bool "TIM14 Capture"
 	default n
 	depends on STM32_TIM14
+	select STM32_CAP
 	---help---
 		Reserve timer 14 for use by Capture
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
+
+if STM32_TIM14_CAP
+
+config STM32_TIM14_CHANNEL
+	int "TIM14 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM14 is enabled for capture usage, you also need specifies the timer input
+		channel {1,..,4}
+
+config STM32_TIM14_CLOCK
+	int "TIM14 work frequence for capture"
+	default 1000000
+	---help---
+		This clock frequence limiting the count rate at the expense of resolution.
+
+endif # STM32_TIM14_CAP
 
 menu "STM32 TIMx Outputs Configuration"
 
@@ -10153,18 +10403,13 @@ config STM32_SPI_INTERRUPTS
 		poll-waiting is recommended if the interrupt rate would be to high in
 		the interrupt driven case.
 
-config STM32_SPI_DMA
-	bool "SPI DMA"
-	default n
-	---help---
-		Use DMA to improve SPI transfer performance.  Cannot be used with STM32_SPI_INTERRUPT.
-
 config STM32_SPI1_DMA
 	bool "SPI1 DMA"
 	default n
-	depends on STM32_SPI1 && STM32_SPI_DMA
+	depends on STM32_SPI1 && !STM32_SPI_INTERRUPT
+	select STM32_SPI_DMA
 	---help---
-		Use DMA to improve SPI1 transfer performance.
+		Use DMA to improve SPI1 transfer performance.  Cannot be used with STM32_SPI_INTERRUPT.
 
 config STM32_SPI1_DMA_BUFFER
 	int "SPI1 DMA buffer size"
@@ -10185,9 +10430,10 @@ config STM32_SPI_DMATHRESHOLD
 config STM32_SPI2_DMA
 	bool "SPI2 DMA"
 	default n
-	depends on STM32_SPI2 && STM32_SPI_DMA
+	depends on STM32_SPI2 && !STM32_SPI_INTERRUPT
+	select STM32_SPI_DMA
 	---help---
-		Use DMA to improve SPI2 transfer performance.
+		Use DMA to improve SPI2 transfer performance.  Cannot be used with STM32_SPI_INTERRUPT.
 
 config STM32_SPI2_DMA_BUFFER
 	int "SPI2 DMA buffer size"
@@ -10199,9 +10445,10 @@ config STM32_SPI2_DMA_BUFFER
 config STM32_SPI3_DMA
 	bool "SPI3 DMA"
 	default n
-	depends on STM32_SPI3 && STM32_SPI_DMA
+	depends on STM32_SPI3 && !STM32_SPI_INTERRUPT
+	select STM32_SPI_DMA
 	---help---
-		Use DMA to improve SPI3 transfer performance.
+		Use DMA to improve SPI3 transfer performance.  Cannot be used with STM32_SPI_INTERRUPT.
 
 config STM32_SPI3_DMA_BUFFER
 	int "SPI3 DMA buffer size"
@@ -10213,9 +10460,10 @@ config STM32_SPI3_DMA_BUFFER
 config STM32_SPI4_DMA
 	bool "SPI4 DMA"
 	default n
-	depends on STM32_SPI4 && STM32_SPI_DMA
+	depends on STM32_SPI4 && !STM32_SPI_INTERRUPT
+	select STM32_SPI_DMA
 	---help---
-		Use DMA to improve SPI4 transfer performance.
+		Use DMA to improve SPI4 transfer performance.  Cannot be used with STM32_SPI_INTERRUPT.
 
 config STM32_SPI4_DMA_BUFFER
 	int "SPI4 DMA buffer size"
@@ -10227,9 +10475,10 @@ config STM32_SPI4_DMA_BUFFER
 config STM32_SPI5_DMA
 	bool "SPI5 DMA"
 	default n
-	depends on STM32_SPI5 && STM32_SPI_DMA
+	depends on STM32_SPI5 && !STM32_SPI_INTERRUPT
+	select STM32_SPI_DMA
 	---help---
-		Use DMA to improve SPI5 transfer performance.
+		Use DMA to improve SPI5 transfer performance.  Cannot be used with STM32_SPI_INTERRUPT.
 
 config STM32_SPI5_DMA_BUFFER
 	int "SPI5 DMA buffer size"
@@ -10241,9 +10490,10 @@ config STM32_SPI5_DMA_BUFFER
 config STM32_SPI6_DMA
 	bool "SPI6 DMA"
 	default n
-	depends on STM32_SPI6 && STM32_SPI_DMA
+	depends on STM32_SPI6 && !STM32_SPI_INTERRUPT
+	select STM32_SPI_DMA
 	---help---
-		Use DMA to improve SPI6 transfer performance.
+		Use DMA to improve SPI6 transfer performance.  Cannot be used with STM32_SPI_INTERRUPT.
 
 config STM32_SPI5_DMA_BUFFER
 	int "SPI5 DMA buffer size"
@@ -10824,6 +11074,18 @@ config STM32_USBHOST_PKTDUMP
 endmenu
 
 comment "USB Device Configuration"
+
+menu "USB Full Speed Debug Configuration"
+	depends on STM32_USBFS
+
+config STM32_USBFS_REGDEBUG
+	bool "Register-Level Debug"
+	default n
+	depends on STM32_USBFS && DEBUG_USB_INFO
+	---help---
+		Enable very low-level register access debug.
+
+endmenu
 
 menu "OTG Configuration"
 	depends on STM32_OTGFS

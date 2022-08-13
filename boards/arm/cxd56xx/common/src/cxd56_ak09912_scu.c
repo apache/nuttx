@@ -51,11 +51,11 @@
 
 #ifdef CONFIG_SENSORS_AK09912_SCU
 
-int board_ak09912_initialize(FAR const char *devpath, int bus)
+int board_ak09912_initialize(const char *devpath, int bus)
 {
   int i;
   int ret;
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
 
   sninfo("Initializing AK09912...\n");
 

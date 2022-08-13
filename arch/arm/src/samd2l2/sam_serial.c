@@ -237,7 +237,7 @@ static inline void
             sam_serialout16(struct sam_dev_s *priv, int offset,
               uint16_t regval);
 static void sam_disableallints(struct sam_dev_s *priv);
-static int  sam_interrupt(int irq, void *context, FAR void *arg);
+static int  sam_interrupt(int irq, void *context, void *arg);
 
 /* UART methods */
 
@@ -566,7 +566,7 @@ static void sam_disableallints(struct sam_dev_s *priv)
  *
  ****************************************************************************/
 
-static int sam_interrupt(int irq, void *context, FAR void *arg)
+static int sam_interrupt(int irq, void *context, void *arg)
 {
   struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct sam_dev_s *priv;

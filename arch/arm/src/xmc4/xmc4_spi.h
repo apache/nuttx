@@ -74,7 +74,7 @@ enum usic_channel_e;
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *xmc4_spibus_initialize(int channel);
+struct spi_dev_s *xmc4_spibus_initialize(int channel);
 
 /****************************************************************************
  * Name:  xmc4_spi[n]select, xmc4_spi[n]status, and xmc4_spi[n]cmddata
@@ -106,56 +106,56 @@ FAR struct spi_dev_s *xmc4_spibus_initialize(int channel);
  ****************************************************************************/
 
 #ifdef CONFIG_XMC4_SPI0
-void  xmc4_spi0select(FAR struct spi_dev_s *dev, uint32_t devid,
+void  xmc4_spi0select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected);
-uint8_t xmc4_spi0status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t xmc4_spi0status(struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int xmc4_spi0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int xmc4_spi0cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_XMC4_SPI1
-void  xmc4_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
+void  xmc4_spi1select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected);
-uint8_t xmc4_spi1status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t xmc4_spi1status(struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int xmc4_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int xmc4_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_XMC4_SPI2
-void  xmc4_spi2select(FAR struct spi_dev_s *dev, uint32_t devid,
+void  xmc4_spi2select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected);
-uint8_t xmc4_spi2status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t xmc4_spi2status(struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int xmc4_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int xmc4_spi2cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_XMC4_SPI3
-void  xmc4_spi3select(FAR struct spi_dev_s *dev, uint32_t devid,
+void  xmc4_spi3select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected);
-uint8_t xmc4_spi3status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t xmc4_spi3status(struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int xmc4_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int xmc4_spi3cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_XMC4_SPI4
-void  xmc4_spi4select(FAR struct spi_dev_s *dev, uint32_t devid,
+void  xmc4_spi4select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected);
-uint8_t xmc4_spi4status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t xmc4_spi4status(struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int xmc4_spi4cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int xmc4_spi4cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 
 #ifdef CONFIG_XMC4_SPI5
-void  xmc4_spi5select(FAR struct spi_dev_s *dev, uint32_t devid,
+void  xmc4_spi5select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected);
-uint8_t xmc4_spi5status(FAR struct spi_dev_s *dev, uint32_t devid);
+uint8_t xmc4_spi5status(struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-int xmc4_spi5cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+int xmc4_spi5cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif
 

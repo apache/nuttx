@@ -224,6 +224,7 @@ define MKIMAGE
 		exit 1; \
 	fi
 	esptool.py -c esp32s2 elf2image $(ESPTOOL_FLASH_OPTS) -o nuttx.bin nuttx
+	$(Q) echo nuttx.bin >> nuttx.manifest
 	$(Q) echo "Generated: nuttx.bin (ESP32-S2 compatible)"
 endef
 else ifeq ($(CONFIG_ESP32S2_APP_FORMAT_MCUBOOT),y)
@@ -237,6 +238,7 @@ define MKIMAGE
 		exit 1; \
 	fi
 	imgtool sign $(IMGTOOL_SIGN_ARGS) nuttx.hex nuttx.bin
+	$(Q) echo nuttx.bin >> nuttx.manifest
 	$(Q) echo "Generated: nuttx.bin (MCUboot compatible)"
 endef
 endif

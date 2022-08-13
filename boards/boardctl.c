@@ -823,7 +823,7 @@ int boardctl(unsigned int cmd, uintptr_t arg)
       return ERROR;
     }
 
-  return OK;
+  return ret;
 }
 
 #endif /* CONFIG_BOARDCTL */

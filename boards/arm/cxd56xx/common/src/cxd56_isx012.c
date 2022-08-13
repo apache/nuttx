@@ -59,12 +59,6 @@
 #define POWER_CHECK_RETRY           (10)
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-FAR struct i2c_master_s *i2c;
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -157,13 +151,11 @@ void board_isx012_release_sleep(void)
   nxsig_usleep(SLEEP_CANCEL_TIME);
 }
 
-int isx012_register(FAR struct i2c_master_s *i2c);
+int isx012_register(struct i2c_master_s *i2c);
 int isx012_unregister(void);
 
-int board_isx012_initialize(int i2c_bus_num)
+struct i2c_master_s *board_isx012_initialize(void)
 {
-  int ret;
-
   _info("Initializing ISX012...\n");
 
 #ifdef IMAGER_ALERT
@@ -178,22 +170,10 @@ int board_isx012_initialize(int i2c_bus_num)
 
   /* Initialize i2c device */
 
-  i2c = cxd56_i2cbus_initialize(i2c_bus_num);
-  if (!i2c)
-    {
-      return -ENODEV;
-    }
-
-  ret = isx012_initialize(i2c);
-  if (ret < 0)
-    {
-      _err("Failed to initialize ISX012.\n");
-    }
-
-  return ret;
+  return cxd56_i2cbus_initialize(IMAGER_I2C);
 }
 
-int board_isx012_uninitialize(void)
+int board_isx012_uninitialize(struct i2c_master_s *i2c)
 {
   int ret;
 

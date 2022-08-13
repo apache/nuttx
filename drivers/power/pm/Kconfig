@@ -1,0 +1,283 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menuconfig PM
+	bool "Power management (PM) system"
+	default n
+	---help---
+		Power management (PM) system. It consists of an OS interface
+		to board logic which can be used to obtain a recommended
+		power level according to a power management policy set by the
+		currently chosen PM governor. It is also used by drivers which
+		can allow or not a power level to be changed or not.
+
+if PM
+
+config PM_NDOMAINS
+	int "Number of PM activity domains"
+	default 1
+	---help---
+		Defines the number of "domains" that the PM system can control.
+		For example, you may want to separately manage the power from the
+		Network domain, shutting down the network when it is not be used,
+		from the UI domain, shutting down the UI when it is not in use.
+
+config PM_PROCFS
+	bool "PM proc fs support"
+	---help---
+		Enable procfs for pm.
+
+config PM_GOVERNOR_GREEDY
+	bool "Greedy governor"
+	---help---
+		This governor simply suggests the lowest-possible power state,
+		considering any states locked by calls to pm_stay() (accessible
+		via BOARDIOC_PM_STAY boardctl calls).
+
+config PM_GOVERNOR_ACTIVITY
+	bool "Activity based"
+	---help---
+		The activity based governor receives activity reports from drivers
+		in units which are accumulated during a certain time slice interval.
+		The governor will then switch between power states given a set of
+		activity thresholds for each state.
+
+menu "Governor options"
+
+config PM_GOVERNOR_EXPLICIT_RELAX
+	int "Stay initially at PM_NORMAL"
+	default 0
+	---help---
+		If you boot into NSH, especially using the greedy PM governor, since
+		NuttX will almost immediately go idle (when waiting for a prompt), the
+		lowest possible run-level will be selected, which may not be desirable.
+		This is not a problem if you directly run you application at boot, which
+		can hold off power levels using pm_stay() (via boardctl).
+
+		This option will initialize all run levels as if
+		pm_stay/pm_staytimeout() were to be called once for each.
+
+		if set to -1, that means pm_stay(), so that your application
+		needs to call pm_relax() (via boardctl()) for every run-level you
+		wish to allow to enter.
+
+		if set to timeout (unit: ms), that means pm_staytimeout(ms).
+		pm_relax() will be auto called after timeout.
+
+if PM_GOVERNOR_ACTIVITY
+
+config PM_GOVERNOR_SLICEMS
+	int "PM time slice (msec)"
+	default 100
+	---help---
+		The power management module collects activity counts in time slices.
+		At the end of the time slice, the count accumulated during that
+		interval is applied to an averaging algorithm to determine the
+		activity level.
+
+		CONFIG_PM_GOVERNOR_SLICEMS provides the duration of that time slice in
+		milliseconds.  Default: 100 Milliseconds
+
+config PM_GOVERNOR_MEMORY
+	int "PM memory (msec)"
+	default 2
+	range 1 6
+	---help---
+		The averaging algorithm is simply: Y = (An*X + SUM(Ai*Yi))/SUM(Aj),
+		where i = 1..n-1 and j= 1..n, n is the length of the "memory",
+		Ai is the weight applied to each value, and X is the current
+		activity.  These weights may be negative and a limited to the
+		range of int16_t.
+
+		  CONFIG_PM_GOVERNOR_MEMORY provides the memory for the algorithm.
+		    Default: 2
+		  CONFIG_PM_GOVERNOR_COEFn provides weight for each sample.  Default: 1
+
+		Setting CONFIG_PM_GOVERNOR_MEMORY=1 disables all smoothing.
+
+config PM_GOVERNOR_COEFN
+	int "PM coefficient"
+	default 1
+	---help---
+		See help associated with CONFIG_PM_GOVERNOR_MEMORY.
+
+config PM_GOVERNOR_COEF1
+	int "PM coefficient 1"
+	default 1
+	---help---
+		See help associated with CONFIG_PM_GOVERNOR_MEMORY.
+
+config PM_GOVERNOR_COEF2
+	int "PM coefficient 2"
+	default 1
+	---help---
+		See help associated with CONFIG_PM_GOVERNOR_MEMORY
+
+		Ignored if CONFIG_PM_GOVERNOR_MEMORY <= 2
+
+config PM_GOVERNOR_COEF3
+	int "PM coefficient 3"
+	default 1
+	---help---
+		See help associated with CONFIG_PM_GOVERNOR_MEMORY
+
+		Ignored if CONFIG_PM_GOVERNOR_MEMORY <= 3
+
+config PM_GOVERNOR_COEF4
+	int "PM coefficient 4"
+	default 1
+	---help---
+		See help associated with CONFIG_PM_GOVERNOR_MEMORY
+
+		Ignored if CONFIG_PM_GOVERNOR_MEMORY <= 4
+
+config PM_GOVERNOR_COEF5
+	int "PM coefficient 5"
+	default 1
+	---help---
+		See help associated with CONFIG_PM_GOVERNOR_MEMORY
+
+		Ignored if CONFIG_PM_GOVERNOR_MEMORY <= 5
+
+config PM_GOVERNOR_IDLEENTER_THRESH
+	int "PM IDLE enter threshold"
+	default 1
+	---help---
+		State changes then occur when the weight activity account crosses
+		threshold values for certain periods of time (time slice count).
+
+		  CONFIG_PM_xxxENTER_THRESH is the threshold value for entering state xxx.
+		  CONFIG_PM_xxxENTER_COUNT is the count for entering state xxx.
+
+		Resuming to normal state, on the other hand, is usually immediate and
+		controlled by wakeup conditions established by the platform.
+
+		Default: <=1: Essentially no activity
+
+config PM_GOVERNOR_IDLEEXIT_THRESH
+	int "PM IDLE exit threshold"
+	default 2
+	---help---
+		State changes then occur when the weight activity account crosses
+		threshold values for certain periods of time (time slice count).
+
+		  CONFIG_PM_xxxENTER_THRESH is the threshold value for entering state xxx.
+		  CONFIG_PM_xxxENTER_COUNT is the count for entering state xxx.
+
+		Resuming to normal state, on the other hand, is usually immediate and
+		controlled by wakeup conditions established by the platform.
+
+		Default: >=2: Active
+
+config PM_GOVERNOR_IDLEENTER_COUNT
+	int "PM IDLE enter count"
+	default 30
+	---help---
+		State changes then occur when the weight activity account crosses
+		threshold values for certain periods of time (time slice count).
+
+		  CONFIG_PM_xxxENTER_THRESH is the threshold value for entering state xxx.
+		  CONFIG_PM_xxxENTER_COUNT is the count for entering state xxx.
+
+		Resuming to normal state, on the other hand, is usually immediate and
+		controlled by wakeup conditions established by the platform.
+
+		Default: Thirty IDLE slices to enter IDLE mode from normal
+
+config PM_GOVERNOR_STANDBYENTER_THRESH
+	int "PM STANDBY enter threshold"
+	default 1
+	---help---
+		State changes then occur when the weight activity account crosses
+		threshold values for certain periods of time (time slice count).
+
+		  CONFIG_PM_xxxENTER_THRESH is the threshold value for entering state xxx.
+		  CONFIG_PM_xxxENTER_COUNT is the count for entering state xxx.
+
+		Resuming to normal state, on the other hand, is usually immediate and
+		controlled by wakeup conditions established by the platform.
+
+		Default: <=1: Essentially no activity
+
+config PM_GOVERNOR_STANDBYEXIT_THRESH
+	int "PM STANDBY exit threshold"
+	default 2
+	---help---
+		State changes then occur when the weight activity account crosses
+		threshold values for certain periods of time (time slice count).
+
+		  CONFIG_PM_xxxENTER_THRESH is the threshold value for entering state xxx.
+		  CONFIG_PM_xxxENTER_COUNT is the count for entering state xxx.
+
+		Resuming to normal state, on the other hand, is usually immediate and
+		controlled by wakeup conditions established by the platform.
+
+		Default: >=2: Active
+
+config PM_GOVERNOR_STANDBYENTER_COUNT
+	int "PM STANDBY enter count"
+	default 50
+	---help---
+		State changes then occur when the weight activity account crosses
+		threshold values for certain periods of time (time slice count).
+
+		  CONFIG_PM_xxxENTER_THRESH is the threshold value for entering state xxx.
+		  CONFIG_PM_xxxENTER_COUNT is the count for entering state xxx.
+
+		Resuming to normal state, on the other hand, is usually immediate and
+		controlled by wakeup conditions established by the platform.
+
+		Default: Fifty IDLE slices to enter STANDBY mode from IDLE
+
+config PM_GOVERNOR_SLEEPENTER_THRESH
+	int "PM SLEEP enter threshold"
+	default 1
+	---help---
+		State changes then occur when the weight activity account crosses
+		threshold values for certain periods of time (time slice count).
+
+		  CONFIG_PM_xxxENTER_THRESH is the threshold value for entering state xxx.
+		  CONFIG_PM_xxxENTER_COUNT is the count for entering state xxx.
+
+		Resuming to normal state, on the other hand, is usually immediate and
+		controlled by wakeup conditions established by the platform.
+
+		Default: <=1: Essentially no activity
+
+config PM_GOVERNOR_SLEEPEXIT_THRESH
+	int "PM SLEEP exit threshold"
+	default 2
+	---help---
+		State changes then occur when the weight activity account crosses
+		threshold values for certain periods of time (time slice count).
+
+		  CONFIG_PM_xxxENTER_THRESH is the threshold value for entering state xxx.
+		  CONFIG_PM_xxxENTER_COUNT is the count for entering state xxx.
+
+		Resuming to normal state, on the other hand, is usually immediate and
+		controlled by wakeup conditions established by the platform.
+
+		Default: >=2: Active
+
+config PM_GOVERNOR_SLEEPENTER_COUNT
+	int "PM SLEEP enter count"
+	default 70
+	---help---
+		State changes then occur when the weight activity account crosses
+		threshold values for certain periods of time (time slice count).
+
+		  CONFIG_PM_xxxENTER_THRESH is the threshold value for entering state xxx.
+		  CONFIG_PM_xxxENTER_COUNT is the count for entering state xxx.
+
+		Resuming to normal state, on the other hand, is usually immediate and
+		controlled by wakeup conditions established by the platform.
+
+		Default: Fifty IDLE slices to enter SLEEP mode from STANDBY
+
+endif # PM_GOVERNOR_ACTIVITY
+
+endmenu
+
+endif # PM

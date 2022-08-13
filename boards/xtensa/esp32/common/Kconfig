@@ -2,6 +2,7 @@
 # For a description of the syntax of this configuration file,
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
+
 config ESP32_MERGE_BINS
 	bool "Merge raw binary files into a single file"
 	default n

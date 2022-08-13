@@ -72,12 +72,14 @@ static const struct file_operations g_sock_fileops =
 
 static struct inode g_sock_inode =
 {
-  .i_crefs = 1,
-  .i_flags = FSNODEFLAG_TYPE_SOCKET,
-  .u =
-    {
-      .i_ops = &g_sock_fileops,
-    },
+  NULL,                   /* i_parent */
+  NULL,                   /* i_peer */
+  NULL,                   /* i_child */
+  1,                      /* i_crefs */
+  FSNODEFLAG_TYPE_SOCKET, /* i_flags */
+  {
+    &g_sock_fileops       /* u */
+  }
 };
 
 /****************************************************************************

@@ -3,205 +3,688 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-comment "RP2040 Configuration Options"
-
-config RP2040_UART0
-	bool "UART0"
-	default y
-	select UART0_SERIALDRIVER
-	select ARCH_HAVE_SERIAL_TERMIOS
-
-if RP2040_UART0
-
-config RP2040_UART0_BAUD
-	int "RP2040 UART0 BAUD"
-	default 115200
-
-config RP2040_UART0_PARITY
-	int "RP2040 UART0 parity"
-	default 0
-	range 0 2
-	---help---
-		RP2040 UART0 parity.  0=None, 1=Odd, 2=Even.  Default: None
-
-config RP2040_UART0_BITS
-	int "RP2040 UART0 number of bits"
-	default 8
-	range 5 8
-	---help---
-		RP2040 UART0 number of bits.  Default: 8
-
-config RP2040_UART0_2STOP
-	int "RP2040 UART0 two stop bits"
-	default 0
-	---help---
-		0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
-
-endif
-
-config RP2040_UART1
-	bool "UART1"
-	default n
-	select UART1_SERIALDRIVER
-	select ARCH_HAVE_SERIAL_TERMIOS
-
-if RP2040_UART1
-
-config RP2040_UART1_BAUD
-	int "RP2040 UART1 BAUD"
-	default 115200
-
-config RP2040_UART1_PARITY
-	int "RP2040 UART1 parity"
-	default 0
-	range 0 2
-	---help---
-		RP2040 UART1 parity.  0=None, 1=Odd, 2=Even.  Default: None
-
-config RP2040_UART1_BITS
-	int "RP2040 UART1 number of bits"
-	default 8
-	range 5 8
-	---help---
-		RP2040 UART1 number of bits.  Default: 8
-
-config RP2040_UART1_2STOP
-	int "RP2040 UART1 two stop bits"
-	default 0
-	---help---
-		0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
-
-endif
+		comment "RP2040 Configuration Options"
 
 config RP2040_DMAC
 	bool "DMAC support"
 	default y
 	select ARCH_DMA
 
+#####################################################################
+#  UART Configuration
+#####################################################################
+
+config RP2040_UART0
+	bool "UART0"
+	default y
+	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Most UART parameters are configured here.  See also the
+		Board Selection menu to configure the pins used by UART0
+
+if RP2040_UART0
+
+	config RP2040_UART0_BAUD
+		int "RP2040 UART0 BAUD"
+		default 115200
+		---help---
+			RP2040 UART0 communication bit rate.  The range of available
+			baud rates depend on the clock supplied to the UART. Given
+			the normally configured 125 MHz clock, the baud
+			rates between 120 and 7 812 500 baud are available.
+
+	config RP2040_UART0_PARITY
+		int "RP2040 UART0 parity"
+		default 0
+		range 0 2
+		---help---
+			RP2040 UART0 parity.  0=None, 1=Odd, 2=Even.  Default: None
+
+	config RP2040_UART0_BITS
+		int "RP2040 UART0 number of bits"
+		default 8
+		range 5 8
+		---help---
+			RP2040 UART0 number of bits.  Default: 8
+
+	config RP2040_UART0_2STOP
+		int "RP2040 UART0 two stop bits"
+		default 0
+		---help---
+			0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
+
+endif # RP2040_UART0
+
+#####################################################################
+
+config RP2040_UART1
+	bool "UART1"
+	default n
+	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Most UART parameters are configured here.  See also the
+		Board Selection menu to configure the pins used by UART1
+
+if RP2040_UART1
+
+	config RP2040_UART1_BAUD
+		int "RP2040 UART1 BAUD"
+		default 115200
+		---help---
+			RP2040 UART0 communication bit rate.  The range of available
+			baud rates depend on the clock supplied to the UART. Given
+			the normally configured 125 MHz clock, the baud
+			rates between 120 and 7 812 500 baud are available.
+
+	config RP2040_UART1_PARITY
+		int "RP2040 UART1 parity"
+		default 0
+		range 0 2
+		---help---
+			RP2040 UART1 parity.  0=None, 1=Odd, 2=Even.  Default: None
+
+	config RP2040_UART1_BITS
+		int "RP2040 UART1 number of bits"
+		default 8
+		range 5 8
+		---help---
+			RP2040 UART1 number of bits.  Default: 8
+
+	config RP2040_UART1_2STOP
+		int "RP2040 UART1 two stop bits"
+		default 0
+		---help---
+			0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
+
+endif
+
+#####################################################################
+#  SPI Configuration
+#####################################################################
+
 config RP2040_SPI
-	bool "SPI"
+	bool "SPI Master Mode Support"
 	select SPI
 
 if RP2040_SPI
 
-config RP2040_SPI0
-	bool "SPI0"
+	config RP2040_SPI0
+		bool "SPI0"
+		default n
+		---help---
+			Most SPI parameters are configured here.  See also the
+			Board Selection menu to configure the pins used by SPI0
 
-config RP2040_SPI1
-	bool "SPI1"
+	config RP2040_SPI1
+		bool "SPI1"
+		default n
+		---help---
+			Most SPI parameters are configured here.  See also the
+			Board Selection menu to configure the pins used by SPI1
 
-config RP2040_SPI_DMA
-	bool "SPI DMA"
-	default y
-	depends on RP2040_DMAC
-	---help---
-		Use DMA to improve SPI transfer performance.
+	config RP2040_SPI_DMA
+		bool "SPI DMA"
+		default y
+		depends on RP2040_DMAC
+		---help---
+			Use DMA to improve SPI transfer performance.
 
-config RP2040_SPI_DMATHRESHOLD
-	int "SPI DMA threshold"
-	default 4
-	depends on RP2040_SPI_DMA
-	---help---
-		When SPI DMA is enabled, small DMA transfers will still be performed
-		by polling logic.  But we need a threshold value to determine what
-		is small.  That value is provided by RP2040_SPI_DMATHRESHOLD.
+	config RP2040_SPI_DMATHRESHOLD
+		int "SPI DMA threshold"
+		default 4
+		depends on RP2040_SPI_DMA
+		---help---
+			When SPI DMA is enabled, small DMA transfers will still be performed
+			by polling logic.  But we need a threshold value to determine what
+			is small.  That value is provided by RP2040_SPI_DMATHRESHOLD.
 
-config RP2040_SPI_DRIVER
-	bool "SPI character driver"
-	default y
-	select SPI_DRIVER
-	---help---
-		Build in support for a character driver at /dev/spi[N] that may be
-		used to perform SPI bus transfers from applications.  The intent of
-		this driver is to support SPI testing.
+	config RP2040_SPI_DRIVER
+		bool "SPI character driver"
+		default y
+		select SPI_DRIVER
+		---help---
+			Build in support for a character driver at /dev/spi[N] that may be
+			used to perform SPI bus transfers from applications.  The intent of
+			this driver is to support SPI testing.
 
-endif
+endif # RP2040_SPI
+
+#####################################################################
+#  I2C Configuration (Master)
+#####################################################################
 
 config RP2040_I2C
-	bool "I2C"
+	bool "I2C Master"
 	select I2C
+	---help---
+		Build in support for I2C master mode.
+		Note: Do not configure the same port as both master and slave.
 
 if RP2040_I2C
 
-config RP2040_I2C0
-	bool "I2C0"
+	config RP2040_I2C0
+		bool "I2C0"
+		default n
+		---help---
+			See the Board Selection menu to configure the pins used by I2C0.
 
-config RP2040_I2C1
-	bool "I2C1"
+	config RP2040_I2C1
+		bool "I2C1"
+		default n
+		---help---
+			See the Board Selection menu to configure the pins used by I2C1.
 
-config RP2040_I2C_DRIVER
-	bool "I2C character driver"
-	default n
-	select I2C_DRIVER
+	config RP2040_I2C_DRIVER
+		bool "I2C character driver"
+		default n
+		select I2C_DRIVER
+		---help---
+			Build in support for a character driver at /dev/i2c[N] that may be
+			used to perform I2C bus transfers from applications.  The intent of
+			this driver is to support I2C testing.  It is not suitable for use
+			in any real driver application.
+
+endif # RP2040_I2C
+
+#####################################################################
+#  I2C Configuration (Slave)
+#####################################################################
+
+config RP2040_I2C_SLAVE
+	bool "I2C Slave"
+	select I2C_SLAVE
 	---help---
-		Build in support for a character driver at /dev/i2c[N] that may be
-		used to perform I2C bus transfers from applications.  The intent of
-		this driver is to support I2C testing.  It is not suitable for use
-		in any real driver application.
+		Build in support for I2C slave mode.
+		Note: Do not configure the same port as both master and slave.
 
-endif
+if RP2040_I2C_SLAVE
+
+	config RP2040_I2C0_SLAVE
+		bool "I2C0"
+		default n
+		---help---
+			See the Board Selection menu to configure the pins used by I2C0.
+
+	if RP2040_I2C0_SLAVE
+
+		config RP2040_I2C0_SLAVE_ADDRESS
+			int "Slave Address (in decimal)"
+			default 42
+			---help---
+				This is the default address of this device on the I2C bus.
+				It should be the canonical address (not the shifted address)
+				in the range 8-119 for 7-bit mode and in the range 0-1023
+				for 10-bit mode.
+
+		config RP2040_I2C0_SLAVE_10BIT
+			bool "Enable 10-bit slave address"
+			default n
+			---help---
+				Set to enable 10-bit mode addressing.
+
+	endif # RP2040_I2C0_SLAVE
+
+	config RP2040_I2C1_SLAVE
+		bool "I2C1"
+		default n
+		---help---
+			See the Board Selection menu to configure the pins used by I2C0.
+
+	if RP2040_I2C1_SLAVE
+
+		config RP2040_I2C1_SLAVE_ADDRESS
+			int "Slave Address (in decimal)"
+			default 42
+			---help---
+				This is the default address of this device on the I2C bus.
+				It should be the canonical address (not the shifted address)
+				in the range 8-119 for 7-bit mode and in the range 0-1023
+				for 10-bit mode.
+
+		config RP2040_I2C1_SLAVE_10BIT
+			bool "Enable 10-bit slave address"
+			default n
+			---help---
+				Set to enable 10-bit mode addressing.
+
+	endif # RP2040_I2C1_SLAVE
+
+endif # RP2040_I2C_SLAVE
+
+#####################################################################
+#  PWM Configuration
+#####################################################################
+
+config RP2040_PWM
+	bool "PWM"
+	select PWM
+	---help---
+		After enabling PWM support here, configure the GPIO pins to use
+		under the Board Selection menu.
+
+if RP2040_PWM
+
+	config PWM_MULTICHAN
+		bool "Support Multi-Channel PWM"
+		default y
+		---help---
+			If support for multi-channel PWM is disabled, the generated code
+			will only support the A channel of the PWM slices.
+
+	if PWM_MULTICHAN
+
+		config PWM_NCHANNELS
+			int "Number of channels"
+			default 2
+			---help---
+				If the number of channels is set to 1, the generated code will
+				only support the A channel of the PWM slices.  This is functionally
+				identical to disabling multi-channel PWM support.
+
+	endif # PWM_MULTICHAN
+
+	config RP2040_PWM0
+		bool "PWM0"
+		---help---
+			See the Board Selection menu to configure the pins used by I2C0.
+
+	if RP2040_PWM0
+
+		config RP2040_PWM0A_INVERT
+			bool "PWM0 channel 1 invert"
+			default n
+			---help---
+				If invert is enabled, the PWM on the A pin will idle high
+				with the pulse going low.
+
+		if PWM_MULTICHAN && PWM_NCHANNELS > 1
+
+			config RP2040_PWM0B_INVERT
+				bool "PWM0 channel 2 invert"
+				default n
+				---help---
+					If invert is enabled, the PWM on the B pin will idle high
+					with the pulse going low.
+
+		endif # PWM_MULTICHAN && PWM_NCHANNELS > 1
+
+		config RP2040_PWM0_PHASE_CORRECT
+			bool "PWM0 phase correct"
+			default n
+
+	endif # RP2040_PWM0
+
+  ###################################################################
+
+	config RP2040_PWM1
+		bool "PWM1"
+		---help---
+			See the Board Selection menu to configure the pins used by I2C0.
+
+	if RP2040_PWM1
+
+		config RP2040_PWM1A_INVERT
+			bool "PWM1 channel 1 invert"
+			default n
+			---help---
+				If invert is enabled, the PWM on the A pin will idle high
+				with the pulse going low.
+
+		if PWM_MULTICHAN && PWM_NCHANNELS > 1
+
+			config RP2040_PWM1B_INVERT
+				bool "PWM1 channel 2 invert"
+				default n
+				---help---
+					If invert is enabled, the PWM on the B pin will idle high
+					with the pulse going low.
+
+		endif # PWM_MULTICHAN && PWM_NCHANNELS > 1
+
+		config RP2040_PWM1_PHASE_CORRECT
+			bool "PWM1 phase correct"
+			default n
+
+	endif # RP2040_PWM1
+
+  ###################################################################
+
+	config RP2040_PWM2
+		bool "PWM2"
+		---help---
+			See the Board Selection menu to configure the pins used by I2C0.
+
+	if RP2040_PWM2
+
+		config RP2040_PWM2A_INVERT
+			bool "PWM2 channel 1 invert"
+			default n
+			---help---
+				If invert is enabled, the PWM on the A pin will idle high
+				with the pulse going low.
+
+		if PWM_MULTICHAN && PWM_NCHANNELS > 1
+
+			config RP2040_PWM2B_INVERT
+				bool "PWM2 channel 2 invert"
+				default n
+				---help---
+					If invert is enabled, the PWM on the B pin will idle high
+					with the pulse going low.
+
+		endif # PWM_MULTICHAN && PWM_NCHANNELS > 1
+
+		config RP2040_PWM2_PHASE_CORRECT
+			bool "PWM2 phase correct"
+			default n
+
+	endif # RP2040_PWM2
+
+  ###################################################################
+
+	config RP2040_PWM3
+		bool "PWM3"
+		---help---
+			See the Board Selection menu to configure the pins used by I2C0.
+
+	if RP2040_PWM3
+
+		config RP2040_PWM3A_GPIO
+			
+		config RP2040_PWM3A_INVERT
+			bool "PWM3 channel 1 invert"
+			default n
+			---help---
+				If invert is enabled, the PWM on the A pin will idle high
+				with the pulse going low.
+
+		if PWM_MULTICHAN && PWM_NCHANNELS > 1
+
+			config RP2040_PWM3B_INVERT
+				bool "PWM3 channel 2 invert"
+				default n
+				---help---
+					If invert is enabled, the PWM on the B pin will idle high
+					with the pulse going low.
+
+		endif # PWM_MULTICHAN && PWM_NCHANNELS > 1
+
+		config RP2040_PWM3_PHASE_CORRECT
+			bool "PWM3 phase correct"
+			default n
+
+	endif # RP2040_PWM3
+
+#####################################################################
+
+	config RP2040_PWM4
+		bool "PWM4"
+		---help---
+			See the Board Selection menu to configure the pins used by I2C0.
+
+	if RP2040_PWM4
+		
+		config RP2040_PWM4A_INVERT
+			bool "PWM4 channel 1 invert"
+			default n
+			---help---
+				If invert is enabled, the PWM on the A pin will idle high
+				with the pulse going low.
+
+		if PWM_MULTICHAN && PWM_NCHANNELS > 1
+
+			config RP2040_PWM4B_INVERT
+				bool "PWM4 channel 2 invert"
+				default n
+				---help---
+					If invert is enabled, the PWM on the B pin will idle high
+					with the pulse going low.
+
+		endif # PWM_MULTICHAN && PWM_NCHANNELS > 1
+
+		config RP2040_PWM4_PHASE_CORRECT
+			bool "PWM4 phase correct"
+			default n
+
+	endif # RP2040_PWM4
+
+#####################################################################
+
+	config RP2040_PWM5
+		bool "PWM5"
+		---help---
+			See the Board Selection menu to configure the pins used by I2C0.
+
+	if RP2040_PWM5
+			
+		config RP2040_PWM5A_INVERT
+			bool "PWM5 channel 1 invert"
+			default n
+			---help---
+				If invert is enabled, the PWM on the A pin will idle high
+				with the pulse going low.
+
+		if PWM_MULTICHAN && PWM_NCHANNELS > 1
+
+			config RP2040_PWM5B_INVERT
+				bool "PWM5 channel 2 invert"
+				default n
+				---help---
+					If invert is enabled, the PWM on the B pin will idle high
+					with the pulse going low.
+
+		endif # PWM_MULTICHAN && PWM_NCHANNELS > 1
+
+		config RP2040_PWM5_PHASE_CORRECT
+			bool "PWM5 phase correct"
+			default n
+
+	endif # RP2040_PWM5
+
+#####################################################################
+
+	config RP2040_PWM6
+		bool "PWM6"
+		---help---
+			See the Board Selection menu to configure the pins used by I2C0.
+
+	if RP2040_PWM6
+			
+		config RP2040_PWM6A_INVERT
+			bool "PWM6 channel 1 invert"
+			default n
+			---help---
+				If invert is enabled, the PWM on the A pin will idle high
+				with the pulse going low.
+
+		if PWM_MULTICHAN && PWM_NCHANNELS > 1
+
+			config RP2040_PWM6B_INVERT
+				bool "PWM6 channel 2 invert"
+				default n
+				---help---
+					If invert is enabled, the PWM on the B pin will idle high
+					with the pulse going low.
+
+		endif # PWM_MULTICHAN && PWM_NCHANNELS > 1
+
+		config RP2040_PWM6_PHASE_CORRECT
+			bool "PWM6 phase correct"
+			default n
+
+	endif # RP2040_PWM6
+
+#####################################################################
+
+	config RP2040_PWM7
+		bool "PWM7"
+		---help---
+			See the Board Selection menu to configure the pins used by I2C0.
+
+	if RP2040_PWM7
+			
+		config RP2040_PWM7A_INVERT
+			bool "PWM7 channel 1 invert"
+			default n
+			---help---
+				If invert is enabled, the PWM on the A pin will idle high
+				with the pulse going low.
+
+		if PWM_MULTICHAN && PWM_NCHANNELS > 1
+
+			config RP2040_PWM7B_GPIO
+
+			config RP2040_PWM7B_INVERT
+				bool "PWM7 channel 2 invert"
+				default n
+				---help---
+					If invert is enabled, the PWM on the B pin will idle high
+					with the pulse going low.
+
+		endif # PWM_MULTICHAN && PWM_NCHANNELS > 1
+
+		config RP2040_PWM7_PHASE_CORRECT
+			bool "PWM7 phase correct"
+			default n
+
+	endif # RP2040_PWM7
+			
+endif # RP2040_PWM
+
+#####################################################################
+#  I2S Configuration
+#####################################################################
 
 config RP2040_I2S
 	bool "I2S"
 	select I2S
+	---help---
+		See the Board Selection menu to configure the pins used by I2S.
 
 if RP2040_I2S
 
-config RP2040_I2S_MAXINFLIGHT
-	int "I2S queue size"
-	default 16
-	---help---
-		This is the total number of transfers that can be enqueue before
-		the caller is required to wait.  This setting determines the number
-		certain queue data structures that will be pre-allocated.
+	config RP2040_I2S_MAXINFLIGHT
+		int "I2S queue size"
+		default 16
+		---help---
+			This is the total number of transfers that can be enqueue before
+			the caller is required to wait.  This setting determines the number
+			certain queue data structures that will be pre-allocated.
 
-config RP2040_I2S_DATALEN
-	int "Data width (bits)"
-	default 16
-	---help---
-		Data width in bits.  This is a default value and may be change
-		via the I2S interface
+	config RP2040_I2S_DATALEN
+		int "Data width (bits)"
+		default 16
+		---help---
+			Data width in bits.  This is a default value and may be change
+			via the I2S interface
 
-config RP2040_I2S_DATA
-	int "I2S DATA GPIO pin assign (0-29)"
-	default 9
-	range 0 29
+	config RP2040_I2S_PIO
+		int "RP2040 PIO number used for I2S (0-1)"
+		default 0
+		range 0 1
 
-config RP2040_I2S_CLOCK
-	int "I2S CLOCk GPIO pin assign (0-29)"
-	default 10
-	range 0 29
-
-config RP2040_I2S_PIO
-	int "RP2040 PIO number used for I2S (0-1)"
-	default 0
-	range 0 1
-
-config RP2040_I2S_PIO_SM
-	int "RP2040 PIO state machine number used for I2S (0-3)"
-	default 0
-	range 0 3
+	config RP2040_I2S_PIO_SM
+		int "RP2040 PIO state machine number used for I2S (0-3)"
+		default 0
+		range 0 3
 
 endif
+		
+#####################################################################
+#  I2S Configuration
+#####################################################################
 
-menuconfig RP2040_SPISD
+config RP2040_SPISD
 	bool "SPI SD Card"
 	default n
 	select MMCSD_SPI
 
 if RP2040_SPISD
 
-config RP2040_SPISD_SLOT_NO
-	int "SPI SD Card Slot Number"
-	default 0
-	---help---
-		Select spi sd card slot number.
+	config RP2040_SPISD_SLOT_NO
+		int "SPI SD Card Slot Number"
+		default 0
+		---help---
+			Select spi sd card slot number.
 
-config RP2040_SPISD_SPI_CH
-	int "SPI channel number"
-	default 0
-	range 0 1
-	---help---
-		Select spi channel number to use spi sd card.
+	config RP2040_SPISD_SPI_CH
+		int "SPI channel number"
+		default 0
+		range 0 1
+		---help---
+			Select spi channel number to use spi sd card.
 
 endif # SPISD Configuration
+
+#####################################################################
+#  ADC Configuration
+#####################################################################
+
+config RP2040_ADC
+	bool "Enable ADC Support"
+	default n
+	---help---
+		If y, the RP2040 ADC code will be built.
+		If the ADC device driver is not built, basic functions
+		to programmatically access the ADC ports will be added.
+
+if RP2040_ADC
+
+	config ADC
+		bool "Include ADC device driver"
+		default n
+		---help---
+			Additional ADC device drivers can be set under the
+			"Analog-to-Digital Conversion" item in the
+			"Device Driver/Analog Device Support" menu.
+
+	if ADC
+
+		config RPC2040_ADC_CHANNEL0
+			bool "Read ADC channel 0"
+			default n
+			---help---
+				If y, then ADC0 will be read.
+
+		config RPC2040_ADC_CHANNEL1
+			bool "Read ADC channel 1"
+			default n
+			---help---
+				If y, then ADC1 will be read.
+
+		config RPC2040_ADC_CHANNEL2
+			bool "Read ADC channel 2"
+			default n
+			---help---
+				If y, then ADC2 will be read.
+
+			config RPC2040_ADC_CHANNEL3
+			bool "Read ADC channel 3"
+			default n
+			---help---
+				If y, then ADC3 will be read.
+
+			config RPC2040_ADC_TEMPERATURE
+			bool "Read ADC chip temperature channel"
+			default n
+			---help---
+				If y, then the ADC chip temperature
+				will be read.
+		
+	endif # ADC
+
+endif # RP2040_ADC
+		
+#####################################################################
+#  WS2812 Configuration
+#####################################################################
+
+config RP2040_BOARD_HAS_WS2812
+	bool "Has ws2812 pixels"
+	default n
+	depends on WS2812
+	---help---
+		See the Board Selection menu to configure the pins used
+		by ws2812.

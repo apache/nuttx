@@ -956,7 +956,8 @@ void lirc_raw_event(FAR struct lirc_lowerhalf_s *lower,
         }
 
       sample = ev.pulse ? LIRC_PULSE(ev.duration) : LIRC_SPACE(ev.duration);
-      rcinfo("delivering %" PRIu32 "us %u to lirc\n", ev.duration, ev.pulse ? 1 : 0);
+      rcinfo("delivering %" PRIu32 "us %u to lirc\n",
+             ev.duration, ev.pulse ? 1 : 0);
     }
 
   flags = enter_critical_section();

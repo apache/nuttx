@@ -80,10 +80,10 @@
 
 struct highpri_s
 {
-  FAR struct nrf52_tim_dev_s *dev;
-  volatile uint64_t           basepri[16];
-  volatile uint64_t           handler;
-  volatile uint64_t           thread;
+  struct nrf52_tim_dev_s *dev;
+  volatile uint64_t       basepri[16];
+  volatile uint64_t       handler;
+  volatile uint64_t       thread;
 };
 
 /****************************************************************************
@@ -115,7 +115,7 @@ void timer_handler(void)
   ret = NRF52_TIM_CHECKINT(g_highpri.dev, NRF52_TIM_CC0);
   if (ret != 1)
     {
-      DEBUGASSERT(0);
+      DEBUGPANIC();
     }
 
   /* Increment the count associated with the current basepri */
@@ -154,7 +154,7 @@ void timer_handler(void)
 
 int highpri_main(int argc, char *argv[])
 {
-  FAR struct nrf52_tim_dev_s *tim = NULL;
+  struct nrf52_tim_dev_s *tim = NULL;
   uint64_t basepri[16];
   uint64_t handler;
   uint64_t thread;

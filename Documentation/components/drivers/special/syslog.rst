@@ -391,7 +391,7 @@ mounting of the file systems.
 The interface ``syslog_file_channel()`` is used to configure the
 SYSLOG file channel:
 
-.. c:function:: FAR struct syslog_channel_s *
+.. c:function:: FAR struct syslog_channel_s * \
                     syslog_file_channel(FAR const char *devpath);
 
   Configure to use a file in a mounted file system

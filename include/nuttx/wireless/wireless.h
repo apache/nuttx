@@ -480,7 +480,8 @@ struct iw_quality
  * This is only additional stats...
  */
 
-struct iw_discarded {
+struct iw_discarded
+{
   uint32_t nwid;      /* Rx : Wrong nwid/essid */
   uint32_t code;      /* Rx : Unable to code/decode (WEP) */
   uint32_t fragment;  /* Rx : Can't perform MAC reassembly */
@@ -620,7 +621,8 @@ struct  iw_scan_req
 
 /* Wireless statistics */
 
-struct iw_statistics {
+struct iw_statistics
+{
   uint16_t status;              /* Status
                                  * - device dependent for now
                                  */

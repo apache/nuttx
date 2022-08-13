@@ -66,16 +66,16 @@ struct uart_bth4_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     uart_bth4_open (FAR struct file *filep);
+static int     uart_bth4_open(FAR struct file *filep);
 static int     uart_bth4_close(FAR struct file *filep);
-static ssize_t uart_bth4_read (FAR struct file *filep,
-                               FAR char *buffer, size_t buflen);
+static ssize_t uart_bth4_read(FAR struct file *filep,
+                              FAR char *buffer, size_t buflen);
 static ssize_t uart_bth4_write(FAR struct file *filep,
                                FAR const char *buffer, size_t buflen);
 static int     uart_bth4_ioctl(FAR struct file *filep,
                                int cmd, unsigned long arg);
-static int     uart_bth4_poll (FAR struct file *filep,
-                               FAR struct pollfd *fds, bool setup);
+static int     uart_bth4_poll(FAR struct file *filep,
+                              FAR struct pollfd *fds, bool setup);
 
 /****************************************************************************
  * Private Data
@@ -84,7 +84,7 @@ static int     uart_bth4_poll (FAR struct file *filep,
 static const struct file_operations g_uart_bth4_ops =
 {
   uart_bth4_open,   /* open */
-  uart_bth4_close,  /* cose */
+  uart_bth4_close,  /* close */
   uart_bth4_read,   /* read */
   uart_bth4_write,  /* write */
   NULL,             /* seek */
@@ -173,6 +173,10 @@ static int uart_bth4_receive(FAR struct bt_driver_s *drv,
           circbuf_write(&dev->circbuf, buffer, buflen);
           uart_bth4_pollnotify(dev, POLLIN);
         }
+    }
+  else
+    {
+      ret = -ENOMEM;
     }
 
   leave_critical_section(flags);
@@ -358,8 +362,8 @@ static int uart_bth4_ioctl(FAR struct file *filep, int cmd,
   return dev->drv->ioctl(dev->drv, cmd, arg);
 }
 
-static int uart_bth4_poll(FAR struct file *filep,
-                          FAR struct pollfd *fds, bool setup)
+static int uart_bth4_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                          bool setup)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct uart_bth4_s *dev = inode->i_private;

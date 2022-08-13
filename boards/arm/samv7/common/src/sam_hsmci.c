@@ -124,8 +124,8 @@ static int sam_hsmci_cardetect(struct sam_hsmci_state_s *state)
   return OK;
 }
 
-static int sam_hsmci_cardetect_handler(int irq, FAR void *context,
-                                       FAR void *arg)
+static int sam_hsmci_cardetect_handler(int irq, void *context,
+                                       void *arg)
 {
   struct sam_hsmci_state_s *state = (struct sam_hsmci_state_s *)arg;
   int ret;
@@ -226,7 +226,7 @@ int sam_hsmci_initialize(int slotno, int minor, gpio_pinset_t cdcfg,
   /* Configure card detect interrupts */
 
   sam_gpioirq(state->cdcfg);
-  irq_attach(state->cdirq, sam_hsmci_cardetect_handler, (FAR void *)state);
+  irq_attach(state->cdirq, sam_hsmci_cardetect_handler, (void *)state);
 
   /* Then inform the HSMCI driver if there is or is not a card in the slot. */
 

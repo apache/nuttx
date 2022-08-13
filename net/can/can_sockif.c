@@ -139,15 +139,13 @@ static uint16_t can_poll_eventhandler(FAR struct net_driver_s *dev,
           eventset |= (POLLHUP | POLLERR);
         }
 
-#if 0
       /* A poll is a sign that we are free to send data. */
 
       else if ((flags & CAN_POLL) != 0 &&
-                 psock_udp_cansend(info->psock) >= 0)
+                 psock_can_cansend(info->psock) >= 0)
         {
           eventset |= (POLLOUT & info->fds->events);
         }
-#endif
 
       /* Awaken the caller of poll() is requested event occurred. */
 
@@ -608,14 +606,12 @@ static int can_poll_local(FAR struct socket *psock, FAR struct pollfd *fds,
           fds->revents |= (POLLRDNORM & fds->events);
         }
 
-    #if 0
-      if (psock_udp_cansend(psock) >= 0)
+      if (psock_can_cansend(psock) >= 0)
         {
-          /* Normal data may be sent without blocking (at least one byte). */
+          /* A CAN frame may be sent without blocking. */
 
           fds->revents |= (POLLWRNORM & fds->events);
         }
-    #endif
 
       /* Check if any requested events are already in effect */
 

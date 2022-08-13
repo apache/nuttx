@@ -124,7 +124,7 @@ static inline void xtensa_attach_fromcpu0_interrupt(void)
  *
  ****************************************************************************/
 
-void xtensa_appcpu_start(void)
+void IRAM_ATTR xtensa_appcpu_start(void)
 {
   struct tcb_s *tcb = this_task();
   register uint32_t sp;
@@ -275,25 +275,33 @@ int up_cpu_start(int cpu)
       regval &= ~RTC_CNTL_SW_STALL_APPCPU_C0_M;
       putreg32(regval, RTC_CNTL_OPTIONS0_REG);
 
-      /* Enable clock gating for the APP CPU */
+      /* OpenOCD might have already enabled clock gating and taken APP CPU
+       * out of reset.  Don't reset the APP CPU if that's the case as this
+       * will clear the breakpoints that may have already been set.
+       */
 
-      regval  = getreg32(DPORT_APPCPU_CTRL_B_REG);
-      regval |= DPORT_APPCPU_CLKGATE_EN;
-      putreg32(regval, DPORT_APPCPU_CTRL_B_REG);
+      regval = getreg32(DPORT_APPCPU_CTRL_B_REG);
+      if ((regval & DPORT_APPCPU_CLKGATE_EN_M) == 0)
+        {
+          /* Enable clock gating for the APP CPU */
 
-      regval  = getreg32(DPORT_APPCPU_CTRL_C_REG);
-      regval &= ~DPORT_APPCPU_RUNSTALL;
-      putreg32(regval, DPORT_APPCPU_CTRL_C_REG);
+          regval |= DPORT_APPCPU_CLKGATE_EN;
+          putreg32(regval, DPORT_APPCPU_CTRL_B_REG);
 
-      /* Reset the APP CPU */
+          regval  = getreg32(DPORT_APPCPU_CTRL_C_REG);
+          regval &= ~DPORT_APPCPU_RUNSTALL;
+          putreg32(regval, DPORT_APPCPU_CTRL_C_REG);
 
-      regval  = getreg32(DPORT_APPCPU_CTRL_A_REG);
-      regval |= DPORT_APPCPU_RESETTING;
-      putreg32(regval, DPORT_APPCPU_CTRL_A_REG);
+          /* Reset the APP CPU */
 
-      regval  = getreg32(DPORT_APPCPU_CTRL_A_REG);
-      regval &= ~DPORT_APPCPU_RESETTING;
-      putreg32(regval, DPORT_APPCPU_CTRL_A_REG);
+          regval  = getreg32(DPORT_APPCPU_CTRL_A_REG);
+          regval |= DPORT_APPCPU_RESETTING;
+          putreg32(regval, DPORT_APPCPU_CTRL_A_REG);
+
+          regval  = getreg32(DPORT_APPCPU_CTRL_A_REG);
+          regval &= ~DPORT_APPCPU_RESETTING;
+          putreg32(regval, DPORT_APPCPU_CTRL_A_REG);
+        }
 
       /* Set the CPU1 start address */
 

@@ -59,7 +59,7 @@
  * alarm expires.
  */
 
-typedef CODE void (*hprtc_alarm_callback_t)(void);
+typedef void (*hprtc_alarm_callback_t)(void);
 
 /****************************************************************************
  * Public Data
@@ -116,7 +116,7 @@ extern "C"
 
 #ifdef CONFIG_RTC_DRIVER
 struct rtc_lowerhalf_s;
-FAR struct rtc_lowerhalf_s *imxrt_rtc_lowerhalf(void);
+struct rtc_lowerhalf_s *imxrt_rtc_lowerhalf(void);
 #endif
 
 /****************************************************************************
@@ -207,7 +207,7 @@ uint32_t imxrt_hprtc_getalarm(void);
  ****************************************************************************/
 
 #if defined(CONFIG_RTC_ALARM) && defined(CONFIG_RTC_DRIVER)
-int imxrt_hprtc_setalarm(FAR struct timespec *ts,
+int imxrt_hprtc_setalarm(struct timespec *ts,
                          hprtc_alarm_callback_t cb);
 #endif
 

@@ -73,6 +73,6 @@ int tiva_eeprom_initialize(void);
  ****************************************************************************/
 
 struct mtd_dev_s; /* Forward reference */
-FAR struct mtd_dev_s *tiva_eeprom_instance(void);
+struct mtd_dev_s *tiva_eeprom_instance(void);
 
 #endif /* __ARCH_ARM_SRC_TIVA_TIVA_EEPROM_H */

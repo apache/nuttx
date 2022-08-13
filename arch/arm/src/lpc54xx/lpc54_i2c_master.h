@@ -50,7 +50,7 @@
  *
  ****************************************************************************/
 
-FAR struct i2c_master_s *lpc54_i2cbus_initialize(int port);
+struct i2c_master_s *lpc54_i2cbus_initialize(int port);
 
 /****************************************************************************
  * Name: lpc54_i2cbus_uninitialize
@@ -67,6 +67,6 @@ FAR struct i2c_master_s *lpc54_i2cbus_initialize(int port);
  *
  ****************************************************************************/
 
-int lpc54_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
+int lpc54_i2cbus_uninitialize(struct i2c_master_s *dev);
 
 #endif /* __ARCH_ARM_SRC_LPC54XX_LPC54_I2C_MASTER_H */

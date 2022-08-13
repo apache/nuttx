@@ -107,10 +107,10 @@
 
 struct nrf52_wdt_lowerhalf_s
 {
-  FAR const struct watchdog_ops_s  *ops; /* Lower half operations */
-  uint32_t lastreset;                    /* The last reset time */
-  bool     started;                      /* true: The watchdog timer has been started */
-  uint16_t mode;                         /* watchdog mode under sleep and halt of CPU */
+  const struct watchdog_ops_s  *ops; /* Lower half operations */
+  uint32_t lastreset;                /* The last reset time */
+  bool     started;                  /* true: The watchdog timer has been started */
+  uint16_t mode;                     /* watchdog mode under sleep and halt of CPU */
 };
 
 /****************************************************************************
@@ -119,12 +119,12 @@ struct nrf52_wdt_lowerhalf_s
 
 /* "Lower half" driver methods **********************************************/
 
-static int nrf52_start(FAR struct watchdog_lowerhalf_s *lower);
-static int nrf52_stop(FAR struct watchdog_lowerhalf_s *lower);
-static int nrf52_keepalive(FAR struct watchdog_lowerhalf_s *lower);
-static int nrf52_getstatus(FAR struct watchdog_lowerhalf_s *lower,
-                           FAR struct watchdog_status_s *status);
-static int nrf52_settimeout(FAR struct watchdog_lowerhalf_s *lower,
+static int nrf52_start(struct watchdog_lowerhalf_s *lower);
+static int nrf52_stop(struct watchdog_lowerhalf_s *lower);
+static int nrf52_keepalive(struct watchdog_lowerhalf_s *lower);
+static int nrf52_getstatus(struct watchdog_lowerhalf_s *lower,
+                           struct watchdog_status_s *status);
+static int nrf52_settimeout(struct watchdog_lowerhalf_s *lower,
                             uint32_t timeout);
 
 /****************************************************************************
@@ -175,10 +175,10 @@ static struct nrf52_wdt_lowerhalf_s g_wdtdev =
  *
  ****************************************************************************/
 
-static int nrf52_start(FAR struct watchdog_lowerhalf_s *lower)
+static int nrf52_start(struct watchdog_lowerhalf_s *lower)
 {
-  FAR struct nrf52_wdt_lowerhalf_s *priv =
-    (FAR struct nrf52_wdt_lowerhalf_s *)lower;
+  struct nrf52_wdt_lowerhalf_s *priv =
+    (struct nrf52_wdt_lowerhalf_s *)lower;
   irqstate_t flags;
 
   wdinfo("Entry: started\n");
@@ -214,7 +214,7 @@ static int nrf52_start(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int nrf52_stop(FAR struct watchdog_lowerhalf_s *lower)
+static int nrf52_stop(struct watchdog_lowerhalf_s *lower)
 {
   /* There is no way to disable the WDT timer once it has been started */
 
@@ -239,10 +239,10 @@ static int nrf52_stop(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int nrf52_keepalive(FAR struct watchdog_lowerhalf_s *lower)
+static int nrf52_keepalive(struct watchdog_lowerhalf_s *lower)
 {
-  FAR struct nrf52_wdt_lowerhalf_s *priv =
-    (FAR struct nrf52_wdt_lowerhalf_s *)lower;
+  struct nrf52_wdt_lowerhalf_s *priv =
+    (struct nrf52_wdt_lowerhalf_s *)lower;
   irqstate_t flags;
 
   wdinfo("Entry\n");
@@ -275,11 +275,11 @@ static int nrf52_keepalive(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int nrf52_getstatus(FAR struct watchdog_lowerhalf_s *lower,
-                           FAR struct watchdog_status_s *status)
+static int nrf52_getstatus(struct watchdog_lowerhalf_s *lower,
+                           struct watchdog_status_s *status)
 {
-  FAR struct nrf52_wdt_lowerhalf_s *priv =
-    (FAR struct nrf52_wdt_lowerhalf_s *)lower;
+  struct nrf52_wdt_lowerhalf_s *priv =
+    (struct nrf52_wdt_lowerhalf_s *)lower;
   uint32_t ticks;
   uint32_t elapsed;
 
@@ -335,11 +335,11 @@ static int nrf52_getstatus(FAR struct watchdog_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int nrf52_settimeout(FAR struct watchdog_lowerhalf_s *lower,
+static int nrf52_settimeout(struct watchdog_lowerhalf_s *lower,
                             uint32_t timeout)
 {
-  FAR struct nrf52_wdt_lowerhalf_s *priv =
-    (FAR struct nrf52_wdt_lowerhalf_s *)lower;
+  struct nrf52_wdt_lowerhalf_s *priv =
+    (struct nrf52_wdt_lowerhalf_s *)lower;
 
   wdinfo("Entry: timeout=%" PRId32 "\n", timeout);
   DEBUGASSERT(priv);
@@ -396,11 +396,11 @@ static int nrf52_settimeout(FAR struct watchdog_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-int nrf52_wdt_initialize(FAR const char *devpath, int16_t mode_sleep,
+int nrf52_wdt_initialize(const char *devpath, int16_t mode_sleep,
                          int16_t mode_halt)
 {
-  FAR struct nrf52_wdt_lowerhalf_s *priv = &g_wdtdev;
-  FAR void *handle;
+  struct nrf52_wdt_lowerhalf_s *priv = &g_wdtdev;
+  void *handle;
 
   wdinfo("Entry: devpath=%s, mode_sleep=%d, mode_halt=%d\n", devpath,
          mode_sleep, mode_halt);
@@ -424,6 +424,6 @@ int nrf52_wdt_initialize(FAR const char *devpath, int16_t mode_sleep,
   /* Register the watchdog driver as /dev/watchdog0 */
 
   handle = watchdog_register(devpath,
-                             (FAR struct watchdog_lowerhalf_s *)priv);
+                             (struct watchdog_lowerhalf_s *)priv);
   return (handle != NULL) ? OK : -ENODEV;
 }

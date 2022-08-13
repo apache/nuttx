@@ -716,6 +716,14 @@ config MX25RXX_SECTOR512
 	bool "Simulate 512 byte Erase Blocks"
 	default n
 
+config MX25RXX_PAGE128
+	bool "128 byte size pages"
+	default n
+	
+config MX25RXX_LXX
+	bool "Run MX25RXX driver in MX25LXX mode"
+	default n
+	
 endif # MTD_MX25RXX
 
 config MTD_SMART

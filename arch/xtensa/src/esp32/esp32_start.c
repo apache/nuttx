@@ -34,13 +34,16 @@
 #include "xtensa.h"
 #include "xtensa_attr.h"
 
-#include "hardware/esp32_dport.h"
-#include "hardware/esp32_rtccntl.h"
 #include "esp32_clockconfig.h"
 #include "esp32_region.h"
 #include "esp32_start.h"
 #include "esp32_spiram.h"
 #include "esp32_wdt.h"
+#ifdef CONFIG_BUILD_PROTECTED
+#  include "esp32_userspace.h"
+#endif
+#include "hardware/esp32_dport.h"
+#include "hardware/esp32_rtccntl.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -88,7 +91,7 @@ extern uint32_t _image_drom_size;
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32_APP_FORMAT_MCUBOOT
-extern int ets_printf(const char *fmt, ...);
+extern int ets_printf(const char *fmt, ...) printflike(1, 2);
 extern void cache_read_enable(int cpu);
 extern void cache_read_disable(int cpu);
 extern void cache_flush(int cpu);
@@ -137,8 +140,8 @@ uint32_t g_idlestack[IDLETHREAD_STACKWORDS]
 
 static noreturn_function void __esp32_start(void)
 {
-  uint32_t regval;
   uint32_t sp;
+  uint32_t regval unused_data;
 
   /* Make sure that normal interrupts are disabled.  This is really only an
    * issue when we are started in un-usual ways (such as from IRAM).  In this
@@ -161,19 +164,37 @@ static noreturn_function void __esp32_start(void)
 
   esp32_region_protection();
 
+#if defined(CONFIG_ESP32_PID) && defined(CONFIG_BUILD_PROTECTED)
+  /* We have 2 VECBASE Addresses: one in CPU and one in DPORT peripheral.
+   * CPU has no knowledge of PID hence any PID can change the CPU VECBASE
+   * address thus jumping to malicious interrupt vectors with higher
+   * privilege.
+   * So we configure CPU to use the VECBASE address in DPORT peripheral.
+   */
+
+  regval = ((uint32_t)&_init_start) >> 10;
+  putreg32(regval, DPORT_PRO_VECBASE_SET_REG);
+
+  regval  = getreg32(DPORT_PRO_VECBASE_CTRL_REG);
+  regval |= BIT(0) | BIT(1);
+  putreg32(regval, DPORT_PRO_VECBASE_CTRL_REG);
+#else
   /* Move CPU0 exception vectors to IRAM */
 
-  __asm__ __volatile__ ("wsr %0, vecbase\n"::"r" (&_init_start));
+  __asm__ __volatile__ ("wsr %0, vecbase\n"::"r"(&_init_start));
+#endif
 
   /* Set .bss to zero */
 
   memset(&_sbss, 0, (&_ebss - &_sbss) * sizeof(_sbss));
 
+#ifndef CONFIG_SMP
   /* Make sure that the APP_CPU is disabled for now */
 
   regval  = getreg32(DPORT_APPCPU_CTRL_B_REG);
   regval &= ~DPORT_APPCPU_CLKGATE_EN;
   putreg32(regval, DPORT_APPCPU_CTRL_B_REG);
+#endif
 
   /* The 2nd stage bootloader enables RTC WDT to check on startup sequence
    * related issues in application. Hence disable that as we are about to
@@ -228,6 +249,17 @@ static noreturn_function void __esp32_start(void)
   esp32_board_initialize();
 
   showprogress("B");
+
+  /* For the case of the separate user-/kernel-space build, perform whatever
+   * platform specific initialization of the user memory is required.
+   * Normally this just means initializing the user space .data and .bss
+   * segments.
+   */
+
+#ifdef CONFIG_BUILD_PROTECTED
+  esp32_userspace();
+  showprogress("C");
+#endif
 
   /* Bring up NuttX */
 

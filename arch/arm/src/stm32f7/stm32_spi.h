@@ -63,7 +63,7 @@ struct spi_dev_s; /* Forward reference */
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *stm32_spibus_initialize(int bus);
+struct spi_dev_s *stm32_spibus_initialize(int bus);
 
 /****************************************************************************
  * Name:  stm32_spi1/2/...select and stm32_spi1/2/...status
@@ -97,45 +97,45 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus);
  ****************************************************************************/
 
 #ifdef CONFIG_STM32F7_SPI1
-void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
+void stm32_spi1select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected);
-uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, uint32_t devid);
-int stm32_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+uint8_t stm32_spi1status(struct spi_dev_s *dev, uint32_t devid);
+int stm32_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 #ifdef CONFIG_STM32F7_SPI2
-void stm32_spi2select(FAR struct spi_dev_s *dev, uint32_t devid,
+void stm32_spi2select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected);
-uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid);
-int stm32_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+uint8_t stm32_spi2status(struct spi_dev_s *dev, uint32_t devid);
+int stm32_spi2cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 #ifdef CONFIG_STM32F7_SPI3
-void stm32_spi3select(FAR struct spi_dev_s *dev, uint32_t devid,
+void stm32_spi3select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected);
-uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, uint32_t devid);
-int stm32_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+uint8_t stm32_spi3status(struct spi_dev_s *dev, uint32_t devid);
+int stm32_spi3cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 #ifdef CONFIG_STM32F7_SPI4
-void stm32_spi4select(FAR struct spi_dev_s *dev, uint32_t devid,
+void stm32_spi4select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected);
-uint8_t stm32_spi4status(FAR struct spi_dev_s *dev, uint32_t devid);
-int stm32_spi4cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+uint8_t stm32_spi4status(struct spi_dev_s *dev, uint32_t devid);
+int stm32_spi4cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 #ifdef CONFIG_STM32F7_SPI5
-void stm32_spi5select(FAR struct spi_dev_s *dev, uint32_t devid,
+void stm32_spi5select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected);
-uint8_t stm32_spi5status(FAR struct spi_dev_s *dev, uint32_t devid);
-int stm32_spi5cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+uint8_t stm32_spi5status(struct spi_dev_s *dev, uint32_t devid);
+int stm32_spi5cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 #ifdef CONFIG_STM32F7_SPI6
-void stm32_spi6select(FAR struct spi_dev_s *dev, uint32_t devid,
+void stm32_spi6select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected);
-uint8_t stm32_spi6status(FAR struct spi_dev_s *dev, uint32_t devid);
-int stm32_spi6cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+uint8_t stm32_spi6status(struct spi_dev_s *dev, uint32_t devid);
+int stm32_spi6cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 /****************************************************************************
@@ -160,33 +160,33 @@ int stm32_spi6cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 
 #ifdef CONFIG_SPI_CALLBACK
 #ifdef CONFIG_STM32F7_SPI1
-int stm32_spi1register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
-                       FAR void *arg);
+int stm32_spi1register(struct spi_dev_s *dev, spi_mediachange_t callback,
+                       void *arg);
 #endif
 
 #ifdef CONFIG_STM32F7_SPI2
-int stm32_spi2register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
-                       FAR void *arg);
+int stm32_spi2register(struct spi_dev_s *dev, spi_mediachange_t callback,
+                       void *arg);
 #endif
 
 #ifdef CONFIG_STM32F7_SPI3
-int stm32_spi3register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
-                       FAR void *arg);
+int stm32_spi3register(struct spi_dev_s *dev, spi_mediachange_t callback,
+                       void *arg);
 #endif
 
 #ifdef CONFIG_STM32F7_SPI4
-int stm32_spi4register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
-                       FAR void *arg);
+int stm32_spi4register(struct spi_dev_s *dev, spi_mediachange_t callback,
+                       void *arg);
 #endif
 
 #ifdef CONFIG_STM32F7_SPI5
-int stm32_spi5register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
-                       FAR void *arg);
+int stm32_spi5register(struct spi_dev_s *dev, spi_mediachange_t callback,
+                       void *arg);
 #endif
 
 #ifdef CONFIG_STM32F7_SPI6
-int stm32_spi6register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
-                       FAR void *arg);
+int stm32_spi6register(struct spi_dev_s *dev, spi_mediachange_t callback,
+                       void *arg);
 #endif
 #endif
 

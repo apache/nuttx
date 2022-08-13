@@ -48,10 +48,15 @@
  *   information for the child process is discarded and not included in the
  *   resource information provided by getrusage().
  *
+ *   Note: This is currently a dummy implementation and as such does not
+ *   honor the 'who' parameter.
+ *
  ****************************************************************************/
 
 int getrusage(int who, FAR struct rusage *r_usage)
 {
+  UNUSED(who);
+
   if (r_usage == NULL)
     {
       set_errno(EINVAL);

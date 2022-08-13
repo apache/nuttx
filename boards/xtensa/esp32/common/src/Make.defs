@@ -18,6 +18,8 @@
 #
 #############################################################################
 
+ifeq ($(CONFIG_ARCH_BOARD_COMMON),y)
+
 ifeq ($(CONFIG_WATCHDOG),y)
   CSRCS += esp32_board_wdt.c
 endif
@@ -46,12 +48,16 @@ ifeq ($(CONFIG_ESP32_SPIFLASH),y)
   CSRCS += esp32_board_spiflash.c
 endif
 
-ifeq ($(CONFIG_ESP32_WIRELESS),y)
+ifeq ($(CONFIG_ESP32_WIFI),y)
   CSRCS += esp32_board_wlan.c
 endif
 
 ifeq ($(CONFIG_SENSORS_BMP180),y)
   CSRCS += esp32_bmp180.c
+endif
+
+ifeq ($(CONFIG_SENSORS_BMP280),y)
+CSRCS += esp32_bmp280.c
 endif
 
 ifeq ($(CONFIG_SENSORS_SHT3X),y)
@@ -82,6 +88,12 @@ ifeq ($(CONFIG_LCD_SSD1306_I2C),y)
   CSRCS += esp32_ssd1306.c
 endif
 
+ifeq ($(CONFIG_LCD_SSD1680),y)
+  CSRCS += esp32_ssd1680.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)
+
+endif

@@ -337,7 +337,7 @@ irq_common:
 	/* The common return point for both isr_handler and irq_handler */
 
 .Lreturn:
-	/* EAX may possibly hold a pointer to a different regiser save area on
+	/* EAX may possibly hold a pointer to a different register save area on
 	 * return.  Are we switching to a new context?
 	 */
 

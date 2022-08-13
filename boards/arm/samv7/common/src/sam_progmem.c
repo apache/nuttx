@@ -42,50 +42,6 @@
 #include "board_progmem.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define ARRAYSIZE(x)                (sizeof((x)) / sizeof((x)[0]))
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-struct mcuboot_partition_s
-{
-  uint32_t    offset;          /* Partition offset from the beginning of MTD */
-  uint32_t    size;            /* Partition size in bytes */
-  const char *devpath;         /* Partition device path */
-};
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static FAR struct mtd_dev_s *g_samv7_progmem_mtd;
-
-#if defined(CONFIG_SAMV7_PROGMEM_OTA_PARTITION)
-static const struct mcuboot_partition_s g_mcuboot_partition_table[] =
-{
-  {
-    .offset  = CONFIG_SAMV7_OTA_PRIMARY_SLOT_OFFSET,
-    .size    = CONFIG_SAMV7_OTA_SLOT_SIZE,
-    .devpath = CONFIG_SAMV7_OTA_PRIMARY_SLOT_DEVPATH
-  },
-  {
-    .offset  = CONFIG_SAMV7_OTA_SECONDARY_SLOT_OFFSET,
-    .size    = CONFIG_SAMV7_OTA_SLOT_SIZE,
-    .devpath = CONFIG_SAMV7_OTA_SECONDARY_SLOT_DEVPATH
-  },
-  {
-    .offset  = CONFIG_SAMV7_OTA_SCRATCH_OFFSET,
-    .size    = CONFIG_SAMV7_OTA_SCRATCH_SIZE,
-    .devpath = CONFIG_SAMV7_OTA_SCRATCH_DEVPATH
-  }
-};
-#endif /* CONFIG_SAMV7_PROGMEM_OTA_PARTITION */
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -105,8 +61,8 @@ static const struct mcuboot_partition_s g_mcuboot_partition_table[] =
  *
  ****************************************************************************/
 
-static int sam_progmem_register_driver(int minor, FAR struct mtd_dev_s *mtd,
-                                       FAR const char *devpath)
+static int sam_progmem_register_driver(int minor, struct mtd_dev_s *mtd,
+                                       const char *devpath)
 {
 #ifdef CONFIG_BCH
   char blockdev[18];
@@ -146,7 +102,6 @@ static int sam_progmem_register_driver(int minor, FAR struct mtd_dev_s *mtd,
   return ret;
 }
 
-#if defined(CONFIG_SAMV7_PROGMEM_OTA_PARTITION)
 /****************************************************************************
  * Name: sam_progmem_alloc_mtdpart
  *
@@ -154,6 +109,7 @@ static int sam_progmem_register_driver(int minor, FAR struct mtd_dev_s *mtd,
  *   Allocate an MTD partition from FLASH.
  *
  * Input Parameters:
+ *   mtd        - The MTD device to be partitioned
  *   mtd_offset - MTD Partition offset from the base address in FLASH.
  *   mtd_size   - Size for the MTD partition.
  *
@@ -162,19 +118,20 @@ static int sam_progmem_register_driver(int minor, FAR struct mtd_dev_s *mtd,
  *
  ****************************************************************************/
 
-static struct mtd_dev_s *sam_progmem_alloc_mtdpart(uint32_t mtd_offset,
-                                                   uint32_t mtd_size)
+static struct mtd_dev_s *sam_progmem_alloc_mtdpart(struct mtd_dev_s *mtd,
+                                                   size_t mtd_offset,
+                                                   size_t mtd_size)
 {
-  uint32_t blocks;
-  uint32_t startblock;
+  ssize_t startblock;
+  size_t  blocks;
 
   ASSERT((mtd_offset + mtd_size) <= up_progmem_neraseblocks() *
           up_progmem_pagesize(0));
   ASSERT((mtd_offset % up_progmem_pagesize(0)) == 0);
   ASSERT((mtd_size % up_progmem_pagesize(0)) == 0);
 
-  finfo("\tMTD offset = 0x%" PRIx32 "\n", mtd_offset);
-  finfo("\tMTD size = 0x%" PRIx32 "\n", mtd_size);
+  finfo("\tMTD offset = 0x%zx\n", mtd_offset);
+  finfo("\tMTD size = %zu\n", mtd_size);
 
   startblock = up_progmem_getpage(mtd_offset);
   if (startblock < 0)
@@ -184,49 +141,8 @@ static struct mtd_dev_s *sam_progmem_alloc_mtdpart(uint32_t mtd_offset,
 
   blocks = mtd_size / up_progmem_pagesize(0);
 
-  return mtd_partition(g_samv7_progmem_mtd, startblock, blocks);
+  return mtd_partition(mtd, startblock, blocks);
 }
-
-/****************************************************************************
- * Name: init_mcuboot_partitions
- *
- * Description:
- *   Initialize partitions that are dedicated to firmware MCUBOOT update.
- *
- * Input Parameters:
- *   minor - The starting minor number for progmem MTD partitions.
- *
- * Returned Value:
- *   Zero on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-static int init_mcuboot_partitions(int minor)
-{
-  FAR struct mtd_dev_s *mtd;
-  int ret = OK;
-
-  for (int i = 0; i < ARRAYSIZE(g_mcuboot_partition_table); ++i)
-    {
-      const struct mcuboot_partition_s *part = &g_mcuboot_partition_table[i];
-      mtd = sam_progmem_alloc_mtdpart(part->offset, part->size);
-
-      if (mtd == NULL)
-        {
-          ferr("ERROR: create MTD OTA partition %s", part->devpath);
-          continue;
-        }
-
-      ret = sam_progmem_register_driver(minor + i, mtd, part->devpath);
-      if (ret < 0)
-        {
-          return ret;
-        }
-    }
-
-  return ret;
-}
-#endif /* CONFIG_SAMV7_PROGMEM_OTA_PARTITION */
 
 /****************************************************************************
  * Public Functions
@@ -240,6 +156,8 @@ static int init_mcuboot_partitions(int minor)
  *
  * Input Parameters:
  *   minor - The starting minor number for progmem MTD partitions.
+ *   table - Progmem MTD partition table
+ *   count - Number of element in progmem MTD partition table
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is
@@ -247,8 +165,11 @@ static int init_mcuboot_partitions(int minor)
  *
  ****************************************************************************/
 
-int board_progmem_init(int minor)
+int board_progmem_init(int minor, struct mtd_partition_s *table,
+                       size_t count)
 {
+  struct mtd_dev_s *progmem_mtd;
+  size_t i;
   int ret = OK;
 
   /* Initialize the SAMV7 FLASH programming memory library */
@@ -257,25 +178,44 @@ int board_progmem_init(int minor)
 
   /* Create an instance of the SAMV7 FLASH program memory device driver */
 
-  g_samv7_progmem_mtd = progmem_initialize();
-  if (g_samv7_progmem_mtd == NULL)
+  progmem_mtd = progmem_initialize();
+  if (progmem_mtd == NULL)
     {
       return -EFAULT;
     }
 
-#if defined(CONFIG_SAMV7_PROGMEM_OTA_PARTITION)
-  ret = init_mcuboot_partitions(minor);
-  if (ret < 0)
+  if (table == NULL || count == 0)
     {
-      return ret;
+      ret = sam_progmem_register_driver(minor, progmem_mtd, NULL);
     }
-#else
-  ret = sam_progmem_register_driver(minor, g_samv7_progmem_mtd, NULL);
-  if (ret < 0)
+  else
     {
-      return ret;
+      for (i = 0; i < count; ++i)
+        {
+          struct mtd_partition_s *part = &table[i];
+
+          part->mtd = sam_progmem_alloc_mtdpart(progmem_mtd, part->offset,
+                                                part->size);
+          if (part->mtd != NULL)
+            {
+              if (part->devpath != NULL)
+                {
+                  ret = sam_progmem_register_driver(minor + i, part->mtd,
+                                                    part->devpath);
+                  if (ret < 0)
+                    {
+                      break;
+                    }
+                }
+            }
+          else
+            {
+              ferr("Failed to allocate MTD partition %d", i);
+              ret = -ENOMEM;
+              break;
+            }
+        }
     }
-#endif
 
   return ret;
 }

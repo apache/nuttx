@@ -30,18 +30,54 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #endif
-#ifdef CONFIG_LIB_SYSCALL
-#  include <syscall.h>
-#endif
 
-#include <arch/xtensa/xtensa_swi.h>
+#include <arch/xtensa/core.h>
+#include <arch/xtensa/xtensa_corebits.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Select software interrupt number for context-switch.
+ * The SW interrupt level must be greater than XCHAL_SYSCALL_LEVEL
+ * and less than XCHAL_EXCM_LEVEL.
+ * So that we can generate an interrupt when up_irq_save is called.
+ * and not generate interrupt when up_irq_disable is called.
+ * Return an error if no suitable software interrupt was found.
+ */
+
+#ifndef XTENSA_SWINT
+#  ifdef XCHAL_SOFTWARE2_INTERRUPT
+#    if XCHAL_INT_LEVEL(XCHAL_SOFTWARE2_INTERRUPT) > XCHAL_SYSCALL_LEVEL && \
+        XCHAL_INT_LEVEL(XCHAL_SOFTWARE2_INTERRUPT) <= XCHAL_EXCM_LEVEL
+#      undef  XTENSA_SWINT
+#      define XTENSA_SWINT XCHAL_SOFTWARE2_INTERRUPT
+#    endif
+#  endif
+#  ifdef XCHAL_SOFTWARE1_INTERRUPT
+#    if XCHAL_INT_LEVEL(XCHAL_SOFTWARE1_INTERRUPT) > XCHAL_SYSCALL_LEVEL && \
+        XCHAL_INT_LEVEL(XCHAL_SOFTWARE1_INTERRUPT) <= XCHAL_EXCM_LEVEL
+#      undef  XTENSA_SWINT
+#      define XTENSA_SWINT XCHAL_SOFTWARE1_INTERRUPT
+#    endif
+#  endif
+#  ifdef XCHAL_SOFTWARE0_INTERRUPT
+#    if XCHAL_INT_LEVEL(XCHAL_SOFTWARE0_INTERRUPT) > XCHAL_SYSCALL_LEVEL && \
+        XCHAL_INT_LEVEL(XCHAL_SOFTWARE0_INTERRUPT) <= XCHAL_EXCM_LEVEL
+#      undef  XTENSA_SWINT
+#      define XTENSA_SWINT XCHAL_SOFTWARE0_INTERRUPT
+#    endif
+#  endif
+#endif
+#ifndef XTENSA_SWINT
+#  error "There is no suitable sw interrupt in this Xtensa configuration."
+#endif
+
+#define XCHAL_SWINT_CALL        (1 << XTENSA_SWINT)
 
 #define SYS_syscall 0x00
 
@@ -79,7 +115,6 @@
  */
 
 #define SYS_switch_context        (2)
-
 
 /* SYS call 3:
  *
@@ -312,7 +347,7 @@ static inline uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1,
                                   uintptr_t parm4, uintptr_t parm5)
 {
   register long reg0 __asm__("a2") = (long)(nbr);
-  register long reg5 __asm__("a7") = (long)(parm4);
+  register long reg5 __asm__("a7") = (long)(parm5);
   register long reg4 __asm__("a6") = (long)(parm4);
   register long reg3 __asm__("a5") = (long)(parm3);
   register long reg2 __asm__("a4") = (long)(parm2);
@@ -346,8 +381,8 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
                                   uintptr_t parm6)
 {
   register long reg0 __asm__("a2") = (long)(nbr);
-  register long reg6 __asm__("a8") = (long)(parm4);
-  register long reg5 __asm__("a7") = (long)(parm4);
+  register long reg6 __asm__("a8") = (long)(parm6);
+  register long reg5 __asm__("a7") = (long)(parm5);
   register long reg4 __asm__("a6") = (long)(parm4);
   register long reg3 __asm__("a5") = (long)(parm3);
   register long reg2 __asm__("a4") = (long)(parm2);
@@ -360,7 +395,7 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
     "rsync\n"
     : "=r"(reg0)
     : "i"(XCHAL_SWINT_CALL), "r"(reg0), "r"(reg1), "r"(reg2),
-      "r"(reg3), "r"(reg4), "r"(reg5)
+      "r"(reg3), "r"(reg4), "r"(reg5), "r"(reg6)
     : "a9", "memory"
   );
 

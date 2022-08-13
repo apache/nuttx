@@ -23,33 +23,30 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/arch.h>
-#include <nuttx/irq.h>
-#include <nuttx/serial/serial.h>
-#include <nuttx/fs/ioctl.h>
 
-#include <sys/types.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <unistd.h>
-#include <string.h>
 #include <assert.h>
-#include <errno.h>
 #include <debug.h>
-
+#include <errno.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
+#include <sys/types.h>
 #ifdef CONFIG_SERIAL_TERMIOS
 #  include <termios.h>
 #endif
+#include <unistd.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/fs/ioctl.h>
+#include <nuttx/irq.h>
+#include <nuttx/serial/serial.h>
 
 #include "xtensa.h"
-#include "chip.h"
-
-#include "hardware/esp32s3_uart.h"
-#include "hardware/esp32s3_system.h"
-
 #include "esp32s3_config.h"
 #include "esp32s3_irq.h"
 #include "esp32s3_lowputc.h"
+#include "hardware/esp32s3_uart.h"
+#include "hardware/esp32s3_system.h"
 
 #ifdef CONFIG_ESP32S3_USBSERIAL
 #  include "esp32s3_usbserial.h"
@@ -59,8 +56,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The console is enabled, and it's not the syslog device,
- * so, it should be a serial device.
+/* The console is enabled, and it's not the syslog device, so, it should be a
+ * serial device.
  */
 
 #ifdef USE_SERIALDRIVER
@@ -71,8 +68,8 @@
  * Console can be UART0 or UART1, but will always be ttys0.
  */
 
-/* In case a UART was assigned to be
- * the console and the corresponding peripheral was also selected.
+/* In case a UART was assigned to be the console and the corresponding
+ * peripheral was also selected.
  */
 
 #ifdef CONSOLE_UART
@@ -101,7 +98,7 @@
 #  define TTYACM0_DEV           g_uart_usbserial
 #endif
 
-/* Pick ttys1 */
+/* Pick ttyS1 */
 
 #if defined(CONFIG_ESP32S3_UART0) && !defined(UART0_ASSIGNED)
 #  define TTYS1_DEV           g_uart0_dev  /* UART0 is ttyS1 */
@@ -149,21 +146,21 @@ static bool esp32s3_rxflowcontrol(struct uart_dev_s *dev,
 
 static struct uart_ops_s g_uart_ops =
 {
-  .setup       = esp32s3_setup,
-  .shutdown    = esp32s3_shutdown,
-  .attach      = esp32s3_attach,
-  .detach      = esp32s3_detach,
-  .txint       = esp32s3_txint,
-  .rxint       = esp32s3_rxint,
-  .rxavailable = esp32s3_rxavailable,
-  .txready     = esp32s3_txready,
-  .txempty     = esp32s3_txempty,
-  .send        = esp32s3_send,
-  .receive     = esp32s3_receive,
-  .ioctl       = esp32s3_ioctl,
+  .setup         = esp32s3_setup,
+  .shutdown      = esp32s3_shutdown,
+  .attach        = esp32s3_attach,
+  .detach        = esp32s3_detach,
+  .ioctl         = esp32s3_ioctl,
+  .receive       = esp32s3_receive,
+  .rxint         = esp32s3_rxint,
+  .rxavailable   = esp32s3_rxavailable,
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-  .rxflowcontrol  = esp32s3_rxflowcontrol,
+  .rxflowcontrol = esp32s3_rxflowcontrol,
 #endif
+  .send          = esp32s3_send,
+  .txint         = esp32s3_txint,
+  .txready       = esp32s3_txready,
+  .txempty       = esp32s3_txempty
 };
 
 /* UART 0 */
@@ -463,7 +460,7 @@ static int esp32s3_attach(struct uart_dev_s *dev)
   /* Set up to receive peripheral interrupts on the current CPU */
 
   priv->cpu = up_cpu_index();
-  priv->cpuint = esp32s3_setup_irq(0, priv->periph, priv->int_pri,
+  priv->cpuint = esp32s3_setup_irq(priv->cpu, priv->periph, priv->int_pri,
                                    ESP32S3_CPUINT_LEVEL);
   if (priv->cpuint < 0)
     {
@@ -687,7 +684,7 @@ static bool esp32s3_txempty(struct uart_dev_s *dev)
 
 static void esp32s3_send(struct uart_dev_s *dev, int ch)
 {
-  esp32s3_lowputc_send_byte(dev->priv, ch);
+  esp32s3_lowputc_send_byte(dev->priv, (char)ch);
 }
 
 /****************************************************************************
@@ -1082,7 +1079,7 @@ void xtensa_earlyserialinit(void)
 
 void xtensa_serialinit(void)
 {
-#ifdef CONSOLE_UART
+#ifdef CONSOLE_DEV
   uart_register("/dev/console", &CONSOLE_DEV);
 #endif
 
@@ -1124,7 +1121,7 @@ int up_putc(int ch)
       up_lowputc('\r');
     }
 
-  up_lowputc(ch);
+  up_lowputc((char)ch);
 
 #ifdef CONSOLE_UART
   esp32s3_lowputc_restore_all_uart_int(CONSOLE_DEV.priv, &int_status);

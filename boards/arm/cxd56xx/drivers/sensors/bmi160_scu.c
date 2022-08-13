@@ -230,17 +230,17 @@ uint32_t g_pmu_stat;
 struct bmi160_dev_s
 {
 #ifdef CONFIG_SENSORS_BMI160_SCU_I2C
-  FAR struct i2c_master_s *i2c; /* I2C interface */
-  uint8_t addr;                 /* BMP280 I2C address */
-  int freq;                     /* BMP280 Frequency <= 3.4MHz */
-  int port;                     /* I2C port */
-  FAR struct seq_s *seq;        /* Sequencer */
-  int fifoid;                   /* Sequencer id */
+  struct i2c_master_s *i2c; /* I2C interface */
+  uint8_t addr;             /* BMP280 I2C address */
+  int freq;                 /* BMP280 Frequency <= 3.4MHz */
+  int port;                 /* I2C port */
+  struct seq_s *seq;        /* Sequencer */
+  int fifoid;               /* Sequencer id */
 
 #else /* CONFIG_SENSORS_BMI160_SCU_SPI */
-  FAR struct spi_dev_s *spi;    /* SPI interface */
-  FAR struct seq_s *seq;        /* Sequencer */
-  int fifoid;                   /* Sequencer id */
+  struct spi_dev_s *spi;    /* SPI interface */
+  struct seq_s *seq;        /* Sequencer */
+  int fifoid;               /* Sequencer id */
 
 #endif
 };
@@ -249,39 +249,39 @@ struct bmi160_dev_s
  * Private Functions
  ****************************************************************************/
 
-static uint8_t bmi160_getreg8(FAR struct bmi160_dev_s *priv,
+static uint8_t bmi160_getreg8(struct bmi160_dev_s *priv,
                               uint8_t regaddr);
-static void bmi160_putreg8(FAR struct bmi160_dev_s *priv,
+static void bmi160_putreg8(struct bmi160_dev_s *priv,
                            uint8_t regaddr, uint8_t regval);
 
 /* Character driver methods */
 
-static int     bmi160_open_gyro(FAR struct file *filep);
-static int     bmi160_open_accel(FAR struct file *filep);
-static int     bmi160_close_gyro(FAR struct file *filep);
-static int     bmi160_close_accel(FAR struct file *filep);
-static ssize_t bmi160_read(FAR struct file *filep, FAR char *buffer,
+static int     bmi160_open_gyro(struct file *filep);
+static int     bmi160_open_accel(struct file *filep);
+static int     bmi160_close_gyro(struct file *filep);
+static int     bmi160_close_accel(struct file *filep);
+static ssize_t bmi160_read(struct file *filep, char *buffer,
                            size_t len);
-static int     bmi160_ioctl(FAR struct file *filep, int cmd,
+static int     bmi160_ioctl(struct file *filep, int cmd,
                             unsigned long arg);
 
-static int     bmi160_checkid(FAR struct bmi160_dev_s *priv);
+static int     bmi160_checkid(struct bmi160_dev_s *priv);
 
 #ifdef CONFIG_SENSORS_BMI160_SCU_I2C
-static int bmi160_devregister(FAR const char *devpath,
-                              FAR struct i2c_master_s *dev,
+static int bmi160_devregister(const char *devpath,
+                              struct i2c_master_s *dev,
                               int minor,
                               const struct file_operations *fops,
                               int port);
 #else /* CONFIG_SENSORS_BMI160_SCU_SPI */
-static int bmi160_devregister(FAR const char *devpath,
-                              FAR struct spi_dev_s *dev,
+static int bmi160_devregister(const char *devpath,
+                              struct spi_dev_s *dev,
                               int minor,
                               const struct file_operations *fops);
 #endif
 
-static int     bmi160_set_accel_pm(FAR struct bmi160_dev_s *priv, int pm);
-static int     bmi160_set_accel_odr(FAR struct bmi160_dev_s *priv, int odr);
+static int     bmi160_set_accel_pm(struct bmi160_dev_s *priv, int pm);
+static int     bmi160_set_accel_odr(struct bmi160_dev_s *priv, int odr);
 
 /****************************************************************************
  * Private Data
@@ -335,8 +335,8 @@ static const uint16_t g_bmi160accelinst[] =
 
 /* Sequencer instance */
 
-static FAR struct seq_s *g_seq_gyro = NULL;
-static FAR struct seq_s *g_seq_accel = NULL;
+static struct seq_s *g_seq_gyro = NULL;
+static struct seq_s *g_seq_accel = NULL;
 
 static int g_refcnt_gyro = 0;
 static int g_refcnt_accel = 0;
@@ -349,7 +349,7 @@ static int g_refcnt_accel = 0;
  *
  ****************************************************************************/
 
-static uint8_t bmi160_getreg8(FAR struct bmi160_dev_s *priv, uint8_t regaddr)
+static uint8_t bmi160_getreg8(struct bmi160_dev_s *priv, uint8_t regaddr)
 {
   uint8_t regval = 0;
   uint16_t inst[2];
@@ -377,7 +377,7 @@ static uint8_t bmi160_getreg8(FAR struct bmi160_dev_s *priv, uint8_t regaddr)
  *
  ****************************************************************************/
 
-static uint8_t bmi160_getregs(FAR struct bmi160_dev_s *priv,
+static uint8_t bmi160_getregs(struct bmi160_dev_s *priv,
                               uint8_t regaddr, void *buffer, int len)
 {
   uint16_t inst[3];
@@ -415,7 +415,7 @@ static uint8_t bmi160_getregs(FAR struct bmi160_dev_s *priv,
  *
  ****************************************************************************/
 
-static void bmi160_putreg8(FAR struct bmi160_dev_s *priv,
+static void bmi160_putreg8(struct bmi160_dev_s *priv,
                            uint8_t regaddr, uint8_t regval)
 {
   uint16_t inst[2];
@@ -440,7 +440,7 @@ static void bmi160_putreg8(FAR struct bmi160_dev_s *priv,
  *
  ****************************************************************************/
 
-static void bmi160_setcommand(FAR struct bmi160_dev_s *priv, uint8_t command)
+static void bmi160_setcommand(struct bmi160_dev_s *priv, uint8_t command)
 {
   /* Write command register */
 
@@ -455,7 +455,7 @@ static void bmi160_setcommand(FAR struct bmi160_dev_s *priv, uint8_t command)
   g_pmu_stat = bmi160_getreg8(priv, BMI160_PMU_STAT) & 0x3c;
 }
 
-static int bmi160_seqinit_gyro(FAR struct bmi160_dev_s *priv)
+static int bmi160_seqinit_gyro(struct bmi160_dev_s *priv)
 {
   DEBUGASSERT(!g_seq_gyro);
 
@@ -494,7 +494,7 @@ static int bmi160_seqinit_gyro(FAR struct bmi160_dev_s *priv)
   return OK;
 }
 
-static int bmi160_seqinit_accel(FAR struct bmi160_dev_s *priv)
+static int bmi160_seqinit_accel(struct bmi160_dev_s *priv)
 {
   DEBUGASSERT(!g_seq_accel);
 
@@ -541,10 +541,10 @@ static int bmi160_seqinit_accel(FAR struct bmi160_dev_s *priv)
  *
  ****************************************************************************/
 
-static int bmi160_open_gyro(FAR struct file *filep)
+static int bmi160_open_gyro(struct file *filep)
 {
-  FAR struct inode        *inode = filep->f_inode;
-  FAR struct bmi160_dev_s *priv  = inode->i_private;
+  struct inode        *inode = filep->f_inode;
+  struct bmi160_dev_s *priv  = inode->i_private;
   int ret;
 
   if (g_refcnt_gyro == 0)
@@ -580,10 +580,10 @@ static int bmi160_open_gyro(FAR struct file *filep)
   return OK;
 }
 
-static int bmi160_open_accel(FAR struct file *filep)
+static int bmi160_open_accel(struct file *filep)
 {
-  FAR struct inode        *inode = filep->f_inode;
-  FAR struct bmi160_dev_s *priv  = inode->i_private;
+  struct inode        *inode = filep->f_inode;
+  struct bmi160_dev_s *priv  = inode->i_private;
   int ret;
 
   if (g_refcnt_accel == 0)
@@ -627,10 +627,10 @@ static int bmi160_open_accel(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static int bmi160_close_gyro(FAR struct file *filep)
+static int bmi160_close_gyro(struct file *filep)
 {
-  FAR struct inode        *inode = filep->f_inode;
-  FAR struct bmi160_dev_s *priv  = inode->i_private;
+  struct inode        *inode = filep->f_inode;
+  struct bmi160_dev_s *priv  = inode->i_private;
 
   g_refcnt_gyro--;
   if (g_refcnt_gyro == 0)
@@ -653,10 +653,10 @@ static int bmi160_close_gyro(FAR struct file *filep)
   return OK;
 }
 
-static int bmi160_close_accel(FAR struct file *filep)
+static int bmi160_close_accel(struct file *filep)
 {
-  FAR struct inode        *inode = filep->f_inode;
-  FAR struct bmi160_dev_s *priv  = inode->i_private;
+  struct inode        *inode = filep->f_inode;
+  struct bmi160_dev_s *priv  = inode->i_private;
 
   g_refcnt_accel--;
   if (g_refcnt_accel == 0)
@@ -689,12 +689,12 @@ static int bmi160_close_accel(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static ssize_t bmi160_read(FAR struct file *filep,
-                           FAR char *buffer,
+static ssize_t bmi160_read(struct file *filep,
+                           char *buffer,
                            size_t len)
 {
-  FAR struct inode        *inode = filep->f_inode;
-  FAR struct bmi160_dev_s *priv  = inode->i_private;
+  struct inode        *inode = filep->f_inode;
+  struct bmi160_dev_s *priv  = inode->i_private;
 
 #ifdef USE_ONESHOTREAD
   bmi160_getregs(priv, BMI160_DATA_14, buffer, 6);
@@ -714,10 +714,10 @@ static ssize_t bmi160_read(FAR struct file *filep,
  *
  ****************************************************************************/
 
-static int bmi160_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int bmi160_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode        *inode = filep->f_inode;
-  FAR struct bmi160_dev_s *priv  = inode->i_private;
+  struct inode        *inode = filep->f_inode;
+  struct bmi160_dev_s *priv  = inode->i_private;
   int ret = OK;
 
   switch (cmd)
@@ -758,7 +758,7 @@ static int bmi160_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int bmi160_checkid(FAR struct bmi160_dev_s *priv)
+static int bmi160_checkid(struct bmi160_dev_s *priv)
 {
   uint8_t devid = 0;
 
@@ -796,23 +796,23 @@ static int bmi160_checkid(FAR struct bmi160_dev_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_BMI160_SCU_I2C
-static int bmi160_devregister(FAR const char *devpath,
-                              FAR struct i2c_master_s *dev,
+static int bmi160_devregister(const char *devpath,
+                              struct i2c_master_s *dev,
                               int minor,
                               const struct file_operations *fops,
                               int port)
 #else /* CONFIG_SENSORS_BMI160_SCU_SPI */
-static int bmi160_devregister(FAR const char *devpath,
-                              FAR struct spi_dev_s *dev,
+static int bmi160_devregister(const char *devpath,
+                              struct spi_dev_s *dev,
                               int minor,
                               const struct file_operations *fops)
 #endif
 {
-  FAR struct bmi160_dev_s *priv;
+  struct bmi160_dev_s *priv;
   char path[12];
   int ret;
 
-  priv = (FAR struct bmi160_dev_s *)kmm_malloc(sizeof(struct bmi160_dev_s));
+  priv = (struct bmi160_dev_s *)kmm_malloc(sizeof(struct bmi160_dev_s));
   if (!priv)
     {
       snerr("Failed to allocate instance\n");
@@ -859,7 +859,7 @@ static int bmi160_devregister(FAR const char *devpath,
  *
  ****************************************************************************/
 
-static int bmi160_set_accel_pm(FAR struct bmi160_dev_s *priv, int pm)
+static int bmi160_set_accel_pm(struct bmi160_dev_s *priv, int pm)
 {
   uint8_t value;
 
@@ -941,7 +941,7 @@ static int bmi160_set_accel_pm(FAR struct bmi160_dev_s *priv, int pm)
  *
  ****************************************************************************/
 
-static int bmi160_set_accel_odr(FAR struct bmi160_dev_s *priv, int odr)
+static int bmi160_set_accel_odr(struct bmi160_dev_s *priv, int odr)
 {
   uint8_t value;
 
@@ -992,9 +992,9 @@ static int bmi160_set_accel_odr(FAR struct bmi160_dev_s *priv, int odr)
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_BMI160_SCU_I2C
-int bmi160_init(FAR struct i2c_master_s *dev, int port)
+int bmi160_init(struct i2c_master_s *dev, int port)
 #else /* CONFIG_SENSORS_BMI160_SCU_SPI */
-int bmi160_init(FAR struct spi_dev_s *dev)
+int bmi160_init(struct spi_dev_s *dev)
 #endif
 {
   struct bmi160_dev_s tmp;
@@ -1056,11 +1056,11 @@ int bmi160_init(FAR struct spi_dev_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_BMI160_SCU_I2C
-int bmi160gyro_register(FAR const char *devpath, int minor,
-                        FAR struct i2c_master_s *dev, int port)
+int bmi160gyro_register(const char *devpath, int minor,
+                        struct i2c_master_s *dev, int port)
 #else /* CONFIG_SENSORS_BMI160_SCU_SPI */
-int bmi160gyro_register(FAR const char *devpath, int minor,
-                        FAR struct spi_dev_s *dev)
+int bmi160gyro_register(const char *devpath, int minor,
+                        struct spi_dev_s *dev)
 #endif
 {
   int ret;
@@ -1096,11 +1096,11 @@ int bmi160gyro_register(FAR const char *devpath, int minor,
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_BMI160_SCU_I2C
-int bmi160accel_register(FAR const char *devpath, int minor,
-                         FAR struct i2c_master_s *dev, int port)
+int bmi160accel_register(const char *devpath, int minor,
+                         struct i2c_master_s *dev, int port)
 #else /* CONFIG_SENSORS_BMI160_SCU_SPI */
-int bmi160accel_register(FAR const char *devpath, int minor,
-                         FAR struct spi_dev_s *dev)
+int bmi160accel_register(const char *devpath, int minor,
+                         struct spi_dev_s *dev)
 #endif
 {
   int ret;

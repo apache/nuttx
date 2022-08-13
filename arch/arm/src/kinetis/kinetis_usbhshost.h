@@ -122,7 +122,7 @@ extern int kinetis_setup_overcurrent(xcpt_t handler, void *arg);
 
 #if defined(CONFIG_KINETIS_USBHS) && defined(CONFIG_USBHOST)
 struct usbhost_connection_s;
-FAR struct usbhost_connection_s *kinetis_ehci_initialize(int controller);
+struct usbhost_connection_s *kinetis_ehci_initialize(int controller);
 #endif
 
 #undef EXTERN

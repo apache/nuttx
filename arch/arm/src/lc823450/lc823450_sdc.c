@@ -137,7 +137,7 @@ extern SINT_T sddep_write(void *src, void *dst, UI_32 size, SINT_T type,
  * Name: _sdc_semtake
  ****************************************************************************/
 
-static int _sdc_semtake(FAR sem_t *sem)
+static int _sdc_semtake(sem_t *sem)
 {
   return nxsem_wait_uninterruptible(sem);
 }
@@ -146,7 +146,7 @@ static int _sdc_semtake(FAR sem_t *sem)
  * Name: _sdc_semgive
  ****************************************************************************/
 
-static void _sdc_semgive(FAR sem_t *sem)
+static void _sdc_semgive(sem_t *sem)
 {
   nxsem_post(sem);
 }
@@ -272,7 +272,7 @@ int lc823450_sdc_initialize(uint32_t ch)
 #endif
 
       default:
-        DEBUGASSERT(false);
+        DEBUGPANIC();
     }
 
   mcinfo("++++ start\n");

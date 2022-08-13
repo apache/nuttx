@@ -128,6 +128,10 @@ endif
 
 ESPTOOL_BINS += $(FLASH_APP)
 
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+	ESPTOOL_BINS += $(CONFIG_ESP32_USER_IMAGE_OFFSET) nuttx_user.bin
+endif
+
 # Commands for colored and formatted output
 
 RED    = \033[1;31m
@@ -235,6 +239,7 @@ define MKIMAGE
 		exit 1; \
 	fi
 	esptool.py -c esp32 elf2image $(ESPTOOL_FLASH_OPTS) -o nuttx.bin nuttx
+	$(Q) echo nuttx.bin >> nuttx.manifest
 	$(Q) echo "Generated: nuttx.bin (ESP32 compatible)"
 endef
 else ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
@@ -248,6 +253,7 @@ define MKIMAGE
 		exit 1; \
 	fi
 	imgtool sign $(IMGTOOL_SIGN_ARGS) nuttx.hex nuttx.bin
+	$(Q) echo nuttx.bin >> nuttx.manifest
 	$(Q) echo "Generated: nuttx.bin (MCUboot compatible)"
 endef
 endif

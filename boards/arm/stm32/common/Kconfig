@@ -3,14 +3,6 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-config BOARD_STM32_COMMON
-	bool "Board common logic"
-	default n
-	---help---
-		Board common logic located in each board/common folder.
-
-if BOARD_STM32_COMMON
-
 if STM32_FOC
 
 menuconfig BOARD_STM32_IHM07M1
@@ -77,5 +69,3 @@ config BOARD_STM32_HALL3PHASE_SAMPLES
 	default 10
 
 endif # SENSORS_HALL3PHASE
-
-endif # BOARD_STM32_COMMON

@@ -100,11 +100,11 @@ const uintptr_t weak_data g_idle_topstack =
  *
  ****************************************************************************/
 
-void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
+void up_allocate_heap(void **heap_start, size_t *heap_size)
 {
   /* Return the heap settings */
 
-  *heap_start = (FAR void *)_START_HEAP;
+  *heap_start = (void *)_START_HEAP;
   *heap_size  = _END_HEAP - _START_HEAP;
 
   /* Colorize the heap for debug */

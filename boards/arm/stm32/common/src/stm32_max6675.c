@@ -77,7 +77,7 @@
 
 int board_max6675_initialize(int devno, int busno)
 {
-  FAR struct spi_dev_s *spi;
+  struct spi_dev_s *spi;
   char devpath[12];
   int ret;
 
@@ -88,7 +88,7 @@ int board_max6675_initialize(int devno, int busno)
       return -ENODEV;
     }
 
-  /* Then register the barometer sensor */
+  /* Then register the temperature sensor */
 
   snprintf(devpath, 12, "/dev/temp%d", devno);
   ret = max6675_register(devpath, spi);

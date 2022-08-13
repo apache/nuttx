@@ -46,7 +46,7 @@
  ****************************************************************************/
 
 static int stm32_rng_initialize(void);
-static int stm32_rng_interrupt(int irq, void *context, FAR void *arg);
+static int stm32_rng_interrupt(int irq, void *context, void *arg);
 static void stm32_rng_enable(void);
 static void stm32_rng_disable(void);
 static ssize_t stm32_rng_read(struct file *filep, char *buffer, size_t);
@@ -154,7 +154,7 @@ static void stm32_rng_disable(void)
  * Name: stm32_rng_interrupt
  ****************************************************************************/
 
-static int stm32_rng_interrupt(int irq, void *context, FAR void *arg)
+static int stm32_rng_interrupt(int irq, void *context, void *arg)
 {
   uint32_t rngsr;
   uint32_t data;

@@ -245,6 +245,8 @@
 #define DR_REG_I2C1_EXT_BASE                    0x3ff67000
 #define DR_REG_SDMMC_BASE                       0x3ff68000
 #define DR_REG_EMAC_BASE                        0x3ff69000
+#define DR_REG_TWAI_BASE                        0x3ff6b000
+#define DR_REG_CAN_BASE                         DR_REG_TWAI_BASE
 #define DR_REG_PWM1_BASE                        0x3ff6c000
 #define DR_REG_I2S1_BASE                        0x3ff6d000
 #define DR_REG_UART2_BASE                       0x3ff6e000

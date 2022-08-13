@@ -58,7 +58,7 @@ FAR int *__errno(void)
 
   FAR struct tls_info_s *tlsinfo = tls_get_info();
 
-  /* And return the return refernce to the error number */
+  /* And return the return reference to the error number */
 
   return tlsinfo ? &tlsinfo->tl_errno : &g_errno;
 }

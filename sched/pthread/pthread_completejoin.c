@@ -54,7 +54,7 @@ static bool pthread_notifywaiters(FAR struct join_s *pjoin)
   int ntasks_waiting;
   int status;
 
-  sinfo("pjoin=0x%p\n", pjoin);
+  sinfo("pjoin=%p\n", pjoin);
 
   /* Are any tasks waiting for our exit value? */
 
@@ -257,7 +257,7 @@ int pthread_completejoin(pid_t pid, FAR void *exit_value)
 void pthread_destroyjoin(FAR struct task_group_s *group,
                          FAR struct join_s *pjoin)
 {
-  sinfo("pjoin=0x%p\n", pjoin);
+  sinfo("pjoin=%p\n", pjoin);
 
   /* Remove the join info from the set of joins */
 

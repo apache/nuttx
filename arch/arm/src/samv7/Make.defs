@@ -91,6 +91,9 @@ endif
 
 ifeq ($(CONFIG_SAMV7_HAVE_TC),y)
 CHIP_CSRCS += sam_tc.c
+ifeq ($(CONFIG_TIMER),y)
+CHIP_CSRCS += sam_tc_lowerhalf.c
+endif
 ifeq ($(CONFIG_SAMV7_ONESHOT),y)
 CHIP_CSRCS += sam_oneshot.c sam_oneshot_lowerhalf.c
 endif

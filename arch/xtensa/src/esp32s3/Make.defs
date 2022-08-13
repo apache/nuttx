@@ -19,62 +19,17 @@
 ############################################################################
 
 include chip/Bootloader.mk
+include common/Make.defs
 
 # The start-up, "head", file.  May be either a .S or a .c file.
 
-HEAD_ASRC  = xtensa_vectors.S xtensa_window_vector.S xtensa_windowspill.S
-HEAD_ASRC += xtensa_int_handlers.S xtensa_user_handler.S
 HEAD_CSRC  = esp32s3_start.c
-
-# Common XTENSA files (arch/xtensa/src/common)
-
-CMN_ASRCS  = xtensa_context.S xtensa_coproc.S xtensa_cpuint.S xtensa_panic.S
-CMN_ASRCS += xtensa_sigtramp.S
-
-CMN_CSRCS  = xtensa_assert.c xtensa_blocktask.c
-CMN_CSRCS += xtensa_cpenable.c xtensa_createstack.c xtensa_exit.c
-CMN_CSRCS += xtensa_initialize.c xtensa_initialstate.c
-CMN_CSRCS += xtensa_irqdispatch.c xtensa_lowputs.c xtensa_mdelay.c
-CMN_CSRCS += xtensa_modifyreg8.c xtensa_modifyreg16.c xtensa_modifyreg32.c
-CMN_CSRCS += xtensa_puts.c xtensa_releasepending.c xtensa_releasestack.c
-CMN_CSRCS += xtensa_reprioritizertr.c xtensa_schedsigaction.c
-CMN_CSRCS += xtensa_sigdeliver.c xtensa_stackframe.c xtensa_udelay.c
-CMN_CSRCS += xtensa_unblocktask.c xtensa_usestack.c xtensa_swint.c
-CMN_CSRCS += xtensa_saveusercontext.c
-
-# Configuration-dependent common XTENSA files
-
-ifeq ($(CONFIG_DEBUG_ALERT),y)
-  CMN_CSRCS += xtensa_dumpstate.c
-endif
-
-ifeq ($(CONFIG_ARCH_FPU),y)
-  CMN_CSRCS += xtensa_fpucmp.c
-endif
-
-ifeq ($(CONFIG_SPINLOCK),y)
-  CMN_CSRCS += xtensa_testset.c
-endif
-
-ifeq ($(CONFIG_SMP),y)
-  CMN_CSRCS += xtensa_cpupause.c
-endif
-
-ifeq ($(CONFIG_STACK_COLORATION),y)
-  CMN_CSRCS += xtensa_checkstack.c
-endif
-
-ifeq ($(CONFIG_XTENSA_SEMIHOSTING_HOSTFS),y)
-  CMN_ASRCS += xtensa_simcall.S
-  CMN_CSRCS += xtensa_hostfs.c
-endif
 
 # Required ESP32-S3 files (arch/xtensa/src/esp32s3)
 
 CHIP_CSRCS  = esp32s3_irq.c esp32s3_clockconfig.c esp32s3_region.c
-CHIP_CSRCS += esp32s3_timerisr.c esp32s3_user.c esp32s3_allocateheap.c
+CHIP_CSRCS += esp32s3_systemreset.c esp32s3_user.c esp32s3_allocateheap.c
 CHIP_CSRCS += esp32s3_wdt.c esp32s3_gpio.c esp32s3_lowputc.c esp32s3_serial.c
-CHIP_CSRCS += esp32s3_systemreset.c
 
 # Configuration-dependent ESP32-S3 files
 
@@ -85,6 +40,10 @@ endif
 ifeq ($(CONFIG_SMP),y)
 CHIP_ASRCS  = esp32s3_cpuindex.S
 CHIP_CSRCS += esp32s3_cpuidlestack.c esp32s3_cpustart.c esp32s3_intercpu_interrupt.c
+endif
+
+ifeq ($(CONFIG_ESP32S3_USBSERIAL),y)
+CHIP_CSRCS += esp32s3_usbserial.c
 endif
 
 ifeq ($(CONFIG_SCHED_TICKLESS),y)
@@ -113,4 +72,32 @@ endif
 
 ifeq ($(CONFIG_ESP32S3_FREERUN),y)
 CHIP_CSRCS += esp32s3_freerun.c
+endif
+
+ifeq ($(CONFIG_ESP32S3_DMA),y)
+CHIP_CSRCS += esp32s3_dma.c
+endif
+
+ifeq ($(CONFIG_ESP32S3_RT_TIMER),y)
+CHIP_CSRCS += esp32s3_rt_timer.c
+endif
+
+ifeq ($(CONFIG_ESP32S3_I2C),y)
+CHIP_CSRCS += esp32s3_i2c.c
+endif
+
+ifeq ($(CONFIG_ESP32S3_SPI),y)
+CHIP_CSRCS += esp32s3_spi.c
+endif
+
+ifeq ($(CONFIG_ESP32S3_SPIFLASH),y)
+CHIP_CSRCS += esp32s3_spiflash.c
+ifeq ($(CONFIG_ESP32S3_MTD),y)
+CHIP_CSRCS += esp32s3_spiflash_mtd.c
+endif
+endif
+
+ifeq ($(CONFIG_ESP32S3_SPIRAM),y)
+CHIP_CSRCS += esp32s3_spiram.c
+CHIP_CSRCS += esp32s3_psram.c
 endif

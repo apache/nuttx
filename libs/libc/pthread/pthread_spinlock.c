@@ -178,7 +178,7 @@ int pthread_spin_lock(pthread_spinlock_t *lock)
 
   /* Loop until we successfully take the spinlock (i.e., until the previous
    * state of the spinlock was SP_UNLOCKED).
-   * NOTE that the test/set operaion is performed via boardctl() to avoid a
+   * NOTE that the test/set operation is performed via boardctl() to avoid a
    * variety of issues.  An option might be to move the implementation of
    * up_testset() to libs/libc/machine.
    */

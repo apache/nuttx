@@ -189,7 +189,7 @@ void up_timer_initialize(void)
   if (ret < 0)
     {
       tmrerr("ERROR: bm3803_oneshot_initialize failed\n");
-      DEBUGASSERT(0);
+      DEBUGPANIC();
     }
 
 #ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
@@ -199,7 +199,7 @@ void up_timer_initialize(void)
   if (ret < 0)
     {
       tmrerr("ERROR: bm3803_oneshot_max_delay failed\n");
-      DEBUGASSERT(0);
+      DEBUGPANIC();
     }
 
   /* Convert this to configured clock ticks for use by the OS timer logic */
@@ -223,7 +223,7 @@ void up_timer_initialize(void)
   if (ret < 0)
     {
       tmrerr("ERROR: bm3803_freerun_initialize failed\n");
-      DEBUGASSERT(0);
+      DEBUGPANIC();
     }
 }
 

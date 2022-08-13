@@ -1938,7 +1938,7 @@ static int smart_scan(FAR struct smart_struct_s *dev)
 #endif
 #ifdef CONFIG_SMARTFS_MULTI_ROOT_DIRS
   int       x;
-  char      devname[22];
+  char      devname[32];
   FAR struct smart_multiroot_device_s *rootdirdev;
 #endif
   static const uint16_t sizetbl[8] =
@@ -2192,8 +2192,7 @@ static int smart_scan(FAR struct smart_struct_s *dev)
             {
               if (dev->partname[0] != '\0')
                 {
-                  snprintf(dev->rwbuffer, sizeof(devname),
-                           "/dev/smart%d%sd%d",
+                  snprintf(devname, sizeof(devname), "/dev/smart%d%sd%d",
                            dev->minor, dev->partname, x + 1);
                 }
               else
@@ -2219,8 +2218,6 @@ static int smart_scan(FAR struct smart_struct_s *dev)
 
               rootdirdev->dev = dev;
               rootdirdev->rootdirnum = x;
-              ret = register_blockdriver(dev->rwbuffer, &g_bops, 0,
-                                         rootdirdev);
 
               /* Inode private data is a reference to the SMART device
                * structure.

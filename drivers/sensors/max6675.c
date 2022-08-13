@@ -73,9 +73,8 @@ static void    max6675_unlock(FAR struct spi_dev_s *spi);
 
 /* Character driver methods */
 
-static int     max6675_open(FAR struct file *filep);
-static int     max6675_close(FAR struct file *filep);
-static ssize_t max6675_read(FAR struct file *, FAR char *, size_t);
+static ssize_t max6675_read(FAR struct file *filep, FAR char *buffer,
+                            size_t buflen);
 static ssize_t max6675_write(FAR struct file *filep, FAR const char *buffer,
                              size_t buflen);
 
@@ -85,8 +84,8 @@ static ssize_t max6675_write(FAR struct file *filep, FAR const char *buffer,
 
 static const struct file_operations g_max6675fops =
 {
-  max6675_open,    /* open */
-  max6675_close,   /* close */
+  NULL,            /* open */
+  NULL,            /* close */
   max6675_read,    /* read */
   max6675_write,   /* write */
   NULL,            /* seek */
@@ -132,37 +131,11 @@ static void max6675_unlock(FAR struct spi_dev_s *spi)
 }
 
 /****************************************************************************
- * Name: max6675_open
- *
- * Description:
- *   This function is called whenever the MAX6675 device is opened.
- *
- ****************************************************************************/
-
-static int max6675_open(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
- * Name: max6675_close
- *
- * Description:
- *   This routine is called when the MAX6675 device is closed.
- *
- ****************************************************************************/
-
-static int max6675_close(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
  * Name: max6675_read
  ****************************************************************************/
 
-static ssize_t max6675_read(FAR struct file *filep,
-                            FAR char *buffer, size_t buflen)
+static ssize_t max6675_read(FAR struct file *filep, FAR char *buffer,
+                            size_t buflen)
 {
   FAR struct inode         *inode = filep->f_inode;
   FAR struct max6675_dev_s *priv  = inode->i_private;

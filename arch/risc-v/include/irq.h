@@ -33,9 +33,8 @@
 
 #include <nuttx/config.h>
 
-#include <arch/types.h>
+#include <sys/types.h>
 
-#include <arch/arch.h>
 #include <arch/csr.h>
 #include <arch/chip/irq.h>
 #include <arch/mode.h>
@@ -43,6 +42,13 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifdef __ASSEMBLY__
+#  define __STR(s)  s
+#else
+#  define __STR(s)  #s
+#endif
+#define __XSTR(s)   __STR(s)
 
 /* Map RISC-V exception code to NuttX IRQ */
 
@@ -567,6 +573,23 @@ struct xcptcontext
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
+
+/****************************************************************************
+ * Inline functions
+ ****************************************************************************/
+
+/* Return the current value of the stack pointer */
+
+static inline uintptr_t up_getsp(void)
+{
+  register uintptr_t sp;
+  __asm__
+  (
+    "\tadd  %0, x0, x2\n"
+    : "=r"(sp)
+  );
+  return sp;
+}
 
 /****************************************************************************
  * Public Data

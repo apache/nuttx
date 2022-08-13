@@ -100,10 +100,10 @@ static struct lcd_dev_s *g_lcd = NULL;
  *
  ****************************************************************************/
 
-static void cxd56_lpm013m091a4ws_select(FAR struct lpm013m091a_lcd_s *lcd)
+static void cxd56_lpm013m091a4ws_select(struct lpm013m091a_lcd_s *lcd)
 {
-  FAR struct lpm013m091a4ws_lcd_s *priv
-    = (FAR struct lpm013m091a4ws_lcd_s *)lcd;
+  struct lpm013m091a4ws_lcd_s *priv
+    = (struct lpm013m091a4ws_lcd_s *)lcd;
 
   SPI_LOCK(priv->spi, true);
   SPI_SELECT(priv->spi, SPIDEV_DISPLAY(0), true);
@@ -122,10 +122,10 @@ static void cxd56_lpm013m091a4ws_select(FAR struct lpm013m091a_lcd_s *lcd)
  *
  ****************************************************************************/
 
-static void cxd56_lpm013m091a4ws_deselect(FAR struct lpm013m091a_lcd_s *lcd)
+static void cxd56_lpm013m091a4ws_deselect(struct lpm013m091a_lcd_s *lcd)
 {
-  FAR struct lpm013m091a4ws_lcd_s *priv
-    = (FAR struct lpm013m091a4ws_lcd_s *)lcd;
+  struct lpm013m091a4ws_lcd_s *priv
+    = (struct lpm013m091a4ws_lcd_s *)lcd;
 
   SPI_SELECT(priv->spi, SPIDEV_DISPLAY(0), false);
   SPI_LOCK(priv->spi, false);
@@ -146,7 +146,7 @@ static void cxd56_lpm013m091a4ws_deselect(FAR struct lpm013m091a_lcd_s *lcd)
  *
  ****************************************************************************/
 
-static int cxd56_lpm013m091a4ws_backlight(FAR struct lpm013m091a_lcd_s *lcd,
+static int cxd56_lpm013m091a4ws_backlight(struct lpm013m091a_lcd_s *lcd,
                                           int level)
 {
   if (level > 0)
@@ -178,11 +178,11 @@ static int cxd56_lpm013m091a4ws_backlight(FAR struct lpm013m091a_lcd_s *lcd,
  *
  ****************************************************************************/
 
-static int cxd56_lpm013m091a4ws_sendcmd(FAR struct lpm013m091a_lcd_s *lcd,
+static int cxd56_lpm013m091a4ws_sendcmd(struct lpm013m091a_lcd_s *lcd,
                                         const uint8_t cmd)
 {
-  FAR struct lpm013m091a4ws_lcd_s *priv
-    = (FAR struct lpm013m091a4ws_lcd_s *)lcd;
+  struct lpm013m091a4ws_lcd_s *priv
+    = (struct lpm013m091a4ws_lcd_s *)lcd;
 
   lcdinfo("%02x\n", cmd);
 
@@ -215,11 +215,11 @@ static int cxd56_lpm013m091a4ws_sendcmd(FAR struct lpm013m091a_lcd_s *lcd,
  *
  ****************************************************************************/
 
-static int cxd56_lpm013m091a4ws_sendparam(FAR struct lpm013m091a_lcd_s *lcd,
+static int cxd56_lpm013m091a4ws_sendparam(struct lpm013m091a_lcd_s *lcd,
                                           const uint8_t param)
 {
-  FAR struct lpm013m091a4ws_lcd_s *priv
-    = (FAR struct lpm013m091a4ws_lcd_s *)lcd;
+  struct lpm013m091a4ws_lcd_s *priv
+    = (struct lpm013m091a4ws_lcd_s *)lcd;
 
   cxd56_gpio_write(DISPLAY_DC, true);  /* Indicate DATA */
   SPI_SEND(priv->spi, param);
@@ -243,11 +243,11 @@ static int cxd56_lpm013m091a4ws_sendparam(FAR struct lpm013m091a_lcd_s *lcd,
  *
  ****************************************************************************/
 
-static int cxd56_lpm013m091a4ws_sendgram(FAR struct lpm013m091a_lcd_s *lcd,
+static int cxd56_lpm013m091a4ws_sendgram(struct lpm013m091a_lcd_s *lcd,
                                          const uint16_t *wd, uint32_t nwords)
 {
-  FAR struct lpm013m091a4ws_lcd_s *priv
-    = (FAR struct lpm013m091a4ws_lcd_s *)lcd;
+  struct lpm013m091a4ws_lcd_s *priv
+    = (struct lpm013m091a4ws_lcd_s *)lcd;
 
   lcdinfo("lcd:%p, wd=%p, nwords=%d\n", lcd, wd, nwords);
 
@@ -272,11 +272,11 @@ static int cxd56_lpm013m091a4ws_sendgram(FAR struct lpm013m091a_lcd_s *lcd,
  *
  ****************************************************************************/
 
-static int cxd56_lpm013m091a4ws_recvparam(FAR struct lpm013m091a_lcd_s *lcd,
+static int cxd56_lpm013m091a4ws_recvparam(struct lpm013m091a_lcd_s *lcd,
                                           uint8_t *param)
 {
-  FAR struct lpm013m091a4ws_lcd_s *priv
-    = (FAR struct lpm013m091a4ws_lcd_s *)lcd;
+  struct lpm013m091a4ws_lcd_s *priv
+    = (struct lpm013m091a4ws_lcd_s *)lcd;
 
   cxd56_gpio_write(DISPLAY_DC, true);  /* Indicate DATA */
   *param = (uint8_t)(SPI_SEND(priv->spi, param) & 0xff);
@@ -300,7 +300,7 @@ static int cxd56_lpm013m091a4ws_recvparam(FAR struct lpm013m091a_lcd_s *lcd,
  *
  ****************************************************************************/
 
-static int cxd56_lpm013m091a4ws_recvgram(FAR struct lpm013m091a_lcd_s *lcd,
+static int cxd56_lpm013m091a4ws_recvgram(struct lpm013m091a_lcd_s *lcd,
                                          uint16_t *wd, uint32_t nwords)
 {
   lcdinfo("wd=%p, nwords=%d\n", wd, nwords);
@@ -324,8 +324,8 @@ static int cxd56_lpm013m091a4ws_recvgram(FAR struct lpm013m091a_lcd_s *lcd,
 
 int board_lcd_initialize(void)
 {
-  FAR struct lpm013m091a4ws_lcd_s *priv = &g_lcddev;
-  FAR struct spi_dev_s *spi;
+  struct lpm013m091a4ws_lcd_s *priv = &g_lcddev;
+  struct spi_dev_s *spi;
 #if defined(CONFIG_CXD56_DMAC)
   DMA_HANDLE            hdl;
   dma_config_t          conf;
@@ -409,7 +409,7 @@ int board_lcd_initialize(void)
  *
  ****************************************************************************/
 
-FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
+struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
   if (lcddev == 0)
     {

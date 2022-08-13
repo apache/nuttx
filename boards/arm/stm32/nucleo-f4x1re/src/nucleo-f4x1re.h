@@ -97,6 +97,17 @@
 #define GPIO_SPI1_SCK_OFF  (GPIO_INPUT | GPIO_PULLDOWN | \
                             GPIO_PORTA | GPIO_PIN5)
 
+/* SSD1306 */
+
+#define GPIO_SSD1306_CS    (GPIO_OUTPUT|GPIO_OTYPER_PP(0)|GPIO_SPEED_2MHz|\
+                            GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN6)
+
+#define GPIO_SSD1306_CMD   (GPIO_OUTPUT|GPIO_OTYPER_PP(0)|GPIO_OSPEED_2MHz|\
+                            GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN7)
+
+#define GPIO_SSD1306_RST   (GPIO_OUTPUT|GPIO_OTYPER_PP(0)|GPIO_SPEED_2MHz|\
+                            GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN9)
+
 /* MCP2551 */
 
 #define GPIO_MCP2515_CS   (GPIO_OUTPUT|GPIO_OTYPER_PP(0)|GPIO_SPEED_2MHz|\
@@ -292,7 +303,7 @@ int board_ajoy_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_CAN_MCP2515
-int stm32_mcp2515initialize(FAR const char *devpath);
+int stm32_mcp2515initialize(const char *devpath);
 #endif
 
 #endif /* __BOARDS_ARM_STM32_NUCLEO_F401RE_SRC_NUCLEO_F401RE_H */

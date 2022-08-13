@@ -91,8 +91,8 @@ void tms570_spidev_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_TMS570_SPI1
-void tms570_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
-                      bool selected)
+void tms570_spi1select(struct spi_dev_s *dev, uint32_t devid,
+                       bool selected)
 {
 #ifdef CONFIG_MMCSD_SPI
   if (devid == SPIDEV_MMCSD(0))
@@ -102,7 +102,7 @@ void tms570_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
 #endif
 }
 
-uint8_t tms570_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t tms570_spi1status(struct spi_dev_s *dev, uint32_t devid)
 {
   uint8_t status = 0;
 
@@ -118,8 +118,8 @@ uint8_t tms570_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 #endif
 
 #ifdef CONFIG_TMS570_SPI4
-void tms570_spi4select(FAR struct spi_dev_s *dev, uint32_t devid,
-                      bool selected)
+void tms570_spi4select(struct spi_dev_s *dev, uint32_t devid,
+                       bool selected)
 {
 #ifdef CONFIG_MMCSD_SPI
   if (devid == SPIDEV_MMCSD(0))
@@ -129,7 +129,7 @@ void tms570_spi4select(FAR struct spi_dev_s *dev, uint32_t devid,
 #endif
 }
 
-uint8_t tms570_spi4status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint8_t tms570_spi4status(struct spi_dev_s *dev, uint32_t devid)
 {
   uint8_t status = 0;
 

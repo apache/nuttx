@@ -61,7 +61,7 @@ CSRCS  = up_initialize.c up_idle.c up_interruptcontext.c up_initialstate.c
 CSRCS += up_createstack.c up_usestack.c up_releasestack.c up_stackframe.c
 CSRCS += up_unblocktask.c up_blocktask.c up_releasepending.c
 CSRCS += up_reprioritizertr.c up_exit.c up_schedulesigaction.c
-CSRCS += up_heap.c up_uart.c up_assert.c up_puts.c
+CSRCS += up_heap.c up_uart.c up_assert.c up_nputs.c
 CSRCS += up_copyfullstate.c
 CSRCS += up_sigdeliver.c
 
@@ -283,10 +283,13 @@ board/libboard$(LIBEXT):
 # So we have to skip the standard facilities and do the construction by ourself.
 # But how to achieve the goal?
 # 1.Command linker generate the default script(-verbose)
-# 2.Replace __init_array_start/__init_array_end with _sinit/_einit
-# 3.Append __init_array_start = .; __init_array_end = .;
-# Step 2 let nxtask_startup find objects need to construct
-# Step 3 cheat the host there is no object to construct
+# 2.Move input sections out of .init_array/.fini_array into new .sinit/.einit
+#   output sections
+# 3.Replace __init_array_start/__init_array_end with _sinit/_einit
+# 4.Append __init_array_start = .; __init_array_end = .;
+# Step 2 cheat the host there is no object to construct (glibc >= 2.34)
+# Step 3 let nxtask_startup find objects need to construct
+# Step 4 cheat the host there is no object to construct (glibc < 2.34)
 # Note: the destructor can be fixed in the same way.
 
 nuttx-names.dat: nuttx-names.in
@@ -314,8 +317,11 @@ nuttx$(EXEEXT): libarch$(LIBEXT) board/libboard$(LIBEXT) $(HEADOBJ) $(LINKOBJS) 
 ifneq ($(CONFIG_HOST_MACOS),y)
 	$(Q) $(OBJCOPY) --redefine-syms=nuttx-names.dat nuttx.rel
 	$(Q) $(CC) $(CFLAGS) -Wl,-verbose 2>&1 | \
-	     sed -e '/====/,/====/!d;//d' -e 's/__executable_start/_stext/g' -e 's/__init_array_start/_sinit/g' \
-	         -e 's/__init_array_end/_einit/g' -e 's/__fini_array_start/_sfini/g' -e 's/__fini_array_end/_efini/g' >nuttx.ld
+	     sed -e '/====/,/====/!d;//d' -e 's/__executable_start/_stext/g' \
+	         -e 's/^\(\s\+\)\(\.init_array\)/\1\2 : { }\n\1.sinit/g' \
+	         -e 's/^\(\s\+\)\(\.fini_array\)/\1\2 : { }\n\1.einit/g' \
+	         -e 's/__init_array_start/_sinit/g' -e 's/__init_array_end/_einit/g' \
+	         -e 's/__fini_array_start/_sfini/g' -e 's/__fini_array_end/_efini/g' >nuttx.ld
 	$(Q) echo "__init_array_start = .; __init_array_end = .; __fini_array_start = .; __fini_array_end = .;" >>nuttx.ld
 endif
 ifneq ($(CONFIG_ALLSYMS),y)

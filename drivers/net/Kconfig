@@ -260,7 +260,7 @@ menuconfig ENCX24J600
 
 if ENCX24J600
 
-config ENC28J60_NINTERFACES
+config ENCX24J600_NINTERFACES
 	int "Number of physical ENCX24J600"
 	default 1
 	range 1 1
@@ -350,6 +350,27 @@ menuconfig NET_LAN91C111
 
 if NET_LAN91C111
 endif # NET_LAN91C111
+
+menuconfig NET_W5500
+	bool "WIZnet W5500 Support"
+	default n
+	select SPI
+	select ARCH_HAVE_NETDEV_STATISTICS
+	---help---
+		References:
+		W5500 Datasheet, Version 1.0.9, 2013 WIZnet Co., Ltd.
+
+if NET_W5500
+
+config NET_W5500_NINTERFACES
+	int "Number of physical W5500 devices"
+	default 1
+	range 1 1
+	---help---
+		Specifies the number of physical WIZnet W5500
+		devices that will be supported.
+
+endif # W5500
 
 if ARCH_HAVE_PHY
 

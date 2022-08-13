@@ -24,17 +24,17 @@
 
 #include <nuttx/config.h>
 
+#include <debug.h>
 #include <stdint.h>
 #include <time.h>
-#include <debug.h>
 
 #include <nuttx/arch.h>
-#include <arch/xtensa/xtensa_specregs.h>
 #include <arch/board/board.h>
+#include <arch/xtensa/xtensa_specregs.h>
 
 #include "clock/clock.h"
-#include "xtensa_timer.h"
 #include "xtensa.h"
+#include "xtensa_counter.h"
 
 /****************************************************************************
  * Private data
@@ -45,52 +45,6 @@ static uint32_t g_tick_divisor;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Function:  xtensa_getcount, xtensa_getcompare, and xtensa_setcompare
- *
- * Description:
- *   Lower level operations on Xtensa special registers.
- *
- ****************************************************************************/
-
-/* Return the current value of the cycle count register */
-
-static inline uint32_t xtensa_getcount(void)
-{
-  uint32_t count;
-
-  __asm__ __volatile__
-  (
-    "rsr %0, CCOUNT"  : "=r"(count)
-  );
-
-  return count;
-}
-
-/* Return the old value of the compare register */
-
-static inline uint32_t xtensa_getcompare(void)
-{
-  uint32_t compare;
-
-  __asm__ __volatile__
-  (
-    "rsr %0, %1"  : "=r"(compare) : "i"(XT_CCOMPARE)
-  );
-
-  return compare;
-}
-
-/* Set the value of the compare register */
-
-static inline void xtensa_setcompare(uint32_t compare)
-{
-  __asm__ __volatile__
-  (
-    "wsr %0, %1" : : "r"(compare), "i"(XT_CCOMPARE)
-  );
-}
 
 /****************************************************************************
  * Function:  esp32s2_timerisr

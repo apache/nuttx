@@ -184,7 +184,7 @@ time_t up_rtc_time(void)
  *
  ****************************************************************************/
 
-int up_rtc_settime(FAR const struct timespec *ts)
+int up_rtc_settime(const struct timespec *ts)
 {
   uint32_t regval;
 
@@ -193,10 +193,10 @@ int up_rtc_settime(FAR const struct timespec *ts)
   /* Disable the LPSRTC */
 
   regval  = getreg32(IMXRT_SNVS_LPCR);
-  regval &= ~SNVS_LPCR_MCENV;
+  regval &= ~SVNS_LPCR_SRTCENV;
   putreg32(regval, IMXRT_SNVS_LPCR);
 
-  while ((getreg32(IMXRT_SNVS_LPCR) & SNVS_LPCR_MCENV) != 0)
+  while ((getreg32(IMXRT_SNVS_LPCR) & SVNS_LPCR_SRTCENV) != 0)
     {
     }
 
@@ -207,8 +207,8 @@ int up_rtc_settime(FAR const struct timespec *ts)
    * IMXRT_SNVS_LPSMCLR 32-bit LSB of alarm setting.
    */
 
-  putreg32((uint32_t)ts->tv_sec >> 17, IMXRT_SNVS_LPSMCMR);
-  putreg32((uint32_t)ts->tv_sec << 15, IMXRT_SNVS_LPSMCLR);
+  putreg32((uint32_t)ts->tv_sec >> 17, IMXRT_SNVS_LPSRTCMR);
+  putreg32((uint32_t)ts->tv_sec << 15, IMXRT_SNVS_LPSRTCLR);
 
   /* The time has been set */
 

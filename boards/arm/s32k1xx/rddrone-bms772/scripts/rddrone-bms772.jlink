@@ -1,0 +1,21 @@
+//
+// Copyright 2022 NXP
+//
+// J-Link Command File for connecting to RDDRONE-BMS772 with a J-Link debugger and flashing a compiled NuttX binary.
+//
+// The script can be executed by entering the command: JLinkExe -CommandFile rddrone-bms772.jlink
+// Note that the current working directory needs to be /boards/arm/s32k1xx/rddrone-bms772/scripts/ 
+//
+
+usb
+si SWD
+speed 1000
+device S32K144
+connect
+r
+w1 0x40020007, 0x44 // Reset entire flash, including the area used for the Emulated EEPROM functionality,
+w1 0x40020000, 0x80 // which may be used to store application parameters.  Avoids issues when upgrading firmware.
+sleep 1000
+loadbin ../../../../../nuttx.bin, 0x00
+r
+qc

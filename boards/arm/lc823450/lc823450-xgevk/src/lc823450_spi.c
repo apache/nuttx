@@ -41,7 +41,7 @@
  *
  ****************************************************************************/
 
-void lc823450_spiselect(FAR struct spi_dev_s *dev, uint32_t devid,
+void lc823450_spiselect(struct spi_dev_s *dev, uint32_t devid,
                         bool selected)
 {
   /* no need */

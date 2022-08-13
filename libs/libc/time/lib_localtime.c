@@ -1549,9 +1549,7 @@ static int tzparse(FAR const char *name, FAR struct state_s *sp,
       else
         {
           int_fast32_t theirstdoffset;
-          int_fast32_t theirdstoffset;
           int_fast32_t theiroffset;
-          int isdst;
           int i;
           int j;
 
@@ -1560,7 +1558,7 @@ static int tzparse(FAR const char *name, FAR struct state_s *sp,
               return -1;
             }
 
-          /* Initial values of theirstdoffset and theirdstoffset */
+          /* Initial value of theirstdoffset */
 
           theirstdoffset = 0;
           for (i = 0; i < sp->timecnt; ++i)
@@ -1573,20 +1571,8 @@ static int tzparse(FAR const char *name, FAR struct state_s *sp,
                 }
             }
 
-          theirdstoffset = 0;
-          for (i = 0; i < sp->timecnt; ++i)
-            {
-              j = sp->types[i];
-              if (sp->ttis[j].tt_isdst)
-                {
-                  theirdstoffset = -sp->ttis[j].tt_gmtoff;
-                  break;
-                }
-            }
-
           /* Initially we're assumed to be in standard time */
 
-          isdst = FALSE;
           theiroffset = theirstdoffset;
 
           /* Now juggle transition times and types
@@ -1609,29 +1595,13 @@ static int tzparse(FAR const char *name, FAR struct state_s *sp,
                    * offset to the transition time;
                    * otherwise, add the standard time
                    * offset to the transition time.
-                   *
-                   * Transitions from DST to DDST
-                   * will effectively disappear since
-                   * POSIX provides for only one DST
-                   * offset.
                    */
 
-                  if (isdst && !sp->ttis[j].tt_ttisstd)
-                    {
-                      sp->ats[i] += dstoffset - theirdstoffset;
-                    }
-                  else
-                    {
-                      sp->ats[i] += stdoffset - theirstdoffset;
-                    }
+                  sp->ats[i] += stdoffset - theirstdoffset;
                 }
 
               theiroffset = -sp->ttis[j].tt_gmtoff;
-              if (sp->ttis[j].tt_isdst)
-                {
-                  theirdstoffset = theiroffset;
-                }
-              else
+              if (!sp->ttis[j].tt_isdst)
                 {
                   theirstdoffset = theiroffset;
                 }

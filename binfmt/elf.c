@@ -277,9 +277,10 @@ static int elf_loadbinary(FAR struct binary_s *binp,
   up_addrenv_clone(&loadinfo.addrenv, &binp->addrenv);
 #else
   binp->alloc[0]  = (FAR void *)loadinfo.textalloc;
+  binp->alloc[1]  = (FAR void *)loadinfo.dataalloc;
 #ifdef CONFIG_BINFMT_CONSTRUCTORS
-  binp->alloc[1]  = loadinfo.ctoralloc;
-  binp->alloc[2]  = loadinfo.dtoralloc;
+  binp->alloc[2]  = loadinfo.ctoralloc;
+  binp->alloc[3]  = loadinfo.dtoralloc;
 #endif
 #endif
 

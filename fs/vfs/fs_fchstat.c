@@ -90,7 +90,7 @@ errout:
  * Input Parameters:
  *   filep  - File structure instance
  *   buf    - The stat to be modified
- *   flags  - The vaild field in buf
+ *   flags  - The valid field in buf
  *
  * Returned Value:
  *   Upon successful completion, 0 shall be returned. Otherwise, the

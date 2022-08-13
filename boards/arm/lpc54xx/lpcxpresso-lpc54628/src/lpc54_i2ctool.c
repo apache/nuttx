@@ -48,7 +48,7 @@
 
 static void lpc54_i2c_register(int bus, int ndx)
 {
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
   int ret;
 
   i2c = lpc54_i2c_handle(bus, ndx);

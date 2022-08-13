@@ -50,6 +50,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/arch.h>
 #include <nuttx/wireless/wireless.h>
+#include <nuttx/tls.h>
 
 #include "xtensa.h"
 #include "xtensa_attr.h"
@@ -321,7 +322,8 @@ static int32_t esp_nvs_erase_key(uint32_t handle, const char *key);
 static int32_t esp_get_random(uint8_t *buf, size_t len);
 static int32_t esp_get_time(void *t);
 static void esp_log_writev(uint32_t level, const char *tag,
-                           const char *format, va_list args);
+                           const char *format, va_list args)
+            printflike(3, 0);
 static void *esp_malloc_internal(size_t size);
 static void *esp_realloc_internal(void *ptr, size_t size);
 static void *esp_calloc_internal(size_t n, size_t size);
@@ -365,7 +367,8 @@ extern void coex_bt_high_prio(void);
 
 int64_t esp_timer_get_time(void);
 void esp_fill_random(void *buf, size_t len);
-void esp_log_write(uint32_t level, const char *tag, const char *format, ...);
+void esp_log_write(uint32_t level, const char *tag, const char *format, ...)
+     printflike(3, 4);
 uint32_t esp_log_timestamp(void);
 uint8_t esp_crc8(const uint8_t *p, uint32_t len);
 void intr_matrix_set(int cpu_no, uint32_t model_num, uint32_t intr_num);
@@ -373,11 +376,6 @@ void intr_matrix_set(int cpu_no, uint32_t model_num, uint32_t intr_num);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-/* Wi-Fi thread private data */
-
-static pthread_key_t g_wifi_thread_key;
-static bool g_wifi_tkey_init;
 
 /* Wi-Fi event private data */
 
@@ -943,7 +941,7 @@ static void *esp_spin_lock_create(void)
   if (!lock)
     {
       wlerr("Failed to alloc %d memory\n", tmp);
-      DEBUGASSERT(0);
+      DEBUGPANIC();
     }
 
   spin_initialize(lock, SP_UNLOCKED);
@@ -1255,23 +1253,24 @@ static int IRAM_ATTR wifi_is_in_isr(void)
 
 static void *esp_thread_semphr_get(void)
 {
+  static int wifi_task_key = -1;
   int ret;
   void *sem;
 
-  if (g_wifi_tkey_init)
-  {
-    ret = pthread_key_create(&g_wifi_thread_key, esp_thread_semphr_free);
-    if (ret)
-      {
-        wlerr("Failed to create pthread key\n");
-        return NULL;
-      }
+  if (wifi_task_key < 0)
+    {
+      ret = task_tls_alloc(esp_thread_semphr_free);
+      if (ret < 0)
+        {
+          wlerr("Failed to create task local key\n");
+          return NULL;
+        }
 
-    g_wifi_tkey_init = true;
-  }
+      wifi_task_key = ret;
+    }
 
-  sem = pthread_getspecific(g_wifi_thread_key);
-  if (!sem)
+  sem = (void *)task_tls_get_value(wifi_task_key);
+  if (sem == NULL)
     {
       sem = esp_semphr_create(1, 0);
       if (!sem)
@@ -1280,10 +1279,10 @@ static void *esp_thread_semphr_get(void)
           return NULL;
         }
 
-      ret = pthread_setspecific(g_wifi_thread_key, sem);
-      if (ret)
+      ret = task_tls_set_value(wifi_task_key, (uintptr_t)sem);
+      if (ret != OK)
         {
-          wlerr("Failed to set specific\n");
+          wlerr("Failed to save semaphore on task local storage: %d\n", ret);
           esp_semphr_delete(sem);
           return NULL;
         }
@@ -1790,7 +1789,7 @@ static uint32_t esp_queue_msg_waiting(void *queue)
 
 static void *esp_event_group_create(void)
 {
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return NULL;
 }
@@ -1805,7 +1804,7 @@ static void *esp_event_group_create(void)
 
 static void esp_event_group_delete(void *event)
 {
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 }
 
 /****************************************************************************
@@ -1818,7 +1817,7 @@ static void esp_event_group_delete(void *event)
 
 static uint32_t esp_event_group_set_bits(void *event, uint32_t bits)
 {
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return false;
 }
@@ -1833,7 +1832,7 @@ static uint32_t esp_event_group_set_bits(void *event, uint32_t bits)
 
 static uint32_t esp_event_group_clear_bits(void *event, uint32_t bits)
 {
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return false;
 }
@@ -1852,7 +1851,7 @@ static uint32_t esp_event_group_wait_bits(void *event,
                                           int32_t wait_for_all_bits,
                                           uint32_t block_time_tick)
 {
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return false;
 }
@@ -2399,7 +2398,7 @@ uint32_t esp_get_free_heap_size(void)
 static void esp_dport_access_stall_other_cpu_start(void)
 {
 #ifdef CONFIG_SMP
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 #endif
 }
 
@@ -2414,7 +2413,7 @@ static void esp_dport_access_stall_other_cpu_start(void)
 static void esp_dport_access_stall_other_cpu_end(void)
 {
 #ifdef CONFIG_SMP
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 #endif
 }
 
@@ -2459,90 +2458,6 @@ static void wifi_apb80m_release(void)
 static int32_t wifi_phy_update_country_info(const char *country)
 {
   return -1;
-}
-
-/****************************************************************************
- * Name: esp_read_mac
- *
- * Description:
- *   Read MAC address from efuse
- *
- * Input Parameters:
- *   mac  - MAC address buffer pointer
- *   type - MAC address type
- *
- * Returned Value:
- *   0 if success or -1 if fail
- *
- ****************************************************************************/
-
-int32_t esp_read_mac(uint8_t *mac, esp_mac_type_t type)
-{
-  uint32_t regval[2];
-  uint8_t tmp;
-  uint8_t *data = (uint8_t *)regval;
-  uint8_t crc;
-  int i;
-
-  if (type > ESP_MAC_BT)
-    {
-      wlerr("Input type is error=%d\n", type);
-      return -1;
-    }
-
-  regval[0] = getreg32(MAC_ADDR0_REG);
-  regval[1] = getreg32(MAC_ADDR1_REG);
-
-  crc = data[6];
-  for (i = 0; i < MAC_LEN; i++)
-    {
-      mac[i] = data[5 - i];
-    }
-
-  if (crc != esp_crc8(mac, MAC_LEN))
-    {
-      wlerr("Failed to check MAC address CRC\n");
-      return -1;
-    }
-
-  if (type == ESP_MAC_WIFI_SOFTAP)
-    {
-      tmp = mac[0];
-      for (i = 0; i < 64; i++)
-        {
-          mac[0] = tmp | 0x02;
-          mac[0] ^= i << 2;
-
-          if (mac[0] != tmp)
-            {
-              break;
-            }
-        }
-
-      if (i >= 64)
-        {
-          wlerr("Failed to generate SoftAP MAC\n");
-          return -1;
-        }
-    }
-
-  if (type == ESP_MAC_BT)
-    {
-      tmp = mac[0];
-      for (i = 0; i < 64; i++)
-        {
-          mac[0] = tmp | 0x02;
-          mac[0] ^= i << 2;
-
-          if (mac[0] != tmp)
-            {
-              break;
-            }
-        }
-      mac[5] += 1;
-    }
-
-  return 0;
 }
 
 /****************************************************************************
@@ -2855,7 +2770,7 @@ static int32_t esp_nvs_set_i8(uint32_t handle,
 #ifdef CONFIG_ESP32_WIFI_SAVE_PARAM
   return esp_nvs_set_blob(handle, key, &value, sizeof(int8_t));
 #else
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return -1;
 #endif
@@ -2886,7 +2801,7 @@ static int32_t esp_nvs_get_i8(uint32_t handle,
 
   return esp_nvs_get_blob(handle, key, out_value, &len);
 #else
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return -1;
 #endif
@@ -2915,7 +2830,7 @@ static int32_t esp_nvs_set_u8(uint32_t handle,
 #ifdef CONFIG_ESP32_WIFI_SAVE_PARAM
   return esp_nvs_set_blob(handle, key, &value, sizeof(uint8_t));
 #else
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return -1;
 #endif
@@ -2946,7 +2861,7 @@ static int32_t esp_nvs_get_u8(uint32_t handle,
 
   return esp_nvs_get_blob(handle, key, out_value, &len);
 #else
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return -1;
 #endif
@@ -2975,7 +2890,7 @@ static int32_t esp_nvs_set_u16(uint32_t handle,
 #ifdef CONFIG_ESP32_WIFI_SAVE_PARAM
   return esp_nvs_set_blob(handle, key, &value, sizeof(uint16_t));
 #else
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return -1;
 #endif
@@ -3006,7 +2921,7 @@ static int32_t esp_nvs_get_u16(uint32_t handle,
 
   return esp_nvs_get_blob(handle, key, out_value, &len);
 #else
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return -1;
 #endif
@@ -3059,7 +2974,7 @@ static int32_t esp_nvs_open(const char *name,
 
   return 0;
 #else
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return -1;
 #endif
@@ -3087,7 +3002,7 @@ static void esp_nvs_close(uint32_t handle)
   kmm_free(nvs_adpt->index_name);
   kmm_free(nvs_adpt);
 #else
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 #endif
 }
 
@@ -3173,7 +3088,7 @@ static int32_t esp_nvs_set_blob(uint32_t handle,
 
   return 0;
 #else
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return -1;
 #endif
@@ -3247,7 +3162,7 @@ static int32_t esp_nvs_get_blob(uint32_t handle,
 
   return 0;
 #else
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return -1;
 #endif
@@ -3295,7 +3210,7 @@ static int32_t esp_nvs_erase_key(uint32_t handle, const char *key)
 
   return 0;
 #else
-  DEBUGASSERT(0);
+  DEBUGPANIC();
 
   return -1;
 #endif
@@ -4291,98 +4206,6 @@ static int esp_freq_to_channel(uint16_t freq)
       channel = (freq - 4000) / 5;
       return channel;
     }
-
-  return 0;
-}
-
-/****************************************************************************
- * Functions needed by libphy.a
- ****************************************************************************/
-
-/****************************************************************************
- * Name: esp_dport_access_reg_read
- *
- * Description:
- *   Read regitser value safely in SMP
- *
- * Input Parameters:
- *   reg - Register address
- *
- * Returned Value:
- *   Register value
- *
- ****************************************************************************/
-
-uint32_t IRAM_ATTR esp_dport_access_reg_read(uint32_t reg)
-{
-  return getreg32(reg);
-}
-
-/****************************************************************************
- * Name: phy_enter_critical
- *
- * Description:
- *   Enter critical state
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   CPU PS value
- *
- ****************************************************************************/
-
-uint32_t IRAM_ATTR phy_enter_critical(void)
-{
-  irqstate_t flags;
-
-  flags = enter_critical_section();
-
-  return flags;
-}
-
-/****************************************************************************
- * Name: phy_exit_critical
- *
- * Description:
- *   Exit from critical state
- *
- * Input Parameters:
- *   level - CPU PS value
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void IRAM_ATTR phy_exit_critical(uint32_t level)
-{
-  leave_critical_section(level);
-}
-
-/****************************************************************************
- * Name: phy_printf
- *
- * Description:
- *   Output format string and its arguments
- *
- * Input Parameters:
- *   format - format string
- *
- * Returned Value:
- *   0
- *
- ****************************************************************************/
-
-int phy_printf(const char *format, ...)
-{
-#ifdef CONFIG_DEBUG_WIRELESS_INFO
-  va_list arg;
-
-  va_start(arg, format);
-  vsyslog(LOG_INFO, format, arg);
-  va_end(arg);
-#endif
 
   return 0;
 }

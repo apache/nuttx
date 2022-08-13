@@ -92,3 +92,130 @@
 
 	.endm
 
+/****************************************************************************
+ * Name: ps_excp_read
+ *
+ * Description:
+ *  Read from the correct PS register corresponding to the current interrupt
+ *  level.
+ *
+ ****************************************************************************/
+
+	.macro ps_excp_read tmp level
+
+	.ifeq \level - 1
+	rsr		\tmp, PS
+	.else
+	rsr		\tmp, EPS_2 + \level - 2
+	.endif
+
+	.endm
+
+/****************************************************************************
+ * Name: ps_excp_write
+ *
+ * Description:
+ *  Write to the correct PS register corresponding to the current interrupt
+ *  level.
+ *
+ ****************************************************************************/
+
+	.macro ps_excp_write tmp level
+
+	.ifeq \level - 1
+	wsr		\tmp, PS
+	.else
+	wsr		\tmp, EPS_2 + \level - 2
+	.endif
+
+	.endm
+
+/****************************************************************************
+ * Name: exception_backtrace
+ *
+ * Description:
+ *   Populate the base save area with the pre-exception A0 and SP to be able
+ *   to backtrace from it.
+ *
+ ****************************************************************************/
+
+	.macro	exception_backtrace	sa level
+
+#if !defined(__XTENSA_CALL0_ABI__) && defined(CONFIG_XTENSA_INTBACKTRACE)
+	l32i    a3, \sa, (4 * REG_A0)    /* Copy pre-exception a0 (return address) */
+	s32e    a3, sp, -16
+	l32i    a3, \sa, (4 * REG_A1)    /* Copy pre-exception a1 (stack pointer) */
+	s32e    a3, sp, -12
+
+	/* Backtracing only needs a0 and a1, no need to create full base save area.
+	 * Also need to change current frame's return address to point to pre-exception's
+	 * last run instruction.
+	 */
+
+	rsr     a0, EPC_1 + \level - 1   /* Return address for debug backtrace */
+	movi    a4, 0xc0000000           /* Constant with top 2 bits set (call size) */
+	or      a0, a0, a4               /* Set top 2 bits */
+	addx2   a0, a4, a0               /* Clear top bit to simulate a call4 size */
+#endif
+
+	.endm
+
+/****************************************************************************
+ * Name: exception_entry
+ *
+ * Description:
+ *  Create an interrupt frame and save level specific registers.  The rest of
+ *  registers will be saved by xtensa_context_save.
+ *
+ ****************************************************************************/
+
+	.macro exception_entry level
+
+	mov		a0, sp                           /* Save SP in A0 */
+	addi	sp, sp, -XCPTCONTEXT_SIZE        /* Allocate interrupt stack frame */
+	s32i	a0, sp, (4 * REG_A1)             /* Save pre-interrupt SP */
+	ps_excp_read a0 \level                   /* Save interruptee's PS */
+	s32i	a0, sp, (4 * REG_PS)
+	rsr		a0, EPC_1 + \level - 1           /* Save interruptee's PC */
+	s32i	a0, sp, (4 * REG_PC)
+
+#ifdef CONFIG_XTENSA_HAVE_EXCEPTION_HOOKS
+	/* Perform chip-specific exception entry operations */
+
+	exception_entry_hook \level sp a0
+#endif
+
+	rsr		a0, EXCSAVE_1 + \level - 1       /* Save interruptee's a0 */
+	s32i	a0, sp, (4 * REG_A0)
+	s32i	a2, sp, (4 * REG_A2)
+
+	.endm
+
+/****************************************************************************
+ * Name: exception_exit
+ *
+ * Description:
+ *  Restore level specific registers, the rest should have been restored
+ *  before calling this macro.
+ *
+ ****************************************************************************/
+
+	.macro exception_exit level
+
+	l32i	a0, a2, (4 * REG_PS)      /* Retrieve interruptee's PS */
+	ps_excp_write a0 \level
+	l32i	a0, a2, (4 * REG_PC)      /* Retrieve interruptee's PC */
+	wsr		a0, EPC_1 + \level - 1
+
+#ifdef CONFIG_XTENSA_HAVE_EXCEPTION_HOOKS
+	/* Perform chip-specific exception exit operations */
+
+	exception_exit_hook \level a2 a0 a1
+#endif
+
+	l32i	a0, a2, (4 * REG_A0)      /* Retrieve interruptee's A0 */
+	l32i	sp, a2, (4 * REG_A1)      /* Retrieve interrupt stack frame */
+	l32i	a2, a2, (4 * REG_A2)      /* Retrieve interruptee's A2 */
+	rsync						      /* Ensure PS and EPC written */
+
+	.endm

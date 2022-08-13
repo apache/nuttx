@@ -82,10 +82,12 @@ static int lpm013m091a_hwinitialize(FAR struct lpm013m091a_dev_s *dev);
 
 /* lcd data transfer methods */
 
-static int lpm013m091a_putrun(fb_coord_t row, fb_coord_t col,
+static int lpm013m091a_putrun(FAR struct lcd_dev_s *dev,
+                              fb_coord_t row, fb_coord_t col,
                               FAR const uint8_t *buffer, size_t npixels);
 #ifndef CONFIG_LCD_NOGETRUN
-static int lpm013m091a_getrun(fb_coord_t row, fb_coord_t col,
+static int lpm013m091a_getrun(FAR struct lcd_dev_s *dev,
+                              fb_coord_t row, fb_coord_t col,
                               FAR uint8_t *buffer,
                               size_t npixels);
 #endif
@@ -276,7 +278,7 @@ static int lpm013m091a_hwinitialize(FAR struct lpm013m091a_dev_s *dev)
  *   Write a partial raster line to the LCD.
  *
  * Parameters:
- *   devno   - Number of lcd device
+ *   dev     - The lcd device
  *   row     - Starting row to write to (range: 0 <= row < yres)
  *   col     - Starting column to write to (range: 0 <= col <= xres-npixels)
  *   buffer  - The buffer containing the run to be written to the LCD
@@ -290,11 +292,12 @@ static int lpm013m091a_hwinitialize(FAR struct lpm013m091a_dev_s *dev)
  *
  ****************************************************************************/
 
-static int lpm013m091a_putrun(fb_coord_t row, fb_coord_t col,
+static int lpm013m091a_putrun(FAR struct lcd_dev_s *lcd_dev,
+                              fb_coord_t row, fb_coord_t col,
                               FAR const uint8_t *buffer, size_t npixels)
 {
   FAR struct lpm013m091a_dev_s *dev = (FAR struct lpm013m091a_dev_s *)
-                                       &g_lpm013m091a_dev;
+                                      lcd_dev;
   FAR struct lpm013m091a_lcd_s *lcd = dev->lcd;
   FAR const uint16_t *src = (FAR const uint16_t *)buffer;
 
@@ -337,7 +340,7 @@ static int lpm013m091a_putrun(fb_coord_t row, fb_coord_t col,
  *   Read a partial raster line from the LCD.
  *
  * Parameter:
- *   devno   - Number of the lcd device
+ *   dev     - The lcd device
  *   row     - Starting row to read from (range: 0 <= row < yres)
  *   col     - Starting column to read read (range: 0 <= col <= xres-npixels)
  *   buffer  - The buffer in which to return the run read from the LCD
@@ -352,8 +355,10 @@ static int lpm013m091a_putrun(fb_coord_t row, fb_coord_t col,
  ****************************************************************************/
 
 #ifndef CONFIG_LCD_NOGETRUN
-int lpm013m091a_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t * buffer,
-                       size_t npixels)
+static int lpm013m091a_getrun(FAR struct lcd_dev_s *dev,
+                              fb_coord_t row, fb_coord_t col,
+                              FAR uint8_t *buffer,
+                              size_t npixels)
 {
   lcderr("getrun is not supported for now.\n");
   return -ENOSYS;
@@ -418,6 +423,7 @@ static int lpm013m091a_getplaneinfo(FAR struct lcd_dev_s *dev,
   if (dev && pinfo && planeno == 0)
     {
       memcpy(pinfo, &g_planeinfo, sizeof(struct lcd_planeinfo_s));
+      pinfo->dev = dev;
 
       lcdinfo("planeno: %d bpp: %d\n", planeno, pinfo->bpp);
 

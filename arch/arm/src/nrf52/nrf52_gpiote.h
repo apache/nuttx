@@ -71,7 +71,7 @@ enum nrf52_gpiote_outcfg_e
 
 void nrf52_gpiote_set_ch_event(uint32_t pinset, int channel,
                                bool risingedge, bool fallingedge,
-                               xcpt_t func, FAR void *arg);
+                               xcpt_t func, void *arg);
 
 #ifdef CONFIG_NRF52_PER_PIN_INTERRUPTS
 /****************************************************************************
@@ -98,7 +98,7 @@ void nrf52_gpiote_set_ch_event(uint32_t pinset, int channel,
  *
  ****************************************************************************/
 
-void nrf52_gpiote_set_pin_event(uint32_t pinset, xcpt_t func, FAR void *arg);
+void nrf52_gpiote_set_pin_event(uint32_t pinset, xcpt_t func, void *arg);
 #else
 
 /****************************************************************************
@@ -122,7 +122,7 @@ void nrf52_gpiote_set_pin_event(uint32_t pinset, xcpt_t func, FAR void *arg);
  ****************************************************************************/
 
 void nrf52_gpiote_set_port_event(uint32_t pinset, xcpt_t func,
-                                 FAR void *arg);
+                                 void *arg);
 
 #endif
 

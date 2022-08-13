@@ -64,20 +64,20 @@ struct bh1750fvi_dev_s
 /* I2C Helpers */
 
 static int     bh1750fvi_read16(FAR struct bh1750fvi_dev_s *priv,
-                 FAR uint16_t *regval);
+                                FAR uint16_t *regval);
 static int     bh1750fvi_write8(FAR struct bh1750fvi_dev_s *priv,
-                 uint8_t regval);
+                                uint8_t regval);
 
 /* Character driver methods */
 
 static int     bh1750fvi_open(FAR struct file *filep);
 static int     bh1750fvi_close(FAR struct file *filep);
 static ssize_t bh1750fvi_read(FAR struct file *filep, FAR char *buffer,
-                  size_t buflen);
+                              size_t buflen);
 static ssize_t bh1750fvi_write(FAR struct file *filep,
-                  FAR const char *buffer, size_t buflen);
+                               FAR const char *buffer, size_t buflen);
 static int     bh1750fvi_ioctl(FAR struct file *filep, int cmd,
-                  unsigned long arg);
+                               unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -85,8 +85,8 @@ static int     bh1750fvi_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations g_bh1750fvi_fops =
 {
-  bh1750fvi_open,   /* open */
-  bh1750fvi_close,  /* close */
+  NULL,             /* open */
+  NULL,             /* close */
   bh1750fvi_read,   /* read */
   bh1750fvi_write,  /* write */
   NULL,             /* seek */
@@ -169,32 +169,6 @@ static int bh1750fvi_write8(FAR struct bh1750fvi_dev_s *priv, uint8_t regval)
     }
 
   return ret;
-}
-
-/****************************************************************************
- * Name: bh1750fvi_open
- *
- * Description:
- *   This function is called whenever the BH1750FVI device is opened.
- *
- ****************************************************************************/
-
-static int bh1750fvi_open(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
- * Name: bh1750fvi_close
- *
- * Description:
- *   This routine is called when the BH1750FVI device is closed.
- *
- ****************************************************************************/
-
-static int bh1750fvi_close(FAR struct file *filep)
-{
-  return OK;
 }
 
 /****************************************************************************

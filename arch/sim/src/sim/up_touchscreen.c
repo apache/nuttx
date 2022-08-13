@@ -115,7 +115,7 @@ int sim_tsc_initialize(int minor)
 
   /* Register the device as an input device */
 
-  snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
+  snprintf(devname, sizeof(devname), DEV_FORMAT, minor);
   iinfo("Registering %s\n", devname);
 
   ret = touch_register(&priv->lower, devname, 1);
@@ -162,7 +162,7 @@ int sim_tsc_uninitialize(void)
 
   /* Un-register the device */
 
-  snprintf(devname, DEV_NAMELEN, DEV_FORMAT, priv->minor);
+  snprintf(devname, sizeof(devname), DEV_FORMAT, priv->minor);
   iinfo("Un-registering %s\n", devname);
 
   touch_unregister(&priv->lower, devname);

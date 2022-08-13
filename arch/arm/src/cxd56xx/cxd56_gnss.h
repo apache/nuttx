@@ -82,7 +82,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int cxd56_gnssinitialize(FAR const char *devpath);
+int cxd56_gnssinitialize(const char *devpath);
 
 #undef EXTERN
 #if defined(__cplusplus)

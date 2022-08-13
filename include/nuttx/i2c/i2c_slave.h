@@ -22,6 +22,30 @@
 #define __INCLUDE_NUTTX_I2C_I2C_SLAVE_H
 
 /****************************************************************************
+ * Using I2C slave mode:
+ *
+ * After I2C slave mode is initialized by calling an architecture defined
+ * initialization function, the hardware will monitor the I2C bus waiting
+ * for messages with this device's address.
+ *
+ * Before I2C data can be received, the I2CS_READ macro should be called
+ * to register a buffer where the received data will be stored, and a
+ * callback function should be registered with either (not both) the
+ * I2CS_REGISTERCALLBACK macro.  When the data is received (via an I2C
+ * write message) it will be written to the supplied buffer and the callback
+ * function will be called.
+ *
+ * The I2C_WRITE macro is used to register a buffer with data to be
+ * sent when the master next issues an I2C read message.  There is no
+ * specific notification that the data has been read, but since usual
+ * I2C operation is for the master to transmit a message indicating
+ * the desired data before reading, the slave should register the
+ * return data in the callback function and preserve it until the next
+ * callback it received.
+ *
+ ****************************************************************************/
+
+/****************************************************************************
  * Included Files
  ****************************************************************************/
 
@@ -90,10 +114,8 @@
  * Name: I2CS_WRITE
  *
  * Description:
- *   Send a block of data on I2C using the previously selected I2C
- *   frequency and slave address. Each write operational will be an 'atomic'
- *   operation in the sense that any other I2C actions will be serialized
- *   and pend until this write completes. Required.
+ *   Send a block of data on I2C to the next master to issue an I2C read
+ *   transaction to this slave. Required.
  *
  * Input Parameters:
  *   dev    - Device-specific state data
@@ -112,10 +134,10 @@
  * Name: I2CS_READ
  *
  * Description:
- *   Receive a block of data from I2C using the previously selected I2C
- *   frequency and slave address. Each read operational will be an 'atomic'
- *   operation in the sense that any other I2C actions will be serialized
- *   and pend until this read completes. Required.
+ *   Register a buffer to receive the data from the next I2C write
+ *   transaction addressed to this slave.  The callback function supplied
+ *   by the I2CS_REGISTERCALLBACK macro will be called once the buffer
+ *   has been filled.  Required.
  *
  * Input Parameters:
  *   dev    - Device-specific state data
@@ -152,18 +174,30 @@
  * Public Types
  ****************************************************************************/
 
+/* The callback function */
+
+typedef int (i2c_slave_callback_t)(void *arg, size_t rx_len);
+
 /* The I2C vtable */
 
 struct i2c_slave_s;
 struct i2c_slaveops_s
 {
-  int (*setownaddress)(FAR struct i2c_slave_s *dev, int addr, int nbits);
-  int (*write)(FAR struct i2c_slave_s *dev, FAR const uint8_t *buffer,
-        int buflen);
-  int (*read)(FAR struct i2c_slave_s *dev, FAR uint8_t *buffer,
-        int buflen);
+  int (*setownaddress)(FAR struct i2c_slave_s *dev,
+                       int                     addr,
+                       int                     nbits);
+
+  int (*write)(FAR struct i2c_slave_s *dev,
+               FAR const uint8_t      *buffer,
+               int                     buflen);
+
+  int (*read)(FAR struct i2c_slave_s *dev,
+              FAR uint8_t            *buffer,
+              int                     buflen);
+
   int (*registercallback)(FAR struct i2c_slave_s *dev,
-        int (*callback)(FAR void *arg), FAR void *arg);
+                          i2c_slave_callback_t   *callback,
+                          FAR void               *arg);
 };
 
 /* I2C private data.  This structure only defines the initial fields of the

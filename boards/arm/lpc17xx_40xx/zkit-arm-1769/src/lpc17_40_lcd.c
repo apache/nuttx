@@ -46,8 +46,8 @@
  * Private Data
  ****************************************************************************/
 
-FAR struct spi_dev_s *g_spidev;
-FAR struct lcd_dev_s *g_lcddev;
+struct spi_dev_s *g_spidev;
+struct lcd_dev_s *g_lcddev;
 
 /****************************************************************************
  * Public Functions
@@ -82,7 +82,7 @@ int board_lcd_initialize(void)
  * Name: board_lcd_getdev
  ****************************************************************************/
 
-FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
+struct lcd_dev_s *board_lcd_getdev(int lcddev)
 {
   g_lcddev = st7567_initialize(g_spidev, lcddev);
   if (!g_lcddev)
@@ -134,7 +134,7 @@ void board_lcd_uninitialize(void)
  *
  ****************************************************************************/
 
-int lpc17_40_ssp0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int lpc17_40_ssp0cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   if (devid == SPIDEV_DISPLAY(0))
     {

@@ -46,12 +46,12 @@
 
 struct ameba_lowerhalf_s
 {
-  FAR const struct watchdog_ops_s  *ops;  /* Lower half operations */
-  uint32_t timeout;                       /* The (actual) selected timeout */
-  uint32_t lastreset;                     /* The last reset time */
-  bool     started;                       /* true: The watchdog timer has
-                                           * been started
-                                           */
+  const struct watchdog_ops_s *ops; /* Lower half operations */
+  uint32_t timeout;                 /* The (actual) selected timeout */
+  uint32_t lastreset;               /* The last reset time */
+  bool     started;                 /* true: The watchdog timer has
+                                     * been started
+                                     */
 };
 
 /****************************************************************************
@@ -60,12 +60,12 @@ struct ameba_lowerhalf_s
 
 /* "Lower half" driver methods */
 
-static int      ameba_start(FAR struct watchdog_lowerhalf_s *lower);
-static int      ameba_stop(FAR struct watchdog_lowerhalf_s *lower);
-static int      ameba_keepalive(FAR struct watchdog_lowerhalf_s *lower);
-static int      ameba_getstatus(FAR struct watchdog_lowerhalf_s *lower,
-                                FAR struct watchdog_status_s *status);
-static int      ameba_settimeout(FAR struct watchdog_lowerhalf_s *lower,
+static int      ameba_start(struct watchdog_lowerhalf_s *lower);
+static int      ameba_stop(struct watchdog_lowerhalf_s *lower);
+static int      ameba_keepalive(struct watchdog_lowerhalf_s *lower);
+static int      ameba_getstatus(struct watchdog_lowerhalf_s *lower,
+                                struct watchdog_status_s *status);
+static int      ameba_settimeout(struct watchdog_lowerhalf_s *lower,
                                  uint32_t timeout);
 
 /****************************************************************************
@@ -108,9 +108,9 @@ static struct ameba_lowerhalf_s g_wdgdev;
  *
  ****************************************************************************/
 
-static int ameba_start(FAR struct watchdog_lowerhalf_s *lower)
+static int ameba_start(struct watchdog_lowerhalf_s *lower)
 {
-  FAR struct ameba_lowerhalf_s *priv = (FAR struct ameba_lowerhalf_s *)lower;
+  struct ameba_lowerhalf_s *priv = (struct ameba_lowerhalf_s *)lower;
   irqstate_t flags;
   flags = enter_critical_section();
   priv->started = true;
@@ -135,9 +135,9 @@ static int ameba_start(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int ameba_stop(FAR struct watchdog_lowerhalf_s *lower)
+static int ameba_stop(struct watchdog_lowerhalf_s *lower)
 {
-  FAR struct ameba_lowerhalf_s *priv = (FAR struct ameba_lowerhalf_s *)lower;
+  struct ameba_lowerhalf_s *priv = (struct ameba_lowerhalf_s *)lower;
   irqstate_t flags;
   flags = enter_critical_section();
   hal_misc_wdt_disable();
@@ -168,9 +168,9 @@ static int ameba_stop(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int ameba_keepalive(FAR struct watchdog_lowerhalf_s *lower)
+static int ameba_keepalive(struct watchdog_lowerhalf_s *lower)
 {
-  FAR struct ameba_lowerhalf_s *priv = (FAR struct ameba_lowerhalf_s *)lower;
+  struct ameba_lowerhalf_s *priv = (struct ameba_lowerhalf_s *)lower;
   irqstate_t flags;
 
   /* Reload the WDT timer */
@@ -198,10 +198,10 @@ static int ameba_keepalive(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int ameba_getstatus(FAR struct watchdog_lowerhalf_s *lower,
-                           FAR struct watchdog_status_s *status)
+static int ameba_getstatus(struct watchdog_lowerhalf_s *lower,
+                           struct watchdog_status_s *status)
 {
-  FAR struct ameba_lowerhalf_s *priv = (FAR struct ameba_lowerhalf_s *)lower;
+  struct ameba_lowerhalf_s *priv = (struct ameba_lowerhalf_s *)lower;
   uint32_t elapsed;
   uint32_t ticks;
 
@@ -248,10 +248,10 @@ static int ameba_getstatus(FAR struct watchdog_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int ameba_settimeout(FAR struct watchdog_lowerhalf_s *lower,
+static int ameba_settimeout(struct watchdog_lowerhalf_s *lower,
                             uint32_t timeout)
 {
-  FAR struct ameba_lowerhalf_s *priv = (FAR struct ameba_lowerhalf_s *)lower;
+  struct ameba_lowerhalf_s *priv = (struct ameba_lowerhalf_s *)lower;
   irqstate_t flags;
   flags = enter_critical_section();
   priv->timeout = timeout;
@@ -281,13 +281,13 @@ static int ameba_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
 void ameba_wdt_initialize(void)
 {
-  FAR struct ameba_lowerhalf_s *priv = &g_wdgdev;
+  struct ameba_lowerhalf_s *priv = &g_wdgdev;
 
   /* Initialize the driver state structure. */
 
   priv->ops = &g_wdgops;
   watchdog_register(CONFIG_WATCHDOG_DEVPATH,
-                    (FAR struct watchdog_lowerhalf_s *)priv);
+                    (struct watchdog_lowerhalf_s *)priv);
 }
 
 #endif /* CONFIG_WATCHDOG */

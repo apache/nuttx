@@ -43,9 +43,9 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-int mmcl_initialize(int minor, FAR struct mtd_dev_s *mtd);
-int mmcl_uninitialize(FAR const char *devname);
-int mmcl_createpartition(int minor, int number, FAR struct mtd_dev_s *mtd);
+int mmcl_initialize(int minor, struct mtd_dev_s *mtd);
+int mmcl_uninitialize(const char *devname);
+int mmcl_createpartition(int minor, int number, struct mtd_dev_s *mtd);
 
 #if defined(__cplusplus)
 }

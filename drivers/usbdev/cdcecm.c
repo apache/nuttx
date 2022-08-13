@@ -161,11 +161,6 @@ static void cdcecm_txdone(FAR struct cdcecm_driver_s *priv);
 
 static void cdcecm_interrupt_work(FAR void *arg);
 
-/* Watchdog timer expirations */
-
-static void cdcecm_poll_work(FAR void *arg);
-static void cdcecm_poll_expiry(wdparm_t arg);
-
 /* NuttX callback functions */
 
 static int  cdcecm_ifup(FAR struct net_driver_s *dev);
@@ -1413,7 +1408,7 @@ static void cdcecm_mkepdesc(int epidx,
         break;
 
       default:
-        DEBUGASSERT(false);
+        DEBUGPANIC();
     }
 }
 

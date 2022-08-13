@@ -37,10 +37,6 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <string.h>
-#include <wchar.h>
 #include <ctype.h>
 #include <wctype.h>
 

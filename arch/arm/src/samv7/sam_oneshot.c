@@ -158,7 +158,7 @@ int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int chan,
 
   /* Get the TC frequency the corresponds to the requested resolution */
 
-  frequency = USEC_PER_SEC / (uint32_t)resolution;
+  frequency = USEC_PER_SEC / resolution;
 
   /* The pre-calculate values to use when we start the timer */
 

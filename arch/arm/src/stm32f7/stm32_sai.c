@@ -63,6 +63,7 @@
 #include "stm32_dma.h"
 #include "stm32_gpio.h"
 #include "stm32_sai.h"
+#include "stm32_pwr.h"
 
 #ifdef CONFIG_STM32F7_SAI
 
@@ -146,41 +147,19 @@
 #  define SAI_RXDMA16_CONFIG   (DMA_SCR_PFCTRL | DMA_SCR_DIR_P2M|DMA_SCR_MINC | \
                                   DMA_SCR_PSIZE_16BITS | DMA_SCR_MSIZE_16BITS | \
                                   DMA_SCR_PBURST_INCR4 | DMA_SCR_MBURST_INCR4)
-
 #  define SAI_RXDMA32_CONFIG   (DMA_SCR_PFCTRL | DMA_SCR_DIR_P2M|DMA_SCR_MINC | \
                                   DMA_SCR_PSIZE_32BITS | DMA_SCR_MSIZE_32BITS | \
                                   DMA_SCR_PBURST_INCR4 | DMA_SCR_MBURST_INCR4)
-#  define SAI_TXDMA8_CONFIG   (DMA_SCR_PFCTRL | DMA_SCR_DIR_M2P | DMA_SCR_MINC | \
+
+#  define SAI_TXDMA8_CONFIG    (DMA_SCR_DIR_M2P | DMA_SCR_MINC | \
+                                  DMA_SCR_PSIZE_8BITS | DMA_SCR_MSIZE_8BITS | \
+                                  DMA_SCR_PBURST_INCR4 | DMA_SCR_MBURST_INCR4)
+#  define SAI_TXDMA16_CONFIG   (DMA_SCR_DIR_M2P | DMA_SCR_MINC | \
+                                  DMA_SCR_PSIZE_16BITS | DMA_SCR_MSIZE_16BITS | \
+                                  DMA_SCR_PBURST_INCR4 | DMA_SCR_MBURST_INCR4)
+#  define SAI_TXDMA32_CONFIG   (DMA_SCR_DIR_M2P | DMA_SCR_MINC | \
                                   DMA_SCR_PSIZE_32BITS | DMA_SCR_MSIZE_32BITS | \
                                   DMA_SCR_PBURST_INCR4 | DMA_SCR_MBURST_INCR4)
-#  define SAI_TXDMA16_CONFIG   (DMA_SCR_PFCTRL | DMA_SCR_DIR_M2P | DMA_SCR_MINC | \
-                                  DMA_SCR_PSIZE_32BITS | DMA_SCR_MSIZE_32BITS | \
-                                  DMA_SCR_PBURST_INCR4 | DMA_SCR_MBURST_INCR4)
-
-#  define SAI_TXDMA32_CONFIG   (DMA_SCR_PFCTRL | DMA_SCR_DIR_M2P | DMA_SCR_MINC | \
-                                  DMA_SCR_PSIZE_32BITS | DMA_SCR_MSIZE_32BITS | \
-                                  DMA_SCR_PBURST_INCR4 | DMA_SCR_MBURST_INCR4)
-
-#endif
-
-#ifdef DMAMAP_SAI1
-
-/* SAI DMA Channel/Stream selection.  There
- * are multiple DMA stream options that must be dis-ambiguated in the board.h
- * file.
- */
-
-#  define SAI1_DMACHAN          DMAMAP_SAI1
-#endif
-
-#ifdef DMAMAP_SAI2
-
-/* SAI DMA Channel/Stream selection.  There
- * are multiple DMA stream options that must be dis-ambiguated in the board.h
- * file.
- */
-
-#  define SAI2_DMACHAN          DMAMAP_SAI2
 #endif
 
 /****************************************************************************
@@ -204,6 +183,10 @@ struct sai_buffer_s
 struct stm32f7_sai_s
 {
   struct i2s_dev_s dev;        /* Externally visible I2S interface */
+
+  /* Callback for changes in sample rate */
+
+  stm32_sai_sampleratecb_t sampleratecb;
   uintptr_t base;              /* SAI block register base address */
   sem_t exclsem;               /* Assures mutually exclusive access to SAI */
   uint32_t frequency;          /* SAI clock frequency */
@@ -1151,6 +1134,17 @@ static uint32_t sai_samplerate(struct i2s_dev_s *dev, uint32_t rate)
 
   DEBUGASSERT(priv && rate > 0);
 
+  /* Call callback to change system clock (needed for STM32F746 Disco) */
+
+  if (priv->sampleratecb != NULL)
+    {
+      priv->frequency = priv->sampleratecb(dev, rate);
+    }
+  else
+    {
+      i2sinfo("No Sample Rate CB set!\n");
+    }
+
   /* Save the new sample rate and update the divider */
 
   priv->samplerate = rate;
@@ -1638,7 +1632,8 @@ static void sai_portinitialize(struct stm32f7_sai_s *priv)
  *
  ****************************************************************************/
 
-struct i2s_dev_s *stm32_sai_initialize(int intf)
+struct i2s_dev_s *stm32_sai_initialize(int intf,
+                                       stm32_sai_sampleratecb_t sampleratecb)
 {
   struct stm32f7_sai_s *priv;
   irqstate_t flags;
@@ -1652,6 +1647,7 @@ struct i2s_dev_s *stm32_sai_initialize(int intf)
         {
           i2sinfo("SAI1 Block A Selected\n");
           priv = &g_sai1a_priv;
+          priv->sampleratecb = sampleratecb;
 
           stm32_configgpio(GPIO_SAI1_SD_A);
 #  ifndef CONFIG_STM32F7_SAI1_A_SYNC_WITH_B
@@ -1668,6 +1664,7 @@ struct i2s_dev_s *stm32_sai_initialize(int intf)
         {
           i2sinfo("SAI1 Block B Selected\n");
           priv = &g_sai1b_priv;
+          priv->sampleratecb = sampleratecb;
 
           stm32_configgpio(GPIO_SAI1_SD_B);
 #  ifndef CONFIG_STM32F7_SAI1_B_SYNC_WITH_A
@@ -1684,6 +1681,7 @@ struct i2s_dev_s *stm32_sai_initialize(int intf)
         {
           i2sinfo("SAI2 Block A Selected\n");
           priv = &g_sai2a_priv;
+          priv->sampleratecb = sampleratecb;
 
           stm32_configgpio(GPIO_SAI2_SD_A);
 #  ifndef CONFIG_STM32F7_SAI2_A_SYNC_WITH_B
@@ -1700,6 +1698,7 @@ struct i2s_dev_s *stm32_sai_initialize(int intf)
         {
           i2sinfo("SAI2 Block B Selected\n");
           priv = &g_sai2b_priv;
+          priv->sampleratecb = sampleratecb;
 
           stm32_configgpio(GPIO_SAI2_SD_B);
 #  ifndef CONFIG_STM32F7_SAI2_B_SYNC_WITH_A

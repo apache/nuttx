@@ -220,6 +220,17 @@ int esp32c3_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_CAN
+
+  /* Initialize TWAI and register the TWAI driver. */
+
+  ret = esp32c3_twai_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp32c3_twai_setup failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_SENSORS_BMP180
   /* Try to register BMP180 device in I2C0 */
 

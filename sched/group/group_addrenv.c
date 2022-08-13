@@ -39,14 +39,14 @@
  * Public Data
  ****************************************************************************/
 
-/* This variable holds the PID of the current task group.  This ID is
- * zero if the current task is a kernel thread that has no address
- * environment (other than the kernel context).
+/* This variable holds the current task group.  This pointer is NULL
+ * if the current task is a kernel thread that has no address environment
+ * (other than the kernel context).
  *
  * This must only be accessed with interrupts disabled.
  */
 
-pid_t g_pid_current = INVALID_PROCESS_ID;
+FAR struct task_group_s *g_group_current[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
  * Public Functions
@@ -85,7 +85,7 @@ int group_addrenv(FAR struct tcb_s *tcb)
   FAR struct task_group_s *group;
   FAR struct task_group_s *oldgroup;
   irqstate_t flags;
-  pid_t pid;
+  int cpu;
   int ret;
 
   /* NULL for the tcb means to use the TCB of the task at the head of the
@@ -111,34 +111,24 @@ int group_addrenv(FAR struct tcb_s *tcb)
       return OK;
     }
 
-  /* Get the PID of the group that needs the address environment */
-
-  pid = group->tg_pid;
-  DEBUGASSERT(pid != INVALID_PROCESS_ID);
-
   /* Are we going to change address environments? */
 
   flags = enter_critical_section();
-  if (pid != g_pid_current)
+
+  cpu = this_cpu();
+  oldgroup = g_group_current[cpu];
+  if (group != oldgroup)
     {
       /* Yes.. Is there a current address environment in place? */
 
-      if (g_pid_current != INVALID_PROCESS_ID)
+      if (oldgroup)
         {
-          /* Find the old group with this ID. */
+          /* We need to flush the D-Cache and Invalidate the I-Cache for
+           * the group whose environment is disappearing.
+           */
 
-          oldgroup = group_findbypid(g_pid_current);
-          DEBUGASSERT(oldgroup &&
-                      (oldgroup->tg_flags & GROUP_FLAG_ADDRENV) != 0);
-
-          if (oldgroup)
-            {
-              /* We need to flush the D-Cache and Invalidate the I-Cache for
-               * the group whose environment is disappearing.
-               */
-
-              up_addrenv_coherent(&oldgroup->tg_addrenv);
-            }
+          DEBUGASSERT((oldgroup->tg_flags & GROUP_FLAG_ADDRENV) != 0);
+          up_addrenv_coherent(&oldgroup->tg_addrenv);
         }
 
       /* Instantiate the new address environment (removing the old
@@ -155,7 +145,7 @@ int group_addrenv(FAR struct tcb_s *tcb)
 
       /* Save the new, current group */
 
-      g_pid_current = pid;
+      g_group_current[cpu] = group;
     }
 
   leave_critical_section(flags);

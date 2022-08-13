@@ -46,7 +46,7 @@
  * Name: erff
  *
  * Description:
- *   This implementation comes from the Handbook of Mathmatical Functions
+ *   This implementation comes from the Handbook of Mathematical Functions
  *   The implementations in this book are not protected by copyright.
  *   erf comes from formula 7.1.26
  *

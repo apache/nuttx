@@ -36,6 +36,58 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_SAMV7_PWM0_CH0
+#define PWM0_CH0 1
+#else
+#define PWM0_CH0 0
+#endif
+
+#ifdef CONFIG_SAMV7_PWM0_CH1
+#define PWM0_CH1 1
+#else
+#define PWM0_CH1 0
+#endif
+
+#ifdef CONFIG_SAMV7_PWM0_CH2
+#define PWM0_CH2 1
+#else
+#define PWM0_CH2 0
+#endif
+
+#ifdef CONFIG_SAMV7_PWM0_CH3
+#define PWM0_CH3 1
+#else
+#define PWM0_CH3 0
+#endif
+
+#define PWM0_NCHANNELS (PWM0_CH0 + PWM0_CH1 + PWM0_CH2 + PWM0_CH3)
+
+#ifdef CONFIG_SAMV7_PWM1_CH0
+#define PWM1_CH0 1
+#else
+#define PWM1_CH0 0
+#endif
+
+#ifdef CONFIG_SAMV7_PWM1_CH1
+#define PWM1_CH1 1
+#else
+#define PWM1_CH1 0
+#endif
+
+#ifdef CONFIG_SAMV7_PWM1_CH2
+#define PWM1_CH2 1
+#else
+#define PWM1_CH2 0
+#endif
+
+#ifdef CONFIG_SAMV7_PWM1_CH3
+#define PWM1_CH3 1
+#else
+#define PWM1_CH3 0
+#endif
+
+#define PWM1_NCHANNELS (PWM1_CH0 + PWM1_CH1 + PWM1_CH2 + PWM1_CH3)
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -66,7 +118,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct pwm_lowerhalf_s *sam_pwminitialize(int pwm);
+struct pwm_lowerhalf_s *sam_pwminitialize(int pwm);
 
 #undef EXTERN
 #if defined(__cplusplus)
