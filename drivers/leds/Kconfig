@@ -148,9 +148,13 @@ config WS2812_FREQUENCY
 	default 800000
 	depends on WS2812
 	---help---
-		This is should be set to the bit frequency of the
-		ws2812s being used.  Newer chips use an 800 kHz
-		bit frequency (the default); although, some older
-		chips run at 400 kHz.
+		Frequency in Hz.
+		On SPI mode (WS2812_NON_SPI_DRIVER not selected), this is
+		the SPI frequency (commonly a few MHz) to generate the required
+		waveforms to represent a 0/1 symbol.
+		On non SPI mode (WS2812_NON_SPI_DRIVER selected), this should be set
+		to the bit frequency of the ws2812s being used. Newer chips use an
+		800 kHz bit frequency (the default); although, some older chips run
+		at 400 kHz.
 		
 endmenu # LED Support
