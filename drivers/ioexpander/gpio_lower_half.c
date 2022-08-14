@@ -98,21 +98,21 @@ static const struct gpio_operations_s g_gplh_ops =
   gplh_setpintype,
 };
 
-/* REVISIT:  The following violates the NuttX coding standard requirement
- * for C89 compatibility.
- */
+/* Identifies the type of the GPIO pin */
 
-static const uint32_t g_gplh_inttype[] =
+static const uint32_t g_gplh_inttype[GPIO_NPINTYPES] =
 {
-  [GPIO_INPUT_PIN]              = IOEXPANDER_VAL_DISABLE,
-  [GPIO_INPUT_PIN_PULLUP]       = IOEXPANDER_VAL_DISABLE,
-  [GPIO_INPUT_PIN_PULLDOWN]     = IOEXPANDER_VAL_DISABLE,
-  [GPIO_INTERRUPT_PIN]          = CONFIG_GPIO_LOWER_HALF_INTTYPE,
-  [GPIO_INTERRUPT_HIGH_PIN]     = IOEXPANDER_VAL_HIGH,
-  [GPIO_INTERRUPT_LOW_PIN]      = IOEXPANDER_VAL_LOW,
-  [GPIO_INTERRUPT_RISING_PIN]   = IOEXPANDER_VAL_RISING,
-  [GPIO_INTERRUPT_FALLING_PIN]  = IOEXPANDER_VAL_FALLING,
-  [GPIO_INTERRUPT_BOTH_PIN]     = IOEXPANDER_VAL_BOTH,
+  IOEXPANDER_VAL_DISABLE,         /* GPIO_INPUT_PIN */
+  IOEXPANDER_VAL_DISABLE,         /* GPIO_INPUT_PIN_PULLUP */
+  IOEXPANDER_VAL_DISABLE,         /* GPIO_INPUT_PIN_PULLDOWN */
+  IOEXPANDER_VAL_DISABLE,         /* GPIO_OUTPUT_PIN */
+  IOEXPANDER_VAL_DISABLE,         /* GPIO_OUTPUT_PIN_OPENDRAIN */
+  CONFIG_GPIO_LOWER_HALF_INTTYPE, /* GPIO_INTERRUPT_PIN */
+  IOEXPANDER_VAL_HIGH,            /* GPIO_INTERRUPT_HIGH_PIN */
+  IOEXPANDER_VAL_LOW,             /* GPIO_INTERRUPT_LOW_PIN */
+  IOEXPANDER_VAL_RISING,          /* GPIO_INTERRUPT_RISING_PIN */
+  IOEXPANDER_VAL_FALLING,         /* GPIO_INTERRUPT_FALLING_PIN */
+  IOEXPANDER_VAL_BOTH,            /* GPIO_INTERRUPT_BOTH_PIN */
 };
 
 /****************************************************************************
