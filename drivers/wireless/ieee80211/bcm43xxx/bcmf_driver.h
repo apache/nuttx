@@ -139,6 +139,11 @@ struct bcmf_frame_s
  * Public Function Prototypes
  ****************************************************************************/
 
+FAR struct bcmf_dev_s *bcmf_allocate_device(void);
+void bcmf_free_device(FAR struct bcmf_dev_s *priv);
+
+int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv);
+
 /* IOCTLs network interface implementation */
 
 int bcmf_wl_set_mac_address(FAR struct bcmf_dev_s *priv, struct ifreq *req);

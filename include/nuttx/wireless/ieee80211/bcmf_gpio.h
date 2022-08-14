@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/ieee80211/bcm43xxx/bcmf_chip_43362.c
+ * include/nuttx/wireless/ieee80211/bcmf_gpio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,66 +18,35 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_WIRELESS_IEEE80211_BCMF_GPIO_H
+#define __INCLUDE_NUTTX_WIRELESS_IEEE80211_BCMF_GPIO_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <stdint.h>
-
-#include "bcmf_interface.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Private Type Definitions
  ****************************************************************************/
 
-#define WRAPPER_REGISTER_OFFSET  0x100000
+typedef struct bcmf_dev_s;
 
 /****************************************************************************
- * Public Data
+ * Public Function Prototypes
  ****************************************************************************/
-
-extern const char bcm43362_nvram_image[];
-extern const unsigned int bcm43362_nvram_image_len;
-
-#ifndef CONFIG_IEEE80211_BROADCOM_FWFILES
-extern const uint8_t bcm43362_firmware_image[];
-extern const unsigned int bcm43362_firmware_image_len;
-#endif
-
-const struct bcmf_chip_data bcmf_43362_config_data =
-{
-  /* General chip stats */
-
-  .ram_base = 0,
-  .ram_size = 0x3c000,
-
-  /* Backplane architecture */
-
-  .core_base =
-  {
-    [CHIPCOMMON_CORE_ID]  = 0x18000000,  /* Chipcommon core register base   */
-    [DOT11MAC_CORE_ID]    = 0x18001000,  /* dot11mac core register base     */
-    [SDIOD_CORE_ID]       = 0x18002000,  /* SDIOD Device core register base */
-    [WLAN_ARMCM3_CORE_ID] = 0x18003000 + /* ARMCM3 core register base       */
-                            WRAPPER_REGISTER_OFFSET,
-    [SOCSRAM_CORE_ID]     = 0x18004000 + /* SOCSRAM core register base      */
-                            WRAPPER_REGISTER_OFFSET
-  },
-
-  /* Firmware images */
-
-  /* TODO find something smarter than using image_len references */
-
-  .nvram_image         = (FAR uint8_t *)bcm43362_nvram_image,
-  .nvram_image_size    = (FAR unsigned int *)&bcm43362_nvram_image_len,
-
-#ifndef CONFIG_IEEE80211_BROADCOM_FWFILES
-  .firmware_image      = (FAR uint8_t *)bcm43362_firmware_image,
-  .firmware_image_size = (FAR unsigned int *)&bcm43362_firmware_image_len,
-#endif
-};
 
 /****************************************************************************
- * Public Functions
+ * Name: bcmf_set_gpio
  ****************************************************************************/
+
+int bcmf_set_gpio(FAR struct bcmf_dev_s *priv, int pin, bool value);
+
+/****************************************************************************
+ * Name: bcmf_get_gpio
+ ****************************************************************************/
+
+int bcmf_get_gpio(FAR struct bcmf_dev_s *priv, int pin, bool *value);
+
+#endif /* __INCLUDE_NUTTX_WIRELESS_IEEE80211_BCMF_GPIO_H */

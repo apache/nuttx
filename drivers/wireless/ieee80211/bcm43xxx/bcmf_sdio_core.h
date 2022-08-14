@@ -47,6 +47,7 @@
 #define SDIO_DEVICE_ID_BROADCOM_43362        43362
 #define SDIO_DEVICE_ID_BROADCOM_43430        43430
 #define SDIO_DEVICE_ID_BROADCOM_43455        0x4345
+#define SDIO_DEVICE_ID_INFINEON_CYW43439     43439
 
 /* Core reg address translation.
  * Both macro's returns a 32 bits byte address on the backplane bus.
@@ -81,23 +82,6 @@
 #define SMB_INT_ACK (1 << 1)  /* Host Interrupt ACK */
 #define SMB_USE_OOB (1 << 2)  /* Use OOB Wakeup */
 #define SMB_DEV_INT (1 << 3)  /* Miscellaneous Interrupt */
-
-enum
-{
-  CHIPCOMMON_CORE_ID = 0,
-  DOT11MAC_CORE_ID,
-  SDIOD_CORE_ID,
-#if defined(CONFIG_IEEE80211_BROADCOM_BCM4301X) || \
-    defined(CONFIG_IEEE80211_BROADCOM_BCM43362) || \
-    defined(CONFIG_IEEE80211_BROADCOM_BCM43438)
-  WLAN_ARMCM3_CORE_ID,
-  SOCSRAM_CORE_ID,
-#endif
-#if defined(CONFIG_IEEE80211_BROADCOM_BCM43455)
-  WLAN_ARMCR4_CORE_ID,
-#endif
-  MAX_CORE_ID
-};
 
 struct chip_core_info
 {

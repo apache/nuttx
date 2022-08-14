@@ -77,16 +77,16 @@
 /* Supported chip configurations */
 
 #ifdef CONFIG_IEEE80211_BROADCOM_BCM4301X
-  extern const struct bcmf_sdio_chip bcmf_4301x_config_sdio;
+  extern const struct bcmf_chip_data bcmf_4301x_config_data;
 #endif
 #ifdef CONFIG_IEEE80211_BROADCOM_BCM43362
-  extern const struct bcmf_sdio_chip bcmf_43362_config_sdio;
+  extern const struct bcmf_chip_data bcmf_43362_config_data;
 #endif
 #ifdef CONFIG_IEEE80211_BROADCOM_BCM43438
-  extern const struct bcmf_sdio_chip bcmf_43438_config_sdio;
+  extern const struct bcmf_chip_data bcmf_43438_config_data;
 #endif
 #ifdef CONFIG_IEEE80211_BROADCOM_BCM43455
-  extern const struct bcmf_sdio_chip bcmf_43455_config_sdio;
+  extern const struct bcmf_chip_data bcmf_43455_config_data;
 #endif
 
 /****************************************************************************
@@ -113,15 +113,6 @@ static bool brcm_chip_sr_capable(FAR struct bcmf_sdio_dev_s *sbus);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-/* Buffer pool for SDIO bus interface
- * This pool is shared between all driver devices
- */
-
-static struct bcmf_sdio_frame
-  g_pktframes[CONFIG_IEEE80211_BROADCOM_FRAME_POOL_SIZE];
-
-/* TODO free_queue should be static */
 
 /****************************************************************************
  * Private Functions
@@ -648,8 +639,141 @@ static bool brcm_chip_sr_capable(FAR struct bcmf_sdio_dev_s *sbus)
 }
 
 /****************************************************************************
+ * Name: bcmf_bus_sdio_initialize
+ ****************************************************************************/
+
+static int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
+                                    int minor, FAR struct sdio_dev_s *dev)
+{
+  FAR struct bcmf_sdio_dev_s *sbus;
+  FAR char *argv[2];
+  char arg1[32];
+  int ret;
+
+  /* Allocate sdio bus structure */
+
+  sbus = (FAR struct bcmf_sdio_dev_s *)kmm_malloc(sizeof(*sbus));
+
+  if (!sbus)
+    {
+      return -ENOMEM;
+    }
+
+  /* Initialize sdio bus device structure */
+
+  memset(sbus, 0, sizeof(*sbus));
+  sbus->sdio_dev           = dev;
+  sbus->minor              = minor;
+  sbus->ready              = false;
+  sbus->sleeping           = true;
+
+  sbus->bus.txframe        = bcmf_sdpcm_queue_frame;
+  sbus->bus.rxframe        = bcmf_sdpcm_get_rx_frame;
+  sbus->bus.allocate_frame = bcmf_sdpcm_alloc_frame;
+  sbus->bus.free_frame     = bcmf_sdpcm_free_frame;
+  sbus->bus.stop           = NULL; /* TODO */
+
+  /* Init transmit frames queue */
+
+  if ((ret = nxsem_init(&sbus->queue_mutex, 0, 1)) != OK)
+    {
+      goto exit_free_bus;
+    }
+
+  list_initialize(&sbus->tx_queue);
+  list_initialize(&sbus->rx_queue);
+
+  /* Setup free buffer list */
+
+  bcmf_initialize_interface_frames();
+
+  /* Init thread semaphore */
+
+  if ((ret = nxsem_init(&sbus->thread_signal, 0, 0)) != OK)
+    {
+      goto exit_free_bus;
+    }
+
+  if ((ret = nxsem_set_protocol(&sbus->thread_signal, SEM_PRIO_NONE)) != OK)
+    {
+      goto exit_free_bus;
+    }
+
+  /* Configure hardware */
+
+  bcmf_board_initialize(sbus->minor);
+
+  /* Register sdio bus */
+
+  priv->bus = &sbus->bus;
+
+  /* Spawn bcmf daemon thread */
+
+  snprintf(arg1, sizeof(arg1), "%p", priv);
+  argv[0] = arg1;
+  argv[1] = NULL;
+  ret = kthread_create(BCMF_THREAD_NAME,
+                       CONFIG_IEEE80211_BROADCOM_SCHED_PRIORITY,
+                       BCMF_THREAD_STACK_SIZE, bcmf_sdio_thread,
+                       argv);
+  if (ret <= 0)
+    {
+      wlerr("Cannot spawn bcmf thread\n");
+      ret = -EBADE;
+      goto exit_free_bus;
+    }
+
+  sbus->thread_id = (pid_t)ret;
+
+  return OK;
+
+exit_free_bus:
+  kmm_free(sbus);
+  priv->bus = NULL;
+  return ret;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: bcmf_sdio_initialize
+ *
+ * Description:
+ *   Initialize the drive with a SDIO connection.
+ ****************************************************************************/
+
+int bcmf_sdio_initialize(int minor, FAR struct sdio_dev_s *dev)
+{
+  int ret;
+  FAR struct bcmf_dev_s *priv;
+
+  wlinfo("minor: %d\n", minor);
+
+  priv = bcmf_allocate_device();
+  if (!priv)
+    {
+      return -ENOMEM;
+    }
+
+  /* Init sdio bus */
+
+  ret = bcmf_bus_sdio_initialize(priv, minor, dev);
+  if (ret != OK)
+    {
+      ret = -EIO;
+      goto exit_free_device;
+    }
+
+  /* Bus initialized, register network driver */
+
+  return bcmf_driver_initialize(priv);
+
+exit_free_device:
+  bcmf_free_device(priv);
+  return ret;
+}
 
 /****************************************************************************
  * Name: bcmf_transfer_bytes
@@ -789,107 +913,6 @@ exit_uninit_hw:
   return ret;
 }
 
-/****************************************************************************
- * Name: bcmf_bus_sdio_initialize
- ****************************************************************************/
-
-int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
-                             int minor, FAR struct sdio_dev_s *dev)
-{
-  FAR struct bcmf_sdio_dev_s *sbus;
-  FAR char *argv[2];
-  char arg1[32];
-  int ret;
-
-  /* Allocate sdio bus structure */
-
-  sbus = (FAR struct bcmf_sdio_dev_s *)kmm_malloc(sizeof(*sbus));
-
-  if (!sbus)
-    {
-      return -ENOMEM;
-    }
-
-  /* Initialize sdio bus device structure */
-
-  memset(sbus, 0, sizeof(*sbus));
-  sbus->sdio_dev           = dev;
-  sbus->minor              = minor;
-  sbus->ready              = false;
-  sbus->sleeping           = true;
-
-  sbus->bus.txframe        = bcmf_sdpcm_queue_frame;
-  sbus->bus.rxframe        = bcmf_sdpcm_get_rx_frame;
-  sbus->bus.allocate_frame = bcmf_sdpcm_alloc_frame;
-  sbus->bus.free_frame     = bcmf_sdpcm_free_frame;
-  sbus->bus.stop           = NULL; /* TODO */
-
-  /* Init transmit frames queue */
-
-  if ((ret = nxsem_init(&sbus->queue_mutex, 0, 1)) != OK)
-    {
-      goto exit_free_bus;
-    }
-
-  list_initialize(&sbus->tx_queue);
-  list_initialize(&sbus->rx_queue);
-  list_initialize(&sbus->free_queue);
-
-  /* Setup free buffer list */
-
-  /* FIXME this should be static to driver */
-
-  for (ret = 0; ret < CONFIG_IEEE80211_BROADCOM_FRAME_POOL_SIZE; ret++)
-    {
-      list_add_tail(&sbus->free_queue, &g_pktframes[ret].list_entry);
-    }
-
-  /* Init thread semaphore */
-
-  if ((ret = nxsem_init(&sbus->thread_signal, 0, 0)) != OK)
-    {
-      goto exit_free_bus;
-    }
-
-  if ((ret = nxsem_set_protocol(&sbus->thread_signal, SEM_PRIO_NONE)) != OK)
-    {
-      goto exit_free_bus;
-    }
-
-  /* Configure hardware */
-
-  bcmf_board_initialize(sbus->minor);
-
-  /* Register sdio bus */
-
-  priv->bus = &sbus->bus;
-
-  /* Spawn bcmf daemon thread */
-
-  snprintf(arg1, sizeof(arg1), "%p", priv);
-  argv[0] = arg1;
-  argv[1] = NULL;
-  ret = kthread_create(BCMF_THREAD_NAME,
-                       CONFIG_IEEE80211_BROADCOM_SCHED_PRIORITY,
-                       BCMF_THREAD_STACK_SIZE, bcmf_sdio_thread,
-                       argv);
-  if (ret <= 0)
-    {
-      wlerr("Cannot spawn bcmf thread\n");
-      ret = -EBADE;
-      goto exit_free_bus;
-    }
-
-  sbus->thread_id = (pid_t)ret;
-
-  return OK;
-
-exit_free_bus:
-  kmm_free(sbus);
-  priv->bus = NULL;
-  return ret;
-}
-
 int bcmf_chipinitialize(FAR struct bcmf_sdio_dev_s *sbus)
 {
   uint32_t value = 0;
@@ -911,28 +934,28 @@ int bcmf_chipinitialize(FAR struct bcmf_sdio_dev_s *sbus)
       case SDIO_DEVICE_ID_BROADCOM_43012:
       case SDIO_DEVICE_ID_BROADCOM_43013:
         wlinfo("bcm%d chip detected\n", chipid);
-        sbus->chip = (struct bcmf_sdio_chip *)&bcmf_4301x_config_sdio;
+        sbus->chip = (struct bcmf_chip_data *)&bcmf_4301x_config_data;
         break;
 #endif
 
 #ifdef CONFIG_IEEE80211_BROADCOM_BCM43362
       case SDIO_DEVICE_ID_BROADCOM_43362:
         wlinfo("bcm43362 chip detected\n");
-        sbus->chip = (struct bcmf_sdio_chip *)&bcmf_43362_config_sdio;
+        sbus->chip = (struct bcmf_chip_data *)&bcmf_43362_config_data;
         break;
 #endif
 
 #ifdef CONFIG_IEEE80211_BROADCOM_BCM43438
       case SDIO_DEVICE_ID_BROADCOM_43430:
         wlinfo("bcm43438 chip detected\n");
-        sbus->chip = (struct bcmf_sdio_chip *)&bcmf_43438_config_sdio;
+        sbus->chip = (struct bcmf_chip_data *)&bcmf_43438_config_data;
         break;
 #endif
 
 #ifdef CONFIG_IEEE80211_BROADCOM_BCM43455
       case SDIO_DEVICE_ID_BROADCOM_43455:
         wlinfo("bcm43455 chip detected\n");
-        sbus->chip = (struct bcmf_sdio_chip *)&bcmf_43455_config_sdio;
+        sbus->chip = (struct bcmf_chip_data *)&bcmf_43455_config_data;
         break;
 #endif
 
@@ -1047,74 +1070,4 @@ int bcmf_sdio_thread(int argc, char **argv)
 
   wlinfo("Exit\n");
   return 0;
-}
-
-struct bcmf_sdio_frame *bcmf_sdio_allocate_frame(FAR struct bcmf_dev_s *priv,
-                                                 bool block, bool tx)
-{
-  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
-  struct bcmf_sdio_frame *sframe;
-
-  while (1)
-    {
-      if (nxsem_wait_uninterruptible(&sbus->queue_mutex) < 0)
-        {
-          DEBUGPANIC();
-        }
-
-      if (!tx ||
-          sbus->tx_queue_count <
-            CONFIG_IEEE80211_BROADCOM_FRAME_POOL_SIZE / 2)
-        {
-          if ((sframe = list_remove_head_type(&sbus->free_queue,
-                                         struct bcmf_sdio_frame,
-                                         list_entry)) != NULL)
-            {
-              if (tx)
-                {
-                  sbus->tx_queue_count++;
-                }
-
-              nxsem_post(&sbus->queue_mutex);
-              break;
-            }
-        }
-
-      nxsem_post(&sbus->queue_mutex);
-
-      if (!block)
-        {
-          wlinfo("No avail buffer\n");
-          return NULL;
-        }
-
-      nxsig_usleep(10 * 1000);
-    }
-
-  sframe->header.len  = HEADER_SIZE + MAX_NETDEV_PKTSIZE +
-                        CONFIG_NET_GUARDSIZE;
-  sframe->header.base = sframe->data;
-  sframe->header.data = sframe->data;
-  sframe->tx          = tx;
-  return sframe;
-}
-
-void bcmf_sdio_free_frame(FAR struct bcmf_dev_s *priv,
-                          struct bcmf_sdio_frame *sframe)
-{
-  FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
-
-  if (nxsem_wait_uninterruptible(&sbus->queue_mutex) < 0)
-    {
-      DEBUGPANIC();
-    }
-
-  list_add_head(&sbus->free_queue, &sframe->list_entry);
-
-  if (sframe->tx)
-    {
-      sbus->tx_queue_count--;
-    }
-
-  nxsem_post(&sbus->queue_mutex);
 }

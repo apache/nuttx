@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/ieee80211/bcm43xxx/bcmf_chip_43362.c
+ * drivers/wireless/ieee80211/bcm43xxx/bcmf_gpio.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,62 +22,65 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <stdint.h>
+#include <stdbool.h>
 
+#include <nuttx/wireless/ieee80211/bcmf_gpio.h>
+
+#include "bcmf_cdc.h"
 #include "bcmf_interface.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define WRAPPER_REGISTER_OFFSET  0x100000
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-extern const char bcm43362_nvram_image[];
-extern const unsigned int bcm43362_nvram_image_len;
-
-#ifndef CONFIG_IEEE80211_BROADCOM_FWFILES
-extern const uint8_t bcm43362_firmware_image[];
-extern const unsigned int bcm43362_firmware_image_len;
-#endif
-
-const struct bcmf_chip_data bcmf_43362_config_data =
-{
-  /* General chip stats */
-
-  .ram_base = 0,
-  .ram_size = 0x3c000,
-
-  /* Backplane architecture */
-
-  .core_base =
-  {
-    [CHIPCOMMON_CORE_ID]  = 0x18000000,  /* Chipcommon core register base   */
-    [DOT11MAC_CORE_ID]    = 0x18001000,  /* dot11mac core register base     */
-    [SDIOD_CORE_ID]       = 0x18002000,  /* SDIOD Device core register base */
-    [WLAN_ARMCM3_CORE_ID] = 0x18003000 + /* ARMCM3 core register base       */
-                            WRAPPER_REGISTER_OFFSET,
-    [SOCSRAM_CORE_ID]     = 0x18004000 + /* SOCSRAM core register base      */
-                            WRAPPER_REGISTER_OFFSET
-  },
-
-  /* Firmware images */
-
-  /* TODO find something smarter than using image_len references */
-
-  .nvram_image         = (FAR uint8_t *)bcm43362_nvram_image,
-  .nvram_image_size    = (FAR unsigned int *)&bcm43362_nvram_image_len,
-
-#ifndef CONFIG_IEEE80211_BROADCOM_FWFILES
-  .firmware_image      = (FAR uint8_t *)bcm43362_firmware_image,
-  .firmware_image_size = (FAR unsigned int *)&bcm43362_firmware_image_len,
-#endif
-};
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: bcmf_set_gpio
+ ****************************************************************************/
+
+int bcmf_set_gpio(FAR struct bcmf_dev_s *priv, int pin, bool value)
+{
+  struct
+    {
+      uint32_t mask;
+      uint32_t value;
+    } buffer;
+
+  uint32_t buf_len = sizeof(buffer);
+
+  if (!(((FAR bcmf_interface_dev_t *)priv->bus)->ready)) return -EIO;
+
+  buffer.mask  = 1 << pin;
+  buffer.value = value ? (1 << pin) : 0;
+
+  return bcmf_cdc_iovar_request(priv,
+                                CHIP_STA_INTERFACE,
+                                true,
+                                IOVAR_STR_GPIOOUT,
+                                (uint8_t *)&buffer,
+                                &buf_len);
+}
+
+/****************************************************************************
+ * Name: bcmf_get_gpio
+ ****************************************************************************/
+
+int bcmf_get_gpio(FAR struct bcmf_dev_s *priv, int pin, bool *value)
+{
+  uint8_t  buffer;
+  uint32_t buf_len = sizeof(buffer);
+  int      ret;
+
+  if (!(((FAR bcmf_interface_dev_t *)priv->bus)->ready)) return -EIO;
+
+  ret = bcmf_cdc_iovar_request(priv,
+                               CHIP_STA_INTERFACE,
+                               false,
+                               IOVAR_STR_CCGPIOIN,
+                               (uint8_t *)&buffer,
+                               &buf_len);
+  if (ret != OK) return ret;
+
+  *value = (buffer & (1 << pin)) != 0;
+
+  return OK;
+}
