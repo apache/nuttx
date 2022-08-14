@@ -36,6 +36,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Append full suffix to avoid the penitential symbol collision */
+
+#define crc64   crc64full
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
 /* CRC64_CHECK is the CRC64 of the string "123456789" without the null byte.
  *
  *   const uint8_t checkbuf[] =
