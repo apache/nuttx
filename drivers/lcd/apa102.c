@@ -697,8 +697,6 @@ static int apa102_setcontrast(FAR struct lcd_dev_s *dev,
 
 static inline void up_clear(FAR struct apa102_dev_s  *priv)
 {
-  int i;
-
   /* Clear the framebuffer */
 
   memset(priv->fb, APA102_BLACK, 4 * APA102_FBSIZE);
