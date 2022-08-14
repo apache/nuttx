@@ -48,7 +48,7 @@
 #define BCMF_CONTROL_INTERFACE_SHIFT 12
 #define BCMF_CONTROL_REQID_SHIFT     16
 
-#define BCMF_CONTROL_TIMEOUT_MS 1000
+#define BCMF_CONTROL_TIMEOUT_MS 2000
 
 /****************************************************************************
  * Private Types
@@ -198,6 +198,29 @@ int bcmf_cdc_control_request_unsafe(FAR struct bcmf_dev_s *priv,
       return -ENOMEM;
     }
 
+#ifdef CONFIG_DEBUG_WIRELESS_INFO
+  if (cmd == WLC_SET_VAR  ||  cmd == WLC_GET_VAR)
+    {
+      wlinfo(">>> Sending control %d %d 0x%08lX [%d] %s %s \n",
+             ifidx,
+             set,
+             cmd,
+             out_len,
+             set ? "set" : "get",
+             name);
+    }
+  else
+    {
+      wlinfo(">>> Sending control %d %d 0x%08lX [%d] %s cmd: %d\n",
+             ifidx,
+             set,
+             cmd,
+             out_len,
+             set ? "set" : "get",
+             cmd);
+    }
+#endif
+
   /* Setup buffer to store response */
 
   priv->control_rxdata = set ? NULL : data;
@@ -210,6 +233,7 @@ int bcmf_cdc_control_request_unsafe(FAR struct bcmf_dev_s *priv,
     {
       /* Free allocated iovar buffer */
 
+      wlerr("cdc send frame failed: %d\n", ret);
       priv->bus->free_frame(priv, frame);
       return ret;
     }
@@ -262,6 +286,10 @@ int bcmf_cdc_ioctl(FAR struct bcmf_dev_s *priv,
 {
   return bcmf_cdc_control_request(priv, ifidx, set, cmd, NULL, data, len);
 }
+
+/****************************************************************************
+ * Name: bcmf_cdc_process_control_frame
+ ****************************************************************************/
 
 int bcmf_cdc_process_control_frame(FAR struct bcmf_dev_s *priv,
                    struct bcmf_frame_s *frame)
