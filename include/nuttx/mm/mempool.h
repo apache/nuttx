@@ -48,19 +48,29 @@ struct mempool_procfs_entry_s
 
 struct mempool_s
 {
-#ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL
-  struct mempool_procfs_entry_s procfs; /* The entry of procfs */
-#endif
+  size_t     bsize;      /* The size for every block in mempool */
+  size_t     ninitial;   /* The initialize number of block in normal mempool */
+  size_t     ninterrupt; /* The number of block in interrupt mempool */
+  size_t     nexpand;    /* The number of expand block every time for mempool */
+  bool       wait;       /* The flag of need to wait when mempool is empty */
+
+  /* Private data for memory pool */
 
   sq_queue_t list;       /* The free block list in normal mempool */
   sq_queue_t ilist;      /* The free block list in interrupt mempool */
   sq_queue_t elist;      /* The expand block list for normal mempool */
-  size_t     bsize;      /* The size for every block in mempool */
-  size_t     ninterrupt; /* The number of block in interrupt mempool */
-  size_t     nexpand;    /* The number of expand block every time for mempool */
   size_t     nused;      /* The number of used block in mempool */
   spinlock_t lock;       /* The protect lock to mempool */
-  sem_t      wait;       /* The semaphore of waiter get free block */
+  sem_t      waitsem;    /* The semaphore of waiter get free block */
+#ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL
+  struct mempool_procfs_entry_s procfs; /* The entry of procfs */
+#endif
+};
+
+struct mempool_multiple_s
+{
+  FAR struct mempool_s *pools;  /* The memory pool array */
+  size_t                npools; /* The number of memory pool array elements */
 };
 
 struct mempoolinfo_s
@@ -91,26 +101,19 @@ extern "C"
  *
  * Description:
  *   Initialize a memory pool.
+ *   The user needs to specify the initialization information of mempool
+ *   including bsize, ninitial, nexpand, ninterrupt.
  *
  * Input Parameters:
- *   pool       - Address of the memory pool to be used.
- *   name       - The name of memory pool.
- *   bsize      - The block size of memory blocks in pool.
- *   ninitial   - The initial count of memory blocks in pool.
- *   nexpand    - The increment count of memory blocks in pool.
- *                If there is not enough memory blocks and it isn't zero,
- *                mempool_alloc will alloc nexpand memory blocks.
- *   ninterrupt - The block count of memory blocks in pool for interrupt
- *                context. These blocks only can use in interrupt context.
+ *   pool - Address of the memory pool to be used.
+ *   name - The name of memory pool.
  *
  * Returned Value:
  *   Zero on success; A negated errno value is returned on any failure.
  *
  ****************************************************************************/
 
-int mempool_init(FAR struct mempool_s *pool, FAR const char *name,
-                 size_t bsize, size_t ninitial, size_t nexpand,
-                 size_t ninterrupt);
+int mempool_init(FAR struct mempool_s *pool, FAR const char *name);
 
 /****************************************************************************
  * Name: mempool_alloc
@@ -203,6 +206,116 @@ void mempool_procfs_register(FAR struct mempool_procfs_entry_s *entry,
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL
 void mempool_procfs_unregister(FAR struct mempool_procfs_entry_s *entry);
 #endif
+
+/****************************************************************************
+ * Name: mempool_multiple_init
+ *
+ * Description:
+ *   Initialize multiple memory pool, each element represents a memory pool.
+ *   The user needs to specify the initialization information of each mempool
+ *   in the array, including bsize, ninitial, nexpand, ninterrupt, wait.
+ *   These mempool will be initialized by mempool_init. The name of all
+ *   mempool are "name".
+ *
+ * Input Parameters:
+ *   name  - The name of memory pool.
+ *   mpool - The handle of the multiple memory pool to be used.
+ *
+ * Returned Value:
+ *   Zero on success; A negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int mempool_multiple_init(FAR struct mempool_multiple_s *mpool,
+                          FAR const char *name);
+
+/****************************************************************************
+ * Name: mempool_multiple_alloc
+ *
+ * Description:
+ *   Allocate an block from specific multiple memory pool.
+ *   If the mempool of the corresponding size doesn't have free block,
+ *   it will continue to alloc memory for a larger memory pool until last
+ *   mempool in multiple mempools.
+ *
+ * Input Parameters:
+ *   mpool - The handle of multiple memory pool to be used.
+ *   size  - The size of alloc blk.
+ *
+ * Returned Value:
+ *   The pointer to the allocated block on success; NULL on any failure.
+ *
+ ****************************************************************************/
+
+FAR void *mempool_multiple_alloc(FAR struct mempool_multiple_s *mpool,
+                                 size_t size);
+
+/****************************************************************************
+ * Name: mempool_multiple_free
+ *
+ * Description:
+ *   Release an memory block to the multiple mempry pool. The blk must have
+ *   been returned by a previous call to mempool_multiple_alloc.
+ *
+ * Input Parameters:
+ *   mpool - The handle of multiple memory pool to be used.
+ *   blk  - The pointer of memory block.
+ ****************************************************************************/
+
+void mempool_multiple_free(FAR struct mempool_multiple_s *mpool,
+                           FAR void *blk);
+
+/****************************************************************************
+ * Name: mempool_multiple_fixed_alloc
+ *
+ * Description:
+ *   Allocate an block from specific multiple memory pool.
+ *   If the mempool of the corresponding size doesn't have free block,
+ *   then wait until free happened or return NULL.
+ *
+ * Input Parameters:
+ *   mpool - The handle of multiple memory pool to be used.
+ *   size  - The size of alloc blk.
+ *
+ * Returned Value:
+ *   The pointer to the allocated block on success; NULL on any failure.
+ *
+ ****************************************************************************/
+
+FAR void *mempool_multiple_fixed_alloc(FAR struct mempool_multiple_s *mpool,
+                                       size_t size);
+
+/****************************************************************************
+ * Name: mempool_multiple_fixed_free
+ *
+ * Description:
+ *   Release an memory block to the multiple mempry pool. The blk must have
+ *   been returned by a previous call to mempool_multiple_fixed_alloc.
+ *
+ * Input Parameters:
+ *   mpool - The handle of multiple memory pool to be used.
+ *   blk   - The pointer of memory block.
+ *   size  - The size of alloc blk.
+ ****************************************************************************/
+
+void mempool_multiple_fixed_free(FAR struct mempool_multiple_s *mpool,
+                                 FAR void *blk, size_t size);
+
+/****************************************************************************
+ * Name: mempool_multiple_deinit
+ *
+ * Description:
+ *   Deallocate multiple memory pool.
+ *
+ * Input Parameters:
+ *   mpool - The handle of multiple memory pool to be used.
+ *
+ * Returned Value:
+ *   Zero on success; A negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int mempool_multiple_deinit(FAR struct mempool_multiple_s *mpool);
 
 #undef EXTERN
 #if defined(__cplusplus)
