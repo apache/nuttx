@@ -42,11 +42,11 @@
 
 /* Command:     GPIOC_WRITE
  * Description: Set the value of an output GPIO
- * Argument:    T0=output a low value; 1=output a high value
+ * Argument:    0=output a low value; 1=output a high value
  *
  * Command:     GPIOC_READ
  * Description: Read the value of an input or output GPIO
- * Argument:    A pointer to an bool value to receive the result:
+ * Argument:    A pointer to a bool value to receive the result:
  *              false=low value; true=high value.
  *
  * Command:     GPIOC_PINTYPE
@@ -54,8 +54,8 @@
  * Argument:    A pointer to an instance of type enum gpio_pintype_e
  *
  * Command:     GPIOC_REGISTER
- * Description: Register to receive a signal whenever there an interrupt
- *              is received on an input gpio pin.  This feature, of course,
+ * Description: Register to receive a signal whenever there is an interrupt
+ *              received on an input gpio pin.  This feature, of course,
  *              depends upon interrupt GPIO support from the platform.
  * Argument:    The number of signal to be generated when the interrupt
  *              occurs.
@@ -114,9 +114,9 @@ typedef CODE int (*pin_interrupt_t)(FAR struct gpio_dev_s *dev, uint8_t pin);
  *   - go_read.  Required for all pin types.
  *   - go_write.  Required only for the GPIO_OUTPUT_PIN pin type.  Unused
  *     for other pin types, may be NULL.
- *   - go_attach and gp_enable.  Required only for the GPIO_INTERRUPT_PIN pin
+ *   - go_attach and go_enable.  Required only for the GPIO_INTERRUPT_PIN pin
  *     type.  Unused for other pin types, may be NULL.
- *   - go_setpinytype.  Required for all pin types.
+ *   - go_setpintype.  Required for all pin types.
  */
 
 struct gpio_dev_s;
