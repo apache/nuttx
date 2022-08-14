@@ -33,15 +33,22 @@
 #include <sys/types.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/compiler.h>
+
 #include <nuttx/irq.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/signal.h>
 #include <nuttx/spi/spi.h>
 
 #include <arch/board/board.h>
 
 #include "bl602_glb.h"
 #include "bl602_gpio.h"
+#include "bl602_romapi.h"
 #include "bl602_spi.h"
+#include "bl602_dma.h"
+#include "hardware/bl602_dma.h"
 #include "hardware/bl602_glb.h"
 #include "hardware/bl602_spi.h"
 #include "hardware/bl602_hbn.h"
@@ -52,6 +59,7 @@
  ****************************************************************************/
 
 #define SPI_FREQ_DEFAULT 400000
+#define LLI_BUFF_SIZE 2048  /* Maximum transaction count per LLI entry. */
 
 /****************************************************************************
  * Private Types
@@ -126,7 +134,8 @@ struct bl602_spi_priv_s
 
   /* Interrupt wait semaphore */
 
-  sem_t sem_isr;
+  sem_t sem_isr_tx;
+  sem_t sem_isr_rx;
 
   uint32_t frequency; /* Requested clock frequency */
   uint32_t actual;    /* Actual clock frequency */
@@ -136,7 +145,8 @@ struct bl602_spi_priv_s
   /* Actual SPI send/receive bits once transmission */
 
   uint8_t nbits;
-  uint8_t dma_chan;
+  int8_t dma_txchan;
+  int8_t dma_rxchan;
 };
 
 /****************************************************************************
@@ -227,7 +237,9 @@ static struct bl602_spi_priv_s bl602_spi_priv =
               {
                 .ops = &bl602_spi_ops
               },
-  .config = &bl602_spi_config
+  .config = &bl602_spi_config,
+  .dma_rxchan = -1,
+  .dma_txchan = -1,
 };
 
 #endif  /* CONFIG_BL602_SPI0 */
@@ -235,6 +247,38 @@ static struct bl602_spi_priv_s bl602_spi_priv =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#ifdef CONFIG_BL602_SPI_DMA
+static void bl602_dma_rx_callback(uint8_t channel, uint8_t status, void *arg)
+{
+  struct bl602_spi_priv_s *priv = (struct bl602_spi_priv_s *)arg;
+  UNUSED(channel);
+  spiinfo("RX interrupt fired with status %u\n", status);
+  if (status == BL602_DMA_INT_EVT_TC)
+    {
+      nxsem_post(&priv->sem_isr_rx);
+    }
+  else
+    {
+      spierr("DMA transfer failed for RX.\n");
+    }
+}
+
+static void bl602_dma_tx_callback(uint8_t channel, uint8_t status, void *arg)
+{
+  struct bl602_spi_priv_s *priv = (struct bl602_spi_priv_s *)arg;
+  UNUSED(channel);
+  spiinfo("TX interrupt fired with status %u\n", status);
+  if (status == BL602_DMA_INT_EVT_TC)
+    {
+      nxsem_post(&priv->sem_isr_tx);
+    }
+  else
+    {
+      spierr("DMA transfer failed for TX.\n");
+    }
+}
+#endif
 
 /****************************************************************************
  * Name: bl602_check_with_new_prescale
@@ -774,6 +818,168 @@ static int bl602_spi_hwfeatures(struct spi_dev_s *dev,
 #endif
 
 /****************************************************************************
+ * Name: lli_list_init
+ *
+ * Description:
+ *   Configure the LLI structure for DMA transactions with SPI
+ *
+ * Input Parameters:
+ *   priv    - Device-specific state data
+ *   tx_lli - A pointer to the LLI structures for TX.
+ *   rx_lli - A pointer to the LLI structures for RX.
+ *   tx_buffer - A pointer to the transaction buffer for TX.
+ *   rx_buffer - A pointer to the transaction buffer for RX.
+ *               Buffer is null if TX only.
+ *   nwords - the length of data to send from the buffer in number of words.
+ *            The wordsize is determined by the number of bits-per-word
+ *            selected for the SPI interface.  If nbits <= 8, the data is
+ *            packed into uint8_t's; if nbits >8, the data is packed into
+ *            uint16_t's
+ *
+ * Returned Value:
+ *   Error state - 0 on success.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BL602_SPI_DMA
+static int lli_list_init(struct bl602_spi_priv_s *priv,
+                         struct bl602_lli_ctrl_s **tx_lli,
+                         struct bl602_lli_ctrl_s **rx_lli,
+                         const void *txbuffer,
+                         void *rxbuffer, size_t nwords)
+{
+  uint8_t i;
+  uint32_t count;
+  uint32_t remainder;
+  struct bl602_dma_ctrl_s  dma_ctrl;
+
+  /* Determine the how many LLI entries will be required */
+
+  count = (nwords * priv->nbits / 8) / LLI_BUFF_SIZE;
+  remainder = (nwords * priv->nbits / 8) % LLI_BUFF_SIZE;
+
+  /* If LLI entry cannot be fully packed with data, add an additional entry
+   * for the remainder entry.
+   */
+
+  if (remainder != 0)
+    {
+      count = count + 1;
+    }
+
+  /* Set the base config that will be used for each entry */
+
+  dma_ctrl.src_width = (priv->nbits / 8) - 1; /* 8/16/32 bits */
+  dma_ctrl.dst_width = dma_ctrl.src_width;
+  dma_ctrl.src_burst_size = 0; /* 1 item per transaction */
+  dma_ctrl.dst_burst_size = 0; /* 1 item per transaction */
+  dma_ctrl.protect = 0;
+  dma_ctrl.tc_int_en = 0; /* We will overwrite this in the last entry */
+  dma_ctrl.rsvd = 0;
+  dma_ctrl.sld = 0; /* Not used for non mem-to-mem transfers. */
+
+  /* We will set these per entry:
+   *  - transfer_size
+   *  - src_increment
+   *  - dst_increment
+   */
+
+  /* Allocate the transfer block.
+   * TODO consider supporting pre-allocation of these structures.
+   * most transaction will only use a single LLI, so we could
+   * actually place the single LLI structure on the stack (4*4 bytes)
+   */
+
+  *tx_lli = kmm_malloc(sizeof(struct bl602_lli_ctrl_s) * count);
+  if (*tx_lli == NULL)
+    {
+      spierr("Failed to allocate lli for tx.\n");
+      return -1;
+    }
+
+  if (rxbuffer != NULL)
+    {
+      *rx_lli = kmm_malloc(sizeof(struct bl602_lli_ctrl_s) * count);
+      if (*rx_lli == NULL)
+        {
+          spierr("Failed to allocate lli for rx.\n");
+          kmm_free(*tx_lli);
+          return -1;
+        }
+    }
+  else
+    {
+      *rx_lli = NULL;
+    }
+
+  for (i = 0; i < count; i++)
+    {
+      /* Check if this is the final entry and there is remainder set */
+
+      if ((i == (count - 1)) && (remainder != 0))
+        {
+          dma_ctrl.transfer_size = remainder;
+        }
+      else
+        {
+          dma_ctrl.transfer_size = LLI_BUFF_SIZE;
+        }
+
+      /* Configure tx side */
+
+        {
+          dma_ctrl.dst_increment = 0;
+          dma_ctrl.src_increment = 1;
+          (*tx_lli)[i].dma_ctrl = dma_ctrl;
+          (*tx_lli)[i].dst_addr = BL602_SPI_FIFO_WDATA;
+          (*tx_lli)[i].src_addr = \
+            (uint32_t)txbuffer + (dma_ctrl.src_width * i * LLI_BUFF_SIZE);
+
+          /* Assume last entry, we will overwrite as needed. */
+
+          (*tx_lli)[i].next_lli = 0;
+
+          /* Link entry */
+
+          if (i != 0)
+            {
+              (*tx_lli)[i - 1].next_lli = (uint32_t)&(*tx_lli)[i];
+            }
+        }
+
+      /* Configure rx side */
+
+      if (rxbuffer != NULL)
+        {
+          dma_ctrl.dst_increment = 1;
+          dma_ctrl.src_increment = 0;
+          (*rx_lli)[i].dma_ctrl = dma_ctrl;
+          (*rx_lli)[i].dst_addr = \
+            (uint32_t)rxbuffer + (dma_ctrl.dst_width * i * LLI_BUFF_SIZE);
+          (*rx_lli)[i].src_addr = BL602_SPI_FIFO_RDATA;
+          (*rx_lli)[i].next_lli = 0; /* Assume last entry, we will overwrite as needed. */
+
+          /* Link entry */
+
+          if (i != 0)
+            {
+              (*rx_lli)[i - 1].next_lli = (uint32_t)&(*rx_lli)[i];
+            }
+        }
+    }
+
+  (*tx_lli)[count - 1].dma_ctrl.tc_int_en = 1;
+
+  if (rxbuffer != NULL)
+    {
+      (*rx_lli)[count - 1].dma_ctrl.tc_int_en = 1;
+    }
+
+  return 0;
+}
+#endif
+
+/****************************************************************************
  * Name: bl602_spi_dma_exchange
  *
  * Description:
@@ -794,13 +1000,97 @@ static int bl602_spi_hwfeatures(struct spi_dev_s *dev,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_BL602_SPI_DMA
 static void bl602_spi_dma_exchange(struct bl602_spi_priv_s *priv,
                                    const void *txbuffer,
                                    void *rxbuffer, uint32_t nwords)
 {
-  spierr("SPI dma not supported\n");
-  DEBUGPANIC();
+  int err;
+
+  #ifdef CONFIG_DEBUG_DMA_INFO
+    struct bl602_dmaregs_s regs;
+  #endif
+
+  struct bl602_lli_ctrl_s *tx_lli;
+  struct bl602_lli_ctrl_s *rx_lli;
+
+  /* Enable master */
+
+  modifyreg32(BL602_SPI_CFG, SPI_CFG_CR_S_EN, SPI_CFG_CR_M_EN);
+
+  err = lli_list_init(priv, &tx_lli, &rx_lli, txbuffer, rxbuffer, nwords);
+
+  if (err < 0)
+    {
+      spierr("Failed to initalize DMA LLI\n");
+      return;
+    }
+
+  /* Configure DMA controller with LLI.
+   * This needs to be set using the ROM API from TCM to initialize all 4
+   * registers from the LLI structure.
+   */
+
+  bl602_romapi_memcpy_4(
+    (uint32_t *)BL602_DMA_CH_N_REG(BL602_DMA_SRCADDR_OFFSET,
+                                   priv->dma_txchan),
+    (uint32_t *)tx_lli, 4);
+
+  if (rxbuffer != NULL)
+    {
+      bl602_romapi_memcpy_4(
+        (uint32_t *)BL602_DMA_CH_N_REG(BL602_DMA_SRCADDR_OFFSET,
+                                      priv->dma_rxchan),
+        (uint32_t *)rx_lli, 4);
+    }
+
+  /* Dump DMA register state */
+
+  bl602_dmasample(&regs);
+  bl602_dmadump(&regs, "Initialized DMA");
+
+  /* Start channel */
+
+  if (rxbuffer != NULL)
+    {
+      bl602_dma_channel_start(priv->dma_rxchan);
+    }
+
+  bl602_dma_channel_start(priv->dma_txchan);
+
+  /* Dump DMA register state */
+
+  bl602_dmasample(&regs);
+  bl602_dmadump(&regs, "Post Start DMA");
+
+  /* Wait for RX and TX to complete. */
+
+  nxsem_wait_uninterruptible(&priv->sem_isr_tx);
+
+  if (rxbuffer != NULL)
+    {
+      nxsem_wait_uninterruptible(&priv->sem_isr_rx);
+    }
+
+  /* Stop channels */
+
+  bl602_dma_channel_stop(priv->dma_txchan);
+
+  if (rxbuffer != NULL)
+    {
+      bl602_dma_channel_stop(priv->dma_rxchan);
+    }
+
+  kmm_free(tx_lli);
+
+  if (rx_lli != NULL)
+    {
+      kmm_free(rx_lli);
+    }
+
+  return;
 }
+#endif
 
 /****************************************************************************
  * Name: bl602_spi_poll_send
@@ -869,6 +1159,7 @@ static uint32_t bl602_spi_poll_send(struct bl602_spi_priv_s *priv,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_BL602_SPI_DMA
 static uint32_t bl602_spi_dma_send(struct bl602_spi_priv_s *priv,
                                    uint32_t wd)
 {
@@ -878,6 +1169,7 @@ static uint32_t bl602_spi_dma_send(struct bl602_spi_priv_s *priv,
 
   return rd;
 }
+#endif
 
 /****************************************************************************
  * Name: bl602_spi_send
@@ -898,9 +1190,11 @@ static uint32_t bl602_spi_dma_send(struct bl602_spi_priv_s *priv,
 static uint32_t bl602_spi_send(struct spi_dev_s *dev, uint32_t wd)
 {
   struct bl602_spi_priv_s *priv = (struct bl602_spi_priv_s *)dev;
+
+#ifdef CONFIG_BL602_SPI_DMA
   uint32_t rd;
 
-  if (priv->dma_chan)
+  if (priv->dma_txchan >= 0 && priv->dma_rxchan >= 0)
     {
       rd = bl602_spi_dma_send(priv, wd);
     }
@@ -910,6 +1204,9 @@ static uint32_t bl602_spi_send(struct spi_dev_s *dev, uint32_t wd)
     }
 
   return rd;
+#else
+  return bl602_spi_poll_send(priv, wd);
+#endif
 }
 
 /****************************************************************************
@@ -998,7 +1295,8 @@ static void bl602_spi_exchange(struct spi_dev_s *dev,
 {
   struct bl602_spi_priv_s *priv = (struct bl602_spi_priv_s *)dev;
 
-  if (priv->dma_chan)
+#ifdef CONFIG_BL602_SPI_DMA
+  if (priv->dma_txchan >= 0 && priv->dma_rxchan >= 0)
     {
       bl602_spi_dma_exchange(priv, txbuffer, rxbuffer, nwords);
     }
@@ -1006,6 +1304,9 @@ static void bl602_spi_exchange(struct spi_dev_s *dev,
     {
       bl602_spi_poll_exchange(priv, txbuffer, rxbuffer, nwords);
     }
+#else
+  bl602_spi_poll_exchange(priv, txbuffer, rxbuffer, nwords);
+#endif
 }
 
 #ifndef CONFIG_SPI_EXCHANGE
@@ -1145,6 +1446,100 @@ static void bl602_swap_spi_0_mosi_with_miso(uint8_t swap)
     }
 }
 
+#ifdef CONFIG_BL602_SPI_DMA
+/****************************************************************************
+ * Name: bl602_spi_dma_init
+ *
+ * Description:
+ *   Initialize BL SPI connection to DMA engine.
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void bl602_spi_dma_init(struct spi_dev_s *dev)
+{
+  struct bl602_spi_priv_s *priv = (struct bl602_spi_priv_s *)dev;
+
+  #ifdef CONFIG_DEBUG_DMA_INFO
+    struct bl602_dmaregs_s regs;
+  #endif
+
+  /* NOTE DMA channels are limited on this device and not all SPI devices
+   * care about the RX side.  Consider making the RX channel optional.
+   */
+
+  /* Request a DMA channel for SPI peripheral */
+
+  priv->dma_rxchan = bl602_dma_channel_request(bl602_dma_rx_callback,
+                                               (void *)priv);
+  if (priv->dma_rxchan < 0)
+    {
+      spierr("Failed to allocate GDMA channel\n");
+
+      DEBUGASSERT(false);
+      return;
+    }
+
+  priv->dma_txchan = bl602_dma_channel_request(bl602_dma_tx_callback,
+                                               (void *)priv);
+  if (priv->dma_txchan < 0)
+    {
+      spierr("Failed to allocate GDMA channel\n");
+
+      /* Release the RX channel since we won't be using it. */
+
+      bl602_dma_channel_release(priv->dma_rxchan);
+      priv->dma_rxchan = -1;
+
+      DEBUGASSERT(false);
+      return;
+    }
+
+  /* Configure channels for SPI DMA */
+
+  /* Configure channel from SPI to Mem */
+
+  modifyreg32(
+    BL602_DMA_CH_N_REG(BL602_DMA_CONFIG_OFFSET, priv->dma_rxchan),
+    DMA_C0CONFIG_FLOWCNTRL_MASK | \
+    DMA_C0CONFIG_DSTPERIPHERAL_MASK | \
+    DMA_C0CONFIG_SRCPERIPHERAL_MASK,
+    (BL602_DMA_TRNS_P2M << DMA_C0CONFIG_FLOWCNTRL_SHIFT) | \
+    (BL602_DMA_REQ_SPI_RX << DMA_C0CONFIG_SRCPERIPHERAL_SHIFT));
+
+  /* Configure channel from Mem to SPI */
+
+  modifyreg32(
+    BL602_DMA_CH_N_REG(BL602_DMA_CONFIG_OFFSET, priv->dma_txchan),
+    DMA_C0CONFIG_FLOWCNTRL_MASK | DMA_C0CONFIG_DSTPERIPHERAL_MASK | \
+    DMA_C0CONFIG_SRCPERIPHERAL_MASK,
+    (BL602_DMA_TRNS_M2P << DMA_C0CONFIG_FLOWCNTRL_SHIFT) | \
+    (BL602_DMA_REQ_SPI_TX << DMA_C0CONFIG_DSTPERIPHERAL_SHIFT));
+
+  /* Set FIFO threshold to trigger DMA */
+
+  modifyreg32(
+    BL602_SPI_FIFO_CFG_1,
+    SPI_FIFO_CFG_1_RX_TH_MASK | SPI_FIFO_CFG_1_TX_TH_MASK,
+    (0 << SPI_FIFO_CFG_1_RX_TH_SHIFT) | (0 << SPI_FIFO_CFG_1_TX_TH_SHIFT));
+
+  /* Enable DMA support */
+
+  modifyreg32(BL602_SPI_FIFO_CFG_0, 0,
+              SPI_FIFO_CFG_0_DMA_RX_EN | SPI_FIFO_CFG_0_DMA_TX_EN);
+
+  /* Dump DMA register state */
+
+  bl602_dmasample(&regs);
+  bl602_dmadump(&regs, "Initialized DMA");
+}
+#endif
+
 /****************************************************************************
  * Name: bl602_spi_init
  *
@@ -1167,6 +1562,8 @@ static void bl602_spi_init(struct spi_dev_s *dev)
   /* Initialize the SPI semaphore that enforces mutually exclusive access */
 
   nxsem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->sem_isr_rx, 0, 0);
+  nxsem_init(&priv->sem_isr_tx, 0, 0);
 
   bl602_configgpio(BOARD_SPI_CS);
   bl602_configgpio(BOARD_SPI_MOSI);
@@ -1192,9 +1589,11 @@ static void bl602_spi_init(struct spi_dev_s *dev)
               | SPI_CFG_CR_BYTE_INV | SPI_CFG_CR_BIT_INV,
               SPI_CFG_CR_DEG_EN);
 
-  /* disable rx ignore */
+  /* Disable rx ignore.
+   * Enable continuous mode.
+   */
 
-  modifyreg32(BL602_SPI_CFG, SPI_CFG_CR_RXD_IGNR_EN, 0);
+  modifyreg32(BL602_SPI_CFG, SPI_CFG_CR_RXD_IGNR_EN, SPI_CFG_CR_M_CONT_EN);
 
   bl602_spi_setfrequency(dev, config->clk_freq);
   bl602_spi_setbits(dev, 8);
@@ -1204,6 +1603,10 @@ static void bl602_spi_init(struct spi_dev_s *dev)
 
   modifyreg32(BL602_SPI_FIFO_CFG_0, SPI_FIFO_CFG_0_RX_CLR
               | SPI_FIFO_CFG_0_TX_CLR, 0);
+
+#ifdef CONFIG_BL602_SPI_DMA
+  bl602_spi_dma_init(dev);
+#endif
 }
 
 /****************************************************************************
@@ -1230,7 +1633,8 @@ static void bl602_spi_deinit(struct spi_dev_s *dev)
   priv->actual = 0;
   priv->mode = SPIDEV_MODE0;
   priv->nbits = 0;
-  priv->dma_chan = 0;
+  priv->dma_txchan = -1;
+  priv->dma_rxchan = -1;
 }
 
 /****************************************************************************
@@ -1317,6 +1721,8 @@ int bl602_spibus_uninitialize(struct spi_dev_s *dev)
   bl602_spi_deinit(dev);
 
   nxsem_destroy(&priv->exclsem);
+  nxsem_destroy(&priv->sem_isr_rx);
+  nxsem_destroy(&priv->sem_isr_tx);
 
   return OK;
 }

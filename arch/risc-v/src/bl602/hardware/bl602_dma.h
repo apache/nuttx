@@ -106,6 +106,18 @@
 #define BL602_DMA_C3CONTROL          (BL602_DMA_BASE + BL602_DMA_C3CONTROL_OFFSET)
 #define BL602_DMA_C3CONFIG           (BL602_DMA_BASE + BL602_DMA_C3CONFIG_OFFSET)
 
+/* Channel register helpers *************************************************/
+
+#define BL602_DMA_CH_REG_OFFSET             0x000100  /* Offset between channels */
+#define BL602_DMA_CH_REG_BASE               BL602_DMA_C0SRCADDR
+#define BL602_DMA_SRCADDR_OFFSET            0x000000  /* CnSrcAddr */
+#define BL602_DMA_DSTADDR_OFFSET            0x000004  /* CnDstAddr */
+#define BL602_DMA_LLI_OFFSET                0x000008  /* CnLLI */
+#define BL602_DMA_CONTROL_OFFSET            0x00000c  /* CnControl */
+#define BL602_DMA_CONFIG_OFFSET             0x000010  /* CnConfig */
+
+#define BL602_DMA_CH_N_REG(reg, ch) ((BL602_DMA_CH_REG_BASE + (BL602_DMA_CH_REG_OFFSET * ch)) + reg)
+
 /* Register bit definitions *************************************************/
 
 #define DMA_INTSTATUS_MASK              (0xff)
@@ -250,5 +262,24 @@
 #define DMA_C3CONFIG_SRCPERIPHERAL_SHIFT              (1)
 #define DMA_C3CONFIG_SRCPERIPHERAL_MASK               (0x1f << DMA_C3CONFIG_SRCPERIPHERAL_SHIFT)
 #define DMA_C3CONFIG_E                                (1 << 0)
+
+#define BL602_DMA_TRNS_M2M (0) /* DMA memory to memory */
+#define BL602_DMA_TRNS_M2P (1) /* DMA memory to peripheral */
+#define BL602_DMA_TRNS_P2M (2) /* DMA peripheral to memory */
+#define BL602_DMA_TRNS_P2P (3) /* DMA peripheral to peripheral */
+
+#define BL602_DMA_REQ_UART0_RX (0)    /* DMA request peripheral UART0 RX */
+#define BL602_DMA_REQ_UART0_TX (1)    /* DMA request peripheral UART0 TX */
+#define BL602_DMA_REQ_UART1_RX (2)    /* DMA request peripheral UART1 RX */
+#define BL602_DMA_REQ_UART1_TX (3)    /* DMA request peripheral UART1 TX */
+#define BL602_DMA_REQ_I2C_RX   (6)    /* DMA request peripheral I2C RX */
+#define BL602_DMA_REQ_I2C_TX   (7)    /* DMA request peripheral I2C TX */
+#define BL602_DMA_REQ_SPI_RX   (10)   /* DMA request peripheral SPI RX */
+#define BL602_DMA_REQ_SPI_TX   (11)   /* DMA request peripheral SPI TX */
+#define BL602_DMA_REQ_I2S_RX   (20)   /* DMA request peripheral SPI RX */
+#define BL602_DMA_REQ_I2S_TX   (21)   /* DMA request peripheral SPI TX */
+#define BL602_DMA_REQ_GPADC0   (22)   /* DMA request peripheral GPADC0 */
+#define BL602_DMA_REQ_GPADC1   (23)   /* DMA request peripheral GPADC1 */
+#define BL602_DMA_REQ_NONE     (0 )   /* DMA request peripheral None */
 
 #endif /* __ARCH_RISCV_SRC_BL602_HARDWARE_BL602_DMA_H */
