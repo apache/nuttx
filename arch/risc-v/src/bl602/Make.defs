@@ -58,6 +58,10 @@ ifeq ($(CONFIG_RTC_DRIVER),y)
 CHIP_CSRCS += bl602_rtc.c bl602_rtc_lowerhalf.c
 endif
 
+ifeq ($(CONFIG_BL602_DMA),y)
+CHIP_CSRCS += bl602_dma.c
+endif
+
 CHIP_CSRCS += bl602_glb.c bl602_gpio.c bl602_hbn.c bl602_systemreset.c
 
 ifeq ($(CONFIG_BL602_WIRELESS),y)

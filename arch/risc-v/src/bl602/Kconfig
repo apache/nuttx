@@ -7,6 +7,11 @@ comment "BL602 Configuration Options"
 
 menu "BL602 Peripheral Support"
 
+config BL602_DMA
+	bool "DMA"
+	default n
+	select ARCH_DMA
+
 config BL602_HAVE_UART0
 	bool "UART0"
 	select BL602_UART0
@@ -42,8 +47,22 @@ config BL602_PWM0
 config BL602_I2C0
 	bool "I2C0"
 
+config BL602_I2C_DMA
+	bool "I2C DMA support"
+	default n
+	depends on BL602_DMA
+	---help---
+		Select to enable DMA SPI transfers
+
 config BL602_SPI0
 	bool "SPI0"
+
+config BL602_SPI_DMA
+	bool "SPI DMA support"
+	default n
+	depends on BL602_DMA
+	---help---
+		Select to enable DMA SPI transfers
 
 config BL602_RTC
 	bool "RTC"

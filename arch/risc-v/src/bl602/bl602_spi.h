@@ -42,8 +42,6 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#ifdef CONFIG_BL602_SPI0
-
 #include <nuttx/spi/spi.h>
 #include <nuttx/spi/spi_transfer.h>
 
@@ -76,8 +74,6 @@ struct spi_dev_s *bl602_spibus_initialize(int port);
  ****************************************************************************/
 
 int bl602_spibus_uninitialize(struct spi_dev_s *dev);
-
-#endif /* CONFIG_BL602_SPI0 */
 
 #ifdef __cplusplus
 }
