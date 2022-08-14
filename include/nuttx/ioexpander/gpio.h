@@ -81,7 +81,11 @@
  * Public Types
  ****************************************************************************/
 
-/* Identifies the type of the GPIO pin */
+/* Identifies the type of the GPIO pin
+ *
+ * Note: If this enum is modified, g_gplh_inttype array in
+ *       drivers/ioexpander/gpio_lower_half.c must be updated accordingly.
+ */
 
 enum gpio_pintype_e
 {
