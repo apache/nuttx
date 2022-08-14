@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/ieee80211/bcm43xxx/bcmf_chip_43362.c
+ * drivers/wireless/ieee80211/bcm43xxx/bcmf_gspi_f2_frame.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,66 +18,49 @@
  *
  ****************************************************************************/
 
+#ifndef __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_GSPI_F2_FRAME_H
+#define __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_GSPI_F2_FRAME_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <stdint.h>
-
-#include "bcmf_interface.h"
+#include "bcmf_driver.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Function Prototypes
  ****************************************************************************/
-
-#define WRAPPER_REGISTER_OFFSET  0x100000
 
 /****************************************************************************
- * Public Data
+ * Name: read_f2_frame
+ *
+ * Description:
+ *    Read and process an F2 frame.
+ *
+ * Parameters:
+ *    priv         - the device structure
+ *    frame_length - Length of frame we are to read.  (From chip status)
+ *
+ * Returns:
+ *    OK on success, negated error code on failure.
  ****************************************************************************/
 
-extern const char bcm43362_nvram_image[];
-extern const unsigned int bcm43362_nvram_image_len;
-
-#ifndef CONFIG_IEEE80211_BROADCOM_FWFILES
-extern const uint8_t bcm43362_firmware_image[];
-extern const unsigned int bcm43362_firmware_image_len;
-#endif
-
-const struct bcmf_chip_data bcmf_43362_config_data =
-{
-  /* General chip stats */
-
-  .ram_base = 0,
-  .ram_size = 0x3c000,
-
-  /* Backplane architecture */
-
-  .core_base =
-  {
-    [CHIPCOMMON_CORE_ID]  = 0x18000000,  /* Chipcommon core register base   */
-    [DOT11MAC_CORE_ID]    = 0x18001000,  /* dot11mac core register base     */
-    [SDIOD_CORE_ID]       = 0x18002000,  /* SDIOD Device core register base */
-    [WLAN_ARMCM3_CORE_ID] = 0x18003000 + /* ARMCM3 core register base       */
-                            WRAPPER_REGISTER_OFFSET,
-    [SOCSRAM_CORE_ID]     = 0x18004000 + /* SOCSRAM core register base      */
-                            WRAPPER_REGISTER_OFFSET
-  },
-
-  /* Firmware images */
-
-  /* TODO find something smarter than using image_len references */
-
-  .nvram_image         = (FAR uint8_t *)bcm43362_nvram_image,
-  .nvram_image_size    = (FAR unsigned int *)&bcm43362_nvram_image_len,
-
-#ifndef CONFIG_IEEE80211_BROADCOM_FWFILES
-  .firmware_image      = (FAR uint8_t *)bcm43362_firmware_image,
-  .firmware_image_size = (FAR unsigned int *)&bcm43362_firmware_image_len,
-#endif
-};
+int bcmf_gspi_read_f2_frame(FAR struct bcmf_dev_s *priv,
+                            int                    frame_length);
 
 /****************************************************************************
- * Public Functions
+ * Name: bcmf_gspi_send_f2_frame
+ *
+ * Description:
+ *    De-queue and send an F2 frame.
+ *
+ * Parameters:
+ *    priv     - the device structure
+ *
+ * Returns:
+ *    OK on success, negated error code on failure.
  ****************************************************************************/
+
+int bcmf_gspi_send_f2_frame(FAR struct bcmf_dev_s *priv);
+
+#endif /* __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_GSPI_F2_FRAME_H */

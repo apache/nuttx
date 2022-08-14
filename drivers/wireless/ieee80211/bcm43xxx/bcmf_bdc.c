@@ -123,6 +123,7 @@ int bcmf_bdc_process_event_frame(FAR struct bcmf_dev_s *priv,
 
   if (data_size < sizeof(struct bcmf_bdc_header))
     {
+      wlerr("invalid event frame -- way too small\n");
       goto exit_invalid_frame;
     }
 
@@ -132,6 +133,7 @@ int bcmf_bdc_process_event_frame(FAR struct bcmf_dev_s *priv,
 
   if (data_size < sizeof(struct bcmf_event_msg))
     {
+      wlerr("invalid event frame -- too small\n");
       goto exit_invalid_frame;
     }
 
@@ -146,6 +148,8 @@ int bcmf_bdc_process_event_frame(FAR struct bcmf_dev_s *priv,
   if (event_msg->eth.ether_type != BCMF_EVENT_ETHER_TYPE ||
       memcmp(event_msg->bcm_eth.oui, bcmf_broadcom_oui, 3))
     {
+      wlerr("invalid event frame -- bad data\n");
+
       goto exit_invalid_frame;
     }
 
@@ -168,7 +172,6 @@ int bcmf_bdc_process_event_frame(FAR struct bcmf_dev_s *priv,
   return OK;
 
 exit_invalid_frame:
-  wlerr("Invalid event frame\n");
   bcmf_hexdump(frame->base, frame->len, (unsigned long)frame->base);
   return -EINVAL;
 }
