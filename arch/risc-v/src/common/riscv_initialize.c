@@ -105,6 +105,19 @@ void up_initialize(void)
   riscv_pminitialize();
 #endif
 
+#ifdef CONFIG_ARCH_DMA
+  /* Initialize the DMA subsystem if the weak function arm_dma_initialize has
+   * been brought into the build
+   */
+
+#ifdef CONFIG_HAVE_WEAKFUNCTIONS
+  if (riscv_dma_initialize)
+#endif
+    {
+      riscv_dma_initialize();
+    }
+#endif
+
   /* Initialize the serial device driver */
 
 #ifdef USE_SERIALDRIVER
