@@ -29,6 +29,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/mm/mempool.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/fs/procfs.h>
 
 /****************************************************************************
@@ -150,12 +151,14 @@ static ssize_t mempool_read(FAR struct file *filep, FAR char *buffer,
     {
       if (totalsize < buflen)
         {
+          FAR struct mempool_s *pool = container_of(entry, struct mempool_s,
+                                                    procfs);
           struct mempoolinfo_s minfo;
 
           buffer    += copysize;
           buflen    -= copysize;
 
-          mempool_info((FAR struct mempool_s *)entry, &minfo);
+          mempool_info(pool, &minfo);
           linesize   = procfs_snprintf(procfile->line, MEMPOOLINFO_LINELEN,
                                        "%12s:%11lu%9lu%9lu%9lu%9lu%9lu\n",
                                        entry->name, minfo.arena,
