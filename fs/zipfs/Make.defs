@@ -21,8 +21,8 @@
 ifeq ($(CONFIG_FS_ZIPFS),y)
 # Files required for ZIPFS file system support
 
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" zipfs/zlib/contrib/minizip}
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" zipfs/zlib}
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" zipfs/zlib/zlib/contrib/minizip}
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" zipfs/zlib/zlib}
 CSRCS += zip_vfs.c
 # Include ZIPFS build support
 
