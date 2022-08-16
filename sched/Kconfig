@@ -821,7 +821,7 @@ config SCHED_CPULOAD_EXTCLK
 		achieved.  This option enables use of such an "external" clock.  The
 		implementation of the clock must be provided by platform-specific
 		logic; that platform-specific logic must call the system function
-		nxsched_process_cpuload() at each timer expiration with interrupts
+		nxsched_process_cpuload_ticks() at each timer expiration with interrupts
 		disabled.
 
 if SCHED_CPULOAD_EXTCLK
