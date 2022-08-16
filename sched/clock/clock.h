@@ -76,9 +76,11 @@ extern struct timespec   g_basetime;
 
 int  clock_basetime(FAR struct timespec *tp);
 
-void weak_function clock_initialize(void);
+void clock_initialize(void);
 #ifndef CONFIG_SCHED_TICKLESS
-void weak_function clock_timer(void);
+void clock_timer(void);
+#else
+#  define clock_timer()
 #endif
 
 int  clock_abstime2ticks(clockid_t clockid,
