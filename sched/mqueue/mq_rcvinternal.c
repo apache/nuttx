@@ -251,7 +251,7 @@ int nxmq_wait_receive(FAR struct mqueue_inode_s *msgq,
 
 ssize_t nxmq_do_receive(FAR struct mqueue_inode_s *msgq,
                         FAR struct mqueue_msg_s *mqmsg,
-                        FAR char *ubuffer, unsigned int *prio)
+                        FAR char *ubuffer, FAR unsigned int *prio)
 {
   FAR struct tcb_s *btcb;
   ssize_t rcvmsglen;

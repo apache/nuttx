@@ -106,7 +106,7 @@ struct task_group_s; /* Forward reference */
 
 /* Functions defined in mq_initialize.c *****************************************/
 
-void weak_function nxmq_initialize(void);
+void nxmq_initialize(void);
 void nxmq_free_msg(FAR struct mqueue_msg_s *mqmsg);
 
 /* mq_waitirq.c *****************************************************************/
@@ -124,7 +124,7 @@ int nxmq_wait_receive(FAR struct mqueue_inode_s *msgq,
                       int oflags, FAR struct mqueue_msg_s **rcvmsg);
 ssize_t nxmq_do_receive(FAR struct mqueue_inode_s *msgq,
                         FAR struct mqueue_msg_s *mqmsg,
-                        FAR char *ubuffer, unsigned int *prio);
+                        FAR char *ubuffer, FAR unsigned int *prio);
 
 /* mq_sndinternal.c *************************************************************/
 

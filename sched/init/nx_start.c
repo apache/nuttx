@@ -564,16 +564,9 @@ void nx_start(void)
 
   g_nx_initstate = OSINIT_MEMORY;
 
-#if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
   /* Initialize tasking data structures */
 
-#ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (task_initialize != NULL)
-#endif
-    {
-      task_initialize();
-    }
-#endif
+  task_initialize();
 
   /* Disables context switching beacuse we need take the memory manager
    * semaphore on this CPU so that it will not be available on the other
@@ -588,49 +581,24 @@ void nx_start(void)
 
   /* Initialize the interrupt handling subsystem (if included) */
 
-#ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (irq_initialize != NULL)
-#endif
-    {
-      irq_initialize();
-    }
+  irq_initialize();
 
   /* Initialize the POSIX timer facility (if included in the link) */
 
-#ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (clock_initialize != NULL)
-#endif
-    {
-      clock_initialize();
-    }
+  clock_initialize();
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
-#ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (timer_initialize != NULL)
-#endif
-    {
-      timer_initialize();
-    }
+  timer_initialize();
 #endif
 
   /* Initialize the signal facility (if in link) */
 
-#ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (nxsig_initialize != NULL)
-#endif
-    {
-      nxsig_initialize();
-    }
+  nxsig_initialize();
 
 #ifndef CONFIG_DISABLE_MQUEUE
   /* Initialize the named message queue facility (if in link) */
 
-#ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (nxmq_initialize != NULL)
-#endif
-    {
-      nxmq_initialize();
-    }
+  nxmq_initialize();
 #endif
 
 #ifdef CONFIG_NET

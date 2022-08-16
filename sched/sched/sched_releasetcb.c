@@ -108,12 +108,7 @@ int nxsched_release_tcb(FAR struct tcb_s *tcb, uint8_t ttype)
        * disabled here).
        */
 
-#ifdef CONFIG_HAVE_WEAKFUNCTIONS
-      if (timer_deleteall != NULL)
-#endif
-        {
-          timer_deleteall(tcb->pid);
-        }
+      timer_deleteall(tcb->pid);
 #endif
 
       /* Release the task's process ID if one was assigned.  PID

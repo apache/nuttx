@@ -81,8 +81,8 @@ extern volatile sq_queue_t g_alloctimers;
  * Public Function Prototypes
  ****************************************************************************/
 
-void weak_function timer_initialize(void);
-void weak_function timer_deleteall(pid_t pid);
+void timer_initialize(void);
+void timer_deleteall(pid_t pid);
 int timer_release(FAR struct posix_timer_s *timer);
 
 #endif /* __SCHED_TIMER_TIMER_H */

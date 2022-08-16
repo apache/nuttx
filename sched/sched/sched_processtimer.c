@@ -218,12 +218,7 @@ void nxsched_process_timer(void)
 
   /* Increment the system time (if in the link) */
 
-#ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (clock_timer != NULL)
-#endif
-    {
-      clock_timer();
-    }
+  clock_timer();
 
 #ifndef CONFIG_SCHED_CPULOAD_EXTCLK
   /* Perform CPU load measurements (before any timer-initiated context
