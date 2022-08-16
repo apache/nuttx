@@ -916,7 +916,6 @@ static int rpmsgfs_opendir(FAR struct inode *mountpt,
   if (rdir->dir == NULL)
     {
       ret = -ENOENT;
-      kmm_free(rdir);
       goto errout_with_semaphore;
     }
 
