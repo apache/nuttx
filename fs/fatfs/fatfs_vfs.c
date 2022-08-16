@@ -438,6 +438,15 @@ static ssize_t fatfs_read(FAR struct file *filep, FAR char *buffer,
       return ret;
     }
 
+  if (filep->f_pos != f_tell(&fp->f))
+    {
+      ret = fatfs_convert_result(f_lseek(&fp->f, filep->f_pos));
+      if (ret < 0)
+        {
+          goto errout_with_sem;
+        }
+    }
+
   ret = fatfs_convert_result(f_read(&fp->f, buffer, buflen, &size));
   if (ret >= 0)
     {
@@ -445,6 +454,7 @@ static ssize_t fatfs_read(FAR struct file *filep, FAR char *buffer,
       ret = size;
     }
 
+errout_with_sem:
   fatfs_semgive(fs);
   return ret;
 }
@@ -467,6 +477,15 @@ static ssize_t fatfs_write(FAR struct file *filep, FAR const char *buffer,
   if (ret < 0)
     {
       return ret;
+    }
+
+  if (filep->f_pos != f_tell(&fp->f))
+    {
+      ret = fatfs_convert_result(f_lseek(&fp->f, filep->f_pos));
+      if (ret < 0)
+        {
+          goto errout_with_sem;
+        }
     }
 
   /* In append mode, need to set the file pointer to end of the file */
@@ -532,12 +551,7 @@ static off_t fatfs_seek(FAR struct file *filep, off_t offset, int whence)
           return -EINVAL;
     }
 
-  ret = fatfs_convert_result(f_lseek(&fp->f, offset));
-  if (ret >= 0)
-    {
-      filep->f_pos = offset;
-    }
-
+  filep->f_pos = offset;
   fatfs_semgive(fs);
   return ret < 0 ? ret : offset;
 }
@@ -806,7 +820,6 @@ static int fatfs_truncate(FAR struct file *filep, off_t length)
 {
   FAR struct fatfs_mountpt_s *fs;
   FAR struct fatfs_file_s *fp;
-  FSIZE_t pos;
   int ret;
 
   /* Recover our private data from the struct file instance */
@@ -819,7 +832,6 @@ static int fatfs_truncate(FAR struct file *filep, off_t length)
       return ret;
     }
 
-  pos = f_tell(&fp->f);
   ret = fatfs_convert_result(f_lseek(&fp->f, length));
   if (ret < 0)
     {
@@ -830,8 +842,6 @@ static int fatfs_truncate(FAR struct file *filep, off_t length)
     {
       ret = fatfs_convert_result(f_truncate(&fp->f));
     }
-
-  fatfs_convert_result(f_lseek(&fp->f, pos));
 
 errsem:
   fatfs_semgive(fs);
