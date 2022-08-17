@@ -245,6 +245,7 @@
 #  endif
 #define ADC_CFGR_EXTEN_SHIFT         (10)                              /* Bits 10-11: External trigger/polarity selection regular channels */
 #define ADC_CFGR_EXTEN_MASK          (3 << ADC_CFGR_EXTEN_SHIFT)
+#  define ADC_CFGR_EXTEN(pol)        ((pol) << ADC_CFGR_EXTEN_SHIFT)   /* Trigger polarity = 0..3 */
 #  define ADC_CFGR_EXTEN_NONE        (0 << ADC_CFGR_EXTEN_SHIFT)       /* Trigger detection disabled */
 #  define ADC_CFGR_EXTEN_RISING      (1 << ADC_CFGR_EXTEN_SHIFT)       /* Trigger detection on the rising edge */
 #  define ADC_CFGR_EXTEN_FALLING     (2 << ADC_CFGR_EXTEN_SHIFT)       /* Trigger detection on the falling edge */
@@ -463,6 +464,8 @@
 #  define ADC_JEXTSEL_T15TRGO        ADC_JSQR_JEXTSEL(15)         /* 1111 TIM15_TRGO */
 #define ADC_JSQR_JEXTEN_SHIFT        (6)                          /* Bits 6-7: External trigger selection for injected greoup */
 #define ADC_JSQR_JEXTEN_MASK         (3 << ADC_JSQR_JEXTEN_SHIFT)
+#  define ADC_JSQR_JEXTEN(pol)       ((pol) << ADC_JSQR_JEXTEN_SHIFT)
+                                                                  /* Trigger polarity = 0..3 */
 #  define ADC_JSQR_JEXTEN_NONE       (0 << ADC_JSQR_JEXTEN_SHIFT) /* 00: Trigger detection disabled */
 #  define ADC_JSQR_JEXTEN_RISING     (1 << ADC_JSQR_JEXTEN_SHIFT) /* 01: Trigger detection on the rising edge */
 #  define ADC_JSQR_JEXTEN_FALLING    (2 << ADC_JSQR_JEXTEN_SHIFT) /* 10: Trigger detection on the falling edge */
