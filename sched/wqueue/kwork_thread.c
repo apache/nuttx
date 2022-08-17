@@ -153,7 +153,7 @@ static int work_thread(int argc, FAR char *argv[])
 
       /* Remove the ready-to-execute work from the list */
 
-      work = (FAR struct work_s *)sq_remfirst(&wqueue->q);
+      work = (FAR struct work_s *)dq_remfirst(&wqueue->q);
       if (work && work->worker)
         {
           /* Extract the work description from the entry (in case the work

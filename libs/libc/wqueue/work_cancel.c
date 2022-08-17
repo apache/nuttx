@@ -63,8 +63,8 @@
 static int work_qcancel(FAR struct usr_wqueue_s *wqueue,
                         FAR struct work_s *work)
 {
-  FAR sq_entry_t *prev = NULL;
-  FAR sq_entry_t *curr;
+  FAR dq_entry_t *prev = NULL;
+  FAR dq_entry_t *curr;
   int ret = -ENOENT;
   int semcount;
 
@@ -82,12 +82,12 @@ static int work_qcancel(FAR struct usr_wqueue_s *wqueue,
   if (work->worker != NULL)
     {
       /* Search the work activelist for the target work. We can't
-       * use sq_rem to do this because there are additional operations that
+       * use dq_rem to do this because there are additional operations that
        * need to be done.
        */
 
       curr = wqueue->q.head;
-      while (curr && curr != &work->u.s.sq)
+      while (curr && curr != &work->u.s.dq)
         {
           prev = curr;
           curr = curr->flink;
@@ -105,13 +105,13 @@ static int work_qcancel(FAR struct usr_wqueue_s *wqueue,
         {
           /* Remove the work from mid- or end-of-queue */
 
-          sq_remafter(prev, &wqueue->q);
+          dq_remafter(prev, &wqueue->q);
         }
       else
         {
           /* Remove the work at the head of the queue */
 
-          sq_remfirst(&wqueue->q);
+          dq_remfirst(&wqueue->q);
           _SEM_GETVALUE(&wqueue->wake, &semcount);
           if (semcount < 1)
             {

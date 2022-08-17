@@ -46,7 +46,7 @@
 
 struct usr_wqueue_s
 {
-  struct sq_queue_s q;      /* The queue of pending work */
+  struct dq_queue_s q;      /* The queue of pending work */
   sem_t             lock;   /* exclusive access to user-mode work queue */
   sem_t             wake;   /* The wake-up semaphore of the  usrthread */
 };
