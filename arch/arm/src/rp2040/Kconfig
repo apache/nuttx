@@ -392,7 +392,7 @@ if RP2040_PWM
 	if RP2040_PWM3
 
 		config RP2040_PWM3A_GPIO
-			
+
 		config RP2040_PWM3A_INVERT
 			bool "PWM3 channel 1 invert"
 			default n
@@ -425,7 +425,7 @@ if RP2040_PWM
 			See the Board Selection menu to configure the pins used by I2C0.
 
 	if RP2040_PWM4
-		
+
 		config RP2040_PWM4A_INVERT
 			bool "PWM4 channel 1 invert"
 			default n
@@ -458,7 +458,7 @@ if RP2040_PWM
 			See the Board Selection menu to configure the pins used by I2C0.
 
 	if RP2040_PWM5
-			
+
 		config RP2040_PWM5A_INVERT
 			bool "PWM5 channel 1 invert"
 			default n
@@ -491,7 +491,7 @@ if RP2040_PWM
 			See the Board Selection menu to configure the pins used by I2C0.
 
 	if RP2040_PWM6
-			
+
 		config RP2040_PWM6A_INVERT
 			bool "PWM6 channel 1 invert"
 			default n
@@ -524,7 +524,7 @@ if RP2040_PWM
 			See the Board Selection menu to configure the pins used by I2C0.
 
 	if RP2040_PWM7
-			
+
 		config RP2040_PWM7A_INVERT
 			bool "PWM7 channel 1 invert"
 			default n
@@ -550,7 +550,7 @@ if RP2040_PWM
 			default n
 
 	endif # RP2040_PWM7
-			
+
 endif # RP2040_PWM
 
 #####################################################################
@@ -591,7 +591,7 @@ if RP2040_I2S
 		range 0 3
 
 endif
-		
+
 #####################################################################
 #  I2S Configuration
 #####################################################################
@@ -672,11 +672,11 @@ if RP2040_ADC
 			---help---
 				If y, then the ADC chip temperature
 				will be read.
-		
+
 	endif # ADC
 
 endif # RP2040_ADC
-		
+
 #####################################################################
 #  WS2812 Configuration
 #####################################################################
@@ -685,6 +685,7 @@ config RP2040_BOARD_HAS_WS2812
 	bool "Has ws2812 pixels"
 	default n
 	depends on WS2812
+	select WS2812_NON_SPI_DRIVER
 	---help---
 		See the Board Selection menu to configure the pins used
 		by ws2812.

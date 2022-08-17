@@ -39,9 +39,9 @@ Buttons and LEDs
 User LED controlled by GPIO25.
 
 A BOOTSEL button, which if held down when power is first
-applied to the board, the cause the RP2040 to boot programming mode 
-and appear to a computer connected via USB as a storage device.  
-Saving a .UF2 file to this device will replace the Flash ROM contents 
+applied to the board, will cause the RP2040 to boot into programming
+mode and appear as a storage device to a computer connected via USB .
+Saving a .UF2 file to this device will replace the Flash ROM contents
 on the RP2040.
 
 Pin Mapping
@@ -83,19 +83,27 @@ Pad   Signal     Notes
 30    Run
 31    GPIO26     ADC0
 32    GPIO27     ADC1
-33    AGND       Analog Ground 
+33    AGND       Analog Ground
 34    GPIO28     ADC2
 35    ADC_VREF
 36    3V3        Power output to peripherals
-37    3V3_EN     Pull to ground to turn off. 
+37    3V3_EN     Pull to ground to turn off.
 38    Ground
 39    VSYS       +5V Supply to board
 40    VBUS       Connected to USB +5V
 ===== ========== ==========
 
+Other RP2040 Pins
+=================
+
+GPIO23 Output - Power supply control.
+GPIO24 Input  - High if USB port or Pad 40 supplying power.
+GPIO25 Output - On board LED.
+ADC3   Input  - Analog voltage equal to one third of VSys voltage.
+
 Separate pins for the Serial Debug Port (SDB) are available
 
-Power Supply 
+Power Supply
 ============
 
 The Raspberry Pi Pico can be powered via the USB connector,
@@ -108,9 +116,9 @@ by an onboard voltage regulator.  This regulator can be disabled
 by pulling pin 37 to ground.
 
 The regulator can run in two modes.  By default the regulator runs
-in PFM mode which provides the best efficiency, but may be 
+in PFM mode which provides the best efficiency, but may be
 switched to PWM mode for improved ripple by outputting a one
-on GPIO23. 
+on GPIO23.
 
 Configurations
 ==============

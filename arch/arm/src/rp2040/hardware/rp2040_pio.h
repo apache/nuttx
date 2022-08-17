@@ -207,6 +207,9 @@
 #define RP2040_PIO_FLEVEL_TX0_SHIFT                 (0)
 #define RP2040_PIO_FLEVEL_TX0_MASK                  (0x0f)
 
+#define RP2040_PIO_FLEVEL_TX_MASK(n)                (0x0f << 8*n)
+#define RP2040_PIO_FLEVEL_RX_MASK(n)                (0xf0 << 8*n)
+
 #define RP2040_PIO_IRQ_MASK                         (0xff)
 
 #define RP2040_PIO_IRQ_FORCE_MASK                   (0xff)

@@ -37,18 +37,23 @@
  * Public Data
  ****************************************************************************/
 
-extern const char cyw43439_nvram_image[];
-extern const unsigned int cyw43439_nvram_image_len;
+extern const uint8_t       g_cyw43439_nvram_image[];
+extern unsigned int        g_cyw43439_nvram_len;
 
 #ifndef CONFIG_IEEE80211_BROADCOM_FWFILES
-extern const uint8_t cyw43439_firmware_image[];
-extern const unsigned int cyw43439_firmware_len;
 
-extern const uint8_t cyw43439_clm_blob_image[];
-extern const unsigned int cyw43439_clm_blob_len;
+extern const uint8_t       g_cyw43439_firmware_image[];
+extern const unsigned int  g_cyw43439_firmware_len;
+
+#ifdef CONFIG_IEEE80211_BROADCOM_HAVE_CLM
+
+extern const uint8_t       g_cyw43439_clm_blob_image[];
+extern const unsigned int  g_cyw43439_clm_blob_len;
+
+#endif
 #endif
 
-const struct bcmf_chip_data cyw43439_config_data =
+const struct bcmf_chip_data g_cyw43439_config_data =
 {
   /* General chip stats */
 
@@ -70,18 +75,16 @@ const struct bcmf_chip_data cyw43439_config_data =
 
   /* Firmware images */
 
-  /* TODO find something smarter than using image_len references */
-
-  .nvram_image         = (FAR uint8_t *)cyw43439_nvram_image,
-  .nvram_image_size    = (FAR unsigned int *)&cyw43439_nvram_image_len,
+  .nvram_image         = (FAR uint8_t *)g_cyw43439_nvram_image,
+  .nvram_image_size    = (FAR unsigned int *)&g_cyw43439_nvram_len,
 
 #ifndef CONFIG_IEEE80211_BROADCOM_FWFILES
-  .firmware_image      = (FAR uint8_t *)cyw43439_firmware_image,
-  .firmware_image_size = (FAR unsigned int *)&cyw43439_firmware_len,
+  .firmware_image      = (FAR uint8_t *)g_cyw43439_firmware_image,
+  .firmware_image_size = (FAR unsigned int *)&g_cyw43439_firmware_len,
 
 #ifdef CONFIG_IEEE80211_BROADCOM_HAVE_CLM
-  .clm_blob_image      = (FAR uint8_t *)cyw43439_clm_blob_image,
-  .clm_blob_image_size = (FAR unsigned int *)&cyw43439_clm_blob_len
+  .clm_blob_image      = (FAR uint8_t *)g_cyw43439_clm_blob_image,
+  .clm_blob_image_size = (FAR unsigned int *)&g_cyw43439_clm_blob_len
 #endif
 #endif
 };

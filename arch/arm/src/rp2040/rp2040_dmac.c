@@ -54,7 +54,6 @@ struct dma_channel_s
 {
   uint8_t        chan;          /* DMA channel number (0-RP2040_DMA_NCHANNELS) */
   bool           inuse;         /* TRUE: The DMA channel is in use */
-  dma_config_t   config;        /* Current configuration */
   dma_callback_t callback;      /* Callback invoked when the DMA completes */
   void          *arg;           /* Argument passed to callback function */
 };
@@ -336,10 +335,6 @@ void rp2040_rxdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
   DEBUGASSERT(dmach != NULL && dmach->inuse);
   ch  = dmach->chan;
 
-  /* Save the configuration (for rp2040_dmastart()). */
-
-  dmach->config = config;
-
   DEBUGASSERT(config.size >= RP2040_DMA_SIZE_BYTE &&
               config.size <= RP2040_DMA_SIZE_WORD);
 
@@ -397,10 +392,6 @@ void rp2040_txdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
   DEBUGASSERT(dmach != NULL && dmach->inuse);
   ch  = dmach->chan;
 
-  /* Save the configuration (for rp2040_dmastart()). */
-
-  dmach->config = config;
-
   DEBUGASSERT(config.size >= RP2040_DMA_SIZE_BYTE &&
               config.size <= RP2040_DMA_SIZE_WORD);
 
@@ -429,6 +420,115 @@ void rp2040_txdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
     }
 
   putreg32(ctrl, RP2040_DMA_CTRL_TRIG(ch));
+}
+
+/****************************************************************************
+ * Name: rp2040_ctrl_dmasetup
+ *
+ * Description:
+ *   Configure a dma channel to send a list of channel control blocks to
+ *   a second dma channel..
+ *
+ * Input Parameters:
+ *   control   - the DMA handle that reads the control blocks.  This is
+ *               the one that should be started.
+ *   transfer  - the DMA handle the transfers data to the peripheral.
+ *   ctrl_blks - the array of control blocks to used.  Terminate this
+ *               list with an all zero control block.
+ *   callback  - callback when last transfer completes
+ *   arg       - arg to pass to callback
+ *
+ ****************************************************************************/
+
+void rp2040_ctrl_dmasetup(DMA_HANDLE           control,
+                          DMA_HANDLE           transfer,
+                          dma_control_block_t *ctrl_blks,
+                          dma_callback_t       callback,
+                          void                *arg)
+{
+  struct dma_channel_s *ctrl_dmach = (struct dma_channel_s *)control;
+  struct dma_channel_s *xfer_dmach = (struct dma_channel_s *)transfer;
+  uint32_t              ctrl_ch;
+  uint32_t              xfer_ch;
+  uint32_t              xfer_reg_addr;
+  uint32_t              ctrl;
+
+  DEBUGASSERT(ctrl_dmach && ctrl_dmach->inuse);
+  DEBUGASSERT(xfer_dmach && xfer_dmach->inuse);
+
+  ctrl_ch = ctrl_dmach->chan;
+  xfer_ch = xfer_dmach->chan;
+
+  xfer_dmach->callback = callback;
+  xfer_dmach->arg      = arg;
+
+  xfer_reg_addr = RP2040_DMA_AL1_CTRL(xfer_ch);
+
+  /* Set DMA registers */
+
+  putreg32((uint32_t)ctrl_blks, RP2040_DMA_READ_ADDR(ctrl_ch));
+  putreg32(xfer_reg_addr, RP2040_DMA_WRITE_ADDR(ctrl_ch));
+  putreg32(4, RP2040_DMA_TRANS_COUNT(ctrl_ch));
+
+  /* Configure the xfer dma channel as follows:
+   *    clear read and write error flags
+   *    set increment on both read and write
+   *    set 32-bit (word) transfer size
+   *    run the ctrl at high priority
+   *    RING_SIZE applies to write
+   *    set RING_SIZE to wrap every 16 bytes
+   *    don't chain to another dma (chain set to ourself)
+   *    use un-paced transfer mode  TREQ_SEL = 0x3f
+   */
+
+  ctrl = RP2040_DMA_CTRL_TRIG_READ_ERROR
+       | RP2040_DMA_CTRL_TRIG_WRITE_ERROR
+       | RP2040_DMA_CTRL_TRIG_INCR_READ
+       | RP2040_DMA_CTRL_TRIG_INCR_WRITE
+       | RP2040_DMA_CTRL_TRIG_HIGH_PRIORITY
+       | RP2040_DMA_CTRL_TRIG_RING_SEL
+       | (4 << RP2040_DMA_CTRL_TRIG_RING_SIZE_SHIFT)
+       | (RP2040_DMA_SIZE_WORD << RP2040_DMA_CTRL_TRIG_DATA_SIZE_SHIFT)
+       | (ctrl_ch << RP2040_DMA_CTRL_TRIG_CHAIN_TO_SHIFT)
+       | (0x3f << RP2040_DMA_CTRL_TRIG_TREQ_SEL_SHIFT);
+
+  putreg32(ctrl, RP2040_DMA_CTRL_TRIG(ctrl_ch));
+}
+
+/****************************************************************************
+ * Name: rp2040_ctrl_dmasetup
+ *
+ * Description:
+ *   Configure a dma channel to send a list of channel control blocks to
+ *   a second dma channel..
+ *
+ * Input Parameters:
+ *   control   - the DMA handle that reads the control blocks.  This is
+ *               the one that should be started.
+ *   size      - transfer size for this block
+ *   pacing    - dma pacing register for this block
+ *   ctrl      - Additional bits to set in CTRL_TRIG for this block.
+ *
+ ****************************************************************************/
+
+uint32_t rp2040_dma_ctrl_blk_ctrl(DMA_HANDLE  control,
+                                  int         size,
+                                  uint32_t    pacing,
+                                  uint32_t    ctrl)
+{
+  struct dma_channel_s *ctrl_dmach = (struct dma_channel_s *)control;
+  uint32_t              ctrl_ch;
+
+  DEBUGASSERT(ctrl_dmach && ctrl_dmach->inuse);
+
+  ctrl_ch = ctrl_dmach->chan;
+
+  return   RP2040_DMA_CTRL_TRIG_EN
+         | RP2040_DMA_CTRL_TRIG_IRQ_QUIET
+         | (ctrl_ch << RP2040_DMA_CTRL_TRIG_CHAIN_TO_SHIFT)
+         | (size    << RP2040_DMA_CTRL_TRIG_DATA_SIZE_SHIFT)
+         | (pacing  << RP2040_DMA_CTRL_TRIG_TREQ_SEL_SHIFT)
+         | ctrl;
 }
 
 /****************************************************************************
@@ -492,4 +592,27 @@ void rp2040_dmastop(DMA_HANDLE handle)
       stat = getreg32(RP2040_DMA_CHAN_ABORT);
     }
   while (stat & bit);
+}
+
+/****************************************************************************
+ * Name: rp2040_dma_register
+ *
+ * Description:
+ *   Get the address of a DMA register based on the given dma handle that
+ *   can be used in the various putreg, getreg and modifyreg functions.
+ *
+ *   This allows other configuration options not normally supplied.
+ *
+ * Assumptions:
+ *   - DMA handle allocated by rp2040_dmachannel()
+ *
+ ****************************************************************************/
+
+uintptr_t rp2040_dma_register(DMA_HANDLE handle, uint16_t offset)
+{
+  struct dma_channel_s *dmach = (struct dma_channel_s *)handle;
+
+  DEBUGASSERT(dmach && dmach->inuse);
+
+  return RP2040_DMA_CH(dmach->chan) + offset;
 }

@@ -84,6 +84,16 @@
 #define RP2040_DMA_SIZE_HALFWORD                1
 #define RP2040_DMA_SIZE_WORD                    2
 
+/* Use this as last item in a DMA control block chain */
+
+#define RP2040_DMA_CTRL_BLOCK_END                   \
+                {                                   \
+                  RP2040_DMA_CTRL_TRIG_IRQ_QUIET,   \
+                  0,                                \
+                  0,                                \
+                  0                                 \
+                }
+
 #ifndef __ASSEMBLY__
 
 #undef EXTERN
@@ -128,6 +138,18 @@ typedef struct
   uint8_t size;
   uint8_t noincr;
 } dma_config_t;
+
+/* Type of items in the array items to 'ctrl_blks' argument for
+ * rp2040_ctrl_dmasetup().
+ */
+
+typedef struct
+  {
+    uint32_t  ctrl_trig;
+    uintptr_t read_addr;
+    uintptr_t write_addr;
+    uint32_t  xfer_count;
+  } dma_control_block_t;
 
 /****************************************************************************
  * Public Data
@@ -222,6 +244,52 @@ void rp2040_txdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
                        size_t nbytes, dma_config_t config);
 
 /****************************************************************************
+ * Name: rp2040_ctrl_dmasetup
+ *
+ * Description:
+ *   Configure a dma channel to send a list of channel control blocks to
+ *   a second dma channel..
+ *
+ * Input Parameters:
+ *   control   - the DMA handle that reads the control blocks.  This is
+ *               the one that should be started.
+ *   transfer  - the DMA handle the transfers data to the peripheral. No
+ *               setup of this handle is required by the caller.
+ *   ctrl_blks - the array of control blocks to used.  Terminate this
+ *               list with an all zero control block.
+ *   callback  - callback when last transfer completes
+ *   arg       - arg to pass to callback
+ *
+ ****************************************************************************/
+
+void rp2040_ctrl_dmasetup(DMA_HANDLE           control,
+                          DMA_HANDLE           transfer,
+                          dma_control_block_t *ctrl_blks,
+                          dma_callback_t       callback,
+                          void                *arg);
+
+/****************************************************************************
+ * Name: rp2040_ctrl_dmasetup
+ *
+ * Description:
+ *   Configure a dma channel to send a list of channel control blocks to
+ *   a second dma channel..
+ *
+ * Input Parameters:
+ *   control   - the DMA handle that reads the control blocks.  This is
+ *               the one that should be started.
+ *   size      - transfer size for this block
+ *   pacing    - dma pacing register for this block
+ *   ctrl      - Additional bits to set in CTRL_TRIG for this block.
+ *
+ ****************************************************************************/
+
+uint32_t rp2040_dma_ctrl_blk_ctrl(DMA_HANDLE  control,
+                                  int         size,
+                                  uint32_t    pacing,
+                                  uint32_t    ctrl);
+
+/****************************************************************************
  * Name: rp2040_dmastart
  *
  * Description:
@@ -249,6 +317,22 @@ void rp2040_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg);
  ****************************************************************************/
 
 void rp2040_dmastop(DMA_HANDLE handle);
+
+/****************************************************************************
+ * Name: rp2040_dma_register
+ *
+ * Description:
+ *   Get the address of a DMA register based on the given DMA handle that
+ *   can be used in the various putreg, getreg and modifyreg functions.
+ *
+ *   This allows other configuration options not normally supplied.
+ *
+ * Assumptions:
+ *   - DMA handle allocated by rp2040_dmachannel()
+ *
+ ****************************************************************************/
+
+uintptr_t rp2040_dma_register(DMA_HANDLE handle, uint16_t offset);
 
 #undef EXTERN
 #if defined(__cplusplus)

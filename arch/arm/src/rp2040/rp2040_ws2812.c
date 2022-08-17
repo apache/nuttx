@@ -165,14 +165,16 @@ static void update_pixels(struct ws2812_dev_s  *dev_data)
 
 static int my_open(struct file *filep)
 {
-  struct inode         *inode     = filep->f_inode;
-  struct ws2812_dev_s  *dev_data  = inode->i_private;
-  struct instance      *priv      = (struct instance *)dev_data->private;
-  rp2040_pio_sm_config  config;
-  int                   divisor;
-  int                   ret;
+  FAR struct inode         *inode     = filep->f_inode;
+  FAR struct ws2812_dev_s  *dev_data  = inode->i_private;
+  FAR struct instance      *priv      = (FAR struct instance *)
+                                                  dev_data->private;
+  rp2040_pio_sm_config      config;
+  int                       divisor;
+  int                       ret;
+  irqstate_t                flags;
 
-  nxsem_wait(&dev_data->exclsem);
+  flags = enter_critical_section();
 
   priv->open_count += 1;
 
@@ -210,7 +212,7 @@ static int my_open(struct file *filep)
 
       priv->pio_sm = rp2040_pio_claim_unused_sm(priv->pio, false);
 
-      /* If we did not get one try the nest pio block, if any */
+      /* If we did not get one try the next pio block, if any */
 
       if (priv->pio_sm < 0) continue;
 
@@ -319,7 +321,7 @@ static int my_open(struct file *filep)
   ret = OK;
 
 post_and_return:
-  nxsem_post(&dev_data->exclsem);
+  leave_critical_section(flags);
 
   return ret;
 }

@@ -1498,10 +1498,16 @@ config ARCH_BOARD_INTEL64_QEMU
 		generic Intel64 hardware.
 
 config ARCH_BOARD_RASPBERRYPI_PICO
-	bool "Raspberry Pi Pico board"
+	bool "Raspberry Pi Pico board (not W)"
 	depends on ARCH_CHIP_RP2040
 	---help---
 		This is a port to the Raspberry Pi Pico board.
+
+config ARCH_BOARD_RASPBERRYPI_PICO_W
+	bool "Raspberry Pi Pico W board"
+	depends on ARCH_CHIP_RP2040
+	---help---
+		This is a port to the Raspberry Pi Pico W board.
 
 config ARCH_BOARD_PIMORONI_TINY2040
 	bool "Pimoroni Tiny2040 board"
@@ -2734,6 +2740,7 @@ config ARCH_BOARD
 	default "qemu-i486"                if ARCH_BOARD_QEMU_I486
 	default "intel64-qemu"             if ARCH_BOARD_INTEL64_QEMU
 	default "raspberrypi-pico"         if ARCH_BOARD_RASPBERRYPI_PICO
+	default "raspberrypi-pico-w"       if ARCH_BOARD_RASPBERRYPI_PICO_W
 	default "pimoroni-tiny2040"        if ARCH_BOARD_PIMORONI_TINY2040
 	default "adafruit-feather-rp2040"  if ARCH_BOARD_ADAFRUIT_FEATHER_RP2040
 	default "adafruit-kb2040"          if ARCH_BOARD_ADAFRUIT_KB2040
@@ -3094,6 +3101,9 @@ source "boards/arm/nuc1xx/nutiny-nuc120/Kconfig"
 endif
 if ARCH_BOARD_RASPBERRYPI_PICO
 source "boards/arm/rp2040/raspberrypi-pico/Kconfig"
+endif
+if ARCH_BOARD_RASPBERRYPI_PICO_W
+source "boards/arm/rp2040/raspberrypi-pico-w/Kconfig"
 endif
 if ARCH_BOARD_PIMORONI_TINY2040
 source "boards/arm/rp2040/pimoroni-tiny2040/Kconfig"

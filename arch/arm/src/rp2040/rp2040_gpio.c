@@ -362,6 +362,31 @@ void rp2040_gpio_disable_irq(uint32_t gpio)
 }
 
 /****************************************************************************
+ * Name: rp2040_gpio_clear_interrupt
+ *
+ * Description:
+ *   Clear the interrupt flags for a gpio pin.
+ *
+ ****************************************************************************/
+
+void rp2040_gpio_clear_interrupt(uint32_t gpio,
+                                 bool     edge_low,
+                                 bool     edge_high)
+{
+  uint32_t reg;
+  uint32_t bits = 0;
+
+  DEBUGASSERT(gpio < RP2040_GPIO_NUM);
+
+  reg = RP2040_IO_BANK0_INTR(gpio);
+
+  if (edge_low)  bits |= 0x04 << (gpio % 8);
+  if (edge_high) bits |= 0x08 << (gpio % 8);
+
+  clrbits_reg32(bits, reg);
+}
+
+/****************************************************************************
  * Name: r2040_gpio_initialize
  *
  * Description:

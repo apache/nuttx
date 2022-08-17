@@ -82,4 +82,9 @@ ifeq ($(CONFIG_RP2040_FLASH_BOOT),y)
 ifneq ($(PICO_SDK_PATH),)
 include chip/boot2/Make.defs
 endif
+
+ifeq ($(CONFIG_IEEE80211_INFINEON_CYW43439),y)
+CHIP_CSRCS += rp2040_cyw43439.c
+endif
+
 endif
