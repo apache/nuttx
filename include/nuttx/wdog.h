@@ -61,17 +61,22 @@ typedef uint32_t  wdparm_t;
 
 typedef CODE void (*wdentry_t)(wdparm_t arg);
 
-/* This is the internal representation of the watchdog timer structure. */
+/* This is the internal representation of the watchdog timer structure.
+ * Notice !!!
+ * Carefully with the struct wdog_s order, you may not directly modify
+ * this. This struct will combine in struct work_s in union type, and,
+ * wqueue will modify/check this struct in kwork work_qcancel().
+ */
 
 struct wdog_s
 {
   FAR struct wdog_s *next;       /* Support for singly linked lists. */
+  wdparm_t           arg;        /* Callback argument */
   wdentry_t          func;       /* Function to execute when delay expires */
 #ifdef CONFIG_PIC
   FAR void          *picbase;    /* PIC base address */
 #endif
   sclock_t           lag;        /* Timer associated with the delay */
-  wdparm_t           arg;        /* Callback argument */
 };
 
 /****************************************************************************
