@@ -222,7 +222,7 @@
 /* FOC ADC trigger on CCR4 **************************************************/
 
 /* PWM channels configuration:
- *   - n channels for phases PWM (CCR1, CCR2, CCR3)
+ *   - 3 channels for phases PWM (CCR1, CCR2, CCR3)
  *   - 1 channel for ADC injection sequence trigger (CCR4)
  */
 
