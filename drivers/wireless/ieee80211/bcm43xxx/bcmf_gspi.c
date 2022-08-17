@@ -61,7 +61,7 @@
 #define BCMF_GSPI_LOWPOWER_TIMEOUT_TICK SEC2TICK(2)
 
 #ifdef CONFIG_IEEE80211_INFINEON_CYW43439
-extern const struct bcmf_chip_data cyw43439_config_data;
+extern const struct bcmf_chip_data g_cyw43439_config_data;
 #endif
 
 #define REV16(x) (((x & 0x000000ff) << 8)   \
@@ -634,7 +634,7 @@ static int bcmf_gspi_probe_chip(FAR bcmf_gspi_dev_t *gbus)
 #ifdef CONFIG_IEEE80211_INFINEON_CYW43439
       case SDIO_DEVICE_ID_INFINEON_CYW43439:
         wlinfo("cyw%d chip detected\n", chipid);
-        gbus->chip = (struct bcmf_chip_data *)&cyw43439_config_data;
+        gbus->chip = (struct bcmf_chip_data *)&g_cyw43439_config_data;
         break;
 #endif
 

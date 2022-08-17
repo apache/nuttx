@@ -48,7 +48,7 @@
 #define BCMF_CONTROL_INTERFACE_SHIFT 12
 #define BCMF_CONTROL_REQID_SHIFT     16
 
-#define BCMF_CONTROL_TIMEOUT_MS 2000
+#define BCMF_CONTROL_TIMEOUT_MS 10000
 
 /****************************************************************************
  * Private Types
