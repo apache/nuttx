@@ -127,7 +127,7 @@ static void work_process(FAR struct usr_wqueue_s *wqueue)
         {
           /* Remove the ready-to-execute work from the list */
 
-          sq_remfirst(&wqueue->q);
+          dq_remfirst(&wqueue->q);
 
           /* Extract the work description from the entry (in case the work
            * instance by the re-used after it has been de-queued).
@@ -288,7 +288,7 @@ int work_usrstart(void)
 
   /* Initialize the work queue */
 
-  sq_init(&g_usrwork.q);
+  dq_init(&g_usrwork.q);
 
 #ifdef CONFIG_BUILD_PROTECTED
 

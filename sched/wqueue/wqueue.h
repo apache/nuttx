@@ -58,7 +58,7 @@ struct kworker_s
 
 struct kwork_wqueue_s
 {
-  struct sq_queue_s q;         /* The queue of pending work */
+  struct dq_queue_s q;         /* The queue of pending work */
   sem_t             sem;       /* The counting semaphore of the wqueue */
   struct kworker_s  worker[1]; /* Describes a worker thread */
 };
@@ -70,7 +70,7 @@ struct kwork_wqueue_s
 #ifdef CONFIG_SCHED_HPWORK
 struct hp_wqueue_s
 {
-  struct sq_queue_s q;         /* The queue of pending work */
+  struct dq_queue_s q;         /* The queue of pending work */
   sem_t             sem;       /* The counting semaphore of the wqueue */
 
   /* Describes each thread in the high priority queue's thread pool */
@@ -86,7 +86,7 @@ struct hp_wqueue_s
 #ifdef CONFIG_SCHED_LPWORK
 struct lp_wqueue_s
 {
-  struct sq_queue_s q;         /* The queue of pending work */
+  struct dq_queue_s q;         /* The queue of pending work */
   sem_t             sem;       /* The counting semaphore of the wqueue */
 
   /* Describes each thread in the low priority queue's thread pool */
