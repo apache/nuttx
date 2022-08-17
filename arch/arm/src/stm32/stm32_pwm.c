@@ -37,7 +37,8 @@
 #include "arm_internal.h"
 #include "chip.h"
 #include "stm32_pwm.h"
-#include "stm32.h"
+#include "stm32_rcc.h"
+#include "stm32_gpio.h"
 
 /* This module then only compiles if there is at least one enabled timer
  * intended for use with the PWM upper half driver.
@@ -374,7 +375,7 @@ struct stm32_pwmtimer_s
   uint8_t  chan_num:3;              /* Number of configured channels */
   uint8_t  timtype:3;               /* See the TIMTYPE_* definitions */
   uint8_t  mode:3;                  /* Timer mode (see stm32_pwm_tim_mode_e) */
-  uint8_t  lock:2;                  /* TODO: Lock configuration */
+  uint8_t  lock:2;                  /* Lock configuration */
   uint8_t  t_dts:3;                 /* Clock division for t_DTS */
   uint8_t  _res:5;                  /* Reserved */
 #ifdef HAVE_PWM_COMPLEMENTARY
