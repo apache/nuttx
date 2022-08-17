@@ -171,6 +171,15 @@
 
 #define MPFS_TXTIMEOUT   (60 * CLK_TCK)
 
+/* RX timeout: Workaround for LAN8742A rev A and B silicon errata
+ * "Cable diagnostics incorrectly returns Open cable connection for
+ *  terminated cable"
+ */
+
+#if CONFIG_MPFS_PHY_RX_TIMEOUT_WA != 0
+#define MPFS_RXTIMEOUT   (CONFIG_MPFS_PHY_RX_TIMEOUT_WA * CLK_TCK)
+#endif
+
 /* PHY reset tim in loop counts */
 
 #define PHY_RESET_WAIT_COUNT (10)
@@ -268,6 +277,9 @@ struct mpfs_ethmac_s
   uint8_t       phyaddr;                         /* PHY address */
 #endif
   struct wdog_s txtimeout;                       /* TX timeout timer */
+#ifdef MPFS_RXTIMEOUT
+  struct wdog_s rxtimeout;                       /* RX timeout timer */
+#endif
   struct work_s irqwork;                         /* For deferring interrupt work to the work queue */
   struct work_s pollwork;                        /* For deferring poll work to the work queue */
   struct work_s timeoutwork;                     /* For managing timeouts */
@@ -390,6 +402,7 @@ static int  mpfs_ethconfig(struct mpfs_ethmac_s *priv);
 static void mpfs_ethreset(struct mpfs_ethmac_s *priv);
 
 static void mpfs_interrupt_work(void *arg);
+static void mpfs_txtimeout_expiry(wdparm_t arg);
 
 /****************************************************************************
  * Private Functions
@@ -470,6 +483,16 @@ static int mpfs_interrupt_0(int irq, void *context, void *arg)
       nwarn("TX complete: cancel timeout\n");
       wd_cancel(&priv->txtimeout);
     }
+
+#ifdef MPFS_RXTIMEOUT
+  if ((isr & INT_RX) != 0)
+    {
+      /* If a RX transfer just completed, restart the timeout */
+
+      wd_start(&priv->rxtimeout, MPFS_RXTIMEOUT,
+               mpfs_txtimeout_expiry, (wdparm_t)priv);
+    }
+#endif
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
@@ -1559,6 +1582,15 @@ static int mpfs_ifup(struct net_driver_s *dev)
   up_enable_irq(priv->mac_q_int[2]);
   up_enable_irq(priv->mac_q_int[3]);
 
+#ifdef MPFS_RXTIMEOUT
+  /* Set up the RX timeout. If we don't receive anything in time, try
+   * to re-initialize
+   */
+
+  wd_start(&priv->rxtimeout, MPFS_RXTIMEOUT,
+           mpfs_txtimeout_expiry, (wdparm_t)priv);
+#endif
+
   return OK;
 }
 
@@ -1601,6 +1633,12 @@ static int mpfs_ifdown(struct net_driver_s *dev)
   /* Cancel the TX timeout timers */
 
   wd_cancel(&priv->txtimeout);
+
+#ifdef MPFS_RXTIMEOUT
+  /* Cancel the RX timeout timers */
+
+  wd_cancel(&priv->rxtimeout);
+#endif
 
   /* Put the MAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the mpfs_ifup() always
