@@ -177,8 +177,12 @@ static struct mpfs_rptun_shmem_s    g_shmem;
 static struct rpmsg_device         *g_mpfs_rpmsg_device;
 static struct rpmsg_virtio_device  *g_mpfs_virtio_device;
 
-static sem_t  g_mpfs_ack_sig       = SEM_INITIALIZER(0);
-static sem_t  g_mpfs_rx_sig        = SEM_INITIALIZER(0);
+#ifndef CONFIG_MPFS_OPENSBI
+static sem_t  g_mpfs_ack_sig  = NXSEM_INITIALIZER(0,
+                                                  PRIOINHERIT_FLAGS_DISABLE);
+static sem_t  g_mpfs_rx_sig   = NXSEM_INITIALIZER(0,
+                                                  PRIOINHERIT_FLAGS_DISABLE);
+#endif
 static struct list_node g_dev_list = LIST_INITIAL_VALUE(g_dev_list);
 
 static uint32_t g_connected_hart_ints;
@@ -429,7 +433,9 @@ static void mpfs_ihc_rx_handler(uint32_t *message, bool is_ack)
     {
       /* Received the ack */
 
+#ifndef CONFIG_MPFS_OPENSBI
       nxsem_post(&g_mpfs_ack_sig);
+#endif
     }
   else
     {
@@ -437,7 +443,9 @@ static void mpfs_ihc_rx_handler(uint32_t *message, bool is_ack)
 
       DEBUGASSERT(g_vq_idx < VRINGS);
 
+#ifndef CONFIG_MPFS_OPENSBI
       nxsem_post(&g_mpfs_rx_sig);
+#endif
     }
 }
 
@@ -785,7 +793,9 @@ static int mpfs_ihc_tx_message(ihc_channel_t channel, uint32_t *message)
 
   if ((RMP_MESSAGE_PRESENT | ACK_INT) & ctrl_reg)
     {
+#ifndef CONFIG_MPFS_OPENSBI
       nxsig_usleep(100);
+#endif
 
       /* Give it a one more try */
 
@@ -821,7 +831,9 @@ static int mpfs_ihc_tx_message(ihc_channel_t channel, uint32_t *message)
         {
           /* Only applicable for the CONTEXTB_HART */
 
+#ifndef CONFIG_MPFS_OPENSBI
           nxsem_wait_uninterruptible(&g_mpfs_ack_sig);
+#endif
         }
     }
 
@@ -1277,7 +1289,9 @@ static int mpfs_rptun_thread(int argc, char *argv[])
       info = &g_mpfs_virtqueue_table[g_vq_idx];
       virtqueue_notification((struct virtqueue *)info->data);
 
+#ifndef CONFIG_MPFS_OPENSBI
       nxsem_wait(&g_mpfs_rx_sig);
+#endif
     }
 
   return 0;
