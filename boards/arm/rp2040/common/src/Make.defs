@@ -20,6 +20,9 @@
 
 ifeq ($(CONFIG_ARCH_BOARD_COMMON),y)
 
+CSRCS += rp2040_common_bringup.c
+CSRCS += rp2040_common_initialize.c
+
 ifeq ($(CONFIG_RP2040_I2C_DRIVER),y)
 CSRCS += rp2040_i2cdev.c
 endif
