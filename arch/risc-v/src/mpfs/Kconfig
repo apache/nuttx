@@ -700,6 +700,14 @@ config MPFS_PHYINIT
 	---help---
 		call mpfs_phy_boardinitialize() on init
 
+config MPFS_PHY_RX_TIMEOUT_WA
+	int "RX restart timeout workaround"
+	default 0
+	---help---
+		This is a workaround for LAN8742A rev A and B silicon errata.
+		Reset ETH interface in case no RX packets have been received
+		in configured time. Set to 0 to disable.
+
 config MPFS_ETH0_PHY_KSZ9477
 	bool "Use ksz9477 switch as an SGMII PHY for ETH0"
 	default n
