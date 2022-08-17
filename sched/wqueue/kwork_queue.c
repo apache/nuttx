@@ -110,15 +110,15 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
   irqstate_t flags;
   int ret = OK;
 
-  /* Remove the entry from the timer and work queue. */
-
-  work_cancel(qid, work);
-
   /* Interrupts are disabled so that this logic can be called from with
    * task logic or from interrupt handling logic.
    */
 
   flags = enter_critical_section();
+
+  /* Remove the entry from the timer and work queue. */
+
+  work_cancel(qid, work);
 
   /* Initialize the work structure. */
 
