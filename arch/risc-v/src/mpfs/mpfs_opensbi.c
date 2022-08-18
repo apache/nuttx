@@ -115,6 +115,7 @@ static int  mpfs_opensbi_ecall_handler(long extid, long funcid,
  */
 
 extern void riscv_lowputc(char ch);
+extern uintptr_t mpfs_get_entrypt(uint64_t hartid);
 
 /* domains init implemented in board specific file */
 
@@ -226,15 +227,6 @@ static const struct sbi_platform platform =
 
 sbi_scratch_holder_t g_scratches[MPFS_MAX_NUM_HARTS] \
                __attribute__((section(".l2_scratchpad")));
-
-static const uint64_t sbi_entrypoints[] =
-{
-  CONFIG_MPFS_HART0_ENTRYPOINT,
-  CONFIG_MPFS_HART1_ENTRYPOINT,
-  CONFIG_MPFS_HART2_ENTRYPOINT,
-  CONFIG_MPFS_HART3_ENTRYPOINT,
-  CONFIG_MPFS_HART4_ENTRYPOINT
-};
 
 /****************************************************************************
  * Private Functions
@@ -618,7 +610,7 @@ void __attribute__((noreturn)) mpfs_opensbi_setup(void)
 
   csr_write(mscratch, &g_scratches[hartid].scratch);
   g_scratches[hartid].scratch.next_mode = PRV_S;
-  g_scratches[hartid].scratch.next_addr = sbi_entrypoints[hartid];
+  g_scratches[hartid].scratch.next_addr = mpfs_get_entrypt(hartid);
   g_scratches[hartid].scratch.next_arg1 = 0;
 
   sbi_init(&g_scratches[hartid].scratch);
