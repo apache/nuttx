@@ -106,13 +106,19 @@ static int rwb_forcetake(FAR sem_t *sem)
 
   return ret;
 }
+#else
+#define rwb_forcetake(sem) OK 
 #endif
 
 /****************************************************************************
  * Name: rwb_semgive
  ****************************************************************************/
 
+#if defined(CONFIG_DRVR_WRITEBUFFER) && CONFIG_DRVR_WRDELAY != 0
 #define rwb_semgive(s) nxsem_post(s)
+#else
+#define rwb_semgive(sem) OK 
+#endif
 
 /****************************************************************************
  * Name: rwb_overlap
@@ -1274,7 +1280,7 @@ int rwb_invalidate(FAR struct rwbuffer_s *rwb,
 #ifdef CONFIG_DRVR_WRITEBUFFER
 int rwb_flush(FAR struct rwbuffer_s *rwb)
 {
-  int ret;
+  int ret = OK;
 
   ret = rwb_forcetake(&rwb->wrsem);
   rwb_wrcanceltimeout(rwb);
