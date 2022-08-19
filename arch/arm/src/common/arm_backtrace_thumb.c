@@ -100,10 +100,7 @@ static void **g_backtrace_code_regions;
  *
  ****************************************************************************/
 
-#ifdef CONFIG_MM_KASAN
-__attribute__((no_sanitize_address))
-#endif
-static int getlroffset(uint8_t *lr)
+nosanitize_address static int getlroffset(uint8_t *lr)
 {
   lr = (uint8_t *)((uintptr_t)lr & 0xfffffffe);
 
@@ -131,10 +128,7 @@ static int getlroffset(uint8_t *lr)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_MM_KASAN
-__attribute__((no_sanitize_address))
-#endif
-static bool in_code_region(void *pc)
+nosanitize_address static bool in_code_region(void *pc)
 {
   int i = 0;
 
@@ -184,9 +178,7 @@ static bool in_code_region(void *pc)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_MM_KASAN
-__attribute__((no_sanitize_address))
-#endif
+nosanitize_address
 static void *backtrace_push_internal(void **psp, void **ppc)
 {
   uint8_t *sp = *psp;
@@ -349,9 +341,7 @@ static void *backtrace_push_internal(void **psp, void **ppc)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_MM_KASAN
-__attribute__((no_sanitize_address))
-#endif
+nosanitize_address
 static int backtrace_push(void *limit, void **sp, void *pc,
                           void **buffer, int size, int *skip)
 {
@@ -401,9 +391,7 @@ static int backtrace_push(void *limit, void **sp, void *pc,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_MM_KASAN
-__attribute__((no_sanitize_address))
-#endif
+nosanitize_address
 static int backtrace_branch(void *limit, void *sp,
                             void **buffer, int size, int *skip)
 {
@@ -485,10 +473,7 @@ static int backtrace_branch(void *limit, void *sp,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_MM_KASAN
-__attribute__((no_sanitize_address))
-#endif
-void up_backtrace_init_code_regions(void **regions)
+nosanitize_address void up_backtrace_init_code_regions(void **regions)
 {
   g_backtrace_code_regions = regions;
 }
@@ -517,9 +502,7 @@ void up_backtrace_init_code_regions(void **regions)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_MM_KASAN
-__attribute__((no_sanitize_address))
-#endif
+nosanitize_address
 int up_backtrace(struct tcb_s *tcb,
                  void **buffer, int size, int skip)
 {
