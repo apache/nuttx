@@ -43,9 +43,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_MM_KASAN
-__attribute__((no_sanitize_address))
-#endif
+nosanitize_address
 static int backtrace(uintptr_t *base, uintptr_t *limit,
                      uintptr_t *fp, uintptr_t *pc,
                      void **buffer, int size, int *skip)
@@ -106,9 +104,7 @@ static int backtrace(uintptr_t *base, uintptr_t *limit,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_MM_KASAN
-__attribute__((no_sanitize_address))
-#endif
+nosanitize_address
 int up_backtrace(struct tcb_s *tcb,
                  void **buffer, int size, int skip)
 {
