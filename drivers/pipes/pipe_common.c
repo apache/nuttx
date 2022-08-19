@@ -745,9 +745,11 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
           eventset |= POLLIN;
         }
 
-      /* Notify the POLLHUP event if the pipe is empty and no writers */
+      /* Notify the POLLHUP event if the pipe is empty and no writers,
+       * or, no readers.
+       */
 
-      if (nbytes == 0 && dev->d_nwriters <= 0)
+      if ((nbytes == 0 && dev->d_nwriters <= 0) || dev->d_nreaders <= 0)
         {
           eventset |= POLLHUP;
         }
