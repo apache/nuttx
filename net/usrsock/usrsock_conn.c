@@ -37,6 +37,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
+#include <nuttx/net/usrsock.h>
 
 #include "usrsock/usrsock.h"
 
@@ -348,7 +349,7 @@ void usrsock_initialize(void)
 
   /* Register /dev/usrsock character device. */
 
-  usrsockdev_register();
+  usrsock_register();
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_USRSOCK */

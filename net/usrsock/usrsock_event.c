@@ -52,8 +52,10 @@
  *
  ****************************************************************************/
 
-int usrsock_event(FAR struct usrsock_conn_s *conn, uint16_t events)
+int usrsock_event(FAR struct usrsock_conn_s *conn)
 {
+  uint16_t events = conn->resp.events;
+
   ninfo("events: %04X\n", events);
 
   if (!events)
