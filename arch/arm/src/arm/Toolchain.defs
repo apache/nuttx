@@ -79,7 +79,7 @@ ifeq ($(CONFIG_ARCH_COVERAGE),y)
   ARCHOPTIMIZATION += -fprofile-generate -ftest-coverage
 endif
 
-ifeq ($(CONFIG_MM_KASAN),y)
+ifeq ($(CONFIG_MM_KASAN_ALL),y)
   ARCHOPTIMIZATION += -fsanitize=kernel-address
 endif
 
