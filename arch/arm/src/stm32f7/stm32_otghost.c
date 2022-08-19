@@ -4684,6 +4684,7 @@ static ssize_t stm32_transfer(struct usbhost_driver_s *drvr,
   struct stm32_usbhost_s *priv = (struct stm32_usbhost_s *)drvr;
   unsigned int chidx = (unsigned int)ep;
   ssize_t nbytes;
+  int ret;
 
   uinfo("chidx: %d buflen: %d\n",  (unsigned int)ep, buflen);
 
