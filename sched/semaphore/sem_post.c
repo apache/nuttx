@@ -151,7 +151,10 @@ int nxsem_post(FAR sem_t *sem)
 
               /* Stop the watchdog timer */
 
-              wd_cancel(&stcb->waitdog);
+              if (WDOG_ISACTIVE(&stcb->waitdog))
+                {
+                  wd_cancel(&stcb->waitdog);
+                }
 
               /* Restart the waiting task. */
 
