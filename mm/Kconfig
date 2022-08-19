@@ -196,6 +196,34 @@ config MM_KASAN
 		bugs in native code. After turn on this option, Please
 		add -fsanitize=kernel-address to CFLAGS/CXXFLAGS too.
 
+config MM_UBSAN
+	bool "Undefined Behavior Sanitizer"
+	default n
+	---help---
+		UBSan is a fast undefined behavior detector. UBSan modifies
+		the program at compile-time to catch various kinds of
+		undefined behavior during program execution
+
+config MM_UBSAN_ALL
+	bool "Enable UBSan for the entire image"
+	depends on MM_UBSAN
+	default y
+	---help---
+		This option activates UBSan instrumentation for the
+		entire image. If you don't enable this option, you have to
+		explicitly specify "-fsanitize=undefined" for
+		the files/directories you want to check. Enabling this option
+		will get image size increased and performance decreased
+		significantly.
+
+config MM_UBSAN_TRAP_ON_ERROR
+	bool "Enable UBsan trap on error to crash immediately"
+	depends on MM_UBSAN
+	default y
+	---help---
+		The undefined instruction trap should cause your program to crash,
+		save the code space significantly.
+
 config MM_FILL_ALLOCATIONS
 	bool "Fill allocations with debug value"
 	default n
