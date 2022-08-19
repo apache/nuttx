@@ -191,6 +191,10 @@
 
 #  define noinstrument_function __attribute__ ((no_instrument_function))
 
+/* The nosanitize_address attribute informs GCC don't sanitize it */
+
+#  define nosanitize_address __attribute__ ((no_sanitize_address))
+
 /* The nostackprotect_function attribute disables stack protection in
  * sensitive functions, e.g., stack coloration routines.
  */
@@ -460,6 +464,7 @@
 #  define inline_function
 #  define noinline_function
 #  define noinstrument_function
+#  define nosanitize_address
 #  define nostackprotect_function
 
 #  define unused_code
@@ -591,6 +596,7 @@
 #  define inline_function
 #  define noinline_function
 #  define noinstrument_function
+#  define nosanitize_address
 #  define nostackprotect_function
 #  define unused_code
 #  define unused_data
@@ -691,6 +697,7 @@
 #  define inline_function
 #  define noinline_function
 #  define noinstrument_function
+#  define nosanitize_address
 #  define nostackprotect_function
 #  define unused_code
 #  define unused_data
@@ -757,6 +764,7 @@
 #  define inline_function
 #  define noinline_function
 #  define noinstrument_function
+#  define nosanitize_address
 #  define nostackprotect_function
 #  define unused_code
 #  define unused_data
