@@ -41,6 +41,16 @@
 #include "kasan/kasan.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if UINTPTR_MAX <= UINT32_MAX
+#  define MM_PTR_FMT_WIDTH 11
+#elif UINTPTR_MAX <= UINT64_MAX
+#  define MM_PTR_FMT_WIDTH 19
+#endif
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -83,6 +93,13 @@ struct mm_heap_s
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
   struct procfs_meminfo_entry_s mm_procfs;
 #endif
+};
+
+struct memdump_info_s
+{
+  pid_t pid;
+  int   blks;
+  int   size;
 };
 
 /****************************************************************************
@@ -280,6 +297,27 @@ static bool mm_takesemaphore(FAR struct mm_heap_s *heap)
 static void mm_givesemaphore(FAR struct mm_heap_s *heap)
 {
   DEBUGVERIFY(_SEM_POST(&heap->mm_semaphore));
+}
+
+/****************************************************************************
+ * Name: mm_memdump_walker
+ ****************************************************************************/
+
+static void mm_memdump_walker(FAR void *ptr, size_t size, int used,
+                              FAR void *user)
+{
+  FAR struct memdump_info_s *info = user;
+
+  if (!used && info->pid <= -2)
+    {
+      info->blks++;
+      info->size += size;
+    }
+  else if (info->pid == -1)
+    {
+      info->blks++;
+      info->size += size;
+    }
 }
 
 /****************************************************************************
@@ -693,6 +731,54 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
   info->uordblks = info->arena - info->fordblks;
 
   return OK;
+}
+/****************************************************************************
+ * Name: mm_memdump
+ *
+ * Description:
+ *   mm_memdump returns a memory info about specified pid of task/thread.
+ *   if pid equals -1, this function will dump all allocated node and output
+ *   backtrace for every allocated node for this heap, if pid equals -2, this
+ *   function will dump all free node for this heap, and if pid is greater
+ *   than or equal to 0, will dump pid allocated node and output backtrace.
+ ****************************************************************************/
+
+void mm_memdump(FAR struct mm_heap_s *heap, pid_t pid)
+{
+#if CONFIG_MM_REGIONS > 1
+  int region;
+#else
+# define region 0
+#endif
+  struct memdump_info_s info;
+
+  if (pid >= -1)
+    {
+      syslog(LOG_INFO, "Dump all used memory node info:\n");
+      syslog(LOG_INFO, "%12s%*s\n", "Size", MM_PTR_FMT_WIDTH, "Address");
+    }
+  else
+    {
+      syslog(LOG_INFO, "Dump all free memory node info:\n");
+      syslog(LOG_INFO, "%12s%*s\n", "Size", MM_PTR_FMT_WIDTH, "Address");
+    }
+
+  info.blks = 0;
+  info.size = 0;
+  info.pid  = pid;
+#if CONFIG_MM_REGIONS > 1
+  for (region = 0; region < heap->mm_nregions; region++)
+#endif
+    {
+      DEBUGVERIFY(mm_takesemaphore(heap));
+      tlsf_walk_pool(heap->mm_heapstart[region],
+                     mm_memdump_walker, &info);
+      mm_givesemaphore(heap);
+    }
+#undef region
+
+  syslog(LOG_INFO, "%12s%12s\n", "Total Blks", "Total Size");
+  syslog(LOG_INFO, "%12d%12d\n", info.blks, info.size);
 }
 
 /****************************************************************************
