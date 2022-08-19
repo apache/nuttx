@@ -304,6 +304,18 @@ config ARCH_COVERAGE
 	---help---
 		Generate code coverage
 
+config ARCH_COVERAGE_ALL
+	bool "Enable code coverage for the entire image"
+	depends on ARCH_COVERAGE
+	default y
+	---help---
+		This option activates code coverage instrumentation for the
+		entire image. If you don't enable this option, you have to
+		explicitly specify "-fprofile-generate -ftest-coverage" for
+		the files/directories you want to check. Enabling this option
+		will get image size increased and performance decreased
+		significantly.
+
 comment "Architecture Options"
 
 config ARCH_NOINTC
