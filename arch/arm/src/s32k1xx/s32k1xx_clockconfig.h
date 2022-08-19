@@ -526,6 +526,24 @@ enum scg_system_clock_mode_e s32k1xx_set_runmode(enum scg_system_clock_mode_e
 int s32k1xx_clockconfig(const struct clock_configuration_s *clkcfg);
 
 /****************************************************************************
+ * Name: s32k1xx_clock_pm_register
+ *
+ * Description:
+ *   This function is called after OS and PM init in order to register to
+ *   receive power management event callbacks.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+#ifdef CONFIG_PM
+void s32k1xx_clock_pm_register(void);
+#endif
+
+/****************************************************************************
  * Name: s32k1xx_get_coreclk
  *
  * Description:
