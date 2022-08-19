@@ -124,6 +124,14 @@ ifeq ($(CONFIG_ARCH_COVERAGE),y)
   ARCHOPTIMIZATION += -fprofile-generate -ftest-coverage
 endif
 
+ifeq ($(CONFIG_MM_UBSAN_ALL),y)
+  ARCHOPTIMIZATION += -fsanitize=undefined
+endif
+
+ifeq ($(CONFIG_MM_UBSAN_TRAP_ON_ERROR),y)
+  ARCHOPTIMIZATION += -fsanitize-undefined-trap-on-error
+endif
+
 ifeq ($(CONFIG_ENDIAN_BIG),y)
   TARGET_ARCH := armeb
 else
