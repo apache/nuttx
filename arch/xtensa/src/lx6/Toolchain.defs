@@ -43,7 +43,7 @@ endif
 
 ARCHCPUFLAGS = -mlongcalls
 
-ifeq ($(CONFIG_MM_KASAN),y)
+ifeq ($(CONFIG_MM_KASAN_ALL),y)
   ARCHOPTIMIZATION += -fsanitize=kernel-address
 endif
 

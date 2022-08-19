@@ -73,7 +73,7 @@ endif
 
 ifeq ($(CONFIG_SIM_ASAN),y)
   ARCHOPTIMIZATION += -fsanitize=address
-else ifeq ($(CONFIG_MM_KASAN),y)
+else ifeq ($(CONFIG_MM_KASAN_ALL),y)
   ARCHOPTIMIZATION += -fsanitize=kernel-address
 endif
 
