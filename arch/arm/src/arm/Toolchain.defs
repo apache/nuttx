@@ -83,6 +83,14 @@ ifeq ($(CONFIG_MM_KASAN),y)
   ARCHOPTIMIZATION += -fsanitize=kernel-address
 endif
 
+ifeq ($(CONFIG_MM_UBSAN_ALL),y)
+  ARCHOPTIMIZATION += -fsanitize=undefined
+endif
+
+ifeq ($(CONFIG_MM_UBSAN_TRAP_ON_ERROR),y)
+  ARCHOPTIMIZATION += -fsanitize-undefined-trap-on-error
+endif
+
 # NuttX buildroot under Linux or Cygwin
 
 ifeq ($(CONFIG_ARM_TOOLCHAIN),BUILDROOT)

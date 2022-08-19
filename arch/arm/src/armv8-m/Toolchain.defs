@@ -89,6 +89,14 @@ ifeq ($(CONFIG_ARMV8M_STACKCHECK),y)
   ARCHOPTIMIZATION += -finstrument-functions -ffixed-r10
 endif
 
+ifeq ($(CONFIG_MM_UBSAN_ALL),y)
+  ARCHOPTIMIZATION += -fsanitize=undefined
+endif
+
+ifeq ($(CONFIG_MM_UBSAN_TRAP_ON_ERROR),y)
+  ARCHOPTIMIZATION += -fsanitize-undefined-trap-on-error
+endif
+
 # Parametrization for ARCHCPUFLAGS
 
 ifeq ($(CONFIG_ARCH_CORTEXM23),y)

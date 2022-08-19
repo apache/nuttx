@@ -169,6 +169,14 @@ ifeq ($(CONFIG_MM_KASAN),y)
   ARCHOPTIMIZATION += -fsanitize=kernel-address
 endif
 
+ifeq ($(CONFIG_MM_UBSAN_ALL),y)
+  ARCHOPTIMIZATION += -fsanitize=undefined
+endif
+
+ifeq ($(CONFIG_MM_UBSAN_TRAP_ON_ERROR),y)
+  ARCHOPTIMIZATION += -fsanitize-undefined-trap-on-error
+endif
+
 ARCHCFLAGS += -fno-common
 ARCHCXXFLAGS += -fno-common -nostdinc++
 
