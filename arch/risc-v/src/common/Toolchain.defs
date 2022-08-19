@@ -162,7 +162,7 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
 
 endif
 
-ifeq ($(CONFIG_MM_KASAN),y)
+ifeq ($(CONFIG_MM_KASAN_ALL),y)
   ARCHOPTIMIZATION += -fsanitize=kernel-address
 endif
 

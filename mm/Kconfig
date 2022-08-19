@@ -191,6 +191,17 @@ config MM_KASAN
 		bugs in native code. After turn on this option, Please
 		add -fsanitize=kernel-address to CFLAGS/CXXFLAGS too.
 
+config MM_KASAN_ALL
+	bool "Enable KASan for the entire image"
+	depends on MM_KASAN
+	default y
+	---help---
+		This option activates address sanitizer for the entire image.
+		If you don't enable this option, you have to explicitly specify
+		"-fsanitize=kernel-address" for the files/directories you want
+		to check. Enabling this option will get image size increased
+		and performance decreased significantly.
+
 config MM_UBSAN
 	bool "Undefined Behavior Sanitizer"
 	default n
