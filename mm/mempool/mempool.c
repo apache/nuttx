@@ -41,6 +41,30 @@ static inline void mempool_add_list(FAR sq_queue_t *list, FAR void *base,
     }
 }
 
+static inline FAR void *mempool_malloc(FAR struct mempool_s *pool, size_t size)
+{
+  if (pool->alloc != NULL)
+    {
+      return pool->alloc(pool, size);
+    }
+  else
+    {
+      return kmm_malloc(size);
+    }
+}
+
+static inline void mempool_mfree(FAR struct mempool_s *pool, FAR void *addr)
+{
+  if (pool->free != NULL)
+    {
+      return pool->free(pool, addr);
+    }
+  else
+    {
+      return kmm_free(addr);
+    }
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -81,7 +105,8 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
     {
       FAR sq_entry_t *base;
 
-      base = kmm_malloc(sizeof(*base) + pool->bsize * count);
+      base = mempool_malloc(pool, sizeof(*base) +
+                            pool->bsize * count);
       if (base == NULL)
         {
           return -ENOMEM;
@@ -153,7 +178,8 @@ retry:
           spin_unlock_irqrestore(&pool->lock, flags);
           if (pool->nexpand != 0)
             {
-              blk = kmm_malloc(sizeof(*blk) + pool->bsize * pool->nexpand);
+              blk = mempool_malloc(pool, sizeof(*blk) + pool->bsize *
+                                   pool->nexpand);
               if (blk == NULL)
                 {
                   return NULL;
@@ -306,7 +332,7 @@ int mempool_deinit(FAR struct mempool_s *pool)
 
   while ((blk = sq_remfirst(&pool->elist)) != NULL)
     {
-      kmm_free(blk);
+      mempool_mfree(pool, blk);
     }
 
   if (pool->wait && pool->nexpand == 0)
