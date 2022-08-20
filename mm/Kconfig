@@ -222,3 +222,34 @@ config MM_PANIC_ON_FAILURE
 	depends on DEBUG_MM
 
 source "mm/iob/Kconfig"
+
+config MM_HEALTH_CHECK
+	bool "Memory health checks"
+	default n
+	---help---
+		If enabled, a worker will be used to perform
+		various health checks on the system memories.
+		
+		The checks include:
+		* Check all stacks for overflow.
+		* The the heap for any corruption.
+
+config MM_CHECK_PERIOD
+	int "Health check period"
+	default 1
+	depends on MM_HEALTH_CHECK
+	---help---
+		The time period that the health checks will
+		be executed. In seconds.
+
+config MM_STACK_USAGE_SAFE_PERCENT
+	int "Safe stack usage"
+	default 90
+	depends on MM_HEALTH_CHECK
+	---help---
+		The stack usage that is considered safe. In
+		percent.
+		
+		If the stack usage goes beyond this percentage,
+		the memory checks will assume that an overflow
+		has occured.

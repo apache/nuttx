@@ -312,6 +312,12 @@ struct mallinfo_task kmm_mallinfo_task(pid_t pid);
 #  endif
 #endif
 
+/* Functions contained in mm_check.c ****************************************/
+
+#ifdef CONFIG_MM_HEALTH_CHECK
+void mm_check_init(void);
+#endif
+
 /* Functions contained in mm_memdump.c **************************************/
 
 void mm_memdump(FAR struct mm_heap_s *heap, pid_t pid);

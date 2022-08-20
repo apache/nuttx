@@ -31,6 +31,7 @@ include iob/Make.defs
 include circbuf/Make.defs
 include mempool/Make.defs
 include kasan/Make.defs
+include mm_check/Make.defs
 
 BINDIR ?= bin
 
