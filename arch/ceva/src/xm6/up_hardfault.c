@@ -100,7 +100,7 @@ int up_hardfault(int irq, void *context, void *arg)
   /* Dump some hard fault info */
 
   hfalert("Hard Fault:\n");
-  hfdumpreg4(P_ECADD     P_MAPAR,       P_MAPSR,     P_MECCCOR);
+  hfdumpreg4(P_ECADD,    P_MAPAR,       P_MAPSR,     P_MECCCOR);
   hfdumpreg4(D_ECCCOR,   D_ECCERR,      D_MECCCOR,   D_MECCERR);
   hfdumpreg4(D_SECCCOR,  D_SECCERR,     UOP_STS,     UOP_PAR);
   hfdumpreg4(MAPAR,      MAPSR,         DBG_GEN,     DBG_GEN_2);
