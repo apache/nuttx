@@ -36,6 +36,12 @@
  * Public Types
  ****************************************************************************/
 
+struct mempool_s;
+typedef CODE void *(*mempool_alloc_t)(FAR struct mempool_s *pool,
+                                      size_t size);
+typedef CODE void (*mempool_free_t)(FAR struct mempool_s *pool,
+                                    FAR void *addr);
+
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL
 struct mempool_procfs_entry_s
 {
@@ -53,6 +59,8 @@ struct mempool_s
   size_t     ninterrupt; /* The number of block in interrupt mempool */
   size_t     nexpand;    /* The number of expand block every time for mempool */
   bool       wait;       /* The flag of need to wait when mempool is empty */
+  mempool_alloc_t alloc; /* The alloc function for mempool */
+  mempool_free_t  free;  /* The free function for mempool */
 
   /* Private data for memory pool */
 
