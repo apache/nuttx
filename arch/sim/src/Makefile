@@ -78,8 +78,10 @@ endif
 VPATH = sim
 DEPPATH = $(patsubst %,--dep-path %,$(subst :, ,$(VPATH)))
 
+CFLAGS += -fvisibility=default
 HOSTCFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
-   $(ARCHCFLAGS) $(HOSTINCLUDES) $(EXTRAFLAGS) -D__SIM__ -pipe
+   $(ARCHCFLAGS) $(HOSTINCLUDES) $(EXTRAFLAGS) -D__SIM__ -pipe \
+   -fvisibility=default
 
 HOSTCFLAGS += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)}
 ifeq ($(CONFIG_HOST_MACOS),y)
