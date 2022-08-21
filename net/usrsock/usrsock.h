@@ -98,7 +98,7 @@ struct usrsock_conn_s
   struct
   {
     sem_t    sem;               /* Request semaphore (only one outstanding request) */
-    uint64_t xid;               /* Expected message exchange id */
+    uint32_t xid;               /* Expected message exchange id */
     bool     inprogress;        /* Request was received but daemon is still processing */
     uint16_t valuelen;          /* Length of value from daemon */
     uint16_t valuelen_nontrunc; /* Actual length of value at daemon */
