@@ -1120,16 +1120,8 @@ errout:
 int usrsockdev_do_request(FAR struct usrsock_conn_s *conn,
                           FAR struct iovec *iov, unsigned int iovcnt)
 {
-  FAR struct usrsockdev_s *dev = conn->dev;
+  FAR struct usrsockdev_s *dev = &g_usrsockdev;
   FAR struct usrsock_request_common_s *req_head = iov[0].iov_base;
-
-  if (!dev)
-    {
-      /* Setup conn for new usrsock device. */
-
-      dev = &g_usrsockdev;
-      conn->dev = dev;
-    }
 
   /* Get exchange id. */
 
