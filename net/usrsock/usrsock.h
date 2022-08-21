@@ -94,7 +94,6 @@ struct usrsock_conn_s
   int8_t        type;                /* Socket type (SOCK_STREAM, etc) */
   int16_t       usockid;             /* Connection number used for kernel<->daemon */
   uint16_t      flags;               /* Socket state flags */
-  struct usrsockdev_s *dev;          /* Device node used for this conn */
 
   struct
   {
