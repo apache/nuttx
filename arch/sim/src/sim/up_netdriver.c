@@ -382,7 +382,6 @@ int netdriver_init(void)
   return netdev_register(dev, NET_LL_ETHERNET);
 }
 
-__attribute__ ((visibility("default")))
 void netdriver_setmacaddr(unsigned char *macaddr)
 {
   memcpy(g_sim_dev.d_mac.ether.ether_addr_octet, macaddr, IFHWADDRLEN);

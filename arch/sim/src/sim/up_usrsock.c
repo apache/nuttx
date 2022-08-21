@@ -399,7 +399,6 @@ static const usrsock_handler_t g_usrsock_handler[] =
  * Public Functions
  ****************************************************************************/
 
-__attribute__ ((visibility("default")))
 int usrsock_event_callback(int16_t usockid, uint16_t events)
 {
   return usrsock_send_event(&g_usrsock, usockid, events);
