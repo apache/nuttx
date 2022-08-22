@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit-rust-1/src/esp32c3_boot.c
+ * boards/risc-v/esp32c3/esp32c3-devkit-rust-1/src/esp32c3_autoleds.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,65 +23,98 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/board.h>
 
-#include "riscv_internal.h"
+#include <debug.h>
+
+#include <arch/board/board.h>
+
+#include "esp32c3_gpio.h"
+#include "hardware/esp32c3_gpio_sigmap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* IO7 is connected to LED D2 */
+
+#define GPIO_LED   7
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static inline void set_led(bool v)
+{
+  ledinfo("Turn LED %s\n", v ? "on":"off");
+  esp32c3_gpiowrite(GPIO_LED, v);
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32c3_board_initialize
- *
- * Description:
- *   All ESP32-C3 architectures must provide the following entry point.
- *   This entry point is called early in the initialization -- after all
- *   memory has been configured and mapped but before any devices have been
- *   initialized.
- *
+ * Name: board_autoled_initialize
  ****************************************************************************/
 
-void esp32c3_board_initialize(void)
+void board_autoled_initialize(void)
 {
-#ifdef CONFIG_SCHED_CRITMONITOR
-  up_perf_init(NULL);
-#endif
+  /* Configure the LED's pin to be used as output */
 
-  /* Configure on-board LEDs if LED support has been selected. */
-
-#ifdef CONFIG_ARCH_LEDS
-  board_autoled_initialize();
-#endif
+  esp32c3_gpio_matrix_out(GPIO_LED, SIG_GPIO_OUT_IDX, 0, 0);
+  esp32c3_configgpio(GPIO_LED, OUTPUT_FUNCTION_1 | INPUT_FUNCTION_1);
 }
 
 /****************************************************************************
- * Name: board_late_initialize
- *
- * Description:
- *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize().  board_late_initialize() will
- *   be called immediately after up_initialize() is called and just before
- *   the initial application is started.  This additional initialization
- *   phase may be used, for example, to initialize board-specific device
- *   drivers.
- *
+ * Name: board_autoled_on
  ****************************************************************************/
 
-#ifdef CONFIG_BOARD_LATE_INITIALIZE
-void board_late_initialize(void)
+void board_autoled_on(int led)
 {
-  /* Perform board-specific initialization */
+  ledinfo("board_autoled_on(%d)\n", led);
 
-  esp32c3_bringup();
+  switch (led)
+    {
+      case LED_STARTED:
+      case LED_HEAPALLOCATE:
+
+        /* As the board provides only one soft controllable LED, we simply
+         * turn it on when the board boots.
+         */
+
+        set_led(true);
+        break;
+
+      case LED_PANIC:
+
+        /* For panic state, the LED is blinking */
+
+        set_led(true);
+        break;
+
+      default:
+        ledinfo("Not handled LED state: %d\n", led);
+        break;
+    }
 }
-#endif
+
+/****************************************************************************
+ * Name: board_autoled_off
+ ****************************************************************************/
+
+void board_autoled_off(int led)
+{
+  switch (led)
+    {
+      case LED_PANIC:
+
+        /* For panic state, the LED is blinking */
+
+        set_led(false);
+        break;
+
+      default:
+        ledinfo("Not handled LED state: %d\n", led);
+        break;
+    }
+}

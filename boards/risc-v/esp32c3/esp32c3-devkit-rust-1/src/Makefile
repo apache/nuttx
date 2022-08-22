@@ -31,7 +31,10 @@ CSRCS += esp32c3_appinit.c
 ifeq ($(CONFIG_BOARDCTL_RESET),y)
 CSRCS += esp32c3_reset.c
 endif
+endif
 
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += esp32c3_autoleds.c
 endif
 
 ifeq ($(CONFIG_BOARDCTL_IOCTL),y)
