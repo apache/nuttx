@@ -38,6 +38,10 @@ ifeq ($(CONFIG_DEBUG_FEATURES),y)
   CSRCS += iob_dump.c
 endif
 
+ifneq ($(CONFIG_IOB_SECTION),"")
+  CFLAGS += ${shell $(DEFINE) "$(CC)" IOB_SECTION=CONFIG_IOB_SECTION}
+endif
+
 # Include iob build support
 
 DEPPATH += --dep-path iob

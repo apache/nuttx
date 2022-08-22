@@ -250,8 +250,6 @@ if RAMLOG_SYSLOG
 
 config RAMLOG_BUFFER_SECTION
 	string "The section where ramlog buffer is located"
-	default ".bss"
-	depends on !ARCH_SIM
 	---help---
 		The section where ramlog buffer is located.
 		The section shall not be initialized on system boot.
