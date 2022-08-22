@@ -1,0 +1,12 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_ESP32C3_DEVKIT_RUST1
+
+config ESP32C3_DEVKIT_RUST1_RUN_IRAM
+	bool "Run from IRAM"
+	default n
+
+endif # ARCH_BOARD_ESP32C3_DEVKIT_RUST1
