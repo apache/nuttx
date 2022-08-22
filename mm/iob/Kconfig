@@ -48,8 +48,6 @@ config IOB_ALIGNMENT
 
 config IOB_SECTION
 	string "The section where iob buffer is located"
-	default ".bss"
-	depends on !ARCH_SIM
 	---help---
 		The section where iob buffer is located.
 		The section must be zero-initialized on system boot.
