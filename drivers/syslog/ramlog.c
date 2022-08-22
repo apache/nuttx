@@ -124,11 +124,12 @@ static const struct file_operations g_ramlogfops =
  */
 
 #ifdef CONFIG_RAMLOG_SYSLOG
+#  ifdef RAMLOG_BUFFER_SECTION
 static char g_sysbuffer[CONFIG_RAMLOG_BUFSIZE]
-#ifdef CONFIG_RAMLOG_BUFFER_SECTION
-                               locate_data(CONFIG_RAMLOG_BUFFER_SECTION)
-#endif
-;
+                       locate_data(RAMLOG_BUFFER_SECTION);
+#  else
+static char g_sysbuffer[CONFIG_RAMLOG_BUFSIZE];
+#  endif
 
 /* This is the device structure for the console or syslogging function.  It
  * must be statically initialized because the RAMLOG ramlog_putc function
@@ -137,15 +138,15 @@ static char g_sysbuffer[CONFIG_RAMLOG_BUFSIZE]
 
 static struct ramlog_dev_s g_sysdev =
 {
-#ifndef CONFIG_RAMLOG_NONBLOCKING
+#  ifndef CONFIG_RAMLOG_NONBLOCKING
   0,                             /* rl_nwaiters */
-#endif
+#  endif
   CONFIG_RAMLOG_BUFSIZE,         /* rl_head */
   CONFIG_RAMLOG_BUFSIZE,         /* rl_tail */
   SEM_INITIALIZER(1),            /* rl_exclsem */
-#ifndef CONFIG_RAMLOG_NONBLOCKING
+#  ifndef CONFIG_RAMLOG_NONBLOCKING
   SEM_INITIALIZER(0),            /* rl_waitsem */
-#endif
+#  endif
   CONFIG_RAMLOG_BUFSIZE,         /* rl_bufsize */
   g_sysbuffer                    /* rl_buffer */
 };

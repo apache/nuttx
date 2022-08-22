@@ -36,6 +36,10 @@ endif
 
 ifeq ($(CONFIG_RAMLOG),y)
   CSRCS += ramlog.c
+
+  ifneq ($(CONFIG_RAMLOG_BUFFER_SECTION),"")
+    CFLAGS += ${shell $(DEFINE) "$(CC)" RAMLOG_BUFFER_SECTION=CONFIG_RAMLOG_BUFFER_SECTION}
+  endif
 endif
 
 ############################################################################
