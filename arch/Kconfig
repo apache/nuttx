@@ -194,7 +194,7 @@ source "arch/or1k/Kconfig"
 source "arch/sparc/Kconfig"
 
 config ARCH_CHIP_CUSTOM
-	bool
+	bool "Custom Chip Support"
 	default n
 
 if ARCH_CHIP_CUSTOM
