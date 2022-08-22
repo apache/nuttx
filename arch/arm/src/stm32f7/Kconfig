@@ -1592,6 +1592,10 @@ config STM32F7_SPI6
 	select SPI
 	select STM32F7_SPI
 
+config STM32F7_SYSCFG
+	bool "SYSCFG"
+	default y
+
 config STM32F7_TIM1
 	bool "TIM1"
 	default n
