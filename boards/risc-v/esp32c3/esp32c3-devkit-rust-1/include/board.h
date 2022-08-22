@@ -25,6 +25,18 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define NUM_BUTTONS       1
+
+#define LED_STARTED       0  /* ON */
+#define LED_HEAPALLOCATE  1  /* ON */
+#define LED_IRQSENABLED   2  /* N/A */
+#define LED_STACKCREATED  3  /* N/A */
+#define LED_INIRQ         4  /* N/A */
+#define LED_SIGNAL        5  /* N/A */
+#define LED_ASSERTION     6  /* N/A */
+#define LED_PANIC         7  /* Blinking */
+#define LED_CPU           8  /* N/A */
+
 /* Clocking *****************************************************************/
 
 #define BOARD_XTAL_FREQUENCY  40000000

@@ -308,6 +308,8 @@ config ARCH_BOARD_ESP32C3_DEVKIT
 config ARCH_BOARD_ESP32C3_DEVKIT_RUST1
 	bool "Espressif ESP32-C3-RUST-1 board"
 	depends on ARCH_CHIP_ESP32C3MINI1
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
 	---help---
 		The ESP32-C3-DevKit-RUST-1 features the ESP32-C3 CPU with a RISC-V core.
 		This board includes the ESP32-C3-MINI-1 module, a 6DoF IMU, a temperature
