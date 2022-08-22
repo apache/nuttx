@@ -115,8 +115,10 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
       rsc->rpmsg_vdev.num_of_vrings = 2;
       rsc->rpmsg_vring0.align       = 8;
       rsc->rpmsg_vring0.num         = 8;
+      rsc->rpmsg_vring0.notifyid    = RSC_NOTIFY_ID_ANY;
       rsc->rpmsg_vring1.align       = 8;
       rsc->rpmsg_vring1.num         = 8;
+      rsc->rpmsg_vring1.notifyid    = RSC_NOTIFY_ID_ANY;
       rsc->config.r2h_buf_size      = 0x800;
       rsc->config.h2r_buf_size      = 0x800;
 
