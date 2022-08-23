@@ -22,7 +22,16 @@ include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
 
-LDSCRIPT = flash.ld
+ifeq ($(CONFIG_STM32_APP_FORMAT_MCUBOOT),y)
+  ifeq ($(CONFIG_MCUBOOT_BOOTLOADER),y)
+    LDSCRIPT = flash-mcuboot-loader.ld
+  else
+    LDSCRIPT = flash-mcuboot-app.ld
+  endif
+else
+  LDSCRIPT = flash.ld
+endif
+
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10

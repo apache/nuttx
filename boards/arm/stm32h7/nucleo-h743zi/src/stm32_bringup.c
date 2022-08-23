@@ -323,5 +323,15 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_MTD
+#ifdef HAVE_PROGMEM_CHARDEV
+  ret = stm32_progmem_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize MTD progmem: %d\n", ret);
+    }
+#endif /* HAVE_PROGMEM_CHARDEV */
+#endif /* CONFIG_MTD */
+
   return OK;
 }
