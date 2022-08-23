@@ -44,70 +44,6 @@ config DEBUG_BQ2429X
 
 endif # BQ2429X
 
-config BQ25618
-	bool "BQ25618 Battery charger support"
-	default n
-	select I2C
-	select I2C_BQ25618
-	depends on BATTERY_CHARGER
-	---help---
-		The BQ25618 are battery charger for lithium-ion batteries.
-
-config I2C_BQ25618
-	bool
-
-config DA9168
-	bool "DA9168 Battery charger support"
-	default n
-	select I2C
-	select I2C_DA9168
-	depends on BATTERY_CHARGER
-	---help---
-		The DA9168 are battery charger for lithium-ion batteries.
-
-config I2C_DA9168
-	bool
-
-config SC8551
-	bool "SC8551 Battery charger support"
-	default n
-	select I2C
-	select I2C_SC8551
-	depends on BATTERY_CHARGER
-	---help---
-		The SC8551 are battery charger for lithium-ion batteries.
-
-config I2C_SC8551
-	bool
-
-config STWLC38
-	bool "STWLC38 Battery charger support"
-	default n
-	select I2C
-	select I2C_STWLC38
-	depends on BATTERY_CHARGER
-	---help---
-		The STWLC38 are wireless rx for power supply.
-
-config I2C_STWLC38
-	bool
-
-config PLUG_IN
-	bool "PLUG_IN Battery charger support"
-	default n
-	depends on BATTERY_CHARGER
-	---help---
-		The plug in for power supply.
-
-config CPS4019
-	bool "CPS4019 Battery charger support"
-	default n
-	select I2C
-	select I2C_CPS4019
-	depends on BATTERY_CHARGER
-	---help---
-		The CPS4019 are wireless rx for power supply.
-
 config AXP202
 	bool "AXP202 Battery charger support"
 	default n
@@ -193,15 +129,6 @@ config BQ27426
 		operational characteristics of a single, Li-based, rechargeable cell.
 		It can be interrogated by a system processor to provide cell information,
 		such as state-of-charge (SOC).
-
-config CW2218
-	bool "CW2218 Battery fuel gauge support"
-	default n
-	select I2C
-	depends on BATTERY_GAUGE
-	---help---
-		The CW2218 is an ultra-compact, system-side or pack-side fuel gauging
-		IC for Lithium-ion based batteries used in wearable and portable devices
 
 config BATTERY_MONITOR
 	bool "Battery Monitor/Management support"

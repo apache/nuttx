@@ -48,35 +48,6 @@ ifeq ($(CONFIG_I2C_AXP202),y)
 CSRCS += axp202.c
 endif
 
-ifeq ($(CONFIG_I2C_SC8551),y)
-CSRCS += sc8551.c
-endif
-
-ifeq ($(CONFIG_I2C_STWLC38),y)
-CSRCS += polaris.c
-CSRCS += polaris_nvm.c
-endif
-
-ifeq ($(CONFIG_PLUG_IN),y)
-CSRCS += plug_in.c
-endif
-
-ifeq ($(CONFIG_I2C_CPS4019),y)
-CSRCS += cps4019_ctl.c
-endif
-
-# Add the BQ256XX I2C-based battery charger driver
-
-ifeq ($(CONFIG_I2C_BQ25618),y)
-CSRCS += bq25618.c
-endif
-
-# Add the DA9168XX I2C-based battery charger driver
-
-ifeq ($(CONFIG_I2C_DA9168),y)
-CSRCS += da9168.c
-endif
-
 endif
 
 # Add battery gauge drivers
@@ -95,12 +66,6 @@ endif
 
 ifeq ($(CONFIG_BQ27426),y)
 CSRCS += bq27426.c
-endif
-
-# Add the cw2218 I2C-based battery gauge driver
-
-ifeq ($(CONFIG_CW2218),y)
-CSRCS += cw2218.c
 endif
 
 endif
