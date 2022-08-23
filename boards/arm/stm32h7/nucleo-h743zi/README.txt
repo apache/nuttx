@@ -159,3 +159,15 @@ Configurations
 
     This configuration provides a basic NuttShell configuration (NSH)
     for the Nucleo-H743ZI.  The default console is the VCOM on USART3.
+
+  
+  MCUboot safe bootloader implementation
+  --------------------------------------
+
+  mcuboot:
+    This configuration provides a base implementation for mcuboot integration
+    in nuttx.
+
+    mcuboot-loader: Nuttx app-based bootloader.
+    mcuboot-app: Nuttx app with nsh as entrypoint.
+

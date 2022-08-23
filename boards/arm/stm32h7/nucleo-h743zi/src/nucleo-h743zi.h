@@ -36,10 +36,12 @@
 
 /* Configuration ************************************************************/
 
-#define HAVE_PROC       1
-#define HAVE_USBDEV     1
-#define HAVE_USBHOST    1
-#define HAVE_USBMONITOR 1
+#define HAVE_PROC            1
+#define HAVE_USBDEV          1
+#define HAVE_USBHOST         1
+#define HAVE_USBMONITOR      1
+#define HAVE_MTDCONFIG       1
+#define HAVE_PROGMEM_CHARDEV 1
 
 /* Can't support USB host or device features if USB OTG FS is not enabled */
 
@@ -76,6 +78,19 @@
 
 #if !defined(CONFIG_USBDEV_TRACE) && !defined(CONFIG_USBHOST_TRACE)
 #  undef HAVE_USBMONITOR
+#endif
+
+#if !defined(CONFIG_STM32H7_PROGMEM) || !defined(CONFIG_MTD_PROGMEM)
+#  undef HAVE_PROGMEM_CHARDEV
+#endif
+
+/* This is the on-chip progmem memory driver minor number */
+
+#define PROGMEM_MTD_MINOR 0
+
+/* flash  */
+#if defined(CONFIG_MMCSD)
+#  define FLASH_BASED_PARAMS
 #endif
 
 /* procfs File System */
@@ -349,6 +364,20 @@ int stm32_pca9635_initialize(void);
 
 #ifdef CONFIG_PWM
 int stm32_pwm_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_mtd_initialize
+ *
+ * Description:
+ *   Initialize MTD drivers.
+ *
+ ****************************************************************************/
+#ifdef CONFIG_MTD
+
+#ifdef HAVE_PROGMEM_CHARDEV
+int stm32_progmem_init(void);
+#endif  /* HAVE_PROGMEM_CHARDEV */
 #endif
 
 #endif /* __BOARDS_ARM_STM32H7_NUCLEO_H743ZI_SRC_NUCLEO_H743ZI_H */
