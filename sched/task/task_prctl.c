@@ -126,7 +126,7 @@ int prctl(int option, ...)
                * necessary.
                */
 
-              strncpy(tcb->name, name, CONFIG_TASK_NAME_SIZE);
+              strlcpy(tcb->name, name, sizeof(tcb->name));
               tcb->name[CONFIG_TASK_NAME_SIZE] = '\0';
             }
           else
@@ -135,7 +135,7 @@ int prctl(int option, ...)
                * necessary.
                */
 
-              strncpy(name, tcb->name, CONFIG_TASK_NAME_SIZE - 1);
+              strlcpy(name, tcb->name, sizeof(tcb->name));
               name[CONFIG_TASK_NAME_SIZE - 1] = '\0';
             }
         }
