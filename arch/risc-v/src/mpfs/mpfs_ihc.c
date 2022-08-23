@@ -969,7 +969,7 @@ mpfs_rptun_get_resource(struct rptun_dev_s *dev)
       rsc->rpmsg_vring1.align       = VRING_ALIGN;
       rsc->rpmsg_vring1.num         = VRING_NR;
       rsc->rpmsg_vring1.da          = VRING1_DESCRIPTORS;
-      rsc->rpmsg_vring0.notifyid    = 1;
+      rsc->rpmsg_vring1.notifyid    = 1;
       rsc->config.r2h_buf_size      = VRING_SIZE;
       rsc->config.h2r_buf_size      = VRING_SIZE;
     }
@@ -1084,23 +1084,17 @@ static int mpfs_rptun_notify(struct rptun_dev_s *dev, uint32_t notifyid)
 {
   uint32_t tx_msg[IHC_MAX_MESSAGE_SIZE];
 
-  /* We're looking for the id, but currently it's just RPTUN_NOTIFY_ALL. It's
-   * OK, the remote end doesn't really care about the id, but that might
-   * change in the future.
-   */
+  /* We only care about the queue with id 0 */
 
-  if (notifyid == RPTUN_NOTIFY_ALL)
+  if (notifyid == 0)
     {
-      tx_msg[0] = 0;
+      tx_msg[0] = 0; /* (notifyid << 16) which is zero */
       tx_msg[1] = 0;
-    }
-  else
-    {
-      tx_msg[0] = (notifyid << 16);
-      tx_msg[1] = 0;
+
+      return mpfs_ihc_tx_message(IHC_CHANNEL_TO_CONTEXTA, tx_msg);
     }
 
-  return mpfs_ihc_tx_message(IHC_CHANNEL_TO_CONTEXTA, tx_msg);
+  return OK;
 }
 
 /****************************************************************************
