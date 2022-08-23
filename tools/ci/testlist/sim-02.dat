@@ -12,3 +12,6 @@
 
 # macOS doesn't have X11
 -Darwin,sim:touchscreen
+
+# Do not build Windows configs
+-,sim:windows
