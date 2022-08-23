@@ -32,7 +32,10 @@
 #ifndef __ASSEMBLY__
 #  include <sys/types.h>
 #  include <stdbool.h>
-#  include <netinet/in.h>
+#  include <stdint.h>
+#  if defined(CONFIG_SIM_NETDEV_TAP)
+#    include <netinet/in.h>
+#  endif
 #endif
 
 /****************************************************************************
@@ -298,15 +301,13 @@ void vpnkit_init(void *priv,
 int vpnkit_avail(void);
 unsigned int vpnkit_read(unsigned char *buf, unsigned int buflen);
 void vpnkit_send(unsigned char *buf, unsigned int buflen);
-void vpnkit_ifup(in_addr_t ifaddr);
-void vpnkit_ifdown(void);
 
 #  define netdev_init(priv,txcb,rxcb) vpnkit_init(priv,txcb,rxcb)
 #  define netdev_avail()              vpnkit_avail()
 #  define netdev_read(buf,buflen)     vpnkit_read(buf,buflen)
 #  define netdev_send(buf,buflen)     vpnkit_send(buf,buflen)
-#  define netdev_ifup(ifaddr)         vpnkit_ifup(ifaddr)
-#  define netdev_ifdown()             vpnkit_ifdown()
+#  define netdev_ifup(ifaddr)         {}
+#  define netdev_ifdown()             {}
 #endif
 
 /* up_netdriver.c ***********************************************************/

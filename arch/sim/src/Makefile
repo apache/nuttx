@@ -76,7 +76,11 @@ endif
 endif
 
 VPATH = :sim
-VPATH += :sim/posix
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+  VPATH += :sim/win
+else
+  VPATH += :sim/posix
+endif
 DEPPATH = $(patsubst %,--dep-path %,$(subst :, ,$(VPATH)))
 
 CFLAGS += -fvisibility=default

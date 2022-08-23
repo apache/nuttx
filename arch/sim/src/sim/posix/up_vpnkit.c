@@ -257,23 +257,3 @@ void vpnkit_send(unsigned char *buf, unsigned int buflen)
 
   DEBUG("a packet sent (size %u)", buflen);
 }
-
-/****************************************************************************
- * Name: vpnkit_ifup
- *
- ****************************************************************************/
-
-void vpnkit_ifup(in_addr_t ifaddr)
-{
-  DEBUG("vpnkit_ifup called");
-}
-
-/****************************************************************************
- * Name: vpnkit_ifdown
- *
- ****************************************************************************/
-
-void vpnkit_ifdown(void)
-{
-  DEBUG("vpnkit_ifdown called");
-}
