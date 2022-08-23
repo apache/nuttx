@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/up_usrsock_host.c
+ * arch/sim/src/sim/posix/up_usrsock_host.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

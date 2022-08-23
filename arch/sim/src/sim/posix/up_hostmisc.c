@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/up_testset.c
+ * arch/sim/src/sim/posix/up_hostmisc.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,8 +22,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <stdint.h>
-#include <stdatomic.h>
+#include <stdlib.h>
 
 #include "up_internal.h"
 
@@ -32,41 +31,28 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_testset
+ * Name: host_abort
  *
  * Description:
- *   Perform an atomic test and set operation on the provided spinlock.
- *
- *   This function must be provided via the architecture-specific logic.
+ *   Abort the simulation
  *
  * Input Parameters:
- *   lock  - A reference to the spinlock object.
- *
- * Returned Value:
- *   The spinlock is always locked upon return.  The previous value of the
- *   spinlock variable is returned, either SP_LOCKED if the spinlock was
- *   previously locked (meaning that the test-and-set operation failed to
- *   obtain the lock) or SP_UNLOCKED if the spinlock was previously unlocked
- *   (meaning that we successfully obtained the lock).
- *
+ *   status - Exit status to set
  ****************************************************************************/
 
-uint8_t up_testset(volatile uint8_t *lock)
+void host_abort(int status)
 {
-#ifdef CONFIG_SMP
-  /* In the multi-CPU SMP case, we use atomic operation to assure that the
-   * following test and set is atomic.
-   */
+  /* exit the simulation */
 
-  return atomic_exchange((_Atomic uint8_t *)lock, 1);
+  exit(status);
+}
+
+int host_backtrace(void** array, int size)
+{
+#ifdef CONFIG_WINDOWS_CYGWIN
+  return 0;
 #else
-
-  /* In the non-SMP case, the simulation is implemented with a single thread
-   * the test-and-set operation is inherently atomic.
-   */
-
-  uint8_t ret = *lock;
-  *lock = 1;
-  return ret;
+  extern int backtrace(void **array, int size);
+  return backtrace(array, size);
 #endif
 }
