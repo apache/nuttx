@@ -192,7 +192,7 @@ static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
 {
   FAR struct spi_bitbang_s *priv = (FAR struct spi_bitbang_s *)dev;
 
-  spiinfo("devid=%d selected=%d\n", devid, selected);
+  spiinfo("devid=%" PRIu32 " selected=%d\n", devid, selected);
   DEBUGASSERT(priv && priv->low->select);
   priv->low->select(priv, devid, selected);
 }
@@ -220,7 +220,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
 
   DEBUGASSERT(priv && priv->low->setfrequency);
   actual = priv->low->setfrequency(priv, frequency);
-  spiinfo("frequency=%d holdtime=%d actual=%d\n",
+  spiinfo("frequency=%" PRIu32 " holdtime=%" PRIu32 " actual=%" PRIu32 "\n",
           frequency, priv->holdtime, actual);
   return actual;
 }
