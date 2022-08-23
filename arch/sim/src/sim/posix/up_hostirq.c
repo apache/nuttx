@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/up_hostirq.c
+ * arch/sim/src/sim/posix/up_hostirq.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
