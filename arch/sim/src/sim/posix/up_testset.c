@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/up_hostmisc.c
+ * arch/sim/src/sim/posix/up_testset.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,7 +22,8 @@
  * Included Files
  ****************************************************************************/
 
-#include <stdlib.h>
+#include <stdint.h>
+#include <stdatomic.h>
 
 #include "up_internal.h"
 
@@ -31,28 +32,41 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: host_abort
+ * Name: up_testset
  *
  * Description:
- *   Abort the simulation
+ *   Perform an atomic test and set operation on the provided spinlock.
+ *
+ *   This function must be provided via the architecture-specific logic.
  *
  * Input Parameters:
- *   status - Exit status to set
+ *   lock  - A reference to the spinlock object.
+ *
+ * Returned Value:
+ *   The spinlock is always locked upon return.  The previous value of the
+ *   spinlock variable is returned, either SP_LOCKED if the spinlock was
+ *   previously locked (meaning that the test-and-set operation failed to
+ *   obtain the lock) or SP_UNLOCKED if the spinlock was previously unlocked
+ *   (meaning that we successfully obtained the lock).
+ *
  ****************************************************************************/
 
-void host_abort(int status)
+uint8_t up_testset(volatile uint8_t *lock)
 {
-  /* exit the simulation */
+#ifdef CONFIG_SMP
+  /* In the multi-CPU SMP case, we use atomic operation to assure that the
+   * following test and set is atomic.
+   */
 
-  exit(status);
-}
-
-int host_backtrace(void** array, int size)
-{
-#ifdef CONFIG_WINDOWS_CYGWIN
-  return 0;
+  return atomic_exchange((_Atomic uint8_t *)lock, 1);
 #else
-  extern int backtrace(void **array, int size);
-  return backtrace(array, size);
+
+  /* In the non-SMP case, the simulation is implemented with a single thread
+   * the test-and-set operation is inherently atomic.
+   */
+
+  uint8_t ret = *lock;
+  *lock = 1;
+  return ret;
 #endif
 }
