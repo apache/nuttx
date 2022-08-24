@@ -71,7 +71,7 @@ SECTIONS
      * and dram0_0_seg reflect the same address space on different buses.
      */
 
-    . = ORIGIN(dram0_0_seg) + _iram_end - _iram_start;
+    . = ORIGIN(dram0_0_seg) + MAX(_iram_end, _diram_i_start) - _diram_i_start;
   } > dram0_0_seg
 
   /* Shared RAM */
