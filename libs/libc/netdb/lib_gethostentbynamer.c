@@ -195,7 +195,7 @@ static int lib_numeric_address(FAR const char *name,
       return -ERANGE;
     }
 
-  strncpy(ptr, name, buflen);
+  strlcpy(ptr, name, buflen);
 
   /* Set the address to h_name */
 
@@ -278,7 +278,7 @@ static int lib_localhost(FAR const char *name, FAR struct hostent_s *host,
           return -ERANGE;
         }
 
-      strncpy(dest, name, buflen);
+      strlcpy(dest, name, buflen);
 
       /* Set the address to h_name */
 
@@ -408,7 +408,7 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent_s *host,
       return -ERANGE;
     }
 
-  strncpy(ptr, name, buflen);
+  strlcpy(ptr, name, buflen);
 
   /* Set the address to h_name */
 
@@ -545,7 +545,7 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent_s *host,
   /* And copy name */
 
   DEBUGASSERT(buflen >= namelen + 1);
-  strncpy(ptr, name, buflen);
+  strlcpy(ptr, name, buflen);
 
   /* Set the address to h_name */
 

@@ -516,7 +516,7 @@ static int netprocfs_readdir(FAR struct fs_dirent_s *dir,
           /* Copy the network statistics directory entry */
 
           entry->d_type = DTYPE_FILE;
-          strncpy(entry->d_name, "stat", NAME_MAX + 1);
+          strlcpy(entry->d_name, "stat", sizeof(entry->d_name));
         }
       else
 #ifdef CONFIG_NET_MLD
@@ -525,7 +525,7 @@ static int netprocfs_readdir(FAR struct fs_dirent_s *dir,
           /* Copy the MLD directory entry */
 
           entry->d_type = DTYPE_FILE;
-          strncpy(entry->d_name, "mld", NAME_MAX + 1);
+          strlcpy(entry->d_name, "mld", sizeof(entry->d_name));
         }
       else
 #endif
@@ -536,7 +536,7 @@ static int netprocfs_readdir(FAR struct fs_dirent_s *dir,
           /* Copy the network statistics directory entry */
 
           entry->d_type = DTYPE_DIRECTORY;
-          strncpy(entry->d_name, "route", NAME_MAX + 1);
+          strlcpy(entry->d_name, "route", sizeof(entry->d_name));
         }
       else
 #endif
@@ -584,7 +584,7 @@ static int netprocfs_readdir(FAR struct fs_dirent_s *dir,
           /* Copy the device statistics file entry */
 
           entry->d_type = DTYPE_FILE;
-          strncpy(entry->d_name, dev->d_ifname, NAME_MAX + 1);
+          strlcpy(entry->d_name, dev->d_ifname, sizeof(entry->d_name));
         }
 
       /* Set up the next directory entry offset.  NOTE that we could use the

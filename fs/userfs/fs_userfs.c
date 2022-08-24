@@ -234,7 +234,7 @@ static int userfs_open(FAR struct file *filep, FAR const char *relpath,
   req->oflags = oflags;
   req->mode   = mode;
 
-  strncpy(req->relpath, relpath, priv->mxwrite);
+  strlcpy(req->relpath, relpath, priv->mxwrite);
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        SIZEOF_USERFS_OPEN_REQUEST_S(pathlen + 1), 0,
@@ -1115,7 +1115,7 @@ static int userfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   req      = (FAR struct userfs_opendir_request_s *)priv->iobuffer;
   req->req = USERFS_REQ_OPENDIR;
 
-  strncpy(req->relpath, relpath, priv->mxwrite);
+  strlcpy(req->relpath, relpath, priv->mxwrite);
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        SIZEOF_USERFS_OPENDIR_REQUEST_S(pathlen + 1), 0,
@@ -1696,7 +1696,7 @@ static int userfs_unlink(FAR struct inode *mountpt,
   req      = (FAR struct userfs_unlink_request_s *)priv->iobuffer;
   req->req = USERFS_REQ_UNLINK;
 
-  strncpy(req->relpath, relpath, priv->mxwrite);
+  strlcpy(req->relpath, relpath, priv->mxwrite);
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        SIZEOF_USERFS_UNLINK_REQUEST_S(pathlen + 1), 0,
@@ -1783,7 +1783,7 @@ static int userfs_mkdir(FAR struct inode *mountpt,
   req->req  = USERFS_REQ_MKDIR;
   req->mode = mode;
 
-  strncpy(req->relpath, relpath, priv->mxwrite);
+  strlcpy(req->relpath, relpath, priv->mxwrite);
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        SIZEOF_USERFS_MKDIR_REQUEST_S(pathlen + 1), 0,
@@ -1869,7 +1869,7 @@ static int userfs_rmdir(FAR struct inode *mountpt,
   req      = (FAR struct userfs_rmdir_request_s *)priv->iobuffer;
   req->req = USERFS_REQ_RMDIR;
 
-  strncpy(req->relpath, relpath, priv->mxwrite);
+  strlcpy(req->relpath, relpath, priv->mxwrite);
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        SIZEOF_USERFS_RMDIR_REQUEST_S(pathlen + 1), 0,
@@ -1960,8 +1960,8 @@ static int userfs_rename(FAR struct inode *mountpt,
   req->req       = USERFS_REQ_RENAME;
   req->newoffset = oldpathlen;
 
-  strncpy(req->oldrelpath, oldrelpath, oldpathlen);
-  strncpy(&req->oldrelpath[oldpathlen], newrelpath, newpathlen);
+  strlcpy(req->oldrelpath, oldrelpath, oldpathlen);
+  strlcpy(&req->oldrelpath[oldpathlen], newrelpath, newpathlen);
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                       SIZEOF_USERFS_RENAME_REQUEST_S(oldpathlen, newpathlen),
@@ -2047,7 +2047,7 @@ static int userfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   req      = (FAR struct userfs_stat_request_s *)priv->iobuffer;
   req->req = USERFS_REQ_STAT;
 
-  strncpy(req->relpath, relpath, priv->mxwrite);
+  strlcpy(req->relpath, relpath, priv->mxwrite);
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        SIZEOF_USERFS_STAT_REQUEST_S(pathlen + 1), 0,
@@ -2139,7 +2139,7 @@ static int userfs_chstat(FAR struct inode *mountpt, FAR const char *relpath,
   req->buf   = *buf;
   req->flags = flags;
 
-  strncpy(req->relpath, relpath, priv->mxwrite);
+  strlcpy(req->relpath, relpath, priv->mxwrite);
 
   nsent = psock_sendto(&priv->psock, priv->iobuffer,
                        SIZEOF_USERFS_CHSTAT_REQUEST_S(pathlen + 1), 0,

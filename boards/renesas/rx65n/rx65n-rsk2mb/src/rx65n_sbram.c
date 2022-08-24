@@ -360,7 +360,7 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
           offset = len - sizeof(pdump->info.filename);
         }
 
-      strncpy((char *)pdump->info.filename, (char *)&filename[offset],
+      strlcpy((char *)pdump->info.filename, (char *)&filename[offset],
               sizeof(pdump->info.filename));
     }
 
@@ -375,7 +375,7 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
   /* Save Context */
 
 #if CONFIG_TASK_NAME_SIZE > 0
-  strncpy(pdump->info.name, rtcb->name, CONFIG_TASK_NAME_SIZE);
+  strlcpy(pdump->info.name, rtcb->name, sizeof(pdump->info.name));
 #endif
 
   pdump->info.pid = rtcb->pid;

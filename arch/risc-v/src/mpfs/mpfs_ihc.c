@@ -1159,8 +1159,8 @@ static int mpfs_rptun_init(const char *shmemname, const char *cpuname)
 #endif
 
   dev->rptun.ops = &g_mpfs_rptun_ops;
-  strncpy(dev->cpuname, cpuname, RPMSG_NAME_SIZE);
-  strncpy(dev->shmemname, shmemname, RPMSG_NAME_SIZE);
+  strlcpy(dev->cpuname, cpuname, sizeof(dev->cpuname));
+  strlcpy(dev->shmemname, shmemname, sizeof(dev->shmemname));
   list_add_tail(&g_dev_list, &dev->node);
 
   ret = rptun_initialize(&dev->rptun);
