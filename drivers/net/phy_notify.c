@@ -322,7 +322,7 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid,
 
       client->pid   = pid;
       client->event = *event;
-      strncpy(client->intf, intf, IFNAMSIZ + 1);
+      strlcpy(client->intf, intf, IFNAMSIZ + 1);
       client->intf[IFNAMSIZ] = '\0';
 
       /* Attach/re-attach the PHY interrupt */

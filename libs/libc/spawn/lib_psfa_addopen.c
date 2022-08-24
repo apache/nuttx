@@ -96,7 +96,7 @@ int posix_spawn_file_actions_addopen(
   entry->fd     = fd;
   entry->oflags = oflags;
   entry->mode   = mode;
-  strncpy(entry->path, path, len + 1);
+  strlcpy(entry->path, path, len + 1);
 
   /* And add it to the file action list */
 

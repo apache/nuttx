@@ -190,7 +190,7 @@ static void noteram_record_taskname(pid_t pid, const char *name)
   ti->size = tilen;
   ti->pid[0] = pid & 0xff;
   ti->pid[1] = (pid >> 8) & 0xff;
-  strncpy(ti->name, name, namelen + 1);
+  strlcpy(ti->name, name, namelen + 1);
   g_noteram_taskname.buffer_used += tilen;
 }
 #endif
@@ -748,7 +748,7 @@ static int noteram_ioctl(struct file *filep, int cmd, unsigned long arg)
           taskname = noteram_get_taskname(param->pid);
           if (taskname != NULL)
             {
-              strncpy(param->taskname, taskname, CONFIG_TASK_NAME_SIZE + 1);
+              strlcpy(param->taskname, taskname, CONFIG_TASK_NAME_SIZE + 1);
               param->taskname[CONFIG_TASK_NAME_SIZE] = '\0';
               ret = 0;
             }

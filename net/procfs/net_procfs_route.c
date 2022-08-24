@@ -715,7 +715,7 @@ static int route_readdir(FAR struct fs_dirent_s *dir,
   /* Save the filename and file type */
 
   entry->d_type = DTYPE_FILE;
-  strncpy(entry->d_name, dname, NAME_MAX + 1);
+  strlcpy(entry->d_name, dname, sizeof(entry->d_name));
 
   /* Set up the next directory entry offset.  NOTE that we could use the
    * standard f_pos instead of our own private index.

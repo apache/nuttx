@@ -337,8 +337,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                 {
                   for (tc = fmt; isdigit(fmt_char(fmt)); fmt++)
                     ;
-                  strncpy(tmp, tc, fmt - tc);
-                  tmp[fmt - tc] = '\0';
+                  strlcpy(tmp, tc, fmt - tc + 1);
                   width = atoi(tmp);
                   fmt--;
                 }

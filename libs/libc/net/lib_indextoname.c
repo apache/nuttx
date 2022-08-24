@@ -61,7 +61,7 @@ FAR char *if_indextoname(unsigned int ifindex, FAR char *ifname)
       req.ifr_ifindex = ifindex;
       if (ioctl(sockfd, SIOCGIFNAME, (unsigned long)&req) >= 0)
         {
-          strncpy(ifname, req.ifr_name, IF_NAMESIZE);
+          strlcpy(ifname, req.ifr_name, IF_NAMESIZE);
           close(sockfd);
           return ifname;
         }

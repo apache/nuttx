@@ -251,7 +251,7 @@ void *up_backuplog_alloc(const char *name, size_t size)
     {
       if (0 == header->entry[index].size)
         {
-          strncpy(header->entry[index].name, name, CXD56_LOG_ENTRY_NAME);
+          strlcpy(header->entry[index].name, name, CXD56_LOG_ENTRY_NAME);
           header->entry[index].addr = (void *)((uint32_t)header +
                                                (allocated << AREASHIFT));
           header->entry[index].size = size;

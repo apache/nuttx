@@ -234,8 +234,7 @@ int nftw(FAR const char *path, nftw_cb_t fn, int fdlimit, int flags)
 {
   char pathbuf[PATH_MAX + 1];
 
-  strncpy(pathbuf, path, PATH_MAX);
-  pathbuf[PATH_MAX] = '\0';
+  strlcpy(pathbuf, path, sizeof(pathbuf));
 
   return do_nftw(pathbuf, fn, fdlimit, flags, 0);
 }
