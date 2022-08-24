@@ -82,6 +82,7 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
 
   FAR void  *src_addr;
   uint8_t src_addr_size;
+  uint8_t offset = 0;
 
 #if CONFIG_NET_RECV_BUFSIZE > 0
   while (iob_get_queue_size(&conn->readahead) > conn->rcvbufs)
@@ -172,7 +173,8 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
    */
 
   ret = iob_trycopyin(iob, (FAR const uint8_t *)&src_addr_size,
-                      sizeof(uint8_t), 0, true);
+                      sizeof(uint8_t), offset, true);
+  offset += sizeof(uint8_t);
   if (ret < 0)
     {
       /* On a failure, iob_trycopyin return a negated error value but does
@@ -185,7 +187,8 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
     }
 
   ret = iob_trycopyin(iob, (FAR const uint8_t *)src_addr, src_addr_size,
-                      sizeof(uint8_t), true);
+                      offset, true);
+  offset += src_addr_size;
   if (ret < 0)
     {
       /* On a failure, iob_trycopyin return a negated error value but does
@@ -197,12 +200,26 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
       return 0;
     }
 
+#ifdef CONFIG_NETDEV_IFINDEX
+  ret = iob_trycopyin(iob, &dev->d_ifindex, sizeof(uint8_t), offset, true);
+  offset += sizeof(uint8_t);
+  if (ret < 0)
+    {
+      /* On a failure, iob_trycopyin return a negated error value but does
+       * not free any I/O buffers.
+       */
+
+      nerr("ERROR: Failed to add dindex to the I/O buffer chain: %d\n", ret);
+      iob_free_chain(iob);
+      return 0;
+    }
+#endif
+
   if (buflen > 0)
     {
       /* Copy the new appdata into the I/O buffer chain */
 
-      ret = iob_trycopyin(iob, buffer, buflen,
-                          src_addr_size + sizeof(uint8_t), true);
+      ret = iob_trycopyin(iob, buffer, buflen, offset, true);
       if (ret < 0)
         {
           /* On a failure, iob_trycopyin return a negated error value but

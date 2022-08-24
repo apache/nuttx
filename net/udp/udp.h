@@ -69,6 +69,7 @@
 /* Definitions for the UDP connection struct flag field */
 
 #define _UDP_FLAG_CONNECTMODE (1 << 0) /* Bit 0:  UDP connection-mode */
+#define _UDP_FLAG_PKTINFO     (1 << 1) /* Bit 1:  UDP PKTINFO */
 
 #define _UDP_ISCONNECTMODE(f) (((f) & _UDP_FLAG_CONNECTMODE) != 0)
 
@@ -689,11 +690,8 @@ uint16_t udp_callback(FAR struct net_driver_s *dev,
  *
  * Input Parameters:
  *   psock    Pointer to the socket structure for the SOCK_DRAM socket
- *   buf      Buffer to receive data
- *   len      Length of buffer
+ *   msg      Receive info and buffer for receive data
  *   flags    Receive flags
- *   from     INET address of source (may be NULL)
- *   fromlen  The length of the address structure
  *
  * Returned Value:
  *   On success, returns the number of characters received.  On  error,
@@ -703,9 +701,8 @@ uint16_t udp_callback(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR void *buf,
-                           size_t len, int flags, FAR struct sockaddr *from,
-                           FAR socklen_t *fromlen);
+ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
+                           int flags);
 
 /****************************************************************************
  * Name: psock_udp_sendto
