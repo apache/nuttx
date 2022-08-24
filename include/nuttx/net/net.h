@@ -246,6 +246,10 @@ struct socket_conn_s
 #ifdef CONFIG_NET_TIMESTAMP
   int32_t       s_timestamp; /* Socket timestamp enabled/disabled */
 #endif
+#ifdef CONFIG_NET_BINDTODEVICE
+  uint8_t       s_boundto;   /* Index of the interface we are bound to.
+                              * Unbound: 0, Bound: 1-MAX_IFINDEX */
+#endif
 #endif
 
   /* Connection-specific content may follow */

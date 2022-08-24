@@ -57,27 +57,27 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_UDP_BINDTODEVICE
+#ifdef CONFIG_NET_BINDTODEVICE
 static FAR struct net_driver_s *upd_bound_device(FAR struct udp_conn_s *conn)
 {
   FAR struct net_driver_s *dev = NULL;
 
   /* Is the UDP socket bound to a device? */
 
-  if (conn->boundto != 0)
+  if (conn->sconn.s_boundto != 0)
     {
       /* Yes..This socket has been bound to an interface.  Convert the
        * interface index into a device structure reference.
        */
 
-      dev = netdev_findbyindex(conn->boundto);
+      dev = netdev_findbyindex(conn->sconn.s_boundto);
       if (dev == NULL)
         {
           /* No device?  It must have been unregistered.  Un-bind the UDP
            * socket.
            */
 
-          conn->boundto = 0;
+          conn->sconn.s_boundto = 0;
         }
     }
 
