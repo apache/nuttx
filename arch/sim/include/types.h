@@ -88,6 +88,8 @@ typedef _uint64_t          _uintmax_t;
 
 #if defined(__WCHAR_TYPE__)
 typedef __WCHAR_TYPE__     _wchar_t;
+#elif defined(_MSC_VER)
+typedef unsigned short     _wchar_t;
 #else
 typedef int                _wchar_t;
 #endif
