@@ -170,7 +170,7 @@
 "task_setcancelstate","sched.h","","int","int","FAR int *"
 "task_setcanceltype","sched.h","defined(CONFIG_CANCELLATION_POINTS)","int","int","FAR int *"
 "task_spawn","nuttx/spawn.h","!defined(CONFIG_BUILD_KERNEL)","int","FAR const char *","main_t","FAR const posix_spawn_file_actions_t *","FAR const posix_spawnattr_t *","FAR char * const []|FAR char * const *","FAR char * const []|FAR char * const *"
-"task_testcancel","pthread.h","defined(CONFIG_CANCELLATION_POINTS)","void"
+"task_testcancel","sched.h","defined(CONFIG_CANCELLATION_POINTS)","void"
 "task_tls_alloc","nuttx/tls.h","CONFIG_TLS_TASK_NELEM > 0","int","tls_dtor_t"
 "timer_create","time.h","!defined(CONFIG_DISABLE_POSIX_TIMERS)","int","clockid_t","FAR struct sigevent *","FAR timer_t *"
 "timer_delete","time.h","!defined(CONFIG_DISABLE_POSIX_TIMERS)","int","timer_t"
