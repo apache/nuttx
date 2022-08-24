@@ -64,8 +64,8 @@
 #  error "No UARTs enabled"
 #endif
 
-/* Which UART with be tty0/console and which tty1-7?  The console will always
- * be ttyS0.  If there is no console then will use the lowest numbered UART.
+/* Which UART will be tty0/console and which tty1-7?  The console will always
+ * be ttyS0.  If there is no console then we'll use the lowest numbered UART.
  */
 
 /* First pick the console and ttys0.  This could be any of UART0-5 */
@@ -123,10 +123,10 @@
 #    define TTYS0_DEV           g_uart5port /* UART5 is ttyS0 */
 #    define UART5_ASSIGNED      1
 #  elif defined(CONFIG_TIVA_UART6)
-#    define TTYS0_DEV           g_uart6port /* UART5 is ttyS0 */
+#    define TTYS0_DEV           g_uart6port /* UART6 is ttyS0 */
 #    define UART6_ASSIGNED      1
 #  elif defined(CONFIG_TIVA_UART7)
-#    define TTYS0_DEV           g_uart7port /* UART5 is ttyS0 */
+#    define TTYS0_DEV           g_uart7port /* UART7 is ttyS0 */
 #    define UART7_ASSIGNED      1
 #  endif
 #endif
@@ -270,8 +270,8 @@
 #endif
 
 /* Pick ttys7. This could be one of UART6-7. It can't be UART0-5 because
- * those have already been assigned to ttsyS0, 1, 2, 3, 4, or 6.  One of
- * UART 6-7 could also be the console.
+ * those have already been assigned to ttsyS0, 1, 2, 3, 4, 5, or 6.  One
+ * of UART 6-7 could also be the console.
  */
 
 #if defined(CONFIG_TIVA_UART6) && !defined(UART6_ASSIGNED)
@@ -844,8 +844,8 @@ static void up_set_format(struct uart_dev_s *dev)
       case 7:
           lcrh |= UART_LCRH_WLEN_7BITS;
           break;
-      case 8:
 
+      case 8:
       default:
           lcrh |= UART_LCRH_WLEN_8BITS;
           break;
