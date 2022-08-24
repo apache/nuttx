@@ -31,10 +31,4 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* UDP protocol (SOL_UDP) socket options */
-
-#define UDP_BINDTODEVICE   (__SO_PROTOCOL + 0) /* Bind this UDP socket to a
-                                                * specific network device.
-                                                */
-
 #endif /* __INCLUDE_NETINET_UDP_H */

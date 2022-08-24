@@ -143,6 +143,7 @@
 #define NUTTX_SO_SNDTIMEO           14
 #define NUTTX_SO_TYPE               15
 #define NUTTX_SO_TIMESTAMP          16
+#define NUTTX_SO_BINDTODEVICE       17
 
 #define NUTTX_SO_SNDBUFFORCE        32
 #define NUTTX_SO_RCVBUFFORCE        33

@@ -56,6 +56,15 @@ config NET_TIMESTAMP
 	---help---
 		Enable or disable support for the SO_TIMESTAMP socket option. Currently only tested & implemented in SocketCAN but should work on all sockets
 
+config NET_BINDTODEVICE
+	bool "SO_BINDTODEVICE socket option Bind-to-device support"
+	default n
+	select NETDEV_IFINDEX
+	---help---
+		Enable support for the NET_BINDTODEVICE socket option.
+		Linux has SO_BINDTODEVICE but in NuttX this option is instead
+		specific to the UDP protocol.
+
 endif # NET_SOCKOPTS
 
 endmenu # Socket Support

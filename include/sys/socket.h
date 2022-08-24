@@ -200,6 +200,8 @@
 #define SO_TIMESTAMP    16 /* Generates a timestamp for each incoming packet
                             * arg: integer value
                             */
+#define SO_BINDTODEVICE 17 /* Bind this socket to a specific network device.
+                            */
 
 /* The options are unsupported but included for compatibility
  * and portability
