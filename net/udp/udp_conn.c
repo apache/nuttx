@@ -145,7 +145,7 @@ static FAR struct udp_conn_s *udp_find_conn(uint8_t domain,
       if (domain == PF_INET)
 #endif
         {
-          if (conn->lport == portno &&
+          if (conn->domain == PF_INET && conn->lport == portno &&
               (net_ipv4addr_cmp(conn->u.ipv4.laddr, ipaddr->ipv4.laddr) ||
                net_ipv4addr_cmp(conn->u.ipv4.laddr, INADDR_ANY)))
             {
@@ -159,7 +159,7 @@ static FAR struct udp_conn_s *udp_find_conn(uint8_t domain,
       else
 #endif
         {
-          if (conn->lport == portno &&
+          if (conn->domain == PF_INET6 && conn->lport == portno &&
               (net_ipv6addr_cmp(conn->u.ipv6.laddr, ipaddr->ipv6.laddr) ||
                net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr)))
             {
