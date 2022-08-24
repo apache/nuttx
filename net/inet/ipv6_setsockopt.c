@@ -34,6 +34,7 @@
 
 #include "mld/mld.h"
 #include "inet/inet.h"
+#include "udp/udp.h"
 
 #ifdef CONFIG_NET_IPv6
 
@@ -107,6 +108,35 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
             {
               ret = mld_leavegroup(mrec);
             }
+        }
+        break;
+
+      case IPV6_PKTINFO:
+      case IPV6_RECVPKTINFO:
+        {
+          FAR struct udp_conn_s *conn;
+          int enable;
+
+          if (psock->s_type != SOCK_DGRAM ||
+              value == NULL || value_len == 0)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          enable = (value_len >= sizeof(int)) ?
+            *(FAR int *)value : (int)*(FAR unsigned char *)value;
+          conn = (FAR struct udp_conn_s *)psock->s_conn;
+          if (enable)
+            {
+              conn->flags |= _UDP_FLAG_PKTINFO;
+            }
+          else
+            {
+              conn->flags &= ~_UDP_FLAG_PKTINFO;
+            }
+
+          ret = OK;
         }
         break;
 
