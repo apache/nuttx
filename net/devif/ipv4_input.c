@@ -297,13 +297,13 @@ int ipv4_input(FAR struct net_driver_s *dev)
             }
           else
 #endif
-#if defined(NET_UDP_HAVE_STACK) && defined(CONFIG_NET_UDP_BINDTODEVICE)
-          /* If the UDP protocol specific socket option UDP_BINDTODEVICE
+#if defined(NET_UDP_HAVE_STACK) && defined(CONFIG_NET_BINDTODEVICE)
+          /* If the protocol specific socket option NET_BINDTODEVICE
            * is selected, then we must forward all UDP packets to the bound
            * socket.
            */
 
-          if (ipv4->proto != IP_PROTO_UDP || !IFF_IS_BOUND(dev->d_flags))
+          if (ipv4->proto != IP_PROTO_UDP)
 #endif
             {
               /* Not destined for us and not forwardable... Drop the

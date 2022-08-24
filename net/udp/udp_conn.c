@@ -620,9 +620,6 @@ FAR struct udp_conn_s *udp_alloc(uint8_t domain)
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
       conn->domain  = domain;
 #endif
-#ifdef CONFIG_NET_UDP_BINDTODEVICE
-      conn->boundto = 0;  /* Not bound to any interface */
-#endif
       conn->lport   = 0;
       conn->ttl     = IP_TTL_DEFAULT;
 #if CONFIG_NET_RECV_BUFSIZE > 0

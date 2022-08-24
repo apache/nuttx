@@ -112,10 +112,6 @@ struct udp_conn_s
   uint8_t  ttl;           /* Default time-to-live */
   uint8_t  crefs;         /* Reference counts on this instance */
 
-#ifdef CONFIG_NET_UDP_BINDTODEVICE
-  uint8_t  boundto;       /* Index of the interface we are bound to.
-                           * Unbound: 0, Bound: 1-MAX_IFINDEX */
-#endif
 #if CONFIG_NET_RECV_BUFSIZE > 0
   int32_t  rcvbufs;       /* Maximum amount of bytes queued in recv */
 #endif

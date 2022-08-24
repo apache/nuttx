@@ -32,16 +32,6 @@ endif # NET_UDP
 
 if NET_UDP && !NET_UDP_NO_STACK
 
-config NET_UDP_BINDTODEVICE
-	bool "UDP Bind-to-device support"
-	default n
-	select NET_UDPPROTO_OPTIONS
-	select NETDEV_IFINDEX
-	---help---
-		Enable support for the UDP_BINDTODEVICE socket option.
-		Linux has SO_BINDTODEVICE but in NuttX this option is instead
-		specific to the UDP protocol.
-
 config NET_UDP_CHECKSUMS
 	bool "UDP checksums"
 	default y if NET_IPv6
