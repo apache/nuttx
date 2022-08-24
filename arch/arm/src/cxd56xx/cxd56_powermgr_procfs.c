@@ -758,8 +758,8 @@ static int cxd56_powermgr_procfs_readdir(struct fs_dirent_s *dir,
     }
 
   entry->d_type = DTYPE_FILE;
-  strncpy(entry->d_name, g_powermg_procfs_dir[procfs->index],
-          strlen(g_powermg_procfs_dir[procfs->index])+1);
+  strlcpy(entry->d_name, g_powermg_procfs_dir[procfs->index],
+          sizeof(entry->d_name));
   procfs->index++;
 
   return OK;

@@ -483,8 +483,7 @@ static void nxtask_setup_name(FAR struct task_tcb_s *tcb,
 {
   /* Copy the name into the TCB */
 
-  strncpy(tcb->cmn.name, name, CONFIG_TASK_NAME_SIZE);
-  tcb->cmn.name[CONFIG_TASK_NAME_SIZE] = '\0';
+  strlcpy(tcb->cmn.name, name, sizeof(tcb->cmn.name));
 }
 #else
 #  define nxtask_setup_name(t,n)

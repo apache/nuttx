@@ -211,7 +211,7 @@ out_copyname:
       return -ERANGE;
     }
 
-  strncpy(dest, g_lo_hostname, buflen);
+  strlcpy(dest, g_lo_hostname, buflen);
   host->h_name = dest;
 
   return 0;

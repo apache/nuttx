@@ -1392,7 +1392,7 @@ int spiffs_fobj_create(FAR struct spiffs_s *fs,
 #ifdef CONFIG_SPIFFS_LEADING_SLASH
   objndx_hdr.name[0] = '/';
 #endif
-  strncpy((char *)objndx_hdr.name + SPIFFS_LEADING_SLASH_SIZE,
+  strlcpy((char *)objndx_hdr.name + SPIFFS_LEADING_SLASH_SIZE,
           (const char *)name,
           CONFIG_SPIFFS_NAME_MAX);
 
@@ -1481,7 +1481,7 @@ int spiffs_fobj_update_ndxhdr(FAR struct spiffs_s *fs,
 
   if (name != NULL)
     {
-      strncpy((FAR char *)objhdr->name + SPIFFS_LEADING_SLASH_SIZE,
+      strlcpy((FAR char *)objhdr->name + SPIFFS_LEADING_SLASH_SIZE,
               (FAR const char *)name,
               CONFIG_SPIFFS_NAME_MAX);
     }

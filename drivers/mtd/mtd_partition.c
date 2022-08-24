@@ -425,7 +425,8 @@ static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
               info->sectorsize  = priv->blocksize;
               info->startsector = priv->firstblock;
 
-              strncpy(info->parent, priv->parent->name, NAME_MAX);
+              strlcpy(info->parent, priv->parent->name,
+                      sizeof(info->parent));
 
               ret = OK;
           }

@@ -2945,11 +2945,11 @@ static int gs2200m_ioctl_ifreq(FAR struct gs2200m_dev_s *dev,
       memcpy(&in[0], &dev->net_dev.d_ipaddr, sizeof(in[0]));
       memcpy(&in[1], &dev->net_dev.d_netmask, sizeof(in[1]));
       memcpy(&in[2], &dev->net_dev.d_draddr, sizeof(in[2]));
-      strncpy(addr[0], inet_ntoa_r(in[0], inetaddr, sizeof(inetaddr)),
+      strlcpy(addr[0], inet_ntoa_r(in[0], inetaddr, sizeof(inetaddr)),
               sizeof(addr[0]));
-      strncpy(addr[1], inet_ntoa_r(in[1], inetaddr, sizeof(inetaddr)),
+      strlcpy(addr[1], inet_ntoa_r(in[1], inetaddr, sizeof(inetaddr)),
               sizeof(addr[1]));
-      strncpy(addr[2], inet_ntoa_r(in[2], inetaddr, sizeof(inetaddr)),
+      strlcpy(addr[2], inet_ntoa_r(in[2], inetaddr, sizeof(inetaddr)),
               sizeof(addr[2]));
 
       gs2200m_set_addresses(dev, addr[0], addr[1], addr[2]);

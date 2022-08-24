@@ -364,7 +364,7 @@ static int lpc17_40_getstatus(struct ubxmdm_lower * lower,
 
   for (i = 0; i < UBXMDM_REGISTER_COUNT; i++)
     {
-      strncpy(status->register_values[i].name,
+      strlcpy(status->register_values[i].name,
               lpc17_40_ubxmdm_name_pins[i].name,
               3);
       status->register_values[i].val =

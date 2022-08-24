@@ -190,7 +190,7 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
 
   /* Remember the routing device name */
 
-  strncpy((FAR char *)state.snd_ifname, (FAR const char *)dev->d_ifname,
+  strlcpy((FAR char *)state.snd_ifname, (FAR const char *)dev->d_ifname,
           IFNAMSIZ);
 
   /* Allocate resources to receive a callback.  This and the following

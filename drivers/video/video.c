@@ -1919,7 +1919,7 @@ static int video_queryctrl(FAR struct v4l2_queryctrl *ctrl)
   ctrl->step          = ext_ctrl.step;
   ctrl->default_value = ext_ctrl.default_value;
   ctrl->flags         = ext_ctrl.flags;
-  strncpy(ctrl->name, ext_ctrl.name, sizeof(ctrl->name));
+  strlcpy(ctrl->name, ext_ctrl.name, sizeof(ctrl->name));
 
   return OK;
 }
@@ -1942,7 +1942,7 @@ static void set_parameter_name(uint32_t id, char *name)
 
   /* copy size = 32 is due to V4L2 specification. */
 
-  strncpy(name, g_video_parameter_name[cnt].name, 32);
+  strlcpy(name, g_video_parameter_name[cnt].name, 32);
 }
 
 static int video_query_ext_ctrl(FAR struct v4l2_query_ext_ctrl *attr)
@@ -1975,7 +1975,7 @@ static int video_query_ext_ctrl(FAR struct v4l2_query_ext_ctrl *attr)
       attr->maximum       = VIDEO_SCENE_MAX - 1;
       attr->step          = 1;
       attr->default_value = 0;
-      strncpy(attr->name, "Scene Mode", 32);
+      strlcpy(attr->name, "Scene Mode", 32);
     }
   else
     {

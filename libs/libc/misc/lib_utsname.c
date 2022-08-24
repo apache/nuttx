@@ -84,26 +84,23 @@ int uname(FAR struct utsname *name)
 
   /* Copy the strings.  Assure that each is NUL terminated. */
 
-  strncpy(name->sysname, "NuttX", SYS_NAMELEN);
+  strlcpy(name->sysname, "NuttX", sizeof(name->sysname));
 
   /* Get the hostname */
 
   ret = gethostname(name->nodename, HOST_NAME_MAX);
   name->nodename[HOST_NAME_MAX - 1] = '\0';
 
-  strncpy(name->release,  CONFIG_VERSION_STRING, SYS_NAMELEN);
-  name->release[SYS_NAMELEN - 1] = '\0';
+  strlcpy(name->release,  CONFIG_VERSION_STRING, sizeof(name->release));
 
 #if defined(__DATE__) && defined(__TIME__)
   snprintf(name->version, VERSION_NAMELEN, "%s %s %s",
            CONFIG_VERSION_BUILD, __DATE__, __TIME__);
 #else
-  strncpy(name->version,  CONFIG_VERSION_BUILD, VERSION_NAMELEN);
+  strlcpy(name->version,  CONFIG_VERSION_BUILD, sizeof(name->version));
 #endif
-  name->version[VERSION_NAMELEN - 1] = '\0';
 
-  strncpy(name->machine,  CONFIG_ARCH, SYS_NAMELEN);
-  name->machine[SYS_NAMELEN - 1] = '\0';
+  strlcpy(name->machine,  CONFIG_ARCH, sizeof(name->machine));
 
   return ret;
 }
