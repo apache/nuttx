@@ -149,6 +149,7 @@ struct sensor_rpmsg_advsub_s
 struct sensor_rpmsg_cell_s
 {
   uint64_t                       cookie;
+  uint32_t                       nbuffer;
   uint32_t                       len;
   char                           data[0];
 };
@@ -799,6 +800,8 @@ static void sensor_rpmsg_push_event_one(FAR struct sensor_rpmsg_dev_s *dev,
 
       cell->len     = ret;
       cell->cookie  = stub->cookie;
+      cell->nbuffer = dev->lower.nbuffer;
+
       sre->written += (sizeof(*cell) + ret + 0x7) & ~0x7;
     }
 
@@ -1067,6 +1070,19 @@ static int sensor_rpmsg_publish_handler(FAR struct rpmsg_endpoint *ept,
       cell = (FAR struct sensor_rpmsg_cell_s *)
              ((FAR char *)data + written);
       dev = (FAR struct sensor_rpmsg_dev_s *)(uintptr_t)cell->cookie;
+      if (cell->nbuffer > dev->lower.nbuffer)
+        {
+          struct file file;
+          int ret;
+
+          ret = file_open(&file, dev->path, SENSOR_REMOTE);
+          if (ret >= 0)
+            {
+              file_ioctl(&file, SNIOC_SET_BUFFER_NUMBER, cell->nbuffer);
+              file_close(&file);
+            }
+        }
+
       dev->push_event(dev->upper, cell->data, cell->len);
       written += sizeof(*cell) + cell->len + 0x7;
       written &= ~0x7;
