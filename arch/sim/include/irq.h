@@ -77,7 +77,13 @@ extern "C"
 
 static inline uintptr_t up_getsp(void)
 {
+#ifdef _MSC_VER
+  uintptr_t regval;
+  __asm mov regval, esp;
+  return regval;
+#else
   return (uintptr_t)__builtin_frame_address(0);
+#endif
 }
 
 /****************************************************************************
