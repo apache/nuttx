@@ -75,16 +75,20 @@
 #define GPIO_EC_MASK         (0xFFF << GPIO_EC_SHIFT)
 #define GPIO_EC_PUPD_SHIFT   (30) /* Bit 30-31 Electrical Configuration PUPD */
 #define GPIO_EC_PUPD_MASK    (3 << GPIO_EC_PUPD_SHIFT)
+#define GPIO_PULLDOWN        (1 << GPIO_EC_PUPD_SHIFT)
+#define GPIO_PULLUP          (2 << GPIO_EC_PUPD_SHIFT)
 #define GPIO_EC_LOCKDN_SHIFT (29) /* Bit 29 Electrical Configuration Lockdn */
-#define GPIO_EC_LOCKDN_MASK  (1 << GPIO_EC_LOCKDN_SHIFT)
+#define GPIO_EC_LOCKDN       (1 << GPIO_EC_LOCKDN_SHIFT)
 #define GPIO_EC_ENHYST_SHIFT (28) /* Bit 28 Electrical Configuration Hyst */
-#define GPIO_EC_ENHYST_MASK  (1 << GPIO_EC_ENHYST_SHIFT)
-#define GPIO_CLAMP_SHIFT     (27) /* Bit 27 Electrical Configuration Clamp */
-#define GPIO_EC_CLAMP_MASK   (1 << GPIO_CLAMP_SHIFT)
+#define GPIO_EC_ENHYST       (1 << GPIO_EC_ENHYST_SHIFT)
+#define GPIO_EC_CLAMP_SHIFT  (27) /* Bit 27 Electrical Configuration Clamp */
+#define GPIO_EC_CLAMP        (1 << GPIO_EC_CLAMP_SHIFT)
 #define GPIO_EC_DRVSTR_SHIFT (23) /* Bit 23-26 Electrical Configuration drive strength */
-#define GPIO_EC_DRVSTR_MASK  (0xF << GPIO_EC_SHIFT)
+#define GPIO_EC_DRVSTR_MASK  (0xF << GPIO_EC_DRVSTR_SHIFT)
+#define GPIO_EC_DRVSTR(x)    (((x) << GPIO_EC_DRVSTR_SHIFT) & GPIO_EC_DRVSTR_MASK)
 #define GPIO_EC_BUFM_SHIFT   (20) /* Bit 20-22 Electrical Configuration Buffer Mode*/
 #define GPIO_EC_BUFM_MASK    (0x7 << GPIO_EC_BUFM_SHIFT)
+#define GPIO_EC_BUFM(x)      (((x) << GPIO_EC_BUFM_SHIFT) & GPIO_EC_BUFM_MASK)
 #define GPIO_AF_SHIFT        (16) /* Bit 16-19 Alternate Function */
 #define GPIO_AF_MASK         (15 << GPIO_AF_SHIFT)
 #define GPIO_MODE_SHIFT      (14) /* Bit 14-15: IO Mode */

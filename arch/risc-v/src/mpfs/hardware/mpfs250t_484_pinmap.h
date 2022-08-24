@@ -80,8 +80,8 @@
                                       MSSIO_MUX_BANK_REG_OFFSET(bank,pin))
 
 /* Default EC configuration for all GPIOS */
-#define MSSIO_EC_DEFAULT (0x0428 << GPIO_EC_SHIFT)
-#define MSSIO_EC_USB_DEFAULT (0x0829 << GPIO_EC_SHIFT)
+#define MSSIO_EC_DEFAULT     GPIO_EC_DRVSTR(0x5)
+#define MSSIO_EC_USB_DEFAULT (GPIO_EC_BUFM(1) | GPIO_EC_DRVSTR(0x5) | GPIO_PULLUP)
 
 /* Basic GPIO definitions for MSSIO */
 
