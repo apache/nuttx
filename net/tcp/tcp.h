@@ -1378,11 +1378,8 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
  *
  * Input Parameters:
  *   psock    Pointer to the socket structure for the SOCK_DRAM socket
- *   buf      Buffer to receive data
- *   len      Length of buffer
+ *   msg      Receive info and buffer for receive data
  *   flags    Receive flags
- *   from     INET address of source (may be NULL)
- *   fromlen  The length of the address structure
  *
  * Returned Value:
  *   On success, returns the number of characters received.  On  error,
@@ -1392,9 +1389,8 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
  *
  ****************************************************************************/
 
-ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR void *buf,
-                           size_t len, int flags, FAR struct sockaddr *from,
-                           FAR socklen_t *fromlen);
+ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
+                           int flags);
 
 /****************************************************************************
  * Name: psock_tcp_send

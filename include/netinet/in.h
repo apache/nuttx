@@ -127,6 +127,8 @@
                                                     * to IPv6 communications only */
 #define IPV6_PKTINFO          (__SO_PROTOCOL + 8)  /* Get some information about
                                                     * the incoming packet */
+#define IPV6_RECVPKTINFO      (__SO_PROTOCOL + 9)  /* It functions just same as
+                                                    * IPV6_PKTINFO for now */
 
 /* Values used with SIOCSIFMCFILTER and SIOCGIFMCFILTER ioctl's */
 

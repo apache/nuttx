@@ -594,11 +594,8 @@ static ssize_t tcp_recvfrom_result(int result, struct tcp_recvfrom_s *pstate)
  *
  * Input Parameters:
  *   psock    Pointer to the socket structure for the SOCK_DRAM socket
- *   buf      Buffer to receive data
- *   len      Length of buffer
+ *   msg      Receive info and buffer for receive data
  *   flags    Receive flags
- *   from     INET address of source (may be NULL)
- *   fromlen  The length of the address structure
  *
  * Returned Value:
  *   On success, returns the number of characters received.  On  error,
@@ -608,10 +605,13 @@ static ssize_t tcp_recvfrom_result(int result, struct tcp_recvfrom_s *pstate)
  *
  ****************************************************************************/
 
-ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR void *buf,
-                           size_t len, int flags, FAR struct sockaddr *from,
-                           FAR socklen_t *fromlen)
+ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
+                           int flags)
 {
+  FAR struct sockaddr   *from    = msg->msg_name;
+  FAR socklen_t         *fromlen = &msg->msg_namelen;
+  FAR void              *buf     = msg->msg_iov->iov_base;
+  size_t                 len     = msg->msg_iov->iov_len;
   struct tcp_recvfrom_s  state;
   FAR struct tcp_conn_s *conn;
   int                    ret;

@@ -203,6 +203,34 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
         }
         break;
 
+      case IP_PKTINFO:
+        {
+          FAR struct udp_conn_s *conn;
+          int enable;
+
+          if (psock->s_type != SOCK_DGRAM ||
+              value == NULL || value_len == 0)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          enable = (value_len >= sizeof(int)) ?
+            *(FAR int *)value : (int)*(FAR unsigned char *)value;
+          conn = (FAR struct udp_conn_s *)psock->s_conn;
+          if (enable)
+            {
+              conn->flags |= _UDP_FLAG_PKTINFO;
+            }
+          else
+            {
+              conn->flags &= ~_UDP_FLAG_PKTINFO;
+            }
+
+          ret = OK;
+        }
+        break;
+
       /* The following IPv4 socket options are defined, but not implemented */
 
       case IP_MULTICAST_IF:           /* Set local device for a multicast

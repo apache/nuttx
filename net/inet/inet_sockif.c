@@ -1569,17 +1569,13 @@ static ssize_t inet_sendfile(FAR struct socket *psock,
 static ssize_t inet_recvmsg(FAR struct socket *psock,
                             FAR struct msghdr *msg, int flags)
 {
-  FAR void *buf = msg->msg_iov->iov_base;
-  size_t len = msg->msg_iov->iov_len;
-  FAR struct sockaddr *from = msg->msg_name;
-  FAR socklen_t *fromlen = &msg->msg_namelen;
   ssize_t ret;
 
   /* If a 'from' address has been provided, verify that it is large
    * enough to hold this address family.
    */
 
-  if (from)
+  if (msg->msg_name)
     {
       socklen_t minlen;
 
@@ -1608,7 +1604,7 @@ static ssize_t inet_recvmsg(FAR struct socket *psock,
           return -EINVAL;
         }
 
-      if (*fromlen < minlen)
+      if (msg->msg_namelen < minlen)
         {
           return -EINVAL;
         }
@@ -1624,7 +1620,7 @@ static ssize_t inet_recvmsg(FAR struct socket *psock,
     case SOCK_STREAM:
       {
 #ifdef NET_TCP_HAVE_STACK
-        ret = psock_tcp_recvfrom(psock, buf, len, flags, from, fromlen);
+        ret = psock_tcp_recvfrom(psock, msg, flags);
 #else
         ret = -ENOSYS;
 #endif
@@ -1636,7 +1632,7 @@ static ssize_t inet_recvmsg(FAR struct socket *psock,
     case SOCK_DGRAM:
       {
 #ifdef NET_UDP_HAVE_STACK
-        ret = psock_udp_recvfrom(psock, buf, len, flags, from, fromlen);
+        ret = psock_udp_recvfrom(psock, msg, flags);
 #else
         ret = -ENOSYS;
 #endif
