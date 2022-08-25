@@ -60,7 +60,7 @@ bool up_fpucmp(const void *saveregs1, const void *saveregs2)
   const uint32_t *regs1 = saveregs1;
   const uint32_t *regs2 = saveregs2;
 
-  return memcmp(&regs1[XCPTCONTEXT_REGS], &regs2[XCPTCONTEXT_REGS],
+  return memcmp(&regs1[COMMON_CTX_REGS], &regs2[COMMON_CTX_REGS],
                 XTENSA_CP_SA_SIZE) == 0;
 }
 #endif /* CONFIG_ARCH_FPU */
