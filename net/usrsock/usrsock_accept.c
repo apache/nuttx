@@ -42,7 +42,7 @@ static uint16_t accept_event(FAR struct net_driver_s *dev, FAR void *pvconn,
                              FAR void *pvpriv, uint16_t flags)
 {
   FAR struct usrsock_data_reqstate_s *pstate = pvpriv;
-  FAR struct usrsock_conn_s *conn = pvconn;
+  FAR struct usrsock_conn_s *conn = pstate->reqstate.conn;
 
   if (flags & USRSOCK_EVENT_ABORT)
     {

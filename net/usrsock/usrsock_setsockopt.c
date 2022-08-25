@@ -49,7 +49,7 @@ static uint16_t setsockopt_event(FAR struct net_driver_s *dev,
                                  uint16_t flags)
 {
   FAR struct usrsock_reqstate_s *pstate = pvpriv;
-  FAR struct usrsock_conn_s *conn = pvconn;
+  FAR struct usrsock_conn_s *conn = pstate->conn;
 
   if (flags & USRSOCK_EVENT_ABORT)
     {

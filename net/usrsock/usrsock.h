@@ -74,7 +74,7 @@ enum usrsock_conn_state_e
 
 struct usrsock_poll_s
 {
-  FAR struct socket *psock;        /* Needed to handle loss of connection */
+  FAR struct usrsock_conn_s *conn; /* Needed to handle loss of connection */
   struct pollfd *fds;              /* Needed to handle poll events */
   FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
 };
