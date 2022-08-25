@@ -2008,7 +2008,8 @@ static int aw86225_start(FAR struct motor_lowerhalf_s *dev)
 
   DEBUGASSERT(dev != NULL);
 
-  if (priv->patterns_reload && priv->patterns)
+  if (priv->patterns &&
+      (priv->patterns_reload || priv->patterns->count != 1))
     {
       /* start excution of patterns before set go bit. */
 
