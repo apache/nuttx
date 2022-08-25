@@ -850,6 +850,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               if (arg >= lower->nbuffer)
                 {
                   lower->nbuffer = arg;
+                  upper->state.nbuffer = arg;
                 }
               else
                 {
