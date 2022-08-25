@@ -44,7 +44,6 @@
  ****************************************************************************/
 
 static uint16_t getpeername_event(FAR struct net_driver_s *dev,
-                                  FAR void *pvconn,
                                   FAR void *pvpriv, uint16_t flags)
 {
   FAR struct usrsock_data_reqstate_s *pstate = pvpriv;

@@ -465,9 +465,6 @@ void devif_dev_callback_free(FAR struct net_driver_s *dev,
  * Input Parameters:
  *   dev - The network device state structure associated with the network
  *     device that initiated the callback event.
- *   pvconn - Holds a reference to the TCP connection structure or the UDP
- *     port structure. It can be NULL if the event is not related to a TCP
- *     connection or UDP port.
  *   flags - The bit set of events to be notified.
  *   list - The list to traverse in performing the notifications
  *
@@ -479,8 +476,8 @@ void devif_dev_callback_free(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-uint16_t devif_conn_event(FAR struct net_driver_s *dev, void *pvconn,
-                          uint16_t flags, FAR struct devif_callback_s *list)
+uint16_t devif_conn_event(FAR struct net_driver_s *dev, uint16_t flags,
+                          FAR struct devif_callback_s *list)
 {
   FAR struct devif_callback_s *next;
 
@@ -507,7 +504,7 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, void *pvconn,
            * beginning of the list (which will be ignored on this pass)
            */
 
-          flags = list->event(dev, pvconn, list->priv, flags);
+          flags = list->event(dev, list->priv, flags);
         }
 
       /* Set up for the next time through the loop */
@@ -528,9 +525,6 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, void *pvconn,
  * Input Parameters:
  *   dev - The network device state structure associated with the network
  *     device that initiated the callback event.
- *   pvconn - Holds a reference to the TCP connection structure or the UDP
- *     port structure. It can be NULL if the event is not related to a TCP
- *     connection or UDP port.
  *   flags - The bit set of events to be notified.
  *
  * Returned Value:
@@ -541,8 +535,7 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, void *pvconn,
  *
  ****************************************************************************/
 
-uint16_t devif_dev_event(FAR struct net_driver_s *dev, void *pvconn,
-                         uint16_t flags)
+uint16_t devif_dev_event(FAR struct net_driver_s *dev, uint16_t flags)
 {
   FAR struct devif_callback_s *cb;
   FAR struct devif_callback_s *next;
@@ -570,7 +563,7 @@ uint16_t devif_dev_event(FAR struct net_driver_s *dev, void *pvconn,
            * beginning of the list (which will be ignored on this pass)
            */
 
-          flags = cb->event(dev, pvconn, cb->priv, flags);
+          flags = cb->event(dev, cb->priv, flags);
         }
     }
 

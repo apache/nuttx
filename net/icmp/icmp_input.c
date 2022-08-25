@@ -330,7 +330,7 @@ void icmp_input(FAR struct net_driver_s *dev)
           goto drop;
         }
 
-      flags = devif_conn_event(dev, conn, ICMP_NEWDATA, conn->sconn.list);
+      flags = devif_conn_event(dev, ICMP_NEWDATA, conn->sconn.list);
       if ((flags & ICMP_NEWDATA) != 0)
         {
           uint16_t nbuffered;

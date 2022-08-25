@@ -52,7 +52,7 @@
  *
  * Input Parameters:
  *   dev      The structure of the network driver that caused the event
- *   conn     The connection structure associated with the socket
+ *   pvpriv   An instance of struct tcp_poll_s cast to void*
  *   flags    Set of events describing why the callback was invoked
  *
  * Returned Value:
@@ -64,10 +64,9 @@
  ****************************************************************************/
 
 static uint16_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
-                                      FAR void *conn,
                                       FAR void *pvpriv, uint16_t flags)
 {
-  FAR struct tcp_poll_s *info = (FAR struct tcp_poll_s *)pvpriv;
+  FAR struct tcp_poll_s *info = pvpriv;
   int reason;
 
   ninfo("flags: %04x\n", flags);

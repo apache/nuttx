@@ -206,8 +206,7 @@ static ssize_t
 
 static uint16_t
   ieee802154_recvfrom_eventhandler(FAR struct net_driver_s *dev,
-                                   FAR void *pvconn, FAR void *pvpriv,
-                                   uint16_t flags)
+                                   FAR void *pvpriv, uint16_t flags)
 {
   FAR struct ieee802154_recvfrom_s *pstate;
   FAR struct radio_driver_s *radio;
@@ -215,7 +214,7 @@ static uint16_t
 
   ninfo("flags: %04x\n", flags);
 
-  DEBUGASSERT(pvpriv != NULL && dev != NULL && pvconn != NULL);
+  DEBUGASSERT(pvpriv != NULL && dev != NULL);
 
   /* Ignore polls from non IEEE 802.15.4 network drivers */
 
@@ -228,7 +227,7 @@ static uint16_t
 
 #warning Missing logic
 
-  pstate = (FAR struct ieee802154_recvfrom_s *)pvpriv;
+  pstate = pvpriv;
   radio  = (FAR struct radio_driver_s *)dev;
 
   /* 'pstate' might be null in some race conditions (?) */

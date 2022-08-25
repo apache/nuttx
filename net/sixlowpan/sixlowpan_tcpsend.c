@@ -288,7 +288,6 @@ static int sixlowpan_tcp_header(FAR struct tcp_conn_s *conn,
  *
  * Input Parameters:
  *   dev    - The structure of the network driver that generated the event.
- *   pvconn - The connection structure associated with the socket
  *   pvpriv - The event handler's private data argument
  *   flags  - Set of events describing why the callback was invoked
  *
@@ -301,10 +300,9 @@ static int sixlowpan_tcp_header(FAR struct tcp_conn_s *conn,
  ****************************************************************************/
 
 static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
-                                      FAR void *pvconn,
                                       FAR void *pvpriv, uint16_t flags)
 {
-  FAR struct sixlowpan_send_s *sinfo = (FAR struct sixlowpan_send_s *)pvpriv;
+  FAR struct sixlowpan_send_s *sinfo = pvpriv;
   FAR struct tcp_conn_s *conn = sinfo->s_conn;
   struct ipv6tcp_hdr_s ipv6tcp;
   int ret;

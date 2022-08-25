@@ -68,7 +68,6 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
 static void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
                                      int status);
 static uint16_t psock_connect_eventhandler(FAR struct net_driver_s *dev,
-                                           FAR void *pvconn,
                                            FAR void *pvpriv, uint16_t flags);
 
 /****************************************************************************
@@ -149,7 +148,7 @@ static void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
  *
  * Input Parameters:
  *   dev      The structure of the network driver that reported the event
- *   pvconn   The connection structure associated with the socket
+ *   pvpriv   An instance of struct tcp_connect_s cast to void*
  *   flags    Set of events describing why the callback was invoked
  *
  * Returned Value:
@@ -161,10 +160,9 @@ static void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
  ****************************************************************************/
 
 static uint16_t psock_connect_eventhandler(FAR struct net_driver_s *dev,
-                                           FAR void *pvconn,
                                            FAR void *pvpriv, uint16_t flags)
 {
-  struct tcp_connect_s *pstate = (struct tcp_connect_s *)pvpriv;
+  struct tcp_connect_s *pstate = pvpriv;
   FAR struct tcp_conn_s *conn = pstate->tc_conn;
 
   ninfo("flags: %04x\n", flags);

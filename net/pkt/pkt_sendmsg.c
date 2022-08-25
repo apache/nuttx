@@ -73,10 +73,9 @@ struct send_s
  ****************************************************************************/
 
 static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
-                                        FAR void *pvconn,
                                         FAR void *pvpriv, uint16_t flags)
 {
-  FAR struct send_s *pstate = (FAR struct send_s *)pvpriv;
+  FAR struct send_s *pstate = pvpriv;
 
   ninfo("flags: %04x sent: %zd\n", flags, pstate->snd_sent);
 

@@ -38,7 +38,7 @@
  * Private Functions
  ****************************************************************************/
 
-static uint16_t accept_event(FAR struct net_driver_s *dev, FAR void *pvconn,
+static uint16_t accept_event(FAR struct net_driver_s *dev,
                              FAR void *pvpriv, uint16_t flags)
 {
   FAR struct usrsock_data_reqstate_s *pstate = pvpriv;

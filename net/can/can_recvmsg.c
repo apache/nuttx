@@ -404,10 +404,9 @@ static int can_recv_filter(struct can_conn_s *conn, canid_t id)
 #endif
 
 static uint16_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
-                                          FAR void *pvconn,
                                           FAR void *pvpriv, uint16_t flags)
 {
-  struct can_recvfrom_s *pstate = (struct can_recvfrom_s *)pvpriv;
+  struct can_recvfrom_s *pstate = pvpriv;
 #if defined(CONFIG_NET_CANPROTO_OPTIONS) || defined(CONFIG_NET_TIMESTAMP)
   struct can_conn_s *conn = (struct can_conn_s *)pstate->pr_sock->s_conn;
 #endif

@@ -168,10 +168,9 @@ static inline void pkt_recvfrom_sender(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 static uint16_t pkt_recvfrom_eventhandler(FAR struct net_driver_s *dev,
-                                          FAR void *pvconn,
                                           FAR void *pvpriv, uint16_t flags)
 {
-  struct pkt_recvfrom_s *pstate = (struct pkt_recvfrom_s *)pvpriv;
+  struct pkt_recvfrom_s *pstate = pvpriv;
 
   ninfo("flags: %04x\n", flags);
 
