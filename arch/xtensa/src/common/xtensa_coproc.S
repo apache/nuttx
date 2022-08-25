@@ -105,7 +105,7 @@ _xtensa_coproc_saoffsets:
 	* ---------------------------------------------------| <- SP
 	*/
 
-	addi		a3, sp, (4 * XCPTCONTEXT_REGS)
+	addi		a3, sp, (4 * COMMON_CTX_REGS)
 
 	/* CPENABLE should show which CPs are enabled. */
 
@@ -216,7 +216,7 @@ Ldone1:
 	* ---------------------------------------------------| <- SP
 	*/
 
-	addi		a3, a2, (4 * XCPTCONTEXT_REGS)
+	addi		a3, a2, (4 * COMMON_CTX_REGS)
 
 	rsr		a8, CPENABLE			/* a8 = which CPs are enabled */
 	beqz		a8, Ldone2			/* Quick exit if none */

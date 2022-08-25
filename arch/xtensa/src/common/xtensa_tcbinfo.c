@@ -64,7 +64,7 @@ const struct tcbinfo_s g_tcbinfo =
   .pri_off   = TCB_PRI_OFF,
   .name_off  = TCB_NAME_OFF,
   .regs_off  = TCB_REGS_OFF,
-  .basic_num = XCPTCONTEXT_REGS,
+  .basic_num = COMMON_CTX_REGS,
   .total_num = XCPTCONTEXT_REGS,
   {
     .p = g_reg_offs,
