@@ -253,7 +253,6 @@
 struct net_driver_s;       /* Forward reference */
 
 typedef CODE uint16_t (*devif_callback_event_t)(FAR struct net_driver_s *dev,
-                                                FAR void *pvconn,
                                                 FAR void *pvpriv,
                                                 uint16_t flags);
 
@@ -389,9 +388,6 @@ void devif_dev_callback_free(FAR struct net_driver_s *dev,
  * Input Parameters:
  *   dev - The network device state structure associated with the network
  *     device that initiated the callback event.
- *   pvconn - Holds a reference to the TCP connection structure or the UDP
- *     port structure. It can be NULL if the event is not related to a TCP
- *     connection or UDP port.
  *   flags - The bit set of events to be notified.
  *   list - The list to traverse in performing the notifications
  *
@@ -403,8 +399,8 @@ void devif_dev_callback_free(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-uint16_t devif_conn_event(FAR struct net_driver_s *dev, FAR void *pvconn,
-                          uint16_t flags, FAR struct devif_callback_s *list);
+uint16_t devif_conn_event(FAR struct net_driver_s *dev, uint16_t flags,
+                          FAR struct devif_callback_s *list);
 
 /****************************************************************************
  * Name: devif_dev_event
@@ -415,9 +411,6 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, FAR void *pvconn,
  * Input Parameters:
  *   dev - The network device state structure associated with the network
  *     device that initiated the callback event.
- *   pvconn - Holds a reference to the TCP connection structure or the UDP
- *     port structure. It can be NULL if the event is not related to a TCP
- *     connection or UDP port.
  *   flags - The bit set of events to be notified.
  *
  * Returned Value:
@@ -428,8 +421,7 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, FAR void *pvconn,
  *
  ****************************************************************************/
 
-uint16_t devif_dev_event(FAR struct net_driver_s *dev, void *pvconn,
-                         uint16_t flags);
+uint16_t devif_dev_event(FAR struct net_driver_s *dev, uint16_t flags);
 
 /****************************************************************************
  * Send data on the current connection.

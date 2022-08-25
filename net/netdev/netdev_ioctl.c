@@ -1939,7 +1939,7 @@ int netdev_ifdown(FAR struct net_driver_s *dev)
 
               /* Notify clients that the network has been taken down */
 
-              devif_dev_event(dev, NULL, NETDEV_DOWN);
+              devif_dev_event(dev, NETDEV_DOWN);
 
 #ifdef CONFIG_NETDOWN_NOTIFIER
               /* Provide signal notifications to threads that want to be

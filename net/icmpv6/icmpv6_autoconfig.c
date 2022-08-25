@@ -90,7 +90,6 @@ static void icmpv6_router_terminate(FAR struct icmpv6_router_s *state,
  ****************************************************************************/
 
 static uint16_t icmpv6_router_eventhandler(FAR struct net_driver_s *dev,
-                                           FAR void *pvconn,
                                            FAR void *priv, uint16_t flags)
 {
   FAR struct icmpv6_router_s *state = (FAR struct icmpv6_router_s *)priv;

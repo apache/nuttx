@@ -45,10 +45,10 @@
  * Private Functions
  ****************************************************************************/
 
-static uint16_t poll_event(FAR struct net_driver_s *dev, FAR void *pvconn,
+static uint16_t poll_event(FAR struct net_driver_s *dev,
                            FAR void *pvpriv, uint16_t flags)
 {
-  FAR struct usrsock_poll_s *info = (FAR struct usrsock_poll_s *)pvpriv;
+  FAR struct usrsock_poll_s *info = pvpriv;
   FAR struct usrsock_conn_s *conn = info->conn;
   pollevent_t eventset = 0;
 

@@ -139,7 +139,7 @@ uint16_t can_callback(FAR struct net_driver_s *dev,
 
       if (net_trylock() == OK)
         {
-          flags = devif_conn_event(dev, conn, flags, conn->sconn.list);
+          flags = devif_conn_event(dev, flags, conn->sconn.list);
           net_unlock();
         }
 

@@ -85,9 +85,9 @@ struct sixlowpan_send_s
  *   send operation when polled by the lower, device interfacing layer.
  *
  * Input Parameters:
- *   dev   - The structure of the network driver that generated the event.
- *   conn  - The connection structure associated with the socket
- *   flags - Set of events describing why the callback was invoked
+ *   dev    - The structure of the network driver that generated the event.
+ *   pvpriv - An instance of struct sixlowpan_send_s cast to void*
+ *   flags  - Set of events describing why the callback was invoked
  *
  * Returned Value:
  *   None
@@ -98,10 +98,9 @@ struct sixlowpan_send_s
  ****************************************************************************/
 
 static uint16_t send_eventhandler(FAR struct net_driver_s *dev,
-                                  FAR void *pvconn,
                                   FAR void *pvpriv, uint16_t flags)
 {
-  FAR struct sixlowpan_send_s *sinfo = (FAR struct sixlowpan_send_s *)pvpriv;
+  FAR struct sixlowpan_send_s *sinfo = pvpriv;
 
   ninfo("flags: %04x\n", flags);
 

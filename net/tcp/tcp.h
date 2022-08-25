@@ -1722,7 +1722,6 @@ int tcp_wrbuffer_test(void);
 
 #ifdef CONFIG_DEBUG_FEATURES
 void tcp_event_handler_dump(FAR struct net_driver_s *dev,
-                            FAR void *pvconn,
                             FAR void *pvpriv,
                             uint16_t flags,
                             FAR struct tcp_conn_s *conn);

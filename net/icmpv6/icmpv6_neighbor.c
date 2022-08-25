@@ -73,7 +73,6 @@ struct icmpv6_neighbor_s
  ****************************************************************************/
 
 static uint16_t icmpv6_neighbor_eventhandler(FAR struct net_driver_s *dev,
-                                             FAR void *pvconn,
                                              FAR void *priv, uint16_t flags)
 {
   FAR struct icmpv6_neighbor_s *state = (FAR struct icmpv6_neighbor_s *)priv;
