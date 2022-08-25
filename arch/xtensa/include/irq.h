@@ -144,12 +144,16 @@
 #if XCHAL_CP_NUM > 0
   /* FPU first address must align to CP align size. */
 
-#  define XCPTCONTEXT_REGS  ALIGN_UP(_REG_CP_START, XCHAL_TOTAL_SA_ALIGN / 4)
-#  define XCPTCONTEXT_SIZE  ((4 * XCPTCONTEXT_REGS) + XTENSA_CP_SA_SIZE + 0x20)
+#  define COMMON_CTX_REGS   ALIGN_UP(_REG_CP_START, XCHAL_TOTAL_SA_ALIGN / 4)
+#  define COPROC_CTX_REGS   (XTENSA_CP_SA_SIZE / 4)
+#  define RESERVE_REGS      8
+#  define XCPTCONTEXT_REGS  (COMMON_CTX_REGS + COPROC_CTX_REGS + RESERVE_REGS)
 #else
-#  define XCPTCONTEXT_REGS  _REG_CP_START
-#  define XCPTCONTEXT_SIZE  ((4 * XCPTCONTEXT_REGS) + 0x20)
+#  define RESERVE_REGS      8
+#  define XCPTCONTEXT_REGS  (_REG_CP_START + RESERVE_REGS)
 #endif
+
+#define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
 
 /****************************************************************************
  * Public Types
