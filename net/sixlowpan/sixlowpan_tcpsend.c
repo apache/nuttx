@@ -76,7 +76,7 @@
 
 struct sixlowpan_send_s
 {
-  FAR struct socket           *s_sock;          /* Internal socket reference */
+  FAR struct tcp_conn_s       *s_conn;          /* Internal connect reference */
   FAR struct devif_callback_s *s_cb;            /* Reference to callback
                                                  * instance */
   sem_t                        s_waitsem;       /* Supports waiting for
@@ -305,7 +305,7 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
                                       FAR void *pvpriv, uint16_t flags)
 {
   FAR struct sixlowpan_send_s *sinfo = (FAR struct sixlowpan_send_s *)pvpriv;
-  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
+  FAR struct tcp_conn_s *conn = sinfo->s_conn;
   struct ipv6tcp_hdr_s ipv6tcp;
   int ret;
 
@@ -391,8 +391,6 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
 
   else if ((flags & TCP_DISCONN_EVENTS) != 0)
     {
-      FAR struct socket *psock = sinfo->s_sock;
-
       nwarn("WARNING: Lost connection\n");
 
       /* We could get here recursively through the callback actions of
@@ -400,7 +398,6 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
        * already been disconnected.
        */
 
-      DEBUGASSERT(psock != NULL);
       if (_SS_ISCONNECTED(conn->sconn.s_flags))
         {
           /* Report the disconnection event to all socket clones */
@@ -620,7 +617,7 @@ static int sixlowpan_send_packet(FAR struct socket *psock,
           nxsem_init(&sinfo.s_waitsem, 0, 0);
           nxsem_set_protocol(&sinfo.s_waitsem, SEM_PRIO_NONE);
 
-          sinfo.s_sock      = psock;
+          sinfo.s_conn      = conn;
           sinfo.s_result    = -EBUSY;
           sinfo.s_destmac   = destmac;
           sinfo.s_buf       = buf;
