@@ -229,7 +229,14 @@ void arm64_fpu_disable(void)
  * Name: up_fpucmp
  *
  * Description:
- *   compare FPU areas from thread context
+ *   Compare FPU areas from thread context.
+ *
+ * Input Parameters:
+ *   saveregs1 - Pointer to the saved FPU registers.
+ *   saveregs2 - Pointer to the saved FPU registers.
+ *
+ * Returned Value:
+ *   True if FPU areas compare equal, False otherwise.
  *
  ***************************************************************************/
 
