@@ -785,22 +785,18 @@ static int mpfs_ihc_tx_message(ihc_channel_t channel, uint32_t *message)
   uint32_t mhartid      = mpfs_ihc_context_to_local_hart_id(channel);
   uint32_t rhartid      = mpfs_ihc_context_to_remote_hart_id(channel);
   uint32_t message_size = getreg32(MPFS_IHC_MSG_SIZE(mhartid, rhartid));
-  uint32_t ctrl_reg     = getreg32(MPFS_IHC_CTRL(mhartid, rhartid));
+  uint32_t ctrl_reg;
+  uint32_t retries      = 10000;
 
   DEBUGASSERT(message_size <= IHC_MAX_MESSAGE_SIZE);
 
   /* Check if the system is busy.  All we can try is wait. */
 
-  if ((RMP_MESSAGE_PRESENT | ACK_INT) & ctrl_reg)
+  do
     {
-#ifndef CONFIG_MPFS_OPENSBI
-      nxsig_usleep(100);
-#endif
-
-      /* Give it a one more try */
-
       ctrl_reg = getreg32(MPFS_IHC_CTRL(mhartid, rhartid));
     }
+  while ((ctrl_reg & (RMP_MESSAGE_PRESENT | ACK_INT)) && --retries);
 
   /* Return if RMP bit 1 indicating busy */
 
