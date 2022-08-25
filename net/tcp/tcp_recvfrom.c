@@ -363,7 +363,7 @@ static inline void tcp_sender(FAR struct net_driver_s *dev,
  *
  * Input Parameters:
  *   dev      The structure of the network driver that generated the event.
- *   pvconn   The connection structure associated with the socket
+ *   pvpriv   An instance of struct tcp_recvfrom_s cast to void*
  *   flags    Set of events describing why the callback was invoked
  *
  * Returned Value:
@@ -375,24 +375,9 @@ static inline void tcp_sender(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 static uint16_t tcp_recvhandler(FAR struct net_driver_s *dev,
-                                FAR void *pvconn, FAR void *pvpriv,
-                                uint16_t flags)
+                                FAR void *pvpriv, uint16_t flags)
 {
-  FAR struct tcp_recvfrom_s *pstate = (struct tcp_recvfrom_s *)pvpriv;
-
-#if 0 /* REVISIT: The assertion fires.  Why? */
-  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
-
-  /* The TCP socket is connected and, hence, should be bound to a device.
-   * Make sure that the polling device is the own that we are bound to.
-   */
-
-  DEBUGASSERT(conn->dev == NULL || conn->dev == dev);
-  if (conn->dev != NULL && conn->dev != dev)
-    {
-      return flags;
-    }
-#endif
+  FAR struct tcp_recvfrom_s *pstate = pvpriv;
 
   ninfo("flags: %04x\n", flags);
 

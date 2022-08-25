@@ -107,7 +107,6 @@ static inline void forward_ipselect(FAR struct forward_s *fwd)
  * Input Parameters:
  *   dev        The structure of the network driver that generated the
  *              event
- *   conn       An instance of the forwarding structure cast to (void *)
  *   pvpriv     An instance of struct forward_s cast to (void *)
  *   flags      Set of events describing why the callback was invoked
  *
@@ -120,10 +119,9 @@ static inline void forward_ipselect(FAR struct forward_s *fwd)
  ****************************************************************************/
 
 static uint16_t ipfwd_eventhandler(FAR struct net_driver_s *dev,
-                                   FAR void *conn,
                                    FAR void *pvpriv, uint16_t flags)
 {
-  FAR struct forward_s *fwd = (FAR struct forward_s *)pvpriv;
+  FAR struct forward_s *fwd = pvpriv;
 
   ninfo("flags: %04x\n", flags);
   DEBUGASSERT(fwd != NULL && fwd->f_iob != NULL && fwd->f_dev != NULL);

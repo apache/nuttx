@@ -66,8 +66,7 @@ static void tcp_close_work(FAR void *param)
  ****************************************************************************/
 
 static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
-                                       FAR void *pvconn, FAR void *pvpriv,
-                                       uint16_t flags)
+                                       FAR void *pvpriv, uint16_t flags)
 {
   FAR struct tcp_conn_s *conn = pvpriv;
 

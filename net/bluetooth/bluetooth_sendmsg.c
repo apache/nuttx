@@ -82,7 +82,6 @@ struct bluetooth_sendto_s
  ****************************************************************************/
 
 static uint16_t bluetooth_sendto_eventhandler(FAR struct net_driver_s *dev,
-                                               FAR void *pvconn,
                                                FAR void *pvpriv,
                                                uint16_t flags)
 {
@@ -106,7 +105,7 @@ static uint16_t bluetooth_sendto_eventhandler(FAR struct net_driver_s *dev,
 
 #warning Missing logic
 
-  pstate = (FAR struct bluetooth_sendto_s *)pvpriv;
+  pstate = pvpriv;
   radio  = (FAR struct radio_driver_s *)dev;
 
   ninfo("flags: %04x sent: %zd\n", flags, pstate->is_sent);

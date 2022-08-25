@@ -83,7 +83,6 @@ struct icmpv6_recvfrom_s
  * Input Parameters:
  *   dev        The structure of the network driver that generated the
  *              event
- *   conn       The received packet, cast to (void *)
  *   pvpriv     An instance of struct icmpv6_recvfrom_s cast to void*
  *   flags      Set of events describing why the callback was invoked
  *
@@ -96,10 +95,9 @@ struct icmpv6_recvfrom_s
  ****************************************************************************/
 
 static uint16_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
-                                  FAR void *pvconn,
-                                  FAR void *pvpriv, uint16_t flags)
+                                      FAR void *pvpriv, uint16_t flags)
 {
-  FAR struct icmpv6_recvfrom_s *pstate = (struct icmpv6_recvfrom_s *)pvpriv;
+  FAR struct icmpv6_recvfrom_s *pstate = pvpriv;
   FAR struct socket *psock;
   FAR struct icmpv6_conn_s *conn;
   FAR struct ipv6_hdr_s *ipv6;

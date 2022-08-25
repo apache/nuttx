@@ -73,7 +73,7 @@ void icmpv6_poll(FAR struct net_driver_s *dev,
 
   /* Perform the application callback */
 
-  devif_conn_event(dev, conn, ICMPv6_POLL,
+  devif_conn_event(dev, ICMPv6_POLL,
                    conn ? conn->sconn.list : dev->d_conncb);
 }
 

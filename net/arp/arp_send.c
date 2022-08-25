@@ -71,7 +71,6 @@ static void arp_send_terminate(FAR struct arp_send_s *state, int result)
  ****************************************************************************/
 
 static uint16_t arp_send_eventhandler(FAR struct net_driver_s *dev,
-                                      FAR void *pvconn,
                                       FAR void *priv, uint16_t flags)
 {
   FAR struct arp_send_s *state = (FAR struct arp_send_s *)priv;

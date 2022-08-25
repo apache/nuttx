@@ -100,7 +100,7 @@ const struct sock_intf_s g_can_sockif =
  *
  * Input Parameters:
  *   dev      The structure of the network driver that caused the event
- *   conn     The connection structure associated with the socket
+ *   pvpriv   An instance of struct can_poll_s cast to void*
  *   flags    Set of events describing why the callback was invoked
  *
  * Returned Value:
@@ -112,10 +112,9 @@ const struct sock_intf_s g_can_sockif =
  ****************************************************************************/
 
 static uint16_t can_poll_eventhandler(FAR struct net_driver_s *dev,
-                                      FAR void *conn,
                                       FAR void *pvpriv, uint16_t flags)
 {
-  FAR struct can_poll_s *info = (FAR struct can_poll_s *)pvpriv;
+  FAR struct can_poll_s *info = pvpriv;
 
   DEBUGASSERT(!info || (info->psock && info->fds));
 

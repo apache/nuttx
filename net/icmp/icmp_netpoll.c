@@ -49,7 +49,7 @@
  *
  * Input Parameters:
  *   dev      The structure of the network driver that caused the event
- *   conn     The connection structure associated with the socket
+ *   pvpriv   An instance of struct icmp_poll_s cast to void*
  *   flags    Set of events describing why the callback was invoked
  *
  * Returned Value:
@@ -61,10 +61,9 @@
  ****************************************************************************/
 
 static uint16_t icmp_poll_eventhandler(FAR struct net_driver_s *dev,
-                                       FAR void *pvconn,
                                        FAR void *pvpriv, uint16_t flags)
 {
-  FAR struct icmp_poll_s *info = (FAR struct icmp_poll_s *)pvpriv;
+  FAR struct icmp_poll_s *info = pvpriv;
   FAR struct icmp_conn_s *conn;
   FAR struct socket *psock;
   pollevent_t eventset;
