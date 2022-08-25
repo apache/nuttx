@@ -49,10 +49,10 @@ static uint16_t poll_event(FAR struct net_driver_s *dev, FAR void *pvconn,
                            FAR void *pvpriv, uint16_t flags)
 {
   FAR struct usrsock_poll_s *info = (FAR struct usrsock_poll_s *)pvpriv;
-  FAR struct usrsock_conn_s *conn = pvconn;
+  FAR struct usrsock_conn_s *conn = info->conn;
   pollevent_t eventset = 0;
 
-  DEBUGASSERT(!info || (info->psock && info->fds));
+  DEBUGASSERT(!info || info->fds);
 
   if (info == NULL)
     {
@@ -161,7 +161,7 @@ static int usrsock_pollsetup(FAR struct socket *psock,
   /* Find a container to hold the poll information */
 
   info = conn->pollinfo;
-  while (info->psock != NULL)
+  while (info->conn != NULL)
     {
       if (++info >= &conn->pollinfo[CONFIG_NET_USRSOCK_NPOLLWAITERS])
         {
@@ -181,9 +181,9 @@ static int usrsock_pollsetup(FAR struct socket *psock,
 
   /* Initialize the poll info container */
 
-  info->psock  = psock;
-  info->fds    = fds;
-  info->cb     = cb;
+  info->conn  = conn;
+  info->fds   = fds;
+  info->cb    = cb;
 
   /* Initialize the callback structure.  Save the reference to the info
    * structure as callback private data so that it will be available during
@@ -327,7 +327,7 @@ static int usrsock_pollteardown(FAR struct socket *psock,
 
       /* Then free the poll info container */
 
-      info->psock = NULL;
+      info->conn = NULL;
     }
 
   return OK;
