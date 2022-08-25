@@ -641,8 +641,6 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
 
   ninfo("cmd: %d\n", cmd);
 
-  net_lock();
-
   /* Execute the command */
 
   switch (cmd)
@@ -1140,8 +1138,6 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
         }
         break;
     }
-
-  net_unlock();
 
   return ret;
 }
