@@ -225,11 +225,13 @@ void nxsched_process_timer(void)
       clock_timer();
     }
 
+#ifndef CONFIG_SCHED_CPULOAD_EXTCLK
   /* Perform CPU load measurements (before any timer-initiated context
    * switches can occur)
    */
 
   nxsched_process_cpuload();
+#endif
 
   /* Check if the currently executing task has exceeded its
    * timeslice.
