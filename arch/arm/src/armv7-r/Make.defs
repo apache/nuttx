@@ -44,6 +44,9 @@ CMN_ASRCS += cp15_coherent_dcache.S cp15_flush_dcache_all.S
 CMN_ASRCS += cp15_flush_dcache.S cp15_invalidate_dcache_all.S
 CMN_ASRCS += cp15_invalidate_dcache.S
 
+ifeq ($(CONFIG_ARMV7R_HAVE_PTM), y)
+  CMN_CSRCS += arm_timer.c
+endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
   CMN_CSRCS += arm_mpu.c
