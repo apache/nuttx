@@ -69,7 +69,7 @@ struct bt_bridge_s
 #ifdef CONFIG_BLUETOOTH_BRIDGE_BTSNOOP
   FAR struct snoop_s       *snoop;
 #endif /* CONFIG_BLUETOOTH_BRIDGE_BTSNOOP */
-  uint8_t                   refs;
+  atomic_uint               refs;
 };
 
 /****************************************************************************
