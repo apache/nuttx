@@ -195,7 +195,7 @@ errout:
  *   The aio_write() function will return the value zero if the I/O operation
  *   is successfully queued; otherwise, the function will return the value
  *   -1 and set errno to indicate the error.  The aio_write() function will
- *   ail if:
+ *   fail if:
  *
  *   EAGAIN - The requested asynchronous I/O operation was not queued due to
  *     system resource limitations.
