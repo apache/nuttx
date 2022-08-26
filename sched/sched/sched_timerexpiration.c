@@ -382,11 +382,13 @@ static unsigned int nxsched_timer_process(unsigned int ticks,
   clock_update_wall_time();
 #endif
 
+#ifndef CONFIG_SCHED_CPULOAD_EXTCLK
   /* Perform CPU load measurements (before any timer-initiated context
    * switches can occur)
    */
 
   nxsched_process_cpuload_ticks(ticks);
+#endif
 
   /* Process watchdogs */
 
