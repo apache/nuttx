@@ -59,6 +59,13 @@ config BLUETOOTH_BRIDGE
 	---help---
 		Enable Bluetooth BT/BLE Dual Mode Bridge Driver.
 
+config BLUETOOTH_BRIDGE_BTSNOOP
+	bool "Bluetooth bridge btsnoop support"
+	default n
+	depends on BLUETOOTH_BRIDGE
+	---help---
+		Enable Bluetooth hci btsnoop log
+
 config BLUETOOTH_NULL
 	bool "NULL Bluetooth device"
 	default n
