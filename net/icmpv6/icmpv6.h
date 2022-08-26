@@ -439,7 +439,7 @@ void icmpv6_setaddresses(FAR struct net_driver_s *dev,
                          const net_ipv6addr_t prefix,
                          unsigned int preflen);
 #else
-#  define icmpv6_setaddresses(d,d,p,p) (0)
+#  define icmpv6_setaddresses(dev,draddr,prefix,preflen) (0)
 #endif
 
 /****************************************************************************
