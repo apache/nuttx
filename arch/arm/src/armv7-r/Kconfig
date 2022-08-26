@@ -12,6 +12,13 @@ config ARMV7R_HAVE_GICv2
 		Selected by the configuration tool if the architecture supports the
 		Generic Interrupt Controller (GIC)
 
+config ARMV7R_HAVE_PTM
+	bool
+	default n
+	---help---
+		Selected by the configuration tool if the architecture supports the
+		per-processor Private Timers (PTMs)
+
 config ARMV7R_MEMINIT
 	bool
 	default y if BOOT_SDRAM_DATA

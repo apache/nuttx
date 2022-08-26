@@ -51,6 +51,10 @@ CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c
 CMN_CSRCS += arm_syscall.c arm_tcbinfo.c arm_undefinedinsn.c
 CMN_CSRCS += arm_perf.c
 
+ifeq ($(CONFIG_ARMV7A_HAVE_PTM), y)
+  CMN_CSRCS += arm_timer.c
+endif
+
 ifeq ($(CONFIG_ARMV7A_L2CC_PL310),y)
   CMN_CSRCS += arm_l2cc_pl310.c
 endif
