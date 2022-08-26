@@ -120,10 +120,10 @@
           sched_note_vprintf(SCHED_NOTE_IP, fmt, va)
 #  define SCHED_NOTE_VBPRINTF(event, fmt, va) \
           sched_note_vbprintf(SCHED_NOTE_IP, event, fmt, va)
-#  define SCHED_NOTE_PRINTF(fmt, args, ...) \
-          sched_note_printf(SCHED_NOTE_IP, fmt, ##args)
-#  define SCHED_NOTE_BPRINTF(event, fmt, args, ...) \
-          sched_note_bprintf(SCHED_NOTE_IP, event, fmt, ##args)
+#  define SCHED_NOTE_PRINTF(fmt, ...) \
+          sched_note_printf(SCHED_NOTE_IP, fmt, ##__VA_ARGS__)
+#  define SCHED_NOTE_BPRINTF(event, fmt, ...) \
+          sched_note_bprintf(SCHED_NOTE_IP, event, fmt, ##__VA_ARGS__)
 #  define SCHED_NOTE_BEGIN() \
           sched_note_begin(SCHED_NOTE_IP, __FUNCTION__)
 #  define SCHED_NOTE_END() \
@@ -133,8 +133,8 @@
 #  define SCHED_NOTE_DUMP(event, buf, len)
 #  define SCHED_NOTE_VPRINTF(fmt, va)
 #  define SCHED_NOTE_VBPRINTF(event, fmt, va)
-#  define SCHED_NOTE_PRINTF(fmt, args, ...)
-#  define SCHED_NOTE_BPRINTF(event, fmt, args, ...)
+#  define SCHED_NOTE_PRINTF(fmt, ...)
+#  define SCHED_NOTE_BPRINTF(event, fmt, ...)
 #  define SCHED_NOTE_BEGIN()
 #  define SCHED_NOTE_END()
 #endif
@@ -678,8 +678,8 @@ void sched_note_filter_irq(struct note_filter_irq_s *oldf,
 #  define SCHED_NOTE_DUMP(event, buf, len)
 #  define SCHED_NOTE_VPRINTF(fmt, va)
 #  define SCHED_NOTE_VBPRINTF(event, fmt, va)
-#  define SCHED_NOTE_PRINTF(fmt, args,...)
-#  define SCHED_NOTE_BPRINTF(event, fmt, args,...)
+#  define SCHED_NOTE_PRINTF(fmt, ...)
+#  define SCHED_NOTE_BPRINTF(event, fmt, ...)
 #  define SCHED_NOTE_BEGIN()
 #  define SCHED_NOTE_END()
 
