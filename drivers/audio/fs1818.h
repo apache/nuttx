@@ -142,6 +142,10 @@ struct fs1818u_dev_s
   uint8_t                 scenario_mode;    /* scenario mode */
   bool                    dump_info;
   int                     mode;
+  bool                    caliberate_done;
+  int                     caliberate_result;
+  bool                    store_cali_value;
+  int                     caliberate_count;
 };
 
 #endif

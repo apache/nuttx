@@ -54,6 +54,7 @@
 
 #define NORMAL_MODE       (0)
 #define DSP_MODE          (1)
+#define CAL_MODE          (2)
 
 /****************************************************************************
  * Private Type Declarations
@@ -110,28 +111,40 @@ static int fs1818_ioctl(FAR struct audio_lowerhalf_s *dev,
 static int fs1818_start_hw(FAR struct fs1818u_dev_s *priv, uint8_t mode);
 static int fs1818_read_otp(FAR struct fs1818u_dev_s *priv);
 static int fs1818_start_up(FAR struct fs1818u_dev_s *priv);
+#ifdef CONFIG_AUDIO_FS1818U_DEBUG
 static int fs1818_dump_reg(FAR struct fs1818u_dev_s *priv);
+#endif
 static int fs1818_config_i2s_and_pll(FAR struct fs1818u_dev_s *priv,
                                      audio_out_format_t * pconfig);
 static int fs1818_set_volume(FAR struct fs1818u_dev_s *priv, uint8_t volume);
 static int fs1818_shut_down(FAR struct fs1818u_dev_s *priv);
-static int fs1818_dsp_bypass(FAR struct fs1818u_dev_s *priv);
+static int fs1818_dsp_bypass(FAR struct fs1818u_dev_s *priv, int mode);
 static int fs1818_usleep(int usec);
+static int fs1818_force_calibrate(FAR struct fs1818u_dev_s *priv,
+                                  uint8_t force, bool store);
+static int fs1818_calibrate_config(FAR struct fs1818u_dev_s *priv);
+static int fs1818_reg_init(FAR struct fs1818u_dev_s *priv);
+static int fs1818_write_fw(FAR struct fs1818u_dev_s *priv, uint8_t mode);
+static int fs1818_update_caliberate_count(FAR struct fs1818u_dev_s *priv);
+
 static int fs1818_set_scenario_handler(FAR struct fs1818u_dev_s *priv,
                                        FAR char *key, FAR char *value,
                                        FAR void *arg);
+#ifdef CONFIG_AUDIO_FS1818U_DEBUG
 static int fs1818_set_print_info_handler(FAR struct fs1818u_dev_s *priv,
                                          FAR char *key, FAR char *value,
                                          FAR void *arg);
+#endif
 static int fs1818_set_mode_handler(FAR struct fs1818u_dev_s *priv,
                                   FAR char *key, FAR char *value,
                                   FAR void *arg);
+static int fs1818_get_cali_value_handler(FAR struct fs1818u_dev_s *priv,
+                                        FAR char *key, FAR char *value,
+                                        FAR void *arg);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-static uint8_t g_calibrate_done = 0;
 
 const static fsm_pll_config_t g_fs1818_pll_tbl[] =
 {
@@ -170,6 +183,11 @@ static const fs1818_info_t fs1818_info[] =
   {
     .key        = "set_mode",
     .handler    = fs1818_set_mode_handler,
+  },
+
+  {
+    .key        = "get_caliberate_value",
+    .handler    = fs1818_get_cali_value_handler,
   },
 
 #ifdef CONFIG_AUDIO_FS1818U_DEBUG
@@ -250,6 +268,7 @@ static void fs1818_parse_string(FAR char *src, FAR char *key,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_AUDIO_FS1818U_DEBUG
 static int fs1818_set_print_info_handler(FAR struct fs1818u_dev_s *priv,
                                          FAR char *key, FAR char *value,
                                          FAR void *arg)
@@ -272,6 +291,7 @@ static int fs1818_set_print_info_handler(FAR struct fs1818u_dev_s *priv,
 
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: fs1818_set_mode_handler
@@ -293,11 +313,61 @@ static int fs1818_set_mode_handler(FAR struct fs1818u_dev_s *priv,
     {
       priv->mode = DSP_MODE;
     }
+  else if (!strncmp(value, "cal", strlen("cal")))
+    {
+      priv->mode = CAL_MODE;
+      priv->store_cali_value = true;
+    }
   else
     {
       auderr("%s value is invaild!\n", key);
       return ERROR;
     }
+
+  if (fs1818_reg_init(priv) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_write_fw(priv, priv->scenario_mode) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_shut_down(priv) == ERROR)
+    {
+      return ERROR;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: fs1818_get_cali_value_handler
+ *
+ * Description:
+ *   get caliberate value handler
+ *
+ ****************************************************************************/
+
+static int fs1818_get_cali_value_handler(FAR struct fs1818u_dev_s *priv,
+                                        FAR char *key, FAR char *value,
+                                        FAR void *arg)
+{
+  FAR char *parse_ptr = (char *)arg;
+
+  memset(parse_ptr, 0, strlen(parse_ptr) + 1);
+  if (priv->caliberate_result == -1)
+    {
+      sprintf(parse_ptr, "caliberate:ERROR");
+    }
+  else
+    {
+      sprintf(parse_ptr, "caliberate:%d:%d", priv->caliberate_result,
+              priv->caliberate_count);
+    }
+
+  auderr("%s\n", parse_ptr);
 
   return OK;
 }
@@ -656,15 +726,33 @@ static int fs1818_start(FAR struct audio_lowerhalf_s *dev)
 
   audinfo("fs1818 start ....\n");
 
-  if (fs1818_dsp_bypass(priv) == ERROR)
+  if (priv->mode == CAL_MODE)
     {
-      return ERROR;
-    }
+      if (fs1818_start_hw(priv, priv->scenario_mode) == ERROR)
+        {
+          auderr("fs1818 start failed!!!\n");
+          return ERROR;
+        }
 
-  if (fs1818_start_hw(priv, priv->scenario_mode) == ERROR)
+      fs1818_usleep(1000 * 10);
+
+      if (fs1818_calibrate_config(priv) == ERROR)
+        {
+          return ERROR;
+        }
+    }
+  else
     {
-      auderr("fs1818 start failed!!!\n");
-      return ERROR;
+      if (fs1818_dsp_bypass(priv, priv->mode) == ERROR)
+        {
+          return ERROR;
+        }
+
+      if (fs1818_start_hw(priv, priv->scenario_mode) == ERROR)
+        {
+          auderr("fs1818 start failed!!!\n");
+          return ERROR;
+        }
     }
 
   return OK;
@@ -688,8 +776,17 @@ static int fs1818_stop(FAR struct audio_lowerhalf_s *dev)
 #endif
 {
   FAR struct fs1818u_dev_s *priv = (FAR struct fs1818u_dev_s *)dev;
+  int ret;
 
   auderr("fs1818u stop!\n");
+
+  if (priv->mode == CAL_MODE)
+    {
+      ret = fs1818_force_calibrate(priv, 1, priv->store_cali_value);
+      auderr("caliberate results:%d\n", ret);
+      priv->caliberate_result = ret;
+      fs1818_update_caliberate_count(priv);
+    }
 
   if (fs1818_shut_down(priv) == ERROR)
     {
@@ -1739,6 +1836,8 @@ static int fs1818_parse_otp(FAR struct fs1818u_dev_s *priv, uint16_t otp_val)
 
   auderr("fs1818_parse_otp Calibrate count: %d\n", cal_cnt);
 
+  priv->caliberate_count = cal_cnt;
+
   otp_h8 = (otp_val >> shift) & bit_mask;
 
   if ((otp_h8 & sig_mask) != 0)
@@ -1761,7 +1860,7 @@ static int fs1818_parse_otp(FAR struct fs1818u_dev_s *priv, uint16_t otp_val)
 
   ret |= fs1818_update_threshold(priv, r25);
 
-  g_calibrate_done = 1;
+  priv->caliberate_done = true;
 
   audinfo("fs1818_parse_otp exit\n");
 
@@ -2185,6 +2284,7 @@ static int fs1818_config_i2s_and_pll(FAR struct fs1818u_dev_s *priv,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_AUDIO_FS1818U_DEBUG
 static int fs1818_dump_reg(FAR struct fs1818u_dev_s *priv)
 {
   uint16_t reg_cnt;
@@ -2217,6 +2317,7 @@ static int fs1818_dump_reg(FAR struct fs1818u_dev_s *priv)
 
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: fs1818_set_volume
@@ -2254,11 +2355,11 @@ static int fs1818_set_volume(FAR struct fs1818u_dev_s *priv, uint8_t volume)
  *
  ****************************************************************************/
 
-static int fs1818_dsp_bypass(FAR struct fs1818u_dev_s *priv)
+static int fs1818_dsp_bypass(FAR struct fs1818u_dev_s *priv, int mode)
 {
   uint16_t dsp_ctl;
 
-  if (priv->mode == NORMAL_MODE)
+  if (mode == NORMAL_MODE)
     {
       auderr("fs1818_dsp_bypass bypass dsp\n");
 
@@ -2347,6 +2448,795 @@ static int fs1818_dsp_bypass(FAR struct fs1818u_dev_s *priv)
 }
 
 /****************************************************************************
+ * Name: fs1818_calibrate_config
+ *
+ * Description:
+ *   fs1818 caliberate configuration
+ *
+ ****************************************************************************/
+
+static int fs1818_calibrate_config(FAR struct fs1818u_dev_s *priv)
+{
+  uint16_t status;
+  uint16_t first_delay = 2500;
+  uint16_t norm_delay = 500;
+
+  priv->nor_volume = 0xf3;
+
+  if (fs1818_dsp_bypass(priv, DSP_MODE) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_OTPACC_REG,
+                            FS1818_OTPACC_ENABLE) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_ZMCONFIG_REG,
+                            FS1818_ZMCONFIG_REG_CALIB_BIT) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_TSCTRL_REG,
+                            FS1818_TSCTRL_TS_NOFF) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_SPKERR_REG,
+                            FS1818_SPKERR_REG_CLEAR) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_SPKM24_REG,
+                            FS1818_SPKM24_REG_CLEAR) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_SPKM6_REG,
+                            FS1818_SPKM6_REG_CLEAR) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_SPKRE_REG,
+                            FS1818_SPKRE_REG_CLEAR) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_ADCENV_REG,
+                            FS1818_ADCENV_REG_AMP_DTEN_ALL) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_ADCTIME_REG,
+                            FS1818_ADCTIME_REG_VALUE) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (!priv->caliberate_done)
+    {
+      fs1818_usleep(first_delay);
+    }
+  else
+    {
+      fs1818_usleep(norm_delay);
+    }
+
+  /* check i2s clk */
+
+  if (fs1818_read_reg_data(priv, FS1818_STATUS_REG, &status) == ERROR)
+    {
+      return ERROR;
+    }
+
+  auderr("fs1818 status reg: 00 0x%04x\n", status);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: fs1818_get_zmdata
+ *
+ * Description:
+ *   fs1818 get zmdata
+ *
+ ****************************************************************************/
+
+static uint16_t fs1818_get_zmdata(FAR struct fs1818u_dev_s *priv,
+                                  uint16_t *zm)
+{
+  int ret;
+  uint16_t zmdata;
+  uint16_t count  = 0;
+  uint16_t done   = 0;
+  uint16_t minval = 0;
+  uint16_t retry  = 0;
+  uint16_t delay_ms = 100;
+  uint16_t preval   = 0;
+  uint16_t retry_max = 80;
+  uint16_t zm_def   = 0xffff;
+  uint16_t zm_done  = 10;
+
+  auderr("fs1818_get_zmdata enter\n");
+
+  while (retry < retry_max)
+    {
+      fs1818_usleep(delay_ms * 1000);
+
+      ret = fs1818_read_reg_data(priv, FS1818_ZMDATA_REG, &zmdata);
+
+      if ((zmdata == 0) || (zmdata == zm_def) || ret)
+        {
+          auderr("fs1818_get_zmdata invalid data, zmdata:%d ret:%d\n",
+                  zmdata, ret);
+
+          fs1818_usleep(delay_ms * 1000);
+          retry++;
+          continue;
+        }
+
+      if (!preval || abs(preval - zmdata) > FS1818_ZMDELTA_MAX)
+        {
+          preval = zmdata;
+          count = 1;
+          minval = zmdata;
+        }
+      else
+        {
+          count++;
+          if (zmdata < minval)
+            {
+              minval = zmdata;
+            }
+        }
+
+      if (count >= zm_done)
+        {
+          done = 1;
+          break;
+        }
+
+      retry++;
+    }
+
+  if (retry >= retry_max && !done)
+    {
+      auderr("fs1818 get zmdata failed\n");
+      return 0;
+    }
+
+  *zm = minval;
+
+  auderr("fs1818_get_zmdata exit\n");
+
+  return done;
+}
+
+/****************************************************************************
+ * Name: fs1818_calc_threshold
+ *
+ * Description:
+ *   fs1818 calc threshold
+ *
+ ****************************************************************************/
+
+static int fs1818_calc_threshold(FAR struct fs1818u_dev_s *priv,
+                                uint16_t zmdata)
+{
+  uint16_t spk_m6;
+  uint16_t spk_m24;
+  uint16_t spk_err;
+  uint16_t spk_rec;
+
+  spk_m24 = (unsigned short)((unsigned int)zmdata * MAGNIF_TEMPR_COEF /
+        (MAGNIF_TEMPR_COEF + TEMPR_COEF * MAGNIF_TEMPR_COEF *
+        (FS1818_TEMP_M24 - EXT_TEMPERATURE)));
+  auderr("fs1818 spk_m24 = 0x%04X\n", spk_m24);
+
+  spk_m6 = (unsigned short)((unsigned int)zmdata * MAGNIF_TEMPR_COEF /
+      (MAGNIF_TEMPR_COEF + TEMPR_COEF * MAGNIF_TEMPR_COEF *
+      (FS1818_TEMP_M6 - EXT_TEMPERATURE)));
+  auderr("fs1818 spk_m6 = 0x%04X\n", spk_m6);
+
+  spk_rec = (unsigned short)((unsigned int)zmdata * MAGNIF_TEMPR_COEF /
+        (MAGNIF_TEMPR_COEF + TEMPR_COEF * MAGNIF_TEMPR_COEF *
+        (FS1818_TEMP_REC - EXT_TEMPERATURE)));
+  auderr("fs1818 spk_rec = 0x%04X\n", spk_rec);
+
+  spk_err = (unsigned short)((unsigned int)zmdata * MAGNIF_TEMPR_COEF /
+        (MAGNIF_TEMPR_COEF + TEMPR_COEF * MAGNIF_TEMPR_COEF *
+        (FS1818_TEMP_ERR - EXT_TEMPERATURE)));
+  auderr("fs1818 spk_err = 0x%04X\n", spk_err);
+
+  /* update threshold */
+
+  if (fs1818_write_reg_data(priv, FS1818_SPKERR_REG, spk_err) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv, FS1818_SPKM24_REG, spk_m24) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv, FS1818_SPKM6_REG, spk_m6) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv, FS1818_SPKRE_REG, spk_rec) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_ADCTIME_REG,
+                            FS1818_ADCTIME_REG_VALUE) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_TSCTRL_REG,
+                            FS1818_TSCTRL_TSAUTO_OFF) == ERROR)
+    {
+      return ERROR;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: fs1818_get_r25_byte
+ *
+ * Description:
+ *   fs1818 get r25 byte
+ *
+ ****************************************************************************/
+
+static uint16_t fs1818_get_r25_byte(uint16_t r25)
+{
+  uint8_t val;
+  uint8_t step_max = 0x7f;
+  uint8_t sig_bit = 0x80;
+
+  val = (unsigned char)((int)abs(r25 - R0_DEFAULT) *
+        CALIB_MAGNIF_FACTOR / CALIB_OTP_R25_STEP);
+
+  if (val > step_max)
+    {
+      val = step_max;
+    }
+
+  val = (r25 >= R0_DEFAULT) ? val : (unsigned char)(val | sig_bit);
+
+  if (0xff == val)
+    {
+      val -= 1;
+    }
+
+  return val;
+}
+
+/****************************************************************************
+ * Name: fs1818_store_config
+ *
+ * Description:
+ *   fs1818 store configuration
+ *
+ ****************************************************************************/
+
+static int fs1818_store_config(FAR struct fs1818u_dev_s *priv,
+                                uint16_t *count)
+{
+  uint16_t value;
+  uint8_t bit_mask    = 0xff;
+  uint8_t calcnt_base = 15;
+  int ret = OK;
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_SYSCTRL_REG,
+                            FS1818_SYSCTRL_REG_PWON) == ERROR)
+    {
+      ret = ERROR;
+      goto error_flag;
+    }
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_BSTCTRL_REG,
+                            FS1818_BSTCTRL_BST_DISABLE_ALL) == ERROR)
+    {
+      ret = ERROR;
+      goto error_flag;
+    }
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_PLLCTRL4_REG,
+                            FS1818_PLLCTRL4_DISABLE_OSC) == ERROR)
+    {
+      ret = ERROR;
+      goto error_flag;
+    }
+
+  /* OTP page */
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_OTPADDR_REG,
+                            FS1818_OTPADDR_ADDR) == ERROR)
+    {
+      ret = ERROR;
+      goto error_flag;
+    }
+
+  /* OTP read clear */
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_OTPCMD_REG,
+                            FS1818_OTPCMD_CMD1) == ERROR)
+    {
+      ret = ERROR;
+      goto error_flag;
+    }
+
+  /* OTP read */
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_OTPCMD_REG,
+                            FS1818_OTPCMD_CMD2) == ERROR)
+    {
+      ret = ERROR;
+      goto error_flag;
+    }
+
+  if (fs1818_wait_stable(priv, FSM_WAIT_OTP_READY) == ERROR)
+    {
+      ret = ERROR;
+      goto error_flag;
+    }
+
+error_flag:
+
+  if (ret == ERROR)
+    {
+      auderr("fs1818_force_calibrate otp busy1\n");
+      return ERROR;
+    }
+
+  if (fs1818_read_reg_data(priv, FS1818_OTPRDATA_REG, &value) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (value == FS1818_OTPPG2_REG_DEFAULT)
+    {
+      *count = 0;
+      auderr("fs1818 Calibrate not start\n");
+    }
+  else
+    {
+      *count = (value & bit_mask) - calcnt_base;
+      auderr("fs1818 Calibrate count: %d\n", count);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: fs1818_store_otp
+ *
+ * Description:
+ *   fs1818 store otp
+ *
+ ****************************************************************************/
+
+static int fs1818_store_otp(FAR struct fs1818u_dev_s *priv, uint8_t valotp)
+{
+  if (fs1818_write_reg_data(priv,
+                            FS1818_PLLCTRL4_REG,
+                            FS1818_PLLCTRL4_DISABLE_ZMADC) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_BSTCTRL_REG,
+                            FS1818_BSTCTRL_BST_BIT_EN) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_OTPADDR_REG,
+                            FS1818_OTPADDR_ADDR) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv, FS1818_OTPWDATA_REG, valotp) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_OTPCMD_REG,
+                            FS1818_OTPCMD_CMD1) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_OTPCMD_REG, FS1818_OTPCMD_CMD3) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_wait_stable(priv, FSM_WAIT_AMP_ON) == ERROR)
+    {
+      auderr("fs1818 failed to wait boost ssend\n");
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_OTPCMD_REG,
+                            FS1818_OTPCMD_CMD4) == ERROR)
+    {
+      return ERROR;
+    }
+
+  fs1818_usleep(1000 * 5);
+
+  if (fs1818_wait_stable(priv, FSM_WAIT_OTP_READY) == ERROR)
+    {
+      auderr("fs1818_force_calibrate otp busy2\n");
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_OTPCMD_REG,
+                            FS1818_OTPCMD_CMD1) == ERROR)
+    {
+      return ERROR;
+    }
+
+  fs1818_usleep(1000 * 1);
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_BSTCTRL_REG,
+                            FS1818_BSTCTRL_BST_DISABLE_ALL) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_PLLCTRL4_REG,
+                            FS1818_PLLCTRL4_DISABLE_OSC) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_BSTCTRL_REG,
+                            FS1818_BSTCTRL_BST_DISABLE_ALL) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_OTPADDR_REG,
+                            FS1818_OTPADDR_ADDR) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_OTPCMD_REG,
+                            FS1818_OTPCMD_CMD1) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_OTPCMD_REG,
+                            FS1818_OTPCMD_CMD2) == ERROR)
+    {
+      return ERROR;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: fs1818_get_byte_r25
+ *
+ * Description:
+ *   fs1818 get r25 byte
+ *
+ ****************************************************************************/
+
+static uint16_t fs1818_get_byte_r25(uint8_t byte)
+{
+  uint8_t sig_bit = 0x80;
+  uint8_t step_max = 0x7f;
+
+  if ((byte & sig_bit) != 0)
+    {
+      /* minus value */
+
+      return R0_DEFAULT - CALIB_OTP_R25_STEP *
+            (byte & step_max) / CALIB_MAGNIF_FACTOR;
+    }
+
+  return R0_DEFAULT + CALIB_OTP_R25_STEP * byte / CALIB_MAGNIF_FACTOR;
+}
+
+/****************************************************************************
+ * Name: fs1818_store_to_otp
+ *
+ * Description:
+ *   fs1818 store value to otp
+ *
+ ****************************************************************************/
+
+static int fs1818_store_to_otp(FAR struct fs1818u_dev_s *priv,
+                              uint8_t valotp)
+{
+  uint16_t value = 0;
+  uint16_t valpwr;
+  uint16_t valuec0;
+  uint16_t valuec4;
+  uint16_t count;
+  uint16_t delta;
+  uint8_t shift = 8;
+  uint8_t bit_mask = 0xff;
+  uint8_t calcnt_base = 15;
+
+  auderr("fs1818_store_to_otp enter, otp:0x%04x\n", valotp);
+
+  if (fs1818_read_reg_data(priv, FS1818_SYSCTRL_REG, &valpwr) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_read_reg_data(priv, FS1818_BSTCTRL_REG, &valuec0) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_read_reg_data(priv, FS1818_PLLCTRL4_REG, &valuec4) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_store_config(priv, &count) == ERROR)
+    {
+      goto otp_exit;
+    }
+
+  delta = fs1818_get_byte_r25(valotp) -
+          fs1818_get_byte_r25((value >> shift) & bit_mask);
+
+  if (delta < 0)
+    {
+      delta *= -1;
+    }
+
+  auderr("fs1818 Calibrate delta: %d\n", delta);
+  auderr("fs1818 Calibrate otp-delta:%d\n", OTP_MIN_DELTA);
+
+  if (count > 0 && delta < OTP_MIN_DELTA)
+    {
+      auderr("fs1818 no need to write otp\n");
+      goto otp_exit;
+    }
+
+  if (count >= CALIB_MAX_USER_TRY)
+    {
+      auderr("fs1818 otp write count exceeds max\n");
+      goto otp_exit;
+    }
+
+  if (fs1818_store_otp(priv, valotp) == ERROR)
+    {
+      goto otp_exit;
+    }
+
+  if (fs1818_wait_stable(priv, FSM_WAIT_OTP_READY) == ERROR)
+    {
+      auderr("fs1818_force_calibrate otp busy3\n");
+      goto otp_exit;
+    }
+
+  if (fs1818_read_reg_data(priv, FS1818_OTPRDATA_REG, &value) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (((value >> shift) & bit_mask) == valotp)
+    {
+      /* Update count */
+
+      count = (value & bit_mask) - calcnt_base;
+      auderr("fs1818 readback succeeded with count = %d\n", count);
+    }
+  else
+    {
+      auderr("fs1818 calibrated read back failed with value = 0x%0,"
+             "Should not happen\n", value);
+      auderr("fs1818 calibrated read back failed with expected = 0x%04X--,"
+             "Should not happen\n", valotp);
+    }
+
+otp_exit:
+
+  if (fs1818_write_reg_data(priv, FS1818_BSTCTRL_REG, valuec0) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv, FS1818_PLLCTRL4_REG, valuec4) == ERROR)
+    {
+      return ERROR;
+    }
+
+  /* Recover power state */
+
+  if (fs1818_write_reg_data(priv, FS1818_SYSCTRL_REG, valpwr) == ERROR)
+    {
+      return ERROR;
+    }
+
+  auderr("fs1818_store_to_otp exit");
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: fs1818_force_calibrate
+ *
+ * Description:
+ *   fs1818 force caliberate
+ *
+ ****************************************************************************/
+
+static int fs1818_force_calibrate(FAR struct fs1818u_dev_s *priv,
+                                  uint8_t force, bool store)
+{
+  uint16_t zmdata;
+  uint16_t vale6;
+  uint16_t r25_byte;
+  uint16_t r25;
+  uint16_t bit_mask = 0xff;
+
+  auderr("fs1818_force_calibrate enter\n");
+
+  if (fs1818_get_zmdata(priv, &zmdata) == 0)
+    {
+      if (fs1818_write_reg_data(priv,
+                                FS1818_OTPACC_REG,
+                                FS1818_OTPACC_DISABLE) == ERROR)
+        {
+          return ERROR;
+        }
+
+      if (fs1818_write_default_threshold(priv) == ERROR)
+        {
+          return ERROR;
+        }
+
+      auderr("fs1818_force_calibrate read data failed\n");
+
+      return ERROR;
+    }
+
+  /* get r25 */
+
+  if (fs1818_read_reg_data(priv, FS1818_OTPPG1W2_REG, &vale6) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (vale6 != 0)
+    {
+      vale6 = vale6 & bit_mask;
+    }
+  else
+    {
+      auderr("fs1818 OTPPG1W2_REG unexpected! Set default value\n");
+      vale6 = RS_TRIM_DEFAULT;
+    }
+
+  r25 = vale6 * RS2RL_RATIO * MAGNIF_FACTOR / zmdata;
+
+  if (r25 < R0_ALLOWANCE_HIGH && r25 > R0_ALLOWANCE_LOW)
+    {
+      auderr("fs1818 SPK R25 = %d\n", r25);
+    }
+  else
+    {
+      if (fs1818_write_reg_data(priv,
+                                FS1818_OTPACC_REG,
+                                FS1818_OTPACC_DISABLE) == ERROR)
+        {
+          return ERROR;
+        }
+
+      auderr("fs1818 speaker impedance out of range %d\n", r25);
+
+      if (fs1818_write_default_threshold(priv) == ERROR)
+        {
+          return ERROR;
+        }
+
+      return ERROR;
+    }
+
+  if (fs1818_calc_threshold(priv, zmdata) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (store)
+    {
+      r25_byte = fs1818_get_r25_byte(r25);
+
+      /* store to otp */
+
+      if (fs1818_store_to_otp(priv, r25_byte) == ERROR)
+        {
+          return ERROR;
+        }
+    }
+
+  auderr("fs1818 recoverty settings\n");
+  if (fs1818_write_reg_data(priv,
+                            FS1818_ZMCONFIG_REG,
+                            FS1818_ZMCONFIG_REG_NORMAL_BIT) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (fs1818_write_reg_data(priv,
+                            FS1818_OTPACC_REG,
+                            FS1818_OTPACC_DISABLE) == ERROR)
+    {
+      return ERROR;
+    }
+
+  auderr("fs1818_force_calibrate exit\n");
+
+  return (int) r25;
+}
+
+static int fs1818_update_caliberate_count(FAR struct fs1818u_dev_s *priv)
+{
+  if (fs1818_read_otp(priv) == ERROR)
+    {
+      return ERROR;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -2421,6 +3311,10 @@ fs1818_initialize(FAR struct i2c_master_s *i2c,
       priv->nor_volume    = 0xef;
       priv->dump_info     = false;
       priv->mode          = DSP_MODE;
+      priv->caliberate_done   = false;
+      priv->store_cali_value  = false;
+      priv->caliberate_result = 0;
+      priv->caliberate_count  = 0;
 
       return &priv->dev;
     }
