@@ -66,6 +66,9 @@ struct bt_bridge_s
 {
   struct bt_bridge_device_s device[BT_FILTER_TYPE_COUNT];
   FAR struct bt_driver_s   *driver;
+#ifdef CONFIG_BLUETOOTH_BRIDGE_BTSNOOP
+  FAR struct snoop_s       *snoop;
+#endif /* CONFIG_BLUETOOTH_BRIDGE_BTSNOOP */
   uint8_t                   refs;
 };
 
@@ -421,8 +424,17 @@ static int bt_bridge_send(FAR struct bt_driver_s *drv,
   flags = enter_critical_section();
   if (bt_filter_can_send(&device->filter, type, data, len))
     {
+      int ret;
+
       leave_critical_section(flags);
-      return driver->send(driver, type, data, len);
+      ret = driver->send(driver, type, data, len);
+
+#ifdef CONFIG_BLUETOOTH_BRIDGE_BTSNOOP
+      snoop_dump(bridge->snoop, data - drv->head_reserve,
+                 len + drv->head_reserve, 0,
+                 SNOOP_DIRECTION_FLAG_SENT);
+#endif /* CONFIG_BLUETOOTH_BRIDGE_BTSNOOP */
+      return ret;
     }
 
   leave_critical_section(flags);
@@ -459,8 +471,17 @@ static int bt_bridge_receive(FAR struct bt_driver_s *drv,
       driver = &device->driver;
       if (bt_filter_can_recv(&device->filter, type, data, len))
         {
+          int ret;
+
           leave_critical_section(flags);
-          return bt_netdev_receive(driver, type, data, len);
+          ret = bt_netdev_receive(driver, type, data, len);
+
+#ifdef CONFIG_BLUETOOTH_BRIDGE_BTSNOOP
+          snoop_dump(bridge->snoop, data - drv->head_reserve,
+                     len + drv->head_reserve, 0,
+                     SNOOP_DIRECTION_FLAG_RECV);
+#endif /* CONFIG_BLUETOOTH_BRIDGE_BTSNOOP */
+          return ret;
         }
     }
 
@@ -476,14 +497,55 @@ static int bt_bridge_ioctl(FAR struct bt_driver_s *drv, int cmd,
   FAR struct bt_bridge_s *bridge = device->bridge;
   int ret;
 
+  switch (cmd)
+    {
+#ifdef CONFIG_BLUETOOTH_BRIDGE_BTSNOOP
+    case SIOCBTSNOOPOPEN:
+      {
+        FAR const char *filename = (FAR const char *)((uintptr_t)arg);
+        FAR struct snoop_s *snoop = (FAR struct snoop_s *)
+                                    kmm_zalloc(sizeof(struct snoop_s));
+        if (!snoop)
+          {
+            return -ENOMEM;
+          }
 
-  if (bridge->driver->ioctl)
-    {
-      ret = bridge->driver->ioctl(drv, cmd, arg);
-    }
-  else
-    {
-      ret = -ENOTTY;
+        ret = snoop_open(snoop, filename, SNOOP_DATALINK_HCI_UART, true);
+        if (ret == OK)
+          {
+            bridge->snoop = snoop;
+          }
+        else
+          {
+            kmm_free(snoop);
+          }
+        break;
+      }
+
+    case SIOCBTSNOOPCLOSE:
+      {
+        FAR struct snoop_s *snoop = bridge->snoop;
+
+        bridge->snoop = NULL;
+        ret = snoop_close(snoop);
+        kmm_free(snoop);
+        break;
+      }
+#endif /* CONFIG_BLUETOOTH_BRIDGE_BTSNOOP */
+
+      /* hci ioctl operation */
+
+    default:
+      {
+        if (bridge->driver->ioctl)
+          {
+            ret = bridge->driver->ioctl(drv, cmd, arg);
+          }
+        else
+          {
+            ret = -ENOTTY;
+          }
+      }
     }
 
   return ret;
