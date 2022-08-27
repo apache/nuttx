@@ -30,6 +30,8 @@ CSRCS += open-amp/lib/virtio/virtio.c
 CSRCS += open-amp/lib/virtio/virtqueue.c
 
 open-amp.zip:
+# Download and unpack tarball if no git repo found
+ifeq ($(wildcard open-amp/.git),)
 	$(Q) curl -L https://github.com/OpenAMP/open-amp/archive/v$(VERSION).zip -o open-amp.zip
 	$(Q) unzip -o open-amp.zip
 	$(Q) mv open-amp-$(VERSION) open-amp
@@ -45,6 +47,7 @@ open-amp.zip:
 	$(Q) patch -p0 < 0010-rpmsg-notify-the-user-when-the-remote-address-is-rec.patch
 	$(Q) patch -p0 < 0011-openamp-avoid-double-calling-ns_bound-when-each-othe.patch
 	$(Q) patch -p0 < 0012-remoteproc-make-all-elf_-functions-static-except-elf.patch
+endif
 
 .openamp_headers: open-amp.zip
 	$(eval headers := $(wildcard open-amp/lib/include/openamp/*.h))
@@ -56,8 +59,10 @@ context:: .openamp_headers
 
 distclean::
 	$(call DELDIR, $(TOPDIR)$(DELIM)include$(DELIM)openamp$(DELIM))
+ifeq ($(wildcard open-amp/.git),)
 	$(call DELDIR, open-amp)
 	$(call DELFILE, open-amp.zip)
+endif
 	$(call DELFILE, .openamp_headers)
 
 endif
