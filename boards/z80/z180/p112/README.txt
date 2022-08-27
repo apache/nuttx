@@ -162,15 +162,3 @@ Status
   with the integration of address environments on the Cortex-A.  It is
   likely that there is some breakage due to incompatibilities with the
   Z180's mini-MMU.
-
-Known compilation problems with SDCC:
-
-Known compilation problems:
-
-    CC:  stdlib/lib_strtof.c
-    stdlib/lib_strtof.c:62:6: warning: #warning "Size of exponent is unknown"
-    stdlib/lib_strtof.c:76: error 122: dividing by ZERO
-    stdlib/lib_strtof.c:102: error 122: dividing by ZERO
-    stdlib/lib_strtof.c:76: error 122: dividing by ZERO
-
-  Workaround: Remove lib_strtof.c from libs/libc/stdlib/Make.defs
