@@ -49,11 +49,14 @@ $(LITTLEFS_TARBALL):
 	$(Q) mv littlefs/littlefs-$(LITTLEFS_VERSION) littlefs/littlefs
 	$(Q) touch littlefs/.littlefsunpack
 
-context::# .littlefsunpack
+# Download and unpack tarball if no git repo found
+ifeq ($(wildcard littlefs/littlefs/.git),)
+context:: .littlefsunpack
 
 distclean::
-#	$(call DELFILE, littlefs/.littlefsunpack)
-#	$(call DELFILE, littlefs/$(LITTLEFS_TARBALL))
-#	$(call DELDIR, littlefs/littlefs)
+	$(call DELFILE, littlefs/.littlefsunpack)
+	$(call DELFILE, littlefs/$(LITTLEFS_TARBALL))
+	$(call DELDIR, littlefs/littlefs)
+endif
 
 endif
