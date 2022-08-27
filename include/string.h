@@ -93,6 +93,7 @@ FAR void  *memmem(FAR const void *haystack, size_t haystacklen,
                   FAR const void *needle, size_t needlelen);
 
 void explicit_bzero(FAR void *s, size_t n);
+int timingsafe_bcmp(FAR const void *b1, FAR const void *b2, size_t n);
 
 #undef EXTERN
 #if defined(__cplusplus)
