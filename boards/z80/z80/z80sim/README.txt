@@ -181,15 +181,3 @@ Then make the SDCC binaries
 and install SDCC:
 
   sudo make install
-
-Known compilation problems:
-
-    CC:  stdlib/lib_strtof.c
-    stdlib/lib_strtof.c:62:6: warning: #warning "Size of exponent is unknown"
-    stdlib/lib_strtof.c:76: error 122: dividing by ZERO
-    stdlib/lib_strtof.c:102: error 122: dividing by ZERO
-    stdlib/lib_strtof.c:76: error 122: dividing by ZERO
-
-  Workaround: Remove lib_strtof.c from libs/libc/stdlib/Make.defs
-
-  In arch/z80/src/z180:  error 26: '_cbr' not a structure/union member
