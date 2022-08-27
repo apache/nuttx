@@ -5,23 +5,7 @@ ZDS-II Compiler Versions
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 Version 4.10.1
-  The ZDS-II version 4.10.2 will not compile NuttX.  It reports "internal
-  errors" on one of the files, mm/mm_initialize.c.  Below is a simple work-
-  around.  With this work-around in place, NuttX builds successfully with
-  the 4.10.1 compiler.
-
-    --- mm/mm_initialize.c.SAVE	2008-02-13 08:06:46.833857700 -0600
-    +++ mm/mm_initialize.c	2008-02-13 08:07:26.367608900 -0600
-    @@ -94,8 +94,11 @@
-    {
-       int i;
-
-    +#if 0 /* DO NOT CHECK IN */
-       CHECK_ALLOCNODE_SIZE;
-       CHECK_FREENODE_SIZE;
-    +#endif
-
-   /* Set up global variables */
+  NuttX builds successfully with the 4.10.1 compiler.
 
 Version 4.9.5
   This is the latest tool version listed on the ZiLOG site for the Z8F6403.

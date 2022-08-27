@@ -22,27 +22,6 @@ Version 4.11.0
   all ez80 boards.  However, it is the older version 4.11.0 that this code
   has been verified against.
 
-  Although it compiles without error, the 4.11.0 compiler generates
-  bad code on one of the files, mm/mm_initialize.c.  Below is a simple work-
-  around.
-
-    --- mm/mm_initialize.c.SAVE	2008-02-13 08:06:46.833857700 -0600
-    +++ mm/mm_initialize.c	2008-02-13 08:07:26.367608900 -0600
-    @@ -94,8 +94,11 @@
-    {
-       int i;
-
-    +#if 0 /* DO NOT CHECK IN */
-       CHECK_ALLOCNODE_SIZE;
-       CHECK_FREENODE_SIZE;
-    +#endif
-
-   /* Set up global variables */
-
-   UPDATE:  I don't know if 4.11.1 has this same problem (I bet not since
-   I submitted the bug to ZiLOG), but I have permanently worked around the
-   above problem for all ZiLOG compilers.
-
 Version 5.1.1
 
   On June 22, 2011 I verified that these configurations build successfully
