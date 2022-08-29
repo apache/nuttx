@@ -1090,7 +1090,7 @@ static int mpfs_req_read(struct mpfs_usbdev_s *priv,
           privreq = NULL;
         }
 
-      if ((privreq->inflight > 0) && (count != 0) &&
+      if ((privreq != NULL) && (privreq->inflight > 0) && (count != 0) &&
           (reg & RXCSRL_REG_EPN_RX_PKT_RDY_MASK) != 0)
         {
           /* Update the total number of bytes transferred */
@@ -1135,9 +1135,12 @@ static int mpfs_req_read(struct mpfs_usbdev_s *priv,
   /* Activate new read request from queue */
 
   privep->rxactive  = true;
-  privreq->req.xfrd = 0;
-  privreq->inflight = privreq->req.len;
-  priv->eplist[epno].descb[0]->addr = (uintptr_t)privreq->req.buf;
+  if (privreq != NULL)
+    {
+      privreq->req.xfrd = 0;
+      privreq->inflight = privreq->req.len;
+      priv->eplist[epno].descb[0]->addr = (uintptr_t)privreq->req.buf;
+    }
 
   return OK;
 }
