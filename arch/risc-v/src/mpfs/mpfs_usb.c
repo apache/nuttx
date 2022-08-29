@@ -81,6 +81,7 @@
 #define MPFS_TRACEERR_EP0SETUPOUTSIZE      0x0015
 #define MPFS_TRACEERR_EPOUTQEMPTY          0x0016
 #define MPFS_TRACEERR_EP0PREMATURETERM     0x0017
+#define MPFS_TRACEERR_TXHALT               0x0018
 
 /* USB trace interrupt codes */
 
@@ -570,12 +571,12 @@ static void mpfs_req_cancel(struct mpfs_ep_s *privep, int16_t result)
  *   epno       - Endpoint number
  *
  * Returned Value:
- *   None
+ *   OK, or error
  *
  ****************************************************************************/
 
-static void mpfs_write_tx_fifo(const void *in_data, uint32_t length,
-                               uint8_t epno)
+static int mpfs_write_tx_fifo(const void *in_data, uint32_t length,
+                              uint8_t epno)
 {
   uint32_t i;
   uint32_t *temp;
@@ -584,6 +585,7 @@ static void mpfs_write_tx_fifo(const void *in_data, uint32_t length,
   uint16_t words = length / 4;
   uint16_t bytes = length - words * 4;
   uint16_t offset;
+  uint16_t retries = 10000;
 
   temp      = (uint32_t *)in_data;
   temp_8bit = (uint8_t *)in_data;
@@ -597,7 +599,13 @@ static void mpfs_write_tx_fifo(const void *in_data, uint32_t length,
           tx_csr = getreg16(MPFS_USB_ENDPOINT(epno) +
                             MPFS_USB_ENDPOINT_TX_CSR_OFFSET);
         }
-      while (tx_csr & TXCSRL_REG_EPN_TX_FIFO_NE_MASK);
+      while ((tx_csr & TXCSRL_REG_EPN_TX_FIFO_NE_MASK) && --retries);
+    }
+
+  if (retries == 0)
+    {
+      usbtrace(TRACE_DEVERROR(MPFS_TRACEERR_TXHALT), epno);
+      return -EIO;
     }
 
   /* Send 32-bit words first */
@@ -615,6 +623,8 @@ static void mpfs_write_tx_fifo(const void *in_data, uint32_t length,
     {
       mpfs_putreg8((uint8_t)temp_8bit[i], MPFS_USB_FIFO(epno));
     }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -629,18 +639,19 @@ static void mpfs_write_tx_fifo(const void *in_data, uint32_t length,
  *   privreq    - The actual write request
  *
  * Returned Value:
- *   None
+ *   OK if success, error otherwise
  *
  ****************************************************************************/
 
-static void mpfs_req_wrsetup(struct mpfs_usbdev_s *priv,
-                             struct mpfs_ep_s *privep,
-                             struct mpfs_req_s *privreq)
+static int mpfs_req_wrsetup(struct mpfs_usbdev_s *priv,
+                            struct mpfs_ep_s *privep,
+                            struct mpfs_req_s *privreq)
 {
   const uint8_t *buf;
   uint32_t packetsize;
   uint8_t epno;
   int nbytes;
+  int ret;
 
   epno = USB_EPNO(privep->ep.eplog);
 
@@ -693,7 +704,11 @@ static void mpfs_req_wrsetup(struct mpfs_usbdev_s *priv,
 
   if (nbytes > packetsize)
     {
-      mpfs_write_tx_fifo(buf, packetsize, epno);
+      ret = mpfs_write_tx_fifo(buf, packetsize, epno);
+      if (ret != OK)
+        {
+          return ret;
+        }
 
       if (epno == EP0)
         {
@@ -709,11 +724,15 @@ static void mpfs_req_wrsetup(struct mpfs_usbdev_s *priv,
         }
 
       privreq->inflight = packetsize;
-      return;
+      return OK;
     }
   else
     {
-      mpfs_write_tx_fifo(buf, nbytes, epno);
+      ret = mpfs_write_tx_fifo(buf, nbytes, epno);
+      if (ret != OK)
+        {
+          return ret;
+        }
     }
 
   privreq->req.xfrd += nbytes;
@@ -734,6 +753,8 @@ static void mpfs_req_wrsetup(struct mpfs_usbdev_s *priv,
                        TXCSRL_REG_EPN_UNDERRUN_MASK,
                        TXCSRL_REG_EPN_TX_PKT_RDY_MASK);
     }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -835,6 +856,7 @@ static int mpfs_req_write(struct mpfs_usbdev_s *priv,
   struct mpfs_req_s *privreq;
   uint8_t epno;
   int bytesleft;
+  int ret;
 
   epno = USB_EPNO(privep->ep.eplog);
 
@@ -881,7 +903,11 @@ static int mpfs_req_write(struct mpfs_usbdev_s *priv,
         {
           /* Perform the write operation. */
 
-          mpfs_req_wrsetup(priv, privep, privreq);
+          ret = mpfs_req_wrsetup(priv, privep, privreq);
+          if (ret != OK)
+            {
+              return ret;
+            }
         }
       else if ((privreq->req.len == 0) && !privep->zlpsent)
         {
