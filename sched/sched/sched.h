@@ -96,8 +96,8 @@
 
 struct tasklist_s
 {
-  DSEG volatile dq_queue_t *list; /* Pointer to the task list */
-  uint8_t attr;                   /* List attribute flags */
+  DSEG dq_queue_t *list; /* Pointer to the task list */
+  uint8_t attr;          /* List attribute flags */
 };
 
 /****************************************************************************
@@ -121,7 +121,7 @@ struct tasklist_s
  * task, is always the IDLE task.
  */
 
-extern volatile dq_queue_t g_readytorun;
+extern dq_queue_t g_readytorun;
 
 #ifdef CONFIG_SMP
 /* In order to support SMP, the function of the g_readytorun list changes,
@@ -154,7 +154,7 @@ extern volatile dq_queue_t g_readytorun;
  * always the CPU's IDLE task.
  */
 
-extern volatile dq_queue_t g_assignedtasks[CONFIG_SMP_NCPUS];
+extern dq_queue_t g_assignedtasks[CONFIG_SMP_NCPUS];
 #endif
 
 /* g_running_tasks[] holds a references to the running task for each cpu.
@@ -169,22 +169,22 @@ extern FAR struct tcb_s *g_running_tasks[CONFIG_SMP_NCPUS];
  * currently active task has disabled pre-emption.
  */
 
-extern volatile dq_queue_t g_pendingtasks;
+extern dq_queue_t g_pendingtasks;
 
 /* This is the list of all tasks that are blocked waiting for a semaphore */
 
-extern volatile dq_queue_t g_waitingforsemaphore;
+extern dq_queue_t g_waitingforsemaphore;
 
 /* This is the list of all tasks that are blocked waiting for a signal */
 
-extern volatile dq_queue_t g_waitingforsignal;
+extern dq_queue_t g_waitingforsignal;
 
 /* This is the list of all tasks that are blocked waiting for a message
  * queue to become non-empty.
  */
 
 #ifndef CONFIG_DISABLE_MQUEUE
-extern volatile dq_queue_t g_waitingformqnotempty;
+extern dq_queue_t g_waitingformqnotempty;
 #endif
 
 /* This is the list of all tasks that are blocked waiting for a message
@@ -192,20 +192,20 @@ extern volatile dq_queue_t g_waitingformqnotempty;
  */
 
 #ifndef CONFIG_DISABLE_MQUEUE
-extern volatile dq_queue_t g_waitingformqnotfull;
+extern dq_queue_t g_waitingformqnotfull;
 #endif
 
 /* This is the list of all tasks that are blocking waiting for a page fill */
 
 #ifdef CONFIG_PAGING
-extern volatile dq_queue_t g_waitingforfill;
+extern dq_queue_t g_waitingforfill;
 #endif
 
 /* This the list of all tasks that have been initialized, but not yet
  * activated. NOTE:  This is the only list that is not prioritized.
  */
 
-extern volatile dq_queue_t g_inactivetasks;
+extern dq_queue_t g_inactivetasks;
 
 /* This is the value of the last process ID assigned to a task */
 
