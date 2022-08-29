@@ -208,7 +208,6 @@ static void tcp_shutdown_monitor(FAR struct tcp_conn_s *conn, uint16_t flags)
    */
 
   net_lock();
-  tcp_callback(conn->dev, conn, flags);
 
   /* Free all allocated connection event callback structures */
 
