@@ -505,6 +505,12 @@ static ssize_t usrsockdev_handle_response(FAR struct usrsockdev_s *dev,
        */
 
       conn->resp.inprogress = true;
+
+      /* This branch indicates successful processing and waiting
+       * for USRSOCK_EVENT_CONNECT_READY event.
+       */
+
+      conn->resp.result = 0;
     }
   else
     {
@@ -558,6 +564,12 @@ usrsockdev_handle_datareq_response(FAR struct usrsockdev_s *dev,
        */
 
       conn->resp.inprogress = true;
+
+      /* This branch indicates successful processing and waiting
+       * for USRSOCK_EVENT_CONNECT_READY event.
+       */
+
+      conn->resp.result = 0;
 
       ret = sizeof(*datahdr);
       goto unlock_out;
