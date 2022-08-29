@@ -79,11 +79,15 @@ static inline int is_real(double x)
  * Public Functions
  ****************************************************************************/
 
-/***************************************************(************************
+/****************************************************************************
  * Name: strtod
  *
  * Description:
  *   Convert a string to a double value
+ *
+ *   NOTE: This implementation is limited as compared to POSIX:
+ *   - Hexadecimal input is not supported
+ *   - INF, INFINITY, NAN, and NAN(...) are not supported
  *
  ****************************************************************************/
 
