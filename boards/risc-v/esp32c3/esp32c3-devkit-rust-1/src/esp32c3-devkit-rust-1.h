@@ -27,6 +27,10 @@
 
 #include <nuttx/compiler.h>
 
+#ifdef CONFIG_VIDEO_FB
+  #include <nuttx/video/fb.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -276,6 +280,27 @@ int esp32c3_pwm_setup(void);
 
 #ifdef CONFIG_ADC
 int board_adc_init(void);
+#endif
+
+/****************************************************************************
+ * Name: apds9960_initialize
+ *
+ * Description:
+ *
+ *   Initialize and register the APDS9960 gesture sensor.
+ *
+ * Input Parameters:
+ *   devno - The device number, used to build the device path as /dev/gestN
+ *   busno - The I2C bus number
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *   Initialize the APDS-9960 sensor
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_APDS9960
+int apds9960_initialize(int devno, int busno);
 #endif
 
 #endif /* __ASSEMBLY__ */

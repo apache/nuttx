@@ -41,6 +41,18 @@ ifeq ($(CONFIG_BOARDCTL_IOCTL),y)
 CSRCS += esp32c3_ioctl.c
 endif
 
+ifeq ($(CONFIG_ESP32C3_SPI),y)
+CSRCS += esp32c3_board_spi.c
+endif
+
+ifeq ($(CONFIG_SENSORS_APDS9960),y)
+CSRCS += esp32c3_apds9960.c
+endif
+
+ifeq ($(CONFIG_LCD_APA102),y)
+CSRCS += esp32c3_apa102.c
+endif
+
 SCRIPTIN = $(SCRIPTDIR)$(DELIM)flat.template.ld
 SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32c3_out.ld
 
