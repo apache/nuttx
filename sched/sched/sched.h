@@ -74,7 +74,7 @@
 #define TLIST_ISINDEXED(s)       ((__TLIST_ATTR(s) & TLIST_ATTR_INDEXED) != 0)
 #define TLIST_ISRUNNABLE(s)      ((__TLIST_ATTR(s) & TLIST_ATTR_RUNNABLE) != 0)
 
-#define __TLIST_HEAD(s)          (FAR dq_queue_t *)g_tasklisttable[s].list
+#define __TLIST_HEAD(s)          g_tasklisttable[s].list
 #define __TLIST_HEADINDEXED(s,c) (&(__TLIST_HEAD(s))[c])
 
 #ifdef CONFIG_SMP

@@ -218,7 +218,7 @@ void nxtask_uninit(FAR struct task_tcb_s *tcb)
    * nxtask_setup_scheduler().
    */
 
-  dq_rem((FAR dq_entry_t *)tcb, (FAR dq_queue_t *)&g_inactivetasks);
+  dq_rem((FAR dq_entry_t *)tcb, &g_inactivetasks);
 
   /* Release all resources associated with the TCB... Including the TCB
    * itself.

@@ -454,7 +454,7 @@ static int nxthread_setup_scheduler(FAR struct tcb_s *tcb, int priority,
       /* Add the task to the inactive task list */
 
       sched_lock();
-      dq_addfirst((FAR dq_entry_t *)tcb, (FAR dq_queue_t *)&g_inactivetasks);
+      dq_addfirst((FAR dq_entry_t *)tcb, &g_inactivetasks);
       tcb->task_state = TSTATE_TASK_INACTIVE;
       sched_unlock();
     }
