@@ -86,7 +86,7 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb)
    * is always the g_readytorun list.
    */
 
-  dq_rem((FAR dq_entry_t *)rtcb, (FAR dq_queue_t *)&g_readytorun);
+  dq_rem((FAR dq_entry_t *)rtcb, &g_readytorun);
 
   /* Since the TCB is not in any list, it is now invalid */
 
@@ -214,7 +214,7 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb)
            * list and add to the head of the g_assignedtasks[cpu] list.
            */
 
-          dq_rem((FAR dq_entry_t *)rtrtcb, (FAR dq_queue_t *)&g_readytorun);
+          dq_rem((FAR dq_entry_t *)rtrtcb, &g_readytorun);
           dq_addfirst((FAR dq_entry_t *)rtrtcb, tasklist);
 
           rtrtcb->cpu = cpu;
