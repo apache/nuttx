@@ -1516,7 +1516,7 @@ static int netdev_rt_ioctl(FAR struct socket *psock, int cmd,
 static int netdev_file_ioctl(FAR struct socket *psock, int cmd,
                              unsigned long arg)
 {
-  int ret;
+  int ret = OK;
 
   switch (cmd)
     {
@@ -1545,8 +1545,6 @@ static int netdev_file_ioctl(FAR struct socket *psock, int cmd,
                  {
                    conn->s_flags &= ~_SF_NONBLOCK;
                  }
-
-               ret = -ENOTTY; /* let file_vioctl update f_oflags */
             }
           else
             {
