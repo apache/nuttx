@@ -377,11 +377,19 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
 
   /* Calculate the base addresses for convenience */
 
+#if (CONFIG_ARCH_TEXT_VBASE != 0x0) && (CONFIG_ARCH_HEAP_VBASE != 0x0)
+  resvbase = CONFIG_ARCH_DATA_VBASE;
+  resvsize = ARCH_DATA_RESERVE_SIZE;
+  textbase = CONFIG_ARCH_TEXT_VBASE;
+  database = resvbase + MM_PGALIGNUP(resvsize);
+  heapbase = CONFIG_ARCH_HEAP_VBASE;
+#else
   resvbase = ADDRENV_VBASE;
   resvsize = ARCH_DATA_RESERVE_SIZE;
   textbase = resvbase + MM_PGALIGNUP(resvsize);
   database = textbase + MM_PGALIGNUP(textsize);
   heapbase = database + MM_PGALIGNUP(datasize);
+#endif
 
   /* Allocate 1 extra page for heap, temporary fix for #5811 */
 
