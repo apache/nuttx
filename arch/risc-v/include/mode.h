@@ -41,6 +41,7 @@
 #  define CSR_EPC           sepc             /* Exception program counter */
 #  define CSR_IE            sie              /* Interrupt enable register */
 #  define CSR_CAUSE         scause           /* Interrupt cause register */
+#  define CSR_TVAL          stval            /* Trap value register */
 
 /* In status register */
 
@@ -74,6 +75,7 @@
 #  define CSR_EPC           mepc             /* Exception program counter */
 #  define CSR_IE            mie              /* Interrupt enable register */
 #  define CSR_CAUSE         mcause           /* Interrupt cause register */
+#  define CSR_TVAL          mtval            /* Trap value register */
 
 /* In status register */
 
