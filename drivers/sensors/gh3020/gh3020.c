@@ -69,6 +69,7 @@
 
 /* Default settings */
 
+#define GH3020_BATCH_DFT         400000     /* Default batch = 400 ms */
 #define GH3020_INTVL_DFT         40000      /* Default interval = 40 ms */
 #define GH3020_SR_DFT            25         /* Default sample rate = 25 Hz */
 #define GH3020_CURRENT_DFT       10000      /* Default LED current = 10mA */
@@ -77,6 +78,8 @@
 
 #define GH3020_CFGLIST_NUM       2          /* Init cfg list number */
 #define GH3020_ONE_SECOND        1000000.0f /* 1 second = 1000000 us */
+#define GH3020_POLL_TIMES_THRES  2500       /* Print log every 2500 pollings */
+#define GH3020_INT_TIMES_THRES   250        /* Print log every 250 interrupts */
 
 /* Macros */
 
@@ -142,6 +145,8 @@ struct gh3020_dev_s
   float led_calibr;                      /* LED calibration coefficent */
   uint16_t efuse;                        /* EFUSE for TIA and LED driver */
   uint16_t fifowtm;                      /* FIFO water marker, unit is data */
+  uint16_t poll_times;                   /* Enter polling times */
+  uint16_t intrpt_times;                 /* Enter interrupt times */
   uint8_t ppgdatacnt[GH3020_SENSOR_NUM]; /* Data number of each PPG channel */
   uint8_t activated;                     /* How many sensors are activated */
   bool factest_mode;                     /* If it's in factory test mode */
@@ -552,6 +557,7 @@ static int gh3020_configspi(FAR struct gh3020_dev_s *priv)
 
   if (SPI_SETFREQUENCY(priv->config->spi, freq) != freq)
     {
+      snerr("SPI cfg fail\n");
       return -EIO;
     }
 
@@ -764,6 +770,7 @@ static void gh3020_push_data(FAR struct gh3020_dev_s *priv)
   uint64_t ts_interval;
   int32_t ts_jitter;
   bool ts_abnormal;
+  bool pushed_any = false;
   uint8_t idx;
   uint8_t j;
 
@@ -783,6 +790,7 @@ static void gh3020_push_data(FAR struct gh3020_dev_s *priv)
                                              priv->ppgdata[idx],
                                              sizeof(struct sensor_ppgq)
                                              * priv->ppgdatacnt[idx]);
+          pushed_any = true;
 
           ts_interval = priv->timestamp - priv->timestamp_last;
           if (priv->batch > 0)
@@ -804,6 +812,11 @@ static void gh3020_push_data(FAR struct gh3020_dev_s *priv)
                      gh3020_node_name_list[idx], ts_interval);
             }
         }
+    }
+
+  if (pushed_any)
+    {
+      priv->timestamp_last = priv->timestamp;
     }
 
   GH3020_DEBUG_LOG("[gh3020] ts %llu push: 0-%u, 1-%u, 2-%u, 5-%u\n",
@@ -908,8 +921,8 @@ static void gh3020_restart_new_fifowtm(FAR struct gh3020_dev_s *priv,
 {
   uint8_t idx;
 
-  GH3020_DEBUG_LOG("[gh3020] restart, interval %lu, new wtm %u(data), old "
-                   "wtm %u(data)\n", priv->interval, fifowtm, priv->fifowtm);
+  syslog(LOG_INFO, "[gh3020] restart, intvl %lu, wtm %u->%u(data)\n",
+         priv->interval, priv->fifowtm, fifowtm);
 
   /* Reset with initialize and some other operations may cause the device's
    * interrupt pin to toggle abnormally. If interrupt reading is used,
@@ -1147,9 +1160,10 @@ static void gh3020_update_sensor(FAR struct gh3020_dev_s *priv)
                 {
                   SCHED_NOTE_PRINTF("activate ppgq%u, rate=%u",
                                     gh3020_node_name_list[idx], rate);
-                  syslog(LOG_INFO, "[gh3020] update ppg%u r=%u\n",
-                         gh3020_node_name_list[idx], rate);
                 }
+
+              syslog(LOG_INFO, "[gh3020] update ppg%u r=%u\n",
+                     gh3020_node_name_list[idx], rate);
 
               sensor->activating = false;
               sensor->activated = true;
@@ -1393,6 +1407,8 @@ static int gh3020_activate(FAR struct sensor_lowerhalf_s *lower,
               priv->activated++;
               priv->interval = sensor->interval;
               priv->batch = sensor->batch;
+              priv->poll_times = 0;
+              priv->intrpt_times = 0;
               rate = (uint16_t)(GH3020_ONE_SECOND / sensor->interval);
               if (sensor->batch > 0)
                 {
@@ -1510,8 +1526,8 @@ static int gh3020_batch(FAR struct sensor_lowerhalf_s *lower,
       *latency_us = fifowtm * sensor->interval;
     }
 
-  GH3020_DEBUG_LOG("[gh3020] set ppg%u batch actual=%lu\n",
-                   gh3020_node_name_list[sensor->chidx], *latency_us);
+  syslog(LOG_INFO, "[gh3020] ppg%u batch %lu->%lu\n",
+         gh3020_node_name_list[sensor->chidx], sensor->batch, *latency_us);
 
   /* Do something only when the batch changed. */
 
@@ -1589,8 +1605,8 @@ static int gh3020_set_interval(FAR struct sensor_lowerhalf_s *lower,
     }
 
   *period_us = GH3020_ONE_SECOND / freq;
-  GH3020_DEBUG_LOG("[gh3020] set ppg%d interval actual=%lu\n",
-                   gh3020_node_name_list[sensor->chidx], *period_us);
+  syslog(LOG_INFO, "[gh3020] ppg%d intvl %lu->%lu\n",
+         gh3020_node_name_list[sensor->chidx], sensor->interval, *period_us);
 
   /* Do something only when the interval changed. */
 
@@ -1811,7 +1827,6 @@ static int gh3020_interrupt_handler(FAR struct ioexpander_dev_s *dev,
 
   /* Get the timestamp */
 
-  priv->timestamp_last = priv->timestamp;
   priv->timestamp = sensor_get_timestamp();
 
   /* Task the worker with retrieving the latest sensor data. We should not do
@@ -1865,6 +1880,14 @@ static void gh3020_worker_intrpt(FAR void *arg)
 
   memset(priv->ppgdatacnt, 0, GH3020_SENSOR_NUM);
 
+  /* Record interrupt times */
+
+  if (++priv->intrpt_times == GH3020_INT_TIMES_THRES)
+    {
+      syslog(LOG_INFO, "intrpt %d times\n", GH3020_INT_TIMES_THRES);
+      priv->intrpt_times = 0;
+    }
+
   /* Goodix's documents said that this function must be called before calling
    * gh3020_fifo_process() in an interrupt procession.
    */
@@ -1907,7 +1930,6 @@ static void gh3020_worker_poll(FAR void *arg)
 
   /* Get timestamp and arrange next worker immediately once enter polling. */
 
-  priv->timestamp_last = priv->timestamp;
   priv->timestamp = sensor_get_timestamp();
   if (priv->activated > 0)
     {
@@ -1920,6 +1942,14 @@ static void gh3020_worker_poll(FAR void *arg)
   /* Start new counter for each channel. */
 
   memset(priv->ppgdatacnt, 0, GH3020_SENSOR_NUM);
+
+  /* Record polling times */
+
+  if (++priv->poll_times == GH3020_POLL_TIMES_THRES)
+    {
+      syslog(LOG_INFO, "poll %d times\n", GH3020_POLL_TIMES_THRES);
+      priv->poll_times = 0;
+    }
 
   /* This function from Goodix's library has an obvious delay and must be
    * called after arranging next worker.
@@ -2008,7 +2038,6 @@ void gh3020_spi_sendcmd(uint8_t cmd)
 
   if (gh3020_configspi(g_priv) != OK)
     {
-      snerr("SPI configuration failed.\n");
       SPI_LOCK(g_priv->config->spi, false);
       return;
     }
@@ -2060,7 +2089,6 @@ void gh3020_spi_writereg(uint16_t regaddr, uint16_t regval)
 
   if (gh3020_configspi(g_priv) != OK)
     {
-      snerr("SPI configuration failed.\n");
       SPI_LOCK(g_priv->config->spi, false);
       return;
     }
@@ -2105,7 +2133,6 @@ uint16_t gh3020_spi_readreg(uint16_t regaddr)
 
   if (gh3020_configspi(g_priv) != OK)
     {
-      snerr("SPI configuration failed.\n");
       SPI_LOCK(g_priv->config->spi, false);
       return 0;
     }
@@ -2161,7 +2188,6 @@ void gh3020_spi_readfifo(FAR uint8_t *pbuf, uint16_t len)
 
   if (gh3020_configspi(g_priv) != OK)
     {
-      snerr("SPI configuration failed.\n");
       SPI_LOCK(g_priv->config->spi, false);
       return;
     }
@@ -2571,7 +2597,7 @@ int gh3020_register(int devno, FAR const struct gh3020_config_s *config)
   priv = kmm_zalloc(sizeof(*priv));
   if (!priv)
     {
-      snerr("Failed to allocate instance.\n");
+      snerr("alloc fail\n");
       return -ENOMEM;
     }
 
@@ -2584,7 +2610,7 @@ int gh3020_register(int devno, FAR const struct gh3020_config_s *config)
       priv->sensor[idx].lower.nbuffer = GH3020_BATCH_NUMBER;
       priv->sensor[idx].dev = priv;
       priv->sensor[idx].interval = GH3020_INTVL_DFT;
-      priv->sensor[idx].batch = GH3020_INTVL_DFT;
+      priv->sensor[idx].batch = GH3020_BATCH_DFT;
       priv->sensor[idx].current = GH3020_CURRENT_DFT;
       priv->sensor[idx].chidx = (uint8_t)idx;
     }
@@ -2598,7 +2624,7 @@ int gh3020_register(int devno, FAR const struct gh3020_config_s *config)
   if (ret != OK)
     {
       ret = -ret;
-      snerr("Device ID doesn't match: %d\n", ret);
+      snerr("Device ID mismatch:%d\n", ret);
       goto err_exit;
     }
 
@@ -2608,7 +2634,7 @@ int gh3020_register(int devno, FAR const struct gh3020_config_s *config)
                            IOEXPANDER_DIRECTION_IN);
   if (ret < 0)
     {
-      snerr("Failed to set direction: %d\n", ret);
+      snerr("set IO direction fail:%d\n", ret);
       goto err_exit;
     }
 
@@ -2617,7 +2643,7 @@ int gh3020_register(int devno, FAR const struct gh3020_config_s *config)
   if (ioehandle == NULL)
     {
       ret = -EIO;
-      snerr("Failed to attach: %d\n", ret);
+      snerr("attach IO intrpt fail:%d\n", ret);
       goto err_exit;
     }
 
@@ -2626,7 +2652,7 @@ int gh3020_register(int devno, FAR const struct gh3020_config_s *config)
                         (FAR void *)IOEXPANDER_VAL_DISABLE);
   if (ret < 0)
     {
-      snerr("Failed to set option: %d\n", ret);
+      snerr("set IO option fail:%d\n", ret);
       goto err_iodetach;
     }
 
@@ -2639,7 +2665,7 @@ int gh3020_register(int devno, FAR const struct gh3020_config_s *config)
                             gh3020_node_name_list[idx]);
       if (ret < 0)
         {
-          snerr("Failed to register GH3020 ppgq%d driver: %d\n",
+          snerr("ppgq%d register fail: %d\n",
                 devno * GH3020_SENSOR_NUM + gh3020_node_name_list[idx], ret);
 
           /* Unregister all registered ppgq sensors */
@@ -2660,7 +2686,7 @@ int gh3020_register(int devno, FAR const struct gh3020_config_s *config)
         }
     }
 
-  syslog(LOG_INFO, "[gh3020] driver v2.1.16, build 2022-07-12\n");
+  syslog(LOG_INFO, "[gh3020] driver v2.1.17, build 2022-08-30\n");
 
   return ret;
 
