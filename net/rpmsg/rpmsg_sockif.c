@@ -149,8 +149,8 @@ static ssize_t    rpmsg_socket_sendmsg(FAR struct socket *psock,
 static ssize_t    rpmsg_socket_recvmsg(FAR struct socket *psock,
                     FAR struct msghdr *msg, int flags);
 static int        rpmsg_socket_close(FAR struct socket *psock);
-static int        rpmsg_socket_ioctl(FAR struct socket *psock, int cmd,
-                                     FAR void *arg, size_t arglen);
+static int        rpmsg_socket_ioctl(FAR struct socket *psock,
+                                     int cmd, unsigned long arg);
 
 /****************************************************************************
  * Public Data
@@ -1310,8 +1310,8 @@ static int rpmsg_socket_close(FAR struct socket *psock)
   return 0;
 }
 
-static int rpmsg_socket_ioctl(FAR struct socket *psock, int cmd,
-                              FAR void *arg, size_t arglen)
+static int rpmsg_socket_ioctl(FAR struct socket *psock,
+                              int cmd, unsigned long arg)
 {
   FAR struct rpmsg_socket_conn_s *conn = psock->s_conn;
   int ret = OK;
@@ -1319,25 +1319,13 @@ static int rpmsg_socket_ioctl(FAR struct socket *psock, int cmd,
   switch (cmd)
     {
       case FIONREAD:
-        if (arglen != sizeof(int))
-          {
-            ret = -EINVAL;
-            break;
-          }
-
         *(FAR int *)((uintptr_t)arg) = circbuf_used(&conn->recvbuf);
-
         break;
+
       case FIONSPACE:
-        if (arglen != sizeof(int))
-          {
-            ret = -EINVAL;
-            break;
-          }
-
         *(FAR int *)((uintptr_t)arg) = rpmsg_socket_get_space(conn);
-
         break;
+
       default:
         ret = -ENOTTY;
         break;

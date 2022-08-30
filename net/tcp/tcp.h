@@ -2000,12 +2000,10 @@ int tcp_txdrain(FAR struct socket *psock, unsigned int timeout);
  *   conn     The TCP connection of interest
  *   cmd      The ioctl command
  *   arg      The argument of the ioctl cmd
- *   arglen   The length of 'arg'
  *
  ****************************************************************************/
 
-int tcp_ioctl(FAR struct tcp_conn_s *conn, int cmd,
-              FAR void *arg, size_t arglen);
+int tcp_ioctl(FAR struct tcp_conn_s *conn, int cmd, unsigned long arg);
 
 /****************************************************************************
  * Name: tcp_sendbuffer_notify
