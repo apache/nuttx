@@ -49,11 +49,10 @@
 
 static void tcp_close_work(FAR void *param)
 {
-  FAR struct tcp_conn_s *conn;
+  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)param;
 
   net_lock();
 
-  conn = (FAR struct tcp_conn_s *)param;
   if (conn && conn->crefs == 0)
     {
       /* Stop the network monitor for all sockets */
@@ -179,11 +178,15 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
   return flags;
 
 end_wait:
-  tcp_callback_free(conn, conn->clscb);
+  if (conn->clscb != NULL)
+    {
+      tcp_callback_free(conn, conn->clscb);
+      conn->clscb = NULL;
+    }
 
   /* Free network resources */
 
-  work_queue(LPWORK, &conn->work, tcp_close_work, conn, 0);
+  work_queue(LPWORK, &conn->clswork, tcp_close_work, conn, 0);
 
   return flags;
 }

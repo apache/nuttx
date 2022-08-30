@@ -769,9 +769,11 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 
   DEBUGASSERT(conn->crefs == 0);
 
-  /* Cancel the close work */
+  /* Cancel close work */
 
-  work_cancel(LPWORK, &conn->work);
+  work_cancel(LPWORK, &conn->clswork);
+
+  /* Cancel tcp timer */
 
   tcp_stop_timer(conn);
 
