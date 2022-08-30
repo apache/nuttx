@@ -602,6 +602,8 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
            * happen until the polling cycle completes).
            */
 
+          tcp_setsequence(conn->sndseq, TCP_WBSEQNO(wrb));
+
           devif_iob_send(dev, TCP_WBIOB(wrb), sndlen, 0);
 
           /* Reset the retransmission timer. */
