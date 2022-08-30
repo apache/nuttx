@@ -2746,9 +2746,8 @@ static uint16_t fs1818_get_r25_byte(uint16_t r25)
  ****************************************************************************/
 
 static int fs1818_store_config(FAR struct fs1818u_dev_s *priv,
-                                uint16_t *count)
+                               FAR uint16_t *count, FAR uint16_t *value)
 {
-  uint16_t value;
   uint8_t bit_mask    = 0xff;
   uint8_t calcnt_base = 15;
   int ret = OK;
@@ -2821,7 +2820,7 @@ error_flag:
       return ERROR;
     }
 
-  if (fs1818_read_reg_data(priv, FS1818_OTPRDATA_REG, &value) == ERROR)
+  if (fs1818_read_reg_data(priv, FS1818_OTPRDATA_REG, value) == ERROR)
     {
       return ERROR;
     }
@@ -2833,8 +2832,8 @@ error_flag:
     }
   else
     {
-      *count = (value & bit_mask) - calcnt_base;
-      auderr("fs1818 Calibrate count: %d\n", count);
+      *count = (*value & bit_mask) - calcnt_base;
+      auderr("fs1818 Calibrate count: %d\n", *count);
     }
 
   return OK;
@@ -3026,7 +3025,7 @@ static int fs1818_store_to_otp(FAR struct fs1818u_dev_s *priv,
       return ERROR;
     }
 
-  if (fs1818_store_config(priv, &count) == ERROR)
+  if (fs1818_store_config(priv, &count, &value) == ERROR)
     {
       goto otp_exit;
     }
