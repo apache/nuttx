@@ -30,16 +30,6 @@ ifeq ($(CONFIG_MOTOR_UPPER),y)
 CSRCS += motor.c
 endif
 
-# Add motor lower-half driver
-
-ifeq ($(CONFIG_MOTOR_DRV2624),y)
-CSRCS += drv2624.c
-endif
-
-ifeq ($(CONFIG_MOTOR_AW86225),y)
-CSRCS += aw86225.c
-endif
-
 # Include motor drivers in the build
 
 MOTOR_DEPPATH := --dep-path motor

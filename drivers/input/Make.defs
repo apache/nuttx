@@ -40,10 +40,6 @@ ifeq ($(CONFIG_INPUT_FT5X06),y)
   CSRCS += ft5x06.c
 endif
 
-ifeq ($(CONFIG_INPUT_NT38350),y)
-  CSRCS += nt38350.c
-endif
-
 ifeq ($(CONFIG_INPUT_ADS7843E),y)
   CSRCS += ads7843e.c
 endif

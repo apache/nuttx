@@ -57,14 +57,6 @@ config MOTOR_UPPER_HAVE_INPUT_POWER
 	bool "Have input power protection"
 	default n
 
-config MOTOR_DRV2624
-	bool "Drv2624 motor driver"
-	default n
-
-config MOTOR_AW86225
-	bool "Aw86225 motor driver"
-	default n
-
 endif
 
 source "drivers/motor/foc/Kconfig"
