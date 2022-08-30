@@ -28,7 +28,7 @@
  * Public Data
  ****************************************************************************/
 
-extern const struct symtab_s g_allsyms[1];
+extern const struct symtab_s g_allsyms[];
 extern const int             g_nallsyms;
 
 /****************************************************************************
