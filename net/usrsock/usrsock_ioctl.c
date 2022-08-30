@@ -103,7 +103,7 @@ static uint16_t ioctl_event(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 static int do_ioctl_request(FAR struct usrsock_conn_s *conn, int cmd,
-                                 FAR void *arg, size_t arglen)
+                            FAR void *arg, size_t arglen)
 {
   struct usrsock_request_ioctl_s req =
   {
@@ -125,9 +125,9 @@ static int do_ioctl_request(FAR struct usrsock_conn_s *conn, int cmd,
   req.cmd = cmd;
   req.arglen = arglen;
 
-  bufs[0].iov_base = (FAR void *)&req;
+  bufs[0].iov_base = &req;
   bufs[0].iov_len = sizeof(req);
-  bufs[1].iov_base = (FAR void *)arg;
+  bufs[1].iov_base = arg;
   bufs[1].iov_len = req.arglen;
 
 #ifdef CONFIG_NETDEV_WIRELESS_IOCTL
@@ -156,12 +156,10 @@ static int do_ioctl_request(FAR struct usrsock_conn_s *conn, int cmd,
  *   psock    A reference to the socket structure of the socket
  *   cmd      The ioctl command
  *   arg      The argument of the ioctl cmd
- *   arglen   The length of 'arg'
  *
  ****************************************************************************/
 
-int usrsock_ioctl(FAR struct socket *psock, int cmd, FAR void *arg,
-                  size_t arglen)
+int usrsock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg_)
 {
   FAR struct usrsock_conn_s *conn = psock->s_conn;
   struct usrsock_data_reqstate_s state =
@@ -172,6 +170,8 @@ int usrsock_ioctl(FAR struct socket *psock, int cmd, FAR void *arg,
   {
   };
 
+  FAR void *arg = (FAR void *)(uintptr_t)arg_;
+  ssize_t arglen;
   int ret;
 
   /* Bypass FIONBIO to socket level,
@@ -181,6 +181,12 @@ int usrsock_ioctl(FAR struct socket *psock, int cmd, FAR void *arg,
   if (cmd == FIONBIO)
     {
       return -ENOTTY;
+    }
+
+  arglen = net_ioctl_arglen(cmd);
+  if (arglen < 0)
+    {
+      return arglen;
     }
 
   net_lock();

@@ -196,8 +196,8 @@ struct sock_intf_s
   CODE ssize_t    (*si_recvmsg)(FAR struct socket *psock,
                     FAR struct msghdr *msg, int flags);
   CODE int        (*si_close)(FAR struct socket *psock);
-  CODE int        (*si_ioctl)(FAR struct socket *psock, int cmd,
-                    FAR void *arg, size_t arglen);
+  CODE int        (*si_ioctl)(FAR struct socket *psock,
+                    int cmd, unsigned long arg);
   CODE int        (*si_socketpair)(FAR struct socket *psocks[2]);
 #ifdef CONFIG_NET_SENDFILE
   CODE ssize_t    (*si_sendfile)(FAR struct socket *psock,
@@ -313,6 +313,23 @@ extern "C"
  ****************************************************************************/
 
 void net_initialize(void);
+
+/****************************************************************************
+ * Name: net_ioctl_arglen
+ *
+ * Description:
+ *   Calculate the ioctl argument buffer length.
+ *
+ * Input Parameters:
+ *
+ *   cmd      The ioctl command
+ *
+ * Returned Value:
+ *   The argument buffer length, or error code.
+ *
+ ****************************************************************************/
+
+ssize_t net_ioctl_arglen(int cmd);
 
 /****************************************************************************
  * Critical section management.
