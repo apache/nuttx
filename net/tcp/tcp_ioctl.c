@@ -55,8 +55,7 @@
  *
  ****************************************************************************/
 
-int tcp_ioctl(FAR struct tcp_conn_s *conn,
-              int cmd, FAR void *arg, size_t arglen)
+int tcp_ioctl(FAR struct tcp_conn_s *conn, int cmd, unsigned long arg)
 {
   int ret = OK;
 

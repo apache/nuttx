@@ -656,12 +656,10 @@ int usrsock_getpeername(FAR struct socket *psock,
  *   psock    A reference to the socket structure of the socket
  *   cmd      The ioctl command
  *   arg      The argument of the ioctl cmd
- *   arglen   The length of 'arg'
  *
  ****************************************************************************/
 
-int usrsock_ioctl(FAR struct socket *psock, int cmd, FAR void *arg,
-                  size_t arglen);
+int usrsock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg);
 
 #undef EXTERN
 #ifdef __cplusplus

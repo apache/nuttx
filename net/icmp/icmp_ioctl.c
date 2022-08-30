@@ -51,12 +51,10 @@
  *   conn     The ICMP connection of interest
  *   cmd      The ioctl command
  *   arg      The argument of the ioctl cmd
- *   arglen   The length of 'arg'
  *
  ****************************************************************************/
 
-int icmp_ioctl(FAR struct socket *psock,
-               int cmd, FAR void *arg, size_t arglen)
+int icmp_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
 {
   FAR struct icmp_conn_s *conn = psock->s_conn;
   int ret = OK;

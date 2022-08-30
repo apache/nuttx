@@ -1597,15 +1597,7 @@ static int netdev_ioctl(FAR struct socket *psock, int cmd,
 {
   if (psock->s_sockif && psock->s_sockif->si_ioctl)
     {
-      ssize_t arglen;
-
-      arglen = net_ioctl_arglen(cmd);
-      if (arglen < 0)
-        {
-          return arglen;
-        }
-
-      return psock->s_sockif->si_ioctl(psock, cmd, (FAR void *)arg, arglen);
+      return psock->s_sockif->si_ioctl(psock, cmd, arg);
     }
   else
     {

@@ -88,8 +88,8 @@ static ssize_t    inet_sendmsg(FAR struct socket *psock,
                     FAR struct msghdr *msg, int flags);
 static ssize_t    inet_recvmsg(FAR struct socket *psock,
                     FAR struct msghdr *msg, int flags);
-static int        inet_ioctl(FAR struct socket *psock, int cmd,
-                    FAR void *arg, size_t arglen);
+static int        inet_ioctl(FAR struct socket *psock,
+                    int cmd, unsigned long arg);
 static int        inet_socketpair(FAR struct socket *psocks[2]);
 #ifdef CONFIG_NET_SENDFILE
 static ssize_t    inet_sendfile(FAR struct socket *psock,
@@ -1338,12 +1338,10 @@ static ssize_t inet_sendmsg(FAR struct socket *psock,
  *   psock    A reference to the socket structure of the socket
  *   cmd      The ioctl command
  *   arg      The argument of the ioctl cmd
- *   arglen   The length of 'arg'
  *
  ****************************************************************************/
 
-static int inet_ioctl(FAR struct socket *psock, int cmd,
-                      FAR void *arg, size_t arglen)
+static int inet_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
 {
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
@@ -1355,14 +1353,14 @@ static int inet_ioctl(FAR struct socket *psock, int cmd,
 #if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
   if (psock->s_type == SOCK_STREAM)
     {
-      return tcp_ioctl(psock->s_conn, cmd, arg, arglen);
+      return tcp_ioctl(psock->s_conn, cmd, arg);
     }
 #endif
 
 #if defined(CONFIG_NET_UDP) && defined(NET_UDP_HAVE_STACK)
   if (psock->s_type == SOCK_DGRAM)
     {
-      return udp_ioctl(psock->s_conn, cmd, arg, arglen);
+      return udp_ioctl(psock->s_conn, cmd, arg);
     }
 #endif
 
