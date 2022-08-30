@@ -101,7 +101,8 @@ static void kasan_report(FAR const void *addr, size_t size, bool is_write)
   if (++recursion == 1)
     {
       _alert("kasan detected a %s access error, address at %0#"PRIxPTR
-            ", size is %zu\n", is_write ? "write" : "read", addr, size);
+            ", size is %zu\n", is_write ? "write" : "read",
+            (uintptr_t)addr, size);
       PANIC();
     }
 
