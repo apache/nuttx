@@ -415,7 +415,14 @@ int fs_getfilep(int fd, FAR struct file **filep)
 int nx_dup2(int fd1, int fd2)
 {
   FAR struct filelist *list;
+  FAR struct file     *filep;
+  FAR struct file      file;
   int ret;
+
+  if (fd1 == fd2)
+    {
+      return fd1;
+    }
 
   /* Get the file descriptor list.  It should not be NULL in this context. */
 
@@ -446,13 +453,19 @@ int nx_dup2(int fd1, int fd2)
         }
     }
 
+  filep = &list->fl_files[fd2 / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK]
+                         [fd2 % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK];
+  memcpy(&file, filep, sizeof(struct file));
+  memset(filep, 0,     sizeof(struct file));
+
   /* Perform the dup2 operation */
 
   ret = file_dup2(&list->fl_files[fd1 / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK]
                                  [fd1 % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK],
-                  &list->fl_files[fd2 / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK]
-                                 [fd2 % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK]);
+                  filep);
   _files_semgive(list);
+
+  file_close(&file);
 
   return ret < 0 ? ret : fd2;
 }
