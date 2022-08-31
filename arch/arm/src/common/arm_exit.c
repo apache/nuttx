@@ -139,4 +139,10 @@ void up_exit(int status)
   /* Then switch contexts */
 
   arm_fullcontextrestore(tcb->xcp.regs);
+
+  /* arm_fullcontextrestore() should not return but could if the software
+   * interrupts are disabled.
+   */
+
+  PANIC();
 }

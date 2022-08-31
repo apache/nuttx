@@ -32,6 +32,7 @@
 #  include <nuttx/arch.h>
 #  include <sys/types.h>
 #  include <stdint.h>
+#  include <syscall.h>
 #endif
 
 /****************************************************************************
@@ -138,6 +139,14 @@
 #define modreg8(v,m,a)  putreg8((getreg8(a) & ~(m)) | ((v) & (m)), (a))
 #define modreg16(v,m,a) putreg16((getreg16(a) & ~(m)) | ((v) & (m)), (a))
 #define modreg32(v,m,a) putreg32((getreg32(a) & ~(m)) | ((v) & (m)), (a))
+
+/* Context switching */
+
+#define arm_fullcontextrestore(restoreregs) \
+  sys_call1(SYS_restore_context, (uintptr_t)restoreregs);
+
+#define arm_switchcontext(saveregs, restoreregs) \
+  sys_call2(SYS_switch_context, (uintptr_t)saveregs, (uintptr_t)restoreregs);
 
 /****************************************************************************
  * Public Types
@@ -258,8 +267,6 @@ void arm_boot(void);
 /* Context switching */
 
 uint32_t *arm_decodeirq(uint32_t *regs);
-void arm_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
-void arm_switchcontext(uint32_t **saveregs, uint32_t *restoreregs);
 
 /* Signal handling **********************************************************/
 
