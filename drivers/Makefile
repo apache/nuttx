@@ -69,6 +69,7 @@ include 1wire/Make.defs
 include rf/Make.defs
 include rc/Make.defs
 include segger/Make.defs
+include usrsock/Make.defs
 
 ifeq ($(CONFIG_SPECIFIC_DRIVERS),y)
 -include platform/Make.defs
