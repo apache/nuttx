@@ -42,6 +42,7 @@ include misc/Make.defs
 include modlib/Make.defs
 include net/Make.defs
 include netdb/Make.defs
+include obstack/Make.defs
 include pthread/Make.defs
 include pwd/Make.defs
 include queue/Make.defs
