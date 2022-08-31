@@ -389,26 +389,4 @@ config AUDIO_I2S
 	depends on AUDIO
 	depends on I2S
 
-config AUDIO_AW88266A
-	bool "Audio AWINIC88266A chip"
-	default n
-
-config AUDIO_CS35L41B
-	bool "Audio CS35L41B chip"
-	default n
-
-config AUDIO_CS35L41B_DEBUG
-  bool "Audio CS35L41B chip debug"
-  depends on  AUDIO_CS35L41B
-  default n
-
-config AUDIO_FS1818U
-	bool "Audio FS1818U chip"
-	default n
-
-config AUDIO_FS1818U_DEBUG
-  bool "Audio FS1818U chip debug"
-  depends on AUDIO_FS1818U
-  default n
-
 endif # DRIVERS_AUDIO

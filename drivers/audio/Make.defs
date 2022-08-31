@@ -86,23 +86,6 @@ ifeq ($(CONFIG_AUDIO_I2S),y)
 CSRCS += audio_i2s.c
 endif
 
-ifeq ($(CONFIG_AUDIO_AW88266A),y)
-CSRCS += aw88266a.c
-endif
-
-ifeq ($(CONFIG_AUDIO_CS35L41B),y)
-CSRCS += cs35l41b.c cs35l41b_fw.c cs35l41_fw_img.c cs35l41_cal_fw_img.c \
-         cs35l41_tune_fw_img.c cs35l41_tune_sco_fw_img.c
-endif
-
-ifeq ($(CONFIG_AUDIO_CS35L41B_DEBUG), y)
-CSRCS += cs35l41b_debug.c
-endif
-
-ifeq ($(CONFIG_AUDIO_FS1818U), y)
-CSRCS += fs1818.c
-endif
-
 # Include Audio driver support
 
 DEPPATH += --dep-path audio
