@@ -182,18 +182,22 @@ fi
 ROOTDIR=$(dirname $(readlink -f ${0}))
 ROOTDIR=$(realpath ${ROOTDIR}/../..)
 
+CONFIGPATH=$2
+
 if [ $1 == "-m" ]; then
   # out of tree build
-  configdir=`echo ${2} | cut -s -d':' -f2`
+  confparams=(${CONFIGPATH//:/ }) 
+  configdir=${confparams[1]}
+
   if [ -z "${configdir}" ]; then
-    boarddir=`echo ${2} | rev | cut -d'/' -f3 | rev`
-    configdir=`echo ${2} | rev | cut -d'/' -f1 | rev`
-    if [ -z "${configdir}" ]; then
-      boarddir=`echo ${2} | rev | cut -d'/' -f4 | rev`
-      configdir=`echo ${2} | rev | cut -d'/' -f2 | rev`
+    # handle cases where the end is a "/"
+    if [ "${CONFIGPATH:(-1)}" = "/" ]; then
+      CONFIGPATH=${CONFIGPATH:0:-1}
     fi
+    boarddir=`echo ${CONFIGPATH} | rev | cut -d'/' -f3 | rev`
+    configdir=`echo ${CONFIGPATH} | rev | cut -d'/' -f1 | rev`
   else
-    boarddir=`echo ${2} | cut -d':' -f1`
+    boarddir=${confparams[0]}
   fi
 
   OUTDIR=${ROOTDIR}/out/${boarddir}/${configdir}
