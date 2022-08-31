@@ -179,12 +179,12 @@
 
 #  define naked_function __attribute__ ((naked,no_instrument_function))
 
-/* The inline_function attribute informs GCC that the function should always
- * be inlined, regardless of the level of optimization.  The
+/* The always_inline_function attribute informs GCC that the function should
+ * always be inlined, regardless of the level of optimization.  The
  * noinline_function indicates that the function should never be inlined.
  */
 
-#  define inline_function __attribute__ ((always_inline,no_instrument_function))
+#  define always_inline_function __attribute__ ((always_inline,no_instrument_function))
 #  define noinline_function __attribute__ ((noinline))
 
 /* The noinstrument_function attribute informs GCC don't instrument it */
@@ -465,7 +465,7 @@
 
 /* SDCC does not support forced inlining. */
 
-#  define inline_function
+#  define always_inline_function
 #  define noinline_function
 #  define noinstrument_function
 #  define nosanitize_address
@@ -598,7 +598,7 @@
 #  define begin_packed_struct
 #  define end_packed_struct
 #  define naked_function
-#  define inline_function
+#  define always_inline_function
 #  define noinline_function
 #  define noinstrument_function
 #  define nosanitize_address
@@ -700,7 +700,7 @@
 #  define end_packed_struct
 #  define reentrant_function
 #  define naked_function
-#  define inline_function
+#  define always_inline_function
 #  define noinline_function
 #  define noinstrument_function
 #  define nosanitize_address
@@ -768,7 +768,7 @@
 #  define end_packed_struct
 #  define reentrant_function
 #  define naked_function
-#  define inline_function
+#  define always_inline_function
 #  define noinline_function
 #  define noinstrument_function
 #  define nosanitize_address

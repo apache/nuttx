@@ -57,7 +57,7 @@ struct xtensa_windowregs_s
  ****************************************************************************/
 
 static void inline get_window_regs(struct xtensa_windowregs_s *frame)
-inline_function;
+always_inline_function;
 
 /****************************************************************************
  * Private Functions
