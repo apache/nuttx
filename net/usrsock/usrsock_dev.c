@@ -851,23 +851,26 @@ static ssize_t usrsockdev_write(FAR struct file *filep,
 
       /* Copy data from user-space. */
 
-      ret = iovec_put(conn->resp.datain.iov, conn->resp.datain.iovcnt,
-                      conn->resp.datain.pos, buffer, len);
-      if (ret < 0)
+      if (len != 0)
         {
-          /* Tried writing beyond buffer. */
+          ret = iovec_put(conn->resp.datain.iov, conn->resp.datain.iovcnt,
+                          conn->resp.datain.pos, buffer, len);
+          if (ret < 0)
+            {
+              /* Tried writing beyond buffer. */
 
-          ret = -EINVAL;
-          conn->resp.result = -EINVAL;
-          conn->resp.datain.pos =
-              conn->resp.datain.total;
-        }
-      else
-        {
-          conn->resp.datain.pos += ret;
-          buffer += ret;
-          len -= ret;
-          ret = origlen - len;
+              ret = -EINVAL;
+              conn->resp.result = -EINVAL;
+              conn->resp.datain.pos =
+                  conn->resp.datain.total;
+            }
+          else
+            {
+              conn->resp.datain.pos += ret;
+              buffer += ret;
+              len -= ret;
+              ret = origlen - len;
+            }
         }
 
       if (conn->resp.datain.pos == conn->resp.datain.total)
