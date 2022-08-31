@@ -31,6 +31,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/usrsock.h>
@@ -172,6 +173,15 @@ int usrsock_ioctl(FAR struct socket *psock, int cmd, FAR void *arg,
   };
 
   int ret;
+
+  /* Bypass FIONBIO to socket level,
+   * since the usrsock server always put the socket in nonblocking mode.
+   */
+
+  if (cmd == FIONBIO)
+    {
+      return -ENOTTY;
+    }
 
   net_lock();
 
