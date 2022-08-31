@@ -216,9 +216,9 @@
 
 /* Queue helpers */
 
-#define dq_get(q)    (dq_remfirst(q))
-#define dq_put(q,n) (dq_addlast((dq_entry_t*)n,(q)))
-#define dq_put_back(q,n) (dq_addfirst((dq_entry_t*)n,(q)))
+#define dq_get(q)    dq_remfirst(q)
+#define dq_put(q,n) dq_addlast((dq_entry_t*)(n),(q))
+#define dq_put_back(q,n) dq_addfirst((dq_entry_t*)(n),(q))
 #define dq_clear(q) \
   do \
     { \
