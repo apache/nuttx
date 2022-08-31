@@ -20,10 +20,8 @@
 
 # Add the queue C files to the build
 
-CSRCS += sq_addlast.c sq_addfirst.c sq_addafter.c sq_cat.c
-CSRCS += sq_rem.c sq_remlast.c sq_remfirst.c sq_remafter.c sq_count.c
-CSRCS += dq_addlast.c dq_addfirst.c dq_addafter.c dq_addbefore.c dq_cat.c
-CSRCS += dq_rem.c dq_remlast.c dq_remfirst.c dq_count.c
+CSRCS += sq_addafter.c sq_remlast.c sq_remfirst.c sq_remafter.c sq_count.c
+CSRCS += dq_addafter.c dq_remlast.c dq_remfirst.c dq_count.c
 
 # Add the queue directory to the build
 
