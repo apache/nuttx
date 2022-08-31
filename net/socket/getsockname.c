@@ -88,7 +88,7 @@ int psock_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   /* Some sanity checking... */
 
-  if (addr == NULL || addrlen == NULL || *addrlen <= 0)
+  if (addr == NULL || addrlen == NULL)
     {
       return -EINVAL;
     }
