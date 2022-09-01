@@ -551,7 +551,15 @@ static off_t fatfs_seek(FAR struct file *filep, off_t offset, int whence)
           return -EINVAL;
     }
 
-  filep->f_pos = offset;
+  if (offset >= 0)
+    {
+      filep->f_pos = offset;
+    }
+  else
+    {
+      ret = -EINVAL;
+    }
+
   fatfs_semgive(fs);
   return ret < 0 ? ret : offset;
 }
