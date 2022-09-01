@@ -81,7 +81,11 @@
 
 void umm_initialize(FAR void *heap_start, size_t heap_size)
 {
+#ifdef CONFIG_BUILD_KERNEL
+  USR_HEAP = mm_initialize(NULL, heap_start, heap_size);
+#else
   USR_HEAP = mm_initialize("Umem", heap_start, heap_size);
+#endif
 }
 
 /****************************************************************************
