@@ -2075,14 +2075,14 @@ int fdcan_initialize(struct fdcan_driver_s *priv)
 
   /* Operation Configuration */
 
-#ifdef STM32H7_FDCAN_LOOPBACK
+#ifdef CONFIG_STM32H7_FDCAN_LOOPBACK
   /* Enable External Loopback Mode (Rx pin disconnected) (RM0433 pg 2494) */
 
   modifyreg32(priv->base + STM32_FDCAN_CCCR_OFFSET, 0, FDCAN_CCCR_TEST);
   modifyreg32(priv->base + STM32_FDCAN_TEST_OFFSET, 0, FDCAN_TEST_LBCK);
 #endif
 
-#ifdef STM32H7_FDCAN_LOOPBACK_INTERNAL
+#ifdef CONFIG_STM32H7_FDCAN_LOOPBACK_INTERNAL
   /* Enable Bus Monitoring / Restricted Op Mode (RM0433 pg 2492, 2494) */
 
   modifyreg32(priv->base + STM32_FDCAN_CCCR_OFFSET, 0, FDCAN_CCCR_MON);
