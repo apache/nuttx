@@ -443,12 +443,6 @@ errout_unlock:
       *fromlen = outaddrlen;
     }
 
-  if (conn->flags & USRSOCK_EVENT_REMOTE_CLOSED &&
-      ret == -ENOTCONN)
-    {
-      ret = OK;
-    }
-
   return ret;
 }
 
