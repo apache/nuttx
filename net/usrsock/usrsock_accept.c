@@ -161,7 +161,7 @@ static int do_accept_request(FAR struct usrsock_conn_s *conn,
   bufs[0].iov_base = &req;
   bufs[0].iov_len = sizeof(req);
 
-  return usrsockdev_do_request(conn, bufs, ARRAY_SIZE(bufs));
+  return usrsock_do_request(conn, bufs, ARRAY_SIZE(bufs));
 }
 
 /****************************************************************************
