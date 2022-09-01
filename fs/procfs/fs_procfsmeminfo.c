@@ -578,6 +578,11 @@ static int meminfo_stat(FAR const char *relpath, FAR struct stat *buf)
 
 void procfs_register_meminfo(FAR struct procfs_meminfo_entry_s *entry)
 {
+  if (NULL == entry->name)
+    {
+      return;
+    }
+
   entry->next = g_procfs_meminfo;
   g_procfs_meminfo = entry;
 }
