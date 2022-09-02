@@ -1025,6 +1025,10 @@ config ENC1_HNE
 
 endif # ENC1_HIP
 
+config ENC1_XIE
+	bool "INDEX signal position capture"
+	default n
+
 config ENC1_XIP
 	bool "INDEX signal initializes position counter"
 	default n
@@ -1099,6 +1103,10 @@ config ENC2_HNE
 	default n
 
 endif # ENC2_HIP
+
+config ENC2_XIE
+	bool "INDEX signal position capture"
+	default n
 
 config ENC2_XIP
 	bool "INDEX signal initializes position counter"
@@ -1177,6 +1185,10 @@ config ENC3_HNE
 
 endif # ENC3_HIP
 
+config ENC3_XIE
+	bool "INDEX signal position capture"
+	default n
+
 config ENC3_XIP
 	bool "INDEX signal initializes position counter"
 	default n
@@ -1251,6 +1263,10 @@ config ENC4_HNE
 	default n
 
 endif # ENC4_HIP
+
+config ENC4_XIE
+	bool "INDEX signal position capture"
+	default n
 
 config ENC4_XIP
 	bool "INDEX signal initializes position counter"
