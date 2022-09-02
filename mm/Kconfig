@@ -228,7 +228,7 @@ config MM_UBSAN_ALL
 		significantly.
 
 config MM_UBSAN_TRAP_ON_ERROR
-	bool "Enable UBsan trap on error to crash immediately"
+	bool "Enable UBSan trap on error to crash immediately"
 	depends on MM_UBSAN
 	default y
 	---help---
