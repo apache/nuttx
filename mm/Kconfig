@@ -232,7 +232,7 @@ config MM_UBSAN_OPTION
 		for available options.
 
 config MM_UBSAN_TRAP_ON_ERROR
-	bool "Enable UBsan trap on error to crash immediately"
+	bool "Enable UBSan trap on error to crash immediately"
 	depends on MM_UBSAN
 	default y
 	---help---
