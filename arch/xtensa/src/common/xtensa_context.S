@@ -69,7 +69,10 @@
 #include "chip.h"
 #include "syscall.h"
 #include "xtensa_asm_utils.h"
-#include "xtensa_coproc.S"
+
+#if XCHAL_CP_NUM > 0
+#  include "xtensa_coproc.S"
+#endif
 
 /****************************************************************************
  * Public Functions
