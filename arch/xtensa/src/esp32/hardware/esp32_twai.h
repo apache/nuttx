@@ -383,7 +383,7 @@
 #define TWAI_SYNC_JUMP_WIDTH    0x00000003
 #define TWAI_SYNC_JUMP_WIDTH_M  (TWAI_SYNC_JUMP_WIDTH_V << TWAI_SYNC_JUMP_WIDTH_S)
 #define TWAI_SYNC_JUMP_WIDTH_V  0x00000003
-#define TWAI_SYNC_JUMP_WIDTH_S  14
+#define TWAI_SYNC_JUMP_WIDTH_S  6
 
 /* TWAI_BAUD_PRESC : RO | R/W; bitpos: [13:0]; default: 0;
  * Baud Rate Prescaler, determines the frequency dividing ratio.
@@ -833,24 +833,34 @@
 
 #define TWAI_CLOCK_DIVIDER_REG (DR_REG_TWAI_BASE + 0x7c)
 
-/* TWAI_CLOCK_OFF : RO | R/W; bitpos: [8]; default: 0;
+/* TWAI_CLOCK_OFF : RO | R/W; bitpos: [3]; default: 0;
  * This bit can be configured under reset mode. 1: Disable the external
  * CLKOUT pin; 0: Enable the external CLKOUT pin
  */
 
-#define TWAI_CLOCK_OFF    (BIT(8))
+#define TWAI_CLOCK_OFF    (BIT(3))
 #define TWAI_CLOCK_OFF_M  (TWAI_CLOCK_OFF_V << TWAI_CLOCK_OFF_S)
 #define TWAI_CLOCK_OFF_V  0x00000001
-#define TWAI_CLOCK_OFF_S  8
+#define TWAI_CLOCK_OFF_S  3
+
+/* TWAI_EXT_MODE : RO | R/W; bitpos: [7]; default: 0;
+ * This bit can be configured under reset mode. 1: Extended mode, compatible
+ * with CAN2.0B; 0: Basic mode
+ */
+
+#define TWAI_EXT_MODE    (BIT(7))
+#define TWAI_EXT_MODE_M  (TWAI_EXT_MODE_V << TWAI_EXT_MODE_S)
+#define TWAI_EXT_MODE_V  0x00000001
+#define TWAI_EXT_MODE_S  7
 
 /* TWAI_CD : R/W; bitpos: [7:0]; default: 0;
  * These bits are used to configure frequency dividing coefficients of the
  * external CLKOUT pin.
  */
 
-#define TWAI_CD    0x000000FF
+#define TWAI_CD    0x00000007
 #define TWAI_CD_M  (TWAI_CD_V << TWAI_CD_S)
-#define TWAI_CD_V  0x000000FF
+#define TWAI_CD_V  0x00000007
 #define TWAI_CD_S  0
 
 #endif /* __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32_TWAI_H */
