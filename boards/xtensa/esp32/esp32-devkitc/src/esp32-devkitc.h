@@ -140,5 +140,16 @@ int esp32_pwm_setup(void);
 int board_spidev_initialize(int bus);
 #endif
 
+/****************************************************************************
+ * Name: esp32_twai_setup
+ *
+ * Description:
+ *  Initialize TWAI and register the TWAI device
+ *
+ ****************************************************************************/
+#ifdef CONFIG_ESP32_TWAI
+int esp32_twai_setup(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_XTENSA_ESP32_ESP32_DEVKITC_SRC_ESP32_DEVKITC_H */

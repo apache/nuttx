@@ -37,6 +37,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/can/can.h>
+#include <nuttx/spinlock.h>
 
 #include "xtensa.h"
 
@@ -124,15 +125,16 @@ struct twai_dev_s
   /* Device configuration */
 
   const struct can_bittiming_const *bittiming_const;
-  uint8_t port;       /* TWAI port number */
-  uint8_t periph;     /* Peripheral ID */
-  uint8_t irq;        /* IRQ associated with this TWAI */
-  uint8_t cpu;        /* CPU ID */
-  uint8_t cpuint;     /* CPU interrupt assigned to this TWAI */
-  uint32_t bitrate;   /* Configured bit rate */
-  uint32_t samplep;   /* Configured sample point */
-  uint32_t sjw;       /* Synchronization jump width */
-  uint32_t base;      /* TWAI register base address */
+  uint8_t    port;       /* TWAI port number */
+  uint8_t    periph;     /* Peripheral ID */
+  uint8_t    irq;        /* IRQ associated with this TWAI */
+  uint8_t    cpu;        /* CPU ID */
+  uint8_t    cpuint;     /* CPU interrupt assigned to this TWAI */
+  uint32_t   bitrate;    /* Configured bit rate */
+  uint32_t   samplep;    /* Configured sample point */
+  uint32_t   sjw;        /* Synchronization jump width */
+  uint32_t   base;       /* TWAI register base address */
+  spinlock_t lock;       /* Device specific lock */
 };
 
 /****************************************************************************
@@ -221,6 +223,7 @@ static struct twai_dev_s g_twai0priv =
   .samplep          = CONFIG_ESP32_TWAI0_SAMPLEP,
   .sjw              = CONFIG_ESP32_TWAI0_SJW,
   .base             = DR_REG_TWAI_BASE,
+  .lock             = SP_UNLOCKED,
 };
 
 static struct can_dev_s g_twai0dev =
@@ -386,12 +389,14 @@ static void esp32twai_reset(struct can_dev_s *dev)
 
   caninfo("TWAI%" PRIu8 "\n", priv->port);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   /* Disable the TWAI and stop ongoing transmissions */
 
   uint32_t mode_value = TWAI_RESET_MODE_M | TWAI_LISTEN_ONLY_MODE_M;
   twai_putreg(TWAI_MODE_REG, mode_value);                 /* Enter Reset Mode */
+
+  modifyreg32(TWAI_CLOCK_DIVIDER_REG, 0, TWAI_EXT_MODE_M);
 
   twai_putreg(TWAI_INT_ENA_REG, 0);                       /* Disable interrupts */
   twai_getreg(TWAI_STATUS_REG);                           /* Clear status bits */
@@ -427,8 +432,7 @@ static void esp32twai_reset(struct can_dev_s *dev)
 
   twai_putreg(TWAI_CMD_REG, TWAI_ABORT_TX_M | TWAI_RELEASE_BUF_M |
               TWAI_CLR_OVERRUN_M);
-
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -455,7 +459,7 @@ static int esp32twai_setup(struct can_dev_s *dev)
 
   caninfo("TWAI%" PRIu8 "\n", priv->port);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   twai_putreg(TWAI_INT_ENA_REG, TWAI_DEFAULT_INTERRUPTS);
 
@@ -465,7 +469,7 @@ static int esp32twai_setup(struct can_dev_s *dev)
     {
       /* Disable the provided CPU Interrupt to configure it. */
 
-      up_disable_irq(priv->cpuint);
+      up_disable_irq(priv->irq);
     }
 
   priv->cpu = up_cpu_index();
@@ -476,7 +480,7 @@ static int esp32twai_setup(struct can_dev_s *dev)
       /* Failed to allocate a CPU interrupt of this type. */
 
       ret = priv->cpuint;
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&priv->lock, flags);
 
       return ret;
     }
@@ -488,16 +492,16 @@ static int esp32twai_setup(struct can_dev_s *dev)
 
       esp32_teardown_irq(priv->cpu, priv->periph, priv->cpuint);
       priv->cpuint = -ENOMEM;
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&priv->lock, flags);
 
       return ret;
     }
 
   /* Enable the CPU interrupt that is linked to the TWAI device. */
 
-  up_enable_irq(priv->cpuint);
+  up_enable_irq(priv->irq);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   return ret;
 }
@@ -529,7 +533,7 @@ static void esp32twai_shutdown(struct can_dev_s *dev)
     {
       /* Disable cpu interrupt */
 
-      up_disable_irq(priv->cpuint);
+      up_disable_irq(priv->irq);
 
       /* Dissociate the IRQ from the ISR */
 
@@ -571,7 +575,8 @@ static void esp32twai_rxint(struct can_dev_s *dev, bool enable)
    * so we have to protect this code section.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
+
   regval = twai_getreg(TWAI_INT_ENA_REG);
   if (enable)
     {
@@ -583,7 +588,8 @@ static void esp32twai_rxint(struct can_dev_s *dev, bool enable)
     }
 
   twai_putreg(TWAI_INT_ENA_REG, regval);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
+
   return;
 }
 
@@ -621,14 +627,14 @@ static void esp32twai_txint(struct can_dev_s *dev, bool enable)
        * have to protect this code section.
        */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&priv->lock);
 
       /* Disable all TX interrupts */
 
       regval = twai_getreg(TWAI_INT_ENA_REG);
       regval &= ~(TWAI_TX_INT_ENA_M);
       twai_putreg(TWAI_INT_ENA_REG, regval);
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&priv->lock, flags);
     }
 }
 
@@ -764,7 +770,7 @@ static int esp32twai_send(struct can_dev_s *dev,
       frame_info |= (1 << 6);
     }
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   /* Make sure that TX interrupts are enabled BEFORE sending the
    * message.
@@ -826,8 +832,7 @@ static int esp32twai_send(struct can_dev_s *dev,
 #else
     twai_putreg(TWAI_CMD_REG, TWAI_TX_REQ_M);
 #endif
-
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   return ret;
 }
@@ -1170,7 +1175,7 @@ static int twai_baud_rate(struct twai_dev_s *priv, int rate, int clock,
 
   /* Configure bit timing */
 
-  timing0 = (best_brp - 1) / 2;
+  timing0 = (best_brp / 2) - 1;
   timing0 |= (sjw - 1) << TWAI_SYNC_JUMP_WIDTH_S;
 
   timing1 = tseg1 - 1;
@@ -1215,11 +1220,13 @@ struct can_dev_s *esp32_twaiinitialize(int port)
 
   caninfo("TWAI%" PRIu8 "\n",  port);
 
-  flags = enter_critical_section();
-
 #ifdef CONFIG_ESP32_TWAI0
   if (port == 0)
     {
+      twaidev = &g_twai0dev;
+
+      flags = spin_lock_irqsave(&g_twai0priv.lock);
+
       /* Enable power to the TWAI module and
        * Enable clocking to the TWAI module
        */
@@ -1235,22 +1242,20 @@ struct can_dev_s *esp32_twaiinitialize(int port)
       esp32_configgpio(CONFIG_ESP32_TWAI0_RXPIN, INPUT_FUNCTION_1);
       esp32_gpio_matrix_in(CONFIG_ESP32_TWAI0_RXPIN, TWAI_RX_IDX, 0);
 
-      twaidev = &g_twai0dev;
+      spin_unlock_irqrestore(&g_twai0priv.lock, flags);
     }
   else
 #endif
 
     {
       canerr("ERROR: Unsupported port: %d\n", port);
-      leave_critical_section(flags);
+
       return NULL;
     }
 
   /* Then just perform a TWAI reset operation */
 
   esp32twai_reset(twaidev);
-
-  leave_critical_section(flags);
 
   return twaidev;
 }
