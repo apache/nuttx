@@ -41,6 +41,22 @@
 #ifdef CONFIG_HAVE_DOUBLE
 double pow(double b, double e)
 {
-  return exp(e * log(b));
+  if (b > 0)
+    {
+      return exp(e * log(b));
+    }
+  else if (b < 0 && e == (int)e)
+    {
+      if ((int)e % 2 == 0)
+        {
+          return exp(e * log(fabs(b)));
+        }
+      else
+        {
+          return -exp(e * log(fabs(b)));
+        }
+    }
+
+  return 0;
 }
 #endif
