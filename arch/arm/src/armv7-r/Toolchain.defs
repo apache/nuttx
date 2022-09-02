@@ -101,7 +101,7 @@ ifeq ($(CONFIG_MM_KASAN_ALL),y)
 endif
 
 ifeq ($(CONFIG_MM_UBSAN_ALL),y)
-  ARCHOPTIMIZATION += -fsanitize=undefined
+  ARCHOPTIMIZATION += $(CONFIG_MM_UBSAN_OPTION)
 endif
 
 ifeq ($(CONFIG_MM_UBSAN_TRAP_ON_ERROR),y)
