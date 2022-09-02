@@ -227,6 +227,15 @@ config MM_UBSAN_ALL
 		will get image size increased and performance decreased
 		significantly.
 
+config MM_UBSAN_OPTION
+	string "UBSan options"
+	depends on MM_UBSAN
+	default "-fsanitize=undefined"
+	---help---
+		This option activates specified UBSan instrumentation. Please
+		refer to https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html
+		for available options.
+
 config MM_UBSAN_TRAP_ON_ERROR
 	bool "Enable UBSan trap on error to crash immediately"
 	depends on MM_UBSAN
