@@ -97,6 +97,12 @@ static int builtin_loadbinary(FAR struct binary_s *binp,
    */
 
   builtin         = builtin_for_index(index);
+  if (builtin == NULL)
+    {
+      berr("ERROR: %s is not a builtin application\n", filename);
+      return -ENOENT;
+    }
+
   binp->entrypt   = builtin->main;
   binp->stacksize = builtin->stacksize;
   binp->priority  = builtin->priority;
