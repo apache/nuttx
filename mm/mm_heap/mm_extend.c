@@ -56,6 +56,7 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
   FAR struct mm_allocnode_s *newnode;
   uintptr_t blockstart;
   uintptr_t blockend;
+  bool ret;
 
   /* Make sure that we were passed valid parameters */
 
@@ -77,7 +78,8 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
 
   /* Take the memory manager semaphore */
 
-  DEBUGVERIFY(mm_takesemaphore(heap));
+  ret = mm_takesemaphore(heap);
+  DEBUGASSERT(ret);
 
   /* Get the terminal node in the old heap.  The block to extend must
    * immediately follow this node.
