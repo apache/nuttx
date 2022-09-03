@@ -61,6 +61,7 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
   FAR struct mm_freenode_s *node;
   uintptr_t heapbase;
   uintptr_t heapend;
+  bool ret;
 #if CONFIG_MM_REGIONS > 1
   int IDX;
 
@@ -91,7 +92,8 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 
   kasan_register(heapstart, &heapsize);
 
-  DEBUGVERIFY(mm_takesemaphore(heap));
+  ret = mm_takesemaphore(heap);
+  DEBUGASSERT(ret);
 
   /* Adjust the provided heap start and size.
    *
