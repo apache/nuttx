@@ -492,7 +492,7 @@ static int_fast64_t detzcode64(FAR const char *codep)
   result = (codep[0] & 0x80) ? -1 : 0;
   for (i = 0; i < 8; ++i)
     {
-      result = (result << 8) | (codep[i] & 0xff);
+      result = (result * 256) | (codep[i] & 0xff);
     }
 
   return result;
