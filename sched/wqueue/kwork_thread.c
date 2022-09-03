@@ -79,7 +79,7 @@
 
 struct hp_wqueue_s g_hpwork =
 {
-  {},
+  {NULL, NULL},
   NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
 };
 
@@ -90,7 +90,7 @@ struct hp_wqueue_s g_hpwork =
 
 struct lp_wqueue_s g_lpwork =
 {
-  {},
+  {NULL, NULL},
   NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
 };
 
