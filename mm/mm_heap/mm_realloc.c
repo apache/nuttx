@@ -72,6 +72,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
   size_t prevsize = 0;
   size_t nextsize = 0;
   FAR void *newmem;
+  bool ret;
 
   /* If oldmem is NULL, then realloc is equivalent to malloc */
 
@@ -108,7 +109,8 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
   /* We need to hold the MM semaphore while we muck with the nodelist. */
 
-  DEBUGVERIFY(mm_takesemaphore(heap));
+  ret = mm_takesemaphore(heap);
+  DEBUGASSERT(ret);
   DEBUGASSERT(oldnode->preceding & MM_ALLOC_BIT);
   DEBUGASSERT(mm_heapmember(heap, oldmem));
 
