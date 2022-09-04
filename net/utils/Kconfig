@@ -24,3 +24,7 @@ config NET_ARCH_CHKSUM
 			uint16_t ipv4_chksum(FAR struct net_driver_s *dev)
 			uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto)
 			uint16_t ipv6_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto, unsigned int iplen)
+
+config NET_SNOOP_BUFSIZE
+	int "Snoop buffer size for interrupt"
+	default 4096

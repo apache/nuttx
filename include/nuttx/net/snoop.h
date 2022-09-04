@@ -27,6 +27,9 @@
 
 #include <stdint.h>
 
+#include <nuttx/mutex.h>
+#include <nuttx/wqueue.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -78,14 +81,18 @@
 #define SNOOP_DATALINK_HCI_BSCP         1003
 #define SNOOP_DATALINK_HCI_SERIAL       1004
 
-#define SNOOP_DIRECTION_FLAG_SENT 0 /* Direction flag 0 = Sent */
-#define SNOOP_DIRECTION_FLAG_RECV 1 /* Direction flag 1 = Received */
+#define SNOOP_DIRECTION_FLAG_SENT       0 /* Direction flag 0 = Sent */
+#define SNOOP_DIRECTION_FLAG_RECV       1 /* Direction flag 1 = Received */
 
 struct snoop_s
 {
-  bool        autosync;
-  uint32_t    datalink;
-  struct file filep;
+  bool             autosync;
+  uint32_t         datalink;
+  struct file      filep;
+  mutex_t          mutex;
+  struct work_s    work;
+  uint8_t          buf[CONFIG_NET_SNOOP_BUFSIZE];
+  size_t           next;
 };
 
 /****************************************************************************
