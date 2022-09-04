@@ -52,26 +52,27 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Directory entry indices */
+#define ARRAY_SIZE(x)   (sizeof(x) / sizeof((x)[0]))
 
-#ifdef CONFIG_NET_STATISTICS
-#  define STAT_INDEX     0
-#  ifdef CONFIG_NET_MLD
-#    define MLD_INDEX    1
-#    define _ROUTE_INDEX 2
-#  else
-#    define _ROUTE_INDEX 1
-#  endif
-#else
-#  define _ROUTE_INDEX   0
-#endif
+/****************************************************************************
+ * Private Type Definitions
+ ****************************************************************************/
 
-#ifdef CONFIG_NET_ROUTE
-#  define ROUTE_INDEX    _ROUTE_INDEX
-#  define DEV_INDEX      (_ROUTE_INDEX + 1)
-#else
-#  define DEV_INDEX      _ROUTE_INDEX
-#endif
+/* Read statistics function type */
+
+typedef CODE ssize_t (*read_stat_t)(FAR struct netprocfs_file_s *priv,
+                                    FAR char *buffer, size_t buflen);
+
+struct netprocfs_entry_s
+{
+  uint8_t                                 type;  /* Type of file */
+  FAR const char                         *name;  /* File name */
+  union
+    {
+      read_stat_t                         stat;  /* Read statistics hook */
+      FAR const struct procfs_operations *ops;
+    } u;
+};
 
 /****************************************************************************
  * Private Function Prototypes
@@ -99,6 +100,48 @@ static int     netprocfs_rewinddir(FAR struct fs_dirent_s *dir);
 static int     netprocfs_stat(FAR const char *relpath, FAR struct stat *buf);
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+extern const struct procfs_operations net_procfs_routeoperations;
+
+/* Netprocfs component mappings */
+
+static const struct netprocfs_entry_s g_net_entries[] =
+{
+#ifdef CONFIG_NET_STATISTICS
+  {
+    DTYPE_FILE, "stat",
+    {
+      netprocfs_read_netstats
+    }
+  },
+#  ifdef CONFIG_NET_MLD
+  {
+    DTYPE_FILE, "mld",
+    {
+      netprocfs_read_mldstats
+    }
+  },
+#  endif
+#endif
+#ifdef CONFIG_NET_ROUTE
+  {
+    DTYPE_DIRECTORY, "route",
+    {
+      (FAR void *)&net_procfs_routeoperations
+    }
+  },
+#endif
+  {
+    DTYPE_FILE, "",
+    {
+      netprocfs_read_devstats
+    }
+  }
+};
+
+/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -123,8 +166,6 @@ const struct procfs_operations net_procfsoperations =
   netprocfs_stat        /* stat */
 };
 
-extern const struct procfs_operations net_procfs_routeoperations;
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -136,9 +177,9 @@ extern const struct procfs_operations net_procfs_routeoperations;
 static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
                           int oflags, mode_t mode)
 {
+  FAR struct net_driver_s *dev = NULL;
   FAR struct netprocfs_file_s *priv;
-  FAR struct net_driver_s *dev;
-  enum netprocfs_entry_e entry;
+  int i;
 
   finfo("Open '%s'\n", relpath);
 
@@ -155,44 +196,25 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
       return -EACCES;
     }
 
-#ifdef CONFIG_NET_STATISTICS
-  /* "net/stat" is an acceptable value for the relpath only if network layer
-   * statistics are enabled.
-   */
+  /* For each net entries */
 
-  if (strcmp(relpath, "net/stat") == 0)
+  for (i = 0; i < ARRAY_SIZE(g_net_entries); i++)
     {
-      entry = NETPROCFS_SUBDIR_STAT;
-      dev   = NULL;
+      if (strncmp(relpath + 4, g_net_entries[i].name,
+                  strlen(g_net_entries[i].name)))
+        {
+          continue;
+        }
+
+      if (g_net_entries[i].type == DTYPE_DIRECTORY)
+        {
+          return g_net_entries[i].u.ops->open(filep, relpath, oflags, mode);
+        }
+
+      break;
     }
-  else
-#ifdef CONFIG_NET_MLD
-  /* "net/mld" is an acceptable value for the relpath only if MLD is
-   * enabled.
-   */
 
-  if (strcmp(relpath, "net/mld") == 0)
-    {
-      entry = NETPROCFS_SUBDIR_MLD;
-      dev   = NULL;
-    }
-  else
-#endif
-#endif
-
-#ifdef CONFIG_NET_ROUTE
-  /* "net/route" is an acceptable value for the relpath only if routing
-   * table support is initialized.
-   */
-
-  if (fnmatch("net/route/**", relpath, 0) == 0)
-    {
-      /* Use the /net/route directory */
-
-      return net_procfs_routeoperations.open(filep, relpath, oflags, mode);
-    }
-  else
-#endif
+  if (i == ARRAY_SIZE(g_net_entries) - 1)
     {
       FAR char *devname;
       FAR char *copy;
@@ -217,8 +239,6 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
           ferr("ERROR: relpath is '%s'\n", relpath);
           return -ENOENT;
         }
-
-      entry = NETPROCFS_SUBDIR_DEV;
     }
 
   /* Allocate the open file structure */
@@ -234,7 +254,7 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
   /* Initialize the open-file structure */
 
   priv->dev   = dev;
-  priv->entry = entry;
+  priv->entry = i;
 
   /* Save the open file structure as the open-specific state in
    * filep->f_priv.
@@ -272,7 +292,7 @@ static ssize_t netprocfs_read(FAR struct file *filep, FAR char *buffer,
                               size_t buflen)
 {
   FAR struct netprocfs_file_s *priv;
-  ssize_t nreturned;
+  ssize_t nreturned = -EINVAL;
 
   finfo("buffer=%p buflen=%lu\n", buffer, (unsigned long)buflen);
 
@@ -283,42 +303,8 @@ static ssize_t netprocfs_read(FAR struct file *filep, FAR char *buffer,
 
   /* Read according to the sub-directory */
 
-  switch (priv->entry)
-    {
-      case NETPROCFS_SUBDIR_DEV:
-
-        /* Show device-specific statistics */
-
-        nreturned = netprocfs_read_devstats(priv, buffer, buflen);
-        break;
-
-#ifdef CONFIG_NET_STATISTICS
-      case NETPROCFS_SUBDIR_STAT:
-
-        /* Show the network layer statistics */
-
-        nreturned = netprocfs_read_netstats(priv, buffer, buflen);
-        break;
-
-#ifdef CONFIG_NET_MLD
-      case NETPROCFS_SUBDIR_MLD:
-
-        /* Show the MLD statistics */
-
-        nreturned = netprocfs_read_mldstats(priv, buffer, buflen);
-        break;
-#endif
-#endif
-
-#ifdef CONFIG_NET_ROUTE
-      case NETPROCFS_SUBDIR_ROUTE:
-        nerr("ERROR: Cannot read from directory net/route\n");
-#endif
-
-      default:
-        nerr("ERROR: Invalid entry for reading: %u\n", priv->entry);
-        nreturned = -EINVAL;
-    }
+  nreturned = g_net_entries[priv->entry].u.stat(priv,
+                                                buffer, buflen);
 
   /* Update the file offset */
 
@@ -384,23 +370,28 @@ static int netprocfs_opendir(FAR const char *relpath,
   FAR struct netprocfs_level1_s *level1;
   int ndevs;
   int ret;
+  int i;
 
   finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
   DEBUGASSERT(relpath && dir);
 
-  /* "net" and "net/route" are the only values of relpath that are
-   * directories.
-   */
+  /* Subdirectory ?  */
 
-#ifdef CONFIG_NET_ROUTE
-  if (fnmatch("net/route", relpath, 0) == 0 ||
-      fnmatch("net/route/**", relpath, 0) == 0)
+  for (i = 0; i < ARRAY_SIZE(g_net_entries); i++)
     {
-      /* Use the /net/route directory */
+      if (strncmp(relpath + 4, g_net_entries[i].name,
+                  strlen(g_net_entries[i].name)))
+        {
+          continue;
+        }
 
-      return net_procfs_routeoperations.opendir(relpath, dir);
+      if (g_net_entries[i].type == DTYPE_DIRECTORY)
+        {
+          return g_net_entries[i].u.ops->opendir(relpath, dir);
+        }
+
+      break;
     }
-#endif
 
   /* Assume that path refers to the 1st level subdirectory.  Allocate the
    * level1 the dirent structure before checking.
@@ -426,15 +417,10 @@ static int netprocfs_opendir(FAR const char *relpath,
       /* Initialize base structure components */
 
       level1->base.nentries = ndevs;
-#ifdef CONFIG_NET_STATISTICS
-      level1->base.nentries++;
-#ifdef CONFIG_NET_MLD
-      level1->base.nentries++;
-#endif
-#endif
-#ifdef CONFIG_NET_ROUTE
-      level1->base.nentries++;
-#endif
+
+      /* Add other enabled net components, except netdev */
+
+      level1->base.nentries += ARRAY_SIZE(g_net_entries) - 1;
     }
   else
     {
@@ -510,36 +496,18 @@ static int netprocfs_readdir(FAR struct fs_dirent_s *dir,
           return -ENOENT;
         }
 
-#ifdef CONFIG_NET_STATISTICS
-      if (index == STAT_INDEX)
-        {
-          /* Copy the network statistics directory entry */
+      /* Process other enabled net components, except netdev */
 
-          entry->d_type = DTYPE_FILE;
-          strlcpy(entry->d_name, "stat", sizeof(entry->d_name));
-        }
-      else
-#ifdef CONFIG_NET_MLD
-      if (index == MLD_INDEX)
+      if (index < ARRAY_SIZE(g_net_entries) - 1)
         {
-          /* Copy the MLD directory entry */
-
-          entry->d_type = DTYPE_FILE;
-          strlcpy(entry->d_name, "mld", sizeof(entry->d_name));
+          entry->d_type = g_net_entries[index].type;
+          strlcpy(entry->d_name,
+                  g_net_entries[index].name, sizeof(entry->d_name));
         }
-      else
-#endif
-#endif
-#ifdef CONFIG_NET_ROUTE
-      if (index == ROUTE_INDEX)
-        {
-          /* Copy the network statistics directory entry */
 
-          entry->d_type = DTYPE_DIRECTORY;
-          strlcpy(entry->d_name, "route", sizeof(entry->d_name));
-        }
+      /* Net device entry */
+
       else
-#endif
         {
           int ifindex;
 
@@ -567,9 +535,9 @@ static int netprocfs_readdir(FAR struct fs_dirent_s *dir,
 
           level1->ifindex = ifindex + 1;
 #else
-          /* Get the raw index, accounting for 1 based indexing */
+          /* Get the raw index */
 
-          ifindex = index - DEV_INDEX + 1;
+          ifindex = index - ARRAY_SIZE(g_net_entries) + 1;
 #endif
           /* Find the device corresponding to this device index */
 
@@ -636,40 +604,37 @@ static int netprocfs_rewinddir(FAR struct fs_dirent_s *dir)
 
 static int netprocfs_stat(FAR const char *relpath, FAR struct stat *buf)
 {
+  int i;
+
   /* Check for the directory "net" */
+
+  buf->st_mode = 0;
 
   if (strcmp(relpath, "net") == 0 || strcmp(relpath, "net/") == 0)
     {
       buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
     }
   else
-#ifdef CONFIG_NET_STATISTICS
-  /* Check for network statistics "net/stat" */
-
-  if (strcmp(relpath, "net/stat") == 0)
     {
-      buf->st_mode = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
-    }
-  else
-#ifdef CONFIG_NET_MLD
-  /* Check for MLD statistics "net/mld" */
+      for (i = 0; i < ARRAY_SIZE(g_net_entries); i++)
+        {
+          if (strcmp(relpath + 4, g_net_entries[i].name) == 0)
+            {
+              if (g_net_entries[i].type == DTYPE_FILE)
+                {
+                  buf->st_mode = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
+                }
+              else if (g_net_entries[i].type == DTYPE_DIRECTORY)
+                {
+                  buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
+                }
 
-  if (strcmp(relpath, "net/mld") == 0)
-    {
-      buf->st_mode = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
+              break;
+            }
+        }
     }
-  else
-#endif
-#endif
-#ifdef CONFIG_NET_ROUTE
-  /* Check for network statistics "net/stat" */
 
-  if (strcmp(relpath, "net/route") == 0)
-    {
-      buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
-    }
-  else
-#endif
+  if (buf->st_mode == 0)
     {
       FAR struct net_driver_s *dev;
       FAR char *devname;
