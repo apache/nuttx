@@ -592,6 +592,27 @@ config IMXRT_FLEXPWM1_MOD1_COMP
 	bool "Use complementary output"
 	default n
 
+config IMXRT_FLEXPWM1_MOD1_TRIG
+	bool "Enable trigger generation"
+	default n
+	---help---
+		Use PWM submodule to trigger FLEXPWM1_PWM1_OUT_TRIG01 output
+		from submodule 1. This can be used to generate an
+		interrupt that can trigger ADC conversion or synchronize
+		other PWMs for example.
+
+config IMXRT_FLEXPWM1_MOD1_SYNC_SRC
+	int "Synchronization source signal"
+	default -1
+	range -1 130
+	---help---
+		PWM module can be synchronized by an external signal. This
+		config option selects the signal's source. The number in
+		IMXRT_FLEXPWM1_MOD1_SYNC_SRC corresponds with the XBAR
+		number (please refer to the documentation for XBAR numbers).
+
+		-1 (default value) means the module is not to be synchronized.
+
 endif
 
 config IMXRT_FLEXPWM1_MOD2
@@ -603,6 +624,27 @@ if IMXRT_FLEXPWM1_MOD2
 config IMXRT_FLEXPWM1_MOD2_COMP
 	bool "Use complementary output"
 	default n
+
+config IMXRT_FLEXPWM1_MOD2_TRIG
+	bool "Enable trigger generation"
+	default n
+	---help---
+		Use PWM submodule to trigger FLEXPWM1_PWM2_OUT_TRIG01 output
+		from submodule 1. This can be used to generate an
+		interrupt that can trigger ADC conversion or synchronize
+		other PWMs for example.
+
+config IMXRT_FLEXPWM1_MOD2_SYNC_SRC
+	int "Synchronization source signal"
+	default -1
+	range -1 130
+	---help---
+		PWM module can be synchronized by an external signal. This
+		config option selects the signal's source. The number in
+		IMXRT_FLEXPWM1_MOD2_SYNC_SRC corresponds with the XBAR
+		number (please refer to the documentation for XBAR numbers).
+
+		-1 (default value) means the module is not to be synchronized.
 
 endif
 
@@ -616,6 +658,27 @@ config IMXRT_FLEXPWM1_MOD3_COMP
 	bool "Use complementary output"
 	default n
 
+config IMXRT_FLEXPWM1_MOD3_TRIG
+	bool "Enable trigger generation"
+	default n
+	---help---
+		Use PWM submodule to trigger FLEXPWM1_PWM3_OUT_TRIG01 output
+		from submodule 1. This can be used to generate an
+		interrupt that can trigger ADC conversion or synchronize
+		other PWMs for example.
+
+config IMXRT_FLEXPWM1_MOD3_SYNC_SRC
+	int "Synchronization source signal"
+	default -1
+	range -1 130
+	---help---
+		PWM module can be synchronized by an external signal. This
+		config option selects the signal's source. The number in
+		IMXRT_FLEXPWM1_MOD3_SYNC_SRC corresponds with the XBAR
+		number (please refer to the documentation for XBAR numbers).
+
+		-1 (default value) means the module is not to be synchronized.
+
 endif
 
 config IMXRT_FLEXPWM1_MOD4
@@ -627,6 +690,27 @@ if IMXRT_FLEXPWM1_MOD4
 config IMXRT_FLEXPWM1_MOD4_COMP
 	bool "Use complementary output"
 	default n
+
+config IMXRT_FLEXPWM1_MOD4_TRIG
+	bool "Enable trigger generation"
+	default n
+	---help---
+		Use PWM submodule to trigger FLEXPWM1_PWM4_OUT_TRIG01 output
+		from submodule 1. This can be used to generate an
+		interrupt that can trigger ADC conversion or synchronize
+		other PWMs for example.
+
+config IMXRT_FLEXPWM1_MOD4_SYNC_SRC
+	int "Synchronization source signal"
+	default -1
+	range -1 130
+	---help---
+		PWM module can be synchronized by an external signal. This
+		config option selects the signal's source. The number in
+		IMXRT_FLEXPWM1_MOD4_SYNC_SRC corresponds with the XBAR
+		number (please refer to the documentation for XBAR numbers).
+
+		-1 (default value) means the module is not to be synchronized.
 
 endif
 
@@ -645,6 +729,27 @@ config IMXRT_FLEXPWM2_MOD1_COMP
 	bool "Use complementary output"
 	default n
 
+config IMXRT_FLEXPWM2_MOD1_TRIG
+	bool "Enable trigger generation"
+	default n
+	---help---
+		Use PWM submodule to trigger FLEXPWM2_PWM1_OUT_TRIG01 output
+		from submodule 1. This can be used to generate an
+		interrupt that can trigger ADC conversion or synchronize
+		other PWMs for example.
+
+config IMXRT_FLEXPWM2_MOD1_SYNC_SRC
+	int "Synchronization source signal"
+	default -1
+	range -1 130
+	---help---
+		PWM module can be synchronized by an external signal. This
+		config option selects the signal's source. The number in
+		IMXRT_FLEXPWM2_MOD1_SYNC_SRC corresponds with the XBAR
+		number (please refer to the documentation for XBAR numbers).
+
+		-1 (default value) means the module is not to be synchronized.
+
 endif
 
 config IMXRT_FLEXPWM2_MOD2
@@ -656,6 +761,27 @@ if IMXRT_FLEXPWM2_MOD2
 config IMXRT_FLEXPWM2_MOD2_COMP
 	bool "Use complementary output"
 	default n
+
+config IMXRT_FLEXPWM2_MOD2_TRIG
+	bool "Enable trigger generation"
+	default n
+	---help---
+		Use PWM submodule to trigger FLEXPWM2_PWM2_OUT_TRIG01 output
+		from submodule 1. This can be used to generate an
+		interrupt that can trigger ADC conversion or synchronize
+		other PWMs for example.
+
+config IMXRT_FLEXPWM2_MOD2_SYNC_SRC
+	int "Synchronization source signal"
+	default -1
+	range -1 130
+	---help---
+		PWM module can be synchronized by an external signal. This
+		config option selects the signal's source. The number in
+		IMXRT_FLEXPWM2_MOD2_SYNC_SRC corresponds with the XBAR
+		number (please refer to the documentation for XBAR numbers).
+
+		-1 (default value) means the module is not to be synchronized.
 
 endif
 
@@ -669,6 +795,27 @@ config IMXRT_FLEXPWM2_MOD3_COMP
 	bool "Use complementary output"
 	default n
 
+config IMXRT_FLEXPWM2_MOD3_TRIG
+	bool "Enable trigger generation"
+	default n
+	---help---
+		Use PWM submodule to trigger FLEXPWM2_PWM3_OUT_TRIG01 output
+		from submodule 1. This can be used to generate an
+		interrupt that can trigger ADC conversion or synchronize
+		other PWMs for example.
+
+config IMXRT_FLEXPWM2_MOD3_SYNC_SRC
+	int "Synchronization source signal"
+	default -1
+	range -1 130
+	---help---
+		PWM module can be synchronized by an external signal. This
+		config option selects the signal's source. The number in
+		IMXRT_FLEXPWM2_MOD3_SYNC_SRC corresponds with the XBAR
+		number (please refer to the documentation for XBAR numbers).
+
+		-1 (default value) means the module is not to be synchronized.
+
 endif
 
 config IMXRT_FLEXPWM2_MOD4
@@ -680,6 +827,27 @@ if IMXRT_FLEXPWM2_MOD4
 config IMXRT_FLEXPWM2_MOD4_COMP
 	bool "Use complementary output"
 	default n
+
+config IMXRT_FLEXPWM2_MOD4_TRIG
+	bool "Enable trigger generation"
+	default n
+	---help---
+		Use PWM submodule to trigger FLEXPWM2_PWM4_OUT_TRIG01 output
+		from submodule 1. This can be used to generate an
+		interrupt that can trigger ADC conversion or synchronize
+		other PWMs for example.
+
+config IMXRT_FLEXPWM2_MOD4_SYNC_SRC
+	int "Synchronization source signal"
+	default -1
+	range -1 130
+	---help---
+		PWM module can be synchronized by an external signal. This
+		config option selects the signal's source. The number in
+		IMXRT_FLEXPWM2_MOD4_SYNC_SRC corresponds with the XBAR
+		number (please refer to the documentation for XBAR numbers).
+
+		-1 (default value) means the module is not to be synchronized.
 
 endif
 
@@ -698,6 +866,27 @@ config IMXRT_FLEXPWM3_MOD1_COMP
 	bool "Use complementary output"
 	default n
 
+config IMXRT_FLEXPWM3_MOD1_TRIG
+	bool "Enable trigger generation"
+	default n
+	---help---
+		Use PWM submodule to trigger FLEXPWM3_PWM1_OUT_TRIG01 output
+		from submodule 1. This can be used to generate an
+		interrupt that can trigger ADC conversion or synchronize
+		other PWMs for example.
+
+config IMXRT_FLEXPWM3_MOD1_SYNC_SRC
+	int "Synchronization source signal"
+	default -1
+	range -1 130
+	---help---
+		PWM module can be synchronized by an external signal. This
+		config option selects the signal's source. The number in
+		IMXRT_FLEXPWM3_MOD1_SYNC_SRC corresponds with the XBAR
+		number (please refer to the documentation for XBAR numbers).
+
+		-1 (default value) means the module is not to be synchronized.
+
 endif
 
 config IMXRT_FLEXPWM3_MOD2
@@ -709,6 +898,27 @@ if IMXRT_FLEXPWM3_MOD2
 config IMXRT_FLEXPWM3_MOD2_COMP
 	bool "Use complementary output"
 	default n
+
+config IMXRT_FLEXPWM3_MOD2_TRIG
+	bool "Enable trigger generation"
+	default n
+	---help---
+		Use PWM submodule to trigger FLEXPWM3_PWM2_OUT_TRIG01 output
+		from submodule 1. This can be used to generate an
+		interrupt that can trigger ADC conversion or synchronize
+		other PWMs for example.
+
+config IMXRT_FLEXPWM3_MOD2_SYNC_SRC
+	int "Synchronization source signal"
+	default -1
+	range -1 130
+	---help---
+		PWM module can be synchronized by an external signal. This
+		config option selects the signal's source. The number in
+		IMXRT_FLEXPWM3_MOD2_SYNC_SRC corresponds with the XBAR
+		number (please refer to the documentation for XBAR numbers).
+
+		-1 (default value) means the module is not to be synchronized.
 
 endif
 
@@ -722,6 +932,27 @@ config IMXRT_FLEXPWM3_MOD3_COMP
 	bool "Use complementary output"
 	default n
 
+config IMXRT_FLEXPWM3_MOD3_TRIG
+	bool "Enable trigger generation"
+	default n
+	---help---
+		Use PWM submodule to trigger FLEXPWM3_PWM3_OUT_TRIG01 output
+		from submodule 1. This can be used to generate an
+		interrupt that can trigger ADC conversion or synchronize
+		other PWMs for example.
+
+config IMXRT_FLEXPWM3_MOD3_SYNC_SRC
+	int "Synchronization source signal"
+	default -1
+	range -1 130
+	---help---
+		PWM module can be synchronized by an external signal. This
+		config option selects the signal's source. The number in
+		IMXRT_FLEXPWM3_MOD3_SYNC_SRC corresponds with the XBAR
+		number (please refer to the documentation for XBAR numbers).
+
+		-1 (default value) means the module is not to be synchronized.
+
 endif
 
 config IMXRT_FLEXPWM3_MOD4
@@ -733,6 +964,27 @@ if IMXRT_FLEXPWM3_MOD4
 config IMXRT_FLEXPWM3_MOD4_COMP
 	bool "Use complementary output"
 	default n
+
+config IMXRT_FLEXPWM3_MOD4_TRIG
+	bool "Enable trigger generation"
+	default n
+	---help---
+		Use PWM submodule to trigger FLEXPWM3_PWM4_OUT_TRIG01 output
+		from submodule 1. This can be used to generate an
+		interrupt that can trigger ADC conversion or synchronize
+		other PWMs for example.
+
+config IMXRT_FLEXPWM3_MOD4_SYNC_SRC
+	int "Synchronization source signal"
+	default -1
+	range -1 130
+	---help---
+		PWM module can be synchronized by an external signal. This
+		config option selects the signal's source. The number in
+		IMXRT_FLEXPWM3_MOD4_SYNC_SRC corresponds with the XBAR
+		number (please refer to the documentation for XBAR numbers).
+
+		-1 (default value) means the module is not to be synchronized.
 
 endif
 
@@ -751,6 +1003,27 @@ config IMXRT_FLEXPWM4_MOD1_COMP
 	bool "Use complementary output"
 	default n
 
+config IMXRT_FLEXPWM4_MOD1_TRIG
+	bool "Enable trigger generation"
+	default n
+	---help---
+		Use PWM submodule to trigger FLEXPWM4_PWM1_OUT_TRIG01 output
+		from submodule 1. This can be used to generate an
+		interrupt that can trigger ADC conversion or synchronize
+		other PWMs for example.
+
+config IMXRT_FLEXPWM4_MOD1_SYNC_SRC
+	int "Synchronization source signal"
+	default -1
+	range -1 130
+	---help---
+		PWM module can be synchronized by an external signal. This
+		config option selects the signal's source. The number in
+		IMXRT_FLEXPWM4_MOD1_SYNC_SRC corresponds with the XBAR
+		number (please refer to the documentation for XBAR numbers).
+
+		-1 (default value) means the module is not to be synchronized.
+
 endif
 
 config IMXRT_FLEXPWM4_MOD2
@@ -762,6 +1035,27 @@ if IMXRT_FLEXPWM4_MOD2
 config IMXRT_FLEXPWM4_MOD2_COMP
 	bool "Use complementary output"
 	default n
+
+config IMXRT_FLEXPWM4_MOD2_TRIG
+	bool "Enable trigger generation"
+	default n
+	---help---
+		Use PWM submodule to trigger FLEXPWM4_PWM2_OUT_TRIG01 output
+		from submodule 1. This can be used to generate an
+		interrupt that can trigger ADC conversion or synchronize
+		other PWMs for example.
+
+config IMXRT_FLEXPWM4_MOD2_SYNC_SRC
+	int "Synchronization source signal"
+	default -1
+	range -1 130
+	---help---
+		PWM module can be synchronized by an external signal. This
+		config option selects the signal's source. The number in
+		IMXRT_FLEXPWM4_MOD2_SYNC_SRC corresponds with the XBAR
+		number (please refer to the documentation for XBAR numbers).
+
+		-1 (default value) means the module is not to be synchronized.
 
 endif
 
@@ -775,6 +1069,27 @@ config IMXRT_FLEXPWM4_MOD3_COMP
 	bool "Use complementary output"
 	default n
 
+config IMXRT_FLEXPWM4_MOD3_TRIG
+	bool "Enable trigger generation"
+	default n
+	---help---
+		Use PWM submodule to trigger FLEXPWM4_PWM3_OUT_TRIG01 output
+		from submodule 1. This can be used to generate an
+		interrupt that can trigger ADC conversion or synchronize
+		other PWMs for example.
+
+config IMXRT_FLEXPWM4_MOD3_SYNC_SRC
+	int "Synchronization source signal"
+	default -1
+	range -1 130
+	---help---
+		PWM module can be synchronized by an external signal. This
+		config option selects the signal's source. The number in
+		IMXRT_FLEXPWM4_MOD3_SYNC_SRC corresponds with the XBAR
+		number (please refer to the documentation for XBAR numbers).
+
+		-1 (default value) means the module is not to be synchronized.
+
 endif
 
 config IMXRT_FLEXPWM4_MOD4
@@ -786,6 +1101,27 @@ if IMXRT_FLEXPWM4_MOD4
 config IMXRT_FLEXPWM4_MOD4_COMP
 	bool "Use complementary output"
 	default n
+
+config IMXRT_FLEXPWM4_MOD4_TRIG
+	bool "Enable trigger generation"
+	default n
+	---help---
+		Use PWM submodule to trigger FLEXPWM4_PWM4_OUT_TRIG01 output
+		from submodule 1. This can be used to generate an
+		interrupt that can trigger ADC conversion or synchronize
+		other PWMs for example.
+
+config IMXRT_FLEXPWM4_MOD4_SYNC_SRC
+	int "Synchronization source signal"
+	default -1
+	range -1 130
+	---help---
+		PWM module can be synchronized by an external signal. This
+		config option selects the signal's source. The number in
+		IMXRT_FLEXPWM4_MOD4_SYNC_SRC corresponds with the XBAR
+		number (please refer to the documentation for XBAR numbers).
+
+		-1 (default value) means the module is not to be synchronized.
 
 endif
 
