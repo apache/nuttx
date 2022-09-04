@@ -475,7 +475,6 @@ if RP2040_I2S
 
 endif # RP2040_I2S
 
-		
 #####################################################################
 #  WS2812 Configuration
 #####################################################################
@@ -501,3 +500,17 @@ if RP2040_BOARD_HAS_WS2812
 			such a pin.
 
 endif # RP2040_BOARD_HAS_WS2812
+
+#####################################################################
+#  FLASH File System Configuration
+#####################################################################
+
+if RP2040_FLASH_FILE_SYSTEM
+
+	config RP2040_FLASH_LENGTH
+		int "Size of flash memory in bytes."
+		default 2097152
+		---help---
+			This is the overall amount of flash memory on the board.
+
+endif # RP2040_FLASH_FILE_SYSTEM

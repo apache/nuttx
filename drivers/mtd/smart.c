@@ -5751,7 +5751,7 @@ static int smart_fsck_file(FAR struct smart_struct_s *dev,
 
       /* next logical sector */
 
-      logsector = *(uint16_t *)chain->nextsector;
+      logsector = SMARTFS_NEXTSECTOR(chain);
     }
   while (logsector != 0xffff);
 
@@ -5879,7 +5879,7 @@ static int smart_fsck_directory(FAR struct smart_struct_s *dev,
 
   /* Check next sector recursively */
 
-  nextsector = *(uint16_t *)chain->nextsector;
+  nextsector = SMARTFS_NEXTSECTOR(chain);
 
   if (nextsector != 0xffff)
     {
@@ -5893,7 +5893,7 @@ static int smart_fsck_directory(FAR struct smart_struct_s *dev,
 
           ferr("Invalidate next log sector %d\n", nextsector);
 
-          *(uint16_t *)chain->nextsector = 0xffff;
+          SMARTFS_SET_NEXTSECTOR(chain, 0xffff);
 
           /* Set flag to relocate later */
 

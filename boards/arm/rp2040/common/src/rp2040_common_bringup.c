@@ -27,6 +27,8 @@
 #include <debug.h>
 #include <errno.h>
 #include <stddef.h>
+#include <string.h>
+#include <sys/stat.h>
 
 #include <nuttx/fs/fs.h>
 
@@ -74,6 +76,14 @@
 #include "rp2040_ws2812.h"
 #endif
 
+#if defined(CONFIG_RP2040_ROMFS_ROMDISK_DEVNAME)
+#  include <rp2040_romfsimg.h>
+#endif
+
+#ifdef CONFIG_RP2040_FLASH_FILE_SYSTEM
+#  include "rp2040_flash_mtd.h"
+#endif
+
 #ifdef CONFIG_WS2812_HAS_WHITE
 #define HAS_WHITE true
 #else /* CONFIG_WS2812_HAS_WHITE */
@@ -91,6 +101,10 @@
 int rp2040_common_bringup(void)
 {
   int ret = 0;
+
+#ifdef CONFIG_RP2040_FLASH_FILE_SYSTEM
+  struct mtd_dev_s *mtd_dev;
+#endif
 
 #ifdef CONFIG_RP2040_I2C_DRIVER
   #ifdef CONFIG_RP2040_I2C0
@@ -570,5 +584,76 @@ int rp2040_common_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_RP2040_FLASH_FILE_SYSTEM
+
+  mtd_dev = rp2040_flash_mtd_initialize();
+
+  if (mtd_dev == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: flash_mtd_initialize failed: %d\n", errno);
+    }
+  else
+    {
+      ret = smart_initialize(0, mtd_dev, NULL);
+
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: smart_initialize failed: %d\n", -ret);
+        }
+      else if (strlen(CONFIG_RP2040_FLASH_MOUNT_POINT) > 0)
+        {
+          mkdir(CONFIG_RP2040_FLASH_MOUNT_POINT, 0777);
+
+          /* Mount the file system */
+
+          ret = nx_mount("/dev/smart0",
+                        CONFIG_RP2040_FLASH_MOUNT_POINT,
+                        "smartfs",
+                        0,
+                        NULL);
+          if (ret < 0)
+            {
+              syslog(LOG_ERR,
+                    "ERROR: nx_mount(\"/dev/smart0\", \"%s\", \"smartfs\","
+                    " 0, NULL) failed: %d\n",
+                    CONFIG_RP2040_FLASH_MOUNT_POINT,
+                    ret);
+            }
+        }
+    }
+
+#endif
+
+#if defined(CONFIG_RP2040_ROMFS_ROMDISK_DEVNAME)
+  /* Register the ROM disk */
+
+  ret = romdisk_register(CONFIG_RP2040_ROMFS_ROMDISK_MINOR,
+                         rp2040_romfs_img,
+                         NSECTORS(rp2040_romfs_img_len),
+                         CONFIG_RP2040_ROMFS_ROMDISK_SECTSIZE);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: romdisk_register failed: %d\n", -ret);
+    }
+  else
+    {
+      /* Mount the file system */
+
+      ret = nx_mount(CONFIG_RP2040_ROMFS_ROMDISK_DEVNAME,
+                     CONFIG_RP2040_ROMFS_MOUNT_MOUNTPOINT,
+                     "romfs",
+                     MS_RDONLY,
+                     NULL);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR,
+                 "ERROR: nx_mount(%s,%s,romfs) failed: %d\n",
+                 CONFIG_RP2040_ROMFS_ROMDISK_DEVNAME,
+                 CONFIG_RP2040_ROMFS_MOUNT_MOUNTPOINT,
+                 ret);
+        }
+    }
+
+#endif
   return OK;
 }
