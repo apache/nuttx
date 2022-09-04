@@ -168,6 +168,47 @@ Pulse width modulator supported in i.MX RT1010 and higher. Multiple channels opt
 Output on pin B is currently supported only as a complementary option to pin A.
 The lower-half of this driver is initialize by calling :c:func:`imxrt_pwminitialize`.
 
+PWM module can be synchronized by an external signal. The external signal used for synchronization
+is selected by IMXRT_FLEXPWMx_MODx_SYNC_SRC config option. The number in IMXRT_FLEXPWM4_MOD4_SYNC_SRC
+corresponds with the XBAR number. Following numbers can be used for synchronization of PWMs with other
+PWM module when using iMXRT1020, iMXRT1050 or iMXRT1060.
+
+- PWM1 Module 1 = 40
+- PWM1 Module 2 = 41
+- PWM1 Module 3 = 42
+- PWM1 Module 4 = 43
+- PWM2 Module 1 = 44
+- PWM2 Module 2 = 45
+- PWM2 Module 3 = 46
+- PWM2 Module 4 = 47
+- PWM3 Module 1 = 48
+- PWM3 Module 2 = 49
+- PWM3 Module 3 = 50
+- PWM3 Module 4 = 51
+- PWM4 Module 1 = 52
+- PWM4 Module 2 = 53
+- PWM4 Module 3 = 54
+- PWM4 Module 4 = 55
+
+iMXRT1170 has different XBAR connections:
+
+- PWM1 Module 1 = 74
+- PWM1 Module 2 = 75
+- PWM1 Module 3 = 76
+- PWM1 Module 4 = 77
+- PWM2 Module 1 = 78
+- PWM2 Module 2 = 79
+- PWM2 Module 3 = 80
+- PWM2 Module 4 = 81
+- PWM3 Module 1 = 82
+- PWM3 Module 2 = 83
+- PWM3 Module 3 = 84
+- PWM3 Module 4 = 85
+- PWM4 Module 1 = 86
+- PWM4 Module 2 = 87
+- PWM4 Module 3 = 88
+- PWM4 Module 4 = 89
+
 SAI
 ---
 
