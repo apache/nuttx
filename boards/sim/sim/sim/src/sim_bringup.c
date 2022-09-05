@@ -176,14 +176,6 @@ int sim_bringup(void)
               syslog(LOG_ERR, "ERROR: IOCTL MTDIOC_BULKERASE failed\n");
             }
 
-#if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
-          /* Initialize a SMART Flash block device and bind it to the MTD
-           * device.
-           */
-
-          smart_initialize(0, mtd, NULL);
-
-#elif defined(CONFIG_FS_SPIFFS)
           /* Register the MTD driver so that it can be accessed from the
            * VFS.
            */
@@ -195,6 +187,14 @@ int sim_bringup(void)
                      ret);
             }
 
+#if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
+          /* Initialize a SMART Flash block device and bind it to the MTD
+           * device.
+           */
+
+          smart_initialize(0, mtd, NULL);
+
+#elif defined(CONFIG_FS_SPIFFS)
           /* Mount the SPIFFS file system */
 
           ret = nx_mount("/dev/rammtd", "/mnt/spiffs", "spiffs", 0, NULL);
@@ -206,17 +206,6 @@ int sim_bringup(void)
             }
 
 #elif defined(CONFIG_FS_LITTLEFS)
-          /* Register the MTD driver so that it can be accessed from the
-           * VFS.
-           */
-
-          ret = register_mtddriver("/dev/rammtd", mtd, 0755, NULL);
-          if (ret < 0)
-            {
-              syslog(LOG_ERR, "ERROR: Failed to register MTD driver: %d\n",
-                     ret);
-            }
-
           /* Mount the LittleFS file system */
 
           ret = nx_mount("/dev/rammtd", "/mnt/lfs", "littlefs", 0,
@@ -451,6 +440,10 @@ int sim_bringup(void)
 #ifdef CONFIG_DEV_RPMSG
   rpmsgdev_register("server", "/dev/console", "/dev/server-console");
   rpmsgdev_register("server", "/dev/null", "/dev/server-null");
+#endif
+
+#ifdef CONFIG_RPMSGMTD
+  rpmsgmtd_register("server", "/dev/rammtd", NULL);
 #endif
 #endif
 

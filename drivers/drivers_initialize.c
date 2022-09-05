@@ -28,6 +28,7 @@
 #include <nuttx/drivers/rpmsgdev.h>
 #include <nuttx/fs/loop.h>
 #include <nuttx/input/uinput.h>
+#include <nuttx/mtd/mtd.h>
 #include <nuttx/net/loopback.h>
 #include <nuttx/net/tun.h>
 #include <nuttx/net/telnet.h>
@@ -166,5 +167,9 @@ void drivers_initialize(void)
 
 #ifdef CONFIG_DEV_RPMSG_SERVER
   rpmsgdev_server_init();
+#endif
+
+#ifdef CONFIG_RPMSGMTD_SERVER
+  rpmsgmtd_server_init();
 #endif
 }
