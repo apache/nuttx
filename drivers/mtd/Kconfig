@@ -137,7 +137,7 @@ config MTD_PROGMEM
 		interfaces must be exported by chip-specific logic.
 
 if MTD_PROGMEM
-		
+
 endif #MTD_PROGMEM
 
 config MTD_CONFIG
@@ -270,6 +270,16 @@ config MTD_NAND_EMBEDDEDECC
 		or 4Gb.
 
 endif # MTD_NAND
+
+config RPMSGMTD
+	bool "MTD RPMSG Client Enable"
+	default n
+	depends on RPTUN
+
+config RPMSGMTD_SERVER
+	bool "MTD RPMSG Server Enable"
+	default n
+	depends on RPTUN
 
 config RAMMTD
 	bool "RAM-based MTD driver"
@@ -719,11 +729,11 @@ config MX25RXX_SECTOR512
 config MX25RXX_PAGE128
 	bool "128 byte size pages"
 	default n
-	
+
 config MX25RXX_LXX
 	bool "Run MX25RXX driver in MX25LXX mode"
 	default n
-	
+
 endif # MTD_MX25RXX
 
 config MTD_SMART
