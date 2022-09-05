@@ -30,6 +30,7 @@
 
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/mutex.h>
 #include <nuttx/rptun/openamp.h>
 #include <nuttx/serial/serial.h>
 #include <nuttx/serial/uart_rpmsg.h>
@@ -73,6 +74,7 @@ begin_packed_struct struct uart_rpmsg_wakeup_s
 struct uart_rpmsg_priv_s
 {
   struct rpmsg_endpoint ept;
+  mutex_t               mutex;
   FAR const char        *devname;
   FAR const char        *cpuname;
   FAR void              *recv_data;
@@ -258,10 +260,14 @@ static void uart_rpmsg_dmatxavail(FAR struct uart_dev_s *dev)
 {
   FAR struct uart_rpmsg_priv_s *priv = dev->priv;
 
+  nxmutex_lock(&priv->mutex);
+
   if (is_rpmsg_ept_ready(&priv->ept) && dev->dmatx.length == 0)
     {
       uart_xmitchars_dma(dev);
     }
+
+  nxmutex_unlock(&priv->mutex);
 }
 
 static void uart_rpmsg_send(FAR struct uart_dev_s *dev, int ch)
@@ -340,12 +346,15 @@ static int uart_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
                              size_t len, uint32_t src, FAR void *priv_)
 {
   FAR struct uart_dev_s *dev = priv_;
+  FAR struct uart_rpmsg_priv_s *priv = dev->priv;
   FAR struct uart_rpmsg_header_s *header = data;
   FAR struct uart_rpmsg_write_s *msg = data;
 
   if (header->response)
     {
       /* Get write-cmd response, this tell how many data have sent */
+
+      nxmutex_lock(&priv->mutex);
 
       dev->dmatx.nbytes = header->result;
       if (header->result < 0)
@@ -354,6 +363,8 @@ static int uart_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
         }
 
       uart_xmitchars_done(dev);
+
+      nxmutex_unlock(&priv->mutex);
 
       /* If have sent some data succeed, then continue send */
 
@@ -364,8 +375,6 @@ static int uart_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
     }
   else if (header->command == UART_RPMSG_TTY_WRITE)
     {
-      FAR struct uart_rpmsg_priv_s *priv = dev->priv;
-
       /* Get write-cmd, there are some data, we need receive them */
 
       priv->recv_data = data;
@@ -441,6 +450,7 @@ int uart_rpmsg_init(FAR const char *cpuname, FAR const char *devname,
       goto fail;
     }
 
+  nxmutex_init(&priv->mutex);
   sprintf(dev_name, "%s%s", UART_RPMSG_DEV_PREFIX, devname);
   uart_register(dev_name, dev);
 
