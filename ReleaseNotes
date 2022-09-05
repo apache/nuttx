@@ -31615,3 +31615,894 @@ All boards in the NuttX tree have been updated.
 NuttX users developing their own custom boards will need to remove any #include "arm_arch.h" and (if necessary), #include "arm_internal.h" instead.
 
 See PR-5720, git commit 54e630e14d7e32d6f81ae79d4e5df3d2fa787ef0.
+
+NuttX-11.0.0 Release Notes
+
+# What's New In This Release
+
+## Bug Fixes and Improvements
+
+ * [#5978](https://github.com/apache/incubator-nuttx/pull/#5978) nuttx: unify FAR attribute usage across the code
+ * [#6064](https://github.com/apache/incubator-nuttx/pull/#6064) sched/environ: Ensure tg_envp terminated by double
+ * [#6038](https://github.com/apache/incubator-nuttx/pull/#6038) sched/pthread_create:fix bug,delete data_sem
+ * [#6035](https://github.com/apache/incubator-nuttx/pull/#6035) sched/init: drivers_initialize() should be late than up_initialize()
+ * [#6026](https://github.com/apache/incubator-nuttx/pull/#6026) sched/note: include-able from C++ files
+ * [#6083](https://github.com/apache/incubator-nuttx/pull/#6083) sched/environ: Refine the environment variables storage layout
+ * [#5992](https://github.com/apache/incubator-nuttx/pull/#5992) sched/note: correct flatten format
+ * [#6271](https://github.com/apache/incubator-nuttx/pull/#6271) sched: Replace pthread_sem_take with nxsem_wait_uninterruptible
+ * [#6220](https://github.com/apache/incubator-nuttx/pull/#6220) sched/note: fix build break
+ * [#6215](https://github.com/apache/incubator-nuttx/pull/#6215) sched/group: addrenv: allocate current group for each cpu
+ * [#6153](https://github.com/apache/incubator-nuttx/pull/#6153) sched:fix mq_timedsend describe
+ * [#6135](https://github.com/apache/incubator-nuttx/pull/#6135) sched: cpuload: add pm callbacks for cpuidle and time compensate for idle task
+ * [#5986](https://github.com/apache/incubator-nuttx/pull/#5986) sched/irq: Fix array overrun in coverity check
+ * [#5859](https://github.com/apache/incubator-nuttx/pull/#5859) sched/sched_timerexpiration.c: change from sched_time to eventtime
+ * [#6137](https://github.com/apache/incubator-nuttx/pull/#6137) sched: remove DEBUGASSERT from nx_waitpid
+ * [#5929](https://github.com/apache/incubator-nuttx/pull/#5929) sched/pthread:need check pthread is DETACHED
+ * [#5915](https://github.com/apache/incubator-nuttx/pull/#5915) sched/note: add support of trace section mark
+ * [#6328](https://github.com/apache/incubator-nuttx/pull/#6328) sched: Move the call of pthread_mutex_inconsistent to nxtask_recover
+ * [#6329](https://github.com/apache/incubator-nuttx/pull/#6329) sched/pthread: Should call up_exit in pthread_exit
+ * [#6296](https://github.com/apache/incubator-nuttx/pull/#6296) sched/wqueue: Add work_timeleft macro to get the left time to start
+ * [#5753](https://github.com/apache/incubator-nuttx/pull/#5753) Fix the initial idle tasks environment
+ * [#5793](https://github.com/apache/incubator-nuttx/pull/#5793) sched/module: correct the check condition
+ * [#6716](https://github.com/apache/incubator-nuttx/pull/#6716) sched/Makefile: move task_reparent.c to appropriate Makefile
+ * [#6707](https://github.com/apache/incubator-nuttx/pull/#6707) sched: Remove the not really used cmptime
+ * [#6679](https://github.com/apache/incubator-nuttx/pull/#6679) sched_critmonitor: remove check zero in sched_critmonitor
+ * [#6677](https://github.com/apache/incubator-nuttx/pull/#6677) sched: handle nxtask_setup_arguments return values
+ * [#6628](https://github.com/apache/incubator-nuttx/pull/#6628) sched/timer: timer_settime not fully satisfy IEEE 1003.1
+ * [#6423](https://github.com/apache/incubator-nuttx/pull/#6423) sched/env: Fix the return value of unsetenv()
+ * [#6410](https://github.com/apache/incubator-nuttx/pull/#6410) sched/mqueue: do sanity check if DEBUG_FEATURES is enabled
+ * [#6403](https://github.com/apache/incubator-nuttx/pull/#6403) sched/mqueue: configurable mqueue notification
+ * [#6402](https://github.com/apache/incubator-nuttx/pull/#6402) sched/mqueue: minor code tuning of message queue
+ * [#6393](https://github.com/apache/incubator-nuttx/pull/#6393) sched/mqueue: replace inline linklist to improve performance
+ * [#6392](https://github.com/apache/incubator-nuttx/pull/#6392) sched/mqueue: remove sched_lock to improve performance
+ * [#6377](https://github.com/apache/incubator-nuttx/pull/#6377) sched/tls: Shouldn't get tls info directly from sp in kernel space
+ * [#6365](https://github.com/apache/incubator-nuttx/pull/#6365) sched/tls: Wrap up_info_size into tls_info_size
+ * [#6340](https://github.com/apache/incubator-nuttx/pull/#6340) Change dpends on SCHED_[L|H]PWORK to SCHED_WORKQUEUE
+ * [#6250](https://github.com/apache/incubator-nuttx/pull/#6250) sched: Remove task_restart in case of CONFIG_BUILD_KERNEL
+ * [#6236](https://github.com/apache/incubator-nuttx/pull/#6236) sched: Remove task_delete in case of CONFIG_BUILD_KERNEL
+ * [#5822](https://github.com/apache/incubator-nuttx/pull/#5822) sched/dumpstack: Print "backtrace:" only in the first iteration
+ * [#5925](https://github.com/apache/incubator-nuttx/pull/#5925) sigact: get free sigact from freelist always successful
+ * [#6227](https://github.com/apache/incubator-nuttx/pull/#6227) Replace all sem_wait with nxsem_wait
+ * [#5931](https://github.com/apache/incubator-nuttx/pull/#5931) fix: pthread_rwlock_timedwrlock.
+ * [#6348](https://github.com/apache/incubator-nuttx/pull/#6348) cpuload: use correct pm cpuload tick
+ * [#5888](https://github.com/apache/incubator-nuttx/pull/#5888) workqueue: add work_foreach support
+ * [#6226](https://github.com/apache/incubator-nuttx/pull/#6226) Replace nxsem_timedwait_uninterruptible with nxsem_tickwait_uninterruptible
+ * [#6085](https://github.com/apache/incubator-nuttx/pull/#6085) semaphore: fix usage of NXSEM_INITIALIZER
+ * [#5819](https://github.com/apache/incubator-nuttx/pull/#5819) pid_t: unify usage of special task IDs
+ * [#6611](https://github.com/apache/incubator-nuttx/pull/#6611) include: Declare nxtask_delete function
+ * [#5960](https://github.com/apache/incubator-nuttx/pull/#5960) timerexpiration:fix DEADCODE when RR_INTERVAL or SCHED_SPORADIC not select
+ * [#6745](https://github.com/apache/incubator-nuttx/pull/#6745) Remove the private NULL, TRUE and FALSE macros
+ * [#6489](https://github.com/apache/incubator-nuttx/pull/#6489) syscall: Remove exit() call gate
+ * [#5887](https://github.com/apache/incubator-nuttx/pull/#5887) signal: Don't do schedule_sigaction when there is no action
+ * [#6359](https://github.com/apache/incubator-nuttx/pull/#6359) signal: add define of SIGHUP/SIGTTIN
+ * [#6283](https://github.com/apache/incubator-nuttx/pull/#6283) pthread/spinlock: Call up_testsest directly in the flat build
+ * [#6282](https://github.com/apache/incubator-nuttx/pull/#6282) timers/watchdog: Ensure it's the idle domain before keepalive
+ * [#6133](https://github.com/apache/incubator-nuttx/pull/#6133) syscall: Fix prototype of exec() to syscall.csv
+ * [#6616](https://github.com/apache/incubator-nuttx/pull/#6616) syscall: Add socketpair to syscall.csv
+ * [#6120](https://github.com/apache/incubator-nuttx/pull/#6120) Implement execle, execve, execvp, execlp and execvpe
+ * [#5814](https://github.com/apache/incubator-nuttx/pull/#5814) env_dup: Allocate memory from the correct memory pool
+
+ * [#5914](https://github.com/apache/incubator-nuttx/pull/#5914) mm/mm_heap: place alloc-bit at the LSB of node->preceeding
+ * [#6685](https://github.com/apache/incubator-nuttx/pull/#6685) mm/mm_heap: update MM_BACKTRACE and malloc failed output
+ * [#6658](https://github.com/apache/incubator-nuttx/pull/#6658) mm: Fixed the usage of CONFIG_MM_BACKTRACE & CONFIG_DEBUG_MM
+ * [#5906](https://github.com/apache/incubator-nuttx/pull/#5906) mm_heap: heapsize align with MM_MIN_CHUNK
+ * [#6409](https://github.com/apache/incubator-nuttx/pull/#6409) mm: Add mm_uninitialize to release the resource
+ * [#6385](https://github.com/apache/incubator-nuttx/pull/#6385) mm: Log name of the Heap to which the new region is being added
+ * [#5855](https://github.com/apache/incubator-nuttx/pull/#5855) mm/memdump: dynamic turn on backtrace in heap when enable DEBUG_MM
+ * [#6749](https://github.com/apache/incubator-nuttx/pull/#6749) mm/kasan: node header should updated from unpoisoning memory
+ * [#6697](https://github.com/apache/incubator-nuttx/pull/#6697) mm/circbuf: support circbuf_is_init and circ_peekat
+ * [#6011](https://github.com/apache/incubator-nuttx/pull/#6011) mm_initialize: malloc() return aligend pointer
+ * [#6750](https://github.com/apache/incubator-nuttx/pull/#6750) mm_heap/kasan: poison free node after return back the heap list
+ * [#6305](https://github.com/apache/incubator-nuttx/pull/#6305) Separate a few debug stuff from CONFIG_DEBUG_MM
+ * [#5982](https://github.com/apache/incubator-nuttx/pull/#5982) openamp: Change the dependence from OPENAMP to RPTUN
+ * [#6762](https://github.com/apache/incubator-nuttx/pull/#6762) merge openamp to newest version (2022.04.0)
+
+ * [#6067](https://github.com/apache/incubator-nuttx/pull/#6067) libc/string: Use Byte-Shift algorithm for very long needles
+ * [#6047](https://github.com/apache/incubator-nuttx/pull/#6047) libc/lib_glob:use strlcpy instead of memcpy
+ * [#6044](https://github.com/apache/incubator-nuttx/pull/#6044) libc/net:use strlcpy instead of strncpy
+ * [#5995](https://github.com/apache/incubator-nuttx/pull/#5995) lib_lib_vsprintf/backtrace: fix the type issue
+ * [#6168](https://github.com/apache/incubator-nuttx/pull/#6168) Implement preadv and pwritev
+ * [#5737](https://github.com/apache/incubator-nuttx/pull/#5737) Add dn resolution function
+ * [#6210](https://github.com/apache/incubator-nuttx/pull/#6210) Optimize bool type handling in c
+ * [#6029](https://github.com/apache/incubator-nuttx/pull/#6029) libc:add strptime support
+ * [#6445](https://github.com/apache/incubator-nuttx/pull/#6445) nuttx/lib: remove dependency on BUILD_FLAT for library memory allocation interface
+ * [#6389](https://github.com/apache/incubator-nuttx/pull/#6389) libc/ipc: add ftok(3) support
+ * [#6384](https://github.com/apache/incubator-nuttx/pull/#6384) libc/stdio: Generate the dummy atexit and on_exit
+ * [#6371](https://github.com/apache/incubator-nuttx/pull/#6371) libc:xtensa:arch_memmove: fix warning
+ * [#6370](https://github.com/apache/incubator-nuttx/pull/#6370) libc:Optimize the behavior of fwrite
+ * [#6360](https://github.com/apache/incubator-nuttx/pull/#6360) libc/time: rearrange itimerspec struct elements
+ * [#6357](https://github.com/apache/incubator-nuttx/pull/#6357) libc/stdio: Support 'e'(O_CLOEXEC) in lib_mode2oflags
+ * [#6248](https://github.com/apache/incubator-nuttx/pull/#6248) libc: Rename lib_Exit lib__Exit
+ * [#5971](https://github.com/apache/incubator-nuttx/pull/#5971) libc: Avoid the compiler generate code call self(memcpy/memmove/memset/memcmp) recursively
+ * [#6240](https://github.com/apache/incubator-nuttx/pull/#6240) libs: Move aeabi_atexit from libxx/ to libc/machine/arm/
+ * [#6229](https://github.com/apache/incubator-nuttx/pull/#6229) libc/string: simplify strrchr
+ * [#6197](https://github.com/apache/incubator-nuttx/pull/#6197) libc: Implement userland implementations of exit functions
+ * [#6196](https://github.com/apache/incubator-nuttx/pull/#6196) libxx: Make HAVE_CXXINITIALIZE workable even HAVE_CXX isn't enabled
+ * [#6175](https://github.com/apache/incubator-nuttx/pull/#6175) libc: Remove the redundant seek in writev
+ * [#6184](https://github.com/apache/incubator-nuttx/pull/#6184) libc/assert: let CONFIG_NDEBUG default to !CONFIG_DEBUG_ASSERTIONS
+ * [#6169](https://github.com/apache/incubator-nuttx/pull/#6169) libc/arch_atomic: add gcc legacy __sync buitins support and add FAR to pointers
+ * [#6140](https://github.com/apache/incubator-nuttx/pull/#6140) libs/libc/string: unify implementation across the functions
+ * [#5948](https://github.com/apache/incubator-nuttx/pull/#5948) libc/lib_localtime:fix deadcode
+ * [#5861](https://github.com/apache/incubator-nuttx/pull/#5861) libs/libc/time: update description of strftime
+ * [#5837](https://github.com/apache/incubator-nuttx/pull/#5837) libc: Implement getrandom on top of "/dev/[u]random"
+ * [#5806](https://github.com/apache/incubator-nuttx/pull/#5806) libc: Change the return type of strerror from "const char *" to "char *"
+ * [#5798](https://github.com/apache/incubator-nuttx/pull/#5798) libc/err: fix unpaired va_end()
+ * [#6139](https://github.com/apache/incubator-nuttx/pull/#6139) libc/string: strcmp/strncmp cast unsigned char
+ * [#6130](https://github.com/apache/incubator-nuttx/pull/#6130) libc: Fix typo error in execle
+ * [#6124](https://github.com/apache/incubator-nuttx/pull/#6124) libc/fixedmatch: Avoid "divide by zero" error
+ * [#6066](https://github.com/apache/incubator-nuttx/pull/#6066) libc/blockstream: add block out stream backend
+ * [#6087](https://github.com/apache/incubator-nuttx/pull/#6087) libc: Don't duplicate string in chdir and lib_restoredir
+ * [#5950](https://github.com/apache/incubator-nuttx/pull/#5950) libs/libc/lib_err.c:add va_end to vwarn
+ * [#5949](https://github.com/apache/incubator-nuttx/pull/#5949) lib_chdir:change ret judgment method
+ * [#5976](https://github.com/apache/incubator-nuttx/pull/#5976) modlib_bind.c: Restore "Relocation address out of range" checks
+ * [#5951](https://github.com/apache/incubator-nuttx/pull/#5951) modlib/modlib_bind:fix unsigned_compare with zero
+ * [#5952](https://github.com/apache/incubator-nuttx/pull/#5952) libc/netdb: Support the recursive lock
+ * [#6027](https://github.com/apache/incubator-nuttx/pull/#6027) netdb/lib_dnsaddserver.c: Do not insert the duplicate DNS address
+ * [#6714](https://github.com/apache/incubator-nuttx/pull/#6714) libc: Remove the unnecessary include from wchar and wctype
+ * [#6613](https://github.com/apache/incubator-nuttx/pull/#6613) libc/stdio: Support "long long" type if CONFIG_HAVE_LONG_LONG is enabled
+ * [#6607](https://github.com/apache/incubator-nuttx/pull/#6607) libc/stdio: Enable LIBC_FLOATINGPOINT by default if ARCH_FPU is enabled
+ * [#6606](https://github.com/apache/incubator-nuttx/pull/#6606) libc/stdio: enable long long formating by CONFIG_HAVE_LONG_LONG
+ * [#6547](https://github.com/apache/incubator-nuttx/pull/#6547) libc: Fix getrandom() bug: Didn't propagate read error
+ * [#6241](https://github.com/apache/incubator-nuttx/pull/#6241) libs: risc-v: Add R_RISCV_JAL support to arch_elf.c
+ * [#6667](https://github.com/apache/incubator-nuttx/pull/#6667) libs/libc/string: add memmem
+ * [#6666](https://github.com/apache/incubator-nuttx/pull/#6666) libc/wchar: support wchar
+ * [#6652](https://github.com/apache/incubator-nuttx/pull/#6652) libc/impure: Fix the inconsistence from the different toolchain
+ * [#6337](https://github.com/apache/incubator-nuttx/pull/#6337) Refine the implementation of TLS
+ * [#6434](https://github.com/apache/incubator-nuttx/pull/#6434) include/cxx: Remove all non standard c++ header files
+ * [#6108](https://github.com/apache/incubator-nuttx/pull/#6108) assert: static_assert is not support in c standard C89,C99
+ * [#5851](https://github.com/apache/incubator-nuttx/pull/#5851) libxx: Add CXX_RTTI for enabling RTTI support for C++ applications
+ * [#6791](https://github.com/apache/incubator-nuttx/pull/#6791) Add Embedded Template Library (ETL) support
+ * [#6720](https://github.com/apache/incubator-nuttx/pull/#6720) libs/libc: correct config name
+ * [#5890](https://github.com/apache/incubator-nuttx/pull/#5890) rexec: fix free error in error handing
+ * [#6709](https://github.com/apache/incubator-nuttx/pull/#6709) Imx6 adb
+ * [#6586](https://github.com/apache/incubator-nuttx/pull/#6586) Sabre6quad netknsh
+ * [#6482](https://github.com/apache/incubator-nuttx/pull/#6482) Use builtins for byteswapping
+ * [#6421](https://github.com/apache/incubator-nuttx/pull/#6421) getrandom: use _NX_XXXX interface to remove cancelation point for kernel
+
+ * [#6205](https://github.com/apache/incubator-nuttx/pull/#6205) binfmt/libelf: Fix function description field
+ * [#6190](https://github.com/apache/incubator-nuttx/pull/#6190) binfmt_execmodule: Use heap size getter for print
+
+# Major Changes to the Build System
+
+## Bug Fixes and Improvements
+
+ * [#6015](https://github.com/apache/incubator-nuttx/pull/#6015) configure.sh: Make top Make.defs symlink to board Make.defs instead
+ * [#6014](https://github.com/apache/incubator-nuttx/pull/#6014) checkpatch.sh: add -m option to enable/disable Change-Id check
+ * [#6013](https://github.com/apache/incubator-nuttx/pull/#6013) tools/mkdeps: Extend MAX_SHQUOTE to 3072
+ * [#6094](https://github.com/apache/incubator-nuttx/pull/#6094) tools/cibuild.sh: Migrate risc-v toolchian from 8.3.0 to 10.2.0
+ * [#5836](https://github.com/apache/incubator-nuttx/pull/#5836) tools:use dump log creat a gdbsever to debug
+ * [#6350](https://github.com/apache/incubator-nuttx/pull/#6350) tools/gencromfs: add attribute to set minimum 4 bytes aignment for cromfs image data
+ * [#6520](https://github.com/apache/incubator-nuttx/pull/#6520) tools/jlink-nuttx: Move the register index check to setget_reg
+ * [#5826](https://github.com/apache/incubator-nuttx/pull/#5826) tools/jlink: Change the type of pid from uint16_t to uint32_t
+ * [#5808](https://github.com/apache/incubator-nuttx/pull/#5808) tools/nxstyle: Order g_white_prefix by alphanum
+ * [#6128](https://github.com/apache/incubator-nuttx/pull/#6128) tools:fix parsememdump.py match error
+ * [#6245](https://github.com/apache/incubator-nuttx/pull/#6245) tools/mkallsyms.sh: Make it work with llvm
+ * [#6129](https://github.com/apache/incubator-nuttx/pull/#6129) tools:minidumpserver.py support xtensa
+ * [#6132](https://github.com/apache/incubator-nuttx/pull/#6132) compiler.h: optimization option is not supported before GCC 4.6
+ * [#6232](https://github.com/apache/incubator-nuttx/pull/#6232) tools/nxstyle: Add the suffix white list
+ * [#6180](https://github.com/apache/incubator-nuttx/pull/#6180) tools/testbuild.sh: Don't skip configure and distclean
+
+# Architectural Support
+
+## New Architecture Support
+
+ * [#6179](https://github.com/apache/incubator-nuttx/pull/#6179) tlsr82: first commit of telink tlsr82xx chip port
+ * [#6687](https://github.com/apache/incubator-nuttx/pull/#6687) Add support for NXP S32K3XX MCU family and boards
+ * [#6375](https://github.com/apache/incubator-nuttx/pull/#6375) stm32wl5: add new chip family
+ * [#6422](https://github.com/apache/incubator-nuttx/pull/#6422) New stm32wb chip family
+ * [#6418](https://github.com/apache/incubator-nuttx/pull/#6418) Eps32 Lilygo t5v2 BSP
+ * [#6478](https://github.com/apache/incubator-nuttx/pull/#6478) arch: arm64: ARMv8-A support for NuttX
+
+## Bug Fixes and Improvements
+
+ * [#6188](https://github.com/apache/incubator-nuttx/pull/#6188) arch: Move -fstack-protector-all and -finstrument-functions from Make.defs to Toolchain.defs
+ * [#6200](https://github.com/apache/incubator-nuttx/pull/#6200) arch: Add gcov related config for arm/risc-v/xtensa
+ * [#6063](https://github.com/apache/incubator-nuttx/pull/#6063) arch/stack_color: correct the stack top of running task
+ * [#6056](https://github.com/apache/incubator-nuttx/pull/#6056) arch/stack_color: correct the end address of stack color
+ * [#5966](https://github.com/apache/incubator-nuttx/pull/#5966) arch:tcbinfo: update tcbinfo as xcpcontext update
+ * [#5865](https://github.com/apache/incubator-nuttx/pull/#5865) arch: Add -fsanitize=kernel-address to ARCHCPUFLAGS if CONFIG_MM_KASAN=y
+ * [#5864](https://github.com/apache/incubator-nuttx/pull/#5864) arch/Toolchain.defs: add wildcard for EXTRA_LIBS
+ * [#5920](https://github.com/apache/incubator-nuttx/pull/#5920) ARCH_ADDRENV: Add guard against mis-configuration 
+ * [#6105](https://github.com/apache/incubator-nuttx/pull/#6105) arch/clang: add support for Clang LTO
+ * [#6089](https://github.com/apache/incubator-nuttx/pull/#6089) arch: Move group_addrenv to common place
+ * [#6183](https://github.com/apache/incubator-nuttx/pull/#6183) arch: Remvoe the error message when toolchain can't find
+ * [#6080](https://github.com/apache/incubator-nuttx/pull/#6080) arch/ostest: remove CONFIG_TESTING_OSTEST_FPUSIZE & board level implement
+ * [#6086](https://github.com/apache/incubator-nuttx/pull/#6086) Remove FAR from the arch and board files of ceva/mips/misoc/or1k/sim/sparc/x86_64/xtensa
+ * [#6778](https://github.com/apache/incubator-nuttx/pull/#6778) arch: common: Fix up_check_tcbstack() for CONFIG_ARCH_ADDRENV=y
+ * [#6665](https://github.com/apache/incubator-nuttx/pull/#6665) arch/stack: get correct stack remain and limit dump size when sp is not within stack
+ * [#6717](https://github.com/apache/incubator-nuttx/pull/#6717) arch: Call board_reset before up_irq_save and spin_trylock
+ * [#6252](https://github.com/apache/incubator-nuttx/pull/#6252) arch/addrenv: Change text write enable/disable to generic mprot
+ * [#6254](https://github.com/apache/incubator-nuttx/pull/#6254) arch: Remove board/libboard$(LIBEXT) from the rerequest of export_startup
+ * [#6276](https://github.com/apache/incubator-nuttx/pull/#6276) arch: Move "-nostartfiles -nodefaultlibs" from Make.defs to Toolchian.defs
+ * [#6351](https://github.com/apache/incubator-nuttx/pull/#6351) arch: Define WCHAR_[MIN|MAX] in arch/include/limits.h
+ * [#6286](https://github.com/apache/incubator-nuttx/pull/#6286) arch: inline up_interrupt_context() 
+ * [#6284](https://github.com/apache/incubator-nuttx/pull/#6284) arch/addrenv: Add missing FAR qualifier to addrenv_mprot
+ * [#6277](https://github.com/apache/incubator-nuttx/pull/#6277) arch/i2c: Change xxx_i2c_tousecs to xxx_i2c_toticks
+ * [#6416](https://github.com/apache/incubator-nuttx/pull/#6416) Fix CONFIG_ALLSYMS for arm, risc-v and xtensa after #5496
+ * [#6567](https://github.com/apache/incubator-nuttx/pull/#6567) arch: Remove the inclusion of arch/irq.h from chip/irq.h
+ * [#6550](https://github.com/apache/incubator-nuttx/pull/#6550) arch: Move up_getsp from arch.h to irq.h
+ * [#6452](https://github.com/apache/incubator-nuttx/pull/#6452) arch/backtrace: correct the skip counter
+ * [#6581](https://github.com/apache/incubator-nuttx/pull/#6581) arch: Correct the order of stack related information in assert
+ * [#5818](https://github.com/apache/incubator-nuttx/pull/#5818) progmem: eliminate PROGMEM_ERASESTATE configuration option
+ * [#5828](https://github.com/apache/incubator-nuttx/pull/#5828) Show assigned cpu in dump task
+ * [#6193](https://github.com/apache/incubator-nuttx/pull/#6193) Elf loader: give temporary write access to user .text memory
+ * [#6176](https://github.com/apache/incubator-nuttx/pull/#6176) UMM: Implement getter for address environment heap start vaddr
+ * [#6367](https://github.com/apache/incubator-nuttx/pull/#6367) dump_task: also dump thread param when dump thread name
+ * [#6062](https://github.com/apache/incubator-nuttx/pull/#6062) SAM3X HSMCI DMA Fixes
+
+ * [#6059](https://github.com/apache/incubator-nuttx/pull/#6059) arch/risc-v/riscv_misaligned: Correct sw source register
+ * [#6065](https://github.com/apache/incubator-nuttx/pull/#6065) RISC-V: Support for mtimer in S-mode
+ * [#6054](https://github.com/apache/incubator-nuttx/pull/#6054) riscv/riscv_schedulesigaction.c: Remove the duplicate state saving
+ * [#6051](https://github.com/apache/incubator-nuttx/pull/#6051) arch/risc-v: Add missing DMB to mtimer / setmtimecmp
+ * [#6050](https://github.com/apache/incubator-nuttx/pull/#6050) RISC-V: Move mhartid to own assembly macro+function
+ * [#6039](https://github.com/apache/incubator-nuttx/pull/#6039) arch/riscv: Move toolchain config to arch/risc-v/Kconfig like xtensa
+ * [#6034](https://github.com/apache/incubator-nuttx/pull/#6034) arch/risc-v: Apply common mtime driver to mtime based chps
+ * [#6022](https://github.com/apache/incubator-nuttx/pull/#6022) arch/risc-v: Apply misaligned access handler for k210/bl602
+ * [#6006](https://github.com/apache/incubator-nuttx/pull/#6006) riscv/ESP32C3: Use the common exception handler
+ * [#6468](https://github.com/apache/incubator-nuttx/pull/#6468) Add I2C_M_NOSTART and I2C_M_NOSTOP support in esp32c3_i2c
+ * [#6583](https://github.com/apache/incubator-nuttx/pull/#6583) risc-v/esp32c3: Add the rest of the reset causes
+ * [#6600](https://github.com/apache/incubator-nuttx/pull/#6600) ESP32-C3: General improvements to Protected Mode infra
+ * [#6487](https://github.com/apache/incubator-nuttx/pull/#6487) risc-v/esp32c3: Implement up_perf_xxx API
+ * [#6538](https://github.com/apache/incubator-nuttx/pull/#6538) ESP32-S3: Add driver for I2C peripheral in Master mode
+ * [#6552](https://github.com/apache/incubator-nuttx/pull/#6552) esp32s3: Fix IOMUX function number for SPI
+ * [#6522](https://github.com/apache/incubator-nuttx/pull/#6522) Added configuration files for using BMP280 with ESP32-DevkitC
+ * [#6549](https://github.com/apache/incubator-nuttx/pull/#6549) Esp32 lilygo tty t5v2 bugfix
+ * [#6540](https://github.com/apache/incubator-nuttx/pull/#6540) ESP32-S2: Improvements to the GPIO driver
+ * [#6539](https://github.com/apache/incubator-nuttx/pull/#6539) ESP32-S2: Add driver for I2C peripheral in Master mode
+ * [#6493](https://github.com/apache/incubator-nuttx/pull/#6493) stm32xx: Fix RTC drift when using HSE
+ * [#6492](https://github.com/apache/incubator-nuttx/pull/#6492) Stm32wl55JC SPI driver
+ * [#6579](https://github.com/apache/incubator-nuttx/pull/#6579) Added ADC support to RP2040
+ * [#6499](https://github.com/apache/incubator-nuttx/pull/#6499) Added PWM for rp2040
+ * [#6502](https://github.com/apache/incubator-nuttx/pull/#6502) risc-v: Move common memory map to its own file from riscv_internal
+ * [#6603](https://github.com/apache/incubator-nuttx/pull/#6603) ESP32: Add support for Protected Mode
+ * [#6516](https://github.com/apache/incubator-nuttx/pull/#6516) arch/stm32_capture fix SMC register offset address and completion slave mode selection
+ * [#6565](https://github.com/apache/incubator-nuttx/pull/#6565) arch/risc-v: Move __XSTR, FLOAD/FSTORE and REGLOAD/REGSTORE to the right place
+ * [#6020](https://github.com/apache/incubator-nuttx/pull/#6020) arch/riscv: Add mtimer driver
+ * [#6008](https://github.com/apache/incubator-nuttx/pull/#6008) arch/risc-v: Attach exception handler in common place
+ * [#5998](https://github.com/apache/incubator-nuttx/pull/#5998) arch/riscv: Minor style change and text correction
+ * [#6003](https://github.com/apache/incubator-nuttx/pull/#6003) esp32c3: Simplify irq dispatch logic
+ * [#5989](https://github.com/apache/incubator-nuttx/pull/#5989) arch/risc-v: Replace riscv_fault with riscv_exception
+ * [#5970](https://github.com/apache/incubator-nuttx/pull/#5970) b-u585i-iot02a:nsh: Drop TrustedFirmware-M dependency
+ * [#5974](https://github.com/apache/incubator-nuttx/pull/#5974) arch/risc-v: use STACK_FRAME_SIZE for in S-mode syscall asm
+ * [#5980](https://github.com/apache/incubator-nuttx/pull/#5980) RISC-V: Fix file name of riscv_dispatch_syscall
+ * [#5985](https://github.com/apache/incubator-nuttx/pull/#5985) RISC-V: Combine 3 variables that depend on CPU amount into one
+ * [#5981](https://github.com/apache/incubator-nuttx/pull/#5981) RISC-V: Fix usage of static_assert in riscv_percpu.c
+ * [#5983](https://github.com/apache/incubator-nuttx/pull/#5983) arch/risc-v: Remove the unnecessary inclusion of board header files
+ * [#5754](https://github.com/apache/incubator-nuttx/pull/#5754) arch/risc-v: Correct stack coloration in riscv_cpu_boot
+ * [#5758](https://github.com/apache/incubator-nuttx/pull/#5758) RISC-V: Prepare CONFIG_BUILD_KERNEL part 1
+ * [#5760](https://github.com/apache/incubator-nuttx/pull/#5760) ESP32-S3: Fix UART IRQ setup hardcoded to CPU 0 
+ * [#5766](https://github.com/apache/incubator-nuttx/pull/#5766) arch/risc-v: Rework riscv_get_newintctx
+ * [#5773](https://github.com/apache/incubator-nuttx/pull/#5773) risc-v/esp32c3: Remove deprecated option for disabling atomics support
+ * [#5775](https://github.com/apache/incubator-nuttx/pull/#5775) arch/risc-v: Merge riscv_getnewintctx into common
+ * [#5781](https://github.com/apache/incubator-nuttx/pull/#5781) phy62xx_exception: using armv6-m exception_common code
+ * [#5782](https://github.com/apache/incubator-nuttx/pull/#5782) RISC-V: Implement option to run NuttX in supervisor mode (S-mode)
+ * [#5809](https://github.com/apache/incubator-nuttx/pull/#5809) fixed mpu9250 not work on i2c bus issue.
+ * [#5765](https://github.com/apache/incubator-nuttx/pull/#5765) esp32 efuse build fix
+ * [#5772](https://github.com/apache/incubator-nuttx/pull/#5772) arch/Kconfig: Don't depend on Xtensa for the SUPPRESS_CLOCK_CONFIG option
+ * [#5825](https://github.com/apache/incubator-nuttx/pull/#5825) ESP32-S3: Enable GPIO read/write operations and interrupts support
+ * [#5827](https://github.com/apache/incubator-nuttx/pull/#5827) Add SPIRAM to ESP32-S2
+ * [#5829](https://github.com/apache/incubator-nuttx/pull/#5829) RISC-V: Add/fix implementation for arch_elf.c
+ * [#5830](https://github.com/apache/incubator-nuttx/pull/#5830) risc-v/qemu-rv: Restore FPU context after context switch
+ * [#5831](https://github.com/apache/incubator-nuttx/pull/#5831) RISC-V: Add kernel stack
+ * [#5833](https://github.com/apache/incubator-nuttx/pull/#5833) ESP32-S2: Remove unused and unsupported configs from Kconfig
+ * [#5834](https://github.com/apache/incubator-nuttx/pull/#5834) ESP32-S2: Initialize instruction cache on startup
+ * [#5878](https://github.com/apache/incubator-nuttx/pull/#5878) arch/risc-v: Use riscv_fpuconfig to enable FPU
+ * [#5898](https://github.com/apache/incubator-nuttx/pull/#5898) riscv/bl602: Implement SPI Cmd/Data
+ * [#5957](https://github.com/apache/incubator-nuttx/pull/#5957) risc-v/esp32c3: Fix regression on IRQ handling for ECALL instruction
+ * [#5905](https://github.com/apache/incubator-nuttx/pull/#5905) arch/risc-v: Store/Restore FPU register in exception_common
+ * [#5795](https://github.com/apache/incubator-nuttx/pull/#5795) ESP32-S3: Clean up and improve GPIO driver interface
+ * [#6604](https://github.com/apache/incubator-nuttx/pull/#6604) esp32s3: Add DMA support
+ * [#5838](https://github.com/apache/incubator-nuttx/pull/#5838) esp32/Make.defs: Organise common arch files and chip files appropriately
+ * [#5868](https://github.com/apache/incubator-nuttx/pull/#5868) arch/risc-v: Move fpu [re]store to common place
+ * [#5869](https://github.com/apache/incubator-nuttx/pull/#5869) riscv/bl602: Enable SPI Master in SPI Poll Send
+ * [#5907](https://github.com/apache/incubator-nuttx/pull/#5907) riscv/bl602: Remove check for LCD driver
+ * [#5908](https://github.com/apache/incubator-nuttx/pull/#5908) riscv/esp32c3: Remove check for LCD driver
+ * [#5746](https://github.com/apache/incubator-nuttx/pull/#5746) RISCV: Fix nasty bug in PMP region test
+ * [#5842](https://github.com/apache/incubator-nuttx/pull/#5842) arch/risc-v: improve style consistency accross chip variants
+ * [#5913](https://github.com/apache/incubator-nuttx/pull/#5913) arch/risc-v: Move group_addrenv to correct place
+ * [#5922](https://github.com/apache/incubator-nuttx/pull/#5922) arch/risc-v: get wider visibility for arch instruction macros
+ * [#5940](https://github.com/apache/incubator-nuttx/pull/#5940) arch/risc-v: Add handler for misaligned load/store
+ * [#5917](https://github.com/apache/incubator-nuttx/pull/#5917) arch/risc-v: move REGLOAD/REGSTORE macro to riscv_internal.h
+ * [#6217](https://github.com/apache/incubator-nuttx/pull/#6217) riscv/pmp: fix bug: PMP_CFG_FLAG_MASK makes pmp cfg fail
+ * [#6192](https://github.com/apache/incubator-nuttx/pull/#6192) Riscv hostfs
+ * [#6235](https://github.com/apache/incubator-nuttx/pull/#6235) RISC-V: add C++ support to crt0
+ * [#5731](https://github.com/apache/incubator-nuttx/pull/#5731) arch/risc-v: Improve speed of context switch
+ * [#6255](https://github.com/apache/incubator-nuttx/pull/#6255) arch/riscv: Remove & ~1 before assign signal_handler to REG_EPC
+ * [#6237](https://github.com/apache/incubator-nuttx/pull/#6237) arch: risc-v: Enable FPU for qemu-rv only if EXPERIMENTAL=y
+ * [#6242](https://github.com/apache/incubator-nuttx/pull/#6242) rv-virt:knsh64
+ * [#6690](https://github.com/apache/incubator-nuttx/pull/#6690) Ability to use newer pico-sdk with RP2040 builds (Issue #4919)
+ * [#6249](https://github.com/apache/incubator-nuttx/pull/#6249) risc-v/mpfs: introduce IHC driver
+ * [#6776](https://github.com/apache/incubator-nuttx/pull/#6776) risc-v/mpfs: usb: configure fifos properly
+ * [#6077](https://github.com/apache/incubator-nuttx/pull/#6077) arch/risc-v: Use fs status definition from csr.h
+ * [#6095](https://github.com/apache/incubator-nuttx/pull/#6095) arch/risc-v: Remove FAR from chip and board folder
+ * [#6101](https://github.com/apache/incubator-nuttx/pull/#6101) arch/risc-v: Change riscv_savefpu/riscv_loadfpu to macro
+ * [#6102](https://github.com/apache/incubator-nuttx/pull/#6102) ARM/RISC-V: Fix xxx_assert from IRQ context
+ * [#6115](https://github.com/apache/incubator-nuttx/pull/#6115) arch/risc-v: Don't clear reserved bits in fcsr in riscv_fpuconfig
+ * [#6116](https://github.com/apache/incubator-nuttx/pull/#6116) arch/risc-v: Enable FPU for K210
+ * [#6117](https://github.com/apache/incubator-nuttx/pull/#6117) arch/risc-v/riscv_misaligned: Implement float load/store support
+ * [#6125](https://github.com/apache/incubator-nuttx/pull/#6125) arch: risc-v: Do not enable FPU for K210 with QEMU
+ * [#6126](https://github.com/apache/incubator-nuttx/pull/#6126) arch/risc-v: add support for GCC LTO
+ * [#6156](https://github.com/apache/incubator-nuttx/pull/#6156) riscv/Makefile: Delete old target used for debugging
+ * [#6162](https://github.com/apache/incubator-nuttx/pull/#6162) RISC-V PMP: Restrict Fence instruction for chips that support S-mode
+ * [#6191](https://github.com/apache/incubator-nuttx/pull/#6191) RISC-V: Fix crt0 file compilation
+ * [#6194](https://github.com/apache/incubator-nuttx/pull/#6194) RISC-V: Fix bug in riscv_addrenv.c
+ * [#6052](https://github.com/apache/incubator-nuttx/pull/#6052) arch/riscv: Jump instead call riscv_dispatch_syscall
+ * [#6131](https://github.com/apache/incubator-nuttx/pull/#6131) RISC-V: Add implementation for vfork
+ * [#6134](https://github.com/apache/incubator-nuttx/pull/#6134) RISC-V: Fix system crash when FPU is in use
+ * [#6145](https://github.com/apache/incubator-nuttx/pull/#6145) RISC-V: Add syscall support for vfork
+ * [#6151](https://github.com/apache/incubator-nuttx/pull/#6151) RISC-V: workaround for the RV64 SoC which does not has mem mapped MTI...
+ * [#6069](https://github.com/apache/incubator-nuttx/pull/#6069) RISC-V: Add support for CONFIG_BUILD_KERNEL
+ * [#6005](https://github.com/apache/incubator-nuttx/pull/#6005) ESP32C3 TWAI (CAN) controller support.
+ * [#5740](https://github.com/apache/incubator-nuttx/pull/#5740) Add ethernet support for risc-v/MPFS
+ * [#5749](https://github.com/apache/incubator-nuttx/pull/#5749) risc-v/mpfs: usb: fix ep0 stall/resume and rx reads 
+ * [#5783](https://github.com/apache/incubator-nuttx/pull/#5783) risc-v/mpfs: usb: fix ep0 read done
+ * [#5881](https://github.com/apache/incubator-nuttx/pull/#5881) MPFS: Fix issue with external interrupt detection
+ * [#5875](https://github.com/apache/incubator-nuttx/pull/#5875) MPFS: Fix error in flat build linker script
+ * [#5912](https://github.com/apache/incubator-nuttx/pull/#5912) arch/risc-v/mpfs: Remove duplicated riscv_restorefpu
+ * [#6060](https://github.com/apache/incubator-nuttx/pull/#6060) MPFS: Fix timer and exception/fault handling
+ * [#6070](https://github.com/apache/incubator-nuttx/pull/#6070) MPFS: Set correct interrupt per mode (M-/S-mode) for mtimer
+ * [#5993](https://github.com/apache/incubator-nuttx/pull/#5993) MPFS: Prepare support for S-mode
+ * [#5780](https://github.com/apache/incubator-nuttx/pull/#5780) MPFS: Add board_memorymap.h
+ * [#6160](https://github.com/apache/incubator-nuttx/pull/#6160) MPFS: Remove # CONFIG_ARCH_FPU is not set from defconfigs
+ * [#6177](https://github.com/apache/incubator-nuttx/pull/#6177) MPFS: Add support for CONFIG_BUILD_KERNEL, adds icicle:knsh
+ * [#6303](https://github.com/apache/incubator-nuttx/pull/#6303) MPFS: Implement S-mode head and start function
+ * [#6304](https://github.com/apache/incubator-nuttx/pull/#6304) risc-v/mpfs: amend OpenSBI to utilize IHC
+ * [#6260](https://github.com/apache/incubator-nuttx/pull/#6260) risc-v/mpfs: apply IHC review fixes
+ * [#6396](https://github.com/apache/incubator-nuttx/pull/#6396) Mpfs fix ddr training failures
+ * [#6395](https://github.com/apache/incubator-nuttx/pull/#6395) risc-v/mpfs: composite usb driver
+ * [#6261](https://github.com/apache/incubator-nuttx/pull/#6261) risc-v/mpfs: IHC: clarify semaphore usage
+ * [#6285](https://github.com/apache/incubator-nuttx/pull/#6285) risc-v/mpfs: IHC: allow hart configuration
+ * [#6437](https://github.com/apache/incubator-nuttx/pull/#6437) risc-v/mpfs: update clock configuration parameters
+ * [#6405](https://github.com/apache/incubator-nuttx/pull/#6405) risc-v/mpfs: Move the entry point to .start section
+ * [#6496](https://github.com/apache/incubator-nuttx/pull/#6496) risc-v/mpfs: emmcsd: fix two issues
+ * [#6326](https://github.com/apache/incubator-nuttx/pull/#6326) mpfs/knsh: Add C++ support
+ * [#6450](https://github.com/apache/incubator-nuttx/pull/#6450) arch/riscv/mpfs: Add a config flag to select SD mux state
+ * [#6503](https://github.com/apache/incubator-nuttx/pull/#6503) arch/risc-v/src/mpfs: Add mpfs_gpiosetevent and gpio irq handling fun…
+ * [#6530](https://github.com/apache/incubator-nuttx/pull/#6530) mpfs: Fix IHC memory locations to native width type
+ * [#6490](https://github.com/apache/incubator-nuttx/pull/#6490) mpfs: Allow mapping of RAM/ROM regions from different memory areas
+ * [#6602](https://github.com/apache/incubator-nuttx/pull/#6602) risc-v/mpfs: usb: fix illegal reads
+ * [#6535](https://github.com/apache/incubator-nuttx/pull/#6535) risc-v/mpfs: ihc: don't start rptun automatically 
+ * [#6361](https://github.com/apache/incubator-nuttx/pull/#6361) arch/risc-v: re-add missing riscv_udelay source
+ * [#6343](https://github.com/apache/incubator-nuttx/pull/#6343) Some cleanup for risc-v
+ * [#6342](https://github.com/apache/incubator-nuttx/pull/#6342) arch/risc-v: Unify common source include
+ * [#6292](https://github.com/apache/incubator-nuttx/pull/#6292) risc-v/opensbi: Generalize the SBI variable handling in makefile
+ * [#6291](https://github.com/apache/incubator-nuttx/pull/#6291) ESP32-C3: Add support for Protected Mode
+ * [#6400](https://github.com/apache/incubator-nuttx/pull/#6400) ESP32-C3: Disable access to invalid memory regions using MPU
+ * [#6336](https://github.com/apache/incubator-nuttx/pull/#6336) esp32*: Disable CONFIG_RAW_BINARY and make Config.mk update nuttx.manifest for nuttx.bin
+ * [#6325](https://github.com/apache/incubator-nuttx/pull/#6325) esp32:wamr_wasi_debug: Remove CONFIG_SCHED_ONEXIT
+ * [#6324](https://github.com/apache/incubator-nuttx/pull/#6324) Fix stm32 pwm HAVE_ADVTIM
+ * [#6323](https://github.com/apache/incubator-nuttx/pull/#6323) esp32: Add an example config for wamr and littlefs
+ * [#6322](https://github.com/apache/incubator-nuttx/pull/#6322) ESP32/ESP32-C3: Fix leak of semaphores created by Wi-Fi kernel thread
+ * [#6317](https://github.com/apache/incubator-nuttx/pull/#6317) esp32_cpuidlestack.c: Remove unnecessary code.
+ * [#6313](https://github.com/apache/incubator-nuttx/pull/#6313) arch: risc-v: Fix crt0.c if CONFIG_HAVE_CXX is not set
+ * [#6300](https://github.com/apache/incubator-nuttx/pull/#6300) risc-v/vfork: FPU was not saved correctly
+ * [#6299](https://github.com/apache/incubator-nuttx/pull/#6299) risc-v/vfork: Fix saved register set and add FPU registers
+ * [#6415](https://github.com/apache/incubator-nuttx/pull/#6415) arch: k210: Add a workaround for clock stabilization
+ * [#6688](https://github.com/apache/incubator-nuttx/pull/#6688) OpenSBI: Add configurable support for domain init
+ * [#6285](https://github.com/apache/incubator-nuttx/pull/#6285) risc-v/mpfs: IHC: allow hart configuration
+ * [#6645](https://github.com/apache/incubator-nuttx/pull/#6645) arch/esp32: Introduce the ESP32_RTC option
+
+ * [#5946](https://github.com/apache/incubator-nuttx/pull/#5946) arch/xtensa: Add xtensa_tcbinfo struct that contains helpful offsets
+ * [#5877](https://github.com/apache/incubator-nuttx/pull/#5877) xtensa: add xtensa arch oneshot ops
+ * [#5876](https://github.com/apache/incubator-nuttx/pull/#5876) xtensa: add xtensa_spill_window declaration
+ * [#5820](https://github.com/apache/incubator-nuttx/pull/#5820) xtensa/esp32(s2)_user.c: Use macros defined in xtens_corebits.h
+ * [#5771](https://github.com/apache/incubator-nuttx/pull/#5771) arch/xtensa: Don't always reset the APP CPU on startup
+ * [#5979](https://github.com/apache/incubator-nuttx/pull/#5979) arch/xtensa: Build the xtensa_tcbinfo.c file for S2 and S3
+ * [#5987](https://github.com/apache/incubator-nuttx/pull/#5987) xtensa/esp32: Add support to TWAI/CANBus
+ * [#5941](https://github.com/apache/incubator-nuttx/pull/#5941) arch/xtensa: add syscall note support in the flat build
+ * [#6167](https://github.com/apache/incubator-nuttx/pull/#6167) arch/xtensa: Replace the xcp context with stack context to improve context switching
+ * [#6148](https://github.com/apache/incubator-nuttx/pull/#6148) arch/xtensa: Refactor assembly macros
+ * [#6147](https://github.com/apache/incubator-nuttx/pull/#6147) arch/xtensa: Simply use xtensa_createstack for CPU1 idle task.
+ * [#6136](https://github.com/apache/incubator-nuttx/pull/#6136) xtensa: Fix backtrace on exceptions
+ * [#6122](https://github.com/apache/incubator-nuttx/pull/#6122) arch/xtensa: Color the other CPUs task when they are created
+ * [#6111](https://github.com/apache/incubator-nuttx/pull/#6111) arch/xtensa: Use syscall interface for xtensa_save/restore_context
+ * [#6109](https://github.com/apache/incubator-nuttx/pull/#6109) arch/sparc,xtensa: Control output by $(Q) as other arch
+ * [#6222](https://github.com/apache/incubator-nuttx/pull/#6222) xtensa: move fpu register to XCPTCONTEXT_REGS
+ * [#6231](https://github.com/apache/incubator-nuttx/pull/#6231) xtensa_sigtramp.S: Remove unnecessary entry instruction
+ * [#6203](https://github.com/apache/incubator-nuttx/pull/#6203) xtensa/xtensa_coproc.S: Use the first allocated memory to save A0
+ * [#5790](https://github.com/apache/incubator-nuttx/pull/#5790) xtensa_coporc: Adjust stack frame for C callable coprocessor functions
+ * [#6258](https://github.com/apache/incubator-nuttx/pull/#6258) xtensa: Fix argument passing for sys_call5 and sys_call6 functions
+ * [#6269](https://github.com/apache/incubator-nuttx/pull/#6269) xtensa: use CONFIG_ARCH_FPU macro for coprocossor and add up_fpucmp
+ * [#6270](https://github.com/apache/incubator-nuttx/pull/#6270) xtensa: Implement syscalls required for Protected Mode
+ * [#6278](https://github.com/apache/incubator-nuttx/pull/#6278) xtensa.h: Remove old prototype
+ * [#6293](https://github.com/apache/incubator-nuttx/pull/#6293) Xtensa: Add missing input operand on sys_call6 inline ASM
+ * [#6349](https://github.com/apache/incubator-nuttx/pull/#6349) arch/xtensa: Remove the assembly signal trampoline
+ * [#6312](https://github.com/apache/incubator-nuttx/pull/#6312) xtensa/esp32s3: Add basic support to SPI
+ * [#6372](https://github.com/apache/incubator-nuttx/pull/#6372) arch/xtensa: Initialize the internal heap early with the rest of custom heaps
+ * [#6352](https://github.com/apache/incubator-nuttx/pull/#6352) esp32-devkitc:wamr_wasi_debug: pin WAMR version
+ * [#6314](https://github.com/apache/incubator-nuttx/pull/#6314) xtensa: esp32: enable cp processor of app core
+ * [#6302](https://github.com/apache/incubator-nuttx/pull/#6302) xtensa: coproc: modify coproc_save/restore to macro
+ * [#6294](https://github.com/apache/incubator-nuttx/pull/#6294) xtensa: add perf counter
+ * [#6380](https://github.com/apache/incubator-nuttx/pull/#6380) arch/xtensa/xtensa_coproc.S: Fix the condition to save the coprocessors state
+ * [#6425](https://github.com/apache/incubator-nuttx/pull/#6425) arch/xtensa: Don't build xtensa_coproc.S
+ * [#6443](https://github.com/apache/incubator-nuttx/pull/#6443) xtensa: Remove old references to co-processors
+ * [#6440](https://github.com/apache/incubator-nuttx/pull/#6440) arch/xtensa: Refactor assembly code
+ * [#6436](https://github.com/apache/incubator-nuttx/pull/#6436) xtensa/esp32_rtc_lowerhalf.c: Initialize ret variable
+ * [#6532](https://github.com/apache/incubator-nuttx/pull/#6532) Remove '-g' LDFLAG
+ * [#6573](https://github.com/apache/incubator-nuttx/pull/#6573) xtensa: Unify common options within a single Make.defs
+
+ * [#6390](https://github.com/apache/incubator-nuttx/pull/#6390) arch/sparc/bm3803: fix the using of uart1 and uart2
+ * [#6327](https://github.com/apache/incubator-nuttx/pull/#6327) arch/sparc: Remove FILE dump code from _up_dumponexit
+
+ * [#6233](https://github.com/apache/incubator-nuttx/pull/#6233) Tiva qemu
+ * [#5151](https://github.com/apache/incubator-nuttx/pull/#5151) Tiva CAN driver
+ * [#6244](https://github.com/apache/incubator-nuttx/pull/#6244) Fix broken tiva_gpioirqclear
+ * [#6548](https://github.com/apache/incubator-nuttx/pull/#6548) tiva: Add UART CTS/RTS support
+
+ * [#5815](https://github.com/apache/incubator-nuttx/pull/#5815) defconfig: add Lua configs for sim and teensy-4.x
+
+ * [#6765](https://github.com/apache/incubator-nuttx/pull/#6765) arm/backtrace: use sp unwind if FRAME_POINTER is enabled on thumb mode
+ * [#6208](https://github.com/apache/incubator-nuttx/pull/#6208) arm: Refine the common Make.defs
+ * [#6309](https://github.com/apache/incubator-nuttx/pull/#6309) Armv6-m LTO fix
+ * [#6071](https://github.com/apache/incubator-nuttx/pull/#6071) arm/rtl8720c: Remove up_getsp which is already implemented in arch/arm/arch.h
+ * [#6072](https://github.com/apache/incubator-nuttx/pull/#6072) arm/armv7-[a|r]: move fpu save/restore to assembly handler
+ * [#6048](https://github.com/apache/incubator-nuttx/pull/#6048) arm/armv8-m: indicating no low-overhead-loop predication by default
+ * [#6042](https://github.com/apache/incubator-nuttx/pull/#6042) arch/arm: Move FPU initialization to common place
+ * [#6001](https://github.com/apache/incubator-nuttx/pull/#6001) arm/armv[7|8]-m: skip the fpu save/restore if stack frame is integer-only
+ * [#5752](https://github.com/apache/incubator-nuttx/pull/#5752) arch: cxd56xx: Fix critical section in serial transmission
+ * [#5761](https://github.com/apache/incubator-nuttx/pull/#5761) arch/arm: Remove the code copy register from xcpt to stack
+ * [#5774](https://github.com/apache/incubator-nuttx/pull/#5774) arch/arm: set the SP to stack top
+ * [#5824](https://github.com/apache/incubator-nuttx/pull/#5824) arch/arm/src/stm32l4: peripheral voltage monitor support for vddio2
+ * [#5863](https://github.com/apache/incubator-nuttx/pull/#5863) arch/arm: Change arm_arch.h to arm_internal.h in arm_perf.c
+ * [#5870](https://github.com/apache/incubator-nuttx/pull/#5870) arch/armv7-a: Fix a typo in Toolchain.defs
+ * [#5845](https://github.com/apache/incubator-nuttx/pull/#5845) armv8-m: make the securefault handled by non-securefult
+ * [#5850](https://github.com/apache/incubator-nuttx/pull/#5850) armv7-m/armv8-m: move up_pref* api to common place
+ * [#5745](https://github.com/apache/incubator-nuttx/pull/#5745) arch/arm/samv7/sam_tc: implement timer driver support
+ * [#5896](https://github.com/apache/incubator-nuttx/pull/#5896) arm/cortex-[a|r]: IRQ Switch return should with shadow SPSR
+ * [#5897](https://github.com/apache/incubator-nuttx/pull/#5897) ESP32{S2/S3/C3}: Enable support for C++ applications
+ * [#5918](https://github.com/apache/incubator-nuttx/pull/#5918) arm/chip: add backtrace support for all chips that support thumb instruction set
+ * [#6079](https://github.com/apache/incubator-nuttx/pull/#6079) arm/arch: using __builtin_frame_address(0) implement up_getsp()
+ * [#6076](https://github.com/apache/incubator-nuttx/pull/#6076) arch/armv[7|8]m: enhance the clang support
+ * [#6073](https://github.com/apache/incubator-nuttx/pull/#6073) arch/arm: Remove all lazy fpu related code
+ * [#6057](https://github.com/apache/incubator-nuttx/pull/#6057) arch/stm32h7: Add SocketCAN FDCAN driver
+ * [#6091](https://github.com/apache/incubator-nuttx/pull/#6091) arch/arm: Move arm_signal_dispatch.c to common folder
+ * [#6165](https://github.com/apache/incubator-nuttx/pull/#6165) arch/arm/Make.defs: unify common source include
+ * [#6123](https://github.com/apache/incubator-nuttx/pull/#6123) arch/arm: add support for GCC LTO
+ * [#6114](https://github.com/apache/incubator-nuttx/pull/#6114) arm/armv[7|8]m: compare of hardware fp registers should skip REG_FP_RESERVED
+ * [#6107](https://github.com/apache/incubator-nuttx/pull/#6107) armv7/r:cp15_cache_all: fix error in LineSize 'r5' mask
+ * [#6099](https://github.com/apache/incubator-nuttx/pull/#6099) arch/armv7-[a|r]: correct the handing of group env switch
+ * [#6097](https://github.com/apache/incubator-nuttx/pull/#6097) arch/armv[7|8]-m: Unify the toolchain definition of eabi/clang/iar for linux and windows
+ * [#6096](https://github.com/apache/incubator-nuttx/pull/#6096) arch/arm: Remove unneeded group_addrenv call which handled by arm_doirq
+ * [#6093](https://github.com/apache/incubator-nuttx/pull/#6093) arch/arm: Remove FAR and CODE from common/ and arm*/ folder
+ * [#6092](https://github.com/apache/incubator-nuttx/pull/#6092) arch/arm: Remove FAR and CODE from chip and board folder
+ * [#6198](https://github.com/apache/incubator-nuttx/pull/#6198) armv7-a: smp: fix stack coloration
+ * [#6185](https://github.com/apache/incubator-nuttx/pull/#6185) arm/cxd56xx/lc823450: replace arch testset to board implement
+ * [#6178](https://github.com/apache/incubator-nuttx/pull/#6178) armv7-a/r: use cps instruction to change cpu mode
+ * [#6163](https://github.com/apache/incubator-nuttx/pull/#6163) arm/arch_setjmp.S: armv6m support setjmp, longjmp
+ * [#6103](https://github.com/apache/incubator-nuttx/pull/#6103) arm: Remove or merge assembly code as much as possible
+ * [#6214](https://github.com/apache/incubator-nuttx/pull/#6214) armv7-a: smp: allocate page table for each cpu
+ * [#6213](https://github.com/apache/incubator-nuttx/pull/#6213) arm/cortex-m/toolchain: try print runtime library only in clang
+ * [#6211](https://github.com/apache/incubator-nuttx/pull/#6211) armv7-a: Inner Shareable TLB maintenance operations
+ * [#6225](https://github.com/apache/incubator-nuttx/pull/#6225) arm/tlsr82: pwm driver optimize and add pulse count support
+ * [#6259](https://github.com/apache/incubator-nuttx/pull/#6259) arm/tlsr82: add hardware aes encrypt and decrypt support
+ * [#6354](https://github.com/apache/incubator-nuttx/pull/#6354) arm/tlsr82: support flash protection and flash voltage calibration
+ * [#6311](https://github.com/apache/incubator-nuttx/pull/#6311) arm/tlsr82: optimize the adc driver
+ * [#6424](https://github.com/apache/incubator-nuttx/pull/#6424) arm/tlsr82: bugfix, tlsr82_flash_ioctl() return wrong value
+ * [#6379](https://github.com/apache/incubator-nuttx/pull/#6379) arm/tlsr82: gpio driver bug fix and optimize
+ * [#6334](https://github.com/apache/incubator-nuttx/pull/#6334) arm/tlsr82: ble performance optimize and problems solve
+ * [#6238](https://github.com/apache/incubator-nuttx/pull/#6238) tlsr82/tc32: optimize the irq process
+ * [#6332](https://github.com/apache/incubator-nuttx/pull/#6332) arch: imx6: add support kernel build and smp 
+ * [#6429](https://github.com/apache/incubator-nuttx/pull/#6429) arch: imx6: Enable imx_idle.c to reduce CPU load
+ * [#6234](https://github.com/apache/incubator-nuttx/pull/#6234) arm/tc32/Make.defs: filter-out arm_udelay.c
+ * [#6736](https://github.com/apache/incubator-nuttx/pull/#6736) arm/allocateheap: fix multiple definition of 'up_allocate_heap'
+ * [#6659](https://github.com/apache/incubator-nuttx/pull/#6659) arch/arm/samv7: fix SPI 16-bit transactions in DMA mode
+ * [#6676](https://github.com/apache/incubator-nuttx/pull/#6676) arm_secure_irq: fix NVIC_IRQ_DBGMONITOR un-secure set failed
+ * [#5645](https://github.com/apache/incubator-nuttx/pull/#5645) arch/arm: optimize context switch speed
+ * [#5662](https://github.com/apache/incubator-nuttx/pull/#5662) arch/arm: Move ARCHCPUFLAGS to Toolchain.defs
+ * [#6228](https://github.com/apache/incubator-nuttx/pull/#6228) arch/arm: Fix target 'arm_fpuconfig.o' given more than once in the same rule
+ * [#6201](https://github.com/apache/incubator-nuttx/pull/#6201) Restore lost flash define for stm32
+ * [#3488](https://github.com/apache/incubator-nuttx/pull/#3488) stm32h7: Adds tickless support
+ * [#6772](https://github.com/apache/incubator-nuttx/pull/#6772) arch/stm32f7/stm32_tim.c: include the missing RCC header
+ * [#6771](https://github.com/apache/incubator-nuttx/pull/#6771) arch/stm32xx/Kconfig: simplify and unify PWM options
+ * [#6757](https://github.com/apache/incubator-nuttx/pull/#6757) STM32L4 DAC: Implements basic support for low level operations
+ * [#6741](https://github.com/apache/incubator-nuttx/pull/#6741) stm32wb/mbox: fixing TX buffer queue
+ * [#6732](https://github.com/apache/incubator-nuttx/pull/#6732) Multiple stm32wl5jc flash usage improvements
+ * [#6775](https://github.com/apache/incubator-nuttx/pull/#6775) arch/stm32/stm32_foc.c: fix some ADC and PWM ifdefs
+ * [#6769](https://github.com/apache/incubator-nuttx/pull/#6769) arch/stm32f0l0g0: add SPI3 support (STM32G0B0 chips)
+ * [#6218](https://github.com/apache/incubator-nuttx/pull/#6218) STM32F746G-Disco, Audiosupport, Bugfix
+ * [#6715](https://github.com/apache/incubator-nuttx/pull/#6715) stm32wb: adding BLE support 
+ * [#6729](https://github.com/apache/incubator-nuttx/pull/#6729) stm32f7: add showprogress in __start
+ * [#6078](https://github.com/apache/incubator-nuttx/pull/#6078) Stm32f746 audio 
+ * [#6413](https://github.com/apache/incubator-nuttx/pull/#6413) stm32wl5: add gpio exti support
+ * [#6426](https://github.com/apache/incubator-nuttx/pull/#6426) stm32wl5: add flash progmem driver support
+ * [#6788](https://github.com/apache/incubator-nuttx/pull/#6788) LPC17xx_40xx PWM multichannel support
+ * [#6758](https://github.com/apache/incubator-nuttx/pull/#6758) LPC17_40 CAN driver SocketCAN support
+ * [#6267](https://github.com/apache/incubator-nuttx/pull/#6267) arch/arm/samv7/sam_afec: fix ADC pin for channel 9
+ * [#6339](https://github.com/apache/incubator-nuttx/pull/#6339) sama5d2: Fix sama5d2 Kconfig errors and add missing pin definitions
+ * [#6268](https://github.com/apache/incubator-nuttx/pull/#6268) arm/cortex-[a|r]: add performance counter implement based on PMU
+ * [#6298](https://github.com/apache/incubator-nuttx/pull/#6298) arch/arm/samv7: Fix PWM operation for single channel mode
+ * [#6265](https://github.com/apache/incubator-nuttx/pull/#6265) Fixes to imxRT and SAM E70 PWM drivers
+ * [#6572](https://github.com/apache/incubator-nuttx/pull/#6572) arch/arm/Kconfig: Add description for ARM_THUMB to make it configurable
+ * [#6508](https://github.com/apache/incubator-nuttx/pull/#6508) sama5: add config SAMA5_SYSTEMRESET in arch/arm/src/sama5/Kconfig
+ * [#6534](https://github.com/apache/incubator-nuttx/pull/#6534) arch/arm/armv7-m: Fix error link argument for compiler-rt
+ * [#6497](https://github.com/apache/incubator-nuttx/pull/#6497) samv7:mcan Fix can buffer calculation. Add two words to every msg buffer
+ * [#6614](https://github.com/apache/incubator-nuttx/pull/#6614) samv7: add support for RX DMA and RS-485 mode to serial driver
+ * [#6599](https://github.com/apache/incubator-nuttx/pull/#6599) arch/arm/samv7: EMAC bugfixes
+ * [#6306](https://github.com/apache/incubator-nuttx/pull/#6306) Add up_textheap_heapmember
+ * [#6204](https://github.com/apache/incubator-nuttx/pull/#6204) MCAN_INT_ACKE must be on the list of MCAN_TXERR_INTS to be properly h…
+ * [#6121](https://github.com/apache/incubator-nuttx/pull/#6121) compile/opt: add config DEBUG_LINK_MAP
+ * [#6614](https://github.com/apache/incubator-nuttx/pull/#6614) samv7: add support for RX DMA and RS-485 mode to serial driver
+ * [#6615](https://github.com/apache/incubator-nuttx/pull/#6615) Add I2C slave mode for RP2040
+ * [#6617](https://github.com/apache/incubator-nuttx/pull/#6617) Fix arm64 stack coloration
+ * [#6682](https://github.com/apache/incubator-nuttx/pull/#6682) Fixed path calculation in BBS RAM
+
+ * [#6790](https://github.com/apache/incubator-nuttx/pull/#6790) Several IMXRT fixes
+ * [#6786](https://github.com/apache/incubator-nuttx/pull/#6786) IMX.RT EDMA Support
+ * [#6787](https://github.com/apache/incubator-nuttx/pull/#6787) imxrt: Ethernet Cleanup and extend support for ETH1 or ETH2 and LAN8742A
+ * [#6794](https://github.com/apache/incubator-nuttx/pull/#6794) IMX.RT Add DMA on LPSPI, LPUART, LPI2C
+
+ * [#6675](https://github.com/apache/incubator-nuttx/pull/#6675) sim: idle pm should do PM_RESOTRE in critical section
+ * [#6689](https://github.com/apache/incubator-nuttx/pull/#6689) sim: Increased priority of loop task
+ * [#6792](https://github.com/apache/incubator-nuttx/pull/#6792) sim/adb: Enable ping for test
+ * [#5862](https://github.com/apache/incubator-nuttx/pull/#5862) arch/sim: Remove the unused SIM_TCNWAITERS from Kconfig
+ * [#5923](https://github.com/apache/incubator-nuttx/pull/#5923) sim: Fix initialization of static C++ constructors when using glibc >= 2.34
+ * [#5885](https://github.com/apache/incubator-nuttx/pull/#5885) sim/rptun: rsc must set rpmsg_vdev.config_len
+ * [#5756](https://github.com/apache/incubator-nuttx/pull/#5756) sim: Enable garbage collection of unused input sections
+ * [#5988](https://github.com/apache/incubator-nuttx/pull/#5988) arch/sim: support simulator keyboard devices
+ * [#6043](https://github.com/apache/incubator-nuttx/pull/#6043) sim: bt: Add specific bluetooth HCI number id
+
+# Driver Support
+
+## New Driver Support
+
+ * [#6030](https://github.com/apache/incubator-nuttx/pull/#6030) Add Sensirion's SCD41 driver and minor fix
+ * [#6412](https://github.com/apache/incubator-nuttx/pull/#6412) drivers/sensors: add driver for as5048a magnetic encoder
+ * [#6345](https://github.com/apache/incubator-nuttx/pull/#6345) drivers: video: add isx019 camera sensor
+ * [#6491](https://github.com/apache/incubator-nuttx/pull/#6491) LITEETH peripheral driver support
+ * [#6525](https://github.com/apache/incubator-nuttx/pull/#6525) drivers: add support of pwm capture driver
+ * [#6537](https://github.com/apache/incubator-nuttx/pull/#6537) drivers/ipcc: add Inter Processor Communication driver
+ * [#5835](https://github.com/apache/incubator-nuttx/pull/#5835) LITESDCARD peripheral driver support
+ * [#6510](https://github.com/apache/incubator-nuttx/pull/#6510) Support for 2.13 inch display v2
+ * [#6634](https://github.com/apache/incubator-nuttx/pull/#6634) drivers/lcd: Add support to use APA102 LED Matrix as LCD Display
+ * [#6408](https://github.com/apache/incubator-nuttx/pull/#6408) e-ink ssd1680 driver
+ * [#6353](https://github.com/apache/incubator-nuttx/pull/#6353) Add driver for WIZnet W5500 Ethernet controller
+
+## Bug Fixes and Improvements
+
+ * [#6068](https://github.com/apache/incubator-nuttx/pull/#6068) driver/mmcsdio: do not hold the semaphore on interrupt context
+ * [#6019](https://github.com/apache/incubator-nuttx/pull/#6019) power/governor: Remove the duplicated function prototype
+ * [#6021](https://github.com/apache/incubator-nuttx/pull/#6021) Test/wm8904balance
+ * [#6018](https://github.com/apache/incubator-nuttx/pull/#6018) Increase audio_comp driver flexibility
+ * [#5927](https://github.com/apache/incubator-nuttx/pull/#5927) Minor improve for mmcsd
+ * [#5747](https://github.com/apache/incubator-nuttx/pull/#5747) drivers/timers: rename notification parameter oneshot to periodic
+ * [#5849](https://github.com/apache/incubator-nuttx/pull/#5849) pm: remove unnecessary depends on OSINIT_OS_READY
+ * [#5853](https://github.com/apache/incubator-nuttx/pull/#5853) driver/syslog: Add microseconds after date time
+ * [#5901](https://github.com/apache/incubator-nuttx/pull/#5901) power: unify lock sates and move pm_auto_update to outer dir
+ * [#5990](https://github.com/apache/incubator-nuttx/pull/#5990) fix uinput rpmsg logic error
+ * [#5816](https://github.com/apache/incubator-nuttx/pull/#5816) drivers/mtd/mtd_config: set different format versions for named and ID modes
+ * [#5736](https://github.com/apache/incubator-nuttx/pull/#5736) driver/uinput: add cross core control function
+ * [#6127](https://github.com/apache/incubator-nuttx/pull/#6127) pm: Move pm_initialize call from driver_initialize to xxx_pminitialize
+ * [#6053](https://github.com/apache/incubator-nuttx/pull/#6053) drivers: remove unimplemented open/close/ioctl interfaces
+ * [#6157](https://github.com/apache/incubator-nuttx/pull/#6157) drivers: mtd: fix null buffer reference
+ * [#6159](https://github.com/apache/incubator-nuttx/pull/#6159) driver/ioexpander: remove response about irq_handler
+ * [#6186](https://github.com/apache/incubator-nuttx/pull/#6186) Stm32f746 audio
+ * [#6164](https://github.com/apache/incubator-nuttx/pull/#6164) drivers/audio/cxd56: Workaround for HW issue of CXD56
+ * [#6655](https://github.com/apache/incubator-nuttx/pull/#6655) driver/syslog: support syslog_rpmsg client and server chardev
+ * [#6657](https://github.com/apache/incubator-nuttx/pull/#6657) drivers/lcd/st7789: update putarea() method
+ * [#6661](https://github.com/apache/incubator-nuttx/pull/#6661) drivers/syslog: Call up_nputs in syslog_default_write
+ * [#6668](https://github.com/apache/incubator-nuttx/pull/#6668) driver/ioe_rpmsg: split server and client ept_cb to simplify code
+ * [#6246](https://github.com/apache/incubator-nuttx/pull/#6246) drivers/sdio: Call SDIO_LOCK before and after the transaction
+ * [#5736](https://github.com/apache/incubator-nuttx/pull/#5736) driver/uinput: add cross core control function
+ * [#5718](https://github.com/apache/incubator-nuttx/pull/#5718) drivers/can: optimize can driver reader side
+ * [#6789](https://github.com/apache/incubator-nuttx/pull/#6789) drivers/net: make sure that net driver d_buf is 16-bit aligned
+ * [#6708](https://github.com/apache/incubator-nuttx/pull/#6708) driver/sensors[2]: enhance and update sensor driver
+ * [#6703](https://github.com/apache/incubator-nuttx/pull/#6703) driver/sensor: add calibrate interface for sensor driver
+ * [#6704](https://github.com/apache/incubator-nuttx/pull/#6704) driver/sensors: enhance sensor driver
+ * [#6696](https://github.com/apache/incubator-nuttx/pull/#6696) driver/sensor: add sensor type of cap and wake_gesture
+ * [#6698](https://github.com/apache/incubator-nuttx/pull/#6698) driver/power:add ioctl cmd for voltage info and protocol and add update event mask
+ * [#6727](https://github.com/apache/incubator-nuttx/pull/#6727) power: add PM_IDLE_DOMAIN to pm.h and remove definations
+ * [#6759](https://github.com/apache/incubator-nuttx/pull/#6759) drivers: Reorganize the power related code layout
+ * [#6748](https://github.com/apache/incubator-nuttx/pull/#6748) power/axp202: Replace battery_charger_operations_s * with battery_charger_dev_s
+ * [#6761](https://github.com/apache/incubator-nuttx/pull/#6761) drivers/wireless/gs2200m: Fix short bit length
+ * [#6743](https://github.com/apache/incubator-nuttx/pull/#6743) drivers/battery: Handle the early changed event correctly
+ * [#6673](https://github.com/apache/incubator-nuttx/pull/#6673) power related update
+ * [#6653](https://github.com/apache/incubator-nuttx/pull/#6653) Driver/sensor: enhance sensor driver to support uorb and multi core access sensor by rpmsg
+ * [#6331](https://github.com/apache/incubator-nuttx/pull/#6331) drivers/mtd/smart.c: Modify devname[] size to avoid overflow
+ * [#6414](https://github.com/apache/incubator-nuttx/pull/#6414) drivers/syslog: fix deadlock by reverting part of the changes from b88a8cf39ff1019ad787c4316b22ce29c7daa2dc
+ * [#6435](https://github.com/apache/incubator-nuttx/pull/#6435) drivers/syslog: reuse rmutex_t for the recursive check
+ * [#6419](https://github.com/apache/incubator-nuttx/pull/#6419) drvers/mmcsd/sdio: function enable should wait for CCCR_IORDY
+ * [#6500](https://github.com/apache/incubator-nuttx/pull/#6500) drivers: serial: Add error for insuff buffer
+ * [#6526](https://github.com/apache/incubator-nuttx/pull/#6526) drivers/lcd: getplaneinfo fix for ST7789,ST7565 and skeleton driver
+ * [#6513](https://github.com/apache/incubator-nuttx/pull/#6513) drivers/lcd: Fix regression on ILI9341 introduced after #6465
+ * [#6544](https://github.com/apache/incubator-nuttx/pull/#6544) Make sensor mpu60x0 more configurable in menuconfig
+ * [#6564](https://github.com/apache/incubator-nuttx/pull/#6564) drivers/lcd_framebuffer: Optimize updateearea for the full screan case
+ * [#6577](https://github.com/apache/incubator-nuttx/pull/#6577) drivers/segger: Support the customize SEGGER_RTT_[BUFFER_]SECTION
+ * [#6113](https://github.com/apache/incubator-nuttx/pull/#6113) pipe: Increase buffer size by one byte to ompensate the full indicator
+ * [#6455](https://github.com/apache/incubator-nuttx/pull/#6455) usbhost_cdcacm: fix error with interrupt IN endpoint
+ * [#6369](https://github.com/apache/incubator-nuttx/pull/#6369) Fix in default syslog date format
+ * [#6601](https://github.com/apache/incubator-nuttx/pull/#6601) usbdev/usbmsc: introduce USBMSC_WRMULTIPLE for faster writes
+ * [#6571](https://github.com/apache/incubator-nuttx/pull/#6571) fix sd can't usage when mult-block receive errro
+ * [#6551](https://github.com/apache/incubator-nuttx/pull/#6551) framebuffer for e-ink display. Added callback function to redraw
+ * [#6456](https://github.com/apache/incubator-nuttx/pull/#6456) mmcsd/sdio: correct return value of sdio_probe()
+ * [#6363](https://github.com/apache/incubator-nuttx/pull/#6363) Added color reset when a syslog channel is added
+ * [#6362](https://github.com/apache/incubator-nuttx/pull/#6362) syslog Fixed separation of log sessions
+ * [#5886](https://github.com/apache/incubator-nuttx/pull/#5886) syslog_rpmsg related update
+ * [#5803](https://github.com/apache/incubator-nuttx/pull/#5803) syslog: Change g_syslog_default_sem to static function variable
+ * [#5801](https://github.com/apache/incubator-nuttx/pull/#5801) syslog/channel: minor fix to avoid unreachabled return
+ * [#6171](https://github.com/apache/incubator-nuttx/pull/#6171) syslog: Fixed a potential buffer overflow issue
+ * [#6618](https://github.com/apache/incubator-nuttx/pull/#6618) Optimize syslog_write performance
+ * [#6669](https://github.com/apache/incubator-nuttx/pull/#6669) lcd/apa102: Fix APA102 RGB LED Matrix interleaving issue
+ * [#6639](https://github.com/apache/incubator-nuttx/pull/#6639) lcd/apa102: Add putarea() support for faster rendering
+ * [#6633](https://github.com/apache/incubator-nuttx/pull/#6633) drivers/bch: Adjust f_pos with the correct value
+ * [#6621](https://github.com/apache/incubator-nuttx/pull/#6621) mmcsd: Remove the not really used capacity field
+ * [#5802](https://github.com/apache/incubator-nuttx/pull/#5802) Refine the uinput implementation
+ * [#5800](https://github.com/apache/incubator-nuttx/pull/#5800) regulator/rpmsg: list delete should use safe version in loop
+ * [#5893](https://github.com/apache/incubator-nuttx/pull/#5893) ioe_rpmsg: use rptun_wait/post to resolve deadlock with usrsock
+ * [#6699](https://github.com/apache/incubator-nuttx/pull/#6699) rtc/rpmsg: when a client connection, server initiates time sync
+ * [#6706](https://github.com/apache/incubator-nuttx/pull/#6706) rptun related update 1
+ * [#6713](https://github.com/apache/incubator-nuttx/pull/#6713) rptun related update
+ * [#5847](https://github.com/apache/incubator-nuttx/pull/#5847) rptun related update
+ * [#6678](https://github.com/apache/incubator-nuttx/pull/#6678) stdio: need also flush stdio when flushall
+ * [#6756](https://github.com/apache/incubator-nuttx/pull/#6756) Minor update for sensor
+ * [#5880](https://github.com/apache/incubator-nuttx/pull/#5880) ramlog: support setting threshold value of ramlog for poll waiters
+ * [#5857](https://github.com/apache/incubator-nuttx/pull/#5857) c89: get rid of designated initializers in common code
+ * [#6738](https://github.com/apache/incubator-nuttx/pull/#6738) w25qxxxjv.c: Use PRIxOFF to format off_t
+ * [#6728](https://github.com/apache/incubator-nuttx/pull/#6728) w25qxxxjv.c: Ensure Quad SPI mode is enabled
+ * [#6459](https://github.com/apache/incubator-nuttx/pull/#6459) Adds device descriptor for the MB5RS2MTA 256KB FRAM part
+ * [#6465](https://github.com/apache/incubator-nuttx/pull/#6465) Add lcd_dev_s pointer to lcd_planeinfo_s to support multiple LCDs per board
+ * [#6588](https://github.com/apache/incubator-nuttx/pull/#6588) SSD1680 Landscape mode bugfix
+ * [#6319](https://github.com/apache/incubator-nuttx/pull/#6319) SSD1306: Added option to force reconfigure display after power off
+ * [#6224](https://github.com/apache/incubator-nuttx/pull/#6224) LCD SSD1306: Added custom configuration option
+ * [#6223](https://github.com/apache/incubator-nuttx/pull/#6223) LCD: Added existing FBIO_SETPOWER support to lcd_framebuffer.c
+ * [#6344](https://github.com/apache/incubator-nuttx/pull/#6344) Video: various updates
+ * [#6320](https://github.com/apache/incubator-nuttx/pull/#6320) use rmutex inside of all repeated implementation
+
+# Board Support
+## New Board Support
+
+ * [#6216](https://github.com/apache/incubator-nuttx/pull/#6216) Nucleo G474RE board support including USB Full Speed Device
+ * [#6754](https://github.com/apache/incubator-nuttx/pull/#6754) NXP S32K1XX: add initial support for NXP RDDRONE-BMS772 board
+ * [#6730](https://github.com/apache/incubator-nuttx/pull/#6730) boards/stm32f7: add intial support for ST steval-eth001v1 board
+ * [#6691](https://github.com/apache/incubator-nuttx/pull/#6691) boards: add initial support for ST steval-stlcs01v1
+ * [#6383](https://github.com/apache/incubator-nuttx/pull/#6383) boards/nucleo-wl55jc: add new board
+ * [#6448](https://github.com/apache/incubator-nuttx/pull/#6448) xtensa/esp32s3: Add esp32s3-eye board support
+ * [#6592](https://github.com/apache/incubator-nuttx/pull/#6592) boards: add initial support for stm32l0538-disco
+ * [#6528](https://github.com/apache/incubator-nuttx/pull/#6528) Added RP2040 Boards: Adafruit KB2040 and Adafruit Feather RP2040
+ * [#6620](https://github.com/apache/incubator-nuttx/pull/#6620) boards/stm32f0l0g0: common board logic support
+ * [#6189](https://github.com/apache/incubator-nuttx/pull/#6189) Sabre 6quad libcxx
+ * [#6793](https://github.com/apache/incubator-nuttx/pull/#6793) TTGO T-Display ESP32 V1.1 board support
+ * [#6266](https://github.com/apache/incubator-nuttx/pull/#6266) Nucleo f401 re oled
+ * [#6592](https://github.com/apache/incubator-nuttx/pull/#6592) boards: add initial support for stm32l0538-disco
+
+## Bug Fixes and Improvements
+
+ * [#6684](https://github.com/apache/incubator-nuttx/pull/#6684) Enable to test C++ static object in ELF
+ * [#6036](https://github.com/apache/incubator-nuttx/pull/#6036) arch, boards: cxd56xx: Minor update for spresense
+ * [#6074](https://github.com/apache/incubator-nuttx/pull/#6074) boards/arm/a1x: Remove the check CONFIG_ARCH_FPU around arm_fpuconfig
+ * [#5964](https://github.com/apache/incubator-nuttx/pull/#5964) boards/nucleo-f446re: support for SystemView
+ * [#5964](https://github.com/apache/incubator-nuttx/pull/#5964) boards/nucleo-f446re: support for SystemView
+ * [#5788](https://github.com/apache/incubator-nuttx/pull/#5788) boards/arm/samv7/same70-qmtech: add gpio driver support
+ * [#5812](https://github.com/apache/incubator-nuttx/pull/#5812) esp32s3-devkit/spiflash: Use SmartFS instead of LittleFS
+ * [#5817](https://github.com/apache/incubator-nuttx/pull/#5817) boards/arm/same70-qmtech: Remove dead code
+ * [#5841](https://github.com/apache/incubator-nuttx/pull/#5841) esp32s3-devkit: Fix the number of memory regions in some configurations
+ * [#5909](https://github.com/apache/incubator-nuttx/pull/#5909) boards/boardctl:common boardctl to read reset cause
+ * [#5751](https://github.com/apache/incubator-nuttx/pull/#5751) boards/sim/adb: Enable CONFIG_ADBD_SOCKET_SERVICE
+ * [#5763](https://github.com/apache/incubator-nuttx/pull/#5763) boards: sabre-6quad: Enable environ and path in knsh/defconfig
+ * [#5839](https://github.com/apache/incubator-nuttx/pull/#5839) boards: rv-virt: Fix stack corruption for rv64 config
+ * [#5860](https://github.com/apache/incubator-nuttx/pull/#5860) boards/arm/uid: fix pointer to int compare
+ * [#5895](https://github.com/apache/incubator-nuttx/pull/#5895) boards: correct path to RCRAWS files during file copy
+ * [#5785](https://github.com/apache/incubator-nuttx/pull/#5785) boards/arm/samv7: define MTD progmem partitions at board level
+ * [#5787](https://github.com/apache/incubator-nuttx/pull/#5787) boards/arm/samv7/same70-qmtech: add /dev/timer0 support
+ * [#5804](https://github.com/apache/incubator-nuttx/pull/#5804) boards/arm/samv7/samv71-xult: Fix mcuboot update example missing config
+ * [#6142](https://github.com/apache/incubator-nuttx/pull/#6142) boards: Switch the elf link script to binfmt/libelf/gnu-elf.ld
+ * [#6199](https://github.com/apache/incubator-nuttx/pull/#6199) boards/space: Remove the unneeded XXXEXT definition
+ * [#6138](https://github.com/apache/incubator-nuttx/pull/#6138) boards/boardctl: correct boarctl return value
+ * [#6141](https://github.com/apache/incubator-nuttx/pull/#6141) boards/risc-v: Remove "MAXOPTIMIZATION = -Os" from Make.defs
+ * [#6143](https://github.com/apache/incubator-nuttx/pull/#6143) boards: Move -fno-common from Make.defs to Toolchain.defs
+ * [#6144](https://github.com/apache/incubator-nuttx/pull/#6144) boards: Move -g from Make.defs to Toolchain.defs 
+ * [#6146](https://github.com/apache/incubator-nuttx/pull/#6146) boards: Move "-fno-exceptions -fcheck-new" from Make.defs to Toolchain.defs
+ * [#6155](https://github.com/apache/incubator-nuttx/pull/#6155) boards: Move -fno-strict-aliasing from Make.defs to Toolchain.defs
+ * [#6195](https://github.com/apache/incubator-nuttx/pull/#6195) boards: rv-virt: Add support ELF to nsh and nsh64 defconfigs
+ * [#6075](https://github.com/apache/incubator-nuttx/pull/#6075) boards/esp32_twai: Remove arm_arch.h from comment
+ * [#6081](https://github.com/apache/incubator-nuttx/pull/#6081) boards/sim: support rc.sysinit
+ * [#6654](https://github.com/apache/incubator-nuttx/pull/#6654) boardctl:add reset subreason restore factory
+ * [#6744](https://github.com/apache/incubator-nuttx/pull/#6744) boards/stm32wb/ble: adding nimble config
+ * [#6752](https://github.com/apache/incubator-nuttx/pull/#6752) NXP S32K1XX: fix LPI2C reset
+ * [#6753](https://github.com/apache/incubator-nuttx/pull/#6753) NXP S32K1XX boards: add up_perf_init to support SEGGER SystemView
+ * [#6798](https://github.com/apache/incubator-nuttx/pull/#6798) board/cxd56xx/audio: Fix CXD56 audio initialization
+ * [#5033](https://github.com/apache/incubator-nuttx/pull/#5033) boards/arm/samv7: Update mcuboot configs
+ * [#6692](https://github.com/apache/incubator-nuttx/pull/#6692) stm32f0l0g0: fixes for SPI half duplex
+ * [#6693](https://github.com/apache/incubator-nuttx/pull/#6693) boards/stm32g071b-disco: add ina230 support and gpio dev support
+ * [#6694](https://github.com/apache/incubator-nuttx/pull/#6694) esp32s3-devkit: Add support to discrete 5-way joystick
+ * [#6764](https://github.com/apache/incubator-nuttx/pull/#6764) boards: spresense: Reduce power consumption with LTE board
+ * [#6777](https://github.com/apache/incubator-nuttx/pull/#6777) boards: Enable thread local storage for some config
+ * [#6391](https://github.com/apache/incubator-nuttx/pull/#6391) esp32c3-devkit/knsh: Enable CONFIG_RAW_BINARY to convert the ELF file
+ * [#6287](https://github.com/apache/incubator-nuttx/pull/#6287) stm32h7: allow definition of HSI divider in board config
+ * [#6373](https://github.com/apache/incubator-nuttx/pull/#6373) board: nucleo-l432kc: Add missing nucleo 432kc spi driver setting
+ * [#6275](https://github.com/apache/incubator-nuttx/pull/#6275) boards/arm: Remove "LDFLAGS += -g" whichi is already added by Toolchain.defs
+ * [#6439](https://github.com/apache/incubator-nuttx/pull/#6439) boards/esp32: Increase the NTP deamon stack size as it was overflowing
+ * [#6273](https://github.com/apache/incubator-nuttx/pull/#6273) board/sim: Enable hellocxx in loadable config
+ * [#6580](https://github.com/apache/incubator-nuttx/pull/#6580) Add ws2812 bringup logic to all RP2040 boards
+ * [#6511](https://github.com/apache/incubator-nuttx/pull/#6511) esp32_board_spi:Missing Data Command pin support
+ * [#6514](https://github.com/apache/incubator-nuttx/pull/#6514) esp32-wrover-kit: Add board profile to support MMC/SDCard over SPI
+ * [#6462](https://github.com/apache/incubator-nuttx/pull/#6462) boards/risc-v/mpfs/m100pfsevp/include/board_liberodefs.h: Update memo…
+ * [#6597](https://github.com/apache/incubator-nuttx/pull/#6597) boards/xtensa: Remove outdated information
+ * [#6582](https://github.com/apache/incubator-nuttx/pull/#6582) boards: stm32f4discovery: Add iperf to rndis/defconfig
+ * [#6626](https://github.com/apache/incubator-nuttx/pull/#6626) stm32: hide STM32xx_SPI_DMA option and select it automatically
+ * [#6627](https://github.com/apache/incubator-nuttx/pull/#6627) stm32g071b-disco: add OLED support
+ * [#6542](https://github.com/apache/incubator-nuttx/pull/#6542) Nucleo Wl55JC board supports E-ink display
+ * [#6622](https://github.com/apache/incubator-nuttx/pull/#6622) arch/stm32f0l0g0: improvements for SPI and enable SPI for STM32G0
+ * [#6623](https://github.com/apache/incubator-nuttx/pull/#6623) stm32f0l0g0: improvements for ADC
+ * [#6625](https://github.com/apache/incubator-nuttx/pull/#6625) stm32f0l0g0/SPI: support for half duplex and simplex rx/tx modes
+ * [#6646](https://github.com/apache/incubator-nuttx/pull/#6646) esp32: Re-organise wireless options
+ * [#6585](https://github.com/apache/incubator-nuttx/pull/#6585) esp32s3-devkit: Add support to ST7735 SPI LCD
+ * [#6648](https://github.com/apache/incubator-nuttx/pull/#6648) Added Adafruit QT Py RP2040 board and made UART, SPI, and I2C configuration more flexible
+
+# File System
+
+## Bug Fixes and Improvements
+
+ * [#6726](https://github.com/apache/incubator-nuttx/pull/#6726) vfs: Remove the unnessary check when CONFIG_DEBUG_MM enable
+ * [#6007](https://github.com/apache/incubator-nuttx/pull/#6007) fs/vfs: fix st_mode mask check
+ * [#6002](https://github.com/apache/incubator-nuttx/pull/#6002) fs/poll: change format for type pollevent_t
+ * [#5797](https://github.com/apache/incubator-nuttx/pull/#5797) fs/rpmsgfs: minor refine the return value
+ * [#6686](https://github.com/apache/incubator-nuttx/pull/#6686) fs/hostfs: Change nuttx_dev_t from uint16_t to uint32_t
+ * [#6674](https://github.com/apache/incubator-nuttx/pull/#6674) procfs related update
+ * [#6671](https://github.com/apache/incubator-nuttx/pull/#6671) rpmsgfs related update
+ * [#6663](https://github.com/apache/incubator-nuttx/pull/#6663) fs/fs_sync/ioctl: update
+ * [#6662](https://github.com/apache/incubator-nuttx/pull/#6662) sys/sysmacros.h: support sysmacros header
+ * [#6630](https://github.com/apache/incubator-nuttx/pull/#6630) partition/gpt: Replace PRI?LBA with PRI?OFF
+ * [#6629](https://github.com/apache/incubator-nuttx/pull/#6629) procfs/mount: Unify uint[32|64]_t to fsblkcnt_t for the code simplification
+ * [#6545](https://github.com/apache/incubator-nuttx/pull/#6545) fs/fat: Fix a bug that long file name cannot be found
+ * [#6401](https://github.com/apache/incubator-nuttx/pull/#6401) fs/mqueue: skip nxmq_pollnotify() if no poll waiters
+ * [#6347](https://github.com/apache/incubator-nuttx/pull/#6347) fs/cromfs: Fixed a hardFault caused by unaligned memory access
+ * [#6104](https://github.com/apache/incubator-nuttx/pull/#6104) fs:oflag need consistent with psock
+ * [#6100](https://github.com/apache/incubator-nuttx/pull/#6100) fs/inode/fs_files:changes fd judgment method
+ * [#5854](https://github.com/apache/incubator-nuttx/pull/#5854) fs/romfs: fix bug about test case:examples/romfs
+ * [#5867](https://github.com/apache/incubator-nuttx/pull/#5867) fs/romfs: fix size of pointer during memory allocation
+ * [#5879](https://github.com/apache/incubator-nuttx/pull/#5879) littlefs: unify lfs error code to nuttx
+ * [#5884](https://github.com/apache/incubator-nuttx/pull/#5884) fs/files_allocate: assert when fd overflow
+ * [#5894](https://github.com/apache/incubator-nuttx/pull/#5894) fs:add _POSIX_OPEN_MAX limit to files_extend
+ * [#5899](https://github.com/apache/incubator-nuttx/pull/#5899) Fs/romfs: fix bug about compare path with same prefix
+ * [#6049](https://github.com/apache/incubator-nuttx/pull/#6049) fs/vfs/fs_truncate.c: Use ioctl to truncate on non-mountpoint inode
+ * [#5891](https://github.com/apache/incubator-nuttx/pull/#5891) opendir: use inode_find() instead when opendir()
+ * [#6024](https://github.com/apache/incubator-nuttx/pull/#6024) fs/fcntl: add O_APPEND flag judge in fcntl
+ * [#6023](https://github.com/apache/incubator-nuttx/pull/#6023) littelfs: deal with block devices w/o ioctl
+ * [#6773](https://github.com/apache/incubator-nuttx/pull/#6773) FS disable FS_LARGEFILE by default
+ * [#5934](https://github.com/apache/incubator-nuttx/pull/#5934) fs/unionfs: fix some warning and bug
+ * [#5938](https://github.com/apache/incubator-nuttx/pull/#5938) fs/procfstcbinfo: minor bug about print address
+ * [#5883](https://github.com/apache/incubator-nuttx/pull/#5883) lseek: use type:off_t for return value
+ * [#5764](https://github.com/apache/incubator-nuttx/pull/#5764) procfs: Remove mallinfo from struct procfs_meminfo_entry_s
+ * [#5924](https://github.com/apache/incubator-nuttx/pull/#5924) fs and unistd: increase OPEN_MAX by claiming a Kconfig
+ * [#5937](https://github.com/apache/incubator-nuttx/pull/#5937) fs/epoll: change type of eventset from uint8_t to uint32_t
+ * [#5807](https://github.com/apache/incubator-nuttx/pull/#5807) sys/type.h: Change pid_t from int16_t to int
+ * [#6307](https://github.com/apache/incubator-nuttx/pull/#6307) littlefs_stat: Fix directory size
+ * [#6724](https://github.com/apache/incubator-nuttx/pull/#6724) add heapcheck(memcheck) flag
+ * [#5935](https://github.com/apache/incubator-nuttx/pull/#5935) fs/rpmsgfs: fix bug about using uninit variable "times"
+ * [#5936](https://github.com/apache/incubator-nuttx/pull/#5936) fs/romfs: fix string overflow
+ * [#5844](https://github.com/apache/incubator-nuttx/pull/#5844) rpmsgfs: do NOT access the pointer when do remote ioctl
+ * [#5856](https://github.com/apache/incubator-nuttx/pull/#5856) rpmsgfs/rename: fix bug about pathname align with 8bytes
+ * [#5892](https://github.com/apache/incubator-nuttx/pull/#5892) rpmsgfs related update
+ * [#5846](https://github.com/apache/incubator-nuttx/pull/#5846) epoll: fix epoll close error, report by kasan
+ * [#6680](https://github.com/apache/incubator-nuttx/pull/#6680) poll: defalut set POLLERR POLLHUP to events
+ * [#6681](https://github.com/apache/incubator-nuttx/pull/#6681) unlink: don't do unlink with inode_semtake
+ * [#6637](https://github.com/apache/incubator-nuttx/pull/#6637) mtd/smartfs: Fix uninitialized variable
+
+# Networking
+
+## Bug Fixes and Improvements
+
+ * [#5967](https://github.com/apache/incubator-nuttx/pull/#5967) net:fix coverity warning
+ * [#5972](https://github.com/apache/incubator-nuttx/pull/#5972) net/utils: fix IPv4 checksum calculation
+ * [#5769](https://github.com/apache/incubator-nuttx/pull/#5769) net/local: correct the socket flags from client socket
+ * [#5750](https://github.com/apache/incubator-nuttx/pull/#5750) net/udp: clear the connection structure after free
+ * [#5748](https://github.com/apache/incubator-nuttx/pull/#5748) net/local: correct the socket flags from server socket
+ * [#6368](https://github.com/apache/incubator-nuttx/pull/#6368) net/tcp: Hold the net lock in tcp_timer_expiry
+ * [#6355](https://github.com/apache/incubator-nuttx/pull/#6355) tcp: remove all devif_timer
+ * [#6154](https://github.com/apache/incubator-nuttx/pull/#6154) net/tcp:make initial tcp port more random
+ * [#5794](https://github.com/apache/incubator-nuttx/pull/#5794) netdb/getaddrinfo: fix NULL pointer reference
+ * [#5791](https://github.com/apache/incubator-nuttx/pull/#5791) netinitialize: call xxx_netinitialize unconditionally
+ * [#5770](https://github.com/apache/incubator-nuttx/pull/#5770) net/sockopt: bypass the SO_RCVBUF/SO_SNDBUF to usrsock
+ * [#6735](https://github.com/apache/incubator-nuttx/pull/#6735) make sure conn's domain is matched with addr's family
+ * [#6608](https://github.com/apache/incubator-nuttx/pull/#6608) net: Fix frame count check fail and race condition
+ * [#6330](https://github.com/apache/incubator-nuttx/pull/#6330) tcp: move wd_timer from wifi driver to tcp stack
+ * [#6289](https://github.com/apache/incubator-nuttx/pull/#6289) net: fix the build when CONFIG_NET_TCP_WRITE_BUFFERS is not enabled
+ * [#6262](https://github.com/apache/incubator-nuttx/pull/#6262) icmp: Fixed replies to broadcasts
+ * [#6161](https://github.com/apache/incubator-nuttx/pull/#6161) Fix udp recvfrom to correctly return addrlen
+ * [#5799](https://github.com/apache/incubator-nuttx/pull/#5799) net/netdev: fix switch case missing break
+ * [#6398](https://github.com/apache/incubator-nuttx/pull/#6398) net/tcp: wave hands on background
+ * [#6297](https://github.com/apache/incubator-nuttx/pull/#6297) net/tcp: Zero keeptimer in case caller set keepalive to false
+ * [#6290](https://github.com/apache/incubator-nuttx/pull/#6290) net/tcp: Use the decrease timer in TCP_TIME_WAIT/TCP_FIN_WAIT_2
+ * [#6264](https://github.com/apache/incubator-nuttx/pull/#6264) Fix ENOENT errors when polling on Netlink socket
+ * [#6428](https://github.com/apache/incubator-nuttx/pull/#6428) net/tcp: d_appdata should remove the tcp specific option field
+ * [#6399](https://github.com/apache/incubator-nuttx/pull/#6399) Packet dropped in IPv4/v6 input is now an info, not a warning
+ * [#6770](https://github.com/apache/incubator-nuttx/pull/#6770) delay creating DNS bind socket
+ * [#6751](https://github.com/apache/incubator-nuttx/pull/#6751) Net thread-safe ether_ntoa_r & inet_ntoa_r
+ * [#6740](https://github.com/apache/incubator-nuttx/pull/#6740) [TCP] Close RAM usage optimization
+ * [#6747](https://github.com/apache/incubator-nuttx/pull/#6747) Fix notify disassocitaion
+ * [#6702](https://github.com/apache/incubator-nuttx/pull/#6702) tcp: check option length before d_len update
+ * [#6701](https://github.com/apache/incubator-nuttx/pull/#6701) udp: Use s_sndtimeo as the actual timeout time
+ * [#6700](https://github.com/apache/incubator-nuttx/pull/#6700) netdev: add return value for ifup / ifdown
+ * [#6563](https://github.com/apache/incubator-nuttx/pull/#6563) net/tcp: discard connect reference before free
+ * [#6562](https://github.com/apache/incubator-nuttx/pull/#6562) net/tcp: fix regression of invalid update the rexmit_seq in buffer mode
+ * [#6543](https://github.com/apache/incubator-nuttx/pull/#6543) net_if: add IFF_LOOPBACK/POINTOPOINT/MULTICAST/BROADCAST
+ * [#6529](https://github.com/apache/incubator-nuttx/pull/#6529) net: Ensure sendmsg and sendfile return -EAGAIN in case of timeout
+ * [#6519](https://github.com/apache/incubator-nuttx/pull/#6519) netdev/carrier: check the IF stautus before carrier
+ * [#6451](https://github.com/apache/incubator-nuttx/pull/#6451) net/tcp(buffered): retransmit only one the earliest not acknowledged segment
+ * [#6640](https://github.com/apache/incubator-nuttx/pull/#6640) net/slip: Rename and clarify orphaned Kconfig options
+ * [#6590](https://github.com/apache/incubator-nuttx/pull/#6590) net/poll: fix race condition if connect free before poll teardown
+ * [#6589](https://github.com/apache/incubator-nuttx/pull/#6589) net/tcp: fix assertion of fallback connection alloc
+ * [#5943](https://github.com/apache/incubator-nuttx/pull/#5943) This PR mainly contains some USRSOCK related changes
+ * [#6041](https://github.com/apache/incubator-nuttx/pull/#6041) rpmsg_usrsock: Support the wireless ioctl which contain pointer
+ * [#5945](https://github.com/apache/incubator-nuttx/pull/#5945) fix:Remove udp send large pkt assert
+ * [#5944](https://github.com/apache/incubator-nuttx/pull/#5944) net: tcp/udp/icmp/icmpv6 add FIONSPACE support
+ * [#5926](https://github.com/apache/incubator-nuttx/pull/#5926) local socket: cancel assert about backlog exceed 255
+ * [#5933](https://github.com/apache/incubator-nuttx/pull/#5933) netdev_file_ioctl: Fix fcntl F_SETFL O_NONBLOCK regression
+ * [#5889](https://github.com/apache/incubator-nuttx/pull/#5889) rpmsg_socket: fix kasan report error
+ * [#5848](https://github.com/apache/incubator-nuttx/pull/#5848) local_socket: default set block mode if accept() a new socket
+ * [#5755](https://github.com/apache/incubator-nuttx/pull/#5755) wireless/80211: update the 80211 header
+ * [#6432](https://github.com/apache/incubator-nuttx/pull/#6432) wireless/bcm43xxx: add extended join parameters
+ * [#6358](https://github.com/apache/incubator-nuttx/pull/#6358) wireless: add Wireless statistics definition
+ * [#6420](https://github.com/apache/incubator-nuttx/pull/#6420) wireless/bcm43xxx: add support of bcm43013 chip
+ * [#6463](https://github.com/apache/incubator-nuttx/pull/#6463) wireless/bcm43xxx: add status print on bcmf_wl_auth_event_handler()
+ * [#6461](https://github.com/apache/incubator-nuttx/pull/#6461) wireless/bcm43xxx: Don't call bcmf_board_setup_oob_irq in bcmf_sdio_thread
+ * [#6457](https://github.com/apache/incubator-nuttx/pull/#6457) wireless/bcm43xxx: configurable buffer size of escan result
+ * [#6453](https://github.com/apache/incubator-nuttx/pull/#6453) wireless/bcm43xxx: replace all busy delay to nxsig_usleep
+ * [#6447](https://github.com/apache/incubator-nuttx/pull/#6447) bcm43xxx: Remove bcmf_txavail_work and resue bcmf_tx_poll_work
+ * [#6446](https://github.com/apache/incubator-nuttx/pull/#6446) wireless/bcm43xxx: improve throughput of net driver
+ * [#6444](https://github.com/apache/incubator-nuttx/pull/#6444) wireless/bcm43xxx: configurable schedule priority of daemon thread
+ * [#6442](https://github.com/apache/incubator-nuttx/pull/#6442) wireless/bcm43xxx: fix typo sq_init() -> dq_init()
+ * [#6441](https://github.com/apache/incubator-nuttx/pull/#6441) wireless/bcm43xx: replace sem_wait to uninterruptible version
+ * [#6431](https://github.com/apache/incubator-nuttx/pull/#6431) wirless/sdio: frame length should with guard bound
+ * [#6430](https://github.com/apache/incubator-nuttx/pull/#6430) wireless/bcm430xx: rename chip minor id to 'x'
+ * [#6427](https://github.com/apache/incubator-nuttx/pull/#6427) wireless/bcm43xxx: load nvram from file system
+ * [#6561](https://github.com/apache/incubator-nuttx/pull/#6561) wireless/bcm43xxx: only break out the send loop if no data
+ * [#6560](https://github.com/apache/incubator-nuttx/pull/#6560) wireless/bcm43xxx: remove flowctrl check
+ * [#6559](https://github.com/apache/incubator-nuttx/pull/#6559) wireless/bcm43xxx: filter out the bssi with same ssid name
+ * [#6558](https://github.com/apache/incubator-nuttx/pull/#6558) wireless/bcm43xxx: mac address does not need to be updated in ifup
+ * [#6557](https://github.com/apache/incubator-nuttx/pull/#6557) wireless/bcm43xxx: discard auth event if netdev down
+ * [#6556](https://github.com/apache/incubator-nuttx/pull/#6556) wireless/bcm43xxx: set listen interval on lowpower
+ * [#6555](https://github.com/apache/incubator-nuttx/pull/#6555) wireless/bcm43xxx: country code should terminating with null
+ * [#6554](https://github.com/apache/incubator-nuttx/pull/#6554) wireless/bcm43xxx: fix memory leak if tx fail
+ * [#6533](https://github.com/apache/incubator-nuttx/pull/#6533) wireless/bcm43xxx: enable tx flow control to improve performance
+ * [#6524](https://github.com/apache/incubator-nuttx/pull/#6524) wireless/bcm43xxx: replace private queue implement to list_node
+ * [#6523](https://github.com/apache/incubator-nuttx/pull/#6523) wireless/bcm43xxx: remove unused tx_queue_count
+ * [#6518](https://github.com/apache/incubator-nuttx/pull/#6518) wireless/bcm43xxx: add dynamic kso control support
+ * [#6517](https://github.com/apache/incubator-nuttx/pull/#6517) wireless/bcm43xxx: correct the return value
+ * [#6501](https://github.com/apache/incubator-nuttx/pull/#6501) wireless/bcm43xxx: add get country code support
+ * [#6494](https://github.com/apache/incubator-nuttx/pull/#6494) wireless/bcm43xxx: add set country code support
+ * [#6488](https://github.com/apache/incubator-nuttx/pull/#6488) wireless/bcm43xxx: add auto power saving support
+ * [#6481](https://github.com/apache/incubator-nuttx/pull/#6481) wireless/bcm43xxx: remove small chunks to improve clm download speed
+ * [#6480](https://github.com/apache/incubator-nuttx/pull/#6480) wireless/bcm43xxx: prefer HPWORK if bcmf task has higher priority than HPWORK
+ * [#6479](https://github.com/apache/incubator-nuttx/pull/#6479) wireless/bcm43xxx: merge frame send to once to improve the performance
+ * [#6471](https://github.com/apache/incubator-nuttx/pull/#6471) wireless/bcm43xxx: enable power saving on netdev up/down
+ * [#6470](https://github.com/apache/incubator-nuttx/pull/#6470) wireless/bcm43xxx: add customized MAC address support
+ * [#6469](https://github.com/apache/incubator-nuttx/pull/#6469) wireless/bcm43xxx: remove global variable for bcmf_sdio_thread
+ * [#6467](https://github.com/apache/incubator-nuttx/pull/#6467) wireless/bcm43xxx: handle disassoc correctly
+ * [#6466](https://github.com/apache/incubator-nuttx/pull/#6466) wireless/bcm43xxx: sort scan result by rssi
+ * [#6464](https://github.com/apache/incubator-nuttx/pull/#6464) wireless/bcm43xxx: add more ioctl command support
+ * [#6636](https://github.com/apache/incubator-nuttx/pull/#6636) wireless/ieee802154: Don't set IFF_DOWN in mac802154netdev_register
+ * [#6695](https://github.com/apache/incubator-nuttx/pull/#6695) bluetooth: fixing BT buffer addref/release balance
+ * [#6782](https://github.com/apache/incubator-nuttx/pull/#6782) bluetooth: fix net lock imbalance in drop casse
+ * [#6672](https://github.com/apache/incubator-nuttx/pull/#6672) rpmsg socket related update
+ * [#6670](https://github.com/apache/incubator-nuttx/pull/#6670) local socket related update
+
+Compatibility Concerns
+
+#6276 - Remove -nostartfiles and -nodefaultlibs from individual board Make.defs.
+
+#6256 - Remove ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef and ARCHWARNINGSXX = -Wall -Wshadow -Wundef and then remove ARCHWARNINGS and ARCHWARNINGSXX from CFLAGS and CXXFLAGS.
+
+#5897 - Remove -fno-exceptions -fcheck-new from ARCHCFLAGS and ARCHCXXFLAGS and change ARCHCFLAGS = to ARCHCFLAGS += and ARCHCXXFLAGS = to ARCHCXXFLAGS +=. C++ exceptions are now managed centrally by Kconfig options CONFIG_CXX_EXCEPTION and CONFIG_CXX_RTTI.
+
+#6144 - Remove from each board:
+
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  ARCHOPTIMIZATION = -g
+endif
+
+and
+
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  LDFLAGS += -g
+endif
+
+as these are now managed centrally by Kconfig option CONFIG_DEBUG_SYMBOLS.
+
+#6155 - Remove from each board:
+
+ifneq ($(CONFIG_DEBUG_NOOPT),y)
+  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
+endif
+
+as these are now managed centrally by Kconfig options CONFIG_DEBUG_OPTLEVEL and CONFIG_DEBUG_FULLOPT.
