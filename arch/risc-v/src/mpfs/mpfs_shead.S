@@ -38,7 +38,7 @@
 
   .extern __trap_vec
 
-  .section .start
+  .section .start, "ax"
   .global __start
 
 /****************************************************************************
