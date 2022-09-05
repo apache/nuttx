@@ -56,7 +56,11 @@ CSRCS += gnu_unwind_find_exidx.c
 endif
 
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
+ifeq ($(CONFIG_ARCH_CHIP_TLSR82),y)
+ASRCS += tc32_setjmp.S
+else
 ASRCS += arch_setjmp.S
+endif
 endif
 
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
