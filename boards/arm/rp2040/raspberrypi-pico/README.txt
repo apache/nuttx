@@ -71,7 +71,7 @@ Defconfigs
 - nsh
     Minimum configuration with NuttShell
 
-- nsh_flash
+- nsh-flash
     NuttX shell with SMART flash filesystem.
 
 - nshsram

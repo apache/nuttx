@@ -156,6 +156,12 @@ nsh
 
 Basic NuttShell configuration (console enabled in UART0, at 115200 bps).
 
+nsh-flash
+---------
+
+Basic NuttShell configuration (console enabled in UART0, at 115200 bps
+with SMART flash filesystem.
+
 nshsram
 -------
 

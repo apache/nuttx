@@ -2031,7 +2031,7 @@ int smartfs_extendfile(FAR struct smartfs_mountpt_s *fs,
           /* Copy the new sector to the old one and chain it */
 
           header = (struct smartfs_chain_header_s *) sf->buffer;
-          SMARTFS_SET_NEXTSECTOR(header, (uint16_t)ret);
+          SMARTFS_SET_NEXTSECTOR(header, ret);
 
           /* Now sync the file to write this sector out */
 
@@ -2087,7 +2087,7 @@ int smartfs_extendfile(FAR struct smartfs_mountpt_s *fs,
               /* Copy the new sector to the old one and chain it */
 
               header = (struct smartfs_chain_header_s *)fs->fs_rwbuffer;
-              SMARTFS_SET_NEXTSECTOR(header, (uint16_t)ret);
+              SMARTFS_SET_NEXTSECTOR(header, ret);
 
               readwrite.offset = offsetof(struct smartfs_chain_header_s,
                                           nextsector);

@@ -129,7 +129,7 @@ int process_f2_frame_header(FAR bcmf_interface_dev_t *gbus,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: read_f2_frame
+ * Name: bcmf_gspi_read_f2_frame
  *
  * Description:
  *    Read and process an F2 frame.

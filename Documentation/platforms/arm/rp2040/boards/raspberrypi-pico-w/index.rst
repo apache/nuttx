@@ -1,5 +1,5 @@
 ===============================
-Raspberry Pi Pico
+Raspberry Pi Pico W
 ===============================
 
 The `Raspberry Pi Pico <https://www.raspberrypi.com/products/raspberry-pi-pico/>`_ is a general purpose board supplied by
@@ -38,6 +38,7 @@ Buttons and LEDs
 ================
 
 LED controlled by GPIO0 of the wireless chip (not the RP2040 processor).
+Use rp2040_extra_gpio_put(0,value) to control this LED.
 
 A BOOTSEL button, which if held down when power is first
 applied to the board, will cause the RP2040 to boot into programming
@@ -178,6 +179,12 @@ nsh
 ---
 
 Basic NuttShell configuration (console enabled in UART0, at 115200 bps).
+
+nsh-flash
+---------
+
+Basic NuttShell configuration (console enabled in UART0, at 115200 bps
+with SMART flash filesystem.
 
 nshsram
 -------
