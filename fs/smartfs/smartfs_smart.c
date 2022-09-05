@@ -853,7 +853,7 @@ static ssize_t smartfs_write(FAR struct file *filep, FAR const char *buffer,
           /* Copy the new sector to the old one and chain it */
 
           header = (struct smartfs_chain_header_s *) sf->buffer;
-          *((uint16_t *) header->nextsector) = (uint16_t) ret;
+          SMARTFS_SET_NEXTSECTOR(header, ret);
 
           /* Now sync the file to write this sector out */
 
@@ -909,7 +909,7 @@ static ssize_t smartfs_write(FAR struct file *filep, FAR const char *buffer,
               /* Copy the new sector to the old one and chain it */
 
               header = (struct smartfs_chain_header_s *) fs->fs_rwbuffer;
-              *((uint16_t *) header->nextsector) = (uint16_t) ret;
+              SMARTFS_SET_NEXTSECTOR(header, ret);
               readwrite.offset = offsetof(struct smartfs_chain_header_s,
                 nextsector);
               readwrite.buffer = (FAR uint8_t *)header->nextsector;

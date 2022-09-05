@@ -72,6 +72,9 @@ Defconfigs
 - nsh
     Minimum configuration with NuttShell
 
+- nsh-flash
+    NuttX shell with SMART flash filesystem.
+
 - nshsram
     Load NuttX binary to SRAM
   
