@@ -45,10 +45,6 @@
 
 #include "smartfs.h"
 
-#ifdef CONFIG_DEBUG_FS_INFO
-#  include <stdio.h>
-#endif
-
 /****************************************************************************
  * Private Type
  ****************************************************************************/
@@ -532,8 +528,6 @@ static ssize_t smartfs_read(FAR struct file *filep, char *buffer,
 
   DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
 
-  finfo("Reading %u bytes\n", (unsigned) buflen);
-
   /* Recover our private data from the struct file instance */
 
   sf    = filep->f_priv;
@@ -639,18 +633,6 @@ static ssize_t smartfs_read(FAR struct file *filep, char *buffer,
 
   /* Return the number of bytes we read */
 
-#ifdef CONFIG_DEBUG_FS_INFO
-  finfo("Read %lu bytes:", bytesread);
-  for (uint32_t i = 0; i < bytesread; ++i)
-    {
-      if ((i & 0x0f) == 0) printf("\n    ");
-
-      printf("%02x, ", buffer[i]);
-    }
-
-  printf("\n");
-#endif
-
   ret = bytesread;
 
 errout_with_semaphore:
@@ -674,18 +656,6 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
   int                       ret;
 
   DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
-
-#ifdef CONFIG_DEBUG_FS_INFO
-  finfo("Writing %lu bytes:", (uint32_t)buflen);
-  for (uint32_t i = 0; i < buflen; ++i)
-    {
-      if ((i & 0x0f) == 0) printf("\n    ");
-
-      printf("%02x, ", buffer[i]);
-    }
-
-  printf("\n");
-#endif
 
   /* Recover our private data from the struct file instance */
 
@@ -882,7 +852,7 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
           /* Copy the new sector to the old one and chain it */
 
           header = (struct smartfs_chain_header_s *) sf->buffer;
-          SMARTFS_SET_NEXTSECTOR(header, (uint16_t) ret);
+          SMARTFS_SET_NEXTSECTOR(header, ret);
 
           /* Now sync the file to write this sector out */
 
@@ -938,7 +908,7 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
               /* Copy the new sector to the old one and chain it */
 
               header = (struct smartfs_chain_header_s *) fs->fs_rwbuffer;
-              SMARTFS_SET_NEXTSECTOR(header, (uint16_t) ret);
+              SMARTFS_SET_NEXTSECTOR(header, ret);
               readwrite.offset = offsetof(struct smartfs_chain_header_s,
                 nextsector);
               readwrite.buffer = (uint8_t *) header->nextsector;
@@ -970,8 +940,6 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
     }
 
   ret = byteswritten;
-
-  finfo("Wrote %u bytes\n", (unsigned) byteswritten);
 
 errout_with_semaphore:
   smartfs_semgive(fs);
