@@ -68,6 +68,14 @@ ifeq ($(CONFIG_NULLMTD),y)
 CSRCS += nullmtd.c
 endif
 
+ifeq ($(CONFIG_RPMSGMTD),y)
+CSRCS += rpmsgmtd.c
+endif
+
+ifeq ($(CONFIG_RPMSGMTD_SERVER),y)
+CSRCS += rpmsgmtd_server.c
+endif
+
 ifeq ($(CONFIG_MTD_AT24XX),y)
 CSRCS += at24xx.c
 endif
