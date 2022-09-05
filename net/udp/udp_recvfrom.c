@@ -257,24 +257,14 @@ static inline void udp_readahead(struct udp_recvfrom_s *pstate)
         }
 #endif
 
-      if (0
-#ifdef CONFIG_NET_IPv6
-          || src_addr_size == sizeof(struct sockaddr_in6)
-#endif
-#ifdef CONFIG_NET_IPv4
-          || src_addr_size == sizeof(struct sockaddr_in)
-#endif
-        )
+      if (pstate->ir_msg->msg_name)
         {
-          if (pstate->ir_msg->msg_name)
-            {
-              pstate->ir_msg->msg_namelen =
-                    src_addr_size > pstate->ir_msg->msg_namelen ?
-                    pstate->ir_msg->msg_namelen : src_addr_size;
+          pstate->ir_msg->msg_namelen =
+                src_addr_size > pstate->ir_msg->msg_namelen ?
+                pstate->ir_msg->msg_namelen : src_addr_size;
 
-              memcpy(pstate->ir_msg->msg_name, srcaddr,
-                     pstate->ir_msg->msg_namelen);
-            }
+          memcpy(pstate->ir_msg->msg_name, srcaddr,
+                 pstate->ir_msg->msg_namelen);
         }
 
       if (pstate->ir_msg->msg_iov->iov_len > 0)
