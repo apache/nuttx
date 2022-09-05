@@ -987,6 +987,44 @@ int open_blockdriver(FAR const char *pathname, int mountflags,
 int close_blockdriver(FAR struct inode *inode);
 
 /****************************************************************************
+ * Name: find_mtddriver
+ *
+ * Description:
+ *   Return the inode of the named MTD driver specified by 'pathname'
+ *
+ * Input Parameters:
+ *   pathname   - the full path to the named MTD driver to be located
+ *   ppinode    - address of the location to return the inode reference
+ *
+ * Returned Value:
+ *   Returns zero on success or a negated errno on failure:
+ *
+ *   ENOENT  - No MTD driver of this name is registered
+ *   ENOTBLK - The inode associated with the pathname is not an MTD driver
+ *
+ ****************************************************************************/
+
+int find_mtddriver(FAR const char *pathname, FAR struct inode **ppinode);
+
+/****************************************************************************
+ * Name: close_mtddriver
+ *
+ * Description:
+ *   Release the inode got by function find_mtddriver()
+ *
+ * Input Parameters:
+ *   pinode    - pointer to the inode
+ *
+ * Returned Value:
+ *   Returns zero on success or a negated errno on failure:
+ *
+ *   EINVAL  - inode is NULL
+ *
+ ****************************************************************************/
+
+int close_mtddriver(FAR struct inode *pinode);
+
+/****************************************************************************
  * Name: fs_fdopen
  *
  * Description:
