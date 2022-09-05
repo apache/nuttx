@@ -391,7 +391,7 @@ struct sensor_rgb           /* Type: RGB */
 struct sensor_hall          /* Type: HALL */
 {
   uint64_t timestamp;       /* Units is microseconds */
-  bool hall;                /* Boolean type */
+  int32_t hall;             /* Hall state */
 };
 
 struct sensor_ir            /* Type: Infrared Ray */
