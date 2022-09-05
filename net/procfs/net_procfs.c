@@ -124,6 +124,14 @@ static const struct netprocfs_entry_s g_net_entries[] =
     }
   },
 #  endif
+#  ifdef CONFIG_NET_TCP
+  {
+    DTYPE_FILE, "tcp",
+    {
+      netprocfs_read_tcpstats
+    }
+  },
+#  endif
 #endif
 #ifdef CONFIG_NET_ROUTE
   {
