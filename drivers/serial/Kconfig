@@ -725,15 +725,15 @@ if UART_BTH4
 
 config UART_BTH4_TXBUFSIZE
 	int "BT H4 uart TX buffer size"
-	default 1024
+	default 2048
 	---help---
-		H4 UART TX buffer size.  Default: 1024
+		H4 UART TX buffer size.  Default: 2048
 
 config UART_BTH4_RXBUFSIZE
 	int "BT H4 uart RX buffer size"
-	default 1024
+	default 8096
 	---help---
-		H4 UART RX buffer size.  Default: 1024
+		H4 UART RX buffer size.  Default: 8096
 
 config UART_BTH4_NPOLLWAITERS
 	int "Number of poll threads"
