@@ -111,6 +111,21 @@ config ARCH_CHIP_EOSS3
 	---help---
 		QuickLogic EOS S3 (ARM Cortex-M4)
 
+config ARCH_CHIP_GD32F4
+	bool "GD32MCU GD32 F4"
+	select ARCH_CORTEXM4
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FETCHADD
+	select ARCH_HAVE_I2CRESET
+	select ARCH_HAVE_HEAPCHECK
+	select ARCH_HAVE_PROGMEM
+	select ARCH_HAVE_SPI_BITORDER
+	select ARCH_HAVE_TICKLESS
+	select ARM_HAVE_MPU_UNIFIED
+	select ARMV7M_HAVE_STACKCHECK
+	---help---
+		GD32MCU GD32 architectures (ARM Cortex-M4).
+
 config ARCH_CHIP_IMX1
 	bool "NXP/Freescale iMX.1"
 	select ARCH_ARM920T
@@ -907,6 +922,7 @@ config ARCH_CHIP
 	default "dm320"		if ARCH_CHIP_DM320
 	default "efm32"		if ARCH_CHIP_EFM32
 	default "eoss3"		if ARCH_CHIP_EOSS3
+	default "gd32f4"	if ARCH_CHIP_GD32F4
 	default "imx1"		if ARCH_CHIP_IMX1
 	default "imx6"		if ARCH_CHIP_IMX6
 	default "imxrt"		if ARCH_CHIP_IMXRT
@@ -1273,6 +1289,9 @@ source "arch/arm/src/efm32/Kconfig"
 endif
 if ARCH_CHIP_EOSS3
 source "arch/arm/src/eoss3/Kconfig"
+endif
+if ARCH_CHIP_GD32F4
+source "arch/arm/src/gd32f4/Kconfig"
 endif
 if ARCH_CHIP_IMX1
 source "arch/arm/src/imx1/Kconfig"

@@ -1,0 +1,2501 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+# if ARCH_CHIP_GD32F4
+
+comment "GD32F4 Configuration Options"
+
+choice
+	prompt "GD32F4 Chip Selection"
+	default ARCH_CHIP_GD32F450ZK
+	depends on ARCH_CHIP_GD32F4
+
+config ARCH_CHIP_GD32F405VG
+	bool "GD32F405VG"
+	select GD32F4_GD32F4XX
+	select GD32F4_GD32F405
+	---help---
+		GD32 F4 Cortex M4, 1024 Kb FLASH, 192 Kb SRAM
+
+config ARCH_CHIP_GD32F407VG
+	bool "GD32F407VG"
+	select GD32F4_GD32F4XX
+	select GD32F4_GD32F407
+	---help---
+		GD32 F4 Cortex M4, 1024 Kb FLASH, 192 Kb SRAM
+
+config ARCH_CHIP_GD32F407ZK
+	bool "GD32F450ZK"
+	select GD32F4_GD32F4XX
+	select GD32F4_GD32F407
+	---help---
+		GD32 F4 Cortex M4, 3072 Kb FLASH, 256 Kb SRAM
+
+config ARCH_CHIP_GD32F450VK
+	bool "GD32F450VK"
+	select GD32F4_GD32F4XX
+	select GD32F4_GD32F450V
+	---help---
+		GD32 F4 Cortex M4, 3072 Kb FLASH, 192 Kb SRAM
+
+config ARCH_CHIP_GD32F450ZK
+	bool "GD32F450ZK"
+	select GD32F4_GD32F4XX
+	select GD32F4_GD32F450Z_I
+	---help---
+		GD32 F4 Cortex M4, 3072 Kb FLASH, 256 Kb SRAM
+
+config ARCH_CHIP_GD32F450ZI
+	bool "GD32F450ZI"
+	select GD32F4_GD32F4XX
+	select GD32F4_GD32F450Z_I
+	select GD32F4_GD32F450XI
+
+config ARCH_CHIP_GD32F450IK
+	bool "GD32F450IK"
+	select GD32F4_GD32F4XX
+	select GD32F4_GD32F450Z_I
+	---help---
+		GD32 F4 Cortex M4, 3072 Kb FLASH, 256 Kb SRAM
+
+
+endchoice # GD32F4 Chip Seclection
+
+choice
+	prompt "Override Flash Size Designator"
+	default GD32F4_FLASH_CONFIG_DEFAULT
+	depends on ARCH_CHIP_GD32F4
+	---help---
+		GD32F4 series parts numbering (sans the package type)
+		ends with a number or letter that designates the FLASH size.
+
+				Designator  Size in KiB
+				   E   	512
+				   G   	1024
+				   I   	2048
+				   K	3072
+
+		This configuration option defaults to using the configuration based
+		on that designator or the default smaller size if there is no last
+		character designator is present in the GD32F4 Chip Selection.
+
+		Examples:
+		   If the GD32F407VE is chosen, the Flash configuration would be
+		   'E', if a variant of the part with a 2048 KiB Flash is released
+		   in the future one could simply select the 'I' designator here.
+
+		   If an GD32F450xx or  Series parts is chosen the default Flash
+		   configuration will be 'E' and can be set herein to 'K' to choose
+		   the larger FLASH part.
+
+config GD32F4_FLASH_CONFIG_DEFAULT
+			bool "Default"
+
+config GD32F4_FLASH_CONFIG_E
+			bool "E 512KiB"
+
+config GD32F4_FLASH_CONFIG_G
+			bool "G 1024KiB"
+
+config GD32F4_FLASH_CONFIG_I
+			bool "I 2048KiB"
+
+config GD32F4_FLASH_CONFIG_K
+			bool "K 3072KiB"
+
+endchoice
+
+
+config GD32F4_GD32F4XX
+	bool
+	default n
+	select ARCH_HAVE_FPU
+	select GD32F4_HAVE_TCM
+	select GD32F4_HAVE_OVERDRIVE
+	select GD32F4_HAVE_EXMC
+
+
+config GD32F4_GD32F405
+	bool
+	default n
+
+config GD32F4_GD32F407
+	bool
+	default n
+	select GD32F4_HAVE_ENETMAC
+
+config GD32F4_GD32F450Z_I
+	# bool "GD32F450Z or GD32F450I"
+	bool
+	default n
+	select GD32F4_GD32F450
+	select GD32F4_HAVE_SPI5
+
+config GD32F4_GD32F450XI
+	# bool "GD32F450xI, 512K SRAM"
+	bool
+	default n
+
+config GD32F4_GD32F450V
+	bool
+	default n
+	select GD32F4_GD32F450
+
+config GD32F4_GD32F450
+	bool
+	default n
+	select GD32F4_HAVE_ENETMAC
+	select GD32F4_HAVE_IPA
+	select GD32F4_HAVE_SPI3
+	select GD32F4_HAVE_SPI4
+	select GD32F4_HAVE_TLI
+	select GD32F4_HAVE_UART6
+	select GD32F4_HAVE_UART7
+
+config GD32F4_DFU
+	bool "DFU bootloader"
+	default n
+	depends on !GD32F4_VALUELINE
+	---help---
+		Configure and position code for use with the GD MCU DFU bootloader.  Do
+		not select this option if you will load code using JTAG/SWM.
+
+
+menu "GD32 Peripheral Support"
+
+# These "hidden" settings determine whether a peripheral option is available
+# for the selected MCU
+
+config GD32F4_HAVE_OVERDRIVE
+	bool
+	default n
+
+config GD32F4_HAVE_ENETMAC
+	bool
+	default n
+
+config GD32F4_HAVE_EXMC
+	bool
+	default n
+
+config GD32F4_HAVE_IPA
+	bool
+	default n
+
+config GD32F4_HAVE_SPI3
+	bool
+	default n
+
+config GD32F4_HAVE_SPI4
+	bool
+	default n
+
+config GD32F4_HAVE_SPI5
+	bool
+	default n
+
+config GD32F4_HAVE_UART6
+	bool
+	default n
+
+config GD32F4_HAVE_UART7
+	bool
+	default n
+
+config GD32F4_HAVE_TCM
+	bool
+	default n
+
+config GD32F4_HAVE_TLI
+	bool
+	default n
+
+
+# These are the peripheral selections proper
+
+config GD32F4_ADC0
+	bool "ADC0"
+	default n
+	select GD32F4_ADC
+	select GD32F4_HAVE_ADC0_DMA if GD32F4_DMA1
+
+config GD32F4_ADC1
+	bool "ADC1"
+	default n
+	select GD32F4_ADC
+	select GD32F4_HAVE_ADC1_DMA if GD32F4_DMA1
+
+config GD32F4_ADC2
+	bool "ADC2"
+	default n
+	select GD32F4_ADC
+	select GD32F4_HAVE_ADC2_DMA if GD32F4_DMA1
+
+config GD32F4_BKPSRAM
+	bool "Enable BKP SRAM Domain"
+	default n
+
+config GD32F4_CAN0
+	bool "CAN0"
+	select CAN
+	select GD32F4_CAN
+	default n
+
+config GD32F4_CAN1
+	bool "CAN1"
+	select CAN
+	select GD32F4_CAN
+	default n
+
+config GD32F4_CRC
+	bool "CRC"
+	default n
+
+config GD32F4_CTC
+	bool "CTC"
+	default n
+
+config GD32F4_DAC0
+	bool "DAC0"
+	default n
+	select GD32F4_DAC
+
+config GD32F4_DAC1
+	bool "DAC1"
+	default n
+	select GD32F4_DAC
+
+config GD32F4_DBG
+	bool "DBG"
+	default n
+
+config GD32F4_DCI
+	bool "DCI"
+	default n
+
+config GD32F4_DMA0
+	bool "DMA0"
+	default n
+	select GD32F4_DMA
+	select ARCH_DMA
+
+config GD32F4_DMA1
+	bool "DMA1"
+	default n
+	select GD32F4_DMA
+	select ARCH_DMA
+
+config GD32F4_ENETMAC
+	bool "Ethernet MAC"
+	default n
+	depends on GD32F4_HAVE_ENETMAC
+	select NETDEVICES
+	select ARCH_HAVE_PHY
+
+config GD32F4_EXMC
+	bool "EXMC"
+	default n
+	depends on GD32F4_HAVE_EXMC
+
+config GD32F4_FMC
+	bool "FMC"
+	default n
+
+config GD32F4_PROGMEM
+	bool "PROGMEM"
+	default n
+	depends on GD32F4_FMC
+	select ARCH_HAVE_PROGMEM
+	select MTD_PROGMEM
+	# select MTD_PROGMEM_ERASESTATE
+	---help---
+		Use a part of GD32F4xx's internal flash memory as a
+		Memory-Technology-Device (MTD).
+
+config GD32F4_MTD
+	bool "MTD driver"
+	default n
+	depends on GD32F4_FMC
+	select MTD
+	select MTD_BYTE_WRITE
+	---help---
+		Initialize an MTD driver for the GD32F4xx on chip Flash, which will
+		add an entry at /dev for application access from userspace.
+
+
+config GD32F4_FWDGT
+	bool "FWDGT"
+	default n
+	select GD32F4_WDGT
+	select WATCHDOG
+
+config GD32F4_IPA
+	bool "IPA"
+	default n
+	depends on GD32F4_HAVE_IPA
+
+config GD32F4_IREF
+	bool "IREF"
+	default n
+
+config GD32F4_I2C0
+	bool "I2C0"
+	default n
+	select GD32F4_I2C
+
+config GD32F4_I2C1
+	bool "I2C1"
+	default n
+	select GD32F4_I2C
+
+config GD32F4_I2C2
+	bool "I2C2"
+	default n
+	select GD32F4_I2C
+
+config GD32F4_I2S1
+	bool "I2S1"
+	default n
+	select SPI
+	select GD32F4_I2S
+
+config GD32F4_I2S2
+	bool "I2S2"
+	default n
+	select SPI
+	select GD32F4_I2S
+
+config GD32F4_RTC
+	bool "RTC"
+	default n
+
+config GD32F4_PMU
+	bool "PMU"
+	default n
+
+config GD32F4_SDIO
+	bool "SDIO"
+	default n
+
+config GD32F4_SPI0
+	bool "SPI0"
+	default n
+	select SPI
+	select GD32F4_SPI
+
+config GD32F4_SPI1
+	bool "SPI1"
+	default n
+	select SPI
+	select GD32F4_SPI
+
+config GD32F4_SPI2
+	bool "SPI2"
+	default n
+	select SPI
+	select GD32F4_SPI
+
+config GD32F4_SPI3
+	bool "SPI3"
+	default n
+	select SPI
+	select GD32F4_SPI
+	depends on GD32F4_HAVE_SPI3
+
+config GD32F4_SPI4
+	bool "SPI4"
+	default n
+	select SPI
+	select GD32F4_SPI
+	depends on GD32F4_HAVE_SPI4
+
+config GD32F4_SPI5
+	bool "SPI5"
+	default n
+	select SPI
+	select GD32F4_SPI
+	depends on GD32F4_HAVE_SPI5
+
+config GD32F4_SYSCFG
+	bool "SYSCFG"
+	default y
+
+config GD32F4_TCMSRAM
+	bool "CMD/DATA TCMSRAM"
+	default n
+
+config GD32F4_TIMER0
+	bool "TIMER0"
+	default n
+	select GD32F4_TIMER
+
+config GD32F4_TIMER1
+	bool "TIMER1"
+	default n
+	select GD32F4_TIMER
+
+config GD32F4_TIMER2
+	bool "TIMER2"
+	default n
+	select GD32F4_TIMER
+
+config GD32F4_TIMER3
+	bool "TIMER3"
+	default n
+	select GD32F4_TIMER
+
+config GD32F4_TIMER4
+	bool "TIMER4"
+	default n
+	select GD32F4_TIMER
+
+config GD32F4_TIMER5
+	bool "TIMER5"
+	default n
+	select GD32F4_TIMER
+
+config GD32F4_TIMER6
+	bool "TIMER6"
+	default n
+	select GD32F4_TIMER
+
+config GD32F4_TIMER7
+	bool "TIMER7"
+	default n
+	select GD32F4_TIMER
+
+config GD32F4_TIMER8
+	bool "TIMER8"
+	default n
+	select GD32F4_TIMER
+
+config GD32F4_TIMER9
+	bool "TIMER9"
+	default n
+	select GD32F4_TIMER
+
+config GD32F4_TIMER10
+	bool "TIMER10"
+	default n
+	select GD32F4_TIMER
+
+config GD32F4_TIMER11
+	bool "TIMER11"
+	default n
+	select GD32F4_TIMER
+
+config GD32F4_TIMER12
+	bool "TIMER12"
+	default n
+	select GD32F4_TIMER
+
+config GD32F4_TIMER13
+	bool "TIMER13"
+	default n
+	select GD32F4_TIMER
+
+config GD32F4_TLI
+	bool "TLI"
+	default n
+
+config GD32F4_TRNG
+	bool "TRNG"
+	default n
+
+config GD32F4_USART0
+	bool "USART0"
+	default y
+	select GD32F4_USART
+
+config GD32F4_USART1
+	bool "USART1"
+	default n
+	select GD32F4_USART
+
+config GD32F4_USART2
+	bool "USART2"
+	default n
+	select GD32F4_USART
+
+config GD32F4_UART3
+	bool "UART3"
+	default n
+	select GD32F4_USART
+
+config GD32F4_UART4
+	bool "UART4"
+	default n
+	select GD32F4_USART
+
+config GD32F4_USART5
+	bool "USART5"
+	default n
+	select GD32F4_USART
+
+config GD32F4_UART6
+	bool "UART6"
+	default n
+	depends on GD32F4_HAVE_UART6
+	select GD32F4_USART
+
+config GD32F4_UART7
+	bool "UART7"
+	default n
+	depends on GD32F4_HAVE_UART7
+	select GD32F4_USART
+
+config GD32F4_USBFS
+	bool "USBFS"
+	default n
+
+config GD32F4_USBHS
+	bool "USBHS"
+	default n
+
+config GD32F4_WWDGT
+	bool "WWDGT"
+	default n
+	select GD32F4_WDGT
+	select WATCHDOG
+
+endmenu  #"GD32 Peripheral Support"
+
+
+config GD32F4_ADC
+	bool
+	default n
+
+config GD32F4_CAN
+	bool
+	default n
+
+config GD32F4_DAC
+	bool
+	default n
+
+config GD32F4_DMA
+	bool
+	default n
+
+config GD32F4_EXMC
+	bool
+	default n
+
+config GD32F4_IPA
+	bool
+	default n
+
+config GD32F4_I2C
+	bool
+	default n
+
+config GD32F4_I2S
+	bool
+	default n
+
+config GD32F4_SPI
+	bool
+	default n
+
+config GD32F4_TIMER
+	bool
+	default n
+
+config GD32F4_USART
+	bool
+	default n
+
+config GD32F4_WDGT
+	bool
+	default n
+
+
+config GD32F4_NOEXT_VECTORS
+	bool "Disable the ARMv7-M EXT vectors"
+	default n
+	---help---
+		Sometimes you may not need any Vector support beyond SysTick
+		and wish to save memory. This applies only to ARMv7-M architectures.
+
+
+choice
+	prompt "JTAG Configuration"
+	default GD32F4_JTAG_DISABLE
+	---help---
+		JTAG Enable settings (by default JTAG-DP and SW-DP are disabled)
+
+config GD32F4_JTAG_DISABLE
+	bool "Disable all JTAG clocking"
+
+config GD32F4_JTAG_FULL_ENABLE
+	bool "Enable full SWJ (JTAG-DP + SW-DP)"
+
+config GD32F4_JTAG_NOJNTRST_ENABLE
+	bool "Enable full SWJ (JTAG-DP + SW-DP) but without JNTRST"
+
+config GD32F4_JTAG_SW_ENABLE
+	bool "Set JTAG-DP disabled and SW-DP enabled"
+
+endchoice
+
+
+config GD32F4_DISABLE_IDLE_SLEEP_DURING_DEBUG
+	bool "Disable IDLE Sleep (WFI) in debug mode"
+	default n
+	---help---
+		In debug configuration, disables the WFI instruction in the IDLE loop
+		to prevent the JTAG from disconnecting. 
+
+config GD32F4_FORCEPOWER
+	bool "Force power"
+	default n
+	---help---
+		Timer and I2C devices may need to the following to force power to be applied
+		unconditionally at power up.  (Otherwise, the device is powered when it is
+		initialized).
+
+config ARCH_BOARD_GD32F4_CUSTOM_CLOCKCONFIG
+	bool "Custom clock configuration"
+	default n
+	---help---
+		Enables special, board-specific GD32F4 clock configuration.
+
+config GD32F4_TCMEXCLUDE
+	bool "Exclude TCM SRAM from the heap"
+	default y if  ARCH_DMA || LIBC_ARCH_ELF
+	depends on GD32F4_HAVE_TCM
+	---help---
+		Exclude TCM SRAM from the HEAP because it cannot be used for DMA
+		and it appears to be impossible to execute ELF modules from TCM
+		RAM.
+
+config GD32F4_TCM_PROCFS
+	bool "TCM PROCFS support"
+	default n
+	depends on !DISABLE_MOUNTPOINT && FS_PROCFS && FS_PROCFS_REGISTER
+	---help---
+		Select to build in support for /proc/tcm.  Reading from /proc/tcm
+		will provide statistics about TCM memory use similar to what you
+		would get from mallinfo() for the user heap.
+
+
+config GD32F4_EXTERNAL_RAM
+	bool "External RAM on EXMC"
+	default n
+	depends on GD32F4_EXMC
+	select ARCH_HAVE_HEAP2
+	---help---
+		In addition to internal SRAM, external RAM may be available through the EXMC.
+
+
+menu "Timer Configuration"
+	depends on GD32F4_TIMER
+
+if SCHED_TICKLESS
+
+config GD32F4_TICKLESS_TIMER
+	int "Tickless by hardware timer"
+	default 1
+	range 0 13
+	depends on !GD32F4_TICKLESS_SYSTICK
+	---help---
+		If the Tickless OS feature is enabled, then one clock must be
+		assigned to provided the timer needed by the OS.
+
+config GD32F4_TICKLESS_CHANNEL
+	int "Tickless timer channel"
+	default 0
+	range 0 3
+	---help---
+		If the Tickless OS feature is enabled, the one clock must be
+		assigned to provided the free-running timer needed by the OS
+		and one channel on that clock is needed to handle intervals.
+
+endif # SCHED_TICKLESS
+
+config GD32F4_FREERUN
+	bool "Timer free-running wrapper"
+	default n
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support a free-running timer.
+
+config GD32F4_ONESHOT
+	bool "Timer one-shot wrapper"
+	default n
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support one-shot timer.
+
+config GD32F4_ONESHOT_MAXTIMERS
+	int "Maximum number of oneshot timers"
+	default 1
+	range 1 8
+	depends on GD32F4_ONESHOT
+	---help---
+		Determines the maximum number of oneshot timers that can be
+		supported.  This setting pre-allocates some minimal support for each
+		of the timers and places an upper limit on the number of oneshot
+		timers that you can use.
+
+# config GD32F4_TIMER0
+# 	bool "TIMER0"
+# 	default n
+# 	depend on GD32F4_HAVE_TIMER0
+
+config GD32F4_TIMER0_PWM
+	bool "TIMER0 PWM"
+	default n
+	depends on GD32F4_TIMER0
+	select ARCH_HAVE_PWM_PULSECOUNT
+	---help---
+		Reserve timer 0 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.
+		If GD32F4_TIMER0 is defined then THIS following may also be defined
+		to indicate that the timer is intended to be used for pulsed output
+		modulation.
+
+
+config GD32F4_TIMER0_MODE
+	int "TIMER0 Mode"
+	default 0
+	range 0 4
+	depends on GD32F4_TIMER0_PWM
+	---help---
+		Specifies the timer mode.
+
+
+config GD32F4_TIMER0_FDTS
+	int "TIMER0 CKDIV for f_DTS"
+	default 0
+	range 0 2
+	depends on GD32F4_TIMER0_PWM
+	---help---
+		The CKDIV bits can be configured by software to specify division ratio 
+		between the timer clock (TIMER_CK) and the dead-time and sampling clock (DTS), 
+		which is used by the dead-time generators and the digital filters.
+
+config GD32F4_TIMER0_DEADTIME
+	int "TIMER0 Dead-time configure"
+	default 0
+	range 0 255
+	depends on GD32F4_TIMER0_PWM
+	---help---
+		This controls the value of the dead-time, which is inserted before the 
+		output transitions.
+
+
+config GD32F4_TIMER0_CHANNEL0
+	bool "TIMER0 PWM Channel 0"
+	default n
+	depends on GD32F4_TIMER0_PWM
+	---help---
+		Enables channel 0.
+
+config GD32F4_TIMER0_CH1MODE
+	int "TIMER0 Channel 0 compare output mode control"
+	default 6
+	range 0 7
+	depends on GD32F4_TIMER0_CHANNEL0
+	---help---
+		This controls the behavior of the output reference signal O0CPRE 
+		which drives CH0_O and CH0_ON.
+
+config GD32F4_TIMER0_CH0O
+	bool "TIMER0 Channel 0 Output"
+	default n
+	depends on GD32F4_TIMER0_CHANNEL0
+	---help---
+		Enables channel 0 output.
+
+config GD32F4_TIMER0_CH0ON
+	bool "TIMER0 Channel 0 Complementary Output"
+	default n
+	depends on GD32F4_TIMER0_CHANNEL0
+	---help---
+		Enables channel 0 Complementary Output.
+
+config GD32F4_TIMER0_CHANNEL1
+	bool "TIMER0 PWM Channel 1"
+	default n
+	depends on GD32F4_TIMER0_PWM
+	---help---
+		Enables channel 1.
+
+config GD32F4_TIMER0_CH1MODE
+	int "TIMER0 Channel 1 compare output mode control"
+	default 6
+	range 0 7
+	depends on GD32F4_TIMER0_CHANNEL1
+	---help---
+		This controls the behavior of the output reference signal O1CPRE 
+		which drives CH1_O and CH1_ON.
+
+config GD32F4_TIMER0_CH1O
+	bool "TIMER0 Channel 1 Output"
+	default n
+	depends on GD32F4_TIMER0_CHANNEL1
+	---help---
+		Enables channel 1 output.
+
+config GD32F4_TIMER0_CH1ON
+	bool "TIMER0 Channel 1 Complementary Output"
+	default n
+	depends on GD32F4_TIMER0_CHANNEL1
+	---help---
+		Enables channel 1 Complementary Output.
+
+config GD32F4_TIMER0_CHANNEL2
+	bool "TIMER0 PWM Channel 2"
+	default n
+	depends on GD32F4_TIMER0_PWM
+	---help---
+		Enables channel 2.
+
+config GD32F4_TIMER0_CH2MODE
+	int "TIMER0 Channel 2 compare output mode control"
+	default 6
+	range 0 7
+	depends on GD32F4_TIMER0_CHANNEL2
+	---help---
+		This controls the behavior of the output reference signal O2CPRE 
+		which drives CH2_O and CH2_ON.
+
+config GD32F4_TIMER0_CH2O
+	bool "TIMER0 Channel 2 Output"
+	default n
+	depends on GD32F4_TIMER0_CHANNEL2
+	---help---
+		Enables channel 2 output.
+
+config GD32F4_TIMER0_CH2ON
+	bool "TIMER0 Channel 2 Complementary Output"
+	default n
+	depends on GD32F4_TIMER0_CHANNEL2
+	---help---
+		Enables channel 2 Complementary Output.
+
+config GD32F4_TIMER0_CHANNEL3
+	bool "TIMER0 PWM Channel 3"
+	default n
+	depends on GD32F4_TIMER0_PWM
+	---help---
+		Enables channel 3.
+
+config GD32F4_TIMER0_CH3MODE
+	int "TIMER0 Channel 3 compare output mode control"
+	default 6
+	range 0 7
+	depends on GD32F4_TIMER0_CHANNEL3
+	---help---
+		This controls the behavior of the output reference signal O3CPRE 
+		which drives CH3_O and CH3_ON.
+
+config GD32F4_TIMER0_CH3O
+	bool "TIMER0 Channel 2 Output"
+	default n
+	depends on GD32F4_TIMER0_CHANNEL2
+	---help---
+		Enables channel 2 output.
+
+config GD32F4_TIMER0_CH3ON
+	bool "TIMER0 Channel 3 Complementary Output"
+	default n
+	depends on GD32F4_TIMER0_CHANNEL3
+	---help---
+		Enables channel 3 Complementary Output.
+
+
+config GD32F4_TIMER0_ADC
+	bool "TIMER0 ADC"
+	default n
+	depends on GD32F4_TIMER0 && GD32F4_ADC
+	---help---
+		Reserve timer 0 for use by ADC
+
+		Timer can be used for different purposes. When the timer0
+		is intended to be used for ADC conversion, the GD32F4_TIMER0 
+		and GD32F4_ADC should be defined before. There requires two
+		definition for ADC usage:  First, assign which timer is used to 
+		trigger the ADC. Second, and configure which ADC to sample.
+
+choice
+	prompt "Select TIMER0 ADC channel"
+	default GD32F4_TIMER0_ADC0
+	depends on GD32F4_TIMER0_ADC
+
+config GD32F4_TIMER0_ADC0
+	bool "TIMER0 ADC channel 0"
+	depends on GD32F4_ADC0
+	select GD32F4_HAVE_ADC0_TIMER
+	---help---
+		Reserve TIMER0 to trigger ADC0
+
+config GD32F4_TIMER0_ADC1
+	bool "TIMER0 ADC channel 1"
+	depends on GD32F4_ADC1
+	select GD32F4_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIMER0 to trigger ADC1
+
+config GD32F4_TIMER0_ADC2
+	bool "TIMER0 ADC channel 2"
+	depends on GD32F4_ADC2
+	select GD32F4_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIMER0 to trigger ADC2
+
+endchoice
+
+
+
+config GD32F4_HAVE_ADC0_TIMER
+	bool
+	default n
+
+config GD32F4_HAVE_ADC1_TIMER
+	bool
+	default n
+
+config GD32F4_HAVE_ADC2_TIMER
+	bool
+	default n
+
+
+config GD32F4_ADC0_SAMPLE_FREQUENCY
+	int "ADC0 Sampling Frequency"
+	default 500
+	depends on GD32F4_HAVE_ADC0_TIMER
+	---help---
+		ADC0 sampling frequency.  Default:  500Hz
+
+config GD32F4_ADC0_TIMERTRIG
+	int "ADC0 Timer Trigger Select"
+	default 0
+	range 0 4
+	depends on GD32F4_HAVE_ADC0_TIMER
+	---help---
+		Values 0:CH0 1:CH1 2:CH2 3:CH3 4:TRGO
+
+config GD32F4_ADC1_SAMPLE_FREQUENCY
+	int "ADC0 Sampling Frequency"
+	default 500
+	depends on GD32F4_HAVE_ADC1_TIMER
+	---help---
+		ADC0 sampling frequency.  Default:  500Hz
+
+config GD32F4_ADC1_TIMERTRIG
+	int "ADC0 Timer Trigger Select"
+	default 0
+	range 0 4
+	depends on GD32F4_HAVE_ADC1_TIMER
+	---help---
+		Values 0:CH0 1:CH1 2:CH2 3:CH3 4:TRGO
+
+config GD32F4_ADC2_SAMPLE_FREQUENCY
+	int "ADC0 Sampling Frequency"
+	default 500
+	depends on GD32F4_HAVE_ADC2_TIMER
+	---help---
+		ADC0 sampling frequency.  Default:  500Hz
+
+config GD32F4_ADC2_TIMERTRIG
+	int "ADC0 Timer Trigger Select"
+	default 0
+	range 0 4
+	depends on GD32F4_HAVE_ADC2_TIMER
+	---help---
+		Values 0:CH0 1:CH1 2:CH2 3:CH3 4:TRGO
+
+
+
+config GD32F4_TIMER0_DAC
+	bool "TIMER0 DAC"
+	default n
+	depends on GD32F4_TIMER0 && GD32F4_DAC
+	---help---
+		Reserve timer 0 for use by DAC
+
+		Timer can be used for different purposes. When the timer0
+		is intended to be used for DAC conversion, the GD32F4_TIMER0 
+		and GD32F4_DAC should be defined before. There requires two
+		definition for DAC usage:  First, assign which timer is used to 
+		trigger the DAC. Second, and configure which DAC channel to work.
+
+choice
+	prompt "Select TIMER DAC channel"
+	default GD32F4_TIMER0_DAC0
+	depends on GD32F4_TIMER0_DAC
+
+config GD32F4_TIMER0_DAC0
+	bool "TIMER0 DAC channel 0"
+	---help---
+		Reserve TIMER0 to trigger DAC0
+
+config GD32F4_TIMER0_DAC1
+	bool "TIMER0 DAC channel 1"
+	---help---
+		Reserve TIMER0 to trigger DAC1
+
+endchoice
+
+
+config GD32F4_TIMER0_CAP
+	bool "TIMER0 Capture"
+	default n
+	depends on GD32F4_TIMER0
+	---help---
+		Reserve timer 0 for use by Capture
+
+		Timer can be used for different purposes. To capture input is 
+		one of the usual purpose.
+
+
+menu "GD32F4 TIMER Outputs Configuration"
+
+config GD32F4_TIMER0_CH0P
+	int "TIMER0 Channel 0 Output polarity"
+	default 0
+	range 0 1
+	depends on GD32F4_TIMER0_CH0O
+	---help---
+		TIMER0 Channel 0 output polarity
+
+config GD32F4_TIMER0_CH0IDLE
+	int "TIMER0 Idle State of Channel 0 Output"
+	default 0
+	range 0 1
+	depends on GD32F4_TIMER0_CH0O
+	---help---
+		TIMER0 channel 0 output idle state
+
+config GD32F4_TIMER0_CH0NP
+	int "TIMER0 Channel 0 Complementary Output polarity"
+	default 0
+	range 0 1
+	depends on GD32F4_TIMER0_CH0ON
+	---help---
+		TIMER0 Channel 0 Complementary Output polarity
+
+config GD32F4_TIMER0_CH0NIDLE
+	int "TIMER0 Idle State of Channel 0 Complementary Output"
+	default 0
+	range 0 1
+	depends on GD32F4_TIMER0_CH0ON
+	---help---
+		TIMER0 channel 0 complementary output idle state
+
+endmenu # GD32F4 Timer Outputs Configuration
+
+endmenu # Timer Configuration
+
+
+menu "ADC Configuration"
+	depends on GD32F4_ADC
+
+config GD32F4_ADC0_RESOLUTION
+	int "ADC0 resolution"
+	depends on GD32F4_ADC0
+	default 0
+	range 0 3
+	---help---
+		ADC0 data resolution. 0: 12 bit, 1: 10 bit, 
+		2: 8 bit, 3: 6 bit
+
+config GD32F4_ADC1_RESOLUTION
+	int "ADC1 resolution"
+	depends on GD32F4_ADC1
+	default 0
+	range 0 3
+	---help---
+		ADC1 data resolution. 0: 12 bit, 1: 10 bit, 
+		2: 8 bit, 3: 6 bit
+
+config GD32F4_ADC2_RESOLUTION
+	int "ADC2 resolution"
+	depends on GD32F4_ADC2
+	default 0
+	range 0 3
+	---help---
+		ADC2 data resolution. 0: 12 bit, 1: 10 bit, 
+		2: 8 bit, 3: 6 bit
+
+config GD32F4_ADC_MAX_SAMPLES
+	int "The maximum number of channels that can be sampled"
+	default 16
+	---help---
+		The ADC supports 19 multiplexed channels and two groups: regular and inserted channel group.
+		The maximum number of samples for regular group can be 16, for inserted channel group 
+		can be 4.
+		User can change the default value according to the board initialize.  The user should 
+		correctly configure this value.
+
+config GD32F4_ADC_NOINT
+	bool "Do not use ADC interrupts"
+	default n
+	---help---
+		Do not use ADC interrupts handlers.
+
+config GD32F4_ADC_LL_OPS
+	bool "ADC low level operations"
+	default n
+	---help---
+		Enable low level ADC operations.
+
+config GD32F4_ADC_CHANGE_SAMPLETIME
+	bool "ADC sample time configuration"
+	default n
+	depends on GD32F4_ADC_LL_OPS
+	---help---
+		Enable ADC sample time configuration (SMPTx registers).
+
+config GD32F4_ADC0_DMA
+	bool "ADC0 DMA"
+	depends on GD32F4_ADC0 && GD32F4_HAVE_ADC0_DMA
+	default n
+	---help---
+		When the ADC is configured to support DMA transfer,
+		the DMA should be selected. When multiple channels are read
+		or if very high trigger frequencies are used, the ADC DMA transfer
+		is necessary.
+
+config GD32F4_ADC0_SCAN
+	bool "ADC0 scan mode"
+	depends on GD32F4_ADC0
+	default y if GD32F4_ADC0_DMA
+	default n
+
+config GD32F4_ADC0_DMA_CFG
+	int "ADC0 DMA configuration"
+	depends on GD32F4_ADC0_DMA
+	range 0 1
+	default 0
+	---help---
+		0 - ADC0 DMA in Circular Mode disable, 1 - ADC0 DMA in Circular Mode enable
+
+config GD32F4_ADC0_ANIOC_SWTRIG
+	int "ADC0 software trigger (ANIOC_TRIGGER) configuration"
+	depends on GD32F4_ADC0
+	range 1 3
+	default 3
+	---help---
+		1 - ANIOC_TRIGGER only trigger regular conversion
+		2 - ANIOC_TRIGGER only trigger injected conversion
+		3 - ANIOC_TRIGGER trigger both regular and injected conversions
+
+config GD32F4_ADC1_DMA
+	bool "ADC1 DMA"
+	depends on GD32F4_ADC1 && GD32F4_HAVE_ADC1_DMA
+	default n
+	---help---
+		When the ADC is configured to support DMA transfer,
+		the DMA should be selected. When multiple channels are read
+		or if very high trigger frequencies are used, the ADC DMA transfer
+		is necessary.
+
+config GD32F4_ADC1_SCAN
+	bool "ADC1 scan mode"
+	depends on GD32F4_ADC1
+	default y if GD32F4_ADC1_DMA
+	default n
+
+config GD32F4_ADC1_DMA_CFG
+	int "ADC1 DMA configuration"
+	depends on GD32F4_ADC1_DMA
+	range 0 1
+	default 0
+	---help---
+		0 - ADC0 DMA in Circular Mode disable, 1 - ADC0 DMA in Circular Mode enable
+
+config GD32F4_ADC1_ANIOC_SWTRIG
+	int "ADC1 software trigger (ANIOC_TRIGGER) configuration"
+	depends on GD32F4_ADC1
+	range 1 3
+	default 3
+	---help---
+		1 - ANIOC_TRIGGER only trigger regular conversion
+		2 - ANIOC_TRIGGER only trigger injected conversion
+		3 - ANIOC_TRIGGER trigger both regular and injected conversions
+
+config GD32F4_ADC2_DMA
+	bool "ADC2 DMA"
+	depends on GD32F4_ADC2 && GD32F4_HAVE_ADC2_DMA
+	default n
+	---help---
+		When the ADC is configured to support DMA transfer,
+		the DMA should be selected. When multiple channels are read
+		or if very high trigger frequencies are used, the ADC DMA transfer
+		is necessary.
+
+config GD32F4_ADC2_SCAN
+	bool "ADC2 scan mode"
+	depends on GD32F4_ADC2
+	default y if GD32F4_ADC2_DMA
+	default n
+
+config GD32F4_ADC2_DMA_CFG
+	int "ADC2 DMA configuration"
+	depends on GD32F4_ADC2_DMA
+	range 0 1
+	default 0
+	---help---
+		0 - ADC0 DMA in Circular Mode disable, 1 - ADC0 DMA in Circular Mode enable
+
+config GD32F4_ADC2_ANIOC_SWTRIG
+	int "ADC2 software trigger (ANIOC_TRIGGER) configuration"
+	depends on GD32F4_ADC2
+	range 1 3
+	default 3
+	---help---
+		1 - ANIOC_TRIGGER only trigger regular conversion
+		2 - ANIOC_TRIGGER only trigger injected conversion
+		3 - ANIOC_TRIGGER trigger both regular and injected conversions
+
+config GD32F4_ADC0_INJECTED_CHANNEL
+	int "ADC0 injected channels"
+	depends on GD32F4_ADC0
+	range 0 4
+	default 0
+	---help---
+		Support for ADC0 injected channels.
+
+config GD32F4_ADC1_INJECTED_CHANNEL
+	int "ADC2 injected channels"
+	depends on GD32F4_ADC1
+	range 0 4
+	default 0
+	---help---
+		Support for ADC1 injected channels.
+
+config GD32F4_ADC2_INJECTED_CHANNEL
+	int "ADC2 injected channels"
+	depends on GD32F4_ADC2
+	range 0 4
+	default 0
+	---help---
+		Support for ADC2 injected channels.
+
+config GD32F4_ADC0_EXTTRIG_REGULAR
+	bool "ADC0 external trigger for regular group"
+	depends on GD32F4_ADC0 && !GD32F4_HAVE_ADC0_TIMER
+	default n
+	---help---
+		Enable EXTTRIG_REGULAR for ADC0.
+
+config GD32F4_ADC1_EXTTRIG_REGULAR
+	bool "ADC1 external trigger for regular group"
+	depends on GD32F4_ADC1 && !GD32F4_HAVE_ADC1_TIMER
+	default n
+	---help---
+		Enable EXTTRIG_REGULAR for ADC1.
+
+config GD32F4_ADC2_EXTTRIG_REGULAR
+	bool "ADC2 external trigger for regular group"
+	depends on GD32F4_ADC2 && !GD32F4_HAVE_ADC2_TIMER
+	default n
+	---help---
+		Enable EXTTRIG_REGULAR for ADC2.
+
+config GD32F4_ADC0_EXTTRIG_INSERTED
+	bool "ADC0 external trigger for injected group"
+	depends on GD32F4_ADC0
+	default n
+	---help---
+		Enable EXTTRIG_INSERTED for ADC0.
+
+config GD32F4_ADC1_EXTTRIG_INSERTED
+	bool "ADC1 external trigger for injected group"
+	depends on GD32F4_ADC1
+	default n
+	---help---
+		Enable EXTTRIG_INSERTED for ADC1.
+
+config GD32F4_ADC2_EXTTRIG_INSERTED
+	bool "ADC2 external trigger for injected group"
+	depends on GD32F4_ADC2
+	default n
+	---help---
+		Enable EXTTRIG_INSERTED for ADC2.
+
+endmenu # ADC Configuration
+
+
+menu "DAC Configuration"
+	depends on GD32F4_DAC
+
+config GD32F4_DAC0_OUTPUT_BUFFER
+	bool "DAC0 output buffer enable"
+	depends on GD32F4_DAC0
+	default y
+	---help---
+		DAC0 output buffer configuration	
+
+config GD32F4_DAC0_DATA
+	int "DAC0 data configuration"
+	depends on GD32F4_DAC0
+	range 0 2
+	default 0
+	---help---
+		0 - data right 12 bit alignment,
+		1 - data left 12 bit alignment,
+		2 - data right 8 bit alignment
+
+config GD32F4_DAC0_TRIG
+	bool "DAC0 trigger enable"
+	depends on GD32F4_DAC0
+	default y
+	---help---
+		DAC0 trigger configuration	
+
+config GD32F4_DAC0_TRIG_MODE
+	int "DAC0 trigger source select"
+	depends on GD32F4_DAC0 && GD32F4_DAC0_TRIG
+	default 0
+	range 0 7
+	---help---
+		0 - TIMER5 TRGO, 1 - TIMER7 TRGO, 2 - TIMER6 TRGO, 3 - TIMER4 TRGO,
+		4 - TIMER1 TRGO, 5 - TIMER2 TRGO, 6 - EXTI interrupt line9 event, 7 - software trigger
+
+
+config GD32F4_DAC0_TIMER_FREQUENCY
+	int "DAC0 timer frequency"
+	depends on GD32F4_DAC0 && GD32F4_DAC0_TRIG
+	default 1000
+	---help---
+		DAC0 output frequency, only in timer triggrer mode is useful.  
+		Default:  1000Hz
+
+config GD32F4_DAC0_DMA
+	bool "DAC0 DMA"
+	depends on GD32F4_DAC0 && GD32F4_DAC0_TRIG
+	default n
+	---help---
+		When the external trigger is enabled, the DMA request can be enabled by setting the
+		DDMAENx bits of the DAC_CTL register. A DMA request will be generated by DAC when an
+		external hardware trigger (not a software trigger) occurs. The user should note that 
+		when use DMA.
+		The timer and output frequency must also be provided to support the DMA transfer,
+		when the timer is selected to trigger DAC DMA.  
+
+config GD32F4_DAC0_DMA_BUFFER_SIZE
+	int "DAC0 DMA buffer size"
+	depends on GD32F4_DAC0_DMA
+	default 64
+
+config GD32F4_DAC1_OUTPUT_BUFFER
+	bool "DAC1 output buffer enable"
+	depends on GD32F4_DAC1
+	default y
+	---help---
+		DAC0 output buffer configuration	
+
+config GD32F4_DAC1_DATA
+	int "DAC1 data configuration"
+	depends on GD32F4_DAC1
+	range 0 2
+	default 0
+	---help---
+		0 - data right 12 bit alignment,
+		1 - data left 12 bit alignment,
+		2 - data right 8 bit alignment
+
+config GD32F4_DAC1_TRIG
+	bool "DAC1 trigger enable"
+	depends on GD32F4_DAC1
+	default y
+	---help---
+		DAC1 trigger configuration	
+
+config GD32F4_DAC1_TRIG_MODE
+	int "DAC1 trigger source select"
+	depends on GD32F4_DAC1 && GD32F4_DAC1_TRIG
+	default 0
+	range 0 7
+	---help---
+		0 - TIMER5 TRGO, 1 - TIMER7 TRGO, 2 - TIMER6 TRGO, 3 - TIMER4 TRGO,
+		4 - TIMER1 TRGO, 5 - TIMER2 TRGO, 6 - EXTI interrupt line9 event, 7 - software trigger
+
+
+config GD32F4_DAC1_TIMER_FREQUENCY
+	int "DAC1 timer frequency"
+	depends on GD32F4_DAC1 && GD32F4_DAC1_TRIG
+	default 1000
+	---help---
+		DAC1 output frequency, only in timer triggrer mode is useful.  
+		Default:  1000Hz
+
+config GD32F4_DAC1_DMA
+	bool "DAC1 DMA"
+	depends on GD32F4_DAC1 && GD32F4_DAC1_TRIG
+	default n
+	---help---
+		When the external trigger is enabled, the DMA request can be enabled by setting the
+		DDMAENx bits of the DAC_CTL register. A DMA request will be generated by DAC when an
+		external hardware trigger (not a software trigger) occurs. The user should note that 
+		when use DMA.
+		The timer and output frequency must also be provided to support the DMA transfer,
+		when the timer is selected to trigger DAC DMA.  
+
+config GD32F4_DAC1_DMA_BUFFER_SIZE
+	int "DAC1 DMA buffer size"
+	depends on GD32F4_DAC1_DMA
+	default 64
+
+endmenu # DAC Configuration
+
+
+config GD32F4_USART_RXDMA
+	bool
+	default n
+
+config GD32F4_SERIALDRIVER
+	bool
+	default n
+
+config GD32F4_1WIREDRIVER
+	bool
+	default n
+
+menu "USART Configuration"
+	depends on GD32F4_USART
+
+comment "USART Device Configuration"
+
+choice
+	prompt "USART0 Driver Configuration"
+	default GD32F4_USART0_SERIALDRIVER
+	depends on GD32F4_USART0
+
+config GD32F4_USART0_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select GD32F4_SERIALDRIVER
+
+config GD32F4_USART0_1WIREDRIVER
+	bool "1-Wire driver"
+	select GD32F4_1WIREDRIVER
+
+endchoice # USART0 Driver Configuration
+
+if GD32F4_USART0_SERIALDRIVER
+
+config USART0_RS485
+	bool "Enable RS-485 on USART0"
+	default n
+	---help---
+		USART0 RS-485 function configuration. If the user configure the RS-485 on
+		USART, the user's should to provide GPIO_USART0_RS485_DIR pin definition 
+		in board initialization. 
+		And it cannot be used with GD32F4_USART0_RXDMA currently.
+
+config USART0_RS485_DIR_POLARITY
+	int "Configure USART0 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART0_RS485
+	---help---
+		Polarity of GPIO_USART0_RS485_DIR pin for RS-485 on USART0. 
+		The state on DIR pin: 0 - receive , 1 - transmit.
+
+config GD32F4_USART0_RXDMA
+	bool "USART0 Rx DMA"
+	default n
+	depends on GD32F4_DMA1
+	select GD32F4_USART_RXDMA
+	select USART0_RXDMA
+	---help---
+		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		access the receiving data buffer.
+
+config GD32F4_USART0_TXDMA
+	bool "USART0 Tx DMA"
+	default n
+	depends on GD32F4_DMA1
+	select GD32F4_USART_TXDMA
+	select USART0_TXDMA
+	---help---
+		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		access the transmitting data buffer.
+
+endif # GD32F4_USART0_SERIALDRIVER
+
+choice
+	prompt "USART1 Driver Configuration"
+	default GD32F4_USART1_SERIALDRIVER
+	depends on GD32F4_USART1
+
+config GD32F4_USART1_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select GD32F4_SERIALDRIVER
+
+config GD32F4_USART1_1WIREDRIVER
+	bool "1-Wire driver"
+	select GD32F4_1WIREDRIVER
+
+endchoice # USART1 Driver Configuration
+
+if GD32F4_USART1_SERIALDRIVER
+
+config USART1_RS485
+	bool "Enable RS-485 on USART1"
+	default n
+	---help---
+		USART1 RS-485 function configuration. If the user configure the RS-485 on
+		USART, the user's should to provide GPIO_USART0_RS485_DIR pin definition 
+		in board initialization. 
+		And it cannot be used with GD32F4_USART1_RXDMA currently.
+
+config USART1_RS485_DIR_POLARITY
+	int "Configure USART1 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART1_RS485
+	---help---
+		Polarity of GPIO_USART1_RS485_DIR pin for RS-485 on USART1. 
+		The state on DIR pin: 0 - receive , 1 - transmit.
+
+config GD32F4_USART1_RXDMA
+	bool "USART1 Rx DMA"
+	default n
+	depends on GD32F4_DMA0
+	select GD32F4_USART_RXDMA
+	select USART1_RXDMA
+	---help---
+		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		access the receiving data buffer.
+
+config GD32F4_USART1_TXDMA
+	bool "USART1 Tx DMA"
+	default n
+	depends on GD32F4_DMA0
+	select GD32F4_USART_TXDMA
+	select USART1_TXDMA
+	---help---
+		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		access the transmitting data buffer.
+
+endif # GD32F4_USART1_SERIALDRIVER
+
+choice
+	prompt "USART2 Driver Configuration"
+	default GD32F4_USART2_SERIALDRIVER
+	depends on GD32F4_USART2
+
+config GD32F4_USART2_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select GD32F4_SERIALDRIVER
+
+config GD32F4_USART2_1WIREDRIVER
+	bool "1-Wire driver"
+	select GD32F4_1WIREDRIVER
+
+endchoice # USART2 Driver Configuration
+
+if GD32F4_USART2_SERIALDRIVER
+
+config USART2_RS485
+	bool "Enable RS-485 on USART2"
+	default n
+	---help---
+		USART2 RS-485 function configuration. If the user configure the RS-485 on
+		USART, the user's should to provide GPIO_USART2_RS485_DIR pin definition 
+		in board initialization. 
+		And it cannot be used with GD32F4_USART2_RXDMA currently.
+
+config USART2_RS485_DIR_POLARITY
+	int "Configure USART2 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART1_RS485
+	---help---
+		Polarity of GPIO_USART2_RS485_DIR pin for RS-485 on USART2. 
+		The state on DIR pin: 0 - receive , 1 - transmit.
+
+config GD32F4_USART2_RXDMA
+	bool "USART2 Rx DMA"
+	default n
+	depends on GD32F4_DMA0
+	select GD32F4_USART_RXDMA
+	select USART2_RXDMA
+	---help---
+		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		access the receiving data buffer.
+
+config GD32F4_USART2_TXDMA
+	bool "USART2 Tx DMA"
+	default n
+	depends on GD32F4_DMA0
+	select GD32F4_USART_TXDMA
+	select USART2_TXDMA
+	---help---
+		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		access the transmitting data buffer.
+
+endif # GD32F4_USART2_SERIALDRIVER
+
+choice
+	prompt "UART3 Driver Configuration"
+	default GD32F4_UART3_SERIALDRIVER
+	depends on GD32F4_UART3
+
+config GD32F4_UART3_SERIALDRIVER
+	bool "Standard serial driver"
+	select UART3_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select GD32F4_SERIALDRIVER
+
+config GD32F4_UART3_1WIREDRIVER
+	bool "1-Wire driver"
+	select GD32F4_1WIREDRIVER
+
+endchoice # UART3 Driver Configuration
+
+if GD32F4_UART3_SERIALDRIVER
+
+config UART3_RS485
+	bool "Enable RS-485 on UART3"
+	default n
+	---help---
+		UART3 RS-485 function configuration. If the user configure the RS-485 on
+		UART, the user's should to provide UART3_RS485_DIR_POLARITY pin definition 
+		in board initialization. 
+		And it cannot be used with GD32F4_UART3_RXDMA currently.
+
+config UART3_RS485_DIR_POLARITY
+	int "Configure UART3 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART3_RS485
+	---help---
+		Polarity of GPIO_UART3_RS485_DIR pin for RS-485 on UART3. 
+		The state on DIR pin: 0 - receive , 1 - transmit.
+
+config GD32F4_UART3_RXDMA
+	bool "UART3 Rx DMA"
+	default n
+	depends on GD32F4_DMA0
+	select GD32F4_USART_RXDMA
+	select UART3_RXDMA
+	---help---
+		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		access the receiving data buffer.
+
+config GD32F4_UART3_TXDMA
+	bool "UART3 Tx DMA"
+	default n
+	depends on GD32F4_DMA0
+	select GD32F4_USART_TXDMA
+	select UART3_TXDMA
+	---help---
+		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		access the transmit data buffer.
+
+endif # GD32F4_UART3_SERIALDRIVER
+
+choice
+	prompt "UART4 Driver Configuration"
+	default GD32F4_UART4_SERIALDRIVER
+	depends on GD32F4_UART4
+
+config GD32F4_UART4_SERIALDRIVER
+	bool "Standard serial driver"
+	select UART4_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select GD32F4_SERIALDRIVER
+
+config GD32F4_UART4_1WIREDRIVER
+	bool "1-Wire driver"
+	select GD32F4_1WIREDRIVER
+
+endchoice # UART4 Driver Configuration
+
+if GD32F4_UART4_SERIALDRIVER
+
+config UART4_RS485
+	bool "Enable RS-485 on UART4"
+	default n
+	---help---
+		UART4 RS-485 function configuration. If the user configure the RS-485 on
+		UART, the user's should to provide UART4_RS485_DIR_POLARITY pin definition 
+		in board initialization. 
+		And it cannot be used with GD32F4_UART4_RXDMA currently.
+
+config UART4_RS485_DIR_POLARITY
+	int "Configure UART4 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART4_RS485
+	---help---
+		Polarity of GPIO_UART4_RS485_DIR pin for RS-485 on UART4. 
+		The state on DIR pin: 0 - receive , 1 - transmit.
+
+config GD32F4_UART4_RXDMA
+	bool "UART4 Rx DMA"
+	default n
+	depends on GD32F4_DMA0
+	select GD32F4_USART_RXDMA
+	select UART4_RXDMA
+	---help---
+		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		access the receiving data buffer.
+
+config GD32F4_UART4_TXDMA
+	bool "UART4 Tx DMA"
+	default n
+	depends on GD32F4_DMA0
+	select GD32F4_USART_TXDMA
+	select UART4_TXDMA
+	---help---
+		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		access the transmit data buffer.
+
+endif # GD32F4_UART4_SERIALDRIVER
+
+choice
+	prompt "USART5 Driver Configuration"
+	default GD32F4_USART5_SERIALDRIVER
+	depends on GD32F4_USART5
+
+config GD32F4_USART5_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART5_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select GD32F4_SERIALDRIVER
+
+config GD32F4_USART5_1WIREDRIVER
+	bool "1-Wire driver"
+	select GD32F4_1WIREDRIVER
+
+endchoice # USART5 Driver Configuration
+
+if GD32F4_USART5_SERIALDRIVER
+
+config USART5_RS485
+	bool "Enable RS-485 on USART5"
+	default n
+	---help---
+		USART5 RS-485 function configuration. If the user configure the RS-485 on
+		USART, the user's should to provide GPIO_USART5_RS485_DIR pin definition 
+		in board initialization. 
+		And it cannot be used with GD32F4_USART5_RXDMA currently.
+
+config USART5_RS485_DIR_POLARITY
+	int "Configure USART5 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART1_RS485
+	---help---
+		Polarity of GPIO_USART5_RS485_DIR pin for RS-485 on USART5. 
+		The state on DIR pin: 0 - receive , 1 - transmit.
+
+config GD32F4_USART5_RXDMA
+	bool "USART5 Rx DMA"
+	default n
+	depends on GD32F4_DMA1
+	select GD32F4_USART_RXDMA
+	select USART5_RXDMA
+	---help---
+		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		access the receiving data buffer.
+
+config GD32F4_USART5_TXDMA
+	bool "USART5 Tx DMA"
+	default n
+	depends on GD32F4_DMA1
+	select GD32F4_USART_TXDMA
+	select USART5_TXDMA
+	---help---
+		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		access the transmitting data buffer.
+
+endif # GD32F4_USART5_SERIALDRIVER
+
+
+choice
+	prompt "UART6 Driver Configuration"
+	default GD32F4_UART6_SERIALDRIVER
+	depends on GD32F4_UART6
+
+config GD32F4_UART6_SERIALDRIVER
+	bool "Standard serial driver"
+	select UART6_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select GD32F4_SERIALDRIVER
+
+config GD32F4_UART6_1WIREDRIVER
+	bool "1-Wire driver"
+	select GD32F4_1WIREDRIVER
+
+endchoice # UART6 Driver Configuration
+
+if GD32F4_UART6_SERIALDRIVER
+
+config UART6_RS485
+	bool "Enable RS-485 on UART6"
+	default n
+	---help---
+		UART6 RS-485 function configuration. If the user configure the RS-485 on
+		UART, the user's should to provide UART6_RS485_DIR_POLARITY pin definition 
+		in board initialization. 
+		And it cannot be used with GD32F4_UART6_RXDMA currently.
+
+config UART6_RS485_DIR_POLARITY
+	int "Configure UART6 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART6_RS485
+	---help---
+		Polarity of GPIO_UART6_RS485_DIR pin for RS-485 on UART6. 
+		The state on DIR pin: 0 - receive , 1 - transmit.
+
+config GD32F4_UART6_RXDMA
+	bool "UART6 Rx DMA"
+	default n
+	depends on GD32F4_DMA0
+	select GD32F4_USART_RXDMA
+	select UART6_RXDMA
+	---help---
+		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		access the receiving data buffer.
+
+config GD32F4_UART6_TXDMA
+	bool "UART6 Tx DMA"
+	default n
+	depends on GD32F4_DMA0
+	select GD32F4_USART_TXDMA
+	select UART6_TXDMA
+	---help---
+		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		access the transmit data buffer.
+
+endif # GD32F4_UART6_SERIALDRIVER
+
+
+choice
+	prompt "UART7 Driver Configuration"
+	default GD32F4_UART7_SERIALDRIVER
+	depends on GD32F4_UART7
+
+config GD32F4_UART7_SERIALDRIVER
+	bool "Standard serial driver"
+	select UART7_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select GD32F4_SERIALDRIVER
+
+config GD32F4_UART7_1WIREDRIVER
+	bool "1-Wire driver"
+	select GD32F4_1WIREDRIVER
+
+endchoice # UART7 Driver Configuration
+
+if GD32F4_UART7_SERIALDRIVER
+
+config UART7_RS485
+	bool "Enable RS-485 on UART7"
+	default n
+	---help---
+		UART7 RS-485 function configuration. If the user configure the RS-485 on
+		UART, the user's should to provide UART7_RS485_DIR_POLARITY pin definition 
+		in board initialization. 
+		And it cannot be used with GD32F4_UART7_RXDMA currently.
+
+config UART7_RS485_DIR_POLARITY
+	int "Configure UART7 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART7_RS485
+	---help---
+		Polarity of GPIO_UART7_RS485_DIR pin for RS-485 on UART7. 
+		The state on DIR pin: 0 - receive , 1 - transmit.
+
+config GD32F4_UART7_RXDMA
+	bool "UART7 Rx DMA"
+	default n
+	depends on GD32F4_DMA0
+	select GD32F4_USART_RXDMA
+	select UART7_RXDMA
+	---help---
+		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		access the receiving data buffer.
+
+config GD32F4_UART7_TXDMA
+	bool "UART7 Tx DMA"
+	default n
+	depends on GD32F4_DMA0
+	select GD32F4_USART_TXDMA
+	select UART7_TXDMA
+	---help---
+		To reduce the burden of the processor in fast data transmit, DMA can be used to 
+		access the transmit data buffer.
+
+endif # GD32F4_UART7_SERIALDRIVER
+
+
+menu "Serial Driver Configuration"
+	depends on GD32F4_SERIALDRIVER
+
+config GD32F4_SERIAL_RXDMA_BUFFER_SIZE
+	int "Rx DMA buffer size"
+	default 32
+	range 32 4096
+	depends on GD32F4_USART_RXDMA
+	---help---
+		The RX DMA buffer size when using RX DMA receive data.
+		Recommended size value given here is multiple of 4 bytes.
+
+config GD32F4_SERIAL_DISABLE_REORDERING
+	bool "Disable reordering of ttySx devices."
+	default n
+	---help---
+		NuttX per default reorders the serial ports (/dev/ttySx) so that the
+		console is always on /dev/ttyS0. If more than one UART is in use this
+		can, however, have the side-effect that all port mappings
+		(hardware USART0 -> /dev/ttyS0) change if the console is moved to another
+		USART. This is in particular relevant if a project uses the USB console
+		in some boards and a serial console in other boards, but does not
+		want the side effect of having all serial port names change when just
+		the console is moved from serial to USB.
+
+config GD32F4_FLOWCONTROL_BROKEN
+	bool "Use Software UART RTS flow control"
+	default n
+	---help---
+		Enable USART RTS flow control using Software. When implement USART RTS by
+		hardware, the nRTS pin should be configured.
+
+config GD32F4_USART_BREAKS
+	bool "Add TIOxSBRK to support sending Breaks"
+	default n
+	---help---
+		Add TIOCxBRK routines to send a line break per the GD32F4 manual, the
+		break will be a pulse based on the value M. This is not a BSD compatible
+		break.
+
+config GD32F4_SERIALBRK_BSDCOMPAT
+	bool "Use GPIO To send Break"
+	depends on GD32F4_USART_BREAKS
+	default n
+	---help---
+		Enable using GPIO on the TX pin to send a BSD compatible break:
+		TIOCSBRK will start the break and TIOCCBRK will end the break.
+		The current GD32F4 USARTS have no way to leave the break (TX=LOW)
+		on because the software starts the break and then the hadware automatically
+		clears the break. This makes it is difficult to sent a long break.
+
+config GD32F4_USART_SINGLEWIRE
+	bool "Single Wire Support"
+	default n
+	depends on GD32F4_USART
+	---help---
+		Enable USART half-duplex mode.  The option enables support for the
+		TIOCSSINGLEWIRE ioctl in the GD32F4 serial driver.
+
+config GD32F4_USART_INVERT
+	bool "Signal inversion support for RX/TX pin"
+	default n
+	depends on GD32F4_USART0 || GD32F4_USART1 || GD32F4_USART1 || GD32F4_USART5
+	---help---
+		Enable signal inversion support for USART RX/TX pin . The option enables 
+		support for the TIOCSINVERT ioctl in the gd32f4 serial driver.
+		RX/TX inversion only support for USART0, 1, 2, 5
+
+endmenu # Serial Driver Configuration
+
+
+if PM
+
+config GD32F4_PM_SERIAL_ACTIVITY
+	int "PM serial activity"
+	default 10
+	---help---
+		PM activity reported to power management logic on every serial
+		interrupt.
+
+endif
+
+endmenu # USART Configuration
+
+
+menu "I2C Configuration"
+	depends on GD32F4_I2C
+
+endmenu
+
+
+config GD32F4_HAVE_RTC_COUNTER
+	bool
+	default n
+
+config GD32F4_HAVE_RTC_SUBSECONDS
+	bool
+	select ARCH_HAVE_RTC_SUBSECONDS
+	default n
+
+menu "RTC Configuration"
+	depends on GD32F4_RTC
+
+config GD32F4_RTC_MAGIC_REG
+	int "BKP register"
+	default 0
+	range  0 19
+	depends on !GD32F4_HAVE_RTC_COUNTER
+	---help---
+		The BKP register used to store/check the Magic value to determine if
+		RTC is already setup
+
+config GD32F4_RTC_MAGIC
+	hex "RTC Magic 1"
+	default 0xfacefeed
+	depends on !GD32F4_HAVE_RTC_COUNTER
+	---help---
+		Value used as Magic to determine if the RTC is already setup
+
+config GD32F4_RTC_MAGIC_TIME_SET
+	hex "RTC Magic 2"
+	default 0xf00dface
+	depends on !GD32F4_HAVE_RTC_COUNTER
+	---help---
+		Value used as Magic to determine if the RTC has been setup and has
+		time set
+
+choice
+	prompt "RTC clock source"
+	default GD32F4_RTC_LXTALCLOCK
+
+config GD32F4_RTC_LXTALCLOCK
+	bool "LXTAL clock"
+	---help---
+		The RTC clock source is the LXTAL clock
+
+config GD32F4_RTC_IRC16MCLOCK
+	bool "IRC16M clock"
+	---help---
+		The RTC clock source is the IRC16M clock
+
+config GD32F4_RTC_HXTALCLOCK
+	bool "HXTAL clock"
+	---help---
+		The RTC clock source is the HXTAL clock, divided down to 1MHz.
+
+endchoice # RTC clock source
+endmenu # RTC configuration
+
+
+menu "SDIO Configuration"
+	depends on GD32F4_SDIO
+
+endmenu
+
+menu "SPI Configuration"
+	depends on GD32F4_SPI
+
+config GD32F4_SPI_INTERRUPT
+	bool "Support SPI interrupt"
+	default n
+	---help---
+		Select to support SPI interrupt. Non-interrupt-driven,poll-waiting is recommended
+		if the interrupt rate would be to high in the interrupt driven case.
+
+config GD32F4_SPI_DMA
+	bool "SPI DMA"
+	default n
+	depends on GD32F4_DMA && !GD32F4_SPI_INTERRUPT
+	---help---
+		Use DMA to improve SPI transfer performance.
+		Should not used with GD32F4_SPI_INTERRUPT at the same time.
+
+config GD32F4_SPI_DMATHRESHOLD
+	int "SPI DMA threshold"
+	default 4
+	depends on GD32F4_SPI_DMA
+	---help---
+		When SPI DMA is enabled, if transfers size is less than GD32F4_SPI_DMATHRESHOLD, 
+		the data transfer will still be performed by polling logic. 
+
+config GD32F4_SPI0_DMA
+	bool "SPI0 DMA"
+	default n
+	depends on GD32F4_SPI0 && GD32F4_SPI_DMA
+	# depends on GD32F4_SPI0 && GD32F4_SPI_DMA && GD32F4_DMA1
+	---help---
+		Use DMA to improve SPI0 transfer performance.
+		Should enable GD32F4 DMA1.
+
+config GD32F4_SPI0_DMA_BUFFER
+	int "SPI0 DMA buffer size"
+	default 0
+	depends on GD32F4_SPI0_DMA
+	---help---
+		DMA buffer for SPI0 RX and TX DMA, recommended buffer size is a multiple of 4.
+
+config GD32F4_SPI1_DMA
+	bool "SPI1 DMA"
+	default n
+	depends on GD32F4_SPI1 && GD32F4_SPI_DMA
+	# depends on GD32F4_SPI1 && GD32F4_SPI_DMA && GD32F4_DMA0
+	---help---
+		Use DMA to improve SPI1 transfer performance.
+		Should enable GD32F4 DMA0.
+
+config GD32F4_SPI1_DMA_BUFFER
+	int "SPI1 DMA buffer size"
+	default 0
+	depends on GD32F4_SPI1_DMA
+	---help---
+		DMA buffer for SPI1 RX and TX DMA, recommended buffer size is a multiple of 4.
+
+config GD32F4_SPI2_DMA
+	bool "SPI2 DMA"
+	default n
+	depends on GD32F4_SPI2 && GD32F4_SPI_DMA
+	# depends on GD32F4_SPI2 && GD32F4_SPI_DMA && GD32F4_DMA0
+	---help---
+		Use DMA to improve SPI1 transfer performance.
+		Should enable GD32F4 DMA0.
+
+config GD32F4_SPI2_DMA_BUFFER
+	int "SPI2 DMA buffer size"
+	default 0
+	depends on GD32F4_SPI2_DMA
+	---help---
+		DMA buffer for SPI2 RX and TX DMA, recommended buffer size is a multiple of 4.
+
+config GD32F3_SPI3_DMA
+	bool "SPI3 DMA"
+	default n
+	depends on GD32F4_SPI3 && GD32F4_SPI_DMA
+	# depends on GD32F4_SPI3 && GD32F4_SPI_DMA && GD32F4_DMA1
+	---help---
+		Use DMA to improve SPI3 transfer performance.
+		Should enable GD32F4 DMA1.
+
+config GD32F4_SPI3_DMA_BUFFER
+	int "SPI3 DMA buffer size"
+	default 0
+	depends on GD32F4_SPI3_DMA
+	---help---
+		DMA buffer for SPI3 RX and TX DMA, recommended buffer size is a multiple of 4.
+
+config GD32F4_SPI4_DMA
+	bool "SPI4 DMA"
+	default n
+	depends on GD32F4_SPI4 && GD32F4_SPI_DMA
+	# depends on GD32F4_SPI4 && GD32F4_SPI_DMA && GD32F4_DMA1
+	---help---
+		Use DMA to improve SPI4 transfer performance.
+		Should enable GD32F4 DMA1.
+
+config GD32F4_SPI4_DMA_BUFFER
+	int "SPI4 DMA buffer size"
+	default 0
+	depends on GD32F4_SPI4_DMA
+	---help---
+		DMA buffer for SPI4 RX and TX DMA, recommended buffer size is a multiple of 4.
+
+config GD32F4_SPI5_DMA
+	bool "SPI5 DMA"
+	default n
+	depends on GD32F4_SPI5 && GD32F4_SPI_DMA
+	# depends on GD32F4_SPI5 && GD32F4_SPI_DMA && GD32F4_DMA1
+	---help---
+		Use DMA to improve SPI5 transfer performance.
+		Should enable GD32F4 DMA1.
+
+config GD32F4_SPI5_DMA_BUFFER
+	int "SPI5 DMA buffer size"
+	default 0
+	depends on GD32F4_SPI5_DMA
+	---help---
+		DMA buffer for SPI5 RX and TX DMA, recommended buffer size is a multiple of 4.
+
+endmenu # SPI Configuration
+
+menu "I2S Configuration"
+	depends on GD32F4_I2S1 || GD32F4_I2S2
+
+endmenu # I2S Configuration
+
+
+config GD32F4_BKPDSRAM
+	bool "Backup domain SRAM File Support"
+	default n
+	depends on GD32F4_BKPSRAM
+
+config GD32F4_BKPDSRAM_FILES
+	int "Max Files to support in Backup domain SRAM"
+	default 4
+	depends on GD32F4_BKPSRAM
+
+config GD32F4_SAVE_CRASHDUMP
+	bool "Enable Saving Panic to Backup domain SRAM"
+	default n
+	depends on GD32F4_BKPSRAM
+
+
+menu "Ethernet MAC configuration"
+	depends on GD32F4_ENETMAC
+
+config GD32F4_PHY_ADDR
+	int "PHY address"
+	default 1
+	---help---
+		The 5-bit address of the PHY on the board.  Default: 1
+
+config GD32F4_PHY_INIT
+	bool "Board-specific PHY Initialization"
+	default n
+	---help---
+		Before the PHY can be used, Some boards require specialized initialization of it.
+		This may include such things as configuring GPIOs, clock, resetting the PHY, etc.
+		If GD32F4_PHY_INIT is defined in the configuration then the board specific logic must
+		provide the function of phyinitialize();  Before first uses the PHY, the GD32F4 Ethernet
+		driver will call this function one time .
+
+config GD32F4_MII
+	bool "Use the media-independent interface (MII) interface"
+	default n
+	---help---
+		Select Ethernet MII interface. The application can only select one of 
+		the MII or RMII mode.
+
+choice
+	prompt "MII clock configuration"
+	default GD32F4_MII_CKOUT0
+	depends on GD32F4_MII
+
+config GD32F4_MII_CKOUT0
+	bool "Use CKOUT0 as MII clock"
+	---help---
+		Use CKOUT0 to clock the MII interface.
+
+config GD32F4_MII_CKOUT1
+	bool "Use CKOUT1 as MII clock"
+	---help---
+		Use CKOUT1 to clock the MII interface.
+
+config GD32F4_MII_EXTCLK
+	bool "External MII clock"
+	---help---
+		MII clock is provided by external clock. And not use CKOUT for
+		MII clock.
+
+endchoice
+
+config GD32F4_AUTO_NEGOTIATION
+	bool "Use autonegotiation"
+	default y
+	---help---
+		Use PHY's autonegotiation mode, and according to the negotiation result
+		to determine the speed and mode.
+
+config GD32F4_ENET_MODE_FULLDUPLEX
+	bool "Full duplex mode"
+	default y
+	depends on !GD32F4_AUTO_NEGOTIATION
+	---help---
+		If GD32F4_AUTO_NEGOTIATION is not defined, then the ENET full duplex mode
+		should be configured.
+
+config GD32F4_ENET_SPEEDMODE_100M
+	bool "100 Mbps"
+	default y
+	depends on !GD32F4_AUTO_NEGOTIATION
+	---help---
+		If GD32F4_AUTO_NEGOTIATION is not defined, then the ENET 100 Mbps mode
+		should be configured.
+
+config GD32F4_PHY_SR
+	int "PHY Status Register Address (decimal)"
+	depends on GD32F4_AUTO_NEGOTIATION
+	---help---
+		This must be provided if GD32F4_AUTO_NEGOTIATION is defined. Because of the 
+		PHY status register address may different from PHY to PHY, the user should set 
+		the address of the PHY status register according to the PHY on board. 
+
+config GD32F4_PHY_SR_ALTCONFIG
+	bool "PHY Status Alternate Bit Layout"
+	default n
+	depends on GD32F4_AUTO_NEGOTIATION
+	---help---
+		Different PHYs present speed and mode information in different ways.  Some
+		will present separate information for speed and mode (this is the default).
+		Those PHYs, for example, may provide a 10/100 Mbps indication and a separate
+		full/half duplex indication. This options selects an alternative representation
+		where speed and mode information are combined.  This might mean, for example,
+		separate bits for 10HD, 100HD, 10FD and 100FD.
+
+config GD32F4_PHY_SR_SPEED
+	hex "PHY Speed Mask"
+	depends on GD32F4_AUTO_NEGOTIATION && !GD32F4_PHY_SR_ALTCONFIG
+	---help---
+		This must be provided if GD32F4_AUTO_NEGOTIATION is defined. This provides bit mask
+		for isolating the 10 or 100MBps speed indication.
+
+config GD32F4_PHY_SR_100M
+	hex "PHY 100Mbps Speed Value"
+	depends on GD32F4_AUTO_NEGOTIATION && !GD32F4_PHY_SR_ALTCONFIG
+	---help---
+		This must be provided if GD32F4_AUTO_NEGOTIATION is defined. This provides the value
+		of the speed bit(s) indicating 100MBps speed.
+
+config GD32F4_PHY_SR_MODE
+	hex "PHY Mode Mask"
+	depends on GD32F4_AUTO_NEGOTIATION && !GD32F4_PHY_SR_ALTCONFIG
+	---help---
+		This must be provided if GD32F4_AUTO_NEGOTIATION is defined. This provide bit mask
+		for isolating the full or half duplex mode bits.
+
+config GD32F4_PHY_SR_FULLDUPLEX
+	hex "PHY Full Duplex Mode Value"
+	depends on GD32F4_AUTO_NEGOTIATION && !GD32F4_PHY_SR_ALTCONFIG
+	---help---
+		This must be provided if GD32F4_AUTO_NEGOTIATION is defined. This provides the
+		value of the mode bits indicating full duplex mode.
+
+config GD32F4_PHY_SR_ALTMODE
+	hex "PHY Mode Mask"
+	depends on GD32F4_AUTO_NEGOTIATION && GD32F4_PHY_SR_ALTCONFIG
+	---help---
+		This must be provided if GD32F4_AUTO_NEGOTIATION is defined. This provide bit mask
+		for isolating the speed and full/half duplex mode bits.
+
+config GD32F4_PHY_SR_10HD
+	hex "10MBase-T Half Duplex Value"
+	depends on GD32F4_AUTO_NEGOTIATION && GD32F4_PHY_SR_ALTCONFIG
+	---help---
+		This must be provided if GD32F4_AUTO_NEGOTIATION is defined. This is the value
+		under the bit mask that represents the 10Mbps, half duplex setting.
+
+config GD32F4_PHY_SR_100HD
+	hex "100Base-T Half Duplex Value"
+	depends on GD32F4_AUTO_NEGOTIATION && GD32F4_PHY_SR_ALTCONFIG
+	---help---
+		This must be provided if GD32F4_AUTO_NEGOTIATION is defined. This is the value
+		under the bit mask that represents the 100Mbps, half duplex setting.
+
+config GD32F4_PHY_SR_10FD
+	hex "10Base-T Full Duplex Value"
+	depends on GD32F4_AUTO_NEGOTIATION && GD32F4_PHY_SR_ALTCONFIG
+	---help---
+		This must be provided if GD32F4_AUTO_NEGOTIATION is defined. This is the value
+		under the bit mask that represents the 10Mbps, full duplex setting.
+
+config GD32F4_PHY_SR_100FD
+	hex "100Base-T Full Duplex Value"
+	depends on GD32F4_AUTO_NEGOTIATION && GD32F4_PHY_SR_ALTCONFIG
+	---help---
+		This must be provided if GD32F4_AUTO_NEGOTIATION is defined. This is the value
+		under the bit mask that represents the 100Mbps, full duplex setting.
+
+config GD32F4_ENET_PTP
+	bool "Precision Time Protocol (PTP)"
+	default n
+	---help---
+		Precision Time Protocol (PTP). Not supported but some hooks are indicated
+		with this condition.
+
+config GD32F4_RMII
+	bool "Use the reduced media-independent interface (RMII) interface"
+	default y if !GD32F4_MII
+	---help---
+		Select Ethernet MII interface. The application can only select one of 
+		the MII or RMII mode.
+
+choice
+	prompt "RMII clock configuration"
+	default GD32F4_RMII_CKOUT0
+	depends on GD32F4_RMII
+
+config GD32F4_RMII_CKOUT0
+	bool "Use CKOUT0 as RMII clock"
+	---help---
+		Use CKOUT0 to clock the RMII interface.
+
+config GD32F4_RMII_CKOUT1
+	bool "Use CKOUT1 as RMII clock"
+	---help---
+		Use CKOUT1 to clock the RMII interface.
+
+config GD32F4_RMII_EXTCLK
+	bool "External RMII clock"
+	---help---
+		Clocking is provided by external clock. And not use CKOUT for 
+		RMII clock.
+
+endchoice # RMII clock configuration
+
+config GD32F4_ENET_MAC_REGDEBUG
+	bool "Register Level Debug"
+	default n
+	depends on DEBUG_NET_INFO
+	---help---
+		Enable very low-level register access debug. Depends on CONFIG_DEBUG_FEATURES.
+
+endmenu # Ethernet MAC configuration
+
+config GD32F4_USBHOST
+	bool "Enable USB Host Support"
+	depends on GD32F4_OTGFS || GD32F4_OTGHS
+	default n
+	select USBHOST
+
+menu "USB FS Host Configuration"
+	depends on GD32F4_OTGFS && GD32F4_USBHOST
+
+endmenu
+
+menu "USB HS Host Configuration"
+	depends on GD32F4_OTGHS && GD32F4_USBHOST
+
+endmenu
+
+menu "USB Host Debug Configuration"
+	depends on GD32F4_USBHOST
+
+endmenu
+
+comment "USB Device Configuration"
+
+config GD32F4_USB_ITRMP
+	bool "Re-map USB interrupt"
+	default n if !GD32F4_CAN1
+	default y if GD32F4_CAN1
+	depends on GD32F4_USB && GD32F4_GD32F4XX
+	---help---
+		The legacy USB in the F1 series shared interrupt lines with USB
+		device and CAN1.  In the F3 series, a hardware options was added to
+		either retain the legacy F1 behavior or to map the USB interrupts to
+		their own dedicated vectors.  The option is available only for the
+		F3 family and selects the use of the dedicated USB interrupts.
+
+menu "CAN driver configuration"
+	depends on GD32F4_CAN
+
+endmenu # "CAN driver configuration"
+
+
+if GD32F4_TLI
+
+menu "TLI Configuration"
+	depends on GD32F4_TLI
+
+endmenu # TLI Configuration
+
+endif # GD32F4_TLI
+
+menu "GD32F4 QEncoder Driver"
+	depends on SENSORS_QENCODER
+	depends on GD32F4_TIMER0 || GD32F4_TIMER1 || GD32F4_TIMER2 || GD32F4_TIMER3 || GD32F4_TIMER4 || GD32F4_TIMER7
+
+endmenu # GD32F4 QEncoder Driver
+
+# endif # ARCH_CHIP_GD32F4
