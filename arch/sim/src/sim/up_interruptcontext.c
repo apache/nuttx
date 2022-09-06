@@ -90,10 +90,6 @@ void *up_doirq(int irq, void *context)
       CURRENT_REGS = NULL;
 
 #ifdef CONFIG_SMP
-      /* Handle signal */
-
-      sim_sigdeliver();
-
       /* Then switch contexts */
 
       longjmp(regs, 1);
