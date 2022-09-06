@@ -171,7 +171,10 @@ static const mpsl_clock_lfclk_cfg_t g_clock_config =
   .skip_wait_lfclk_started  = false
 };
 
-static struct nrf52_sdc_dev_s g_sdc_dev;
+static struct nrf52_sdc_dev_s g_sdc_dev =
+{
+  .lock = NXMUTEX_INITIALIZER,
+};
 
 /****************************************************************************
  * Private Functions
@@ -498,11 +501,6 @@ int nrf52_sdc_initialize(void)
   int ret;
   int32_t required_memory;
   sdc_cfg_t cfg;
-
-  /* Initialize device data */
-
-  memset(&g_sdc_dev, 0, sizeof(g_sdc_dev));
-  nxmutex_init(&g_sdc_dev.lock);
 
   /* Register interrupt handler for normal-priority events. SWI5 will be
    * used by MPSL to delegate low-priority work

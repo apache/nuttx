@@ -102,9 +102,6 @@ struct sam_chconfig_s
 
 struct sam_tcconfig_s
 {
-  uintptr_t base;          /* TC register base address */
-  uint8_t tc;              /* Timer/counter number */
-
   /* Channels */
 
   struct sam_chconfig_s channel[SAM_TC_NCHANNELS];
@@ -198,8 +195,6 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel);
 #ifdef CONFIG_SAMV7_TC0
 static const struct sam_tcconfig_s g_tc012config =
 {
-  .base    = SAM_TC012_BASE,
-  .tc      = 0,
   .channel =
   {
     [0] =
@@ -275,8 +270,6 @@ static const struct sam_tcconfig_s g_tc012config =
 #ifdef CONFIG_SAMV7_TC1
 static const struct sam_tcconfig_s g_tc345config =
 {
-  .base    = SAM_TC345_BASE,
-  .tc      = 1,
   .channel =
   {
     [0] =
@@ -352,8 +345,6 @@ static const struct sam_tcconfig_s g_tc345config =
 #ifdef CONFIG_SAMV7_TC2
 static const struct sam_tcconfig_s g_tc678config =
 {
-  .base    = SAM_TC678_BASE,
-  .tc      = 2,
   .channel =
   {
     [0] =
@@ -429,8 +420,6 @@ static const struct sam_tcconfig_s g_tc678config =
 #ifdef CONFIG_SAMV7_TC3
 static const struct sam_tcconfig_s g_tc901config =
 {
-  .base    = SAM_TC901_BASE,
-  .tc      = 3,
   .channel =
   {
     [0] =
@@ -506,19 +495,39 @@ static const struct sam_tcconfig_s g_tc901config =
 /* Timer/counter state */
 
 #ifdef CONFIG_SAMV7_TC0
-static struct sam_tc_s g_tc012;
+static struct sam_tc_s g_tc012 =
+{
+  .lock    = NXMUTEX_INITIALIZER,
+  .base    = SAM_TC012_BASE,
+  .tc      = 0,
+};
 #endif
 
 #ifdef CONFIG_SAMV7_TC1
-static struct sam_tc_s g_tc345;
+static struct sam_tc_s g_tc345 =
+{
+  .lock    = NXMUTEX_INITIALIZER,
+  .base    = SAM_TC345_BASE,
+  .tc      = 1,
+};
 #endif
 
 #ifdef CONFIG_SAMV7_TC2
-static struct sam_tc_s g_tc678;
+static struct sam_tc_s g_tc678 =
+{
+  .lock    = NXMUTEX_INITIALIZER,
+  .base    = SAM_TC789_BASE,
+  .tc      = 2,
+};
 #endif
 
 #ifdef CONFIG_SAMV7_TC3
-static struct sam_tc_s g_tc901;
+static struct sam_tc_s g_tc901 =
+{
+  .lock    = NXMUTEX_INITIALIZER,
+  .base    = SAM_TC901_BASE,
+  .tc      = 3,
+};
 #endif
 
 /* TC frequency data.  This table provides the frequency for each
@@ -1055,13 +1064,6 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
   flags = enter_critical_section();
   if (!tc->initialized)
     {
-      /* Initialize the timer counter data structure. */
-
-      memset(tc, 0, sizeof(struct sam_tc_s));
-      nxmutex_init(&tc->lock);
-      tc->base = tcconfig->base;
-      tc->tc   = tcconfig->tc;
-
       /* Initialize the channels */
 
       for (chndx = 0, ch = chfirst; chndx < SAM_TC_NCHANNELS; chndx++)

@@ -255,6 +255,14 @@ static void i2c_pad_configure(struct sam_i2c_dev_s *priv);
  * Private Data
  ****************************************************************************/
 
+static const struct i2c_ops_s g_i2cops =
+{
+  .transfer = sam_i2c_transfer,
+#ifdef CONFIG_I2C_RESET
+  .reset = sam_i2c_reset,
+#endif
+};
+
 #ifdef SAMD2L2_HAVE_I2C0
 static const struct i2c_attr_s g_i2c0attr =
 {
@@ -270,7 +278,16 @@ static const struct i2c_attr_s g_i2c0attr =
   .base      = SAM_SERCOM0_BASE,
 };
 
-static struct sam_i2c_dev_s g_i2c0;
+static struct sam_i2c_dev_s g_i2c0 =
+{
+  .dev       =
+  {
+    .ops     = &g_i2cops,
+  },
+  .attr      = &g_i2c0attr,
+  .lock      = NXMUTEX_INITIALIZER,
+  .waitsem   = SEM_INITIALIZER(0),
+};
 #endif
 #ifdef SAMD2L2_HAVE_I2C1
 static const struct i2c_attr_s g_i2c1attr =
@@ -287,7 +304,16 @@ static const struct i2c_attr_s g_i2c1attr =
   .base      = SAM_SERCOM1_BASE,
 };
 
-static struct sam_i2c_dev_s g_i2c1;
+static struct sam_i2c_dev_s g_i2c1 =
+{
+  .dev       =
+  {
+    .ops     = &g_i2cops,
+  },
+  .attr      = &g_i2c1attr,
+  .lock      = NXMUTEX_INITIALIZER,
+  .waitsem   = SEM_INITIALIZER(0),
+};
 #endif
 
 #ifdef SAMD2L2_HAVE_I2C2
@@ -305,7 +331,16 @@ static const struct i2c_attr_s g_i2c2attr =
   .base      = SAM_SERCOM2_BASE,
 };
 
-static struct sam_i2c_dev_s g_i2c2;
+static struct sam_i2c_dev_s g_i2c2 =
+{
+  .dev       =
+  {
+    .ops     = &g_i2cops,
+  },
+  .attr      = &g_i2c2attr,
+  .lock      = NXMUTEX_INITIALIZER,
+  .waitsem   = SEM_INITIALIZER(0),
+};
 #endif
 
 #ifdef SAMD2L2_HAVE_I2C3
@@ -323,7 +358,16 @@ static const struct i2c_attr_s g_i2c3attr =
   .base      = SAM_SERCOM3_BASE,
 };
 
-static struct sam_i2c_dev_s g_i2c3;
+static struct sam_i2c_dev_s g_i2c3 =
+{
+  .dev       =
+  {
+    .ops     = &g_i2cops,
+  },
+  .attr      = &g_i2c3attr,
+  .lock      = NXMUTEX_INITIALIZER,
+  .waitsem   = SEM_INITIALIZER(0),
+};
 #endif
 
 #ifdef SAMD2L2_HAVE_I2C4
@@ -341,7 +385,16 @@ static const struct i2c_attr_s g_i2c4attr =
   .base      = SAM_SERCOM4_BASE,
 };
 
-static struct sam_i2c_dev_s g_i2c4;
+static struct sam_i2c_dev_s g_i2c4 =
+{
+  .dev       =
+  {
+    .ops     = &g_i2cops,
+  },
+  .attr      = &g_i2c4attr,
+  .lock      = NXMUTEX_INITIALIZER,
+  .waitsem   = SEM_INITIALIZER(0),
+};
 #endif
 
 #ifdef SAMD2L2_HAVE_I2C5
@@ -359,16 +412,17 @@ static const struct i2c_attr_s g_i2c5attr =
   .base      = SAM_SERCOM5_BASE,
 };
 
-static struct sam_i2c_dev_s g_i2c5;
-#endif
-
-struct i2c_ops_s g_i2cops =
+static struct sam_i2c_dev_s g_i2c5 =
 {
-  .transfer = sam_i2c_transfer,
-#ifdef CONFIG_I2C_RESET
-  .reset = sam_i2c_reset,
-#endif
+  .dev       =
+  {
+    .ops     = &g_i2cops,
+  },
+  .attr      = &g_i2c5attr,
+  .lock      = NXMUTEX_INITIALIZER,
+  .waitsem   = SEM_INITIALIZER(0),
 };
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -1253,13 +1307,9 @@ struct i2c_master_s *sam_i2c_master_initialize(int bus)
 #ifdef SAMD2L2_HAVE_I2C0
   if (bus == 0)
     {
-      /* Select up I2C0 and setup invariant attributes */
+      /* Select up I2C0 and the (initial) I2C frequency */
 
       priv = &g_i2c0;
-      priv->attr = &g_i2c0attr;
-
-      /* Select the (initial) I2C frequency */
-
       frequency = CONFIG_SAM_I2C0_FREQUENCY;
     }
   else
@@ -1267,13 +1317,9 @@ struct i2c_master_s *sam_i2c_master_initialize(int bus)
 #ifdef SAMD2L2_HAVE_I2C1
   if (bus == 1)
     {
-      /* Select up I2C1 and setup invariant attributes */
+      /* Select up I2C1 and the (initial) I2C frequency */
 
       priv = &g_i2c1;
-      priv->attr = &g_i2c1attr;
-
-      /* Select the (initial) I2C frequency */
-
       frequency = CONFIG_SAM_I2C1_FREQUENCY;
     }
   else
@@ -1281,13 +1327,9 @@ struct i2c_master_s *sam_i2c_master_initialize(int bus)
 #ifdef SAMD2L2_HAVE_I2C2
   if (bus == 2)
     {
-      /* Select up I2C2 and setup invariant attributes */
+      /* Select up I2C2 and the (initial) I2C frequency */
 
       priv = &g_i2c2;
-      priv->attr = &g_i2c2attr;
-
-      /* Select the (initial) I2C frequency */
-
       frequency = CONFIG_SAM_I2C2_FREQUENCY;
     }
   else
@@ -1295,13 +1337,9 @@ struct i2c_master_s *sam_i2c_master_initialize(int bus)
 #ifdef SAMD2L2_HAVE_I2C3
   if (bus == 3)
     {
-      /* Select up I2C3 and setup invariant attributes */
+      /* Select up I2C3 and the (initial) I2C frequency */
 
       priv = &g_i2c3;
-      priv->attr = &g_i2c3attr;
-
-      /* Select the (initial) I2C frequency */
-
       frequency = CONFIG_SAM_I2C3_FREQUENCY;
     }
   else
@@ -1309,13 +1347,9 @@ struct i2c_master_s *sam_i2c_master_initialize(int bus)
 #ifdef SAMD2L2_HAVE_I2C4
   if (bus == 4)
     {
-      /* Select up I2C4 and setup invariant attributes */
+      /* Select up I2C4 and the (initial) I2C frequency */
 
       priv = &g_i2c4;
-      priv->attr = &g_i2c4attr;
-
-      /* Select the (initial) I2C frequency */
-
       frequency = CONFIG_SAM_I2C4_FREQUENCY;
     }
   else
@@ -1323,13 +1357,9 @@ struct i2c_master_s *sam_i2c_master_initialize(int bus)
 #ifdef SAMD2L2_HAVE_I2C5
   if (bus == 5)
     {
-      /* Select up I2C5 and setup invariant attributes */
+      /* Select up I2C5 and the (initial) I2C frequency */
 
       priv = &g_i2c5;
-      priv->attr = &g_i2c5attr;
-
-      /* Select the (initial) I2C frequency */
-
       frequency = CONFIG_SAM_I2C5_FREQUENCY;
     }
   else
@@ -1352,14 +1382,6 @@ struct i2c_master_s *sam_i2c_master_initialize(int bus)
       leave_critical_section(flags);
       return NULL;
     }
-
-  /* Initialize the I2C driver structure */
-
-  priv->dev.ops = &g_i2cops;
-  priv->flags = 0;
-
-  nxmutex_init(&priv->lock);
-  nxsem_init(&priv->waitsem, 0, 0);
 
   /* Perform repeatable I2C hardware initialization */
 
@@ -1385,11 +1407,6 @@ int sam_i2c_uninitialize(struct i2c_master_s *dev)
   /* Disable I2C interrupts */
 
   up_disable_irq(priv->attr->irq);
-
-  /* Reset data structures */
-
-  nxmutex_destroy(&priv->lock);
-  nxsem_destroy(&priv->waitsem);
 
   /* Detach Interrupt Handler */
 

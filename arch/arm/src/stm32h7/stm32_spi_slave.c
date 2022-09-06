@@ -313,6 +313,8 @@ static const struct spi_slave_ctrlrops_s g_ctrlr_ops =
 #define SPI_SLAVE_INIT_DMA(x)                           \
   .rxch          = DMAMAP_SPI##x##_RX,                  \
   .txch          = DMAMAP_SPI##x##_TX,                  \
+  .rxsem         = SEM_INITIALIZER(0),                  \
+  .txsem         = SEM_INITIALIZER(0),                  \
   .outq	         = SPI_SLAVE_OUTQ(x),                   \
   .inq	         = SPI_SLAVE_INQ(x),
 #else
@@ -334,6 +336,7 @@ static const struct spi_slave_ctrlrops_s g_ctrlr_ops =
   .irq           = STM32_IRQ_SPI##x,                    \
   SPI_SLAVE_INIT_DMA(x)                                 \
   .initialized   = false,                               \
+  .lock          = NXMUTEX_INITIALIZER,                 \
   SPI_SLAVE_INIT_PM_PREPARE                             \
   .config        = CONFIG_STM32H7_SPI##x##_COMMTYPE,    \
 }
@@ -1648,27 +1651,12 @@ static void spi_slave_initialize(struct stm32_spidev_s *priv)
 
   spi_putreg(priv, STM32_SPI_CRCPOLY_OFFSET, 7);
 
-  /* Initialize the SPI mutex that enforces mutually exclusive access. */
-
-  nxmutex_init(&priv->lock);
-
 #ifdef CONFIG_STM32H7_SPI_DMA
   /* DMA will be started in the interrupt handler, synchronized to the master
    * nss
    */
 
   priv->dmarunning = false;
-
-  /* Initialize the SPI semaphores that is used to wait for DMA completion.
-   * This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  nxsem_init(&priv->rxsem, 0, 0);
-  nxsem_init(&priv->txsem, 0, 0);
-
-  sem_setprotocol(&priv->rxsem, SEM_PRIO_NONE);
-  sem_setprotocol(&priv->txsem, SEM_PRIO_NONE);
 
   if (priv->config != SIMPLEX_TX)
     {

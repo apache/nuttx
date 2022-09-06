@@ -164,7 +164,13 @@ struct kinetis_edma_s
 
 /* The state of the eDMA */
 
-static struct kinetis_edma_s g_edma;
+static struct kinetis_edma_s g_edma =
+{
+  .chlock = NXMUTEX_INITIALIZER,
+#if CONFIG_KINETIS_EDMA_NTCD > 0
+  .dsem = SEM_INITIALIZER(CONFIG_KINETIS_EDMA_NTCD),
+#endif
+};
 
 #if CONFIG_KINETIS_EDMA_NTCD > 0
 /* This is a singly-linked list of free TCDs */
@@ -739,18 +745,12 @@ void weak_function arm_dma_initialize(void)
 
   /* Initialize data structures */
 
-  memset(&g_edma, 0, sizeof(struct kinetis_edma_s));
   for (i = 0; i < KINETIS_EDMA_NCHANNELS; i++)
     {
       g_edma.dmach[i].chan = i;
     }
 
-  /* Initialize mutex & semaphore */
-
-  nxmutex_init(&g_edma.chlock);
 #if CONFIG_KINETIS_EDMA_NTCD > 0
-  nxsem_init(&g_edma.dsem, 0, CONFIG_KINETIS_EDMA_NTCD);
-
   /* Initialize the list of free TCDs from the pool of pre-allocated TCDs. */
 
   kinetis_tcd_initialize();

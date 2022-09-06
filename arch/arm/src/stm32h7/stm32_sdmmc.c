@@ -588,6 +588,7 @@ struct stm32_dev_s g_sdmmcdev1 =
 #if defined(CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE)
   .d0_gpio           = SDMMC1_SDIO_PULL(GPIO_SDMMC1_D0),
 #endif
+  .waitsem            = SEM_INITIALIZER(0),
 #if defined(HAVE_SDMMC_SDIO_MODE) && defined(CONFIG_SDMMC1_SDIO_MODE)
   .sdiomode          = true,
 #endif
@@ -642,6 +643,7 @@ struct stm32_dev_s g_sdmmcdev2 =
 #if defined(CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE)
   .d0_gpio           = SDMMC2_SDIO_PULL(GPIO_SDMMC2_D0),
 #endif
+  .waitsem            = SEM_INITIALIZER(0),
 #if defined(HAVE_SDMMC_SDIO_MODE) && defined(CONFIG_SDMMC2_SDIO_MODE)
   .sdiomode          = true,
 #endif
@@ -3482,12 +3484,6 @@ struct sdio_dev_s *sdio_initialize(int slotno)
       mcerr("ERROR: Unsupported SDMMC slot: %d\n", slotno);
       return NULL;
     }
-
-  /* Initialize the SDIO slot structure */
-
-  /* Initialize semaphores */
-
-  nxsem_init(&priv->waitsem, 0, 0);
 
   /* Reset the card and assure that it is in the initial, unconfigured
    * state.

@@ -113,6 +113,7 @@ static struct imxrt_flexspidev_s g_flexspi0dev =
     .ops = &g_flexspi0ops,
   },
   .base = (struct flexspi_type_s *) IMXRT_FLEXSPIC_BASE,
+  .lock = NXMUTEX_INITIALIZER,
 };
 
 #define FREQ_1MHz             (1000000ul)
@@ -1267,12 +1268,6 @@ struct flexspi_dev_s *imxrt_flexspi_initialize(int intf)
   if (!priv->initialized)
     {
       /* No perform one time initialization */
-
-      /* Initialize the FlexSPI mutex that enforces mutually exclusive
-       * access to the FlexSPI registers.
-       */
-
-      nxmutex_init(&priv->lock);
 
       /* Perform hardware initialization. Puts the FlexSPI into an active
        * state.

@@ -397,6 +397,7 @@ struct kinetis_dev_s g_sdhcdev =
 #endif
 #endif
   },
+  .waitsem = SEM_INITIALIZER(0),
 };
 
 /* Register logging support */
@@ -2850,10 +2851,6 @@ struct sdio_dev_s *sdhc_initialize(int slotno)
   DEBUGASSERT(slotno == 0);
 
   /* Initialize the SDHC slot structure data structure */
-
-  /* Initialize semaphores */
-
-  nxsem_init(&priv->waitsem, 0, 0);
 
   /* In addition to the system clock, the SDHC module needs a clock for the
    * base for the external card clock.  There are four possible sources for

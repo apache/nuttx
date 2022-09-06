@@ -461,7 +461,11 @@ static void sam_disconnect(struct usbhost_driver_s *drvr,
  * single global instance.
  */
 
-static struct sam_ohci_s g_ohci;
+static struct sam_ohci_s g_ohci =
+{
+  .lock = NXMUTEX_INITIALIZER,
+  .pscsem = SEM_INITIALIZER(0),
+};
 
 /* This is the connection/enumeration interface */
 
@@ -3953,11 +3957,6 @@ struct usbhost_connection_s *sam_ohci_initialize(int controller)
   DEBUGASSERT(controller == 0);
   DEBUGASSERT(sizeof(struct sam_ed_s)  == SIZEOF_SAM_ED_S);
   DEBUGASSERT(sizeof(struct sam_gtd_s) == SIZEOF_SAM_TD_S);
-
-  /* Initialize the state data structure */
-
-  nxsem_init(&g_ohci.pscsem,  0, 0);
-  nxmutex_init(&g_ohci.lock);
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
   g_ohci.ininterval  = MAX_PERINTERVAL;

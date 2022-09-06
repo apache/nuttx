@@ -154,6 +154,7 @@ static const struct spi_ops_s g_spiops =
 static struct sam_spidev_s g_spidev =
 {
   .base              = SAM_QSPI_BASE,
+  .spilock           = NXMUTEX_INITIALIZER,
   .select            = sam_qspi_select,
 };
 
@@ -832,12 +833,6 @@ struct spi_dev_s *sam_qspi_spi_initialize(int intf)
       qspi_getreg(spi, SAM_QSPI_SR_OFFSET);
       qspi_getreg(spi, SAM_QSPI_RDR_OFFSET);
 
-      /* Initialize the SPI mutex that enforces mutually exclusive
-       * access to the SPI registers.
-       */
-
-      nxmutex_init(&spi->spilock);
-      spi->escape_lastxfer = false;
       spi->initialized = true;
     }
 

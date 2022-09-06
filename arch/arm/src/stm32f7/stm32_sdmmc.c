@@ -637,7 +637,7 @@ struct stm32_dev_s g_sdmmcdev1 =
 #ifdef CONFIG_STM32F7_SDMMC1_DMAPRIO
   .dmapri            = CONFIG_STM32F7_SDMMC1_DMAPRIO,
 #endif
-
+  .waitsem           = SEM_INITIALIZER(0),
 #ifdef HAVE_SDMMC_SDIO_MODE
 #ifdef CONFIG_SDMMC1_SDIO_MODE
   .sdiomode          = true,
@@ -697,7 +697,7 @@ struct stm32_dev_s g_sdmmcdev2 =
 #ifdef CONFIG_STM32F7_SDMMC2_DMAPRIO
   .dmapri            = CONFIG_STM32F7_SDMMC2_DMAPRIO,
 #endif
-
+  .waitsem           = SEM_INITIALIZER(0),
 #ifdef HAVE_SDMMC_SDIO_MODE
 #ifdef CONFIG_SDMMC2_SDIO_MODE
   .sdiomode          = true,
@@ -3385,12 +3385,6 @@ struct sdio_dev_s *sdio_initialize(int slotno)
       mcerr("ERROR: Unsupported SDMMC slot: %d\n", slotno);
       return NULL;
     }
-
-  /* Initialize the SDIO slot structure */
-
-  /* Initialize semaphores */
-
-  nxsem_init(&priv->waitsem, 0, 0);
 
 #ifdef CONFIG_STM32F7_SDMMC_DMA
   /* Allocate a DMA channel */

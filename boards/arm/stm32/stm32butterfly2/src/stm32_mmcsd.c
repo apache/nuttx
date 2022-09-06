@@ -68,7 +68,7 @@ static void *g_chmediaarg;
 
 /* Semafor to inform stm32_cd_thread that card was inserted or pulled out */
 
-static sem_t g_cdsem;
+static sem_t g_cdsem = SEM_INITIALIZER(0);
 
 /****************************************************************************
  * Private Functions
@@ -185,9 +185,7 @@ int stm32_mmcsd_initialize(int minor)
 
   stm32_gpiosetevent(GPIO_SD_CD, true, true, true, stm32_cd, NULL);
 
-  nxsem_init(&g_cdsem, 0, 0);
   pthread_attr_init(&pattr);
-
 #ifdef CONFIG_DEBUG_FS
   pthread_attr_setstacksize(&pattr, 1024);
 #else

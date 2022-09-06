@@ -336,6 +336,7 @@ static const struct spi_ops_s g_spi0ops =
 static struct sam_spidev_s g_spi0dev =
 {
   .base              = SAM_SPI0_BASE,
+  .spilock           = NXMUTEX_INITIALIZER,
   .select            = sam_spi0select,
 #ifdef CONFIG_SAMV7_SPI_DMA
   .pid               = SAM_PID_SPI0,
@@ -375,6 +376,7 @@ static const struct spi_ops_s g_spi1ops =
 static struct sam_spidev_s g_spi1dev =
 {
   .base              = SAM_SPI1_BASE,
+  .spilock           = NXMUTEX_INITIALIZER,
   .select            = sam_spi1select,
 #ifdef CONFIG_SAMV7_SPI_DMA
   .pid               = SAM_PID_SPI1,
@@ -2156,12 +2158,6 @@ struct spi_dev_s *sam_spibus_initialize(int port)
       spi_getreg(spi, SAM_SPI_SR_OFFSET);
       spi_getreg(spi, SAM_SPI_RDR_OFFSET);
 
-      /* Initialize the SPI mutex that enforces mutually exclusive
-       * access to the SPI registers.
-       */
-
-      nxmutex_init(&spi->spilock);
-      spi->escape_lastxfer = false;
       spi->initialized = true;
 
 #ifdef CONFIG_SAMV7_SPI_DMA

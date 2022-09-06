@@ -130,6 +130,12 @@ static struct lc823450_spidev_s g_spidev =
     {
       &g_spiops
     },
+#ifndef CONFIG_SPI_OWNBUS
+  .lock              = NXMUTEX_INITIALIZER,
+#endif
+#ifdef CONFIG_LC823450_SPI_DMA
+  .dma_wait          = SEM_INITIALIZER(0),
+#endif
 };
 
 /****************************************************************************
@@ -523,10 +529,6 @@ struct spi_dev_s *lc823450_spibus_initialize(int port)
       modifyreg32(MCLKCNTAPB, 0, MCLKCNTAPB_PORT5_CLKEN);
       modifyreg32(MRSTCNTAPB, 0, MRSTCNTAPB_PORT5_RSTB);
 
-#ifndef CONFIG_SPI_OWNBUS
-      nxmutex_init(&priv->lock);
-#endif
-
       /* Initialize SPI mode. It must be done before starting SPI transfer */
 
       /* PO: SPI Mode3 (default) */
@@ -543,7 +545,6 @@ struct spi_dev_s *lc823450_spibus_initialize(int port)
       lc823450_spiinitialize();
 
 #ifdef CONFIG_LC823450_SPI_DMA
-      nxsem_init(&priv->dma_wait, 0, 0);
       priv->hdma = lc823450_dmachannel(DMA_CHANNEL_SIOTX);
       lc823450_dmarequest(priv->hdma, DMA_REQUEST_SIOTX);
 

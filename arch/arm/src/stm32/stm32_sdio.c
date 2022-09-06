@@ -549,6 +549,7 @@ struct stm32_dev_s g_sdiodev =
 #endif
 #endif
   },
+  .waitsem = SEM_INITIALIZER(0),
 };
 
 /* Register logging support */
@@ -3018,12 +3019,6 @@ struct sdio_dev_s *sdio_initialize(int slotno)
   /* There is only one slot */
 
   struct stm32_dev_s *priv = &g_sdiodev;
-
-  /* Initialize the SDIO slot structure */
-
-  /* Initialize semaphores */
-
-  nxsem_init(&priv->waitsem, 0, 0);
 
   /* Allocate a DMA channel */
 

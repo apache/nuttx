@@ -315,7 +315,17 @@ static void seq_handleisopdoneintr(struct cxd56_scudev_s *priv,
  * Private Data
  ****************************************************************************/
 
-struct cxd56_scudev_s g_scudev;
+struct cxd56_scudev_s g_scudev =
+{
+  .syncwait = SEM_INITIALIZER(0),
+  .synclock = NXMUTEX_INITIALIZER,
+  .oneshotwait =
+  {
+    SEM_INITIALIZER(0),
+    SEM_INITIALIZER(0),
+    SEM_INITIALIZER(0),
+  },
+};
 
 /****************************************************************************
  * Public Data
@@ -3417,22 +3427,9 @@ void seq_close(struct seq_s *seq)
 
 void scu_initialize(void)
 {
-  struct cxd56_scudev_s *priv = &g_scudev;
-  int i;
-
 #ifdef CONFIG_CXD56_UDMAC
   cxd56_udmainitialize();
 #endif
-
-  memset(priv, 0, sizeof(struct cxd56_scudev_s));
-
-  nxmutex_init(&priv->synclock);
-  nxsem_init(&priv->syncwait, 0, 0);
-
-  for (i = 0; i < 3; i++)
-    {
-      nxsem_init(&priv->oneshotwait[i], 0, 0);
-    }
 
   scufifo_initialize();
 
@@ -3486,9 +3483,6 @@ void scu_initialize(void)
 
 void scu_uninitialize(void)
 {
-  struct cxd56_scudev_s *priv = &g_scudev;
-  int i;
-
   /* Request don't sleep */
 
   seq_inhibitrequest(REQ_SLEEP, true);
@@ -3496,12 +3490,4 @@ void scu_uninitialize(void)
   up_disable_irq(CXD56_IRQ_SCU_3);
 
   cxd56_scuseq_clock_disable();
-
-  nxsem_destroy(&priv->syncwait);
-  nxmutex_destroy(&priv->synclock);
-
-  for (i = 0; i < 3; i++)
-    {
-      nxsem_destroy(&priv->oneshotwait[i]);
-    }
 }

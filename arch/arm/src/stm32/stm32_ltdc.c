@@ -808,11 +808,11 @@ static uint8_t g_transpclut[STM32_LTDC_NCLUT];
 
 /* The LTDC mutex that enforces mutually exclusive access */
 
-static mutex_t g_lock;
+static mutex_t g_lock = NXMUTEX_INITIALIZER;
 
 /* The semaphore for interrupt handling */
 
-static sem_t g_semirq;
+static sem_t g_semirq = SEM_INITIALIZER(0);
 
 /* This structure provides irq handling */
 
@@ -1608,11 +1608,6 @@ static int stm32_ltdc_reload(uint8_t value, bool waitvblank)
 
 static void stm32_ltdc_irqconfig(void)
 {
-  /* Initialize the LTDC mutex that enforces mutually exclusive access */
-
-  nxmutex_init(&g_lock);
-  nxsem_init(g_interrupt.sem, 0, 0);
-
   /* Attach LTDC interrupt vector */
 
   irq_attach(g_interrupt.irq, stm32_ltdcirq, NULL);

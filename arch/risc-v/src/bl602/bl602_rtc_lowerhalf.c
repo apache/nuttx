@@ -155,6 +155,7 @@ static const struct rtc_ops_s g_rtc_ops =
 static struct bl602_lowerhalf_s g_rtc_lowerhalf =
 {
   .ops        = &g_rtc_ops,
+  .devlock = NXMUTEX_INITIALIZER,
 };
 
 /****************************************************************************
@@ -678,13 +679,6 @@ int up_rtc_initialize(void)
 
 struct rtc_lowerhalf_s *bl602_rtc_lowerhalf_initialize(void)
 {
-  nxmutex_init(&g_rtc_lowerhalf.devlock);
-
-#ifdef CONFIG_RTC_PERIODIC
-  g_rtc_lowerhalf.periodic_enable = 0;
-#endif
-  memset(&g_rtc_lowerhalf.rtc_base, 0, sizeof(g_rtc_lowerhalf.rtc_base));
-
   g_rtc_lowerhalf.rtc_base.tm_year = 70;
   g_rtc_lowerhalf.rtc_base.tm_mday = 1;
 

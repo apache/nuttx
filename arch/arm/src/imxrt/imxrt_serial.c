@@ -846,6 +846,7 @@ static struct imxrt_uart_s g_lpuart1priv =
 
 #ifdef CONFIG_LPUART1_TXDMA
   .dma_txreqsrc = IMXRT_DMACHAN_LPUART1_TX,
+  .txdmasem     = SEM_INITIALIZER(1),
 #endif
 #ifdef CONFIG_LPUART1_RXDMA
   .dma_rxreqsrc = IMXRT_DMACHAN_LPUART1_RX,
@@ -914,6 +915,7 @@ static struct imxrt_uart_s g_lpuart2priv =
 
 #ifdef CONFIG_LPUART2_TXDMA
   .dma_txreqsrc = IMXRT_DMACHAN_LPUART2_TX,
+  .txdmasem     = SEM_INITIALIZER(1),
 #endif
 #ifdef CONFIG_LPUART2_RXDMA
   .dma_rxreqsrc = IMXRT_DMACHAN_LPUART2_RX,
@@ -980,6 +982,7 @@ static struct imxrt_uart_s g_lpuart3priv =
 
 #ifdef CONFIG_LPUART3_TXDMA
   .dma_txreqsrc = IMXRT_DMACHAN_LPUART3_TX,
+  .txdmasem     = SEM_INITIALIZER(1),
 #endif
 #ifdef CONFIG_LPUART3_RXDMA
   .dma_rxreqsrc = IMXRT_DMACHAN_LPUART3_RX,
@@ -1046,6 +1049,7 @@ static struct imxrt_uart_s g_lpuart4priv =
 
 #ifdef CONFIG_LPUART4_TXDMA
   .dma_txreqsrc = IMXRT_DMACHAN_LPUART4_TX,
+  .txdmasem     = SEM_INITIALIZER(1),
 #endif
 #ifdef CONFIG_LPUART4_RXDMA
   .dma_rxreqsrc = IMXRT_DMACHAN_LPUART4_RX,
@@ -1112,6 +1116,7 @@ static struct imxrt_uart_s g_lpuart5priv =
 
 #ifdef CONFIG_LPUART5_TXDMA
   .dma_txreqsrc = IMXRT_DMACHAN_LPUART5_TX,
+  .txdmasem     = SEM_INITIALIZER(1),
 #endif
 #ifdef CONFIG_LPUART5_RXDMA
   .dma_rxreqsrc = IMXRT_DMACHAN_LPUART5_RX,
@@ -1178,6 +1183,7 @@ static struct imxrt_uart_s g_lpuart6priv =
 
 #ifdef CONFIG_LPUART6_TXDMA
   .dma_txreqsrc = IMXRT_DMACHAN_LPUART6_TX,
+  .txdmasem     = SEM_INITIALIZER(1),
 #endif
 #ifdef CONFIG_LPUART6_RXDMA
   .dma_rxreqsrc = IMXRT_DMACHAN_LPUART6_RX,
@@ -1244,6 +1250,7 @@ static struct imxrt_uart_s g_lpuart7priv =
 
 #ifdef CONFIG_LPUART7_TXDMA
   .dma_txreqsrc = IMXRT_DMACHAN_LPUART7_TX,
+  .txdmasem     = SEM_INITIALIZER(1),
 #endif
 #ifdef CONFIG_LPUART7_RXDMA
   .dma_rxreqsrc = IMXRT_DMACHAN_LPUART7_RX,
@@ -1310,6 +1317,7 @@ static struct imxrt_uart_s g_lpuart8priv =
 
 #ifdef CONFIG_LPUART8_TXDMA
   .dma_txreqsrc = IMXRT_DMACHAN_LPUART8_TX,
+  .txdmasem     = SEM_INITIALIZER(1),
 #endif
 #ifdef CONFIG_LPUART8_RXDMA
   .dma_rxreqsrc = IMXRT_DMACHAN_LPUART8_RX,
@@ -1457,8 +1465,6 @@ static int imxrt_dma_setup(struct uart_dev_s *dev)
             {
               return -EBUSY;
             }
-
-          nxsem_init(&priv->txdmasem, 0, 1);
         }
 
       /* Enable Tx DMA for the UART */
@@ -1659,7 +1665,6 @@ static void imxrt_dma_shutdown(struct uart_dev_s *dev)
 
       imxrt_dmach_free(priv->txdma);
       priv->txdma = NULL;
-      nxsem_destroy(&priv->txdmasem);
     }
 #endif
 }

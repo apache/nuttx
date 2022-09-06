@@ -103,7 +103,10 @@ static const struct file_operations g_chargerops =
 #endif
 };
 
-static struct charger_dev_s g_chargerdev;
+static struct charger_dev_s g_chargerdev =
+{
+  .batlock = NXMUTEX_INITIALIZER,
+};
 
 /****************************************************************************
  * Private Functions
@@ -620,10 +623,6 @@ int cxd56_charger_initialize(const char *devpath)
 {
   struct charger_dev_s *priv = &g_chargerdev;
   int ret;
-
-  /* Initialize the CXD5247 device structure */
-
-  nxmutex_init(&priv->batlock);
 
   /* Register battery driver */
 

@@ -234,12 +234,12 @@ static const struct i2s_ops_s g_i2sops =
 };
 
 static DMA_HANDLE _hrxdma;
-static sem_t      _sem_rxdma;
-static sem_t      _sem_buf_over;
+static sem_t _sem_rxdma = SEM_INITIALIZER(0);
+static sem_t _sem_buf_over = SEM_INITIALIZER(0);
 
 static DMA_HANDLE _htxdma;
-static sem_t      _sem_txdma;
-static sem_t      _sem_buf_under;
+static sem_t _sem_txdma = SEM_INITIALIZER(0);
+static sem_t _sem_buf_under = SEM_INITIALIZER(0);
 
 /****************************************************************************
  * Public Data
@@ -1034,12 +1034,7 @@ struct i2s_dev_s *lc823450_i2sdev_initialize(void)
 #endif
 
   _hrxdma = lc823450_dmachannel(DMA_CHANNEL_VIRTUAL);
-  nxsem_init(&_sem_rxdma, 0, 0);
-  nxsem_init(&_sem_buf_over, 0, 0);
-
   _htxdma = lc823450_dmachannel(DMA_CHANNEL_VIRTUAL);
-  nxsem_init(&_sem_txdma, 0, 0);
-  nxsem_init(&_sem_buf_under, 0, 0);
 
 #ifdef CONFIG_SMP
   cpu_set_t cpuset0;

@@ -89,8 +89,8 @@ static int      ez80_i2c_transfer(FAR struct i2c_master_s *dev,
  * Private Data
  ****************************************************************************/
 
-static bool    g_initialized;  /* true:I2C has been initialized */
-static mutex_t g_i2clock;      /* Serialize I2C transfers */
+static bool    g_initialized;                   /* true:I2C has been initialized */
+static mutex_t g_i2clock = NXMUTEX_INITIALIZER; /* Serialize I2C transfers */
 
 const struct i2c_ops_s g_ops =
 {
@@ -911,10 +911,6 @@ FAR struct i2c_master_s *ez80_i2cbus_initialize(int port)
       /* No GPIO setup is required -- I2C pints,
        * SCL/SDA are not multiplexed
        */
-
-      /* This mutex enforces serialized access for I2C transfers */
-
-      nxmutex_init(&g_i2clock);
 
       /* Enable I2C -- but not interrupts */
 

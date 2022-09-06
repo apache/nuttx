@@ -236,6 +236,7 @@ static struct sam_spidev_s g_spi0dev =
 #ifdef CONFIG_SAMD5E5SPI_DMA
   .dma_tx_trig = DMAC_TRIGSRC_SERCOM0_TX,
   .dma_rx_trig = DMAC_TRIGSRC_SERCOM0_RX,
+  .dmasem      = SEM_INITIALIZER(0),
 #endif
 };
 #endif
@@ -286,6 +287,7 @@ static struct sam_spidev_s g_spi1dev =
 #ifdef CONFIG_SAMD5E5SPI_DMA
   .dma_tx_trig = DMAC_TRIGSRC_SERCOM1_TX,
   .dma_rx_trig = DMAC_TRIGSRC_SERCOM1_RX,
+  .dmasem      = SEM_INITIALIZER(0),
 #endif
 };
 #endif
@@ -336,6 +338,7 @@ static struct sam_spidev_s g_spi2dev =
 #ifdef CONFIG_SAMD5E5SPI_DMA
   .dma_tx_trig = DMAC_TRIGSRC_SERCOM2_TX,
   .dma_rx_trig = DMAC_TRIGSRC_SERCOM2_RX,
+  .dmasem      = SEM_INITIALIZER(0),
 #endif
 };
 #endif
@@ -386,6 +389,7 @@ static struct sam_spidev_s g_spi3dev =
 #ifdef CONFIG_SAMD5E5SPI_DMA
   .dma_tx_trig = DMAC_TRIGSRC_SERCOM3_TX,
   .dma_rx_trig = DMAC_TRIGSRC_SERCOM3_RX,
+  .dmasem      = SEM_INITIALIZER(0),
 #endif
 };
 #endif
@@ -436,6 +440,7 @@ static struct sam_spidev_s g_spi4dev =
 #ifdef CONFIG_SAMD5E5SPI_DMA
   .dma_tx_trig = DMAC_TRIGSRC_SERCOM4_TX,
   .dma_rx_trig = DMAC_TRIGSRC_SERCOM4_RX,
+  .dmasem      = SEM_INITIALIZER(0),
 #endif
 };
 #endif
@@ -486,6 +491,7 @@ static struct sam_spidev_s g_spi5dev =
 #ifdef CONFIG_SAMD5E5SPI_DMA
   .dma_tx_trig = DMAC_TRIGSRC_SERCOM5_TX,
   .dma_rx_trig = DMAC_TRIGSRC_SERCOM5_RX,
+  .dmasem      = SEM_INITIALIZER(0),
 #endif
 };
 #endif
@@ -536,6 +542,7 @@ static struct sam_spidev_s g_spi6dev =
 #ifdef CONFIG_SAMD5E5SPI_DMA
   .dma_tx_trig = DMAC_TRIGSRC_SERCOM6_TX,
   .dma_rx_trig = DMAC_TRIGSRC_SERCOM6_RX,
+  .dmasem      = SEM_INITIALIZER(0),
 #endif
 };
 #endif
@@ -586,6 +593,7 @@ static struct sam_spidev_s g_spi7dev =
 #ifdef CONFIG_SAMD5E5SPI_DMA
   .dma_tx_trig = DMAC_TRIGSRC_SERCOM7_TX,
   .dma_rx_trig = DMAC_TRIGSRC_SERCOM7_RX,
+  .dmasem      = SEM_INITIALIZER(0),
 #endif
 };
 #endif
@@ -1519,10 +1527,6 @@ static void spi_dma_setup(struct sam_spidev_s *priv)
   priv->dma_tx = sam_dmachannel(DMACH_FLAG_BEATSIZE_BYTE |
                                 DMACH_FLAG_MEM_INCREMENT |
                                 DMACH_FLAG_PERIPH_TXTRIG(priv->dma_tx_trig));
-
-  /* Initialize the semaphore used to notify when DMA is complete */
-
-  nxsem_init(&priv->dmasem, 0, 0);
 }
 #endif
 

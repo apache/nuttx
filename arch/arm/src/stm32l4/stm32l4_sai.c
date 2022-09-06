@@ -233,6 +233,7 @@ static struct stm32l4_sai_s g_sai1a_priv =
 {
   .dev.ops     = &g_i2sops,
   .base        = STM32L4_SAI1_A_BASE,
+  .lock        = NXMUTEX_INITIALIZER,
   .frequency   = STM32L4_SAI1_FREQUENCY,
 #ifdef CONFIG_STM32L4_SAI1_A_SYNC_WITH_B
   .syncen      = SAI_CR1_SYNCEN_SYNC_INT,
@@ -244,6 +245,7 @@ static struct stm32l4_sai_s g_sai1a_priv =
 #endif
   .datalen     = CONFIG_STM32L4_SAI_DEFAULT_DATALEN,
   .samplerate  = CONFIG_STM32L4_SAI_DEFAULT_SAMPLERATE,
+  .bufsem      = SEM_INITIALIZER(CONFIG_STM32L4_SAI_MAXINFLIGHT),
 };
 #endif
 
@@ -252,6 +254,7 @@ static struct stm32l4_sai_s g_sai1b_priv =
 {
   .dev.ops     = &g_i2sops,
   .base        = STM32L4_SAI1_B_BASE,
+  .lock        = NXMUTEX_INITIALIZER,
   .frequency   = STM32L4_SAI1_FREQUENCY,
 #ifdef CONFIG_STM32L4_SAI1_B_SYNC_WITH_A
   .syncen      = SAI_CR1_SYNCEN_SYNC_INT,
@@ -263,6 +266,7 @@ static struct stm32l4_sai_s g_sai1b_priv =
 #endif
   .datalen     = CONFIG_STM32L4_SAI_DEFAULT_DATALEN,
   .samplerate  = CONFIG_STM32L4_SAI_DEFAULT_SAMPLERATE,
+  .bufsem      = SEM_INITIALIZER(CONFIG_STM32L4_SAI_MAXINFLIGHT),
 };
 #endif
 
@@ -273,6 +277,7 @@ static struct stm32l4_sai_s g_sai2a_priv =
 {
   .dev.ops     = &g_i2sops,
   .base        = STM32L4_SAI2_A_BASE,
+  .lock        = NXMUTEX_INITIALIZER,
   .frequency   = STM32L4_SAI2_FREQUENCY,
 #ifdef CONFIG_STM32L4_SAI2_A_SYNC_WITH_B
   .syncen      = SAI_CR1_SYNCEN_SYNC_INT,
@@ -284,6 +289,7 @@ static struct stm32l4_sai_s g_sai2a_priv =
 #endif
   .datalen     = CONFIG_STM32L4_SAI_DEFAULT_DATALEN,
   .samplerate  = CONFIG_STM32L4_SAI_DEFAULT_SAMPLERATE,
+  .bufsem      = SEM_INITIALIZER(CONFIG_STM32L4_SAI_MAXINFLIGHT),
 };
 #endif
 
@@ -292,6 +298,7 @@ static struct stm32l4_sai_s g_sai2b_priv =
 {
   .dev.ops     = &g_i2sops,
   .base        = STM32L4_SAI2_B_BASE,
+  .lock        = NXMUTEX_INITIALIZER,
   .frequency   = STM32L4_SAI2_FREQUENCY,
 #ifdef CONFIG_STM32L4_SAI2_B_SYNC_WITH_A
   .syncen      = SAI_CR1_SYNCEN_SYNC_INT,
@@ -303,6 +310,7 @@ static struct stm32l4_sai_s g_sai2b_priv =
 #endif
   .datalen     = CONFIG_STM32L4_SAI_DEFAULT_DATALEN,
   .samplerate  = CONFIG_STM32L4_SAI_DEFAULT_SAMPLERATE,
+  .bufsem      = SEM_INITIALIZER(CONFIG_STM32L4_SAI_MAXINFLIGHT),
 };
 #endif
 
@@ -1222,8 +1230,6 @@ static void sai_buf_initialize(struct stm32l4_sai_s *priv)
   int i;
 
   priv->freelist = NULL;
-  nxsem_init(&priv->bufsem, 0, CONFIG_STM32L4_SAI_MAXINFLIGHT);
-
   for (i = 0; i < CONFIG_STM32L4_SAI_MAXINFLIGHT; i++)
     {
       sai_buf_free(priv, &priv->containers[i]);
@@ -1247,8 +1253,6 @@ static void sai_buf_initialize(struct stm32l4_sai_s *priv)
 static void sai_portinitialize(struct stm32l4_sai_s *priv)
 {
   sai_dump_regs(priv, "Before initialization");
-
-  nxmutex_init(&priv->lock);
 
   /* Initialize buffering */
 

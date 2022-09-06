@@ -448,6 +448,7 @@ struct mpfs_dev_s g_emmcsd_dev =
   .blocksize         = 512,
   .onebit            = false,
   .polltransfer      = true,
+  .waitsem           = SEM_INITIALIZER(0),
 };
 
 /****************************************************************************
@@ -2908,10 +2909,6 @@ struct sdio_dev_s *sdio_initialize(int slotno)
 {
   struct mpfs_dev_s *priv = NULL;
   priv = &g_emmcsd_dev;
-
-  /* Initialize semaphores */
-
-  nxsem_init(&priv->waitsem, 0, 0);
 
   /* Reset the card and assure that it is in the initial, unconfigured
    * state.

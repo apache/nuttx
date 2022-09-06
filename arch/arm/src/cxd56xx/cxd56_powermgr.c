@@ -166,10 +166,10 @@ static int cxd56_pmmsghandler(int cpuid, int protoid, uint32_t pdata,
 
 static struct cxd56_pm_target_id_s g_target_id_table;
 static struct file g_queuedesc;
-static sem_t       g_bootsync;
-static mutex_t     g_regcblock;
-static mutex_t     g_freqlock;
-static sem_t       g_freqlockwait;
+static sem_t       g_bootsync = SEM_INITIALIZER(0);
+static mutex_t     g_regcblock = NXMUTEX_INITIALIZER;
+static mutex_t     g_freqlock = NXMUTEX_INITIALIZER;
+static sem_t       g_freqlockwait = SEM_INITIALIZER(0);
 static dq_queue_t  g_cbqueue;
 static sq_queue_t  g_freqlockqueue;
 static sq_queue_t  g_wakelockqueue;
@@ -818,35 +818,10 @@ int cxd56_pm_hotsleep(int idletime)
 int cxd56_pm_initialize(void)
 {
   int taskid;
-  int ret;
 
   dq_init(&g_cbqueue);
   sq_init(&g_freqlockqueue);
   sq_init(&g_wakelockqueue);
-
-  ret = nxmutex_init(&g_regcblock);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  ret = nxmutex_init(&g_freqlock);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  ret = nxsem_init(&g_freqlockwait, 0, 0);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  ret = nxsem_init(&g_bootsync, 0, 0);
-  if (ret < 0)
-    {
-      return ret;
-    }
 
   taskid = task_create("cxd56_pm_task", CXD56_PM_TASK_PRIO,
                        CXD56_PM_TASK_STACKSIZE, cxd56_pm_maintask,

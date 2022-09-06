@@ -312,9 +312,13 @@ static struct tiva_ssidev_s g_ssidev[] =
 #if NSSI_ENABLED > 1
     .base = TIVA_SSI0_BASE,
 #endif
+#ifndef CONFIG_SSI_POLLWAIT
+    .xfrsem = SEM_INITIALIZER(0),
+#endif
 #if !defined(CONFIG_SSI_POLLWAIT) && NSSI_ENABLED > 1
     .irq  = TIVA_IRQ_SSI0,
 #endif
+    .lock = NXMUTEX_INITIALIZER,
   },
 #endif
 #ifdef CONFIG_TIVA_SSI1
@@ -323,9 +327,13 @@ static struct tiva_ssidev_s g_ssidev[] =
 #if NSSI_ENABLED > 1
     .base = TIVA_SSI1_BASE,
 #endif
+#ifndef CONFIG_SSI_POLLWAIT
+    .xfrsem  = SEM_INITIALIZER(0),
+#endif
 #if !defined(CONFIG_SSI_POLLWAIT) && NSSI_ENABLED > 1
     .irq  = TIVA_IRQ_SSI1,
 #endif
+    .lock    = NXMUTEX_INITIALIZER,
   },
 #endif
 #ifdef CONFIG_TIVA_SSI2
@@ -334,9 +342,13 @@ static struct tiva_ssidev_s g_ssidev[] =
 #if NSSI_ENABLED > 1
     .base = TIVA_SSI2_BASE,
 #endif
+#ifndef CONFIG_SSI_POLLWAIT
+    .xfrsem  = SEM_INITIALIZER(0),
+#endif
 #if !defined(CONFIG_SSI_POLLWAIT) && NSSI_ENABLED > 1
     .irq  = TIVA_IRQ_SSI2,
 #endif
+    .lock    = NXMUTEX_INITIALIZER,
   },
 #endif
 #ifdef CONFIG_TIVA_SSI3
@@ -345,9 +357,13 @@ static struct tiva_ssidev_s g_ssidev[] =
 #if NSSI_ENABLED > 1
     .base = TIVA_SSI3_BASE,
 #endif
+#ifndef CONFIG_SSI_POLLWAIT
+    .xfrsem = SEM_INITIALIZER(0),
+#endif
 #if !defined(CONFIG_SSI_POLLWAIT) && NSSI_ENABLED > 1
     .irq  = TIVA_IRQ_SSI3,
 #endif
+    .lock   = NXMUTEX_INITIALIZER,
   },
 #endif
 };
@@ -1597,11 +1613,6 @@ struct spi_dev_s *tiva_ssibus_initialize(int port)
     }
 
   /* Initialize the state structure */
-
-#ifndef CONFIG_SSI_POLLWAIT
-  nxsem_init(&priv->xfrsem, 0, 0);
-#endif
-  nxmutex_init(&priv->lock);
 
   /* Set all CR1 fields to reset state.  This will be master mode. */
 

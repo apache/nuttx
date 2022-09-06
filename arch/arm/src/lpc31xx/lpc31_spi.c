@@ -157,6 +157,7 @@ static struct lpc31_spidev_s g_spidev =
     {
       &g_spiops
     },
+  .lock = NXMUTEX_INITIALIZER,
 };
 
 #ifdef CONFIG_LPC31_SPI_REGDEBUG
@@ -963,10 +964,6 @@ struct spi_dev_s *lpc31_spibus_initialize(int port)
 
   lpc31_softreset(RESETID_SPIRSTAPB);
   lpc31_softreset(RESETID_SPIRSTIP);
-
-  /* Initialize the SPI mutex that enforces mutually exclusive access */
-
-  nxmutex_init(&priv->lock);
 
   /* Reset the SPI block */
 

@@ -143,6 +143,8 @@ struct nrf52_radio_dev_s g_nrf52_radio_dev_1 =
   .txbuf_len = NRF52_RADIO_TXBUFFER,
   .rxbuf     = g_nrf52_radio_dev_rx1,
   .txbuf     = g_nrf52_radio_dev_tx1,
+  .lock      = NXMUTEX_INITIALIZER,
+  .sem_isr   = SEM_INITIALIZER(0),
 };
 
 /****************************************************************************
@@ -1159,11 +1161,6 @@ nrf52_radio_initialize(int intf, struct nrf52_radio_board_s *board)
 
   irq_attach(dev->irq, nrf52_radio_isr, dev);
   up_enable_irq(dev->irq);
-
-  /* Initialize mutex */
-
-  nxmutex_init(&dev->lock);
-  nxsem_init(&dev->sem_isr, 0, 0);
 
   /* Connect board-specific data */
 

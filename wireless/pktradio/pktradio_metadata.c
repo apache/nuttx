@@ -49,7 +49,7 @@ static FAR struct pktradio_metadata_s *g_free_metadata;
 
 /* Supports mutually exclusive access to the free list */
 
-static mutex_t g_metadata_lock;
+static mutex_t g_metadata_lock = NXMUTEX_INITIALIZER;
 
 /* Idempotence support */
 
@@ -103,9 +103,6 @@ void pktradio_metadata_initialize(void)
           g_free_metadata    = metadata;
         }
 
-      /* Initialize the mutual exclusion mutex */
-
-      nxmutex_init(&g_metadata_lock);
       g_metadata_initialized = true;
     }
 }

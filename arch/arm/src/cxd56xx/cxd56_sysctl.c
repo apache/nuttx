@@ -66,8 +66,8 @@ static int  sysctl_rxhandler(int cpuid, int protoid,
  * Private Data
  ****************************************************************************/
 
-static mutex_t g_lock;
-static sem_t g_sync;
+static mutex_t g_lock = NXMUTEX_INITIALIZER;
+static sem_t g_sync = SEM_INITIALIZER(0);
 static int g_errcode = 0;
 
 static const struct file_operations g_sysctlfops =
@@ -159,11 +159,6 @@ int cxd56_sysctlcmd(uint8_t id, uint32_t data)
 void cxd56_sysctlinitialize(void)
 {
   cxd56_iccinit(CXD56_PROTO_SYSCTL);
-
-  nxmutex_init(&g_lock);
-  nxsem_init(&g_sync, 0, 0);
-
   cxd56_iccregisterhandler(CXD56_PROTO_SYSCTL, sysctl_rxhandler, NULL);
-
   register_driver("/dev/sysctl", &g_sysctlfops, 0666, NULL);
 }

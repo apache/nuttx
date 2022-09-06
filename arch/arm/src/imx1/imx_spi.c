@@ -209,7 +209,9 @@ static struct imx_spidev_s g_spidev[] =
   {
     .ops  = &g_spiops,
     .base = IMX_CSPI1_VBASE,
+    .lock    = NXMUTEX_INITIALIZER,
 #ifndef CONFIG_SPI_POLLWAIT
+    .waitsem = SEM_INITIALIZER(0),
     .irq  = IMX_IRQ_CSPI1,
 #endif
   },
@@ -218,7 +220,9 @@ static struct imx_spidev_s g_spidev[] =
   {
     .ops  = &g_spiops,
     .base = IMX_CSPI2_VBASE,
+    .lock    = NXMUTEX_INITIALIZER,
 #ifndef CONFIG_SPI_POLLWAIT
+    .waitsem = SEM_INITIALIZER(0),
     .irq  = IMX_IRQ_CSPI2,
 #endif
   },
@@ -1107,11 +1111,6 @@ struct spi_dev_s *imx_spibus_initialize(int port)
     }
 
   /* Initialize the state structure */
-
-#ifndef CONFIG_SPI_POLLWAIT
-  nxsem_init(&priv->waitsem, 0, 0);
-#endif
-  nxmutex_init(&priv->lock);
 
   /* Initialize control register:
    * min frequency, ignore ready, master mode, mode=0, 8-bit

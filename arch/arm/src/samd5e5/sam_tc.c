@@ -85,8 +85,9 @@ static const struct tc_attr_s g_tc0attr =
 };
 static struct sam_tc_dev_s g_tc0 =
 {
-  .initialized = false,
-  .inuse = false,
+  .attr      = &g_tc0attr,
+  .lock      = NXMUTEX_INITIALIZER,
+  .waitsem   = SEM_INITIALIZER(0),
 };
 #endif
 
@@ -103,8 +104,9 @@ static const struct tc_attr_s g_tc1attr =
 };
 static struct sam_tc_dev_s g_tc1 =
 {
-  .initialized = false,
-  .inuse = false,
+  .attr      = &g_tc0attr,
+  .lock      = NXMUTEX_INITIALIZER,
+  .waitsem   = SEM_INITIALIZER(0),
 };
 #endif
 
@@ -121,8 +123,9 @@ static const struct tc_attr_s g_tc2attr =
 };
 static struct sam_tc_dev_s g_tc2 =
 {
-  .initialized = false,
-  .inuse = false,
+  .attr      = &g_tc0attr,
+  .lock      = NXMUTEX_INITIALIZER,
+  .waitsem   = SEM_INITIALIZER(0),
 };
 #endif
 
@@ -139,8 +142,9 @@ static const struct tc_attr_s g_tc3attr =
 };
 static struct sam_tc_dev_s g_tc3 =
 {
-  .initialized = false,
-  .inuse = false,
+  .attr      = &g_tc0attr,
+  .lock      = NXMUTEX_INITIALIZER,
+  .waitsem   = SEM_INITIALIZER(0),
 };
 #endif
 
@@ -157,8 +161,9 @@ static const struct tc_attr_s g_tc4attr =
 };
 static struct sam_tc_dev_s g_tc4 =
 {
-  .initialized = false,
-  .inuse = false,
+  .attr      = &g_tc0attr,
+  .lock      = NXMUTEX_INITIALIZER,
+  .waitsem   = SEM_INITIALIZER(0),
 };
 #endif
 
@@ -175,8 +180,9 @@ static const struct tc_attr_s g_tc5attr =
 };
 static struct sam_tc_dev_s g_tc5 =
 {
-  .initialized = false,
-  .inuse = false,
+  .attr      = &g_tc0attr,
+  .lock      = NXMUTEX_INITIALIZER,
+  .waitsem   = SEM_INITIALIZER(0),
 };
 #endif
 
@@ -481,60 +487,54 @@ static inline struct sam_tc_dev_s *sam_tc_initialize(int tc)
 #ifdef CONFIG_SAMD5E5_TC0
   if (tc == 0)
     {
-      /* Select up TC0 and setup invariant attributes */
+      /* Select up TC0 */
 
       priv = &g_tc0;
-      priv->attr = &g_tc0attr;
     }
   else
 #endif
 #ifdef CONFIG_SAMD5E5_TC1
   if (tc == 1)
     {
-      /* Select up TC1 and setup invariant attributes */
+      /* Select up TC1 */
 
       priv = &g_tc1;
-      priv->attr = &g_tc1attr;
     }
   else
 #endif
 #ifdef CONFIG_SAMD5E5_TC2
   if (tc == 2)
     {
-      /* Select up TC2 and setup invariant attributes */
+      /* Select up TC2 */
 
       priv = &g_tc2;
-      priv->attr = &g_tc2attr;
     }
   else
 #endif
 #ifdef CONFIG_SAMD5E5_TC3
   if (tc == 3)
     {
-      /* Select up TC3 and setup invariant attributes */
+      /* Select up TC3 */
 
       priv = &g_tc3;
-      priv->attr = &g_tc3attr;
     }
   else
 #endif
 #ifdef CONFIG_SAMD5E5_TC4
   if (tc == 4)
     {
-      /* Select up TC4 and setup invariant attributes */
+      /* Select up TC4 */
 
       priv = &g_tc4;
-      priv->attr = &g_tc4attr;
     }
   else
 #endif
 #ifdef CONFIG_SAMD5E5_TC5
   if (tc == 5)
     {
-      /* Select up TC5 and setup invariant attributes */
+      /* Select up TC5 */
 
       priv = &g_tc5;
-      priv->attr = &g_tc5attr;
     }
   else
 #endif
@@ -616,11 +616,6 @@ TC_HANDLE sam_tc_allocate(int tc, int frequency)
         }
 
       tmrinfo("TC%d attached irq %d\n", tc, priv->attr->irq);
-
-      /* Initialize the TC driver structure */
-
-      priv->flags = 0;
-      nxmutex_init(&priv->lock);
 
       /* Enable clocking to the TC module in PCHCTRL */
 

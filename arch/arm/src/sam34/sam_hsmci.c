@@ -542,6 +542,7 @@ struct sam_dev_s g_sdiodev =
     .dmasendsetup     = sam_dmasendsetup,
 #endif
   },
+  .waitsem = SEM_INITIALIZER(0),
 };
 
 /* Register logging support */
@@ -2699,9 +2700,6 @@ struct sdio_dev_s *sdio_initialize(int slotno)
 
   /* Initialize the HSMCI slot structure */
 
-  /* Initialize semaphores */
-
-  nxsem_init(&priv->waitsem, 0, 0);
 #ifdef CONFIG_SAM34_DMAC0
   /* Allocate a DMA channel.  A FIFO size of 8 is sufficient. */
 

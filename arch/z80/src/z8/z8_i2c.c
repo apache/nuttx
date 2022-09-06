@@ -95,10 +95,10 @@ extern uint32_t get_freq(void);
  * Private Data
  ****************************************************************************/
 
-static bool    g_initialized;  /* true:I2C has been initialized */
-static mutex_t g_i2clock;      /* Serialize I2C transfers */
+static bool    g_initialized;                   /* true:I2C has been initialized */
+static mutex_t g_i2clock = NXMUTEX_INITIALIZER; /* Serialize I2C transfers */
 
-const struct i2c_ops_s g_ops =
+static const struct i2c_ops_s g_ops =
 {
   z8_i2c_transfer,
 #ifdef CONFIG_I2C_RESET
@@ -630,10 +630,6 @@ FAR struct i2c_master_s *z8_i2cbus_initialize(int port)
 
       PAADDR = 0x02;
       PACTL |= 0xc0;
-
-      /* This mutex enforces serialized access for I2C transfers */
-
-      nxmutex_init(&g_i2clock);
 
       /* Enable I2C -- no interrupts */
 

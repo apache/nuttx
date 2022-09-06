@@ -135,7 +135,8 @@ static const struct rtc_ops_s g_rtc_ops =
 
 static struct ez80_lowerhalf_s g_rtc_lowerhalf =
 {
-  &g_rtc_ops           /* ops */
+  &g_rtc_ops,          /* ops */
+  NXMUTEX_INITIALIZER,
 };
 
 /****************************************************************************
@@ -569,7 +570,6 @@ static int ez80_rdalarm(FAR struct rtc_lowerhalf_s *lower,
 
 FAR struct rtc_lowerhalf_s *ez80_rtc_lowerhalf(void)
 {
-  nxmutex_init(&g_rtc_lowerhalf.devlock);
   return (FAR struct rtc_lowerhalf_s *)&g_rtc_lowerhalf;
 }
 

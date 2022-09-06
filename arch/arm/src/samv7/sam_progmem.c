@@ -153,7 +153,7 @@
  ****************************************************************************/
 
 static uint32_t g_page_buffer[SAMV7_PAGE_WORDS];
-static mutex_t g_page_lock;
+static mutex_t g_page_lock = NXMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Private Functions
@@ -190,12 +190,6 @@ void sam_progmem_initialize(void)
   regval  = getreg32(SAM_EEFC_FMR);
   regval &= ~EEFC_FMR_FRDY;
   sam_eefc_writefmr(regval);
-
-  /* Initialize the mutex that manages exclusive access to the global
-   * page buffer.
-   */
-
-  nxmutex_init(&g_page_lock);
 }
 
 /****************************************************************************

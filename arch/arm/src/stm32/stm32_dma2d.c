@@ -250,11 +250,11 @@ static uint32_t g_clut[STM32_DMA2D_NCLUT *
 
 /* The DMA2D mutex that enforces mutually exclusive access */
 
-static mutex_t g_lock;
+static mutex_t g_lock = NXMUTEX_INITIALIZER;
 
 /* Semaphore for interrupt handling */
 
-static sem_t g_semirq;
+static sem_t g_semirq = SEM_INITIALIZER(0);
 
 /* This structure provides irq handling */
 
@@ -1094,13 +1094,6 @@ int stm32_dma2dinitialize(void)
       /* Enable dma2d is done in rcc_enableahb1, see
        * arch/arm/src/stm32/stm32f40xxx_rcc.c
        */
-
-      /* Initialize the DMA2D mutex that enforces mutually exclusive
-       * access to the driver
-       */
-
-      nxmutex_init(&g_lock);
-      nxsem_init(g_interrupt.sem, 0, 0);
 
 #ifdef CONFIG_STM32_FB_CMAP
       /* Enable dma2d transfer and clut loading interrupts only */

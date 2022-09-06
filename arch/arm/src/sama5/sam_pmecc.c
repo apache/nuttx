@@ -172,7 +172,10 @@ static uint32_t pmecc_correctionalgo(uint32_t isr, uintptr_t data);
 
 /* PMECC state data */
 
-static struct sam_pmecc_s g_pmecc;
+static struct sam_pmecc_s g_pmecc =
+{
+  .lock = NXMUTEX_INITIALIZER,
+};
 
 /* Maps BCH_ERR correctability register value to number of errors per
  * sector.
@@ -998,28 +1001,6 @@ static int pmecc_pagelayout(uint16_t datasize, uint16_t eccsize)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: pmecc_initialize
- *
- * Description:
- *   Perform one-time PMECC initialization.  This must be called before any
- *   other PMECC interfaces are used.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#if NAND_NPMECC_BANKS > 1
-void pmecc_initialize(void)
-{
-  nxmutex_init(&g_pmecc.lock);
-}
-#endif
 
 /****************************************************************************
  * Name: pmecc_configure

@@ -403,6 +403,7 @@ static struct imxrt_enc_lowerhalf_s imxrt_enc1_priv =
   .ops    = &g_qecallbacks,
   .config = &imxrt_enc1_config,
   .data   = &imxrt_enc1_data,
+  .lock   = NXMUTEX_INITIALIZER,
 };
 #endif
 
@@ -441,6 +442,7 @@ static struct imxrt_enc_lowerhalf_s imxrt_enc2_priv =
   .ops    = &g_qecallbacks,
   .config = &imxrt_enc2_config,
   .data   = &imxrt_enc2_data,
+  .lock   = NXMUTEX_INITIALIZER,
 };
 #endif
 
@@ -479,6 +481,7 @@ static struct imxrt_enc_lowerhalf_s imxrt_enc3_priv =
   .ops    = &g_qecallbacks,
   .config = &imxrt_enc3_config,
   .data   = &imxrt_enc3_data,
+  .lock   = NXMUTEX_INITIALIZER,
 };
 #endif
 
@@ -517,6 +520,7 @@ static struct imxrt_enc_lowerhalf_s imxrt_enc4_priv =
   .ops    = &g_qecallbacks,
   .config = &imxrt_enc4_config,
   .data   = &imxrt_enc4_data,
+  .lock   = NXMUTEX_INITIALIZER,
 };
 #endif
 
@@ -1224,10 +1228,6 @@ int imxrt_qeinitialize(const char *devpath, int enc)
     default:
       return -ENODEV;
     }
-
-  /* Initialize private data */
-
-  nxmutex_init(&priv->lock);
 
   /* Register the upper-half driver */
 

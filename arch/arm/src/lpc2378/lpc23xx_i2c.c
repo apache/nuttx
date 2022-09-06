@@ -153,13 +153,25 @@ static int  lpc2378_i2c_reset(struct i2c_master_s * dev);
  ****************************************************************************/
 
 #ifdef CONFIG_LPC2378_I2C0
-static struct lpc2378_i2cdev_s g_i2c0dev;
+static struct lpc2378_i2cdev_s g_i2c0dev =
+{
+  .lock = NXMUTEX_INITIALIZER,
+  .wait = SEM_INITIALIZER(0),
+};
 #endif
 #ifdef CONFIG_LPC2378_I2C1
-static struct lpc2378_i2cdev_s g_i2c1dev;
+static struct lpc2378_i2cdev_s g_i2c1dev =
+{
+  .lock = NXMUTEX_INITIALIZER,
+  .wait = SEM_INITIALIZER(0),
+};
 #endif
 #ifdef CONFIG_LPC2378_I2C2
-static struct lpc2378_i2cdev_s g_i2c2dev;
+static struct lpc2378_i2cdev_s g_i2c2dev =
+{
+  .lock = NXMUTEX_INITIALIZER,
+  .wait = SEM_INITIALIZER(0),
+};
 #endif
 
 struct i2c_ops_s lpc2378_i2c_ops =
@@ -580,11 +592,6 @@ struct i2c_master_s *lpc2378_i2cbus_initialize(int port)
 
   putreg32(I2C_CONSET_I2EN, priv->base + I2C_CONSET_OFFSET);
 
-  /* Initialize mutex & semaphores */
-
-  nxmutex_init(&priv->lock);
-  nxsem_init(&priv->wait, 0, 0);
-
   /* Attach Interrupt Handler */
 
   irq_attach(priv->irqid, lpc2378_i2c_interrupt, priv);
@@ -614,11 +621,6 @@ int lpc2378_i2cbus_uninitialize(struct i2c_master_s * dev)
   /* Disable I2C */
 
   putreg32(I2C_CONCLRT_I2ENC, priv->base + I2C_CONCLR_OFFSET);
-
-  /* Reset data structures */
-
-  nxmutex_destroy(&priv->lock);
-  nxsem_destroy(&priv->wait);
 
   /* Cancel the watchdog timer */
 

@@ -425,7 +425,8 @@ struct sam_dev_s g_sdmmcdev[SAM_MAX_SDMMC_DEV_SLOTS] =
       .dmasendsetup     = sam_sendsetup,
 #endif
 #endif
-    }
+    },
+    .waitsem            = SEM_INITIALIZER(0),
   },
 #endif
 
@@ -482,7 +483,8 @@ struct sam_dev_s g_sdmmcdev[SAM_MAX_SDMMC_DEV_SLOTS] =
       .dmarecvsetup     = sam_recvsetup,
       .dmasendsetup     = sam_sendsetup,
 #endif
-    }
+    },
+    .waitsem            = SEM_INITIALIZER(0),
   }
 #endif
 #endif
@@ -3588,11 +3590,7 @@ struct sdio_dev_s *sam_sdmmc_sdio_initialize(int slotno)
 
   struct sam_dev_s *priv = &g_sdmmcdev[slotno];
 
-  /* Initialize the SDMMC slot structure data structure
-   * Initialize semaphores
-   */
-
-  nxsem_init(&priv->waitsem, 0, 0);
+  /* Initialize the SDMMC slot structure data structure */
 
   switch (priv->addr)
     {

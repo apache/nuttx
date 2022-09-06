@@ -245,7 +245,12 @@ static const struct file_operations g_tsdops =
 
 /* The driver state structure is pre-allocated. */
 
-static struct sam_tsd_s g_tsd;
+static struct sam_tsd_s g_tsd =
+{
+  .threshx = INVALID_THRESHOLD,
+  .threshy = INVALID_THRESHOLD,
+  .waitsem = SEM_INITIALIZER(0),
+};
 
 /****************************************************************************
  * Private Functions
@@ -1650,11 +1655,7 @@ int sam_tsd_register(struct sam_adc_s *adc, int minor)
 
   /* Initialize the touchscreen device driver instance */
 
-  memset(priv, 0, sizeof(struct sam_tsd_s));
-  priv->adc     = adc;               /* Save the ADC device handle */
-  priv->threshx = INVALID_THRESHOLD; /* Initialize thresholding logic */
-  priv->threshy = INVALID_THRESHOLD; /* Initialize thresholding logic */
-  nxsem_init(&priv->waitsem, 0, 0);
+  priv->adc = adc; /* Save the ADC device handle */
 
   /* Register the device as an input device */
 
@@ -1665,7 +1666,7 @@ int sam_tsd_register(struct sam_adc_s *adc, int minor)
   if (ret < 0)
     {
       ierr("ERROR: register_driver() failed: %d\n", ret);
-      goto errout_with_priv;
+      return ret;
     }
 
   /* And return success.  The hardware will be initialized as soon as the
@@ -1673,10 +1674,6 @@ int sam_tsd_register(struct sam_adc_s *adc, int minor)
    */
 
   return OK;
-
-errout_with_priv:
-  nxsem_destroy(&priv->waitsem);
-  return ret;
 }
 
 /****************************************************************************

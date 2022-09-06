@@ -88,7 +88,10 @@ static const struct file_operations g_gaugeops =
 #endif
 };
 
-static struct bat_gauge_dev_s g_gaugedev;
+static struct bat_gauge_dev_s g_gaugedev =
+{
+  .batlock = NXMUTEX_INITIALIZER,
+};
 
 /****************************************************************************
  * Private Functions
@@ -344,10 +347,6 @@ int cxd56_gauge_initialize(const char *devpath)
 {
   struct bat_gauge_dev_s *priv = &g_gaugedev;
   int ret;
-
-  /* Initialize the CXD5247 device structure */
-
-  nxmutex_init(&priv->batlock);
 
   /* Register battery driver */
 

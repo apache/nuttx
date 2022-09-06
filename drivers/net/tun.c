@@ -148,8 +148,8 @@ struct tun_device_s
 
 struct tun_driver_s
 {
-  uint8_t free_tuns;
   mutex_t lock;
+  uint8_t free_tuns;
 };
 
 /****************************************************************************
@@ -205,7 +205,11 @@ static int tun_poll(FAR struct file *filep, FAR struct pollfd *fds,
  * Private Data
  ****************************************************************************/
 
-static struct tun_driver_s g_tun;
+static struct tun_driver_s g_tun =
+{
+  NXMUTEX_INITIALIZER,
+};
+
 static struct tun_device_s g_tun_devices[CONFIG_TUN_NINTERFACES];
 
 static const struct file_operations g_tun_file_ops =
@@ -1315,10 +1319,7 @@ static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
 int tun_initialize(void)
 {
-  nxmutex_init(&g_tun.lock);
-
   g_tun.free_tuns = (1 << CONFIG_TUN_NINTERFACES) - 1;
-
   register_driver("/dev/tun", &g_tun_file_ops, 0644, &g_tun);
   return OK;
 }

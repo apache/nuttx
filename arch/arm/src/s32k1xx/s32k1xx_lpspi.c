@@ -261,6 +261,7 @@ static struct s32k1xx_lpspidev_s g_lpspi0dev =
 #ifdef CONFIG_S32K1XX_LPSPI_INTERRUPTS
   .spiirq       = S32K1XX_IRQ_LPSPI0,
 #endif
+  .lock         = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_S32K1XX_LPSPI_DMA
   .rxch         = DMAMAP_LPSPI0_RX,
   .txch         = DMAMAP_LPSPI0_TX,
@@ -311,6 +312,7 @@ static struct s32k1xx_lpspidev_s g_lpspi1dev =
 #ifdef CONFIG_S32K1XX_LPSPI_INTERRUPTS
   .spiirq       = S32K1XX_IRQ_LPSPI1,
 #endif
+  .lock         = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_S32K1XX_LPSPI_DMA
   .rxch         = DMAMAP_LPSPI1_RX,
   .txch         = DMAMAP_LPSPI1_TX,
@@ -361,6 +363,7 @@ static struct s32k1xx_lpspidev_s g_lpspi2dev =
 #ifdef CONFIG_S32K1XX_LPSPI_INTERRUPTS
   .spiirq       = S32K1XX_IRQ_LPSPI2,
 #endif
+  .lock         = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_S32K1XX_LPSPI_DMA
   .rxch         = DMAMAP_LPSPI2_RX,
   .txch         = DMAMAP_LPSPI2_TX,
@@ -1713,10 +1716,6 @@ static void s32k1xx_lpspi_bus_initialize(struct s32k1xx_lpspidev_s *priv)
   s32k1xx_lpspi_setbits((struct spi_dev_s *)priv, 8);
 
   s32k1xx_lpspi_setmode((struct spi_dev_s *)priv, SPIDEV_MODE0);
-
-  /* Initialize the SPI mutex that enforces mutually exclusive access */
-
-  nxmutex_init(&priv->lock);
 
   /* Enable LPSPI */
 
