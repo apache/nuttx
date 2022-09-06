@@ -268,6 +268,7 @@ MCU. Follow the links for the details:
          - :ref:`introduction/detailed_support:TI/Stellaris LM4F120x` (ARM Cortex-M4)
          - :ref:`introduction/detailed_support:TI/Tiva TM4C123G` (ARM Cortex-M4)
          - :ref:`introduction/detailed_support:TI/Tiva TM4C1294` (ARM Cortex-M4)
+         - :ref:`introduction/detailed_support:TI/Tiva TM4C129E` (ARM Cortex-M4)
          - :ref:`introduction/detailed_support:TI/Tiva TM4C129X` (ARM Cortex-M4)
          - :ref:`introduction/detailed_support:TI/SimpleLink CC13x2` (ARM Cortex-M4)
          - :ref:`introduction/detailed_support:TI/Hercules TMS570LS04xx` (ARM Cortex-R4)

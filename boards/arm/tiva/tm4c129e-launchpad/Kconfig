@@ -1,0 +1,75 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_TM4C129E_LAUNCHPAD
+if TIMER && TIVA_TIMER32_PERIODIC
+
+config TM4C129E_LAUNCHPAD_TIMER
+	bool
+	default n
+
+choice
+	prompt "Timer driver selection"
+	default TM4C129E_LAUNCHPAD_TIMER_NONE
+
+config TM4C129E_LAUNCHPAD_TIMER_NONE
+	bool "None"
+
+config TM4C129E_LAUNCHPAD_TIMER0
+	bool "Timer 0"
+	depends on TIVA_TIMER0
+	select TM4C129E_LAUNCHPAD_TIMER
+
+config TM4C129E_LAUNCHPAD_TIMER1
+	bool "Timer 1"
+	depends on TIVA_TIMER1
+	select TM4C129E_LAUNCHPAD_TIMER
+
+config TM4C129E_LAUNCHPAD_TIMER2
+	bool "Timer 2"
+	depends on TIVA_TIMER2
+	select TM4C129E_LAUNCHPAD_TIMER
+
+config TM4C129E_LAUNCHPAD_TIMER3
+	bool "Timer 3"
+	depends on TIVA_TIMER3
+	select TM4C129E_LAUNCHPAD_TIMER
+
+config TM4C129E_LAUNCHPAD_TIMER4
+	bool "Timer 4"
+	depends on TIVA_TIMER4
+	select TM4C129E_LAUNCHPAD_TIMER
+
+config TM4C129E_LAUNCHPAD_TIMER5
+	bool "Timer 5"
+	depends on TIVA_TIMER5
+	select TM4C129E_LAUNCHPAD_TIMER
+
+config TM4C129E_LAUNCHPAD_TIMER6
+	bool "Timer 6"
+	depends on TIVA_TIMER6
+	select TM4C129E_LAUNCHPAD_TIMER
+
+config TM4C129E_LAUNCHPAD_TIMER7
+	bool "Timer 7"
+	depends on TIVA_TIMER7
+	select TM4C129E_LAUNCHPAD_TIMER
+
+endchoice # Timer driver selection
+
+if TM4C129E_LAUNCHPAD_TIMER
+
+config TM4C129E_LAUNCHPAD_TIMER_DEVNAME
+	string "Timer device name"
+	default "/dev/timer0"
+
+config TM4C129E_LAUNCHPAD_TIMER_ALTCLK
+	bool "Use alternate clock source"
+	default n
+	depends on EXPERIMENTAL
+
+endif # TM4C129E_LAUNCHPAD_TIMER
+endif # TIVA_TIMER32_PERIODIC
+endif # ARCH_BOARD_TM4C129E_LAUNCHPAD

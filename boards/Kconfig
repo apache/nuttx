@@ -2285,6 +2285,16 @@ config ARCH_BOARD_TM4C1294_LAUNCHPAD
 	---help---
 		Tiva EK-TM4C1294XL LaunchPad.
 
+config ARCH_BOARD_TM4C129E_LAUNCHPAD
+	bool "Tiva EK-TM4C129EXL Crypto Connected LaunchPad"
+	depends on ARCH_CHIP_TM4C129ENCPDT
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Tiva EK-TM4C129EXL Crypto Connected LaunchPad featuring the
+		TM4C129ENCPDT chip.
+
 config ARCH_BOARD_TMS570LS31X_USB_KIT
 	bool "TI TMS570LS31X_USB_KIT"
 	depends on ARCH_CHIP_TMS570LS3137ZWT
@@ -2775,6 +2785,7 @@ config ARCH_BOARD
 	default "teensy-lc"                if ARCH_BOARD_TEENSY_LC
 	default "tm4c123g-launchpad"       if ARCH_BOARD_TM4C123G_LAUNCHPAD
 	default "tm4c1294-launchpad"       if ARCH_BOARD_TM4C1294_LAUNCHPAD
+	default "tm4c129e-launchpad"       if ARCH_BOARD_TM4C129E_LAUNCHPAD
 	default "tms570ls31x-usb-kit"      if ARCH_BOARD_TMS570LS31X_USB_KIT
 	default "ttgo_lora_esp32"          if ARCH_BOARD_TTGO_LORA_ESP32
 	default "twr-k60n512"              if ARCH_BOARD_TWR_K60N512
@@ -3402,6 +3413,9 @@ source "boards/arm/tiva/tm4c123g-launchpad/Kconfig"
 endif
 if ARCH_BOARD_TM4C1294_LAUNCHPAD
 source "boards/arm/tiva/tm4c1294-launchpad/Kconfig"
+endif
+if ARCH_BOARD_TM4C129E_LAUNCHPAD
+source "boards/arm/tiva/tm4c129e-launchpad/Kconfig"
 endif
 if ARCH_BOARD_LAUNCHXL_TMS57004
 source "boards/arm/tms570/launchxl-tms57004/Kconfig"
