@@ -98,6 +98,12 @@ config MMCSD_IDMODE_CLOCK
 		SPI clock identify MMC/SD card.
 		Should be 400KHz or less.
 
+config MMCSD_SPIRETRY_COUNT
+	int "MMC/SD read/write fail retry max count"
+	default 0
+	---help---
+		Try to recovery MMCSD read/write fail.
+
 endif
 
 config SDIO_DMA

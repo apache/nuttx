@@ -1161,6 +1161,8 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
 {
   FAR struct mmcsd_slot_s *slot;
   FAR struct spi_dev_s *spi;
+  FAR unsigned char *restore = buffer;
+  int retry_count = 0;
   size_t nbytes;
   off_t  offset;
   uint8_t response;
@@ -1235,6 +1237,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
       return (ssize_t)ret;
     }
 
+retry:
   SPI_SELECT(spi, SPIDEV_MMCSD(0), true);
 
   /* Single or multiple block read? */
@@ -1307,6 +1310,21 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
 
 errout_with_eio:
   SPI_SELECT(spi, SPIDEV_MMCSD(0), false);
+  if (retry_count++ < CONFIG_MMCSD_SPIRETRY_COUNT)
+    {
+      buffer = restore;
+      ret = mmcsd_mediainitialize(slot);
+      if (ret < 0)
+        {
+          ferr("ERROR: Failed to reinitialize card\n");
+        }
+      else
+        {
+          fwarn("ERROR: retry %d\n", retry_count);
+          goto retry;
+        }
+    }
+
   mmcsd_semgive(slot);
   return -EIO;
 }
@@ -1326,6 +1344,8 @@ static ssize_t mmcsd_write(FAR struct inode *inode,
 {
   FAR struct mmcsd_slot_s *slot;
   FAR struct spi_dev_s *spi;
+  FAR const unsigned char *restore = buffer;
+  int retry_count = 0;
   size_t nbytes;
   off_t  offset;
   uint8_t response;
@@ -1410,6 +1430,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode,
       return (ssize_t)ret;
     }
 
+retry:
   SPI_SELECT(spi, SPIDEV_MMCSD(0), true);
 
   /* Single or multiple block transfer? */
@@ -1502,6 +1523,21 @@ static ssize_t mmcsd_write(FAR struct inode *inode,
 
 errout_with_sem:
   SPI_SELECT(spi, SPIDEV_MMCSD(0), false);
+  if (retry_count++ < CONFIG_MMCSD_SPIRETRY_COUNT)
+    {
+      buffer = restore;
+      ret = mmcsd_mediainitialize(slot);
+      if (ret < 0)
+        {
+          ferr("ERROR: Failed to reinitialize card\n");
+        }
+      else
+        {
+          fwarn("ERROR: retry %d\n", retry_count);
+          goto retry;
+        }
+    }
+
   mmcsd_semgive(slot);
   return -EIO;
 }
