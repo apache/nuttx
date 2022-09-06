@@ -694,11 +694,11 @@ config STM32H7_SPI6
 	select SPI
 	select STM32H7_SPI
 
+endmenu # STM32H7 SPI Selection
+
 config STM32H7_SYSCFG
 	bool "SYSCFG"
 	default y
-
-endmenu # STM32H7 SPI Selection
 
 menu "STM32H7 Timer Selection"
 
