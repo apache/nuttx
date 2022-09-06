@@ -1452,7 +1452,6 @@ static inline void esp32c3_i2c_process(struct esp32c3_i2c_priv_s *priv,
 
 struct i2c_master_s *esp32c3_i2cbus_initialize(int port)
 {
-  irqstate_t flags;
   struct esp32c3_i2c_priv_s *priv;
 #ifndef CONFIG_I2C_POLLED
   const struct esp32c3_i2c_config_s *config;
@@ -1470,11 +1469,11 @@ struct i2c_master_s *esp32c3_i2cbus_initialize(int port)
       return NULL;
     }
 
-  flags = enter_critical_section();
+  nxmutex_lock(&priv->lock);
 
-  if ((volatile int)priv->refs++ != 0)
+  if (priv->refs++ != 0)
     {
-      leave_critical_section(flags);
+      nxmutex_unlock(&priv->lock);
 
       i2cinfo("Returning previously initialized I2C bus. "
               "Handler: %" PRIxPTR "\n", (uintptr_t)priv);
@@ -1498,7 +1497,8 @@ struct i2c_master_s *esp32c3_i2cbus_initialize(int port)
     {
       /* Failed to allocate a CPU interrupt of this type. */
 
-      leave_critical_section(flags);
+      priv->refs--;
+      nxmutex_unlock(&priv->lock);
 
       return NULL;
     }
@@ -1510,7 +1510,8 @@ struct i2c_master_s *esp32c3_i2cbus_initialize(int port)
 
       esp32c3_free_cpuint(config->periph);
       priv->cpuint = -ENOMEM;
-      leave_critical_section(flags);
+      priv->refs--;
+      nxmutex_unlock(&priv->lock);
 
       return NULL;
     }
@@ -1521,8 +1522,7 @@ struct i2c_master_s *esp32c3_i2cbus_initialize(int port)
 #endif
 
   esp32c3_i2c_init(priv);
-
-  leave_critical_section(flags);
+  nxmutex_unlock(&priv->lock);
 
   i2cinfo("I2C bus initialized! Handler: %" PRIxPTR "\n", (uintptr_t)priv);
 
@@ -1547,7 +1547,6 @@ struct i2c_master_s *esp32c3_i2cbus_initialize(int port)
 
 int esp32c3_i2cbus_uninitialize(struct i2c_master_s *dev)
 {
-  irqstate_t flags;
   struct esp32c3_i2c_priv_s *priv = (struct esp32c3_i2c_priv_s *)dev;
 
   DEBUGASSERT(dev);
@@ -1557,15 +1556,12 @@ int esp32c3_i2cbus_uninitialize(struct i2c_master_s *dev)
       return ERROR;
     }
 
-  flags = enter_critical_section();
-
+  nxmutex_lock(&priv->lock);
   if (--priv->refs)
     {
-      leave_critical_section(flags);
+      nxmutex_unlock(&priv->lock);
       return OK;
     }
-
-  leave_critical_section(flags);
 
 #ifndef CONFIG_I2C_POLLED
   up_disable_irq(priv->cpuint);
@@ -1574,6 +1570,7 @@ int esp32c3_i2cbus_uninitialize(struct i2c_master_s *dev)
 #endif
 
   esp32c3_i2c_deinit(priv);
+  nxmutex_unlock(&priv->lock);
 
   return OK;
 }

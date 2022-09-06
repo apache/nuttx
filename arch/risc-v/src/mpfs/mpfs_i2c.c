@@ -780,7 +780,6 @@ static int mpfs_i2c_setfrequency(struct mpfs_i2c_priv_s *priv,
 struct i2c_master_s *mpfs_i2cbus_initialize(int port)
 {
   struct mpfs_i2c_priv_s *priv;
-  irqstate_t flags;
   int ret;
 
   switch (port)
@@ -799,15 +798,13 @@ struct i2c_master_s *mpfs_i2cbus_initialize(int port)
         return NULL;
   }
 
-  flags = enter_critical_section();
-
-  if ((volatile int)priv->refs++ != 0)
+  nxmutex_lock(&priv->lock);
+  if (priv->refs++ != 0)
     {
-      leave_critical_section(flags);
+      nxmutex_unlock(&priv->lock);
 
       i2cinfo("Returning previously initialized I2C bus. "
-              "Handler: %" PRIxPTR "\n",
-              (uintptr_t)priv);
+              "Handler: %" PRIxPTR "\n", (uintptr_t)priv);
 
       return (struct i2c_master_s *)priv;
     }
@@ -815,18 +812,20 @@ struct i2c_master_s *mpfs_i2cbus_initialize(int port)
   ret = irq_attach(priv->plic_irq, mpfs_i2c_irq, priv);
   if (ret != OK)
     {
-      leave_critical_section(flags);
+      priv->refs--;
+      nxmutex_unlock(&priv->lock);
       return NULL;
     }
 
   ret = mpfs_i2c_init(priv);
   if (ret != OK)
     {
-      leave_critical_section(flags);
+      priv->refs--;
+      nxmutex_unlock(&priv->lock);
       return NULL;
     }
 
-  leave_critical_section(flags);
+  nxmutex_unlock(&priv->lock);
 
   i2cinfo("I2C bus initialized! Handler: %" PRIxPTR "\n", (uintptr_t)priv);
 
@@ -852,7 +851,6 @@ struct i2c_master_s *mpfs_i2cbus_initialize(int port)
 int mpfs_i2cbus_uninitialize(struct i2c_master_s *dev)
 {
   struct mpfs_i2c_priv_s *priv = (struct mpfs_i2c_priv_s *)dev;
-  irqstate_t flags;
 
   DEBUGASSERT(dev);
 
@@ -861,17 +859,15 @@ int mpfs_i2cbus_uninitialize(struct i2c_master_s *dev)
       return ERROR;
     }
 
-  flags = enter_critical_section();
-
+  nxmutex_lock(&priv->lock);
   if (--priv->refs)
     {
-      leave_critical_section(flags);
+      nxmutex_unlock(&priv->lock);
       return OK;
     }
 
-  leave_critical_section(flags);
-
   mpfs_i2c_deinit(priv);
+  nxmutex_unlock(&priv->lock);
 
   return OK;
 }

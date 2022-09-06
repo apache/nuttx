@@ -1165,7 +1165,6 @@ struct onewire_dev_s *stm32_1wireinitialize(int port)
 {
   struct stm32_1wire_priv_s *priv = NULL;  /* Private data of device with multiple instances */
   struct stm32_1wire_inst_s *inst = NULL;  /* Device, single instance */
-  int irqs;
 
   /* Get 1-Wire private structure */
 
@@ -1232,14 +1231,13 @@ struct onewire_dev_s *stm32_1wireinitialize(int port)
    * power-up hardware and configure GPIOs.
    */
 
-  irqs = enter_critical_section();
-
+  nxmutex_lock(&priv->lock);
   if (priv->refs++ == 0)
     {
       stm32_1wire_init(priv);
     }
 
-  leave_critical_section(irqs);
+  nxmutex_unlock(&priv->lock);
   return (struct onewire_dev_s *)inst;
 }
 
@@ -1261,7 +1259,6 @@ struct onewire_dev_s *stm32_1wireinitialize(int port)
 int stm32_1wireuninitialize(struct onewire_dev_s *dev)
 {
   struct stm32_1wire_priv_s *priv = ((struct stm32_1wire_inst_s *)dev)->priv;
-  int irqs;
 
   DEBUGASSERT(priv);
 
@@ -1272,16 +1269,13 @@ int stm32_1wireuninitialize(struct onewire_dev_s *dev)
       return ERROR;
     }
 
-  irqs = enter_critical_section();
-
+  nxmutex_lock(&priv->lock);
   if (--priv->refs)
     {
-      leave_critical_section(irqs);
+      nxmutex_unlock(&priv->lock);
       kmm_free(priv);
       return OK;
     }
-
-  leave_critical_section(irqs);
 
   /* Disable power and other HW resource (GPIO's) */
 

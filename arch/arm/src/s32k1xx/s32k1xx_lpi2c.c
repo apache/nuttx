@@ -1754,8 +1754,7 @@ out:
 
 struct i2c_master_s *s32k1xx_i2cbus_initialize(int port)
 {
-  struct s32k1xx_lpi2c_priv_s * priv = NULL;
-  irqstate_t flags;
+  struct s32k1xx_lpi2c_priv_s *priv = NULL;
 
   /* Get I2C private structure */
 
@@ -1781,16 +1780,14 @@ struct i2c_master_s *s32k1xx_i2cbus_initialize(int port)
    * power-up hardware and configure pins.
    */
 
-  flags = enter_critical_section();
-
-  if ((volatile int)priv->refs++ == 0)
+  nxmutex_lock(&priv->lock);
+  if (priv->refs++ == 0)
     {
       s32k1xx_lpi2c_sem_init(priv);
       s32k1xx_lpi2c_init(priv);
     }
 
-  leave_critical_section(flags);
-
+  nxmutex_unlock(&priv->lock);
   return (struct i2c_master_s *)priv;
 }
 
@@ -1805,7 +1802,6 @@ struct i2c_master_s *s32k1xx_i2cbus_initialize(int port)
 int s32k1xx_i2cbus_uninitialize(struct i2c_master_s *dev)
 {
   struct s32k1xx_lpi2c_priv_s *priv = (struct s32k1xx_lpi2c_priv_s *)dev;
-  irqstate_t flags;
 
   DEBUGASSERT(dev);
 
@@ -1816,19 +1812,17 @@ int s32k1xx_i2cbus_uninitialize(struct i2c_master_s *dev)
       return ERROR;
     }
 
-  flags = enter_critical_section();
-
+  nxmutex_lock(&priv->lock);
   if (--priv->refs > 0)
     {
-      leave_critical_section(flags);
+      nxmutex_unlock(&priv->lock);
       return OK;
     }
-
-  leave_critical_section(flags);
 
   /* Disable power and other HW resource (GPIO's) */
 
   s32k1xx_lpi2c_deinit(priv);
+  nxmutex_unlock(&priv->lock);
 
   /* Release unused resources */
 

@@ -170,7 +170,7 @@ ssize_t nxffs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
     {
       ferr("ERROR: File not open for read access\n");
       ret = -EACCES;
-      goto errout_with_excllock;
+      goto errout_with_lock;
     }
 
   /* Loop until all bytes have been read */
@@ -194,7 +194,7 @@ ssize_t nxffs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
         {
           ferr("ERROR: nxffs_rdseek failed: %d\n", -ret);
           ret = -EACCES;
-          goto errout_with_excllock;
+          goto errout_with_lock;
         }
 
       /* How many bytes are available at this offset */
@@ -222,7 +222,7 @@ ssize_t nxffs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
   nxmutex_unlock(&volume->lock);
   return total;
 
-errout_with_excllock:
+errout_with_lock:
   nxmutex_unlock(&volume->lock);
 errout:
   return (ssize_t)ret;

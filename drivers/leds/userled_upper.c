@@ -229,7 +229,7 @@ static int userled_close(FAR struct file *filep)
     {
       lederr("ERROR: Failed to find open entry\n");
       ret = -ENOENT;
-      goto errout_with_excllock;
+      goto errout_with_lock;
     }
 
   /* Remove the structure from the device */
@@ -248,7 +248,7 @@ static int userled_close(FAR struct file *filep)
   kmm_free(opriv);
   ret = OK;
 
-errout_with_excllock:
+errout_with_lock:
   nxmutex_unlock(&priv->lu_lock);
   return ret;
 }

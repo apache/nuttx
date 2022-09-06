@@ -2583,8 +2583,7 @@ out:
 
 struct i2c_master_s *stm32_i2cbus_initialize(int port)
 {
-  struct stm32_i2c_priv_s * priv = NULL;
-  irqstate_t flags;
+  struct stm32_i2c_priv_s *priv = NULL;
 
 #if STM32_PCLK1_FREQUENCY < 4000000
 #   warning STM32_I2C_INIT: Peripheral clock must be at least 4 MHz to support 400 kHz operation.
@@ -2622,9 +2621,8 @@ struct i2c_master_s *stm32_i2cbus_initialize(int port)
    * power-up hardware and configure GPIOs.
    */
 
-  flags = enter_critical_section();
-
-  if ((volatile int)priv->refs++ == 0)
+  nxmutex_lock(&priv->lock);
+  if (priv->refs++ == 0)
     {
       stm32_i2c_init(priv);
 
@@ -2645,7 +2643,7 @@ struct i2c_master_s *stm32_i2cbus_initialize(int port)
 #endif /* CONFIG_STM32_I2C_DMA */
     }
 
-  leave_critical_section(flags);
+  nxmutex_unlock(&priv->lock);
   return (struct i2c_master_s *)priv;
 }
 
@@ -2660,7 +2658,6 @@ struct i2c_master_s *stm32_i2cbus_initialize(int port)
 int stm32_i2cbus_uninitialize(struct i2c_master_s *dev)
 {
   struct stm32_i2c_priv_s *priv = (struct stm32_i2c_priv_s *)dev;
-  irqstate_t flags;
 
   DEBUGASSERT(dev);
 
@@ -2671,15 +2668,12 @@ int stm32_i2cbus_uninitialize(struct i2c_master_s *dev)
       return ERROR;
     }
 
-  flags = enter_critical_section();
-
+  nxmutex_lock(&priv->lock);
   if (--priv->refs)
     {
-      leave_critical_section(flags);
+      nxmutex_unlock(&priv->lock);
       return OK;
     }
-
-  leave_critical_section(flags);
 
   /* Disable power and other HW resource (GPIO's) */
 
@@ -2690,6 +2684,7 @@ int stm32_i2cbus_uninitialize(struct i2c_master_s *dev)
   stm32_dmafree(priv->txdma);
 #endif
 
+  nxmutex_unlock(&priv->lock);
   return OK;
 }
 

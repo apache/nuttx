@@ -1306,7 +1306,6 @@ out:
 struct i2c_master_s *kinetis_i2cbus_initialize(int port)
 {
   struct kinetis_i2cdev_s *priv;
-  irqstate_t flags;
 
   i2cinfo("port=%d\n", port);
 
@@ -1341,14 +1340,13 @@ struct i2c_master_s *kinetis_i2cbus_initialize(int port)
       return NULL;
     }
 
-  flags = enter_critical_section();
-  if ((volatile int)priv->refs++ == 0)
+  nxmutex_lock(&priv->lock);
+  if (priv->refs++ == 0)
     {
       kinetis_i2c_init(priv);
     }
 
-  leave_critical_section(flags);
-
+  nxmutex_unlock(&priv->lock);
   return &priv->dev;
 }
 
@@ -1363,7 +1361,6 @@ struct i2c_master_s *kinetis_i2cbus_initialize(int port)
 int kinetis_i2cbus_uninitialize(struct i2c_master_s *dev)
 {
   struct kinetis_i2cdev_s *priv = (struct kinetis_i2cdev_s *)dev;
-  irqstate_t flags;
 
   DEBUGASSERT(priv != NULL);
 
@@ -1374,20 +1371,19 @@ int kinetis_i2cbus_uninitialize(struct i2c_master_s *dev)
       return ERROR;
     }
 
-  flags = enter_critical_section();
-
+  nxmutex_lock(&priv->lock);
   if (--priv->refs)
     {
-      leave_critical_section(flags);
+      nxmutex_unlock(&priv->lock);
       return OK;
     }
-
-  leave_critical_section(flags);
 
   /* Disable power and other HW resource (GPIO's) */
 
   kinetis_i2c_deinit(priv);
   wd_cancel(&priv->timeout);
+
+  nxmutex_unlock(&priv->lock);
   return OK;
 }
 
