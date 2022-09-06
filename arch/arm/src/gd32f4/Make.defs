@@ -1,0 +1,57 @@
+############################################################################
+# arch/arm/src/gd32f4/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+include armv7-m/Make.defs
+
+CHIP_CSRCS  = gd32f4xx_allocateheap.c gd32f4xx_start.c gd32f4xx_rcu.c
+CHIP_CSRCS += gd32f4xx_serial.c gd32f4xx_lowputc.c
+CHIP_CSRCS += gd32f4xx_gpio.c gd32f4xx_syscfg.c
+CHIP_CSRCS += gd32f4xx_irq.c gd32f4xx_exti.c
+CHIP_CSRCS += gd32f4xx_dma.c
+
+ifneq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += gd32f4xx_timerisr.c
+else
+CHIP_CSRCS += gd32f4xx_tickless.c
+endif
+
+ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
+CHIP_CSRCS += gd32f4xx_idle.c
+endif
+
+#ifneq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
+#CHIP_CSRCS += gd32f4xx_pminitialize.c
+#endif
+
+#ifneq ($(CONFIG_GD32F4_PROGMEM),y)
+CHIP_CSRCS += gd32f4xx_fmc.c gd32f4xx_progmem.c
+#endif
+
+ifeq ($(CONFIG_GD32F4_ENETMAC),y)
+CHIP_CSRCS += gd32f4xx_enet.c
+endif
+
+ifeq ($(CONFIG_GD32F4_PMU),y)
+CHIP_CSRCS += gd32f4xx_pmu.c
+endif
+
+ifeq ($(CONFIG_GD32F4_SPI),y)
+CHIP_CSRCS += gd32f4xx_spi.c
+endif

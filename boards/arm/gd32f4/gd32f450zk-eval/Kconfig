@@ -1,0 +1,121 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_GD32F450ZK_EVAL
+
+choice
+	prompt "Select Console wiring."
+	default GD32F450ZK_EVAL_CONSOLE_BOARD
+	---help---
+		Select where you will connect the console.
+
+		Virtual COM Port:
+
+		Advantage: Use the ST-Link as a console. No Extra wiring
+		needed.
+
+		Disadvantage: Not the best choice for initial bring up.
+
+		BOARD USART Connector:
+
+		Advantage: You have a shield so it is easy.
+
+		Disadvantage: You loose the use of the
+		other functions on PA9, PA10
+
+				GD32F450ZK_EVAL
+			USART0 GPIO
+			-- ----- --------- ----
+			RX    USART0_RX PA10
+			TX    USART0_TX PA9
+			-- ----- --------- ---
+
+config GD32F450ZK_EVAL_CONSOLE_BOARD
+	bool "Eval Com Connector"
+	select GD32_USART0
+	select USART0_SERIALDRIVER
+	select USART0_SERIAL_CONSOLE
+	select GD32F4_FLASH_CONFIG_K
+
+config GD32F450ZK_EVAL_CONSOLE_VIRTUAL
+	bool "Virtual Comport"
+	select GD32_USART3
+	select USART3_SERIALDRIVER
+	select USART3_SERIAL_CONSOLE
+
+config GD32F450ZK_EVAL_CONSOLE_NONE
+	bool "No Console"
+
+endchoice # "Select Console wiring"
+
+
+choice
+	prompt "GD32F4 MCU Crystal Selected"
+	default GD32F4_BOARD_USE_HXTAL
+
+config GD32F4_BOARD_USE_HXTAL
+	bool "Use Hxtal as clock source"
+	# select GD32F4_BOARD_HXTAL_VALUE
+
+config GD32F4_BOARD_USE_IRC16
+	bool "Use IRC16M as clock source"
+
+endchoice # CPU Frequency
+
+config GD32F4_BOARD_HXTAL_VALUE
+	int "GD32F450Z Eval Board Hxtal Value"
+	default 25000000
+	depends on GD32F4_BOARD_USE_HXTAL
+	---help---
+		GD32F450Z Eval Board Hxtal Value, default is 25MHz.
+
+choice
+	prompt "GD32F4 MCU System Frequency"
+	default GD32F4_200MHZ
+
+config GD32F4_200MHZ
+	bool "200 MHz"
+
+config GD32F4_168MHZ
+	bool "168 MHz"
+
+config GD32F4_120MHZ
+	bool "120 MHz"
+
+endchoice # CPU Frequency
+
+
+config GD32F4_GD25_BLOCKMOUNT
+	bool "GD25 serial FLASH auto-mount"
+	default n
+	depends on GD32F4_SPI5 && MTD_GD25
+	---help---
+		Automatically initialize the GD25 SPI FLASH driver when NSH starts.
+
+choice
+	prompt "GD25 SPI FLASH configuration"
+	default GD32F4_GD25_NXFFS
+	depends on GD32F4_GD25_BLOCKMOUNT
+
+config GD32F4_GD25_FTL
+	bool "Create GD25 SPI FLASH block driver"
+	---help---
+		Create the MTD driver for the GD25 and "wrap" the GD25 as a standard
+		block driver that could then, for example, be mounted using FAT or
+		any other file system.  Any file system may be used, but there will
+		be no wear-leveling.
+
+config GD32F4_GD25_NXFFS
+	bool "Create GD25 serial FLASH NXFFS file system"
+	depends on FS_NXFFS
+	---help---
+		Create the MTD driver for the GD25 and mount the GD25 device as
+		a wear-leveling, NuttX FLASH file system (NXFFS).  The downside of
+		NXFFS is that it can be very slow.
+
+endchoice # GD25 serial FLASH configuration
+
+
+endif # ARCH_BOARD_GD32F450ZK_EVAL
