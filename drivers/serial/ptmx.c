@@ -63,8 +63,8 @@
 
 struct ptmx_dev_s
 {
-  uint8_t px_next;                  /* Next minor number to allocate */
   mutex_t px_lock;                  /* Supports mutual exclusion */
+  uint8_t px_next;                  /* Next minor number to allocate */
   uint32_t px_alloctab[INDEX_MAX];  /* Set of allocated PTYs */
 };
 
@@ -96,7 +96,10 @@ static const struct file_operations g_ptmx_fops =
 #endif
 };
 
-static struct ptmx_dev_s g_ptmx;
+static struct ptmx_dev_s g_ptmx =
+{
+  NXMUTEX_INITIALIZER,
+};
 
 /****************************************************************************
  * Private Functions
@@ -275,10 +278,6 @@ static ssize_t ptmx_write(FAR struct file *filep,
 
 int ptmx_register(void)
 {
-  /* Initialize driver state */
-
-  nxmutex_init(&g_ptmx.px_lock);
-
   /* Register the PTMX driver */
 
   return register_driver("/dev/ptmx", &g_ptmx_fops, 0666, NULL);

@@ -226,14 +226,18 @@ static struct s32k3xx_qspidev_s g_qspi0dev =
     .ops             = &g_qspi0ops,
   },
   .base              = S32K3XX_QSPI_BASE,
+  .lock              = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_S32K3XX_QSPI_INTERRUPTS
   .handler           = qspi_interrupt,
   .irq               = S32K3XX_IRQ_QSPI,
+  .op_sem            = SEM_INITIALIZER(0),
 #endif
   .intf              = 0,
 #ifdef CONFIG_S32K3XX_QSPI_DMA
   .rxch              = DMA_REQ_QSPI_RX,
   .txch              = DMA_REQ_QSPI_TX,
+  .rxsem             = SEM_INITIALIZER(0),
+  .txsem             = SEM_INITIALIZER(0),
 #endif
 };
 
@@ -1785,13 +1789,7 @@ struct qspi_dev_s *s32k3xx_qspi_initialize(int intf)
 
   if (!priv->initialized)
     {
-      /* Now perform one time initialization.
-       *
-       * Initialize the QSPI semaphore that enforces mutually exclusive
-       * access to the QSPI registers.
-       */
-
-      nxmutex_init(&priv->lock);
+      /* Now perform one time initialization. */
 
 #ifdef CONFIG_S32K3XX_QSPI_INTERRUPTS
       /* Attach the interrupt handler */
@@ -1801,8 +1799,6 @@ struct qspi_dev_s *s32k3xx_qspi_initialize(int intf)
         {
           spierr("ERROR: Failed to attach irq %d\n", priv->irq);
         }
-
-      nxsem_init(&priv->op_sem, 0, 0);
 #endif
 
       /* Perform hardware initialization.  Puts the QSPI into an active
@@ -1824,17 +1820,12 @@ struct qspi_dev_s *s32k3xx_qspi_initialize(int intf)
 #endif
 
 #ifdef CONFIG_S32K3XX_QSPI_DMA
-  /* Initialize the QSPI semaphores that is used to wait for DMA completion.
-   * This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
+      /* Initialize the QSPI dma channel. */
 
       if (priv->rxch && priv->txch)
         {
           if (priv->txdma == NULL && priv->rxdma == NULL)
             {
-              nxsem_init(&priv->rxsem, 0, 0);
-              nxsem_init(&priv->txsem, 0, 0);
               priv->txdma = s32k3xx_dmach_alloc(priv->txch
                                                 | DMAMUX_CHCFG_ENBL, 0);
               priv->rxdma = s32k3xx_dmach_alloc(priv->rxch
@@ -1851,9 +1842,6 @@ struct qspi_dev_s *s32k3xx_qspi_initialize(int intf)
     }
 
   return &priv->qspi;
-
-  nxmutex_destroy(&priv->lock);
-  return NULL;
 }
 
 #endif /* CONFIG_S32K3XX_QSPI */

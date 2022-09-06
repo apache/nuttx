@@ -1776,13 +1776,6 @@ int esp32_wlan_sta_initialize(void)
         eth_mac[0], eth_mac[1], eth_mac[2],
         eth_mac[3], eth_mac[4], eth_mac[5]);
 
-  ret = esp_wifi_scan_init();
-  if (ret < 0)
-    {
-      nerr("ERROR: Initialize Wi-Fi scan parameter error: %d\n", ret);
-      return ret;
-    }
-
   ret = esp32_net_initialize(ESP32_WLAN_STA_DEVNO, eth_mac, &g_sta_ops);
   if (ret < 0)
     {
@@ -1842,13 +1835,6 @@ int esp32_wlan_softap_initialize(void)
   ninfo("Wi-Fi softAP MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
         eth_mac[0], eth_mac[1], eth_mac[2],
         eth_mac[3], eth_mac[4], eth_mac[5]);
-
-  ret = esp_wifi_scan_init();
-  if (ret < 0)
-    {
-      nerr("ERROR: Initialize Wi-Fi scan parameter error: %d\n", ret);
-      return ret;
-    }
 
   ret = esp32_net_initialize(ESP32_WLAN_SOFTAP_DEVNO, eth_mac,
                              &g_softap_ops);

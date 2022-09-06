@@ -78,7 +78,11 @@ struct dma_controller_s
 
 /* This is the overall state of the DMA controller */
 
-static struct dma_controller_s g_dmac;
+static struct dma_controller_s g_dmac =
+{
+  .lock = NXMUTEX_INITIALIZER,
+  .chansem = SEM_INITIALIZER(CXD56_DMA_NCHANNELS),
+};
 
 /* This is the array of all DMA channels */
 
@@ -238,9 +242,6 @@ void cxd56_udmainitialize(void)
   dmainfo("Initialize uDMAC\n");
 
   /* Initialize the channel list  */
-
-  nxmutex_init(&g_dmac.lock);
-  nxsem_init(&g_dmac.chansem, 0, CXD56_DMA_NCHANNELS);
 
   for (i = 0; i < CXD56_DMA_NCHANNELS; i++)
     {

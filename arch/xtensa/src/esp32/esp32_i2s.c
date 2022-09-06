@@ -413,7 +413,9 @@ static struct esp32_i2s_s esp32_i2s0_priv =
         {
           .ops = &g_i2sops
         },
-  .config = &esp32_i2s0_config
+  .lock = NXMUTEX_INITIALIZER,
+  .config = &esp32_i2s0_config,
+  .bufsem = SEM_INITIALIZER(0),
 };
 #endif /* CONFIG_ESP32_I2S0 */
 
@@ -472,7 +474,9 @@ static struct esp32_i2s_s esp32_i2s1_priv =
         {
           .ops = &g_i2sops
         },
-  .config = &esp32_i2s1_config
+  .lock = NXMUTEX_INITIALIZER,
+  .config = &esp32_i2s1_config,
+  .bufsem = SEM_INITIALIZER(0),
 };
 #endif /* CONFIG_ESP32_I2S1 */
 
@@ -616,14 +620,6 @@ static int i2s_buf_initialize(struct esp32_i2s_s *priv)
   priv->tx.carry.value = 0;
 
   priv->bf_freelist = NULL;
-  ret = nxsem_init(&priv->bufsem, 0, 0);
-
-  if (ret < 0)
-    {
-      i2serr("ERROR: nxsem_init failed: %d\n", ret);
-      return ret;
-    }
-
   for (int i = 0; i < CONFIG_ESP32_I2S_MAXINFLIGHT; i++)
     {
       i2s_buf_free(priv, &priv->containers[i]);
@@ -1902,8 +1898,6 @@ struct i2s_dev_s *esp32_i2sbus_initialize(int port)
 
   flags = spin_lock_irqsave(&priv->slock);
 
-  nxmutex_init(&priv->lock);
-
   i2s_configure(priv);
 
   /* Allocate buffer containers */
@@ -1937,8 +1931,7 @@ struct i2s_dev_s *esp32_i2sbus_initialize(int port)
   /* Failure exit */
 
 err:
-  spin_unlock_irqrestore(&priv->slock, flags);
-  nxmutex_destroy(&priv->lock);
+  spin_unlock_irqrestore(&priv->lock, flags);
   return NULL;
 }
 

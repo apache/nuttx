@@ -189,7 +189,7 @@ extern int lc823450_dvfs_boost(int timeout);
 static struct lc823450_usbdev_s g_usbdev;
 
 static DMA_HANDLE g_hdma;
-static sem_t dma_wait;
+static sem_t dma_wait = SEM_INITIALIZER(0);
 
 #ifdef CONFIG_USBMSC_OPT
 static struct lc823450_dma_llist g_dma_list[16];
@@ -1453,7 +1453,6 @@ void arm_usbinitialize(void)
       return;
     }
 
-  nxsem_init(&dma_wait, 0, 0);
   g_hdma = lc823450_dmachannel(DMA_CHANNEL_USBDEV);
   lc823450_dmarequest(g_hdma, DMA_REQUEST_USBDEV);
 
@@ -1722,7 +1721,6 @@ void usbdev_msc_read_enter()
   privep->epcmd &= ~USB_EPCMD_EMPTY_EN;
   epcmd_write(CONFIG_USBMSC_EPBULKIN, (privep->epcmd));
   lc823450_dmareauest_dir(g_hdma, DMA_REQUEST_USBDEV, 1);
-  nxsem_init(&dma_wait, 0, 0);
 }
 
 /****************************************************************************
@@ -1825,7 +1823,6 @@ void usbdev_msc_write_enter0(void)
   privep->epcmd &= ~USB_EPCMD_READY_EN;
   epcmd_write(CONFIG_USBMSC_EPBULKOUT, (privep->epcmd));
   lc823450_dmareauest_dir(g_hdma, DMA_REQUEST_USBDEV, 0);
-  nxsem_init(&dma_wait, 0, 0);
 }
 
 /****************************************************************************

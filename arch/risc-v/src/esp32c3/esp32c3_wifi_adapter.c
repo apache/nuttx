@@ -5091,13 +5091,6 @@ int esp_wifi_adapter_init(void)
       goto errout_init_txdone;
     }
 
-  ret = esp_wifi_scan_init();
-  if (ret < 0)
-    {
-      nerr("ERROR: Initialize Wi-Fi scan parameter error: %d\n", ret);
-      return ret;
-    }
-
   ret = esp_wifi_set_country(&country);
   if (ret < 0)
     {

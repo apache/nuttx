@@ -83,7 +83,8 @@ struct esp32_rt_priv_s
 
 static struct esp32_rt_priv_s g_rt_priv =
 {
-  .pid = INVALID_PROCESS_ID
+  .pid = INVALID_PROCESS_ID,
+  .toutsem = SEM_INITIALIZER(0),
 };
 
 /****************************************************************************
@@ -690,8 +691,6 @@ int esp32_rt_timer_init(void)
       return -EINVAL;
     }
 
-  nxsem_init(&priv->toutsem, 0, 0);
-
   pid = kthread_create(RT_TIMER_TASK_NAME,
                        RT_TIMER_TASK_PRIORITY,
                        RT_TIMER_TASK_STACK_SIZE,
@@ -765,7 +764,5 @@ void esp32_rt_timer_deinit(void)
       kthread_delete(priv->pid);
       priv->pid = INVALID_PROCESS_ID;
     }
-
-  nxsem_destroy(&priv->toutsem);
 }
 

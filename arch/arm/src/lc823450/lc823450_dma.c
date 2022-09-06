@@ -122,7 +122,10 @@ static int phydmastart(struct lc823450_phydmach_s *pdmach);
  * Private Data
  ****************************************************************************/
 
-static struct lc823450_dma_s g_dma;
+static struct lc823450_dma_s g_dma =
+{
+  .lock = NXMUTEX_INITIALIZER,
+};
 volatile uint8_t g_dma_inprogress;
 
 /****************************************************************************
@@ -341,8 +344,6 @@ void arm_dma_initialize(void)
       g_dma.phydmach[i].inprogress = 0;
       sq_init(&g_dma.phydmach[i].req_q);
     }
-
-  nxmutex_init(&g_dma.lock);
 
   if (irq_attach(LC823450_IRQ_DMAC, dma_interrupt, NULL) != 0)
     {

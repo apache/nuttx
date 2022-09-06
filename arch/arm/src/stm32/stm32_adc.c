@@ -697,7 +697,8 @@ static const struct stm32_adc_ops_s g_adc_llops =
 
 struct adccmn_data_s g_adc123_cmn =
 {
-  .refcount = 0
+  .refcount = 0,
+  .lock = NXMUTEX_INITIALIZER,
 };
 
 #  elif defined(HAVE_IP_ADC_V2)
@@ -711,7 +712,8 @@ struct adccmn_data_s g_adc123_cmn =
 
 struct adccmn_data_s g_adc12_cmn =
 {
-  .refcount = 0
+  .refcount = 0,
+  .lock = NXMUTEX_INITIALIZER,
 };
 
 #    endif
@@ -721,7 +723,8 @@ struct adccmn_data_s g_adc12_cmn =
 
 struct adccmn_data_s g_adc34_cmn =
 {
-  .refcount = 0
+  .refcount = 0,
+  .lock = NXMUTEX_INITIALIZER,
 };
 
 #    endif
@@ -4755,10 +4758,6 @@ struct adc_dev_s *stm32_adcinitialize(int intf, const uint8_t *chanlist,
   priv->adc_channels = ADC_CHANNELS_NUMBER;
 #endif
 
-#ifdef ADC_HAVE_CB
-  priv->cb        = NULL;
-#endif
-
 #ifdef CONFIG_STM32_ADC_LL_OPS
   /* Store reference to the upper-half ADC device */
 
@@ -4770,16 +4769,6 @@ struct adc_dev_s *stm32_adcinitialize(int intf, const uint8_t *chanlist,
         intf, priv->cr_channels, priv->cj_channels);
 #else
   ainfo("intf: %d cr_channels: %d\n", intf, priv->cr_channels);
-#endif
-
-#ifdef HAVE_ADC_CMN_DATA
-  /* Initialize the ADC common data semaphore.
-   *
-   * REVISIT: This will be done several times for each initialzied ADC in
-   *          the ADC block.
-   */
-
-  nxmutex_init(&priv->cmn->lock);
 #endif
 
   return dev;

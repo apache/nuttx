@@ -81,9 +81,17 @@
 
 #ifdef CONFIG_LC823450_SDC_DMA
 static DMA_HANDLE _hrdma[2];
-static sem_t      _sem_rwait[2];
+static sem_t _sem_rwait[2] =
+{
+  SEM_INITIALIZER(0),
+  SEM_INITIALIZER(0),
+};
 static DMA_HANDLE _hwdma[2];
-static sem_t      _sem_wwait[2];
+static sem_t _sem_wwait[2] =
+{
+  SEM_INITIALIZER(0),
+  SEM_INITIALIZER(0),
+};
 #endif /* CONFIG_LC823450_SDC_DMA */
 
 static uint64_t _sddep_timeout = (10 * 100); /* 10sec (in tick) */
@@ -281,9 +289,7 @@ SINT_T sddep_os_init(struct sddrcfg_s *cfg)
 
 #ifdef CONFIG_LC823450_SDC_DMA
   _hrdma[ch] = lc823450_dmachannel(DMA_CHANNEL_VIRTUAL);
-  nxsem_init(&_sem_rwait[ch], 0, 0);
   _hwdma[ch] = lc823450_dmachannel(DMA_CHANNEL_VIRTUAL);
-  nxsem_init(&_sem_wwait[ch], 0, 0);
 #endif /* CONFIG_LC823450_SDC_DMA */
   return 0;
 }

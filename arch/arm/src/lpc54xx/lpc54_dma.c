@@ -73,7 +73,10 @@ struct lpc54_dma_s
 
 /* The state of the LPC54 DMA block */
 
-static struct lpc54_dma_s g_dma;
+static struct lpc54_dma_s g_dma =
+{
+  .lock = NXMUTEX_INITIALIZER,
+};
 
 /* The SRAMBASE register must be configured with an address (preferably in
  * on-chip SRAM) where DMA descriptors will be stored.  Each DMA channel has
@@ -231,10 +234,6 @@ void weak_function arm_dma_initialize(void)
   putreg32(DMA_ALL_CHANNELS, LPC54_DMA_ERRINT0);
   putreg32(DMA_ALL_CHANNELS, LPC54_DMA_INTA0);
   putreg32(DMA_ALL_CHANNELS, LPC54_DMA_INTB0);
-
-  /* Initialize the DMA state structure */
-
-  nxmutex_init(&g_dma.lock);
 
   /* Set the SRAMBASE to the beginning a array of DMA descriptors, one for
    * each DMA channel.

@@ -380,6 +380,7 @@ struct lpc43_dev_s g_scard_dev =
     .dmasendsetup     = lpc43_dmasendsetup,
 #endif
   },
+  .waitsem = SEM_INITIALIZER(0),
 };
 
 #ifdef CONFIG_LPC43_SDMMC_DMA
@@ -2823,10 +2824,6 @@ struct sdio_dev_s *lpc43_sdmmc_initialize(int slotno)
   /* Setup the delay register */
 
   lpc43_putreg(LPC43_SDMMC_DELAY_DEFAULT, LPC43_SDMMC_DELAY);
-
-  /* Initialize semaphores */
-
-  nxsem_init(&priv->waitsem, 0, 0);
 
   /* Configure GPIOs for 4-bit, wide-bus operation */
 

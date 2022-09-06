@@ -343,7 +343,11 @@ static struct sam_xdmach_s g_xdmach[SAMV7_NDMACHAN] =
 
 /* This describes the overall state of DMA controller */
 
-static struct sam_xdmac_s g_xdmac;
+static struct sam_xdmac_s g_xdmac =
+{
+  .chlock     = NXMUTEX_INITIALIZER,
+  .dsem       = SEM_INITIALIZER(SAMV7_NDMACHAN),
+};
 
 /****************************************************************************
  * Private Functions
@@ -1561,11 +1565,6 @@ void sam_dmainitialize(struct sam_xdmac_s *xdmac)
   /* Disable all DMA channels */
 
   sam_putdmac(xdmac, XDMAC_CHAN_ALL, SAM_XDMAC_GD_OFFSET);
-
-  /* Initialize mutex & semaphores */
-
-  nxmutex_init(&xdmac->chlock);
-  nxsem_init(&xdmac->dsem, 0, SAMV7_NDMACHAN);
 }
 
 /****************************************************************************

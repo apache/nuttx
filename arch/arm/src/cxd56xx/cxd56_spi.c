@@ -77,7 +77,6 @@ struct cxd56_spidev_s
   uint8_t          port;        /* Port number */
   int              initialized; /* Initialized flag */
 #ifdef CONFIG_CXD56_DMAC
-  bool             dmaenable;   /* Use DMA or not */
   DMA_HANDLE       rxdmach;     /* RX DMA channel handle */
   DMA_HANDLE       txdmach;     /* TX DMA channel handle */
   sem_t            dmasem;      /* Wait for DMA to complete */
@@ -189,6 +188,10 @@ static struct cxd56_spidev_s g_spi4dev =
 #ifdef CONFIG_CXD56_SPI_INTERRUPTS
   .spiirq            = CXD56_IRQ_IMG_SPI,
 #endif
+  .lock              = NXMUTEX_INITIALIZER,
+#ifdef CONFIG_CXD56_DMAC
+  .dmasem            = SEM_INITIALIZER(0),
+#endif
 };
 
 #endif
@@ -232,6 +235,10 @@ static struct cxd56_spidev_s g_spi5dev =
 #ifdef CONFIG_CXD56_SPI_INTERRUPTS
   .spiirq            = CXD56_IRQ_IMG_WSPI,
 #endif
+  .lock              = NXMUTEX_INITIALIZER,
+#ifdef CONFIG_CXD56_DMAC
+  .dmasem            = SEM_INITIALIZER(0),
+#endif
 };
 #endif
 
@@ -274,6 +281,10 @@ static struct cxd56_spidev_s g_spi0dev =
 #ifdef CONFIG_CXD56_SPI_INTERRUPTS
   .spiirq            = CXD56_IRQ_SPIM,
 #endif
+  .lock              = NXMUTEX_INITIALIZER,
+#ifdef CONFIG_CXD56_DMAC
+  .dmasem            = SEM_INITIALIZER(0),
+#endif
 };
 #endif
 
@@ -315,6 +326,10 @@ static struct cxd56_spidev_s g_spi3dev =
   .initialized       = 0,
 #ifdef CONFIG_CXD56_SPI_INTERRUPTS
   .spiirq            = CXD56_IRQ_SCU_SPI,
+#endif
+  .lock              = NXMUTEX_INITIALIZER,
+#ifdef CONFIG_CXD56_DMAC
+  .dmasem            = SEM_INITIALIZER(0),
 #endif
 };
 #endif
@@ -863,15 +878,13 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                          void *rxbuffer, size_t nwords)
 {
 #ifdef CONFIG_CXD56_DMAC
-  struct cxd56_spidev_s *priv = (struct cxd56_spidev_s *)dev;
-
 #ifdef CONFIG_CXD56_SPI_DMATHRESHOLD
   size_t dmath = CONFIG_CXD56_SPI_DMATHRESHOLD;
 #else
   size_t dmath = 0;
 #endif
 
-  if (priv->dmaenable && dmath < nwords)
+  if (dmath < nwords)
     {
       spi_dmaexchange(dev, txbuffer, rxbuffer, nwords);
     }
@@ -1204,7 +1217,6 @@ struct spi_dev_s *cxd56_spibus_initialize(int port)
   /* DMA settings */
 
 #ifdef CONFIG_CXD56_DMAC
-  priv->dmaenable = false;
   priv->txdmach   = NULL;
   priv->rxdmach   = NULL;
 #endif
@@ -1243,10 +1255,6 @@ struct spi_dev_s *cxd56_spibus_initialize(int port)
   /* Select a default frequency of approx. 400KHz */
 
   spi_setfrequency((struct spi_dev_s *)priv, 400000);
-
-  /* Initialize the SPI mutex that enforces mutually exclusive access */
-
-  nxmutex_init(&priv->lock);
 
 #ifdef CONFIG_CXD56_SPI3_SCUSEQ
   /* Enable the SPI, but not enable port 3 when SCU support enabled.
@@ -1328,12 +1336,6 @@ void cxd56_spi_dmaconfig(int port, int chtype, DMA_HANDLE handle,
 
           priv->txdmach = handle;
           memcpy(&priv->txconfig, conf, sizeof(dma_config_t));
-
-          if (!priv->dmaenable)
-            {
-              nxsem_init(&priv->dmasem, 0, 0);
-              priv->dmaenable = true;
-            }
         }
       else if ((chtype == CXD56_SPI_DMAC_CHTYPE_RX) && (!priv->rxdmach))
         {
@@ -1341,12 +1343,6 @@ void cxd56_spi_dmaconfig(int port, int chtype, DMA_HANDLE handle,
 
           priv->rxdmach = handle;
           memcpy(&priv->rxconfig, conf, sizeof(dma_config_t));
-
-          if (!priv->dmaenable)
-            {
-              nxsem_init(&priv->dmasem, 0, 0);
-              priv->dmaenable = true;
-            }
         }
     }
 }

@@ -358,7 +358,11 @@ static uint8_t g_usart1_rxdmabuffer[RXDMA_BUFFER_SIZE];
 
 /* HCI USART1 variable state information */
 
-static struct hciuart_state_s g_hciusart1_state;
+static struct hciuart_state_s g_hciusart1_state =
+{
+  .rxwait = SEM_INITIALIZER(0),
+  .txwait = SEM_INITIALIZER(0),
+};
 
 /* HCI USART1 constant configuration information */
 
@@ -418,7 +422,11 @@ static uint8_t g_usart2_rxdmabuffer[RXDMA_BUFFER_SIZE];
 
 /* HCI USART2 variable state information */
 
-static struct hciuart_state_s g_hciusart2_state;
+static struct hciuart_state_s g_hciusart2_state =
+{
+  .rxwait = SEM_INITIALIZER(0),
+  .txwait = SEM_INITIALIZER(0),
+};
 
 /* HCI USART2 constant configuration information */
 
@@ -474,7 +482,11 @@ static uint8_t g_usart3_rxdmabuffer[RXDMA_BUFFER_SIZE];
 
 /* HCI USART3 variable state information */
 
-static struct hciuart_state_s g_hciusart3_state;
+static struct hciuart_state_s g_hciusart3_state =
+{
+  .rxwait = SEM_INITIALIZER(0),
+  .txwait = SEM_INITIALIZER(0),
+};
 
 /* HCI USART3 constant configuration information */
 
@@ -532,7 +544,11 @@ static uint8_t g_usart6_rxdmabuffer[RXDMA_BUFFER_SIZE];
 
 /* HCI USART6 variable state information */
 
-static struct hciuart_state_s g_hciusart6_state;
+static struct hciuart_state_s g_hciusart6_state =
+{
+  .rxwait = SEM_INITIALIZER(0),
+  .txwait = SEM_INITIALIZER(0),
+};
 
 /* HCI USART6 constant configuration information */
 
@@ -588,7 +604,11 @@ static uint8_t g_uart7_rxdmabuffer[RXDMA_BUFFER_SIZE];
 
 /* HCI UART7 variable state information */
 
-static struct hciuart_state_s g_hciuart7_state;
+static struct hciuart_state_s g_hciuart7_state =
+{
+  .rxwait = SEM_INITIALIZER(0),
+  .txwait = SEM_INITIALIZER(0),
+};
 
 /* HCI UART7 constant configuration information */
 
@@ -644,7 +664,11 @@ static uint8_t g_uart8_rxdmabuffer[RXDMA_BUFFER_SIZE];
 
 /* HCI UART8 variable state information */
 
-static struct hciuart_state_s g_hciuart8_state;
+static struct hciuart_state_s g_hciuart8_state =
+{
+  .rxwait = SEM_INITIALIZER(0),
+  .txwait = SEM_INITIALIZER(0),
+};
 
 /* HCI UART8 constant configuration information */
 
@@ -2585,11 +2609,6 @@ void hciuart_initialize(void)
           /* Disable U[S]ART interrupts */
 
           hciuart_disableints(config, HCIUART_ALLINTS);
-
-          /* Initialize signalling semaphores */
-
-          nxsem_init(&state->rxwait, 0, 0);
-          nxsem_init(&state->txwait, 0, 0);
 
           /* Attach and enable the HCI UART IRQ */
 

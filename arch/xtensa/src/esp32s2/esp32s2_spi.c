@@ -1431,9 +1431,6 @@ static void esp32s2_spi_init(struct spi_dev_s *dev)
            SPI_USER1_REG(id));
 
 #if defined(CONFIG_ESP32S2_SPI2_DMA) || defined(CONFIG_ESP32S2_SPI3_DMA)
-  nxsem_init(&priv->sem_isr, 0, 0);
-  nxsem_set_protocol(&priv->sem_isr, SEM_PRIO_NONE);
-
   esp32s2_spi_dma_init(dev);
 #endif
 

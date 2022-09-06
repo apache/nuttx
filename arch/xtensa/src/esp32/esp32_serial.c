@@ -202,10 +202,10 @@
  */
 
 #ifdef USE_DMA0
-static sem_t g_dma0_sem;
+static sem_t g_dma0_sem = SEM_INITIALIZER(1);
 #endif
 #ifdef USE_DMA1
-static sem_t g_dma1_sem;
+static sem_t g_dma1_sem = SEM_INITIALIZER(1);
 #endif
 
 /* UART DMA RX/TX descriptors */
@@ -2079,12 +2079,10 @@ void xtensa_serialinit(void)
 
 #ifdef CONFIG_SERIAL_TXDMA
 #ifdef USE_DMA0
-  nxsem_init(&g_dma0_sem, 0, 1);
   dma_config(0);
   dma_attach(0);
 #endif
 #ifdef USE_DMA1
-  nxsem_init(&g_dma1_sem, 0, 1);
   dma_config(1);
   dma_attach(1);
 #endif

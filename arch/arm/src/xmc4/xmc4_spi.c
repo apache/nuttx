@@ -325,6 +325,7 @@ static const struct spi_ops_s g_spi0ops =
 static struct xmc4_spidev_s g_spi0dev =
 {
   .base         = XMC4_USIC0_CH0_BASE,
+  .spilock      = NXMUTEX_INITIALIZER,
   .select       = xmc4_spi0select,
 #ifdef CONFIG_XMC4_SPI_DMA
   .rxintf       = DMACHAN_INTF_SPI0RX,
@@ -362,6 +363,7 @@ static const struct spi_ops_s g_spi1ops =
 static struct xmc4_spidev_s g_spi1dev =
 {
   .base         = XMC4_USIC0_CH1_BASE,
+  .spilock      = NXMUTEX_INITIALIZER,
   .select       = xmc4_spi1select,
 #ifdef CONFIG_XMC4_SPI_DMA
   .rxintf       = DMACHAN_INTF_SPI1RX,
@@ -399,6 +401,7 @@ static const struct spi_ops_s g_spi2ops =
 static struct xmc4_spidev_s g_spi2dev =
 {
   .base         = XMC4_USIC1_CH0_BASE,
+  .spilock      = NXMUTEX_INITIALIZER,
   .select       = xmc4_spi2select,
 #ifdef CONFIG_XMC4_SPI_DMA
   .rxintf       = DMACHAN_INTF_SPI2RX,
@@ -436,6 +439,7 @@ static const struct spi_ops_s g_spi3ops =
 static struct xmc4_spidev_s g_spi3dev =
 {
   .base         = XMC4_USIC1_CH1_BASE,
+  .spilock      = NXMUTEX_INITIALIZER,
   .select       = xmc4_spi3select,
 #ifdef CONFIG_XMC4_SPI_DMA
   .rxintf       = DMACHAN_INTF_SPI3RX,
@@ -473,6 +477,7 @@ static const struct spi_ops_s g_spi4ops =
 static struct xmc4_spidev_s g_spi4dev =
 {
   .base          = XMC4_USIC2_CH0_BASE,
+  .spilock      = NXMUTEX_INITIALIZER,
   .select        = xmc4_spi4select,
 #ifdef CONFIG_XMC4_SPI_DMA
   .rxintf        = DMACHAN_INTF_SPI4RX,
@@ -511,6 +516,7 @@ static const struct spi_ops_s g_spi5ops =
 static struct xmc4_spidev_s g_spi5dev =
 {
   .base         = XMC4_USIC2_CH1_BASE,
+  .spilock      = NXMUTEX_INITIALIZER,
   .select       = xmc4_spi5select,
 #ifdef CONFIG_XMC4_SPI_DMA
   .rxintf       = DMACHAN_INTF_SPI5RX,
@@ -2057,11 +2063,6 @@ struct spi_dev_s *xmc4_spibus_initialize(int channel)
 
       spi_putreg(spi, 0, XMC4_USIC_CCR_OFFSET);
 
-      /* Initialize the SPI mutex that enforces mutually exclusive
-       * access to the SPI registers.
-       */
-
-      nxmutex_init(&spi->spilock);
       spi->initialized = true;
 
 #ifdef CONFIG_XMC4_SPI_DMA

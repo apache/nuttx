@@ -104,8 +104,8 @@ struct sam_dma_s
 
 /* These mutex protect the DMA channel and descriptor tables */
 
-static mutex_t g_chlock;
-static sem_t g_dsem;
+static mutex_t g_chlock = NXMUTEX_INITIALIZER;
+static sem_t g_dsem = SEM_INITIALIZER(CONFIG_SAM34_NLLDESC);
 
 /* CTRLA field lookups */
 
@@ -1340,11 +1340,6 @@ void weak_function arm_dma_initialize(void)
   /* Enable the DMA controller */
 
   putreg32(DMAC_EN_ENABLE, SAM_DMAC_EN);
-
-  /* Initialize mutex & semaphores */
-
-  nxmutex_init(&g_chlock);
-  nxsem_init(&g_dsem, 0, CONFIG_SAM34_NLLDESC);
 }
 
 /****************************************************************************

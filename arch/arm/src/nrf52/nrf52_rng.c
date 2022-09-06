@@ -72,7 +72,11 @@ struct rng_dev_s
  * Private Data
  ****************************************************************************/
 
-static struct rng_dev_s g_rngdev;
+static struct rng_dev_s g_rngdev =
+{
+  .rd_sem = SEM_INITIALIZER(0),
+  .lock   = NXMUTEX_INITIALIZER,
+};
 
 static const struct file_operations g_rngops =
 {
@@ -123,13 +127,6 @@ static int nrf52_rng_initialize(void)
     return OK;
 
   first_flag = false;
-
-  _info("Initializing RNG\n");
-
-  memset(&g_rngdev, 0, sizeof(struct rng_dev_s));
-
-  nxsem_init(&g_rngdev.rd_sem, 0, 0);
-  nxmutex_init(&g_rngdev.lock);
 
   _info("Ready to stop\n");
   nrf52_rng_stop();

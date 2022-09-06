@@ -283,7 +283,11 @@ static struct pic32mz_dev_s g_spi1dev =
   {
     &g_spi1ops
   },
-  .config            = &g_spi1config
+  .config            = &g_spi1config,
+  .lock              = NXMUTEX_INITIALIZER,
+#ifdef CONFIG_PIC32MZ_SPI_DMA
+  .dmawait           = SEM_INITIALIZER(0),
+#endif
 };
 #endif
 
@@ -333,6 +337,10 @@ static struct pic32mz_dev_s g_spi2dev =
     &g_spi2ops
   },
   .config            = &g_spi2config,
+  .lock              = NXMUTEX_INITIALIZER,
+#ifdef CONFIG_PIC32MZ_SPI_DMA
+  .dmawait           = SEM_INITIALIZER(0),
+#endif
 };
 #endif
 
@@ -382,6 +390,10 @@ static struct pic32mz_dev_s g_spi3dev =
     &g_spi3ops
   },
   .config            = &g_spi3config,
+  .lock              = NXMUTEX_INITIALIZER,
+#ifdef CONFIG_PIC32MZ_SPI_DMA
+  .dmawait           = SEM_INITIALIZER(0),
+#endif
 };
 #endif
 
@@ -431,6 +443,10 @@ static struct pic32mz_dev_s g_spi4dev =
     &g_spi4ops
   },
   .config            = &g_spi4config,
+  .lock              = NXMUTEX_INITIALIZER,
+#ifdef CONFIG_PIC32MZ_SPI_DMA
+  .dmawait           = SEM_INITIALIZER(0),
+#endif
 };
 #endif
 
@@ -480,6 +496,10 @@ static struct pic32mz_dev_s g_spi5dev =
     &g_spi5ops
   },
   .config            = &g_spi5config,
+  .lock              = NXMUTEX_INITIALIZER,
+#ifdef CONFIG_PIC32MZ_SPI_DMA
+  .dmawait           = SEM_INITIALIZER(0),
+#endif
 };
 #endif
 
@@ -529,6 +549,10 @@ static struct pic32mz_dev_s g_spi6dev =
     &g_spi6ops
   },
   .config            = &g_spi6config,
+  .lock              = NXMUTEX_INITIALIZER,
+#ifdef CONFIG_PIC32MZ_SPI_DMA
+  .dmawait           = SEM_INITIALIZER(0),
+#endif
 };
 #endif
 
@@ -2015,8 +2039,6 @@ struct spi_dev_s *pic32mz_spibus_initialize(int port)
     {
       spierr("ERROR: Failed to allocate the TX DMA channel\n");
     }
-
-  nxsem_init(&priv->dmawait, 0, 0);
 #endif
 
 #ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS
@@ -2077,10 +2099,6 @@ struct spi_dev_s *pic32mz_spibus_initialize(int port)
 
   priv->nbits = 8;
   priv->mode  = SPIDEV_MODE0;
-
-  /* Initialize the SPI mutex that enforces mutually exclusive access */
-
-  nxmutex_init(&priv->lock);
 
 #ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS
   /* Enable interrupts at the SPI controller */

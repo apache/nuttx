@@ -365,13 +365,16 @@ static struct stm32h7_qspidev_s g_qspi0dev =
     .ops             = &g_qspi0ops,
   },
   .base              = STM32_QUADSPI_BASE,
+  .lock              = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_STM32H7_QSPI_INTERRUPTS
   .handler           = qspi0_interrupt,
   .irq               = STM32_IRQ_QUADSPI,
+  .op_sem            = SEM_INITIALIZER(0),
 #endif
   .intf              = 0,
 #ifdef CONFIG_STM32H7_QSPI_DMA
   .candma            = true,
+  .dmawait           = SEM_INITIALIZER(0),
 #endif
 };
 
@@ -2614,13 +2617,7 @@ struct qspi_dev_s *stm32h7_qspi_initialize(int intf)
 
   if (!priv->initialized)
     {
-      /* Now perform one time initialization.
-       *
-       * Initialize the QSPI mutex that enforces mutually exclusive
-       * access to the QSPI registers.
-       */
-
-      nxmutex_init(&priv->lock);
+      /* Now perform one time initialization. */
 
 #ifdef CONFIG_STM32H7_QSPI_DMA
       /* Pre-allocate DMA channels. */
@@ -2634,8 +2631,6 @@ struct qspi_dev_s *stm32h7_qspi_initialize(int intf)
               priv->candma = false;
             }
         }
-
-      nxsem_init(&priv->dmawait, 0, 0);
 #endif
 
 #ifdef CONFIG_STM32H7_QSPI_INTERRUPTS
@@ -2645,10 +2640,8 @@ struct qspi_dev_s *stm32h7_qspi_initialize(int intf)
       if (ret < 0)
         {
           spierr("ERROR: Failed to attach irq %d\n", priv->irq);
-          goto errout_with_dmawait;
+          goto errout_with_dmach;
         }
-
-      nxsem_init(&priv->op_sem, 0, 0);
 #endif
 
       /* Perform hardware initialization.  Puts the QSPI into an active
@@ -2677,10 +2670,9 @@ errout_with_irq:
 #ifdef CONFIG_STM32H7_QSPI_INTERRUPTS
   irq_detach(priv->irq);
 
-errout_with_dmawait:
+errout_with_dmach:
 #endif
 #ifdef CONFIG_STM32H7_QSPI_DMA
-  nxsem_destroy(&priv->dmawait);
   if (priv->dmach)
     {
       stm32_dmafree(priv->dmach);
@@ -2688,7 +2680,6 @@ errout_with_dmawait:
     }
 #endif
 
-  nxmutex_destroy(&priv->lock);
   return NULL;
 }
 

@@ -202,8 +202,8 @@ static struct tx_buf_ind_s g_tx_buf_indicator =
 static uint8_t locate_data(".wifi_ram.txbuff")
 g_tx_buff[BL602_NET_TXBUFF_NUM][BL602_NET_TXBUFF_SIZE];
 
-static mutex_t g_wifi_scan_lock; /* wifi scan complete mutex */
-static sem_t g_wifi_connect_sem;
+static mutex_t g_wifi_scan_lock = NXMUTEX_INITIALIZER;
+static sem_t g_wifi_connect_sem = SEM_INITIALIZER(0);
 
 /* Rx Pending List */
 
@@ -2106,23 +2106,8 @@ void bl602_net_event(int evt, int val)
 int bl602_net_initialize(void)
 {
   struct bl602_net_driver_s *priv;
-  int                            tmp;
   int                            idx;
   uint8_t                        mac[6];
-
-  /* Initialize scan mutex & semaphore */
-
-  tmp = nxmutex_init(&g_wifi_scan_lock);
-  if (tmp < 0)
-    {
-      return tmp;
-    }
-
-  tmp = sem_init(&g_wifi_connect_sem, 0, 0);
-  if (tmp < 0)
-    {
-      return tmp;
-    }
 
   list_initialize(&g_rx_pending);
 
@@ -2202,12 +2187,7 @@ int bl602_net_initialize(void)
        * performed
        */
 
-      tmp = netdev_register(&priv->net_dev, NET_LL_IEEE80211);
-      if (tmp < 0)
-        {
-          nxmutex_destroy(&g_wifi_scan_lock);
-          return tmp;
-        }
+      return netdev_register(&priv->net_dev, NET_LL_IEEE80211);
     }
 
   return OK;

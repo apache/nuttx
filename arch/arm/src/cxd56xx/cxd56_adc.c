@@ -223,6 +223,7 @@ static struct cxd56adc_dev_s g_lpadc0priv =
   .wm     = NULL,
   .filter = NULL,
   .notify = NULL,
+  .lock   = NXMUTEX_INITIALIZER,
   .crefs  = 0,
 };
 #endif
@@ -239,6 +240,7 @@ static struct cxd56adc_dev_s g_lpadc1priv =
   .wm     = NULL,
   .filter = NULL,
   .notify = NULL,
+  .lock   = NXMUTEX_INITIALIZER,
   .crefs  = 0,
 };
 #endif
@@ -255,6 +257,7 @@ static struct cxd56adc_dev_s g_lpadc2priv =
   .wm     = NULL,
   .filter = NULL,
   .notify = NULL,
+  .lock   = NXMUTEX_INITIALIZER,
   .crefs  = 0,
 };
 #endif
@@ -271,6 +274,7 @@ static struct cxd56adc_dev_s g_lpadc3priv =
   .wm     = NULL,
   .filter = NULL,
   .notify = NULL,
+  .lock   = NXMUTEX_INITIALIZER,
   .crefs  = 0,
 };
 #endif
@@ -287,6 +291,7 @@ static struct cxd56adc_dev_s g_hpadc0priv =
   .wm     = NULL,
   .filter = NULL,
   .notify = NULL,
+  .lock   = NXMUTEX_INITIALIZER,
   .crefs  = 0,
 };
 #endif
@@ -303,6 +308,7 @@ static struct cxd56adc_dev_s g_hpadc1priv =
   .wm     = NULL,
   .filter = NULL,
   .notify = NULL,
+  .lock   = NXMUTEX_INITIALIZER,
   .crefs  = 0,
 };
 #endif
@@ -1107,9 +1113,8 @@ int cxd56_adcinitialize(void)
       aerr("Failed to register driver(lpadc0): %d\n", ret);
       return ret;
     }
-
-  nxmutex_init(&g_lpadc0priv.lock);
 #endif
+
 #if defined (CONFIG_CXD56_LPADC1) || defined (CONFIG_CXD56_LPADC0_1) || defined (CONFIG_CXD56_LPADC_ALL)
   ret = register_driver("/dev/lpadc1", &g_adcops, 0666, &g_lpadc1priv);
   if (ret < 0)
@@ -1117,9 +1122,8 @@ int cxd56_adcinitialize(void)
       aerr("Failed to register driver(lpadc1): %d\n", ret);
       return ret;
     }
-
-  nxmutex_init(&g_lpadc1priv.lock);
 #endif
+
 #if defined (CONFIG_CXD56_LPADC2) || defined (CONFIG_CXD56_LPADC_ALL)
   ret = register_driver("/dev/lpadc2", &g_adcops, 0666, &g_lpadc2priv);
   if (ret < 0)
@@ -1127,9 +1131,8 @@ int cxd56_adcinitialize(void)
       aerr("Failed to register driver(lpadc2): %d\n", ret);
       return ret;
     }
-
-  nxmutex_init(&g_lpadc2priv.lock);
 #endif
+
 #if defined (CONFIG_CXD56_LPADC3) || defined (CONFIG_CXD56_LPADC_ALL)
   ret = register_driver("/dev/lpadc3", &g_adcops, 0666, &g_lpadc3priv);
   if (ret < 0)
@@ -1137,9 +1140,8 @@ int cxd56_adcinitialize(void)
       aerr("Failed to register driver(lpadc3): %d\n", ret);
       return ret;
     }
-
-  nxmutex_init(&g_lpadc3priv.lock);
 #endif
+
 #ifdef CONFIG_CXD56_HPADC0
   ret = register_driver("/dev/hpadc0", &g_adcops, 0666, &g_hpadc0priv);
   if (ret < 0)
@@ -1147,9 +1149,8 @@ int cxd56_adcinitialize(void)
       aerr("Failed to register driver(hpadc0): %d\n", ret);
       return ret;
     }
-
-  nxmutex_init(&g_hpadc0priv.lock);
 #endif
+
 #ifdef CONFIG_CXD56_HPADC1
   ret = register_driver("/dev/hpadc1", &g_adcops, 0666, &g_hpadc1priv);
   if (ret < 0)
@@ -1157,8 +1158,6 @@ int cxd56_adcinitialize(void)
       aerr("Failed to register driver(hpadc1): %d\n", ret);
       return ret;
     }
-
-  nxmutex_init(&g_hpadc1priv.lock);
 #endif
 
   return ret;

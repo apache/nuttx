@@ -137,8 +137,11 @@ static const struct block_operations g_bops =
   NULL                 /* ioctl    */
 };
 
-static sem_t g_waitsem;
-struct cxd56_emmc_state_s g_emmcdev;
+static sem_t g_waitsem = SEM_INITIALIZER(0);
+struct cxd56_emmc_state_s g_emmcdev =
+{
+  .lock = NXMUTEX_INITIALIZER,
+};
 
 /****************************************************************************
  * Private Functions
@@ -938,10 +941,6 @@ int cxd56_emmcinitialize(void)
   int ret;
 
   priv = &g_emmcdev;
-
-  memset(priv, 0, sizeof(struct cxd56_emmc_state_s));
-  nxmutex_init(&priv->lock);
-  nxsem_init(&g_waitsem, 0, 0);
 
   ret = emmc_hwinitialize();
   if (ret != OK)

@@ -130,7 +130,10 @@ static int     hif_unlink(struct inode *inode);
 
 /* Host interface driver */
 
-static struct cxd56_hifdrv_s g_hifdrv;
+static struct cxd56_hifdrv_s g_hifdrv =
+{
+  .sync = SEM_INITIALIZER(0),
+};
 
 /* Host interface operations */
 
@@ -379,8 +382,6 @@ static int hif_initialize(struct hostif_buff_s *buffer)
 
   DEBUGASSERT(buffer);
 
-  memset(drv, 0, sizeof(struct cxd56_hifdrv_s));
-
   /* Get the number of devices */
 
   for (num = 0; num < MAX_BUFFER_NUM; num++)
@@ -440,8 +441,6 @@ static int hif_initialize(struct hostif_buff_s *buffer)
   /* Initialize communication with system CPU */
 
   cxd56_iccinit(CXD56_PROTO_HOSTIF);
-
-  nxsem_init(&drv->sync, 0, 0);
 
   ret = cxd56_iccregisterhandler(CXD56_PROTO_HOSTIF, hif_rxhandler, NULL);
 

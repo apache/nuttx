@@ -161,6 +161,7 @@ static struct lpc23xx_spidev_s g_spidev =
     {
       &g_spiops
     },
+  .lock = NXMUTEX_INITIALIZER,
 };
 
 /****************************************************************************
@@ -588,10 +589,6 @@ struct spi_dev_s *lpc23_spibus_initialize(int port)
   /* Select a default frequency of approx. 400KHz */
 
   spi_setfrequency((struct spi_dev_s *)priv, 400000);
-
-  /* Initialize the SPI mutex that enforces mutually exclusive access */
-
-  nxmutex_init(&priv->lock);
   return &priv->spidev;
 }
 

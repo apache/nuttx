@@ -105,6 +105,7 @@ static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
   {
     .chan     = 0,
     .irq      = STM32_IRQ_DMA1CH1,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(0),
   },
 #endif /* DMA1_NCHANNELS > 0 */
@@ -112,6 +113,7 @@ static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
   {
     .chan     = 1,
     .irq      = STM32_IRQ_DMA1CH2,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(1),
   },
 #endif /* DMA1_NCHANNELS > 1 */
@@ -119,6 +121,7 @@ static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
   {
     .chan     = 2,
     .irq      = STM32_IRQ_DMA1CH3,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(2),
   },
 #endif /* DMA1_NCHANNELS > 2 */
@@ -126,6 +129,7 @@ static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
   {
     .chan     = 3,
     .irq      = STM32_IRQ_DMA1CH4,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(3),
   },
 #endif /* DMA1_NCHANNELS > 3 */
@@ -133,6 +137,7 @@ static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
   {
     .chan     = 4,
     .irq      = STM32_IRQ_DMA1CH5,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(4),
   },
 #endif /* DMA1_NCHANNELS > 4 */
@@ -140,6 +145,7 @@ static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
   {
     .chan     = 5,
     .irq      = STM32_IRQ_DMA1CH6,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(5),
   },
 #endif /* DMA1_NCHANNELS > 5 */
@@ -147,6 +153,7 @@ static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
   {
     .chan     = 6,
     .irq      = STM32_IRQ_DMA1CH7,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(6),
   },
 #endif /* DMA1_NCHANNELS > 6 */
@@ -154,6 +161,7 @@ static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
   {
     .chan     = 7,
     .irq      = STM32_IRQ_DMA1CH8,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(7),
   },
 #endif /* DMA1_NCHANNELS > 7 */
@@ -162,6 +170,7 @@ static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
   {
     .chan     = 0,
     .irq      = STM32_IRQ_DMA2CH1,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(0),
   },
 #endif /* DMA2_NCHANNELS > 0 */
@@ -169,6 +178,7 @@ static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
   {
     .chan     = 1,
     .irq      = STM32_IRQ_DMA2CH2,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(1),
   },
 #endif /* DMA2_NCHANNELS > 1 */
@@ -176,6 +186,7 @@ static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
   {
     .chan     = 2,
     .irq      = STM32_IRQ_DMA2CH3,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(2),
   },
 #endif /* DMA2_NCHANNELS > 2 */
@@ -189,6 +200,7 @@ static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
 #else
     .irq      = STM32_IRQ_DMA2CH45,
 #endif
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(3),
   },
 #endif /* DMA2_NCHANNELS > 3 */
@@ -202,6 +214,7 @@ static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
 #else
     .irq      = STM32_IRQ_DMA2CH45,
 #endif
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(4),
   },
 #endif /* DMA2_NCHANNELS > 4 */
@@ -209,6 +222,7 @@ static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
   {
     .chan     = 5,
     .irq      = STM32_IRQ_DMA2CH5,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(5),
   },
 #endif /* DMA2_NCHANNELS > 5 */
@@ -216,6 +230,7 @@ static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
   {
     .chan     = 6,
     .irq      = STM32_IRQ_DMA2CH6,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(6),
   },
 #endif /* DMA2_NCHANNELS > 6 */
@@ -223,6 +238,7 @@ static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
   {
     .chan     = 7,
     .irq      = STM32_IRQ_DMA2CH7,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(7),
   },
 #endif /* DMA2_NCHANNELS > 7 */
@@ -401,7 +417,6 @@ void weak_function arm_dma_initialize(void)
   for (chndx = 0; chndx < DMA_NCHANNELS; chndx++)
     {
       dmach = &g_dma[chndx];
-      nxsem_init(&dmach->sem, 0, 1);
 
       /* Attach DMA interrupt vectors */
 

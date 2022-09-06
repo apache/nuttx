@@ -268,7 +268,9 @@ static struct imx_spidev_s g_spidev[] =
       .ops     = &g_spiops,
       .base    = IMX_ECSPI1_VBASE,
       .spindx  = SPI1_NDX,
+      .lock    = NXMUTEX_INITIALIZER,
 #ifndef CONFIG_SPI_POLLWAIT
+      .waitsem = SEM_INITIALIZER(0),
       .irq     = IMX_IRQ_ECSPI1,
 #endif
       .select  = imx_spi1select,
@@ -284,7 +286,9 @@ static struct imx_spidev_s g_spidev[] =
       .ops     = &g_spiops,
       .base    = IMX_ECSPI2_VBASE,
       .spindx  = SPI2_NDX,
+      .lock    = NXMUTEX_INITIALIZER,
 #ifndef CONFIG_SPI_POLLWAIT
+      .waitsem = SEM_INITIALIZER(0),
       .irq     = IMX_IRQ_ECSPI2,
 #endif
       .select  = imx_spi2select,
@@ -300,7 +304,9 @@ static struct imx_spidev_s g_spidev[] =
       .ops     = &g_spiops,
       .base    = IMX_ECSPI3_VBASE,
       .spindx  = SPI3_NDX,
+      .lock    = NXMUTEX_INITIALIZER,
 #ifndef CONFIG_SPI_POLLWAIT
+      .waitsem = SEM_INITIALIZER(0),
       .irq     = IMX_IRQ_ECSPI3,
 #endif
       .select  = imx_spi3select,
@@ -316,7 +322,9 @@ static struct imx_spidev_s g_spidev[] =
       .ops     = &g_spiops,
       .base    = IMX_ECSPI4_VBASE,
       .spindx  = SPI4_NDX,
+      .lock    = NXMUTEX_INITIALIZER,
 #ifndef CONFIG_SPI_POLLWAIT
+      .waitsem = SEM_INITIALIZER(0),
       .irq     = IMX_IRQ_ECSPI4,
 #endif
       .select  = imx_spi4select,
@@ -332,7 +340,9 @@ static struct imx_spidev_s g_spidev[] =
       .ops     = &g_spiops,
       .base    = IMX_ECSPI5_VBASE,
       .spindx  = SPI5_NDX,
+      .lock    = NXMUTEX_INITIALIZER,
 #ifndef CONFIG_SPI_POLLWAIT
+      .waitsem = SEM_INITIALIZER(0),
       .irq     = IMX_IRQ_ECSPI5,
 #endif
       .select  = imx_spi5select,
@@ -1281,13 +1291,6 @@ struct spi_dev_s *imx_spibus_initialize(int port)
     }
 
   /* Initialize the state structure */
-
-  /* Initialize Semaphores */
-
-#ifndef CONFIG_SPI_POLLWAIT
-  nxsem_init(&priv->waitsem, 0, 0);
-#endif
-  nxmutex_init(&priv->lock);
 
   /* Initialize control register:
    * min frequency, ignore ready, master mode, mode=0, 8-bit

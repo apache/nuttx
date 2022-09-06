@@ -148,10 +148,11 @@ static struct lpc43_sspdev_s g_ssp0dev =
       &g_spi0ops
     },
   .sspbase           = LPC43_SSP0_BASE,
-  .sspbasefreq       = BOARD_SSP0_BASEFREQ
+  .sspbasefreq       = BOARD_SSP0_BASEFREQ,
 #ifdef CONFIG_LPC43_SSP_INTERRUPTS
   .sspirq            = LPC43_IRQ_SSP0,
 #endif
+  .lock              = NXMUTEX_INITIALIZER,
 };
 #endif /* CONFIG_LPC43_SSP0 */
 
@@ -188,10 +189,11 @@ static struct lpc43_sspdev_s g_ssp1dev =
       &g_spi1ops
     },
   .sspbase           = LPC43_SSP1_BASE,
-  .sspbasefreq       = BOARD_SSP1_BASEFREQ
+  .sspbasefreq       = BOARD_SSP1_BASEFREQ,
 #ifdef CONFIG_LPC43_SSP_INTERRUPTS
   .sspirq            = LPC43_IRQ_SSP1,
 #endif
+  .lock              = NXMUTEX_INITIALIZER,
 };
 #endif /* CONFIG_LPC43_SSP1 */
 
@@ -826,10 +828,6 @@ struct spi_dev_s *lpc43_sspbus_initialize(int port)
   /* Select a default frequency of approx. 400KHz */
 
   ssp_setfrequency((struct spi_dev_s *)priv, 400000);
-
-  /* Initialize the SPI mutex that enforces mutually exclusive access */
-
-  nxmutex_init(&priv->lock);
 
   /* Enable the SPI */
 

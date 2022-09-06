@@ -539,6 +539,9 @@ static struct sam_xdmach_s g_xdmach0[SAM_NDMACHAN] =
 
 static struct sam_xdmac_s g_xdmac0 =
 {
+  .chlock     = NXMUTEX_INITIALIZER,
+  .dsem       = SEM_INITIALIZER(SAM_NDMACHAN),
+
   /* XDMAC 0 base address */
 
   .base       = SAM_XDMAC0_VBASE,
@@ -713,6 +716,9 @@ static struct sam_xdmach_s g_xdmach1[SAM_NDMACHAN] =
 
 static struct sam_xdmac_s g_xdmac1 =
 {
+  .chlock     = NXMUTEX_INITIALIZER,
+  .dsem       = SEM_INITIALIZER(SAM_NDMACHAN),
+
   /* XDMAC 0 base address */
 
   .base       = SAM_XDMAC1_VBASE,
@@ -1979,11 +1985,6 @@ void sam_dmainitialize(struct sam_xdmac_s *xdmac)
   /* Disable all DMA channels */
 
   sam_putdmac(xdmac, XDMAC_CHAN_ALL, SAM_XDMAC_GD_OFFSET);
-
-  /* Initialize mutex & semaphores */
-
-  nxmutex_init(&xdmac->chlock);
-  nxsem_init(&xdmac->dsem, 0, SAM_NDMACHAN);
 }
 
 /****************************************************************************

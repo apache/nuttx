@@ -308,8 +308,8 @@ static uint32_t g_devinuse;
 
 /* The following are used to managed the class creation operation */
 
-static mutex_t                 g_lock;     /* For mutually exclusive thread creation */
-static sem_t                   g_syncsem;  /* Thread data passing interlock */
+static mutex_t g_lock = NXMUTEX_INITIALIZER;
+static sem_t g_syncsem = SEM_INITIALIZER(0);
 static struct usbhost_state_s *g_priv;     /* Data passed to thread */
 
 /****************************************************************************
@@ -2197,11 +2197,6 @@ errout:
 
 int usbhost_xboxcontroller_init(void)
 {
-  /* Perform any one-time initialization of the class implementation */
-
-  nxmutex_init(&g_lock);
-  nxsem_init(&g_syncsem, 0, 0);
-
   /* Advertise our availability to support (certain) devices */
 
   return usbhost_registerclass(&g_xboxcontroller);

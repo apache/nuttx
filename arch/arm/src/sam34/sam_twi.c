@@ -187,21 +187,43 @@ static void twi_hw_initialize(struct twi_dev_s *priv, unsigned int pid,
  * Private Data
  ****************************************************************************/
 
+static const struct i2c_ops_s g_twiops =
+{
+  .transfer = twi_transfer,
+#ifdef CONFIG_I2C_RESET
+  .reset  = twi_reset
+#endif
+};
+
 #ifdef CONFIG_SAM34_TWIM0
-static struct twi_dev_s g_twi0;
+static struct twi_dev_s g_twi0 =
+{
+  .dev =
+  {
+    .ops = g_twiops,
+  },
+  .base = SAM_TWI0_BASE,
+  .irq = SAM_IRQ_TWI0,
+  .twi = 0,
+  .lock = NXMUTEX_INITIALIZER,
+  .waitsem = SEM_INITIALIZER(0),
+};
 #endif
 
 #ifdef CONFIG_SAM34_TWIM1
-static struct twi_dev_s g_twi1;
-#endif
-
-static const struct i2c_ops_s g_twiops =
+static struct twi_dev_s g_twi1 =
 {
-  .transfer = twi_transfer
-#ifdef CONFIG_I2C_RESET
-  , .reset  = twi_reset
-#endif
+  .dev =
+  {
+    .ops = g_twiops,
+  },
+  .base = SAM_TWI1_BASE,
+  .irq = SAM_IRQ_TWI1,
+  .twi = 1,
+  .lock = NXMUTEX_INITIALIZER,
+  .waitsem = SEM_INITIALIZER(0),
 };
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -891,12 +913,7 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
 #ifdef CONFIG_SAM34_TWIM0
   if (bus == 0)
     {
-      /* Set up TWI0 register base address and IRQ number */
-
-      priv       = &g_twi0;
-      priv->base = SAM_TWI0_BASE;
-      priv->irq  = SAM_IRQ_TWI0;
-      priv->twi  = 0;
+      priv = &g_twi0;
 
       /* Enable peripheral clocking */
 
@@ -917,12 +934,7 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
 #ifdef CONFIG_SAM34_TWIM1
   if (bus == 1)
     {
-      /* Set up TWI1 register base address and IRQ number */
-
-      priv       = &g_twi1;
-      priv->base = SAM_TWI1_BASE;
-      priv->irq  = SAM_IRQ_TWI1;
-      priv->twi  = 1;
+      priv = &g_twi1;
 
       /* Enable peripheral clocking */
 
@@ -945,15 +957,6 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
       i2cerr("ERROR: Unsupported bus: TWI%d\n", bus);
       return NULL;
     }
-
-  /* Initialize the device structure */
-
-  priv->dev.ops = &g_twiops;
-
-  /* Initialize mutex & semaphores */
-
-  nxmutex_init(&priv->lock);
-  nxsem_init(&priv->waitsem, 0, 0);
 
   /* Configure and enable the TWI hardware */
 
@@ -988,11 +991,6 @@ int sam_i2cbus_uninitialize(struct i2c_master_s * dev)
   /* Disable interrupts */
 
   up_disable_irq(priv->irq);
-
-  /* Reset data structures */
-
-  nxmutex_destroy(&priv->lock);
-  nxsem_destroy(&priv->waitsem);
 
   /* Cancel the watchdog timer */
 

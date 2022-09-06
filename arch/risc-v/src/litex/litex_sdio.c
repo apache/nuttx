@@ -212,6 +212,7 @@ struct litex_dev_s g_sdiodev =
     .callbackenable   = litex_callbackenable,
     .registercallback = litex_registercallback,
   },
+  .waitsem = SEM_INITIALIZER(0),
 };
 
 /****************************************************************************
@@ -1441,8 +1442,6 @@ struct sdio_dev_s *sdio_initialize(int slotno)
   struct litex_dev_s *priv = &g_sdiodev;
 
   mcinfo("slotno: %d\n", slotno);
-
-  nxsem_init(&priv->waitsem, 0, 0);
 
   litex_reset(&priv->dev);
   return &g_sdiodev.dev;

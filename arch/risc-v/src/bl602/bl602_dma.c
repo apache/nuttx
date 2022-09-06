@@ -67,7 +67,11 @@ struct dma_controller_s
 
 /* This is the overall state of the DMA controller */
 
-static struct dma_controller_s g_dmac;
+static struct dma_controller_s g_dmac =
+{
+  .exclsem = NXSEM_INITIALIZER(1, PRIOINHERIT_FLAGS_ENABLE),
+  .chansem = SEM_INITIALIZER(BL602_DMA_NCHANNELS),
+};
 
 /* This is the array of all DMA channels */
 
@@ -356,9 +360,6 @@ void weak_function riscv_dma_initialize(void)
    */
 
   /* Initialize the channel list  */
-
-  nxsem_init(&g_dmac.exclsem, 0, 1);
-  nxsem_init(&g_dmac.chansem, 0, BL602_DMA_NCHANNELS);
 
   for (ch = 0; ch < BL602_DMA_NCHANNELS; ch++)
     {

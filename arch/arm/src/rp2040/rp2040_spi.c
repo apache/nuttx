@@ -187,6 +187,10 @@ static struct rp2040_spidev_s g_spi0dev =
 #ifdef CONFIG_RP2040_SPI_INTERRUPTS
   .spiirq            = RP2040_SPI0_IRQ,
 #endif
+  .lock              = NXMUTEX_INITIALIZER,
+#ifdef CONFIG_RP2040_SPI_DMA
+  .dmasem            = SEM_INITIALIZER(0),
+#endif
 };
 #endif
 
@@ -231,6 +235,10 @@ static struct rp2040_spidev_s g_spi1dev =
   .initialized       = 0,
 #ifdef CONFIG_RP2040_SPI_INTERRUPTS
   .spiirq            = RP2040_SPI1_IRQ,
+#endif
+  .lock              = NXMUTEX_INITIALIZER,
+#ifdef CONFIG_RP2040_SPI_DMA
+  .dmasem            = SEM_INITIALIZER(0),
 #endif
 };
 #endif
@@ -817,8 +825,6 @@ struct spi_dev_s *rp2040_spibus_initialize(int port)
   /* DMA settings */
 
 #ifdef CONFIG_RP2040_SPI_DMA
-  nxsem_init(&priv->dmasem, 0, 0);
-
   priv->txdmach = rp2040_dmachannel();
   txconf.size = RP2040_DMA_SIZE_BYTE;
   txconf.noincr = false;
@@ -856,10 +862,6 @@ struct spi_dev_s *rp2040_spibus_initialize(int port)
   /* Select a default frequency of approx. 400KHz */
 
   spi_setfrequency((struct spi_dev_s *)priv, 400000);
-
-  /* Initialize the SPI mutex that enforces mutually exclusive access */
-
-  nxmutex_init(&priv->lock);
 
   regval = spi_getreg(priv, RP2040_SPI_SSPCR1_OFFSET);
   spi_putreg(priv, RP2040_SPI_SSPCR1_OFFSET, regval | RP2040_SPI_SSPCR1_SSE);

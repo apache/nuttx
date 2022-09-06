@@ -290,7 +290,7 @@ struct dma_channel_s
 /* This is the array of all DMA channels */
 
 static struct dma_channel_s g_dmach[NCHANNELS];
-static mutex_t g_dmalock;
+static mutex_t g_dmalock = NXMUTEX_INITIALIZER;
 
 static int dma_init(int ch);
 static int dma_uninit(int ch);
@@ -726,8 +726,6 @@ void weak_function arm_dma_initialize(void)
       g_dmach[i].chan = i;
       up_enable_irq(irq_map[i]);
     }
-
-  nxmutex_init(&g_dmalock);
 }
 
 /****************************************************************************

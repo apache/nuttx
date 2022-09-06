@@ -180,13 +180,37 @@ static const struct spi_slave_ctrlrops_s g_ctrlr_ops =
 #ifdef CONFIG_SAMV7_SPI0_SLAVE
 /* This is the overall state of the SPI0 controller */
 
-static struct sam_spidev_s g_spi0_ctrlr;
+static struct sam_spidev_s g_spi0_ctrlr =
+{
+  .ctrlr   =
+  {
+    .ops   = g_ctrlr_ops,
+  },
+  .base    = SAM_SPI0_BASE,
+  .spilock = NXMUTEX_INITIALIZER,
+  .irq     = SAM_IRQ_SPI0,
+  .nbits   = 8,
+  .spino   = 0,
+  .nss     = true,
+};
 #endif
 
 #ifdef CONFIG_SAMV7_SPI1_SLAVE
 /* This is the overall state of the SPI0 controller */
 
-static struct sam_spidev_s g_spi1_ctrlr;
+static struct sam_spidev_s g_spi1_ctrlr =
+{
+  .ctrlr   =
+  {
+    .ops   = g_ctrlr_ops,
+  },
+  .base    = SAM_SPI1_BASE,
+  .spilock = NXMUTEX_INITIALIZER,
+  .irq     = SAM_IRQ_SPI0,
+  .nbits   = 8,
+  .spino   = 1,
+  .nss     = true,
+};
 #endif
 
 /****************************************************************************
@@ -1097,20 +1121,6 @@ struct spi_slave_ctrlr_s *sam_spi_slave_initialize(int port)
   priv = &g_spi1_ctrlr;
 #endif
 
-  /* Set up the initial state for this chip select structure.  Other fields
-   * are zeroed.
-   */
-
-  memset(priv, 0, sizeof(struct sam_spidev_s));
-
-  /* Initialize the SPI operations */
-
-  priv->ctrlr.ops = &g_ctrlr_ops;
-
-  /* Save the SPI controller number */
-
-  priv->spino = spino;
-
   /* Has the SPI hardware been initialized? */
 
   if (!priv->initialized)
@@ -1123,11 +1133,6 @@ struct spi_slave_ctrlr_s *sam_spi_slave_initialize(int port)
 #endif
 #if defined(CONFIG_SAMV7_SPI0_SLAVE)
         {
-          /* Set the SPI0 register base address and interrupt information */
-
-          priv->base = SAM_SPI0_BASE,
-          priv->irq  = SAM_IRQ_SPI0;
-
           /* Enable peripheral clocking to SPI0 */
 
           sam_spi0_enableclk();
@@ -1145,11 +1150,6 @@ struct spi_slave_ctrlr_s *sam_spi_slave_initialize(int port)
 #endif
 #if defined(CONFIG_SAMV7_SPI1_SLAVE)
         {
-          /* Set the SPI1 register base address and interrupt information */
-
-          priv->base = SAM_SPI1_BASE,
-          priv->irq  = SAM_IRQ_SPI1;
-
           /* Enable peripheral clocking to SPI1 */
 
           sam_spi1_enableclk();
@@ -1187,12 +1187,6 @@ struct spi_slave_ctrlr_s *sam_spi_slave_initialize(int port)
       spi_getreg(priv, SAM_SPI_SR_OFFSET);
       spi_getreg(priv, SAM_SPI_RDR_OFFSET);
 
-      /* Initialize the SPI mutex that enforces mutually exclusive
-       * access to the SPI registers.
-       */
-
-      nxmutex_init(&priv->spilock);
-      priv->nss         = true;
       priv->initialized = true;
 
       /* Disable all SPI interrupts at the SPI peripheral */
@@ -1214,7 +1208,6 @@ struct spi_slave_ctrlr_s *sam_spi_slave_initialize(int port)
   regval |= (SPI_CSR_NCPHA | SPI_CSR_BITS(8));
   spi_putreg(priv, regval, SAM_SPI_CSR0_OFFSET);
 
-  priv->nbits = 8;
   spiinfo("csr[offset=%02x]=%08x\n", offset, regval);
 
   return &priv->ctrlr;

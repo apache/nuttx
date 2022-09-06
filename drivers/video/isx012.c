@@ -262,7 +262,10 @@ static int isx012_set_value
  * Private Data
  ****************************************************************************/
 
-static isx012_dev_t   g_isx012_private;
+static isx012_dev_t g_isx012_private =
+{
+  NXMUTEX_INITIALIZER,
+};
 
 #ifndef ISX012_NOT_USE_NSTBY
 static const isx012_reg_t g_isx012_presleep[] =
@@ -3156,8 +3159,6 @@ int isx012_initialize(void)
   /* Initialize other information */
 
   priv->state      = STATE_ISX012_POWEROFF;
-
-  nxmutex_init(&priv->i2c_lock);
   return OK;
 }
 

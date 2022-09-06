@@ -184,6 +184,7 @@ static struct lpc17_40_sspdev_s g_ssp0dev =
 #ifdef CONFIG_LPC17_40_SSP_INTERRUPTS
   .sspirq            = LPC17_40_IRQ_SSP0,
 #endif
+  .lock              = NXMUTEX_INITIALIZER,
 };
 #endif /* CONFIG_LPC17_40_SSP0 */
 
@@ -219,6 +220,7 @@ static struct lpc17_40_sspdev_s g_ssp1dev =
 #ifdef CONFIG_LPC17_40_SSP_INTERRUPTS
   .sspirq            = LPC17_40_IRQ_SSP1,
 #endif
+  .lock              = NXMUTEX_INITIALIZER,
 };
 #endif /* CONFIG_LPC17_40_SSP1 */
 
@@ -254,6 +256,7 @@ static struct lpc17_40_sspdev_s g_ssp2dev =
 #ifdef CONFIG_LPC17_40_SSP_INTERRUPTS
   .sspirq            = LPC17_40_IRQ_SSP2,
 #endif
+  .lock              = NXMUTEX_INITIALIZER,
 };
 #endif /* CONFIG_LPC17_40_SSP2 */
 
@@ -992,10 +995,6 @@ struct spi_dev_s *lpc17_40_sspbus_initialize(int port)
   /* Select a default frequency of approx. 400KHz */
 
   ssp_setfrequency((struct spi_dev_s *)priv, 400000);
-
-  /* Initialize the SPI mutex that enforces mutually exclusive access */
-
-  nxmutex_init(&priv->lock);
 
   /* Enable the SPI */
 

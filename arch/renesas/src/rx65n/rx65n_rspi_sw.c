@@ -291,7 +291,9 @@ static struct rx65n_rspidev_s g_rspi0dev =
   .rspigrpbase = RX65N_GRPAL0_ADDR,
   .rspierimask = RX65N_GRPAL0_SPEI0_MASK,
   .rspiidlimask = RX65N_GRPAL0_SPII0_MASK,
+  .waitsem = SEM_INITIALIZER(0),
 #endif
+  .lock = NXMUTEX_INITIALIZER,
 };
 #endif
 
@@ -343,7 +345,9 @@ static struct rx65n_rspidev_s g_rspi1dev =
   .rspigrpbase = RX65N_GRPAL0_ADDR,
   .rspierimask = RX65N_GRPAL0_SPEI1_MASK,
   .rspiidlimask = RX65N_GRPAL0_SPII1_MASK,
+  .waitsem = SEM_INITIALIZER(0),
 #endif
+  .lock = NXMUTEX_INITIALIZER,
 };
 #endif
 
@@ -395,7 +399,9 @@ static struct rx65n_rspidev_s g_rspi2dev =
   .rspigrpbase = RX65N_GRPAL0_ADDR,
   .rspierimask = RX65N_GRPAL0_SPEI2_MASK,
   .rspiidlimask = RX65N_GRPAL0_SPII2_MASK,
+  .waitsem = SEM_INITIALIZER(0),
 #endif
+  .lock = NXMUTEX_INITIALIZER,
 };
 #endif
 
@@ -1842,11 +1848,6 @@ static void rspi_bus_initialize(FAR struct rx65n_rspidev_s *priv)
 {
   uint8_t regval8;
   uint16_t regval16;
-
-#ifndef CONFIG_SPI_POLLWAIT
-  nxsem_init(&priv->waitsem, 0, 0);
-#endif
-  nxmutex_init(&priv->lock);
 
   /* Initialize control register */
 

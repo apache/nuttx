@@ -49,10 +49,10 @@
 struct z16f_spi_s
 {
   struct spi_dev_s spi;        /* Externally visible part of the SPI interface */
+  mutex_t lock;                /* Assures mutually exclusive access to SPI */
   bool initialized;            /* TRUE: Controller has been initialized */
   uint8_t nbits;               /* Width of word in bits (1-8) */
   uint8_t mode;                /* Mode 0,1,2,3 */
-  mutex_t lock;                /* Assures mutually exclusive access to SPI */
   uint32_t frequency;          /* Requested clock frequency */
   uint32_t actual;             /* Actual clock frequency */
 
@@ -144,7 +144,13 @@ static const struct spi_ops_s g_epsiops =
 
 /* ESPI driver state */
 
-static struct z16f_spi_s g_espi;
+static struct z16f_spi_s g_espi =
+{
+  {
+    &g_epsiops
+  },
+  NXMUTEX_INITIALIZER
+};
 
 /****************************************************************************
  * Public Data
@@ -792,8 +798,6 @@ FAR struct spi_dev_s *z16_spibus_initialize(int port)
       /* Initialize the ESPI state structure */
 
       flags = enter_critical_section();
-      priv->spi.ops = &g_epsiops;
-      nxmutex_init(&priv->lock);
 
       /* Set up the SPI pin configuration (board-specific logic is required
        * to configure and manage all chip selects).

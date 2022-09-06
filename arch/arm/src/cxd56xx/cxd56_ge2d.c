@@ -64,8 +64,8 @@ static const struct file_operations g_ge2dfops =
   .ioctl = ge2d_ioctl
 };
 
-static sem_t g_wait;
-static mutex_t g_lock;
+static sem_t g_wait = SEM_INITIALIZER(0);
+static mutex_t g_lock = NXMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Private Functions
@@ -184,9 +184,6 @@ int cxd56_ge2dinitialize(const char *devname)
 {
   int ret;
 
-  nxmutex_init(&g_lock);
-  nxsem_init(&g_wait, 0, 0);
-
   ret = register_driver(devname, &g_ge2dfops, 0666, NULL);
   if (ret != 0)
     {
@@ -215,9 +212,5 @@ void cxd56_ge2duninitialize(const char *devname)
   irq_detach(CXD56_IRQ_GE2D);
 
   cxd56_img_ge2d_clock_disable();
-
-  nxmutex_destroy(&g_lock);
-  nxsem_destroy(&g_wait);
-
   unregister_driver(devname);
 }

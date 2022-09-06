@@ -74,7 +74,11 @@ struct trng_dev_s
  * Private Data
  ****************************************************************************/
 
-static struct trng_dev_s g_trngdev;
+static struct trng_dev_s g_trngdev =
+{
+  .lock = NXMUTEX_INITIALIZER,
+  .waitsem = SEM_INITIALIZER(0),
+};
 
 static const struct file_operations g_trngops =
 {
@@ -334,15 +338,6 @@ static int sam_rng_initialize(void)
   int ret;
 
   finfo("Initializing TRNG hardware\n");
-
-  /* Initialize the device structure */
-
-  memset(&g_trngdev, 0, sizeof(struct trng_dev_s));
-
-  /* Initialize mutex & semaphores */
-
-  nxmutex_init(&g_trngdev.lock);
-  nxsem_init(&g_trngdev.waitsem, 0, 0);
 
   /* Enable clocking to the TRNG */
 

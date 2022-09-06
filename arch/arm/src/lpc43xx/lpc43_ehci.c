@@ -555,7 +555,12 @@ static int lpc43_reset(void);
  * global instance.
  */
 
-static struct lpc43_ehci_s g_ehci;
+static struct lpc43_ehci_s g_ehci =
+{
+  .lock = NXMUTEX_INITIALIZER,
+  .pscsem = SEM_INITIALIZER(0),
+  .ep0.iocsem = SEM_INITIALIZER(1),
+};
 
 /* This is the connection/enumeration interface */
 
@@ -4839,15 +4844,6 @@ struct usbhost_connection_s *lpc43_ehci_initialize(int controller)
   /* Software Configuration *************************************************/
 
   usbhost_vtrace1(EHCI_VTRACE1_INITIALIZING, 0);
-
-  /* Initialize the EHCI state data structure */
-
-  nxmutex_init(&g_ehci.lock);
-  nxsem_init(&g_ehci.pscsem,  0, 0);
-
-  /* Initialize EP0 */
-
-  nxsem_init(&g_ehci.ep0.iocsem, 0, 1);
 
   /* Initialize the root hub port structures */
 

@@ -464,6 +464,7 @@ struct cxd56_sdiodev_s g_sdhcdev =
       .dmasendsetup     = cxd56_sdio_sendsetup,
 #endif
     },
+  .waitsem = SEM_INITIALIZER(0),
 };
 
 /* Register logging support */
@@ -1314,10 +1315,6 @@ static void cxd56_sdio_sdhci_reset(struct sdio_dev_s *dev)
          getreg32(CXD56_SDHCI_IRQSTATEN));
 
   /* Initialize the SDHC slot structure data structure */
-
-  /* Initialize semaphores */
-
-  nxsem_init(&priv->waitsem, 0, 0);
 
   /* The next phase of the hardware reset would be to set the SYSCTRL INITA
    * bit to send 80 clock ticks for card to power up and then reset the card

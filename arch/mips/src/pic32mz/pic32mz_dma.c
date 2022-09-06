@@ -133,6 +133,7 @@ static void pic32mz_dma_config(struct pic32mz_dmach_s *dmach,
 
 static struct pic32mz_dmac_s g_dmac =
 {
+  .chlock = NXMUTEX_INITIALIZER,
   .dmachs =
     {
       {
@@ -735,10 +736,6 @@ void weak_function up_dma_initialize(void)
   /* Enable the DMA module. */
 
   pic32mz_dma_putglobal(PIC32MZ_DMA_CONSET_OFFSET, DMA_CON_ON);
-
-  /* Initialize the mutex. */
-
-  nxmutex_init(&g_dmac.chlock);
 }
 
 /****************************************************************************

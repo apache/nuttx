@@ -459,7 +459,11 @@ static void *hw_usb_get_fifoctr_adr (uint16_t pipemode);
  * single globalinstance.
  */
 
-static struct rx65n_usbhost_s g_usbhost;
+static struct rx65n_usbhost_s g_usbhost =
+{
+  .lock = NXMUTEX_INITIALIZER,
+  .pscsem = SEM_INITIALIZER(0),
+};
 
 /* This is the connection/enumeration interface */
 
@@ -8359,11 +8363,6 @@ struct usbhost_connection_s *rx65n_usbhost_initialize(int controller)
   /* Initialize function address generation logic */
 
   usbhost_devaddr_initialize(&priv->rhport);
-
-  /* Initialize semaphores & mutex */
-
-  nxsem_init(&priv->pscsem,  0, 0);
-  nxmutex_init(&priv->lock);
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
   priv->ininterval  = MAX_PERINTERVAL;

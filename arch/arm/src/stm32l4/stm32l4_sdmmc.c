@@ -567,6 +567,7 @@ struct stm32_dev_s g_sdmmcdev1 =
 #ifdef CONFIG_STM32L4_SDMMC1_DMAPRIO
   .dmapri            = CONFIG_STM32L4_SDMMC1_DMAPRIO,
 #endif
+  .waitsem           = SEM_INITIALIZER(0),
 };
 #endif
 #ifdef CONFIG_STM32L4_SDMMC2
@@ -620,6 +621,7 @@ struct stm32_dev_s g_sdmmcdev2 =
 #ifdef CONFIG_STM32L4_SDMMC2_DMAPRIO
   .dmapri            = CONFIG_STM32L4_SDMMC2_DMAPRIO,
 #endif
+  .waitsem           = SEM_INITIALIZER(0),
 };
 #endif
 
@@ -3093,12 +3095,6 @@ struct sdio_dev_s *sdio_initialize(int slotno)
       mcerr("ERROR: Unsupported SDMMC slot: %d\n", slotno);
       return NULL;
     }
-
-  /* Initialize the SDIO slot structure */
-
-  /* Initialize semaphores */
-
-  nxsem_init(&priv->waitsem, 0, 0);
 
 #ifdef CONFIG_STM32L4_SDMMC_DMA
   /* Allocate a DMA channel */

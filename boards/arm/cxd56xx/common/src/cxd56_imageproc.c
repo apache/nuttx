@@ -209,10 +209,10 @@ struct aligned_data(16) ge2d_abcmd_s
  ****************************************************************************/
 
 static bool g_imageprocinitialized = false;
-static sem_t g_rotwait;
-static mutex_t g_rotlock;
-static mutex_t g_gelock;
-static mutex_t g_ablock;
+static sem_t g_rotwait = SEM_INITIALIZER(0);
+static mutex_t g_rotlock = NXMUTEX_INITIALIZER;
+static mutex_t g_gelock = NXMUTEX_INITIALIZER;
+static mutex_t g_ablock = NXMUTEX_INITIALIZER;
 
 static struct file g_gfile;
 static char g_gcmdbuf[256] aligned_data(16);
@@ -551,14 +551,7 @@ void imageproc_initialize(void)
     }
 
   g_imageprocinitialized = true;
-
-  nxmutex_init(&g_rotlock);
-  nxsem_init(&g_rotwait, 0, 0);
-  nxmutex_init(&g_gelock);
-  nxmutex_init(&g_ablock);
-
   cxd56_ge2dinitialize(GEDEVNAME);
-
   file_open(&g_gfile, GEDEVNAME, O_RDWR);
 
   putreg32(1, ROT_INTR_CLEAR);
@@ -585,12 +578,6 @@ void imageproc_finalize(void)
     }
 
   cxd56_ge2duninitialize(GEDEVNAME);
-
-  nxsem_destroy(&g_rotwait);
-  nxmutex_destroy(&g_rotlock);
-  nxmutex_destroy(&g_gelock);
-  nxmutex_destroy(&g_ablock);
-
   g_imageprocinitialized = false;
 }
 

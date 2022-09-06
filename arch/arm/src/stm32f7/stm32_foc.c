@@ -533,7 +533,7 @@ struct stm32_foc_dev_s
 struct stm32_foc_adccmn_s
 {
   uint8_t       cntr; /* ADC common counter */
-  sem_t         lock; /* Lock data */
+  mutex_t       lock; /* Lock data */
 };
 
 /* STM32 FOC volatile data */
@@ -639,7 +639,8 @@ static void stm32_foc_hw_config_get(struct foc_dev_s *dev);
 
 static struct stm32_foc_adccmn_s g_stm32_foc_adccmn123 =
 {
-  .cntr = 0
+  .cntr = 0,
+  .lock = NXMUTEX_INITIALIZER,
 };
 
 /* STM32 specific FOC data */
@@ -2085,10 +2086,6 @@ stm32_foc_initialize(int inst, struct stm32_foc_board_s *board)
    */
 
   modifyreg32(FOC_PWM_FZ_REG, 0, pwmfzbit);
-
-  /* Initialize ADC common data mutex  */
-
-  nxmutex_init(&foc_priv->adc_cmn->lock);
 
   /* Initialize calibration semaphore */
 

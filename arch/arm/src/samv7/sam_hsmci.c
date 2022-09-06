@@ -532,51 +532,53 @@ static void sam_callback(void *arg);
  * Private Data
  ****************************************************************************/
 
-/* Callbacks */
-
-static const struct sdio_dev_s g_callbacks =
-{
-  .reset            = sam_reset,
-  .capabilities     = sam_capabilities,
-  .status           = sam_status,
-  .widebus          = sam_widebus,
-  .clock            = sam_clock,
-  .attach           = sam_attach,
-  .sendcmd          = sam_sendcmd,
-  .blocksetup       = sam_blocksetup,
-  .recvsetup        = sam_recvsetup,
-  .sendsetup        = sam_sendsetup,
-  .cancel           = sam_cancel,
-  .waitresponse     = sam_waitresponse,
-  .recv_r1          = sam_recvshort,
-  .recv_r2          = sam_recvlong,
-  .recv_r3          = sam_recvshort,
-  .recv_r4          = sam_recvnotimpl,
-  .recv_r5          = sam_recvnotimpl,
-  .recv_r6          = sam_recvshort,
-  .recv_r7          = sam_recvshort,
-  .waitenable       = sam_waitenable,
-  .eventwait        = sam_eventwait,
-  .callbackenable   = sam_callbackenable,
-  .registercallback = sam_registercallback,
-#ifdef CONFIG_SDIO_DMA
-#ifndef HSCMI_NORXDMA
-  .dmarecvsetup     = sam_dmarecvsetup,
-#else
-  .dmarecvsetup     = sam_recvsetup,
-#endif
-#ifndef HSCMI_NOTXDMA
-  .dmasendsetup     = sam_dmasendsetup,
-#else
-  .dmasendsetup     = sam_sendsetup,
-#endif
-#endif
-};
-
 /* Pre-allocate memory for each HSMCI device */
 
 #ifdef CONFIG_SAMV7_HSMCI0
-static struct sam_dev_s g_hsmci0;
+static struct sam_dev_s g_hsmci0 =
+{
+  .dev =
+  {
+    .reset            = sam_reset,
+    .capabilities     = sam_capabilities,
+    .status           = sam_status,
+    .widebus          = sam_widebus,
+    .clock            = sam_clock,
+    .attach           = sam_attach,
+    .sendcmd          = sam_sendcmd,
+    .blocksetup       = sam_blocksetup,
+    .recvsetup        = sam_recvsetup,
+    .sendsetup        = sam_sendsetup,
+    .cancel           = sam_cancel,
+    .waitresponse     = sam_waitresponse,
+    .recv_r1          = sam_recvshort,
+    .recv_r2          = sam_recvlong,
+    .recv_r3          = sam_recvshort,
+    .recv_r4          = sam_recvnotimpl,
+    .recv_r5          = sam_recvnotimpl,
+    .recv_r6          = sam_recvshort,
+    .recv_r7          = sam_recvshort,
+    .waitenable       = sam_waitenable,
+    .eventwait        = sam_eventwait,
+    .callbackenable   = sam_callbackenable,
+    .registercallback = sam_registercallback,
+#ifdef CONFIG_SDIO_DMA
+#ifndef HSCMI_NORXDMA
+    .dmarecvsetup     = sam_dmarecvsetup,
+#else
+    .dmarecvsetup     = sam_recvsetup,
+#endif
+#ifndef HSCMI_NOTXDMA
+    .dmasendsetup     = sam_dmasendsetup,
+#else
+    .dmasendsetup     = sam_sendsetup,
+#endif
+#endif
+  },
+  .waitsem            = SEM_INITIALIZER(0),
+  .base               = SAM_HSMCI0_BASE,
+  .hsmci              = 0,
+};
 #endif
 
 /****************************************************************************
@@ -3270,11 +3272,6 @@ struct sdio_dev_s *sdio_initialize(int slotno)
 
       priv = &g_hsmci0;
 
-      /* HSMCI0 Initialization */
-
-      priv->base  = SAM_HSMCI0_BASE;
-      priv->hsmci = 0;
-
       /* Configure PIOs for 4-bit, wide-bus operation.  NOTE: (1) the chip
        * is capable of 8-bit wide bus operation but D4-D7 are not configured,
        * (2) any card detection PIOs must be set up in board-specific logic.
@@ -3308,16 +3305,6 @@ struct sdio_dev_s *sdio_initialize(int slotno)
 
   mcinfo("priv: %p base: %08" PRIx32 " hsmci: %d pid: %" PRId32 "\n",
          priv, priv->base, priv->hsmci, pid);
-
-  /* Initialize the HSMCI slot structure */
-
-  /* Initialize semaphores */
-
-  nxsem_init(&priv->waitsem, 0, 0);
-
-  /* Initialize the callbacks */
-
-  memcpy(&priv->dev, &g_callbacks, sizeof(struct sdio_dev_s));
 
   /* Allocate a DMA channel */
 

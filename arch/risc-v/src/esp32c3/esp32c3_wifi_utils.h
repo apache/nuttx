@@ -95,22 +95,6 @@ int esp_wifi_get_scan_results(struct iwreq *iwr);
 
 void esp_wifi_scan_event_parse(void);
 
-/****************************************************************************
- * Name: esp_wifi_scan_init
- *
- * Description:
- *   Initialize Wi-Fi scan parameter.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   OK is returned on success. Otherwise, a negated errno value is returned.
- *
- ****************************************************************************/
-
-int esp_wifi_scan_init(void);
-
 #ifdef __cplusplus
 }
 #endif

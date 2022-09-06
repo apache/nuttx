@@ -90,7 +90,17 @@ struct lpc31_i2cdev_s
 #define I2C_STATE_HEADER    2
 #define I2C_STATE_TRANSFER  3
 
-static struct lpc31_i2cdev_s i2cdevices[2];
+static struct lpc31_i2cdev_s i2cdevices[2] =
+{
+  {
+    .lock = NXMUTEX_INITIALIZER,
+    .wait = SEM_INITIALIZER(0),
+  },
+  {
+    .lock = NXMUTEX_INITIALIZER,
+    .wait = SEM_INITIALIZER(0),
+  },
+};
 
 /****************************************************************************
  * Private Function Prototypes
@@ -555,11 +565,6 @@ struct i2c_master_s *lpc31_i2cbus_initialize(int port)
   priv->clkid = (port == 0) ? CLKID_I2C0PCLK   : CLKID_I2C1PCLK;
   priv->rstid = (port == 0) ? RESETID_I2C0RST  : RESETID_I2C1RST;
   priv->irqid = (port == 0) ? LPC31_IRQ_I2C0   : LPC31_IRQ_I2C1;
-
-  /* Initialize mutex & semaphores */
-
-  nxmutex_init(&priv->lock);
-  nxsem_init(&priv->wait, 0, 0);
 
   /* Enable I2C system clocks */
 

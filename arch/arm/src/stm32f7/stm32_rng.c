@@ -69,7 +69,11 @@ struct rng_dev_s
  * Private Data
  ****************************************************************************/
 
-static struct rng_dev_s g_rngdev;
+static struct rng_dev_s g_rngdev =
+{
+  .rd_devlock = NXMUTEX_INITIALIZER,
+  .rd_readsem = SEM_INITIALIZER(0),
+};
 
 static const struct file_operations g_rngops =
 {
@@ -96,10 +100,6 @@ static const struct file_operations g_rngops =
 static int stm32_rng_initialize(void)
 {
   _info("Initializing RNG\n");
-
-  memset(&g_rngdev, 0, sizeof(struct rng_dev_s));
-
-  nxmutex_init(&g_rngdev.rd_devlock);
 
   if (irq_attach(STM32_IRQ_RNG, stm32_rnginterrupt, NULL))
     {
@@ -259,7 +259,11 @@ static ssize_t stm32_rngread(struct file *filep, char *buffer, size_t buflen)
 
   /* We've got the device semaphore, proceed with reading */
 
-  nxsem_init(&g_rngdev.rd_readsem, 0, 0);
+  /* Reset the operation semaphore with 0 for blocking until the
+   * buffer is filled from interrupts.
+   */
+
+  nxsem_reset(&g_rngdev.rd_readsem, 0);
 
   g_rngdev.rd_buflen = buflen;
   g_rngdev.rd_buf = buffer;
@@ -271,10 +275,6 @@ static ssize_t stm32_rngread(struct file *filep, char *buffer, size_t buflen)
   /* Wait until the buffer is filled */
 
   ret = nxsem_wait(&g_rngdev.rd_readsem);
-
-  /* Done with the operation semaphore */
-
-  nxsem_destroy(&g_rngdev.rd_readsem);
 
   /* Free RNG via the device mutex for next use */
 

@@ -97,7 +97,7 @@ static const struct file_operations g_uart0fops =
   .write = uart0_write
 };
 
-static mutex_t g_lock;
+static mutex_t g_lock = NXMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Private Functions
@@ -233,8 +233,6 @@ int cxd56_uart0initialize(const char *devname)
 {
   int ret;
 
-  nxmutex_init(&g_lock);
-
   ret = register_driver(devname, &g_uart0fops, 0666, NULL);
   if (ret != 0)
     {
@@ -251,7 +249,6 @@ int cxd56_uart0initialize(const char *devname)
 void cxd56_uart0uninitialize(const char *devname)
 {
   unregister_driver(devname);
-  nxmutex_destroy(&g_lock);
 }
 
 #endif /* CONFIG_CXD56_UART0 */

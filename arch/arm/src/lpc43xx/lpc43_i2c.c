@@ -118,10 +118,18 @@ struct lpc43_i2cdev_s
 };
 
 #ifdef CONFIG_LPC43_I2C0
-static struct lpc43_i2cdev_s g_i2c0dev;
+static struct lpc43_i2cdev_s g_i2c0dev =
+{
+  .lock = NXMUTEX_INITIALIZER,
+  .wait = SEM_INITIALIZER(0),
+};
 #endif
 #ifdef CONFIG_LPC43_I2C1
-static struct lpc43_i2cdev_s g_i2c1dev;
+static struct lpc43_i2cdev_s g_i2c1dev =
+{
+  .lock = NXMUTEX_INITIALIZER,
+  .wait = SEM_INITIALIZER(0),
+};
 #endif
 
 /****************************************************************************
@@ -527,11 +535,6 @@ struct i2c_master_s *lpc43_i2cbus_initialize(int port)
   leave_critical_section(flags);
 
   putreg32(I2C_CONSET_I2EN, priv->base + LPC43_I2C_CONSET_OFFSET);
-
-  /* Initialize mutex & semaphores */
-
-  nxmutex_init(&priv->lock);
-  nxsem_init(&priv->wait, 0, 0);
 
   /* Attach Interrupt Handler */
 

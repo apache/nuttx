@@ -108,6 +108,7 @@ static struct avr_spidev_s g_spidev =
     {
       &g_spiops
     },
+  .lock              = NXMUTEX_INITIALIZER,
 };
 
 /****************************************************************************
@@ -480,10 +481,6 @@ FAR struct spi_dev_s *avr_spibus_initialize(int port)
   /* Select a default frequency of approx. 400KHz */
 
   spi_setfrequency((FAR struct spi_dev_s *)priv, 400000);
-
-  /* Initialize the SPI mutex that enforces mutually exclusive access */
-
-  nxmutex_init(&priv->lock);
 
   leave_critical_section(flags);
   return &priv->spidev;

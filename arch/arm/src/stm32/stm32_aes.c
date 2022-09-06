@@ -68,7 +68,7 @@ static int  stm32aes_setup_cr(int mode, int encrypt);
  * Private Data
  ****************************************************************************/
 
-static mutex_t g_stm32aes_lock;
+static mutex_t g_stm32aes_lock = NXMUTEX_INITIALIZER;
 static bool    g_stm32aes_initdone = false;
 
 /****************************************************************************
@@ -231,8 +231,6 @@ int stm32_aesinitialize(void)
 {
   uint32_t regval;
 
-  nxmutex_init(&g_stm32aes_lock);
-
   regval  = getreg32(STM32_RCC_AHBENR);
   regval |= RCC_AHBENR_AESEN;
   putreg32(regval, STM32_RCC_AHBENR);
@@ -252,7 +250,6 @@ int stm32_aesuninitialize(void)
   regval &= ~RCC_AHBENR_AESEN;
   putreg32(regval, STM32_RCC_AHBENR);
 
-  nxmutex_destroy(&g_stm32aes_lock);
   return OK;
 }
 
