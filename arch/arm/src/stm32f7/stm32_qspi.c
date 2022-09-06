@@ -335,7 +335,7 @@ static const struct qspi_ops_s g_qspi0ops =
 
 static struct stm32f7_qspidev_s g_qspi0dev =
 {
-  .qspi            =
+  .qspi              =
   {
     .ops             = &g_qspi0ops,
   },

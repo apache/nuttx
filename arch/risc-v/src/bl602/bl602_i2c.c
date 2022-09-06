@@ -115,8 +115,8 @@ struct bl602_i2c_priv_s
  ****************************************************************************/
 
 static int bl602_i2c_transfer(struct i2c_master_s *dev,
-                              struct i2c_msg_s *   msgs,
-                              int                      count);
+                              struct i2c_msg_s    *msgs,
+                              int                  count);
 
 #ifdef CONFIG_I2C_RESET
 static int bl602_i2c_reset(struct i2c_master_s *dev);
@@ -658,8 +658,8 @@ static void bl602_i2c_set_freq(int freq)
  ****************************************************************************/
 
 static int bl602_i2c_transfer(struct i2c_master_s *dev,
-                              struct i2c_msg_s *   msgs,
-                              int                      count)
+                              struct i2c_msg_s    *msgs,
+                              int                  count)
 {
   int                          i;
   int                          j;
@@ -943,7 +943,7 @@ static int bl602_i2c_irq(int cpuint, void *context, void *arg)
 
 struct i2c_master_s *bl602_i2cbus_initialize(int port)
 {
-  struct bl602_i2c_priv_s *        priv;
+  struct bl602_i2c_priv_s         *priv;
   const struct bl602_i2c_config_s *config;
 
   switch (port)

@@ -1348,7 +1348,7 @@ static int adc_timinit(struct stm32_dev_s *priv)
    *   0 <= prescaler  <= 65536
    *   1 <= reload <= 65535
    *
-   * So ( prescaler = pclck / 65535 / freq ) would be optimal.
+   * So (prescaler = pclck / 65535 / freq) would be optimal.
    */
 
   prescaler = (priv->pclck / priv->freq + 65534) / 65535;

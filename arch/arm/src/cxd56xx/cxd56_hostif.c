@@ -442,9 +442,7 @@ static int hif_initialize(struct hostif_buff_s *buffer)
 
   cxd56_iccinit(CXD56_PROTO_HOSTIF);
 
-  ret = cxd56_iccregisterhandler(CXD56_PROTO_HOSTIF, hif_rxhandler, NULL);
-
-  return ret;
+  return cxd56_iccregisterhandler(CXD56_PROTO_HOSTIF, hif_rxhandler, NULL);
 }
 
 /****************************************************************************

@@ -189,7 +189,7 @@ static void spi_recvblock(struct spi_dev_s *dev, void *rxbuffer,
 
 /* Initialization */
 
-static void        spi_bus_initialize(struct max326_spidev_s *priv);
+static void spi_bus_initialize(struct max326_spidev_s *priv);
 
 /****************************************************************************
  * Private Data
@@ -232,9 +232,9 @@ static const struct spi_ops_s g_sp0iops =
 static struct max326_spidev_s g_spi0dev =
 {
   .dev      =
-    {
-      &g_sp0iops
-    },
+  {
+    .ops    = &g_sp0iops,
+  },
   .base     = MAX326_SPI0_BASE,
   .lock     = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_MAX326_SPI_INTERRUPTS

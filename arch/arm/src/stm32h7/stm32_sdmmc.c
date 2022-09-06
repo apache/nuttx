@@ -588,14 +588,14 @@ struct stm32_dev_s g_sdmmcdev1 =
     .dmasendsetup     = stm32_dmasendsetup,
 #endif
   },
-  .base              = STM32_SDMMC1_BASE,
-  .nirq              = STM32_IRQ_SDMMC1,
+  .base               = STM32_SDMMC1_BASE,
+  .nirq               = STM32_IRQ_SDMMC1,
 #if defined(CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE)
-  .d0_gpio           = SDMMC1_SDIO_PULL(GPIO_SDMMC1_D0),
+  .d0_gpio            = SDMMC1_SDIO_PULL(GPIO_SDMMC1_D0),
 #endif
   .waitsem            = SEM_INITIALIZER(0),
 #if defined(HAVE_SDMMC_SDIO_MODE) && defined(CONFIG_SDMMC1_SDIO_MODE)
-  .sdiomode          = true,
+  .sdiomode           = true,
 #endif
 };
 #endif
@@ -643,14 +643,14 @@ struct stm32_dev_s g_sdmmcdev2 =
     .dmasendsetup     = stm32_dmasendsetup,
 #endif
   },
-  .base              = STM32_SDMMC2_BASE,
-  .nirq              = STM32_IRQ_SDMMC2,
+  .base               = STM32_SDMMC2_BASE,
+  .nirq               = STM32_IRQ_SDMMC2,
 #if defined(CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE)
-  .d0_gpio           = SDMMC2_SDIO_PULL(GPIO_SDMMC2_D0),
+  .d0_gpio            = SDMMC2_SDIO_PULL(GPIO_SDMMC2_D0),
 #endif
   .waitsem            = SEM_INITIALIZER(0),
 #if defined(HAVE_SDMMC_SDIO_MODE) && defined(CONFIG_SDMMC2_SDIO_MODE)
-  .sdiomode          = true,
+  .sdiomode           = true,
 #endif
 };
 #endif

@@ -177,9 +177,9 @@ static const struct spi_ops_s g_spi0ops =
 static struct rp2040_spidev_s g_spi0dev =
 {
   .spidev            =
-                        {
-                          &g_spi0ops
-                        },
+  {
+    .ops             = &g_spi0ops,
+  },
   .spibase           = RP2040_SPI0_BASE,
   .spibasefreq       = 0,
   .port              = 0,
@@ -226,9 +226,9 @@ static const struct spi_ops_s g_spi1ops =
 static struct rp2040_spidev_s g_spi1dev =
 {
   .spidev            =
-                        {
-                          &g_spi1ops
-                        },
+  {
+    .ops             = &g_spi1ops,
+  },
   .spibase           = RP2040_SPI1_BASE,
   .spibasefreq       = 0,
   .port              = 1,
@@ -874,7 +874,6 @@ struct spi_dev_s *rp2040_spibus_initialize(int port)
   /* Set a initialized flag */
 
   priv->initialized = 1;
-
   return &priv->spidev;
 }
 

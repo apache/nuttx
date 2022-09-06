@@ -293,9 +293,9 @@ static uint8_t g_spi0_rxbuf[SPI0_DMA_BUFSIZE_ADJ] SPI_DMA_BUFEER_ALIGN;
 static struct gd32_spidev_s g_spi0dev =
 {
   .spidev   =
-              {
-               &g_spi0ops
-              },
+  {
+    .ops    = &g_spi0ops
+  },
   .spibase  = GD32_SPI0,
   .spiclock = GD32_PCLK2_FREQUENCY,
   .lock     = NXMUTEX_INITIALIZER,
@@ -1451,12 +1451,12 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
   struct gd32_spidev_s *priv = (struct gd32_spidev_s *)dev;
   DEBUGASSERT(priv && priv->spibase);
 
-  uint8_t         *brxptr = (uint8_t *)rxbuffer;
-  const uint8_t   *btxptr = (uint8_t *)txbuffer;
-  uint16_t        *wrxptr = (uint16_t *)rxbuffer;
-  const uint16_t  *wtxptr = (const uint16_t *)txbuffer;
-  uint8_t          byte;
-  uint16_t         word;
+  uint8_t        *brxptr = (uint8_t *)rxbuffer;
+  const uint8_t  *btxptr = (uint8_t *)txbuffer;
+  uint16_t       *wrxptr = (uint16_t *)rxbuffer;
+  const uint16_t *wtxptr = (const uint16_t *)txbuffer;
+  uint8_t         byte;
+  uint16_t        word;
 
   spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
 

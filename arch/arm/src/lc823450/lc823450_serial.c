@@ -168,7 +168,6 @@ struct up_dev_s
   DMA_HANDLE       hrxdma;
   DMA_HANDLE       htxdma;
   sem_t rxdma_wait;
-  sem_t rxpkt_wait;
   sem_t txdma_wait;
 #endif /* CONFIG_HSUART */
   spinlock_t lock;
@@ -1112,7 +1111,7 @@ static void uart_rxdma_callback(DMA_HANDLE hdma, void *arg, int result)
  * Name: up_hs_dmasetup
  ****************************************************************************/
 
-static void  up_hs_dmasetup()
+static void  up_hs_dmasetup(void)
 {
   irqstate_t flags;
 

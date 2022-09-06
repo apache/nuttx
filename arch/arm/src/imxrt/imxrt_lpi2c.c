@@ -1070,7 +1070,7 @@ static void imxrt_lpi2c_setclock(struct imxrt_lpi2c_priv_s *priv,
                               CCM_CSCDR2_LPI2C_CLK_PODF_SHIFT;
               lpi2c_clk_div = lpi2c_clk_div + 1;
               src_freq      = (BOARD_XTAL_FREQUENCY * pll3_div) /
-                              (8  * lpi2c_clk_div) ;
+                              (8 * lpi2c_clk_div);
             }
 
           /* LPI2C output frequency = (Source Clock (Hz)/ 2^prescale) /
@@ -1976,7 +1976,7 @@ static int imxrt_lpi2c_dma_transfer(struct imxrt_lpi2c_priv_s *priv)
                      LPI2C_MIER_NDIE | LPI2C_MIER_ALIE |
                      LPI2C_MIER_PLTIE | LPI2C_MIER_FEIE);
 
-  imxrt_dmach_start(priv->dma, imxrt_dma_callback, (void *)priv);
+  imxrt_dmach_start(priv->dma, imxrt_dma_callback, priv);
 
   imxrt_lpi2c_modifyreg(priv, IMXRT_LPI2C_MDER_OFFSET, 0,
                           LPI2C_MDER_TDDE | LPI2C_MDER_RDDE);

@@ -70,7 +70,7 @@ struct btnet_discoverstate_s
 {
   struct bt_gatt_discover_params_s bd_params;
   struct bt_uuid_s bd_uuid;         /* Discovery UUID */
-  sem_t bd_donesem;                 /* Manages exclusive access */
+  sem_t bd_donesem;                 /* Done notification */
 };
 
 /* GATT read state variables. */
@@ -79,7 +79,7 @@ struct btnet_rdstate_s
 {
   struct btreq_s *rd_btreq;
   uint8_t rd_result;                /* The result of the read */
-  sem_t rd_donesem;                 /* Manages exclusive access */
+  sem_t rd_donesem;                 /* Done notification */
 };
 
 /* GATT write state variables. */
@@ -88,7 +88,7 @@ struct btnet_wrstate_s
 {
   struct btreq_s *wr_btreq;
   uint8_t wr_result;                /* The result of the read */
-  sem_t wr_donesem;                 /* Manages exclusive access */
+  sem_t wr_donesem;                 /* Done notification */
 };
 
 /****************************************************************************

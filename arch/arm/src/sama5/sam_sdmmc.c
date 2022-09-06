@@ -378,7 +378,7 @@ struct sam_dev_s g_sdmmcdev[SAM_MAX_SDMMC_DEV_SLOTS] =
     .sw_cd_gpio         = PIN_SDMMC0_CD_GPIO,
 #endif
 #if defined(CONFIG_SAMA5_SDMMC0_INVERT_CD)
-    .cd_invert         = true,
+    .cd_invert          = true,
 #endif
     .dev                =
     {
@@ -437,7 +437,7 @@ struct sam_dev_s g_sdmmcdev[SAM_MAX_SDMMC_DEV_SLOTS] =
     .sw_cd_gpio         = PIN_SDMMC1_CD_GPIO,
 #endif
 #if defined(CONFIG_SAMA5_SDMMC1_INVERT_CD)
-    .cd_invert         = true,
+    .cd_invert          = true,
 #endif
     .dev                =
     {
@@ -1111,7 +1111,7 @@ static void sam_receive(struct sam_dev_s *priv)
         {
           /* Transfer any trailing fractional word */
 
-          uint8_t *ptr = (uint8_t *) priv->buffer;
+          uint8_t *ptr = (uint8_t *)priv->buffer;
           int i;
 
           for (i = 0; i < priv->remaining; i++)
@@ -1873,7 +1873,7 @@ static void sam_frequency(struct sdio_dev_s *dev, uint32_t frequency)
 
 static void sam_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s *) dev;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   uint32_t regval;
   int wait_microseconds = 0;
 
@@ -2354,7 +2354,7 @@ static int sam_recvsetup(struct sdio_dev_s *dev, uint8_t *buffer,
    * handler and DMA memory invalidation.
    */
 
-  priv->buffer = (uint32_t *) buffer;
+  priv->buffer = (uint32_t *)buffer;
   priv->remaining = nbytes;
 
   /* Then set up the SDIO data path */
@@ -2408,7 +2408,8 @@ static int sam_sendsetup(struct sdio_dev_s *dev,
 
   /* Save the source buffer information for use by the interrupt handler */
 
-  priv->buffer = (uint32_t *) buffer; priv->remaining = nbytes;
+  priv->buffer = (uint32_t *)buffer;
+  priv->remaining = nbytes;
 
   /* Then set up the SDIO data path */
 
@@ -3052,7 +3053,7 @@ static int sam_dmarecvsetup(struct sdio_dev_s *dev,
    * handler
    */
 
-  priv->buffer = (uint32_t *) buffer;
+  priv->buffer = (uint32_t *)buffer;
   priv->remaining = buflen;
   priv->bufferend = (uint32_t *)(buffer + buflen);
 
@@ -3122,7 +3123,7 @@ static int sam_dmasendsetup(struct sdio_dev_s *dev,
 
   /* Save the source buffer information for use by the interrupt handler */
 
-  priv->buffer    = (uint32_t *) buffer;
+  priv->buffer    = (uint32_t *)buffer;
   priv->remaining = buflen;
   priv->bufferend = (uint32_t *)(buffer + buflen);
 
@@ -3610,8 +3611,8 @@ struct sdio_dev_s *sam_sdmmc_sdio_initialize(int slotno)
       sam_configpio(PIO_SDMMC0_CK);
       sam_configpio(PIO_SDMMC0_CMD);
 
-#    if ( defined(CONFIG_SAMA5_SDMMC0_WIDTH_D1_D4) || \
-        defined(CONFIG_SAMA5_SDMMC0_WIDTH_D1_D8) )
+#    if (defined(CONFIG_SAMA5_SDMMC0_WIDTH_D1_D4) || \
+        defined(CONFIG_SAMA5_SDMMC0_WIDTH_D1_D8))
       sam_configpio(PIO_SDMMC0_DAT1);
       sam_configpio(PIO_SDMMC0_DAT2);
       sam_configpio(PIO_SDMMC0_DAT3);

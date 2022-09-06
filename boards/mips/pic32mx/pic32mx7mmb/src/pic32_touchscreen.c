@@ -968,10 +968,10 @@ static void tc_worker(void *arg)
 static int tc_open(struct file *filep)
 {
 #ifdef CONFIG_TOUCHSCREEN_REFCNT
-  struct inode         *inode;
-  struct tc_dev_s      *priv;
-  uint8_t               tmp;
-  int                   ret;
+  struct inode    *inode;
+  struct tc_dev_s *priv;
+  uint8_t          tmp;
+  int              ret;
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
@@ -1021,9 +1021,9 @@ errout_with_lock:
 static int tc_close(struct file *filep)
 {
 #ifdef CONFIG_TOUCHSCREEN_REFCNT
-  struct inode         *inode;
-  struct tc_dev_s      *priv;
-  int                   ret;
+  struct inode    *inode;
+  struct tc_dev_s *priv;
+  int              ret;
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
@@ -1185,9 +1185,9 @@ static int tc_ioctl(struct file *filep, int cmd, unsigned long arg)
   iinfo("cmd: %d arg: %ld\n", cmd, arg);
   return -ENOTTY; /* None yet supported */
 #else
-  struct inode         *inode;
-  struct tc_dev_s      *priv;
-  int                   ret;
+  struct inode    *inode;
+  struct tc_dev_s *priv;
+  int              ret;
 
   iinfo("cmd: %d arg: %ld\n", cmd, arg);
   DEBUGASSERT(filep);
@@ -1224,13 +1224,12 @@ static int tc_ioctl(struct file *filep, int cmd, unsigned long arg)
  * Name: tc_poll
  ****************************************************************************/
 
-static int tc_poll(struct file *filep, struct pollfd *fds,
-                        bool setup)
+static int tc_poll(struct file *filep, struct pollfd *fds, bool setup)
 {
-  struct inode         *inode;
-  struct tc_dev_s      *priv;
-  int                   ret;
-  int                   i;
+  struct inode    *inode;
+  struct tc_dev_s *priv;
+  int              ret;
+  int              i;
 
   iinfo("setup: %d\n", (int)setup);
   DEBUGASSERT(filep && fds);

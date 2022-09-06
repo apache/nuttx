@@ -139,10 +139,10 @@ static const struct spi_ops_s g_spiops =
 static struct lpc17_40_spidev_s g_spidev =
 {
   .spidev            =
-    {
-      &g_spiops
-    },
-  .lock = NXMUTEX_INITIALIZER,
+  {
+    .ops             = &g_spiops,
+  },
+  .lock              = NXMUTEX_INITIALIZER,
 };
 
 /****************************************************************************

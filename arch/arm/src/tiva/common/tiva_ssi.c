@@ -323,45 +323,45 @@ static struct tiva_ssidev_s g_ssidev[] =
 #endif
 #ifdef CONFIG_TIVA_SSI1
   {
-    .ops  = &g_spiops,
+    .ops     = &g_spiops,
 #if NSSI_ENABLED > 1
-    .base = TIVA_SSI1_BASE,
+    .base    = TIVA_SSI1_BASE,
 #endif
 #ifndef CONFIG_SSI_POLLWAIT
     .xfrsem  = SEM_INITIALIZER(0),
 #endif
 #if !defined(CONFIG_SSI_POLLWAIT) && NSSI_ENABLED > 1
-    .irq  = TIVA_IRQ_SSI1,
+    .irq     = TIVA_IRQ_SSI1,
 #endif
     .lock    = NXMUTEX_INITIALIZER,
   },
 #endif
 #ifdef CONFIG_TIVA_SSI2
   {
-    .ops  = &g_spiops,
+    .ops     = &g_spiops,
 #if NSSI_ENABLED > 1
-    .base = TIVA_SSI2_BASE,
+    .base    = TIVA_SSI2_BASE,
 #endif
 #ifndef CONFIG_SSI_POLLWAIT
     .xfrsem  = SEM_INITIALIZER(0),
 #endif
 #if !defined(CONFIG_SSI_POLLWAIT) && NSSI_ENABLED > 1
-    .irq  = TIVA_IRQ_SSI2,
+    .irq     = TIVA_IRQ_SSI2,
 #endif
     .lock    = NXMUTEX_INITIALIZER,
   },
 #endif
 #ifdef CONFIG_TIVA_SSI3
   {
-    .ops  = &g_spiops,
+    .ops    = &g_spiops,
 #if NSSI_ENABLED > 1
-    .base = TIVA_SSI3_BASE,
+    .base   = TIVA_SSI3_BASE,
 #endif
 #ifndef CONFIG_SSI_POLLWAIT
     .xfrsem = SEM_INITIALIZER(0),
 #endif
 #if !defined(CONFIG_SSI_POLLWAIT) && NSSI_ENABLED > 1
-    .irq  = TIVA_IRQ_SSI3,
+    .irq    = TIVA_IRQ_SSI3,
 #endif
     .lock   = NXMUTEX_INITIALIZER,
   },

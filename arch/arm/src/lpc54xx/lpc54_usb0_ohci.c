@@ -510,8 +510,8 @@ static struct lpc54_usbhost_s g_usbhost =
 
 static struct usbhost_connection_s g_usbconn =
 {
-  .wait             = lpc54_wait,
-  .enumerate        = lpc54_enumerate,
+  .wait      = lpc54_wait,
+  .enumerate = lpc54_enumerate,
 };
 
 /* Aligned static memory allocations */
@@ -2756,7 +2756,7 @@ static int lpc54_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   struct lpc54_usbhost_s *priv = (struct lpc54_usbhost_s *)drvr;
   struct lpc54_ed_s *ed = (struct lpc54_ed_s *)ep0;
   uint16_t len;
-  int  ret;
+  int ret;
 
   DEBUGASSERT(priv != NULL && ed != NULL && req != NULL);
 
@@ -2799,7 +2799,7 @@ static int lpc54_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   struct lpc54_usbhost_s *priv = (struct lpc54_usbhost_s *)drvr;
   struct lpc54_ed_s *ed = (struct lpc54_ed_s *)ep0;
   uint16_t len;
-  int  ret;
+  int ret;
 
   DEBUGASSERT(priv != NULL && ed != NULL && req != NULL);
 
@@ -3721,7 +3721,7 @@ static inline void lpc54_ep0init(struct lpc54_usbhost_s *priv)
   /* Initialize the common tail TD. */
 
   memset(TDTAIL, 0, sizeof(struct lpc54_gtd_s));
-  TDTAIL->ed              = EDCTRL;
+  TDTAIL->ed = EDCTRL;
 
   /* Link the common tail TD to the ED's TD list */
 

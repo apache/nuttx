@@ -347,9 +347,9 @@ static uint8_t g_spi1_rxbuf[SPI1_DMABUFSIZE_ADJUSTED] SPI1_DMABUFSIZE_ALGN;
 static struct stm32_spidev_s g_spi1dev =
 {
   .spidev   =
-              {
-               &g_sp1iops
-              },
+  {
+    .ops    = &g_sp1iops,
+  },
   .spibase  = STM32_SPI1_BASE,
   .spiclock = SPI1_KERNEL_CLOCK_FREQ,
   .spiirq   = STM32_IRQ_SPI1,
@@ -419,9 +419,9 @@ static uint8_t g_spi2_rxbuf[SPI2_DMABUFSIZE_ADJUSTED] SPI2_DMABUFSIZE_ALGN;
 static struct stm32_spidev_s g_spi2dev =
 {
   .spidev   =
-              {
-               &g_sp2iops
-              },
+  {
+    .ops    = &g_sp2iops,
+  },
   .spibase  = STM32_SPI2_BASE,
   .spiclock = SPI2_KERNEL_CLOCK_FREQ,
   .spiirq   = STM32_IRQ_SPI2,
@@ -491,9 +491,9 @@ static uint8_t g_spi3_rxbuf[SPI3_DMABUFSIZE_ADJUSTED] SPI3_DMABUFSIZE_ALGN;
 static struct stm32_spidev_s g_spi3dev =
 {
   .spidev   =
-              {
-               &g_sp3iops
-              },
+  {
+    .ops    = &g_sp3iops,
+  },
   .spibase  = STM32_SPI3_BASE,
   .spiclock = SPI3_KERNEL_CLOCK_FREQ,
   .spiirq   = STM32_IRQ_SPI3,
@@ -1786,7 +1786,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   static uint8_t rxdummy[ARMV7M_DCACHE_LINESIZE]
     aligned_data(ARMV7M_DCACHE_LINESIZE);
   static const uint16_t txdummy = 0xffff;
-  void * orig_rxbuffer = rxbuffer;
+  void *orig_rxbuffer = rxbuffer;
 
   DEBUGASSERT(priv != NULL);
 

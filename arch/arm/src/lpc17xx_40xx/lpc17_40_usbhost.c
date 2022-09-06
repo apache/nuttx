@@ -421,8 +421,8 @@ static struct lpc17_40_usbhost_s g_usbhost =
 
 static struct usbhost_connection_s g_usbconn =
 {
-  .wait             = lpc17_40_wait,
-  .enumerate        = lpc17_40_enumerate,
+  .wait      = lpc17_40_wait,
+  .enumerate = lpc17_40_enumerate,
 };
 
 /* This is a free list of EDs and TD buffers */
@@ -2665,7 +2665,7 @@ static int lpc17_40_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   struct lpc17_40_usbhost_s *priv = (struct lpc17_40_usbhost_s *)drvr;
   struct lpc17_40_ed_s *ed = (struct lpc17_40_ed_s *)ep0;
   uint16_t len;
-  int  ret;
+  int ret;
 
   DEBUGASSERT(priv != NULL && ed != NULL && req != NULL);
 
@@ -3634,7 +3634,7 @@ static inline void lpc17_40_ep0init(struct lpc17_40_usbhost_s *priv)
   /* Initialize the common tail TD. */
 
   memset(TDTAIL, 0, sizeof(struct lpc17_40_gtd_s));
-  TDTAIL->ed              = EDCTRL;
+  TDTAIL->ed = EDCTRL;
 
   /* Link the common tail TD to the ED's TD list */
 

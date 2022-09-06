@@ -393,9 +393,9 @@ static const struct esp32s2_i2s_config_s esp32s2_i2s0_config =
 static struct esp32s2_i2s_s esp32s2_i2s0_priv =
 {
   .dev =
-        {
-          .ops = &g_i2sops
-        },
+  {
+    .ops = &g_i2sops
+  },
   .lock = NXMUTEX_INITIALIZER,
   .config = &esp32s2_i2s0_config,
   .bufsem = SEM_INITIALIZER(0)

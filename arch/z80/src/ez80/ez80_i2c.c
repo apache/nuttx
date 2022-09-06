@@ -92,7 +92,7 @@ static int      ez80_i2c_transfer(FAR struct i2c_master_s *dev,
 static bool    g_initialized;                   /* true:I2C has been initialized */
 static mutex_t g_i2clock = NXMUTEX_INITIALIZER; /* Serialize I2C transfers */
 
-const struct i2c_ops_s g_ops =
+static const struct i2c_ops_s g_ops =
 {
   ez80_i2c_transfer
 };

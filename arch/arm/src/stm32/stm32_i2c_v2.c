@@ -473,7 +473,7 @@ static inline void stm32_i2c_sendstart(struct stm32_i2c_priv_s *priv);
 static inline void stm32_i2c_sendstop(struct stm32_i2c_priv_s *priv);
 static inline
 uint32_t stm32_i2c_getstatus(struct stm32_i2c_priv_s *priv);
-static int stm32_i2c_isr_process(struct stm32_i2c_priv_s * priv);
+static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv);
 #ifndef CONFIG_I2C_POLLED
 static int stm32_i2c_isr(int irq, void *context, void *arg);
 #endif
@@ -485,7 +485,7 @@ static int stm32_i2c_process(struct i2c_master_s *dev,
 static int stm32_i2c_transfer(struct i2c_master_s *dev,
                               struct i2c_msg_s *msgs, int count);
 #ifdef CONFIG_I2C_RESET
-static int stm32_i2c_reset(struct i2c_master_s * dev);
+static int stm32_i2c_reset(struct i2c_master_s *dev);
 #endif
 #ifdef CONFIG_PM
 static int stm32_i2c_pm_prepare(struct pm_callback_s *cb, int domain,
@@ -2468,11 +2468,18 @@ static int stm32_i2c_process(struct i2c_master_s *dev,
 static int stm32_i2c_transfer(struct i2c_master_s *dev,
                               struct i2c_msg_s *msgs, int count)
 {
+  struct stm32_i2c_priv_s *priv;
   int ret;
+
+  DEBUGASSERT(dev);
+
+  /* Get I2C private structure */
+
+  priv = ((struct stm32_i2c_inst_s *)dev)->priv;
 
   /* Ensure that address or flags don't change meanwhile */
 
-  ret = nxmutex_lock(&((struct stm32_i2c_inst_s *)dev)->priv->lock);
+  ret = nxmutex_lock(&priv->lock);
   if (ret >= 0)
     {
       ret = stm32_i2c_process(dev, msgs, count);
@@ -2490,7 +2497,7 @@ static int stm32_i2c_transfer(struct i2c_master_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
-static int stm32_i2c_reset(struct i2c_master_s * dev)
+static int stm32_i2c_reset(struct i2c_master_s *dev)
 {
   struct stm32_i2c_priv_s *priv;
   unsigned int clock_count;

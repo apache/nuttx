@@ -81,7 +81,7 @@ static struct rng_dev_s g_rngdev =
 
 static const struct file_operations g_rngops =
 {
-  .read  = esp32_rng_read,       /* read */
+  .read = esp32_rng_read,       /* read */
 };
 
 /****************************************************************************

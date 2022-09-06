@@ -1083,7 +1083,7 @@ static int UART_RAMCODE tlsr82_interrupt(int irq, void *context, void *arg)
   UNUSED(context);
 
   struct uart_dev_s *dev = (struct uart_dev_s *)arg;
-  uart_priv_t *     priv = (uart_priv_t *)dev->priv;
+  uart_priv_t       *priv = (uart_priv_t *)dev->priv;
 
   if ((UART_BUF_CNT1_REG & UART_BUF_CNT1_RX_ERR))
     {
@@ -1163,7 +1163,7 @@ static int UART_RAMCODE tlsr82_dma_interrupt(int irq, void *context,
                                              void *arg)
 {
   struct uart_dev_s *dev = (struct uart_dev_s *)arg;
-  uart_priv_t *     priv = (uart_priv_t *)dev->priv;
+  uart_priv_t       *priv = (uart_priv_t *)dev->priv;
 
   /* Check the uart dma rx interrupt status */
 
@@ -1503,7 +1503,7 @@ static void tlsr82_uart_dma_txint(struct uart_dev_s *dev, bool enable)
    * Instead, we use DMA interrupts that are activated once during boot
    * sequence. Furthermore we can use up_dma_txcallback() to handle staff at
    * half DMA transfer or after transfer completion (depending configuration,
-   * see stm32_dmastart(...) ).
+   * see stm32_dmastart(...)).
    */
 }
 #endif

@@ -45,8 +45,8 @@
 #  define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
-#define ROTL_32(x,n) ( ((x) << (n)) | ((x) >> (32-(n))) )
-#define ROTR_32(x,n) ( ((x) >> (n)) | ((x) << (32-(n))) )
+#define ROTL_32(x,n) (((x) << (n)) | ((x) >> (32 - (n))))
+#define ROTR_32(x,n) (((x) >> (n)) | ((x) << (32 - (n))))
 
 /****************************************************************************
  * Private Function Prototypes
