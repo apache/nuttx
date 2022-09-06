@@ -2197,6 +2197,24 @@ Refer to the EK-TM4C1294XL board
 `README <https://github.com/apache/incubator-nuttx/blob/master/boards/arm/tiva/tm4c1294-launchpad/README.txt>`__
 file for more detailed information about this port.
 
+TI/Tiva TM4C129E
+----------------
+
+This port uses the TI Tiva C Series TM4C129E Crypto Connected
+LaunchPad `(EK-TM4C129EXL) <https://www.ti.com/tool/EK-TM4C129EXL>`__.
+
+**STATUS:**
+
+-  Support for the EK-TM4C129EXL is based on support for the similar
+   EK-TM4C1294XL. This basic board support includes a configuration
+   for the NuttShell :ref:`NSH <nsh>`), a configuration for testing
+   IPv6, and a configuration for testing the RTOS using the ostest
+   example in the NuttX apps repository.
+
+Refer to the EK-TM4C129EXL board
+`README <https://github.com/apache/incubator-nuttx/blob/master/boards/arm/tiva/tm4c129e-launchpad/README.txt>`__
+file for more detailed information about this port.
+
 TI/Tiva TM4C129X
 ----------------
 
