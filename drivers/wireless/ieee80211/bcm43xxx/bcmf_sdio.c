@@ -66,9 +66,9 @@
 
 /* Chip-common registers */
 
-#define CHIPCOMMON_GPIO_CONTROL ((uint32_t)(0x18000000 + 0x6c) )
-#define CHIPCOMMON_SR_CONTROL0  ((uint32_t)(0x18000000 + 0x504) )
-#define CHIPCOMMON_SR_CONTROL1  ((uint32_t)(0x18000000 + 0x508) )
+#define CHIPCOMMON_GPIO_CONTROL ((uint32_t)(0x18000000 + 0x6c))
+#define CHIPCOMMON_SR_CONTROL0  ((uint32_t)(0x18000000 + 0x504))
+#define CHIPCOMMON_SR_CONTROL1  ((uint32_t)(0x18000000 + 0x508))
 
 /****************************************************************************
  * Public Data

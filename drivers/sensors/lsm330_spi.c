@@ -896,8 +896,8 @@ static ssize_t lsm330acl_dvr_read(FAR void *instance_handle,
 
   DEBUGASSERT(priv != NULL);
 
-  lsm330_read_acl_registerblk(priv, priv->seek_address, (uint8_t *)buffer,
-                              buflen);
+  lsm330_read_acl_registerblk(priv, priv->seek_address,
+                              (FAR uint8_t *)buffer, buflen);
   return buflen;
 }
 
@@ -912,8 +912,8 @@ static ssize_t lsm330gyro_dvr_read(FAR void *instance_handle,
 
   DEBUGASSERT(priv != NULL);
 
-  lsm330_read_gyro_registerblk(priv, priv->seek_address, (uint8_t *)buffer,
-                               buflen);
+  lsm330_read_gyro_registerblk(priv, priv->seek_address,
+                               (FAR uint8_t *)buffer, buflen);
   return buflen;
 }
 
@@ -933,8 +933,8 @@ static ssize_t lsm330acl_dvr_write(FAR void *instance_handle,
       return -EROFS;
     }
 
-  lsm330_write_acl_registerblk(priv, priv->seek_address, (uint8_t *)buffer,
-                               buflen);
+  lsm330_write_acl_registerblk(priv, priv->seek_address,
+                               (FAR uint8_t *)buffer, buflen);
   return buflen;
 }
 
@@ -1139,7 +1139,7 @@ static int lsm330acl_open(FAR struct file *filep)
   FAR struct lsm330_dev_s *priv = inode->i_private;
   int ret;
 
-  ret = lsm330acl_dvr_open((FAR void *)priv, 0);
+  ret = lsm330acl_dvr_open(priv, 0);
   return ret;
 }
 
@@ -1153,7 +1153,7 @@ static int lsm330gyro_open(FAR struct file *filep)
   FAR struct lsm330_dev_s *priv = inode->i_private;
   int ret;
 
-  ret = lsm330gyro_dvr_open((FAR void *)priv, 0);
+  ret = lsm330gyro_dvr_open(priv, 0);
   return ret;
 }
 
@@ -1167,7 +1167,7 @@ static int lsm330acl_close(FAR struct file *filep)
   FAR struct lsm330_dev_s *priv = inode->i_private;
   int ret;
 
-  ret = lsm330acl_dvr_close((FAR void *)priv, 0);
+  ret = lsm330acl_dvr_close(priv, 0);
   return ret;
 }
 
@@ -1181,7 +1181,7 @@ static int lsm330gyro_close(FAR struct file *filep)
   FAR struct lsm330_dev_s *priv = inode->i_private;
   int ret;
 
-  ret = lsm330gyro_dvr_close((FAR void *)priv, 0);
+  ret = lsm330gyro_dvr_close(priv, 0);
   return ret;
 }
 
@@ -1367,7 +1367,7 @@ int lsm330_register(FAR const char *devpath_acl,
   priv->flink = g_lsm330a_list;
   g_lsm330a_list = priv;
   priva = priv;
-  config_acl->leaf_handle = (void *)priv;
+  config_acl->leaf_handle = priv;
 
   /* Initialize the LSM330 gyroscope device structure. */
 
@@ -1405,7 +1405,7 @@ int lsm330_register(FAR const char *devpath_acl,
 
   priv->flink = g_lsm330g_list;
   g_lsm330g_list = priv;
-  config_gyro->leaf_handle = (void *)priv;
+  config_gyro->leaf_handle = priv;
 
   config_acl->sc_ops  = &g_lsm330acl_dops;
   config_gyro->sc_ops = &g_lsm330gyro_dops;

@@ -1290,6 +1290,7 @@ int tsc2007_register(FAR struct i2c_master_s *dev,
 
 errout_with_priv:
   nxmutex_destroy(&priv->devlock);
+  nxsem_destroy(&priv->waitsem);
 #ifdef CONFIG_TSC2007_MULTIPLE
   kmm_free(priv);
 #endif

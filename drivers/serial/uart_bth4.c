@@ -50,7 +50,7 @@ union bt_hdr_u
 
 struct uart_bth4_s
 {
-  FAR struct bt_driver_s  *drv;
+  FAR struct bt_driver_s *drv;
 
   FAR struct circbuf_s    circbuf;
 
@@ -60,7 +60,7 @@ struct uart_bth4_s
   size_t                  sendlen;
   mutex_t                 sendlock;
 
-  FAR struct pollfd       *fds[CONFIG_UART_BTH4_NPOLLWAITERS];
+  FAR struct pollfd      *fds[CONFIG_UART_BTH4_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -437,7 +437,7 @@ int uart_bth4_register(FAR const char *path, FAR struct bt_driver_s *drv)
   drv->priv    = dev;
 
   nxmutex_init(&dev->sendlock);
-  nxsem_init(&dev->recvsem,  0, 0);
+  nxsem_init(&dev->recvsem, 0, 0);
 
   ret = register_driver(path, &g_uart_bth4_ops, 0666, dev);
   if (ret < 0)

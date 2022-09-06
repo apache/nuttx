@@ -196,26 +196,27 @@ enum can_state_s
 
 struct mcp2515_can_s
 {
-  struct mcp2515_config_s *config; /* The constant configuration */
-  uint8_t state;                   /* See enum can_state_s */
-  uint8_t nalloc;                  /* Number of allocated filters */
-  mutex_t lock;                    /* Enforces mutually exclusive access */
-  sem_t txfsem;                    /* Used to wait for TX FIFO availability */
-  uint32_t btp;                    /* Current bit timing */
-  uint8_t rxints;                  /* Configured RX interrupts */
-  uint8_t txints;                  /* Configured TX interrupts */
+  FAR struct mcp2515_config_s *config; /* The constant configuration */
+
+  uint8_t state;               /* See enum can_state_s */
+  uint8_t nalloc;              /* Number of allocated filters */
+  mutex_t lock;                /* Enforces mutually exclusive access */
+  sem_t txfsem;                /* Used to wait for TX FIFO availability */
+  uint32_t btp;                /* Current bit timing */
+  uint8_t rxints;              /* Configured RX interrupts */
+  uint8_t txints;              /* Configured TX interrupts */
 #ifdef CONFIG_CAN_ERRORS
-  uint32_t olderrors;              /* Used to detect the changes in error states */
+  uint32_t olderrors;          /* Used to detect the changes in error states */
 #endif
-  uint8_t filters;                 /* Standard/Extende filter bit allocator. */
-  uint8_t txbuffers;               /* TX Buffers bit allocator. */
+  uint8_t filters;             /* Standard/Extende filter bit allocator. */
+  uint8_t txbuffers;           /* TX Buffers bit allocator. */
 
   FAR uint8_t *spi_txbuf;
   FAR uint8_t *spi_rxbuf;
 #ifdef CONFIG_MCP2515_REGDEBUG
-  uintptr_t regaddr;               /* Last register address read */
-  uint32_t regval;                 /* Last value read from the register */
-  unsigned int count;              /* Number of times that the value was read */
+  uintptr_t regaddr;           /* Last register address read */
+  uint32_t regval;             /* Last value read from the register */
+  unsigned int count;          /* Number of times that the value was read */
 #endif
 };
 
@@ -1182,14 +1183,9 @@ static void mcp2515_reset_lowlevel(FAR struct mcp2515_can_s *priv)
 
   nxsig_usleep(1000);
 
-  /* Make sure that all buffers are released.
-   *
-   * REVISIT: What if a thread is waiting for a buffer?  The following
-   * will not wake up any waiting threads.
-   */
+  /* Make sure that all buffers are released. */
 
-  nxsem_destroy(&priv->txfsem);
-  nxsem_init(&priv->txfsem, 0, MCP2515_NUM_TX_BUFFERS);
+  nxsem_reset(&priv->txfsem, MCP2515_NUM_TX_BUFFERS);
   priv->txbuffers = 0b111;
 
   /* Define the current state and unlock */
@@ -2136,7 +2132,7 @@ static void mcp2515_receive(FAR struct can_dev_s *dev, uint8_t offset)
 
   /* Save the message data */
 
-  ret = can_receive(dev, &hdr, (FAR uint8_t *) & RXREGVAL(MCP2515_RXB0D0));
+  ret = can_receive(dev, &hdr, (FAR uint8_t *)&RXREGVAL(MCP2515_RXB0D0));
 
   if (ret < 0)
     {

@@ -709,7 +709,7 @@ static int max11802_interrupt(int irq, FAR void *context, FAR void *arg)
 static int max11802_open(FAR struct file *filep)
 {
 #ifdef CONFIG_MAX11802_REFCNT
-  FAR struct inode         *inode;
+  FAR struct inode          *inode;
   FAR struct max11802_dev_s *priv;
   uint8_t                   tmp;
   int                       ret;
@@ -765,7 +765,7 @@ errout_with_lock:
 static int max11802_close(FAR struct file *filep)
 {
 #ifdef CONFIG_MAX11802_REFCNT
-  FAR struct inode         *inode;
+  FAR struct inode          *inode;
   FAR struct max11802_dev_s *priv;
   int                       ret;
 
@@ -936,7 +936,7 @@ errout:
 
 static int max11802_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode         *inode;
+  FAR struct inode          *inode;
   FAR struct max11802_dev_s *priv;
   int                       ret;
 
@@ -1248,6 +1248,7 @@ int max11802_register(FAR struct spi_dev_s *spi,
 
 errout_with_priv:
   nxmutex_destroy(&priv->devlock);
+  nxsem_destroy(&priv->waitsem);
 #ifdef CONFIG_MAX11802_MULTIPLE
   kmm_free(priv);
 #endif

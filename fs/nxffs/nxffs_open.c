@@ -1094,7 +1094,7 @@ int nxffs_dup(FAR const struct file *oldp, FAR struct file *newp)
   /* Just increment the reference count on the ofile */
 
   ofile->crefs++;
-  newp->f_priv = (FAR void *)ofile;
+  newp->f_priv = ofile;
   return OK;
 }
 

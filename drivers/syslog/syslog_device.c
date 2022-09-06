@@ -145,6 +145,15 @@ static inline int syslog_dev_lock(FAR struct syslog_dev_s *syslog_dev)
 }
 
 /****************************************************************************
+ * Name: syslog_dev_unlock
+ ****************************************************************************/
+
+static inline void syslog_dev_unlock(FAR struct syslog_dev_s *syslog_dev)
+{
+  nxrmutex_unlock(&syslog_dev->sl_lock);
+}
+
+/****************************************************************************
  * Name: syslog_dev_open
  *
  * Description:
@@ -499,12 +508,12 @@ static ssize_t syslog_dev_write(FAR struct syslog_channel_s *channel,
         }
     }
 
-  nxrmutex_unlock(&syslog_dev->sl_lock);
+  syslog_dev_unlock(syslog_dev);
   return buflen;
 
 errout_with_lock:
   syslog_dev->sl_state = SYSLOG_FAILURE;
-  nxrmutex_unlock(&syslog_dev->sl_lock);
+  syslog_dev_unlock(syslog_dev);
   return ret;
 }
 
@@ -588,7 +597,7 @@ static int syslog_dev_putc(FAR struct syslog_channel_s *channel, int ch)
       nbytes = file_write(&syslog_dev->sl_file, &uch, 1);
     }
 
-  nxrmutex_unlock(&syslog_dev->sl_lock);
+  syslog_dev_unlock(syslog_dev);
 
   /* Check if the write was successful.  If not, nbytes will be
    * a negated errno value.
@@ -689,7 +698,7 @@ static int syslog_dev_flush(FAR struct syslog_channel_s *channel)
 FAR struct syslog_channel_s *syslog_dev_initialize(FAR const char *devpath,
                                                    int oflags, int mode)
 {
-  FAR struct syslog_dev_s * syslog_dev;
+  FAR struct syslog_dev_s *syslog_dev;
 
   syslog_dev = kmm_zalloc(sizeof(struct syslog_dev_s));
 

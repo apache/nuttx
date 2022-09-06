@@ -249,7 +249,7 @@ static int comp_open(FAR struct file *filep)
 
 static int comp_close(FAR struct file *filep)
 {
-  FAR struct inode     *inode = filep->f_inode;
+  FAR struct inode      *inode = filep->f_inode;
   FAR struct comp_dev_s *dev   = inode->i_private;
   irqstate_t            flags;
   int                   ret;
@@ -363,16 +363,19 @@ int comp_register(FAR const char *path, FAR struct comp_dev_s *dev)
       if (ret < 0)
         {
           aerr("ERROR: Failed to bind callbacks: %d\n", ret);
+          nxmutex_destroy(&dev->ad_lock);
+          nxsem_destroy(&dev->ad_readsem);
           return ret;
         }
     }
 
   /* Register the COMP character driver */
 
-  ret =  register_driver(path, &comp_fops, 0444, dev);
+  ret = register_driver(path, &comp_fops, 0444, dev);
   if (ret < 0)
     {
       nxmutex_destroy(&dev->ad_lock);
+      nxsem_destroy(&dev->ad_readsem);
     }
 
   return ret;

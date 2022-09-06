@@ -716,7 +716,7 @@ static int ads7843e_interrupt(int irq, FAR void *context, FAR void *arg)
 static int ads7843e_open(FAR struct file *filep)
 {
 #ifdef CONFIG_ADS7843E_REFCNT
-  FAR struct inode         *inode;
+  FAR struct inode          *inode;
   FAR struct ads7843e_dev_s *priv;
   uint8_t                   tmp;
   int                       ret;
@@ -772,7 +772,7 @@ errout_with_lock:
 static int ads7843e_close(FAR struct file *filep)
 {
 #ifdef CONFIG_ADS7843E_REFCNT
-  FAR struct inode         *inode;
+  FAR struct inode          *inode;
   FAR struct ads7843e_dev_s *priv;
   int                       ret;
 
@@ -943,7 +943,7 @@ errout:
 
 static int ads7843e_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode         *inode;
+  FAR struct inode          *inode;
   FAR struct ads7843e_dev_s *priv;
   int                       ret;
 
@@ -1214,6 +1214,7 @@ int ads7843e_register(FAR struct spi_dev_s *spi,
 
 errout_with_priv:
   nxmutex_destroy(&priv->devlock);
+  nxsem_destroy(&priv->waitsem);
 #ifdef CONFIG_ADS7843E_MULTIPLE
   kmm_free(priv);
 #endif

@@ -415,10 +415,10 @@ static int sx127x_txfifo_write(FAR struct sx127x_dev_s *dev,
                                FAR const uint8_t *data, size_t datalen);
 #endif
 #ifdef CONFIG_LPWAN_SX127X_RXSUPPORT
-static ssize_t sx127x_rxfifo_get(struct sx127x_dev_s *dev,
+static ssize_t sx127x_rxfifo_get(FAR struct sx127x_dev_s *dev,
                                  FAR uint8_t *buffer, size_t buflen);
-static void sx127x_rxfifo_put(struct sx127x_dev_s *dev, FAR uint8_t *buffer,
-                              size_t buflen);
+static void sx127x_rxfifo_put(FAR struct sx127x_dev_s *dev,
+                              FAR uint8_t *buffer, size_t buflen);
 #endif
 
 /* POSIX API */
@@ -494,7 +494,7 @@ static void sx127x_unlock(FAR struct spi_dev_s *spi)
  * Name: sx127x_select
  ****************************************************************************/
 
-static inline void sx127x_select(struct sx127x_dev_s * dev)
+static inline void sx127x_select(FAR struct sx127x_dev_s *dev)
 {
   SPI_SELECT(dev->spi, SPIDEV_LPWAN(0), true);
 }
@@ -503,7 +503,7 @@ static inline void sx127x_select(struct sx127x_dev_s * dev)
  * Name: sx127x_deselect
  ****************************************************************************/
 
-static inline void sx127x_deselect(struct sx127x_dev_s * dev)
+static inline void sx127x_deselect(FAR struct sx127x_dev_s *dev)
 {
   SPI_SELECT(dev->spi, SPIDEV_LPWAN(0), false);
 }
@@ -866,7 +866,7 @@ static ssize_t sx127x_read(FAR struct file *filep, FAR char *buffer,
 
   /* Get RX data from fifo */
 
-  ret = sx127x_rxfifo_get(dev, (uint8_t *)buffer, buflen);
+  ret = sx127x_rxfifo_get(dev, (FAR uint8_t *)buffer, buflen);
 
   nxmutex_unlock(&dev->dev_lock);
   return ret;
@@ -926,7 +926,7 @@ static ssize_t sx127x_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Call modulation specific send */
 
-  ret = dev->ops.send(dev, (uint8_t *)buffer, buflen);
+  ret = dev->ops.send(dev, (FAR uint8_t *)buffer, buflen);
 
   /* Change mode to TX to start data transfer */
 
@@ -1497,7 +1497,7 @@ static void sx127x_isr0_process(FAR void *arg)
 {
   DEBUGASSERT(arg);
 
-  FAR struct sx127x_dev_s *dev = (struct sx127x_dev_s *)arg;
+  FAR struct sx127x_dev_s *dev = (FAR struct sx127x_dev_s *)arg;
   int ret = OK;
 
   /* Return immediately if isr0_process is not initialized */
@@ -1606,7 +1606,7 @@ static size_t sx127x_fskook_rxhandle(FAR struct sx127x_dev_s *dev)
 
   /* Put data on local fifo */
 
-  sx127x_rxfifo_put(dev, (uint8_t *)&rxdata, len);
+  sx127x_rxfifo_put(dev, (FAR uint8_t *)&rxdata, len);
 
   /* Return total length */
 
@@ -1684,7 +1684,7 @@ static size_t sx127x_lora_rxhandle(FAR struct sx127x_dev_s *dev)
 
   /* Put data on local fifo */
 
-  sx127x_rxfifo_put(dev, (uint8_t *)&rxdata, len);
+  sx127x_rxfifo_put(dev, (FAR uint8_t *)&rxdata, len);
 
   /* Return total length */
 
@@ -1863,7 +1863,7 @@ static int sx127x_fskook_send(FAR struct sx127x_dev_s *dev,
     {
       /* First byte is length */
 
-      ret = sx127x_txfifo_write(dev, (uint8_t *)&datalen, 1);
+      ret = sx127x_txfifo_write(dev, (FAR uint8_t *)&datalen, 1);
     }
 
   /* Write payload */

@@ -379,7 +379,7 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
   FAR struct nxflat_hdr_s    *hdr;
   FAR const struct symtab_s  *symbol;
 
-  char    *symname;
+  FAR char *symname;
   uint32_t offset;
   uint16_t nimports;
 #ifdef CONFIG_ARCH_ADDRENV

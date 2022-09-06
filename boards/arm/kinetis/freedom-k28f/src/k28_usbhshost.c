@@ -398,9 +398,9 @@ static void usb_msc_disconnect(void *arg)
 
 int k28_usbhost_initialize(void)
 {
-  int      ret;
+  int ret;
 #  ifdef HAVE_USB_AUTOMOUNTER
-  int      index;
+  int index;
 #  endif
 
   /* First, register all of the class drivers needed to support the drivers

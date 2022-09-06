@@ -85,20 +85,20 @@ struct ms5611_dev_s
   FAR struct sensor_lowerhalf_s sensor_lower;
 
 #ifdef CONFIG_MS5611_I2C
-  FAR struct i2c_master_s  *i2c;       /* I2C interface */
-  uint8_t                   addr;      /* I2C address */
+  FAR struct i2c_master_s *i2c;       /* I2C interface */
+  uint8_t                  addr;      /* I2C address */
 #endif
 
 #ifdef CONFIG_MS5611_SPI
-  FAR struct spi_dev_s     *spi;       /* SPI interface */
+  FAR struct spi_dev_s    *spi;       /* SPI interface */
 #endif
 
-  uint32_t                  freq;      /* Bus Frequency I2C/SPI */
-  struct ms5611_calib_s     calib;     /* Calib. params from ROM */
-  unsigned long             interval;  /* Polling interval */
-  bool                      enabled;   /* Enable/Disable MS5611 */
-  sem_t                     run;       /* Locks measure cycle */
-  mutex_t                   lock;      /* Manages exclusive to device */
+  uint32_t                 freq;      /* Bus Frequency I2C/SPI */
+  struct ms5611_calib_s    calib;     /* Calib. params from ROM */
+  unsigned long            interval;  /* Polling interval */
+  bool                     enabled;   /* Enable/Disable MS5611 */
+  sem_t                    run;       /* Locks measure cycle */
+  mutex_t                  lock;      /* Manages exclusive to device */
 };
 
 /****************************************************************************
@@ -668,6 +668,7 @@ int ms5611_register(FAR struct i2c_master_s *i2c, int devno, uint8_t addr)
     {
       snerr("Failed to initialize physical device ms5611:%d\n", ret);
       nxmutex_destroy(&priv->lock);
+      nxsem_destroy(&priv->run);
       kmm_free(priv);
       return ret;
     }
@@ -679,6 +680,7 @@ int ms5611_register(FAR struct i2c_master_s *i2c, int devno, uint8_t addr)
     {
       snerr("Failed to register driver: %d\n", ret);
       nxmutex_destroy(&priv->lock);
+      nxsem_destroy(&priv->run);
       kmm_free(priv);
       return ret;
     }
@@ -696,6 +698,7 @@ int ms5611_register(FAR struct i2c_master_s *i2c, int devno, uint8_t addr)
       snerr("Failed to create the notification kthread!\n");
       sensor_unregister(&priv->sensor_lower, devno);
       nxmutex_destroy(&priv->lock);
+      nxsem_destroy(&priv->run);
       kmm_free(priv);
       return ret;
     }

@@ -816,7 +816,7 @@ static void _write_data(FAR struct gs2200m_dev_s *dev,
  ****************************************************************************/
 
 static void _read_data(FAR struct gs2200m_dev_s *dev,
-                       FAR uint8_t  *buff,
+                       FAR uint8_t *buff,
                        FAR uint16_t len)
 {
   memset(buff, 0, len);
@@ -832,8 +832,8 @@ static void _read_data(FAR struct gs2200m_dev_s *dev,
 
 static uint16_t _read_data_len(FAR struct gs2200m_dev_s *dev)
 {
-  uint8_t  hdr[8];
-  uint8_t  res[8];
+  uint8_t hdr[8];
+  uint8_t res[8];
   uint16_t len = 0;
   int n = 0;
 
@@ -889,10 +889,10 @@ retry:
  ****************************************************************************/
 
 enum spi_status_e gs2200m_hal_write(FAR struct gs2200m_dev_s *dev,
-                                    const void *data,
+                                    FAR const void *data,
                                     uint16_t txlen)
 {
-  uint8_t *tx = (uint8_t *)data;
+  FAR uint8_t *tx = (FAR uint8_t *)data;
   uint8_t  hdr[8];
   uint8_t  res[8];
   int n = 0;
@@ -1091,6 +1091,7 @@ static void _parse_pkt_in_s0(FAR struct pkt_ctx_s *pkt_ctx,
 static void _parse_pkt_in_s1(FAR struct pkt_ctx_s *pkt_ctx,
                              FAR struct pkt_dat_s *pkt_dat)
 {
+  FAR char *msg;
   int msize;
   int n;
 
@@ -1102,7 +1103,7 @@ static void _parse_pkt_in_s1(FAR struct pkt_ctx_s *pkt_ctx,
   ASSERT(pkt_ctx->ptr > pkt_ctx->head);
   msize = pkt_ctx->ptr - pkt_ctx->head;
 
-  char *msg = (char *)kmm_calloc(msize + 1, 1);
+  msg = (FAR char *)kmm_calloc(msize + 1, 1);
   ASSERT(msg);
 
   memcpy(msg, pkt_ctx->head, msize);
@@ -1219,7 +1220,7 @@ static void _parse_pkt_in_s3(FAR struct pkt_ctx_s *pkt_ctx,
 
       /* Read data length */
 
-      pkt_ctx->dlen = _to_uint16((char *)pkt_ctx->ptr);
+      pkt_ctx->dlen = _to_uint16((FAR char *)pkt_ctx->ptr);
       pkt_ctx->ptr += 3;
 
       wlinfo("dlen=%d\n", pkt_ctx->dlen);
@@ -1271,7 +1272,7 @@ static void _parse_pkt_in_s4(FAR struct pkt_ctx_s *pkt_ctx,
 
       memset(addr, 0, sizeof(addr));
       memset(port, 0, sizeof(port));
-      n = sscanf((char *)pkt_ctx->ptr, "%s %s\t", addr, port);
+      n = sscanf((FAR const char *)pkt_ctx->ptr, "%s %s\t", addr, port);
       ASSERT(2 == n);
 
       wlinfo("from (%s:%s)\n", addr, port);
@@ -1286,7 +1287,7 @@ static void _parse_pkt_in_s4(FAR struct pkt_ctx_s *pkt_ctx,
 
       /* Read data length */
 
-      pkt_ctx->dlen = _to_uint16((char *)pkt_ctx->ptr);
+      pkt_ctx->dlen = _to_uint16((FAR char *)pkt_ctx->ptr);
       pkt_ctx->ptr += 3;
 
       wlinfo("dlen=%d\n", pkt_ctx->dlen);
@@ -1367,7 +1368,7 @@ static enum pkt_type_e _parse_pkt(FAR uint8_t *p, uint16_t len,
 static void _dup_pkt_dat_and_notify(FAR struct gs2200m_dev_s *dev,
                                     FAR struct pkt_dat_s *pkt_dat0)
 {
-  struct pkt_dat_s *pkt_dat;
+  FAR struct pkt_dat_s *pkt_dat;
   uint8_t c;
 
   /* Only bulk data */
@@ -1419,9 +1420,9 @@ static enum pkt_type_e gs2200m_recv_pkt(FAR struct gs2200m_dev_s *dev,
   enum pkt_type_e   t = TYPE_ERROR;
   enum spi_status_e s;
   uint16_t len;
-  uint8_t *p;
+  FAR uint8_t *p;
 
-  p = (uint8_t *)kmm_calloc(MAX_PKT_LEN, 1);
+  p = (FAR uint8_t *)kmm_calloc(MAX_PKT_LEN, 1);
   ASSERT(p);
 
   s = gs2200m_hal_read(dev, p, &len);
@@ -1633,7 +1634,7 @@ errout:
 
 static enum pkt_type_e gs2200m_disassociate(FAR struct gs2200m_dev_s *dev)
 {
-  return gs2200m_send_cmd2(dev, (char *)"AT+WD\r\n");
+  return gs2200m_send_cmd2(dev, "AT+WD\r\n");
 }
 
 /****************************************************************************
@@ -1826,7 +1827,7 @@ enum pkt_type_e gs2200m_get_wstatus(FAR struct gs2200m_dev_s *dev)
   /* Initialize pkt_dat and send command */
 
   memset(&pkt_dat, 0, sizeof(pkt_dat));
-  r = gs2200m_send_cmd(dev, (char *)"AT+WSTATUS\r\n", &pkt_dat);
+  r = gs2200m_send_cmd(dev, "AT+WSTATUS\r\n", &pkt_dat);
 
   if (r != TYPE_OK)
     {
@@ -2017,7 +2018,8 @@ static enum pkt_type_e gs2200m_send_bulk(FAR struct gs2200m_dev_s *dev,
 
   /* Send the bulk data */
 
-  s = gs2200m_hal_write(dev, (char *)dev->tx_buff, msg->len + bulk_hdr_size);
+  s = gs2200m_hal_write(dev, (FAR char *)dev->tx_buff,
+                        msg->len + bulk_hdr_size);
 
   if (s == SPI_TIMEOUT)
     {
@@ -3497,6 +3499,7 @@ FAR void *gs2200m_register(FAR const char *devpath,
   dev->spi   = spi;
   dev->path  = strdup(devpath);
   dev->lower = lower;
+  dev->pfd   = NULL;
 
   nxmutex_init(&dev->dev_lock);
 

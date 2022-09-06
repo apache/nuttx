@@ -293,7 +293,7 @@ static djoy_buttonset_t djoy_supported(
 static djoy_buttonset_t djoy_sample(
   FAR const struct djoy_lowerhalf_s *lower)
 {
-  FAR struct spq10kbd_dev_s  *priv =
+  FAR struct spq10kbd_dev_s *priv =
     (FAR struct spq10kbd_dev_s *)(lower->config);
   return priv->djoystate;
 }
@@ -311,7 +311,7 @@ static void djoy_enable(FAR const struct djoy_lowerhalf_s *lower,
                         djoy_buttonset_t press, djoy_buttonset_t release,
                         djoy_interrupt_t handler, FAR void *arg)
 {
-  FAR struct spq10kbd_dev_s  *priv =
+  FAR struct spq10kbd_dev_s *priv =
     (FAR struct spq10kbd_dev_s *)(lower->config);
   priv->djoypressmask    = press;
   priv->djoyreleasemask  = release;
@@ -326,11 +326,11 @@ static void djoy_enable(FAR const struct djoy_lowerhalf_s *lower,
 
 static void spq10kbd_worker(FAR void *arg)
 {
-  FAR struct spq10kbd_dev_s  *priv = (FAR struct spq10kbd_dev_s *)arg;
-  uint16_t                    regval;
-  uint8_t                     key;
-  uint8_t                     state;
-  int                         ret;
+  FAR struct spq10kbd_dev_s *priv = (FAR struct spq10kbd_dev_s *)arg;
+  uint16_t                   regval;
+  uint8_t                    key;
+  uint8_t                    state;
+  int                        ret;
 
   ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
@@ -420,8 +420,8 @@ static void spq10kbd_worker(FAR void *arg)
 
 static int spq10kbd_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  FAR struct spq10kbd_dev_s  *priv = (FAR struct spq10kbd_dev_s *)arg;
-  int                         ret;
+  FAR struct spq10kbd_dev_s *priv = (FAR struct spq10kbd_dev_s *)arg;
+  int                        ret;
 
   /* Let the event worker know that it has an interrupt event to handle
    * It is possbile that we will already have work scheduled from a
@@ -451,8 +451,8 @@ static int spq10kbd_interrupt(int irq, FAR void *context, FAR void *arg)
 
 static int spq10kbd_open(FAR struct file *filep)
 {
-  FAR struct inode           *inode;
-  FAR struct spq10kbd_dev_s  *priv;
+  FAR struct inode          *inode;
+  FAR struct spq10kbd_dev_s *priv;
 
   DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
@@ -475,8 +475,8 @@ static int spq10kbd_open(FAR struct file *filep)
 
 static int spq10kbd_close(FAR struct file *filep)
 {
-  FAR struct inode           *inode;
-  FAR struct spq10kbd_dev_s  *priv;
+  FAR struct inode          *inode;
+  FAR struct spq10kbd_dev_s *priv;
 
   DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
@@ -502,11 +502,11 @@ static int spq10kbd_close(FAR struct file *filep)
 static ssize_t spq10kbd_read(FAR struct file *filep, FAR char *buffer,
                              size_t len)
 {
-  FAR struct inode           *inode;
-  FAR struct spq10kbd_dev_s  *priv;
-  size_t                      nbytes;
-  uint16_t                    tail;
-  int                         ret;
+  FAR struct inode          *inode;
+  FAR struct spq10kbd_dev_s *priv;
+  size_t                     nbytes;
+  uint16_t                   tail;
+  int                        ret;
 
   DEBUGASSERT(filep && filep->f_inode && buffer);
   inode = filep->f_inode;
@@ -603,10 +603,10 @@ static ssize_t spq10kbd_write(FAR struct file *filep, FAR const char *buffer,
 static int spq10kbd_poll(FAR struct file *filep, FAR struct pollfd *fds,
                          bool setup)
 {
-  FAR struct inode           *inode;
-  FAR struct spq10kbd_dev_s  *priv;
-  int                         ret;
-  int                         i;
+  FAR struct inode          *inode;
+  FAR struct spq10kbd_dev_s *priv;
+  int                        ret;
+  int                        i;
 
   DEBUGASSERT(filep && filep->f_inode && fds);
   inode = filep->f_inode;
@@ -994,7 +994,7 @@ int spq10kbd_register(FAR struct i2c_master_s *i2c,
   priv->waiting   = false;
 
 #ifdef CONFIG_SPQ10KBD_DJOY
-  priv->djoylower.config       = (FAR void *)priv;
+  priv->djoylower.config       = priv;
   priv->djoylower.dl_supported = djoy_supported;
   priv->djoylower.dl_sample    = djoy_sample;
   priv->djoylower.dl_enable    = djoy_enable;
@@ -1045,6 +1045,7 @@ int spq10kbd_register(FAR struct i2c_master_s *i2c,
 
 errout_with_priv:
   nxmutex_destroy(&priv->lock);
+  nxsem_destroy(&priv->waitsem);
   kmm_free(priv);
   return ret;
 }

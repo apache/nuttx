@@ -2049,14 +2049,6 @@ int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi)
   memset(slot, 0, sizeof(struct mmcsd_slot_s));
   nxmutex_init(&slot->lock);
 
-#ifdef CONFIG_DEBUG_FEATURES
-  if (slot->spi)
-    {
-      ferr("ERROR: Already registered\n");
-      return -EBUSY;
-    }
-#endif
-
   /* Bind the SPI port to the slot */
 
   slot->spi      = spi;
@@ -2094,6 +2086,7 @@ int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi)
   if (ret < 0)
     {
       ferr("ERROR: register_blockdriver failed: %d\n", -ret);
+      nxmutex_destroy(&slot->lock);
       slot->spi = NULL;
       return ret;
     }
@@ -2102,7 +2095,7 @@ int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi)
    * removal of cards.
    */
 
-  SPI_REGISTERCALLBACK(spi, mmcsd_mediachanged, (FAR void *)slot);
+  SPI_REGISTERCALLBACK(spi, mmcsd_mediachanged, slot);
   return OK;
 }
 

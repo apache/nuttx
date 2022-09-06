@@ -44,7 +44,7 @@
  * Name: bcmf_hexdump
  ****************************************************************************/
 
-void bcmf_hexdump(uint8_t *data, unsigned int len, unsigned long offset)
+void bcmf_hexdump(FAR uint8_t *data, unsigned int len, unsigned long offset)
 {
   unsigned int i;
   unsigned int char_count = 0;

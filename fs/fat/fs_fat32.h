@@ -861,8 +861,8 @@
 struct fat_file_s;
 struct fat_mountpt_s
 {
-  struct inode      *fs_blkdriver; /* The block driver inode that hosts the FAT32 fs */
-  struct fat_file_s *fs_head;      /* A list to all files opened on this mountpoint */
+  FAR struct inode      *fs_blkdriver; /* The block driver inode that hosts the FAT32 fs */
+  FAR struct fat_file_s *fs_head;      /* A list to all files opened on this mountpoint */
 
   mutex_t  fs_lock;                /* Used to assume thread-safe access */
   off_t    fs_hwsectorsize;        /* HW: Sector size reported by block driver */
@@ -896,7 +896,7 @@ struct fat_mountpt_s
 
 struct fat_file_s
 {
-  struct fat_file_s *ff_next;      /* Retained in a singly linked list */
+  FAR struct fat_file_s *ff_next;  /* Retained in a singly linked list */
   uint8_t  ff_bflags;              /* The file buffer/mount flags */
   uint8_t  ff_oflags;              /* Flags provided when file was opened */
   uint8_t  ff_sectorsincluster;    /* Sectors remaining in cluster */
@@ -1013,10 +1013,10 @@ extern "C"
 
 /* Utitilies to handle unaligned or byte swapped accesses */
 
-EXTERN uint16_t fat_getuint16(uint8_t *ptr);
-EXTERN uint32_t fat_getuint32(uint8_t *ptr);
-EXTERN void   fat_putuint16(uint8_t *ptr, uint16_t value16);
-EXTERN void   fat_putuint32(uint8_t *ptr, uint32_t value32);
+EXTERN uint16_t fat_getuint16(FAR uint8_t *ptr);
+EXTERN uint32_t fat_getuint32(FAR uint8_t *ptr);
+EXTERN void   fat_putuint16(FAR uint8_t *ptr, uint16_t value16);
+EXTERN void   fat_putuint32(FAR uint8_t *ptr, uint32_t value32);
 
 /* Get the current time for FAT creation and write times */
 
@@ -1025,79 +1025,84 @@ EXTERN time_t fat_fattime2systime(uint16_t fattime, uint16_t fatdate);
 
 /* Handle hardware interactions for mounting */
 
-EXTERN int    fat_mount(struct fat_mountpt_s *fs, bool writeable);
-EXTERN int    fat_checkmount(struct fat_mountpt_s *fs);
+EXTERN int    fat_mount(FAR struct fat_mountpt_s *fs, bool writeable);
+EXTERN int    fat_checkmount(FAR struct fat_mountpt_s *fs);
 
 /* low-level hardware access */
 
-EXTERN int    fat_hwread(struct fat_mountpt_s *fs, uint8_t *buffer,
+EXTERN int    fat_hwread(FAR struct fat_mountpt_s *fs, FAR uint8_t *buffer,
                          off_t sector, unsigned int nsectors);
-EXTERN int    fat_hwwrite(struct fat_mountpt_s *fs, uint8_t *buffer,
+EXTERN int    fat_hwwrite(FAR struct fat_mountpt_s *fs, FAR uint8_t *buffer,
                           off_t sector, unsigned int nsectors);
 
 /* Cluster / cluster chain access helpers */
 
-EXTERN off_t  fat_cluster2sector(struct fat_mountpt_s *fs, uint32_t cluster);
-EXTERN off_t  fat_getcluster(struct fat_mountpt_s *fs, uint32_t clusterno);
-EXTERN int    fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno,
-                             off_t startsector);
-EXTERN int    fat_removechain(struct fat_mountpt_s *fs, uint32_t cluster);
-EXTERN int32_t fat_extendchain(struct fat_mountpt_s *fs, uint32_t cluster);
+EXTERN off_t  fat_cluster2sector(FAR struct fat_mountpt_s *fs,
+                                 uint32_t cluster);
+EXTERN off_t  fat_getcluster(FAR struct fat_mountpt_s *fs,
+                             uint32_t clusterno);
+EXTERN int    fat_putcluster(FAR struct fat_mountpt_s *fs,
+                             uint32_t clusterno, off_t startsector);
+EXTERN int    fat_removechain(FAR struct fat_mountpt_s *fs,
+                              uint32_t cluster);
+EXTERN int32_t fat_extendchain(FAR struct fat_mountpt_s *fs,
+                               uint32_t cluster);
 
 #define fat_createchain(fs) fat_extendchain(fs, 0)
 
 /* Help for traversing directory trees and accessing directory entries */
 
-EXTERN int    fat_nextdirentry(struct fat_mountpt_s *fs,
-                               struct fs_fatdir_s *dir);
-EXTERN int    fat_finddirentry(struct fat_mountpt_s *fs,
-                               struct fat_dirinfo_s *dirinfo,
-                               const char *path);
-EXTERN int    fat_dirnamewrite(struct fat_mountpt_s *fs,
-                               struct fat_dirinfo_s *dirinfo);
-EXTERN int    fat_dirwrite(struct fat_mountpt_s *fs,
-                           struct fat_dirinfo_s *dirinfo,
+EXTERN int    fat_nextdirentry(FAR struct fat_mountpt_s *fs,
+                               FAR struct fs_fatdir_s *dir);
+EXTERN int    fat_finddirentry(FAR struct fat_mountpt_s *fs,
+                               FAR struct fat_dirinfo_s *dirinfo,
+                               FAR const char *path);
+EXTERN int    fat_dirnamewrite(FAR struct fat_mountpt_s *fs,
+                               FAR struct fat_dirinfo_s *dirinfo);
+EXTERN int    fat_dirwrite(FAR struct fat_mountpt_s *fs,
+                           FAR struct fat_dirinfo_s *dirinfo,
                            uint8_t attributes, uint32_t fattime);
-EXTERN int    fat_allocatedirentry(struct fat_mountpt_s *fs,
-                                   struct fat_dirinfo_s *dirinfo);
-EXTERN int    fat_freedirentry(struct fat_mountpt_s *fs,
-                               struct fat_dirseq_s *seq);
+EXTERN int    fat_allocatedirentry(FAR struct fat_mountpt_s *fs,
+                                   FAR struct fat_dirinfo_s *dirinfo);
+EXTERN int    fat_freedirentry(FAR struct fat_mountpt_s *fs,
+                               FAR struct fat_dirseq_s *seq);
 EXTERN int    fat_dirname2path(FAR struct fat_mountpt_s *fs,
                                FAR struct fs_dirent_s *dir,
                                FAR struct dirent *entry);
 
 /* File creation and removal helpers */
 
-EXTERN int    fat_dirtruncate(struct fat_mountpt_s *fs,
+EXTERN int    fat_dirtruncate(FAR struct fat_mountpt_s *fs,
                               FAR uint8_t *direntry);
-EXTERN int    fat_dirshrink(struct fat_mountpt_s *fs, FAR uint8_t *direntry,
-                            off_t length);
-EXTERN int    fat_dirextend(FAR struct fat_mountpt_s *fs,
-                            FAR struct fat_file_s *ff, off_t length);
-EXTERN int    fat_dircreate(struct fat_mountpt_s *fs,
-                            struct fat_dirinfo_s *dirinfo);
-EXTERN int    fat_remove(struct fat_mountpt_s *fs, const char *relpath,
+EXTERN int    fat_dirshrink(FAR struct fat_mountpt_s *fs,
+                            FAR uint8_t *direntry, off_t length);
+EXTERN int    fat_dirextend(FAR FAR struct fat_mountpt_s *fs,
+                            FAR FAR struct fat_file_s *ff, off_t length);
+EXTERN int    fat_dircreate(FAR struct fat_mountpt_s *fs,
+                            FAR struct fat_dirinfo_s *dirinfo);
+EXTERN int    fat_remove(FAR struct fat_mountpt_s *fs,
+                         FAR const char *relpath,
                          bool directory);
 
 /* Mountpoint and file buffer cache (for partial sector accesses) */
 
-EXTERN int    fat_fscacheflush(struct fat_mountpt_s *fs);
-EXTERN int    fat_fscacheread(struct fat_mountpt_s *fs, off_t sector);
-EXTERN int    fat_ffcacheflush(struct fat_mountpt_s *fs,
-                               struct fat_file_s *ff);
-EXTERN int    fat_ffcacheread(struct fat_mountpt_s *fs,
-                              struct fat_file_s *ff, off_t sector);
-EXTERN int    fat_ffcacheinvalidate(struct fat_mountpt_s *fs,
-                                    struct fat_file_s *ff);
+EXTERN int    fat_fscacheflush(FAR struct fat_mountpt_s *fs);
+EXTERN int    fat_fscacheread(FAR struct fat_mountpt_s *fs, off_t sector);
+EXTERN int    fat_ffcacheflush(FAR struct fat_mountpt_s *fs,
+                               FAR struct fat_file_s *ff);
+EXTERN int    fat_ffcacheread(FAR struct fat_mountpt_s *fs,
+                              FAR struct fat_file_s *ff, off_t sector);
+EXTERN int    fat_ffcacheinvalidate(FAR struct fat_mountpt_s *fs,
+                                    FAR struct fat_file_s *ff);
 
 /* FSINFO sector support */
 
-EXTERN int    fat_updatefsinfo(struct fat_mountpt_s *fs);
-EXTERN int    fat_computefreeclusters(struct fat_mountpt_s *fs);
-EXTERN int    fat_nfreeclusters(struct fat_mountpt_s *fs,
-                                fsblkcnt_t *pfreeclusters);
-EXTERN int    fat_currentsector(struct fat_mountpt_s *fs,
-                                struct fat_file_s *ff, off_t position);
+EXTERN int    fat_updatefsinfo(FAR struct fat_mountpt_s *fs);
+EXTERN int    fat_computefreeclusters(FAR struct fat_mountpt_s *fs);
+EXTERN int    fat_nfreeclusters(FAR struct fat_mountpt_s *fs,
+                                FAR fsblkcnt_t *pfreeclusters);
+EXTERN int    fat_currentsector(FAR struct fat_mountpt_s *fs,
+                                FAR struct fat_file_s *ff, off_t position);
 
 #undef EXTERN
 #if defined(__cplusplus)
