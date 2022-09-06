@@ -943,7 +943,6 @@ static int bl602_i2c_irq(int cpuint, void *context, void *arg)
 
 struct i2c_master_s *bl602_i2cbus_initialize(int port)
 {
-  irqstate_t                       flags;
   struct bl602_i2c_priv_s *        priv;
   const struct bl602_i2c_config_s *config;
 
@@ -960,13 +959,10 @@ struct i2c_master_s *bl602_i2cbus_initialize(int port)
 
   config = priv->config;
 
-  flags = enter_critical_section();
-
-  priv->refs++;
-
-  if (priv->refs > 1)
+  nxmutex_lock(&priv->lock);
+  if (++priv->refs > 1)
   {
-    leave_critical_section(flags);
+    nxmutex_unlock(&priv->lock);
     return (struct i2c_master_s *)priv;
   }
 
@@ -979,7 +975,7 @@ struct i2c_master_s *bl602_i2cbus_initialize(int port)
   bl602_i2c_intmask(I2C_INT_ALL, 1);
   irq_attach(BL602_IRQ_I2C, bl602_i2c_irq, priv);
 
-  leave_critical_section(flags);
+  nxmutex_unlock(&priv->lock);
 
   return (struct i2c_master_s *)priv;
 }
@@ -994,7 +990,6 @@ struct i2c_master_s *bl602_i2cbus_initialize(int port)
 
 int bl602_i2cbus_uninitialize(struct i2c_master_s *dev)
 {
-  irqstate_t flags;
   struct bl602_i2c_priv_s *priv = (struct bl602_i2c_priv_s *)dev;
 
   DEBUGASSERT(dev);
@@ -1004,17 +999,15 @@ int bl602_i2cbus_uninitialize(struct i2c_master_s *dev)
       return ERROR;
     }
 
-  flags = enter_critical_section();
-
+  nxmutex_lock(&priv->lock);
   if (--priv->refs)
     {
-      leave_critical_section(flags);
+      nxmutex_unlock(&priv->lock);
       return OK;
     }
 
-  leave_critical_section(flags);
-
   bl602_swrst_ahb_slave1(AHB_SLAVE1_I2C);
+  nxmutex_unlock(&priv->lock);
 
   return OK;
 }

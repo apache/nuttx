@@ -235,11 +235,12 @@ static struct bl602_spi_priv_s bl602_spi_priv =
 {
   .spi_dev =
   {
-    .ops   = &bl602_spi_ops
+    .ops      = &bl602_spi_ops
   },
-  .config  = &bl602_spi_config,
-  .lock    = NXMUTEX_INITIALIZER,
-  .sem_isr = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .config     = &bl602_spi_config,
+  .lock       = NXMUTEX_INITIALIZER,
+  .sem_isr_tx = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .sem_isr_rx = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
   .dma_rxchan = -1,
   .dma_txchan = -1,
 };
@@ -1652,7 +1653,6 @@ struct spi_dev_s *bl602_spibus_initialize(int port)
 {
   struct spi_dev_s *spi_dev;
   struct bl602_spi_priv_s *priv;
-  irqstate_t flags;
 
   switch (port)
     {
@@ -1667,21 +1667,19 @@ struct spi_dev_s *bl602_spibus_initialize(int port)
 
   spi_dev = (struct spi_dev_s *)priv;
 
-  flags = enter_critical_section();
-
+  nxmutex_lock(&priv->lock);
   if (priv->refs != 0)
     {
-      leave_critical_section(flags);
+      priv->refs--;
+      nxmutex_unlock(&priv->lock);
 
       return spi_dev;
     }
 
   bl602_spi_init(spi_dev);
-
   priv->refs++;
 
-  leave_critical_section(flags);
-
+  nxmutex_unlock(&priv->lock);
   return spi_dev;
 }
 
@@ -1695,7 +1693,6 @@ struct spi_dev_s *bl602_spibus_initialize(int port)
 
 int bl602_spibus_uninitialize(struct spi_dev_s *dev)
 {
-  irqstate_t flags;
   struct bl602_spi_priv_s *priv = (struct bl602_spi_priv_s *)dev;
 
   DEBUGASSERT(dev);
@@ -1705,15 +1702,12 @@ int bl602_spibus_uninitialize(struct spi_dev_s *dev)
       return ERROR;
     }
 
-  flags = enter_critical_section();
-
+  nxmutex_lock(&priv->lock);
   if (--priv->refs)
     {
-      leave_critical_section(flags);
+      nxmutex_unlock(&priv->lock);
       return OK;
     }
-
-  leave_critical_section(flags);
 
   bl602_spi_deinit(dev);
   return OK;

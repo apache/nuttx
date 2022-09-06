@@ -301,7 +301,7 @@ static int nunchuck_open(FAR struct file *filep)
     {
       ierr("ERROR: Failed to allocate open structure\n");
       ret = -ENOMEM;
-      goto errout_with_excllock;
+      goto errout_with_lock;
     }
 
   /* Attach the open structure to the device */
@@ -314,7 +314,7 @@ static int nunchuck_open(FAR struct file *filep)
   filep->f_priv = (FAR void *)opriv;
   ret = OK;
 
-errout_with_excllock:
+errout_with_lock:
   nxmutex_unlock(&priv->lock);
   return ret;
 }
@@ -382,7 +382,7 @@ static int nunchuck_close(FAR struct file *filep)
     {
       ierr("ERROR: Failed to find open entry\n");
       ret = -ENOENT;
-      goto errout_with_excllock;
+      goto errout_with_lock;
     }
 
   /* Remove the structure from the device */
@@ -402,7 +402,7 @@ static int nunchuck_close(FAR struct file *filep)
 
   ret = OK;
 
-errout_with_excllock:
+errout_with_lock:
   nxmutex_unlock(&priv->lock);
   return ret;
 }

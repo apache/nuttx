@@ -86,7 +86,7 @@ int nxffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           ferr("ERROR: Open files\n");
           ret = -EBUSY;
-          goto errout_with_excllock;
+          goto errout_with_lock;
         }
 
       /* Re-format the volume -- all is lost */
@@ -109,7 +109,7 @@ int nxffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       ret = MTD_IOCTL(volume->mtd, cmd, arg);
     }
 
-errout_with_excllock:
+errout_with_lock:
   nxmutex_unlock(&volume->lock);
 errout:
   return ret;

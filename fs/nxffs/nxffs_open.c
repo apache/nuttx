@@ -416,7 +416,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
 
           ferr("ERROR: File is open for reading\n");
           ret = -ENOSYS;
-          goto errout_with_excllock;
+          goto errout_with_lock;
         }
 
       /* It would be an error if we are asked to create the file
@@ -427,7 +427,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
         {
           ferr("ERROR: File exists, can't create O_EXCL\n");
           ret = -EEXIST;
-          goto errout_with_excllock;
+          goto errout_with_lock;
         }
 
       /* Were we asked to truncate the file?  NOTE: Don't truncate the
@@ -455,7 +455,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
           ferr("ERROR: File %s exists and we were not asked to "
                "truncate it\n", name);
           ret = -ENOSYS;
-          goto errout_with_excllock;
+          goto errout_with_lock;
         }
     }
 
@@ -467,7 +467,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
     {
       ferr("ERROR: Not asked to create the file\n");
       ret = -ENOENT;
-      goto errout_with_excllock;
+      goto errout_with_lock;
     }
 
   /* Make sure that the length of the file name will fit in a uint8_t */
@@ -477,7 +477,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
     {
       ferr("ERROR: Name is too long: %d\n", namlen);
       ret = -EINVAL;
-      goto errout_with_excllock;
+      goto errout_with_lock;
     }
 
   /* Yes.. Create a new structure that will describe the state of this open
@@ -494,7 +494,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
   if (!wrfile)
     {
       ret = -ENOMEM;
-      goto errout_with_excllock;
+      goto errout_with_lock;
     }
 #endif
 
@@ -660,7 +660,7 @@ errout_with_ofile:
   kmm_free(wrfile);
 #endif
 
-errout_with_excllock:
+errout_with_lock:
   nxmutex_unlock(&volume->lock);
 errout_with_wrsem:
   nxsem_post(&volume->wrsem);
@@ -707,7 +707,7 @@ static inline int nxffs_rdopen(FAR struct nxffs_volume_s *volume,
         {
           ferr("ERROR: File is open for writing\n");
           ret = -ENOSYS;
-          goto errout_with_excllock;
+          goto errout_with_lock;
         }
 
       /* Just increment the reference count on the ofile */
@@ -731,7 +731,7 @@ static inline int nxffs_rdopen(FAR struct nxffs_volume_s *volume,
         {
           ferr("ERROR: ofile allocation failed\n");
           ret = -ENOMEM;
-          goto errout_with_excllock;
+          goto errout_with_lock;
         }
 
       /* Initialize the open file state structure */
@@ -762,7 +762,7 @@ static inline int nxffs_rdopen(FAR struct nxffs_volume_s *volume,
 
 errout_with_ofile:
   kmm_free(ofile);
-errout_with_excllock:
+errout_with_lock:
   nxmutex_unlock(&volume->lock);
 errout:
   return ret;

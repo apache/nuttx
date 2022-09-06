@@ -1228,7 +1228,7 @@ static int sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
     {
       i2serr("ERROR: SAI has no receiver\n");
       ret = -EAGAIN;
-      goto errout_with_excllock;
+      goto errout_with_lock;
     }
 
   mode = priv->syncen ? SAI_CR1_MODE_SLAVE_RX : SAI_CR1_MODE_MASTER_RX;
@@ -1264,7 +1264,7 @@ static int sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   nxmutex_unlock(&priv->lock);
   return OK;
 
-errout_with_excllock:
+errout_with_lock:
   nxmutex_unlock(&priv->lock);
   sai_buf_free(priv, bfcontainer);
   return ret;
@@ -1328,7 +1328,7 @@ static int sai_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
     {
       i2serr("ERROR: SAI has no transmitter\n");
       ret = -EAGAIN;
-      goto errout_with_excllock;
+      goto errout_with_lock;
     }
 
   mode = priv->syncen ? SAI_CR1_MODE_SLAVE_TX : SAI_CR1_MODE_MASTER_TX;
@@ -1364,7 +1364,7 @@ static int sai_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   nxmutex_unlock(&priv->lock);
   return OK;
 
-errout_with_excllock:
+errout_with_lock:
   nxmutex_unlock(&priv->lock);
   sai_buf_free(priv, bfcontainer);
   return ret;

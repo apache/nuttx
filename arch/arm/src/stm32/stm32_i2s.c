@@ -1853,7 +1853,7 @@ static int stm32_i2s_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
     {
       i2serr("ERROR: I2S%d has no receiver\n", priv->i2sno);
       ret = -EAGAIN;
-      goto errout_with_excllock;
+      goto errout_with_lock;
     }
 
   /* Add a reference to the audio buffer */
@@ -1883,7 +1883,7 @@ static int stm32_i2s_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   nxmutex_unlock(&priv->lock);
   return OK;
 
-errout_with_excllock:
+errout_with_lock:
   nxmutex_unlock(&priv->lock);
 
 errout_with_buf:
@@ -2065,7 +2065,7 @@ static int stm32_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
     {
       i2serr("ERROR: I2S%d has no transmitter\n", priv->i2sno);
       ret = -EAGAIN;
-      goto errout_with_excllock;
+      goto errout_with_lock;
     }
 
   /* Add a reference to the audio buffer */
@@ -2095,7 +2095,7 @@ static int stm32_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   nxmutex_unlock(&priv->lock);
   return OK;
 
-errout_with_excllock:
+errout_with_lock:
   nxmutex_unlock(&priv->lock);
 
 errout_with_buf:

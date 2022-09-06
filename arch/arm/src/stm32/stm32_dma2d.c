@@ -111,7 +111,7 @@ struct stm32_dma2d_s
   uint32_t *clut;              /* Color lookup table */
 #endif
 
-  mutex_t   *lock;             /* Ensure mutually exclusive access */
+  mutex_t  *lock;              /* Ensure mutually exclusive access */
 };
 
 /* Interrupt handling */

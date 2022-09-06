@@ -1358,7 +1358,6 @@ struct spi_dev_s *esp32c3_spibus_initialize(int port)
 {
   struct spi_dev_s *spi_dev;
   struct esp32c3_spi_priv_s *priv;
-  irqstate_t flags;
 
   switch (port)
     {
@@ -1373,12 +1372,11 @@ struct spi_dev_s *esp32c3_spibus_initialize(int port)
 
   spi_dev = (struct spi_dev_s *)priv;
 
-  flags = enter_critical_section();
-
-  if ((volatile int)priv->refs != 0)
+  nxmutex_lock(&priv->lock);
+  if (priv->refs != 0)
     {
-      leave_critical_section(flags);
-
+      priv->refs++;
+      nxmutex_unlock(&priv->lock);
       return spi_dev;
     }
 
@@ -1397,8 +1395,7 @@ struct spi_dev_s *esp32c3_spibus_initialize(int port)
     {
       /* Failed to allocate a CPU interrupt of this type. */
 
-      leave_critical_section(flags);
-
+      nxmutex_unlock(&priv->lock);
       return NULL;
     }
 
@@ -1408,7 +1405,7 @@ struct spi_dev_s *esp32c3_spibus_initialize(int port)
 
       esp32c3_free_cpuint(priv->config->periph);
       priv->cpuint = -ENOMEM;
-      leave_critical_section(flags);
+      nxmutex_unlock(&priv->lock);
 
       return NULL;
     }
@@ -1419,11 +1416,9 @@ struct spi_dev_s *esp32c3_spibus_initialize(int port)
 #endif
 
   esp32c3_spi_init(spi_dev);
-
   priv->refs++;
 
-  leave_critical_section(flags);
-
+  nxmutex_unlock(&priv->lock);
   return spi_dev;
 }
 
@@ -1443,7 +1438,6 @@ struct spi_dev_s *esp32c3_spibus_initialize(int port)
 
 int esp32c3_spibus_uninitialize(struct spi_dev_s *dev)
 {
-  irqstate_t flags;
   struct esp32c3_spi_priv_s *priv = (struct esp32c3_spi_priv_s *)dev;
 
   DEBUGASSERT(dev);
@@ -1453,15 +1447,12 @@ int esp32c3_spibus_uninitialize(struct spi_dev_s *dev)
       return ERROR;
     }
 
-  flags = enter_critical_section();
-
+  nxmutex_lock(&priv->lock);
   if (--priv->refs != 0)
     {
-      leave_critical_section(flags);
+      nxmutex_unlock(&priv->lock);
       return OK;
     }
-
-  leave_critical_section(flags);
 
 #ifdef CONFIG_ESP32C3_SPI2_DMA
   up_disable_irq(priv->cpuint);

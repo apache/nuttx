@@ -2699,12 +2699,8 @@ static int stm32_i2c_pm_prepare(struct pm_callback_s *cb, int domain,
 
 struct i2c_master_s *stm32_i2cbus_initialize(int port)
 {
-  struct stm32_i2c_priv_s * priv = NULL;  /* private data of device with multiple instances */
-  struct stm32_i2c_inst_s * inst = NULL;  /* device, single instance */
-  irqstate_t irqs;
-#ifdef CONFIG_PM
-  int ret;
-#endif
+  struct stm32_i2c_priv_s *priv = NULL;  /* private data of device with multiple instances */
+  struct stm32_i2c_inst_s *inst = NULL;  /* device, single instance */
 
 #if 0                           /* REVISIT: this is not true for all STM32 M0 */
 #if STM32_HSI_FREQUENCY != 8000000 || defined(INVALID_CLOCK_SOURCE)
@@ -2750,29 +2746,27 @@ struct i2c_master_s *stm32_i2cbus_initialize(int port)
 
   /* Initialize instance */
 
-  inst->ops       = &stm32_i2c_ops;
-  inst->priv      = priv;
+  inst->ops  = &stm32_i2c_ops;
+  inst->priv = priv;
 
   /* Init private data for the first time, increment refs count,
    * power-up hardware and configure GPIOs.
    */
 
-  irqs = enter_critical_section();
+  nxmutex_lock(&priv->lock);
 
-  if ((volatile int)priv->refs++ == 0)
+  if (priv->refs++ == 0)
     {
       stm32_i2c_init(priv);
 
 #ifdef CONFIG_PM
       /* Register to receive power management callbacks */
 
-      ret = pm_register(&priv->pm_cb);
-      DEBUGASSERT(ret == OK);
-      UNUSED(ret);
+      DEBUGVERIFY(pm_register(&priv->pm_cb));
 #endif
     }
 
-  leave_critical_section(irqs);
+  nxmutex_unlock(&priv->lock);
   return (struct i2c_master_s *)inst;
 }
 
@@ -2784,39 +2778,38 @@ struct i2c_master_s *stm32_i2cbus_initialize(int port)
  *
  ****************************************************************************/
 
-int stm32_i2cbus_uninitialize(struct i2c_master_s * dev)
+int stm32_i2cbus_uninitialize(struct i2c_master_s *dev)
 {
-  irqstate_t irqs;
+  struct stm32_i2c_priv_s *priv;
 
   DEBUGASSERT(dev);
+  priv = ((struct stm32_i2c_inst_s *)dev)->priv;
 
   /* Decrement refs and check for underflow */
 
-  if (((struct stm32_i2c_inst_s *)dev)->priv->refs == 0)
+  if (priv->refs == 0)
     {
       return ERROR;
     }
 
-  irqs = enter_critical_section();
-
-  if (--((struct stm32_i2c_inst_s *)dev)->priv->refs)
+  nxmutex_lock(&priv->lock);
+  if (--priv->refs)
     {
-      leave_critical_section(irqs);
+      nxmutex_unlock(&priv->lock);
       kmm_free(dev);
       return OK;
     }
 
-  leave_critical_section(irqs);
-
 #ifdef CONFIG_PM
   /* Unregister power management callbacks */
 
-  pm_unregister(&((struct stm32_i2c_inst_s *)dev)->priv->pm_cb);
+  pm_unregister(&priv->pm_cb);
 #endif
 
   /* Disable power and other HW resource (GPIO's) */
 
-  stm32_i2c_deinit(((struct stm32_i2c_inst_s *)dev)->priv);
+  stm32_i2c_deinit(priv);
+  nxmutex_unlock(&priv->lock);
 
   kmm_free(dev);
   return OK;
