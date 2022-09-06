@@ -62,17 +62,17 @@ typedef struct timerfd_waiter_sem_s
 
 struct timerfd_priv_s
 {
-  mutex_t       lock;           /* Enforces device exclusive access */
-  timerfd_waiter_sem_t *rdsems; /* List of blocking readers */
-  int           clock;          /* Clock to use as the timing base */
-  int           delay;          /* If non-zero, used to reset repetitive
-                                 * timers */
-  struct wdog_s wdog;           /* The watchdog that provides the timing */
-  struct work_s work;           /* For deferred timeout operations */
-  timerfd_t     counter;        /* timerfd counter */
-  spinlock_t    splock;         /* timerfd counter specific lock */
-  unsigned int  minor;          /* timerfd minor number */
-  uint8_t       crefs;          /* References counts on timerfd (max: 255) */
+  mutex_t                   lock;    /* Enforces device exclusive access */
+  FAR timerfd_waiter_sem_t *rdsems;  /* List of blocking readers */
+  int                       clock;   /* Clock to use as the timing base */
+  int                       delay;   /* If non-zero, used to reset repetitive
+                                      * timers */
+  struct wdog_s             wdog;    /* The watchdog that provides the timing */
+  struct work_s             work;    /* For deferred timeout operations */
+  timerfd_t                 counter; /* timerfd counter */
+  spinlock_t                splock;  /* timerfd counter specific lock */
+  unsigned int              minor;   /* timerfd minor number */
+  uint8_t                   crefs;   /* References counts on timerfd (max: 255) */
 
   /* The following is a list if poll structures of threads waiting for
    * driver events.
@@ -98,7 +98,7 @@ static int timerfd_poll(FAR struct file *filep, FAR struct pollfd *fds,
 #endif
 
 static int timerfd_blocking_io(FAR struct timerfd_priv_s *dev,
-                               timerfd_waiter_sem_t *sem,
+                               FAR timerfd_waiter_sem_t  *sem,
                                FAR timerfd_waiter_sem_t **slist);
 
 static unsigned int timerfd_get_unique_minor(void);
@@ -268,7 +268,7 @@ static int timerfd_close(FAR struct file *filep)
 }
 
 static int timerfd_blocking_io(FAR struct timerfd_priv_s *dev,
-                               timerfd_waiter_sem_t *sem,
+                               FAR  timerfd_waiter_sem_t *sem,
                                FAR timerfd_waiter_sem_t **slist)
 {
   int ret;
@@ -283,14 +283,15 @@ static int timerfd_blocking_io(FAR struct timerfd_priv_s *dev,
 
   if (ret < 0)
     {
+      FAR timerfd_waiter_sem_t *cur_sem;
+
       /* Interrupted wait, unregister semaphore
        * TODO ensure that lock wait does not fail (ECANCELED)
        */
 
       nxmutex_lock(&dev->lock);
 
-      timerfd_waiter_sem_t *cur_sem = *slist;
-
+      cur_sem = *slist;
       if (cur_sem == sem)
         {
           *slist = sem->next;
@@ -337,13 +338,14 @@ static ssize_t timerfd_read(FAR struct file *filep, FAR char *buffer,
 
   if (timerfd_get_counter(dev) == 0)
     {
+      timerfd_waiter_sem_t sem;
+
       if (filep->f_oflags & O_NONBLOCK)
         {
           nxmutex_unlock(&dev->lock);
           return -EAGAIN;
         }
 
-      timerfd_waiter_sem_t sem;
       nxsem_init(&sem.sem, 0, 0);
       do
         {
@@ -448,6 +450,7 @@ out:
 static void timerfd_timeout_work(FAR void *arg)
 {
   FAR struct timerfd_priv_s *dev = (FAR struct timerfd_priv_s *)arg;
+  FAR timerfd_waiter_sem_t *cur_sem;
   int ret;
 
   ret = nxmutex_lock(&dev->lock);
@@ -465,7 +468,7 @@ static void timerfd_timeout_work(FAR void *arg)
 
   /* Notify all of the waiting readers */
 
-  timerfd_waiter_sem_t *cur_sem = dev->rdsems;
+  cur_sem = dev->rdsems;
   while (cur_sem != NULL)
     {
       nxsem_post(&cur_sem->sem);

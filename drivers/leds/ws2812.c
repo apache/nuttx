@@ -123,7 +123,7 @@ struct ws2812_dev_s
 {
   FAR struct spi_dev_s *spi;  /* SPI interface */
   uint16_t nleds;             /* Number of addressable LEDs */
-  uint8_t *tx_buf;            /* Buffer for write transaction and state */
+  FAR uint8_t *tx_buf;        /* Buffer for write transaction and state */
   mutex_t lock;               /* Assures exclusive access to the driver */
 };
 
@@ -144,9 +144,9 @@ static void ws2812_pack(FAR uint8_t *buf, uint32_t rgb);
 
 #ifdef CONFIG_WS2812_NON_SPI_DRIVER
 
-static ssize_t  ws2812_open(FAR struct file  *filep);
+static ssize_t ws2812_open(FAR struct file *filep);
 
-static ssize_t  ws2812_close(FAR struct file  *filep);
+static ssize_t ws2812_close(FAR struct file *filep);
 
 #endif /* CONFIG_WS2812_NON_SPI_DRIVER */
 
@@ -255,7 +255,7 @@ static const uint8_t ws2812_gamma[256] =
  *
  ****************************************************************************/
 
-ssize_t  ws2812_open(FAR struct file  *filep)
+ssize_t ws2812_open(FAR struct file *filep)
 {
   FAR struct inode        *inode = filep->f_inode;
   FAR struct ws2812_dev_s *priv  = inode->i_private;
@@ -283,9 +283,9 @@ ssize_t  ws2812_open(FAR struct file  *filep)
 
 static int ws2812_close(FAR struct file *filep)
 {
-  FAR struct inode         *inode    = filep->f_inode;
-  FAR struct ws2812_dev_s  *priv     = inode->i_private;
-  int                       res      = OK;
+  FAR struct inode        *inode = filep->f_inode;
+  FAR struct ws2812_dev_s *priv  = inode->i_private;
+  int                      res   = OK;
 
   if (priv != NULL  &&  priv->close != NULL)
     {
@@ -316,9 +316,9 @@ ssize_t ws2812_write(FAR struct file *filep,
                      FAR const char  *data,
                      size_t           len)
 {
-  FAR struct inode         *inode    = filep->f_inode;
-  FAR struct ws2812_dev_s  *priv     = inode->i_private;
-  ssize_t                   res;
+  FAR struct inode        *inode = filep->f_inode;
+  FAR struct ws2812_dev_s *priv  = inode->i_private;
+  ssize_t                  res;
 
   if ((len % WS2812_RW_PIXEL_SIZE) != 0)
     {
@@ -350,9 +350,9 @@ ssize_t ws2812_read(FAR struct file *filep,
                     FAR char        *data,
                     size_t           len)
 {
-  FAR struct inode         *inode    = filep->f_inode;
-  FAR struct ws2812_dev_s  *priv     = inode->i_private;
-  ssize_t                   res;
+  FAR struct inode        *inode = filep->f_inode;
+  FAR struct ws2812_dev_s *priv  = inode->i_private;
+  ssize_t                  res;
 
   if (priv == NULL  ||  priv->read == NULL)
     {
@@ -846,8 +846,8 @@ uint32_t ws2812_hsv_to_rgb(uint8_t hue,
 uint32_t ws2812_gamma_correct(uint32_t pixel)
 {
   uint32_t     res;
-  FAR uint8_t *in  = (FAR uint8_t *) &pixel;
-  FAR uint8_t *out = (FAR uint8_t *) &res;
+  FAR uint8_t *in  = (FAR uint8_t *)&pixel;
+  FAR uint8_t *out = (FAR uint8_t *)&res;
 
   *out++ = ws2812_gamma[*in++];
   *out++ = ws2812_gamma[*in++];

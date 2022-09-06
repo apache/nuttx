@@ -50,13 +50,13 @@ typedef struct eventfd_waiter_sem_s
 
 struct eventfd_priv_s
 {
-  mutex_t     lock;             /* Enforces device exclusive access */
-  eventfd_waiter_sem_t *rdsems; /* List of blocking readers */
-  eventfd_waiter_sem_t *wrsems; /* List of blocking writers */
-  eventfd_t    counter;         /* eventfd counter */
-  unsigned int minor;           /* eventfd minor number */
-  uint8_t      crefs;           /* References counts on eventfd (max: 255) */
-  bool         mode_semaphore;  /* eventfd mode (semaphore or counter) */
+  mutex_t                   lock;            /* Enforces device exclusive access */
+  FAR eventfd_waiter_sem_t *rdsems;          /* List of blocking readers */
+  FAR eventfd_waiter_sem_t *wrsems;          /* List of blocking writers */
+  eventfd_t                 counter;         /* eventfd counter */
+  unsigned int              minor;           /* eventfd minor number */
+  uint8_t                   crefs;           /* References counts on eventfd (max: 255) */
+  bool                      mode_semaphore;  /* eventfd mode (semaphore or counter) */
 
   /* The following is a list if poll structures of threads waiting for
    * driver events.
@@ -84,7 +84,7 @@ static int eventfd_do_poll(FAR struct file *filep, FAR struct pollfd *fds,
 #endif
 
 static int eventfd_blocking_io(FAR struct eventfd_priv_s *dev,
-                               eventfd_waiter_sem_t *sem,
+                               FAR eventfd_waiter_sem_t  *sem,
                                FAR eventfd_waiter_sem_t **slist);
 
 static unsigned int eventfd_get_unique_minor(void);
@@ -237,7 +237,7 @@ static int eventfd_do_close(FAR struct file *filep)
 }
 
 static int eventfd_blocking_io(FAR struct eventfd_priv_s *dev,
-                               eventfd_waiter_sem_t *sem,
+                               FAR eventfd_waiter_sem_t  *sem,
                                FAR eventfd_waiter_sem_t **slist)
 {
   int ret;
@@ -252,14 +252,15 @@ static int eventfd_blocking_io(FAR struct eventfd_priv_s *dev,
 
   if (ret < 0)
     {
+      FAR eventfd_waiter_sem_t *cur_sem;
+
       /* Interrupted wait, unregister semaphore
        * TODO ensure that lock wait does not fail (ECANCELED)
        */
 
       nxmutex_lock(&dev->lock);
 
-      eventfd_waiter_sem_t *cur_sem = *slist;
-
+      cur_sem = *slist;
       if (cur_sem == sem)
         {
           *slist = sem->next;
@@ -288,6 +289,7 @@ static ssize_t eventfd_do_read(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct eventfd_priv_s *dev = inode->i_private;
+  FAR eventfd_waiter_sem_t *cur_sem;
   ssize_t ret;
 
   if (len < sizeof(eventfd_t) || buffer == NULL)
@@ -305,13 +307,14 @@ static ssize_t eventfd_do_read(FAR struct file *filep, FAR char *buffer,
 
   if (dev->counter == 0)
     {
+      eventfd_waiter_sem_t sem;
+
       if (filep->f_oflags & O_NONBLOCK)
         {
           nxmutex_unlock(&dev->lock);
           return -EAGAIN;
         }
 
-      eventfd_waiter_sem_t sem;
       nxsem_init(&sem.sem, 0, 0);
       do
         {
@@ -348,7 +351,7 @@ static ssize_t eventfd_do_read(FAR struct file *filep, FAR char *buffer,
 
   /* Notify all waiting writers that counter have been decremented */
 
-  eventfd_waiter_sem_t *cur_sem = dev->wrsems;
+  cur_sem = dev->wrsems;
   while (cur_sem != NULL)
     {
       nxsem_post(&cur_sem->sem);
@@ -366,6 +369,7 @@ static ssize_t eventfd_do_write(FAR struct file *filep,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct eventfd_priv_s *dev = inode->i_private;
+  FAR eventfd_waiter_sem_t *cur_sem;
   ssize_t ret;
   eventfd_t new_counter;
 
@@ -386,6 +390,8 @@ static ssize_t eventfd_do_write(FAR struct file *filep,
 
   if (new_counter < dev->counter)
     {
+      eventfd_waiter_sem_t sem;
+
       /* Overflow detected */
 
       if (filep->f_oflags & O_NONBLOCK)
@@ -394,7 +400,6 @@ static ssize_t eventfd_do_write(FAR struct file *filep,
           return -EAGAIN;
         }
 
-      eventfd_waiter_sem_t sem;
       nxsem_init(&sem.sem, 0, 0);
       do
         {
@@ -423,7 +428,7 @@ static ssize_t eventfd_do_write(FAR struct file *filep,
 
   /* Notify all of the waiting readers */
 
-  eventfd_waiter_sem_t *cur_sem = dev->rdsems;
+  cur_sem = dev->rdsems;
   while (cur_sem != NULL)
     {
       nxsem_post(&cur_sem->sem);

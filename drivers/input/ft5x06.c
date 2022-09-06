@@ -850,7 +850,7 @@ static ssize_t ft5x06_read(FAR struct file *filep, FAR char *buffer,
                            size_t len)
 {
   FAR struct inode *inode;
-  FAR struct ft5x06_dev_s  *priv;
+  FAR struct ft5x06_dev_s *priv;
   int ret;
 
   DEBUGASSERT(filep);
@@ -921,9 +921,9 @@ errout:
 
 static int ft5x06_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode         *inode;
+  FAR struct inode        *inode;
   FAR struct ft5x06_dev_s *priv;
-  int                       ret;
+  int                      ret;
 
   iinfo("cmd: %d arg: %ld\n", cmd, arg);
   DEBUGASSERT(filep);
@@ -975,12 +975,12 @@ static int ft5x06_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 static int ft5x06_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                        bool setup)
+                       bool setup)
 {
-  FAR struct inode         *inode;
+  FAR struct inode        *inode;
   FAR struct ft5x06_dev_s *priv;
-  int                       ret;
-  int                       i;
+  int                      ret;
+  int                      i;
 
   iinfo("setup: %d\n", (int)setup);
   DEBUGASSERT(filep && fds);
@@ -1176,6 +1176,7 @@ int ft5x06_register(FAR struct i2c_master_s *i2c,
 
 errout_with_priv:
   nxmutex_destroy(&priv->devlock);
+  nxsem_destroy(&priv->waitsem);
   kmm_free(priv);
   return ret;
 }

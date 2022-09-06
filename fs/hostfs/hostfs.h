@@ -60,8 +60,8 @@ struct hostfs_ofile_s
 
 struct hostfs_mountpt_s
 {
-  FAR struct hostfs_ofile_s  *fs_head;      /* A singly-linked list of open files */
-  char                        fs_root[HOSTFS_MAX_PATH];
+  FAR struct hostfs_ofile_s *fs_head;      /* A singly-linked list of open files */
+  char                       fs_root[HOSTFS_MAX_PATH];
 };
 
 /****************************************************************************

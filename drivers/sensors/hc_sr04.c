@@ -423,6 +423,7 @@ int hcsr04_register(FAR const char *devpath,
   if (ret < 0)
     {
       nxmutex_destroy(&priv->devlock);
+      nxsem_destroy(&priv->conv_donesem);
       kmm_free(priv);
       hcsr04_dbg("Error occurred during the driver registering = %d\n", ret);
       return ret;

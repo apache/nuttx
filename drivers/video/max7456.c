@@ -1262,7 +1262,7 @@ static ssize_t mx7_read_cm(FAR struct file *filep, FAR char *buf, size_t len)
   ssize_t ret;
 
   nxmutex_lock(&dev->lock);
-  ret = __read_cm(dev, filep->f_pos, (FAR uint8_t *) buf, len);
+  ret = __read_cm(dev, filep->f_pos, (FAR uint8_t *)buf, len);
   nxmutex_unlock(&dev->lock);
 
   return ret;
@@ -1346,7 +1346,7 @@ static ssize_t mx7_write_fb(FAR struct file *filep, FAR const char *buf,
   ssize_t ret;
 
   nxmutex_lock(&dev->lock);
-  ret = __write_fb(dev, (FAR uint8_t *) buf, len, dev->ca, filep->f_pos);
+  ret = __write_fb(dev, (FAR uint8_t *)buf, len, dev->ca, filep->f_pos);
   nxmutex_unlock(&dev->lock);
 
   return ret;

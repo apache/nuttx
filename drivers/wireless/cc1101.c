@@ -435,7 +435,7 @@ static ssize_t cc1101_file_write(FAR struct file *filep,
       return ret;
     }
 
-  ret = cc1101_write(dev, (const uint8_t *)buffer, buflen);
+  ret = cc1101_write(dev, (FAR const uint8_t *)buffer, buflen);
   cc1101_send(dev);
   nxmutex_unlock(&dev->devlock);
   return ret;
@@ -560,7 +560,7 @@ static ssize_t cc1101_file_read(FAR struct file *filep, FAR char *buffer,
       return ret;
     }
 
-  buflen = fifo_get(dev, (uint8_t *)buffer, buflen);
+  buflen = fifo_get(dev, (FAR uint8_t *)buffer, buflen);
   nxmutex_unlock(&dev->devlock);
   return buflen;
 }

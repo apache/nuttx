@@ -1980,17 +1980,7 @@ int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
   /* Init authentication signal semaphore */
 
-  ret = nxsem_init(&auth_signal, 0, 0);
-  if (ret == OK)
-    {
-      ret = nxsem_set_protocol(&auth_signal, SEM_PRIO_NONE);
-    }
-
-  if (ret < OK)
-    {
-      goto errout_with_auth;
-    }
-
+  nxsem_init(&auth_signal, 0, 0);
   priv->auth_signal = &auth_signal;
 
   ssid.ssid_len = iwr->u.essid.length;

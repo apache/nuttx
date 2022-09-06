@@ -193,7 +193,7 @@ static inline void ht16k33_write_cmd(FAR struct ht16k33_dev_s *priv,
   msg.frequency = CONFIG_HT16K33_I2C_FREQ;   /* I2C frequency */
   msg.addr      = HT16K33_I2C_ADDR + dev_id; /* 7-bit address */
   msg.flags     = 0;                         /* Write transaction */
-  msg.buffer    = (FAR uint8_t *) data;      /* Transfer from this address */
+  msg.buffer    = data;                      /* Transfer from this address */
   msg.length    = 1;                         /* Send one byte */
 
   /* Perform the transfer */
@@ -233,11 +233,11 @@ static inline void ht16k33_write_data(FAR struct ht16k33_dev_s *priv,
 
   /* Setup the message to write data to HT16K33 */
 
-  msg.frequency = CONFIG_HT16K33_I2C_FREQ;    /* I2C frequency */
-  msg.addr      = HT16K33_I2C_ADDR + dev_id;  /* 7-bit address */
-  msg.flags     = 0;                          /* Write transaction */
-  msg.buffer    = (FAR uint8_t *) data;       /* Transfer from here */
-  msg.length    = nbytes + 1;                 /* Send cmd + nbytes */
+  msg.frequency = CONFIG_HT16K33_I2C_FREQ;   /* I2C frequency */
+  msg.addr      = HT16K33_I2C_ADDR + dev_id; /* 7-bit address */
+  msg.flags     = 0;                         /* Write transaction */
+  msg.buffer    = data;                      /* Transfer from here */
+  msg.length    = nbytes + 1;                /* Send cmd + nbytes */
 
   /* Perform the transfer */
 

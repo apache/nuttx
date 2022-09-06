@@ -330,7 +330,7 @@ static inline void nrf24l01_configspi(FAR struct spi_dev_s *spi)
  * Name: nrf24l01_select
  ****************************************************************************/
 
-static inline void nrf24l01_select(struct nrf24l01_dev_s * dev)
+static inline void nrf24l01_select(FAR struct nrf24l01_dev_s *dev)
 {
   SPI_SELECT(dev->spi, SPIDEV_WIRELESS(0), true);
 }
@@ -339,7 +339,7 @@ static inline void nrf24l01_select(struct nrf24l01_dev_s * dev)
  * Name: nrf24l01_deselect
  ****************************************************************************/
 
-static inline void nrf24l01_deselect(struct nrf24l01_dev_s * dev)
+static inline void nrf24l01_deselect(FAR struct nrf24l01_dev_s *dev)
 {
   SPI_SELECT(dev->spi, SPIDEV_WIRELESS(0), false);
 }
@@ -638,7 +638,7 @@ static inline bool nrf24l01_chipenable(FAR struct nrf24l01_dev_s *dev,
 #ifdef CONFIG_WL_NRF24L01_RXSUPPORT
 static void nrf24l01_worker(FAR void *arg)
 {
-  FAR struct nrf24l01_dev_s *dev = (FAR struct nrf24l01_dev_s *) arg;
+  FAR struct nrf24l01_dev_s *dev = (FAR struct nrf24l01_dev_s *)arg;
   uint8_t status;
   uint8_t fifo_status;
 
@@ -1053,7 +1053,8 @@ static ssize_t nrf24l01_read(FAR struct file *filep, FAR char *buffer,
         }
     }
 
-  ret = nrf24l01_recv(dev, (uint8_t *)buffer, buflen, &dev->last_recvpipeno);
+  ret = nrf24l01_recv(dev, (FAR uint8_t *)buffer, buflen,
+                      &dev->last_recvpipeno);
 
 errout:
   nxmutex_unlock(&dev->devlock);
@@ -1084,7 +1085,7 @@ static ssize_t nrf24l01_write(FAR struct file *filep, FAR const char *buffer,
       return ret;
     }
 
-  ret = nrf24l01_send(dev, (const uint8_t *)buffer, buflen);
+  ret = nrf24l01_send(dev, (FAR const uint8_t *)buffer, buflen);
 
   nxmutex_unlock(&dev->devlock);
   return ret;

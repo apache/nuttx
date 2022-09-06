@@ -109,7 +109,7 @@ struct nxterm_state_s
 {
   FAR const struct nxterm_operations_s *ops; /* Window operations */
   FAR void *handle;                          /* The window handle */
-  FAR struct nxterm_window_s wndo;           /* Describes the window and font */
+  struct nxterm_window_s wndo;               /* Describes the window and font */
   mutex_t lock;                              /* Forces mutually exclusive access */
 #ifdef CONFIG_DEBUG_GRAPHICS
   pid_t holder;                              /* Deadlock avoidance */
