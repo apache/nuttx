@@ -2164,7 +2164,7 @@ static int ssc_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
     {
       i2serr("ERROR: SSC%d has no receiver\n", priv->sscno);
       ret = -EAGAIN;
-      goto errout_with_excllock;
+      goto errout_with_lock;
     }
 
   /* Add a reference to the audio buffer */
@@ -2195,7 +2195,7 @@ static int ssc_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   nxmutex_unlock(&priv->lock);
   return OK;
 
-errout_with_excllock:
+errout_with_lock:
   nxmutex_unlock(&priv->lock);
 
 errout_with_buf:
@@ -2387,7 +2387,7 @@ static int ssc_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
     {
       i2serr("ERROR: SSC%d has no transmitter\n", priv->sscno);
       ret = -EAGAIN;
-      goto errout_with_excllock;
+      goto errout_with_lock;
     }
 
   /* Add a reference to the audio buffer */
@@ -2418,7 +2418,7 @@ static int ssc_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   nxmutex_unlock(&priv->lock);
   return OK;
 
-errout_with_excllock:
+errout_with_lock:
   nxmutex_unlock(&priv->lock);
 
 errout_with_buf:

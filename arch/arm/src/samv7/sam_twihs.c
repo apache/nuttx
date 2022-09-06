@@ -1363,7 +1363,6 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
   struct twi_dev_s *priv;
   uint32_t frequency;
   const struct twi_attr_s *attr = 0;
-  irqstate_t flags;
   int ret;
 
   i2cinfo("Initializing TWIHS%d\n", bus);
@@ -1415,11 +1414,11 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
       return NULL;
     }
 
-  flags = enter_critical_section();
+  nxmutex_lock(&priv->lock);
 
   /* Has the device already been initialized? */
 
-  if ((volatile int)priv->refs++ == 0)
+  if (priv->refs++ == 0)
     {
       /* Perform one-time TWIHS initialization */
 
@@ -1443,12 +1442,12 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
       twi_hw_initialize(priv, frequency);
     }
 
-  leave_critical_section(flags);
+  nxmutex_unlock(&priv->lock);
   return &priv->dev;
 
 errout_with_lock:
   priv->refs--;
-  leave_critical_section(flags);
+  nxmutex_unlock(&priv->lock);
   return NULL;
 }
 
@@ -1463,7 +1462,6 @@ errout_with_lock:
 int sam_i2cbus_uninitialize(struct i2c_master_s *dev)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *) dev;
-  irqstate_t flags;
 
   DEBUGASSERT(priv);
 
@@ -1478,8 +1476,7 @@ int sam_i2cbus_uninitialize(struct i2c_master_s *dev)
 
   /* Disable TWIHS interrupts */
 
-  flags = enter_critical_section();
-
+  nxmutex_lock(&priv->lock);
   if (--priv->refs == 0)
     {
       up_disable_irq(priv->attr->irq);
@@ -1493,7 +1490,7 @@ int sam_i2cbus_uninitialize(struct i2c_master_s *dev)
       irq_detach(priv->attr->irq);
     }
 
-  leave_critical_section(flags);
+  nxmutex_unlock(&priv->lock);
   return OK;
 }
 

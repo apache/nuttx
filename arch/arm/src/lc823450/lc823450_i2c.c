@@ -1069,7 +1069,6 @@ exit:
 struct i2c_master_s *lc823450_i2cbus_initialize(int port)
 {
   struct lc823450_i2c_priv_s *priv = NULL;
-  irqstate_t flags;
 
   switch (port)
     {
@@ -1092,14 +1091,13 @@ struct i2c_master_s *lc823450_i2cbus_initialize(int port)
    * power-up hardware and configure GPIOs.
    */
 
-  flags = enter_critical_section();
-
-  if ((volatile int)priv->refs++ == 0)
+  nxmutex_lock(&priv->lock);
+  if (priv->refs++ == 0)
     {
       lc823450_i2c_init(priv, port);
     }
 
-  leave_critical_section(flags);
+  nxmutex_unlock(&priv->lock);
   return (struct i2c_master_s *)priv;
 }
 
@@ -1114,7 +1112,6 @@ struct i2c_master_s *lc823450_i2cbus_initialize(int port)
 int lc823450_i2cbus_uninitialize(struct i2c_master_s *dev)
 {
   struct lc823450_i2c_priv_s *priv = (struct lc823450_i2c_priv_s *)dev;
-  irqstate_t flags;
   int port = -1;
 
   DEBUGASSERT(dev);
@@ -1126,15 +1123,12 @@ int lc823450_i2cbus_uninitialize(struct i2c_master_s *dev)
       return OK;
     }
 
-  flags = enter_critical_section();
-
+  nxmutex_lock(&priv->lock);
   if (--priv->refs != 0)
     {
-      leave_critical_section(flags);
+      nxmutex_unlock(&priv->lock);
       return OK;
     }
-
-  leave_critical_section(flags);
 
 #ifdef CONFIG_LC823450_I2C0
   if (priv == &lc823450_i2c0_priv)
@@ -1153,12 +1147,14 @@ int lc823450_i2cbus_uninitialize(struct i2c_master_s *dev)
   if (-1 == port)
     {
       DEBUGPANIC();
+      nxmutex_unlock(&priv->lock);
       return -EFAULT;
     }
 
   /* Disable power and other HW resource */
 
   lc823450_i2c_deinit(priv, port);
+  nxmutex_unlock(&priv->lock);
 
   return OK;
 }

@@ -3034,8 +3034,7 @@ static int rx65n_i2c_reset(FAR struct i2c_master_s *dev)
 
 FAR struct i2c_master_s *rx65n_i2cbus_initialize(int channel)
 {
-  struct rx65n_i2c_priv_s * priv = NULL;
-  irqstate_t irqs;
+  struct rx65n_i2c_priv_s *priv = NULL;
 
   /* Get I2C private structure */
 
@@ -3074,17 +3073,18 @@ FAR struct i2c_master_s *rx65n_i2cbus_initialize(int channel)
    * initialize RIIC registers and attach IRQs
    */
 
-  irqs = enter_critical_section();
+  nxmutex_lock(&priv->lock);
 
-  if ((volatile int)priv->refs++ == 0)
+  if (priv->refs++ == 0)
     {
       /* Initialize the RIIC registers */
 
       rx65n_riic_init(priv);
     }
 
-  leave_critical_section(irqs);
   riic_mpc_disable();
+  nxmutex_unlock(&priv->lock);
+
   return (struct i2c_master_s *)priv;
 }
 
@@ -3099,7 +3099,6 @@ FAR struct i2c_master_s *rx65n_i2cbus_initialize(int channel)
 int rx65n_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
 {
   FAR struct rx65n_i2c_priv_s *priv = (struct rx65n_i2c_priv_s *)dev;
-  irqstate_t flags;
 
   DEBUGASSERT(dev);
 
@@ -3110,15 +3109,12 @@ int rx65n_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
       return ERROR;
     }
 
-  flags = enter_critical_section();
-
+  nxmutex_lock(&priv->lock);
   if (--priv->refs)
     {
-      leave_critical_section(flags);
+      nxmutex_unlock(&priv->lock);
       return OK;
     }
-
-  leave_critical_section(flags);
 
   /* Disable power and other HW resource (GPIO's) */
 
@@ -3129,6 +3125,7 @@ int rx65n_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
   irq_detach(priv->dev->tei_irq);
   irq_detach(priv->dev->eei_irq);
 
+  nxmutex_unlock(&priv->lock);
   return OK;
 }
 

@@ -1143,10 +1143,6 @@ struct onewire_dev_s *stm32l4_1wireinitialize(int port)
 {
   struct stm32_1wire_priv_s *priv = NULL;  /* Private data of device with multiple instances */
   struct stm32_1wire_inst_s *inst = NULL;  /* Device, single instance */
-  irqstate_t irqs;
-#ifdef CONFIG_PM
-  int ret;
-#endif
 
   /* Get 1-Wire private structure */
 
@@ -1196,15 +1192,14 @@ struct onewire_dev_s *stm32l4_1wireinitialize(int port)
 
   /* Initialize instance */
 
-  inst->ops       = &stm32_1wire_ops;
-  inst->priv      = priv;
+  inst->ops  = &stm32_1wire_ops;
+  inst->priv = priv;
 
   /* Initialize private data for the first time, increment reference count,
    * power-up hardware and configure GPIOs.
    */
 
-  irqs = enter_critical_section();
-
+  nxmutex_lock(&priv->lock);
   if (priv->refs++ == 0)
     {
       stm32_1wire_init(priv);
@@ -1212,13 +1207,11 @@ struct onewire_dev_s *stm32l4_1wireinitialize(int port)
 #ifdef CONFIG_PM
       /* Register to receive power management callbacks */
 
-      ret = pm_register(&priv->pm_cb);
-      DEBUGASSERT(ret == OK);
-      UNUSED(ret);
+      DEBUGVERIFY(pm_register(&priv->pm_cb));
 #endif
     }
 
-  leave_critical_section(irqs);
+  nxmutex_unlock(&priv->lock);
   return (struct onewire_dev_s *)inst;
 }
 
@@ -1240,7 +1233,6 @@ struct onewire_dev_s *stm32l4_1wireinitialize(int port)
 int stm32l4_1wireuninitialize(struct onewire_dev_s *dev)
 {
   struct stm32_1wire_priv_s *priv = ((struct stm32_1wire_inst_s *)dev)->priv;
-  irqstate_t irqs;
 
   DEBUGASSERT(priv != NULL);
 
@@ -1251,16 +1243,13 @@ int stm32l4_1wireuninitialize(struct onewire_dev_s *dev)
       return ERROR;
     }
 
-  irqs = enter_critical_section();
-
+  nxmutex_lock(&priv->lock);
   if (--priv->refs)
     {
-      leave_critical_section(irqs);
+      nxmutex_unlock(&priv->lock);
       kmm_free(priv);
       return OK;
     }
-
-  leave_critical_section(irqs);
 
 #ifdef CONFIG_PM
   /* Unregister power management callbacks */
@@ -1271,6 +1260,7 @@ int stm32l4_1wireuninitialize(struct onewire_dev_s *dev)
   /* Disable power and other HW resource (GPIO's) */
 
   stm32_1wire_deinit(priv);
+  nxmutex_unlock(&priv->lock);
 
   /* Free instance */
 

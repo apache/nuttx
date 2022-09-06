@@ -862,7 +862,7 @@ struct i2c_slave_s *s32k1xx_i2cbus_slave_initialize(int port)
 
   flags = enter_critical_section();
 
-  if ((volatile int) priv->refs == 0)
+  if (priv->refs == 0)
     {
       /* Initialize private data for the first time, increment reference
        * count, power-up hardware and configure pins.
