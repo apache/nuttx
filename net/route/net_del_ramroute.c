@@ -90,7 +90,7 @@ static int net_match_ipv4(FAR struct net_route_ipv4_s *route, FAR void *arg)
 
   net_ipv4_dumproute("Comparing", route);
   ninfo("With:\n");
-  ninfo("  target=%08lx netmask=%08lx\n",
+  ninfo("  target=%08" PRIu32 " netmask=%08" PRIu32 "\n",
         HTONL(match->target), HTONL(match->netmask));
 
   if (net_ipv4addr_maskcmp(route->target, match->target, match->netmask) &&
