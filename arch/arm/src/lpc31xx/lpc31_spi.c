@@ -154,10 +154,10 @@ static const struct spi_ops_s g_spiops =
 static struct lpc31_spidev_s g_spidev =
 {
   .spidev            =
-    {
-      &g_spiops
-    },
-  .lock = NXMUTEX_INITIALIZER,
+  {
+    .ops             = &g_spiops,
+  },
+  .lock              = NXMUTEX_INITIALIZER,
 };
 
 #ifdef CONFIG_LPC31_SPI_REGDEBUG
@@ -489,7 +489,7 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
 static void spi_select(struct spi_dev_s *dev, uint32_t devid,
                        bool selected)
 {
-  struct lpc31_spidev_s *priv = (struct lpc31_spidev_s *) dev;
+  struct lpc31_spidev_s *priv = (struct lpc31_spidev_s *)dev;
   uint8_t slave = 0;
 
   /* FIXME: map the devid to the SPI slave - this should really

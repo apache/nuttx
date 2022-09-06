@@ -334,9 +334,9 @@ static inline int usbhost_tdfree(FAR struct usbhost_state_s *priv);
 
 /* struct usbhost_registry_s methods */
 
-static struct usbhost_class_s *
-  usbhost_create(FAR struct usbhost_hubport_s *hport,
-                 FAR const struct usbhost_id_s *id);
+static FAR struct usbhost_class_s *
+usbhost_create(FAR struct usbhost_hubport_s *hport,
+               FAR const struct usbhost_id_s *id);
 
 /* struct usbhost_class_s methods */
 
@@ -399,13 +399,13 @@ static const struct file_operations g_hidmouse_fops =
 
 /* This is a bitmap that is used to allocate device names /dev/mouse0-31. */
 
-static uint32_t                g_devinuse;
+static uint32_t g_devinuse;
 
 /* The following are used to managed the class creation operation */
 
 static mutex_t g_lock = NXMUTEX_INITIALIZER;
 static sem_t g_syncsem = SEM_INITIALIZER(0);
-static struct usbhost_state_s *g_priv;     /* Data passed to thread */
+static FAR struct usbhost_state_s *g_priv;
 
 /****************************************************************************
  * Private Functions
@@ -1764,8 +1764,8 @@ static inline int usbhost_tdfree(FAR struct usbhost_state_s *priv)
  ****************************************************************************/
 
 static FAR struct usbhost_class_s *
-  usbhost_create(FAR struct usbhost_hubport_s *hport,
-                 FAR const struct usbhost_id_s *id)
+usbhost_create(FAR struct usbhost_hubport_s *hport,
+               FAR const struct usbhost_id_s *id)
 {
   FAR struct usbhost_state_s *priv;
 
@@ -1913,7 +1913,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
  *
  ****************************************************************************/
 
-static int usbhost_disconnected(struct usbhost_class_s *usbclass)
+static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass)
 {
   FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)usbclass;
   int i;

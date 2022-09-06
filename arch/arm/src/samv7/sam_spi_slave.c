@@ -170,11 +170,11 @@ static const uint8_t g_csroffset[4] =
 
 static const struct spi_slave_ctrlrops_s g_ctrlr_ops =
 {
-  .bind              = spi_bind,
-  .unbind            = spi_unbind,
-  .enqueue           = spi_enqueue,
-  .qfull             = spi_qfull,
-  .qflush            = spi_qflush,
+  .bind    = spi_bind,
+  .unbind  = spi_unbind,
+  .enqueue = spi_enqueue,
+  .qfull   = spi_qfull,
+  .qflush  = spi_qflush,
 };
 
 #ifdef CONFIG_SAMV7_SPI0_SLAVE

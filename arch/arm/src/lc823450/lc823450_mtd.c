@@ -815,7 +815,6 @@ int lc823450_mtd_uninitialize(uint32_t devno)
   DEBUGASSERT(ret == OK);
 
   nxmutex_destroy(&priv->lock);
-
   kmm_free(g_mtdmaster[ch]);
 
   g_mtdmaster[ch] = NULL;

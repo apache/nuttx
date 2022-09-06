@@ -221,13 +221,13 @@ static const struct spi_ops_s g_spi0ops =
 
 static struct kinetis_spidev_s g_spi0dev =
 {
-  .spidev            =
+  .spidev   =
   {
     &g_spi0ops
   },
-  .spibase           = KINETIS_SPI0_BASE,
+  .spibase  = KINETIS_SPI0_BASE,
   .lock     = NXMUTEX_INITIALIZER,
-  .ctarsel           = KINETIS_SPI_CTAR0_OFFSET,
+  .ctarsel  = KINETIS_SPI_CTAR0_OFFSET,
 #ifdef CONFIG_KINETIS_SPI_DMA
 #  ifdef CONFIG_KINETIS_SPI0_DMA
   .rxch     = KINETIS_DMA_REQUEST_SRC_SPI0_RX,
@@ -273,13 +273,13 @@ static const struct spi_ops_s g_spi1ops =
 
 static struct kinetis_spidev_s g_spi1dev =
 {
-  .spidev            =
+  .spidev   =
   {
     &g_spi1ops
   },
-  .spibase           = KINETIS_SPI1_BASE,
+  .spibase  = KINETIS_SPI1_BASE,
   .lock     = NXMUTEX_INITIALIZER,
-  .ctarsel           = KINETIS_SPI_CTAR0_OFFSET,
+  .ctarsel  = KINETIS_SPI_CTAR0_OFFSET,
 #ifdef CONFIG_KINETIS_SPI_DMA
 #  ifdef CONFIG_KINETIS_SPI1_DMA
   .rxch     = KINETIS_DMA_REQUEST_SRC_SPI1_RX,
@@ -325,13 +325,13 @@ static const struct spi_ops_s g_spi2ops =
 
 static struct kinetis_spidev_s g_spi2dev =
 {
-  .spidev            =
+  .spidev   =
   {
     &g_spi2ops
   },
-  .spibase           = KINETIS_SPI2_BASE,
+  .spibase  = KINETIS_SPI2_BASE,
   .lock     = NXMUTEX_INITIALIZER,
-  .ctarsel           = KINETIS_SPI_CTAR0_OFFSET,
+  .ctarsel  = KINETIS_SPI_CTAR0_OFFSET,
 #ifdef CONFIG_KINETIS_SPI_DMA
 #  ifdef CONFIG_KINETIS_SPI2_DMA
   .rxch     = KINETIS_DMA_REQUEST_SRC_FTM3_CH6__SPI2_RX,
@@ -1661,7 +1661,7 @@ struct spi_dev_s *kinetis_spibus_initialize(int port)
 
   /* select mode 0 */
 
-  priv->mode      = SPIDEV_MODE3;
+  priv->mode = SPIDEV_MODE3;
   spi_setmode(&priv->spidev, SPIDEV_MODE0);
 
   /* Select a default frequency of approx. 400KHz */

@@ -494,8 +494,8 @@ static struct efm32_usbhost_s g_usbhost =
 
 static struct usbhost_connection_s g_usbconn =
 {
-  .wait             = efm32_wait,
-  .enumerate        = efm32_enumerate,
+  .wait      = efm32_wait,
+  .enumerate = efm32_enumerate,
 };
 
 #ifdef HAVE_USBHOST_TRACE
@@ -5280,7 +5280,7 @@ static inline void efm32_sw_initialize(struct efm32_usbhost_s *priv)
       struct efm32_chan_s *chan = &priv->chan[i];
 
       chan->chidx = i;
-      nxsem_init(&chan->waitsem,  0, 0);
+      nxsem_init(&chan->waitsem, 0, 0);
     }
 }
 

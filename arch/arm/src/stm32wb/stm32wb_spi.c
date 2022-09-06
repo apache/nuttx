@@ -276,9 +276,9 @@ static const struct spi_ops_s g_spi1ops =
 static struct stm32wb_spidev_s g_spi1dev =
 {
   .spidev   =
-    {
-      &g_spi1ops
-    },
+  {
+    .ops    = &g_spi1ops,
+  },
   .spibase  = STM32WB_SPI1_BASE,
   .spiclock = STM32WB_PCLK2_FREQUENCY,
 #ifdef CONFIG_STM32WB_SPI_INTERRUPTS
@@ -334,9 +334,9 @@ static const struct spi_ops_s g_spi2ops =
 static struct stm32wb_spidev_s g_spi2dev =
 {
   .spidev   =
-    {
-      &g_spi2ops
-    },
+  {
+    .ops    = &g_spi2ops,
+  },
   .spibase  = STM32WB_SPI2_BASE,
   .spiclock = STM32WB_PCLK1_FREQUENCY,
 #ifdef CONFIG_STM32WB_SPI_INTERRUPTS

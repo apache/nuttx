@@ -424,7 +424,7 @@ void esp_wifi_scan_event_parse(void)
               /* Copy ESSID */
 
               essid_len = MIN(strlen((const char *)
-                                    ap_list_buffer[bss_count].ssid), 32);
+                                     ap_list_buffer[bss_count].ssid), 32);
               essid_len_aligned = (essid_len + 3) & -4;
               if (result_size < ESP_IW_EVENT_SIZE(essid)+essid_len_aligned)
                 {

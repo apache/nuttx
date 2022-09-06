@@ -1776,8 +1776,8 @@ static int s32k1xx_lpi2c_dma_transfer(struct s32k1xx_lpi2c_priv_s *priv)
                      LPI2C_MIER_NDIE | LPI2C_MIER_ALIE |
                      LPI2C_MIER_PLTIE | LPI2C_MIER_FEIE);
 
-  s32k1xx_dmach_start(priv->rxdma, s32k1xx_rxdma_callback, (void *)priv);
-  s32k1xx_dmach_start(priv->txdma, s32k1xx_txdma_callback, (void *)priv);
+  s32k1xx_dmach_start(priv->rxdma, s32k1xx_rxdma_callback, priv);
+  s32k1xx_dmach_start(priv->txdma, s32k1xx_txdma_callback, priv);
 
   s32k1xx_lpi2c_modifyreg(priv, S32K1XX_LPI2C_MDER_OFFSET, 0,
                           LPI2C_MDER_TDDE | LPI2C_MDER_RDDE);

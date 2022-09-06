@@ -73,7 +73,7 @@ struct lc823450_spidev_s
 #endif
 #ifdef CONFIG_LC823450_SPI_DMA
   DMA_HANDLE       hdma;
-  sem_t dma_wait;
+  sem_t            dma_wait;
 #endif /* CONFIG_LC823450_SPI_DMA */
 };
 
@@ -127,9 +127,9 @@ static const struct spi_ops_s g_spiops =
 static struct lc823450_spidev_s g_spidev =
 {
   .spidev            =
-    {
-      &g_spiops
-    },
+  {
+    .ops             = &g_spiops
+  },
 #ifndef CONFIG_SPI_OWNBUS
   .lock              = NXMUTEX_INITIALIZER,
 #endif

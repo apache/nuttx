@@ -271,7 +271,7 @@ static struct emmc_dma_desc_s *emmc_setupdma(void *buf, unsigned int nbytes)
   int i;
   int ndescs;
   struct emmc_dma_desc_s *descs;
-  struct emmc_dma_desc_s  *d;
+  struct emmc_dma_desc_s *d;
   uint32_t addr;
   uint32_t size;
   unsigned int remain;
@@ -935,12 +935,10 @@ static int cxd56_emmc_geometry(struct inode *inode,
 
 int cxd56_emmcinitialize(void)
 {
-  struct cxd56_emmc_state_s *priv;
+  struct cxd56_emmc_state_s *priv = &g_emmcdev;
   uint8_t *buf;
   struct emmc_dma_desc_s *descs;
   int ret;
-
-  priv = &g_emmcdev;
 
   ret = emmc_hwinitialize();
   if (ret != OK)

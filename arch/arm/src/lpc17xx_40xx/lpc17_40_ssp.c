@@ -177,9 +177,9 @@ static const struct spi_ops_s g_spi0ops =
 static struct lpc17_40_sspdev_s g_ssp0dev =
 {
   .spidev            =
-    {
-      &g_spi0ops
-    },
+  {
+    .ops             = &g_spi0ops,
+  },
   .sspbase           = LPC17_40_SSP0_BASE,
 #ifdef CONFIG_LPC17_40_SSP_INTERRUPTS
   .sspirq            = LPC17_40_IRQ_SSP0,
@@ -213,9 +213,9 @@ static const struct spi_ops_s g_spi1ops =
 static struct lpc17_40_sspdev_s g_ssp1dev =
 {
   .spidev            =
-    {
-      &g_spi1ops
-    },
+  {
+    .ops             = &g_spi1ops,
+  },
   .sspbase           = LPC17_40_SSP1_BASE,
 #ifdef CONFIG_LPC17_40_SSP_INTERRUPTS
   .sspirq            = LPC17_40_IRQ_SSP1,
@@ -249,9 +249,9 @@ static const struct spi_ops_s g_spi2ops =
 static struct lpc17_40_sspdev_s g_ssp2dev =
 {
   .spidev            =
-    {
-      &g_spi2ops
-    },
+  {
+    .ops             = &g_spi2ops,
+  },
   .sspbase           = LPC17_40_SSP2_BASE,
 #ifdef CONFIG_LPC17_40_SSP_INTERRUPTS
   .sspirq            = LPC17_40_IRQ_SSP2,

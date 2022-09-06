@@ -461,8 +461,8 @@ static int stm32_dma2d_waitforirq(void)
 #ifdef CONFIG_STM32F7_DMA2D_L8
 static int stm32_dma2d_loadclut(uintptr_t pfcreg)
 {
-  int        ret;
-  uint32_t   regval;
+  int      ret;
+  uint32_t regval;
 
   /* Start clut loading */
 
@@ -495,7 +495,7 @@ static int stm32_dma2d_loadclut(uintptr_t pfcreg)
 
 static int stm32_dma2d_start(void)
 {
-  int        ret;
+  int ret;
 
   /* Start dma transfer */
 
@@ -681,7 +681,7 @@ static void stm32_dma2d_lpfc(int lid, uint32_t blendmode, uint8_t alpha,
 #ifdef CONFIG_STM32F7_FB_CMAP
   if (fmt == DMA2D_PF_L8)
     {
-      struct stm32_dma2d_s * layer = &g_dma2ddev;
+      struct stm32_dma2d_s *layer = &g_dma2ddev;
 
       /* Load CLUT automatically */
 
@@ -745,7 +745,7 @@ static void stm32_dma2d_lpfc(int lid, uint32_t blendmode, uint8_t alpha,
 static int stm32_dma2d_setclut(const struct fb_cmap_s *cmap)
 {
   int n;
-  struct stm32_dma2d_s * priv = &g_dma2ddev;
+  struct stm32_dma2d_s *priv = &g_dma2ddev;
 
   lcdinfo("cmap=%p\n", cmap);
 
@@ -814,7 +814,7 @@ static int stm32_dma2d_fillcolor(struct stm32_dma2d_overlay_s *oinfo,
                                  uint32_t argb)
 {
   int ret;
-  struct stm32_dma2d_s * priv = &g_dma2ddev;
+  struct stm32_dma2d_s *priv = &g_dma2ddev;
   DEBUGASSERT(oinfo != NULL && oinfo->oinfo != NULL && area != NULL);
 
   lcdinfo("oinfo=%p, argb=%08x\n", oinfo, argb);
@@ -895,9 +895,9 @@ static int stm32_dma2d_blit(struct stm32_dma2d_overlay_s *doverlay,
                             struct stm32_dma2d_overlay_s *soverlay,
                             const struct fb_area_s *sarea)
 {
-  int        ret;
-  uint32_t  mode;
-  struct stm32_dma2d_s * priv = &g_dma2ddev;
+  int      ret;
+  uint32_t mode;
+  struct stm32_dma2d_s *priv = &g_dma2ddev;
 
   lcdinfo("doverlay=%p, destxpos=%d, destypos=%d, soverlay=%p, sarea=%p\n",
           doverlay, destxpos, destypos, soverlay, sarea);
@@ -994,8 +994,8 @@ static int stm32_dma2d_blend(struct stm32_dma2d_overlay_s *doverlay,
                              struct stm32_dma2d_overlay_s *boverlay,
                              const struct fb_area_s *barea)
 {
-  int    ret;
-  struct stm32_dma2d_s * priv = &g_dma2ddev;
+  int ret;
+  struct stm32_dma2d_s *priv = &g_dma2ddev;
 
   lcdinfo("doverlay=%p, destxpos=%d, destypos=%d, "
           "foverlay=%p, forexpos=%d, foreypos=%d, "

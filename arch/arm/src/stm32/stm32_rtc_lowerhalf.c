@@ -158,7 +158,7 @@ static const struct rtc_ops_s g_rtc_ops =
 
 static struct stm32_lowerhalf_s g_rtc_lowerhalf =
 {
-  .ops        = &g_rtc_ops,
+  .ops     = &g_rtc_ops,
   .devlock = NXMUTEX_INITIALIZER,
 };
 

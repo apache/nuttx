@@ -163,7 +163,7 @@ struct usbhost_state_s
   mutex_t                              lock;         /* Used to maintain mutual exclusive access */
   struct work_s                        work;         /* For interacting with the worker thread */
   FAR uint8_t                         *tbuffer;      /* The allocated transfer buffer */
-  FAR uint8_t                          obuffer[20];  /* The fixed output transfer buffer */
+  uint8_t                              obuffer[20];  /* The fixed output transfer buffer */
   size_t                               tbuflen;      /* Size of the allocated transfer buffer */
   usbhost_ep_t                         epin;         /* IN endpoint */
   usbhost_ep_t                         epout;        /* OUT endpoint */
@@ -223,9 +223,9 @@ static inline int usbhost_tfree(FAR struct usbhost_state_s *priv);
 
 /* struct usbhost_registry_s methods */
 
-static struct usbhost_class_s *
-  usbhost_create(FAR struct usbhost_hubport_s *hport,
-                 FAR const struct usbhost_id_s *id);
+static FAR struct usbhost_class_s *
+usbhost_create(FAR struct usbhost_hubport_s *hport,
+               FAR const struct usbhost_id_s *id);
 
 /* struct usbhost_class_s methods */
 
@@ -310,7 +310,7 @@ static uint32_t g_devinuse;
 
 static mutex_t g_lock = NXMUTEX_INITIALIZER;
 static sem_t g_syncsem = SEM_INITIALIZER(0);
-static struct usbhost_state_s *g_priv;     /* Data passed to thread */
+static FAR struct usbhost_state_s *g_priv;
 
 /****************************************************************************
  * Private Functions
@@ -1510,8 +1510,8 @@ static inline int usbhost_tfree(FAR struct usbhost_state_s *priv)
  ****************************************************************************/
 
 static FAR struct usbhost_class_s *
-  usbhost_create(FAR struct usbhost_hubport_s *hport,
-                 FAR const struct usbhost_id_s *id)
+usbhost_create(FAR struct usbhost_hubport_s *hport,
+               FAR const struct usbhost_id_s *id)
 {
   FAR struct usbhost_state_s *priv;
 
@@ -1651,7 +1651,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
  *
  ****************************************************************************/
 
-static int usbhost_disconnected(struct usbhost_class_s *usbclass)
+static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass)
 {
   FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)usbclass;
   int i;
@@ -1901,10 +1901,10 @@ static int usbhost_close(FAR struct file *filep)
 static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer,
                             size_t len)
 {
-  FAR struct inode                          *inode;
-  FAR struct usbhost_state_s                *priv;
-  FAR struct xbox_controller_buttonstate_s  sample;
-  int                                       ret;
+  FAR struct inode                     *inode;
+  FAR struct usbhost_state_s           *priv;
+  struct xbox_controller_buttonstate_s sample;
+  int                                  ret;
 
   DEBUGASSERT(filep && filep->f_inode && buffer);
   inode = filep->f_inode;

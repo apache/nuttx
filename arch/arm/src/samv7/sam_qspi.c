@@ -302,7 +302,7 @@ static const struct qspi_ops_s g_qspi0ops =
 
 static struct sam_qspidev_s g_qspi0dev =
 {
-  .qspi            =
+  .qspi              =
   {
     .ops             = &g_qspi0ops,
   },
@@ -856,7 +856,7 @@ static int qspi_memory_dma(struct sam_qspidev_s *priv,
   /* Start the DMA */
 
   priv->result = -EBUSY;
-  ret = sam_dmastart(priv->dmach, qspi_dma_callback, (void *)priv);
+  ret = sam_dmastart(priv->dmach, qspi_dma_callback, priv);
   if (ret < 0)
     {
       spierr("ERROR: sam_dmastart failed: %d\n", ret);

@@ -280,9 +280,9 @@ static const struct spi_ops_s g_spi1ops =
 static struct stm32l4_spidev_s g_spi1dev =
 {
   .spidev   =
-              {
-               &g_spi1ops
-              },
+  {
+    .ops    = &g_spi1ops,
+  },
   .spibase  = STM32L4_SPI1_BASE,
   .spiclock = STM32L4_PCLK2_FREQUENCY,
 #ifdef CONFIG_STM32L4_SPI_INTERRUPTS
@@ -338,9 +338,9 @@ static const struct spi_ops_s g_spi2ops =
 static struct stm32l4_spidev_s g_spi2dev =
 {
   .spidev   =
-              {
-                &g_spi2ops
-              },
+  {
+    .ops    = &g_spi2ops,
+  },
   .spibase  = STM32L4_SPI2_BASE,
   .spiclock = STM32L4_PCLK1_FREQUENCY,
 #ifdef CONFIG_STM32L4_SPI_INTERRUPTS
@@ -394,9 +394,9 @@ static const struct spi_ops_s g_spi3ops =
 static struct stm32l4_spidev_s g_spi3dev =
 {
   .spidev   =
-              {
-               &g_spi3ops
-              },
+  {
+    .ops    = &g_spi3ops,
+  },
   .spibase  = STM32L4_SPI3_BASE,
   .spiclock = STM32L4_PCLK1_FREQUENCY,
 #ifdef CONFIG_STM32L4_SPI_INTERRUPTS

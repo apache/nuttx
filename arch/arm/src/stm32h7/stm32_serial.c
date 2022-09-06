@@ -919,31 +919,31 @@ static char g_uart8txbuffer[UART8_TXBUFSIZE_ADJUSTED] \
 static struct up_dev_s g_usart1priv =
 {
   .dev =
-    {
+  {
 #if CONSOLE_UART == 1
-      .isconsole = true,
+    .isconsole   = true,
 #endif
-      .recv      =
-      {
-        .size    = sizeof(g_usart1rxbuffer),
-        .buffer  = g_usart1rxbuffer,
-      },
-      .xmit      =
-      {
-        .size    = sizeof(g_usart1txbuffer),
-        .buffer  = g_usart1txbuffer,
-      },
-#if defined(CONFIG_USART1_RXDMA) && defined(CONFIG_USART1_TXDMA)
-      .ops       = &g_uart_rxtxdma_ops,
-#elif defined(CONFIG_USART1_RXDMA) && !defined(CONFIG_USART1_TXDMA)
-      .ops       = &g_uart_rxdma_ops,
-#elif !defined(CONFIG_USART1_RXDMA) && defined(CONFIG_USART1_TXDMA)
-      .ops       = &g_uart_txdma_ops,
-#else
-      .ops       = &g_uart_ops,
-#endif
-      .priv      = &g_usart1priv,
+    .recv        =
+    {
+      .size      = sizeof(g_usart1rxbuffer),
+      .buffer    = g_usart1rxbuffer,
     },
+    .xmit        =
+    {
+      .size      = sizeof(g_usart1txbuffer),
+      .buffer    = g_usart1txbuffer,
+    },
+#if defined(CONFIG_USART1_RXDMA) && defined(CONFIG_USART1_TXDMA)
+    .ops         = &g_uart_rxtxdma_ops,
+#elif defined(CONFIG_USART1_RXDMA) && !defined(CONFIG_USART1_TXDMA)
+    .ops         = &g_uart_rxdma_ops,
+#elif !defined(CONFIG_USART1_RXDMA) && defined(CONFIG_USART1_TXDMA)
+    .ops         = &g_uart_txdma_ops,
+#else
+    .ops         = &g_uart_ops,
+#endif
+    .priv        = &g_usart1priv,
+  },
 
   .irq           = STM32_IRQ_USART1,
   .rxftcfg       = CONFIG_USART1_RXFIFO_THRES,
@@ -989,31 +989,31 @@ static struct up_dev_s g_usart1priv =
 static struct up_dev_s g_usart2priv =
 {
   .dev =
-    {
+  {
 #if CONSOLE_UART == 2
-      .isconsole = true,
+    .isconsole = true,
 #endif
-      .recv      =
-      {
-        .size    = sizeof(g_usart2rxbuffer),
-        .buffer  = g_usart2rxbuffer,
-      },
-      .xmit      =
-      {
-        .size    = sizeof(g_usart2txbuffer),
-        .buffer  = g_usart2txbuffer,
-      },
-#if defined(CONFIG_USART2_RXDMA) && defined(CONFIG_USART2_TXDMA)
-      .ops       = &g_uart_rxtxdma_ops,
-#elif defined(CONFIG_USART2_RXDMA) && !defined(CONFIG_USART2_TXDMA)
-      .ops       = &g_uart_rxdma_ops,
-#elif !defined(CONFIG_USART2_RXDMA) && defined(CONFIG_USART2_TXDMA)
-      .ops       = &g_uart_txdma_ops,
-#else
-      .ops       = &g_uart_ops,
-#endif
-      .priv      = &g_usart2priv,
+    .recv        =
+    {
+      .size      = sizeof(g_usart2rxbuffer),
+      .buffer    = g_usart2rxbuffer,
     },
+    .xmit        =
+    {
+      .size      = sizeof(g_usart2txbuffer),
+      .buffer    = g_usart2txbuffer,
+    },
+#if defined(CONFIG_USART2_RXDMA) && defined(CONFIG_USART2_TXDMA)
+    .ops         = &g_uart_rxtxdma_ops,
+#elif defined(CONFIG_USART2_RXDMA) && !defined(CONFIG_USART2_TXDMA)
+    .ops         = &g_uart_rxdma_ops,
+#elif !defined(CONFIG_USART2_RXDMA) && defined(CONFIG_USART2_TXDMA)
+    .ops         = &g_uart_txdma_ops,
+#else
+    .ops         = &g_uart_ops,
+#endif
+    .priv        = &g_usart2priv,
+  },
 
   .irq           = STM32_IRQ_USART2,
   .rxftcfg       = CONFIG_USART2_RXFIFO_THRES,
@@ -1059,31 +1059,31 @@ static struct up_dev_s g_usart2priv =
 static struct up_dev_s g_usart3priv =
 {
   .dev =
-    {
+  {
 #if CONSOLE_UART == 3
-      .isconsole = true,
+    .isconsole = true,
 #endif
-      .recv      =
-      {
-        .size    = sizeof(g_usart3rxbuffer),
-        .buffer  = g_usart3rxbuffer,
-      },
-      .xmit      =
-      {
-        .size    = sizeof(g_usart3txbuffer),
-        .buffer  = g_usart3txbuffer,
-      },
-#if defined(CONFIG_USART3_RXDMA) && defined(CONFIG_USART3_TXDMA)
-      .ops       = &g_uart_rxtxdma_ops,
-#elif defined(CONFIG_USART3_RXDMA) && !defined(CONFIG_USART3_TXDMA)
-      .ops       = &g_uart_rxdma_ops,
-#elif !defined(CONFIG_USART3_RXDMA) && defined(CONFIG_USART3_TXDMA)
-      .ops       = &g_uart_txdma_ops,
-#else
-      .ops       = &g_uart_ops,
-#endif
-      .priv      = &g_usart3priv,
+    .recv        =
+    {
+      .size      = sizeof(g_usart3rxbuffer),
+      .buffer    = g_usart3rxbuffer,
     },
+    .xmit        =
+    {
+      .size      = sizeof(g_usart3txbuffer),
+      .buffer    = g_usart3txbuffer,
+    },
+#if defined(CONFIG_USART3_RXDMA) && defined(CONFIG_USART3_TXDMA)
+    .ops         = &g_uart_rxtxdma_ops,
+#elif defined(CONFIG_USART3_RXDMA) && !defined(CONFIG_USART3_TXDMA)
+    .ops         = &g_uart_rxdma_ops,
+#elif !defined(CONFIG_USART3_RXDMA) && defined(CONFIG_USART3_TXDMA)
+    .ops         = &g_uart_txdma_ops,
+#else
+    .ops         = &g_uart_ops,
+#endif
+    .priv        = &g_usart3priv,
+  },
 
   .irq           = STM32_IRQ_USART3,
   .rxftcfg       = CONFIG_USART3_RXFIFO_THRES,
@@ -1129,31 +1129,31 @@ static struct up_dev_s g_usart3priv =
 static struct up_dev_s g_uart4priv =
 {
   .dev =
-    {
+  {
 #if CONSOLE_UART == 4
-      .isconsole = true,
+    .isconsole   = true,
 #endif
-      .recv      =
-      {
-        .size    = sizeof(g_uart4rxbuffer),
-        .buffer  = g_uart4rxbuffer,
-      },
-      .xmit      =
-      {
-        .size    = sizeof(g_uart4txbuffer),
-        .buffer  = g_uart4txbuffer,
-      },
-#if defined(CONFIG_UART4_RXDMA) && defined(CONFIG_UART4_TXDMA)
-      .ops       = &g_uart_rxtxdma_ops,
-#elif defined(CONFIG_UART4_RXDMA) && !defined(CONFIG_UART4_TXDMA)
-      .ops       = &g_uart_rxdma_ops,
-#elif !defined(CONFIG_UART4_RXDMA) && defined(CONFIG_UART4_TXDMA)
-      .ops       = &g_uart_txdma_ops,
-#else
-      .ops       = &g_uart_ops,
-#endif
-      .priv      = &g_uart4priv,
+    .recv        =
+    {
+      .size      = sizeof(g_uart4rxbuffer),
+      .buffer    = g_uart4rxbuffer,
     },
+    .xmit        =
+    {
+      .size      = sizeof(g_uart4txbuffer),
+      .buffer    = g_uart4txbuffer,
+    },
+#if defined(CONFIG_UART4_RXDMA) && defined(CONFIG_UART4_TXDMA)
+    .ops         = &g_uart_rxtxdma_ops,
+#elif defined(CONFIG_UART4_RXDMA) && !defined(CONFIG_UART4_TXDMA)
+    .ops         = &g_uart_rxdma_ops,
+#elif !defined(CONFIG_UART4_RXDMA) && defined(CONFIG_UART4_TXDMA)
+    .ops         = &g_uart_txdma_ops,
+#else
+    .ops         = &g_uart_ops,
+#endif
+    .priv        = &g_uart4priv,
+  },
 
   .irq           = STM32_IRQ_UART4,
   .rxftcfg       = CONFIG_UART4_RXFIFO_THRES,
@@ -1199,31 +1199,31 @@ static struct up_dev_s g_uart4priv =
 static struct up_dev_s g_uart5priv =
 {
   .dev =
-    {
+  {
 #if CONSOLE_UART == 5
-      .isconsole = true,
+    .isconsole   = true,
 #endif
-      .recv      =
-      {
-        .size    = sizeof(g_uart5rxbuffer),
-        .buffer  = g_uart5rxbuffer,
-      },
-      .xmit      =
-      {
-        .size    = sizeof(g_uart5txbuffer),
-        .buffer  = g_uart5txbuffer,
-      },
-#if defined(CONFIG_UART5_RXDMA) && defined(CONFIG_UART5_TXDMA)
-      .ops       = &g_uart_rxtxdma_ops,
-#elif defined(CONFIG_UART5_RXDMA) && !defined(CONFIG_UART5_TXDMA)
-      .ops       = &g_uart_rxdma_ops,
-#elif !defined(CONFIG_UART5_RXDMA) && defined(CONFIG_UART5_TXDMA)
-      .ops       = &g_uart_txdma_ops,
-#else
-      .ops       = &g_uart_ops,
-#endif
-      .priv      = &g_uart5priv,
+    .recv        =
+    {
+      .size      = sizeof(g_uart5rxbuffer),
+      .buffer    = g_uart5rxbuffer,
     },
+    .xmit        =
+    {
+      .size      = sizeof(g_uart5txbuffer),
+      .buffer    = g_uart5txbuffer,
+    },
+#if defined(CONFIG_UART5_RXDMA) && defined(CONFIG_UART5_TXDMA)
+    .ops         = &g_uart_rxtxdma_ops,
+#elif defined(CONFIG_UART5_RXDMA) && !defined(CONFIG_UART5_TXDMA)
+    .ops         = &g_uart_rxdma_ops,
+#elif !defined(CONFIG_UART5_RXDMA) && defined(CONFIG_UART5_TXDMA)
+    .ops         = &g_uart_txdma_ops,
+#else
+    .ops         = &g_uart_ops,
+#endif
+    .priv        = &g_uart5priv,
+  },
 
   .irq           = STM32_IRQ_UART5,
   .rxftcfg       = CONFIG_UART5_RXFIFO_THRES,
@@ -1269,31 +1269,31 @@ static struct up_dev_s g_uart5priv =
 static struct up_dev_s g_usart6priv =
 {
   .dev =
-    {
+  {
 #if CONSOLE_UART == 6
-      .isconsole = true,
+    .isconsole   = true,
 #endif
-      .recv      =
-      {
-        .size    = sizeof(g_usart6rxbuffer),
-        .buffer  = g_usart6rxbuffer,
-      },
-      .xmit      =
-      {
-        .size    = sizeof(g_usart6txbuffer),
-        .buffer  = g_usart6txbuffer,
-      },
-#if defined(CONFIG_USART6_RXDMA) && defined(CONFIG_USART6_TXDMA)
-      .ops       = &g_uart_rxtxdma_ops,
-#elif defined(CONFIG_USART6_RXDMA) && !defined(CONFIG_USART6_TXDMA)
-      .ops       = &g_uart_rxdma_ops,
-#elif !defined(CONFIG_USART6_RXDMA) && defined(CONFIG_USART6_TXDMA)
-      .ops       = &g_uart_txdma_ops,
-#else
-      .ops       = &g_uart_ops,
-#endif
-      .priv      = &g_usart6priv,
+    .recv        =
+    {
+      .size      = sizeof(g_usart6rxbuffer),
+      .buffer    = g_usart6rxbuffer,
     },
+    .xmit        =
+    {
+      .size      = sizeof(g_usart6txbuffer),
+      .buffer    = g_usart6txbuffer,
+    },
+#if defined(CONFIG_USART6_RXDMA) && defined(CONFIG_USART6_TXDMA)
+    .ops         = &g_uart_rxtxdma_ops,
+#elif defined(CONFIG_USART6_RXDMA) && !defined(CONFIG_USART6_TXDMA)
+    .ops         = &g_uart_rxdma_ops,
+#elif !defined(CONFIG_USART6_RXDMA) && defined(CONFIG_USART6_TXDMA)
+    .ops         = &g_uart_txdma_ops,
+#else
+    .ops         = &g_uart_ops,
+#endif
+    .priv        = &g_usart6priv,
+  },
 
   .irq           = STM32_IRQ_USART6,
   .rxftcfg       = CONFIG_USART6_RXFIFO_THRES,
@@ -1339,31 +1339,31 @@ static struct up_dev_s g_usart6priv =
 static struct up_dev_s g_uart7priv =
 {
   .dev =
-    {
+  {
 #if CONSOLE_UART == 7
-      .isconsole = true,
+    .isconsole   = true,
 #endif
-      .recv      =
-      {
-        .size    = sizeof(g_uart7rxbuffer),
-        .buffer  = g_uart7rxbuffer,
-      },
-      .xmit      =
-      {
-        .size    = sizeof(g_uart7txbuffer),
-        .buffer  = g_uart7txbuffer,
-      },
-#if defined(CONFIG_UART7_RXDMA) && defined(CONFIG_UART7_TXDMA)
-      .ops       = &g_uart_rxtxdma_ops,
-#elif defined(CONFIG_UART7_RXDMA) && !defined(CONFIG_UART7_TXDMA)
-      .ops       = &g_uart_rxdma_ops,
-#elif !defined(CONFIG_UART7_RXDMA) && defined(CONFIG_UART7_TXDMA)
-      .ops       = &g_uart_txdma_ops,
-#else
-      .ops       = &g_uart_ops,
-#endif
-      .priv      = &g_uart7priv,
+    .recv        =
+    {
+      .size      = sizeof(g_uart7rxbuffer),
+      .buffer    = g_uart7rxbuffer,
     },
+    .xmit        =
+    {
+      .size      = sizeof(g_uart7txbuffer),
+      .buffer    = g_uart7txbuffer,
+    },
+#if defined(CONFIG_UART7_RXDMA) && defined(CONFIG_UART7_TXDMA)
+    .ops         = &g_uart_rxtxdma_ops,
+#elif defined(CONFIG_UART7_RXDMA) && !defined(CONFIG_UART7_TXDMA)
+    .ops         = &g_uart_rxdma_ops,
+#elif !defined(CONFIG_UART7_RXDMA) && defined(CONFIG_UART7_TXDMA)
+    .ops         = &g_uart_txdma_ops,
+#else
+    .ops         = &g_uart_ops,
+#endif
+    .priv        = &g_uart7priv,
+  },
 
   .irq           = STM32_IRQ_UART7,
   .rxftcfg       = CONFIG_UART7_RXFIFO_THRES,
@@ -1409,31 +1409,31 @@ static struct up_dev_s g_uart7priv =
 static struct up_dev_s g_uart8priv =
 {
   .dev =
-    {
+  {
 #if CONSOLE_UART == 8
-      .isconsole = true,
+    .isconsole   = true,
 #endif
-      .recv      =
-      {
-        .size    = sizeof(g_uart8rxbuffer),
-        .buffer  = g_uart8rxbuffer,
-      },
-      .xmit      =
-      {
-        .size    = sizeof(g_uart8txbuffer),
-        .buffer  = g_uart8txbuffer,
-      },
-#if defined(CONFIG_UART8_RXDMA) && defined(CONFIG_UART8_TXDMA)
-      .ops       = &g_uart_rxtxdma_ops,
-#elif defined(CONFIG_UART8_RXDMA) && !defined(CONFIG_UART8_TXDMA)
-      .ops       = &g_uart_rxdma_ops,
-#elif !defined(CONFIG_UART8_RXDMA) && defined(CONFIG_UART8_TXDMA)
-      .ops       = &g_uart_txdma_ops,
-#else
-      .ops       = &g_uart_ops,
-#endif
-      .priv      = &g_uart8priv,
+    .recv        =
+    {
+      .size      = sizeof(g_uart8rxbuffer),
+      .buffer    = g_uart8rxbuffer,
     },
+    .xmit        =
+    {
+      .size      = sizeof(g_uart8txbuffer),
+      .buffer    = g_uart8txbuffer,
+    },
+#if defined(CONFIG_UART8_RXDMA) && defined(CONFIG_UART8_TXDMA)
+    .ops         = &g_uart_rxtxdma_ops,
+#elif defined(CONFIG_UART8_RXDMA) && !defined(CONFIG_UART8_TXDMA)
+    .ops         = &g_uart_rxdma_ops,
+#elif !defined(CONFIG_UART8_RXDMA) && defined(CONFIG_UART8_TXDMA)
+    .ops         = &g_uart_txdma_ops,
+#else
+    .ops         = &g_uart_ops,
+#endif
+    .priv        = &g_uart8priv,
+  },
 
   .irq           = STM32_IRQ_UART8,
   .rxftcfg       = CONFIG_UART8_RXFIFO_THRES,
@@ -2274,7 +2274,7 @@ static int up_dma_setup(struct uart_dev_s *dev)
        * worth of time to claim bytes before they are overwritten.
        */
 
-      stm32_dmastart(priv->rxdma, up_dma_rxcallback, (void *)priv, true);
+      stm32_dmastart(priv->rxdma, up_dma_rxcallback, priv, true);
     }
 #endif
 
@@ -3253,7 +3253,7 @@ static void up_dma_reenable(struct up_dev_s *priv)
    * worth of time to claim bytes before they are overwritten.
    */
 
-  stm32_dmastart(priv->rxdma, up_dma_rxcallback, (void *)priv, true);
+  stm32_dmastart(priv->rxdma, up_dma_rxcallback, priv, true);
 
   /* Clear DMA suspended flag. */
 
@@ -3352,7 +3352,7 @@ static void up_dma_txcallback(DMA_HANDLE handle, uint8_t status, void *arg)
           /* Start transmission with the callback on DMA completion */
 
           stm32_dmastart(priv->txdma, up_dma_txcallback,
-                        (void *)priv, false);
+                         priv, false);
 
           return;
         }
@@ -3438,7 +3438,7 @@ static void up_dma_send(struct uart_dev_s *dev)
 
   /* Start transmission with the callback on DMA completion */
 
-  stm32_dmastart(priv->txdma, up_dma_txcallback, (void *)priv, false);
+  stm32_dmastart(priv->txdma, up_dma_txcallback, priv, false);
 }
 #endif
 
@@ -3481,7 +3481,7 @@ static void up_dma_txint(struct uart_dev_s *dev, bool enable)
    * Instead, we use DMA interrupts that are activated once during boot
    * sequence. Furthermore we can use up_dma_txcallback() to handle staff at
    * half DMA transfer or after transfer completion (depending configuration,
-   * see stm32_dmastart(...) ).
+   * see stm32_dmastart(...)).
    */
 }
 #endif

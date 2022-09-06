@@ -2955,7 +2955,7 @@ int isx012_initialize(void)
 
   /* Initialize other information */
 
-  priv->state      = STATE_ISX012_POWEROFF;
+  priv->state = STATE_ISX012_POWEROFF;
   return OK;
 }
 

@@ -173,7 +173,7 @@ struct cxd56adc_dev_s
   uint8_t          fifomode;      /* fifo mode */
   struct scufifo_wm_s *wm;        /* water mark */
   struct math_filter_s *filter;   /* math filter */
-  struct scuev_notify_s * notify; /* notify */
+  struct scuev_notify_s *notify;  /* notify */
   mutex_t          lock;          /* exclusive mutex */
   int              crefs;         /* reference count */
 };

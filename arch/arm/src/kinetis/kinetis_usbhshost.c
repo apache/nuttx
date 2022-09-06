@@ -4042,10 +4042,6 @@ static int kinetis_epalloc(struct usbhost_driver_s *drvr,
   epinfo->xfrtype   = epdesc->xfrtype;
   epinfo->speed     = hport->speed;
 
-  /* The iocsem semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
   nxsem_init(&epinfo->iocsem, 0, 0);
 
   /* Success.. return an opaque reference to the endpoint information
@@ -5052,21 +5048,21 @@ struct usbhost_connection_s *kinetis_ehci_initialize(int controller)
   /* Sanity checks */
 
   DEBUGASSERT(controller == 0);
-  DEBUGASSERT(((uintptr_t) & g_asynchead & 0x1f) == 0);
+  DEBUGASSERT(((uintptr_t)&g_asynchead & 0x1f) == 0);
   DEBUGASSERT((sizeof(struct kinetis_qh_s) & 0x1f) == 0);
   DEBUGASSERT((sizeof(struct kinetis_qtd_s) & 0x1f) == 0);
 
 #  ifdef CONFIG_KINETIS_EHCI_PREALLOCATE
-  DEBUGASSERT(((uintptr_t) & g_qhpool & 0x1f) == 0);
-  DEBUGASSERT(((uintptr_t) & g_qtdpool & 0x1f) == 0);
+  DEBUGASSERT(((uintptr_t)&g_qhpool & 0x1f) == 0);
+  DEBUGASSERT(((uintptr_t)&g_qtdpool & 0x1f) == 0);
 #  endif
 
 #  ifndef CONFIG_USBHOST_INT_DISABLE
-  DEBUGASSERT(((uintptr_t) & g_intrhead & 0x1f) == 0);
+  DEBUGASSERT(((uintptr_t)&g_intrhead & 0x1f) == 0);
 #    ifdef CONFIG_KINETIS_EHCI_PREALLOCATE
-  DEBUGASSERT(((uintptr_t) g_framelist & 0xfff) == 0);
+  DEBUGASSERT(((uintptr_t)g_framelist & 0xfff) == 0);
 #    endif
-#  endif                               /* CONFIG_USBHOST_INT_DISABLE */
+#  endif /* CONFIG_USBHOST_INT_DISABLE */
 
   /* Software Configuration *************************************************/
 
@@ -5300,7 +5296,7 @@ struct usbhost_connection_s *kinetis_ehci_initialize(int controller)
 
   /* Attach the periodic QH to Period Frame List */
 
-  physaddr = kinetis_physramaddr((uintptr_t) & g_intrhead);
+  physaddr = kinetis_physramaddr((uintptr_t)&g_intrhead);
   for (i = 0; i < FRAME_LIST_SIZE; i++)
     {
       g_framelist[i] = kinetis_swap32(physaddr) | PFL_TYP_QH;

@@ -384,7 +384,7 @@
      (MCAN0_TXEVENTFIFO_BYTES >> 2)
 
 #  define MCAN0_TXFIFIOQ_BYTES \
-     MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN0_TXFIFOQ_SIZE *  \
+     MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN0_TXFIFOQ_SIZE * \
                    (MCAN0_TXBUFFER_ELEMENT_SIZE + 8))
 #  define MCAN0_TXFIFIOQ_WORDS (MCAN0_TXFIFIOQ_BYTES >> 2)
 
@@ -669,7 +669,7 @@
      (MCAN1_TXEVENTFIFO_BYTES >> 2)
 
 #  define MCAN1_TXFIFIOQ_BYTES \
-     MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN1_TXFIFOQ_SIZE *  \
+     MCAN_ALIGN_UP(CONFIG_SAMV7_MCAN1_TXFIFOQ_SIZE * \
                    (MCAN1_TXBUFFER_ELEMENT_SIZE + 8))
 #  define MCAN1_TXFIFIOQ_WORDS (MCAN1_TXFIFIOQ_BYTES >> 2)
 
@@ -1006,7 +1006,7 @@ static uint32_t g_mcan0_msgram[MCAN0_MSGRAM_WORDS]
 
 /* Constant configuration */
 
-static struct sam_config_s g_mcan0const =
+static const struct sam_config_s g_mcan0const =
 {
   .rxpinset         = GPIO_MCAN0_RX,
   .txpinset         = GPIO_MCAN0_TX,
@@ -1104,7 +1104,7 @@ static uint32_t g_mcan1_msgram[MCAN1_MSGRAM_WORDS]
 
 /* MCAN1 constant configuration */
 
-static struct sam_config_s g_mcan1const =
+static const struct sam_config_s g_mcan1const =
 {
   .rxpinset         = GPIO_MCAN1_RX,
   .txpinset         = GPIO_MCAN1_TX,

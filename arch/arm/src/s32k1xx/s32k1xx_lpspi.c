@@ -255,7 +255,7 @@ static struct s32k1xx_lpspidev_s g_lpspi0dev =
 {
   .spidev       =
   {
-    &g_spi0ops
+    .ops        = &g_spi0ops,
   },
   .spibase      = S32K1XX_LPSPI0_BASE,
 #ifdef CONFIG_S32K1XX_LPSPI_INTERRUPTS
@@ -306,7 +306,7 @@ static struct s32k1xx_lpspidev_s g_lpspi1dev =
 {
   .spidev       =
   {
-    &g_spi1ops
+    .ops        = &g_spi1ops,
   },
   .spibase      = S32K1XX_LPSPI1_BASE,
 #ifdef CONFIG_S32K1XX_LPSPI_INTERRUPTS
@@ -357,7 +357,7 @@ static struct s32k1xx_lpspidev_s g_lpspi2dev =
 {
   .spidev       =
   {
-    &g_spi2ops
+    .ops        = &g_spi2ops,
   },
   .spibase      = S32K1XX_LPSPI2_BASE,
 #ifdef CONFIG_S32K1XX_LPSPI_INTERRUPTS
@@ -1369,8 +1369,8 @@ static void s32k1xx_lpspi_exchange_nodma(struct spi_dev_s *dev,
        * take care of big endian mode of hardware !!
        */
 
-      const uint8_t *src = (const uint8_t *)txbuffer;
-      uint8_t *dest = (uint8_t *) rxbuffer;
+      const uint8_t *src = txbuffer;
+      uint8_t *dest = rxbuffer;
       uint32_t word = 0x0;
 #ifdef CONFIG_S32K1XX_LPSPI_DWORD
       uint32_t word1 = 0x0;
@@ -1447,8 +1447,8 @@ static void s32k1xx_lpspi_exchange_nodma(struct spi_dev_s *dev,
     {
       /* 32-bit or 64 bit, word size memory transfers */
 
-      const uint32_t *src = (const uint32_t *)txbuffer;
-      uint32_t *dest = (uint32_t *) rxbuffer;
+      const uint32_t *src = txbuffer;
+      uint32_t *dest = rxbuffer;
       uint32_t word = 0x0;
 #ifdef CONFIG_S32K1XX_LPSPI_DWORD
       uint32_t word1 = 0x0;
@@ -1528,8 +1528,8 @@ static void s32k1xx_lpspi_exchange_nodma(struct spi_dev_s *dev,
     {
       /* 16-bit mode */
 
-      const uint16_t *src = (const uint16_t *)txbuffer;
-      uint16_t *dest = (uint16_t *) rxbuffer;
+      const uint16_t *src = txbuffer;
+      uint16_t *dest = rxbuffer;
       uint16_t word;
 
       while (nwords-- > 0)
@@ -1563,8 +1563,8 @@ static void s32k1xx_lpspi_exchange_nodma(struct spi_dev_s *dev,
     {
       /* 8-bit mode */
 
-      const uint8_t *src = (const uint8_t *)txbuffer;
-      uint8_t *dest = (uint8_t *) rxbuffer;
+      const uint8_t *src = txbuffer;
+      uint8_t *dest = rxbuffer;
       uint8_t word;
 
       while (nwords-- > 0)

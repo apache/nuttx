@@ -1085,8 +1085,8 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
 
 static void spi_select(struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
-  struct xmc4_spics_s   *spics  = (struct xmc4_spics_s *)dev;
-  struct xmc4_spidev_s  *spi    = spi_device(spics);
+  struct xmc4_spics_s  *spics = (struct xmc4_spics_s *)dev;
+  struct xmc4_spidev_s *spi   = spi_device(spics);
 
   /* Are we selecting or de-selecting the device? */
 

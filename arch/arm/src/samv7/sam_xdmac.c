@@ -189,7 +189,7 @@ static const struct sam_pidmap_s g_xdmac_txchan[] =
 
 /* This array describes the available link list descriptors */
 
-struct chnext_view1_s g_lldesc[CONFIG_SAMV7_NLLDESC];
+static struct chnext_view1_s g_lldesc[CONFIG_SAMV7_NLLDESC];
 
 /* This array describes the state of each XDMAC channel 0 */
 

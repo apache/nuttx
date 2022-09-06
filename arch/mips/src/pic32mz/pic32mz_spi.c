@@ -281,7 +281,7 @@ static struct pic32mz_dev_s g_spi1dev =
 {
   .spidev            =
   {
-    &g_spi1ops
+    .ops             = &g_spi1ops,
   },
   .config            = &g_spi1config,
   .lock              = NXMUTEX_INITIALIZER,
@@ -334,7 +334,7 @@ static struct pic32mz_dev_s g_spi2dev =
 {
   .spidev            =
   {
-    &g_spi2ops
+    .ops             = &g_spi2ops,
   },
   .config            = &g_spi2config,
   .lock              = NXMUTEX_INITIALIZER,
@@ -387,7 +387,7 @@ static struct pic32mz_dev_s g_spi3dev =
 {
   .spidev            =
   {
-    &g_spi3ops
+    .ops             = &g_spi3ops,
   },
   .config            = &g_spi3config,
   .lock              = NXMUTEX_INITIALIZER,
@@ -440,7 +440,7 @@ static struct pic32mz_dev_s g_spi4dev =
 {
   .spidev            =
   {
-    &g_spi4ops
+    .ops             = &g_spi4ops,
   },
   .config            = &g_spi4config,
   .lock              = NXMUTEX_INITIALIZER,
@@ -493,7 +493,7 @@ static struct pic32mz_dev_s g_spi5dev =
 {
   .spidev            =
   {
-    &g_spi5ops
+    .ops             = &g_spi5ops,
   },
   .config            = &g_spi5config,
   .lock              = NXMUTEX_INITIALIZER,
@@ -546,7 +546,7 @@ static struct pic32mz_dev_s g_spi6dev =
 {
   .spidev            =
   {
-    &g_spi6ops
+    .ops             = &g_spi6ops,
   },
   .config            = &g_spi6config,
   .lock              = NXMUTEX_INITIALIZER,
@@ -1752,7 +1752,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
   priv->result = -EBUSY;
 
-  ret = pic32mz_dma_start(priv->rxdma, spi_dmarxcallback, (void *)priv);
+  ret = pic32mz_dma_start(priv->rxdma, spi_dmarxcallback, priv);
   if (ret < 0)
     {
       spierr("ERROR: RX DMA start failed: %d\n", ret);
@@ -1761,7 +1761,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
   spi_rxdma_sample(priv, DMA_AFTER_START);
 
-  ret = pic32mz_dma_start(priv->txdma, spi_dmatxcallback, (void *)priv);
+  ret = pic32mz_dma_start(priv->txdma, spi_dmatxcallback, priv);
   if (ret < 0)
     {
       spierr("ERROR: TX DMA start failed: %d\n", ret);

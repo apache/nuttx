@@ -160,7 +160,7 @@ struct cxd56_gnss_dev_s
   uint8_t                         num_open;
   uint8_t                         notify_data;
   struct file                     cepfp;
-  void *                          cepbuf;
+  void                           *cepbuf;
   struct pollfd                  *fds[CONFIG_CXD56_GNSS_NPOLLWAITERS];
 #if CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0
   struct cxd56_gnss_sig_s         sigs[CONFIG_CXD56_GNSS_NSIGNALRECEIVERS];
@@ -1797,8 +1797,8 @@ static int cxd56_gnss_select_rtk_satellite(struct file *filep,
 static int cxd56_gnss_get_rtk_satellite(struct file *filep,
                                         unsigned long arg)
 {
-  int       ret;
-  uint32_t  gnss = 0;
+  int      ret;
+  uint32_t gnss = 0;
 
   if (!arg)
     {
@@ -2580,7 +2580,7 @@ static int cxd56_gnss_initialize(struct cxd56_gnss_dev_s *dev)
 
 static int cxd56_gnss_open(struct file *filep)
 {
-  struct inode *           inode;
+  struct inode            *inode;
   struct cxd56_gnss_dev_s *priv;
   int                      ret = OK;
   int                      retry = 50;
@@ -2687,7 +2687,7 @@ success:
 
 static int cxd56_gnss_close(struct file *filep)
 {
-  struct inode *          inode;
+  struct inode            *inode;
   struct cxd56_gnss_dev_s *priv;
   int                     ret = OK;
 
@@ -2829,7 +2829,7 @@ static ssize_t cxd56_gnss_write(struct file *filep,
 static int cxd56_gnss_ioctl(struct file *filep, int cmd,
                             unsigned long arg)
 {
-  struct inode *          inode;
+  struct inode            *inode;
   struct cxd56_gnss_dev_s *priv;
   int ret;
 

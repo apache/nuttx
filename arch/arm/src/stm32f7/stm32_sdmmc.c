@@ -1598,7 +1598,7 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
 #ifdef HAVE_SDMMC_SDIO_MODE
   uint32_t mask;
 #endif
-  struct stm32_dev_s *priv = (struct stm32_dev_s *) arg;
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)arg;
 
   DEBUGASSERT(priv != NULL);
 
