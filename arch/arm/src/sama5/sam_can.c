@@ -287,8 +287,17 @@ static const struct sam_config_s g_can0const =
   },
 };
 
-static struct sam_can_s g_can0priv;
-static struct can_dev_s g_can0dev;
+static struct sam_can_s g_can0priv =
+{
+  .config           = &g_can0const,
+  .freemb           = CAN_ALL_MAILBOXES,
+  .lock             = NXMUTEX_INITIALIZER,
+};
+static struct can_dev_s g_can0dev =
+{
+  .cd_ops           = &g_canops,
+  .cd_priv          = &g_can0priv,
+};
 #endif
 
 #ifdef CONFIG_SAMA5_CAN1
@@ -322,8 +331,17 @@ static const struct sam_config_s g_can1const =
   },
 };
 
-static struct sam_can_s g_can1priv;
-static struct can_dev_s g_can1dev;
+static struct sam_can_s g_can1priv =
+{
+  .config           = &g_can1const,
+  .freemb           = CAN_ALL_MAILBOXES,
+  .lock             = NXMUTEX_INITIALIZER,
+};
+static struct can_dev_s g_can1dev =
+{
+  .cd_ops           = &g_canops,
+  .cd_priv          = &g_can1priv,
+};
 #endif
 
 /****************************************************************************
@@ -1902,7 +1920,6 @@ struct can_dev_s *sam_caninitialize(int port)
 {
   struct can_dev_s *dev;
   struct sam_can_s *priv;
-  const struct sam_config_s *config;
 
   caninfo("CAN%d\n", port);
 
@@ -1915,9 +1932,8 @@ struct can_dev_s *sam_caninitialize(int port)
     {
       /* Select the CAN0 device structure */
 
-      dev    = &g_can0dev;
-      priv   = &g_can0priv;
-      config = &g_can0const;
+      dev  = &g_can0dev;
+      priv = &g_can0priv;
     }
   else
 #endif
@@ -1926,9 +1942,8 @@ struct can_dev_s *sam_caninitialize(int port)
     {
       /* Select the CAN1 device structure */
 
-      dev    = &g_can1dev;
-      priv   = &g_can1priv;
-      config = &g_can1const;
+      dev  = &g_can1dev;
+      priv = &g_can1priv;
     }
   else
 #endif
@@ -1943,15 +1958,7 @@ struct can_dev_s *sam_caninitialize(int port)
     {
       /* Yes, then perform one time data initialization */
 
-      memset(priv, 0, sizeof(struct sam_can_s));
-      priv->config      = config;
-      priv->freemb      = CAN_ALL_MAILBOXES;
       priv->initialized = true;
-
-      nxmutex_init(&priv->lock);
-
-      dev->cd_ops       = &g_canops;
-      dev->cd_priv      = (void *)priv;
 
       /* And put the hardware in the initial state */
 

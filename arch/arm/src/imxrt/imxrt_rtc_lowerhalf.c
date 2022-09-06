@@ -128,7 +128,8 @@ static const struct rtc_ops_s g_rtc_ops =
 
 static struct imxrt_lowerhalf_s g_rtc_lowerhalf =
 {
-  .ops         = &g_rtc_ops,
+  .ops     = &g_rtc_ops,
+  .devlock = NXMUTEX_INITIALIZER,
 };
 
 /****************************************************************************
@@ -514,7 +515,6 @@ static int imxrt_rdalarm(struct rtc_lowerhalf_s *lower,
 
 struct rtc_lowerhalf_s *imxrt_rtc_lowerhalf(void)
 {
-  nxmutex_init(&g_rtc_lowerhalf.devlock);
   return (struct rtc_lowerhalf_s *)&g_rtc_lowerhalf;
 }
 

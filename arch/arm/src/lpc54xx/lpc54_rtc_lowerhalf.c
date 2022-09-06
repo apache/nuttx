@@ -146,6 +146,7 @@ static const struct rtc_ops_s g_rtc_ops =
 static struct lpc54_lowerhalf_s g_rtc_lowerhalf =
 {
   .ops           = &g_rtc_ops,
+  .devlock = NXMUTEX_INITIALIZER,
 };
 
 /****************************************************************************
@@ -639,7 +640,6 @@ static int lpc54_cancelperiodic(struct rtc_lowerhalf_s *lower, int id)
 
 struct rtc_lowerhalf_s *lpc54_rtc_lowerhalf(void)
 {
-  nxmutex_init(&g_rtc_lowerhalf.devlock);
   return (struct rtc_lowerhalf_s *)&g_rtc_lowerhalf;
 }
 

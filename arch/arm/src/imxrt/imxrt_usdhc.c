@@ -422,7 +422,8 @@ struct imxrt_dev_s g_sdhcdev[IMXRT_MAX_SDHC_DEV_SLOTS] =
       .dmasendsetup     = imxrt_sendsetup,
 #endif
 #endif
-    }
+    },
+    .waitsem = SEM_INITIALIZER(0),
   },
 #endif
 
@@ -479,7 +480,8 @@ struct imxrt_dev_s g_sdhcdev[IMXRT_MAX_SDHC_DEV_SLOTS] =
       .dmarecvsetup     = imxrt_recvsetup,
       .dmasendsetup     = imxrt_sendsetup,
 #endif
-    }
+    },
+    .waitsem = SEM_INITIALIZER(0),
   }
 #endif
 #endif
@@ -3215,11 +3217,8 @@ struct sdio_dev_s *imxrt_usdhc_initialize(int slotno)
   DEBUGASSERT(slotno < IMXRT_MAX_SDHC_DEV_SLOTS);
   struct imxrt_dev_s *priv = &g_sdhcdev[slotno];
 
-  /* Initialize the USDHC slot structure data structure
-   * Initialize semaphores
-   */
+  /* Initialize the USDHC slot structure data structure */
 
-  nxsem_init(&priv->waitsem, 0, 0);
   switch (priv->addr)
     {
     case IMXRT_USDHC1_BASE:

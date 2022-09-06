@@ -89,7 +89,10 @@ enum
  * Private Data
  ****************************************************************************/
 
-static struct rng_s g_rng;
+static struct rng_s g_rng =
+{
+  NXMUTEX_INITIALIZER,
+};
 
 #ifdef CONFIG_BOARD_ENTROPY_POOL
 /* Entropy pool structure can be provided by board source. Use for this is,
@@ -357,21 +360,6 @@ static void rng_buf_internal(FAR uint8_t *bytes, size_t nbytes)
     }
 }
 
-static void rng_init(void)
-{
-  cryptinfo("Initializing RNG\n");
-
-  memset(&g_rng, 0, sizeof(struct rng_s));
-  nxmutex_init(&g_rng.rd_lock);
-
-  /* We do not initialize output here because this is called
-   * quite early in boot and there may not be enough entropy.
-   *
-   * Board level may define CONFIG_BOARD_INITRNGSEED if it implements
-   * early random seeding.
-   */
-}
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -517,8 +505,6 @@ void up_rngreseed(void)
 
 void up_randompool_initialize(void)
 {
-  rng_init();
-
 #ifdef CONFIG_BOARD_INITRNGSEED
   board_init_rngseed();
 #endif

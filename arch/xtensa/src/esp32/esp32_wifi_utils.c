@@ -87,7 +87,10 @@ struct wifi_scan_result
  * Private Data
  ****************************************************************************/
 
-static struct wifi_scan_result g_scan_priv;
+static struct wifi_scan_result g_scan_priv =
+{
+  .scan_signal = SEM_INITIALIZER(0),
+};
 static uint8_t g_channel_num = 0;
 static uint8_t g_channel_list[CHANNEL_MAX_NUM];
 
@@ -539,38 +542,4 @@ scan_result_full:
 
   priv->scan_status = ESP_SCAN_DONE;
   nxsem_post(&priv->scan_signal);
-}
-
-/****************************************************************************
- * Name: esp_wifi_scan_init
- *
- * Description:
- *   Initialize ESP32 Wi-Fi scan parameter.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   OK is returned on success. Otherwise, a negated errno value is returned.
- *
- ****************************************************************************/
-
-int esp_wifi_scan_init(void)
-{
-  int ret;
-  struct wifi_scan_result *scan_priv = &g_scan_priv;
-
-  /* Initialize the scan structure */
-
-  memset(scan_priv, 0, sizeof(*scan_priv));
-
-  /* Init scan signal */
-
-  if ((ret = nxsem_init(&scan_priv->scan_signal, 0, 0)) != OK)
-    {
-      wlerr("ERROR: Initialization scan signal failed: %d\n", ret);
-      return ret;
-    }
-
-  return ret;
 }

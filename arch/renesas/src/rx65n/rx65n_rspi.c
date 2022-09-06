@@ -308,13 +308,17 @@ static struct rx65n_rspidev_s g_rspi0dev =
   .rspigrpbase = RX65N_GRPAL0_ADDR,
   .rspierimask = RX65N_GRPAL0_SPEI0_MASK,
   .rspiidlimask = RX65N_GRPAL0_SPII0_MASK,
+  .waitsem = SEM_INITIALIZER(0),
 #endif
 #if defined(CONFIG_RX65N_RSPI_DTC_DT_MODE)
   .p_txdt  = &g_tx0dt,
   .p_rxdt  = &g_rx0dt,
+  .txsem = SEM_INITIALIZER(0),
+  .rxsem = SEM_INITIALIZER(0),
   .txvec = RX65N_RSPI0_TXVECT,
   .rxvec = RX65N_RSPI0_RXVECT,
 #endif
+  .lock = NXMUTEX_INITIALIZER,
 };
 #endif
 
@@ -370,13 +374,17 @@ static struct rx65n_rspidev_s g_rspi1dev =
   .rspigrpbase = RX65N_GRPAL0_ADDR,
   .rspierimask = RX65N_GRPAL0_SPEI1_MASK,
   .rspiidlimask = RX65N_GRPAL0_SPII1_MASK,
+  .waitsem = SEM_INITIALIZER(0),
 #endif
 #if defined(CONFIG_RX65N_RSPI_DTC_DT_MODE)
   .p_txdt = &g_tx1dt,
   .p_rxdt = &g_rx1dt,
+  .txsem = SEM_INITIALIZER(0),
+  .rxsem = SEM_INITIALIZER(0),
   .txvec = RX65N_RSPI1_TXVECT,
   .rxvec = RX65N_RSPI1_RXVECT,
 #endif
+  .lock = NXMUTEX_INITIALIZER,
 };
 #endif
 
@@ -432,13 +440,17 @@ static struct rx65n_rspidev_s g_rspi2dev =
   .rspigrpbase = RX65N_GRPAL0_ADDR,
   .rspierimask = RX65N_GRPAL0_SPEI2_MASK,
   .rspiidlimask = RX65N_GRPAL0_SPII2_MASK,
+  .waitsem = SEM_INITIALIZER(0),
 #endif
 #if defined(CONFIG_RX65N_RSPI_DTC_DT_MODE)
   .p_txdt = &g_tx2dt,
   .p_rxdt = &g_rx2dt,
+  .txsem = SEM_INITIALIZER(0),
+  .rxsem = SEM_INITIALIZER(0),
   .txvec = RX65N_RSPI2_TXVECT,
   .rxvec = RX65N_RSPI2_RXVECT,
 #endif
+  .lock = NXMUTEX_INITIALIZER,
 };
 #endif
 
@@ -2209,17 +2221,6 @@ static void rspi_bus_initialize(FAR struct rx65n_rspidev_s *priv)
 
 #if  defined(CONFIG_RX65N_RSPI_DTC_DT_MODE)
   int ret;
-#endif
-
-#ifdef CONFIG_RX65N_RSPI_SW_DT_MODE
-#ifndef CONFIG_SPI_POLLWAIT
-  nxsem_init(&priv->waitsem, 0, 0);
-#endif
-#elif defined(CONFIG_RX65N_RSPI_DTC_DT_MODE)
-  /* Initialize the SPI semaphores that is used to wait for DTC completion */
-
-  nxsem_init(&priv->rxsem, 0, 0);
-  nxsem_init(&priv->txsem, 0, 0);
 
   /* Prepare Transmit and receive parameter */
 
@@ -2243,7 +2244,6 @@ static void rspi_bus_initialize(FAR struct rx65n_rspidev_s *priv)
     }
 
 #endif
-  nxmutex_init(&priv->lock);
 
   /* Initialize control register */
 

@@ -152,6 +152,7 @@ static const struct rtc_ops_s g_rtc_ops =
 static struct max326_lowerhalf_s g_rtc_lowerhalf =
 {
   .ops        = &g_rtc_ops,
+  .devlock = NXMUTEX_INITIALIZER,
 };
 
 /****************************************************************************
@@ -747,7 +748,6 @@ static int max326_cancelperiodic(struct rtc_lowerhalf_s *lower, int id)
 
 struct rtc_lowerhalf_s *max326_rtc_lowerhalf(void)
 {
-  nxmutex_init(&g_rtc_lowerhalf.devlock);
   return (struct rtc_lowerhalf_s *)&g_rtc_lowerhalf;
 }
 

@@ -114,7 +114,10 @@ struct btnet_wrstate_s
  * the unharvested results.
  */
 
-static struct btnet_scanstate_s     g_scanstate;
+static struct btnet_scanstate_s g_scanstate =
+{
+  NXMUTEX_INITIALIZER,
+};
 
 /****************************************************************************
  * Private Functions
@@ -618,7 +621,6 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
             {
               /* Initialize scan state */
 
-              nxmutex_init(&g_scanstate.bs_lock);
               g_scanstate.bs_scanning = true;
               g_scanstate.bs_head     = 0;
               g_scanstate.bs_tail     = 0;
@@ -629,7 +631,6 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
 
               if (ret < 0)
                 {
-                  nxmutex_destroy(&g_scanstate.bs_lock);
                   g_scanstate.bs_scanning = false;
                 }
             }
@@ -664,7 +665,6 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
           ret = bt_stop_scanning();
           wlinfo("Stop scanning: %d\n", ret);
 
-          nxmutex_destroy(&g_scanstate.bs_lock);
           g_scanstate.bs_scanning = false;
         }
         break;

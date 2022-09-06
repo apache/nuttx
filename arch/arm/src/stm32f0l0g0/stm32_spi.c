@@ -325,7 +325,10 @@ static struct stm32_spidev_s g_spi1dev =
 
   .rxch     = DMACHAN_SPI1_RX,
   .txch     = DMACHAN_SPI1_TX,
+  .rxsem    = SEM_INITIALIZER(0),
+  .txsem    = SEM_INITIALIZER(0),
 #endif
+  .lock     = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_PM
   .pm_cb.prepare = spi_pm_prepare,
 #endif
@@ -379,7 +382,10 @@ static struct stm32_spidev_s g_spi2dev =
 #ifdef CONFIG_STM32F0L0G0_SPI2_DMA
   .rxch     = DMACHAN_SPI2_RX,
   .txch     = DMACHAN_SPI2_TX,
+  .rxsem    = SEM_INITIALIZER(0),
+  .txsem    = SEM_INITIALIZER(0),
 #endif
+  .lock     = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_PM
   .pm_cb.prepare = spi_pm_prepare,
 #endif
@@ -433,7 +439,10 @@ static struct stm32_spidev_s g_spi3dev =
 #ifdef CONFIG_STM32F0L0G0_SPI3_DMA
   .rxch     = DMACHAN_SPI3_RX,
   .txch     = DMACHAN_SPI3_TX,
+  .rxsem    = SEM_INITIALIZER(0),
+  .txsem    = SEM_INITIALIZER(0),
 #endif
+  .lock     = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_PM
   .pm_cb.prepare = spi_pm_prepare,
 #endif
@@ -1946,20 +1955,9 @@ static void spi_bus_initialize(struct stm32_spidev_s *priv)
 
   spi_putreg(priv, STM32_SPI_CRCPR_OFFSET, 7);
 
-  /* Initialize the SPI mutex that enforces mutually exclusive access */
-
-  nxmutex_init(&priv->lock);
-
 #ifdef CONFIG_STM32F0L0G0_SPI_DMA
   if (priv->rxch && priv->txch)
     {
-      /* Initialize the SPI semaphores that is used to wait for DMA
-       * completion
-       */
-
-      nxsem_init(&priv->rxsem, 0, 0);
-      nxsem_init(&priv->txsem, 0, 0);
-
       /* Get DMA channels.  NOTE: stm32_dmachannel() will always assign the
        * DMA channel. If the channel is not available, then
        * stm32_dmachannel() will block and wait until the channel becomes

@@ -204,20 +204,50 @@ static void tiva_adc_dump_dev(void);
 static struct adc_dev_s      dev0;
 static struct tiva_adc_s     adc0;
 
-static struct tiva_adc_sse_s sse00;
-static struct tiva_adc_sse_s sse01;
-static struct tiva_adc_sse_s sse02;
-static struct tiva_adc_sse_s sse03;
+static struct tiva_adc_sse_s sse00 =
+{
+  .lock = NXMUTEX_INITIALIZER,
+};
+
+static struct tiva_adc_sse_s sse01 =
+{
+  .lock = NXMUTEX_INITIALIZER,
+};
+
+static struct tiva_adc_sse_s sse02 =
+{
+  .lock = NXMUTEX_INITIALIZER,
+};
+
+static struct tiva_adc_sse_s sse03 =
+{
+  .lock = NXMUTEX_INITIALIZER,
+};
 #endif
 
 #ifdef CONFIG_TIVA_ADC1
 static struct adc_dev_s      dev1;
 static struct tiva_adc_s     adc1;
 
-static struct tiva_adc_sse_s sse10;
-static struct tiva_adc_sse_s sse11;
-static struct tiva_adc_sse_s sse12;
-static struct tiva_adc_sse_s sse13;
+static struct tiva_adc_sse_s sse10 =
+{
+  .lock = NXMUTEX_INITIALIZER,
+};
+
+static struct tiva_adc_sse_s sse11 =
+{
+  .lock = NXMUTEX_INITIALIZER,
+};
+
+static struct tiva_adc_sse_s sse12 =
+{
+  .lock = NXMUTEX_INITIALIZER,
+};
+
+static struct tiva_adc_sse_s sse13 =
+{
+  .lock = NXMUTEX_INITIALIZER,
+};
 #endif
 
 /* Offer run-time ADC objects in array form to help reduce the reliance on
@@ -812,7 +842,6 @@ static struct tiva_adc_s *tiva_adc_struct_init(struct tiva_adc_cfg_s *cfg)
                     {
                       sse->adc = cfg->adc;
                       sse->num = s;
-                      nxmutex_init(&sse->lock);
                       sse->ena = false;
                       sse->cfg = true;
                     }

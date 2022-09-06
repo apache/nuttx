@@ -59,7 +59,6 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int esp32s2_rng_initialize(void);
 static ssize_t esp32s2_rng_read(struct file *filep, char *buffer,
                                 size_t buflen);
 
@@ -77,7 +76,10 @@ struct rng_dev_s
  * Private Data
  ****************************************************************************/
 
-static struct rng_dev_s g_rngdev;
+static struct rng_dev_s g_rngdev =
+{
+  .rd_lock = NXMUTEX_INITIALIZER,
+};
 
 static const struct file_operations g_rngops =
 {
@@ -122,16 +124,6 @@ uint32_t IRAM_ATTR esp_random(void)
 
   last_ccount = ccount;
   return result ^ getreg32(WDEV_RND_REG);
-}
-
-static int esp32s2_rng_initialize(void)
-{
-  _info("Initializing RNG\n");
-
-  memset(&g_rngdev, 0, sizeof(struct rng_dev_s));
-  nxmutex_init(&g_rngdev.rd_lock);
-
-  return OK;
 }
 
 /****************************************************************************
@@ -192,7 +184,6 @@ static ssize_t esp32s2_rng_read(struct file *filep, char *buffer,
 #ifdef CONFIG_DEV_RANDOM
 void devrandom_register(void)
 {
-  esp32s2_rng_initialize();
   register_driver("/dev/random", &g_rngops, 0444, NULL);
 }
 #endif
@@ -214,9 +205,6 @@ void devrandom_register(void)
 #ifdef CONFIG_DEV_URANDOM_ARCH
 void devurandom_register(void)
 {
-#ifndef CONFIG_DEV_RANDOM
-  esp32s2_rng_initialize();
-#endif
   register_driver("dev/urandom", &g_rngops, 0444, NULL);
 }
 #endif

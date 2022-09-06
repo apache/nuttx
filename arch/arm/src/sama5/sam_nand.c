@@ -272,16 +272,36 @@ static void     nand_reset(struct sam_nandcs_s *priv);
  */
 
 #ifdef CONFIG_SAMA5_EBICS0_NAND
-static struct sam_nandcs_s g_cs0nand;
+static struct sam_nandcs_s g_cs0nand =
+{
+#ifdef CONFIG_SAMA5_NAND_DMA
+  .waitsem = SEM_INITIALIZER(0)
+#endif
+};
 #endif
 #ifdef CONFIG_SAMA5_EBICS1_NAND
-static struct sam_nandcs_s g_cs1nand;
+static struct sam_nandcs_s g_cs1nand =
+{
+#ifdef CONFIG_SAMA5_NAND_DMA
+  .waitsem = SEM_INITIALIZER(0)
+#endif
+};
 #endif
 #ifdef CONFIG_SAMA5_EBICS2_NAND
-static struct sam_nandcs_s g_cs2nand;
+static struct sam_nandcs_s g_cs2nand =
+{
+#ifdef CONFIG_SAMA5_NAND_DMA
+  .waitsem = SEM_INITIALIZER(0)
+#endif
+};
 #endif
 #ifdef CONFIG_SAMA5_EBICS3_NAND
-static struct sam_nandcs_s g_cs3nand;
+static struct sam_nandcs_s g_cs3nand =
+{
+#ifdef CONFIG_SAMA5_NAND_DMA
+  .waitsem = SEM_INITIALIZER(0)
+#endif
+};
 #endif
 
 /****************************************************************************
@@ -290,7 +310,15 @@ static struct sam_nandcs_s g_cs3nand;
 
 /* NAND global state */
 
-struct sam_nand_s g_nand;
+struct sam_nand_s g_nand =
+{
+#if NAND_NBANKS > 1
+  .lock = NXMUTEX_INITIALIZER,
+#endif
+#ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
+  .waitsem = SEM_INITIALIZER(0),
+#endif
+};
 
 /****************************************************************************
  * Private Functions
@@ -2966,7 +2994,6 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
 
   /* Initialize the device structure */
 
-  memset(priv, 0, sizeof(struct sam_nandcs_s));
   priv->raw.cmdaddr    = cmdaddr;
   priv->raw.addraddr   = addraddr;
   priv->raw.dataaddr   = dataaddr;
@@ -2980,34 +3007,15 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
 #endif
   priv->cs             = cs;
 
-#ifdef CONFIG_SAMA5_NAND_DMA
-  nxsem_init(&priv->waitsem, 0, 0);
-#endif
-
   /* Perform one-time, global NFC/PMECC initialization */
 
   if (!g_nand.initialized)
     {
-      /* Initialize the global nand state structure */
-
-#if NAND_NBANKS > 1
-      nxmutex_init(&g_nand.lock);
-#endif
-
-#ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
-      nxsem_init(&g_nand.waitsem, 0, 0);
-#endif
-
       /* Enable the NAND FLASH Controller (The NFC is always used) */
 
       nand_putreg(SAM_HSMC_CTRL, HSMC_CTRL_NFCEN);
 
-#ifdef CONFIG_SAMA5_HAVE_PMECC
-      /* Perform one-time initialization of the PMECC */
-
-      pmecc_initialize();
-
-#else
+#ifndef CONFIG_SAMA5_HAVE_PMECC
       /* Disable the PMECC if it is not being used */
 
       nand_putreg(SAM_HSMC_PMECCTRL, HSMC_PMECCTRL_RST);

@@ -252,9 +252,12 @@ static struct s32k3xx_lpspidev_s g_lpspi0dev =
 #ifdef CONFIG_S32K3XX_LPSPI_INTERRUPTS
   .spiirq       = S32K3XX_IRQ_LPSPI0,
 #endif
+  .lock         = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_S32K3XX_LPSPI0_DMA
   .rxch         = DMA_REQ_LPSPI0_RX,
   .txch         = DMA_REQ_LPSPI0_TX,
+  .rxsem        = SEM_INITIALIZER(0),
+  .txsem        = SEM_INITIALIZER(0),
 #endif
   .pincfg       = CONFIG_S32K3XX_LPSPI0_PINCFG,
 };
@@ -299,9 +302,12 @@ static struct s32k3xx_lpspidev_s g_lpspi1dev =
 #ifdef CONFIG_S32K3XX_LPSPI_INTERRUPTS
   .spiirq       = S32K3XX_IRQ_LPSPI1,
 #endif
+  .lock         = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_S32K3XX_LPSPI1_DMA
   .rxch         = DMA_REQ_LPSPI1_RX,
   .txch         = DMA_REQ_LPSPI1_TX,
+  .rxsem        = SEM_INITIALIZER(0),
+  .txsem        = SEM_INITIALIZER(0),
 #endif
   .pincfg       = CONFIG_S32K3XX_LPSPI1_PINCFG,
 };
@@ -346,9 +352,12 @@ static struct s32k3xx_lpspidev_s g_lpspi2dev =
 #ifdef CONFIG_S32K3XX_LPSPI_INTERRUPTS
   .spiirq       = S32K3XX_IRQ_LPSPI2,
 #endif
+  .lock         = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_S32K3XX_LPSPI2_DMA
   .rxch         = DMA_REQ_LPSPI2_RX,
   .txch         = DMA_REQ_LPSPI2_TX,
+  .rxsem        = SEM_INITIALIZER(0),
+  .txsem        = SEM_INITIALIZER(0),
 #endif
   .pincfg       = CONFIG_S32K3XX_LPSPI2_PINCFG,
 };
@@ -393,9 +402,12 @@ static struct s32k3xx_lpspidev_s g_lpspi3dev =
 #ifdef CONFIG_S32K3XX_LPSPI_INTERRUPTS
   .spiirq       = S32K3XX_IRQ_LPSPI3,
 #endif
+  .lock         = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_S32K3XX_LPSPI3_DMA
   .rxch         = DMA_REQ_LPSPI3_RX,
   .txch         = DMA_REQ_LPSPI3_TX,
+  .rxsem        = SEM_INITIALIZER(0),
+  .txsem        = SEM_INITIALIZER(0),
 #endif
   .pincfg       = CONFIG_S32K3XX_LPSPI3_PINCFG,
 };
@@ -440,9 +452,12 @@ static struct s32k3xx_lpspidev_s g_lpspi4dev =
 #ifdef CONFIG_S32K3XX_LPSPI_INTERRUPTS
   .spiirq       = S32K3XX_IRQ_LPSPI4,
 #endif
+  .lock         = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_S32K3XX_LPSPI4_DMA
   .rxch         = DMA_REQ_LPSPI4_RX,
   .txch         = DMA_REQ_LPSPI4_TX,
+  .rxsem        = SEM_INITIALIZER(0),
+  .txsem        = SEM_INITIALIZER(0),
 #endif
   .pincfg       = CONFIG_S32K3XX_LPSPI4_PINCFG,
 };
@@ -487,9 +502,12 @@ static struct s32k3xx_lpspidev_s g_lpspi5dev =
 #ifdef CONFIG_S32K3XX_LPSPI_INTERRUPTS
   .spiirq       = S32K3XX_IRQ_LPSPI5,
 #endif
+  .lock         = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_S32K3XX_LPSPI5_DMA
   .rxch         = DMA_REQ_LPSPI5_RX,
   .txch         = DMA_REQ_LPSPI5_TX,
+  .rxsem        = SEM_INITIALIZER(0),
+  .txsem        = SEM_INITIALIZER(0),
 #endif
   .pincfg       = CONFIG_S32K3XX_LPSPI5_PINCFG,
 };
@@ -2033,10 +2051,6 @@ static void s32k3xx_lpspi_bus_initialize(struct s32k3xx_lpspidev_s *priv)
 
   s32k3xx_lpspi_setmode((struct spi_dev_s *)priv, SPIDEV_MODE0);
 
-  /* Initialize the SPI mutex that enforces mutually exclusive access */
-
-  nxmutex_init(&priv->lock);
-
   /* Enable LPSPI */
 
   s32k3xx_lpspi_modifyreg32(priv, S32K3XX_LPSPI_CR_OFFSET, 0, LPSPI_CR_MEN);
@@ -2389,17 +2403,10 @@ struct spi_dev_s *s32k3xx_lpspibus_initialize(int bus)
     }
 
 #ifdef CONFIG_S32K3XX_LPSPI_DMA
-  /* Initialize the SPI semaphores that is used to wait for DMA completion.
-   * This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
   if (priv->rxch && priv->txch)
     {
       if (priv->txdma == NULL && priv->rxdma == NULL)
         {
-          nxsem_init(&priv->rxsem, 0, 0);
-          nxsem_init(&priv->txsem, 0, 0);
           priv->txdma = s32k3xx_dmach_alloc(priv->txch | DMAMUX_CHCFG_ENBL,
                                             0);
           priv->rxdma = s32k3xx_dmach_alloc(priv->rxch | DMAMUX_CHCFG_ENBL,

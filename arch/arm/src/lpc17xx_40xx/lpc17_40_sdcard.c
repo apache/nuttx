@@ -444,6 +444,7 @@ struct lpc17_40_dev_s g_scard_dev =
 #endif
 #endif
   },
+  .waitsem = SEM_INITIALIZER(0),
 };
 
 /* Register logging support */
@@ -2718,10 +2719,6 @@ struct sdio_dev_s *sdio_initialize(int slotno)
   putreg32(regval, LPC17_40_SYSCON_PCONP);
 
   /* Initialize the SD card slot structure */
-
-  /* Initialize semaphores */
-
-  nxsem_init(&priv->waitsem, 0, 0);
 
 #ifdef CONFIG_LPC17_40_SDCARD_DMA
   /* Configure the SDCARD DMA request */

@@ -59,7 +59,12 @@
 
 /* The state of the user mode work queue. */
 
-struct usr_wqueue_s g_usrwork;
+struct usr_wqueue_s g_usrwork =
+{
+  {NULL, NULL},
+  NXMUTEX_INITIALIZER,
+  SEM_INITIALIZER(0),
+};
 
 /****************************************************************************
  * Private Functions
@@ -277,13 +282,6 @@ int work_usrstart(void)
   pthread_attr_t attr;
   struct sched_param param;
 #endif
-
-  /* Set up the work queue lock */
-
-  nxmutex_init(&g_usrwork.lock);
-
-  _SEM_INIT(&g_usrwork.wake, 0, 0);
-  _SEM_SETPROTOCOL(&g_usrwork.wake, SEM_PRIO_NONE);
 
   /* Initialize the work queue */
 

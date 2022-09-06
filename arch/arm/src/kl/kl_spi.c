@@ -126,6 +126,7 @@ static struct kl_spidev_s g_spi0dev =
       &g_spi0ops
     },
   .spibase           = KL_SPI0_BASE,
+  .lock              = NXMUTEX_INITIALIZER,
 };
 #endif
 
@@ -158,6 +159,7 @@ static struct kl_spidev_s g_spi1dev =
       &g_spi1ops
     },
   .spibase           = KL_SPI1_BASE,
+  .lock              = NXMUTEX_INITIALIZER,
 };
 #endif
 
@@ -688,10 +690,6 @@ struct spi_dev_s *kl_spibus_initialize(int port)
   /* Select a default frequency of approx. 400KHz */
 
   spi_setfrequency((struct spi_dev_s *)priv, 400000);
-
-  /* Initialize the SPI mutex that enforces mutually exclusive access */
-
-  nxmutex_init(&priv->lock);
   return &priv->spidev;
 }
 

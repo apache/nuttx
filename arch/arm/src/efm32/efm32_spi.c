@@ -226,7 +226,15 @@ static const struct spi_ops_s g_spiops =
 #ifdef CONFIG_EFM32_USART0_ISSPI
 /* Support for SPI on USART0 */
 
-static struct efm32_spidev_s g_spi0dev;
+static struct efm32_spidev_s g_spi0dev =
+{
+#ifdef CONFIG_EFM32_SPI_DMA
+  .rxdmasem = SEM_INITIALIZER(0),
+  .txdmasem = SEM_INITIALIZER(0),
+#endif
+  .lock = NXMUTEX_INITIALIZER,
+};
+
 static const struct efm32_spiconfig_s g_spi0config =
 {
   .base              = EFM32_USART0_BASE,
@@ -249,7 +257,15 @@ static const struct efm32_spiconfig_s g_spi0config =
 #ifdef CONFIG_EFM32_USART1_ISSPI
 /* Support for SPI on USART1 */
 
-static struct efm32_spidev_s g_spi1dev;
+static struct efm32_spidev_s g_spi1dev =
+{
+#ifdef CONFIG_EFM32_SPI_DMA
+  .rxdmasem = SEM_INITIALIZER(0),
+  .txdmasem = SEM_INITIALIZER(0),
+#endif
+  .lock = NXMUTEX_INITIALIZER,
+};
+
 static const struct efm32_spiconfig_s g_spi1config =
 {
   .base              = EFM32_USART1_BASE,
@@ -272,7 +288,15 @@ static const struct efm32_spiconfig_s g_spi1config =
 #ifdef CONFIG_EFM32_USART2_ISSPI
 /* Support for SPI on USART2 */
 
-static struct efm32_spidev_s g_spi2dev;
+static struct efm32_spidev_s g_spi2dev =
+{
+#ifdef CONFIG_EFM32_SPI_DMA
+  .rxdmasem = SEM_INITIALIZER(0),
+  .txdmasem = SEM_INITIALIZER(0),
+#endif
+  .lock = NXMUTEX_INITIALIZER,
+};
+
 static const struct efm32_spiconfig_s g_spi2config =
 {
   .base              = EFM32_USART2_BASE,
@@ -1577,10 +1601,6 @@ static int spi_portinitialize(struct efm32_spidev_s *priv)
 
   spi_putreg(config, EFM32_USART_CMD_OFFSET, USART_CMD_MASTEREN);
 
-  /* Initialize the SPI mutex that enforces mutually exclusive access */
-
-  nxmutex_init(&priv->lock);
-
 #ifdef CONFIG_EFM32_SPI_DMA
   /* Allocate two DMA channels... one for the RX and one for the TX side of
    * the transfer.
@@ -1601,12 +1621,6 @@ static int spi_portinitialize(struct efm32_spidev_s *priv)
              port);
       goto errout_with_rxdmach;
     }
-
-  /* Initialized semaphores used to wait for DMA completion */
-
-  nxsem_init(&priv->rxdmasem, 0, 0);
-  nxsem_init(&priv->txdmasem, 0, 0);
-
 #endif
 
   /* Enable SPI */

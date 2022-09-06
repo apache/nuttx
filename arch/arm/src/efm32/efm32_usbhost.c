@@ -484,7 +484,11 @@ static inline int efm32_hw_initialize(struct efm32_usbhost_s *priv);
  * single global instance.
  */
 
-static struct efm32_usbhost_s g_usbhost;
+static struct efm32_usbhost_s g_usbhost =
+{
+  .lock = NXMUTEX_INITIALIZER,
+  .pscsem = SEM_INITIALIZER(0),
+};
 
 /* This is the connection/enumeration interface */
 
@@ -5258,11 +5262,6 @@ static inline void efm32_sw_initialize(struct efm32_usbhost_s *priv)
   /* Initialize function address generation logic */
 
   usbhost_devaddr_initialize(&priv->rhport);
-
-  /* Initialize semaphores & mutex */
-
-  nxsem_init(&priv->pscsem,  0, 0);
-  nxmutex_init(&priv->lock);
 
   /* Initialize the driver state data */
 

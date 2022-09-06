@@ -90,82 +90,98 @@ static struct gd32_dma_channel_s g_dmachan[DMA_NCHANNELS] =
   {
     .chan_num  = GD32_DMA_CH0,
     .irq       = GD32_IRQ_DMA0_CHANNEL0,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA0,
   },
   {
     .chan_num  = GD32_DMA_CH1,
     .irq       = GD32_IRQ_DMA0_CHANNEL1,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA0,
   },
   {
     .chan_num  = GD32_DMA_CH2,
     .irq       = GD32_IRQ_DMA0_CHANNEL2,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA0,
   },
   {
     .chan_num  = GD32_DMA_CH3,
     .irq       = GD32_IRQ_DMA0_CHANNEL3,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA0,
   },
   {
     .chan_num  = GD32_DMA_CH4,
     .irq       = GD32_IRQ_DMA0_CHANNEL4,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA0,
   },
   {
     .chan_num  = GD32_DMA_CH5,
     .irq       = GD32_IRQ_DMA0_CHANNEL5,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA0,
   },
   {
     .chan_num  = GD32_DMA_CH6,
     .irq       = GD32_IRQ_DMA0_CHANNEL6,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA0,
   },
   {
     .chan_num  = GD32_DMA_CH7,
     .irq       = GD32_IRQ_DMA0_CHANNEL7,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA0,
   },
 
   {
     .chan_num  = GD32_DMA_CH0,
     .irq       = GD32_IRQ_DMA1_CHANNEL0,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA1,
   },
   {
     .chan_num  = GD32_DMA_CH1,
     .irq       = GD32_IRQ_DMA1_CHANNEL1,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA1,
   },
   {
     .chan_num  = GD32_DMA_CH2,
     .irq       = GD32_IRQ_DMA1_CHANNEL2,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA1,
   },
   {
     .chan_num  = GD32_DMA_CH3,
     .irq       = GD32_IRQ_DMA1_CHANNEL3,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA1,
   },
   {
     .chan_num  = GD32_DMA_CH4,
     .irq       = GD32_IRQ_DMA1_CHANNEL4,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA1,
   },
   {
     .chan_num  = GD32_DMA_CH5,
     .irq       = GD32_IRQ_DMA1_CHANNEL5,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA1,
   },
   {
     .chan_num  = GD32_DMA_CH6,
     .irq       = GD32_IRQ_DMA1_CHANNEL6,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase    = GD32_DMA1,
   },
   {
     .chan_num  = GD32_DMA_CH7,
     .irq       = GD32_IRQ_DMA1_CHANNEL7,
+    .chsem     = SEM_INITIALIZER(1),
     .dmabase   = GD32_DMA1,
   },
 };
@@ -516,8 +532,6 @@ void weak_function arm_dma_initialize(void)
       dmachan = &g_dmachan[channelx];
 
       DEBUGASSERT(dmachan != NULL);
-
-      nxsem_init(&dmachan->chsem, 0, 1);
 
       /* Attach DMA interrupt vectors */
 

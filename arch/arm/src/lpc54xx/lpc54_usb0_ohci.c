@@ -500,7 +500,11 @@ static inline void lpc54_ep0init(struct lpc54_usbhost_s *priv);
  * single global instance.
  */
 
-static struct lpc54_usbhost_s g_usbhost;
+static struct lpc54_usbhost_s g_usbhost =
+{
+  .lock = NXMUTEX_INITIALIZER,
+  .pscsem = SEM_INITIALIZER(0),
+};
 
 /* This is the connection/enumeration interface */
 
@@ -3821,11 +3825,6 @@ struct usbhost_connection_s *lpc54_usbhost_initialize(int controller)
   /* Initialize function address generation logic */
 
   usbhost_devaddr_initialize(&priv->rhport);
-
-  /* Initialize semaphores & mutex */
-
-  nxsem_init(&priv->pscsem,  0, 0);
-  nxmutex_init(&priv->lock);
 
 #ifndef CONFIG_OHCI_INT_DISABLE
   priv->ininterval  = MAX_PERINTERVAL;

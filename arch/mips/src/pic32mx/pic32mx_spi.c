@@ -147,6 +147,7 @@ static struct pic32mx_dev_s g_spi1dev =
   .rxirq             = PIC32MX_IRQSRC_SPI1RX,
   .txirq             = PIC32MX_IRQSRC_SPI1TX,
 #endif
+  .lock              = NXMUTEX_INITIALIZER,
 };
 #endif
 
@@ -185,6 +186,7 @@ static struct pic32mx_dev_s g_spi2dev =
   .rxirq             = PIC32MX_IRQSRC_SPI2RX,
   .txirq             = PIC32MX_IRQSRC_SPI2TX,
 #endif
+  .lock              = NXMUTEX_INITIALIZER,
 };
 #endif
 
@@ -223,6 +225,7 @@ static struct pic32mx_dev_s g_spi3dev =
   .rxirq             = PIC32MX_IRQSRC_SPI3RX,
   .txirq             = PIC32MX_IRQSRC_SPI3TX,
 #endif
+  .lock              = NXMUTEX_INITIALIZER,
 };
 #endif
 
@@ -261,6 +264,7 @@ static struct pic32mx_dev_s g_spi4dev =
   .rxirq             = PIC32MX_IRQSRC_SPI4RX,
   .txirq             = PIC32MX_IRQSRC_SPI4TX,
 #endif
+  .lock              = NXMUTEX_INITIALIZER,
 };
 #endif
 
@@ -962,10 +966,6 @@ struct spi_dev_s *pic32mx_spibus_initialize(int port)
 
   priv->nbits = 8;
   priv->mode  = SPIDEV_MODE0;
-
-  /* Initialize the SPI mutex that enforces mutually exclusive access */
-
-  nxmutex_init(&priv->lock);
 
 #ifdef CONFIG_PIC32MX_SPI_INTERRUPTS
   /* Enable interrupts at the SPI controller */

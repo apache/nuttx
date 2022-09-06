@@ -84,7 +84,10 @@ struct lpc43_gpdma_s
 
 /* The state of the LPC43 DMA block */
 
-static struct lpc43_gpdma_s g_gpdma;
+static struct lpc43_gpdma_s g_gpdma =
+{
+  .lock = NXMUTEX_INITIALIZER,
+};
 
 /****************************************************************************
  * Public Data
@@ -290,8 +293,6 @@ void weak_function arm_dma_initialize(void)
   putreg32(DMACH_ALL, LPC43_GPDMA_INTERRCLR);
 
   /* Initialize the DMA state structure */
-
-  nxmutex_init(&g_gpdma.lock);
 
   for (i = 0; i < LPC43_NDMACH; i++)
     {

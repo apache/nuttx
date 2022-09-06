@@ -439,7 +439,8 @@ static const struct stm32_adc_ops_s g_adc_llops =
 
 struct adccmn_data_s g_adc123_cmn =
 {
-  .refcount = 0
+  .refcount = 0,
+  .lock = NXMUTEX_INITIALIZER,
 };
 
 /* ADC1 state */
@@ -3031,10 +3032,6 @@ struct adc_dev_s *stm32_adc_initialize(int intf,
   priv->adc_channels = ADC_CHANNELS_NUMBER;
 #endif
 
-#ifdef ADC_HAVE_CB
-  priv->cb        = NULL;
-#endif
-
 #ifdef CONFIG_STM32F7_ADC_LL_OPS
   /* Store reference to the upper-half ADC device */
 
@@ -3048,13 +3045,6 @@ struct adc_dev_s *stm32_adc_initialize(int intf,
   ainfo("intf: %d cr_channels: %d\n", intf, priv->cr_channels);
 #endif
 
-  /* Initialize the ADC common data semaphore.
-   *
-   * REVISIT: This will be done several times for each initialzied ADC in
-   *          the ADC block.
-   */
-
-  nxmutex_init(&priv->cmn->lock);
   return dev;
 }
 

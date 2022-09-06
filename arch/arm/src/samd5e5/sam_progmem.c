@@ -155,7 +155,7 @@
  ****************************************************************************/
 
 static uint32_t g_page_buffer[SAMD5E5_PAGE_WORDS];
-static mutex_t g_page_lock;
+static mutex_t g_page_lock = NXMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Private Functions
@@ -350,12 +350,6 @@ void sam_progmem_initialize(void)
            NVMCTRL_CTRLA_WMODE_MAN  |
            NVMCTRL_CTRLA_AUTOWS;
   putreg16(ctrla, SAM_NVMCTRL_CTRLA);
-
-  /* Initialize the mutex that manages exclusive access to the global
-   * page buffer.
-   */
-
-  nxmutex_init(&g_page_lock);
 }
 
 /****************************************************************************

@@ -314,10 +314,12 @@ static struct sam_qspidev_s g_qspi0dev =
 #ifdef QSPI_USE_INTERRUPTS
   .irq               = SAM_IRQ_QSPI,
 #endif
+  .lock              = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_SAMV7_QSPI_DMA
   .candma            = SAMV7_QSPI0_DMA,
   .rxintf            = XDMACH_QSPI_RX,
   .txintf            = XDMACH_QSPI_TX,
+  .dmawait           = SEM_INITIALIZER(0),
 #endif
 };
 #endif /* CONFIG_SAMV7_QSPI */
@@ -1756,12 +1758,6 @@ struct qspi_dev_s *sam_qspi_initialize(int intf)
     {
       /* No perform one time initialization */
 
-      /* Initialize the QSPI mutex that enforces mutually exclusive
-       * access to the QSPI registers.
-       */
-
-      nxmutex_init(&priv->lock);
-
 #ifdef CONFIG_SAMV7_QSPI_DMA
       /* Pre-allocate DMA channels. */
 
@@ -1774,8 +1770,6 @@ struct qspi_dev_s *sam_qspi_initialize(int intf)
               priv->candma = false;
             }
         }
-
-      nxsem_init(&priv->dmawait, 0, 0);
 #endif
 
 #ifdef QSPI_USE_INTERRUPTS
@@ -1785,7 +1779,7 @@ struct qspi_dev_s *sam_qspi_initialize(int intf)
       if (ret < 0)
         {
           spierr("ERROR: Failed to attach irq %d\n", priv->irq);
-          goto errout_with_dmawait;
+          goto errout_with_dmach;
         }
 #endif
 
@@ -1814,10 +1808,9 @@ errout_with_irq:
 #ifdef QSPI_USE_INTERRUPTS
   irq_detach(priv->irq);
 
-errout_with_dmawait:
+errout_with_dmach:
 #endif
 #ifdef CONFIG_SAMV7_QSPI_DMA
-  nxsem_destroy(&priv->dmawait);
   if (priv->dmach)
     {
       sam_dmafree(priv->dmach);
@@ -1825,7 +1818,6 @@ errout_with_dmawait:
     }
 #endif
 
-  nxmutex_destroy(&priv->lock);
   return NULL;
 }
 #endif /* CONFIG_SAMV7_QSPI */

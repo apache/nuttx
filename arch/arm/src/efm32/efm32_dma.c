@@ -78,7 +78,11 @@ struct dma_controller_s
 
 /* This is the overall state of the DMA controller */
 
-static struct dma_controller_s g_dmac;
+static struct dma_controller_s g_dmac =
+{
+  .lock = NXMUTEX_INITIALIZER,
+  .chansem = SEM_INITIALIZER(EFM32_DMA_NCHANNELS),
+};
 
 /* This is the array of all DMA channels */
 
@@ -265,9 +269,6 @@ void weak_function arm_dma_initialize(void)
   dmainfo("Initialize XDMAC0\n");
 
   /* Initialize the channel list  */
-
-  nxmutex_init(&g_dmac.lock);
-  nxsem_init(&g_dmac.chansem, 0, EFM32_DMA_NCHANNELS);
 
   for (i = 0; i < EFM32_DMA_NCHANNELS; i++)
     {

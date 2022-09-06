@@ -165,7 +165,8 @@ static struct rp2040_flash_dev_s my_dev =
 #endif
       rp2040_flash_ioctl,
       "rp_flash"
-    }
+  },
+  .lock = NXMUTEX_INITIALIZER,
 };
 
 static bool initialized = false;
@@ -502,8 +503,6 @@ struct mtd_dev_s *rp2040_flash_mtd_initialize(void)
     }
 
   initialized = true;
-
-  nxmutex_init(&my_dev.lock);
 
   if (FLASH_BLOCK_COUNT < 4)
     {

@@ -292,7 +292,11 @@ static int send_read_cmd(FAR struct i2c_config_s *config,
  * Private Data
  ****************************************************************************/
 
-static isx019_dev_t g_isx019_private;
+static isx019_dev_t g_isx019_private =
+{
+  NXMUTEX_INITIALIZER,
+  NXMUTEX_INITIALIZER,
+};
 
 static struct imgsensor_ops_s g_isx019_ops =
 {
@@ -3362,15 +3366,11 @@ static int isx019_set_value(uint32_t id,
 int isx019_initialize(void)
 {
   imgsensor_register(&g_isx019_ops);
-  nxmutex_init(&g_isx019_private.i2c_lock);
-  nxmutex_init(&g_isx019_private.fpga_lock);
   return OK;
 }
 
 int isx019_uninitialize(void)
 {
-  nxmutex_destroy(&g_isx019_private.i2c_lock);
-  nxmutex_destroy(&g_isx019_private.fpga_lock);
   return OK;
 }
 

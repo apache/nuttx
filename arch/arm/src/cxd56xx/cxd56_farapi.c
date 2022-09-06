@@ -113,8 +113,8 @@ extern struct modulelist_s _image_modlist_base[];
  * Private Data
  ****************************************************************************/
 
-static sem_t g_farwait;
-static mutex_t g_farlock;
+static sem_t g_farwait = SEM_INITIALIZER(0);
+static mutex_t g_farlock = NXMUTEX_INITIALIZER;
 static struct pm_cpu_wakelock_s g_wlock =
 {
   .count = 0,
@@ -288,10 +288,7 @@ void cxd56_farapiinitialize(void)
       PANIC();
 #  endif
     }
-
 #endif
-  nxmutex_init(&g_farlock);
-  nxsem_init(&g_farwait, 0, 0);
 
   cxd56_iccinit(CXD56_PROTO_MBX);
   cxd56_iccinit(CXD56_PROTO_FLG);

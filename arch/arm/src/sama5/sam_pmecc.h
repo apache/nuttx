@@ -295,27 +295,6 @@ void pmecc_enable(void);
 void pmecc_disable(void);
 
 /****************************************************************************
- * Name: pmecc_initialize
- *
- * Description:
- *   Perform one-time PMECC initialization.  This must be called before any
- *   other PMECC interfaces are used.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#if NAND_NPMECC_BANKS > 1
-void pmecc_initialize(void);
-#else
-#  define pmecc_initialize()
-#endif
-
-/****************************************************************************
  * Name: pmecc_configure
  *
  * Description:
@@ -417,7 +396,6 @@ void pmecc_buildgf(uint32_t mm, int16_t *indexof, int16_t *alphato);
 #  define pmecc_unlock()
 #  define pmecc_enable()
 #  define pmecc_disable()
-#  define pmecc_initialize()
 #  define pmecc_configure(a,b)   (0)
 #  define pmecc_get_eccsize()    (0)
 #  define pmecc_get_pagesize()   (0)

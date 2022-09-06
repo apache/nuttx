@@ -125,9 +125,9 @@ static int    sam_rxbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
 
 /* These mutex protect the DMA channel and descriptor tables */
 
-static mutex_t g_chlock;
+static mutex_t g_chlock = NXMUTEX_INITIALIZER;
 #if CONFIG_SAMD5E5_DMAC_NDESC > 0
-static sem_t g_dsem;
+static sem_t g_dsem = SEM_INITIALIZER(CONFIG_SAMD5E5_DMAC_NDESC);
 #endif
 
 /* This array describes the state of each DMA channel */
@@ -723,13 +723,6 @@ void weak_function arm_dma_initialize(void)
 {
   dmainfo("Initialize DMAC\n");
   int i;
-
-  /* Initialize global mutex & semaphore */
-
-  nxmutex_init(&g_chlock);
-#if CONFIG_SAMD5E5_DMAC_NDESC > 0
-  nxsem_init(&g_dsem, 0, CONFIG_SAMD5E5_DMAC_NDESC);
-#endif
 
   /* Initialized the DMA channel table */
 

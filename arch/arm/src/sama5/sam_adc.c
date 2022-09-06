@@ -497,11 +497,20 @@ static const struct adc_ops_s g_adcops =
 
 /* ADC internal state */
 
-static struct sam_adc_s g_adcpriv;
+static struct sam_adc_s g_adcpriv =
+{
+  .lock        = NXMUTEX_INITIALIZER,
+};
 
 /* ADC device instance */
 
-static struct adc_dev_s g_adcdev;
+static struct adc_dev_s g_adcdev =
+{
+#ifdef SAMA5_ADC_HAVE_CHANNELS
+  .ad_ops      = &g_adcops,
+#endif
+  .ad_priv     = &g_adcpriv,
+};
 
 /****************************************************************************
  * Private Functions
@@ -2041,16 +2050,8 @@ struct adc_dev_s *sam_adc_initialize(void)
       /* Initialize the public ADC device data structure */
 
 #ifdef SAMA5_ADC_HAVE_CHANNELS
-      g_adcdev.ad_ops  = &g_adcops;
       priv->dev = &g_adcdev;
 #endif
-
-      g_adcdev.ad_priv = priv;
-
-      /* Initialize the private ADC device data structure */
-
-      nxmutex_init(&priv->lock);
-      priv->cb  = NULL;
 
 #ifdef CONFIG_SAMA5_ADC_DMA
       /* Allocate a DMA channel from DMAC1 */

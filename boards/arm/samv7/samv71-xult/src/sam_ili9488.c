@@ -490,6 +490,7 @@ static struct sam_dev_s g_lcddev =
     .getcontrast  = sam_getcontrast,
     .setcontrast  = sam_setcontrast,
   },
+  .waitsem = SEM_INITIALIZER(0),
 };
 
 /****************************************************************************
@@ -1562,18 +1563,13 @@ int board_lcd_initialize(void)
 
   sam_smc_initialize();
 
-  /* Initialize the LCD state structure */
-
-  nxsem_init(&priv->waitsem, 0, 0);
-
   /* Allocate a DMA channel */
 
   priv->dmach = sam_dmachannel(0, DMA_FLAGS);
   if (!priv->dmach)
     {
       lcderr("ERROR: Failed to allocate a DMA channel\n");
-      ret =  -EAGAIN;
-      goto errout_with_waitsem;
+      return -EAGAIN;
     }
 
   /* Identify and configure the LCD */
@@ -1604,9 +1600,6 @@ int board_lcd_initialize(void)
 errout_with_dmach:
   sam_dmafree(priv->dmach);
   priv->dmach = NULL;
-
-errout_with_waitsem:
-  nxsem_destroy(&priv->waitsem);
   return ret;
 }
 
@@ -1648,7 +1641,6 @@ void board_lcd_uninitialize(void)
   /* Free other resources */
 
   wd_cancel(&priv->dmadog);
-  nxsem_destroy(&priv->waitsem);
 
   /* Put the LCD in the lowest possible power state */
 

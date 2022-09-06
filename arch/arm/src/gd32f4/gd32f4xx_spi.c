@@ -298,6 +298,7 @@ static struct gd32_spidev_s g_spi0dev =
               },
   .spibase  = GD32_SPI0,
   .spiclock = GD32_PCLK2_FREQUENCY,
+  .lock     = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_GD32F4_SPI_INTERRUPT
   .spiirq   = GD32_IRQ_SPI0,
 #endif
@@ -314,6 +315,8 @@ static struct gd32_spidev_s g_spi0dev =
   .rxch     = 0,
   .txch     = 0,
 #  endif
+  .rxsem    = SEM_INITIALIZER(0),
+  .txsem    = SEM_INITIALIZER(0),
 #endif
 };
 #endif
@@ -363,6 +366,7 @@ static struct gd32_spidev_s g_spi1dev =
               },
   .spibase  = GD32_SPI1,
   .spiclock = GD32_PCLK1_FREQUENCY,
+  .lock     = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_GD32F4_SPI_INTERRUPT
   .spiirq   = GD32_IRQ_SPI1,
 #endif
@@ -379,6 +383,8 @@ static struct gd32_spidev_s g_spi1dev =
   .rxch     = 0,
   .txch     = 0,
 #  endif
+  .rxsem    = SEM_INITIALIZER(0),
+  .txsem    = SEM_INITIALIZER(0),
 #endif
 };
 #endif
@@ -428,6 +434,7 @@ static struct gd32_spidev_s g_spi2dev =
               },
   .spibase  = GD32_SPI2,
   .spiclock = GD32_PCLK1_FREQUENCY,
+  .lock     = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_GD32F4_SPI_INTERRUPT
   .spiirq   = GD32_IRQ_SPI2,
 #endif
@@ -444,6 +451,8 @@ static struct gd32_spidev_s g_spi2dev =
   .rxch     = 0,
   .txch     = 0,
 #  endif
+  .rxsem    = SEM_INITIALIZER(0),
+  .txsem    = SEM_INITIALIZER(0),
 #endif
 };
 #endif
@@ -493,6 +502,7 @@ static struct gd32_spidev_s g_spi3dev =
               },
   .spibase  = GD32_SPI3,
   .spiclock = GD32_PCLK2_FREQUENCY,
+  .lock     = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_GD32F4_SPI_INTERRUPT
   .spiirq   = GD32_IRQ_SPI3,
 #endif
@@ -509,6 +519,8 @@ static struct gd32_spidev_s g_spi3dev =
   .rxch     = 0,
   .txch     = 0,
 #  endif
+  .rxsem    = SEM_INITIALIZER(0),
+  .txsem    = SEM_INITIALIZER(0),
 #endif
 };
 #endif
@@ -558,6 +570,7 @@ static struct gd32_spidev_s g_spi4dev =
               },
   .spibase  = GD32_SPI4,
   .spiclock = GD32_PCLK2_FREQUENCY,
+  .lock     = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_GD32F4_SPI_INTERRUPT
   .spiirq   = GD32_IRQ_SPI4,
 #endif
@@ -574,6 +587,8 @@ static struct gd32_spidev_s g_spi4dev =
   .rxch     = 0,
   .txch     = 0,
 #  endif
+  .rxsem    = SEM_INITIALIZER(0),
+  .txsem    = SEM_INITIALIZER(0),
 #endif
 };
 #endif
@@ -623,6 +638,7 @@ static struct gd32_spidev_s g_spi5dev =
               },
   .spibase  = GD32_SPI5,
   .spiclock = GD32_PCLK2_FREQUENCY,
+  .lock     = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_GD32F5_SPI_INTERRUPT
   .spiirq   = GD32_IRQ_SPI5,
 #endif
@@ -639,6 +655,8 @@ static struct gd32_spidev_s g_spi5dev =
   .rxch     = 0,
   .txch     = 0,
 #  endif
+  .rxsem    = SEM_INITIALIZER(0),
+  .txsem    = SEM_INITIALIZER(0),
 #endif
 };
 #endif
@@ -2041,23 +2059,11 @@ static void spi_bus_initialize(struct gd32_spidev_s *priv)
 
   spi_setfrequency((struct spi_dev_s *)priv, 400000);
 
-  /* Initialize the SPI lock that enforces mutually exclusive access */
-
-  nxmutex_init(&priv->lock);
-
 #ifdef CONFIG_GD32F4_SPI_DMA
-  /* Initialize the SPI semaphores that is used to wait for DMA completion.
-   * This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
   if (priv->rxch && priv->txch)
     {
       if (priv->txdma == NULL && priv->rxdma == NULL)
         {
-          nxsem_init(&priv->rxsem, 0, 0);
-          nxsem_init(&priv->txsem, 0, 0);
-
           /* Get DMA channels */
 
           priv->rxdma = gd32_dma_channel_alloc(priv->rxch);

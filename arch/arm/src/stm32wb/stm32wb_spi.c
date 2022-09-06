@@ -289,7 +289,10 @@ static struct stm32wb_spidev_s g_spi1dev =
 
   .rxch     = DMAMAP_SPI1_RX,
   .txch     = DMAMAP_SPI1_TX,
+  .rxsem    = SEM_INITIALIZER(0),
+  .txsem    = SEM_INITIALIZER(0),
 #endif
+  .lock     = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_PM
   .pm_cb.prepare = spi_pm_prepare,
 #endif
@@ -342,7 +345,10 @@ static struct stm32wb_spidev_s g_spi2dev =
 #ifdef CONFIG_STM32WB_SPI_DMA
   .rxch     = DMACHAN_SPI2_RX,
   .txch     = DMACHAN_SPI2_TX,
+  .rxsem    = SEM_INITIALIZER(0),
+  .txsem    = SEM_INITIALIZER(0),
 #endif
+  .lock     = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_PM
   .pm_cb.prepare = spi_pm_prepare,
 #endif
@@ -1680,16 +1686,7 @@ static void spi_bus_initialize(struct stm32wb_spidev_s *priv)
 
   spi_putreg(priv, STM32WB_SPI_CRCPR_OFFSET, 7);
 
-  /* Initialize the SPI mutex that enforces mutually exclusive access */
-
-  nxmutex_init(&priv->lock);
-
 #ifdef CONFIG_STM32WB_SPI_DMA
-  /* Initialize the SPI semaphores that is used to wait for DMA completion */
-
-  nxsem_init(&priv->rxsem, 0, 0);
-  nxsem_init(&priv->txsem, 0, 0);
-
   /* Get DMA channels.  NOTE: stm32wb_dmachannel() will always assign the DMA
    * channel.  If the channel is not available, then stm32wb_dmachannel()
    * will block and wait until the channel becomes available.  WARNING: If

@@ -72,7 +72,10 @@ struct wrbuffer_s
 
 /* This is the state of the global write buffer resource */
 
-static struct wrbuffer_s g_wrbuffer;
+static struct wrbuffer_s g_wrbuffer =
+{
+  SEM_INITIALIZER(CONFIG_NET_UDP_NWRBCHAINS)
+};
 
 /****************************************************************************
  * Public Functions
@@ -99,8 +102,6 @@ void udp_wrbuffer_initialize(void)
     {
       sq_addfirst(&g_wrbuffer.buffers[i].wb_node, &g_wrbuffer.freebuffers);
     }
-
-  nxsem_init(&g_wrbuffer.sem, 0, CONFIG_NET_UDP_NWRBCHAINS);
 }
 
 /****************************************************************************

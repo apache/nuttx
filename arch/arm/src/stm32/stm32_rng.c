@@ -70,7 +70,11 @@ struct rng_dev_s
  * Private Data
  ****************************************************************************/
 
-static struct rng_dev_s g_rngdev;
+static struct rng_dev_s g_rngdev =
+{
+  .rd_devlock = NXMUTEX_INITIALIZER,
+  .rd_readsem = SEM_INITIALIZER(0),
+};
 
 static const struct file_operations g_rngops =
 {
@@ -99,10 +103,6 @@ static int stm32_rng_initialize(void)
   uint32_t regval;
 
   _info("Initializing RNG\n");
-
-  memset(&g_rngdev, 0, sizeof(struct rng_dev_s));
-
-  nxmutex_init(&g_rngdev.rd_devlock);
 
   if (irq_attach(STM32_IRQ_RNG, stm32_rng_interrupt, NULL))
     {
@@ -241,7 +241,11 @@ static ssize_t stm32_rng_read(struct file *filep, char *buffer,
 
   /* We've got the mutex. */
 
-  nxsem_init(&g_rngdev.rd_readsem, 0, 0);
+  /* Reset the operation semaphore with 0 for blocking until the
+   * buffer is filled from interrupts.
+   */
+
+  nxsem_reset(&g_rngdev.rd_readsem, 0);
 
   g_rngdev.rd_buflen = buflen;
   g_rngdev.rd_buf = buffer;

@@ -332,7 +332,10 @@ static struct stm32wl5_spidev_s g_spi1dev =
   .rxch     = 0,
   .txch     = 0,
 #  endif
+  .rxsem    = SEM_INITIALIZER(0),
+  .txsem    = SEM_INITIALIZER(0),
 #endif
+  .lock     = NXMUTEX_INITIALIZER,
 };
 #endif
 
@@ -1728,16 +1731,9 @@ static void spi_bus_initialize(struct stm32wl5_spidev_s *priv)
 
   spi_putreg(priv, STM32WL5_SPI_CRCPR_OFFSET, 7);
 
-  /* Initialize the SPI mutex that enforces mutually exclusive access */
-
-  nxmutex_init(&priv->lock);
-
 #ifdef CONFIG_STM32WL5_SPI_DMA
   if (priv->rxch && priv->txch)
     {
-      nxsem_init(&priv->rxsem, 0, 0);
-      nxsem_init(&priv->txsem, 0, 0);
-
       /* Get DMA channels.  NOTE: stm32wl5_dmachannel() will always assign
        * the DMA channel.  If the channel is not available, then
        * stm32wl5_dmachannel() will block and wait until the channel becomes

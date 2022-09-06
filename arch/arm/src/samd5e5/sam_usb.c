@@ -1004,7 +1004,11 @@ static void sam_add_sof_user(struct sam_usbhost_s *priv);
  * instance.
  */
 
-static struct sam_usbhost_s g_usbhost;
+static struct sam_usbhost_s g_usbhost =
+{
+  .lock = NXMUTEX_INITIALIZER,
+  .pscsem = SEM_INITIALIZER(0),
+};
 
 /* This is the connection/enumeration interface */
 
@@ -8470,13 +8474,6 @@ static inline void sam_sw_initialize(struct sam_usbhost_s *priv)
   struct usbhost_hubport_s *hport;
   int epno;
 
-  /* Initialize the device state structure.  NOTE: many fields
-   * have the initial value of zero and, hence, are not explicitly
-   * initialized here.
-   */
-
-  memset(priv, 0, sizeof(struct sam_usbhost_s));
-
   /* Initialize the device operations */
 
   drvr                 = &priv->drvr;
@@ -8530,17 +8527,6 @@ static inline void sam_sw_initialize(struct sam_usbhost_s *priv)
     }
 
   sam_reset_pipes(priv, false);
-
-  /* Initialize semaphore & mutex */
-
-  nxsem_init(&priv->pscsem,  0, 0);
-  nxmutex_init(&priv->lock);
-
-  /* The pscsem semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  sem_setprotocol(&priv->pscsem, SEM_PRIO_NONE);
 
   /* Initialize the driver state data */
 

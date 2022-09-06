@@ -55,7 +55,10 @@ struct rng_dev_s
  * Private Data
  ****************************************************************************/
 
-static struct rng_dev_s g_rngdev;
+static struct rng_dev_s g_rngdev =
+{
+  .rd_devlock = NXMUTEX_INITIALIZER,
+};
 
 static const struct file_operations g_rngops =
 {
@@ -145,7 +148,6 @@ static ssize_t lpc54_read(struct file *filep, char *buffer, size_t buflen)
 #ifdef CONFIG_DEV_RANDOM
 void devrandom_register(void)
 {
-  nxmutex_init(&g_rngdev.rd_devlock);
   register_driver("/dev/random", &g_rngops, 0444, NULL);
 }
 #endif
@@ -167,9 +169,6 @@ void devrandom_register(void)
 #ifdef CONFIG_DEV_URANDOM_ARCH
 void devurandom_register(void)
 {
-#ifndef CONFIG_DEV_RANDOM
-  nxmutex_init(&g_rngdev.rd_devlock);
-#endif
   register_driver("/dev/urandom", &g_rngops, 0444, NULL);
 }
 #endif

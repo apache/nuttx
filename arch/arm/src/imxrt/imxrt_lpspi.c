@@ -248,9 +248,12 @@ static struct imxrt_lpspidev_s g_lpspi1dev =
 #ifdef CONFIG_IMXRT_LPSPI_INTERRUPTS
   .spiirq       = IMXRT_IRQ_LPSPI1,
 #endif
+  .lock         = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_IMXRT_LPSPI1_DMA
   .rxch         = IMXRT_DMACHAN_LPSPI1_RX,
   .txch         = IMXRT_DMACHAN_LPSPI1_TX,
+  .rxsem        = SEM_INITIALIZER(0),
+  .txsem        = SEM_INITIALIZER(0),
 #endif
 };
 #endif
@@ -294,9 +297,12 @@ static struct imxrt_lpspidev_s g_lpspi2dev =
 #ifdef CONFIG_IMXRT_LPSPI_INTERRUPTS
   .spiirq       = IMXRT_IRQ_LPSPI2,
 #endif
+  .lock         = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_IMXRT_LPSPI2_DMA
   .rxch         = IMXRT_DMACHAN_LPSPI2_RX,
   .txch         = IMXRT_DMACHAN_LPSPI2_TX,
+  .rxsem        = SEM_INITIALIZER(0),
+  .txsem        = SEM_INITIALIZER(0),
 #endif
 };
 #endif
@@ -340,9 +346,12 @@ static struct imxrt_lpspidev_s g_lpspi3dev =
 #ifdef CONFIG_IMXRT_LPSPI_INTERRUPTS
   .spiirq       = IMXRT_IRQ_LPSPI3,
 #endif
+  .lock         = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_IMXRT_LPSPI3_DMA
   .rxch         = IMXRT_DMACHAN_LPSPI3_RX,
   .txch         = IMXRT_DMACHAN_LPSPI3_TX,
+  .rxsem        = SEM_INITIALIZER(0),
+  .txsem        = SEM_INITIALIZER(0),
 #endif
 };
 #endif
@@ -386,9 +395,12 @@ static struct imxrt_lpspidev_s g_lpspi4dev =
 #ifdef CONFIG_IMXRT_LPSPI_INTERRUPTS
   .spiirq       = IMXRT_IRQ_LPSPI4,
 #endif
+  .lock         = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_IMXRT_LPSPI4_DMA
   .rxch         = IMXRT_DMACHAN_LPSPI4_RX,
   .txch         = IMXRT_DMACHAN_LPSPI4_TX,
+  .rxsem        = SEM_INITIALIZER(0),
+  .txsem        = SEM_INITIALIZER(0),
 #endif
 };
 #endif
@@ -1711,10 +1723,6 @@ static void imxrt_lpspi_bus_initialize(struct imxrt_lpspidev_s *priv)
 
   imxrt_lpspi_setmode((struct spi_dev_s *)priv, SPIDEV_MODE0);
 
-  /* Initialize the SPI mutex that enforces mutually exclusive access */
-
-  nxmutex_init(&priv->lock);
-
   /* Enable LPSPI */
 
   imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_CR_OFFSET, 0, LPSPI_CR_MEN);
@@ -2041,18 +2049,10 @@ struct spi_dev_s *imxrt_lpspibus_initialize(int bus)
     }
 
 #ifdef CONFIG_IMXRT_LPSPI_DMA
-  /* Initialize the SPI semaphores that is used to wait for DMA completion.
-   * This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
   if (priv->rxch && priv->txch)
     {
       if (priv->txdma == NULL && priv->rxdma == NULL)
         {
-          nxsem_init(&priv->rxsem, 0, 0);
-          nxsem_init(&priv->txsem, 0, 0);
-
           priv->txdma = imxrt_dmach_alloc(priv->txch | DMAMUX_CHCFG_ENBL,
                                             0);
           priv->rxdma = imxrt_dmach_alloc(priv->rxch | DMAMUX_CHCFG_ENBL,

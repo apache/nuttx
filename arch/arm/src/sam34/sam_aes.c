@@ -59,7 +59,7 @@
  * Private Data
  ****************************************************************************/
 
-static mutex_t g_samaes_lock;
+static mutex_t g_samaes_lock = NXMUTEX_INITIALIZER;
 static bool    g_samaes_initdone = false;
 
 /****************************************************************************
@@ -159,7 +159,6 @@ static int samaes_setup_mr(uint32_t keysize, int mode, int encrypt)
 
 static int samaes_initialize(void)
 {
-  nxmutex_init(&g_samaes_lock);
   sam_aes_enableclk();
   putreg32(AES_CR_SWRST, SAM_AES_CR);
   return OK;

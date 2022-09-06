@@ -94,48 +94,56 @@ static struct stm32_dma_s g_dma[DMA_NSTREAMS] =
     .stream   = 0,
     .irq      = STM32_IRQ_DMA1S0,
     .shift    = DMA_INT_STREAM0_SHIFT,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(0),
   },
   {
     .stream   = 1,
     .irq      = STM32_IRQ_DMA1S1,
     .shift    = DMA_INT_STREAM1_SHIFT,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(1),
   },
   {
     .stream   = 2,
     .irq      = STM32_IRQ_DMA1S2,
     .shift    = DMA_INT_STREAM2_SHIFT,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(2),
   },
   {
     .stream   = 3,
     .irq      = STM32_IRQ_DMA1S3,
     .shift    = DMA_INT_STREAM3_SHIFT,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(3),
   },
   {
     .stream   = 4,
     .irq      = STM32_IRQ_DMA1S4,
     .shift    = DMA_INT_STREAM4_SHIFT,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(4),
   },
   {
     .stream   = 5,
     .irq      = STM32_IRQ_DMA1S5,
     .shift    = DMA_INT_STREAM5_SHIFT,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(5),
   },
   {
     .stream   = 6,
     .irq      = STM32_IRQ_DMA1S6,
     .shift    = DMA_INT_STREAM6_SHIFT,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(6),
   },
   {
     .stream   = 7,
     .irq      = STM32_IRQ_DMA1S7,
     .shift    = DMA_INT_STREAM7_SHIFT,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(7),
   },
 #if STM32F7_NDMA > 1
@@ -143,47 +151,55 @@ static struct stm32_dma_s g_dma[DMA_NSTREAMS] =
     .stream   = 0,
     .irq      = STM32_IRQ_DMA2S0,
     .shift    = DMA_INT_STREAM0_SHIFT,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(0),
   },
   {
     .stream   = 1,
     .irq      = STM32_IRQ_DMA2S1,
     .shift    = DMA_INT_STREAM1_SHIFT,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(1),
   },
   {
     .stream   = 2,
     .irq      = STM32_IRQ_DMA2S2,
     .shift    = DMA_INT_STREAM2_SHIFT,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(2),
   },
   {
     .stream   = 3,
     .irq      = STM32_IRQ_DMA2S3,
     .shift    = DMA_INT_STREAM3_SHIFT,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(3),
   },
   {
     .stream   = 4,
     .irq      = STM32_IRQ_DMA2S4,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(4),
   },
   {
     .stream   = 5,
     .irq      = STM32_IRQ_DMA2S5,
     .shift    = DMA_INT_STREAM5_SHIFT,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(5),
   },
   {
     .stream   = 6,
     .irq      = STM32_IRQ_DMA2S6,
     .shift    = DMA_INT_STREAM6_SHIFT,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(6),
   },
   {
     .stream   = 7,
     .irq      = STM32_IRQ_DMA2S7,
     .shift    = DMA_INT_STREAM7_SHIFT,
+    .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(7),
   },
 #endif
@@ -440,7 +456,6 @@ void weak_function arm_dma_initialize(void)
   for (stream = 0; stream < DMA_NSTREAMS; stream++)
     {
       dmast = &g_dma[stream];
-      nxsem_init(&dmast->sem, 0, 1);
 
       /* Attach DMA interrupt vectors */
 

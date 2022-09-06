@@ -380,6 +380,7 @@ struct lpc54_dev_s g_scard_dev =
     .dmasendsetup     = lpc54_dmasendsetup,
 #endif
   },
+  .waitsem = SEM_INITIALIZER(0),
 };
 
 #ifdef CONFIG_LPC54_SDMMC_DMA
@@ -2826,10 +2827,6 @@ struct sdio_dev_s *lpc54_sdmmc_initialize(int slotno)
   /* Enable clocking to the SD/MMC peripheral */
 
   lpc54_sdmmc_enableclk();
-
-  /* Initialize semaphores */
-
-  nxsem_init(&priv->waitsem, 0, 0);
 
   /* Configure GPIOs for 4-bit, wide-bus operation */
 

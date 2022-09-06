@@ -202,7 +202,9 @@ static struct nrf52_spidev_s g_spi0dev =
   },
 
   .base      = NRF52_SPIM0_BASE,
+  .lock      = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_NRF52_SPI_MASTER_INTERRUPTS
+  .sem_isr   = SEM_INITIALIZER(0),
   .irq       = NRF52_IRQ_SPI_TWI_0,
 #endif
   .sck_pin   = BOARD_SPI0_SCK_PIN,
@@ -253,7 +255,9 @@ static struct nrf52_spidev_s g_spi1dev =
   },
 
   .base      = NRF52_SPIM1_BASE,
+  .lock      = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_NRF52_SPI_MASTER_INTERRUPTS
+  .sem_isr   = SEM_INITIALIZER(0),
   .irq       = NRF52_IRQ_SPI_TWI_1,
 #endif
   .sck_pin   = BOARD_SPI1_SCK_PIN,
@@ -304,7 +308,9 @@ static struct nrf52_spidev_s g_spi2dev =
   },
 
   .base      = NRF52_SPIM2_BASE,
+  .lock      = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_NRF52_SPI_MASTER_INTERRUPTS
+  .sem_isr   = SEM_INITIALIZER(0),
   .irq       = NRF52_IRQ_SPI2,
 #endif
   .sck_pin   = BOARD_SPI2_SCK_PIN,
@@ -355,7 +361,9 @@ static struct nrf52_spidev_s g_spi3dev =
   },
 
   .base      = NRF52_SPIM3_BASE,
+  .lock      = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_NRF52_SPI_MASTER_INTERRUPTS
+  .sem_isr   = SEM_INITIALIZER(0),
   .irq       = NRF52_IRQ_SPI3,
 #endif
   .sck_pin   = BOARD_SPI3_SCK_PIN,
@@ -1470,13 +1478,7 @@ struct spi_dev_s *nrf52_spibus_initialize(int port)
 
   priv->initialized = true;
 
-  /* Initialize the SPI mutex */
-
-  nxmutex_init(&priv->lock);
-
 #ifdef CONFIG_NRF52_SPI_MASTER_INTERRUPTS
-  nxsem_init(&priv->sem_isr, 0, 0);
-
   /* Attach SPI interrupt */
 
   irq_attach(priv->irq, nrf52_spi_isr, priv);

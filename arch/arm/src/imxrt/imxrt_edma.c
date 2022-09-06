@@ -155,7 +155,13 @@ struct imxrt_edma_s
 
 /* The state of the eDMA */
 
-static struct imxrt_edma_s g_edma;
+static struct imxrt_edma_s g_edma =
+{
+  .chlock = NXMUTEX_INITIALIZER,
+#if CONFIG_IMXRT_EDMA_NTCD > 0
+  .dsem = SEM_INITIALIZER(CONFIG_IMXRT_EDMA_NTCD),
+#endif
+};
 
 #if CONFIG_IMXRT_EDMA_NTCD > 0
 /* This is a singly-linked list of free TCDs */
@@ -740,18 +746,12 @@ void weak_function arm_dma_initialize(void)
 
   /* Initialize data structures */
 
-  memset(&g_edma, 0, sizeof(struct imxrt_edma_s));
   for (i = 0; i < IMXRT_EDMA_NCHANNELS; i++)
     {
       g_edma.dmach[i].chan = i;
     }
 
-  /* Initialize mutex & semaphores */
-
-  nxmutex_init(&g_edma.chlock);
 #if CONFIG_IMXRT_EDMA_NTCD > 0
-  nxsem_init(&g_edma.dsem, 0, CONFIG_IMXRT_EDMA_NTCD);
-
   /* Initialize the list of free TCDs from the pool of pre-allocated TCDs. */
 
   imxrt_tcd_initialize();
