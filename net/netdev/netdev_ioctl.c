@@ -905,9 +905,12 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
           if (dev)
             {
               req->ifr_flags = dev->d_flags;
+              ret = OK;
             }
-
-          ret = OK;
+          else
+            {
+              ret = -ENODEV;
+            }
         }
         break;
 
@@ -947,6 +950,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
 #endif
                 {
                   nerr("Unsupported link layer\n");
+                  ret = -ENOSYS;
                 }
             }
         }
@@ -992,6 +996,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
 #endif
                 {
                   nerr("Unsupported link layer\n");
+                  ret = -ENOSYS;
                 }
             }
         }
@@ -1017,7 +1022,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
       case SIOCGIFCOUNT:  /* Get number of devices */
         {
           req->ifr_count = netdev_count();
-          ret = -ENOSYS;
+          ret = OK;
         }
         break;
 
