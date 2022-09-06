@@ -115,7 +115,7 @@ static void mld_gendog_work(FAR void *arg)
    * index.
    */
 
-  ifindex = (int)arg;
+  ifindex = (intptr_t)arg;
   DEBUGASSERT(ifindex > 0);
 
   net_lock();
@@ -234,7 +234,7 @@ static void mld_v1dog_work(FAR void *arg)
    * index.
    */
 
-  ifindex = (int)arg;
+  ifindex = (intptr_t)arg;
   DEBUGASSERT(ifindex > 0);
 
   net_lock();
