@@ -33,6 +33,7 @@
 #include <errno.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/mutex.h>
 #include <nuttx/i2c/i2c_master.h>
 
 #include <nuttx/irq.h>
@@ -92,11 +93,11 @@ struct bl602_i2c_priv_s
 
   const struct bl602_i2c_config_s *config;
 
-  uint8_t  subflag;  /* Sub address flag */
-  uint32_t subaddr;  /* Sub address */
-  uint8_t  sublen;   /* Sub address length */
-  sem_t    sem_excl; /* Mutual exclusion semaphore */
-  sem_t    sem_isr;  /* Interrupt wait semaphore */
+  uint8_t  subflag;   /* Sub address flag */
+  uint32_t subaddr;   /* Sub address */
+  uint8_t  sublen;    /* Sub address length */
+  mutex_t  lock;      /* Mutual exclusion mutex */
+  sem_t    sem_isr;   /* Interrupt wait semaphore */
 
   /* I2C work state */
 
@@ -151,6 +152,8 @@ static struct bl602_i2c_priv_s bl602_i2c0_priv =
   .config   = &bl602_i2c0_config,
   .subaddr  = 0,
   .sublen   = 0,
+  .lock     = NXMUTEX_INITIALIZER,
+  .sem_isr  = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
   .i2cstate = EV_I2C_END_INT,
   .msgv     = NULL,
   .msgid    = 0,
@@ -226,26 +229,6 @@ static void bl602_i2c_recvdata(struct bl602_i2c_priv_s *priv)
     }
 
   priv->bytes += count;
-}
-
-/****************************************************************************
- * Name: bl602_i2c_sem_init
- *
- * Description:
- *   Initialize semaphores
- *
- ****************************************************************************/
-
-static void bl602_i2c_sem_init(struct bl602_i2c_priv_s *priv)
-{
-  nxsem_init(&priv->sem_excl, 0, 1);
-
-  /* This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  nxsem_init(&priv->sem_isr, 0, 1);
-  nxsem_set_protocol(&priv->sem_isr, SEM_PRIO_NONE);
 }
 
 /****************************************************************************
@@ -689,10 +672,10 @@ static int bl602_i2c_transfer(struct i2c_master_s *dev,
       return -1;
     }
 
-  ret = nxsem_wait_uninterruptible(&priv->sem_excl);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
-      i2cerr("take sem_excl error\n");
+      i2cerr("lock error\n");
       return ret;
     }
 
@@ -759,8 +742,7 @@ static int bl602_i2c_transfer(struct i2c_master_s *dev,
       nxsem_post(&priv->sem_isr);
     }
 
-  nxsem_post(&priv->sem_excl);
-
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -996,7 +978,6 @@ struct i2c_master_s *bl602_i2cbus_initialize(int port)
   up_enable_irq(BL602_IRQ_I2C);
   bl602_i2c_intmask(I2C_INT_ALL, 1);
   irq_attach(BL602_IRQ_I2C, bl602_i2c_irq, priv);
-  bl602_i2c_sem_init(priv);
 
   leave_critical_section(flags);
 
@@ -1034,9 +1015,6 @@ int bl602_i2cbus_uninitialize(struct i2c_master_s *dev)
   leave_critical_section(flags);
 
   bl602_swrst_ahb_slave1(AHB_SLAVE1_I2C);
-
-  nxsem_destroy(&priv->sem_excl);
-  nxsem_destroy(&priv->sem_isr);
 
   return OK;
 }

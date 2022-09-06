@@ -142,38 +142,6 @@ static const struct i2c_ops_s ds_i2c_ops =
  * Private Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: ds_i2c_sem_wait
- *
- * Description:
- *   Take the exclusive access, waiting as necessary
- *
- ****************************************************************************/
-
-static inline int ds_i2c_sem_wait(FAR struct i2c_master_s *i2cdev)
-{
-  FAR struct ds_i2c_inst_s *inst = (FAR struct ds_i2c_inst_s *)i2cdev;
-  FAR struct onewire_master_s *master = inst->master;
-
-  return nxrmutex_lock(&master->devlock);
-}
-
-/****************************************************************************
- * Name: ds_i2c_sem_post
- *
- * Description:
- *   Release the mutual exclusion semaphore
- *
- ****************************************************************************/
-
-static inline void ds_i2c_sem_post(FAR struct i2c_master_s *i2cdev)
-{
-  FAR struct ds_i2c_inst_s *inst = (FAR struct ds_i2c_inst_s *)i2cdev;
-  FAR struct onewire_master_s *master = inst->master;
-
-  nxrmutex_unlock(&master->devlock);
-}
-
 static int ds_error(uint8_t buf[])
 {
   /* Warnings */
@@ -732,14 +700,14 @@ static int ds_i2c_reset(FAR struct i2c_master_s *i2cdev)
   FAR struct onewire_master_s *master = inst->master;
   int ret;
 
-  ret = ds_i2c_sem_wait(i2cdev);
+  ret = nxrmutex_lock(&master->devlock);
   if (ret < 0)
     {
       return ret;
     }
 
   ret = ONEWIRE_RESET(master->dev);
-  ds_i2c_sem_post(i2cdev);
+  nxrmutex_unlock(&master->devlock);
 
   return ret;
 }
@@ -757,16 +725,18 @@ static int ds_i2c_transfer(FAR struct i2c_master_s *i2cdev,
                            FAR struct i2c_msg_s *msgs,
                            int count)
 {
+  FAR struct ds_i2c_inst_s *inst = (FAR struct ds_i2c_inst_s *)i2cdev;
+  FAR struct onewire_master_s *master = inst->master;
   int ret;
 
-  ret = ds_i2c_sem_wait(i2cdev);
+  ret = nxrmutex_lock(&master->devlock);
   if (ret < 0)
     {
       return ret;
     }
 
   ret = ds_i2c_process(i2cdev, msgs, count);
-  ds_i2c_sem_post(i2cdev);
+  nxrmutex_unlock(&master->devlock);
 
   return ret;
 }

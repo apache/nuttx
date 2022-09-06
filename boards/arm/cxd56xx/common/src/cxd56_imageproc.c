@@ -32,6 +32,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 
 #include <debug.h>
@@ -205,9 +206,9 @@ struct aligned_data(16) ge2d_abcmd_s
  ****************************************************************************/
 
 static sem_t g_rotwait;
-static sem_t g_rotexc;
-static sem_t g_geexc;
-static sem_t g_abexc;
+static mutex_t g_rotlock;
+static mutex_t g_gelock;
+static mutex_t g_ablock;
 
 static struct file g_gfile;
 static char g_gcmdbuf[256] aligned_data(16);
@@ -216,24 +217,13 @@ static char g_gcmdbuf[256] aligned_data(16);
  * Private Functions
  ****************************************************************************/
 
-static int ip_semtake(sem_t * id)
-{
-  return nxsem_wait_uninterruptible(id);
-}
-
-static void ip_semgive(sem_t * id)
-{
-  nxsem_post(id);
-}
-
 static int intr_handler_rot(int irq, void *context, void *arg)
 {
   putreg32(1, ROT_INTR_CLEAR);
   putreg32(0, ROT_INTR_ENABLE);
   putreg32(1, ROT_INTR_DISABLE);
 
-  ip_semgive(&g_rotwait);
-
+  nxsem_post(&g_rotwait);
   return 0;
 }
 
@@ -415,7 +405,7 @@ static void imageproc_convert_(int      is_yuv2rgb,
       return;
     }
 
-  ret = ip_semtake(&g_rotexc);
+  ret = nxmutex_lock(&g_rotlock);
   if (ret)
     {
       return;
@@ -445,9 +435,8 @@ static void imageproc_convert_(int      is_yuv2rgb,
   putreg32(0, ROT_RGB_ALIGNMENT);
   putreg32(1, ROT_COMMAND);
 
-  ip_semtake(&g_rotwait);
-
-  ip_semgive(&g_rotexc);
+  nxsem_wait_uninterruptible(&g_rotwait);
+  nxmutex_unlock(&g_rotlock);
 }
 
 static void get_rect_info(imageproc_imginfo_t *imginfo,
@@ -527,10 +516,10 @@ static void *get_blendarea(imageproc_imginfo_t *imginfo, int offset)
 
 void imageproc_initialize(void)
 {
-  nxsem_init(&g_rotexc, 0, 1);
+  nxmutex_init(&g_rotlock);
   nxsem_init(&g_rotwait, 0, 0);
-  nxsem_init(&g_geexc, 0, 1);
-  nxsem_init(&g_abexc, 0, 1);
+  nxmutex_init(&g_gelock);
+  nxmutex_init(&g_ablock);
   nxsem_set_protocol(&g_rotwait, SEM_PRIO_NONE);
 
   cxd56_ge2dinitialize(GEDEVNAME);
@@ -558,9 +547,9 @@ void imageproc_finalize(void)
   cxd56_ge2duninitialize(GEDEVNAME);
 
   nxsem_destroy(&g_rotwait);
-  nxsem_destroy(&g_rotexc);
-  nxsem_destroy(&g_geexc);
-  nxsem_destroy(&g_abexc);
+  nxmutex_destroy(&g_rotlock);
+  nxmutex_destroy(&g_gelock);
+  nxmutex_destroy(&g_ablock);
 }
 
 void imageproc_convert_yuv2rgb(uint8_t * ibuf,
@@ -629,7 +618,7 @@ int imageproc_resize(uint8_t * ibuf,
       return -EINVAL;
     }
 
-  ret = ip_semtake(&g_geexc);
+  ret = nxmutex_lock(&g_gelock);
   if (ret)
     {
       return ret;
@@ -652,7 +641,7 @@ int imageproc_resize(uint8_t * ibuf,
                     0x0080);
   if (cmd == NULL)
     {
-      ip_semgive(&g_geexc);
+      nxmutex_unlock(&g_gelock);
       return -EINVAL;
     }
 
@@ -666,12 +655,11 @@ int imageproc_resize(uint8_t * ibuf,
   ret = file_write(&g_gfile, g_gcmdbuf, len);
   if (ret < 0)
     {
-      ip_semgive(&g_geexc);
+      nxmutex_unlock(&g_gelock);
       return -EFAULT;
     }
 
-  ip_semgive(&g_geexc);
-
+  nxmutex_unlock(&g_gelock);
   return 0;
 }
 
@@ -747,7 +735,7 @@ int imageproc_clip_and_resize(uint8_t * ibuf,
       clip_height = ivsize;
     }
 
-  ret = ip_semtake(&g_geexc);
+  ret = nxmutex_lock(&g_gelock);
   if (ret)
     {
       return ret;
@@ -771,7 +759,7 @@ int imageproc_clip_and_resize(uint8_t * ibuf,
 
   if (cmd == NULL)
     {
-      ip_semgive(&g_geexc);
+      nxmutex_unlock(&g_gelock);
       return -EINVAL;
     }
 
@@ -785,12 +773,11 @@ int imageproc_clip_and_resize(uint8_t * ibuf,
   ret = file_write(&g_gfile, g_gcmdbuf, len);
   if (ret < 0)
     {
-      ip_semgive(&g_geexc);
+      nxmutex_unlock(&g_gelock);
       return -EFAULT;
     }
 
-  ip_semgive(&g_geexc);
-
+  nxmutex_unlock(&g_gelock);
   return 0;
 }
 
@@ -939,7 +926,7 @@ int imageproc_alpha_blend(imageproc_imginfo_t *dst,
   src_addr = get_blendarea(src,   src_offset);
   a_addr   = get_blendarea(alpha, a_offset);
 
-  ret = ip_semtake(&g_abexc);
+  ret = nxmutex_lock(&g_ablock);
   if (ret)
     {
       return ret; /* -EINTR */
@@ -962,7 +949,7 @@ int imageproc_alpha_blend(imageproc_imginfo_t *dst,
 
   if (cmd == NULL)
     {
-      ip_semgive(&g_abexc);
+      nxmutex_unlock(&g_ablock);
       return -EINVAL;
     }
 
@@ -976,11 +963,11 @@ int imageproc_alpha_blend(imageproc_imginfo_t *dst,
   ret = file_write(&g_gfile, g_gcmdbuf, len);
   if (ret < 0)
     {
-      ip_semgive(&g_abexc);
+      nxmutex_unlock(&g_ablock);
       return -EFAULT;
     }
 
-  ip_semgive(&g_abexc);
+  nxmutex_unlock(&g_ablock);
   return 0;
 }
 

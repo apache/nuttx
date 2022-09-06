@@ -78,7 +78,7 @@ struct bt_conn_handoff_s
 static struct bt_conn_s g_conns[CONFIG_BLUETOOTH_MAX_CONN];
 static struct bt_conn_handoff_s g_conn_handoff =
 {
-  SEM_INITIALIZER(1),
+  NXSEM_INITIALIZER(1, PRIOINHERIT_FLAGS_DISABLE),
   NULL
 };
 

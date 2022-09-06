@@ -27,7 +27,7 @@
 #include <stdlib.h>
 
 #include <nuttx/atexit.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/tls.h>
 
 #if CONFIG_LIBC_MAX_EXITFUNS > 0
@@ -72,11 +72,11 @@ static FAR struct atexit_list_s * get_exitfuncs(void)
 static int exitfunc_lock(void)
 {
   FAR struct task_info_s *info = task_get_info();
-  int ret = _SEM_WAIT(&info->ta_sem);
+  int ret = nxmutex_lock(&info->ta_lock);
 
   if (ret < 0)
     {
-      ret = _SEM_ERRVAL(ret);
+      ret = -ret;
     }
 
   return ret;
@@ -94,7 +94,7 @@ static void exitfunc_unlock(void)
 {
   FAR struct task_info_s *info = task_get_info();
 
-  _SEM_POST(&info->ta_sem);
+  nxmutex_unlock(&info->ta_lock);
 }
 
 /****************************************************************************

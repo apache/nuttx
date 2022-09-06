@@ -55,7 +55,7 @@
 
 int mac802154_req_data(MACHANDLE mac,
                        FAR const struct ieee802154_frame_meta_s *meta,
-                       FAR struct iob_s *frame, bool allowinterrupt)
+                       FAR struct iob_s *frame)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
@@ -141,12 +141,12 @@ int mac802154_req_data(MACHANDLE mac,
 
   /* From this point on, we need exclusive access to the privmac struct */
 
-  ret = mac802154_lock(priv, allowinterrupt);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       /* Should only fail if interrupted by a signal */
 
-      wlwarn("WARNING: mac802154_takesem failed: %d\n", ret);
+      wlwarn("WARNING: nxmutex_lock failed: %d\n", ret);
       return ret;
     }
 
@@ -212,7 +212,7 @@ int mac802154_req_data(MACHANDLE mac,
       if (priv->devmode != IEEE802154_DEVMODE_PANCOORD)
         {
           ret = -EINVAL;
-          goto errout_with_sem;
+          goto errout_with_lock;
         }
     }
 
@@ -238,15 +238,15 @@ int mac802154_req_data(MACHANDLE mac,
 
   /* Allocate the txdesc, waiting if necessary, allow interruptions */
 
-  ret = mac802154_txdesc_alloc(priv, &txdesc, true);
+  ret = mac802154_txdesc_alloc(priv, &txdesc);
   if (ret < 0)
     {
       /* Should only fail if interrupted by a signal while re-acquiring
-       * exclsem.  So the lock is not held if a failure is returned.
+       * lock.  So the lock is not held if a failure is returned.
        */
 
       wlwarn("WARNING: mac802154_txdesc_alloc failed: %d\n", ret);
-      return ret;
+      goto errout_with_lock;
     }
 
   /* Set the offset to 0 to include the header ( we do not want to
@@ -320,7 +320,7 @@ int mac802154_req_data(MACHANDLE mac,
               memcpy(&txdesc->destaddr, &meta->destaddr,
                      sizeof(struct ieee802154_addr_s));
               mac802154_setupindirect(priv, txdesc);
-              mac802154_unlock(priv)
+              nxmutex_unlock(&priv->lock);
             }
           else
             {
@@ -336,7 +336,7 @@ int mac802154_req_data(MACHANDLE mac,
 
           /* We no longer need to have the MAC layer locked. */
 
-          mac802154_unlock(priv)
+          nxmutex_unlock(&priv->lock);
 
           /* Notify the radio driver that there is data available */
 
@@ -353,8 +353,8 @@ errout_with_txdesc:
   txdesc->frame = NULL;
   mac802154_txdesc_free(priv, txdesc);
 
-errout_with_sem:
-  mac802154_unlock(priv)
+errout_with_lock:
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 

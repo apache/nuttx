@@ -77,11 +77,6 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-/* NAND locking */
-
-static int      nand_lock(FAR struct nand_dev_s *nand);
-#define         nand_unlock(n) nxsem_post(&(n)->exclsem)
-
 /* Bad block checking */
 
 #ifdef CONFIG_MTD_NAND_BLOCKCHECK
@@ -119,26 +114,6 @@ static int     nand_ioctl(struct mtd_dev_s *dev, int cmd,
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: nand_lock
- *
- * Description:
- *   Get exclusive access to the nand.
- *
- * Input Parameters:
- *   nand  - Pointer to a struct nand_dev_s instance.
- *   block - Number of block to check.
- *
- * Returned Value:
- *   OK on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-static int nand_lock(FAR struct nand_dev_s *nand)
-{
-  return nxsem_wait(&nand->exclsem);
-}
 
 /****************************************************************************
  * Name: nand_checkblock
@@ -548,7 +523,7 @@ static int nand_erase(struct mtd_dev_s *dev, off_t startblock,
 
   /* Lock access to the NAND until we complete the erase */
 
-  nand_lock(nand);
+  nxmutex_lock(&nand->lock);
   while (blocksleft-- > 0)
     {
       /* Erase each sector */
@@ -558,14 +533,14 @@ static int nand_erase(struct mtd_dev_s *dev, off_t startblock,
         {
           ferr("ERROR: nand_eraseblock failed on block %ld: %d\n",
                (long)startblock, ret);
-          nand_unlock(nand);
+          nxmutex_unlock(&nand->lock);
           return ret;
         }
 
       startblock++;
     }
 
-  nand_unlock(nand);
+  nxmutex_unlock(&nand->lock);
   return (int)nblocks;
 }
 
@@ -614,7 +589,7 @@ static ssize_t nand_bread(struct mtd_dev_s *dev, off_t startpage,
 
   /* Lock access to the NAND until we complete the read */
 
-  nand_lock(nand);
+  nxmutex_lock(&nand->lock);
 
   /* Then read every page from NAND */
 
@@ -657,11 +632,11 @@ static ssize_t nand_bread(struct mtd_dev_s *dev, off_t startpage,
       buffer += pagesize;
     }
 
-  nand_unlock(nand);
+  nxmutex_unlock(&nand->lock);
   return npages;
 
 errout_with_lock:
-  nand_unlock(nand);
+  nxmutex_unlock(&nand->lock);
   return ret;
 }
 
@@ -710,7 +685,7 @@ static ssize_t nand_bwrite(struct mtd_dev_s *dev, off_t startpage,
 
   /* Lock access to the NAND until we complete the write */
 
-  nand_lock(nand);
+  nxmutex_lock(&nand->lock);
 
   /* Then write every page into NAND */
 
@@ -753,11 +728,11 @@ static ssize_t nand_bwrite(struct mtd_dev_s *dev, off_t startpage,
       buffer += pagesize;
     }
 
-  nand_unlock(nand);
+  nxmutex_unlock(&nand->lock);
   return npages;
 
 errout_with_lock:
-  nand_unlock(nand);
+  nxmutex_unlock(&nand->lock);
   return ret;
 }
 
@@ -967,7 +942,7 @@ FAR struct mtd_dev_s *nand_initialize(FAR struct nand_raw_s *raw)
   nand->mtd.ioctl  = nand_ioctl;
   nand->raw        = raw;
 
-  nxsem_init(&nand->exclsem, 0, 1);
+  nxmutex_init(&nand->lock);
 
 #if defined(CONFIG_MTD_NAND_BLOCKCHECK) && defined(CONFIG_DEBUG_INFO) && \
     defined(CONFIG_DEBUG_FS)

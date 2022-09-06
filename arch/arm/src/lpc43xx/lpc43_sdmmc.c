@@ -251,8 +251,6 @@ static void lpc43_putreg(uint32_t val, uint32_t addr);
 
 /* Low-level helpers ********************************************************/
 
-static int  lpc43_takesem(struct lpc43_dev_s *priv);
-#define     lpc43_givesem(priv) (nxsem_post(&priv->waitsem))
 static inline void lpc43_setclock(uint32_t clkdiv);
 static inline void lpc43_sdcard_clock(bool enable);
 static int  lpc43_ciu_sendcmd(uint32_t cmd, uint32_t arg);
@@ -492,27 +490,6 @@ static void lpc43_putreg(uint32_t val, uint32_t addr)
   putreg32(val, addr);
 }
 #endif
-
-/****************************************************************************
- * Name: lpc43_takesem
- *
- * Description:
- *   Take the wait semaphore (handling false alarm wakeups due to the receipt
- *   of signals).
- *
- * Input Parameters:
- *   dev - Instance of the SD card device driver state structure.
- *
- * Returned Value:
- *   Normally OK, but may return -ECANCELED in the rare event that the task
- *   has been canceled.
- *
- ****************************************************************************/
-
-static int lpc43_takesem(struct lpc43_dev_s *priv)
-{
-  return nxsem_wait_uninterruptible(&priv->waitsem);
-}
 
 /****************************************************************************
  * Name: lpc43_setclock
@@ -869,7 +846,7 @@ static void lpc43_endwait(struct lpc43_dev_s *priv,
 
   /* Wake up the waiting thread */
 
-  lpc43_givesem(priv);
+  nxsem_post(&priv->waitsem);
 }
 
 /****************************************************************************
@@ -2308,7 +2285,7 @@ static sdio_eventset_t lpc43_eventwait(struct sdio_dev_s *dev)
        * incremented and there will be no wait.
        */
 
-      ret = lpc43_takesem(priv);
+      ret = nxsem_wait_uninterruptible(&priv->waitsem);
       if (ret < 0)
         {
           /* Task canceled.  Cancel the wdog -- assuming it was started and

@@ -126,9 +126,6 @@ static uint32_t nfs_xdrneg1;
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     nfs_semtake(FAR struct nfsmount *nmp);
-static void    nfs_semgive(FAR struct nfsmount *nmp);
-
 static int     nfs_filecreate(FAR struct nfsmount *nmp,
                    FAR struct nfsnode *np, FAR const char *relpath,
                    mode_t mode);
@@ -228,24 +225,6 @@ const struct mountpt_operations nfs_operations =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: nfs_semtake
- ****************************************************************************/
-
-static int nfs_semtake(FAR struct nfsmount *nmp)
-{
-  return nxsem_wait_uninterruptible(&nmp->nm_sem);
-}
-
-/****************************************************************************
- * Name: nfs_semgive
- ****************************************************************************/
-
-static void nfs_semgive(FAR struct nfsmount *nmp)
-{
-  nxsem_post(&nmp->nm_sem);
-}
 
 /****************************************************************************
  * Name: nfs_filecreate
@@ -693,7 +672,7 @@ static int nfs_open(FAR struct file *filep, FAR const char *relpath,
       return -ENOMEM;
     }
 
-  ret = nfs_semtake(nmp);
+  ret = nxmutex_lock(&nmp->nm_lock);
   if (ret < 0)
     {
       kmm_free(np);
@@ -714,7 +693,7 @@ static int nfs_open(FAR struct file *filep, FAR const char *relpath,
       if (ret != -ENOENT)
         {
           ferr("ERROR: nfs_fileopen failed: %d\n", ret);
-          goto errout_with_semaphore;
+          goto errout_with_lock;
         }
 
       /* The file does not exist. Check if we were asked to create the file.
@@ -729,7 +708,7 @@ static int nfs_open(FAR struct file *filep, FAR const char *relpath,
            */
 
           ferr("ERROR: File does not exist\n");
-          goto errout_with_semaphore;
+          goto errout_with_lock;
         }
 
       /* Create the file */
@@ -738,7 +717,7 @@ static int nfs_open(FAR struct file *filep, FAR const char *relpath,
       if (ret != OK)
         {
           ferr("ERROR: nfs_filecreate failed: %d\n", ret);
-          goto errout_with_semaphore;
+          goto errout_with_lock;
         }
     }
 
@@ -761,16 +740,16 @@ static int nfs_open(FAR struct file *filep, FAR const char *relpath,
   np->n_next   = nmp->nm_head;
   nmp->nm_head = np;
 
-  nfs_semgive(nmp);
+  nxmutex_unlock(&nmp->nm_lock);
   return OK;
 
-errout_with_semaphore:
+errout_with_lock:
   if (np)
     {
       kmm_free(np);
     }
 
-  nfs_semgive(nmp);
+  nxmutex_unlock(&nmp->nm_lock);
   return ret;
 }
 
@@ -806,7 +785,7 @@ static int nfs_close(FAR struct file *filep)
 
   /* Get exclusive access to the mount structure. */
 
-  ret = nfs_semtake(nmp);
+  ret = nxmutex_lock(&nmp->nm_lock);
   if (ret < 0)
     {
       return ret;
@@ -868,7 +847,7 @@ static int nfs_close(FAR struct file *filep)
     }
 
   filep->f_priv = NULL;
-  nfs_semgive(nmp);
+  nxmutex_unlock(&nmp->nm_lock);
   return ret;
 }
 
@@ -907,7 +886,7 @@ static ssize_t nfs_read(FAR struct file *filep, FAR char *buffer,
 
   DEBUGASSERT(nmp != NULL);
 
-  ret = nfs_semtake(nmp);
+  ret = nxmutex_lock(&nmp->nm_lock);
   if (ret < 0)
     {
       return (ssize_t)ret;
@@ -983,7 +962,7 @@ static ssize_t nfs_read(FAR struct file *filep, FAR char *buffer,
       if (ret)
         {
           ferr("ERROR: nfs_request failed: %d\n", ret);
-          goto errout_with_semaphore;
+          goto errout_with_lock;
         }
 
       /* The read was successful.  Get a pointer to the beginning of the NFS
@@ -1039,8 +1018,8 @@ static ssize_t nfs_read(FAR struct file *filep, FAR char *buffer,
         }
     }
 
-errout_with_semaphore:
-  nfs_semgive(nmp);
+errout_with_lock:
+  nxmutex_unlock(&nmp->nm_lock);
   return bytesread > 0 ? bytesread : ret;
 }
 
@@ -1082,7 +1061,7 @@ static ssize_t nfs_write(FAR struct file *filep, FAR const char *buffer,
 
   DEBUGASSERT(nmp != NULL);
 
-  ret = nfs_semtake(nmp);
+  ret = nxmutex_lock(&nmp->nm_lock);
   if (ret < 0)
     {
       return (ssize_t)ret;
@@ -1093,7 +1072,7 @@ static ssize_t nfs_write(FAR struct file *filep, FAR const char *buffer,
   if (np->n_size + buflen < np->n_size)
     {
       ret = -EFBIG;
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 
   /* Now loop until we send the entire user buffer */
@@ -1167,7 +1146,7 @@ static ssize_t nfs_write(FAR struct file *filep, FAR const char *buffer,
       if (ret)
         {
           ferr("ERROR: nfs_request failed: %d\n", ret);
-          goto errout_with_semaphore;
+          goto errout_with_lock;
         }
 
       /* Get a pointer to the WRITE reply data */
@@ -1203,7 +1182,7 @@ static ssize_t nfs_write(FAR struct file *filep, FAR const char *buffer,
       if (tmp < 1 || tmp > writesize)
         {
           ret = -EIO;
-          goto errout_with_semaphore;
+          goto errout_with_lock;
         }
 
       writesize = tmp;
@@ -1228,8 +1207,8 @@ static ssize_t nfs_write(FAR struct file *filep, FAR const char *buffer,
       buffer       += writesize;
     }
 
-errout_with_semaphore:
-  nfs_semgive(nmp);
+errout_with_lock:
+  nxmutex_unlock(&nmp->nm_lock);
   return byteswritten > 0 ? byteswritten : ret;
 }
 
@@ -1260,7 +1239,7 @@ static int nfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   DEBUGASSERT(nmp != NULL);
 
-  ret = nfs_semtake(nmp);
+  ret = nxmutex_lock(&nmp->nm_lock);
   if (ret < 0)
     {
       return ret;
@@ -1275,7 +1254,7 @@ static int nfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   newp->f_priv = np;
 
-  nfs_semgive(nmp);
+  nxmutex_unlock(&nmp->nm_lock);
   return OK;
 }
 
@@ -1307,7 +1286,7 @@ static int nfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 
   memset(buf, 0, sizeof(*buf));
 
-  ret = nfs_semtake(nmp);
+  ret = nxmutex_lock(&nmp->nm_lock);
   if (ret < 0)
     {
       return ret;
@@ -1326,7 +1305,7 @@ static int nfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
   buf->st_mtim = np->n_mtime;
   buf->st_ctim = np->n_ctime;
 
-  nfs_semgive(nmp);
+  nxmutex_unlock(&nmp->nm_lock);
   return OK;
 }
 
@@ -1357,7 +1336,7 @@ static int nfs_fchstat(FAR const struct file *filep,
   nmp = (FAR struct nfsmount *)filep->f_inode->i_private;
   DEBUGASSERT(nmp != NULL);
 
-  ret = nfs_semtake(nmp);
+  ret = nxmutex_lock(&nmp->nm_lock);
   if (ret < 0)
     {
       return ret;
@@ -1367,7 +1346,7 @@ static int nfs_fchstat(FAR const struct file *filep,
 
   ret = nfs_filechstat(nmp, np, buf, flags);
 
-  nfs_semgive(nmp);
+  nxmutex_unlock(&nmp->nm_lock);
   return ret;
 }
 
@@ -1396,7 +1375,7 @@ static int nfs_truncate(FAR struct file *filep, off_t length)
 
   DEBUGASSERT(nmp != NULL);
 
-  ret = nfs_semtake(nmp);
+  ret = nxmutex_lock(&nmp->nm_lock);
   if (ret >= 0)
     {
       struct stat buf;
@@ -1406,7 +1385,7 @@ static int nfs_truncate(FAR struct file *filep, off_t length)
       buf.st_size = length;
       ret = nfs_filechstat(nmp, np, &buf, CH_STAT_SIZE);
 
-      nfs_semgive(nmp);
+      nxmutex_unlock(&nmp->nm_lock);
     }
 
   return ret;
@@ -1448,7 +1427,7 @@ static int nfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
       return -ENOMEM;
     }
 
-  ret = nfs_semtake(nmp);
+  ret = nxmutex_lock(&nmp->nm_lock);
   if (ret < 0)
     {
       goto errout_with_ndir;
@@ -1460,7 +1439,7 @@ static int nfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   if (ret != OK)
     {
       ferr("ERROR: nfs_findnode failed: %d\n", ret);
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 
   /* The entry is a directory */
@@ -1470,7 +1449,7 @@ static int nfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
     {
       ferr("ERROR:  Not a directory, type=%" PRId32 "\n", objtype);
       ret = -ENOTDIR;
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 
   /* Save the directory information in struct fs_dirent_s so that it can be
@@ -1482,11 +1461,11 @@ static int nfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
   memcpy(ndir->nfs_fhandle, &fhandle.handle, fhandle.length);
   *dir = &ndir->nfs_base;
-  nfs_semgive(nmp);
+  nxmutex_unlock(&nmp->nm_lock);
   return 0;
 
-errout_with_semaphore:
-  nfs_semgive(nmp);
+errout_with_lock:
+  nxmutex_unlock(&nmp->nm_lock);
 errout_with_ndir:
   kmm_free(ndir);
   return ret;
@@ -1548,7 +1527,7 @@ static int nfs_readdir(FAR struct inode *mountpt,
   nmp = mountpt->i_private;
   ndir = (FAR struct nfs_dir_s *)dir;
 
-  ret = nfs_semtake(nmp);
+  ret = nxmutex_lock(&nmp->nm_lock);
   if (ret < 0)
     {
       return ret;
@@ -1605,7 +1584,7 @@ read_dir:
   if (ret != OK)
     {
       ferr("ERROR: nfs_request failed: %d\n", ret);
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 
   /* A new group of entries was successfully read.  Process the
@@ -1653,7 +1632,7 @@ next_entry:
         {
           finfo("End of directory\n");
           ret = -ENOENT;
-          goto errout_with_semaphore;
+          goto errout_with_lock;
         }
 
       /* What would it mean if there were not data and we not at the end of
@@ -1726,7 +1705,7 @@ next_entry:
   if (ret != OK)
     {
       ferr("ERROR: nfs_lookup failed: %d\n", ret);
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 
   /* Set the dirent file type */
@@ -1769,8 +1748,8 @@ next_entry:
 
   finfo("type: %d->%d\n", (int)tmp, entry->d_type);
 
-errout_with_semaphore:
-  nfs_semgive(nmp);
+errout_with_lock:
+  nxmutex_unlock(&nmp->nm_lock);
   return ret;
 }
 
@@ -2035,13 +2014,13 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   /* Initialize the allocated mountpt state structure. */
 
-  /* Initialize the semaphore that controls access.  The initial count
-   * is zero, but nfs_semgive() is called at the completion of
+  /* Initialize the mutex that controls access.
+   * nxmutex_lock() is called at the completion of
    * initialization, incrementing the count to one.
    */
 
-  nxsem_init(&nmp->nm_sem, 0, 0);   /* Initialize the semaphore that
-                                     * controls access */
+  nxmutex_init(&nmp->nm_lock);   /* Initialize the mutex that
+                                  * controls access */
 
   /* Initialize NFS */
 
@@ -2103,7 +2082,6 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   /* Mounted! */
 
   *handle = (FAR void *)nmp;
-  nfs_semgive(nmp);
 
   finfo("Successfully mounted\n");
   return OK;
@@ -2120,7 +2098,7 @@ bad:
 
   /* Free connection-related resources */
 
-  nxsem_destroy(&nmp->nm_sem);
+  nxmutex_destroy(&nmp->nm_lock);
   kmm_free(nmp);
 
   return ret;
@@ -2148,7 +2126,7 @@ static int nfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
 
   /* Get exclusive access to the mount structure */
 
-  ret = nfs_semtake(nmp);
+  ret = nxmutex_lock(&nmp->nm_lock);
   if (ret < 0)
     {
       return ret;
@@ -2169,7 +2147,7 @@ static int nfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
        */
 
       ret = (flags != 0) ? -ENOSYS : -EBUSY;
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 
   /* Disconnect from the server */
@@ -2178,14 +2156,14 @@ static int nfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
 
   /* And free any allocated resources */
 
-  nxsem_destroy(&nmp->nm_sem);
+  nxmutex_destroy(&nmp->nm_lock);
   kmm_free(nmp->nm_rpcclnt);
   kmm_free(nmp);
 
   return OK;
 
-errout_with_semaphore:
-  nfs_semgive(nmp);
+errout_with_lock:
+  nxmutex_unlock(&nmp->nm_lock);
   return ret;
 }
 
@@ -2327,7 +2305,7 @@ static int nfs_statfs(FAR struct inode *mountpt, FAR struct statfs *sbp)
 
   nmp = (FAR struct nfsmount *)mountpt->i_private;
 
-  ret = nfs_semtake(nmp);
+  ret = nxmutex_lock(&nmp->nm_lock);
   if (ret < 0)
     {
       return ret;
@@ -2347,7 +2325,7 @@ static int nfs_statfs(FAR struct inode *mountpt, FAR struct statfs *sbp)
                     (FAR void *)nmp->nm_iobuffer, nmp->nm_buflen);
   if (ret)
     {
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 
   sfp                   = (FAR struct rpc_reply_fsstat *)nmp->nm_iobuffer;
@@ -2364,8 +2342,8 @@ static int nfs_statfs(FAR struct inode *mountpt, FAR struct statfs *sbp)
   sbp->f_ffree          = tquad;
   sbp->f_namelen        = NAME_MAX;
 
-errout_with_semaphore:
-  nfs_semgive(nmp);
+errout_with_lock:
+  nxmutex_unlock(&nmp->nm_lock);
   return ret;
 }
 
@@ -2399,7 +2377,7 @@ static int nfs_remove(FAR struct inode *mountpt, FAR const char *relpath)
 
   nmp = (FAR struct nfsmount *)mountpt->i_private;
 
-  ret = nfs_semtake(nmp);
+  ret = nxmutex_lock(&nmp->nm_lock);
   if (ret < 0)
     {
       return ret;
@@ -2411,7 +2389,7 @@ static int nfs_remove(FAR struct inode *mountpt, FAR const char *relpath)
   if (ret != OK)
     {
       ferr("ERROR: nfs_finddir returned: %d\n", ret);
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 
   /* Create the REMOVE RPC call arguments */
@@ -2445,8 +2423,8 @@ static int nfs_remove(FAR struct inode *mountpt, FAR const char *relpath)
                     (FAR void *)&nmp->nm_msgbuffer.removef, reqlen,
                     (FAR void *)nmp->nm_iobuffer, nmp->nm_buflen);
 
-errout_with_semaphore:
-  nfs_semgive(nmp);
+errout_with_lock:
+  nxmutex_unlock(&nmp->nm_lock);
   return ret;
 }
 
@@ -2482,7 +2460,7 @@ static int nfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
 
   nmp = (FAR struct nfsmount *) mountpt->i_private;
 
-  ret = nfs_semtake(nmp);
+  ret = nxmutex_lock(&nmp->nm_lock);
   if (ret < 0)
     {
       return ret;
@@ -2496,7 +2474,7 @@ static int nfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
   if (ret != OK)
     {
       ferr("ERROR: nfs_finddir returned: %d\n", ret);
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 
   /* Format the MKDIR call message arguments */
@@ -2572,8 +2550,8 @@ static int nfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
       ferr("ERROR: nfs_request failed: %d\n", ret);
     }
 
-errout_with_semaphore:
-  nfs_semgive(nmp);
+errout_with_lock:
+  nxmutex_unlock(&nmp->nm_lock);
   return ret;
 }
 
@@ -2607,7 +2585,7 @@ static int nfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
 
   nmp = (FAR struct nfsmount *)mountpt->i_private;
 
-  ret = nfs_semtake(nmp);
+  ret = nxmutex_lock(&nmp->nm_lock);
   if (ret < 0)
     {
       return ret;
@@ -2621,7 +2599,7 @@ static int nfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
   if (ret != OK)
     {
       ferr("ERROR: nfs_finddir returned: %d\n", ret);
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 
   /* Set up the RMDIR call message arguments */
@@ -2655,8 +2633,8 @@ static int nfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
                         (FAR void *)&nmp->nm_msgbuffer.rmdir, reqlen,
                         (FAR void *)nmp->nm_iobuffer, nmp->nm_buflen);
 
-errout_with_semaphore:
-  nfs_semgive(nmp);
+errout_with_lock:
+  nxmutex_unlock(&nmp->nm_lock);
   return ret;
 }
 
@@ -2693,7 +2671,7 @@ static int nfs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
 
   nmp = (FAR struct nfsmount *)mountpt->i_private;
 
-  ret = nfs_semtake(nmp);
+  ret = nxmutex_lock(&nmp->nm_lock);
   if (ret < 0)
     {
       return ret;
@@ -2705,7 +2683,7 @@ static int nfs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
   if (ret != OK)
     {
       ferr("ERROR: nfs_finddir returned: %d\n", ret);
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 
   /* Find the NFS node of the directory containing the 'to' object */
@@ -2714,7 +2692,7 @@ static int nfs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
   if (ret != OK)
     {
       ferr("ERROR: nfs_finddir returned: %d\n", ret);
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 
   /* Format the RENAME RPC arguments */
@@ -2768,8 +2746,8 @@ static int nfs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
                     (FAR void *)&nmp->nm_msgbuffer.renamef, reqlen,
                     (FAR void *)nmp->nm_iobuffer, nmp->nm_buflen);
 
-errout_with_semaphore:
-  nfs_semgive(nmp);
+errout_with_lock:
+  nxmutex_unlock(&nmp->nm_lock);
   return ret;
 }
 
@@ -2866,7 +2844,7 @@ static int nfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
   memset(buf, 0, sizeof(*buf));
 
-  ret = nfs_semtake(nmp);
+  ret = nxmutex_lock(&nmp->nm_lock);
   if (ret < 0)
     {
       return ret;
@@ -2878,7 +2856,7 @@ static int nfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   if (ret != OK)
     {
       ferr("ERROR: nfs_findnode failed: %d\n", ret);
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 
   /* Extract the file mode, file type, and file size. */
@@ -2898,8 +2876,8 @@ static int nfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   fxdr_nfsv3time(&attributes.fa_ctime, &ts);
   buf->st_ctime = ts.tv_sec;
 
-errout_with_semaphore:
-  nfs_semgive(nmp);
+errout_with_lock:
+  nxmutex_unlock(&nmp->nm_lock);
   return ret;
 }
 
@@ -2931,7 +2909,7 @@ static int nfs_chstat(FAR struct inode *mountpt, FAR const char *relpath,
   nmp = (FAR struct nfsmount *)mountpt->i_private;
   DEBUGASSERT(nmp && buf);
 
-  ret = nfs_semtake(nmp);
+  ret = nxmutex_lock(&nmp->nm_lock);
   if (ret < 0)
     {
       return ret;
@@ -2943,7 +2921,7 @@ static int nfs_chstat(FAR struct inode *mountpt, FAR const char *relpath,
   if (ret != OK)
     {
       ferr("ERROR: nfs_findnode failed: %d\n", ret);
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 
   /* Initialize the nfs node */
@@ -2955,7 +2933,7 @@ static int nfs_chstat(FAR struct inode *mountpt, FAR const char *relpath,
 
   ret = nfs_filechstat(nmp, &np, buf, flags);
 
-errout_with_semaphore:
-  nfs_semgive(nmp);
+errout_with_lock:
+  nxmutex_unlock(&nmp->nm_lock);
   return ret;
 }

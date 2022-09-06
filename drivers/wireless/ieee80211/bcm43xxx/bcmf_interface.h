@@ -49,29 +49,6 @@ typedef struct bcmf_sdio_dev_s bcmf_interface_dev_t;
 typedef bcmf_gspi_dev_t bcmf_interface_dev_t;
 #endif
 
-/* Note:
- * The structure referred to above must as its first item:
- *
- *  struct bcmf_bus_dev_s  bus;            --- Default bcmf bus structure
- *
- * The structure must also contain the following items:
- *
- *  int                    cur_chip_id;    --- Chip ID read from the card
- *  struct bcmf_chip_data *chip;           --- Chip specific configuration
- *
- *  sem_t                  thread_signal;  --- Thread event semaphore
- *
- *  uint32_t       backplane_current_addr; --- Current F1 backplane base addr
- *
- *  uint8_t                max_seq;        --- Maximum TX sequence allowed
- *  uint8_t                tx_seq;         --- TX sequence number (next)
- *
- *  sem_t                  queue_mutex;    --- Lock for TX/RX/free queues
- *  struct list_node       tx_queue;       --- Queue of frames to transmit
- *  struct list_node       rx_queue;       --- Queue of frames for receiving
- *  volatile int           tx_queue_count; --- Count of items in TX queue
- */
-
 /* Structure used to manage interface frames */
 
 typedef struct bcmf_interface_frame_s

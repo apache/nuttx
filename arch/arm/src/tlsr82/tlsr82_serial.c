@@ -262,7 +262,8 @@ static char g_uart0txbuffer[UART0_TX_BUF_SIZE];
 #ifdef CONFIG_TLSR82_UART0_TXDMA
 static char g_uart0txdmabuf[UART0_TXDMA_BUF_SIZE + DMA_HEAD_LEN] \
 aligned_data(4);
-static sem_t g_uart0txdmasem = SEM_INITIALIZER(1);
+static sem_t g_uart0txdmasem = NXSEM_INITIALIZER(1,
+                                 PRIOINHERIT_FLAGS_DISABLE);
 #endif
 
 #ifdef CONFIG_TLSR82_UART0_RXDMA
@@ -1548,7 +1549,6 @@ static void tlsr82_uart_dma_txavail(struct uart_dev_s *dev)
   /* Wait for the previous dma transfer finish */
 
   nxsem_wait(priv->txdmasem);
-
   uart_xmitchars_dma(dev);
 }
 #endif

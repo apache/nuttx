@@ -42,6 +42,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/power/pm.h>
 #include <nuttx/1wire/1wire.h>
@@ -108,7 +109,7 @@ struct stm32_1wire_priv_s
 {
   const struct stm32_1wire_config_s *config; /* Port configuration */
   volatile int refs;                         /* Reference count */
-  sem_t    sem_excl;                         /* Mutual exclusion semaphore */
+  mutex_t  lock;                             /* Mutual exclusion mutex */
   sem_t    sem_isr;                          /* Interrupt wait semaphore */
   int      baud;                             /* Baud rate */
   const struct stm32_1wire_msg_s *msgs;      /* Messages data */
@@ -143,11 +144,6 @@ static void stm32_1wire_set_apb_clock(struct stm32_1wire_priv_s *priv,
                                       bool on);
 static int stm32_1wire_init(struct stm32_1wire_priv_s *priv);
 static int stm32_1wire_deinit(struct stm32_1wire_priv_s *priv);
-static inline void stm32_1wire_sem_init(struct stm32_1wire_priv_s *priv);
-static inline void stm32_1wire_sem_destroy(
-    struct stm32_1wire_priv_s *priv);
-static inline int  stm32_1wire_sem_wait(struct stm32_1wire_priv_s *priv);
-static inline void stm32_1wire_sem_post(struct stm32_1wire_priv_s *priv);
 static int stm32_1wire_process(struct stm32_1wire_priv_s *priv,
                                const struct stm32_1wire_msg_s *msgs,
                                int count);
@@ -188,6 +184,8 @@ static struct stm32_1wire_priv_s stm32_1wire1_priv =
 {
   .config     = &stm32_1wire1_config,
   .refs       = 0,
+  .lock       = NXMUTEX_INITIALIZER,
+  .sem_isr    = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
   .msgs       = NULL,
 #ifdef CONFIG_PM
   .pm_cb.prepare = stm32_1wire_pm_prepare,
@@ -210,6 +208,8 @@ static struct stm32_1wire_priv_s stm32_1wire2_priv =
 {
   .config   = &stm32_1wire2_config,
   .refs     = 0,
+  .lock     = NXMUTEX_INITIALIZER,
+  .sem_isr  = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
   .msgs     = NULL,
 #ifdef CONFIG_PM
   .pm_cb.prepare = stm32_1wire_pm_prepare,
@@ -232,6 +232,8 @@ static struct stm32_1wire_priv_s stm32_1wire3_priv =
 {
   .config   = &stm32_1wire3_config,
   .refs     = 0,
+  .lock     = NXMUTEX_INITIALIZER,
+  .sem_isr  = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
   .msgs     = NULL,
 #ifdef CONFIG_PM
   .pm_cb.prepare = stm32_1wire_pm_prepare,
@@ -254,6 +256,8 @@ static struct stm32_1wire_priv_s stm32_1wire4_priv =
 {
   .config   = &stm32_1wire4_config,
   .refs     = 0,
+  .lock     = NXMUTEX_INITIALIZER,
+  .sem_isr  = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
   .msgs     = NULL,
 #ifdef CONFIG_PM
   .pm_cb.prepare = stm32_1wire_pm_prepare,
@@ -276,6 +280,8 @@ static struct stm32_1wire_priv_s stm32_1wire5_priv =
 {
   .config   = &stm32_1wire5_config,
   .refs     = 0,
+  .lock     = NXMUTEX_INITIALIZER,
+  .sem_isr  = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
   .msgs     = NULL,
 #ifdef CONFIG_PM
   .pm_cb.prepare = stm32_1wire_pm_prepare,
@@ -624,67 +630,6 @@ static int stm32_1wire_deinit(struct stm32_1wire_priv_s *priv)
 }
 
 /****************************************************************************
- * Name: stm32_1wire_sem_init
- *
- * Description:
- *   Initialize semaphores
- *
- ****************************************************************************/
-
-static inline void stm32_1wire_sem_init(struct stm32_1wire_priv_s *priv)
-{
-  nxsem_init(&priv->sem_excl, 0, 1);
-  nxsem_init(&priv->sem_isr, 0, 0);
-
-  /* The sem_isr semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&priv->sem_isr, SEM_PRIO_NONE);
-}
-
-/****************************************************************************
- * Name: stm32_1wire_sem_destroy
- *
- * Description:
- *   Destroy semaphores.
- *
- ****************************************************************************/
-
-static inline void stm32_1wire_sem_destroy(
-    struct stm32_1wire_priv_s *priv)
-{
-  nxsem_destroy(&priv->sem_excl);
-  nxsem_destroy(&priv->sem_isr);
-}
-
-/****************************************************************************
- * Name: stm32_1wire_sem_wait
- *
- * Description:
- *   Take the exclusive access, waiting as necessary
- *
- ****************************************************************************/
-
-static inline int stm32_1wire_sem_wait(struct stm32_1wire_priv_s *priv)
-{
-  return nxsem_wait_uninterruptible(&priv->sem_excl);
-}
-
-/****************************************************************************
- * Name: stm32_1wire_sem_post
- *
- * Description:
- *   Release the mutual exclusion semaphore
- *
- ****************************************************************************/
-
-static inline void stm32_1wire_sem_post(struct stm32_1wire_priv_s *priv)
-{
-  nxsem_post(&priv->sem_excl);
-}
-
-/****************************************************************************
  * Name: stm32_1wire_exec
  *
  * Description:
@@ -701,7 +646,7 @@ static int stm32_1wire_process(struct stm32_1wire_priv_s *priv,
 
   /* Lock out other clients */
 
-  ret = stm32_1wire_sem_wait(priv);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -797,8 +742,7 @@ static int stm32_1wire_process(struct stm32_1wire_priv_s *priv,
 
   /* Release the port for re-use by other clients */
 
-  stm32_1wire_sem_post(priv);
-
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -1138,7 +1082,6 @@ static int stm32_1wire_pm_prepare(struct pm_callback_s *cb, int domain,
   struct stm32_1wire_priv_s *priv =
       (struct stm32_1wire_priv_s *)((char *)cb -
                                  offsetof(struct stm32_1wire_priv_s, pm_cb));
-  int sval;
 
   /* Logic to prepare for a reduced power state goes here. */
 
@@ -1153,13 +1096,7 @@ static int stm32_1wire_pm_prepare(struct pm_callback_s *cb, int domain,
 
       /* Check if exclusive lock for 1-Wire bus is held. */
 
-      if (nxsem_get_value(&priv->sem_excl, &sval) < 0)
-        {
-          DEBUGPANIC();
-          return -EINVAL;
-        }
-
-      if (sval <= 0)
+      if (nxmutex_is_locked(&priv->lock))
         {
           /* Exclusive lock is held, do not allow entry to deeper PM
            * states.
@@ -1270,7 +1207,6 @@ struct onewire_dev_s *stm32l4_1wireinitialize(int port)
 
   if (priv->refs++ == 0)
     {
-      stm32_1wire_sem_init(priv);
       stm32_1wire_init(priv);
 
 #ifdef CONFIG_PM
@@ -1335,10 +1271,6 @@ int stm32l4_1wireuninitialize(struct onewire_dev_s *dev)
   /* Disable power and other HW resource (GPIO's) */
 
   stm32_1wire_deinit(priv);
-
-  /* Release unused resources */
-
-  stm32_1wire_sem_destroy(priv);
 
   /* Free instance */
 

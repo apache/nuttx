@@ -60,6 +60,7 @@
 #include <string.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/mutex.h>
 #include <nuttx/signal.h>
 #include <nuttx/ascii.h>
 #include <nuttx/fs/fs.h>
@@ -107,7 +108,7 @@ struct ht16k33_dev_s
   uint8_t    col;               /* Current col position to write on display  */
   uint8_t    buffer[HT16K33_MAX_COL];
   bool       pendscroll;
-  sem_t sem_excl;
+  mutex_t    lock;
 };
 
 struct lcd_instream_s
@@ -804,7 +805,7 @@ static ssize_t ht16k33_write(FAR struct file *filep, FAR const char *buffer,
   uint8_t ch;
   uint8_t count;
 
-  nxsem_wait(&priv->sem_excl);
+  nxmutex_lock(&priv->lock);
 
   /* Initialize the stream for use with the SLCD CODEC */
 
@@ -909,7 +910,7 @@ static ssize_t ht16k33_write(FAR struct file *filep, FAR const char *buffer,
 
   lcd_curpos_to_fpos(priv, priv->row, priv->col, &filep->f_pos);
 
-  nxsem_post(&priv->sem_excl);
+  nxmutex_unlock(&priv->lock);
   return buflen;
 }
 
@@ -933,7 +934,7 @@ static off_t ht16k33_seek(FAR struct file *filep, off_t offset, int whence)
   off_t maxpos;
   off_t pos;
 
-  nxsem_wait(&priv->sem_excl);
+  nxmutex_lock(&priv->lock);
 
   maxpos = HT16K33_MAX_ROW * HT16K33_MAX_COL + (HT16K33_MAX_ROW - 1);
   pos    = filep->f_pos;
@@ -990,7 +991,7 @@ static off_t ht16k33_seek(FAR struct file *filep, off_t offset, int whence)
         break;
     }
 
-  nxsem_post(&priv->sem_excl);
+  nxmutex_unlock(&priv->lock);
   return pos;
 }
 
@@ -1046,9 +1047,9 @@ static int ht16k33_ioctl(FAR struct file *filep, int cmd,
           FAR struct ht16k33_dev_s *priv =
             (FAR struct ht16k33_dev_s *)inode->i_private;
 
-          nxsem_wait(&priv->sem_excl);
+          nxmutex_lock(&priv->lock);
           *(FAR int *)((uintptr_t)arg) = 1; /* Hardcoded */
-          nxsem_post(&priv->sem_excl);
+          nxmutex_unlock(&priv->lock);
         }
         break;
 
@@ -1058,11 +1059,9 @@ static int ht16k33_ioctl(FAR struct file *filep, int cmd,
           FAR struct ht16k33_dev_s *priv =
             (FAR struct ht16k33_dev_s *)inode->i_private;
 
-          nxsem_wait(&priv->sem_excl);
-
+          nxmutex_lock(&priv->lock);
           ht16k33_setcontrast(priv, 0, (uint8_t)arg);
-
-          nxsem_post(&priv->sem_excl);
+          nxmutex_unlock(&priv->lock);
         }
         break;
 
@@ -1119,7 +1118,7 @@ int ht16k33_register(int devno, FAR struct i2c_master_s *i2c)
   priv->row        = 0;
   priv->pendscroll = false;
 
-  nxsem_init(&priv->sem_excl, 0, 1);
+  nxmutex_init(&priv->lock);
 
   /* Initialize the display */
 

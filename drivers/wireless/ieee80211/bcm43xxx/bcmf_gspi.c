@@ -856,7 +856,7 @@ static int bcmf_bus_gspi_initialize(FAR struct bcmf_dev_s  *priv,
 
   /* Init transmit frames queue */
 
-  if ((ret = nxsem_init(&gbus->queue_mutex, 0, 1)) != OK)
+  if ((ret = nxmutex_init(&gbus->queue_lock)) != OK)
     {
       goto exit_free_bus;
     }

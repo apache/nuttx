@@ -62,9 +62,9 @@ void nxterm_unregister(FAR struct nxterm_state_s *priv)
 
   DEBUGASSERT(priv != NULL);
 
-  /* Destroy semaphores */
+  /* Destroy mutex */
 
-  nxsem_destroy(&priv->exclsem);
+  nxmutex_destroy(&priv->lock);
 #ifdef CONFIG_NXTERM_NXKBDIN
   nxsem_destroy(&priv->waitsem);
 #endif

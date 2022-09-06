@@ -30,6 +30,7 @@
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/sensors/adxl345.h>
 
@@ -100,7 +101,7 @@ struct adxl345_dev_s
   /* Common fields */
 
   FAR struct adxl345_config_s *config; /* Board configuration data */
-  sem_t exclsem;                       /* Manages exclusive access to this structure */
+  mutex_t lock;                        /* Manages exclusive access to this structure */
 #ifdef CONFIG_ADXL345_SPI
   FAR struct spi_dev_s *spi;           /* Saved SPI driver instance */
 #else

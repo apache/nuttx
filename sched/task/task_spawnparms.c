@@ -30,7 +30,7 @@
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/signal.h>
 #include <nuttx/spawn.h>
 #include <nuttx/fs/fs.h>
@@ -42,9 +42,9 @@
  * Public Data
  ****************************************************************************/
 
-sem_t g_spawn_parmsem = SEM_INITIALIZER(1);
+mutex_t g_spawn_parmlock = NXMUTEX_INITIALIZER;
 #ifndef CONFIG_SCHED_WAITPID
-sem_t g_spawn_execsem = SEM_INITIALIZER(0);
+sem_t g_spawn_execsem = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE);
 #endif
 struct spawn_parms_s g_spawn_parms;
 
@@ -143,26 +143,6 @@ static inline int nxspawn_open(FAR struct spawn_open_file_action_s *action)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: spawn_semtake and spawn_semgive
- *
- * Description:
- *   Give and take semaphores
- *
- * Input Parameters:
- *
- *   sem - The semaphore to act on.
- *
- * Returned Value:
- *   See nxsem_wait_uninterruptible
- *
- ****************************************************************************/
-
-int spawn_semtake(FAR sem_t *sem)
-{
-  return nxsem_wait_uninterruptible(sem);
-}
 
 /****************************************************************************
  * Name: spawn_execattrs

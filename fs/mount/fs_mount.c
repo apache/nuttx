@@ -335,7 +335,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
       goto errout;
     }
 
-  ret = inode_semtake();
+  ret = inode_lock();
   if (ret < 0)
     {
       goto errout_with_inode;
@@ -365,7 +365,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
           ferr("ERROR: target %s exists and is a special node\n", target);
           ret = -ENOTDIR;
           inode_release(mountpt_inode);
-          goto errout_with_semaphore;
+          goto errout_with_lock;
         }
     }
   else
@@ -392,7 +392,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
            */
 
           ferr("ERROR: Failed to reserve inode for target %s\n", target);
-          goto errout_with_semaphore;
+          goto errout_with_lock;
         }
     }
 
@@ -455,7 +455,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
 
   mountpt_inode->u.i_mops  = mops;
   mountpt_inode->i_private = fshandle;
-  inode_semgive();
+  inode_unlock();
 
   /* We can release our reference to the blkdrver_inode, if the filesystem
    * wants to retain the blockdriver inode (which it should), then it must
@@ -483,8 +483,8 @@ errout_with_mountpt:
   inode_release(mountpt_inode);
   inode_remove(target);
 
-errout_with_semaphore:
-  inode_semgive();
+errout_with_lock:
+  inode_unlock();
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   RELEASE_SEARCH(&desc);
 #endif

@@ -46,8 +46,8 @@ void rewind(FAR FILE *stream)
       return;
     }
 
-  lib_take_semaphore(stream);
+  lib_take_lock(stream);
   (void) fseek(stream, 0L, SEEK_SET);
   stream->fs_flags &= ~__FS_FLAG_ERROR;
-  lib_give_semaphore(stream);
+  lib_give_lock(stream);
 }

@@ -34,7 +34,7 @@
 
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/ioexpander/ioexpander.h>
 #include <nuttx/ioexpander/pca9555.h>
@@ -128,20 +128,20 @@ struct pca9555_callback_s
 
 struct pca9555_dev_s
 {
-  struct ioexpander_dev_s      dev;     /* Nested structure to allow casting as public gpio
-                                         * expander. */
+  struct ioexpander_dev_s      dev;      /* Nested structure to allow casting as public gpio
+                                          * expander. */
 #ifdef CONFIG_PCA9555_SHADOW_MODE
-  uint8_t sreg[8];                      /* Shadowed registers of the PCA9555 */
+  uint8_t sreg[8];                       /* Shadowed registers of the PCA9555 */
 #endif
 #ifdef CONFIG_PCA9555_MULTIPLE
-  FAR struct pca9555_dev_s    *flink;   /* Supports a singly linked list of drivers */
+  FAR struct pca9555_dev_s    *flink;    /* Supports a singly linked list of drivers */
 #endif
-  FAR struct pca9555_config_s *config;  /* Board configuration data */
-  FAR struct i2c_master_s     *i2c;     /* Saved I2C driver instance */
-  sem_t                        exclsem; /* Mutual exclusion */
+  FAR struct pca9555_config_s *config;   /* Board configuration data */
+  FAR struct i2c_master_s     *i2c;      /* Saved I2C driver instance */
+  mutex_t                      lock;     /* Mutual exclusion */
 
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
-  struct work_s work;                   /* Supports the interrupt handling "bottom half" */
+  struct work_s work;                    /* Supports the interrupt handling "bottom half" */
 
   /* Saved callback information for each I/O expander client */
 

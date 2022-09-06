@@ -54,6 +54,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/queue.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/i2s.h>
@@ -188,7 +189,7 @@ struct stm32f7_sai_s
 
   stm32_sai_sampleratecb_t sampleratecb;
   uintptr_t base;              /* SAI block register base address */
-  sem_t exclsem;               /* Assures mutually exclusive access to SAI */
+  mutex_t lock;                /* Assures mutually exclusive access to SAI */
   uint32_t frequency;          /* SAI clock frequency */
   uint32_t syncen;             /* Synchronization setting */
 #ifdef CONFIG_STM32F7_SAI_DMA
@@ -222,14 +223,6 @@ static void     sai_dump_regs(struct stm32f7_sai_s *priv, const char *msg);
 #else
 #  define       sai_dump_regs(s,m)
 #endif
-
-/* Semaphore helpers */
-
-static void     sai_exclsem_take(struct stm32f7_sai_s *priv);
-#define         sai_exclsem_give(priv) nxsem_post(&priv->exclsem)
-
-static void     sai_bufsem_take(struct stm32f7_sai_s *priv);
-#define         sai_bufsem_give(priv) nxsem_post(&priv->bufsem)
 
 /* Buffer container helpers */
 
@@ -684,37 +677,6 @@ static void sai_dump_regs(struct stm32f7_sai_s *priv, const char *msg)
 #endif
 }
 #endif
-
-/****************************************************************************
- * Name: sai_exclsem_take
- *
- * Description:
- *   Take the exclusive access semaphore handling any exceptional conditions
- *
- * Input Parameters:
- *   priv - A reference to the SAI peripheral state
- *
- * Returned Value:
- *  None
- *
- ****************************************************************************/
-
-static void sai_exclsem_take(struct stm32f7_sai_s *priv)
-{
-  int ret;
-
-  /* Wait until we successfully get the semaphore.  EINTR is the only
-   * expected 'failure' (meaning that the wait for the semaphore was
-   * interrupted by a signal).
-   */
-
-  do
-    {
-      ret = nxsem_wait(&priv->exclsem);
-      DEBUGASSERT(ret == 0 || ret == -EINTR);
-    }
-  while (ret == -EINTR);
-}
 
 /****************************************************************************
  * Name: sai_mckdivider
@@ -1258,7 +1220,7 @@ static int sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
   /* Get exclusive access to the SAI driver data */
 
-  sai_exclsem_take(priv);
+  nxmutex_lock(&priv->lock);
 
   /* Verify not already TX'ing */
 
@@ -1266,7 +1228,7 @@ static int sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
     {
       i2serr("ERROR: SAI has no receiver\n");
       ret = -EAGAIN;
-      goto errout_with_exclsem;
+      goto errout_with_excllock;
     }
 
   mode = priv->syncen ? SAI_CR1_MODE_SLAVE_RX : SAI_CR1_MODE_MASTER_RX;
@@ -1299,11 +1261,11 @@ static int sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 #endif
   DEBUGASSERT(ret == OK);
   leave_critical_section(flags);
-  sai_exclsem_give(priv);
+  nxmutex_unlock(&priv->lock);
   return OK;
 
-errout_with_exclsem:
-  sai_exclsem_give(priv);
+errout_with_excllock:
+  nxmutex_unlock(&priv->lock);
   sai_buf_free(priv, bfcontainer);
   return ret;
 }
@@ -1358,7 +1320,7 @@ static int sai_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
   /* Get exclusive access to the SAI driver data */
 
-  sai_exclsem_take(priv);
+  nxmutex_lock(&priv->lock);
 
   /* Verify not already RX'ing */
 
@@ -1366,7 +1328,7 @@ static int sai_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
     {
       i2serr("ERROR: SAI has no transmitter\n");
       ret = -EAGAIN;
-      goto errout_with_exclsem;
+      goto errout_with_excllock;
     }
 
   mode = priv->syncen ? SAI_CR1_MODE_SLAVE_TX : SAI_CR1_MODE_MASTER_TX;
@@ -1399,44 +1361,13 @@ static int sai_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 #endif
   DEBUGASSERT(ret == OK);
   leave_critical_section(flags);
-  sai_exclsem_give(priv);
+  nxmutex_unlock(&priv->lock);
   return OK;
 
-errout_with_exclsem:
-  sai_exclsem_give(priv);
+errout_with_excllock:
+  nxmutex_unlock(&priv->lock);
   sai_buf_free(priv, bfcontainer);
   return ret;
-}
-
-/****************************************************************************
- * Name: sai_bufsem_take
- *
- * Description:
- *   Take the buffer semaphore handling any exceptional conditions
- *
- * Input Parameters:
- *   priv - A reference to the SAI peripheral state
- *
- * Returned Value:
- *  None
- *
- ****************************************************************************/
-
-static void sai_bufsem_take(struct stm32f7_sai_s *priv)
-{
-  int ret;
-
-  /* Wait until we successfully get the semaphore.  EINTR is the only
-   * expected 'failure' (meaning that the wait for the semaphore was
-   * interrupted by a signal).
-   */
-
-  do
-    {
-      ret = nxsem_wait(&priv->bufsem);
-      DEBUGASSERT(ret == 0 || ret == -EINTR);
-    }
-  while (ret == -EINTR);
 }
 
 /****************************************************************************
@@ -1468,7 +1399,7 @@ static struct sai_buffer_s *sai_buf_allocate(struct stm32f7_sai_s *priv)
    * have at least one free buffer container.
    */
 
-  sai_bufsem_take(priv);
+  nxsem_wait_uninterruptible(&priv->bufsem);
 
   /* Get the buffer from the head of the free list */
 
@@ -1515,7 +1446,7 @@ static void sai_buf_free(struct stm32f7_sai_s *priv,
 
   /* Wake up any threads waiting for a buffer container */
 
-  sai_bufsem_give(priv);
+  nxsem_post(&priv->bufsem);
 }
 
 /****************************************************************************
@@ -1568,7 +1499,7 @@ static void sai_portinitialize(struct stm32f7_sai_s *priv)
 {
   sai_dump_regs(priv, "Before initialization");
 
-  nxsem_init(&priv->exclsem, 0, 1);
+  nxmutex_init(&priv->lock);
 
   /* Initialize buffering */
 

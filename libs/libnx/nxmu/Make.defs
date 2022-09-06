@@ -25,9 +25,8 @@
 ifeq ($(CONFIG_NX),y)
 
 CSRCS += nxmu_sendserver.c nx_connect.c nx_disconnect.c
-CSRCS += nx_eventhandler.c nx_eventnotify.c nxmu_semtake.c
-CSRCS += nx_block.c nx_synch.c
-CSRCS += nx_kbdchin.c nx_kbdin.c nx_mousein.c
+CSRCS += nx_eventhandler.c nx_eventnotify.c nx_block.c
+CSRCS += nx_synch.c nx_kbdchin.c nx_kbdin.c nx_mousein.c
 CSRCS += nx_releasebkgd.c nx_requestbkgd.c nx_setbgcolor.c
 
 CSRCS += nxmu_sendwindow.c nx_closewindow.c nx_constructwindow.c

@@ -889,41 +889,6 @@ static inline void __mx7_read_nvm(FAR struct mx7_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: __lock
- *
- * Description:
- *   Locks the @dev data structure (mutex) to protect it against concurrent
- *   access. This is necessary, because @dev has some state information in it
- *   that has to be kept consistent with the chip. This lock also protects
- *   operations that must not be interrupted by other access to the chip.
- *
- *   Use this function before calling one of the lock-dependent helper
- *   functions defined above (there are some defined below here, too).
- *
- ****************************************************************************/
-
-static void inline __lock(FAR struct mx7_dev_s *dev)
-{
-  nxmutex_lock(&dev->lock);
-}
-
-/****************************************************************************
- * Name: __unlock
- *
- * Description:
- *   Unlocks the @dev data structure (mutex).
- *
- *   Use this function after calling one of the lock-dependent helper
- *   functions defined above (there are some defined below here, too).
- *
- ****************************************************************************/
-
-static void inline __unlock(FAR struct mx7_dev_s *dev)
-{
-  nxmutex_unlock(&dev->lock);
-}
-
-/****************************************************************************
  * Name: mx7_reset
  *
  * Description:
@@ -935,7 +900,7 @@ static void inline __unlock(FAR struct mx7_dev_s *dev)
 
 static void mx7_reset(FAR struct mx7_dev_s *dev)
 {
-  __lock(dev);
+  nxmutex_lock(&dev->lock);
 
   /* Issue the reset command. */
 
@@ -947,7 +912,7 @@ static void mx7_reset(FAR struct mx7_dev_s *dev)
 
   /* All done. */
 
-  __unlock(dev);
+  nxmutex_unlock(&dev->lock);
 }
 
 /****************************************************************************
@@ -1296,9 +1261,9 @@ static ssize_t mx7_read_cm(FAR struct file *filep, FAR char *buf, size_t len)
   FAR struct mx7_dev_s *dev = inode->i_private;
   ssize_t ret;
 
-  __lock(dev);
+  nxmutex_lock(&dev->lock);
   ret = __read_cm(dev, filep->f_pos, (FAR uint8_t *) buf, len);
-  __unlock(dev);
+  nxmutex_unlock(&dev->lock);
 
   return ret;
 }
@@ -1380,9 +1345,9 @@ static ssize_t mx7_write_fb(FAR struct file *filep, FAR const char *buf,
   FAR struct mx7_dev_s *dev = inode->i_private;
   ssize_t ret;
 
-  __lock(dev);
+  nxmutex_lock(&dev->lock);
   ret = __write_fb(dev, (FAR uint8_t *) buf, len, dev->ca, filep->f_pos);
-  __unlock(dev);
+  nxmutex_unlock(&dev->lock);
 
   return ret;
 }
@@ -1567,9 +1532,9 @@ static ssize_t mx7_debug_read(FAR struct file *filep,
 
       /* Read the register. */
 
-      __lock(dev);
+      nxmutex_lock(&dev->lock);
       ret = __mx7_read_reg(dev, addr, &val, 1);
-      __unlock(dev);
+      nxmutex_unlock(&dev->lock);
 
       if (ret != 1)
         {
@@ -1622,9 +1587,9 @@ static ssize_t mx7_debug_write(FAR struct file *filep, FAR const char *buf,
 
   /* Write the register value. */
 
-  __lock(dev);
+  nxmutex_lock(&dev->lock);
   __mx7_write_reg(dev, addr, &val, 1);
-  __unlock(dev);
+  nxmutex_unlock(&dev->lock);
 
   return len;
 }
@@ -1741,7 +1706,7 @@ int max7456_register(FAR const char *path, FAR struct mx7_config_s *config)
    * I'm doing it anyway for consistency.
    */
 
-  __lock(dev);
+  nxmutex_lock(&dev->lock);
 
   /* Thus sayeth the datasheet (pp. 38):
    *
@@ -1816,7 +1781,7 @@ int max7456_register(FAR const char *path, FAR struct mx7_config_s *config)
 
   /* Release the device to the world. */
 
-  __unlock(dev);
+  nxmutex_unlock(&dev->lock);
 
   return 0;
 }

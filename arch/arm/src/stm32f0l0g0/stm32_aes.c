@@ -34,7 +34,7 @@
 #include <nuttx/crypto/crypto.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
@@ -68,8 +68,8 @@ static int  stm32aes_setup_cr(int mode, int encrypt);
  * Private Data
  ****************************************************************************/
 
-static sem_t g_stm32aes_lock;
-static bool  g_stm32aes_initdone = false;
+static mutex_t g_stm32aes_lock;
+static bool    g_stm32aes_initdone = false;
 
 /****************************************************************************
  * Public Data
@@ -231,7 +231,7 @@ int stm32_aesinitialize(void)
 {
   uint32_t regval;
 
-  nxsem_init(&g_stm32aes_lock, 0, 1);
+  nxmutex_init(&g_stm32aes_lock);
 
   regval  = getreg32(STM32_RCC_AHBENR);
   regval |= RCC_AHBENR_AESEN;
@@ -252,8 +252,7 @@ int stm32_aesuninitialize(void)
   regval &= ~RCC_AHBENR_AESEN;
   putreg32(regval, STM32_RCC_AHBENR);
 
-  nxsem_destroy(&g_stm32aes_lock);
-
+  nxmutex_destroy(&g_stm32aes_lock);
   return OK;
 }
 
@@ -286,7 +285,7 @@ int aes_cypher(void *out, const void *in, size_t size,
       return -EINVAL;
     }
 
-  ret = nxsem_wait(&g_stm32aes_lock);
+  ret = nxmutex_lock(&g_stm32aes_lock);
   if (ret < 0)
     {
       return ret;
@@ -319,6 +318,6 @@ int aes_cypher(void *out, const void *in, size_t size,
   stm32aes_enable(false);
 
 out:
-  nxsem_post(&g_stm32aes_lock);
+  nxmutex_unlock(&g_stm32aes_lock);
   return ret;
 }

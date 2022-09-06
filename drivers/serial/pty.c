@@ -37,6 +37,7 @@
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/serial/pty.h>
@@ -92,14 +93,13 @@ struct pty_devpair_s
   uint8_t pp_minor;             /* Minor device number */
   uint16_t pp_nopen;            /* Open file count */
   sem_t pp_slavesem;            /* Slave lock semaphore */
-  sem_t pp_exclsem;             /* Mutual exclusion */
+  mutex_t pp_lock;              /* Mutual exclusion */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     pty_semtake(FAR struct pty_devpair_s *devpair);
 static void    pty_destroy(FAR struct pty_devpair_s *devpair);
 static int     pty_pipe(FAR struct pty_devpair_s *devpair);
 static int     pty_open(FAR struct file *filep);
@@ -138,21 +138,6 @@ static const struct file_operations g_pty_fops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pty_semtake
- ****************************************************************************/
-
-static int pty_semtake(FAR struct pty_devpair_s *devpair)
-{
-  return nxsem_wait_uninterruptible(&devpair->pp_exclsem);
-}
-
-/****************************************************************************
- * Name: pty_semgive
- ****************************************************************************/
-
-#define pty_semgive(c) nxsem_post(&(c)->pp_exclsem)
-
-/****************************************************************************
  * Name: pty_destroy
  ****************************************************************************/
 
@@ -188,7 +173,7 @@ static void pty_destroy(FAR struct pty_devpair_s *devpair)
 
   /* And free the device structure */
 
-  nxsem_destroy(&devpair->pp_exclsem);
+  nxmutex_destroy(&devpair->pp_lock);
   nxsem_destroy(&devpair->pp_slavesem);
   kmm_free(devpair);
 }
@@ -250,7 +235,7 @@ static int pty_open(FAR struct file *filep)
 
   /* Get exclusive access to the device structure */
 
-  ret = pty_semtake(devpair);
+  ret = nxmutex_lock(&devpair->pp_lock);
   if (ret < 0)
     {
       return ret;
@@ -268,7 +253,7 @@ static int pty_open(FAR struct file *filep)
         {
           /* Release the exclusive access before wait */
 
-          pty_semgive(devpair);
+          nxmutex_unlock(&devpair->pp_lock);
 
           /* Wait until unlocked.
            * We will also most certainly suspend here.
@@ -288,7 +273,7 @@ static int pty_open(FAR struct file *filep)
            * cause suspension.
            */
 
-          ret = pty_semtake(devpair);
+          ret = nxmutex_lock(&devpair->pp_lock);
           if (ret < 0)
             {
               return ret;
@@ -324,7 +309,7 @@ static int pty_open(FAR struct file *filep)
         }
     }
 
-  pty_semgive(devpair);
+  nxmutex_unlock(&devpair->pp_lock);
   return ret;
 }
 
@@ -347,7 +332,7 @@ static int pty_close(FAR struct file *filep)
 
   /* Get exclusive access */
 
-  ret = pty_semtake(devpair);
+  ret = nxmutex_lock(&devpair->pp_lock);
   if (ret < 0)
     {
       return ret;
@@ -394,7 +379,7 @@ static int pty_close(FAR struct file *filep)
       devpair->pp_nopen--;
     }
 
-  pty_semgive(devpair);
+  nxmutex_unlock(&devpair->pp_lock);
   return OK;
 }
 
@@ -624,7 +609,7 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access */
 
-  ret = pty_semtake(devpair);
+  ret = nxmutex_lock(&devpair->pp_lock);
   if (ret < 0)
     {
       return ret;
@@ -788,7 +773,7 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
-  pty_semgive(devpair);
+  nxmutex_unlock(&devpair->pp_lock);
   return ret;
 }
 
@@ -811,7 +796,7 @@ static int pty_poll(FAR struct file *filep, FAR struct pollfd *fds,
   dev     = inode->i_private;
   devpair = dev->pd_devpair;
 
-  ret = pty_semtake(devpair);
+  ret = nxmutex_lock(&devpair->pp_lock);
   if (ret < 0)
     {
       return ret;
@@ -880,7 +865,7 @@ static int pty_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 errout:
-  pty_semgive(devpair);
+  nxmutex_unlock(&devpair->pp_lock);
   return ret;
 }
 
@@ -902,7 +887,7 @@ static int pty_unlink(FAR struct inode *inode)
 
   /* Get exclusive access */
 
-  ret = pty_semtake(devpair);
+  ret = nxmutex_lock(&devpair->pp_lock);
   if (ret < 0)
     {
       return ret;
@@ -922,7 +907,7 @@ static int pty_unlink(FAR struct inode *inode)
       return OK;
     }
 
-  pty_semgive(devpair);
+  nxmutex_unlock(&devpair->pp_lock);
   return OK;
 }
 #endif
@@ -963,10 +948,10 @@ int pty_register2(int minor, bool susv1)
       return -ENOMEM;
     }
 
-  /* Initialize semaphores */
+  /* Initialize semaphores & mutex */
 
   nxsem_init(&devpair->pp_slavesem, 0, 0);
-  nxsem_init(&devpair->pp_exclsem, 0, 1);
+  nxmutex_init(&devpair->pp_lock);
 
   /* The pp_slavesem semaphore is used for signaling and, hence, should not
    * have priority inheritance enabled.
@@ -1028,7 +1013,7 @@ errout_with_master:
   unregister_driver(devname);
 
 errout_with_devpair:
-  nxsem_destroy(&devpair->pp_exclsem);
+  nxmutex_destroy(&devpair->pp_lock);
   nxsem_destroy(&devpair->pp_slavesem);
   kmm_free(devpair);
   return ret;

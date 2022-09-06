@@ -32,6 +32,7 @@
 #include <poll.h>
 
 #include <nuttx/wqueue.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 
@@ -283,12 +284,12 @@ struct cc1101_dev_s
   uint32_t miso_pin;      /* MISO Pin */
   struct work_s irq_work; /* Interrupt handling "bottom half" */
   uint8_t nopens;         /* The number of times the device has been opened */
-  sem_t devsem;           /* Ensures exclusive access to this structure */
+  mutex_t devlock;        /* Ensures exclusive access to this structure */
   uint8_t *rx_buffer;     /* Circular RX buffer.  [pipe# / pkt_len] [packet data...] */
   uint16_t fifo_len;      /* Number of bytes stored in fifo */
   uint16_t nxt_read;      /* Next read index */
   uint16_t nxt_write;     /* Next write index */
-  sem_t sem_rx_buffer;    /* Protect access to rx fifo */
+  mutex_t lock_rx_buffer; /* Protect access to rx fifo */
   sem_t sem_rx;           /* Wait for availability of received data */
   sem_t sem_tx;           /* Wait for availability of send data */
   FAR struct pollfd *pfd; /* Polled file descr  (or NULL if any) */

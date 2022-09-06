@@ -27,7 +27,7 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/spi/spi.h>
 
 #ifdef CONFIG_SPI_BITBANG
@@ -87,7 +87,7 @@ struct spi_bitbang_s
   FAR const struct spi_bitbang_ops_s *low; /* Low-level operations */
   uint32_t         holdtime;               /* SCK hold time to achieve requested frequency */
   bitexchange_t    exchange;               /* The select bit exchange function */
-  sem_t            exclsem;                /* Supports mutually exclusive access to SPI */
+  mutex_t          lock;                   /* Supports mutually exclusive access to SPI */
 #ifdef CONFIG_SPI_BITBANG_VARWIDTH
   uint8_t          nbits;                  /* Number of bits in the transfer */
 #endif

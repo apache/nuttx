@@ -508,24 +508,6 @@ static int romfs_cachenode(FAR struct romfs_mountpt_s *rm,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: romfs_semtake
- ****************************************************************************/
-
-int romfs_semtake(FAR struct romfs_mountpt_s *rm)
-{
-  return nxsem_wait_uninterruptible(&rm->rm_sem);
-}
-
-/****************************************************************************
- * Name: romfs_semgive
- ****************************************************************************/
-
-void romfs_semgive(FAR struct romfs_mountpt_s *rm)
-{
-  nxsem_post(&rm->rm_sem);
-}
-
-/****************************************************************************
  * Name: romfs_hwread
  *
  * Description: Read the specified sector into the sector buffer

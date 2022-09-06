@@ -1558,7 +1558,7 @@ static int spiffs_unbind(FAR void *handle, FAR struct inode **mtdinode,
       kmm_free(fs->cache);
     }
 
-  /* Free the volume memory (note that the semaphore is now stale!) */
+  /* Free the volume memory (note that the mutex is now stale!) */
 
   nxrmutex_destroy(&fs->lock);
   kmm_free(fs);

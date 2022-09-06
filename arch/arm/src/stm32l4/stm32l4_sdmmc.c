@@ -390,8 +390,6 @@ struct stm32_sampleregs_s
 static inline void sdmmc_putreg32(struct stm32_dev_s *priv, uint32_t value,
                                   int offset);
 static inline uint32_t sdmmc_getreg32(struct stm32_dev_s *priv, int offset);
-static int  stm32_takesem(struct stm32_dev_s *priv);
-#define     stm32_givesem(priv) (nxsem_post(&priv->waitsem))
 static inline void stm32_setclkcr(struct stm32_dev_s *priv, uint32_t clkcr);
 static void stm32_configwaitints(struct stm32_dev_s *priv, uint32_t waitmask,
               sdio_eventset_t waitevents, sdio_eventset_t wkupevents);
@@ -671,27 +669,6 @@ static inline void sdmmc_modifyreg32(struct stm32_dev_s *priv, int offset,
   regval |= setbits;
   putreg32(regval, priv->base + offset);
   leave_critical_section(flags);
-}
-
-/****************************************************************************
- * Name: stm32_takesem
- *
- * Description:
- *   Take the wait semaphore (handling false alarm wakeups due to the receipt
- *   of signals).
- *
- * Input Parameters:
- *   priv  - Instance of the SDMMC private state structure.
- *
- * Returned Value:
- *   Normally OK, but may return -ECANCELED in the rare event that the task
- *   has been canceled.
- *
- ****************************************************************************/
-
-static int stm32_takesem(struct stm32_dev_s *priv)
-{
-  return nxsem_wait_uninterruptible(&priv->waitsem);
 }
 
 /****************************************************************************
@@ -1361,7 +1338,7 @@ static void stm32_endwait(struct stm32_dev_s *priv,
 
   /* Wake up the waiting thread */
 
-  stm32_givesem(priv);
+  nxsem_post(&priv->waitsem);
 }
 
 /****************************************************************************
@@ -2643,7 +2620,7 @@ static sdio_eventset_t stm32_eventwait(struct sdio_dev_s *dev)
        * incremented and there will be no wait.
        */
 
-      ret = stm32_takesem(priv);
+      ret = nxsem_wait_uninterruptible(priv);
       if (ret < 0)
         {
           /* Task canceled.  Cancel the wdog (assuming it was started) and

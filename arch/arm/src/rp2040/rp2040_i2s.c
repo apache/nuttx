@@ -35,6 +35,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/queue.h>
@@ -138,7 +139,7 @@ struct rp2040_transport_s
 struct rp2040_i2s_s
 {
   struct i2s_dev_s  dev;            /* Externally visible I2S interface */
-  sem_t             exclsem;        /* Assures mutually exclusive access to I2S */
+  mutex_t           lock;           /* Assures mutually exclusive access to I2S */
   bool              initialized;    /* Has I2S interface been initialized */
   uint8_t           datalen;        /* Data width (8 or 16) */
 #ifdef CONFIG_DEBUG_FEATURES
@@ -167,14 +168,6 @@ struct rp2040_i2s_s
 #else
 #  define       i2s_dump_buffer(m,b,s)
 #endif
-
-/* Semaphore helpers */
-
-static int      i2s_exclsem_take(struct rp2040_i2s_s *priv);
-#define         i2s_exclsem_give(priv) nxsem_post(&priv->exclsem)
-
-static int      i2s_bufsem_take(struct rp2040_i2s_s *priv);
-#define         i2s_bufsem_give(priv) nxsem_post(&priv->bufsem)
 
 /* Buffer container helpers */
 
@@ -236,46 +229,6 @@ static const struct i2s_ops_s g_i2sops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: i2s_exclsem_take
- *
- * Description:
- *   Take the exclusive access semaphore handling any exceptional conditions
- *
- * Input Parameters:
- *   priv - A reference to the i2s peripheral state
- *
- * Returned Value:
- *   Normally OK, but may return -ECANCELED in the rare event that the task
- *   has been canceled.
- *
- ****************************************************************************/
-
-static int i2s_exclsem_take(struct rp2040_i2s_s *priv)
-{
-  return nxsem_wait_uninterruptible(&priv->exclsem);
-}
-
-/****************************************************************************
- * Name: i2s_bufsem_take
- *
- * Description:
- *   Take the buffer semaphore handling any exceptional conditions
- *
- * Input Parameters:
- *   priv - A reference to the i2s peripheral state
- *
- * Returned Value:
- *   Normally OK, but may return -ECANCELED in the rare event that the task
- *   has been canceled.
- *
- ****************************************************************************/
-
-static int i2s_bufsem_take(struct rp2040_i2s_s *priv)
-{
-  return nxsem_wait_uninterruptible(&priv->bufsem);
-}
-
-/****************************************************************************
  * Name: i2s_buf_allocate
  *
  * Description:
@@ -305,7 +258,7 @@ static struct rp2040_buffer_s *i2s_buf_allocate(struct rp2040_i2s_s *priv)
    * have at least one free buffer container.
    */
 
-  ret = i2s_bufsem_take(priv);
+  ret = nxsem_wait_uninterruptible(&priv->bufsem);
   if (ret < 0)
     {
       return NULL;
@@ -356,7 +309,7 @@ static void i2s_buf_free(struct rp2040_i2s_s *priv,
 
   /* Wake up any threads waiting for a buffer container */
 
-  i2s_bufsem_give(priv);
+  nxsem_post(&priv->bufsem);
 }
 
 /****************************************************************************
@@ -913,7 +866,7 @@ static int rp2040_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
   /* Get exclusive access to the I2S driver data */
 
-  ret = i2s_exclsem_take(priv);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       goto errout_with_buf;
@@ -937,7 +890,7 @@ static int rp2040_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   sq_addlast((sq_entry_t *)bfcontainer, &priv->tx.pend);
 
   leave_critical_section(flags);
-  i2s_exclsem_give(priv);
+  nxmutex_unlock(&priv->lock);
   return OK;
 
 errout_with_buf:
@@ -1351,7 +1304,7 @@ struct i2s_dev_s *rp2040_i2sbus_initialize(int port)
 
   /* Initialize the common parts for the I2S device structure */
 
-  nxsem_init(&priv->exclsem, 0, 1);
+  nxmutex_init(&priv->lock);
   priv->dev.ops = &g_i2sops;
 
   /* Initialize buffering */
@@ -1379,7 +1332,7 @@ struct i2s_dev_s *rp2040_i2sbus_initialize(int port)
   /* Failure exits */
 
 errout_with_alloc:
-  nxsem_destroy(&priv->exclsem);
+  nxmutex_destroy(&priv->lock);
   kmm_free(priv);
   return NULL;
 }

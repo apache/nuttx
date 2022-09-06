@@ -33,7 +33,7 @@
 #include <debug.h>
 
 #include <nuttx/mtd/nand_raw.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 
 #include "arm_internal.h"
 #include "chip.h"
@@ -321,7 +321,7 @@ struct sam_nand_s
 {
   bool initialized;          /* True:  One time initialization is complete */
 #if NAND_NBANKS > 1
-  sem_t exclsem;             /* Enforce exclusive access to the SMC hardware */
+  mutex_t lock;              /* Enforce exclusive access to the SMC hardware */
 #endif
 
   /* Dynamic state */

@@ -33,6 +33,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 
 #include "arm_internal.h"
@@ -67,7 +68,7 @@ struct dma_channel_s
 
 struct dma_controller_s
 {
-  sem_t exclsem;                 /* Protects channel table */
+  mutex_t lock;                  /* Protects channel table */
   sem_t chansem;                 /* Count of free channels */
 };
 
@@ -265,7 +266,7 @@ void weak_function arm_dma_initialize(void)
 
   /* Initialize the channel list  */
 
-  nxsem_init(&g_dmac.exclsem, 0, 1);
+  nxmutex_init(&g_dmac.lock);
   nxsem_init(&g_dmac.chansem, 0, EFM32_DMA_NCHANNELS);
 
   for (i = 0; i < EFM32_DMA_NCHANNELS; i++)
@@ -343,7 +344,7 @@ DMA_HANDLE efm32_dmachannel(void)
 
   /* Get exclusive access to the DMA channel list */
 
-  ret = nxsem_wait_uninterruptible(&g_dmac.exclsem);
+  ret = nxmutex_lock(&g_dmac.lock);
   if (ret < 0)
     {
       nxsem_post(&g_dmac.chansem);
@@ -372,7 +373,7 @@ DMA_HANDLE efm32_dmachannel(void)
         }
     }
 
-  nxsem_post(&g_dmac.exclsem);
+  nxmutex_unlock(&g_dmac.lock);
 
   /* Since we have reserved a DMA descriptor by taking a count from chansem,
    * it would be a serious logic failure if we could not find a free channel

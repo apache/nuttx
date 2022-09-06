@@ -26,7 +26,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/list.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/sensors/sensor.h>
 
 /****************************************************************************
@@ -56,7 +56,7 @@ static int usensor_ioctl(FAR struct file *filep, int cmd,
 
 struct usensor_context_s
 {
-  sem_t            exclsem;   /* Manages exclusive access to file operations */
+  mutex_t          lock;      /* Manages exclusive access to file operations */
   struct list_node list;      /* List of node registered */
 };
 
@@ -114,14 +114,14 @@ static int usensor_register(FAR struct usensor_context_s *usensor,
       goto errout_with_lower;
     }
 
-  ret = nxsem_wait(&usensor->exclsem);
+  ret = nxmutex_lock(&usensor->lock);
   if (ret < 0)
     {
       goto errout_with_register;
     }
 
   list_add_tail(&usensor->list, &lower->node);
-  nxsem_post(&usensor->exclsem);
+  nxmutex_unlock(&usensor->lock);
 
   return ret;
 
@@ -138,7 +138,7 @@ static int usensor_unregister(FAR struct usensor_context_s *usensor,
   FAR struct usensor_lowerhalf_s *lower;
   int ret;
 
-  ret = nxsem_wait(&usensor->exclsem);
+  ret = nxmutex_lock(&usensor->lock);
   if (ret < 0)
     {
       return ret;
@@ -150,14 +150,14 @@ static int usensor_unregister(FAR struct usensor_context_s *usensor,
       if (strcmp(path, lower->path) == 0)
         {
           list_delete(&lower->node);
-          nxsem_post(&usensor->exclsem);
+          nxmutex_unlock(&usensor->lock);
           sensor_custom_unregister(&lower->driver, path);
           kmm_free(lower);
           return 0;
         }
     }
 
-  nxsem_post(&usensor->exclsem);
+  nxmutex_unlock(&usensor->lock);
   return -ENOENT;
 }
 
@@ -232,19 +232,19 @@ int usensor_initialize(void)
       return -ENOMEM;
     }
 
-  nxsem_init(&usensor->exclsem, 0, 1);
+  nxmutex_init(&usensor->lock);
   list_initialize(&usensor->list);
 
   ret = register_driver(USENSOR_PATH, &g_usensor_fops, 0666, usensor);
   if (ret < 0)
     {
-      goto errout_with_sem;
+      goto errout_with_lock;
     }
 
   return ret;
 
-errout_with_sem:
-  nxsem_destroy(&usensor->exclsem);
+errout_with_lock:
+  nxmutex_destroy(&usensor->lock);
   kmm_free(usensor);
   return ret;
 }

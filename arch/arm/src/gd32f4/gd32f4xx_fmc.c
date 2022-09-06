@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 
 #include <stdbool.h>
 #include <assert.h>
@@ -41,42 +41,11 @@
  * Private Data
  ****************************************************************************/
 
-static sem_t g_gd32_fmc_sem = SEM_INITIALIZER(1);
+static mutex_t g_gd32_fmc_lock = NXMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: gd32_fmc_sem_lock
- *
- * Description:
- *   Lock semaphore
- *
- * Return Value:
- *   Zero(OK)  - On success
- *   EINVAL    - Invalid attempt to get the semaphore
- *   ECANCELED - May be returned if the thread is canceled while waiting
- *
- ****************************************************************************/
-
-static int gd32_fmc_sem_lock(void)
-{
-  return nxsem_wait_uninterruptible(&g_gd32_fmc_sem);
-}
-
-/****************************************************************************
- * Name: gd32_fmc_sem_unlock
- *
- * Description:
- *   Lock semaphore
- *
- ****************************************************************************/
-
-static void gd32_fmc_sem_unlock(void)
-{
-  nxsem_post(&g_gd32_fmc_sem);
-}
 
 /****************************************************************************
  * Name: gd32_fmc_state_get
@@ -203,7 +172,7 @@ int gd32_fmc_unlock(void)
 {
   int ret;
 
-  ret = gd32_fmc_sem_lock();
+  ret = nxmutex_lock(&g_gd32_fmc_lock);
   if (ret < 0)
     {
       return ret;
@@ -217,8 +186,7 @@ int gd32_fmc_unlock(void)
       putreg32(FMC_UNLOCK_KEY1, GD32_FMC_KEY);
     }
 
-  gd32_fmc_sem_unlock();
-
+  nxmutex_unlock(&g_gd32_fmc_lock);
   return ret;
 }
 
@@ -234,7 +202,7 @@ int gd32_fmc_lock(void)
 {
   int ret;
 
-  ret = gd32_fmc_sem_lock();
+  ret = nxmutex_lock(&g_gd32_fmc_lock);
   if (ret < 0)
     {
       return ret;
@@ -244,8 +212,7 @@ int gd32_fmc_lock(void)
 
   modifyreg32(GD32_FMC_CTL, 0, FMC_CTL_LK);
 
-  gd32_fmc_sem_unlock();
-
+  nxmutex_unlock(&g_gd32_fmc_lock);
   return ret;
 }
 

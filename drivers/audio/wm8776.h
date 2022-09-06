@@ -31,6 +31,7 @@
 #include <pthread.h>
 
 #include <nuttx/mqueue.h>
+#include <nuttx/mutex.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/fs/ioctl.h>
 
@@ -85,7 +86,7 @@ struct wm8776_dev_s
   char                    mqname[16];       /* Our message queue name */
   pthread_t               threadid;         /* ID of our thread */
   uint32_t                bitrate;          /* Actual programmed bit rate */
-  sem_t                   pendsem;          /* Protect pendq */
+  mutex_t                 pendlock;         /* Protect pendq */
   uint16_t                samprate;         /* Configured samprate (samples/sec) */
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
 #ifndef CONFIG_AUDIO_EXCLUDE_BALANCE

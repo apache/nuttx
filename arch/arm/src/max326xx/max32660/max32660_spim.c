@@ -57,7 +57,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/spi/spi.h>
 
 #include "arm_internal.h"
@@ -97,7 +97,7 @@ struct max326_spidev_s
   uint32_t         base;         /* SPI base address */
   uint32_t         frequency;    /* Requested clock frequency */
   uint32_t         actual;       /* Actual clock frequency */
-  sem_t            exclsem;      /* Held while chip is selected for mutual exclusion */
+  mutex_t          lock;         /* Held while chip is selected for mutual exclusion */
   uint16_t         rxbytes;      /* Number of bytes received into rxbuffer */
   uint16_t         txbytes;      /* Number of bytes sent from txbuffer */
   uint16_t         xfrlen;       /* Transfer length */
@@ -820,11 +820,11 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
 
   if (lock)
     {
-      ret = nxsem_wait_uninterruptible(&priv->exclsem);
+      ret = nxmutex_lock(&priv->lock);
     }
   else
     {
-      ret = nxsem_post(&priv->exclsem);
+      ret = nxmutex_unlock(&priv->lock);
     }
 
   return ret;
@@ -1433,9 +1433,9 @@ static void spi_bus_initialize(struct max326_spidev_s *priv)
   regval = priv->wire3 ? SPI_CTRL2_DATWIDTH_SINGLE : SPI_CTRL2_DATWIDTH_DUAL;
   spi_modify_ctrl2(priv, regval, SPI_CTRL2_DATWIDTH_MASK);
 
-  /* Initialize the SPI semaphore that enforces mutually exclusive access */
+  /* Initialize the SPI mutex that enforces mutually exclusive access */
 
-  nxsem_init(&priv->exclsem, 0, 1);
+  nxmutex_init(&priv->lock);
 
   /* Disable all interrupts at the peripheral */
 

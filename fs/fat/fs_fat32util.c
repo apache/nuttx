@@ -348,24 +348,6 @@ void fat_putuint32(FAR uint8_t *ptr, uint32_t value32)
 }
 
 /****************************************************************************
- * Name: fat_semtake
- ****************************************************************************/
-
-int fat_semtake(struct fat_mountpt_s *fs)
-{
-  return nxsem_wait_uninterruptible(&fs->fs_sem);
-}
-
-/****************************************************************************
- * Name: fat_semgive
- ****************************************************************************/
-
-void fat_semgive(struct fat_mountpt_s *fs)
-{
-  nxsem_post(&fs->fs_sem);
-}
-
-/****************************************************************************
  * Name: fat_systime2fattime
  *
  * Description:

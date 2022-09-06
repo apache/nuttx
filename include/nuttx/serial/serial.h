@@ -120,7 +120,7 @@
 
 struct uart_buffer_s
 {
-  sem_t            sem;    /* Used to control exclusive access to the buffer */
+  mutex_t          lock;   /* Used to control exclusive access to the buffer */
   volatile int16_t head;   /* Index to the head [IN] index in the buffer */
   volatile int16_t tail;   /* Index to the tail [OUT] index in the buffer */
   int16_t          size;   /* The allocated size of the buffer */
@@ -291,12 +291,12 @@ struct uart_dev_s
   tcflag_t             tc_lflag;     /* Local modes */
 #endif
 
-  /* Semaphores */
+  /* Semaphores & mutex */
 
-  sem_t                closesem;     /* Locks out new open while close is in progress */
   sem_t                xmitsem;      /* Wakeup user waiting for space in xmit.buffer */
   sem_t                recvsem;      /* Wakeup user waiting for data in recv.buffer */
-  sem_t                pollsem;      /* Manages exclusive access to fds[] */
+  mutex_t              closelock;    /* Locks out new open while close is in progress */
+  mutex_t              polllock;     /* Manages exclusive access to fds[] */
 
   /* I/O buffers */
 

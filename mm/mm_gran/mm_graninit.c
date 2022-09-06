@@ -138,7 +138,7 @@ GRAN_HANDLE gran_initialize(FAR void *heapstart, size_t heapsize,
       /* Initialize mutual exclusion support */
 
 #ifndef CONFIG_GRAN_INTR
-      nxsem_init(&priv->exclsem, 0, 1);
+      nxmutex_init(&priv->lock);
 #endif
     }
 

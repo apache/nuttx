@@ -42,23 +42,8 @@
 #include "inode/inode.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define poll_semgive(sem) nxsem_post(sem)
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: poll_semtake
- ****************************************************************************/
-
-static int poll_semtake(FAR sem_t *sem)
-{
-  return nxsem_wait(sem);
-}
 
 /****************************************************************************
  * Name: poll_fdsetup
@@ -512,7 +497,7 @@ int nx_poll(FAR struct pollfd *fds, unsigned int nfds, int timeout)
         {
           /* Wait for the poll event or signal with no timeout */
 
-          ret = poll_semtake(&sem);
+          ret = nxsem_wait(&sem);
         }
 
       /* Teardown the poll operation and get the count of events.  Zero will

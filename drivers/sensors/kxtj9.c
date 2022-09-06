@@ -34,7 +34,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/sensors/kxtj9.h>
 #include <nuttx/random.h>
 
@@ -114,7 +114,7 @@
 struct kxtj9_dev_s
 {
   FAR struct i2c_master_s *i2c;
-  sem_t exclsem;
+  mutex_t lock;
   bool enable;
   bool power_enabled;
   uint8_t address;
@@ -325,7 +325,7 @@ static int kxtj9_configure(FAR struct kxtj9_dev_s *priv, uint8_t odr)
   uint8_t wbuf[0];
   int ret;
 
-  ret = nxsem_wait_uninterruptible(&priv->exclsem);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -360,7 +360,7 @@ static int kxtj9_configure(FAR struct kxtj9_dev_s *priv, uint8_t odr)
   priv->int_ctrl = KXTJ9_IEN | KXTJ9_IEA | KXTJ9_IEL;
   kxtj9_reg_write(priv, INT_CTRL1, priv->int_ctrl);
 
-  nxsem_post(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
   return 0;
 }
 
@@ -378,7 +378,7 @@ static int kxtj9_enable(FAR struct kxtj9_dev_s *priv, bool on)
   uint8_t wbuf[1];
   int ret;
 
-  ret = nxsem_wait_uninterruptible(&priv->exclsem);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -406,7 +406,7 @@ static int kxtj9_enable(FAR struct kxtj9_dev_s *priv, bool on)
       sninfo("KXTJ9 in operating mode\n");
     }
 
-  nxsem_post(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
   return OK;
 }
 
@@ -425,7 +425,7 @@ static int kxtj9_read_sensor_data(FAR struct kxtj9_dev_s *priv,
   uint8_t data;
   int ret;
 
-  ret = nxsem_wait_uninterruptible(&priv->exclsem);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -442,7 +442,7 @@ static int kxtj9_read_sensor_data(FAR struct kxtj9_dev_s *priv,
   /* Read INT_REL to clear interrupt status */
 
   kxtj9_reg_read(priv, INT_REL, &data, 1);
-  nxsem_post(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
 
   /* Feed sensor data to entropy pool */
 
@@ -628,7 +628,7 @@ int kxtj9_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   priv->i2c     = i2c;
   priv->address = address;
-  nxsem_init(&priv->exclsem, 0, 1);
+  nxmutex_init(&priv->lock);
 
   /* Register the character driver */
 

@@ -42,7 +42,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/spi/spi.h>
 
 #include "arm_internal.h"
@@ -100,7 +100,7 @@ struct sam_spidev_s
 
   /* Dynamic configuration */
 
-  sem_t spilock;               /* Used to managed exclusive access to the bus */
+  mutex_t spilock;             /* Used to managed exclusive access to the bus */
   uint32_t frequency;          /* Requested clock frequency */
   uint32_t actual;             /* Actual clock frequency */
   uint8_t mode;                /* Mode 0,1,2,3 */
@@ -238,7 +238,7 @@ static struct sam_spidev_s g_spi0dev =
   .muxconfig   = BOARD_SERCOM0_MUXCONFIG,
   .srcfreq     = BOARD_SERCOM0_FREQUENCY,
   .base        = SAM_SERCOM0_BASE,
-  .spilock     = SEM_INITIALIZER(1),
+  .spilock     = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_SAMD2L2_SPI_DMA
   .dma_tx_trig = DMAC_TRIGSRC_SERCOM0_TX,
   .dma_rx_trig = DMAC_TRIGSRC_SERCOM0_RX,
@@ -288,7 +288,7 @@ static struct sam_spidev_s g_spi1dev =
   .muxconfig   = BOARD_SERCOM1_MUXCONFIG,
   .srcfreq     = BOARD_SERCOM1_FREQUENCY,
   .base        = SAM_SERCOM1_BASE,
-  .spilock     = SEM_INITIALIZER(1),
+  .spilock     = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_SAMD2L2_SPI_DMA
   .dma_tx_trig = DMAC_TRIGSRC_SERCOM1_TX,
   .dma_rx_trig = DMAC_TRIGSRC_SERCOM1_RX,
@@ -338,7 +338,7 @@ static struct sam_spidev_s g_spi2dev =
   .muxconfig   = BOARD_SERCOM2_MUXCONFIG,
   .srcfreq     = BOARD_SERCOM2_FREQUENCY,
   .base        = SAM_SERCOM2_BASE,
-  .spilock     = SEM_INITIALIZER(1),
+  .spilock     = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_SAMD2L2_SPI_DMA
   .dma_tx_trig = DMAC_TRIGSRC_SERCOM2_TX,
   .dma_rx_trig = DMAC_TRIGSRC_SERCOM2_RX,
@@ -388,7 +388,7 @@ static struct sam_spidev_s g_spi3dev =
   .muxconfig   = BOARD_SERCOM3_MUXCONFIG,
   .srcfreq     = BOARD_SERCOM3_FREQUENCY,
   .base        = SAM_SERCOM3_BASE,
-  .spilock     = SEM_INITIALIZER(1),
+  .spilock     = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_SAMD2L2_SPI_DMA
   .dma_tx_trig = DMAC_TRIGSRC_SERCOM3_TX,
   .dma_rx_trig = DMAC_TRIGSRC_SERCOM3_RX,
@@ -438,7 +438,7 @@ static struct sam_spidev_s g_spi4dev =
   .muxconfig   = BOARD_SERCOM4_MUXCONFIG,
   .srcfreq     = BOARD_SERCOM4_FREQUENCY,
   .base        = SAM_SERCOM4_BASE,
-  .spilock     = SEM_INITIALIZER(1),
+  .spilock     = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_SAMD2L2_SPI_DMA
   .dma_tx_trig = DMAC_TRIGSRC_SERCOM4_TX,
   .dma_rx_trig = DMAC_TRIGSRC_SERCOM4_RX,
@@ -488,7 +488,7 @@ static struct sam_spidev_s g_spi5dev =
   .muxconfig   = BOARD_SERCOM5_MUXCONFIG,
   .srcfreq     = BOARD_SERCOM5_FREQUENCY,
   .base        = SAM_SERCOM5_BASE,
-  .spilock     = SEM_INITIALIZER(1),
+  .spilock     = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_SAMD2L2_SPI_DMA
   .dma_tx_trig = DMAC_TRIGSRC_SERCOM5_TX,
   .dma_rx_trig = DMAC_TRIGSRC_SERCOM5_RX,
@@ -811,11 +811,11 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
   spiinfo("lock=%d\n", lock);
   if (lock)
     {
-      ret = nxsem_wait_uninterruptible(&priv->spilock);
+      ret = nxmutex_lock(&priv->spilock);
     }
   else
     {
-      ret = nxsem_post(&priv->spilock);
+      ret = nxmutex_unlock(&priv->spilock);
     }
 
   return ret;

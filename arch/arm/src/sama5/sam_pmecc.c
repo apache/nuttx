@@ -59,7 +59,7 @@
 
 #include <nuttx/mtd/nand_model.h>
 #include <nuttx/mtd/nand_scheme.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 
 #include "sam_pmecc.h"
 #include "sam_nand.h"
@@ -135,7 +135,7 @@ struct sam_pmecc_s
 {
   bool configured;           /* True: Configured for some HSMC NAND bank */
 #if NAND_NPMECC_BANKS > 1
-  sem_t exclem;              /* For mutually exclusive access to the PMECC */
+  mutex_t lock;              /* For mutually exclusive access to the PMECC */
   uint8_t cs;                /* Currently configured for this bank */
 #endif
   bool    sector1k;          /* True: 1024B sector size; False: 512B sector size */
@@ -467,7 +467,7 @@ static uint32_t pmecc_getsigma(void)
 
           /* Init smu[i+1] with 0 */
 
-          for (k = 0; k < (2 * PMECC_MAX_CORRECTABILITY + 1); k ++)
+          for (k = 0; k < (2 * PMECC_MAX_CORRECTABILITY + 1); k++)
             {
               g_pmecc.desc.smu[i + 1][k] = 0;
             }
@@ -1017,7 +1017,7 @@ static int pmecc_pagelayout(uint16_t datasize, uint16_t eccsize)
 #if NAND_NPMECC_BANKS > 1
 void pmecc_initialize(void)
 {
-  nxsem_init(&g_pmecc.exclsem, 0, 1);
+  nxmutex_init(&g_pmecc.lock);
 }
 #endif
 
@@ -1282,7 +1282,7 @@ int pmecc_configure(struct sam_nandcs_s *priv, bool protected)
 #if NAND_NPMECC_BANKS > 1
 int pmecc_lock(void)
 {
-  return nxsem_wait_uninterruptible(&g_pmecc.exclsem);
+  return nxmutex_lock(&g_pmecc.lock);
 }
 #endif
 
@@ -1303,7 +1303,7 @@ int pmecc_lock(void)
 #if NAND_NPMECC_BANKS > 1
 void pmecc_unlock(void)
 {
-  nxsem_post(&g_pmecc.exclsem);
+  nxmutex_unlock(&g_pmecc.lock);
 }
 #endif
 

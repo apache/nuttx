@@ -134,7 +134,7 @@ FAR struct local_conn_s *local_alloc(void)
        * Make sure data will not be garbled when multi-thread sends.
        */
 
-      nxsem_init(&conn->lc_sendsem, 0, 1);
+      nxmutex_init(&conn->lc_sendlock);
 
       /* Add the connection structure to the list of listeners */
 
@@ -218,7 +218,7 @@ void local_free(FAR struct local_conn_s *conn)
 
   /* Destory sem associated with the connection */
 
-  nxsem_destroy(&conn->lc_sendsem);
+  nxmutex_destroy(&conn->lc_sendlock);
 
   /* And free the connection structure */
 

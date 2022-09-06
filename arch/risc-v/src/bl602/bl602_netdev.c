@@ -32,6 +32,7 @@
 #include <assert.h>
 #include <debug.h>
 #include <sched.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/kmalloc.h>
@@ -201,7 +202,7 @@ static struct tx_buf_ind_s g_tx_buf_indicator =
 static uint8_t locate_data(".wifi_ram.txbuff")
 g_tx_buff[BL602_NET_TXBUFF_NUM][BL602_NET_TXBUFF_SIZE];
 
-static sem_t g_wifi_scan_sem; /* wifi scan complete semaphore */
+static mutex_t g_wifi_scan_lock; /* wifi scan complete mutex */
 static sem_t g_wifi_connect_sem;
 
 /* Rx Pending List */
@@ -1531,7 +1532,7 @@ bl602_net_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
               para->flags = 0;
             }
 
-          if (nxsem_trywait(&g_wifi_scan_sem) == 0)
+          if (nxmutex_trylock(&g_wifi_scan_lock) == 0)
             {
               if (priv->channel != 0)
                 {
@@ -1564,24 +1565,24 @@ bl602_net_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         {
           struct iwreq *req = (struct iwreq *)arg;
 
-          nxsem_wait(&g_wifi_scan_sem);
+          nxmutex_lock(&g_wifi_scan_lock);
 
           if (g_state.scan_result_status != 0)
             {
               wlwarn("scan failed\n");
-              nxsem_post(&g_wifi_scan_sem);
+              nxmutex_unlock(&g_wifi_scan_lock);
               return -EIO;
             }
 
           if (g_state.scan_result_len == 0)
             {
               req->u.data.length = 0;
-              nxsem_post(&g_wifi_scan_sem);
+              nxmutex_unlock(&g_wifi_scan_lock);
               return OK;
             }
 
           ret = format_scan_result_to_wapi(req, g_state.scan_result_len);
-          nxsem_post(&g_wifi_scan_sem);
+          nxmutex_unlock(&g_wifi_scan_lock);
           return ret;
         }
       while (0);
@@ -2049,7 +2050,7 @@ void bl602_net_event(int evt, int val)
       do
         {
           g_state.scan_result_status = val;
-          nxsem_post(&g_wifi_scan_sem);
+          nxmutex_unlock(&g_wifi_scan_lock);
         }
       while (0);
 
@@ -2109,9 +2110,9 @@ int bl602_net_initialize(void)
   int                            idx;
   uint8_t                        mac[6];
 
-  /* Initialize scan semaphore */
+  /* Initialize scan mutex & semaphore */
 
-  tmp = sem_init(&g_wifi_scan_sem, 0, 1);
+  tmp = nxmutex_init(&g_wifi_scan_lock);
   if (tmp < 0)
     {
       return tmp;
@@ -2204,7 +2205,7 @@ int bl602_net_initialize(void)
       tmp = netdev_register(&priv->net_dev, NET_LL_IEEE80211);
       if (tmp < 0)
         {
-          sem_destroy(&g_wifi_scan_sem);
+          nxmutex_destroy(&g_wifi_scan_lock);
           return tmp;
         }
     }

@@ -44,6 +44,7 @@
 
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/input/ads7843e.h>
@@ -134,7 +135,7 @@ struct ads7843e_dev_s
   volatile bool penchange;              /* An unreported event is buffered */
   uint16_t threshx;                     /* Thresholding X value */
   uint16_t threshy;                     /* Thresholding Y value */
-  sem_t devsem;                         /* Manages exclusive access to this structure */
+  mutex_t devlock;                      /* Manages exclusive access to this structure */
   sem_t waitsem;                        /* Used to wait for the availability of data */
 
   FAR struct ads7843e_config_s *config; /* Board configuration data */

@@ -58,6 +58,7 @@
 
 #include <nuttx/wdog.h>
 #include <nuttx/arch.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/i2c/i2c_master.h>
 
@@ -120,7 +121,7 @@ struct twi_dev_s
   uint8_t             twi;        /* TWI peripheral number (for debug output) */
   uint8_t             pid;        /* TWI peripheral ID */
 
-  sem_t               exclsem;    /* Only one thread can access at a time */
+  mutex_t             lock;       /* Only one thread can access at a time */
   sem_t               waitsem;    /* Wait for TWI transfer completion */
   struct wdog_s       timeout;    /* Watchdog to recover from bus hangs */
   volatile int        result;     /* The result of the transfer */
@@ -139,11 +140,6 @@ struct twi_dev_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
-
-/* Low-level helper functions */
-
-static int twi_takesem(sem_t *sem);
-#define     twi_givesem(sem) (nxsem_post(sem))
 
 #ifdef CONFIG_SAM34_TWI_REGDEBUG
 static bool twi_checkreg(struct twi_dev_s *priv, bool wr,
@@ -210,26 +206,6 @@ static const struct i2c_ops_s g_twiops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: twi_takesem
- *
- * Description:
- *   Take the wait semaphore.  May be interrupted by a signal.
- *
- * Input Parameters:
- *   dev - Instance of the SDIO device driver state structure.
- *
- * Returned Value:
- *     EINVAL - Invalid attempt to get the semaphore
- *     EINTR  - The wait was interrupted by the receipt of a signal.
- *
- ****************************************************************************/
-
-static int twi_takesem(sem_t *sem)
-{
-  return nxsem_wait(sem);
-}
 
 /****************************************************************************
  * Name: twi_checkreg
@@ -385,7 +361,7 @@ static int twi_wait(struct twi_dev_s *priv)
   do
     {
       i2cinfo("TWI%d Waiting...\n", priv->twi);
-      ret = twi_takesem(&priv->waitsem);
+      ret = nxsem_wait(&priv->waitsem);
       i2cinfo("TWI%d Awakened with result: %d\n", priv->twi, priv->result);
 
       if (ret < 0)
@@ -424,7 +400,7 @@ static void twi_wakeup(struct twi_dev_s *priv, int result)
   /* Wake up the waiting thread with the result of the transfer */
 
   priv->result = result;
-  twi_givesem(&priv->waitsem);
+  nxsem_post(&priv->waitsem);
 }
 
 /****************************************************************************
@@ -692,7 +668,7 @@ static int twi_transfer(struct i2c_master_s *dev,
 
   /* Get exclusive access to the device */
 
-  ret = twi_takesem(&priv->exclsem);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -730,7 +706,7 @@ static int twi_transfer(struct i2c_master_s *dev,
     }
 
   leave_critical_section(flags);
-  twi_givesem(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -974,9 +950,9 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
 
   priv->dev.ops = &g_twiops;
 
-  /* Initialize semaphores */
+  /* Initialize mutex & semaphores */
 
-  nxsem_init(&priv->exclsem, 0, 1);
+  nxmutex_init(&priv->lock);
   nxsem_init(&priv->waitsem, 0, 0);
 
   /* The waitsem semaphore is used for signaling and, hence, should not have
@@ -1021,7 +997,7 @@ int sam_i2cbus_uninitialize(struct i2c_master_s * dev)
 
   /* Reset data structures */
 
-  nxsem_destroy(&priv->exclsem);
+  nxmutex_destroy(&priv->lock);
   nxsem_destroy(&priv->waitsem);
 
   /* Cancel the watchdog timer */

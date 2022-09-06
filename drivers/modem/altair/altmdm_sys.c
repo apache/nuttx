@@ -63,7 +63,7 @@ int altmdm_sys_initlock(FAR struct altmdm_sys_lock_s *handle)
       return ERROR;
     }
 
-  ret = nxsem_init(&handle->sem, 0, 1);
+  ret = nxmutex_init(&handle->lock);
 
 #ifdef CONFIG_MODEM_ALTMDM_DEBUG
   if (ret < 0)
@@ -94,7 +94,7 @@ int altmdm_sys_deletelock(FAR struct altmdm_sys_lock_s *handle)
       return ERROR;
     }
 
-  ret = nxsem_destroy(&handle->sem);
+  ret = nxmutex_destroy(&handle->lock);
 
 #ifdef CONFIG_MODEM_ALTMDM_DEBUG
   if (ret < 0)
@@ -125,7 +125,7 @@ int altmdm_sys_lock(FAR struct altmdm_sys_lock_s *handle)
       return ERROR;
     }
 
-  ret = nxsem_wait_uninterruptible(&handle->sem);
+  ret = nxmutex_lock(&handle->lock);
   if (ret < 0)
     {
       m_err("nxsem_wait_uninterruptible() failed:%d\n", ret);
@@ -153,7 +153,7 @@ int altmdm_sys_unlock(FAR struct altmdm_sys_lock_s *handle)
       return ERROR;
     }
 
-  ret = nxsem_post(&handle->sem);
+  ret = nxmutex_unlock(&handle->lock);
 
 #ifdef CONFIG_MODEM_ALTMDM_DEBUG
   if (ret < 0)

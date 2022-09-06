@@ -38,7 +38,7 @@
 #include <nuttx/analog/adc.h>
 #include <nuttx/analog/ioctl.h>
 #include <nuttx/analog/ltc1867l.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 
 #if defined(CONFIG_ADC_LTC1867L)
 
@@ -61,7 +61,7 @@ struct ltc1867l_dev_s
   unsigned int devno;
   FAR struct ltc1867l_channel_config_s *channel_config;
   int channel_config_count;
-  sem_t sem;
+  mutex_t lock;
 };
 
 /****************************************************************************
@@ -222,7 +222,7 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
 
   if (cmd == ANIOC_TRIGGER)
     {
-      while (nxsem_wait(&priv->sem) < 0);
+      while (nxmutex_lock(&priv->lock) < 0);
 
       adc_lock(spi);
 
@@ -267,7 +267,7 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
         }
 
       adc_unlock(spi);
-      nxsem_post(&priv->sem);
+      nxmutex_unlock(&priv->lock);
     }
   else
     {
@@ -331,7 +331,7 @@ int ltc1867l_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   adcpriv->channel_config = channel_config;
   adcpriv->channel_config_count = channel_config_count;
 
-  ret = nxsem_init(&adcpriv->sem, 1, 1);
+  ret = nxmutex_init(&adcpriv->lock);
   if (ret < 0)
     {
       kmm_free(adcpriv);
@@ -342,7 +342,7 @@ int ltc1867l_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   if (adcdev == NULL)
     {
       aerr("ERROR: Failed to allocate adc_dev_s instance\n");
-      nxsem_destroy(&adcpriv->sem);
+      nxmutex_destroy(&adcpriv->lock);
       kmm_free(adcpriv);
       return -ENOMEM;
     }
@@ -358,7 +358,7 @@ int ltc1867l_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
     {
       aerr("ERROR: Failed to register adc driver: %d\n", ret);
       kmm_free(adcdev);
-      nxsem_destroy(&adcpriv->sem);
+      nxmutex_destroy(&adcpriv->lock);
       kmm_free(adcpriv);
     }
 

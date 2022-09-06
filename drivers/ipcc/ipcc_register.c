@@ -95,7 +95,7 @@ void ipcc_cleanup(FAR struct ipcc_driver_s *priv)
   nxsem_destroy(&priv->rxsem);
   nxsem_destroy(&priv->txsem);
   priv->ipcc->ops.cleanup(priv->ipcc);
-  nxsem_destroy(&priv->exclsem);
+  nxmutex_destroy(&priv->lock);
   kmm_free(priv);
 }
 
@@ -176,7 +176,7 @@ int ipcc_register(FAR struct ipcc_lower_s *ipcc)
 
   /* nxsem_init can't really fail us if we provide it with valid params */
 
-  nxsem_init(&priv->exclsem, 0, 1);
+  nxmutex_init(&priv->lock);
   nxsem_init(&priv->rxsem, 0, 0);
   nxsem_init(&priv->txsem, 0, 1);
 
@@ -184,6 +184,5 @@ int ipcc_register(FAR struct ipcc_lower_s *ipcc)
 
 error:
   ipcc_cleanup(priv);
-
   return ret;
 }

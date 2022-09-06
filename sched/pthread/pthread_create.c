@@ -558,9 +558,9 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
   sched_lock();
   if (ret == OK)
     {
-      nxsem_wait_uninterruptible(&ptcb->cmn.group->tg_joinsem);
+      nxmutex_lock(&ptcb->cmn.group->tg_joinlock);
       pthread_addjoininfo(ptcb->cmn.group, pjoin);
-      pthread_sem_give(&ptcb->cmn.group->tg_joinsem);
+      nxmutex_unlock(&ptcb->cmn.group->tg_joinlock);
       nxtask_activate((FAR struct tcb_s *)ptcb);
 
       /* Return the thread information to the caller */

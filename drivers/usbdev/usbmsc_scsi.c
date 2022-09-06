@@ -364,7 +364,7 @@ static int usbmsc_scsi_wait(FAR struct usbmsc_dev_s *priv)
 
   /* We must hold the SCSI lock to call this function */
 
-  DEBUGASSERT(priv->thlock.semcount < 1);
+  DEBUGASSERT(nxmutex_is_locked(&priv->thlock));
 
   /* A flag is used to prevent driving up the semaphore count.  This function
    * is called (primarily) from the SCSI work thread so we must disable
@@ -378,7 +378,7 @@ static int usbmsc_scsi_wait(FAR struct usbmsc_dev_s *priv)
 
   /* Relinquish our lock on the SCSI state data */
 
-  usbmsc_scsi_unlock(priv);
+  nxmutex_unlock(&priv->thlock);
 
   /* Now wait for a SCSI event to be signaled */
 
@@ -390,7 +390,7 @@ static int usbmsc_scsi_wait(FAR struct usbmsc_dev_s *priv)
 
   /* Re-acquire our lock on the SCSI state data */
 
-  ret2 = usbmsc_scsi_lock(priv);
+  ret2 = nxmutex_lock(&priv->thlock);
   leave_critical_section(flags);
   return ret >= 0 ? ret2 : ret;
 }
@@ -1925,7 +1925,7 @@ static int usbmsc_cmdparsestate(FAR struct usbmsc_dev_s *priv)
 
   /* Get exclusive access to the block driver */
 
-  ret = usbmsc_scsi_lock(priv);
+  ret = nxmutex_lock(&priv->thlock);
   if (ret < 0)
     {
       return ret;
@@ -2132,7 +2132,7 @@ static int usbmsc_cmdparsestate(FAR struct usbmsc_dev_s *priv)
       break;
     }
 
-  usbmsc_scsi_unlock(priv);
+  nxmutex_unlock(&priv->thlock);
 
   /* Is a response required?  (Not for read6/10/12 and write6/10/12). */
 
@@ -2845,7 +2845,7 @@ int usbmsc_scsi_main(int argc, char *argv[])
 
   /* Get exclusive access to SCSI state data */
 
-  ret = usbmsc_scsi_lock(priv);
+  ret = nxmutex_lock(&priv->thlock);
   if (ret < 0)
     {
       return EXIT_FAILURE;
@@ -2867,7 +2867,7 @@ int usbmsc_scsi_main(int argc, char *argv[])
         {
           /* The thread has been canceled */
 
-          usbmsc_scsi_unlock(priv);
+          nxmutex_unlock(&priv->thlock);
           return EXIT_FAILURE;
         }
     }
@@ -2879,7 +2879,7 @@ int usbmsc_scsi_main(int argc, char *argv[])
   priv->thstate    = USBMSC_STATE_IDLE;
   eventset         = priv->theventset;
   priv->theventset = USBMSC_EVENT_NOEVENTS;
-  usbmsc_scsi_unlock(priv);
+  nxmutex_unlock(&priv->thlock);
 
   /* Then loop until we are asked to terminate */
 
@@ -2891,7 +2891,7 @@ int usbmsc_scsi_main(int argc, char *argv[])
        * handling.
        */
 
-      ret = usbmsc_scsi_lock(priv);
+      ret = nxmutex_lock(&priv->thlock);
       if (ret < 0)
         {
           return EXIT_FAILURE;
@@ -2906,7 +2906,7 @@ int usbmsc_scsi_main(int argc, char *argv[])
               /* The thread has been canceled */
 
               leave_critical_section(flags);
-              usbmsc_scsi_unlock(priv);
+              nxmutex_unlock(&priv->thlock);
               return EXIT_FAILURE;
             }
         }
@@ -2918,7 +2918,7 @@ int usbmsc_scsi_main(int argc, char *argv[])
 
       eventset         = priv->theventset;
       priv->theventset = USBMSC_EVENT_NOEVENTS;
-      usbmsc_scsi_unlock(priv);
+      nxmutex_unlock(&priv->thlock);
 
       /* Were we awakened by some event that requires immediate action?
        *
@@ -3062,17 +3062,4 @@ void usbmsc_scsi_signal(FAR struct usbmsc_dev_s *priv)
     }
 
   leave_critical_section(flags);
-}
-
-/****************************************************************************
- * Name: usbmsc_scsi_lock
- *
- * Description:
- *   Get exclusive access to SCSI state data.
- *
- ****************************************************************************/
-
-int usbmsc_scsi_lock(FAR struct usbmsc_dev_s *priv)
-{
-  return nxsem_wait_uninterruptible(&priv->thlock);
 }

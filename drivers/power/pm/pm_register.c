@@ -60,9 +60,9 @@ int pm_register(FAR struct pm_callback_s *callbacks)
 
   /* Add the new entry to the end of the list of registered callbacks */
 
-  nxsem_wait(&g_pmglobals.regsem);
+  nxmutex_lock(&g_pmglobals.reglock);
   dq_addlast(&callbacks->entry, &g_pmglobals.registry);
-  nxsem_post(&g_pmglobals.regsem);
+  nxmutex_unlock(&g_pmglobals.reglock);
 
   return 0;
 }

@@ -53,7 +53,6 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/video/fb.h>
 
 #include "arm_internal.h"
@@ -143,7 +142,6 @@ struct am335x_lcd_dev_s
 
   struct am335x_panel_info_s panel;
 
-  sem_t exclsem;        /* Assure mutually exclusive access */
   nxgl_coord_t stride;  /* Width of framebuffer in bytes */
   size_t fbsize;        /* Size of the framebuffer allocation */
 };
@@ -586,7 +584,6 @@ int am335x_lcd_initialize(const struct am335x_panel_info_s *panel)
 
   /* Initialize the device state singleton */
 
-  nxsem_init(&priv->exclsem, 0, 1);
   memcpy(&priv->panel, panel, sizeof(struct am335x_panel_info_s));
 
   /* Save framebuffer information */

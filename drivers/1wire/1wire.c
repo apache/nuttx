@@ -138,7 +138,6 @@ static int onewire_pm_prepare(FAR struct pm_callback_s *cb, int domain,
   struct onewire_master_s *master =
       (struct onewire_master_s *)((char *)cb -
                                   offsetof(struct onewire_master_s, pm_cb));
-  int sval;
 
   /* Logic to prepare for a reduced power state goes here. */
 
@@ -153,13 +152,7 @@ static int onewire_pm_prepare(FAR struct pm_callback_s *cb, int domain,
 
       /* Check if exclusive lock for the bus master is held. */
 
-      if (nxsem_get_value(&master->devsem.sem, &sval) < 0)
-        {
-          DEBUGPANIC();
-          return -EINVAL;
-        }
-
-      if (sval <= 0)
+      if (nxrmutex_is_locked(&master->devlock)
         {
           /* Exclusive lock is held, do not allow entry to deeper PM
            * states.

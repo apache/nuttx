@@ -30,6 +30,7 @@
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/sensors/xen1210.h>
 
@@ -72,7 +73,7 @@ struct xen1210_dev_s
   /* Common fields */
 
   FAR struct xen1210_config_s *config; /* Board configuration data */
-  sem_t exclsem;                       /* Manages exclusive access to this structure */
+  mutex_t lock;                        /* Manages exclusive access to this structure */
   FAR struct spi_dev_s *spi;           /* Saved SPI driver instance */
 
   uint8_t status;                      /* See XEN1210_STAT_* definitions */

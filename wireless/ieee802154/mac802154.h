@@ -138,7 +138,7 @@ int mac802154_get_mhrlen(MACHANDLE mac,
 
 int mac802154_req_data(MACHANDLE mac,
                        FAR const struct ieee802154_frame_meta_s *meta,
-                       FAR struct iob_s *frame, bool allowinterrupt);
+                       FAR struct iob_s *frame);
 
 /****************************************************************************
  * Name: mac802154_req_purge

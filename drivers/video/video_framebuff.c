@@ -103,13 +103,13 @@ void video_framebuff_init(video_framebuff_t *fbuf)
   fbuf->vbuf_tail  = NULL;
   fbuf->vbuf_next  = NULL;
 
-  nxsem_init(&fbuf->lock_empty, 0, 1);
+  nxmutex_init(&fbuf->lock_empty);
 }
 
 void video_framebuff_uninit(video_framebuff_t *fbuf)
 {
   video_framebuff_realloc_container(fbuf, 0);
-  nxsem_destroy(&fbuf->lock_empty);
+  nxmutex_destroy(&fbuf->lock_empty);
 }
 
 int video_framebuff_realloc_container(video_framebuff_t *fbuf, int sz)
@@ -154,7 +154,7 @@ vbuf_container_t *video_framebuff_get_container(video_framebuff_t *fbuf)
 {
   vbuf_container_t *ret;
 
-  nxsem_wait_uninterruptible(&fbuf->lock_empty);
+  nxmutex_lock(&fbuf->lock_empty);
   ret = fbuf->vbuf_empty;
   if (ret)
     {
@@ -162,18 +162,17 @@ vbuf_container_t *video_framebuff_get_container(video_framebuff_t *fbuf)
       ret->next        = NULL;
     }
 
-  nxsem_post(&fbuf->lock_empty);
-
+  nxmutex_unlock(&fbuf->lock_empty);
   return ret;
 }
 
 void video_framebuff_free_container(video_framebuff_t *fbuf,
                                     vbuf_container_t  *cnt)
 {
-  nxsem_wait_uninterruptible(&fbuf->lock_empty);
+  nxmutex_lock(&fbuf->lock_empty);
   cnt->next = fbuf->vbuf_empty;
   fbuf->vbuf_empty = cnt;
-  nxsem_post(&fbuf->lock_empty);
+  nxmutex_unlock(&fbuf->lock_empty);
 }
 
 void video_framebuff_queue_container(video_framebuff_t *fbuf,

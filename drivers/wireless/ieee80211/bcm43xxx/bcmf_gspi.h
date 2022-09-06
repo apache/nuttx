@@ -31,6 +31,7 @@
 #include <stdbool.h>
 
 #include <nuttx/list.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/wireless/ieee80211/bcmf_gspi.h>
 
@@ -49,6 +50,29 @@
 #define BCMF_UPLOAD_TRANSFER_SIZE  64
 
 /* gSPI bus structure extension */
+
+/* Note:
+ * The structure referred to above must as its first item:
+ *
+ *  struct bcmf_bus_dev_s  bus;            --- Default bcmf bus structure
+ *
+ * The structure must also contain the following items:
+ *
+ *  int                    cur_chip_id;    --- Chip ID read from the card
+ *  struct bcmf_chip_data *chip;           --- Chip specific configuration
+ *
+ *  sem_t                  thread_signal;  --- Thread event semaphore
+ *
+ *  uint32_t       backplane_current_addr; --- Current F1 backplane base addr
+ *
+ *  uint8_t                max_seq;        --- Maximum TX sequence allowed
+ *  uint8_t                tx_seq;         --- TX sequence number (next)
+ *
+ *  mutex_t                queue_lock;    --- Lock for TX/RX/free queues
+ *  struct list_node       tx_queue;       --- Queue of frames to transmit
+ *  struct list_node       rx_queue;       --- Queue of frames for receiving
+ *  volatile int           tx_queue_count; --- Count of items in TX queue
+ */
 
 typedef struct bcmf_gspi_dev_s
 {
@@ -73,7 +97,7 @@ typedef struct bcmf_gspi_dev_s
   uint8_t max_seq;                 /* Maximum transmit sequence allowed */
   uint8_t tx_seq;                  /* Transmit sequence number (next) */
 
-  sem_t queue_mutex;               /* Lock for TX/RX/free queues */
+  mutex_t queue_lock;              /* Lock for TX/RX/free queues */
   struct list_node tx_queue;       /* Queue of frames to transmit */
   struct list_node rx_queue;       /* Queue of frames used to receive */
   volatile int tx_queue_count;     /* Count of items in TX queue */

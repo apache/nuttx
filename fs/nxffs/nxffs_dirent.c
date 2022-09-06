@@ -80,7 +80,7 @@ int nxffs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
       return -ENOMEM;
     }
 
-  ret = nxsem_wait(&volume->exclsem);
+  ret = nxmutex_lock(&volume->lock);
   if (ret < 0)
     {
       goto errout_with_ndir;
@@ -91,18 +91,18 @@ int nxffs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   if (relpath && relpath[0] != '\0')
     {
       ret = -ENOENT;
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 
   /* Set the offset to the offset to the first valid inode */
 
   ndir->offset = volume->inoffset;
-  nxsem_post(&volume->exclsem);
+  nxmutex_unlock(&volume->lock);
   *dir = &ndir->base;
   return 0;
 
-errout_with_semaphore:
-  nxsem_post(&volume->exclsem);
+errout_with_lock:
+  nxmutex_unlock(&volume->lock);
 
 errout_with_ndir:
   kmm_free(ndir);
@@ -150,7 +150,7 @@ int nxffs_readdir(FAR struct inode *mountpt,
 
   volume = mountpt->i_private;
   ndir = (FAR struct nxffs_dir_s *)dir;
-  ret = nxsem_wait(&volume->exclsem);
+  ret = nxmutex_lock(&volume->lock);
   if (ret < 0)
     {
       goto errout;
@@ -181,7 +181,7 @@ int nxffs_readdir(FAR struct inode *mountpt,
       ret = OK;
     }
 
-  nxsem_post(&volume->exclsem);
+  nxmutex_unlock(&volume->lock);
 
 errout:
   return ret;
@@ -209,7 +209,7 @@ int nxffs_rewinddir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
   /* Recover the file system state from the NuttX inode instance */
 
   volume = mountpt->i_private;
-  ret = nxsem_wait(&volume->exclsem);
+  ret = nxmutex_lock(&volume->lock);
   if (ret < 0)
     {
       goto errout;
@@ -220,7 +220,7 @@ int nxffs_rewinddir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
   ((FAR struct nxffs_dir_s *)dir)->offset = volume->inoffset;
   ret = OK;
 
-  nxsem_post(&volume->exclsem);
+  nxmutex_unlock(&volume->lock);
 
 errout:
   return ret;

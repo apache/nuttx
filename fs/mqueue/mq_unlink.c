@@ -138,7 +138,7 @@ int file_mq_unlink(FAR const char *mq_name)
    * functioning as a directory and the directory is not empty.
    */
 
-  ret = inode_semtake();
+  ret = inode_lock();
   if (ret < 0)
     {
       goto errout_with_inode;
@@ -147,7 +147,7 @@ int file_mq_unlink(FAR const char *mq_name)
   if (inode->i_child != NULL)
     {
       ret = -ENOTEMPTY;
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 
   /* Remove the old inode from the tree.  Because we hold a reference count
@@ -172,14 +172,14 @@ int file_mq_unlink(FAR const char *mq_name)
    * in-use.
    */
 
-  inode_semgive();
+  inode_unlock();
   mq_inode_release(inode);
   RELEASE_SEARCH(&desc);
   sched_unlock();
   return OK;
 
-errout_with_semaphore:
-  inode_semgive();
+errout_with_lock:
+  inode_unlock();
 
 errout_with_inode:
   inode_release(inode);

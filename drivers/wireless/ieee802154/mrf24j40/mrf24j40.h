@@ -30,7 +30,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/spi/spi.h>
 
@@ -122,7 +122,7 @@ struct mrf24j40_radio_s
   struct work_s csma_pollwork; /* For deferring poll work to the work queue */
   struct work_s gts_pollwork;  /* For deferring poll work to the work queue */
 
-  sem_t         exclsem;       /* Exclusive access to this struct */
+  mutex_t       lock;          /* Exclusive access to this struct */
 
   /* MAC Attributes */
 

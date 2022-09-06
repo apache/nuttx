@@ -44,6 +44,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/mutex.h>
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
@@ -188,7 +189,7 @@ struct mxt_dev_s
 #endif
 
   volatile bool event;             /* True: An unreported event is buffered */
-  sem_t devsem;                    /* Manages exclusive access to this structure */
+  mutex_t devlock;                 /* Manages exclusive access to this structure */
   sem_t waitsem;                   /* Used to wait for the availability of data */
   uint32_t frequency;              /* Current I2C frequency */
 
@@ -669,7 +670,7 @@ static inline int mxt_waitsample(FAR struct mxt_dev_s *priv)
    * run, but they cannot run yet because pre-emption is disabled.
    */
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
 
   /* Try to get the a sample... if we cannot, then wait on the semaphore
    * that is posted when new sample data is available.
@@ -694,7 +695,7 @@ static inline int mxt_waitsample(FAR struct mxt_dev_s *priv)
    * sample.  Interrupts and pre-emption will be re-enabled while we wait.
    */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
 
 errout:
   /* Then re-enable interrupts.  We might get interrupt here and there
@@ -969,17 +970,7 @@ static void mxt_worker(FAR void *arg)
 
   /* Get exclusive access to the MXT driver data structure */
 
-  do
-    {
-      ret = nxsem_wait_uninterruptible(&priv->devsem);
-
-      /* This would only fail if something canceled the worker thread?
-       * That is not expected.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -ECANCELED);
-    }
-  while (ret < 0);
+  nxmutex_lock(&priv->devlock);
 
   /* Loop, processing each message from the maXTouch */
 
@@ -992,7 +983,7 @@ static void mxt_worker(FAR void *arg)
       if (ret < 0)
         {
           ierr("ERROR: mxt_getmessage failed: %d\n", ret);
-          goto errout_with_semaphore;
+          goto errout_with_lock;
         }
 
       id = msg.id;
@@ -1054,11 +1045,11 @@ static void mxt_worker(FAR void *arg)
     }
   while (id != 0xff && retries < 16);
 
-errout_with_semaphore:
+errout_with_lock:
 
   /* Release our lock on the MXT device */
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
 
   /* Acknowledge and re-enable maXTouch interrupts */
 
@@ -1122,7 +1113,7 @@ static int mxt_open(FAR struct file *filep)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return ret;
@@ -1137,7 +1128,7 @@ static int mxt_open(FAR struct file *filep)
 
       ierr("ERROR: Too many opens: %d\n", priv->crefs);
       ret = -EMFILE;
-      goto errout_with_sem;
+      goto errout_with_lock;
     }
 
   /* When the reference increments to 1, this is the first open event
@@ -1152,7 +1143,7 @@ static int mxt_open(FAR struct file *filep)
       if (ret < 0)
         {
           ierr("ERROR: Failed to enable touch: %d\n", ret);
-          goto errout_with_sem;
+          goto errout_with_lock;
         }
 
       /* Clear any pending messages by reading all messages.  This will
@@ -1165,7 +1156,7 @@ static int mxt_open(FAR struct file *filep)
         {
           ierr("ERROR: mxt_flushmsgs failed: %d\n", ret);
           mxt_putobject(priv, MXT_TOUCH_MULTI_T9, MXT_TOUCH_CTRL, 0);
-          goto errout_with_sem;
+          goto errout_with_lock;
         }
 
       /* Enable touch interrupts */
@@ -1177,8 +1168,8 @@ static int mxt_open(FAR struct file *filep)
 
   priv->crefs = tmp;
 
-errout_with_sem:
-  nxsem_post(&priv->devsem);
+errout_with_lock:
+  nxmutex_unlock(&priv->devlock);
   return ret;
 }
 
@@ -1200,7 +1191,7 @@ static int mxt_close(FAR struct file *filep)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return ret;
@@ -1229,7 +1220,7 @@ static int mxt_close(FAR struct file *filep)
         }
     }
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return OK;
 }
 
@@ -1268,7 +1259,7 @@ static ssize_t mxt_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return ret;
@@ -1466,7 +1457,7 @@ static ssize_t mxt_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
 errout:
   sched_unlock();
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return ret;
 }
 
@@ -1489,7 +1480,7 @@ static int mxt_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return ret;
@@ -1521,7 +1512,7 @@ static int mxt_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return ret;
 }
 
@@ -1546,7 +1537,7 @@ static int mxt_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   /* Are we setting up the poll?  Or tearing it down? */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return ret;
@@ -1611,7 +1602,7 @@ static int mxt_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 errout:
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return ret;
 }
 
@@ -1868,9 +1859,9 @@ int mxt_register(FAR struct i2c_master_s *i2c,
   priv->i2c   = i2c;              /* Save the SPI device handle */
   priv->lower = lower;            /* Save the board configuration */
 
-  /* Initialize semaphores */
+  /* Initialize mutex & semaphores */
 
-  nxsem_init(&priv->devsem, 0, 1);  /* Initialize device semaphore */
+  nxmutex_init(&priv->devlock);     /* Initialize device mutex */
   nxsem_init(&priv->waitsem, 0, 0); /* Initialize event wait semaphore */
 
   /* The event wait semaphore is used for signaling and, hence, should not
@@ -1928,7 +1919,7 @@ errout_with_hwinit:
 errout_with_irq:
   MXT_DETACH(lower);
 errout_with_priv:
-  nxsem_destroy(&priv->devsem);
+  nxmutex_destroy(&priv->devlock);
   nxsem_destroy(&priv->waitsem);
   kmm_free(priv);
   return ret;

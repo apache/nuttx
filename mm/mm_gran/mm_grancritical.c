@@ -60,7 +60,7 @@ int gran_enter_critical(FAR struct gran_s *priv)
   priv->irqstate = enter_critical_section();
   return OK;
 #else
-  return nxsem_wait_uninterruptible(&priv->exclsem);
+  return nxmutex_lock(&priv->lock);
 #endif
 }
 
@@ -69,7 +69,7 @@ void gran_leave_critical(FAR struct gran_s *priv)
 #ifdef CONFIG_GRAN_INTR
   leave_critical_section(priv->irqstate);
 #else
-  nxsem_post(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
 #endif
 }
 

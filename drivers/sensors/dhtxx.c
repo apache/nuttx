@@ -35,7 +35,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/time.h>
 #include <nuttx/clock.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/sensors/dhtxx.h>
 
 /****************************************************************************
@@ -76,7 +76,7 @@
 struct dhtxx_dev_s
 {
   FAR struct dhtxx_config_s *config;
-  sem_t devsem;
+  mutex_t devlock;
   uint8_t raw_data[5];
 };
 
@@ -412,11 +412,11 @@ static int dhtxx_open(FAR struct file *filep)
   FAR struct dhtxx_dev_s  *priv  = inode->i_private;
   int ret;
 
-  /* Acquire the semaphore, wait the sampling time before sending anything to
+  /* Acquire the mutex, wait the sampling time before sending anything to
    * pass unstable state.
    */
 
-  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return ret;
@@ -428,7 +428,7 @@ static int dhtxx_open(FAR struct file *filep)
 
   /* Sensor ready. */
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return OK;
 }
 
@@ -459,7 +459,7 @@ static ssize_t dhtxx_read(FAR struct file *filep, FAR char *buffer,
 
   memset(priv->raw_data, 0u, sizeof(priv->raw_data));
 
-  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return (ssize_t)ret;
@@ -512,7 +512,7 @@ out:
 
   /* Sensor ready for new reading */
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return ret;
 }
 
@@ -560,6 +560,8 @@ int dhtxx_register(FAR const char *devpath,
     }
 
   priv->config = config;
+
+  nxmutex_init(&priv->devlock);
 
   /* Register the character driver */
 

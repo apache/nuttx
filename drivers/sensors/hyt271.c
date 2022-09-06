@@ -34,7 +34,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/signal.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/hyt271.h>
@@ -93,7 +93,7 @@ struct hyt271_dev_s
   struct hyt271_sensor_s sensor[HYT271_SENSOR_MAX]; /* Sensor types */
   FAR struct i2c_master_s *i2c;                     /* I2C interface */
   FAR struct hyt271_bus_s *bus;                     /* Bus power interface */
-  sem_t                   lock_measure_cycle;       /* Locks measure cycle */
+  mutex_t                 lock_measure_cycle;       /* Locks measure cycle */
   uint32_t                freq;                     /* I2C Frequency */
 #ifdef CONFIG_SENSORS_HYT271_POLL
   unsigned long           interval;                 /* Polling interval */
@@ -416,7 +416,7 @@ static int hyt271_change_addr(FAR struct hyt271_dev_s *dev, uint8_t addr)
    * change operation.
    */
 
-  ret = nxsem_wait(&dev->lock_measure_cycle);
+  ret = nxmutex_lock(&dev->lock_measure_cycle);
   if (ret < 0)
     {
       return ret;
@@ -517,11 +517,11 @@ static int hyt271_change_addr(FAR struct hyt271_dev_s *dev, uint8_t addr)
 
   dev->addr = addr;
 
-  nxsem_post(&dev->lock_measure_cycle);
+  nxmutex_unlock(&dev->lock_measure_cycle);
   return OK;
 
 err_unlock:
-  nxsem_post(&dev->lock_measure_cycle);
+  nxmutex_unlock(&dev->lock_measure_cycle);
   return ret;
 }
 
@@ -551,7 +551,7 @@ static int hyt271_measure_read(FAR struct hyt271_dev_s *dev,
    * read operation.
    */
 
-  ret = nxsem_wait(&dev->lock_measure_cycle);
+  ret = nxmutex_lock(&dev->lock_measure_cycle);
   if (ret < 0)
     {
       return ret;
@@ -588,12 +588,12 @@ static int hyt271_measure_read(FAR struct hyt271_dev_s *dev,
                buffer[2] << 8 | buffer[3];
   data->timestamp = hyt271_curtime();
 
-  nxsem_post(&dev->lock_measure_cycle);
+  nxmutex_unlock(&dev->lock_measure_cycle);
 
   return OK;
 
 err_unlock:
-  nxsem_post(&dev->lock_measure_cycle);
+  nxmutex_unlock(&dev->lock_measure_cycle);
   return ret;
 }
 
@@ -911,7 +911,7 @@ int hyt271_register(int devno, FAR struct i2c_master_s *i2c, uint8_t addr,
   priv->initial_read = false;
 #endif
 
-  nxsem_init(&priv->lock_measure_cycle, 0, 1);
+  nxmutex_init(&priv->lock_measure_cycle);
 #ifdef CONFIG_SENSORS_HYT271_POLL
   nxsem_init(&priv->run, 0, 0);
   nxsem_set_protocol(&priv->run, SEM_PRIO_NONE);
@@ -973,7 +973,7 @@ humi_err:
 temp_err:
   sensor_unregister(&priv->sensor[HYT271_SENSOR_TEMP].lower, devno);
 
-  nxsem_destroy(&priv->lock_measure_cycle);
+  nxmutex_destroy(&priv->lock_measure_cycle);
   kmm_free(priv);
   return ret;
 }

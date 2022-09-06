@@ -57,6 +57,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 
@@ -148,7 +149,7 @@ struct gd32_spidev_s
   uint32_t         spiclock;     /* Clocking for the SPI module */
   uint32_t         frequency;    /* Requested clock frequency */
   uint32_t         actual;       /* Actual clock frequency */
-  sem_t            exclsem;      /* Held while chip is selected for mutual exclusion */
+  mutex_t          lock;         /* Held while chip is selected for mutual exclusion */
   uint8_t          nbits;        /* Width of word in bits (8 to 16) */
   uint8_t          mode;         /* Mode 0,1,2,3 */
 #ifdef CONFIG_GD32F4_SPI_INTERRUPT
@@ -1096,11 +1097,11 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
 
   if (lock)
     {
-      ret = nxsem_wait_uninterruptible(&priv->exclsem);
+      ret = nxmutex_lock(&priv->lock);
     }
   else
     {
-      ret = nxsem_post(&priv->exclsem);
+      ret = nxmutex_unlock(&priv->lock);
     }
 
   return ret;
@@ -2111,9 +2112,9 @@ static void spi_bus_initialize(struct gd32_spidev_s *priv)
 
   spi_setfrequency((struct spi_dev_s *)priv, 400000);
 
-  /* Initialize the SPI semaphore that enforces mutually exclusive access */
+  /* Initialize the SPI lock that enforces mutually exclusive access */
 
-  nxsem_init(&priv->exclsem, 0, 1);
+  nxmutex_init(&priv->lock);
 
 #ifdef CONFIG_GD32F4_SPI_DMA
   /* Initialize the SPI semaphores that is used to wait for DMA completion.

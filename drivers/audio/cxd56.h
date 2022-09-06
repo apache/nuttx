@@ -269,7 +269,6 @@ struct cxd56_dev_s
   struct file             mq;               /* Message queue for receiving messages */
   char                    mqname[16];       /* Our message queue name */
   pthread_t               threadid;         /* ID of our thread */
-  sem_t                   pendsem;          /* Protect pendq */
 
   struct dq_queue_s       up_pendq;         /* Pending buffers from app to process */
   struct dq_queue_s       up_runq;          /* Buffers from app being played */

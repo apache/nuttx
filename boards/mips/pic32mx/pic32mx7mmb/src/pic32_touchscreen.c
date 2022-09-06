@@ -38,6 +38,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/input/touchscreen.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 
 #include <arch/board/board.h>
@@ -194,7 +195,7 @@ struct tc_dev_s
   volatile bool penchange;             /* An unreported event is buffered */
   uint16_t value;                      /* Partial sample value (Y+ or X-) */
   uint16_t newy;                       /* New, un-thresholded Y value */
-  sem_t devsem;                        /* Manages exclusive access to this structure */
+  mutex_t devlock;                     /* Manages exclusive access to this structure */
   sem_t waitsem;                       /* Used to wait for the availability of data */
   struct tc_sample_s sample;           /* Last sampled touch point data */
   struct work_s work;                  /* Supports the state machine delayed processing */
@@ -562,12 +563,12 @@ static int tc_waitsample(struct tc_dev_s *priv,
 
   sched_lock();
 
-  /* Now release the semaphore that manages mutually exclusive access to
+  /* Now release the mutex that manages mutually exclusive access to
    * the device structure.  This may cause other tasks to become ready to
    * run, but they cannot run yet because pre-emption is disabled.
    */
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
 
   /* Try to get the a sample... if we cannot, then wait on the semaphore
    * that is posted when new sample data is available.
@@ -587,12 +588,12 @@ static int tc_waitsample(struct tc_dev_s *priv,
         }
     }
 
-  /* Re-acquire the semaphore that manages mutually exclusive access to
+  /* Re-acquire the mutex that manages mutually exclusive access to
    * the device structure. We may have to wait here. But we have our sample.
    * Interrupts and pre-emption will be re-enabled while we wait.
    */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
 
 errout:
   /* Restore pre-emption.  We might get suspended here but that is okay
@@ -980,7 +981,7 @@ static int tc_open(struct file *filep)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return ret;
@@ -994,7 +995,7 @@ static int tc_open(struct file *filep)
       /* More than 255 opens; uint8_t overflows to zero */
 
       ret = -EMFILE;
-      goto errout_with_sem;
+      goto errout_with_lock;
     }
 
   /* When the reference increments to 1, this is the first open event
@@ -1005,8 +1006,8 @@ static int tc_open(struct file *filep)
 
   priv->crefs = tmp;
 
-errout_with_sem:
-  nxsem_post(&priv->devsem);
+errout_with_lock:
+  nxmutex_unlock(&priv->devlock);
   return ret;
 #else
   return OK;
@@ -1032,7 +1033,7 @@ static int tc_close(struct file *filep)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return ret;
@@ -1048,7 +1049,7 @@ static int tc_close(struct file *filep)
       priv->crefs--;
     }
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
 #endif
   return OK;
 }
@@ -1086,7 +1087,7 @@ static ssize_t tc_read(struct file *filep, char *buffer, size_t len)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return ret;
@@ -1170,7 +1171,7 @@ static ssize_t tc_read(struct file *filep, char *buffer, size_t len)
   ret = SIZEOF_TOUCH_SAMPLE_S(1);
 
 errout:
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return ret;
 }
 
@@ -1197,7 +1198,7 @@ static int tc_ioctl(struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return ret;
@@ -1214,7 +1215,7 @@ static int tc_ioctl(struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return ret;
 #endif
 }
@@ -1240,7 +1241,7 @@ static int tc_poll(struct file *filep, struct pollfd *fds,
 
   /* Are we setting up the poll?  Or tearing it down? */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return ret;
@@ -1305,7 +1306,7 @@ static int tc_poll(struct file *filep, struct pollfd *fds,
     }
 
 errout:
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return ret;
 }
 
@@ -1366,7 +1367,7 @@ int pic32mx_tsc_setup(int minor)
   /* Initialize the touchscreen device driver instance */
 
   memset(priv, 0, sizeof(struct tc_dev_s));
-  nxsem_init(&priv->devsem,  0, 1); /* Initialize device structure semaphore */
+  nxmutex_init(&priv->devlock);     /* Initialize device structure mutex */
   nxsem_init(&priv->waitsem, 0, 0); /* Initialize pen event wait semaphore */
 
   /* Register the device as an input device */
@@ -1398,7 +1399,7 @@ int pic32mx_tsc_setup(int minor)
   return OK;
 
 errout_with_priv:
-  nxsem_destroy(&priv->devsem);
+  nxmutex_destroy(&priv->devlock);
 #ifdef CONFIG_TOUCHSCREEN_MULTIPLE
   kmm_free(priv);
 #endif

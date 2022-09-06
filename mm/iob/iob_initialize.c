@@ -87,19 +87,22 @@ FAR struct iob_qentry_s *g_iob_qcommitted;
 
 /* Counting semaphores that tracks the number of free IOBs/qentries */
 
-sem_t g_iob_sem = SEM_INITIALIZER(CONFIG_IOB_NBUFFERS);
+sem_t g_iob_sem = NXSEM_INITIALIZER(CONFIG_IOB_NBUFFERS,
+                                    PRIOINHERIT_FLAGS_DISABLE);
 
 #if CONFIG_IOB_THROTTLE > 0
 /* Counts available I/O buffers when throttled */
 
-sem_t g_throttle_sem = SEM_INITIALIZER(CONFIG_IOB_NBUFFERS -
-                                       CONFIG_IOB_THROTTLE);
+sem_t g_throttle_sem = NXSEM_INITIALIZER(CONFIG_IOB_NBUFFERS -
+                                        CONFIG_IOB_THROTTLE,
+                                        PRIOINHERIT_FLAGS_DISABLE);
 #endif
 
 #if CONFIG_IOB_NCHAINS > 0
 /* Counts free I/O buffer queue containers */
 
-sem_t g_qentry_sem = SEM_INITIALIZER(CONFIG_IOB_NCHAINS);
+sem_t g_qentry_sem = NXSEM_INITIALIZER(CONFIG_IOB_NCHAINS,
+                                       PRIOINHERIT_FLAGS_DISABLE);
 #endif
 
 /****************************************************************************

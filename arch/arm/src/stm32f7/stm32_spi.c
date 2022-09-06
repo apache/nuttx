@@ -59,7 +59,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/power/pm.h>
 
@@ -203,7 +203,7 @@ struct stm32_spidev_s
   uint32_t         rxccr;        /* DMA control register for RX transfers */
 #endif
   bool             initialized;  /* Has SPI interface been initialized */
-  sem_t            exclsem;      /* Held while chip is selected for mutual exclusion */
+  mutex_t          lock;         /* Held while chip is selected for mutual exclusion */
   uint32_t         frequency;    /* Requested clock frequency */
   uint32_t         actual;       /* Actual clock frequency */
   int8_t           nbits;        /* Width of word in bits */
@@ -1238,11 +1238,11 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
 
   if (lock)
     {
-      ret = nxsem_wait_uninterruptible(&priv->exclsem);
+      ret = nxmutex_lock(&priv->lock);
     }
   else
     {
-      ret = nxsem_post(&priv->exclsem);
+      ret = nxmutex_unlock(&priv->lock);
     }
 
   return ret;
@@ -2061,7 +2061,6 @@ static int spi_pm_prepare(struct pm_callback_s *cb, int domain,
   struct stm32_spidev_s *priv =
       (struct stm32_spidev_s *)((char *)cb -
                                     offsetof(struct stm32_spidev_s, pm_cb));
-  int sval;
 
   /* Logic to prepare for a reduced power state goes here. */
 
@@ -2076,13 +2075,7 @@ static int spi_pm_prepare(struct pm_callback_s *cb, int domain,
 
       /* Check if exclusive lock for SPI bus is held. */
 
-      if (nxsem_get_value(&priv->exclsem, &sval) < 0)
-        {
-          DEBUGPANIC();
-          return -EINVAL;
-        }
-
-      if (sval <= 0)
+      if (nxmutex_is_locked(&priv->lock))
         {
           /* Exclusive lock is held, do not allow entry to deeper
            * PM states.
@@ -2160,9 +2153,9 @@ static void spi_bus_initialize(struct stm32_spidev_s *priv)
 
   spi_putreg(priv, STM32_SPI_CRCPR_OFFSET, 7);
 
-  /* Initialize the SPI semaphore that enforces mutually exclusive access. */
+  /* Initialize the SPI mutex that enforces mutually exclusive access. */
 
-  nxsem_init(&priv->exclsem, 0, 1);
+  nxmutex_init(&priv->lock);
 
 #ifdef CONFIG_STM32F7_SPI_DMA
   /* Initialize the SPI semaphores that is used to wait for DMA completion.

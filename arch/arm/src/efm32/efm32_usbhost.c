@@ -38,6 +38,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
 #include <nuttx/signal.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
@@ -250,7 +251,7 @@ struct efm32_usbhost_s
   volatile bool     connected; /* Connected to device */
   volatile bool     change;    /* Connection change */
   volatile bool     pscwait;   /* True: Thread is waiting for a port event */
-  sem_t             exclsem;   /* Support mutually exclusive access */
+  mutex_t           lock;      /* Support mutually exclusive access */
   sem_t             pscsem;    /* Semaphore to wait for a port event */
   struct efm32_ctrlinfo_s ep0; /* Root hub port EP0 description */
 
@@ -302,11 +303,6 @@ static inline void efm32_modifyreg(uint32_t addr, uint32_t clrbits,
 #else
 #  define efm32_pktdump(m,b,n)
 #endif
-
-/* Semaphores ***************************************************************/
-
-static int efm32_takesem(sem_t *sem);
-#define efm32_givesem(s) nxsem_post(s);
 
 /* Byte stream access helper functions **************************************/
 
@@ -744,20 +740,6 @@ static inline void efm32_modifyreg(uint32_t addr, uint32_t clrbits,
                                    uint32_t setbits)
 {
   efm32_putreg(addr, (((efm32_getreg(addr)) & ~clrbits) | setbits));
-}
-
-/****************************************************************************
- * Name: efm32_takesem
- *
- * Description:
- *   This is just a wrapper to handle the annoying behavior of semaphore
- *   waits that return due to the receipt of a signal.
- *
- ****************************************************************************/
-
-static int efm32_takesem(sem_t *sem)
-{
-  return nxsem_wait_uninterruptible(sem);
 }
 
 /****************************************************************************
@@ -1269,7 +1251,7 @@ static void efm32_chan_wakeup(struct efm32_usbhost_s *priv,
                                      USBHOST_VTRACE2_CHANWAKEUP_OUT,
                           chan->epno, chan->result);
 
-          efm32_givesem(&chan->waitsem);
+          nxsem_post(chan->waitsem);
           chan->waiter = false;
         }
 
@@ -2965,7 +2947,7 @@ static void efm32_gint_connected(struct efm32_usbhost_s *priv)
       priv->smstate = SMSTATE_ATTACHED;
       if (priv->pscwait)
         {
-          efm32_givesem(&priv->pscsem);
+          nxsem_post(&priv->pscsem);
           priv->pscwait = false;
         }
     }
@@ -3012,7 +2994,7 @@ static void efm32_gint_disconnected(struct efm32_usbhost_s *priv)
 
       if (priv->pscwait)
         {
-          efm32_givesem(&priv->pscsem);
+          nxsem_post(&priv->pscsem);
           priv->pscwait = false;
         }
     }
@@ -3918,7 +3900,7 @@ static int efm32_wait(struct usbhost_connection_s *conn,
       /* Wait for the next connection event */
 
       priv->pscwait = true;
-      ret = efm32_takesem(&priv->pscsem);
+      ret = nxsem_wait_uninterruptible(&priv->pscsem);
       if (ret < 0)
         {
           return ret;
@@ -4099,7 +4081,7 @@ static int efm32_ep0configure(struct usbhost_driver_s *drvr,
    * structures.
    */
 
-  ret = efm32_takesem(&priv->exclsem);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -4123,7 +4105,7 @@ static int efm32_ep0configure(struct usbhost_driver_s *drvr,
 
   efm32_chan_configure(priv, ep0info->inndx);
 
-  efm32_givesem(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
   return OK;
 }
 
@@ -4166,7 +4148,7 @@ static int efm32_epalloc(struct usbhost_driver_s *drvr,
    * structures.
    */
 
-  ret = efm32_takesem(&priv->exclsem);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -4187,7 +4169,7 @@ static int efm32_epalloc(struct usbhost_driver_s *drvr,
       ret = efm32_xfrep_alloc(priv, epdesc, ep);
     }
 
-  efm32_givesem(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -4220,7 +4202,7 @@ static int efm32_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   /* We must have exclusive access to the USB host hardware and structures */
 
-  ret = efm32_takesem(&priv->exclsem);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -4252,7 +4234,7 @@ static int efm32_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
       kmm_free(ctrlep);
     }
 
-  efm32_givesem(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
   return OK;
 }
 
@@ -4490,7 +4472,7 @@ static int efm32_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
    * structures.
    */
 
-  ret = efm32_takesem(&priv->exclsem);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -4534,7 +4516,7 @@ static int efm32_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
             {
               /* All success transactions exit here */
 
-              efm32_givesem(&priv->exclsem);
+              nxmutex_unlock(&priv->lock);
               return OK;
             }
 
@@ -4549,7 +4531,7 @@ static int efm32_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   /* All failures exit here after all retries and timeouts are exhausted */
 
-  efm32_givesem(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
   return -ETIMEDOUT;
 }
 
@@ -4577,7 +4559,7 @@ static int efm32_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   /* We must have exclusive access to the USB host hardware and structures */
 
-  ret = efm32_takesem(&priv->exclsem);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -4625,7 +4607,7 @@ static int efm32_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                 {
                   /* All success transactins exit here */
 
-                  efm32_givesem(&priv->exclsem);
+                  nxmutex_unlock(&priv->lock);
                   return OK;
                 }
 
@@ -4641,7 +4623,7 @@ static int efm32_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   /* All failures exit here after all retries and timeouts are exhausted */
 
-  efm32_givesem(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
   return -ETIMEDOUT;
 }
 
@@ -4698,7 +4680,7 @@ static ssize_t efm32_transfer(struct usbhost_driver_s *drvr,
 
   /* We must have exclusive access to the USB host hardware and structures */
 
-  ret = efm32_takesem(&priv->exclsem);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return (ssize_t)ret;
@@ -4715,7 +4697,7 @@ static ssize_t efm32_transfer(struct usbhost_driver_s *drvr,
       nbytes = efm32_out_transfer(priv, chidx, buffer, buflen);
     }
 
-  efm32_givesem(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
   return nbytes;
 }
 
@@ -4770,7 +4752,7 @@ static int efm32_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   /* We must have exclusive access to the USB host hardware and structures */
 
-  ret = efm32_takesem(&priv->exclsem);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -4787,7 +4769,7 @@ static int efm32_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
       ret = efm32_out_asynch(priv, chidx, buffer, buflen, callback, arg);
     }
 
-  efm32_givesem(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 #endif /* CONFIG_USBHOST_ASYNCH */
@@ -4846,7 +4828,7 @@ static int efm32_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
       /* Wake'em up! */
 
-      efm32_givesem(&chan->waitsem);
+      nxsem_post(&chan->waitsem);
       chan->waiter = false;
     }
 
@@ -4923,7 +4905,7 @@ static int efm32_connect(struct usbhost_driver_s *drvr,
   if (priv->pscwait)
     {
       priv->pscwait = false;
-      efm32_givesem(&priv->pscsem);
+      nxsem_post(&priv->pscsem);
     }
 
   leave_critical_section(flags);
@@ -5277,10 +5259,10 @@ static inline void efm32_sw_initialize(struct efm32_usbhost_s *priv)
 
   usbhost_devaddr_initialize(&priv->rhport);
 
-  /* Initialize semaphores */
+  /* Initialize semaphores & mutex */
 
   nxsem_init(&priv->pscsem,  0, 0);
-  nxsem_init(&priv->exclsem, 0, 1);
+  nxmutex_init(&priv->lock);
 
   /* The pscsem semaphore is used for signaling and, hence, should not have
    * priority inheritance enabled.

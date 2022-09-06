@@ -73,7 +73,7 @@ int register_mtddriver(FAR const char *path, FAR struct mtd_dev_s *mtd,
    * valid data.
    */
 
-  ret = inode_semtake();
+  ret = inode_lock();
   if (ret < 0)
     {
       return ret;
@@ -93,7 +93,7 @@ int register_mtddriver(FAR const char *path, FAR struct mtd_dev_s *mtd,
       ret             = OK;
     }
 
-  inode_semgive();
+  inode_unlock();
   return ret;
 }
 

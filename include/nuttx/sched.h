@@ -460,7 +460,7 @@ struct task_group_s
 
                               /* Pthread join Info:                         */
 
-  sem_t tg_joinsem;               /* Mutually exclusive access to join data */
+  sem_t tg_joinlock;              /* Mutually exclusive access to join data */
   FAR struct join_s *tg_joinhead; /* Head of a list of join data            */
   FAR struct join_s *tg_jointail; /* Tail of a list of join data            */
 #endif

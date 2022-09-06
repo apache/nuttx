@@ -323,13 +323,13 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
 
         /* Queue frame and notify network layer frame is available */
 
-        if (nxsem_wait_uninterruptible(&ibus->queue_mutex) < 0)
+        if (nxmutex_lock(&ibus->queue_lock) < 0)
           {
             DEBUGPANIC();
           }
 
         list_add_tail(&ibus->rx_queue, &iframe->list_entry);
-        nxsem_post(&ibus->queue_mutex);
+        nxmutex_unlock(&ibus->queue_lock);
 
         bcmf_netdev_notify_rx(priv);
 
@@ -376,14 +376,14 @@ int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv)
       return -EAGAIN;
     }
 
-  if (nxsem_wait_uninterruptible(&ibus->queue_mutex) < 0)
+  if (nxmutex_lock(&ibus->queue_lock) < 0)
     {
       DEBUGPANIC();
     }
 
   iframe = list_remove_head_type(&ibus->tx_queue, bcmf_interface_frame_t,
                                  list_entry);
-  nxsem_post(&ibus->queue_mutex);
+  nxmutex_unlock(&ibus->queue_lock);
 
   header = (struct bcmf_sdpcm_header *)iframe->header.base;
 
@@ -448,14 +448,14 @@ int bcmf_sdpcm_queue_frame(FAR struct bcmf_dev_s *priv,
 
   /* Add frame in tx queue */
 
-  if (nxsem_wait_uninterruptible(&ibus->queue_mutex) < 0)
+  if (nxmutex_lock(&ibus->queue_lock) < 0)
     {
       DEBUGPANIC();
     }
 
   list_add_tail(&ibus->tx_queue, &iframe->list_entry);
 
-  nxsem_post(&ibus->queue_mutex);
+  nxmutex_unlock(&ibus->queue_lock);
 
   /* Notify bcmf thread tx frame is ready */
 
@@ -511,7 +511,7 @@ struct bcmf_frame_s *bcmf_sdpcm_get_rx_frame(FAR struct bcmf_dev_s *priv)
   bcmf_interface_frame_t *iframe;
   FAR bcmf_interface_dev_t *ibus = (FAR bcmf_interface_dev_t *)priv->bus;
 
-  if (nxsem_wait_uninterruptible(&ibus->queue_mutex) < 0)
+  if (nxmutex_lock(&ibus->queue_lock) < 0)
     {
       DEBUGPANIC();
     }
@@ -520,7 +520,7 @@ struct bcmf_frame_s *bcmf_sdpcm_get_rx_frame(FAR struct bcmf_dev_s *priv)
                                  bcmf_interface_frame_t,
                                  list_entry);
 
-  nxsem_post(&ibus->queue_mutex);
+  nxmutex_unlock(&ibus->queue_lock);
 
   if (iframe == NULL)
     {

@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include <time.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 
 /****************************************************************************
@@ -44,7 +45,7 @@
 
 struct altmdm_sys_lock_s
 {
-  sem_t sem;
+  mutex_t lock;
 };
 
 struct altmdm_sys_csem_s

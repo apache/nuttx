@@ -45,7 +45,7 @@
  *
  *   NOTES:
  *     (1) size is the whole chunk size (payload and header)
- *     (2) the caller must hold the MM semaphore.
+ *     (2) the caller must hold the MM mutex.
  *
  ****************************************************************************/
 

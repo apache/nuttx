@@ -151,7 +151,7 @@ static int nxterm_close(FAR struct file *filep)
 
   /* Get exclusive access */
 
-  ret = nxterm_semwait(priv);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -166,7 +166,7 @@ static int nxterm_close(FAR struct file *filep)
     {
       /* Yes.. Unregister the terminal device */
 
-      nxterm_sempost(priv);
+      nxmutex_unlock(&priv->lock);
       nxterm_unregister(priv);
       return OK;
     }
@@ -177,7 +177,7 @@ static int nxterm_close(FAR struct file *filep)
       priv->orefs--;
     }
 
-  nxterm_sempost(priv);
+  nxmutex_unlock(&priv->lock);
 #endif
 
   return OK;
@@ -203,7 +203,7 @@ static ssize_t nxterm_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Get exclusive access */
 
-  ret = nxterm_semwait(priv);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -292,7 +292,7 @@ static ssize_t nxterm_write(FAR struct file *filep, FAR const char *buffer,
   /* Show the cursor at its new position */
 
   nxterm_showcursor(priv);
-  nxterm_sempost(priv);
+  nxmutex_unlock(&priv->lock);
   return (ssize_t)buflen;
 }
 
@@ -328,7 +328,7 @@ static int nxterm_unlink(FAR struct inode *inode)
 
   /* Get exclusive access */
 
-  ret = nxterm_semwait(priv);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -348,12 +348,12 @@ static int nxterm_unlink(FAR struct inode *inode)
     {
       /* No.. Unregister the terminal device now */
 
-      nxterm_sempost(priv);
+      nxmutex_unlock(&priv->lock);
       nxterm_unregister(priv);
       return OK;
     }
 
-  nxterm_sempost(priv);
+  nxmutex_unlock(&priv->lock);
   return OK;
 }
 #endif

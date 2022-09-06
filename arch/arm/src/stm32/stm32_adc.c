@@ -41,7 +41,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/analog/adc.h>
 #include <nuttx/analog/ioctl.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 
 #include "arm_internal.h"
 #include "chip.h"
@@ -379,7 +379,7 @@
 struct adccmn_data_s
 {
   uint8_t refcount; /* How many ADC instances are currently in use */
-  sem_t   lock;     /* Exclusive access to common ADC data */
+  mutex_t lock;     /* Exclusive access to common ADC data */
 };
 #endif
 
@@ -495,10 +495,6 @@ static void tim_putreg(struct stm32_dev_s *priv, int offset,
 static void tim_modifyreg(struct stm32_dev_s *priv, int offset,
                           uint16_t clrbits, uint16_t setbits);
 static void tim_dumpregs(struct stm32_dev_s *priv, const char *msg);
-#endif
-
-#ifdef HAVE_ADC_CMN_DATA
-static int  adccmn_lock(struct stm32_dev_s *priv, bool lock);
 #endif
 
 static void adc_rccreset(struct stm32_dev_s *priv, bool reset);
@@ -1799,28 +1795,6 @@ static void adc_inj_startconv(struct stm32_dev_s *priv, bool enable)
 #endif /* ADC_HAVE_INJECTED */
 
 /****************************************************************************
- * Name: adccmn_lock
- ****************************************************************************/
-
-#ifdef HAVE_ADC_CMN_DATA
-static int adccmn_lock(struct stm32_dev_s *priv, bool lock)
-{
-  int ret;
-
-  if (lock)
-    {
-      ret = nxsem_wait_uninterruptible(&priv->cmn->lock);
-    }
-  else
-    {
-      ret = nxsem_post(&priv->cmn->lock);
-    }
-
-  return ret;
-}
-#endif
-
-/****************************************************************************
  * Name: adc_rccreset
  *
  * Description:
@@ -2833,7 +2807,7 @@ static void adc_reset(struct adc_dev_s *dev)
   /* Only if this is the first initialzied ADC instance in the ADC block */
 
 #ifdef HAVE_ADC_CMN_DATA
-  if (adccmn_lock(priv, true) < 0)
+  if (nxmutex_lock(&priv->cmn->lock) < 0)
     {
       goto out;
     }
@@ -2851,7 +2825,7 @@ static void adc_reset(struct adc_dev_s *dev)
     }
 
 #ifdef HAVE_ADC_CMN_DATA
-  adccmn_lock(priv, false);
+  nxmutex_unlock(&priv->cmn->lock);
 #endif
 
 out:
@@ -2963,7 +2937,7 @@ static int adc_setup(struct adc_dev_s *dev)
 #ifdef HAVE_ADC_CMN_DATA
   /* Increase instances counter */
 
-  ret = adccmn_lock(priv, true);
+  ret = nxmutex_lock(&priv->cmn->lock);
   if (ret < 0)
     {
       return ret;
@@ -2982,7 +2956,7 @@ static int adc_setup(struct adc_dev_s *dev)
 
 #ifdef HAVE_ADC_CMN_DATA
   priv->cmn->refcount += 1;
-  adccmn_lock(priv, false);
+  nxmutex_unlock(&priv->cmn->lock);
 #endif
 
   /* The ADC device is ready */
@@ -3032,7 +3006,7 @@ static void adc_shutdown(struct adc_dev_s *dev)
 #endif
 
 #ifdef HAVE_ADC_CMN_DATA
-  if (adccmn_lock(priv, true) < 0)
+  if (nxmutex_lock(&priv->cmn->lock) < 0)
     {
       return;
     }
@@ -3076,7 +3050,7 @@ static void adc_shutdown(struct adc_dev_s *dev)
       priv->cmn->refcount -= 1;
     }
 
-  adccmn_lock(priv, false);
+  nxmutex_unlock(&priv->cmn->lock);
 #endif
 }
 
@@ -4805,7 +4779,7 @@ struct adc_dev_s *stm32_adcinitialize(int intf, const uint8_t *chanlist,
    *          the ADC block.
    */
 
-  nxsem_init(&priv->cmn->lock, 0, 1);
+  nxmutex_init(&priv->cmn->lock);
 #endif
 
   return dev;

@@ -60,6 +60,7 @@
 #include <errno.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/mutex.h>
 
 #include "libc.h"
 
@@ -324,8 +325,8 @@ static int g_lcl_isset;
 static int g_gmt_isset;
 static FAR struct state_s *g_lcl_ptr;
 static FAR struct state_s *g_gmt_ptr;
-static sem_t g_lcl_sem = SEM_INITIALIZER(1);
-static sem_t g_gmt_sem = SEM_INITIALIZER(1);
+static mutex_t g_lcl_lock = NXMUTEX_INITIALIZER;
+static mutex_t g_gmt_lock = NXMUTEX_INITIALIZER;
 
 /* Section 4.12.3 of X3.159-1989 requires that
  *    Except for the strftime function, these functions [asctime,
@@ -416,28 +417,6 @@ static int  tzparse(FAR const char *name, FAR struct state_s *sp,
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-static void tz_semtake(FAR sem_t *sem)
-{
-  int errcode = 0;
-  int ret;
-
-  do
-    {
-      ret = _SEM_WAIT(sem);
-      if (ret < 0)
-        {
-          errcode = _SEM_ERRNO(ret);
-          DEBUGASSERT(errcode == EINTR || errcode == ECANCELED);
-        }
-    }
-  while (ret < 0 && errcode == EINTR);
-}
-
-static void tz_semgive(FAR sem_t *sem)
-{
-  DEBUGVERIFY(_SEM_POST(sem));
-}
 
 static int_fast32_t detzcode(FAR const char *codep)
 {
@@ -1795,7 +1774,7 @@ static FAR struct tm *gmtsub(FAR const time_t *timep,
         }
 #endif
 
-      tz_semtake(&g_gmt_sem);
+      nxmutex_lock(&g_gmt_lock);
       if (!g_gmt_isset)
         {
           g_gmt_ptr = lib_malloc(sizeof *g_gmt_ptr);
@@ -1806,7 +1785,7 @@ static FAR struct tm *gmtsub(FAR const time_t *timep,
             }
         }
 
-      tz_semgive(&g_gmt_sem);
+      nxmutex_unlock(&g_gmt_lock);
     }
 
   tmp->tm_zone = GMT;
@@ -2513,7 +2492,7 @@ void tzset(void)
     }
 #endif
 
-  tz_semtake(&g_lcl_sem);
+  nxmutex_lock(&g_lcl_lock);
   name = getenv("TZ");
   if (name == NULL)
     {
@@ -2565,7 +2544,7 @@ void tzset(void)
 tzname:
   settzname();
 out:
-  tz_semgive(&g_lcl_sem);
+  nxmutex_unlock(&g_lcl_lock);
 }
 
 FAR struct tm *localtime(FAR const time_t *timep)

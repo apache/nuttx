@@ -46,7 +46,7 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 
 #include "rp2040_flash_mtd.h"
 #include "rp2040_rom.h"
@@ -103,7 +103,7 @@
 typedef struct rp2040_flash_dev_s
 {
   struct mtd_dev_s mtd_dev;                 /* Embedded mdt_dev structure */
-  sem_t            sem;                     /* file access serialization  */
+  mutex_t          lock;                    /* file access serialization  */
   uint32_t         boot_2[BOOT_2_SIZE / 4]; /* RAM copy of boot_2         */
 } rp2040_flash_dev_t;
 
@@ -256,8 +256,7 @@ static int     rp2040_flash_erase(struct mtd_dev_s *dev,
          nblocks,
          FLASH_BLOCK_SIZE * nblocks);
 
-  ret = nxsem_wait(&(rp_dev->sem));
-
+  ret = nxmutex_lock(&rp_dev->lock);
   if (ret < 0)
     {
       return ret;
@@ -280,8 +279,7 @@ static int     rp2040_flash_erase(struct mtd_dev_s *dev,
 
   ret = nblocks;
 
-  nxsem_post(&(rp_dev->sem));
-
+  nxmutex_unlock(&rp_dev->lock);
   return ret;
 }
 
@@ -299,8 +297,7 @@ static ssize_t rp2040_flash_block_read(struct mtd_dev_s *dev,
   int                 length;
   int                 ret   = OK;
 
-  ret = nxsem_wait(&(rp_dev->sem));
-
+  ret = nxmutex_lock(&rp_dev->lock);
   if (ret < 0)
     {
       return ret;
@@ -325,8 +322,7 @@ static ssize_t rp2040_flash_block_read(struct mtd_dev_s *dev,
 
   /* Update the file position */
 
-  nxsem_post(&(rp_dev->sem));
-
+  nxmutex_unlock(&rp_dev->lock);
   return nblocks;
 }
 
@@ -341,10 +337,9 @@ static ssize_t rp2040_flash_block_write(struct mtd_dev_s *dev,
 {
   rp2040_flash_dev_t *rp_dev = (rp2040_flash_dev_t *) dev;
   irqstate_t          flags;
-  int                 ret   = OK;
+  int                 ret;
 
-  ret = nxsem_wait(&(rp_dev->sem));
-
+  ret = nxmutex_lock(&rp_dev->lock);
   if (ret < 0)
     {
       return ret;
@@ -385,8 +380,7 @@ static ssize_t rp2040_flash_block_write(struct mtd_dev_s *dev,
 
   ret = nblocks;
 
-  nxsem_post(&(rp_dev->sem));
-
+  nxmutex_unlock(&rp_dev->lock);
   return ret;
 }
 
@@ -394,17 +388,16 @@ static ssize_t rp2040_flash_block_write(struct mtd_dev_s *dev,
  * Name: rp2040_flash_byte_read
  ****************************************************************************/
 
-static ssize_t rp2040_flash_byte_read  (struct mtd_dev_s *dev,
-                                        off_t             offset,
-                                        size_t            nbytes,
-                                        uint8_t          *buffer)
+static ssize_t rp2040_flash_byte_read(struct mtd_dev_s *dev,
+                                      off_t             offset,
+                                      size_t            nbytes,
+                                      uint8_t          *buffer)
 {
-  rp2040_flash_dev_t *rp_dev = (rp2040_flash_dev_t *) dev;
+  rp2040_flash_dev_t *rp_dev = (rp2040_flash_dev_t *)dev;
   int                 length;
   int                 ret   = OK;
 
-  ret = nxsem_wait(&(rp_dev->sem));
-
+  ret = nxmutex_lock(&rp_dev->lock);
   if (ret < 0)
     {
       return ret;
@@ -437,8 +430,7 @@ static ssize_t rp2040_flash_byte_read  (struct mtd_dev_s *dev,
 
   /* Update the file position */
 
-  nxsem_post(&(rp_dev->sem));
-
+  nxmutex_unlock(&rp_dev->lock);
   return length;
 }
 
@@ -511,7 +503,7 @@ struct mtd_dev_s *rp2040_flash_mtd_initialize(void)
 
   initialized = true;
 
-  nxsem_init(&(my_dev.sem), 0, 1);
+  nxmutex_init(&my_dev.lock);
 
   if (FLASH_BLOCK_COUNT < 4)
     {

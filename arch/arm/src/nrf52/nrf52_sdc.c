@@ -32,6 +32,7 @@
 #include <nuttx/wireless/bluetooth/bt_driver.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/mutex.h>
 #include <arch/armv7-m/nvicpri.h>
 #include <arch/nrf52/nrf52_irq.h>
 #include <nuttx/wqueue.h>
@@ -102,7 +103,7 @@ struct nrf52_sdc_dev_s
   uint8_t mempool[MEMPOOL_SIZE];
   uint8_t msg_buffer[HCI_MSG_BUFFER_MAX_SIZE];
 
-  sem_t exclsem;
+  mutex_t lock;
   struct work_s work;
 };
 
@@ -204,7 +205,7 @@ static int bt_hci_send(struct bt_driver_s *btdev,
 
       /* Ensure non-concurrent access to SDC operations */
 
-      nxsem_wait_uninterruptible(&g_sdc_dev.exclsem);
+      nxmutex_lock(&g_sdc_dev.lock);
 
       if (type == BT_CMD)
         {
@@ -215,8 +216,7 @@ static int bt_hci_send(struct bt_driver_s *btdev,
           ret = sdc_hci_data_put(data);
         }
 
-      nxsem_post(&g_sdc_dev.exclsem);
-
+      nxmutex_unlock(&g_sdc_dev.lock);
       if (ret >= 0)
         {
           ret = len;
@@ -258,9 +258,9 @@ static void low_prio_worker(void *arg)
    * internally when required.
    */
 
-  nxsem_wait_uninterruptible(&g_sdc_dev.exclsem);
+  nxmutex_lock(&g_sdc_dev.lock);
   mpsl_low_priority_process();
-  nxsem_post(&g_sdc_dev.exclsem);
+  nxmutex_unlock(&g_sdc_dev.lock);
 }
 
 /****************************************************************************
@@ -274,9 +274,9 @@ static void on_hci_worker(void *arg)
    * worker
    */
 
-  nxsem_wait_uninterruptible(&g_sdc_dev.exclsem);
+  nxmutex_lock(&g_sdc_dev.lock);
   on_hci();
-  nxsem_post(&g_sdc_dev.exclsem);
+  nxmutex_unlock(&g_sdc_dev.lock);
 }
 
 /****************************************************************************
@@ -502,7 +502,7 @@ int nrf52_sdc_initialize(void)
   /* Initialize device data */
 
   memset(&g_sdc_dev, 0, sizeof(g_sdc_dev));
-  nxsem_init(&g_sdc_dev.exclsem, 0, 1);
+  nxmutex_init(&g_sdc_dev.lock);
 
   /* Register interrupt handler for normal-priority events. SWI5 will be
    * used by MPSL to delegate low-priority work

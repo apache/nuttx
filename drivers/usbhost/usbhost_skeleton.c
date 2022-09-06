@@ -35,7 +35,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/arch.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/wqueue.h>
 
 #include <nuttx/usb/usb.h>
@@ -89,7 +89,7 @@ struct usbhost_state_s
   volatile bool           disconnected; /* TRUE: Device has been disconnected */
   uint8_t                 ifno;         /* Interface number */
   int16_t                 crefs;        /* Reference count on the driver instance */
-  sem_t                   exclsem;      /* Used to maintain mutual exclusive access */
+  mutex_t                 lock;         /* Used to maintain mutual exclusive access */
   struct work_s           work;         /* For interacting with the worker thread */
   FAR uint8_t            *tbuffer;      /* The allocated transfer buffer */
   size_t                  tbuflen;      /* Size of the allocated transfer buffer */
@@ -100,12 +100,6 @@ struct usbhost_state_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
-
-/* Semaphores */
-
-static int usbhost_takesem(FAR sem_t *sem);
-static void usbhost_forcetake(FAR sem_t *sem);
-#define usbhost_givesem(s) nxsem_post(s);
 
 /* Memory allocation services */
 
@@ -192,48 +186,6 @@ static uint32_t g_devinuse;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: usbhost_takesem
- *
- * Description:
- *   This is just a wrapper to handle the annoying behavior of semaphore
- *   waits that return due to the receipt of a signal.
- *
- ****************************************************************************/
-
-static int usbhost_takesem(FAR sem_t *sem)
-{
-  return nxsem_wait_uninterruptible(sem);
-}
-
-/****************************************************************************
- * Name: usbhost_forcetake
- *
- * Description:
- *   This is just another wrapper but this one continues even if the thread
- *   is canceled.  This must be done in certain conditions where were must
- *   continue in order to clean-up resources.
- *
- ****************************************************************************/
-
-static void usbhost_forcetake(FAR sem_t *sem)
-{
-  int ret;
-
-  do
-    {
-      ret = nxsem_wait_uninterruptible(sem);
-
-      /* The only expected error would -ECANCELED meaning that the
-       * parent thread has been canceled.  We have to continue and
-       * terminate the poll in this case.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -ECANCELED);
-    }
-  while (ret < 0);
-}
 
 /****************************************************************************
  * Name: usbhost_allocclass
@@ -680,7 +632,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
 
   if (ret >= 0)
     {
-      ret = usbhost_takesem(&priv->exclsem);
+      ret = nxmutex_lock(&priv->lock);
       if (ret < 0)
         {
           return ert;
@@ -708,8 +660,9 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
 
           uinfo("Successfully initialized\n");
           priv->crefs--;
-          usbhost_givesem(&priv->exclsem);
         }
+
+      nxmutex_unlock(&priv->lock);
     }
 
   return ret;
@@ -921,11 +874,11 @@ static FAR struct usbhost_class_s *
 
           priv->crefs = 1;
 
-          /* Initialize semaphores
+          /* Initialize mutex
            * (this works okay in the interrupt context)
            */
 
-          nxsem_init(&priv->exclsem, 0, 1);
+          nxmutex_init(&priv->lock);
 
           /* Return the instance of the USB class driver */
 

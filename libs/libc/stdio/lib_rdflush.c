@@ -65,7 +65,7 @@ int lib_rdflush(FAR FILE *stream)
 
   /* Get exclusive access to the stream */
 
-  lib_take_semaphore(stream);
+  lib_take_lock(stream);
 
   /* If the buffer is currently being used for read access, then discard all
    * of the read-ahead data. We do not support concurrent buffered read/write
@@ -98,12 +98,12 @@ int lib_rdflush(FAR FILE *stream)
 
       if (fseek(stream, -rdoffset, SEEK_CUR) < 0)
         {
-          lib_give_semaphore(stream);
+          lib_give_lock(stream);
           return ERROR;
         }
     }
 
-  lib_give_semaphore(stream);
+  lib_give_lock(stream);
   return OK;
 }
 

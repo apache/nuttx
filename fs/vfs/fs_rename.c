@@ -170,7 +170,7 @@ next_subdir:
    * of  zero.
    */
 
-  ret = inode_semtake();
+  ret = inode_lock();
   if (ret < 0)
     {
       goto errout;
@@ -185,7 +185,7 @@ next_subdir:
        */
 
       ret = -EEXIST;
-      goto errout_with_sem;
+      goto errout_with_lock;
     }
 
   /* Copy the inode state from the old inode to the newly allocated inode */
@@ -230,7 +230,7 @@ next_subdir:
       /* Remove the new node we just recreated */
 
       inode_remove(newpath);
-      goto errout_with_sem;
+      goto errout_with_lock;
     }
 
   /* Remove all of the children from the unlinked inode */
@@ -239,8 +239,8 @@ next_subdir:
   oldinode->i_parent = NULL;
   ret = OK;
 
-errout_with_sem:
-  inode_semgive();
+errout_with_lock:
+  inode_unlock();
 
 errout:
   RELEASE_SEARCH(&newdesc);

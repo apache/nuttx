@@ -74,7 +74,7 @@ FAR struct nxterm_state_s *
   priv->minor   = minor;
   memcpy(&priv->wndo, wndo, sizeof(struct nxterm_window_s));
 
-  nxsem_init(&priv->exclsem, 0, 1);
+  nxmutex_init(&priv->lock);
 #ifdef CONFIG_DEBUG_GRAPHICS
   priv->holder  = NO_HOLDER;
 #endif

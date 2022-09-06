@@ -29,7 +29,7 @@
 #include <debug.h>
 #include <semaphore.h>
 
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/crypto/crypto.h>
 
 #include "riscv_internal.h"
@@ -54,7 +54,7 @@
  ****************************************************************************/
 
 static bool g_aes_inited;
-static sem_t g_aes_sem = SEM_INITIALIZER(1);
+static mutex_t g_aes_lock = NXMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Private Functions
@@ -188,7 +188,7 @@ int esp32c3_aes_ecb_cypher(struct esp32c3_aes_s *aes, bool encrypt,
   DEBUGASSERT(aes && input && output);
   DEBUGASSERT(size && ((size % AES_BLK_SIZE) == 0));
 
-  ret = nxsem_wait(&g_aes_sem);
+  ret = nxmutex_lock(&g_aes_lock);
   if (ret < 0)
     {
       return ret;
@@ -204,7 +204,7 @@ int esp32c3_aes_ecb_cypher(struct esp32c3_aes_s *aes, bool encrypt,
       d += AES_BLK_SIZE;
     }
 
-  ret = nxsem_post(&g_aes_sem);
+  ret = nxmutex_unlock(&g_aes_lock);
   if (ret < 0)
     {
       return ret;
@@ -246,7 +246,7 @@ int esp32c3_aes_cbc_cypher(struct esp32c3_aes_s *aes, bool encrypt,
   DEBUGASSERT(aes && input && output && ivptr);
   DEBUGASSERT(size && ((size % AES_BLK_SIZE) == 0));
 
-  ret = nxsem_wait(&g_aes_sem);
+  ret = nxmutex_lock(&g_aes_lock);
   if (ret < 0)
     {
       return ret;
@@ -283,7 +283,7 @@ int esp32c3_aes_cbc_cypher(struct esp32c3_aes_s *aes, bool encrypt,
       d += AES_BLK_SIZE;
     }
 
-  ret = nxsem_post(&g_aes_sem);
+  ret = nxmutex_unlock(&g_aes_lock);
   if (ret < 0)
     {
       return ret;
@@ -328,7 +328,7 @@ int esp32c3_aes_ctr_cypher(struct esp32c3_aes_s *aes, uint32_t *offptr,
   DEBUGASSERT(aes && offptr && cntptr && cacheptr && input && output);
   DEBUGASSERT(size);
 
-  ret = nxsem_wait(&g_aes_sem);
+  ret = nxmutex_lock(&g_aes_lock);
   if (ret < 0)
     {
       return ret;
@@ -359,7 +359,7 @@ int esp32c3_aes_ctr_cypher(struct esp32c3_aes_s *aes, uint32_t *offptr,
 
   *offptr = n;
 
-  ret = nxsem_post(&g_aes_sem);
+  ret = nxmutex_unlock(&g_aes_lock);
   if (ret < 0)
     {
       return ret;
@@ -412,7 +412,7 @@ int esp32c3_aes_xts_cypher(struct esp32c3_aes_xts_s *aes, bool encrypt,
   DEBUGASSERT((size >= AES_BLK_SIZE) &&
               (size <= ((1 << 20) * AES_BLK_SIZE)));
 
-  ret = nxsem_wait(&g_aes_sem);
+  ret = nxmutex_lock(&g_aes_lock);
   if (ret < 0)
     {
       return ret;
@@ -476,7 +476,7 @@ int esp32c3_aes_xts_cypher(struct esp32c3_aes_xts_s *aes, bool encrypt,
         }
     }
 
-  ret = nxsem_post(&g_aes_sem);
+  ret = nxmutex_unlock(&g_aes_lock);
   if (ret < 0)
     {
       return ret;

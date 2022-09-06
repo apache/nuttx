@@ -35,6 +35,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 
 #include <arch/board/board.h>
@@ -91,7 +92,7 @@ struct emmc_dma_desc_s
 
 struct cxd56_emmc_state_s
 {
-  sem_t excsem;
+  mutex_t lock;
   int crefs;
   uint32_t total_sectors;
 };
@@ -142,16 +143,6 @@ struct cxd56_emmc_state_s g_emmcdev;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-static int emmc_takesem(sem_t *sem)
-{
-  return nxsem_wait_uninterruptible(sem);
-}
-
-static void emmc_givesem(sem_t *sem)
-{
-  nxsem_post(sem);
-}
 
 static void emmc_cmdstarted(void)
 {
@@ -429,7 +420,7 @@ static void emmc_send(int datatype, uint32_t opcode, uint32_t arg,
 
   /* Wait for command or data transfer done */
 
-  ret = emmc_takesem(&g_waitsem);
+  ret = nxsem_wait_uninterruptible(&g_waitsem);
   if (ret < 0)
     {
       return;
@@ -592,8 +583,7 @@ static int emmc_interrupt(int irq, void *context, void *arg)
       ferr("End-bit error/write no CRC.\n");
     }
 
-  emmc_givesem(&g_waitsem);
-
+  nxsem_post(&g_waitsem);
   return OK;
 }
 
@@ -705,7 +695,7 @@ static int cxd56_emmc_readsectors(struct cxd56_emmc_state_s *priv,
       return -ENOMEM;
     }
 
-  ret = emmc_takesem(&priv->excsem);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       kmm_free(descs);
@@ -746,9 +736,8 @@ static int cxd56_emmc_readsectors(struct cxd56_emmc_state_s *priv,
     }
 
 finish:
-  emmc_givesem(&priv->excsem);
+  nxmutex_unlock(&priv->lock);
   kmm_free(descs);
-
   return ret;
 }
 
@@ -767,7 +756,7 @@ static int cxd56_emmc_writesectors(struct cxd56_emmc_state_s *priv,
       return -ENOMEM;
     }
 
-  ret = emmc_takesem(&priv->excsem);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       kmm_free(descs);
@@ -822,9 +811,8 @@ static int cxd56_emmc_writesectors(struct cxd56_emmc_state_s *priv,
   emmc_flushwritefifo();
 
 finish:
-  emmc_givesem(&priv->excsem);
+  nxmutex_unlock(&priv->lock);
   kmm_free(descs);
-
   return ret;
 }
 #endif
@@ -839,14 +827,14 @@ static int cxd56_emmc_open(struct inode *inode)
 
   /* Just increment the reference count on the driver */
 
-  ret = emmc_takesem(&priv->excsem);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
     }
 
   priv->crefs++;
-  emmc_givesem(&priv->excsem);
+  nxmutex_unlock(&priv->lock);
   return OK;
 }
 
@@ -861,14 +849,14 @@ static int cxd56_emmc_close(struct inode *inode)
   /* Decrement the reference count on the block driver */
 
   DEBUGASSERT(priv->crefs > 0);
-  ret = emmc_takesem(&priv->excsem);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
     }
 
   priv->crefs--;
-  emmc_givesem(&priv->excsem);
+  nxmutex_unlock(&priv->lock);
   return OK;
 }
 
@@ -952,7 +940,7 @@ int cxd56_emmcinitialize(void)
   priv = &g_emmcdev;
 
   memset(priv, 0, sizeof(struct cxd56_emmc_state_s));
-  nxsem_init(&priv->excsem, 0, 1);
+  nxmutex_init(&priv->lock);
   nxsem_init(&g_waitsem, 0, 0);
   nxsem_set_protocol(&g_waitsem, SEM_PRIO_NONE);
 

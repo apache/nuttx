@@ -34,7 +34,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/signal.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/telnet.h>
@@ -216,7 +216,7 @@ static const struct file_operations g_factory_fops =
  */
 
 static struct telnet_dev_s *g_telnet_clients[CONFIG_TELNET_MAXLCLIENTS];
-static sem_t                g_clients_sem = SEM_INITIALIZER(1);
+static mutex_t              g_clients_lock = NXMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Private Functions
@@ -630,10 +630,10 @@ static int telnet_open(FAR struct file *filep)
 
   /* Get exclusive access to the device structures */
 
-  ret = nxsem_wait(&g_clients_sem);
+  ret = nxmutex_lock(&g_clients_lock);
   if (ret < 0)
     {
-      nerr("ERROR: nxsem_wait failed: %d\n", ret);
+      nerr("ERROR: nxmutex_lock failed: %d\n", ret);
       goto errout;
     }
 
@@ -648,7 +648,7 @@ static int telnet_open(FAR struct file *filep)
       /* More than 255 opens; uint8_t would overflow to zero */
 
       ret = -EMFILE;
-      goto errout_with_sem;
+      goto errout_with_lock;
     }
 
   /* Save the new open count on success */
@@ -656,8 +656,8 @@ static int telnet_open(FAR struct file *filep)
   priv->td_crefs = tmp;
   ret = OK;
 
-errout_with_sem:
-  nxsem_post(&g_clients_sem);
+errout_with_lock:
+  nxmutex_unlock(&g_clients_lock);
 
 errout:
   return ret;
@@ -679,10 +679,10 @@ static int telnet_close(FAR struct file *filep)
 
   /* Get exclusive access to the device structures */
 
-  ret = nxsem_wait(&g_clients_sem);
+  ret = nxmutex_lock(&g_clients_lock);
   if (ret < 0)
     {
-      nerr("ERROR: nxsem_wait failed: %d\n", ret);
+      nerr("ERROR: nxmutex_lock failed: %d\n", ret);
       return ret;
     }
 
@@ -692,7 +692,7 @@ static int telnet_close(FAR struct file *filep)
 
   if (priv->td_crefs > 1)
     {
-      /* Just decrement the reference count and release the semaphore */
+      /* Just decrement the reference count */
 
       priv->td_crefs--;
     }
@@ -748,7 +748,7 @@ static int telnet_close(FAR struct file *filep)
       kmm_free(priv);
     }
 
-  nxsem_post(&g_clients_sem);
+  nxmutex_unlock(&g_clients_lock);
   return ret;
 }
 
@@ -961,10 +961,10 @@ static int telnet_session(FAR struct telnet_session_s *session)
    * Get exclusive access to the minor counter.
    */
 
-  ret = nxsem_wait_uninterruptible(&g_clients_sem);
+  ret = nxmutex_lock(&g_clients_lock);
   if (ret < 0)
     {
-      nerr("ERROR: nxsem_wait failed: %d\n", ret);
+      nerr("ERROR: nxmutex_lock failed: %d\n", ret);
       goto errout_with_clone;
     }
 
@@ -986,7 +986,7 @@ static int telnet_session(FAR struct telnet_session_s *session)
     {
       nerr("ERROR: Too many sessions\n");
       ret = -ENFILE;
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 
   /* Register the driver */
@@ -996,7 +996,7 @@ static int telnet_session(FAR struct telnet_session_s *session)
     {
       nerr("ERROR: Failed to register the driver %s: %d\n",
            session->ts_devpath, ret);
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 
   /* Close the original psock (keeping the clone) */
@@ -1015,12 +1015,12 @@ static int telnet_session(FAR struct telnet_session_s *session)
   /* Save ourself in the list of Telnet client threads */
 
   g_telnet_clients[priv->td_minor] = priv;
-  nxsem_post(&g_clients_sem);
+  nxmutex_unlock(&g_clients_lock);
 
   return OK;
 
-errout_with_semaphore:
-  nxsem_post(&g_clients_sem);
+errout_with_lock:
+  nxmutex_unlock(&g_clients_lock);
 
 errout_with_clone:
   psock_close(&priv->td_psock);
