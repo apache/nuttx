@@ -65,6 +65,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/i2c/i2c_master.h>
 
@@ -114,7 +115,7 @@ struct lpc2378_i2cdev_s
   unsigned int     base;       /* Base address of registers */
   uint16_t         irqid;      /* IRQ for this device */
 
-  sem_t            mutex;      /* Only one thread can access at a time */
+  mutex_t          lock;       /* Only one thread can access at a time */
   sem_t            wait;       /* Place to wait for state machine completion */
   volatile uint8_t state;      /* State of state machine */
   struct wdog_s    timeout;    /* Watchdog to timeout when bus hung */
@@ -404,7 +405,7 @@ static int lpc2378_i2c_transfer(struct i2c_master_s *dev,
 
   /* Get exclusive access to the I2C bus */
 
-  nxsem_wait(&priv->mutex);
+  nxmutex_lock(&priv->lock);
 
   /* Set up for the transfer */
 
@@ -425,7 +426,7 @@ static int lpc2378_i2c_transfer(struct i2c_master_s *dev,
 
   ret = lpc2378_i2c_start(priv);
 
-  nxsem_post(&priv->mutex);
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -579,9 +580,9 @@ struct i2c_master_s *lpc2378_i2cbus_initialize(int port)
 
   putreg32(I2C_CONSET_I2EN, priv->base + I2C_CONSET_OFFSET);
 
-  /* Initialize semaphores */
+  /* Initialize mutex & semaphores */
 
-  nxsem_init(&priv->mutex, 0, 1);
+  nxmutex_init(&priv->lock);
   nxsem_init(&priv->wait, 0, 0);
 
   /* The wait semaphore is used for signaling and, hence, should not have
@@ -622,7 +623,7 @@ int lpc2378_i2cbus_uninitialize(struct i2c_master_s * dev)
 
   /* Reset data structures */
 
-  nxsem_destroy(&priv->mutex);
+  nxmutex_destroy(&priv->lock);
   nxsem_destroy(&priv->wait);
 
   /* Cancel the watchdog timer */

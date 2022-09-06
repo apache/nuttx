@@ -44,13 +44,12 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/loop.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define loop_semgive(d) nxsem_post(&(d)->sem)  /* To match loop_semtake */
 #define MAX_OPENCNT     (255)                  /* Limit of uint8_t */
 
 /****************************************************************************
@@ -59,7 +58,7 @@
 
 struct loop_struct_s
 {
-  sem_t        sem;          /* For safe read-modify-write operations */
+  mutex_t      lock;         /* For safe read-modify-write operations */
   uint32_t     nsectors;     /* Number of sectors on device */
   off_t        offset;       /* Offset (in bytes) to the first sector */
   uint16_t     sectsize;     /* The size of one sector */
@@ -72,7 +71,6 @@ struct loop_struct_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     loop_semtake(FAR struct loop_struct_s *dev);
 static int     loop_open(FAR struct inode *inode);
 static int     loop_close(FAR struct inode *inode);
 static ssize_t loop_read(FAR struct inode *inode, FAR unsigned char *buffer,
@@ -105,15 +103,6 @@ static const struct block_operations g_bops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: loop_semtake
- ****************************************************************************/
-
-static int loop_semtake(FAR struct loop_struct_s *dev)
-{
-  return nxsem_wait(&dev->sem);
-}
-
-/****************************************************************************
  * Name: loop_open
  *
  * Description: Open the block device
@@ -130,7 +119,7 @@ static int loop_open(FAR struct inode *inode)
 
   /* Make sure we have exclusive access to the state structure */
 
-  ret = loop_semtake(dev);
+  ret = nxmutex_lock(&dev->lock);
   if (ret == OK)
     {
       if (dev->opencnt == MAX_OPENCNT)
@@ -144,7 +133,7 @@ static int loop_open(FAR struct inode *inode)
           dev->opencnt++;
         }
 
-      loop_semgive(dev);
+      nxmutex_unlock(&dev->lock);
     }
 
   return ret;
@@ -167,7 +156,7 @@ static int loop_close(FAR struct inode *inode)
 
   /* Make sure we have exclusive access to the state structure */
 
-  ret = loop_semtake(dev);
+  ret = nxmutex_lock(&dev->lock);
   if (ret == OK)
     {
       if (dev->opencnt == 0)
@@ -181,7 +170,7 @@ static int loop_close(FAR struct inode *inode)
           dev->opencnt--;
         }
 
-      loop_semgive(dev);
+      nxmutex_unlock(&dev->lock);
     }
 
   return ret;
@@ -371,7 +360,7 @@ int losetup(FAR const char *devname, FAR const char *filename,
 
   /* Initialize the loop device structure. */
 
-  nxsem_init(&dev->sem, 0, 1);
+  nxmutex_init(&dev->lock);
   dev->nsectors  = (sb.st_size - offset) / sectsize;
   dev->sectsize  = sectsize;
   dev->offset    = offset;

@@ -22,7 +22,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 
 #include <assert.h>
 #include <debug.h>
@@ -68,7 +68,7 @@ struct kasan_region_s
  * Private Data
  ****************************************************************************/
 
-static sem_t g_lock = SEM_INITIALIZER(1);
+static mutex_t g_lock = NXMUTEX_INITIALIZER;
 static FAR struct kasan_region_s *g_region;
 static uint32_t g_region_init;
 
@@ -199,11 +199,11 @@ void kasan_register(FAR void *addr, FAR size_t *size)
   region->begin = (uintptr_t)addr;
   region->end   = region->begin + *size;
 
-  _SEM_WAIT(&g_lock);
+  nxmutex_lock(&g_lock);
   region->next  = g_region;
   g_region      = region;
   g_region_init = KASAN_INIT_VALUE;
-  _SEM_POST(&g_lock);
+  nxmutex_unlock(&g_lock);
 
   kasan_poison(addr, *size);
   *size -= KASAN_REGION_SIZE(*size);

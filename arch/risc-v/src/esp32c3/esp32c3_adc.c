@@ -29,7 +29,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 
 #include "riscv_internal.h"
 #include "esp32c3.h"
@@ -248,7 +248,7 @@ static uint16_t g_cal_digit;
 
 static uint32_t g_clk_ref;
 
-static sem_t g_sem_excl = SEM_INITIALIZER(1);
+static mutex_t g_lock = NXMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Private Functions
@@ -573,10 +573,10 @@ static void adc_read_work(struct adc_dev_s *dev)
   int32_t adc;
   struct adc_chan_s *priv = (struct adc_chan_s *)dev->ad_priv;
 
-  ret = nxsem_wait(&g_sem_excl);
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
-      aerr("Failed to wait sem ret=%d\n", ret);
+      aerr("Failed to lock ret=%d\n", ret);
       return ;
     }
 
@@ -591,7 +591,7 @@ static void adc_read_work(struct adc_dev_s *dev)
   ainfo("channel: %" PRIu8 ", voltage: %" PRIu32 " mV\n", priv->channel,
         adc);
 
-  nxsem_post(&g_sem_excl);
+  nxmutex_unlock(&g_lock);
 }
 
 /****************************************************************************
@@ -706,11 +706,11 @@ static int adc_setup(struct adc_dev_s *dev)
 
   /* Start calibration only once  */
 
-  ret = nxsem_wait(&g_sem_excl);
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       adc_disable_clk();
-      aerr("Failed to wait sem ret=%d\n", ret);
+      aerr("Failed to lock ret=%d\n", ret);
       return ret;
     }
 
@@ -720,7 +720,7 @@ static int adc_setup(struct adc_dev_s *dev)
       g_calibrated = true;
     }
 
-  nxsem_post(&g_sem_excl);
+  nxmutex_unlock(&g_lock);
 
   /* The ADC device is ready */
 

@@ -34,6 +34,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/mutex.h>
 #include <nuttx/board.h>
 #include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
@@ -154,7 +155,7 @@ struct cxd56_devsig_table_s
 
 struct cxd56_gnss_dev_s
 {
-  sem_t                           devsem;
+  mutex_t                         devlock;
   sem_t                           syncsem;
   uint8_t                         num_open;
   uint8_t                         notify_data;
@@ -165,7 +166,7 @@ struct cxd56_gnss_dev_s
   struct cxd56_gnss_sig_s         sigs[CONFIG_CXD56_GNSS_NSIGNALRECEIVERS];
 #endif
   struct cxd56_gnss_shared_info_s shared_info;
-  sem_t                           ioctllock;
+  mutex_t                         ioctllock;
   sem_t                           apiwait;
   int                             apiret;
 };
@@ -1483,7 +1484,7 @@ static int cxd56_gnss_set_signal(struct file *filep, unsigned long arg)
   inode = filep->f_inode;
   priv  = (struct cxd56_gnss_dev_s *)inode->i_private;
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return ret;
@@ -2270,7 +2271,7 @@ static void cxd56_gnss_common_signalhandler(uint32_t data,
   int                      i;
   int                      ret;
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return;
@@ -2294,7 +2295,7 @@ static void cxd56_gnss_common_signalhandler(uint32_t data,
       fw_gd_setnotifymask(sigtype, FALSE);
     }
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
 }
 #endif /* CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0 */
 
@@ -2378,7 +2379,7 @@ static void cxd56_gnss_default_sighandler(uint32_t data, void *userdata)
       break;
     }
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return;
@@ -2386,7 +2387,7 @@ static void cxd56_gnss_default_sighandler(uint32_t data, void *userdata)
 
   poll_notify(priv->fds, CONFIG_CXD56_GNSS_NPOLLWAITERS, POLLIN);
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
 
 #if CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0
   cxd56_gnss_common_signalhandler(data, userdata);
@@ -2594,7 +2595,7 @@ static int cxd56_gnss_open(struct file *filep)
       usleep(100 * 1000);
     }
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return ret;
@@ -2695,7 +2696,7 @@ static int cxd56_gnss_close(struct file *filep)
   inode = filep->f_inode;
   priv  = (struct cxd56_gnss_dev_s *)inode->i_private;
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return ret;
@@ -2842,7 +2843,7 @@ static int cxd56_gnss_ioctl(struct file *filep, int cmd,
       return -EINVAL;
     }
 
-  ret = nxsem_wait(&priv->ioctllock);
+  ret = nxmutex_lock(&priv->ioctllock);
   if (ret < 0)
     {
       return ret;
@@ -2850,8 +2851,7 @@ static int cxd56_gnss_ioctl(struct file *filep, int cmd,
 
   ret = g_cmdlist[cmd](filep, arg);
 
-  nxsem_post(&priv->ioctllock);
-
+  nxmutex_unlock(&priv->ioctllock);
   return ret;
 }
 
@@ -2882,7 +2882,7 @@ static int cxd56_gnss_poll(struct file *filep, struct pollfd *fds,
   inode = filep->f_inode;
   priv  = (struct cxd56_gnss_dev_s *)inode->i_private;
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return ret;
@@ -2933,7 +2933,7 @@ static int cxd56_gnss_poll(struct file *filep, struct pollfd *fds,
     }
 
 errout:
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return ret;
 }
 
@@ -3015,7 +3015,7 @@ static int cxd56_gnss_register(const char *devpath)
 
   memset(priv, 0, sizeof(struct cxd56_gnss_dev_s));
 
-  ret = nxsem_init(&priv->devsem, 0, 1);
+  ret = nxmutex_init(&priv->devlock);
   if (ret < 0)
     {
       gnsserr("Failed to initialize gnss devsem!\n");
@@ -3031,7 +3031,7 @@ static int cxd56_gnss_register(const char *devpath)
 
   nxsem_set_protocol(&priv->apiwait, SEM_PRIO_NONE);
 
-  ret = nxsem_init(&priv->ioctllock, 0, 1);
+  ret = nxmutex_init(&priv->ioctllock);
   if (ret < 0)
     {
       gnsserr("Failed to initialize gnss ioctllock!\n");

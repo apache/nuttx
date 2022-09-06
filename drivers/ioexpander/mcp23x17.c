@@ -129,21 +129,6 @@ static const struct ioexpander_ops_s g_mcp23x17_ops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mcp23x17_lock
- *
- * Description:
- *   Get exclusive access to the MCP23X17
- *
- ****************************************************************************/
-
-static int mcp23x17_lock(FAR struct mcp23x17_dev_s *priv)
-{
-  return nxsem_wait_uninterruptible(&priv->exclsem);
-}
-
-#define mcp23x17_unlock(p) nxsem_post(&(p)->exclsem)
-
-/****************************************************************************
  * Name: mcp23x17_write
  *
  * Description:
@@ -334,7 +319,7 @@ static int mcp23x17_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   /* Get exclusive access to the MCP23X17 */
 
-  ret = mcp23x17_lock(priv);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -342,7 +327,7 @@ static int mcp23x17_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   ret = mcp23x17_setbit(priv, MCP23X17_IODIRA, pin,
                         (direction == IOEXPANDER_DIRECTION_IN));
-  mcp23x17_unlock(priv);
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -375,7 +360,7 @@ static int mcp23x17_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
     {
       /* Get exclusive access to the MCP23X17 */
 
-      ret = mcp23x17_lock(priv);
+      ret = nxmutex_lock(&priv->lock);
       if (ret < 0)
         {
           return ret;
@@ -383,7 +368,7 @@ static int mcp23x17_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
       ret = mcp23x17_setbit(priv, MCP23X17_IPOLA, pin,
                             ((uintptr_t)value == IOEXPANDER_VAL_INVERT));
-      mcp23x17_unlock(priv);
+      nxmutex_unlock(&priv->lock);
     }
 
   return ret;
@@ -414,14 +399,14 @@ static int mcp23x17_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   /* Get exclusive access to the MCP23X17 */
 
-  ret = mcp23x17_lock(priv);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
     }
 
   ret = mcp23x17_setbit(priv, MCP23X17_GPIOA, pin, value);
-  mcp23x17_unlock(priv);
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -452,7 +437,7 @@ static int mcp23x17_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   /* Get exclusive access to the MCP23X17 */
 
-  ret = mcp23x17_lock(priv);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -460,7 +445,7 @@ static int mcp23x17_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   ret = mcp23x17_getbit(priv, MCP23X17_GPIOA, pin, value);
 
-  mcp23x17_unlock(priv);
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -489,14 +474,14 @@ static int mcp23x17_readbuf(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   /* Get exclusive access to the MCP23X17 */
 
-  ret = mcp23x17_lock(priv);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
     }
 
   ret = mcp23x17_getbit(priv, MCP23X17_GPIOA, pin, value);
-  mcp23x17_unlock(priv);
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -588,7 +573,7 @@ static int mcp23x17_multiwritepin(FAR struct ioexpander_dev_s *dev,
 
   /* Get exclusive access to the MCP23X17 */
 
-  ret = mcp23x17_lock(priv);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -603,7 +588,7 @@ static int mcp23x17_multiwritepin(FAR struct ioexpander_dev_s *dev,
   ret = mcp23x17_writeread(priv, &addr, 1, &buf[1], 2);
   if (ret < 0)
     {
-      mcp23x17_unlock(priv);
+      nxmutex_unlock(&priv->lock);
       return ret;
     }
 #else
@@ -621,7 +606,7 @@ static int mcp23x17_multiwritepin(FAR struct ioexpander_dev_s *dev,
       pin = pins[i];
       if (pin > 15)
         {
-          mcp23x17_unlock(priv);
+          nxmutex_unlock(&priv->lock);
           return -ENXIO;
         }
       else if (pin > 7)
@@ -651,7 +636,7 @@ static int mcp23x17_multiwritepin(FAR struct ioexpander_dev_s *dev,
 #endif
   ret = mcp23x17_write(priv, buf, 3);
 
-  mcp23x17_unlock(priv);
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -681,7 +666,7 @@ static int mcp23x17_multireadpin(FAR struct ioexpander_dev_s *dev,
 
   /* Get exclusive access to the MCP23X17 */
 
-  ret = mcp23x17_lock(priv);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -689,7 +674,7 @@ static int mcp23x17_multireadpin(FAR struct ioexpander_dev_s *dev,
 
   ret = mcp23x17_getmultibits(priv, MCP23X17_GPIOA,
                               pins, values, count);
-  mcp23x17_unlock(priv);
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -719,7 +704,7 @@ static int mcp23x17_multireadbuf(FAR struct ioexpander_dev_s *dev,
 
   /* Get exclusive access to the MCP23X17 */
 
-  ret = mcp23x17_lock(priv);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -727,7 +712,7 @@ static int mcp23x17_multireadbuf(FAR struct ioexpander_dev_s *dev,
 
   ret = mcp23x17_getmultibits(priv, MCP23X17_GPIOA,
                               pins, values, count);
-  mcp23x17_unlock(priv);
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -766,7 +751,7 @@ static FAR void *mcp23x17_attach(FAR struct ioexpander_dev_s *dev,
 
   /* Get exclusive access to the MCP23X17 */
 
-  ret = mcp23x17_lock(priv);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -792,7 +777,7 @@ static FAR void *mcp23x17_attach(FAR struct ioexpander_dev_s *dev,
 
   /* Add this callback to the table */
 
-  mcp23x17_unlock(priv);
+  nxmutex_unlock(&priv->lock);
   return handle;
 }
 
@@ -986,7 +971,7 @@ FAR struct ioexpander_dev_s *mcp23x17_initialize(
   priv->config->enable(priv->config, TRUE);
 #endif
 
-  nxsem_init(&priv->exclsem, 0, 1);
+  nxmutex_init(&priv->lock);
   return &priv->dev;
 }
 

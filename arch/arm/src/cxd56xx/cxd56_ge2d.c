@@ -27,6 +27,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 
 #include <stdio.h>
@@ -50,8 +51,6 @@ static ssize_t ge2d_read(struct file *filep, char *buffer,
 static ssize_t ge2d_write(struct file *filep, const char *buffer,
                           size_t len);
 static int ge2d_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int ge2d_semtake(sem_t *id);
-static void ge2d_semgive(sem_t *id);
 static int ge2d_irqhandler(int irq, void *context, void *arg);
 
 /****************************************************************************
@@ -66,29 +65,11 @@ static const struct file_operations g_ge2dfops =
 };
 
 static sem_t g_wait;
-static sem_t g_lock;
+static mutex_t g_lock;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: ge2d_semtake
- ****************************************************************************/
-
-static int ge2d_semtake(sem_t *id)
-{
-  return nxsem_wait_uninterruptible(id);
-}
-
-/****************************************************************************
- * Name: ge2d_semgive
- ****************************************************************************/
-
-static void ge2d_semgive(sem_t *id)
-{
-  nxsem_post(id);
-}
 
 /****************************************************************************
  * Name: ge2d_read
@@ -119,7 +100,7 @@ static ssize_t ge2d_write(struct file *filep, const char *buffer,
 
   /* Get exclusive access */
 
-  ge2d_semtake(&g_lock);
+  nxmutex_lock(&g_lock);
 
   /* Set operation buffer and start processing.
    * Descriptor start address bit 0 is select to bus, always 1 (memory),
@@ -141,14 +122,13 @@ static ssize_t ge2d_write(struct file *filep, const char *buffer,
 
   /* Wait for interrupts for processing done. */
 
-  ge2d_semtake(&g_wait);
+  nxsem_wait_uninterruptible(&g_wait);
 
   /* Disable interrupts */
 
   putreg32(0, GE2D_INTR_ENABLE);
 
-  ge2d_semgive(&g_lock);
-
+  nxmutex_unlock(&g_lock);
   return len;
 }
 
@@ -192,8 +172,7 @@ static int ge2d_irqhandler(int irq, void *context, void *arg)
 
   /* Release semaphore anyway */
 
-  ge2d_semgive(&g_wait);
-
+  nxsem_post(&g_wait);
   return OK;
 }
 
@@ -205,7 +184,7 @@ int cxd56_ge2dinitialize(const char *devname)
 {
   int ret;
 
-  nxsem_init(&g_lock, 0, 1);
+  nxmutex_init(&g_lock);
   nxsem_init(&g_wait, 0, 0);
   nxsem_set_protocol(&g_wait, SEM_PRIO_NONE);
 
@@ -238,7 +217,7 @@ void cxd56_ge2duninitialize(const char *devname)
 
   cxd56_img_ge2d_clock_disable();
 
-  nxsem_destroy(&g_lock);
+  nxmutex_destroy(&g_lock);
   nxsem_destroy(&g_wait);
 
   unregister_driver(devname);

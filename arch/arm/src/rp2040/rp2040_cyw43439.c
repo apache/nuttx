@@ -400,7 +400,7 @@ static int my_write(struct gspi_dev_s   *gspi,
 
   /* Claim the exclusive lock */
 
-  nxsem_wait(&gspi->exclsem);
+  nxmutex_lock(&gspi->lock);
 
   /* Reset the PIO state machine just to be sure. */
 
@@ -541,8 +541,7 @@ static int my_write(struct gspi_dev_s   *gspi,
 
   /* Release the exclusive lock */
 
-  nxsem_post(&gspi->exclsem);
-
+  nxmutex_unlock(&gspi->lock);
   return dma_info.status;
 }
 
@@ -616,7 +615,7 @@ static int my_read(struct gspi_dev_s   *gspi,
 
   /* Claim the exclusive lock */
 
-  nxsem_wait(&gspi->exclsem);
+  nxmutex_lock(&gspi->lock);
 
   /* Reset the PIO state machine just to be sure. */
 
@@ -761,8 +760,7 @@ static int my_read(struct gspi_dev_s   *gspi,
 
   /* Release the exclusive lock */
 
-  nxsem_post(&gspi->exclsem);
-
+  nxmutex_unlock(&gspi->lock);
   return dma_info.status;
 }
 
@@ -820,7 +818,7 @@ gspi_dev_t *rp2040_cyw_setup(uint8_t gpio_on,
   rp_io->gpio_clock  = gpio_clock;
   rp_io->gpio_intr   = gpio_intr;
 
-  nxsem_init(&gspi->exclsem, 0, 1);
+  nxmutex_init(&gspi->lock);
 
   /* Initialize the cyw43439 power-on and chip select lines. */
 

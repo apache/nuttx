@@ -115,7 +115,7 @@ int shmctl(int shmid, int cmd, struct shmid_ds *buf)
 
   /* Get exclusive access to the region data structure */
 
-  ret = nxsem_wait(&region->sr_sem);
+  ret = nxmutex_lock(&region->sr_lock);
   if (ret < 0)
     {
       shmerr("ERROR: nxsem_wait failed: %d\n", ret);
@@ -178,7 +178,7 @@ int shmctl(int shmid, int cmd, struct shmid_ds *buf)
       default:
         shmerr("ERROR: Unrecognized command: %d\n", cmd);
         ret = -EINVAL;
-        goto errout_with_semaphore;
+        goto errout_with_lock;
     }
 
   /* Save the process ID of the last operation */
@@ -192,11 +192,11 @@ int shmctl(int shmid, int cmd, struct shmid_ds *buf)
 
   /* Release our lock on the entry */
 
-  nxsem_post(&region->sr_sem);
+  nxmutex_unlock(&region->sr_lock);
   return ret;
 
-errout_with_semaphore:
-  nxsem_post(&region->sr_sem);
+errout_with_lock:
+  nxmutex_unlock(&region->sr_lock);
 
 errout_with_ret:
   set_errno(-ret);
@@ -223,8 +223,8 @@ errout_with_ret:
  *   None
  *
  * Assumption:
- *   The caller holds either the region table semaphore or else the
- *   semaphore on the particular entry being deleted.
+ *   The caller holds either the region table mutex or else the
+ *   mutex on the particular entry being deleted.
  *
  ****************************************************************************/
 
@@ -242,7 +242,7 @@ void shm_destroy(int shmid)
 
   /* Reset the region entry to its initial state */
 
-  nxsem_destroy(&region->sr_sem);
+  nxmutex_destroy(&region->sr_lock);
   memset(region, 0, sizeof(struct shm_region_s));
 }
 

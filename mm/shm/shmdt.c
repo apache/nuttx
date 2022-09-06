@@ -105,7 +105,7 @@ int shmdt(FAR const void *shmaddr)
 
   /* Get exclusive access to the region data structure */
 
-  ret = nxsem_wait(&region->sr_sem);
+  ret = nxmutex_lock(&region->sr_lock);
   if (ret < 0)
     {
       shmerr("ERROR: nxsem_wait failed: %d\n", ret);
@@ -170,7 +170,7 @@ int shmdt(FAR const void *shmaddr)
 
   /* Release our lock on the entry */
 
-  nxsem_post(&region->sr_sem);
+  nxmutex_unlock(&region->sr_lock);
   return OK;
 
 errout_with_errno:

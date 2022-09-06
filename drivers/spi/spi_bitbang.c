@@ -33,7 +33,7 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/spi/spi_bitbang.h>
 
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 
 #ifdef CONFIG_SPI_BITBANG
 
@@ -161,11 +161,11 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
   spiinfo("lock=%d\n", lock);
   if (lock)
     {
-      ret = nxsem_wait_uninterruptible(&priv->exclsem);
+      ret = nxmutex_lock(&priv->lock);
     }
   else
     {
-      ret = nxsem_post(&priv->exclsem);
+      ret = nxmutex_unlock(&priv->lock);
     }
 
   return ret;
@@ -539,7 +539,7 @@ FAR struct spi_dev_s *spi_create_bitbang(FAR const struct
   priv->nbits   = 8;
 #endif
 
-  nxsem_init(&priv->exclsem, 0, 1);
+  nxmutex_init(&priv->lock);
 
   /* Select an initial state of mode 0, 8-bits, and 400KHz */
 

@@ -55,6 +55,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/wdog.h>
@@ -106,7 +107,7 @@ struct ft5x06_dev_s
   int16_t lastx;                            /* Last reported X position */
   int16_t lasty;                            /* Last reported Y position */
 #endif
-  sem_t devsem;                             /* Manages exclusive access to
+  mutex_t devlock;                          /* Manages exclusive access to
                                              * this structure */
   sem_t waitsem;                            /* Used to wait for the
                                              * availability of data */
@@ -245,17 +246,7 @@ static void ft5x06_data_worker(FAR void *arg)
    * corrupt any read operation that is in place.
    */
 
-  do
-    {
-      ret = nxsem_wait_uninterruptible(&priv->devsem);
-
-      /* This would only fail if something canceled the worker thread?
-       * That is not expected.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -ECANCELED);
-    }
-  while (ret < 0);
+  nxmutex_lock(&priv->devlock);
 
   /* Read touch data */
 
@@ -340,7 +331,7 @@ static void ft5x06_data_worker(FAR void *arg)
   config->enable(config, true);
 #endif
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
 }
 
 /****************************************************************************
@@ -627,7 +618,7 @@ static ssize_t ft5x06_waitsample(FAR struct ft5x06_dev_s *priv,
    * run, but they cannot run yet because pre-emption is disabled.
    */
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
 
   /* Try to get the a sample... if we cannot, then wait on the semaphore
    * that is posted when new sample data is available.
@@ -656,7 +647,7 @@ static ssize_t ft5x06_waitsample(FAR struct ft5x06_dev_s *priv,
    * sample.  Interrupts and pre-emption will be re-enabled while we wait.
    */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret >= 0)
     {
       /* Now sample the data.
@@ -763,10 +754,10 @@ static int ft5x06_open(FAR struct file *filep)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
-      ierr("ERROR: nxsem_wait failed: %d\n", ret);
+      ierr("ERROR: nxmutex_lock failed: %d\n", ret);
       return ret;
     }
 
@@ -778,7 +769,7 @@ static int ft5x06_open(FAR struct file *filep)
       /* More than 255 opens; uint8_t overflows to zero */
 
       ret = -EMFILE;
-      goto errout_with_sem;
+      goto errout_with_lock;
     }
 
   /* When the reference increments to 1, this is the first open event
@@ -791,7 +782,7 @@ static int ft5x06_open(FAR struct file *filep)
       if (ret < 0)
         {
           ierr("ERROR: ft5x06_bringup failed: %d\n", ret);
-          goto errout_with_sem;
+          goto errout_with_lock;
         }
     }
 
@@ -799,8 +790,8 @@ static int ft5x06_open(FAR struct file *filep)
 
   priv->crefs = tmp;
 
-errout_with_sem:
-  nxsem_post(&priv->devsem);
+errout_with_lock:
+  nxmutex_unlock(&priv->devlock);
   return ret;
 }
 
@@ -822,10 +813,10 @@ static int ft5x06_close(FAR struct file *filep)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
-      ierr("ERROR: nxsem_wait failed: %d\n", ret);
+      ierr("ERROR: nxmutex_lock failed: %d\n", ret);
       return ret;
     }
 
@@ -847,7 +838,7 @@ static int ft5x06_close(FAR struct file *filep)
       ft5x06_shutdown(priv);
     }
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return OK;
 }
 
@@ -883,10 +874,10 @@ static ssize_t ft5x06_read(FAR struct file *filep, FAR char *buffer,
 
   /* Get exclusive access to the driver data structure */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
-      ierr("ERROR: nxsem_wait failed: %d\n", ret);
+      ierr("ERROR: nxmutex_lock failed: %d\n", ret);
       return ret;
     }
 
@@ -920,7 +911,7 @@ static ssize_t ft5x06_read(FAR struct file *filep, FAR char *buffer,
   ret = SIZEOF_TOUCH_SAMPLE_S(1);
 
 errout:
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return ret;
 }
 
@@ -943,10 +934,10 @@ static int ft5x06_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
-      ierr("ERROR: nxsem_wait failed: %d\n", ret);
+      ierr("ERROR: nxmutex_lock failed: %d\n", ret);
       return ret;
     }
 
@@ -975,7 +966,7 @@ static int ft5x06_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return ret;
 }
 
@@ -1000,10 +991,10 @@ static int ft5x06_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   /* Are we setting up the poll?  Or tearing it down? */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
-      ierr("ERROR: nxsem_wait failed: %d\n", ret);
+      ierr("ERROR: nxmutex_lock failed: %d\n", ret);
       return ret;
     }
 
@@ -1066,7 +1057,7 @@ static int ft5x06_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 errout:
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return ret;
 }
 
@@ -1132,7 +1123,7 @@ int ft5x06_register(FAR struct i2c_master_s *i2c,
   priv->config    = config;            /* Save the board configuration */
   priv->frequency = config->frequency; /* Set the current I2C frequency */
 
-  nxsem_init(&priv->devsem,  0, 1);    /* Initialize device structure semaphore */
+  nxmutex_init(&priv->devlock);        /* Initialize device structure mutex */
   nxsem_init(&priv->waitsem, 0, 0);    /* Initialize pen event wait semaphore */
 
   /* The event wait semaphore is used for signaling and, hence, should not
@@ -1190,7 +1181,7 @@ int ft5x06_register(FAR struct i2c_master_s *i2c,
   return OK;
 
 errout_with_priv:
-  nxsem_destroy(&priv->devsem);
+  nxmutex_destroy(&priv->devlock);
   kmm_free(priv);
   return ret;
 }

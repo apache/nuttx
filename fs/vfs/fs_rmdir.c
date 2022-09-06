@@ -133,7 +133,7 @@ int rmdir(FAR const char *pathname)
        * -EBUSY to indicate that the inode was not deleted now.
        */
 
-      ret = inode_semtake();
+      ret = inode_lock();
       if (ret < 0)
         {
           errcode = -ret;
@@ -141,7 +141,7 @@ int rmdir(FAR const char *pathname)
         }
 
       ret = inode_remove(pathname);
-      inode_semgive();
+      inode_unlock();
 
       if (ret < 0 && ret != -EBUSY)
         {

@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/ipcc.h>
+#include <nuttx/mutex.h>
 #include <stdio.h>
 
 /****************************************************************************
@@ -38,7 +39,7 @@ struct ipcc_driver_s
   FAR struct ipcc_lower_s  *ipcc;     /* Lower half driver state */
   int                       crefs;    /* Count number of open references */
   int                       unlinked; /* 1 - driver has been unlinked */
-  sem_t                     exclsem;  /* Mutual exclusion for driver */
+  mutex_t                   lock;     /* Mutual exclusion for driver */
   sem_t                     rxsem;    /* Data ready to read semaphore */
   sem_t                     txsem;    /* Data ready to send semaphore */
 };

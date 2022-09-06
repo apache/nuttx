@@ -35,6 +35,7 @@
 
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
@@ -104,8 +105,8 @@ struct ieee802154_privmac_s
   FAR struct mac802154_maccb_s   *cb;       /* Head of a list of MAC callbacks */
   FAR struct mac802154_radiocb_s radiocb;   /* Interface to bind to radio */
 
-  sem_t exclsem;                            /* Support exclusive access */
-  uint8_t nclients;                         /* Number of notification clients */
+  mutex_t                        lock;      /* Support exclusive access */
+  uint8_t                        nclients;  /* Number of notification clients */
 
   /* Only support a single command at any given time. As of now I see no
    * condition where you need to have more than one command frame
@@ -305,7 +306,7 @@ struct ieee802154_privmac_s
  ****************************************************************************/
 
 int  mac802154_txdesc_alloc(FAR struct ieee802154_privmac_s *priv,
-      FAR struct ieee802154_txdesc_s **txdesc, bool allow_interrupt);
+      FAR struct ieee802154_txdesc_s **txdesc);
 
 void mac802154_setupindirect(FAR struct ieee802154_privmac_s *priv,
       FAR struct ieee802154_txdesc_s *txdesc);
@@ -510,62 +511,12 @@ void mac802154_notify(FAR struct ieee802154_privmac_s *priv,
 
 /* General helpers **********************************************************/
 
-#define mac802154_givesem(s) nxsem_post(s)
-
-static inline int mac802154_takesem(sem_t *sem, bool allowinterrupt)
-{
-  if (allowinterrupt)
-    {
-      return nxsem_wait(sem);
-    }
-  else
-    {
-      return nxsem_wait_uninterruptible(sem);
-    }
-}
-
-#ifdef CONFIG_MAC802154_LOCK_VERBOSE
-#define mac802154_unlock(dev) \
-  mac802154_givesem(&dev->exclsem); \
-  wlinfo("MAC unlocked\n");
-#else
-#define mac802154_unlock(dev) \
-  mac802154_givesem(&dev->exclsem);
-#endif
-
-#define mac802154_lock(dev, allowinterrupt) \
-  mac802154_lockpriv(dev, allowinterrupt, __FUNCTION__)
-
-static inline int
-mac802154_lockpriv(FAR struct ieee802154_privmac_s *dev,
-                   bool allowinterrupt, FAR const char *funcname)
-{
-  int ret;
-
-#ifdef CONFIG_MAC802154_LOCK_VERBOSE
-  wlinfo("Locking MAC: %s\n", funcname);
-#endif
-  ret = mac802154_takesem(&dev->exclsem, allowinterrupt);
-  if (ret < 0)
-    {
-      wlwarn("Failed to lock MAC\n");
-    }
-  else
-    {
-#ifdef CONFIG_MAC802154_LOCK_VERBOSE
-      wlinfo("MAC locked\n");
-#endif
-    }
-
-  return ret;
-}
-
 static inline void
 mac802154_txdesc_free(FAR struct ieee802154_privmac_s *priv,
                       FAR struct ieee802154_txdesc_s *txdesc)
 {
   sq_addlast((FAR sq_entry_t *)txdesc, &priv->txdesc_queue);
-  mac802154_givesem(&priv->txdesc_sem);
+  nxsem_post(&priv->txdesc_sem);
 }
 
 /****************************************************************************

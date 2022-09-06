@@ -26,6 +26,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/irq.h>
 #include <nuttx/signal.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 
 #include <inttypes.h>
@@ -186,8 +187,8 @@ struct decimator_s
 
 struct cxd56_scudev_s
 {
-  sem_t syncwait; /* Semaphore for synchronize with SCU firmware */
-  sem_t syncexc;  /* Semaphore for exclusive access to sync */
+  sem_t syncwait;   /* Semaphore for synchronize with SCU firmware */
+  mutex_t synclock; /* Mutex for exclusive access to sync */
 
   /* SCU hardware resource management bitmaps (1 = allocated) */
 
@@ -230,8 +231,6 @@ static int8_t seq_alloc(void);
 static inline void seq_free(int8_t sid);
 static inline int8_t oneshot_alloc(void);
 static inline void oneshot_free(int8_t tid);
-static int seq_semtake(sem_t *id);
-static void seq_semgive(sem_t *id);
 static void seq_fifosetactive(struct seq_s *seq, int fifoid);
 static void seq_fifosetinactive(struct seq_s *seq, int fifoid);
 static int seq_fifoisactive(struct seq_s *seq, int fifoid);
@@ -358,24 +357,6 @@ static const struct coeff_addr_s g_caddrs[3][2] =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: seq_semtake
- ****************************************************************************/
-
-static int seq_semtake(sem_t *id)
-{
-  return nxsem_wait_uninterruptible(id);
-}
-
-/****************************************************************************
- * Name: seq_semgive
- ****************************************************************************/
-
-static void seq_semgive(sem_t *id)
-{
-  nxsem_post(id);
-}
 
 /****************************************************************************
  * Name: seq_fifosetactive
@@ -1083,7 +1064,7 @@ static int seq_oneshot(int bustype, int slave, uint16_t *inst,
 
   /* Wait for one shot is done */
 
-  seq_semtake(&priv->oneshotwait[tid]);
+  nxsem_wait_uninterruptible(&priv->oneshotwait[tid]);
 
   /* Disable interrupt for one shot sequencer */
 
@@ -1451,7 +1432,7 @@ static void seq_sync(struct seq_s *seq, int req)
 {
   struct cxd56_scudev_s *priv = &g_scudev;
 
-  seq_semtake(&priv->syncexc);
+  nxmutex_lock(&priv->synclock);
 
   /* Save current request */
 
@@ -1468,11 +1449,11 @@ static void seq_sync(struct seq_s *seq, int req)
 
   /* Wait for interrupt from SCU firmware */
 
-  seq_semtake(&priv->syncwait);
+  nxsem_wait_uninterruptible(&priv->syncwait);
 
   priv->currentreq = 0;
 
-  seq_semgive(&priv->syncexc);
+  nxmutex_unlock(&priv->synclock);
 }
 
 /****************************************************************************
@@ -1628,7 +1609,7 @@ static void seq_handleoneshot(struct cxd56_scudev_s *priv, uint32_t intr)
         {
           putreg32(bit, SCU_INT_CLEAR_MAIN);
 
-          seq_semgive(&priv->oneshotwait[i]);
+          nxsem_post(&priv->oneshotwait[i]);
         }
     }
 }
@@ -1655,7 +1636,7 @@ static void seq_handleisopdoneintr(struct cxd56_scudev_s *priv,
       putreg32(1 << 27, SCU_INT_DISABLE_MAIN);
       putreg32(1 << 27, SCU_INT_CLEAR_MAIN);
 
-      seq_semgive(&priv->syncwait);
+      nxsem_post(&priv->syncwait);
     }
 }
 
@@ -1754,7 +1735,7 @@ static int seq_scuirqhandler(int irq, void *context, void *arg)
                   tid = out - 1;
 
                   priv->oneshoterr[tid] = -EIO;
-                  seq_semgive(&priv->oneshotwait[tid]);
+                  nxsem_post(&priv->oneshotwait[tid]);
                 }
             }
         }
@@ -2886,7 +2867,7 @@ static void seq_fifodmadone(DMA_HANDLE handle, uint8_t status, void *arg)
 {
   struct scufifo_s *fifo = (struct scufifo_s *)arg;
   fifo->dmaresult = status;
-  seq_semgive(&fifo->dmawait);
+  nxsem_post(&fifo->dmawait);
 }
 #else
 /****************************************************************************
@@ -3045,7 +3026,7 @@ int seq_read(struct seq_s *seq, int fifoid, char *buffer, int length)
 
       /* Wait for DMA is done */
 
-      seq_semtake(&fifo->dmawait);
+      nxsem_wait_uninterruptible(&fifo->dmawait);
       if (fifo->dmaresult)
         {
           /* ERROR */
@@ -3446,7 +3427,7 @@ void scu_initialize(void)
 
   memset(priv, 0, sizeof(struct cxd56_scudev_s));
 
-  nxsem_init(&priv->syncexc, 0, 1);
+  nxmutex_init(&priv->synclock);
   nxsem_init(&priv->syncwait, 0, 0);
   nxsem_set_protocol(&priv->syncwait, SEM_PRIO_NONE);
 
@@ -3520,7 +3501,7 @@ void scu_uninitialize(void)
   cxd56_scuseq_clock_disable();
 
   nxsem_destroy(&priv->syncwait);
-  nxsem_destroy(&priv->syncexc);
+  nxmutex_destroy(&priv->synclock);
 
   for (i = 0; i < 3; i++)
     {

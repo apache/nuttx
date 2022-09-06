@@ -39,6 +39,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
 #include <nuttx/signal.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/i2c/i2c_master.h>
 
@@ -117,7 +118,7 @@ struct lc823450_i2c_priv_s
   const struct lc823450_i2c_config_s *config;
 
   int   refs;                /* Reference count */
-  sem_t sem_excl;            /* Mutual exclusion semaphore */
+  mutex_t lock;              /* Mutual exclusion mutex */
 #ifndef CONFIG_I2C_POLLED
   sem_t sem_isr;             /* Interrupt wait semaphore */
 #endif
@@ -137,10 +138,6 @@ struct lc823450_i2c_priv_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static inline int
-lc823450_i2c_sem_wait(struct lc823450_i2c_priv_s *priv);
-static inline void
-lc823450_i2c_sem_post(struct lc823450_i2c_priv_s *priv);
 static inline int
 lc823450_i2c_sem_waitdone(struct lc823450_i2c_priv_s *priv);
 
@@ -209,6 +206,10 @@ static struct lc823450_i2c_priv_s lc823450_i2c0_priv =
   .ops      = &lc823450_i2c_ops,
   .config   = &lc823450_i2c0_config,
   .refs     = 0,
+  .lock     = NXMUTEX_INITIALIZER,
+#ifndef CONFIG_I2C_POLLED
+  .sem_isr  = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+#endif
   .irqstate = IRQSTATE_IDLE,
   .msgc     = 0,
   .msgv     = NULL,
@@ -235,6 +236,10 @@ static struct lc823450_i2c_priv_s lc823450_i2c1_priv =
   .ops      = &lc823450_i2c_ops,
   .config   = &lc823450_i2c1_config,
   .refs     = 0,
+  .lock     = NXMUTEX_INITIALIZER,
+#ifndef CONFIG_I2C_POLLED
+  .sem_isr  = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+#endif
   .irqstate = IRQSTATE_IDLE,
   .msgc     = 0,
   .msgv     = NULL,
@@ -249,34 +254,6 @@ static struct lc823450_i2c_priv_s lc823450_i2c1_priv =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: lc823450_i2c_sem_wait
- *
- * Description:
- *   Take the exclusive access, waiting as necessary.  May be interrupted by
- *   a signal.
- *
- ****************************************************************************/
-
-static inline int lc823450_i2c_sem_wait(struct lc823450_i2c_priv_s *priv)
-{
-  return nxsem_wait(&priv->sem_excl);
-}
-
-/****************************************************************************
- * Name: lc823450_i2c_sem_post
- *
- * Description:
- *   Release the mutual exclusion semaphore
- *
- ****************************************************************************/
-
-static inline void
-lc823450_i2c_sem_post(struct lc823450_i2c_priv_s *priv)
-{
-  nxsem_post(&priv->sem_excl);
-}
 
 /****************************************************************************
  * Name: lc823450_i2c_sem_waitdone
@@ -978,7 +955,7 @@ static int lc823450_i2c_transfer(struct i2c_master_s *dev,
 
   /* Ensure that address or flags don't change meanwhile */
 
-  ret = lc823450_i2c_sem_wait(priv);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -1073,8 +1050,7 @@ static int lc823450_i2c_transfer(struct i2c_master_s *dev,
 #endif
 
 exit:
-  lc823450_i2c_sem_post(priv);
-
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -1120,10 +1096,6 @@ struct i2c_master_s *lc823450_i2cbus_initialize(int port)
 
   if ((volatile int)priv->refs++ == 0)
     {
-      nxsem_init(&priv->sem_excl, 0, 1);
-#ifndef CONFIG_I2C_POLLED
-      nxsem_init(&priv->sem_isr, 0, 0);
-#endif
       lc823450_i2c_init(priv, port);
     }
 
@@ -1187,13 +1159,6 @@ int lc823450_i2cbus_uninitialize(struct i2c_master_s *dev)
   /* Disable power and other HW resource */
 
   lc823450_i2c_deinit(priv, port);
-
-  /* Release unused resources */
-
-  nxsem_destroy(&priv->sem_excl);
-#ifndef CONFIG_I2C_POLLED
-  nxsem_destroy(&priv->sem_isr);
-#endif
 
   return OK;
 }

@@ -32,7 +32,7 @@
 #include <arch/irq.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -55,7 +55,7 @@ static struct icmpv6_conn_s g_icmpv6_connections[CONFIG_NET_ICMPv6_NCONNS];
 /* A list of all free IPPROTO_ICMP socket connections */
 
 static dq_queue_t g_free_icmpv6_connections;
-static sem_t g_free_sem = SEM_INITIALIZER(1);
+static mutex_t g_free_lock = NXMUTEX_INITIALIZER;
 
 /* A list of all allocated IPPROTO_ICMP socket connections */
 
@@ -104,9 +104,9 @@ FAR struct icmpv6_conn_s *icmpv6_alloc(void)
   FAR struct icmpv6_conn_s *conn = NULL;
   int ret;
 
-  /* The free list is protected by a semaphore (that behaves like a mutex). */
+  /* The free list is protected by a mutex. */
 
-  ret = net_lockedwait(&g_free_sem);
+  ret = nxmutex_lock(&g_free_lock);
   if (ret >= 0)
     {
 #ifdef CONFIG_NET_ALLOC_CONNS
@@ -133,7 +133,7 @@ FAR struct icmpv6_conn_s *icmpv6_alloc(void)
           dq_addlast(&conn->sconn.node, &g_active_icmpv6_connections);
         }
 
-      nxsem_post(&g_free_sem);
+      nxmutex_unlock(&g_free_lock);
     }
 
   return conn;
@@ -150,13 +150,13 @@ FAR struct icmpv6_conn_s *icmpv6_alloc(void)
 
 void icmpv6_free(FAR struct icmpv6_conn_s *conn)
 {
-  /* The free list is protected by a semaphore (that behaves like a mutex). */
+  /* The free list is protected by a mutex. */
 
   DEBUGASSERT(conn->crefs == 0);
 
-  /* Take the semaphore (perhaps waiting) */
+  /* Take the mutex (perhaps waiting) */
 
-  net_lockedwait_uninterruptible(&g_free_sem);
+  nxmutex_lock(&g_free_lock);
 
   /* Remove the connection from the active list */
 
@@ -169,7 +169,7 @@ void icmpv6_free(FAR struct icmpv6_conn_s *conn)
   /* Free the connection */
 
   dq_addlast(&conn->sconn.node, &g_free_icmpv6_connections);
-  nxsem_post(&g_free_sem);
+  nxmutex_unlock(&g_free_lock);
 }
 
 /****************************************************************************

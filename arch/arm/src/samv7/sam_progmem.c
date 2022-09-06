@@ -28,7 +28,7 @@
 #include <errno.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <arch/samv7/chip.h>
 
 #include "arm_internal.h"
@@ -153,32 +153,11 @@
  ****************************************************************************/
 
 static uint32_t g_page_buffer[SAMV7_PAGE_WORDS];
-static sem_t g_page_sem;
+static mutex_t g_page_lock;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: page_buffer_lock
- *
- * Description:
- *   Get exclusive access to the global page buffer
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static int page_buffer_lock(void)
-{
-  return nxsem_wait_uninterruptible(&g_page_sem);
-}
-
-#define page_buffer_unlock() nxsem_post(&g_page_sem)
 
 /****************************************************************************
  * Public Functions
@@ -212,11 +191,11 @@ void sam_progmem_initialize(void)
   regval &= ~EEFC_FMR_FRDY;
   sam_eefc_writefmr(regval);
 
-  /* Initialize the semaphore that manages exclusive access to the global
+  /* Initialize the mutex that manages exclusive access to the global
    * page buffer.
    */
 
-  nxsem_init(&g_page_sem, 0, 1);
+  nxmutex_init(&g_page_lock);
 }
 
 /****************************************************************************
@@ -526,7 +505,7 @@ ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
 
   /* Get exclusive access to the global page buffer */
 
-  ret = page_buffer_lock();
+  ret = nxmutex_lock(&g_page_lock);
   if (ret < 0)
     {
       return (ssize_t)ret;
@@ -610,7 +589,7 @@ ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
       page++;
     }
 
-  page_buffer_unlock();
+  nxmutex_unlock(&g_page_lock);
   return written;
 }
 

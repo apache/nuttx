@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/mm_heap/mm_sem.c
+ * mm/mm_heap/mm_lock.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -30,7 +30,6 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/mm/mm.h>
 
 #include "mm_heap/mm.h"
@@ -40,55 +39,23 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mm_seminitialize
- *
- * Description:
- *   Initialize the MM mutex
- *
- ****************************************************************************/
-
-void mm_seminitialize(FAR struct mm_heap_s *heap)
-{
-  /* Initialize the MM semaphore to one (to support one-at-a-time access to
-   * private data sets).
-   */
-
-  _SEM_INIT(&heap->mm_semaphore, 0, 1);
-}
-
-/****************************************************************************
- * Name: mm_seminitialize
- *
- * Description:
- *   Uninitialize the MM mutex
- *
- ****************************************************************************/
-
-void mm_semuninitialize(FAR struct mm_heap_s *heap)
-{
-  /* Uninitialize the MM semaphore */
-
-  _SEM_DESTROY(&heap->mm_semaphore);
-}
-
-/****************************************************************************
- * Name: mm_takesemaphore
+ * Name: mm_lock
  *
  * Description:
  *   Take the MM mutex. This may be called from the OS in certain conditions
- *   when it is impossible to wait on a semaphore:
+ *   when it is impossible to wait on a mutex:
  *     1.The idle process performs the memory corruption check.
  *     2.The task/thread free the memory in the exiting process.
  *
  * Input Parameters:
- *   heap  - heap instance want to take semaphore
+ *   heap  - heap instance want to take mutex
  *
  * Returned Value:
- *   true if the semaphore can be taken, otherwise false.
+ *   true if the lock can be taken, otherwise false.
  *
  ****************************************************************************/
 
-bool mm_takesemaphore(FAR struct mm_heap_s *heap)
+bool mm_lock(FAR struct mm_heap_s *heap)
 {
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   /* Check current environment */
@@ -96,17 +63,13 @@ bool mm_takesemaphore(FAR struct mm_heap_s *heap)
   if (up_interrupt_context())
     {
 #if !defined(CONFIG_SMP)
-      int val;
-
-      /* Check the semaphore value, if held by someone, then return false.
+      /* Check the mutex value, if held by someone, then return false.
        * Or, touch the heap internal data directly.
        */
 
-      _SEM_GETVALUE(&heap->mm_semaphore, &val);
-
-      return val > 0;
+      return !nxmutex_is_locked(&heap->mm_lock);
 #else
-      /* Can't take semaphore in SMP interrupt handler */
+      /* Can't take mutex in SMP interrupt handler */
 
       return false;
 #endif
@@ -115,7 +78,7 @@ bool mm_takesemaphore(FAR struct mm_heap_s *heap)
 #endif
 
   /* getpid() returns the task ID of the task at the head of the ready-to-
-   * run task list.  mm_takesemaphore() may be called during context
+   * run task list.  mm_lock() may be called during context
    * switches.  There are certain situations during context switching when
    * the OS data structures are in flux and then can't be freed immediately
    * (e.g. the running thread stack).
@@ -130,39 +93,19 @@ bool mm_takesemaphore(FAR struct mm_heap_s *heap)
     }
   else
     {
-      int ret;
-
-      /* Take the semaphore (perhaps waiting) */
-
-      do
-        {
-          ret = _SEM_WAIT(&heap->mm_semaphore);
-
-          /* The only case that an error should occur here is if the wait
-           * was awakened by a signal.
-           */
-
-          if (ret < 0)
-            {
-              ret = _SEM_ERRVAL(ret);
-              DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
-            }
-        }
-      while (ret < 0);
-
-      return true;
+      return nxmutex_lock(&heap->mm_lock) >= 0;
     }
 }
 
 /****************************************************************************
- * Name: mm_givesemaphore
+ * Name: mm_unlock
  *
  * Description:
  *   Release the MM mutex when it is not longer needed.
  *
  ****************************************************************************/
 
-void mm_givesemaphore(FAR struct mm_heap_s *heap)
+void mm_unlock(FAR struct mm_heap_s *heap)
 {
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   if (up_interrupt_context())
@@ -171,5 +114,5 @@ void mm_givesemaphore(FAR struct mm_heap_s *heap)
     }
 #endif
 
-  DEBUGVERIFY(_SEM_POST(&heap->mm_semaphore));
+  DEBUGVERIFY(nxmutex_unlock(&heap->mm_lock));
 }

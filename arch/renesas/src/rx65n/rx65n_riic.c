@@ -26,6 +26,7 @@
 #include <stdint.h>
 #include <assert.h>
 #include <errno.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/kthread.h>
 #include "rx65n_riic.h"
@@ -110,12 +111,12 @@ struct rx65n_i2c_priv_s
 {
   const struct      i2c_ops_s *ops;
   const struct      rx65n_i2c_dev_s *dev;
-  int refs;                          /* Referernce count */
-  int bus;                           /* Bus number */
+  int               refs;            /* Referernce count */
+  int               bus;             /* Bus number */
   volatile uint8_t  mode;            /* See enum rx65n_i2c_mode_e */
   volatile uint8_t  dev_sts;         /* See enum rx65n_i2c_dev_sts_e */
   volatile uint8_t  event;           /* See enum rx65n_i2c_event_e */
-  sem_t             sem_excl;        /* Mutual exclusion semaphore */
+  mutex_t           lock;            /* Mutual exclusion mutex */
   sem_t             sem_isr;         /* Interrupt wait semaphore */
   uint8_t           msgc;            /* Number of Messages */
   struct            i2c_msg_s *msgv; /* Message list */
@@ -241,6 +242,10 @@ static struct rx65n_i2c_priv_s rx65n_riic0_priv =
   .dev       = &rx65n_riic0_dev,
   .refs      = 0,
   .bus       = 0,
+  .lock      = NXMUTEX_INITIALIZER,
+#ifndef CONFIG_I2C_POLLED
+  .sem_isr   = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+#endif
   .mode      = RIIC_NONE,
   .dev_sts   = RIIC_STS_NO_INIT,
   .event     = RIIC_EV_NONE,
@@ -272,6 +277,10 @@ static struct rx65n_i2c_priv_s rx65n_riic1_priv =
   .dev       = &rx65n_riic1_dev,
   .refs      = 0,
   .bus       = 1,
+  .lock      = NXMUTEX_INITIALIZER,
+#ifndef CONFIG_I2C_POLLED
+  .sem_isr   = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+#endif
   .mode      = RIIC_NONE,
   .dev_sts   = RIIC_STS_NO_INIT,
   .event     = RIIC_EV_NONE,
@@ -303,6 +312,10 @@ static struct rx65n_i2c_priv_s rx65n_riic2_priv =
   .dev       = &rx65n_riic2_dev,
   .refs      = 0,
   .bus       = 2,
+  .lock      = NXMUTEX_INITIALIZER,
+#ifndef CONFIG_I2C_POLLED
+  .sem_isr   = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+#endif
   .mode      = RIIC_NONE,
   .dev_sts   = RIIC_STS_NO_INIT,
   .event     = RIIC_EV_NONE,
@@ -2799,7 +2812,7 @@ static int rx65n_i2c_transfer(FAR struct i2c_master_s *dev, \
 
   /* Get exclusive access to the I2C bus */
 
-  nxsem_wait(&priv->sem_excl);
+  nxmutex_lock(&priv->lock);
 
   priv->mode = RIIC_READY;
   priv->dev_sts = RIIC_STS_IDLE;
@@ -2889,7 +2902,7 @@ static int rx65n_i2c_transfer(FAR struct i2c_master_s *dev, \
         }
     }
 
-  nxsem_post(&priv->sem_excl);
+  nxmutex_unlock(&priv->lock);
 
   while (RIIC_FINISH != priv->mode && RIIC_NONE != priv->mode);
 
@@ -2969,7 +2982,7 @@ static int rx65n_i2c_reset(FAR struct i2c_master_s *dev)
 
   DEBUGASSERT(priv->refs > 0);
 
-  nxsem_wait(&priv->sem_excl);
+  nxmutex_lock(&priv->lock);
 
   if (priv->bus == 0)
     {
@@ -3006,7 +3019,7 @@ static int rx65n_i2c_reset(FAR struct i2c_master_s *dev)
       rx65n_putreg(regval, RX65N_RIIC2_ICCR1);
     }
 
-  nxsem_post(&priv->sem_excl);
+  nxmutex_unlock(&priv->lock);
   return OK;
 }
 #endif /* CONFIG_I2C_RESET */
@@ -3065,11 +3078,6 @@ FAR struct i2c_master_s *rx65n_i2cbus_initialize(int channel)
 
   if ((volatile int)priv->refs++ == 0)
     {
-      /* Initialize semaphores */
-
-      nxsem_init(&priv->sem_excl, 0, 1);
-      nxsem_init(&priv->sem_isr, 0, 0);
-
       /* Initialize the RIIC registers */
 
       rx65n_riic_init(priv);
@@ -3120,11 +3128,6 @@ int rx65n_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
   irq_detach(priv->dev->rxi_irq);
   irq_detach(priv->dev->tei_irq);
   irq_detach(priv->dev->eei_irq);
-
-  /* Release unused resources */
-
-  nxsem_destroy(&priv->sem_excl);
-  nxsem_destroy(&priv->sem_isr);
 
   return OK;
 }

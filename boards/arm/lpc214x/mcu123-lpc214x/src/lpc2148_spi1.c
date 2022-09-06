@@ -57,7 +57,7 @@
 
 #include <arch/board/board.h>
 #include <nuttx/arch.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/spi/spi.h>
 
 #include "arm_internal.h"
@@ -130,7 +130,7 @@ static struct spi_dev_s g_spidev =
   &g_spiops
 };
 
-static sem_t g_exclsem = SEM_INITIALIZER(1);  /* For mutually exclusive access */
+static mutex_t g_lock = NXMUTEX_INITIALIZER;  /* For mutually exclusive access */
 
 /****************************************************************************
  * Public Data
@@ -167,11 +167,11 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
 
   if (lock)
     {
-      ret = nxsem_wait_uninterruptible(&g_exclsem);
+      ret = nxmutex_lock(&g_lock);
     }
   else
     {
-      ret = nxsem_post(&g_exclsem);
+      ret = nxmutex_unlock(&g_lock);
     }
 
   return ret;

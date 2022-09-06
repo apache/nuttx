@@ -77,9 +77,6 @@ static
                   uint8_t regaddr);
 static void     wm8904_writereg(FAR struct wm8904_dev_s *priv,
                   uint8_t regaddr, uint16_t regval);
-static int      wm8904_takesem(FAR sem_t *sem);
-static int      wm8904_forcetake(FAR sem_t *sem);
-#define         wm8904_givesem(s) nxsem_post(s)
 
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
 static inline uint16_t wm8904_scalevolume(uint16_t volume, b16_t scale);
@@ -389,57 +386,6 @@ static void wm8904_writereg(FAR struct wm8904_dev_s *priv, uint8_t regaddr,
 
       audinfo("retries=%d regaddr=%02x\n", retries, regaddr);
     }
-}
-
-/****************************************************************************
- * Name: wm8904_takesem
- *
- * Description:
- *  Take a semaphore count, handling the nasty EINTR return if we are
- *  interrupted by a signal.
- *
- ****************************************************************************/
-
-static int wm8904_takesem(sem_t *sem)
-{
-  return nxsem_wait_uninterruptible(sem);
-}
-
-/****************************************************************************
- * Name: wm8904_forcetake
- *
- * Description:
- *   This is just another wrapper but this one continues even if the thread
- *   is canceled.  This must be done in certain conditions where were must
- *   continue in order to clean-up resources.
- *
- ****************************************************************************/
-
-static int wm8904_forcetake(FAR sem_t *sem)
-{
-  int result;
-  int ret = OK;
-
-  do
-    {
-      result = nxsem_wait_uninterruptible(sem);
-
-      /* The only expected error would -ECANCELED meaning that the
-       * parent thread has been canceled.  We have to continue and
-       * terminate the poll in this case.
-       */
-
-      DEBUGASSERT(result == OK || result == -ECANCELED);
-      if (ret == OK && result < 0)
-        {
-          /* Remember the first failure */
-
-          ret = result;
-        }
-    }
-  while (result < 0);
-
-  return ret;
 }
 
 /****************************************************************************
@@ -1529,7 +1475,7 @@ static int wm8904_sendbuffer(FAR struct wm8904_dev_s *priv)
    * only while accessing 'inflight'.
    */
 
-  ret = wm8904_takesem(&priv->pendsem);
+  ret = nxmutex_lock(&priv->pendlock);
   if (ret < 0)
     {
       return ret;
@@ -1588,7 +1534,7 @@ static int wm8904_sendbuffer(FAR struct wm8904_dev_s *priv)
         }
     }
 
-  wm8904_givesem(&priv->pendsem);
+  nxmutex_unlock(&priv->pendlock);
   return ret;
 }
 
@@ -1795,7 +1741,7 @@ static int wm8904_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
 
   /* Add the new buffer to the tail of pending audio buffers */
 
-  ret = wm8904_takesem(&priv->pendsem);
+  ret = nxmutex_lock(&priv->pendlock);
   if (ret < 0)
     {
       return ret;
@@ -1803,7 +1749,7 @@ static int wm8904_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
 
   apb->flags |= AUDIO_APB_OUTPUT_ENQUEUED;
   dq_addlast(&apb->dq_entry, &priv->pendq);
-  wm8904_givesem(&priv->pendsem);
+  nxmutex_unlock(&priv->pendlock);
 
   /* Send a message to the worker thread indicating that a new buffer has
    * been enqueued.  If mq is NULL, then the playing has not yet started.
@@ -1915,9 +1861,9 @@ static int wm8904_reserve(FAR struct audio_lowerhalf_s *dev)
   FAR struct wm8904_dev_s *priv = (FAR struct wm8904_dev_s *) dev;
   int ret;
 
-  /* Borrow the APBQ semaphore for thread sync */
+  /* Borrow the APBQ mutex for thread sync */
 
-  ret = wm8904_takesem(&priv->pendsem);
+  ret = nxmutex_lock(&priv->pendlock);
   if (ret < 0)
     {
       return ret;
@@ -1943,8 +1889,7 @@ static int wm8904_reserve(FAR struct audio_lowerhalf_s *dev)
       priv->reserved    = true;
     }
 
-  wm8904_givesem(&priv->pendsem);
-
+  nxmutex_unlock(&priv->pendlock);
   return ret;
 }
 
@@ -1974,14 +1919,14 @@ static int wm8904_release(FAR struct audio_lowerhalf_s *dev)
       priv->threadid = 0;
     }
 
-  /* Borrow the APBQ semaphore for thread sync */
+  /* Borrow the APBQ mutex for thread sync */
 
-  ret = wm8904_forcetake(&priv->pendsem);
+  ret = nxmutex_lock(&priv->pendlock);
 
   /* Really we should free any queued buffers here */
 
   priv->reserved = false;
-  wm8904_givesem(&priv->pendsem);
+  nxmutex_unlock(&priv->pendlock);
 
   return ret;
 }
@@ -2200,7 +2145,7 @@ static void *wm8904_workerthread(pthread_addr_t pvarg)
 
   /* Return any pending buffers in our pending queue */
 
-  wm8904_forcetake(&priv->pendsem);
+  nxmutex_lock(&priv->pendlock);
   while ((apb = (FAR struct ap_buffer_s *)dq_remfirst(&priv->pendq)) != NULL)
     {
       /* Release our reference to the buffer */
@@ -2216,7 +2161,7 @@ static void *wm8904_workerthread(pthread_addr_t pvarg)
 #endif
     }
 
-  wm8904_givesem(&priv->pendsem);
+  nxmutex_unlock(&priv->pendlock);
 
   /* Return any pending buffers in our done queue */
 
@@ -2601,7 +2546,7 @@ FAR struct audio_lowerhalf_s *
       priv->i2c        = i2c;
       priv->i2s        = i2s;
 
-      nxsem_init(&priv->pendsem, 0, 1);
+      nxmutex_init(&priv->pendlock);
       dq_init(&priv->pendq);
       dq_init(&priv->doneq);
 
@@ -2630,7 +2575,7 @@ FAR struct audio_lowerhalf_s *
   return NULL;
 
 errout_with_dev:
-  nxsem_destroy(&priv->pendsem);
+  nxmutex_destroy(&priv->pendlock);
   kmm_free(priv);
   return NULL;
 }

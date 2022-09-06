@@ -47,7 +47,7 @@ extern "C"
  *   De-allocate a PTY minor number.
  *
  * Assumptions:
- *   Caller hold the px_exclsem
+ *   Caller hold the px_excllock
  *
  ****************************************************************************/
 

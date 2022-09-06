@@ -30,6 +30,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <nuttx/mutex.h>
 
 #include "sam_config.h"
 #include "sam_port.h"
@@ -101,7 +102,7 @@ struct sam_tc_dev_s
   uint32_t freq;                  /* TC freq  */
   uint32_t duty;                  /* TC duty cycle */
 
-  sem_t exclsem;              /* Only one thread can access at a time */
+  mutex_t lock;               /* Only one thread can access at a time */
   sem_t waitsem;              /* Wait for TC  */
 
   bool initialized;        /* True: Timer data has been initialized */

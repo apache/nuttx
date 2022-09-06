@@ -33,7 +33,7 @@
 
 #include <nuttx/crypto/crypto.h>
 #include <nuttx/arch.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
@@ -59,8 +59,8 @@
  * Private Data
  ****************************************************************************/
 
-static sem_t g_samaes_lock;
-static bool  g_samaes_initdone = false;
+static mutex_t g_samaes_lock;
+static bool    g_samaes_initdone = false;
 
 /****************************************************************************
  * Public Data
@@ -69,16 +69,6 @@ static bool  g_samaes_initdone = false;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-static void samaes_lock(void)
-{
-  nxsem_wait(&g_samaes_lock);
-}
-
-static void samaes_unlock(void)
-{
-  nxsem_post(&g_samaes_lock);
-}
 
 static void samaes_memcpy(void *out, const void *in, size_t size)
 {
@@ -169,7 +159,7 @@ static int samaes_setup_mr(uint32_t keysize, int mode, int encrypt)
 
 static int samaes_initialize(void)
 {
-  nxsem_init(&g_samaes_lock, 0, 1);
+  nxmutex_init(&g_samaes_lock);
   sam_aes_enableclk();
   putreg32(AES_CR_SWRST, SAM_AES_CR);
   return OK;
@@ -197,12 +187,12 @@ int aes_cypher(void *out, const void *in, size_t size,
       return -EINVAL;
     }
 
-  samaes_lock();
+  nxmutex_lock(&g_samaes_lock);
 
   ret = samaes_setup_mr(keysize, mode & AES_MODE_MASK, encrypt);
   if (ret < 0)
     {
-      samaes_unlock();
+      nxmutex_unlock(&g_samaes_lock);
       return ret;
     }
 
@@ -232,6 +222,6 @@ int aes_cypher(void *out, const void *in, size_t size,
       size -= AES_BLOCK_SIZE;
     }
 
-  samaes_unlock();
+  nxmutex_unlock(&g_samaes_lock);
   return ret;
 }

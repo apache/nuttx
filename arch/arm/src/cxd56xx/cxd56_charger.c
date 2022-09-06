@@ -39,6 +39,7 @@
 #include <math.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/mutex.h>
 #include <nuttx/power/battery_charger.h>
 #include <nuttx/power/battery_ioctl.h>
 
@@ -64,7 +65,7 @@
 
 struct charger_dev_s
 {
-  sem_t batsem;
+  mutex_t batlock;
 };
 
 /****************************************************************************
@@ -451,7 +452,7 @@ static int charger_ioctl(struct file *filep, int cmd, unsigned long arg)
   struct charger_dev_s *priv = inode->i_private;
   int ret = -ENOTTY;
 
-  nxsem_wait_uninterruptible(&priv->batsem);
+  nxmutex_lock(&priv->batlock);
 
   switch (cmd)
     {
@@ -593,8 +594,7 @@ static int charger_ioctl(struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
-  nxsem_post(&priv->batsem);
-
+  nxmutex_unlock(&priv->batlock);
   return ret;
 }
 
@@ -623,7 +623,7 @@ int cxd56_charger_initialize(const char *devpath)
 
   /* Initialize the CXD5247 device structure */
 
-  nxsem_init(&priv->batsem, 0, 1);
+  nxmutex_init(&priv->batlock);
 
   /* Register battery driver */
 

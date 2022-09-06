@@ -210,7 +210,7 @@ static int nxposix_spawn_proxy(int argc, FAR char *argv[])
 
   g_spawn_parms.result = ret;
 #ifndef CONFIG_SCHED_WAITPID
-  spawn_semgive(&g_spawn_execsem);
+  nxsem_post(&g_spawn_execsem);
 #endif
   return OK;
 }
@@ -347,10 +347,10 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
 
   /* Get exclusive access to the global parameter structure */
 
-  ret = spawn_semtake(&g_spawn_parmsem);
+  ret = nxmutex_lock(&g_spawn_parmlock);
   if (ret < 0)
     {
-      serr("ERROR: spawn_semtake failed: %d\n", ret);
+      serr("ERROR: nxmutex_lock failed: %d\n", ret);
       return -ret;
     }
 
@@ -370,7 +370,7 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
   if (ret < 0)
     {
       serr("ERROR: nxsched_get_param failed: %d\n", ret);
-      spawn_semgive(&g_spawn_parmsem);
+      nxmutex_unlock(&g_spawn_parmlock);
       return -ret;
     }
 
@@ -414,10 +414,10 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
       goto errout_with_lock;
     }
 #else
-  ret = spawn_semtake(&g_spawn_execsem);
+  ret = nxsem_wait_uninterruptible(&g_spawn_execsem);
   if (ret < 0)
     {
-      serr("ERROR: spawn_semtake() failed: %d\n", ret);
+      serr("ERROR: nxsem_wait_uninterruptible() failed: %d\n", ret);
       goto errout_with_lock;
     }
 #endif
@@ -430,6 +430,6 @@ errout_with_lock:
 #ifdef CONFIG_SCHED_WAITPID
   sched_unlock();
 #endif
-  spawn_semgive(&g_spawn_parmsem);
+  nxmutex_unlock(&g_spawn_parmlock);
   return ret;
 }

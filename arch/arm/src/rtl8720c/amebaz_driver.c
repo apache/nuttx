@@ -64,7 +64,7 @@ static void amebaz_state_timeout(wdparm_t arg)
     }
 
   state->status = AMEBAZ_STATUS_TIMEOUT;
-  nxsem_post(&state->mutex);
+  nxsem_post(&state->sem);
 }
 
 static int amebaz_state_run(struct amebaz_state_s *state, int32_t delay)
@@ -84,7 +84,7 @@ static int amebaz_state_wait(struct amebaz_state_s *state)
   int ret = 0;
   while (state->status == AMEBAZ_STATUS_RUN)
     {
-      ret = nxsem_wait_uninterruptible(&state->mutex);
+      ret = nxsem_wait_uninterruptible(&state->sem);
       if (ret != 0)
         {
           break;
@@ -101,7 +101,7 @@ static void amebaz_state_post(struct amebaz_state_s *state, int status)
   if (_status == AMEBAZ_STATUS_RUN)
     {
       wd_cancel(&state->timeout);
-      nxsem_post(&state->mutex);
+      nxsem_post(&state->sem);
     }
 }
 
@@ -112,7 +112,7 @@ static void amebaz_state_deinit(struct amebaz_state_s *state)
 
 static int amebaz_state_init(struct amebaz_state_s *state)
 {
-  if (nxsem_init(&state->mutex, 0, 0) != OK)
+  if (nxsem_init(&state->sem, 0, 0) != OK)
     {
       return -ENOMEM;
     }
@@ -509,7 +509,7 @@ int amebaz_wl_get_scan_results(struct amebaz_dev_s *priv, struct iwreq *iwr)
 
   iwr->u.data.length = amebaz_wl_format_scan_results(priv, iwr);
 exit_sem_post:
-  nxsem_post(&state->mutex);
+  nxsem_post(&state->sem);
 exit_failed:
   if (ret < 0)
     {

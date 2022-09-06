@@ -37,7 +37,6 @@
 #include <nuttx/signal.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/clock.h>
-#include <nuttx/semaphore.h>
 
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
@@ -116,7 +115,6 @@ struct usbhost_hubpriv_s
   bool                      compounddev;  /* Hub is part of compound device */
   bool                      indicator;    /* Port indicator */
   uint16_t                  pwrondelay;   /* Power on wait time in ms */
-  sem_t                     exclsem;      /* Used to maintain mutual exclusive access */
   struct work_s             work;         /* Used for deferred callback work */
   usbhost_ep_t              intin;        /* Interrupt IN endpoint */
 
@@ -1105,10 +1103,6 @@ static void usbhost_disconnect_event(FAR void *arg)
 
   usbhost_hport_deactivate(hport);
 
-  /* Destroy the semaphores */
-
-  nxsem_destroy(&priv->exclsem);
-
   /* Disconnect the USB host device */
 
   DRVR_DISCONNECT(hport->drvr, hport);
@@ -1318,10 +1312,6 @@ static FAR struct usbhost_class_s *
       uerr("ERROR: DRVR_IOALLOC failed: %d\n", ret);
       goto errout_with_ctrlreq;
     }
-
-  /* Initialize semaphores (this works okay in the interrupt context) */
-
-  nxsem_init(&priv->exclsem, 0, 1);
 
   /* Initialize per-port data */
 

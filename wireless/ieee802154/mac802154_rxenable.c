@@ -60,20 +60,20 @@ static void mac802154_rxenabletimeout(FAR void *arg)
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)arg;
 
-  while (mac802154_lock(priv, true) != 0);
+  while (nxmutex_lock(&priv->lock) != 0);
 
   if (priv->curr_op != MAC802154_OP_RXENABLE)
     {
-      mac802154_unlock(priv);
+      nxmutex_unlock(&priv->lock);
       return;
     }
 
   mac802154_rxdisable(priv);
 
   priv->curr_op = MAC802154_OP_NONE;
-  mac802154_givesem(&priv->opsem);
+  nxsem_post(&priv->opsem);
 
-  mac802154_unlock(priv)
+  nxmutex_unlock(&priv->lock);
 }
 
 /****************************************************************************
@@ -103,7 +103,7 @@ int mac802154_req_rxenable(MACHANDLE mac,
   if (priv->sfspec.sforder < 15)
     {
       return -EINVAL;
-      goto errout_with_sem;
+      goto errout_with_lock;
     }
 
   /* Non-beacon enabled network */
@@ -119,7 +119,7 @@ int mac802154_req_rxenable(MACHANDLE mac,
            * MAC in order to unlock it.
            */
 
-          ret = mac802154_takesem(&priv->opsem, true);
+          ret = nxsem_wait_uninterruptible(&priv->opsem);
           if (ret < 0)
             {
               return ret;
@@ -129,14 +129,14 @@ int mac802154_req_rxenable(MACHANDLE mac,
 
           /* Get exclusive access to the MAC */
 
-          ret = mac802154_lock(priv, true);
+          ret = nxmutex_lock(&priv->lock);
           if (ret < 0)
             {
               /* Should only fail if interrupted by a signal */
 
-              wlwarn("WARNING: mac802154_takesem failed: %d\n", ret);
+              wlwarn("WARNING: nxmutex_lock failed: %d\n", ret);
 
-              mac802154_givesem(&priv->opsem);
+              nxsem_post(&priv->opsem);
               return ret;
             }
 
@@ -150,33 +150,33 @@ int mac802154_req_rxenable(MACHANDLE mac,
         }
       else
         {
-          ret = mac802154_lock(priv, true);
+          ret = nxmutex_lock(&priv->lock);
           if (ret < 0)
             {
               /* Should only fail if interrupted by a signal */
 
-              wlwarn("WARNING: mac802154_takesem failed: %d\n", ret);
+              wlwarn("WARNING: nxmutex_lock failed: %d\n", ret);
               return ret;
             }
 
           if (priv->curr_op != MAC802154_OP_RXENABLE)
             {
               ret = -EINVAL;
-              goto errout_with_sem;
+              goto errout_with_lock;
             }
 
           mac802154_timercancel(priv);
           mac802154_rxdisable(priv);
 
           priv->curr_op = MAC802154_OP_NONE;
-          mac802154_givesem(&priv->opsem);
+          nxsem_post(&priv->opsem);
         }
     }
 
-  mac802154_unlock(priv)
+  nxmutex_unlock(&priv->lock);
   return OK;
 
-errout_with_sem:
-  mac802154_unlock(priv)
+errout_with_lock:
+  nxmutex_unlock(&priv->lock);
   return ret;
 }

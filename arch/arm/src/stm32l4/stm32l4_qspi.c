@@ -40,7 +40,7 @@
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/spi/qspi.h>
 
 #include "arm_internal.h"
@@ -167,7 +167,7 @@ struct stm32l4_qspidev_s
   uint8_t nbits;                /* Width of word in bits (8 to 32) */
   uint8_t intf;                 /* QSPI controller number (0) */
   bool initialized;             /* TRUE: Controller has been initialized */
-  sem_t exclsem;                /* Assures mutually exclusive access to QSPI */
+  mutex_t lock;                 /* Assures mutually exclusive access to QSPI */
   bool memmap;                  /* TRUE: Controller is in memory mapped mode */
 
 #ifdef STM32L4_QSPI_INTERRUPTS
@@ -1698,11 +1698,11 @@ static int qspi_lock(struct qspi_dev_s *dev, bool lock)
   spiinfo("lock=%d\n", lock);
   if (lock)
     {
-      ret = nxsem_wait_uninterruptible(&priv->exclsem);
+      ret = nxmutex_lock(&priv->lock);
     }
   else
     {
-      ret = nxsem_post(&priv->exclsem);
+      ret = nxmutex_unlock(&priv->lock);
     }
 
   return ret;
@@ -2499,11 +2499,11 @@ struct qspi_dev_s *stm32l4_qspi_initialize(int intf)
     {
       /* Now perform one time initialization */
 
-      /* Initialize the QSPI semaphore that enforces mutually exclusive
+      /* Initialize the QSPI mutex that enforces mutually exclusive
        * access to the QSPI registers.
        */
 
-      nxsem_init(&priv->exclsem, 0, 1);
+      nxmutex_init(&priv->lock);
 
 #ifdef CONFIG_STM32L4_QSPI_DMA
       /* Pre-allocate DMA channels. */
@@ -2583,7 +2583,7 @@ errout_with_dmawait:
     }
 #endif
 
-  nxsem_destroy(&priv->exclsem);
+  nxmutex_destroy(&priv->lock);
   return NULL;
 }
 

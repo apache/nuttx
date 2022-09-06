@@ -130,21 +130,6 @@ static const struct ioexpander_ops_s g_pcf8574_ops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pcf8574_lock
- *
- * Description:
- *   Get exclusive access to the I/O Expander
- *
- ****************************************************************************/
-
-static int pcf8574_lock(FAR struct pcf8574_dev_s *priv)
-{
-  return nxsem_wait_uninterruptible(&priv->exclsem);
-}
-
-#define pcf8574_unlock(p) nxsem_post(&(p)->exclsem)
-
-/****************************************************************************
  * Name: pcf8574_read
  *
  * Description:
@@ -255,7 +240,7 @@ static int pcf8574_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   /* Get exclusive access to the I/O Expander */
 
-  ret = pcf8574_lock(priv);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -282,7 +267,7 @@ static int pcf8574_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   ret = pcf8574_write(priv, priv->inpins | priv->outstate);
 
-  pcf8574_unlock(priv);
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -325,7 +310,7 @@ static int pcf8574_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
       ioe_pinset_t bit = ((ioe_pinset_t)1 << pin);
 
       ret = OK;
-      ret = pcf8574_lock(priv);
+      ret = nxmutex_lock(&priv->lock);
       if (ret < 0)
         {
           return ret;
@@ -370,7 +355,7 @@ static int pcf8574_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
             ret = -EINVAL;
         }
 
-      pcf8574_unlock(priv);
+      nxmutex_unlock(&priv->lock);
     }
 #endif
 
@@ -407,7 +392,7 @@ static int pcf8574_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   /* Get exclusive access to the I/O Expander */
 
-  ret = pcf8574_lock(priv);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -418,7 +403,7 @@ static int pcf8574_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
   if ((priv->inpins & (1 << pin)) != 0)
     {
       gpioerr("ERROR: pin%u is an input\n", pin);
-      pcf8574_unlock(priv);
+      nxmutex_unlock(&priv->lock);
       return -EINVAL;
     }
 
@@ -439,7 +424,7 @@ static int pcf8574_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   ret = pcf8574_write(priv, priv->inpins | priv->outstate);
 
-  pcf8574_unlock(priv);
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -483,7 +468,7 @@ static int pcf8574_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   /* Get exclusive access to the I/O Expander */
 
-  ret = pcf8574_lock(priv);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -498,7 +483,7 @@ static int pcf8574_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
        */
 
       *value = ((priv->outstate & (1 << pin)) != 0);
-      pcf8574_unlock(priv);
+      nxmutex_unlock(&priv->lock);
       return OK;
     }
 
@@ -529,7 +514,7 @@ static int pcf8574_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
   ret = OK;
 
 errout_with_lock:
-  pcf8574_unlock(priv);
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -567,7 +552,7 @@ static int pcf8574_multiwritepin(FAR struct ioexpander_dev_s *dev,
 
   /* Get exclusive access to the I/O Expander */
 
-  ret = pcf8574_lock(priv);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -608,7 +593,7 @@ static int pcf8574_multiwritepin(FAR struct ioexpander_dev_s *dev,
 
   ret = pcf8574_write(priv, priv->inpins | priv->outstate);
 
-  pcf8574_unlock(priv);
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 #endif
@@ -648,7 +633,7 @@ static int pcf8574_multireadpin(FAR struct ioexpander_dev_s *dev,
 
   /* Get exclusive access to the I/O Expander */
 
-  ret = pcf8574_lock(priv);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -704,7 +689,7 @@ static int pcf8574_multireadpin(FAR struct ioexpander_dev_s *dev,
   ret = OK;
 
 errout_with_lock:
-  pcf8574_unlock(priv);
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 #endif
@@ -740,7 +725,7 @@ static FAR void *pcf8574_attach(FAR struct ioexpander_dev_s *dev,
 
   /* Get exclusive access to the I/O Expander */
 
-  ret = pcf8574_lock(priv);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -764,7 +749,7 @@ static FAR void *pcf8574_attach(FAR struct ioexpander_dev_s *dev,
         }
     }
 
-  pcf8574_unlock(priv);
+  nxmutex_unlock(&priv->lock);
   return handle;
 }
 #endif
@@ -929,7 +914,7 @@ static void pcf8574_irqworker(void *arg)
 
   /* Check for pending interrupts */
 
-  ret = pcf8574_lock(priv);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -941,7 +926,7 @@ static void pcf8574_irqworker(void *arg)
 
   pinset        = priv->intstat;
   priv->intstat = 0;
-  pcf8574_unlock(priv);
+  nxmutex_unlock(&priv->lock);
 
   /* Perform pin interrupt callbacks */
 
@@ -1155,7 +1140,7 @@ FAR struct ioexpander_dev_s *pcf8574_initialize(FAR struct i2c_master_s *i2c,
   priv->config->enable(config, true);
 #endif
 
-  nxsem_init(&priv->exclsem, 0, 1);
+  nxmutex_init(&priv->lock);
   return &priv->dev;
 }
 

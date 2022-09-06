@@ -212,32 +212,6 @@ static void gd32_dma_clock_enable(uint32_t dmabase)
 }
 
 /****************************************************************************
- * Name: gd32_dmasem_take
- *
- * Description:
- *   Used to request exclusive access to a DMA channel.
- *
- ****************************************************************************/
-
-static int gd32_dmasem_take(struct gd32_dma_channel_s *dmachan)
-{
-  return nxsem_wait_uninterruptible(&dmachan->chsem);
-}
-
-/****************************************************************************
- * Name: gd32_dmasem_give
- *
- * Description:
- *   Used to free exclusive access to a DMA channel.
- *
- ****************************************************************************/
-
-static inline void gd32_dmasem_give(struct gd32_dma_channel_s *dmachan)
-{
-  nxsem_post(&dmachan->chsem);
-}
-
-/****************************************************************************
  * Name: gd32_dma_channel_get
  *
  * Description:
@@ -647,10 +621,9 @@ DMA_HANDLE gd32_dma_channel_alloc(uint8_t periph_req)
 
   /* Get exclusive access to the DMA channel */
 
-  ret = gd32_dmasem_take(dmachan);
+  ret = nxsem_wait_uninterruptible(&dmachan->chsem);
   if (ret < 0)
     {
-      gd32_dmasem_give(dmachan);
       return NULL;
     }
 
@@ -692,7 +665,7 @@ void gd32_dma_channel_free(DMA_HANDLE handle)
 
   /* Release the channel */
 
-  gd32_dmasem_give(dmachan);
+  nxsem_post(&dmachan->chsem);
 }
 
 /****************************************************************************

@@ -33,7 +33,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 
 #include <inttypes.h>
 #include <stdbool.h>
@@ -75,21 +75,11 @@
  * Private Data
  ****************************************************************************/
 
-static sem_t g_sem = SEM_INITIALIZER(1);
+static mutex_t g_lock = NXMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-static int sem_lock(void)
-{
-  return nxsem_wait_uninterruptible(&g_sem);
-}
-
-static inline void sem_unlock(void)
-{
-  nxsem_post(&g_sem);
-}
 
 static void stm32_eeprom_unlock(void)
 {
@@ -272,14 +262,14 @@ int stm32_flash_unlock(void)
 {
   int ret;
 
-  ret = sem_lock();
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return ret;
     }
 
   flash_unlock();
-  sem_unlock();
+  nxmutex_unlock(&g_lock);
 
   return ret;
 }
@@ -288,14 +278,14 @@ int stm32_flash_lock(void)
 {
   int ret;
 
-  ret = sem_lock();
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return ret;
     }
 
   flash_lock();
-  sem_unlock();
+  nxmutex_unlock(&g_lock);
 
   return ret;
 }
@@ -320,14 +310,14 @@ ssize_t stm32_eeprom_write(size_t addr, const void *buf, size_t buflen)
       return -EINVAL;
     }
 
-  ret = sem_lock();
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return (ssize_t)ret;
     }
 
   outlen = stm32_eeprom_erase_write(addr, buf, buflen);
-  sem_unlock();
+  nxmutex_unlock(&g_lock);
 
   return outlen;
 }
@@ -337,14 +327,14 @@ ssize_t stm32_eeprom_erase(size_t addr, size_t eraselen)
   ssize_t outlen;
   int ret;
 
-  ret = sem_lock();
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return (ssize_t)ret;
     }
 
   outlen = stm32_eeprom_erase_write(addr, NULL, eraselen);
-  sem_unlock();
+  nxmutex_unlock(&g_lock);
 
   return outlen;
 }
@@ -437,7 +427,7 @@ ssize_t up_progmem_eraseblock(size_t block)
 
   /* Get flash ready and begin erasing single page */
 
-  ret = sem_lock();
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return (ssize_t)ret;
@@ -460,7 +450,7 @@ ssize_t up_progmem_eraseblock(size_t block)
     }
 
   flash_lock();
-  sem_unlock();
+  nxmutex_unlock(&g_lock);
 
   /* Verify */
 
@@ -506,7 +496,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
 
   /* Get flash ready and begin flashing */
 
-  ret = sem_lock();
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return (ssize_t)ret;
@@ -554,7 +544,7 @@ out:
     }
 
   flash_lock();
-  sem_unlock();
+  nxmutex_unlock(&g_lock);
   return (ret == OK) ? written : ret;
 }
 

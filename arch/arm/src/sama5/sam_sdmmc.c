@@ -245,8 +245,6 @@ struct sam_sdmmcregs_s
 
 /* Low-level helpers ********************************************************/
 
-static void sam_takesem(struct sam_dev_s *priv);
-#define     sam_givesem(priv) (nxsem_post(&priv->waitsem))
 static void sam_configwaitints(struct sam_dev_s *priv, uint32_t waitints,
               sdio_eventset_t waitevents, sdio_eventset_t wkupevents);
 static void sam_configxfrints(struct sam_dev_s *priv, uint32_t xfrints);
@@ -729,26 +727,6 @@ static inline void sam_putreg(struct sam_dev_s *priv, uint32_t value,
 }
 
 /****************************************************************************
- * Name: sam_takesem
- *
- * Description:
- *   Take the wait semaphore (handling false alarm wakeups due to the receipt
- *   of signals).
- *
- * Input Parameters:
- *   dev - Instance of the SDIO device driver state structure.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void sam_takesem(struct sam_dev_s *priv)
-{
-  nxsem_wait_uninterruptible(&priv->waitsem);
-}
-
-/****************************************************************************
  * Name: sam_configwaitints
  *
  * Description:
@@ -1221,7 +1199,7 @@ static void sam_endwait(struct sam_dev_s *priv, sdio_eventset_t wkupevent)
 
   /* Wake up the waiting thread */
 
-  sam_givesem(priv);
+  nxsem_post(&priv->waitsem);
 }
 
 /****************************************************************************
@@ -2939,7 +2917,7 @@ static sdio_eventset_t sam_eventwait(struct sdio_dev_s *dev)
        * incremented and there will be no wait.
        */
 
-      sam_takesem(priv);
+      nxsem_wait_uninterruptible(&priv->waitsem);
       wkupevent = priv->wkupevent;
 
       /* Check if the event has occurred.  When the event has occurred, then

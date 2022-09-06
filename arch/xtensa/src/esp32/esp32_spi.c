@@ -38,8 +38,8 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/clock.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
-#include <nuttx/spinlock.h>
 #include <nuttx/spi/spi.h>
 
 #include <arch/board/board.h>
@@ -146,7 +146,7 @@ struct esp32_spi_priv_s
 
   /* Held while chip is selected for mutual exclusion */
 
-  sem_t            exclsem;
+  mutex_t          lock;
 
   /* Interrupt wait semaphore */
 
@@ -163,8 +163,6 @@ struct esp32_spi_priv_s
   /* Actual SPI send/receive bits once transmission */
 
   uint8_t          nbits;
-
-  spinlock_t       lock;        /* Device specific lock. */
 };
 
 /****************************************************************************
@@ -274,10 +272,12 @@ static const struct spi_ops_s esp32_spi2_ops =
 static struct esp32_spi_priv_s esp32_spi2_priv =
 {
   .spi_dev =
-              {
-                .ops = &esp32_spi2_ops
-              },
-  .config  = &esp32_spi2_config
+  {
+    .ops   = &esp32_spi2_ops
+  },
+  .config  = &esp32_spi2_config,
+  .lock    = NXMUTEX_INITIALIZER,
+  .sem_isr = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
 };
 #endif /* CONFIG_ESP32_SPI2 */
 
@@ -348,10 +348,12 @@ static const struct spi_ops_s esp32_spi3_ops =
 static struct esp32_spi_priv_s esp32_spi3_priv =
 {
   .spi_dev =
-              {
-                .ops = &esp32_spi3_ops
-              },
-  .config  = &esp32_spi3_config
+  {
+    .ops = &esp32_spi3_ops
+  },
+  .config  = &esp32_spi3_config,
+  .lock    = NXMUTEX_INITIALIZER,
+  .sem_isr = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
 };
 #endif /* CONFIG_ESP32_SPI3 */
 
@@ -477,11 +479,11 @@ static int esp32_spi_lock(struct spi_dev_s *dev, bool lock)
 
   if (lock)
     {
-      ret = nxsem_wait_uninterruptible(&priv->exclsem);
+      ret = nxmutex_lock(&priv->lock);
     }
   else
     {
-      ret = nxsem_post(&priv->exclsem);
+      ret = nxmutex_unlock(&priv->lock);
     }
 
   return ret;
@@ -1267,10 +1269,6 @@ static void esp32_spi_init(struct spi_dev_s *dev)
   const struct esp32_spi_config_s *config = priv->config;
   uint32_t regval;
 
-  /* Initialize the SPI semaphore that enforces mutually exclusive access */
-
-  nxsem_init(&priv->exclsem, 0, 1);
-
   esp32_gpiowrite(config->cs_pin, 1);
   esp32_gpiowrite(config->mosi_pin, 1);
   esp32_gpiowrite(config->miso_pin, 1);
@@ -1331,9 +1329,6 @@ static void esp32_spi_init(struct spi_dev_s *dev)
 
   if (config->use_dma)
     {
-      nxsem_init(&priv->sem_isr, 0, 0);
-      nxsem_set_protocol(&priv->sem_isr, SEM_PRIO_NONE);
-
       modifyreg32(DPORT_PERIP_CLK_EN_REG, 0, config->dma_clk_bit);
       modifyreg32(DPORT_PERIP_RST_EN_REG, config->dma_rst_bit, 0);
 
@@ -1426,7 +1421,6 @@ struct spi_dev_s *esp32_spibus_initialize(int port)
   int ret;
   struct spi_dev_s *spi_dev;
   struct esp32_spi_priv_s *priv;
-  irqstate_t flags;
 
   switch (port)
     {
@@ -1444,13 +1438,13 @@ struct spi_dev_s *esp32_spibus_initialize(int port)
         return NULL;
     }
 
-  flags = spin_lock_irqsave(&priv->lock);
+  nxmutex_lock(&priv->lock);
 
   spi_dev = (struct spi_dev_s *)priv;
-
-  if ((volatile int)priv->refs != 0)
+  if (priv->refs != 0)
     {
-      spin_unlock_irqrestore(&priv->lock, flags);
+      priv->refs++;
+      nxmutex_unlock(&priv->lock);
 
       return spi_dev;
     }
@@ -1464,7 +1458,7 @@ struct spi_dev_s *esp32_spibus_initialize(int port)
                                      1, ESP32_CPUINT_LEVEL);
       if (priv->cpuint < 0)
         {
-          spin_unlock_irqrestore(&priv->lock, flags);
+          nxmutex_unlock(&priv->lock);
           return NULL;
         }
 
@@ -1474,7 +1468,7 @@ struct spi_dev_s *esp32_spibus_initialize(int port)
           esp32_teardown_irq(priv->cpu,
                              priv->config->periph,
                              priv->cpuint);
-          spin_unlock_irqrestore(&priv->lock, flags);
+          nxmutex_unlock(&priv->lock);
           return NULL;
         }
 
@@ -1482,11 +1476,9 @@ struct spi_dev_s *esp32_spibus_initialize(int port)
     }
 
   esp32_spi_init(spi_dev);
-
   priv->refs++;
 
-  spin_unlock_irqrestore(&priv->lock, flags);
-
+  nxmutex_unlock(&priv->lock);
   return spi_dev;
 }
 
@@ -1500,7 +1492,6 @@ struct spi_dev_s *esp32_spibus_initialize(int port)
 
 int esp32_spibus_uninitialize(struct spi_dev_s *dev)
 {
-  irqstate_t flags;
   struct esp32_spi_priv_s *priv = (struct esp32_spi_priv_s *)dev;
 
   DEBUGASSERT(dev);
@@ -1510,15 +1501,12 @@ int esp32_spibus_uninitialize(struct spi_dev_s *dev)
       return ERROR;
     }
 
-  flags = spin_lock_irqsave(&priv->lock);
-
+  nxmutex_lock(&priv->lock);
   if (--priv->refs != 0)
     {
-      spin_unlock_irqrestore(&priv->lock, flags);
+      nxmutex_unlock(&priv->lock);
       return OK;
     }
-
-  spin_unlock_irqrestore(&priv->lock, flags);
 
   if (priv->config->use_dma)
     {
@@ -1526,13 +1514,10 @@ int esp32_spibus_uninitialize(struct spi_dev_s *dev)
       esp32_teardown_irq(priv->cpu,
                          priv->config->periph,
                          priv->cpuint);
-
-      nxsem_destroy(&priv->sem_isr);
     }
 
   esp32_spi_deinit(dev);
-
-  nxsem_destroy(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
 
   return OK;
 }

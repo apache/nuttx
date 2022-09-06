@@ -47,6 +47,7 @@
 #include <debug.h>
 #include <nuttx/clock.h>
 #include <nuttx/arch.h>
+#include <nuttx/mutex.h>
 #include <nuttx/kthread.h>
 #include <arch/board/board.h>
 
@@ -78,10 +79,10 @@
  * Private Data
  ****************************************************************************/
 
-static sem_t _sdc_sem[2] =
+static mutex_t _sdc_lock[2] =
 {
-  SEM_INITIALIZER(1),
-  SEM_INITIALIZER(1)
+  NXMUTEX_INITIALIZER,
+  NXMUTEX_INITIALIZER
 };
 
 static struct sddrcfg_s _sdch0;
@@ -134,24 +135,6 @@ extern SINT_T sddep_write(void *src, void *dst, UI_32 size, SINT_T type,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _sdc_semtake
- ****************************************************************************/
-
-static int _sdc_semtake(sem_t *sem)
-{
-  return nxsem_wait_uninterruptible(sem);
-}
-
-/****************************************************************************
- * Name: _sdc_semgive
- ****************************************************************************/
-
-static void _sdc_semgive(sem_t *sem)
-{
-  nxsem_post(sem);
-}
-
-/****************************************************************************
  * Name: _lc823450_sdc_support_trim
  ****************************************************************************/
 
@@ -202,7 +185,7 @@ int lc823450_sdc_clearcardinfo(uint32_t ch)
 
   mcinfo("++++ start\n");
 
-  ret = _sdc_semtake(&_sdc_sem[ch]);
+  ret = nxmutex_lock(&_sdc_lock[ch]);
   if (ret < 0)
     {
       return ret;
@@ -218,7 +201,7 @@ int lc823450_sdc_clearcardinfo(uint32_t ch)
     }
 #endif
 
-  _sdc_semgive(&_sdc_sem[ch]);
+  nxmutex_unlock(&_sdc_lock[ch]);
   mcinfo("---- end ret=%d\n", ret);
   return ret;
 }
@@ -277,11 +260,11 @@ int lc823450_sdc_initialize(uint32_t ch)
 
   mcinfo("++++ start\n");
 
-  ret = _sdc_semtake(&_sdc_sem[ch]);
+  ret = nxmutex_lock(&_sdc_lock[ch]);
   if (ret >= 0)
     {
       ret = sddr_initialize(_cfg[ch]);
-      _sdc_semgive(&_sdc_sem[ch]);
+      nxmutex_unlock(&_sdc_lock[ch]);
       mcinfo("---- end ret=%d\n", ret);
     }
 
@@ -298,11 +281,11 @@ int lc823450_sdc_finalize(uint32_t ch)
 
   mcinfo("++++ start ch=%ld\n", ch);
 
-  ret = _sdc_semtake(&_sdc_sem[ch]);
+  ret = nxmutex_lock(&_sdc_lock[ch]);
   if (ret >= 0)
     {
       ret = sddr_finalize(_cfg[ch]);
-      _sdc_semgive(&_sdc_sem[ch]);
+      nxmutex_unlock(&_sdc_lock[ch]);
       mcinfo("---- end ret=%d\n", ret);
     }
 
@@ -319,7 +302,7 @@ int lc823450_sdc_identifycard(uint32_t ch)
 
   mcinfo("++++ start\n");
 
-  ret = _sdc_semtake(&_sdc_sem[ch]);
+  ret = nxmutex_lock(&_sdc_lock[ch]);
   if (ret < 0)
     {
       return ret;
@@ -335,7 +318,7 @@ int lc823450_sdc_identifycard(uint32_t ch)
     }
 #endif
 
-  _sdc_semgive(&_sdc_sem[ch]);
+  nxmutex_unlock(&_sdc_lock[ch]);
   mcinfo("---- end ret=%d\n", ret);
   return ret;
 }
@@ -351,11 +334,11 @@ int lc823450_sdc_setclock(uint32_t ch, uint32_t limitclk, uint32_t sysclk)
   mcinfo("++++ start ch=%ld limitClk=%ld sysClk=%ld\n",
          ch, limitclk, sysclk);
 
-  ret = _sdc_semtake(&_sdc_sem[ch]);
+  ret = nxmutex_lock(&_sdc_lock[ch]);
   if (ret >= 0)
     {
       ret = sddr_setclock(limitclk, sysclk, _cfg[ch]);
-      _sdc_semgive(&_sdc_sem[ch]);
+      nxmutex_unlock(&_sdc_lock[ch]);
       mcinfo("---- end ret=%d\n", ret);
     }
 
@@ -376,11 +359,11 @@ int lc823450_sdc_refmediatype(uint32_t ch)
 
   mcinfo("++++ start\n");
 
-  ret = _sdc_semtake(&_sdc_sem[ch]);
+  ret = nxmutex_lock(&_sdc_lock[ch]);
   if (ret >= 0)
     {
       ret = sddr_refmediatype(_cfg[ch]);
-      _sdc_semgive(&_sdc_sem[ch]);
+      nxmutex_unlock(&_sdc_lock[ch]);
       mcinfo("---- end ret=%d\n", ret);
     }
 
@@ -398,12 +381,12 @@ int lc823450_sdc_getcardsize(uint32_t ch,
 
   mcinfo("++++ start\n");
 
-  ret = _sdc_semtake(&_sdc_sem[ch]);
+  ret = nxmutex_lock(&_sdc_lock[ch]);
   if (ret >= 0)
     {
       ret = sddr_getcardsize(psecnum, psecsize, _cfg[ch]);
 
-      _sdc_semgive(&_sdc_sem[ch]);
+      nxmutex_unlock(&_sdc_lock[ch]);
       mcinfo("---- end ret=%d\n", ret);
     }
 
@@ -421,7 +404,7 @@ int lc823450_sdc_readsector(uint32_t ch,
   int ret;
   int i = 0;
 
-  ret = _sdc_semtake(&_sdc_sem[ch]);
+  ret = nxmutex_lock(&_sdc_lock[ch]);
   if (ret < 0)
     {
       return ret;
@@ -435,7 +418,7 @@ int lc823450_sdc_readsector(uint32_t ch,
   if (ch && _sec_cache_enabled && 1 == cnt && addr == _sec_cache_add)
     {
       memcpy(pbuf, _sec_cache, sizeof(_sec_cache));
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 #endif
 
@@ -488,9 +471,9 @@ int lc823450_sdc_readsector(uint32_t ch,
         }
     }
 
-errout_with_semaphore:
+errout_with_lock:
 #endif
-  _sdc_semgive(&_sdc_sem[ch]);
+  nxmutex_unlock(&_sdc_lock[ch]);
 
   mcinfo("----  end ret=%d\n", ret);
   return ret;
@@ -506,7 +489,7 @@ int lc823450_sdc_writesector(uint32_t ch,
 {
   int ret;
 
-  ret = _sdc_semtake(&_sdc_sem[ch]);
+  ret = nxmutex_lock(&_sdc_lock[ch]);
   if (ret < 0)
     {
       return ret;
@@ -536,7 +519,7 @@ int lc823450_sdc_writesector(uint32_t ch,
       mcinfo("ret=%d ch=%" PRId32 " add=%ld cnt=%d\n", ret, ch, addr, cnt);
     }
 
-  _sdc_semgive(&_sdc_sem[ch]);
+  nxmutex_unlock(&_sdc_lock[ch]);
 
   mcinfo("----  end ret=%d\n", ret);
   return ret;
@@ -560,7 +543,7 @@ int lc823450_sdc_trimsector(uint32_t ch, unsigned long addr,
 {
   int ret;
 
-  ret = _sdc_semtake(&_sdc_sem[ch]);
+  ret = nxmutex_lock(&_sdc_lock[ch]);
   if (ret < 0)
     {
       return ret;
@@ -582,7 +565,7 @@ int lc823450_sdc_trimsector(uint32_t ch, unsigned long addr,
       mcinfo("ret=%d ch=%" PRId32 " add=%ld cnt=%d\n", ret, ch, addr, cnt);
     }
 
-  _sdc_semgive(&_sdc_sem[ch]);
+  nxmutex_unlock(&_sdc_lock[ch]);
 
   mcinfo("----  end ret=%d\n", ret);
   return ret;
@@ -598,12 +581,12 @@ int lc823450_sdc_cachectl(uint32_t ch, int ctrl)
 
   mcinfo("++++ ch=%" PRId32 ", ctrl=%d\n", ch, ctrl);
 
-  ret = _sdc_semtake(&_sdc_sem[ch]);
+  ret = nxmutex_lock(&_sdc_lock[ch]);
   if (ret >= 0)
     {
       ret = sddr_cachectrl(ctrl, _cfg[ch]);
 
-      _sdc_semgive(&_sdc_sem[ch]);
+      nxmutex_unlock(&_sdc_lock[ch]);
       mcinfo("----  end ret=%d\n", ret);
     }
 
@@ -620,7 +603,7 @@ int lc823450_sdc_changespeedmode(uint32_t ch, int mode)
 
   mcinfo("++++ ch=%" PRId32 ", mode=%d\n", ch, mode);
 
-  ret = _sdc_semtake(&_sdc_sem[ch]);
+  ret = nxmutex_lock(&_sdc_lock[ch]);
   if (ret < 0)
     {
       return ret;
@@ -646,7 +629,7 @@ int lc823450_sdc_changespeedmode(uint32_t ch, int mode)
         }
     }
 
-  _sdc_semgive(&_sdc_sem[ch]);
+  nxmutex_unlock(&_sdc_lock[ch]);
   mcinfo("----  end ret=%d\n", ret);
   return ret;
 }
@@ -662,7 +645,7 @@ int lc823450_sdc_getcid(uint32_t ch, char *cidstr, int length)
 
   mcinfo("++++ ch=%" PRId32 "\n", ch);
 
-  ret = _sdc_semtake(&_sdc_sem[ch]);
+  ret = nxmutex_lock(&_sdc_lock[ch]);
   if (ret < 0)
     {
       return ret;
@@ -683,7 +666,7 @@ int lc823450_sdc_getcid(uint32_t ch, char *cidstr, int length)
       *cidstr = '\0';
     }
 
-  _sdc_semgive(&_sdc_sem[ch]);
+  nxmutex_unlock(&_sdc_lock[ch]);
   mcinfo("----  end ret=%d\n", ret);
   return ret;
 }
@@ -694,7 +677,6 @@ int lc823450_sdc_getcid(uint32_t ch, char *cidstr, int length)
 
 int lc823450_sdc_locked(void)
 {
-  int val;
   int ret;
   int i;
 
@@ -702,8 +684,7 @@ int lc823450_sdc_locked(void)
 
   for (i = 0; i < 2; i++)
     {
-      nxsem_get_value(&_sdc_sem[i], &val);
-      if (1 != val)
+      if (nxmutex_is_locked(&_sdc_lock[i]))
         {
           ret = 1;
           break;

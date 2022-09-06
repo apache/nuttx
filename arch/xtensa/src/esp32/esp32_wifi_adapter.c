@@ -42,7 +42,7 @@
 #include <nuttx/mqueue.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/irq.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/kthread.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
@@ -382,7 +382,7 @@ void intr_matrix_set(int cpu_no, uint32_t model_num, uint32_t intr_num);
 static struct work_s g_wifi_evt_work;
 static sq_queue_t g_wifi_evt_queue;
 static struct wifi_notify g_wifi_notify[WIFI_ADPT_EVT_MAX];
-static sem_t g_wifiexcl_sem = SEM_INITIALIZER(1);
+static mutex_t g_wifiexcl_lock = NXMUTEX_INITIALIZER;
 
 /* Callback function to update Wi-Fi MAC time */
 
@@ -779,7 +779,7 @@ static int esp_wifi_lock(bool lock)
 
   if (lock)
     {
-      ret = nxsem_wait_uninterruptible(&g_wifiexcl_sem);
+      ret = nxmutex_lock(&g_wifiexcl_lock);
       if (ret < 0)
         {
           wlinfo("Failed to lock Wi-Fi ret=%d\n", ret);
@@ -787,7 +787,7 @@ static int esp_wifi_lock(bool lock)
     }
   else
     {
-      ret = nxsem_post(&g_wifiexcl_sem);
+      ret = nxmutex_unlock(&g_wifiexcl_lock);
       if (ret < 0)
         {
           wlinfo("Failed to unlock Wi-Fi ret=%d\n", ret);

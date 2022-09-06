@@ -24,6 +24,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/mm/circbuf.h>
 
@@ -57,7 +58,7 @@ struct uart_bth4_s
 
   uint8_t                 sendbuf[CONFIG_UART_BTH4_TXBUFSIZE];
   size_t                  sendlen;
-  sem_t                   sendlock;
+  mutex_t                 sendlock;
 
   FAR struct pollfd       *fds[CONFIG_UART_BTH4_NPOLLWAITERS];
 };
@@ -239,7 +240,7 @@ static ssize_t uart_bth4_write(FAR struct file *filep,
   size_t hdrlen;
   int ret;
 
-  ret = nxsem_wait_uninterruptible(&dev->sendlock);
+  ret = nxmutex_lock(&dev->sendlock);
   if (ret < 0)
     {
       return ret;
@@ -329,7 +330,7 @@ static ssize_t uart_bth4_write(FAR struct file *filep,
 err:
   dev->sendlen = 0;
 out:
-  nxsem_post(&dev->sendlock);
+  nxmutex_unlock(&dev->sendlock);
   return ret < 0 ? ret : buflen;
 }
 
@@ -435,7 +436,7 @@ int uart_bth4_register(FAR const char *path, FAR struct bt_driver_s *drv)
   drv->receive = uart_bth4_receive;
   drv->priv    = dev;
 
-  nxsem_init(&dev->sendlock, 0, 1);
+  nxmutex_init(&dev->sendlock);
   nxsem_init(&dev->recvsem,  0, 0);
 
   nxsem_set_protocol(&dev->recvsem, SEM_PRIO_NONE);
@@ -443,7 +444,7 @@ int uart_bth4_register(FAR const char *path, FAR struct bt_driver_s *drv)
   ret = register_driver(path, &g_uart_bth4_ops, 0666, dev);
   if (ret < 0)
     {
-      nxsem_destroy(&dev->sendlock);
+      nxmutex_destroy(&dev->sendlock);
       nxsem_destroy(&dev->recvsem);
       circbuf_uninit(&dev->circbuf);
       kmm_free(dev);

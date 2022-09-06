@@ -63,6 +63,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/i2c/i2c_master.h>
 
@@ -171,7 +172,7 @@ struct sam_i2c_dev_s
   uint16_t flags;                /* Transfer flags */
   uint16_t nextflags;            /* Next message flags */
 
-  sem_t exclsem;              /* Only one thread can access at a time */
+  mutex_t lock;               /* Only one thread can access at a time */
   sem_t waitsem;              /* Wait for I2C transfer completion */
   volatile int result;        /* The result of the transfer */
   volatile int xfrd;          /* Number of bytes transfers */
@@ -204,10 +205,6 @@ static uint32_t i2c_getreg32(struct sam_i2c_dev_s *priv,
                              unsigned int offset);
 static void i2c_putreg32(struct sam_i2c_dev_s *priv, uint32_t regval,
                          unsigned int offset);
-
-static int i2c_takesem(sem_t * sem);
-static int i2c_takesem_noncancelable(sem_t * sem);
-#define i2c_givesem(sem) (nxsem_post(sem))
 
 #ifdef CONFIG_SAM_I2C_REGDEBUG
 static bool i2c_checkreg(struct sam_i2c_dev_s *priv, bool wr,
@@ -456,45 +453,6 @@ static void i2c_putreg32(struct sam_i2c_dev_s *priv, uint32_t regval,
                          unsigned int offset)
 {
   putreg32(regval, priv->attr->base + offset);
-}
-
-/****************************************************************************
- * Name: i2c_takesem
- *
- * Description:
- *   Take the wait semaphore.  May be interrupted by a signal.
- *
- * Input Parameters:
- *   dev - Instance of the SDIO device driver state structure.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static int i2c_takesem(sem_t *sem)
-{
-  return nxsem_wait(sem);
-}
-
-/****************************************************************************
- * Name: i2c_takesem_noncancelable
- *
- * Description:
- *   Take the wait semaphore (handling false alarm wake-ups due to the
- *   receipt of signals).  May be interrupted by a signal.
- *
- * Input Parameters:
- *   dev - Instance of the SDIO device driver state structure.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static int i2c_takesem_noncancelable(sem_t *sem)
-{
-  return nxsem_wait_uninterruptible(sem);
 }
 
 /****************************************************************************
@@ -989,7 +947,7 @@ static int sam_i2c_transfer(struct i2c_master_s *dev,
 
   /* Get exclusive access to the device */
 
-  ret = i2c_takesem(&priv->exclsem);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -1031,7 +989,7 @@ static int sam_i2c_transfer(struct i2c_master_s *dev,
                       SAM_I2C_INTENCLR_OFFSET);
 
           leave_critical_section(flags);
-          i2c_givesem(&priv->exclsem);
+          nxmutex_unlock(&priv->lock);
           return ret;
         }
 
@@ -1042,7 +1000,7 @@ static int sam_i2c_transfer(struct i2c_master_s *dev,
       msgs++;
     }
 
-  i2c_givesem(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -1400,7 +1358,7 @@ struct i2c_master_s *sam_i2c_master_initialize(int bus)
   priv->dev.ops = &g_i2cops;
   priv->flags = 0;
 
-  nxsem_init(&priv->exclsem, 0, 1);
+  nxmutex_init(&priv->lock);
   nxsem_init(&priv->waitsem, 0, 0);
 
   /* Perform repeatable I2C hardware initialization */
@@ -1430,7 +1388,7 @@ int sam_i2c_uninitialize(struct i2c_master_s *dev)
 
   /* Reset data structures */
 
-  nxsem_destroy(&priv->exclsem);
+  nxmutex_destroy(&priv->lock);
   nxsem_destroy(&priv->waitsem);
 
   /* Detach Interrupt Handler */
@@ -1457,7 +1415,7 @@ int sam_i2c_reset(struct i2c_master_s *dev)
 
   /* Get exclusive access to the I2C device */
 
-  ret = i2c_takesem_noncancelable(&priv->exclsem);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -1490,7 +1448,7 @@ int sam_i2c_reset(struct i2c_master_s *dev)
 
   /* Release our lock on the bus */
 
-  i2c_givesem(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 #endif /* CONFIG_I2C_RESET */

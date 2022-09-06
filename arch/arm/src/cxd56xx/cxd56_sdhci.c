@@ -308,8 +308,6 @@ struct cxd56_sdhcregs_s
 
 /* Low-level helpers ********************************************************/
 
-static int  cxd56_takesem(struct cxd56_sdiodev_s *priv);
-#define     cxd56_givesem(priv) (nxsem_post(&(priv)->waitsem))
 static void cxd56_configwaitints(struct cxd56_sdiodev_s *priv,
               uint32_t waitints, sdio_eventset_t waitevents,
               sdio_eventset_t wkupevents);
@@ -483,27 +481,6 @@ static uint32_t cxd56_sdhci_adma_dscr[CXD56_SDIO_MAX_LEN_ADMA_DSCR * 2];
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: cxd56_takesem
- *
- * Description:
- *   Take the wait semaphore (handling false alarm wakeups due to the receipt
- *   of signals).
- *
- * Input Parameters:
- *   dev - Instance of the SDIO device driver state structure.
- *
- * Returned Value:
- *   Normally OK, but may return -ECANCELED in the rare event that the task
- *   has been canceled.
- *
- ****************************************************************************/
-
-static int cxd56_takesem(struct cxd56_sdiodev_s *priv)
-{
-  return nxsem_wait_uninterruptible(&priv->waitsem);
-}
 
 /****************************************************************************
  * Name: cxd56_configwaitints
@@ -1006,7 +983,7 @@ static void cxd56_endwait(struct cxd56_sdiodev_s *priv,
 
   /* Wake up the waiting thread */
 
-  cxd56_givesem(priv);
+  nxsem_post(&priv->waitsem);
 }
 
 /****************************************************************************
@@ -2599,7 +2576,7 @@ static sdio_eventset_t cxd56_sdio_eventwait(struct sdio_dev_s *dev)
        * there will be no wait.
        */
 
-      ret = cxd56_takesem(priv);
+      ret = nxsem_wait_uninterruptible(&priv->waitsem);
       if (ret < 0)
         {
           /* Task canceled.  Cancel the wdog (assuming it was started) and
@@ -2641,7 +2618,7 @@ static sdio_eventset_t cxd56_sdio_eventwait(struct sdio_dev_s *dev)
 
   cxd56_configwaitints(priv, 0, 0, 0);
 #ifdef CONFIG_SDIO_DMA
-  priv->xfrflags   = 0;
+  priv->xfrflags = 0;
   if (priv->aligned_buffer)
     {
       if (priv->dma_cmd == MMCSD_CMD17 || priv->dma_cmd == MMCSD_CMD18)
@@ -2655,7 +2632,6 @@ static sdio_eventset_t cxd56_sdio_eventwait(struct sdio_dev_s *dev)
       /* Free aligned buffer */
 
       kmm_free(priv->aligned_buffer);
-
       priv->aligned_buffer = NULL;
     }
 #endif

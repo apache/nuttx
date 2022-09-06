@@ -41,7 +41,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/timers/pwm.h>
 #include <nuttx/leds/rgbled.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 
 #include <arch/irq.h>
 
@@ -57,7 +57,7 @@ struct rgbled_upperhalf_s
 {
   uint8_t           crefs;    /* The number of times the device has been opened */
   volatile bool     started;  /* True: pulsed output is being generated */
-  sem_t             exclsem;  /* Supports mutual exclusion */
+  mutex_t           lock;     /* Supports mutual exclusion */
   FAR struct pwm_lowerhalf_s *devledr;
   FAR struct pwm_lowerhalf_s *devledg;
   FAR struct pwm_lowerhalf_s *devledb;
@@ -120,7 +120,7 @@ static int rgbled_open(FAR struct file *filep)
 
   /* Get exclusive access to the device structures */
 
-  ret = nxsem_wait(&upper->exclsem);
+  ret = nxmutex_lock(&upper->lock);
   if (ret < 0)
     {
       lcderr("ERROR: nxsem_wait failed: %d\n", ret);
@@ -138,7 +138,7 @@ static int rgbled_open(FAR struct file *filep)
       /* More than 255 opens; uint8_t overflows to zero */
 
       ret = -EMFILE;
-      goto errout_with_sem;
+      goto errout_with_lock;
     }
 
   /* Save the new open count on success */
@@ -146,8 +146,8 @@ static int rgbled_open(FAR struct file *filep)
   upper->crefs = tmp;
   ret = OK;
 
-errout_with_sem:
-  nxsem_post(&upper->exclsem);
+errout_with_lock:
+  nxmutex_unlock(&upper->lock);
 
 errout:
   return ret;
@@ -171,7 +171,7 @@ static int rgbled_close(FAR struct file *filep)
 
   /* Get exclusive access to the device structures */
 
-  ret = nxsem_wait(&upper->exclsem);
+  ret = nxmutex_lock(&upper->lock);
   if (ret < 0)
     {
       lcderr("ERROR: nxsem_wait failed: %d\n", ret);
@@ -187,7 +187,7 @@ static int rgbled_close(FAR struct file *filep)
       upper->crefs--;
     }
 
-  nxsem_post(&upper->exclsem);
+  nxmutex_unlock(&upper->lock);
   ret = OK;
 
 errout:
@@ -509,7 +509,7 @@ int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledr,
    * kmm_zalloc())
    */
 
-  nxsem_init(&upper->exclsem, 0, 1);
+  nxmutex_init(&upper->lock);
   upper->devledr = ledr;
   upper->devledg = ledg;
   upper->devledb = ledb;

@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <assert.h>
 #include <unistd.h>
+
 #include <nuttx/semaphore.h>
 
 /****************************************************************************
@@ -36,8 +37,9 @@
  ****************************************************************************/
 
 #define NXRMUTEX_NO_HOLDER     (pid_t)-1
-#define NXMUTEX_INITIALIZER    SEM_INITIALIZER(1)
-#define NXRMUTEX_INITIALIZER   {SEM_INITIALIZER(1), NXRMUTEX_NO_HOLDER, 0}
+#define NXMUTEX_INITIALIZER    NXSEM_INITIALIZER(1, 0)
+#define NXRMUTEX_INITIALIZER   {NXSEM_INITIALIZER(1, 0), \
+                                NXRMUTEX_NO_HOLDER, 0}
 
 /****************************************************************************
  * Public Type Definitions
@@ -49,7 +51,7 @@ struct rmutex_s
 {
   mutex_t mutex;
   pid_t holder;
-  uint16_t count;
+  unsigned int count;
 };
 
 typedef struct rmutex_s rmutex_t;
@@ -226,7 +228,6 @@ static inline bool nxmutex_is_locked(FAR mutex_t *mutex)
   int ret;
 
   ret = _SEM_GETVALUE(mutex, &cnt);
-
   DEBUGASSERT(ret == OK);
 
   return cnt < 1;
@@ -263,6 +264,24 @@ static inline int nxmutex_unlock(FAR mutex_t *mutex)
     }
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: nxmutex_reset
+ *
+ * Description:
+ *   This function reset lock state.
+ *
+ * Parameters:
+ *   mutex - mutex descriptor.
+ *
+ * Return Value:
+ *
+ ****************************************************************************/
+
+static inline int nxmutex_reset(FAR mutex_t *mutex)
+{
+  return nxsem_reset(mutex, 1);
 }
 
 /****************************************************************************
@@ -339,7 +358,7 @@ static inline int nxrmutex_lock(FAR rmutex_t *rmutex)
 
   if (rmutex->holder == tid)
     {
-      DEBUGASSERT(rmutex->count < UINT16_MAX);
+      DEBUGASSERT(rmutex->count < UINT_MAX);
       rmutex->count++;
       ret = OK;
     }
@@ -386,7 +405,7 @@ static inline int nxrmutex_trylock(FAR rmutex_t *rmutex)
 
   if (rmutex->holder == tid)
     {
-      DEBUGASSERT(rmutex->count < UINT16_MAX);
+      DEBUGASSERT(rmutex->count < UINT_MAX);
       rmutex->count++;
       ret = OK;
     }
@@ -470,15 +489,79 @@ static inline int nxrmutex_unlock(FAR rmutex_t *rmutex)
   DEBUGASSERT(rmutex->holder == tid);
   DEBUGASSERT(rmutex->count > 0);
 
-  if (rmutex->count == 1)
+  if (rmutex->count-- == 1)
     {
-      rmutex->count = 0;
       rmutex->holder = NXRMUTEX_NO_HOLDER;
       ret = nxmutex_unlock(&rmutex->mutex);
     }
-  else
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nrxmutex_breaklock
+ *
+ * Description:
+ *   This function attempts to break the recursive mutex
+ *
+ * Parameters:
+ *   rmutex - Recursive mutex descriptor.
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   Possible returned errors:
+ *
+ ****************************************************************************/
+
+static inline int nxrmutex_breaklock(FAR rmutex_t *rmutex,
+                                     FAR unsigned int *count)
+{
+  pid_t tid = gettid();
+  int ret = -EPERM;
+
+  if (rmutex->holder == tid)
     {
-      rmutex->count--;
+      *count = rmutex->count;
+      rmutex->count = 0;
+      rmutex->holder = NXRMUTEX_NO_HOLDER;
+      nxmutex_unlock(&rmutex->mutex);
+      ret = 0;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nxrmutex_restorelock
+ *
+ * Description:
+ *   This function attempts to restore the recursive mutex.
+ *
+ * Parameters:
+ *   rmutex - Recursive mutex descriptor.
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   Possible returned errors:
+ *
+ ****************************************************************************/
+
+static inline int nxrmutex_restorelock(FAR rmutex_t *rmutex,
+                                       unsigned int count)
+{
+  pid_t tid = gettid();
+  int ret;
+
+  DEBUGASSERT(rmutex->holder != tid);
+  ret = nxmutex_lock(&rmutex->mutex);
+  if (ret == OK)
+    {
+      rmutex->holder = tid;
+      rmutex->count = count;
     }
 
   return ret;

@@ -35,7 +35,7 @@
 #include <arch/board/board.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/spi/spi.h>
 
 #include "arm_internal.h"
@@ -102,7 +102,7 @@ struct lpc17_40_sspdev_s
 #ifdef CONFIG_LPC17_40_SSP_INTERRUPTS
   uint8_t          sspirq;     /* SPI IRQ number */
 #endif
-  sem_t            exclsem;    /* Held while chip is selected for mutual exclusion */
+  mutex_t          lock;       /* Held while chip is selected for mutual exclusion */
   uint32_t         frequency;  /* Requested clock frequency */
   uint32_t         actual;     /* Actual clock frequency */
   uint8_t          nbits;      /* Width of word in bits (4 to 16) */
@@ -336,11 +336,11 @@ static int ssp_lock(struct spi_dev_s *dev, bool lock)
 
   if (lock)
     {
-      ret = nxsem_wait_uninterruptible(&priv->exclsem);
+      ret = nxmutex_lock(&priv->lock);
     }
   else
     {
-      ret = nxsem_post(&priv->exclsem);
+      ret = nxmutex_unlock(&priv->lock);
     }
 
   return ret;
@@ -993,9 +993,9 @@ struct spi_dev_s *lpc17_40_sspbus_initialize(int port)
 
   ssp_setfrequency((struct spi_dev_s *)priv, 400000);
 
-  /* Initialize the SPI semaphore that enforces mutually exclusive access */
+  /* Initialize the SPI mutex that enforces mutually exclusive access */
 
-  nxsem_init(&priv->exclsem, 0, 1);
+  nxmutex_init(&priv->lock);
 
   /* Enable the SPI */
 

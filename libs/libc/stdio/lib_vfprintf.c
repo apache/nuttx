@@ -48,9 +48,9 @@ int vfprintf(FAR FILE *stream, FAR const IPTR char *fmt, va_list ap)
    * before being pre-empted by the next thread.
    */
 
-  lib_take_semaphore(stream);
+  lib_take_lock(stream);
   n = lib_vsprintf(&stdoutstream.public, fmt, ap);
-  lib_give_semaphore(stream);
+  lib_give_lock(stream);
 
   return n;
 }

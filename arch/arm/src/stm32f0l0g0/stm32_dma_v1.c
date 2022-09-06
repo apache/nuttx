@@ -32,7 +32,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 
 #include <arch/chip/chip.h>
 
@@ -199,24 +199,6 @@ static inline void dmachan_putreg(struct stm32_dma_s *dmach,
                                   uint32_t offset, uint32_t value)
 {
   putreg32(value, dmach->base + offset);
-}
-
-/****************************************************************************
- * Name: stm32_dmatake() and stm32_dmagive()
- *
- * Description:
- *   Used to get exclusive access to a DMA channel.
- *
- ****************************************************************************/
-
-static int stm32_dmatake(struct stm32_dma_s *dmach)
-{
-  return nxsem_wait_uninterruptible(&dmach->sem);
-}
-
-static inline void stm32_dmagive(struct stm32_dma_s *dmach)
-{
-  nxsem_post(&dmach->sem);
 }
 
 /****************************************************************************
@@ -400,7 +382,7 @@ DMA_HANDLE stm32_dmachannel(unsigned int chndef)
    * is available if it is currently being used by another driver
    */
 
-  ret = stm32_dmatake(dmach);
+  ret = nxsem_wait_uninterruptible(&dmach->sem);
   if (ret < 0)
     {
       return NULL;
@@ -447,7 +429,7 @@ void stm32_dmafree(DMA_HANDLE handle)
 
   /* Release the channel */
 
-  stm32_dmagive(dmach);
+  nxsem_post(&dmach->sem);
 }
 
 /****************************************************************************

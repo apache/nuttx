@@ -106,7 +106,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/mm/iob.h>
@@ -263,8 +263,8 @@ struct spirit_driver_s
   struct work_s                    rxwork;    /* RX work queue support (LP) */
   struct work_s                    pollwork;  /* TX network poll work (LP) */
   struct wdog_s                    txtimeout; /* TX timeout timer */
-  sem_t                            rxsem;     /* Exclusive access to the RX queue */
-  sem_t                            txsem;     /* Exclusive access to the TX queue */
+  mutex_t                          rxlock;    /* Exclusive access to the RX queue */
+  mutex_t                          txlock;    /* Exclusive access to the TX queue */
   bool                             ifup;      /* Spirit is on and interface is up */
   uint8_t                          state;     /* See  enum spirit_driver_state_e */
   uint8_t                          counter;   /* Count used with TX timeout */
@@ -276,11 +276,6 @@ struct spirit_driver_s
  ****************************************************************************/
 
 /* Helpers */
-
-static void spirit_rxlock(FAR struct spirit_driver_s *priv);
-static inline void spirit_rxunlock(FAR struct spirit_driver_s *priv);
-static void spirit_txlock(FAR struct spirit_driver_s *priv);
-static inline void spirit_txunlock(FAR struct spirit_driver_s *priv);
 
 static void spirit_set_ipaddress(FAR struct net_driver_s *dev);
 static int  spirit_set_readystate(FAR struct spirit_driver_s *priv);
@@ -448,110 +443,6 @@ static struct spirit_pktstack_address_s g_addrinit =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: spirit_rxlock
- *
- * Description:
- *   Get exclusive access to the incoming RX packet queue.
- *
- * Input Parameters:
- *   priv - Reference to a driver state structure instance
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void spirit_rxlock(FAR struct spirit_driver_s *priv)
-{
-  int ret;
-
-  /* The only error that can be reported by nxsem_wait_uninterruptible() is
-   * ECANCELED if the the thread is canceled.  All of the work runs on the
-   * LP work thread, however.  It is very unlikely that the LP worker thread
-   * will be canceled and, if so, it should finish the work in progress
-   * before dying anyway.
-   */
-
-  do
-    {
-      ret = nxsem_wait_uninterruptible(&priv->rxsem);
-      DEBUGASSERT(ret == 0 || ret == -ECANCELED);
-    }
-  while (ret < 0);
-}
-
-/****************************************************************************
- * Name: spirit_rxunlock
- *
- * Description:
- *   Relinquish exclusive access to the incoming RX packet queue.
- *
- * Input Parameters:
- *   priv - Reference to a driver state structure instance
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static inline void spirit_rxunlock(FAR struct spirit_driver_s *priv)
-{
-  nxsem_post(&priv->rxsem);
-}
-
-/****************************************************************************
- * Name: spirit_txlock
- *
- * Description:
- *   Get exclusive access to the outgoing TX packet queue.
- *
- * Input Parameters:
- *   priv - Reference to a driver state structure instance
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void spirit_txlock(FAR struct spirit_driver_s *priv)
-{
-  int ret;
-
-  /* The only error that can be reported by nxsem_wait_uninterruptible() is
-   * ECANCELED if the the thread is canceled.  All of the work runs on the
-   * LP work thread, however.  It is very unlikely that the LP worker thread
-   * will be canceled and, if so, it should finish the work in progress
-   * before dying anyway.
-   */
-
-  do
-    {
-      ret = nxsem_wait_uninterruptible(&priv->txsem);
-      DEBUGASSERT(ret == 0 || ret == -ECANCELED);
-    }
-  while (ret < 0);
-}
-
-/****************************************************************************
- * Name: spirit_txunlock
- *
- * Description:
- *   Relinquish exclusive access to the outgoing TX packet queue.
- *
- * Input Parameters:
- *   priv - Reference to a driver state structure instance
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static inline void spirit_txunlock(FAR struct spirit_driver_s *priv)
-{
-  nxsem_post(&priv->txsem);
-}
 
 /****************************************************************************
  * Name: spirit_set_ipaddress
@@ -740,7 +631,7 @@ static void spirit_transmit_work(FAR void *arg)
    * cannot run until this completes.
    */
 
-  spirit_txlock(priv);
+  nxmutex_lock(&priv->txlock);
 
   while (priv->txhead != NULL && priv->state == DRIVER_STATE_IDLE)
     {
@@ -921,7 +812,7 @@ static void spirit_transmit_work(FAR void *arg)
                spirit_txtimeout_expiry, (wdparm_t)priv);
     }
 
-  spirit_txunlock(priv);
+  nxmutex_unlock(&priv->txlock);
   return;
 
 errout_with_rxtimeout:
@@ -931,7 +822,7 @@ errout_with_csma:
   spirit_csma_enable(spirit, S_DISABLE);
 
 errout_with_lock:
-  spirit_txunlock(priv);
+  nxmutex_unlock(&priv->txlock);
   NETDEV_TXERRORS(&priv->radio.r_dev);
   return;
 }
@@ -1031,7 +922,7 @@ static void spirit_receive_work(FAR void *arg)
 
   while (priv->rxhead != NULL)
     {
-      spirit_rxlock(priv);
+      nxmutex_lock(&priv->rxlock);
 
       /* Remove the contained IOB from the RX queue */
 
@@ -1046,7 +937,7 @@ static void spirit_receive_work(FAR void *arg)
           priv->rxtail = NULL;
         }
 
-      spirit_rxunlock(priv);
+      nxmutex_unlock(&priv->rxlock);
 
       /* Remove the IOB from the container */
 
@@ -1451,7 +1342,7 @@ static void spirit_interrupt_work(FAR void *arg)
 
                   pktmeta->pm_flink          = NULL;
 
-                  spirit_rxlock(priv);
+                  nxmutex_lock(&priv->rxlock);
                   if (priv->rxtail == NULL)
                     {
                       priv->rxhead           = pktmeta;
@@ -1462,7 +1353,7 @@ static void spirit_interrupt_work(FAR void *arg)
                     }
 
                   priv->rxtail               = pktmeta;
-                  spirit_rxunlock(priv);
+                  nxmutex_unlock(&priv->rxlock);
 
                   /* Forward the packet to the network.  This must be done
                    * on the LP worker thread with the network locked.
@@ -2307,7 +2198,7 @@ static int spirit_req_data(FAR struct radio_driver_s *netdev,
 
       pktmeta->pm_flink          = NULL;
 
-      spirit_txlock(priv);
+      nxmutex_lock(&priv->txlock);
       if (priv->txtail == NULL)
         {
           priv->txhead           = pktmeta;
@@ -2318,7 +2209,7 @@ static int spirit_req_data(FAR struct radio_driver_s *netdev,
         }
 
       priv->txtail               = pktmeta;
-      spirit_txunlock(priv);
+      nxmutex_unlock(&priv->txlock);
 
       /* If are no transmissions or receptions in progress, then schedule
        * transmission of the frame in the IOB at the head of the IOB queue.
@@ -2744,8 +2635,8 @@ int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
   /* Attach the interface, lower driver, and devops */
 
   priv->lower = lower;
-  nxsem_init(&priv->rxsem, 0, 1);          /* Access to RX packet queue */
-  nxsem_init(&priv->txsem, 0, 1);          /* Access to TX packet queue */
+  nxmutex_init(&priv->rxlock);          /* Access to RX packet queue */
+  nxmutex_init(&priv->txlock);          /* Access to TX packet queue */
 
   /* Initialize the IEEE 802.15.4 network device fields */
 

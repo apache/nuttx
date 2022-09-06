@@ -42,7 +42,7 @@
 #include <nuttx/compiler.h>
 
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/queue.h>
 
@@ -412,7 +412,7 @@ struct ap_buffer_s
   apb_samp_t            nmaxbytes;  /* The maximum number of bytes */
   apb_samp_t            nbytes;     /* The number of bytes used */
   apb_samp_t            curbyte;    /* Next byte to be processed */
-  sem_t                 sem;        /* Reference locking semaphore */
+  mutex_t               lock;       /* Reference locking mutex */
   uint16_t              flags;      /* Buffer flags */
   uint16_t              crefs;      /* Number of reference counts */
   FAR uint8_t           *samp;      /* Offset of the first sample */

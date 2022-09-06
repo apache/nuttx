@@ -35,6 +35,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/queue.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/usb/storage.h>
 #include <nuttx/usb/usbdev.h>
@@ -388,7 +389,7 @@ struct usbmsc_dev_s
 
   pid_t             thpid;            /* The worker thread task ID */
   sem_t             thsynch;          /* Used to synchronizer terminal events */
-  sem_t             thlock;           /* Used to get exclusive access to the state data */
+  mutex_t           thlock;           /* Used to get exclusive access to the state data */
   sem_t             thwaitsem;        /* Used to signal worker thread */
   volatile bool     thwaiting;        /* True: worker thread is waiting for an event */
   volatile uint8_t  thstate;          /* State of the worker thread */
@@ -497,26 +498,6 @@ EXTERN FAR struct usbmsc_dev_s *g_usbmsc_handoff;
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Name: usbmsc_scsi_lock
- *
- * Description:
- *   Get exclusive access to SCSI state data.
- *
- ****************************************************************************/
-
-int usbmsc_scsi_lock(FAR struct usbmsc_dev_s *priv);
-
-/****************************************************************************
- * Name: usbmsc_scsi_unlock
- *
- * Description:
- *   Relinquish exclusive access to SCSI state data.
- *
- ****************************************************************************/
-
-#define usbmsc_scsi_unlock(priv) nxsem_post(&priv->thlock)
 
 /****************************************************************************
  * Name: usbmsc_scsi_signal

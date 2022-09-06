@@ -34,7 +34,7 @@
 #include <stdlib.h>
 #include <sys/param.h>
 #include <debug.h>
-#include <semaphore.h>
+#include <nuttx/mutex.h>
 
 #include "riscv_internal.h"
 #include "hardware/esp32c3_rsa.h"
@@ -75,7 +75,7 @@
  * Private Data
  ****************************************************************************/
 
-static sem_t g_rsa_sem = SEM_INITIALIZER(1);
+static mutex_t g_rsa_lock = NXMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Private Functions
@@ -224,7 +224,7 @@ static void esp32c3_mpi_wait_op_complete(void)
 
 static void esp32c3_mpi_enable_hardware_hw_op(void)
 {
-  nxsem_wait(&g_rsa_sem);
+  nxmutex_lock(&g_rsa_lock);
 
   /* Enable RSA hardware */
 
@@ -262,7 +262,7 @@ static void esp32c3_mpi_disable_hardware_hw_op(void)
   modifyreg32(SYSTEM_PERIP_CLK_EN1_REG, SYSTEM_CRYPTO_RSA_CLK_EN, 0);
   modifyreg32(SYSTEM_PERIP_RST_EN1_REG, 0, SYSTEM_CRYPTO_RSA_RST);
 
-  nxsem_post(&g_rsa_sem);
+  nxmutex_unlock(&g_rsa_lock);
 }
 
 /****************************************************************************

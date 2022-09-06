@@ -29,7 +29,7 @@
 
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/ioexpander/ioexpander.h>
 #include <nuttx/ioexpander/mcp23x17.h>
@@ -154,7 +154,7 @@ struct mcp23x17_dev_s
                                          */
   FAR struct mcp23x17_config_s *config; /* Board configuration data */
   FAR struct i2c_master_s *i2c;         /* Saved I2C driver instance */
-  sem_t exclsem;                        /* Mutual exclusion */
+  mutex_t lock;                         /* Mutual exclusion */
 
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
 #ifdef CONFIG_MCP23X17_INT_POLL

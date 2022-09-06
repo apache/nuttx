@@ -33,7 +33,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/random.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/sensors/lis3dsh.h>
 
 #if defined(CONFIG_SPI) && defined(CONFIG_LIS3DSH)
@@ -56,7 +56,7 @@ struct lis3dsh_dev_s
   FAR struct spi_dev_s *spi;           /* Pointer to the SPI instance */
   FAR struct lis3dsh_config_s *config; /* Pointer to the configuration
                                         * of the LIS3DSH sensor */
-  sem_t datasem;                       /* Manages exclusive access to this
+  mutex_t datalock;                    /* Manages exclusive access to this
                                         * structure */
   struct lis3dsh_sensor_data_s data;   /* The data as measured by the sensor */
   struct work_s work;                  /* The work queue is responsible for
@@ -219,12 +219,12 @@ static void lis3dsh_read_measurement_data(FAR struct lis3dsh_dev_s *dev)
 
   lis3dsh_read_acclerometer_data(dev, &x_acc, &y_acc, &z_acc);
 
-  /* Acquire the semaphore before the data is copied */
+  /* Acquire the mutex before the data is copied */
 
-  ret = nxsem_wait(&dev->datasem);
+  ret = nxmutex_lock(&dev->datalock);
   if (ret < 0)
     {
-      snerr("ERROR: Could not acquire dev->datasem: %d\n", ret);
+      snerr("ERROR: Could not acquire dev->datalock: %d\n", ret);
       return;
     }
 
@@ -234,9 +234,9 @@ static void lis3dsh_read_measurement_data(FAR struct lis3dsh_dev_s *dev)
   dev->data.y_acc = (int16_t)y_acc;
   dev->data.z_acc = (int16_t)z_acc;
 
-  /* Give back the semaphore */
+  /* Give back the mutex */
 
-  nxsem_post(&dev->datasem);
+  nxmutex_unlock(&dev->datalock);
 
   /* Feed sensor data to entropy pool */
 
@@ -459,12 +459,12 @@ static ssize_t lis3dsh_read(FAR struct file *filep, FAR char *buffer,
       return -ENOSYS;
     }
 
-  /* Acquire the semaphore before the data is copied */
+  /* Acquire the mutex before the data is copied */
 
-  ret = nxsem_wait(&priv->datasem);
+  ret = nxmutex_lock(&priv->datalock);
   if (ret < 0)
     {
-      snerr("ERROR: Could not acquire priv->datasem: %d\n", ret);
+      snerr("ERROR: Could not acquire priv->datalock: %d\n", ret);
       return ret;
     }
 
@@ -477,10 +477,9 @@ static ssize_t lis3dsh_read(FAR struct file *filep, FAR char *buffer,
   data->y_acc = priv->data.y_acc;
   data->z_acc = priv->data.z_acc;
 
-  /* Give back the semaphore */
+  /* Give back the mutex */
 
-  nxsem_post(&priv->datasem);
-
+  nxmutex_unlock(&priv->datalock);
   return sizeof(FAR struct lis3dsh_sensor_data_s);
 }
 
@@ -540,8 +539,7 @@ int lis3dsh_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   priv->config      = config;
   priv->work.worker = NULL;
 
-  nxsem_init(&priv->datasem, 0, 1);     /* Initialize sensor data access
-                                         * semaphore */
+  nxmutex_init(&priv->datalock); /* Initialize sensor data access mutex */
 
   /* Setup SPI frequency and mode */
 
@@ -555,7 +553,7 @@ int lis3dsh_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
     {
       snerr("ERROR: Failed to register driver: %d\n", ret);
       kmm_free(priv);
-      nxsem_destroy(&priv->datasem);
+      nxmutex_destroy(&priv->datalock);
       return ret;
     }
 

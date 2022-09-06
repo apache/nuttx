@@ -1804,8 +1804,8 @@ int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
                             WLC_DISASSOC, (uint8_t *)&scbval, &out_len);
     }
 
-  ret = bcmf_sem_wait(&priv->auth_signal, BCMF_AUTH_TIMEOUT_MS);
-
+  ret = nxsem_tickwait_uninterruptible(&priv->auth_signal,
+                                       MSEC2TICK(BCMF_AUTH_TIMEOUT_MS));
   wlinfo("semwait done ! %d\n", ret);
 
   if (ret < 0)

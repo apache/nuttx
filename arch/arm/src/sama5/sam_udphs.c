@@ -845,7 +845,7 @@ static void sam_dumpep(struct sam_usbdev_s *priv, int epno)
  * Description:
  *   Allocate a DMA transfer descriptor by removing it from the free list
  *
- * Assumption:  Caller holds the exclsem
+ * Assumption:  Caller holds the lock
  *
  ****************************************************************************/
 
@@ -873,7 +873,7 @@ static struct sam_dtd_s *sam_dtd_alloc(struct sam_usbdev_s *priv)
  * Description:
  *   Free a DMA transfer descriptor by returning it to the free list
  *
- * Assumption:  Caller holds the exclsem
+ * Assumption:  Caller holds the lock
  *
  ****************************************************************************/
 

@@ -34,6 +34,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/mutex.h>
 #include <nuttx/signal.h>
 #include <nuttx/random.h>
 #include <nuttx/sensors/hc_sr04.h>
@@ -69,7 +70,7 @@ static int hcsr04_poll(FAR struct file *filep, FAR struct pollfd *fds,
 struct hcsr04_dev_s
 {
   FAR struct hcsr04_config_s *config;
-  sem_t devsem;
+  mutex_t devlock;
   sem_t conv_donesem;
   int time_start_pulse;
   int time_finish_pulse;
@@ -138,13 +139,13 @@ static int hcsr04_open(FAR struct file *filep)
   FAR struct hcsr04_dev_s *priv = inode->i_private;
   int ret;
 
-  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return ret;
     }
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   hcsr04_dbg("OPENED\n");
   return OK;
 }
@@ -155,13 +156,13 @@ static int hcsr04_close(FAR struct file *filep)
   FAR struct hcsr04_dev_s *priv = inode->i_private;
   int ret;
 
-  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return ret;
     }
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   hcsr04_dbg("CLOSED\n");
   return OK;
 }
@@ -177,7 +178,7 @@ static ssize_t hcsr04_read(FAR struct file *filep, FAR char *buffer,
 
   /* Get exclusive access */
 
-  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return (ssize_t)ret;
@@ -213,7 +214,7 @@ static ssize_t hcsr04_read(FAR struct file *filep, FAR char *buffer,
         }
     }
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return length;
 }
 
@@ -232,7 +233,7 @@ static int hcsr04_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access */
 
-  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return ret;
@@ -258,7 +259,7 @@ static int hcsr04_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
     }
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return ret;
 }
 
@@ -288,7 +289,7 @@ static int hcsr04_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   /* Get exclusive access */
 
-  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return ret;
@@ -351,7 +352,7 @@ static int hcsr04_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 out:
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return ret;
 }
 
@@ -415,7 +416,7 @@ int hcsr04_register(FAR const char *devpath,
     }
 
   priv->config = config;
-  nxsem_init(&priv->devsem, 0, 1);
+  nxmutex_init(&priv->devlock);
   nxsem_init(&priv->conv_donesem, 0, 0);
 
   ret = register_driver(devpath, &g_hcsr04ops, 0666, priv);

@@ -26,7 +26,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <semaphore.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/netdev.h>
@@ -56,7 +56,7 @@ enum
 
 struct amebaz_state_s
 {
-  sem_t                   mutex;
+  sem_t                   sem;
   struct wdog_s           timeout;
   int status;
 };

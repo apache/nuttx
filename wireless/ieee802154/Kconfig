@@ -91,13 +91,6 @@ config MAC802154_SFEVENT_VERBOSE
 	---help---
 		Enable verbose logging of superframe events Default: false
 
-config MAC802154_LOCK_VERBOSE
-	bool "Verbose logging related to MAC lock management"
-	default n
-	depends on DEBUG_WIRELESS_INFO
-	---help---
-		Enable verbose logging of MAC lock management. Default: false
-
 config IEEE802154_MACDEV
 	bool "Character driver for IEEE 802.15.4 MAC layer"
 	default n

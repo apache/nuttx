@@ -32,7 +32,7 @@
 #include <stdint.h>
 
 #include <nuttx/addrenv.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 
 #ifdef CONFIG_MM_SHM
 
@@ -56,10 +56,10 @@
 
 struct shm_region_s
 {
-  struct shmid_ds sr_ds; /* Region info */
-  bool  sr_flags;        /* See SRFLAGS_* definitions */
-  key_t sr_key;          /* Lookup key */
-  sem_t sr_sem;          /* Manages exclusive access to this region */
+  struct  shmid_ds sr_ds;  /* Region info */
+  bool    sr_flags;        /* See SRFLAGS_* definitions */
+  key_t   sr_key;          /* Lookup key */
+  mutex_t sr_lock;         /* Manages exclusive access to this region */
 
   /* List of physical pages allocated for this memory region */
 
@@ -72,7 +72,7 @@ struct shm_region_s
 
 struct shm_info_s
 {
-  sem_t si_sem;         /* Manages exclusive access to the region list */
+  mutex_t si_lock;         /* Manages exclusive access to the region list */
   struct shm_region_s si_region[CONFIG_ARCH_SHM_MAXREGIONS];
 };
 
@@ -108,8 +108,8 @@ extern struct shm_info_s g_shminfo;
  *   None
  *
  * Assumption:
- *   The caller holds either the region table semaphore or else the
- *   semaphore on the particular entry being deleted.
+ *   The caller holds either the region table mutex or else the
+ *   mutex on the particular entry being deleted.
  *
  ****************************************************************************/
 

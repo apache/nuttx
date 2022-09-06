@@ -65,10 +65,6 @@
 #define NX_CLIMSG_PRIO 42
 #define NX_SVRMSG_PRIO 42
 
-/* Handy macros */
-
-#define nxmu_semgive(sem)    _SEM_POST(sem) /* To match nxmu_semtake() */
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -566,22 +562,6 @@ extern "C"
  ****************************************************************************/
 
 int nxmu_start(int display, int plane);
-
-/****************************************************************************
- * Name: nxmu_semtake
- *
- * Description:
- *   Take the semaphore, handling EINTR wakeups.  See the nxmu_semgive macro.
- *
- * Input Parameters:
- *   sem - the semaphore to be taken.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void nxmu_semtake(sem_t *sem);
 
 /****************************************************************************
  * Name: nxmu_sendserver

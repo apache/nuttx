@@ -33,6 +33,7 @@
 #include <nuttx/nuttx.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/queue.h>
+#include <nuttx/mutex.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
@@ -165,10 +166,10 @@ struct usbdev_adb_s
 
   /* Char device driver */
 
-  sem_t                 exclsem; /* Enforces device exclusive access */
-  adb_char_waiter_sem_t *rdsems; /* List of blocking readers */
-  adb_char_waiter_sem_t *wrsems; /* List of blocking writers */
-  uint8_t               crefs;   /* Count of opened instances */
+  mutex_t                lock;     /* Enforces device exclusive access */
+  adb_char_waiter_sem_t *rdsems;   /* List of blocking readers */
+  adb_char_waiter_sem_t *wrsems;   /* List of blocking writers */
+  uint8_t               crefs;     /* Count of opened instances */
   FAR struct pollfd *fds[CONFIG_USBADB_NPOLLWAITERS];
 };
 
@@ -1462,7 +1463,7 @@ static int usbclass_classobject(int minor,
 
   /* Initialize the char device structure */
 
-  nxsem_init(&alloc->dev.exclsem, 0, 1);
+  nxmutex_init(&alloc->dev.lock);
   alloc->dev.crefs = 0;
 
   /* Register char device driver */
@@ -1554,7 +1555,7 @@ static int adb_char_open(FAR struct file *filep)
 
   /* Get exclusive access to the device structures */
 
-  ret = nxsem_wait(&priv->exclsem);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -1566,7 +1567,7 @@ static int adb_char_open(FAR struct file *filep)
 
   assert(priv->crefs != 0);
 
-  nxsem_post(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -1586,7 +1587,7 @@ static int adb_char_close(FAR struct file *filep)
 
   /* Get exclusive access to the device structures */
 
-  ret = nxsem_wait(&priv->exclsem);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -1598,7 +1599,7 @@ static int adb_char_close(FAR struct file *filep)
 
   assert(priv->crefs >= 0);
 
-  nxsem_post(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
   return OK;
 }
 
@@ -1635,7 +1636,7 @@ static int adb_char_blocking_io(FAR struct usbdev_adb_s *priv,
 
   leave_critical_section(flags);
 
-  nxsem_post(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
 
   /* Wait for USB device to notify */
 
@@ -1644,10 +1645,10 @@ static int adb_char_blocking_io(FAR struct usbdev_adb_s *priv,
   if (ret < 0)
     {
       /* Interrupted wait, unregister semaphore
-       * TODO ensure that exclsem wait does not fail (ECANCELED)
+       * TODO ensure that lock wait does not fail (ECANCELED)
        */
 
-      nxsem_wait_uninterruptible(&priv->exclsem);
+      nxmutex_lock(&priv->lock);
 
       flags = enter_critical_section();
 
@@ -1670,11 +1671,11 @@ static int adb_char_blocking_io(FAR struct usbdev_adb_s *priv,
         }
 
       leave_critical_section(flags);
-      nxsem_post(&priv->exclsem);
+      nxmutex_unlock(&priv->lock);
       return ret;
     }
 
-  return nxsem_wait(&priv->exclsem);
+  return nxmutex_lock(&priv->lock);
 }
 
 /****************************************************************************
@@ -1703,7 +1704,7 @@ static ssize_t adb_char_read(FAR struct file *filep, FAR char *buffer,
       return -EPIPE;
     }
 
-  ret = nxsem_wait(&priv->exclsem);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -1715,7 +1716,7 @@ static ssize_t adb_char_read(FAR struct file *filep, FAR char *buffer,
     {
       if (filep->f_oflags & O_NONBLOCK)
         {
-          nxsem_post(&priv->exclsem);
+          nxmutex_unlock(&priv->lock);
           return -EAGAIN;
         }
 
@@ -1737,7 +1738,7 @@ static ssize_t adb_char_read(FAR struct file *filep, FAR char *buffer,
         }
       while (sq_empty(&priv->rxpending));
 
-      /* RX queue not empty and exclsem locked so we are the only reader */
+      /* RX queue not empty and lock locked so we are the only reader */
 
       nxsem_destroy(&sem.sem);
     }
@@ -1798,7 +1799,7 @@ static ssize_t adb_char_read(FAR struct file *filep, FAR char *buffer,
         }
     }
 
-  nxsem_post(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
   return retlen;
 }
 
@@ -1829,7 +1830,7 @@ static ssize_t adb_char_write(FAR struct file *filep,
       return -EPIPE;
     }
 
-  ret = nxsem_wait(&priv->exclsem);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -1925,7 +1926,7 @@ static ssize_t adb_char_write(FAR struct file *filep,
   ret = wlen;
 
 errout:
-  nxsem_post(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -1939,7 +1940,7 @@ static int adb_char_poll(FAR struct file *filep, FAR struct pollfd *fds,
   pollevent_t eventset;
   irqstate_t flags;
 
-  ret = nxsem_wait(&priv->exclsem);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -2010,7 +2011,7 @@ static int adb_char_poll(FAR struct file *filep, FAR struct pollfd *fds,
 exit_leave_critical:
   leave_critical_section(flags);
 errout:
-  nxsem_post(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 

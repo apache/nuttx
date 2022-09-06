@@ -35,7 +35,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/clock.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/timers/rtc.h>
 
 /****************************************************************************
@@ -55,7 +55,7 @@ struct rtc_alarminfo_s
 struct rtc_upperhalf_s
 {
   FAR struct rtc_lowerhalf_s *lower;  /* Contained lower half driver */
-  sem_t exclsem;                      /* Supports mutual exclusion */
+  mutex_t lock;                       /* Supports mutual exclusion */
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   uint8_t crefs;                      /* Number of open references */
@@ -158,7 +158,7 @@ static void rtc_destroy(FAR struct rtc_upperhalf_s *upper)
 
   /* And free our container */
 
-  nxsem_destroy(&upper->exclsem);
+  nxmutex_destroy(&upper->lock);
   kmm_free(upper);
 }
 #endif
@@ -245,7 +245,7 @@ static int rtc_open(FAR struct file *filep)
 
   /* Get exclusive access to the device structures */
 
-  ret = nxsem_wait(&upper->exclsem);
+  ret = nxmutex_lock(&upper->lock);
   if (ret < 0)
     {
       return ret;
@@ -255,7 +255,7 @@ static int rtc_open(FAR struct file *filep)
 
   upper->crefs++;
   DEBUGASSERT(upper->crefs > 0);
-  nxsem_post(&upper->exclsem);
+  nxmutex_unlock(&upper->lock);
   return OK;
 }
 #endif
@@ -282,7 +282,7 @@ static int rtc_close(FAR struct file *filep)
 
   /* Get exclusive access to the device structures */
 
-  ret = nxsem_wait(&upper->exclsem);
+  ret = nxmutex_lock(&upper->lock);
   if (ret < 0)
     {
       return ret;
@@ -292,7 +292,7 @@ static int rtc_close(FAR struct file *filep)
 
   DEBUGASSERT(upper->crefs > 0);
   upper->crefs--;
-  nxsem_post(&upper->exclsem);
+  nxmutex_unlock(&upper->lock);
 
   /* If the count has decremented to zero and the driver has been unlinked,
    * then commit Hara-Kiri now.
@@ -349,7 +349,7 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access to the device structures */
 
-  ret = nxsem_wait(&upper->exclsem);
+  ret = nxmutex_lock(&upper->lock);
   if (ret < 0)
     {
       return ret;
@@ -746,7 +746,7 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
     }
 
-  nxsem_post(&upper->exclsem);
+  nxmutex_unlock(&upper->lock);
   return ret;
 }
 
@@ -769,7 +769,7 @@ static int rtc_unlink(FAR struct inode *inode)
 
   /* Get exclusive access to the device structures */
 
-  ret = nxsem_wait(&upper->exclsem);
+  ret = nxmutex_lock(&upper->lock);
   if (ret < 0)
     {
       return ret;
@@ -778,7 +778,7 @@ static int rtc_unlink(FAR struct inode *inode)
   /* Indicate that the driver has been unlinked */
 
   upper->unlinked = true;
-  nxsem_post(&upper->exclsem);
+  nxmutex_unlock(&upper->lock);
 
   /* If there are no further open references to the driver, then commit
    * Hara-Kiri now.
@@ -835,7 +835,7 @@ int rtc_initialize(int minor, FAR struct rtc_lowerhalf_s *lower)
   /* Initialize the upper half container */
 
   upper->lower = lower;     /* Contain lower half driver */
-  nxsem_init(&upper->exclsem, 0, 1);
+  nxmutex_init(&upper->lock);
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   upper->crefs = 0;         /* No open references */
@@ -853,7 +853,7 @@ int rtc_initialize(int minor, FAR struct rtc_lowerhalf_s *lower)
   ret = register_driver(devpath, &rtc_fops, 0666, upper);
   if (ret < 0)
     {
-      nxsem_destroy(&upper->exclsem);
+      nxmutex_destroy(&upper->lock);
       kmm_free(upper);
       return ret;
     }

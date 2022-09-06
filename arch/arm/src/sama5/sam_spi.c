@@ -41,7 +41,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/spi/spi.h>
 
 #include "arm_internal.h"
@@ -174,7 +174,7 @@ typedef void (*select_t)(uint32_t devid, bool selected);
 struct sam_spidev_s
 {
   uint32_t base;               /* SPI controller register base address */
-  sem_t spisem;                /* Assures mutually exclusive access to SPI */
+  mutex_t spilock;             /* Assures mutually exclusive access to SPI */
   select_t select;             /* SPI select callout */
   bool initialized;            /* TRUE: Controller has been initialized */
 #ifdef CONFIG_SAMA5_SPI_DMA
@@ -857,11 +857,11 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
   spiinfo("lock=%d\n", lock);
   if (lock)
     {
-      ret = nxsem_wait_uninterruptible(&spi->spisem);
+      ret = nxmutex_lock(&spi->spilock);
     }
   else
     {
-      ret = nxsem_post(&spi->spisem);
+      ret = nxmutex_unlock(&spi->spilock);
     }
 
   return ret;
@@ -1783,11 +1783,11 @@ struct spi_dev_s *sam_spibus_initialize(int port)
       spi_getreg(spi, SAM_SPI_SR_OFFSET);
       spi_getreg(spi, SAM_SPI_RDR_OFFSET);
 
-      /* Initialize the SPI semaphore that enforces mutually exclusive
+      /* Initialize the SPI mutex that enforces mutually exclusive
        * access to the SPI registers.
        */
 
-      nxsem_init(&spi->spisem, 0, 1);
+      nxmutex_init(&spi->spilock);
       spi->initialized = true;
 
 #ifdef CONFIG_SAMA5_SPI_DMA

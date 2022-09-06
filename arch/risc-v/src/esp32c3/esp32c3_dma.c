@@ -32,6 +32,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/mutex.h>
 #include <nuttx/kmalloc.h>
 #include <arch/irq.h>
 
@@ -66,8 +67,8 @@
  * Private Data
  ****************************************************************************/
 
-static bool  g_dma_chan_used[ESP32C3_DMA_CHAN_MAX];
-static sem_t g_dma_exc_sem = SEM_INITIALIZER(1);
+static bool    g_dma_chan_used[ESP32C3_DMA_CHAN_MAX];
+static mutex_t g_dma_lock = NXMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Public Functions
@@ -107,7 +108,7 @@ int32_t esp32c3_dma_request(enum esp32c3_dma_periph_e periph,
   dmainfo("periph=%" PRIu32 " tx_prio=%" PRIu32 " rx_prio=%" PRIu32 "\n",
           (uint32_t)periph, tx_prio, rx_prio);
 
-  nxsem_wait_uninterruptible(&g_dma_exc_sem);
+  nxmutex_lock(&g_dma_lock);
 
   for (chan = 0; chan < ESP32C3_DMA_CHAN_MAX; chan++)
     {
@@ -122,8 +123,7 @@ int32_t esp32c3_dma_request(enum esp32c3_dma_periph_e periph,
     {
       dmaerr("No available GDMA channel for allocation\n");
 
-      nxsem_post(&g_dma_exc_sem);
-
+      nxmutex_unlock(&g_dma_lock);
       return ERROR;
     }
 
@@ -170,8 +170,7 @@ int32_t esp32c3_dma_request(enum esp32c3_dma_periph_e periph,
   SET_REG(DMA_OUT_PRI_CH0_REG, chan, tx_prio);
   SET_REG(DMA_IN_PRI_CH0_REG, chan, rx_prio);
 
-  nxsem_post(&g_dma_exc_sem);
-
+  nxmutex_unlock(&g_dma_lock);
   return chan;
 }
 

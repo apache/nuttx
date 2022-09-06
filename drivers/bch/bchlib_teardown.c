@@ -75,7 +75,7 @@ int bchlib_teardown(FAR void *handle)
       kmm_free(bch->buffer);
     }
 
-  nxsem_destroy(&bch->sem);
+  nxmutex_destroy(&bch->lock);
   kmm_free(bch);
   return OK;
 }

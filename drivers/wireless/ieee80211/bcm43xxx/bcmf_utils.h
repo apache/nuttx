@@ -27,8 +27,6 @@
 
 #include <stdint.h>
 
-#include <nuttx/semaphore.h>
-
 #ifndef min
 #define min(a,b) ((a) < (b) ? (a) : (b))
 #endif
@@ -42,8 +40,6 @@
  ****************************************************************************/
 
 void bcmf_hexdump(uint8_t *data, unsigned int len, unsigned long offset);
-
-int bcmf_sem_wait(sem_t *sem, unsigned int timeout_ms);
 
 static inline uint16_t bcmf_getle16(void *val)
 {

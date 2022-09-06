@@ -141,7 +141,7 @@ int nxffs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
   /* Get the mountpoint private data from the NuttX inode structure */
 
   volume = mountpt->i_private;
-  ret = nxsem_wait(&volume->exclsem);
+  ret = nxmutex_lock(&volume->lock);
   if (ret != OK)
     {
       goto errout;
@@ -151,7 +151,7 @@ int nxffs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
 
   ret = nxffs_rminode(volume, relpath);
 
-  nxsem_post(&volume->exclsem);
+  nxmutex_unlock(&volume->lock);
 
 errout:
   return ret;

@@ -72,7 +72,7 @@ static int work_qcancel(FAR struct usr_wqueue_s *wqueue,
 
   /* Get exclusive access to the work queue */
 
-  while (_SEM_WAIT(&wqueue->lock) < 0);
+  while (nxmutex_lock(&wqueue->lock) < 0);
 
   /* Cancelling the work is simply a matter of removing the work structure
    * from the work queue.  This must be done with interrupts disabled because
@@ -123,7 +123,7 @@ static int work_qcancel(FAR struct usr_wqueue_s *wqueue,
       ret = OK;
     }
 
-  _SEM_POST(&wqueue->lock);
+  nxmutex_unlock(&wqueue->lock);
   return ret;
 }
 

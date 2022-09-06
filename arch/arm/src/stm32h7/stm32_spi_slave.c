@@ -36,7 +36,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/spi/slave.h>
 #include <nuttx/power/pm.h>
@@ -199,7 +199,7 @@ struct stm32_spidev_s
   bool             dmarunning;   /* DMA is started */
 #endif
   bool             initialized;  /* Has SPI interface been initialized */
-  sem_t            exclsem;      /* Held while chip is selected for mutual
+  mutex_t          lock;         /* Held while chip is selected for mutual
                                   * exclusion */
   int8_t           nbits;        /* Width of word in bits */
   uint8_t          mode;         /* Mode 0,1,2,3 */
@@ -905,24 +905,13 @@ static int spi_lock(struct spi_slave_ctrlr_s *ctrlr, bool lock)
 
   if (lock)
     {
-      /* Take the semaphore (perhaps waiting) */
+      /* Take the mutex (perhaps waiting) */
 
-      do
-        {
-          ret = nxsem_wait(&priv->exclsem);
-
-          /* The only case that an error should occur here is if the wait
-           * was awakened by a signal.
-           */
-
-          DEBUGASSERT(ret == OK || ret == -EINTR);
-        }
-      while (ret == -EINTR);
+      ret = nxmutex_lock(&priv->lock);
     }
   else
     {
-      nxsem_post(&priv->exclsem);
-      ret = OK;
+      ret = nxmutex_unlock(&priv->lock);
     }
 
   return ret;
@@ -1551,7 +1540,6 @@ static int spi_pm_prepare(struct pm_callback_s *cb, int domain,
   struct stm32_spidev_s *priv =
       (struct stm32_spidev_s *)((char *)cb -
                                     offsetof(struct stm32_spidev_s, pm_cb));
-  int sval;
 
   /* Logic to prepare for a reduced power state goes here. */
 
@@ -1566,15 +1554,9 @@ static int spi_pm_prepare(struct pm_callback_s *cb, int domain,
 
       /* Check if exclusive lock for SPI bus is held. */
 
-      if (nxsem_getvalue(&priv->exclsem, &sval) < 0)
-        {
-          DEBUGPANIC();
-          return -EINVAL;
-        }
-
       /* If exclusive lock is held, do not allow entry to deeper PM states */
 
-      if (sval <= 0)
+      if (nxmutex_is_locked(&priv->lock))
         {
           return -EBUSY;
         }
@@ -1666,9 +1648,9 @@ static void spi_slave_initialize(struct stm32_spidev_s *priv)
 
   spi_putreg(priv, STM32_SPI_CRCPOLY_OFFSET, 7);
 
-  /* Initialize the SPI semaphore that enforces mutually exclusive access. */
+  /* Initialize the SPI mutex that enforces mutually exclusive access. */
 
-  nxsem_init(&priv->exclsem, 0, 1);
+  nxmutex_init(&priv->lock);
 
 #ifdef CONFIG_STM32H7_SPI_DMA
   /* DMA will be started in the interrupt handler, synchronized to the master

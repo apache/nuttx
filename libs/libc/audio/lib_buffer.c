@@ -41,38 +41,8 @@
 #if defined(CONFIG_AUDIO)
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: apb_semtake
- *
- *       Take an Audio Pipeline Buffer.
- *
- ****************************************************************************/
-
-static void apb_semtake(FAR struct ap_buffer_s *apb)
-{
-  int ret;
-
-  /* Take the semaphore (perhaps waiting) */
-
-  while (_SEM_WAIT(&apb->sem) < 0)
-    {
-      /* The only case that an error should occr here is if
-       * the wait was awakened by a signal.
-       */
-
-      DEBUGASSERT(_SEM_ERRNO(ret) == EINTR || _SEM_ERRNO(ret) == ECANCELED);
-      UNUSED(ret);
-    }
-}
-
-/****************************************************************************
- * Name: apb_semgive
- ****************************************************************************/
-
-#define apb_semgive(b) _SEM_POST(&b->sem)
 
 /****************************************************************************
  * Name: apb_alloc
@@ -118,7 +88,7 @@ int apb_alloc(FAR struct audio_buf_desc_s *bufdesc)
       apb->session    = bufdesc->session;
 #endif
 
-      _SEM_INIT(&apb->sem, 0, 1);
+      nxmutex_init(&apb->lock);
       ret = sizeof(struct audio_buf_desc_s);
     }
 
@@ -138,14 +108,14 @@ void apb_free(FAR struct ap_buffer_s *apb)
 
   /* Perform a reference count decrement and possibly release the memory */
 
-  apb_semtake(apb);
+  nxmutex_lock(&apb->lock);
   refcount = apb->crefs--;
-  apb_semgive(apb);
+  nxmutex_unlock(&apb->lock);
 
   if (refcount <= 1)
     {
       audinfo("Freeing %p\n", apb);
-      _SEM_DESTROY(&apb->sem);
+      nxmutex_destroy(&apb->lock);
       lib_ufree(apb);
     }
 }
@@ -163,9 +133,9 @@ void apb_reference(FAR struct ap_buffer_s *apb)
 {
   /* Do we need any thread protection here?  Almost certainly... */
 
-  apb_semtake(apb);
+  nxmutex_lock(&apb->lock);
   apb->crefs++;
-  apb_semgive(apb);
+  nxmutex_unlock(&apb->lock);
 }
 
 #endif /* CONFIG_AUDIO */

@@ -37,7 +37,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/timers/timer.h>
 
 #ifdef CONFIG_TIMER
@@ -50,7 +50,7 @@
 
 struct timer_upperhalf_s
 {
-  sem_t exclsem;           /* Supports mutual exclusion */
+  mutex_t lock;            /* Supports mutual exclusion */
   uint8_t crefs;           /* The number of times the device has been opened */
   FAR char *path;          /* Registration path */
 
@@ -143,7 +143,7 @@ static int timer_open(FAR struct file *filep)
 
   /* Get exclusive access to the device structures */
 
-  ret = nxsem_wait(&upper->exclsem);
+  ret = nxmutex_lock(&upper->lock);
   if (ret < 0)
     {
       goto errout;
@@ -160,7 +160,7 @@ static int timer_open(FAR struct file *filep)
       /* More than 255 opens; uint8_t overflows to zero */
 
       ret = -EMFILE;
-      goto errout_with_sem;
+      goto errout_with_lock;
     }
 
   /* Save the new open count */
@@ -168,8 +168,8 @@ static int timer_open(FAR struct file *filep)
   upper->crefs = tmp;
   ret = OK;
 
-errout_with_sem:
-  nxsem_post(&upper->exclsem);
+errout_with_lock:
+  nxmutex_unlock(&upper->lock);
 
 errout:
   return ret;
@@ -193,7 +193,7 @@ static int timer_close(FAR struct file *filep)
 
   /* Get exclusive access to the device structures */
 
-  ret = nxsem_wait(&upper->exclsem);
+  ret = nxmutex_lock(&upper->lock);
   if (ret < 0)
     {
       return ret;
@@ -208,7 +208,7 @@ static int timer_close(FAR struct file *filep)
       upper->crefs--;
     }
 
-  nxsem_post(&upper->exclsem);
+  nxmutex_unlock(&upper->lock);
   return OK;
 }
 
@@ -266,7 +266,7 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access to the device structures */
 
-  ret = nxsem_wait(&upper->exclsem);
+  ret = nxmutex_lock(&upper->lock);
   if (ret < 0)
     {
       return ret;
@@ -432,7 +432,7 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
     }
 
-  nxsem_post(&upper->exclsem);
+  nxmutex_unlock(&upper->lock);
   return ret;
 }
 
@@ -490,7 +490,7 @@ FAR void *timer_register(FAR const char *path,
    */
 
   upper->lower = lower;
-  nxsem_init(&upper->exclsem, 0, 1);
+  nxmutex_init(&upper->lock);
 
   /* Copy the registration path */
 
@@ -516,7 +516,7 @@ errout_with_path:
   kmm_free(upper->path);
 
 errout_with_upper:
-  nxsem_destroy(&upper->exclsem);
+  nxmutex_destroy(&upper->lock);
   kmm_free(upper);
 
 errout:
@@ -563,7 +563,7 @@ void timer_unregister(FAR void *handle)
 
   /* Then free all of the driver resources */
 
-  nxsem_destroy(&upper->exclsem);
+  nxmutex_destroy(&upper->lock);
   kmm_free(upper->path);
   kmm_free(upper);
 }

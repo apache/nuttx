@@ -239,7 +239,7 @@ static int nxtask_spawn_proxy(int argc, FAR char *argv[])
 
   g_spawn_parms.result = ret;
 #ifndef CONFIG_SCHED_WAITPID
-  spawn_semgive(&g_spawn_execsem);
+  nxsem_post(&g_spawn_execsem);
 #endif
   return OK;
 }
@@ -356,10 +356,10 @@ int task_spawn(FAR const char *name, main_t entry,
 
   /* Get exclusive access to the global parameter structure */
 
-  ret = spawn_semtake(&g_spawn_parmsem);
+  ret = nxmutex_lock(&g_spawn_parmlock);
   if (ret < 0)
     {
-      serr("ERROR: spawn_semtake failed: %d\n", ret);
+      serr("ERROR: nxmutex_lock failed: %d\n", ret);
       return ret;
     }
 
@@ -381,7 +381,7 @@ int task_spawn(FAR const char *name, main_t entry,
     {
       serr("ERROR: nxsched_get_param failed: %d\n", ret);
       g_spawn_parms.pid = NULL;
-      spawn_semgive(&g_spawn_parmsem);
+      nxmutex_unlock(&g_spawn_parmlock);
       return ret;
     }
 
@@ -427,7 +427,7 @@ int task_spawn(FAR const char *name, main_t entry,
       goto errout_with_lock;
     }
 #else
-  ret = spawn_semtake(&g_spawn_execsem);
+  ret = nxsem_wait_uninterruptible(&g_spawn_execsem);
   if (ret < 0)
     {
       serr("ERROR: g_spawn_execsem() failed: %d\n", ret);
@@ -450,7 +450,7 @@ errout_with_lock:
   sched_unlock();
 #endif
   g_spawn_parms.pid = NULL;
-  spawn_semgive(&g_spawn_parmsem);
+  nxmutex_unlock(&g_spawn_parmlock);
   return ret;
 }
 

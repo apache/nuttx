@@ -55,7 +55,7 @@ void inode_release(FAR struct inode *node)
 
       do
         {
-          ret = inode_semtake();
+          ret = inode_lock();
 
           /* This only possible error is due to cancellation of the thread.
            * We need to try again anyway in this case, otherwise the
@@ -82,14 +82,14 @@ void inode_release(FAR struct inode *node)
            * should be NULL.
            */
 
-          inode_semgive();
+          inode_unlock();
 
           DEBUGASSERT(node->i_peer == NULL);
           inode_free(node);
         }
       else
         {
-          inode_semgive();
+          inode_unlock();
         }
     }
 }

@@ -32,7 +32,7 @@
 #include <stdlib.h>
 #include <inttypes.h>
 #include <debug.h>
-#include <semaphore.h>
+#include <nuttx/mutex.h>
 
 #include "riscv_internal.h"
 #include "hardware/esp32c3_sha.h"
@@ -105,7 +105,7 @@
  ****************************************************************************/
 
 static bool g_sha_inited;
-static sem_t g_sha_sem = SEM_INITIALIZER(1);
+static mutex_t g_sha_lock = NXMUTEX_INITIALIZER;
 static const unsigned char esp32c3_sha_padding[64] =
 {
   0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -536,7 +536,7 @@ int esp32c3_sha1_update(struct esp32c3_sha1_context_s *ctx,
   len = (ilen / 64) * 64;
   if (len || local_len)
     {
-      ret = nxsem_wait(&g_sha_sem);
+      ret = nxmutex_lock(&g_sha_lock);
       if (ret < 0)
         {
           return ret;
@@ -558,7 +558,7 @@ int esp32c3_sha1_update(struct esp32c3_sha1_context_s *ctx,
         }
 
       ret = esp32c3_sha1_block(ctx, input, len, ctx->buffer, local_len);
-      ret |= nxsem_post(&g_sha_sem);
+      ret |= nxmutex_unlock(&g_sha_lock);
 
       if (ret != 0)
         {
@@ -762,7 +762,7 @@ int esp32c3_sha256_update(struct esp32c3_sha256_context_s *ctx,
 
   if (len || local_len)
     {
-      ret = nxsem_wait(&g_sha_sem);
+      ret = nxmutex_lock(&g_sha_lock);
       if (ret < 0)
         {
           return ret;
@@ -784,7 +784,7 @@ int esp32c3_sha256_update(struct esp32c3_sha256_context_s *ctx,
         }
 
       ret = esp32c3_sha256_block(ctx, input, len,  ctx->buffer, local_len);
-      ret |= nxsem_post(&g_sha_sem);
+      ret |= nxmutex_unlock(&g_sha_lock);
 
       if (ret != 0)
         {

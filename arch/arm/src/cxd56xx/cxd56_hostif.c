@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/mutex.h>
 #include <nuttx/irq.h>
 
 #include <stdio.h>
@@ -89,7 +90,7 @@ struct cxd56_hifdev_s
   uint32_t      flags;
   const void    *buffer;
   size_t        len;
-  sem_t         exclsem;
+  mutex_t       lock;
   int           crefs;
 };
 
@@ -220,14 +221,14 @@ static int hif_open(struct file *filep)
 
   /* Increment reference counter */
 
-  nxsem_wait_uninterruptible(&priv->exclsem);
+  nxmutex_lock(&priv->lock);
 
   priv->crefs++;
   DEBUGASSERT(priv->crefs > 0);
 
   if (priv->crefs > 1)
     {
-      nxsem_post(&priv->exclsem);
+      nxmutex_unlock(&priv->lock);
       return OK;
     }
 
@@ -238,8 +239,7 @@ static int hif_open(struct file *filep)
       priv->flags |= O_NONBLOCK;
     }
 
-  nxsem_post(&priv->exclsem);
-
+  nxmutex_unlock(&priv->lock);
   return OK;
 }
 
@@ -256,13 +256,12 @@ static int hif_close(struct file *filep)
 
   /* Decrement reference counter */
 
-  nxsem_wait_uninterruptible(&priv->exclsem);
+  nxmutex_lock(&priv->lock);
 
   DEBUGASSERT(priv->crefs > 0);
   priv->crefs--;
 
-  nxsem_post(&priv->exclsem);
-
+  nxmutex_unlock(&priv->lock);
   return OK;
 }
 
@@ -424,7 +423,7 @@ static int hif_initialize(struct hostif_buff_s *buffer)
           return ret;
         }
 
-      nxsem_init(&priv->exclsem, 0, 1);
+      nxmutex_init(&priv->lock);
       priv->crefs = 0;
     }
 

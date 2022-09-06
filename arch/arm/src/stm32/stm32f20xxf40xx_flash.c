@@ -32,7 +32,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 
 #include <stdbool.h>
 #include <assert.h>
@@ -65,21 +65,11 @@
  * Private Data
  ****************************************************************************/
 
-static sem_t g_sem = SEM_INITIALIZER(1);
+static mutex_t g_lock = NXMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-static int sem_lock(void)
-{
-  return nxsem_wait_uninterruptible(&g_sem);
-}
-
-static inline void sem_unlock(void)
-{
-  nxsem_post(&g_sem);
-}
 
 static void flash_unlock(void)
 {
@@ -128,14 +118,14 @@ int stm32_flash_unlock(void)
 {
   int ret;
 
-  ret = sem_lock();
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return ret;
     }
 
   flash_unlock();
-  sem_unlock();
+  nxmutex_unlock(&g_lock);
 
   return ret;
 }
@@ -144,14 +134,14 @@ int stm32_flash_lock(void)
 {
   int ret;
 
-  ret = sem_lock();
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return ret;
     }
 
   flash_lock();
-  sem_unlock();
+  nxmutex_unlock(&g_lock);
 
   return ret;
 }
@@ -344,7 +334,7 @@ ssize_t up_progmem_eraseblock(size_t block)
       return -EFAULT;
     }
 
-  sem_lock();
+  nxmutex_lock(&g_lock);
 
   /* Get flash ready and begin erasing single block */
 
@@ -360,7 +350,7 @@ ssize_t up_progmem_eraseblock(size_t block)
     }
 
   modifyreg32(STM32_FLASH_CR, FLASH_CR_SER, 0);
-  sem_unlock();
+  nxmutex_unlock(&g_lock);
 
   /* Verify */
 
@@ -398,7 +388,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
       return -EFAULT;
     }
 
-  sem_lock();
+  nxmutex_lock(&g_lock);
 
   /* Get flash ready and begin flashing */
 
@@ -430,14 +420,14 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
       if (getreg32(STM32_FLASH_SR) & FLASH_CR_SER)
         {
           modifyreg32(STM32_FLASH_CR, FLASH_CR_PG, 0);
-          sem_unlock();
+          nxmutex_unlock(&g_lock);
           return -EROFS;
         }
 
       if (getreg16(addr) != *hword)
         {
           modifyreg32(STM32_FLASH_CR, FLASH_CR_PG, 0);
-          sem_unlock();
+          nxmutex_unlock(&g_lock);
           return -EIO;
         }
     }
@@ -448,7 +438,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
   data_cache_enable();
 #endif
 
-  sem_unlock();
+  nxmutex_unlock(&g_lock);
   return written;
 }
 

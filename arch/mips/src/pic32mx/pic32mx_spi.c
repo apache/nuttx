@@ -35,7 +35,7 @@
 #include <arch/board/board.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/spi/spi.h>
 
 #include "mips_internal.h"
@@ -74,7 +74,7 @@ struct pic32mx_dev_s
   uint8_t          rxirq;      /* SPI receive done interrupt number */
   uint8_t          txirq;      /* SPI transfer done interrupt number */
 #endif
-  sem_t            exclsem;    /* Held while chip is selected for mutual exclusion */
+  mutex_t          lock;       /* Held while chip is selected for mutual exclusion */
   uint32_t         frequency;  /* Requested clock frequency */
   uint32_t         actual;     /* Actual clock frequency */
   uint8_t          nbits;      /* Width of word in bits (8 to 16) */
@@ -427,11 +427,11 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
 
   if (lock)
     {
-      ret = nxsem_wait_uninterruptible(&priv->exclsem);
+      ret = nxmutex_lock(&priv->lock);
     }
   else
     {
-      ret = nxsem_post(&priv->exclsem);
+      ret = nxmutex_unlock(&priv->lock);
     }
 
   return ret;
@@ -963,9 +963,9 @@ struct spi_dev_s *pic32mx_spibus_initialize(int port)
   priv->nbits = 8;
   priv->mode  = SPIDEV_MODE0;
 
-  /* Initialize the SPI semaphore that enforces mutually exclusive access */
+  /* Initialize the SPI mutex that enforces mutually exclusive access */
 
-  nxsem_init(&priv->exclsem, 0, 1);
+  nxmutex_init(&priv->lock);
 
 #ifdef CONFIG_PIC32MX_SPI_INTERRUPTS
   /* Enable interrupts at the SPI controller */

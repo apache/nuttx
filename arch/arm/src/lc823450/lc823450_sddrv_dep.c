@@ -129,15 +129,6 @@ static void dma_callback(DMA_HANDLE hdma, void *arg, int result)
 #endif /* CONFIG_LC823450_SDC_DMA */
 
 /****************************************************************************
- * Name: _sddep_semtake
- ****************************************************************************/
-
-static int _sddep_semtake(sem_t *sem)
-{
-  return nxsem_wait_uninterruptible(sem);
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -427,7 +418,7 @@ SINT_T sddep_read(void *src, void *dst, UI_32 size, SINT_T type,
     }
 
   lc823450_dmastart(_hrdma[ch], dma_callback, &_sem_rwait[ch]);
-  return _sddep_semtake(&_sem_rwait[ch]);
+  return nxsem_wait_uninterruptible(&_sem_rwait[ch]);
 #else
   SINT_T i;
   UI_32 *p = (UI_32 *)src;
@@ -518,7 +509,7 @@ SINT_T sddep_write(void *src, void *dst, UI_32 size, SINT_T type,
     }
 
   lc823450_dmastart(_hwdma[ch], dma_callback, &_sem_wwait[ch]);
-  return _sddep_semtake(&_sem_wwait[ch]);
+  return nxsem_wait_uninterruptible(&_sem_wwait[ch]);
 
 #else
   SINT_T i;

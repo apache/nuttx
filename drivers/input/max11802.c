@@ -338,7 +338,7 @@ static int max11802_waitsample(FAR struct max11802_dev_s *priv,
    * run, but they cannot run yet because pre-emption is disabled.
    */
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
 
   /* Try to get the a sample... if we cannot, then wait on the semaphore
    * that is posted when new sample data is available.
@@ -367,7 +367,7 @@ static int max11802_waitsample(FAR struct max11802_dev_s *priv,
    * sample.  Interrupts and pre-emption will be re-enabled while we wait.
    */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
 
 errout:
   /* Then re-enable interrupts.  We might get interrupt here and there
@@ -483,17 +483,7 @@ static void max11802_worker(FAR void *arg)
 
   /* Get exclusive access to the driver data structure */
 
-  do
-    {
-      ret = nxsem_wait_uninterruptible(&priv->devsem);
-
-      /* This would only fail if something canceled the worker thread?
-       * That is not expected.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -ECANCELED);
-    }
-  while (ret < 0);
+  nxmutex_lock(&priv->devlock);
 
   /* Check for pen up or down by reading the PENIRQ GPIO. */
 
@@ -669,7 +659,7 @@ ignored:
 
   /* Release our lock on the state structure and unlock the SPI bus */
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   max11802_unlock(priv->spi);
 }
 
@@ -734,7 +724,7 @@ static int max11802_open(FAR struct file *filep)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return ret;
@@ -748,7 +738,7 @@ static int max11802_open(FAR struct file *filep)
       /* More than 255 opens; uint8_t overflows to zero */
 
       ret = -EMFILE;
-      goto errout_with_sem;
+      goto errout_with_lock;
     }
 
   /* When the reference increments to 1, this is the first open event
@@ -759,8 +749,8 @@ static int max11802_open(FAR struct file *filep)
 
   priv->crefs = tmp;
 
-errout_with_sem:
-  nxsem_post(&priv->devsem);
+errout_with_lock:
+  nxmutex_unlock(&priv->devlock);
   return ret;
 #else
   iinfo("Opening\n");
@@ -788,7 +778,7 @@ static int max11802_close(FAR struct file *filep)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return ret;
@@ -804,7 +794,7 @@ static int max11802_close(FAR struct file *filep)
       priv->crefs--;
     }
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
 #endif
   iinfo("Closing\n");
   return OK;
@@ -846,7 +836,7 @@ static ssize_t max11802_read(FAR struct file *filep, FAR char *buffer,
 
   /* Get exclusive access to the driver data structure */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       ierr("ERROR: nxsem_wait: %d\n", ret);
@@ -935,7 +925,7 @@ static ssize_t max11802_read(FAR struct file *filep, FAR char *buffer,
   ret = SIZEOF_TOUCH_SAMPLE_S(1);
 
 errout:
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   iinfo("Returning: %d\n", ret);
   return ret;
 }
@@ -959,7 +949,7 @@ static int max11802_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return ret;
@@ -990,7 +980,7 @@ static int max11802_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return ret;
 }
 
@@ -1015,7 +1005,7 @@ static int max11802_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   /* Are we setting up the poll?  Or tearing it down? */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return ret;
@@ -1077,7 +1067,7 @@ static int max11802_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 errout:
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return ret;
 }
 
@@ -1142,10 +1132,10 @@ int max11802_register(FAR struct spi_dev_s *spi,
   priv->threshx = INVALID_THRESHOLD; /* Initialize thresholding logic */
   priv->threshy = INVALID_THRESHOLD; /* Initialize thresholding logic */
 
-  /* Initialize semaphores */
+  /* Initialize mutex & semaphores */
 
-  nxsem_init(&priv->devsem,  0, 1);    /* Initialize device structure semaphore */
-  nxsem_init(&priv->waitsem, 0, 0);    /* Initialize pen event wait semaphore */
+  nxmutex_init(&priv->devlock);     /* Initialize device structure mutex */
+  nxsem_init(&priv->waitsem, 0, 0); /* Initialize pen event wait semaphore */
 
   /* The pen event semaphore is used for signaling and, hence, should not
    * have priority inheritance enabled.
@@ -1263,7 +1253,7 @@ int max11802_register(FAR struct spi_dev_s *spi,
   return OK;
 
 errout_with_priv:
-  nxsem_destroy(&priv->devsem);
+  nxmutex_destroy(&priv->devlock);
 #ifdef CONFIG_MAX11802_MULTIPLE
   kmm_free(priv);
 #endif

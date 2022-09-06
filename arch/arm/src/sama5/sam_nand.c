@@ -314,7 +314,7 @@ struct sam_nand_s g_nand;
 #if NAND_NBANKS > 1
 static int nand_lock(void)
 {
-  return nxsem_wait_uninterruptible(&g_nand.exclsem);
+  return nxmutex_lock(&g_nand.lock);
 }
 #endif
 
@@ -335,7 +335,7 @@ static int nand_lock(void)
 #if NAND_NBANKS > 1
 static void nand_unlock(void)
 {
-  nxsem_post(&g_nand.exclsem);
+  nxmutex_unlock(&g_nand.lock);
 }
 #endif
 
@@ -2996,7 +2996,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
       /* Initialize the global nand state structure */
 
 #if NAND_NBANKS > 1
-      nxsem_init(&g_nand.exclsem, 0, 1);
+      nxmutex_init(&g_nand.lock);
 #endif
 
 #ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS

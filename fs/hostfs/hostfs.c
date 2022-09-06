@@ -37,6 +37,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/mutex.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/fat.h>
 #include <nuttx/fs/ioctl.h>
@@ -122,8 +123,7 @@ static int     hostfs_chstat(FAR struct inode *mountpt,
  * Private Data
  ****************************************************************************/
 
-static uint8_t  g_seminitialized = FALSE;
-static sem_t    g_sem;
+static mutex_t g_lock = NXMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Public Data
@@ -169,24 +169,6 @@ const struct mountpt_operations hostfs_operations =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: hostfs_semtake
- ****************************************************************************/
-
-int hostfs_semtake(FAR struct hostfs_mountpt_s *fs)
-{
-  return nxsem_wait_uninterruptible(fs->fs_sem);
-}
-
-/****************************************************************************
- * Name: hostfs_semgive
- ****************************************************************************/
-
-void hostfs_semgive(FAR struct hostfs_mountpt_s *fs)
-{
-  nxsem_post(fs->fs_sem);
-}
 
 /****************************************************************************
  * Name: hostfs_mkpath
@@ -275,9 +257,9 @@ static int hostfs_open(FAR struct file *filep, FAR const char *relpath,
 
   DEBUGASSERT(fs != NULL);
 
-  /* Take the semaphore */
+  /* Take the lock */
 
-  ret = hostfs_semtake(fs);
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return ret;
@@ -289,7 +271,7 @@ static int hostfs_open(FAR struct file *filep, FAR const char *relpath,
   if (hf == NULL)
     {
       ret = -ENOMEM;
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 
   /* Append to the host's root directory */
@@ -340,13 +322,13 @@ static int hostfs_open(FAR struct file *filep, FAR const char *relpath,
   fs->fs_head = hf;
 
   ret = OK;
-  goto errout_with_semaphore;
+  goto errout_with_lock;
 
 errout_with_buffer:
   kmm_free(hf);
 
-errout_with_semaphore:
-  hostfs_semgive(fs);
+errout_with_lock:
+  nxmutex_unlock(&g_lock);
   if (ret == -EINVAL)
     {
       ret = -EIO;
@@ -378,9 +360,9 @@ static int hostfs_close(FAR struct file *filep)
   fs    = inode->i_private;
   hf    = filep->f_priv;
 
-  /* Take the semaphore */
+  /* Take the lock */
 
-  ret = hostfs_semtake(fs);
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return ret;
@@ -440,7 +422,7 @@ static int hostfs_close(FAR struct file *filep)
   kmm_free(hf);
 
 okout:
-  hostfs_semgive(fs);
+  nxmutex_unlock(&g_lock);
   return OK;
 }
 
@@ -468,9 +450,9 @@ static ssize_t hostfs_read(FAR struct file *filep, FAR char *buffer,
 
   DEBUGASSERT(fs != NULL);
 
-  /* Take the semaphore */
+  /* Take the lock */
 
-  ret = hostfs_semtake(fs);
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return ret;
@@ -484,7 +466,7 @@ static ssize_t hostfs_read(FAR struct file *filep, FAR char *buffer,
       filep->f_pos += ret;
     }
 
-  hostfs_semgive(fs);
+  nxmutex_unlock(&g_lock);
   return ret;
 }
 
@@ -510,9 +492,9 @@ static ssize_t hostfs_write(FAR struct file *filep, const char *buffer,
 
   DEBUGASSERT(fs != NULL);
 
-  /* Take the semaphore */
+  /* Take the lock */
 
-  ret = hostfs_semtake(fs);
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return ret;
@@ -525,7 +507,7 @@ static ssize_t hostfs_write(FAR struct file *filep, const char *buffer,
   if ((hf->oflags & O_WROK) == 0)
     {
       ret = -EACCES;
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 
   /* Call the host to perform the write */
@@ -536,8 +518,8 @@ static ssize_t hostfs_write(FAR struct file *filep, const char *buffer,
       filep->f_pos += ret;
     }
 
-errout_with_semaphore:
-  hostfs_semgive(fs);
+errout_with_lock:
+  nxmutex_unlock(&g_lock);
   return ret;
 }
 
@@ -564,9 +546,9 @@ static off_t hostfs_seek(FAR struct file *filep, off_t offset, int whence)
 
   DEBUGASSERT(fs != NULL);
 
-  /* Take the semaphore */
+  /* Take the lock */
 
-  ret = hostfs_semtake(fs);
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return ret;
@@ -580,7 +562,7 @@ static off_t hostfs_seek(FAR struct file *filep, off_t offset, int whence)
       filep->f_pos = ret;
     }
 
-  hostfs_semgive(fs);
+  nxmutex_unlock(&g_lock);
   return ret;
 }
 
@@ -607,9 +589,9 @@ static int hostfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   DEBUGASSERT(fs != NULL);
 
-  /* Take the semaphore */
+  /* Take the lock */
 
-  ret = hostfs_semtake(fs);
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return ret;
@@ -619,7 +601,7 @@ static int hostfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   ret = host_ioctl(hf->fd, cmd, arg);
 
-  hostfs_semgive(fs);
+  nxmutex_unlock(&g_lock);
   return ret;
 }
 
@@ -650,9 +632,9 @@ static int hostfs_sync(FAR struct file *filep)
 
   DEBUGASSERT(fs != NULL);
 
-  /* Take the semaphore */
+  /* Take the lock */
 
-  ret = hostfs_semtake(fs);
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return ret;
@@ -660,7 +642,7 @@ static int hostfs_sync(FAR struct file *filep)
 
   host_sync(hf->fd);
 
-  hostfs_semgive(fs);
+  nxmutex_unlock(&g_lock);
   return OK;
 }
 
@@ -724,9 +706,9 @@ static int hostfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
   fs    = inode->i_private;
   DEBUGASSERT(fs != NULL);
 
-  /* Take the semaphore */
+  /* Take the lock */
 
-  ret = hostfs_semtake(fs);
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return ret;
@@ -736,7 +718,7 @@ static int hostfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 
   ret = host_fstat(hf->fd, buf);
 
-  hostfs_semgive(fs);
+  nxmutex_unlock(&g_lock);
   return ret;
 }
 
@@ -770,9 +752,9 @@ static int hostfs_fchstat(FAR const struct file *filep,
   fs    = inode->i_private;
   DEBUGASSERT(fs != NULL);
 
-  /* Take the semaphore */
+  /* Take the lock */
 
-  ret = hostfs_semtake(fs);
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return ret;
@@ -782,7 +764,7 @@ static int hostfs_fchstat(FAR const struct file *filep,
 
   ret = host_fchstat(hf->fd, buf, flags);
 
-  hostfs_semgive(fs);
+  nxmutex_unlock(&g_lock);
   return ret;
 }
 
@@ -815,9 +797,9 @@ static int hostfs_ftruncate(FAR struct file *filep, off_t length)
   fs    = inode->i_private;
   DEBUGASSERT(fs != NULL);
 
-  /* Take the semaphore */
+  /* Take the lock */
 
-  ret = hostfs_semtake(fs);
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return ret;
@@ -827,7 +809,7 @@ static int hostfs_ftruncate(FAR struct file *filep, off_t length)
 
   ret = host_ftruncate(hf->fd, length);
 
-  hostfs_semgive(fs);
+  nxmutex_unlock(&g_lock);
   return ret;
 }
 
@@ -859,9 +841,9 @@ static int hostfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
       return -ENOMEM;
     }
 
-  /* Take the semaphore */
+  /* Take the lock */
 
-  ret = hostfs_semtake(fs);
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       goto errout_with_hdir;
@@ -877,15 +859,15 @@ static int hostfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   if (hdir->dir == NULL)
     {
       ret = -ENOENT;
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 
   *dir = (FAR struct fs_dirent_s *)hdir;
-  hostfs_semgive(fs);
+  nxmutex_unlock(&g_lock);
   return OK;
 
-errout_with_semaphore:
-  hostfs_semgive(fs);
+errout_with_lock:
+  nxmutex_unlock(&g_lock);
 
 errout_with_hdir:
   kmm_free(hdir);
@@ -902,7 +884,6 @@ errout_with_hdir:
 static int hostfs_closedir(FAR struct inode *mountpt,
                            FAR struct fs_dirent_s *dir)
 {
-  FAR struct hostfs_mountpt_s *fs;
   FAR struct hostfs_dir_s *hdir;
   int ret;
 
@@ -912,12 +893,11 @@ static int hostfs_closedir(FAR struct inode *mountpt,
 
   /* Recover our private data from the inode instance */
 
-  fs = mountpt->i_private;
   hdir = (FAR struct hostfs_dir_s *)dir;
 
-  /* Take the semaphore */
+  /* Take the lock */
 
-  ret = hostfs_semtake(fs);
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return ret;
@@ -927,7 +907,7 @@ static int hostfs_closedir(FAR struct inode *mountpt,
 
   host_closedir(hdir->dir);
 
-  hostfs_semgive(fs);
+  nxmutex_unlock(&g_lock);
   kmm_free(hdir);
   return OK;
 }
@@ -943,7 +923,6 @@ static int hostfs_readdir(FAR struct inode *mountpt,
                           FAR struct fs_dirent_s *dir,
                           FAR struct dirent *entry)
 {
-  FAR struct hostfs_mountpt_s *fs;
   FAR struct hostfs_dir_s *hdir;
   int ret;
 
@@ -953,12 +932,11 @@ static int hostfs_readdir(FAR struct inode *mountpt,
 
   /* Recover our private data from the inode instance */
 
-  fs = mountpt->i_private;
   hdir = (FAR struct hostfs_dir_s *)dir;
 
-  /* Take the semaphore */
+  /* Take the lock */
 
-  ret = hostfs_semtake(fs);
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return ret;
@@ -968,7 +946,7 @@ static int hostfs_readdir(FAR struct inode *mountpt,
 
   ret = host_readdir(hdir->dir, entry);
 
-  hostfs_semgive(fs);
+  nxmutex_unlock(&g_lock);
   return ret;
 }
 
@@ -982,7 +960,6 @@ static int hostfs_readdir(FAR struct inode *mountpt,
 static int hostfs_rewinddir(FAR struct inode *mountpt,
                             FAR struct fs_dirent_s *dir)
 {
-  FAR struct hostfs_mountpt_s *fs;
   FAR struct hostfs_dir_s *hdir;
   int ret;
 
@@ -992,12 +969,11 @@ static int hostfs_rewinddir(FAR struct inode *mountpt,
 
   /* Recover our private data from the inode instance */
 
-  fs = mountpt->i_private;
   hdir = (FAR struct hostfs_dir_s *)dir;
 
-  /* Take the semaphore */
+  /* Take the lock */
 
-  ret = hostfs_semtake(fs);
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return ret;
@@ -1007,7 +983,7 @@ static int hostfs_rewinddir(FAR struct inode *mountpt,
 
   host_rewinddir(hdir->dir);
 
-  hostfs_semgive(fs);
+  nxmutex_unlock(&g_lock);
   return OK;
 }
 
@@ -1073,28 +1049,13 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   kmm_free(options);
 
-  /* If the global semaphore hasn't been initialized, then
-   * initialized it now.
-   */
+  /* Take the lock for the mount */
 
-  fs->fs_sem = &g_sem;
-  if (!g_seminitialized)
+  ret = nxmutex_lock(&g_lock);
+  if (ret < 0)
     {
-      /* Initialize the semaphore that controls access */
-
-      nxsem_init(&g_sem, 0, 0);
-      g_seminitialized = TRUE;
-    }
-  else
-    {
-      /* Take the semaphore for the mount */
-
-      ret = hostfs_semtake(fs);
-      if (ret < 0)
-        {
-          kmm_free(fs);
-          return ret;
-        }
+      kmm_free(fs);
+      return ret;
     }
 
   /* Initialize the allocated mountpt state structure.  The filesystem is
@@ -1122,7 +1083,7 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
     }
 
   *handle = (FAR void *)fs;
-  hostfs_semgive(fs);
+  nxmutex_unlock(&g_lock);
   return OK;
 }
 
@@ -1147,7 +1108,7 @@ static int hostfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
 
   /* Check if there are sill any files opened on the filesystem. */
 
-  ret = hostfs_semtake(fs);
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return ret;
@@ -1157,7 +1118,7 @@ static int hostfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
     {
       /* We cannot unmount now.. there are open files */
 
-      hostfs_semgive(fs);
+      nxmutex_unlock(&g_lock);
 
       /* This implementation currently only supports unmounting if there are
        * no open file references.
@@ -1166,7 +1127,7 @@ static int hostfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
       return (flags != 0) ? -ENOSYS : -EBUSY;
     }
 
-  hostfs_semgive(fs);
+  nxmutex_unlock(&g_lock);
   kmm_free(fs);
   return ret;
 }
@@ -1191,7 +1152,7 @@ static int hostfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 
   fs = mountpt->i_private;
 
-  ret = hostfs_semtake(fs);
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return ret;
@@ -1203,7 +1164,7 @@ static int hostfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   ret = host_statfs(fs->fs_root, buf);
   buf->f_type = HOSTFS_MAGIC;
 
-  hostfs_semgive(fs);
+  nxmutex_unlock(&g_lock);
   return ret;
 }
 
@@ -1228,7 +1189,7 @@ static int hostfs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
 
   fs = mountpt->i_private;
 
-  ret = hostfs_semtake(fs);
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return ret;
@@ -1242,7 +1203,7 @@ static int hostfs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
 
   ret = host_unlink(path);
 
-  hostfs_semgive(fs);
+  nxmutex_unlock(&g_lock);
   return ret;
 }
 
@@ -1268,7 +1229,7 @@ static int hostfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
 
   fs = mountpt->i_private;
 
-  ret = hostfs_semtake(fs);
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return ret;
@@ -1282,7 +1243,7 @@ static int hostfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
 
   ret = host_mkdir(path, mode);
 
-  hostfs_semgive(fs);
+  nxmutex_unlock(&g_lock);
   return ret;
 }
 
@@ -1307,9 +1268,9 @@ int hostfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
 
   fs = mountpt->i_private;
 
-  /* Take the semaphore */
+  /* Take the lock */
 
-  ret = hostfs_semtake(fs);
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return ret;
@@ -1323,7 +1284,7 @@ int hostfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
 
   ret = host_rmdir(path);
 
-  hostfs_semgive(fs);
+  nxmutex_unlock(&g_lock);
   return ret;
 }
 
@@ -1350,7 +1311,7 @@ int hostfs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
 
   fs = mountpt->i_private;
 
-  ret = hostfs_semtake(fs);
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return ret;
@@ -1367,7 +1328,7 @@ int hostfs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
 
   ret = host_rename(oldpath, newpath);
 
-  hostfs_semgive(fs);
+  nxmutex_unlock(&g_lock);
   return ret;
 }
 
@@ -1393,7 +1354,7 @@ static int hostfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
   fs = mountpt->i_private;
 
-  ret = hostfs_semtake(fs);
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return ret;
@@ -1407,7 +1368,7 @@ static int hostfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
   ret = host_stat(path, buf);
 
-  hostfs_semgive(fs);
+  nxmutex_unlock(&g_lock);
   return ret;
 }
 
@@ -1433,7 +1394,7 @@ static int hostfs_chstat(FAR struct inode *mountpt, FAR const char *relpath,
 
   fs = mountpt->i_private;
 
-  ret = hostfs_semtake(fs);
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return ret;
@@ -1447,7 +1408,7 @@ static int hostfs_chstat(FAR struct inode *mountpt, FAR const char *relpath,
 
   ret = host_chstat(path, buf, flags);
 
-  hostfs_semgive(fs);
+  nxmutex_unlock(&g_lock);
   return ret;
 }
 

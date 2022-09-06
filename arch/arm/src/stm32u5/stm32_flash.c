@@ -40,6 +40,7 @@
 #include <debug.h>
 #include <errno.h>
 #include <string.h>
+#include <nuttx/mutex.h>
 
 #include "stm32_rcc.h"
 #include "stm32_waste.h"
@@ -96,36 +97,12 @@
  * Private Data
  ****************************************************************************/
 
-static sem_t g_sem = SEM_INITIALIZER(1);
+static mutex_t g_lock = NXMUTEX_INITIALIZER;
 static uint32_t g_page_buffer[FLASH_PAGE_WORDS];
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-static inline void sem_lock(void)
-{
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&g_sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
-}
-
-static inline void sem_unlock(void)
-{
-  nxsem_post(&g_sem);
-}
 
 static void flash_unlock(void)
 {
@@ -192,16 +169,16 @@ static inline void flash_erase(size_t page)
 
 void stm32_flash_unlock(void)
 {
-  sem_lock();
+  nxmutex_lock(&g_lock);
   flash_unlock();
-  sem_unlock();
+  nxmutex_unlock(&g_lock);
 }
 
 void stm32_flash_lock(void)
 {
-  sem_lock();
+  nxmutex_lock(&g_lock);
   flash_lock();
-  sem_unlock();
+  nxmutex_unlock(&g_lock);
 }
 
 /****************************************************************************
@@ -233,7 +210,7 @@ uint32_t stm32_flash_user_optbytes(uint32_t clrbits, uint32_t setbits)
   DEBUGASSERT((clrbits & FLASH_OPTR_RDP_MASK) == 0);
   DEBUGASSERT((setbits & FLASH_OPTR_RDP_MASK) == 0);
 
-  sem_lock();
+  nxmutex_lock(&g_lock);
   flash_optbytes_unlock();
 
   /* Modify Option Bytes in register. */
@@ -257,7 +234,7 @@ uint32_t stm32_flash_user_optbytes(uint32_t clrbits, uint32_t setbits)
     }
 
   flash_optbytes_lock();
-  sem_unlock();
+  nxmutex_unlock(&g_lock);
 
   return regval;
 }
@@ -316,13 +293,13 @@ ssize_t up_progmem_eraseblock(size_t block)
 
   /* Erase single block */
 
-  sem_lock();
+  nxmutex_lock(&g_lock);
   flash_unlock();
 
   flash_erase(block);
 
   flash_lock();
-  sem_unlock();
+  nxmutex_unlock(&g_lock);
 
   /* Verify */
 
@@ -395,7 +372,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t buflen)
   dest = (uint32_t *)((uint8_t *)addr - offset);
   written = 0;
 
-  sem_lock();
+  nxmutex_lock(&g_lock);
 
   /* Get flash ready and begin flashing. */
 
@@ -502,7 +479,7 @@ out:
     }
 
   flash_lock();
-  sem_unlock();
+  nxmutex_unlock(&g_lock);
   return (ret == OK) ? written : ret;
 }
 

@@ -31,6 +31,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/drivers/drivers.h>
@@ -57,7 +58,7 @@ static ssize_t stm32_rng_read(struct file *filep, char *buffer, size_t);
 
 struct rng_dev_s
 {
-  sem_t rd_devsem;      /* Threads can only exclusively access the RNG */
+  mutex_t rd_devlock;   /* Threads can only exclusively access the RNG */
   sem_t rd_readsem;     /* To block until the buffer is filled  */
   char *rd_buf;
   size_t rd_buflen;
@@ -101,7 +102,7 @@ static int stm32_rng_initialize(void)
 
   memset(&g_rngdev, 0, sizeof(struct rng_dev_s));
 
-  nxsem_init(&g_rngdev.rd_devsem, 0, 1);
+  nxmutex_init(&g_rngdev.rd_devlock);
 
   if (irq_attach(STM32_IRQ_RNG, stm32_rng_interrupt, NULL))
     {
@@ -232,13 +233,13 @@ static ssize_t stm32_rng_read(struct file *filep, char *buffer,
 {
   int ret;
 
-  ret = nxsem_wait(&g_rngdev.rd_devsem);
+  ret = nxmutex_lock(&g_rngdev.rd_devlock);
   if (ret < 0)
     {
       return ret;
     }
 
-  /* We've got the semaphore. */
+  /* We've got the mutex. */
 
   /* Initialize the operation semaphore with 0 for blocking until the
    * buffer is filled from interrupts.  The readsem semaphore is used
@@ -262,7 +263,7 @@ static ssize_t stm32_rng_read(struct file *filep, char *buffer,
 
   /* Free RNG for next use */
 
-  nxsem_post(&g_rngdev.rd_devsem);
+  nxmutex_unlock(&g_rngdev.rd_devlock);
   return ret < 0 ? ret : buflen;
 }
 

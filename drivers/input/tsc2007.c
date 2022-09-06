@@ -51,6 +51,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/random.h>
@@ -152,7 +153,7 @@ struct tsc2007_dev_s
   uint8_t nwaiters;                    /* Number of threads waiting for TSC2007 data */
   uint8_t id;                          /* Current touch point ID */
   volatile bool penchange;             /* An unreported event is buffered */
-  sem_t devsem;                        /* Manages exclusive access to this structure */
+  mutex_t devlock;                     /* Manages exclusive access to this structure */
   sem_t waitsem;                       /* Used to wait for the availability of data */
 
   FAR struct tsc2007_config_s *config; /* Board configuration data */
@@ -339,7 +340,7 @@ static int tsc2007_waitsample(FAR struct tsc2007_dev_s *priv,
    * run, but they cannot run yet because pre-emption is disabled.
    */
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
 
   /* Try to get the a sample... if we cannot, then wait on the semaphore
    * that is posted when new sample data is available.
@@ -365,7 +366,7 @@ static int tsc2007_waitsample(FAR struct tsc2007_dev_s *priv,
    * sample.  Interrupts and pre-emption will be re-enabled while we wait.
    */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
 
 errout:
   /* Then re-enable interrupts.  We might get interrupt here and there
@@ -788,7 +789,7 @@ static int tsc2007_open(FAR struct file *filep)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       ierr("ERROR: nxsem_wait failed: %d\n", ret);
@@ -803,7 +804,7 @@ static int tsc2007_open(FAR struct file *filep)
       /* More than 255 opens; uint8_t overflows to zero */
 
       ret = -EMFILE;
-      goto errout_with_sem;
+      goto errout_with_lock;
     }
 
   /* When the reference increments to 1, this is the first open event
@@ -814,8 +815,8 @@ static int tsc2007_open(FAR struct file *filep)
 
   priv->crefs = tmp;
 
-errout_with_sem:
-  nxsem_post(&priv->devsem);
+errout_with_lock:
+  nxmutex_unlock(&priv->devlock);
   return ret;
 #else
   return OK;
@@ -841,7 +842,7 @@ static int tsc2007_close(FAR struct file *filep)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       ierr("ERROR: nxsem_wait failed: %d\n", ret);
@@ -858,7 +859,7 @@ static int tsc2007_close(FAR struct file *filep)
       priv->crefs--;
     }
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
 #endif
   return OK;
 }
@@ -897,7 +898,7 @@ static ssize_t tsc2007_read(FAR struct file *filep, FAR char *buffer,
 
   /* Get exclusive access to the driver data structure */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       ierr("ERROR: nxsem_wait failed: %d\n", ret);
@@ -992,7 +993,7 @@ static ssize_t tsc2007_read(FAR struct file *filep, FAR char *buffer,
   ret = SIZEOF_TOUCH_SAMPLE_S(1);
 
 errout:
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return ret;
 }
 
@@ -1015,7 +1016,7 @@ static int tsc2007_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       ierr("ERROR: nxsem_wait failed: %d\n", ret);
@@ -1063,7 +1064,7 @@ static int tsc2007_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return ret;
 }
 
@@ -1088,7 +1089,7 @@ static int tsc2007_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   /* Are we setting up the poll?  Or tearing it down? */
 
-  ret = nxsem_wait(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       ierr("ERROR: nxsem_wait failed: %d\n", ret);
@@ -1154,7 +1155,7 @@ static int tsc2007_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 errout:
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return ret;
 }
 
@@ -1220,7 +1221,7 @@ int tsc2007_register(FAR struct i2c_master_s *dev,
   priv->i2c    = dev;               /* Save the I2C device handle */
   priv->config = config;            /* Save the board configuration */
 
-  nxsem_init(&priv->devsem,  0, 1); /* Initialize device structure semaphore */
+  nxmutex_init(&priv->devlock);     /* Initialize device structure mutex */
   nxsem_init(&priv->waitsem, 0, 0); /* Initialize pen event wait semaphore */
 
   /* The event wait semaphore is used for signaling and, hence, should not
@@ -1294,7 +1295,7 @@ int tsc2007_register(FAR struct i2c_master_s *dev,
   return OK;
 
 errout_with_priv:
-  nxsem_destroy(&priv->devsem);
+  nxmutex_destroy(&priv->devlock);
 #ifdef CONFIG_TSC2007_MULTIPLE
   kmm_free(priv);
 #endif
