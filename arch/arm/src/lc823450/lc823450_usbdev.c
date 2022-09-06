@@ -560,7 +560,7 @@ static struct usbdev_req_s *lc823450_epallocreq(struct usbdev_ep_s *ep)
   usbtrace(TRACE_EPALLOCREQ, ((struct lc823450_ep_s *)ep)->epphy);
 
   privreq = (struct lc823450_req_s *)
-    kmm_malloc(sizeof(struct lc823450_req_s));
+    kmm_zalloc(sizeof(struct lc823450_req_s));
 
   if (!privreq)
     {
@@ -568,7 +568,6 @@ static struct usbdev_req_s *lc823450_epallocreq(struct usbdev_ep_s *ep)
       return NULL;
     }
 
-  memset(privreq, 0, sizeof(struct lc823450_req_s));
   return &privreq->req;
 }
 
@@ -1710,7 +1709,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
  * Name: usbdev_msc_read_enter
  ****************************************************************************/
 
-void usbdev_msc_read_enter()
+void usbdev_msc_read_enter(void)
 {
   struct lc823450_ep_s *privep;
 #  ifdef CONFIG_DVFS
@@ -1727,7 +1726,7 @@ void usbdev_msc_read_enter()
  * Name: usbdev_msc_read_exit
  ****************************************************************************/
 
-void usbdev_msc_read_exit()
+void usbdev_msc_read_exit(void)
 {
   struct lc823450_ep_s *privep;
 

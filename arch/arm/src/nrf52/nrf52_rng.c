@@ -145,7 +145,7 @@ static int nrf52_rng_initialize(void)
 
 static int nrf52_rng_irqhandler(int irq, void *context, void *arg)
 {
-  struct rng_dev_s *priv = (struct rng_dev_s *) &g_rngdev;
+  struct rng_dev_s *priv = (struct rng_dev_s *)&g_rngdev;
   uint8_t *addr;
 
   if (getreg32(NRF52_RNG_EVENTS_RDY) == RNG_INT_RDY)
@@ -200,7 +200,7 @@ static ssize_t nrf52_rng_read(struct file *filep, char *buffer,
       return -EBUSY;
     }
 
-  priv->rd_buf = (uint8_t *) buffer;
+  priv->rd_buf = (uint8_t *)buffer;
   priv->buflen = buflen;
   priv->rd_count = 0;
 

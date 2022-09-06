@@ -1538,7 +1538,7 @@ static int imxrt_dma_setup(struct uart_dev_s *dev)
        * worth of time to claim bytes before they are overwritten.
        */
 
-      imxrt_dmach_start(priv->rxdma, imxrt_dma_rxcallback, (void *)priv);
+      imxrt_dmach_start(priv->rxdma, imxrt_dma_rxcallback, priv);
     }
 #endif
 
@@ -1866,7 +1866,7 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_SERIAL_TERMIOS
     case TCGETS:
       {
-        struct termios  *termiosp = (struct termios *)arg;
+        struct termios *termiosp = (struct termios *)arg;
         struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev;
 
         if (!termiosp)
@@ -1928,7 +1928,7 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
 
     case TCSETS:
       {
-        struct termios  *termiosp = (struct termios *)arg;
+        struct termios *termiosp = (struct termios *)arg;
         struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev;
         uint32_t baud;
         uint32_t ie;
@@ -2398,7 +2398,7 @@ static void imxrt_dma_reenable(struct imxrt_uart_s *priv)
    * worth of time to claim bytes before they are overwritten.
    */
 
-  imxrt_dmach_start(priv->rxdma, imxrt_dma_rxcallback, (void *)priv);
+  imxrt_dmach_start(priv->rxdma, imxrt_dma_rxcallback, priv);
 
   /* Clear DMA suspended flag. */
 
@@ -2569,7 +2569,7 @@ static void imxrt_dma_send(struct uart_dev_s *dev)
 
   /* Start transmission with the callback on DMA completion */
 
-  imxrt_dmach_start(priv->txdma, imxrt_dma_txcallback, (void *)priv);
+  imxrt_dmach_start(priv->txdma, imxrt_dma_txcallback, priv);
 }
 #endif
 

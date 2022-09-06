@@ -138,7 +138,7 @@ static struct pic32mx_dev_s g_spi1dev =
 {
   .spidev            =
   {
-    &g_spi1ops
+    .ops             = &g_spi1ops,
   },
   .base              = PIC32MX_SPI1_K1BASE,
 #ifdef CONFIG_PIC32MX_SPI_INTERRUPTS
@@ -177,7 +177,7 @@ static struct pic32mx_dev_s g_spi2dev =
 {
   .spidev            =
   {
-    &g_spi2ops
+    .ops             = &g_spi2ops,
   },
   .base              = PIC32MX_SPI2_K1BASE,
 #ifdef CONFIG_PIC32MX_SPI_INTERRUPTS
@@ -216,7 +216,7 @@ static struct pic32mx_dev_s g_spi3dev =
 {
   .spidev            =
   {
-    &g_spi3ops
+    .ops             = &g_spi3ops,
   },
   .base              = PIC32MX_SPI3_K1BASE,
 #ifdef CONFIG_PIC32MX_SPI_INTERRUPTS
@@ -255,7 +255,7 @@ static struct pic32mx_dev_s g_spi4dev =
 {
   .spidev            =
   {
-    &g_spi4ops
+    .ops             = &g_spi4ops,
   },
   .base              = PIC32MX_SPI4_K1BASE,
 #ifdef CONFIG_PIC32MX_SPI_INTERRUPTS

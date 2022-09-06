@@ -1941,17 +1941,17 @@ static uint8_t rx65n_riic_read_data(FAR struct rx65n_i2c_priv_s *priv)
 
   if (0 == priv->bus)
     {
-      regval = (uint8_t *) (RX65N_RIIC0_ICDRR);
+      regval = (uint8_t *)(RX65N_RIIC0_ICDRR);
     }
 
   else if (1 == priv->bus)
     {
-      regval = (uint8_t *) (RX65N_RIIC1_ICDRR);
+      regval = (uint8_t *)(RX65N_RIIC1_ICDRR);
     }
 
   else
     {
-      regval = (uint8_t *) (RX65N_RIIC2_ICDRR);
+      regval = (uint8_t *)(RX65N_RIIC2_ICDRR);
     }
 
   return *regval;

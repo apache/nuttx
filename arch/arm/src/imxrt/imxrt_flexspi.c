@@ -112,7 +112,7 @@ static struct imxrt_flexspidev_s g_flexspi0dev =
   {
     .ops = &g_flexspi0ops,
   },
-  .base = (struct flexspi_type_s *) IMXRT_FLEXSPIC_BASE,
+  .base = (struct flexspi_type_s *)IMXRT_FLEXSPIC_BASE,
   .lock = NXMUTEX_INITIALIZER,
 };
 

@@ -586,7 +586,7 @@ static int z8_i2c_transfer(FAR struct i2c_master_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
-static int z8_i2c_reset(FAR struct i2c_master_s * dev)
+static int z8_i2c_reset(FAR struct i2c_master_s *dev)
 {
   return OK;
 }

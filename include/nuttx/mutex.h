@@ -528,7 +528,7 @@ static inline int nxrmutex_breaklock(FAR rmutex_t *rmutex,
       rmutex->count = 0;
       rmutex->holder = NXRMUTEX_NO_HOLDER;
       nxmutex_unlock(&rmutex->mutex);
-      ret = 0;
+      ret = OK;
     }
 
   return ret;

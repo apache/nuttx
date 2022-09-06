@@ -246,7 +246,7 @@ static struct s32k3xx_lpspidev_s g_lpspi0dev =
 {
   .spidev       =
   {
-    &g_spi0ops
+    .ops        = &g_spi0ops,
   },
   .spibase      = S32K3XX_LPSPI0_BASE,
 #ifdef CONFIG_S32K3XX_LPSPI_INTERRUPTS
@@ -296,7 +296,7 @@ static struct s32k3xx_lpspidev_s g_lpspi1dev =
 {
   .spidev       =
   {
-    &g_spi1ops
+    .ops        = &g_spi1ops,
   },
   .spibase      = S32K3XX_LPSPI1_BASE,
 #ifdef CONFIG_S32K3XX_LPSPI_INTERRUPTS
@@ -346,7 +346,7 @@ static struct s32k3xx_lpspidev_s g_lpspi2dev =
 {
   .spidev       =
   {
-    &g_spi2ops
+    .ops        = &g_spi2ops,
   },
   .spibase      = S32K3XX_LPSPI2_BASE,
 #ifdef CONFIG_S32K3XX_LPSPI_INTERRUPTS
@@ -396,7 +396,7 @@ static struct s32k3xx_lpspidev_s g_lpspi3dev =
 {
   .spidev       =
   {
-    &g_spi3ops
+    .ops        = &g_spi3ops,
   },
   .spibase      = S32K3XX_LPSPI3_BASE,
 #ifdef CONFIG_S32K3XX_LPSPI_INTERRUPTS
@@ -446,7 +446,7 @@ static struct s32k3xx_lpspidev_s g_lpspi4dev =
 {
   .spidev       =
   {
-    &g_spi4ops
+    .ops        = &g_spi4ops,
   },
   .spibase      = S32K3XX_LPSPI4_BASE,
 #ifdef CONFIG_S32K3XX_LPSPI_INTERRUPTS
@@ -496,7 +496,7 @@ static struct s32k3xx_lpspidev_s g_lpspi5dev =
 {
   .spidev       =
   {
-    &g_spi5ops
+    .ops        = &g_spi5ops,
   },
   .spibase      = S32K3XX_LPSPI5_BASE,
 #ifdef CONFIG_S32K3XX_LPSPI_INTERRUPTS
@@ -1555,8 +1555,8 @@ static void s32k3xx_lpspi_exchange_nodma(struct spi_dev_s *dev,
        * take care of big endian mode of hardware !!
        */
 
-      const uint8_t *src = (const uint8_t *)txbuffer;
-      uint8_t *dest = (uint8_t *) rxbuffer;
+      const uint8_t *src = txbuffer;
+      uint8_t *dest = rxbuffer;
       uint32_t word = 0x0;
 #ifdef CONFIG_S32K3XX_LPSPI_DWORD
       uint32_t word1 = 0x0;
@@ -1633,8 +1633,8 @@ static void s32k3xx_lpspi_exchange_nodma(struct spi_dev_s *dev,
     {
       /* 32-bit or 64 bit, word size memory transfers */
 
-      const uint32_t *src = (const uint32_t *)txbuffer;
-      uint32_t *dest = (uint32_t *) rxbuffer;
+      const uint32_t *src = txbuffer;
+      uint32_t *dest = rxbuffer;
       uint32_t word = 0x0;
 #ifdef CONFIG_S32K3XX_LPSPI_DWORD
       uint32_t word1 = 0x0;
@@ -1714,8 +1714,8 @@ static void s32k3xx_lpspi_exchange_nodma(struct spi_dev_s *dev,
     {
       /* 16-bit mode */
 
-      const uint16_t *src = (const uint16_t *)txbuffer;
-      uint16_t *dest = (uint16_t *) rxbuffer;
+      const uint16_t *src = txbuffer;
+      uint16_t *dest = rxbuffer;
       uint16_t word;
 
       while (nwords-- > 0)
@@ -1749,8 +1749,8 @@ static void s32k3xx_lpspi_exchange_nodma(struct spi_dev_s *dev,
     {
       /* 8-bit mode */
 
-      const uint8_t *src = (const uint8_t *)txbuffer;
-      uint8_t *dest = (uint8_t *) rxbuffer;
+      const uint8_t *src = txbuffer;
+      uint8_t *dest = rxbuffer;
       uint8_t word;
 
       while (nwords-- > 0)
@@ -1806,12 +1806,12 @@ static void s32k3xx_lpspi_exchange(struct spi_dev_s *dev,
                                    const void *txbuffer, void *rxbuffer,
                                    size_t nwords)
 {
-  int                          ret;
-  size_t                       adjust;
-  ssize_t                      nbytes;
-  static uint8_t               rxdummy[4] aligned_data(4);
-  static const uint16_t        txdummy = 0xffff;
-  uint32_t                     regval;
+  int                        ret;
+  size_t                     adjust;
+  ssize_t                    nbytes;
+  static uint8_t             rxdummy[4] aligned_data(4);
+  static const uint16_t      txdummy = 0xffff;
+  uint32_t                   regval;
   struct s32k3xx_lpspidev_s *priv = (struct s32k3xx_lpspidev_s *)dev;
 
   DEBUGASSERT(priv != NULL);

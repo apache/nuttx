@@ -2704,7 +2704,7 @@ static int stm32l4_i2c_transfer(struct i2c_master_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
-static int stm32l4_i2c_reset(struct i2c_master_s * dev)
+static int stm32l4_i2c_reset(struct i2c_master_s *dev)
 {
   struct stm32l4_i2c_priv_s *priv;
   unsigned int clock_count;

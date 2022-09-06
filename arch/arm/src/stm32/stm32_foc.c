@@ -1136,7 +1136,7 @@ static int stm32_foc_adc_start(struct foc_dev_s *dev, bool state)
 
 static int stm32_foc_adc_cfg(struct foc_dev_s *dev)
 {
-  struct stm32_foc_dev_s  *foc_dev = STM32_FOC_DEV_FROM_DEV_GET(dev);
+  struct stm32_foc_dev_s *foc_dev = STM32_FOC_DEV_FROM_DEV_GET(dev);
 
   DEBUGASSERT(dev);
   DEBUGASSERT(foc_dev);
@@ -1452,10 +1452,10 @@ errout:
 
 static int stm32_foc_shutdown(struct foc_dev_s *dev)
 {
-  struct stm32_foc_dev_s    *foc_dev = STM32_FOC_DEV_FROM_DEV_GET(dev);
-  struct stm32_foc_board_s  *board   = STM32_FOC_BOARD_FROM_DEV_GET(dev);
-  struct stm32_foc_priv_s   *priv    = STM32_FOC_PRIV_FROM_DEV_GET(dev);
-  int                        ret     = OK;
+  struct stm32_foc_dev_s   *foc_dev = STM32_FOC_DEV_FROM_DEV_GET(dev);
+  struct stm32_foc_board_s *board   = STM32_FOC_BOARD_FROM_DEV_GET(dev);
+  struct stm32_foc_priv_s  *priv    = STM32_FOC_PRIV_FROM_DEV_GET(dev);
+  int                       ret     = OK;
 
   DEBUGASSERT(dev);
   DEBUGASSERT(foc_dev);

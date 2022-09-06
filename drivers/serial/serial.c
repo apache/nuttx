@@ -1665,8 +1665,8 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
   nxmutex_init(&dev->xmit.lock);
   nxmutex_init(&dev->recv.lock);
   nxmutex_init(&dev->closelock);
-  nxsem_init(&dev->xmitsem,  0, 0);
-  nxsem_init(&dev->recvsem,  0, 0);
+  nxsem_init(&dev->xmitsem, 0, 0);
+  nxsem_init(&dev->recvsem, 0, 0);
   nxmutex_init(&dev->polllock);
 
   /* Register the serial driver */

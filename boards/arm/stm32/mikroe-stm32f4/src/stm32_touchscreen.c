@@ -747,7 +747,7 @@ static void tc_worker(void *arg)
          * the on-board transistor drive logic to energize the touch panel.
          */
 
-        *((uint32_t *) LCD_TP_PORT_SETRESET) = LCD_SAMPY_BITS;
+        *((uint32_t *)LCD_TP_PORT_SETRESET) = LCD_SAMPY_BITS;
 
         /* Allow time for the Y DRIVE to settle */
 
@@ -813,7 +813,7 @@ static void tc_worker(void *arg)
          * the on-board transistor drive logic to energize the touch panel.
          */
 
-        *((uint32_t *) LCD_TP_PORT_SETRESET) = LCD_SAMPY_BITS;
+        *((uint32_t *)LCD_TP_PORT_SETRESET) = LCD_SAMPY_BITS;
 
         /* Allow time for the Y DRIVE to settle */
 
@@ -881,7 +881,7 @@ static void tc_worker(void *arg)
              * touch panel.
              */
 
-            *((uint32_t *) LCD_TP_PORT_SETRESET) = LCD_SAMPX_BITS;
+            *((uint32_t *)LCD_TP_PORT_SETRESET) = LCD_SAMPX_BITS;
 
             /* Allow time for the X sampling */
 
@@ -1091,10 +1091,10 @@ static void tc_worker(void *arg)
 static int tc_open(struct file *filep)
 {
 #ifdef CONFIG_TOUCHSCREEN_REFCNT
-  struct inode         *inode;
-  struct tc_dev_s      *priv;
-  uint8_t               tmp;
-  int                   ret;
+  struct inode    *inode;
+  struct tc_dev_s *priv;
+  uint8_t          tmp;
+  int              ret;
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
@@ -1144,9 +1144,9 @@ errout_with_lock:
 static int tc_close(struct file *filep)
 {
 #ifdef CONFIG_TOUCHSCREEN_REFCNT
-  struct inode         *inode;
-  struct tc_dev_s      *priv;
-  int                   ret;
+  struct inode    *inode;
+  struct tc_dev_s *priv;
+  int              ret;
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
@@ -1347,13 +1347,12 @@ static int tc_ioctl(struct file *filep, int cmd, unsigned long arg)
  * Name: tc_poll
  ****************************************************************************/
 
-static int tc_poll(struct file *filep, struct pollfd *fds,
-                        bool setup)
+static int tc_poll(struct file *filep, struct pollfd *fds, bool setup)
 {
-  struct inode         *inode;
-  struct tc_dev_s      *priv;
-  int                   ret;
-  int                   i;
+  struct inode    *inode;
+  struct tc_dev_s *priv;
+  int              ret;
+  int              i;
 
   iinfo("setup: %d\n", (int)setup);
   DEBUGASSERT(filep && fds);

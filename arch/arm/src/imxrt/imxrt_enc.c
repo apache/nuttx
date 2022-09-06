@@ -1201,7 +1201,7 @@ static int imxrt_ioctl(struct qe_lowerhalf_s *lower, int cmd,
 
 int imxrt_qeinitialize(const char *devpath, int enc)
 {
-  struct imxrt_enc_lowerhalf_s * priv = NULL;
+  struct imxrt_enc_lowerhalf_s *priv = NULL;
 
   switch (enc)
     {

@@ -115,7 +115,7 @@ static void i2c_setfrequency(struct lpc31_i2cdev_s *priv,
 static int  i2c_transfer(struct i2c_master_s *dev,
                          struct i2c_msg_s *msgs, int count);
 #ifdef CONFIG_I2C_RESET
-static int  i2c_reset(struct i2c_master_s * dev);
+static int  i2c_reset(struct i2c_master_s *dev);
 #endif
 
 /****************************************************************************
@@ -418,7 +418,7 @@ out:
 
 static void i2c_timeout(wdparm_t arg)
 {
-  struct lpc31_i2cdev_s *priv = (struct lpc31_i2cdev_s *) arg;
+  struct lpc31_i2cdev_s *priv = (struct lpc31_i2cdev_s *)arg;
 
   irqstate_t flags = enter_critical_section();
 
@@ -478,7 +478,7 @@ static void i2c_hwreset(struct lpc31_i2cdev_s *priv)
 static int i2c_transfer(struct i2c_master_s *dev,
                         struct i2c_msg_s *msgs, int count)
 {
-  struct lpc31_i2cdev_s *priv = (struct lpc31_i2cdev_s *) dev;
+  struct lpc31_i2cdev_s *priv = (struct lpc31_i2cdev_s *)dev;
   irqstate_t flags;
   int ret;
 
@@ -539,7 +539,7 @@ static int i2c_transfer(struct i2c_master_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
-static int i2c_reset(struct i2c_master_s * dev)
+static int i2c_reset(struct i2c_master_s *dev)
 {
   return OK;
 }

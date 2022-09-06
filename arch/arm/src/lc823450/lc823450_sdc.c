@@ -82,7 +82,7 @@
 static mutex_t _sdc_lock[2] =
 {
   NXMUTEX_INITIALIZER,
-  NXMUTEX_INITIALIZER
+  NXMUTEX_INITIALIZER,
 };
 
 static struct sddrcfg_s _sdch0;

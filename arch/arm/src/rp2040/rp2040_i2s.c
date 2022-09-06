@@ -964,7 +964,7 @@ static int rp2040_i2s_ioctl(struct i2s_dev_s *dev, int cmd,
                             unsigned long arg)
 {
   struct rp2040_i2s_s *priv = (struct rp2040_i2s_s *)dev;
-  struct audio_buf_desc_s  *bufdesc;
+  struct audio_buf_desc_s *bufdesc;
   int ret = -ENOTTY;
 
   switch (cmd)
@@ -1095,7 +1095,7 @@ static int rp2040_i2s_ioctl(struct i2s_dev_s *dev, int cmd,
         {
           i2sinfo("AUDIOIOC_ALLOCBUFFER\n");
 
-          bufdesc = (struct audio_buf_desc_s *) arg;
+          bufdesc = (struct audio_buf_desc_s *)arg;
           ret = apb_alloc(bufdesc);
         }
         break;
@@ -1109,7 +1109,7 @@ static int rp2040_i2s_ioctl(struct i2s_dev_s *dev, int cmd,
         {
           i2sinfo("AUDIOIOC_FREEBUFFER\n");
 
-          bufdesc = (struct audio_buf_desc_s *) arg;
+          bufdesc = (struct audio_buf_desc_s *)arg;
           DEBUGASSERT(bufdesc->u.buffer != NULL);
           apb_free(bufdesc->u.buffer);
           ret = sizeof(struct audio_buf_desc_s);

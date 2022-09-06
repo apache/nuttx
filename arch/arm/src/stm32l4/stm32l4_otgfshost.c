@@ -493,8 +493,8 @@ static struct stm32l4_usbhost_s g_usbhost =
 
 static struct usbhost_connection_s g_usbconn =
 {
-  .wait             = stm32l4_wait,
-  .enumerate        = stm32l4_enumerate,
+  .wait      = stm32l4_wait,
+  .enumerate = stm32l4_enumerate,
 };
 
 /****************************************************************************
@@ -5285,7 +5285,7 @@ static inline void stm32l4_sw_initialize(struct stm32l4_usbhost_s *priv)
       struct stm32l4_chan_s *chan = &priv->chan[i];
 
       chan->chidx = i;
-      nxsem_init(&chan->waitsem,  0, 0);
+      nxsem_init(&chan->waitsem, 0, 0);
     }
 }
 

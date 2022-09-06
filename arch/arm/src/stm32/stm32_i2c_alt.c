@@ -10,7 +10,7 @@
  *   Copyright (C) 2011-2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- *   Copyright( C) 2014 Patrizio Simona. All rights reserved.
+ *   Copyright (C) 2014 Patrizio Simona. All rights reserved.
  *   Author: Patrizio Simona <psimona@ethz.ch>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -2233,7 +2233,7 @@ static int stm32_i2c_transfer(struct i2c_master_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
-static int stm32_i2c_reset(struct i2c_master_s * dev)
+static int stm32_i2c_reset(struct i2c_master_s *dev)
 {
   struct stm32_i2c_priv_s *priv = (struct stm32_i2c_priv_s *)dev;
   unsigned int clock_count;

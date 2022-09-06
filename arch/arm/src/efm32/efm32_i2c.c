@@ -742,7 +742,7 @@ static void efm32_i2c_setclock(struct efm32_i2c_priv_s *priv,
 #elif defined(CONFIG_EFM32_I2C_CLHR_ASYMMETRIC)
 #  define n (6 + 3)           /* Ratio is 6:3 */
 #else                         /* CLHR STANDARD */
-#  define n ( 4 + 4)          /* Ratio is 4:4 */
+#  define n (4 + 4)           /* Ratio is 4:4 */
 #endif
 
       div = (BOARD_HFPERCLK_FREQUENCY - (4 * frequency)) / (n * frequency);

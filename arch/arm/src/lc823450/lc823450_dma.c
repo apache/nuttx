@@ -306,7 +306,7 @@ static void dma_done(DMA_HANDLE handle, void *arg, int result)
   test_done = 1;
 }
 
-void lc823450_dma_test()
+void lc823450_dma_test(void)
 {
   int i;
   for (i = 0; i < 256; i++)

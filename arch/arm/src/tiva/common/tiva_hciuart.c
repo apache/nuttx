@@ -193,14 +193,14 @@ static struct hciuart_state_s g_hciuart0_state =
 static const struct hciuart_config_s g_hciuart0_config =
 {
   .lower         =
-    {
-      .rxattach  = hciuart_rxattach,
-      .rxenable  = hciuart_rxenable,
-      .setbaud   = hciuart_setbaud,
-      .read      = hciuart_read,
-      .write     = hciuart_write,
-      .rxdrain   = hciuart_rxdrain,
-    },
+  {
+    .rxattach    = hciuart_rxattach,
+    .rxenable    = hciuart_rxenable,
+    .setbaud     = hciuart_setbaud,
+    .read        = hciuart_read,
+    .write       = hciuart_write,
+    .rxdrain     = hciuart_rxdrain,
+  },
 
   .state         = &g_hciuart0_state,
 
@@ -243,14 +243,14 @@ static struct hciuart_state_s g_hciuart1_state =
 static const struct hciuart_config_s g_hciuart1_config =
 {
   .lower         =
-    {
-      .rxattach  = hciuart_rxattach,
-      .rxenable  = hciuart_rxenable,
-      .setbaud   = hciuart_setbaud,
-      .read      = hciuart_read,
-      .write     = hciuart_write,
-      .rxdrain   = hciuart_rxdrain,
-    },
+  {
+    .rxattach    = hciuart_rxattach,
+    .rxenable    = hciuart_rxenable,
+    .setbaud     = hciuart_setbaud,
+    .read        = hciuart_read,
+    .write       = hciuart_write,
+    .rxdrain     = hciuart_rxdrain,
+  },
 
   .state         = &g_hciuart1_state,
 
@@ -293,14 +293,14 @@ static struct hciuart_state_s g_hciuart2_state =
 static const struct hciuart_config_s g_hciuart2_config =
 {
   .lower         =
-    {
-      .rxattach  = hciuart_rxattach,
-      .rxenable  = hciuart_rxenable,
-      .setbaud   = hciuart_setbaud,
-      .read      = hciuart_read,
-      .write     = hciuart_write,
-      .rxdrain   = hciuart_rxdrain,
-    },
+  {
+    .rxattach    = hciuart_rxattach,
+    .rxenable    = hciuart_rxenable,
+    .setbaud     = hciuart_setbaud,
+    .read        = hciuart_read,
+    .write       = hciuart_write,
+    .rxdrain     = hciuart_rxdrain,
+  },
 
   .state         = &g_hciuart2_state,
 
@@ -343,14 +343,14 @@ static struct hciuart_state_s g_hciuart3_state =
 static const struct hciuart_config_s g_hciuart3_config =
 {
   .lower         =
-    {
-      .rxattach  = hciuart_rxattach,
-      .rxenable  = hciuart_rxenable,
-      .setbaud   = hciuart_setbaud,
-      .read      = hciuart_read,
-      .write     = hciuart_write,
-      .rxdrain   = hciuart_rxdrain,
-    },
+  {
+    .rxattach    = hciuart_rxattach,
+    .rxenable    = hciuart_rxenable,
+    .setbaud     = hciuart_setbaud,
+    .read        = hciuart_read,
+    .write       = hciuart_write,
+    .rxdrain     = hciuart_rxdrain,
+  },
 
   .state         = &g_hciuart3_state,
 
@@ -393,14 +393,14 @@ static struct hciuart_state_s g_hciuart4_state;
 static const struct hciuart_config_s g_hciuart4_config =
 {
   .lower         =
-    {
-      .rxattach  = hciuart_rxattach,
-      .rxenable  = hciuart_rxenable,
-      .setbaud   = hciuart_setbaud,
-      .read      = hciuart_read,
-      .write     = hciuart_write,
-      .rxdrain   = hciuart_rxdrain,
-    },
+  {
+    .rxattach    = hciuart_rxattach,
+    .rxenable    = hciuart_rxenable,
+    .setbaud     = hciuart_setbaud,
+    .read        = hciuart_read,
+    .write       = hciuart_write,
+    .rxdrain     = hciuart_rxdrain,
+  },
 
   .state         = &g_hciuart4_state,
 
@@ -443,14 +443,14 @@ static struct hciuart_state_s g_hciuart5_state =
 static const struct hciuart_config_s g_hciuart5_config =
 {
   .lower         =
-    {
-      .rxattach  = hciuart_rxattach,
-      .rxenable  = hciuart_rxenable,
-      .setbaud   = hciuart_setbaud,
-      .read      = hciuart_read,
-      .write     = hciuart_write,
-      .rxdrain   = hciuart_rxdrain,
-    },
+  {
+    .rxattach    = hciuart_rxattach,
+    .rxenable    = hciuart_rxenable,
+    .setbaud     = hciuart_setbaud,
+    .read        = hciuart_read,
+    .write       = hciuart_write,
+    .rxdrain     = hciuart_rxdrain,
+  },
 
   .state         = &g_hciuart5_state,
 
@@ -493,14 +493,14 @@ static struct hciuart_state_s g_hciuart6_state =
 static const struct hciuart_config_s g_hciuart6_config =
 {
   .lower         =
-    {
-      .rxattach  = hciuart_rxattach,
-      .rxenable  = hciuart_rxenable,
-      .setbaud   = hciuart_setbaud,
-      .read      = hciuart_read,
-      .write     = hciuart_write,
-      .rxdrain   = hciuart_rxdrain,
-    },
+  {
+    .rxattach    = hciuart_rxattach,
+    .rxenable    = hciuart_rxenable,
+    .setbaud     = hciuart_setbaud,
+    .read        = hciuart_read,
+    .write       = hciuart_write,
+    .rxdrain     = hciuart_rxdrain,
+  },
 
   .state         = &g_hciuart6_state,
 
@@ -543,14 +543,14 @@ static struct hciuart_state_s g_hciuart7_state =
 static const struct hciuart_config_s g_hciuart7_config =
 {
   .lower         =
-    {
-      .rxattach  = hciuart_rxattach,
-      .rxenable  = hciuart_rxenable,
-      .setbaud   = hciuart_setbaud,
-      .read      = hciuart_read,
-      .write     = hciuart_write,
-      .rxdrain   = hciuart_rxdrain,
-    },
+  {
+    .rxattach    = hciuart_rxattach,
+    .rxenable    = hciuart_rxenable,
+    .setbaud     = hciuart_setbaud,
+    .read        = hciuart_read,
+    .write       = hciuart_write,
+    .rxdrain     = hciuart_rxdrain,
+  },
 
   .state         = &g_hciuart7_state,
 

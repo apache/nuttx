@@ -264,20 +264,20 @@ struct esp32_transport_s
 
 struct esp32_i2s_s
 {
-  struct i2s_dev_s  dev;          /* Externally visible I2S interface */
-  mutex_t           lock;         /* Ensures mutually exclusive access */
-  int               cpuint;       /* I2S interrupt ID */
-  uint8_t           cpu;          /* CPU ID */
-  spinlock_t        slock;        /* Device specific lock. */
+  struct i2s_dev_s  dev;        /* Externally visible I2S interface */
+  mutex_t           lock;       /* Ensures mutually exclusive access */
+  int               cpuint;     /* I2S interrupt ID */
+  uint8_t           cpu;        /* CPU ID */
+  spinlock_t        slock;      /* Device specific lock. */
 
   /* Port configuration */
 
   const struct esp32_i2s_config_s *config;
 
-  uint32_t          mclk_freq;    /* I2S actual master clock */
-  uint32_t          channels;     /* Audio channels (1:mono or 2:stereo) */
-  uint32_t          rate;         /* I2S actual configured sample-rate */
-  uint32_t          data_width;   /* I2S actual configured data_width */
+  uint32_t          mclk_freq;  /* I2S actual master clock */
+  uint32_t          channels;   /* Audio channels (1:mono or 2:stereo) */
+  uint32_t          rate;       /* I2S actual configured sample-rate */
+  uint32_t          data_width; /* I2S actual configured data_width */
 
 #ifdef I2S_HAVE_TX
   struct esp32_transport_s tx;  /* TX transport state */
@@ -410,9 +410,9 @@ static const struct esp32_i2s_config_s esp32_i2s0_config =
 static struct esp32_i2s_s esp32_i2s0_priv =
 {
   .dev =
-        {
-          .ops = &g_i2sops
-        },
+  {
+    .ops = &g_i2sops,
+  },
   .lock = NXMUTEX_INITIALIZER,
   .config = &esp32_i2s0_config,
   .bufsem = SEM_INITIALIZER(0),
@@ -471,9 +471,9 @@ static const struct esp32_i2s_config_s esp32_i2s1_config =
 static struct esp32_i2s_s esp32_i2s1_priv =
 {
   .dev =
-        {
-          .ops = &g_i2sops
-        },
+  {
+    .ops = &g_i2sops,
+  },
   .lock = NXMUTEX_INITIALIZER,
   .config = &esp32_i2s1_config,
   .bufsem = SEM_INITIALIZER(0),
@@ -614,8 +614,6 @@ static void i2s_buf_free(struct esp32_i2s_s *priv,
 
 static int i2s_buf_initialize(struct esp32_i2s_s *priv)
 {
-  int ret;
-
   priv->tx.carry.bytes = 0;
   priv->tx.carry.value = 0;
 
@@ -1786,7 +1784,6 @@ static int esp32_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   bfcontainer->result   = -EBUSY;
 
   ret = i2s_txdma_setup(priv, bfcontainer);
-
   if (ret != OK)
     {
       goto errout_with_buf;
@@ -1797,7 +1794,6 @@ static int esp32_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
                   apb->nbytes - apb->curbyte);
 
   nxmutex_unlock(&priv->lock);
-
   return OK;
 
 errout_with_buf:

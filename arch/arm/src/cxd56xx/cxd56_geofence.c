@@ -399,7 +399,7 @@ static int cxd56_geofence_get_all_status(unsigned long arg)
 
 static int cxd56_geofence_set_mode(unsigned long arg)
 {
-  int                                   ret;
+  int                           ret;
   struct cxd56_geofence_mode_s *mode;
 
   if (!arg)
@@ -550,7 +550,7 @@ static int cxd56_geofence_poll(struct file *filep,
                                struct pollfd *fds,
                                bool setup)
 {
-  struct inode *               inode;
+  struct inode                *inode;
   struct cxd56_geofence_dev_s *priv;
   int                          ret = OK;
   int                          i;

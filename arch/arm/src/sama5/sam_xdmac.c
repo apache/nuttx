@@ -548,7 +548,7 @@ static struct sam_xdmac_s g_xdmac0 =
 
   /* This array describes the available link list descriptors */
 
-  .descr       = g_desc0,
+  .descr      = g_desc0,
 
   /* This array describes each DMA channel */
 
@@ -725,7 +725,7 @@ static struct sam_xdmac_s g_xdmac1 =
 
   /* This array describes the available link list descriptors */
 
-  .descr       = g_desc1,
+  .descr      = g_desc1,
 
   /* This array describes each DMA channel */
 

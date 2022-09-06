@@ -248,7 +248,7 @@ static int  tivacan_rxhandler(int argc, char** argv);
 int tivacan_handle_errors(struct can_dev_s *dev);
 
 #ifdef CONFIG_CAN_ERRORS
-void tivacan_handle_errors_wqueue(void * dev);
+void tivacan_handle_errors_wqueue(void *dev);
 #endif
 
 /****************************************************************************
@@ -393,11 +393,11 @@ static void tivacan_reset(struct can_dev_s *dev)
 
 static int tivacan_setup(struct can_dev_s *dev)
 {
-  uint32_t  irq;
-  int       ret;
-  uint32_t  reg;
-  struct tiva_canmod_s    *canmod = dev->cd_priv;
-  char     *kthd_argv[2];
+  uint32_t irq;
+  int      ret;
+  uint32_t reg;
+  struct tiva_canmod_s *canmod = dev->cd_priv;
+  char    *kthd_argv[2];
   kthd_argv[1] = NULL;
 
   switch (canmod->modnum)
@@ -1379,7 +1379,7 @@ static bool tivacan_txempty(struct can_dev_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_CAN_ERRORS
-void tivacan_handle_errors_wqueue(void * dev)
+void tivacan_handle_errors_wqueue(void *dev)
 {
   irqstate_t flags;
   struct tiva_canmod_s *canmod = ((struct can_dev_s *)dev)->cd_priv;
@@ -2042,7 +2042,7 @@ int tivacan_alloc_fifo(struct can_dev_s *dev, int depth)
 static void tivacan_free_fifo(struct can_dev_s *dev,
                               tiva_can_fifo_t *fifo)
 {
-  struct tiva_canmod_s * canmod = dev->cd_priv;
+  struct tiva_canmod_s *canmod = dev->cd_priv;
   nxmutex_lock(&canmod->thd_iface_lock);
 
   for (int i = 0; i < TIVA_CAN_NUM_MBOXES; ++i)

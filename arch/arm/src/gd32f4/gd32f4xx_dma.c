@@ -176,7 +176,7 @@ static struct gd32_dma_channel_s g_dmachan[DMA_NCHANNELS] =
     .chan_num  = GD32_DMA_CH6,
     .irq       = GD32_IRQ_DMA1_CHANNEL6,
     .chsem     = SEM_INITIALIZER(1),
-    .dmabase    = GD32_DMA1,
+    .dmabase   = GD32_DMA1,
   },
   {
     .chan_num  = GD32_DMA_CH7,

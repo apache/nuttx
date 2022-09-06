@@ -1270,8 +1270,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
   /* Start RX and TX DMA channels */
 
-  sam_dmastart(priv->dma_tx, spi_dma_callback, (void *)priv);
-  sam_dmastart(priv->dma_rx, spi_dma_callback, (void *)priv);
+  sam_dmastart(priv->dma_tx, spi_dma_callback, priv);
+  sam_dmastart(priv->dma_rx, spi_dma_callback, priv);
 
   /* Enable SPI to trigger the TX DMA channel */
 

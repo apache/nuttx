@@ -307,7 +307,7 @@ static void adc_enable(struct stm32_dev_s *priv, bool enable);
 static uint32_t adc_sqrbits(struct stm32_dev_s *priv, int first,
                             int last, int offset);
 static int  adc_set_ch(struct adc_dev_s *dev, uint8_t ch);
-static bool adc_internal(struct stm32_dev_s * priv);
+static bool adc_internal(struct stm32_dev_s *priv);
 
 static int  adc_resolution_set(struct adc_dev_s *dev, uint8_t res);
 
@@ -930,7 +930,7 @@ static int adc_timinit(struct stm32_dev_s *priv)
    *   0 <= prescaler  <= 65536
    *   1 <= reload <= 65535
    *
-   * So ( prescaler = pclck / 65535 / freq ) would be optimal.
+   * So (prescaler = pclck / 65535 / freq) would be optimal.
    */
 
   prescaler = (priv->pclck / priv->freq + 65534) / 65535;
@@ -2158,7 +2158,7 @@ static uint32_t adc_sqrbits(struct stm32_dev_s *priv, int first,
  * Name: adc_internal
  ****************************************************************************/
 
-static bool adc_internal(struct stm32_dev_s * priv)
+static bool adc_internal(struct stm32_dev_s *priv)
 {
   int i;
 

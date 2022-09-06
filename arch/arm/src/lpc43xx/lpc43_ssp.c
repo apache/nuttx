@@ -144,9 +144,9 @@ static const struct spi_ops_s g_spi0ops =
 static struct lpc43_sspdev_s g_ssp0dev =
 {
   .spidev            =
-    {
-      &g_spi0ops
-    },
+  {
+    .ops             = &g_spi0ops,
+  },
   .sspbase           = LPC43_SSP0_BASE,
   .sspbasefreq       = BOARD_SSP0_BASEFREQ,
 #ifdef CONFIG_LPC43_SSP_INTERRUPTS
@@ -185,9 +185,9 @@ static const struct spi_ops_s g_spi1ops =
 static struct lpc43_sspdev_s g_ssp1dev =
 {
   .spidev            =
-    {
-      &g_spi1ops
-    },
+  {
+    .ops             = &g_spi1ops,
+  },
   .sspbase           = LPC43_SSP1_BASE,
   .sspbasefreq       = BOARD_SSP1_BASEFREQ,
 #ifdef CONFIG_LPC43_SSP_INTERRUPTS
