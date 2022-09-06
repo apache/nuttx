@@ -32,7 +32,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 
 #include <stdbool.h>
 #include <assert.h>
@@ -72,21 +72,11 @@
  * Private Data
  ****************************************************************************/
 
-static sem_t g_sem = SEM_INITIALIZER(1);
+static mutex_t g_lock = NXMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-static int sem_lock(void)
-{
-  return nxsem_wait_uninterruptible(&g_sem);
-}
-
-static inline void sem_unlock(void)
-{
-  nxsem_post(&g_sem);
-}
 
 static void flash_unlock(uintptr_t base)
 {
@@ -117,7 +107,7 @@ int stm32_flash_unlock(void)
 {
   int ret;
 
-  ret = sem_lock();
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return ret;
@@ -127,7 +117,7 @@ int stm32_flash_unlock(void)
 #if defined(STM32_FLASH_DUAL_BANK)
   flash_unlock(STM32_FLASHIF1_BASE);
 #endif
-  sem_unlock();
+  nxmutex_unlock(&g_lock);
 
   return ret;
 }
@@ -136,7 +126,7 @@ int stm32_flash_lock(void)
 {
   int ret;
 
-  ret = sem_lock();
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return ret;
@@ -146,7 +136,7 @@ int stm32_flash_lock(void)
 #if defined(STM32_FLASH_DUAL_BANK)
   flash_lock(STM32_FLASHIF1_BASE);
 #endif
-  sem_unlock();
+  nxmutex_unlock(&g_lock);
 
   return ret;
 }
@@ -249,7 +239,7 @@ ssize_t up_progmem_eraseblock(size_t block)
       base = STM32_FLASHIF_BASE;
     }
 
-  ret = sem_lock();
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return (ssize_t)ret;
@@ -257,7 +247,7 @@ ssize_t up_progmem_eraseblock(size_t block)
 
   if ((getreg32(STM32_RCC_CR) & RCC_CR_HSION) == 0)
     {
-      sem_unlock();
+      nxmutex_unlock(&g_lock);
       return -EPERM;
     }
 
@@ -280,7 +270,7 @@ ssize_t up_progmem_eraseblock(size_t block)
     }
 
   modifyreg32(base + STM32_FLASH_CR_OFFSET, FLASH_CR_PER, 0);
-  sem_unlock();
+  nxmutex_unlock(&g_lock);
 
   /* Verify */
 
@@ -333,7 +323,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
       return -EFAULT;
     }
 
-  ret = sem_lock();
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       return (ssize_t)ret;
@@ -341,7 +331,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
 
   if ((getreg32(STM32_RCC_CR) & RCC_CR_HSION) == 0)
     {
-      sem_unlock();
+      nxmutex_unlock(&g_lock);
       return -EPERM;
     }
 
@@ -367,21 +357,21 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
       if ((getreg32(base + STM32_FLASH_SR_OFFSET) & FLASH_SR_WRPRT_ERR) != 0)
         {
           modifyreg32(base + STM32_FLASH_CR_OFFSET, FLASH_CR_PG, 0);
-          sem_unlock();
+          nxmutex_unlock(&g_lock);
           return -EROFS;
         }
 
       if (getreg16(addr) != *hword)
         {
           modifyreg32(base + STM32_FLASH_CR_OFFSET, FLASH_CR_PG, 0);
-          sem_unlock();
+          nxmutex_unlock(&g_lock);
           return -EIO;
         }
     }
 
   modifyreg32(base + STM32_FLASH_CR_OFFSET, FLASH_CR_PG, 0);
 
-  sem_unlock();
+  nxmutex_unlock(&g_lock);
   return written;
 }
 

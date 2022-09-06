@@ -55,6 +55,7 @@
 #include <nuttx/pthread.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/signal.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 
 #include <bl602_netdev.h>
@@ -1281,26 +1282,26 @@ void bl_os_irq_disable(int32_t n)
 void *bl_os_mutex_create(void)
 {
   int ret;
-  sem_t *sem;
+  mutex_t *mutex;
   int tmp;
 
-  tmp = sizeof(sem_t);
-  sem = (sem_t *)kmm_malloc(tmp);
-  if (!sem)
+  tmp = sizeof(mutex_t);
+  mutex = (mutex_t *)kmm_malloc(tmp);
+  if (!mutex)
     {
       wlerr("ERROR: Failed to alloc %d memory\n", tmp);
       return NULL;
     }
 
-  ret = nxsem_init(sem, 0, 1);
+  ret = nxmutex_init(mutex);
   if (ret)
     {
-      wlerr("ERROR: Failed to initialize sem error=%d\n", ret);
-      kmm_free(sem);
+      wlerr("ERROR: Failed to initialize mutex error=%d\n", ret);
+      kmm_free(mutex);
       return NULL;
     }
 
-  return sem;
+  return mutex;
 }
 
 /****************************************************************************
@@ -1319,10 +1320,10 @@ void *bl_os_mutex_create(void)
 
 void bl_os_mutex_delete(void *mutex_data)
 {
-  sem_t *sem = (sem_t *)mutex_data;
+  mutex_t *mutex = (mutex_t *)mutex_data;
 
-  nxsem_destroy(sem);
-  kmm_free(sem);
+  nxmutex_destroy(mutex);
+  kmm_free(mutex);
 }
 
 /****************************************************************************
@@ -1342,12 +1343,12 @@ void bl_os_mutex_delete(void *mutex_data)
 int32_t bl_os_mutex_lock(void *mutex_data)
 {
   int ret;
-  sem_t *sem = (sem_t *)mutex_data;
+  mutex_t *mutex = (mutex_t *)mutex_data;
 
-  ret = nxsem_wait(sem);
+  ret = nxmutex_lock(mutex);
   if (ret)
     {
-      wlerr("ERROR: Failed to wait sem\n");
+      wlerr("ERROR: Failed to wait mutex\n");
     }
 
   return bl_os_errno_trans(ret);
@@ -1370,12 +1371,12 @@ int32_t bl_os_mutex_lock(void *mutex_data)
 int32_t bl_os_mutex_unlock(void *mutex_data)
 {
   int ret;
-  sem_t *sem = (sem_t *)mutex_data;
+  mutex_t *mutex = (mutex_t *)mutex_data;
 
-  ret = nxsem_post(sem);
+  ret = nxmutex_unlock(mutex);
   if (ret)
     {
-      wlerr("ERROR: Failed to post sem error=%d\n", ret);
+      wlerr("ERROR: Failed to unlock error=%d\n", ret);
     }
 
   return bl_os_errno_trans(ret);

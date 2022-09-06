@@ -315,17 +315,6 @@ static const struct file_operations g_cc1101ops =
  * Private Functions
  ****************************************************************************/
 
-static int cc1101_takesem(FAR sem_t *sem)
-{
-  return nxsem_wait(sem);
-}
-
-/****************************************************************************
- * Name: cc1101_givesem
- ****************************************************************************/
-
-#define cc1101_givesem(sem) nxsem_post(sem)
-
 /****************************************************************************
  * Name: cc1101_file_open
  *
@@ -350,7 +339,7 @@ static int cc1101_file_open(FAR struct file *filep)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = cc1101_takesem(&dev->devsem);
+  ret = nxmutex_lock(&dev->devlock);
   if (ret < 0)
     {
       return ret;
@@ -369,7 +358,7 @@ static int cc1101_file_open(FAR struct file *filep)
   dev->nopens++;
 
 errout:
-  nxsem_post(&dev->devsem);
+  nxmutex_unlock(&dev->devlock);
   return ret;
 }
 
@@ -398,7 +387,7 @@ static int cc1101_file_close(FAR struct file *filep)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = cc1101_takesem(&dev->devsem);
+  ret = nxmutex_lock(&dev->devlock);
   if (ret < 0)
     {
       return ret;
@@ -410,7 +399,7 @@ static int cc1101_file_close(FAR struct file *filep)
 #endif
   dev->nopens--;
 
-  nxsem_post(&dev->devsem);
+  nxmutex_unlock(&dev->devlock);
   return OK;
 }
 
@@ -440,7 +429,7 @@ static ssize_t cc1101_file_write(FAR struct file *filep,
 
   /* Get exclusive access to the driver data structure */
 
-  ret = cc1101_takesem(&dev->devsem);
+  ret = nxmutex_lock(&dev->devlock);
   if (ret < 0)
     {
       return ret;
@@ -448,7 +437,7 @@ static ssize_t cc1101_file_write(FAR struct file *filep,
 
   ret = cc1101_write(dev, (const uint8_t *)buffer, buflen);
   cc1101_send(dev);
-  nxsem_post(&dev->devsem);
+  nxmutex_unlock(&dev->devlock);
   return ret;
 }
 
@@ -465,7 +454,7 @@ static void fifo_put(FAR struct cc1101_dev_s *dev, FAR uint8_t *buffer,
   int ret;
   int i;
 
-  ret = cc1101_takesem(&dev->sem_rx_buffer);
+  ret = nxmutex_lock(&dev->lock_rx_buffer);
   if (ret < 0)
     {
       return;
@@ -484,7 +473,7 @@ static void fifo_put(FAR struct cc1101_dev_s *dev, FAR uint8_t *buffer,
     }
 
   dev->nxt_write = (dev->nxt_write + 1) % CONFIG_WL_CC1101_RXFIFO_LEN;
-  nxsem_post(&dev->sem_rx_buffer);
+  nxmutex_unlock(&dev->lock_rx_buffer);
 }
 
 /****************************************************************************
@@ -501,7 +490,7 @@ static uint8_t fifo_get(FAR struct cc1101_dev_s *dev, FAR uint8_t *buffer,
   uint8_t i;
   int ret;
 
-  ret = cc1101_takesem(&dev->sem_rx_buffer);
+  ret = nxmutex_lock(&dev->lock_rx_buffer);
   if (ret < 0)
     {
       return ret;
@@ -525,7 +514,7 @@ static uint8_t fifo_get(FAR struct cc1101_dev_s *dev, FAR uint8_t *buffer,
   dev->fifo_len--;
 
 no_data:
-  nxsem_post(&dev->sem_rx_buffer);
+  nxmutex_unlock(&dev->lock_rx_buffer);
   return pktlen;
 }
 
@@ -550,7 +539,7 @@ static ssize_t cc1101_file_read(FAR struct file *filep, FAR char *buffer,
   DEBUGASSERT(inode && inode->i_private);
   dev = (FAR struct cc1101_dev_s *)inode->i_private;
 
-  ret = cc1101_takesem(&dev->devsem);
+  ret = nxmutex_lock(&dev->devlock);
   if (ret < 0)
     {
       return ret;
@@ -572,7 +561,7 @@ static ssize_t cc1101_file_read(FAR struct file *filep, FAR char *buffer,
     }
 
   buflen = fifo_get(dev, (uint8_t *)buffer, buflen);
-  nxsem_post(&dev->devsem);
+  nxmutex_unlock(&dev->devlock);
   return buflen;
 }
 
@@ -601,7 +590,7 @@ static int cc1101_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   /* Exclusive access */
 
-  ret = cc1101_takesem(&dev->devsem);
+  ret = nxmutex_lock(&dev->devlock);
   if (ret < 0)
     {
       return ret;
@@ -636,13 +625,13 @@ static int cc1101_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
        * don't wait for RX.
        */
 
-      cc1101_takesem(&dev->sem_rx_buffer);
+      nxmutex_lock(&dev->lock_rx_buffer);
       if (dev->fifo_len > 0)
         {
           poll_notify(&dev->pfd, 1, POLLIN);
         }
 
-      nxsem_post(&dev->sem_rx_buffer);
+      nxmutex_unlock(&dev->lock_rx_buffer);
     }
   else /* Tear it down */
     {
@@ -650,7 +639,7 @@ static int cc1101_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 errout:
-  nxsem_post(&dev->devsem);
+  nxmutex_unlock(&dev->devlock);
   return ret;
 }
 
@@ -1422,7 +1411,7 @@ int cc1101_send(FAR struct cc1101_dev_s *dev)
     }
 
   cc1101_strobe(dev, CC1101_STX);
-  cc1101_takesem(&dev->sem_tx);
+  nxsem_wait(&dev->sem_tx);
 
   /* this is set MCSM1, send auto to rx */
 
@@ -1489,8 +1478,8 @@ int cc1101_register(FAR const char *path, FAR struct cc1101_dev_s *dev)
   dev->nxt_read  = 0;
   dev->nxt_write = 0;
   dev->fifo_len  = 0;
-  nxsem_init(&(dev->devsem), 0, 1);
-  nxsem_init(&(dev->sem_rx_buffer), 0, 1);
+  nxmutex_init(&dev->devlock);
+  nxmutex_init(&dev->lock_rx_buffer);
   nxsem_init(&(dev->sem_rx), 0, 0);
   nxsem_init(&(dev->sem_tx), 0, 0);
 

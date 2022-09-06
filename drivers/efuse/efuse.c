@@ -36,7 +36,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/efuse/efuse.h>
 
 #ifdef CONFIG_EFUSE
@@ -53,7 +53,7 @@
 
 struct efuse_upperhalf_s
 {
-  sem_t     exclsem;  /* Supports mutual exclusion */
+  mutex_t   lock;     /* Supports mutual exclusion */
   FAR char *path;     /* Registration path */
 
   /* The contained lower-half driver */
@@ -148,7 +148,7 @@ static int efuse_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access to the device structures */
 
-  ret = nxsem_wait(&upper->exclsem);
+  ret = nxmutex_lock(&upper->lock);
   if (ret < 0)
     {
       return ret;
@@ -238,7 +238,7 @@ static int efuse_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
     }
 
-  nxsem_post(&upper->exclsem);
+  nxmutex_unlock(&upper->lock);
   return ret;
 }
 
@@ -291,7 +291,7 @@ FAR void *efuse_register(FAR const char *path,
    * by kmm_zalloc()).
    */
 
-  nxsem_init(&upper->exclsem, 0, 1);
+  nxmutex_init(&upper->lock);
   upper->lower = lower;
 
   /* Copy the registration path */
@@ -318,7 +318,7 @@ errout_with_path:
   kmm_free(upper->path);
 
 errout_with_upper:
-  nxsem_destroy(&upper->exclsem);
+  nxmutex_destroy(&upper->lock);
   kmm_free(upper);
 
 errout:
@@ -361,7 +361,7 @@ void efuse_unregister(FAR void *handle)
   /* Then free all of the driver resources */
 
   kmm_free(upper->path);
-  nxsem_destroy(&upper->exclsem);
+  nxmutex_destroy(&upper->lock);
   kmm_free(upper);
 }
 

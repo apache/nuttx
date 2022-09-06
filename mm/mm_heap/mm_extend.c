@@ -76,9 +76,9 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
   DEBUGASSERT(MM_ALIGN_UP(blockstart) == blockstart);
   DEBUGASSERT(MM_ALIGN_DOWN(blockend) == blockend);
 
-  /* Take the memory manager semaphore */
+  /* Take the memory manager mutex */
 
-  ret = mm_takesemaphore(heap);
+  ret = mm_lock(heap);
   DEBUGASSERT(ret);
 
   /* Get the terminal node in the old heap.  The block to extend must
@@ -108,7 +108,7 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
   newnode->preceding = oldnode->size | MM_ALLOC_BIT;
 
   heap->mm_heapend[region] = newnode;
-  mm_givesemaphore(heap);
+  mm_unlock(heap);
 
   /* Finally "free" the new block of memory where the old terminal node was
    * located.

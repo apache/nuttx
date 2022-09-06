@@ -73,7 +73,7 @@ ssize_t lib_fflush(FAR FILE *stream, bool bforce)
 
   /* Make sure that we have exclusive access to the stream */
 
-  lib_take_semaphore(stream);
+  lib_take_lock(stream);
 
   /* Check if there is an allocated I/O buffer */
 
@@ -82,7 +82,7 @@ ssize_t lib_fflush(FAR FILE *stream, bool bforce)
       /* No, then there can be nothing remaining in the buffer. */
 
       ret = 0;
-      goto errout_with_sem;
+      goto errout_with_lock;
     }
 
   /* Make sure that the buffer holds valid data */
@@ -100,7 +100,7 @@ ssize_t lib_fflush(FAR FILE *stream, bool bforce)
            */
 
           ret = 0;
-          goto errout_with_sem;
+          goto errout_with_lock;
         }
 
       /* How many bytes of write data are used in the buffer now */
@@ -123,7 +123,7 @@ ssize_t lib_fflush(FAR FILE *stream, bool bforce)
 
               stream->fs_flags |= __FS_FLAG_ERROR;
               ret = _NX_GETERRVAL(bytes_written);
-              goto errout_with_sem;
+              goto errout_with_lock;
             }
 
           /* Handle partial writes.  fflush() must either return with
@@ -156,11 +156,11 @@ ssize_t lib_fflush(FAR FILE *stream, bool bforce)
    * remaining in the buffer.
    */
 
-  lib_give_semaphore(stream);
+  lib_give_lock(stream);
   return stream->fs_bufpos - stream->fs_bufstart;
 
-errout_with_sem:
-  lib_give_semaphore(stream);
+errout_with_lock:
+  lib_give_lock(stream);
   return ret;
 
 #else

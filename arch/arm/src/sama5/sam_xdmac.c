@@ -34,7 +34,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 
 #include "arm_internal.h"
 #include "sched/sched.h"
@@ -125,9 +125,9 @@ struct sam_xdmach_s
 
 struct sam_xdmac_s
 {
-  /* These semaphores protect the DMA channel and descriptor tables */
+  /* These mutex protect the DMA channel and descriptor tables */
 
-  sem_t chsem;                       /* Protects channel table */
+  mutex_t chlock;                    /* Protects channel table */
   sem_t dsem;                        /* Protects descriptor table */
   uint32_t base;                     /* DMA register channel base address */
 
@@ -619,24 +619,6 @@ static struct sam_xdmac_s g_xdmac1 =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: sam_takechsem() and sam_givechsem()
- *
- * Description:
- *   Used to get exclusive access to the DMA channel table
- *
- ****************************************************************************/
-
-static int sam_takechsem(struct sam_xdmac_s *xdmac)
-{
-  return nxsem_wait_uninterruptible(&xdmac->chsem);
-}
-
-static inline void sam_givechsem(struct sam_xdmac_s *xdmac)
-{
-  nxsem_post(&xdmac->chsem);
-}
 
 /****************************************************************************
  * Name: sam_takedsem() and sam_givedsem()
@@ -1310,7 +1292,7 @@ sam_allocdesc(struct sam_xdmach_s *xdmach, struct chnext_view1_s *prev,
        * that is an atomic operation.
        */
 
-      ret = sam_takechsem(xdmac);
+      ret = nxmutex_lock(&xdmac->chlock);
       if (ret < 0)
         {
           sam_givedsem(xdmac);
@@ -1382,7 +1364,7 @@ sam_allocdesc(struct sam_xdmach_s *xdmach, struct chnext_view1_s *prev,
        * search loop should always be successful.
        */
 
-      sam_givechsem(xdmac);
+      nxmutex_unlock(&xdmac->chlock);
       DEBUGASSERT(descr != NULL);
     }
 
@@ -1886,9 +1868,9 @@ void sam_dmainitialize(struct sam_xdmac_s *xdmac)
 
   sam_putdmac(xdmac, XDMAC_CHAN_ALL, SAM_XDMAC_GD_OFFSET);
 
-  /* Initialize semaphores */
+  /* Initialize mutex & semaphores */
 
-  nxsem_init(&xdmac->chsem, 0, 1);
+  nxmutex_init(&xdmac->chlock);
   nxsem_init(&xdmac->dsem, 0, SAM_NDMACHAN);
 }
 
@@ -2003,7 +1985,7 @@ DMA_HANDLE sam_dmachannel(uint8_t dmacno, uint32_t chflags)
    */
 
   xdmach = NULL;
-  ret = sam_takechsem(xdmac);
+  ret = nxmutex_lock(&xdmac->chlock);
   if (ret < 0)
     {
       return NULL;
@@ -2036,7 +2018,7 @@ DMA_HANDLE sam_dmachannel(uint8_t dmacno, uint32_t chflags)
         }
     }
 
-  sam_givechsem(xdmac);
+  nxmutex_unlock(&xdmac->chlock);
 
   /* Show the result of the allocation */
 

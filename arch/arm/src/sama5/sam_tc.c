@@ -59,7 +59,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
@@ -125,7 +125,7 @@ struct sam_chan_s
 
 struct sam_tc_s
 {
-  sem_t exclsem;           /* Assures mutually exclusive access to TC */
+  mutex_t lock;            /* Assures mutually exclusive access to TC */
   uintptr_t base;          /* Register base address */
   uint8_t pid;             /* Peripheral ID/irq number */
   uint8_t tc;              /* Timer/channel number (0 or 1) */
@@ -150,9 +150,6 @@ struct sam_tc_s
  ****************************************************************************/
 
 /* Low-level helpers ********************************************************/
-
-static int  sam_takesem(struct sam_tc_s *tc);
-#define     sam_givesem(tc) (nxsem_post(&tc->exclsem))
 
 #ifdef CONFIG_SAMA5_TC_REGDEBUG
 static void sam_regdump(struct sam_chan_s *chan, const char *msg);
@@ -462,26 +459,6 @@ static const uint8_t g_regoffset[TC_NREGISTERS] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_takesem
- *
- * Description:
- *   Take the wait semaphore (handling false alarm wakeups due to the receipt
- *   of signals).
- *
- * Input Parameters:
- *   dev - Instance of the SDIO device driver state structure.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static int sam_takesem(struct sam_tc_s *tc)
-{
-  return nxsem_wait_uninterruptible(&tc->exclsem);
-}
-
-/****************************************************************************
  * Name: sam_regdump
  *
  * Description:
@@ -697,7 +674,7 @@ static inline void sam_chan_putreg(struct sam_chan_s *chan,
  *   and channel.  NULL is returned on any failure.
  *
  *   On successful return, the caller holds the tc exclusive access
- *   semaphore.
+ *   mutex.
  *
  ****************************************************************************/
 
@@ -765,7 +742,7 @@ static int sam_tc_interrupt(struct sam_tc_s *tc)
  *   and channel.  NULL is returned on any failure.
  *
  *   On successful return, the caller holds the tc exclusive access
- *   semaphore.
+ *   mutex.
  *
  ****************************************************************************/
 
@@ -916,7 +893,7 @@ static uint32_t sam_tc_divfreq_lookup(uint32_t ftcin, int ndx)
  *   and channel.  NULL is returned on any failure.
  *
  *   On successful return, the caller holds the tc exclusive access
- *   semaphore.
+ *   mutex.
  *
  ****************************************************************************/
 
@@ -971,7 +948,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
     }
 
   /* Has the timer counter been initialized.  We have to be careful here
-   * because there is no semaphore protection.
+   * because there is no mutex protection.
    */
 
   flags = enter_critical_section();
@@ -980,7 +957,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
       /* Initialize the timer counter data structure. */
 
       memset(tc, 0, sizeof(struct sam_tc_s));
-      nxsem_init(&tc->exclsem, 0, 1);
+      nxmutex_init(&tc->lock);
       tc->base = tcconfig->base;
       tc->tc   = channel < 3 ? 0 : 1;
       tc->pid  = tcconfig->pid;
@@ -1057,7 +1034,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
 
   /* Get exclusive access to the timer/count data structure */
 
-  ret = sam_takesem(tc);
+  ret = nxmutex_lock(&tc->lock);
   if (ret < 0)
     {
       leave_critical_section(flags);
@@ -1077,7 +1054,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
       /* No.. return a failure */
 
       tmrerr("ERROR: Channel %d is in-use\n", channel);
-      sam_givesem(tc);
+      nxmutex_unlock(&tc->lock);
       return NULL;
     }
 
@@ -1085,7 +1062,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
 
   chan->inuse = true;
 
-  /* And return the channel with the semaphore locked */
+  /* And return the channel with the mutex locked */
 
   sam_regdump(chan, "Initialized");
   return chan;
@@ -1143,7 +1120,7 @@ TC_HANDLE sam_tc_allocate(int channel, int mode)
 
       sam_chan_putreg(chan, SAM_TC_CMR_OFFSET, mode);
       sam_regdump(chan, "Allocated");
-      sam_givesem(chan->tc);
+      nxmutex_unlock(&chan->tc->lock);
     }
 
   /* Return an opaque reference to the channel */

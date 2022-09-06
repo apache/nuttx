@@ -59,6 +59,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/queue.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 
 #include "arm_internal.h"
@@ -145,9 +146,9 @@ struct kinetis_dmach_s
 
 struct kinetis_edma_s
 {
-  /* These semaphores protect the DMA channel and descriptor tables */
+  /* These mutex protect the DMA channel and descriptor tables */
 
-  sem_t chsem;                    /* Protects channel table */
+  mutex_t chlock;                 /* Protects channel table */
 #if CONFIG_KINETIS_EDMA_NTCD > 0
   sem_t dsem;                     /* Supports wait for free descriptors */
 #endif
@@ -179,25 +180,6 @@ static struct kinetis_edmatcd_s g_tcd_pool[CONFIG_KINETIS_EDMA_NTCD]
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: kinetis_takechsem() and kinetis_givechsem()
- *
- * Description:
- *   Used to get exclusive access to the DMA channel table for channel
- *   allocation.
- *
- ****************************************************************************/
-
-static int kinetis_takechsem(void)
-{
-  return nxsem_wait_uninterruptible(&g_edma.chsem);
-}
-
-static inline void kinetis_givechsem(void)
-{
-  nxsem_post(&g_edma.chsem);
-}
 
 /****************************************************************************
  * Name: kinetis_takedsem() and kinetis_givedsem()
@@ -763,9 +745,9 @@ void weak_function arm_dma_initialize(void)
       g_edma.dmach[i].chan = i;
     }
 
-  /* Initialize semaphores */
+  /* Initialize mutex & semaphore */
 
-  nxsem_init(&g_edma.chsem, 0, 1);
+  nxmutex_init(&g_edma.chlock);
 #if CONFIG_KINETIS_EDMA_NTCD > 0
   nxsem_init(&g_edma.dsem, 0, CONFIG_KINETIS_EDMA_NTCD);
 
@@ -867,7 +849,7 @@ DMACH_HANDLE kinetis_dmach_alloc(uint8_t dmamux, uint8_t dchpri)
   /* Search for an available DMA channel */
 
   dmach = NULL;
-  ret = kinetis_takechsem();
+  ret = nxmutex_lock(&g_edma.chlock);
   if (ret < 0)
     {
       return NULL;
@@ -904,7 +886,7 @@ DMACH_HANDLE kinetis_dmach_alloc(uint8_t dmamux, uint8_t dchpri)
         }
     }
 
-  kinetis_givechsem();
+  nxmutex_unlock(&g_edma.chlock);
 
   /* Show the result of the allocation */
 

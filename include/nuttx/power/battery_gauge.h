@@ -28,7 +28,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/list.h>
 
 #include <stdbool.h>
@@ -127,7 +127,7 @@ struct battery_gauge_dev_s
   /* Fields required by the upper-half driver */
 
   FAR const struct battery_gauge_operations_s *ops; /* Battery operations */
-  sem_t batsem;                                     /* Enforce mutually exclusive access */
+  mutex_t batlock;                                  /* Enforce mutually exclusive access */
 
   struct list_node flist;
 

@@ -336,8 +336,6 @@ struct mpfs_dev_s
 
 /* Low-level helper  ********************************************************/
 
-#define     mpfs_givesem(priv) (nxsem_post(&priv->waitsem))
-
 /* Mutual exclusion */
 
 #if defined(CONFIG_SDIO_MUXBUS)
@@ -455,27 +453,6 @@ struct mpfs_dev_s g_emmcsd_dev =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: mpfs_takesem
- *
- * Description:
- *   Take the wait semaphore (handling false alarm wakeups due to the receipt
- *   of signals).
- *
- * Input Parameters:
- *   priv  - Instance of the EMMCSD private state structure.
- *
- * Returned Value:
- *   Normally OK, but may return -ECANCELED in the rare event that the task
- *   has been canceled.
- *
- ****************************************************************************/
-
-static int mpfs_takesem(struct mpfs_dev_s *priv)
-{
-  return nxsem_wait_uninterruptible(&priv->waitsem);
-}
 
 /****************************************************************************
  * Name: mpfs_reset_lines
@@ -915,7 +892,7 @@ static void mpfs_endwait(struct mpfs_dev_s *priv,
 
   /* Wake up the waiting thread */
 
-  mpfs_givesem(priv);
+  nxsem_post(&priv->waitsem);
 }
 
 /****************************************************************************
@@ -2718,7 +2695,7 @@ static sdio_eventset_t mpfs_eventwait(struct sdio_dev_s *dev)
        * incremented and there will be no wait.
        */
 
-      ret = mpfs_takesem(priv);
+      ret = nxsem_wait_uninterruptible(&priv->waitsem);
       if (ret < 0)
         {
           /* Task canceled.  Cancel the wdog (assuming it was started) and

@@ -434,7 +434,7 @@ struct file
 
 struct filelist
 {
-  sem_t             fl_sem;     /* Manage access to the file list */
+  mutex_t           fl_lock;    /* Manage access to the file list */
   uint8_t           fl_rows;    /* The number of rows of fl_files array */
   FAR struct file **fl_files;   /* The pointer of two layer file descriptors array */
 };
@@ -500,7 +500,7 @@ struct file_struct
 
 struct streamlist
 {
-  sem_t                   sl_sem;   /* For thread safety */
+  mutex_t                 sl_lock;   /* For thread safety */
   struct file_struct      sl_std[3];
   FAR struct file_struct *sl_head;
   FAR struct file_struct *sl_tail;

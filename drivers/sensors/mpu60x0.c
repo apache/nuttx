@@ -973,7 +973,6 @@ int mpu60x0_register(FAR const char *path, FAR struct mpu_config_s *config)
       snerr("ERROR: Failed to configure mpu60x0: %d\n", ret);
 
       nxmutex_destroy(&priv->lock);
-
       kmm_free(priv);
       return ret;
     }
@@ -986,7 +985,6 @@ int mpu60x0_register(FAR const char *path, FAR struct mpu_config_s *config)
       snerr("ERROR: Failed to register mpu60x0 interface: %d\n", ret);
 
       nxmutex_destroy(&priv->lock);
-
       kmm_free(priv);
       return ret;
     }

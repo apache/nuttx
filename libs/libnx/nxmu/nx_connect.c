@@ -32,6 +32,7 @@
 #include <debug.h>
 
 #include <nuttx/signal.h>
+#include <nuttx/mutex.h>
 #include <nuttx/mqueue.h>
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxmu.h>
@@ -51,8 +52,8 @@
  * NOTE: that client ID 0 is reserved for the server(s) themselves
  */
 
-static sem_t    g_nxlibsem =  SEM_INITIALIZER(1);
-static uint32_t g_nxcid    = 1;
+static mutex_t  g_nxliblock = NXMUTEX_INITIALIZER;
+static uint32_t g_nxcid     = 1;
 
 /****************************************************************************
  * Public Functions
@@ -111,9 +112,9 @@ NXHANDLE nx_connectinstance(FAR const char *svrmqname)
 
   /* Create the client MQ name */
 
-  nxmu_semtake(&g_nxlibsem);
+  nxmutex_lock(&g_nxliblock);
   conn->cid = g_nxcid++;
-  nxmu_semgive(&g_nxlibsem);
+  nxmutex_unlock(&g_nxliblock);
 
   sprintf(climqname, NX_CLIENT_MQNAMEFMT, conn->cid);
 

@@ -29,7 +29,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 
 #include "route/cacheroute.h"
 #include "route/route.h"
@@ -122,7 +122,7 @@ static struct net_cache_ipv4_entry_s
 
 /* Serializes access to the routing table cache */
 
-static sem_t g_ipv4_cachelock = SEM_INITIALIZER(1);
+static mutex_t g_ipv4_cachelock = NXMUTEX_INITIALIZER;
 #endif
 
 #if defined(CONFIG_ROUTE_IPv6_CACHEROUTE)
@@ -141,47 +141,12 @@ static struct net_cache_ipv6_entry_s
 
 /* Serializes access to the routing table cache */
 
-static sem_t g_ipv6_cachelock = SEM_INITIALIZER(1);
+static mutex_t g_ipv6_cachelock = NXMUTEX_INITIALIZER;
 #endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: net_lock_ipv4_cache and net_lock_ipv6_cache
- *
- * Description:
- *   Lock the routing table cache list.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Zero (OK) is returned on success;  A negated errno value is returned on
- *   any failure.
- *
- ****************************************************************************/
-
-#define net_lock_ipv4_cache() nxsem_wait_uninterruptible(&g_ipv4_cachelock)
-#define net_lock_ipv6_cache() nxsem_wait_uninterruptible(&g_ipv6_cachelock)
-
-/****************************************************************************
- * Name: net_unlock_ipv4_cache and net_unlock_ipv6_cache
- *
- * Description:
- *   Unlock the routing table cache list.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#define net_unlock_ipv4_cache() nxsem_post(&g_ipv4_cachelock)
-#define net_unlock_ipv6_cache() nxsem_post(&g_ipv6_cachelock)
 
 /****************************************************************************
  * Name: net_add_newest_ipv4 and net_add_newest_ipv6
@@ -515,7 +480,7 @@ int net_addcache_ipv4(FAR struct net_route_ipv4_s *route)
 
   /* Get exclusive access to the cache */
 
-  ret = net_lock_ipv4_cache();
+  ret = nxmutex_lock(&g_ipv4_cachelock);
   if (ret < 0)
     {
       return ret;
@@ -543,7 +508,7 @@ int net_addcache_ipv4(FAR struct net_route_ipv4_s *route)
 
           if (prev == NULL)
             {
-              net_unlock_ipv4_cache();
+              nxmutex_unlock(&g_ipv4_cachelock);
               return OK;
             }
 
@@ -581,7 +546,7 @@ int net_addcache_ipv4(FAR struct net_route_ipv4_s *route)
   /* Then add the new cache entry as the newest entry in the table */
 
   net_add_newest_ipv4(cache);
-  net_unlock_ipv4_cache();
+  nxmutex_unlock(&g_ipv4_cachelock);
   return OK;
 }
 #endif
@@ -597,7 +562,7 @@ int net_addcache_ipv6(FAR struct net_route_ipv6_s *route)
 
   /* Get exclusive access to the cache */
 
-  ret = net_lock_ipv6_cache();
+  ret = nxmutex_lock(&g_ipv6_cachelock);
   if (ret < 0)
     {
       return ret;
@@ -625,7 +590,7 @@ int net_addcache_ipv6(FAR struct net_route_ipv6_s *route)
 
           if (prev == NULL)
             {
-              net_unlock_ipv6_cache();
+              nxmutex_unlock(&g_ipv6_cachelock);
               return OK;
             }
 
@@ -663,7 +628,7 @@ int net_addcache_ipv6(FAR struct net_route_ipv6_s *route)
   /* Then add the new cache entry as the newest entry in the table */
 
   net_add_newest_ipv6(cache);
-  net_unlock_ipv6_cache();
+  nxmutex_unlock(&g_ipv6_cachelock);
   return OK;
 }
 #endif
@@ -694,7 +659,7 @@ int net_foreachcache_ipv4(route_handler_ipv4_t handler, FAR void *arg)
 
   /* Get exclusive access to the cache */
 
-  ret = net_lock_ipv4_cache();
+  ret = nxmutex_lock(&g_ipv4_cachelock);
   if (ret < 0)
     {
       return ret;
@@ -714,7 +679,7 @@ int net_foreachcache_ipv4(route_handler_ipv4_t handler, FAR void *arg)
 
   /* Unlock the cache */
 
-  net_unlock_ipv4_cache();
+  nxmutex_unlock(&g_ipv4_cachelock);
   return ret;
 }
 #endif
@@ -728,7 +693,7 @@ int net_foreachcache_ipv6(route_handler_ipv6_t handler, FAR void *arg)
 
   /* Get exclusive access to the cache */
 
-  ret = net_lock_ipv6_cache();
+  ret = nxmutex_lock(&g_ipv6_cachelock);
   if (ret < 0)
     {
       return ret;
@@ -748,7 +713,7 @@ int net_foreachcache_ipv6(route_handler_ipv6_t handler, FAR void *arg)
 
   /* Unlock the cache */
 
-  net_unlock_ipv6_cache();
+  nxmutex_unlock(&g_ipv6_cachelock);
   return ret;
 }
 #endif
@@ -774,7 +739,7 @@ void net_flushcache_ipv4(void)
 
   /* Get exclusive access to the cache */
 
-  ret = net_lock_ipv4_cache();
+  ret = nxmutex_lock(&g_ipv4_cachelock);
   if (ret >= 0)
     {
       /* Reset the cache */
@@ -783,7 +748,7 @@ void net_flushcache_ipv4(void)
 
       /* Unlock the cache */
 
-      net_unlock_ipv4_cache();
+      nxmutex_unlock(&g_ipv4_cachelock);
     }
 }
 #endif
@@ -795,7 +760,7 @@ void net_flushcache_ipv6(void)
 
   /* Get exclusive access to the cache */
 
-  ret = net_lock_ipv6_cache();
+  ret = nxmutex_lock(&g_ipv6_cachelock);
   if (ret >= 0)
     {
       /* Reset the cache */
@@ -804,7 +769,7 @@ void net_flushcache_ipv6(void)
 
       /* Unlock the cache */
 
-      net_unlock_ipv6_cache();
+      nxmutex_unlock(&g_ipv6_cachelock);
     }
 }
 #endif

@@ -103,7 +103,6 @@ struct btnet_driver_s
 
   /* For internal use by this driver */
 
-  sem_t bd_exclsem;                  /* Exclusive access to struct */
   bool bd_bifup;                     /* true:ifup false:ifdown */
   struct work_s bd_pollwork;         /* Defer poll work to the work queue */
 
@@ -1249,10 +1248,6 @@ int bt_netdev_register(FAR struct bt_driver_s *btdev)
   bt_hci_cb_register(hcicb);
 #endif
 
-  /* Setup a locking semaphore for exclusive device driver access */
-
-  nxsem_init(&priv->bd_exclsem, 0, 1);
-
   /* Set the network mask. */
 
   btnet_netmask(netdev);
@@ -1320,10 +1315,6 @@ int bt_netdev_register(FAR struct bt_driver_s *btdev)
   nerr("ERROR: netdev_register() failed: %d\n", ret);
 
 errout:
-
-  /* Un-initialize semaphores */
-
-  nxsem_destroy(&priv->bd_exclsem);
 
   /* Free memory and return the error */
 

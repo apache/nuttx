@@ -68,27 +68,27 @@ void inode_initialize(void)
 }
 
 /****************************************************************************
- * Name: inode_semtake
+ * Name: inode_lock
  *
  * Description:
  *   Get exclusive access to the in-memory inode tree (g_inode_sem).
  *
  ****************************************************************************/
 
-int inode_semtake(void)
+int inode_lock(void)
 {
   return nxrmutex_lock(&g_inode_lock);
 }
 
 /****************************************************************************
- * Name: inode_semgive
+ * Name: inode_unlock
  *
  * Description:
  *   Relinquish exclusive access to the in-memory inode tree (g_inode_sem).
  *
  ****************************************************************************/
 
-void inode_semgive(void)
+void inode_unlock(void)
 {
   DEBUGVERIFY(nxrmutex_unlock(&g_inode_lock));
 }

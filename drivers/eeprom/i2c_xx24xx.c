@@ -84,6 +84,7 @@
 #include <nuttx/fs/fs.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/mutex.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/eeprom/i2c_xx24xx.h>
 
@@ -125,7 +126,7 @@ struct ee24xx_dev_s
 
   /* Driver management */
 
-  sem_t                sem;      /* file write access serialization */
+  mutex_t              lock;     /* file write access serialization */
   uint8_t              refs;     /* Nr of times the device has been opened */
   bool                 readonly; /* Flags */
 
@@ -338,32 +339,6 @@ static int ee24xx_writepage(FAR struct ee24xx_dev_s *eedev, uint32_t memaddr,
 }
 
 /****************************************************************************
- * Name: ee24xx_semtake
- *
- * Acquire a resource to access the device.
- * The purpose of the semaphore is to block tasks that try to access the
- * EEPROM while another task is actively using it.
- *
- ****************************************************************************/
-
-static int ee24xx_semtake(FAR struct ee24xx_dev_s *eedev)
-{
-  return nxsem_wait_uninterruptible(&eedev->sem);
-}
-
-/****************************************************************************
- * Name: ee24xx_semgive
- *
- * Release a resource to access the device.
- *
- ****************************************************************************/
-
-static inline void ee24xx_semgive(FAR struct ee24xx_dev_s *eedev)
-{
-  nxsem_post(&eedev->sem);
-}
-
-/****************************************************************************
  * Driver Functions
  ****************************************************************************/
 
@@ -383,7 +358,7 @@ static int ee24xx_open(FAR struct file *filep)
   DEBUGASSERT(inode && inode->i_private);
   eedev = (FAR struct ee24xx_dev_s *)inode->i_private;
 
-  ret = ee24xx_semtake(eedev);
+  ret = nxmutex_lock(&eedev->lock);
   if (ret < 0)
     {
       return ret;
@@ -400,7 +375,7 @@ static int ee24xx_open(FAR struct file *filep)
       eedev->refs += 1;
     }
 
-  ee24xx_semgive(eedev);
+  nxmutex_unlock(&eedev->lock);
   return ret;
 }
 
@@ -420,7 +395,7 @@ static int ee24xx_close(FAR struct file *filep)
   DEBUGASSERT(inode && inode->i_private);
   eedev = (FAR struct ee24xx_dev_s *)inode->i_private;
 
-  ret = ee24xx_semtake(eedev);
+  ret = nxmutex_lock(&eedev->lock);
   if (ret < 0)
     {
       return ret;
@@ -439,7 +414,7 @@ static int ee24xx_close(FAR struct file *filep)
       eedev->refs -= 1;
     }
 
-  ee24xx_semgive(eedev);
+  nxmutex_unlock(&eedev->lock);
   return ret;
 }
 
@@ -460,7 +435,7 @@ static off_t ee24xx_seek(FAR struct file *filep, off_t offset, int whence)
   DEBUGASSERT(inode && inode->i_private);
   eedev = (FAR struct ee24xx_dev_s *)inode->i_private;
 
-  ret = ee24xx_semtake(eedev);
+  ret = nxmutex_lock(&eedev->lock);
   if (ret < 0)
     {
       return ret;
@@ -486,7 +461,7 @@ static off_t ee24xx_seek(FAR struct file *filep, off_t offset, int whence)
 
       /* Return EINVAL if the whence argument is invalid */
 
-      ee24xx_semgive(eedev);
+      nxmutex_unlock(&eedev->lock);
       return -EINVAL;
     }
 
@@ -515,7 +490,7 @@ static off_t ee24xx_seek(FAR struct file *filep, off_t offset, int whence)
       ret = -EINVAL;
     }
 
-  ee24xx_semgive(eedev);
+  nxmutex_unlock(&eedev->lock);
   return ret;
 }
 
@@ -536,7 +511,7 @@ static ssize_t ee24xx_read(FAR struct file *filep, FAR char *buffer,
   DEBUGASSERT(inode && inode->i_private);
   eedev = (FAR struct ee24xx_dev_s *)inode->i_private;
 
-  ret = ee24xx_semtake(eedev);
+  ret = nxmutex_lock(&eedev->lock);
   if (ret < 0)
     {
       return ret;
@@ -594,7 +569,7 @@ static ssize_t ee24xx_read(FAR struct file *filep, FAR char *buffer,
   filep->f_pos += len;
 
 done:
-  ee24xx_semgive(eedev);
+  nxmutex_unlock(&eedev->lock);
   return ret;
 }
 
@@ -615,7 +590,7 @@ static ssize_t at24cs_read_uuid(FAR struct file *filep, FAR char *buffer,
   DEBUGASSERT(inode && inode->i_private);
   eedev = (FAR struct ee24xx_dev_s *)inode->i_private;
 
-  ret = ee24xx_semtake(eedev);
+  ret = nxmutex_lock(&eedev->lock);
   if (ret < 0)
     {
       return ret;
@@ -669,7 +644,7 @@ static ssize_t at24cs_read_uuid(FAR struct file *filep, FAR char *buffer,
   filep->f_pos += len;
 
 done:
-  ee24xx_semgive(eedev);
+  nxmutex_unlock(&eedev->lock);
   return ret;
 }
 #endif
@@ -715,7 +690,7 @@ static ssize_t ee24xx_write(FAR struct file *filep, FAR const char *buffer,
 
   savelen = len; /* save number of bytes written */
 
-  ret = ee24xx_semtake(eedev);
+  ret = nxmutex_lock(&eedev->lock);
   if (ret < 0)
     {
       return ret;
@@ -795,7 +770,7 @@ static ssize_t ee24xx_write(FAR struct file *filep, FAR const char *buffer,
   ret = savelen;
 
 done:
-  ee24xx_semgive(eedev);
+  nxmutex_unlock(&eedev->lock);
   return ret;
 }
 
@@ -863,7 +838,7 @@ int ee24xx_initialize(FAR struct i2c_master_s *bus, uint8_t devaddr,
       return -ENOMEM;
     }
 
-  nxsem_init(&eedev->sem, 0, 1);
+  nxmutex_init(&eedev->lock);
 
   eedev->freq     = CONFIG_EE24XX_FREQUENCY;
   eedev->i2c      = bus;

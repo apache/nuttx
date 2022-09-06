@@ -78,7 +78,7 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
    * cmdtrans but needs access to the MAC in order to unlock it.
    */
 
-  ret = mac802154_takesem(&priv->opsem, true);
+  ret = nxsem_wait_uninterruptible(&priv->opsem);
   if (ret < 0)
     {
       return ret;
@@ -86,10 +86,10 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
 
   /* Get exclusive access to the MAC */
 
-  ret = mac802154_lock(priv, true);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
-      mac802154_givesem(&priv->opsem);
+      nxsem_post(&priv->opsem);
       return ret;
     }
 
@@ -98,11 +98,11 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
 
   /* Allocate the txdesc, waiting if necessary */
 
-  ret = mac802154_txdesc_alloc(priv, &txdesc, true);
+  ret = mac802154_txdesc_alloc(priv, &txdesc);
   if (ret < 0)
     {
-      mac802154_unlock(priv)
-      mac802154_givesem(&priv->opsem);
+      nxmutex_unlock(&priv->lock);
+      nxsem_post(&priv->opsem);
       return ret;
     }
 
@@ -148,7 +148,7 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
 
   /* We no longer need to have the MAC layer locked. */
 
-  mac802154_unlock(priv)
+  nxmutex_unlock(&priv->lock);
 
   /* Notify the radio driver that there is data available */
 
@@ -208,7 +208,7 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
 
       priv->curr_op = MAC802154_OP_NONE;
       priv->cmd_desc = NULL;
-      mac802154_givesem(&priv->opsem);
+      nxsem_post(&priv->opsem);
 
       mac802154_notify(priv, primitive);
     }
@@ -268,14 +268,14 @@ void mac802154_polltimeout(FAR void *arg)
   primitive->type = IEEE802154_PRIMITIVE_CONF_POLL;
   primitive->u.pollconf.status = IEEE802154_STATUS_NO_DATA;
 
-  mac802154_lock(priv, false);
+  nxmutex_lock(&priv->lock);
 
   /* We are no longer performing the association operation */
 
   priv->curr_op = MAC802154_OP_NONE;
   priv->cmd_desc = NULL;
-  mac802154_givesem(&priv->opsem);
+  nxsem_post(&priv->opsem);
 
   mac802154_notify(priv, primitive);
-  mac802154_unlock(priv);
+  nxmutex_unlock(&priv->lock);
 }

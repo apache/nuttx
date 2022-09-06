@@ -31,6 +31,7 @@
 #include <semaphore.h>
 
 #include <nuttx/list.h>
+#include <nuttx/mutex.h>
 #include <nuttx/wqueue.h>
 
 /****************************************************************************
@@ -92,7 +93,7 @@ struct regulator_dev_s
   FAR const struct regulator_ops_s *ops;
   uint32_t use_count;
   uint32_t open_count;
-  sem_t regulator_sem;
+  mutex_t regulator_lock;
   struct list_node list;
   struct list_node consumer_list;
 

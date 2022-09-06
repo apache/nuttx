@@ -46,21 +46,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _local_semtake() and _local_semgive()
- *
- * Description:
- *   Take/give semaphore
- *
- ****************************************************************************/
-
-static inline void _local_semtake(sem_t *sem)
-{
-  net_lockedwait_uninterruptible(sem);
-}
-
-#define _local_semgive(sem) nxsem_post(sem)
-
-/****************************************************************************
  * Name: local_stream_connect
  *
  * Description:
@@ -143,7 +128,7 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
 
   if (nxsem_get_value(&server->lc_waitsem, &sval) >= 0 && sval < 1)
     {
-      _local_semgive(&server->lc_waitsem);
+      nxsem_post(&server->lc_waitsem);
     }
 
   /* Wait for the server to accept the connections */
@@ -152,7 +137,7 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
     {
       do
         {
-          _local_semtake(&client->lc_waitsem);
+          net_lockedwait_uninterruptible(&client->lc_waitsem);
           ret = client->u.client.lc_result;
         }
       while (ret == -EBUSY);

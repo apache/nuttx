@@ -109,7 +109,7 @@ int nx_umount2(FAR const char *target, unsigned int flags)
 
   /* Hold the semaphore through the unbind logic */
 
-  ret = inode_semtake();
+  ret = inode_lock();
   if (ret < 0)
     {
       goto errout_with_mountpt;
@@ -121,12 +121,12 @@ int nx_umount2(FAR const char *target, unsigned int flags)
     {
       /* The inode is unhappy with the blkdrvr for some reason */
 
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
   else if (ret > 0)
     {
       ret = -EBUSY;
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 
   /* Successfully unbound.  Convert the mountpoint inode to regular
@@ -146,7 +146,7 @@ int nx_umount2(FAR const char *target, unsigned int flags)
 
       DEBUGASSERT(mountpt_inode->i_crefs > 0);
       mountpt_inode->i_crefs--;
-      inode_semgive();
+      inode_unlock();
     }
   else
 #endif
@@ -157,7 +157,7 @@ int nx_umount2(FAR const char *target, unsigned int flags)
        */
 
       ret = inode_remove(target);
-      inode_semgive();
+      inode_unlock();
 
       /* The return value of -EBUSY is normal (in fact, it should
        * not be OK)
@@ -188,8 +188,8 @@ int nx_umount2(FAR const char *target, unsigned int flags)
 
   /* A lot of goto's!  But they make the error handling much simpler */
 
-errout_with_semaphore:
-  inode_semgive();
+errout_with_lock:
+  inode_unlock();
 
 errout_with_mountpt:
   inode_release(mountpt_inode);

@@ -49,7 +49,7 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/signal.h>
 #include <nuttx/wireless/wireless.h>
 #include <nuttx/wireless/gs2200m.h>
@@ -180,7 +180,7 @@ struct gs2200m_dev_s
   struct notif_q_s     notif_q;
   FAR struct spi_dev_s *spi;
   struct work_s        irq_work;
-  sem_t                dev_sem;
+  mutex_t              dev_lock;
   bool                 int_enabled;
   dq_queue_t           pkt_q[16];
   uint16_t             pkt_q_cnt[16];
@@ -692,24 +692,6 @@ errout:
 }
 
 /****************************************************************************
- * Name: gs2200m_lock
- ****************************************************************************/
-
-static int gs2200m_lock(FAR struct gs2200m_dev_s *dev)
-{
-  return nxsem_wait_uninterruptible(&dev->dev_sem);
-}
-
-/****************************************************************************
- * Name: gs2200m_unlock
- ****************************************************************************/
-
-static void gs2200m_unlock(FAR struct gs2200m_dev_s *dev)
-{
-  nxsem_post(&dev->dev_sem);
-}
-
-/****************************************************************************
  * Name: gs2200m_read
  ****************************************************************************/
 
@@ -728,7 +710,7 @@ static ssize_t gs2200m_read(FAR struct file *filep, FAR char *buffer,
 
   ASSERT(1 == len);
 
-  ret = nxsem_wait(&dev->dev_sem);
+  ret = nxmutex_lock(&dev->dev_lock);
   if (ret < 0)
     {
       /* Return if a signal is received or if the the task was canceled
@@ -747,7 +729,7 @@ static ssize_t gs2200m_read(FAR struct file *filep, FAR char *buffer,
 
   memcpy(buffer, &cid, sizeof(cid));
 
-  gs2200m_unlock(dev);
+  nxmutex_unlock(&dev->dev_lock);
   return 1;
 }
 
@@ -2988,7 +2970,7 @@ static int gs2200m_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Lock the device */
 
-  ret = gs2200m_lock(dev);
+  ret = nxmutex_lock(&dev->dev_lock);
   if (ret < 0)
     {
       /* Return only if the task was canceled */
@@ -3102,7 +3084,7 @@ static int gs2200m_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Unlock the device */
 
-  gs2200m_unlock(dev);
+  nxmutex_unlock(&dev->dev_lock);
   return ret;
 }
 
@@ -3124,7 +3106,7 @@ static int gs2200m_poll(FAR struct file *filep, FAR struct pollfd *fds,
   DEBUGASSERT(inode && inode->i_private);
   dev = (FAR struct gs2200m_dev_s *)inode->i_private;
 
-  ret = gs2200m_lock(dev);
+  ret = nxmutex_lock(&dev->dev_lock);
   if (ret < 0)
     {
       /* Return if the task was canceled */
@@ -3167,7 +3149,7 @@ static int gs2200m_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 errout:
-  gs2200m_unlock(dev);
+  nxmutex_unlock(&dev->dev_lock);
   return ret;
 }
 
@@ -3194,7 +3176,7 @@ static void gs2200m_irq_worker(FAR void *arg)
 
   do
     {
-      ret = gs2200m_lock(dev);
+      ret = nxmutex_lock(&dev->dev_lock);
 
       /* The only failure would be if the worker thread were canceled.  That
        * is very unlikely, however.
@@ -3345,7 +3327,7 @@ errout:
   /* NOTE: Enable gs2200m irq which was disabled in gs2200m_irq() */
 
   dev->lower->enable();
-  gs2200m_unlock(dev);
+  nxmutex_unlock(&dev->dev_lock);
 }
 
 /****************************************************************************
@@ -3517,7 +3499,7 @@ FAR void *gs2200m_register(FAR const char *devpath,
   dev->path  = strdup(devpath);
   dev->lower = lower;
 
-  nxsem_init(&dev->dev_sem, 0, 1);
+  nxmutex_init(&dev->dev_lock);
 
   dev->pfd   = NULL;
 

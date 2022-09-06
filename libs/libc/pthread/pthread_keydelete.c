@@ -28,7 +28,7 @@
 #include <assert.h>
 #include <errno.h>
 
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/tls.h>
 
 #if CONFIG_TLS_NELEM > 0
@@ -70,16 +70,16 @@ int pthread_key_delete(pthread_key_t key)
        */
 
       mask = (tls_ndxset_t)1 << key;
-      ret = _SEM_WAIT(&info->ta_sem);
+      ret = nxmutex_lock(&info->ta_lock);
       if (ret == OK)
         {
           DEBUGASSERT((info->ta_tlsset & mask) != 0);
           info->ta_tlsset &= ~mask;
-          _SEM_POST(&info->ta_sem);
+          nxmutex_unlock(&info->ta_lock);
         }
       else
         {
-          ret = _SEM_ERRNO(ret);
+          ret = -ret;
         }
     }
 

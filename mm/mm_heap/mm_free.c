@@ -84,10 +84,10 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
       return;
     }
 
-  if (mm_takesemaphore(heap) == false)
+  if (mm_lock(heap) == false)
     {
       /* Meet -ESRCH return, which means we are in situations
-       * during context switching(See mm_takesemaphore() & getpid()).
+       * during context switching(See mm_lock() & getpid()).
        * Then add to the delay list.
        */
 
@@ -173,6 +173,5 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
   /* Add the merged node to the nodelist */
 
   mm_addfreechunk(heap, node);
-
-  mm_givesemaphore(heap);
+  mm_unlock(heap);
 }

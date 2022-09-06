@@ -34,7 +34,7 @@
 #include <stdint.h>
 #include <fixedmath.h>
 
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 
 #ifdef CONFIG_BATTERY_MONITOR
 
@@ -301,7 +301,7 @@ struct battery_monitor_dev_s
   /* Fields required by the upper-half driver */
 
   FAR const struct battery_monitor_operations_s *ops; /* Battery operations */
-  sem_t batsem;                                       /* Enforce mutually exclusive access */
+  mutex_t batlock;                                    /* Enforce mutually exclusive access */
 
   struct list_node flist;
 

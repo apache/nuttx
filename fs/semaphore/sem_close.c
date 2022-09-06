@@ -84,7 +84,7 @@ int sem_close(FAR sem_t *sem)
 
   do
     {
-      ret = inode_semtake();
+      ret = inode_lock();
 
       /* The only error that is expected is due to thread cancellation.
        * At this point, we must continue to free the semaphore anyway.
@@ -115,14 +115,14 @@ int sem_close(FAR sem_t *sem)
        * unlinked, then the peer pointer should be NULL.
        */
 
-      inode_semgive();
+      inode_unlock();
 
       DEBUGASSERT(inode->i_peer == NULL);
       inode_free(inode);
       return OK;
     }
 
-  inode_semgive();
+  inode_unlock();
   return OK;
 }
 

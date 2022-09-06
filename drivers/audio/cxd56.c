@@ -3727,7 +3727,6 @@ struct audio_lowerhalf_s *cxd56_initialize(
       priv->lower   = lower;
       priv->state   = CXD56_DEV_STATE_OFF;
 
-      nxsem_init(&priv->pendsem, 0, 1);
       dq_init(&priv->up_pendq);
       dq_init(&priv->up_runq);
 #ifdef CONFIG_AUDIO_CXD56_SRC

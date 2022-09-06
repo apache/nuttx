@@ -36,7 +36,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/video/fb.h>
 
 #include <arch/board/board.h>
@@ -111,7 +111,7 @@ struct stm32_dma2d_s
   uint32_t *clut;              /* Color lookup table */
 #endif
 
-  sem_t *lock;                 /* Ensure mutually exclusive access */
+  mutex_t *lock;               /* Ensure mutually exclusive access */
 };
 
 /* Interrupt handling */
@@ -247,9 +247,9 @@ static uint32_t g_clut[STM32_DMA2D_NCLUT *
                       / 4];
 #endif /* CONFIG_STM32F7_FB_CMAP */
 
-/* The DMA2D semaphore that enforces mutually exclusive access */
+/* The DMA2D mutex that enforces mutually exclusive access */
 
-static sem_t g_lock;
+static mutex_t g_lock;
 
 /* Semaphore for interrupt handling */
 
@@ -749,7 +749,7 @@ static int stm32_dma2d_setclut(const struct fb_cmap_s *cmap)
 
   lcdinfo("cmap=%p\n", cmap);
 
-  nxsem_wait(priv->lock);
+  nxmutex_lock(priv->lock);
 
   for (n = cmap->first; n < cmap->len - 1 && n < STM32_DMA2D_NCLUT; n++)
     {
@@ -783,8 +783,7 @@ static int stm32_dma2d_setclut(const struct fb_cmap_s *cmap)
 #  endif
     }
 
-  nxsem_post(priv->lock);
-
+  nxmutex_unlock(priv->lock);
   return OK;
 }
 #endif /* CONFIG_STM32F7_FB_CMAP */
@@ -831,7 +830,7 @@ static int stm32_dma2d_fillcolor(struct stm32_dma2d_overlay_s *oinfo,
     }
 #endif
 
-  nxsem_wait(priv->lock);
+  nxmutex_lock(priv->lock);
 
   /* Set output pfc */
 
@@ -863,7 +862,7 @@ static int stm32_dma2d_fillcolor(struct stm32_dma2d_overlay_s *oinfo,
       lcderr("ERROR: Returning ECANCELED\n");
     }
 
-  nxsem_post(priv->lock);
+  nxmutex_unlock(priv->lock);
   return ret;
 }
 
@@ -903,7 +902,7 @@ static int stm32_dma2d_blit(struct stm32_dma2d_overlay_s *doverlay,
   lcdinfo("doverlay=%p, destxpos=%d, destypos=%d, soverlay=%p, sarea=%p\n",
           doverlay, destxpos, destypos, soverlay, sarea);
 
-  nxsem_wait(priv->lock);
+  nxmutex_lock(priv->lock);
 
   /* Set output pfc */
 
@@ -953,7 +952,7 @@ static int stm32_dma2d_blit(struct stm32_dma2d_overlay_s *doverlay,
       lcderr("ERROR: Returning ECANCELED\n");
     }
 
-  nxsem_post(priv->lock);
+  nxmutex_unlock(priv->lock);
   return ret;
 }
 
@@ -1015,7 +1014,7 @@ static int stm32_dma2d_blend(struct stm32_dma2d_overlay_s *doverlay,
     }
 #endif
 
-  nxsem_wait(priv->lock);
+  nxmutex_lock(priv->lock);
 
   /* Set output pfc */
 
@@ -1063,7 +1062,7 @@ static int stm32_dma2d_blend(struct stm32_dma2d_overlay_s *doverlay,
       lcderr("ERROR: Returning ECANCELED\n");
     }
 
-  nxsem_post(priv->lock);
+  nxmutex_unlock(priv->lock);
   return ret;
 }
 
@@ -1093,11 +1092,11 @@ int stm32_dma2dinitialize(void)
        * arch/arm/src/stm32f7/stm32f7xxxx_rcc.c
        */
 
-      /* Initialize the DMA2D semaphore that enforces mutually exclusive
+      /* Initialize the DMA2D mutex that enforces mutually exclusive
        * access to the driver
        */
 
-      nxsem_init(&g_lock, 0, 1);
+      nxmutex_init(&g_lock);
 
       /* Initialize the semaphore for interrupt handling.  This waitsem
        * semaphore is used for signaling and, hence, should not have

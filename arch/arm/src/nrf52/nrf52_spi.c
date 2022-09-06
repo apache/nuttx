@@ -31,7 +31,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <arch/board/board.h>
 #include <nuttx/power/pm.h>
 
@@ -83,7 +83,7 @@ struct nrf52_spidev_s
   uint32_t         frequency;  /* Requested clock frequency */
   uint8_t          mode;       /* Mode 0,1,2,3 */
 
-  sem_t            exclsem;    /* Held while chip is selected for mutual
+  mutex_t          lock;       /* Held while chip is selected for mutual
                                 * exclusion
                                 */
 #ifdef CONFIG_NRF52_SPI_MASTER_INTERRUPTS
@@ -687,11 +687,11 @@ static int nrf52_spi_lock(struct spi_dev_s *dev, bool lock)
 
   if (lock)
     {
-      ret = nxsem_wait_uninterruptible(&priv->exclsem);
+      ret = nxmutex_lock(&priv->lock);
     }
   else
     {
-      ret = nxsem_post(&priv->exclsem);
+      ret = nxmutex_unlock(&priv->lock);
     }
 
   return ret;
@@ -1470,9 +1470,9 @@ struct spi_dev_s *nrf52_spibus_initialize(int port)
 
   priv->initialized = true;
 
-  /* Initialize the SPI semaphore */
+  /* Initialize the SPI mutex */
 
-  nxsem_init(&priv->exclsem, 0, 1);
+  nxmutex_init(&priv->lock);
 
 #ifdef CONFIG_NRF52_SPI_MASTER_INTERRUPTS
   /* This semaphore is used for signaling and, hence, should not have

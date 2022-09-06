@@ -109,7 +109,7 @@ struct t67xx_dev_s
   FAR struct i2c_master_s *i2c;  /* I2C interface */
   uint8_t addr;                  /* I2C address */
   struct timespec boot_time;     /* When sensor was booted */
-  sem_t devsem;
+  mutex_t devlock;
 };
 
 /****************************************************************************
@@ -574,7 +574,7 @@ static ssize_t t67xx_read(FAR struct file *filep, FAR char *buffer,
 
   /* Get exclusive access */
 
-  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return ret;
@@ -599,7 +599,7 @@ static ssize_t t67xx_read(FAR struct file *filep, FAR char *buffer,
       if (ret < 0)
         {
           snerr("ERROR: t67xx_read_gas_ppm failed: %d\n", ret);
-          nxsem_post(&priv->devsem);
+          nxmutex_unlock(&priv->devlock);
           return (ssize_t)ret;
         }
 
@@ -608,7 +608,7 @@ static ssize_t t67xx_read(FAR struct file *filep, FAR char *buffer,
       *ptr++ = gas_ppm;
     }
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return nsamples * sizeof(struct t67xx_value_s);
 }
 
@@ -634,7 +634,7 @@ static int t67xx_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access */
 
-  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxmutex_lock(&priv->devlock);
   if (ret < 0)
     {
       return ret;
@@ -675,7 +675,7 @@ static int t67xx_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return ret;
 }
 
@@ -721,7 +721,7 @@ int t67xx_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   priv->i2c  = i2c;
   priv->addr = addr;
 
-  nxsem_init(&priv->devsem, 0, 1);
+  nxmutex_init(&priv->devlock);
 
   clock_systime_timespec(&priv->boot_time);
 

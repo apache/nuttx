@@ -77,9 +77,9 @@ int ipcc_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   /* Get exclusive access to driver */
 
-  if ((ret = nxsem_wait(&priv->exclsem)) < 0)
+  if ((ret = nxmutex_lock(&priv->lock)) < 0)
     {
-      /* nxsem_wait() will return on signal, we did not start
+      /* nxmutex_lock() will return on signal, we did not start
        * any transfer yet, so we can safely return with error
        */
 
@@ -98,7 +98,7 @@ int ipcc_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       *slot = NULL;
       fds->priv = NULL;
-      nxsem_post(&priv->exclsem);
+      nxmutex_unlock(&priv->lock);
       return OK;
     }
 
@@ -125,7 +125,7 @@ int ipcc_poll(FAR struct file *filep, FAR struct pollfd *fds,
       /* No free poll slot found */
 
       fds->priv = NULL;
-      nxsem_post(&priv->exclsem);
+      nxmutex_unlock(&priv->lock);
       return -EBUSY;
     }
 
@@ -147,6 +147,6 @@ int ipcc_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   poll_notify(priv->fds, CONFIG_IPCC_NPOLLWAITERS, eventset);
 
-  nxsem_post(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
   return OK;
 }

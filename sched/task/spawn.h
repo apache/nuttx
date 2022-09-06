@@ -26,6 +26,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/mutex.h>
 #include <spawn.h>
 
 /****************************************************************************
@@ -71,7 +72,7 @@ struct spawn_parms_s
  * Public Data
  ****************************************************************************/
 
-extern sem_t g_spawn_parmsem;
+extern mutex_t g_spawn_parmlock;
 #ifndef CONFIG_SCHED_WAITPID
 extern sem_t g_spawn_execsem;
 #endif
@@ -80,24 +81,6 @@ extern struct spawn_parms_s g_spawn_parms;
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Name: spawn_semtake and spawn_semgive
- *
- * Description:
- *   Give and take semaphores
- *
- * Input Parameters:
- *
- *   sem - The semaphore to act on.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-int spawn_semtake(FAR sem_t *sem);
-#define spawn_semgive(sem) nxsem_post(sem)
 
 /****************************************************************************
  * Name: spawn_execattrs

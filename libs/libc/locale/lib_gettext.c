@@ -30,12 +30,13 @@
 #include <fcntl.h>
 #include <libintl.h>
 #include <locale.h>
-#include <nuttx/tls.h>
 #include <strings.h>
-#include <semaphore.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
+
+#include <nuttx/mutex.h>
+#include <nuttx/tls.h>
 
 #include "libc.h"
 
@@ -83,7 +84,7 @@ static FAR const char *g_catname[] =
   "LC_ALL",
 };
 
-static sem_t g_sem = SEM_INITIALIZER(1);
+static mutex_t g_lock = NXMUTEX_INITIALIZER;
 static FAR struct mofile_s *g_mofile;
 
 #ifdef CONFIG_BUILD_KERNEL
@@ -577,7 +578,7 @@ FAR char *dcngettext(FAR const char *domainname,
            CONFIG_LIBC_LOCALE_PATH"/%s/%s/%s.mo",
            lang, g_catname[category], domainname);
 
-  while (_SEM_WAIT(&g_sem) < 0);
+  while (nxmutex_lock(&g_lock) < 0);
 
   for (mofile = g_mofile; mofile; mofile = mofile->next)
     {
@@ -594,7 +595,7 @@ FAR char *dcngettext(FAR const char *domainname,
       mofile = lib_malloc(sizeof(*mofile));
       if (mofile == NULL)
         {
-          _SEM_POST(&g_sem);
+          nxmutex_unlock(&g_lock);
           return notrans;
         }
 
@@ -602,7 +603,7 @@ FAR char *dcngettext(FAR const char *domainname,
       mofile->map = momap(path, &mofile->size);
       if (mofile->map == MAP_FAILED)
         {
-          _SEM_POST(&g_sem);
+          nxmutex_unlock(&g_lock);
           lib_free(mofile);
           return notrans;
         }
@@ -647,7 +648,7 @@ FAR char *dcngettext(FAR const char *domainname,
       g_mofile = mofile;
     }
 
-  _SEM_POST(&g_sem); /* Leave look before search */
+  nxmutex_unlock(&g_lock); /* Leave look before search */
 
   trans = molookup(mofile->map, mofile->size, msgid1);
   if (trans == NULL)

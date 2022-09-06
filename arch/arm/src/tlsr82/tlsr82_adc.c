@@ -32,7 +32,7 @@
 
 #include <nuttx/analog/adc.h>
 #include <nuttx/analog/ioctl.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <arch/board/board.h>
 
 #include "tlsr82_adc.h"
@@ -215,7 +215,7 @@ static struct adc_dev_s g_adc_chanbat_dev =
 };
 #endif
 
-static sem_t g_sem_excl = SEM_INITIALIZER(1);
+static mutex_t g_lock = NXMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Inline Functions
@@ -864,7 +864,7 @@ static void adc_read_work(struct adc_dev_s *dev)
   int32_t adc;
   struct adc_chan_s *priv = (struct adc_chan_s *)dev->ad_priv;
 
-  ret = nxsem_wait(&g_sem_excl);
+  ret = nxmutex_lock(&g_lock);
   if (ret < 0)
     {
       aerr("Failed to wait sem ret=%d\n", ret);
@@ -913,7 +913,7 @@ static void adc_read_work(struct adc_dev_s *dev)
   ainfo("channel: %" PRIu8 ", voltage: %" PRIu32 " mV\n", priv->channel,
         adc);
 
-  nxsem_post(&g_sem_excl);
+  nxmutex_unlock(&g_lock);
 }
 
 /****************************************************************************

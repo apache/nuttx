@@ -39,7 +39,7 @@
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 
 #include "arm_internal.h"
 #include "barriers.h"
@@ -71,7 +71,7 @@ struct imxrt_flexspidev_s
 
   bool initialized;            /* TRUE: Controller has been initialized */
 
-  sem_t exclsem;               /* Assures mutually exclusive access to
+  mutex_t lock;                /* Assures mutually exclusive access to
                                 * FlexSPI */
 };
 
@@ -1104,11 +1104,11 @@ static int imxrt_flexspi_lock(struct flexspi_dev_s *dev, bool lock)
   spiinfo("lock=%d\n", lock);
   if (lock)
     {
-      ret = nxsem_wait_uninterruptible(&priv->exclsem);
+      ret = nxmutex_lock(&priv->lock);
     }
   else
     {
-      ret = nxsem_post(&priv->exclsem);
+      ret = nxmutex_unlock(&priv->lock);
     }
 
   return ret;
@@ -1268,11 +1268,11 @@ struct flexspi_dev_s *imxrt_flexspi_initialize(int intf)
     {
       /* No perform one time initialization */
 
-      /* Initialize the FlexSPI semaphore that enforces mutually exclusive
+      /* Initialize the FlexSPI mutex that enforces mutually exclusive
        * access to the FlexSPI registers.
        */
 
-      nxsem_init(&priv->exclsem, 0, 1);
+      nxmutex_init(&priv->lock);
 
       /* Perform hardware initialization. Puts the FlexSPI into an active
        * state.

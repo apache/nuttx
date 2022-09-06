@@ -36,7 +36,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <arch/chip/scu.h>
 #include <arch/chip/adc.h>
 
@@ -174,7 +174,7 @@ struct cxd56adc_dev_s
   struct scufifo_wm_s *wm;        /* water mark */
   struct math_filter_s *filter;   /* math filter */
   struct scuev_notify_s * notify; /* notify */
-  sem_t            exclsem;       /* exclusive semaphore */
+  mutex_t          lock;          /* exclusive mutex */
   int              crefs;         /* reference count */
 };
 
@@ -718,14 +718,14 @@ static int cxd56_adc_open(struct file *filep)
 
   /* Increment reference counter */
 
-  nxsem_wait_uninterruptible(&priv->exclsem);
+  nxmutex_lock(&priv->lock);
 
   priv->crefs++;
   DEBUGASSERT(priv->crefs > 0);
 
   if (priv->crefs > 1)
     {
-      nxsem_post(&priv->exclsem);
+      nxmutex_unlock(&priv->lock);
       return OK;
     }
 
@@ -738,7 +738,7 @@ static int cxd56_adc_open(struct file *filep)
   priv->seq = seq_open(SEQ_TYPE_NORMAL, type);
   if (!priv->seq)
     {
-      nxsem_post(&priv->exclsem);
+      nxmutex_unlock(&priv->lock);
       return -ENOENT;
     }
 
@@ -751,14 +751,13 @@ static int cxd56_adc_open(struct file *filep)
   ret = set_ofstgain(priv);
   if (ret < 0)
     {
-      nxsem_post(&priv->exclsem);
+      nxmutex_unlock(&priv->lock);
       return ret;
     }
 
   ainfo("open ch%d freq%d scufifo%d\n", priv->ch, priv->freq, priv->fsize);
 
-  nxsem_post(&priv->exclsem);
-
+  nxmutex_unlock(&priv->lock);
   return OK;
 }
 
@@ -781,14 +780,14 @@ static int cxd56_adc_close(struct file *filep)
 
   /* Decrement reference counter */
 
-  nxsem_wait_uninterruptible(&priv->exclsem);
+  nxmutex_lock(&priv->lock);
 
   DEBUGASSERT(priv->crefs > 0);
   priv->crefs--;
 
   if (priv->crefs > 0)
     {
-      nxsem_post(&priv->exclsem);
+      nxmutex_unlock(&priv->lock);
       return OK;
     }
 
@@ -815,8 +814,7 @@ static int cxd56_adc_close(struct file *filep)
       priv->notify = NULL;
     }
 
-  nxsem_post(&priv->exclsem);
-
+  nxmutex_unlock(&priv->lock);
   return OK;
 }
 
@@ -1110,7 +1108,7 @@ int cxd56_adcinitialize(void)
       return ret;
     }
 
-  nxsem_init(&g_lpadc0priv.exclsem, 0, 1);
+  nxmutex_init(&g_lpadc0priv.lock);
 #endif
 #if defined (CONFIG_CXD56_LPADC1) || defined (CONFIG_CXD56_LPADC0_1) || defined (CONFIG_CXD56_LPADC_ALL)
   ret = register_driver("/dev/lpadc1", &g_adcops, 0666, &g_lpadc1priv);
@@ -1120,7 +1118,7 @@ int cxd56_adcinitialize(void)
       return ret;
     }
 
-  nxsem_init(&g_lpadc1priv.exclsem, 0, 1);
+  nxmutex_init(&g_lpadc1priv.lock);
 #endif
 #if defined (CONFIG_CXD56_LPADC2) || defined (CONFIG_CXD56_LPADC_ALL)
   ret = register_driver("/dev/lpadc2", &g_adcops, 0666, &g_lpadc2priv);
@@ -1130,7 +1128,7 @@ int cxd56_adcinitialize(void)
       return ret;
     }
 
-  nxsem_init(&g_lpadc2priv.exclsem, 0, 1);
+  nxmutex_init(&g_lpadc2priv.lock);
 #endif
 #if defined (CONFIG_CXD56_LPADC3) || defined (CONFIG_CXD56_LPADC_ALL)
   ret = register_driver("/dev/lpadc3", &g_adcops, 0666, &g_lpadc3priv);
@@ -1140,7 +1138,7 @@ int cxd56_adcinitialize(void)
       return ret;
     }
 
-  nxsem_init(&g_lpadc3priv.exclsem, 0, 1);
+  nxmutex_init(&g_lpadc3priv.lock);
 #endif
 #ifdef CONFIG_CXD56_HPADC0
   ret = register_driver("/dev/hpadc0", &g_adcops, 0666, &g_hpadc0priv);
@@ -1150,7 +1148,7 @@ int cxd56_adcinitialize(void)
       return ret;
     }
 
-  nxsem_init(&g_hpadc0priv.exclsem, 0, 1);
+  nxmutex_init(&g_hpadc0priv.lock);
 #endif
 #ifdef CONFIG_CXD56_HPADC1
   ret = register_driver("/dev/hpadc1", &g_adcops, 0666, &g_hpadc1priv);
@@ -1160,7 +1158,7 @@ int cxd56_adcinitialize(void)
       return ret;
     }
 
-  nxsem_init(&g_hpadc1priv.exclsem, 0, 1);
+  nxmutex_init(&g_hpadc1priv.lock);
 #endif
 
   return ret;

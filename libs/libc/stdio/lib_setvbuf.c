@@ -125,7 +125,7 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
 
   /* Make sure that we have exclusive access to the stream */
 
-  lib_take_semaphore(stream);
+  lib_take_lock(stream);
 
   /* setvbuf() may only be called AFTER the stream has been opened and
    * BEFORE any operations have been performed on the stream.
@@ -136,7 +136,7 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
   if (stream->fs_fd < 0)
     {
       errcode = EBADF;
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 
   /* Return EBUSY if operations have already been performed on the buffer.
@@ -149,7 +149,7 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
   if (stream->fs_bufpos != stream->fs_bufstart)
     {
       errcode = EBUSY;
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 
   /* Initialize by clearing related flags.  We try to avoid any permanent
@@ -196,7 +196,7 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
                 if (newbuf == NULL)
                   {
                     errcode = ENOMEM;
-                    goto errout_with_semaphore;
+                    goto errout_with_lock;
                   }
               }
           }
@@ -246,11 +246,11 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
 
 reuse_buffer:
   stream->fs_flags    = flags;
-  lib_give_semaphore(stream);
+  lib_give_lock(stream);
   return OK;
 
-errout_with_semaphore:
-  lib_give_semaphore(stream);
+errout_with_lock:
+  lib_give_lock(stream);
 
 errout:
   set_errno(errcode);

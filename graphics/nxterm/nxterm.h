@@ -29,7 +29,7 @@
 
 #include <stdint.h>
 
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxtk.h>
@@ -110,7 +110,7 @@ struct nxterm_state_s
   FAR const struct nxterm_operations_s *ops; /* Window operations */
   FAR void *handle;                          /* The window handle */
   FAR struct nxterm_window_s wndo;           /* Describes the window and font */
-  sem_t exclsem;                             /* Forces mutually exclusive access */
+  mutex_t lock;                              /* Forces mutually exclusive access */
 #ifdef CONFIG_DEBUG_GRAPHICS
   pid_t holder;                              /* Deadlock avoidance */
 #endif
@@ -172,16 +172,6 @@ extern const struct file_operations g_nxterm_drvrops;
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/* Semaphore helpers */
-
-#ifdef CONFIG_DEBUG_GRAPHICS
-int nxterm_semwait(FAR struct nxterm_state_s *priv);
-int nxterm_sempost(FAR struct nxterm_state_s *priv);
-#else
-#  define nxterm_semwait(p) nxsem_wait(&p->exclsem)
-#  define nxterm_sempost(p) nxsem_post(&p->exclsem)
-#endif
 
 /* Common device registration/un-registration */
 

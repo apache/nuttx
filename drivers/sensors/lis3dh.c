@@ -48,6 +48,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/random.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/sensors/lis3dh.h>
 #include <nuttx/sensors/ioctl.h>
@@ -75,7 +76,7 @@ struct lis3dh_dev_s
   sem_t readsem;                        /* Read notification semaphore */
   uint8_t fifobuf[LIS3DH_FIFOBUF_SIZE]; /* Raw FIFO buffer */
   struct lis3dh_sensor_data_s queue[LIS3DH_QUEUE_MAX];
-  sem_t queuesem;                       /* Queue exclusive lock */
+  mutex_t queuelock;                    /* Queue exclusive lock */
   uint8_t queue_rpos;                   /* Queue read position */
   uint8_t queue_wpos;                   /* Queue write position */
   uint8_t queue_count;                  /* Number of elements in the queue */
@@ -266,45 +267,6 @@ static int lis3dh_ident(FAR struct lis3dh_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: lis3dh_queue_lock
- *
- * Description:
- *   Locks exclusive access to the ring buffer queue
- *
- * Input Parameters:
- *   dev - Pointer to device driver instance
- *
- ****************************************************************************/
-
-static void lis3dh_queue_lock(FAR struct lis3dh_dev_s *dev)
-{
-  int ret;
-
-  ret = nxsem_wait(&dev->queuesem);
-  if (ret < 0)
-    {
-      snerr("ERROR: queuesem wait error: %d\n", ret);
-      return;
-    }
-}
-
-/****************************************************************************
- * Name: lis3dh_queue_unlock
- *
- * Description:
- *   Unlocks exclusive access to the ring buffer queue
- *
- * Input Parameters:
- *   dev - Pointer to device driver instance
- *
- ****************************************************************************/
-
-static void lis3dh_queue_unlock(FAR struct lis3dh_dev_s *dev)
-{
-  nxsem_post(&dev->queuesem);
-}
-
-/****************************************************************************
  * Name: lis3dh_queue_push
  *
  * Description:
@@ -318,10 +280,10 @@ static void lis3dh_queue_unlock(FAR struct lis3dh_dev_s *dev)
 static int lis3dh_queue_push(FAR struct lis3dh_dev_s *dev,
                              struct lis3dh_sensor_data_s *data)
 {
-  lis3dh_queue_lock(dev);
+  nxmutex_lock(&dev->queuelock);
   if (dev->queue_count >= LIS3DH_QUEUE_MAX)
     {
-      lis3dh_queue_unlock(dev);
+      nxmutex_unlock(&dev->queuelock);
       return -ENOMEM;
     }
 
@@ -329,7 +291,7 @@ static int lis3dh_queue_push(FAR struct lis3dh_dev_s *dev,
   dev->queue[dev->queue_wpos % LIS3DH_QUEUE_MAX] = *data;
 
   dev->queue_count++;
-  lis3dh_queue_unlock(dev);
+  nxmutex_unlock(&dev->queuelock);
 
   return OK;
 }
@@ -352,10 +314,10 @@ static int lis3dh_queue_push(FAR struct lis3dh_dev_s *dev,
 static int lis3dh_queue_pop(FAR struct lis3dh_dev_s *dev,
                             struct lis3dh_sensor_data_s *data)
 {
-  lis3dh_queue_lock(dev);
+  nxmutex_lock(&dev->queuelock);
   if (dev->queue_count == 0)
     {
-      lis3dh_queue_unlock(dev);
+      nxmutex_unlock(&dev->queuelock);
       return -EAGAIN;
     }
 
@@ -364,8 +326,7 @@ static int lis3dh_queue_pop(FAR struct lis3dh_dev_s *dev,
 
   dev->queue_count--;
 
-  lis3dh_queue_unlock(dev);
-
+  nxmutex_unlock(&dev->queuelock);
   return OK;
 }
 
@@ -1003,9 +964,9 @@ int lis3dh_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   priv->work.worker = NULL;
   priv->queue_count = 0;
 
-  /* Initialize queue semaphore */
+  /* Initialize queue mutex */
 
-  nxsem_init(&priv->queuesem, 0, 1);
+  nxmutex_init(&priv->queuelock);
 
   /* Initialize read notification semaphore */
 
@@ -1024,7 +985,7 @@ int lis3dh_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
     {
       snerr("ERROR: Failed to register driver: %d\n", ret);
       kmm_free(priv);
-      nxsem_destroy(&priv->queuesem);
+      nxmutex_destroy(&priv->queuelock);
       nxsem_destroy(&priv->readsem);
       return ret;
     }

@@ -34,6 +34,7 @@
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/mutex.h>
 
 #include <sys/ioctl.h>
 #include <sys/timerfd.h>
@@ -61,7 +62,7 @@ typedef struct timerfd_waiter_sem_s
 
 struct timerfd_priv_s
 {
-  sem_t         exclsem;        /* Enforces device exclusive access */
+  mutex_t       lock;           /* Enforces device exclusive access */
   timerfd_waiter_sem_t *rdsems; /* List of blocking readers */
   int           clock;          /* Clock to use as the timing base */
   int           delay;          /* If non-zero, used to reset repetitive
@@ -145,7 +146,8 @@ static FAR struct timerfd_priv_s *timerfd_allocdev(void)
     {
       /* Initialize the private structure */
 
-      nxsem_init(&dev->exclsem, 0, 0);
+      nxmutex_init(&dev->lock);
+      nxmutex_lock(&dev->lock);
     }
 
   return dev;
@@ -155,7 +157,7 @@ static void timerfd_destroy(FAR struct timerfd_priv_s *dev)
 {
   wd_cancel(&dev->wdog);
   work_cancel(TIMER_FD_WORK, &dev->work);
-  nxsem_destroy(&dev->exclsem);
+  nxmutex_destroy(&dev->lock);
   kmm_free(dev);
 }
 
@@ -190,7 +192,7 @@ static int timerfd_open(FAR struct file *filep)
 
   /* Get exclusive access to the device structures */
 
-  ret = nxsem_wait(&priv->exclsem);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -212,7 +214,7 @@ static int timerfd_open(FAR struct file *filep)
       ret = OK;
     }
 
-  nxsem_post(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -228,7 +230,7 @@ static int timerfd_close(FAR struct file *filep)
 
   /* Get exclusive access to the device structures */
 
-  ret = nxsem_wait(&priv->exclsem);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -245,7 +247,7 @@ static int timerfd_close(FAR struct file *filep)
       /* Just decrement the reference count and release the semaphore */
 
       priv->crefs--;
-      nxsem_post(&priv->exclsem);
+      nxmutex_unlock(&priv->lock);
       return OK;
     }
 
@@ -258,7 +260,7 @@ static int timerfd_close(FAR struct file *filep)
 
   unregister_driver(devpath);
 
-  DEBUGASSERT(priv->exclsem.semcount == 0);
+  DEBUGASSERT(nxmutex_is_locked(&priv->lock));
   timerfd_release_minor(priv->minor);
   timerfd_destroy(priv);
 
@@ -273,7 +275,7 @@ static int timerfd_blocking_io(FAR struct timerfd_priv_s *dev,
   sem->next = *slist;
   *slist = sem;
 
-  nxsem_post(&dev->exclsem);
+  nxmutex_unlock(&dev->lock);
 
   /* Wait for timerfd to notify */
 
@@ -282,10 +284,10 @@ static int timerfd_blocking_io(FAR struct timerfd_priv_s *dev,
   if (ret < 0)
     {
       /* Interrupted wait, unregister semaphore
-       * TODO ensure that exclsem wait does not fail (ECANCELED)
+       * TODO ensure that lock wait does not fail (ECANCELED)
        */
 
-      nxsem_wait_uninterruptible(&dev->exclsem);
+      nxmutex_lock(&dev->lock);
 
       timerfd_waiter_sem_t *cur_sem = *slist;
 
@@ -305,11 +307,11 @@ static int timerfd_blocking_io(FAR struct timerfd_priv_s *dev,
             }
         }
 
-      nxsem_post(&dev->exclsem);
+      nxmutex_unlock(&dev->lock);
       return ret;
     }
 
-  return nxsem_wait(&dev->exclsem);
+  return nxmutex_lock(&dev->lock);
 }
 
 static ssize_t timerfd_read(FAR struct file *filep, FAR char *buffer,
@@ -325,7 +327,7 @@ static ssize_t timerfd_read(FAR struct file *filep, FAR char *buffer,
       return -EINVAL;
     }
 
-  ret = nxsem_wait(&dev->exclsem);
+  ret = nxmutex_lock(&dev->lock);
   if (ret < 0)
     {
       return ret;
@@ -337,7 +339,7 @@ static ssize_t timerfd_read(FAR struct file *filep, FAR char *buffer,
     {
       if (filep->f_oflags & O_NONBLOCK)
         {
-          nxsem_post(&dev->exclsem);
+          nxmutex_unlock(&dev->lock);
           return -EAGAIN;
         }
 
@@ -371,7 +373,7 @@ static ssize_t timerfd_read(FAR struct file *filep, FAR char *buffer,
 
   spin_unlock_irqrestore(&dev->splock, intflags);
 
-  nxsem_post(&dev->exclsem);
+  nxmutex_unlock(&dev->lock);
   return sizeof(timerfd_t);
 }
 
@@ -384,7 +386,7 @@ static int timerfd_poll(FAR struct file *filep, FAR struct pollfd *fds,
   int ret;
   int i;
 
-  ret = nxsem_wait(&dev->exclsem);
+  ret = nxmutex_lock(&dev->lock);
   if (ret < 0)
     {
       return ret;
@@ -440,7 +442,7 @@ static int timerfd_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 out:
-  nxsem_post(&dev->exclsem);
+  nxmutex_unlock(&dev->lock);
   return ret;
 }
 #endif
@@ -450,7 +452,7 @@ static void timerfd_timeout_work(FAR void *arg)
   FAR struct timerfd_priv_s *dev = (FAR struct timerfd_priv_s *)arg;
   int ret;
 
-  ret = nxsem_wait_uninterruptible(&dev->exclsem);
+  ret = nxmutex_lock(&dev->lock);
   if (ret < 0)
     {
       wd_cancel(&dev->wdog);
@@ -473,8 +475,7 @@ static void timerfd_timeout_work(FAR void *arg)
     }
 
   dev->rdsems = NULL;
-
-  nxsem_post(&dev->exclsem);
+  nxmutex_unlock(&dev->lock);
 }
 
 static void timerfd_timeout(wdparm_t idev)
@@ -566,7 +567,7 @@ int timerfd_create(int clockid, int flags)
 
   /* Device is ready for use */
 
-  nxsem_post(&new_dev->exclsem);
+  nxmutex_unlock(&new_dev->lock);
 
   /* Try open new device */
 

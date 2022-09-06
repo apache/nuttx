@@ -34,6 +34,7 @@
 #include <stdbool.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/i2c/i2c_master.h>
@@ -188,7 +189,7 @@ struct adc_dev_s
 
   uint8_t                     ad_ocount;     /* The number of times the device has been opened */
   uint8_t                     ad_nrxwaiters; /* Number of threads waiting to enqueue a message */
-  sem_t                       ad_closesem;   /* Locks out new opens while close is in progress */
+  mutex_t                     ad_closelock;  /* Locks out new opens while close is in progress */
   sem_t                       ad_recvsem;    /* Used to wakeup user waiting for space in ad_recv.buffer */
   struct adc_fifo_s           ad_recv;       /* Describes receive FIFO */
   bool                        ad_isovr;      /* Flag to indicate an ADC overrun */

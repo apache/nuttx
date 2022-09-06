@@ -42,6 +42,7 @@
 #include <nuttx/config.h>
 #include <nuttx/signal.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/mutex.h>
 
 /****************************************************************************
  * Public Types
@@ -177,7 +178,7 @@ struct ft80x_dev_s
 
   struct work_s intwork;                  /* Support back end interrupt processing */
   uint32_t frequency;                     /* Effective frequency */
-  sem_t exclsem;                          /* Mutual exclusion semaphore */
+  mutex_t lock;                           /* Mutual exclusion mutex */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   uint8_t crefs;                          /* Number of open references */
   bool unlinked;                          /* True if the driver has been unlinked */

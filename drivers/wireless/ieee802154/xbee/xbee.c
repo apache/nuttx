@@ -960,10 +960,10 @@ static void xbee_process_txstatus(FAR struct xbee_priv_s *priv,
 static void xbee_notify(FAR struct xbee_priv_s *priv,
                         FAR struct ieee802154_primitive_s *primitive)
 {
-  while (nxsem_wait(&priv->primitive_sem) < 0);
+  while (nxmutex_lock(&priv->primitive_lock) < 0);
 
   sq_addlast((FAR sq_entry_t *)primitive, &priv->primitive_queue);
-  nxsem_post(&priv->primitive_sem);
+  nxmutex_unlock(&priv->primitive_lock);
 
   if (work_available(&priv->notifwork))
     {
@@ -990,10 +990,10 @@ static void xbee_notify_worker(FAR void *arg)
 
   DEBUGASSERT(priv != NULL);
 
-  while (nxsem_wait(&priv->primitive_sem) < 0);
+  while (nxmutex_lock(&priv->primitive_lock) < 0);
   primitive =
     (FAR struct ieee802154_primitive_s *)sq_remfirst(&priv->primitive_queue);
-  nxsem_post(&priv->primitive_sem);
+  nxmutex_unlock(&priv->primitive_lock);
 
   while (primitive != NULL)
     {
@@ -1063,11 +1063,11 @@ static void xbee_notify_worker(FAR void *arg)
 
       /* Get the next primitive then loop */
 
-      while (nxsem_wait(&priv->primitive_sem) < 0);
+      while (nxmutex_lock(&priv->primitive_lock) < 0);
 
       primitive = (FAR struct ieee802154_primitive_s *)
                   sq_remfirst(&priv->primitive_queue);
-      nxsem_post(&priv->primitive_sem);
+      nxmutex_unlock(&priv->primitive_lock);
     }
 }
 
@@ -1246,9 +1246,9 @@ XBEEHANDLE xbee_init(FAR struct spi_dev_s *spi,
   priv->lower = lower;
   priv->spi   = spi;
 
-  nxsem_init(&priv->primitive_sem, 0, 1);
-  nxsem_init(&priv->atquery_sem, 0, 1);
-  nxsem_init(&priv->tx_sem, 0, 1);
+  nxmutex_init(&priv->primitive_lock);
+  nxmutex_init(&priv->atquery_lock);
+  nxmutex_init(&priv->tx_lock);
   nxsem_init(&priv->txdone_sem, 0, 0);
   nxsem_set_protocol(&priv->txdone_sem, SEM_PRIO_NONE);
 
@@ -1527,7 +1527,7 @@ int xbee_atquery(FAR struct xbee_priv_s *priv, FAR const char *atcommand)
 
   /* Only allow one query at a time */
 
-  ret = nxsem_wait(&priv->atquery_sem);
+  ret = nxmutex_lock(&priv->atquery_lock);
   if (ret < 0)
     {
       return ret;
@@ -1574,7 +1574,7 @@ int xbee_atquery(FAR struct xbee_priv_s *priv, FAR const char *atcommand)
           wd_cancel(&priv->atquery_wd);
           priv->querycmd[0] = 0;
           priv->querycmd[1] = 0;
-          nxsem_post(&priv->atquery_sem);
+          nxmutex_unlock(&priv->atquery_lock);
           return ret;
         }
 
@@ -1589,8 +1589,7 @@ int xbee_atquery(FAR struct xbee_priv_s *priv, FAR const char *atcommand)
     }
   while (!priv->querydone);
 
-  nxsem_post(&priv->atquery_sem);
-
+  nxmutex_unlock(&priv->atquery_lock);
   return OK;
 }
 

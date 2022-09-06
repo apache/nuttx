@@ -28,7 +28,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/list.h>
 
 #include <stdbool.h>
@@ -144,7 +144,7 @@ struct battery_charger_dev_s
 
   FAR const struct battery_charger_operations_s *ops; /* Battery operations */
 
-  sem_t batsem;  /* Enforce mutually exclusive access */
+  mutex_t batlock;  /* Enforce mutually exclusive access */
 
   struct list_node flist;
 

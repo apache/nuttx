@@ -25,7 +25,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/power/pm.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/sched.h>
 
 #include "pm.h"
@@ -46,7 +46,7 @@
 
 struct pm_global_s g_pmglobals =
 {
-  SEM_INITIALIZER(1)
+  NXMUTEX_INITIALIZER
 };
 
 /****************************************************************************

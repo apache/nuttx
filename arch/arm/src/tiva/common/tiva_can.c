@@ -155,7 +155,7 @@ struct tiva_canmod_s
 
   /* Mutex for threads accessing the interface registers */
 
-  mutex_t   thd_iface_mtx;
+  mutex_t   thd_iface_lock;
 
   /* Interface registers base address for threads threads */
 
@@ -169,7 +169,7 @@ struct tiva_canmod_s
    * The TX FIFO should never be resized at runtime.
    */
 
-  mutex_t   fifo_mtx;
+  mutex_t   fifo_lock;
 
   /* All RX FIFOs + 1 TX FIFO */
 
@@ -479,7 +479,7 @@ static int tivacan_setup(struct can_dev_s *dev)
 
   tivacan_ioctl(dev, CANIOC_SET_BITTIMING, (unsigned long)&default_timing);
 
-  nxmutex_lock(&canmod->thd_iface_mtx);
+  nxmutex_lock(&canmod->thd_iface_lock);
 
   /* Ensure a consistent state */
 
@@ -542,7 +542,7 @@ static int tivacan_setup(struct can_dev_s *dev)
               & TIVA_CANIF_CRQ_BUSY);
     }
 
-  nxmutex_unlock(&canmod->thd_iface_mtx);
+  nxmutex_unlock(&canmod->thd_iface_lock);
 
   /* Register the ISR */
 
@@ -735,7 +735,7 @@ int tivacan_rxhandler(int argc, char** argv)
   while (true)
     {
       nxsem_wait(&canmod->rxsem);
-      nxmutex_lock(&canmod->thd_iface_mtx);
+      nxmutex_lock(&canmod->thd_iface_lock);
 
       /* Process the received message(s). Since hardware RX FIFOS are used
        * and new messages are received into the mailbox with the lowest
@@ -847,7 +847,7 @@ int tivacan_rxhandler(int argc, char** argv)
 #endif
         }
 
-        nxmutex_unlock(&canmod->thd_iface_mtx);
+        nxmutex_unlock(&canmod->thd_iface_lock);
 
 #ifdef CONFIG_CAN_ERRORS
         if (ret == OK)
@@ -1199,7 +1199,7 @@ static int tivacan_send(struct can_dev_s *dev, struct can_msg_s *msg)
       return -EBUSY;
     }
 
-  nxmutex_lock(&canmod->thd_iface_mtx);
+  nxmutex_lock(&canmod->thd_iface_lock);
 
   /* Protect the message object due the minute chance that the mailbox was
    * previously used for a remote frame and could receive messages, causing
@@ -1291,7 +1291,7 @@ static int tivacan_send(struct can_dev_s *dev, struct can_msg_s *msg)
   while (getreg32(canmod->thd_iface_base + TIVA_CANIF_OFFSET_CRQ)
           & TIVA_CANIF_CRQ_BUSY);
 
-  nxmutex_unlock(&canmod->thd_iface_mtx);
+  nxmutex_unlock(&canmod->thd_iface_lock);
 
   /* Move to the next message in the h/w TX FIFO.
    * Tell the upper-half the message has been submitted... this recurses
@@ -1972,7 +1972,7 @@ int tivacan_alloc_fifo(struct can_dev_s *dev, int depth)
   int free_fifo_idx = -1;
   struct tiva_canmod_s *canmod = dev->cd_priv;
 
-  nxmutex_lock(&canmod->fifo_mtx);
+  nxmutex_lock(&canmod->fifo_lock);
 
   /* Mailboxes allocated other RX FIFOs or the TX FIFO */
 
@@ -2007,7 +2007,7 @@ int tivacan_alloc_fifo(struct can_dev_s *dev, int depth)
 
   if (numclaimed != depth)
     {
-      nxmutex_unlock(&canmod->fifo_mtx);
+      nxmutex_unlock(&canmod->fifo_lock);
       return -ENOSPC;
     }
   else
@@ -2017,7 +2017,7 @@ int tivacan_alloc_fifo(struct can_dev_s *dev, int depth)
       claimed &= 0xffffffff >> (32 - i);
       canmod->fifos[free_fifo_idx] = claimed;
 
-      nxmutex_unlock(&canmod->fifo_mtx);
+      nxmutex_unlock(&canmod->fifo_lock);
       return free_fifo_idx;
     }
 }
@@ -2044,7 +2044,7 @@ static void tivacan_free_fifo(struct can_dev_s *dev,
                               tiva_can_fifo_t *fifo)
 {
   struct tiva_canmod_s * canmod = dev->cd_priv;
-  nxmutex_lock(&canmod->thd_iface_mtx);
+  nxmutex_lock(&canmod->thd_iface_lock);
 
   for (int i = 0; i < TIVA_CAN_NUM_MBOXES; ++i)
     {
@@ -2056,7 +2056,7 @@ static void tivacan_free_fifo(struct can_dev_s *dev,
         }
     }
 
-  nxmutex_unlock(&canmod->thd_iface_mtx);
+  nxmutex_unlock(&canmod->thd_iface_lock);
 }
 
 /****************************************************************************
@@ -2321,8 +2321,7 @@ static int  tivacan_initfilter(struct can_dev_s *dev,
         }
     }
 
-  nxmutex_unlock(&canmod->thd_iface_mtx);
-
+  nxmutex_unlock(&canmod->thd_iface_lock);
   return OK;
 }
 
@@ -2380,14 +2379,14 @@ int tiva_can_initialize(char *devpath, int modnum)
 
   /* Initialize concurrancy objects for accessing interfaces */
 
-  ret = nxmutex_init(&canmod->thd_iface_mtx);
+  ret = nxmutex_init(&canmod->thd_iface_lock);
   if (ret < 0)
     {
       canerr("ERROR: failed to initialize mutex: %d\n", ret);
       return ret;
     }
 
-  ret = nxmutex_init(&canmod->fifo_mtx);
+  ret = nxmutex_init(&canmod->fifo_lock);
   if (ret < 0)
     {
       canerr("ERROR: failed to initialize mutex: %d\n", ret);

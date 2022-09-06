@@ -120,7 +120,7 @@ static int foc_open(FAR struct file *filep)
 
   /* If the port is the middle of closing, wait until the close is finished */
 
-  ret = nxsem_wait(&dev->closesem);
+  ret = nxmutex_lock(&dev->closelock);
   if (ret >= 0)
     {
       /* Increment the count of references to the device.  If this the first
@@ -158,7 +158,7 @@ static int foc_open(FAR struct file *filep)
             }
         }
 
-      nxsem_post(&dev->closesem);
+      nxmutex_unlock(&dev->closelock);
     }
 
 errout:
@@ -179,7 +179,7 @@ static int foc_close(FAR struct file *filep)
   FAR struct foc_dev_s *dev   = inode->i_private;
   int                   ret   = 0;
 
-  ret = nxsem_wait(&dev->closesem);
+  ret = nxmutex_lock(&dev->closelock);
   if (ret >= 0)
     {
       /* Decrement the references to the driver. If the reference count will
@@ -189,7 +189,7 @@ static int foc_close(FAR struct file *filep)
       if (dev->ocount > 1)
         {
           dev->ocount--;
-          nxsem_post(&dev->closesem);
+          nxmutex_unlock(&dev->closelock);
         }
       else
         {
@@ -200,7 +200,7 @@ static int foc_close(FAR struct file *filep)
           /* Shutdown the device */
 
           ret = foc_shutdown(dev);
-          nxsem_post(&dev->closesem);
+          nxmutex_unlock(&dev->closelock);
         }
     }
 
@@ -846,9 +846,9 @@ int foc_register(FAR const char *path, FAR struct foc_dev_s *dev)
       goto errout;
     }
 
-  /* Initialize semaphores */
+  /* Initialize mutex & semaphores */
 
-  nxsem_init(&dev->closesem, 0, 1);
+  nxmutex_init(&dev->closelock);
   nxsem_init(&dev->statesem, 0, 0);
   nxsem_set_protocol(&dev->statesem, SEM_PRIO_NONE);
 
@@ -857,7 +857,7 @@ int foc_register(FAR const char *path, FAR struct foc_dev_s *dev)
   ret = register_driver(path, &g_foc_fops, 0666, dev);
   if (ret < 0)
     {
-      nxsem_destroy(&dev->closesem);
+      nxmutex_destroy(&dev->closelock);
       nxsem_destroy(&dev->statesem);
       goto errout;
     }

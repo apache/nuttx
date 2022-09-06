@@ -60,24 +60,6 @@ static struct smartfs_mountpt_s *g_mounthead = NULL;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: smartfs_semtake
- ****************************************************************************/
-
-int smartfs_semtake(struct smartfs_mountpt_s *fs)
-{
-  return nxsem_wait_uninterruptible(fs->fs_sem);
-}
-
-/****************************************************************************
- * Name: smartfs_semgive
- ****************************************************************************/
-
-void smartfs_semgive(struct smartfs_mountpt_s *fs)
-{
-  nxsem_post(fs->fs_sem);
-}
-
-/****************************************************************************
  * Name: smartfs_rdle16
  *
  * Description:

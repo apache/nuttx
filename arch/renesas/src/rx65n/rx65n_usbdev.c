@@ -298,8 +298,6 @@ uint8_t g_buffer[64] ;
 # define rx65n_putreg16(val,addr) putreg16(val,addr)
 # define rx65n_putreg32(val,addr) putreg32(val,addr)
 
-#define rx65n_usbdev_givesem(s) nxsem_post(s);
-
 /* Request queue operations *************************************************/
 
 FAR struct rx65n_req_s *rx65n_rqdequeue(FAR struct rx65n_ep_s

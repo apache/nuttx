@@ -30,6 +30,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/mutex.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/aht10.h>
@@ -68,7 +69,7 @@ struct aht10_dev_s
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   int16_t crefs;                /* Number of open references */
 #endif
-  sem_t devsem;
+  mutex_t devlock;
 };
 
 /****************************************************************************
@@ -338,28 +339,17 @@ static int aht10_open(FAR struct file *filep)
 {
   FAR struct inode       *inode = filep->f_inode;
   FAR struct aht10_dev_s *priv  = inode->i_private;
-  int ret;
 
   /* Get exclusive access */
 
-  do
-    {
-      ret = nxsem_wait(&priv->devsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxmutex_lock(&priv->devlock);
 
   /* Increment the count of open references on the driver */
 
   priv->crefs++;
   DEBUGASSERT(priv->crefs > 0);
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return OK;
 }
 #endif
@@ -377,21 +367,10 @@ static int aht10_close(FAR struct file *filep)
 {
   FAR struct inode       *inode = filep->f_inode;
   FAR struct aht10_dev_s *priv  = inode->i_private;
-  int ret;
 
   /* Get exclusive access */
 
-  do
-    {
-      ret = nxsem_wait(&priv->devsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxmutex_lock(&priv->devlock);
 
   /* Decrement the count of open references on the driver */
 
@@ -404,12 +383,12 @@ static int aht10_close(FAR struct file *filep)
 
   if (priv->crefs <= 0 && priv->unlinked)
     {
-      nxsem_destroy(&priv->devsem);
+      nxmutex_destroy(&priv->devlock);
       kmm_free(priv);
       return OK;
     }
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return OK;
 }
 #endif
@@ -430,17 +409,7 @@ static ssize_t aht10_read(FAR struct file *filep,
 
   /* Get exclusive access */
 
-  do
-    {
-      ret = nxsem_wait(&priv->devsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxmutex_lock(&priv->devlock);
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   if (priv->unlinked)
@@ -449,7 +418,7 @@ static ssize_t aht10_read(FAR struct file *filep,
        * sensor use on hot swappable I2C bus.
        */
 
-      nxsem_post(&priv->devsem);
+      nxmutex_unlock(&priv->devlock);
       return -ENODEV;
     }
 #endif
@@ -470,7 +439,7 @@ static ssize_t aht10_read(FAR struct file *filep,
         }
     }
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return length;
 }
 
@@ -496,17 +465,7 @@ static int aht10_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access */
 
-  do
-    {
-      ret = nxsem_wait(&priv->devsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxmutex_lock(&priv->devlock);
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   if (priv->unlinked)
@@ -515,7 +474,7 @@ static int aht10_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
        * sensor use on hot swappable I2C bus.
        */
 
-      nxsem_post(&priv->devsem);
+      nxmutex_unlock(&priv->devlock);
       return -ENODEV;
     }
 #endif
@@ -559,7 +518,7 @@ static int aht10_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return ret;
 }
 
@@ -578,23 +537,13 @@ static int aht10_unlink(FAR struct inode *inode)
 
   /* Get exclusive access */
 
-  do
-    {
-      ret = nxsem_wait(&priv->devsem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxmutex_lock(&priv->devlock);
 
   /* Are there open references to the driver data structure? */
 
   if (priv->crefs <= 0)
     {
-      nxsem_destroy(&priv->devsem);
+      nxmutex_destroy(&priv->devlock);
       kmm_free(priv);
       return OK;
     }
@@ -604,7 +553,7 @@ static int aht10_unlink(FAR struct inode *inode)
    */
 
   priv->unlinked = true;
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return ret;
 }
 #endif
@@ -651,7 +600,7 @@ int aht10_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   priv->i2c  = i2c;
   priv->addr = addr;
 
-  nxsem_init(&priv->devsem, 0, 1);
+  nxmutex_init(&priv->devlock);
 
   ret = aht10_initialize(priv);
   if (ret < 0)

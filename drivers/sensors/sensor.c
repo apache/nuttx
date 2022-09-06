@@ -543,7 +543,7 @@ static int sensor_open(FAR struct file *filep)
   if (user == NULL)
     {
       ret = -ENOMEM;
-      goto errout_with_sem;
+      goto errout_with_lock;
     }
 
   if (lower->ops->open)
@@ -600,7 +600,7 @@ static int sensor_open(FAR struct file *filep)
   sensor_pollnotify(upper, POLLPRI);
 
   filep->f_priv = user;
-  goto errout_with_sem;
+  goto errout_with_lock;
 
 errout_with_open:
   if (lower->ops->close)
@@ -610,7 +610,7 @@ errout_with_open:
 
 errout_with_user:
   kmm_free(user);
-errout_with_sem:
+errout_with_lock:
   nxrmutex_unlock(&upper->lock);
   return ret;
 }

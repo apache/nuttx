@@ -29,7 +29,7 @@
 
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/ioexpander/ioexpander.h>
 #include <nuttx/ioexpander/pcf8574.h>
@@ -129,7 +129,7 @@ struct pcf8574_dev_s
                                         * expander. */
   FAR struct pcf8574_config_s *config; /* Board configuration data */
   FAR struct i2c_master_s *i2c;        /* Saved I2C driver instance */
-  sem_t exclsem;                       /* Mutual exclusion */
+  mutex_t lock;                        /* Mutual exclusion */
   uint8_t inpins;                      /* Set of input pins */
   uint8_t outstate;                    /* State of all output pins */
 

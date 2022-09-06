@@ -33,7 +33,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/spi/spi.h>
 
 #include <arch/board/board.h>
@@ -368,7 +368,7 @@ struct str71x_spidev_s
   bool             initialized; /* Initialize port only once! */
   uint32_t         spibase;     /* BSPIn base address */
   uint16_t         csbit;       /* BSPIn SS bit int GPIO0 */
-  sem_t            exclsem;     /* Supports mutually exclusive access */
+  mutex_t          lock;        /* Supports mutually exclusive access */
 };
 
 /****************************************************************************
@@ -429,7 +429,7 @@ static struct str71x_spidev_s g_spidev0 =
   },
   .spibase = STR71X_BSPI0_BASE,
   .csbit   = ENC_GPIO0_CS,
-  .exclsem = SEM_INITIALIZER(1)
+  .lock = NXMUTEX_INITIALIZER
 };
 #endif
 
@@ -442,7 +442,7 @@ static struct str71x_spidev_s g_spidev1 =
   },
   .spibase = STR71X_BSPI1_BASE,
   .csbit   = MMCSD_GPIO0_CS,
-  .exclsem = SEM_INITIALIZER(1)
+  .lock = NXMUTEX_INITIALIZER
 };
 #endif
 
@@ -580,11 +580,11 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
 
   if (lock)
     {
-      ret = nxsem_wait_uninterruptible(&priv->exclsem);
+      ret = nxmutex_lock(&priv->lock);
     }
   else
     {
-      ret = nxsem_post(&priv->exclsem);
+      ret = nxmutex_unlock(&priv->lock);
     }
 
   return ret;

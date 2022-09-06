@@ -26,6 +26,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/mutex.h>
 #include <sys/types.h>
 
 #include <stdint.h>
@@ -113,7 +114,7 @@ typedef uint8_t pipe_ndx_t;   /*  8-bit index */
 
 struct pipe_dev_s
 {
-  sem_t      d_bfsem;       /* Used to serialize access to d_buffer and indices */
+  mutex_t    d_bflock;      /* Used to serialize access to d_buffer and indices */
   sem_t      d_rdsem;       /* Empty buffer - Reader waits for data write */
   sem_t      d_wrsem;       /* Full buffer - Writer waits for data read */
   pipe_ndx_t d_wrndx;       /* Index in d_buffer to save next byte written */

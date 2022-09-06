@@ -146,7 +146,7 @@ void mrf24j40_dopoll_csma(FAR void *arg)
 
   /* Get exclusive access to the driver */
 
-  while (nxsem_wait(&dev->exclsem) < 0)
+  while (nxmutex_lock(&dev->lock) < 0)
     {
     }
 
@@ -172,7 +172,7 @@ void mrf24j40_dopoll_csma(FAR void *arg)
         }
     }
 
-  nxsem_post(&dev->exclsem);
+  nxmutex_unlock(&dev->lock);
 }
 
 /****************************************************************************
@@ -205,7 +205,7 @@ void mrf24j40_dopoll_gts(FAR void *arg)
 
   /* Get exclusive access to the driver */
 
-  while (nxsem_wait(&dev->exclsem) < 0)
+  while (nxmutex_lock(&dev->lock) < 0)
     {
     }
 
@@ -228,7 +228,7 @@ void mrf24j40_dopoll_gts(FAR void *arg)
         }
     }
 
-  nxsem_post(&dev->exclsem);
+  nxmutex_unlock(&dev->lock);
 }
 
 /****************************************************************************
@@ -437,7 +437,7 @@ FAR struct ieee802154_radio_s *
 
   /* Allow exclusive access to the privmac struct */
 
-  nxsem_init(&dev->exclsem, 0, 1);
+  nxmutex_init(&dev->lock);
 
   dev->radio.bind         = mrf24j40_bind;
   dev->radio.reset        = mrf24j40_reset;

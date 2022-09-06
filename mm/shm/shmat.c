@@ -119,7 +119,7 @@ FAR void *shmat(int shmid, FAR const void *shmaddr, int shmflg)
 
   /* Get exclusive access to the region data structure */
 
-  ret = nxsem_wait(&region->sr_sem);
+  ret = nxmutex_lock(&region->sr_lock);
   if (ret < 0)
     {
       shmerr("ERROR: nxsem_wait failed: %d\n", ret);
@@ -134,7 +134,7 @@ FAR void *shmat(int shmid, FAR const void *shmaddr, int shmflg)
     {
       shmerr("ERROR: gran_alloc() failed\n");
       ret = -ENOMEM;
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 
   /* Convert the region size to pages */
@@ -171,15 +171,15 @@ FAR void *shmat(int shmid, FAR const void *shmaddr, int shmflg)
 
   /* Release our lock on the entry */
 
-  nxsem_post(&region->sr_sem);
+  nxmutex_unlock(&region->sr_lock);
   return (FAR void *)vaddr;
 
 errout_with_vaddr:
   gran_free(group->tg_shm.gs_handle, (FAR void *)vaddr,
             region->sr_ds.shm_segsz);
 
-errout_with_semaphore:
-  nxsem_post(&region->sr_sem);
+errout_with_lock:
+  nxmutex_unlock(&region->sr_lock);
 
 errout_with_ret:
   set_errno(-ret);

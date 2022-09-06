@@ -31,6 +31,7 @@
 #include <pthread.h>
 
 #include <nuttx/mqueue.h>
+#include <nuttx/mutex.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/fs/ioctl.h>
 
@@ -1822,7 +1823,7 @@ struct wm8994_dev_s
   char                    mqname[16];       /* Our message queue name */
   pthread_t               threadid;         /* ID of our thread */
   uint32_t                bitrate;          /* Actual programmed bit rate */
-  sem_t                   pendsem;          /* Protect pendq */
+  mutex_t                 pendlock;         /* Protect pendq */
 #ifdef WM8994_USE_FFLOCK_INT
   struct work_s           work;             /* Interrupt work */
 #endif

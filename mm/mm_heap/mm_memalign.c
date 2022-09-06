@@ -115,11 +115,11 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 
   kasan_poison((FAR void *)rawchunk, mm_malloc_size((FAR void *)rawchunk));
 
-  /* We need to hold the MM semaphore while we muck with the chunks and
+  /* We need to hold the MM mutex while we muck with the chunks and
    * nodelist.
    */
 
-  ret = mm_takesemaphore(heap);
+  ret = mm_lock(heap);
   DEBUGASSERT(ret);
 
   /* Get the node associated with the allocation and the next node after
@@ -223,7 +223,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
       mm_shrinkchunk(heap, node, size);
     }
 
-  mm_givesemaphore(heap);
+  mm_unlock(heap);
 
   MM_ADD_BACKTRACE(heap, node);
 

@@ -105,7 +105,7 @@ int sem_unlink(FAR const char *name)
    * functioning as a directory and the directory is not empty.
    */
 
-  ret = inode_semtake();
+  ret = inode_lock();
   if (ret < 0)
     {
       errcode = -ret;
@@ -115,7 +115,7 @@ int sem_unlink(FAR const char *name)
   if (inode->i_child != NULL)
     {
       errcode = ENOTEMPTY;
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 
   /* Remove the old inode from the tree.  Because we hold a reference count
@@ -140,14 +140,14 @@ int sem_unlink(FAR const char *name)
    * reference, that can only occur if the semaphore is not in-use.
    */
 
-  inode_semgive();
+  inode_unlock();
   ret = sem_close((FAR sem_t *)inode->u.i_nsem);
   RELEASE_SEARCH(&desc);
   sched_unlock();
   return ret;
 
-errout_with_semaphore:
-  inode_semgive();
+errout_with_lock:
+  inode_unlock();
 
 errout_with_inode:
   inode_release(inode);

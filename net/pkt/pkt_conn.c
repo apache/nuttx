@@ -32,7 +32,7 @@
 #include <arch/irq.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -63,30 +63,11 @@ static struct pkt_conn_s g_pkt_connections[CONFIG_NET_PKT_CONNS];
 /* A list of all free packet socket connections */
 
 static dq_queue_t g_free_pkt_connections;
-static sem_t g_free_sem = SEM_INITIALIZER(1);
+static mutex_t g_free_lock = NXMUTEX_INITIALIZER;
 
 /* A list of all allocated packet socket connections */
 
 static dq_queue_t g_active_pkt_connections;
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: _pkt_semtake() and _pkt_semgive()
- *
- * Description:
- *   Take/give semaphore
- *
- ****************************************************************************/
-
-static inline void _pkt_semtake(FAR sem_t *sem)
-{
-  net_lockedwait_uninterruptible(sem);
-}
-
-#define _pkt_semgive(sem) nxsem_post(sem)
 
 /****************************************************************************
  * Public Functions
@@ -129,9 +110,9 @@ FAR struct pkt_conn_s *pkt_alloc(void)
   int i;
 #endif
 
-  /* The free list is protected by a semaphore (that behaves like a mutex). */
+  /* The free list is protected by a mutex. */
 
-  _pkt_semtake(&g_free_sem);
+  nxmutex_lock(&g_free_lock);
 #ifdef CONFIG_NET_ALLOC_CONNS
   if (dq_peek(&g_free_pkt_connections) == NULL)
     {
@@ -154,7 +135,7 @@ FAR struct pkt_conn_s *pkt_alloc(void)
       dq_addlast(&conn->sconn.node, &g_active_pkt_connections);
     }
 
-  _pkt_semgive(&g_free_sem);
+  nxmutex_unlock(&g_free_lock);
   return conn;
 }
 
@@ -169,11 +150,11 @@ FAR struct pkt_conn_s *pkt_alloc(void)
 
 void pkt_free(FAR struct pkt_conn_s *conn)
 {
-  /* The free list is protected by a semaphore (that behaves like a mutex). */
+  /* The free list is protected by a mutex. */
 
   DEBUGASSERT(conn->crefs == 0);
 
-  _pkt_semtake(&g_free_sem);
+  nxmutex_lock(&g_free_lock);
 
   /* Remove the connection from the active list */
 
@@ -186,7 +167,7 @@ void pkt_free(FAR struct pkt_conn_s *conn)
   /* Free the connection */
 
   dq_addlast(&conn->sconn.node, &g_free_pkt_connections);
-  _pkt_semgive(&g_free_sem);
+  nxmutex_unlock(&g_free_lock);
 }
 
 /****************************************************************************

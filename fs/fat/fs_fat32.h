@@ -33,7 +33,7 @@
 #include <time.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -864,7 +864,7 @@ struct fat_mountpt_s
   struct inode      *fs_blkdriver; /* The block driver inode that hosts the FAT32 fs */
   struct fat_file_s *fs_head;      /* A list to all files opened on this mountpoint */
 
-  sem_t    fs_sem;                 /* Used to assume thread-safe access */
+  mutex_t  fs_lock;                /* Used to assume thread-safe access */
   off_t    fs_hwsectorsize;        /* HW: Sector size reported by block driver */
   off_t    fs_hwnsectors;          /* HW: The number of sectors reported by the hardware */
   off_t    fs_fatbase;             /* Logical block of start of filesystem (past resd sectors) */
@@ -1017,11 +1017,6 @@ EXTERN uint16_t fat_getuint16(uint8_t *ptr);
 EXTERN uint32_t fat_getuint32(uint8_t *ptr);
 EXTERN void   fat_putuint16(uint8_t *ptr, uint16_t value16);
 EXTERN void   fat_putuint32(uint8_t *ptr, uint32_t value32);
-
-/* Manage the per-mount semaphore that protects access to shared resources */
-
-EXTERN int    fat_semtake(struct fat_mountpt_s *fs);
-EXTERN void   fat_semgive(struct fat_mountpt_s *fs);
 
 /* Get the current time for FAT creation and write times */
 

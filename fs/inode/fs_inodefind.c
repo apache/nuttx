@@ -55,7 +55,7 @@ int inode_find(FAR struct inode_search_s *desc)
    * references on the node.
    */
 
-  ret = inode_semtake();
+  ret = inode_lock();
   if (ret < 0)
     {
       return ret;
@@ -74,6 +74,6 @@ int inode_find(FAR struct inode_search_s *desc)
       node->i_crefs++;
     }
 
-  inode_semgive();
+  inode_unlock();
   return ret;
 }

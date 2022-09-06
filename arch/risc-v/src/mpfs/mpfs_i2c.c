@@ -37,6 +37,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/clock.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/i2c/i2c_master.h>
 
@@ -134,7 +135,7 @@ struct mpfs_i2c_priv_s
 
   uint8_t                ser_address; /* Own i2c address */
   uint8_t                target_addr; /* Target i2c address */
-  sem_t                  sem_excl;    /* Mutual exclusion semaphore */
+  mutex_t                lock;        /* Mutual exclusion mutex */
   sem_t                  sem_isr;     /* Interrupt wait semaphore */
   int                    refs;        /* Reference count */
 
@@ -162,6 +163,8 @@ static struct mpfs_i2c_priv_s g_mpfs_i2c0_lo_priv =
   .frequency      = 0,
   .ser_address    = 0x21,
   .target_addr    = 0,
+  .lock           = NXMUTEX_INITIALIZER,
+  .sem_isr        = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
   .refs           = 0,
   .tx_size        = 0,
   .tx_idx         = 0,
@@ -183,6 +186,8 @@ static struct mpfs_i2c_priv_s g_mpfs_i2c1_lo_priv =
   .frequency      = 0,
   .ser_address    = 0x21,
   .target_addr    = 0,
+  .lock           = NXMUTEX_INITIALIZER,
+  .sem_isr        = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
   .refs           = 0,
   .tx_size        = 0,
   .tx_idx         = 0,
@@ -341,82 +346,6 @@ static void mpfs_i2c_deinit(struct mpfs_i2c_priv_s *priv)
 static int mpfs_i2c_sem_waitdone(struct mpfs_i2c_priv_s *priv)
 {
   return nxsem_tickwait_uninterruptible(&priv->sem_isr, SEC2TICK(10));
-}
-
-/****************************************************************************
- * Name: mpfs_i2c_sem_wait
- *
- * Description:
- *   Take the exclusive access, waiting as necessary.
- *
- * Parameters:
- *   priv          - Pointer to the internal driver state structure.
- *
- * Returned Value:
- *   Zero (OK) is returned on success. A negated errno value is returned on
- *   failure.
- *
- ****************************************************************************/
-
-static int mpfs_i2c_sem_wait(struct mpfs_i2c_priv_s *priv)
-{
-  return nxsem_wait_uninterruptible(&priv->sem_excl);
-}
-
-/****************************************************************************
- * Name: mpfs_i2c_sem_post
- *
- * Description:
- *   Release the mutual exclusion semaphore.
- *
- * Parameters:
- *   priv          - Pointer to the internal driver state structure.
- *
- ****************************************************************************/
-
-static void mpfs_i2c_sem_post(struct mpfs_i2c_priv_s *priv)
-{
-  nxsem_post(&priv->sem_excl);
-}
-
-/****************************************************************************
- * Name: mpfs_i2c_sem_destroy
- *
- * Description:
- *   Destroy semaphores.
- *
- * Parameters:
- *   priv          - Pointer to the internal driver state structure.
- *
- ****************************************************************************/
-
-static void mpfs_i2c_sem_destroy(struct mpfs_i2c_priv_s *priv)
-{
-  nxsem_destroy(&priv->sem_excl);
-  nxsem_destroy(&priv->sem_isr);
-}
-
-/****************************************************************************
- * Name: mpfs_i2c_sem_init
- *
- * Description:
- *   Initialize semaphores.
- *
- * Parameters:
- *   priv          - Pointer to the internal driver state structure.
- *
- ****************************************************************************/
-
-static inline void mpfs_i2c_sem_init(struct mpfs_i2c_priv_s *priv)
-{
-  nxsem_init(&priv->sem_excl, 0, 1);
-
-  /* This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  nxsem_init(&priv->sem_isr, 0, 0);
-  nxsem_set_protocol(&priv->sem_isr, SEM_PRIO_NONE);
 }
 
 /****************************************************************************
@@ -632,7 +561,7 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
   i2cinfo("Starting transfer request of %d message(s):\n", count);
   DEBUGASSERT(count > 0);
 
-  ret = mpfs_i2c_sem_wait(priv);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -716,8 +645,7 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
         i2cinfo("Message %" PRIu8 " transfer complete.\n", priv->msgid);
     }
 
-  mpfs_i2c_sem_post(priv);
-
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -891,7 +819,6 @@ struct i2c_master_s *mpfs_i2cbus_initialize(int port)
       return NULL;
     }
 
-  mpfs_i2c_sem_init(priv);
   ret = mpfs_i2c_init(priv);
   if (ret != OK)
     {
@@ -945,7 +872,6 @@ int mpfs_i2cbus_uninitialize(struct i2c_master_s *dev)
   leave_critical_section(flags);
 
   mpfs_i2c_deinit(priv);
-  mpfs_i2c_sem_destroy(priv);
 
   return OK;
 }

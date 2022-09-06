@@ -41,8 +41,8 @@
 #include <nuttx/clock.h>
 #include <nuttx/irq.h>
 #include <nuttx/i2c/i2c_master.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
-#include <nuttx/spinlock.h>
 
 #include <arch/board/board.h>
 
@@ -204,7 +204,7 @@ struct esp32s3_i2c_priv_s
 
   const struct esp32s3_i2c_config_s *config;
   int refs;                    /* Reference count */
-  sem_t sem_excl;              /* Mutual exclusion semaphore */
+  mutex_t lock;                /* Mutual exclusion mutex */
 
 #ifndef CONFIG_I2C_POLLED
   sem_t sem_isr;               /* Interrupt wait semaphore */
@@ -226,8 +226,6 @@ struct esp32s3_i2c_priv_s
   bool ready_read;             /* If I2C has read data */
 
   uint32_t clk_freq;           /* Current I2C Clock frequency */
-
-  spinlock_t lock;             /* Device specific lock */
 
 #ifdef CONFIG_I2C_TRACE
   /* I2C trace support */
@@ -253,10 +251,6 @@ static int i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs,
                         int count);
 static inline void i2c_process(struct esp32s3_i2c_priv_s *priv,
                                uint32_t status);
-static void i2c_sem_init(struct esp32s3_i2c_priv_s *priv);
-static void i2c_sem_destroy(struct esp32s3_i2c_priv_s *priv);
-static void i2c_sem_post(struct esp32s3_i2c_priv_s *priv);
-static int i2c_sem_wait(struct esp32s3_i2c_priv_s *priv);
 #ifndef CONFIG_I2C_POLLED
 static int i2c_sem_waitdone(struct esp32s3_i2c_priv_s *priv);
 #endif
@@ -319,6 +313,10 @@ static struct esp32s3_i2c_priv_s g_esp32s3_i2c0_priv =
   .id         = ESP32S3_I2C0,
   .config     = &g_esp32s3_i2c0_config,
   .refs       = 0,
+  .lock       = NXMUTEX_INITIALIZER,
+#ifndef CONFIG_I2C_POLLED
+  .sem_isr    = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+#endif
   .i2cstate   = I2CSTATE_IDLE,
   .msgv       = NULL,
   .msgid      = 0,
@@ -351,6 +349,10 @@ static struct esp32s3_i2c_priv_s g_esp32s3_i2c1_priv =
   .id         = ESP32S3_I2C1,
   .config     = &g_esp32s3_i2c1_config,
   .refs       = 0,
+  .lock       = NXMUTEX_INITIALIZER,
+#ifndef CONFIG_I2C_POLLED
+  .sem_isr    = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+#endif
   .i2cstate   = I2CSTATE_IDLE,
   .msgv       = NULL,
   .msgid      = 0,
@@ -946,86 +948,6 @@ static int i2c_polling_waitdone(struct esp32s3_i2c_priv_s *priv)
 #endif
 
 /****************************************************************************
- * Name: i2c_sem_wait
- *
- * Description:
- *   Take the exclusive access, waiting as necessary.
- *
- * Parameters:
- *   priv          - Pointer to the internal driver state structure.
- *
- * Returned Value:
- *   Zero (OK) is returned on success. A negated errno value is returned on
- *   failure.
- *
- ****************************************************************************/
-
-static int i2c_sem_wait(struct esp32s3_i2c_priv_s *priv)
-{
-  return nxsem_wait_uninterruptible(&priv->sem_excl);
-}
-
-/****************************************************************************
- * Name: i2c_sem_post
- *
- * Description:
- *   Release the mutual exclusion semaphore.
- *
- * Parameters:
- *   priv          - Pointer to the internal driver state structure.
- *
- ****************************************************************************/
-
-static void i2c_sem_post(struct esp32s3_i2c_priv_s *priv)
-{
-  nxsem_post(&priv->sem_excl);
-}
-
-/****************************************************************************
- * Name: i2c_sem_destroy
- *
- * Description:
- *   Destroy semaphores.
- *
- * Parameters:
- *   priv          - Pointer to the internal driver state structure.
- *
- ****************************************************************************/
-
-static void i2c_sem_destroy(struct esp32s3_i2c_priv_s *priv)
-{
-  nxsem_destroy(&priv->sem_excl);
-#ifndef CONFIG_I2C_POLLED
-  nxsem_destroy(&priv->sem_isr);
-#endif
-}
-
-/****************************************************************************
- * Name: i2c_sem_init
- *
- * Description:
- *   Initialize semaphores.
- *
- * Parameters:
- *   priv          - Pointer to the internal driver state structure.
- *
- ****************************************************************************/
-
-static void i2c_sem_init(struct esp32s3_i2c_priv_s *priv)
-{
-  nxsem_init(&priv->sem_excl, 0, 1);
-
-  /* This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-#ifndef CONFIG_I2C_POLLED
-  nxsem_init(&priv->sem_isr, 0, 0);
-  nxsem_set_protocol(&priv->sem_isr, SEM_PRIO_NONE);
-#endif
-}
-
-/****************************************************************************
  * Device Driver Operations
  ****************************************************************************/
 
@@ -1054,7 +976,7 @@ static int i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs,
 
   DEBUGASSERT(count > 0);
 
-  ret = i2c_sem_wait(priv);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
@@ -1180,8 +1102,7 @@ static int i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs,
   /* Dump the trace result */
 
   i2c_tracedump(priv);
-
-  i2c_sem_post(priv);
+  nxmutex_unlock(&priv->lock);
 
   return ret;
 }
@@ -1226,13 +1147,12 @@ static void i2c_clear_bus(struct esp32s3_i2c_priv_s *priv)
 #ifdef CONFIG_I2C_RESET
 static int i2c_reset(struct i2c_master_s *dev)
 {
-  irqstate_t flags;
   struct esp32s3_i2c_priv_s *priv = (struct esp32s3_i2c_priv_s *)dev;
 
   DEBUGASSERT(dev != NULL);
   DEBUGASSERT(priv->refs > 0);
 
-  flags = spin_lock_irqsave(&priv->lock);
+  nxmutex_lock(&priv->lock);
 
   i2c_reset_fsmc(priv);
 
@@ -1245,8 +1165,7 @@ static int i2c_reset(struct i2c_master_s *dev)
   priv->bytes      = 0;
   priv->ready_read = false;
 
-  spin_unlock_irqrestore(&priv->lock, flags);
-
+  nxmutex_unlock(&priv->lock);
   return OK;
 }
 #endif
@@ -1616,7 +1535,6 @@ static void i2c_process(struct esp32s3_i2c_priv_s *priv, uint32_t status)
 
 struct i2c_master_s *esp32s3_i2cbus_initialize(int port)
 {
-  irqstate_t flags;
   struct esp32s3_i2c_priv_s *priv;
 #ifndef CONFIG_I2C_POLLED
   const struct esp32s3_i2c_config_s *config;
@@ -1639,12 +1557,10 @@ struct i2c_master_s *esp32s3_i2cbus_initialize(int port)
         return NULL;
     }
 
-  flags = spin_lock_irqsave(&priv->lock);
-
+  nxmutex_lock(&priv->lock);
   if (priv->refs++ != 0)
     {
-      spin_unlock_irqrestore(&priv->lock, flags);
-
+      nxmutex_unlock(&priv->lock);
       return (struct i2c_master_s *)priv;
     }
 
@@ -1660,7 +1576,8 @@ struct i2c_master_s *esp32s3_i2cbus_initialize(int port)
     {
       /* Failed to allocate a CPU interrupt of this type */
 
-      spin_unlock_irqrestore(&priv->lock, flags);
+      priv->refs--;
+      nxmutex_unlock(&priv->lock);
 
       return NULL;
     }
@@ -1669,20 +1586,17 @@ struct i2c_master_s *esp32s3_i2cbus_initialize(int port)
   if (ret != OK)
     {
       esp32s3_teardown_irq(priv->cpu, config->periph, priv->cpuint);
+      priv->refs--;
 
-      spin_unlock_irqrestore(&priv->lock, flags);
-
+      nxmutex_unlock(&priv->lock);
       return NULL;
     }
 
   up_enable_irq(config->irq);
 #endif
 
-  i2c_sem_init(priv);
-
   i2c_init(priv);
-
-  spin_unlock_irqrestore(&priv->lock, flags);
+  nxmutex_unlock(&priv->lock);
 
   return (struct i2c_master_s *)priv;
 }
@@ -1705,7 +1619,6 @@ struct i2c_master_s *esp32s3_i2cbus_initialize(int port)
 
 int esp32s3_i2cbus_uninitialize(struct i2c_master_s *dev)
 {
-  irqstate_t flags;
   struct esp32s3_i2c_priv_s *priv = (struct esp32s3_i2c_priv_s *)dev;
 
   DEBUGASSERT(dev != NULL);
@@ -1715,15 +1628,12 @@ int esp32s3_i2cbus_uninitialize(struct i2c_master_s *dev)
       return ERROR;
     }
 
-  flags = spin_lock_irqsave(&priv->lock);
-
+  nxmutex_lock(&priv->lock);
   if (--priv->refs)
     {
-      spin_unlock_irqrestore(&priv->lock, flags);
+      nxmutex_unlock(&priv->lock);
       return OK;
     }
-
-  spin_unlock_irqrestore(&priv->lock, flags);
 
 #ifndef CONFIG_I2C_POLLED
   up_disable_irq(priv->config->irq);
@@ -1731,8 +1641,7 @@ int esp32s3_i2cbus_uninitialize(struct i2c_master_s *dev)
 #endif
 
   i2c_deinit(priv);
-
-  i2c_sem_destroy(priv);
+  nxmutex_unlock(&priv->lock);
 
   return OK;
 }

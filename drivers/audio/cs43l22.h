@@ -330,7 +330,7 @@ struct cs43l22_dev_s
   char                    mqname[16];       /* Our message queue name */
   pthread_t               threadid;         /* ID of our thread */
   uint32_t                bitrate;          /* Actual programmed bit rate */
-  sem_t                   pendsem;          /* Protect pendq */
+  mutex_t                 pendlock;         /* Protect pendq */
 #ifdef CS43L22_USE_FFLOCK_INT
   struct work_s           work;             /* Interrupt work */
 #endif

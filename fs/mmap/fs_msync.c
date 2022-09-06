@@ -77,7 +77,7 @@ int msync(FAR void *start, size_t length, int flags)
 
   /* Find a region containing this start and length in the list of regions */
 
-  ret = nxsem_wait(&g_rammaps.exclsem);
+  ret = nxmutex_lock(&g_rammaps.lock);
   if (ret < 0)
     {
       return ret;
@@ -159,7 +159,7 @@ int msync(FAR void *start, size_t length, int flags)
     }
 
 errout_with_semaphore:
-  nxsem_post(&g_rammaps.exclsem);
+  nxmutex_unlock(&g_rammaps.lock);
   if (ret < 0)
     {
       set_errno(-ret);

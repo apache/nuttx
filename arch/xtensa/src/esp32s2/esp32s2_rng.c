@@ -33,7 +33,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/drivers/drivers.h>
 
@@ -70,7 +70,7 @@ static ssize_t esp32s2_rng_read(struct file *filep, char *buffer,
 struct rng_dev_s
 {
   uint8_t *rd_buf;
-  sem_t    rd_sem;         /* semaphore for read RNG data */
+  mutex_t  rd_lock;        /* mutex for read RNG data */
 };
 
 /****************************************************************************
@@ -129,9 +129,7 @@ static int esp32s2_rng_initialize(void)
   _info("Initializing RNG\n");
 
   memset(&g_rngdev, 0, sizeof(struct rng_dev_s));
-
-  nxsem_init(&g_rngdev.rd_sem, 0, 1);
-  nxsem_set_protocol(&g_rngdev.rd_sem, SEM_PRIO_NONE);
+  nxmutex_init(&g_rngdev.rd_lock);
 
   return OK;
 }
@@ -147,7 +145,7 @@ static ssize_t esp32s2_rng_read(struct file *filep, char *buffer,
   ssize_t read_len;
   uint8_t *rd_buf = (uint8_t *)buffer;
 
-  if (nxsem_wait(&priv->rd_sem) != OK)
+  if (nxmutex_lock(&priv->rd_lock) != OK)
     {
       return -EBUSY;
     }
@@ -166,10 +164,9 @@ static ssize_t esp32s2_rng_read(struct file *filep, char *buffer,
       buflen -= to_copy;
     }
 
-  /* Release rd_sem for next read */
+  /* Release rd_lock for next read */
 
-  nxsem_post(&priv->rd_sem);
-
+  nxmutex_unlock(&priv->rd_lock);
   return read_len;
 }
 

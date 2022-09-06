@@ -31,14 +31,13 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/fs/fs.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define bchlib_semgive(d) nxsem_post(&(d)->sem)  /* To match bchlib_semtake */
 #define MAX_OPENCNT       (255)                  /* Limit of uint8_t */
 
 /****************************************************************************
@@ -51,7 +50,7 @@ struct bchlib_s
   uint32_t sectsize;       /* The size of one sector on the device */
   size_t nsectors;         /* Number of sectors supported by the device */
   size_t sector;           /* The current sector in the buffer */
-  sem_t sem;               /* For atomic accesses to this structure */
+  mutex_t lock;            /* For atomic accesses to this structure */
   uint8_t refs;            /* Number of references */
   bool dirty;              /* true: Data has been written to the buffer */
   bool readonly;           /* true: Only read operations are supported */
@@ -82,7 +81,6 @@ EXTERN const struct file_operations bch_fops;
  * Public Function Prototypes
  ****************************************************************************/
 
-EXTERN int  bchlib_semtake(FAR struct bchlib_s *bch);
 EXTERN int  bchlib_flushsector(FAR struct bchlib_s *bch);
 EXTERN int  bchlib_readsector(FAR struct bchlib_s *bch, size_t sector);
 

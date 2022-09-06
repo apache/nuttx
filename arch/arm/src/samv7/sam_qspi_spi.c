@@ -41,7 +41,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/spi/spi.h>
 
 #include "arm_internal.h"
@@ -86,7 +86,7 @@ typedef void (*select_t)(uint32_t devid, bool selected);
 struct sam_spidev_s
 {
   uint32_t base;               /* SPI controller register base address */
-  sem_t spisem;                /* Assures mutually exclusive access to SPI */
+  mutex_t spilock;             /* Assures mutually exclusive access to SPI */
   select_t select;             /* SPI select call-out */
   bool initialized;            /* TRUE: Controller has been initialized */
   bool escape_lastxfer;        /* Don't set LASTXFER-Bit in the next transfer */
@@ -257,11 +257,11 @@ static int qspi_spi_lock(struct spi_dev_s *dev, bool lock)
   spiinfo("lock=%d\n", lock);
   if (lock)
     {
-      ret = nxsem_wait_uninterruptible(&spi->spisem);
+      ret = nxmutex_lock(&spi->spilock);
     }
   else
     {
-      ret = nxsem_post(&spi->spisem);
+      ret = nxmutex_unlock(&spi->spilock);
     }
 
   return ret;
@@ -832,11 +832,11 @@ struct spi_dev_s *sam_qspi_spi_initialize(int intf)
       qspi_getreg(spi, SAM_QSPI_SR_OFFSET);
       qspi_getreg(spi, SAM_QSPI_RDR_OFFSET);
 
-      /* Initialize the SPI semaphore that enforces mutually exclusive
+      /* Initialize the SPI mutex that enforces mutually exclusive
        * access to the SPI registers.
        */
 
-      nxsem_init(&spi->spisem, 0, 1);
+      nxmutex_init(&spi->spilock);
       spi->escape_lastxfer = false;
       spi->initialized = true;
     }

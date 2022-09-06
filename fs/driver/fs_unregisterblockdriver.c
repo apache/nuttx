@@ -44,11 +44,11 @@ int unregister_blockdriver(FAR const char *path)
 {
   int ret;
 
-  ret = inode_semtake();
+  ret = inode_lock();
   if (ret >= 0)
     {
       ret = inode_remove(path);
-      inode_semgive();
+      inode_unlock();
     }
 
   return ret;

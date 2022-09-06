@@ -6011,25 +6011,13 @@ struct hrtim_dev_s *stm32_hrtiminitialize(void)
 #ifndef CONFIG_STM32_HRTIM_DISABLE_CHARDRV
 int hrtim_register(const char *path, struct hrtim_dev_s *dev)
 {
-  int ret ;
-
   /* Initialize the HRTIM device structure */
 
   dev->hd_ocount = 0;
 
-  /* Initialize semaphores */
-
-  nxsem_init(&dev->hd_closesem, 0, 1);
-
   /* Register the HRTIM character driver */
 
-  ret =  register_driver(path, &hrtim_fops, 0444, dev);
-  if (ret < 0)
-    {
-      nxsem_destroy(&dev->hd_closesem);
-    }
-
-  return ret;
+  return register_driver(path, &hrtim_fops, 0444, dev);
 }
 #endif /* CONFIG_STM32_HRTIM_DISABLE_CHARDRV */
 

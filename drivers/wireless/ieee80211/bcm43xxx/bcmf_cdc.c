@@ -175,7 +175,6 @@ int bcmf_cdc_control_request(FAR struct bcmf_dev_s *priv,
                                         name, data, len);
 
   nxsem_post(&priv->control_mutex);
-
   return ret;
 }
 
@@ -214,7 +213,8 @@ int bcmf_cdc_control_request_unsafe(FAR struct bcmf_dev_s *priv,
       return ret;
     }
 
-  ret = bcmf_sem_wait(&priv->control_timeout, BCMF_CONTROL_TIMEOUT_MS);
+  ret = nxsem_tickwait_uninterruptible(&priv->control_timeout,
+                                       MSEC2TICK(BCMF_CONTROL_TIMEOUT_MS));
   if (ret < 0)
     {
       wlerr("Error while waiting for control response %d\n", ret);

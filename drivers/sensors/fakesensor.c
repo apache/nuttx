@@ -187,6 +187,7 @@ static inline void fakesensor_read_gps(FAR struct fakesensor_s *sensor)
   float hoop;
   float altitude;
   char raw[150];
+
   memset(&gps, 0, sizeof(struct sensor_gps));
 
 read:

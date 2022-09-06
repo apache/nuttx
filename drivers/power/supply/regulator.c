@@ -58,7 +58,7 @@ static int _regulator_set_voltage_unlocked(FAR struct regulator_s *regulator,
  ****************************************************************************/
 
 static struct list_node g_reg_list = LIST_INITIAL_VALUE(g_reg_list);
-static sem_t g_reg_sem             = SEM_INITIALIZER(1);
+static mutex_t g_reg_lock          = NXMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Private Functions
@@ -150,7 +150,7 @@ static FAR struct regulator_dev_s *regulator_dev_lookup(const char *supply)
   FAR struct regulator_dev_s *rdev;
   FAR struct regulator_dev_s *rdev_found = NULL;
 
-  nxsem_wait_uninterruptible(&g_reg_sem);
+  nxmutex_lock(&g_reg_lock);
   list_for_every_entry(&g_reg_list, rdev, struct regulator_dev_s, list)
     {
       if (rdev->desc->name && strcmp(rdev->desc->name, supply) == 0)
@@ -160,7 +160,7 @@ static FAR struct regulator_dev_s *regulator_dev_lookup(const char *supply)
         }
     }
 
-  nxsem_post(&g_reg_sem);
+  nxmutex_unlock(&g_reg_lock);
 
 #if defined(CONFIG_REGULATOR_RPMSG)
   if (rdev_found == NULL)
@@ -416,10 +416,10 @@ FAR struct regulator_s *regulator_get(FAR const char *id)
   regulator->rdev = rdev;
   list_initialize(&regulator->list);
 
-  nxsem_wait_uninterruptible(&rdev->regulator_sem);
+  nxmutex_lock(&rdev->regulator_lock);
   rdev->open_count++;
   list_add_tail(&rdev->consumer_list, &regulator->list);
-  nxsem_post(&rdev->regulator_sem);
+  nxmutex_unlock(&rdev->regulator_lock);
 
   return regulator;
 }
@@ -448,14 +448,14 @@ void regulator_put(FAR struct regulator_s *regulator)
 
   rdev = regulator->rdev;
 
-  nxsem_wait_uninterruptible(&g_reg_sem);
+  nxmutex_lock(&g_reg_lock);
 
-  nxsem_wait_uninterruptible(&rdev->regulator_sem);
+  nxmutex_lock(&rdev->regulator_lock);
   list_delete(&regulator->list);
   rdev->open_count--;
-  nxsem_post(&rdev->regulator_sem);
+  nxmutex_unlock(&rdev->regulator_lock);
 
-  nxsem_post(&g_reg_sem);
+  nxmutex_unlock(&g_reg_lock);
 
   kmm_free(regulator);
 }
@@ -487,9 +487,9 @@ int regulator_is_enabled(FAR struct regulator_s *regulator)
 
   rdev = regulator->rdev;
 
-  nxsem_wait_uninterruptible(&rdev->regulator_sem);
+  nxmutex_lock(&rdev->regulator_lock);
   ret = _regulator_is_enabled(rdev);
-  nxsem_post(&rdev->regulator_sem);
+  nxmutex_unlock(&rdev->regulator_lock);
 
   return ret;
 }
@@ -521,7 +521,7 @@ int regulator_enable(FAR struct regulator_s *regulator)
 
   rdev = regulator->rdev;
 
-  nxsem_wait_uninterruptible(&rdev->regulator_sem);
+  nxmutex_lock(&rdev->regulator_lock);
   if (rdev->use_count == 0)
     {
       ret = _regulator_do_enable(rdev);
@@ -534,8 +534,7 @@ int regulator_enable(FAR struct regulator_s *regulator)
   rdev->use_count++;
 
 err:
-  nxsem_post(&rdev->regulator_sem);
-
+  nxmutex_unlock(&rdev->regulator_lock);
   return ret;
 }
 
@@ -594,7 +593,7 @@ int regulator_disable(FAR struct regulator_s *regulator)
 
   rdev = regulator->rdev;
 
-  nxsem_wait_uninterruptible(&rdev->regulator_sem);
+  nxmutex_lock(&rdev->regulator_lock);
   if (rdev->use_count <= 0)
     {
       ret = -EIO;
@@ -613,7 +612,7 @@ int regulator_disable(FAR struct regulator_s *regulator)
   rdev->use_count--;
 
 err:
-  nxsem_post(&rdev->regulator_sem);
+  nxmutex_unlock(&rdev->regulator_lock);
   return ret;
 }
 
@@ -673,9 +672,9 @@ int regulator_set_voltage(FAR struct regulator_s *regulator,
 
   rdev = regulator->rdev;
 
-  nxsem_wait_uninterruptible(&rdev->regulator_sem);
+  nxmutex_lock(&rdev->regulator_lock);
   ret = _regulator_set_voltage_unlocked(regulator, min_uv, max_uv);
-  nxsem_post(&rdev->regulator_sem);
+  nxmutex_unlock(&rdev->regulator_lock);
 
   return ret;
 }
@@ -707,9 +706,9 @@ int regulator_get_voltage(FAR struct regulator_s *regulator)
 
   rdev = regulator->rdev;
 
-  nxsem_wait_uninterruptible(&rdev->regulator_sem);
+  nxmutex_lock(&rdev->regulator_lock);
   ret = _regulator_get_voltage(rdev);
-  nxsem_post(&rdev->regulator_sem);
+  nxmutex_unlock(&rdev->regulator_lock);
 
   return ret;
 }
@@ -776,7 +775,7 @@ regulator_register(FAR const struct regulator_desc_s *regulator_desc,
   rdev->desc = regulator_desc;
   rdev->ops = regulator_ops;
   rdev->priv = priv;
-  nxsem_init(&rdev->regulator_sem, 0, 1);
+  nxmutex_init(&rdev->regulator_lock);
   list_initialize(&rdev->consumer_list);
   list_initialize(&rdev->list);
 
@@ -795,9 +794,9 @@ regulator_register(FAR const struct regulator_desc_s *regulator_desc,
                                 rdev->desc->apply_uv);
     }
 
-  nxsem_wait_uninterruptible(&g_reg_sem);
+  nxmutex_lock(&g_reg_lock);
   list_add_tail(&g_reg_list, &rdev->list);
-  nxsem_post(&g_reg_sem);
+  nxmutex_unlock(&g_reg_lock);
 
   return rdev;
 }
@@ -818,16 +817,16 @@ void regulator_unregister(FAR struct regulator_dev_s *rdev)
       return;
     }
 
-  nxsem_wait_uninterruptible(&g_reg_sem);
+  nxmutex_lock(&g_reg_lock);
   if (rdev->open_count)
     {
       pwrerr("unregister, open %" PRIu32 "\n", rdev->open_count);
-      nxsem_post(&g_reg_sem);
+      nxmutex_unlock(&g_reg_lock);
       return;
     }
 
   list_delete(&rdev->list);
-  nxsem_post(&g_reg_sem);
+  nxmutex_unlock(&g_reg_lock);
 
   kmm_free(rdev);
 }

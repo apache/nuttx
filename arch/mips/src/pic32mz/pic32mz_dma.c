@@ -32,6 +32,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/mutex.h>
 
 #include "mips_internal.h"
 #include "sched/sched.h"
@@ -72,7 +73,7 @@ struct pic32mz_dmac_s
 {
   /* Protects the channels' table */
 
-  sem_t chsem;
+  mutex_t chlock;
 
   /* Describes all DMA channels */
 
@@ -82,9 +83,6 @@ struct pic32mz_dmac_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
-
-static int pic32mz_dma_takesem(struct pic32mz_dmac_s *dmac);
-static inline void pic32mz_dma_givesem(struct pic32mz_dmac_s *dmac);
 
 static inline uint32_t pic32mz_dma_getreg(struct pic32mz_dmach_s *dmach,
                                           uint8_t offset);
@@ -183,32 +181,6 @@ static struct pic32mz_dmac_s g_dmac =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: pic32mz_dma_takesem
- *
- * Description:
- *   Take the exclusive access, waiting as necessary
- *
- ****************************************************************************/
-
-static int pic32mz_dma_takesem(struct pic32mz_dmac_s *dmac)
-{
-  return nxsem_wait_uninterruptible(&dmac->chsem);
-}
-
-/****************************************************************************
- * Name: pic32mz_dma_givesem
- *
- * Description:
- *   Release the semaphore
- *
- ****************************************************************************/
-
-static inline void pic32mz_dma_givesem(struct pic32mz_dmac_s *dmac)
-{
-  nxsem_post(&dmac->chsem);
-}
 
 /****************************************************************************
  * Name: pic32mz_dma_getreg
@@ -764,9 +736,9 @@ void weak_function up_dma_initialize(void)
 
   pic32mz_dma_putglobal(PIC32MZ_DMA_CONSET_OFFSET, DMA_CON_ON);
 
-  /* Initialize the semaphore. */
+  /* Initialize the mutex. */
 
-  nxsem_init(&g_dmac.chsem, 0, 1);
+  nxmutex_init(&g_dmac.chlock);
 }
 
 /****************************************************************************
@@ -791,7 +763,7 @@ DMA_HANDLE pic32mz_dma_alloc(const struct pic32mz_dma_chcfg_s *cfg)
 
   /* Search for an available DMA channel */
 
-  ret = pic32mz_dma_takesem(&g_dmac);
+  ret = nxmutex_lock(&g_dmac.chlock);
   if (ret < 0)
     {
       return NULL;
@@ -828,7 +800,7 @@ DMA_HANDLE pic32mz_dma_alloc(const struct pic32mz_dma_chcfg_s *cfg)
         }
     }
 
-  pic32mz_dma_givesem(&g_dmac);
+  nxmutex_unlock(&g_dmac.chlock);
 
   /* Show the result of the allocation */
 

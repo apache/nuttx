@@ -34,7 +34,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 
 #include "cxd56_dmac.h"
 
@@ -290,7 +290,7 @@ struct dma_channel_s
 /* This is the array of all DMA channels */
 
 static struct dma_channel_s g_dmach[NCHANNELS];
-static sem_t g_dmaexc;
+static mutex_t g_dmalock;
 
 static int dma_init(int ch);
 static int dma_uninit(int ch);
@@ -727,7 +727,7 @@ void weak_function arm_dma_initialize(void)
       up_enable_irq(irq_map[i]);
     }
 
-  nxsem_init(&g_dmaexc, 0, 1);
+  nxmutex_init(&g_dmalock);
 }
 
 /****************************************************************************
@@ -762,7 +762,7 @@ DMA_HANDLE cxd56_dmachannel(int ch, ssize_t maxsize)
 
   /* Get exclusive access to allocate channel */
 
-  nxsem_wait_uninterruptible(&g_dmaexc);
+  nxmutex_lock(&g_dmalock);
 
   if (ch < 0 || ch >= NCHANNELS)
     {
@@ -806,12 +806,11 @@ DMA_HANDLE cxd56_dmachannel(int ch, ssize_t maxsize)
 
   dmach->inuse  = true;
 
-  nxsem_post(&g_dmaexc);
-
+  nxmutex_unlock(&g_dmalock);
   return (DMA_HANDLE)dmach;
 
 err:
-  nxsem_post(&g_dmaexc);
+  nxmutex_unlock(&g_dmalock);
   return NULL;
 }
 
@@ -845,7 +844,7 @@ void cxd56_dmafree(DMA_HANDLE handle)
       return;
     }
 
-  nxsem_wait_uninterruptible(&g_dmaexc);
+  nxmutex_lock(&g_dmalock);
 
   if (!dmach->inuse)
     {
@@ -863,7 +862,7 @@ void cxd56_dmafree(DMA_HANDLE handle)
   dmach->inuse = false;
 
 err:
-  nxsem_post(&g_dmaexc);
+  nxmutex_unlock(&g_dmalock);
 }
 
 /****************************************************************************

@@ -33,7 +33,7 @@
 #include <stdbool.h>
 
 #include <nuttx/fs/fs.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 
 /************************************************************************************
  * Public Types
@@ -68,7 +68,7 @@ struct opamp_dev_s
   /* Fields managed by common upper half OPAMP logic */
 
   uint8_t                 ad_ocount;    /* The number of times the device has been opened */
-  sem_t                   ad_closesem;  /* Locks out new opens while close is in progress */
+  mutex_t                 ad_closelock; /* Locks out new opens while close is in progress */
 #endif
 
   /* Fields provided by lower half OPAMP logic */

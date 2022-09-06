@@ -152,7 +152,7 @@ int host_fstat(int fd, struct stat *buf)
    * Assumptions:
    *  - host_lseek never fails
    *  - It's ok to change the file offset temporarily as
-   *    hostfs_semtake provides enough serialization.
+   *    hostfs_lock provides enough serialization.
    */
 
   off_t saved_off = host_lseek(fd, 0, SEEK_CUR);

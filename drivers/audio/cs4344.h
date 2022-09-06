@@ -32,6 +32,7 @@
 #include <mqueue.h>
 
 #include <nuttx/wqueue.h>
+#include <nuttx/mutex.h>
 #include <nuttx/fs/ioctl.h>
 
 #ifdef CONFIG_AUDIO
@@ -71,7 +72,7 @@ struct cs4344_dev_s
   char                    mqname[16];       /* Our message queue name */
   pthread_t               threadid;         /* ID of our thread */
   uint32_t                bitrate;          /* Actual programmed bit rate */
-  sem_t                   pendsem;          /* Protect pendq */
+  mutex_t                 pendlock;         /* Protect pendq */
   uint16_t                samprate;         /* Configured samprate (samples/sec) */
   uint8_t                 nchannels;        /* Number of channels (1 or 2) */
   uint8_t                 bpsamp;           /* Bits per sample (8 or 16) */

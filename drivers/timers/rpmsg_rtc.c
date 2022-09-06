@@ -28,7 +28,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/rptun/openamp.h>
-#include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/timers/rpmsg_rtc.h>
 #include <nuttx/timers/arch_rtc.h>
 
@@ -119,7 +119,7 @@ struct rpmsg_rtc_server_s
   FAR struct rtc_ops_s *ops;
   FAR struct rtc_lowerhalf_s *lower;
   struct list_node list;
-  sem_t exclsem;
+  mutex_t lock;
 };
 
 struct rpmsg_rtc_client_s
@@ -473,7 +473,7 @@ static int rpmsg_rtc_server_settime(FAR struct rtc_lowerhalf_s *lower,
   ret = server->lower->ops->settime(server->lower, rtctime);
   if (ret >= 0)
     {
-      nxsem_wait_uninterruptible(&server->exclsem);
+      nxmutex_lock(&server->lock);
       msg.sec  = timegm((FAR struct tm *)rtctime);
       msg.nsec = rtctime->tm_nsec;
       msg.header.command = RPMSG_RTC_SYNC;
@@ -483,7 +483,7 @@ static int rpmsg_rtc_server_settime(FAR struct rtc_lowerhalf_s *lower,
           rpmsg_send(&client->ept, &msg, sizeof(msg));
         }
 
-      nxsem_post(&server->exclsem);
+      nxmutex_unlock(&server->lock);
     }
 
   return ret;
@@ -600,9 +600,9 @@ static void rpmsg_rtc_server_ns_unbind(FAR struct rpmsg_endpoint *ept)
                                             struct rpmsg_rtc_client_s, ept);
   FAR struct rpmsg_rtc_server_s *server = ept->priv;
 
-  nxsem_wait_uninterruptible(&server->exclsem);
+  nxmutex_lock(&server->lock);
   list_delete(&client->node);
-  nxsem_post(&server->exclsem);
+  nxmutex_unlock(&server->lock);
   rpmsg_destroy_ept(&client->ept);
   kmm_free(client);
 }
@@ -738,9 +738,9 @@ static void rpmsg_rtc_server_ns_bind(FAR struct rpmsg_device *rdev,
       rpmsg_send(&client->ept, &msg, sizeof(msg));
     }
 
-  nxsem_wait_uninterruptible(&server->exclsem);
+  nxmutex_lock(&server->lock);
   list_add_tail(&server->list, &client->node);
-  nxsem_post(&server->exclsem);
+  nxmutex_unlock(&server->lock);
 }
 #endif
 
@@ -802,12 +802,12 @@ FAR struct rtc_lowerhalf_s *rpmsg_rtc_server_initialize(
       server->ops = &g_rpmsg_rtc_server_ops;
       server->lower = lower;
       list_initialize(&server->list);
-      nxsem_init(&server->exclsem, 0, 1);
+      nxmutex_init(&server->lock);
       if (rpmsg_register_callback(server, NULL, NULL,
                                   rpmsg_rtc_server_ns_match,
                                   rpmsg_rtc_server_ns_bind) < 0)
         {
-          nxsem_destroy(&server->exclsem);
+          nxmutex_destroy(&server->lock);
           kmm_free(server);
           return NULL;
         }

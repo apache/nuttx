@@ -83,7 +83,7 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
 
   /* Get exclusive access to the stream */
 
-  lib_take_semaphore(stream);
+  lib_take_lock(stream);
 
   /* If the buffer is currently being used for read access, then
    * discard all of the read-ahead data.  We do not support concurrent
@@ -92,7 +92,7 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
 
   if (lib_rdflush(stream) < 0)
     {
-      goto errout_with_semaphore;
+      goto errout_with_lock;
     }
 
   /* Determine the number of bytes left in the buffer */
@@ -128,7 +128,7 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
           int bytes_buffered = lib_fflush(stream, false);
           if (bytes_buffered < 0)
             {
-              goto errout_with_semaphore;
+              goto errout_with_lock;
             }
         }
     }
@@ -140,7 +140,7 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
         {
           _NX_SETERRNO(ret);
           ret = ERROR;
-          goto errout_with_semaphore;
+          goto errout_with_lock;
         }
 
       src += ret;
@@ -156,8 +156,8 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
 
   ret = (uintptr_t)src - (uintptr_t)start;
 
-errout_with_semaphore:
-  lib_give_semaphore(stream);
+errout_with_lock:
+  lib_give_lock(stream);
 
 errout:
   if (ret < 0)

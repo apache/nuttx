@@ -34,6 +34,7 @@
 #include <assert.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/mutex.h>
 #include <nuttx/i2c/i2c_master.h>
 
 #include <nuttx/irq.h>
@@ -75,7 +76,7 @@ struct rp2040_i2cdev_s
   int8_t           port;       /* Port number */
   uint32_t         base_freq;  /* branch frequency */
 
-  sem_t            mutex;      /* Only one thread can access at a time */
+  mutex_t          lock;       /* Only one thread can access at a time */
   sem_t            wait;       /* Place to wait for transfer completion */
   struct wdog_s    timeout;    /* watchdog to timeout when bus hung */
   uint32_t         frequency;  /* Current I2C frequency */
@@ -94,6 +95,8 @@ static struct rp2040_i2cdev_s g_i2c0dev =
   .port = 0,
   .base = RP2040_I2C0_BASE,
   .irqid = RP2040_I2C0_IRQ,
+  .lock = NXMUTEX_INITIALIZER,
+  .wait = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
   .refs = 0,
 };
 #endif
@@ -103,6 +106,8 @@ static struct rp2040_i2cdev_s g_i2c1dev =
   .port = 1,
   .base = RP2040_I2C1_BASE,
   .irqid = RP2040_I2C1_IRQ,
+  .lock = NXMUTEX_INITIALIZER,
+  .wait = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
   .refs = 0,
 };
 #endif
@@ -110,9 +115,6 @@ static struct rp2040_i2cdev_s g_i2c1dev =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-static inline int i2c_takesem(sem_t *sem);
-static inline int i2c_givesem(sem_t *sem);
 
 static inline uint32_t i2c_reg_read(struct rp2040_i2cdev_s *priv,
                                     uint32_t offset);
@@ -136,24 +138,6 @@ static int  rp2040_i2c_transfer(struct i2c_master_s *dev,
 #ifdef CONFIG_I2C_RESET
 static int rp2040_i2c_reset(struct i2c_master_s *dev);
 #endif
-
-/****************************************************************************
- * Name: i2c_takesem
- ****************************************************************************/
-
-static inline int i2c_takesem(sem_t *sem)
-{
-  return nxsem_wait_uninterruptible(sem);
-}
-
-/****************************************************************************
- * Name: i2c_givesem
- ****************************************************************************/
-
-static inline int i2c_givesem(sem_t *sem)
-{
-  return nxsem_post(sem);
-}
 
 /****************************************************************************
  * I2C device operations
@@ -284,7 +268,7 @@ static void rp2040_i2c_timeout(wdparm_t arg)
   irqstate_t flags             = enter_critical_section();
 
   priv->error = -ENODEV;
-  i2c_givesem(&priv->wait);
+  nxsem_post(&priv->wait);
   leave_critical_section(flags);
 }
 
@@ -394,7 +378,7 @@ static int rp2040_i2c_interrupt(int irq, void *context, void *arg)
       ret = wd_cancel(&priv->timeout);
       if (ret == OK)
         {
-          i2c_givesem(&priv->wait);
+          nxsem_post(&priv->wait);
         }
     }
 
@@ -462,7 +446,7 @@ static int rp2040_i2c_receive(struct rp2040_i2cdev_s *priv, int last)
                   RP2040_I2C_IC_INTR_STAT_R_RX_FULL,
                   RP2040_I2C_IC_INTR_STAT_R_RX_FULL);
       leave_critical_section(flags);
-      i2c_takesem(&priv->wait);
+      nxsem_wait_uninterruptible(&priv->wait);
 
       if (priv->error != OK)
         {
@@ -517,8 +501,7 @@ static int rp2040_i2c_send(struct rp2040_i2cdev_s *priv, int last)
               RP2040_I2C_IC_INTR_STAT_R_TX_EMPTY);
   leave_critical_section(flags);
 
-  i2c_takesem(&priv->wait);
-
+  nxsem_wait_uninterruptible(&priv->wait);
   return 0;
 }
 
@@ -546,7 +529,7 @@ static int rp2040_i2c_transfer(struct i2c_master_s *dev,
 
   /* Get exclusive access to the I2C bus */
 
-  i2c_takesem(&priv->mutex);
+  nxmutex_lock(&priv->lock);
 
   /* Check wait semaphore value. If the value is not 0, the transfer can not
    * be performed normally.
@@ -618,8 +601,7 @@ static int rp2040_i2c_transfer(struct i2c_master_s *dev,
       rp2040_i2c_disable(priv);
     }
 
-  i2c_givesem(&priv->mutex);
-
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -658,8 +640,7 @@ static int rp2040_i2c_reset(struct i2c_master_s *dev)
 
   /* Lock out other clients */
 
-  i2c_takesem(&priv->mutex);
-
+  nxmutex_lock(&priv->lock);
   ret = -EIO;
 
   /* De-init the port */
@@ -775,7 +756,7 @@ out_without_reinit:
 
   /* Release the port for re-use by other clients */
 
-  i2c_givesem(&priv->mutex);
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 #endif /* CONFIG_I2C_RESET */
@@ -880,7 +861,7 @@ struct i2c_master_s *rp2040_i2cbus_initialize(int port)
 #ifdef CONFIG_RP2040_I2C0
   if (port == 0)
     {
-      priv        = &g_i2c0dev;
+      priv          = &g_i2c0dev;
       priv->dev.ops = &rp2040_i2c_ops;
     }
   else
@@ -888,7 +869,7 @@ struct i2c_master_s *rp2040_i2cbus_initialize(int port)
 #ifdef CONFIG_RP2040_I2C1
   if (port == 1)
     {
-      priv        = &g_i2c1dev;
+      priv          = &g_i2c1dev;
       priv->dev.ops = &rp2040_i2c_ops;
     }
   else
@@ -919,10 +900,6 @@ struct i2c_master_s *rp2040_i2cbus_initialize(int port)
   rp2040_i2c_setfrequency(priv, I2C_DEFAULT_FREQUENCY);
 
   leave_critical_section(flags);
-
-  nxsem_init(&priv->mutex, 0, 1);
-  nxsem_init(&priv->wait, 0, 0);
-  nxsem_set_protocol(&priv->wait, SEM_PRIO_NONE);
 
   /* Attach Interrupt Handler */
 
@@ -965,8 +942,6 @@ int rp2040_i2cbus_uninitialize(struct i2c_master_s *dev)
   irq_detach(priv->irqid);
 
   wd_cancel(&priv->timeout);
-  nxsem_destroy(&priv->mutex);
-  nxsem_destroy(&priv->wait);
 
   return OK;
 }

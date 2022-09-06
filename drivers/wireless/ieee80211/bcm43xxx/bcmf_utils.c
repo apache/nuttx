@@ -77,12 +77,3 @@ void bcmf_hexdump(uint8_t *data, unsigned int len, unsigned long offset)
       wlinfo("%08lx: %s%s\n", offset + i - char_count, hex_line, char_line);
     }
 }
-
-/****************************************************************************
- * Name: bcmf_sem_wait
- ****************************************************************************/
-
-int bcmf_sem_wait(sem_t *sem, unsigned int timeout_ms)
-{
-  return nxsem_tickwait_uninterruptible(sem, MSEC2TICK(timeout_ms));
-}

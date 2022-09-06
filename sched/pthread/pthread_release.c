@@ -83,7 +83,7 @@ void pthread_release(FAR struct task_group_s *group)
       kmm_free(join);
     }
 
-  /* Destroy the join list semaphore */
+  /* Destroy the join list mutex */
 
-  nxsem_destroy(&group->tg_joinsem);
+  nxmutex_destroy(&group->tg_joinlock);
 }

@@ -79,7 +79,7 @@ void nxterm_redraw(NXTERM handle,
 
   do
     {
-      ret = nxterm_semwait(priv);
+      ret = nxmutex_lock(&priv->lock);
     }
   while (ret < 0);
 
@@ -100,5 +100,5 @@ void nxterm_redraw(NXTERM handle,
       nxterm_fillchar(priv, rect, &priv->bm[i]);
     }
 
-  nxterm_sempost(priv);
+  nxmutex_unlock(&priv->lock);
 }

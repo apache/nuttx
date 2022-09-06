@@ -53,7 +53,7 @@ struct rpmsgmtd_s
                                       * opreation until the connection
                                       * between two cpu established.
                                       */
-  mutex_t               geoexcl;     /* Get mtd geometry operation mutex */
+  mutex_t               geolock;     /* Get mtd geometry operation mutex */
   struct mtd_geometry_s geo;         /* MTD geomerty */
 };
 
@@ -195,7 +195,7 @@ static int rpmsgmtd_get_geometry(FAR struct rpmsgmtd_s *dev)
 {
   int ret;
 
-  ret = nxmutex_lock(&dev->geoexcl);
+  ret = nxmutex_lock(&dev->geolock);
   if (ret < 0)
     {
       return ret;
@@ -209,7 +209,7 @@ static int rpmsgmtd_get_geometry(FAR struct rpmsgmtd_s *dev)
                            (unsigned long)&dev->geo);
     }
 
-  nxmutex_unlock(&dev->geoexcl);
+  nxmutex_unlock(&dev->geolock);
   return ret;
 }
 
@@ -1073,7 +1073,7 @@ int rpmsgmtd_register(FAR const char *remotecpu, FAR const char *remotepath,
 
   nxsem_init(&dev->wait, 0, 0);
   nxsem_set_protocol(&dev->wait, SEM_PRIO_NONE);
-  nxmutex_init(&dev->geoexcl);
+  nxmutex_init(&dev->geolock);
 
   /* Register the rpmsg callback */
 

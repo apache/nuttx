@@ -1074,7 +1074,6 @@ struct hrtim_dev_s
   /* Fields managed by common upper half HRTIM logic */
 
   uint8_t hd_ocount; /* The number of times the device has been opened */
-  sem_t hd_closesem; /* Locks out new opens while close is in progress */
 #endif
 
   /* Fields provided by lower half HRTIM logic */

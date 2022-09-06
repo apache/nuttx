@@ -37,6 +37,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/signal.h>
+#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/ohci.h>
@@ -136,7 +137,7 @@ struct rx65n_usbhost_s
 
 #endif
 
-  sem_t            exclsem;     /* Support mutually exclusive access */
+  mutex_t          lock;         /* Support mutually exclusive access */
 
   /* Semaphore to wait Write-back Done Head event */
 
@@ -292,9 +293,6 @@ static void rx65n_usbhost_clearbit (volatile short *regadd,
            uint16_t clearbitval);
 
 /* Semaphores ***************************************************************/
-
-static int rx65n_usbhost_takesem(sem_t *sem);
-#define rx65n_usbhost_givesem(s) nxsem_post(s);
 
 /* Byte stream access helper functions **************************************/
 
@@ -2877,7 +2875,7 @@ void usb_hstd_brdy_pipe_process (uint16_t bitsts)
 #endif
                     }
 
-                  rx65n_usbhost_givesem(&g_rx65n_edlist[i].wdhsem);
+                  nxsem_post(&g_rx65n_edlist[i].wdhsem);
                 }
             }
         }
@@ -2959,7 +2957,7 @@ void usb_hstd_bemp_pipe_process (uint16_t bitsts)
 
                   /* Release the semaphore for this pipe */
 
-                 rx65n_usbhost_givesem(&g_rx65n_edlist[i].wdhsem);
+                 nxsem_post(&g_rx65n_edlist[i].wdhsem);
                 }
 
               else
@@ -3589,7 +3587,7 @@ void usb_hstd_nrdy_endprocess (uint16_t pipe)
 
           /* Release the semaphore for this pipe */
 
-          rx65n_usbhost_givesem(&g_rx65n_edlist[pipe].wdhsem);
+          nxsem_post(&g_rx65n_edlist[pipe].wdhsem);
         }
       else
         {
@@ -3611,7 +3609,7 @@ void usb_hstd_nrdy_endprocess (uint16_t pipe)
 
           /* Release the semaphore for this pipe */
 
-          rx65n_usbhost_givesem(&g_rx65n_edlist[pipe].wdhsem);
+          nxsem_post(&g_rx65n_edlist[pipe].wdhsem);
         }
     }
 }
@@ -4454,7 +4452,7 @@ void usb_hstd_brdy_pipe (void)
 
           usb_hstd_ctrl_end((uint16_t) USB_CTRL_END);
 
-          rx65n_usbhost_givesem(&EDCTRL->wdhsem);
+          nxsem_post(&EDCTRL->wdhsem);
           return; /* Nothing else to do here... as of now... */
         }
 
@@ -4575,7 +4573,7 @@ void usb_hstd_brdy_pipe (void)
       (EDCTRL->xfrinfo->tdxfercond == USB_READSHRT) ||
       (EDCTRL->xfrinfo->tdxfercond == USB_READOVER))
         {
-          rx65n_usbhost_givesem(&EDCTRL->wdhsem);
+          nxsem_post(&EDCTRL->wdhsem);
         }
 
       hw_usb_clear_sts_brdy (USB_PIPE0); /* This was missing? */
@@ -4680,7 +4678,7 @@ void usb_hstd_bemp_pipe (void)
 
           usb_hstd_ctrl_end((uint16_t) USB_CTRL_END);
 
-          rx65n_usbhost_givesem(&EDCTRL->wdhsem);
+          nxsem_post(&EDCTRL->wdhsem);
           return; /* As of now, Nothing else to do here... */
         }
 
@@ -4958,35 +4956,6 @@ static void rx65n_usbhost_putreg(uint16_t val, uint32_t addr)
 #endif
 
 /****************************************************************************
- * Name: rx65n_usbhost_takesem
- *
- * Description:
- *   This is just a wrapper to handle the annoying behavior of semaphore
- *   waits that return due to the receipt of a signal.
- *
- ****************************************************************************/
-
-static int rx65n_usbhost_takesem(sem_t *sem)
-{
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(sem);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
-  return ret;
-}
-
-/****************************************************************************
  * Name: rx65n_usbhost_getle16
  *
  * Description:
@@ -5253,7 +5222,7 @@ static inline int rx65n_usbhost_remctrled(struct rx65n_usbhost_s *priv,
 
   if (g_kbdport == g_usbidx)
     {
-      rx65n_usbhost_givesem(&g_rx65n_edlist[g_kbdpipe].wdhsem);
+      nxsem_post(&g_rx65n_edlist[g_kbdpipe].wdhsem);
     }
 
   return OK;
@@ -5847,7 +5816,7 @@ static int rx65n_usbhost_ctrltd(struct rx65n_usbhost_s *priv,
 
       if (dirpid == GTD_STATUS_DP_SETUP)
         {
-          rx65n_usbhost_takesem(&priv->exclsem);
+          nxmutex_lock(&priv->lock);
 
           /* Set DATA0 bit of DCPCTR */
 
@@ -5878,17 +5847,17 @@ static int rx65n_usbhost_ctrltd(struct rx65n_usbhost_s *priv,
           hw_usb_hset_sureq();
 
           /* At this point every thing is done w.r.t hardware to send the
-           * setup packet... Now release the exclusive access semaphore and
+           * setup packet... Now release the exclusive access mutex and
            * wait for wdhsem
            */
 
-          rx65n_usbhost_givesem(&priv->exclsem);
+          nxmutex_unlock(&priv->lock);
 
           /* Wait for the Writeback Done Head interrupt */
 
           if (priv->connected)
             {
-             rx65n_usbhost_takesem(&ed->wdhsem);
+             nxsem_wait_uninterruptible(&ed->wdhsem);
             }
 
           /* Disable setup packet status response */
@@ -5899,7 +5868,7 @@ static int rx65n_usbhost_ctrltd(struct rx65n_usbhost_s *priv,
 
       else if (dirpid == GTD_STATUS_DP_IN)
         {
-          rx65n_usbhost_takesem(&priv->exclsem);
+          nxmutex_lock(&priv->lock);
 
           /* BEMP0 Disable */
 
@@ -5915,27 +5884,27 @@ static int rx65n_usbhost_ctrltd(struct rx65n_usbhost_s *priv,
            * to receive the setup data... Now wait for interrupt
            */
 
-          rx65n_usbhost_givesem (&priv->exclsem);
+          nxmutex_unlock(&priv->lock);
 
           if (priv->connected)
             {
-             rx65n_usbhost_takesem(&ed->wdhsem);
+             nxsem_wait_uninterruptible(&ed->wdhsem);
             }
         }
 
       else if (dirpid == GTD_STATUS_DP_OUT)
         {
-          rx65n_usbhost_takesem(&priv->exclsem);
+          nxmutex_lock(&priv->lock);
 
           /* process setup packet status phase */
 
           usb_hstd_ctrl_write_start(buffer, buflen);
 
-          rx65n_usbhost_givesem (&priv->exclsem);
+          nxmutex_unlock(&priv->lock);
 
           if (priv->connected)
             {
-               rx65n_usbhost_takesem(&ed->wdhsem);
+               nxsem_wait_uninterruptible(&ed->wdhsem);
             }
 
           /* Disable Empty Interrupt */
@@ -6189,20 +6158,20 @@ static void rx65n_usbhost_bottomhalf (void *arg)
    * is no real option (other than to reschedule and delay).
    */
 
-  rx65n_usbhost_takesem(&g_usbhost.exclsem);
+  nxmutex_lock(&g_usbhost.lock);
 
   if (bottom_half_processing == USB_PROCESS_SACK_INT)
     {
       EDCTRL->xfrinfo->tdstatus = TD_CC_NOERROR;
       hw_usb_hclear_sts_sack();
-      rx65n_usbhost_givesem(&EDCTRL->wdhsem);
+      nxsem_post(&EDCTRL->wdhsem);
     }
 
   else if (bottom_half_processing == USB_PROCESS_SIGN_INT)
     {
       EDCTRL->xfrinfo->tdstatus = TD_CC_PIDCHECKFAILURE;
       hw_usb_hclear_sts_sign();
-      rx65n_usbhost_givesem(&EDCTRL->wdhsem);
+      nxsem_post(&EDCTRL->wdhsem);
     }
 
   else if (bottom_half_processing == USB_PROCESS_ATTACHED_INT)
@@ -6235,7 +6204,7 @@ static void rx65n_usbhost_bottomhalf (void *arg)
           if (priv->pscwait)
             {
               priv->pscwait = false;
-              rx65n_usbhost_givesem(&priv->pscsem);
+              nxsem_post(&priv->pscsem);
             }
         }
       else
@@ -6264,13 +6233,13 @@ static void rx65n_usbhost_bottomhalf (void *arg)
 
           /* hardware is available */
 
-          rx65n_usbhost_givesem(&g_usbhost.exclsem);
+          nxmutex_unlock(&g_usbhost.lock);
 
           /* Are we bound to a class instance? */
 
           if (g_kbdpipe)
             {
-              rx65n_usbhost_givesem(&g_rx65n_edlist[g_kbdpipe].wdhsem);
+              nxsem_post(&g_rx65n_edlist[g_kbdpipe].wdhsem);
             }
 
           g_kbdpipe = 0;
@@ -6286,7 +6255,7 @@ static void rx65n_usbhost_bottomhalf (void *arg)
 
           if (priv->pscwait)
             {
-              rx65n_usbhost_givesem(&priv->pscsem);
+              nxsem_post(&priv->pscsem);
               priv->pscwait = false;
             }
 
@@ -6329,7 +6298,7 @@ static void rx65n_usbhost_bottomhalf (void *arg)
       bottom_half_processing);
     }
 
-  rx65n_usbhost_givesem(&g_usbhost.exclsem);
+  nxmutex_unlock(&g_usbhost.lock);
 }
 
 /****************************************************************************
@@ -6423,7 +6392,7 @@ static int rx65n_usbhost_wait(struct usbhost_connection_s *conn,
       /* Wait for the next connection event */
 
       priv->pscwait = true;
-      ret = rx65n_usbhost_takesem(&priv->pscsem);
+      ret = nxsem_wait_uninterruptible(&priv->pscsem);
       if (ret < 0)
         {
           return ret;
@@ -6600,7 +6569,7 @@ static int rx65n_usbhost_ep0configure(struct usbhost_driver_s *drvr,
 
   /* We must have exclusive access to EP0 and the control list */
 
-  rx65n_usbhost_takesem(&priv->exclsem);
+  nxmutex_lock(&priv->lock);
   usb_cstd_set_nak(USB_PIPE0);
 
   /* Make sure, all the DEVADDn registers are set to default state */
@@ -6624,7 +6593,7 @@ static int rx65n_usbhost_ep0configure(struct usbhost_driver_s *drvr,
   hw_usb_set_curpipe (USB_CUSE, USB_PIPE0);
   hw_usb_set_bclr (USB_CUSE);
 
-  rx65n_usbhost_givesem(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
   return OK;
 }
 
@@ -6672,7 +6641,7 @@ static int rx65n_usbhost_epalloc(struct usbhost_driver_s *drvr,
    * periodic list and the interrupt table.
    */
 
-  rx65n_usbhost_takesem(&priv->exclsem);
+  nxmutex_lock(&priv->lock);
 
   /* Take the ED descriptor from the list of ED Array - based on pipe num
    * Also note it down as part of ED structurie itself
@@ -6819,7 +6788,7 @@ static int rx65n_usbhost_epalloc(struct usbhost_driver_s *drvr,
         }
     }
 
-  rx65n_usbhost_givesem(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -6858,7 +6827,7 @@ static int rx65n_usbhost_epfree(struct usbhost_driver_s *drvr,
    * the periodic list and the interrupt table.
    */
 
-  rx65n_usbhost_takesem(&priv->exclsem);
+  nxmutex_lock(&priv->lock);
 
   /* Remove the ED to the correct list depending on the trasfer type */
 
@@ -6888,7 +6857,7 @@ static int rx65n_usbhost_epfree(struct usbhost_driver_s *drvr,
   /* Put the ED back into the free list */
 
   rx65n_usbhost_edfree(ed);
-  rx65n_usbhost_givesem(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -6935,7 +6904,7 @@ static int rx65n_usbhost_alloc(struct usbhost_driver_s *drvr,
 
   /* We must have exclusive access to the transfer buffer pool */
 
-  rx65n_usbhost_takesem(&priv->exclsem);
+  nxmutex_lock(&priv->lock);
 
   *buffer = rx65n_usbhost_tballoc();
   if (*buffer)
@@ -6944,7 +6913,7 @@ static int rx65n_usbhost_alloc(struct usbhost_driver_s *drvr,
       ret = OK;
     }
 
-  rx65n_usbhost_givesem(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -6979,9 +6948,9 @@ static int rx65n_usbhost_free(struct usbhost_driver_s *drvr, uint8_t *buffer)
 
   /* We must have exclusive access to the transfer buffer pool */
 
-  rx65n_usbhost_takesem(&priv->exclsem);
+  nxmutex_lock(&priv->lock);
   rx65n_usbhost_tbfree(buffer);
-  rx65n_usbhost_givesem(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
   return OK;
 }
 
@@ -7173,7 +7142,8 @@ static int rx65n_usbhost_ctrlin(struct usbhost_driver_s *drvr,
                 USB_REQ_RECIPIENT_INTERFACE) &&
                 (req_req == USBHID_REQUEST_GETREPORT))
     {
-       rx65n_usbhost_takesem (&g_rx65n_edlist[kbd_interrupt_in_pipe].wdhsem);
+      nxsem_wait_uninterruptible(
+        &g_rx65n_edlist[kbd_interrupt_in_pipe].wdhsem);
 
           *(local_buf + 0) = kbd_report_data [0];
           *(local_buf + 1) = kbd_report_data [1];
@@ -7491,7 +7461,7 @@ static ssize_t rx65n_usbhost_transfer(struct usbhost_driver_s *drvr,
        *
        */
 
-      rx65n_usbhost_takesem(&priv->exclsem);
+      nxmutex_lock(&priv->lock);
 
       /* Allocate a structure to retain the information needed when the
        * transfer completes.
@@ -7505,8 +7475,8 @@ static ssize_t rx65n_usbhost_transfer(struct usbhost_driver_s *drvr,
         {
           uerr("ERROR: rx65n_usbhost_alloc_xfrinfo failed\n");
           nbytes = -ENOMEM;
-          rx65n_usbhost_givesem(&priv->exclsem);
-          goto errout_with_sem;
+          nxmutex_unlock(&priv->lock);
+          goto errout_with_lock;
         }
 
       /* Newly added condition */
@@ -7569,7 +7539,7 @@ static ssize_t rx65n_usbhost_transfer(struct usbhost_driver_s *drvr,
       /* Set up the transfer */
 
       ret = rx65n_usbhost_transfer_common(priv, ed, buffer, buflen);
-      rx65n_usbhost_givesem(&priv->exclsem);
+      nxmutex_unlock(&priv->lock);
       if (ret < 0)
         {
           uerr("ERROR: rx65n_usbhost_transfer_common failed: %d\n", ret);
@@ -7581,7 +7551,7 @@ static ssize_t rx65n_usbhost_transfer(struct usbhost_driver_s *drvr,
 
       if (priv->connected)
         {
-          rx65n_usbhost_takesem(&ed->wdhsem);
+          nxsem_wait_uninterruptible(&ed->wdhsem);
         }
 
       /* Update the buffer pointer for next buffer operation */
@@ -7650,9 +7620,9 @@ errout_with_xfrinfo:
   }
   while (0);
 
-errout_with_sem:
+errout_with_lock:
 
-  /* rx65n_usbhost_givesem(&priv->exclsem); */
+  /* nxmutex_unlock(&priv->lock); */
 
   return nbytes;
 }
@@ -7802,7 +7772,7 @@ static int rx65n_usbhost_asynch(struct usbhost_driver_s *drvr,
    * buffer pool, the bulk and interrupt lists, and the HCCA interrupt table.
    */
 
-  rx65n_usbhost_takesem(&priv->exclsem);
+  nxmutex_lock(&priv->lock);
 
   /* Allocate a structure to retain the information needed when the
    * asynchronous transfer completes.
@@ -7815,7 +7785,7 @@ static int rx65n_usbhost_asynch(struct usbhost_driver_s *drvr,
     {
       uerr("ERROR: rx65n_usbhost_alloc_xfrinfo failed\n");
       ret = -ENOMEM;
-      goto errout_with_sem;
+      goto errout_with_lock;
     }
 
   /* Initialize the transfer structure */
@@ -7835,7 +7805,7 @@ static int rx65n_usbhost_asynch(struct usbhost_driver_s *drvr,
   if (ret < 0)
     {
       uerr("ERROR: rx65n_usbhost_dma_alloc failed: %d\n", ret);
-      goto errout_with_sem;
+      goto errout_with_lock;
     }
 
   /* If a buffer was allocated, then use it instead of the callers buffer */
@@ -7861,7 +7831,7 @@ static int rx65n_usbhost_asynch(struct usbhost_driver_s *drvr,
 
   /* Enable Ready Interrupt */
 
-  rx65n_usbhost_givesem(&priv->exclsem);
+  nxmutex_unlock(&priv->lock);
   return OK;
 
 errout_with_asynch:
@@ -7877,8 +7847,8 @@ errout_with_asynch:
   rx65n_usbhost_free_xfrinfo(xfrinfo);
   ed->xfrinfo = NULL;
 
-errout_with_sem:
-  rx65n_usbhost_givesem(&priv->exclsem);
+errout_with_lock:
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 #endif /* CONFIG_USBHOST_ASYNCH */
@@ -7965,7 +7935,7 @@ static int rx65n_usbhost_cancel(FAR struct usbhost_driver_s *drvr,
 
               /* Wake up the waiting thread */
 
-              rx65n_usbhost_givesem(&g_rx65n_edlist[USB_PIPE6].wdhsem);
+              nxsem_post(&g_rx65n_edlist[USB_PIPE6].wdhsem);
 
               /* And free the transfer structure */
 
@@ -8397,10 +8367,10 @@ struct usbhost_connection_s *rx65n_usbhost_initialize(int controller)
 
   usbhost_devaddr_initialize(&priv->rhport);
 
-  /* Initialize semaphores */
+  /* Initialize semaphores & mutex */
 
   nxsem_init(&priv->pscsem,  0, 0);
-  nxsem_init(&priv->exclsem, 0, 1);
+  nxmutex_lock(&priv->lock);
 
   /* The pscsem semaphore is used for signaling and, hence, should not have
    * priority inheritance enabled.
