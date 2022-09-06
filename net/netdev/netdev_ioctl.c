@@ -1645,6 +1645,18 @@ ssize_t net_ioctl_arglen(int cmd)
       case SIOCGIFCOUNT:
       case SIOCSIFFLAGS:
       case SIOCGIFFLAGS:
+      case SIOCMIINOTIFY:
+      case SIOCGMIIPHY:
+      case SIOCGMIIREG:
+      case SIOCSMIIREG:
+      case SIOCGCANBITRATE:
+      case SIOCSCANBITRATE:
+      case SIOCACANEXTFILTER:
+      case SIOCDCANEXTFILTER:
+      case SIOCACANSTDFILTER:
+      case SIOCDCANSTDFILTER:
+      case SIOCGIFNAME:
+      case SIOCGIFINDEX:
         return sizeof(struct ifreq);
 
       case SIOCGLIFADDR:
@@ -1677,14 +1689,6 @@ ssize_t net_ioctl_arglen(int cmd)
       case SIOCADDRT:
       case SIOCDELRT:
         return sizeof(struct rtentry);
-
-      case SIOCMIINOTIFY:
-        return sizeof(struct mii_ioctl_notify_s);
-
-      case SIOCGMIIPHY:
-      case SIOCGMIIREG:
-      case SIOCSMIIREG:
-        return sizeof(struct mii_ioctl_data_s);
 
       default:
 #ifdef CONFIG_NETDEV_IOCTL
