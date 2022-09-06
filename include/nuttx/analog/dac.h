@@ -60,18 +60,18 @@
 
 begin_packed_struct struct dac_msg_s
 {
-  uint8_t      am_channel;               /* The 8-bit DAC Channel */
-  int32_t      am_data;                  /* DAC convert result (4 bytes) */
+  uint8_t am_channel;               /* The 8-bit DAC Channel */
+  int32_t am_data;                  /* DAC convert result (4 bytes) */
 } end_packed_struct;
 
 struct dac_fifo_s
 {
-  sem_t         af_sem;                  /* Counting semaphore */
-  uint8_t       af_head;                 /* Index to the head [IN] index
-                                          * in the circular buffer */
-  uint8_t       af_tail;                 /* Index to the tail [OUT] index
-                                          * in the circular buffer */
-                                         /* Circular buffer of DAC messages */
+  sem_t   af_sem;                  /* Counting semaphore */
+  uint8_t af_head;                 /* Index to the head [IN] index
+                                    * in the circular buffer */
+  uint8_t af_tail;                 /* Index to the tail [OUT] index
+                                    * in the circular buffer */
+                                   /* Circular buffer of DAC messages */
   struct dac_msg_s af_buffer[CONFIG_DAC_FIFOSIZE];
 };
 
@@ -128,14 +128,14 @@ struct dac_ops_s
 
 struct dac_dev_s
 {
-  const struct dac_ops_s *ad_ops;       /* Arch-specific operations */
-  void                   *ad_priv;      /* Used by the arch-specific logic */
-  uint8_t                 ad_ocount;    /* The number of times the device has
-                                         * been opened */
-  uint8_t                 ad_nchannel;  /* Number of dac channel */
-  mutex_t                 ad_closelock; /* Locks out new opens while close is
-                                         * in progress */
-  struct dac_fifo_s       ad_xmit;      /* Describes receive FIFO */
+  FAR const struct dac_ops_s *ad_ops;       /* Arch-specific operations */
+  FAR void                   *ad_priv;      /* Used by the arch-specific logic */
+  uint8_t                     ad_ocount;    /* The number of times the device has
+                                             * been opened */
+  uint8_t                     ad_nchannel;  /* Number of dac channel */
+  mutex_t                     ad_closelock; /* Locks out new opens while close is
+                                             * in progress */
+  struct dac_fifo_s           ad_xmit;      /* Describes receive FIFO */
 };
 
 /****************************************************************************

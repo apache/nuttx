@@ -69,7 +69,7 @@ struct nfsmount
 {
   FAR struct nfsnode       *nm_head;          /* A list of all files opened on this mountpoint */
   mutex_t                   nm_lock;          /* Used to assure thread-safe access */
-  nfsfh_t                  *nm_fh;            /* File handle of root dir */
+  FAR nfsfh_t              *nm_fh;            /* File handle of root dir */
   char                      nm_path[90];      /* server's path of the directory being mounted */
   struct nfs_fattr          nm_fattr;         /* nfs file attribute cache */
   FAR struct rpcclnt       *nm_rpcclnt;       /* RPC state */

@@ -66,9 +66,9 @@
 
 /* Chip-common registers */
 
-#define CHIPCOMMON_GPIO_CONTROL ((uint32_t)(0x18000000 + 0x6c) )
-#define CHIPCOMMON_SR_CONTROL0  ((uint32_t)(0x18000000 + 0x504) )
-#define CHIPCOMMON_SR_CONTROL1  ((uint32_t)(0x18000000 + 0x508) )
+#define CHIPCOMMON_GPIO_CONTROL ((uint32_t)(0x18000000 + 0x6c))
+#define CHIPCOMMON_SR_CONTROL0  ((uint32_t)(0x18000000 + 0x504))
+#define CHIPCOMMON_SR_CONTROL1  ((uint32_t)(0x18000000 + 0x508))
 
 /****************************************************************************
  * Public Data
@@ -652,7 +652,6 @@ static int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
   /* Allocate sdio bus structure */
 
   sbus = (FAR struct bcmf_sdio_dev_s *)kmm_malloc(sizeof(*sbus));
-
   if (!sbus)
     {
       return -ENOMEM;
@@ -674,11 +673,7 @@ static int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
 
   /* Init transmit frames queue */
 
-  if ((ret = nxmutex_init(&sbus->queue_lock)) != OK)
-    {
-      goto exit_free_bus;
-    }
-
+  nxmutex_init(&sbus->queue_lock);
   list_initialize(&sbus->tx_queue);
   list_initialize(&sbus->rx_queue);
 
@@ -688,10 +683,7 @@ static int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
 
   /* Init thread semaphore */
 
-  if ((ret = nxsem_init(&sbus->thread_signal, 0, 0)) != OK)
-    {
-      goto exit_free_bus;
-    }
+  nxsem_init(&sbus->thread_signal, 0, 0);
 
   /* Configure hardware */
 

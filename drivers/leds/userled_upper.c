@@ -158,7 +158,7 @@ static int userled_open(FAR struct file *filep)
 
   /* Attach the open structure to the file structure */
 
-  filep->f_priv = (FAR void *)opriv;
+  filep->f_priv = opriv;
   ret = OK;
 
 errout_with_lock:

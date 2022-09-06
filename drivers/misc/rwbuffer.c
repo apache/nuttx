@@ -72,12 +72,9 @@ static ssize_t rwb_read_(FAR struct rwbuffer_s *rwb, off_t startblock,
  ****************************************************************************/
 
 #if defined(CONFIG_DRVR_WRITEBUFFER)
-static int rwb_lock(FAR mutex_t *lock)
-{
-  return nxmutex_lock(lock);
-}
+#  define rwb_lock(l) nxmutex_lock(l)
 #else
-# define rwb_lock(s) OK
+#  define rwb_lock(l) OK
 #endif
 
 /****************************************************************************
@@ -85,9 +82,9 @@ static int rwb_lock(FAR mutex_t *lock)
  ****************************************************************************/
 
 #if defined(CONFIG_DRVR_WRITEBUFFER)
-# define rwb_unlock(l) nxmutex_unlock(l)
+#  define rwb_unlock(l) nxmutex_unlock(l)
 #else
-# define rwb_unlock(l)
+#  define rwb_unlock(l)
 #endif
 
 /****************************************************************************
@@ -211,7 +208,7 @@ static void rwb_wrstarttimeout(FAR struct rwbuffer_s *rwb)
    */
 
   int ticks = MSEC2TICK(CONFIG_DRVR_WRDELAY);
-  work_queue(LPWORK, &rwb->work, rwb_wrtimeout, (FAR void *)rwb, ticks);
+  work_queue(LPWORK, &rwb->work, rwb_wrtimeout, rwb, ticks);
 #endif
 }
 #endif

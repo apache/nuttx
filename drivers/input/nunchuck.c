@@ -188,7 +188,7 @@ static int nunchuck_sample(FAR struct nunchuck_dev_s *priv,
 {
   uint8_t cmd[2];
   uint8_t data[6];
-  static bool initialized = false;
+  static bool initialized;
 
   if (!initialized)
     {

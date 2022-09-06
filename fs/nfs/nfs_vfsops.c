@@ -241,14 +241,14 @@ const struct mountpt_operations nfs_operations =
 static int nfs_filecreate(FAR struct nfsmount *nmp, FAR struct nfsnode *np,
                           FAR const char *relpath, mode_t mode)
 {
-  struct file_handle      fhandle;
-  struct nfs_fattr        fattr;
-  char                    filename[NAME_MAX + 1];
-  FAR uint32_t           *ptr;
-  uint32_t                tmp;
-  int                     namelen;
-  int                     reqlen;
-  int                     ret;
+  struct file_handle  fhandle;
+  struct nfs_fattr    fattr;
+  char                filename[NAME_MAX + 1];
+  FAR uint32_t       *ptr;
+  uint32_t            tmp;
+  int                 namelen;
+  int                 reqlen;
+  int                 ret;
 
   /* Find the NFS node of the directory containing the file to be created */
 
@@ -332,8 +332,8 @@ static int nfs_filecreate(FAR struct nfsmount *nmp, FAR struct nfsnode *np,
 
   nfs_statistics(NFSPROC_CREATE);
   ret = nfs_request(nmp, NFSPROC_CREATE,
-                    (FAR void *)&nmp->nm_msgbuffer.create, reqlen,
-                    (FAR void *)nmp->nm_iobuffer, nmp->nm_buflen);
+                    &nmp->nm_msgbuffer.create, reqlen,
+                    nmp->nm_iobuffer, nmp->nm_buflen);
 
   /* Check for success */
 
@@ -499,8 +499,8 @@ static int nfs_filechstat(FAR struct nfsmount *nmp, FAR struct nfsnode *np,
 
   nfs_statistics(NFSPROC_SETATTR);
   ret = nfs_request(nmp, NFSPROC_SETATTR,
-                    (FAR void *)&nmp->nm_msgbuffer.setattr, reqlen,
-                    (FAR void *)nmp->nm_iobuffer, nmp->nm_buflen);
+                    &nmp->nm_msgbuffer.setattr, reqlen,
+                    nmp->nm_iobuffer, nmp->nm_buflen);
   if (ret != OK)
     {
       ferr("ERROR: nfs_request failed: %d\n", ret);
@@ -778,8 +778,8 @@ static int nfs_close(FAR struct file *filep)
 
   /* Recover our private data from the struct file instance */
 
-  nmp = (FAR struct nfsmount *) filep->f_inode->i_private;
-  np  = (FAR struct nfsnode *) filep->f_priv;
+  nmp = (FAR struct nfsmount *)filep->f_inode->i_private;
+  np  = (FAR struct nfsnode *)filep->f_priv;
 
   DEBUGASSERT(nmp != NULL);
 
@@ -957,8 +957,8 @@ static ssize_t nfs_read(FAR struct file *filep, FAR char *buffer,
       finfo("Reading %zu bytes\n", readsize);
       nfs_statistics(NFSPROC_READ);
       ret = nfs_request(nmp, NFSPROC_READ,
-                        (FAR void *)&nmp->nm_msgbuffer.read, reqlen,
-                        (FAR void *)nmp->nm_iobuffer, nmp->nm_buflen);
+                        &nmp->nm_msgbuffer.read, reqlen,
+                        nmp->nm_iobuffer, nmp->nm_buflen);
       if (ret)
         {
           ferr("ERROR: nfs_request failed: %d\n", ret);
@@ -1035,17 +1035,17 @@ errout_with_lock:
 static ssize_t nfs_write(FAR struct file *filep, FAR const char *buffer,
                          size_t buflen)
 {
-  FAR struct nfsmount   *nmp;
-  FAR struct nfsnode    *np;
-  ssize_t                writesize;
-  ssize_t                bufsize;
-  ssize_t                byteswritten = 0;
-  size_t                 reqlen;
-  FAR uint32_t          *ptr;
-  uint32_t               tmp;
-  int                    commit = 0;
-  int                    committed = NFSV3WRITE_FILESYNC;
-  int                    ret;
+  FAR struct nfsmount *nmp;
+  FAR struct nfsnode  *np;
+  ssize_t              writesize;
+  ssize_t              bufsize;
+  ssize_t              byteswritten = 0;
+  size_t               reqlen;
+  FAR uint32_t        *ptr;
+  uint32_t             tmp;
+  int                  commit = 0;
+  int                  committed = NFSV3WRITE_FILESYNC;
+  int                  ret;
 
   finfo("Write %zu bytes to offset %jd\n",
         buflen, (intmax_t)filep->f_pos);
@@ -1140,8 +1140,8 @@ static ssize_t nfs_write(FAR struct file *filep, FAR const char *buffer,
 
       nfs_statistics(NFSPROC_WRITE);
       ret = nfs_request(nmp, NFSPROC_WRITE,
-                        (FAR void *)nmp->nm_iobuffer, reqlen,
-                        (FAR void *)&nmp->nm_msgbuffer.write,
+                        nmp->nm_iobuffer, reqlen,
+                        &nmp->nm_msgbuffer.write,
                         sizeof(struct rpc_reply_write));
       if (ret)
         {
@@ -1579,8 +1579,8 @@ read_dir:
 
   nfs_statistics(NFSPROC_READDIR);
   ret = nfs_request(nmp, NFSPROC_READDIR,
-                    (FAR void *)&nmp->nm_msgbuffer.readdir, reqlen,
-                    (FAR void *)nmp->nm_iobuffer, nmp->nm_buflen);
+                    &nmp->nm_msgbuffer.readdir, reqlen,
+                    nmp->nm_iobuffer, nmp->nm_buflen);
   if (ret != OK)
     {
       ferr("ERROR: nfs_request failed: %d\n", ret);
@@ -2081,7 +2081,7 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   /* Mounted! */
 
-  *handle = (FAR void *)nmp;
+  *handle = nmp;
 
   finfo("Successfully mounted\n");
   return OK;
@@ -2198,8 +2198,8 @@ static int nfs_fsinfo(FAR struct nfsmount *nmp)
 
   nfs_statistics(NFSPROC_FSINFO);
   ret = nfs_request(nmp, NFSPROC_FSINFO,
-                    (FAR void *)fsinfo, sizeof(struct FS3args),
-                    (FAR void *)nmp->nm_iobuffer, nmp->nm_buflen);
+                    fsinfo, sizeof(struct FS3args),
+                    nmp->nm_iobuffer, nmp->nm_buflen);
   if (ret)
     {
       return ret;
@@ -2264,8 +2264,8 @@ static int nfs_fsinfo(FAR struct nfsmount *nmp)
     {
       nfs_statistics(NFSPROC_GETATTR);
       ret = nfs_request(nmp, NFSPROC_GETATTR,
-                        (FAR void *)fsinfo, sizeof(struct FS3args),
-                        (FAR void *)nmp->nm_iobuffer, nmp->nm_buflen);
+                        fsinfo, sizeof(struct FS3args),
+                        nmp->nm_iobuffer, nmp->nm_buflen);
       if (ret)
         {
           return ret;
@@ -2321,8 +2321,8 @@ static int nfs_statfs(FAR struct inode *mountpt, FAR struct statfs *sbp)
 
   nfs_statistics(NFSPROC_FSSTAT);
   ret = nfs_request(nmp, NFSPROC_FSSTAT,
-                    (FAR void *)fsstat, sizeof(struct FS3args),
-                    (FAR void *)nmp->nm_iobuffer, nmp->nm_buflen);
+                    fsstat, sizeof(struct FS3args),
+                    nmp->nm_iobuffer, nmp->nm_buflen);
   if (ret)
     {
       goto errout_with_lock;
@@ -2360,14 +2360,14 @@ errout_with_lock:
 
 static int nfs_remove(FAR struct inode *mountpt, FAR const char *relpath)
 {
-  FAR struct nfsmount    *nmp;
-  struct file_handle      fhandle;
-  struct nfs_fattr        fattr;
-  char                    filename[NAME_MAX + 1];
-  FAR uint32_t           *ptr;
-  int                     namelen;
-  int                     reqlen;
-  int                     ret;
+  FAR struct nfsmount *nmp;
+  struct file_handle   fhandle;
+  struct nfs_fattr     fattr;
+  char                 filename[NAME_MAX + 1];
+  FAR uint32_t        *ptr;
+  int                  namelen;
+  int                  reqlen;
+  int                  ret;
 
   /* Sanity checks */
 
@@ -2420,8 +2420,8 @@ static int nfs_remove(FAR struct inode *mountpt, FAR const char *relpath)
 
   nfs_statistics(NFSPROC_REMOVE);
   ret = nfs_request(nmp, NFSPROC_REMOVE,
-                    (FAR void *)&nmp->nm_msgbuffer.removef, reqlen,
-                    (FAR void *)nmp->nm_iobuffer, nmp->nm_buflen);
+                    &nmp->nm_msgbuffer.removef, reqlen,
+                    nmp->nm_iobuffer, nmp->nm_buflen);
 
 errout_with_lock:
   nxmutex_unlock(&nmp->nm_lock);
@@ -2442,15 +2442,15 @@ errout_with_lock:
 static int nfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
                      mode_t mode)
 {
-  FAR struct nfsmount   *nmp;
-  struct file_handle     fhandle;
-  struct nfs_fattr       fattr;
-  char                   dirname[NAME_MAX + 1];
-  FAR uint32_t          *ptr;
-  uint32_t               tmp;
-  int                    namelen;
-  int                    reqlen;
-  int                    ret;
+  FAR struct nfsmount *nmp;
+  struct file_handle   fhandle;
+  struct nfs_fattr     fattr;
+  char                 dirname[NAME_MAX + 1];
+  FAR uint32_t        *ptr;
+  uint32_t             tmp;
+  int                  namelen;
+  int                  reqlen;
+  int                  ret;
 
   /* Sanity checks */
 
@@ -2458,7 +2458,7 @@ static int nfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
 
   /* Get the mountpoint private data from the inode structure */
 
-  nmp = (FAR struct nfsmount *) mountpt->i_private;
+  nmp = (FAR struct nfsmount *)mountpt->i_private;
 
   ret = nxmutex_lock(&nmp->nm_lock);
   if (ret < 0)
@@ -2543,8 +2543,8 @@ static int nfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
 
   nfs_statistics(NFSPROC_MKDIR);
   ret = nfs_request(nmp, NFSPROC_MKDIR,
-                    (FAR void *)&nmp->nm_msgbuffer.mkdir, reqlen,
-                    (FAR void *)&nmp->nm_iobuffer, nmp->nm_buflen);
+                    &nmp->nm_msgbuffer.mkdir, reqlen,
+                    &nmp->nm_iobuffer, nmp->nm_buflen);
   if (ret)
     {
       ferr("ERROR: nfs_request failed: %d\n", ret);
@@ -2568,14 +2568,14 @@ errout_with_lock:
 
 static int nfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
 {
-  FAR struct nfsmount   *nmp;
-  struct file_handle     fhandle;
-  struct nfs_fattr       fattr;
-  char                   dirname[NAME_MAX + 1];
-  FAR uint32_t          *ptr;
-  int                    namelen;
-  int                    reqlen;
-  int                    ret;
+  FAR struct nfsmount *nmp;
+  struct file_handle   fhandle;
+  struct nfs_fattr     fattr;
+  char                 dirname[NAME_MAX + 1];
+  FAR uint32_t        *ptr;
+  int                  namelen;
+  int                  reqlen;
+  int                  ret;
 
   /* Sanity checks */
 
@@ -2630,8 +2630,8 @@ static int nfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
 
   nfs_statistics(NFSPROC_RMDIR);
   ret = nfs_request(nmp, NFSPROC_RMDIR,
-                        (FAR void *)&nmp->nm_msgbuffer.rmdir, reqlen,
-                        (FAR void *)nmp->nm_iobuffer, nmp->nm_buflen);
+                    &nmp->nm_msgbuffer.rmdir, reqlen,
+                    nmp->nm_iobuffer, nmp->nm_buflen);
 
 errout_with_lock:
   nxmutex_unlock(&nmp->nm_lock);
@@ -2652,16 +2652,16 @@ errout_with_lock:
 static int nfs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
                       FAR const char *newrelpath)
 {
-  FAR struct nfsmount    *nmp;
-  struct file_handle      from_handle;
-  struct file_handle      to_handle;
-  char                    from_name[NAME_MAX + 1];
-  char                    to_name[NAME_MAX + 1];
-  struct nfs_fattr        fattr;
-  FAR uint32_t           *ptr;
-  int                     namelen;
-  int                     reqlen;
-  int                     ret;
+  FAR struct nfsmount *nmp;
+  struct file_handle   from_handle;
+  struct file_handle   to_handle;
+  char                 from_name[NAME_MAX + 1];
+  char                 to_name[NAME_MAX + 1];
+  struct nfs_fattr     fattr;
+  FAR uint32_t        *ptr;
+  int                  namelen;
+  int                  reqlen;
+  int                  ret;
 
   /* Sanity checks */
 
@@ -2743,8 +2743,8 @@ static int nfs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
 
   nfs_statistics(NFSPROC_RENAME);
   ret = nfs_request(nmp, NFSPROC_RENAME,
-                    (FAR void *)&nmp->nm_msgbuffer.renamef, reqlen,
-                    (FAR void *)nmp->nm_iobuffer, nmp->nm_buflen);
+                    &nmp->nm_msgbuffer.renamef, reqlen,
+                    nmp->nm_iobuffer, nmp->nm_buflen);
 
 errout_with_lock:
   nxmutex_unlock(&nmp->nm_lock);

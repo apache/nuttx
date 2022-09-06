@@ -699,7 +699,7 @@ int tivacan_rxhandler(int argc, char** argv)
   struct can_msg_s msg;
 
 #ifdef CONFIG_CAN_ERRORS
-  int      ret;
+  int ret;
 #endif
 
   /* argv[0] contains the thread name */

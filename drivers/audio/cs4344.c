@@ -1440,7 +1440,7 @@ FAR struct audio_lowerhalf_s *cs4344_initialize(FAR struct i2s_dev_s *i2s)
 
   /* Allocate a CS4344 device structure */
 
-  priv = (FAR struct cs4344_dev_s *) kmm_zalloc(sizeof(struct cs4344_dev_s));
+  priv = (FAR struct cs4344_dev_s *)kmm_zalloc(sizeof(struct cs4344_dev_s));
   if (priv)
     {
       /* Initialize the CS4344 device structure.  Since we used kmm_zalloc,
@@ -1460,7 +1460,5 @@ FAR struct audio_lowerhalf_s *cs4344_initialize(FAR struct i2s_dev_s *i2s)
       return &priv->dev;
     }
 
-  nxmutex_destroy(&priv->pendlock);
-  kmm_free(priv);
   return NULL;
 }

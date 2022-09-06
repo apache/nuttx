@@ -114,7 +114,7 @@ typedef struct video_format_s video_format_t;
 
 struct video_type_inf_s
 {
-  mutex_t                lock_state;
+  mutex_t              lock_state;
   enum video_state_e   state;
   int32_t              remaining_capnum;
   video_wait_capture_t wait_capture;
@@ -658,7 +658,7 @@ static int start_capture(enum v4l2_buf_type type,
      sf,
      &si);
   g_video_data_ops->start_capture(nr_fmt, df, &di, video_complete_capture);
-  g_video_data_ops->set_buf((uint8_t *)bufaddr, bufsize);
+  g_video_data_ops->set_buf((FAR uint8_t *)bufaddr, bufsize);
 
   return OK;
 }
@@ -847,7 +847,7 @@ static int32_t initialize_scene_gamma(uint8_t **gamma)
     }
 
   *gamma = malloc(sz);
-  val.p_u8 = (uint8_t *)*gamma;
+  val.p_u8 = (FAR uint8_t *)*gamma;
   g_video_sensor_ops->get_value(IMGSENSOR_ID_GAMMA_CURVE, sz, &val);
   return sz;
 }
@@ -1787,7 +1787,6 @@ static int video_takepict_start(FAR struct video_mng_s *vmng,
   irqstate_t           flags;
   enum video_state_e   next_video_state;
   FAR vbuf_container_t *container;
-
   int                  ret = OK;
 
   if (vmng == NULL)
@@ -2221,7 +2220,7 @@ static int set_pvalue(uint32_t id, int size, void *pval)
       return -ENOTTY;
     }
 
-  value.p_u8 = (uint8_t *)pval;
+  value.p_u8 = (FAR uint8_t *)pval;
   return g_video_sensor_ops->set_value(id, size, value);
 }
 
@@ -3069,7 +3068,7 @@ static int video_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
 static FAR void *video_register(FAR const char *devpath)
 {
-  FAR    video_mng_t *priv;
+  FAR video_mng_t *priv;
   int    ret;
   size_t allocsize;
 
@@ -3128,7 +3127,7 @@ static FAR void *video_register(FAR const char *devpath)
       return NULL;
     }
 
-  return (FAR void *)priv;
+  return priv;
 }
 
 static int video_unregister(FAR video_mng_t *v_mgr)
@@ -3142,7 +3141,7 @@ static int video_unregister(FAR video_mng_t *v_mgr)
   else
     {
       nxmutex_destroy(&v_mgr->lock_open_num);
-      unregister_driver((const char *)v_mgr->devpath);
+      unregister_driver(v_mgr->devpath);
 
       kmm_free(v_mgr->devpath);
       kmm_free(v_mgr);
@@ -3227,8 +3226,8 @@ static int video_complete_capture(uint8_t  err_code, uint32_t datasize)
         }
       else
         {
-          g_video_data_ops->set_buf((uint8_t *)container->buf.m.userptr,
-                                  container->buf.length);
+          g_video_data_ops->set_buf((FAR uint8_t *)container->buf.m.userptr,
+                                    container->buf.length);
         }
     }
 

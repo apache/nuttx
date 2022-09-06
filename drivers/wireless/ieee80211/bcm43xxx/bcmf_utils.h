@@ -39,17 +39,17 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-void bcmf_hexdump(uint8_t *data, unsigned int len, unsigned long offset);
+void bcmf_hexdump(FAR uint8_t *dat, unsigned int len, unsigned long offset);
 
-static inline uint16_t bcmf_getle16(void *val)
+static inline uint16_t bcmf_getle16(FAR void *val)
 {
-  uint8_t *valb = (uint8_t *)val;
+  FAR uint8_t *valb = (FAR uint8_t *)val;
   return (uint16_t)valb[0] << 8 | (uint16_t)valb[1];
 }
 
-static inline uint32_t bcmf_getle32(void *val)
+static inline uint32_t bcmf_getle32(FAR void *val)
 {
-  uint16_t *valw = (uint16_t *)val;
+  FAR uint16_t *valw = (FAR uint16_t *)val;
   return (uint32_t)bcmf_getle16(valw) << 16 | bcmf_getle16(valw + 1);
 }
 
