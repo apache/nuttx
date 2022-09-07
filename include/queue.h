@@ -312,11 +312,12 @@ void dq_addafter(FAR dq_entry_t *prev, FAR dq_entry_t *node,
 
 /* Remove nodes from queues */
 
-FAR  sq_entry_t *sq_remafter(FAR sq_entry_t *node, FAR sq_queue_t *queue);
-FAR  sq_entry_t *sq_remlast(FAR sq_queue_t *queue);
-FAR  dq_entry_t *dq_remlast(FAR dq_queue_t *queue);
-FAR  sq_entry_t *sq_remfirst(FAR sq_queue_t *queue);
-FAR  dq_entry_t *dq_remfirst(FAR dq_queue_t *queue);
+FAR sq_entry_t *sq_remafter(FAR sq_entry_t *node, FAR sq_queue_t *queue);
+FAR dq_entry_t *dq_remafter(FAR dq_entry_t *node, FAR dq_queue_t *queue);
+FAR sq_entry_t *sq_remlast(FAR sq_queue_t *queue);
+FAR dq_entry_t *dq_remlast(FAR dq_queue_t *queue);
+FAR sq_entry_t *sq_remfirst(FAR sq_queue_t *queue);
+FAR dq_entry_t *dq_remfirst(FAR dq_queue_t *queue);
 
 /* Count nodes in queues */
 
