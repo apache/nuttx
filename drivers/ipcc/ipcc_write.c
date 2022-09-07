@@ -142,9 +142,10 @@ ssize_t ipcc_write(FAR struct file *filep, FAR const char *buffer,
       return ret;
     }
 
+  flags = enter_critical_section();
+
   for (nwritten = 0; ; )
     {
-      flags = enter_critical_section();
 #ifdef CONFIG_IPCC_BUFFERED
       /* Buffered write, if buffer is empty try to write directly to
        * IPCC memory, else buffer data in circbuf - it will be written
@@ -239,8 +240,11 @@ ssize_t ipcc_write(FAR struct file *filep, FAR const char *buffer,
        */
 
       nxsem_post(&priv->exclsem);
+
       if ((ret = nxsem_wait(&priv->txsem)))
         {
+          leave_critical_section(flags);
+
           /* We were interrupted by signal, return error or number
            * of bytes written
            */
@@ -258,6 +262,7 @@ ssize_t ipcc_write(FAR struct file *filep, FAR const char *buffer,
        */
 
       nxsem_wait(&priv->exclsem);
-      continue;
     }
+
+  leave_critical_section(flags);
 }

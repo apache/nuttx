@@ -140,20 +140,21 @@ ssize_t ipcc_read(FAR struct file *filep, FAR char *buffer,
       return ret;
     }
 
+  /* Disable interrupts, or we might get in situation when we:
+   * - read 0 bytes from circbuf
+   * - interrupt comes in
+   *   - it copies data to buffer and notifies blocked readers
+   *     (in this case sem count is 0, so no sem_post() is called)
+   * - interrupt ends
+   * - since we are in blocking mode, and we read 0 from buffer
+   *   we call sem_wait() and we hang in there cause rx interrupt
+   *   will not be triggered again.
+   */
+
+  flags = enter_critical_section();
+
   for (; ; )
     {
-      /* Disable interrupts, or we might get in situation when we:
-       * - read 0 bytes from circbuf
-       * - interrupt comes in
-       *   - it copies data to buffer and notifies blocked readers
-       *     (in this case sem count is 0, so no sem_post() is called)
-       * - interrupt ends
-       * - since we are in blocking mode, and we read 0 from buffer
-       *   we call sem_wait() and we hang in there cause rx interrupt
-       *   will not be triggered again.
-       */
-
-      flags = enter_critical_section();
 #ifdef CONFIG_IPCC_BUFFERED
       /* Data is buffered in interrupt handler, so we simply
        * have to return buffers content to the user
@@ -230,13 +231,13 @@ ssize_t ipcc_read(FAR struct file *filep, FAR char *buffer,
         }
 
       /* We are in blocking mode, so we have to wait for data to arrive.
-       * nxsem_wait() will atomically leave critical section for us so
-       * we don't have to do it.
        */
 
       nxsem_post(&priv->exclsem);
       if ((ret = nxsem_wait(&priv->rxsem)))
         {
+          leave_critical_section(flags);
+
           /* We were interrupted by signal, but we have not written
            * any data to caller's buffer, so we return with error
            */
@@ -254,6 +255,7 @@ ssize_t ipcc_read(FAR struct file *filep, FAR char *buffer,
        */
 
       nxsem_wait(&priv->exclsem);
-      continue;
     }
+
+  leave_critical_section(flags);
 }
