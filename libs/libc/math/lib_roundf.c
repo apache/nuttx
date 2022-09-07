@@ -33,7 +33,14 @@
 
 float roundf(float x)
 {
-  float f = modff(x, &x);
+  float f;
+
+  if (isinff(x) || isnanf(x))
+    {
+      return x;
+    }
+
+  f = modff(x, &x);
   if (x <= 0.0f && f <= -0.5f)
     {
       x -= 1.0f;

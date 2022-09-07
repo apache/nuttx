@@ -34,7 +34,14 @@
 #ifdef CONFIG_HAVE_DOUBLE
 double round(double x)
 {
-  double f = modf(x, &x);
+  double f;
+
+  if (isinf(x) || isnan(x))
+    {
+      return x;
+    }
+
+  f = modf(x, &x);
   if (x <= 0.0 && f <= -0.5)
     {
       x -= 1.0;
