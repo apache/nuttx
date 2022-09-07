@@ -171,14 +171,6 @@ config MTD_CONFIG_RAM_CONSOLIDATE
 		Another benefit of this option is it reduces code space a bit
 		since the "reserved block" consolidate routine is not needed.
 
-config MTD_CONFIG_ERASEDVALUE
-	hex "Erased value of bytes on the MTD device"
-	default 0xff
-	---help---
-		Specifies the value of the erased state of the MTD FLASH.  For
-		most FLASH parts, this is 0xff, but could also be zero depending
-		on the device.
-
 config MTD_CONFIG_NAMED
 	bool "Use item NAMES instead of ID/enumeration in Dev Config device"
 	default n
