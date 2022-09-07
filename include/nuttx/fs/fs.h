@@ -208,7 +208,7 @@ struct file_operations
   int     (*open)(FAR struct file *filep);
 
   /* The following methods must be identical in signature and position
-   * because the struct file_operations and struct mountp_operations are
+   * because the struct file_operations and struct mountpt_operations are
    * treated like unions.
    */
 
