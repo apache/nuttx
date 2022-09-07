@@ -256,8 +256,6 @@ static int     rp2040_flash_erase(struct mtd_dev_s *dev,
          nblocks,
          FLASH_BLOCK_SIZE * nblocks);
 
-  usleep(500000);
-
   ret = nxsem_wait(&(rp_dev->sem));
 
   if (ret < 0)
