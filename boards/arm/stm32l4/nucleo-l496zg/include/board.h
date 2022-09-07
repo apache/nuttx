@@ -58,7 +58,7 @@
 #define STM32L4_HSE_FREQUENCY     8000000ul  /* 8 MHz from MCO output */
 #define STM32L4_LSE_FREQUENCY     32768
 
-#define HSE_CLOCK_CONFIG
+#define MSI_CLOCK_CONFIG
 
 #if defined(HSI_CLOCK_CONFIG)
 
