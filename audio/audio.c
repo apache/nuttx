@@ -153,7 +153,6 @@ static int audio_open(FAR struct file *filep)
   ret = nxsem_wait(&upper->exclsem);
   if (ret < 0)
     {
-      ret = -errno;
       goto errout;
     }
 
@@ -204,7 +203,6 @@ static int audio_close(FAR struct file *filep)
   ret = nxsem_wait(&upper->exclsem);
   if (ret < 0)
     {
-      ret = -errno;
       goto errout;
     }
 
