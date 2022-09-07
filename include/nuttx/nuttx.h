@@ -112,5 +112,19 @@
 
 #define min3_t(type, x, y, z) min_t(type, (type)min_t(type, x, y), z)
 
+/* Name: swap_t
+ *
+ * Description:
+ *   swap values of @a and @b, using the specified type
+ *
+ * Arguments:
+ *   type - data type to use
+ *   a    - first value
+ *   b    - second value
+ */
+
+#define swap_t(type, a, b) \
+        do { type __tmp = (a); (a) = (b); (b) = __tmp; } while (0)
+
 #endif /* __INCLUDE_NUTTX_NUTTX_H */
 
