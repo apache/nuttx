@@ -425,7 +425,7 @@ static int inet_bind(FAR struct socket *psock,
           nwarn("WARNING: TCP/IP stack is not available in this "
                 "configuration\n");
 
-          return -ENOSYS;
+          ret = -ENOSYS;
 #endif
         }
         break;
@@ -693,7 +693,7 @@ static int inet_connect(FAR struct socket *psock,
       {
         if (addrlen < sizeof(struct sockaddr_in))
           {
-            return -EBADF;
+            return -EINVAL;
           }
       }
       break;
@@ -704,7 +704,7 @@ static int inet_connect(FAR struct socket *psock,
       {
         if (addrlen < sizeof(struct sockaddr_in6))
           {
-            return -EBADF;
+            return -EINVAL;
           }
       }
       break;
@@ -873,7 +873,7 @@ static int inet_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
           {
             if (*addrlen < sizeof(struct sockaddr_in))
               {
-                return -EBADF;
+                return -EINVAL;
               }
           }
           break;
@@ -884,7 +884,7 @@ static int inet_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
           {
             if (*addrlen < sizeof(struct sockaddr_in6))
               {
-                return -EBADF;
+                return -EINVAL;
               }
           }
           break;
@@ -930,10 +930,9 @@ static int inet_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
        */
 
       psock_close(newsock);
-      return ret;
     }
 
-  return OK;
+  return ret;
 
 #else
   nwarn("WARNING: SOCK_STREAM not supported in this configuration\n");
