@@ -309,6 +309,7 @@ ssize_t usrsock_sendmsg(FAR struct socket *psock,
 
           ret = net_timedwait(&state.recvsem,
                               _SO_TIMEOUT(conn->sconn.s_sndtimeo));
+          usrsock_teardown_request_callback(&state);
           if (ret < 0)
             {
               if (ret == -ETIMEDOUT)
@@ -326,14 +327,7 @@ ssize_t usrsock_sendmsg(FAR struct socket *psock,
                   nerr("net_timedwait errno: %zd\n", ret);
                   DEBUGPANIC();
                 }
-            }
 
-          usrsock_teardown_request_callback(&state);
-
-          /* Did wait timeout or got signal? */
-
-          if (ret != 0)
-            {
               goto errout_unlock;
             }
 
