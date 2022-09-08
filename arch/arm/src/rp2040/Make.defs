@@ -82,6 +82,10 @@ ifeq ($(CONFIG_IEEE80211_INFINEON_CYW43439),y)
 CHIP_CSRCS += rp2040_cyw43439.c
 endif
 
+ifeq ($(CONFIG_WATCHDOG),y)
+CHIP_CSRCS += rp2040_wdt.c
+endif
+
 ifeq ($(CONFIG_RP2040_FLASH_FILE_SYSTEM),y)
 CHIP_CSRCS += rp2040_flash_mtd.c
 CHIP_ASRCS += rp2040_flash_initialize.S
