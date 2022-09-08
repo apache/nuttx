@@ -215,7 +215,28 @@ config ARCH_CHIP_STM32H753ZI
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, LQFP144
 
+config ARCH_CHIP_STM32H7B3LI
+	bool "STM32H7B3LI"
+	select STM32H7_STM32H7B3XX
+	select STM32H7_FLASH_CONFIG_I
+	select STM32H7_IO_CONFIG_L
+	select STM32H7_HAVE_FDCAN1
+	select STM32H7_HAVE_FDCAN2
+	select STM32H7_HAVE_SMPS
+	---help---
+		STM32 H7 Cortex M7, 2048 Kb FLASH, 1376 Kb SRAM,
+		with cryptographic accelerator, TFBGA225
+
 endchoice # STM32 H7 Chip Selection
+
+config STM32H7_HAVE_SMPS
+	bool
+	default n
+
+config STM32H7_PWR_DIRECT_SMPS_SUPPLY
+	bool "Use direct SMPS supply mode"
+	depends on STM32H7_HAVE_SMPS
+	default n
 
 config STM32H7_IO_CONFIG_A
 	bool
@@ -226,6 +247,10 @@ config STM32H7_IO_CONFIG_B
 	default n
 
 config STM32H7_IO_CONFIG_I
+	bool
+	default n
+
+config STM32H7_IO_CONFIG_L
 	bool
 	default n
 
@@ -242,6 +267,23 @@ config STM32H7_IO_CONFIG_Z
 	default n
 
 config STM32H7_STM32H7X3XX
+	bool
+	default n
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
+	select STM32H7_HAVE_ETHERNET
+	select STM32H7_HAVE_FMC
+	select STM32H7_HAVE_GPIOF if !STM32H7_IO_CONFIG_V
+	select STM32H7_HAVE_GPIOG if !STM32H7_IO_CONFIG_V
+	select STM32H7_HAVE_SPI4
+	select STM32H7_HAVE_SPI5 if !STM32H7_IO_CONFIG_V
+	select STM32H7_HAVE_SPI6
+
+config STM32H7_STM32H7B3XX
 	bool
 	default n
 	select ARCH_HAVE_FPU

@@ -29,7 +29,7 @@
 #include "chip.h"
 #include "hardware/stm32_memorymap.h"
 
-#if defined(CONFIG_STM32H7_STM32H7X3XX) || defined(CONFIG_STM32H7_STM32H7X7XX)
+#if defined(CONFIG_STM32H7_STM32H7X3XX) || defined(CONFIG_STM32H7_STM32H7X7XX) || defined(CONFIG_STM32H7_STM32H7B3XX)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -410,5 +410,5 @@
 # define USART_PRESC_DIV128       (10 << USART_PRESC_SHIFT) /* Input clock divided by 128 */
 # define USART_PRESC_DIV256       (11 << USART_PRESC_SHIFT) /* Input clock divided by 256 */
 
-#endif /* CONFIG_STM32H7_STM32H7X3XX || CONFIG_STM32H7_STM32H7X7XX */
+#endif /* CONFIG_STM32H7_STM32H7X3XX || CONFIG_STM32H7_STM32H7X7XX || CONFIG_STM32H7_STM32H7B3XX */
 #endif /* __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_UART_H */
