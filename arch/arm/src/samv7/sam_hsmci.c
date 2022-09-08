@@ -1204,14 +1204,6 @@ static void sam_dmacallback(DMA_HANDLE handle, void *arg, int result)
         {
           /* Okay.. wake up any waiting threads */
 
-          if (priv->buffer != NULL)
-            {
-              up_invalidate_dcache((uintptr_t)priv->buffer,
-                                   (uintptr_t)priv->buffer + priv->remaining);
-              priv->buffer    = NULL;
-              priv->remaining = 0;
-            }
-
           sam_endwait(priv, SDIOWAIT_TRANSFERDONE);
         }
     }
@@ -1580,6 +1572,20 @@ static int sam_hsmci_interrupt(int irq, void *context, void *arg)
 
           else
             {
+              /* If buffer is not NULL that means that RX DMA is finished.
+               * We need to invalidate RX buffer */
+
+              if (priv->buffer != NULL)
+                {
+                  DEBUGASSERT(priv->remaining > 0);
+
+                  up_invalidate_dcache((uintptr_t)priv->buffer,
+                                       (uintptr_t)priv->buffer +
+                                       priv->remaining);
+                  priv->buffer    = NULL;
+                  priv->remaining = 0;
+                }
+
               /* End the transfer */
 
               sam_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
