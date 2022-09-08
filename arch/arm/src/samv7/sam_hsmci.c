@@ -1204,6 +1204,14 @@ static void sam_dmacallback(DMA_HANDLE handle, void *arg, int result)
         {
           /* Okay.. wake up any waiting threads */
 
+          if (priv->buffer != NULL)
+            {
+              up_invalidate_dcache((uintptr_t)priv->buffer,
+                                   (uintptr_t)priv->buffer + priv->remaining);
+              priv->buffer    = NULL;
+              priv->remaining = 0;
+            }
+
           sam_endwait(priv, SDIOWAIT_TRANSFERDONE);
         }
     }
@@ -3010,9 +3018,11 @@ static int sam_dmarecvsetup(struct sdio_dev_s *dev, uint8_t *buffer,
 
   /* Start the DMA */
 
-  priv->dmabusy = true;
-  priv->xfrbusy = true;
-  priv->txbusy  = false;
+  priv->dmabusy   = true;
+  priv->xfrbusy   = true;
+  priv->txbusy    = false;
+  priv->buffer    = (uint32_t *)buffer;
+  priv->remaining = buflen;
   sam_dmastart(priv->dma, sam_dmacallback, priv);
 
   /* Configure transfer-related interrupts.  Transfer interrupts are not
