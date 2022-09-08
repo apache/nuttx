@@ -92,10 +92,10 @@ static ssize_t usrsock_iovec_do(FAR void *srcdst, size_t srcdstlen,
                                 FAR struct iovec *iov, int iovcnt,
                                 size_t pos, bool from_iov)
 {
-  ssize_t total = 0;
-  size_t srclen = 0;
   FAR uint8_t *ioout = srcdst;
   FAR uint8_t *iovbuf;
+  ssize_t total = 0;
+  size_t srclen = 0;
 
   /* Rewind to correct position. */
 
@@ -117,8 +117,7 @@ static ssize_t usrsock_iovec_do(FAR void *srcdst, size_t srcdstlen,
     {
       /* Position beyond iovec. */
 
-      total = -EINVAL;
-      goto out;
+      return -EINVAL;
     }
 
   iovbuf = iov->iov_base;
@@ -178,7 +177,6 @@ static ssize_t usrsock_iovec_do(FAR void *srcdst, size_t srcdstlen,
         }
     }
 
-out:
   return total;
 }
 
@@ -291,21 +289,18 @@ usrsock_handle_datareq_response(FAR struct usrsock_conn_s *conn,
   FAR struct usrsock_req_s *req = &g_usrsock_req;
   int num_inbufs;
   int iovpos;
-  ssize_t ret;
 
   if (USRSOCK_MESSAGE_REQ_IN_PROGRESS(hdr->head.flags))
     {
       if (datahdr->reqack.result > 0)
         {
           ninfo("error: request in progress, and result > 0.\n");
-          ret = -EINVAL;
-          goto unlock_out;
+          return -EINVAL;
         }
       else if (datahdr->valuelen > 0)
         {
           ninfo("error: request in progress, and valuelen > 0.\n");
-          ret = -EINVAL;
-          goto unlock_out;
+          return -EINVAL;
         }
 
       /* In-progress response is acknowledgment that response was
@@ -314,8 +309,7 @@ usrsock_handle_datareq_response(FAR struct usrsock_conn_s *conn,
 
       conn->resp.inprogress = true;
 
-      ret = sizeof(*datahdr);
-      goto unlock_out;
+      return sizeof(*datahdr);
     }
 
   conn->resp.inprogress = false;
@@ -336,16 +330,14 @@ usrsock_handle_datareq_response(FAR struct usrsock_conn_s *conn,
           nerr("error: response result negative, and valuelen or "
                "valuelen_nontrunc non-zero.\n");
 
-          ret = -EINVAL;
-          goto unlock_out;
+          return -EINVAL;
         }
 
       /* Done with request/response. */
 
       usrsock_event(conn);
 
-      ret = sizeof(*datahdr);
-      goto unlock_out;
+      return sizeof(*datahdr);
     }
 
   /* Check that number of buffers match available. */
@@ -357,8 +349,7 @@ usrsock_handle_datareq_response(FAR struct usrsock_conn_s *conn,
       nwarn("not enough recv buffers (need: %d, have: %d).\n", num_inbufs,
             conn->resp.datain.iovcnt);
 
-      ret = -EINVAL;
-      goto unlock_out;
+      return -EINVAL;
     }
 
   /* Adjust length of receiving buffers. */
@@ -375,8 +366,7 @@ usrsock_handle_datareq_response(FAR struct usrsock_conn_s *conn,
             datahdr->valuelen,
             conn->resp.datain.iov[iovpos].iov_len);
 
-      ret = -EINVAL;
-      goto unlock_out;
+      return -EINVAL;
     }
 
   /* Adjust read size. */
@@ -397,8 +387,7 @@ usrsock_handle_datareq_response(FAR struct usrsock_conn_s *conn,
                 hdr->result,
                 conn->resp.datain.iov[iovpos].iov_len);
 
-          ret = -EINVAL;
-          goto unlock_out;
+          return -EINVAL;
         }
 
       /* Adjust read size. */
@@ -415,10 +404,7 @@ usrsock_handle_datareq_response(FAR struct usrsock_conn_s *conn,
   /* Next written buffers are redirected to data buffers. */
 
   req->datain_conn = conn;
-  ret = sizeof(*datahdr);
-
-unlock_out:
-  return ret;
+  return sizeof(*datahdr);
 }
 
 /****************************************************************************
@@ -552,8 +538,7 @@ ssize_t usrsock_response(FAR const char *buffer, size_t len,
           nwarn("message too short, %zu < %zu.\n", len,
                 sizeof(struct usrsock_message_common_s));
 
-          ret = -EINVAL;
-          goto errout;
+          return -EINVAL;
         }
 
       /* Handle message. */
@@ -604,7 +589,6 @@ ssize_t usrsock_response(FAR const char *buffer, size_t len,
         }
     }
 
-errout:
   return ret;
 }
 
@@ -687,8 +671,8 @@ int usrsock_do_request(FAR struct usrsock_conn_s *conn,
 
 void usrsock_abort(void)
 {
-  FAR struct usrsock_conn_s *conn = NULL;
   FAR struct usrsock_req_s *req = &g_usrsock_req;
+  FAR struct usrsock_conn_s *conn = NULL;
   int ret;
 
   net_lock();
