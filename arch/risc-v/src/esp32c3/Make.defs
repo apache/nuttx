@@ -148,6 +148,10 @@ ifeq ($(CONFIG_ESP32C3_ADC),y)
 CHIP_CSRCS += esp32c3_adc.c
 endif
 
+ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE),y)
+CHIP_CSRCS += esp32c3_crypto.c
+endif
+
 ifeq ($(CONFIG_ESP32C3_AES_ACCELERATOR),y)
 CHIP_CSRCS += esp32c3_aes.c
 endif

@@ -112,6 +112,154 @@ struct esp32c3_sha512_context_s
 
 int esp32c3_sha_init(void);
 
+/****************************************************************************
+ * Name: esp32c3_sha1_init
+ *
+ * Description:
+ *   Initializes a SHA-1 context.
+ *
+ * Input Parameters:
+ *   ctx      - The SHA-1 context to initialize
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32c3_sha1_init(struct esp32c3_sha1_context_s *ctx);
+
+/****************************************************************************
+ * Name: esp32c3_sha1_starts
+ *
+ * Description:
+ *   Starts a SHA-1 checksum calculation.
+ *
+ * Input Parameters:
+ *   ctx      - The SHA-1 context to initialize
+ *
+ * Returned Value:
+ *   OK is returned on success.
+ *
+ ****************************************************************************/
+
+int esp32c3_sha1_starts(struct esp32c3_sha1_context_s *ctx);
+
+/****************************************************************************
+ * Name: esp32c3_sha1_update
+ *
+ * Description:
+ *   Feeds an input buffer into an ongoing SHA-1 checksum calculation.
+ *
+ * Input Parameters:
+ *   ctx      - The SHA-1 context to use
+ *   input    - The buffer holding the input data
+ *   ilen     - The length of the input data in Bytes
+ *
+ * Returned Value:
+ *   OK is returned on success.
+ *   Otherwise, a negated errno value is returned.
+ *
+ ****************************************************************************/
+
+int esp32c3_sha1_update(struct esp32c3_sha1_context_s *ctx,
+                        const unsigned char *input,
+                        size_t ilen);
+
+/****************************************************************************
+ * Name: esp32c3_sha1_finish
+ *
+ * Description:
+ *   Finishes the SHA-1 operation,
+ *   and writes the result to the output buffer.
+ *
+ * Input Parameters:
+ *   ctx      - The SHA-1 context to use
+ *   output   - The SHA-1 checksum result
+ *
+ * Returned Value:
+ *   OK is returned on success.
+ *   Otherwise, a negated errno value is returned.
+ *
+ ****************************************************************************/
+
+int esp32c3_sha1_finish(struct esp32c3_sha1_context_s *ctx,
+                        unsigned char output[20]);
+
+/****************************************************************************
+ * Name: esp32c3_sha256_init
+ *
+ * Description:
+ *   Initializes a SHA-256 context.
+ *
+ * Input Parameters:
+ *   ctx      - The SHA-256 context to initialize
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32c3_sha256_init(struct esp32c3_sha256_context_s *ctx);
+
+/****************************************************************************
+ * Name: esp32c3_sha256_starts
+ *
+ * Description:
+ *   Starts a SHA-224 or SHA-256 checksum calculation.
+ *
+ * Input Parameters:
+ *   ctx      - The SHA-256 context to initialize
+ *   is224    - Determines which function to use
+ *
+ * Returned Value:
+ *   OK is returned on success.
+ *
+ ****************************************************************************/
+
+int esp32c3_sha256_starts(struct esp32c3_sha256_context_s *ctx, bool is224);
+
+/****************************************************************************
+ * Name: esp32c3_sha256_update
+ *
+ * Description:
+ *   Feeds an input buffer into an ongoing SHA-224 or SHA-256
+ *   checksum calculation.
+ *
+ * Input Parameters:
+ *   ctx      - The SHA-256 context to use
+ *   input    - The buffer holding the input data
+ *   ilen     - The length of the input data in Bytes
+ *
+ * Returned Value:
+ *   OK is returned on success.
+ *   Otherwise, a negated errno value is returned.
+ *
+ ****************************************************************************/
+
+int esp32c3_sha256_update(struct esp32c3_sha256_context_s *ctx,
+                          const unsigned char *input,
+                          size_t ilen);
+
+/****************************************************************************
+ * Name: esp32c3_sha256_finish
+ *
+ * Description:
+ *   Finishes the SHA-224 or SHA-256 operation, and writes the result to
+ *   the output buffer.
+ *
+ * Input Parameters:
+ *   ctx      - The SHA-256 context to use
+ *   output   - The SHA-256 checksum result
+ *
+ * Returned Value:
+ *   OK is returned on success.
+ *   Otherwise, a negated errno value is returned.
+ *
+ ****************************************************************************/
+
+int esp32c3_sha256_finish(struct esp32c3_sha256_context_s *ctx,
+                          unsigned char output[32]);
+
 #ifdef __cplusplus
 }
 #endif
