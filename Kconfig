@@ -66,7 +66,12 @@ endmenu # License Setup
 menu "Build Setup"
 
 config EXPERIMENTAL
-	bool "Prompt for development and/or incomplete code/drivers"
+	bool "Show experimental options"
+	---help---
+		Some features and drivers are considered "experimental" or
+		development/work-in-progress status. By default, these options are
+		hidden in the Kconfig menus. Enabling "Show experimental options"
+		makes these options visible and makes it possible to enable them.
 
 config DEFAULT_SMALL
 	bool "Default to smallest size"
