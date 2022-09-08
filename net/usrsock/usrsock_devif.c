@@ -48,13 +48,13 @@
 
 struct usrsock_req_s
 {
-  sem_t     sem;               /* Request semaphore (only one outstanding
-                                * request) */
-  sem_t     acksem;            /* Request acknowledgment notification */
-  uint32_t  newxid;            /* New transcation Id */
-  uint32_t  ackxid;            /* Exchange id for which waiting ack */
-  uint16_t  nbusy;             /* Number of requests blocked from different
-                                * threads */
+  sem_t    sem;               /* Request semaphore (only one outstanding
+                               * request) */
+  sem_t    acksem;            /* Request acknowledgment notification */
+  uint32_t newxid;            /* New transcation Id */
+  uint32_t ackxid;            /* Exchange id for which waiting ack */
+  uint16_t nbusy;             /* Number of requests blocked from different
+                               * threads */
 
   /* Connection instance to receive data buffers. */
 
