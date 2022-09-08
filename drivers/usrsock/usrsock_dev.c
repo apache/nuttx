@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/usrsock/usrsock_dev.c
+ * drivers/usrsock/usrsock_dev.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -109,7 +109,10 @@ static const struct file_operations g_usrsockdevops =
 #endif
 };
 
-static struct usrsockdev_s g_usrsockdev;
+static struct usrsockdev_s g_usrsockdev =
+{
+  NXSEM_INITIALIZER(1, PRIOINHERIT_FLAGS_DISABLE)
+};
 
 /****************************************************************************
  * Private Functions
@@ -585,11 +588,6 @@ int usrsock_request(FAR struct iovec *iov, unsigned int iovcnt)
 
 void usrsock_register(void)
 {
-  /* Initialize device private structure. */
-
-  g_usrsockdev.ocount = 0;
-  nxsem_init(&g_usrsockdev.devsem, 0, 1);
-
   register_driver("/dev/usrsock", &g_usrsockdevops, 0666,
                   &g_usrsockdev);
 }
