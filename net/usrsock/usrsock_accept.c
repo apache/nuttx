@@ -428,7 +428,6 @@ int usrsock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                */
 
               outaddrlen = state.valuelen_nontrunc;
-
               ret = OK;
             }
         }
