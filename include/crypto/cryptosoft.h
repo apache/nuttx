@@ -73,9 +73,6 @@ struct swcr_data
   struct swcr_data *sw_next;
 };
 
-extern const uint8_t hmac_ipad_buffer[HMAC_MAX_BLOCK_LEN];
-extern const uint8_t hmac_opad_buffer[HMAC_MAX_BLOCK_LEN];
-
 int swcr_encdec(FAR struct cryptop *, FAR struct cryptodesc *,
                 FAR struct swcr_data *, caddr_t);
 int swcr_authcompute(FAR struct cryptop *, FAR struct cryptodesc *,

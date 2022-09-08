@@ -37,7 +37,7 @@
 
 #include "arm_internal.h"
 #include "chip.h"
-#include <chip/lpc43_aes.h>
+#include <hardware/lpc43_aes.h>
 
 #define AES_BLOCK_SIZE 16
 

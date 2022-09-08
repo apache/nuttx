@@ -126,6 +126,10 @@ ifeq ($(CONFIG_CRYPTO_AES),y)
 CHIP_CSRCS += lpc43_aes.c
 endif
 
+ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE),y)
+CHIP_CSRCS += lpc43_crypto.c
+endif
+
 ifeq ($(CONFIG_LPC43_USB0),y)
 ifeq ($(CONFIG_USBDEV),y)
 CHIP_CSRCS += lpc43_usb0dev.c
