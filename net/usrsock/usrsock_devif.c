@@ -199,7 +199,6 @@ static ssize_t usrsock_handle_event(FAR const void *buffer, size_t len)
         if (len < sizeof(*hdr))
           {
             nwarn("message too short, %zu < %zu.\n", len, sizeof(*hdr));
-
             return -EINVAL;
           }
 
@@ -209,7 +208,6 @@ static ssize_t usrsock_handle_event(FAR const void *buffer, size_t len)
         if (!conn)
           {
             nwarn("no active connection for usockid=%d.\n", hdr->usockid);
-
             return -ENOENT;
           }
 
@@ -341,14 +339,12 @@ usrsock_handle_datareq_response(FAR struct usrsock_conn_s *conn,
         {
           nerr("error: response result negative, and valuelen or "
                "valuelen_nontrunc non-zero.\n");
-
           return -EINVAL;
         }
 
       /* Done with request/response. */
 
       usrsock_event(conn);
-
       return sizeof(*datahdr);
     }
 
@@ -360,7 +356,6 @@ usrsock_handle_datareq_response(FAR struct usrsock_conn_s *conn,
     {
       nwarn("not enough recv buffers (need: %d, have: %d).\n", num_inbufs,
             conn->resp.datain.iovcnt);
-
       return -EINVAL;
     }
 
@@ -374,10 +369,8 @@ usrsock_handle_datareq_response(FAR struct usrsock_conn_s *conn,
   if (conn->resp.datain.iov[iovpos].iov_len < datahdr->valuelen)
     {
       nwarn("%dth buffer not large enough (need: %d, have: %zu).\n",
-            iovpos,
-            datahdr->valuelen,
+            iovpos, datahdr->valuelen,
             conn->resp.datain.iov[iovpos].iov_len);
-
       return -EINVAL;
     }
 
@@ -395,10 +388,8 @@ usrsock_handle_datareq_response(FAR struct usrsock_conn_s *conn,
         {
           nwarn("%dth buffer not large enough "
                 "(need: %" PRId32 ", have: %zu).\n",
-                iovpos,
-                hdr->result,
+                iovpos, hdr->result,
                 conn->resp.datain.iov[iovpos].iov_len);
-
           return -EINVAL;
         }
 
@@ -457,7 +448,6 @@ static ssize_t usrsock_handle_req_response(FAR const void *buffer,
   if (len < hdrlen)
     {
       nwarn("message too short, %zu < %zu.\n", len, hdrlen);
-
       return -EINVAL;
     }
 
@@ -549,7 +539,6 @@ ssize_t usrsock_response(FAR const char *buffer, size_t len,
         {
           nwarn("message too short, %zu < %zu.\n", len,
                 sizeof(struct usrsock_message_common_s));
-
           return -EINVAL;
         }
 
@@ -660,7 +649,6 @@ int usrsock_do_request(FAR struct usrsock_conn_s *conn,
   req->ackxid = req_head->xid;
 
   ret = usrsock_request(iov, iovcnt);
-
   if (ret == OK)
     {
       /* Wait ack for request. */
@@ -673,7 +661,6 @@ int usrsock_do_request(FAR struct usrsock_conn_s *conn,
   /* Free request line for next command. */
 
   nxsem_post(&req->sem);
-
   return ret;
 }
 

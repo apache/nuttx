@@ -235,7 +235,6 @@ int usrsock_getsockopt(FAR struct usrsock_conn_s *conn,
 
 errout_unlock:
   net_unlock();
-
   return ret;
 }
 

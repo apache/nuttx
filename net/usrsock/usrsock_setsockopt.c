@@ -168,7 +168,6 @@ int usrsock_setsockopt(FAR struct usrsock_conn_s *conn,
   int ret;
 
   DEBUGASSERT(conn);
-
   net_lock();
 
   if (conn->state == USRSOCK_CONN_STATE_UNINITIALIZED ||

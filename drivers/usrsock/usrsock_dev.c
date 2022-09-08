@@ -58,15 +58,15 @@
 
 struct usrsockdev_s
 {
-  sem_t    devsem; /* Lock for device node */
-  uint8_t  ocount; /* The number of times the device has been opened */
+  sem_t   devsem; /* Lock for device node */
+  uint8_t ocount; /* The number of times the device has been opened */
   struct
   {
-    FAR const struct iovec *iov; /* Pending request buffers */
-    int       iovcnt;            /* Number of request buffers */
-    size_t    pos;               /* Reader position on request buffer */
+    FAR const struct iovec *iov;    /* Pending request buffers */
+    int                     iovcnt; /* Number of request buffers */
+    size_t                  pos;    /* Reader position on request buffer */
   } req;
-  struct pollfd *pollfds[CONFIG_NET_USRSOCKDEV_NPOLLWAITERS];
+  FAR struct pollfd *pollfds[CONFIG_NET_USRSOCKDEV_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -163,9 +163,9 @@ static void usrsockdev_pollnotify(FAR struct usrsockdev_s *dev,
 static ssize_t usrsockdev_read(FAR struct file *filep, FAR char *buffer,
                                size_t len)
 {
-  FAR struct inode        *inode = filep->f_inode;
+  FAR struct inode *inode = filep->f_inode;
   FAR struct usrsockdev_s *dev;
-  int                      ret;
+  int ret;
 
   if (len == 0)
     {
@@ -217,7 +217,6 @@ static ssize_t usrsockdev_read(FAR struct file *filep, FAR char *buffer,
     }
 
   usrsockdev_semgive(&dev->devsem);
-
   return len;
 }
 
@@ -228,7 +227,7 @@ static ssize_t usrsockdev_read(FAR struct file *filep, FAR char *buffer,
 static off_t usrsockdev_seek(FAR struct file *filep, off_t offset,
                              int whence)
 {
-  FAR struct inode        *inode = filep->f_inode;
+  FAR struct inode *inode = filep->f_inode;
   FAR struct usrsockdev_s *dev;
   off_t pos;
   int ret;
@@ -286,7 +285,6 @@ static off_t usrsockdev_seek(FAR struct file *filep, off_t offset,
     }
 
   usrsockdev_semgive(&dev->devsem);
-
   return pos;
 }
 
@@ -299,8 +297,8 @@ static ssize_t usrsockdev_write(FAR struct file *filep,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct usrsockdev_s *dev;
-  ssize_t ret = 0;
   bool req_done = false;
+  ssize_t ret = 0;
 
   if (len == 0)
     {
@@ -318,7 +316,7 @@ static ssize_t usrsockdev_write(FAR struct file *filep,
 
   DEBUGASSERT(dev);
 
-  ret = (ssize_t)usrsockdev_semtake(&dev->devsem);
+  ret = usrsockdev_semtake(&dev->devsem);
   if (ret < 0)
     {
       return ret;
@@ -379,7 +377,6 @@ static int usrsockdev_open(FAR struct file *filep)
     }
 
   usrsockdev_semgive(&dev->devsem);
-
   return ret;
 }
 
@@ -550,7 +547,6 @@ int usrsock_request(FAR struct iovec *iov, unsigned int iovcnt)
   usrsockdev_pollnotify(dev, POLLIN);
 
   usrsockdev_semgive(&dev->devsem);
-
   return OK;
 }
 
