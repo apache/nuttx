@@ -238,7 +238,6 @@ int usrsock_socket(int domain, int type, int protocol,
   usrsock_teardown_request_callback(&state);
 
   net_unlock();
-
   return OK;
 
 errout_teardown_callback:
@@ -246,7 +245,6 @@ errout_teardown_callback:
 errout_free_conn:
   usrsock_free(conn);
   net_unlock();
-
   return err;
 }
 

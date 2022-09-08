@@ -248,7 +248,6 @@ int usrsock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg_)
 
 errout_unlock:
   net_unlock();
-
   return ret;
 }
 
