@@ -535,9 +535,11 @@ static int netprocfs_readdir(FAR struct fs_dirent_s *dir,
 
           level1->ifindex = ifindex + 1;
 #else
-          /* Get the raw index */
+          /* Get the raw index, (why +2 ? The ifindex should remove device
+           * entry of last g_net_entries(-1) and start the devidx from 1)
+           */
 
-          ifindex = index - ARRAY_SIZE(g_net_entries) + 1;
+          ifindex = index + 2 - ARRAY_SIZE(g_net_entries);
 #endif
           /* Find the device corresponding to this device index */
 
