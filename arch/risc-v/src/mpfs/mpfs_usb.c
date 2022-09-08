@@ -308,6 +308,40 @@ static void mpfs_modifyreg16(uintptr_t addr, uint16_t clearbits,
 }
 
 /****************************************************************************
+ * Name: mpfs_modifyreg8
+ *
+ * Description:
+ *   Atomically modify the specified bits in the memory mapped register.
+ *   This also checks the addr range is valid.
+ *
+ * Input Parameters:
+ *   addr      - Address to access
+ *   clearbits - Bits to clear
+ *   setbits   - Bits to set
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void mpfs_modifyreg8(uintptr_t addr, uint8_t clearbits,
+                             uint8_t setbits)
+{
+  irqstate_t flags;
+  uint8_t    regval;
+
+  DEBUGASSERT((addr >= MPFS_USB_BASE) && addr < (MPFS_USB_BASE +
+               MPFS_USB_REG_MAX));
+
+  flags   = spin_lock_irqsave(NULL);
+  regval  = getreg8(addr);
+  regval &= ~clearbits;
+  regval |= setbits;
+  putreg8(regval, addr);
+  spin_unlock_irqrestore(NULL, flags);
+}
+
+/****************************************************************************
  * Register Operations
  ****************************************************************************/
 
@@ -3691,9 +3725,15 @@ static void mpfs_hw_shutdown(struct mpfs_usbdev_s *priv)
 {
   priv->usbdev.speed = USB_SPEED_UNKNOWN;
 
+  /* Force disconnect and give some time to finish it up */
+
+  mpfs_modifyreg8(MPFS_USB_POWER, POWER_REG_SOFT_CONN_MASK, 0);
+  nxsig_usleep(1000);
+
   /* Disable all interrupts */
 
   mpfs_putreg8(0, MPFS_USB_ENABLE);
+  up_disable_irq(MPFS_IRQ_USB_MC);
 
   /* Disable clocking to the peripheral */
 
@@ -3817,6 +3857,8 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
   int ret;
 
   DEBUGASSERT(driver != NULL);
+
+  mpfs_sw_setup(priv);
 
   /* First hook up the driver */
 
