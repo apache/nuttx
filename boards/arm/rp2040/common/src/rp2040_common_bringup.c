@@ -76,6 +76,10 @@
 #include "rp2040_ws2812.h"
 #endif
 
+#ifdef CONFIG_WATCHDOG
+#  include "rp2040_wdt.h"
+#endif
+
 #if defined(CONFIG_RP2040_ROMFS_ROMDISK_DEVNAME)
 #  include <rp2040_romfsimg.h>
 #endif
@@ -581,6 +585,18 @@ int rp2040_common_bringup(void)
     {
       syslog(LOG_ERR, "Failed to initialize WS2812: %d\n", errno);
       return -errno;
+    }
+#endif
+
+#ifdef CONFIG_WATCHDOG
+  /* Configure watchdog timer */
+
+  ret = rp2040_wdt_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize watchdog drivers: %d\n",
+             ret);
     }
 #endif
 
