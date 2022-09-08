@@ -763,6 +763,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
 
   if (dev == NULL)
     {
+      net_unlock();
       return ret;
     }
 
