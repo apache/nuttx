@@ -328,6 +328,7 @@ int usrsock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
           ret = net_timedwait(&state.reqstate.recvsem,
                               _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
+          usrsock_teardown_data_request_callback(&state);
           if (ret < 0)
             {
               if (ret == -ETIMEDOUT)
@@ -345,14 +346,7 @@ int usrsock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                   nerr("net_timedwait errno: %d\n", ret);
                   DEBUGPANIC();
                 }
-            }
 
-          usrsock_teardown_data_request_callback(&state);
-
-          /* Did wait timeout or got signal? */
-
-          if (ret != 0)
-            {
               goto errout_free_conn;
             }
 
