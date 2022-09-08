@@ -51,6 +51,7 @@ ifeq ($(CONFIG_CRYPTO_CRYPTODEV),y)
   CRYPTO_CSRCS += idgen.c
   CRYPTO_CSRCS += key_wrap.c
   CRYPTO_CSRCS += siphash.c
+  CRYPTO_CSRCS += hmac_buff.c
 endif
 
 # BLAKE2s hash algorithm

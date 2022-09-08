@@ -208,6 +208,14 @@ int esp32c3_aes_xts_setkey(struct esp32c3_aes_xts_s *aes, const void *keyptr,
 
 int esp32c3_aes_init(void);
 
+/****************************************************************************
+ * Name: aes_cypher
+ ****************************************************************************/
+
+int esp32c3_aes_cypher(void *out, const void *in, size_t size,
+                       const void *iv, const void *key, size_t keysize,
+                       int mode, int encrypt);
+
 #ifdef __cplusplus
 }
 #endif

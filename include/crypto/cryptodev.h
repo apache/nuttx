@@ -313,6 +313,11 @@ struct crypt_op
   caddr_t iv;
 };
 
+/* hamc buffer, software & hardware need it */
+
+extern const uint8_t hmac_ipad_buffer[HMAC_MAX_BLOCK_LEN];
+extern const uint8_t hmac_opad_buffer[HMAC_MAX_BLOCK_LEN];
+
 #define CRYPTO_MAX_MAC_LEN  20
 
 /* done against open of /dev/crypto, to get a cloned descriptor.
@@ -344,4 +349,9 @@ int crypto_getfeat(FAR int *);
 
 FAR struct cryptop *crypto_getreq(int);
 void crypto_freereq(FAR struct cryptop *);
+
+#ifdef CONFIG_CRYPTO_CRYPTODEV_HARDWARE
+void hwcr_init(void);
+#endif
+
 #endif /* __INCLUDE_CRYPTO_CRYPTODEV_H */
