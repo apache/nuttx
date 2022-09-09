@@ -66,10 +66,8 @@
 #define REG_R12             (12)
 #define REG_R13             (13)
 #define REG_R14             (14)
-#define REG_R15             (15)
-#define REG_CPSR            (16)
 
-#define ARM_CONTEXT_REGS    (17)
+#define ARM_CONTEXT_REGS    (15)
 
 /* If the MCU supports a floating point unit, then it will be necessary
  * to save the state of the FPU status register and data registers on
@@ -162,9 +160,12 @@
 #  define FPU_CONTEXT_REGS  (0)
 #endif
 
+#define REG_R15             (ARM_CONTEXT_REGS + FPU_CONTEXT_REGS)
+#define REG_CPSR            (REG_R15 + 1)
+
 /* The total number of registers saved by software */
 
-#define XCPTCONTEXT_REGS    (ARM_CONTEXT_REGS + FPU_CONTEXT_REGS)
+#define XCPTCONTEXT_REGS    (REG_CPSR + 1)
 #define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
 
 /* Friendly register names */
