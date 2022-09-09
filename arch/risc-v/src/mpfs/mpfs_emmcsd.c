@@ -1423,6 +1423,16 @@ static void mpfs_emmc_card_init(struct mpfs_dev_s *priv)
            MPFS_SYSREG_B4_10_11);
   putreg32(LIBERO_SETTING_MSSIO_BANK4_IO_CFG_12_13_CR_EMMC,
            MPFS_SYSREG_4_12_13);
+
+#ifdef CONFIG_MPFS_EMMCSD_MUX_GPIO
+  /* Select eMMC-card */
+
+  mcinfo("Selecting eMMC card\n");
+  mpfs_gpiowrite(MPFS_EMMCSD_GPIO, false);
+
+#else
+  putreg32(0, SDIO_REGISTER_ADDRESS);
+#endif
 }
 
 /****************************************************************************
@@ -1453,6 +1463,19 @@ static bool mpfs_device_reset(struct sdio_dev_s *dev)
 
   up_disable_irq(priv->plic_irq);
 
+  /* SD card needs FPGA out of reset and FIC3 clks for the eMMC / SD
+   * switch.  It's OK if these are already out of reset or clk applied.
+   * Also, switching back from SD card to eMMC needs these clocks.
+   */
+
+  modifyreg32(MPFS_SYSREG_SOFT_RESET_CR,
+              SYSREG_SOFT_RESET_CR_FPGA |
+              SYSREG_SOFT_RESET_CR_FIC3,
+              0);
+
+  modifyreg32(MPFS_SYSREG_SUBBLK_CLOCK_CR, 0,
+              SYSREG_SUBBLK_CLOCK_CR_FIC3);
+
   if (!priv->emmc)
     {
       /* Apply default HW settings */
@@ -1460,17 +1483,6 @@ static bool mpfs_device_reset(struct sdio_dev_s *dev)
       priv->bus_voltage = MPFS_EMMCSD_3_3V_BUS_VOLTAGE;
       priv->bus_speed   = MPFS_EMMCSD_MODE_SDR;
       priv->jumpers_3v3 = true;
-
-      /* SD card needs FPGA out of reset and FIC3 clks for the eMMC / SD
-       * switch. It's OK if these are already out of reset or clk applied.
-       */
-
-      modifyreg32(MPFS_SYSREG_SOFT_RESET_CR,
-                  SYSREG_SOFT_RESET_CR_FPGA |
-                  SYSREG_SOFT_RESET_CR_FIC3, 0);
-
-      modifyreg32(MPFS_SYSREG_SUBBLK_CLOCK_CR, 0,
-                  SYSREG_SUBBLK_CLOCK_CR_FIC3);
 
       mpfs_sdcard_init(priv);
     }
