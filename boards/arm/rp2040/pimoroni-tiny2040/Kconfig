@@ -5,26 +5,5 @@
 
 if ARCH_BOARD_PIMORONI_TINY2040
 
-config RP2040_FLASH_BOOT
-	bool "flash boot"
-	default y
-	---help---
-		If y, the built binary can be used for flash boot.
-		If not, the binary is for SRAM boot.
-
-config RP2040_FLASH_CHIP
-	string "Second stage boot loader"
-	default "w25q080"
-	---help---
-		This is the name of the Pico-SDK second stage boot loader
-		to use for this board.  This board using a Q16 flash chip
-		which is compatible with the w25q080 boot loader.
-		Basically this option should not be changed.
-
-config RP2040_UF2_BINARY
-	bool "uf2 binary format"
-	default y
-	---help---
-		Create nuttx.uf2 binary format used on RP2040 based arch.
 
 endif
