@@ -72,10 +72,6 @@ int nxmq_alloc_msgq(FAR struct mq_attr *attr,
    */
 
   DEBUGASSERT((!attr || attr->mq_msgsize <= MQ_MAX_BYTES) && pmsgq);
-  if ((attr && attr->mq_msgsize > MQ_MAX_BYTES) || !pmsgq)
-    {
-      return -EINVAL;
-    }
 
   /* Allocate memory for the new message queue. */
 

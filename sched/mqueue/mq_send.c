@@ -117,6 +117,7 @@ int file_mq_send(FAR struct file *mq, FAR const char *msg, size_t msglen,
       /* Now allocate the message. */
 
       mqmsg = nxmq_alloc_msg();
+      DEBUGASSERT(mqmsg != NULL);
 
       /* Check if the message was successfully allocated */
 
@@ -129,8 +130,7 @@ int file_mq_send(FAR struct file *mq, FAR const char *msg, size_t msglen,
        * to be exceeded in that case.
        */
 
-      ret = (mqmsg == NULL) ? -ENOMEM :
-            nxmq_do_send(msgq, mqmsg, msg, msglen, prio);
+      ret = nxmq_do_send(msgq, mqmsg, msg, msglen, prio);
     }
 
   leave_critical_section(flags);
