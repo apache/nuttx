@@ -59,6 +59,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/init.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/mutex.h>
 
@@ -1768,7 +1769,7 @@ static FAR struct tm *gmtsub(FAR const time_t *timep,
   if (!g_gmt_isset)
     {
 #ifndef __KERNEL__
-      if (up_interrupt_context() || sched_idletask())
+      if (up_interrupt_context() || (sched_idletask() && OSINIT_IDLELOOP()))
         {
           return NULL;
         }
@@ -2486,7 +2487,7 @@ void tzset(void)
   FAR const char *name;
 
 #ifndef __KERNEL__
-  if (up_interrupt_context() || sched_idletask())
+  if (up_interrupt_context() || (sched_idletask() && OSINIT_IDLELOOP()))
     {
       return;
     }
