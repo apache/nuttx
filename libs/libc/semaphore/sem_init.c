@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <sys/types.h>
 #include <limits.h>
 #include <errno.h>
@@ -67,27 +68,24 @@ int nxsem_init(FAR sem_t *sem, int pshared, unsigned int value)
    * range.
    */
 
-  if (sem != NULL && value <= SEM_VALUE_MAX)
-    {
-      /* Initialize the semaphore count */
+  DEBUGASSERT(sem != NULL && value <= SEM_VALUE_MAX);
 
-      sem->semcount         = (int16_t)value;
+  /* Initialize the semaphore count */
 
-      /* Initialize to support priority inheritance */
+  sem->semcount = (int16_t)value;
+
+  /* Initialize to support priority inheritance */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-      sem->flags            = 0;
+  sem->flags    = 0;
 #  if CONFIG_SEM_PREALLOCHOLDERS > 0
-      sem->hhead            = NULL;
+  sem->hhead    = NULL;
 #  else
-      INITIALIZE_SEMHOLDER(&sem->holder[0]);
-      INITIALIZE_SEMHOLDER(&sem->holder[1]);
+  INITIALIZE_SEMHOLDER(&sem->holder[0]);
+  INITIALIZE_SEMHOLDER(&sem->holder[1]);
 #  endif
 #endif
-      return OK;
-    }
-
-  return -EINVAL;
+  return OK;
 }
 
 /****************************************************************************

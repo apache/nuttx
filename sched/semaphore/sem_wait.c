@@ -72,7 +72,7 @@ int nxsem_wait(FAR sem_t *sem)
 {
   FAR struct tcb_s *rtcb = this_task();
   irqstate_t flags;
-  int ret = -EINVAL;
+  int ret;
 
   /* This API should not be called from interrupt handlers & idleloop */
 
@@ -88,108 +88,105 @@ int nxsem_wait(FAR sem_t *sem)
 
   /* Make sure we were supplied with a valid semaphore. */
 
-  if (sem != NULL)
+  /* Check if the lock is available */
+
+  if (sem->semcount > 0)
     {
-      /* Check if the lock is available */
+      /* It is, let the task take the semaphore. */
 
-      if (sem->semcount > 0)
-        {
-          /* It is, let the task take the semaphore. */
+      sem->semcount--;
+      nxsem_add_holder(sem);
+      rtcb->waitsem = NULL;
+      ret = OK;
+    }
 
-          sem->semcount--;
-          nxsem_add_holder(sem);
-          rtcb->waitsem = NULL;
-          ret = OK;
-        }
+  /* The semaphore is NOT available, We will have to block the
+   * current thread of execution.
+   */
 
-      /* The semaphore is NOT available, We will have to block the
-       * current thread of execution.
+  else
+    {
+      /* First, verify that the task is not already waiting on a
+       * semaphore
        */
 
-      else
-        {
-          /* First, verify that the task is not already waiting on a
-           * semaphore
-           */
+      DEBUGASSERT(rtcb->waitsem == NULL);
 
-          DEBUGASSERT(rtcb->waitsem == NULL);
+      /* Handle the POSIX semaphore (but don't set the owner yet) */
 
-          /* Handle the POSIX semaphore (but don't set the owner yet) */
+      sem->semcount--;
 
-          sem->semcount--;
+      /* Save the waited on semaphore in the TCB */
 
-          /* Save the waited on semaphore in the TCB */
+      rtcb->waitsem = sem;
 
-          rtcb->waitsem = sem;
-
-          /* If priority inheritance is enabled, then check the priority of
-           * the holder of the semaphore.
-           */
+      /* If priority inheritance is enabled, then check the priority of
+       * the holder of the semaphore.
+       */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-          /* Disable context switching.  The following operations must be
-           * atomic with regard to the scheduler.
-           */
+      /* Disable context switching.  The following operations must be
+       * atomic with regard to the scheduler.
+       */
 
-          sched_lock();
+      sched_lock();
 
-          /* Boost the priority of any threads holding a count on the
-           * semaphore.
-           */
+      /* Boost the priority of any threads holding a count on the
+       * semaphore.
+       */
 
-          nxsem_boost_priority(sem);
+      nxsem_boost_priority(sem);
 #endif
-          /* Set the errno value to zero (preserving the original errno)
-           * value).  We reuse the per-thread errno to pass information
-           * between sem_waitirq() and this functions.
-           */
+      /* Set the errno value to zero (preserving the original errno)
+       * value).  We reuse the per-thread errno to pass information
+       * between sem_waitirq() and this functions.
+       */
 
-          rtcb->errcode = OK;
+      rtcb->errcode = OK;
 
-          /* Add the TCB to the prioritized semaphore wait queue, after
-           * checking this is not the idle task - descheduling that
-           * isn't going to end well.
-           */
+      /* Add the TCB to the prioritized semaphore wait queue, after
+       * checking this is not the idle task - descheduling that
+       * isn't going to end well.
+       */
 
-          DEBUGASSERT(NULL != rtcb->flink);
-          up_block_task(rtcb, TSTATE_WAIT_SEM);
+      DEBUGASSERT(NULL != rtcb->flink);
+      up_block_task(rtcb, TSTATE_WAIT_SEM);
 
-          /* When we resume at this point, either (1) the semaphore has been
-           * assigned to this thread of execution, or (2) the semaphore wait
-           * has been interrupted by a signal or a timeout.  We can detect
-           * these latter cases be examining the per-thread errno value.
-           *
-           * In the event that the semaphore wait was interrupted by a
-           * signal or a timeout, certain semaphore clean-up operations have
-           * already been performed (see sem_waitirq.c).  Specifically:
-           *
-           * - nxsem_canceled() was called to restore the priority of all
-           *   threads that hold a reference to the semaphore,
-           * - The semaphore count was decremented, and
-           * - tcb->waitsem was nullifed.
-           *
-           * It is necessary to do these things in sem_waitirq.c because a
-           * long time may elapse between the time that the signal was issued
-           * and this thread is awakened and this leaves a door open to
-           * several race conditions.
-           */
+      /* When we resume at this point, either (1) the semaphore has been
+       * assigned to this thread of execution, or (2) the semaphore wait
+       * has been interrupted by a signal or a timeout.  We can detect
+       * these latter cases be examining the per-thread errno value.
+       *
+       * In the event that the semaphore wait was interrupted by a
+       * signal or a timeout, certain semaphore clean-up operations have
+       * already been performed (see sem_waitirq.c).  Specifically:
+       *
+       * - nxsem_canceled() was called to restore the priority of all
+       *   threads that hold a reference to the semaphore,
+       * - The semaphore count was decremented, and
+       * - tcb->waitsem was nullifed.
+       *
+       * It is necessary to do these things in sem_waitirq.c because a
+       * long time may elapse between the time that the signal was issued
+       * and this thread is awakened and this leaves a door open to
+       * several race conditions.
+       */
 
-          /* Check if an error occurred while we were sleeping.  Expected
-           * errors include EINTR meaning that we were awakened by a signal
-           * or ETIMEDOUT meaning that the timer expired for the case of
-           * sem_timedwait().
-           *
-           * If we were not awakened by a signal or a timeout, then
-           * nxsem_add_holder() was called by logic in sem_wait() fore this
-           * thread was restarted.
-           */
+      /* Check if an error occurred while we were sleeping.  Expected
+       * errors include EINTR meaning that we were awakened by a signal
+       * or ETIMEDOUT meaning that the timer expired for the case of
+       * sem_timedwait().
+       *
+       * If we were not awakened by a signal or a timeout, then
+       * nxsem_add_holder() was called by logic in sem_wait() fore this
+       * thread was restarted.
+       */
 
-          ret = rtcb->errcode != OK ? -rtcb->errcode : OK;
+      ret = rtcb->errcode != OK ? -rtcb->errcode : OK;
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-          sched_unlock();
+      sched_unlock();
 #endif
-        }
     }
 
   leave_critical_section(flags);
