@@ -388,6 +388,13 @@ config MPFS_IHC_RPMSG_CH2
 		Use this only if using 2 x RPMSG channels.  This makes the NuttX work as the
 		RPMSG channel 2 client.
 
+config MPFS_IHC_WITH_HSS
+	bool "IHC with HSS"
+	depends on MPFS_IHC_CLIENT
+	default n
+	---help---
+		Set this to true if using IHC with HSS bootloader
+
 config MPFS_ETHMAC
 	bool
 	default n
