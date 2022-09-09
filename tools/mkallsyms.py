@@ -27,7 +27,9 @@ import cxxfilt
 
 from elftools import __version__
 from elftools.elf.elffile import ELFFile
-
+from elftools.elf.sections import (
+    NoteSection, SymbolTableSection, SymbolTableIndexSection
+)
 
 class SymbolTables(object):
 
