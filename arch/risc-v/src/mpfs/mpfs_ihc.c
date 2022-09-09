@@ -169,7 +169,9 @@ static int mpfs_rptun_register_callback(struct rptun_dev_s *dev,
  * HSS.
  */
 
+#ifdef CONFIG_MPFS_IHC_WITH_HSS
 uint8_t unused_filler[0x80000] __attribute__((section(".filler_area")));
+#endif
 
 static struct rpmsg_endpoint       g_mpgs_echo_ping_ept;
 static struct mpfs_queue_table_s   g_mpfs_virtqueue_table[VRINGS];
