@@ -1,0 +1,28 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if NET_USRSOCK
+
+menu "Usrsock Driver Support"
+
+choice
+	prompt "Select usrsock device interface"
+	default NET_USRSOCK_DEVICE
+
+config NET_USRSOCK_DEVICE
+	bool "/dev/usrsock"
+	---help---
+		Will export /dev/usrsock device node for usrsock request/response operations
+
+config NET_USRSOCK_CUSTOM
+	bool "Customerized interface"
+	---help---
+		Will send usrsock request or receive usrsock response via other kind of interface
+
+endchoice
+
+endmenu
+
+endif # NET_USRSOCK
