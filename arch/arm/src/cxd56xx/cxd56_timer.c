@@ -72,7 +72,7 @@
  * wrap around. Timer's base clock is dynamically changed with cpu clock.
  */
 
-#define TIMER_MAXTIMEOUT    (ULONG_MAX / 160 / TIMER_DIVIDER)
+#define CXD56_MAXTIMEOUT    (ULONG_MAX / 160 / TIMER_DIVIDER)
 
 /****************************************************************************
  * Private Types
@@ -377,10 +377,10 @@ static int cxd56_settimeout(struct timer_lowerhalf_s *lower,
 
   /* Can this timeout be represented? */
 
-  if (timeout < 1 || timeout > TIMER_MAXTIMEOUT)
+  if (timeout < 1 || timeout > CXD56_MAXTIMEOUT)
     {
       tmrerr("ERROR: Cannot represent timeout=%" PRIu32 " > %lu\n",
-             timeout, TIMER_MAXTIMEOUT);
+             timeout, CXD56_MAXTIMEOUT);
       return -ERANGE;
     }
 

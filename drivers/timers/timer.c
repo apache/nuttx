@@ -285,14 +285,7 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       {
         /* Start the timer, resetting the time to the current timeout */
 
-        if (lower->ops->start)
-          {
-            ret = lower->ops->start(lower);
-          }
-        else
-          {
-            ret = -ENOSYS;
-          }
+        ret = TIMER_START(lower);
       }
       break;
 
@@ -305,8 +298,7 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       {
         /* Stop the timer */
 
-        DEBUGASSERT(lower->ops->stop != NULL); /* Required */
-        ret = lower->ops->stop(lower);
+        ret = TIMER_STOP(lower);
         nxsig_cancel_notification(&upper->work);
       }
       break;
@@ -322,21 +314,14 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         /* Get the current timer status */
 
-        if (lower->ops->getstatus) /* Optional */
+        status = (FAR struct timer_status_s *)((uintptr_t)arg);
+        if (status)
           {
-            status = (FAR struct timer_status_s *)((uintptr_t)arg);
-            if (status)
-              {
-                ret = lower->ops->getstatus(lower, status);
-              }
-            else
-              {
-                ret = -EINVAL;
-              }
+            ret = TIMER_GETSTATUS(lower, status);
           }
         else
           {
-            ret = -ENOSYS;
+            ret = -EINVAL;
           }
       }
       break;
@@ -353,14 +338,7 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       {
         /* Set a new timeout value (and reset the timer) */
 
-        if (lower->ops->settimeout) /* Optional */
-          {
-            ret = lower->ops->settimeout(lower, (uint32_t)arg);
-          }
-        else
-          {
-            ret = -ENOSYS;
-          }
+        ret = TIMER_SETTIMEOUT(lower, (uint32_t)arg);
       }
       break;
 
@@ -396,14 +374,7 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       {
         /*  Get the maximum supported timeout value */
 
-        if (lower->ops->maxtimeout) /* Optional */
-          {
-            ret = lower->ops->maxtimeout(lower, (FAR uint32_t *)arg);
-          }
-        else
-          {
-            ret = -ENOSYS;
-          }
+        ret = TIMER_MAXTIMEOUT(lower, (FAR uint32_t *)arg);
       }
       break;
 
@@ -420,14 +391,7 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
          * method.
          */
 
-        if (lower->ops->ioctl) /* Optional */
-          {
-            ret = lower->ops->ioctl(lower, cmd, arg);
-          }
-        else
-          {
-            ret = -ENOTTY;
-          }
+        ret = TIMER_IOCTL(lower, cmd, arg);
       }
       break;
     }
@@ -553,8 +517,7 @@ void timer_unregister(FAR void *handle)
 
   /* Disable the timer */
 
-  DEBUGASSERT(lower->ops->stop); /* Required */
-  lower->ops->stop(lower);
+  TIMER_STOP(lower);
   nxsig_cancel_notification(&upper->work);
 
   /* Unregister the timer device */
