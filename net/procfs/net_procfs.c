@@ -132,6 +132,14 @@ static const struct netprocfs_entry_s g_net_entries[] =
     }
   },
 #  endif
+#  ifdef CONFIG_NET_UDP
+  {
+    DTYPE_FILE, "udp",
+    {
+      netprocfs_read_udpstats
+    }
+  },
+#  endif
 #endif
 #ifdef CONFIG_NET_ROUTE
   {
