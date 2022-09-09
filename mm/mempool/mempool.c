@@ -88,12 +88,10 @@ static inline void mempool_mfree(FAR struct mempool_s *pool, FAR void *addr)
 
 int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
 {
+  FAR sq_entry_t *base;
   size_t count;
 
-  if (pool == NULL || pool->bsize == 0)
-    {
-      return -EINVAL;
-    }
+  DEBUGASSERT(pool != NULL && pool->bsize != 0);
 
   pool->nused = 0;
   sq_init(&pool->list);
@@ -101,24 +99,19 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
   sq_init(&pool->elist);
 
   count = pool->ninitial + pool->ninterrupt;
-  if (count != 0)
+  base = mempool_malloc(pool, sizeof(*base) +
+                        pool->bsize * count);
+  if (base == NULL)
     {
-      FAR sq_entry_t *base;
-
-      base = mempool_malloc(pool, sizeof(*base) +
-                            pool->bsize * count);
-      if (base == NULL)
-        {
-          return -ENOMEM;
-        }
-
-      sq_addfirst(base, &pool->elist);
-      mempool_add_list(&pool->ilist, base + 1,
-                       pool->ninterrupt, pool->bsize);
-      mempool_add_list(&pool->list, (FAR char *)(base + 1) +
-                       pool->ninterrupt * pool->bsize,
-                       pool->ninitial, pool->bsize);
+      return -ENOMEM;
     }
+
+  sq_addfirst(base, &pool->elist);
+  mempool_add_list(&pool->ilist, base + 1,
+                   pool->ninterrupt, pool->bsize);
+  mempool_add_list(&pool->list, (FAR char *)(base + 1) +
+                   pool->ninterrupt * pool->bsize,
+                   pool->ninitial, pool->bsize);
 
   if (pool->wait && pool->nexpand == 0)
     {
@@ -154,10 +147,7 @@ FAR void *mempool_alloc(FAR struct mempool_s *pool)
   FAR sq_entry_t *blk;
   irqstate_t flags;
 
-  if (pool == NULL)
-    {
-      return NULL;
-    }
+  DEBUGASSERT(pool != NULL);
 
 retry:
   flags = spin_lock_irqsave(&pool->lock);
@@ -223,19 +213,24 @@ out_with_lock:
 void mempool_free(FAR struct mempool_s *pool, FAR void *blk)
 {
   irqstate_t flags;
-  FAR char *base;
 
-  if (blk == NULL || pool == NULL)
-    {
-      return;
-    }
+  DEBUGASSERT(pool != NULL && blk != NULL);
 
   flags = spin_lock_irqsave(&pool->lock);
-  base = (FAR char *)(sq_peek(&pool->elist) + 1);
-  if (pool->ninterrupt && (FAR char *)blk >= base &&
-      (FAR char *)blk < base + pool->ninterrupt * pool->bsize)
+  if (pool->ninterrupt)
     {
-      sq_addfirst(blk, &pool->ilist);
+      FAR char *base;
+
+      base = (FAR char *)(sq_peek(&pool->elist) + 1);
+      if ((FAR char *)blk >= base &&
+          (FAR char *)blk < base + pool->ninterrupt * pool->bsize)
+        {
+          sq_addfirst(blk, &pool->ilist);
+        }
+      else
+        {
+          sq_addfirst(blk, &pool->list);
+        }
     }
   else
     {
@@ -274,10 +269,7 @@ int mempool_info(FAR struct mempool_s *pool, FAR struct mempoolinfo_s *info)
 {
   irqstate_t flags;
 
-  if (pool == NULL || info == NULL)
-    {
-      return -EINVAL;
-    }
+  DEBUGASSERT(pool != NULL && info != NULL);
 
   flags = spin_lock_irqsave(&pool->lock);
   info->ordblks = sq_count(&pool->list);
@@ -315,10 +307,7 @@ int mempool_deinit(FAR struct mempool_s *pool)
 {
   FAR sq_entry_t *blk;
 
-  if (pool == NULL)
-    {
-      return -EINVAL;
-    }
+  DEBUGASSERT(pool != NULL);
 
   if (pool->nused != 0)
     {
