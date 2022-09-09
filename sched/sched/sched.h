@@ -178,22 +178,6 @@ extern dq_queue_t g_pendingtasks;
 
 extern dq_queue_t g_waitingforsignal;
 
-/* This is the list of all tasks that are blocked waiting for a message
- * queue to become non-empty.
- */
-
-#ifndef CONFIG_DISABLE_MQUEUE
-extern dq_queue_t g_waitingformqnotempty;
-#endif
-
-/* This is the list of all tasks that are blocked waiting for a message
- * queue to become non-full.
- */
-
-#ifndef CONFIG_DISABLE_MQUEUE
-extern dq_queue_t g_waitingformqnotfull;
-#endif
-
 /* This is the list of all tasks that are blocking waiting for a page fill */
 
 #ifdef CONFIG_PAGING

@@ -97,6 +97,9 @@ int nxmq_alloc_msgq(FAR struct mq_attr *attr,
 #ifndef CONFIG_DISABLE_MQUEUE_NOTIFICATION
       msgq->ntpid = INVALID_PROCESS_ID;
 #endif
+
+      dq_init(&msgq->waitfornotempty);
+      dq_init(&msgq->waitfornotfull);
     }
   else
     {
