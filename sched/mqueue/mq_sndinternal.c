@@ -389,17 +389,13 @@ int nxmq_do_send(FAR struct mqueue_inode_s *msgq,
   if (msgq->nwaitnotempty > 0)
     {
       /* Find the highest priority task that is waiting for
-       * this queue to be non-empty in g_waitingformqnotempty
+       * this queue to be non-empty in waitfornotempty
        * list. leave_critical_section() should give us sufficient
        * protection since interrupts should never cause a change
        * in this list
        */
 
-      for (btcb = (FAR struct tcb_s *)g_waitingformqnotempty.head;
-           btcb && btcb->waitobj != msgq;
-           btcb = btcb->flink)
-        {
-        }
+      btcb = (FAR struct tcb_s *)dq_peek(MQ_WNELIST(msgq));
 
       /* If one was found, unblock it */
 

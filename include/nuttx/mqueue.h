@@ -85,6 +85,9 @@
 # define nxmq_pollnotify(msgq, eventset)
 #endif
 
+# define MQ_WNELIST(mq)               (&((mq)->waitfornotempty))
+# define MQ_WNFLIST(mq)               (&((mq)->waitfornotfull))
+
 /****************************************************************************
  * Public Type Declarations
  ****************************************************************************/
@@ -94,6 +97,8 @@
 struct mqueue_inode_s
 {
   FAR struct inode *inode;    /* Containing inode */
+  dq_queue_t waitfornotempty; /* Task list waiting for not empty */
+  dq_queue_t waitfornotfull;  /* Task list waiting for not full */
   struct list_node msglist;   /* Prioritized message list */
   int16_t maxmsgs;            /* Maximum number of messages in the queue */
   int16_t nmsgs;              /* Number of message in the queue */
