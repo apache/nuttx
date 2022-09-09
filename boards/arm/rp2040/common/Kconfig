@@ -4,6 +4,32 @@
 #
 
 #####################################################################
+#  Build Configuration
+#####################################################################
+
+config RP2040_FLASH_BOOT
+	bool "flash boot"
+	default y
+	---help---
+		If y, the built binary can be used for flash boot.
+		If not, the binary is for SRAM boot.
+
+config RP2040_FLASH_CHIP
+	string "Second stage boot loader"
+	default "w25q080"
+	---help---
+		This is the name of the Pico-SDK second stage boot loader
+		to use for this board.  This board using a Q16 flash chip
+		which is compatible with the w25q080 boot loader.
+		Basically this option should not be changed.
+
+config RP2040_UF2_BINARY
+	bool "uf2 binary format"
+	default y
+	---help---
+		Create nuttx.uf2 binary format used on RP2040 based arch.
+
+#####################################################################
 #  UART Configuration
 #####################################################################
 
@@ -212,7 +238,7 @@ endif # RP2040_I2C0 || RP2040_I2C0_SLAVE
 
 #####################################################################
 
-if RP2040_I2C1 || RP2040_I2C0_SLAVE
+if RP2040_I2C1 || RP2040_I2C1_SLAVE
 
   config RP2040_I2C1_SDA_GPIO
    int "GPIO pin for I2C1 SDA (2, 6, 10, 14, 18, 22, or 26)"
@@ -228,7 +254,7 @@ if RP2040_I2C1 || RP2040_I2C0_SLAVE
     ---help---
       Refer to board documentation to see which pins are available.
 
-endif # RP2040_I2C1 || RP2040_I2C0_SLAVE
+endif # RP2040_I2C1 || RP2040_I2C1_SLAVE
 
 #####################################################################
 #  PWM Configuration

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp2040/pimoroni-tiny2040/src/rp2040_spi.c
+ * boards/arm/rp2040/common/src/rp2040_spi.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -90,6 +90,19 @@ uint8_t rp2040_spi0status(struct spi_dev_s *dev, uint32_t devid)
 #ifdef CONFIG_SPI_CMDDATA
 int rp2040_spi0cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
+#ifdef CONFIG_LCD_ST7789
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      /*  This is the Data/Command control pad which determines whether the
+       *  data bits are data or a command.
+       */
+
+      rp2040_gpio_put(CONFIG_RP2040_SPI0_RX_GPIO, !cmd);
+
+      return OK;
+    }
+#endif
+
   return -ENODEV;
 }
 #endif
@@ -118,6 +131,19 @@ uint8_t rp2040_spi1status(struct spi_dev_s *dev, uint32_t devid)
 #ifdef CONFIG_SPI_CMDDATA
 int rp2040_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
+#if defined (CONFIG_LCD_ST7789) || (CONFIG_LCD_ST7735)
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      /*  This is the Data/Command control pad which determines whether the
+       *  data bits are data or a command.
+       */
+
+      rp2040_gpio_put(CONFIG_RP2040_SPI1_RX_GPIO, !cmd);
+
+      return OK;
+    }
+#endif
+
   return -ENODEV;
 }
 #endif
