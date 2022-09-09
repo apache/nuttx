@@ -32,7 +32,6 @@
 #define SIZEOF_HEAD sizeof(FAR struct mempool_s *)
 #define MAX(a, b)   ((a) > (b) ? (a) : (b))
 
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -57,7 +56,7 @@ mempool_multiple_find(FAR struct mempool_multiple_s *mpool, size_t size)
 
           low = ++mid;
         }
-      else if (n == 0 || size == mid->bsize)
+      else if (size == mid->bsize || n == 0)
         {
           return mid;
         }
@@ -92,10 +91,7 @@ int mempool_multiple_init(FAR struct mempool_multiple_s *mpool,
 {
   int i;
 
-  if (mpool == NULL || mpool->pools == NULL)
-    {
-      return -EINVAL;
-    }
+  DEBUGASSERT(mpool != NULL && mpool->pools != NULL);
 
   for (i = 0; i < mpool->npools; i++)
     {
@@ -135,22 +131,21 @@ int mempool_multiple_init(FAR struct mempool_multiple_s *mpool,
 FAR void *mempool_multiple_alloc(FAR struct mempool_multiple_s *mpool,
                                  size_t size)
 {
+  FAR struct mempool_s *end = mpool->pools + mpool->npools;
   FAR struct mempool_s *pool;
 
   pool = mempool_multiple_find(mpool, size + SIZEOF_HEAD);
-  if (pool != NULL)
+  DEBUGASSERT(pool != NULL);
+  do
     {
-      do
+      FAR void *blk = mempool_alloc(pool);
+      if (blk != NULL)
         {
-          FAR void *blk = mempool_alloc(pool);
-          if (blk != NULL)
-            {
-              *(FAR struct mempool_s **)blk = pool;
-              return (FAR char *)blk + SIZEOF_HEAD;
-            }
+          *(FAR struct mempool_s **)blk = pool;
+          return (FAR char *)blk + SIZEOF_HEAD;
         }
-      while (++pool< mpool->pools + mpool->npools);
     }
+  while (++pool< end);
 
   return NULL;
 }
@@ -173,13 +168,11 @@ void mempool_multiple_free(FAR struct mempool_multiple_s *mpool,
   FAR struct mempool_s *pool;
   FAR void *mem;
 
-  if (blk != NULL)
-    {
-      mem = (FAR char *)blk - SIZEOF_HEAD;
-      pool = *(FAR struct mempool_s **)mem;
+  DEBUGASSERT(mpool != NULL && blk != NULL);
 
-      mempool_free(pool, mem);
-    }
+  mem = (FAR char *)blk - SIZEOF_HEAD;
+  pool = *(FAR struct mempool_s **)mem;
+  mempool_free(pool, mem);
 }
 
 /****************************************************************************
@@ -205,12 +198,8 @@ FAR void *mempool_multiple_fixed_alloc(FAR struct mempool_multiple_s *mpool,
   FAR struct mempool_s *pool;
 
   pool = mempool_multiple_find(mpool, size);
-  if (pool != NULL)
-    {
-      return mempool_alloc(pool);
-    }
-
-  return NULL;
+  DEBUGASSERT(pool != NULL);
+  return mempool_alloc(pool);
 }
 
 /****************************************************************************
@@ -229,14 +218,13 @@ FAR void *mempool_multiple_fixed_alloc(FAR struct mempool_multiple_s *mpool,
 void mempool_multiple_fixed_free(FAR struct mempool_multiple_s *mpool,
                                  FAR void *blk, size_t size)
 {
-  if (blk != NULL)
-    {
-      FAR struct mempool_s *pool = mempool_multiple_find(mpool, size);
-      if (pool != NULL)
-        {
-          mempool_free(pool, blk);
-        }
-    }
+  FAR struct mempool_s *pool;
+
+  DEBUGASSERT(mpool != NULL && blk != NULL);
+
+  pool = mempool_multiple_find(mpool, size);
+  DEBUGASSERT(pool != NULL);
+  mempool_free(pool, blk);
 }
 
 /****************************************************************************
@@ -257,10 +245,7 @@ int mempool_multiple_deinit(FAR struct mempool_multiple_s *mpool)
 {
   int i;
 
-  if (mpool == NULL)
-    {
-      return -EINVAL;
-    }
+  DEBUGASSERT(mpool != NULL);
 
   for (i = 0; i < mpool->npools; i++)
     {
