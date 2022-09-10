@@ -47,6 +47,10 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += esp32_buttons.c
 endif
 
+ifeq ($(CONFIG_LPWAN_SX127X),y)
+CSRCS += esp32_sx127x.c
+endif
+
 SCRIPTOUT = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_out.ld
 
 .PHONY = context distclean
