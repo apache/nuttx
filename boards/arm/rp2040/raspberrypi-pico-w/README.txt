@@ -84,9 +84,23 @@ Defconfigs
 
 - nshsram
     Load NuttX binary to SRAM
-  
+
 - smp
     Enable SMP mode. Both Core 0 and Core 1 are used by NuttX.
+
+- telnet
+    NuttShell configuration (console enabled in UART0, at 115200 bps) with
+    WiFi client mode and both telnet server and client enabled.
+
+    In order to use this configuration you must have RaspberryPi's pico-sdk
+    on your build system and have the PICO-SDK-PATH environment variable
+    set with the location of pico-sdk.
+
+    After loading this configuration use make menuconfig to change the
+    country code in Device Drivers->Wireless Device Support->IEEE 802.11
+    Device Support and the wireless configuration in Application
+    Configuration->Network Utilities->Network initialization->WAPI
+    Configuration to match your wireless network.
 
 - ssd1306
     SSD1306 OLED display (I2C) test configuration
@@ -96,8 +110,8 @@ Defconfigs
            VCC ----- 3V3 OUT        (Pin 36)
            SDA ----- GP4 (I2C0 SDA) (Pin 6)
            SCL ----- GP5 (I2C0 SCL) (Pin 7)
-           
-- lcd1602 
+
+- lcd1602
     LCD 1602 Segment LCD Disaply (I2C)
     Connection:
     PCF8574 BackPack Raspberry Pi Pico
@@ -120,7 +134,7 @@ Defconfigs
     * Card hot swapping is not supported.
 
 - st7735
-    st7735 SPI LCD support      
+    st7735 SPI LCD support
     Connection:
       st7735         Raspberry Pi Pico
            GND ----- GND             (Pin 3 or 38 or ...)
@@ -130,7 +144,7 @@ Defconfigs
             CS ----- GP13 (SPI1 CSn) (Pin 17)
        AO(D/C) ----- GP12 (SPI1 RX)  (Pin 16)
             BL ----- GP11            (Pin 15)
-         RESET ----- GP10            (Pin 14)  
+         RESET ----- GP10            (Pin 14)
 
 - enc28j60
     ENC28J60 SPI ethernet controller support
