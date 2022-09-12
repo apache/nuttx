@@ -97,8 +97,6 @@
 #define MPFS_MMC_CLOCK_200MHZ              200000u
 
 #define MPFS_EMMCSD_DEBOUNCE_TIME          0x300000u
-#define MPFS_EMMCSD_MODE_LEGACY            0x7u
-
 #define MPFS_EMMCSD_DATA_TIMEOUT           500000
 
 #define MPFS_EMMCSD_SRS10_3_3V_BUS_VOLTAGE (0x7 << 9)
@@ -142,6 +140,12 @@
 /* HS400 mode with Enhanced Strobe */
 
 #define MPFS_EMMCSD_MODE_HS400_ES          0x6u
+
+/* Backwards compatibility with legacy MMC card supports clock frequency up
+ * to 26MHz and data bus width of 1 bit, 4 bits, and 8 bits.
+ */
+
+#define MPFS_EMMCSD_MODE_LEGACY            0x7u
 
 /* Define the Hardware FIFO size */
 
@@ -292,7 +296,7 @@ struct mpfs_dev_s
 
   const bool         emmc;            /* eMMC or SD */
   int                bus_voltage;     /* Bus voltage */
-  int                bus_speed;       /* Bus speed */
+  int                bus_speed;       /* eMMC Bus speed */
   bool               jumpers_3v3;     /* Jumper settings: 1v8 or 3v3 */
 
   /* Event support */
@@ -1491,8 +1495,21 @@ static bool mpfs_device_reset(struct sdio_dev_s *dev)
       /* For the eMMC, use these default values */
 
       priv->bus_voltage = MPFS_EMMCSD_1_8V_BUS_VOLTAGE;
-      priv->bus_speed   = MPFS_EMMCSD_MODE_HS200;
       priv->jumpers_3v3 = false;
+
+      /* The following defines come from the board.h file */
+
+#if defined(MPFS_EMMC_CLK_200MHZ)
+      /* MMCSD_CMD6 with 0x03B90200u isn't used here.  It's just the clk. */
+
+      priv->bus_speed   = MPFS_EMMCSD_MODE_HS200;
+#elif defined(MPFS_EMMC_CLK_50MHZ)
+      /* MMCSD_CMD6 with argument 0x03B90100u isn't used here. */
+
+      priv->bus_speed   = MPFS_EMMCSD_MODE_SDR;
+#else
+      priv->bus_speed   = MPFS_EMMCSD_MODE_LEGACY;
+#endif
 
       /* Apply proper IOMUX values for the eMMC. This is required especially
        * if this NuttX works as the system bootloader. Otherwise, it's
@@ -1841,7 +1858,18 @@ static void mpfs_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
     /* Enable normal MMC operation clocking */
 
     case CLOCK_MMC_TRANSFER:
-      clckr = MPFS_MMC_CLOCK_200MHZ;
+      if (priv->bus_speed == MPFS_EMMCSD_MODE_HS200)
+        {
+          clckr = MPFS_MMC_CLOCK_200MHZ;
+        }
+      else if (priv->bus_speed == MPFS_EMMCSD_MODE_SDR)
+        {
+          clckr = MPFS_MMC_CLOCK_50MHZ;
+        }
+      else
+        {
+          clckr = MPFS_MMC_CLOCK_26MHZ;
+        }
       break;
 
     /* SD normal operation clocking (wide 4-bit mode) */
