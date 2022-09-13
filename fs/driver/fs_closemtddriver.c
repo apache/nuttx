@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp2040/adafruit-kb2040/src/rp2040_reset.c
+ * fs/driver/fs_closemtddriver.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,39 +23,49 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/board.h>
-#include <nuttx/arch.h>
 
-#ifdef CONFIG_BOARDCTL_RESET
+#include <errno.h>
+#include <nuttx/fs/fs.h>
+
+#include "inode/inode.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_reset
+ * Name: close_mtddriver
  *
  * Description:
- *   Reset board.  Support for this function is required by board-level
- *   logic if CONFIG_BOARDCTL_RESET is selected.
+ *   Release the inode got by function find_mtddriver()
  *
  * Input Parameters:
- *   status - Status information provided with the reset event.  This
- *            meaning of this status information is board-specific.  If not
- *            used by a board, the value zero may be provided in calls to
- *            board_reset().
+ *   pinode    - pointer to the inode
  *
  * Returned Value:
- *   If this function returns, then it was not possible to power-off the
- *   board due to some constraints.  The return value int this case is a
- *   board-specific reason for the failure to shutdown.
+ *   Returns zero on success or a negated errno on failure:
+ *
+ *   EINVAL  - inode is NULL
  *
  ****************************************************************************/
 
-int board_reset(int status)
+#ifdef CONFIG_MTD
+int close_mtddriver(FAR struct inode *pinode)
 {
-  up_systemreset();
-  return 0;
-}
+  /* Sanity checks */
 
-#endif /* CONFIG_BOARDCTL_RESET */
+  if (pinode == NULL)
+    {
+      return -EINVAL;
+    }
+
+  inode_release(pinode);
+
+  return OK;
+}
+#else
+int close_mtddriver(FAR struct inode *pinode)
+{
+  return -ENODEV;
+}
+#endif /* CONFIG_MTD */

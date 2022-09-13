@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp2040/pimoroni-tiny2040/src/rp2040_reset.c
+ * libs/libc/queue/dq_remafter.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,40 +22,29 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <nuttx/board.h>
-#include <nuttx/arch.h>
-
-#ifdef CONFIG_BOARDCTL_RESET
+#include <queue.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_reset
+ * Name: dq_remafter
  *
  * Description:
- *   Reset board.  Support for this function is required by board-level
- *   logic if CONFIG_BOARDCTL_RESET is selected.
- *
- * Input Parameters:
- *   status - Status information provided with the reset event.  This
- *            meaning of this status information is board-specific.  If not
- *            used by a board, the value zero may be provided in calls to
- *            board_reset().
- *
- * Returned Value:
- *   If this function returns, then it was not possible to power-off the
- *   board due to some constraints.  The return value int this case is a
- *   board-specific reason for the failure to shutdown.
+ *   dq_remafter removes the entry following 'node' from the 'queue'.
+ *   Returns a reference to the removed entry.
  *
  ****************************************************************************/
 
-int board_reset(int status)
+FAR dq_entry_t *dq_remafter(FAR dq_entry_t *node, FAR dq_queue_t *queue)
 {
-  up_systemreset();
-  return 0;
-}
+  FAR dq_entry_t *ret = node->flink;
 
-#endif /* CONFIG_BOARDCTL_RESET */
+  if (queue->head != NULL && ret != NULL)
+    {
+      dq_rem(ret, queue);
+    }
+
+  return ret;
+}

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp2040/raspberrypi-pico/src/rp2040_reset.c
+ * boards/arm/tiva/tm4c129e-launchpad/src/tm4c_hciuart.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,39 +23,60 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/board.h>
-#include <nuttx/arch.h>
 
-#ifdef CONFIG_BOARDCTL_RESET
+#include <stdbool.h>
+#include <stdio.h>
+#include <debug.h>
+#include <errno.h>
+
+#include <nuttx/wireless/bluetooth/bt_uart.h>
+
+#include "tiva_hciuart.h"
+#include "tm4c129e-launchpad.h"
+
+#include <arch/board/board.h>
+
+#ifdef HAVE_HCIUART
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_reset
+ * Name: hciuart_dev_initialize
  *
  * Description:
- *   Reset board.  Support for this function is required by board-level
- *   logic if CONFIG_BOARDCTL_RESET is selected.
+ *   This function is called by board initialization logic to configure the
+ *   Bluetooth HCI UART driver
  *
  * Input Parameters:
- *   status - Status information provided with the reset event.  This
- *            meaning of this status information is board-specific.  If not
- *            used by a board, the value zero may be provided in calls to
- *            board_reset().
+ *   None
  *
  * Returned Value:
- *   If this function returns, then it was not possible to power-off the
- *   board due to some constraints.  The return value int this case is a
- *   board-specific reason for the failure to shutdown.
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-int board_reset(int status)
+int hciuart_dev_initialize(void)
 {
-  up_systemreset();
-  return 0;
+  int ret;
+
+  /* Perform one-time initialization */
+
+  hciuart_initialize();
+
+  /* Instantiate the HCI UART lower half interface
+   * Then initialize the HCI UART upper half driver with the bluetooth stack
+   */
+
+  ret = btuart_register(hciuart_instantiate(HCIUART_SERDEV));
+  if (ret < 0)
+    {
+      wlerr("ERROR: btuart_register() failed: %d\n", ret);
+    }
+
+  return ret;
 }
 
-#endif /* CONFIG_BOARDCTL_RESET */
+#endif /* HAVE_HCIUART */

@@ -57,9 +57,9 @@ static uint16_t connect_event(FAR struct net_driver_s *dev,
 
       /* Stop further callbacks */
 
-      pstate->cb->flags   = 0;
-      pstate->cb->priv    = NULL;
-      pstate->cb->event   = NULL;
+      pstate->cb->flags = 0;
+      pstate->cb->priv  = NULL;
+      pstate->cb->event = NULL;
 
       /* Wake up the waiting thread */
 
@@ -73,9 +73,9 @@ static uint16_t connect_event(FAR struct net_driver_s *dev,
 
       /* Stop further callbacks */
 
-      pstate->cb->flags   = 0;
-      pstate->cb->priv    = NULL;
-      pstate->cb->event   = NULL;
+      pstate->cb->flags = 0;
+      pstate->cb->priv  = NULL;
+      pstate->cb->event = NULL;
 
       /* Wake up the waiting thread */
 
@@ -98,6 +98,7 @@ static int do_connect_request(FAR struct usrsock_conn_s *conn,
   };
 
   struct iovec bufs[2];
+  int ret;
 
   if (addrlen > UINT16_MAX)
     {
@@ -115,7 +116,13 @@ static int do_connect_request(FAR struct usrsock_conn_s *conn,
   bufs[1].iov_base = (FAR void *)addr;
   bufs[1].iov_len = addrlen;
 
-  return usrsockdev_do_request(conn, bufs, ARRAY_SIZE(bufs));
+  ret = usrsock_do_request(conn, bufs, ARRAY_SIZE(bufs));
+  if (ret == -ENETDOWN)
+    {
+      ret = -ECONNABORTED;
+    }
+
+  return ret;
 }
 
 /****************************************************************************

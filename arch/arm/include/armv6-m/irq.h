@@ -215,7 +215,7 @@ struct xcptcontext
 
 /* Get/set the PRIMASK register */
 
-static inline uint8_t getprimask(void) inline_function;
+static inline uint8_t getprimask(void) always_inline_function;
 static inline uint8_t getprimask(void)
 {
   uint32_t primask;
@@ -229,7 +229,7 @@ static inline uint8_t getprimask(void)
   return (uint8_t)primask;
 }
 
-static inline void setprimask(uint32_t primask) inline_function;
+static inline void setprimask(uint32_t primask) always_inline_function;
 static inline void setprimask(uint32_t primask)
 {
   __asm__ __volatile__
@@ -242,7 +242,7 @@ static inline void setprimask(uint32_t primask)
 
 /* Disable IRQs */
 
-static inline void up_irq_disable(void) inline_function;
+static inline void up_irq_disable(void) always_inline_function;
 static inline void up_irq_disable(void)
 {
   __asm__ __volatile__ ("\tcpsid  i\n");
@@ -250,7 +250,7 @@ static inline void up_irq_disable(void)
 
 /* Save the current primask state & disable IRQs */
 
-static inline irqstate_t up_irq_save(void) inline_function;
+static inline irqstate_t up_irq_save(void) always_inline_function;
 static inline irqstate_t up_irq_save(void)
 {
   unsigned short primask;
@@ -272,7 +272,7 @@ static inline irqstate_t up_irq_save(void)
 
 /* Enable IRQs */
 
-static inline void up_irq_enable(void) inline_function;
+static inline void up_irq_enable(void) always_inline_function;
 static inline void up_irq_enable(void)
 {
   __asm__ __volatile__ ("\tcpsie  i\n");
@@ -280,7 +280,7 @@ static inline void up_irq_enable(void)
 
 /* Restore saved primask state */
 
-static inline void up_irq_restore(irqstate_t flags) inline_function;
+static inline void up_irq_restore(irqstate_t flags) always_inline_function;
 static inline void up_irq_restore(irqstate_t flags)
 {
   /* If bit 0 of the primask is 0, then we need to restore
@@ -297,7 +297,7 @@ static inline void up_irq_restore(irqstate_t flags)
 
 /* Get/set IPSR */
 
-static inline uint32_t getipsr(void) inline_function;
+static inline uint32_t getipsr(void) always_inline_function;
 static inline uint32_t getipsr(void)
 {
   uint32_t ipsr;
@@ -313,7 +313,7 @@ static inline uint32_t getipsr(void)
 
 /* Get/set CONTROL */
 
-static inline uint32_t getcontrol(void) inline_function;
+static inline uint32_t getcontrol(void) always_inline_function;
 static inline uint32_t getcontrol(void)
 {
   uint32_t control;
@@ -327,7 +327,7 @@ static inline uint32_t getcontrol(void)
   return control;
 }
 
-static inline void setcontrol(uint32_t control) inline_function;
+static inline void setcontrol(uint32_t control) always_inline_function;
 static inline void setcontrol(uint32_t control)
 {
   __asm__ __volatile__

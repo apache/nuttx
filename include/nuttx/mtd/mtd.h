@@ -687,6 +687,49 @@ bool filemtd_isfilemtd(FAR struct mtd_dev_s *mtd);
 FAR struct mtd_dev_s *nullmtd_initialize(size_t mtdlen, int16_t sectsize,
                                          int32_t erasesize);
 
+/****************************************************************************
+ * Name: rpmsgmtd_register
+ *
+ * Description:
+ *   Rpmsg-mtd client register function, the client cpu should call
+ *   this function in the board initialize process.
+ *
+ * Parameters:
+ *   remotecpu  - the server cpu name
+ *   remotepath - the device you want to access in the remote cpu
+ *   localpath  - the device path in local cpu, if NULL, the localpath is
+ *                same as the remotepath, provide this argument to supoort
+ *                custom device path
+ *
+ * Returned Values:
+ *   OK on success; A negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RPMSGMTD
+int rpmsgmtd_register(FAR const char *remotecpu, FAR const char *remotepath,
+                      FAR const char *localpath);
+#endif
+
+/****************************************************************************
+ * Name: rpmsgmtd_server_init
+ *
+ * Description:
+ *   Rpmsg-mtd server initialize function, the server cpu should call
+ *   this function.
+ *
+ * Parameters:
+ *   None
+ *
+ * Returned Values:
+ *   OK on success; A negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RPMSGMTD_SERVER
+int rpmsgmtd_server_init(void);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }

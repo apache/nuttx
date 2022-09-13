@@ -51,12 +51,10 @@
  *   conn     The TCP connection of interest
  *   cmd      The ioctl command
  *   arg      The argument of the ioctl cmd
- *   arglen   The length of 'arg'
  *
  ****************************************************************************/
 
-int udp_ioctl(FAR struct udp_conn_s *conn,
-              int cmd, FAR void *arg, size_t arglen)
+int udp_ioctl(FAR struct udp_conn_s *conn, int cmd, unsigned long arg)
 {
   FAR struct iob_s *iob;
   int ret = OK;

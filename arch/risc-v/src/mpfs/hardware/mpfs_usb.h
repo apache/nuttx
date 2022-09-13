@@ -27,7 +27,7 @@
 
 #define SOFT_RESET_REG_MASK               0x03u
 
-#define MPFS_USB_NENDPOINTS               8   /* 4 IN and 4 OUT endpoints */
+#define MPFS_USB_NENDPOINTS               9  /* EP0 + 4x IN and 4x OUT EPs */
 #define MPFS_USB_MAXPACKETSIZE(ep)        64
 #define MPFS_USB_MAXPACKETSIZE_HS(ep)     512
 #define MPFS_EP0_MAXPACKET                64

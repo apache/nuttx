@@ -49,22 +49,6 @@
  * Public Type Definitions
  ****************************************************************************/
 
-/* Describes the /net directory entries */
-
-enum netprocfs_entry_e
-{
-  NETPROCFS_SUBDIR_DEV = 0           /* Multiple instances, e.g. /proc/net/eth0 */
-#ifdef CONFIG_NET_STATISTICS
-  , NETPROCFS_SUBDIR_STAT            /* /proc/net/stat */
-#ifdef CONFIG_NET_MLD
-  , NETPROCFS_SUBDIR_MLD             /* /proc/net/mld */
-#endif
-#endif
-#ifdef CONFIG_NET_ROUTE
-  , NETPROCFS_SUBDIR_ROUTE           /* /proc/net/route */
-#endif
-};
-
 /* This structure describes one open "file" */
 
 struct net_driver_s;                 /* Forward reference */
@@ -75,7 +59,7 @@ struct netprocfs_file_s
   uint8_t lineno;                    /* Line number */
   uint8_t linesize;                  /* Number of valid characters in line[] */
   uint8_t offset;                    /* Offset to first valid character in line[] */
-  uint8_t entry;                     /* See enum netprocfs_entry_e */
+  uint8_t entry;                     /* Entry index of netprocfs_entry_s */
   char line[NET_LINELEN];            /* Pre-allocated buffer for formatted lines */
 };
 
@@ -177,6 +161,52 @@ ssize_t netprocfs_read_netstats(FAR struct netprocfs_file_s *priv,
 
 #if defined(CONFIG_NET_STATISTICS) && defined(CONFIG_NET_MLD)
 ssize_t netprocfs_read_mldstats(FAR struct netprocfs_file_s *priv,
+                                FAR char *buffer, size_t buflen);
+#endif
+
+/****************************************************************************
+ * Name: netprocfs_read_tcpstats
+ *
+ * Description:
+ *   Read and format TCP statistics.
+ *
+ * Input Parameters:
+ *   priv - A reference to the network procfs file structure
+ *   buffer - The user-provided buffer into which network status will be
+ *            returned.
+ *   bulen  - The size in bytes of the user provided buffer.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCP
+ssize_t netprocfs_read_tcpstats(FAR struct netprocfs_file_s *priv,
+                                FAR char *buffer, size_t buflen);
+#endif
+
+/****************************************************************************
+ * Name: netprocfs_read_udpstats
+ *
+ * Description:
+ *   Read and format UDP statistics.
+ *
+ * Input Parameters:
+ *   priv - A reference to the network procfs file structure
+ *   buffer - The user-provided buffer into which network status will be
+ *            returned.
+ *   bulen  - The size in bytes of the user provided buffer.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_UDP
+ssize_t netprocfs_read_udpstats(FAR struct netprocfs_file_s *priv,
                                 FAR char *buffer, size_t buflen);
 #endif
 

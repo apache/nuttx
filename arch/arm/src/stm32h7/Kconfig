@@ -655,50 +655,47 @@ menu "STM32H7 SPI Selection"
 config STM32H7_SPI1
 	bool "SPI1"
 	default n
-	depends on EXPERIMENTAL
 	select SPI
 	select STM32H7_SPI
 
 config STM32H7_SPI2
 	bool "SPI2"
 	default n
-	depends on EXPERIMENTAL
 	select SPI
 	select STM32H7_SPI
 
 config STM32H7_SPI3
 	bool "SPI3"
 	default n
-	depends on EXPERIMENTAL
 	select SPI
 	select STM32H7_SPI
 
 config STM32H7_SPI4
 	bool "SPI4"
 	default n
-	depends on STM32H7_HAVE_SPI4 && EXPERIMENTAL
+	depends on STM32H7_HAVE_SPI4
 	select SPI
 	select STM32H7_SPI
 
 config STM32H7_SPI5
 	bool "SPI5"
 	default n
-	depends on STM32H7_HAVE_SPI5 && EXPERIMENTAL
+	depends on STM32H7_HAVE_SPI5
 	select SPI
 	select STM32H7_SPI
 
 config STM32H7_SPI6
 	bool "SPI6"
 	default n
-	depends on STM32H7_HAVE_SPI6 && EXPERIMENTAL
+	depends on STM32H7_HAVE_SPI6
 	select SPI
 	select STM32H7_SPI
+
+endmenu # STM32H7 SPI Selection
 
 config STM32H7_SYSCFG
 	bool "SYSCFG"
 	default y
-
-endmenu # STM32H7 SPI Selection
 
 menu "STM32H7 Timer Selection"
 

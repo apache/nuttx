@@ -31,6 +31,8 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/wireless/ieee80211/bcmf_gspi.h>
 
+#include "barriers.h"
+
 #include "rp2040_cyw43439.h"
 #include "rp2040_pio.h"
 #include "rp2040_pio_instructions.h"
@@ -414,18 +416,25 @@ static int my_write(FAR struct gspi_dev_s  *gspi,
                      rp_io->pio_sm,
                      pio_encode_jmp(rp_io->pio_location));
 
-  /* Set the PIO X (tx bit len) and Y (rx bit len) registers.
+  /* Set the PIO X and Y registers.
+   *
+   * We load X (the TX bit length) with one less than the number of
+   * bits to transmit to the chip. This length includes the 32-bit
+   * command word and all the 32-bit data words. Since the length
+   * parameter is a byte count we round up just to be sure.
+   *
+   * We load Y (the RX bit length) with zero as we're not reading
+   * any data.
+   *
    * This is slightly magical.  The way we load the X is to first
    * push the the number of bits to transmit onto the transmit fifo.
    * Then we force the PIO state machine to execute the instruction
    * "out x, 32" which transfers the word from the output shift
    * register (OSR) to the X register.  When this instruction executes
-   * the PIO will notice the the OSR is empty, so will automatically
+   * the PIO will notice that the OSR is empty, so will automatically
    * pull a value (the one we just added) from the input fifo.
    *
-   * Loading the Y works the same way, except we round the number of
-   * bits up to a multiple of 32, so the pio program will be sure to
-   * autopush the final data to the output fifo.
+   * Loading the Y works the same way.
    */
 
   rp2040_pio_sm_put(rp_io->pio, rp_io->pio_sm, 32 * ((length + 3) / 4) + 31);
@@ -487,6 +496,7 @@ static int my_write(FAR struct gspi_dev_s  *gspi,
   /* Assert gpio_select by pulling line low */
 
   rp2040_gpio_put(rp_io->gpio_select, false);
+  ARM_DMB();
 
   /* Enable the state machine.  This starts the pio program running */
 
@@ -496,8 +506,22 @@ static int my_write(FAR struct gspi_dev_s  *gspi,
 
   nxsem_wait(&dma_info.sem);
 
+  /* At this point all the data has been queued but my not have all been
+   * sent.  We know that the PIO program will make the data line an input
+   * once all the data is sent so we'll check for this.
+   */
+
+  while (getreg32(RP2040_IO_BANK0_GPIO_STATUS(rp_io->gpio_data))
+                  & RP2040_IO_BANK0_GPIO_STATUS_OEFROMPERI)
+    {
+      /* Just busy wait -- testing indicates a worst case of
+       * 20 loops (100 instructions).
+       */
+    }
+
   /* Un-assert select by pulling line high. */
 
+  ARM_DMB();
   rp2040_gpio_put(rp_io->gpio_select, true);
 
   /* Free the DMA controller */
@@ -509,7 +533,9 @@ static int my_write(FAR struct gspi_dev_s  *gspi,
 
   rp2040_pio_sm_set_enabled(rp_io->pio, rp_io->pio_sm, false);
 
-  /* At this point the data pin is input so it should be pulled high */
+  /* At this point the data pin is input so it should have been
+   * pulled high by rp2040's gpio pullup.
+   */
 
   my_interrupt_enable(gspi, true);
 
@@ -606,32 +632,40 @@ static int my_read(FAR struct gspi_dev_s  *gspi,
                      rp_io->pio_sm,
                      pio_encode_jmp(rp_io->pio_location));
 
-  /* Set the PIO X (tx bit len) and Y (rx bit len) registers.
+  /* Set the PIO X and Y registers.
+   *
+   * We load X (the TX bit length) with one less than the number of
+   * bits to transmit to the chip. Since we only send the 32-bit command
+   * word we set X to 31.
+   *
+   * We load Y with the number of bits to read.  This is based on the
+   * byte count in "length" which we round up to a 32-bit boundry so the
+   * pio program will be sure to autopush the final data to the output fifo.
+   *
    * This is slightly magical.  The way we load the X is to first
    * push the the number of bits to transmit onto the transmit fifo.
    * Then we force the PIO state machine to execute the instruction
    * "out x, 32" which transfers the word from the output shift
    * register (OSR) to the X register.  When this instruction executes
-   * the PIO will notice the the OSR is empty, so will automatically
+   * the PIO will notice that the OSR is empty, so will automatically
    * pull a value (the one we just added) from the input fifo.
    *
-   * Loading the Y works the same way, except we round the number of
-   * bits up to a multiple of 32, so the pio program will be sure to
-   * autopush the final data to the output fifo.
+   * Loading the Y works the same way.
    */
 
   rp2040_pio_sm_put(rp_io->pio, rp_io->pio_sm, 31);
   rp2040_pio_sm_exec(rp_io->pio, rp_io->pio_sm, pio_encode_out(pio_x, 32));
 
-  /* RX bit length is 32 bits for each 4 bytes requested
-   * plus 32 bits for status
-   */
+  /* RX bit length is 32 bits for each 4 bytes requested. */
 
   bit_length = 32 * ((length + 3) / 4);
 
-  /* For F1 reads and 32 bits for delay */
+  /* For F1 reads add 32 bits for delay */
 
-  if (function == gspi_f1_backplane) bit_length += 32;
+  if (function == gspi_f1_backplane)
+    {
+      bit_length += 32;
+    }
 
   rp2040_pio_sm_put(rp_io->pio, rp_io->pio_sm, bit_length);
   rp2040_pio_sm_exec(rp_io->pio, rp_io->pio_sm, pio_encode_out(pio_y, 32));
@@ -689,6 +723,7 @@ static int my_read(FAR struct gspi_dev_s  *gspi,
   /* Assert gpio_select by pulling line low */
 
   rp2040_gpio_put(rp_io->gpio_select, false);
+  ARM_DMB();
 
   /* Enable the state machine.  This starts the pio program running */
 
@@ -704,6 +739,7 @@ static int my_read(FAR struct gspi_dev_s  *gspi,
 
   /* Un-assert select by pulling line high. */
 
+  ARM_DMB();
   rp2040_gpio_put(rp_io->gpio_select, true);
 
   /* Free the DMA controllers */
@@ -717,7 +753,9 @@ static int my_read(FAR struct gspi_dev_s  *gspi,
 
   rp2040_pio_sm_set_enabled(rp_io->pio, rp_io->pio_sm, false);
 
-  /* At this point the data pin is input so it should be pulled high */
+  /* At this point the data pin is input so it should have been
+   * pulled high by rp2040's gpio pullup.
+   */
 
   my_interrupt_enable(gspi, true);
 

@@ -36,6 +36,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/udp.h>
+#include <netinet/in.h>
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
@@ -60,11 +61,8 @@ struct udp_recvfrom_s
 {
   FAR struct udp_conn_s   *ir_conn;      /* Connection associated with the socket */
   FAR struct devif_callback_s *ir_cb;    /* Reference to callback instance */
+  FAR struct msghdr       *ir_msg;       /* Receive info and buffer */
   sem_t                    ir_sem;       /* Semaphore signals recv completion */
-  size_t                   ir_buflen;    /* Length of receive buffer */
-  uint8_t                 *ir_buffer;    /* Pointer to receive buffer */
-  FAR struct sockaddr     *ir_from;      /* Address of sender */
-  FAR socklen_t           *ir_fromlen;   /* Number of bytes allocated for address of sender */
   ssize_t                  ir_recvlen;   /* The received length */
   int                      ir_result;    /* Success:OK, failure:negated errno */
 };
@@ -73,34 +71,62 @@ struct udp_recvfrom_s
  * Private Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: udp_update_recvlen
- *
- * Description:
- *   Update information about space available for new data and update size
- *   of data in buffer,  This logic accounts for the case where
- *   udp_readahead() sets state.ir_recvlen == -1 .
- *
- * Input Parameters:
- *   pstate   recvfrom state structure
- *   recvlen  size of new data appended to buffer
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static inline void udp_update_recvlen(FAR struct udp_recvfrom_s *pstate,
-                                      size_t recvlen)
+static void udp_recvpktinfo(FAR struct udp_recvfrom_s *pstate,
+                            FAR void *srcaddr, uint8_t ifindex)
 {
-  if (pstate->ir_recvlen < 0)
+  FAR struct msghdr     *msg      = pstate->ir_msg;
+  FAR struct udp_conn_s *conn     = pstate->ir_conn;
+  FAR struct cmsghdr    *control  = msg->msg_control;
+  size_t                 cmsg_len = 0;
+
+  if (!(conn->flags & _UDP_FLAG_PKTINFO))
     {
-      pstate->ir_recvlen = 0;
+      goto out;
     }
 
-  pstate->ir_recvlen += recvlen;
-  pstate->ir_buffer  += recvlen;
-  pstate->ir_buflen  -= recvlen;
+#ifdef CONFIG_NET_IPv4
+  if (conn->domain == PF_INET)
+    {
+      FAR struct sockaddr_in *infrom  = srcaddr;
+      FAR struct in_pktinfo *pkt_info = CMSG_DATA(control);
+
+      if (msg->msg_controllen < CMSG_LEN(sizeof(struct in_pktinfo)))
+        {
+          goto out;
+        }
+
+      cmsg_len                      = CMSG_LEN(sizeof(struct in_pktinfo));
+      control->cmsg_level           = IPPROTO_IP;
+      control->cmsg_type            = IP_PKTINFO;
+      control->cmsg_len             = cmsg_len;
+      pkt_info->ipi_ifindex         = ifindex;
+      pkt_info->ipi_addr.s_addr     = infrom->sin_addr.s_addr;
+      pkt_info->ipi_spec_dst.s_addr = conn->u.ipv4.laddr;
+    }
+#endif
+
+#ifdef CONFIG_NET_IPv6
+  if (conn->domain == PF_INET6)
+    {
+      FAR struct sockaddr_in6 *infrom  = srcaddr;
+      FAR struct in6_pktinfo *pkt_info = CMSG_DATA(control);
+
+      if (msg->msg_controllen < CMSG_LEN(sizeof(struct in6_pktinfo)))
+        {
+          goto out;
+        }
+
+      cmsg_len               = CMSG_LEN(sizeof(struct in6_pktinfo));
+      control->cmsg_level    = IPPROTO_IPV6;
+      control->cmsg_type     = IPV6_PKTINFO;
+      control->cmsg_len      = cmsg_len;
+      pkt_info->ipi6_ifindex = ifindex;
+      net_ipv6addr_copy(&pkt_info->ipi6_addr, infrom->sin6_addr.s6_addr);
+    }
+#endif
+
+out:
+  msg->msg_controllen = cmsg_len;
 }
 
 /****************************************************************************
@@ -128,9 +154,9 @@ static size_t udp_recvfrom_newdata(FAR struct net_driver_s *dev,
 
   /* Get the length of the data to return */
 
-  if (dev->d_len > pstate->ir_buflen)
+  if (dev->d_len > pstate->ir_msg->msg_iov->iov_len)
     {
-      recvlen = pstate->ir_buflen;
+      recvlen = pstate->ir_msg->msg_iov->iov_len;
     }
   else
     {
@@ -139,13 +165,12 @@ static size_t udp_recvfrom_newdata(FAR struct net_driver_s *dev,
 
   /* Copy the new appdata into the user buffer */
 
-  memcpy(pstate->ir_buffer, dev->d_appdata, recvlen);
-  ninfo("Received %d bytes (of %d)\n", (int)recvlen, (int)dev->d_len);
+  memcpy(pstate->ir_msg->msg_iov->iov_base, dev->d_appdata, recvlen);
+  ninfo("Received %zu bytes (of %" PRIu16 ")\n", recvlen, dev->d_len);
 
-  /* Update the accumulated size of the data read */
+  /* Update the size of the data read */
 
-  udp_update_recvlen(pstate, recvlen);
-
+  pstate->ir_recvlen = recvlen;
   return recvlen;
 }
 
@@ -194,7 +219,14 @@ static inline void udp_readahead(struct udp_recvfrom_s *pstate)
   if ((iob = iob_peek_queue(&conn->readahead)) != NULL)
     {
       FAR struct iob_s *tmp;
+#ifdef CONFIG_NET_IPv6
+      uint8_t srcaddr[sizeof(struct sockaddr_in6)];
+#else
+      uint8_t srcaddr[sizeof(struct sockaddr_in)];
+#endif
       uint8_t src_addr_size;
+      uint8_t offset  = 0;
+      uint8_t ifindex = 0;
 
       DEBUGASSERT(iob->io_pktlen > 0);
 
@@ -202,54 +234,57 @@ static inline void udp_readahead(struct udp_recvfrom_s *pstate)
        * the user buffer.
        */
 
-      recvlen = iob_copyout(&src_addr_size, iob, sizeof(uint8_t), 0);
+      recvlen = iob_copyout(&src_addr_size, iob, sizeof(uint8_t), offset);
+      offset += sizeof(uint8_t);
       if (recvlen != sizeof(uint8_t))
         {
           goto out;
         }
 
-      if (0
-#ifdef CONFIG_NET_IPv6
-          || src_addr_size == sizeof(struct sockaddr_in6)
-#endif
-#ifdef CONFIG_NET_IPv4
-          || src_addr_size == sizeof(struct sockaddr_in)
-#endif
-        )
+      recvlen = iob_copyout(srcaddr, iob, src_addr_size, offset);
+      offset += src_addr_size;
+      if (recvlen != src_addr_size)
         {
-          if (pstate->ir_from)
-            {
-              socklen_t len = *pstate->ir_fromlen;
-              len = (socklen_t)
-                src_addr_size > len ? len : (socklen_t)src_addr_size;
-
-              recvlen = iob_copyout((FAR uint8_t *)pstate->ir_from, iob,
-                                    len, sizeof(uint8_t));
-              if (recvlen != len)
-                {
-                  goto out;
-                }
-            }
+          goto out;
         }
 
-      if (pstate->ir_buflen > 0)
+#ifdef CONFIG_NETDEV_IFINDEX
+      recvlen = iob_copyout(&ifindex, iob, sizeof(uint8_t), offset);
+      offset += sizeof(uint8_t);
+      if (recvlen != sizeof(uint8_t))
         {
-          recvlen = iob_copyout(pstate->ir_buffer, iob, pstate->ir_buflen,
-                                src_addr_size + sizeof(uint8_t));
+          goto out;
+        }
+#endif
+
+      if (pstate->ir_msg->msg_name)
+        {
+          pstate->ir_msg->msg_namelen =
+                src_addr_size > pstate->ir_msg->msg_namelen ?
+                pstate->ir_msg->msg_namelen : src_addr_size;
+
+          memcpy(pstate->ir_msg->msg_name, srcaddr,
+                 pstate->ir_msg->msg_namelen);
+        }
+
+      if (pstate->ir_msg->msg_iov->iov_len > 0)
+        {
+          recvlen = iob_copyout(pstate->ir_msg->msg_iov->iov_base,
+                                iob, pstate->ir_msg->msg_iov->iov_len,
+                                offset);
 
           ninfo("Received %d bytes (of %d)\n", recvlen, iob->io_pktlen);
 
           /* Update the accumulated size of the data read */
 
-          pstate->ir_recvlen  = recvlen;
-          pstate->ir_buffer  += recvlen;
-          pstate->ir_buflen  -= recvlen;
-          *pstate->ir_fromlen = src_addr_size;
+          pstate->ir_recvlen = recvlen;
         }
       else
         {
           pstate->ir_recvlen = 0;
         }
+
+      udp_recvpktinfo(pstate, srcaddr, ifindex);
 
 out:
       /* Remove the I/O buffer chain from the head of the read-ahead
@@ -287,6 +322,13 @@ out:
 static inline void udp_sender(FAR struct net_driver_s *dev,
                               FAR struct udp_recvfrom_s *pstate)
 {
+#ifdef CONFIG_NET_IPv6
+  uint8_t srcaddr[sizeof(struct sockaddr_in6)];
+#else
+  uint8_t srcaddr[sizeof(struct sockaddr_in)];
+#endif
+  socklen_t fromlen = 0;
+
   /* Get the family from the packet type, IP address from the IP header, and
    * the port number from the UDP header.
    */
@@ -296,21 +338,15 @@ static inline void udp_sender(FAR struct net_driver_s *dev,
   if (IFF_IS_IPv6(dev->d_flags))
 #endif
     {
-      FAR struct sockaddr_in6 *infrom =
-        (FAR struct sockaddr_in6 *)pstate->ir_from;
-      FAR socklen_t *fromlen = pstate->ir_fromlen;
+      FAR struct sockaddr_in6 *infrom = (FAR struct sockaddr_in6 *)srcaddr;
+      FAR struct udp_hdr_s *udp   = UDPIPv6BUF;
+      FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
 
-      if (infrom)
-        {
-          FAR struct udp_hdr_s *udp   = UDPIPv6BUF;
-          FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
+      infrom->sin6_family = AF_INET6;
+      infrom->sin6_port   = udp->srcport;
+      fromlen = sizeof(struct sockaddr_in6);
 
-          infrom->sin6_family = AF_INET6;
-          infrom->sin6_port   = udp->srcport;
-          *fromlen = sizeof(struct sockaddr_in6);
-
-          net_ipv6addr_copy(infrom->sin6_addr.s6_addr, ipv6->srcipaddr);
-        }
+      net_ipv6addr_copy(infrom->sin6_addr.s6_addr, ipv6->srcipaddr);
     }
 #endif /* CONFIG_NET_IPv6 */
 
@@ -319,53 +355,59 @@ static inline void udp_sender(FAR struct net_driver_s *dev,
   else
 #endif
     {
-      FAR struct sockaddr_in *infrom  =
-        (FAR struct sockaddr_in *)pstate->ir_from;
-      FAR socklen_t *fromlen = pstate->ir_fromlen;
-
-      if (infrom)
-        {
 #ifdef CONFIG_NET_IPv6
-          FAR struct udp_conn_s *conn = pstate->ir_conn;
+      FAR struct udp_conn_s *conn = pstate->ir_conn;
 
+      if (conn->domain == PF_INET6)
+        {
           /* Hybrid dual-stack IPv6/IPv4 implementations recognize a special
            * class of addresses, the IPv4-mapped IPv6 addresses.
            */
 
-          if (conn->domain == PF_INET6)
-            {
-              FAR struct sockaddr_in6 *infrom6 =
-                (FAR struct sockaddr_in6 *)infrom;
-              FAR struct udp_hdr_s *udp   = UDPIPv6BUF;
-              FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
-              in_addr_t ipv4addr;
+          FAR struct sockaddr_in6 *infrom6 =
+            (FAR struct sockaddr_in6 *)srcaddr;
+          FAR struct udp_hdr_s *udp   = UDPIPv6BUF;
+          FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
+          in_addr_t ipv4addr;
 
-              /* Encode the IPv4 address as an IPv4-mapped IPv6 address */
+          /* Encode the IPv4 address as an IPv4-mapped IPv6 address */
 
-              infrom6->sin6_family = AF_INET6;
-              infrom6->sin6_port = udp->srcport;
-              *fromlen = sizeof(struct sockaddr_in6);
-
-              ipv4addr = net_ip4addr_conv32(ipv6->srcipaddr);
-              ip6_map_ipv4addr(ipv4addr, infrom6->sin6_addr.s6_addr16);
-            }
-          else
+          infrom6->sin6_family = AF_INET6;
+          infrom6->sin6_port = udp->srcport;
+          fromlen  = sizeof(struct sockaddr_in6);
+          ipv4addr = net_ip4addr_conv32(ipv6->srcipaddr);
+          ip6_map_ipv4addr(ipv4addr, infrom6->sin6_addr.s6_addr16);
+        }
+      else
 #endif
-            {
-              FAR struct udp_hdr_s *udp   = UDPIPv4BUF;
-              FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
+        {
+          FAR struct sockaddr_in *infrom = (FAR struct sockaddr_in *)srcaddr;
+          FAR struct udp_hdr_s *udp   = UDPIPv4BUF;
+          FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
 
-              infrom->sin_family = AF_INET;
-              infrom->sin_port   = udp->srcport;
-              *fromlen = sizeof(struct sockaddr_in);
+          infrom->sin_family = AF_INET;
+          infrom->sin_port   = udp->srcport;
+          fromlen = sizeof(struct sockaddr_in);
 
-              net_ipv4addr_copy(infrom->sin_addr.s_addr,
-                                net_ip4addr_conv32(ipv4->srcipaddr));
-              memset(infrom->sin_zero, 0, sizeof(infrom->sin_zero));
-            }
+          net_ipv4addr_copy(infrom->sin_addr.s_addr,
+                            net_ip4addr_conv32(ipv4->srcipaddr));
+          memset(infrom->sin_zero, 0, sizeof(infrom->sin_zero));
         }
     }
 #endif /* CONFIG_NET_IPv4 */
+
+  if (pstate->ir_msg->msg_name)
+    {
+      pstate->ir_msg->msg_namelen = fromlen > pstate->ir_msg->msg_namelen ?
+                                    pstate->ir_msg->msg_namelen : fromlen;
+      memcpy(pstate->ir_msg->msg_name, srcaddr, pstate->ir_msg->msg_namelen);
+    }
+
+#ifdef CONFIG_NETDEV_IFINDEX
+  udp_recvpktinfo(pstate, srcaddr, dev->d_ifindex);
+#else
+  udp_recvpktinfo(pstate, srcaddr, 0);
+#endif
 }
 
 /****************************************************************************
@@ -387,13 +429,13 @@ static void udp_terminate(FAR struct udp_recvfrom_s *pstate, int result)
 {
   /* Don't allow any further UDP call backs. */
 
-  pstate->ir_cb->flags   = 0;
-  pstate->ir_cb->priv    = NULL;
-  pstate->ir_cb->event   = NULL;
+  pstate->ir_cb->flags = 0;
+  pstate->ir_cb->priv  = NULL;
+  pstate->ir_cb->event = NULL;
 
   /* Save the result of the transfer */
 
-  pstate->ir_result      = result;
+  pstate->ir_result    = result;
 
   /* Wake up the waiting thread, returning the number of bytes
    * actually read.
@@ -482,8 +524,7 @@ static uint16_t udp_eventhandler(FAR struct net_driver_s *dev,
  *
  * Input Parameters:
  *   conn     The UDP connection of interest
- *   buf      Buffer to receive data
- *   len      Length of buffer
+ *   msg      Receive info and buffer for receive data
  *   pstate   A pointer to the state structure to be initialized
  *
  * Returned Value:
@@ -494,9 +535,7 @@ static uint16_t udp_eventhandler(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 static void udp_recvfrom_initialize(FAR struct udp_conn_s *conn,
-                                    FAR void *buf, size_t len,
-                                    FAR struct sockaddr *infrom,
-                                    FAR socklen_t *fromlen,
+                                    FAR struct msghdr *msg,
                                     FAR struct udp_recvfrom_s *pstate)
 {
   /* Initialize the state structure. */
@@ -510,14 +549,11 @@ static void udp_recvfrom_initialize(FAR struct udp_conn_s *conn,
   nxsem_init(&pstate->ir_sem, 0, 0); /* Doesn't really fail */
   nxsem_set_protocol(&pstate->ir_sem, SEM_PRIO_NONE);
 
-  pstate->ir_buflen    = len;
-  pstate->ir_buffer    = buf;
-  pstate->ir_from      = infrom;
-  pstate->ir_fromlen   = fromlen;
+  pstate->ir_msg  = msg;
 
   /* Set up the start time for the timeout */
 
-  pstate->ir_conn      = conn;
+  pstate->ir_conn = conn;
 }
 
 /* The only un-initialization that has to be performed is destroying the
@@ -583,9 +619,7 @@ static ssize_t udp_recvfrom_result(int result, struct udp_recvfrom_s *pstate)
  *
  * Input Parameters:
  *   psock  Pointer to the socket structure for the SOCK_DRAM socket
- *   buf    Buffer to receive data
- *   len    Length of buffer
- *   from   INET address of source (may be NULL)
+ *   msg    Receive info and buffer for receive data
  *
  * Returned Value:
  *   On success, returns the number of characters received.  On  error,
@@ -595,9 +629,8 @@ static ssize_t udp_recvfrom_result(int result, struct udp_recvfrom_s *pstate)
  *
  ****************************************************************************/
 
-ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR void *buf,
-                           size_t len, int flags, FAR struct sockaddr *from,
-                           FAR socklen_t *fromlen)
+ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
+                           int flags)
 {
   FAR struct udp_conn_s *conn = (FAR struct udp_conn_s *)psock->s_conn;
   FAR struct net_driver_s *dev;
@@ -611,7 +644,7 @@ ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR void *buf,
    */
 
   net_lock();
-  udp_recvfrom_initialize(conn, buf, len, from, fromlen, &state);
+  udp_recvfrom_initialize(conn, msg, &state);
 
   /* Copy the read-ahead data from the packet */
 
@@ -665,9 +698,9 @@ ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR void *buf,
         {
           /* Set up the callback in the connection */
 
-          state.ir_cb->flags   = (UDP_NEWDATA | NETDEV_DOWN);
-          state.ir_cb->priv    = (FAR void *)&state;
-          state.ir_cb->event   = udp_eventhandler;
+          state.ir_cb->flags = (UDP_NEWDATA | NETDEV_DOWN);
+          state.ir_cb->priv  = (FAR void *)&state;
+          state.ir_cb->event = udp_eventhandler;
 
           /* Wait for either the receive to complete or for an error/timeout
            * to occur.  net_timedwait will also terminate if a signal is

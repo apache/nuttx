@@ -69,8 +69,8 @@ static int        local_accept(FAR struct socket *psock,
 static int        local_poll(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
 static int        local_close(FAR struct socket *psock);
-static int        local_ioctl(FAR struct socket *psock, int cmd,
-                    FAR void *arg, size_t arglen);
+static int        local_ioctl(FAR struct socket *psock,
+                    int cmd, unsigned long arg);
 static int        local_socketpair(FAR struct socket *psocks[2]);
 
 /****************************************************************************
@@ -704,12 +704,10 @@ static int local_close(FAR struct socket *psock)
  *   psock    A reference to the socket structure of the socket
  *   cmd      The ioctl command
  *   arg      The argument of the ioctl cmd
- *   arglen   The length of 'arg'
  *
  ****************************************************************************/
 
-static int local_ioctl(FAR struct socket *psock, int cmd,
-                       FAR void *arg, size_t arglen)
+static int local_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
 {
   FAR struct local_conn_s *conn;
   int ret = OK;

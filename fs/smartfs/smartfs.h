@@ -197,8 +197,24 @@
 #  define offsetof(type, member) ((size_t) & (((type *)0)->member))
 #endif
 
-#define SMARTFS_NEXTSECTOR(h)    (*((uint16_t *)h->nextsector))
-#define SMARTFS_USED(h)          (*((uint16_t *)h->used))
+#ifdef CONFIG_SMARTFS_ALIGNED_ACCESS
+#  define SMARTFS_NEXTSECTOR(h)        (smartfs_rdle16(h->nextsector))
+#  define SMARTFS_SET_NEXTSECTOR(h, v) smartfs_wrle16(h->nextsector, \
+                                            (uint16_t)(v))
+
+#  define SMARTFS_USED(h)              (smartfs_rdle16(h->used))
+#  define SMARTFS_SET_USED(h, v)       smartfs_wrle16(h->used, \
+                                            (uint16_t)(v))
+
+#else
+#  define SMARTFS_NEXTSECTOR(h)        (*((uint16_t *)h->nextsector))
+#  define SMARTFS_SET_NEXTSECTOR(h, v) ((*((uint16_t *)h->nextsector)) = \
+                                            (uint16_t)(v))
+
+#  define SMARTFS_USED(h)              (*((uint16_t *)h->used))
+#  define SMARTFS_SET_USED(h, v)       ((*((uint16_t *)h->used)) = \
+                                            (uint16_t)(v))
+#endif
 
 #ifdef CONFIG_MTD_SMART_ENABLE_CRC
 #define CONFIG_SMARTFS_USE_SECTOR_BUFFER

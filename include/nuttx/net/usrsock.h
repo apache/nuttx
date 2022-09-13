@@ -29,6 +29,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <sys/uio.h>
 
 #include <nuttx/net/netconfig.h>
 #include <nuttx/compiler.h>
@@ -36,6 +37,10 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifndef ARRAY_SIZE
+#  define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+#endif
 
 /* Event message flags */
 
@@ -254,5 +259,49 @@ begin_packed_struct struct usrsock_message_socket_event_s
 
   int16_t usockid;
 } end_packed_struct;
+
+/****************************************************************************
+ * Name: usrsock_iovec_get() - copy from iovec to buffer.
+ ****************************************************************************/
+
+ssize_t usrsock_iovec_get(FAR void *dst, size_t dstlen,
+                          FAR const struct iovec *iov, int iovcnt,
+                          size_t pos);
+
+/****************************************************************************
+ * Name: usrsock_iovec_put() - copy to iovec from buffer.
+ ****************************************************************************/
+
+ssize_t usrsock_iovec_put(FAR struct iovec *iov, int iovcnt, size_t pos,
+                          FAR const void *src, size_t srclen);
+
+/****************************************************************************
+ * Name: usrsock_abort() - abort all usrsock's operations
+ ****************************************************************************/
+
+void usrsock_abort(void);
+
+/****************************************************************************
+ * Name: usrsock_response() - handle usrsock request's ack/response
+ ****************************************************************************/
+
+ssize_t usrsock_response(FAR const char *buffer, size_t len,
+                         FAR bool *req_done);
+
+/****************************************************************************
+ * Name: usrsock_request() - finish usrsock's request
+ ****************************************************************************/
+
+int usrsock_request(FAR struct iovec *iov, unsigned int iovcnt);
+
+/****************************************************************************
+ * Name: usrsock_register
+ *
+ * Description:
+ *   Register /dev/usrsock
+ *
+ ****************************************************************************/
+
+void usrsock_register(void);
 
 #endif /* __INCLUDE_NUTTX_NET_USRSOCK_H */

@@ -24,13 +24,10 @@
 
 #include <nuttx/config.h>
 
-#include <fcntl.h>
 #include <errno.h>
-#include <poll.h>
 #include <syslog.h>
 #include <string.h>
 
-#include <nuttx/fs/fs.h>
 #include <nuttx/net/usrsock.h>
 
 #include "up_usrsock_host.h"
@@ -47,9 +44,8 @@
 
 struct usrsock_s
 {
-  struct file usock;
-  uint8_t     in [SIM_USRSOCK_BUFSIZE];
-  uint8_t     out[SIM_USRSOCK_BUFSIZE];
+  uint8_t in[SIM_USRSOCK_BUFSIZE];
+  uint8_t out[SIM_USRSOCK_BUFSIZE];
 };
 
 /****************************************************************************
@@ -72,22 +68,7 @@ static struct usrsock_s g_usrsock;
 static int usrsock_send(struct usrsock_s *usrsock,
                         const void *buf, size_t len)
 {
-  uint8_t *data = (uint8_t *)buf;
-  ssize_t ret;
-
-  while (len > 0)
-    {
-      ret = file_write(&usrsock->usock, data, len);
-      if (ret < 0)
-        {
-          return ret;
-        }
-
-      data += ret;
-      len  -= ret;
-    }
-
-  return 0;
+  return usrsock_response(buf, len, NULL);
 }
 
 static int usrsock_send_ack(struct usrsock_s *usrsock,
@@ -404,47 +385,46 @@ int usrsock_event_callback(int16_t usockid, uint16_t events)
   return usrsock_send_event(&g_usrsock, usockid, events);
 }
 
-int usrsock_init(void)
+void usrsock_register(void)
 {
-  return file_open(&g_usrsock.usock, "/dev/usrsock", O_RDWR);
 }
 
-void usrsock_loop(void)
+/****************************************************************************
+ * Name: usrsock_request
+ ****************************************************************************/
+
+int usrsock_request(FAR struct iovec *iov, unsigned int iovcnt)
 {
   struct usrsock_request_common_s *common;
   int ret;
-  struct pollfd pfd =
-    {
-      .ptr    = &g_usrsock.usock,
-      .events = POLLIN | POLLFILE,
-    };
 
-  ret = poll(&pfd, 1, 0);
-  if (ret > 0)
-    {
-      ret = file_read(&g_usrsock.usock, g_usrsock.in, sizeof(g_usrsock.in));
-      if (ret > 0)
-        {
-          common = (struct usrsock_request_common_s *)g_usrsock.in;
+  /* Copy request to buffer */
 
-          if (common->reqid >= 0 &&
-              common->reqid < USRSOCK_REQUEST__MAX)
-            {
-              ret = g_usrsock_handler[common->reqid](&g_usrsock,
-                                                     g_usrsock.in, ret);
-              if (ret < 0)
-                {
-                  syslog(LOG_ERR, "Usrsock request %d failed: %d\n",
-                                  common->reqid, ret);
-                }
-            }
-          else
-            {
-              syslog(LOG_ERR, "Invalid request id: %d\n",
-                              common->reqid);
-            }
-        }
+  ret = usrsock_iovec_get(g_usrsock.in, sizeof(g_usrsock.in),
+                          iov, iovcnt, 0);
+  if (ret <= 0)
+    {
+      return ret;
     }
 
-  usrsock_host_loop();
+  common = (struct usrsock_request_common_s *)g_usrsock.in;
+
+  if (common->reqid >= 0 &&
+      common->reqid < USRSOCK_REQUEST__MAX)
+    {
+      ret = g_usrsock_handler[common->reqid](&g_usrsock,
+                                              g_usrsock.in, ret);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "Usrsock request %d failed: %d\n",
+                          common->reqid, ret);
+        }
+    }
+  else
+    {
+      syslog(LOG_ERR, "Invalid request id: %d\n",
+                      common->reqid);
+    }
+
+  return ret;
 }

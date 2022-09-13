@@ -88,8 +88,8 @@ static ssize_t    inet_sendmsg(FAR struct socket *psock,
                     FAR struct msghdr *msg, int flags);
 static ssize_t    inet_recvmsg(FAR struct socket *psock,
                     FAR struct msghdr *msg, int flags);
-static int        inet_ioctl(FAR struct socket *psock, int cmd,
-                    FAR void *arg, size_t arglen);
+static int        inet_ioctl(FAR struct socket *psock,
+                    int cmd, unsigned long arg);
 static int        inet_socketpair(FAR struct socket *psocks[2]);
 #ifdef CONFIG_NET_SENDFILE
 static ssize_t    inet_sendfile(FAR struct socket *psock,
@@ -425,7 +425,7 @@ static int inet_bind(FAR struct socket *psock,
           nwarn("WARNING: TCP/IP stack is not available in this "
                 "configuration\n");
 
-          return -ENOSYS;
+          ret = -ENOSYS;
 #endif
         }
         break;
@@ -693,7 +693,7 @@ static int inet_connect(FAR struct socket *psock,
       {
         if (addrlen < sizeof(struct sockaddr_in))
           {
-            return -EBADF;
+            return -EINVAL;
           }
       }
       break;
@@ -704,7 +704,7 @@ static int inet_connect(FAR struct socket *psock,
       {
         if (addrlen < sizeof(struct sockaddr_in6))
           {
-            return -EBADF;
+            return -EINVAL;
           }
       }
       break;
@@ -873,7 +873,7 @@ static int inet_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
           {
             if (*addrlen < sizeof(struct sockaddr_in))
               {
-                return -EBADF;
+                return -EINVAL;
               }
           }
           break;
@@ -884,7 +884,7 @@ static int inet_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
           {
             if (*addrlen < sizeof(struct sockaddr_in6))
               {
-                return -EBADF;
+                return -EINVAL;
               }
           }
           break;
@@ -930,10 +930,9 @@ static int inet_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
        */
 
       psock_close(newsock);
-      return ret;
     }
 
-  return OK;
+  return ret;
 
 #else
   nwarn("WARNING: SOCK_STREAM not supported in this configuration\n");
@@ -1338,12 +1337,10 @@ static ssize_t inet_sendmsg(FAR struct socket *psock,
  *   psock    A reference to the socket structure of the socket
  *   cmd      The ioctl command
  *   arg      The argument of the ioctl cmd
- *   arglen   The length of 'arg'
  *
  ****************************************************************************/
 
-static int inet_ioctl(FAR struct socket *psock, int cmd,
-                      FAR void *arg, size_t arglen)
+static int inet_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
 {
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
@@ -1355,14 +1352,14 @@ static int inet_ioctl(FAR struct socket *psock, int cmd,
 #if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
   if (psock->s_type == SOCK_STREAM)
     {
-      return tcp_ioctl(psock->s_conn, cmd, arg, arglen);
+      return tcp_ioctl(psock->s_conn, cmd, arg);
     }
 #endif
 
 #if defined(CONFIG_NET_UDP) && defined(NET_UDP_HAVE_STACK)
   if (psock->s_type == SOCK_DGRAM)
     {
-      return udp_ioctl(psock->s_conn, cmd, arg, arglen);
+      return udp_ioctl(psock->s_conn, cmd, arg);
     }
 #endif
 
@@ -1571,17 +1568,13 @@ static ssize_t inet_sendfile(FAR struct socket *psock,
 static ssize_t inet_recvmsg(FAR struct socket *psock,
                             FAR struct msghdr *msg, int flags)
 {
-  FAR void *buf = msg->msg_iov->iov_base;
-  size_t len = msg->msg_iov->iov_len;
-  FAR struct sockaddr *from = msg->msg_name;
-  FAR socklen_t *fromlen = &msg->msg_namelen;
   ssize_t ret;
 
   /* If a 'from' address has been provided, verify that it is large
    * enough to hold this address family.
    */
 
-  if (from)
+  if (msg->msg_name)
     {
       socklen_t minlen;
 
@@ -1610,7 +1603,7 @@ static ssize_t inet_recvmsg(FAR struct socket *psock,
           return -EINVAL;
         }
 
-      if (*fromlen < minlen)
+      if (msg->msg_namelen < minlen)
         {
           return -EINVAL;
         }
@@ -1626,7 +1619,7 @@ static ssize_t inet_recvmsg(FAR struct socket *psock,
     case SOCK_STREAM:
       {
 #ifdef NET_TCP_HAVE_STACK
-        ret = psock_tcp_recvfrom(psock, buf, len, flags, from, fromlen);
+        ret = psock_tcp_recvfrom(psock, msg, flags);
 #else
         ret = -ENOSYS;
 #endif
@@ -1638,7 +1631,7 @@ static ssize_t inet_recvmsg(FAR struct socket *psock,
     case SOCK_DGRAM:
       {
 #ifdef NET_UDP_HAVE_STACK
-        ret = psock_udp_recvfrom(psock, buf, len, flags, from, fromlen);
+        ret = psock_udp_recvfrom(psock, msg, flags);
 #else
         ret = -ENOSYS;
 #endif

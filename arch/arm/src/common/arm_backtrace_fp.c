@@ -52,14 +52,13 @@ static int backtrace(uintptr_t *base, uintptr_t *limit,
 
   if (pc)
     {
-      i++;
       if ((*skip)-- <= 0)
         {
-          *buffer++ = pc;
+          buffer[i++] = pc;
         }
     }
 
-  for (; i < size; fp = (uintptr_t *)*(fp - 1), i++)
+  for (; i < size; fp = (uintptr_t *)*(fp - 1))
     {
       if (fp > limit || fp < base || *fp == 0)
         {
@@ -68,7 +67,7 @@ static int backtrace(uintptr_t *base, uintptr_t *limit,
 
       if ((*skip)-- <= 0)
         {
-          *buffer++ = (void *)*fp;
+          buffer[i++] = (void *)*fp;
         }
     }
 
@@ -144,8 +143,8 @@ int up_backtrace(struct tcb_s *tcb,
             {
               ret += backtrace(rtcb->stack_base_ptr,
                                rtcb->stack_base_ptr + rtcb->adj_stack_size,
-                               (void *)CURRENT_REGS[REG_FP],
-                               (void *)CURRENT_REGS[REG_PC],
+                               (void *)rtcb->xcp.regs[REG_FP],
+                               (void *)rtcb->xcp.regs[REG_PC],
                                &buffer[ret], size - ret, &skip);
             }
         }

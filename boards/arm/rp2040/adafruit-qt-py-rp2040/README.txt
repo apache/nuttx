@@ -5,16 +5,15 @@ This directory contains the port of NuttX to the Adafruit QT Py RP2040.
 See https://learn.adafruit.com/adafruit-qt-py-2040 for information 
 about Adafruit QT Py RP2040.
 
-Currently only the following devices are supported.
-
-  Supported:
+NuttX supports the following RP2040 capabilities:
   - UART  (console port)
     - GPIO 5 (UART1 RX) and GPIO 20 (UART1 TX) are used for the console.
   - I2C
-  - SPI
+  - SPI (master only)
   - DMAC
   - PWM
   - ADC
+  - Watchdog
   - USB device
     - MSC, CDC/ACM serial and these composite device are supported.
     - CDC/ACM serial device can be used for the console.
@@ -23,9 +22,17 @@ Currently only the following devices are supported.
   - SRAM Boot
     - If Pico SDK is available, nuttx.uf2 file which can be used in
       BOOTSEL mode will be created.
+  - Persistent flash filesystem in unused flash ROM
 
-  Not supported:
-  - All other devices
+NuttX also provide support for these external devices:
+
+  - WS2812 smart pixel support
+
+There is currently no direct user mode access to these RP2040 hardware features:
+  - SPI Slave Mode
+  - SSI
+  - RTC
+  - Timers
 
 Installation
 ============
@@ -64,6 +71,9 @@ Defconfigs
 
 - nsh
     Minimum configuration with NuttShell
+
+- nsh-flash
+    NuttX shell with SMART flash filesystem.
 
 - nshsram
     Load NuttX binary to SRAM

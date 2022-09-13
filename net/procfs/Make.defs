@@ -33,6 +33,12 @@ ifeq ($(CONFIG_NET_STATISTICS),y)
 ifeq ($(CONFIG_NET_MLD),y)
   NET_CSRCS += net_mld.c
 endif
+ifeq ($(CONFIG_NET_TCP),y)
+  NET_CSRCS += net_tcp.c
+endif
+ifeq ($(CONFIG_NET_UDP),y)
+  NET_CSRCS += net_udp.c
+endif
 endif
 
 # Routing table

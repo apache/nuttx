@@ -1,5 +1,5 @@
 ===============================
-Raspberry Pi Pico
+Raspberry Pi Pico W
 ===============================
 
 The `Raspberry Pi Pico <https://www.raspberrypi.com/products/raspberry-pi-pico/>`_ is a general purpose board supplied by
@@ -38,6 +38,7 @@ Buttons and LEDs
 ================
 
 LED controlled by GPIO0 of the wireless chip (not the RP2040 processor).
+Use rp2040_extra_gpio_put(0,value) to control this LED.
 
 A BOOTSEL button, which if held down when power is first
 applied to the board, will cause the RP2040 to boot into programming
@@ -179,6 +180,12 @@ nsh
 
 Basic NuttShell configuration (console enabled in UART0, at 115200 bps).
 
+nsh-flash
+---------
+
+Basic NuttShell configuration (console enabled in UART0, at 115200 bps
+with SMART flash filesystem.
+
 nshsram
 -------
 
@@ -207,6 +214,17 @@ st7735
 
 NuttShell configuration (console enabled in UART0, at 115200 bps) with support for
 st7735.
+
+telnet
+------
+
+NuttShell configuration (console enabled in UART0, at 115200 bps) with WiFi client
+mode and both telnet server and client enabled.
+
+After loading this configuration use make menuconfig to change the country code in
+Device Drivers->Wireless Device Support->IEEE 802.11 Device Support and the 
+wireless configuration in Application Configuration->Network Utilities->Network 
+initialization->WAPI Configuration to match your wireless network.
 
 usbmsc
 ------

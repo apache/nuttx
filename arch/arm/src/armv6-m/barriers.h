@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp2040/raspberrypi-pico-w/src/rp2040_reset.c
+ * arch/arm/src/armv6-m/barriers.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,44 +18,25 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_ARMV6_M_BARRIERS_H
+#define __ARCH_ARM_SRC_ARMV6_M_BARRIERS_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <nuttx/board.h>
-#include <nuttx/arch.h>
-
-#ifdef CONFIG_BOARDCTL_RESET
-
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: board_reset
- *
- * Description:
- *   Reset board.  Support for this function is required by board-level
- *   logic if CONFIG_BOARDCTL_RESET is selected.
- *
- * Input Parameters:
- *   status - Status information provided with the reset event.  This
- *            meaning of this status information is board-specific.  If not
- *            used by a board, the value zero may be provided in calls to
- *            board_reset().
- *
- * Returned Value:
- *   If this function returns, then it was not possible to power-off the
- *   board due to some constraints.  The return value int this case is a
- *   board-specific reason for the failure to shutdown.
- *
- ****************************************************************************/
+/* ARMv6-M memory barriers */
 
-int board_reset(int status)
-{
-  up_systemreset();
-  return 0;
-}
+#define arm_isb(n) __asm__ __volatile__ ("isb " #n : : : "memory")
+#define arm_dsb(n) __asm__ __volatile__ ("dsb " #n : : : "memory")
+#define arm_dmb(n) __asm__ __volatile__ ("dmb " #n : : : "memory")
 
-#endif /* CONFIG_BOARDCTL_RESET */
+#define ARM_DSB()  arm_dsb(15)
+#define ARM_ISB()  arm_isb(15)
+#define ARM_DMB()  arm_dmb(15)
+
+#endif /* __ARCH_ARM_SRC_ARMV6_M_BARRIERS_H */

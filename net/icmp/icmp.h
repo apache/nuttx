@@ -390,13 +390,11 @@ void icmp_reply(FAR struct net_driver_s *dev, int type, int code);
  *   conn     The ICMP connection of interest
  *   cmd      The ioctl command
  *   arg      The argument of the ioctl cmd
- *   arglen   The length of 'arg'
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMP_SOCKET
-int icmp_ioctl(FAR struct socket *psock,
-               int cmd, FAR void *arg, size_t arglen);
+int icmp_ioctl(FAR struct socket *psock, int cmd, unsigned long arg);
 #endif
 
 #undef EXTERN

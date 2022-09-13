@@ -54,9 +54,9 @@ static uint16_t accept_event(FAR struct net_driver_s *dev,
 
       /* Stop further callbacks */
 
-      pstate->reqstate.cb->flags   = 0;
-      pstate->reqstate.cb->priv    = NULL;
-      pstate->reqstate.cb->event   = NULL;
+      pstate->reqstate.cb->flags = 0;
+      pstate->reqstate.cb->priv  = NULL;
+      pstate->reqstate.cb->event = NULL;
 
       /* Wake up the waiting thread */
 
@@ -90,9 +90,9 @@ static uint16_t accept_event(FAR struct net_driver_s *dev,
 
       /* Stop further callbacks */
 
-      pstate->reqstate.cb->flags   = 0;
-      pstate->reqstate.cb->priv    = NULL;
-      pstate->reqstate.cb->event   = NULL;
+      pstate->reqstate.cb->flags = 0;
+      pstate->reqstate.cb->priv  = NULL;
+      pstate->reqstate.cb->event = NULL;
 
       /* Wake up the waiting thread */
 
@@ -106,9 +106,9 @@ static uint16_t accept_event(FAR struct net_driver_s *dev,
 
       /* Stop further callbacks */
 
-      pstate->reqstate.cb->flags   = 0;
-      pstate->reqstate.cb->priv    = NULL;
-      pstate->reqstate.cb->event   = NULL;
+      pstate->reqstate.cb->flags = 0;
+      pstate->reqstate.cb->priv  = NULL;
+      pstate->reqstate.cb->event = NULL;
 
       /* Wake up the waiting thread */
 
@@ -122,9 +122,9 @@ static uint16_t accept_event(FAR struct net_driver_s *dev,
 
       /* Stop further callbacks */
 
-      pstate->reqstate.cb->flags   = 0;
-      pstate->reqstate.cb->priv    = NULL;
-      pstate->reqstate.cb->event   = NULL;
+      pstate->reqstate.cb->flags = 0;
+      pstate->reqstate.cb->priv  = NULL;
+      pstate->reqstate.cb->event = NULL;
 
       /* Wake up the waiting thread */
 
@@ -161,7 +161,7 @@ static int do_accept_request(FAR struct usrsock_conn_s *conn,
   bufs[0].iov_base = &req;
   bufs[0].iov_len = sizeof(req);
 
-  return usrsockdev_do_request(conn, bufs, ARRAY_SIZE(bufs));
+  return usrsock_do_request(conn, bufs, ARRAY_SIZE(bufs));
 }
 
 /****************************************************************************
@@ -328,6 +328,7 @@ int usrsock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
           ret = net_timedwait(&state.reqstate.recvsem,
                               _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
+          usrsock_teardown_data_request_callback(&state);
           if (ret < 0)
             {
               if (ret == -ETIMEDOUT)
@@ -345,14 +346,7 @@ int usrsock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                   nerr("net_timedwait errno: %d\n", ret);
                   DEBUGPANIC();
                 }
-            }
 
-          usrsock_teardown_data_request_callback(&state);
-
-          /* Did wait timeout or got signal? */
-
-          if (ret != 0)
-            {
               goto errout_free_conn;
             }
 
@@ -428,7 +422,6 @@ int usrsock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                */
 
               outaddrlen = state.valuelen_nontrunc;
-
               ret = OK;
             }
         }

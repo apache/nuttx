@@ -622,23 +622,6 @@ int netdev_carrier_on(FAR struct net_driver_s *dev);
 int netdev_carrier_off(FAR struct net_driver_s *dev);
 
 /****************************************************************************
- * Name: net_ioctl_arglen
- *
- * Description:
- *   Calculate the ioctl argument buffer length.
- *
- * Input Parameters:
- *
- *   cmd      The ioctl command
- *
- * Returned Value:
- *   The argument buffer length, or error code.
- *
- ****************************************************************************/
-
-ssize_t net_ioctl_arglen(int cmd);
-
-/****************************************************************************
  * Name: net_chksum
  *
  * Description:

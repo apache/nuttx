@@ -46,6 +46,11 @@
 
 #define GPIO_SSD1306_RST 16
 
+/* SX1276 pins */
+
+#define GPIO_SX127X_RESET   23    /* RESET connected to IO23 */
+#define GPIO_SX127X_DIO0    26    /* DIO0 connected to IO26  */
+
 /* BOOT Button */
 
 #define BUTTON_BOOT  0
@@ -146,6 +151,25 @@ int esp32_gpio_init(void);
 
 #ifdef CONFIG_SPI_DRIVER
 int board_spidev_initialize(int bus);
+#endif
+
+/****************************************************************************
+ * Name: esp32_lpwaninitialize
+ *
+ * Description:
+ *   Initialize the SX127x driver
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_LPWAN_SX127X
+int esp32_lpwaninitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

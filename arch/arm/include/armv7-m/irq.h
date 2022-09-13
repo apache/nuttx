@@ -268,7 +268,7 @@ struct xcptcontext
 
 /* Get/set the PRIMASK register */
 
-static inline uint8_t getprimask(void) inline_function;
+static inline uint8_t getprimask(void) always_inline_function;
 static inline uint8_t getprimask(void)
 {
   uint32_t primask;
@@ -282,7 +282,7 @@ static inline uint8_t getprimask(void)
   return (uint8_t)primask;
 }
 
-static inline void setprimask(uint32_t primask) inline_function;
+static inline void setprimask(uint32_t primask) always_inline_function;
 static inline void setprimask(uint32_t primask)
 {
   __asm__ __volatile__
@@ -293,13 +293,13 @@ static inline void setprimask(uint32_t primask)
       : "memory");
 }
 
-static inline void cpsie(void) inline_function;
+static inline void cpsie(void) always_inline_function;
 static inline void cpsie(void)
 {
   __asm__ __volatile__ ("\tcpsie  i\n");
 }
 
-static inline void cpsid(void) inline_function;
+static inline void cpsid(void) always_inline_function;
 static inline void cpsid(void)
 {
   __asm__ __volatile__ ("\tcpsid  i\n");
@@ -311,7 +311,7 @@ static inline void cpsid(void)
  * lower priority level as the BASEPRI value.
  */
 
-static inline uint8_t getbasepri(void) inline_function;
+static inline uint8_t getbasepri(void) always_inline_function;
 static inline uint8_t getbasepri(void)
 {
   uint32_t basepri;
@@ -326,7 +326,7 @@ static inline uint8_t getbasepri(void)
   return (uint8_t)basepri;
 }
 
-static inline void setbasepri(uint32_t basepri) inline_function;
+static inline void setbasepri(uint32_t basepri) always_inline_function;
 static inline void setbasepri(uint32_t basepri)
 {
   __asm__ __volatile__
@@ -344,7 +344,7 @@ static inline void setbasepri(uint32_t basepri)
  * 837070 Workaround may be required if we are raising the priority.
  */
 
-static inline void raisebasepri(uint32_t basepri) inline_function;
+static inline void raisebasepri(uint32_t basepri) always_inline_function;
 static inline void raisebasepri(uint32_t basepri)
 {
   register uint32_t primask;
@@ -375,7 +375,7 @@ static inline void raisebasepri(uint32_t basepri)
 
 /* Disable IRQs */
 
-static inline void up_irq_disable(void) inline_function;
+static inline void up_irq_disable(void) always_inline_function;
 static inline void up_irq_disable(void)
 {
 #ifdef CONFIG_ARMV7M_USEBASEPRI
@@ -389,7 +389,7 @@ static inline void up_irq_disable(void)
 
 /* Save the current primask state & disable IRQs */
 
-static inline irqstate_t up_irq_save(void) inline_function;
+static inline irqstate_t up_irq_save(void) always_inline_function;
 static inline irqstate_t up_irq_save(void)
 {
 #ifdef CONFIG_ARMV7M_USEBASEPRI
@@ -421,7 +421,7 @@ static inline irqstate_t up_irq_save(void)
 
 /* Enable IRQs */
 
-static inline void up_irq_enable(void) inline_function;
+static inline void up_irq_enable(void) always_inline_function;
 static inline void up_irq_enable(void)
 {
   /* In this case, we are always retaining or lowering the priority value */
@@ -432,7 +432,7 @@ static inline void up_irq_enable(void)
 
 /* Restore saved primask state */
 
-static inline void up_irq_restore(irqstate_t flags) inline_function;
+static inline void up_irq_restore(irqstate_t flags) always_inline_function;
 static inline void up_irq_restore(irqstate_t flags)
 {
 #ifdef CONFIG_ARMV7M_USEBASEPRI
@@ -460,7 +460,7 @@ static inline void up_irq_restore(irqstate_t flags)
 
 /* Get/set IPSR */
 
-static inline uint32_t getipsr(void) inline_function;
+static inline uint32_t getipsr(void) always_inline_function;
 static inline uint32_t getipsr(void)
 {
   uint32_t ipsr;
@@ -476,7 +476,7 @@ static inline uint32_t getipsr(void)
 
 /* Get/set CONTROL */
 
-static inline uint32_t getcontrol(void) inline_function;
+static inline uint32_t getcontrol(void) always_inline_function;
 static inline uint32_t getcontrol(void)
 {
   uint32_t control;
@@ -490,7 +490,7 @@ static inline uint32_t getcontrol(void)
   return control;
 }
 
-static inline void setcontrol(uint32_t control) inline_function;
+static inline void setcontrol(uint32_t control) always_inline_function;
 static inline void setcontrol(uint32_t control)
 {
   __asm__ __volatile__

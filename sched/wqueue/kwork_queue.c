@@ -50,7 +50,7 @@
 static void hp_work_timer_expiry(wdparm_t arg)
 {
   irqstate_t flags = enter_critical_section();
-  sq_addlast((FAR sq_entry_t *)arg, &g_hpwork.q);
+  dq_addlast((FAR dq_entry_t *)arg, &g_hpwork.q);
   nxsem_post(&g_hpwork.sem);
   leave_critical_section(flags);
 }
@@ -64,7 +64,7 @@ static void hp_work_timer_expiry(wdparm_t arg)
 static void lp_work_timer_expiry(wdparm_t arg)
 {
   irqstate_t flags = enter_critical_section();
-  sq_addlast((FAR sq_entry_t *)arg, &g_lpwork.q);
+  dq_addlast((FAR dq_entry_t *)arg, &g_lpwork.q);
   nxsem_post(&g_lpwork.sem);
   leave_critical_section(flags);
 }
@@ -110,15 +110,15 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
   irqstate_t flags;
   int ret = OK;
 
-  /* Remove the entry from the timer and work queue. */
-
-  work_cancel(qid, work);
-
   /* Interrupts are disabled so that this logic can be called from with
    * task logic or from interrupt handling logic.
    */
 
   flags = enter_critical_section();
+
+  /* Remove the entry from the timer and work queue. */
+
+  work_cancel(qid, work);
 
   /* Initialize the work structure. */
 
@@ -134,7 +134,7 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
 
       if (!delay)
         {
-          sq_addlast((FAR sq_entry_t *)work, &g_hpwork.q);
+          dq_addlast((FAR dq_entry_t *)work, &g_hpwork.q);
           nxsem_post(&g_hpwork.sem);
         }
       else
@@ -152,7 +152,7 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
 
       if (!delay)
         {
-          sq_addlast((FAR sq_entry_t *)work, &g_lpwork.q);
+          dq_addlast((FAR dq_entry_t *)work, &g_lpwork.q);
           nxsem_post(&g_lpwork.sem);
         }
       else

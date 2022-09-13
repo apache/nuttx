@@ -860,6 +860,11 @@ boards/arm/tiva/tm4c1294-launchpad
   platform for ARM Cortex-M4F-based microcontrollers from Texas
   Instruments.
 
+boards/arm/tiva/tm4c129e-launchpad
+  This is a port of NuttX to the Tiva TM4C129E Crypto Connected LaunchPad. This
+  board is a low-cost evaluation platform for ARM Cortex-M4F-based
+  microcontrollers from Texas Instruments.
+
 boards/arm/tmx570/tms570ls31x-usb-kit
   TI Hercules TMS570LS31xx Evaluation Kit (TMDS570ls31xx USB Kit)
   featuring the Hercules TMS570LS3137ZWT chip.

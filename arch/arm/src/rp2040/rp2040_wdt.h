@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp2040/adafruit-qt-py-rp2040/src/rp2040_reset.c
+ * arch/arm/src/rp2040/rp2040_wdt.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,44 +18,41 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_RP2040_RP2040_WDT_H
+#define __ARCH_ARM_SRC_RP2040_RP2040_WDT_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/board.h>
-#include <nuttx/arch.h>
 
-#ifdef CONFIG_BOARDCTL_RESET
+#ifndef __ASSEMBLY__
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: board_reset
- *
- * Description:
- *   Reset board.  Support for this function is required by board-level
- *   logic if CONFIG_BOARDCTL_RESET is selected.
- *
- * Input Parameters:
- *   status - Status information provided with the reset event.  This
- *            meaning of this status information is board-specific.  If not
- *            used by a board, the value zero may be provided in calls to
- *            board_reset().
- *
- * Returned Value:
- *   If this function returns, then it was not possible to power-off the
- *   board due to some constraints.  The return value int this case is a
- *   board-specific reason for the failure to shutdown.
- *
- ****************************************************************************/
-
-int board_reset(int status)
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
 {
-  up_systemreset();
-  return 0;
-}
+#else
+#define EXTERN extern
+#endif
 
-#endif /* CONFIG_BOARDCTL_RESET */
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: rp2040_wdt_init
+ ****************************************************************************/
+
+int rp2040_wdt_init(void);
+
+#undef EXTERN
+
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+
+#endif /* __ARCH_ARM_SRC_RP2040_RP2040_WDT_H */

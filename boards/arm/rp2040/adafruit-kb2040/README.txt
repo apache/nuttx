@@ -4,16 +4,15 @@ README
 This directory contains the port of NuttX to the Adafruit KB2040.
 See https://www.adafruit.com/product/5302 for information about Adafruit KB2040.
 
-Currently only the following devices are supported.
-
-  Supported:
+NuttX supports the following RP2040 capabilities:
   - UART  (console port)
     - GPIO 0 (UART0 TX) and GPIO 1 (UART0 RX) are used for the console.
   - I2C
-  - SPI
+  - SPI (master only)
   - DMAC
   - PWM
   - ADC
+  - Watchdog
   - USB device
     - MSC, CDC/ACM serial and these composite device are supported.
     - CDC/ACM serial device can be used for the console.
@@ -22,15 +21,23 @@ Currently only the following devices are supported.
   - SRAM Boot
     - If Pico SDK is available, nuttx.uf2 file which can be used in
       BOOTSEL mode will be created.
+  - Persistent flash filesystem in unused flash ROM
+
+NuttX also provide support for these external devices:
+
   - BMP180 sensor at I2C0 (don't forget to define I2C0 GPIOs at "I2C0 GPIO pin assign" in Board Selection menu)
   - INA219 sensor / module (don't forget to define I2C0 GPIOs at "I2C0 GPIO pin assign" in Board Selection menu)
   - Pico Display Pack (ST7789 LCD)
     - RGB leds and buttons are not supported yet.
   - Pico Audio Pack (PCM5100A I2S DAC)
     - I2S interface is realized by PIO.
+  - WS2812 smart pixel support
 
-  Not supported:
-  - All other devices
+There is currently no direct user mode access to these RP2040 hardware features:
+  - SPI Slave Mode
+  - SSI
+  - RTC
+  - Timers
 
 Installation
 ============
@@ -69,6 +76,9 @@ Defconfigs
 
 - nsh
     Minimum configuration with NuttShell
+
+- nsh-flash
+    NuttX shell with SMART flash filesystem.
 
 - nshsram
     Load NuttX binary to SRAM

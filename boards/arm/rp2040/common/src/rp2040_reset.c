@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp2040/adafruit-feather-rp2040/src/rp2040_reset.c
+ * boards/arm/rp2040/common/src/rp2040_reset.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

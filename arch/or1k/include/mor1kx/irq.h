@@ -233,7 +233,7 @@ static inline void up_irq_restore(irqstate_t flags)
 
 /* Enable IRQs */
 
-static inline void up_irq_enable(void) inline_function;
+static inline void up_irq_enable(void) always_inline_function;
 static inline void up_irq_enable(void)
 {
   irqstate_t flags;
