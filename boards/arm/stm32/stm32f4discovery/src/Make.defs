@@ -52,6 +52,10 @@ ifeq ($(CONFIG_ENC28J60),y)
 CSRCS += stm32_enc28j60.c
 endif
 
+ifeq ($(CONFIG_NET_W5500),y)
+CSRCS += stm32_w5500.c
+endif
+
 ifeq ($(CONFIG_LPWAN_SX127X),y)
 CSRCS += stm32_sx127x.c
 endif
