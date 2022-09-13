@@ -337,50 +337,51 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
       return -EBADF;
     }
 
-  /* Handle retrieval of the socket option according to the level at which
-   * option should be applied.
-   */
-
-  switch (level)
-    {
-      case SOL_SOCKET:   /* Socket-level options (see include/sys/socket.h) */
-       ret = psock_socketlevel_option(psock, option, value, value_len);
-       break;
-
-#ifdef CONFIG_NET_TCPPROTO_OPTIONS
-      case IPPROTO_TCP:  /* TCP protocol socket options (see include/netinet/tcp.h) */
-       ret = tcp_getsockopt(psock, option, value, value_len);
-       break;
-#endif
-
-#ifdef CONFIG_NET_CANPROTO_OPTIONS
-      case SOL_CAN_RAW:/* CAN protocol socket options (see include/netpacket/can.h) */
-       ret = can_getsockopt(psock, option, value, value_len);
-       break;
-#endif
-
-      /* These levels are defined in sys/socket.h, but are not yet
-       * implemented.
-       */
-
-      case IPPROTO_IP:   /* TCP protocol socket options (see include/netinet/ip.h) */
-      case IPPROTO_IPV6: /* TCP protocol socket options (see include/netinet/ip6.h) */
-      case IPPROTO_UDP:  /* TCP protocol socket options (see include/netinit/udp.h) */
-      default:           /* The provided level is invalid */
-        ret = -ENOPROTOOPT;
-       break;
-    }
-
 #ifdef CONFIG_NET_USRSOCK
   /* Try usrsock further if the protocol not available */
 
-  if (ret == -ENOPROTOOPT && psock->s_type == SOCK_USRSOCK_TYPE)
+  if (psock->s_type == SOCK_USRSOCK_TYPE)
     {
       ret = usrsock_getsockopt(psock->s_conn, level,
                                option, value, value_len);
     }
+  else
+#endif
+    {
+      /* Handle retrieval of the socket option according to the level at which
+      * option should be applied.
+      */
+
+      switch (level)
+        {
+          case SOL_SOCKET:   /* Socket-level options (see include/sys/socket.h) */
+            ret = psock_socketlevel_option(psock, option, value, value_len);
+            break;
+
+#ifdef CONFIG_NET_TCPPROTO_OPTIONS
+          case IPPROTO_TCP:  /* TCP protocol socket options (see include/netinet/tcp.h) */
+            ret = tcp_getsockopt(psock, option, value, value_len);
+            break;
 #endif
 
+#ifdef CONFIG_NET_CANPROTO_OPTIONS
+          case SOL_CAN_RAW:/* CAN protocol socket options (see include/netpacket/can.h) */
+            ret = can_getsockopt(psock, option, value, value_len);
+            break;
+#endif
+
+          /* These levels are defined in sys/socket.h, but are not yet
+          * implemented.
+          */
+
+          case IPPROTO_IP:   /* TCP protocol socket options (see include/netinet/ip.h) */
+          case IPPROTO_IPV6: /* TCP protocol socket options (see include/netinet/ip6.h) */
+          case IPPROTO_UDP:  /* TCP protocol socket options (see include/netinit/udp.h) */
+          default:           /* The provided level is invalid */
+            ret = -ENOPROTOOPT;
+          break;
+        }
+    }
   return ret;
 }
 
