@@ -25,7 +25,7 @@ config INPUT_MOUSE_WHEEL
 	bool "Enable mouse wheel support"
 	default n
 	---help---
-		Enable support for a 4-button mouse report that includes a while
+		Enable support for a 4-button mouse report that includes a wheel
 		position.
 
 endif # INPUT_MOUSE
@@ -422,24 +422,24 @@ config STMPE811_THRESHX
 	default 12
 	depends on !STMPE811_TSC_DISABLE
 	---help---
-		STMPE811 touchscreen data comes in a a very high rate.  New touch positions
-		will only be reported when the X or Y data changes by these thresholds.
-		This trades reduced data rates for some loss in dragging accuracy.  The
-		STMPE811 is configure for 12-bit values the raw ranges are 0-4095. So
-		for example, if your display is 320x240, then THRESHX=13 and THRESHY=17
-		would correspond to one pixel.  Default: 12
+		STMPE811 touchscreen data comes in at a very high rate.  New touch
+		positions will only be reported when the X or Y data changes by these
+		thresholds.  This trades reduced data rates for some loss in dragging
+		accuracy.  The STMPE811 is configured for 12-bit values; the raw ranges
+		are 0-4095.  So for example, if your display is 320x240, then THRESHX=13
+		and THRESHY=17 would correspond to one pixel.  Default: 12
 
 config STMPE811_THRESHY
 	int "Y threshold"
 	default 12
 	depends on !STMPE811_TSC_DISABLE
 	---help---
-		STMPE811 touchscreen data comes in a a very high rate.  New touch positions
-		will only be reported when the X or Y data changes by these thresholds.
-		This trades reduced data rates for some loss in dragging accuracy.  The
-		STMPE811 is configure for 12-bit values the raw ranges are 0-4095. So
-		for example, if your display is 320x240, then THRESHX=13 and THRESHY=17
-		would correspond to one pixel.  Default: 12
+		STMPE811 touchscreen data comes in at a very high rate.  New touch
+		positions will only be reported when the X or Y data changes by these
+		thresholds.  This trades reduced data rates for some loss in dragging
+		accuracy.  The STMPE811 is configured for 12-bit values; the raw ranges
+		are 0-4095. So for example, if your display is 320x240, then THRESHX=13
+		and THRESHY=17 would correspond to one pixel.  Default: 12
 
 config STMPE811_ADC_DISABLE
 	bool "Disable STMPE811 ADC Support"
@@ -458,8 +458,8 @@ config STMPE811_GPIOINT_DISABLE
 	default y
 	depends on !STMPE811_GPIO_DISABLE
 	---help---
-		Disable driver GPIO interrupt functionality (ignored if GPIO functionality is
-		disabled).
+		Disable driver GPIO interrupt functionality (ignored if GPIO
+		functionality is disabled).
 
 config STMPE811_TEMP_DISABLE
 	bool "Disable STMPE811 Temperature Sensor Support"
@@ -514,21 +514,18 @@ config INPUT_BUTTONS_LOWER
 	default n
 	depends on ARCH_BUTTONS && ARCH_IRQBUTTONS
 	---help---
-		If the board supports the standard button interfaces as
-		defined in include/nuttx/board.h header file, then this
-		standard button lower half driver might be usable.
+		If the board supports the standard button interfaces as defined in
+		include/nuttx/board.h header file, then this standard button lower
+		half driver might be usable.
 
 		In order for this generic driver to be usable:
-
-		1. The board implementation must provide the button
-		   interfaces as defined in include/nuttx/board.h
-		2. The board implementation must support interrupts for each
-		   button.
+		1. The board implementation must provide the button interfaces as
+		   defined in include/nuttx/board.h
+		2. The board implementation must support interrupts for each button.
 
 		If your board does not meet these requirements, then the
-		button_lower.c file can still be copied to your your
-		board src/ directory and modified for your specific board
-		requirements.
+		button_lower.c file can still be copied to your board src/ directory
+		and modified for your specific board requirements.
 
 config INPUT_BUTTONS_NPOLLWAITERS
 	int "Max Number of Poll Waiters"
@@ -579,8 +576,8 @@ config INPUT_NUNCHUCK
 	---help---
 		Enable a Nintendo Wii Nunchuck joystick upper half driver. The
 		nunchuck joystick provides position data as an integer value.The
-		analog positional data may also	be accompanied by discrete
-		button data.
+		analog positional data may also be accompanied by discrete button
+		data.
 
 if INPUT_NUNCHUCK
 
