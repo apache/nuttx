@@ -37,8 +37,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_MMCSD_MMCSUPPORT) && defined(CONFIG_MPFS_EMMCSD)
-#define MPFS_EMMC_CLK_26MHZ
+#ifdef CONFIG_MMCSD_MMCSUPPORT
+#  define MPFS_EMMC_CLK_MODE MPFS_EMMCSD_MODE_SDR
+#endif
+
+#ifdef CONFIG_MMCSD_SDIO
+#  define MPFS_SD_CLOCK_4BIT MPFS_MMC_CLOCK_25MHZ
 #endif
 
 #ifdef CONFIG_MPFS_EMMCSD_MUX_GPIO
