@@ -29,7 +29,9 @@
 #include <string.h>
 #include <assert.h>
 #include <fcntl.h>
+#include <poll.h>
 #include <limits.h>
+#include <debug.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
@@ -93,6 +95,8 @@ static off_t   rpmsgdev_seek(FAR struct file *filep, off_t offset,
 static size_t  rpmsgdev_ioctl_arglen(int cmd);
 static int     rpmsgdev_ioctl(FAR struct file *filep, int cmd,
                               unsigned long arg);
+static int     rpmsgdev_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                             bool setup);
 
 /* Functions for sending data to the remote cpu */
 
@@ -114,6 +118,9 @@ static int     rpmsgdev_read_handler(FAR struct rpmsg_endpoint *ept,
 static int     rpmsgdev_ioctl_handler(FAR struct rpmsg_endpoint *ept,
                                       FAR void *data, size_t len,
                                       uint32_t src, FAR void *priv);
+static int     rpmsgdev_notify_handler(FAR struct rpmsg_endpoint *ept,
+                                       FAR void *data, size_t len,
+                                       uint32_t src, FAR void *priv);
 
 /* Functions for creating communication with remote cpu */
 
@@ -134,12 +141,14 @@ static void    rpmsgdev_ns_bound(struct rpmsg_endpoint *ept);
 
 static const rpmsg_ept_cb g_rpmsgdev_handler[] =
 {
-  [RPMSGDEV_OPEN]  = rpmsgdev_default_handler,
-  [RPMSGDEV_CLOSE] = rpmsgdev_default_handler,
-  [RPMSGDEV_READ]  = rpmsgdev_read_handler,
-  [RPMSGDEV_WRITE] = rpmsgdev_default_handler,
-  [RPMSGDEV_LSEEK] = rpmsgdev_default_handler,
-  [RPMSGDEV_IOCTL] = rpmsgdev_ioctl_handler,
+  [RPMSGDEV_OPEN]   = rpmsgdev_default_handler,
+  [RPMSGDEV_CLOSE]  = rpmsgdev_default_handler,
+  [RPMSGDEV_READ]   = rpmsgdev_read_handler,
+  [RPMSGDEV_WRITE]  = rpmsgdev_default_handler,
+  [RPMSGDEV_LSEEK]  = rpmsgdev_default_handler,
+  [RPMSGDEV_IOCTL]  = rpmsgdev_ioctl_handler,
+  [RPMSGDEV_POLL]   = rpmsgdev_default_handler,
+  [RPMSGDEV_NOTIFY] = rpmsgdev_notify_handler,
 };
 
 /* File operations */
@@ -152,7 +161,7 @@ const struct file_operations g_rpmsgdev_ops =
   rpmsgdev_write,         /* write */
   rpmsgdev_seek,          /* seek */
   rpmsgdev_ioctl,         /* ioctl */
-  NULL                    /* poll */
+  rpmsgdev_poll           /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL                  /* unlink */
 #endif
@@ -579,6 +588,7 @@ static int rpmsgdev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   msg = rpmsgdev_get_tx_payload_buffer(dev, &space);
   if (msg == NULL)
     {
+      nxmutex_unlock(&dev->excl);
       return -ENOMEM;
     }
 
@@ -593,6 +603,63 @@ static int rpmsgdev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   ret = rpmsgdev_send_recv(dev, RPMSGDEV_IOCTL, false, &msg->header,
                            msglen, arglen > 0 ? (FAR void *)arg : NULL);
+
+  nxmutex_unlock(&dev->excl);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: rpmsgdev_poll
+ *
+ * Description:
+ *   Rpmsg-device poll operation
+ *
+ * Parameters:
+ *   filep - the file instance
+ *   fds   - The structure describing the events to be monitored.
+ *   setup - true: Setup up the poll; false: Teardown the poll
+ *
+ * Returned Values:
+ *   OK on success; A negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+static int rpmsgdev_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                         bool setup)
+{
+  FAR struct rpmsgdev_s *dev;
+  struct rpmsgdev_poll_s msg;
+  int ret;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(filep->f_inode != NULL);
+
+  /* Recover our private data from the struct file instance */
+
+  dev = filep->f_inode->i_private;
+  DEBUGASSERT(dev != NULL);
+
+  /* Take the semaphore */
+
+  ret = nxmutex_lock(&dev->excl);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Setup or teardown the poll */
+
+  msg.events  = fds->events;
+  msg.setup   = setup;
+  msg.fds     = (uint64_t)(uintptr_t)fds;
+
+  ret = rpmsgdev_send_recv(dev, RPMSGDEV_POLL, true, &msg.header,
+                           sizeof(msg), NULL);
+  if (ret < 0)
+    {
+      rpmsgdeverr("Send failed, ret=%d\n", ret);
+    }
 
   nxmutex_unlock(&dev->excl);
   return ret;
@@ -820,6 +887,37 @@ static int rpmsgdev_ioctl_handler(FAR struct rpmsg_endpoint *ept,
     }
 
   rpmsg_post(ept, &cookie->sem);
+  return 0;
+}
+
+/****************************************************************************
+ * Name: rpmsgdev_notify_handler
+ *
+ * Description:
+ *   Rpmsg-device poll notify handler.
+ *
+ * Parameters:
+ *   ept  - The rpmsg endpoint
+ *   data - The return message
+ *   len  - The return message length
+ *   src  - unknow
+ *   priv - unknow
+ *
+ * Returned Values:
+ *   Always OK
+ *
+ ****************************************************************************/
+
+static int rpmsgdev_notify_handler(FAR struct rpmsg_endpoint *ept,
+                                   FAR void *data, size_t len,
+                                   uint32_t src, FAR void *priv)
+{
+  FAR struct rpmsgdev_notify_s *rsp = data;
+  FAR struct pollfd *fds;
+
+  fds = (FAR struct pollfd *)(uintptr_t)rsp->fds;
+  poll_notify(&fds, 1, rsp->revents);
+
   return 0;
 }
 
