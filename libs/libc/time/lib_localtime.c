@@ -2584,5 +2584,10 @@ time_t mktime(FAR struct tm *tmp)
 
 time_t timegm(FAR struct tm *tmp)
 {
+  if (tmp != NULL)
+    {
+      tmp->tm_isdst = 0;
+    }
+
   return time1(tmp, gmtsub, 0L);
 }
