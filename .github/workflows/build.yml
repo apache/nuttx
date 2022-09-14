@@ -119,7 +119,7 @@ jobs:
 
     strategy:
       matrix:
-        boards: [arm-01, arm-02, arm-03, arm-04, arm-05, arm-06, arm-07, arm-08, arm-09, arm-10, arm-11, arm-12, arm-13, other, risc-v, sim-01, sim-02, xtensa]
+        boards: [arm-01, arm-02, arm-03, arm-04, arm-05, arm-06, arm-07, arm-08, arm-09, arm-10, arm-11, arm-12, arm-13, other, risc-v, sim-01, sim-02, xtensa, codechecker]
 
     steps:
       - name: Download Source Artifact
@@ -157,10 +157,15 @@ jobs:
             git config --global --add safe.directory /github/workspace/sources/nuttx
             git config --global --add safe.directory /github/workspace/sources/apps
             cd sources/nuttx/tools/ci
-            ./cibuild.sh -A -R -c testlist/${{matrix.boards}}.dat
+            if [ "X${{matrix.boards}}" = "Xcodechecker" ]; then
+                ./cibuild.sh -A -R -c --codechecker testlist/${{matrix.boards}}.dat
+            else
+              ./cibuild.sh -A -R -c testlist/${{matrix.boards}}.dat
+            fi
             ccache -s
 
       - uses: actions/upload-artifact@v3
+        if: ${{ always() }}
         with:
           name: linux-builds
           path: buildartifacts/

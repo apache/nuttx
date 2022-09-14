@@ -1,0 +1,4 @@
+# Select a random set of targets to check. If you need to check a specific target, write the target list in this file.
+# Make sure that the compilation check time does not exceed the average time.
+
+/arm/sama5/sama5d4-ek/configs/nxwm,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI
