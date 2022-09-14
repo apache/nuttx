@@ -36,6 +36,7 @@ PRINTLISTONLY=0
 GITCLEAN=0
 SAVEARTIFACTS=0
 CHECKCLEAN=1
+CODECHECKER=0
 RUN=0
 
 case $(uname -s) in
@@ -57,7 +58,7 @@ esac
 
 function showusage {
   echo ""
-  echo "USAGE: $progname [-l|m|c|g|n] [-d] [-e <extraflags>] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] [-p] [-G] <testlist-file>"
+  echo "USAGE: $progname [-l|m|c|g|n] [-d] [-e <extraflags>] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] [-p] [-G] [--codechecker] <testlist-file>"
   echo "       $progname -h"
   echo ""
   echo "Where:"
@@ -80,6 +81,7 @@ function showusage {
   echo "         as well."
   echo "  -R execute \"run\" script in the config directories if exists."
   echo "  -h will show this help test and terminate"
+  echo "  --codechecker enables CodeChecker statically analyze the code."
   echo "  <testlist-file> selects the list of configurations to test.  No default"
   echo ""
   echo "Your PATH variable must include the path to both the build tools and the"
@@ -132,6 +134,9 @@ while [ ! -z "$1" ]; do
     ;;
   -R )
     RUN=1
+    ;;
+  --codechecker )
+    CODECHECKER=1
     ;;
   -h )
     showusage
@@ -208,12 +213,50 @@ function exportandimport {
   return $fail
 }
 
+function compressartifacts {
+  local target_path=$1
+  local target_name=$2
+
+  pushd $target_path >/dev/null
+
+  tar zcf ${target_name}.tar.gz ${target_name}
+  rm -rf ${target_name} 
+
+  popd >/dev/null
+}
+
 function makefunc {
   if ! ${MAKE} ${MAKE_FLAGS} "${EXTRA_FLAGS}" ${JOPTION} $@ 1>/dev/null; then
     fail=1
   else
     exportandimport
   fi
+
+  return $fail
+}
+
+function checkfunc {
+  build_cmd="${MAKE} ${MAKE_FLAGS} \"${EXTRA_FLAGS}\" ${JOPTION} 1>/dev/null"
+
+  local config_sub_path=$(echo "$config" | sed "s/:/\//")
+  local sub_target_name=${config_sub_path#$(dirname "${config_sub_path}")/}
+  local codechecker_dir=${ARTIFACTDIR}/codechecker_logs/${config_sub_path}
+
+  mkdir -p "${codechecker_dir}"
+
+  echo "    Checking NuttX by Codechecker..."
+  CodeChecker check -b "${build_cmd}" -o "${codechecker_dir}/logs" -e sensitive --ctu
+  codecheck_ret=$?
+  echo "    Storing analysis result to CodeChecker..."
+  echo "      Generating HTML report..."
+  CodeChecker parse --export html --output "${codechecker_dir}/html" "${codechecker_dir}/logs" 1>/dev/null
+  echo "      Compressing logs..."
+  compressartifacts "$(dirname "${codechecker_dir}")" "${sub_target_name}"
+
+# If you need to stop CI, uncomment the following line.
+#  if [ $codecheck_ret -ne 0 ]; then
+#    fail=1
+#  fi
 
   return $fail
 }
@@ -283,7 +326,12 @@ function configure {
 
 function build {
   echo "  Building NuttX..."
-  makefunc
+  if [ "${CODECHECKER}" -eq 1 ]; then
+    checkfunc
+  else
+    makefunc
+  fi
+
   if [ ${SAVEARTIFACTS} -eq 1 ]; then
     artifactconfigdir=$ARTIFACTDIR/$(echo $config | sed "s/:/\//")/
     mkdir -p $artifactconfigdir
