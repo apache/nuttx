@@ -44,6 +44,8 @@
 #define RPMSGDEV_WRITE           4
 #define RPMSGDEV_LSEEK           5
 #define RPMSGDEV_IOCTL           6
+#define RPMSGDEV_POLL            7
+#define RPMSGDEV_NOTIFY          8
 
 /****************************************************************************
  * Public Types
@@ -90,6 +92,21 @@ begin_packed_struct struct rpmsgdev_ioctl_s
   uint64_t                 arg;
   uint32_t                 arglen;
   char                     buf[1];
+} end_packed_struct;
+
+begin_packed_struct struct rpmsgdev_poll_s
+{
+  struct rpmsgdev_header_s header;
+  uint32_t                 events;
+  uint32_t                 setup;
+  uint64_t                 fds;
+} end_packed_struct;
+
+begin_packed_struct struct rpmsgdev_notify_s
+{
+  struct rpmsgdev_header_s header;
+  uint64_t                 fds;
+  uint32_t                 revents;
 } end_packed_struct;
 
 /****************************************************************************
