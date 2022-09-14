@@ -156,7 +156,7 @@
 /* Provide default SD-card 4bit clk if unset at board.h */
 
 #ifndef MPFS_SD_CLOCK_4BIT
-#  define MPFS_SD_CLOCK_4BIT MPFS_MMC_CLOCK_25MHZ
+#  define MPFS_SD_CLOCK_4BIT MPFS_MMC_CLOCK_50MHZ
 #endif
 
 /* Define the Hardware FIFO size */
@@ -1869,7 +1869,7 @@ static void mpfs_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
     /* SD normal operation clocking (narrow 1-bit mode) */
 
     case CLOCK_SD_TRANSFER_1BIT:
-      clckr = MPFS_MMC_CLOCK_25MHZ;
+      clckr = MPFS_MMC_CLOCK_50MHZ;
       break;
   }
 
