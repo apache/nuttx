@@ -229,6 +229,8 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   gcc \
   gcc-avr \
   gcc-multilib \
+  clang \
+  clang-tidy \
   gettext \
   git \
   lib32z1-dev \
@@ -260,6 +262,8 @@ ENV PIP_NO_CACHE_DIR=0
 # setuptools and also wheel so we can use the binary releases of packages
 # instead of requiring them to be compiled.
 RUN pip3 install setuptools wheel
+# Install CodeChecker and use it to statically analyze the code.
+RUN pip3 install CodeChecker
 
 RUN mkdir /tools
 WORKDIR /tools
