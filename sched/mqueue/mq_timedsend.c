@@ -239,6 +239,7 @@ int file_mq_timedsend(FAR struct file *mq, FAR const char *msg,
   if (ret != OK)
     {
       ret = -ret;
+      nxmq_free_msg(mqmsg);
       goto errout_in_critical_section;
     }
 
