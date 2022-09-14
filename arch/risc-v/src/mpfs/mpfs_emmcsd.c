@@ -147,6 +147,18 @@
 
 #define MPFS_EMMCSD_MODE_LEGACY            0x7u
 
+/* Provide default eMMC CLK_MODE if unset at board.h */
+
+#ifndef MPFS_EMMC_CLK_MODE
+#  define MPFS_EMMC_CLK_MODE MPFS_EMMCSD_MODE_HS200
+#endif
+
+/* Provide default SD-card 4bit clk if unset at board.h */
+
+#ifndef MPFS_SD_CLOCK_4BIT
+#  define MPFS_SD_CLOCK_4BIT MPFS_MMC_CLOCK_25MHZ
+#endif
+
 /* Define the Hardware FIFO size */
 
 #define FIFO_SIZE_IN_BYTES                 64
@@ -296,7 +308,7 @@ struct mpfs_dev_s
 
   const bool         emmc;            /* eMMC or SD */
   int                bus_voltage;     /* Bus voltage */
-  int                bus_speed;       /* eMMC Bus speed */
+  int                bus_mode;        /* eMMC Bus mode */
   bool               jumpers_3v3;     /* Jumper settings: 1v8 or 3v3 */
 
   /* Event support */
@@ -1485,7 +1497,6 @@ static bool mpfs_device_reset(struct sdio_dev_s *dev)
       /* Apply default HW settings */
 
       priv->bus_voltage = MPFS_EMMCSD_3_3V_BUS_VOLTAGE;
-      priv->bus_speed   = MPFS_EMMCSD_MODE_SDR;
       priv->jumpers_3v3 = true;
 
       mpfs_sdcard_init(priv);
@@ -1499,17 +1510,7 @@ static bool mpfs_device_reset(struct sdio_dev_s *dev)
 
       /* The following defines come from the board.h file */
 
-#if defined(MPFS_EMMC_CLK_200MHZ)
-      /* MMCSD_CMD6 with 0x03B90200u isn't used here.  It's just the clk. */
-
-      priv->bus_speed   = MPFS_EMMCSD_MODE_HS200;
-#elif defined(MPFS_EMMC_CLK_50MHZ)
-      /* MMCSD_CMD6 with argument 0x03B90100u isn't used here. */
-
-      priv->bus_speed   = MPFS_EMMCSD_MODE_SDR;
-#else
-      priv->bus_speed   = MPFS_EMMCSD_MODE_LEGACY;
-#endif
+      priv->bus_mode    = MPFS_EMMC_CLK_MODE;
 
       /* Apply proper IOMUX values for the eMMC. This is required especially
        * if this NuttX works as the system bootloader. Otherwise, it's
@@ -1652,9 +1653,9 @@ static bool mpfs_device_reset(struct sdio_dev_s *dev)
             break;
 
           case MPFS_EMMCSD_3_3V_BUS_VOLTAGE:
-            if ((priv->bus_speed != MPFS_EMMCSD_MODE_HS200) &&
-                (priv->bus_speed != MPFS_EMMCSD_MODE_HS400_ES) &&
-                (priv->bus_speed != MPFS_EMMCSD_MODE_HS400))
+            if ((priv->bus_mode != MPFS_EMMCSD_MODE_HS200) &&
+                (priv->bus_mode != MPFS_EMMCSD_MODE_HS400_ES) &&
+                (priv->bus_mode != MPFS_EMMCSD_MODE_HS400))
               {
                 mpfs_set_sdhost_power(priv,
                                       MPFS_EMMCSD_SRS10_3_3V_BUS_VOLTAGE);
@@ -1858,24 +1859,26 @@ static void mpfs_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
     /* Enable normal MMC operation clocking */
 
     case CLOCK_MMC_TRANSFER:
-      if (priv->bus_speed == MPFS_EMMCSD_MODE_HS200)
+      if (priv->bus_mode == MPFS_EMMCSD_MODE_HS200)
         {
           clckr = MPFS_MMC_CLOCK_200MHZ;
         }
-      else if (priv->bus_speed == MPFS_EMMCSD_MODE_SDR)
+      else if (priv->bus_mode == MPFS_EMMCSD_MODE_SDR)
         {
           clckr = MPFS_MMC_CLOCK_50MHZ;
         }
       else
         {
-          clckr = MPFS_MMC_CLOCK_26MHZ;
+          /* 26 MHz may not be divided from 200 MHz */
+
+          clckr = MPFS_MMC_CLOCK_25MHZ;
         }
       break;
 
     /* SD normal operation clocking (wide 4-bit mode) */
 
     case CLOCK_SD_TRANSFER_4BIT:
-      clckr = MPFS_MMC_CLOCK_25MHZ;
+      clckr = MPFS_SD_CLOCK_4BIT;
       break;
 
     /* SD normal operation clocking (narrow 1-bit mode) */
