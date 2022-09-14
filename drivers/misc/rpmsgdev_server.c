@@ -24,7 +24,9 @@
 
 #include <string.h>
 #include <fcntl.h>
+#include <poll.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
@@ -45,6 +47,8 @@ struct rpmsgdev_server_s
 {
   struct rpmsg_endpoint ept;
   struct file           file;
+  struct pollfd         fds[CONFIG_DEV_RPMSG_NPOLLWAITERS];
+  uint64_t              cfds[CONFIG_DEV_RPMSG_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -53,22 +57,26 @@ struct rpmsgdev_server_s
 
 /* Functions handle the messages from the client cpu */
 
-static int rpmsgdev_open_handler(FAR struct rpmsg_endpoint *ept,
-                                 FAR void *data, size_t len,
-                                 uint32_t src, FAR void *priv);
-static int rpmsgdev_close_handler(FAR struct rpmsg_endpoint *ept,
+static int  rpmsgdev_open_handler(FAR struct rpmsg_endpoint *ept,
                                   FAR void *data, size_t len,
                                   uint32_t src, FAR void *priv);
-static int rpmsgdev_read_handler(FAR struct rpmsg_endpoint *ept,
-                                 FAR void *data, size_t len,
-                                 uint32_t src, FAR void *priv);
-static int rpmsgdev_write_handler(FAR struct rpmsg_endpoint *ept,
+static int  rpmsgdev_close_handler(FAR struct rpmsg_endpoint *ept,
+                                   FAR void *data, size_t len,
+                                   uint32_t src, FAR void *priv);
+static int  rpmsgdev_read_handler(FAR struct rpmsg_endpoint *ept,
                                   FAR void *data, size_t len,
                                   uint32_t src, FAR void *priv);
-static int rpmsgdev_lseek_handler(FAR struct rpmsg_endpoint *ept,
-                                  FAR void *data, size_t len,
-                                  uint32_t src, FAR void *priv);
-static int rpmsgdev_ioctl_handler(FAR struct rpmsg_endpoint *ept,
+static int  rpmsgdev_write_handler(FAR struct rpmsg_endpoint *ept,
+                                   FAR void *data, size_t len,
+                                   uint32_t src, FAR void *priv);
+static int  rpmsgdev_lseek_handler(FAR struct rpmsg_endpoint *ept,
+                                   FAR void *data, size_t len,
+                                   uint32_t src, FAR void *priv);
+static int  rpmsgdev_ioctl_handler(FAR struct rpmsg_endpoint *ept,
+                                   FAR void *data, size_t len,
+                                   uint32_t src, FAR void *priv);
+static void rpmsgdev_poll_cb(FAR struct pollfd *fds);
+static int  rpmsgdev_poll_handler(FAR struct rpmsg_endpoint *ept,
                                   FAR void *data, size_t len,
                                   uint32_t src, FAR void *priv);
 
@@ -97,6 +105,7 @@ static const rpmsg_ept_cb g_rpmsgdev_handler[] =
   [RPMSGDEV_WRITE] = rpmsgdev_write_handler,
   [RPMSGDEV_LSEEK] = rpmsgdev_lseek_handler,
   [RPMSGDEV_IOCTL] = rpmsgdev_ioctl_handler,
+  [RPMSGDEV_POLL]  = rpmsgdev_poll_handler,
 };
 
 /****************************************************************************
@@ -248,6 +257,97 @@ static int rpmsgdev_ioctl_handler(FAR struct rpmsg_endpoint *ept,
                                   msg->arglen > 0 ? (unsigned long)msg->buf :
                                   msg->arg);
 
+  return rpmsg_send(ept, msg, len);
+}
+
+/****************************************************************************
+ * Name: rpmsgdev_poll_cb
+ ****************************************************************************/
+
+static void rpmsgdev_poll_cb(FAR struct pollfd *fds)
+{
+  FAR struct rpmsgdev_server_s *server = fds->arg;
+  FAR struct rpmsgdev_notify_s msg;
+  int tmp;
+
+  DEBUGASSERT(fds != NULL && (uintptr_t)fds >= (uintptr_t)server->fds);
+
+  tmp = fds - server->fds;
+
+  msg.header.command = RPMSGDEV_NOTIFY;
+  msg.revents = fds->revents;
+  msg.fds     = server->cfds[tmp];
+
+  fds->revents = 0;
+
+  rpmsg_send(&server->ept, &msg, sizeof(msg));
+}
+
+/****************************************************************************
+ * Name: rpmsgdev_poll_handler
+ ****************************************************************************/
+
+static int rpmsgdev_poll_handler(FAR struct rpmsg_endpoint *ept,
+                                 FAR void *data, size_t len,
+                                 uint32_t src, FAR void *priv)
+{
+  FAR struct rpmsgdev_server_s *server = ept->priv;
+  FAR struct rpmsgdev_poll_s *msg = data;
+  FAR struct pollfd *fds = NULL;
+  int i;
+
+  DEBUGASSERT(msg->fds != 0);
+
+  if (msg->setup)
+    {
+      for (i = 0; i < CONFIG_DEV_RPMSG_NPOLLWAITERS; i++)
+        {
+          if (server->cfds[i] == 0)
+            {
+              server->cfds[i] = msg->fds;
+              break;
+            }
+        }
+
+      if (i >= CONFIG_DEV_RPMSG_NPOLLWAITERS)
+        {
+          msg->header.result = -EBUSY;
+          goto out;
+        }
+
+      fds          = &server->fds[i];
+      fds->events  = msg->events;
+      fds->revents = 0;
+      fds->cb      = rpmsgdev_poll_cb;
+      fds->arg     = server;
+
+      msg->header.result = file_poll(&server->file, fds, true);
+    }
+  else
+    {
+      for (i = 0; i < CONFIG_DEV_RPMSG_NPOLLWAITERS; i++)
+        {
+          if (server->cfds[i] == msg->fds)
+            {
+              break;
+            }
+        }
+
+      if (i >= CONFIG_DEV_RPMSG_NPOLLWAITERS)
+        {
+          msg->header.result = -EINVAL;
+          goto out;
+        }
+
+      fds = &server->fds[i];
+      msg->header.result = file_poll(&server->file, fds, false);
+      if (msg->header.result == OK)
+        {
+          server->cfds[i] = 0;
+        }
+    }
+
+out:
   return rpmsg_send(ept, msg, len);
 }
 
