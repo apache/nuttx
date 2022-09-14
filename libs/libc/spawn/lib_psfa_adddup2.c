@@ -89,8 +89,17 @@ int posix_spawn_file_actions_adddup2(
   /* NOTE: Workaround to avoid an error when executing dup2 action */
 
   flags = fcntl(fd1, F_GETFD);
+  if (flags < 0)
+    {
+      return flags;
+    }
+
   flags &= ~FD_CLOEXEC;
-  fcntl(fd1, F_SETFD, flags);
+  flags = fcntl(fd1, F_SETFD, flags);
+  if (flags < 0)
+    {
+      return flags;
+    }
 
   /* And add it to the file action list */
 
