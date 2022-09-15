@@ -276,7 +276,7 @@ Where <subdir> is one of the following:
 
          CONFIG_HOST_WINDOWS=y
          CONFIG_WINDOWS_CYGWIN=y
-         CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y
+         CONFIG_ARM_TOOLCHAIN_BUILDROOT=y
 
     3. The configuration enables both the serial and telnetd NSH interfaces.
 
@@ -306,4 +306,4 @@ Where <subdir> is one of the following:
 
          CONFIG_HOST_WINDOWS=y
          CONFIG_WINDOWS_CYGWIN=y
-         CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y
+         CONFIG_ARM_TOOLCHAIN_BUILDROOT=y

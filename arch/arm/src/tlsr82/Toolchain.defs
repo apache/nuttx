@@ -27,16 +27,16 @@
 # command-line selection.
 #
 
-ifeq ($(filter y, $(CONFIG_ARMV6M_TOOLCHAIN_BUILDROOT)),y)
-  CONFIG_ARMV6M_TOOLCHAIN ?= BUILDROOT
+ifeq ($(filter y, $(CONFIG_ARM_TOOLCHAIN_BUILDROOT)),y)
+  CONFIG_TOOLCHAIN ?= BUILDROOT
 endif
 
-ifeq ($(filter y, $(CONFIG_ARMV6M_TOOLCHAIN_GNU_EABI)),y)
-  CONFIG_ARMV6M_TOOLCHAIN ?= GNU_EABI
+ifeq ($(filter y, $(CONFIG_ARM_TOOLCHAIN_GNU_EABI)),y)
+  CONFIG_TOOLCHAIN ?= GNU_EABI
 endif
 
-ifeq ($(filter y, $(CONFIG_ARMV6M_TOOLCHAIN_CLANG)),y)
-  CONFIG_ARMV6M_TOOLCHAIN ?= CLANG
+ifeq ($(filter y, $(CONFIG_ARM_TOOLCHAIN_CLANG)),y)
+  CONFIG_TOOLCHAIN ?= CLANG
 endif
 
 #
@@ -54,7 +54,7 @@ endif
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
   ARCHOPTIMIZATION += $(CONFIG_DEBUG_OPTLEVEL)
 else ifeq ($(CONFIG_DEBUG_FULLOPT),y)
-  ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),CLANG)
+  ifeq ($(CONFIG_TOOLCHAIN),CLANG)
     ARCHOPTIMIZATION += -Oz
   else
     ARCHOPTIMIZATION += -Os
@@ -77,7 +77,7 @@ endif
 
 # Clang Configuration files
 
-ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),CLANG)
+ifeq ($(CONFIG_TOOLCHAIN),CLANG)
   TOOLCHAIN_MARCH := --config armv6m_soft_nofp_nosys
 endif
 
@@ -91,21 +91,21 @@ endif
 
 # NuttX buildroot under Linux or Cygwin
 
-ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),BUILDROOT)
+ifeq ($(CONFIG_TOOLCHAIN),BUILDROOT)
   CROSSDEV ?= arm-nuttx-eabi-
   ARCHCPUFLAGS = $(TOOLCHAIN_MARCH) $(TOOLCHAIN_MTUNE) $(TOOLCHAIN_MFLOAT)
 endif
 
 # Generic GNU EABI toolchain
 
-ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),GNU_EABI)
+ifeq ($(CONFIG_TOOLCHAIN),GNU_EABI)
   CROSSDEV ?= tc32-elf-
   ARCHCPUFLAGS = $(TOOLCHAIN_MARCH) $(TOOLCHAIN_MTUNE) $(TOOLCHAIN_MFLOAT)
 endif
 
 # Clang toolchain
 
-ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),CLANG)
+ifeq ($(CONFIG_TOOLCHAIN),CLANG)
   ARCHCPUFLAGS = $(TOOLCHAIN_MARCH) $(TOOLCHAIN_MTUNE) $(TOOLCHAIN_MFLOAT)
 
   CC      = clang
@@ -180,7 +180,7 @@ endif
 # Add the builtin library
 
 COMPILER_RT_LIB = $(shell $(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name)
-ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),CLANG)
+ifeq ($(CONFIG_TOOLCHAIN),CLANG)
   ifeq ($(wildcard $(COMPILER_RT_LIB)),)
     # if "--print-libgcc-file-name" unable to find the correct libgcc PATH
     # then go ahead and try "--print-file-name"

@@ -1060,8 +1060,8 @@ Configurations
        CONFIG_HOST_LINUX=y                 : Linux or other pure POSIX invironment
 
      System Type -> Toolchain:
-       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
-       CONFIG_ARMV7M_OABI_TOOLCHAIN=n      : EABI (Not OABI
+       CONFIG_ARM_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
+       CONFIG_ARM_TOOLCHAIN_BUILDROOT_OABI=n      : EABI (Not OABI
 
      If you want to use the Atmel GCC toolchain, for example, here are the
      steps to do so:
@@ -1071,7 +1071,7 @@ Configurations
        CONFIG_HOST_CYGWIN=y    : Using Cygwin or other POSIX environment
 
      System Type -> Toolchain:
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y  : General GCC EABI toolchain under windows
+       CONFIG_ARM_TOOLCHAIN_GNU_EABI=y  : General GCC EABI toolchain under windows
 
      Library Routines ->
        CONFIG_ARCH_SIZET_LONG=n            : size_t is an unsigned int, not long

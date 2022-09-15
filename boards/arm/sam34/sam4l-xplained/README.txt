@@ -446,8 +446,8 @@ Configurations
      that is easily reconfigured:
 
      System Type -> Toolchain:
-       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
-       CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
+       CONFIG_ARM_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
+       CONFIG_ARM_TOOLCHAIN_BUILDROOT_OABI=y      : Older, OABI toolchain
 
      If you want to use the Atmel GCC toolchain, here are the steps to
      do so:
@@ -457,7 +457,7 @@ Configurations
        CONFIG_HOST_CYGWIN=y    : Using Cygwin or other POSIX environment
 
      System Type -> Toolchain:
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y  : General GCC EABI toolchain under windows
+       CONFIG_ARM_TOOLCHAIN_GNU_EABI=y  : General GCC EABI toolchain under windows
 
      This re-configuration should be done before making NuttX or else the
      subsequent 'make' will fail.  If you have already attempted building

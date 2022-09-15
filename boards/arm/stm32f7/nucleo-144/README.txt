@@ -535,7 +535,7 @@ f7xx-nsh:
      for Linux.  That can easily be reconfigured, of course.
 
      CONFIG_HOST_LINUX=y                     : Builds under Linux
-     CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y      : ARM GNU for Linux
+     CONFIG_ARM_TOOLCHAIN_GNU_EABI=y      : ARM GNU for Linux
 
   3. The serial console may be configured to use either USART3 (which would
      correspond to the Virtual COM port) or with the console device
@@ -602,4 +602,4 @@ f7xx-evalos:
     for Linux.  That can easily be reconfigured, of course.
 
     CONFIG_HOST_LINUX=y                     : Builds under Linux
-    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y      : ARM GNU for Linux
+    CONFIG_ARM_TOOLCHAIN_GNU_EABI=y      : ARM GNU for Linux

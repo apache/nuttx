@@ -256,8 +256,8 @@ CONFIGURATION
     2. Uses the older, OABI, buildroot toolchain.  But that is easily
        reconfigured:
 
-       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
-       CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
+       CONFIG_ARM_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
+       CONFIG_ARM_TOOLCHAIN_BUILDROOT_OABI=y      : Older, OABI toolchain
 
     3. This NSH has support for built-in applications enabled, however,
        no built-in configurations are built in the defulat configuration.

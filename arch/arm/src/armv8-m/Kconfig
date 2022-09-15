@@ -67,36 +67,6 @@ config ARMV8M_DTCM
 	default n
 	depends on ARMV8M_HAVE_DTCM
 
-choice
-	prompt "Toolchain Selection"
-	default ARMV8M_TOOLCHAIN_GNU_EABI
-
-config ARMV8M_TOOLCHAIN_BUILDROOT
-	bool "Buildroot (Cygwin or Linux)"
-	depends on !WINDOWS_NATIVE
-	select ARCH_TOOLCHAIN_GNU
-
-config ARMV8M_TOOLCHAIN_GNU_EABI
-	bool "Generic GNU EABI toolchain"
-	select ARCH_TOOLCHAIN_GNU
-	---help---
-		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
-		configured for arm-none-eabi.
-
-config ARMV8M_TOOLCHAIN_CLANG
-	bool "Generic Clang toolchain"
-	select ARCH_TOOLCHAIN_CLANG
-
-endchoice
-
-config ARMV8M_OABI_TOOLCHAIN
-	bool "OABI (vs EABI)"
-	default n
-	depends on ARMV8M_TOOLCHAIN_BUILDROOT
-	---help---
-		Most of the older buildroot toolchains are OABI and are named
-		arm-nuttx-elf- vs. arm-nuttx-eabi-
-
 config ARMV8M_TARGET2_PREL
 	bool "R_ARM_TARGET2 is PC relative"
 	default n if !CXX_EXCEPTION

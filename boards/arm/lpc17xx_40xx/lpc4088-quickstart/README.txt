@@ -247,7 +247,7 @@ Information Common to All Configurations
        CONFIG_WINDOWS_CYGWIN=y             : Cywin under Windows
 
      System Type -> Toolchain:
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y  : GNU ARM EABI toolchain
+       CONFIG_ARM_TOOLCHAIN_GNU_EABI=y  : GNU ARM EABI toolchain
 
   3. By Default, UART0 is used as the serial console in all configurations.
      This may be connected to your computer via an external RS-232 driver or
@@ -279,8 +279,8 @@ Configuration Directories
     1. Uses the older, OABI, buildroot toolchain.  But that is easily
        reconfigured:
 
-       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
-       CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
+       CONFIG_ARM_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
+       CONFIG_ARM_TOOLCHAIN_BUILDROOT_OABI=y      : Older, OABI toolchain
 
     2. At the end of the build, there will be several files in the top-level
        NuttX build directory:
@@ -361,8 +361,8 @@ Configuration Directories
     1. Uses the older, OABI, buildroot toolchain.  But that is easily
        reconfigured:
 
-       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
-       CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
+       CONFIG_ARM_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
+       CONFIG_ARM_TOOLCHAIN_BUILDROOT_OABI=y      : Older, OABI toolchain
 
     2. This NSH has support for built-in applications enabled, however,
        no built-in configurations are built in the defulat configuration.

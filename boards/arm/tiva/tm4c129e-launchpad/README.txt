@@ -99,7 +99,7 @@ Where <subdir> is one of the following:
 
        CONFIG_HOST_LINUX=y                 : Linux (Cygwin under Windows okay too).
        CONFIG_ARCH_TOOLCHAIN_GNU=y         : GNU toolchain (arm-none-eabi-gcc)
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y
+       CONFIG_ARM_TOOLCHAIN_GNU_EABIL=y
        CONFIG_RAW_BINARY=y                 : Output formats: ELF and raw binary
 
     3. Default stack sizes are large and should really be tuned to reduce the
