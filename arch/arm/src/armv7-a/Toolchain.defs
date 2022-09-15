@@ -61,4 +61,26 @@ else
   ARCHCPUFLAGS += -mfloat-abi=soft
 endif
 
+ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
+
+  ifeq ($(CONFIG_ARCH_CORTEXA5),y)
+    LDCPUFLAGS = Cortex-A5
+  else ifeq ($(CONFIG_ARCH_CORTEXA7),y)
+    LDCPUFLAGS = Cortex-A7
+  else ifeq ($(CONFIG_ARCH_CORTEXA8),y)
+    LDCPUFLAGS = Cortex-A8
+  else ifeq ($(CONFIG_ARCH_CORTEXA9),y)
+    LDCPUFLAGS = Cortex-A9
+  endif
+
+  ifeq ($(CONFIG_ARCH_FPU),)
+    LDFLAGS += --cpu=$(LDCPUFLAGS).no_neon.no_vfp
+  else ifeq ($(CONFIG_ARM_NEON),)
+    LDFLAGS += --cpu=$(LDCPUFLAGS).no_neon
+  else
+    LDFLAGS += --cpu=$(LDCPUFLAGS)
+  endif
+
+endif
+
 include $(TOPDIR)/arch/arm/src/common/Toolchain.defs

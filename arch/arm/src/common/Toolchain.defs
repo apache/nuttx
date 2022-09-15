@@ -131,6 +131,32 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_CLANG),y)
 
   ARCHOPTIMIZATION += -fno-builtin
 
+# ARM Compiler Clang toolchain
+
+else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
+
+  CC      = armclang
+  CXX     = armclang
+  CPP     = armclang -E -P -x c
+  LD      = armlink
+  STRIP   = llvm-strip --strip-unneeded
+  AR      = armar -rcs
+  NM      = llvm-nm
+  OBJCOPY = llvm-objcopy
+  OBJDUMP = llvm-objdump
+
+  # Since the no_builtin attribute is not fully supported on Clang
+  # disable the built-in functions, refer:
+  # https://github.com/apache/incubator-nuttx/pull/5971
+
+  ARCHOPTIMIZATION += -fno-builtin
+  ARCHOPTIMIZATION += --target=arm-arm-none-eabi
+
+  # Suppress license warning
+
+  ARCHCPUFLAGS += -Wno-license-management
+  LDFLAGS      += --diag_suppress=9931
+
 # Default toolchain
 
 else
@@ -174,23 +200,35 @@ endif
 ARCHOPTIMIZATION += -fno-common -Wall -Wshadow -Wundef
 ARCHOPTIMIZATION += -nostdlib
 
-LDFLAGS += -nostdlib
+ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),)
+  LDFLAGS += -nostdlib
+endif
 
 # Optimization of unused sections
 
-ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
-  LDFLAGS          += --gc-sections
-  ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
+ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),)
+  ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
+    LDFLAGS          += --gc-sections
+    ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
+  endif
 endif
 
 # Debug link map
 
 ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
-  LDFLAGS += --cref -Map=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),)
+    LDFLAGS += --cref -Map=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
+  else
+    LDFLAGS += --strict --map --xref --symbols --info=unused --info=veneers
+    LDFLAGS += --info=summarysizes --info=summarystack
+  endif
 endif
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION += -g
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
+    LDFLAGS += --debug
+  endif
 endif
 
 # Add the builtin library

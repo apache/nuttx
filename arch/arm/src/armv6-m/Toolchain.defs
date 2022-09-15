@@ -27,6 +27,8 @@ TOOLCHAIN_MFLOAT := -mfloat-abi=soft
 
 ifeq ($(CONFIG_ARM_TOOLCHAIN_CLANG),y)
   TOOLCHAIN_MARCH := --config armv6m_soft_nofp_nosys
+else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
+  LDFLAGS += --cpu=Cortex-M0
 endif
 
 include $(TOPDIR)/arch/arm/src/common/Toolchain.defs

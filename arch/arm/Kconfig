@@ -42,6 +42,10 @@ config ARM_TOOLCHAIN_CLANG
 	bool "Generic Clang toolchain"
 	select ARCH_TOOLCHAIN_CLANG
 
+config ARM_TOOLCHAIN_ARMCLANG
+	bool "ARM Compiler Clang toolchain"
+	select ARCH_TOOLCHAIN_CLANG
+
 endchoice
 
 choice
