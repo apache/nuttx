@@ -58,7 +58,7 @@ Buildroot Toolchain
   In order to use the buildroot toolchain, you also must set the following
   in your .config file:
 
-    CONFIG_LM3S_TOOLCHAIN_BUILDROOT=y
+    CONFIG_LM3S_ARM_TOOLCHAIN_BUILDROOT=y
 
 boards/misoc/lm32/misoc/include/generated
 ===============================

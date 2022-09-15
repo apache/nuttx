@@ -215,7 +215,7 @@ Configuration Sub-Directories
 
          CONFIG_HOST_WINDOWS=y
          CONFIG_WINDOWS_CYGWIN=y
-         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y
+         CONFIG_ARM_TOOLCHAIN_GNU_EABI=y
 
   httpd:
     This builds the uIP web server example using the examples/webserver application
@@ -228,7 +228,7 @@ Configuration Sub-Directories
 
          CONFIG_HOST_WINDOWS=y
          CONFIG_WINDOWS_CYGWIN=y
-         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y
+         CONFIG_ARM_TOOLCHAIN_GNU_EABI=y
 
        This example can only be built using the buildroot toolchain
        with NXFLAT support
@@ -273,7 +273,7 @@ Configuration Sub-Directories
        That, however, is easily reconfigurable:
 
          CONFIG_HOST_LINUX=y
-         CONFIG_ARM7M_TOOLCHAIN_BUILDROOT=y
+         CONFIG_ARM7M_ARM_TOOLCHAIN_BUILDROOT=y
 
        This example can only be built using the buildroot toolchain
        with NXFLAT support

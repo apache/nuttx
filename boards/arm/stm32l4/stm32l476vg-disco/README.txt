@@ -443,7 +443,7 @@ Configurations
        for Linux.  That can easily be reconfigured, of course.
 
        CONFIG_HOST_LINUX=y                 : Builds under Linux
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y  : Generic EABI toolchain for Linux
+       CONFIG_ARM_TOOLCHAIN_GNU_EABI=y  : Generic EABI toolchain for Linux
 
     3. Although the default console is USART2 (which would correspond to
        the Virtual COM port) I have done all testing with the console

@@ -737,7 +737,7 @@ Configuration Sub-Directories
     2. This configuration targets Linux using a generic ARM EABI toolchain:
 
        CONFIG_LINUX=y
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y
+       CONFIG_ARM_TOOLCHAIN_GNU_EABI=y
 
        But that can easily be re-configured.
 
@@ -780,7 +780,7 @@ Configuration Sub-Directories
 
        CONFIG_HOST_WINDOWS=y                   : Windows
        CONFIG_WINDOWS_CYGWIN=y                 : Cygwin environment on Windows
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Windows
+       CONFIG_ARM_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Windows
 
     2. The mouse is really useless with no display and no cursor.  So this
        configuration is only suited for low-level testing.  It is also awkward
@@ -813,8 +813,8 @@ Configuration Sub-Directories
     1. Uses the older, OABI, buildroot toolchain.  But that is easily
        reconfigured:
 
-       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
-       CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
+       CONFIG_ARM_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
+       CONFIG_ARM_TOOLCHAIN_BUILDROOT_OABI=y      : Older, OABI toolchain
 
     2. This configuration supports a network.  You may have to change
        these settings for your network:
@@ -893,7 +893,7 @@ Configuration Sub-Directories
 
        CONFIG_HOST_WINDOWS=y                   : Windows
        CONFIG_HOST_WINDOWS_CYGWIN=y            : under Cygwin
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Windows
+       CONFIG_ARM_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Windows
 
   STATUS:
     2015-06-02.  This configuration was added in an attempt to replace
@@ -920,8 +920,8 @@ Configuration Sub-Directories
        reconfigured:
 
        CONFIG_HOST_LINUX=y                 : Linux
-       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
-       CONFIG_ARMV7M_OABI_TOOLCHAIN=n      : Newer, EABI toolchain
+       CONFIG_ARM_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
+       CONFIG_ARM_TOOLCHAIN_BUILDROOT_OABI=n      : Newer, EABI toolchain
 
   STATUS:
     2015-06-02.  Do to issues introduced by recent versions of GCC, NXFLAT

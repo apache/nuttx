@@ -23,7 +23,7 @@
 
 # ARM
 
-/arm/stm32/stm32f4discovery/configs/nsh,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI
+/arm/stm32/stm32f4discovery/configs/nsh,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 
 # XTENSA
 

@@ -617,5 +617,5 @@ Where <subdir> is one of the following:
        can easily be reconfigured, of course.
 
        CONFIG_HOST_LINUX=y                 : Linux (Cygwin under Windows okay too).
-       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot (arm-nuttx-elf-gcc)
+       CONFIG_ARM_TOOLCHAIN_BUILDROOT=y : Buildroot (arm-nuttx-elf-gcc)
        CONFIG_RAW_BINARY=y                 : Output formats: ELF and raw binary

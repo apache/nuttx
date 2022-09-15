@@ -1,8 +1,8 @@
-/arm/stm32/stm32f4discovery,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI
+/arm/stm32/stm32f4discovery,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 -stm32f4discovery:winbuild
 
-/arm/stm32/stm32ldiscovery,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI
+/arm/stm32/stm32ldiscovery,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 
-/arm/stm32/stm32vldiscovery,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI
+/arm/stm32/stm32vldiscovery,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 
-/arm/stm32/viewtool-stm32f107,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI
+/arm/stm32/viewtool-stm32f107,CONFIG_ARM_TOOLCHAIN_GNU_EABI
