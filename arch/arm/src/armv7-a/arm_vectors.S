@@ -102,19 +102,18 @@
 	 * s0, s1, ... in increasing address order.
 	 */
 
-#ifdef CONFIG_ARM_DPFPU32
-	vstmia.64	\out!, {d0-d15}			/* Save the full FP context */
-	vstmia.64	\out!, {d16-d31}
-#else
-	vstmia		\out!, {s0-s31}			/* Save the full FP context */
-#endif
-
-	/* Store the floating point control and status register.  At the end of the
-	 * vstmia, r1 will point to the FPSCR storage location.
-	 */
+	/* Store the floating point control and status register. */
 
 	vmrs		\tmp, fpscr			/* Fetch the FPSCR */
-	str		\tmp, [\out], #4		/* Save the floating point control and status register */
+	str		\tmp, [\out, #-4]! 		/* Save the floating point control and status register */
+
+#ifdef CONFIG_ARM_DPFPU32
+	vstmdb.64	\out!, {d16-d31}		/* Save the full FP context */
+	vstmdb.64	\out!, {d0-d15}
+#else
+	vstmdb		\out!, {s0-s31}			/* Save the full FP context */
+#endif
+
 	.endm
 #endif
 
@@ -175,7 +174,7 @@ arm_vectorirq:
 	/* Save the LR and SPSR onto the SYS mode stack before switch. */
 
 	sub		lr, lr, #4
-	srsdb		sp, #PSR_MODE_SYS
+	srsdb		sp!, #PSR_MODE_SYS
 
 	/* Switch to SYS mode */
 
@@ -189,24 +188,19 @@ arm_vectorirq:
 	 * and store r0-r12 into the frame.
 	 */
 
-	sub		sp, sp, #XCPTCONTEXT_SIZE
-	stmia		sp, {r0-r12}			/* Save the SYS mode regs */
+	stmdb		sp!, {r0-r12}			/* Save the SYS mode regs */
 
-	/* Get the correct values of USR/SYS r13(sp) and r14(lr) in r1 and r2 */
+	/* Get the correct values of USR/SYS r13(sp) in r1 and
+	 * save r13 and r14 into the frame.
+	 */
 
-	add		r1, sp, #XCPTCONTEXT_SIZE
-	mov		r2, r14
-
-	/* Save r13(sp), r14(lr) */
-
-	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
-	stmia		r0, {r1-r2}
+	add		r1, sp, #(XCPTCONTEXT_SIZE-4*REG_R0)
+	stmdb		sp!, {r1, r14}
 
 #ifdef CONFIG_ARCH_FPU
 	/* Save the state of the floating point registers. */
 
-	add		r0, sp, #(4*REG_S0)		/* R1=Address of FP register storage */
-	savefpu		r0, r1
+	savefpu		sp, r1
 #endif
 
 	/* Then call the IRQ handler with interrupts disabled. */
@@ -214,19 +208,14 @@ arm_vectorirq:
 	mov		fp, #0				/* Init frame pointer */
 	mov		r0, sp				/* Get r0=xcp */
 
+	mov		r4, sp				/* Save the SP in a preserved register */
+
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
 	/* Call arm_decodeirq() on the interrupt stack */
 
 	setirqstack	r1, r3				/* SP = interrupt stack top */
-	str		r0, [sp, #-4]!			/* Save the xcp address at SP-4 then update SP */
-	mov		r4, sp				/* Save the SP in a preserved register */
-	bic		sp, sp, #7			/* Force 8-byte alignment */
-	bl		arm_decodeirq			/* Call the handler */
-	ldr		sp, [r4]			/* Restore the user stack pointer */
 #else
 	/* Call arm_decodeirq() on the user stack */
-
-	mov		r4, sp				/* Save the SP in a preserved register */
 
 	/* If the interrupt stack is disabled, reserve xcpcontext to ensure
 	 * that signal processing can have a separate xcpcontext to handle
@@ -239,17 +228,16 @@ arm_vectorirq:
 	 */
 
 	sub		sp, sp, #XCPTCONTEXT_SIZE	/* Reserve signal context */
+#endif
 
 	bic		sp, sp, #7			/* Force 8-byte alignment */
 	bl		arm_decodeirq			/* Call the handler */
 	mov		sp, r4				/* Restore the possibly unaligned stack pointer */
-#endif
 
 #ifdef CONFIG_ARCH_FPU
 	/* Restore the state of the floating point registers. */
 
-	add		r1, r0, #(4*REG_S0)		/* R1=Address of FP register storage */
-	restorefpu	r1, r2
+	restorefpu	r0, r2
 #endif
 
 	/* Switch back IRQ mode and return with shadow SPSR */
@@ -264,13 +252,12 @@ arm_vectorirq:
 
 	/* Life is simple when everything is IRQ mode */
 
-	mov		r14, r0				/* (IRQ) r14=Register storage area */
+	ldmia		r0, {r13, r14}^			/* Restore user mode r13 and r14 */
+	add		r14, r0, #8
 	ldmia		r14!, {r0-r12}			/* Restore common r0-r12 */
-	ldmia		r14, {r13, r14}^		/* Restore user mode r13/r14 */
 
 	/* Restore the CPSR, SYS mode registers and return. */
 
-	add		r14, r14, #(4*(REG_R15-REG_R13))
 	rfeia		r14
 
 #if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
@@ -297,7 +284,7 @@ arm_vectorsvc:
 
 	/* Save the LR and SPSR onto the SYS mode stack before switch. */
 
-	srsdb		sp, #PSR_MODE_SYS
+	srsdb		sp!, #PSR_MODE_SYS
 
 	/* Switch to SYS mode */
 
@@ -311,24 +298,19 @@ arm_vectorsvc:
 	 * and store r0-r12 into the frame.
 	 */
 
-	sub		sp, sp, #XCPTCONTEXT_SIZE
-	stmia		sp, {r0-r12}			/* Save the SYS mode regs */
+	stmdb		sp!, {r0-r12}			/* Save the SYS mode regs */
 
-	/* Get the correct values of USR/SYS r13(sp) and r14(lr) in r1 and r2 */
+	/* Get the correct values of USR/SYS r13(sp) in r1 and
+	 * save r13 and r14 into the frame.
+	 */
 
-	add		r1, sp, #XCPTCONTEXT_SIZE
-	mov		r2, r14
-
-	/* Save r13(sp), r14(lr) */
-
-	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
-	stmia		r0, {r1-r2}
+	add		r1, sp, #(XCPTCONTEXT_SIZE-4*REG_R0)
+	stmdb		sp!, {r1, r14}
 
 #ifdef CONFIG_ARCH_FPU
 	/* Save the state of the floating point registers. */
 
-	add		r0, sp, #(4*REG_S0)		/* R1=Address of FP register storage */
-	savefpu		r0, r1
+	savefpu		sp, r1
 #endif
 
 	/* Then call the SVC handler with interrupts disabled.
@@ -338,19 +320,14 @@ arm_vectorsvc:
 	mov		fp, #0				/* Init frame pointer */
 	mov		r0, sp				/* Get r0=xcp */
 
+	mov		r4, sp				/* Save the SP in a preserved register */
+
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
 	/* Call arm_syscall() on the interrupt stack */
 
 	setirqstack	r1, r3				/* SP = interrupt stack top */
-	str		r0, [sp, #-4]!			/* Save the xcp address at SP-4 then update SP */
-	mov		r4, sp				/* Save the SP in a preserved register */
-	bic		sp, sp, #7			/* Force 8-byte alignment */
-	bl		arm_syscall			/* Call the handler */
-	ldr		sp, [r4]			/* Restore the user stack pointer */
 #else
 	/* Call arm_syscall() on the user stack */
-
-	mov		r4, sp				/* Save the SP in a preserved register */
 
 	/* If the interrupt stack is disabled, reserve xcpcontext to ensure
 	 * that signal processing can have a separate xcpcontext to handle
@@ -363,17 +340,16 @@ arm_vectorsvc:
 	 */
 
 	sub		sp, sp, #XCPTCONTEXT_SIZE	/* Reserve signal context */
+#endif
 
 	bic		sp, sp, #7			/* Force 8-byte alignment */
 	bl		arm_syscall			/* Call the handler */
 	mov		sp, r4				/* Restore the possibly unaligned stack pointer */
-#endif
 
 #ifdef CONFIG_ARCH_FPU
 	/* Restore the state of the floating point registers. */
 
-	add		r1, r0, #(4*REG_S0)		/* R1=Address of FP register storage */
-	restorefpu	r1, r2
+	restorefpu	r0, r2
 #endif
 
 	/* Switch back SVC mode and return with shadow SPSR */
@@ -388,13 +364,12 @@ arm_vectorsvc:
 
 	/* Life is simple when everything is SVC mode */
 
-	mov		r14, r0				/* (SVC) r14=Register storage area */
+	ldmia		r0, {r13, r14}^			/* Restore user mode r13 and r14 */
+	add		r14, r0, #8
 	ldmia		r14!, {r0-r12}			/* Restore common r0-r12 */
-	ldmia		r14, {r13, r14}^		/* Restore user mode r13/r14 */
 
 	/* Restore the CPSR, SYS mode registers and return. */
 
-	add		r14, r14, #(4*(REG_R15-REG_R13))
 	rfeia		r14
 	.size	arm_vectorsvc, . - arm_vectorsvc
 
@@ -420,7 +395,7 @@ arm_vectordata:
 	/* Save the LR and SPSR onto the SYS mode stack before switch. */
 
 	sub		lr, lr, #8
-	srsdb		sp, #PSR_MODE_SYS
+	srsdb		sp!, #PSR_MODE_SYS
 
 	/* Switch to SYS mode */
 
@@ -434,24 +409,19 @@ arm_vectordata:
 	 * and store r0-r12 into the frame.
 	 */
 
-	sub		sp, sp, #XCPTCONTEXT_SIZE
-	stmia		sp, {r0-r12}			/* Save the SYS mode regs */
+	stmdb		sp!, {r0-r12}			/* Save the SYS mode regs */
 
-	/* Get the correct values of USR/SYS r13(sp) and r14(lr) in r1 and r2 */
+	/* Get the correct values of USR/SYS r13(sp) in r1 and
+	 * save r13 and r14 into the frame.
+	 */
 
-	add		r1, sp, #XCPTCONTEXT_SIZE
-	mov		r2, r14
-
-	/* Save r13(sp), r14(lr) */
-
-	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
-	stmia		r0, {r1-r2}
+	add		r1, sp, #(XCPTCONTEXT_SIZE-4*REG_R0)
+	stmdb		sp!, {r1, r14}
 
 #ifdef CONFIG_ARCH_FPU
 	/* Save the state of the floating point registers. */
 
-	add		r0, sp, #(4*REG_S0)		/* R1=Address of FP register storage */
-	savefpu		r0, r1
+	savefpu		sp, r1
 #endif
 
 	/* Then call the data abort handler with interrupts disabled.
@@ -470,8 +440,7 @@ arm_vectordata:
 #ifdef CONFIG_ARCH_FPU
 	/* Restore the state of the floating point registers. */
 
-	add		r1, r0, #(4*REG_S0)		/* R1=Address of FP register storage */
-	restorefpu	r1, r2
+	restorefpu	r0, r2
 #endif
 
 	/* Switch back ABT mode and return with shadow SPSR */
@@ -486,13 +455,12 @@ arm_vectordata:
 
 	/* Life is simple when everything is ABT mode */
 
-	mov		r14, r0				/* (ABT) r14=Register storage area */
+	ldmia		r0, {r13, r14}^			/* Restore user mode r13 and r14 */
+	add		r14, r0, #8
 	ldmia		r14!, {r0-r12}			/* Restore common r0-r12 */
-	ldmia		r14, {r13, r14}^		/* Restore user mode r13/r14 */
 
 	/* Restore the CPSR, SYS mode registers and return. */
 
-	add		r14, r14, #(4*(REG_R15-REG_R13))
 	rfeia		r14
 	.size	arm_vectordata, . - arm_vectordata
 
@@ -518,7 +486,7 @@ arm_vectorprefetch:
 	/* Save the LR and SPSR onto the SYS mode stack before switch. */
 
 	sub		lr, lr, #4
-	srsdb		sp, #PSR_MODE_SYS
+	srsdb		sp!, #PSR_MODE_SYS
 
 	cpsid		if, #PSR_MODE_SYS		/* Switch to SYS mode */
 
@@ -526,24 +494,19 @@ arm_vectorprefetch:
 	 * and store r0-r12 into the frame.
 	 */
 
-	sub		sp, sp, #XCPTCONTEXT_SIZE
-	stmia		sp, {r0-r12}			/* Save the SYS mode regs */
+	stmdb		sp!, {r0-r12}			/* Save the SYS mode regs */
 
-	/* Get the correct values of USR/SYS r13(sp) and r14(lr) in r1 and r2 */
+	/* Get the correct values of USR/SYS r13(sp) in r1 and
+	 * save r13 and r14 into the frame.
+	 */
 
-	add		r1, sp, #XCPTCONTEXT_SIZE
-	mov		r2, r14
-
-	/* Save r13(sp), r14(lr) */
-
-	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
-	stmia		r0, {r1-r2}
+	add		r1, sp, #(XCPTCONTEXT_SIZE-4*REG_R0)
+	stmdb		sp!, {r1, r14}
 
 #ifdef CONFIG_ARCH_FPU
 	/* Save the state of the floating point registers. */
 
-	add		r0, sp, #(4*REG_S0)		/* R1=Address of FP register storage */
-	savefpu		r0, r1
+	savefpu		sp, r1
 #endif
 
 	/* Then call the prefetch abort handler with interrupts disabled.
@@ -562,8 +525,7 @@ arm_vectorprefetch:
 #ifdef CONFIG_ARCH_FPU
 	/* Restore the state of the floating point registers. */
 
-	add		r1, r0, #(4*REG_S0)		/* R1=Address of FP register storage */
-	restorefpu	r1, r2
+	restorefpu	r0, r2
 #endif
 
 	/* Switch back ABT mode and return with shadow SPSR */
@@ -578,13 +540,12 @@ arm_vectorprefetch:
 
 	/* Life is simple when everything is ABT mode */
 
-	mov		r14, r0				/* (ABT) r14=Register storage area */
+	ldmia		r0, {r13, r14}^			/* Restore user mode r13 and r14 */
+	add		r14, r0, #8
 	ldmia		r14!, {r0-r12}			/* Restore common r0-r12 */
-	ldmia		r14, {r13, r14}^		/* Restore user mode r13/r14 */
 
 	/* Restore the CPSR, SYS mode registers and return. */
 
-	add		r14, r14, #(4*(REG_R15-REG_R13))
 	rfeia		r14
 	.size	arm_vectorprefetch, . - arm_vectorprefetch
 
@@ -607,7 +568,7 @@ arm_vectorundefinsn:
 
 	/* Save the LR and SPSR onto the SYS mode stack before switch. */
 
-	srsdb		sp, #PSR_MODE_SYS
+	srsdb		sp!, #PSR_MODE_SYS
 
 	cpsid		if, #PSR_MODE_SYS		/* Switch to SYS mode */
 
@@ -615,24 +576,19 @@ arm_vectorundefinsn:
 	 * and store r0-r12 into the frame.
 	 */
 
-	sub		sp, sp, #XCPTCONTEXT_SIZE
-	stmia		sp, {r0-r12}			/* Save the SYS mode regs */
+	stmdb		sp!, {r0-r12}			/* Save the SYS mode regs */
 
-	/* Get the correct values of USR/SYS r13(sp) and r14(lr) in r1 and r2 */
+	/* Get the correct values of USR/SYS r13(sp) in r1 and
+	 * save r13 and r14 into the frame.
+	 */
 
-	add		r1, sp, #XCPTCONTEXT_SIZE
-	mov		r2, r14
-
-	/* Save r13(sp), r14(lr) */
-
-	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
-	stmia		r0, {r1-r2}
+	add		r1, sp, #(XCPTCONTEXT_SIZE-4*REG_R0)
+	stmdb		sp!, {r1, r14}
 
 #ifdef CONFIG_ARCH_FPU
 	/* Save the state of the floating point registers. */
 
-	add		r0, sp, #(4*REG_S0)		/* R1=Address of FP register storage */
-	savefpu		r0, r1
+	savefpu		sp, r1
 #endif
 
 	/* Then call the undef insn handler with interrupts disabled.
@@ -649,8 +605,7 @@ arm_vectorundefinsn:
 #ifdef CONFIG_ARCH_FPU
 	/* Restore the state of the floating point registers. */
 
-	add		r1, r0, #(4*REG_S0)		/* R1=Address of FP register storage */
-	restorefpu	r1, r2
+	restorefpu	r0, r2
 #endif
 
 	/* Switch back UND mode and return with shadow SPSR */
@@ -665,13 +620,12 @@ arm_vectorundefinsn:
 
 	/* Life is simple when everything is UND mode */
 
-	mov		r14, r0				/* (UND) r14=Register storage area */
+	ldmia		r0, {r13, r14}^			/* Restore user mode r13 and r14 */
+	add		r14, r0, #8
 	ldmia		r14!, {r0-r12}			/* Restore common r0-r12 */
-	ldmia		r14, {r13, r14}^		/* Restore user mode r13/r14 */
 
 	/* Restore the CPSR, SYS mode registers and return. */
 
-	add		r14, r14, #(4*(REG_R15-REG_R13))
 	rfeia		r14
 	.size	arm_vectorundefinsn, . - arm_vectorundefinsn
 
@@ -698,7 +652,7 @@ arm_vectorfiq:
 	/* Save the LR and SPSR onto the SYS mode stack before switch. */
 
 	sub		lr, lr, #4
-	srsdb		sp, #PSR_MODE_SYS
+	srsdb		sp!, #PSR_MODE_SYS
 
 	cpsid		if, #PSR_MODE_SYS		/* Switch to SYS mode */
 
@@ -706,24 +660,19 @@ arm_vectorfiq:
 	 * and store r0-r12 into the frame.
 	 */
 
-	sub		sp, sp, #XCPTCONTEXT_SIZE
-	stmia		sp, {r0-r12}			/* Save the SYS mode regs */
+	stmdb		sp!, {r0-r12}			/* Save the SYS mode regs */
 
-	/* Get the correct values of USR/SYS r13(sp) and r14(lr) in r1 and r2 */
+	/* Get the correct values of USR/SYS r13(sp) in r1 and
+	 * save r13 and r14 into the frame.
+	 */
 
-	add		r1, sp, #XCPTCONTEXT_SIZE
-	mov		r2, r14
-
-	/* Save r13(sp), r14(lr) */
-
-	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
-	stmia		r0, {r1-r2}
+	add		r1, sp, #(XCPTCONTEXT_SIZE-4*REG_R0)
+	stmdb		sp!, {r1, r14}
 
 #ifdef CONFIG_ARCH_FPU
 	/* Save the state of the floating point registers. */
 
-	add		r0, sp, #(4*REG_S0)		/* R1=Address of FP register storage */
-	savefpu		r0, r1
+	savefpu		sp, r1
 #endif
 
 	/* Then call the FIQ handler with interrupts disabled. */
@@ -731,29 +680,22 @@ arm_vectorfiq:
 	mov		fp, #0				/* Init frame pointer */
 	mov		r0, sp				/* Get r0=xcp */
 
+	mov		r4, sp				/* Save the SP in a preserved register */
+
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
 	/* Call arm_decodefiq() on the interrupt stack */
 
-	setfiqstack	r1, r4				/* SP = interrupt stack top */
-	str		r0, [sp, #-4]!			/* Save the xcp address at SP-4 then update SP */
-	mov		r4, sp				/* Save the SP in a preserved register */
-	bic		sp, sp, #7			/* Force 8-byte alignment */
-	bl		arm_decodefiq			/* Call the handler */
-	ldr		sp, [r4]			/* Restore the user stack pointer */
-#else
-	/* Call arm_decodefiq() on the user stack */
+	setfiqstack	r1, r3				/* SP = interrupt stack top */
+#endif
 
-	mov		r4, sp				/* Save the SP in a preserved register */
 	bic		sp, sp, #7			/* Force 8-byte alignment */
 	bl		arm_decodefiq			/* Call the handler */
 	mov		sp, r4				/* Restore the possibly unaligned stack pointer */
-#endif
 
 #ifdef CONFIG_ARCH_FPU
 	/* Restore the state of the floating point registers. */
 
-	add		r1, r0, #(4*REG_S0)		/* R1=Address of FP register storage */
-	restorefpu	r1, r2
+	restorefpu	r0, r2
 #endif
 
 	/* Switch back FIQ mode and return with shadow SPSR */
@@ -768,13 +710,14 @@ arm_vectorfiq:
 
 	/* Life is simple when everything is FIQ mode */
 
-	mov		r14, r0				/* (FIQ) r14=Register storage area */
+	ldmia		r0, {r13, r14}^			/* Restore user mode r13 and r14 */
+	add		r14, r0, #8
 	ldmia		r14!, {r0-r7}			/* Restore common r0-r7 */
-	ldmia		r14, {r8-r14}^			/* Restore user mode r8-r14 */
+	ldmia		r14, {r8-r12}^			/* Restore user mode r8-r12 */
+	add		r14, r14, #20
 
 	/* Restore the CPSR, SYS mode registers and return. */
 
-	add		r14, r14, #(4*(REG_R15-REG_R13))
 	rfeia		r14
 
 #if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7

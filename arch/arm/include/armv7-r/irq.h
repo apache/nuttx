@@ -51,24 +51,6 @@
  * individual registers in the xcp.regs array:
  */
 
-#define REG_R0              (0)
-#define REG_R1              (1)
-#define REG_R2              (2)
-#define REG_R3              (3)
-#define REG_R4              (4)
-#define REG_R5              (5)
-#define REG_R6              (6)
-#define REG_R7              (7)
-#define REG_R8              (8)
-#define REG_R9              (9)
-#define REG_R10             (10)
-#define REG_R11             (11)
-#define REG_R12             (12)
-#define REG_R13             (13)
-#define REG_R14             (14)
-
-#define ARM_CONTEXT_REGS    (15)
-
 /* If the MCU supports a floating point unit, then it will be necessary
  * to save the state of the FPU status register and data registers on
  * each context switch.  These registers are not saved during interrupt
@@ -85,87 +67,104 @@
  */
 
 #ifdef CONFIG_ARCH_FPU
-#  define REG_D0            (ARM_CONTEXT_REGS+0)  /* D0 */
-#  define REG_S0            (ARM_CONTEXT_REGS+0)  /* S0 */
-#  define REG_S1            (ARM_CONTEXT_REGS+1)  /* S1 */
-#  define REG_D1            (ARM_CONTEXT_REGS+2)  /* D1 */
-#  define REG_S2            (ARM_CONTEXT_REGS+2)  /* S2 */
-#  define REG_S3            (ARM_CONTEXT_REGS+3)  /* S3 */
-#  define REG_D2            (ARM_CONTEXT_REGS+4)  /* D2 */
-#  define REG_S4            (ARM_CONTEXT_REGS+4)  /* S4 */
-#  define REG_S5            (ARM_CONTEXT_REGS+5)  /* S5 */
-#  define REG_D3            (ARM_CONTEXT_REGS+6)  /* D3 */
-#  define REG_S6            (ARM_CONTEXT_REGS+6)  /* S6 */
-#  define REG_S7            (ARM_CONTEXT_REGS+7)  /* S7 */
-#  define REG_D4            (ARM_CONTEXT_REGS+8)  /* D4 */
-#  define REG_S8            (ARM_CONTEXT_REGS+8)  /* S8 */
-#  define REG_S9            (ARM_CONTEXT_REGS+9)  /* S9 */
-#  define REG_D5            (ARM_CONTEXT_REGS+10) /* D5 */
-#  define REG_S10           (ARM_CONTEXT_REGS+10) /* S10 */
-#  define REG_S11           (ARM_CONTEXT_REGS+11) /* S11 */
-#  define REG_D6            (ARM_CONTEXT_REGS+12) /* D6 */
-#  define REG_S12           (ARM_CONTEXT_REGS+12) /* S12 */
-#  define REG_S13           (ARM_CONTEXT_REGS+13) /* S13 */
-#  define REG_D7            (ARM_CONTEXT_REGS+14) /* D7 */
-#  define REG_S14           (ARM_CONTEXT_REGS+14) /* S14 */
-#  define REG_S15           (ARM_CONTEXT_REGS+15) /* S15 */
-#  define REG_D8            (ARM_CONTEXT_REGS+16) /* D8 */
-#  define REG_S16           (ARM_CONTEXT_REGS+16) /* S16 */
-#  define REG_S17           (ARM_CONTEXT_REGS+17) /* S17 */
-#  define REG_D9            (ARM_CONTEXT_REGS+18) /* D9 */
-#  define REG_S18           (ARM_CONTEXT_REGS+18) /* S18 */
-#  define REG_S19           (ARM_CONTEXT_REGS+19) /* S19 */
-#  define REG_D10           (ARM_CONTEXT_REGS+20) /* D10 */
-#  define REG_S20           (ARM_CONTEXT_REGS+20) /* S20 */
-#  define REG_S21           (ARM_CONTEXT_REGS+21) /* S21 */
-#  define REG_D11           (ARM_CONTEXT_REGS+22) /* D11 */
-#  define REG_S22           (ARM_CONTEXT_REGS+22) /* S22 */
-#  define REG_S23           (ARM_CONTEXT_REGS+23) /* S23 */
-#  define REG_D12           (ARM_CONTEXT_REGS+24) /* D12 */
-#  define REG_S24           (ARM_CONTEXT_REGS+24) /* S24 */
-#  define REG_S25           (ARM_CONTEXT_REGS+25) /* S25 */
-#  define REG_D13           (ARM_CONTEXT_REGS+26) /* D13 */
-#  define REG_S26           (ARM_CONTEXT_REGS+26) /* S26 */
-#  define REG_S27           (ARM_CONTEXT_REGS+27) /* S27 */
-#  define REG_D14           (ARM_CONTEXT_REGS+28) /* D14 */
-#  define REG_S28           (ARM_CONTEXT_REGS+28) /* S28 */
-#  define REG_S29           (ARM_CONTEXT_REGS+29) /* S29 */
-#  define REG_D15           (ARM_CONTEXT_REGS+30) /* D15 */
-#  define REG_S30           (ARM_CONTEXT_REGS+30) /* S30 */
-#  define REG_S31           (ARM_CONTEXT_REGS+31) /* S31 */
+#  define REG_D0            (0)  /* D0 */
+#  define REG_S0            (0)  /* S0 */
+#  define REG_S1            (1)  /* S1 */
+#  define REG_D1            (2)  /* D1 */
+#  define REG_S2            (2)  /* S2 */
+#  define REG_S3            (3)  /* S3 */
+#  define REG_D2            (4)  /* D2 */
+#  define REG_S4            (4)  /* S4 */
+#  define REG_S5            (5)  /* S5 */
+#  define REG_D3            (6)  /* D3 */
+#  define REG_S6            (6)  /* S6 */
+#  define REG_S7            (7)  /* S7 */
+#  define REG_D4            (8)  /* D4 */
+#  define REG_S8            (8)  /* S8 */
+#  define REG_S9            (9)  /* S9 */
+#  define REG_D5            (10) /* D5 */
+#  define REG_S10           (10) /* S10 */
+#  define REG_S11           (11) /* S11 */
+#  define REG_D6            (12) /* D6 */
+#  define REG_S12           (12) /* S12 */
+#  define REG_S13           (13) /* S13 */
+#  define REG_D7            (14) /* D7 */
+#  define REG_S14           (14) /* S14 */
+#  define REG_S15           (15) /* S15 */
+#  define REG_D8            (16) /* D8 */
+#  define REG_S16           (16) /* S16 */
+#  define REG_S17           (17) /* S17 */
+#  define REG_D9            (18) /* D9 */
+#  define REG_S18           (18) /* S18 */
+#  define REG_S19           (19) /* S19 */
+#  define REG_D10           (20) /* D10 */
+#  define REG_S20           (20) /* S20 */
+#  define REG_S21           (21) /* S21 */
+#  define REG_D11           (22) /* D11 */
+#  define REG_S22           (22) /* S22 */
+#  define REG_S23           (23) /* S23 */
+#  define REG_D12           (24) /* D12 */
+#  define REG_S24           (24) /* S24 */
+#  define REG_S25           (25) /* S25 */
+#  define REG_D13           (26) /* D13 */
+#  define REG_S26           (26) /* S26 */
+#  define REG_S27           (27) /* S27 */
+#  define REG_D14           (28) /* D14 */
+#  define REG_S28           (28) /* S28 */
+#  define REG_S29           (29) /* S29 */
+#  define REG_D15           (30) /* D15 */
+#  define REG_S30           (30) /* S30 */
+#  define REG_S31           (31) /* S31 */
 #  ifdef CONFIG_ARM_HAVE_DPFPU32
-#    define REG_D16         (ARM_CONTEXT_REGS+32) /* D16 */
-#    define REG_D17         (ARM_CONTEXT_REGS+34) /* D17 */
-#    define REG_D18         (ARM_CONTEXT_REGS+36) /* D18 */
-#    define REG_D19         (ARM_CONTEXT_REGS+38) /* D19 */
-#    define REG_D20         (ARM_CONTEXT_REGS+40) /* D20 */
-#    define REG_D21         (ARM_CONTEXT_REGS+42) /* D21 */
-#    define REG_D22         (ARM_CONTEXT_REGS+44) /* D22 */
-#    define REG_D23         (ARM_CONTEXT_REGS+46) /* D23 */
-#    define REG_D24         (ARM_CONTEXT_REGS+48) /* D24 */
-#    define REG_D25         (ARM_CONTEXT_REGS+50) /* D25 */
-#    define REG_D26         (ARM_CONTEXT_REGS+52) /* D26 */
-#    define REG_D27         (ARM_CONTEXT_REGS+54) /* D27 */
-#    define REG_D28         (ARM_CONTEXT_REGS+56) /* D28 */
-#    define REG_D29         (ARM_CONTEXT_REGS+58) /* D29 */
-#    define REG_D30         (ARM_CONTEXT_REGS+60) /* D30 */
-#    define REG_D31         (ARM_CONTEXT_REGS+62) /* D31 */
-#    define REG_FPSCR       (ARM_CONTEXT_REGS+64) /* Floating point status and control */
+#    define REG_D16         (32) /* D16 */
+#    define REG_D17         (34) /* D17 */
+#    define REG_D18         (36) /* D18 */
+#    define REG_D19         (38) /* D19 */
+#    define REG_D20         (40) /* D20 */
+#    define REG_D21         (42) /* D21 */
+#    define REG_D22         (44) /* D22 */
+#    define REG_D23         (46) /* D23 */
+#    define REG_D24         (48) /* D24 */
+#    define REG_D25         (50) /* D25 */
+#    define REG_D26         (52) /* D26 */
+#    define REG_D27         (54) /* D27 */
+#    define REG_D28         (56) /* D28 */
+#    define REG_D29         (58) /* D29 */
+#    define REG_D30         (60) /* D30 */
+#    define REG_D31         (62) /* D31 */
+#    define REG_FPSCR       (64) /* Floating point status and control */
 #    define FPU_CONTEXT_REGS  (65)
 #  else
-#    define REG_FPSCR       (ARM_CONTEXT_REGS+32) /* Floating point status and control */
+#    define REG_FPSCR       (32) /* Floating point status and control */
 #    define FPU_CONTEXT_REGS  (33)
 #  endif
 #else
 #  define FPU_CONTEXT_REGS  (0)
 #endif
 
-#define REG_R15             (ARM_CONTEXT_REGS + FPU_CONTEXT_REGS)
-#define REG_CPSR            (REG_R15 + 1)
+#define REG_R13             (FPU_CONTEXT_REGS+0)
+#define REG_R14             (FPU_CONTEXT_REGS+1)
+#define REG_R0              (FPU_CONTEXT_REGS+2)
+#define REG_R1              (FPU_CONTEXT_REGS+3)
+#define REG_R2              (FPU_CONTEXT_REGS+4)
+#define REG_R3              (FPU_CONTEXT_REGS+5)
+#define REG_R4              (FPU_CONTEXT_REGS+6)
+#define REG_R5              (FPU_CONTEXT_REGS+7)
+#define REG_R6              (FPU_CONTEXT_REGS+8)
+#define REG_R7              (FPU_CONTEXT_REGS+9)
+#define REG_R8              (FPU_CONTEXT_REGS+10)
+#define REG_R9              (FPU_CONTEXT_REGS+11)
+#define REG_R10             (FPU_CONTEXT_REGS+12)
+#define REG_R11             (FPU_CONTEXT_REGS+13)
+#define REG_R12             (FPU_CONTEXT_REGS+14)
+#define REG_R15             (FPU_CONTEXT_REGS+15)
+#define REG_CPSR            (FPU_CONTEXT_REGS+16)
+
+#define ARM_CONTEXT_REGS    (17)
 
 /* The total number of registers saved by software */
 
-#define XCPTCONTEXT_REGS    (REG_CPSR + 1)
+#define XCPTCONTEXT_REGS    (FPU_CONTEXT_REGS + ARM_CONTEXT_REGS)
 #define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
 
 /* Friendly register names */
