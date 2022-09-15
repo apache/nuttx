@@ -26,15 +26,15 @@
 #
 
 ifeq ($(filter y, \
-      $(CONFIG_ARMV7R_TOOLCHAIN_BUILDROOT) \
+      $(CONFIG_ARM_TOOLCHAIN_BUILDROOT) \
     ),y)
-  CONFIG_ARMV7R_TOOLCHAIN ?= BUILDROOT
+  CONFIG_TOOLCHAIN ?= BUILDROOT
 endif
 
 ifeq ($(filter y, \
-      $(CONFIG_ARMV7R_TOOLCHAIN_GNU_EABI) \
+      $(CONFIG_ARM_TOOLCHAIN_GNU_EABI) \
     ),y)
-  CONFIG_ARMV7R_TOOLCHAIN ?= GNU_EABI
+  CONFIG_TOOLCHAIN ?= GNU_EABI
 endif
 
 #
@@ -116,17 +116,17 @@ endif
 
 # NuttX buildroot under Linux or Cygwin
 
-ifeq ($(CONFIG_ARMV7R_TOOLCHAIN),BUILDROOT)
-ifeq ($(CONFIG_ARMV7R_OABI_TOOLCHAIN),y)
-  CROSSDEV ?= $(TARGET_ARCH)-nuttx-elf-
-else
+ifeq ($(CONFIG_ARM_TOOLCHAIN_BUILDROOT),y)
   CROSSDEV ?= $(TARGET_ARCH)-nuttx-eabi-
 endif
+
+ifeq ($(CONFIG_ARM_TOOLCHAIN_BUILDROOT_OABI),y)
+  CROSSDEV ?= $(TARGET_ARCH)-nuttx-elf-
 endif
 
 # Generic GNU EABI toolchain
 
-ifeq ($(CONFIG_ARMV7R_TOOLCHAIN),GNU_EABI)
+ifeq ($(CONFIG_TOOLCHAIN),GNU_EABI)
   CROSSDEV ?= $(TARGET_ARCH)-none-eabi-
 endif
 
@@ -179,7 +179,7 @@ NM      = $(CROSSDEV)nm
 
 ifeq ($(CONFIG_LTO_FULL),y)
   ARCHOPTIMIZATION += -flto
-  ifeq ($(CONFIG_ARMV7R_TOOLCHAIN),GNU_EABI)
+  ifeq ($(CONFIG_TOOLCHAIN),GNU_EABI)
     LD := $(CROSSDEV)gcc
     AR := $(CROSSDEV)gcc-ar rcs
     NM := $(CROSSDEV)gcc-nm

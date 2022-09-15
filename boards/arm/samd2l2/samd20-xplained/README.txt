@@ -282,8 +282,8 @@ GNU Toolchain Options
   toolchain.  To use alternative toolchain, you simply need to add change of
   the following configuration options to your .config (or defconfig) file:
 
-    CONFIG_ARMV6M_TOOLCHAIN_BUILDROOT=y  : NuttX buildroot under Linux or Cygwin (default)
-    CONFIG_ARMV6M_TOOLCHAIN_GNU_EABI=y   : Generic GCC ARM EABI toolchain
+    CONFIG_ARM_TOOLCHAIN_BUILDROOT=y  : NuttX buildroot under Linux or Cygwin (default)
+    CONFIG_ARM_TOOLCHAIN_GNU_EABI=y   : Generic GCC ARM EABI toolchain
 
   NOTE about Windows native toolchains
   ------------------------------------
@@ -663,7 +663,7 @@ Configurations
      that is easily reconfigured:
 
      System Type -> Toolchain:
-       CONFIG_ARMV6M_TOOLCHAIN_GNU_EABI=y
+       CONFIG_ARM_TOOLCHAIN_GNU_EABI=y
 
      Any re-configuration should be done before making NuttX or else the
      subsequent 'make' will fail.  If you have already attempted building

@@ -595,7 +595,7 @@ Configurations
      'make menuconfig'.  Here are the relevant current settings:
 
      System Type -> Toolchain:
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y  : GNU ARM EABI toolchain for Windows
+       CONFIG_ARM_TOOLCHAIN_GNU_EABI=y  : GNU ARM EABI toolchain for Windows
 
 Configuration sub-directories
 -----------------------------

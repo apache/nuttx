@@ -1357,7 +1357,7 @@ Configuration Sub-directories
 
        CONFIG_HOST_WINDOWS=y                   : Windows
        CONFIG_WINDOWS_CYGWIN=y                 : Cygwin environment on Windows
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Windows
+       CONFIG_ARM_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Windows
 
     2. By default, this project assumes that you are *NOT* using the DFU
        bootloader.
@@ -1608,7 +1608,7 @@ Configuration Sub-directories
 
        CONFIG_HOST_WINDOWS=y                   : Windows
        CONFIG_WINDOWS_CYGWIN=y                 : Cygwin environment on Windows
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Windows
+       CONFIG_ARM_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Windows
 
        This is easily changed by modifying the configuration.
 
@@ -1768,7 +1768,7 @@ Configuration Sub-directories
 
        CONFIG_HOST_WINDOWS=y                   : Builds under Windows
        CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Windows
+       CONFIG_ARM_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Windows
 
     2. To use this configuration with the STM32F4DIS-BB baseboard you
        should:
@@ -2070,7 +2070,7 @@ Configuration Sub-directories
     An example using the NuttX graphics system (NX).   This example focuses on
     placing lines on the background in various orientations.
 
-      CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Windows
+      CONFIG_ARM_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Windows
       CONFIG_LCD_LANDSCAPE=y                  : 320x240 landscape orientation
 
     The STM32F4Discovery board does not have any graphics capability.  This
@@ -2146,7 +2146,7 @@ Configuration Sub-directories
 
          CONFIG_HOST_WINDOWS=y                   : Windows
          CONFIG_WINDOWS_CYGWIN=y                 : Cygwin
-         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Windows
+         CONFIG_ARM_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Windows
 
     2. CONFIG_ARCH_CUSTOM_PMINIT and CONFIG_ARCH_IDLE_CUSTOM are necessary
        parts of the PM configuration:
@@ -2196,7 +2196,7 @@ Configuration Sub-directories
 
        CONFIG_HOST_WINDOWS=y                   : Builds under windows
        CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin and
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y      : Generic ARM EABI toolchain for Windows
+       CONFIG_ARM_TOOLCHAIN_GNU_EABI=y      : Generic ARM EABI toolchain for Windows
 
     2. By default, this project assumes that you are *NOT* using the DFU
        bootloader.
@@ -2336,7 +2336,7 @@ Configuration Sub-directories
 
        CONFIG_HOST_WINDOWS=y                   : Builds under Windows
        CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Windows
+       CONFIG_ARM_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Windows
 
     2. This configuration does have USART2 output enabled and set up as
        the system logging device:
@@ -2415,7 +2415,7 @@ Configuration Sub-directories
 
        CONFIG_HOST_WINDOWS=y                   : Windows
        CONFIG_WINDOWS_NATIVE=y                 : Native Windows environment
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Windows
+       CONFIG_ARM_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Windows
 
       Build Tools.  The build still relies on some Unix-like commands.  I use
       the GNUWin32 tools that can be downloaded from http://gnuwin32.sourceforge.net/.

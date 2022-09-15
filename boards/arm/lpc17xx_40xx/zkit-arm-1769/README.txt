@@ -390,7 +390,7 @@ Where <subdir> is one of the following:
     2. Default toolchain:
 
        CONFIG_HOST_LINUX=y                 : Builds under Windows (or Cygwin)
-       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : NuttX buildroot toolchain
+       CONFIG_ARM_TOOLCHAIN_BUILDROOT=y : NuttX buildroot toolchain
 
   thttpd:
     This builds the THTTPD web server example using the THTTPD and
@@ -410,7 +410,7 @@ Where <subdir> is one of the following:
     2. Default toolchain:
 
        CONFIG_HOST_LINUX=y                 : Builds under Windows (or Cygwin)
-       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : NuttX buildroot toolchain
+       CONFIG_ARM_TOOLCHAIN_BUILDROOT=y : NuttX buildroot toolchain
 
     3. TCP/IP (only) networking is enabled with this configuration:
 

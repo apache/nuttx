@@ -453,7 +453,7 @@ NOTES:
 
 System Type -> Toolchain:
 
-    CONFIG_ARMV7A_TOOLCHAIN_GNU_EABI=y  : GNU EABI toolchain
+    CONFIG_ARM_TOOLCHAIN_GNU_EABI=y  : GNU EABI toolchain
 
 4. The SAMA5Dx is running at 528MHz by default in these configurations.
 
