@@ -144,7 +144,7 @@ static ssize_t iovec_do(FAR void *srcdst, size_t srcdstlen,
 
   /* Rewind to correct position. */
 
-  while (pos >= 0 && iovcnt > 0)
+  while (iovcnt > 0)
     {
       if (iov->iov_len <= pos)
         {
