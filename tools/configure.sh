@@ -24,7 +24,7 @@ TOPDIR="${WD}/.."
 MAKECMD="make"
 USAGE="
 
-USAGE: ${0} [-E] [-e] [-l|m|c|g|n|B] [L] [-a <app-dir>] <board-name>:<config-name> [make-opts]
+USAGE: ${0} [-E] [-e] [-l|m|c|g|n|B] [L] [-a <app-dir>] <board-selection> [make-opts]
 
 Where:
   -E enforces distclean if already configured.
@@ -40,8 +40,13 @@ Where:
   -L  Lists all available configurations.
   -a <app-dir> is the path to the apps/ directory, relative to the nuttx
      directory
-  <board-name> is the name of the board in the boards directory
-  configs/<config-name> is the name of the board configuration sub-directory
+  <board-selection> is either:
+    For in-tree boards: a <board-name>:<config-name> pair where <board-name> is
+    the name of the board in the boards directory and <config-name> is the name
+    of the board configuration sub-directory (e.g. boardname:nsh), or: For
+    out-of-tree custom boards: a path to the board's configuration directory,
+    either relative to TOPDIR (e.g. ../mycustomboards/myboardname/config/nsh)
+    or an absolute path.
   make-opts directly pass to make
 
 "
