@@ -75,36 +75,6 @@ config SENSORS_AK09912
 	---help---
 		Enable driver for AK09911/AK09912 Compass sensor.
 
-config SENSORS_AK09919C
-	bool "Asahi AK09919C Compass Sensor"
-	default n
-	select I2C
-	---help---
-		Enable driver for AK09919C Compass sensor.
-
-config SENSORS_AK09919C_BUFFER_NUMBER
-	int "The nunmber of circular buffer for sensor AK09919C"
-	default 1
-	depends on SENSORS_AK09919C
-	---help---
-		The number of the circular buffer used. If the value equal to zero,
-		indicates that the circular buffer is disabled.
-
-config SENSORS_CT7117
-	bool "Sensylink CT7117 Temperature Sensor"
-	default n
-	select I2C
-	---help---
-		Enable driver for CT7117 Temperature Sensor.
-
-config SENSORS_CT7117_BUFFER_NUMBER
-	int "The nunmber of circular buffer for sensor CT7117"
-	default 1
-	depends on SENSORS_CT7117
-	---help---
-		The number of the circular buffer used. If the value equal to zero,
-		indicates that the circular buffer is disabled.
-
 config SENSORS_AS5048B
 	bool "AMS AS5048B Magnetic Rotary Encoder support"
 	default n
@@ -561,20 +531,6 @@ config DEBUG_LPS25H
 		Enables debug features for the LPS25H
 
 endif # SENSORS_LPS25H
-
-config SENSORS_LPS27HHW
-	bool "STMicro LPS27HHW barometer sensor"
-	default n
-	select I2C
-	---help---
-		Enable driver support for the STMicro LPS27HHW barometer sensor.
-
-config SENSORS_ICP10125
-	bool "InvenSense ICP10125 barometer sensor"
-	default n
-	select I2C
-	---help---
-		Enable driver support for the InvenSense ICP10125 barometer sensor.
 
 config SENSORS_LTC4151
 	bool "LTC4151 current and voltage monitor"

@@ -60,16 +60,9 @@ ifeq ($(CONFIG_SENSORS_APDS9960),y)
   CSRCS += apds9960.c
 endif
 
-ifeq ($(CONFIG_SENSORS_AK09919C),y)
-  CSRCS += ak09919c.c
-endif
 
 ifeq ($(CONFIG_SENSORS_AK09912),y)
   CSRCS += ak09912.c
-endif
-
-ifeq ($(CONFIG_SENSORS_CT7117),y)
-  CSRCS += ct7117.c
 endif
 
 ifeq ($(CONFIG_SENSORS_AS5048B),y)
@@ -118,14 +111,6 @@ endif
 
 ifeq ($(CONFIG_SENSORS_LPS25H),y)
   CSRCS += lps25h.c
-endif
-
-ifeq ($(CONFIG_SENSORS_LPS27HHW),y)
-  CSRCS += lps27hhw.c
-endif
-
-ifeq ($(CONFIG_SENSORS_ICP10125),y)
-  CSRCS += icp10125.c
 endif
 
 ifeq ($(CONFIG_ADXL345_I2C),y)
