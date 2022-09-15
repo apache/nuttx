@@ -55,6 +55,10 @@ ifeq ($(CONFIG_ESP32_TWAI),y)
 CSRCS += esp32_twai.c
 endif
 
+ifeq ($(CONFIG_NET_W5500),y)
+CSRCS += esp32_w5500.c
+endif
+
 SCRIPTOUT = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_out.ld
 
 .PHONY = context distclean
