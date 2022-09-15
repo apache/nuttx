@@ -84,6 +84,38 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_CLANG),y)
     endif
   endif
 
+else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
+
+  ifeq ($(CONFIG_ARCH_CORTEXM23),y)
+    LDFLAGS += --cpu=Cortex-M23
+  else ifeq ($(CONFIG_ARCH_CORTEXM33),y)
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      LDFLAGS += --cpu=Cortex-M33
+    else
+      LDFLAGS += --cpu=Cortex-M33.no_fp
+    endif
+  else ifeq ($(CONFIG_ARCH_CORTEXM35P),y)
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      LDFLAGS += --cpu=Cortex-M35P
+    else
+      LDFLAGS += --cpu=Cortex-M35P.no_fp
+    endif
+  else ifeq ($(CONFIG_ARCH_CORTEXM55),y)
+    ifeq ($(CONFIG_ARM_HAVE_MVE),y)
+      ifeq ($(CONFIG_ARCH_FPU),y)
+        LDFLAGS += --cpu=Cortex-M55
+      else
+        LDFLAGS += --cpu=Cortex-M55.no_fp
+      endif
+    else
+      ifeq ($(CONFIG_ARCH_FPU),y)
+        LDFLAGS += --cpu=Cortex-M55.no_mve
+      else
+        LDFLAGS += --cpu=Cortex-M55.no_mve.no_fp
+      endif
+    endif
+  endif
+
 endif
 
 ifeq ($(CONFIG_ARMV8M_STACKCHECK),y)

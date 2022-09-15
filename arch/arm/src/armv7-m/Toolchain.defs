@@ -75,6 +75,28 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_CLANG),y)
       TOOLCHAIN_MARCH += --config armv7m_soft_nofp_nosys
   endif
 
+else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
+
+  ifeq ($(CONFIG_ARCH_CORTEXM4),y)
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      LDFLAGS += --cpu=Cortex-M4
+    else
+      LDFLAGS += --cpu=Cortex-M4.no_fp
+    endif
+  else ifeq ($(CONFIG_ARCH_CORTEXM7),y)
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      ifeq ($(CONFIG_ARCH_DPFPU),y)
+        LDFLAGS += --cpu=Cortex-M7
+      else
+        LDFLAGS += --cpu=Cortex-M7.fp.sp
+      endif
+    else
+      LDFLAGS += --cpu=Cortex-M7.no_fp
+    endif
+  else # ifeq ($(CONFIG_ARCH_CORTEXM3),y)
+    LDFLAGS += --cpu=Cortex-M3
+  endif
+
 endif
 
 ifeq ($(CONFIG_ARMV7M_STACKCHECK),y)
