@@ -46,7 +46,7 @@ case ${os} in
     brew update --quiet
     ;;
   Linux)
-    install="python-tools gen-romfs gperf kconfig-frontends rust arm-gcc-toolchain arm64-gcc-toolchain mips-gcc-toolchain riscv-gcc-toolchain xtensa-esp32-gcc-toolchain rx-gcc-toolchain sparc-gcc-toolchain c-cache"
+    install="python-tools codechecker clang_clang-tidy gen-romfs gperf kconfig-frontends rust arm-gcc-toolchain arm64-gcc-toolchain mips-gcc-toolchain riscv-gcc-toolchain xtensa-esp32-gcc-toolchain rx-gcc-toolchain sparc-gcc-toolchain c-cache"
     ;;
 esac
 
@@ -68,6 +68,18 @@ function python-tools {
   if ! command -v imgtool &> /dev/null; then
     pip3 install imgtool
   fi
+}
+
+function codechecker {
+  pip3 install CodeChecker
+}
+
+function clang_clang-tidy {
+  # Install Clang and Clang-Tidy for Ubuntu.
+  apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -qq \
+    -o APT::Immediate-Configure=0 \
+    clang \
+    clang-tidy
 }
 
 function u-boot-tools {
