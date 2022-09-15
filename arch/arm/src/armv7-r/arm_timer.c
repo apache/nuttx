@@ -30,6 +30,7 @@
 #include "arm_timer.h"
 #include "barriers.h"
 #include "gic.h"
+#include "cp15.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -88,108 +89,43 @@ static const struct oneshot_operations_s g_arm_timer_ops =
 
 static inline uint32_t arm_timer_get_freq(void)
 {
-  uint32_t freq;
-
   ARM_ISB();
-
-  __asm__ __volatile__
-  (
-    "\tmrc   p15, 0, %0, c14, c0, 0\n"  /* Read CNTFRQ */
-    : "=r"(freq)
-    :
-    :
-  );
-
-  return freq;
+  return CP15_GET(CNTFRQ);
 }
 
 static inline void arm_timer_set_freq(uint32_t freq)
 {
-  __asm__ __volatile__
-  (
-    "\tmcr   p15, 0, %0, c14, c0, 0\n"  /* Write CNTFRQ */
-    :
-    : "r"(freq)
-    :
-  );
-
+  CP15_SET(CNTFRQ, freq);
   ARM_ISB();
 }
 
 static inline uint64_t arm_timer_get_count(void)
 {
-  uint64_t count;
-
   ARM_ISB();
-
-  __asm__ __volatile__
-  (
-    "\tmrrc   p15, 0, %Q0, %R0, c14\n"  /* Read CNTPCT */
-    : "=r"(count)
-    :
-    :
-  );
-
-  return count;
+  return CP15_GET64(CNTPCT);
 }
 
 static inline uint32_t arm_timer_get_ctrl(void)
 {
-  uint32_t ctrl;
-
   ARM_ISB();
-
-  __asm__ __volatile__
-  (
-    "\tmrc   p15, 0, %0, c14, c2, 1\n"  /* Read CNTP_CTL */
-    : "=r"(ctrl)
-    :
-    :
-  );
-
-  return ctrl;
+  return CP15_GET(CNTP_CTL);
 }
 
 static inline void arm_timer_set_ctrl(uint32_t ctrl)
 {
-  __asm__ __volatile__
-  (
-    "\tmcr   p15, 0, %0, c14, c2, 1\n"  /* Write CNTP_CTL */
-    :
-    : "r"(ctrl)
-    :
-  );
-
+  CP15_SET(CNTP_CTL, ctrl);
   ARM_ISB();
 }
 
 static inline uint32_t arm_timer_get_tval(void)
 {
-  uint32_t tval;
-
   ARM_ISB();
-
-  __asm__ __volatile__
-  (
-    "\tmrc   p15, 0, %0, c14, c2, 0\n"  /* Read CNTP_TVAL */
-    : "=r"(tval)
-    :
-    :
-  );
-
-  return tval;
+  return CP15_GET(CNTP_TVAL);
 }
 
 static inline void arm_timer_set_tval(uint32_t tval)
 {
-  __asm__ __volatile__
-  (
-    "\tmcr   p15, 0, %0, c14, c2, 0\n"  /* Write CNTP_TVAL */
-    :
-    : "r"(tval)
-    :
-  );
-
+  CP15_SET(CNTP_TVAL, tval);
   ARM_ISB();
 }
 
