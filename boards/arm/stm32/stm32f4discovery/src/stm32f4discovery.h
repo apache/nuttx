@@ -592,7 +592,7 @@ int stm32_pwm_setup(void);
  ****************************************************************************/
 
 #ifdef CONFIG_CAPTURE
-int stm32_capture_setup(FAR const char *devpath);
+int stm32_capture_setup(const char *devpath);
 #endif
 
 /****************************************************************************

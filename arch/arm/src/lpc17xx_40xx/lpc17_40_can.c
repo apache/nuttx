@@ -246,7 +246,7 @@ struct lpc17_40_can_s
 
   struct net_driver_s dev;      /* Interface understood by the network */
 
-  FAR void *cd_priv;            /* Used by the arch-specific logic */
+  void *cd_priv;                /* Used by the arch-specific logic */
 
 #ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
   struct txmbstats txmb[TXMBCOUNT];
@@ -308,9 +308,9 @@ static int  lpc17can_ifup(struct net_driver_s *dev);
 static int  lpc17can_ifdown(struct net_driver_s *dev);
 static int  lpc17can_txavail(struct net_driver_s *dev);
 
-static bool lpc17can_txringfull(FAR struct lpc17_40_can_s *dev);
+static bool lpc17can_txringfull(struct lpc17_40_can_s *dev);
 static int lpc17can_txpoll(struct net_driver_s *dev);
-static int lpc17can_transmit(FAR struct lpc17_40_can_s *dev);
+static int lpc17can_transmit(struct lpc17_40_can_s *dev);
 #endif
 
 /****************************************************************************
@@ -1013,7 +1013,7 @@ static int lpc17can_send(struct lpc17_40_can_s *dev,
  *
  ****************************************************************************/
 
-static inline bool lpc17can_txringfull(FAR struct lpc17_40_can_s *dev)
+static inline bool lpc17can_txringfull(struct lpc17_40_can_s *dev)
 {
   return !lpc17can_txready(dev);
 }
@@ -1040,8 +1040,8 @@ static inline bool lpc17can_txringfull(FAR struct lpc17_40_can_s *dev)
 
 static int lpc17can_txpoll(struct net_driver_s *dev)
 {
-  FAR struct lpc17_40_can_s *priv =
-    (FAR struct lpc17_40_can_s *)dev->d_private;
+  struct lpc17_40_can_s *priv =
+    (struct lpc17_40_can_s *)dev->d_private;
 
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
@@ -1093,9 +1093,9 @@ static int lpc17can_txpoll(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static int lpc17can_transmit(FAR struct lpc17_40_can_s *dev)
+static int lpc17can_transmit(struct lpc17_40_can_s *dev)
 {
-  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->cd_priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->cd_priv;
   struct can_frame *frame = (struct can_frame *)dev->dev.d_buf;
   uint32_t tid = (uint32_t)frame->can_id;
   uint32_t tfi = (uint32_t)frame->can_dlc << 16;
@@ -1679,8 +1679,8 @@ static int can_bittiming(struct up_dev_s *priv)
 
 static int lpc17can_txavail(struct net_driver_s *dev)
 {
-  FAR struct lpc17_40_can_s *priv =
-    (FAR struct lpc17_40_can_s *)dev->d_private;
+  struct lpc17_40_can_s *priv =
+    (struct lpc17_40_can_s *)dev->d_private;
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -1725,8 +1725,8 @@ static int lpc17can_txavail(struct net_driver_s *dev)
 
 static int lpc17can_ifup(struct net_driver_s *dev)
 {
-  FAR struct lpc17_40_can_s *priv =
-    (FAR struct lpc17_40_can_s *)dev->d_private;
+  struct lpc17_40_can_s *priv =
+    (struct lpc17_40_can_s *)dev->d_private;
 
   priv->bifup = true;
 
@@ -1760,8 +1760,8 @@ static int lpc17can_ifup(struct net_driver_s *dev)
 
 static int lpc17can_ifdown(struct net_driver_s *dev)
 {
-  FAR struct lpc17_40_can_s *priv =
-    (FAR struct lpc17_40_can_s *)dev->d_private;
+  struct lpc17_40_can_s *priv =
+    (struct lpc17_40_can_s *)dev->d_private;
 
   lpc17can_reset(priv);
 

@@ -84,7 +84,7 @@
  *
  ****************************************************************************/
 
-int stm32_capture_setup(FAR const char *devpath)
+int stm32_capture_setup(const char *devpath)
 {
 #ifdef HAVE_CAPTURE
   struct cap_lowerhalf_s *capture;

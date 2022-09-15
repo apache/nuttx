@@ -139,30 +139,30 @@ struct stm32wl5_tim_ops_s
 {
   /* Basic Timers */
 
-  int  (*setmode)(FAR struct stm32wl5_tim_dev_s *dev,
+  int  (*setmode)(struct stm32wl5_tim_dev_s *dev,
                   enum stm32wl5_tim_mode_e mode);
-  int  (*setclock)(FAR struct stm32wl5_tim_dev_s *dev, uint32_t freq);
-  uint32_t (*getclock)(FAR struct stm32wl5_tim_dev_s *dev);
-  void (*setperiod)(FAR struct stm32wl5_tim_dev_s *dev, uint32_t period);
-  uint32_t (*getperiod)(FAR struct stm32wl5_tim_dev_s *dev);
-  uint32_t (*getcounter)(FAR struct stm32wl5_tim_dev_s *dev);
+  int  (*setclock)(struct stm32wl5_tim_dev_s *dev, uint32_t freq);
+  uint32_t (*getclock)(struct stm32wl5_tim_dev_s *dev);
+  void (*setperiod)(struct stm32wl5_tim_dev_s *dev, uint32_t period);
+  uint32_t (*getperiod)(struct stm32wl5_tim_dev_s *dev);
+  uint32_t (*getcounter)(struct stm32wl5_tim_dev_s *dev);
 
   /* General and Advanced Timers Adds */
 
-  int  (*setchannel)(FAR struct stm32wl5_tim_dev_s *dev, uint8_t channel,
+  int  (*setchannel)(struct stm32wl5_tim_dev_s *dev, uint8_t channel,
                      enum stm32wl5_tim_channel_e mode);
-  int  (*setcompare)(FAR struct stm32wl5_tim_dev_s *dev, uint8_t channel,
+  int  (*setcompare)(struct stm32wl5_tim_dev_s *dev, uint8_t channel,
                      uint32_t compare);
-  int  (*getcapture)(FAR struct stm32wl5_tim_dev_s *dev, uint8_t channel);
+  int  (*getcapture)(struct stm32wl5_tim_dev_s *dev, uint8_t channel);
 
   /* Timer interrupts */
 
-  int  (*setisr)(FAR struct stm32wl5_tim_dev_s *dev,
+  int  (*setisr)(struct stm32wl5_tim_dev_s *dev,
                  xcpt_t handler, void *arg, int source);
-  void (*enableint)(FAR struct stm32wl5_tim_dev_s *dev, int source);
-  void (*disableint)(FAR struct stm32wl5_tim_dev_s *dev, int source);
-  void (*ackint)(FAR struct stm32wl5_tim_dev_s *dev, int source);
-  int  (*checkint)(FAR struct stm32wl5_tim_dev_s *dev, int source);
+  void (*enableint)(struct stm32wl5_tim_dev_s *dev, int source);
+  void (*disableint)(struct stm32wl5_tim_dev_s *dev, int source);
+  void (*ackint)(struct stm32wl5_tim_dev_s *dev, int source);
+  int  (*checkint)(struct stm32wl5_tim_dev_s *dev, int source);
 };
 
 /****************************************************************************
@@ -171,11 +171,11 @@ struct stm32wl5_tim_ops_s
 
 /* Power-up timer and get its structure */
 
-FAR struct stm32wl5_tim_dev_s *stm32wl5_tim_init(int timer);
+struct stm32wl5_tim_dev_s *stm32wl5_tim_init(int timer);
 
 /* Power-down timer, mark it as unused */
 
-int stm32wl5_tim_deinit(FAR struct stm32wl5_tim_dev_s *dev);
+int stm32wl5_tim_deinit(struct stm32wl5_tim_dev_s *dev);
 
 /****************************************************************************
  * Name: stm32wl5_timer_initialize
@@ -196,7 +196,7 @@ int stm32wl5_tim_deinit(FAR struct stm32wl5_tim_dev_s *dev);
  ****************************************************************************/
 
 #ifdef CONFIG_TIMER
-int stm32wl5_timer_initialize(FAR const char *devpath, int timer);
+int stm32wl5_timer_initialize(const char *devpath, int timer);
 #endif
 
 #undef EXTERN
