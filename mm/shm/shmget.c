@@ -151,7 +151,7 @@ static int shm_reserve(key_t key, int shmflg)
 
 static int shm_extend(int shmid, size_t size)
 {
-  FAR struct shm_region_s *region =  &g_shminfo.si_region[shmid];
+  FAR struct shm_region_s *region = &g_shminfo.si_region[shmid];
   unsigned int pgalloc;
   unsigned int pgneeded;
 
