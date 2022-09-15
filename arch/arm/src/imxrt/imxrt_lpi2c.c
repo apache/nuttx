@@ -263,7 +263,7 @@ static inline void imxrt_lpi2c_sendstop(struct imxrt_lpi2c_priv_s *priv);
 static inline uint32_t
 imxrt_lpi2c_getstatus(struct imxrt_lpi2c_priv_s *priv);
 
-static int imxrt_lpi2c_isr_process(struct imxrt_lpi2c_priv_s * priv);
+static int imxrt_lpi2c_isr_process(struct imxrt_lpi2c_priv_s *priv);
 
 #ifndef CONFIG_I2C_POLLED
 static int imxrt_lpi2c_isr(int irq, void *context, void *arg);
@@ -1251,7 +1251,7 @@ imxrt_lpi2c_getstatus(struct imxrt_lpi2c_priv_s *priv)
  ****************************************************************************/
 
 static inline uint32_t
-imxrt_lpi2c_getenabledints(FAR struct imxrt_lpi2c_priv_s *priv)
+imxrt_lpi2c_getenabledints(struct imxrt_lpi2c_priv_s *priv)
 {
   return imxrt_lpi2c_getreg(priv, IMXRT_LPI2C_MIER_OFFSET);
 }
@@ -1743,8 +1743,7 @@ static int imxrt_lpi2c_deinit(struct imxrt_lpi2c_priv_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_IMXRT_LPI2C_DMA
-static int imxrt_lpi2c_dma_configure_mder(FAR struct imxrt_lpi2c_priv_s *
-                                          priv)
+static int imxrt_lpi2c_dma_configure_mder(struct imxrt_lpi2c_priv_s *priv)
 {
   struct imxrt_edma_xfrconfig_s config;
   memset(&config, 0, sizeof(config));
@@ -1775,9 +1774,8 @@ static int imxrt_lpi2c_dma_configure_mder(FAR struct imxrt_lpi2c_priv_s *
  ****************************************************************************/
 
 #ifdef CONFIG_IMXRT_LPI2C_DMA
-static int imxrt_lpi2c_dma_command_configure(FAR struct imxrt_lpi2c_priv_s
-                                              *priv, uint16_t *ccmd,
-                                              uint32_t ncmd)
+static int imxrt_lpi2c_dma_command_configure(struct imxrt_lpi2c_priv_s *priv,
+                                             uint16_t *ccmd, uint32_t ncmd)
 {
   struct imxrt_edma_xfrconfig_s config;
   memset(&config, 0, sizeof(config));
@@ -1808,9 +1806,8 @@ static int imxrt_lpi2c_dma_command_configure(FAR struct imxrt_lpi2c_priv_s
  ****************************************************************************/
 
 #ifdef CONFIG_IMXRT_LPI2C_DMA
-static int imxrt_lpi2c_dma_data_configure(FAR struct imxrt_lpi2c_priv_s
-                                              *priv,
-                                              struct i2c_msg_s *msg)
+static int imxrt_lpi2c_dma_data_configure(struct imxrt_lpi2c_priv_s *priv,
+                                          struct i2c_msg_s *msg)
 {
   struct imxrt_edma_xfrconfig_s config;
   memset(&config, 0, sizeof(config));
@@ -1853,9 +1850,8 @@ static int imxrt_lpi2c_dma_data_configure(FAR struct imxrt_lpi2c_priv_s
  ****************************************************************************/
 
 #ifdef CONFIG_IMXRT_LPI2C_DMA
-static int imxrt_lpi2c_form_command_list(FAR struct imxrt_lpi2c_priv_s
-                                              *priv, struct i2c_msg_s *msg,
-                                              int ncmds)
+static int imxrt_lpi2c_form_command_list(struct imxrt_lpi2c_priv_s *priv,
+                                         struct i2c_msg_s *msg, int ncmds)
 {
   ssize_t length = 0;
 
@@ -1914,7 +1910,7 @@ static int imxrt_lpi2c_form_command_list(FAR struct imxrt_lpi2c_priv_s
  ****************************************************************************/
 
 #ifdef CONFIG_IMXRT_LPI2C_DMA
-static int imxrt_lpi2c_dma_transfer(FAR struct imxrt_lpi2c_priv_s *priv)
+static int imxrt_lpi2c_dma_transfer(struct imxrt_lpi2c_priv_s *priv)
 {
   int m;
   int ntotcmds = 0;

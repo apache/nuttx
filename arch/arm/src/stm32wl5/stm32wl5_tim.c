@@ -210,7 +210,7 @@
 
 struct stm32wl5_tim_priv_s
 {
-  FAR const struct stm32wl5_tim_ops_s *ops;
+  const struct stm32wl5_tim_ops_s *ops;
   enum stm32wl5_tim_mode_e mode;
   uint32_t base;                      /* TIMn base address */
 };
@@ -221,61 +221,61 @@ struct stm32wl5_tim_priv_s
 
 /* Register helpers */
 
-static inline uint16_t stm32wl5_getreg16(FAR struct stm32wl5_tim_dev_s *dev,
-                                        uint8_t offset);
-static inline void stm32wl5_putreg16(FAR struct stm32wl5_tim_dev_s *dev,
-                                    uint8_t offset, uint16_t value);
-static inline void stm32wl5_modifyreg16(FAR struct stm32wl5_tim_dev_s *dev,
-                                       uint8_t offset, uint16_t clearbits,
-                                       uint16_t setbits);
-static inline uint32_t stm32wl5_getreg32(FAR struct stm32wl5_tim_dev_s *dev,
-                                        uint8_t offset);
-static inline void stm32wl5_putreg32(FAR struct stm32wl5_tim_dev_s *dev,
-                                    uint8_t offset, uint32_t value);
+static inline uint16_t stm32wl5_getreg16(struct stm32wl5_tim_dev_s *dev,
+                                         uint8_t offset);
+static inline void stm32wl5_putreg16(struct stm32wl5_tim_dev_s *dev,
+                                     uint8_t offset, uint16_t value);
+static inline void stm32wl5_modifyreg16(struct stm32wl5_tim_dev_s *dev,
+                                        uint8_t offset, uint16_t clearbits,
+                                        uint16_t setbits);
+static inline uint32_t stm32wl5_getreg32(struct stm32wl5_tim_dev_s *dev,
+                                         uint8_t offset);
+static inline void stm32wl5_putreg32(struct stm32wl5_tim_dev_s *dev,
+                                     uint8_t offset, uint32_t value);
 
 /* Timer helpers */
 
-static void stm32wl5_tim_reload_counter(FAR struct stm32wl5_tim_dev_s *dev);
-static void stm32wl5_tim_enable(FAR struct stm32wl5_tim_dev_s *dev);
-static void stm32wl5_tim_disable(FAR struct stm32wl5_tim_dev_s *dev);
-static void stm32wl5_tim_reset(FAR struct stm32wl5_tim_dev_s *dev);
+static void stm32wl5_tim_reload_counter(struct stm32wl5_tim_dev_s *dev);
+static void stm32wl5_tim_enable(struct stm32wl5_tim_dev_s *dev);
+static void stm32wl5_tim_disable(struct stm32wl5_tim_dev_s *dev);
+static void stm32wl5_tim_reset(struct stm32wl5_tim_dev_s *dev);
 #if defined(HAVE_TIM1_GPIOCONFIG) || defined(HAVE_TIM2_GPIOCONFIG) || \
     defined(HAVE_TIM3_GPIOCONFIG) || defined(HAVE_TIM4_GPIOCONFIG) || \
     defined(HAVE_TIM5_GPIOCONFIG) || defined(HAVE_TIM8_GPIOCONFIG) || \
     defined(HAVE_TIM15_GPIOCONFIG) || defined(HAVE_TIM16_GPIOCONFIG) || \
     defined(HAVE_TIM17_GPIOCONFIG)
 static void stm32wl5_tim_gpioconfig(uint32_t cfg,
-                                   enum stm32wl5_tim_channel_e mode);
+                                    enum stm32wl5_tim_channel_e mode);
 #endif
 
 /* Timer methods */
 
-static int stm32wl5_tim_setmode(FAR struct stm32wl5_tim_dev_s *dev,
-                               enum stm32wl5_tim_mode_e mode);
-static int stm32wl5_tim_setclock(FAR struct stm32wl5_tim_dev_s *dev,
-                                uint32_t freq);
-static uint32_t  stm32wl5_tim_getclock(FAR struct stm32wl5_tim_dev_s *dev);
-static void stm32wl5_tim_setperiod(FAR struct stm32wl5_tim_dev_s *dev,
-                                  uint32_t period);
-static uint32_t stm32wl5_tim_getperiod(FAR struct stm32wl5_tim_dev_s *dev);
-static uint32_t stm32wl5_tim_getcounter(FAR struct stm32wl5_tim_dev_s *dev);
-static int stm32wl5_tim_setchannel(FAR struct stm32wl5_tim_dev_s *dev,
-                                  uint8_t channel,
-                                  enum stm32wl5_tim_channel_e mode);
-static int stm32wl5_tim_setcompare(FAR struct stm32wl5_tim_dev_s *dev,
-                                  uint8_t channel, uint32_t compare);
-static int stm32wl5_tim_getcapture(FAR struct stm32wl5_tim_dev_s *dev,
-                                  uint8_t channel);
-static int stm32wl5_tim_setisr(FAR struct stm32wl5_tim_dev_s *dev,
-                              xcpt_t handler, void *arg, int source);
-static void stm32wl5_tim_enableint(FAR struct stm32wl5_tim_dev_s *dev,
-                                  int source);
-static void stm32wl5_tim_disableint(FAR struct stm32wl5_tim_dev_s *dev,
+static int stm32wl5_tim_setmode(struct stm32wl5_tim_dev_s *dev,
+                                enum stm32wl5_tim_mode_e mode);
+static int stm32wl5_tim_setclock(struct stm32wl5_tim_dev_s *dev,
+                                 uint32_t freq);
+static uint32_t  stm32wl5_tim_getclock(struct stm32wl5_tim_dev_s *dev);
+static void stm32wl5_tim_setperiod(struct stm32wl5_tim_dev_s *dev,
+                                   uint32_t period);
+static uint32_t stm32wl5_tim_getperiod(struct stm32wl5_tim_dev_s *dev);
+static uint32_t stm32wl5_tim_getcounter(struct stm32wl5_tim_dev_s *dev);
+static int stm32wl5_tim_setchannel(struct stm32wl5_tim_dev_s *dev,
+                                   uint8_t channel,
+                                   enum stm32wl5_tim_channel_e mode);
+static int stm32wl5_tim_setcompare(struct stm32wl5_tim_dev_s *dev,
+                                   uint8_t channel, uint32_t compare);
+static int stm32wl5_tim_getcapture(struct stm32wl5_tim_dev_s *dev,
+                                   uint8_t channel);
+static int stm32wl5_tim_setisr(struct stm32wl5_tim_dev_s *dev,
+                               xcpt_t handler, void *arg, int source);
+static void stm32wl5_tim_enableint(struct stm32wl5_tim_dev_s *dev,
                                    int source);
-static void stm32wl5_tim_ackint(FAR struct stm32wl5_tim_dev_s *dev,
-                               int source);
-static int stm32wl5_tim_checkint(FAR struct stm32wl5_tim_dev_s *dev,
+static void stm32wl5_tim_disableint(struct stm32wl5_tim_dev_s *dev,
+                                    int source);
+static void stm32wl5_tim_ackint(struct stm32wl5_tim_dev_s *dev,
                                 int source);
+static int stm32wl5_tim_checkint(struct stm32wl5_tim_dev_s *dev,
+                                 int source);
 
 /****************************************************************************
  * Private Data
@@ -409,8 +409,8 @@ struct stm32wl5_tim_priv_s stm32wl5_tim17_priv =
  *
  ****************************************************************************/
 
-static inline uint16_t stm32wl5_getreg16(FAR struct stm32wl5_tim_dev_s *dev,
-                                        uint8_t offset)
+static inline uint16_t stm32wl5_getreg16(struct stm32wl5_tim_dev_s *dev,
+                                         uint8_t offset)
 {
   return getreg16(((struct stm32wl5_tim_priv_s *)dev)->base + offset);
 }
@@ -423,8 +423,8 @@ static inline uint16_t stm32wl5_getreg16(FAR struct stm32wl5_tim_dev_s *dev,
  *
  ****************************************************************************/
 
-static inline void stm32wl5_putreg16(FAR struct stm32wl5_tim_dev_s *dev,
-                                    uint8_t offset, uint16_t value)
+static inline void stm32wl5_putreg16(struct stm32wl5_tim_dev_s *dev,
+                                     uint8_t offset, uint16_t value)
 {
   putreg16(value, ((struct stm32wl5_tim_priv_s *)dev)->base + offset);
 }
@@ -437,9 +437,9 @@ static inline void stm32wl5_putreg16(FAR struct stm32wl5_tim_dev_s *dev,
  *
  ****************************************************************************/
 
-static inline void stm32wl5_modifyreg16(FAR struct stm32wl5_tim_dev_s *dev,
-                                       uint8_t offset, uint16_t clearbits,
-                                       uint16_t setbits)
+static inline void stm32wl5_modifyreg16(struct stm32wl5_tim_dev_s *dev,
+                                        uint8_t offset, uint16_t clearbits,
+                                        uint16_t setbits)
 {
   modifyreg16(((struct stm32wl5_tim_priv_s *)dev)->base + offset, clearbits,
               setbits);
@@ -454,8 +454,8 @@ static inline void stm32wl5_modifyreg16(FAR struct stm32wl5_tim_dev_s *dev,
  *
  ****************************************************************************/
 
-static inline uint32_t stm32wl5_getreg32(FAR struct stm32wl5_tim_dev_s *dev,
-                                        uint8_t offset)
+static inline uint32_t stm32wl5_getreg32(struct stm32wl5_tim_dev_s *dev,
+                                         uint8_t offset)
 {
   return getreg32(((struct stm32wl5_tim_priv_s *)dev)->base + offset);
 }
@@ -469,7 +469,7 @@ static inline uint32_t stm32wl5_getreg32(FAR struct stm32wl5_tim_dev_s *dev,
  *
  ****************************************************************************/
 
-static inline void stm32wl5_putreg32(FAR struct stm32wl5_tim_dev_s *dev,
+static inline void stm32wl5_putreg32(struct stm32wl5_tim_dev_s *dev,
                                     uint8_t offset, uint32_t value)
 {
   putreg32(value, ((struct stm32wl5_tim_priv_s *)dev)->base + offset);
@@ -479,7 +479,7 @@ static inline void stm32wl5_putreg32(FAR struct stm32wl5_tim_dev_s *dev,
  * Name: stm32wl5_tim_reload_counter
  ****************************************************************************/
 
-static void stm32wl5_tim_reload_counter(FAR struct stm32wl5_tim_dev_s *dev)
+static void stm32wl5_tim_reload_counter(struct stm32wl5_tim_dev_s *dev)
 {
   uint16_t val = stm32wl5_getreg16(dev, STM32WL5_GTIM_EGR_OFFSET);
   val |= GTIM_EGR_UG;
@@ -490,7 +490,7 @@ static void stm32wl5_tim_reload_counter(FAR struct stm32wl5_tim_dev_s *dev)
  * Name: stm32wl5_tim_enable
  ****************************************************************************/
 
-static void stm32wl5_tim_enable(FAR struct stm32wl5_tim_dev_s *dev)
+static void stm32wl5_tim_enable(struct stm32wl5_tim_dev_s *dev)
 {
   uint16_t val = stm32wl5_getreg16(dev, STM32WL5_GTIM_CR1_OFFSET);
   val |= GTIM_CR1_CEN;
@@ -502,7 +502,7 @@ static void stm32wl5_tim_enable(FAR struct stm32wl5_tim_dev_s *dev)
  * Name: stm32wl5_tim_disable
  ****************************************************************************/
 
-static void stm32wl5_tim_disable(FAR struct stm32wl5_tim_dev_s *dev)
+static void stm32wl5_tim_disable(struct stm32wl5_tim_dev_s *dev)
 {
   uint16_t val = stm32wl5_getreg16(dev, STM32WL5_GTIM_CR1_OFFSET);
   val &= ~GTIM_CR1_CEN;
@@ -518,7 +518,7 @@ static void stm32wl5_tim_disable(FAR struct stm32wl5_tim_dev_s *dev)
  *
  ****************************************************************************/
 
-static void stm32wl5_tim_reset(FAR struct stm32wl5_tim_dev_s *dev)
+static void stm32wl5_tim_reset(struct stm32wl5_tim_dev_s *dev)
 {
   ((struct stm32wl5_tim_priv_s *)dev)->mode = STM32WL5_TIM_MODE_DISABLED;
   stm32wl5_tim_disable(dev);
@@ -553,8 +553,8 @@ static void stm32wl5_tim_gpioconfig(uint32_t cfg,
  * Name: stm32wl5_tim_setmode
  ****************************************************************************/
 
-static int stm32wl5_tim_setmode(FAR struct stm32wl5_tim_dev_s *dev,
-                               enum stm32wl5_tim_mode_e mode)
+static int stm32wl5_tim_setmode(struct stm32wl5_tim_dev_s *dev,
+                                enum stm32wl5_tim_mode_e mode)
 {
   uint16_t val = GTIM_CR1_CEN | GTIM_CR1_ARPE;
 
@@ -629,8 +629,8 @@ static int stm32wl5_tim_setmode(FAR struct stm32wl5_tim_dev_s *dev,
  * Name: stm32wl5_tim_setclock
  ****************************************************************************/
 
-static int stm32wl5_tim_setclock(FAR struct stm32wl5_tim_dev_s *dev,
-                                uint32_t freq)
+static int stm32wl5_tim_setclock(struct stm32wl5_tim_dev_s *dev,
+                                 uint32_t freq)
 {
   uint32_t freqin;
   int prescaler;
@@ -754,7 +754,7 @@ static int stm32wl5_tim_setclock(FAR struct stm32wl5_tim_dev_s *dev,
  * Name: stm32wl5_tim_getclock
  ****************************************************************************/
 
-static uint32_t stm32wl5_tim_getclock(FAR struct stm32wl5_tim_dev_s *dev)
+static uint32_t stm32wl5_tim_getclock(struct stm32wl5_tim_dev_s *dev)
 {
   uint32_t freqin;
   uint32_t clock;
@@ -844,8 +844,8 @@ static uint32_t stm32wl5_tim_getclock(FAR struct stm32wl5_tim_dev_s *dev)
  * Name: stm32wl5_tim_setperiod
  ****************************************************************************/
 
-static void stm32wl5_tim_setperiod(FAR struct stm32wl5_tim_dev_s *dev,
-                                uint32_t period)
+static void stm32wl5_tim_setperiod(struct stm32wl5_tim_dev_s *dev,
+                                   uint32_t period)
 {
   DEBUGASSERT(dev != NULL);
   stm32wl5_putreg32(dev, STM32WL5_GTIM_ARR_OFFSET, period);
@@ -855,7 +855,7 @@ static void stm32wl5_tim_setperiod(FAR struct stm32wl5_tim_dev_s *dev,
  * Name: stm32wl5_tim_getperiod
  ****************************************************************************/
 
-static uint32_t stm32wl5_tim_getperiod (FAR struct stm32wl5_tim_dev_s *dev)
+static uint32_t stm32wl5_tim_getperiod (struct stm32wl5_tim_dev_s *dev)
 {
   DEBUGASSERT(dev != NULL);
   return stm32wl5_getreg32 (dev, STM32WL5_GTIM_ARR_OFFSET);
@@ -865,7 +865,7 @@ static uint32_t stm32wl5_tim_getperiod (FAR struct stm32wl5_tim_dev_s *dev)
  * Name: stm32wl5_tim_getcounter
  ****************************************************************************/
 
-static uint32_t stm32wl5_tim_getcounter(FAR struct stm32wl5_tim_dev_s *dev)
+static uint32_t stm32wl5_tim_getcounter(struct stm32wl5_tim_dev_s *dev)
 {
   DEBUGASSERT(dev != NULL);
   uint32_t counter = stm32wl5_getreg32(dev, STM32WL5_GTIM_CNT_OFFSET);
@@ -897,9 +897,9 @@ static uint32_t stm32wl5_tim_getcounter(FAR struct stm32wl5_tim_dev_s *dev)
  * Name: stm32wl5_tim_setchannel
  ****************************************************************************/
 
-static int stm32wl5_tim_setchannel(FAR struct stm32wl5_tim_dev_s *dev,
-                                  uint8_t channel,
-                                  enum stm32wl5_tim_channel_e mode)
+static int stm32wl5_tim_setchannel(struct stm32wl5_tim_dev_s *dev,
+                                   uint8_t channel,
+                                   enum stm32wl5_tim_channel_e mode)
 {
   uint16_t ccmr_orig   = 0;
   uint16_t ccmr_val    = 0;
@@ -1294,8 +1294,8 @@ static int stm32wl5_tim_setchannel(FAR struct stm32wl5_tim_dev_s *dev,
  * Name: stm32wl5_tim_setcompare
  ****************************************************************************/
 
-static int stm32wl5_tim_setcompare(FAR struct stm32wl5_tim_dev_s *dev,
-                                  uint8_t channel, uint32_t compare)
+static int stm32wl5_tim_setcompare(struct stm32wl5_tim_dev_s *dev,
+                                   uint8_t channel, uint32_t compare)
 {
   DEBUGASSERT(dev != NULL);
 
@@ -1328,8 +1328,8 @@ static int stm32wl5_tim_setcompare(FAR struct stm32wl5_tim_dev_s *dev,
  * Name: stm32wl5_tim_getcapture
  ****************************************************************************/
 
-static int stm32wl5_tim_getcapture(FAR struct stm32wl5_tim_dev_s *dev,
-                                  uint8_t channel)
+static int stm32wl5_tim_getcapture(struct stm32wl5_tim_dev_s *dev,
+                                   uint8_t channel)
 {
   DEBUGASSERT(dev != NULL);
 
@@ -1355,8 +1355,8 @@ static int stm32wl5_tim_getcapture(FAR struct stm32wl5_tim_dev_s *dev,
  * Name: stm32wl5_tim_setisr
  ****************************************************************************/
 
-static int stm32wl5_tim_setisr(FAR struct stm32wl5_tim_dev_s *dev,
-                              xcpt_t handler, void *arg, int source)
+static int stm32wl5_tim_setisr(struct stm32wl5_tim_dev_s *dev,
+                               xcpt_t handler, void *arg, int source)
 {
   int vectorno;
 
@@ -1454,8 +1454,8 @@ static int stm32wl5_tim_setisr(FAR struct stm32wl5_tim_dev_s *dev,
  * Name: stm32wl5_tim_enableint
  ****************************************************************************/
 
-static void stm32wl5_tim_enableint(FAR struct stm32wl5_tim_dev_s *dev,
-                                  int source)
+static void stm32wl5_tim_enableint(struct stm32wl5_tim_dev_s *dev,
+                                   int source)
 {
   DEBUGASSERT(dev != NULL);
   stm32wl5_modifyreg16(dev, STM32WL5_GTIM_DIER_OFFSET, 0, GTIM_DIER_UIE);
@@ -1465,8 +1465,8 @@ static void stm32wl5_tim_enableint(FAR struct stm32wl5_tim_dev_s *dev,
  * Name: stm32wl5_tim_disableint
  ****************************************************************************/
 
-static void stm32wl5_tim_disableint(FAR struct stm32wl5_tim_dev_s *dev,
-                                   int source)
+static void stm32wl5_tim_disableint(struct stm32wl5_tim_dev_s *dev,
+                                    int source)
 {
   DEBUGASSERT(dev != NULL);
   stm32wl5_modifyreg16(dev, STM32WL5_GTIM_DIER_OFFSET, GTIM_DIER_UIE, 0);
@@ -1476,8 +1476,7 @@ static void stm32wl5_tim_disableint(FAR struct stm32wl5_tim_dev_s *dev,
  * Name: stm32wl5_tim_ackint
  ****************************************************************************/
 
-static void stm32wl5_tim_ackint(FAR struct stm32wl5_tim_dev_s *dev,
-                               int source)
+static void stm32wl5_tim_ackint(struct stm32wl5_tim_dev_s *dev, int source)
 {
   stm32wl5_putreg16(dev, STM32WL5_GTIM_SR_OFFSET, ~GTIM_SR_UIF);
 }
@@ -1486,7 +1485,7 @@ static void stm32wl5_tim_ackint(FAR struct stm32wl5_tim_dev_s *dev,
  * Name: stm32wl5_tim_checkint
  ****************************************************************************/
 
-static int stm32wl5_tim_checkint(FAR struct stm32wl5_tim_dev_s *dev,
+static int stm32wl5_tim_checkint(struct stm32wl5_tim_dev_s *dev,
                                 int source)
 {
   uint16_t regval = stm32wl5_getreg16(dev, STM32WL5_GTIM_SR_OFFSET);
@@ -1501,7 +1500,7 @@ static int stm32wl5_tim_checkint(FAR struct stm32wl5_tim_dev_s *dev,
  * Name: stm32wl5_tim_init
  ****************************************************************************/
 
-FAR struct stm32wl5_tim_dev_s *stm32wl5_tim_init(int timer)
+struct stm32wl5_tim_dev_s *stm32wl5_tim_init(int timer)
 {
   struct stm32wl5_tim_dev_s *dev = NULL;
 
@@ -1608,7 +1607,7 @@ FAR struct stm32wl5_tim_dev_s *stm32wl5_tim_init(int timer)
  *
  ****************************************************************************/
 
-int stm32wl5_tim_deinit(FAR struct stm32wl5_tim_dev_s *dev)
+int stm32wl5_tim_deinit(struct stm32wl5_tim_dev_s *dev)
 {
   DEBUGASSERT(dev != NULL);
 

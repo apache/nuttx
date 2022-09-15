@@ -173,8 +173,8 @@ static const struct part_table part_table[] =
 
 int stm32wl5_flash_init(void)
 {
-  FAR struct mtd_dev_s *mtd;
-  FAR struct mtd_dev_s *mtd_part;
+  struct mtd_dev_s *mtd;
+  struct mtd_dev_s *mtd_part;
   int offset;
   int mtdconfig_minor;
   int mtdblk_minor;

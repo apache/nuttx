@@ -62,11 +62,11 @@ extern "C"
  *   success or NULL (with errno set) on failure
  ****************************************************************************/
 
-FAR void * rp2040_ws2812_setup(FAR const char *path,
-                               int             port,
-                               int             power_pin,
-                               uint16_t        pixel_count,
-                               bool            has_white);
+void * rp2040_ws2812_setup(const char *path,
+                           int         port,
+                           int         power_pin,
+                           uint16_t    pixel_count,
+                           bool        has_white);
 
 /****************************************************************************
  * Name: rp2040_ws2812_release
@@ -84,7 +84,7 @@ FAR void * rp2040_ws2812_setup(FAR const char *path,
  *
  ****************************************************************************/
 
-int rp2040_ws2812_release(FAR void * driver);
+int rp2040_ws2812_release(void * driver);
 
 #endif
 

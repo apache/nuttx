@@ -85,7 +85,7 @@
 
 /* Get the private data pointer from a device pointer */
 
-#define PRIV(x) ((FAR struct private_s *)(x)->ad_priv)
+#define PRIV(x) ((struct private_s *)(x)->ad_priv)
 
 /****************************************************************************
  * Private Type Definitions
@@ -93,34 +93,34 @@
 
 struct private_s
 {
-  FAR const struct adc_callback_s *callback;     /* ADC Callback Structure */
-  FAR FAR struct   adc_dev_s      *next_device;
-  FAR FAR struct   adc_dev_s      *prior_device;
-  bool                             has_channel[ADC_CHANNEL_COUNT];
+  const struct adc_callback_s *callback;     /* ADC Callback Structure */
+  struct   adc_dev_s          *next_device;
+  struct   adc_dev_s          *prior_device;
+  bool                         has_channel[ADC_CHANNEL_COUNT];
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static int  interrupt_handler(int       irq,
-                              FAR void *context,
-                              FAR void *arg);
+static int  interrupt_handler(int   irq,
+                              void *context,
+                              void *arg);
 
 static void get_next_channel(void);
-static void add_device(FAR struct adc_dev_s *dev);
-static void remove_device(FAR struct adc_dev_s *dev);
+static void add_device(struct adc_dev_s *dev);
+static void remove_device(struct adc_dev_s *dev);
 
 /* ADC methods */
 
-static int  my_bind(FAR struct adc_dev_s            *dev,
-                   FAR const struct adc_callback_s *callback);
+static int  my_bind(struct adc_dev_s            *dev,
+                    const struct adc_callback_s *callback);
 
-static void my_reset(FAR struct adc_dev_s *dev);
-static int  my_setup(FAR struct adc_dev_s *dev);
-static void my_shutdown(FAR struct adc_dev_s *dev);
-static void my_rxint(FAR struct adc_dev_s *dev, bool enable);
-static int  my_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg);
+static void my_reset(struct adc_dev_s *dev);
+static int  my_setup(struct adc_dev_s *dev);
+static void my_shutdown(struct adc_dev_s *dev);
+static void my_rxint(struct adc_dev_s *dev, bool enable);
+static int  my_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -141,7 +141,7 @@ static const int8_t g_gpio_map[ADC_CHANNEL_COUNT] =
   26, 27, 28, 29, -1
 };
 
-static FAR struct adc_dev_s *g_first_device     = NULL;
+static struct adc_dev_s *g_first_device     = NULL;
 
 static uint8_t               g_current_channel  = 0xf0; /* too big */
 static uint8_t               g_active_count     = 0;
@@ -162,10 +162,10 @@ static uint8_t               g_active_count     = 0;
 
 static int interrupt_handler(int irq, void *context, void *arg)
 {
-  FAR struct adc_dev_s            *a_device;
-  FAR const struct adc_callback_s *a_callback;
-  int32_t                          value;
-  bool                             error_bit_set;
+  struct adc_dev_s            *a_device;
+  const struct adc_callback_s *a_callback;
+  int32_t                      value;
+  bool                         error_bit_set;
 
   if (g_active_count == 0)
     {
@@ -242,9 +242,9 @@ static int interrupt_handler(int irq, void *context, void *arg)
 
 static void get_next_channel(void)
 {
-  FAR struct adc_dev_s *a_device;
-  uint8_t               next = g_current_channel + 1;
-  uint32_t              value;
+  struct adc_dev_s *a_device;
+  uint8_t           next = g_current_channel + 1;
+  uint32_t          value;
 
   while (true)
     {
@@ -324,9 +324,9 @@ static void get_next_channel(void)
  *  Note: This is called from inside a critical section.
  ****************************************************************************/
 
-static void add_device(FAR struct adc_dev_s *dev)
+static void add_device(struct adc_dev_s *dev)
 {
-  uint32_t   value;
+  uint32_t value;
 
   g_active_count += 1;
 
@@ -381,9 +381,9 @@ static void add_device(FAR struct adc_dev_s *dev)
  *  Note: This is called from inside a critical section.
  ****************************************************************************/
 
-void remove_device(FAR struct adc_dev_s *dev)
+void remove_device(struct adc_dev_s *dev)
 {
-  FAR struct adc_dev_s *a_device;
+  struct adc_dev_s *a_device;
 
   if (dev == g_first_device)
     {
@@ -488,7 +488,7 @@ static void my_reset(struct adc_dev_s *dev)
 
 static int my_setup(struct adc_dev_s *dev)
 {
-  int        ret;
+  int ret;
 
   ainfo("entered: 0x%08lX\n", dev);
 
@@ -520,7 +520,7 @@ static int my_setup(struct adc_dev_s *dev)
  *  Note: This is called from inside a critical section.
  ****************************************************************************/
 
-static void my_shutdown(FAR struct adc_dev_s *dev)
+static void my_shutdown(struct adc_dev_s *dev)
 {
   ainfo("entered: 0x%08lX\n", dev);
 
@@ -598,16 +598,16 @@ static int my_ioctl(struct adc_dev_s *dev,
  *   success or NULL (with errno set) on failure
  ****************************************************************************/
 
-int rp2040_adc_setup(FAR const char *path,
-                     bool            read_adc0,
-                     bool            read_adc1,
-                     bool            read_adc2,
-                     bool            read_adc3,
-                     bool            read_temp)
+int rp2040_adc_setup(const char *path,
+                     bool        read_adc0,
+                     bool        read_adc1,
+                     bool        read_adc2,
+                     bool        read_adc3,
+                     bool        read_temp)
 {
-  FAR struct adc_dev_s *dev;
-  FAR struct private_s *priv;
-  int                   ret;
+  struct adc_dev_s *dev;
+  struct private_s *priv;
+  int               ret;
 
   ainfo("entered\n");
 
