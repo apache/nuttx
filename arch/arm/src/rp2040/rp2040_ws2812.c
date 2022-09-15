@@ -42,13 +42,13 @@
 
 struct instance
 {
-  uint32_t              pio;          /* The pio instance we are using.    */
-  uint32_t              pio_location; /* the program location in the pio.  */
-  uint32_t              pio_sm;       /* The state machine we are using.   */
-  FAR uint8_t          *pixels;       /* Buffer to hold pixels             */
-  size_t                open_count;   /* Number of opens on this instance. */
-  clock_t               last_dma;     /* when last DMA completed.          */
-  int                   power_pin;    /* pin for ws2812 power              */
+  uint32_t          pio;          /* The pio instance we are using.    */
+  uint32_t          pio_location; /* the program location in the pio.  */
+  uint32_t          pio_sm;       /* The state machine we are using.   */
+  uint8_t          *pixels;       /* Buffer to hold pixels             */
+  size_t            open_count;   /* Number of opens on this instance. */
+  clock_t           last_dma;     /* when last DMA completed.          */
+  int               power_pin;    /* pin for ws2812 power              */
 };
 
 /****************************************************************************
@@ -96,9 +96,8 @@ static const struct rp2040_pio_program pio_program =
 
 void dma_complete(DMA_HANDLE handle, uint8_t status, void *arg)
 {
-  FAR struct ws2812_dev_s  *dev_data = arg;
-  FAR struct instance      *priv     = (FAR struct instance *)
-                                          dev_data->private;
+  struct ws2812_dev_s *dev_data = arg;
+  struct instance     *priv     = (struct instance *)dev_data->private;
 
   rp2040_dmafree(handle);
 
@@ -118,13 +117,12 @@ void dma_complete(DMA_HANDLE handle, uint8_t status, void *arg)
  *
  ****************************************************************************/
 
-static void update_pixels(FAR struct ws2812_dev_s  *dev_data)
+static void update_pixels(struct ws2812_dev_s  *dev_data)
 {
-  FAR struct instance      *priv       = (FAR struct instance *)
-                                            dev_data->private;
-  clock_t                   time_delta;
-  DMA_HANDLE                dma_handle = rp2040_dmachannel();
-  dma_config_t              dma_config =
+  struct instance *priv       = (struct instance *)dev_data->private;
+  clock_t          time_delta;
+  DMA_HANDLE       dma_handle = rp2040_dmachannel();
+  dma_config_t     dma_config =
     {
       .dreq   = rp2040_pio_get_dreq(priv->pio, priv->pio_sm, true),
       .size   = RP2040_DMA_SIZE_WORD,
@@ -165,16 +163,15 @@ static void update_pixels(FAR struct ws2812_dev_s  *dev_data)
  *
  ****************************************************************************/
 
-static int my_open(FAR struct file *filep)
+static int my_open(struct file *filep)
 {
-  FAR struct inode         *inode     = filep->f_inode;
-  FAR struct ws2812_dev_s  *dev_data  = inode->i_private;
-  FAR struct instance      *priv      = (FAR struct instance *)
-                                                  dev_data->private;
-  rp2040_pio_sm_config      config;
-  int                       divisor;
-  int                       ret;
-  irqstate_t                flags;
+  struct inode         *inode     = filep->f_inode;
+  struct ws2812_dev_s  *dev_data  = inode->i_private;
+  struct instance      *priv      = (struct instance *)dev_data->private;
+  rp2040_pio_sm_config  config;
+  int                   divisor;
+  int                   ret;
+  irqstate_t            flags;
 
   flags = enter_critical_section();
 
@@ -341,12 +338,11 @@ post_and_return:
  *
  ****************************************************************************/
 
-static int my_close(FAR struct file *filep)
+static int my_close(struct file *filep)
 {
-  FAR struct inode         *inode    = filep->f_inode;
-  FAR struct ws2812_dev_s  *dev_data = inode->i_private;
-  FAR struct instance      *priv     = (FAR struct instance *)
-                                          dev_data->private;
+  struct inode        *inode    = filep->f_inode;
+  struct ws2812_dev_s *dev_data = inode->i_private;
+  struct instance     *priv     = (struct instance *)dev_data->private;
 
   nxsem_wait(&dev_data->exclsem);
 
@@ -379,17 +375,16 @@ static int my_close(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static ssize_t my_write(FAR struct file *filep,
-                        FAR const char  *data,
-                        size_t           len)
+static ssize_t my_write(struct file *filep,
+                        const char  *data,
+                        size_t       len)
 {
-  FAR struct inode         *inode      = filep->f_inode;
-  FAR struct ws2812_dev_s  *dev_data   = inode->i_private;
-  FAR struct instance      *priv       = (FAR struct instance *)
-                                            dev_data->private;
-  int                       position   = filep->f_pos;
-  FAR uint8_t              *xfer_p     = priv->pixels + position;
-  int                       xfer_index = 0;
+  struct inode        *inode      = filep->f_inode;
+  struct ws2812_dev_s *dev_data   = inode->i_private;
+  struct instance     *priv       = (struct instance *)dev_data->private;
+  int                  position   = filep->f_pos;
+  uint8_t             *xfer_p     = priv->pixels + position;
+  int                  xfer_index = 0;
 
   if (data == NULL)
     {
@@ -462,17 +457,16 @@ static ssize_t my_write(FAR struct file *filep,
  *
  ****************************************************************************/
 
-static ssize_t my_read(FAR struct file *filep,
-                       FAR char        *data,
-                       size_t           len)
+static ssize_t my_read(struct file *filep,
+                       char        *data,
+                       size_t       len)
 {
-  FAR struct inode         *inode      = filep->f_inode;
-  FAR struct ws2812_dev_s  *dev_data   = inode->i_private;
-  FAR struct instance      *priv       = (FAR struct instance *)
-                                            dev_data->private;
-  int                       position   = filep->f_pos;
-  FAR uint8_t              *xfer_p     = priv->pixels + position;
-  int                       xfer_index = 0;
+  struct inode        *inode      = filep->f_inode;
+  struct ws2812_dev_s *dev_data   = inode->i_private;
+  struct instance     *priv       = (struct instance *)dev_data->private;
+  int                  position   = filep->f_pos;
+  uint8_t             *xfer_p     = priv->pixels + position;
+  int                  xfer_index = 0;
 
   if (data == NULL  ||  len == 0)
     {
@@ -543,14 +537,14 @@ static ssize_t my_read(FAR struct file *filep,
  *   success or NULL (with errno set) on failure
  ****************************************************************************/
 
-FAR void * rp2040_ws2812_setup(FAR const char *path,
-                               int             port,
-                               int             power_pin,
-                               uint16_t        pixel_count,
-                               bool            has_white)
+void * rp2040_ws2812_setup(const char *path,
+                           int         port,
+                           int         power_pin,
+                           uint16_t    pixel_count,
+                           bool        has_white)
 {
-  FAR struct ws2812_dev_s * dev_data;
-  FAR struct instance     * priv;
+  struct ws2812_dev_s *dev_data;
+  struct instance     *priv;
   int err;
 
   dev_data = kmm_zalloc(sizeof(struct ws2812_dev_s));
@@ -616,11 +610,10 @@ FAR void * rp2040_ws2812_setup(FAR const char *path,
  *
  ****************************************************************************/
 
-int rp2040_ws2812_release(FAR void * driver)
+int rp2040_ws2812_release(void * driver)
 {
-  FAR struct ws2812_dev_s  *dev_data = driver;
-  FAR struct instance      *priv     = (FAR struct instance *)
-                                            dev_data->private;
+  struct ws2812_dev_s *dev_data = driver;
+  struct instance     *priv     = (struct instance *)dev_data->private;
 
   int ret = OK;
 

@@ -61,8 +61,8 @@ struct sam_gpio_enc_lowerhalf_s
    * half callback structure:
    */
 
-  FAR const struct qe_ops_s *ops;           /* Lower half callback structure */
-  FAR struct sam_qeconfig_s *config;        /* static configuration */
+  const struct qe_ops_s *ops;           /* Lower half callback structure */
+  struct sam_qeconfig_s *config;        /* static configuration */
 };
 
 /****************************************************************************
@@ -71,13 +71,11 @@ struct sam_gpio_enc_lowerhalf_s
 
 static int board_gpio_enc_irqx(gpio_pinset_t pinset, int irq,
                                xcpt_t irqhandler, void *arg);
-static int sam_gpio_enc_interrupt(int irq, FAR void *context,
-                                     FAR void *arg);
-static int sam_gpio_enc_position(FAR struct qe_lowerhalf_s *lower,
-                                 FAR int32_t *pos);
-static int sam_gpio_enc_setup(FAR struct qe_lowerhalf_s *lower);
-static int sam_gpio_enc_shutdown(FAR struct qe_lowerhalf_s *lower);
-static int sam_gpio_enc_reset(FAR struct qe_lowerhalf_s *lower);
+static int sam_gpio_enc_interrupt(int irq, void *context, void *arg);
+static int sam_gpio_enc_position(struct qe_lowerhalf_s *lower, int32_t *pos);
+static int sam_gpio_enc_setup(struct qe_lowerhalf_s *lower);
+static int sam_gpio_enc_shutdown(struct qe_lowerhalf_s *lower);
+static int sam_gpio_enc_reset(struct qe_lowerhalf_s *lower);
 
 /****************************************************************************
  * Private Data
@@ -119,7 +117,7 @@ static struct sam_gpio_enc_lowerhalf_s sam_gpio_enc_priv =
  ****************************************************************************/
 
 static int board_gpio_enc_irqx(gpio_pinset_t pinset, int irq,
-                             xcpt_t irqhandler, void *arg)
+                               xcpt_t irqhandler, void *arg)
 {
   irqstate_t flags;
 
@@ -159,12 +157,11 @@ static int board_gpio_enc_irqx(gpio_pinset_t pinset, int irq,
  *
  ****************************************************************************/
 
-static int sam_gpio_enc_interrupt(int irq, FAR void *context,
-                                     FAR void *arg)
+static int sam_gpio_enc_interrupt(int irq, void *context, void *arg)
 {
-  FAR struct sam_gpio_enc_lowerhalf_s *dev =
-    (FAR struct sam_gpio_enc_lowerhalf_s *)arg;
-  FAR struct sam_qeconfig_s *priv = (struct sam_qeconfig_s *)dev->config;
+  struct sam_gpio_enc_lowerhalf_s *dev =
+    (struct sam_gpio_enc_lowerhalf_s *)arg;
+  struct sam_qeconfig_s *priv = (struct sam_qeconfig_s *)dev->config;
 
   unsigned int state_a;
   unsigned int state_b;
@@ -200,12 +197,11 @@ static int sam_gpio_enc_interrupt(int irq, FAR void *context,
  *
  ****************************************************************************/
 
-static int sam_gpio_enc_position(FAR struct qe_lowerhalf_s *lower,
-                                 FAR int32_t *pos)
+static int sam_gpio_enc_position(struct qe_lowerhalf_s *lower, int32_t *pos)
 {
-  FAR struct sam_gpio_enc_lowerhalf_s *priv =
-    (FAR struct sam_gpio_enc_lowerhalf_s *)lower;
-  FAR struct sam_qeconfig_s *config = priv->config;
+  struct sam_gpio_enc_lowerhalf_s *priv =
+    (struct sam_gpio_enc_lowerhalf_s *)lower;
+  struct sam_qeconfig_s *config = priv->config;
 
   *pos = config->position - config->position_base;
   return OK;
@@ -221,11 +217,11 @@ static int sam_gpio_enc_position(FAR struct qe_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int sam_gpio_enc_setup(FAR struct qe_lowerhalf_s *lower)
+static int sam_gpio_enc_setup(struct qe_lowerhalf_s *lower)
 {
-  FAR struct sam_gpio_enc_lowerhalf_s *priv =
-    (FAR struct sam_gpio_enc_lowerhalf_s *)lower;
-  FAR struct sam_qeconfig_s *config = priv->config;
+  struct sam_gpio_enc_lowerhalf_s *priv =
+    (struct sam_gpio_enc_lowerhalf_s *)lower;
+  struct sam_qeconfig_s *config = priv->config;
   int ret;
   unsigned int state_a;
   unsigned int state_b;
@@ -274,11 +270,11 @@ static int sam_gpio_enc_setup(FAR struct qe_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int sam_gpio_enc_shutdown(FAR struct qe_lowerhalf_s *lower)
+static int sam_gpio_enc_shutdown(struct qe_lowerhalf_s *lower)
 {
-  FAR struct sam_gpio_enc_lowerhalf_s *priv =
-    (FAR struct sam_gpio_enc_lowerhalf_s *)lower;
-  FAR struct sam_qeconfig_s *config = priv->config;
+  struct sam_gpio_enc_lowerhalf_s *priv =
+    (struct sam_gpio_enc_lowerhalf_s *)lower;
+  struct sam_qeconfig_s *config = priv->config;
   int ret;
 
   /* Disable GPIO interrupts. */
@@ -304,12 +300,12 @@ static int sam_gpio_enc_shutdown(FAR struct qe_lowerhalf_s *lower)
   return OK;
 }
 
-static int sam_gpio_enc_reset(FAR struct qe_lowerhalf_s *lower)
+static int sam_gpio_enc_reset(struct qe_lowerhalf_s *lower)
 {
-  FAR struct sam_gpio_enc_lowerhalf_s *priv =
-    (FAR struct sam_gpio_enc_lowerhalf_s *)lower;
-  FAR struct sam_qeconfig_s *config =
-    (FAR struct sam_qeconfig_s *)priv->config;
+  struct sam_gpio_enc_lowerhalf_s *priv =
+    (struct sam_gpio_enc_lowerhalf_s *)lower;
+  struct sam_qeconfig_s *config =
+    (struct sam_qeconfig_s *)priv->config;
 
   config->position = config->position_base;
 
@@ -339,13 +335,13 @@ int sam_gpio_enc_init(gpio_pinset_t enca_cfg, gpio_pinset_t encb_cfg,
 {
   int ret;
 
-  FAR struct sam_gpio_enc_lowerhalf_s *dev =
+  struct sam_gpio_enc_lowerhalf_s *dev =
     (struct sam_gpio_enc_lowerhalf_s *)&sam_gpio_enc_priv;
-  FAR struct sam_qeconfig_s *priv = (struct sam_qeconfig_s *)dev->config;
+  struct sam_qeconfig_s *priv = (struct sam_qeconfig_s *)dev->config;
 
   /* Register the device as "dev/gpio_enc". */
 
-  ret = qe_register("/dev/gpio_enc", (FAR struct qe_lowerhalf_s *)dev);
+  ret = qe_register("/dev/gpio_enc", (struct qe_lowerhalf_s *)dev);
   if (ret < 0)
     {
       snerr("ERROR: qe_register failed: %d\n", ret);

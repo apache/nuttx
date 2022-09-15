@@ -134,7 +134,7 @@ static void systick_disable(void)
  *
  ****************************************************************************/
 
-int board_boot_image(FAR const char *path, uint32_t hdr_size)
+int board_boot_image(const char *path, uint32_t hdr_size)
 {
   static struct arm_vector_table vt;
   int fd;

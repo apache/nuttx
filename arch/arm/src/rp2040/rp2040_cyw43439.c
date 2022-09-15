@@ -124,7 +124,7 @@ static const rp2040_pio_program_t pio_program =
 
 static void dma_complete(DMA_HANDLE handle, uint8_t status, void *arg)
 {
-  FAR dma_info_t *dma_info = arg;
+  dma_info_t *dma_info = arg;
 
   /* Remember the status and post the dma complete event. */
 
@@ -140,9 +140,9 @@ static void dma_complete(DMA_HANDLE handle, uint8_t status, void *arg)
  *
  ****************************************************************************/
 
-static int my_init(FAR gspi_dev_t  *gspi)
+static int my_init(gspi_dev_t  *gspi)
 {
-  FAR rp2040_gspi_t *rp_io = (FAR rp2040_gspi_t *)(gspi->io_dev);
+  rp2040_gspi_t *rp_io = (rp2040_gspi_t *)(gspi->io_dev);
 
   uint32_t              divisor;
   irqstate_t            flags;
@@ -283,11 +283,11 @@ static int my_init(FAR gspi_dev_t  *gspi)
  *
  ****************************************************************************/
 
-static int my_set_isr(FAR gspi_dev_t  *gspi,
+static int my_set_isr(gspi_dev_t  *gspi,
                       xcpt_t           thread_isr,
-                      FAR void        *thread_isr_arg)
+                      void        *thread_isr_arg)
 {
-  FAR rp2040_gspi_t *rp_io = (FAR rp2040_gspi_t *)(gspi->io_dev);
+  rp2040_gspi_t *rp_io = (rp2040_gspi_t *)(gspi->io_dev);
 
   /* Set up, but do not enable, interrupt service for the data pin */
 
@@ -309,10 +309,10 @@ static int my_set_isr(FAR gspi_dev_t  *gspi,
  *
  ****************************************************************************/
 
-static int my_interrupt_enable(FAR gspi_dev_t  *gspi,
+static int my_interrupt_enable(gspi_dev_t  *gspi,
                                bool             enable)
 {
-  FAR rp2040_gspi_t *rp_io         = (FAR rp2040_gspi_t *)(gspi->io_dev);
+  rp2040_gspi_t *rp_io         = (rp2040_gspi_t *)(gspi->io_dev);
   static int         disable_count = 0;
 
   if (enable)
@@ -336,9 +336,9 @@ static int my_interrupt_enable(FAR gspi_dev_t  *gspi,
  *
  ****************************************************************************/
 
-static int my_deinit(FAR gspi_dev_t *gspi)
+static int my_deinit(gspi_dev_t *gspi)
 {
-  FAR rp2040_gspi_t *rp_io = (FAR rp2040_gspi_t *)(gspi->io_dev);
+  rp2040_gspi_t *rp_io = (rp2040_gspi_t *)(gspi->io_dev);
 
   rp2040_gpio_irq_attach(rp_io->gpio_data,
                          RP2040_GPIO_INTR_EDGE_LOW,
@@ -364,14 +364,14 @@ static int my_deinit(FAR gspi_dev_t *gspi)
  *
  ****************************************************************************/
 
-static int my_write(FAR struct gspi_dev_s  *gspi,
-                    bool                    increment,
-                    enum gspi_cmd_func_e    function,
-                    uint32_t                address,
-                    uint16_t                length,
-                    FAR const uint32_t     *data)
+static int my_write(struct gspi_dev_s   *gspi,
+                    bool                 increment,
+                    enum gspi_cmd_func_e function,
+                    uint32_t             address,
+                    uint16_t             length,
+                    const uint32_t      *data)
 {
-  FAR rp2040_gspi_t *rp_io      = (FAR rp2040_gspi_t *)(gspi->io_dev);
+  rp2040_gspi_t *rp_io      = (rp2040_gspi_t *)(gspi->io_dev);
   dma_info_t         dma_info;
   DMA_HANDLE         xfer_dma   = rp2040_dmachannel();
   uint32_t           command    =    (0x1                  << 31)
@@ -554,25 +554,25 @@ static int my_write(FAR struct gspi_dev_s  *gspi,
  *
  ****************************************************************************/
 
-static int my_read(FAR struct gspi_dev_s  *gspi,
-                   bool                    increment,
-                   enum gspi_cmd_func_e    function,
-                   uint32_t                address,
-                   uint16_t                length,
-                   FAR uint32_t           *buffer)
+static int my_read(struct gspi_dev_s   *gspi,
+                   bool                 increment,
+                   enum gspi_cmd_func_e function,
+                   uint32_t             address,
+                   uint16_t             length,
+                   uint32_t            *buffer)
 {
-  FAR rp2040_gspi_t *rp_io      = (FAR rp2040_gspi_t *)(gspi->io_dev);
-  dma_info_t         dma_info;
-  DMA_HANDLE         xfer_dma   = rp2040_dmachannel();
-  DMA_HANDLE         ctrl_dma   = rp2040_dmachannel();
-  uint32_t           temp_word;
-  uint32_t           bit_length;
-  uint32_t           command    =    ((increment ? 1 : 0) << 30)
-                                   | ((function & 0x3)    << 28)
-                                   | ((address & 0x1ffff) << 11)
-                                   | (length & 0x7ff);
+  rp2040_gspi_t *rp_io      = (rp2040_gspi_t *)(gspi->io_dev);
+  dma_info_t     dma_info;
+  DMA_HANDLE     xfer_dma   = rp2040_dmachannel();
+  DMA_HANDLE     ctrl_dma   = rp2040_dmachannel();
+  uint32_t       temp_word;
+  uint32_t       bit_length;
+  uint32_t       command    = ((increment ? 1 : 0) << 30)
+                            | ((function & 0x3)    << 28)
+                            | ((address & 0x1ffff) << 11)
+                            | (length & 0x7ff);
 
-  uint32_t           pacing = rp2040_pio_get_dreq(rp_io->pio,
+  uint32_t       pacing     = rp2040_pio_get_dreq(rp_io->pio,
                                                   rp_io->pio_sm,
                                                   false);
 
@@ -783,9 +783,9 @@ gspi_dev_t *rp2040_cyw_setup(uint8_t gpio_on,
                              uint8_t gpio_clock,
                              uint8_t gpio_intr)
 {
-  FAR gspi_dev_t    *gspi;
-  FAR rp2040_gspi_t *rp_io;
-  int                err;
+  gspi_dev_t    *gspi;
+  rp2040_gspi_t *rp_io;
+  int            err;
 
   wlinfo("entered.\n");
 
@@ -845,7 +845,7 @@ gspi_dev_t *rp2040_cyw_setup(uint8_t gpio_on,
 
   wlinfo("setup complete. gspi = 0x%08lX\n", (uint32_t) gspi);
 
-  return (FAR void *) gspi;
+  return (void *)gspi;
 }
 
 /****************************************************************************
@@ -857,7 +857,7 @@ gspi_dev_t *rp2040_cyw_setup(uint8_t gpio_on,
 
 void rp2040_cyw_remove(gspi_dev_t *gspi)
 {
-  /* gspi_deregister((FAR gspi_dev_t *)gspi); */
+  /* gspi_deregister((gspi_dev_t *)gspi); */
 }
 
 /****************************************************************************

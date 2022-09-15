@@ -719,7 +719,7 @@ static ssize_t stm32wl5_ipcc_write_notify(struct ipcc_lower_s *ipcc)
  *
  ****************************************************************************/
 
-static int stm32wl5_ipcc_cleanup(FAR struct ipcc_lower_s *ipcc)
+static int stm32wl5_ipcc_cleanup(struct ipcc_lower_s *ipcc)
 {
   DEBUGASSERT(ipcc);
   DEBUGASSERT(ipcc->chan <= IPCC_NCHAN);

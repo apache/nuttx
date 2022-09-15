@@ -300,11 +300,11 @@ struct imxrt_enc_lowerhalf_s
 
   /* IMXRT driver-specific fields: */
 
-  FAR const struct imxrt_qeconfig_s *config;  /* static configuration */
+  const struct imxrt_qeconfig_s *config;  /* static configuration */
   struct qe_index_s *data;
-  sem_t sem_excl;                             /* Mutual exclusion semaphore to
-                                               * ensure atomic 32-bit reads.
-                                               */
+  sem_t sem_excl;                         /* Mutual exclusion semaphore to
+                                           * ensure atomic 32-bit reads.
+                                           */
 };
 
 /****************************************************************************
@@ -336,7 +336,7 @@ static void imxrt_enc_modulo_enable(struct imxrt_enc_lowerhalf_s *priv,
                                     uint32_t modulus);
 static void imxrt_enc_modulo_disable(struct imxrt_enc_lowerhalf_s *priv);
 
-static int imxrt_enc_index(int irq, void *context, FAR void *arg);
+static int imxrt_enc_index(int irq, void *context, void *arg);
 
 #ifdef CONFIG_DEBUG_SENSORS
 static int imxrt_enc_test_gen(struct imxrt_enc_lowerhalf_s *priv,
@@ -835,12 +835,12 @@ static void imxrt_enc_modulo_disable(struct imxrt_enc_lowerhalf_s *priv)
  *
  ****************************************************************************/
 
-static int imxrt_enc_index(int irq, void *context, FAR void *arg)
+static int imxrt_enc_index(int irq, void *context, void *arg)
 {
-  FAR struct imxrt_enc_lowerhalf_s *priv =
-    (FAR struct imxrt_enc_lowerhalf_s *)arg;
-  FAR const struct imxrt_qeconfig_s *config = priv->config;
-  FAR struct qe_index_s *data = priv->data;
+  struct imxrt_enc_lowerhalf_s *priv =
+    (struct imxrt_enc_lowerhalf_s *)arg;
+  const struct imxrt_qeconfig_s *config = priv->config;
+  struct qe_index_s *data = priv->data;
   uint16_t regval = getreg16(config->base + IMXRT_ENC_CTRL_OFFSET);
 
   if ((regval & ENC_CTRL_XIRQ) != 0)
@@ -1159,7 +1159,7 @@ static int imxrt_ioctl(struct qe_lowerhalf_s *lower, int cmd,
                        unsigned long arg)
 {
   struct imxrt_enc_lowerhalf_s *priv = (struct imxrt_enc_lowerhalf_s *)lower;
-  FAR struct qe_index_s *data = priv->data;
+  struct qe_index_s *data = priv->data;
   switch (cmd)
     {
       /* QEIOC_POSDIFF:

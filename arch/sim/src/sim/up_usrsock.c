@@ -393,7 +393,7 @@ void usrsock_register(void)
  * Name: usrsock_request
  ****************************************************************************/
 
-int usrsock_request(FAR struct iovec *iov, unsigned int iovcnt)
+int usrsock_request(struct iovec *iov, unsigned int iovcnt)
 {
   struct usrsock_request_common_s *common;
   int ret;

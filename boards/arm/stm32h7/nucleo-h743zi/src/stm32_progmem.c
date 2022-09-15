@@ -95,7 +95,7 @@ static int init_ota_partitions(void);
  * Private Data
  ****************************************************************************/
 
-static FAR struct mtd_dev_s *g_progmem_mtd;
+static struct mtd_dev_s *g_progmem_mtd;
 
 #if defined(CONFIG_STM32_PROGMEM_OTA_PARTITION)
 static const struct ota_partition_s g_ota_partition_table[] =

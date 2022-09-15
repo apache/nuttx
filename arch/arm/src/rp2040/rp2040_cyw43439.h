@@ -104,7 +104,7 @@ gspi_dev_t *rp2040_cyw_setup(uint8_t gpio_on,
  *
  ****************************************************************************/
 
-void rp2040_cyw_remove(FAR gspi_dev_t *dev);
+void rp2040_cyw_remove(gspi_dev_t *dev);
 
 #undef EXTERN
 #if defined(__cplusplus)
