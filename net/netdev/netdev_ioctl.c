@@ -950,8 +950,14 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
             if (ret >= 0)
               {
                 dev->d_mac.radio.nv_addrlen = properties.sp_addrlen;
+
+                DEBUGASSERT(dev->d_mac.radio.nv_addrlen <=
+                            sizeof(dev->d_mac.radio.nv_addr));
+                DEBUGASSERT(dev->d_mac.radio.nv_addrlen <=
+                            sizeof(req->ifr_hwaddr.sa_data));
+
                 memcpy(dev->d_mac.radio.nv_addr,
-                       req->ifr_hwaddr.sa_data, NET_6LOWPAN_ADDRSIZE);
+                       req->ifr_hwaddr.sa_data, dev->d_mac.radio.nv_addrlen);
               }
           }
         else
