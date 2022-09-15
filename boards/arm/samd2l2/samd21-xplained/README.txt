@@ -536,7 +536,7 @@ Configurations
      that is easily reconfigured:
 
      System Type -> Toolchain:
-       CONFIG_ARMV6M_TOOLCHAIN_GNU_EABI=y
+       CONFIG_ARM_TOOLCHAIN_GNU_EABI=y
 
      Any re-configuration should be done before making NuttX or else the
      subsequent 'make' will fail.  If you have already attempted building

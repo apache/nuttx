@@ -606,7 +606,7 @@ Where <subdir> is one of the following:
     focuses on general window controls, movement, mouse and keyboard
     input.
 
-      CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y  : GNU EABI toolchain for Windows
+      CONFIG_ARM_TOOLCHAIN_GNU_EABI=y  : GNU EABI toolchain for Windows
       CONFIG_LCD_RPORTRAIT=y              : 240x320 reverse portrait
 
     NOTES:
@@ -772,7 +772,7 @@ Where <subdir> is one of the following:
 
          CONFIG_HOST_WINDOWS=y               : Windows
          CONFIG_WINDOWS_CYGWIN=y             : with Cygwin
-         CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : NuttX buildroot under Linux or Cygwin
+         CONFIG_ARM_TOOLCHAIN_BUILDROOT=y : NuttX buildroot under Linux or Cygwin
          CONFIG_LCD_LANDSCAPE=y              : 320x240 landscape
 
   pm:
@@ -800,7 +800,7 @@ Where <subdir> is one of the following:
 
          CONFIG_HOST_WINDOWS=y                   : Windows
          CONFIG_WINDOWS_CYGWIN=y                 : Cygwin
-         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Windows
+         CONFIG_ARM_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Windows
 
     3. CONFIG_ARCH_CUSTOM_PMINIT and CONFIG_ARCH_IDLE_CUSTOM are necessary
        parts of the PM configuration:
@@ -845,7 +845,7 @@ Where <subdir> is one of the following:
     driver at examples/usbserial.  See examples/README.txt for
     more information.
 
-      CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin
+      CONFIG_ARM_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin
 
     USB debug output can be enabled as by changing the following
     settings in the configuration file:
@@ -906,4 +906,4 @@ Where <subdir> is one of the following:
     2. Build environment (can be easily reconfigured):
 
        CONFIG_HOST_LINUX=y                  : Linux (or Cygwin)
-       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y  : NuttX buildroot under Linux or Cygwin
+       CONFIG_ARM_TOOLCHAIN_BUILDROOT=y  : NuttX buildroot under Linux or Cygwin

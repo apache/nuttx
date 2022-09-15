@@ -519,7 +519,7 @@ Configuration sub-directories
          CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin
 
        System Type:
-         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Windows
+         CONFIG_ARM_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Windows
 
     4. To enable SLCD support:
 

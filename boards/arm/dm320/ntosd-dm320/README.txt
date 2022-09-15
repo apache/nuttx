@@ -239,7 +239,7 @@ Common Configuration Notes
      Linux.  This is easily reconfigured:
 
         CONFIG_HOST_LINUX=y
-        CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y
+        CONFIG_ARM_TOOLCHAIN_GNU_EABI=y
 
 Configuration Sub-Directories
 -----------------------------

@@ -4,31 +4,3 @@
 #
 
 comment "ARM Configuration Options"
-
-choice
-	prompt "Toolchain Selection"
-	default ARM_TOOLCHAIN_GNU_EABI
-
-config ARM_TOOLCHAIN_BUILDROOT
-	bool "Buildroot (Cygwin or Linux)"
-	depends on !WINDOWS_NATIVE
-
-config ARM_TOOLCHAIN_GNU_EABI
-	bool "Generic GNU EABI toolchain"
-	---help---
-		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
-		configured for arm-none-eabi-.
-
-config ARM_TOOLCHAIN_GNU_OABI
-	bool "Generic GNU OABI toolchain"
-	---help---
-		This option should work for any GNU toolchain configured for arm-elf-.
-
-endchoice
-
-config ARM_OABI_TOOLCHAIN
-	bool "OABI (vs EABI)"
-	default n
-	depends on ARM_TOOLCHAIN_BUILDROOT
-	---help---
-		Most of the older buildroot toolchains are OABI and are named arm-nuttx-elf- vs. arm-nuttx-eabi-

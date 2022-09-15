@@ -701,7 +701,7 @@ Where <subdir> is one of the following:
 
        CONFIG_HOST_WINDOWS=y                   : Builds under Windows
        CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Windows
+       CONFIG_ARM_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Windows
 
     3. This example supports the PWM test (apps/examples/pwm) but this must
        be manually enabled by selecting:

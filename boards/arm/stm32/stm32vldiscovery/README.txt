@@ -215,4 +215,4 @@ Where <subdir> is one of the following:
 
     Default toolchain:
 
-    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Linux
+    CONFIG_ARM_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Linux

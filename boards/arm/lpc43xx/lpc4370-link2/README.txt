@@ -275,7 +275,7 @@ Code Red IDE/Tools
   from SRAM.
 
     CONFIG_LPC43_BOOT_SRAM=y            : Executing in SRAM
-    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y  : GNU EABI toolchain for Windows
+    CONFIG_ARM_TOOLCHAIN_GNU_EABI=y  : GNU EABI toolchain for Windows
 
   To execute from SPIFI, you would need to set:
 
@@ -615,7 +615,7 @@ Where <subdir> is one of the following:
        by setting the following configuration options.
 
          CONFIG_LPC43_BOOT_SRAM=y            : Executing in SRAM
-         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y  : GNU EABI toolchain for Windows
+         CONFIG_ARM_TOOLCHAIN_GNU_EABI=y  : GNU EABI toolchain for Windows
 
     3. To execute from SPIFI, you would need to set:
 

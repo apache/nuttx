@@ -623,7 +623,7 @@ GNU Toolchain Options
      under the System Type menu.
   2. The default toolchain is the NuttX buildroot under Linux or Cygwin:
 
-    CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y
+    CONFIG_ARM_TOOLCHAIN_BUILDROOT=y
 
 Freedom K66F Configuration Options
 ==================================
@@ -814,7 +814,7 @@ Where <subdir> is one of the following:
 
        CONFIG_HOST_WINDOWS=y               : Cygwin under Windows
        CONFIG_WINDOWS_CYGWIN=y
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y  : ARM/mbed toolcahin (arm-none-elf-gcc)
+       CONFIG_ARM_TOOLCHAIN_GNU_EABI=y  : ARM/mbed toolcahin (arm-none-elf-gcc)
        CONFIG_INTELHEX_BINARY=y            : Output formats: Intel hex binary
 
     3. The Serial Console is provided on UART1 with the correct pin
@@ -864,7 +864,7 @@ Where <subdir> is one of the following:
 
          CONFIG_HOST_WINDOWS=y               : Cygwin under Windows
          CONFIG_WINDOWS_CYGWIN=y
-         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y  : ARM/mbed toolcahin (arm-none-elf-gcc)
+         CONFIG_ARM_TOOLCHAIN_GNU_EABI=y  : ARM/mbed toolcahin (arm-none-elf-gcc)
          CONFIG_INTELHEX_BINARY=y            : Output formats: Intel hex binary
 
     3. The Serial Console is provided on UART1 with the correct pin

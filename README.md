@@ -1402,7 +1402,7 @@ damage your configuration (see
   toolchains.  If you are using the older OABI toolchain the prefix for
   the tools will be `arm-nuttx-elf-`; for the EABI toolchain the prefix will
   be `arm-nuttx-eabi-`. If you are using the older OABI toolchain with
-  an ARM Cortex-M3/4, you will need to set CONFIG_ARMV7M_OABI_TOOLCHAIN
+  an ARM Cortex-M3/4, you will need to set CONFIG_ARM_TOOLCHAIN_BUILDROOT_OABI
   in the `.config` file in order to pick the right tool prefix.
 
   If the make system ever picks the wrong prefix for your toolchain, you

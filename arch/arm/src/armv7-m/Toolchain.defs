@@ -28,21 +28,21 @@
 #
 
 ifeq ($(filter y, \
-      $(CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT) \
+      $(CONFIG_ARM_TOOLCHAIN_BUILDROOT) \
     ),y)
-  CONFIG_ARMV7M_TOOLCHAIN ?= BUILDROOT
+  CONFIG_TOOLCHAIN ?= BUILDROOT
 endif
 
 ifeq ($(filter y, \
-      $(CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI) \
+      $(CONFIG_ARM_TOOLCHAIN_GNU_EABI) \
     ),y)
-  CONFIG_ARMV7M_TOOLCHAIN ?= GNU_EABI
+  CONFIG_TOOLCHAIN ?= GNU_EABI
 endif
 
 ifeq ($(filter y, \
-      $(CONFIG_ARMV7M_TOOLCHAIN_CLANG) \
+      $(CONFIG_ARM_TOOLCHAIN_CLANG) \
     ),y)
-  CONFIG_ARMV7M_TOOLCHAIN ?= CLANG
+  CONFIG_TOOLCHAIN ?= CLANG
 endif
 
 #
@@ -60,7 +60,7 @@ endif
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
   ARCHOPTIMIZATION += $(CONFIG_DEBUG_OPTLEVEL)
 else ifeq ($(CONFIG_DEBUG_FULLOPT),y)
-  ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),CLANG)
+  ifeq ($(CONFIG_TOOLCHAIN),CLANG)
     ARCHOPTIMIZATION += -Oz
   else
     ARCHOPTIMIZATION += -Os
@@ -136,7 +136,7 @@ endif
 
 # Clang Configuration files
 
-ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),CLANG)
+ifeq ($(CONFIG_TOOLCHAIN),CLANG)
 
   ifeq ($(CONFIG_ARCH_CORTEXM4),y)
     ifeq ($(CONFIG_ARCH_FPU),y)
@@ -162,21 +162,21 @@ ifeq ($(CONFIG_LTO_THIN),y)
   ARCHOPTIMIZATION += -flto=thin
 else ifeq ($(CONFIG_LTO_FULL),y)
   ARCHOPTIMIZATION += -flto
-  ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),GNU_EABI)
+  ifeq ($(CONFIG_TOOLCHAIN),GNU_EABI)
     ARCHOPTIMIZATION += -fuse-linker-plugin
   endif
 endif
 
 # NuttX buildroot under Linux or Cygwin
 
-ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),BUILDROOT)
-ifeq ($(CONFIG_ARMV7M_OABI_TOOLCHAIN),y)
-  CROSSDEV ?= arm-nuttx-elf-
-  ARCHCPUFLAGS = $(TOOLCHAIN_MARCH) $(TOOLCHAIN_MTUNE) $(TOOLCHAIN_MFLOAT)
-else
+ifeq ($(CONFIG_ARM_TOOLCHAIN_BUILDROOT),y)
   CROSSDEV ?= arm-nuttx-eabi-
   ARCHCPUFLAGS = $(TOOLCHAIN_MARCH) $(TOOLCHAIN_MTUNE) -mthumb $(TOOLCHAIN_MFLOAT)
 endif
+
+ifeq ($(CONFIG_ARM_TOOLCHAIN_BUILDROOT_OABI),y)
+  CROSSDEV ?= arm-nuttx-elf-
+  ARCHCPUFLAGS = $(TOOLCHAIN_MARCH) $(TOOLCHAIN_MTUNE) $(TOOLCHAIN_MFLOAT)
 endif
 
 ifeq ($(CONFIG_MM_KASAN_ALL),y)
@@ -185,14 +185,14 @@ endif
 
 # Generic GNU EABI toolchain
 
-ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),GNU_EABI)
+ifeq ($(CONFIG_TOOLCHAIN),GNU_EABI)
   CROSSDEV ?= arm-none-eabi-
   ARCHCPUFLAGS = $(TOOLCHAIN_MARCH) $(TOOLCHAIN_MTUNE) -mthumb $(TOOLCHAIN_MFLOAT)
 endif
 
 # Clang toolchain
 
-ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),CLANG)
+ifeq ($(CONFIG_TOOLCHAIN),CLANG)
   ARCHCPUFLAGS = $(TOOLCHAIN_MARCH) $(TOOLCHAIN_MTUNE) $(TOOLCHAIN_MFLOAT)
 
   CC      = clang
@@ -225,7 +225,7 @@ else
   NM      = $(CROSSDEV)nm
 
   ifeq ($(CONFIG_LTO_FULL),y)
-    ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),GNU_EABI)
+    ifeq ($(CONFIG_TOOLCHAIN),GNU_EABI)
       LD := $(CROSSDEV)gcc
       AR := $(CROSSDEV)gcc-ar rcs
       NM := $(CROSSDEV)gcc-nm
@@ -272,7 +272,7 @@ endif
 # Add the builtin library
 
 COMPILER_RT_LIB = $(shell $(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name)
-ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),CLANG)
+ifeq ($(CONFIG_TOOLCHAIN),CLANG)
   ifeq ($(wildcard $(COMPILER_RT_LIB)),)
     # if "--print-libgcc-file-name" unable to find the correct libgcc PATH
     # then go ahead and try "--print-file-name"
