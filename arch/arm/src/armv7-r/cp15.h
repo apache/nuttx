@@ -55,7 +55,13 @@
  * Reference: Cortex-A5™ MPCore, Technical Reference Manual, Paragraph 4.2.
  */
 
-#define _CP15(op1,rd,crn,crm,op2) p15, op1, rd, crn, crm, op2
+#ifdef __ASSEMBLY__
+#  define _CP15(op1,rd,crn,crm,op2) p15, op1, rd, crn, crm, op2
+#  define _CP15_64(op1,lo,hi,op2)   p15, op1, lo, hi, op2
+#else
+#  define _CP15(op1,rd,crn,crm,op2) "p15, " #op1 ", %0, " #crn ", " #crm ", " #op2
+#  define _CP15_64(op1,lo,hi,op2)   "p15, " #op1 ", %Q0, %R0, " #op2
+#endif
 
 #define CP15_MIDR(r)       _CP15(0, r, c0, c0, 0)   /* Main ID Register */
 #define CP15_CTR(r)        _CP15(0, r, c0, c0, 1)   /* Cache Type Register */
@@ -141,16 +147,70 @@
 #define CP15_TPIDRURO(r)   _CP15(0, r, c13, c0, 3)
 #define CP15_TPIDRPRW(r)   _CP15(0, r, c13, c0, 4)
 
-#define CP15_CNTFRQ(r)     _CP15(0, r, c14, c0, 0)   /* Counter Frequency register */
-#define CP15_CNTKCTL(r)    _CP15(0, r, c14, c1, 0)   /* Timer PL1 Control register */
-#define CP15_CNTP_TVAL(r)  _CP15(0, r, c14, c2, 0)   /* PL1 Physical TimerValue register */
-#define CP15_CNTP_CTL(r)   _CP15(0, r, c14, c2, 0)   /* PL1 Physical Timer Control register */
-#define CP15_CNTV_TVAL(r)  _CP15(0, r, c14, c3, 0)   /* Virtual TimerValue register */
-#define CP15_CNTV_CTL(r)   _CP15(0, r, c14, c3, 0)   /* Virtual Timer Control register */
-#define CP15_CNTPCT(r,n)   _CP15(0, r, c14, c14, n)  /* 64-bit Physical Count register */
-#define CP15_CNTVCT(r,n)   _CP15(1, r, c14, c14, n)  /* Virtual Count register */
-#define CP15_CNTP_CVAL(r,n) _CP15(2, r, c14, c14, n) /* PL1 Physical Timer CompareValue register */
-#define CP15_CNTV_CVAL(r,n) _CP15(3, r, c14, c14, n) /* Virtual Timer CompareValue register */
+#define CP15_CNTFRQ(r)     _CP15(0, r, c14, c0, 0)  /* Counter Frequency register */
+#define CP15_CNTKCTL(r)    _CP15(0, r, c14, c1, 0)  /* Timer PL1 Control register */
+#define CP15_CNTP_TVAL(r)  _CP15(0, r, c14, c2, 0)  /* PL1 Physical TimerValue register */
+#define CP15_CNTP_CTL(r)   _CP15(0, r, c14, c2, 1)  /* PL1 Physical Timer Control register */
+#define CP15_CNTV_TVAL(r)  _CP15(0, r, c14, c3, 0)  /* Virtual TimerValue register */
+#define CP15_CNTV_CTL(r)   _CP15(0, r, c14, c3, 0)  /* Virtual Timer Control register */
+
+#define CP15_CNTPCT(lo,hi) _CP15_64(0, lo, hi, c14)   /* Physical Count register */
+
 #define CP15_DCIALLU(r)    _CP15(0, r, c15, c5, 0)   /* Invalidate data cache */
+
+#define CP15_SET(reg, value)            \
+  do                                    \
+    {                                   \
+      __asm__ __volatile__              \
+      (                                 \
+        "mcr " CP15_ ## reg(0) "\n"     \
+        :: "r"(value): "memory"         \
+      );                                \
+    }                                   \
+  while(0)                              \
+
+#define CP15_SET2(reg, op, value)       \
+  do                                    \
+    {                                   \
+      __asm__ __volatile__              \
+      (                                 \
+        "mcr " CP15_ ## reg(0, op) "\n" \
+        :: "r"(value): "memory"         \
+      );                                \
+    }                                   \
+  while(0)                              \
+
+#define CP15_GET(reg)                   \
+  ({                                    \
+     uint32_t value;                    \
+     __asm__ __volatile__               \
+     (                                  \
+       "mrc " CP15_ ## reg(0) "\n"      \
+       : "=r"(value) :: "memory"        \
+     );                                 \
+     value;                             \
+  })                                    \
+
+#define CP15_SET64(reg, value)          \
+  do                                    \
+    {                                   \
+      __asm__ __volatile__              \
+      (                                 \
+        "mcrr " CP15_ ## reg(0,0) "\n"  \
+        :: "r"(value): "memory"         \
+      );                                \
+    }                                   \
+  while(0)                              \
+
+#define CP15_GET64(reg)                 \
+  ({                                    \
+     uint64_t value;                    \
+     __asm__ __volatile__               \
+     (                                  \
+       "mrrc " CP15_ ## reg(0,0) "\n"   \
+       : "=r"(value) :: "memory"        \
+     );                                 \
+     value;                             \
+  })                                    \
 
 #endif /* __ARCH_ARM_SRC_ARMV7_R_CP15_H */
