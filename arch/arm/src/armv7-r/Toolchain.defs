@@ -37,4 +37,24 @@ else
   ARCHCPUFLAGS += -mfloat-abi=soft
 endif
 
+ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
+
+  ifeq ($(CONFIG_ARCH_CORTEXR4),y)
+    LDFLAGS += --cpu=Cortex-R4
+  else ifeq ($(CONFIG_ARCH_CORTEXR5),y)
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      LDFLAGS += --cpu=Cortex-R5
+    else
+      LDFLAGS += --cpu=Cortex-R5.no_vfp
+    endif
+  else ifeq ($(CONFIG_ARCH_CORTEXR7),y)
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      LDFLAGS += --cpu=Cortex-R7
+    else
+      LDFLAGS += --cpu=Cortex-R7.no_vfp
+    endif
+  endif
+
+endif
+
 include $(TOPDIR)/arch/arm/src/common/Toolchain.defs
