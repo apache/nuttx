@@ -41,7 +41,7 @@ CSRCS += sched_getaffinity.c sched_setaffinity.c
 endif
 
 ifeq ($(CONFIG_SIG_SIGSTOP_ACTION),y)
-CSRCS += sched_suspend.c sched_continue.c
+CSRCS += sched_suspend.c
 endif
 
 ifeq ($(CONFIG_SCHED_WAITPID),y)

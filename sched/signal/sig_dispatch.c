@@ -430,6 +430,8 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 
   if (masked == 0)
     {
+      flags = enter_critical_section();
+
       /* If the task is blocked waiting for a semaphore, then that task must
        * be unblocked when a signal is received.
        */
@@ -462,10 +464,12 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 #ifdef HAVE_GROUP_MEMBERS
           group_continue(stcb);
 #else
-          nxsched_continue(stcb);
+          up_unblock_task(stcb);
 #endif
         }
 #endif
+
+      leave_critical_section(flags);
     }
 
   /* In case nxsig_ismember failed due to an invalid signal number */
