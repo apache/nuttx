@@ -182,6 +182,9 @@ SECTIONS
         *(.data);
         *(.data.*);
         . = ALIGN(4);
+        KEEP(*(.info));
+        KEEP(*(.info.*));
+        . = ALIGN(4);
         PROVIDE(_end_data_ = . );
     }
 
