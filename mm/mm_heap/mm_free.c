@@ -139,8 +139,8 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
       /* Then merge the two chunks */
 
       node->size          += next->size;
-      andbeyond->preceding =  node->size |
-                              (andbeyond->preceding & MM_ALLOC_BIT);
+      andbeyond->preceding = node->size |
+                             (andbeyond->preceding & MM_ALLOC_BIT);
       next                 = (FAR struct mm_freenode_s *)andbeyond;
     }
 
