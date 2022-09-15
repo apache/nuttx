@@ -901,7 +901,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
         if (dev->d_lltype == NET_LL_ETHERNET ||
             dev->d_lltype == NET_LL_IEEE80211)
           {
-            req->ifr_hwaddr.sa_family = NET_SOCK_FAMILY;
+            req->ifr_hwaddr.sa_family = ARPHRD_ETHER;
             memcpy(req->ifr_hwaddr.sa_data,
                    dev->d_mac.ether.ether_addr_octet, IFHWADDRLEN);
           }
@@ -911,7 +911,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
         if (dev->d_lltype == NET_LL_IEEE802154 ||
             dev->d_lltype == NET_LL_PKTRADIO)
           {
-            req->ifr_hwaddr.sa_family = NET_SOCK_FAMILY;
+            req->ifr_hwaddr.sa_family = ARPHRD_IEEE802154;
             memcpy(req->ifr_hwaddr.sa_data,
                    dev->d_mac.radio.nv_addr,
                    dev->d_mac.radio.nv_addrlen);
