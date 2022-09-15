@@ -1274,10 +1274,44 @@ menuconfig IMXRT_ADC1
 	default n
 	select IMXRT_ADC
 
+if IMXRT_ADC1
+
+config IMXRT_ADC1_ETC
+	int "ADC1 External Trigger"
+	range -1 130
+	default -1
+	---help---
+		ADC module can be triggered by an external source (timer, PWM, etc).
+		This config option selects the signal's source. The number in
+		IMXRT_ADC1_ETC corresponds with the XBAR number of the source (please
+		refer to the documentation for XBAR numbers).
+
+		-1 (default value) means the conversion is not to be triggered by an
+		external source.
+
+endif
+
 menuconfig IMXRT_ADC2
 	bool "ADC2"
 	default n
 	select IMXRT_ADC
+
+if IMXRT_ADC2
+
+config IMXRT_ADC2_ETC
+	int "ADC2 External Trigger"
+	range -1 130
+	default -1
+	---help---
+		ADC module can be triggered by an external source (timer, PWM, etc).
+		This config option selects the signal's source. The number in
+		IMXRT_ADC2_ETC corresponds with the XBAR number of the source (please
+		refer to the documentation for XBAR numbers).
+
+		-1 (default value) means the conversion is not to be triggered by an
+		external source.
+
+endif
 
 endmenu
 

@@ -33,6 +33,7 @@
  ****************************************************************************/
 
 #define TRIG_OFFSET   0x28
+#define IRQ_OFFSET    0x10
 #define CHAIN_OFFSET  0x4
 #define RESULT_OFFSET 0x4
 
