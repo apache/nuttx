@@ -68,9 +68,3 @@ config MEM_FD_VFS_PATH
 	depends on FS_TMPFS
 	---help---
 		The relative path to where memfd will exist in the tmpfs namespace.
-
-config LIBC_ERR
-	bool "Support err() verr() verrx() warn() vwarn() vwarnx()"
-	default y
-	---help---
-		Support err() verr() verrx() warn() vwarn() vwarnx().  Default: y
