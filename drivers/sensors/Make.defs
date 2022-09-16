@@ -239,10 +239,6 @@ endif # CONFIG_I2C
 
 ifeq ($(CONFIG_SPI),y)
 
-ifeq ($(CONFIG_SENSORS_AD5940),y)
-  CSRCS += ad5940.c
-endif
-
 ifeq ($(CONFIG_ADXL345_SPI),y)
   CSRCS += adxl345_spi.c
 endif
@@ -257,10 +253,6 @@ endif
 
 ifeq ($(CONFIG_LIS3DH),y)
   CSRCS += lis3dh.c
-endif
-
-ifeq ($(CONFIG_SENSORS_GH3020),y)
-  include sensors${DELIM}gh3020${DELIM}Make.defs
 endif
 
 ifeq ($(CONFIG_SENSORS_MAX31855),y)
@@ -310,10 +302,6 @@ ifeq ($(CONFIG_SENSORS_DS18B20),y)
 endif
 
 endif # CONFIG_1WIRE
-
-ifeq ($(CONFIG_SENSORS_MAX86178),y)
-  CSRCS += max86178.c
-endif
 
 ifeq ($(CONFIG_SENSORS_MPU60X0),y)
   CSRCS += mpu60x0.c

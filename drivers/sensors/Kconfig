@@ -49,13 +49,6 @@ config SENSORS_FAKESENSOR
 		2.1234,3.23443,2.23456
 		...
 
-config SENSORS_AD5940
-	bool "Analog Device AD5940 AFE Support"
-	default n
-	---help---
-		Enable support for the Analog Device AD5940 impedance and
-		electrochemical analog front end.
-
 config SENSORS_APDS9960
 	bool "Avago APDS-9960 Gesture Sensor support"
 	default n
@@ -117,21 +110,6 @@ config SENSORS_BMG160
 	select SPI
 	---help---
 		Enable driver support for the Bosch BMG160 gyroscope sensor.
-
-config SENSORS_GH3020
-	bool "Goodix GH3020 PPG sensor Support"
-	default n
-	select SPI
-	select IOEXPANDER
-	---help---
-		Enable support for the Goodix GH3020 PPG sensor
-
-config SENSORS_GH3020_DEBUG_LOG
-	bool "Print debug log of GH3020"
-	default n
-	depends on SENSORS_GH3020
-	---help---
-		Print the debug log of GH3020 with syslog.
 
 config SENSORS_LSM6DSO
 	bool "STMicro LSM6DSO support"
@@ -885,34 +863,6 @@ config SENSORS_MAX6675
 	select SPI
 	---help---
 		Enables support for the MAX6675 driver
-
-config SENSORS_MAX86178
-	bool "Maxim MAX86178 Vital-Sign AFE Support"
-	default n
-	---help---
-		Enable support for the Maxim max86178 Vital-Sign AFE
-
-if SENSORS_MAX86178
-
-choice
-	prompt "MAX86178 Interface"
-	default SENSORS_MAX86178_SPI
-
-config SENSORS_MAX86178_SPI
-	bool "MAX86178 SPI Interface"
-	select SPI
-	---help---
-		Enables support for the SPI interface
-
-config SENSORS_MAX86178_I2C
-	bool "MAX86178 I2C Interface"
-	select I2C
-	---help---
-		Enables support for the I2C interface
-
-endchoice
-
-endif # SENSORS_MAX86178
 
 config SENSORS_LIS3MDL
 	bool "STMicro LIS3MDL 3-Axis magnetometer support"
