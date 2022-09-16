@@ -31,6 +31,7 @@
 
 #define SIZEOF_HEAD sizeof(FAR struct mempool_s *)
 #define MAX(a, b)   ((a) > (b) ? (a) : (b))
+#define MIN(a, b)   ((a) < (b) ? (a) : (b))
 
 /****************************************************************************
  * Private Functions
@@ -145,9 +146,50 @@ FAR void *mempool_multiple_alloc(FAR struct mempool_multiple_s *mpool,
           return (FAR char *)blk + SIZEOF_HEAD;
         }
     }
-  while (++pool< end);
+  while (++pool < end);
 
   return NULL;
+}
+
+/****************************************************************************
+ * Name: mempool_multiple_realloc
+ *
+ * Description:
+ *   Change the size of the block memory pointed to by oldblk to size bytes.
+ *
+ * Input Parameters:
+ *   mpool  - The handle of multiple memory pool to be used.
+ *   oldblk - The pointer to change the size of the block memory.
+ *   size   - The size of alloc blk.
+ *
+ * Returned Value:
+ *   The pointer to the allocated block on success; NULL on any failure.
+ *
+ ****************************************************************************/
+
+FAR void *mempool_multiple_realloc(FAR struct mempool_multiple_s *mpool,
+                                   FAR void *oldblk, size_t size)
+{
+  FAR void *blk;
+
+  if (size < 1)
+    {
+      mempool_multiple_free(mpool, oldblk);
+      return NULL;
+    }
+
+  blk = mempool_multiple_alloc(mpool, size);
+  if (blk != NULL && oldblk != NULL)
+    {
+      FAR struct mempool_s *oldpool;
+
+      oldpool = *(FAR struct mempool_s **)
+                ((FAR char *)oldblk - SIZEOF_HEAD);
+      memcpy(blk, oldblk, MIN(oldpool->bsize, size));
+      mempool_multiple_free(mpool, oldblk);
+    }
+
+  return blk;
 }
 
 /****************************************************************************
@@ -176,6 +218,32 @@ void mempool_multiple_free(FAR struct mempool_multiple_s *mpool,
 }
 
 /****************************************************************************
+ * Name: mempool_multiple_alloc_size
+ *
+ * Description:
+ *   Get size of memory block from multiple memory.
+ *
+ * Input Parameters:
+ *   blk  - The pointer of memory block.
+ *
+ * Returned Value:
+ *   The size of memory block.
+ *
+ ****************************************************************************/
+
+size_t mempool_multiple_alloc_size(FAR void *blk)
+{
+  FAR struct mempool_s *pool;
+  FAR void *mem;
+
+  DEBUGASSERT(blk != NULL);
+
+  mem = (FAR char *)blk - SIZEOF_HEAD;
+  pool = *(FAR struct mempool_s **)mem;
+  return pool->bsize;
+}
+
+/****************************************************************************
  * Name: mempool_multiple_fixed_alloc
  *
  * Description:
@@ -200,6 +268,45 @@ FAR void *mempool_multiple_fixed_alloc(FAR struct mempool_multiple_s *mpool,
   pool = mempool_multiple_find(mpool, size);
   DEBUGASSERT(pool != NULL);
   return mempool_alloc(pool);
+}
+
+/****************************************************************************
+ * Name: mempool_multiple_fixed_realloc
+ *
+ * Description:
+ *   Change the size of the block memory pointed to by oldblk to size bytes.
+ *
+ * Input Parameters:
+ *   mpool   - The handle of multiple memory pool to be used.
+ *   oldblk  - The pointer to change the size of the block memory.
+ *   oldsize - The size of block memory to oldblk.
+ *   size    - The size of alloc blk.
+ *
+ * Returned Value:
+ *   The pointer to the allocated block on success; NULL on any failure.
+ *
+ ****************************************************************************/
+
+FAR void *
+mempool_multiple_fixed_realloc(FAR struct mempool_multiple_s *mpool,
+                               FAR void *oldblk, size_t oldsize, size_t size)
+{
+  FAR void *blk;
+
+  if (size < 1)
+    {
+      mempool_multiple_fixed_free(mpool, oldblk, oldsize);
+      return NULL;
+    }
+
+  blk = mempool_multiple_fixed_alloc(mpool, size);
+  if (blk != NULL && oldblk != NULL)
+    {
+      memcpy(blk, oldblk, MIN(oldsize, size));
+      mempool_multiple_fixed_free(mpool, oldblk, oldsize);
+    }
+
+  return blk;
 }
 
 /****************************************************************************
