@@ -1073,12 +1073,12 @@ rpserver
 
   4.Rpmsg Net
     Source:
-      $(CONFIG_APPS_DIR)/system/usrsock_rpmsg/usrsock_rpmsg.h
-      $(CONFIG_APPS_DIR)/system/usrsock_rpmsg/usrsock_rpmsg_server.c
-      $(CONFIG_APPS_DIR)/system/usrsock_rpmsg/usrsock_rpmsg_client.c
       include/nuttx/net/rpmsg.h
       include/nuttx/net/rpmsgdrv.h
       drivers/net/rpmsgdrv.c
+      drivers/usrsock/usrsock_rpmsg.h
+      drivers/usrsock/usrsock_rpmsg.c
+      $(CONFIG_APPS_DIR)/system/usrsock_rpmsg/usrsock_rpmsg_server.c
     Describe:
       1)Rpmsg UsrSock client
       2)Rpmsg UsrSock server
@@ -1134,7 +1134,6 @@ rpserver
           0     0   0 FIFO     Kthread N-- Ready              00000000 000000 Idle Task
           1     1 224 FIFO     Kthread --- Waiting  Signal    00000000 002032 hpwork
           3     3 100 FIFO     Task    --- Running            00000000 004080 init
-          4     4 224 FIFO     Kthread --- Waiting  Signal    00000002 002000 rptun server 0x5671e900
 
     3>RpmsgFS:
       Mount the remote file system via RPMSGFS, cu to proxy first:
@@ -1169,21 +1168,9 @@ rpserver
           3     3 224 FIFO     Kthread --- Waiting  Signal    00000002 002000 rptun proxy 0x56634fa0
          12     3  80 FIFO     Task    --- Waiting  Semaphore 00000000 002032 usrsock
 
-      cu to proxy and start the rpmsg usrsock client:
-
-      server> cu
-      proxy> usrsock server &
-        usrsock [5:80]
-      proxy> ps
-        PID GROUP PRI POLICY   TYPE    NPX STATE    EVENT     SIGMASK   STACK COMMAND
-          0     0   0 FIFO     Kthread N-- Ready              00000000 000000 Idle Task
-          1     1 224 FIFO     Kthread --- Waiting  Signal    00000000 002032 hpwork
-          3     3 100 FIFO     Task    --- Running            00000000 004080 init
-          4     4 224 FIFO     Kthread --- Waiting  Signal    00000002 002000 rptun server 0x5671e900
-          5     4  80 FIFO     Task    --- Waiting  Semaphore 00000000 002016 usrsock server
-
       send ICMP ping to network server via rpmsg usrsock:
 
+      server> cu
       proxy> ping 127.0.0.1
       PING 127.0.0.1 56 bytes of data
       56 bytes from 127.0.0.1: icmp_seq=0 time=20 ms
