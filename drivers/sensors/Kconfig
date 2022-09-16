@@ -111,36 +111,6 @@ config SENSORS_BMG160
 	---help---
 		Enable driver support for the Bosch BMG160 gyroscope sensor.
 
-config SENSORS_LSM6DSO
-	bool "STMicro LSM6DSO support"
-	default n
-	select SPI
-	select IOEXPANDER
-	---help---
-		Enable driver support for the STMicro LSM6DSO sensor.
-
-config SENSORS_LSM6DSO_FIFO_SLOTS_NUMBER
-	int "The nunmber of fifo slots for sensor LSM6DSO"
-	default 10
-	depends on SENSORS_LSM6DSO
-	---help---
-		The nunmber of fifo slots for sensor LSM6DSO.
-
-config SENSORS_BMI270
-	bool "Bosch BMI270 Accelerator & Gyroscope Sensor support"
-	default n
-	select SPI
-	select IOEXPANDER
-	---help---
-		Enable driver support for the Bosch BMI270 sensor.
-
-config SENSORS_BMI270_FIFO_SLOTS_NUMBER
-	int "The nunmber of fifo slots for sensor BMI270"
-	default 10
-	depends on SENSORS_BMI270
-	---help---
-		The nunmber of fifo slots for sensor BMI270.
-
 config SENSORS_BMI160
 	bool "Bosch BMI160 Inertial Measurement Sensor support"
 	default n
@@ -794,7 +764,7 @@ config MPU60X0_GYRO_FS_SEL
 	int "MPU60x0 Gyro FS_SEL"
 	default 2
 	---help---
-		Sets the @fs_sel bit in GYRO_CONFIG to the value provided. Per 
+		Sets the @fs_sel bit in GYRO_CONFIG to the value provided. Per
 		the	datasheet, the meaning of @fs_sel is as follows:
 		GYRO_CONFIG(0x1b) :   XG_ST YG_ST ZG_ST FS_SEL1 FS_SEL0 x  x  x
 		XG_ST, YG_ST, ZG_ST  :  self-test (unsupported in this driver)
