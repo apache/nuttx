@@ -90,29 +90,6 @@ config SENSORS_AK09919C_BUFFER_NUMBER
 		The number of the circular buffer used. If the value equal to zero,
 		indicates that the circular buffer is disabled.
 
-config SENSORS_SX9373
-	bool "Semtech SX9373 Capacitive Sensor"
-	default n
-	select I2C
-	---help---
-		Enable driver for SX9373 Capacitive Sensor.
-
-config SENSORS_SX9373_BUFFER_NUMBER
-	int "The nunmber of circular buffer for sensor SX9373"
-	default 1
-	depends on SENSORS_SX9373
-	---help---
-		The number of the circular buffer used. If the value equal to zero,
-		indicates that the circular buffer is disabled.
-
-config SENSOR_SX9373_RAWDATA
-	bool "Semtech SX9373 capacitive sensor raw data"
-	default n
-	depends on SENSORS_SX9373
-	---help---
-		Enable to obtain the raw data of each channel of sx9373 for
-		algorithm analysis and parameter debugging.
-
 config SENSORS_CT7117
 	bool "Sensylink CT7117 Temperature Sensor"
 	default n
@@ -201,54 +178,6 @@ config SENSORS_LSM6DSO_FIFO_SLOTS_NUMBER
 	---help---
 		The nunmber of fifo slots for sensor LSM6DSO.
 
-config SENSORS_OPT3006
-	bool "TI OPT3006 Ambient Light Sensor support"
-	default n
-	select I2C
-	select IOEXPANDER
-	---help---
-		Enable driver support for the TI OPT3006 Ambient light sensor.
-
-config SENSORS_OPT3006_BUFFER_NUMBER
-	int "The number of circular buffer for sensor OPT3006"
-	default 1
-	depends on SENSORS_OPT3006
-	---help---
-		The number of the circular buffer used. If the value equal to zero,
-		indicates that the circular buffer is disabled.
-
-config SENSORS_OPT3007
-	bool "TI OPT3007 Ambient Light Sensor support"
-	default n
-	select I2C
-	select IOEXPANDER
-	---help---
-		Enable driver support for the TI OPT3007 Ambient light sensor.
-
-config SENSORS_OPT3007_BUFFER_NUMBER
-	int "The number of circular buffer for sensor OPT3007"
-	default 1
-	depends on SENSORS_OPT3007
-	---help---
-		The number of the circular buffer used. If the value equal to zero,
-		indicates that the circular buffer is disabled.
-
-config SENSORS_STK31850
-	bool "STK31850 Ambient Light Sensor support"
-	default n
-	select I2C
-	select IOEXPANDER
-	---help---
-		Enable driver support for the TI STK31850 Ambient light sensor.
-
-config SENSORS_STK31850_BUFFER_NUMBER
-	int "The number of circular buffer for sensor STK31850"
-	default 1
-	depends on SENSORS_STK31850
-	---help---
-		The number of the circular buffer used. If the value equal to zero,
-		indicates that the circular buffer is disabled.
-
 config SENSORS_BMI270
 	bool "Bosch BMI270 Accelerator & Gyroscope Sensor support"
 	default n
@@ -263,14 +192,6 @@ config SENSORS_BMI270_FIFO_SLOTS_NUMBER
 	depends on SENSORS_BMI270
 	---help---
 		The nunmber of fifo slots for sensor BMI270.
-
-config SENSORS_PAT9126JA
-	bool "PixArt PAT9126JA optical tracking sensor support"
-	default n
-	select I2C
-	---help---
-		Enable driver support for the PixArt PAT9126JA optical tracking
-		sensor.
 
 config SENSORS_BMI160
 	bool "Bosch BMI160 Inertial Measurement Sensor support"
