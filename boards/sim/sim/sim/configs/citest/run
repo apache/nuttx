@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+set -e
+set -o xtrace
+
+WD=$(cd $(dirname $0) && pwd)
+WORKSPACE=$(cd $WD/../../../../../../.. && pwd -P)
+nuttx=$WORKSPACE/nuttx
+logs=${WD}/logs
+target="sim"
+BOARD="sim"
+core="sim"
+
+echo $WD
+echo $WORKSPACE
+
+image=`find ${nuttx} -type f -name 'nuttx'`
+path=${image%/*}
+cd ${nuttx}/tools/ci/testrun/script
+python3 -m pytest -m "common" ./ -B ${BOARD} -P ${path} -L ${logs}/${BOARD}/${core} -R ${target} -C --json=${logs}/${BOARD}/${core}/pytest.json
+ret="$?"
+
+#clean
+find ${nuttx}/tools/ci/testrun -name '__pycache__' |xargs rm -rf
+find ${nuttx}/tools/ci/testrun -name '.pytest_cache' |xargs rm -rf
+rm -rf ${logs}
+
+echo $ret
+exit $ret
