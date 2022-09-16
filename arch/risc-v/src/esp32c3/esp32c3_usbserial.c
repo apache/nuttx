@@ -32,6 +32,7 @@
 
 #ifdef CONFIG_SERIAL_TERMIOS
 #  include <termios.h>
+#  include <nuttx/fs/ioctl.h>
 #endif
 
 #include <nuttx/arch.h>
