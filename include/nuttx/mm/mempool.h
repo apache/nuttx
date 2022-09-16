@@ -259,6 +259,25 @@ FAR void *mempool_multiple_alloc(FAR struct mempool_multiple_s *mpool,
                                  size_t size);
 
 /****************************************************************************
+ * Name: mempool_multiple_realloc
+ *
+ * Description:
+ *   Change the size of the block memory pointed to by oldblk to size bytes.
+ *
+ * Input Parameters:
+ *   mpool  - The handle of multiple memory pool to be used.
+ *   oldblk - The pointer to change the size of the block memory.
+ *   size   - The size of alloc blk.
+ *
+ * Returned Value:
+ *   The pointer to the allocated block on success; NULL on any failure.
+ *
+ ****************************************************************************/
+
+FAR void *mempool_multiple_realloc(FAR struct mempool_multiple_s *mpool,
+                                   FAR void *oldblk, size_t size);
+
+/****************************************************************************
  * Name: mempool_multiple_free
  *
  * Description:
@@ -272,6 +291,22 @@ FAR void *mempool_multiple_alloc(FAR struct mempool_multiple_s *mpool,
 
 void mempool_multiple_free(FAR struct mempool_multiple_s *mpool,
                            FAR void *blk);
+
+/****************************************************************************
+ * Name: mempool_multiple_alloc_size
+ *
+ * Description:
+ *   Get size of memory block from multiple memory.
+ *
+ * Input Parameters:
+ *   blk  - The pointer of memory block.
+ *
+ * Returned Value:
+ *   The size of memory block.
+ *
+ ****************************************************************************/
+
+size_t mempool_multiple_alloc_size(FAR void *blk);
 
 /****************************************************************************
  * Name: mempool_multiple_fixed_alloc
@@ -292,6 +327,28 @@ void mempool_multiple_free(FAR struct mempool_multiple_s *mpool,
 
 FAR void *mempool_multiple_fixed_alloc(FAR struct mempool_multiple_s *mpool,
                                        size_t size);
+
+/****************************************************************************
+ * Name: mempool_multiple_fixed_realloc
+ *
+ * Description:
+ *   Change the size of the block memory pointed to by oldblk to size bytes.
+ *
+ * Input Parameters:
+ *   mpool   - The handle of multiple memory pool to be used.
+ *   oldblk  - The pointer to change the size of the block memory.
+ *   oldsize - The size of block memory to oldblk.
+ *   size    - The size of alloc blk.
+ *
+ * Returned Value:
+ *   The pointer to the allocated block on success; NULL on any failure.
+ *
+ ****************************************************************************/
+
+FAR void *
+mempool_multiple_fixed_realloc(FAR struct mempool_multiple_s *mpool,
+                               FAR void *oldblk, size_t oldsize,
+                               size_t size);
 
 /****************************************************************************
  * Name: mempool_multiple_fixed_free
