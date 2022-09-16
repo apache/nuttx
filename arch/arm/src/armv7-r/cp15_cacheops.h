@@ -346,6 +346,7 @@
 .macro cp15_invalidate_icache, tmp
   mov \tmp, #0
   mrc p15, 0, \tmp, c7, c5, 0 /* ICIALLU */
+  isb
 .endm
 
 /****************************************************************************
@@ -686,6 +687,7 @@ static inline void cp15_invalidate_btb_inner_sharable(void)
 static inline void cp15_invalidate_icache(void)
 {
   CP15_SET(ICIALLU, 0);
+  ARM_ISB();
 }
 
 /****************************************************************************
