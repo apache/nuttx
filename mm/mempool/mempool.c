@@ -99,19 +99,22 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
   sq_init(&pool->elist);
 
   count = pool->ninitial + pool->ninterrupt;
-  base = mempool_malloc(pool, sizeof(*base) +
-                        pool->bsize * count);
-  if (base == NULL)
+  if (count != 0)
     {
-      return -ENOMEM;
-    }
+      base = mempool_malloc(pool, sizeof(*base) +
+                            pool->bsize * count);
+      if (base == NULL)
+        {
+          return -ENOMEM;
+        }
 
-  sq_addfirst(base, &pool->elist);
-  mempool_add_list(&pool->ilist, base + 1,
-                   pool->ninterrupt, pool->bsize);
-  mempool_add_list(&pool->list, (FAR char *)(base + 1) +
-                   pool->ninterrupt * pool->bsize,
-                   pool->ninitial, pool->bsize);
+      sq_addfirst(base, &pool->elist);
+      mempool_add_list(&pool->ilist, base + 1,
+                       pool->ninterrupt, pool->bsize);
+      mempool_add_list(&pool->list, (FAR char *)(base + 1) +
+                       pool->ninterrupt * pool->bsize,
+                       pool->ninitial, pool->bsize);
+    }
 
   if (pool->wait && pool->nexpand == 0)
     {
