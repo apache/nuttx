@@ -977,7 +977,7 @@ config ARCH_NUSER_INTERRUPTS
 # and DEBUG_FEATURES.
 
 menu "Bring-Up Options"
-	depends on EXPERIMENTAL && DEBUG_FEATURES
+	depends on DEBUG_FEATURES
 
 config SUPPRESS_CLOCK_CONFIG
 	bool "Suppress clock configuration"

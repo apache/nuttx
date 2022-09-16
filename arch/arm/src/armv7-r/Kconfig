@@ -55,7 +55,7 @@ menu "L2 Cache Configuration"
 config ARMV7R_L2CC_PL310
 	bool "ARMv7-A L2CC P310 Support"
 	default n
-	depends on ARMV7R_HAVE_L2CC_PL310 && EXPERIMENTAL
+	depends on ARMV7R_HAVE_L2CC_PL310
 	select ARCH_L2CACHE
 	---help---
 		Enable the 2 Cache Controller (L2CC) is based on the L2CC-PL310 ARM
