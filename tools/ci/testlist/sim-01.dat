@@ -5,6 +5,7 @@
 
 # clang doesn't -fsanitize=kernel-address
 -Darwin,sim:kasan
+-Darwin,sim:citest
 
 # macOS doesn't support ELF loading
 -Darwin,sim:elf
