@@ -40,28 +40,29 @@
 static inline struct mempool_s *
 mempool_multiple_find(FAR struct mempool_multiple_s *mpool, size_t size)
 {
-  FAR struct mempool_s *low = mpool->pools;
-  FAR struct mempool_s *mid;
-  size_t n = mpool->npools;
+  size_t right = mpool->npools;
+  size_t left = 0;
+  size_t mid;
 
-  while (1)
+  while (left < right)
     {
-      n >>= 1;
-      mid = low + n;
-      if (size > mid->bsize)
+      mid = (left + right) >> 1;
+      if (mpool->pools[mid].bsize > size)
         {
-          if (n == 0)
-            {
-              return NULL;
-            }
-
-          low = ++mid;
+          right = mid;
         }
-      else if (size == mid->bsize || n == 0)
+      else
         {
-          return mid;
+          left = mid + 1;
         }
     }
+
+  if (left == mpool->npools)
+    {
+      return NULL;
+    }
+
+  return &mpool->pools[left];
 }
 
 /****************************************************************************
@@ -136,7 +137,11 @@ FAR void *mempool_multiple_alloc(FAR struct mempool_multiple_s *mpool,
   FAR struct mempool_s *pool;
 
   pool = mempool_multiple_find(mpool, size + SIZEOF_HEAD);
-  DEBUGASSERT(pool != NULL);
+  if (pool == NULL)
+    {
+      return NULL;
+    }
+
   do
     {
       FAR void *blk = mempool_alloc(pool);
@@ -266,7 +271,11 @@ FAR void *mempool_multiple_fixed_alloc(FAR struct mempool_multiple_s *mpool,
   FAR struct mempool_s *pool;
 
   pool = mempool_multiple_find(mpool, size);
-  DEBUGASSERT(pool != NULL);
+  if (pool == NULL)
+    {
+      return NULL;
+    }
+
   return mempool_alloc(pool);
 }
 
