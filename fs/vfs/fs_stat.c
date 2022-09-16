@@ -438,6 +438,7 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
   buf->st_mtim  = inode->i_mtime;
   buf->st_ctim  = inode->i_ctime;
 #endif
+  buf->st_ino   = inode->i_ino;
 
   return OK;
 }
