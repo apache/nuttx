@@ -31,7 +31,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define MEM_FD_VFS_PATH CONFIG_LIBC_TMPDIR "/" CONFIG_MEM_FD_VFS_PATH "/%s"
+#define LIBC_MEM_FD_VFS_PATH \
+          CONFIG_LIBC_TMPDIR "/" CONFIG_LIBC_MEM_FD_VFS_PATH "/%s"
 
 /****************************************************************************
  * Public Functions
@@ -42,7 +43,7 @@ int memfd_create(FAR const char *name, unsigned int flags)
 #ifdef CONFIG_FS_TMPFS
   char path[PATH_MAX];
 
-  snprintf(path, sizeof(path), MEM_FD_VFS_PATH, name);
+  snprintf(path, sizeof(path), LIBC_MEM_FD_VFS_PATH, name);
   return open(path, O_RDWR | flags);
 #else
   set_errno(ENOSYS);
