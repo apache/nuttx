@@ -34,6 +34,8 @@
 #include <nuttx/signal.h>
 #include <nuttx/wdog.h>
 
+#ifndef CONFIG_DISABLE_POSIX_TIMERS
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -85,4 +87,5 @@ void timer_initialize(void);
 void timer_deleteall(pid_t pid);
 int timer_release(FAR struct posix_timer_s *timer);
 
+#endif /* CONFIG_DISABLE_POSIX_TIMERS */
 #endif /* __SCHED_TIMER_TIMER_H */
