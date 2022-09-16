@@ -36,11 +36,7 @@ endif
 
 # Common assembly language files
 
-CMN_ASRCS += arm_cpuhead.S arm_vectoraddrexcptn.S
-CMN_ASRCS += arm_vectors.S cp15_cache_size.S cp15_clean_dcache_all.S
-CMN_ASRCS += cp15_clean_dcache.S cp15_coherent_dcache.S
-CMN_ASRCS += cp15_flush_dcache_all.S cp15_flush_dcache.S
-CMN_ASRCS += cp15_invalidate_dcache_all.S cp15_invalidate_dcache.S
+CMN_ASRCS += arm_cpuhead.S arm_vectoraddrexcptn.S arm_vectors.S
 
 # Common C source files
 
@@ -49,7 +45,7 @@ CMN_CSRCS += arm_doirq.c arm_gicv2.c arm_gicv2_dump.c
 CMN_CSRCS += arm_initialstate.c arm_mmu.c arm_prefetchabort.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c
 CMN_CSRCS += arm_syscall.c arm_tcbinfo.c arm_undefinedinsn.c
-CMN_CSRCS += arm_perf.c
+CMN_CSRCS += arm_perf.c cp15_cacheops.c
 
 ifeq ($(CONFIG_ARMV7A_HAVE_PTM), y)
   CMN_CSRCS += arm_timer.c
