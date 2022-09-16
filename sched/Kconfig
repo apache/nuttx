@@ -197,6 +197,7 @@ config PREALLOC_TIMERS
 	int "Number of pre-allocated POSIX timers"
 	default 4 if DEFAULT_SMALL
 	default 8 if !DEFAULT_SMALL
+	depends on !DISABLE_POSIX_TIMERS
 	---help---
 		The number of pre-allocated POSIX timer structures.  The system manages a
 		pool of preallocated timer structures to minimize dynamic allocations.  Set to
