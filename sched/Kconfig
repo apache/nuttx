@@ -165,7 +165,7 @@ config ARCH_HAVE_TIMEKEEPING
 config CLOCK_TIMEKEEPING
 	bool "Support timekeeping algorithms"
 	default n
-	depends on EXPERIMENTAL && ARCH_HAVE_TIMEKEEPING
+	depends on ARCH_HAVE_TIMEKEEPING
 	---help---
 		CLOCK_TIMEKEEPING enables experimental time management algorithms.
 
