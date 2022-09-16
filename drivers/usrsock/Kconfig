@@ -16,12 +16,21 @@ config NET_USRSOCK_DEVICE
 	---help---
 		Will export /dev/usrsock device node for usrsock request/response operations
 
+config NET_USRSOCK_RPMSG
+	bool "rpmsg transport"
+	---help---
+		Will send usrsock request or receive usrsock response via rpmsg channel directly
+
 config NET_USRSOCK_CUSTOM
 	bool "Customerized interface"
 	---help---
 		Will send usrsock request or receive usrsock response via other kind of interface
 
 endchoice
+
+config NET_USRSOCK_RPMSG_CPUNAME
+	string "The cpuname on which the rpmsg server runs"
+	depends on NET_USRSOCK_RPMSG
 
 endmenu
 
