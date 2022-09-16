@@ -165,7 +165,7 @@ endif # MM_PGALLOC
 config MM_SHM
 	bool "Shared memory support"
 	default n
-	depends on MM_PGALLOC && BUILD_KERNEL && EXPERIMENTAL
+	depends on MM_PGALLOC && BUILD_KERNEL
 	---help---
 		Build in support for the shared memory interfaces shmget(), shmat(),
 		shmctl(), and shmdt().

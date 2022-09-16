@@ -18,7 +18,6 @@ if NET_MLD
 config NET_MLD_ROUTER
 	bool # "MLD Router support"
 	default n
-	depends on EXPERIMENTAL
 	---help---
 		Enables a few hooks that will be needed for router support in the
 		future.  Not yet ready for prime time.

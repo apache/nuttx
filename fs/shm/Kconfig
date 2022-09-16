@@ -6,7 +6,7 @@
 config FS_SHM
 	bool "Shared memory support"
 	default n
-	depends on MM_SHM && EXPERIMENTAL
+	depends on MM_SHM
 	---help---
 		Include support for shm_open() and shm_close.
 
