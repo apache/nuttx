@@ -62,7 +62,7 @@ config LIBC_ENVPATH
 		Use the contents of the common environment variable to locate executable
 		or library files.  Default: n
 
-config MEM_FD_VFS_PATH
+config LIBC_MEM_FD_VFS_PATH
 	string "Relative path to memfd storage"
 	default "memfd"
 	depends on FS_TMPFS
