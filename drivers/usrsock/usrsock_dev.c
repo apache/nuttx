@@ -194,7 +194,7 @@ static ssize_t usrsockdev_read(FAR struct file *filep, FAR char *buffer,
       /* Copy request to user-space. */
 
       rlen = usrsock_iovec_get(buffer, len, dev->req.iov, dev->req.iovcnt,
-                               dev->req.pos);
+                               dev->req.pos, NULL);
       if (rlen < 0)
         {
           /* Tried reading beyond buffer. */
@@ -263,7 +263,7 @@ static off_t usrsockdev_seek(FAR struct file *filep, off_t offset,
       /* Copy request to user-space. */
 
       rlen = usrsock_iovec_get(NULL, 0, dev->req.iov, dev->req.iovcnt,
-                               pos);
+                               pos, NULL);
       if (rlen < 0)
         {
           /* Tried seek beyond buffer. */
@@ -484,7 +484,7 @@ static int usrsockdev_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (dev->req.iov != NULL &&
           !(usrsock_iovec_get(NULL, 0, dev->req.iov,
-                              dev->req.iovcnt, dev->req.pos) < 0))
+                              dev->req.iovcnt, dev->req.pos, NULL) < 0))
         {
           eventset |= POLLIN;
         }
