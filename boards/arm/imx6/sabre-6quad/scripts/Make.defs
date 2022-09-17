@@ -22,7 +22,11 @@ include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/arm/src/armv7-a/Toolchain.defs
 
-LDSCRIPT = dramboot.ld
+ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
+  LDSCRIPT = dramboot.sct
+else
+  LDSCRIPT = dramboot.ld
+endif
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
