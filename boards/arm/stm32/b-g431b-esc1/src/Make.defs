@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32/nucleo-g431rb/src/Make.defs
+# boards/arm/stm32/b-g431b-esc1/src/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
