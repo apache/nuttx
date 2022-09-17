@@ -86,3 +86,7 @@ endif
 ifeq ($(CONFIG_ARCH_HAVE_FETCHADD),y)
   CMN_ASRCS += arm_fetchadd.S
 endif
+
+ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
+  CMN_CSRCS += arm_link_steering.c
+endif

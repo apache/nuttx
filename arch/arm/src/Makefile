@@ -105,9 +105,9 @@ else
   LIBPATH_OPT = --userlibpath
   LIBRARY_OPT = --library=
   SCRIPT_OPT  = --scatter=
-  EXTRA_LIBS += arm_vectors.o
+  EXTRA_LIBS += arm_vectors.o arm_link_steering.o
+  LDFLAGS    += --edit=$(ARCH_SRCDIR)$(DELIM)common$(DELIM)arm_link_steering.steer
 endif
-
 
 LDFLAGS += $(addprefix $(SCRIPT_OPT),$(call CONVERT_PATH,$(ARCHSCRIPT))) $(EXTRALINKCMDS)
 LIBPATHS += $(LIBPATH_OPT) $(call CONVERT_PATH,$(TOPDIR)$(DELIM)staging)

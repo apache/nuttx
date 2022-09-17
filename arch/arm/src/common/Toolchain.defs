@@ -157,6 +157,28 @@ else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
   ARCHCPUFLAGS += -Wno-license-management
   LDFLAGS      += --diag_suppress=9931
 
+  # Resolving symbols using generated steering files will emit the warnings 6331 and 6332.
+  # Warning: L6331W: No eligible global symbol matches pattern xxx.
+  # Warning: L6332W: Undefined symbol xxx (referred from xxx). Resolved to symbol xxx.
+
+  LDFLAGS      += --diag_suppress=6331,6332
+
+  # The scatter file is generated, and thus sometimes input sections are specified
+  # even though there will be no such sections found in the libraries linked.
+  # Warning: L6314W: No section matches pattern *(xxx).
+
+  LDFLAGS      += --diag_suppress=6314
+
+  # Allow Empty Execution region declared on scatter
+  # Warning: L6312W: Empty Execution region description for region xxx
+
+  LDFLAGS      += --diag_suppress=6312
+
+  # Match pattern for an unused section that is being removed.
+  # Warning: L6329W: Pattern xxx only matches removed unused sections.
+
+  LDFLAGS      += --diag_suppress=6329
+
 # Default toolchain
 
 else
