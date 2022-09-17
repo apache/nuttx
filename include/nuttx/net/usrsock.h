@@ -266,7 +266,7 @@ begin_packed_struct struct usrsock_message_socket_event_s
 
 ssize_t usrsock_iovec_get(FAR void *dst, size_t dstlen,
                           FAR const struct iovec *iov, int iovcnt,
-                          size_t pos);
+                          size_t pos, FAR bool *done);
 
 /****************************************************************************
  * Name: usrsock_iovec_put() - copy to iovec from buffer.

@@ -90,7 +90,7 @@ static struct usrsock_req_s g_usrsock_req =
 
 static ssize_t usrsock_iovec_do(FAR void *srcdst, size_t srcdstlen,
                                 FAR struct iovec *iov, int iovcnt,
-                                size_t pos, bool from_iov)
+                                size_t pos, bool from_iov, FAR bool *done)
 {
   FAR uint8_t *ioout = srcdst;
   FAR uint8_t *iovbuf;
@@ -117,7 +117,8 @@ static ssize_t usrsock_iovec_do(FAR void *srcdst, size_t srcdstlen,
     {
       /* Position beyond iovec. */
 
-      return -EINVAL;
+      total = -EINVAL;
+      goto out;
     }
 
   iovbuf = iov->iov_base;
@@ -175,6 +176,12 @@ static ssize_t usrsock_iovec_do(FAR void *srcdst, size_t srcdstlen,
           iov++;
           iovcnt--;
         }
+    }
+
+out:
+  if (done)
+    {
+      *done = !srclen && !iovcnt;
     }
 
   return total;
@@ -599,10 +606,10 @@ ssize_t usrsock_response(FAR const char *buffer, size_t len,
 
 ssize_t usrsock_iovec_get(FAR void *dst, size_t dstlen,
                           FAR const struct iovec *iov, int iovcnt,
-                          size_t pos)
+                          size_t pos, FAR bool *done)
 {
   return usrsock_iovec_do(dst, dstlen, (FAR struct iovec *)iov, iovcnt,
-                          pos, true);
+                          pos, true, done);
 }
 
 /****************************************************************************
@@ -613,7 +620,7 @@ ssize_t usrsock_iovec_put(FAR struct iovec *iov, int iovcnt, size_t pos,
                           FAR const void *src, size_t srclen)
 {
   return usrsock_iovec_do((FAR void *)src, srclen, iov, iovcnt,
-                          pos, false);
+                          pos, false, NULL);
 }
 
 /****************************************************************************
