@@ -193,6 +193,9 @@
 #define IN6_IS_ADDR_MULTICAST(a) \
   ((a)->s6_addr[0] == 0xff)
 
+#define IN6_IS_ADDR_LINKLOCAL(a) \
+  ((a)->s6_addr16[0] & HTONS(0xffc0) == HTONS(0xfe80))
+
 #define IN6_IS_ADDR_LOOPBACK(a) \
   ((a)->s6_addr32[0] == 0 && \
    (a)->s6_addr32[1] == 0 && \
