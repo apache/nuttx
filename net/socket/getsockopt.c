@@ -34,6 +34,7 @@
 
 #include "socket/socket.h"
 #include "tcp/tcp.h"
+#include "udp/udp.h"
 #include "usrsock/usrsock.h"
 #include "utils/utils.h"
 #include "can/can.h"
@@ -260,14 +261,90 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
         break;
 #endif
 
+#if CONFIG_NET_RECV_BUFSIZE > 0
+      case SO_RCVBUF:     /* Reports receive buffer size */
+        {
+          if (*value_len != sizeof(int))
+            {
+              return -EINVAL;
+            }
+
+#if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
+          if (psock->s_type == SOCK_STREAM)
+            {
+              FAR struct tcp_conn_s *tcp;
+
+              tcp = (FAR struct tcp_conn_s *)conn;
+
+              *(FAR int *)value = tcp->rcv_bufs;
+            }
+          else
+#endif
+#if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
+          if (psock->s_type == SOCK_DGRAM)
+            {
+              FAR struct udp_conn_s *udp;
+
+              udp = (FAR struct udp_conn_s *)conn;
+
+              *(FAR int *)value = udp->rcvbufs;
+            }
+          else
+#endif
+            {
+              return -ENOPROTOOPT;
+            }
+
+          break;
+        }
+#endif
+
+#if CONFIG_NET_SEND_BUFSIZE > 0
+      case SO_SNDBUF:     /* Reports send buffer size */
+        {
+          if (*value_len != sizeof(int))
+            {
+              return -EINVAL;
+            }
+
+#if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
+          if (psock->s_type == SOCK_STREAM)
+            {
+              FAR struct tcp_conn_s *tcp;
+
+              tcp = (FAR struct tcp_conn_s *)conn;
+
+              *(FAR int *)value = tcp->snd_bufs;
+            }
+          else
+#endif
+#if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
+          if (psock->s_type == SOCK_DGRAM)
+            {
+              FAR struct udp_conn_s *udp;
+
+              udp = (FAR struct udp_conn_s *)conn;
+
+              /* Save the send buffer size */
+
+              *(FAR int *)value = udp->sndbufs;
+            }
+          else
+#endif
+            {
+              return -ENOPROTOOPT;
+            }
+
+          break;
+        }
+#endif
+
       /* The following are not yet implemented
        * (return values other than {0,1})
        */
 
       case SO_LINGER:     /* Lingers on a close() if data is present */
-      case SO_RCVBUF:     /* Sets receive buffer size */
       case SO_RCVLOWAT:   /* Sets the minimum number of bytes to input */
-      case SO_SNDBUF:     /* Sets send buffer size */
       case SO_SNDLOWAT:   /* Sets the minimum number of bytes to output */
 
       default:
