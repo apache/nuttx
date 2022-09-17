@@ -1,0 +1,114 @@
+#! armclang -E --target=arm-arm-none-eabi -x c -mcpu=cortex-m3
+
+/****************************************************************************
+ * boards/arm/tiva/lm3s6965-ek/scripts/ld.sct
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+#define FLASH_START 0x00000000
+#define FLASH_SIZE  0x00040000
+#define SRAM_START  0x20000000
+#define SRAM_SIZE   0x00010000
+
+SRAM_SECTIONS FLASH_START FLASH_SIZE
+{
+  text +0
+    {
+      *(.vectors,+FIRST)
+      *(.text)
+      *(.text.*)
+      *(.fixup)
+      *(.gnu.warning)
+      *(.rodata)
+      *(.rodata.*)
+      *(.gnu.linkonce.t.*)
+      *(.glue_7)
+      *(.glue_7t)
+      *(.got)
+      *(.gcc_except_table)
+      *(.gnu.linkonce.r.*)
+    }
+
+  init_section AlignExpr(ImageLimit(text), 0x4)
+    {
+      *(.init_array)
+      *(.init_array.*)
+    }
+
+  ARM.extab AlignExpr(ImageLimit(init_section), 0x4)
+    {
+      *(.ARM.extab*)
+    }
+
+  ARM.exidx AlignExpr(ImageLimit(ARM.extab), 0x4)
+    {
+      *(.ARM.exidx*)
+    }
+
+  ARM.Collect AlignExpr(ImageLimit(ARM.exidx), 0x4)
+    {
+      *(.ARM.Collect*)
+    }
+
+  eronly AlignExpr(ImageLimit(ARM.Collect), 0x4)
+    {
+    }
+
+  tdata SRAM_START SRAM_SIZE
+    {
+      *(.tdata)
+      *(.tdata.*)
+      *(.gnu.linkonce.td.*)
+    }
+
+  tbss AlignExpr(ImageLimit(tdata), 0x4)
+    {
+      *(.tbss)
+      *(.tbss.*)
+      *(.gnu.linkonce.tb.*)
+      *(.tcommon);
+    }
+
+  noinit AlignExpr(ImageLimit(tbss), 0x4)
+    {
+      *(.noinit*)
+    }
+
+  data AlignExpr(ImageLimit(noinit), 0x4)
+    {
+      *(+RW)
+    }
+
+  bss AlignExpr(ImageLimit(data), 0x8)
+    {
+      *(+ZI)
+    }
+
+  stab           0 { *(.stab) }
+  stabstr        0 { *(.stabstr) }
+  stab.excl      0 { *(.stab.excl) }
+  stab.exclstr   0 { *(.stab.exclstr) }
+  stab.index     0 { *(.stab.index) }
+  stab.indexstr  0 { *(.stab.indexstr) }
+  comment        0 { *(.comment) }
+  debug_abbrev   0 { *(.debug_abbrev) }
+  debug_info     0 { *(.debug_info) }
+  debug_line     0 { *(.debug_line) }
+  debug_pubnames 0 { *(.debug_pubnames) }
+  debug_aranges  0 { *(.debug_aranges) }
+}

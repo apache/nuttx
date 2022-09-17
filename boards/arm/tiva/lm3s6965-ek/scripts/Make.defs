@@ -22,7 +22,11 @@ include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
 
-ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)ld.script
+ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
+  ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)ld.sct
+else
+  ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)ld.script
+endif
 
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
 ifeq ($(CONFIG_NXFLAT),y)
