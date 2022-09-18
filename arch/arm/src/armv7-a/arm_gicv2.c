@@ -523,7 +523,21 @@ int up_prioritize_irq(int irq, int priority)
 
 void up_trigger_irq(int irq, cpu_set_t cpuset)
 {
-  arm_cpu_sgi(irq, cpuset);
+  if (irq >= 0 && irq <= GIC_IRQ_SGI15)
+    {
+      arm_cpu_sgi(irq, cpuset);
+    }
+  else if (irq >= 0 && irq < NR_IRQS)
+    {
+      uintptr_t regaddr;
+
+      /* Write '1' to the corresponding bit in the distributor Interrupt
+       * Set-Pending (ICDISPR)
+       */
+
+      regaddr = GIC_ICDISPR(irq);
+      putreg32(GIC_ICDISPR_INT(irq), regaddr);
+    }
 }
 
 /****************************************************************************
