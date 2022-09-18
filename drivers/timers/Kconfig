@@ -371,6 +371,10 @@ choice
 config WATCHDOG_AUTOMONITOR_BY_CAPTURE
 	bool "Capture callback"
 
+config WATCHDOG_AUTOMONITOR_BY_TIMER
+	bool "Timer callback"
+	depends on TIMER
+
 config WATCHDOG_AUTOMONITOR_BY_WDOG
 	bool "Wdog callback"
 
@@ -388,7 +392,7 @@ config WATCHDOG_AUTOMONITOR_TIMEOUT
 	int "Auto-monitor reset timeout(second)"
 	default 60
 
-if WATCHDOG_AUTOMONITOR_BY_WDOG || WATCHDOG_AUTOMONITOR_BY_WORKER
+if !WATCHDOG_AUTOMONITOR_BY_CAPTURE && !WATCHDOG_AUTOMONITOR_BY_IDLE
 
 config WATCHDOG_AUTOMONITOR_PING_INTERVAL
 	int "Auto-monitor keep a live interval"
@@ -400,7 +404,7 @@ config WATCHDOG_AUTOMONITOR_PING_INTERVAL
 		This interval will only be used by auto-monitor by Worker callback
 		or by Timer callback.
 
-endif # WATCHDOG_AUTOMONITOR_BY_WDOG || WATCHDOG_AUTOMONITOR_BY_WORKER
+endif # !WATCHDOG_AUTOMONITOR_BY_CAPTURE && !WATCHDOG_AUTOMONITOR_BY_IDLE
 
 endif # WATCHDOG_AUTOMONITOR
 
