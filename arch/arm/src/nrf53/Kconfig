@@ -1,0 +1,54 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "NRF53 Configuration Options"
+
+choice
+	prompt "NRF53 Chip Selection"
+	default ARCH_CHIP_NRF5340
+	depends on ARCH_CHIP_NRF53
+
+config ARCH_CHIP_NRF5340
+	bool "NRF5340"
+
+endchoice # NRF53 Chip Selection
+
+# NRF53 Families
+
+
+choice
+	prompt "NRF5340 Core Selection"
+	default ARCH_CHIP_NRF5340_CPUAPP
+	depends on ARCH_CHIP_NRF5340
+
+config ARCH_CHIP_NRF5340_CPUAPP
+	bool "NRF53 App core"
+
+config ARCH_CHIP_NRF5340_CPUNET
+	bool "NRF53 Net core"
+
+endchoice # NRF5340 Core Selection
+
+# Peripheral Selection
+
+config NRF53_UART
+	bool
+	default n
+
+menu "NRF53 Peripheral Selection"
+
+config NRF53_UART0
+	bool "UART0"
+	default n
+	select UART0_SERIALDRIVER
+	select NRF53_UART
+
+config NRF53_UART1
+	bool "UART1"
+	default n
+	select UART1_SERIALDRIVER
+	select NRF53_UART
+
+endmenu # NRF53 Peripheral Selection
