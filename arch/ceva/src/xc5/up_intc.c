@@ -162,7 +162,7 @@ int up_prioritize_irq(int irq, int priority)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_HAVE_IRQTRIGGER
-void up_trigger_irq(int irq)
+void up_trigger_irq(int irq, cpu_set_t cpuset)
 {
   if (irq >= IRQ_VINT_FIRST)
     {

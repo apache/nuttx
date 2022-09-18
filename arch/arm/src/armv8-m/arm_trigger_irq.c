@@ -47,7 +47,7 @@
  *
  ****************************************************************************/
 
-void up_trigger_irq(int irq)
+void up_trigger_irq(int irq, cpu_set_t cpuset)
 {
   uint32_t pend_bit = 0;
 
