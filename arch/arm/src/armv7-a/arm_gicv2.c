@@ -523,19 +523,33 @@ int up_prioritize_irq(int irq, int priority)
 
 void up_trigger_irq(int irq, cpu_set_t cpuset)
 {
-  uint32_t regval;
+  if (irq >= 0 && irq <= GIC_IRQ_SGI15)
+    {
+      uint32_t regval;
 
 #ifdef CONFIG_SMP
-  regval = GIC_ICDSGIR_INTID(irq)        |
-           GIC_ICDSGIR_CPUTARGET(cpuset) |
-           GIC_ICDSGIR_TGTFILTER_LIST;
+      regval = GIC_ICDSGIR_INTID(irq)        |
+               GIC_ICDSGIR_CPUTARGET(cpuset) |
+               GIC_ICDSGIR_TGTFILTER_LIST;
 #else
-  regval = GIC_ICDSGIR_INTID(irq)   |
-           GIC_ICDSGIR_CPUTARGET(0) |
-           GIC_ICDSGIR_TGTFILTER_THIS;
+      regval = GIC_ICDSGIR_INTID(irq)   |
+               GIC_ICDSGIR_CPUTARGET(0) |
+               GIC_ICDSGIR_TGTFILTER_THIS;
 #endif
 
-  putreg32(regval, GIC_ICDSGIR);
+      putreg32(regval, GIC_ICDSGIR);
+    }
+  else if (irq >= 0 && irq < NR_IRQS)
+    {
+      uintptr_t regaddr;
+
+      /* Write '1' to the corresponding bit in the distributor Interrupt
+       * Set-Pending (ICDISPR)
+       */
+
+      regaddr = GIC_ICDISPR(irq);
+      putreg32(GIC_ICDISPR_INT(irq), regaddr);
+    }
 }
 
 /****************************************************************************
