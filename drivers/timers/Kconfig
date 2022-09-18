@@ -370,25 +370,37 @@ choice
 
 config WATCHDOG_AUTOMONITOR_BY_CAPTURE
 	bool "Capture callback"
+	---help---
+		Feed watchdog through watchdog_ops_s::capture callback periodically
 
 config WATCHDOG_AUTOMONITOR_BY_ONESHOT
 	bool "Oneshot callback"
 	depends on ONESHOT
+	---help---
+		Feed watchdog through oneshot_lowerhalf_s functions periodically
 
 config WATCHDOG_AUTOMONITOR_BY_TIMER
 	bool "Timer callback"
 	depends on TIMER
+	---help---
+		Feed watchdog through timer_lowerhalf_s functions periodically
 
 config WATCHDOG_AUTOMONITOR_BY_WDOG
 	bool "Wdog callback"
+	---help---
+		Feed watchdog through wdog functions periodically
 
 config WATCHDOG_AUTOMONITOR_BY_WORKER
 	bool "Worker callback"
 	depends on SCHED_WORKQUEUE
+	---help---
+		Feed watchdog through wqueue functions periodically
 
 config WATCHDOG_AUTOMONITOR_BY_IDLE
 	bool "Idle callback"
 	depends on PM
+	---help---
+		Feed watchdog before idle through pm_callback_s::notify callback
 
 endchoice
 
