@@ -7,6 +7,7 @@ comment "ARMv7-A Configuration Options"
 
 config ARMV7A_HAVE_GICv2
 	bool
+	select ARCH_HAVE_IRQTRIGGER
 	default n
 	---help---
 		Selected by the configuration tool if the architecture supports the

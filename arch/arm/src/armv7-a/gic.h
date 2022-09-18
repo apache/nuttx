@@ -681,7 +681,7 @@ static inline unsigned int arm_gic_nlines(void)
  *
  ****************************************************************************/
 
-static inline int arm_cpu_sgi(int sgi, unsigned int cpuset)
+static inline void arm_cpu_sgi(int sgi, unsigned int cpuset)
 {
   uint32_t regval;
 
@@ -694,7 +694,6 @@ static inline int arm_cpu_sgi(int sgi, unsigned int cpuset)
 #endif
 
   putreg32(regval, GIC_ICDSGIR);
-  return OK;
 }
 
 /****************************************************************************
