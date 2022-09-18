@@ -400,13 +400,12 @@ if !WATCHDOG_AUTOMONITOR_BY_CAPTURE && !WATCHDOG_AUTOMONITOR_BY_IDLE
 
 config WATCHDOG_AUTOMONITOR_PING_INTERVAL
 	int "Auto-monitor keep a live interval"
-	default WATCHDOG_AUTOMONITOR_TIMEOUT
-	range 1 WATCHDOG_AUTOMONITOR_TIMEOUT
+	range 0 WATCHDOG_AUTOMONITOR_TIMEOUT
+	default 0
 	---help---
-		If the interval is same as WATCHDOG_AUTOMONITOR_TIMEOUT
-		the default value will change to (WATCHDOG_AUTOMONITOR_TIMEOUT / 2).
-		This interval will only be used by auto-monitor by Worker callback
-		or by Timer callback.
+		If the interval is 0, it will change to (WATCHDOG_AUTOMONITOR_TIMEOUT / 2).
+		This interval will only be used by auto-monitor in oneshot, timer, wdog or
+		worker case.
 
 endif # !WATCHDOG_AUTOMONITOR_BY_CAPTURE && !WATCHDOG_AUTOMONITOR_BY_IDLE
 
