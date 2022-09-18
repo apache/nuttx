@@ -371,6 +371,10 @@ choice
 config WATCHDOG_AUTOMONITOR_BY_CAPTURE
 	bool "Capture callback"
 
+config WATCHDOG_AUTOMONITOR_BY_ONESHOT
+	bool "Oneshot callback"
+	depends on ONESHOT
+
 config WATCHDOG_AUTOMONITOR_BY_TIMER
 	bool "Timer callback"
 	depends on TIMER
