@@ -505,6 +505,40 @@ int up_prioritize_irq(int irq, int priority)
 }
 
 /****************************************************************************
+ * Name: up_trigger_irq
+ *
+ * Description:
+ *   Perform a Software Generated Interrupt (SGI).  If CONFIG_SMP is
+ *   selected, then the SGI is sent to all CPUs specified in the CPU set.
+ *   That set may include the current CPU.
+ *
+ *   If CONFIG_SMP is not selected, the cpuset is ignored and SGI is sent
+ *   only to the current CPU.
+ *
+ * Input Parameters
+ *   irq    - The SGI interrupt ID (0-15)
+ *   cpuset - The set of CPUs to receive the SGI
+ *
+ ****************************************************************************/
+
+void up_trigger_irq(int irq, cpu_set_t cpuset)
+{
+  uint32_t regval;
+
+#ifdef CONFIG_SMP
+  regval = GIC_ICDSGIR_INTID(irq)        |
+           GIC_ICDSGIR_CPUTARGET(cpuset) |
+           GIC_ICDSGIR_TGTFILTER_LIST;
+#else
+  regval = GIC_ICDSGIR_INTID(irq)   |
+           GIC_ICDSGIR_CPUTARGET(0) |
+           GIC_ICDSGIR_TGTFILTER_THIS;
+#endif
+
+  putreg32(regval, GIC_ICDSGIR);
+}
+
+/****************************************************************************
  * Name: arm_gic_irq_trigger
  *
  * Description:

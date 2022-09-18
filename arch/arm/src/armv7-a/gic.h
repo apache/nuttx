@@ -662,42 +662,6 @@ static inline unsigned int arm_gic_nlines(void)
 }
 
 /****************************************************************************
- * Name: arm_cpu_sgi
- *
- * Description:
- *   Perform a Software Generated Interrupt (SGI).  If CONFIG_SMP is
- *   selected, then the SGI is sent to all CPUs specified in the CPU set.
- *   That set may include the current CPU.
- *
- *   If CONFIG_SMP is not selected, the cpuset is ignored and SGI is sent
- *   only to the current CPU.
- *
- * Input Parameters:
- *   sgi    - The SGI interrupt ID (0-15)
- *   cpuset - The set of CPUs to receive the SGI
- *
- * Returned Value:
- *   OK is always returned at present.
- *
- ****************************************************************************/
-
-static inline int arm_cpu_sgi(int sgi, unsigned int cpuset)
-{
-  uint32_t regval;
-
-#ifdef CONFIG_SMP
-  regval = GIC_ICDSGIR_INTID(sgi) |  GIC_ICDSGIR_CPUTARGET(cpuset) |
-           GIC_ICDSGIR_TGTFILTER_LIST;
-#else
-  regval = GIC_ICDSGIR_INTID(sgi) |  GIC_ICDSGIR_CPUTARGET(0) |
-           GIC_ICDSGIR_TGTFILTER_THIS;
-#endif
-
-  putreg32(regval, GIC_ICDSGIR);
-  return OK;
-}
-
-/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 

@@ -241,8 +241,6 @@ int arm_pause_handler(int irq, void *context, void *arg)
 
 int up_cpu_pause(int cpu)
 {
-  int ret;
-
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
@@ -267,22 +265,13 @@ int up_cpu_pause(int cpu)
 
   /* Execute SGI2 */
 
-  ret = arm_cpu_sgi(GIC_IRQ_SGI2, (1 << cpu));
-  if (ret < 0)
-    {
-      /* What happened?  Unlock the g_cpu_wait spinlock */
+  up_trigger_irq(GIC_IRQ_SGI2, (1 << cpu));
 
-      spin_unlock(&g_cpu_wait[cpu]);
-    }
-  else
-    {
-      /* Wait for the other CPU to unlock g_cpu_paused meaning that
-       * it is fully paused and ready for up_cpu_resume();
-       */
+  /* Wait for the other CPU to unlock g_cpu_paused meaning that
+   * it is fully paused and ready for up_cpu_resume();
+   */
 
-      spin_lock(&g_cpu_paused[cpu]);
-    }
-
+  spin_lock(&g_cpu_paused[cpu]);
   spin_unlock(&g_cpu_paused[cpu]);
 
   /* On successful return g_cpu_wait will be locked, the other CPU will be
@@ -290,7 +279,7 @@ int up_cpu_pause(int cpu)
    * called.  g_cpu_paused will be unlocked in any case.
    */
 
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
