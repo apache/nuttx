@@ -99,12 +99,15 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),)
   endif
 
   LIBPATH_OPT = -L
+  LIBRARY_OPT = -l
   SCRIPT_OPT  = -T
 else
   LIBPATH_OPT = --userlibpath
-  EXTRA_LIBS += arm_vectors.o
+  LIBRARY_OPT = --library=
   SCRIPT_OPT  = --scatter=
+  EXTRA_LIBS += arm_vectors.o
 endif
+
 
 LDFLAGS += $(addprefix $(SCRIPT_OPT),$(call CONVERT_PATH,$(ARCHSCRIPT))) $(EXTRALINKCMDS)
 LIBPATHS += $(LIBPATH_OPT) $(call CONVERT_PATH,$(TOPDIR)$(DELIM)staging)
@@ -114,9 +117,9 @@ ifeq ($(BOARDMAKE),y)
   LIBPATHS += $(LIBPATH_OPT) $(call CONVERT_PATH,$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board)
 endif
 
-LDLIBS = $(patsubst %.a,%,$(patsubst lib%,--library=%,$(LINKLIBS)))
+LDLIBS = $(patsubst %.a,%,$(patsubst lib%,$(LIBRARY_OPT)%,$(LINKLIBS)))
 ifeq ($(BOARDMAKE),y)
-  LDLIBS += --library=board
+  LDLIBS += $(LIBRARY_OPT)board
 endif
 
 VPATH += chip
