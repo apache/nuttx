@@ -504,6 +504,33 @@ int up_prioritize_irq(int irq, int priority)
 }
 
 /****************************************************************************
+ * Name: up_affinity_irq
+ *
+ * Description:
+ *   Set an IRQ affinity by software.
+ *
+ ****************************************************************************/
+
+void up_affinity_irq(int irq, cpu_set_t cpuset)
+{
+  if (irq >= GIC_IRQ_SPI && irq < NR_IRQS)
+    {
+      uintptr_t regaddr;
+      uint32_t regval;
+
+      /* Write the new cpuset to the corresponding field in the in the
+       * distributor Interrupt Processor Target Register (GIC_ICDIPTR).
+       */
+
+      regaddr = GIC_ICDIPTR(irq);
+      regval  = getreg32(regaddr);
+      regval &= ~GIC_ICDIPTR_ID_MASK(irq);
+      regval |= GIC_ICDIPTR_ID(irq, cpuset);
+      putreg32(regval, regaddr);
+    }
+}
+
+/****************************************************************************
  * Name: up_trigger_irq
  *
  * Description:
