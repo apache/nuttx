@@ -331,28 +331,7 @@ static uart_dev_t g_uart0_dev =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uart_reset
- *
- * Description:
- *   Reset the uart hardware, the software pointer must be set to zero
- *   (function uart_clr_rx_index() must be called).
- *
- * Parameters:
- *   void
- *
- * Returned Values:
- *   void
- *
- ****************************************************************************/
-
-static inline void uart_reset(void)
-{
-  RESET_RST0_REG |= RESET_RST0_UART;
-  RESET_RST0_REG &= ~RESET_RST0_UART;
-}
-
-/****************************************************************************
- * Name: uart_reset
+ * Name: uart_clr_rx_index
  *
  * Description:
  *   Clear the uart receive software pointer, this function must be called
@@ -369,6 +348,49 @@ static inline void uart_reset(void)
 static inline void uart_clr_rx_index(int uart_num)
 {
   uart_rxindex = 0;
+}
+
+/****************************************************************************
+ * Name: uart_clr_tx_index
+ *
+ * Description:
+ *   Clear the uart transimit software pointer, this function must be called
+ *   after wakeup from power-saving mode or reset uart.
+ *
+ * Parameters:
+ *   uart_num  - the uart hardware index
+ *
+ * Returned Values:
+ *   void
+ *
+ ****************************************************************************/
+
+static inline void uart_clr_tx_index(int uart_num)
+{
+  uart_txindex = 0;
+}
+
+/****************************************************************************
+ * Name: uart_reset
+ *
+ * Description:
+ *   Reset the uart hardware, the software pointer must be set to zero
+ *   (function uart_clr_rx_index() must be called).
+ *
+ * Parameters:
+ *   uart_num  - the uart hardware index
+ *
+ * Returned Values:
+ *   void
+ *
+ ****************************************************************************/
+
+static inline void uart_reset(int uart_num)
+{
+  RESET_RST0_REG |= RESET_RST0_UART;
+  RESET_RST0_REG &= ~RESET_RST0_UART;
+  uart_clr_rx_index(uart_num);
+  uart_clr_tx_index(uart_num);
 }
 
 /****************************************************************************
@@ -999,7 +1021,7 @@ static int tlsr82_uart_setup(struct uart_dev_s *dev)
 
   /* Reset the uart */
 
-  uart_reset();
+  uart_reset(priv->port);
 
   /* Uart communication parameters config
    * TODO: unity below functions to uart_format_config()
@@ -1071,10 +1093,9 @@ static int UART_RAMCODE tlsr82_interrupt(int irq, void *context, void *arg)
 
       uart_irq_clr(priv->port, UART_IRQ_CLR_RX);
 
-      /* uart_reset() clear hardware pointer, and clear software pointer */
+      /* uart_reset() clear hardware and software fifo index */
 
-      uart_reset();
-      uart_clr_rx_index(priv->port);
+      uart_reset(priv->port);
     }
 
 #ifdef CONFIG_SERIAL_TXDMA
