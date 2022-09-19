@@ -29,6 +29,7 @@
 #include <time.h>
 #include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
@@ -277,6 +278,60 @@ static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds,
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: poll_notify
+ *
+ * Description:
+ *   Notify the poll, this function should be called by drivers to notify
+ *   the caller the poll is ready.
+ *
+ * Input Parameters:
+ *   afds     - The fds array
+ *   nfds     - Number of fds array
+ *   eventset - List of events to check for activity
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void poll_notify(FAR struct pollfd **afds, int nfds, pollevent_t eventset)
+{
+  int i;
+  int semcount;
+  FAR struct pollfd *fds;
+
+  DEBUGASSERT(afds != NULL && nfds >= 1);
+
+  for (i = 0; i < nfds && eventset; i++)
+    {
+      fds = afds[i];
+      if (fds != NULL)
+        {
+          /* The error event must be set in fds->revents */
+
+          fds->revents |= eventset & (fds->events | POLLERR | POLLHUP);
+          if ((fds->revents & (POLLERR | POLLHUP)) != 0)
+            {
+              /* Error, clear POLLIN and POLLOUT event */
+
+              fds->revents &= ~(POLLIN | POLLOUT);
+            }
+
+          if (fds->revents != 0)
+            {
+              finfo("Report events: %08" PRIx32 "\n", fds->revents);
+
+              nxsem_get_value(fds->sem, &semcount);
+              if (semcount < 1)
+                {
+                  nxsem_post(fds->sem);
+                }
+            }
+        }
+    }
+}
+
+/****************************************************************************
  * Name: file_poll
  *
  * Description:
@@ -328,11 +383,7 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
         {
           if (setup)
             {
-              fds->revents |= (fds->events & (POLLIN | POLLOUT));
-              if (fds->revents != 0)
-                {
-                  nxsem_post(fds->sem);
-                }
+              poll_notify(&fds, 1, POLLIN | POLLOUT);
             }
 
           ret = OK;
@@ -340,8 +391,7 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
     }
   else
     {
-      fds->revents |= (POLLERR | POLLHUP);
-      nxsem_post(fds->sem);
+      poll_notify(&fds, 1, POLLERR | POLLHUP);
 
       ret = OK;
     }

@@ -1054,30 +1054,6 @@ static bool hts221_sample(FAR struct hts221_dev_s *priv)
   return status.is_humid_ready || status.is_temp_ready;
 }
 
-static void hts221_notify(FAR struct hts221_dev_s *priv)
-{
-  DEBUGASSERT(priv != NULL);
-
-  int i;
-
-  /* If there are threads waiting on poll() for data to become available,
-   * then wake them up now.  NOTE: we wake up all waiting threads because we
-   * do not know that they are going to do.  If they all try to read the
-   * data, then some make end up blocking after all.
-   */
-
-  for (i = 0; i < CONFIG_HTS221_NPOLLWAITERS; i++)
-    {
-      FAR struct pollfd *fds = priv->fds[i];
-      if (fds)
-        {
-          fds->revents |= POLLIN;
-          hts221_dbg("Report events: %08" PRIx32 "\n", fds->revents);
-          nxsem_post(fds->sem);
-        }
-    }
-}
-
 static int hts221_poll(FAR struct file *filep, FAR struct pollfd *fds,
                        bool setup)
 {
@@ -1139,7 +1115,7 @@ static int hts221_poll(FAR struct file *filep, FAR struct pollfd *fds,
       flags = enter_critical_section();
       if (priv->int_pending || hts221_sample(priv))
         {
-          hts221_notify(priv);
+          poll_notify(priv->fds, CONFIG_HTS221_NPOLLWAITERS, POLLIN);
         }
 
       leave_critical_section(flags);
@@ -1170,7 +1146,7 @@ static int hts221_int_handler(int irq, FAR void *context, FAR void *arg)
 
   priv->int_pending = true;
   hts221_dbg("Hts221 interrupt\n");
-  hts221_notify(priv);
+  poll_notify(priv->fds, CONFIG_HTS221_NPOLLWAITERS, POLLIN);
 
   return OK;
 }

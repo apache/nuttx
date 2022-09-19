@@ -144,6 +144,8 @@ int ppoll(FAR struct pollfd *fds, nfds_t nfds,
           FAR const struct timespec *timeout_ts,
           FAR const sigset_t *sigmask);
 
+void poll_notify(FAR struct pollfd **afds, int nfds, pollevent_t eventset);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

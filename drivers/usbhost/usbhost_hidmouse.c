@@ -292,10 +292,6 @@ static int usbhost_takesem(FAR sem_t *sem);
 static void usbhost_forcetake(FAR sem_t *sem);
 #define usbhost_givesem(s) nxsem_post(s);
 
-/* Polling support */
-
-static void usbhost_pollnotify(FAR struct usbhost_state_s *dev);
-
 /* Memory allocation services */
 
 static inline FAR struct usbhost_state_s *usbhost_allocclass(void);
@@ -465,29 +461,6 @@ static void usbhost_forcetake(FAR sem_t *sem)
       DEBUGASSERT(ret == OK || ret == -ECANCELED);
     }
   while (ret < 0);
-}
-
-/****************************************************************************
- * Name: usbhost_pollnotify
- ****************************************************************************/
-
-static void usbhost_pollnotify(FAR struct usbhost_state_s *priv)
-{
-  int i;
-
-  for (i = 0; i < CONFIG_HIDMOUSE_NPOLLWAITERS; i++)
-    {
-      struct pollfd *fds = priv->fds[i];
-      if (fds)
-        {
-          fds->revents |= (fds->events & POLLIN);
-          if (fds->revents != 0)
-            {
-              uinfo("Report events: %08" PRIx32 "\n", fds->revents);
-              nxsem_post(fds->sem);
-            }
-        }
-    }
 }
 
 /****************************************************************************
@@ -677,8 +650,6 @@ static void usbhost_destroy(FAR void *arg)
 
 static void usbhost_notify(FAR struct usbhost_state_s *priv)
 {
-  int i;
-
   /* If there are threads waiting for read data, then signal one of them
    * that the read data is available.
    */
@@ -694,16 +665,7 @@ static void usbhost_notify(FAR struct usbhost_state_s *priv)
    * all try to read the data, then some make end up blocking after all.
    */
 
-  for (i = 0; i < CONFIG_HIDMOUSE_NPOLLWAITERS; i++)
-    {
-      struct pollfd *fds = priv->fds[i];
-      if (fds)
-        {
-          fds->revents |= POLLIN;
-          iinfo("Report events: %08" PRIx32 "\n", fds->revents);
-          nxsem_post(fds->sem);
-        }
-    }
+  poll_notify(priv->fds, CONFIG_HIDMOUSE_NPOLLWAITERS, POLLIN);
 }
 
 /****************************************************************************
@@ -2558,7 +2520,7 @@ static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (priv->valid)
         {
-          usbhost_pollnotify(priv);
+          poll_notify(priv->fds, CONFIG_HIDMOUSE_NPOLLWAITERS, POLLIN);
         }
     }
   else

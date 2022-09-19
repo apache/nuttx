@@ -92,6 +92,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
+#include <poll.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -638,8 +639,7 @@ static int cc1101_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
       cc1101_takesem(&dev->sem_rx_buffer);
       if (dev->fifo_len > 0)
         {
-          dev->pfd->revents |= POLLIN; /* Data available for input */
-          nxsem_post(dev->pfd->sem);
+          poll_notify(&dev->pfd, 1, POLLIN);
         }
 
       nxsem_post(&dev->sem_rx_buffer);
@@ -1540,9 +1540,7 @@ void cc1101_isr_process(FAR void *arg)
 
           if (dev->pfd)
             {
-              dev->pfd->revents |= POLLIN; /* Data available for input */
-              wlinfo("Wake up polled fd\n");
-              nxsem_post(dev->pfd->sem);
+              poll_notify(&dev->pfd, 1, POLLIN);
             }
         }
         break;

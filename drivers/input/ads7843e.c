@@ -279,24 +279,13 @@ static uint16_t ads7843e_sendcmd(FAR struct ads7843e_dev_s *priv,
 
 static void ads7843e_notify(FAR struct ads7843e_dev_s *priv)
 {
-  int i;
-
   /* If there are threads waiting on poll() for ADS7843E data to become
    * available, then wake them up now.  NOTE: we wake up all waiting threads
    * because we do not know that they are going to do.  If they all try to
    * read the data, then some make end up blocking after all.
    */
 
-  for (i = 0; i < CONFIG_ADS7843E_NPOLLWAITERS; i++)
-    {
-      struct pollfd *fds = priv->fds[i];
-      if (fds)
-        {
-          fds->revents |= POLLIN;
-          iinfo("Report events: %08" PRIx32 "\n", fds->revents);
-          nxsem_post(fds->sem);
-        }
-    }
+  poll_notify(priv->fds, CONFIG_ADS7843E_NPOLLWAITERS, POLLIN);
 
   /* If there are threads waiting for read data, then signal one of them
    * that the read data is available.

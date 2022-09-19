@@ -441,29 +441,6 @@ static int spq10kbd_interrupt(int irq, FAR void *context, FAR void *arg)
 }
 
 /****************************************************************************
- * Name: spq10kbd_pollnotify
- ****************************************************************************/
-
-static void spq10kbd_pollnotify(FAR struct spq10kbd_dev_s *priv)
-{
-  int i;
-
-  for (i = 0; i < CONFIG_SPQ10KBD_NPOLLWAITERS; i++)
-    {
-      struct pollfd *fds = priv->fds[i];
-      if (fds)
-        {
-          fds->revents |= (fds->events & POLLIN);
-          if (fds->revents != 0)
-            {
-              uinfo("Report events: %08" PRIx32 "\n", fds->revents);
-              nxsem_post(fds->sem);
-            }
-        }
-    }
-}
-
-/****************************************************************************
  * Name: spq10kbd_open
  *
  * Description:
@@ -676,7 +653,7 @@ static int spq10kbd_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (priv->headndx != priv->tailndx)
         {
-          spq10kbd_pollnotify(priv);
+          poll_notify(priv->fds, CONFIG_SPQ10KBD_NPOLLWAITERS, POLLIN);
         }
     }
   else

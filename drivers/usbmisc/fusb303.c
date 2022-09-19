@@ -114,7 +114,6 @@ static ssize_t fusb303_write(FAR struct file *filep, FAR const char *buffer,
 static int fusb303_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 static int fusb303_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup);
-static void fusb303_notify(FAR struct fusb303_dev_s *priv);
 
 /****************************************************************************
  * Private Data
@@ -894,7 +893,7 @@ static int fusb303_poll(FAR struct file *filep, FAR struct pollfd *fds,
       flags = enter_critical_section();
       if (priv->int_pending)
         {
-          fusb303_notify(priv);
+          poll_notify(priv->fds, CONFIG_FUSB303_NPOLLWAITERS, POLLIN);
         }
 
       leave_critical_section(flags);
@@ -918,38 +917,6 @@ out:
 }
 
 /****************************************************************************
- * Name: fusb303_notify
- *
- * Description:
- *   Notify thread about data to be available
- *
- ****************************************************************************/
-
-static void fusb303_notify(FAR struct fusb303_dev_s *priv)
-{
-  int i;
-
-  DEBUGASSERT(priv != NULL);
-
-  /* If there are threads waiting on poll() for FUSB303 data to become
-   * available, then wake them up now.  NOTE: we wake up all waiting threads
-   * because we do not know that they are going to do.  If they all try to
-   * read the data, then some make end up blocking after all.
-   */
-
-  for (i = 0; i < CONFIG_FUSB303_NPOLLWAITERS; i++)
-    {
-      struct pollfd *fds = priv->fds[i];
-      if (fds)
-        {
-          fds->revents |= POLLIN;
-          fusb303_info("Report events: %08" PRIx32 "\n", fds->revents);
-          nxsem_post(fds->sem);
-        }
-    }
-}
-
-/****************************************************************************
  * Name: fusb303_callback
  *
  * Description:
@@ -967,7 +934,7 @@ static int fusb303_int_handler(int irq, FAR void *context, FAR void *arg)
   flags = enter_critical_section();
   priv->int_pending = true;
 
-  fusb303_notify(priv);
+  poll_notify(priv->fds, CONFIG_FUSB303_NPOLLWAITERS, POLLIN);
   leave_critical_section(flags);
 
   return OK;
