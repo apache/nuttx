@@ -381,7 +381,7 @@ static void riscv_dumpstate(void)
   else
     {
       up_saveusercontext(s_last_regs);
-      rtcb->xcp.regs = (uint32_t *)s_last_regs;
+      rtcb->xcp.regs = (uintptr_t *)s_last_regs;
     }
 
   /* Show back trace */
