@@ -111,6 +111,10 @@ ifneq ($(CONFIG_LIBM),y)
   STDLIBS += -lm
 endif
 
+ifneq ($(CONFIG_SIM_UBSAN),y)
+  STDLIBS += -lubsan
+endif
+
 ifeq ($(CONFIG_STACK_COLORATION),y)
   CSRCS += up_checkstack.c
 endif
