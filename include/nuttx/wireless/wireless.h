@@ -150,6 +150,31 @@
 #define SIOCSIWPTAPRIO      _WLIOC(0x0039)  /* Set PTA priority type */
 #define SIOCGIWPTAPRIO      _WLIOC(0x003a)  /* Get PTA priority type */
 
+/* -------------------- DEV PRIVATE IOCTL LIST -------------------- */
+
+/* These 32 ioctl are wireless device private, for 16 commands.
+ * Each driver is free to use them for whatever purpose it chooses,
+ * however the driver *must* export the description of those ioctls
+ * with SIOCGIWPRIV and *must* use arguments as defined below.
+ */
+
+#define SIOCIWFIRSTPRIV     _WLIOC(0x00e0)
+#define SIOCIWLASTPRIV      _WLIOC(0x00ff)
+
+/* ------------------------- IOCTL STUFF ------------------------- */
+
+/* The first and the last (range) */
+
+#define SIOCIWFIRST         _WLIOC(0x0000)  /* First network command */
+#define SIOCIWLAST          SIOCIWLASTPRIV  /* 0x8bff */
+
+#define IW_IOCTL_IDX(cmd)   ((cmd) - SIOCIWFIRST)
+
+/* Odd : get (world access), even : set (root access) */
+
+#define IW_IS_SET(cmd)      (!((cmd) & 0x1))
+#define IW_IS_GET(cmd)      ((cmd) & 0x1)
+
 #define WL_IS80211POINTERCMD(cmd) ((cmd) == SIOCGIWSCAN || \
                                    (cmd) == SIOCSIWSCAN || \
                                    (cmd) == SIOCSIWCOUNTRY || \
@@ -159,11 +184,6 @@
                                    (cmd) == SIOCGIWENCODEEXT || \
                                    (cmd) == SIOCGIWESSID || \
                                    (cmd) == SIOCSIWESSID)
-
-/* Device-specific network IOCTL commands *******************************************/
-
-#define WL_NETFIRST         0x0000          /* First network command */
-#define WL_NNETCMDS         0x003b          /* Number of network commands */
 
 /* ------------------------------ WIRELESS EVENTS --------------------------------- */
 
