@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
+#include <poll.h>
 #include <sched.h>
 #include <assert.h>
 #include <errno.h>
@@ -475,8 +476,6 @@ static inline bool tc_valid_sample(uint16_t sample)
 
 static void tc_notify(struct tc_dev_s *priv)
 {
-  int i;
-
   /* If there are threads waiting on poll() for touchscreen data to become
    * available, then wake them up now.  NOTE: we wake up all waiting threads
    * because we do not know that they are going to do.
@@ -484,16 +483,7 @@ static void tc_notify(struct tc_dev_s *priv)
    * all.
    */
 
-  for (i = 0; i < CONFIG_TOUCHSCREEN_NPOLLWAITERS; i++)
-    {
-      struct pollfd *fds = priv->fds[i];
-      if (fds)
-        {
-          fds->revents |= POLLIN;
-          iinfo("Report events: %08" PRIx32 "\n", fds->revents);
-          nxsem_post(fds->sem);
-        }
-    }
+  poll_notify(priv->fds, CONFIG_TOUCHSCREEN_NPOLLWAITERS, POLLIN);
 
   /* If there are threads waiting for read data, then signal one of them
    * that the read data is available.

@@ -230,7 +230,6 @@ static void btn_sample(FAR struct btn_upperhalf_s *priv)
   btn_buttonset_t change;
   btn_buttonset_t press;
   btn_buttonset_t release;
-  int i;
 
   DEBUGASSERT(priv && priv->bu_lower);
   lower = priv->bu_lower;
@@ -267,19 +266,8 @@ static void btn_sample(FAR struct btn_upperhalf_s *priv)
         {
           /* Yes.. Notify all waiters */
 
-          for (i = 0; i < CONFIG_INPUT_BUTTONS_NPOLLWAITERS; i++)
-            {
-              FAR struct pollfd *fds = opriv->bo_fds[i];
-              if (fds)
-                {
-                  fds->revents |= (fds->events & POLLIN);
-                  if (fds->revents != 0)
-                    {
-                      iinfo("Report events: %08" PRIx32 "\n", fds->revents);
-                      nxsem_post(fds->sem);
-                    }
-                }
-            }
+          poll_notify(opriv->bo_fds, CONFIG_INPUT_BUTTONS_NPOLLWAITERS,
+                      POLLIN);
         }
 
       /* Have any signal events occurred? */
@@ -687,12 +675,7 @@ static int btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
               if (opriv->bo_pending)
                 {
-                  fds->revents |= (fds->events & POLLIN);
-                  if (fds->revents != 0)
-                    {
-                      iinfo("Report events: %08" PRIx32 "\n", fds->revents);
-                      nxsem_post(fds->sem);
-                    }
+                  poll_notify(&fds, 1, POLLIN);
                 }
 
               break;

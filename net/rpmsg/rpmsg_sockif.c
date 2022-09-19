@@ -205,27 +205,6 @@ static inline void rpmsg_socket_post(FAR sem_t *sem)
     }
 }
 
-static void rpmsg_socket_pollnotify(FAR struct rpmsg_socket_conn_s *conn,
-                                    pollevent_t eventset)
-{
-  int i;
-
-  for (i = 0; i < CONFIG_NET_RPMSG_NPOLLWAITERS; i++)
-    {
-      FAR struct pollfd *fds = conn->fds[i];
-
-      if (fds)
-        {
-          fds->revents |= ((fds->events | POLLERR | POLLHUP) & eventset);
-
-          if (fds->revents != 0)
-            {
-              rpmsg_socket_post(fds->sem);
-            }
-        }
-    }
-}
-
 static FAR struct rpmsg_socket_conn_s *rpmsg_socket_alloc(void)
 {
   FAR struct rpmsg_socket_conn_s *conn;
@@ -314,7 +293,7 @@ static int rpmsg_socket_ept_cb(FAR struct rpmsg_endpoint *ept,
         }
 
       rpmsg_socket_post(&conn->sendsem);
-      rpmsg_socket_pollnotify(conn, POLLOUT);
+      poll_notify(conn->fds, CONFIG_NET_RPMSG_NPOLLWAITERS, POLLOUT);
       rpmsg_socket_unlock(&conn->recvlock);
     }
   else
@@ -329,7 +308,7 @@ static int rpmsg_socket_ept_cb(FAR struct rpmsg_endpoint *ept,
       if (rpmsg_socket_get_space(conn) > 0)
         {
           rpmsg_socket_post(&conn->sendsem);
-          rpmsg_socket_pollnotify(conn, POLLOUT);
+          poll_notify(conn->fds, CONFIG_NET_RPMSG_NPOLLWAITERS, POLLOUT);
         }
 
       rpmsg_socket_unlock(&conn->sendlock);
@@ -379,7 +358,7 @@ static int rpmsg_socket_ept_cb(FAR struct rpmsg_endpoint *ept,
                   nerr("circbuf_write overflow, %zu, %zu\n", written, len);
                 }
 
-              rpmsg_socket_pollnotify(conn, POLLIN);
+              poll_notify(conn->fds, CONFIG_NET_RPMSG_NPOLLWAITERS, POLLIN);
             }
 
           rpmsg_socket_unlock(&conn->recvlock);
@@ -411,7 +390,8 @@ static inline void rpmsg_socket_destroy_ept(
       rpmsg_destroy_ept(&conn->ept);
       rpmsg_socket_post(&conn->sendsem);
       rpmsg_socket_post(&conn->recvsem);
-      rpmsg_socket_pollnotify(conn, POLLIN | POLLOUT);
+      poll_notify(conn->fds, CONFIG_NET_RPMSG_NPOLLWAITERS,
+                  POLLIN | POLLOUT);
     }
 
   rpmsg_socket_unlock(&conn->recvlock);
@@ -553,7 +533,7 @@ static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
   rpmsg_socket_ns_bound(&new->ept);
 
   rpmsg_socket_post(&server->recvsem);
-  rpmsg_socket_pollnotify(server, POLLIN);
+  poll_notify(server->fds, CONFIG_NET_RPMSG_NPOLLWAITERS, POLLIN);
 }
 
 static int rpmsg_socket_getaddr(FAR struct rpmsg_socket_conn_s *conn,
@@ -868,7 +848,7 @@ static int rpmsg_socket_poll(FAR struct socket *psock,
 
           if (conn->next)
             {
-              eventset |= (fds->events & POLLIN);
+              eventset |= POLLIN;
             }
         }
       else if (_SS_ISCONNECTED(conn->sconn.s_flags))
@@ -883,7 +863,7 @@ static int rpmsg_socket_poll(FAR struct socket *psock,
 
               if (rpmsg_socket_get_space(conn) > 0)
                 {
-                  eventset |= (fds->events & POLLOUT);
+                  eventset |= POLLOUT;
                 }
 
               rpmsg_socket_unlock(&conn->sendlock);
@@ -892,7 +872,7 @@ static int rpmsg_socket_poll(FAR struct socket *psock,
 
               if (!circbuf_is_empty(&conn->recvbuf))
                 {
-                  eventset |= (fds->events & POLLIN);
+                  eventset |= POLLIN;
                 }
 
               rpmsg_socket_unlock(&conn->recvlock);
@@ -908,10 +888,7 @@ static int rpmsg_socket_poll(FAR struct socket *psock,
           eventset |= POLLERR;
         }
 
-      if (eventset)
-        {
-          rpmsg_socket_pollnotify(conn, eventset);
-        }
+      poll_notify(conn->fds, CONFIG_NET_RPMSG_NPOLLWAITERS, eventset);
     }
   else if (fds->priv != NULL)
     {

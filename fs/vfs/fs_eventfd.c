@@ -81,9 +81,6 @@ static ssize_t eventfd_do_write(FAR struct file *filep,
 #ifdef CONFIG_EVENT_FD_POLL
 static int eventfd_do_poll(FAR struct file *filep, FAR struct pollfd *fds,
                        bool setup);
-
-static void eventfd_pollnotify(FAR struct eventfd_priv_s *dev,
-                               pollevent_t eventset);
 #endif
 
 static int eventfd_blocking_io(FAR struct eventfd_priv_s *dev,
@@ -143,29 +140,6 @@ static void eventfd_destroy(FAR struct eventfd_priv_s *dev)
   nxsem_destroy(&dev->exclsem);
   kmm_free(dev);
 }
-
-#ifdef CONFIG_EVENT_FD_POLL
-static void eventfd_pollnotify(FAR struct eventfd_priv_s *dev,
-                               pollevent_t eventset)
-{
-  FAR struct pollfd *fds;
-  int i;
-
-  for (i = 0; i < CONFIG_EVENT_FD_NPOLLWAITERS; i++)
-    {
-      fds = dev->fds[i];
-      if (fds)
-        {
-          fds->revents |= eventset & fds->events;
-
-          if (fds->revents != 0)
-            {
-              nxsem_post(fds->sem);
-            }
-        }
-    }
-}
-#endif
 
 static unsigned int eventfd_get_unique_minor(void)
 {
@@ -370,7 +344,7 @@ static ssize_t eventfd_do_read(FAR struct file *filep, FAR char *buffer,
 #ifdef CONFIG_EVENT_FD_POLL
   /* Notify all poll/select waiters */
 
-  eventfd_pollnotify(dev, POLLOUT);
+  poll_notify(dev->fds, CONFIG_EVENT_FD_NPOLLWAITERS, POLLOUT);
 #endif
 
   /* Notify all waiting writers that counter have been decremented */
@@ -447,7 +421,7 @@ static ssize_t eventfd_do_write(FAR struct file *filep,
 #ifdef CONFIG_EVENT_FD_POLL
   /* Notify all poll/select waiters */
 
-  eventfd_pollnotify(dev, POLLIN);
+  poll_notify(dev->fds, CONFIG_EVENT_FD_NPOLLWAITERS, POLLIN);
 #endif
 
   /* Notify all of the waiting readers */
@@ -538,10 +512,7 @@ static int eventfd_do_poll(FAR struct file *filep, FAR struct pollfd *fds,
       eventset |= POLLIN;
     }
 
-  if (eventset)
-    {
-      eventfd_pollnotify(dev, eventset);
-    }
+  poll_notify(dev->fds, CONFIG_EVENT_FD_NPOLLWAITERS, eventset);
 
 out:
   nxsem_post(&dev->exclsem);

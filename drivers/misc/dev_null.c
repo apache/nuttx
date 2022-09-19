@@ -105,11 +105,7 @@ static int devnull_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   if (setup)
     {
-      fds->revents |= (fds->events & (POLLIN | POLLOUT));
-      if (fds->revents != 0)
-        {
-          nxsem_post(fds->sem);
-        }
+      poll_notify(&fds, 1, POLLIN | POLLOUT);
     }
 
   return OK;

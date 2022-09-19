@@ -243,10 +243,6 @@ static int  usbhost_takesem(FAR sem_t *sem);
 static void usbhost_forcetake(FAR sem_t *sem);
 #define usbhost_givesem(s) nxsem_post(s);
 
-/* Polling support */
-
-static void usbhost_pollnotify(FAR struct usbhost_state_s *dev);
-
 /* Memory allocation services */
 
 static inline FAR struct usbhost_state_s *usbhost_allocclass(void);
@@ -678,29 +674,6 @@ static void usbhost_forcetake(FAR sem_t *sem)
       DEBUGASSERT(ret == OK || ret == -ECANCELED);
     }
   while (ret < 0);
-}
-
-/****************************************************************************
- * Name: usbhost_pollnotify
- ****************************************************************************/
-
-static void usbhost_pollnotify(FAR struct usbhost_state_s *priv)
-{
-  int i;
-
-  for (i = 0; i < CONFIG_HIDKBD_NPOLLWAITERS; i++)
-    {
-      struct pollfd *fds = priv->fds[i];
-      if (fds)
-        {
-          fds->revents |= (fds->events & POLLIN);
-          if (fds->revents != 0)
-            {
-              uinfo("Report events: %08" PRIx32 "\n", fds->revents);
-              nxsem_post(fds->sem);
-            }
-        }
-    }
 }
 
 /****************************************************************************
@@ -1294,7 +1267,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
 
               if (empty)
                 {
-                  usbhost_pollnotify(priv);
+                  poll_notify(priv->fds, CONFIG_HIDKBD_NPOLLWAITERS, POLLIN);
                 }
 
               /* Yes.. Is there a thread waiting for keyboard data now? */
@@ -2532,7 +2505,7 @@ static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (priv->headndx != priv->tailndx)
         {
-          usbhost_pollnotify(priv);
+          poll_notify(priv->fds, CONFIG_HIDKBD_NPOLLWAITERS, POLLIN);
         }
     }
   else

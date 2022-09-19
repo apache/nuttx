@@ -118,7 +118,6 @@ static int            lis2dh_powerdown(FAR struct lis2dh_dev_s *dev);
 static int            lis2dh_reboot(FAR struct lis2dh_dev_s *dev);
 static int            lis2dh_poll(FAR struct file *filep,
                         FAR struct pollfd *fds, bool setup);
-static void           lis2dh_notify(FAR struct lis2dh_dev_s *priv);
 static int            lis2dh_int_handler(int irq, FAR void *context,
                         FAR void *arg);
 static int            lis2dh_setup(FAR struct lis2dh_dev_s *dev,
@@ -439,7 +438,7 @@ static ssize_t lis2dh_read(FAR struct file *filep, FAR char *buffer,
           priv->int_pending = true;
 #endif
 
-          lis2dh_notify(priv);
+          poll_notify(priv->fds, CONFIG_LIS2DH_NPOLLWAITERS, POLLIN);
           leave_critical_section(flags);
         }
       else if (fifo_mode != LIS2DH_STREAM_MODE && priv->fifo_stopped)
@@ -715,7 +714,7 @@ static int lis2dh_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (priv->int_pending)
         {
-          lis2dh_notify(priv);
+          poll_notify(priv->fds, CONFIG_LIS2DH_NPOLLWAITERS, POLLIN);
         }
     }
   else if (fds->priv)
@@ -734,30 +733,6 @@ static int lis2dh_poll(FAR struct file *filep, FAR struct pollfd *fds,
 out:
   nxsem_post(&priv->devsem);
   return ret;
-}
-
-static void lis2dh_notify(FAR struct lis2dh_dev_s *priv)
-{
-  DEBUGASSERT(priv != NULL);
-
-  int i;
-
-  /* If there are threads waiting on poll() for LIS2DH data to become
-   * available, then wake them up now.  NOTE: we wake up all waiting threads
-   * because we do not know that they are going to do.  If they all try to
-   * read the data, then some make end up blocking after all.
-   */
-
-  for (i = 0; i < CONFIG_LIS2DH_NPOLLWAITERS; i++)
-    {
-      struct pollfd *fds = priv->fds[i];
-      if (fds)
-        {
-          fds->revents |= POLLIN;
-          lis2dh_dbg("lis2dh: Report events: %08" PRIx32 "\n", fds->revents);
-          nxsem_post(fds->sem);
-        }
-    }
 }
 
 /****************************************************************************
@@ -783,7 +758,7 @@ static int lis2dh_int_handler(int irq, FAR void *context, FAR void *arg)
   priv->int_pending = true;
 #endif
 
-  lis2dh_notify(priv);
+  poll_notify(priv->fds, CONFIG_LIS2DH_NPOLLWAITERS, POLLIN);
   leave_critical_section(flags);
 
   return OK;

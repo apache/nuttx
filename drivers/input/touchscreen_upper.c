@@ -66,8 +66,6 @@ struct touch_upperhalf_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static void    touch_notify(FAR struct touch_openpriv_s *openpriv,
-                            pollevent_t eventset);
 static int     touch_open(FAR struct file *filep);
 static int     touch_close(FAR struct file *filep);
 static ssize_t touch_read(FAR struct file *filep, FAR char *buffer,
@@ -100,29 +98,6 @@ static const struct file_operations g_touch_fops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-static void touch_notify(FAR struct touch_openpriv_s *openpriv,
-                         pollevent_t eventset)
-{
-  FAR struct pollfd *fd = openpriv->fds;
-
-  fd = openpriv->fds;
-  if (fd)
-    {
-      fd->revents |= (fd->events & eventset);
-      if (fd->revents != 0)
-        {
-          /* report event log */
-
-          int semcount;
-          nxsem_get_value(fd->sem, &semcount);
-          if (semcount < 1)
-            {
-              nxsem_post(fd->sem);
-            }
-        }
-    }
-}
 
 /****************************************************************************
  * Name: touch_open
@@ -323,13 +298,10 @@ static int touch_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
 
       if (!circbuf_is_empty(&openpriv->circbuf))
         {
-          eventset |= (fds->events & POLLIN);
+          eventset |= POLLIN;
         }
 
-      if (eventset)
-        {
-          touch_notify(openpriv, POLLIN);
-        }
+      poll_notify(&openpriv->fds, 1, eventset);
     }
   else if (fds->priv)
     {
@@ -368,7 +340,7 @@ void touch_event(FAR void *priv, FAR const struct touch_sample_s *sample)
           nxsem_post(&openpriv->waitsem);
         }
 
-      touch_notify(openpriv, POLLIN);
+      poll_notify(&openpriv->fds, 1, POLLIN);
     }
 
   nxsem_post(&upper->exclsem);

@@ -81,48 +81,6 @@ static const struct comp_callback_s g_comp_callback =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: comp_pollnotify
- *
- * Description:
- *   This function is called to notify any waiters of poll-reated events.
- *
- ****************************************************************************/
-
-static void comp_pollnotify(FAR struct comp_dev_s *dev,
-                            pollevent_t eventset)
-{
-  int i;
-
-  if (eventset & POLLERR)
-    {
-      eventset &= ~(POLLOUT | POLLIN);
-    }
-
-  for (i = 0; i < CONFIG_DEV_COMP_NPOLLWAITERS; i++)
-    {
-      FAR struct pollfd *fds = dev->d_fds[i];
-
-      if (fds)
-        {
-          fds->revents |= eventset & (fds->events | POLLERR | POLLHUP);
-
-          if ((fds->revents & (POLLOUT | POLLHUP)) == (POLLOUT | POLLHUP))
-            {
-              /* POLLOUT and POLLHUP are mutually exclusive. */
-
-              fds->revents &= ~POLLOUT;
-            }
-
-          if (fds->revents != 0)
-            {
-              ainfo("Report events: %08" PRIx32 "\n", fds->revents);
-              nxsem_post(fds->sem);
-            }
-        }
-    }
-}
-
-/****************************************************************************
  * Name: comp_semtake
  ****************************************************************************/
 
@@ -220,7 +178,7 @@ static int comp_notify(FAR struct comp_dev_s *dev, uint8_t val)
 
   dev->val = val;
 
-  comp_pollnotify(dev, POLLIN);
+  poll_notify(dev->d_fds, CONFIG_DEV_COMP_NPOLLWAITERS, POLLIN);
   nxsem_post(&dev->ad_readsem);
 
   return 0;
