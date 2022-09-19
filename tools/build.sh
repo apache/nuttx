@@ -56,6 +56,17 @@ function setup_toolchain()
       export PATH=${ROOTDIR}/prebuilts/${TOOLCHAIN[$j]}/linux/${ARCH[$i]}/bin:$PATH
     done
   done
+
+  # Arm Compiler
+  export PATH=${ROOTDIR}/prebuilts/clang/linux/armclang/bin:$PATH
+  export ARM_PRODUCT_DEF=${ROOTDIR}/prebuilts/clang/linux/armclang/mappings/eval.elmap
+
+  if [ ! -n "${LM_LICENSE_FILE}" ]; then
+    export LM_LICENSE_FILE=${HOME}/.arm/ds/licenses/DS000-EV-31030.lic
+  fi
+  if [ ! -n "${ARMLMD_LICENSE_FILE}" ]; then
+    export ARMLMD_LICENSE_FILE=${HOME}/.arm/ds/licenses/DS000-EV-31030.lic
+  fi
 }
 
 function build_board()
