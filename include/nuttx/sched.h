@@ -608,9 +608,9 @@ struct tcb_s
   FAR struct dspace_s *dspace;           /* Allocated area for .bss and .data   */
 #endif
 
-  /* POSIX Semaphore Control Fields *****************************************/
+  /* POSIX Semaphore and Message Queue Control Fields ***********************/
 
-  sem_t *waitsem;                        /* Semaphore ID waiting on         */
+  FAR void *waitobj;                     /* Object thread waiting on        */
 
   /* POSIX Signal Control Fields ********************************************/
 
@@ -619,12 +619,6 @@ struct tcb_s
   sq_queue_t sigpendactionq;             /* List of pending signal actions  */
   sq_queue_t sigpostedq;                 /* List of posted signals          */
   siginfo_t  sigunbinfo;                 /* Signal info when task unblocked */
-
-  /* POSIX Named Message Queue Fields ***************************************/
-
-#ifndef CONFIG_DISABLE_MQUEUE
-  FAR struct mqueue_inode_s *msgwaitq;   /* Waiting for this message queue  */
-#endif
 
   /* Tqueue Fields used for xring ********************************************/
 

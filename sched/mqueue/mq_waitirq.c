@@ -65,16 +65,16 @@ void nxmq_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 
   /* It is possible that an interrupt/context switch beat us to the punch and
    * already changed the task's state.  NOTE:  The operations within the if
-   * are safe because interrupts are always disabled with the msgwaitq,
+   * are safe because interrupts are always disabled with the waitobj,
    * nwaitnotempty, and nwaitnotfull fields are modified.
    */
 
   /* Get the message queue associated with the waiter from the TCB */
 
-  msgq = wtcb->msgwaitq;
+  msgq = wtcb->waitobj;
   DEBUGASSERT(msgq);
 
-  wtcb->msgwaitq = NULL;
+  wtcb->waitobj = NULL;
 
   /* Decrement the count of waiters and cancel the wait */
 

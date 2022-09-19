@@ -89,7 +89,7 @@ int nxsem_trywait(FAR sem_t *sem)
 
       sem->semcount--;
       nxsem_add_holder(sem);
-      rtcb->waitsem = NULL;
+      rtcb->waitobj = NULL;
       ret = OK;
     }
   else

@@ -67,7 +67,7 @@
 
 void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 {
-  sem_t *sem = wtcb->waitsem;
+  FAR sem_t *sem = wtcb->waitobj;
 
   /* It is possible that an interrupt/context switch beat us to the punch
    * and already changed the task's state.
@@ -91,7 +91,7 @@ void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 
   /* Indicate that the semaphore wait is over. */
 
-  wtcb->waitsem = NULL;
+  wtcb->waitobj = NULL;
 
   /* Mark the errno value for the thread. */
 
