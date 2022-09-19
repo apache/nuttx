@@ -124,7 +124,7 @@ static const struct netprocfs_entry_s g_net_entries[] =
     }
   },
 #  endif
-#  ifdef CONFIG_NET_TCP
+#  if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
   {
     DTYPE_FILE, "tcp",
     {
@@ -132,7 +132,7 @@ static const struct netprocfs_entry_s g_net_entries[] =
     }
   },
 #  endif
-#  ifdef CONFIG_NET_UDP
+#  if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
   {
     DTYPE_FILE, "udp",
     {

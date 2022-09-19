@@ -182,7 +182,7 @@ ssize_t netprocfs_read_mldstats(FAR struct netprocfs_file_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP
+#if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
 ssize_t netprocfs_read_tcpstats(FAR struct netprocfs_file_s *priv,
                                 FAR char *buffer, size_t buflen);
 #endif
@@ -205,7 +205,7 @@ ssize_t netprocfs_read_tcpstats(FAR struct netprocfs_file_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_UDP
+#if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
 ssize_t netprocfs_read_udpstats(FAR struct netprocfs_file_s *priv,
                                 FAR char *buffer, size_t buflen);
 #endif
