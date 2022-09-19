@@ -292,6 +292,18 @@ uintptr_t arm_intstack_top(void);
 #if defined(CONFIG_ARCH_ARMV6M) || defined(CONFIG_ARCH_ARMV7M) || \
     defined(CONFIG_ARCH_ARMV8M)
 
+/* This is the address of the  exception vector table (determined by the
+ * linker script).
+ */
+
+#if defined(__ICCARM__)
+/* _vectors replaced on __vector_table for IAR C-SPY Simulator */
+
+extern const void *__vector_table[];
+#else
+extern const void *_vectors[];
+#endif
+
 /* Interrupt acknowledge and dispatch */
 
 void arm_ack_irq(int irq);
