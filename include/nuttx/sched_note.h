@@ -125,9 +125,9 @@
 #  define SCHED_NOTE_BPRINTF(event, fmt, ...) \
           sched_note_bprintf(SCHED_NOTE_IP, event, fmt, ##__VA_ARGS__)
 #  define SCHED_NOTE_BEGIN() \
-          sched_note_begin(SCHED_NOTE_IP, __FUNCTION__)
+          sched_note_begin(SCHED_NOTE_IP)
 #  define SCHED_NOTE_END() \
-          sched_note_end(SCHED_NOTE_IP, __FUNCTION__)
+          sched_note_end(SCHED_NOTE_IP)
 #else
 #  define SCHED_NOTE_STRING(buf)
 #  define SCHED_NOTE_DUMP(event, buf, len)
@@ -553,8 +553,8 @@ void sched_note_printf(uintptr_t ip,
                        FAR const char *fmt, ...) printflike(2, 3);
 void sched_note_bprintf(uintptr_t ip, uint8_t event,
                         FAR const char *fmt, ...) printflike(3, 4);
-void sched_note_begin(uintptr_t ip, FAR const char *buf);
-void sched_note_end(uintptr_t ip, FAR const char *buf);
+void sched_note_begin(uintptr_t ip);
+void sched_note_end(uintptr_t ip);
 #else
 #  define sched_note_string(ip,b)
 #  define sched_note_dump(ip,e,b,l)
@@ -562,8 +562,8 @@ void sched_note_end(uintptr_t ip, FAR const char *buf);
 #  define sched_note_vbprintf(ip,e,f,v)
 #  define sched_note_printf(ip,f,...)
 #  define sched_note_bprintf(ip,e,f,...)
-#  define sched_note_begin(ip,f)
-#  define sched_note_end(ip,f)
+#  define sched_note_begin(ip)
+#  define sched_note_end(ip)
 #endif /* CONFIG_SCHED_INSTRUMENTATION_DUMP */
 
 #if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
