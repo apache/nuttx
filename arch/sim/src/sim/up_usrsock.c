@@ -403,7 +403,7 @@ int usrsock_request(FAR struct iovec *iov, unsigned int iovcnt)
   /* Copy request to buffer */
 
   ret = usrsock_iovec_get(g_usrsock.in, sizeof(g_usrsock.in),
-                          iov, iovcnt, 0);
+                          iov, iovcnt, 0, NULL);
   if (ret <= 0)
     {
       return ret;
