@@ -52,14 +52,14 @@ static struct mm_heap_s g_mmheap1;
 static struct mm_heap_s g_mmheap2;
 #    define MM_HEAP2    &g_mmheap2
 #  endif
-#  define _START_TEXT2  ((const void *)&_stext2)
-#  define _END_TEXT2    ((const void *)&_etext2)
-#  define _START_BSS2   ((void *)&_sbss2)
-#  define _END_BSS2     ((void *)&_ebss2)
-#  define _DATA_INIT2   ((const void *)&_eronly2)
-#  define _START_DATA2  ((void *)&_sdata2)
-#  define _END_DATA2    ((void *)&_edata2)
-#  define _END_HEAP2    ((void *)&_eheap2)
+#  define _START_TEXT2  _stext2
+#  define _END_TEXT2    _etext2
+#  define _START_BSS2   _sbss2
+#  define _END_BSS2     _ebss2
+#  define _DATA_INIT2   _eronly2
+#  define _START_DATA2  _sdata2
+#  define _END_DATA2    _edata2
+#  define _END_HEAP2    _eheap2
 #else
 #  define MM_HEAP2      NULL
 #  define _START_TEXT2  NULL
@@ -79,14 +79,14 @@ static struct mm_heap_s g_mmheap2;
 static struct mm_heap_s g_mmheap3;
 #    define MM_HEAP3    &g_mmheap3
 #  endif
-#  define _START_TEXT3  ((const void *)&_stext3)
-#  define _END_TEXT3    ((const void *)&_etext3)
-#  define _START_BSS3   ((void *)&_sbss3)
-#  define _END_BSS3     ((void *)&_ebss3)
-#  define _DATA_INIT3   ((const void *)&_eronly3)
-#  define _START_DATA3  ((void *)&_sdata3)
-#  define _END_DATA3    ((void *)&_edata3)
-#  define _END_HEAP3    ((void *)&_eheap3)
+#  define _START_TEXT3  _stext3
+#  define _END_TEXT3    _etext3
+#  define _START_BSS3   _sbss3
+#  define _END_BSS3     _ebss3
+#  define _DATA_INIT3   _eronly3
+#  define _START_DATA3  _sdata3
+#  define _END_DATA3    _edata3
+#  define _END_HEAP3    _eheap3
 #else
 #  define MM_HEAP3      NULL
 #  define _START_TEXT3  NULL
@@ -106,14 +106,14 @@ static struct mm_heap_s g_mmheap3;
 static struct mm_heap_s g_mmheap4;
 #    define MM_HEAP4    &g_mmheap4
 #  endif
-#  define _START_TEXT4  ((const void *)&_stext4)
-#  define _END_TEXT4    ((const void *)&_etext4)
-#  define _START_BSS4   ((void *)&_sbss4)
-#  define _END_BSS4     ((void *)&_ebss4)
-#  define _DATA_INIT4   ((const void *)&_eronly4)
-#  define _START_DATA4  ((void *)&_sdata4)
-#  define _END_DATA4    ((void *)&_edata4)
-#  define _END_HEAP4    ((void *)&_eheap4)
+#  define _START_TEXT4  _stext4
+#  define _END_TEXT4    _etext4
+#  define _START_BSS4   _sbss4
+#  define _END_BSS4     _ebss4
+#  define _DATA_INIT4   _eronly4
+#  define _START_DATA4  _sdata4
+#  define _END_DATA4    _edata4
+#  define _END_HEAP4    _eheap4
 #else
 #  define MM_HEAP4      NULL
 #  define _START_TEXT4  NULL

@@ -86,8 +86,8 @@ uintptr_t g_fiqstack_top[CONFIG_SMP_NCPUS] =
 
 /* Symbols defined via the linker script */
 
-extern uint32_t _vector_start; /* Beginning of vector block */
-extern uint32_t _vector_end;   /* End+1 of vector block */
+extern uint8_t _vector_start[]; /* Beginning of vector block */
+extern uint8_t _vector_end[];   /* End+1 of vector block */
 
 /****************************************************************************
  * Public Functions
@@ -132,8 +132,8 @@ void up_irqinitialize(void)
 
   /* Set the VBAR register to the address of the vector table */
 
-  DEBUGASSERT((((uintptr_t)&_vector_start) & ~VBAR_MASK) == 0);
-  cp15_wrvbar((uint32_t)&_vector_start);
+  DEBUGASSERT((((uintptr_t)_vector_start) & ~VBAR_MASK) == 0);
+  cp15_wrvbar((uint32_t)_vector_start);
 #endif /* CONFIG_ARCH_LOWVECTORS */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS

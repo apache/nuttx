@@ -38,8 +38,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-extern uint32_t _stextram;
-extern uint32_t _etextram;
+extern uint8_t _stextram[];
+extern uint8_t _etextram[];
 
 #ifdef CONFIG_DEBUG_HARDFAULT_ALERT
 # define hfalert(format, ...)  _alert(format, ##__VA_ARGS__)
@@ -85,16 +85,16 @@ int arm_hardfault(int irq, void *context, void *arg)
    * FLASH region or in the user FLASH region.
    */
 
-  if (((uintptr_t)pc >= (uintptr_t)&_stext &&
-       (uintptr_t)pc <  (uintptr_t)&_etext) ||
+  if (((uintptr_t)pc >= (uintptr_t)_stext &&
+       (uintptr_t)pc <  (uintptr_t)_etext) ||
       ((uintptr_t)pc >= (uintptr_t)USERSPACE->us_textstart &&
        (uintptr_t)pc <  (uintptr_t)USERSPACE->us_textend))
 #else
   /* SVCalls are expected only from the base, kernel FLASH region */
 
-  if (((uintptr_t)pc >= (uintptr_t)&_stext && (uintptr_t)pc <
-      (uintptr_t)&_etext) || ((uintptr_t)pc >= (uintptr_t)&_stextram &&
-      (uintptr_t)pc <  (uintptr_t)&_etextram))
+  if (((uintptr_t)pc >= (uintptr_t)_stext && (uintptr_t)pc <
+      (uintptr_t)_etext) || ((uintptr_t)pc >= (uintptr_t)_stextram &&
+      (uintptr_t)pc <  (uintptr_t)_etextram))
 #endif
     {
       /* Fetch the instruction that caused the Hard fault */

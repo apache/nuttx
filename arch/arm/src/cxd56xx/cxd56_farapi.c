@@ -106,7 +106,7 @@ struct farmsg_s
  * Public Data
  ****************************************************************************/
 
-extern char _image_modlist_base[];
+extern struct modulelist_s _image_modlist_base[];
 
 /****************************************************************************
  * Private Data
@@ -230,7 +230,7 @@ void farapi_main(int id, void *arg, struct modulelist_s *mlist)
   api = &msg.u.api;
 
   msg.cpuid      = getreg32(CPU_ID);
-  msg.modid      = mlist - (struct modulelist_s *)&_image_modlist_base;
+  msg.modid      = mlist - _image_modlist_base;
 
   api->id        = id;
   api->arg       = arg;

@@ -240,7 +240,7 @@ int esp_spiram_enable_rodata_access(void)
 #if defined(CONFIG_ESP32S3_SPIRAM_FETCH_INSTRUCTIONS)
 void instruction_flash_page_info_init(void)
 {
-  uint32_t instr_page_cnt = ((uint32_t)&_instruction_reserved_end -
+  uint32_t instr_page_cnt = ((uint32_t)_instruction_reserved_end -
                             SOC_IROM_LOW + MMU_PAGE_SIZE - 1) /
                             MMU_PAGE_SIZE;
 
@@ -269,8 +269,8 @@ int IRAM_ATTR instruction_flash2spiram_offset(void)
 #if defined(CONFIG_ESP32_SPIRAM_RODATA)
 void rodata_flash_page_info_init(void)
 {
-  uint32_t rodata_page_cnt = ((uint32_t)&_rodata_reserved_end -
-                              ((uint32_t)&_rodata_reserved_start &
+  uint32_t rodata_page_cnt = ((uint32_t)_rodata_reserved_end -
+                              ((uint32_t)_rodata_reserved_start &
                               ~ (MMU_PAGE_SIZE - 1)) + MMU_PAGE_SIZE - 1) /
                               MMU_PAGE_SIZE;
 

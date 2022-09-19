@@ -40,7 +40,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IDLE_STACK ((uint32_t)&_ebss+CONFIG_IDLETHREAD_STACKSIZE)
+#define IDLE_STACK ((uint32_t)_ebss + CONFIG_IDLETHREAD_STACKSIZE)
 
 /****************************************************************************
  * Public Data
@@ -93,7 +93,7 @@ void __start(void)
    * certain that there are no issues with the state of global variables.
    */
 
-  for (dest = &_sbss; dest < &_ebss; )
+  for (dest = (uint32_t *)_sbss; dest < (uint32_t *)_ebss; )
     {
       *dest++ = 0;
     }
@@ -106,7 +106,9 @@ void __start(void)
    * end of all of the other read-only data (.text, .rodata) at _eronly.
    */
 
-  for (src = &_eronly, dest = &_sdata; dest < &_edata; )
+  for (src = (const uint32_t *)_eronly,
+       dest = (uint32_t *)_sdata; dest < (uint32_t *)_edata;
+      )
     {
       *dest++ = *src++;
     }

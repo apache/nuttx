@@ -39,8 +39,8 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_USE_TEXT_HEAP
-extern uint32_t _siramheap;
-extern uint32_t _eiramheap;
+extern uint8_t _siramheap[];
+extern uint8_t _eiramheap[];
 #endif
 
 /****************************************************************************
@@ -338,8 +338,8 @@ uint32_t *xtensa_user(int exccause, uint32_t *regs)
    */
 
   if (exccause == EXCCAUSE_LOAD_STORE_ERROR &&
-      (uintptr_t)&_siramheap <= regs[REG_EXCVADDR] &&
-      (uintptr_t)&_eiramheap > regs[REG_EXCVADDR])
+      (uintptr_t)_siramheap <= regs[REG_EXCVADDR] &&
+      (uintptr_t)_eiramheap > regs[REG_EXCVADDR])
     {
       uint8_t *pc = (uint8_t *)regs[REG_PC];
       uint8_t imm8;

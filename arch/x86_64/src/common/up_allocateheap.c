@@ -49,7 +49,7 @@
  * Public Functions
  ****************************************************************************/
 
-const uintptr_t g_idle_topstack = (uintptr_t)&_ebss +
+const uintptr_t g_idle_topstack = (uintptr_t)_ebss +
   CONFIG_IDLETHREAD_STACKSIZE;
 
 /****************************************************************************

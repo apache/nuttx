@@ -51,7 +51,7 @@
  * aligned).
  */
 
-const uintptr_t g_idle_topstack = (uintptr_t)&_ebss +
+const uintptr_t g_idle_topstack = (uintptr_t)_ebss +
   CONFIG_IDLETHREAD_STACKSIZE;
 
 /****************************************************************************
@@ -67,7 +67,7 @@ const uintptr_t g_idle_topstack = (uintptr_t)&_ebss +
 
 /* __stack is the end of RAM address, it would be set by linker. */
 
-extern char __stack[];
+extern uint8_t __stack[];
 
 /****************************************************************************
  * Private Functions
@@ -115,7 +115,7 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
 
   board_autoled_on(LED_HEAPALLOCATE);
   *heap_start = (void *)g_idle_topstack;
-  *heap_size = (uint32_t)&__stack - g_idle_topstack;
+  *heap_size = (uint32_t)__stack - g_idle_topstack;
 
   /* Colorize the heap for debug */
 

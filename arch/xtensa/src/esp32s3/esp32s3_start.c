@@ -93,8 +93,8 @@ extern int cache_occupy_addr(uint32_t addr, uint32_t size);
  * Public Data
  ****************************************************************************/
 
-extern int _rodata_reserved_start;
-extern int _rodata_reserved_end;
+extern uint8_t _rodata_reserved_start[];
+extern uint8_t _rodata_reserved_end[];
 
 /* Address of the CPU0 IDLE thread */
 
@@ -143,13 +143,13 @@ static void IRAM_ATTR configure_cpu_caches(void)
   /* Configure the Cache MMU size for instruction and rodata in flash. */
 
   uint32_t rodata_reserved_start_align =
-    (uint32_t)&_rodata_reserved_start & ~(MMU_PAGE_SIZE - 1);
+    (uint32_t)_rodata_reserved_start & ~(MMU_PAGE_SIZE - 1);
   uint32_t cache_mmu_irom_size =
     ((rodata_reserved_start_align - SOC_DROM_LOW) / MMU_PAGE_SIZE) *
       sizeof(uint32_t);
 
   uint32_t cache_mmu_drom_size =
-    (((uint32_t)&_rodata_reserved_end - rodata_reserved_start_align +
+    (((uint32_t)_rodata_reserved_end - rodata_reserved_start_align +
       MMU_PAGE_SIZE - 1) /
       MMU_PAGE_SIZE) * sizeof(uint32_t);
 
@@ -158,8 +158,8 @@ static void IRAM_ATTR configure_cpu_caches(void)
 
   cache_set_idrom_mmu_info(cache_mmu_irom_size / sizeof(uint32_t),
                            cache_mmu_drom_size / sizeof(uint32_t),
-                           (uint32_t)&_rodata_reserved_start,
-                           (uint32_t)&_rodata_reserved_end,
+                           (uint32_t)_rodata_reserved_start,
+                           (uint32_t)_rodata_reserved_end,
                            s_instr_flash2spiram_off,
                            s_rodata_flash2spiram_off);
 
@@ -248,15 +248,15 @@ void noreturn_function IRAM_ATTR __esp32s3_start(void)
 
   /* Move CPU0 exception vectors to IRAM */
 
-  __asm__ __volatile__ ("wsr %0, vecbase\n"::"r" (&_init_start));
+  __asm__ __volatile__ ("wsr %0, vecbase\n"::"r" (_init_start));
 
   /* Clear .bss. We'll do this inline (vs. calling memset) just to be
    * certain that there are no issues with the state of global variables.
    */
 
-  for (uint32_t *dest = &_sbss; dest < &_ebss; dest++)
+  for (uint32_t *dest = (uint32_t *)_sbss; dest < (uint32_t *)_ebss; )
     {
-      *dest = 0;
+      *dest++ = 0;
     }
 
 #ifndef CONFIG_SMP

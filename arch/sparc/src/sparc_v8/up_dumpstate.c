@@ -122,7 +122,7 @@ void up_dumpstate(void)
   /* Get the limits on the interrupt stack memory */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-  istackbase = (uint32_t)&g_intstackbase;
+  istackbase = (uint32_t)g_intstackbase;
   istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4;
 
   /* Show interrupt stack info */

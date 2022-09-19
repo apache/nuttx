@@ -34,7 +34,7 @@
 /* Idle thread stack starts from _ebss */
 
 #ifndef __ASSEMBLY__
-#define RV32M1_IDLESTACK_BASE  (uint32_t)&_ebss
+#define RV32M1_IDLESTACK_BASE  (uint32_t)_ebss
 #else
 #define RV32M1_IDLESTACK_BASE  _ebss
 #endif

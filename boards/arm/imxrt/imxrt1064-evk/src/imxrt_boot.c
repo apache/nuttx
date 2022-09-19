@@ -67,7 +67,7 @@ void imxrt_ocram_initialize(void)
   src = (uint32_t *) (LOCATE_IN_SRC(g_boot_data.start) + g_boot_data.size);
   dest = (uint32_t *) (g_boot_data.start + g_boot_data.size);
 
-  while (dest < (uint32_t *) &_etext)
+  while (dest < (uint32_t *)_etext)
     {
       *dest++ = *src++;
     }

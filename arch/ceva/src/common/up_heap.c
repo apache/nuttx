@@ -57,8 +57,8 @@ static struct mm_heap_s g_mmheap1;
 static struct mm_heap_s g_mmheap2;
 #    define MM_HEAP2    &g_mmheap2
 #  endif
-#  define _END_BSS2     ((void *)&_ebss2)
-#  define _END_HEAP2    ((void *)&_eheap2)
+#  define _END_BSS2     _ebss2
+#  define _END_HEAP2    _eheap2
 #else
 #  define MM_HEAP2      NULL
 #  define _END_BSS2     NULL
@@ -72,8 +72,8 @@ static struct mm_heap_s g_mmheap2;
 static struct mm_heap_s g_mmheap3;
 #    define MM_HEAP3    &g_mmheap3
 #  endif
-#  define _END_BSS3     ((void *)&_ebss3)
-#  define _END_HEAP3    ((void *)&_eheap3)
+#  define _END_BSS3     _ebss3
+#  define _END_HEAP3    _eheap3
 #else
 #  define MM_HEAP3      NULL
 #  define _END_BSS3     NULL
@@ -87,8 +87,8 @@ static struct mm_heap_s g_mmheap3;
 static struct mm_heap_s g_mmheap4;
 #    define MM_HEAP4    &g_mmheap4
 #  endif
-#  define _END_BSS4     ((void *)&_ebss4)
-#  define _END_HEAP4    ((void *)&_eheap4)
+#  define _END_BSS4     _ebss4
+#  define _END_HEAP4    _eheap4
 #else
 #  define MM_HEAP4      NULL
 #  define _END_BSS4     NULL

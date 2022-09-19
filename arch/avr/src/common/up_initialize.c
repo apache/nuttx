@@ -87,7 +87,7 @@ volatile uint8_t *g_current_regs;
 #if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
 static inline void up_color_intstack(void)
 {
-  uint8_t *ptr = (uint8_t *)&g_intstackalloc;
+  uint8_t *ptr = g_intstackalloc;
   ssize_t size;
 
   for (size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);

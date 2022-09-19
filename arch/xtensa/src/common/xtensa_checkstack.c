@@ -183,7 +183,7 @@ size_t up_check_intstack(void)
 #ifdef CONFIG_SMP
   return xtensa_stack_check(xtensa_intstack_alloc(), INTSTACK_SIZE);
 #else
-  return xtensa_stack_check((uintptr_t)&g_intstackalloc, INTSTACK_SIZE);
+  return xtensa_stack_check((uintptr_t)g_intstackalloc, INTSTACK_SIZE);
 #endif
 }
 

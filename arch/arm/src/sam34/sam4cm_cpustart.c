@@ -98,7 +98,7 @@ static void cpu1_boot(void)
     {
       /* Use CPU0 vectors */
 
-      putreg32((uint32_t)&_stext, NVIC_VECTAB);
+      putreg32((uint32_t)_stext, NVIC_VECTAB);
       sam_ipc1_enableclk();
 
       /* Clear : write-only */

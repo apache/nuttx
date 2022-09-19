@@ -246,7 +246,7 @@ size_t up_check_intstack(void)
   return arm_stack_check((void *)arm_intstack_alloc(),
                          STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
 #else
-  return arm_stack_check((void *)&g_intstackalloc,
+  return arm_stack_check(g_intstackalloc,
                          STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
 #endif
 }

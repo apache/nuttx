@@ -89,8 +89,8 @@
  * into that region.
  */
 
-extern uintptr_t _RAM_ADDR_U_INIT_PARAM;
-#define ETH_RAMADDR (((uintptr_t)&_RAM_ADDR_U_INIT_PARAM << 16) + 0x00c000)
+extern uint8_t _RAM_ADDR_U_INIT_PARAM[];
+#define ETH_RAMADDR (((uintptr_t)_RAM_ADDR_U_INIT_PARAM << 16) + 0x00c000)
 
 #if CONFIG_NET_ETH_PKTSIZE > 1518
 #  error "MAXF size too big for this device"

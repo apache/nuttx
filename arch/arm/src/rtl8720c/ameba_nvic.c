@@ -316,7 +316,7 @@ void up_irqinitialize(void)
 
   /* Restore the NVIC vector location to local */
 
-  memcpy(&__vectors, (void *) * (volatile uint32_t *)(NVIC_VECTAB)
+  memcpy(__vectors, (void *) * (volatile uint32_t *)(NVIC_VECTAB)
          + NVIC_IRQ_FIRST * sizeof(uint32_t), sizeof(__vectors));
 
   /* Set the NVIC vector location in case _vectors not equal zero. */

@@ -95,8 +95,7 @@ void up_irqinitialize(void)
 
 #if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 15
   size_t intstack_size = (CONFIG_ARCH_INTERRUPTSTACK & ~15);
-  riscv_stack_color((void *)((uintptr_t)&g_intstacktop - intstack_size),
-                 intstack_size);
+  riscv_stack_color(g_intstacktop - intstack_size, intstack_size);
 #endif
 
   /* Clear all pending flags */

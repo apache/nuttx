@@ -112,12 +112,12 @@
  * Private Types
  ****************************************************************************/
 
-extern const uint32_t SRAM_BASE_ADDR;
-extern const uint32_t SRAM_END_ADDR;
-extern const uint32_t ITCM_BASE_ADDR;
-extern const uint32_t ITCM_END_ADDR;
-extern const uint32_t DTCM_BASE_ADDR;
-extern const uint32_t DTCM_END_ADDR;
+extern uint8_t SRAM_BASE_ADDR[];
+extern uint8_t SRAM_END_ADDR[];
+extern uint8_t ITCM_BASE_ADDR[];
+extern uint8_t ITCM_END_ADDR[];
+extern uint8_t DTCM_BASE_ADDR[];
+extern uint8_t DTCM_END_ADDR[];
 
 /****************************************************************************
  * Private Functions
@@ -173,24 +173,24 @@ void s32k3xx_start(void)
    * then on a cold boot we go into a bootloop somehow
    */
 
-  dest = (uint64_t *)&SRAM_BASE_ADDR;
-  while (dest < (uint64_t *)&SRAM_END_ADDR)
+  dest = (uint64_t *)SRAM_BASE_ADDR;
+  while (dest < (uint64_t *)SRAM_END_ADDR)
     {
       *dest++ = STARTUP_ECC_INITVALUE;
     }
 
   /* ITCM */
 
-  dest = (uint64_t *)&ITCM_BASE_ADDR;
-  while (dest < (uint64_t *)&ITCM_END_ADDR)
+  dest = (uint64_t *)ITCM_BASE_ADDR;
+  while (dest < (uint64_t *)ITCM_END_ADDR)
     {
       *dest++ = STARTUP_ECC_INITVALUE;
     }
 
   /* DTCM */
 
-  dest = (uint64_t *)&DTCM_BASE_ADDR;
-  while (dest < (uint64_t *)&DTCM_END_ADDR)
+  dest = (uint64_t *)DTCM_BASE_ADDR;
+  while (dest < (uint64_t *)DTCM_END_ADDR)
     {
       *dest++ = STARTUP_ECC_INITVALUE;
     }
@@ -199,7 +199,7 @@ void s32k3xx_start(void)
    * certain that there are no issues with the state of global variables.
    */
 
-  for (dest = (uint64_t *)&_sbss; dest < (uint64_t *)&_ebss; )
+  for (dest = (uint64_t *)_sbss; dest < (uint64_t *)_ebss; )
     {
       *dest++ = 0;
     }
@@ -211,8 +211,8 @@ void s32k3xx_start(void)
    * end of all of the other read-only data (.text, .rodata) at _eronly.
    */
 
-  for (src = (uint64_t *)&_eronly, dest = (uint64_t *)&_sdata;
-     dest < (uint64_t *)&_edata;
+  for (src = (uint64_t *)_eronly, dest = (uint64_t *)_sdata;
+     dest < (uint64_t *)_edata;
       )
     {
       *dest++ = *src++;
@@ -227,8 +227,8 @@ void s32k3xx_start(void)
    */
 
 #ifdef CONFIG_ARCH_RAMFUNCS
-  for (src = (uint64_t *)&_framfuncs, dest = (uint64_t *)&_sramfuncs;
-     dest < (uint64_t *)&_eramfuncs;
+  for (src = (uint64_t *)_framfuncs, dest = (uint64_t *)_sramfuncs;
+     dest < (uint64_t *)_eramfuncs;
       )
     {
       *dest++ = *src++;

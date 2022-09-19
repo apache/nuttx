@@ -45,7 +45,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IDLE_STACK      ((const char *)&_ebss+CONFIG_IDLETHREAD_STACKSIZE)
+#define IDLE_STACK      (_ebss + CONFIG_IDLETHREAD_STACKSIZE)
 
 #ifndef ARMV8M_PERIPHERAL_INTERRUPTS
 #  error ARMV8M_PERIPHERAL_INTERRUPTS must be defined to the number of I/O interrupts to be supported

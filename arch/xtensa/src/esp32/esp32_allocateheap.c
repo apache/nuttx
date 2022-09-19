@@ -90,7 +90,7 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
 #else
   board_autoled_on(LED_HEAPALLOCATE);
 
-  *heap_start = (void *)&_sheap;
+  *heap_start = (void *)_sheap;
   DEBUGASSERT(HEAP_REGION1_END > (uintptr_t)*heap_start);
   *heap_size = (size_t)(HEAP_REGION1_END - (uintptr_t)*heap_start);
 #endif /* CONFIG_BUILD_PROTECTED && CONFIG_MM_KERNEL_HEAP */
@@ -117,7 +117,7 @@ void up_allocate_kheap(void **heap_start, size_t *heap_size)
    * Check boards/xtensa/esp32.
    */
 
-  uintptr_t kbase = (uintptr_t)&_sheap;
+  uintptr_t kbase = (uintptr_t)_sheap;
   uintptr_t ktop  = KDRAM_0_END;
   size_t    ksize = ktop - kbase;
 
@@ -172,7 +172,7 @@ void xtensa_add_region(void)
 
 #ifndef CONFIG_SMP
   start = (void *)(HEAP_REGION2_START + XTENSA_IMEM_REGION_SIZE);
-  size  = (size_t)(uintptr_t)&_eheap - (size_t)start;
+  size  = (size_t)(uintptr_t)_eheap - (size_t)start;
 #ifdef CONFIG_BUILD_PROTECTED
   kmm_addregion(start, size);
 #else
@@ -188,7 +188,7 @@ void xtensa_add_region(void)
 #endif
 
   start = (void *)HEAP_REGION3_START + XTENSA_IMEM_REGION_SIZE;
-  size  = (size_t)(uintptr_t)&_eheap - (size_t)start;
+  size  = (size_t)(uintptr_t)_eheap - (size_t)start;
 #ifdef CONFIG_BUILD_PROTECTED
   kmm_addregion(start, size);
 #else
@@ -209,8 +209,8 @@ void xtensa_add_region(void)
 #ifdef CONFIG_ESP32_SPIRAM
 #  if defined(CONFIG_HEAP2_BASE) && defined(CONFIG_HEAP2_SIZE)
 #    ifdef CONFIG_XTENSA_EXTMEM_BSS
-      start = (void *)(&_ebss_extmem);
-      size = CONFIG_HEAP2_SIZE - (size_t)(&_ebss_extmem - &_sbss_extmem);
+      start = _ebss_extmem;
+      size = CONFIG_HEAP2_SIZE - (_ebss_extmem - _sbss_extmem);
 #    else
       start = (void *)CONFIG_HEAP2_BASE;
       size = CONFIG_HEAP2_SIZE;

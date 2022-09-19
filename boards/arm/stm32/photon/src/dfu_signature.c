@@ -43,8 +43,8 @@ begin_packed_struct struct dfu_signature
  * Public Data
  ****************************************************************************/
 
-extern uint32_t _firmware_start;
-extern uint32_t _firmware_end;
+extern uint8_t _firmware_start[];
+extern uint8_t _firmware_end[];
 
 /****************************************************************************
  * Private Data
@@ -53,12 +53,12 @@ extern uint32_t _firmware_end;
 __attribute__((externally_visible)) locate_data(".dfu_signature")
 const struct dfu_signature dfu_sign =
 {
-  (uint32_t)&_firmware_start, /* Flash image start address */
-  (uint32_t)&_firmware_end,   /* Flash image end address */
-  {0, 0, 0, 0},               /* reserved */
-  6,                          /* Current board is photon */
-  4, 1,                       /* Firmware is "system-part1" */
-  {0, 0, 0, 0, 0, 0, 0, 0},   /* reserved */
+  (uint32_t)_firmware_start, /* Flash image start address */
+  (uint32_t)_firmware_end,   /* Flash image end address */
+  {0, 0, 0, 0},              /* reserved */
+  6,                         /* Current board is photon */
+  4, 1,                      /* Firmware is "system-part1" */
+  {0, 0, 0, 0, 0, 0, 0, 0},  /* reserved */
 };
 
 /****************************************************************************

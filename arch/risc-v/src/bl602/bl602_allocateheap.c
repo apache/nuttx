@@ -33,10 +33,10 @@
  * Public Variables
  ****************************************************************************/
 
-extern uint8_t _heap_start;
-extern uint8_t _heap_size;
-extern uint8_t _heap_wifi_start;
-extern uint8_t _heap_wifi_size;
+extern uint8_t _heap_start[];
+extern uint8_t _heap_size[];
+extern uint8_t _heap_wifi_start[];
+extern uint8_t _heap_wifi_size[];
 
 /****************************************************************************
  * Public Functions
@@ -59,8 +59,8 @@ extern uint8_t _heap_wifi_size;
 
 void up_allocate_heap(void **heap_start, size_t *heap_size)
 {
-  *heap_start = (void *)&_heap_start;
-  *heap_size  = (size_t)&_heap_size;
+  *heap_start = (void *)_heap_start;
+  *heap_size  = (size_t)_heap_size;
 }
 
 /****************************************************************************
@@ -75,7 +75,7 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
 #if CONFIG_MM_REGIONS > 1
 void riscv_addregion(void)
 {
-  kumm_addregion(&_heap_wifi_start, (uint32_t)(&_heap_wifi_size));
+  kumm_addregion(_heap_wifi_start, (uint32_t)_heap_wifi_size);
 }
 #endif
 

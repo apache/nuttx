@@ -34,7 +34,7 @@
 /* Idle thread stack starts from _ebss */
 
 #ifndef __ASSEMBLY__
-#define QEMU_RV_IDLESTACK_BASE  (uintptr_t)&_ebss
+#define QEMU_RV_IDLESTACK_BASE  (uintptr_t)_ebss
 #else
 #define QEMU_RV_IDLESTACK_BASE  _ebss
 #endif

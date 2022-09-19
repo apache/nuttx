@@ -71,11 +71,11 @@ void lib_cxx_initialize(void)
 #else
       initializer_t *initp;
 
-      sinfo("_sinit: %p _einit: %p\n", &_sinit, &_einit);
+      sinfo("_sinit: %p _einit: %p\n", _sinit, _einit);
 
       /* Visit each entry in the initialization table */
 
-      for (initp = &_sinit; initp != &_einit; initp++)
+      for (initp = _sinit; initp < _einit; initp++)
         {
           initializer_t initializer = *initp;
           sinfo("initp: %p initializer: %p\n", initp, initializer);

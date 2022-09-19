@@ -50,7 +50,7 @@ volatile uintptr_t *g_current_regs[CONFIG_SMP_NCPUS];
 #if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 15
 static inline void up_color_intstack(void)
 {
-  uint32_t *ptr = (uint32_t *)&g_intstackalloc;
+  uint32_t *ptr = (uint32_t *)g_intstackalloc;
   ssize_t size;
 
   for (size = (CONFIG_ARCH_INTERRUPTSTACK & ~15);
