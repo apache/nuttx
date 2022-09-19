@@ -33,42 +33,42 @@
 
 /* Kernel ROM */
 
-#define KIROM_START     (uintptr_t)&__kirom_start
-#define KIROM_SIZE      (uintptr_t)&__kirom_size
-#define KDROM_START     (uintptr_t)&__kdrom_start
-#define KDROM_SIZE      (uintptr_t)&__kdrom_size
+#define KIROM_START     (uintptr_t)__kirom_start
+#define KIROM_SIZE      (uintptr_t)__kirom_size
+#define KDROM_START     (uintptr_t)__kdrom_start
+#define KDROM_SIZE      (uintptr_t)__kdrom_size
 
 /* Kernel RAM */
 
-#define KIRAM_START     (uintptr_t)&__kiram_start
-#define KIRAM_SIZE      (uintptr_t)&__kiram_size
-#define KIRAM_END       (uintptr_t)&__kiram_end
-#define KDRAM_START     (uintptr_t)&__kdram_start
-#define KDRAM_SIZE      (uintptr_t)&__kdram_size
-#define KDRAM_END       (uintptr_t)&__kdram_end
+#define KIRAM_START     (uintptr_t)__kiram_start
+#define KIRAM_SIZE      (uintptr_t)__kiram_size
+#define KIRAM_END       (uintptr_t)__kiram_end
+#define KDRAM_START     (uintptr_t)__kdram_start
+#define KDRAM_SIZE      (uintptr_t)__kdram_size
+#define KDRAM_END       (uintptr_t)__kdram_end
 
 /* Exception vectors */
 
-#define VECTORS_START   (uintptr_t)&__vectors_start
-#define VECTORS_END     (uintptr_t)&__vectors_end
+#define VECTORS_START   (uintptr_t)__vectors_start
+#define VECTORS_END     (uintptr_t)__vectors_end
 
 /* User ROM */
 
-#define UIROM_START     (uintptr_t)&__uirom_start
-#define UIROM_SIZE      (uintptr_t)&__uirom_size
-#define UIROM_END       (uintptr_t)&__uirom_end
-#define UDROM_START     (uintptr_t)&__udrom_start
-#define UDROM_SIZE      (uintptr_t)&__udrom_size
-#define UDROM_END       (uintptr_t)&__udrom_end
+#define UIROM_START     (uintptr_t)__uirom_start
+#define UIROM_SIZE      (uintptr_t)__uirom_size
+#define UIROM_END       (uintptr_t)__uirom_end
+#define UDROM_START     (uintptr_t)__udrom_start
+#define UDROM_SIZE      (uintptr_t)__udrom_size
+#define UDROM_END       (uintptr_t)__udrom_end
 
 /* User RAM */
 
-#define UIRAM_START     (uintptr_t)&__uiram_start
-#define UIRAM_SIZE      (uintptr_t)&__uiram_size
-#define UIRAM_END       (uintptr_t)&__uiram_end
-#define UDRAM_START     (uintptr_t)&__udram_start
-#define UDRAM_SIZE      (uintptr_t)&__udram_size
-#define UDRAM_END       (uintptr_t)&__udram_end
+#define UIRAM_START     (uintptr_t)__uiram_start
+#define UIRAM_SIZE      (uintptr_t)__uiram_size
+#define UIRAM_END       (uintptr_t)__uiram_end
+#define UDRAM_START     (uintptr_t)__udram_start
+#define UDRAM_SIZE      (uintptr_t)__udram_size
+#define UDRAM_END       (uintptr_t)__udram_end
 
 /****************************************************************************
  * Public Data
@@ -76,41 +76,41 @@
 
 /* Kernel ROM (RX)  */
 
-extern uintptr_t        __kirom_start;
-extern uintptr_t        __kirom_size;
-extern uintptr_t        __kdrom_start;
-extern uintptr_t        __kdrom_size;
+extern uint8_t          __kirom_start[];
+extern uint8_t          __kirom_size[];
+extern uint8_t          __kdrom_start[];
+extern uint8_t          __kdrom_size[];
 
 /* Kernel RAM (RW) */
 
-extern uintptr_t        __kiram_start;
-extern uintptr_t        __kiram_size;
-extern uintptr_t        __kiram_end;
-extern uintptr_t        __kdram_start;
-extern uintptr_t        __kdram_size;
-extern uintptr_t        __kdram_end;
+extern uint8_t          __kiram_start[];
+extern uint8_t          __kiram_size[];
+extern uint8_t          __kiram_end[];
+extern uint8_t          __kdram_start[];
+extern uint8_t          __kdram_size[];
+extern uint8_t          __kdram_end[];
 
 /* Exception vectors */
 
-extern uintptr_t        __vectors_start;
-extern uintptr_t        __vectors_end;
+extern uint8_t          __vectors_start[];
+extern uint8_t          __vectors_end[];
 
 /* User ROM (RX) */
 
-extern uintptr_t        __uirom_start;
-extern uintptr_t        __uirom_size;
-extern uintptr_t        __uirom_end;
-extern uintptr_t        __udrom_start;
-extern uintptr_t        __udrom_size;
-extern uintptr_t        __udrom_end;
+extern uint8_t          __uirom_start[];
+extern uint8_t          __uirom_size[];
+extern uint8_t          __uirom_end[];
+extern uint8_t          __udrom_start[];
+extern uint8_t          __udrom_size[];
+extern uint8_t          __udrom_end[];
 
 /* User RAM (RW) */
 
-extern uintptr_t        __uiram_start;
-extern uintptr_t        __uiram_size;
-extern uintptr_t        __uiram_end;
-extern uintptr_t        __udram_start;
-extern uintptr_t        __udram_size;
-extern uintptr_t        __udram_end;
+extern uint8_t          __uiram_start[];
+extern uint8_t          __uiram_size[];
+extern uint8_t          __uiram_end[];
+extern uint8_t          __udram_start[];
+extern uint8_t          __udram_size[];
+extern uint8_t          __udram_end[];
 
 #endif /* __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_RUST1_INCLUDE_BOARD_MEMORYMAP_H */

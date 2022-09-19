@@ -39,7 +39,7 @@
 /* Idle thread stack starts from _ebss */
 
 #ifndef __ASSEMBLY__
-#define K210_IDLESTACK_BASE  (uintptr_t)&_ebss
+#define K210_IDLESTACK_BASE  (uintptr_t)_ebss
 #else
 #define K210_IDLESTACK_BASE  _ebss
 #endif

@@ -418,7 +418,7 @@ static void arm_dumpstate(void)
 #  ifdef CONFIG_SMP
                  (uint32_t)arm_intstack_alloc(),
 #  else
-                 (uint32_t)&g_intstackalloc,
+                 (uint32_t)g_intstackalloc,
 #  endif
                  (CONFIG_ARCH_INTERRUPTSTACK & ~7),
                  !!CURRENT_REGS);

@@ -47,20 +47,20 @@
 /* These symbols are exported from up_exceptions.S:
  */
 
-extern uint32_t vectortab;
-extern uint32_t avr32_int0;
-extern uint32_t avr32_int1;
-extern uint32_t avr32_int2;
-extern uint32_t avr32_int3;
+extern uint8_t vectortab[];
+extern uint8_t avr32_int0[];
+extern uint8_t avr32_int1[];
+extern uint8_t avr32_int2[];
+extern uint8_t avr32_int3[];
 
 /* The provide interrupt handling offsets relative to the EVBA
  * address (which should be vectortab).
  */
 
-#define AVR32_INT0_RADDR ((uint32_t)&avr32_int0 - (uint32_t)&vectortab)
-#define AVR32_INT1_RADDR ((uint32_t)&avr32_int1 - (uint32_t)&vectortab)
-#define AVR32_INT2_RADDR ((uint32_t)&avr32_int2 - (uint32_t)&vectortab)
-#define AVR32_INT3_RADDR ((uint32_t)&avr32_int3 - (uint32_t)&vectortab)
+#define AVR32_INT0_RADDR (avr32_int0 - vectortab)
+#define AVR32_INT1_RADDR (avr32_int1 - vectortab)
+#define AVR32_INT2_RADDR (avr32_int2 - vectortab)
+#define AVR32_INT3_RADDR (avr32_int3 - vectortab)
 
 /****************************************************************************
  * Private Types

@@ -165,39 +165,29 @@
 #if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
 /* The (optional) interrupt stack */
 
-extern uint32_t g_intstackalloc; /* Allocated interrupt stack */
-extern uint32_t g_intstacktop;   /* Initial top of interrupt stack */
+extern uint8_t g_intstackalloc[]; /* Allocated interrupt stack */
+extern uint8_t g_intstacktop[];   /* Initial top of interrupt stack */
 #endif
 
 /* Address of the CPU0 IDLE thread */
 
 extern uint32_t g_idlestack[IDLETHREAD_STACKWORDS];
 
-/* These 'addresses' of these values are setup by the linker script.  They
- * are not actual uint32_t storage locations! They are only used meaningfully
- * in the following way:
- *
- *  - The linker script defines, for example, the symbol_sdata.
- *  - The declaration extern uint32_t _sdata; makes C happy.  C will believe
- *    that the value _sdata is the address of a uint32_t variable _data (it
- *    is not!).
- *  - We can recover the linker value then by simply taking the address of
- *    of _data.  like:  uint32_t *pdata = &_sdata;
- */
+/* These symbols are setup by the linker script. */
 
-extern uint32_t _init_start;        /* Start of initialization logic */
-extern uint32_t _stext;             /* Start of .text */
-extern uint32_t _etext;             /* End+1 of .text + .rodata */
-extern uint32_t _sdata;             /* Start of .data */
-extern uint32_t _edata;             /* End+1 of .data */
-extern uint32_t _srodata;           /* Start of .rodata */
-extern uint32_t _erodata;           /* End+1 of .rodata */
-extern uint32_t _sbss;              /* Start of .bss */
-extern uint32_t _ebss;              /* End+1 of .bss */
-extern uint32_t _sheap;             /* Start of heap */
-extern uint32_t _eheap;             /* End+1 of heap */
-extern uint32_t _sbss_extmem;       /* start of external memory bss */
-extern uint32_t _ebss_extmem;       /* End+1 of external memory bss */
+extern uint8_t _init_start[];        /* Start of initialization logic */
+extern uint8_t _stext[];             /* Start of .text */
+extern uint8_t _etext[];             /* End+1 of .text + .rodata */
+extern uint8_t _sdata[];             /* Start of .data */
+extern uint8_t _edata[];             /* End+1 of .data */
+extern uint8_t _srodata[];           /* Start of .rodata */
+extern uint8_t _erodata[];           /* End+1 of .rodata */
+extern uint8_t _sbss[];              /* Start of .bss */
+extern uint8_t _ebss[];              /* End+1 of .bss */
+extern uint8_t _sheap[];             /* Start of heap */
+extern uint8_t _eheap[];             /* End+1 of heap */
+extern uint8_t _sbss_extmem[];       /* start of external memory bss */
+extern uint8_t _ebss_extmem[];       /* End+1 of external memory bss */
 
 /****************************************************************************
  * Inline Functions

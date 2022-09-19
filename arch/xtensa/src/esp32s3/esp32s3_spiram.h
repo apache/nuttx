@@ -139,8 +139,8 @@ bool esp_spiram_is_initialized(void);
 
 #if defined(CONFIG_ESP32S3_SPIRAM_FETCH_INSTRUCTIONS)
 
-extern int _instruction_reserved_start;
-extern int _instruction_reserved_end;
+extern uint8_t _instruction_reserved_start[];
+extern uint8_t _instruction_reserved_end[];
 
 /**
  * @brief Get the start page number of the instruction in SPI flash
@@ -170,8 +170,8 @@ int instruction_flash2spiram_offset(void);
 
 #if defined(CONFIG_SPIRAM_RODATA)
 
-extern int _rodata_reserved_start;
-extern int _rodata_reserved_end;
+extern uint8_t _rodata_reserved_start[];
+extern uint8_t _rodata_reserved_end[];
 
 /**
  * @brief Get the start page number of the rodata in SPI flash

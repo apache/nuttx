@@ -49,7 +49,7 @@
  * ARM EABI requires 64 bit stack alignment.
  */
 
-#define HEAP_BASE      ((uintptr_t)&_ebss + CONFIG_IDLETHREAD_STACKSIZE)
+#define HEAP_BASE      ((uintptr_t)_ebss + CONFIG_IDLETHREAD_STACKSIZE)
 
 /****************************************************************************
  * Public Data
@@ -135,7 +135,7 @@ void __start(void)
    * certain that there are no issues with the state of global variables.
    */
 
-  for (dest = _START_BSS; dest < _END_BSS; )
+  for (dest = (uint32_t *)_START_BSS; dest < (uint32_t *)_END_BSS; )
     {
       *dest++ = 0;
     }
@@ -148,7 +148,9 @@ void __start(void)
    * end of all of the other read-only data (.text, .rodata) at _eronly.
    */
 
-  for (src = _DATA_INIT, dest = _START_DATA; dest < _END_DATA; )
+  for (src = (const uint32_t *)_DATA_INIT,
+       dest = (uint32_t *)_START_DATA; dest < (uint32_t *)_END_DATA;
+      )
     {
       *dest++ = *src++;
     }

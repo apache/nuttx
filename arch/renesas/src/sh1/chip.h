@@ -48,8 +48,8 @@
 
 #ifndef __ASSEMBLY__
 #  if CONFIG_ARCH_INTERRUPTSTACK > 3
-     extern uint32_t g_intstackalloc;
-     extern uint32_t g_intstacktop;
+     extern uint8_t g_intstackalloc[];
+     extern uint8_t g_intstacktop[];
 #  endif
 #endif
 

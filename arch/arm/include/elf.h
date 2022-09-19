@@ -18,7 +18,7 @@
  *
  ****************************************************************************/
 
-/* Reference: "ELF for the ARM® Architecture," ARM IHI 0044D, current through
+/* Reference: "ELF for the ARM Architecture," ARM IHI 0044D, current through
  *   ABI release 2.08, October 28, 2009, ARM Limited.
  */
 
@@ -248,6 +248,16 @@
 #define DT_ARM_PREEMPTMAP        0x70000002
 #define DT_ARM_RESERVED2         0x70000003
 
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+typedef struct __EIT_entry
+{
+  unsigned long fnoffset;
+  unsigned long content;
+} __EIT_entry;
+
 /* ELF register definitions */
 
 /* Holds the general purpose registers $a1 * through to $pc
@@ -256,5 +266,25 @@
  */
 
 typedef unsigned long elf_gregset_t[18];
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+extern __EIT_entry __exidx_start[];
+extern __EIT_entry __exidx_end[];
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __ARCH_ARM_INCLUDE_ELF_H */

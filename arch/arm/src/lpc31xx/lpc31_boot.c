@@ -55,8 +55,8 @@ struct section_mapping_s
  * Public Data
  ****************************************************************************/
 
-extern uint32_t _vector_start; /* Beginning of vector block */
-extern uint32_t _vector_end;   /* End+1 of vector block */
+extern uint8_t _vector_start[]; /* Beginning of vector block */
+extern uint8_t _vector_end[];   /* End+1 of vector block */
 
 /****************************************************************************
  * Private Data
@@ -295,8 +295,8 @@ static void up_copyvectorblock(void)
    *                        0xffff0000)
    */
 
-  src  = (uint32_t *)&_vector_start;
-  end  = (uint32_t *)&_vector_end;
+  src  = (uint32_t *)_vector_start;
+  end  = (uint32_t *)_vector_end;
   dest = (uint32_t *)LPC31_VECTOR_VSRAM;
 
   while (src < end)

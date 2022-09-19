@@ -65,8 +65,8 @@ typedef uint32_t *(*doirq_t)(int irq, uint32_t *regs);
 
 /* Symbols defined via the linker script */
 
-extern uint32_t _vector_start; /* Beginning of vector block */
-extern uint32_t _vector_end;   /* End+1 of vector block */
+extern uint8_t _vector_start[]; /* Beginning of vector block */
+extern uint8_t _vector_end[];   /* End+1 of vector block */
 
 /****************************************************************************
  * Private Data
@@ -166,13 +166,7 @@ static void sam_dumpaic(const char *msg, uintptr_t base, int irq)
 
 static inline size_t sam_vectorsize(void)
 {
-  uintptr_t src;
-  uintptr_t end;
-
-  src  = (uintptr_t)&_vector_start;
-  end  = (uintptr_t)&_vector_end;
-
-  return (size_t)(end - src);
+  return _vector_end - _vector_start;
 }
 
 /****************************************************************************
@@ -523,8 +517,8 @@ void up_irqinitialize(void)
 #elif defined(CONFIG_SAMA5_BOOT_SDRAM)
   /* Set the VBAR register to the address of the vector table in SDRAM */
 
-  DEBUGASSERT((((uintptr_t)&_vector_start) & ~VBAR_MASK) == 0);
-  cp15_wrvbar((uint32_t)&_vector_start);
+  DEBUGASSERT((((uintptr_t)_vector_start) & ~VBAR_MASK) == 0);
+  cp15_wrvbar((uint32_t)_vector_start);
 
 #endif /* CONFIG_SAMA5_BOOT_ISRAM || CONFIG_SAMA5_BOOT_CS0FLASH */
 #endif /* CONFIG_ARCH_LOWVECTORS */

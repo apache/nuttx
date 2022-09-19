@@ -237,7 +237,7 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
 #ifdef CONFIG_SMP
           istackbase = xtensa_intstack_alloc();
 #else
-          istackbase = &g_intstackalloc;
+          istackbase = g_intstackalloc;
 #endif
           xtensa_window_spill();
 

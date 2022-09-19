@@ -304,8 +304,7 @@ uint32_t nrf_nvmc_read_dev_id1(void)
 
 uint32_t system_image_start_address(void)
 {
-  extern uint32_t _stext;
-  return (uint32_t)&_stext;
+  return (uint32_t)_stext;
 }
 
 /****************************************************************************
@@ -324,7 +323,7 @@ uint32_t system_image_start_address(void)
 
 uint32_t system_image_ro_section_end(void)
 {
-  return (uint32_t)&_eronly;
+  return (uint32_t)_eronly;
 }
 
 /****************************************************************************
@@ -343,16 +342,7 @@ uint32_t system_image_ro_section_end(void)
 
 uint32_t system_image_data_section_size(void)
 {
-  extern uint32_t _edata;
-  extern uint32_t _sdata;
-  uint32_t data_size;
-  uint32_t start;
-  uint32_t end;
-
-  start     = (uint32_t)&_sdata;
-  end       = (uint32_t)&_edata;
-  data_size = end - start;
-  return data_size;
+  return _edata - _sdata;
 }
 
 /****************************************************************************

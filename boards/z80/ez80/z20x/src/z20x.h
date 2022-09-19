@@ -106,27 +106,27 @@
  * 0bffff _progend     End of RAM
  */
 
-extern unsigned long _vecstart;
-#define VECSTART     ((uintptr_t)&_vecstart)
+extern uint8_t _vecstart[];
+#define VECSTART     ((uintptr_t)_vecstart)
 
-extern unsigned long _vecend;
-#define VECEND       ((uintptr_t)&_vecend)
+extern uint8_t _vecend[];
+#define VECEND       ((uintptr_t)_vecend)
 
 #define VECSIZE      (VECEND - VECSTART + 1)
 
-extern unsigned long _loaderstart;
-#define LOADERSTART  ((uintptr_t)&_loaderstart)
+extern uint8_t _loaderstart[];
+#define LOADERSTART  ((uintptr_t)_loaderstart)
 
-extern unsigned long _loaderend;
-#define LOADEREND    ((uintptr_t)&_loaderend)
+extern uint8_t _loaderend[];
+#define LOADEREND    ((uintptr_t)_loaderend)
 
 #define LOADERSIZE   (LOADEREND - LOADERSTART + 1)
 
-extern unsigned long _progstart;
-#define PROGSTART    ((uintptr_t)&_progstart)
+extern uint8_t _progstart[];
+#define PROGSTART    ((uintptr_t)_progstart)
 
-extern unsigned long _progend;
-#define PROGEND      ((uintptr_t)&_progend)
+extern uint8_t _progend[];
+#define PROGEND      ((uintptr_t)_progend)
 
 #define PROGSIZE     (PROGEND - PROGSTART + 1)
 

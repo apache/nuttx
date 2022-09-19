@@ -140,7 +140,7 @@ void xtensa_appcpu_start(void)
 
   /* Move CPU0 exception vectors to IRAM */
 
-  __asm__ __volatile__ ("wsr %0, vecbase\n"::"r" (&_init_start));
+  __asm__ __volatile__ ("wsr %0, vecbase\n"::"r" (_init_start));
 
   /* Make page 0 access raise an exception */
 

@@ -59,13 +59,12 @@
 
 void up_allocate_heap(void **heap_start, size_t *heap_size)
 {
-  extern uint32_t *_dram0_rtos_reserved_start;
+  extern uint8_t _dram0_rtos_reserved_start[];
 
   board_autoled_on(LED_HEAPALLOCATE);
 
-  *heap_start = (void *)&_sheap;
-  *heap_size = (size_t)((uintptr_t)&_dram0_rtos_reserved_start -
-                        (uintptr_t)&_sheap);
+  *heap_start = _sheap;
+  *heap_size = _dram0_rtos_reserved_start - _sheap;
 }
 
 /****************************************************************************

@@ -221,7 +221,7 @@ ssize_t up_check_stack_remain(void)
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 size_t up_check_intstack(void)
 {
-  return sparc_stack_check((uintptr_t)&g_intstackalloc,
+  return sparc_stack_check((uintptr_t)g_intstackalloc,
                            STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
 }
 

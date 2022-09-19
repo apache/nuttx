@@ -91,7 +91,7 @@ static void cpu1_boot(void)
 
   if (cpu == 1)
     {
-      putreg32((uint32_t)&_stext, NVIC_VECTAB); /* use CPU0 vectors */
+      putreg32((uint32_t)_stext, NVIC_VECTAB); /* use CPU0 vectors */
 
 #if defined(CONFIG_BUILD_FLAT) && defined(CONFIG_ARM_MPU)
       lc823450_mpuinitialize();

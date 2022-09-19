@@ -155,8 +155,8 @@ EXTERN volatile bool g_rtc_enabled;
  * beginning and the end of the C++ initialization section.
  */
 
-extern initializer_t _sinit;
-extern initializer_t _einit;
+extern initializer_t _sinit[];
+extern initializer_t _einit[];
 #endif
 
 /****************************************************************************

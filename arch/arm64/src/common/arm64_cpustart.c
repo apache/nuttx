@@ -153,7 +153,7 @@ static void arm64_start_cpu(int cpu_num, char *stack, int stack_sz,
   flush_end     = flush_start + sizeof(cpu_boot_params);
   up_flush_dcache(flush_start, flush_end);
 
-  if (pcsi_cpu_on(cpu_mpid, (uint64_t)&__start))
+  if (pcsi_cpu_on(cpu_mpid, (uint64_t)__start))
     {
       sinfo("Failed to boot secondary CPU core %d (MPID:%#lx)\n", cpu_num,
             cpu_mpid);

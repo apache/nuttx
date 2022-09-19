@@ -106,17 +106,17 @@
 #  define _START_DATA  __sfb(".data")
 #  define _END_DATA    __sfe(".data")
 #else
-#  define _START_TEXT  &_stext
-#  define _END_TEXT    &_etext
-#  define _START_BSS   &_sbss
-#  define _END_BSS     &_ebss
-#  define _DATA_INIT   &_eronly
-#  define _START_DATA  &_sdata
-#  define _END_DATA    &_edata
-#  define _START_TDATA &_stdata
-#  define _END_TDATA   &_etdata
-#  define _START_TBSS  &_stbss
-#  define _END_TBSS    &_etbss
+#  define _START_TEXT  _stext
+#  define _END_TEXT    _etext
+#  define _START_BSS   _sbss
+#  define _END_BSS     _ebss
+#  define _DATA_INIT   _eronly
+#  define _START_DATA  _sdata
+#  define _END_DATA    _edata
+#  define _START_TDATA _stdata
+#  define _END_TDATA   _etdata
+#  define _START_TBSS  _stbss
+#  define _END_TBSS    _etbss
 #endif
 
 /* This is the value used to mark the stack for subsequent stack monitoring
@@ -207,33 +207,23 @@ EXTERN const uintptr_t g_idle_topstack;
 /* Address of the saved user stack pointer */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-EXTERN uint32_t g_intstackalloc; /* Allocated stack base */
-EXTERN uint32_t g_intstacktop;   /* Initial top of interrupt stack */
+EXTERN uint8_t g_intstackalloc[]; /* Allocated stack base */
+EXTERN uint8_t g_intstacktop[];   /* Initial top of interrupt stack */
 #endif
 
-/* These 'addresses' of these values are setup by the linker script.  They
- * are not actual uint32_t storage locations! They are only used
- * meaningfully in the following way:
- *
- *  - The linker script defines, for example, the symbol_sdata.
- *  - The declaration extern uint32_t _sdata; makes C happy.  C will believe
- *    that the value _sdata is the address of a uint32_t variable _data (it
- *    is not!).
- *  - We can recover the linker value then by simply taking the address of
- *    of _data.  like:  uint32_t *pdata = &_sdata;
- */
+/* These symbols are setup by the linker script. */
 
-EXTERN uint32_t _stext;           /* Start of .text */
-EXTERN uint32_t _etext;           /* End_1 of .text + .rodata */
-EXTERN const uint32_t _eronly;    /* End+1 of read only section (.text + .rodata) */
-EXTERN uint32_t _sdata;           /* Start of .data */
-EXTERN uint32_t _edata;           /* End+1 of .data */
-EXTERN uint32_t _sbss;            /* Start of .bss */
-EXTERN uint32_t _ebss;            /* End+1 of .bss */
-EXTERN uint32_t _stdata;          /* Start of .tdata */
-EXTERN uint32_t _etdata;          /* End+1 of .tdata */
-EXTERN uint32_t _stbss;           /* Start of .tbss */
-EXTERN uint32_t _etbss;           /* End+1 of .tbss */
+EXTERN uint8_t _stext[];           /* Start of .text */
+EXTERN uint8_t _etext[];           /* End_1 of .text + .rodata */
+EXTERN const uint8_t _eronly[];    /* End+1 of read only section (.text + .rodata) */
+EXTERN uint8_t _sdata[];           /* Start of .data */
+EXTERN uint8_t _edata[];           /* End+1 of .data */
+EXTERN uint8_t _sbss[];            /* Start of .bss */
+EXTERN uint8_t _ebss[];            /* End+1 of .bss */
+EXTERN uint8_t _stdata[];          /* Start of .tdata */
+EXTERN uint8_t _etdata[];          /* End+1 of .tdata */
+EXTERN uint8_t _stbss[];           /* Start of .tbss */
+EXTERN uint8_t _etbss[];           /* End+1 of .tbss */
 
 /* Sometimes, functions must be executed from RAM.  In this case, the
  * following macro may be used (with GCC!) to specify a function that will
@@ -257,9 +247,9 @@ EXTERN uint32_t _etbss;           /* End+1 of .tbss */
  * functions from flash to RAM.
  */
 
-EXTERN const uint32_t _framfuncs; /* Copy source address in FLASH */
-EXTERN uint32_t _sramfuncs;       /* Copy destination start address in RAM */
-EXTERN uint32_t _eramfuncs;       /* Copy destination end address in RAM */
+EXTERN const uint8_t _framfuncs[]; /* Copy source address in FLASH */
+EXTERN uint8_t _sramfuncs[];       /* Copy destination start address in RAM */
+EXTERN uint8_t _eramfuncs[];       /* Copy destination end address in RAM */
 
 #else /* CONFIG_ARCH_RAMFUNCS */
 

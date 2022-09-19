@@ -50,8 +50,8 @@ struct section_mapping_s
  * Public Data
  ****************************************************************************/
 
-extern uint32_t _vector_start; /* Beginning of vector block */
-extern uint32_t _vector_end;   /* End+1 of vector block */
+extern uint8_t _vector_start; /* Beginning of vector block */
+extern uint8_t _vector_end;   /* End+1 of vector block */
 
 /****************************************************************************
  * Private Data
@@ -171,8 +171,8 @@ static void up_copyvectorblock(void)
    */
 
 #if !defined(CONFIG_BOOT_RUNFROMFLASH) && !defined(CONFIG_BOOT_COPYTORAM)
-  uint32_t *src  = (uint32_t *)&_vector_start;
-  uint32_t *end  = (uint32_t *)&_vector_end;
+  uint32_t *src  = (uint32_t *)_vector_start;
+  uint32_t *end  = (uint32_t *)_vector_end;
   uint32_t *dest = (uint32_t *)VECTOR_BASE;
 
   while (src < end)

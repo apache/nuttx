@@ -89,14 +89,14 @@ void __rv32m1_start(void)
 
 #ifdef CONFIG_RV32M1_ITCM
 
-  src = &_slitcm;
-  dest = &_svitcm;
+  src = (uint32_t *)_slitcm;
+  dest = (uint32_t *)_svitcm;
 
   if (src != dest)
     {
       /* Copy codes from Flash LMA Region to ITCM VMA Region */
 
-      for (; dest < &_evitcm; )
+      for (; dest < (uint32_t *)_evitcm; )
         {
           *dest++ = *src++;
         }
@@ -108,7 +108,7 @@ void __rv32m1_start(void)
    * certain that there are no issues with the state of global variables.
    */
 
-  for (dest = &_sbss; dest < &_ebss; )
+  for (dest = (uint32_t *)_sbss; dest < (uint32_t *)_ebss; )
     {
       *dest++ = 0;
     }
@@ -119,7 +119,9 @@ void __rv32m1_start(void)
    * end of all of the other read-only data (.text, .rodata) at _eronly.
    */
 
-  for (src = &_eronly, dest = &_sdata; dest < &_edata; )
+  for (src = (const uint32_t *)_eronly,
+       dest = (uint32_t *)_sdata; dest < (uint32_t *)_edata;
+      )
     {
       *dest++ = *src++;
     }

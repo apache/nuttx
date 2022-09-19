@@ -147,7 +147,7 @@ void up_lowinit(void)
    * certain that there are no issues with the state of global variables.
    */
 
-  for (dest = &_bss_start; dest < &_end; )
+  for (dest = (uint32_t *)_bss_start; dest < (uint32_t *)_end; )
     {
       *dest++ = 0;
     }

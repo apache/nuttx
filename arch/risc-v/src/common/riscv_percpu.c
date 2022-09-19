@@ -96,7 +96,7 @@ static void riscv_percpu_init(void)
       /* Set interrupt stack (if any) */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
-      g_percpu[i].irq_stack = (uintptr_t)&g_intstacktop - i * STACK_SIZE;
+      g_percpu[i].irq_stack = (uintptr_t)g_intstacktop - i * STACK_SIZE;
 #endif
 
       sq_addlast((struct sq_entry_s *) &g_percpu[i], &g_freelist);

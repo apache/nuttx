@@ -79,7 +79,7 @@ void up_irqinitialize(void)
   /* Colorize the interrupt stack for debug purposes */
 
   size_t intstack_size = (CONFIG_ARCH_INTERRUPTSTACK & ~15);
-  riscv_stack_color((void *)&g_intstackalloc, intstack_size);
+  riscv_stack_color(g_intstackalloc, intstack_size);
 #endif
 
   /* Attach the common interrupt handler */

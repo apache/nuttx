@@ -38,32 +38,32 @@
 
 /* Kernel code memory (RX) */
 
-#define KFLASH_START    (uintptr_t)&__kflash_start
-#define KFLASH_SIZE     (uintptr_t)&__kflash_size
-#define KSRAM_START     (uintptr_t)&__ksram_start
-#define KSRAM_SIZE      (uintptr_t)&__ksram_size
-#define KSRAM_END       (uintptr_t)&__ksram_end
+#define KFLASH_START    (uintptr_t)__kflash_start
+#define KFLASH_SIZE     (uintptr_t)__kflash_size
+#define KSRAM_START     (uintptr_t)__ksram_start
+#define KSRAM_SIZE      (uintptr_t)__ksram_size
+#define KSRAM_END       (uintptr_t)__ksram_end
 
 /* Kernel RAM (RW) */
 
-#define PGPOOL_START    (uintptr_t)&__pgheap_start
-#define PGPOOL_SIZE     (uintptr_t)&__pgheap_size
+#define PGPOOL_START    (uintptr_t)__pgheap_start
+#define PGPOOL_SIZE     (uintptr_t)__pgheap_size
 
 /* Page pool (RWX) */
 
-#define PGPOOL_START    (uintptr_t)&__pgheap_start
-#define PGPOOL_SIZE     (uintptr_t)&__pgheap_size
+#define PGPOOL_START    (uintptr_t)__pgheap_start
+#define PGPOOL_SIZE     (uintptr_t)__pgheap_size
 #define PGPOOL_END      (PGPOOL_START + PGPOOL_SIZE)
 
 /* User flash */
 
-#define UFLASH_START    (uintptr_t)&__uflash_start
-#define UFLASH_SIZE     (uintptr_t)&__uflash_size
+#define UFLASH_START    (uintptr_t)__uflash_start
+#define UFLASH_SIZE     (uintptr_t)__uflash_size
 
 /* User RAM */
 
-#define USRAM_START     (uintptr_t)&__usram_start
-#define USRAM_SIZE      (uintptr_t)&__usram_size
+#define USRAM_START     (uintptr_t)__usram_start
+#define USRAM_SIZE      (uintptr_t)__usram_size
 
 /****************************************************************************
  * Public Data
@@ -71,28 +71,28 @@
 
 /* Kernel code memory (RX)  */
 
-extern uintptr_t        __kflash_start;
-extern uintptr_t        __kflash_size;
+extern uint8_t          __kflash_start[];
+extern uint8_t          __kflash_size[];
 
 /* Kernel RAM (RW) */
 
-extern uintptr_t        __ksram_start;
-extern uintptr_t        __ksram_size;
-extern uintptr_t        __ksram_end;
+extern uint8_t          __ksram_start[];
+extern uint8_t          __ksram_size[];
+extern uint8_t          __ksram_end[];
 
 /* Page pool (RWX) */
 
-extern uintptr_t        __pgheap_start;
-extern uintptr_t        __pgheap_size;
+extern uint8_t          __pgheap_start[];
+extern uint8_t          __pgheap_size[];
 
 /* User code memory (RX) */
 
-extern uintptr_t        __uflash_start;
-extern uintptr_t        __uflash_size;
+extern uint8_t          __uflash_start[];
+extern uint8_t          __uflash_size[];
 
 /* User RAM (RW) */
 
-extern uintptr_t        __usram_start;
-extern uintptr_t        __usram_size;
+extern uint8_t          __usram_start[];
+extern uint8_t          __usram_size[];
 
 #endif /* __BOARDS_RISC_V_MPFS_ICICLE_INCLUDE_BOARD_MEMORYMAP_H */

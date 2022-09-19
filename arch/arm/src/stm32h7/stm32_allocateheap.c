@@ -113,7 +113,7 @@
 #  define SRAM4_START ((uint32_t)(STM32_SRAM4_BASE))
 #  define SRAM4_END   ((uint32_t)(SRAM4_START + STM32H7_SRAM4_SIZE))
 
-#  define SRAM4_HEAP_START ((uint32_t)(&_sram4_heap_start))
+#  define SRAM4_HEAP_START ((uint32_t)_sram4_heap_start)
 #endif
 
 /* The STM32 H7 has DTCM memory */
@@ -135,7 +135,7 @@
  ****************************************************************************/
 
 #ifdef HAVE_SRAM4
-extern const uint32_t _sram4_heap_start;
+extern const uint8_t _sram4_heap_start[];
 #endif
 
 /****************************************************************************

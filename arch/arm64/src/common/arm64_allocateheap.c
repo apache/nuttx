@@ -125,7 +125,7 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
 
   /* Return the heap settings */
 
-  *heap_start = (void *)g_idle_topstack;
+  *heap_start = g_idle_topstack;
   *heap_size  = CONFIG_RAM_END - (size_t)g_idle_topstack;
   sinfo("heap_start=0x%p, heap_size=0x%"PRIx64"\n", *heap_start, *heap_size);
 #endif

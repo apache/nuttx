@@ -127,7 +127,7 @@ int up_backtrace(struct tcb_s *tcb,
 #  ifdef CONFIG_SMP
           istacklimit = arm_intstack_top();
 #  else
-          istacklimit = &g_intstacktop;
+          istacklimit = g_intstacktop;
 #  endif /* CONFIG_SMP */
           ret = backtrace(istacklimit - (CONFIG_ARCH_INTERRUPTSTACK & ~7),
                           istacklimit,

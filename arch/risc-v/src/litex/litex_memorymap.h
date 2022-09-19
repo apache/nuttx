@@ -37,7 +37,7 @@
 /* Idle thread stack starts from _ebss */
 
 #ifndef __ASSEMBLY__
-#define LITEX_IDLESTACK_BASE  (uint32_t)&_ebss
+#define LITEX_IDLESTACK_BASE  (uint32_t)_ebss
 #else
 #define LITEX_IDLESTACK_BASE  _ebss
 #endif

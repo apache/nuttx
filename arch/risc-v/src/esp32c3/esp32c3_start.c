@@ -80,13 +80,13 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32C3_APP_FORMAT_MCUBOOT
-extern uint32_t _image_irom_vma;
-extern uint32_t _image_irom_lma;
-extern uint32_t _image_irom_size;
+extern uint8_t _image_irom_vma[];
+extern uint8_t _image_irom_lma[];
+extern uint8_t _image_irom_size[];
 
-extern uint32_t _image_drom_vma;
-extern uint32_t _image_drom_lma;
-extern uint32_t _image_drom_size;
+extern uint8_t _image_drom_vma[];
+extern uint8_t _image_drom_lma[];
+extern uint8_t _image_drom_size[];
 #endif
 
 /****************************************************************************
@@ -119,7 +119,7 @@ IRAM_ATTR noreturn_function void __start(void);
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32C3_APP_FORMAT_MCUBOOT
-HDR_ATTR static void (*_entry_point)(void) = &__start;
+HDR_ATTR static void (*_entry_point)(void) = __start;
 #endif
 
 /****************************************************************************
@@ -186,12 +186,12 @@ static int map_rom_segments(void)
   uint32_t irom_page_count;
 
   size_t partition_offset = PRIMARY_SLOT_OFFSET;
-  uint32_t app_irom_lma = partition_offset + (uint32_t)&_image_irom_lma;
-  uint32_t app_irom_size = (uint32_t)&_image_irom_size;
-  uint32_t app_irom_vma = (uint32_t)&_image_irom_vma;
-  uint32_t app_drom_lma = partition_offset + (uint32_t)&_image_drom_lma;
-  uint32_t app_drom_size = (uint32_t)&_image_drom_size;
-  uint32_t app_drom_vma = (uint32_t)&_image_drom_vma;
+  uint32_t app_irom_lma = partition_offset + (uint32_t)_image_irom_lma;
+  uint32_t app_irom_size = (uint32_t)_image_irom_size;
+  uint32_t app_irom_vma = (uint32_t)_image_irom_vma;
+  uint32_t app_drom_lma = partition_offset + (uint32_t)_image_drom_lma;
+  uint32_t app_drom_size = (uint32_t)_image_drom_size;
+  uint32_t app_drom_vma = (uint32_t)_image_drom_vma;
 
   uint32_t autoload = cache_suspend_icache();
   cache_invalidate_icache_all();
@@ -288,9 +288,9 @@ void __esp32c3_start(void)
    * certain that there are no issues with the state of global variables.
    */
 
-  for (uint32_t *dest = &_sbss; dest < &_ebss; dest++)
+  for (uint32_t *dest = (uint32_t *)_sbss; dest < (uint32_t *)_ebss; )
     {
-      *dest = 0;
+      *dest++ = 0;
     }
 
   showprogress('B');

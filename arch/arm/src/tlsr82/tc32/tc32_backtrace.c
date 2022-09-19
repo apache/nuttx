@@ -471,7 +471,7 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
 #  ifdef CONFIG_SMP
                                arm_intstack_top(),
 #  else
-                               &g_intstacktop,
+                               g_intstacktop,
 #  endif /* CONFIG_SMP */
                                &sp, (void *)up_backtrace + 10,
                                buffer, size, &skip);

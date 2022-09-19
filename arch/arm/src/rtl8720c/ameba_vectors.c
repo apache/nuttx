@@ -30,8 +30,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-extern uint32_t __stack;
-#define IDLE_STACK      ((const char *)&__stack - 4)
+extern uint8_t __stack[];
+#define IDLE_STACK      (__stack - 4)
 #ifndef ARMV8M_PERIPHERAL_INTERRUPTS
 #  error ARMV8M_PERIPHERAL_INTERRUPTS must be defined to the number of I/O interrupts to be supported
 #endif

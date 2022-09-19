@@ -33,48 +33,48 @@
 
 /* Kernel ROM */
 
-#define KIROM_START     (uintptr_t)&__kirom_start
-#define KIROM_SIZE      (uintptr_t)&__kirom_size
-#define KDROM_START     (uintptr_t)&__kdrom_start
-#define KDROM_SIZE      (uintptr_t)&__kdrom_size
+#define KIROM_START     (uintptr_t)__kirom_start
+#define KIROM_SIZE      (uintptr_t)__kirom_size
+#define KDROM_START     (uintptr_t)__kdrom_start
+#define KDROM_SIZE      (uintptr_t)__kdrom_size
 
 /* Kernel RAM */
 
-#define KIRAM_0_START   (uintptr_t)&__kiram_0_start
-#define KIRAM_0_SIZE    (uintptr_t)&__kiram_0_size
-#define KIRAM_0_END     (uintptr_t)&__kiram_0_end
-#define KIRAM_1_START   (uintptr_t)&__kiram_1_start
-#define KIRAM_1_SIZE    (uintptr_t)&__kiram_1_size
-#define KIRAM_1_END     (uintptr_t)&__kiram_1_end
-#define KDRAM_0_START   (uintptr_t)&__kdram_0_start
-#define KDRAM_0_SIZE    (uintptr_t)&__kdram_0_size
-#define KDRAM_0_END     (uintptr_t)&__kdram_0_end
-#define KDRAM_1_START   (uintptr_t)&__kdram_1_start
-#define KDRAM_1_SIZE    (uintptr_t)&__kdram_1_size
-#define KDRAM_1_END     (uintptr_t)&__kdram_1_end
+#define KIRAM_0_START   (uintptr_t)__kiram_0_start
+#define KIRAM_0_SIZE    (uintptr_t)__kiram_0_size
+#define KIRAM_0_END     (uintptr_t)__kiram_0_end
+#define KIRAM_1_START   (uintptr_t)__kiram_1_start
+#define KIRAM_1_SIZE    (uintptr_t)__kiram_1_size
+#define KIRAM_1_END     (uintptr_t)__kiram_1_end
+#define KDRAM_0_START   (uintptr_t)__kdram_0_start
+#define KDRAM_0_SIZE    (uintptr_t)__kdram_0_size
+#define KDRAM_0_END     (uintptr_t)__kdram_0_end
+#define KDRAM_1_START   (uintptr_t)__kdram_1_start
+#define KDRAM_1_SIZE    (uintptr_t)__kdram_1_size
+#define KDRAM_1_END     (uintptr_t)__kdram_1_end
 
 /* Exception vectors */
 
-#define VECTORS_START   (uintptr_t)&__vectors_start
-#define VECTORS_END     (uintptr_t)&__vectors_end
+#define VECTORS_START   (uintptr_t)__vectors_start
+#define VECTORS_END     (uintptr_t)__vectors_end
 
 /* User ROM */
 
-#define UIROM_START     (uintptr_t)&__uirom_start
-#define UIROM_SIZE      (uintptr_t)&__uirom_size
-#define UIROM_END       (uintptr_t)&__uirom_end
-#define UDROM_START     (uintptr_t)&__udrom_start
-#define UDROM_SIZE      (uintptr_t)&__udrom_size
-#define UDROM_END       (uintptr_t)&__udrom_end
+#define UIROM_START     (uintptr_t)__uirom_start
+#define UIROM_SIZE      (uintptr_t)__uirom_size
+#define UIROM_END       (uintptr_t)__uirom_end
+#define UDROM_START     (uintptr_t)__udrom_start
+#define UDROM_SIZE      (uintptr_t)__udrom_size
+#define UDROM_END       (uintptr_t)__udrom_end
 
 /* User RAM */
 
-#define UIRAM_START     (uintptr_t)&__uiram_start
-#define UIRAM_SIZE      (uintptr_t)&__uiram_size
-#define UIRAM_END       (uintptr_t)&__uiram_end
-#define UDRAM_START     (uintptr_t)&__udram_start
-#define UDRAM_SIZE      (uintptr_t)&__udram_size
-#define UDRAM_END       (uintptr_t)&__udram_end
+#define UIRAM_START     (uintptr_t)__uiram_start
+#define UIRAM_SIZE      (uintptr_t)__uiram_size
+#define UIRAM_END       (uintptr_t)__uiram_end
+#define UDRAM_START     (uintptr_t)__udram_start
+#define UDRAM_SIZE      (uintptr_t)__udram_size
+#define UDRAM_END       (uintptr_t)__udram_end
 
 /****************************************************************************
  * Public Data
@@ -82,47 +82,47 @@
 
 /* Kernel ROM (RX)  */
 
-extern uintptr_t        __kirom_start;
-extern uintptr_t        __kirom_size;
-extern uintptr_t        __kdrom_start;
-extern uintptr_t        __kdrom_size;
+extern uint8_t          __kirom_start[];
+extern uint8_t          __kirom_size[];
+extern uint8_t          __kdrom_start[];
+extern uint8_t          __kdrom_size[];
 
 /* Kernel RAM (RW) */
 
-extern uintptr_t        __kiram_0_start;
-extern uintptr_t        __kiram_0_size;
-extern uintptr_t        __kiram_0_end;
-extern uintptr_t        __kiram_1_start;
-extern uintptr_t        __kiram_1_size;
-extern uintptr_t        __kiram_1_end;
-extern uintptr_t        __kdram_0_start;
-extern uintptr_t        __kdram_0_size;
-extern uintptr_t        __kdram_0_end;
-extern uintptr_t        __kdram_1_start;
-extern uintptr_t        __kdram_1_size;
-extern uintptr_t        __kdram_1_end;
+extern uint8_t          __kiram_0_start[];
+extern uint8_t          __kiram_0_size[];
+extern uint8_t          __kiram_0_end[];
+extern uint8_t          __kiram_1_start[];
+extern uint8_t          __kiram_1_size[];
+extern uint8_t          __kiram_1_end[];
+extern uint8_t          __kdram_0_start[];
+extern uint8_t          __kdram_0_size[];
+extern uint8_t          __kdram_0_end[];
+extern uint8_t          __kdram_1_start[];
+extern uint8_t          __kdram_1_size[];
+extern uint8_t          __kdram_1_end[];
 
 /* Exception vectors */
 
-extern uintptr_t        __vectors_start;
-extern uintptr_t        __vectors_end;
+extern uint8_t          __vectors_start[];
+extern uint8_t          __vectors_end[];
 
 /* User ROM (RX) */
 
-extern uintptr_t        __uirom_start;
-extern uintptr_t        __uirom_size;
-extern uintptr_t        __uirom_end;
-extern uintptr_t        __udrom_start;
-extern uintptr_t        __udrom_size;
-extern uintptr_t        __udrom_end;
+extern uint8_t          __uirom_start[];
+extern uint8_t          __uirom_size[];
+extern uint8_t          __uirom_end[];
+extern uint8_t          __udrom_start[];
+extern uint8_t          __udrom_size[];
+extern uint8_t          __udrom_end[];
 
 /* User RAM (RW) */
 
-extern uintptr_t        __uiram_start;
-extern uintptr_t        __uiram_size;
-extern uintptr_t        __uiram_end;
-extern uintptr_t        __udram_start;
-extern uintptr_t        __udram_size;
-extern uintptr_t        __udram_end;
+extern uint8_t          __uiram_start[];
+extern uint8_t          __uiram_size[];
+extern uint8_t          __uiram_end[];
+extern uint8_t          __udram_start[];
+extern uint8_t          __udram_size[];
+extern uint8_t          __udram_end[];
 
 #endif /* __BOARDS_XTENSA_ESP32_TTGO_EINK_5_V2_INCLUDE_BOARD_MEMORYMAP_H */
