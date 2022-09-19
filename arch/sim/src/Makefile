@@ -111,7 +111,7 @@ ifneq ($(CONFIG_LIBM),y)
   STDLIBS += -lm
 endif
 
-ifneq ($(CONFIG_SIM_UBSAN),y)
+ifeq ($(CONFIG_SIM_UBSAN),y)
   STDLIBS += -lubsan
 endif
 
