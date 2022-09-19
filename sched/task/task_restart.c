@@ -133,9 +133,9 @@ int nxtask_restart(pid_t pid)
    */
 
 #ifdef CONFIG_SMP
-  tasklist = TLIST_HEAD(tcb->cmn.task_state, tcb->cmn.cpu);
+  tasklist = TLIST_HEAD(&tcb->cmn, tcb->cmn.cpu);
 #else
-  tasklist = TLIST_HEAD(tcb->cmn.task_state);
+  tasklist = TLIST_HEAD(&tcb->cmn);
 #endif
 
   dq_rem((FAR dq_entry_t *)tcb, tasklist);

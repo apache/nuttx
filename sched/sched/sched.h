@@ -68,22 +68,25 @@
 #define TLIST_ATTR_PRIORITIZED   (1 << 0) /* Bit 0: List is prioritized */
 #define TLIST_ATTR_INDEXED       (1 << 1) /* Bit 1: List is indexed by CPU */
 #define TLIST_ATTR_RUNNABLE      (1 << 2) /* Bit 2: List includes running tasks */
+#define TLIST_ATTR_OFFSET        (1 << 3) /* Bit 3: Pointer of task list is offset */
 
 #define __TLIST_ATTR(s)          g_tasklisttable[s].attr
 #define TLIST_ISPRIORITIZED(s)   ((__TLIST_ATTR(s) & TLIST_ATTR_PRIORITIZED) != 0)
 #define TLIST_ISINDEXED(s)       ((__TLIST_ATTR(s) & TLIST_ATTR_INDEXED) != 0)
 #define TLIST_ISRUNNABLE(s)      ((__TLIST_ATTR(s) & TLIST_ATTR_RUNNABLE) != 0)
+#define TLIST_ISOFFSET(s)        ((__TLIST_ATTR(s) & TLIST_ATTR_OFFSET) != 0)
 
-#define __TLIST_HEAD(s)          g_tasklisttable[s].list
-#define __TLIST_HEADINDEXED(s,c) (&(__TLIST_HEAD(s))[c])
+#define __TLIST_HEAD(t) \
+  (TLIST_ISOFFSET((t)->task_state) ? (FAR dq_queue_t *)((FAR uint8_t *)((t)->waitobj) + \
+  (uintptr_t)g_tasklisttable[(t)->task_state].list) : g_tasklisttable[(t)->task_state].list)
 
 #ifdef CONFIG_SMP
-#  define TLIST_HEAD(s,c) \
-  ((TLIST_ISINDEXED(s)) ? __TLIST_HEADINDEXED(s,c) : __TLIST_HEAD(s))
-#  define TLIST_BLOCKED(s)       __TLIST_HEAD(s)
+#  define TLIST_HEAD(t,c) \
+    ((TLIST_ISINDEXED((t)->task_state)) ? (&(__TLIST_HEAD(t))[c]) : __TLIST_HEAD(t))
+#  define TLIST_BLOCKED(t)       __TLIST_HEAD(t)
 #else
-#  define TLIST_HEAD(s)          __TLIST_HEAD(s)
-#  define TLIST_BLOCKED(s)       __TLIST_HEAD(s)
+#  define TLIST_HEAD(t)          __TLIST_HEAD(t)
+#  define TLIST_BLOCKED(t)       __TLIST_HEAD(t)
 #endif
 
 /****************************************************************************
@@ -170,10 +173,6 @@ extern FAR struct tcb_s *g_running_tasks[CONFIG_SMP_NCPUS];
  */
 
 extern dq_queue_t g_pendingtasks;
-
-/* This is the list of all tasks that are blocked waiting for a semaphore */
-
-extern dq_queue_t g_waitingforsemaphore;
 
 /* This is the list of all tasks that are blocked waiting for a signal */
 
