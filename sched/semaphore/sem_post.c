@@ -153,10 +153,6 @@ int nxsem_post(FAR sem_t *sem)
               wd_cancel(&stcb->waitdog);
             }
 
-          /* It is, let the task take the semaphore */
-
-          stcb->waitobj = NULL;
-
           /* Restart the waiting task. */
 
           up_unblock_task(stcb);
