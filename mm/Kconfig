@@ -229,7 +229,7 @@ config MM_UBSAN_ALL
 
 config MM_UBSAN_OPTION
 	string "UBSan options"
-	depends on MM_UBSAN
+	depends on MM_UBSAN || SIM_UBSAN
 	default "-fsanitize=undefined"
 	---help---
 		This option activates specified UBSan instrumentation. Please
