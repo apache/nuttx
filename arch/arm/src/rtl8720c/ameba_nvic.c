@@ -64,10 +64,6 @@
 
 volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
 
-/* extern int32_t    __StackLimit; */
-
-extern uint32_t   _vectors[];
-
 /****************************************************************************
  * Private Function Declarations
  ****************************************************************************/

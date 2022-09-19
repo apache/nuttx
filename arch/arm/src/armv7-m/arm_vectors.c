@@ -45,7 +45,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IDLE_STACK      ((unsigned int)&_ebss+CONFIG_IDLETHREAD_STACKSIZE)
+#define IDLE_STACK      ((const char *)&_ebss+CONFIG_IDLETHREAD_STACKSIZE)
 
 #ifndef ARMV7M_PERIPHERAL_INTERRUPTS
 #  error ARMV7M_PERIPHERAL_INTERRUPTS must be defined to the number of I/O interrupts to be supported
@@ -76,7 +76,7 @@ extern void exception_common(void);
  * Note that the [ ... ] designated initializer is a GCC extension.
  */
 
-const unsigned int _vectors[] locate_data(".vectors") =
+const void *_vectors[] locate_data(".vectors") =
 {
   /* Initial stack */
 
@@ -84,10 +84,9 @@ const unsigned int _vectors[] locate_data(".vectors") =
 
   /* Reset exception handler */
 
-  (unsigned int)&__start,
+  __start,
 
   /* Vectors 2 - n point directly at the generic handler */
 
-  [2 ... (15 + ARMV7M_PERIPHERAL_INTERRUPTS)] = (unsigned int)
-                                                &exception_common
+  [2 ... (15 + ARMV7M_PERIPHERAL_INTERRUPTS)] = exception_common
 };

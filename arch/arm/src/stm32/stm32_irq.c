@@ -72,18 +72,6 @@
 
 volatile uint32_t *g_current_regs[1];
 
-/* This is the address of the  exception vector table (determined by the
- * linker script).
- */
-
-#if defined(__ICCARM__)
-/* _vectors replaced on __vector_table for IAR C-SPY Simulator */
-
-extern uint32_t __vector_table[];
-#else
-extern uint32_t _vectors[];
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/

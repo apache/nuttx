@@ -110,16 +110,6 @@ const uint32_t g_cpu_intstack_top[CONFIG_SMP_NCPUS] =
 };
 #endif /* defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7 */
 
-/* This is the address of the  exception vector table (determined by the
- * linker script).
- */
-
-extern uint32_t _vectors[];
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
