@@ -131,13 +131,13 @@ int nxtask_terminate(pid_t pid, bool nonblocking)
 
   /* Get the task list associated with the thread's state and CPU */
 
-  tasklist = TLIST_HEAD(dtcb->task_state, cpu);
+  tasklist = TLIST_HEAD(dtcb, cpu);
 #else
   /* In the non-SMP case, we can be assured that the task to be terminated
    * is not running.  get the task list associated with the task state.
    */
 
-  tasklist = TLIST_HEAD(dtcb->task_state);
+  tasklist = TLIST_HEAD(dtcb);
 #endif
 
   /* Remove the task from the task list */

@@ -130,7 +130,7 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb)
    */
 
   cpu      = rtcb->cpu;
-  tasklist = TLIST_HEAD(rtcb->task_state, cpu);
+  tasklist = TLIST_HEAD(rtcb, cpu);
 
   /* Check if the TCB to be removed is at the head of a ready-to-run list.
    * For the case of SMP, there are two lists involved:  (1) the

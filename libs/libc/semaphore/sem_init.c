@@ -73,6 +73,10 @@ int nxsem_init(FAR sem_t *sem, int pshared, unsigned int value)
 
       sem->semcount         = (int16_t)value;
 
+      /* Initialize semaphore wait list */
+
+      dq_init(&sem->waitlist);
+
       /* Initialize to support priority inheritance */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE

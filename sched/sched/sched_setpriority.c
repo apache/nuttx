@@ -278,7 +278,7 @@ static inline void nxsched_blocked_setpriority(FAR struct tcb_s *tcb,
 
   /* CASE 3a. The task resides in a prioritized list. */
 
-  tasklist = TLIST_BLOCKED(task_state);
+  tasklist = TLIST_BLOCKED(tcb);
   if (TLIST_ISPRIORITIZED(task_state))
     {
       /* Remove the TCB from the prioritized task list */

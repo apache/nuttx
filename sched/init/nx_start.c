@@ -134,10 +134,6 @@ FAR struct tcb_s *g_running_tasks[CONFIG_SMP_NCPUS];
 
 dq_queue_t g_pendingtasks;
 
-/* This is the list of all tasks that are blocked waiting for a semaphore */
-
-dq_queue_t g_waitingforsemaphore;
-
 /* This is the list of all tasks that are blocked waiting for a signal */
 
 dq_queue_t g_waitingforsignal;
@@ -237,8 +233,8 @@ const struct tasklist_s g_tasklisttable[NUM_TASK_STATES] =
     0
   },
   {                                              /* TSTATE_WAIT_SEM */
-    &g_waitingforsemaphore,
-    TLIST_ATTR_PRIORITIZED
+    (FAR void *)offsetof(sem_t, waitlist),
+    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_OFFSET
   },
   {                                              /* TSTATE_WAIT_SIG */
     &g_waitingforsignal,
@@ -429,9 +425,9 @@ void nx_start(void)
        */
 
 #ifdef CONFIG_SMP
-      tasklist = TLIST_HEAD(TSTATE_TASK_RUNNING, i);
+      tasklist = TLIST_HEAD(&g_idletcb[i].cmn, i);
 #else
-      tasklist = TLIST_HEAD(TSTATE_TASK_RUNNING);
+      tasklist = TLIST_HEAD(&g_idletcb[i].cmn);
 #endif
       dq_addfirst((FAR dq_entry_t *)&g_idletcb[i], tasklist);
 
