@@ -386,7 +386,7 @@ static int netdev_bluetooth_ioctl(FAR struct socket *psock, int cmd,
 
   if (arg != 0ul)
     {
-      if (WL_IBLUETOOTHCMD(cmd))
+      if (_BLUETOOTHIOCVALID(cmd))
         {
           /* Get the name of the Bluetooth device to receive the IOCTL
            * command
@@ -510,7 +510,7 @@ static int netdev_pktradio_ioctl(FAR struct socket *psock, int cmd,
 
   if (arg != 0ul)
     {
-      if (WL_ISPKTRADIOCMD(cmd))
+      if (_PKRADIOIOCVALID(cmd))
         {
           /* Get the packet radio device to receive the radio IOCTL
            * command
@@ -571,7 +571,7 @@ static int netdev_wifr_ioctl(FAR struct socket *psock, int cmd,
 
   /* Verify that this is a valid wireless network IOCTL command */
 
-  if (_WLIOCVALID(cmd) && (unsigned)_IOC_NR(cmd) <= WL_NNETCMDS)
+  if (_WLIOCVALID(cmd))
     {
       /* Get the wireless device associated with the IOCTL command */
 
@@ -1575,7 +1575,7 @@ ssize_t net_ioctl_arglen(int cmd)
       default:
 #ifdef CONFIG_NETDEV_IOCTL
 #  ifdef CONFIG_NETDEV_WIRELESS_IOCTL
-        if (_WLIOCVALID(cmd) && _IOC_NR(cmd) <= WL_NNETCMDS)
+        if (_WLIOCVALID(cmd))
           {
             return sizeof(struct iwreq);
           }
@@ -1589,14 +1589,14 @@ ssize_t net_ioctl_arglen(int cmd)
 #  endif
 
 #  ifdef CONFIG_WIRELESS_PKTRADIO
-        if (WL_ISPKTRADIOCMD(cmd))
+        if (_PKRADIOIOCVALID(cmd))
           {
             return sizeof(struct pktradio_ifreq_s);
           }
 #  endif
 
 #  ifdef CONFIG_WIRELESS_BLUETOOTH
-        if (WL_IBLUETOOTHCMD(cmd))
+        if (_BLUETOOTHIOCVALID(cmd))
           {
             return sizeof(struct btreq_s);
           }

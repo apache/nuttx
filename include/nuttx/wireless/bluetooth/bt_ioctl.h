@@ -42,7 +42,7 @@
 
 #include <net/if.h>
 
-#include <nuttx/wireless/wireless.h>
+#include <nuttx/fs/ioctl.h>
 #include <nuttx/wireless/bluetooth/bt_core.h>
 #include <nuttx/wireless/bluetooth/bt_hci.h>
 #include <nuttx/wireless/bluetooth/bt_gatt.h>
@@ -67,10 +67,6 @@
 
 /* Bluetooth network device IOCTL commands. */
 
-#if !defined(WL_BLUETOOTHCMDS) || WL_BLUETOOTHCMDS != 28
-#  error Incorrect setting for number of Bluetooth IOCTL commands
-#endif
-
 /* IOCTL Commands ***********************************************************
  * Many derive from NetBSD, at least in name.
  * All of the following use an argument of type struct btreg_s:
@@ -91,9 +87,9 @@
  *   Thus, you can cycle through all devices in the system.
  */
 
-#define SIOCGBTINFO            _WLIOC(WL_BLUETOOTHFIRST + 0)
-#define SIOCGBTINFOA           _WLIOC(WL_BLUETOOTHFIRST + 1)
-#define SIOCNBTINFO            _WLIOC(WL_BLUETOOTHFIRST + 2)
+#define SIOCGBTINFO            _BLUETOOTHIOC(0)
+#define SIOCGBTINFOA           _BLUETOOTHIOC(1)
+#define SIOCNBTINFO            _BLUETOOTHIOC(2)
 
 /* Features
  *
@@ -105,8 +101,8 @@
  *   features.  Only page 0 is value.
  */
 
-#define SIOCGBTFEAT            _WLIOC(WL_BLUETOOTHFIRST + 3)
-#define SIOCGBTLEFEAT          _WLIOC(WL_BLUETOOTHFIRST + 4)
+#define SIOCGBTFEAT            _BLUETOOTHIOC(3)
+#define SIOCGBTLEFEAT          _BLUETOOTHIOC(4)
 
 /* Set Flags, Link Policy, and Packet Types
  *
@@ -119,9 +115,9 @@
  *   the device supports.
  */
 
-#define SIOCSBTFLAGS           _WLIOC(WL_BLUETOOTHFIRST + 5)
-#define SIOCSBTPOLICY          _WLIOC(WL_BLUETOOTHFIRST + 6)
-#define SIOCSBTPTYPE           _WLIOC(WL_BLUETOOTHFIRST + 7)
+#define SIOCSBTFLAGS           _BLUETOOTHIOC(5)
+#define SIOCSBTPOLICY          _BLUETOOTHIOC(6)
+#define SIOCSBTPTYPE           _BLUETOOTHIOC(7)
 
 /* Get Statistics:
  *
@@ -131,8 +127,8 @@
  *   Read device statistics, and zero them.
  */
 
-#define SIOCGBTSTATS           _WLIOC(WL_BLUETOOTHFIRST + 8)
-#define SIOCZBTSTATS           _WLIOC(WL_BLUETOOTHFIRST + 9)
+#define SIOCGBTSTATS           _BLUETOOTHIOC(8)
+#define SIOCZBTSTATS           _BLUETOOTHIOC(9)
 
 /* Advertisement
  *
@@ -143,8 +139,8 @@
  *   Stop advertising.
  */
 
-#define SIOCBTADVSTART         _WLIOC(WL_BLUETOOTHFIRST + 10)
-#define SIOCBTADVSTOP          _WLIOC(WL_BLUETOOTHFIRST + 11)
+#define SIOCBTADVSTART         _BLUETOOTHIOC(10)
+#define SIOCBTADVSTOP          _BLUETOOTHIOC(11)
 
 /* Scanning
  *
@@ -158,9 +154,9 @@
  *   Stop LE scanning and discard any buffered results.
  */
 
-#define SIOCBTSCANSTART        _WLIOC(WL_BLUETOOTHFIRST + 12)
-#define SIOCBTSCANGET          _WLIOC(WL_BLUETOOTHFIRST + 13)
-#define SIOCBTSCANSTOP         _WLIOC(WL_BLUETOOTHFIRST + 14)
+#define SIOCBTSCANSTART        _BLUETOOTHIOC(12)
+#define SIOCBTSCANGET          _BLUETOOTHIOC(13)
+#define SIOCBTSCANSTOP         _BLUETOOTHIOC(14)
 
 /* Security
  *
@@ -168,7 +164,7 @@
  *   Enable security for a connection.
  */
 
-#define SIOCBTSECURITY         _WLIOC(WL_BLUETOOTHFIRST + 15)
+#define SIOCBTSECURITY         _BLUETOOTHIOC(15)
 
 /* GATT
  *
@@ -182,20 +178,20 @@
  *   Write GATT data
  */
 
-#define SIOCBTEXCHANGE         _WLIOC(WL_BLUETOOTHFIRST + 16)
-#define SIOCBTDISCOVER         _WLIOC(WL_BLUETOOTHFIRST + 17)
-#define SIOCBTGATTRD           _WLIOC(WL_BLUETOOTHFIRST + 18)
-#define SIOCBTGATTWR           _WLIOC(WL_BLUETOOTHFIRST + 19)
+#define SIOCBTEXCHANGE         _BLUETOOTHIOC(16)
+#define SIOCBTDISCOVER         _BLUETOOTHIOC(17)
+#define SIOCBTGATTRD           _BLUETOOTHIOC(18)
+#define SIOCBTGATTWR           _BLUETOOTHIOC(19)
 
 /* Connect/diconnect from a peer */
 
-#define SIOCBTCONNECT          _WLIOC(WL_BLUETOOTHFIRST + 24)
-#define SIOCBTDISCONNECT       _WLIOC(WL_BLUETOOTHFIRST + 25)
+#define SIOCBTCONNECT          _BLUETOOTHIOC(24)
+#define SIOCBTDISCONNECT       _BLUETOOTHIOC(25)
 
 /* btsnoop open and close operations */
 
-#define SIOCBTSNOOPOPEN        _WLIOC(WL_BLUETOOTHFIRST + 26)
-#define SIOCBTSNOOPCLOSE       _WLIOC(WL_BLUETOOTHFIRST + 27)
+#define SIOCBTSNOOPOPEN        _BLUETOOTHIOC(26)
+#define SIOCBTSNOOPCLOSE       _BLUETOOTHIOC(27)
 
 /* Definitions associated with struct btreg_s *******************************/
 
