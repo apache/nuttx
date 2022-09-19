@@ -223,7 +223,6 @@ static void djoy_sample(FAR struct djoy_upperhalf_s *priv)
   djoy_buttonset_t press;
   djoy_buttonset_t release;
   irqstate_t flags;
-  int i;
 
   DEBUGASSERT(priv);
   lower = priv->du_lower;
@@ -265,19 +264,8 @@ static void djoy_sample(FAR struct djoy_upperhalf_s *priv)
 
           /* Yes.. Notify all waiters */
 
-          for (i = 0; i < CONFIG_INPUT_DJOYSTICK_NPOLLWAITERS; i++)
-            {
-              FAR struct pollfd *fds = opriv->do_fds[i];
-              if (fds)
-                {
-                  fds->revents |= (fds->events & POLLIN);
-                  if (fds->revents != 0)
-                    {
-                      iinfo("Report events: %08" PRIx32 "\n", fds->revents);
-                      nxsem_post(fds->sem);
-                    }
-                }
-            }
+          poll_notify(opriv->do_fds, CONFIG_INPUT_DJOYSTICK_NPOLLWAITERS,
+                      POLLIN);
         }
 
       /* Have any signal events occurred? */
@@ -629,12 +617,7 @@ static int djoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
               if (opriv->do_pollpending)
                 {
-                  fds->revents |= (fds->events & POLLIN);
-                  if (fds->revents != 0)
-                    {
-                      iinfo("Report events: %08" PRIx32 "\n", fds->revents);
-                      nxsem_post(fds->sem);
-                    }
+                  poll_notify(&fds, 1, POLLIN);
                 }
 
               break;

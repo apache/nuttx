@@ -223,7 +223,6 @@ static void ajoy_sample(FAR struct ajoy_upperhalf_s *priv)
   ajoy_buttonset_t press;
   ajoy_buttonset_t release;
   irqstate_t flags;
-  int i;
 
   DEBUGASSERT(priv);
   lower = priv->au_lower;
@@ -265,19 +264,8 @@ static void ajoy_sample(FAR struct ajoy_upperhalf_s *priv)
 
           /* Yes.. Notify all waiters */
 
-          for (i = 0; i < CONFIG_INPUT_AJOYSTICK_NPOLLWAITERS; i++)
-            {
-              FAR struct pollfd *fds = opriv->ao_fds[i];
-              if (fds)
-                {
-                  fds->revents |= (fds->events & POLLIN);
-                  if (fds->revents != 0)
-                    {
-                      iinfo("Report events: %08" PRIx32 "\n", fds->revents);
-                      nxsem_post(fds->sem);
-                    }
-                }
-            }
+          poll_notify(opriv->ao_fds, CONFIG_INPUT_AJOYSTICK_NPOLLWAITERS,
+                      POLLIN);
         }
 
       /* Have any signal events occurred? */
@@ -635,12 +623,7 @@ static int ajoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
               if (opriv->ao_pollpending)
                 {
-                  fds->revents |= (fds->events & POLLIN);
-                  if (fds->revents != 0)
-                    {
-                      iinfo("Report events: %08" PRIx32 "\n", fds->revents);
-                      nxsem_post(fds->sem);
-                    }
+                  poll_notify(&fds, 1, POLLIN);
                 }
 
               break;

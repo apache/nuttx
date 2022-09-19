@@ -100,11 +100,6 @@
 
 static int            can_takesem(FAR sem_t *sem);
 
-/* Poll helpers */
-
-static void           can_pollnotify(FAR struct can_dev_s *dev,
-                                     pollevent_t eventset);
-
 /* CAN helpers */
 
 static uint8_t        can_dlc2bytes(uint8_t dlc);
@@ -168,30 +163,6 @@ static int can_takesem(FAR sem_t *sem)
  ****************************************************************************/
 
 #define can_givesem(sem) nxsem_post(sem)
-
-/****************************************************************************
- * Name: can_pollnotify
- ****************************************************************************/
-
-static void can_pollnotify(FAR struct can_dev_s *dev, pollevent_t eventset)
-{
-  FAR struct pollfd *fds;
-  int i;
-
-  for (i = 0; i < CONFIG_CAN_NPOLLWAITERS; i++)
-    {
-      fds = dev->cd_fds[i];
-      if (fds != NULL)
-        {
-          fds->revents |= fds->events & eventset;
-          if (fds->revents != 0)
-            {
-              caninfo("Report events: %08" PRIx32 "\n", fds->revents);
-              nxsem_post(fds->sem);
-            }
-        }
-    }
-}
 
 /****************************************************************************
  * Name: can_dlc2bytes
@@ -1154,7 +1125,7 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (ndx != dev->cd_xmit.tx_head)
         {
-          eventset |= fds->events & POLLOUT;
+          eventset |= POLLOUT;
         }
 
       can_givesem(&dev->cd_xmit.tx_sem);
@@ -1174,7 +1145,7 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
             {
               /* No need to wait, just notify the application immediately */
 
-              eventset |= fds->events & POLLIN;
+              eventset |= POLLIN;
             }
           else
             {
@@ -1182,10 +1153,7 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
             }
         }
 
-      if (eventset != 0)
-        {
-          can_pollnotify(dev, eventset);
-        }
+      poll_notify(dev->cd_fds, CONFIG_CAN_NPOLLWAITERS, eventset);
     }
   else if (fds->priv != NULL)
     {
@@ -1401,7 +1369,7 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
            * cd_recv buffer
            */
 
-          can_pollnotify(dev, POLLIN);
+          poll_notify(dev->cd_fds, CONFIG_CAN_NPOLLWAITERS, POLLIN);
 
           sval = 0;
           if (nxsem_get_value(&fifo->rx_sem, &sval) < 0)
@@ -1546,7 +1514,7 @@ int can_txdone(FAR struct can_dev_s *dev)
        * buffer
        */
 
-      can_pollnotify(dev, POLLOUT);
+      poll_notify(dev->cd_fds, CONFIG_CAN_NPOLLWAITERS, POLLOUT);
 
       /* Are there any threads waiting for space in the TX FIFO? */
 

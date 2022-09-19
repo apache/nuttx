@@ -1024,11 +1024,7 @@ static int lcd_poll(struct file *filep, struct pollfd *fds,
     {
       /* Data is always available to be read */
 
-      fds->revents |= (fds->events & (POLLIN | POLLOUT));
-      if (fds->revents != 0)
-        {
-          nxsem_post(fds->sem);
-        }
+      poll_notify(&fds, 1, POLLIN | POLLOUT);
     }
 
   return OK;

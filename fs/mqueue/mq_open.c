@@ -127,18 +127,15 @@ static int nxmq_file_poll(FAR struct file *filep,
 
       if (msgq->nmsgs < msgq->maxmsgs)
         {
-          eventset |= (fds->events & POLLOUT);
+          eventset |= POLLOUT;
         }
 
       if (msgq->nmsgs)
         {
-          eventset |= (fds->events & POLLIN);
+          eventset |= POLLIN;
         }
 
-      if (eventset)
-        {
-          nxmq_pollnotify(msgq, eventset);
-        }
+      nxmq_pollnotify(msgq, eventset);
     }
   else if (fds->priv != NULL)
     {
@@ -369,34 +366,6 @@ static mqd_t nxmq_vopen(FAR const char *mq_name, int oflags, va_list ap)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-#if CONFIG_FS_MQUEUE_NPOLLWAITERS > 0
-void nxmq_pollnotify(FAR struct mqueue_inode_s *msgq, pollevent_t eventset)
-{
-  int i;
-
-  for (i = 0; i < CONFIG_FS_MQUEUE_NPOLLWAITERS; i++)
-    {
-      FAR struct pollfd *fds = msgq->fds[i];
-
-      if (fds)
-        {
-          fds->revents |= (fds->events & eventset);
-
-          if (fds->revents != 0)
-            {
-              int semcount;
-
-              nxsem_get_value(fds->sem, &semcount);
-              if (semcount < 1)
-                {
-                  nxsem_post(fds->sem);
-                }
-            }
-        }
-    }
-}
-#endif
 
 /****************************************************************************
  * Name: file_mq_open

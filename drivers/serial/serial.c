@@ -81,7 +81,6 @@
  ****************************************************************************/
 
 static int     uart_takesem(FAR sem_t *sem, bool errout);
-static void    uart_pollnotify(FAR uart_dev_t *dev, pollevent_t eventset);
 
 /* Write support */
 
@@ -164,40 +163,6 @@ static int uart_takesem(FAR sem_t *sem, bool errout)
  ****************************************************************************/
 
 #define uart_givesem(sem) nxsem_post(sem)
-
-/****************************************************************************
- * Name: uart_pollnotify
- ****************************************************************************/
-
-static void uart_pollnotify(FAR uart_dev_t *dev, pollevent_t eventset)
-{
-  int i;
-
-  for (i = 0; i < CONFIG_SERIAL_NPOLLWAITERS; i++)
-    {
-      struct pollfd *fds = dev->fds[i];
-      if (fds)
-        {
-#ifdef CONFIG_SERIAL_REMOVABLE
-          fds->revents |= ((fds->events | (POLLERR | POLLHUP)) & eventset);
-#else
-          fds->revents |= (fds->events & eventset);
-#endif
-          if (fds->revents != 0)
-            {
-              int semcount;
-
-              finfo("Report events: %08" PRIx32 "\n", fds->revents);
-
-              nxsem_get_value(fds->sem, &semcount);
-              if (semcount < 1)
-                {
-                  nxsem_post(fds->sem);
-                }
-            }
-        }
-    }
-}
 
 /****************************************************************************
  * Name: uart_putxmitchar
@@ -1570,7 +1535,7 @@ static int uart_poll(FAR struct file *filep,
 
       if (ndx != dev->xmit.tail)
         {
-          eventset |= (fds->events & POLLOUT);
+          eventset |= POLLOUT;
         }
 
       uart_givesem(&dev->xmit.sem);
@@ -1585,7 +1550,7 @@ static int uart_poll(FAR struct file *filep,
       uart_takesem(&dev->recv.sem, false);
       if (dev->recv.head != dev->recv.tail)
         {
-          eventset |= (fds->events & POLLIN);
+          eventset |= POLLIN;
         }
 
       uart_givesem(&dev->recv.sem);
@@ -1599,10 +1564,7 @@ static int uart_poll(FAR struct file *filep,
         }
 #endif
 
-      if (eventset)
-        {
-          uart_pollnotify(dev, eventset);
-        }
+      poll_notify(dev->fds, CONFIG_SERIAL_NPOLLWAITERS, eventset);
     }
   else if (fds->priv != NULL)
     {
@@ -1757,7 +1719,7 @@ void uart_datareceived(FAR uart_dev_t *dev)
 {
   /* Notify all poll/select waiters that they can read from the recv buffer */
 
-  uart_pollnotify(dev, POLLIN);
+  poll_notify(dev->fds, CONFIG_SERIAL_NPOLLWAITERS, POLLIN);
 
   /* Is there a thread waiting for read data?  */
 
@@ -1795,7 +1757,7 @@ void uart_datasent(FAR uart_dev_t *dev)
 {
   /* Notify all poll/select waiters that they can write to xmit buffer */
 
-  uart_pollnotify(dev, POLLOUT);
+  poll_notify(dev->fds, CONFIG_SERIAL_NPOLLWAITERS, POLLOUT);
 
   /* Is there a thread waiting for space in xmit.buffer?  */
 
@@ -1845,7 +1807,7 @@ void uart_connected(FAR uart_dev_t *dev, bool connected)
     {
       /* Notify all poll/select waiters that a hangup occurred */
 
-      uart_pollnotify(dev, (POLLERR | POLLHUP));
+      poll_notify(dev->fds, CONFIG_SERIAL_NPOLLWAITERS, POLLERR | POLLHUP);
 
       /* Yes.. wake up all waiting threads.  Each thread should detect the
        * disconnection and return the ENOTCONN error.

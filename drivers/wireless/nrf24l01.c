@@ -714,10 +714,7 @@ static void nrf24l01_worker(FAR void *arg)
 
       if (dev->pfd && has_data)
         {
-          dev->pfd->revents |= POLLIN;  /* Data available for input */
-
-          wlinfo("Wake up polled fd\n");
-          nxsem_post(dev->pfd->sem);
+          poll_notify(&dev->pfd, 1, POLLIN);
         }
 
       /* Clear interrupt sources */
@@ -1410,8 +1407,7 @@ static int nrf24l01_poll(FAR struct file *filep, FAR struct pollfd *fds,
       nxsem_wait(&dev->sem_fifo);
       if (dev->fifo_len > 0)
         {
-          dev->pfd->revents |= POLLIN;  /* Data available for input */
-          nxsem_post(dev->pfd->sem);
+          poll_notify(&dev->pfd, 1, POLLIN);
         }
 
       nxsem_post(&dev->sem_fifo);

@@ -201,24 +201,13 @@ static const uint8_t g_event_map[4] =
 
 static void ft5x06_notify(FAR struct ft5x06_dev_s *priv)
 {
-  int i;
-
   /* If there are threads waiting on poll() for FT5x06 data to become
    * available, then wake them up now.  NOTE: we wake up all waiting threads
    * because we do not know that they are going to do.  If they all try to
    * read the data, then some make end up blocking after all.
    */
 
-  for (i = 0; i < CONFIG_FT5X06_NPOLLWAITERS; i++)
-    {
-      struct pollfd *fds = priv->fds[i];
-      if (fds)
-        {
-          fds->revents |= POLLIN;
-          iinfo("Report events: %08" PRIx32 "\n", fds->revents);
-          nxsem_post(fds->sem);
-        }
-    }
+  poll_notify(priv->fds, CONFIG_FT5X06_NPOLLWAITERS, POLLIN);
 
   /* If there are threads waiting for read data, then signal one of them
    * that the read data is available.

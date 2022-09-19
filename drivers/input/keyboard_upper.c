@@ -75,7 +75,6 @@ static ssize_t keyboard_write(FAR struct file *filep, FAR const char *buffer,
                               size_t len);
 static int     keyboard_poll(FAR struct file *filep, FAR struct pollfd *fds,
                              bool setup);
-static void    keyboard_notify(FAR struct keyboard_opriv_s *buffer);
 
 /****************************************************************************
  * Private Data
@@ -98,30 +97,6 @@ static const struct file_operations g_keyboard_fops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: keyboard_notify
- ****************************************************************************/
-
-static void keyboard_notify(FAR struct keyboard_opriv_s *opriv)
-{
-  FAR struct pollfd *fds = opriv->fds;
-  if (fds != NULL)
-    {
-      fds->revents |= (fds->events & POLLIN);
-      if (fds->revents != 0)
-        {
-          /* report event log */
-
-          int semcount;
-          nxsem_get_value(fds->sem, &semcount);
-          if (semcount < 1)
-            {
-              nxsem_post(fds->sem);
-            }
-        }
-    }
-}
 
 /****************************************************************************
  * Name: keyboard_open
@@ -301,7 +276,7 @@ static int keyboard_poll(FAR struct file *filep,
 
       if (!circbuf_is_empty(&opriv->circ))
         {
-          keyboard_notify(opriv);
+          poll_notify(&opriv->fds, 1, POLLIN);
         }
     }
   else
@@ -437,7 +412,7 @@ void keyboard_event(FAR struct keyboard_lowerhalf_s *lower, uint32_t keycode,
               nxsem_post(&opriv->waitsem);
             }
 
-          keyboard_notify(opriv);
+          poll_notify(&opriv->fds, 1, POLLIN);
           nxsem_post(&opriv->locksem);
         }
     }

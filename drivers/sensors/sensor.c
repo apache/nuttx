@@ -511,28 +511,12 @@ static ssize_t sensor_do_samples(FAR struct sensor_upperhalf_s *upper,
 static void sensor_pollnotify_one(FAR struct sensor_user_s *user,
                                   pollevent_t eventset)
 {
-  int semcount;
-
   if (eventset == POLLPRI)
     {
       user->changed = true;
     }
 
-  if (!user->fds)
-    {
-      return;
-    }
-
-  user->fds->revents |= (user->fds->events & eventset);
-  if (user->fds->revents != 0)
-    {
-      sninfo("Report events: %08" PRIx32 "\n", user->fds->revents);
-      nxsem_get_value(user->fds->sem, &semcount);
-      if (semcount < 1)
-        {
-          nxsem_post(user->fds->sem);
-        }
-    }
+  poll_notify(&user->fds, 1, eventset);
 }
 
 static void sensor_pollnotify(FAR struct sensor_upperhalf_s *upper,
@@ -923,31 +907,28 @@ static int sensor_poll(FAR struct file *filep,
 
           if (filep->f_oflags & O_NONBLOCK)
             {
-              eventset |= (fds->events & POLLIN);
+              eventset |= POLLIN;
             }
           else
             {
               nxsem_get_value(&user->buffersem, &semcount);
               if (semcount > 0)
                 {
-                  eventset |= (fds->events & POLLIN);
+                  eventset |= POLLIN;
                 }
             }
         }
       else if (sensor_is_updated(upper, user))
         {
-          eventset |= (fds->events & POLLIN);
+          eventset |= POLLIN;
         }
 
       if (user->changed)
         {
-          eventset |= (fds->events & POLLPRI);
+          eventset |= POLLPRI;
         }
 
-      if (eventset)
-        {
-          sensor_pollnotify_one(user, eventset);
-        }
+        sensor_pollnotify_one(user, eventset);
     }
   else
     {

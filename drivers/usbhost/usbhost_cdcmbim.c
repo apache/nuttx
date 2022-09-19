@@ -241,10 +241,6 @@ struct usbhost_cdcmbim_s
 static void usbhost_takesem(sem_t *sem);
 #define usbhost_givesem(s) nxsem_post(s);
 
-/* Polling support */
-
-static void usbhost_pollnotify(FAR struct usbhost_cdcmbim_s *priv);
-
 /* Memory allocation services */
 
 static inline FAR struct usbhost_cdcmbim_s *usbhost_allocclass(void);
@@ -397,29 +393,6 @@ static int usbhost_ctrl_cmd(FAR struct usbhost_cdcmbim_s *priv,
     }
 
   return ret;
-}
-
-/****************************************************************************
- * Name: usbhost_pollnotify
- ****************************************************************************/
-
-static void usbhost_pollnotify(FAR struct usbhost_cdcmbim_s *priv)
-{
-  int i;
-
-  for (i = 0; i < CONFIG_USBHOST_CDCMBIM_NPOLLWAITERS; i++)
-    {
-      struct pollfd *fds = priv->fds[i];
-      if (fds)
-        {
-          fds->revents |= (fds->events & POLLIN);
-          if (fds->revents != 0)
-            {
-              uinfo("Report events: %08" PRIx32 "\n", fds->revents);
-              nxsem_post(fds->sem);
-            }
-        }
-    }
 }
 
 static ssize_t usbhost_readmessage(FAR struct usbhost_cdcmbim_s *priv,
@@ -614,7 +587,8 @@ static int cdcwdm_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (priv->comm_rxlen > 0)
         {
-          usbhost_pollnotify(priv);
+          poll_notify(priv->fds, CONFIG_USBHOST_CDCMBIM_NPOLLWAITERS,
+                      POLLIN);
         }
     }
   else
@@ -956,7 +930,7 @@ static void usbhost_rxdata_work(FAR void *arg)
 
   /* Notify any poll waiters we have data */
 
-  usbhost_pollnotify(priv);
+  poll_notify(priv->fds, CONFIG_USBHOST_CDCMBIM_NPOLLWAITERS, POLLIN);
 
 errout:
   usbhost_givesem(&priv->exclsem);

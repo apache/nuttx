@@ -271,30 +271,6 @@ static bool hcsr04_sample(FAR struct hcsr04_dev_s *priv)
   return (done == 0);
 }
 
-static void hcsr04_notify(FAR struct hcsr04_dev_s *priv)
-{
-  DEBUGASSERT(priv != NULL);
-
-  int i;
-
-  /* If there are threads waiting on poll() for data to become available,
-   * then wake them up now.  NOTE: we wake up all waiting threads because we
-   * do not know that they are going to do.  If they all try to read the
-   * data, then some make end up blocking after all.
-   */
-
-  for (i = 0; i < CONFIG_HCSR04_NPOLLWAITERS; i++)
-    {
-      FAR struct pollfd *fds = priv->fds[i];
-      if (fds)
-        {
-          fds->revents |= POLLIN;
-          hcsr04_dbg("Report events: %08" PRIx32 "\n", fds->revents);
-          nxsem_post(fds->sem);
-        }
-    }
-}
-
 static int hcsr04_poll(FAR struct file *filep, FAR struct pollfd *fds,
                        bool setup)
 {
@@ -356,7 +332,7 @@ static int hcsr04_poll(FAR struct file *filep, FAR struct pollfd *fds,
       flags = enter_critical_section();
       if (hcsr04_sample(priv))
         {
-          hcsr04_notify(priv);
+          poll_notify(priv->fds, CONFIG_HCSR04_NPOLLWAITERS, POLLIN);
         }
 
       leave_critical_section(flags);
@@ -415,7 +391,7 @@ static int hcsr04_int_handler(int irq, FAR void *context, FAR void *arg)
     }
 
   hcsr04_dbg("HC-SR04 interrupt\n");
-  hcsr04_notify(priv);
+  poll_notify(priv->fds, CONFIG_HCSR04_NPOLLWAITERS, POLLIN);
 
   return OK;
 }

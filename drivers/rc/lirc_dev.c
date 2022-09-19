@@ -80,7 +80,6 @@ struct lirc_fh_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static void lirc_pollnotify(FAR struct lirc_fh_s *fh, pollevent_t eventset);
 static int lirc_open(FAR struct file *filep);
 static int lirc_close(FAR struct file *filep);
 static int lirc_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
@@ -112,28 +111,6 @@ static const struct file_operations g_lirc_fops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-static void lirc_pollnotify(FAR struct lirc_fh_s *fh,
-                            pollevent_t eventset)
-{
-  int semcount;
-
-  if (fh->fd)
-    {
-      fh->fd->revents |= (fh->fd->events & eventset);
-
-      if (fh->fd->revents != 0)
-        {
-          rcinfo("Report events: %08" PRIx32 "\n", fh->fd->revents);
-
-          nxsem_get_value(fh->fd->sem, &semcount);
-          if (semcount < 1)
-            {
-              nxsem_post(fh->fd->sem);
-            }
-        }
-    }
-}
 
 static int lirc_open(FAR struct file *filep)
 {
@@ -251,13 +228,10 @@ static int lirc_poll(FAR struct file *filep,
 
       if (!circbuf_is_empty(&fh->buffer))
         {
-          eventset = (fds->events & (POLLIN | POLLRDNORM));
+          eventset |= POLLIN | POLLRDNORM;
         }
 
-      if (eventset)
-        {
-          lirc_pollnotify(fh, eventset);
-        }
+      poll_notify(&fh->fd, 1, eventset);
     }
   else if (fds->priv != NULL)
     {
@@ -941,7 +915,7 @@ void lirc_raw_event(FAR struct lirc_lowerhalf_s *lower,
               fh = (FAR struct lirc_fh_s *)node;
               if (circbuf_write(&fh->buffer, &gap, sizeof(int)) > 0)
                 {
-                  lirc_pollnotify(fh, POLLIN | POLLRDNORM);
+                  poll_notify(&fh->fd, 1, POLLIN | POLLRDNORM);
                   nxsem_get_value(&fh->waitsem, &semcount);
                   if (semcount < 1)
                     {
@@ -971,7 +945,7 @@ void lirc_raw_event(FAR struct lirc_lowerhalf_s *lower,
 
       if (circbuf_write(&fh->buffer, &sample, sizeof(unsigned int)) > 0)
         {
-          lirc_pollnotify(fh, POLLIN | POLLRDNORM);
+          poll_notify(&fh->fd, 1, POLLIN | POLLRDNORM);
           nxsem_get_value(&fh->waitsem, &semcount);
           if (semcount < 1)
             {
@@ -1015,7 +989,7 @@ void lirc_scancode_event(FAR struct lirc_lowerhalf_s *lower,
       fh = (FAR struct lirc_fh_s *)node;
       if (circbuf_write(&fh->buffer, lsc, sizeof(*lsc)) > 0)
         {
-          lirc_pollnotify(fh, POLLIN | POLLRDNORM);
+          poll_notify(&fh->fd, 1, POLLIN | POLLRDNORM);
           nxsem_get_value(&fh->waitsem, &semcount);
           if (semcount < 1)
             {
@@ -1061,7 +1035,7 @@ void lirc_sample_event(FAR struct lirc_lowerhalf_s *lower,
       fh = (FAR struct lirc_fh_s *)node;
       if (circbuf_write(&fh->buffer, &sample, sizeof(unsigned int)) > 0)
         {
-          lirc_pollnotify(fh, POLLIN | POLLRDNORM);
+          poll_notify(&fh->fd, 1, POLLIN | POLLRDNORM);
           nxsem_get_value(&fh->waitsem, &semcount);
           if (semcount < 1)
             {

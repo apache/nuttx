@@ -423,8 +423,7 @@ static void _notif_q_push(FAR struct gs2200m_dev_s *dev, char cid)
     {
       /* If poll() waits and cid has been pushed to the queue, notify  */
 
-      dev->pfd->revents |= POLLIN;
-      nxsem_post(dev->pfd->sem);
+      poll_notify(&dev->pfd, 1, POLLIN);
     }
 
   wlinfo("+++ pushed %c count=%d\n", cid, dev->notif_q.count);
@@ -3159,9 +3158,7 @@ static int gs2200m_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (0 < n)
         {
-          dev->pfd->revents |= POLLIN;
-          nxsem_post(dev->pfd->sem);
-          wlinfo("==== _notif_q_count=%d\n", n);
+          poll_notify(&dev->pfd, 1, POLLIN);
         }
     }
   else

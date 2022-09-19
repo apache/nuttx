@@ -94,9 +94,6 @@ static ssize_t timerfd_read(FAR struct file *filep, FAR char *buffer,
 #ifdef CONFIG_TIMER_FD_POLL
 static int timerfd_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup);
-
-static void timerfd_pollnotify(FAR struct timerfd_priv_s *dev,
-                               pollevent_t eventset);
 #endif
 
 static int timerfd_blocking_io(FAR struct timerfd_priv_s *dev,
@@ -173,29 +170,6 @@ static timerfd_t timerfd_get_counter(FAR struct timerfd_priv_s *dev)
 
   return counter;
 }
-
-#ifdef CONFIG_TIMER_FD_POLL
-static void timerfd_pollnotify(FAR struct timerfd_priv_s *dev,
-                               pollevent_t eventset)
-{
-  FAR struct pollfd *fds;
-  int i;
-
-  for (i = 0; i < CONFIG_TIMER_FD_NPOLLWAITERS; i++)
-    {
-      fds = dev->fds[i];
-      if (fds)
-        {
-          fds->revents |= eventset & fds->events;
-
-          if (fds->revents != 0)
-            {
-              nxsem_post(fds->sem);
-            }
-        }
-    }
-}
-#endif
 
 static unsigned int timerfd_get_unique_minor(void)
 {
@@ -460,7 +434,9 @@ static int timerfd_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   if (timerfd_get_counter(dev) > 0)
     {
-      timerfd_pollnotify(dev, POLLIN);
+#ifdef CONFIG_TIMER_FD_POLL
+      poll_notify(dev->fds, CONFIG_TIMER_FD_NPOLLWAITERS, POLLIN);
+#endif
     }
 
 out:
@@ -484,7 +460,7 @@ static void timerfd_timeout_work(FAR void *arg)
 #ifdef CONFIG_TIMER_FD_POLL
   /* Notify all poll/select waiters */
 
-  timerfd_pollnotify(dev, POLLIN);
+  poll_notify(dev->fds, CONFIG_TIMER_FD_NPOLLWAITERS, POLLIN);
 #endif
 
   /* Notify all of the waiting readers */

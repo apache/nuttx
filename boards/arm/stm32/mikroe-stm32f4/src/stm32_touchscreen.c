@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
+#include <poll.h>
 #include <sched.h>
 #include <assert.h>
 #include <errno.h>
@@ -575,8 +576,6 @@ static inline bool tc_valid_sample(uint16_t sample)
 
 static void tc_notify(struct tc_dev_s *priv)
 {
-  int i;
-
   /* If no threads have the driver open, then just dump the state */
 
 #ifdef CONFIG_TOUCHSCREEN_REFCNT
@@ -595,16 +594,7 @@ static void tc_notify(struct tc_dev_s *priv)
    * read the data, then some make end up blocking after all.
    */
 
-  for (i = 0; i < CONFIG_TOUCHSCREEN_NPOLLWAITERS; i++)
-    {
-      struct pollfd *fds = priv->fds[i];
-      if (fds)
-        {
-          fds->revents |= POLLIN;
-          iinfo("Report events: %08" PRIx32 "\n", fds->revents);
-          nxsem_post(fds->sem);
-        }
-    }
+  poll_notify(priv->fds, CONFIG_TOUCHSCREEN_NPOLLWAITERS, POLLIN);
 
   /* If there are threads waiting for read data, then signal one of them
    * that the read data is available.

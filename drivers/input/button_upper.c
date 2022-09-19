@@ -295,16 +295,7 @@ static void btn_sample(FAR struct btn_upperhalf_s *priv)
         {
           /* Yes.. Notify waiter */
 
-          FAR struct pollfd *fds = opriv->bo_fds;
-          if (fds)
-            {
-              fds->revents |= (fds->events & POLLIN);
-              if (fds->revents != 0)
-                {
-                  iinfo("Report events: %08" PRIx32 "\n", fds->revents);
-                  nxsem_post(fds->sem);
-                }
-            }
+          poll_notify(&opriv->bo_fds, 1, POLLIN);
         }
 
       /* Have any signal events occurred? */
@@ -765,12 +756,7 @@ static int btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
           if (opriv->bo_pending)
             {
-              fds->revents |= (fds->events & POLLIN);
-              if (fds->revents != 0)
-                {
-                  iinfo("Report events: %08" PRIx32 "\n", fds->revents);
-                  nxsem_post(fds->sem);
-                }
+              poll_notify(&fds, 1, POLLIN);
             }
         }
     }

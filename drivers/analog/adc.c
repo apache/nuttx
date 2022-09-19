@@ -497,25 +497,6 @@ static int adc_receive(FAR struct adc_dev_s *dev, uint8_t ch, int32_t data)
 }
 
 /****************************************************************************
- * Name: adc_pollnotify
- ****************************************************************************/
-
-static void adc_pollnotify(FAR struct adc_dev_s *dev, uint32_t type)
-{
-  int i;
-
-  for (i = 0; i < CONFIG_ADC_NPOLLWAITERS; i++)
-    {
-      struct pollfd *fds = dev->fds[i];
-      if (fds)
-        {
-          fds->revents |= type;
-          nxsem_post(fds->sem);
-        }
-    }
-}
-
-/****************************************************************************
  * Name: adc_notify
  ****************************************************************************/
 
@@ -527,7 +508,7 @@ static void adc_notify(FAR struct adc_dev_s *dev)
    * then wake them up now.
    */
 
-  adc_pollnotify(dev, POLLIN);
+  poll_notify(dev->fds, CONFIG_ADC_NPOLLWAITERS, POLLIN);
 
   /* If there are threads waiting for read data, then signal one of them
    * that the read data is available.
@@ -596,7 +577,7 @@ static int adc_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
 
       if (dev->ad_recv.af_head != dev->ad_recv.af_tail)
         {
-          adc_pollnotify(dev, POLLIN);
+          poll_notify(dev->fds, CONFIG_ADC_NPOLLWAITERS, POLLIN);
         }
     }
   else if (fds->priv)

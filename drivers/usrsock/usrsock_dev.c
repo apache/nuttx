@@ -153,29 +153,6 @@ static bool usrsockdev_is_opened(FAR struct usrsockdev_s *dev)
 }
 
 /****************************************************************************
- * Name: usrsockdev_pollnotify
- ****************************************************************************/
-
-static void usrsockdev_pollnotify(FAR struct usrsockdev_s *dev,
-                                  pollevent_t eventset)
-{
-  int i;
-  for (i = 0; i < ARRAY_SIZE(dev->pollfds); i++)
-    {
-      struct pollfd *fds = dev->pollfds[i];
-      if (fds)
-        {
-          fds->revents |= (fds->events & eventset);
-          if (fds->revents != 0)
-            {
-              ninfo("Report events: %08" PRIx32 "\n", fds->revents);
-              nxsem_post(fds->sem);
-            }
-        }
-    }
-}
-
-/****************************************************************************
  * Name: usrsockdev_read
  ****************************************************************************/
 
@@ -512,10 +489,7 @@ static int usrsockdev_poll(FAR struct file *filep, FAR struct pollfd *fds,
           eventset |= POLLIN;
         }
 
-      if (eventset)
-        {
-          usrsockdev_pollnotify(dev, eventset);
-        }
+      poll_notify(dev->pollfds, ARRAY_SIZE(dev->pollfds), eventset);
     }
   else
     {
@@ -566,7 +540,7 @@ int usrsock_request(FAR struct iovec *iov, unsigned int iovcnt)
 
       /* Notify daemon of new request. */
 
-      usrsockdev_pollnotify(dev, POLLIN);
+      poll_notify(dev->pollfds, ARRAY_SIZE(dev->pollfds), POLLIN);
     }
   else
     {

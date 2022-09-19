@@ -2318,7 +2318,6 @@ static void cxd56_gnss_default_sighandler(uint32_t data, void *userdata)
 {
   struct cxd56_gnss_dev_s *priv =
                           (struct cxd56_gnss_dev_s *)userdata;
-  int                      i;
   int                      ret;
   int                      dtype = CXD56_CPU1_GET_DATA(data);
 
@@ -2385,16 +2384,7 @@ static void cxd56_gnss_default_sighandler(uint32_t data, void *userdata)
       return;
     }
 
-  for (i = 0; i < CONFIG_CXD56_GNSS_NPOLLWAITERS; i++)
-    {
-      struct pollfd *fds = priv->fds[i];
-      if (fds)
-        {
-          fds->revents |= POLLIN;
-          gnssinfo("Report events: %08" PRIx32 "\n", fds->revents);
-          nxsem_post(fds->sem);
-        }
-    }
+  poll_notify(priv->fds, CONFIG_CXD56_GNSS_NPOLLWAITERS, POLLIN);
 
   nxsem_post(&priv->devsem);
 
