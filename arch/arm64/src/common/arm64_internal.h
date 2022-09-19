@@ -171,22 +171,13 @@ INIT_STACK_DEFINE_EXTERN(g_interrupt_stack, INTSTACK_SIZE);
 /* Address of the saved user stack pointer */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-EXTERN uint64_t g_intstackalloc; /* Allocated stack base */
-EXTERN uint64_t g_intstacktop;   /* Initial top of interrupt stack */
+EXTERN uint8_t g_intstackalloc[]; /* Allocated stack base */
+EXTERN uint8_t g_intstacktop[];   /* Initial top of interrupt stack */
 #else
 #  error CONFIG_ARCH_INTERRUPTSTACK must be defined (4096 at least) at arm64
 #endif
 
-/* These 'addresses' of these values are setup by the linker script.  They
- * are not actual uint64_t storage locations! They are only used
- * meaningfully in the following way:
- *
- *  - The linker script defines, for example, the symbol_sdata.
- *  - The declaration extern uint64_t _sdata; makes C happy.  C will believe
- *    that the value _sdata is the address of a uint64_t variable _data
- *    (it is not!).
- *  - We can recover the linker value then by simply taking the address of
- *    of _data.  like:  uint64_t *pdata = &_sdata;
+/* These symbols are setup by the linker script.
  *
  * Memory layout for Nuttx at arm64 for FLAT Build
  *
@@ -217,20 +208,20 @@ EXTERN uint64_t g_intstacktop;   /* Initial top of interrupt stack */
  * please check dramboot.ld at specified platform for more detail
  */
 
-EXTERN char _stext[];            /* Start of .text */
-EXTERN char _etext[];            /* End of .text */
-EXTERN char _sztext[];           /* Size of .text */
-EXTERN char _srodata[];          /* Start of .rodata */
-EXTERN char _erodata[];          /* End+1 of .rodata */
-EXTERN char _szrodata[];         /* Size of .rodata */
-EXTERN const char _eronly[];     /* End+1 of read only section (.text + .rodata) */
-EXTERN char _sdata[];            /* Start of .data */
-EXTERN char _edata[];            /* End+1 of .data */
-EXTERN char _sbss[];             /* Start of .bss */
-EXTERN char _ebss[];             /* End+1 of .bss */
-EXTERN char _szdata[];           /* Size of data(.data + .bss) */
-EXTERN char _e_initstack[];      /* End+1 of .initstack */
-EXTERN char g_idle_topstack[];   /* End+1 of heap */
+EXTERN uint8_t _stext[];            /* Start of .text */
+EXTERN uint8_t _etext[];            /* End of .text */
+EXTERN uint8_t _sztext[];           /* Size of .text */
+EXTERN uint8_t _srodata[];          /* Start of .rodata */
+EXTERN uint8_t _erodata[];          /* End+1 of .rodata */
+EXTERN uint8_t _szrodata[];         /* Size of .rodata */
+EXTERN const uint8_t _eronly[];     /* End+1 of read only section (.text + .rodata) */
+EXTERN uint8_t _sdata[];            /* Start of .data */
+EXTERN uint8_t _edata[];            /* End+1 of .data */
+EXTERN uint8_t _sbss[];             /* Start of .bss */
+EXTERN uint8_t _ebss[];             /* End+1 of .bss */
+EXTERN uint8_t _szdata[];           /* Size of data(.data + .bss) */
+EXTERN uint8_t _e_initstack[];      /* End+1 of .initstack */
+EXTERN uint8_t g_idle_topstack[];   /* End+1 of heap */
 
 #  define _START_TEXT  _stext
 #  define _END_TEXT    _etext

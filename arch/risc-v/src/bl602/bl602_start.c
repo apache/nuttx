@@ -97,9 +97,9 @@ extern void bl602_boardinitialize(void);
 
 uint32_t noinstrument_function boot2_get_flash_addr(void)
 {
-  extern uint8_t __boot2_flash_cfg_src;
+  extern uint8_t __boot2_flash_cfg_src[];
 
-  return (uint32_t)(&__boot2_flash_cfg_src +
+  return (uint32_t)(__boot2_flash_cfg_src +
                     (sizeof(g_boot2_partition_table.table.entries[0]) *
                      g_boot2_partition_table.table.table.entry_cnt));
 }

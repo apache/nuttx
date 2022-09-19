@@ -51,13 +51,13 @@
 #define DDIR_EX2IN           (0 << MSS_DDTC_DDIR_SHIFT)
 #define DDIR_IN2EX           (1 << MSS_DDTC_DDIR_SHIFT)
 
-#define _START_INTTBL        ((void *)&_sinttbl)
+#define _START_INTTBL        ((void *)_sinttbl)
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-extern char _sinttbl;
+extern uint8_t _sinttbl[];
 
 /****************************************************************************
  * Private Functions

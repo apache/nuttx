@@ -392,7 +392,7 @@ static void riscv_dumpstate(void)
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
   riscv_dump_stack("IRQ", sp,
-                   (uintptr_t)&g_intstackalloc,
+                   (uintptr_t)g_intstackalloc,
                    (CONFIG_ARCH_INTERRUPTSTACK & ~15),
                    !!CURRENT_REGS);
   if (CURRENT_REGS)

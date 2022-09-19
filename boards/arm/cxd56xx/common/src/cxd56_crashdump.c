@@ -190,7 +190,7 @@ void board_crashdump(uintptr_t currentsp, void *tcb,
 #ifdef CONFIG_SMP
   pdump->info.stacks.interrupt.top = (uint32_t)arm_intstack_top();
 #else
-  pdump->info.stacks.interrupt.top = (uint32_t)&g_intstacktop;
+  pdump->info.stacks.interrupt.top = (uint32_t)g_intstacktop;
 #endif
   pdump->info.stacks.interrupt.size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
 

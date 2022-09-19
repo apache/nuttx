@@ -200,8 +200,8 @@ static void up_dumpstate(void)
 
   /* Get the limits on the interrupt stack memory */
 
-  istackbase = (uint32_t)&g_intstackbase;
-  istacksize = &g_intstackbase - &g_intstackalloc;
+  istackbase = (uint32_t)g_intstackbase;
+  istacksize = g_intstackbase - g_intstackalloc;
 
   /* Show interrupt stack info */
 

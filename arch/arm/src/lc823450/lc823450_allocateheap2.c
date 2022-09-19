@@ -151,9 +151,9 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
   /* Return the heap settings */
 
 #ifdef CONFIG_LC823450_SPIFI_BOOT
-  *heap_start = (uintptr_t *)&_ebss + 4096; /* see ld-spif-boot.script */
+  *heap_start = _ebss + 4096; /* see ld-spif-boot.script */
 #else
-  *heap_start = (uintptr_t *)&_eronly; /* see ld.script */
+  *heap_start = (void *)_eronly; /* see ld.script */
 #endif
 
   *heap_size  = SRAM1_END - (int)*heap_start;
@@ -227,7 +227,7 @@ void arm_addregion(void)
 
   /* NOTE: add 1KB to avoid conflicts of initial stack */
 
-  region_start = (uintptr_t *)&_ebss + 1024;
+  region_start = _ebss + 1024;
   region_size  = 0x02040000 - (int)region_start;
 
   umm_addregion(region_start, region_size);

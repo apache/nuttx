@@ -34,8 +34,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define _START_HEAP                     ((uintptr_t)&__bss_end__)
-#define _END_HEAP                       ((uintptr_t)&__sram_end__)
+#define _START_HEAP                     ((uintptr_t)__bss_end__)
+#define _END_HEAP                       ((uintptr_t)__sram_end__)
 #ifdef CONFIG_HEAP_COLORATION
 #  define song_heap_color(start, size)  memset(start, HEAP_COLOR, size)
 #else
@@ -46,9 +46,10 @@
  * Public Data
  ****************************************************************************/
 
-extern uint32_t __stack;
-extern uint32_t __bss_end__;
-extern uint32_t __sram_end__;
+extern uint8_t __stack[];
+extern uint8_t __bss_end__[];
+extern uint8_t __sram_end__[];
+
 /* g_idle_topstack: _sbss is the start of the BSS region as defined by the
  * linker script. _ebss lies at the end of the BSS region. The idle task
  * stack starts at the end of BSS and is of size CONFIG_IDLETHREAD_STACKSIZE.
@@ -60,7 +61,7 @@ extern uint32_t __sram_end__;
  */
 
 const uintptr_t weak_data g_idle_topstack =
-  ((uintptr_t)&__stack);
+  ((uintptr_t)__stack);
 
 /****************************************************************************
  * Public Functions

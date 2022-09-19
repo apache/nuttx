@@ -101,8 +101,8 @@
  */
 
 #if defined(CONFIG_S32K3XX_DTCM_HEAP) && !defined(S32K3XX_DCTM_ASSIGNED)
-#  define REGION1_RAM_START    &DTCM_BASE_ADDR
-#  define REGION1_RAM_SIZE     ((size_t)(&DTCM_END_ADDR) - (size_t)(&DTCM_BASE_ADDR))
+#  define REGION1_RAM_START    DTCM_BASE_ADDR
+#  define REGION1_RAM_SIZE     (DTCM_END_ADDR - DTCM_BASE_ADDR)
 #  define S32K3XX_DCTM_ASSIGNED 1
 #else
 #  warning CONFIG_MM_REGIONS > 1 but no available memory region
@@ -115,14 +115,14 @@
  * Private Types
  ****************************************************************************/
 
-extern const uint32_t SRAM_BASE_ADDR;
-extern const uint32_t SRAM_END_ADDR;
-extern const uint32_t SRAM_STDBY_BASE_ADDR;
-extern const uint32_t SRAM_STDBY_END_ADDR;
-extern const uint32_t ITCM_BASE_ADDR;
-extern const uint32_t ITCM_END_ADDR;
-extern const uint32_t DTCM_BASE_ADDR;
-extern const uint32_t DTCM_END_ADDR;
+extern uint8_t SRAM_BASE_ADDR[];
+extern uint8_t SRAM_END_ADDR[];
+extern uint8_t SRAM_STDBY_BASE_ADDR[];
+extern uint8_t SRAM_STDBY_END_ADDR[];
+extern uint8_t ITCM_BASE_ADDR[];
+extern uint8_t ITCM_END_ADDR[];
+extern uint8_t DTCM_BASE_ADDR[];
+extern uint8_t DTCM_END_ADDR[];
 
 /****************************************************************************
  * Public Data
@@ -138,7 +138,7 @@ extern const uint32_t DTCM_END_ADDR;
  * aligned).
  */
 
-const uintptr_t g_idle_topstack = (uintptr_t)&_ebss +
+const uintptr_t g_idle_topstack = (uintptr_t)_ebss +
                                   CONFIG_IDLETHREAD_STACKSIZE;
 
 /****************************************************************************
@@ -198,7 +198,7 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
 
   uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend +
                      CONFIG_MM_KERNEL_HEAPSIZE;
-  size_t    usize = SRAM_END_ADDR - ubase;
+  size_t    usize = (uintptr_t)SRAM_END_ADDR - ubase;
 
   DEBUGASSERT(ubase < (uintptr_t)SRAM_END_ADDR);
 
@@ -213,8 +213,7 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
 
   board_autoled_on(LED_HEAPALLOCATE);
   *heap_start = (void *)g_idle_topstack;
-  *heap_size  = (size_t)(&SRAM_END_ADDR) -
-                (((size_t)&_ebss) + CONFIG_IDLETHREAD_STACKSIZE);
+  *heap_size  = SRAM_END_ADDR - (_ebss + CONFIG_IDLETHREAD_STACKSIZE);
 #endif
 }
 

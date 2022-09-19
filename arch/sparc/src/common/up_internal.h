@@ -133,33 +133,23 @@ extern uint32_t g_idle_topstack;
 extern void g_intstackbase;
 #endif
 
-/* These 'addresses' of these values are setup by the linker script.They are
- * not actual uint32_t storage locations! They are only used meaningfully in
- * the following way:
- *
- *  - The linker script defines, for example, the symbol_sdata.
- *  - The declaration extern uint32_t _sdata; makes C happy.  C will believe
- *    that the value _sdata is the address of a uint32_t variable _data
- *    (it is not!).
- *  - We can recoved the linker value then by simply taking the address of
- *    of _data.  like:  uint32_t *pdata = &_sdata;
- */
+/* These symbols are setup by the linker script. */
 
-extern uint32_t _text_start;         /* Start of .text */
-extern uint32_t _etext;              /* End+1 of .text + .rodata */
-extern const uint32_t _rodata_start; /* Start of .data in FLASH */
-extern uint32_t _sdata;              /* Start of .data */
-extern uint32_t _edata;              /* End+1 of .data */
-extern uint32_t _bss_start;          /* Start of .bss */
-extern uint32_t _end;                /* End+1 of .bss */
+extern char _text_start[];         /* Start of .text */
+extern char _etext[];              /* End+1 of .text + .rodata */
+extern const char _rodata_start[]; /* Start of .data in FLASH */
+extern char _sdata[];              /* Start of .data */
+extern char _edata[];              /* End+1 of .data */
+extern char _bss_start[];          /* Start of .bss */
+extern char _end[];                /* End+1 of .bss */
 #ifdef CONFIG_ARCH_RAMFUNCS
-extern uint32_t _sramfunc;           /* Start of ramfuncs */
-extern uint32_t _eramfunc;           /* End+1 of ramfuncs */
-extern uint32_t _ramfunc_loadaddr;   /* Start of ramfuncs in FLASH */
-extern uint32_t _ramfunc_sizeof;     /* Size of ramfuncs */
-extern uint32_t _bmxdkpba_address;   /* BMX register setting */
-extern uint32_t _bmxdudba_address;   /* BMX register setting */
-extern uint32_t _bmxdupba_address;   /* BMX register setting */
+extern char _sramfunc[];           /* Start of ramfuncs */
+extern char _eramfunc[];           /* End+1 of ramfuncs */
+extern char _ramfunc_loadaddr[];   /* Start of ramfuncs in FLASH */
+extern char _ramfunc_sizeof[];     /* Size of ramfuncs */
+extern char _bmxdkpba_address[];   /* BMX register setting */
+extern char _bmxdudba_address[];   /* BMX register setting */
+extern char _bmxdupba_address[];   /* BMX register setting */
 #endif /* CONFIG_ARCH_RAMFUNCS */
 #endif /* __ASSEMBLY__ */
 

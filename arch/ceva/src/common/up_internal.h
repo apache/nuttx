@@ -79,16 +79,16 @@
 
 /* Linker defined section addresses */
 
-#define _START_TEXT    ((const void *)&_stext)
-#define _END_TEXT      ((const void *)&_etext)
-#define _START_BSS     ((void *)&_sbss)
-#define _END_BSS       ((void *)&_ebss)
-#define _DATA_INIT     ((const void *)&_eronly)
-#define _START_DATA    ((void *)&_sdata)
-#define _END_DATA      ((void *)&_edata)
-#define _START_HEAP    ((void *)&_ebss + CONFIG_IDLETHREAD_STACKSIZE)
-#define _END_HEAP      ((void *)&_eheap)
-#define _END_MEM       ((void *)~0)
+#define _START_TEXT    _stext
+#define _END_TEXT      _etext
+#define _START_BSS     _sbss
+#define _END_BSS       _ebss
+#define _DATA_INIT     _eronly
+#define _START_DATA    _sdata
+#define _END_DATA      _edata
+#define _START_HEAP    (_ebss + CONFIG_IDLETHREAD_STACKSIZE)
+#define _END_HEAP      _eheap
+#define _END_MEM       ((char *)~0)
 
 /* This is the value used to mark the stack for subsequent stack monitoring
  * logic.
@@ -129,76 +129,66 @@ EXTERN void *g_idle_topstack;
 
 /* Address of the interrupt stack pointer */
 
-EXTERN char g_intstackalloc; /* Allocated stack base */
-EXTERN char g_intstackbase;  /* Initial top of interrupt stack */
+EXTERN uint8_t g_intstackalloc[]; /* Allocated stack base */
+EXTERN uint8_t g_intstackbase[];  /* Initial top of interrupt stack */
 
-/* These 'addresses' of these values are setup by the linker script.
- * They are not actual char storage locations! They are only used
- * meaningfully in the following way:
- *
- *  - The linker script defines, for example, the symbol _sdata.
- *  - The declareion extern char _sdata; makes C happy.  C will believe
- *    that the value _sdata is the address of a char variable _data (it is
- *    not!).
- *  - We can recover the linker value then by simply taking the address of
- *    of _data.  like:  char *pdata = &_sdata;
- */
+/* These symbols are setup by the linker script. */
 
 /* Start of .text */
 
-EXTERN const char _stext;
-EXTERN const char _stext2;
-EXTERN const char _stext3;
-EXTERN const char _stext4;
+EXTERN const uint8_t _stext[];
+EXTERN const uint8_t _stext2[];
+EXTERN const uint8_t _stext3[];
+EXTERN const uint8_t _stext4[];
 
 /* End+1 of .text */
 
-EXTERN const char _etext;
-EXTERN const char _etext2;
-EXTERN const char _etext3;
-EXTERN const char _etext4;
+EXTERN const uint8_t _etext[];
+EXTERN const uint8_t _etext2[];
+EXTERN const uint8_t _etext3[];
+EXTERN const uint8_t _etext4[];
 
 /* End+1 of read only section (.text + .rodata) */
 
-EXTERN const char _eronly;
-EXTERN const char _eronly2;
-EXTERN const char _eronly3;
-EXTERN const char _eronly4;
+EXTERN const uint8_t _eronly[];
+EXTERN const uint8_t _eronly2[];
+EXTERN const uint8_t _eronly3[];
+EXTERN const uint8_t _eronly4[];
 
 /* Start of .data */
 
-EXTERN char _sdata;
-EXTERN char _sdata2;
-EXTERN char _sdata3;
-EXTERN char _sdata4;
+EXTERN uint8_t _sdata[];
+EXTERN uint8_t _sdata2[];
+EXTERN uint8_t _sdata3[];
+EXTERN uint8_t _sdata4[];
 
 /* End+1 of .data */
 
-EXTERN char _edata;
-EXTERN char _edata2;
-EXTERN char _edata3;
-EXTERN char _edata4;
+EXTERN uint8_t _edata[];
+EXTERN uint8_t _edata2[];
+EXTERN uint8_t _edata3[];
+EXTERN uint8_t _edata4[];
 
 /* Start of .bss */
 
-EXTERN char _sbss;
-EXTERN char _sbss2;
-EXTERN char _sbss3;
-EXTERN char _sbss4;
+EXTERN uint8_t _sbss[];
+EXTERN uint8_t _sbss2[];
+EXTERN uint8_t _sbss3[];
+EXTERN uint8_t _sbss4[];
 
 /* End+1 of .bss */
 
-EXTERN char _ebss;
-EXTERN char _ebss2;
-EXTERN char _ebss3;
-EXTERN char _ebss4;
+EXTERN uint8_t _ebss[];
+EXTERN uint8_t _ebss2[];
+EXTERN uint8_t _ebss3[];
+EXTERN uint8_t _ebss4[];
 
 /* End+1 of the memory */
 
-EXTERN char _eheap;
-EXTERN char _eheap2;
-EXTERN char _eheap3;
-EXTERN char _eheap4;
+EXTERN uint8_t _eheap[];
+EXTERN uint8_t _eheap2[];
+EXTERN uint8_t _eheap3[];
+EXTERN uint8_t _eheap4[];
 
 #endif /* __ASSEMBLY__ */
 

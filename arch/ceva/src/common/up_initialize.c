@@ -41,10 +41,10 @@
 
 static inline void up_color_intstack(void)
 {
-  uint32_t *ptr = (uint32_t *)&g_intstackalloc;
+  uint32_t *ptr = (uint32_t *)g_intstackalloc;
   ssize_t size;
 
-  for (size = &g_intstackbase - &g_intstackalloc;
+  for (size = g_intstackbase - g_intstackalloc;
        size > 0;
        size -= sizeof(uint32_t))
     {

@@ -371,7 +371,7 @@ void xtensa_dumpstate(void)
 #  ifdef CONFIG_SMP
                     (uint32_t)xtensa_intstack_alloc(),
 #  else
-                    (uint32_t)&g_intstackalloc,
+                    (uint32_t)g_intstackalloc,
 #  endif
                     INTSTACK_SIZE,
                     !!CURRENT_REGS);

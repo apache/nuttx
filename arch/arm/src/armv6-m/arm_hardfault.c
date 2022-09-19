@@ -82,15 +82,15 @@ int arm_hardfault(int irq, void *context, void *arg)
    * FLASH region or in the user FLASH region.
    */
 
-  if (((uintptr_t)pc >= (uintptr_t)&_stext &&
-       (uintptr_t)pc <  (uintptr_t)&_etext) ||
+  if (((uintptr_t)pc >= (uintptr_t)_stext &&
+       (uintptr_t)pc <  (uintptr_t)_etext) ||
       ((uintptr_t)pc >= (uintptr_t)USERSPACE->us_textstart &&
        (uintptr_t)pc <  (uintptr_t)USERSPACE->us_textend))
 #else
   /* SVCalls are expected only from the base, kernel FLASH region */
 
-  if ((uintptr_t)pc >= (uintptr_t)&_stext &&
-      (uintptr_t)pc <  (uintptr_t)&_etext)
+  if ((uintptr_t)pc >= (uintptr_t)_stext &&
+      (uintptr_t)pc <  (uintptr_t)_etext)
 #endif
     {
       /* Fetch the instruction that caused the Hard fault */

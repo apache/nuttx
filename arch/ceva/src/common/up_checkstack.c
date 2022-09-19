@@ -160,13 +160,13 @@ ssize_t up_check_stack_remain(void)
 
 size_t up_check_intstack(void)
 {
-  return ceva_stack_check((uintptr_t)&g_intstackalloc,
-                          &g_intstackbase - &g_intstackalloc);
+  return ceva_stack_check((uintptr_t)g_intstackalloc,
+                          g_intstackbase - g_intstackalloc);
 }
 
 size_t up_check_intstack_remain(void)
 {
-  return &g_intstackbase - &g_intstackalloc - up_check_intstack();
+  return g_intstackbase - g_intstackalloc - up_check_intstack();
 }
 
 #endif /* CONFIG_STACK_COLORATION */

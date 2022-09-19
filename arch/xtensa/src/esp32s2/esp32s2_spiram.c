@@ -279,8 +279,8 @@ bool esp_spiram_test(void)
 #if defined(CONFIG_ESP32S2_SPIRAM_RODATA)
 void rodata_flash_page_info_init(void)
 {
-  uint32_t rodata_page_cnt = ((uint32_t)&_rodata_reserved_end -
-                              ((uint32_t)&_rodata_reserved_start &
+  uint32_t rodata_page_cnt = ((uint32_t)_rodata_reserved_end -
+                              ((uint32_t)_rodata_reserved_start &
                               ~ (MMU_PAGE_SIZE - 1)) + MMU_PAGE_SIZE - 1) /
                               MMU_PAGE_SIZE;
 
