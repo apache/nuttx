@@ -66,26 +66,6 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* This symbol references the Cortex-M3/4 vector table (as positioned by the
- * linker script, ld.script or ld.script.dfu.  The standard location for the
- * vector table is at the beginning of FLASH at address 0x0800:0000.  If we
- * are using the STMicro DFU bootloader, then the vector table will be offset
- * to a different location in FLASH and we will need to set the NVIC vector
- * location to this alternative location.
- */
-
-#if defined(__ICCARM__)
-/* _vectors replaced on __vector_table for IAR C-SPY Simulator */
-
-extern uint32_t __vector_table[];
-#else
-extern uint32_t _vectors[];
-#endif
-
-/****************************************************************************
  * Inline Functions
  ****************************************************************************/
 

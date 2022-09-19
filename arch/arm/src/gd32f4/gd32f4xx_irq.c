@@ -72,12 +72,6 @@
 
 volatile uint32_t *g_current_regs[1];
 
-/* This is the address of the  exception vector table (determined by the
- * linker script).
- */
-
-extern uint32_t _vectors[];
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
