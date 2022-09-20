@@ -45,6 +45,18 @@
  * Public data
  ****************************************************************************/
 
+/* g_current_regs[] holds a references to the current interrupt level
+ * register storage structure.  If is non-NULL only during interrupt
+ * processing.  Access to g_current_regs[] must be through the macro
+ * CURRENT_REGS for portability.
+ */
+
+/* For the case of configurations with multiple CPUs, then there must be one
+ * such value for each processor that can receive an interrupt.
+ */
+
+volatile uint64_t *g_current_regs[CONFIG_SMP_NCPUS];
+
 #ifdef CONFIG_SMP
 INIT_STACK_ARRAY_DEFINE(g_cpu_idlestackalloc, CONFIG_SMP_NCPUS,
                           SMP_STACK_SIZE);

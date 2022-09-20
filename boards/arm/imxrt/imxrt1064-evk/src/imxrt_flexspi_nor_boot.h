@@ -85,7 +85,7 @@
 #define LOCATE_IN_SRC(x)            (((uint32_t)(x)) - IMAGE_DEST + FLASH_BASE)
 
 #ifdef CONFIG_IMXRT1064_EVK_SDRAM
-#  define DCD_ADDRESS               &g_dcd_data
+#  define DCD_ADDRESS               g_dcd_data
 #else
 #  define DCD_ADDRESS               0
 #endif

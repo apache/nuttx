@@ -36,12 +36,6 @@
 #include "lm32.h"
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-volatile uint32_t *g_current_regs;
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -51,10 +45,6 @@ volatile uint32_t *g_current_regs;
 
 void up_irqinitialize(void)
 {
-  /* currents_regs is non-NULL only while processing an interrupt */
-
-  g_current_regs = NULL;
-
   /* Attach the software interrupt */
 
   irq_attach(LM32_IRQ_SWINT, lm32_swint, NULL);

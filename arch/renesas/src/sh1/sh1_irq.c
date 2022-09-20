@@ -34,12 +34,6 @@
 #include "chip.h"
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-volatile uint32_t *g_current_regs;
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -49,10 +43,6 @@ volatile uint32_t *g_current_regs;
 
 void up_irqinitialize(void)
 {
-  /* Currents_regs is non-NULL only while processing an interrupt */
-
-  g_current_regs = NULL;
-
   /* Enable interrupts */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
