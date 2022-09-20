@@ -385,6 +385,59 @@
 
 /* XDMA Controller 0 Channel Definitions (always secure) */
 
+#if defined(ATSAMA5D2)
+#define XDMAC0_CH_TWI0_TX           0  /* TWI0 Transmit */
+#define XDMAC0_CH_TWI0_RX           1  /* TWI0 Receive */
+#define XDMAC0_CH_TWI1_TX           2  /* TWI1 Transmit */
+#define XDMAC0_CH_TWI1_RX           3  /* TWI1 Receive */
+#define XDMAC0_CH_QSPI0_TX          4  /* QSPI0 Transmit */
+#define XDMAC0_CH_QSPI0_RX          5  /* QSPI0 Receive */
+#define XDMAC0_CH_SPI0_TX           6  /* SPI0 Transmit */
+#define XDMAC0_CH_SPI0_RX           7  /* SPI0 Receive */
+#define XDMAC0_CH_SPI1_TX           8  /* SPI1 Transmit */
+#define XDMAC0_CH_SPI1_RX           9  /* SPI1 Receive */
+#define XDMAC0_CH_PWM_TX            10 /* PWM Transmit */
+#define XDMAC0_CH_FLEXCOM0_TX       11 /* FLEXCOM0 Transmit */
+#define XDMAC0_CH_FLEXCOM0_RX       12 /* FLEXCOM0 Receive */
+#define XDMAC0_CH_FLEXCOM1_TX       13 /* FLEXCOM1 Transmit */
+#define XDMAC0_CH_FLEXCOM1_RX       14 /* FLEXCOM1 Receive */
+#define XDMAC0_CH_FLEXCOM2_TX       15 /* FLEXCOM2 Transmit */
+#define XDMAC0_CH_FLEXCOM2_RX       16 /* FLEXCOM2 Receive */
+#define XDMAC0_CH_FLEXCOM3_TX       17 /* FLEXCOM3 Transmit */
+#define XDMAC0_CH_FLEXCOM3_RX       18 /* FLEXCOM3 Receive */
+#define XDMAC0_CH_FLEXCOM4_TX       19 /* FLEXCOM4 Transmit */
+#define XDMAC0_CH_FLEXCOM4_RX       20 /* FLEXCOM4 Receive */
+#define XDMAC0_CH_SSC0_TX           21 /* SSC0 Transmit */
+#define XDMAC0_CH_SSC0_RX           22 /* SSC0 Receive */
+#define XDMAC0_CH_SSC1_TX           23 /* SSC1 Transmit */
+#define XDMAC0_CH_SSC1_RX           24 /* SSC1 Receive */
+#define XDMAC0_CH_ADC_RX            25 /* ADC Receive */
+#define XDMAC0_CH_AES_TX            26 /* AES Receive */
+#define XDMAC0_CH_AES_RX            27 /* AES Transmit */
+#define XDMAC0_CH_TDES_TX           28 /* TDES Transmit */
+#define XDMAC0_CH_TDES_RX           29 /* TDES Receive */
+#define XDMAC0_CH_SHA_TX            30 /* SHA Transmit */
+#define XDMAC0_CH_I2SC0_TX          31 /* I2SC0 Transmit */
+#define XDMAC0_CH_I2SC0_RX          32 /* I2SC0 Receive */
+#define XDMAC0_CH_I2SC1_TX          33 /* I2SC1 Transmit */
+#define XDMAC0_CH_I2SC1_RX          34 /* I2SC1 Receive */
+#define XDMAC0_CH_UART0_TX          35 /* UART0 Transmit */
+#define XDMAC0_CH_UART0_RX          36 /* UART0 Receive */
+#define XDMAC0_CH_UART1_TX          37 /* UART1 Transmit */
+#define XDMAC0_CH_UART1_RX          38 /* UART1 Receive */
+#define XDMAC0_CH_UART2_TX          39 /* UART2 Transmit */
+#define XDMAC0_CH_UART2_RX          40 /* UART2 Receive */
+#define XDMAC0_CH_UART3_TX          41 /* UART3 Transmit */
+#define XDMAC0_CH_UART3_RX          42 /* UART3 Receive */
+#define XDMAC0_CH_UART4_TX          43 /* UART4 Transmit */
+#define XDMAC0_CH_UART4_RX          44 /* UART4 Receive */
+#define XDMAC0_CH_TC0_RX            45 /* TC0 Receive */
+#define XDMAC0_CH_TC1_RX            46 /* TC1 Receive */
+#define XDMAC0_CH_CLASSD_TX         47 /* CLASSD Transmit */
+#define XDMAC0_CH_QSPI1_TX          48 /* QSPI1 Transmit */
+#define XDMAC0_CH_QSPI1_RX          49 /* QSPI1 Receive */
+#define XDMAC0_CH_PDMIC_RX          50 /* PDMIC Receive */
+#elif defined(ATSAMA5D4)
 #define XDMAC0_CH_HSMCI0            0  /* HSMCI0 Receive/Transmit */
 #define XDMAC0_CH_HSMCI1            1  /* HSMCI1 Receive/Transmit */
 #define XDMAC0_CH_TWI0_TX           2  /* TWI0 Transmit */
@@ -431,9 +484,63 @@
 #define XDMAC0_CH_SHA_TX            44 /* SHA Transmit */
 #define XDMAC0_CH_CATB_TX           46 /* CATB Transmit */
 #define XDMAC0_CH_CATB_RX           47 /* CATB Receive */
+#endif
 
 /* XDMA Controller 1 Channel Definitions (never secure) */
 
+#if defined(ATSAMA5D2)
+#define XDMAC1_CH_TWI0_TX           0  /* TWI0 Transmit */
+#define XDMAC1_CH_TWI0_RX           1  /* TWI0 Receive */
+#define XDMAC1_CH_TWI1_TX           2  /* TWI1 Transmit */
+#define XDMAC1_CH_TWI1_RX           3  /* TWI1 Receive */
+#define XDMAC1_CH_QSPI0_TX          4  /* QSPI0 Transmit */
+#define XDMAC1_CH_QSPI0_RX          5  /* QSPI0 Receive */
+#define XDMAC1_CH_SPI0_TX           6  /* SPI0 Transmit */
+#define XDMAC1_CH_SPI0_RX           7  /* SPI0 Receive */
+#define XDMAC1_CH_SPI1_TX           8  /* SPI1 Transmit */
+#define XDMAC1_CH_SPI1_RX           9  /* SPI1 Receive */
+#define XDMAC1_CH_PWM_TX            10 /* PWM Transmit */
+#define XDMAC1_CH_FLEXCOM0_TX       11 /* FLEXCOM0 Transmit */
+#define XDMAC1_CH_FLEXCOM0_RX       12 /* FLEXCOM0 Receive */
+#define XDMAC1_CH_FLEXCOM1_TX       13 /* FLEXCOM1 Transmit */
+#define XDMAC1_CH_FLEXCOM1_RX       14 /* FLEXCOM1 Receive */
+#define XDMAC1_CH_FLEXCOM2_TX       15 /* FLEXCOM2 Transmit */
+#define XDMAC1_CH_FLEXCOM2_RX       16 /* FLEXCOM2 Receive */
+#define XDMAC1_CH_FLEXCOM3_TX       17 /* FLEXCOM3 Transmit */
+#define XDMAC1_CH_FLEXCOM3_RX       18 /* FLEXCOM3 Receive */
+#define XDMAC1_CH_FLEXCOM4_TX       19 /* FLEXCOM4 Transmit */
+#define XDMAC1_CH_FLEXCOM4_RX       20 /* FLEXCOM4 Receive */
+#define XDMAC1_CH_SSC0_TX           21 /* SSC0 Transmit */
+#define XDMAC1_CH_SSC0_RX           22 /* SSC0 Receive */
+#define XDMAC1_CH_SSC1_TX           23 /* SSC1 Transmit */
+#define XDMAC1_CH_SSC1_RX           24 /* SSC1 Receive */
+#define XDMAC1_CH_ADC_RX            25 /* ADC Receive */
+#define XDMAC1_CH_AES_TX            26 /* AES Receive */
+#define XDMAC1_CH_AES_RX            27 /* AES Transmit */
+#define XDMAC1_CH_TDES_TX           28 /* TDES Transmit */
+#define XDMAC1_CH_TDES_RX           29 /* TDES Receive */
+#define XDMAC1_CH_SHA_TX            30 /* SHA Transmit */
+#define XDMAC1_CH_I2SC0_TX          31 /* I2SC0 Transmit */
+#define XDMAC1_CH_I2SC0_RX          32 /* I2SC0 Receive */
+#define XDMAC1_CH_I2SC1_TX          33 /* I2SC1 Transmit */
+#define XDMAC1_CH_I2SC1_RX          34 /* I2SC1 Receive */
+#define XDMAC1_CH_UART0_TX          35 /* UART0 Transmit */
+#define XDMAC1_CH_UART0_RX          36 /* UART0 Receive */
+#define XDMAC1_CH_UART1_TX          37 /* UART1 Transmit */
+#define XDMAC1_CH_UART1_RX          38 /* UART1 Receive */
+#define XDMAC1_CH_UART2_TX          39 /* UART2 Transmit */
+#define XDMAC1_CH_UART2_RX          40 /* UART2 Receive */
+#define XDMAC1_CH_UART3_TX          41 /* UART3 Transmit */
+#define XDMAC1_CH_UART3_RX          42 /* UART3 Receive */
+#define XDMAC1_CH_UART4_TX          43 /* UART4 Transmit */
+#define XDMAC1_CH_UART4_RX          44 /* UART4 Receive */
+#define XDMAC1_CH_TC0_RX            45 /* TC0 Receive */
+#define XDMAC1_CH_TC1_RX            46 /* TC1 Receive */
+#define XDMAC1_CH_CLASSD_TX         47 /* CLASSD Transmit */
+#define XDMAC1_CH_QSPI1_TX          48 /* QSPI1 Transmit */
+#define XDMAC1_CH_QSPI1_RX          49 /* QSPI1 Receive */
+#define XDMAC1_CH_PDMIC_RX          50 /* PDMIC Receive */
+#elif defined(ATSAMA5D4)
 #define XDMAC1_CH_HSMCI0            0  /* HSMCI0 Receive/Transmit */
 #define XDMAC1_CH_HSMCI1            1  /* HSMCI1 Receive/Transmit */
 #define XDMAC1_CH_TWI0_TX           2  /* TWI0 Transmit */
@@ -469,6 +576,7 @@
 #define XDMAC1_CH_ADC_RX            32 /* ADC Receive */
 #define XDMAC1_CH_SMD_TX            33 /* SMD Transmit */
 #define XDMAC1_CH_SMD_RX            34 /* SMD Receive */
+#endif
 
 /* Descriptor structure member definitions **********************************/
 
