@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/misoc/src/minerva/minerva_initialize.c
+ * arch/misoc/src/common/misoc_initialize.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
