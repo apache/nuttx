@@ -20,18 +20,18 @@
 
 HEAD_ASRC   = minerva_vectors.S
 
-CMN_CSRCS   = misoc_lowputs.c misoc_serial.c misoc_mdelay.c
-CMN_CSRCS  += misoc_modifyreg8.c misoc_modifyreg16.c misoc_modifyreg32.c
-CMN_CSRCS  += misoc_puts.c misoc_udelay.c misoc_timerisr.c misoc_net.c
-CMN_CSRCS  += misoc_flushcache.c
+CMN_CSRCS   = misoc_initialize.c misoc_lowputs.c misoc_serial.c
+CMN_CSRCS  += misoc_mdelay.c misoc_modifyreg8.c misoc_modifyreg16.c
+CMN_CSRCS  += misoc_modifyreg32.c misoc_puts.c misoc_udelay.c
+CMN_CSRCS  += misoc_timerisr.c misoc_net.c misoc_flushcache.c
 
 CHIP_ASRCS  = minerva_syscall.S
 
 CHIP_CSRCS  = minerva_allocateheap.c minerva_assert.c minerva_blocktask.c
 CHIP_CSRCS += minerva_copystate.c minerva_createstack.c minerva_decodeirq.c
 CHIP_CSRCS += minerva_doirq.c minerva_dumpstate.c minerva_exit.c minerva_idle.c
-CHIP_CSRCS += minerva_initialize.c minerva_initialstate.c
-CHIP_CSRCS += minerva_irq.c minerva_releasepending.c minerva_releasestack.c
-CHIP_CSRCS += minerva_stackframe.c minerva_swint.c minerva_unblocktask.c
-CHIP_CSRCS += minerva_reprioritizertr.c minerva_schedulesigaction.c minerva_sigdeliver.c
+CHIP_CSRCS += minerva_initialstate.c minerva_irq.c minerva_releasepending.c
+CHIP_CSRCS += minerva_releasestack.c minerva_stackframe.c minerva_swint.c
+CHIP_CSRCS += minerva_unblocktask.c minerva_reprioritizertr.c
+CHIP_CSRCS += minerva_schedulesigaction.c minerva_sigdeliver.c
 CHIP_CSRCS += minerva_flushcache.c minerva_doexceptions.c minerva_usetack.c
