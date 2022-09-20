@@ -158,8 +158,7 @@ static struct imxrt_flexpwm_module_s g_pwm1_modules[] =
 #else
     .complementary = false,
 #endif
-    .sync_src = IMXRT_XBARA1(XBAR_INPUT,
-                             CONFIG_IMXRT_FLEXPWM1_MOD1_SYNC_SRC),
+    .sync_src = CONFIG_IMXRT_FLEXPWM1_MOD1_SYNC_SRC,
     .ext_sync = IMXRT_XBARA1_OUT_FLEXPWM1_EXT_SYNC0_SEL_OFFSET,
   },
 #endif
@@ -187,8 +186,7 @@ static struct imxrt_flexpwm_module_s g_pwm1_modules[] =
 #else
     .complementary = false,
 #endif
-    .sync_src = IMXRT_XBARA1(XBAR_INPUT,
-                             CONFIG_IMXRT_FLEXPWM1_MOD2_SYNC_SRC),
+    .sync_src = CONFIG_IMXRT_FLEXPWM1_MOD2_SYNC_SRC,
     .ext_sync = IMXRT_XBARA1_OUT_FLEXPWM1_EXT_SYNC1_SEL_OFFSET,
   },
 #endif
@@ -216,8 +214,7 @@ static struct imxrt_flexpwm_module_s g_pwm1_modules[] =
 #else
     .complementary = false,
 #endif
-    .sync_src = IMXRT_XBARA1(XBAR_INPUT,
-                             CONFIG_IMXRT_FLEXPWM1_MOD3_SYNC_SRC),
+    .sync_src = CONFIG_IMXRT_FLEXPWM1_MOD3_SYNC_SRC,
     .ext_sync = IMXRT_XBARA1_OUT_FLEXPWM1_EXT_SYNC2_SEL_OFFSET,
   },
 #endif
@@ -245,8 +242,7 @@ static struct imxrt_flexpwm_module_s g_pwm1_modules[] =
 #else
     .complementary = false,
 #endif
-    .sync_src = IMXRT_XBARA1(XBAR_INPUT,
-                             CONFIG_IMXRT_FLEXPWM1_MOD4_SYNC_SRC),
+    .sync_src = CONFIG_IMXRT_FLEXPWM1_MOD4_SYNC_SRC,
     .ext_sync = IMXRT_XBARA1_OUT_FLEXPWM1_EXT_SYNC3_SEL_OFFSET,
   },
 #endif
@@ -292,8 +288,7 @@ static struct imxrt_flexpwm_module_s g_pwm2_modules[] =
 #else
     .complementary = false,
 #endif
-    .sync_src = IMXRT_XBARA1(XBAR_INPUT,
-                             CONFIG_IMXRT_FLEXPWM2_MOD1_SYNC_SRC),
+    .sync_src = CONFIG_IMXRT_FLEXPWM2_MOD1_SYNC_SRC,
     .ext_sync = IMXRT_XBARA1_OUT_FLEXPWM2_EXT_SYNC0_SEL_OFFSET,
   },
 #endif
@@ -321,8 +316,7 @@ static struct imxrt_flexpwm_module_s g_pwm2_modules[] =
 #else
     .complementary = false,
 #endif
-    .sync_src = IMXRT_XBARA1(XBAR_INPUT,
-                             CONFIG_IMXRT_FLEXPWM2_MOD2_SYNC_SRC),
+    .sync_src = CONFIG_IMXRT_FLEXPWM2_MOD2_SYNC_SRC,
     .ext_sync = IMXRT_XBARA1_OUT_FLEXPWM2_EXT_SYNC1_SEL_OFFSET,
   },
 #endif
@@ -350,8 +344,7 @@ static struct imxrt_flexpwm_module_s g_pwm2_modules[] =
 #else
     .complementary = false,
 #endif
-    .sync_src = IMXRT_XBARA1(XBAR_INPUT,
-                             CONFIG_IMXRT_FLEXPWM2_MOD3_SYNC_SRC),
+    .sync_src = CONFIG_IMXRT_FLEXPWM2_MOD3_SYNC_SRC,
     .ext_sync = IMXRT_XBARA1_OUT_FLEXPWM2_EXT_SYNC2_SEL_OFFSET,
   },
 #endif
@@ -379,8 +372,7 @@ static struct imxrt_flexpwm_module_s g_pwm2_modules[] =
 #else
     .complementary = false,
 #endif
-    .sync_src = IMXRT_XBARA1(XBAR_INPUT,
-                             CONFIG_IMXRT_FLEXPWM2_MOD4_SYNC_SRC),
+    .sync_src = CONFIG_IMXRT_FLEXPWM2_MOD4_SYNC_SRC,
     .ext_sync = IMXRT_XBARA1_OUT_FLEXPWM2_EXT_SYNC3_SEL_OFFSET,
   }
 #endif
@@ -426,8 +418,7 @@ static struct imxrt_flexpwm_module_s g_pwm3_modules[] =
 #else
     .complementary = false,
 #endif
-    .sync_src = IMXRT_XBARA1(XBAR_INPUT,
-                             CONFIG_IMXRT_FLEXPWM3_MOD1_SYNC_SRC),
+    .sync_src = CONFIG_IMXRT_FLEXPWM3_MOD1_SYNC_SRC,
     .ext_sync = IMXRT_XBARA1_OUT_FLEXPWM3_EXT_SYNC0_SEL_OFFSET,
   },
 #endif
@@ -455,8 +446,7 @@ static struct imxrt_flexpwm_module_s g_pwm3_modules[] =
 #else
     .complementary = false,
 #endif
-    .sync_src = IMXRT_XBARA1(XBAR_INPUT,
-                             CONFIG_IMXRT_FLEXPWM3_MOD2_SYNC_SRC),
+    .sync_src = CONFIG_IMXRT_FLEXPWM3_MOD2_SYNC_SRC,
     .ext_sync = IMXRT_XBARA1_OUT_FLEXPWM3_EXT_SYNC1_SEL_OFFSET,
   },
 #endif
@@ -484,8 +474,7 @@ static struct imxrt_flexpwm_module_s g_pwm3_modules[] =
 #else
     .complementary = false,
 #endif
-    .sync_src = IMXRT_XBARA1(XBAR_INPUT,
-                             CONFIG_IMXRT_FLEXPWM3_MOD3_SYNC_SRC),
+    .sync_src = CONFIG_IMXRT_FLEXPWM3_MOD3_SYNC_SRC,
     .ext_sync = IMXRT_XBARA1_OUT_FLEXPWM3_EXT_SYNC2_SEL_OFFSET,
   },
 #endif
@@ -513,8 +502,7 @@ static struct imxrt_flexpwm_module_s g_pwm3_modules[] =
 #else
     .complementary = false,
 #endif
-    .sync_src = IMXRT_XBARA1(XBAR_INPUT,
-                             CONFIG_IMXRT_FLEXPWM3_MOD4_SYNC_SRC),
+    .sync_src = CONFIG_IMXRT_FLEXPWM3_MOD4_SYNC_SRC,
     .ext_sync = IMXRT_XBARA1_OUT_FLEXPWM3_EXT_SYNC3_SEL_OFFSET,
   },
 #endif
@@ -560,8 +548,7 @@ static struct imxrt_flexpwm_module_s g_pwm4_modules[] =
 #else
     .complementary = false,
 #endif
-    .sync_src = IMXRT_XBARA1(XBAR_INPUT,
-                             CONFIG_IMXRT_FLEXPWM4_MOD1_SYNC_SRC),
+    .sync_src = CONFIG_IMXRT_FLEXPWM4_MOD1_SYNC_SRC,
     .ext_sync = IMXRT_XBARA1_OUT_FLEXPWM4_EXT_SYNC0_SEL_OFFSET,
   },
 #endif
@@ -589,8 +576,7 @@ static struct imxrt_flexpwm_module_s g_pwm4_modules[] =
 #else
     .complementary = false,
 #endif
-    .sync_src = IMXRT_XBARA1(XBAR_INPUT,
-                             CONFIG_IMXRT_FLEXPWM4_MOD2_SYNC_SRC),
+    .sync_src = CONFIG_IMXRT_FLEXPWM4_MOD2_SYNC_SRC,
     .ext_sync = IMXRT_XBARA1_OUT_FLEXPWM4_EXT_SYNC1_SEL_OFFSET,
   },
 #endif
@@ -618,8 +604,7 @@ static struct imxrt_flexpwm_module_s g_pwm4_modules[] =
 #else
     .complementary = false,
 #endif
-    .sync_src = IMXRT_XBARA1(XBAR_INPUT,
-                             CONFIG_IMXRT_FLEXPWM4_MOD3_SYNC_SRC),
+    .sync_src = CONFIG_IMXRT_FLEXPWM4_MOD3_SYNC_SRC,
     .ext_sync = IMXRT_XBARA1_OUT_FLEXPWM4_EXT_SYNC3_SEL_OFFSET,
   },
 #endif
@@ -647,8 +632,7 @@ static struct imxrt_flexpwm_module_s g_pwm4_modules[] =
 #else
     .complementary = false,
 #endif
-    .sync_src = IMXRT_XBARA1(XBAR_INPUT,
-                             CONFIG_IMXRT_FLEXPWM4_MOD4_SYNC_SRC),
+    .sync_src = CONFIG_IMXRT_FLEXPWM4_MOD4_SYNC_SRC,
     .ext_sync = IMXRT_XBARA1_OUT_FLEXPWM4_EXT_SYNC4_SEL_OFFSET,
   },
 #endif
@@ -955,16 +939,27 @@ static int pwm_setup(struct pwm_lowerhalf_s *dev)
           /* Connect corresponding XBARs */
 
           ret = imxrt_xbar_connect(priv->modules[i].ext_sync,
-                                   priv->modules[i].sync_src);
+                                   IMXRT_XBARA1(XBAR_INPUT,
+                                                priv->modules[i].sync_src));
           if (ret < 0)
             {
+              /* Disable external triggering if XBAR connection failed */
+
+              regval = getreg16(priv->base + IMXRT_FLEXPWM_SM0CTRL2_OFFSET
+                                           + MODULE_OFFSET * shift);
+              regval &= ~(SMCTRL2_INIT_SEL_EXT_SYNC |
+                          SMCTRL2_FORCE_SEL_EXT_SYNC |
+                          SMCTRL2_FRCEN);
+              putreg16(regval, priv->base + IMXRT_FLEXPWM_SM0CTRL2_OFFSET
+                                          + MODULE_OFFSET * shift);
+
               pwmerr("ERROR: imxrt_xbar_connect failed: %d\n", ret);
             }
         }
 
       if (priv->modules[i].trig_en)
         {
-          /* Use duty cycle register for trigger generation */
+          /* Use period register for trigger generation */
 
           regval = getreg16(priv->base + IMXRT_FLEXPWM_SM0TCTRL_OFFSET
                                        + MODULE_OFFSET * shift);
