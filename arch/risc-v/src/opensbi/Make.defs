@@ -37,10 +37,10 @@ INCLUDES  += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)opensbi$(DELIM)open
 SBI_DIR   := opensbi
 
 OPENSBI_UNPACK  = opensbi-3rdparty
-OPENSBI_COMMIT  = 19b05a2fd4fd04329d26f73a73e179631d7ae44c
+OPENSBI_COMMIT  = b18bb7ce78d4e5504a9cbd8df7b57d795f489a0a
 OPENSBI_URL     = https://github.com/tiiuae/opensbi/tarball
 OPENSBI_TARBALL = opensbi.tar.gz
-OPENSBI_DIR     = tiiuae-opensbi-19b05a2
+OPENSBI_DIR     = tiiuae-opensbi-b18bb7c
 
 $(OPENSBI_TARBALL):
 	$(Q) echo "Downloading: OpenSBI"
