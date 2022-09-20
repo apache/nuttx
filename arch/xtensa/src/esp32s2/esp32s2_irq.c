@@ -81,18 +81,6 @@
 #define ESP32S2_PRIO_INDEX(p)   ((p) - ESP32S2_MIN_PRIORITY)
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* g_current_regs[] holds a reference to the current interrupt level
- * register storage structure.  It is non-NULL only during interrupt
- * processing.  Access to g_current_regs[] must be through the macro
- * CURRENT_REGS for portability.
- */
-
-volatile uint32_t *g_current_regs[1];
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 

@@ -30,6 +30,16 @@
 #include "z80_internal.h"
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* This holds a references to the current interrupt level register storage
+ * structure.  If is non-NULL only during interrupt processing.
+ */
+
+volatile FAR chipreg_t *g_current_regs;
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
