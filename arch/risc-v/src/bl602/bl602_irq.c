@@ -38,12 +38,6 @@
 #include "chip.h"
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-volatile uintptr_t *g_current_regs[1];
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -87,10 +81,6 @@ void up_irqinitialize(void)
   size_t intstack_size = (CONFIG_ARCH_INTERRUPTSTACK & ~15);
   riscv_stack_color((void *)&g_intstackalloc, intstack_size);
 #endif
-
-  /* currents_regs is non-NULL only while processing an interrupt */
-
-  CURRENT_REGS = NULL;
 
   /* Attach the common interrupt handler */
 

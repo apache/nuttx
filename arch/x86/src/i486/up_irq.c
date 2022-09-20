@@ -246,10 +246,6 @@ static inline void up_idtinit(void)
 
 void up_irqinitialize(void)
 {
-  /* currents_regs is non-NULL only while processing an interrupt */
-
-  g_current_regs = NULL;
-
   /* Initialize the IDT */
 
   up_idtinit();

@@ -35,12 +35,6 @@
 #include "m9s12.h"
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-volatile uint8_t *g_current_regs;
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -50,10 +44,6 @@ volatile uint8_t *g_current_regs;
 
 void up_irqinitialize(void)
 {
-  /* currents_regs is non-NULL only while processing an interrupt */
-
-  g_current_regs = NULL;
-
   /* Initialize logic to support a second level of interrupt decoding for
    * GPIO pins.
    */

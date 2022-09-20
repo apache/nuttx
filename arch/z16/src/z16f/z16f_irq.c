@@ -53,10 +53,6 @@ void up_irqinitialize(void)
   putreg16(0x0000, Z16F_IRQ1_EN);
   putreg16(0x0000, Z16F_IRQ2_EN);
 
-  /* currents_regs is non-NULL only while processing an interrupt */
-
-  g_current_regs = NULL;
-
   /* And finally, enable interrupts */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
