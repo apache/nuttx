@@ -50,26 +50,6 @@
 #define IRQ__STATUS 0x14
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* g_current_regs[] holds a references to the current interrupt level
- * register storage structure.  If is non-NULL only during interrupt
- * processing.  Access to g_current_regs[] must be through the macro
- * CURRENT_REGS for portability.
- */
-
-volatile uint32_t *g_current_regs[1];
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -115,10 +95,6 @@ void up_irqinitialize(void)
   putreg32(0, IRQ_REG(IRQ__LEVEL));
   putreg32(0, IRQ_REG(IRQ__MODE + 0x20));
   putreg32(0, IRQ_REG(IRQ__LEVEL + 0x20));
-
-  /* currents_regs is non-NULL only while processing an interrupt */
-
-  CURRENT_REGS = NULL;
 
   /* Setup UART shared interrupt */
 

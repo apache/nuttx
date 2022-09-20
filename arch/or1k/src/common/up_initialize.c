@@ -31,6 +31,18 @@
 #include "up_internal.h"
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* g_current_regs[] holds a references to the current interrupt level
+ * register storage structure.  It is non-NULL only during interrupt
+ * processing.  Access to g_current_regs[] must be through the macro
+ * CURRENT_REGS for portability.
+ */
+
+volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -104,7 +116,7 @@ void up_enable_dcache(void)
 #if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
 static inline void up_color_intstack(void)
 {
-  uint32_t *ptr = (uint32_t *)&g_intstackalloc;
+  uint32_t *ptr = (uint32_t *)g_intstackalloc;
   ssize_t size;
 
   for (size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);

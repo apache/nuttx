@@ -330,10 +330,6 @@ void __start(void)
 
   get_cpu_ver();
 
-  /* run as interrupt context, before scheduler running */
-
-  CURRENT_REGS = NULL;
-
   nx_start();
 
   /* Shouldn't get here */

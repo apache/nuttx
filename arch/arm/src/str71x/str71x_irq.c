@@ -37,18 +37,6 @@
 #include "str71x.h"
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* g_current_regs[] holds a references to the current interrupt level
- * register storage structure.  If is non-NULL only during interrupt
- * processing.  Access to g_current_regs[] must be through the macro
- * CURRENT_REGS for portability.
- */
-
-volatile uint32_t *g_current_regs[1];
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -58,10 +46,6 @@ volatile uint32_t *g_current_regs[1];
 
 void up_irqinitialize(void)
 {
-  /* Currents_regs is non-NULL only while processing an interrupt */
-
-  CURRENT_REGS = NULL;
-
   /* The bulk of IRQ initialization if performed in str71x_head.S, so we
    * have very little to do here -- basically just enabling interrupts;
    *

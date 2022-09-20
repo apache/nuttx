@@ -73,12 +73,6 @@
  * Public Data
  ****************************************************************************/
 
-/* For the case of configurations with multiple CPUs, then there must be one
- * such value for each processor that can receive an interrupt.
- */
-
-volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
-
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
 /* In the SMP configuration, we will need two custom interrupt stacks.
  * These definitions provide the aligned stack allocations.
@@ -506,10 +500,6 @@ void up_irqinitialize(void)
       putreg32(DEFPRIORITY32, regaddr);
       regaddr += 4;
     }
-
-  /* currents_regs is non-NULL only while processing an interrupt */
-
-  CURRENT_REGS = NULL;
 
   /* Attach the SVCall and Hard Fault exception handlers.  The SVCall
    * exception is used for performing context switches; The Hard Fault

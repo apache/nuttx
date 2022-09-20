@@ -63,7 +63,7 @@
 #define SCLK 1
 
 #ifdef CONFIG_IMXRT1050_EVK_SDRAM
-#  define DCD_ADDRESS               &g_dcd_data
+#  define DCD_ADDRESS               g_dcd_data
 #else
 #  define DCD_ADDRESS               0
 #endif

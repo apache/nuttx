@@ -63,12 +63,6 @@ extern uint32_t avr32_int3;
 #define AVR32_INT3_RADDR ((uint32_t)&avr32_int3 - (uint32_t)&vectortab)
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-volatile uint32_t *g_current_regs;
-
-/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -203,10 +197,6 @@ void up_irqinitialize(void)
     {
       putreg32(g_ipr[0], AVR32_INTC_IPR(group));
     }
-
-  /* currents_regs is non-NULL only while processing an interrupt */
-
-  g_current_regs = NULL;
 
   /* Attach the exception handlers */
 

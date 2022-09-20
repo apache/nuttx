@@ -37,12 +37,6 @@
 #include "mpfs_plic.h"
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-volatile uintptr_t *g_current_regs[1];
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -93,10 +87,6 @@ void up_irqinitialize(void)
 
   uintptr_t threshold_address = mpfs_plic_get_thresholdbase();
   putreg32(0, threshold_address);
-
-  /* currents_regs is non-NULL only while processing an interrupt */
-
-  CURRENT_REGS = NULL;
 
   /* Attach the common interrupt handler */
 

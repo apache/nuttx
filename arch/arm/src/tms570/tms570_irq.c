@@ -40,18 +40,6 @@
 #include "tms570_irq.h"
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* g_current_regs[] holds a references to the current interrupt level
- * register storage structure.  If is non-NULL only during interrupt
- * processing.  Access to g_current_regs[] must be through the macro
- * CURRENT_REGS for portability.
- */
-
-volatile uint32_t *g_current_regs[1];
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -137,10 +125,6 @@ void up_irqinitialize(void)
 #ifdef TMS570_VIM_REQENACLR3
   putreg32(0xffffffff, TMS570_VIM_REQENACLR3);
 #endif
-
-  /* currents_regs is non-NULL only while processing an interrupt */
-
-  CURRENT_REGS = NULL;
 
 #ifdef CONFIG_ARMV7R_HAVE_DECODEFIQ
   /* By default, interrupt CHAN0 is mapped to ESM (Error Signal Module)

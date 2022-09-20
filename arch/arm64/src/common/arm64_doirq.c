@@ -42,22 +42,6 @@
 #include "arm64_fatal.h"
 
 /****************************************************************************
- * Public data
- ****************************************************************************/
-
-/* g_current_regs[] holds a references to the current interrupt level
- * register storage structure.  If is non-NULL only during interrupt
- * processing.  Access to g_current_regs[] must be through the macro
- * CURRENT_REGS for portability.
- */
-
-/* For the case of configurations with multiple CPUs, then there must be one
- * such value for each processor that can receive an interrupt.
- */
-
-volatile uint64_t *g_current_regs[CONFIG_SMP_NCPUS];
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -138,10 +122,6 @@ void up_irqinitialize(void)
   /* Initialize the Generic Interrupt Controller (GIC) for CPU0 */
 
   arm64_gic_initialize();   /* Initialization common to all CPUs */
-
-  /* currents_regs is non-NULL only while processing an interrupt */
-
-  CURRENT_REGS = NULL;
 
 #ifdef CONFIG_SMP
   arm64_smp_sgi_init();

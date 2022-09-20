@@ -38,14 +38,6 @@
  * Public Data
  ****************************************************************************/
 
-/* g_current_regs[] holds a references to the current interrupt level
- * register storage structure.  If is non-NULL only during interrupt
- * processing.  Access to g_current_regs[] must be through the macro
- * CURRENT_REGS for portability.
- */
-
-volatile uint32_t *g_current_regs[1];
-
 /* Symbols defined via the linker script */
 
 extern uint32_t _vector_start; /* Beginning of vector block */
@@ -119,10 +111,6 @@ void up_irqinitialize(void)
       getreg32(AM335X_INTC_PEND_IRQ(i));   /* Reading status clears pending interrupts */
       getreg32(AM335X_INTC_PEND_FIQ(i));   /* Reading status clears pending interrupts */
     }
-
-  /* currents_regs is non-NULL only while processing an interrupt */
-
-  CURRENT_REGS = NULL;
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* Initialize logic to support a second level of interrupt decoding for

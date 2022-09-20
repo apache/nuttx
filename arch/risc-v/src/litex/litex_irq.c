@@ -36,12 +36,6 @@
 #include "litex.h"
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-volatile uintptr_t *g_current_regs[1];
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -67,10 +61,6 @@ void up_irqinitialize(void)
 #endif
 
   /* litex vexriscv dont have priority and threshold control */
-
-  /* currents_regs is non-NULL only while processing an interrupt */
-
-  CURRENT_REGS = NULL;
 
   /* Attach the common interrupt handler */
 

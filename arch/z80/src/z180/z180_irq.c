@@ -39,12 +39,6 @@
  * Public Data
  ****************************************************************************/
 
-/* This holds a references to the current interrupt level register storage
- * structure.  If is non-NULL only during interrupt processing.
- */
-
-volatile chipreg_t *g_current_regs;
-
 /* This holds the value of the MMU's CBR register.  This value is set to the
  * interrupted tasks's CBR on interrupt entry, changed to the new task's CBR
  * if an interrupt level context switch occurs, and restored on interrupt
