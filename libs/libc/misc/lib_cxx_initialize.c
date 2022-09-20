@@ -50,13 +50,6 @@ typedef CODE void (*initializer_t)(void);
 extern initializer_t _sinit;
 extern initializer_t _einit;
 
-/* _stext and _etext are symbols exported by the linker script that mark the
- * beginning and the end of text.
- */
-
-extern uintptr_t _stext;
-extern uintptr_t _etext;
-
 #if defined(CONFIG_ARCH_SIM) && defined(CONFIG_HOST_MACOS)
 extern void macho_call_saved_init_funcs(void);
 #endif
@@ -93,8 +86,7 @@ void lib_cxx_initialize(void)
 #else
       initializer_t *initp;
 
-      sinfo("_sinit: %p _einit: %p _stext: %p _etext: %p\n",
-            &_sinit, &_einit, &_stext, &_etext);
+      sinfo("_sinit: %p _einit: %p\n", &_sinit, &_einit);
 
       /* Visit each entry in the initialization table */
 
@@ -103,13 +95,11 @@ void lib_cxx_initialize(void)
           initializer_t initializer = *initp;
           sinfo("initp: %p initializer: %p\n", initp, initializer);
 
-          /* Make sure that the address is non-NULL and lies in the text
-           * region defined by the linker script.  Some toolchains may put
+          /* Make sure that the address is non-NULL. Some toolchains may put
            * NULL values or counts in the initialization table.
            */
 
-          if ((FAR void *)initializer >= (FAR void *)&_stext &&
-              (FAR void *)initializer < (FAR void *)&_etext)
+          if (initializer)
             {
               sinfo("Calling %p\n", initializer);
               initializer();
