@@ -32,23 +32,8 @@
 #include "libc.h"
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/* This type defines one entry in initialization array */
-
-typedef CODE void (*initializer_t)(void);
-
-/****************************************************************************
  * External References
  ****************************************************************************/
-
-/* _sinit and _einit are symbols exported by the linker script that mark the
- * beginning and the end of the C++ initialization section.
- */
-
-extern initializer_t _sinit;
-extern initializer_t _einit;
 
 #if defined(CONFIG_ARCH_SIM) && defined(CONFIG_HOST_MACOS)
 extern void macho_call_saved_init_funcs(void);
