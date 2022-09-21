@@ -25,7 +25,6 @@ include $(TOPDIR)/arch/arm/src/armv7-r/Toolchain.defs
 LDSCRIPT = flash-sram.ld
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
-ARCHCPUFLAGS = -mcpu=cortex-r4 -mbig-endian
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
 
 CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe

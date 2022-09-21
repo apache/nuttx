@@ -23,7 +23,7 @@ include armv7-r/Make.defs
 # SAMA5-specific C source files
 
 CHIP_CSRCS  = tms570_boot.c tms570_clockconfig.c tms570_esm.c tms570_gio.c
-CHIP_CSRCS += tms570_irq.c tms570_lowputc.c tms570_serial.c tms570_spi.c
+CHIP_CSRCS += tms570_irq.c tms570_lowputc.c tms570_serial.c
 
 # Configuration dependent C and assembly language files
 
@@ -38,3 +38,5 @@ endif
 ifeq ($(CONFIG_TMS570_GIO_IRQ),y)
 CHIP_CSRCS += tms570_gioirq.c
 endif
+
+CMN_CSRCS := $(filter-out arm_gicv2.c, $(CMN_CSRCS))
