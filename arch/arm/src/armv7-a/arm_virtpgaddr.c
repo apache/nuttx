@@ -26,7 +26,7 @@
 
 #include "pgalloc.h"
 
-#if defined(CONFIG_MM_PGALLOC) && defined(CONFIG_ARCH_PGPOOL_MAPPING)
+#ifdef CONFIG_MM_PGALLOC
 
 /****************************************************************************
  * Public Functions
@@ -58,4 +58,4 @@ uintptr_t arm_virtpgaddr(uintptr_t paddr)
   return 0;
 }
 
-#endif /* CONFIG_MM_PGALLOC && CONFIG_ARCH_PGPOOL_MAPPING */
+#endif /* CONFIG_MM_PGALLOC */

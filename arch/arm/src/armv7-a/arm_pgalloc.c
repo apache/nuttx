@@ -56,9 +56,6 @@ static uintptr_t alloc_pgtable(void)
   irqstate_t flags;
   uintptr_t paddr;
   uint32_t *l2table;
-#ifndef CONFIG_ARCH_PGPOOL_MAPPING
-  uint32_t l1save;
-#endif
 
   /* Allocate one physical page for the L2 page table */
 
@@ -70,19 +67,9 @@ static uintptr_t alloc_pgtable(void)
 
       flags = enter_critical_section();
 
-#ifdef CONFIG_ARCH_PGPOOL_MAPPING
       /* Get the virtual address corresponding to the physical page address */
 
       l2table = (uint32_t *)arm_pgvaddr(paddr);
-#else
-      /* Temporarily map the page into the virtual address space */
-
-      l1save = mmu_l1_getentry(ARCH_SCRATCH_VBASE);
-      mmu_l1_setentry(paddr & ~SECTION_MASK, ARCH_SCRATCH_VBASE,
-                      MMU_MEMFLAGS);
-      l2table = (uint32_t *)(ARCH_SCRATCH_VBASE |
-                                 (paddr & SECTION_MASK));
-#endif
 
       /* Initialize the page table */
 
@@ -95,11 +82,6 @@ static uintptr_t alloc_pgtable(void)
       up_flush_dcache((uintptr_t)l2table,
                       (uintptr_t)l2table + MM_PGSIZE);
 
-#ifndef CONFIG_ARCH_PGPOOL_MAPPING
-      /* Restore the scratch section page table entry */
-
-      mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
-#endif
       leave_critical_section(flags);
     }
 
@@ -205,9 +187,6 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
   uint32_t *l2table;
   irqstate_t flags;
   uintptr_t paddr;
-#ifndef CONFIG_ARCH_PGPOOL_MAPPING
-  uint32_t l1save;
-#endif
   unsigned int index;
 
   binfo("tcb->pid=%d tcb->group=%p\n", tcb->pid, tcb->group);
@@ -247,21 +226,9 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
 
       flags = enter_critical_section();
 
-#ifdef CONFIG_ARCH_PGPOOL_MAPPING
       /* Get the virtual address corresponding to the physical page address */
 
       l2table = (uint32_t *)arm_pgvaddr(paddr);
-#else
-      /* Temporarily map the level 2 page table into the "scratch" virtual
-       * address space
-       */
-
-      l1save = mmu_l1_getentry(ARCH_SCRATCH_VBASE);
-      mmu_l1_setentry(paddr & ~SECTION_MASK, ARCH_SCRATCH_VBASE,
-                      MMU_MEMFLAGS);
-      l2table = (uint32_t *)(ARCH_SCRATCH_VBASE |
-                                 (paddr & SECTION_MASK));
-#endif
 
       /* Back up L2 entry with physical memory */
 
@@ -269,9 +236,6 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
       binfo("a new page (paddr=%x)\n", paddr);
       if (paddr == 0)
         {
-#ifndef CONFIG_ARCH_PGPOOL_MAPPING
-          mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
-#endif
           leave_critical_section(flags);
           return 0;
         }
@@ -296,11 +260,6 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
       up_flush_dcache((uintptr_t)&l2table[index],
                       (uintptr_t)&l2table[index] + sizeof(uint32_t));
 
-#ifndef CONFIG_ARCH_PGPOOL_MAPPING
-      /* Restore the scratch L1 page table entry */
-
-      mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
-#endif
       leave_critical_section(flags);
     }
 
