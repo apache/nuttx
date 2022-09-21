@@ -87,29 +87,35 @@ endif
 
 # NuttX buildroot under Linux or Cygwin
 
-ifeq ($(CONFIG_ENDIAN_BIG),y)
-  ARCHCPUFLAGS += -mbig-endian
-  TARGET_ARCH := armeb
-else
-  ARCHCPUFLAGS += -mlittle-endian
-  TARGET_ARCH := arm
+ifeq ($(CONFIG_ARM_TOOLCHAIN_BUILDROOT),y)
+  TARGET_TOOL := -nuttx-eabi-
+else ifeq ($(CONFIG_ARM_TOOLCHAIN_BUILDROOT_OABI),y)
+  TARGET_TOOL := -nuttx-elf-
+else ifeq ($(CONFIG_ARM_TOOLCHAIN_GNU_EABI),y)
+  TARGET_TOOL := -none-eabi-
+endif
+
+ifneq ($(TARGET_TOOL),)
+  ifeq ($(CONFIG_ENDIAN_BIG),y)
+
+    # Fallback to common toolchain if "armeb" is unavailable
+
+    ifeq ($(shell command -v armeb$(TARGET_TOOL)gcc 2> /dev/null),)
+      TARGET_ARCH := arm
+      ARCHCPUFLAGS += -mlittle-endian
+    else
+      TARGET_ARCH := armeb
+      ARCHCPUFLAGS += -mbig-endian
+    endif
+  else
+    ARCHCPUFLAGS += -mlittle-endian
+    TARGET_ARCH := arm
+  endif
+
+  CROSSDEV ?= $(TARGET_ARCH)$(TARGET_TOOL)
 endif
 
 ARCHCPUFLAGS += $(TOOLCHAIN_MARCH) $(TOOLCHAIN_MTUNE) $(TOOLCHAIN_MFLOAT)
-
-ifeq ($(CONFIG_ARM_TOOLCHAIN_BUILDROOT),y)
-  CROSSDEV ?= $(TARGET_ARCH)-nuttx-eabi-
-endif
-
-ifeq ($(CONFIG_ARM_TOOLCHAIN_BUILDROOT_OABI),y)
-  CROSSDEV ?= $(TARGET_ARCH)-nuttx-elf-
-endif
-
-# Generic GNU EABI toolchain
-
-ifeq ($(CONFIG_ARM_TOOLCHAIN_GNU_EABI),y)
-  CROSSDEV ?= $(TARGET_ARCH)-none-eabi-
-endif
 
 # Clang toolchain
 
