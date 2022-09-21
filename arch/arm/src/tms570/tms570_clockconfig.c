@@ -203,7 +203,7 @@ static uint32_t check_frequency(uint32_t cnt1_clksrc)
 
 uint32_t _errata_sswf021_45_both_plls(uint32_t count)
 {
-  uint32_t failcode;
+  uint32_t failcode = 0u;
   uint32_t retries;
   uint32_t clkcntrlsave;
   uint32_t regval;
