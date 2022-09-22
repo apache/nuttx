@@ -12,4 +12,5 @@ menuconfig FS_FATFS
 
 config FS_FATFS_SECTOR_RATIO
 	int "The ratio between fatfs filesystem sector and block device sector"
+	depends on FS_FATFS
 	default 1
