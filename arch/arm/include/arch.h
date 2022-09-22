@@ -104,6 +104,13 @@ do { \
 #  endif
 #endif /* CONFIG_ARCH_ADDRENV */
 
+/* Redefine the linker symbols as armlink style */
+
+#ifdef CONFIG_ARM_TOOLCHAIN_ARMCLANG
+#  define _sinit   Image$$init_section$$Base
+#  define _einit   Image$$init_section$$Limit
+#endif
+
 /****************************************************************************
  * Inline functions
  ****************************************************************************/

@@ -148,6 +148,24 @@
 #define arm_switchcontext(saveregs, restoreregs) \
   sys_call2(SYS_switch_context, (uintptr_t)saveregs, (uintptr_t)restoreregs);
 
+/* Redefine the linker symbols as armlink style */
+
+#ifdef CONFIG_ARM_TOOLCHAIN_ARMCLANG
+#  define _stext   Image$$text$$Base
+#  define _etext   Image$$text$$Limit
+#  define _eronly  Image$$eronly$$Base
+#  define _sdata   Image$$data$$Base
+#  define _edata   Image$$data$$RW$$Limit
+#  define _sbss    Image$$bss$$Base
+#  define _ebss    Image$$bss$$ZI$$Limit
+#  define _stdata  Image$$tdata$$Base
+#  define _etdata  Image$$tdata$$Limit
+#  define _stbss   Image$$tbss$$Base
+#  define _etbss   Image$$tbss$$Limit
+#  define _snoinit Image$$noinit$$Base
+#  define _enoinit Image$$noinit$$Limit
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

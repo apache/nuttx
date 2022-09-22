@@ -157,6 +157,22 @@ else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
   ARCHCPUFLAGS += -Wno-license-management
   LDFLAGS      += --diag_suppress=9931
 
+  # Input sections are specified even though there will be no such
+  # sections found in the libraries linked.
+  # Warning: L6314W: No section matches pattern *(xxx).
+
+  LDFLAGS      += --diag_suppress=6314
+
+  # Allow Empty Execution region declared on scatter
+  # Warning: L6312W: Empty Execution region description for region xxx
+
+  LDFLAGS      += --diag_suppress=6312
+
+  # Match pattern for an unused section that is being removed.
+  # Warning: L6329W: Pattern xxx only matches removed unused sections.
+
+  LDFLAGS      += --diag_suppress=6329
+
 # Default toolchain
 
 else
