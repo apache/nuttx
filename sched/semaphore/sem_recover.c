@@ -72,17 +72,17 @@ void nxsem_recover(FAR struct tcb_s *tcb)
    * restart the exiting task.
    *
    * NOTE:  In the case that the task is waiting we can assume: (1) That the
-   * task state is TSTATE_WAIT_SEM and (2) that the 'waitsem' in the TCB is
+   * task state is TSTATE_WAIT_SEM and (2) that the 'waitobj' in the TCB is
    * non-null.  If we get here via pthread_cancel() or via task_delete(),
    * then the task state should be preserved; it will be altered in other
-   * cases but in those cases waitsem should be NULL anyway (but we do not
+   * cases but in those cases waitobj should be NULL anyway (but we do not
    * enforce that here).
    */
 
   flags = enter_critical_section();
   if (tcb->task_state == TSTATE_WAIT_SEM)
     {
-      sem_t *sem = tcb->waitsem;
+      FAR sem_t *sem = tcb->waitobj;
       DEBUGASSERT(sem != NULL && sem->semcount < 0);
 
       /* Restore the correct priority of all threads that hold references
@@ -105,7 +105,7 @@ void nxsem_recover(FAR struct tcb_s *tcb)
        * semaphore list.
        */
 
-      tcb->waitsem = NULL;
+      tcb->waitobj = NULL;
     }
 
   /* Release all semphore holders for the task */

@@ -98,7 +98,7 @@ int nxsem_wait(FAR sem_t *sem)
 
           sem->semcount--;
           nxsem_add_holder(sem);
-          rtcb->waitsem = NULL;
+          rtcb->waitobj = NULL;
           ret = OK;
         }
 
@@ -112,7 +112,7 @@ int nxsem_wait(FAR sem_t *sem)
            * semaphore
            */
 
-          DEBUGASSERT(rtcb->waitsem == NULL);
+          DEBUGASSERT(rtcb->waitobj == NULL);
 
           /* Handle the POSIX semaphore (but don't set the owner yet) */
 
@@ -120,7 +120,7 @@ int nxsem_wait(FAR sem_t *sem)
 
           /* Save the waited on semaphore in the TCB */
 
-          rtcb->waitsem = sem;
+          rtcb->waitobj = sem;
 
           /* If priority inheritance is enabled, then check the priority of
            * the holder of the semaphore.
@@ -166,7 +166,7 @@ int nxsem_wait(FAR sem_t *sem)
            * - nxsem_canceled() was called to restore the priority of all
            *   threads that hold a reference to the semaphore,
            * - The semaphore count was decremented, and
-           * - tcb->waitsem was nullifed.
+           * - tcb->waitobj was nullifed.
            *
            * It is necessary to do these things in sem_waitirq.c because a
            * long time may elapse between the time that the signal was issued
