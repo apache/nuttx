@@ -82,6 +82,22 @@ void arm_enable_smp(int cpu)
       putreg32(regval, SCU_CTRL);
     }
 
+  /* Actions for other CPUs */
+
+  else
+    {
+      /* Invalidate CPUn L1 data cache so that is will we be reloaded from
+       * coherent L2.
+       */
+
+      cp15_dcache_op_level(0, CP15_CACHE_INVALIDATE);
+      ARM_DSB();
+
+      /* Wait for the SCU to be enabled by the primary processor -- should
+       * not be necessary.
+       */
+    }
+
   /* Enable the data cache, set the SMP mode with ACTLR.SMP=1.
    *
    *   SMP - Sgnals if the Cortex-A9 processor is taking part in coherency
