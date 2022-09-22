@@ -252,8 +252,8 @@ int nxmq_wait_send(FAR struct mqueue_inode_s *msgq, int oflags)
        * When we are unblocked, we will try again
        */
 
-      rtcb           = this_task();
-      rtcb->msgwaitq = msgq;
+      rtcb          = this_task();
+      rtcb->waitobj = msgq;
       msgq->nwaitnotfull++;
 
       /* Initialize the errcode used to communication wake-up error
@@ -396,7 +396,7 @@ int nxmq_do_send(FAR struct mqueue_inode_s *msgq,
        */
 
       for (btcb = (FAR struct tcb_s *)g_waitingformqnotempty.head;
-           btcb && btcb->msgwaitq != msgq;
+           btcb && btcb->waitobj != msgq;
            btcb = btcb->flink)
         {
         }
@@ -410,7 +410,7 @@ int nxmq_do_send(FAR struct mqueue_inode_s *msgq,
           wd_cancel(&btcb->waitdog);
         }
 
-      btcb->msgwaitq = NULL;
+      btcb->waitobj = NULL;
       msgq->nwaitnotempty--;
       up_unblock_task(btcb);
     }
