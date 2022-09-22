@@ -11,6 +11,7 @@ menu "NETDB Support"
 
 config LIBC_GAISTRERROR
 	bool "Enable gai_strerror"
+	depends on LIBC_NETDB
 	default n
 	---help---
 		The gai_strerror() function shall return a text string describing an error
@@ -20,10 +21,12 @@ config LIBC_GAISTRERROR
 
 config NETDB_BUFSIZE
 	int "gethostbyname/gethostbyaddr buffer size"
+	depends on LIBC_NETDB
 	default 256
 
 config NETDB_MAX_IPADDR
 	int "Max number of IP addresses per host"
+	depends on LIBC_NETDB
 	default 2 if NET_IPv4 && NET_IPv6
 	default 1
 	---help---
