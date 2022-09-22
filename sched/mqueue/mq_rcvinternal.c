@@ -303,7 +303,6 @@ ssize_t nxmq_do_receive(FAR struct mqueue_inode_s *msgq,
           wd_cancel(&btcb->waitdog);
         }
 
-      btcb->waitobj = NULL;
       msgq->nwaitnotfull--;
       up_unblock_task(btcb);
     }

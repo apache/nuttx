@@ -83,8 +83,6 @@ void nxmq_wait_irq(FAR struct tcb_s *wtcb, int errcode)
       msgq = wtcb->waitobj;
       DEBUGASSERT(msgq);
 
-      wtcb->waitobj = NULL;
-
       /* Decrement the count of waiters and cancel the wait */
 
       if (wtcb->task_state == TSTATE_WAIT_MQNOTEMPTY)

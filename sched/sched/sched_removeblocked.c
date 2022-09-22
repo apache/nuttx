@@ -67,6 +67,10 @@ void nxsched_remove_blocked(FAR struct tcb_s *btcb)
 
   dq_rem((FAR dq_entry_t *)btcb, TLIST_BLOCKED(task_state));
 
+  /* Indicate that the wait is over. */
+
+  btcb->waitobj = NULL;
+
   /* Make sure the TCB's state corresponds to not being in
    * any list
    */
