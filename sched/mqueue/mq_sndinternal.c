@@ -410,7 +410,6 @@ int nxmq_do_send(FAR struct mqueue_inode_s *msgq,
           wd_cancel(&btcb->waitdog);
         }
 
-      btcb->waitobj = NULL;
       msgq->nwaitnotempty--;
       up_unblock_task(btcb);
     }

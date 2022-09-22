@@ -97,10 +97,6 @@ void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 
       sem->semcount++;
 
-      /* Indicate that the semaphore wait is over. */
-
-      wtcb->waitobj = NULL;
-
       /* Mark the errno value for the thread. */
 
       wtcb->errcode = errcode;
