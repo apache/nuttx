@@ -90,7 +90,7 @@ void arm_enable_smp(int cpu)
        * coherent L2.
        */
 
-      cp15_invalidate_dcache_all();
+      cp15_dcache_op_level(0, CP15_CACHE_INVALIDATE);
       ARM_DSB();
 
       /* Wait for the SCU to be enabled by the primary processor -- should

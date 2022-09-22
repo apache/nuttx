@@ -29,14 +29,6 @@
 #include "cp15_cacheops.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define CP15_CACHE_INVALIDATE       0
-#define CP15_CACHE_CLEAN            1
-#define CP15_CACHE_CLEANINVALIDATE  2
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -67,70 +59,6 @@ static inline uint32_t cp15_cache_get_info(uint32_t *sets, uint32_t *ways)
     }
 
   return (1 << ((ccsidr & 0x7) + 2)) * 4;
-}
-
-static void cp15_dcache_op_level(uint32_t level, int op)
-{
-  uint32_t sets;
-  uint32_t ways;
-  uint32_t set;
-  uint32_t way;
-  uint32_t line;
-  uint32_t way_shift;
-  uint32_t set_shift;
-  uint32_t val = level << 1;
-
-  /* Select by CSSELR */
-
-  CP15_SET(CSSELR, val);
-
-  /* Get cache info */
-
-  line = cp15_cache_get_info(&sets, &ways);
-
-  way_shift = 32 - ilog2(ways);
-  set_shift = ilog2(line);
-
-  ARM_DSB();
-
-  /* A: Log2(ways)
-   * B: L+S
-   * L: Log2(line)
-   * S: Log2(sets)
-   *
-   * The bits are packed as follows:
-   *  31  31-A        B B-1    L L-1   4 3   1 0
-   * |---|-------------|--------|-------|-----|-|
-   * |Way|    zeros    |   Set  | zeros |level|0|
-   * |---|-------------|--------|-------|-----|-|
-   */
-
-  for (way = 0; way < ways; way++)
-    {
-      for (set = 0; set < sets; set++)
-        {
-          val  = level << 1;
-          val |= way << way_shift;
-          val |= set << set_shift;
-
-          switch (op)
-            {
-              case CP15_CACHE_INVALIDATE:
-                cp15_invalidate_dcacheline_bysetway(val);
-                break;
-              case CP15_CACHE_CLEAN:
-                cp15_clean_dcache_bysetway(val);
-                break;
-              case CP15_CACHE_CLEANINVALIDATE:
-                cp15_cleaninvalidate_dcacheline(val);
-                break;
-              default:
-                break;
-            }
-        }
-    }
-
-  ARM_ISB();
 }
 
 static void cp15_dcache_op(int op)
@@ -196,6 +124,70 @@ static void cp15_dcache_op_mva(uintptr_t start, uintptr_t end, int op)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+void cp15_dcache_op_level(uint32_t level, int op)
+{
+  uint32_t sets;
+  uint32_t ways;
+  uint32_t set;
+  uint32_t way;
+  uint32_t line;
+  uint32_t way_shift;
+  uint32_t set_shift;
+  uint32_t val = level << 1;
+
+  /* Select by CSSELR */
+
+  CP15_SET(CSSELR, val);
+
+  /* Get cache info */
+
+  line = cp15_cache_get_info(&sets, &ways);
+
+  way_shift = 32 - ilog2(ways);
+  set_shift = ilog2(line);
+
+  ARM_DSB();
+
+  /* A: Log2(ways)
+   * B: L+S
+   * L: Log2(line)
+   * S: Log2(sets)
+   *
+   * The bits are packed as follows:
+   *  31  31-A        B B-1    L L-1   4 3   1 0
+   * |---|-------------|--------|-------|-----|-|
+   * |Way|    zeros    |   Set  | zeros |level|0|
+   * |---|-------------|--------|-------|-----|-|
+   */
+
+  for (way = 0; way < ways; way++)
+    {
+      for (set = 0; set < sets; set++)
+        {
+          val  = level << 1;
+          val |= way << way_shift;
+          val |= set << set_shift;
+
+          switch (op)
+            {
+              case CP15_CACHE_INVALIDATE:
+                cp15_invalidate_dcacheline_bysetway(val);
+                break;
+              case CP15_CACHE_CLEAN:
+                cp15_clean_dcache_bysetway(val);
+                break;
+              case CP15_CACHE_CLEANINVALIDATE:
+                cp15_cleaninvalidate_dcacheline(val);
+                break;
+              default:
+                break;
+            }
+        }
+    }
+
+  ARM_ISB();
+}
 
 void cp15_coherent_dcache(uintptr_t start, uintptr_t end)
 {

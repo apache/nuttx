@@ -63,6 +63,10 @@
 
 /* Cache definitions ********************************************************/
 
+#define CP15_CACHE_INVALIDATE       0
+#define CP15_CACHE_CLEAN            1
+#define CP15_CACHE_CLEANINVALIDATE  2
+
 /* L1 Memory */
 
 #define CP15_L1_LINESIZE 32
@@ -897,6 +901,23 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: cp15_dcache_op_level
+ *
+ * Description:
+ *   Dcache operation from level
+ *
+ * Input Parameters:
+ *   level - cache level
+ *   op    - CP15_CACHE_XX
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void cp15_dcache_op_level(uint32_t level, int op);
 
 /****************************************************************************
  * Name: cp15_coherent_dcache
