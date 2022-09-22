@@ -242,6 +242,17 @@ config ARCH_BOARD_ESP32_ETHERNETKIT
   		more flexible power supply options, the ESP32-Ethernet-Kit also supports power
   		over Ethernet (PoE).
 
+config ARCH_BOARD_ESP32_LYRAT
+	bool "Espressif ESP32-LyraT"
+	depends on ARCH_CHIP_ESP32WROVER
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESP32_GPIO_IRQ
+	---help---
+		ESP32-LyraT is an open-source development board for Espressif Systems' Audio
+		Development Framework (ADF). It is designed for smart speakers and smart-home
+		applications. This port is for board version 4.3.
+
 config ARCH_BOARD_ESP32_WROVERKIT
 	bool "Espressif ESP-WROVER-KIT"
 	depends on ARCH_CHIP_ESP32WROVER
@@ -2629,6 +2640,7 @@ config ARCH_BOARD
 	default "esp32-devkitc"            if ARCH_BOARD_ESP32_DEVKITC
 	default "ttgo_eink5_v2"            if ARCH_BOARD_TTGO_T5V2_ESP32
 	default "esp32-ethernet-kit"       if ARCH_BOARD_ESP32_ETHERNETKIT
+	default "esp32-lyrat"              if ARCH_BOARD_ESP32_LYRAT
 	default "esp32-wrover-kit"         if ARCH_BOARD_ESP32_WROVERKIT
 	default "esp32c3-devkit"           if ARCH_BOARD_ESP32C3_DEVKIT
 	default "esp32c3-devkit-rust-1"    if ARCH_BOARD_ESP32C3_DEVKIT_RUST1
@@ -3619,6 +3631,9 @@ source "boards/xtensa/esp32/ttgo_eink5_v2/Kconfig"
 endif
 if ARCH_BOARD_ESP32_ETHERNETKIT
 source "boards/xtensa/esp32/esp32-ethernet-kit/Kconfig"
+endif
+if ARCH_BOARD_ESP32_LYRAT
+source "boards/xtensa/esp32/esp32-lyrat/Kconfig"
 endif
 if ARCH_BOARD_ESP32_WROVERKIT
 source "boards/xtensa/esp32/esp32-wrover-kit/Kconfig"
