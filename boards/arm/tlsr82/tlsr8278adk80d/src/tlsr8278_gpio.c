@@ -41,6 +41,10 @@
 
 #if defined(CONFIG_DEV_GPIO) && !defined(CONFIG_GPIO_LOWER_HALF)
 
+#if BOARD_NGPIO == 0
+#  error "BOARD_NGPIO must > 0"
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -82,22 +86,54 @@ static const struct gpio_operations_s gpio_ops =
 
 static struct tlsr82gpio_dev_s g_gpdevs[BOARD_NGPIO] =
 {
+#if BOARD_NGPIO > 0
   {
-    .pinset = GPIO_PIN_PD6,
-    .init_pintype = GPIO_INPUT_PIN_PULLDOWN,
+    .pinset = BOARD_GPIO0_PIN,
+    .init_pintype = BOARD_GPIO0_TYPE,
   },
+#endif
+#if BOARD_NGPIO > 1
   {
-    .pinset = GPIO_PIN_PD0,
-    .init_pintype = GPIO_OUTPUT_PIN,
+    .pinset = BOARD_GPIO1_PIN,
+    .init_pintype = BOARD_GPIO1_TYPE,
   },
+#endif
+#if BOARD_NGPIO > 2
   {
-    .pinset = GPIO_PIN_PD1,
-    .init_pintype = GPIO_OUTPUT_PIN,
+    .pinset = BOARD_GPIO2_PIN,
+    .init_pintype = BOARD_GPIO2_TYPE,
   },
+#endif
+#if BOARD_NGPIO > 3
   {
-    .pinset = GPIO_PIN_PB3,
-    .init_pintype = GPIO_INTERRUPT_FALLING_PIN,
+    .pinset = BOARD_GPIO3_PIN,
+    .init_pintype = BOARD_GPIO3_TYPE,
   }
+#endif
+#if BOARD_NGPIO > 4
+  {
+    .pinset = BOARD_GPIO4_PIN,
+    .init_pintype = BOARD_GPIO4_TYPE,
+  }
+#endif
+#if BOARD_NGPIO > 5
+  {
+    .pinset = BOARD_GPIO5_PIN,
+    .init_pintype = BOARD_GPIO5_TYPE,
+  }
+#endif
+#if BOARD_NGPIO > 6
+  {
+    .pinset = BOARD_GPIO6_PIN,
+    .init_pintype = BOARD_GPIO6_TYPE,
+  }
+#endif
+#if BOARD_NGPIO > 7
+  {
+    .pinset = BOARD_GPIO7_PIN,
+    .init_pintype = BOARD_GPIO7_TYPE,
+  }
+#endif
 };
 
 /****************************************************************************
