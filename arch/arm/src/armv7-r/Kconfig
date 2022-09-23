@@ -54,7 +54,7 @@ if ARMV7R_HAVE_L2CC
 menu "L2 Cache Configuration"
 
 config ARMV7R_L2CC_PL310
-	bool "ARMv7-A L2CC P310 Support"
+	bool "ARMv7-R L2CC P310 Support"
 	default n
 	depends on ARMV7R_HAVE_L2CC_PL310
 	select ARCH_L2CACHE
