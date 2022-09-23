@@ -55,6 +55,12 @@ Development Environment
     $ openocd -f interface/stlink.cfg -f target/stm32g4x.cfg -c init \
       -c "reset halt" -c "flash write_image erase nuttx.bin 0x08000000"
 
+    NOTE: The above command might fail unless either: udev rules have been
+    configured on the development system (preferred) or the command is run as
+    root with 'sudo' (not encouraged). See:
+    - https://openocd.org/doc/html/Running.html
+    - https://forgge.github.io/theCore/guides/running-openocd-without-sudo.html
+
   * Start GDB with:
     $ arm-nuttx-eabi-gdb -tui nuttx
 
