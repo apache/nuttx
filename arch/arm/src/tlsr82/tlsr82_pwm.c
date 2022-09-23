@@ -166,7 +166,7 @@ static const struct pwm_ops_s g_pwmops =
 static struct tlsr82_pwmtimer_s g_pwm0dev =
 {
   .ops         = &g_pwmops,
-  .pincfg      = GPIO_PIN_PD5 | GPIO_AF_MUX0,
+  .pincfg      = BOARD_PWM0_PIN,
   .id          = 0,
   .invert      = false,
   .started     = false,
@@ -180,7 +180,7 @@ static struct tlsr82_pwmtimer_s g_pwm0dev =
 static struct tlsr82_pwmtimer_s g_pwm1dev =
 {
   .ops         = &g_pwmops,
-  .pincfg      = GPIO_PIN_PD3 | GPIO_AF_MUX0,
+  .pincfg      = BOARD_PWM1_PIN,
   .id          = 1,
   .invert      = true,
   .started     = false,
@@ -191,7 +191,7 @@ static struct tlsr82_pwmtimer_s g_pwm1dev =
 static struct tlsr82_pwmtimer_s g_pwm2dev =
 {
   .ops         = &g_pwmops,
-  .pincfg      = GPIO_PIN_PD4 | GPIO_AF_MUX2,
+  .pincfg      = BOARD_PWM2_PIN,
   .id          = 2,
   .invert      = true,
   .started     = false,
@@ -202,7 +202,7 @@ static struct tlsr82_pwmtimer_s g_pwm2dev =
 static struct tlsr82_pwmtimer_s g_pwm3dev =
 {
   .ops         = &g_pwmops,
-  .pincfg      = GPIO_PIN_PB4 | GPIO_AF_MUX1,
+  .pincfg      = BOARD_PWM3_PIN,
   .id          = 3,
   .invert      = false,
   .started     = false,
@@ -213,7 +213,7 @@ static struct tlsr82_pwmtimer_s g_pwm3dev =
 static struct tlsr82_pwmtimer_s g_pwm4dev =
 {
   .ops         = &g_pwmops,
-  .pincfg      = GPIO_INVLD_CFG,
+  .pincfg      = BOARD_PWM4_PIN,
   .id          = 4,
   .invert      = false,
   .started     = false,
@@ -224,7 +224,7 @@ static struct tlsr82_pwmtimer_s g_pwm4dev =
 static struct tlsr82_pwmtimer_s g_pwm5dev =
 {
   .ops         = &g_pwmops,
-  .pincfg      = GPIO_INVLD_CFG,
+  .pincfg      = BOARD_PWM5_PIN,
   .id          = 5,
   .invert      = false,
   .started     = false,

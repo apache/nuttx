@@ -28,16 +28,6 @@
 #include <nuttx/config.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define BOARD_NGPIO 4
-
-#define GPIO_IN_CFG          (GPIO_AF_INPUT | GPIO_PUPD_NONE)
-#define GPIO_OUT_CFG         (GPIO_AF_OUTPUT | GPIO_PUPD_NONE)
-#define GPIO_INT_CFG         (GPIO_AF_INPUT | GPIO_IRQ_NORMAL | GPIO_POL_RISE)
-
-/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
