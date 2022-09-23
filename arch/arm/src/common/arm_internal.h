@@ -301,7 +301,7 @@ uintptr_t arm_intstack_top(void);
 
 extern const void *__vector_table[];
 #else
-extern const void *_vectors[];
+extern const void * const _vectors[];
 #endif
 
 /* Interrupt acknowledge and dispatch */

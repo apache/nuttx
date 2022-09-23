@@ -76,7 +76,7 @@ extern void exception_common(void);
  * Note that the [ ... ] designated initializer is a GCC extension.
  */
 
-const void *_vectors[] locate_data(".vectors") =
+const void * const _vectors[] locate_data(".vectors") =
 {
   /* Initial stack */
 
