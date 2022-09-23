@@ -61,11 +61,11 @@
 #define CONSOLE_PRIV               g_uart0priv
 #define CONSOLE_DEV                g_uart0_dev
 
-#define UART0_PIN_TX_MUX           GPIO_AF_MUX1
-#define UART0_PIN_RX_MUX           GPIO_AF_MUX1
+#define UART0_PIN_TX_MUX           BOARD_UART0_TX_MUX
+#define UART0_PIN_RX_MUX           BOARD_UART0_RX_MUX
 
-#define UART0_PIN_TX               GPIO_PIN_PB1
-#define UART0_PIN_RX               GPIO_PIN_PB0
+#define UART0_PIN_TX               BOARD_UART0_TX_PIN
+#define UART0_PIN_RX               BOARD_UART0_RX_PIN
 
 #define UART0_TX_BUF_SIZE          CONFIG_TLSR82_UART0_TX_BUF_SIZE
 #define UART0_RX_BUF_SIZE          CONFIG_TLSR82_UART0_RX_BUF_SIZE

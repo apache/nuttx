@@ -45,6 +45,13 @@
 #define ADC_CHAN_VBAT            254
 #define ADC_CHAN_NONE            255
 
+/* ADC Channel type definition */
+
+#define ADC_CHAN_TYPE_NONE   0
+#define ADC_CHAN_TYPE_BASE   1
+#define ADC_CHAN_TYPE_VBAT   2
+#define ADC_CHAN_TYPE_TEMP   3
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
