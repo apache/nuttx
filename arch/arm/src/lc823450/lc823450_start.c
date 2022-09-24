@@ -170,10 +170,6 @@ void __start(void)
       *dest++ = *src++;
     }
 
-  /* run as interrupt context, before scheduler running */
-
-  CURRENT_REGS = (uint32_t *)1;
-
 #ifdef CONFIG_LASTKMSG_LOWOUTS
 
   if (g_lastksg_buf.sig == LASTKMSG_SIG_REBOOT)
