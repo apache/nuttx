@@ -31,7 +31,6 @@
 #include <time.h>
 #include <string.h>
 #include <debug.h>
-#include <queue.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>

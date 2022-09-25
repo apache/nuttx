@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/queue.h
+ * include/nuttx/queue.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_QUEUE_H
-#define __INCLUDE_QUEUE_H
+#ifndef __INCLUDE_NUTTX_QUEUE_H
+#define __INCLUDE_NUTTX_QUEUE_H
 
 /****************************************************************************
  * Included Files
@@ -329,4 +329,4 @@ size_t dq_count(FAR dq_queue_t *queue);
 }
 #endif
 
-#endif /* __INCLUDE_QUEUE_H_ */
+#endif /* __INCLUDE_NUTTX_QUEUE_H_ */

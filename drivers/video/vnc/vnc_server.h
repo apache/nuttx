@@ -29,8 +29,8 @@
 
 #include <stdint.h>
 #include <pthread.h>
-#include <queue.h>
 
+#include <nuttx/queue.h>
 #include <nuttx/video/fb.h>
 #include <nuttx/video/rfb.h>
 #include <nuttx/video/vnc.h>

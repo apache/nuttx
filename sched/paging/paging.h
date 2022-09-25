@@ -26,7 +26,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <queue.h>
 
 #ifdef CONFIG_PAGING
 

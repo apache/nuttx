@@ -27,11 +27,11 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <sched.h>
-#include <queue.h>
 #include <assert.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/queue.h>
 #include <nuttx/sched.h>
 
 #include "sched/sched.h"

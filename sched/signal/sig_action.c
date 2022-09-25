@@ -27,12 +27,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <signal.h>
-#include <queue.h>
 #include <sched.h>
 #include <assert.h>
 #include <errno.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/queue.h>
 #include <nuttx/spinlock.h>
 
 #include "sched/sched.h"

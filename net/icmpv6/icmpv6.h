@@ -29,7 +29,6 @@
 
 #include <sys/types.h>
 #include <stdint.h>
-#include <queue.h>
 #include <assert.h>
 
 #include <nuttx/mm/iob.h>

@@ -31,11 +31,11 @@
 #include <sys/un.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <queue.h>
 #include <stdint.h>
 #include <poll.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/queue.h>
 #include <nuttx/net/net.h>
 #include <nuttx/semaphore.h>
 

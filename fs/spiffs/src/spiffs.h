@@ -55,8 +55,8 @@ extern "C"
 
 #include <sys/types.h>
 #include <sys/mount.h>
-#include <queue.h>
 
+#include <nuttx/queue.h>
 #include <nuttx/mutex.h>
 #include <nuttx/mtd/mtd.h>
 

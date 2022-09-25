@@ -27,13 +27,13 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <math.h>
-#include <queue.h>
 #include <string.h>
 #include <inttypes.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
+#include <nuttx/queue.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mqueue.h>

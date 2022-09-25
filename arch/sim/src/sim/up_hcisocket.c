@@ -33,10 +33,10 @@
 #include <assert.h>
 #include <debug.h>
 #include <errno.h>
-#include <queue.h>
 
 #include <nuttx/nuttx.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/queue.h>
 #include <nuttx/net/bluetooth.h>
 #include <nuttx/wireless/bluetooth/bt_driver.h>
 #include <nuttx/wireless/bluetooth/bt_uart.h>

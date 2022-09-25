@@ -30,8 +30,8 @@
 #include <sys/types.h>
 #include <string.h>
 #include <aio.h>
-#include <queue.h>
 
+#include <nuttx/queue.h>
 #include <nuttx/wqueue.h>
 
 #ifdef CONFIG_FS_AIO

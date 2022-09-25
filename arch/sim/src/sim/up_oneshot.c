@@ -28,12 +28,12 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
-#include <queue.h>
 
 #include <nuttx/nuttx.h>
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/queue.h>
 #include <nuttx/timers/oneshot.h>
 #include <nuttx/timers/arch_alarm.h>
 

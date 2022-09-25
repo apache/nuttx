@@ -28,12 +28,12 @@
 #include <stdint.h>
 #include <assert.h>
 #include <debug.h>
-#include <queue.h>
 
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/queue.h>
 
 #include "riscv_internal.h"
 #include "chip.h"

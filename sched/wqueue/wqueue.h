@@ -28,9 +28,9 @@
 
 #include <sys/types.h>
 #include <stdbool.h>
-#include <queue.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/queue.h>
 
 #ifdef CONFIG_SCHED_WORKQUEUE
 

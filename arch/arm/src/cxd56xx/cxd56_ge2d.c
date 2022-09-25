@@ -29,7 +29,6 @@
 #include <nuttx/irq.h>
 #include <nuttx/semaphore.h>
 
-#include <queue.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>

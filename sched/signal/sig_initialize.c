@@ -25,10 +25,10 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <queue.h>
 #include <assert.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/queue.h>
 
 #include "signal/signal.h"
 

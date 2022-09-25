@@ -36,7 +36,6 @@
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
-#include <queue.h>
 
 #include <arpa/inet.h>
 

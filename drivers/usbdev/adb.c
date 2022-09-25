@@ -23,22 +23,21 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/nuttx.h>
-#include <queue.h>
+
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <fcntl.h>
+#include <poll.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/kmalloc.h>
-
+#include <nuttx/queue.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
 #include <nuttx/usb/adb.h>
-
 #include <nuttx/fs/fs.h>
-#include <fcntl.h>
-#include <poll.h>
 
 #ifdef CONFIG_USBADB_BOARD_SERIALSTR
 #include <nuttx/board.h>

@@ -28,13 +28,13 @@
 #include <nuttx/config.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mqueue.h>
+#include <nuttx/queue.h>
 
 #include <assert.h>
 #include <debug.h>
 #include <errno.h>
 #include <sched.h>
 #include <fcntl.h>
-#include <queue.h>
 
 #include <arch/chip/pm.h>
 
