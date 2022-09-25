@@ -33,8 +33,8 @@
 #include <debug.h>
 #include <assert.h>
 #include <errno.h>
-#include <queue.h>
 
+#include <nuttx/queue.h>
 #include <nuttx/sched.h>
 #include <nuttx/arch.h>
 #include <nuttx/semaphore.h>

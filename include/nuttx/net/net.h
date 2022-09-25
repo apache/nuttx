@@ -33,8 +33,8 @@
 #include <stdbool.h>
 #include <stdarg.h>
 #include <semaphore.h>
-#include <queue.h>
 
+#include <nuttx/queue.h>
 #ifdef CONFIG_MM_IOB
 #  include <nuttx/mm/iob.h>
 #endif

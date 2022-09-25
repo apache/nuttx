@@ -27,10 +27,10 @@
 
 #include <sys/types.h>
 #include <time.h>
-#include <queue.h>
 #include <errno.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/queue.h>
 
 #include "timer/timer.h"
 

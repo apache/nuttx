@@ -25,7 +25,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/net/dns.h>
-#include <queue.h>
+#include <nuttx/queue.h>
 
 #include "libc.h"
 #include "netdb/lib_dns.h"

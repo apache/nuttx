@@ -31,9 +31,9 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <assert.h>
-#include <queue.h>
 #include <debug.h>
 
+#include <nuttx/queue.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/kthread.h>
 #include <nuttx/semaphore.h>

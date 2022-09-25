@@ -29,8 +29,8 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <queue.h>
 
+#include <nuttx/queue.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/net.h>

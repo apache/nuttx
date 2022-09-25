@@ -28,8 +28,8 @@
 
 #include <nuttx/config.h>
 #include <stdint.h>
-#include <queue.h>
 
+#include <nuttx/queue.h>
 #include <nuttx/wdog.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/icmpv6.h>

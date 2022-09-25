@@ -26,8 +26,9 @@
 
 #include <stdbool.h>
 #include <sched.h>
-#include <queue.h>
 #include <assert.h>
+
+#include <nuttx/queue.h>
 
 #ifdef CONFIG_SMP
 #  include <nuttx/spinlock.h>

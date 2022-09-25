@@ -26,10 +26,10 @@
 
 #include <assert.h>
 #include <errno.h>
-#include <queue.h>
 
 #include <nuttx/sched.h>
 #include <nuttx/mutex.h>
+#include <nuttx/queue.h>
 
 #include "aio/aio.h"
 

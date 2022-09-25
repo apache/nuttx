@@ -33,11 +33,11 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
-#include <queue.h>
 #include <debug.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/queue.h>
 #include <nuttx/wdog.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial/serial.h>

@@ -35,7 +35,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <mqueue.h>
-#include <queue.h>
 #include <poll.h>
 
 #if CONFIG_MQ_MAXMSGSIZE > 0

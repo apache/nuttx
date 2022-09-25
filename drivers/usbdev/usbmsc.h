@@ -32,9 +32,9 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <queue.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/queue.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/usb/storage.h>
 #include <nuttx/usb/usbdev.h>

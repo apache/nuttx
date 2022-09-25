@@ -27,10 +27,10 @@
 #include <stdint.h>
 #include <signal.h>
 #include <assert.h>
-#include <queue.h>
 #include <errno.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/queue.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/semaphore.h>
 

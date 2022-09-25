@@ -29,7 +29,6 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <queue.h>
 
 #include <nuttx/net/net.h>
 

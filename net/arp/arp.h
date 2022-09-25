@@ -38,7 +38,6 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <queue.h>
 #include <errno.h>
 
 #include <netinet/in.h>

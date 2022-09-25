@@ -24,11 +24,11 @@
 
 #include <nuttx/config.h>
 
-#include <queue.h>
 #include <assert.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/queue.h>
 #include <nuttx/wqueue.h>
 
 #include "wqueue/wqueue.h"

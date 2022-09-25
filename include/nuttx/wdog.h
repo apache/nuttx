@@ -29,7 +29,6 @@
 
 #include <nuttx/clock.h>
 #include <stdint.h>
-#include <queue.h>
 
 /****************************************************************************
  * Pre-processor Definitions

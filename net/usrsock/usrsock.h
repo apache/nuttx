@@ -31,7 +31,6 @@
 
 #include <sys/types.h>
 #include <sys/uio.h>
-#include <queue.h>
 
 #include <nuttx/semaphore.h>
 

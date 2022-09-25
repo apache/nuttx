@@ -29,10 +29,10 @@
 
 #include <sys/types.h>
 #include <stdbool.h>
-#include <queue.h>
 #include <sched.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/queue.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/spinlock.h>
 

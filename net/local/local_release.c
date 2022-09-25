@@ -26,10 +26,10 @@
 #if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL)
 
 #include <errno.h>
-#include <queue.h>
 #include <assert.h>
 
 #include <nuttx/nuttx.h>
+#include <nuttx/queue.h>
 #include <nuttx/net/net.h>
 
 #include <arch/irq.h>

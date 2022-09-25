@@ -28,7 +28,6 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <queue.h>
 #include <netpacket/ieee802154.h>
 
 #include <nuttx/net/net.h>

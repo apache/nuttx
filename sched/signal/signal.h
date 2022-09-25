@@ -29,10 +29,10 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <queue.h>
 #include <sched.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/queue.h>
 
 /****************************************************************************
  * Pre-processor Definitions

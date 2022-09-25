@@ -55,13 +55,13 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
-#include <queue.h>
 #include <debug.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/arch.h>
+#include <nuttx/queue.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/storage.h>

@@ -28,9 +28,9 @@
 #include <unistd.h>
 #include <assert.h>
 #include <errno.h>
-#include <queue.h>
 #include <debug.h>
 
+#include <nuttx/queue.h>
 #include <nuttx/net/net.h>
 
 #include <arch/irq.h>

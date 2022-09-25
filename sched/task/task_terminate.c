@@ -26,9 +26,9 @@
 
 #include <sys/types.h>
 #include <assert.h>
-#include <queue.h>
 #include <errno.h>
 
+#include <nuttx/queue.h>
 #include <nuttx/sched.h>
 #include <nuttx/irq.h>
 #include <nuttx/sched_note.h>

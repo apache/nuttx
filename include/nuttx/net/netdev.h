@@ -52,7 +52,8 @@
 
 #include <sys/ioctl.h>
 #include <stdint.h>
-#include <queue.h>
+
+#include <nuttx/queue.h>
 
 #include <net/if.h>
 #include <net/ethernet.h>

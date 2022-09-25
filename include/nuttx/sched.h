@@ -29,7 +29,6 @@
 
 #include <sys/types.h>
 #include <stdint.h>
-#include <queue.h>
 #include <sched.h>
 #include <signal.h>
 #include <semaphore.h>
@@ -38,6 +37,7 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/irq.h>
+#include <nuttx/queue.h>
 #include <nuttx/wdog.h>
 #include <nuttx/mm/shm.h>
 #include <nuttx/fs/fs.h>

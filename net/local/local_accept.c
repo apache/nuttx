@@ -28,10 +28,10 @@
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
-#include <queue.h>
 #include <debug.h>
 
 #include <nuttx/nuttx.h>
+#include <nuttx/queue.h>
 #include <nuttx/net/net.h>
 
 #include "socket/socket.h"
