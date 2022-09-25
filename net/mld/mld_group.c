@@ -27,7 +27,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <queue.h>
 #include <assert.h>
 #include <debug.h>
 
@@ -36,6 +35,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/queue.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>

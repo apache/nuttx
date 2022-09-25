@@ -32,7 +32,6 @@
 #include <errno.h>
 #include <debug.h>
 #include <stdio.h>
-#include <queue.h>
 #include <stddef.h>
 #ifdef CONFIG_SYSTEM_PROPERTY
 #  include <system_property.h>
@@ -41,6 +40,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/queue.h>
 #include <nuttx/signal.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbdev.h>

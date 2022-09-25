@@ -31,12 +31,12 @@
 #  define CONFIG_DEBUG_NET 1
 #endif
 
-#include <queue.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/queue.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/mm/iob.h>

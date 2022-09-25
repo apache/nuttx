@@ -24,10 +24,10 @@
 
 #include <nuttx/config.h>
 
-#include <queue.h>
 #include <assert.h>
 
 #include <nuttx/init.h>
+#include <nuttx/queue.h>
 #include <nuttx/power/pm.h>
 
 #include "pm.h"

@@ -54,11 +54,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <nuttx/queue.h>
 #include <nuttx/wdog.h>
 
 #include <stdbool.h>
 #include <time.h>
-#include <queue.h>
 
 #ifdef CONFIG_PM
 

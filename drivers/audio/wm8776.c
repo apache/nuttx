@@ -35,11 +35,11 @@
 #include <assert.h>
 #include <errno.h>
 #include <fixedmath.h>
-#include <queue.h>
 #include <debug.h>
 
 #include <nuttx/spinlock.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/queue.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/clock.h>
 #include <nuttx/wqueue.h>

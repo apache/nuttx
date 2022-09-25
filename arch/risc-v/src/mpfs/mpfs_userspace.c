@@ -27,6 +27,7 @@
 #include <stdint.h>
 #include <assert.h>
 
+#include <nuttx/queue.h>
 #include <nuttx/userspace.h>
 
 #include <arch/board/board_memorymap.h>

@@ -30,10 +30,10 @@
 #include <sched.h>
 #include <errno.h>
 #include <assert.h>
-#include <queue.h>
 
 #include <nuttx/semaphore.h>
 #include <nuttx/clock.h>
+#include <nuttx/queue.h>
 #include <nuttx/wqueue.h>
 
 #include "wqueue/wqueue.h"

@@ -27,11 +27,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include <queue.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/queue.h>
 #include <nuttx/sched.h>
 #include <nuttx/arch.h>
 #include <nuttx/signal.h>

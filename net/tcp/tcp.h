@@ -28,9 +28,9 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <queue.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/queue.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/ip.h>

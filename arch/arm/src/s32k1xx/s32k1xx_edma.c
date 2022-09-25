@@ -50,13 +50,13 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <queue.h>
 #include <assert.h>
 #include <debug.h>
 #include <errno.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/queue.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/semaphore.h>
 

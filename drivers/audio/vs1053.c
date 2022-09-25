@@ -36,11 +36,11 @@
 #include <assert.h>
 #include <debug.h>
 #include <errno.h>
-#include <queue.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
 #include <nuttx/mqueue.h>
+#include <nuttx/queue.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/audio/audio.h>

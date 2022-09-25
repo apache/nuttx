@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
+#include <nuttx/queue.h>
 #include <nuttx/spinlock.h>
 
 #include <arch/barriers.h>
@@ -31,8 +32,6 @@
 
 #include <assert.h>
 #include <stdint.h>
-
-#include <queue.h>
 
 #include "riscv_internal.h"
 #include "riscv_percpu.h"

@@ -28,8 +28,7 @@
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/spi/spi.h>
-#include <queue.h>
-#include <debug.h>
+#include <nuttx/queue.h>
 #include <nuttx/irq.h>
 
 /****************************************************************************

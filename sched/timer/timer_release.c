@@ -24,10 +24,10 @@
 
 #include <nuttx/config.h>
 
-#include <queue.h>
 #include <errno.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/queue.h>
 #include <nuttx/kmalloc.h>
 
 #include "timer/timer.h"

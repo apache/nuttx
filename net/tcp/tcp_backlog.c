@@ -28,10 +28,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <queue.h>
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/queue.h>
 #include <nuttx/net/net.h>
 
 #include "devif/devif.h"

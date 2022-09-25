@@ -67,7 +67,6 @@
 #include <stdbool.h>
 #include <time.h>
 #include <string.h>
-#include <queue.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
@@ -76,6 +75,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/queue.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/clock.h>

@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 
-#include <queue.h>
+#include <nuttx/queue.h>
 #include <assert.h>
 
 /****************************************************************************
