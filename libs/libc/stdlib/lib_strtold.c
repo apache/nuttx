@@ -71,7 +71,12 @@
 
 static inline int is_real(long double x)
 {
-  const long double infinite = 1.0L / 0.0L;
+  /* NOTE: Windows MSVC restrictions, MSVC doesn't allow division through a
+   * zero literal, but allows it through non-const variable set to zero
+   */
+
+  const long double divzero = 0.0L;
+  const long double infinite = 1.0L / divzero;
   return (x < infinite) && (x >= -infinite);
 }
 
@@ -101,7 +106,13 @@ long double strtold(FAR const char *str, FAR char **endptr)
   int n;
   int num_digits;
   int num_decimals;
-  const long double infinite = 1.0L / 0.0L;
+
+  /* NOTE: Windows MSVC restrictions, MSVC doesn't allow division through a
+   * zero literal, but allows it through non-const variable set to zero
+   */
+
+  const long double divzero = 0.0L;
+  const long double infinite = 1.0L / divzero;
 
   /* Skip leading whitespace */
 
