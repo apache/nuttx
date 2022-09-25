@@ -76,7 +76,6 @@ struct accept_s
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP
 static inline void accept_tcpsender(FAR struct socket *psock,
                                     FAR struct tcp_conn_s *conn,
                                     FAR struct sockaddr *addr,
@@ -127,7 +126,6 @@ static inline void accept_tcpsender(FAR struct socket *psock,
 #endif /* CONFIG_NET_IPv6 */
     }
 }
-#endif /* CONFIG_NET_TCP */
 
 /****************************************************************************
  * Name: accept_eventhandler
