@@ -519,7 +519,7 @@ struct phyplus_tim_dev_s *phyplus_tim_init(int timer)
       default:
         {
           tmrerr("ERROR: unsupported TIMER %d\n", timer);
-          goto errout;
+          return NULL;
         }
     }
 
@@ -532,11 +532,10 @@ struct phyplus_tim_dev_s *phyplus_tim_init(int timer)
   else
     {
       tmrerr("ERROR: TIMER %d is already in use\n", timer);
-      tim = NULL;
+      return NULL;
     }
 
   syslog(LOG_ERR, "phyplus_tim_init 2\n");
-  errout:
   return (struct phyplus_tim_dev_s *)tim;
 }
 

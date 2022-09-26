@@ -773,7 +773,6 @@ static int sx127x_open(FAR struct file *filep)
 
 errout:
   nxsem_post(&dev->dev_sem);
-
   return ret;
 }
 
@@ -816,7 +815,6 @@ static int sx127x_close(FAR struct file *filep)
   dev->nopens--;
 
   nxsem_post(&dev->dev_sem);
-
   return OK;
 }
 
@@ -944,7 +942,6 @@ errout:
    */
 
   sx127x_opmode_set(dev, dev->idle);
-
   nxsem_post(&dev->dev_sem);
 
   return ret;
@@ -1185,7 +1182,7 @@ static int sx127x_poll(FAR struct file *filep, FAR struct pollfd *fds,
   inode = filep->f_inode;
 
   DEBUGASSERT(inode && inode->i_private);
-  dev  = (FAR struct sx127x_dev_s *)inode->i_private;
+  dev = (FAR struct sx127x_dev_s *)inode->i_private;
 
   /* Exclusive access */
 
@@ -1587,7 +1584,7 @@ static size_t sx127x_fskook_rxhandle(FAR struct sx127x_dev_s *dev)
       wlerr("Unsupported data length! %d > %d\n",
             datalen, SX127X_READ_DATA_MAX);
       sx127x_unlock(dev->spi);
-      goto errout;
+      return 0;
     }
 
   /* Read payload and store */
@@ -1617,8 +1614,6 @@ static size_t sx127x_fskook_rxhandle(FAR struct sx127x_dev_s *dev)
   /* Put data on local fifo */
 
   sx127x_rxfifo_put(dev, (uint8_t *)&rxdata, len);
-
-errout:
 
   /* Return total length */
 
@@ -1659,7 +1654,7 @@ static size_t sx127x_lora_rxhandle(FAR struct sx127x_dev_s *dev)
       wlerr("Unsupported data length! %d > %d\n",
             datalen, SX127X_READ_DATA_MAX);
       sx127x_unlock(dev->spi);
-      goto errout;
+      return 0;
     }
 
   /* Get start address of last packet received */
@@ -1697,8 +1692,6 @@ static size_t sx127x_lora_rxhandle(FAR struct sx127x_dev_s *dev)
   /* Put data on local fifo */
 
   sx127x_rxfifo_put(dev, (uint8_t *)&rxdata, len);
-
-errout:
 
   /* Return total length */
 
@@ -1822,7 +1815,6 @@ static int sx127x_txfifo_write(FAR struct sx127x_dev_s *dev,
   /* Write buffer to FIFO */
 
   sx127x_writereg(dev, SX127X_CMN_FIFO, data, datalen);
-
   return OK;
 }
 
@@ -1848,8 +1840,7 @@ static int sx127x_fskook_send(FAR struct sx127x_dev_s *dev,
   if (datalen > SX127X_FOM_PAYLOADLEN_MAX)
     {
       wlerr("Not supported data len!\n");
-      ret = -EINVAL;
-      goto errout;
+      return -EINVAL;
     }
 
 #if 1
@@ -1861,8 +1852,7 @@ static int sx127x_fskook_send(FAR struct sx127x_dev_s *dev,
   if (datalen > 63)
     {
       wlerr("Not supported data len!\n");
-      ret = -EINVAL;
-      goto errout;
+      return -EINVAL;
     }
 #endif
 
@@ -1890,8 +1880,6 @@ static int sx127x_fskook_send(FAR struct sx127x_dev_s *dev,
   /* Unlock SPI */
 
   sx127x_unlock(dev->spi);
-
-errout:
   return ret;
 }
 #endif /* CONFIG_LPWAN_SX127X_FSKOOK */
@@ -1917,8 +1905,7 @@ static int sx127x_lora_send(FAR struct sx127x_dev_s *dev,
   if (datalen > SX127X_LRM_PAYLOADLEN_MAX)
     {
       wlerr("Not supported data len!\n");
-      ret = -EINVAL;
-      goto errout;
+      return -EINVAL;
     }
 
   /* Lock SPI */
@@ -1936,8 +1923,6 @@ static int sx127x_lora_send(FAR struct sx127x_dev_s *dev,
   /* Unlock SPI */
 
   sx127x_unlock(dev->spi);
-
-errout:
   return ret;
 }
 #endif /* CONFIG_LPWAN_SX127X_LORA */
@@ -1957,7 +1942,7 @@ static int sx127x_opmode_init(FAR struct sx127x_dev_s *dev, uint8_t opmode)
 
   if (opmode == dev->opmode)
     {
-      goto errout;
+      return OK;
     }
 
   /* Board-specific opmode configuration */
@@ -1966,7 +1951,7 @@ static int sx127x_opmode_init(FAR struct sx127x_dev_s *dev, uint8_t opmode)
   if (ret < 0)
     {
       wlerr("Board-specific opmode_change failed %d!\n", ret);
-      goto errout;
+      return ret;
     }
 
   /* Initialize opmode */
@@ -1975,10 +1960,9 @@ static int sx127x_opmode_init(FAR struct sx127x_dev_s *dev, uint8_t opmode)
   if (ret < 0)
     {
       wlerr("opmode_init failed %d!\n", ret);
-      goto errout;
+      return ret;
     }
 
-errout:
   return ret;
 }
 
@@ -1998,7 +1982,7 @@ static int sx127x_opmode_set(FAR struct sx127x_dev_s *dev, uint8_t opmode)
 
   if (opmode == dev->opmode)
     {
-      goto errout;
+      return ret;
     }
 
 #ifdef CONFIG_LPWAN_SX127X_RXSUPPORT
@@ -2019,8 +2003,6 @@ static int sx127x_opmode_set(FAR struct sx127x_dev_s *dev, uint8_t opmode)
   /* Update local variable */
 
   dev->opmode = opmode;
-
-errout:
   return ret;
 }
 
@@ -2120,9 +2102,8 @@ static int sx127x_fskook_opmode_init(FAR struct sx127x_dev_s *dev,
   clrbits = SX127X_CMN_DIOMAP1_DIO0_MASK;
   sx127x_modregbyte(dev, SX127X_CMN_DIOMAP1, setbits, clrbits);
 
-  sx127x_unlock(dev->spi);
-
 errout:
+  sx127x_unlock(dev->spi);
   return ret;
 }
 
@@ -2143,7 +2124,6 @@ static int sx127x_fskook_opmode_set(FAR struct sx127x_dev_s *dev,
 
   uint8_t setbits = 0;
   uint8_t clrbits = 0;
-  int     ret     = OK;
 
   switch (opmode)
     {
@@ -2162,8 +2142,7 @@ static int sx127x_fskook_opmode_set(FAR struct sx127x_dev_s *dev,
       default:
         {
           wlerr("ERROR: invalid FSK/OOK mode %d\n", opmode);
-          ret = -EINVAL;
-          goto errout;
+          return -EINVAL;
         }
     }
 
@@ -2176,9 +2155,7 @@ static int sx127x_fskook_opmode_set(FAR struct sx127x_dev_s *dev,
   sx127x_modregbyte(dev, SX127X_CMN_OPMODE, setbits, clrbits);
 
   sx127x_unlock(dev->spi);
-
-errout:
-  return ret;
+  return OK;
 }
 
 #ifdef CONFIG_LPWAN_SX127X_FSKOOK
@@ -2197,11 +2174,9 @@ static int sx127x_fskook_rxbw_set(FAR struct sx127x_dev_s *dev,
   DEBUGASSERT(dev->modulation == SX127X_MODULATION_FSK ||
               dev->modulation == SX127X_MODULATION_OOK);
 
-  int ret = OK;
-
   if (rx_bw == dev->fskook.rx_bw)
     {
-      goto errout;
+      return OK;
     }
 
   switch (rx_bw)
@@ -2246,17 +2221,14 @@ static int sx127x_fskook_rxbw_set(FAR struct sx127x_dev_s *dev,
       default:
         {
           wlerr("Unsupported bandwidth %d\n", rx_bw);
-          ret = -EINVAL;
-          goto errout;
+          return -EINVAL;
         }
     }
 
   /* Update local */
 
   dev->fskook.rx_bw = rx_bw;
-
-errout:
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -2273,11 +2245,9 @@ static int sx127x_fskook_afcbw_set(FAR struct sx127x_dev_s *dev,
   DEBUGASSERT(dev->modulation == SX127X_MODULATION_FSK ||
               dev->modulation == SX127X_MODULATION_OOK);
 
-  int ret = OK;
-
   if (afc_bw == dev->fskook.afc_bw)
     {
-      goto errout;
+      return OK;
     }
 
   switch (afc_bw)
@@ -2322,17 +2292,14 @@ static int sx127x_fskook_afcbw_set(FAR struct sx127x_dev_s *dev,
       default:
         {
           wlerr("Unsupported bandwidth %d\n", afc_bw);
-          ret = -EINVAL;
-          goto errout;
+          return -EINVAL;
         }
     }
 
   /* Update local */
 
   dev->fskook.afc_bw = afc_bw;
-
-errout:
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -2389,7 +2356,6 @@ static int sx127x_fskook_seq_init(FAR struct sx127x_dev_s *dev)
 
   uint8_t seq1 = 0;
   uint8_t seq2 = 0;
-  int     ret  = OK;
 
   /* Need sleep mode or standby mode */
 
@@ -2415,8 +2381,7 @@ static int sx127x_fskook_seq_init(FAR struct sx127x_dev_s *dev)
   /* Unlock SPI */
 
   sx127x_unlock(dev->spi);
-
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -2449,14 +2414,12 @@ static int sx127x_fskook_syncword_set(FAR struct sx127x_dev_s *dev,
   uint8_t setbits = 0;
   uint8_t clrbits = 0;
   uint8_t offset  = 0;
-  int     ret     = OK;
   int     i       = 0;
 
   if (len > SX127X_FOM_SYNCSIZE_MAX)
     {
       wlerr("Unsupported sync word length %d!", len);
-      ret = -EINVAL;
-      goto errout;
+      return -EINVAL;
     }
 
   /* Lock SPI */
@@ -2495,9 +2458,7 @@ static int sx127x_fskook_syncword_set(FAR struct sx127x_dev_s *dev,
   /* Unlock SPI */
 
   sx127x_unlock(dev->spi);
-
-errout:
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -2631,19 +2592,17 @@ static int sx127x_fskook_fdev_set(FAR struct sx127x_dev_s *dev,
                                   uint32_t freq)
 {
   uint32_t fdev = 0;
-  int      ret  = OK;
 
   /* Only for FSK modulation */
 
   if (dev->modulation != SX127X_MODULATION_FSK)
     {
-      ret = -EINVAL;
-      goto errout;
+      return -EINVAL;
     }
 
   if (freq == dev->fskook.fdev)
     {
-      goto errout;
+      return OK;
     }
 
   /* Lock SPI */
@@ -2669,9 +2628,7 @@ static int sx127x_fskook_fdev_set(FAR struct sx127x_dev_s *dev,
   /* Update local variable */
 
   dev->fskook.fdev = freq;
-
-errout:
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -2685,12 +2642,11 @@ errout:
 static int sx127x_fskook_bitrate_set(FAR struct sx127x_dev_s *dev,
                                      uint32_t bitrate)
 {
-  uint32_t br  = 0;
-  int      ret = OK;
+  uint32_t br = 0;
 
   if (bitrate == dev->fskook.bitrate)
     {
-      goto errout;
+      return OK;
     }
 
   /* Get bitrate register value */
@@ -2722,9 +2678,7 @@ static int sx127x_fskook_bitrate_set(FAR struct sx127x_dev_s *dev,
   /* Update local variable */
 
   dev->fskook.bitrate = bitrate;
-
-errout:
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -2843,7 +2797,6 @@ static int sx127x_lora_opmode_init(FAR struct sx127x_dev_s *dev,
           /* Reset FIFO pointer */
 
           sx127x_writeregbyte(dev, SX127X_LRM_ADDRPTR, 0);
-
           break;
         }
 
@@ -2861,7 +2814,6 @@ static int sx127x_lora_opmode_init(FAR struct sx127x_dev_s *dev,
           /* Reset FIFO pointer */
 
           sx127x_writeregbyte(dev, SX127X_LRM_ADDRPTR, 0);
-
           break;
         }
 
@@ -2870,7 +2822,6 @@ static int sx127x_lora_opmode_init(FAR struct sx127x_dev_s *dev,
           /* DIO0 is CAD DONE */
 
           dio0map = SX127X_LRM_DIOMAP1_DIO0_CADDONE;
-
           break;
         }
 
@@ -2888,9 +2839,8 @@ static int sx127x_lora_opmode_init(FAR struct sx127x_dev_s *dev,
   clrbits = SX127X_CMN_DIOMAP1_DIO0_MASK;
   sx127x_modregbyte(dev, SX127X_CMN_DIOMAP1, setbits, clrbits);
 
-  sx127x_unlock(dev->spi);
-
 errout:
+  sx127x_unlock(dev->spi);
   return ret;
 }
 
@@ -2941,13 +2891,12 @@ static int sx127x_lora_opmode_set(FAR struct sx127x_dev_s *dev,
                     ((opmode - 1) << SX127X_CMN_OPMODE_MODE_SHIFT),
                     SX127X_CMN_OPMODE_MODE_MASK);
 
-  sx127x_unlock(dev->spi);
-
   /* Wait for mode ready. REVISIT: do we need this ? */
 
   nxsig_usleep(250);
 
 errout:
+  sx127x_unlock(dev->spi);
   return ret;
 }
 
@@ -2977,13 +2926,10 @@ static int sx127x_lora_syncword_set(FAR struct sx127x_dev_s *dev,
 {
   DEBUGASSERT(dev->modulation == SX127X_MODULATION_LORA);
 
-  int ret = OK;
-
   if (len != 1)
     {
       wlerr("LORA support sync word with len = 1 but len = %d\n", len);
-      ret = -EINVAL;
-      goto errout;
+      return -EINVAL;
     }
 
   /* Lock SPI */
@@ -2997,9 +2943,7 @@ static int sx127x_lora_syncword_set(FAR struct sx127x_dev_s *dev,
   /* Unlock SPI */
 
   sx127x_unlock(dev->spi);
-
-  errout:
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -3016,11 +2960,10 @@ static int sx127x_lora_bw_set(FAR struct sx127x_dev_s *dev, uint8_t bw)
 
   uint8_t clrbits = 0;
   uint8_t setbits = 0;
-  int     ret     = OK;
 
   if (bw == dev->lora.bw)
     {
-      goto errout;
+      return OK;
     }
 
   switch (bw)
@@ -3046,22 +2989,18 @@ static int sx127x_lora_bw_set(FAR struct sx127x_dev_s *dev, uint8_t bw)
           /* Unlock SPI */
 
           sx127x_unlock(dev->spi);
-
           break;
         }
 
       default:
         {
-          ret = -EINVAL;
           wlerr("Unsupported bandwidth %d\n", bw);
-          goto errout;
+          return -EINVAL;
         }
     }
 
   dev->lora.bw = bw;
-
-errout:
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -3078,11 +3017,10 @@ static int sx127x_lora_cr_set(FAR struct sx127x_dev_s *dev, uint8_t cr)
 
   uint8_t clrbits = 0;
   uint8_t setbits = 0;
-  int     ret     = OK;
 
   if (cr == dev->lora.cr)
     {
-      goto errout;
+      return OK;
     }
 
   switch (cr)
@@ -3103,22 +3041,18 @@ static int sx127x_lora_cr_set(FAR struct sx127x_dev_s *dev, uint8_t cr)
           /* Unlock SPI */
 
           sx127x_unlock(dev->spi);
-
           break;
         }
 
       default:
         {
-          ret = -EINVAL;
           wlerr("Unsupported code rate %d\n", cr);
-          goto errout;
+          return -EINVAL;
         }
     }
 
   dev->lora.cr = cr;
-
-errout:
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -3137,11 +3071,10 @@ static int sx127x_lora_sf_set(FAR struct sx127x_dev_s *dev, uint8_t sf)
   uint8_t dthr    = SX127X_LRM_DETECTTHR_SF7SF12;
   uint8_t setbits = 0;
   uint8_t clrbits = 0;
-  int     ret     = OK;
 
   if (dev->lora.sf == sf)
     {
-      goto errout;
+      return OK;
     }
 
   /* Special configuration required by SF6 (highest data rate transmission):
@@ -3155,8 +3088,7 @@ static int sx127x_lora_sf_set(FAR struct sx127x_dev_s *dev, uint8_t sf)
       if (dev->lora.implicthdr == true)
         {
           wlerr("SF6 needs implicit header ON!\n");
-          ret = -EINVAL;
-          goto errout;
+          return -EINVAL;
         }
 
       dopt = SX127X_LRM_DETECTOPT_DO_SF6;
@@ -3183,9 +3115,7 @@ static int sx127x_lora_sf_set(FAR struct sx127x_dev_s *dev, uint8_t sf)
   /* Update local variable */
 
   dev->lora.sf = sf;
-
-errout:
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -3203,18 +3133,16 @@ static int sx127x_lora_implicthdr_set(FAR struct sx127x_dev_s *dev,
 
   uint8_t setbits = 0;
   uint8_t clrbits = 0;
-  int     ret     = OK;
 
   if (dev->lora.sf == 6 && enable == false)
     {
       wlerr("SF=6 requires implicit header ON\n");
-      ret = -EINVAL;
-      goto errout;
+      return -EINVAL;
     }
 
   if (enable == dev->lora.implicthdr)
     {
-      goto errout;
+      return OK;
     }
 
   /* Lock SPI */
@@ -3235,9 +3163,7 @@ static int sx127x_lora_implicthdr_set(FAR struct sx127x_dev_s *dev,
   /* Update local variable */
 
   dev->lora.implicthdr = enable;
-
-errout:
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -3619,13 +3545,12 @@ static int sx127x_modulation_set(FAR struct sx127x_dev_s *dev,
 {
   uint8_t setbits = 0;
   uint8_t clrbits = 0;
-  int     ret     = OK;
 
   wlinfo("modulation_set %d->%d\n", dev->modulation, modulation);
 
   if (modulation == dev->modulation)
     {
-      goto errout;
+      return OK;
     }
 
   /* Modulation can be only changed in SLEEP mode */
@@ -3669,8 +3594,7 @@ static int sx127x_modulation_set(FAR struct sx127x_dev_s *dev,
       default:
         {
           wlerr("ERROR: Unsupported modulation type %d\n", modulation);
-          ret = -EINVAL;
-          goto errout;
+          return -EINVAL;
         }
     }
 
@@ -3697,9 +3621,7 @@ static int sx127x_modulation_set(FAR struct sx127x_dev_s *dev,
   /* Initial configuration */
 
   sx127x_modulation_init(dev);
-
-errout:
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -3790,7 +3712,6 @@ static bool sx127x_channel_scan(FAR struct sx127x_dev_s *dev,
   /* Store return value in struct */
 
   chanscan->free = ret;
-
   return ret;
 }
 
@@ -3838,7 +3759,7 @@ static int sx127x_frequency_set(FAR struct sx127x_dev_s *dev, uint32_t freq)
 
   if (freq == dev->freq)
     {
-      goto errout;
+      return OK;
     }
 
   /* REVISIT: needs sleep/standby mode ? */
@@ -3877,10 +3798,8 @@ static int sx127x_frequency_set(FAR struct sx127x_dev_s *dev, uint32_t freq)
   if (ret < 0)
     {
       wlerr("Board-specific freq_select failed %d!\n", ret);
-      goto errout;
     }
 
-errout:
   return ret;
 }
 
@@ -3901,7 +3820,7 @@ static int sx127x_power_set(FAR struct sx127x_dev_s *dev, int8_t power)
 
   if (dev->power == power)
     {
-      goto errout;
+      return OK;
     }
 
   /* PA BOOST configuration */
@@ -4025,8 +3944,6 @@ static int sx127x_power_set(FAR struct sx127x_dev_s *dev, int8_t power)
   /* Update local variable */
 
   dev->power = power;
-
-errout:
   return ret;
 #endif
 }
@@ -4114,7 +4031,7 @@ static int sx127x_calibration(FAR struct sx127x_dev_s *dev, uint32_t freq)
   if (ret < 0)
     {
       wlerr("ERROR: can't change modulation to FSK\n");
-      goto errout;
+      return ret;
     }
 
   /* We need standby mode ? */
@@ -4153,8 +4070,6 @@ static int sx127x_calibration(FAR struct sx127x_dev_s *dev, uint32_t freq)
   sx127x_unlock(dev->spi);
 
   wlinfo("Calibration done\n");
-
-errout:
   return ret;
 }
 
@@ -4168,8 +4083,8 @@ errout:
 
 static int sx127x_init(FAR struct sx127x_dev_s *dev)
 {
-  int     ret     = OK;
-  uint8_t regval  = 0;
+  int     ret    = OK;
+  uint8_t regval = 0;
 
   wlinfo("Init sx127x dev\n");
 
@@ -4209,8 +4124,7 @@ static int sx127x_init(FAR struct sx127x_dev_s *dev)
       /* Probably sth wrong with communication */
 
       wlerr("ERROR: failed to get chip version!\n");
-      ret = -ENODATA;
-      goto errout;
+      return -ENODATA;
     }
 
   wlinfo("SX127X version = 0x%02x\n", regval);
@@ -4236,7 +4150,7 @@ static int sx127x_init(FAR struct sx127x_dev_s *dev)
   ret = sx127x_frequency_set(dev, CONFIG_LPWAN_SX127X_RFFREQ_DEFAULT);
   if (ret < 0)
     {
-      goto errout;
+      return ret;
     }
 
   /* Configure RF output power - common for FSK/OOK and LORA */
@@ -4244,12 +4158,10 @@ static int sx127x_init(FAR struct sx127x_dev_s *dev)
   ret = sx127x_power_set(dev, CONFIG_LPWAN_SX127X_TXPOWER_DEFAULT);
   if (ret < 0)
     {
-      goto errout;
+      return ret;
     }
 
   wlinfo("Init sx127x dev - DONE\n");
-
-errout:
   return ret;
 }
 
@@ -4272,7 +4184,6 @@ static int sx127x_deinit(FAR struct sx127x_dev_s *dev)
   /* Reset radio */
 
   sx127x_reset(dev);
-
   return OK;
 }
 
@@ -4669,21 +4580,21 @@ int sx127x_register(FAR struct spi_dev_s *spi,
 
   /* Initlaize configuration */
 
-  dev->idle             = SX127X_IDLE_OPMODE;
+  dev->idle           = SX127X_IDLE_OPMODE;
 #ifdef CONFIG_LPWAN_SX127X_TXSUPPORT
-  dev->pa_force         = lower->pa_force;
+  dev->pa_force       = lower->pa_force;
 #endif
-  dev->crcon            = CONFIG_LPWAN_SX127X_CRCON;
+  dev->crcon          = CONFIG_LPWAN_SX127X_CRCON;
 #ifdef CONFIG_LPWAN_SX127X_FSKOOK
-  dev->fskook.fixlen    = false;
+  dev->fskook.fixlen  = false;
 #endif
 #ifdef CONFIG_LPWAN_SX127X_LORA
-  dev->lora.invert_iq   = false;
+  dev->lora.invert_iq = false;
 #endif
 
   /* Polled file decr */
 
-  dev->pfd        = NULL;
+  dev->pfd = NULL;
 
   /* Initialize sem */
 

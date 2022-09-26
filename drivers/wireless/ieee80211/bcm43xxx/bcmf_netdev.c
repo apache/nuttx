@@ -733,7 +733,6 @@ errout_in_wl_active:
   bcmf_wl_active(priv, false);
 
 errout_in_critical_section:
-
   leave_critical_section(flags);
 
   return ret;

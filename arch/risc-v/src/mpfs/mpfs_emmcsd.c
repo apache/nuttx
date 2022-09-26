@@ -2748,7 +2748,6 @@ static sdio_eventset_t mpfs_eventwait(struct sdio_dev_s *dev)
   /* Disable event-related interrupts */
 
 errout_with_waitints:
-
   mpfs_configwaitints(priv, 0, 0, 0);
 
   leave_critical_section(flags);

@@ -902,7 +902,6 @@ static int usbhost_xboxcontroller_poll(int argc, char *argv[])
     }
 
 exitloop:
-
   /* We get here when the driver is removed, when too many errors have
    * been encountered, or when the thread is canceled.
    *

@@ -851,7 +851,6 @@ static int max44009_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 out:
-
   nxsem_post(&priv->dev_sem);
   return ret;
 }

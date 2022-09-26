@@ -508,7 +508,6 @@ errout_with_semaphore:
 #endif
 
 errout_with_inode:
-
 #if defined(BDFS_SUPPORT) || defined(MDFS_SUPPORT)
   if (drvr_inode != NULL)
     {

@@ -188,7 +188,8 @@ static inline void fakesensor_read_gps(FAR struct fakesensor_s *sensor)
   float altitude;
   char raw[150];
   memset(&gps, 0, sizeof(struct sensor_gps));
-  read:
+
+read:
   fakesensor_read_csv_line(
           &sensor->data, raw, sizeof(raw), sensor->raw_start);
   FAR char *pos = strstr(raw, "GGA");

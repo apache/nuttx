@@ -376,7 +376,6 @@ int bcmf_probe(FAR struct bcmf_sdio_dev_s *sbus)
   return OK;
 
 exit_error:
-
   wlerr("ERROR: failed to probe device %d\n", sbus->minor);
   return ret;
 }

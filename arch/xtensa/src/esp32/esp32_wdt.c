@@ -275,7 +275,6 @@ static int esp32_wdt_start(struct esp32_wdt_dev_s *dev)
 static int esp32_wdt_set_stg_conf(struct esp32_wdt_dev_s *dev,
                                    uint8_t stage, uint8_t conf)
 {
-  int ret = OK;
   uint32_t mask;
   DEBUGASSERT(dev);
 
@@ -376,13 +375,11 @@ static int esp32_wdt_set_stg_conf(struct esp32_wdt_dev_s *dev,
       default:
         {
           tmrerr("ERROR: unsupported stage %d\n", stage);
-          ret = EINVAL;
-          goto errout;
+          return -EINVAL;
         }
     }
 
-  errout:
-    return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -571,7 +568,6 @@ static uint16_t esp32_rtc_clk(struct esp32_wdt_dev_s *dev)
 static int esp32_wdt_settimeout(struct esp32_wdt_dev_s *dev,
                                 uint32_t value, uint8_t stage)
 {
-  int ret = OK;
   DEBUGASSERT(dev);
 
     switch (stage)
@@ -655,13 +651,11 @@ static int esp32_wdt_settimeout(struct esp32_wdt_dev_s *dev,
       default:
         {
           tmrerr("ERROR: unsupported stage %d\n", stage);
-          ret = EINVAL;
-          goto errout;
+          return EINVAL;
         }
     }
 
-  errout:
-    return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -951,7 +945,7 @@ struct esp32_wdt_dev_s *esp32_wdt_init(uint8_t wdt_id)
       default:
         {
           tmrerr("ERROR: unsupported WDT %d\n", wdt_id);
-          goto errout;
+          return NULL;
         }
     }
 
@@ -962,15 +956,14 @@ struct esp32_wdt_dev_s *esp32_wdt_init(uint8_t wdt_id)
   if (wdt->inuse == true)
     {
       tmrerr("ERROR: WDT %d is already in use\n", wdt_id);
-      wdt = NULL;
+      return NULL;
     }
   else
     {
       wdt->inuse = true;
     }
 
-  errout:
-    return (struct esp32_wdt_dev_s *)wdt;
+  return (struct esp32_wdt_dev_s *)wdt;
 }
 
 /****************************************************************************

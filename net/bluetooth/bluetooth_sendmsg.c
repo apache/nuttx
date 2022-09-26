@@ -176,9 +176,9 @@ static uint16_t bluetooth_sendto_eventhandler(FAR struct net_driver_s *dev,
 
       /* Don't allow any further call backs. */
 
-      pstate->is_cb->flags    = 0;
-      pstate->is_cb->priv     = NULL;
-      pstate->is_cb->event    = NULL;
+      pstate->is_cb->flags = 0;
+      pstate->is_cb->priv  = NULL;
+      pstate->is_cb->event = NULL;
 
       /* Wake up the waiting thread */
 
@@ -191,10 +191,10 @@ errout:
 
   /* Don't allow any further call backs. */
 
-  pstate->is_cb->flags    = 0;
-  pstate->is_cb->priv     = NULL;
-  pstate->is_cb->event    = NULL;
-  pstate->is_sent         = ret;
+  pstate->is_cb->flags = 0;
+  pstate->is_cb->priv  = NULL;
+  pstate->is_cb->event = NULL;
+  pstate->is_sent      = ret;
 
   /* Wake up the waiting thread */
 

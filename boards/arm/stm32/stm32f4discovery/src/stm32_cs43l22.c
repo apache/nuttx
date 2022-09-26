@@ -371,7 +371,6 @@ int stm32_cs43l22_initialize(int minor)
 errout_with_pcm:
 errout_with_cs43l22:
 errout_with_irq:
-
 #if 0
   irq_detach(IRQ_INT_CS43L22);
 errout_with_i2s:

@@ -288,7 +288,6 @@ static int32_t wdt_config_stage(struct esp32s2_wdt_dev_s *dev,
                                 enum esp32s2_wdt_stage_e stage,
                                 enum esp32s2_wdt_stage_action_e cfg)
 {
-  int32_t ret = OK;
   uint32_t mask;
 
   DEBUGASSERT(dev != NULL);
@@ -362,13 +361,11 @@ static int32_t wdt_config_stage(struct esp32s2_wdt_dev_s *dev,
     default:
       {
         wderr("ERROR: unsupported stage %d\n", stage);
-        ret = -EINVAL;
-        goto errout;
+        return -EINVAL;
       }
   }
 
-  errout:
-    return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -499,8 +496,6 @@ static void wdt_pre(struct esp32s2_wdt_dev_s *dev, uint16_t pre)
 static int32_t wdt_settimeout(struct esp32s2_wdt_dev_s *dev, uint32_t value,
                               enum esp32s2_wdt_stage_e stage)
 {
-  int32_t ret = OK;
-
   DEBUGASSERT(dev != NULL);
 
   switch (stage)
@@ -568,13 +563,11 @@ static int32_t wdt_settimeout(struct esp32s2_wdt_dev_s *dev, uint32_t value,
     default:
       {
         wderr("ERROR: unsupported stage %d\n", stage);
-        ret = -EINVAL;
-        goto errout;
+        return -EINVAL;
       }
   }
 
-  errout:
-    return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -650,7 +643,6 @@ static int32_t wdt_setisr(struct esp32s2_wdt_dev_s *dev, xcpt_t handler,
           irq_detach(wdt->irq);
         }
 
-      ret = OK;
       goto errout;
     }
 
@@ -671,7 +663,6 @@ static int32_t wdt_setisr(struct esp32s2_wdt_dev_s *dev, xcpt_t handler,
       /* Associate an IRQ Number (from the WDT) to an ISR */
 
       ret = irq_attach(wdt->irq, handler, arg);
-
       if (ret != OK)
         {
           esp32s2_teardown_irq(wdt->periph, wdt->cpuint);

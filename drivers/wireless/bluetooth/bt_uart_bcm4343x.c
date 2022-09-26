@@ -368,7 +368,7 @@ static int load_bcm4343x_firmware(FAR const struct btuart_lowerhalf_s *lower)
       ret = -ECOMM;
     }
 
-  load_bcm4343x_firmware_finished:
+load_bcm4343x_firmware_finished:
   lower->rxenable(lower, false);
   lower->rxattach(lower, NULL, NULL);
 

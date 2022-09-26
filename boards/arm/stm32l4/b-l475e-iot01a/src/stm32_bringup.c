@@ -187,7 +187,7 @@ int stm32l4_bringup(void)
                               mtd_part, partref);
 #endif
 
-  process_next_part:
+process_next_part:
 
               /* Update the pointer to point to the next size in the list */
 

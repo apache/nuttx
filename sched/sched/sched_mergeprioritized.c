@@ -85,7 +85,7 @@ void nxsched_merge_prioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2,
     {
       /* Special case.. list1 is empty.  There is nothing to be done. */
 
-      goto out;
+      return;
     }
 
   /* Now the TCBs are no longer accessible and we can change the state on
@@ -108,7 +108,7 @@ void nxsched_merge_prioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2,
       /* Special case.. list2 is empty.  Move list1 to list2. */
 
       dq_move(&clone, list2);
-      goto out;
+      return;
     }
 
   /* Now loop until all entries from list1 have been merged into list2. tcb1
@@ -157,8 +157,4 @@ void nxsched_merge_prioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2,
         }
     }
   while (tcb1 != NULL);
-
-out:
-
-  return;
 }

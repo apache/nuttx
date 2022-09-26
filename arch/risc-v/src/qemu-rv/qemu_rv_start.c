@@ -116,7 +116,6 @@ void qemu_rv_start(int mhartid)
   nx_start();
 
 cpux:
-
 #ifdef CONFIG_SMP
   riscv_cpu_boot(mhartid);
 #endif

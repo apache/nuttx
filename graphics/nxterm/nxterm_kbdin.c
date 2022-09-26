@@ -223,7 +223,6 @@ ssize_t nxterm_read(FAR struct file *filep, FAR char *buffer, size_t len)
   /* Notify all poll/select waiters that they can write to the FIFO */
 
 errout_without_sem:
-
   if (nread > 0)
     {
       nxterm_pollnotify(priv, POLLOUT);
