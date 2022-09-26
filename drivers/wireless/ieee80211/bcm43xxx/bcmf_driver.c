@@ -751,7 +751,6 @@ process_next_bss:
     }
 
 wl_escan_result_processed:
-
   if (status == WLC_E_STATUS_PARTIAL)
     {
       /* More frames to come */

@@ -1199,7 +1199,6 @@ static int up_hs_send(struct uart_dev_s *dev, const char *buf, int buflen)
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 
 retry:
-
   nxsem_wait(&priv->txdma_wait);
 
   /* If buflen <= FIFO space, write it by PIO. */

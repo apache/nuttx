@@ -2909,6 +2909,7 @@ static int cxd56_sdio_dmarecvsetup(struct sdio_dev_s *dev,
 
   cxd56_sample(priv, SAMPLENDX_AFTER_SETUP);
   return OK;
+
 error:
 
   /* Free allocated align buffer */
@@ -3034,6 +3035,7 @@ static int cxd56_sdio_dmasendsetup(struct sdio_dev_s *dev,
   cxd56_configxfrints(priv, SDHCI_DMADONE_INTS);
 
   return OK;
+
 error:
 
   /* Free allocated align buffer */

@@ -172,11 +172,11 @@ static FAR const unsigned char *_strptime(FAR const unsigned char *buf,
           goto literal;
         }
 
-    again:
+again:
       switch (c = *fmt++)
         {
           case '%': /* "%%" is converted to "%". */
-          literal:
+literal:
             if (c != *bp++)
               {
                 return NULL;

@@ -141,6 +141,7 @@ int really_write(int fd, uint8_t *buffer, size_t total)
     }
 
   return 0;
+
 err:
 
   /* On error: stop listening to the socket */

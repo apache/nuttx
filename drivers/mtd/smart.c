@@ -1323,7 +1323,6 @@ static int smart_setsectorsize(FAR struct smart_struct_s *dev, uint16_t size)
    */
 
 errexit:
-
 #ifndef CONFIG_MTD_SMART_MINIMIZE_RAM
   if (dev->smap)
     {
@@ -4975,8 +4974,7 @@ static int smart_readsector(FAR struct smart_struct_s *dev,
     {
       ferr("ERROR: Logical sector %d too large\n", req->logsector);
 
-      ret = -EINVAL;
-      goto errout;
+      return -EINVAL;
     }
 
 #ifndef CONFIG_MTD_SMART_MINIMIZE_RAM
@@ -4987,8 +4985,7 @@ static int smart_readsector(FAR struct smart_struct_s *dev,
   if (physsector == 0xffff)
     {
       ferr("ERROR: Logical sector %d not allocated\n", req->logsector);
-      ret = -EINVAL;
-      goto errout;
+      return -EINVAL;
     }
 
 #ifdef CONFIG_MTD_SMART_ENABLE_CRC
@@ -5004,8 +5001,7 @@ static int smart_readsector(FAR struct smart_struct_s *dev,
       /* TODO:  Mark the block bad */
 
       ferr("ERROR: Error reading phys sector %d\n", physsector);
-      ret = -EIO;
-      goto errout;
+      return -EIO;
     }
 
 #if SMART_STATUS_VERSION == 1
@@ -5031,8 +5027,7 @@ static int smart_readsector(FAR struct smart_struct_s *dev,
 
           ferr("ERROR: Error validating sector %d CRC during read\n",
                physsector);
-          ret = -EIO;
-          goto errout;
+          return -EIO;
         }
     }
 
@@ -5052,8 +5047,7 @@ static int smart_readsector(FAR struct smart_struct_s *dev,
   if (ret != sizeof(struct smart_sect_header_s))
     {
       ferr("ERROR: Error reading sector %d header\n", physsector);
-      ret = -EIO;
-      goto errout;
+      return -EIO;
     }
 
   /* Do a sanity check on the header data */
@@ -5066,8 +5060,7 @@ static int smart_readsector(FAR struct smart_struct_s *dev,
 
       ferr("ERROR: Error in logical sector %d header, phys=%d\n",
           req->logsector, physsector);
-      ret = -EIO;
-      goto errout;
+      return -EIO;
     }
 
   /* Read the sector data into the buffer */
@@ -5081,13 +5074,9 @@ static int smart_readsector(FAR struct smart_struct_s *dev,
   if (ret != req->count)
     {
       ferr("ERROR: Error reading phys sector %d\n", physsector);
-      ret = -EIO;
-      goto errout;
+      return -EIO;
     }
-
 #endif
-
-errout:
 
   return ret;
 }

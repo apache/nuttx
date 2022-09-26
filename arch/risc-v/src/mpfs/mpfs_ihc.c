@@ -1451,7 +1451,6 @@ int mpfs_ihc_init(void)
   return OK;
 
 init_error:
-
   up_disable_irq(g_plic_irq);
   return ret;
 }

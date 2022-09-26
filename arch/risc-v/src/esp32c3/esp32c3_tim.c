@@ -975,7 +975,7 @@ struct esp32c3_tim_dev_s *esp32c3_tim_init(int timer)
       tim = NULL;
     }
 
-  errout:
+errout:
   return (struct esp32c3_tim_dev_s *)tim;
 }
 

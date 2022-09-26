@@ -261,7 +261,6 @@ static void mrf24j40_irqwork_rx(FAR struct mrf24j40_radio_s *dev)
   dev->radiocb->rxframe(dev->radiocb, ind);
 
 done:
-
   /* Enable reception of next packet by flushing the fifo.
    * This is an MRF24J40 errata (no. 1).
    */

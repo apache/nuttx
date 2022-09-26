@@ -375,7 +375,6 @@ errout_with_halfduplex:
   /* Release our reference to the half duplex FIFO */
 
   local_release_halfduplex(conn);
-
   return ret;
 #else
   return -EISCONN;

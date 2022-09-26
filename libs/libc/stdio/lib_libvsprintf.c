@@ -580,7 +580,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 
           flags &= ~FL_FLTUPP;
 
-          flt_oper:
+flt_oper:
           ndigs = 0;
           if ((flags & FL_PREC) == 0)
             {
@@ -937,7 +937,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 
           size = strnlen(pnt, (flags & FL_PREC) ? prec : ~0);
 
-        str_lpad:
+str_lpad:
           if ((flags & FL_LPAD) == 0)
             {
               while (size < width)

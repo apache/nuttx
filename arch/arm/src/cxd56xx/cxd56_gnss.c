@@ -1511,14 +1511,14 @@ static int cxd56_gnss_set_signal(struct file *filep, unsigned long arg)
                checksig->pid == pid)
         {
           checksig->enable = 0;
-          goto _success;
+          goto success;
         }
     }
 
   if (sig == NULL)
     {
       ret = -ENOENT;
-      goto _err;
+      goto err;
     }
 
   fw_gd_setnotifymask(setting->gnsssig, FALSE);
@@ -1530,8 +1530,8 @@ static int cxd56_gnss_set_signal(struct file *filep, unsigned long arg)
   sig->info.signo   = setting->signo;
   sig->info.data    = setting->data;
 
-  _success:
-  _err:
+success:
+err:
   nxsem_post(&priv->devsem);
 #endif /* CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0 */
 
@@ -2138,26 +2138,26 @@ cxd56_gnss_read_cep_file(struct file *fp, int32_t offset,
   if (fp == NULL)
     {
       ret = -ENOENT;
-      goto _err0;
+      goto err0;
     }
 
   buf = (char *)kmm_malloc(len);
   if (buf == NULL)
     {
       ret = -ENOMEM;
-      goto _err0;
+      goto err0;
     }
 
   ret = file_seek(fp, offset, SEEK_SET);
   if (ret < 0)
     {
-      goto _err1;
+      goto err1;
     }
 
   ret = file_read(fp, buf, len);
   if (ret <= 0)
     {
-      goto _err1;
+      goto err1;
     }
 
   *retval = ret;
@@ -2169,9 +2169,9 @@ cxd56_gnss_read_cep_file(struct file *fp, int32_t offset,
    * sequence.
    */
 
-  _err1:
+err1:
   kmm_free(buf);
-  _err0:
+err0:
   *retval = ret;
   cxd56_cpu1sigsend(CXD56_CPU1_DATA_TYPE_CEP, 0);
 
@@ -2204,14 +2204,14 @@ static void cxd56_gnss_read_backup_file(int *retval)
   if (buf == NULL)
     {
       ret = -ENOMEM;
-      goto _err;
+      goto err;
     }
 
   ret = file_open(&file, CONFIG_CXD56_GNSS_BACKUP_FILENAME, O_RDONLY);
   if (ret < 0)
     {
       kmm_free(buf);
-      goto _err;
+      goto err;
     }
 
   do
@@ -2238,7 +2238,7 @@ static void cxd56_gnss_read_backup_file(int *retval)
 
   /* Notify the termination of backup sequence by write zero length data */
 
-  _err:
+err:
   *retval = ret;
   cxd56_cpu1sigsend(CXD56_CPU1_DATA_TYPE_BKUPFILE, 0);
 }
@@ -2458,13 +2458,10 @@ static int cxd56_gnss_cpufifo_api(struct file *filep, unsigned int api,
        */
 
       _warn("Cannot wait GNSS semaphore %d\n", ret);
-      goto _err;
+      return ret;
     }
 
-  ret = priv->apiret;
-
-  _err:
-  return ret;
+  return priv->apiret;
 }
 
 /****************************************************************************
@@ -2608,7 +2605,7 @@ static int cxd56_gnss_open(struct file *filep)
       ret = nxsem_init(&priv->syncsem, 0, 0);
       if (ret < 0)
         {
-          goto _err0;
+          goto err0;
         }
 
       nxsem_set_protocol(&priv->syncsem, SEM_PRIO_NONE);
@@ -2625,13 +2622,13 @@ static int cxd56_gnss_open(struct file *filep)
 
       if (ret < 0)
         {
-          goto _err1;
+          goto err1;
         }
 
       ret = fw_pm_startcpu(CXD56_GNSS_GPS_CPUID, 1);
       if (ret < 0)
         {
-          goto _err2;
+          goto err2;
         }
 
 #ifndef CONFIG_CXD56_GNSS_HOT_SLEEP
@@ -2646,31 +2643,31 @@ static int cxd56_gnss_open(struct file *filep)
       ret = cxd56_gnss_wait_notify(&priv->syncsem, 5);
       if (ret < 0)
         {
-          goto _err2;
+          goto err2;
         }
 
       ret = fw_gd_writebuffer(CXD56_CPU1_DATA_TYPE_INFO, 0,
                               &priv->shared_info, sizeof(priv->shared_info));
       if (ret < 0)
         {
-          goto _err2;
+          goto err2;
         }
 
       nxsem_destroy(&priv->syncsem);
     }
 
   priv->num_open++;
-  goto _success;
+  goto success;
 
-  _err2:
+err2:
 #ifndef CONFIG_CXD56_GNSS_HOT_SLEEP
   fw_pm_sleepcpu(CXD56_GNSS_GPS_CPUID, PM_SLEEP_MODE_HOT_ENABLE);
 #endif
   fw_pm_sleepcpu(CXD56_GNSS_GPS_CPUID, PM_SLEEP_MODE_COLD);
-  _err1:
+err1:
   nxsem_destroy(&priv->syncsem);
-  _err0:
-  _success:
+err0:
+success:
   nxsem_post(&priv->devsem);
   return ret;
 }
@@ -2718,7 +2715,7 @@ static int cxd56_gnss_close(struct file *filep)
         }
     }
 
-  errout:
+errout:
   nxsem_post(&priv->devsem);
   return ret;
 }
@@ -2749,12 +2746,12 @@ static ssize_t cxd56_gnss_read(struct file *filep, char *buffer,
   if (!buffer)
     {
       ret = -EINVAL;
-      goto _err;
+      goto err;
     }
 
   if (len == 0)
     {
-      goto _success;
+      goto out;
     }
 
   /* setect data type */
@@ -2763,7 +2760,7 @@ static ssize_t cxd56_gnss_read(struct file *filep, char *buffer,
   if (type < 0)
     {
       ret = -ESPIPE;
-      goto _err;
+      goto out;
     }
 
   if (type == CXD56_CPU1_DATA_TYPE_GNSS)
@@ -2787,8 +2784,7 @@ static ssize_t cxd56_gnss_read(struct file *filep, char *buffer,
 
   ret = fw_gd_readbuffer(type, offset, buffer, len);
 
-  _err:
-  _success:
+out:
   filep->f_pos = 0;
   return ret;
 }
@@ -3023,14 +3019,14 @@ static int cxd56_gnss_register(const char *devpath)
   if (ret < 0)
     {
       gnsserr("Failed to initialize gnss devsem!\n");
-      goto _err0;
+      goto err0;
     }
 
   ret = nxsem_init(&priv->apiwait, 0, 0);
   if (ret < 0)
     {
       gnsserr("Failed to initialize gnss apiwait!\n");
-      goto _err0;
+      goto err0;
     }
 
   nxsem_set_protocol(&priv->apiwait, SEM_PRIO_NONE);
@@ -3039,21 +3035,21 @@ static int cxd56_gnss_register(const char *devpath)
   if (ret < 0)
     {
       gnsserr("Failed to initialize gnss ioctllock!\n");
-      goto _err0;
+      goto err0;
     }
 
   ret = cxd56_gnss_initialize(priv);
   if (ret < 0)
     {
       gnsserr("Failed to initialize gnss device!\n");
-      goto _err0;
+      goto err0;
     }
 
   ret = register_driver(devpath, &g_gnssfops, 0666, priv);
   if (ret < 0)
     {
       gnsserr("Failed to register driver: %d\n", ret);
-      goto _err0;
+      goto err0;
     }
 
   for (i = 0; i < sizeof(devsig_table) / sizeof(devsig_table[0]); i++)
@@ -3063,7 +3059,7 @@ static int cxd56_gnss_register(const char *devpath)
         {
           gnsserr("Failed to initialize ICC for GPS CPU: %d,%d\n", ret,
                 devsig_table[i].sigtype);
-          goto _err2;
+          goto err1;
         }
 
       cxd56_cpu1sigregisterhandler(devsig_table[i].sigtype,
@@ -3071,13 +3067,12 @@ static int cxd56_gnss_register(const char *devpath)
     }
 
   gnssinfo("GNSS driver loaded successfully!\n");
-
   return ret;
 
-  _err2:
+err1:
   unregister_driver(devpath);
 
-  _err0:
+err0:
   kmm_free(priv);
   return ret;
 }

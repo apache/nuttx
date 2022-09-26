@@ -568,7 +568,7 @@ static uint8_t fifoget(FAR struct nrf24l01_dev_s *dev, FAR uint8_t *buffer,
 
   dev->fifo_len -= (pktlen + 1);
 
-  no_data:
+no_data:
   nxsem_post(&dev->sem_fifo);
   return pktlen;
 }

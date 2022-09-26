@@ -397,7 +397,6 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
     }
 
 errout:
-
 #ifdef CONFIG_SMP
   leave_critical_section(flags);
 #else

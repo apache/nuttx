@@ -2647,7 +2647,6 @@ static sdio_eventset_t stm32_eventwait(struct sdio_dev_s *dev)
   /* Disable event-related interrupts */
 
 errout_with_waitints:
-
   stm32_configwaitints(priv, 0, 0, 0);
 #ifdef CONFIG_STM32_SDIO_DMA
   priv->xfrflags   = 0;

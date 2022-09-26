@@ -767,7 +767,7 @@ struct esp32_tim_dev_s *esp32_tim_init(int timer)
       default:
         {
           tmrerr("ERROR: unsupported TIMER %d\n", timer);
-          goto errout;
+          return NULL;
         }
     }
 
@@ -780,10 +780,9 @@ struct esp32_tim_dev_s *esp32_tim_init(int timer)
   else
     {
       tmrerr("ERROR: TIMER %d is already in use\n", timer);
-      tim = NULL;
+      return NULL;
     }
 
-  errout:
   return (struct esp32_tim_dev_s *)tim;
 }
 
