@@ -101,7 +101,7 @@ OSCRAM_SECTIONS DDR3_START DDR3_SIZE
       CONSTRUCTORS
     }
 
-  bss AlignExpr(ImageLimit(data), 0x8)
+  bss AlignExpr(ImageLimit(data), 0x10)
     {
       *(.bss)
       *(.bss.*)
