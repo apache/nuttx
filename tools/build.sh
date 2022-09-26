@@ -59,8 +59,10 @@ function setup_toolchain()
 
   # Arm Compiler
   export PATH=${ROOTDIR}/prebuilts/clang/linux/armclang/bin:$PATH
-  export ARM_PRODUCT_DEF=${ROOTDIR}/prebuilts/clang/linux/armclang/mappings/eval.elmap
 
+  if [ ! -n "${ARM_PRODUCT_DEF}" ]; then
+    export ARM_PRODUCT_DEF=${ROOTDIR}/prebuilts/clang/linux/armclang/mappings/eval.elmap
+  fi
   if [ ! -n "${LM_LICENSE_FILE}" ]; then
     export LM_LICENSE_FILE=${HOME}/.arm/ds/licenses/DS000-EV-31030.lic
   fi
