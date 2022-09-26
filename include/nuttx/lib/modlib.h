@@ -87,6 +87,14 @@
  * Public Types
  ****************************************************************************/
 
+#ifdef CONFIG_LIBC_ARCH_ELF_64BIT
+typedef Elf64_Off Elf_Off;
+typedef Elf64_Dyn Elf_Dyn;
+#else
+typedef Elf32_Off Elf_Off;
+typedef Elf32_Dyn Elf_Dyn;
+#endif
+
 /* This is the type of the function that is called to uninitialize the
  * the loaded module.  This may mean, for example, un-registering a device
  * driver. If the module is successfully uninitialized, its memory will be
@@ -198,13 +206,19 @@ struct mod_loadinfo_s
   size_t            dataalign;   /* Necessary alignment of .bss/.text */
   off_t             filelen;     /* Length of the entire module file */
   Elf_Ehdr          ehdr;        /* Buffered module file header */
+  FAR Elf_Phdr     *phdr;        /* Buffered module program headers */
   FAR Elf_Shdr     *shdr;        /* Buffered module section headers */
+  FAR void	   *exported;    /* Module exports */
   uint8_t          *iobuffer;    /* File I/O buffer */
+  uintptr_t	    datasec;     /* ET_DYN - data area start from Phdr */
+  uintptr_t	    segpad;      /* Padding between text and data */
 
   uint16_t          symtabidx;   /* Symbol table section index */
   uint16_t          strtabidx;   /* String table section index */
+  uint16_t          dsymtabidx;  /* Dynamic symbol table section index */
   uint16_t          buflen;      /* size of iobuffer[] */
   int               filfd;       /* Descriptor for the file being loaded */
+  int               nexports;    /* ET_DYN - Number of symbols exported */
 };
 
 /****************************************************************************
@@ -529,5 +543,18 @@ int modlib_registry_verify(FAR struct module_s *modp);
  ****************************************************************************/
 
 int modlib_registry_foreach(mod_callback_t callback, FAR void *arg);
+
+/****************************************************************************
+ * Name: modlib_freesymtab
+ *
+ * Description:
+ *   Free a symbol table for the current module.
+ *
+ * Input Parameters:
+ *   modp - Module state descriptor
+ *
+ ****************************************************************************/
+
+void modlib_freesymtab(FAR struct module_s *modp);
 
 #endif /* __INCLUDE_NUTTX_LIB_MODLIB_H */

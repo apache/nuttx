@@ -142,6 +142,10 @@ static inline int dlremove(FAR void *handle)
 #endif
     }
 
+  /* Free the modules exported symmbols table */
+
+  modlib_freesymtab(modp);
+
   /* Remove the module from the registry */
 
   ret = modlib_registry_del(modp);

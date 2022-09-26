@@ -88,6 +88,12 @@ int modlib_freebuffers(struct mod_loadinfo_s *loadinfo)
       loadinfo->shdr      = NULL;
     }
 
+  if (loadinfo->phdr != NULL)
+    {
+      lib_free((FAR void *)loadinfo->phdr);
+      loadinfo->phdr      = NULL;
+    }
+
   if (loadinfo->iobuffer != NULL)
     {
       lib_free((FAR void *)loadinfo->iobuffer);
