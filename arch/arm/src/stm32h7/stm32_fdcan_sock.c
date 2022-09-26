@@ -43,7 +43,7 @@
 #include <nuttx/net/can.h>
 #include <netpacket/can.h>
 
-#ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
+#if defined(CONFIG_NET_CAN_RAW_TX_DEADLINE) || defined(CONFIG_NET_TIMESTAMP)
 #include <sys/time.h>
 #endif
 
@@ -112,7 +112,7 @@
 
 #define POOL_SIZE           1
 
-#ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
+#if defined(CONFIG_NET_CAN_RAW_TX_DEADLINE) || defined(CONFIG_NET_TIMESTAMP)
 #define MSG_DATA            sizeof(struct timeval)
 #else
 #define MSG_DATA            0
