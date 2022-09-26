@@ -699,7 +699,7 @@ int esp32c3_wdt_initialize(const char *devpath, enum esp32c3_wdt_inst_e wdt)
 
   if (lower->wdt == NULL)
     {
-      return = -EINVAL;
+      return -EINVAL;
     }
 
   lower->started = esp32c3_wdt_is_running(lower->wdt);

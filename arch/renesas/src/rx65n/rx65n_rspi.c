@@ -1303,14 +1303,14 @@ static int rspi_transfer(struct rx65n_rspidev_s *priv, const void *txbuffer,
   if (ret > 1)
     {
       spierr("ERROR:Fail to setup DTC for TX transfer\n");
-      return EINVAL;
+      return -EINVAL;
     }
 
   ret = rspi_dtcrxsetup(priv, rxbuffer, &rxdummy, nwords);
   if (ret > 1)
     {
       spierr("ERROR:[%d] Fail to setup DTC for RX transfer\n");
-      return EINVAL;
+      return -EINVAL;
     }
 
   flags = enter_critical_section();

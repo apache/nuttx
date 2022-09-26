@@ -95,7 +95,7 @@ int clock_abstime2ticks(clockid_t clockid,
   ret = clock_gettime(clockid, &currtime);
   if (ret != OK)
     {
-      return EINVAL;
+      return ret;
     }
 
   if (clock_timespec_compare(abstime, &currtime) < 0)

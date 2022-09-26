@@ -87,7 +87,7 @@ int getservbyname_r(FAR const char *name, FAR const char *proto,
     }
   else
     {
-      return EINVAL;
+      return -EINVAL;
     }
 
   for (i = 0; g_services_db[i].s_name; i++)
