@@ -1779,11 +1779,6 @@ bl602_net_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 
           if (req->u.essid.flags == 0)
             {
-              if (g_state.connected == 0)
-                {
-                  return OK;
-                }
-
               return bl602_ioctl_wifi_stop(priv, arg);
             }
           else if (req->u.essid.flags == 1)
