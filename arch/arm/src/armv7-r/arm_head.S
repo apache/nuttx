@@ -27,6 +27,7 @@
 #include "arm.h"
 #include "cp15.h"
 #include "sctlr.h"
+#include "arm_internal.h"
 
 	.file	"arm_head.S"
 
