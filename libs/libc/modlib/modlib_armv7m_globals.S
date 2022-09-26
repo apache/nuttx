@@ -1,0 +1,1119 @@
+        .arch armv7e-m
+        .syntax unified
+        .thumb
+        .data
+        .align 4
+	.global globalNames
+
+globalNames:
+.L0:	.string	"_ZdlPvj"
+.L1:	.string	"__cos"
+.L2:	.string	"__cxa_pure_virtual"
+.L3:	.string	"__dso_handle"
+.L4:	.string	"__dtoa_engine"
+.L5:	.string	"__sin"
+.L6:	.string	"__swap_uint32"
+.L7:	.string	"__swap_uint64"
+.L8:	.string	"__ultoa_invert"
+.L9:	.string	"_exit"
+.L10:	.string	"abort"
+.L11:	.string	"abs"
+.L12:	.string	"accept"
+.L13:	.string	"access"
+.L14:	.string	"acos"
+.L15:	.string	"acosf"
+.L16:	.string	"acosh"
+.L17:	.string	"acoshf"
+.L18:	.string	"acoshl"
+.L19:	.string	"acosl"
+.L20:	.string	"add_file_action"
+.L21:	.string	"asin"
+.L22:	.string	"asinf"
+.L23:	.string	"asinh"
+.L24:	.string	"asinhf"
+.L25:	.string	"asinhl"
+.L26:	.string	"asinl"
+.L27:	.string	"asprintf"
+.L28:	.string	"atan"
+.L29:	.string	"atan2"
+.L30:	.string	"atan2f"
+.L31:	.string	"atan2l"
+.L32:	.string	"atanf"
+.L33:	.string	"atanh"
+.L34:	.string	"atanhf"
+.L35:	.string	"atanhl"
+.L36:	.string	"atanl"
+.L37:	.string	"b16atan2"
+.L38:	.string	"b16cos"
+.L39:	.string	"b16sin"
+.L40:	.string	"basename"
+.L41:	.string	"bind"
+.L42:	.string	"boardctl"
+.L43:	.string	"bsearch"
+.L44:	.string	"cabs"
+.L45:	.string	"cacheflush"
+.L46:	.string	"calloc"
+.L47:	.string	"cbrtf"
+.L48:	.string	"ceil"
+.L49:	.string	"ceilf"
+.L50:	.string	"ceill"
+.L51:	.string	"cfgetspeed"
+.L52:	.string	"cfmakeraw"
+.L53:	.string	"cfsetspeed"
+.L54:	.string	"chdir"
+.L55:	.string	"cimag"
+.L56:	.string	"clearenv"
+.L57:	.string	"clearerr"
+.L58:	.string	"clock"
+.L59:	.string	"close"
+.L60:	.string	"closedir"
+.L61:	.string	"connect"
+.L62:	.string	"copysign"
+.L63:	.string	"copysignf"
+.L64:	.string	"copysignl"
+.L65:	.string	"cos"
+.L66:	.string	"cosf"
+.L67:	.string	"cosh"
+.L68:	.string	"coshf"
+.L69:	.string	"coshl"
+.L70:	.string	"cosl"
+.L71:	.string	"crc16"
+.L72:	.string	"crc16part"
+.L73:	.string	"crc32"
+.L74:	.string	"crc32part"
+.L75:	.string	"crc64"
+.L76:	.string	"crc64part"
+.L77:	.string	"crc8"
+.L78:	.string	"crc8ccitt"
+.L79:	.string	"crc8part"
+.L80:	.string	"creal"
+.L81:	.string	"daemon"
+.L82:	.string	"difftime"
+.L83:	.string	"dirname"
+.L84:	.string	"div"
+.L85:	.string	"dlclose"
+.L86:	.string	"dlerror"
+.L87:	.string	"dlopen"
+.L88:	.string	"dlsym"
+.L89:	.string	"dlsymtab"
+.L90:	.string	"dns_add_nameserver"
+.L91:	.string	"dns_bind"
+.L92:	.string	"dns_find_answer"
+.L93:	.string	"dns_foreach_nameserver"
+.L94:	.string	"dns_initialize"
+.L95:	.string	"dns_notify_nameserver"
+.L96:	.string	"dns_query"
+.L97:	.string	"dns_register_notify"
+.L98:	.string	"dns_save_answer"
+.L99:	.string	"dns_semgive"
+.L100:	.string	"dns_semtake"
+.L101:	.string	"dns_unregister_notify"
+.L102:	.string	"dprintf"
+.L103:	.string	"dup"
+.L104:	.string	"dup2"
+.L105:	.string	"envpath_init"
+.L106:	.string	"envpath_next"
+.L107:	.string	"envpath_release"
+.L108:	.string	"erf"
+.L109:	.string	"erff"
+.L110:	.string	"erfl"
+.L111:	.string	"ether_ntoa"
+.L112:	.string	"exec"
+.L113:	.string	"exit"
+.L114:	.string	"exp"
+.L115:	.string	"expf"
+.L116:	.string	"expl"
+.L117:	.string	"explicit_bzero"
+.L118:	.string	"fabs"
+.L119:	.string	"fabsf"
+.L120:	.string	"fabsl"
+.L121:	.string	"fclose"
+.L122:	.string	"fcntl"
+.L123:	.string	"fdopen"
+.L124:	.string	"feof"
+.L125:	.string	"ferror"
+.L126:	.string	"fflush"
+.L127:	.string	"ffs"
+.L128:	.string	"ffsl"
+.L129:	.string	"ffsll"
+.L130:	.string	"fgetc"
+.L131:	.string	"fgetpos"
+.L132:	.string	"fgets"
+.L133:	.string	"fileno"
+.L134:	.string	"floor"
+.L135:	.string	"floorf"
+.L136:	.string	"floorl"
+.L137:	.string	"fls"
+.L138:	.string	"flsl"
+.L139:	.string	"flsll"
+.L140:	.string	"fma"
+.L141:	.string	"fmaf"
+.L142:	.string	"fmod"
+.L143:	.string	"fmodf"
+.L144:	.string	"fmodl"
+.L145:	.string	"fopen"
+.L146:	.string	"fprintf"
+.L147:	.string	"fputc"
+.L148:	.string	"fputs"
+.L149:	.string	"fread"
+.L150:	.string	"free"
+.L151:	.string	"freeaddrinfo"
+.L152:	.string	"freopen"
+.L153:	.string	"frexp"
+.L154:	.string	"frexpf"
+.L155:	.string	"frexpl"
+.L156:	.string	"fscanf"
+.L157:	.string	"fseek"
+.L158:	.string	"fsetpos"
+.L159:	.string	"fstat"
+.L160:	.string	"fstatfs"
+.L161:	.string	"fsync"
+.L162:	.string	"ftell"
+.L163:	.string	"ftruncate"
+.L164:	.string	"fwrite"
+.L165:	.string	"gai_strerror"
+.L166:	.string	"gamma"
+.L167:	.string	"getaddrinfo"
+.L168:	.string	"getcwd"
+.L169:	.string	"getenv"
+.L170:	.string	"gethostbyaddr"
+.L171:	.string	"gethostbyaddr_r"
+.L172:	.string	"gethostbyname"
+.L173:	.string	"gethostbyname_r"
+.L174:	.string	"gethostname"
+.L175:	.string	"getnameinfo"
+.L176:	.string	"getopt"
+.L177:	.string	"getoptargp"
+.L178:	.string	"getoptindp"
+.L179:	.string	"getoptoptp"
+.L180:	.string	"getpeername"
+.L181:	.string	"getpid"
+.L182:	.string	"getprotobyname"
+.L183:	.string	"getrandom"
+.L184:	.string	"gets"
+.L185:	.string	"gets_s"
+.L186:	.string	"getservbyname"
+.L187:	.string	"getservbyname_r"
+.L188:	.string	"getsockname"
+.L189:	.string	"getsockopt"
+.L190:	.string	"gettimeofday"
+.L191:	.string	"gmtime"
+.L192:	.string	"gmtime_r"
+.L193:	.string	"h_errno"
+.L194:	.string	"htonl"
+.L195:	.string	"htons"
+.L196:	.string	"hypot"
+.L197:	.string	"ilogb"
+.L198:	.string	"ilogbf"
+.L199:	.string	"imaxabs"
+.L200:	.string	"in6addr_any"
+.L201:	.string	"inet_addr"
+.L202:	.string	"inet_aton"
+.L203:	.string	"inet_ntoa"
+.L204:	.string	"inet_ntop"
+.L205:	.string	"inet_pton"
+.L206:	.string	"ioctl"
+.L207:	.string	"isatty"
+.L208:	.string	"itoa"
+.L209:	.string	"kill"
+.L210:	.string	"labs"
+.L211:	.string	"ldexp"
+.L212:	.string	"ldexpf"
+.L213:	.string	"ldexpl"
+.L214:	.string	"ldiv"
+.L215:	.string	"lgamma"
+.L216:	.string	"lgamma_r"
+.L217:	.string	"listen"
+.L218:	.string	"llabs"
+.L219:	.string	"lldiv"
+.L220:	.string	"localeconv"
+.L221:	.string	"log"
+.L222:	.string	"log10"
+.L223:	.string	"log10f"
+.L224:	.string	"log10l"
+.L225:	.string	"log2"
+.L226:	.string	"log2f"
+.L227:	.string	"log2l"
+.L228:	.string	"logf"
+.L229:	.string	"logl"
+.L230:	.string	"lseek"
+.L231:	.string	"malloc"
+.L232:	.string	"match"
+.L233:	.string	"meadow_mappings"
+.L234:	.string	"memalign"
+.L235:	.string	"memccpy"
+.L236:	.string	"memchr"
+.L237:	.string	"memcmp"
+.L238:	.string	"memcpy"
+.L239:	.string	"memmove"
+.L240:	.string	"memrchr"
+.L241:	.string	"memset"
+.L242:	.string	"mkdir"
+.L243:	.string	"mkfifo"
+.L244:	.string	"mkfifo2"
+.L245:	.string	"mkstemp"
+.L246:	.string	"mktemp"
+.L247:	.string	"mktime"
+.L248:	.string	"mmap"
+.L249:	.string	"modf"
+.L250:	.string	"modff"
+.L251:	.string	"modfl"
+.L252:	.string	"mono_main"
+.L253:	.string	"mono_should_run"
+.L254:	.string	"mount"
+.L255:	.string	"munmap"
+.L256:	.string	"nanosleep"
+.L257:	.string	"nrand"
+.L258:	.string	"ntohl"
+.L259:	.string	"ntohs"
+.L260:	.string	"open"
+.L261:	.string	"opendir"
+.L262:	.string	"optarg"
+.L263:	.string	"optind"
+.L264:	.string	"optopt"
+.L265:	.string	"perror"
+.L266:	.string	"pipe"
+.L267:	.string	"pipe2"
+.L268:	.string	"poll"
+.L269:	.string	"posix_spawnattr_dump"
+.L270:	.string	"posix_spawnattr_getflags"
+.L271:	.string	"posix_spawnattr_getschedparam"
+.L272:	.string	"posix_spawnattr_getschedpolicy"
+.L273:	.string	"posix_spawnattr_getsigmask"
+.L274:	.string	"posix_spawnattr_init"
+.L275:	.string	"posix_spawnattr_setflags"
+.L276:	.string	"posix_spawnattr_setschedparam"
+.L277:	.string	"posix_spawnattr_setschedpolicy"
+.L278:	.string	"posix_spawnattr_setsigmask"
+.L279:	.string	"pow"
+.L280:	.string	"powf"
+.L281:	.string	"powl"
+.L282:	.string	"ppoll"
+.L283:	.string	"prctl"
+.L284:	.string	"pread"
+.L285:	.string	"printf"
+.L286:	.string	"pselect"
+.L287:	.string	"psiginfo"
+.L288:	.string	"psignal"
+.L289:	.string	"pthread_attr_destroy"
+.L290:	.string	"pthread_attr_getinheritsched"
+.L291:	.string	"pthread_attr_getschedparam"
+.L292:	.string	"pthread_attr_getschedpolicy"
+.L293:	.string	"pthread_attr_getstack"
+.L294:	.string	"pthread_attr_getstacksize"
+.L295:	.string	"pthread_attr_init"
+.L296:	.string	"pthread_attr_setinheritsched"
+.L297:	.string	"pthread_attr_setschedparam"
+.L298:	.string	"pthread_attr_setschedpolicy"
+.L299:	.string	"pthread_attr_setstack"
+.L300:	.string	"pthread_attr_setstacksize"
+.L301:	.string	"pthread_barrier_destroy"
+.L302:	.string	"pthread_barrier_init"
+.L303:	.string	"pthread_barrier_wait"
+.L304:	.string	"pthread_barrierattr_destroy"
+.L305:	.string	"pthread_barrierattr_getpshared"
+.L306:	.string	"pthread_barrierattr_init"
+.L307:	.string	"pthread_barrierattr_setpshared"
+.L308:	.string	"pthread_cancel"
+.L309:	.string	"pthread_cleanup_pop"
+.L310:	.string	"pthread_cleanup_push"
+.L311:	.string	"pthread_cond_broadcast"
+.L312:	.string	"pthread_cond_destroy"
+.L313:	.string	"pthread_cond_init"
+.L314:	.string	"pthread_cond_signal"
+.L315:	.string	"pthread_cond_timedwait"
+.L316:	.string	"pthread_cond_wait"
+.L317:	.string	"pthread_condattr_destroy"
+.L318:	.string	"pthread_condattr_init"
+.L319:	.string	"pthread_create"
+.L320:	.string	"pthread_detach"
+.L321:	.string	"pthread_exit"
+.L322:	.string	"pthread_get_stackaddr_np"
+.L323:	.string	"pthread_get_stacksize_np"
+.L324:	.string	"pthread_getschedparam"
+.L325:	.string	"pthread_getspecific"
+.L326:	.string	"pthread_join"
+.L327:	.string	"pthread_key_create"
+.L328:	.string	"pthread_key_delete"
+.L329:	.string	"pthread_kill"
+.L330:	.string	"pthread_mutex_consistent"
+.L331:	.string	"pthread_mutex_destroy"
+.L332:	.string	"pthread_mutex_init"
+.L333:	.string	"pthread_mutex_lock"
+.L334:	.string	"pthread_mutex_timedlock"
+.L335:	.string	"pthread_mutex_trylock"
+.L336:	.string	"pthread_mutex_unlock"
+.L337:	.string	"pthread_mutexattr_destroy"
+.L338:	.string	"pthread_mutexattr_getprotocol"
+.L339:	.string	"pthread_mutexattr_getpshared"
+.L340:	.string	"pthread_mutexattr_getrobust"
+.L341:	.string	"pthread_mutexattr_gettype"
+.L342:	.string	"pthread_mutexattr_init"
+.L343:	.string	"pthread_mutexattr_setprotocol"
+.L344:	.string	"pthread_mutexattr_setpshared"
+.L345:	.string	"pthread_mutexattr_setrobust"
+.L346:	.string	"pthread_mutexattr_settype"
+.L347:	.string	"pthread_once"
+.L348:	.string	"pthread_rwlock_destroy"
+.L349:	.string	"pthread_rwlock_init"
+.L350:	.string	"pthread_rwlock_rdlock"
+.L351:	.string	"pthread_rwlock_timedrdlock"
+.L352:	.string	"pthread_rwlock_timedwrlock"
+.L353:	.string	"pthread_rwlock_tryrdlock"
+.L354:	.string	"pthread_rwlock_trywrlock"
+.L355:	.string	"pthread_rwlock_unlock"
+.L356:	.string	"pthread_rwlock_wrlock"
+.L357:	.string	"pthread_setcancelstate"
+.L358:	.string	"pthread_setcanceltype"
+.L359:	.string	"pthread_setschedparam"
+.L360:	.string	"pthread_setschedprio"
+.L361:	.string	"pthread_setspecific"
+.L362:	.string	"pthread_sigmask"
+.L363:	.string	"pthread_startup"
+.L364:	.string	"pthread_testcancel"
+.L365:	.string	"pthread_yield"
+.L366:	.string	"putenv"
+.L367:	.string	"puts"
+.L368:	.string	"pwrite"
+.L369:	.string	"qsort"
+.L370:	.string	"raise"
+.L371:	.string	"rand"
+.L372:	.string	"random"
+.L373:	.string	"read"
+.L374:	.string	"readdir"
+.L375:	.string	"readdir_r"
+.L376:	.string	"readv"
+.L377:	.string	"realloc"
+.L378:	.string	"recv"
+.L379:	.string	"recvfrom"
+.L380:	.string	"recvmsg"
+.L381:	.string	"remove"
+.L382:	.string	"rename"
+.L383:	.string	"rewinddir"
+.L384:	.string	"rint"
+.L385:	.string	"rintf"
+.L386:	.string	"rintl"
+.L387:	.string	"rmdir"
+.L388:	.string	"round"
+.L389:	.string	"roundf"
+.L390:	.string	"roundl"
+.L391:	.string	"scalbn"
+.L392:	.string	"scalbnf"
+.L393:	.string	"scanf"
+.L394:	.string	"seekdir"
+.L395:	.string	"select"
+.L396:	.string	"sem_destroy"
+.L397:	.string	"sem_getprotocol"
+.L398:	.string	"sem_getvalue"
+.L399:	.string	"sem_init"
+.L400:	.string	"sem_post"
+.L401:	.string	"sem_setprotocol"
+.L402:	.string	"sem_timedwait"
+.L403:	.string	"sem_trywait"
+.L404:	.string	"sem_wait"
+.L405:	.string	"send"
+.L406:	.string	"sendfile"
+.L407:	.string	"sendmsg"
+.L408:	.string	"sendto"
+.L409:	.string	"set_errno"
+.L410:	.string	"setbuf"
+.L411:	.string	"setenv"
+.L412:	.string	"sethostname"
+.L413:	.string	"setlocale"
+.L414:	.string	"setlogmask"
+.L415:	.string	"setsockopt"
+.L416:	.string	"settimeofday"
+.L417:	.string	"setvbuf"
+.L418:	.string	"shutdown"
+.L419:	.string	"sigaction"
+.L420:	.string	"sigaddset"
+.L421:	.string	"sigdelset"
+.L422:	.string	"sigemptyset"
+.L423:	.string	"sigfillset"
+.L424:	.string	"sighold"
+.L425:	.string	"sigignore"
+.L426:	.string	"sigismember"
+.L427:	.string	"signal"
+.L428:	.string	"sigpause"
+.L429:	.string	"sigpending"
+.L430:	.string	"sigprocmask"
+.L431:	.string	"sigqueue"
+.L432:	.string	"sigrelse"
+.L433:	.string	"sigset"
+.L434:	.string	"sigsuspend"
+.L435:	.string	"sigtimedwait"
+.L436:	.string	"sigwait"
+.L437:	.string	"sigwaitinfo"
+.L438:	.string	"sin"
+.L439:	.string	"sinf"
+.L440:	.string	"sinh"
+.L441:	.string	"sinhf"
+.L442:	.string	"sinhl"
+.L443:	.string	"sinl"
+.L444:	.string	"sleep"
+.L445:	.string	"snprintf"
+.L446:	.string	"socket"
+.L447:	.string	"sprintf"
+.L448:	.string	"sqrt"
+.L449:	.string	"sqrtf"
+.L450:	.string	"sqrtl"
+.L451:	.string	"srand"
+.L452:	.string	"sscanf"
+.L453:	.string	"stat"
+.L454:	.string	"statfs"
+.L455:	.string	"stpcpy"
+.L456:	.string	"stpncpy"
+.L457:	.string	"strcasecmp"
+.L458:	.string	"strcasestr"
+.L459:	.string	"strcat"
+.L460:	.string	"strchr"
+.L461:	.string	"strcmp"
+.L462:	.string	"strcoll"
+.L463:	.string	"strcpy"
+.L464:	.string	"strcspn"
+.L465:	.string	"strdup"
+.L466:	.string	"stream_semgive"
+.L467:	.string	"stream_semtake"
+.L468:	.string	"strerror"
+.L469:	.string	"strerror_r"
+.L470:	.string	"strftime"
+.L471:	.string	"strlen"
+.L472:	.string	"strncasecmp"
+.L473:	.string	"strncat"
+.L474:	.string	"strncmp"
+.L475:	.string	"strncpy"
+.L476:	.string	"strndup"
+.L477:	.string	"strnlen"
+.L478:	.string	"strpbrk"
+.L479:	.string	"strrchr"
+.L480:	.string	"strsep"
+.L481:	.string	"strsignal"
+.L482:	.string	"strspn"
+.L483:	.string	"strstr"
+.L484:	.string	"strtod"
+.L485:	.string	"strtof"
+.L486:	.string	"strtoimax"
+.L487:	.string	"strtok"
+.L488:	.string	"strtok_r"
+.L489:	.string	"strtol"
+.L490:	.string	"strtold"
+.L491:	.string	"strtoll"
+.L492:	.string	"strtoul"
+.L493:	.string	"strtoull"
+.L494:	.string	"strtoumax"
+.L495:	.string	"strxfrm"
+.L496:	.string	"swab"
+.L497:	.string	"sysconf"
+.L498:	.string	"syslog"
+.L499:	.string	"tan"
+.L500:	.string	"tanf"
+.L501:	.string	"tanh"
+.L502:	.string	"tanhf"
+.L503:	.string	"tanhl"
+.L504:	.string	"tanl"
+.L505:	.string	"tcdrain"
+.L506:	.string	"tcflow"
+.L507:	.string	"tcflush"
+.L508:	.string	"tcgetattr"
+.L509:	.string	"tcsetattr"
+.L510:	.string	"tea_decrypt"
+.L511:	.string	"tea_encrypt"
+.L512:	.string	"telldir"
+.L513:	.string	"tempnam"
+.L514:	.string	"tgamma"
+.L515:	.string	"time"
+.L516:	.string	"tmpnam"
+.L517:	.string	"trunc"
+.L518:	.string	"truncate"
+.L519:	.string	"truncf"
+.L520:	.string	"truncl"
+.L521:	.string	"uadd32x64"
+.L522:	.string	"uadd64"
+.L523:	.string	"ub32sqrtub16"
+.L524:	.string	"umul32"
+.L525:	.string	"umul32x64"
+.L526:	.string	"umul64"
+.L527:	.string	"uname"
+.L528:	.string	"ungetc"
+.L529:	.string	"unlink"
+.L530:	.string	"unsetenv"
+.L531:	.string	"usleep"
+.L532:	.string	"usub64"
+.L533:	.string	"usub64x32"
+.L534:	.string	"vasprintf"
+.L535:	.string	"vdprintf"
+.L536:	.string	"vfork"
+.L537:	.string	"vfprintf"
+.L538:	.string	"vfscanf"
+.L539:	.string	"vprintf"
+.L540:	.string	"vsnprintf"
+.L541:	.string	"vsprintf"
+.L542:	.string	"vsscanf"
+.L543:	.string	"vsyslog"
+.L544:	.string	"waitpid"
+.L545:	.string	"write"
+.L546:	.string	"writev"
+.L547:	.string	"xorshift128"
+.L548:	.string	"zalloc"
+	.size	globalNames, . - globalNames
+
+	.align	4
+	.global	nGlobals
+	.type	nGlobals, "object"
+nGlobals:	
+	.word	549
+	.size	nGlobals, . - nGlobals
+
+	.global globalTable
+	.type	globalTable, "object"
+globalTable:
+	.word	.L0, _ZdlPvj
+	.word	.L1, __cos
+	.word	.L2, __cxa_pure_virtual
+	.word	.L3, __dso_handle
+	.word	.L4, __dtoa_engine
+	.word	.L5, __sin
+	.word	.L6, __swap_uint32
+	.word	.L7, __swap_uint64
+	.word	.L8, __ultoa_invert
+	.word	.L9, _exit
+	.word	.L10, abort
+	.word	.L11, abs
+	.word	.L12, accept
+	.word	.L13, access
+	.word	.L14, acos
+	.word	.L15, acosf
+	.word	.L16, acosh
+	.word	.L17, acoshf
+	.word	.L18, acoshl
+	.word	.L19, acosl
+	.word	.L20, add_file_action
+	.word	.L21, asin
+	.word	.L22, asinf
+	.word	.L23, asinh
+	.word	.L24, asinhf
+	.word	.L25, asinhl
+	.word	.L26, asinl
+	.word	.L27, asprintf
+	.word	.L28, atan
+	.word	.L29, atan2
+	.word	.L30, atan2f
+	.word	.L31, atan2l
+	.word	.L32, atanf
+	.word	.L33, atanh
+	.word	.L34, atanhf
+	.word	.L35, atanhl
+	.word	.L36, atanl
+	.word	.L37, b16atan2
+	.word	.L38, b16cos
+	.word	.L39, b16sin
+	.word	.L40, basename
+	.word	.L41, bind
+	.word	.L42, boardctl
+	.word	.L43, bsearch
+	.word	.L44, cabs
+	.word	.L45, cacheflush
+	.word	.L46, calloc
+	.word	.L47, cbrtf
+	.word	.L48, ceil
+	.word	.L49, ceilf
+	.word	.L50, ceill
+	.word	.L51, cfgetspeed
+	.word	.L52, cfmakeraw
+	.word	.L53, cfsetspeed
+	.word	.L54, chdir
+	.word	.L55, cimag
+	.word	.L56, clearenv
+	.word	.L57, clearerr
+	.word	.L58, clock
+	.word	.L59, close
+	.word	.L60, closedir
+	.word	.L61, connect
+	.word	.L62, copysign
+	.word	.L63, copysignf
+	.word	.L64, copysignl
+	.word	.L65, cos
+	.word	.L66, cosf
+	.word	.L67, cosh
+	.word	.L68, coshf
+	.word	.L69, coshl
+	.word	.L70, cosl
+	.word	.L71, crc16
+	.word	.L72, crc16part
+	.word	.L73, crc32
+	.word	.L74, crc32part
+	.word	.L75, crc64
+	.word	.L76, crc64part
+	.word	.L77, crc8
+	.word	.L78, crc8ccitt
+	.word	.L79, crc8part
+	.word	.L80, creal
+	.word	.L81, daemon
+	.word	.L82, difftime
+	.word	.L83, dirname
+	.word	.L84, div
+	.word	.L85, dlclose
+	.word	.L86, dlerror
+	.word	.L87, dlopen
+	.word	.L88, dlsym
+	.word	.L89, dlsymtab
+	.word	.L90, dns_add_nameserver
+	.word	.L91, dns_bind
+	.word	.L92, dns_find_answer
+	.word	.L93, dns_foreach_nameserver
+	.word	.L94, dns_initialize
+	.word	.L95, dns_notify_nameserver
+	.word	.L96, dns_query
+	.word	.L97, dns_register_notify
+	.word	.L98, dns_save_answer
+	.word	.L99, dns_semgive
+	.word	.L100, dns_semtake
+	.word	.L101, dns_unregister_notify
+	.word	.L102, dprintf
+	.word	.L103, dup
+	.word	.L104, dup2
+	.word	.L105, envpath_init
+	.word	.L106, envpath_next
+	.word	.L107, envpath_release
+	.word	.L108, erf
+	.word	.L109, erff
+	.word	.L110, erfl
+	.word	.L111, ether_ntoa
+	.word	.L112, exec
+	.word	.L113, exit
+	.word	.L114, exp
+	.word	.L115, expf
+	.word	.L116, expl
+	.word	.L117, explicit_bzero
+	.word	.L118, fabs
+	.word	.L119, fabsf
+	.word	.L120, fabsl
+	.word	.L121, fclose
+	.word	.L122, fcntl
+	.word	.L123, fdopen
+	.word	.L124, feof
+	.word	.L125, ferror
+	.word	.L126, fflush
+	.word	.L127, ffs
+	.word	.L128, ffsl
+	.word	.L129, ffsll
+	.word	.L130, fgetc
+	.word	.L131, fgetpos
+	.word	.L132, fgets
+	.word	.L133, fileno
+	.word	.L134, floor
+	.word	.L135, floorf
+	.word	.L136, floorl
+	.word	.L137, fls
+	.word	.L138, flsl
+	.word	.L139, flsll
+	.word	.L140, fma
+	.word	.L141, fmaf
+	.word	.L142, fmod
+	.word	.L143, fmodf
+	.word	.L144, fmodl
+	.word	.L145, fopen
+	.word	.L146, fprintf
+	.word	.L147, fputc
+	.word	.L148, fputs
+	.word	.L149, fread
+	.word	.L150, free
+	.word	.L151, freeaddrinfo
+	.word	.L152, freopen
+	.word	.L153, frexp
+	.word	.L154, frexpf
+	.word	.L155, frexpl
+	.word	.L156, fscanf
+	.word	.L157, fseek
+	.word	.L158, fsetpos
+	.word	.L159, fstat
+	.word	.L160, fstatfs
+	.word	.L161, fsync
+	.word	.L162, ftell
+	.word	.L163, ftruncate
+	.word	.L164, fwrite
+	.word	.L165, gai_strerror
+	.word	.L166, gamma
+	.word	.L167, getaddrinfo
+	.word	.L168, getcwd
+	.word	.L169, getenv
+	.word	.L170, gethostbyaddr
+	.word	.L171, gethostbyaddr_r
+	.word	.L172, gethostbyname
+	.word	.L173, gethostbyname_r
+	.word	.L174, gethostname
+	.word	.L175, getnameinfo
+	.word	.L176, getopt
+	.word	.L177, getoptargp
+	.word	.L178, getoptindp
+	.word	.L179, getoptoptp
+	.word	.L180, getpeername
+	.word	.L181, getpid
+	.word	.L182, getprotobyname
+	.word	.L183, getrandom
+	.word	.L184, gets
+	.word	.L185, gets_s
+	.word	.L186, getservbyname
+	.word	.L187, getservbyname_r
+	.word	.L188, getsockname
+	.word	.L189, getsockopt
+	.word	.L190, gettimeofday
+	.word	.L191, gmtime
+	.word	.L192, gmtime_r
+	.word	.L193, h_errno
+	.word	.L194, htonl
+	.word	.L195, htons
+	.word	.L196, hypot
+	.word	.L197, ilogb
+	.word	.L198, ilogbf
+	.word	.L199, imaxabs
+	.word	.L200, in6addr_any
+	.word	.L201, inet_addr
+	.word	.L202, inet_aton
+	.word	.L203, inet_ntoa
+	.word	.L204, inet_ntop
+	.word	.L205, inet_pton
+	.word	.L206, ioctl
+	.word	.L207, isatty
+	.word	.L208, itoa
+	.word	.L209, kill
+	.word	.L210, labs
+	.word	.L211, ldexp
+	.word	.L212, ldexpf
+	.word	.L213, ldexpl
+	.word	.L214, ldiv
+	.word	.L215, lgamma
+	.word	.L216, lgamma_r
+	.word	.L217, listen
+	.word	.L218, llabs
+	.word	.L219, lldiv
+	.word	.L220, localeconv
+	.word	.L221, log
+	.word	.L222, log10
+	.word	.L223, log10f
+	.word	.L224, log10l
+	.word	.L225, log2
+	.word	.L226, log2f
+	.word	.L227, log2l
+	.word	.L228, logf
+	.word	.L229, logl
+	.word	.L230, lseek
+	.word	.L231, malloc
+	.word	.L232, match
+	.word	.L233, meadow_mappings
+	.word	.L234, memalign
+	.word	.L235, memccpy
+	.word	.L236, memchr
+	.word	.L237, memcmp
+	.word	.L238, memcpy
+	.word	.L239, memmove
+	.word	.L240, memrchr
+	.word	.L241, memset
+	.word	.L242, mkdir
+	.word	.L243, mkfifo
+	.word	.L244, mkfifo2
+	.word	.L245, mkstemp
+	.word	.L246, mktemp
+	.word	.L247, mktime
+	.word	.L248, mmap
+	.word	.L249, modf
+	.word	.L250, modff
+	.word	.L251, modfl
+	.word	.L252, mono_main
+	.word	.L253, mono_should_run
+	.word	.L254, mount
+	.word	.L255, munmap
+	.word	.L256, nanosleep
+	.word	.L257, nrand
+	.word	.L258, ntohl
+	.word	.L259, ntohs
+	.word	.L260, open
+	.word	.L261, opendir
+	.word	.L262, optarg
+	.word	.L263, optind
+	.word	.L264, optopt
+	.word	.L265, perror
+	.word	.L266, pipe
+	.word	.L267, pipe2
+	.word	.L268, poll
+	.word	.L269, posix_spawnattr_dump
+	.word	.L270, posix_spawnattr_getflags
+	.word	.L271, posix_spawnattr_getschedparam
+	.word	.L272, posix_spawnattr_getschedpolicy
+	.word	.L273, posix_spawnattr_getsigmask
+	.word	.L274, posix_spawnattr_init
+	.word	.L275, posix_spawnattr_setflags
+	.word	.L276, posix_spawnattr_setschedparam
+	.word	.L277, posix_spawnattr_setschedpolicy
+	.word	.L278, posix_spawnattr_setsigmask
+	.word	.L279, pow
+	.word	.L280, powf
+	.word	.L281, powl
+	.word	.L282, ppoll
+	.word	.L283, prctl
+	.word	.L284, pread
+	.word	.L285, printf
+	.word	.L286, pselect
+	.word	.L287, psiginfo
+	.word	.L288, psignal
+	.word	.L289, pthread_attr_destroy
+	.word	.L290, pthread_attr_getinheritsched
+	.word	.L291, pthread_attr_getschedparam
+	.word	.L292, pthread_attr_getschedpolicy
+	.word	.L293, pthread_attr_getstack
+	.word	.L294, pthread_attr_getstacksize
+	.word	.L295, pthread_attr_init
+	.word	.L296, pthread_attr_setinheritsched
+	.word	.L297, pthread_attr_setschedparam
+	.word	.L298, pthread_attr_setschedpolicy
+	.word	.L299, pthread_attr_setstack
+	.word	.L300, pthread_attr_setstacksize
+	.word	.L301, pthread_barrier_destroy
+	.word	.L302, pthread_barrier_init
+	.word	.L303, pthread_barrier_wait
+	.word	.L304, pthread_barrierattr_destroy
+	.word	.L305, pthread_barrierattr_getpshared
+	.word	.L306, pthread_barrierattr_init
+	.word	.L307, pthread_barrierattr_setpshared
+	.word	.L308, pthread_cancel
+	.word	.L309, pthread_cleanup_pop
+	.word	.L310, pthread_cleanup_push
+	.word	.L311, pthread_cond_broadcast
+	.word	.L312, pthread_cond_destroy
+	.word	.L313, pthread_cond_init
+	.word	.L314, pthread_cond_signal
+	.word	.L315, pthread_cond_timedwait
+	.word	.L316, pthread_cond_wait
+	.word	.L317, pthread_condattr_destroy
+	.word	.L318, pthread_condattr_init
+	.word	.L319, pthread_create
+	.word	.L320, pthread_detach
+	.word	.L321, pthread_exit
+	.word	.L322, pthread_get_stackaddr_np
+	.word	.L323, pthread_get_stacksize_np
+	.word	.L324, pthread_getschedparam
+	.word	.L325, pthread_getspecific
+	.word	.L326, pthread_join
+	.word	.L327, pthread_key_create
+	.word	.L328, pthread_key_delete
+	.word	.L329, pthread_kill
+	.word	.L330, pthread_mutex_consistent
+	.word	.L331, pthread_mutex_destroy
+	.word	.L332, pthread_mutex_init
+	.word	.L333, pthread_mutex_lock
+	.word	.L334, pthread_mutex_timedlock
+	.word	.L335, pthread_mutex_trylock
+	.word	.L336, pthread_mutex_unlock
+	.word	.L337, pthread_mutexattr_destroy
+	.word	.L338, pthread_mutexattr_getprotocol
+	.word	.L339, pthread_mutexattr_getpshared
+	.word	.L340, pthread_mutexattr_getrobust
+	.word	.L341, pthread_mutexattr_gettype
+	.word	.L342, pthread_mutexattr_init
+	.word	.L343, pthread_mutexattr_setprotocol
+	.word	.L344, pthread_mutexattr_setpshared
+	.word	.L345, pthread_mutexattr_setrobust
+	.word	.L346, pthread_mutexattr_settype
+	.word	.L347, pthread_once
+	.word	.L348, pthread_rwlock_destroy
+	.word	.L349, pthread_rwlock_init
+	.word	.L350, pthread_rwlock_rdlock
+	.word	.L351, pthread_rwlock_timedrdlock
+	.word	.L352, pthread_rwlock_timedwrlock
+	.word	.L353, pthread_rwlock_tryrdlock
+	.word	.L354, pthread_rwlock_trywrlock
+	.word	.L355, pthread_rwlock_unlock
+	.word	.L356, pthread_rwlock_wrlock
+	.word	.L357, pthread_setcancelstate
+	.word	.L358, pthread_setcanceltype
+	.word	.L359, pthread_setschedparam
+	.word	.L360, pthread_setschedprio
+	.word	.L361, pthread_setspecific
+	.word	.L362, pthread_sigmask
+	.word	.L363, pthread_startup
+	.word	.L364, pthread_testcancel
+	.word	.L365, pthread_yield
+	.word	.L366, putenv
+	.word	.L367, puts
+	.word	.L368, pwrite
+	.word	.L369, qsort
+	.word	.L370, raise
+	.word	.L371, rand
+	.word	.L372, random
+	.word	.L373, read
+	.word	.L374, readdir
+	.word	.L375, readdir_r
+	.word	.L376, readv
+	.word	.L377, realloc
+	.word	.L378, recv
+	.word	.L379, recvfrom
+	.word	.L380, recvmsg
+	.word	.L381, remove
+	.word	.L382, rename
+	.word	.L383, rewinddir
+	.word	.L384, rint
+	.word	.L385, rintf
+	.word	.L386, rintl
+	.word	.L387, rmdir
+	.word	.L388, round
+	.word	.L389, roundf
+	.word	.L390, roundl
+	.word	.L391, scalbn
+	.word	.L392, scalbnf
+	.word	.L393, scanf
+	.word	.L394, seekdir
+	.word	.L395, select
+	.word	.L396, sem_destroy
+	.word	.L397, sem_getprotocol
+	.word	.L398, sem_getvalue
+	.word	.L399, sem_init
+	.word	.L400, sem_post
+	.word	.L401, sem_setprotocol
+	.word	.L402, sem_timedwait
+	.word	.L403, sem_trywait
+	.word	.L404, sem_wait
+	.word	.L405, send
+	.word	.L406, sendfile
+	.word	.L407, sendmsg
+	.word	.L408, sendto
+	.word	.L409, set_errno
+	.word	.L410, setbuf
+	.word	.L411, setenv
+	.word	.L412, sethostname
+	.word	.L413, setlocale
+	.word	.L414, setlogmask
+	.word	.L415, setsockopt
+	.word	.L416, settimeofday
+	.word	.L417, setvbuf
+	.word	.L418, shutdown
+	.word	.L419, sigaction
+	.word	.L420, sigaddset
+	.word	.L421, sigdelset
+	.word	.L422, sigemptyset
+	.word	.L423, sigfillset
+	.word	.L424, sighold
+	.word	.L425, sigignore
+	.word	.L426, sigismember
+	.word	.L427, signal
+	.word	.L428, sigpause
+	.word	.L429, sigpending
+	.word	.L430, sigprocmask
+	.word	.L431, sigqueue
+	.word	.L432, sigrelse
+	.word	.L433, sigset
+	.word	.L434, sigsuspend
+	.word	.L435, sigtimedwait
+	.word	.L436, sigwait
+	.word	.L437, sigwaitinfo
+	.word	.L438, sin
+	.word	.L439, sinf
+	.word	.L440, sinh
+	.word	.L441, sinhf
+	.word	.L442, sinhl
+	.word	.L443, sinl
+	.word	.L444, sleep
+	.word	.L445, snprintf
+	.word	.L446, socket
+	.word	.L447, sprintf
+	.word	.L448, sqrt
+	.word	.L449, sqrtf
+	.word	.L450, sqrtl
+	.word	.L451, srand
+	.word	.L452, sscanf
+	.word	.L453, stat
+	.word	.L454, statfs
+	.word	.L455, stpcpy
+	.word	.L456, stpncpy
+	.word	.L457, strcasecmp
+	.word	.L458, strcasestr
+	.word	.L459, strcat
+	.word	.L460, strchr
+	.word	.L461, strcmp
+	.word	.L462, strcoll
+	.word	.L463, strcpy
+	.word	.L464, strcspn
+	.word	.L465, strdup
+	.word	.L466, stream_semgive
+	.word	.L467, stream_semtake
+	.word	.L468, strerror
+	.word	.L469, strerror_r
+	.word	.L470, strftime
+	.word	.L471, strlen
+	.word	.L472, strncasecmp
+	.word	.L473, strncat
+	.word	.L474, strncmp
+	.word	.L475, strncpy
+	.word	.L476, strndup
+	.word	.L477, strnlen
+	.word	.L478, strpbrk
+	.word	.L479, strrchr
+	.word	.L480, strsep
+	.word	.L481, strsignal
+	.word	.L482, strspn
+	.word	.L483, strstr
+	.word	.L484, strtod
+	.word	.L485, strtof
+	.word	.L486, strtoimax
+	.word	.L487, strtok
+	.word	.L488, strtok_r
+	.word	.L489, strtol
+	.word	.L490, strtold
+	.word	.L491, strtoll
+	.word	.L492, strtoul
+	.word	.L493, strtoull
+	.word	.L494, strtoumax
+	.word	.L495, strxfrm
+	.word	.L496, swab
+	.word	.L497, sysconf
+	.word	.L498, syslog
+	.word	.L499, tan
+	.word	.L500, tanf
+	.word	.L501, tanh
+	.word	.L502, tanhf
+	.word	.L503, tanhl
+	.word	.L504, tanl
+	.word	.L505, tcdrain
+	.word	.L506, tcflow
+	.word	.L507, tcflush
+	.word	.L508, tcgetattr
+	.word	.L509, tcsetattr
+	.word	.L510, tea_decrypt
+	.word	.L511, tea_encrypt
+	.word	.L512, telldir
+	.word	.L513, tempnam
+	.word	.L514, tgamma
+	.word	.L515, time
+	.word	.L516, tmpnam
+	.word	.L517, trunc
+	.word	.L518, truncate
+	.word	.L519, truncf
+	.word	.L520, truncl
+	.word	.L521, uadd32x64
+	.word	.L522, uadd64
+	.word	.L523, ub32sqrtub16
+	.word	.L524, umul32
+	.word	.L525, umul32x64
+	.word	.L526, umul64
+	.word	.L527, uname
+	.word	.L528, ungetc
+	.word	.L529, unlink
+	.word	.L530, unsetenv
+	.word	.L531, usleep
+	.word	.L532, usub64
+	.word	.L533, usub64x32
+	.word	.L534, vasprintf
+	.word	.L535, vdprintf
+	.word	.L536, vfork
+	.word	.L537, vfprintf
+	.word	.L538, vfscanf
+	.word	.L539, vprintf
+	.word	.L540, vsnprintf
+	.word	.L541, vsprintf
+	.word	.L542, vsscanf
+	.word	.L543, vsyslog
+	.word	.L544, waitpid
+	.word	.L545, write
+	.word	.L546, writev
+	.word	.L547, xorshift128
+	.word	.L548, zalloc
+	.size	globalTable, . - globalTable

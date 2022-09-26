@@ -23,12 +23,14 @@ ifeq ($(CONFIG_LIBC_MODLIB),y)
 # Add the nuttx/lib/modlib.h files to the build
 
 CSRCS += modlib_bind.c modlib_depend.c modlib_init.c modlib_iobuffer.c
-CSRCS += modlib_load.c modlib_loadshdrs.c
+CSRCS += modlib_load.c modlib_loadhdrs.c
 CSRCS += modlib_read.c modlib_registry.c modlib_sections.c
 CSRCS += modlib_symbols.c modlib_symtab.c modlib_uninit.c modlib_unload.c
-CSRCS += modlib_verify.c
+CSRCS += modlib_verify.c 
 
 # Add the modlib directory to the build
+
+ASRCS += modlib_globals.S
 
 DEPPATH += --dep-path modlib
 VPATH += :modlib
