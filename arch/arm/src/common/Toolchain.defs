@@ -78,10 +78,16 @@ endif
 
 ifeq ($(CONFIG_LTO_THIN),y)
   ARCHOPTIMIZATION += -flto=thin
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
+    LDFLAGS += --lto
+  endif
 else ifeq ($(CONFIG_LTO_FULL),y)
   ARCHOPTIMIZATION += -flto
   ifeq ($(CONFIG_ARM_TOOLCHAIN_GNU_EABI),y)
     ARCHOPTIMIZATION += -fuse-linker-plugin
+  endif
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
+    LDFLAGS += --lto
   endif
 endif
 
@@ -220,9 +226,10 @@ ifneq ($(CONFIG_CXX_RTTI),y)
 endif
 
 ARCHOPTIMIZATION += -fno-common -Wall -Wshadow -Wundef
-ARCHOPTIMIZATION += -nostdlib
 
-ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),)
+ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
+  ARCHOPTIMIZATION += -nostdlib
+else
   LDFLAGS += -nostdlib
 endif
 
