@@ -109,84 +109,25 @@ int clock_systime_timespec(FAR struct timespec *ts)
   else
 #endif
     {
-#if defined(CONFIG_SCHED_TICKLESS)
       /* In tickless mode, all timing is controlled by platform-specific
        * code.  Let the platform timer do the work.
        */
 
-#ifdef CONFIG_SCHED_TICKLESS_TICK_ARGUMENT
+#if defined(CONFIG_SCHED_TICKLESS_TICK_ARGUMENT)
       clock_t ticks;
       int ret;
 
       ret = up_timer_gettick(&ticks);
       timespec_from_tick(ts, ticks);
       return ret;
-#else
+#elif defined(CONFIG_SCHED_TICKLESS)
       return up_timer_gettime(ts);
-#endif
-
-#elif defined(CONFIG_HAVE_LONG_LONG) && (CONFIG_USEC_PER_TICK % 1000) != 0
+#else
       /* 64-bit microsecond calculations should improve our accuracy
        * when the clock period is in units of microseconds.
        */
 
-      uint64_t usecs;
-      uint64_t secs;
-      uint64_t nsecs;
-
-      /* Get the time since power-on in seconds and microseconds.
-       * NOTE that overflow is still possible if we use a 64-bit
-       * timer.
-       */
-
-      usecs = (uint64_t)TICK2USEC(clock_systime_ticks());
-      secs  = usecs / USEC_PER_SEC;
-
-      /* Return the elapsed time in seconds and nanoseconds */
-
-      nsecs = (usecs - (secs * USEC_PER_SEC)) * NSEC_PER_USEC;
-
-      ts->tv_sec  = (time_t)secs;
-      ts->tv_nsec = (long)nsecs;
-      return OK;
-
-#else
-      /* We know that the clock rate is in units of milliseconds
-       * show we should be able to do the calculations with less
-       * chance of overflow.
-       *
-       * 32-bit millisecond calculations should be just fine in
-       * most cases.  For a 32-bit system timer and a clock period
-       * of 10 milliseconds, the msecs value will overflow at about
-       * 49.7 days.
-       *
-       * So.. we will still use 64-bit calculations if we have them
-       * in order to avoid that limitation.
-       */
-
-#ifdef CONFIG_HAVE_LONG_LONG
-      uint64_t msecs;
-      uint64_t secs;
-      uint64_t nsecs;
-#define WIDE_CAST (uint64_t)
-#else
-      clock_t msecs;
-      clock_t secs;
-      clock_t nsecs;
-#define WIDE_CAST
-#endif
-
-      /* Get the time since power-on in seconds and milliseconds */
-
-      msecs = TICK2MSEC(WIDE_CAST clock_systime_ticks());
-      secs  = msecs / MSEC_PER_SEC;
-
-      /* Return the elapsed time in seconds and nanoseconds */
-
-      nsecs = (msecs - (secs * MSEC_PER_SEC)) * NSEC_PER_MSEC;
-
-      ts->tv_sec  = (time_t)secs;
-      ts->tv_nsec = (long)nsecs;
+      timespec_from_tick(ts, clock_systime_ticks());
       return OK;
 #endif
     }

@@ -75,67 +75,70 @@
 
 clock_t clock_systime_ticks(void)
 {
-#ifdef CONFIG_SCHED_TICKLESS
-# ifdef CONFIG_SYSTEM_TIME64
+#ifdef CONFIG_RTC_HIRES
+  /* Do we have a high-resolution RTC that can provide us with the time? */
 
-  struct timespec ts;
-
-  /* Get the time from the platform specific hardware */
-
-  clock_systime_timespec(&ts);
-
-  /* Convert to a 64-bit value in microseconds, then in clock tick units */
-
-  return USEC2TICK(1000000 * (uint64_t)ts.tv_sec + ts.tv_nsec / 1000);
-
-# else /* CONFIG_SYSTEM_TIME64 */
-
-  struct timespec ts;
-  uint64_t tmp;
-
-  /* Get the time from the platform specific hardware */
-
-  clock_systime_timespec(&ts);
-
-  /* Convert to a 64- then a 32-bit value */
-
-  tmp = USEC2TICK(1000000 * (uint64_t)ts.tv_sec + ts.tv_nsec / 1000);
-  return (clock_t)(tmp & TIMER_MASK32);
-
-# endif /* CONFIG_SYSTEM_TIME64 */
-#else /* CONFIG_SCHED_TICKLESS */
-# ifdef CONFIG_SYSTEM_TIME64
-
-  clock_t sample;
-  clock_t verify;
-
-  /* 64-bit accesses are not atomic on most architectures.  The following
-   * loop samples the 64-bit timer twice and loops in the rare event that
-   * there was 32-bit rollover between samples.
-   *
-   * If there is no 32-bit rollover, then:
-   *
-   *  - The MS 32-bits of each sample will be the same, and
-   *  - The LS 32-bits of the second sample will be greater than or equal to
-   *    the LS 32-bits for the first sample.
-   */
-
-  do
+  if (g_rtc_enabled)
     {
-      verify = g_system_ticks;
-      sample = g_system_ticks;
+      struct timespec ts;
+
+      /* Get the time from the platform specific hardware */
+
+      clock_systime_timespec(&ts);
+
+      /* Convert to a 64-bit value in microseconds,
+       * then in clock tick units.
+       */
+
+      return timespec_to_tick(&ts);
     }
-  while ((sample &  TIMER_MASK32)  < (verify &  TIMER_MASK32) ||
-         (sample & ~TIMER_MASK32) != (verify & ~TIMER_MASK32));
+  else
+#endif
+    {
+      /* In tickless mode, all timing is controlled by platform-specific
+       * code.  Let the platform timer do the work.
+       */
 
-  return sample;
+#if defined(CONFIG_SCHED_TICKLESS_TICK_ARGUMENT)
+      clock_t ticks;
+      up_timer_gettick(&ticks);
+      return ticks;
+#elif defined(CONFIG_SCHED_TICKLESS)
+      struct timespec ts;
+      up_timer_gettime(&ts);
+      return timespec_to_tick(&ts);
+#elif defined(CONFIG_SYSTEM_TIME64)
 
-# else /* CONFIG_SYSTEM_TIME64 */
+      clock_t sample;
+      clock_t verify;
 
-  /* Return the current system time */
+      /* 64-bit accesses are not atomic on most architectures.  The following
+       * loop samples the 64-bit timer twice and loops in the rare event that
+       * there was 32-bit rollover between samples.
+       *
+       * If there is no 32-bit rollover, then:
+       *
+       *  - The MS 32-bits of each sample will be the same, and
+       *  - The LS 32-bits of the second sample will be greater than or equal
+       *    to the LS 32-bits for the first sample.
+       */
 
-  return g_system_ticks;
+      do
+        {
+          verify = g_system_ticks;
+          sample = g_system_ticks;
+        }
+      while ((sample &  TIMER_MASK32)  < (verify &  TIMER_MASK32) ||
+             (sample & ~TIMER_MASK32) != (verify & ~TIMER_MASK32));
 
-# endif /* CONFIG_SYSTEM_TIME64 */
-#endif /* CONFIG_SCHED_TICKLESS */
+      return sample;
+
+#else /* CONFIG_SYSTEM_TIME64 */
+
+      /* Return the current system time */
+
+      return g_system_ticks;
+
+#endif /* CONFIG_SYSTEM_TIME64 */
+    }
 }
