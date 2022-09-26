@@ -393,20 +393,23 @@ static int netprocfs_opendir(FAR const char *relpath,
 
   /* Subdirectory ?  */
 
-  for (i = 0; i < ARRAY_SIZE(g_net_entries); i++)
+  if (strlen(relpath) > 4)
     {
-      if (strncmp(relpath + 4, g_net_entries[i].name,
-                  strlen(g_net_entries[i].name)))
+      for (i = 0; i < ARRAY_SIZE(g_net_entries); i++)
         {
-          continue;
-        }
+          if (strncmp(relpath + 4, g_net_entries[i].name,
+                      strlen(g_net_entries[i].name)))
+            {
+              continue;
+            }
 
-      if (g_net_entries[i].type == DTYPE_DIRECTORY)
-        {
-          return g_net_entries[i].u.ops->opendir(relpath, dir);
-        }
+          if (g_net_entries[i].type == DTYPE_DIRECTORY)
+            {
+              return g_net_entries[i].u.ops->opendir(relpath, dir);
+            }
 
-      break;
+          break;
+        }
     }
 
   /* Assume that path refers to the 1st level subdirectory.  Allocate the
