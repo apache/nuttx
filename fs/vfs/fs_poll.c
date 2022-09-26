@@ -312,9 +312,9 @@ void poll_notify(FAR struct pollfd **afds, int nfds, pollevent_t eventset)
           fds->revents |= eventset & (fds->events | POLLERR | POLLHUP);
           if ((fds->revents & (POLLERR | POLLHUP)) != 0)
             {
-              /* Error, clear POLLIN and POLLOUT event */
+              /* Error or Hung up, clear POLLOUT event */
 
-              fds->revents &= ~(POLLIN | POLLOUT);
+              fds->revents &= ~POLLOUT;
             }
 
           if (fds->revents != 0)
