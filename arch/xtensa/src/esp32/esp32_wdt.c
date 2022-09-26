@@ -651,7 +651,7 @@ static int esp32_wdt_settimeout(struct esp32_wdt_dev_s *dev,
       default:
         {
           tmrerr("ERROR: unsupported stage %d\n", stage);
-          return EINVAL;
+          return -EINVAL;
         }
     }
 

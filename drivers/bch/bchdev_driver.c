@@ -261,7 +261,7 @@ static off_t bch_seek(FAR struct file *filep, off_t offset, int whence)
    *   point, subsequent reads of data in the gap shall return bytes with the
    *   value 0 until data is actually written into the gap."
    *
-   * We can conform to the first part, but not the second.  But return EINVAL
+   * We can conform to the first part, but not the second. But return -EINVAL
    * if:
    *
    *  "...the resulting file offset would be negative for a regular file,

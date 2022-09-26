@@ -681,7 +681,7 @@ static int IRAM_ATTR esp32_configure_cpu_freq(uint32_t cpu_freq_mhz)
     }
   else
     {
-      return EINVAL;
+      return -EINVAL;
     }
 
   xtal_freq = esp32_rtc_clk_xtal_freq_get();
