@@ -62,7 +62,12 @@ function python-tools {
   PYTHONUSERBASE=${prebuilt}/pylocal
   export PYTHONUSERBASE
   add_path "${PYTHONUSERBASE}"/bin
-  pip3 install pexpect
+  pip3 install pexpect==4.8.0
+  pip3 install pytest==6.2.5
+  pip3 install pytest-repeat==0.9.1
+  pip3 install pytest-json==0.4.0
+  pip3 install pytest-ordering==0.6
+  pip3 install pyserial==3.5
 
   # MCUboot's tool for image signing and key management
   if ! command -v imgtool &> /dev/null; then
