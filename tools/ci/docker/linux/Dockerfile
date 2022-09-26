@@ -264,6 +264,13 @@ ENV PIP_NO_CACHE_DIR=0
 RUN pip3 install setuptools wheel
 # Install CodeChecker and use it to statically analyze the code.
 RUN pip3 install CodeChecker
+# Install pytest
+RUN pip3 install pexpect==4.8.0
+RUN pip3 install pytest==6.2.5
+RUN pip3 install pytest-repeat==0.9.1
+RUN pip3 install pytest-json==0.4.0
+RUN pip3 install pytest-ordering==0.6
+RUN pip3 install pyserial==3.5
 
 RUN mkdir /tools
 WORKDIR /tools
