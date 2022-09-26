@@ -319,7 +319,6 @@ static int epbuf_write(int epnum, void *buf, size_t len)
   privep = &g_usbdev.eplist[epnum];
 
 cont:
-
   if (epnum == 0)
     {
       while (!(getreg32(USB_EPCTRL(epnum)) & USB_EPCTRL_EMPTYI) &&

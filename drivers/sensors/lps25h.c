@@ -420,7 +420,6 @@ static ssize_t lps25h_read(FAR struct file *filep, FAR char *buffer,
     }
 
 out:
-
   nxsem_post(&dev->devsem);
   return length;
 }

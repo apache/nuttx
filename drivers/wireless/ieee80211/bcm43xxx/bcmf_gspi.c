@@ -893,7 +893,6 @@ static int bcmf_bus_gspi_initialize(FAR struct bcmf_dev_s  *priv,
   return OK;
 
 exit_free_bus:
-
   wlinfo("failed.\n");
 
   kmm_free(gbus);

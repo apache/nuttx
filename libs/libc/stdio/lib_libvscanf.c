@@ -123,7 +123,8 @@ static FAR const char *findscanset(FAR const char *fmt,
     {
       set[c / 8] |= (1 << (c % 8));     /* Take character c */
 
-    doswitch:n = fmt_char(fmt++);       /* Examine the next */
+doswitch:
+      n = fmt_char(fmt++);       /* Examine the next */
       switch (n)
         {
         case 0:                /* Format ended too soon */

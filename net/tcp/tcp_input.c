@@ -538,7 +538,6 @@ reset:
   return;
 
 found:
-
   flags = 0;
 
   /* We do a very naive form of TCP reset processing; we just accept

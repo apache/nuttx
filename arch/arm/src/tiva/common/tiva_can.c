@@ -1663,7 +1663,6 @@ int tivacan_handle_errors(struct can_dev_s *dev)
            canmod->base + TIVA_CAN_OFFSET_STS);
 
 save_regs_and_return:
-
 #endif /* CONFIG_CAN_ERRORS */
 
   /* Save contents of CANSTS and CANERR for other functions to use

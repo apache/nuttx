@@ -7649,8 +7649,8 @@ errout_with_xfrinfo:
   ed->xfrinfo = NULL;
   }
   while (0);
-errout_with_sem:
 
+errout_with_sem:
   /* rx65n_usbhost_givesem(&priv->exclsem); */
 
   return nbytes;

@@ -245,7 +245,6 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
   /* Update the stream flags and return success */
 
 reuse_buffer:
-
   stream->fs_flags    = flags;
   lib_give_semaphore(stream);
   return OK;

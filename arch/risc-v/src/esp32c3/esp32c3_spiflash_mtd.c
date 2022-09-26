@@ -244,7 +244,7 @@ static ssize_t esp32c3_read(struct mtd_dev_s *dev, off_t offset,
   ret = nxsem_wait(&g_exclsem);
   if (ret < 0)
     {
-      goto error_with_buffer;
+      return ret;
     }
 
   ret = spi_flash_read(offset, buffer, nbytes);
@@ -259,8 +259,6 @@ static ssize_t esp32c3_read(struct mtd_dev_s *dev, off_t offset,
 #ifdef CONFIG_ESP32C3_STORAGE_MTD_DEBUG
   finfo("%s()=%d\n", __func__, ret);
 #endif
-
-error_with_buffer:
 
   return ret;
 }
@@ -449,7 +447,7 @@ static ssize_t esp32c3_bread_decrypt(struct mtd_dev_s *dev,
 static ssize_t esp32c3_write(struct mtd_dev_s *dev, off_t offset,
                            size_t nbytes, const uint8_t *buffer)
 {
-  int ret;
+  ssize_t ret;
   struct esp32c3_mtd_dev_s *priv = (struct esp32c3_mtd_dev_s *)dev;
 
   ASSERT(buffer);
@@ -470,7 +468,7 @@ static ssize_t esp32c3_write(struct mtd_dev_s *dev, off_t offset,
   ret = nxsem_wait(&g_exclsem);
   if (ret < 0)
     {
-      goto error_with_buffer;
+      return ret;
     }
 
   ret = spi_flash_write(offset, buffer, nbytes);
@@ -486,9 +484,7 @@ static ssize_t esp32c3_write(struct mtd_dev_s *dev, off_t offset,
   finfo("%s()=%d\n", __func__, ret);
 #endif
 
-error_with_buffer:
-
-  return (ssize_t)ret;
+  return ret;
 }
 
 /****************************************************************************
@@ -582,7 +578,7 @@ static ssize_t esp32c3_bwrite_encrypt(struct mtd_dev_s *dev,
   ret = nxsem_wait(&g_exclsem);
   if (ret < 0)
     {
-      goto error_with_buffer;
+      return ret;
     }
 
   ret = spi_flash_write_encrypted(addr, buffer, size);
@@ -597,8 +593,6 @@ static ssize_t esp32c3_bwrite_encrypt(struct mtd_dev_s *dev,
 #ifdef CONFIG_ESP32C3_STORAGE_MTD_DEBUG
   finfo("%s()=%d\n", __func__, ret);
 #endif
-
-error_with_buffer:
 
   return ret;
 }

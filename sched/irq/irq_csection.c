@@ -186,7 +186,6 @@ irqstate_t enter_critical_section(void)
    */
 
 try_again:
-
   ret = up_irq_save();
 
   /* Verify that the system has sufficiently initialized so that the task

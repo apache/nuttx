@@ -73,7 +73,6 @@ static int pseudorename(FAR const char *oldpath, FAR struct inode *oldinode,
    */
 
 next_subdir:
-
   SETUP_SEARCH(&newdesc, newpath, true);
   ret = inode_find(&newdesc);
   if (ret >= 0)
@@ -333,7 +332,6 @@ static int mountptrename(FAR const char *oldpath, FAR struct inode *oldinode,
       struct stat buf;
 
 next_subdir:
-
       /* Something exists for this directory entry.  Do nothing in the
        * degenerate case where a directory or file is being moved to
        * itself.

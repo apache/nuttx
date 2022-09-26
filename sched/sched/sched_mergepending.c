@@ -201,7 +201,7 @@ bool nxsched_merge_pending(void)
         {
           /* The pending task list is empty */
 
-          goto errout;
+          return false;
         }
 
       cpu  = nxsched_select_cpu(ALL_CPUS); /* REVISIT:  Maybe ptcb->affinity */
@@ -272,7 +272,6 @@ bool nxsched_merge_pending(void)
     }
 
 errout:
-
   return ret;
 }
 #endif /* CONFIG_SMP */

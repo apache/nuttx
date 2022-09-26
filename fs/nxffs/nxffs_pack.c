@@ -1391,7 +1391,6 @@ int nxffs_pack(FAR struct nxffs_volume_s *volume)
    */
 
 start_pack:
-
   pack.ioblock     = nxffs_getblock(volume, iooffset);
   pack.iooffset    = nxffs_getoffset(volume, iooffset, pack.ioblock);
   volume->froffset = iooffset;

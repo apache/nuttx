@@ -706,7 +706,6 @@ static int esp32c3_rsa_deduce_primes(struct esp32c3_mpi_s const *N,
   ret = ESP32C3_ERR_MPI_BAD_INPUT_DATA;
 
 cleanup:
-
   esp32c3_mpi_free(&K);
   esp32c3_mpi_free(&T);
   return ret;
@@ -772,7 +771,6 @@ static int esp32c3_rsa_deduce_private_exponent(struct esp32c3_mpi_s const *P,
   ESP32C3_MPI_CHK(esp32c3_mpi_inv_mod(D, E, &K), cleanup);
 
 cleanup:
-
   esp32c3_mpi_free(&K);
   esp32c3_mpi_free(&L);
 
@@ -990,7 +988,6 @@ static int esp32c3_rsa_validate_params(const struct esp32c3_mpi_s *N,
     }
 
 cleanup:
-
   esp32c3_mpi_free(&K);
   esp32c3_mpi_free(&L);
 
@@ -1172,7 +1169,6 @@ int esp32c3_rsa_import_raw(struct esp32c3_rsa_context_s *ctx,
     }
 
 cleanup:
-
   if (ret != 0)
     {
       return (ESP32C3_ERR_RSA_BAD_INPUT_DATA + ret);
@@ -1375,7 +1371,6 @@ int esp32c3_rsa_export_raw(const struct esp32c3_rsa_context_s *ctx,
     }
 
 cleanup:
-
   return ret;
 }
 

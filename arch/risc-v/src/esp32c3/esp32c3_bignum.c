@@ -811,7 +811,6 @@ static int mpi_mult_mpi_overlong(struct esp32c3_mpi_s *Z,
 
 cleanup:
   esp32c3_mpi_free(&ztemp);
-
   return ret;
 }
 
@@ -848,6 +847,7 @@ static int mpi_mult_mpi_failover_mod_mult(struct esp32c3_mpi_s *Z,
   esp32c3_mpi_read_result_hw_op(Z, z_words);
 
   Z->s = X->s * Y->s;
+
 cleanup:
   esp32c3_mpi_disable_hardware_hw_op();
   return ret;
@@ -983,7 +983,6 @@ static int mpi_write_hlp(struct esp32c3_mpi_s *X, int radix,
   *p += length;
 
 cleanup:
-
   return ret;
 }
 
@@ -1447,7 +1446,6 @@ int esp32c3_mpi_copy(struct esp32c3_mpi_s *X,
   memcpy(X->p, Y->p, i * CIL);
 
 cleanup:
-
   return ret;
 }
 
@@ -1604,7 +1602,6 @@ int esp32c3_mpi_lset(struct esp32c3_mpi_s *X, int32_t z)
   X->s  = (z < 0) ? -1 : 1;
 
 cleanup:
-
   return ret;
 }
 
@@ -1678,7 +1675,6 @@ int esp32c3_mpi_set_bit(struct esp32c3_mpi_s *X,
   X->p[off] |= (uint32_t) val << idx;
 
 cleanup:
-
   return ret;
 }
 
@@ -1863,9 +1859,7 @@ int esp32c3_mpi_read_string(struct esp32c3_mpi_s *X,
     }
 
 cleanup:
-
   esp32c3_mpi_free(&T);
-
   return ret;
 }
 
@@ -2001,9 +1995,7 @@ int esp32c3_mpi_write_string(const struct esp32c3_mpi_s *X, int radix,
   *olen = p - buf;
 
 cleanup:
-
   esp32c3_mpi_free(&T);
-
   return ret;
 }
 
@@ -2059,7 +2051,6 @@ int esp32c3_mpi_read_binary(struct esp32c3_mpi_s *X,
     }
 
 cleanup:
-
   return ret;
 }
 
@@ -2193,7 +2184,6 @@ int esp32c3_mpi_shift_l(struct esp32c3_mpi_s *X, size_t count)
     }
 
 cleanup:
-
   return ret;
 }
 
@@ -2619,7 +2609,6 @@ int esp32c3_mpi_add_abs(struct esp32c3_mpi_s *X,
     }
 
 cleanup:
-
   return ret;
 }
 
@@ -2702,9 +2691,7 @@ int esp32c3_mpi_sub_abs(struct esp32c3_mpi_s *X,
     }
 
 cleanup:
-
   esp32c3_mpi_free(&TB);
-
   return ret;
 }
 
@@ -2755,7 +2742,6 @@ int esp32c3_mpi_add_mpi(struct esp32c3_mpi_s *X,
     }
 
 cleanup:
-
   return ret;
 }
 
@@ -2806,7 +2792,6 @@ int esp32c3_mpi_sub_mpi(struct esp32c3_mpi_s *X,
     }
 
 cleanup:
-
   return ret;
 }
 
@@ -3166,7 +3151,6 @@ int esp32c3_mpi_div_mpi(struct esp32c3_mpi_s *Q,
     }
 
 cleanup:
-
   esp32c3_mpi_free(&X); esp32c3_mpi_free(&Y); esp32c3_mpi_free(&Z);
   esp32c3_mpi_free(&T1); esp32c3_mpi_free(&T2);
 
@@ -3250,7 +3234,6 @@ int esp32c3_mpi_mod_mpi(struct esp32c3_mpi_s *R,
     }
 
 cleanup:
-
   return ret;
 }
 
@@ -3583,7 +3566,6 @@ int esp32c3_mpi_exp_mod(struct esp32c3_mpi_s *X,
     }
 
 cleanup:
-
   for (i = (one << (wsize - 1)); i < (one << wsize); i++)
     {
       esp32c3_mpi_free(&W[i]);
@@ -3673,9 +3655,7 @@ int esp32c3_mpi_gcd(struct esp32c3_mpi_s *G,
   ESP32C3_MPI_CHK(esp32c3_mpi_copy(G, &TB), cleanup);
 
 cleanup:
-
   esp32c3_mpi_free(&TG); esp32c3_mpi_free(&TA); esp32c3_mpi_free(&TB);
-
   return ret;
 }
 
@@ -3854,7 +3834,6 @@ int esp32c3_mpi_inv_mod(struct esp32c3_mpi_s *X,
   ESP32C3_MPI_CHK(esp32c3_mpi_copy(X, &V1), cleanup);
 
 cleanup:
-
   esp32c3_mpi_free(&TA);
   esp32c3_mpi_free(&TU);
   esp32c3_mpi_free(&U1);
