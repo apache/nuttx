@@ -1646,13 +1646,16 @@ void up_timer_initialize(void);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_TICKLESS)
+#if defined(CONFIG_SCHED_TICKLESS) && !defined(CONFIG_SCHED_TICKLESS_TICK_ARGUMENT)
 int up_timer_gettime(FAR struct timespec *ts);
 #endif
 
+#if defined(CONFIG_SCHED_TICKLESS_TICK_ARGUMENT) || defined(CONFIG_CLOCK_TIMEKEEPING)
+int up_timer_gettick(FAR clock_t *ticks);
+#endif
+
 #ifdef CONFIG_CLOCK_TIMEKEEPING
-int up_timer_getcounter(FAR uint64_t *cycles);
-void up_timer_getmask(FAR uint64_t *mask);
+void up_timer_getmask(FAR clock_t *mask);
 #endif
 
 /****************************************************************************
@@ -1690,7 +1693,11 @@ void up_timer_getmask(FAR uint64_t *mask);
  ****************************************************************************/
 
 #if defined(CONFIG_SCHED_TICKLESS) && defined(CONFIG_SCHED_TICKLESS_ALARM)
+#  ifndef CONFIG_SCHED_TICKLESS_TICK_ARGUMENT
 int up_alarm_cancel(FAR struct timespec *ts);
+#  else
+int up_alarm_tick_cancel(FAR clock_t *ticks);
+#  endif
 #endif
 
 /****************************************************************************
@@ -1719,7 +1726,11 @@ int up_alarm_cancel(FAR struct timespec *ts);
  ****************************************************************************/
 
 #if defined(CONFIG_SCHED_TICKLESS) && defined(CONFIG_SCHED_TICKLESS_ALARM)
+#  ifndef CONFIG_SCHED_TICKLESS_TICK_ARGUMENT
 int up_alarm_start(FAR const struct timespec *ts);
+#  else
+int up_alarm_tick_start(clock_t ticks);
+#  endif
 #endif
 
 /****************************************************************************
@@ -1759,7 +1770,11 @@ int up_alarm_start(FAR const struct timespec *ts);
  ****************************************************************************/
 
 #if defined(CONFIG_SCHED_TICKLESS) && !defined(CONFIG_SCHED_TICKLESS_ALARM)
+#  ifndef CONFIG_SCHED_TICKLESS_TICK_ARGUMENT
 int up_timer_cancel(FAR struct timespec *ts);
+#  else
+int up_timer_tick_cancel(FAR clock_t *ticks);
+#  endif
 #endif
 
 /****************************************************************************
@@ -1788,7 +1803,11 @@ int up_timer_cancel(FAR struct timespec *ts);
  ****************************************************************************/
 
 #if defined(CONFIG_SCHED_TICKLESS) && !defined(CONFIG_SCHED_TICKLESS_ALARM)
+#  ifndef CONFIG_SCHED_TICKLESS_TICK_ARGUMENT
 int up_timer_start(FAR const struct timespec *ts);
+#  else
+int up_timer_tick_start(clock_t ticks);
+#  endif
 #endif
 
 /****************************************************************************
@@ -2251,6 +2270,7 @@ void nxsched_timer_expiration(void);
 
 #if defined(CONFIG_SCHED_TICKLESS) && defined(CONFIG_SCHED_TICKLESS_ALARM)
 void nxsched_alarm_expiration(FAR const struct timespec *ts);
+void nxsched_alarm_tick_expiration(clock_t ticks);
 #endif
 
 /****************************************************************************

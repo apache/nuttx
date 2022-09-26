@@ -60,6 +60,26 @@ config SCHED_TICKLESS
 
 if SCHED_TICKLESS
 
+config SCHED_TICKLESS_TICK_ARGUMENT
+	bool "Scheduler use tick argument"
+	default n
+	---help---
+		Enables use of tick argument in scheduler. If enabled, then the
+		board-specific logic must provide the following functions:
+
+			int up_timer_gettick(FAR clock_t *ticks);
+
+		If SCHED_TICKLESS_ALARM is enabled, then these additional interfaces are
+		expected:
+
+			int up_alarm_tick_cancel(FAR clock_t *ticks);
+			int up_alarm_tick_start(clock_t ticks);
+
+		Otherwise, these additional interfaces are expected:
+
+			int up_timer_tick_cancel(FAR clock_t *ticks);
+			int up_timer_tick_start(FAR clock_t ticks);
+
 config SCHED_TICKLESS_ALARM
 	bool "Tickless alarm"
 	default n

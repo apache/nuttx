@@ -72,7 +72,7 @@ static int clock_get_current_time(FAR struct timespec *ts,
 
   flags = enter_critical_section();
 
-  ret = up_timer_getcounter(&counter);
+  ret = up_timer_gettick(&counter);
   if (ret < 0)
     {
       goto errout_in_critical_section;
@@ -123,7 +123,7 @@ int clock_timekeeping_set_wall_time(FAR const struct timespec *ts)
 
   flags = enter_critical_section();
 
-  ret = up_timer_getcounter(&counter);
+  ret = up_timer_gettick(&counter);
   if (ret < 0)
     {
       goto errout_in_critical_section;
@@ -217,7 +217,7 @@ void clock_update_wall_time(void)
 
   flags = enter_critical_section();
 
-  ret = up_timer_getcounter(&counter);
+  ret = up_timer_gettick(&counter);
   if (ret < 0)
     {
       goto errout_in_critical_section;
@@ -289,7 +289,7 @@ void clock_inittimekeeping(FAR const struct timespec *tp)
       clock_basetime(&g_clock_wall_time);
     }
 
-  up_timer_getcounter(&g_clock_last_counter);
+  up_timer_gettick(&g_clock_last_counter);
 }
 
 #endif /* CONFIG_CLOCK_TIMEKEEPING */

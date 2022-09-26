@@ -114,7 +114,16 @@ int clock_systime_timespec(FAR struct timespec *ts)
        * code.  Let the platform timer do the work.
        */
 
+#ifdef CONFIG_SCHED_TICKLESS_TICK_ARGUMENT
+      clock_t ticks;
+      int ret;
+
+      ret = up_timer_gettick(&ticks);
+      timespec_from_tick(ts, ticks);
+      return ret;
+#else
       return up_timer_gettime(ts);
+#endif
 
 #elif defined(CONFIG_HAVE_LONG_LONG) && (CONFIG_USEC_PER_TICK % 1000) != 0
       /* 64-bit microsecond calculations should improve our accuracy
