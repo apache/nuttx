@@ -377,7 +377,7 @@ static off_t rx65n_sbram_seek(FAR struct file *filep, off_t offset,
    *   0 until data is actually written into the gap."
    *
    * We can conform to the first part, but not the second.
-   * But return EINVAL if
+   * But return -EINVAL if
    *
    *  "...the resulting file offset would be negative for a regular
    *  file, block

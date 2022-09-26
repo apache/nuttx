@@ -7651,6 +7651,7 @@ errout_with_xfrinfo:
   while (0);
 
 errout_with_sem:
+
   /* rx65n_usbhost_givesem(&priv->exclsem); */
 
   return nbytes;

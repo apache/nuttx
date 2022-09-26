@@ -614,7 +614,7 @@ static off_t ee25xx_seek(FAR struct file *filep, off_t offset, int whence)
    *  value 0 until data is actually written into the gap."
    *
    * We can conform to the first part, but not the second.
-   * But return EINVAL if
+   * But return -EINVAL if
    *
    *  "...the resulting file offset would be negative for a regular file,
    *  block special file, or directory."
