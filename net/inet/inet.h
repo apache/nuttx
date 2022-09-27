@@ -67,12 +67,6 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#ifdef CONFIG_NET_IPv4
-/* Increasing number used for the IP ID field. */
-
-EXTERN uint16_t g_ipid;
-#endif /* CONFIG_NET_IPv4 */
-
 /* Well-known IPv6 addresses */
 
 #ifdef CONFIG_NET_IPv6
@@ -260,6 +254,58 @@ int inet_close(FAR struct socket *psock);
  ****************************************************************************/
 
 int inet_txdrain(FAR struct socket *psock, unsigned int timeout);
+
+/****************************************************************************
+ * Name: ipv4_build_header
+ *
+ * Description:
+ *   build IPv4 header
+ *
+ * Input Parameters:
+ *   ipv4       Pointer to IPv4 header's buffer
+ *   total_len  total length of the IPv4 packet
+ *   prot       the next level protocol used in IPv4 packet
+ *   src_ip     Source IPv4 address
+ *   dst_ip     Destination IPv4 address
+ *   ttl        Time to live(IPv4)
+ *   opt        IPv4 options
+ *
+ * Returned Value:
+ *   length of IPv4 header
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv4
+uint16_t ipv4_build_header(FAR struct ipv4_hdr_s *ipv4, uint16_t total_len,
+                           uint16_t prot, FAR const in_addr_t *src_ip,
+                           FAR const in_addr_t *dst_ip, uint8_t ttl,
+                           FAR struct ipv4_opt_s *opt);
+#endif
+
+/****************************************************************************
+ * Name: ipv6_build_header
+ *
+ * Description:
+ *   build IPv6 header
+ *
+ * Input Parameters:
+ *   ipv6         Pointer to IPv6 header's buffer
+ *   payload_len  Length of the IPv6 payload(without IPv6 header length)
+ *   prot         Type of header immediately following the IPv6 header
+ *   src_ip       Source IPv6 address
+ *   dst_ip       Destination IPv6 address
+ *   ttl          hop limit(IPv6)
+ *
+ * Returned Value:
+ *   length of IPv6 header
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+uint16_t ipv6_build_header(FAR struct ipv6_hdr_s *ipv6, uint16_t payload_len,
+                           uint16_t prot, const net_ipv6addr_t src_ip,
+                           const net_ipv6addr_t dst_ip, uint8_t ttl);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

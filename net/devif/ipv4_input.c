@@ -105,6 +105,7 @@
 #include "ipforward/ipforward.h"
 #include "devif/devif.h"
 #include "nat/nat.h"
+#include "utils/utils.h"
 
 /****************************************************************************
  * Private Data
@@ -342,7 +343,7 @@ int ipv4_input(FAR struct net_driver_s *dev)
     }
 #endif
 
-  if (ipv4_chksum(dev) != 0xffff)
+  if (ipv4_chksum(IPv4BUF) != 0xffff)
     {
       /* Compute and check the IP header checksum. */
 

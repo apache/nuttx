@@ -21,7 +21,7 @@ config NET_ARCH_CHKSUM
 
 			uint16_t chksum(uint16_t sum, FAR const uint8_t *data, uint16_t len)
 			uint16_t net_chksum(FAR uint16_t *data, uint16_t len)
-			uint16_t ipv4_chksum(FAR struct net_driver_s *dev)
+			uint16_t ipv4_chksum(FAR struct ipv4_hdr_s *ipv4)
 			uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto)
 			uint16_t ipv6_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto, unsigned int iplen)
 

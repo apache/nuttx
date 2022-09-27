@@ -97,7 +97,6 @@ struct icmp_sendto_s
 static void sendto_request(FAR struct net_driver_s *dev,
                            FAR struct icmp_sendto_s *pstate)
 {
-  FAR struct ipv4_hdr_s *ipv4;
   FAR struct icmp_hdr_s *icmp;
 
   IFF_SET_IPv4(dev->d_flags);
@@ -112,33 +111,16 @@ static void sendto_request(FAR struct net_driver_s *dev,
 
   dev->d_sndlen += pstate->snd_buflen;
 
-  /* Initialize the IP header. */
-
-  ipv4              = IPv4BUF;
-  ipv4->vhl         = 0x45;
-  ipv4->tos         = 0;
-  ipv4->len[0]      = (dev->d_len >> 8);
-  ipv4->len[1]      = (dev->d_len & 0xff);
-  ++g_ipid;
-  ipv4->ipid[0]     = g_ipid >> 8;
-  ipv4->ipid[1]     = g_ipid & 0xff;
-  ipv4->ipoffset[0] = IP_FLAG_DONTFRAG >> 8;
-  ipv4->ipoffset[1] = IP_FLAG_DONTFRAG & 0xff;
-  ipv4->ttl         = IP_TTL_DEFAULT;
-  ipv4->proto       = IP_PROTO_ICMP;
-
-  net_ipv4addr_hdrcopy(ipv4->srcipaddr, &dev->d_ipaddr);
-  net_ipv4addr_hdrcopy(ipv4->destipaddr, &pstate->snd_toaddr);
-
   /* Copy the ICMP header and payload into place after the IPv4 header */
 
   icmp              = IPBUF(IPv4_HDRLEN);
   memcpy(icmp, pstate->snd_buf, pstate->snd_buflen);
 
-  /* Calculate IP checksum. */
+  /* Initialize the IP header. */
 
-  ipv4->ipchksum    = 0;
-  ipv4->ipchksum    = ~(ipv4_chksum(dev));
+  ipv4_build_header(IPv4BUF, dev->d_len, IP_PROTO_ICMP,
+                    &dev->d_ipaddr, &pstate->snd_toaddr,
+                    IP_TTL_DEFAULT, NULL);
 
   /* Calculate the ICMP checksum. */
 
@@ -149,8 +131,7 @@ static void sendto_request(FAR struct net_driver_s *dev,
       icmp->icmpchksum = 0xffff;
     }
 
-  ninfo("Outgoing ICMP packet length: %d (%d)\n",
-        dev->d_len, (ipv4->len[0] << 8) | ipv4->len[1]);
+  ninfo("Outgoing ICMP packet length: %d\n", dev->d_len);
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.icmp.sent++;

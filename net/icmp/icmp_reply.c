@@ -127,27 +127,9 @@ void icmp_reply(FAR struct net_driver_s *dev, int type, int code)
 
   memmove(icmp + 1, ipv4, datalen);
 
-  /* Initialize the IP header. */
-
-  ipv4->vhl         = 0x45;
-  ipv4->tos         = 0;
-  ipv4->len[0]      = (dev->d_len >> 8);
-  ipv4->len[1]      = (dev->d_len & 0xff);
-  ++g_ipid;
-  ipv4->ipid[0]     = g_ipid >> 8;
-  ipv4->ipid[1]     = g_ipid & 0xff;
-  ipv4->ipoffset[0] = IP_FLAG_DONTFRAG >> 8;
-  ipv4->ipoffset[1] = IP_FLAG_DONTFRAG & 0xff;
-  ipv4->ttl         = IP_TTL_DEFAULT;
-  ipv4->proto       = IP_PROTO_ICMP;
-
-  /* Calculate IP checksum. */
-
-  ipv4->ipchksum    = 0;
-  ipv4->ipchksum    = ~ipv4_chksum(dev);
-
-  net_ipv4addr_hdrcopy(ipv4->destipaddr, ipv4->srcipaddr);
-  net_ipv4addr_hdrcopy(ipv4->srcipaddr, &dev->d_ipaddr);
+  ipv4_build_header(IPv4BUF, dev->d_len, IP_PROTO_ICMP,
+                    &dev->d_ipaddr, (FAR in_addr_t *)ipv4->srcipaddr,
+                    IP_TTL_DEFAULT, NULL);
 
   /* Initialize the ICMP header */
 
@@ -165,8 +147,7 @@ void icmp_reply(FAR struct net_driver_s *dev, int type, int code)
       icmp->icmpchksum = 0xffff;
     }
 
-  ninfo("Outgoing ICMP packet length: %d (%d)\n",
-         dev->d_len, (ipv4->len[0] << 8) | ipv4->len[1]);
+  ninfo("Outgoing ICMP packet length: %d\n", dev->d_len);
 }
 
 #endif /* CONFIG_NET_ICMP */

@@ -102,9 +102,10 @@ static uint16_t igmp_chksum(FAR uint8_t *buffer, int buflen)
 void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
                FAR const in_addr_t *destipaddr, uint8_t msgid)
 {
-  FAR struct igmp_iphdr_s *ipv4 = IPBUF(0);
   FAR struct igmp_hdr_s *igmp;
   uint16_t iphdrlen;
+  struct ipv4_opt_s opt;
+  uint32_t tmp;
 
   ninfo("msgid: %02x destipaddr: %08x\n", msgid, (int)*destipaddr);
 
@@ -125,30 +126,12 @@ void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
 
   /* Add the router alert option to the IPv4 header (RFC 2113) */
 
-  ipv4->ra[0]       = HTONS(IPOPT_RA >> 16);
-  ipv4->ra[1]       = HTONS(IPOPT_RA & 0xffff);
+  tmp = HTONL(IPOPT_RA);
+  memcpy(opt.data, &tmp, sizeof(uint32_t));
+  opt.len = sizeof(uint32_t);
 
-  /* Initialize the IPv4 header */
-
-  ipv4->vhl         = 0x46;  /* 4->IP; 6->24 bytes */
-  ipv4->tos         = 0;
-  ipv4->len[0]      = (dev->d_len >> 8);
-  ipv4->len[1]      = (dev->d_len & 0xff);
-  ++g_ipid;
-  ipv4->ipid[0]     = g_ipid >> 8;
-  ipv4->ipid[1]     = g_ipid & 0xff;
-  ipv4->ipoffset[0] = IP_FLAG_DONTFRAG >> 8;
-  ipv4->ipoffset[1] = IP_FLAG_DONTFRAG & 0xff;
-  ipv4->ttl         = IGMP_TTL;
-  ipv4->proto       = IP_PROTO_IGMP;
-
-  net_ipv4addr_hdrcopy(ipv4->srcipaddr, &dev->d_ipaddr);
-  net_ipv4addr_hdrcopy(ipv4->destipaddr, destipaddr);
-
-  /* Calculate IP checksum. */
-
-  ipv4->ipchksum    = 0;
-  ipv4->ipchksum    = ~igmp_chksum((FAR uint8_t *)igmp, iphdrlen);
+  ipv4_build_header(IPv4BUF, dev->d_len, IP_PROTO_IGMP,
+                    &dev->d_ipaddr, destipaddr, IGMP_TTL, &opt);
 
   /* Set up the IGMP message */
 
@@ -164,8 +147,7 @@ void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
   IGMP_STATINCR(g_netstats.igmp.poll_send);
   IGMP_STATINCR(g_netstats.ipv4.sent);
 
-  ninfo("Outgoing IGMP packet length: %d (%d)\n",
-        dev->d_len, (ipv4->len[0] << 8) | ipv4->len[1]);
+  ninfo("Outgoing IGMP packet length: %d\n", dev->d_len);
   igmp_dumppkt(RA, iphdrlen + IGMP_HDRLEN);
 }
 
