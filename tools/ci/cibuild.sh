@@ -68,6 +68,8 @@ function python-tools {
   pip3 install pytest-json==0.4.0
   pip3 install pytest-ordering==0.6
   pip3 install pyserial==3.5
+  pip3 install pyelftools
+  pip3 install cxxfilt
 
   # MCUboot's tool for image signing and key management
   if ! command -v imgtool &> /dev/null; then
