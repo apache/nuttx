@@ -5,7 +5,7 @@
 
 config OPENSBI
 	bool "OpenSBI support"
-	depends on ARCH_RISCV
+	depends on ARCH_RISCV && ALLOW_BSD_COMPONENTS
 	default n
 	---help---
 		Enable or disable Open Source Supervisor Binary Interface (OpenSBI) features
