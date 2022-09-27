@@ -126,6 +126,37 @@ config MPFS_DDR_INIT
 	---help---
 		Initializes and performs DDR training on the associated DDR memory.
 
+choice
+	prompt "Choose DDR type"
+	depends on MPFS_DDR_INIT
+	default MPFS_DDR_TYPE_LPDDR4
+	
+config MPFS_DDR_TYPE_DDR3
+	bool "Use DDR3"
+
+config MPFS_DDR_TYPE_DDR3L
+	bool "Use DDR3L"
+
+config MPFS_DDR_TYPE_DDR4
+	bool "Use DDR4"
+
+config MPFS_DDR_TYPE_LPDDR3
+	bool "Use LPDDR3"
+
+config MPFS_DDR_TYPE_LPDDR4
+	bool "Use LPDDR4"
+
+endchoice
+
+config MPFS_DDR_TYPE
+	int
+	depends on MPFS_DDR_INIT
+	default 0 if MPFS_DDR_TYPE_DDR3
+	default 1 if MPFS_DDR_TYPE_DDR3L
+	default 2 if MPFS_DDR_TYPE_DDR4
+	default 3 if MPFS_DDR_TYPE_LPDDR3
+	default 4 if MPFS_DDR_TYPE_LPDDR4
+
 config MPFS_EMMCSD_MUX_GPIO
 	bool "GPIO driven EMMCSD mux"
 	default n
