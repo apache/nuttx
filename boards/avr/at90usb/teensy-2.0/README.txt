@@ -156,7 +156,7 @@ I have the SD-ADP SD/MMC Card Adaptor from www.gravitech.com
   o Connect directly to 3.3V or 5.0V microcontroller
   o Card detect LED
   o Includes 11-pin male header
-  o Board dimension: 2.0”x1.3”
+  o Board dimension: 2.0"x1.3"
 
 SD-ADP Pinout / SD Connection
 

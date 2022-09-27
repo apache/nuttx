@@ -19,7 +19,7 @@
 
 /****************************************************************************
  * References:
- *   "PGA112, PGA113, PGA116, PGA117: Zerø-Drift PROGRAMMABLE GAIN AMPLIFIER
+ *   "PGA112, PGA113, PGA116, PGA117: ZerÃ¸-Drift PROGRAMMABLE GAIN AMPLIFIER
  *   with MUX", SBOS424B, March 2008, Revised September 2008, Texas
  *   Instruments Incorporated"
  *

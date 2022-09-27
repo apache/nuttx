@@ -27,7 +27,7 @@ The Stellaris RDK-S2E Reference Design Kit includes the following features:
 
 Features of the LM3S6432 Microcontroller
 
- o  32-bit RISC performance using ARM® Cortex™-M3 v7M architecture
+ o  32-bit RISC performance using ARMÂ® Cortexâ„¢-M3 v7M architecture
     - 50-MHz operation
     - Hardware-division and single-cycle-multiplication
     - Integrated Nested Vectored Interrupt Controller (NVIC)
@@ -41,10 +41,10 @@ Features of the LM3S6432 Microcontroller
  o  Two independent integrated analog comparators
  o  One I2C module
  o  One PWM generator block
-    – One 16-bit counter
-    – Two comparators
-    – Produces two independent PWM signals
-    – One dead-band generator
+    - One 16-bit counter
+    - Two comparators
+    - Produces two independent PWM signals
+    - One dead-band generator
  o  0 to 43 GPIOs, depending on user configuration
  o  On-chip low drop-out (LDO) voltage regulator
 

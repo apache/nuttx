@@ -48,15 +48,15 @@ struct lpc31_header_s
                                *    should always be set to 0x41676d69.
                                */
   uint32_t execution_crc32;   /* 0x08    CRC32 value of execution part of
-                               *    the image. If the ‘image_type’ is set
-                               *    to ‘0xA’, this field is ignored by boot
+                               *    the image. If the 'image_type' is set
+                               *    to '0xA', this field is ignored by boot
                                *    ROM.
                                */
   uint32_t reserved0[4];      /* 0x0c-0x18: Should be zero. */
   uint32_t imagetype;         /* 0x1c Specifies whether CRC check should be
                                *    done on the image or not:
-                               *      0xA – No CRC check required.
-                               *      0xB – Do CRC32 check on both header and
+                               *      0xA - No CRC check required.
+                               *      0xB - Do CRC32 check on both header and
                                *            execution part of the image.
                                */
   uint32_t imagelength;       /* 0x20    Total image length including header
@@ -82,7 +82,7 @@ struct lpc31_header_s
                                */
   uint32_t header_crc32;      /* 0x6c CRC32 value of the header
                                *    (bytes 0x00 to 0x6C of the image).
-                               *    If the ‘image_type’ is set to ‘0xA’,
+                               *    If the 'image_type' is set to '0xA',
                                *    this field is ignored by boot ROM.
                                */
   uint32_t reserved1[4];      /* 0x70-0x7c: Should be zero. */

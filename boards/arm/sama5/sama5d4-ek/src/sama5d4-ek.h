@@ -536,9 +536,9 @@
  *
  *   - 7 inch LCD at 800x480 18-bit RGB resolution and white backlight
  *   - Projected Capacitive Multi-Touch Controller based on the Atmel
- *     MXT768E maXTouch™ IC
- *   - 4 Capacitive “Navigation” Keys available via an Atmel AT42QT1070
- *     QTouch™ Button Sensor IC
+ *     MXT768E maXTouchâ„¢ IC
+ *   - 4 Capacitive "Navigation" Keys available via an Atmel AT42QT1070
+ *     QTouchâ„¢ Button Sensor IC
  *   - 200 bytes of non-volatile serial EEPROM
  *
  * Both the MXT768E and the AT42QT1070 are I2C devices with interrupting

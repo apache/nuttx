@@ -346,7 +346,7 @@
 #define ADC_UD_CONTROL_OVERFLOW     0x05
 #define ADC_UD_CONTROL_LATENCY      0x06
 
-/* Dolby Prologic™ Processing Unit Control Selectors */
+/* Dolby Prologicâ„¢ Processing Unit Control Selectors */
 
 #define ADC_DP_CONTROL_UNDEF        0x00
 #define ADC_DP_CONTROL_ENABLE       0x01
@@ -1155,7 +1155,7 @@ struct adc_mpeg_decoder_desc_s
                                  *      00 = Not supported
                                  *      01 = Supported at Fs
                                  *      10 = Reserved
-                                 *      11 = Supported at Fs and ½Fs.
+                                 *      11 = Supported at Fs and Â½Fs.
                                  *    Bit 10:
                                  *    Bit 11-15: Reserved */
   uint8_t md_features;          /* 7: MPEG features

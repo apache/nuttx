@@ -186,7 +186,7 @@ static inline void rcc_enableapb1(void)
 
 #ifdef CONFIG_STM32_USB
   /* USB clock divider. This bit must be valid before enabling the USB
-   * clock in the RCC_APB1ENR register. This bit can’t be reset if the USB
+   * clock in the RCC_APB1ENR register. This bit can't be reset if the USB
    * clock is enabled.
    */
 

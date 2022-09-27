@@ -7,22 +7,22 @@ README
 
 CONTENTS
 ^^^^^^^^
-  • MC9S12NE64 Features
-  • NE64 Badge Pin Usage
-  • Development Environment
-  • NuttX Buildroot Toolchain
-  • FreeScale HCS12 Serial Monitor
-  • Soft Registers
-  • HCS12/NE64BADGE-specific Configuration Options
-  • Configurations
+  o MC9S12NE64 Features
+  o NE64 Badge Pin Usage
+  o Development Environment
+  o NuttX Buildroot Toolchain
+  o FreeScale HCS12 Serial Monitor
+  o Soft Registers
+  o HCS12/NE64BADGE-specific Configuration Options
+  o Configurations
 
 MC9S12NE64 Features
 ^^^^^^^^^^^^^^^^^^^
 
-  • 16-bit HCS12 core
+  o 16-bit HCS12 core
     - HCS12 CPU
     - Upward compatible with M68HC11 instruction set
-    - Interrupt stacking and programmer’s model identical to M68HC11
+    - Interrupt stacking and programmer's model identical to M68HC11
     - Instruction queue
     - Enhanced indexed addressing
     - Memory map and interface (MMC)
@@ -32,16 +32,16 @@ MC9S12NE64 Features
       trace buffer (DBG)
     - Multiplexed expansion bus interface (MEBI) - available only in
       112-pin package version
-  • Wakeup interrupt inputs
+  o Wakeup interrupt inputs
     - Up to 21 port bits available for wakeup interrupt function with
       digital filtering
-  • Memory
+  o Memory
     - 64K bytes of FLASH EEPROM
     - 8K bytes of RAM
-  • Analog-to-digital converter (ATD)
+  o Analog-to-digital converter (ATD)
     - One 8-channel module with 10-bit resolution
     - External conversion trigger capability
-  • Timer module (TIM)
+  o Timer module (TIM)
     - 4-channel timer
     - Each channel configurable as either input capture or output
       compare
@@ -50,11 +50,11 @@ MC9S12NE64 Features
     - 16-bit pulse accumulator
     - External event counting
     - Gated time accumulation
-  • Serial interfaces
+  o Serial interfaces
     - Two asynchronous serial communications interface (SCI)
     - One synchronous serial peripheral interface (SPI)
     - One inter-IC bus (IIC)
-  • Ethernet Media access controller (EMAC)
+  o Ethernet Media access controller (EMAC)
     - IEEE 802.3 compliant
     - Medium-independent interface (MII)
     - Full-duplex and half-duplex modes
@@ -66,10 +66,10 @@ MC9S12NE64 Features
     - Exact match for single 48-bit individual (unicast) address
     - Hash (64-bit hash) check of group (multicast) addresses
     - Promiscuous mode
-  • Ethertype filter
-  • Loopback mode
-  • Two receive and one transmit Ethernet buffer interfaces
-  • Ethernet 10/100 Mbps transceiver (EPHY)
+  o Ethertype filter
+  o Loopback mode
+  o Two receive and one transmit Ethernet buffer interfaces
+  o Ethernet 10/100 Mbps transceiver (EPHY)
     - IEEE 802.3 compliant
     - Digital adaptive equalization
     - Half-duplex and full-duplex
@@ -78,7 +78,7 @@ MC9S12NE64 Features
     - 125-MHz clock generator and timing recovery
     - Integrated wave-shaping circuitry
     - Loopback modes
-  • CRG (clock and reset generator module)
+  o CRG (clock and reset generator module)
     - Windowed COP watchdog
     - Real-time interrupt
     - Clock monitor
@@ -86,19 +86,19 @@ MC9S12NE64 Features
     - Phase-locked loop clock frequency multiplier
     - Limp home mode in absence of external clock
     - 25-MHz crystal oscillator reference clock
-  • Operating frequency
+  o Operating frequency
     - 50 MHz equivalent to 25 MHz bus speed for single chip
     - 32 MHz equivalent to 16 MHz bus speed in expanded bus modes
-  • Internal 2.5-V regulator
-    - Supports an input voltage range from 3.3 V ± 5%
+  o Internal 2.5-V regulator
+    - Supports an input voltage range from 3.3 V Â± 5%
     - Low-power mode capability
     - Includes low-voltage reset (LVR) circuitry
-  • 80-pin TQFP-EP or 112-pin LQFP package
+  o 80-pin TQFP-EP or 112-pin LQFP package
     - Up to 70 I/O pins with 3.3 V input and drive capability (112-pin
       package)
     - Up to two dedicated 3.3 V input only lines (IRQ, XIRQ)
-  • Development support
-    - Single-wire background debug™ mode (BDM)
+  o Development support
+    - Single-wire background debugÂ™ mode (BDM)
     - On-chip hardware breakpoints
     - Enhanced DBG debug features
 
@@ -282,21 +282,21 @@ FreeScale HCS12 Serial Monitor
 
   Memory Configuration:
     Registers:
-    • Register space is located at 0x0000–0x03ff.
+    o Register space is located at 0x0000-0x03ff.
     FLASH:
-    • FLASH memory is any address greater than 0x4000. All paged
+    o FLASH memory is any address greater than 0x4000. All paged
       addresses are assumed to be FLASH memory.
-    • Application code should exclude the 0xf780–0xff7f memory.
+    o Application code should exclude the 0xf780-0xff7f memory.
     SRAM:
-    • RAM ends at 0x3FFF and builds down to the limit of the device’s
+    o RAM ends at 0x3FFF and builds down to the limit of the device's
       available RAM.
-    • The serial monitor's stack pointer is set to the end of RAM+1
+    o The serial monitor's stack pointer is set to the end of RAM+1
       (0x4000).
     EEPROM:
-    • EEPROM (if the target device has any) is limited to the available
-      space between the registers and the RAM (0x0400–to start of RAM).
+    o EEPROM (if the target device has any) is limited to the available
+      space between the registers and the RAM (0x0400 to start of RAM).
     External Devices:
-    • External devices attached to the multiplexed external bus
+    o External devices attached to the multiplexed external bus
       interface are not supported
 
   Serial Communications:
@@ -307,10 +307,10 @@ FreeScale HCS12 Serial Monitor
   Interrupts:
     The serial monitor redirects interrupt vectors to an unprotected
     portion of FLASH just before the protected monitor program
-    (0xf780–0xf7fe).  The monitor will automatically redirect vector
+    (0xf780-0xf7fe).  The monitor will automatically redirect vector
     programming operations to these user vectors.  The user code should
     therefore keep the normal (non-monitor) vector locations
-    (0xff80–0xfffe).
+    (0xff80-0xfffe).
 
 Soft Registers
 ^^^^^^^^^^^^^^

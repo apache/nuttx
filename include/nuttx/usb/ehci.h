@@ -544,10 +544,10 @@
 
 /* Micro-frame Schedule Control. Table 3-10 */
 
-#define SITD_FMSCHED_SSMASK_SHIFT      (0)        /* Bitx 0-7: Split Start Mask (µFrame S-mask) */
+#define SITD_FMSCHED_SSMASK_SHIFT      (0)        /* Bitx 0-7: Split Start Mask (ÂµFrame S-mask) */
 #define SITD_FMSCHED_SSMASK_MASK       (0xff << SITD_FMSCHED_SSMASK_SHIFT)
 #  define SITD_FMSCHED_SSMASK(n)       ((n) << SITD_FMSCHED_SSMASK_SHIFT)
-#define SITD_FMSCHED_SCMASK_SHIFT      (8)        /* Bitx 8-15: Split Completion Mask (µFrame C-Mask) */
+#define SITD_FMSCHED_SCMASK_SHIFT      (8)        /* Bitx 8-15: Split Completion Mask (ÂµFrame C-Mask) */
 #define SITD_FMSCHED_SCMASK_MASK       (0xff << SITD_FMSCHED_SCMASK_SHIFT)
 #  define SITD_FMSCHED_SCMASK(n)       ((n) << SITD_FMSCHED_SCMASK_SHIFT)
                                                   /* Bits 16-31: Reserved */
@@ -556,7 +556,7 @@
 
 #define SITD_XFRSTATE_STATUS_SHIFT     (0)        /* Bits 0-7: Status */
 #define SITD_XFRSTATE_STATUS_MASK      (0xff << SITD_XFRSTATE_STATUS_SHIFT)
-#define SITD_XFRSTATE_CPROGMASK_SHIFT  (8)        /* Bits 8-15: µFrame Complete-split Progress Mask  */
+#define SITD_XFRSTATE_CPROGMASK_SHIFT  (8)        /* Bits 8-15: ÂµFrame Complete-split Progress Mask  */
 #define SITD_XFRSTATE_CPROGMASK_MASK   (0xff << SITD_XFRSTATE_CPROGMASK_SHIFT)
 #define SITD_XFRSTATE_NBYTES_SHIFT     (16)       /* Bits 16-25: Total Bytes To Transfer */
 #define SITD_XFRSTATE_NBYTES_MASK      (0x3ff << SITD_XFRSTATE_NBYTES_SHIFT)
@@ -704,10 +704,10 @@
 
 /* Endpoint Capabilities: Queue Head DWord 2. Table 3-20 */
 
-#define QH_EPCAPS_SSMASK_SHIFT         (0)        /* Bitx 0-7: Interrupt Schedule Mask (µFrame S-mask) */
+#define QH_EPCAPS_SSMASK_SHIFT         (0)        /* Bitx 0-7: Interrupt Schedule Mask (ÂµFrame S-mask) */
 #define QH_EPCAPS_SSMASK_MASK          (0xff << QH_EPCAPS_SSMASK_SHIFT)
 #  define QH_EPCAPS_SSMASK(n)          ((n) <<  QH_EPCAPS_SSMASK_SHIFT)
-#define QH_EPCAPS_SCMASK_SHIFT         (8)        /* Bitx 8-15: Split Completion Mask (µFrame C-Mask) */
+#define QH_EPCAPS_SCMASK_SHIFT         (8)        /* Bitx 8-15: Split Completion Mask (ÂµFrame C-Mask) */
 #define QH_EPCAPS_SCMASK_MASK          (0xff << QH_EPCAPS_SCMASK_SHIFT)
 #  define QH_EPCAPS_SCMASK(n)          ((n) << QH_EPCAPS_SCMASK_SHIFT)
 #define QH_EPCAPS_HUBADDR_SHIFT        (16)       /* Bitx 16-22: Hub Address */

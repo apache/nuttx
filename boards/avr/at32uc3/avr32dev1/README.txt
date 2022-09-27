@@ -235,7 +235,7 @@ AVR32 Bootloader
 
   "To launch BatchISP, open a command prompt. Windows or Cygwin command
    prompt can be used provided that the bin folder of the FLIP installation
-   directory is in the PATH (Windows’ or Cygwin’s) environment variable.
+   directory is in the PATH (Windows' or Cygwin's) environment variable.
    When running BatchISP on AT32UC3xxxxx, the target part has to be specified
    with -device at32uc3xxxxx and the communication port with -hardware usb.
    Commands can then be placed after -operation. These commands are executed

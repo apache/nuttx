@@ -19,7 +19,7 @@
  ****************************************************************************/
 
 /* References:
- *   - NXP UM10314 LPC3130/31 User manual Rev. 1.01 — 9 September 2009
+ *   - NXP UM10314 LPC3130/31 User manual Rev. 1.01 - 9 September 2009
  *   - NXP lpc313x.cdl.drivers.zip example driver code
  */
 
@@ -100,12 +100,12 @@
  *    undefined operation. Once power is applied to VDD and VDDQ
  *    (simultaneously) and the clock is stable (stable clock is defined as
  *    a signal cycling within timing constraints specified for the clock
- *    pin), the SDRAM requires a 100µs delay prior to issuing any command
+ *    pin), the SDRAM requires a 100Âµs delay prior to issuing any command
  *    other than a COMMAND INHIBIT or NOP.
  *
- *   "Starting at some point during this 100µs period and continuing at least
+ *   "Starting at some point during this 100Âµs period and continuing at least
  *    through the end of this period, COMMAND INHIBIT or NOP commands should
- *    be applied.  Once the 100µs delay has been satisfied with at least one
+ *    be applied.  Once the 100Âµs delay has been satisfied with at least one
  *    COMMAND INHIBIT or NOP command having been applied, a PRECHARGE command
  *    should be applied. All banks must then be precharged, thereby placing
  *    the device in the all banks idle state.

@@ -387,7 +387,7 @@
  *   External Memory - 1
  *   Voltage Range - 5.0V
  *   Communications Controller - CSIO, UART
- *   Other Features - 1MB MMU, 2xDMA’s, 2xUARTs
+ *   Other Features - 1MB MMU, 2xDMAs, 2xUARTs
  *   Speed (MHz) - 20, 10, 33
  *   Core / CPU Used - Z180
  *   Pin Count - 64, 68, 80
