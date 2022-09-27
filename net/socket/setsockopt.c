@@ -80,7 +80,7 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 
   /* Verify that the socket option if valid (but might not be supported ) */
 
-  if (!_SO_SETVALID(option) || !value)
+  if (!value)
     {
       return -EINVAL;
     }
@@ -445,16 +445,12 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
         }
 #endif
 
-      /* The following are not yet implemented */
-
-      case SO_RCVLOWAT:   /* Sets the minimum number of bytes to input */
-      case SO_SNDLOWAT:   /* Sets the minimum number of bytes to output */
-
       /* There options are only valid when used with getopt */
 
       case SO_ACCEPTCONN: /* Reports whether socket listening is enabled */
       case SO_ERROR:      /* Reports and clears error status. */
       case SO_TYPE:       /* Reports the socket type */
+        return -EINVAL;
 
       default:
         return -ENOPROTOOPT;
