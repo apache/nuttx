@@ -59,15 +59,11 @@
    * globally in include/nuttx/clock.h.
    */
 
-#  ifdef CONFIG_SYSTEM_TIME64
-extern volatile uint64_t g_system_timer;
-#  else
-extern volatile uint32_t g_system_timer;
-#  endif
+extern volatile clock_t g_system_ticks;
 #endif
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
-extern struct timespec   g_basetime;
+extern struct timespec  g_basetime;
 #endif
 
 /****************************************************************************
