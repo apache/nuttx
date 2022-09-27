@@ -11,9 +11,9 @@ by ``CONFIG_USEC_PER_TICK`` (default 10000 microseconds or 100Hz.
 If ``CONFIG_SCHED_TICKLESS`` is selected, the default is 100
 microseconds). The timer generates an interrupt each
 ``CONFIG_USEC_PER_TICK`` microseconds and increments a counter
-called ``g_system_timer``. ``g_system_timer`` then provides a
+called ``g_system_ticks``. ``g_system_ticks`` then provides a
 time-base for calculating *up-time* and elapsed time intervals in
-units of ``CONFIG_USEC_PER_TICK``. The range of ``g_system_timer``
+units of ``CONFIG_USEC_PER_TICK``. The range of ``g_system_ticks``
 is, by default, 32-bits. However, if the MCU supports type
 ``long long`` and ``CONFIG_SYSTEM_TIME16`` is selected, a 64-bit
 system timer will be supported instead.
@@ -159,7 +159,7 @@ which requires the following base functions to read and set time:
 -  ``up_rtc_gettime()``. Get the current time from the high
    resolution RTC clock/counter. This interface is only supported
    by the high-resolution RTC/counter hardware implementation. It
-   is used to replace the system timer (``g_system_tick``).
+   is used to replace the system timer (``g_system_ticks``).
 -  ``up_rtc_settime()``. Set the RTC to the provided time. All RTC
    implementations must be able to set their time based on a
    standard timespec.
@@ -167,7 +167,7 @@ which requires the following base functions to read and set time:
 System Tick and Time
 ====================
 
-The system tick is represented by ``g_system_timer``.
+The system tick is represented by ``g_system_ticks``.
 
 Running at rate of system base timer, used for time-slicing, and
 so forth.
@@ -178,7 +178,7 @@ after successful initialization variables are overridden by calls
 to ``up_rtc_gettime()`` which is running continuously even in
 power-down modes.
 
-In the case of ``CONFIG_RTC_HIRES`` is set the ``g_system_timer``
+In the case of ``CONFIG_RTC_HIRES`` is set the ``g_system_ticks``
 keeps counting at rate of a system timer, which however, is
 disabled in power-down mode. By comparing this time and RTC
 (actual time) one may determine the actual system active time. To
