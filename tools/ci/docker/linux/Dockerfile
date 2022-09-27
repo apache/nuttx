@@ -271,6 +271,8 @@ RUN pip3 install pytest-repeat==0.9.1
 RUN pip3 install pytest-json==0.4.0
 RUN pip3 install pytest-ordering==0.6
 RUN pip3 install pyserial==3.5
+# Used to generate symbol table files
+RUN pip3 install pyelftools cxxfilt
 
 RUN mkdir /tools
 WORKDIR /tools
