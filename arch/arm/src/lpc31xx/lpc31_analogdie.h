@@ -295,9 +295,9 @@
 #define CODEC_DEC_DCFILTO               (1 << 18) /* Bit 18: Enable DC blocking filter after decimation filters */
 #define CODEC_DEC_DBLIN                 (1 << 17) /* Bit 17: Enable soft start-up after a reset */
 #define CODEC_DEC_DELAY_DBLIN           (1 << 16) /* Bit 16: Enable delay timer after a reset */
-#define CODEC_DEC_GAINL_SHIFT           (8)       /* Bits 8-15: Gain settings, LEFT channel (2’s compliment format 0.5dB/bit) */
+#define CODEC_DEC_GAINL_SHIFT           (8)       /* Bits 8-15: Gain settings, LEFT channel (2's compliment format 0.5dB/bit) */
 #define CODEC_DEC_GAINL_MASK            (0xff << CODEC_DEC_GAINL_SHIFT)
-#define CODEC_DEC_GAINR_SHIFT           (0)       /* Bits 0-7: Gain settings RIGHT channel (2’s compliment format 0.5dB/bit) */
+#define CODEC_DEC_GAINR_SHIFT           (0)       /* Bits 0-7: Gain settings RIGHT channel (2's compliment format 0.5dB/bit) */
 #define CODEC_DEC_GAINR_MASK            (0xff << CODEC_DEC_GAINR_SHIFT)
 
 /* Interpolator control */

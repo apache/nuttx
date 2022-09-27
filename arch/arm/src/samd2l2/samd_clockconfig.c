@@ -20,9 +20,9 @@
 
 /* References:
  *   1. "Atmel SAM D20J / SAM D20G / SAM D20E ARM-Based Microcontroller
- *      Datasheet", 42129J–SAM–12/2013
+ *      Datasheet", 42129J-SAM-12/2013
  *   2. "Atmel SAM D21E / SAM D21G / SAM D21J SMART ARM-Based Microcontroller
- *      Datasheet", Atmel-42181E–SAM-D21_Datasheet–02/2015
+ *      Datasheet", Atmel-42181E-SAM-D21_Datasheet-02/2015
  *   3. Atmel sample code for the SAMD20.  This code has an ASF license
  *      with is compatible with the NuttX BSD license, but includes the
  *      provision that this code not be used in non-Atmel products.  That

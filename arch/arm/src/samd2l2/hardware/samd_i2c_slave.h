@@ -20,7 +20,7 @@
 
 /* References:
  *   "Atmel SAM D20J / SAM D20G / SAM D20E ARM-Based Microcontroller
- *   Datasheet", 42129J–SAM–12/2013
+ *   Datasheet", 42129J-SAM-12/2013
  */
 
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_I2C_SLAVE_H

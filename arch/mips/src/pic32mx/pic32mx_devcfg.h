@@ -51,7 +51,7 @@
 
 /* Device configuration word 3 */
 
-#define DEVCFG3_USERID_SHIFT        (0)        /* Bits 0-15: User-defined, readable via ICSP™ and JTAG */
+#define DEVCFG3_USERID_SHIFT        (0)        /* Bits 0-15: User-defined, readable via ICSPâ„¢ and JTAG */
 #define DEVCFG3_USERID_MASK         (0xffff << DEVCFG3_USERID_SHIFT)
 
 #if defined(CHIP_PIC32MX1) || defined(CHIP_PIC32MX2)

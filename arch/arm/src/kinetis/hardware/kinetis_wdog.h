@@ -67,7 +67,7 @@
 
 /* Watchdog Status and Control Register High (16-bit) */
 
-#define WDOG_STCTRLH_WDOGEN          (1 << 0)  /* Bit 0:  Enables or disables the WDOG’s operation */
+#define WDOG_STCTRLH_WDOGEN          (1 << 0)  /* Bit 0:  Enables or disables the WDOG's operation */
 #define WDOG_STCTRLH_CLKSRC          (1 << 1)  /* Bit 1:  Selects clock source for the WDOG timer */
 #define WDOG_STCTRLH_IRQRSTEN        (1 << 2)  /* Bit 2:  Enable the debug breadcrumbs feature */
 #define WDOG_STCTRLH_WINEN           (1 << 3)  /* Bit 3:  Enable windowing mode */
@@ -88,7 +88,7 @@
 #  define WDOG_STCTRLH_BYTESEL_BYTE2 (2 << WDOG_STCTRLH_BYTESEL_SHIFT) /* Byte 2 selected */
 #  define WDOG_STCTRLH_BYTESEL_BYTE3 (3 << WDOG_STCTRLH_BYTESEL_SHIFT) /* Byte 3 selected */
 
-#define WDOG_STCTRLH_DISTESTWDOG     (1 << 14) /* Bit 14: Disable WDOG’s functional test mode */
+#define WDOG_STCTRLH_DISTESTWDOG     (1 << 14) /* Bit 14: Disable WDOG's functional test mode */
                                                /* Bit 15: Reserved */
 
 /* Watchdog Status and Control Register Low (16-bit) */

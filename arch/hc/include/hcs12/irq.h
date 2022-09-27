@@ -39,7 +39,7 @@
 /* CCR bit definitions */
 
 #define HCS12_CCR_C (1 << 0) /* Bit 0: Carry/Borrow status bit */
-#define HCS12_CCR_V (1 << 1) /* Bit 1: Two’s complement overflow status bit */
+#define HCS12_CCR_V (1 << 1) /* Bit 1: Two's complement overflow status bit */
 #define HCS12_CCR_Z (1 << 2) /* Bit 2: Zero status bit */
 #define HCS12_CCR_N (1 << 3) /* Bit 3: Negative status bit */
 #define HCS12_CCR_I (1 << 4) /* Bit 4: Maskable interrupt control bit */

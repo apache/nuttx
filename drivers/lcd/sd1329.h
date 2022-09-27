@@ -305,7 +305,7 @@
  * Normal Display, Entire Display ON, Entire Display OFF or Inverse Display.
  *
  * Normal Display (0xa4)
- *   Reset the “Entire Display ON, Entire Display OFF or Inverse Display”
+ *   Reset the "Entire Display ON, Entire Display OFF or Inverse Display"
  *   effects and turn the data to ON at the corresponding gray level.
  *
  * Set Entire Display ON (0xa5)
@@ -318,7 +318,7 @@
  *
  * Inverse Display (0xa7)
  *   The gray scale level of display data are swapped such that
- *   “GS0” <-> “GS15”, “GS1” <-> “GS14”, etc.
+ *   "GS0" <-> "GS15", "GS1" <-> "GS14", etc.
  *
  * Byte 1: Display mode command
  */
@@ -359,27 +359,27 @@
  * is defined separately. The lower nibble adjusts the phase length of Reset
  * (phase 1). The higher nibble is used to select the phase length of first
  * pre-charge phase (phase 2). The phase length is ranged from 1 to 16
- * DCLK's. RESET for A[3:0] is set to 3 which means 4 DCLK’s selected for
- * Reset phase. POR for A[7:4] is set to 5 which means 6 DCLK’s is selected
+ * DCLK's. RESET for A[3:0] is set to 3 which means 4 DCLK's selected for
+ * Reset phase. POR for A[7:4] is set to 5 which means 6 DCLK's is selected
  * for first pre-charge phase.
  * Please refer to Table 9-1 for detail breakdown levels of each step.
  *
  * Byte 1: 0xb1
- * Byte 2: A[3:0]: Phase 1 period of 1~16 DCLK’s
- *         A[7:4]: Phase 2 period of 1~16 DCLK’s
+ * Byte 2: A[3:0]: Phase 1 period of 1~16 DCLK's
+ *         A[7:4]: Phase 2 period of 1~16 DCLK's
  */
 
 #define SSD1329_PHASE_LENGTH 0xb1
 
 /* Set Frame Frequency
  *
- * This double byte command is used to set the number of DCLK’s per row
+ * This double byte command is used to set the number of DCLK's per row
  * between the range of 0x14 and 0x7f.  Then the Frame frequency of the
  * matrix display is equal to DCLK frequency / A[6:0].
  *
  * Byte 1: 0xb2
- * Byte 2: A[6:0]:Total number of DCLK’s per row. Ranging from
- *         0x14 to 0x4e DCLK’s. frame Frequency = DCLK freq /A[6:0].
+ * Byte 2: A[6:0]:Total number of DCLK's per row. Ranging from
+ *         0x14 to 0x4e DCLK's. frame Frequency = DCLK freq /A[6:0].
  */
 
 #define SSD1329_FRAME_FREQ 0xb2
@@ -420,7 +420,7 @@
  * Except gray scale level GS0 that has no pre-charge and current drive, each
  * gray scale level is programmed in the length of current drive stage pulse
  * width with unit of DCLK. The longer the length of the pulse width, the
- * brighter the OLED pixel when it’s turned ON.
+ * brighter the OLED pixel when it's turned ON.
  *
  * The setting of gray scale table entry can perform gamma correction on OLED
  * panel display. Normally, it is desired that the brightness response of the

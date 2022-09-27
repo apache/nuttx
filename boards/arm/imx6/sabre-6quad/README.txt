@@ -213,7 +213,7 @@ Debug:
   - JTAG connector (20-pin)
   - 1x Serial-to-USB connector (for JTAG)
 OS Support:
-  - Linux® and Android™ from NXP/Freescale
+  - LinuxÂ® and Androidâ„¢ from NXP/Freescale
   - Others supported via third party (QNX, Windows Embedded)
 Tools Support:
   - Manufacturing tool from NXP/Freescale

@@ -106,7 +106,7 @@
 
 #define IEEE695_COMENT_TRANSLATOR    0x00  /* Translator (may name the source language or translator) */
 #define IEEE695_COMENT_INTELCOPY     0x01  /* Intel copyright (ignored) */
-                                           /* 0x2–0x9b Intel reserved */
+                                           /* 0x2-0x9b Intel reserved */
 #define IEEE695_COMENT_LIBSPEC       0x81  /* Library specifier (Replaced by comment class 9f) */
 #define IEEE695_COMENT_MSDOSVER      0x9c  /* MS-DOS version (obsolete) */
 #define IEEE695_COMENT_MEMMODEL      0x9d  /* Memory model */
@@ -373,7 +373,7 @@ struct ieee695_record_s
 
 #define SIZEOF_IEEE695_RECORD(len) (sizeof(struct ieee695_record_s)+(len))
 
-/* 80H THEADR—Translator Header Record */
+/* 80H THEADR - Translator Header Record */
 
 struct ieee695_theadr_s
 {
@@ -383,7 +383,7 @@ struct ieee695_theadr_s
   uint8_t name[1];         /* Name string data begins here */
 };
 
-/* 82H LHEADR—Library Module Header Record */
+/* 82H LHEADR - Library Module Header Record */
 
 struct ieee695_lheadr_s
 {
@@ -393,7 +393,7 @@ struct ieee695_lheadr_s
   uint8_t name[1];         /* Name string data begins here */
 };
 
-/* 88H COMENT—Comment Record */
+/* 88H COMENT - Comment Record */
 
 struct ieee695_coment_s
 {
@@ -405,7 +405,7 @@ struct ieee695_coment_s
   uint8_t cstring[1];      /* Commentary Byte String (optional) */
 };
 
-/* 8AH or 8BH MODEND—Module End Record */
+/* 8AH or 8BH MODEND - Module End Record */
 
 struct ieee695_modend_s
 {

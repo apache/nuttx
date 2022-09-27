@@ -61,7 +61,7 @@
 #define RNG_VER_MINOR_MASK      (0xff << RNG_VER_MINOR_SHIFT)
 #define RNG_VER_MAJOR_SHIFT     (8)       /* Bits 8-15: Major version number */
 #define RNG_VER_MAJOR_MASK      (0xff << RNG_VER_MAJOR_SHIFT)
-                                          /* Bits 27–16: Reserved */
+                                          /* Bits 27-16: Reserved */
 #define RNG_VER_TYPE_SHIFT      (28)      /* Bits 28-31: Random number generator type */
 #define RNG_VER_TYPE_MASK       (15 << RNG_VER_TYPE_SHIFT)
 #  define RNG_VER_TYPE_RNGA     (0 << RNG_VER_TYPE_SHIFT)

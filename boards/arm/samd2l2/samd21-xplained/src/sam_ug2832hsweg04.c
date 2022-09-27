@@ -45,10 +45,10 @@
  *  10 DISPLAY_RESET  10 PB05 PORT           10 PB15 PORT
  *  ----------------- ---------------------- ----------------------
  *  11 N/C            11 PA08 SERCOM2 PAD[0] 11 PA08 SERCOM2 PAD[0]
- *                            I²C SDA                I²C SDA
+ *                            IÂ²C SDA                IÂ²C SDA
  *  ----------------- ---------------------- ----------------------
  *  12 N/C            12 PA09 SERCOM2 PAD[1] 12 PA09 SERCOM2 PAD[1]
- *                            I²C SCL                I²C SCL
+ *                            IÂ²C SCL                IÂ²C SCL
  *  ----------------- ---------------------- ----------------------
  *  13 N/C            13 PB09 SERCOM4 PAD[1] 13 PB11 SERCOM4 PAD[1]
  *                            USART RX               USART RX

@@ -51,7 +51,7 @@
 #define SAM_XDMAC_GSWR_OFFSET       0x0038 /* Global Channel Software Request Register */
 #define SAM_XDMAC_GSWS_OFFSET       0x003c /* Global Channel Software Request Status Register */
 #define SAM_XDMAC_GSWF_OFFSET       0x0040 /* Global Channel Software Flush Request Register */
-                                           /* 0x0044–0x004c Reserved */
+                                           /* 0x0044-0x004c Reserved */
 
 /* Offsets to the base of the DMA channel registers */
 
@@ -100,7 +100,7 @@
 #define SAM_XDMACH_CSUS_OFFSET      0x0030 /* Channel Source Microblock Stride */
 #define SAM_XDMACH_CDUS_OFFSET      0x0034 /* Channel Destination Microblock Stride */
                                            /* 0x0038-0x003c Reserved */
-                                           /* 0x0fec–0x0ffc Reserved */
+                                           /* 0x0fec-0x0ffc Reserved */
 
 /* XDMAC Register Addresses *************************************************/
 

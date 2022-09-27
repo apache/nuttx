@@ -52,7 +52,7 @@
  *   <CRm> is the operational register
  *   <Op2> is the Opcode_2 value for the register.
  *
- * Reference: Cortex-A5™ MPCore, Technical Reference Manual, Paragraph 4.2.
+ * Reference: Cortex-A5â„¢ MPCore, Technical Reference Manual, Paragraph 4.2.
  */
 
 #ifdef __ASSEMBLY__

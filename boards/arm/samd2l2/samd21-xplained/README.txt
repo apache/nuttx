@@ -100,10 +100,10 @@ Modules
     10 microSD_DETECT 10 PB05 GPIO           10 PB15 GPIO
     ----------------- ---------------------- ---------------------- ------------------------------------
     11 TWI SDA        11 PA08 SERCOM2 PAD[0] 11 PA08 SERCOM2 PAD[0] EXT1, EXT2, EXT3 and EDBG
-                              I²C SDA                I²C SDA
+                              IÂ²C SDA                IÂ²C SDA
     ----------------- ---------------------- ---------------------- ------------------------------------
     12 TWI SCL        12 PA09 SERCOM2 PAD[1] 12 PA09 SERCOM2 PAD[1] EXT2, EXT3 and EDBG
-                              I²C SCL                I²C SCL
+                              IÂ²C SCL                IÂ²C SCL
     ----------------- ---------------------- ---------------------- ------------------------------------
     13 USART RX       13 PB09 SERCOM4 PAD[1] 13 PB11 SERCOM4 PAD[1] EXT3
                               USART RX               USART RX
@@ -211,10 +211,10 @@ Modules
     10 DISPLAY_RESET  10 PB05 GPIO           10 PB15 GPIO
     ----------------- ---------------------- ---------------------- ------------------------------------
     11 N/C            11 PA08 SERCOM2 PAD[0] 11 PA08 SERCOM2 PAD[0] EXT1, EXT2, EXT3 and EDBG
-                              I²C SDA                I²C SDA
+                              IÂ²C SDA                IÂ²C SDA
     ----------------- ---------------------- ---------------------- ------------------------------------
     12 N/C            12 PA09 SERCOM2 PAD[1] 12 PA09 SERCOM2 PAD[1] EXT2, EXT3 and EDBG
-                              I²C SCL                I²C SCL
+                              IÂ²C SCL                IÂ²C SCL
     ----------------- ---------------------- ---------------------- ------------------------------------
     13 N/C            13 PB09 SERCOM4 PAD[1] 13 PB11 SERCOM4 PAD[1] EXT3
                               USART RX               USART RX
