@@ -552,19 +552,7 @@ void up_trigger_irq(int irq, cpu_set_t cpuset)
 {
   if (irq >= 0 && irq <= GIC_IRQ_SGI15)
     {
-      uint32_t regval;
-
-#ifdef CONFIG_SMP
-      regval = GIC_ICDSGIR_INTID(irq)        |
-               GIC_ICDSGIR_CPUTARGET(cpuset) |
-               GIC_ICDSGIR_TGTFILTER_LIST;
-#else
-      regval = GIC_ICDSGIR_INTID(irq)   |
-               GIC_ICDSGIR_CPUTARGET(0) |
-               GIC_ICDSGIR_TGTFILTER_THIS;
-#endif
-
-      putreg32(regval, GIC_ICDSGIR);
+      arm_cpu_sgi(irq, cpuset);
     }
   else if (irq >= 0 && irq < NR_IRQS)
     {

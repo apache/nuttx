@@ -265,7 +265,7 @@ int up_cpu_pause(int cpu)
 
   /* Execute SGI2 */
 
-  up_trigger_irq(GIC_IRQ_SGI2, (1 << cpu));
+  arm_cpu_sgi(GIC_IRQ_SGI2, (1 << cpu));
 
   /* Wait for the other CPU to unlock g_cpu_paused meaning that
    * it is fully paused and ready for up_cpu_resume();
