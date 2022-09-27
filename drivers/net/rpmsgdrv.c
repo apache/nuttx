@@ -1111,6 +1111,7 @@ int net_rpmsg_drv_init(FAR const char *cpuname,
 {
   FAR struct net_rpmsg_drv_s *priv;
   FAR struct net_driver_s *dev;
+  int ret;
 
   /* Allocate the interface structure */
 
@@ -1149,7 +1150,6 @@ int net_rpmsg_drv_init(FAR const char *cpuname,
                           NULL);
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
-
-  netdev_register(dev, lltype);
-  return OK;
+  ret = netdev_register(dev, lltype);
+  return ret;
 }
