@@ -337,7 +337,6 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       nerr("ERROR: Failed to open FIFO for %s: %d\n",
            conn->lc_path, ret);
       goto errout_with_halfduplex;
-      return ret;
     }
 
   /* Sync to the start of the next packet in the stream and get the size of
