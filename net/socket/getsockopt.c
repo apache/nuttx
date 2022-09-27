@@ -85,7 +85,7 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 
   /* Verify that the socket option if valid (but might not be supported ) */
 
-  if (!_SO_GETVALID(option) || !value || !value_len)
+  if (!value || !value_len)
     {
       return -EINVAL;
     }
@@ -338,14 +338,6 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
           break;
         }
 #endif
-
-      /* The following are not yet implemented
-       * (return values other than {0,1})
-       */
-
-      case SO_LINGER:     /* Lingers on a close() if data is present */
-      case SO_RCVLOWAT:   /* Sets the minimum number of bytes to input */
-      case SO_SNDLOWAT:   /* Sets the minimum number of bytes to output */
 
       default:
         return -ENOPROTOOPT;
