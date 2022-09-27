@@ -122,8 +122,8 @@ clock_t clock_systime_ticks(void)
 
   do
     {
-      verify = g_system_timer;
-      sample = g_system_timer;
+      verify = g_system_ticks;
+      sample = g_system_ticks;
     }
   while ((sample &  TIMER_MASK32)  < (verify &  TIMER_MASK32) ||
          (sample & ~TIMER_MASK32) != (verify & ~TIMER_MASK32));
@@ -134,7 +134,7 @@ clock_t clock_systime_ticks(void)
 
   /* Return the current system time */
 
-  return g_system_timer;
+  return g_system_ticks;
 
 # endif /* CONFIG_SYSTEM_TIME64 */
 #endif /* CONFIG_SCHED_TICKLESS */

@@ -49,9 +49,9 @@
 
 #ifndef CONFIG_SCHED_TICKLESS
 #ifdef CONFIG_SYSTEM_TIME64
-volatile uint64_t g_system_timer = INITIAL_SYSTEM_TIMER_TICKS;
+volatile uint64_t g_system_ticks = INITIAL_SYSTEM_TIMER_TICKS;
 #else
-volatile uint32_t g_system_timer = INITIAL_SYSTEM_TIMER_TICKS;
+volatile uint32_t g_system_ticks = INITIAL_SYSTEM_TIMER_TICKS;
 #endif
 #endif
 
@@ -394,8 +394,8 @@ void clock_resynchronize(FAR struct timespec *rtc_diff)
 
       /* Add the sleep time to correct system timer */
 
-      g_system_timer += SEC2TICK(rtc_diff->tv_sec);
-      g_system_timer += NSEC2TICK(rtc_diff->tv_nsec);
+      g_system_ticks += SEC2TICK(rtc_diff->tv_sec);
+      g_system_ticks += NSEC2TICK(rtc_diff->tv_nsec);
     }
 
 skip:
@@ -418,6 +418,6 @@ void clock_timer(void)
 {
   /* Increment the per-tick system counter */
 
-  g_system_timer++;
+  g_system_ticks++;
 }
 #endif
