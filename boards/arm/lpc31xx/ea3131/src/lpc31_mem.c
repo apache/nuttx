@@ -103,12 +103,12 @@
  *    pin), the SDRAM requires a 100µs delay prior to issuing any command
  *    other than a COMMAND INHIBIT or NOP.
  *
- *   "Starting at some point during this 100µs period and continuing at least
- *    through the end of this period, COMMAND INHIBIT or NOP commands should
- *    be applied.  Once the 100µs delay has been satisfied with at least one
- *    COMMAND INHIBIT or NOP command having been applied, a PRECHARGE command
- *    should be applied. All banks must then be precharged, thereby placing
- *    the device in the all banks idle state.
+ *   "Starting at some point during this 100µs period and continuing at
+ *    least through the end of this period, COMMAND INHIBIT or NOP commands
+ *    should be applied.  Once the 100µs delay has been satisfied with at
+ *    least one COMMAND INHIBIT or NOP command having been applied, a
+ *    PRECHARGE command should be applied. All banks must then be precharged,
+ *    thereby placing the device in the all banks idle state.
  *
  *   "Once in the idle state, two AUTO REFRESH cycles must be performed.
  *    After the AUTO REFRESH cycles are complete, the SDRAM is ready for mode

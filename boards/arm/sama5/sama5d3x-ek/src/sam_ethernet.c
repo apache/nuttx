@@ -166,8 +166,8 @@ void weak_function sam_netinitialize(void)
    * (MICREL KSZ9021/31) operating at 10/100/1000 Mbps.
    * The board supports RGMII interface mode.
    * The Ethernet interface consists of 4 pairs of low voltage differential
-   * pair signals designated from GRX± and GTx± plus control signals for link
-   * activity indicators. These signals can be used to connect to a
+   * pair signals designated from GRX± and GTx± plus control signals for
+   * link activity indicators. These signals can be used to connect to a
    * 10/100/1000 BaseT RJ45 connector integrated on the main board.
    *
    * The KSZ9021/31 interrupt is available on PB35 INT_GETH0
