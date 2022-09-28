@@ -1228,19 +1228,8 @@ static int telnet_poll(FAR struct file *filep, FAR struct pollfd *fds,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct telnet_dev_s *priv = inode->i_private;
-  FAR struct socket *psock;
 
   DEBUGASSERT(fds != NULL);
-
-  /* Get the underlying socket structure and verify that the sockfd
-   * corresponds to valid, allocated socket
-   */
-
-  psock = &priv->td_psock;
-  if (psock == NULL || psock->s_conn == NULL)
-    {
-      return -EBADF;
-    }
 
   /* Test if we have cached data waiting to be read */
 
@@ -1253,7 +1242,7 @@ static int telnet_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   /* Then let psock_poll() do the heavy lifting */
 
-  return psock_poll(psock, fds, setup);
+  return psock_poll(&priv->td_psock, fds, setup);
 }
 
 /****************************************************************************
