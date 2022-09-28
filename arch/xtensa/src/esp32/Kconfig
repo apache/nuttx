@@ -276,20 +276,6 @@ config ESP32_TWAI
 	default n
 	select CAN
 
-config ESP32_I2S0
-	bool "I2S 0"
-	default n
-	depends on EXPERIMENTAL
-	---help---
-		No yet implemented
-
-config ESP32_I2S1
-	bool "I2S 2"
-	default n
-	depends on EXPERIMENTAL
-	---help---
-		No yet implemented
-
 config ESP32_LEDC
 	bool "LEDC (PWM)"
 	default n
@@ -332,6 +318,283 @@ config ESP32_SDMMC
 	depends on EXPERIMENTAL
 	---help---
 		No yet implemented
+
+config ESP32_I2S
+	bool "I2S"
+	select I2S
+	---help---
+		See the Board Selection menu to configure the pins used by I2S.
+
+if ESP32_I2S
+
+config ESP32_I2S0
+	bool "I2S 0"
+	default n
+	select ARCH_DMA
+	select ESP32_GPIO_IRQ
+
+if ESP32_I2S0
+
+config ESP32_I2S0_RX
+	bool "Enable I2S receiver"
+	default y
+	---help---
+		Enable I2S receive logic
+
+config ESP32_I2S0_TX
+	bool "Enable I2S transmitter"
+	default y
+	---help---
+		Enable I2S transmit logic
+
+choice
+	prompt "I2S0 role"
+	default ESP32_I2S0_ROLE_MASTER
+	---help---
+		Selects the operation role of the I2S0.
+
+config ESP32_I2S0_ROLE_MASTER
+	bool "Master"
+
+config ESP32_I2S0_ROLE_SLAVE
+	bool "Slave"
+
+endchoice
+
+choice
+	prompt "Bit width"
+	---help---
+		Selects the valid data bits per sample.
+		Note that this option may be overwritten by the audio
+		according to the bit width of the file being played
+
+config ESP32_I2S0_DATA_BIT_WIDTH_8BIT
+	bool "8 bits"
+
+config ESP32_I2S0_DATA_BIT_WIDTH_16BIT
+	bool "16 bits"
+
+config ESP32_I2S0_DATA_BIT_WIDTH_24BIT
+	bool "24 bits"
+
+config ESP32_I2S0_DATA_BIT_WIDTH_32BIT
+	bool "32 bits"
+
+endchoice
+
+config ESP32_I2S0_DATA_BIT_WIDTH
+	int
+	default 8 if ESP32_I2S0_DATA_BIT_WIDTH_8BIT
+	default 16 if ESP32_I2S0_DATA_BIT_WIDTH_16BIT
+	default 24 if ESP32_I2S0_DATA_BIT_WIDTH_24BIT
+	default 32 if ESP32_I2S0_DATA_BIT_WIDTH_32BIT
+
+config ESP32_I2S0_SAMPLE_RATE
+	int "I2S0 sample rate"
+	default 44100
+	range 8000 48000
+	---help---
+		Selects the sample rate.
+		Note that this option may be overwritten by the audio
+		according to the bit width of the file being played
+
+config ESP32_I2S0_BCLKPIN
+	int "I2S0 BCLK pin"
+	default 4
+	range 0 33 if ESP32_I2S0_ROLE_MASTER
+	range 0 39 if ESP32_I2S0_ROLE_SLAVE
+
+config ESP32_I2S0_WSPIN
+	int "I2S0 WS pin"
+	default 5
+	range 0 33 if ESP32_I2S0_ROLE_MASTER
+	range 0 39 if ESP32_I2S0_ROLE_SLAVE
+
+config ESP32_I2S0_DINPIN
+	int "I2S0 DOUT pin"
+	depends on ESP32_I2S0_RX
+	default 12
+	range 0 39
+
+config ESP32_I2S0_DOUTPIN
+	int "I2S0 DOUT pin"
+	depends on ESP32_I2S0_TX
+	default 18
+	range 0 33
+
+config ESP32_I2S0_MCLK
+	bool "Enable I2S Master Clock"
+	depends on ESP32_I2S0_ROLE_MASTER
+	default n
+	---help---
+		Enable I2S master clock
+
+choice
+	prompt "I2S0 MCLK pin"
+	depends on ESP32_I2S0_MCLK
+	default ESP32_I2S0_MCLKPIN_GPIO0
+	---help---
+		Selects the pin to output master clock.
+
+config ESP32_I2S0_MCLKPIN_GPIO0
+	bool "GPIO0"
+
+config ESP32_I2S0_MCLKPIN_GPIO1
+	bool "GPIO1 (U0TXD)"
+
+config ESP32_I2S0_MCLKPIN_GPIO3
+	bool "GPIO3 [U0RXD]"
+
+endchoice
+
+config ESP32_I2S0_MCLKPIN
+	int
+	default 0
+	default 0 if ESP32_I2S0_MCLKPIN_GPIO0
+	default 1 if ESP32_I2S0_MCLKPIN_GPIO1
+	default 3 if ESP32_I2S0_MCLKPIN_GPIO3
+
+endif #ESP32_I2S0
+
+config ESP32_I2S1
+	bool "I2S 1"
+	default n
+	select ARCH_DMA
+	select ESP32_GPIO_IRQ
+
+if ESP32_I2S1
+
+config ESP32_I2S1_RX
+	bool "Enable I2S receiver"
+	default y
+	---help---
+		Enable I2S receive logic
+
+config ESP32_I2S1_TX
+	bool "Enable I2S transmitter"
+	default y
+	---help---
+		Enable I2S transmit logic
+
+choice
+	prompt "I2S1 role"
+	default ESP32_I2S1_ROLE_MASTER
+	---help---
+		Selects the operation role of the I2S1.
+
+config ESP32_I2S1_ROLE_MASTER
+	bool "Master"
+
+config ESP32_I2S1_ROLE_SLAVE
+	bool "Slave"
+
+endchoice
+
+choice
+	prompt "Bit width"
+	---help---
+		Selects the valid data bits per sample.
+		Note that this option may be overwritten by the audio
+		according to the bit width of the file being played
+
+config ESP32_I2S1_DATA_BIT_WIDTH_8BIT
+	bool "8 bits"
+
+config ESP32_I2S1_DATA_BIT_WIDTH_16BIT
+	bool "16 bits"
+
+config ESP32_I2S1_DATA_BIT_WIDTH_24BIT
+	bool "24 bits"
+
+config ESP32_I2S1_DATA_BIT_WIDTH_32BIT
+	bool "32 bits"
+
+endchoice
+
+config ESP32_I2S1_DATA_BIT_WIDTH
+	int
+	default 16
+	default 8 if ESP32_I2S1_DATA_BIT_WIDTH_8BIT
+	default 16 if ESP32_I2S1_DATA_BIT_WIDTH_16BIT
+	default 24 if ESP32_I2S1_DATA_BIT_WIDTH_24BIT
+	default 32 if ESP32_I2S1_DATA_BIT_WIDTH_32BIT
+
+config ESP32_I2S1_SAMPLE_RATE
+	int "I2S1 sample rate"
+	default 44100
+	range 8000 48000
+	---help---
+		Selects the sample rate.
+		Note that this option may be overwritten by the audio
+		according to the bit width of the file being played
+
+config ESP32_I2S1_BCLKPIN
+	int "I2S1 BCLK pin"
+	default 19
+	range 0 33 if ESP32_I2S1_ROLE_MASTER
+	range 0 39 if ESP32_I2S1_ROLE_SLAVE
+
+config ESP32_I2S1_WSPIN
+	int "I2S1 WS pin"
+	default 18
+	range 0 33 if ESP32_I2S1_ROLE_MASTER
+	range 0 39 if ESP32_I2S1_ROLE_SLAVE
+
+config ESP32_I2S1_DOUTPIN
+	int "I2S1 DOUT pin"
+	depends on ESP32_I2S1_RX
+	default 17
+	range 0 39
+
+config ESP32_I2S1_DOUTPIN
+	int "I2S1 DOUT pin"
+	depends on ESP32_I2S1_TX
+	default 16
+	range 0 33
+
+config ESP32_I2S1_MCLK
+	bool "Enable I2S Master Clock"
+	depends on ESP32_I2S1_ROLE_MASTER
+	default n
+	---help---
+		Enable I2S master clock
+
+choice
+	prompt "I2S1 MCLK pin"
+	depends on ESP32_I2S1_MCLK
+	default ESP32_I2S1_MCLKPIN_GPIO0
+	---help---
+		Selects the pin to output master clock.
+
+config ESP32_I2S1_MCLKPIN_GPIO0
+	bool "GPIO0"
+
+config ESP32_I2S1_MCLKPIN_GPIO1
+	bool "GPIO1 (U0TXD)"
+
+config ESP32_I2S1_MCLKPIN_GPIO3
+	bool "GPIO3 [U0RXD]"
+
+endchoice
+
+config ESP32_I2S1_MCLKPIN
+	int
+	default 0
+	default 0 if ESP32_I2S1_MCLKPIN_GPIO0
+	default 1 if ESP32_I2S1_MCLKPIN_GPIO1
+	default 3 if ESP32_I2S1_MCLKPIN_GPIO3
+
+endif #ESP32_I2S1
+
+config I2S_DMADESC_NUM
+	int "I2S DMA maximum number of descriptors"
+	default 2
+	---help---
+		Configure the maximum number of out-link/in-link descriptors to
+		be chained for a I2S DMA transfer.
+
+endif #ESP32_I2S
+
 
 config ESP32_SPI
 	bool
