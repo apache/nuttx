@@ -97,6 +97,11 @@ typedef unsigned int nfds_t;
 
 typedef uint32_t pollevent_t;
 
+/* The poll callback type */
+
+struct pollfd;
+typedef CODE void (*pollcb_t)(FAR struct pollfd *fds);
+
 /* This is the NuttX variant of the standard pollfd structure.  The poll()
  * interfaces receive a variable length array of such structures.
  *
@@ -117,7 +122,8 @@ struct pollfd
   /* Non-standard fields used internally by NuttX. */
 
   FAR void    *ptr;     /* The psock or file being polled */
-  FAR sem_t   *sem;     /* Pointer to semaphore used to post output event */
+  FAR void    *arg;     /* The poll callback function argument */
+  pollcb_t     cb;      /* The poll callback function */
   FAR void    *priv;    /* For use by drivers */
 };
 
