@@ -82,14 +82,6 @@ config TELNET_CHARACTER_MODE
 		will echo a character which telnet client sent. By default, it works
 		in line mode.
 
-config TELNET_IOTHREAD_PRIORITY
-	int "I/O thread priority"
-	default 100
-
-config TELNET_IOTHREAD_STACKSIZE
-	int "I/O thread stack size"
-	default 1024
-
 config TELNET_SUPPORT_NAWS
 	bool "Support NAWS (Negotiate About Window Size)"
 	default n

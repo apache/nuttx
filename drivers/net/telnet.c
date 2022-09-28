@@ -59,14 +59,6 @@
 #  define CONFIG_TELNET_MAXLCLIENTS 8
 #endif
 
-#ifndef CONFIG_TELNET_IOTHREAD_PRIORITY
-#  define CONFIG_TELNET_IOTHREAD_PRIORITY 100
-#endif
-
-#ifndef CONFIG_TELNET_IOTHREAD_STACKSIZE
-#  define CONFIG_TELNET_IOTHREAD_STACKSIZE 1024
-#endif
-
 #undef HAVE_SIGNALS
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
 #  define HAVE_SIGNALS
@@ -120,8 +112,6 @@ enum telnet_state_e
 
 struct telnet_dev_s
 {
-  sem_t             td_exclsem;   /* Enforces mutually exclusive access */
-  sem_t             td_iosem;     /* I/O thread will notify that data is available */
   uint8_t           td_state;     /* (See telnet_state_e) */
   uint8_t           td_crefs;     /* The number of open references to the session */
   uint8_t           td_minor;     /* Minor device number */
@@ -135,7 +125,6 @@ struct telnet_dev_s
 #ifdef HAVE_SIGNALS
   pid_t             td_pid;
 #endif
-  struct pollfd     td_fds;
   FAR struct socket td_psock;     /* A clone of the internal socket structure */
   char td_rxbuffer[CONFIG_TELNET_RXBUFFER_SIZE];
   char td_txbuffer[CONFIG_TELNET_TXBUFFER_SIZE];
@@ -162,7 +151,6 @@ static bool    telnet_putchar(FAR struct telnet_dev_s *priv, uint8_t ch,
                  int *nwritten);
 static void    telnet_sendopt(FAR struct telnet_dev_s *priv, uint8_t option,
                  uint8_t value);
-static int     telnet_io_main(int argc, FAR char** argv);
 
 /* Telnet character driver methods */
 
@@ -227,9 +215,7 @@ static const struct file_operations g_factory_fops =
  * characters received via Telenet (via Ctrl-C SIGINT, in particular).
  */
 
-static pid_t                g_telnet_io_kthread = INVALID_PROCESS_ID;
 static struct telnet_dev_s *g_telnet_clients[CONFIG_TELNET_MAXLCLIENTS];
-static sem_t                g_iosem       = SEM_INITIALIZER(0);
 static sem_t                g_clients_sem = SEM_INITIALIZER(1);
 
 /****************************************************************************
@@ -644,7 +630,7 @@ static int telnet_open(FAR struct file *filep)
 
   /* Get exclusive access to the device structures */
 
-  ret = nxsem_wait(&priv->td_exclsem);
+  ret = nxsem_wait(&g_clients_sem);
   if (ret < 0)
     {
       nerr("ERROR: nxsem_wait failed: %d\n", ret);
@@ -671,7 +657,7 @@ static int telnet_open(FAR struct file *filep)
   ret = OK;
 
 errout_with_sem:
-  nxsem_post(&priv->td_exclsem);
+  nxsem_post(&g_clients_sem);
 
 errout:
   return ret;
@@ -693,11 +679,11 @@ static int telnet_close(FAR struct file *filep)
 
   /* Get exclusive access to the device structures */
 
-  ret = nxsem_wait(&priv->td_exclsem);
+  ret = nxsem_wait(&g_clients_sem);
   if (ret < 0)
     {
       nerr("ERROR: nxsem_wait failed: %d\n", ret);
-      goto errout;
+      return ret;
     }
 
   /* Decrement the references to the driver.  If the reference count will
@@ -709,7 +695,6 @@ static int telnet_close(FAR struct file *filep)
       /* Just decrement the reference count and release the semaphore */
 
       priv->td_crefs--;
-      nxsem_post(&priv->td_exclsem);
     }
   else
     {
@@ -748,9 +733,6 @@ static int telnet_close(FAR struct file *filep)
           kmm_free(devpath);
         }
 
-      /* Remove ourself from the clients list */
-
-      nxsem_wait(&g_clients_sem);
       for (i = 0; i < CONFIG_TELNET_MAXLCLIENTS; i++)
         {
           if (g_telnet_clients[i] == priv)
@@ -760,40 +742,13 @@ static int telnet_close(FAR struct file *filep)
             }
         }
 
-      /* If the socket is still polling */
-
-      if (priv->td_fds.events)
-        {
-          /* Tear down the poll */
-
-          psock_poll(&priv->td_psock, &priv->td_fds, FALSE);
-          priv->td_fds.events = 0;
-        }
-
-      nxsem_post(&g_clients_sem);
-
-      /* Notify the I/O thread that a client was removed */
-
-      nxsem_post(&g_iosem);
-
       /* Close the socket */
 
       psock_close(&priv->td_psock);
-
-      /* Release the driver memory.  What if there are threads waiting on
-       * td_exclsem?  They will never be awakened!  How could this happen?
-       * crefs == 1 so there are no other open references to the driver.
-       * But this could have if someone were trying to re-open the driver
-       * after every other thread has closed it.  That really should not
-       * happen in the intended usage model.
-       */
-
-      DEBUGASSERT(priv->td_exclsem.semcount == 0);
-      nxsem_destroy(&priv->td_exclsem);
       kmm_free(priv);
     }
 
-errout:
+  nxsem_post(&g_clients_sem);
   return ret;
 }
 
@@ -807,7 +762,6 @@ static ssize_t telnet_read(FAR struct file *filep, FAR char *buffer,
   FAR struct inode *inode = filep->f_inode;
   FAR struct telnet_dev_s *priv = inode->i_private;
   ssize_t nread = 0;
-  int ret;
 
   ninfo("len: %zd\n", len);
 
@@ -824,54 +778,32 @@ static ssize_t telnet_read(FAR struct file *filep, FAR char *buffer,
 
       if (priv->td_pending == 0)
         {
-          /* poll fds.revents contains last poll status in case of error */
-
-          if ((priv->td_fds.revents & (POLLHUP | POLLERR)) != 0)
+          nread = psock_recv(&priv->td_psock,
+                             priv->td_rxbuffer,
+                             CONFIG_TELNET_RXBUFFER_SIZE,
+                             0);
+          if (nread <= 0)
             {
-              return -EPIPE;
+              return nread;
             }
 
-          if (filep->f_oflags & O_NONBLOCK)
-            {
-              return -EAGAIN;
-            }
-
-          /* Wait for new data, interrupt, or thread cancellation */
-
-          ret = nxsem_wait(&priv->td_iosem);
-          if (ret < 0)
-            {
-              nerr("ERROR: nxsem_wait failed: %d\n", ret);
-              return (ssize_t)ret;
-            }
-
-          continue;
-        }
-
-      /* Take exclusive access to data buffer */
-
-      ret = nxsem_wait(&priv->td_exclsem);
-      if (ret < 0)
-        {
-          nerr("ERROR: nxsem_wait failed: %d\n", ret);
-          return (ssize_t)ret;
+          priv->td_pending = nread;
         }
 
       /* Process the buffered telnet data */
 
       src = &priv->td_rxbuffer[priv->td_offset];
       nread = telnet_receive(priv, src, priv->td_pending, buffer, len);
-
-      nxsem_post(&priv->td_exclsem);
     }
   while (nread == 0);
 
-  /* Notify the I/O thread the rxbuffer is available */
+#ifdef HAVE_SIGNALS
+  /* Check if any of the received characters is a
+   * control that should generate a signal.
+   */
 
-  if (nread > 0)
-    {
-      nxsem_post(&g_iosem);
-    }
+  telnet_check_ctrlchar(priv, buffer, nread);
+#endif
 
   /* Returned Value:
    *
@@ -893,8 +825,8 @@ static ssize_t telnet_write(FAR struct file *filep, FAR const char *buffer,
   FAR struct inode *inode = filep->f_inode;
   FAR struct telnet_dev_s *priv = inode->i_private;
   FAR const char *src = buffer;
+  ssize_t ret = 0;
   ssize_t nsent;
-  ssize_t ret;
   int ncopied;
   char ch;
   bool eol;
@@ -990,17 +922,6 @@ static int telnet_session(FAR struct telnet_session_s *session)
       return -ENOMEM;
     }
 
-  /* Initialize the allocated driver instance */
-
-  nxsem_init(&priv->td_exclsem, 0, 1);
-  nxsem_init(&priv->td_iosem, 0, 0);
-
-  /* td_iosem is used for signaling and, hence, must not participate in
-   * priority inheritance.
-   */
-
-  nxsem_set_protocol(&priv->td_iosem, SEM_PRIO_NONE);
-
   priv->td_state     = STATE_NORMAL;
   priv->td_crefs     = 0;
   priv->td_minor     = 0;
@@ -1091,32 +1012,10 @@ static int telnet_session(FAR struct telnet_session_s *session)
   telnet_sendopt(priv, TELNET_WILL, TELNET_ECHO);
 #endif
 
-  /* Has the I/O thread been started? */
-
-  if (g_telnet_io_kthread == INVALID_PROCESS_ID)
-    {
-      /* g_iosem is used for signaling and, hence, must not participate in
-       * priority inheritance.
-       */
-
-      nxsem_set_protocol(&g_iosem, SEM_PRIO_NONE);
-
-      /* Start the I/O thread */
-
-      ret = kthread_create("telnet_io", CONFIG_TELNET_IOTHREAD_PRIORITY,
-                           CONFIG_TELNET_IOTHREAD_STACKSIZE, telnet_io_main,
-                           NULL);
-      if (ret > 0)
-        {
-          g_telnet_io_kthread = ret;
-        }
-    }
-
   /* Save ourself in the list of Telnet client threads */
 
   g_telnet_clients[priv->td_minor] = priv;
   nxsem_post(&g_clients_sem);
-  nxsem_post(&g_iosem);
 
   return OK;
 
@@ -1197,11 +1096,10 @@ static int telnet_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #endif
 
     default:
-      ret = -ENOTTY;
+      ret = psock_ioctl(&priv->td_psock, cmd, arg);
       break;
     }
 
-  UNUSED(priv);  /* Avoid warning if not used */
   return ret;
 }
 
@@ -1247,117 +1145,6 @@ static int telnet_poll(FAR struct file *filep, FAR struct pollfd *fds,
   /* Then let psock_poll() do the heavy lifting */
 
   return psock_poll(&priv->td_psock, fds, setup);
-}
-
-/****************************************************************************
- * Name: telnet_io_main
- ****************************************************************************/
-
-static int telnet_io_main(int argc, FAR char** argv)
-{
-  FAR struct telnet_dev_s *priv;
-  FAR char *buffer;
-  int i;
-  int ret;
-
-  while (1)
-    {
-      nxsem_reset(&g_iosem, 0);
-
-      /* Poll each client in the g_telnet_clients[] array. */
-
-      nxsem_wait(&g_clients_sem);
-      for (i = 0; i < CONFIG_TELNET_MAXLCLIENTS; i++)
-        {
-          priv = g_telnet_clients[i];
-          if (priv != NULL &&
-              !(priv->td_fds.revents & (POLLHUP | POLLERR)) &&
-              (CONFIG_TELNET_RXBUFFER_SIZE -
-               priv->td_pending - priv->td_offset) > 0)
-            {
-              priv->td_fds.sem     = &g_iosem;
-              priv->td_fds.events  = POLLIN | POLLHUP | POLLERR;
-              priv->td_fds.revents = 0;
-
-              psock_poll(&priv->td_psock, &priv->td_fds, TRUE);
-            }
-        }
-
-      nxsem_post(&g_clients_sem);
-
-      /* Wait for any Telnet connect/disconnect events
-       * to include/remove client sockets from polling
-       */
-
-      nxsem_wait(&g_iosem);
-
-      /* Revisit each client in the g_telnet_clients[] array */
-
-      nxsem_wait(&g_clients_sem);
-      for (i = 0; i < CONFIG_TELNET_MAXLCLIENTS; i++)
-        {
-          priv = g_telnet_clients[i];
-
-          /* If poll was setup previously (events != 0) */
-
-          if (priv != NULL && priv->td_fds.events)
-            {
-              /* Check for a pending poll() */
-
-              if (priv->td_fds.revents & POLLIN)
-                {
-                  if (priv->td_pending < CONFIG_TELNET_RXBUFFER_SIZE)
-                    {
-                      /* Take exclusive access to data buffer */
-
-                      nxsem_wait(&priv->td_exclsem);
-                      buffer = priv->td_rxbuffer + priv->td_pending +
-                               priv->td_offset;
-
-                      ret = psock_recv(&priv->td_psock, buffer,
-                                       CONFIG_TELNET_RXBUFFER_SIZE -
-                                       priv->td_pending - priv->td_offset,
-                                       0);
-
-                      priv->td_pending += ret;
-                      nxsem_post(&priv->td_exclsem);
-
-                      /* Notify the client thread that data is available */
-
-                      nxsem_post(&priv->td_iosem);
-
-#ifdef HAVE_SIGNALS
-                      /* Check if any of the received characters is a
-                       * control that should generate a signal.
-                       */
-
-                      telnet_check_ctrlchar(priv, buffer, ret);
-#endif
-                    }
-                }
-
-              /* Tear it down */
-
-              psock_poll(&priv->td_psock, &priv->td_fds, FALSE);
-              priv->td_fds.events = 0;
-
-              /* POLLHUP (or POLLERR) indicates that this session has
-               * terminated.
-               */
-
-              if (priv->td_fds.revents & (POLLHUP | POLLERR))
-                {
-                  /* notify the client thread */
-
-                  nxsem_post(&priv->td_iosem);
-                }
-            }
-        }
-
-      nxsem_post(&g_clients_sem);
-    }
-
-  return 0;
 }
 
 /****************************************************************************
