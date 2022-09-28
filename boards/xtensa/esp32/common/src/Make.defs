@@ -32,6 +32,10 @@ ifeq ($(CONFIG_I2C_DRIVER),y)
   CSRCS += esp32_board_i2c.c
 endif
 
+ifeq ($(CONFIG_ESP32_I2S),y)
+  CSRCS += esp32_board_i2sdev.c
+endif
+
 ifeq ($(CONFIG_I2CMULTIPLEXER_TCA9548A),y)
   CSRCS += esp32_tca9548a.c
 endif

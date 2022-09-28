@@ -87,6 +87,10 @@
 #  include "esp32_board_i2c.h"
 #endif
 
+#ifdef CONFIG_ESP32_I2S
+#  include "esp32_i2s.h"
+#endif
+
 #ifdef CONFIG_I2CMULTIPLEXER_TCA9548A
 #  include "esp32_tca9548a.h"
 #endif
@@ -452,6 +456,36 @@ int esp32_bringup(void)
       syslog(LOG_ERR, "Failed to initialize BMP280 driver: %d\n", ret);
     }
 #endif
+
+#ifdef CONFIG_ESP32_I2S
+
+#ifdef CONFIG_ESP32_I2S0
+
+  /* Configure I2S generic audio on I2S0 */
+
+  ret = board_i2sdev_initialize(ESP32_I2S0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize I2S%d driver: %d\n",
+             CONFIG_ESP32_I2S0, ret);
+    }
+
+#endif  /* CONFIG_ESP32_I2S0 */
+
+#ifdef CONFIG_ESP32_I2S1
+
+  /* Configure I2S generic audio on I2S1 */
+
+  ret = board_i2sdev_initialize(ESP32_I2S1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize I2S%d driver: %d\n",
+             CONFIG_ESP32_I2S0, ret);
+    }
+
+#endif  /* CONFIG_ESP32_I2S1 */
+
+#endif /* CONFIG_ESP32_I2S */
 
 #ifdef CONFIG_SENSORS_SHT3X
   /* Try to register SHT3x device in I2C0 */
