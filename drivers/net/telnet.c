@@ -926,7 +926,7 @@ static ssize_t telnet_write(FAR struct file *filep, FAR const char *buffer,
             {
               nerr("ERROR: psock_send failed '%s': %zd\n",
                    priv->td_txbuffer, ret);
-              return ret;
+              goto out;
             }
 
           /* Reset the index to the beginning of the TX buffer. */
@@ -944,7 +944,7 @@ static ssize_t telnet_write(FAR struct file *filep, FAR const char *buffer,
         {
           nerr("ERROR: psock_send failed '%s': %zd\n",
                priv->td_txbuffer, ret);
-          return ret;
+          goto out;
         }
     }
 
@@ -954,7 +954,8 @@ static ssize_t telnet_write(FAR struct file *filep, FAR const char *buffer,
    * some logic if you report that you sent more than you were requested to.
    */
 
-  return len;
+out:
+  return nsent ? nsent : ret;
 }
 
 /****************************************************************************
