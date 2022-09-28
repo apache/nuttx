@@ -50,7 +50,8 @@ function setup_toolchain()
     export XTENSAD_LICENSE_FILE=28000@10.221.64.91
   fi
   export WASI_SDK_ROOT=${ROOTDIR}/prebuilts/clang/linux/wasm
-  export PYTHONPATH=${ROOTDIR}/prebuilts/tools/python
+  export PYTHONPATH=${PYTHONPATH}:${ROOTDIR}/prebuilts/tools/python/dist-packages/pyelftools
+  export PYTHONPATH=${PYTHONPATH}:${ROOTDIR}/prebuilts/tools/python/dist-packages/cxxfilt
 
   for (( i = 0; i < ${#ARCH[*]}; i++)); do
     for (( j = 0; j < ${#TOOLCHAIN[*]}; j++)); do
