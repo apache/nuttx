@@ -143,6 +143,8 @@ enum part_type_e
 
 static uint64_t g_cpu_clock = MPFS_MSS_EXT_SGMII_REF_CLK;
 
+#ifdef CONFIG_MPFS_BOOTLOADER
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -629,6 +631,8 @@ void mpfs_clockconfig(void)
 
   mpfs_pll_config();
 }
+
+#endif
 
 /****************************************************************************
  * Name: mpfs_get_cpuclk
