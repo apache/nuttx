@@ -365,10 +365,7 @@ int epoll_ctl(int epfd, int op, int fd, struct epoll_event *ev)
         return -1;
     }
 
-  if (eph->poll[0].sem)
-    {
-      poll_notify(&eph->poll, 1, eph->poll[0].events);
-    }
+  poll_notify(&eph->poll, 1, eph->poll[0].events);
 
   return 0;
 }
