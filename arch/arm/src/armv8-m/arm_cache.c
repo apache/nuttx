@@ -177,6 +177,78 @@ void up_disable_icache(void)
 #endif
 
 /****************************************************************************
+ * Name: up_invalidate_icache
+ *
+ * Description:
+ *   Invalidate the instruction cache within the specified region.
+ *
+ * Input Parameters:
+ *   start - virtual start address of region
+ *   end   - virtual end address of region + 1
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARMV8M_ICACHE
+void up_invalidate_icache(uintptr_t start, uintptr_t end)
+{
+  uint32_t ccsidr;
+  uint32_t sshift;
+  uint32_t ssize;
+
+  /* Get the characteristics of the I-Cache */
+
+  ccsidr = getreg32(NVIC_CCSIDR);
+  sshift = CCSIDR_LSSHIFT(ccsidr) + 4;   /* log2(cache-line-size-in-bytes) */
+
+  /* Invalidate the I-Cache containing this range of addresses */
+
+  ssize  = (1 << sshift);
+
+  /* Round down the start address to the nearest cache line boundary.
+   *
+   *   sshift = 5      : Offset to the beginning of the set field
+   *   (ssize - 1)  = 0x007f : Mask of the set field
+   */
+
+  ARM_DSB();
+
+  if ((start & (ssize - 1)) != 0)
+    {
+      start &= ~(ssize - 1);
+      putreg32(start, NVIC_ICIMVAU);
+      start += ssize;
+    }
+
+  while (start + ssize <= end)
+    {
+      /* The below store causes the cache to check its directory and
+       * determine if this address is contained in the cache. If so, it
+       * invalidate that cache line. Only the cache way containing the
+       * address is invalidated. If the address is not in the cache, then
+       * nothing is invalidated.
+       */
+
+      putreg32(start, NVIC_ICIMVAU);
+
+      /* Increment the address by the size of one cache line. */
+
+      start += ssize;
+    }
+
+  if (start < end)
+    {
+      putreg32(start, NVIC_ICIMVAU);
+    }
+
+  ARM_DSB();
+  ARM_ISB();
+}
+#endif /* CONFIG_ARMV8M_ICACHE */
+
+/****************************************************************************
  * Name: up_invalidate_icache_all
  *
  * Description:
@@ -406,7 +478,7 @@ void up_invalidate_dcache(uintptr_t start, uintptr_t end)
 
   ARM_DSB();
 
-  if (start & (ssize - 1))
+  if ((start & (ssize - 1)) != 0)
     {
       start &= ~(ssize - 1);
       putreg32(start, NVIC_DCCIMVAC);
