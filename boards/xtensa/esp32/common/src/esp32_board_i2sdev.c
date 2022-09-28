@@ -37,6 +37,9 @@
 
 #include "esp32_i2s.h"
 
+#if defined CONFIG_ESP32_I2S0 && !defined CONFIG_AUDIO_CS4344 || \
+    defined CONFIG_ESP32_I2S1
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -107,3 +110,5 @@ int board_i2sdev_initialize(int port)
 
   return ret;
 }
+
+#endif /* CONFIG_ESP32_I2S0 && !CONFIG_AUDIO_CS4344 || CONFIG_ESP32_I2S1 */
