@@ -55,8 +55,8 @@ These steps are given in the setup guide in
 Flashing
 ========
 
-Firmware for ESP32 is flashed via the USB/UART interface using the ``esptool.py`` tool. 
-It's a two step process where the first converts the ELF file into a ESP32-compatible binary 
+Firmware for ESP32 is flashed via the USB/UART interface using the ``esptool.py`` tool.
+It's a two step process where the first converts the ELF file into a ESP32-compatible binary
 and the second flashes it to the board.  These steps are included into the build system and you can
 flash your NuttX firmware simply by running::
 
@@ -68,7 +68,7 @@ Bootloader and partitions
 -------------------------
 
 ESP32 requires a bootloader to be flashed as well as a set of FLASH partitions. This is only needed the first time
-(or any time you which to modify either of these). An easy way is to use prebuilt binaries for NuttX `from here <https://github.com/espressif/esp-nuttx-bootloader>`_. In there you will find instructions to rebuild these if necessary. 
+(or any time you which to modify either of these). An easy way is to use prebuilt binaries for NuttX `from here <https://github.com/espressif/esp-nuttx-bootloader>`_. In there you will find instructions to rebuild these if necessary.
 Once you downloaded both binaries, you can flash them by adding an ``ESPTOOL_BINDIR`` parameter, pointing to the directory where these binaries were downloaded:
 
 .. code-block:: console
@@ -79,7 +79,7 @@ Once you downloaded both binaries, you can flash them by adding an ``ESPTOOL_BIN
    SPI FLASH erase.
 
    .. code-block:: console
-       
+
       $ esptool.py erase_flash
 
 Peripheral Support
@@ -90,12 +90,12 @@ The following list indicates the state of peripherals' support in NuttX:
 ========== ======= =====
 Peripheral Support NOTES
 ========== ======= =====
-GPIO         Yes       
+GPIO         Yes
 UART         Yes
-SPI          Yes       
-I2C          Yes       
-DMA          Yes       
-Wifi         Yes       
+SPI          Yes
+I2C          Yes
+DMA          Yes
+Wifi         Yes
 Ethernet     Yes
 SPIFLASH     Yes
 SPIRAM       Yes
@@ -109,13 +109,14 @@ ADC          No
 Bluetooth    Yes
 SDIO         No
 SD/MMC       No
-I2S          No
-LED_PWM      No
+I2S          Yes
+LED_PWM      Yes
 RMT          No
 MCPWM        No
 Pulse_CNT    No
 SHA          No
 RSA          No
+CAN/TWAI     Yes
 ========== ======= =====
 
 Memory Map
@@ -290,7 +291,7 @@ Wi-Fi SoftAP
 ============
 
 It is possible to use ESP32 as an Access Point (SoftAP). Actually there are some
-boards with a ``sta_softap`` which enables this support.
+boards config examples called sta_softap which enables this support
 
 If you are using this board config profile you can run these commands to be able
 to connect your smartphone or laptop to your board::
@@ -349,6 +350,19 @@ Enter in the NSH shell using your preferred serial console tool and run the scan
            response type:   3
         advertiser data: 1e ff 06 00 01 09 20 02 7c 33 a3 a7 cd c9 44 5b
     nsh>
+
+I2S
+===
+
+The I2S peripheral is accessible using either the generic I2S audio driver or a specific
+audio codec driver. Also, it's possible to use the I2S character driver to bypass the
+audio subsystem and develop specific usages of the I2S peripheral.
+
+.. note:: Note that the bit-width and sample rate can be modified "on-the-go" when using
+   audio-related drivers. That is not the case for the I2S character device driver and
+   such parameters are set on compile time through `make menuconfig`.
+
+Please check for usage examples using the :doc:`ESP32 DevKitC </platforms/xtensa/esp32/boards/esp32-devkitc/index>`.
 
 Using QEMU
 ==========

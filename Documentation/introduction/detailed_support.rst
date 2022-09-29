@@ -3025,26 +3025,20 @@ ESP32 (Dual Xtensa LX6)
 Xtensa LX6 ESP32
 ----------------
 
-Basic architectural support for Xtensa LX6 processors and the port for
-the Espressif ESP32 were added in NuttX-7.19. The basic ESP32 port is
-function in both single CPU and dual CPU SMP configurations.
+Initial architectural support for Xtensa LX6 processors for the Espressif
+ESP32 were added in NuttX-7.19, enabling both single CPU and dual CPU
+SMP configurations.
 
 **Espressif ESP32 DevkitC V4 Board** The NuttX release includes support for
 Espressif ESP32 DevkitC V4 board. There is an NSH configuration for each
 CPU configuration and an OS test configuration for verification of the
 port.
 
-**STATUS**. ESP32 support in NuttX-7.19 is functional, but very
-preliminary. There is little yet in the way of device driver support.
-Outstanding issues include missing clock configuration logic, missing
-partition tables to support correct configuration from FLASH, and some
-serial driver pin configuration issues. The configuration is usable
-despite these limitations. Refer to the NuttX board
-`README <https://github.com/apache/incubator-nuttx/blob/master/boards/xtensa/esp32/esp32-devkitc/README.txt>`__
-file for further information.
-
-Release NuttX-10.0.0 brought a bunch of additions to the ESP32 port.  This
+**STATUS**. Release NuttX-10.0.0 brought a bunch of additions to the ESP32 port.  This
 includes: I2C, SPI, RTC, PM, Timers, Watchdog Timer and Ethernet.
+
+Please, refer to the :doc:`ESP32 </platforms/xtensa/esp32/index>` on NuttX for
+further information.
 
 Zilog ZNEO Z16F
 ===============
