@@ -43,37 +43,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arm_gic_nlines
- *
- * Description:
- *   Return the number of interrupt lines supported by this GIC
- *   implementation (include both PPIs (32) and SPIs).
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   The number of interrupt lines.
- *
- ****************************************************************************/
-
-static inline unsigned int arm_gic_nlines(void)
-{
-  uint32_t regval;
-  uint32_t field;
-
-  /* Get the number of interrupt lines. */
-
-  regval = getreg32(GIC_ICDICTR);
-  field = (regval & GIC_ICDICTR_ITLINES_MASK) >> GIC_ICDICTR_ITLINES_SHIFT;
-  return (field + 1) << 5;
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Name: arm_gic0_initialize
  *
  * Description:
