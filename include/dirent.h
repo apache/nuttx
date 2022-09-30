@@ -153,6 +153,8 @@ int        scandir(FAR const char *path, FAR struct dirent ***namelist,
                                       FAR const struct dirent **));
 int        alphasort(FAR const struct dirent **a,
                      FAR const struct dirent **b);
+int        versionsort(FAR const struct dirent **a,
+                       FAR const struct dirent **b);
 
 int        dirfd(FAR DIR *dirp);
 

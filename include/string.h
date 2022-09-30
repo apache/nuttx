@@ -81,6 +81,7 @@ FAR char  *strsignal(int signum);
 FAR char  *strtok(FAR char *, FAR const char *);
 FAR char  *strtok_r(FAR char *, FAR const char *, FAR char **);
 size_t     strxfrm(FAR char *, FAR const char *, size_t n);
+int        strverscmp(FAR const char *s1, FAR const char *s2);
 
 FAR void  *memchr(FAR const void *s, int c, size_t n);
 FAR void  *memrchr(FAR const void *s, int c, size_t n);
