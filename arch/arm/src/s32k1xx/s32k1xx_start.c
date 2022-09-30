@@ -98,7 +98,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_FEATURES
+#if defined(HAVE_LPUART_CONSOLE) && defined(CONFIG_DEBUG_FEATURES)
 #  define showprogress(c) s32k1xx_lowputc(c)
 #else
 #  define showprogress(c)
