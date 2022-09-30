@@ -5,8 +5,7 @@
 
 menuconfig NETDEVICES
 	bool "Network Device/PHY Support"
-	default n if !ARCH_HAVE_PHY
-	default y if ARCH_HAVE_PHY
+	default y
 	depends on NET
 	---help---
 		Network interface driver and PHY selections.  This options enables
