@@ -23,7 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_USRSOCK)
+#if defined(CONFIG_NET_USRSOCK_DEVICE)
 
 #include <sys/types.h>
 #include <inttypes.h>
@@ -566,4 +566,4 @@ void usrsock_register(void)
                   &g_usrsockdev);
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_USRSOCK */
+#endif /* CONFIG_NET_USRSOCK_DEVICE */
