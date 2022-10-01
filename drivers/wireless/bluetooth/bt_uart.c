@@ -64,8 +64,7 @@ static ssize_t btuart_read(FAR struct btuart_upperhalf_s *upper,
   ssize_t ntotal = 0;
   ssize_t nread;
 
-  wlinfo("buflen %lu minread %lu\n",
-         (unsigned long)buflen, (unsigned long)minread);
+  wlinfo("buflen %zu minread %zu\n", buflen, minread);
 
   DEBUGASSERT(upper != NULL && upper->lower != NULL);
   lower = upper->lower;
@@ -86,12 +85,11 @@ static ssize_t btuart_read(FAR struct btuart_upperhalf_s *upper,
         }
       else if (nread < 0)
         {
-          wlwarn("Returned error %d\n", (int)nread);
+          wlwarn("Returned error %zd\n", nread);
           return nread;
         }
 
-      wlinfo("read %ld remaining %lu\n",
-             (long)nread, (unsigned long)(buflen - nread));
+      wlinfo("read %zd remaining %zu\n", nread, buflen - nread);
 
       buflen -= nread;
       ntotal += nread;
@@ -124,10 +122,9 @@ static void btuart_rxwork(FAR void *arg)
    */
 
   nread = btuart_read(upper, data, H4_HEADER_SIZE, 0);
-  if (nread != 1)
+  if (nread != H4_HEADER_SIZE)
     {
-      wlwarn("WARNING: Unable to read H4 packet type: %ld\n",
-             (long)nread);
+      wlwarn("WARNING: Unable to read H4 packet type: %zd\n", nread);
       goto errout_with_busy;
     }
 
@@ -149,8 +146,7 @@ static void btuart_rxwork(FAR void *arg)
                       hdrlen, hdrlen);
   if (nread != hdrlen)
     {
-      wlwarn("WARNING: Unable to read H4 packet header: %ld\n",
-          (long)nread);
+      wlwarn("WARNING: Unable to read H4 packet header: %zd\n", nread);
       goto errout_with_busy;
     }
 
@@ -176,8 +172,7 @@ static void btuart_rxwork(FAR void *arg)
                       pktlen, pktlen);
   if (nread != pktlen)
     {
-      wlwarn("WARNING: Unable to read H4 packet: %ld\n",
-          (long)nread);
+      wlwarn("WARNING: Unable to read H4 packet: %zd\n", nread);
       goto errout_with_busy;
     }
 
