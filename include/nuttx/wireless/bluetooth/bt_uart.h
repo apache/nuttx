@@ -137,6 +137,11 @@ struct btuart_lowerhalf_s
   /* Flush/drain all buffered RX data */
 
   CODE ssize_t (*rxdrain)(FAR const struct btuart_lowerhalf_s *lower);
+
+  /* Lower-half logic may support platform-specific ioctl commands */
+
+  CODE int (*ioctl)(FAR const struct btuart_lowerhalf_s *lower,
+                    int cmd, unsigned long arg);
 };
 
 /****************************************************************************
