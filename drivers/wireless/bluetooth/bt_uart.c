@@ -306,3 +306,23 @@ void btuart_close(FAR struct bt_driver_s *dev)
 
   lower->rxattach(lower, NULL, NULL);
 }
+
+int btuart_ioctl(FAR struct bt_driver_s *dev,
+                 int cmd, unsigned long arg)
+{
+  FAR struct btuart_upperhalf_s *upper;
+  FAR const struct btuart_lowerhalf_s *lower;
+
+  upper = (FAR struct btuart_upperhalf_s *)dev;
+  DEBUGASSERT(upper != NULL && upper->lower != NULL);
+  lower = upper->lower;
+
+  if (lower->ioctl)
+    {
+      return lower->ioctl(lower, cmd, arg);
+    }
+  else
+    {
+      return -ENOTTY;
+    }
+}
