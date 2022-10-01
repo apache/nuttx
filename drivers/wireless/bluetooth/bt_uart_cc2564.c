@@ -190,6 +190,7 @@ int btuart_register(FAR const struct btuart_lowerhalf_s *lower)
   upper->dev.open         = btuart_open;
   upper->dev.send         = btuart_send;
   upper->dev.close        = btuart_close;
+  upper->dev.ioctl        = btuart_ioctl;
   upper->lower            = lower;
 
   /* Load firmware */
