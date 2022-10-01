@@ -30,7 +30,6 @@
 #include <poll.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -40,8 +39,6 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/kthread.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/serial/tioctl.h>
 #include <nuttx/wireless/bluetooth/bt_uart_shim.h>
 
@@ -59,9 +56,7 @@ struct hciuart_state_s
   FAR void *arg;                /* Rx callback argument */
 
   struct file f;                /* File structure */
-  bool enabled;                 /* Flag indicating that reception is enabled */
-
-  pid_t serialmontask;          /* The receive serial octets task handle */
+  struct pollfd p;              /* Poll structure */
 };
 
 struct hciuart_config_s
@@ -80,6 +75,7 @@ struct hciuart_config_s
 
 static void hciuart_rxattach(FAR const struct btuart_lowerhalf_s *lower,
                              btuart_rxcallback_t callback, FAR void *arg);
+static void hciuart_rxpollcb(FAR struct pollfd *fds);
 static void hciuart_rxenable(FAR const struct btuart_lowerhalf_s *lower,
                              bool enable);
 static int hciuart_setbaud(FAR const struct btuart_lowerhalf_s *lower,
@@ -143,6 +139,35 @@ hciuart_rxattach(FAR const struct btuart_lowerhalf_s *lower,
 }
 
 /****************************************************************************
+ * Name: hciuart_rxpollcb
+ *
+ * Description:
+ *   Callback to receive the UART driver POLLIN notification.
+ *
+ ****************************************************************************/
+
+static void hciuart_rxpollcb(FAR struct pollfd *fds)
+{
+  FAR struct hciuart_config_s *n = (FAR struct hciuart_config_s *)fds->arg;
+  FAR struct hciuart_state_s *s = &n->state;
+
+  if (fds->revents & POLLIN)
+    {
+      fds->revents = 0;
+      if (s->callback != NULL)
+        {
+          wlinfo("Activating callback\n");
+          s->callback(&n->lower, s->arg);
+        }
+      else
+        {
+          wlwarn("Dropping data (no CB)\n");
+          hciuart_rxdrain(&n->lower);
+        }
+    }
+}
+
+/****************************************************************************
  * Name: hciuart_rxenable
  *
  * Description:
@@ -161,15 +186,10 @@ static void hciuart_rxenable(FAR const struct btuart_lowerhalf_s *lower,
   FAR struct hciuart_config_s *config = (FAR struct hciuart_config_s *)lower;
   FAR struct hciuart_state_s *s = &config->state;
 
-  irqstate_t flags = spin_lock_irqsave(NULL);
-  if (enable != s->enabled)
+  if (enable != !!s->p.priv)
     {
-      wlinfo(enable ? "Enable\n" : "Disable\n");
+      file_poll(&s->f, &s->p, enable);
     }
-
-  s->enabled = enable;
-
-  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -303,74 +323,6 @@ static int hciuart_ioctl(FAR const struct btuart_lowerhalf_s *lower,
 }
 
 /****************************************************************************
- * Name: hcicollecttask
- *
- * Description:
- *   Loop and alert when serial data arrive
- *
- ****************************************************************************/
-
-static int hcicollecttask(int argc, FAR char **argv)
-{
-  FAR struct hciuart_config_s *n;
-  FAR struct hciuart_state_s *s;
-  struct pollfd p;
-
-  n = (FAR struct hciuart_config_s *)
-    ((uintptr_t)strtoul(argv[1], NULL, 0));
-  s = &n->state;
-
-  /* Put materials into poll structure */
-
-  p.ptr = &s->f;
-  p.events = POLLIN | POLLFILE;
-
-  for (; ; )
-    {
-      /* Wait for data to arrive */
-
-      int ret = nx_poll(&p, 1, -1);
-      if (ret < 0)
-        {
-          wlwarn("Poll interrupted %d\n", ret);
-          continue;
-        }
-
-      wlinfo("Poll completed %d\n", p.revents);
-
-      /* Given the nature of file_poll, there are multiple reasons why
-       * we might be here, so make sure we only consider the read.
-       */
-
-      if (p.revents & POLLIN)
-        {
-          if (!s->enabled)
-            {
-              /* We aren't expected to be listening, so drop these data */
-
-              wlwarn("Dropping data\n");
-              hciuart_rxdrain(&n->lower);
-            }
-          else
-            {
-              if (s->callback != NULL)
-                {
-                  wlinfo("Activating callback\n");
-                  s->callback(&n->lower, s->arg);
-                }
-              else
-                {
-                  wlwarn("Dropping data (no CB)\n");
-                  hciuart_rxdrain(&n->lower);
-                }
-            }
-        }
-    }
-
-  return OK;
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -393,8 +345,6 @@ FAR struct btuart_lowerhalf_s *btuart_shim_getdevice(FAR const char *path)
 {
   FAR struct hciuart_config_s *n;
   FAR struct hciuart_state_s *s;
-  FAR char *argv[2];
-  char arg1[16];
   int ret;
 
   /* Get the memory for this shim instance */
@@ -416,6 +366,12 @@ FAR struct btuart_lowerhalf_s *btuart_shim_getdevice(FAR const char *path)
       return NULL;
     }
 
+  /* Setup poll structure */
+
+  s->p.events = POLLIN;
+  s->p.arg    = n;
+  s->p.cb     = hciuart_rxpollcb;
+
   /* Hook the routines in */
 
   n->lower.rxattach = hciuart_rxattach;
@@ -425,19 +381,6 @@ FAR struct btuart_lowerhalf_s *btuart_shim_getdevice(FAR const char *path)
   n->lower.write    = hciuart_write;
   n->lower.rxdrain  = hciuart_rxdrain;
   n->lower.ioctl    = hciuart_ioctl;
-
-  /* Create the monitor thread */
-
-  snprintf(arg1, 16, "%p", n);
-  argv[0] = arg1;
-  argv[1] = NULL;
-
-  ret = kthread_create("BT HCI Rx", CONFIG_BLUETOOTH_TXCONN_PRIORITY,
-                       CONFIG_DEFAULT_TASK_STACKSIZE, hcicollecttask, argv);
-  if (ret > 0)
-    {
-      s->serialmontask = (pid_t)ret;
-    }
 
   return (FAR struct btuart_lowerhalf_s *)n;
 }
