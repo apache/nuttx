@@ -89,6 +89,8 @@ static ssize_t hciuart_read(FAR const struct btuart_lowerhalf_s *lower,
 static ssize_t hciuart_write(FAR const struct btuart_lowerhalf_s *lower,
                              FAR const void *buffer, size_t buflen);
 static ssize_t hciuart_rxdrain(FAR const struct btuart_lowerhalf_s *lower);
+static int hciuart_ioctl(FAR const struct btuart_lowerhalf_s *lower,
+                         int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Functions
@@ -188,12 +190,10 @@ static int
 hciuart_setbaud(FAR const struct btuart_lowerhalf_s *lower, uint32_t baud)
 {
 #ifdef CONFIG_SERIAL_TERMIOS
-  FAR struct hciuart_config_s *config = (FAR struct hciuart_config_s *)lower;
-  FAR struct hciuart_state_s *state = &config->state;
   struct termios tio;
   int ret;
 
-  ret = file_ioctl(&state->f, TCGETS, (long unsigned int)&tio);
+  ret = hciuart_ioctl(lower, TCGETS, (unsigned long)&tio);
   if (ret)
     {
       wlerr("ERROR during TCGETS\n");
@@ -209,7 +209,7 @@ hciuart_setbaud(FAR const struct btuart_lowerhalf_s *lower, uint32_t baud)
 
   tio.c_cflag |= CRTS_IFLOW | CCTS_OFLOW;
 
-  ret = file_ioctl(&state->f, TCSETS, (unsigned long int)&tio);
+  ret = hciuart_ioctl(lower, TCSETS, (unsigned long)&tio);
   if (ret)
     {
       wlerr("ERROR during TCSETS, does UART support CTS/RTS?\n");
@@ -286,10 +286,20 @@ hciuart_write(FAR const struct btuart_lowerhalf_s *lower,
 
 static ssize_t hciuart_rxdrain(FAR const struct btuart_lowerhalf_s *lower)
 {
+  return hciuart_ioctl(lower, TCDRN, 0);
+}
+
+/****************************************************************************
+ * Name: hciuart_ioctl
+ ****************************************************************************/
+
+static int hciuart_ioctl(FAR const struct btuart_lowerhalf_s *lower,
+                         int cmd, unsigned long arg)
+{
   FAR struct hciuart_config_s *config = (FAR struct hciuart_config_s *)lower;
   FAR struct hciuart_state_s *s = &config->state;
 
-  return file_ioctl(&s->f, TCDRN, 0);
+  return file_ioctl(&s->f, cmd, arg);
 }
 
 /****************************************************************************
@@ -414,6 +424,7 @@ FAR struct btuart_lowerhalf_s *btuart_shim_getdevice(FAR const char *path)
   n->lower.read     = hciuart_read;
   n->lower.write    = hciuart_write;
   n->lower.rxdrain  = hciuart_rxdrain;
+  n->lower.ioctl    = hciuart_ioctl;
 
   /* Create the monitor thread */
 
