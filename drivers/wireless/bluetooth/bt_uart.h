@@ -91,5 +91,6 @@ int btuart_send(FAR struct bt_driver_s *dev,
                 enum bt_buf_type_e type,
                 FAR void *data, size_t len);
 int btuart_open(FAR struct bt_driver_s *dev);
+void btuart_close(FAR struct bt_driver_s *dev);
 
 #endif /* __DRIVER_WIRELESS_BLUETOOTH_BT_UART_H */

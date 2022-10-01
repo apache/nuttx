@@ -275,10 +275,6 @@ int btuart_open(FAR struct bt_driver_s *dev)
   DEBUGASSERT(upper != NULL && upper->lower != NULL);
   lower = upper->lower;
 
-  /* Disable Rx callbacks */
-
-  lower->rxenable(lower, false);
-
   /* Drain any cached Rx data */
 
   lower->rxdrain(lower);
@@ -291,4 +287,22 @@ int btuart_open(FAR struct bt_driver_s *dev)
 
   lower->rxenable(lower, true);
   return OK;
+}
+
+void btuart_close(FAR struct bt_driver_s *dev)
+{
+  FAR struct btuart_upperhalf_s *upper;
+  FAR const struct btuart_lowerhalf_s *lower;
+
+  upper = (FAR struct btuart_upperhalf_s *)dev;
+  DEBUGASSERT(upper != NULL && upper->lower != NULL);
+  lower = upper->lower;
+
+  /* Disable Rx callbacks */
+
+  lower->rxenable(lower, false);
+
+  /* Detach the Rx event handler */
+
+  lower->rxattach(lower, NULL, NULL);
 }
