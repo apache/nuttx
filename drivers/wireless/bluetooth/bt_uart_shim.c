@@ -241,8 +241,7 @@ hciuart_read(FAR const struct btuart_lowerhalf_s *lower,
   FAR struct hciuart_config_s *config = (FAR struct hciuart_config_s *)lower;
   FAR struct hciuart_state_s *state = &config->state;
 
-  wlinfo("config %p buffer %p buflen %lu\n",
-         config, buffer, (unsigned long)buflen);
+  wlinfo("config %p buffer %p buflen %zu\n", config, buffer, buflen);
 
   /* NOTE: This assumes that the caller has exclusive access to the Rx
    * buffer, i.e., one lower half instance can server only one upper half!
@@ -272,8 +271,7 @@ hciuart_write(FAR const struct btuart_lowerhalf_s *lower,
   FAR struct hciuart_config_s *config = (FAR struct hciuart_config_s *)lower;
   FAR struct hciuart_state_s *state = &config->state;
 
-  wlinfo("config %p buffer %p buflen %lu\n",
-         config, buffer, (unsigned long)buflen);
+  wlinfo("config %p buffer %p buflen %zu\n", config, buffer, buflen);
 
   return file_write(&state->f, buffer, buflen);
 }
