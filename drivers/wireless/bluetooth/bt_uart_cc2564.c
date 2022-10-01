@@ -189,6 +189,7 @@ int btuart_register(FAR const struct btuart_lowerhalf_s *lower)
   upper->dev.head_reserve = H4_HEADER_SIZE;
   upper->dev.open         = btuart_open;
   upper->dev.send         = btuart_send;
+  upper->dev.close        = btuart_close;
   upper->lower            = lower;
 
   /* Load firmware */
