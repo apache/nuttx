@@ -131,14 +131,14 @@ void qemu_rv_start_s(int mhartid)
 {
   /* Disable MMU and enable PMP */
 
-  SET_CSR(satp, 0x0);
-  SET_CSR(pmpaddr0, 0x3fffffffffffffull);
-  SET_CSR(pmpcfg0, 0xf);
+  WRITE_CSR(satp, 0x0);
+  WRITE_CSR(pmpaddr0, 0x3fffffffffffffull);
+  WRITE_CSR(pmpcfg0, 0xf);
 
   /* Set exception and interrupt delegation for S-mode */
 
-  SET_CSR(medeleg, 0xffff);
-  SET_CSR(mideleg, 0xffff);
+  WRITE_CSR(medeleg, 0xffff);
+  WRITE_CSR(mideleg, 0xffff);
 
   /* Allow to write satp from S-mode */
 
@@ -152,11 +152,11 @@ void qemu_rv_start_s(int mhartid)
   /* Set the trap vector for S-mode */
 
   extern void __trap_vec(void);
-  SET_CSR(stvec, (uintptr_t)__trap_vec);
+  WRITE_CSR(stvec, (uintptr_t)__trap_vec);
 
   /* Set mepc to the entry */
 
-  SET_CSR(mepc, (uintptr_t)qemu_rv_start);
+  WRITE_CSR(mepc, (uintptr_t)qemu_rv_start);
   asm volatile("mret");
 }
 #endif
