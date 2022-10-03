@@ -50,6 +50,34 @@
 #endif
 
 /****************************************************************************
+ * Extern Function Declarations
+ ****************************************************************************/
+
+#ifdef CONFIG_BUILD_KERNEL
+extern void __trap_vec(void);
+extern void __trap_vec_m(void);
+extern void up_mtimer_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: qemu_rv_clear_bss
+ ****************************************************************************/
+
+void qemu_rv_clear_bss(void)
+{
+  uint32_t *dest;
+
+  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
+   * certain that there are no issues with the state of global variables.
+   */
+
+  for (dest = (uint32_t *)_sbss; dest < (uint32_t *)_ebss; )
+    {
+      *dest++ = 0;
+    }
+}
+
+/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -69,8 +97,6 @@ uintptr_t g_idle_topstack = QEMU_RV_IDLESTACK_TOP;
 
 void qemu_rv_start(int mhartid)
 {
-  uint32_t *dest;
-
   /* Configure FPU */
 
   riscv_fpuconfig();
@@ -80,14 +106,9 @@ void qemu_rv_start(int mhartid)
       goto cpux;
     }
 
-  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
-   * certain that there are no issues with the state of global variables.
-   */
-
-  for (dest = (uint32_t *)_sbss; dest < (uint32_t *)_ebss; )
-    {
-      *dest++ = 0;
-    }
+#ifndef CONFIG_BUILD_KERNEL
+  qemu_rv_clear_bss();
+#endif
 
   showprogress('A');
 
@@ -98,12 +119,6 @@ void qemu_rv_start(int mhartid)
   showprogress('B');
 
   /* Do board initialization */
-
-#ifdef CONFIG_ARCH_USE_S_MODE
-  /* Initialize the per CPU areas */
-
-  riscv_percpu_add_hart(mhartid);
-#endif
 
   showprogress('C');
 
@@ -116,6 +131,7 @@ void qemu_rv_start(int mhartid)
   nx_start();
 
 cpux:
+
 #ifdef CONFIG_SMP
   riscv_cpu_boot(mhartid);
 #endif
@@ -126,9 +142,16 @@ cpux:
     }
 }
 
-#ifdef CONFIG_ARCH_USE_S_MODE
+#ifdef CONFIG_BUILD_KERNEL
+
 void qemu_rv_start_s(int mhartid)
 {
+  qemu_rv_clear_bss();
+
+  /* Initialize the per CPU areas */
+
+  riscv_percpu_add_hart(mhartid);
+
   /* Disable MMU and enable PMP */
 
   WRITE_CSR(satp, 0x0);
@@ -151,13 +174,27 @@ void qemu_rv_start_s(int mhartid)
 
   /* Set the trap vector for S-mode */
 
-  extern void __trap_vec(void);
   WRITE_CSR(stvec, (uintptr_t)__trap_vec);
+
+  /* Set the trap vector for M-mode */
+
+  WRITE_CSR(mtvec, (uintptr_t)__trap_vec_m);
+
+  /* Initialize mtimer before entering to S-mode */
+
+  up_mtimer_initialize();
 
   /* Set mepc to the entry */
 
   WRITE_CSR(mepc, (uintptr_t)qemu_rv_start);
-  asm volatile("mret");
+
+  /* Set a0 to mhartid explicitly and enter to S-mode */
+
+  asm volatile (
+      "mv a0, %0 \n"
+      "mret \n"
+      :: "r" (mhartid)
+  );
 }
 #endif
 
