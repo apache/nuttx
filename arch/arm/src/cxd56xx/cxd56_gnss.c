@@ -2746,7 +2746,7 @@ static ssize_t cxd56_gnss_read(struct file *filep, char *buffer,
   if (!buffer)
     {
       ret = -EINVAL;
-      goto err;
+      goto out;
     }
 
   if (len == 0)
