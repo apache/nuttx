@@ -298,11 +298,12 @@ to connect your smartphone or laptop to your board::
 
     nsh> ifup wlan1
     nsh> dhcpd_start wlan1
-    nsh> wapi psk wlan0 mypasswd 1
+    nsh> wapi psk wlan1 mypasswd 3
     nsh> wapi essid wlan1 nuttxap 1
 
 In this case, you are creating the access point ``nuttxapp`` in your board and to
-connect to it on your smartphone you will be required to type the password ``mypasswd``.
+connect to it on your smartphone you will be required to type the password ``mypasswd``
+using WPA2.
 The ``dhcpd_start`` is necessary to let your board to associate an IP to your smartphone.
 
 Bluetooth
