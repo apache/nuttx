@@ -1448,7 +1448,9 @@ static bool mpfs_device_reset(struct sdio_dev_s *dev)
   irqstate_t flags;
   uint32_t regval;
   uint32_t cap;
+#ifdef CONFIG_MPFS_EMMCSD_CD
   uint32_t srs09;
+#endif
   bool retval = true;
   int status = MPFS_EMMCSD_INITIALIZED;
 
@@ -1600,6 +1602,7 @@ static bool mpfs_device_reset(struct sdio_dev_s *dev)
 
   /* Card state stable */
 
+#ifdef CONFIG_MPFS_EMMCSD_CD
   srs09 = getreg32(MPFS_EMMCSD_SRS09);
   DEBUGASSERT(srs09 & MPFS_EMMCSD_SRS09_CSS);
 
@@ -1614,6 +1617,7 @@ static bool mpfs_device_reset(struct sdio_dev_s *dev)
           retval = false;
         }
     }
+#endif
 
   /* Set 1-bit bus mode */
 
