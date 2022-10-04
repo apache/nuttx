@@ -137,10 +137,9 @@ irqstate_t spin_lock_irqsave(spinlock_t *lock)
 
 void spin_unlock_irqrestore(spinlock_t *lock, irqstate_t flags)
 {
-  int me = this_cpu();
-
   if (NULL == lock)
     {
+      int me = this_cpu();
       DEBUGASSERT(0 < g_irq_spin_count[me]);
       g_irq_spin_count[me]--;
 
