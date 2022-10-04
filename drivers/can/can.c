@@ -360,10 +360,11 @@ static FAR struct can_reader_s *init_can_reader(FAR struct file *filep)
 
 static int can_open(FAR struct file *filep)
 {
-  FAR struct inode     *inode = filep->f_inode;
-  FAR struct can_dev_s *dev   = inode->i_private;
-  irqstate_t            flags;
-  int                   ret;
+  FAR struct inode        *inode  = filep->f_inode;
+  FAR struct can_dev_s    *dev    = inode->i_private;
+  FAR struct can_reader_s *reader;
+  irqstate_t               flags;
+  int                      ret;
 
   /* If the port is the middle of closing, wait until the close is finished */
 
@@ -415,8 +416,9 @@ static int can_open(FAR struct file *filep)
 
           if ((filep->f_oflags & O_RDOK) != 0)
             {
-              list_add_head(&dev->cd_readers,
-                            (FAR struct list_node *)init_can_reader(filep));
+              reader = init_can_reader(filep);
+              DEBUGASSERT(reader);
+              list_add_head(&dev->cd_readers, &reader->list);
             }
         }
 
@@ -1262,6 +1264,7 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
   FAR uint8_t             *dest;
   FAR struct list_node    *node;
   FAR struct list_node    *tmp;
+  FAR struct can_reader_s *reader;
   int                      nexttail;
   int                      errcode = -ENOMEM;
   int                      i;
@@ -1330,7 +1333,7 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
 
   list_for_every_safe(&dev->cd_readers, node, tmp)
     {
-      FAR struct can_reader_s *reader = (FAR struct can_reader_s *)node;
+      reader = (FAR struct can_reader_s *)node;
       fifo = &reader->fifo;
 
       nexttail = fifo->rx_tail + 1;
