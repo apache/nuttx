@@ -94,7 +94,7 @@ config NET_CAN_RAW_DEFAULT_TX_DEADLINE
 config NET_CAN_RAW_FILTER_MAX
 	int "CAN_RAW_FILTER max filter count"
 	default 32
-	depends on NET_CAN_SOCK_OPTS
+	depends on NET_CANPROTO_OPTIONS
 	---help---
 		Maximum number of CAN_RAW filters that can be set per CAN connection.
 
