@@ -55,6 +55,7 @@ static_assert(RISCV_PERCPU_IRQSTACK == offsetof(riscv_percpu_t, irq_stack),
 static riscv_percpu_t   g_percpu[HART_CNT];
 static sq_queue_t       g_freelist;
 static uintptr_t        g_initialized;
+static spinlock_t       g_percpu_spin;
 
 /****************************************************************************
  * Private Functions
@@ -76,7 +77,7 @@ static void riscv_percpu_init(void)
 
   /* Need to lock access during configuration */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_percpu_spin);
 
   /* Initialize if not done so already */
 
@@ -102,7 +103,7 @@ static void riscv_percpu_init(void)
     }
 
 out_with_lock:
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_percpu_spin, flags);
 }
 
 /****************************************************************************
@@ -131,9 +132,9 @@ void riscv_percpu_add_hart(uintptr_t hartid)
 
   /* Get free entry for this hart, this must not fail */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_percpu_spin);
   percpu = (riscv_percpu_t *)sq_remfirst(&g_freelist);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_percpu_spin, flags);
   DEBUGASSERT(percpu);
 
   /* Assign hartid, stack has already been assigned */
