@@ -35,7 +35,7 @@
 #include <nuttx/mmcsd.h>
 
 #include <stm32.h>
-#include <stm32_uart.h>
+#include <stm32_romfs.h>
 
 #include <arch/board/board.h>
 
@@ -89,6 +89,15 @@ int stm32_bringup(void)
              "ERROR: Failed to mount the PROC filesystem: %d\n",  ret);
     }
 #endif /* CONFIG_FS_PROCFS */
+
+#ifdef CONFIG_STM32_ROMFS
+  ret = stm32_romfs_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount romfs at %s: %d\n",
+             CONFIG_STM32_ROMFS_MOUNTPOINT, ret);
+    }
+#endif
 
 #ifdef CONFIG_INPUT_BUTTONS
   /* Register the BUTTON driver */
