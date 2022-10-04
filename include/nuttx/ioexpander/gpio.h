@@ -184,9 +184,46 @@ extern "C"
  *   Register GPIO pin device driver at /dev/gpioN, where N is the provided
  *   minor number.
  *
+ * Input Parameters:
+ *   dev    - A pointer to a gpio_dev_s
+ *   minor  - An integer value to be concatenated with '/dev/gpio'
+ *            to form the device name.
+ *
+ * Returned Value:
+ *   Zero on success; A negated errno value is returned on a failure
+ *   all error values returned by inode_reserve:
+ *
+ *   EINVAL - 'path' is invalid for this operation
+ *   EEXIST - An inode already exists at 'path'
+ *   ENOMEM - Failed to allocate in-memory resources for the operation
+ *
  ****************************************************************************/
 
 int gpio_pin_register(FAR struct gpio_dev_s *dev, int minor);
+
+/****************************************************************************
+ * Name: gpio_pin_register_byname
+ *
+ * Description:
+ *   Register GPIO pin device driver with it's pin name.
+ *
+ * Input Parameters:
+ *   dev      - A pointer to a gpio_dev_s
+ *   pinname  - A pointer to the name to be concatenated with '/dev/'
+ *              to form the device name.
+ *
+ * Returned Value:
+ *   Zero on success; A negated errno value is returned on a failure
+ *   all error values returned by inode_reserve:
+ *
+ *   EINVAL - 'path' is invalid for this operation
+ *   EEXIST - An inode already exists at 'path'
+ *   ENOMEM - Failed to allocate in-memory resources for the operation
+ *
+ ****************************************************************************/
+
+int gpio_pin_register_byname(FAR struct gpio_dev_s *dev,
+                             FAR const char *pinname);
 
 /****************************************************************************
  * Name: gpio_pin_unregister
@@ -195,9 +232,44 @@ int gpio_pin_register(FAR struct gpio_dev_s *dev, int minor);
  *   Unregister GPIO pin device driver at /dev/gpioN, where N is the provided
  *   minor number.
  *
+ * Input Parameters:
+ *   dev    - A pointer to a gpio_dev_s
+ *   minor  - An integer value to be concatenated with '/dev/gpio'
+ *            to form the device name.
+ *
+ * Returned Value:
+ *   Zero on success; A negated value is returned on a failure
+ *   (all error values returned by inode_remove):
+ *
+ *   ENOENT - path does not exist.
+ *   EBUSY  - Ref count is not 0;
+ *
  ****************************************************************************/
 
 int gpio_pin_unregister(FAR struct gpio_dev_s *dev, int minor);
+
+/****************************************************************************
+ * Name: gpio_pin_unregister_byname
+ *
+ * Description:
+ *   Unregister GPIO pin device driver at /dev/pinname.
+ *
+ * Input Parameters:
+ *   dev      - A pointer to a gpio_dev_s
+ *   pinname  - A pointer to the name to be concatenated with '/dev/'
+ *              to form the device name.
+ *
+ *
+ * Returned Value:
+ *   Zero on success; A negated value is returned on a failure
+ *   (all error values returned by inode_remove):
+ *
+ *   ENOENT - path does not exist.
+ *   EBUSY  - Ref count is not 0;
+ ****************************************************************************/
+
+int gpio_pin_unregister_byname(FAR struct gpio_dev_s *dev,
+                               FAR const char *pinname);
 
 /****************************************************************************
  * Name: gpio_lower_half
