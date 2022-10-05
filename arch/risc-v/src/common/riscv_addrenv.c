@@ -89,6 +89,11 @@
 
 #define ADDRENV_VBASE       (CONFIG_ARCH_DATA_VBASE)
 
+/* Make sure the address environment virtual address boundary is valid */
+
+static_assert((ADDRENV_VBASE & RV_MMU_SECTION_ALIGN) == 0,
+              "Addrenv start address is not aligned to section boundary");
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/

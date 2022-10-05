@@ -172,7 +172,7 @@ static void map_region(uintptr_t paddr, uintptr_t vaddr, size_t size,
           /* No, allocate 1 page, this must not fail */
 
           l3pbase = slab_alloc();
-          DEBUGASSERT(l3pbase);
+          ASSERT(l3pbase);
 
           /* Map it to the L3 table */
 
@@ -205,6 +205,15 @@ static void map_region(uintptr_t paddr, uintptr_t vaddr, size_t size,
 
 void mpfs_kernel_mappings(void)
 {
+  /* Ensure the sections are aligned properly, requirement is 2MB due to the
+   * L3 page table size (one table maps 2MB of memory). This mapping cannot
+   * handle unaligned L3 sections.
+   */
+
+  ASSERT((KFLASH_START & RV_MMU_SECTION_ALIGN) == 0);
+  ASSERT((KSRAM_START & RV_MMU_SECTION_ALIGN) == 0);
+  ASSERT((PGPOOL_START & RV_MMU_SECTION_ALIGN) == 0);
+
   /* Initialize slab allocator for L3 page tables */
 
   slab_init(PGT_L3_PBASE);
