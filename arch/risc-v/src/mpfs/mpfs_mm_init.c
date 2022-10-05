@@ -181,7 +181,7 @@ static void map_region(uintptr_t paddr, uintptr_t vaddr, size_t size,
 
           /* Map it to the L3 table */
 
-          mmu_ln_setentry(2, PGT_L2_VBASE, l3pbase, vaddr, MMU_UPGT_FLAGS);
+          mmu_ln_setentry(2, PGT_L2_VBASE, l3pbase, vaddr, PTE_G);
         }
 
       /* Then add the L3 mappings */
