@@ -231,6 +231,17 @@ int esp32s2_bringup(void)
 
 #ifdef CONFIG_ESP32S2_I2S
 
+#ifdef CONFIG_AUDIO_CS4344
+
+  /* Configure CS4344 audio on I2S0 */
+
+  ret = esp32s2_cs4344_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "Failed to initialize CS4344 audio: %d\n", ret);
+    }
+#else
+
   /* Configure I2S generic audio on I2S0 */
 
   ret = board_i2sdev_initialize();
@@ -238,6 +249,7 @@ int esp32s2_bringup(void)
     {
       syslog(LOG_ERR, "Failed to initialize I2S0 driver: %d\n", ret);
     }
+#endif /* CONFIG_AUDIO_CS4344 */
 
 #endif /* CONFIG_ESP32S2_I2S */
 

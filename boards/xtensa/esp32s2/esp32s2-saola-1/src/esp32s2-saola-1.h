@@ -170,8 +170,29 @@ int board_bmp180_initialize(int devno, int busno);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32S2_I2S
+#if defined(CONFIG_ESP32S2_I2S) && !defined(CONFIG_AUDIO_CS4344)
 int board_i2sdev_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: esp32s2_cs4344_initialize
+ *
+ * Description:
+ *   This function is called by platform-specific, setup logic to configure
+ *   and register the CS4344 device.  This function will register the driver
+ *   as /dev/audio/pcm[x] where x is determined by the I2S port number.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_AUDIO_CS4344
+int esp32s2_cs4344_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
