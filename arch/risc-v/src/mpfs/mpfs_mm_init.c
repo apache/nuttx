@@ -58,6 +58,11 @@
 #define PGT_L2_SIZE     (512)  /* Enough to map 1 GiB */
 #define PGT_L3_SIZE     (1024) /* Enough to map 4 MiB */
 
+/* Calculate the minimum size for the L3 table */
+
+#define KMEM_SIZE       (KFLASH_SIZE + KSRAM_SIZE)
+#define PGT_L3_MIN_SIZE ((KMEM_SIZE + RV_MMU_PAGE_MASK) >> RV_MMU_PAGE_SHIFT)
+
 #define SLAB_COUNT      (sizeof(m_l3_pgtable) / RV_MMU_PAGE_SIZE)
 
 /****************************************************************************
@@ -213,6 +218,10 @@ void mpfs_kernel_mappings(void)
   ASSERT((KFLASH_START & RV_MMU_SECTION_ALIGN) == 0);
   ASSERT((KSRAM_START & RV_MMU_SECTION_ALIGN) == 0);
   ASSERT((PGPOOL_START & RV_MMU_SECTION_ALIGN) == 0);
+
+  /* Check that the L3 table is of sufficient size */
+
+  ASSERT(PGT_L3_SIZE >= PGT_L3_MIN_SIZE);
 
   /* Initialize slab allocator for L3 page tables */
 
