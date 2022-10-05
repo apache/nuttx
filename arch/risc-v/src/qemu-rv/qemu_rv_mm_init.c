@@ -25,6 +25,10 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 
+#ifdef CONFIG_SMP
+#  include <nuttx/spinlock.h>
+#endif
+
 #include <stdint.h>
 #include <assert.h>
 #include <debug.h>
@@ -90,6 +94,11 @@ uintptr_t               g_kernel_pgt_pbase = PGT_L1_PBASE;
 
 static sq_queue_t       g_free_slabs;
 static pgalloc_slab_t   g_slabs[SLAB_COUNT];
+
+#ifdef CONFIG_SMP
+static spinlock_t g_mm_init_spin = SP_UNLOCKED;
+static bool g_mm_inited = false;
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -252,9 +261,23 @@ void qemu_rv_kernel_mappings(void)
 
 void qemu_rv_mm_init(void)
 {
-  /* Setup the kernel mappings */
+#ifdef CONFIG_SMP
+  irqstate_t flags;
+  flags = spin_lock_irqsave(&g_mm_init_spin);
 
-  qemu_rv_kernel_mappings();
+  if (!g_mm_inited)
+    {
+#endif
+      /* Setup the kernel mappings */
+
+      qemu_rv_kernel_mappings();
+
+#ifdef CONFIG_SMP
+      g_mm_inited = true;
+    }
+
+  spin_unlock_irqrestore(&g_mm_init_spin, flags);
+#endif
 
   /* Enable MMU (note: system is still in M-mode) */
 
