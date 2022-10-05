@@ -64,7 +64,7 @@
  *   Zero (OK) on success, a negated errno value on error.
  *
  * Assumptions/Limitations:
- *   Memory addresses [&romfs_data_begin .. &romfs_data_begin) should contain
+ *   Memory addresses [romfs_data_begin .. romfs_data_end) should contain
  *   ROMFS volume data, as included in the assembly snippet above (l. 84).
  *
  ****************************************************************************/
