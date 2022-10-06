@@ -31,4 +31,6 @@
 
 #define RISCV_CLINT_MSIP        QEMU_RV_CLINT_MSIP
 
+#define RISCV_IPI               RISCV_CLINT_MSIP
+
 #endif /* __ARCH_RISCV_SRC_QEMU_RV_HARDWARE_QEMU_RV_CLINT_H */

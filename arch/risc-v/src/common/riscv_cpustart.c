@@ -60,13 +60,13 @@
 
 void riscv_cpu_boot(int cpu)
 {
-  /* Clear machine software interrupt for CPU(cpu) */
+  /* Clear IPI for CPU(cpu) */
 
-  putreg32(0, (uintptr_t)RISCV_CLINT_MSIP + (4 * cpu));
+  putreg32(0, (uintptr_t)RISCV_IPI + (4 * cpu));
 
   /* Enable machine software interrupt for IPI to boot */
 
-  up_enable_irq(RISCV_IRQ_MSOFT);
+  up_enable_irq(RISCV_IRQ_SOFT);
 
   /* Wait interrupt */
 
@@ -89,7 +89,7 @@ void riscv_cpu_boot(int cpu)
 
   /* Clear machine software interrupt for CPU(cpu) */
 
-  putreg32(0, (uintptr_t)RISCV_CLINT_MSIP + (4 * cpu));
+  putreg32(0, (uintptr_t)RISCV_IPI + (4 * cpu));
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Notify that this CPU has started */
@@ -143,7 +143,7 @@ int up_cpu_start(int cpu)
 
   /* Send IPI to CPU(cpu) */
 
-  putreg32(1, (uintptr_t)RISCV_CLINT_MSIP + (cpu * 4));
+  putreg32(1, (uintptr_t)RISCV_IPI + (cpu * 4));
 
   return 0;
 }
