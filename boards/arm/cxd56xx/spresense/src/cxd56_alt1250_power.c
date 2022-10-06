@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/cxd56xx/spresense/include/cxd56_altmdm.h
+ * boards/arm/cxd56xx/spresense/src/cxd56_alt1250_power.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,82 +18,127 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_ALTMDM_H
-#define __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_ALTMDM_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#ifndef __ASSEMBLY__
+#if defined(CONFIG_MODEM_ALT1250)
+
+#include <stdio.h>
+#include <debug.h>
+#include <errno.h>
+
+#include <nuttx/board.h>
+#include <nuttx/spi/spi.h>
+#include <nuttx/modem/alt1250.h>
+#include <nuttx/wdog.h>
+#include <arch/board/board.h>
+#include "cxd56_gpio.h"
+#include "cxd56_pinconfig.h"
 
 /****************************************************************************
- * Public Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
+#define RESET_INTERVAL_TIMEOUT MSEC2TICK(1)
 
 /****************************************************************************
- * Public Function Prototypes
+ * Private Data
  ****************************************************************************/
 
-#if defined(CONFIG_MODEM_ALTMDM)
+static struct wdog_s g_reset_wd;
+static sem_t g_wd_wait;
 
 /****************************************************************************
- * Name: board_altmdm_initialize
- *
- * Description:
- *   Initialize Altair modem
- *
+ * Public Functions
  ****************************************************************************/
 
-int board_altmdm_initialize(const char *devpath);
-
 /****************************************************************************
- * Name: board_altmdm_uninitialize
- *
- * Description:
- *   Uninitialize Altair modem
- *
- ****************************************************************************/
-
-int board_altmdm_uninitialize(void);
-
-/****************************************************************************
- * Name: board_altmdm_poweron
+ * Name: board_alt1250_poweron
  *
  * Description:
  *   Power on the Altair modem device on the board.
  *
  ****************************************************************************/
 
-void board_altmdm_poweron(void);
+void board_alt1250_poweron(void)
+{
+  /* Power on altair modem device */
+
+  cxd56_gpio_config(ALT1250_LTE_POWER_BUTTON, false);
+  cxd56_gpio_write(ALT1250_LTE_POWER_BUTTON, false);
+
+  cxd56_gpio_config(ALT1250_SHUTDOWN, false);
+  cxd56_gpio_write(ALT1250_SHUTDOWN, true);
+
+  board_power_control(POWER_LTE, true);
+}
 
 /****************************************************************************
- * Name: board_altmdm_poweroff
+ * Name: board_alt1250_poweroff
  *
  * Description:
  *   Power off the Altair modem device on the board.
  *
  ****************************************************************************/
 
-void board_altmdm_poweroff(void);
+void board_alt1250_poweroff(void)
+{
+  /* Power off Altair modem device */
 
-#endif
+  board_power_control(POWER_LTE, false);
 
-#undef EXTERN
-#if defined(__cplusplus)
+  cxd56_gpio_write(ALT1250_SHUTDOWN, false);
+  cxd56_gpio_write(ALT1250_LTE_POWER_BUTTON, false);
 }
+
+/****************************************************************************
+ * Name: board_alt1250_timeout
+ *
+ * Description:
+ *   Watchdog timer for timeout of reset interval.
+ *
+ ****************************************************************************/
+
+static void board_alt1250_timeout(wdparm_t arg)
+{
+  sem_t *wd_wait = (sem_t *)arg;
+
+  nxsem_post(wd_wait);
+}
+
+/****************************************************************************
+ * Name: board_alt1250_reset
+ *
+ * Description:
+ *   Reset the Altair modem device on the board.
+ *
+ ****************************************************************************/
+
+void board_alt1250_reset(void)
+{
+  memset(&g_reset_wd, 0, sizeof(struct wdog_s));
+  nxsem_init(&g_wd_wait, 0, 0);
+
+  /* Reset Altair modem device */
+
+  cxd56_gpio_write(ALT1250_SHUTDOWN, false);
+
+  /* ALT1250_SHUTDOWN should be low in the range 101usec to 100msec */
+
+  wd_start(&g_reset_wd, RESET_INTERVAL_TIMEOUT,
+           board_alt1250_timeout, (wdparm_t)&g_wd_wait);
+
+  /* Wait for the watchdog timer to expire */
+
+  nxsem_wait_uninterruptible(&g_wd_wait);
+
+  cxd56_gpio_write(ALT1250_SHUTDOWN, true);
+
+  nxsem_destroy(&g_wd_wait);
+}
+
 #endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_ALTMDM_H */
