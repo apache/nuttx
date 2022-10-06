@@ -27,6 +27,7 @@
 #include <nuttx/init.h>
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
+#include <arch/barriers.h>
 
 #include "riscv_internal.h"
 #include "chip.h"
@@ -133,8 +134,11 @@ void qemu_rv_start(int mhartid)
 cpux:
 
 #ifdef CONFIG_SMP
-  riscv_cpu_boot(mhartid);
+#ifdef CONFIG_BUILD_KERNEL
+  qemu_rv_mm_init();
 #endif
+  riscv_cpu_boot(mhartid);
+#endif /* CONFIG_SMP */
 
   while (true)
     {
@@ -144,9 +148,25 @@ cpux:
 
 #ifdef CONFIG_BUILD_KERNEL
 
+static bool g_bss_cleared = false;
+
 void qemu_rv_start_s(int mhartid)
 {
-  qemu_rv_clear_bss();
+  if (0 == mhartid)
+    {
+      qemu_rv_clear_bss();
+      g_bss_cleared = true;
+      __DMB();
+    }
+#ifdef CONFIG_SMP
+  else
+    {
+      while (!g_bss_cleared)
+        {
+          __DMB();
+        }
+    }
+#endif
 
   /* Initialize the per CPU areas */
 
@@ -180,9 +200,14 @@ void qemu_rv_start_s(int mhartid)
 
   WRITE_CSR(mtvec, (uintptr_t)__trap_vec_m);
 
-  /* Initialize mtimer before entering to S-mode */
+  if (0 == mhartid)
+    {
+      /* Only the primary CPU needs to initialize mtimer
+       * before entering to S-mode
+       */
 
-  up_mtimer_initialize();
+      up_mtimer_initialize();
+    }
 
   /* Set mepc to the entry */
 
