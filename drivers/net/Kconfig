@@ -342,6 +342,23 @@ menuconfig NET_LAN91C111
 if NET_LAN91C111
 endif # NET_LAN91C111
 
+menuconfig NET_SKELETON
+	bool "Skeleton network support"
+	default n
+	select ARCH_HAVE_NETDEV_STATISTICS
+	---help---
+		NuttX skeleton network driver
+
+if NET_SKELETON
+config NET_SKELETON_IRQ
+	int "Skeleton IRQ number"
+	default 0
+
+config NET_SKELETON_NINTERFACES
+	int "Number of physical skeleton devices"
+	default 1
+endif
+
 menuconfig NET_W5500
 	bool "WIZnet W5500 Support"
 	default n
