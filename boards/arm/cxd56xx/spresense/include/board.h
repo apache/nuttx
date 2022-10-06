@@ -45,7 +45,7 @@
 #include "cxd56_gpioif.h"
 
 #include "cxd56_audio.h"
-#include "cxd56_altmdm.h"
+#include "cxd56_alt1250.h"
 #include "cxd56_ak09912.h"
 #include "cxd56_apds9930.h"
 #include "cxd56_apds9960.h"
@@ -272,11 +272,11 @@ enum board_power_device
 
 /* Altair modem device pin definitions **************************************/
 
-#define ALTMDM_SLAVE_REQ          PIN_SPI2_SCK
-#define ALTMDM_MASTER_REQ         PIN_RTC_IRQ_OUT
-#define ALTMDM_WAKEUP             PIN_SPI2_MOSI
-#define ALTMDM_SHUTDOWN           PIN_SPI2_MISO
-#define ALTMDM_LTE_POWER_BUTTON   PIN_AP_CLK
+#define ALT1250_SLAVE_REQ          PIN_SPI2_SCK
+#define ALT1250_MASTER_REQ         PIN_RTC_IRQ_OUT
+#define ALT1250_WAKEUP             PIN_SPI2_MOSI
+#define ALT1250_SHUTDOWN           PIN_SPI2_MISO
+#define ALT1250_LTE_POWER_BUTTON   PIN_AP_CLK
 
 /****************************************************************************
  * Public Types
