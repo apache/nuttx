@@ -123,6 +123,8 @@ void qemu_rv_start(int mhartid)
   showprogress('C');
 
 #ifdef CONFIG_BUILD_KERNEL
+  /* Setup page tables for kernel and enable MMU */
+
   qemu_rv_mm_init();
 #endif
 
@@ -144,13 +146,22 @@ cpux:
 
 #ifdef CONFIG_BUILD_KERNEL
 
+/****************************************************************************
+ * Name: qemu_rv_start_s
+ ****************************************************************************/
+
 void qemu_rv_start_s(int mhartid)
 {
-  qemu_rv_clear_bss();
+  /* NOTE: still in M-mode */
 
-  /* Initialize the per CPU areas */
+  if (0 == mhartid)
+    {
+      qemu_rv_clear_bss();
 
-  riscv_percpu_add_hart(mhartid);
+      /* Initialize the per CPU areas */
+
+      riscv_percpu_add_hart(mhartid);
+    }
 
   /* Disable MMU and enable PMP */
 
@@ -180,9 +191,14 @@ void qemu_rv_start_s(int mhartid)
 
   WRITE_CSR(mtvec, (uintptr_t)__trap_vec_m);
 
-  /* Initialize mtimer before entering to S-mode */
+  if (0 == mhartid)
+    {
+      /* Only the primary CPU needs to initialize mtimer
+       * before entering to S-mode
+       */
 
-  up_mtimer_initialize();
+      up_mtimer_initialize();
+    }
 
   /* Set mepc to the entry */
 

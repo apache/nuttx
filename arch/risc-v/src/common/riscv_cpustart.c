@@ -38,6 +38,11 @@
 #include "sched/sched.h"
 #include "init/init.h"
 #include "riscv_internal.h"
+
+#ifdef CONFIG_BUILD_KERNEL
+#  include "riscv_mmu.h"
+#endif
+
 #include "chip.h"
 
 /****************************************************************************
@@ -71,6 +76,17 @@ void riscv_cpu_boot(int cpu)
   /* Wait interrupt */
 
   asm("WFI");
+
+#ifdef CONFIG_BUILD_KERNEL
+  /* Initialize the per CPU areas */
+
+  riscv_percpu_add_hart((uintptr_t)cpu);
+
+  /* Enable MMU */
+
+  binfo("mmu_enable: satp=%lx\n", g_kernel_pgt_pbase);
+  mmu_enable(g_kernel_pgt_pbase, 0);
+#endif
 
   _info("CPU%d Started\n", this_cpu());
 
