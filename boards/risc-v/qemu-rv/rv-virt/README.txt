@@ -22,11 +22,11 @@
 
 4. Run the nuttx with qemu
 
-  $ qemu-system-riscv32 -semihosting -M virt -cpu rv32 -smp 8 -bios none -kernel nuttx -nographic
+  $ qemu-system-riscv32 -semihosting -M virt,aclint=on -cpu rv32 -smp 8 -bios none -kernel nuttx -nographic
 
   or
 
-  $ qemu-system-riscv64 -semihosting -M virt -cpu rv64 -smp 8 -bios none -kernel nuttx -nographic
+  $ qemu-system-riscv64 -semihosting -M virt,aclint=on -cpu rv64 -smp 8 -bios none -kernel nuttx -nographic
 
   NuttShell (NSH) NuttX-10.3.0-RC1
   nsh> mount -t hostfs -o fs=. /host
