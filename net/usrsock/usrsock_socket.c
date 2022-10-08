@@ -79,6 +79,10 @@ static uint16_t socket_event(FAR struct net_driver_s *dev,
 
           conn->state   = USRSOCK_CONN_STATE_READY;
           conn->usockid = pstate->result;
+          if (flags & USRSOCK_EVENT_SENDTO_READY)
+            {
+              conn->flags |= USRSOCK_EVENT_SENDTO_READY;
+            }
         }
 
       /* Stop further callbacks */
