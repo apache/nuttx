@@ -228,6 +228,10 @@ ifeq ($(CONFIG_SENSORS_T67XX),y)
   CSRCS += t67xx.c
 endif
 
+ifeq ($(CONFIG_SENSORS_LTR308),y)
+  CSRCS += ltr308.c
+endif
+
 endif # CONFIG_I2C
 
 # These drivers depend on SPI support
