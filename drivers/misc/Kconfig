@@ -25,11 +25,6 @@ config DEV_RPMSG_SERVER
 	default n
 	depends on RPTUN
 
-config DEV_RPMSG_NPOLLWAITERS
-	int "RPMSG Device Max Number of Poll Threads"
-	default 4
-	depends on DEV_RPMSG_SERVER
-
 config DRVR_MKRD
 	bool "RAM disk wrapper (mkrd)"
 	default n

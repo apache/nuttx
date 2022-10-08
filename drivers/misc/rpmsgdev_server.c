@@ -28,7 +28,9 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/list.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/mutex.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/drivers/rpmsgdev.h>
 #include <nuttx/rptun/openamp.h>
@@ -43,12 +45,23 @@
  * Private Types
  ****************************************************************************/
 
+struct rpmsgdev_device_s
+{
+  struct file      file;  /* The open file */
+  struct pollfd    fd;    /* The poll fd */
+  uint64_t         cfd;   /* The client poll fd pointer */
+  struct list_node node;  /* The double-linked list node */
+};
+
 struct rpmsgdev_server_s
 {
-  struct rpmsg_endpoint ept;
-  struct file           file;
-  struct pollfd         fds[CONFIG_DEV_RPMSG_NPOLLWAITERS];
-  uint64_t              cfds[CONFIG_DEV_RPMSG_NPOLLWAITERS];
+  struct rpmsg_endpoint ept;   /* Rpmsg end point */
+  struct list_node      head;  /* The double-linked list head of opened
+                                * devices
+                                */
+  mutex_t               lock;  /* The mutex used to protect the list
+                                * operation
+                                */
 };
 
 /****************************************************************************
@@ -122,11 +135,31 @@ static int rpmsgdev_open_handler(FAR struct rpmsg_endpoint *ept,
 {
   FAR struct rpmsgdev_server_s *server = ept->priv;
   FAR struct rpmsgdev_open_s *msg = data;
+  FAR struct rpmsgdev_device_s *dev;
 
-  msg->header.result = file_open(&server->file,
+  dev = kmm_zalloc(sizeof(*dev));
+  if (dev == NULL)
+    {
+      msg->header.result = -ENOMEM;
+      goto out;
+    }
+
+  msg->header.result = file_open(&dev->file,
                                  &ept->name[RPMSGDEV_NAME_PREFIX_LEN],
                                  msg->flags, 0);
+  if (msg->header.result < 0)
+    {
+      kmm_free(dev);
+      goto out;
+    }
 
+  msg->filep = (uint64_t)(uintptr_t)&dev->file;
+
+  nxmutex_lock(&server->lock);
+  list_add_tail(&server->head, &dev->node);
+  nxmutex_unlock(&server->lock);
+
+out:
   return rpmsg_send(ept, msg, sizeof(*msg));
 }
 
@@ -140,8 +173,18 @@ static int rpmsgdev_close_handler(FAR struct rpmsg_endpoint *ept,
 {
   FAR struct rpmsgdev_server_s *server = ept->priv;
   FAR struct rpmsgdev_close_s *msg = data;
+  FAR struct rpmsgdev_device_s *dev =
+    (FAR struct rpmsgdev_device_s *)(uintptr_t)msg->filep;
 
-  msg->header.result = file_close(&server->file);
+  msg->header.result = file_close(&dev->file);
+  if (msg->header.result == 0)
+    {
+      nxmutex_lock(&server->lock);
+      list_delete(&dev->node);
+      nxmutex_unlock(&server->lock);
+
+      kmm_free(dev);
+    }
 
   return rpmsg_send(ept, msg, sizeof(*msg));
 }
@@ -154,9 +197,9 @@ static int rpmsgdev_read_handler(FAR struct rpmsg_endpoint *ept,
                                  FAR void *data, size_t len,
                                  uint32_t src, FAR void *priv)
 {
-  FAR struct rpmsgdev_server_s *server = ept->priv;
   FAR struct rpmsgdev_read_s *msg = data;
   FAR struct rpmsgdev_read_s *rsp;
+  FAR struct file *filep = (FAR struct file *)(uintptr_t)msg->filep;
   int ret = -ENOENT;
   size_t read = 0;
   uint32_t space;
@@ -177,7 +220,7 @@ static int rpmsgdev_read_handler(FAR struct rpmsg_endpoint *ept,
           space = msg->count - read;
         }
 
-      ret = file_read(&server->file, rsp->buf, space);
+      ret = file_read(filep, rsp->buf, space);
 
       rsp->header.result = ret;
       rpmsg_send_nocopy(ept, rsp, (ret < 0 ? 0 : ret) + sizeof(*rsp) - 1);
@@ -200,14 +243,14 @@ static int rpmsgdev_write_handler(FAR struct rpmsg_endpoint *ept,
                                   FAR void *data, size_t len,
                                   uint32_t src, FAR void *priv)
 {
-  FAR struct rpmsgdev_server_s *server = ept->priv;
   FAR struct rpmsgdev_write_s *msg = data;
+  FAR struct file *filep = (FAR struct file *)(uintptr_t)msg->filep;
   size_t written = 0;
   int ret = -ENOENT;
 
   while (written < msg->count)
     {
-      ret = file_write(&server->file, msg->buf + written,
+      ret = file_write(filep, msg->buf + written,
                        msg->count - written);
       if (ret <= 0)
         {
@@ -234,10 +277,10 @@ static int rpmsgdev_lseek_handler(FAR struct rpmsg_endpoint *ept,
                                   FAR void *data, size_t len,
                                   uint32_t src, FAR void *priv)
 {
-  FAR struct rpmsgdev_server_s *server = ept->priv;
   FAR struct rpmsgdev_lseek_s *msg = data;
+  FAR struct file *filep = (FAR struct file *)(uintptr_t)msg->filep;
 
-  msg->header.result = file_seek(&server->file, msg->offset, msg->whence);
+  msg->header.result = file_seek(filep, msg->offset, msg->whence);
 
   return rpmsg_send(ept, msg, len);
 }
@@ -250,10 +293,10 @@ static int rpmsgdev_ioctl_handler(FAR struct rpmsg_endpoint *ept,
                                   FAR void *data, size_t len,
                                   uint32_t src, FAR void *priv)
 {
-  FAR struct rpmsgdev_server_s *server = ept->priv;
   FAR struct rpmsgdev_ioctl_s *msg = data;
+  FAR struct file *filep = (FAR struct file *)(uintptr_t)msg->filep;
 
-  msg->header.result = file_ioctl(&server->file, msg->request,
+  msg->header.result = file_ioctl(filep, msg->request,
                                   msg->arglen > 0 ? (unsigned long)msg->buf :
                                   msg->arg);
 
@@ -267,16 +310,15 @@ static int rpmsgdev_ioctl_handler(FAR struct rpmsg_endpoint *ept,
 static void rpmsgdev_poll_cb(FAR struct pollfd *fds)
 {
   FAR struct rpmsgdev_server_s *server = fds->arg;
+  FAR struct rpmsgdev_device_s *dev =
+    container_of(fds, FAR struct rpmsgdev_device_s, fd);
   FAR struct rpmsgdev_notify_s msg;
-  int tmp;
 
-  DEBUGASSERT(fds != NULL && (uintptr_t)fds >= (uintptr_t)server->fds);
-
-  tmp = fds - server->fds;
+  DEBUGASSERT(fds != NULL && dev->cfd != 0);
 
   msg.header.command = RPMSGDEV_NOTIFY;
   msg.revents = fds->revents;
-  msg.fds     = server->cfds[tmp];
+  msg.fds     = dev->cfd;
 
   fds->revents = 0;
 
@@ -293,61 +335,34 @@ static int rpmsgdev_poll_handler(FAR struct rpmsg_endpoint *ept,
 {
   FAR struct rpmsgdev_server_s *server = ept->priv;
   FAR struct rpmsgdev_poll_s *msg = data;
-  FAR struct pollfd *fds = NULL;
-  int i;
+  FAR struct rpmsgdev_device_s *dev =
+    (FAR struct rpmsgdev_device_s *)(uintptr_t)msg->filep;
 
   DEBUGASSERT(msg->fds != 0);
 
   if (msg->setup)
     {
-      for (i = 0; i < CONFIG_DEV_RPMSG_NPOLLWAITERS; i++)
-        {
-          if (server->cfds[i] == 0)
-            {
-              server->cfds[i] = msg->fds;
-              break;
-            }
-        }
+      /* Do not allow double setup */
 
-      if (i >= CONFIG_DEV_RPMSG_NPOLLWAITERS)
-        {
-          msg->header.result = -EBUSY;
-          goto out;
-        }
+      DEBUGASSERT(dev->cfd == 0);
 
-      fds          = &server->fds[i];
-      fds->events  = msg->events;
-      fds->revents = 0;
-      fds->cb      = rpmsgdev_poll_cb;
-      fds->arg     = server;
+      dev->cfd        = msg->fds;
+      dev->fd.events  = msg->events;
+      dev->fd.revents = 0;
+      dev->fd.cb      = rpmsgdev_poll_cb;
+      dev->fd.arg     = server;
 
-      msg->header.result = file_poll(&server->file, fds, true);
+      msg->header.result = file_poll(&dev->file, &dev->fd, true);
     }
   else
     {
-      for (i = 0; i < CONFIG_DEV_RPMSG_NPOLLWAITERS; i++)
-        {
-          if (server->cfds[i] == msg->fds)
-            {
-              break;
-            }
-        }
-
-      if (i >= CONFIG_DEV_RPMSG_NPOLLWAITERS)
-        {
-          msg->header.result = -EINVAL;
-          goto out;
-        }
-
-      fds = &server->fds[i];
-      msg->header.result = file_poll(&server->file, fds, false);
+      msg->header.result = file_poll(&dev->file, &dev->fd, false);
       if (msg->header.result == OK)
         {
-          server->cfds[i] = 0;
+          dev->cfd = 0;
         }
     }
 
-out:
   return rpmsg_send(ept, msg, len);
 }
 
@@ -379,6 +394,8 @@ static void rpmsgdev_ns_bind(FAR struct rpmsg_device *rdev,
       return;
     }
 
+  list_initialize(&server->head);
+  nxmutex_init(&server->lock);
   server->ept.priv = server;
 
   ret = rpmsg_create_ept(&server->ept, rdev, name,
@@ -397,10 +414,31 @@ static void rpmsgdev_ns_bind(FAR struct rpmsg_device *rdev,
 static void rpmsgdev_ns_unbind(FAR struct rpmsg_endpoint *ept)
 {
   FAR struct rpmsgdev_server_s *server = ept->priv;
+  FAR struct rpmsgdev_device_s *dev;
+  FAR struct rpmsgdev_device_s *tmpdev;
 
-  file_close(&server->file);
+  nxmutex_lock(&server->lock);
+
+  list_for_every_entry_safe(&server->head, dev, tmpdev,
+                            struct rpmsgdev_device_s, node)
+    {
+      if (dev->cfd != 0)
+        {
+          file_poll(&dev->file, &dev->fd, false);
+        }
+
+      if (dev->file.f_inode != NULL)
+        {
+          file_close(&dev->file);
+        }
+
+      list_delete(&dev->node);
+      kmm_free(dev);
+    }
+
+  nxmutex_unlock(&server->lock);
+
   rpmsg_destroy_ept(&server->ept);
-
   kmm_free(server);
 }
 
