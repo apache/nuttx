@@ -184,6 +184,12 @@ static const struct arm_mmu_region mmu_nxrt_regions[] =
                         MT_NORMAL | MT_RW | MT_SECURE),
 };
 
+static const struct arm_mmu_config mmu_nxrt_config =
+{
+  .num_regions = ARRAY_SIZE(mmu_nxrt_regions),
+  .mmu_regions = mmu_nxrt_regions,
+};
+
 /***************************************************************************
  * Private Functions
  ***************************************************************************/
@@ -507,9 +513,9 @@ static void setup_page_tables(void)
 
   /* setup translation table for mirtos execution regions */
 
-  for (index = 0; index < ARRAY_SIZE(mmu_nxrt_regions); index++)
+  for (index = 0; index < mmu_nxrt_config.num_regions; index++)
     {
-      region = &mmu_nxrt_regions[index];
+      region = &mmu_nxrt_config.mmu_regions[index];
       if (region->size || region->attrs)
         {
           init_xlat_tables(region);
