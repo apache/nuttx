@@ -48,11 +48,18 @@
 #define MTIMER_FREQ 10000000
 #define TICK_COUNT (10000000 / TICK_PER_SEC)
 
+#ifdef CONFIG_BUILD_KERNEL
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static uint32_t g_mtimer_cnt = 0;
+static uint32_t g_stimer_pending = false;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-#ifdef CONFIG_BUILD_KERNEL
 
 /****************************************************************************
  * Name: qemu_rv_ssoft_interrupt
@@ -69,9 +76,23 @@ static int qemu_rv_ssoft_interrupt(int irq, void *context, void *arg)
 
   CLEAR_CSR(sip, SIP_SSIP);
 
-  /* Proceed the OS timer */
+  if (g_stimer_pending)
+    {
+      g_stimer_pending = false;
 
-  nxsched_process_timer();
+      /* Proceed the OS timer */
+
+      nxsched_process_timer();
+    }
+#ifdef CONFIG_SMP
+  else
+    {
+      /* We assume IPI has been issued */
+
+      riscv_pause_handler(irq, context, arg);
+    }
+#endif
+
   return 0;
 }
 
@@ -173,6 +194,9 @@ void qemu_rv_mtimer_interrupt(void)
   current = getreg64(QEMU_RV_CLINT_MTIMECMP);
   next = current + TICK_COUNT;
   putreg64(next, QEMU_RV_CLINT_MTIMECMP);
+
+  g_mtimer_cnt++;
+  g_stimer_pending = true;
 
   /* Post Supervisor Software Interrupt */
 
