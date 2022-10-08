@@ -54,6 +54,11 @@
  * Private Types
  ****************************************************************************/
 
+struct rpmsgdev_priv_s
+{
+  uint64_t filep; /* store server file pointer */
+};
+
 struct rpmsgdev_s
 {
   struct rpmsg_endpoint ept;         /* Rpmsg endpoint */
@@ -63,10 +68,6 @@ struct rpmsgdev_s
                                       * opreation until the connection
                                       * between two cpu established.
                                       */
-  mutex_t               excl;        /* Exclusive mutex, used to support thread
-                                      * safe.
-                                      */
-  int                   open_count;  /* Device open count */
 };
 
 /* Rpmsg device cookie used to handle the response from the remote cpu */
@@ -188,6 +189,7 @@ const struct file_operations g_rpmsgdev_ops =
 static int rpmsgdev_open(FAR struct file *filep)
 {
   FAR struct rpmsgdev_s *dev;
+  FAR struct rpmsgdev_priv_s *priv;
   struct rpmsgdev_open_s msg;
   int ret;
 
@@ -202,33 +204,30 @@ static int rpmsgdev_open(FAR struct file *filep)
   dev = filep->f_inode->i_private;
   DEBUGASSERT(dev != NULL);
 
-  /* Take the semaphore */
+  priv = (FAR struct rpmsgdev_priv_s *)kmm_zalloc(sizeof(*priv));
+  if (priv == NULL)
+    {
+      return -ENOMEM;
+    }
 
-  ret = nxmutex_lock(&dev->excl);
+  /* Try to open the device in the remote cpu */
+
+  msg.flags = filep->f_oflags;
+  ret = rpmsgdev_send_recv(dev, RPMSGDEV_OPEN, true, &msg.header,
+                           sizeof(msg), NULL);
   if (ret < 0)
     {
-      rpmsgdeverr("semtake error, ret=%d\n", ret);
+      rpmsgdeverr("open failed, ret=%d\n", ret);
+      kmm_free(priv);
       return ret;
     }
 
-  /* Check if this is the first time that the driver has been opened. */
+  priv->filep = msg.filep;
 
-  if (dev->open_count++ == 0)
-    {
-      /* Try to open the file in the host file system */
+  /* Attach the private date to the struct file instance */
 
-      msg.flags = filep->f_oflags;
+  filep->f_priv = priv;
 
-      ret = rpmsgdev_send_recv(dev, RPMSGDEV_OPEN, true, &msg.header,
-                               sizeof(msg), NULL);
-      if (ret < 0)
-        {
-          rpmsgdeverr("open failed\n");
-          dev->open_count--;
-        }
-    }
-
-  nxmutex_unlock(&dev->excl);
   return ret;
 }
 
@@ -249,6 +248,7 @@ static int rpmsgdev_open(FAR struct file *filep)
 static int rpmsgdev_close(FAR struct file *filep)
 {
   FAR struct rpmsgdev_s *dev;
+  FAR struct rpmsgdev_priv_s *priv;
   struct rpmsgdev_close_s msg;
   int ret;
 
@@ -258,30 +258,24 @@ static int rpmsgdev_close(FAR struct file *filep)
 
   /* Recover our private data from the struct file instance */
 
-  dev = filep->f_inode->i_private;
-  DEBUGASSERT(dev != NULL);
+  dev  = filep->f_inode->i_private;
+  priv = filep->f_priv;
+  DEBUGASSERT(dev != NULL && priv != NULL);
 
-  /* Take the semaphore */
+  /* Try to close the device in the remote cpu */
 
-  ret = nxmutex_lock(&dev->excl);
+  msg.filep = priv->filep;
+  ret = rpmsgdev_send_recv(dev, RPMSGDEV_CLOSE, true, &msg.header,
+                           sizeof(msg), NULL);
   if (ret < 0)
     {
+      rpmsgdeverr("close failed, ret=%d\n", ret);
       return ret;
     }
 
-  /* There are no more references to the port */
+  filep->f_priv = NULL;
+  kmm_free(priv);
 
-  if (--dev->open_count == 0)
-    {
-      ret = rpmsgdev_send_recv(dev, RPMSGDEV_CLOSE, true, &msg.header,
-                               sizeof(msg), NULL);
-      if (ret < 0)
-        {
-          dev->open_count++;
-        }
-    }
-
-  nxmutex_unlock(&dev->excl);
   return ret;
 }
 
@@ -306,6 +300,7 @@ static ssize_t rpmsgdev_read(FAR struct file *filep, FAR char *buffer,
                              size_t buflen)
 {
   FAR struct rpmsgdev_s *dev;
+  FAR struct rpmsgdev_priv_s *priv;
   struct rpmsgdev_read_s msg;
   struct iovec read;
   ssize_t ret;
@@ -321,28 +316,20 @@ static ssize_t rpmsgdev_read(FAR struct file *filep, FAR char *buffer,
 
   /* Recover our private data from the struct file instance */
 
-  dev = filep->f_inode->i_private;
-  DEBUGASSERT(dev != NULL);
-
-  /* Take the semaphore */
-
-  ret = nxmutex_lock(&dev->excl);
-  if (ret < 0)
-    {
-      return ret;
-    }
+  dev  = filep->f_inode->i_private;
+  priv = filep->f_priv;
+  DEBUGASSERT(dev != NULL && priv != NULL);
 
   /* Call the host to perform the read */
 
   read.iov_base = buffer;
   read.iov_len  = 0;
 
+  msg.filep = priv->filep;
   msg.count = buflen;
 
   ret = rpmsgdev_send_recv(dev, RPMSGDEV_READ, true, &msg.header,
                            sizeof(msg) - 1, &read);
-
-  nxmutex_unlock(&dev->excl);
 
   return read.iov_len ? read.iov_len : ret;
 }
@@ -370,6 +357,7 @@ static ssize_t rpmsgdev_write(FAR struct file *filep, const char *buffer,
                               size_t buflen)
 {
   FAR struct rpmsgdev_s *dev;
+  FAR struct rpmsgdev_priv_s *priv;
   FAR struct rpmsgdev_write_s *msg;
   struct rpmsgdev_cookie_s cookie;
   uint32_t space;
@@ -385,16 +373,9 @@ static ssize_t rpmsgdev_write(FAR struct file *filep, const char *buffer,
 
   /* Recover our private data from the struct file instance */
 
-  dev = filep->f_inode->i_private;
-  DEBUGASSERT(dev != NULL);
-
-  /* Take the semaphore */
-
-  ret = nxmutex_lock(&dev->excl);
-  if (ret < 0)
-    {
-      return ret;
-    }
+  dev  = filep->f_inode->i_private;
+  priv = filep->f_priv;
+  DEBUGASSERT(dev != NULL && priv != NULL);
 
   /* Perform the rpmsg write */
 
@@ -428,6 +409,7 @@ static ssize_t rpmsgdev_write(FAR struct file *filep, const char *buffer,
 
       msg->header.command = RPMSGDEV_WRITE;
       msg->header.result  = -ENXIO;
+      msg->filep          = priv->filep;
       msg->count          = space;
       memcpy(msg->buf, buffer + written, space);
 
@@ -450,8 +432,6 @@ static ssize_t rpmsgdev_write(FAR struct file *filep, const char *buffer,
 
 out:
   nxsem_destroy(&cookie.sem);
-  nxmutex_unlock(&dev->excl);
-
   return ret < 0 ? ret : buflen;
 }
 
@@ -475,8 +455,8 @@ out:
 static off_t rpmsgdev_seek(FAR struct file *filep, off_t offset, int whence)
 {
   FAR struct rpmsgdev_s *dev;
+  FAR struct rpmsgdev_priv_s *priv;
   struct rpmsgdev_lseek_s msg;
-  off_t ret;
 
   /* Sanity checks */
 
@@ -484,27 +464,18 @@ static off_t rpmsgdev_seek(FAR struct file *filep, off_t offset, int whence)
 
   /* Recover our private data from the struct file instance */
 
-  dev = filep->f_inode->i_private;
-  DEBUGASSERT(dev != NULL);
-
-  /* Take the semaphore */
-
-  ret = nxmutex_lock(&dev->excl);
-  if (ret < 0)
-    {
-      return ret;
-    }
+  dev  = filep->f_inode->i_private;
+  priv = filep->f_priv;
+  DEBUGASSERT(dev != NULL && priv != NULL);
 
   /* Call our internal routine to perform the seek */
 
+  msg.filep  = priv->filep;
   msg.offset = offset;
   msg.whence = whence;
 
-  ret = rpmsgdev_send_recv(dev, RPMSGDEV_LSEEK, true, &msg.header,
-                           sizeof(msg), NULL);
-
-  nxmutex_unlock(&dev->excl);
-  return ret;
+  return rpmsgdev_send_recv(dev, RPMSGDEV_LSEEK, true, &msg.header,
+                            sizeof(msg), NULL);
 }
 
 /****************************************************************************
@@ -557,11 +528,11 @@ static size_t rpmsgdev_ioctl_arglen(int cmd)
 static int rpmsgdev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct rpmsgdev_s *dev;
+  FAR struct rpmsgdev_priv_s *priv;
   FAR struct rpmsgdev_ioctl_s *msg;
   uint32_t space;
   size_t arglen;
   size_t msglen;
-  int ret;
 
   /* Sanity checks */
 
@@ -569,16 +540,9 @@ static int rpmsgdev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Recover our private data from the struct file instance */
 
-  dev = filep->f_inode->i_private;
-  DEBUGASSERT(dev != NULL);
-
-  /* Take the semaphore */
-
-  ret = nxmutex_lock(&dev->excl);
-  if (ret < 0)
-    {
-      return ret;
-    }
+  dev  = filep->f_inode->i_private;
+  priv = filep->f_priv;
+  DEBUGASSERT(dev != NULL && priv != NULL);
 
   /* Call our internal routine to perform the ioctl */
 
@@ -588,10 +552,10 @@ static int rpmsgdev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   msg = rpmsgdev_get_tx_payload_buffer(dev, &space);
   if (msg == NULL)
     {
-      nxmutex_unlock(&dev->excl);
       return -ENOMEM;
     }
 
+  msg->filep   = priv->filep;
   msg->request = cmd;
   msg->arg     = arg;
   msg->arglen  = arglen;
@@ -601,11 +565,8 @@ static int rpmsgdev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       memcpy(msg->buf, (FAR void *)(uintptr_t)arg, arglen);
     }
 
-  ret = rpmsgdev_send_recv(dev, RPMSGDEV_IOCTL, false, &msg->header,
-                           msglen, arglen > 0 ? (FAR void *)arg : NULL);
-
-  nxmutex_unlock(&dev->excl);
-  return ret;
+  return rpmsgdev_send_recv(dev, RPMSGDEV_IOCTL, false, &msg->header,
+                            msglen, arglen > 0 ? (FAR void *)arg : NULL);
 }
 
 /****************************************************************************
@@ -628,8 +589,8 @@ static int rpmsgdev_poll(FAR struct file *filep, FAR struct pollfd *fds,
                          bool setup)
 {
   FAR struct rpmsgdev_s *dev;
+  FAR struct rpmsgdev_priv_s *priv;
   struct rpmsgdev_poll_s msg;
-  int ret;
 
   /* Sanity checks */
 
@@ -637,32 +598,19 @@ static int rpmsgdev_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   /* Recover our private data from the struct file instance */
 
-  dev = filep->f_inode->i_private;
-  DEBUGASSERT(dev != NULL);
-
-  /* Take the semaphore */
-
-  ret = nxmutex_lock(&dev->excl);
-  if (ret < 0)
-    {
-      return ret;
-    }
+  dev  = filep->f_inode->i_private;
+  priv = filep->f_priv;
+  DEBUGASSERT(dev != NULL && priv != NULL);
 
   /* Setup or teardown the poll */
 
-  msg.events  = fds->events;
-  msg.setup   = setup;
-  msg.fds     = (uint64_t)(uintptr_t)fds;
+  msg.filep  = priv->filep;
+  msg.events = fds->events;
+  msg.setup  = setup;
+  msg.fds    = (uint64_t)(uintptr_t)fds;
 
-  ret = rpmsgdev_send_recv(dev, RPMSGDEV_POLL, true, &msg.header,
-                           sizeof(msg), NULL);
-  if (ret < 0)
-    {
-      rpmsgdeverr("Send failed, ret=%d\n", ret);
-    }
-
-  nxmutex_unlock(&dev->excl);
-  return ret;
+  return rpmsgdev_send_recv(dev, RPMSGDEV_POLL, true, &msg.header,
+                            sizeof(msg), NULL);
 }
 
 /****************************************************************************
@@ -1085,8 +1033,6 @@ int rpmsgdev_register(FAR const char *remotecpu, FAR const char *remotepath,
   dev->remotecpu  = remotecpu;
   dev->remotepath = remotepath;
 
-  nxmutex_init(&dev->excl);
-
   nxsem_init(&dev->wait, 0, 0);
   nxsem_set_protocol(&dev->wait, SEM_PRIO_NONE);
 
@@ -1127,7 +1073,6 @@ fail_with_rpmsg:
                             NULL);
 
 fail:
-  nxmutex_destroy(&dev->excl);
   nxsem_destroy(&dev->wait);
   kmm_free(dev);
 

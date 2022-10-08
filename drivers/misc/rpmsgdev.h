@@ -61,17 +61,20 @@ begin_packed_struct struct rpmsgdev_header_s
 begin_packed_struct struct rpmsgdev_open_s
 {
   struct rpmsgdev_header_s header;
+  uint64_t                 filep;
   int32_t                  flags;
 } end_packed_struct;
 
 begin_packed_struct struct rpmsgdev_close_s
 {
   struct rpmsgdev_header_s header;
+  uint64_t                 filep;
 } end_packed_struct;
 
 begin_packed_struct struct rpmsgdev_read_s
 {
   struct rpmsgdev_header_s header;
+  uint64_t                 filep;
   uint32_t                 count;
   char                     buf[1];
 } end_packed_struct;
@@ -81,6 +84,7 @@ begin_packed_struct struct rpmsgdev_read_s
 begin_packed_struct struct rpmsgdev_lseek_s
 {
   struct rpmsgdev_header_s header;
+  uint64_t                 filep;
   int32_t                  whence;
   int32_t                  offset;
 } end_packed_struct;
@@ -88,15 +92,17 @@ begin_packed_struct struct rpmsgdev_lseek_s
 begin_packed_struct struct rpmsgdev_ioctl_s
 {
   struct rpmsgdev_header_s header;
-  int32_t                  request;
+  uint64_t                 filep;
   uint64_t                 arg;
   uint32_t                 arglen;
+  int32_t                  request;
   char                     buf[1];
 } end_packed_struct;
 
 begin_packed_struct struct rpmsgdev_poll_s
 {
   struct rpmsgdev_header_s header;
+  uint64_t                 filep;
   uint32_t                 events;
   uint32_t                 setup;
   uint64_t                 fds;
