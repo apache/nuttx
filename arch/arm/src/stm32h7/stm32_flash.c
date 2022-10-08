@@ -332,10 +332,10 @@ static inline
 struct stm32h7_flash_priv_s * stm32h7_flash_bank(size_t address)
 {
   struct stm32h7_flash_priv_s *priv = NULL;
-    
+ 
   uint32_t bank_size;
 #ifdef STM32_DUAL_BANK
-  bank_size = stm32h7_flash_size(priv)/2;
+  bank_size = stm32h7_flash_size(priv) / 2;
 #else
   bank_size = stm32h7_flash_size(priv);
 #endif
@@ -397,6 +397,7 @@ static int stm32h7_israngeerased(size_t startaddress, size_t size)
         {
           bwritten++;
         }
+
       baddr++;
       count++;
     }
