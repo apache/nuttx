@@ -1144,4 +1144,36 @@ config HDC1008_DEBUG
 		Enables debug features for the HDC1008
 
 endif # SENSORS_HDC1008
+
+config SENSORS_LTR308
+	bool "LTR308 Lite-On ambient light sensor"
+	default n
+  select I2C
+	---help---
+		Enable driver support for the LTR308 Lite-on ambient light sensor.
+
+if SENSORS_LTR308
+
+config SENSORS_LTR308_I2C_FREQUENCY
+	int "LTR308 I2C frequency"
+	default 400000
+	range 1 400000
+
+config SENSORS_LTR308_POLL_INTERVAL
+	int "Polling interval in microseconds, default 1 sec"
+	depends on SENSORS_LTR308
+	default 1000000
+	range 0 4294967295
+	---help---
+		The interval until a new sensor measurement will be triggered.
+
+config SENSORS_LTR308_THREAD_STACKSIZE
+	int "Worker thread stack size"
+	depends on SENSORS_LTR308
+	default 1024
+	---help---
+		The stack size for the worker thread.
+
+endif # SENSORS_LTR308
+
 endif # SENSORS
