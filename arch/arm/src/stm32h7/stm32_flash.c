@@ -137,6 +137,7 @@
 
 #  define STM32_FLASH_NBLOCKS      16
 #  define STM32_FLASH_SIZE        _K(16 * 128)
+#  define STM32_DUAL_BANK         1
 
 #endif
 
@@ -182,7 +183,7 @@ static struct stm32h7_flash_priv_s stm32h7_flash_bank1_priv =
   .stblock = 0,
   .stpage  = 0,
 };
-#if STM32_FLASH_NBLOCKS > 1
+#if STM32_DUAL_BANK
 static struct stm32h7_flash_priv_s stm32h7_flash_bank2_priv =
 {
   .sem = SEM_INITIALIZER(1),
@@ -330,15 +331,24 @@ static inline uint32_t stm32h7_flash_size(
 static inline
 struct stm32h7_flash_priv_s * stm32h7_flash_bank(size_t address)
 {
-  struct stm32h7_flash_priv_s *priv = &stm32h7_flash_bank1_priv;
-  if (address < priv->base || address >=
-      priv->base + stm32h7_flash_size(priv))
+  struct stm32h7_flash_priv_s *priv = NULL;
+    
+  uint32_t bank_size;
+#ifdef STM32_DUAL_BANK
+  bank_size = stm32h7_flash_size(priv)/2;
+#else
+  bank_size = stm32h7_flash_size(priv);
+#endif
+
+  if (address >= stm32h7_flash_bank1_priv.base && address <
+      stm32h7_flash_bank1_priv.base + bank_size)
     {
-      return NULL;
+      priv = &stm32h7_flash_bank1_priv;
     }
 
-#if STM32_FLASH_NBLOCKS > 1
-  if (address >= stm32h7_flash_bank2_priv.base)
+#ifdef STM32_DUAL_BANK
+  else if (address >= stm32h7_flash_bank2_priv.base && address <
+      stm32h7_flash_bank2_priv.base + bank_size)
     {
       priv = &stm32h7_flash_bank2_priv;
     }
@@ -363,7 +373,7 @@ static int stm32h7_israngeerased(size_t startaddress, size_t size)
   size_t bwritten = 0;
 
   if (!stm32h7_flash_bank(startaddress) ||
-      !stm32h7_flash_bank(startaddress + size))
+      !stm32h7_flash_bank(startaddress + size - 1))
     {
       return -EIO;
     }
@@ -380,14 +390,14 @@ static int stm32h7_israngeerased(size_t startaddress, size_t size)
       count += 4;
     }
 
-  baddr = (uint8_t *)addr;
+  baddr = (uint8_t *)startaddress;
   while (count < size)
     {
       if (getreg8(baddr) != FLASH_ERASEDVALUE)
         {
           bwritten++;
         }
-
+      baddr++;
       count++;
     }
 
