@@ -420,6 +420,7 @@ struct sensor_gps_vendor_bream
   uint32_t headacc;         /* Reserved. Heading accuracy estimate (both motion and vehicle) */
   int16_t magdec;           /* Magnetic declination */
   uint16_t magacc;          /* Magnetic declination accuracy */
+  uint8_t  cn0;             /* Carrier-to-noise density ratio (signal strength) */
 };
 
 struct sensor_gps           /* Type: Gps */
