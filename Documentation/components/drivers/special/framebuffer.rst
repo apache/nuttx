@@ -83,6 +83,7 @@ By selecting the ``ttgo_t_display_esp32:lvgl_fb`` config, the ``lvgldemo`` examp
        * ``st7789_lcdinitialize`` is part of the LCD screen driver at ``drivers/lcd/st7789.c``;
 
 * The LVGL demo application (``lvgldemo``) makes use of the ``ioctl`` system call to trigger a ``FBIO_UPDATE`` request to the higher-level device driver to refresh the LCD screen with framebuffer data:
+
 .. code-block:: c
 
    ioctl(state.fd, FBIO_UPDATE, (unsigned long)((uintptr_t)&fb_area));

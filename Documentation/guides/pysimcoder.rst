@@ -4,7 +4,7 @@
 pysimCoder integration with NuttX
 =================================
 
-`PysimCoder <https://github.com/robertobucher/pysimCoder>`_ is as an open source
+`PysimCoder <https://github.com/robertobucher/pysimCoder>`__ is as an open source
 Rapid Control Application Development Tool which is able to transfer block diagrams into C code.
 Combined with NuttX, it can be used in real time control application and as an alternative to
 expensive licensed programs and prototyping platforms. Example of `DC motor control application

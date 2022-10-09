@@ -1,6 +1,6 @@
-===========
+==============
 ws2812 Drivers
-===========
+==============
 
 This driver allows control of any smart pixels that use the ws2812
 protocol.  It supports pixel chains that use normal RGB pixels or
