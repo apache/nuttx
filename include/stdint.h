@@ -145,6 +145,14 @@
 #  define UINTMAX_C(x)      UINT32_C(x)
 #endif
 
+#ifdef __INT64_DEFINED
+#  define PTRDIFF_MIN       INT64_MIN
+#  define PTRDIFF_MAX       INT64_MAX
+#else
+#  define PTRDIFF_MIN       INT32_MIN
+#  define PTRDIFF_MAX       INT32_MAX
+# endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
