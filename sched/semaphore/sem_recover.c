@@ -98,14 +98,6 @@ void nxsem_recover(FAR struct tcb_s *tcb)
        */
 
       sem->semcount++;
-
-      /* Clear the semaphore to assure that it is not reused.  But leave the
-       * state as TSTATE_WAIT_SEM.  This is necessary because this is a
-       * necessary indication that the TCB still resides in the waiting-for-
-       * semaphore list.
-       */
-
-      tcb->waitobj = NULL;
     }
 
   /* Release all semphore holders for the task */
