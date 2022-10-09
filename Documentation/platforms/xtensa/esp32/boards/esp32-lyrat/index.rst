@@ -136,7 +136,7 @@ Switch** when **MicroSD Card** is in operation, because some of signals
 are shared by both devices.
 
 Enable MicroSD Card in 1-wire Mode
-""""""""""""""""""""""""""""""""""
+----------------------------------
 
 Set **Function DIP Switch** to:
 
@@ -170,7 +170,7 @@ In this mode:
 * *Vol-* touch button is available for use with the API
 
 Enable MicroSD Card in 4-wire Mode
-""""""""""""""""""""""""""""""""""
+----------------------------------
 
 Set **Function DIP Switch** to:
 
@@ -208,7 +208,7 @@ It may be used for debugging, application upload, as well as implementing
 several other functions.
 
 Enable JTAG
-"""""""""""
+-----------
 
 Set **Function DIP Switch** to:
 
@@ -316,7 +316,7 @@ the state of particular signal bus or debug operation of ESP32. Note that some
 signals are shared.
 
 UART Header / JP2
-"""""""""""""""""
+-----------------
 
 +---+-------------+
 |   | Header Pin  |
@@ -332,7 +332,7 @@ UART Header / JP2
 
 
 I2S Header / JP4
-""""""""""""""""
+----------------
 
 +---+----------------+-------------+
 |   | I2C Header Pin | ESP32 Pin   |
@@ -352,7 +352,7 @@ I2S Header / JP4
 
 
 I2C Header / JP5
-""""""""""""""""
+----------------
 
 +---+----------------+-------------+
 |   | I2C Header Pin | ESP32 Pin   |
@@ -366,7 +366,7 @@ I2C Header / JP5
 
 
 JTAG Header / JP7
-"""""""""""""""""
+-----------------
 
 +---+---------------+-------------+
 |   | ESP32 Pin     | JTAG Signal |

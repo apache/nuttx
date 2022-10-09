@@ -1,6 +1,6 @@
-====================
+=====================
 LCD Character Drivers
-====================
+=====================
 
 The LCD driver exposes the LCD interface to userspace via ``ioctl()`` commands.
 
@@ -23,7 +23,7 @@ In general, the binding sequence is:
 .. _genericlcdlcd:
 
 Generic LCD Character Driver
-------------------------
+----------------------------
 
 This example will walk through the path from userspace to hardware-specific details on how an LCD screen is bound to an LCD character driver.
 
@@ -82,6 +82,7 @@ By selecting the ``ttgo_t_display_esp32:lvgl_lcd`` config, the ``lvgldemo`` exam
    * ``st7789_lcdinitialize`` is part of the LCD screen driver at ``drivers/lcd/st7789.c``;
 
 * The LVGL demo application (``lvgldemo``) makes use of the ``ioctl`` system call to trigger an ``LCDDEVIO_PUTAREA`` request to the higher-level device driver to refresh the LCD screen with data:
+
 .. code-block:: c
 
    ioctl(state.fd, LCDDEVIO_PUTAREA, (unsigned long)((uintptr_t)&lcd_area));;
