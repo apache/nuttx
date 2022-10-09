@@ -259,15 +259,14 @@ int bl602_dma_channel_start(uint8_t channel_id)
   /* Unmask interrupts for:
    *  - DMA_INT_TCOMPLETED
    *  - DMA_INT_ERR
-   * Enable Terminal Count interrupt.
+   * Note it is expected that the TC interupt to be enabled prior to this
+   * function call if needed as it is nominally controlled via the LLI
+   * mechanism.
    */
 
   modifyreg32(BL602_DMA_CH_N_REG(BL602_DMA_CONFIG_OFFSET, channel_id),
               DMA_C0CONFIG_ITC | DMA_C0CONFIG_IE,
               0);
-  modifyreg32(BL602_DMA_CH_N_REG(BL602_DMA_CONTROL_OFFSET, channel_id),
-              0,
-              DMA_C0CONTROL_I);
 
   /* Enable channel */
 
