@@ -113,15 +113,19 @@ typedef CODE void (*pollcb_t)(FAR struct pollfd *fds);
 
 struct pollfd
 {
+  union
+  {
+    int        fd;      /* Standard, the descriptor being polled */
+    FAR void  *ptr;     /* Non-standard, the psock or file being polled */
+  };
+
   /* Standard fields */
 
-  int          fd;      /* The descriptor being polled */
   pollevent_t  events;  /* The input event flags */
   pollevent_t  revents; /* The output event flags */
 
   /* Non-standard fields used internally by NuttX. */
 
-  FAR void    *ptr;     /* The psock or file being polled */
   FAR void    *arg;     /* The poll callback function argument */
   pollcb_t     cb;      /* The poll callback function */
   FAR void    *priv;    /* For use by drivers */
