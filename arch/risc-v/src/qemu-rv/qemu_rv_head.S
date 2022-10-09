@@ -105,11 +105,7 @@ __start:
 
   /* Jump to qemu_rv_start */
 
-#ifdef CONFIG_ARCH_USE_S_MODE
-  jal  x1, qemu_rv_start_s
-#else
   jal  x1, qemu_rv_start
-#endif
 
   /* We shouldn't return from _start */
 

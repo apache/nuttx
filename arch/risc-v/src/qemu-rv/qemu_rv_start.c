@@ -95,7 +95,11 @@ uintptr_t g_idle_topstack = QEMU_RV_IDLESTACK_TOP;
  * Name: qemu_rv_start
  ****************************************************************************/
 
+#ifdef CONFIG_BUILD_KERNEL
+void qemu_rv_start_s(int mhartid)
+#else
 void qemu_rv_start(int mhartid)
+#endif
 {
   /* Configure FPU */
 
@@ -147,10 +151,10 @@ cpux:
 #ifdef CONFIG_BUILD_KERNEL
 
 /****************************************************************************
- * Name: qemu_rv_start_s
+ * Name: qemu_rv_start
  ****************************************************************************/
 
-void qemu_rv_start_s(int mhartid)
+void qemu_rv_start(int mhartid)
 {
   /* NOTE: still in M-mode */
 
@@ -202,7 +206,7 @@ void qemu_rv_start_s(int mhartid)
 
   /* Set mepc to the entry */
 
-  WRITE_CSR(mepc, (uintptr_t)qemu_rv_start);
+  WRITE_CSR(mepc, (uintptr_t)qemu_rv_start_s);
 
   /* Set a0 to mhartid explicitly and enter to S-mode */
 
