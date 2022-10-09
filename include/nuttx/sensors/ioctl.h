@@ -241,11 +241,12 @@
 #define SNIOC_FEAT_MANAGE          _SNIOC(0x006b)  /* Feature manage command */
 #define SNIOC_SET_SCALE_XL         _SNIOC(0x006c)  /* Set accelerator scale command */
 
-/* IOCTL commands unique to the GH3020 */
+/* IOCTL commands unique to the GH3x2x */
 
 #define SNIOC_CTRL_LED_CURRENT     _SNIOC(0x006d)  /* Set LED driver current */
 #define SNIOC_CTRL_OPEN_FACTEST    _SNIOC(0x006e)  /* Enter factory test mode */
 #define SNIOC_CTRL_EXIT_FACTEST    _SNIOC(0x006f)  /* Exit factory test mode */
+#define SNIOC_CTRL_PPG_GAIN        _SNIOC(0x0071)  /* Set PPG TIA gain */
 
 /* IOCTL commands unique to the PAT9126JA */
 
