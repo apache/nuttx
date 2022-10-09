@@ -59,9 +59,13 @@
 
 #define IGROUPR_VAL  0xFFFFFFFFU
 
+/***************************************************************************
+ * Private Data
+ ***************************************************************************/
+
 /* Redistributor base addresses for each core */
 
-unsigned long gic_rdists[CONFIG_SMP_NCPUS];
+static unsigned long gic_rdists[CONFIG_SMP_NCPUS];
 
 /***************************************************************************
  * Private Functions
