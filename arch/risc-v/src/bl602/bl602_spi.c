@@ -933,7 +933,8 @@ static int lli_list_init(struct bl602_spi_priv_s *priv,
           (*tx_lli)[i].dma_ctrl = dma_ctrl;
           (*tx_lli)[i].dst_addr = BL602_SPI_FIFO_WDATA;
           (*tx_lli)[i].src_addr = \
-            (uint32_t)txbuffer + (dma_ctrl.src_width * i * LLI_BUFF_SIZE);
+            (uint32_t)txbuffer + \
+            ((dma_ctrl.src_width + 1) * i * LLI_BUFF_SIZE);
 
           /* Assume last entry, we will overwrite as needed. */
 
@@ -955,7 +956,8 @@ static int lli_list_init(struct bl602_spi_priv_s *priv,
           dma_ctrl.src_increment = 0;
           (*rx_lli)[i].dma_ctrl = dma_ctrl;
           (*rx_lli)[i].dst_addr = \
-            (uint32_t)rxbuffer + (dma_ctrl.dst_width * i * LLI_BUFF_SIZE);
+            (uint32_t)rxbuffer + \
+            ((dma_ctrl.dst_width + 1) * i * LLI_BUFF_SIZE);
           (*rx_lli)[i].src_addr = BL602_SPI_FIFO_RDATA;
           (*rx_lli)[i].next_lli = 0; /* Assume last entry, we will overwrite as needed. */
 
@@ -1006,7 +1008,6 @@ static void bl602_spi_dma_exchange(struct bl602_spi_priv_s *priv,
                                    void *rxbuffer, uint32_t nwords)
 {
   int err;
-
   #ifdef CONFIG_DEBUG_DMA_INFO
     struct bl602_dmaregs_s regs;
   #endif
