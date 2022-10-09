@@ -74,6 +74,10 @@ ifeq ($(CONFIG_ARM_THUMB),y)
   ARCHOPTIMIZATION += -mthumb
 endif
 
+ifeq ($(CONFIG_UNWINDER_ARM),y)
+  ARCHOPTIMIZATION += -funwind-tables -fasynchronous-unwind-tables
+endif
+
 # Link Time Optimization
 
 ifeq ($(CONFIG_LTO_THIN),y)

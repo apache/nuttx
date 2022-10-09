@@ -63,16 +63,16 @@ ifeq ($(CONFIG_SCHED_THREAD_LOCAL),y)
   CMN_CSRCS += arm_tls.c
 endif
 
-ifeq ($(CONFIG_SCHED_BACKTRACE),y)
-  ifeq ($(CONFIG_FRAME_POINTER),y)
-    ifeq ($(CONFIG_ARM_THUMB),y)
-      CMN_CSRCS += arm_backtrace_thumb.c
-    else
-      CMN_CSRCS += arm_backtrace_fp.c
-    endif
-  else
-    CMN_CSRCS += arm_backtrace_thumb.c
-  endif
+ifeq ($(CONFIG_UNWINDER_FRAME_POINTER),y)
+  CMN_CSRCS += arm_backtrace_fp.c
+endif
+
+ifeq ($(CONFIG_UNWINDER_STACK_POINTER),y)
+  CMN_CSRCS += arm_backtrace_thumb.c
+endif
+
+ifeq ($(CONFIG_UNWINDER_ARM),y)
+  CMN_CSRCS += arm_backtrace_unwind.c
 endif
 
 CMN_ASRCS += vfork.S
