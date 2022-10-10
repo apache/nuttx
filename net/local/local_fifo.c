@@ -56,6 +56,32 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: local_format_name
+ *
+ * Description:
+ *   Format the name of the half duplex FIFO.
+ *
+ ****************************************************************************/
+
+static void local_format_name(FAR const char *inpath, FAR char *outpath,
+                              FAR const char *suffix, int32_t id)
+{
+  if (id < 0)
+    {
+      snprintf(outpath, LOCAL_FULLPATH_LEN - 1,
+               CONFIG_NET_LOCAL_VFS_PATH "/%s%s", inpath, suffix);
+    }
+  else
+    {
+      snprintf(outpath, LOCAL_FULLPATH_LEN - 1,
+               CONFIG_NET_LOCAL_VFS_PATH "/%s%s%" PRIx32,
+               inpath, suffix, id);
+    }
+
+  outpath[LOCAL_FULLPATH_LEN - 1] = '\0';
+}
+
+/****************************************************************************
  * Name: local_cs_name
  *
  * Description:
@@ -64,23 +90,10 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NET_LOCAL_STREAM
-static inline void local_cs_name(FAR struct local_conn_s *conn,
-                                 FAR char *path)
+static void local_cs_name(FAR struct local_conn_s *conn, FAR char *path)
 {
-  if (conn->lc_instance_id < 0)
-    {
-      snprintf(path, LOCAL_FULLPATH_LEN - 1,
-               CONFIG_NET_LOCAL_VFS_PATH "/%s" LOCAL_CS_SUFFIX,
-               conn->lc_path);
-    }
-  else
-    {
-      snprintf(path, LOCAL_FULLPATH_LEN - 1,
-               CONFIG_NET_LOCAL_VFS_PATH "/%s" LOCAL_CS_SUFFIX "%" PRIx32,
-               conn->lc_path, conn->lc_instance_id);
-    }
-
-  path[LOCAL_FULLPATH_LEN - 1] = '\0';
+  local_format_name(conn->lc_path, path,
+                    LOCAL_CS_SUFFIX, conn->lc_instance_id);
 }
 #endif /* CONFIG_NET_LOCAL_STREAM */
 
@@ -93,23 +106,10 @@ static inline void local_cs_name(FAR struct local_conn_s *conn,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_LOCAL_STREAM
-static inline void local_sc_name(FAR struct local_conn_s *conn,
-                                 FAR char *path)
+static void local_sc_name(FAR struct local_conn_s *conn, FAR char *path)
 {
-  if (conn->lc_instance_id < 0)
-    {
-      snprintf(path, LOCAL_FULLPATH_LEN - 1,
-               CONFIG_NET_LOCAL_VFS_PATH "/%s" LOCAL_SC_SUFFIX,
-               conn->lc_path);
-    }
-  else
-    {
-      snprintf(path, LOCAL_FULLPATH_LEN - 1,
-               CONFIG_NET_LOCAL_VFS_PATH "/%s" LOCAL_SC_SUFFIX "%" PRIx32,
-               conn->lc_path, conn->lc_instance_id);
-    }
-
-  path[LOCAL_FULLPATH_LEN - 1] = '\0';
+  local_format_name(conn->lc_path, path,
+                    LOCAL_SC_SUFFIX, conn->lc_instance_id);
 }
 #endif /* CONFIG_NET_LOCAL_STREAM */
 
@@ -122,11 +122,9 @@ static inline void local_sc_name(FAR struct local_conn_s *conn,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_LOCAL_DGRAM
-static inline void local_hd_name(FAR const char *inpath, FAR char *outpath)
+static void local_hd_name(FAR const char *inpath, FAR char *outpath)
 {
-  snprintf(outpath, LOCAL_FULLPATH_LEN - 1,
-           CONFIG_NET_LOCAL_VFS_PATH "/%s" LOCAL_HD_SUFFIX, inpath);
-  outpath[LOCAL_FULLPATH_LEN - 1] = '\0';
+  local_format_name(inpath, outpath, LOCAL_HD_SUFFIX, -1);
 }
 #endif /* CONFIG_NET_LOCAL_DGRAM */
 
