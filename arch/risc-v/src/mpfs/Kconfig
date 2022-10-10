@@ -157,6 +157,13 @@ config MPFS_DDR_TYPE
 	default 3 if MPFS_DDR_TYPE_LPDDR3
 	default 4 if MPFS_DDR_TYPE_LPDDR4
 
+config MPFS_ENABLE_CACHE
+	bool "Enable L2 cache"
+	depends on MPFS_BOOTLOADER
+	default y
+	---help---
+		Enables L2 cache in L2LIM memory
+
 config MPFS_EMMCSD_MUX_GPIO
 	bool "GPIO driven EMMCSD mux"
 	default n

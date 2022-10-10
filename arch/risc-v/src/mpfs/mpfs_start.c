@@ -163,7 +163,7 @@ void __mpfs_start(uint64_t mhartid)
    * the CONFIG_MPFS_BOOTLOADER -option.
    */
 
-#ifdef CONFIG_MPFS_BOOTLOADER
+#ifdef CONFIG_MPFS_ENABLE_CACHE
   if (mhartid == 0)
     {
       mpfs_enable_cache();
