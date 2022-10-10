@@ -120,7 +120,13 @@ static int bl602_dma_int_handler(int irq, void *context, void *arg)
         {
           dmainfo("CH %d Error Int fired\n", ch);
           putreg32((1 << ch), BL602_DMA_INTERRCLR);
-          g_dmach[ch].callback(ch, BL602_DMA_INT_EVT_ERR, g_dmach[ch].arg);
+          if (g_dmach[ch].callback != NULL)
+            {
+              g_dmach[ch].callback(
+                ch,
+                BL602_DMA_INT_EVT_ERR,
+                g_dmach[ch].arg);
+            }
         }
     }
 
