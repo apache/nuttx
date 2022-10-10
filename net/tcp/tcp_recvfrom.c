@@ -706,7 +706,7 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
    *    want for more because there may be no timeout).
    */
 
-  if (state.ir_recvlen == 0 && state.ir_buflen > 0)
+  if (state.ir_buflen > 0)
     {
       /* Set up the callback in the connection */
 
