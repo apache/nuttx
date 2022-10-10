@@ -40,6 +40,7 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_HAVE_BACKTRACE
 int sched_backtrace(pid_t tid, FAR void **buffer, int size, int skip)
 {
   FAR struct tcb_s *rtcb = NULL;
@@ -55,3 +56,4 @@ int sched_backtrace(pid_t tid, FAR void **buffer, int size, int skip)
 
   return up_backtrace(rtcb, buffer, size, skip);
 }
+#endif
