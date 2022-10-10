@@ -1999,6 +1999,14 @@ config DEBUG_LINK_MAP
 		and debugging magic section games, and for seeing which
 		pieces of code get eliminated with DEBUG_OPT_UNUSED_SECTIONS.
 
+config CCACHE
+	bool "Use ccache"
+	default n
+	---help---
+		If enabled, ccache will be used during the build.
+		Build artifacts will be cached to a local storage, considerably
+		reducing build times.
+
 endmenu # Build Setup
 
 menu "System Type"
