@@ -598,7 +598,6 @@ config ARCH_CHIP_PHY62XX
 config ARCH_CHIP_TLSR82
 	bool "Telink TLSR82XX"
 	select ARCH_ARMV6M
-	select ARCH_HAVE_BACKTRACE
 	select ARCH_HAVE_RESET
 	select LIBC_ARCH_ATOMIC
 	---help---
