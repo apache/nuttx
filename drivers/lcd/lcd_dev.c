@@ -145,7 +145,7 @@ static int lcddev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               {
                 ret = priv->planeinfo.getrun(priv->lcd_ptr, row,
                                              lcd_area->col_start, buf,
-                                             row_size);
+                                             cols);
                 if (ret < 0)
                   {
                     break;
@@ -184,7 +184,7 @@ static int lcddev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               {
                 ret = priv->planeinfo.putrun(priv->lcd_ptr, row,
                                              lcd_area->col_start, buf,
-                                             row_size);
+                                             cols);
                 if (ret < 0)
                   {
                     break;
