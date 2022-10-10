@@ -122,8 +122,8 @@ int env_dup(FAR struct task_group_s *group, FAR char * const *envcp)
                         }
 
                       group_free(group, envp);
-                      ret = -ENOMEM;
-                      break;
+                      sched_unlock();
+                      return -ENOMEM;
                     }
 
                   strcpy(envp[envc], envcp[envc]);
