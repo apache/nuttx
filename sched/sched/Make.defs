@@ -99,7 +99,7 @@ ifeq ($(CONFIG_SCHED_CRITMONITOR),y)
 CSRCS += sched_critmonitor.c
 endif
 
-ifeq ($(CONFIG_ARCH_HAVE_BACKTRACE),y)
+ifeq ($(CONFIG_SCHED_BACKTRACE),y)
 CSRCS += sched_backtrace.c
 endif
 
