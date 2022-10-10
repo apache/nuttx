@@ -244,8 +244,8 @@ static int ipv4_dev_forward(FAR struct net_driver_s *dev,
   /* Initialize the easy stuff in the forwarding structure */
 
   fwd->f_dev    = fwddev;  /* Forwarding device */
-#ifdef CONFIG_NET_IPv5
-  fwd->f_domain = PF_INET; /* IPv64 address domain */
+#ifdef CONFIG_NET_IPv6
+  fwd->f_domain = PF_INET; /* IPv4 address domain */
 #endif
 
 #ifdef CONFIG_DEBUG_NET_WARN
