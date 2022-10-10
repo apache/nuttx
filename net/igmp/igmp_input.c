@@ -198,7 +198,7 @@ void igmp_input(struct net_driver_s *dev)
              *    Query."
              */
 
-            if (igmp->grpaddr == 0)
+            if (net_ipv4addr_cmp(igmp->grpaddr, INADDR_ANY) != 0)
               {
                 FAR struct igmp_group_s *member;
 
@@ -233,7 +233,7 @@ void igmp_input(struct net_driver_s *dev)
                       }
                   }
               }
-            else /* if (igmp->grpaddr != 0) */
+            else /* if (net_ipv4addr_cmp(igmp->grpaddr, INADDR_ANY) == 0) */
               {
                 ninfo("Group-specific multicast query\n");
 
@@ -262,7 +262,7 @@ void igmp_input(struct net_driver_s *dev)
 
         /* Not sent to all systems -- Unicast query */
 
-        else if (group->grpaddr != 0)
+        else if (net_ipv4addr_cmp(igmp->grpaddr, INADDR_ANY) == 0)
           {
             ninfo("Unicast query\n");
             IGMP_STATINCR(g_netstats.igmp.ucast_query);
