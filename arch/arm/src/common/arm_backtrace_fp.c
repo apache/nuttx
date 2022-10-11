@@ -33,8 +33,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_FRAME_POINTER) && !defined(CONFIG_ARM_THUMB)
-
 /****************************************************************************
  * Name: backtrace
  *
@@ -171,4 +169,3 @@ int up_backtrace(struct tcb_s *tcb,
 
   return ret;
 }
-#endif /* CONFIG_FRAME_POINTER && !CONFIG_ARM_THUMB */
