@@ -91,7 +91,7 @@
  * definitions and Windows network definitions.
  */
 
-void netdriver_setmacaddr(unsigned char *macaddr);
+void netdriver_setmacaddr(int devidx, unsigned char *macaddr);
 
 /****************************************************************************
  * Private Types
@@ -254,7 +254,7 @@ static void set_ethaddr(struct in_addr addr)
                  adapters->PhysicalAddress[2], adapters->PhysicalAddress[3],
                  adapters->PhysicalAddress[4], adapters->PhysicalAddress[5]);
 
-              netdriver_setmacaddr(adapters->PhysicalAddress);
+              netdriver_setmacaddr(0, adapters->PhysicalAddress);
               break;
             }
         }
