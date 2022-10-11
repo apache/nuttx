@@ -108,14 +108,17 @@ struct sel_arg_struct
 #ifdef TAPDEV_DEBUG
 static int  gdrop = 0;
 #endif
-static int  gtapdevfd = -1;
-static char gdevname[IFNAMSIZ];
-static void *g_priv = NULL;
-static void (*g_tx_done_intr_cb)(void *priv) = NULL;
-static void (*g_rx_ready_intr_cb)(void *priv) = NULL;
+static int  gtapdevfd[CONFIG_SIM_NETDEV_NUMBER] =
+{
+  [0 ... CONFIG_SIM_NETDEV_NUMBER - 1] = -1
+};
+static char gdevname[CONFIG_SIM_NETDEV_NUMBER][IFNAMSIZ];
+static void *g_priv[CONFIG_SIM_NETDEV_NUMBER];
+static void (*g_tx_done_intr_cb[CONFIG_SIM_NETDEV_NUMBER])(void *priv);
+static void (*g_rx_ready_intr_cb[CONFIG_SIM_NETDEV_NUMBER])(void *priv);
 
 #ifdef CONFIG_SIM_NET_HOST_ROUTE
-static struct rtentry ghostroute;
+static struct rtentry ghostroute[CONFIG_SIM_NETDEV_NUMBER];
 #endif
 
 /****************************************************************************
@@ -142,7 +145,7 @@ static inline void dump_ethhdr(const char *msg, unsigned char *buf,
 #  define dump_ethhdr(m,b,l)
 #endif
 
-static void set_macaddr(void)
+static void set_macaddr(int devidx)
 {
   unsigned char mac[7];
 
@@ -155,11 +158,15 @@ static void set_macaddr(void)
    *
    * With a unique MAC address, we get ALL the packets.
    *
+   * The generated MAC addresses will be same if we use timestamp as seed and
+   * create more than one device at the same time, so add index to make mac
+   * address different.
+   *
    * TODO:  The generated MAC address should be checked to see if it
    *        conflicts with something else on the network.
    */
 
-  srand(time(NULL));
+  srand(time(NULL) + devidx);
   mac[0] = 0x42;
   mac[1] = rand() % 256;
   mac[2] = rand() % 256;
@@ -168,14 +175,14 @@ static void set_macaddr(void)
   mac[5] = rand() % 256;
   mac[6] = 0;
 
-  netdriver_setmacaddr(mac);
+  netdriver_setmacaddr(devidx, mac);
 }
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-void tapdev_init(void *priv,
+void tapdev_init(int devidx, void *priv,
                  void (*tx_done_intr_cb)(void *priv),
                  void (*rx_ready_intr_cb)(void *priv))
 {
@@ -210,7 +217,7 @@ void tapdev_init(void *priv,
 
   /* Save the tap device name */
 
-  strncpy(gdevname, ifr.ifr_name, IFNAMSIZ);
+  strncpy(gdevname[devidx], ifr.ifr_name, IFNAMSIZ);
 
 #ifdef CONFIG_SIM_NET_BRIDGE
   /* Get a socket with which to manipulate the tap device; the remaining
@@ -229,14 +236,14 @@ void tapdev_init(void *priv,
 
   memset(&ifr, 0, sizeof(ifr));
   strncpy(ifr.ifr_name, CONFIG_SIM_NET_BRIDGE_DEVICE, IFNAMSIZ);
-  ifr.ifr_ifindex = if_nametoindex(gdevname);
+  ifr.ifr_ifindex = if_nametoindex(gdevname[devidx]);
 
   ret = ioctl(sockfd, SIOCBRADDIF, &ifr);
   if (ret < 0)
     {
       syslog(LOG_ERR, "TAPDEV: ioctl failed (can't add interface %s to "
              "bridge %s): %d\n",
-             gdevname, CONFIG_SIM_NET_BRIDGE_DEVICE, -ret);
+             gdevname[devidx], CONFIG_SIM_NET_BRIDGE_DEVICE, -ret);
       close(sockfd);
       close(tapdevfd);
       return;
@@ -247,40 +254,40 @@ void tapdev_init(void *priv,
   if (ret < 0)
     {
       syslog(LOG_ERR, "TAPDEV: ioctl failed (can't get MTU "
-             "from %s): %d\n", gdevname, -ret);
+             "from %s): %d\n", gdevname[devidx], -ret);
       close(tapdevfd);
       return;
     }
   else
     {
-      netdriver_setmtu(ifr.ifr_mtu);
+      netdriver_setmtu(devidx, ifr.ifr_mtu);
     }
 #endif
 
-  gtapdevfd = tapdevfd;
-  g_priv = priv;
+  gtapdevfd[devidx] = tapdevfd;
+  g_priv[devidx] = priv;
 
   /* Register the emulated TX done interrupt callback */
 
-  g_tx_done_intr_cb = tx_done_intr_cb;
+  g_tx_done_intr_cb[devidx] = tx_done_intr_cb;
 
   /* Register the emulated RX ready interrupt callback */
 
-  g_rx_ready_intr_cb = rx_ready_intr_cb;
+  g_rx_ready_intr_cb[devidx] = rx_ready_intr_cb;
 
   /* Set the MAC address */
 
-  set_macaddr();
+  set_macaddr(devidx);
 }
 
-int tapdev_avail(void)
+int tapdev_avail(int devidx)
 {
   struct timeval tv;
   fd_set fdset;
 
   /* We can't do anything if we failed to open the tap device */
 
-  if (gtapdevfd < 0)
+  if (gtapdevfd[devidx] < 0)
     {
       return 0;
     }
@@ -291,21 +298,21 @@ int tapdev_avail(void)
   tv.tv_usec = 0;
 
   FD_ZERO(&fdset);
-  FD_SET(gtapdevfd, &fdset);
+  FD_SET(gtapdevfd[devidx], &fdset);
 
-  return select(gtapdevfd + 1, &fdset, NULL, NULL, &tv) > 0;
+  return select(gtapdevfd[devidx] + 1, &fdset, NULL, NULL, &tv) > 0;
 }
 
-unsigned int tapdev_read(unsigned char *buf, unsigned int buflen)
+unsigned int tapdev_read(int devidx, unsigned char *buf, unsigned int buflen)
 {
   int ret;
 
-  if (!tapdev_avail())
+  if (!tapdev_avail(devidx))
     {
       return 0;
     }
 
-  ret = read(gtapdevfd, buf, buflen);
+  ret = read(gtapdevfd[devidx], buf, buflen);
   if (ret < 0)
     {
       syslog(LOG_ERR, "TAPDEV: read failed: %d\n", -ret);
@@ -316,11 +323,11 @@ unsigned int tapdev_read(unsigned char *buf, unsigned int buflen)
   return ret;
 }
 
-void tapdev_send(unsigned char *buf, unsigned int buflen)
+void tapdev_send(int devidx, unsigned char *buf, unsigned int buflen)
 {
   int ret;
 
-  if (gtapdevfd < 0)
+  if (gtapdevfd[devidx] < 0)
     {
       return;
     }
@@ -336,7 +343,7 @@ void tapdev_send(unsigned char *buf, unsigned int buflen)
     }
 #endif
 
-  ret = write(gtapdevfd, buf, buflen);
+  ret = write(gtapdevfd[devidx], buf, buflen);
   if (ret < 0)
     {
       syslog(LOG_ERR, "TAPDEV: write failed: %d\n", -ret);
@@ -347,20 +354,20 @@ void tapdev_send(unsigned char *buf, unsigned int buflen)
 
   /* Emulate TX done interrupt */
 
-  if (g_tx_done_intr_cb != NULL)
+  if (g_tx_done_intr_cb[devidx] != NULL)
     {
-      g_tx_done_intr_cb(g_priv);
+      g_tx_done_intr_cb[devidx](g_priv[devidx]);
     }
 
   /* Emulate RX ready interrupt */
 
-  if (g_rx_ready_intr_cb != NULL && tapdev_avail())
+  if (g_rx_ready_intr_cb[devidx] != NULL && tapdev_avail(devidx))
     {
-      g_rx_ready_intr_cb(g_priv);
+      g_rx_ready_intr_cb[devidx](g_priv[devidx]);
     }
 }
 
-void tapdev_ifup(in_addr_t ifaddr)
+void tapdev_ifup(int devidx, in_addr_t ifaddr)
 {
   struct ifreq ifr;
   int          sockfd;
@@ -370,7 +377,7 @@ void tapdev_ifup(in_addr_t ifaddr)
   struct sockaddr_in *addr;
 #endif
 
-  if (gtapdevfd < 0)
+  if (gtapdevfd[devidx] < 0)
     {
       return;
     }
@@ -386,7 +393,7 @@ void tapdev_ifup(in_addr_t ifaddr)
 
   /* Bring the TAP interface up */
 
-  strncpy(ifr.ifr_name, gdevname, IFNAMSIZ);
+  strncpy(ifr.ifr_name, gdevname[devidx], IFNAMSIZ);
 
   ret = ioctl(sockfd, SIOCGIFFLAGS, (unsigned long)&ifr);
   if (ret < 0)
@@ -410,17 +417,17 @@ void tapdev_ifup(in_addr_t ifaddr)
 #ifdef CONFIG_SIM_NET_HOST_ROUTE
   /* Add host route */
 
-  memset(&ghostroute, 0, sizeof(ghostroute));
+  memset(&ghostroute[devidx], 0, sizeof(ghostroute[devidx]));
 
-  addr = (struct sockaddr_in *)&ghostroute.rt_dst;
+  addr = (struct sockaddr_in *)&ghostroute[devidx].rt_dst;
   addr->sin_family = AF_INET;
   addr->sin_addr.s_addr = ifaddr;
 
-  ghostroute.rt_dev    = gdevname;
-  ghostroute.rt_flags  = RTF_UP | RTF_HOST;
-  ghostroute.rt_metric = 0;
+  ghostroute[devidx].rt_dev    = gdevname[devidx];
+  ghostroute[devidx].rt_flags  = RTF_UP | RTF_HOST;
+  ghostroute[devidx].rt_metric = 0;
 
-  ret = ioctl(sockfd, SIOCADDRT, (unsigned long)&ghostroute);
+  ret = ioctl(sockfd, SIOCADDRT, (unsigned long)&ghostroute[devidx]);
   if (ret < 0)
     {
       syslog(LOG_ERR, "TAPDEV: ioctl failed"
@@ -433,18 +440,18 @@ void tapdev_ifup(in_addr_t ifaddr)
   close(sockfd);
 }
 
-void tapdev_ifdown(void)
+void tapdev_ifdown(int devidx)
 {
 #ifdef CONFIG_SIM_NET_HOST_ROUTE
   int sockfd;
   int ret;
 
-  if (gtapdevfd < 0)
+  if (gtapdevfd[devidx] < 0)
     {
       return;
     }
 
-  if (((struct sockaddr_in *)&ghostroute.rt_dst)->sin_addr.s_addr != 0)
+  if (((struct sockaddr_in *)&ghostroute[devidx].rt_dst)->sin_addr.s_addr)
     {
       /* Get a socket with which to manipulate the tap device */
 
@@ -455,7 +462,7 @@ void tapdev_ifdown(void)
           return;
         }
 
-      ret = ioctl(sockfd, SIOCDELRT, (unsigned long)&ghostroute);
+      ret = ioctl(sockfd, SIOCDELRT, (unsigned long)&ghostroute[devidx]);
       if (ret < 0)
         {
           syslog(LOG_ERR, "TAPDEV: ioctl failed "

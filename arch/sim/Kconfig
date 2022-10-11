@@ -194,6 +194,17 @@ config SIM_NETDEV_VPNKIT
 
 endchoice
 
+config SIM_NETDEV_NUMBER
+	int "Number of Simulated Network Device"
+	default 1
+	range 1 8
+	depends on SIM_NETDEV_TAP
+	---help---
+		The number of simulated network devices.
+
+		Note that only one network device will be brought up by netinit automatically,
+		others will be kept in DOWN state by default.
+
 endif
 
 config SIM_NETDEV_VPNKIT_PATH

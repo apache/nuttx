@@ -46,6 +46,10 @@
 #  define CONFIG_SMP_NCPUS 1
 #endif
 
+#ifndef CONFIG_SIM_NETDEV_NUMBER
+#  define CONFIG_SIM_NETDEV_NUMBER 1
+#endif
+
 /* Determine which (if any) console driver to use */
 
 #ifndef CONFIG_DEV_CONSOLE
@@ -258,21 +262,22 @@ int sim_ajoy_initialize(void);
 /* up_tapdev.c **************************************************************/
 
 #if defined(CONFIG_SIM_NETDEV_TAP) && !defined(__CYGWIN__)
-void tapdev_init(void *priv,
+void tapdev_init(int devidx, void *priv,
                  void (*tx_done_intr_cb)(void *priv),
                  void (*rx_ready_intr_cb)(void *priv));
-int tapdev_avail(void);
-unsigned int tapdev_read(unsigned char *buf, unsigned int buflen);
-void tapdev_send(unsigned char *buf, unsigned int buflen);
-void tapdev_ifup(in_addr_t ifaddr);
-void tapdev_ifdown(void);
+int tapdev_avail(int devidx);
+unsigned int tapdev_read(int devidx, unsigned char *buf,
+                         unsigned int buflen);
+void tapdev_send(int devidx, unsigned char *buf, unsigned int buflen);
+void tapdev_ifup(int devidx, in_addr_t ifaddr);
+void tapdev_ifdown(int devidx);
 
-#  define netdev_init(priv,txcb,rxcb) tapdev_init(priv,txcb,rxcb)
-#  define netdev_avail()              tapdev_avail()
-#  define netdev_read(buf,buflen)     tapdev_read(buf,buflen)
-#  define netdev_send(buf,buflen)     tapdev_send(buf,buflen)
-#  define netdev_ifup(ifaddr)         tapdev_ifup(ifaddr)
-#  define netdev_ifdown()             tapdev_ifdown()
+#  define netdev_init(idx,priv,txcb,rxcb) tapdev_init(idx,priv,txcb,rxcb)
+#  define netdev_avail(idx)               tapdev_avail(idx)
+#  define netdev_read(idx,buf,buflen)     tapdev_read(idx,buf,buflen)
+#  define netdev_send(idx,buf,buflen)     tapdev_send(idx,buf,buflen)
+#  define netdev_ifup(idx,ifaddr)         tapdev_ifup(idx,ifaddr)
+#  define netdev_ifdown(idx)              tapdev_ifdown(idx)
 #endif
 
 /* up_wpcap.c ***************************************************************/
@@ -284,12 +289,12 @@ void wpcap_init(void *priv,
 unsigned int wpcap_read(unsigned char *buf, unsigned int buflen);
 void wpcap_send(unsigned char *buf, unsigned int buflen);
 
-#  define netdev_init(priv,txcb,rxcb) wpcap_init(priv,txcb,rxcb)
-#  define netdev_avail()              1
-#  define netdev_read(buf,buflen)     wpcap_read(buf,buflen)
-#  define netdev_send(buf,buflen)     wpcap_send(buf,buflen)
-#  define netdev_ifup(ifaddr)         {}
-#  define netdev_ifdown()             {}
+#  define netdev_init(idx,priv,txcb,rxcb) wpcap_init(priv,txcb,rxcb)
+#  define netdev_avail(idx)               1
+#  define netdev_read(idx,buf,buflen)     wpcap_read(buf,buflen)
+#  define netdev_send(idx,buf,buflen)     wpcap_send(buf,buflen)
+#  define netdev_ifup(idx,ifaddr)         {}
+#  define netdev_ifdown(idx)              {}
 #endif
 
 /* up_vpnkit.c **************************************************************/
@@ -302,19 +307,19 @@ int vpnkit_avail(void);
 unsigned int vpnkit_read(unsigned char *buf, unsigned int buflen);
 void vpnkit_send(unsigned char *buf, unsigned int buflen);
 
-#  define netdev_init(priv,txcb,rxcb) vpnkit_init(priv,txcb,rxcb)
-#  define netdev_avail()              vpnkit_avail()
-#  define netdev_read(buf,buflen)     vpnkit_read(buf,buflen)
-#  define netdev_send(buf,buflen)     vpnkit_send(buf,buflen)
-#  define netdev_ifup(ifaddr)         {}
-#  define netdev_ifdown()             {}
+#  define netdev_init(idx,priv,txcb,rxcb) vpnkit_init(priv,txcb,rxcb)
+#  define netdev_avail(idx)               vpnkit_avail()
+#  define netdev_read(idx,buf,buflen)     vpnkit_read(buf,buflen)
+#  define netdev_send(idx,buf,buflen)     vpnkit_send(buf,buflen)
+#  define netdev_ifup(idx,ifaddr)         {}
+#  define netdev_ifdown(idx)              {}
 #endif
 
 /* up_netdriver.c ***********************************************************/
 
 int netdriver_init(void);
-void netdriver_setmacaddr(unsigned char *macaddr);
-void netdriver_setmtu(int mtu);
+void netdriver_setmacaddr(int devidx, unsigned char *macaddr);
+void netdriver_setmtu(int devidx, int mtu);
 void netdriver_loop(void);
 
 /* up_rptun.c ***************************************************************/
