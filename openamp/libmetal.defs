@@ -21,7 +21,15 @@
 ifeq ($(CONFIG_OPENAMP),y)
 
 ifeq ($(CONFIG_ARCH), sim)
+ifeq ($(CONFIG_HOST_ARM64), y)
+LIBMETAL_ARCH = aarch64
+else ifeq ($(CONFIG_HOST_ARM), y)
+LIBMETAL_ARCH = arm
+else ifeq ($(CONFIG_HOST_X86), y)
+LIBMETAL_ARCH = x86
+else
 LIBMETAL_ARCH = x86_64
+endif
 else ifeq ($(CONFIG_ARCH), risc-v)
 LIBMETAL_ARCH = riscv
 else
