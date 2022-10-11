@@ -84,12 +84,12 @@ void srand48(long seed)
  * Name: seed48
  ****************************************************************************/
 
-FAR unsigned short *seed48(FAR unsigned short *s)
+FAR unsigned short *seed48(unsigned short seed16v[3])
 {
   static unsigned short p[3];
 
   memcpy(p, g_seed48, sizeof p);
-  memcpy(g_seed48, s, sizeof p);
+  memcpy(g_seed48, seed16v, sizeof p);
   return p;
 }
 
