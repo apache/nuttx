@@ -188,6 +188,7 @@
 #define TCP_ABORT          (1 << 7)
 #define TCP_CONNECTED      (1 << 8)
 #define TCP_TIMEDOUT       (1 << 9)
+#define TCP_WAITALL        (1 << 10)
 
 /* Bits 10-11: Unused, available */
 
