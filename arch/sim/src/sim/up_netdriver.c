@@ -62,6 +62,7 @@
 #include <debug.h>
 #include <string.h>
 
+#include <nuttx/compiler.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/net.h>
@@ -82,7 +83,7 @@ static struct work_s g_recv_work;
 
 /* Ethernet peripheral state */
 
-static struct net_driver_s g_sim_dev;
+static struct net_driver_s g_sim_dev[CONFIG_SIM_NETDEV_NUMBER];
 
 /****************************************************************************
  * Private Functions
@@ -90,6 +91,10 @@ static struct net_driver_s g_sim_dev;
 
 static void netdriver_reply(struct net_driver_s *dev)
 {
+  int devidx = (intptr_t)dev->d_private;
+
+  UNUSED(devidx);
+
   /* If the receiving resulted in data that should be sent out on
    * the network, the field d_len is set to a value > 0.
    */
@@ -121,7 +126,7 @@ static void netdriver_reply(struct net_driver_s *dev)
       /* Send the packet */
 
       NETDEV_TXPACKETS(dev);
-      netdev_send(dev->d_buf, dev->d_len);
+      netdev_send(devidx, dev->d_buf, dev->d_len);
       NETDEV_TXDONE(dev);
     }
 }
@@ -130,6 +135,9 @@ static void netdriver_recv_work(void *arg)
 {
   struct net_driver_s *dev = arg;
   struct eth_hdr_s *eth;
+  int devidx = (intptr_t)dev->d_private;
+
+  UNUSED(devidx);
 
   net_lock();
 
@@ -137,13 +145,14 @@ static void netdriver_recv_work(void *arg)
    * to prevent RX data stream congestion.
    */
 
-  while (netdev_avail())
+  while (netdev_avail(devidx))
     {
       /* netdev_read will return 0 on a timeout event and > 0
        * on a data received event
        */
 
-      dev->d_len = netdev_read((unsigned char *)dev->d_buf,
+      dev->d_len = netdev_read(devidx,
+                               (unsigned char *)dev->d_buf,
                                dev->d_pktsize);
       if (dev->d_len > 0)
         {
@@ -218,7 +227,7 @@ static void netdriver_recv_work(void *arg)
 
                   if (dev->d_len > 0)
                     {
-                      netdev_send(dev->d_buf, dev->d_len);
+                      netdev_send(devidx, dev->d_buf, dev->d_len);
                     }
                 }
               else
@@ -241,6 +250,10 @@ static void netdriver_recv_work(void *arg)
 
 static int netdriver_txpoll(struct net_driver_s *dev)
 {
+  int devidx = (intptr_t)dev->d_private;
+
+  UNUSED(devidx);
+
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
    */
@@ -274,7 +287,7 @@ static int netdriver_txpoll(struct net_driver_s *dev)
           /* Send the packet */
 
           NETDEV_TXPACKETS(dev);
-          netdev_send(dev->d_buf, dev->d_len);
+          netdev_send(devidx, dev->d_buf, dev->d_len);
           NETDEV_TXDONE(dev);
         }
     }
@@ -288,15 +301,21 @@ static int netdriver_txpoll(struct net_driver_s *dev)
 
 static int netdriver_ifup(struct net_driver_s *dev)
 {
-  netdev_ifup(dev->d_ipaddr);
+  int devidx = (intptr_t)dev->d_private;
+
+  UNUSED(devidx);
+  netdev_ifup(devidx, dev->d_ipaddr);
   netdev_carrier_on(dev);
   return OK;
 }
 
 static int netdriver_ifdown(struct net_driver_s *dev)
 {
+  int devidx = (intptr_t)dev->d_private;
+
+  UNUSED(devidx);
   netdev_carrier_off(dev);
-  netdev_ifdown();
+  netdev_ifdown(devidx);
   return OK;
 }
 
@@ -347,55 +366,71 @@ static void netdriver_rxready_interrupt(void *priv)
 
 int netdriver_init(void)
 {
-  struct net_driver_s *dev = &g_sim_dev;
+  struct net_driver_s *dev;
   void *pktbuf;
   int pktsize;
-
-  /* Internal initialization */
-
-  netdev_init(dev,
-              netdriver_txdone_interrupt,
-              netdriver_rxready_interrupt);
-
-  /* Update the buffer size */
-
-  pktsize = dev->d_pktsize ? dev->d_pktsize :
-            (MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE);
-
-  /* Allocate packet buffer */
-
-  pktbuf = kmm_malloc(pktsize);
-  if (pktbuf == NULL)
+  int devidx;
+  for (devidx = 0; devidx < CONFIG_SIM_NETDEV_NUMBER; devidx++)
     {
-      return -ENOMEM;
+      dev = &g_sim_dev[devidx];
+
+      /* Internal initialization */
+
+      netdev_init(devidx, dev,
+                  netdriver_txdone_interrupt,
+                  netdriver_rxready_interrupt);
+
+      /* Update the buffer size */
+
+      pktsize = dev->d_pktsize ? dev->d_pktsize :
+                (MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE);
+
+      /* Allocate packet buffer */
+
+      pktbuf = kmm_malloc(pktsize);
+      if (pktbuf == NULL)
+        {
+          return -ENOMEM;
+        }
+
+      /* Set callbacks */
+
+      dev->d_buf     = pktbuf;
+      dev->d_ifup    = netdriver_ifup;
+      dev->d_ifdown  = netdriver_ifdown;
+      dev->d_txavail = netdriver_txavail;
+      dev->d_private = (void *)(intptr_t)devidx;
+
+      /* Register the device with the OS so that socket IOCTLs can be
+       * performed
+       */
+
+      netdev_register(dev, NET_LL_ETHERNET);
     }
 
-  /* Set callbacks */
-
-  dev->d_buf     = pktbuf;
-  dev->d_ifup    = netdriver_ifup;
-  dev->d_ifdown  = netdriver_ifdown;
-  dev->d_txavail = netdriver_txavail;
-
-  /* Register the device with the OS so that socket IOCTLs can be performed */
-
-  return netdev_register(dev, NET_LL_ETHERNET);
+  return OK;
 }
 
-void netdriver_setmacaddr(unsigned char *macaddr)
+void netdriver_setmacaddr(int devidx, unsigned char *macaddr)
 {
-  memcpy(g_sim_dev.d_mac.ether.ether_addr_octet, macaddr, IFHWADDRLEN);
+  memcpy(g_sim_dev[devidx].d_mac.ether.ether_addr_octet, macaddr,
+         IFHWADDRLEN);
 }
 
-void netdriver_setmtu(int mtu)
+void netdriver_setmtu(int devidx, int mtu)
 {
-  g_sim_dev.d_pktsize = mtu;
+  g_sim_dev[devidx].d_pktsize = mtu;
 }
 
 void netdriver_loop(void)
 {
-  if (work_available(&g_recv_work) && netdev_avail())
+  int devidx;
+  for (devidx = 0; devidx < CONFIG_SIM_NETDEV_NUMBER; devidx++)
     {
-      work_queue(LPWORK, &g_recv_work, netdriver_recv_work, &g_sim_dev, 0);
+      if (work_available(&g_recv_work) && netdev_avail(devidx))
+        {
+          work_queue(LPWORK, &g_recv_work, netdriver_recv_work,
+                     &g_sim_dev[devidx], 0);
+        }
     }
 }
