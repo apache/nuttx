@@ -412,7 +412,8 @@ static uint16_t tcp_recvhandler(FAR struct net_driver_s *dev,
            * next receive is performed.
            */
 
-          if (pstate->ir_recvlen > 0)
+          if ((pstate->ir_recvlen > 0 && (flags & TCP_WAITALL) == 0) ||
+              pstate->ir_buflen == 0)
             {
               ninfo("TCP resume\n");
 
@@ -556,30 +557,20 @@ static void tcp_recvfrom_initialize(FAR struct tcp_conn_s *conn,
 
 static ssize_t tcp_recvfrom_result(int result, struct tcp_recvfrom_s *pstate)
 {
-  /* Check for a error/timeout detected by the event handler.  Errors are
-   * signaled by negative errno values for the rcv length
+  /* Check if any data were received. If so, then return their length and
+   * ignore any error codes.
    */
 
-  if (pstate->ir_result < 0)
+  if (pstate->ir_recvlen > 0)
     {
-      /* This might return EAGAIN on a timeout or ENOTCONN on loss of
-       * connection (TCP only)
-       */
-
-      return pstate->ir_result;
+      return pstate->ir_recvlen;
     }
 
-  /* If net_timedwait failed, then we were probably reawakened by a signal.
-   * In this case, net_timedwait will have returned negated errno
-   * appropriately.
+  /* If no data were received, return the error code instead. The event
+   * handler error is prioritized over any previous error.
    */
 
-  if (result < 0)
-    {
-      return result;
-    }
-
-  return pstate->ir_recvlen;
+  return (pstate->ir_result <= 0) ? pstate->ir_result : result;
 }
 
 /****************************************************************************
@@ -698,15 +689,18 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
   /* We get here when we we decide that we need to setup the wait for
    * incoming TCP/IP data.  Just a few more conditions to check:
    *
-   * 1) Make sure thet there is buffer space to receive additional data
+   * 1) Make sure that there is buffer space to receive additional data
    *    (state.ir_buflen > 0).  This could be zero, for example,  we filled
    *    the user buffer with data from the read-ahead buffers.  And
    * 2) then we not want to wait if we already obtained some data from the
    *    read-ahead buffer.  In that case, return now with what we have (don't
    *    want for more because there may be no timeout).
+   * 3) If however MSG_WAITALL flag is set, block here till all requested
+   *    data are received (or there is a timeout / error).
    */
 
-  if (state.ir_recvlen == 0 && state.ir_buflen > 0)
+  if (((flags & MSG_WAITALL) != 0 || state.ir_recvlen == 0) &&
+      state.ir_buflen > 0)
     {
       /* Set up the callback in the connection */
 
@@ -714,16 +708,17 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
       if (state.ir_cb)
         {
           state.ir_cb->flags   = (TCP_NEWDATA | TCP_DISCONN_EVENTS);
+          state.ir_cb->flags  |= (flags & MSG_WAITALL) ? TCP_WAITALL : 0;
           state.ir_cb->priv    = (FAR void *)&state;
           state.ir_cb->event   = tcp_recvhandler;
 
           /* Wait for either the receive to complete or for an error/timeout
-           * to occur.  net_timedwait will also terminate if a signal isi
+           * to occur.  net_timedwait will also terminate if a signal is
            * received.
            */
 
           ret = net_timedwait(&state.ir_sem,
-                              _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
+                               _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
           if (ret == -ETIMEDOUT)
             {
               ret = -EAGAIN;
@@ -734,7 +729,7 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
           tcp_callback_free(conn, state.ir_cb);
           ret = tcp_recvfrom_result(ret, &state);
         }
-      else
+      else if (ret <= 0)
         {
           ret = -EBUSY;
         }
