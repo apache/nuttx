@@ -176,17 +176,18 @@ function arm-gcc-toolchain {
     local flavor
     case ${os} in
       Darwin)
-        flavor=mac
+        flavor=-darwin
         ;;
       Linux)
-        flavor=x86_64-linux
+        flavor=
         ;;
     esac
     cd "${prebuilt}"
-    wget --quiet https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-${flavor}.tar.bz2
-    tar jxf gcc-arm-none-eabi-10.3-2021.10-${flavor}.tar.bz2
-    mv gcc-arm-none-eabi-10.3-2021.10 gcc-arm-none-eabi
-    rm gcc-arm-none-eabi-10.3-2021.10-${flavor}.tar.bz2
+    wget --quiet https://developer.arm.com/-/media/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1${flavor}-x86_64-arm-none-eabi.tar.xz
+    xz -d arm-gnu-toolchain-11.3.rel1${flavor}-x86_64-arm-none-eabi.tar.xz
+    tar xf arm-gnu-toolchain-11.3.rel1${flavor}-x86_64-arm-none-eabi.tar
+    mv arm-gnu-toolchain-11.3.rel1${flavor}-x86_64-arm-none-eabi gcc-arm-none-eabi
+    rm arm-gnu-toolchain-11.3.rel1${flavor}-x86_64-arm-none-eabi.tar
   fi
   arm-none-eabi-gcc --version
 }
