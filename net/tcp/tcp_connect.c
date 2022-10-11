@@ -43,6 +43,7 @@
 #include "devif/devif.h"
 #include "netdev/netdev.h"
 #include "socket/socket.h"
+#include "inet/inet.h"
 #include "tcp/tcp.h"
 
 #ifdef NET_TCP_HAVE_STACK
@@ -315,6 +316,32 @@ int psock_tcp_connect(FAR struct socket *psock,
 
   if (ret >= 0)
     {
+      /* Update laddr to device addr */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+      if (conn->domain == PF_INET6)
+        {
+#endif
+          if (net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr))
+            {
+              net_ipv6addr_copy(conn->u.ipv6.laddr, conn->dev->d_ipv6addr);
+            }
+        }
+#endif /* CONFIG_NET_IPv6 */
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+      else
+#endif
+        {
+          if (net_ipv4addr_cmp(conn->u.ipv4.laddr, INADDR_ANY))
+            {
+              net_ipv4addr_copy(conn->u.ipv4.laddr, conn->dev->d_ipaddr);
+            }
+        }
+#endif /* CONFIG_NET_IPv4 */
+
       /* Notify the device driver that new connection is available. */
 
       netdev_txnotify_dev(conn->dev);
