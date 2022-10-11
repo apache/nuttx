@@ -68,7 +68,7 @@ ifeq ($(CONFIG_UNWINDER_FRAME_POINTER),y)
 endif
 
 ifeq ($(CONFIG_UNWINDER_STACK_POINTER),y)
-  CMN_CSRCS += arm_backtrace_thumb.c
+  CMN_CSRCS += arm_backtrace_sp.c
 endif
 
 ifeq ($(CONFIG_UNWINDER_ARM),y)
