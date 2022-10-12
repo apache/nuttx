@@ -914,6 +914,21 @@ struct section_mapping_s
   uint32_t mmuflags;   /* MMU settings for the region (e.g., cache-able) */
   uint32_t nsections;  /* Number of mappings in the region */
 };
+
+struct page_entry_s
+{
+  uint32_t physbase;        /* Physical address of the region to be mapped */
+  uint32_t virtbase;        /* Virtual address of the region to be mapped */
+  uint32_t mmuflags;        /* MMU settings for the region (e.g., cache-able) */
+  uint32_t npages;          /* Number of mappings in the region */
+};
+
+struct page_mapping_s
+{
+  uint32_t l2table;                 /* Virtual address of l2 table */
+  uint32_t entrynum;                /* Page entry number */
+  const struct page_entry_s *entry; /* Page entry */
+};
 #endif
 
 /****************************************************************************
@@ -1530,6 +1545,74 @@ void mmu_l1_map_region(const struct section_mapping_s *mapping);
 #ifndef CONFIG_ARCH_ROMPGTABLE
 void mmu_l1_map_regions(const struct section_mapping_s *mappings,
                         size_t count);
+#endif
+
+/****************************************************************************
+ * Name: mmu_l1_map_page
+ *
+ * Description:
+ *   Set level 1 page entrie in order to map a region
+ *   array of memory.
+ *
+ * Input Parameters:
+ *   mapping - Describes the mapping to be performed.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_ARCH_ROMPGTABLE
+void mmu_l1_map_page(const struct section_mapping_s *mapping);
+#endif
+
+/****************************************************************************
+ * Name: mmu_l1_map_pages
+ *
+ * Description:
+ *   Set multiple level 1 page entries in order to map a region
+ *   array of memory.
+ *
+ * Input Parameters:
+ *   mappings - Describes the mapping to be performed.
+ *   count    - The number of mappings to be performed.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_ARCH_ROMPGTABLE
+void mmu_l1_map_pages(const struct section_mapping_s *mappings,
+                      size_t count);
+#endif
+
+/****************************************************************************
+ * Name: mmu_l2_map_page
+ *
+ * Description:
+ *   Set level 2 page entrie in order to map a region
+ *   array of memory.
+ *
+ * Input Parameters:
+ *   mapping - Describes the mapping to be performed.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_ARCH_ROMPGTABLE
+void mmu_l2_map_page(const struct page_mapping_s *mapping);
+#endif
+
+/****************************************************************************
+ * Name: mmu_l2_map_pages
+ *
+ * Description:
+ *   Set multiple level 2 page entries in order to map a region
+ *   array of memory.
+ *
+ * Input Parameters:
+ *   mappings - Describes the mapping to be performed.
+ *   count    - The number of mappings to be performed.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_ARCH_ROMPGTABLE
+void mmu_l2_map_pages(const struct page_mapping_s *mappings,
+                      size_t count);
 #endif
 
 /****************************************************************************
