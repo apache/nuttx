@@ -48,7 +48,7 @@
  * Public Data
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_CHIP_QEMU_A53
+#ifdef CONFIG_ARCH_CHIP_QEMU
 #define CONFIG_QEMU_UART_BASE      0x9000000
 #define CONFIG_QEMU_UART_IRQ       (GIC_SPI_INT_BASE + 1)
 #endif
