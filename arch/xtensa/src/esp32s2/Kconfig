@@ -272,6 +272,10 @@ config ESP32S2_SPIFLASH
 	bool "SPI Flash"
 	default n
 
+config ESP32S2_SPIRAM
+	bool "SPI RAM Support"
+	default n
+
 config ESP32S2_TIMER0
 	bool "64-bit Timer 0 (Group 0 Timer 0)"
 	default n
