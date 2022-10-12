@@ -3019,6 +3019,17 @@ LiteX on ARTY A7
 Support for the Digilent ARTY_A7 board along with CPU VexRiscV SOC were
 added in NuttX-9.0.
 
+ESP32-C3
+--------
+
+Initial architectural support for ESP32-C3 (RISC-V) was added in NuttX-10.1.0
+
+**Espressif ESP32-C3 Devkit Board** The NuttX release includes support for
+Espressif ESP32-C3 Devkit board.
+
+Please, refer to the :doc:`ESP32-C3 </platforms/risc-v/esp32c3/index>` on NuttX for
+further information.
+
 ESP32 (Dual Xtensa LX6)
 =======================
 
@@ -3026,7 +3037,7 @@ Xtensa LX6 ESP32
 ----------------
 
 Initial architectural support for Xtensa LX6 processors for the Espressif
-ESP32 were added in NuttX-7.19, enabling both single CPU and dual CPU
+ESP32 was added in NuttX-7.19, enabling both single CPU and dual CPU
 SMP configurations.
 
 **Espressif ESP32 DevkitC V4 Board** The NuttX release includes support for
@@ -3038,6 +3049,36 @@ port.
 includes: I2C, SPI, RTC, PM, Timers, Watchdog Timer and Ethernet.
 
 Please, refer to the :doc:`ESP32 </platforms/xtensa/esp32/index>` on NuttX for
+further information.
+
+ESP32-S2 (Single Xtensa LX7)
+=======================
+
+Xtensa LX7 ESP32-S2
+----------------
+
+Initial architectural support for Xtensa LX7 processor for the Espressif
+ESP32-S2 was added in NuttX-10.2.
+
+**Espressif ESP32-S2 Saola V1 Board** The NuttX release includes support for
+Espressif ESP32-S2 Saola V1 board.
+
+Please, refer to the :doc:`ESP32-S2 </platforms/xtensa/esp32s2/index>` on NuttX for
+further information.
+
+ESP32-S3 (Dual Xtensa LX7)
+=======================
+
+Xtensa LX7 ESP32-S3
+----------------
+
+Initial architectural support for dual Xtensa LX7 processors for the Espressif
+ESP32-S3 was added in NuttX-10.3.
+
+**Espressif ESP32-S3 DevKit Board** The NuttX release includes support for
+Espressif ESP32-S3 DevKit board.
+
+Please, refer to the :doc:`ESP32-S3 </platforms/xtensa/esp32s3/index>` on NuttX for
 further information.
 
 Zilog ZNEO Z16F
