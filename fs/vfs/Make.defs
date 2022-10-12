@@ -54,6 +54,12 @@ ifeq ($(CONFIG_TIMER_FD),y)
 CSRCS += fs_timerfd.c
 endif
 
+# Support for signalfd
+
+ifeq ($(CONFIG_SIGNAL_FD),y)
+CSRCS += fs_signalfd.c
+endif
+
 # Include vfs build support
 
 DEPPATH += --dep-path vfs
