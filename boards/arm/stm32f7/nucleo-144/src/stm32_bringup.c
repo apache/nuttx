@@ -184,7 +184,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_CAN
+#ifdef CONFIG_STM32F7_CAN_CHARDRIVER
   ret = stm32_can_setup();
   if (ret < 0)
     {

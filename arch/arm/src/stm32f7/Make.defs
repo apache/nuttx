@@ -155,8 +155,12 @@ ifeq ($(CONFIG_SENSORS_QENCODER),y)
 CHIP_CSRCS += stm32_qencoder.c
 endif
 
-ifeq ($(CONFIG_STM32F7_CAN),y)
+ifeq ($(CONFIG_STM32F7_CAN_CHARDRIVER),y)
 CHIP_CSRCS += stm32_can.c
+endif
+
+ifeq ($(CONFIG_STM32F7_CAN_SOCKET),y)
+CHIP_CSRCS += stm32_can_sock.c
 endif
 
 ifeq ($(CONFIG_STM32F7_SAI),y)
