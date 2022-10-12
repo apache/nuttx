@@ -43,16 +43,16 @@
 
 #define INSTR_IS(i, o)      (((i) & (IMASK_##o)) == (IOP_##o))
 
-#define IMASK_T_PUSH_LO     0xff00      /* push {reglist} (not LR) */
+#define IMASK_T_PUSH_LO     0xff00      /* tpush {reglist} (not LR) */
 #define IOP_T_PUSH_LO       0x6400
 
-#define IMASK_T_PUSH        0xff00      /* push {reglist} (inc LR) */
+#define IMASK_T_PUSH        0xff00      /* tpush {reglist} (inc LR) */
 #define IOP_T_PUSH          0x6500
 
-#define IMASK_T_SUB_SP_16   0xff80      /* sub sp, # */
+#define IMASK_T_SUB_SP_16   0xff80      /* tsub sp, # */
 #define IOP_T_SUB_SP_16     0x6080
 
-#define IMASK_T_BL          0xf000      /* bl */
+#define IMASK_T_BL          0xf000      /* tjl */
 #define IOP_T_BL            0x9000
 
 #define INSTR_LIMIT         0x2000
@@ -62,6 +62,22 @@
  ****************************************************************************/
 
 static void **g_backtrace_code_regions;
+
+/****************************************************************************
+ * Inline functions
+ ****************************************************************************/
+
+static inline uint32_t tc32_getsp(void)
+{
+  uint32_t sp;
+  __asm__
+  (
+    "\ttmov %0, sp\n\t"
+    : "=r"(sp)
+  );
+
+  return sp;
+}
 
 /****************************************************************************
  * Private Functions
@@ -169,7 +185,7 @@ static void *backtrace_push_internal(void **psp, void **ppc)
   uint8_t *base;
   uint8_t *lr;
   uint16_t ins16;
-  int offset = 1;
+  int state = 0;
   bool found;
   int frame;
   int i;
@@ -183,28 +199,55 @@ static void *backtrace_push_internal(void **psp, void **ppc)
       return NULL;
     }
 #endif
-
   found = false;
+
+  /* Stack frame increase order:
+   * <function>:
+   * 1  tpush {rx, lr}     (must    , IOP_T_PUSH     , case 2)
+   * 2  other instructions
+   * 3  tpush {rx}         (not must, IOP_T_PUSH_LO  , case 1)
+   * 4  tpush {rx}         (not must, IOP_T_PUSH_LO  , case 1)
+   * 5  ...
+   * 6  tpush {rx}         (not must, IOP_T_PUSH_LO  , case 1)
+   * 7  other instructions
+   * 8  tsub  sp, #n       (not must, IOP_T_SUB_SP_16, case 0)
+   */
 
   for (i = 0; i < INSTR_LIMIT; i += 2)
     {
       base  = pc - i;
       ins16 = *(uint16_t *)(base);
-      if (INSTR_IS(ins16, T_PUSH))
+      switch (state)
         {
-          /* Bit 1 number in low byte indicates the number of pushed
-           * low register, +1 for LR is alao pushed into the stack.
-           */
+          case 0:
+            if (INSTR_IS(ins16, T_SUB_SP_16))
+              {
+                /* Low 7 bit (imm7) is the number (4*imm7) sub to sp */
 
-          frame = __builtin_popcount(ins16 & 0xff) + 1;
-          ins16 = *(uint16_t *)(base - 2);
-          if (INSTR_IS(ins16, T_PUSH_LO))
-            {
-              offset += __builtin_popcount(ins16 & 0xff);
-              frame  += offset - 1;
-            }
+                frame += (ins16 & 0x7f);
+                state  = 1;
+                break;
+              }
 
-          found = true;
+          case 1:
+            if (INSTR_IS(ins16, T_PUSH_LO))
+              {
+                frame += __builtin_popcount(ins16 & 0xff);
+                state  = 1;
+                break;
+              }
+
+            if (INSTR_IS(ins16, T_PUSH))
+              {
+                /* +1, because include the LR */
+
+                frame += __builtin_popcount(ins16 & 0xff) + 1;
+                found  = true;
+              }
+            break;
+
+          default:
+            break;
         }
 
       if (found)
@@ -230,48 +273,19 @@ static void *backtrace_push_internal(void **psp, void **ppc)
       return NULL;
     }
 
-  i = 0;
-
-  while (base + i < pc)
-    {
-      ins16 = *(uint16_t *)(base + i);
-      if (INSTR_IS(ins16, T_SUB_SP_16))
-        {
-          /* Low 7 bit indicates the number sub to sp */
-
-          frame += (ins16 & 0x7f);
-          break;
-        }
-
-      if (INSTR_IS(ins16, T_PUSH_LO))
-        {
-          /* Bit 1 number in low 8bit indicated the number of pushed
-           * low register.
-           */
-
-          frame += __builtin_popcount(ins16 & 0xff);
-        }
-
-      /* 16bit instruction */
-
-      i += 2;
-    }
-
-  lr = (uint8_t *)*((uint32_t *)sp + frame - offset);
+  lr = (uint8_t *)*((uint32_t *)sp + frame - 1);
   if (!in_code_region(lr))
     {
       return NULL;
     }
 
-  offset = getlroffset(lr);
-  if (offset == 0)
+  if (getlroffset(lr) == 0)
     {
       return NULL;
     }
 
   *psp = (uint32_t *)sp + frame;
-
-  return lr - offset;
+  return lr - 4;
 }
 
 /****************************************************************************
@@ -334,7 +348,6 @@ nosanitize_address
 static int backtrace_branch(void *limit, void *sp,
                             void **buffer, int size, int *skip)
 {
-#if 1
   uint16_t ins16;
   uint32_t addr;
   int i;
@@ -372,13 +385,6 @@ static int backtrace_branch(void *limit, void *sp,
     }
 
   return i;
-#else
-  /* Not implement backtrace branch method temporarily
-   * Wait for the instruction tjl encode document from telink.
-   */
-
-  return 0;
-#endif
 }
 
 /****************************************************************************
@@ -462,7 +468,7 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
 
   if (tcb == rtcb)
     {
-      sp = (void *)up_getsp();
+      sp = (void *)tc32_getsp();
 
       if (up_interrupt_context())
         {
@@ -473,12 +479,12 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
 #  else
                                g_intstacktop,
 #  endif /* CONFIG_SMP */
-                               &sp, (void *)up_backtrace + 10,
+                               &sp, (void *)up_backtrace + 16,
                                buffer, size, &skip);
 #else
           ret = backtrace_push(rtcb->stack_base_ptr +
                                rtcb->adj_stack_size,
-                               &sp, (void *)up_backtrace + 10,
+                               &sp, (void *)up_backtrace + 16,
                                buffer, size, &skip);
 #endif
           if (ret < size)
@@ -494,7 +500,7 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
         {
           ret = backtrace_push(rtcb->stack_base_ptr +
                                rtcb->adj_stack_size, &sp,
-                               (void *)up_backtrace + 10,
+                               (void *)up_backtrace + 16,
                                buffer, size, &skip);
         }
 
