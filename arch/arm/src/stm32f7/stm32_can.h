@@ -103,6 +103,8 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_STM32F7_CAN_CHARDRIVER
+
 /****************************************************************************
  * Name: stm32_caninitialize
  *
@@ -119,6 +121,26 @@ extern "C"
 
 struct can_dev_s;
 struct can_dev_s *stm32_caninitialize(int port);
+#endif
+
+#ifdef CONFIG_STM32F7_CAN_SOCKET
+
+/****************************************************************************
+ * Name: stm32_cansockinitialize
+ *
+ * Description:
+ *   Initialize the selected CAN port as SocketCAN interface
+ *
+ * Input Parameters:
+ *   Port number (for hardware that has multiple CAN interfaces)
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ ****************************************************************************/
+
+int stm32_cansockinitialize(int port);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

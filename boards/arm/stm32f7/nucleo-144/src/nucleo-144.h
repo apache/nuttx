@@ -312,8 +312,16 @@ int stm32_qencoder_initialize(const char *devpath, int timer);
  * Name: stm32_can_setup
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_CAN
+#ifdef CONFIG_STM32F7_CAN_CHARDRIVER
 int stm32_can_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_cansock_setup
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32F7_CAN_SOCKET
+int stm32_cansock_setup(void);
 #endif
 
 /****************************************************************************
