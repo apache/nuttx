@@ -1709,7 +1709,7 @@ config ARCH_BOARD_SABRE_6QUAD
 
 config ARCH_BOARD_QEMU_A53
 	bool "Qemu A53 board"
-	depends on ARCH_CHIP_QEMU_A53
+	depends on ARCH_CHIP_QEMU
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		This options selects support for NuttX on the QEMU A53
