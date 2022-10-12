@@ -65,10 +65,17 @@ int sysinfo(FAR struct sysinfo *info)
 #ifdef CONFIG_SCHED_CPULOAD
   clock_cpuload(0, &cpuload);
 
-  info->loads[0] = ((cpuload.total - cpuload.active) <<
-                     SI_LOAD_SHIFT) / cpuload.total;
-  info->loads[1] = info->loads[0];
-  info->loads[2] = info->loads[0];
+  /* On the simulator, you may hit cpuload.total == 0, but probably never
+   * on real hardware.
+   */
+
+  if (cpuload.total)
+    {
+      info->loads[0] = ((cpuload.total - cpuload.active) <<
+                         SI_LOAD_SHIFT) / cpuload.total;
+      info->loads[1] = info->loads[0];
+      info->loads[2] = info->loads[0];
+    }
 #endif
 
 #ifdef MM_KERNEL_USRHEAP_INIT
