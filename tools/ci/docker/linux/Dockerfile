@@ -18,6 +18,7 @@ FROM ubuntu:20.04 AS builder-base
 # This should only be used for temp build images that artifacts will be copied from
 RUN apt-get update -qq && apt-get install -y -qq \
   curl \
+  patch \
   xz-utils
 
 ###############################################################################
@@ -85,7 +86,9 @@ FROM nuttx-toolchain-base AS nuttx-toolchain-arm
 # Download the latest ARM GCC toolchain prebuilt by ARM
 RUN mkdir gcc-arm-none-eabi && \
   curl -s -L  "https://developer.arm.com/-/media/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-eabi.tar.xz" \
-  | tar -C gcc-arm-none-eabi --strip-components 1 -xJ
+  | tar -C gcc-arm-none-eabi --strip-components 1 -xJ  \
+  && curl -s -L -O "https://raw.githubusercontent.com/apache/incubator-nuttx/master/tools/ci/patch/arm-none-eabi-workaround-for-newlib-version-break.patch" \
+  && patch -p0 < arm-none-eabi-workaround-for-newlib-version-break.patch
 
 ###############################################################################
 # Build image for tool required by ARM64 builds
