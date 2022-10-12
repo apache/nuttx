@@ -187,6 +187,7 @@ function arm-gcc-toolchain {
     xz -d arm-gnu-toolchain-11.3.rel1${flavor}-x86_64-arm-none-eabi.tar.xz
     tar xf arm-gnu-toolchain-11.3.rel1${flavor}-x86_64-arm-none-eabi.tar
     mv arm-gnu-toolchain-11.3.rel1${flavor}-x86_64-arm-none-eabi gcc-arm-none-eabi
+    patch -p0 < ${nuttx}/tools/ci/patch/arm-none-eabi-workaround-for-newlib-version-break.patch
     rm arm-gnu-toolchain-11.3.rel1${flavor}-x86_64-arm-none-eabi.tar
   fi
   arm-none-eabi-gcc --version
