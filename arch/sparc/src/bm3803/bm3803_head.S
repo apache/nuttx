@@ -324,7 +324,7 @@ __start:
 
         set   BM3803_REG,%g1
         ld    [%g1+4], %g2
-        or    %g2, 0x4f, %g2        	/*将存储器配置为读改写（区别于写选通），等待后期设置为最大*/
+        or    %g2, 0x4f, %g2        	!Enable read-modify-write cycle(no byte write strobe),maximum wait-states
         st    %g2, [%g1+4]
         nop
 
