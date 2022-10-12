@@ -33,7 +33,7 @@
 #define MB(x)           (KB(x) << 10)
 #define GB(x)           (MB(UINT64_C(x)) << 10)
 
-#if defined(CONFIG_ARCH_CHIP_QEMU_A53)
+#if defined(CONFIG_ARCH_CHIP_QEMU)
 
 #define CONFIG_GICD_BASE          0x8000000
 #define CONFIG_GICR_BASE          0x80a0000
