@@ -48,3 +48,19 @@ config TIMER_FD_NPOLLWAITERS
 		Maximum number of threads that can be waiting on poll()
 
 endif # TIMER_FD
+
+config SIGNAL_FD
+	bool "SignalFD"
+	default n
+	---help---
+		Create a file descriptor for accepting signals
+
+if SIGNAL_FD
+
+config SIGNAL_FD_NPOLLWAITERS
+	int "Number of signalFD poll waiters"
+	default 2
+	---help---
+		Maximum number of threads that can be waiting on poll()
+
+endif # SIGNAL_FD
