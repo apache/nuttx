@@ -1707,13 +1707,13 @@ config ARCH_BOARD_SABRE_6QUAD
 		This options selects support for NuttX on the NXP/Freescale Sabre
 		board featuring the iMX 6Quad CPU.
 
-config ARCH_BOARD_QEMU_A53
-	bool "Qemu A53 board"
+config ARCH_BOARD_QEMU_ARMV8A
+	bool "Qemu ARMv8a CPUs board"
 	depends on ARCH_CHIP_QEMU
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
-		This options selects support for NuttX on the QEMU A53
-		board featuring the qemu a53 CPU.
+		This options selects support for NuttX on the QEMU ARMv8a + virt
+		board featuring the qemu ARMv8a CPUs.
 
 config ARCH_BOARD_SAMA5D2_XULT
 	bool "Atmel SAMA5D2 Xplained Ultra development board"
@@ -2784,7 +2784,7 @@ config ARCH_BOARD
 	default "rv32m1-vega"              if ARCH_BOARD_RV32M1_VEGA
 	default "rv-virt"                  if ARCH_BOARD_QEMU_RV_VIRT
 	default "sabre-6quad"              if ARCH_BOARD_SABRE_6QUAD
-	default "qemu-a53"                 if ARCH_BOARD_QEMU_A53
+	default "qemu-armv8a"              if ARCH_BOARD_QEMU_ARMV8A
 	default "sama5d2-xult"             if ARCH_BOARD_SAMA5D2_XULT
 	default "giant-board"              if ARCH_BOARD_GIANT_BOARD
 	default "sama5d3x-ek"              if ARCH_BOARD_SAMA5D3X_EK
@@ -2969,8 +2969,8 @@ endif
 if ARCH_BOARD_SABRE_6QUAD
 source "boards/arm/imx6/sabre-6quad/Kconfig"
 endif
-if ARCH_BOARD_QEMU_A53
-source "boards/arm64/qemu/qemu-a53/Kconfig"
+if ARCH_BOARD_QEMU_ARMV8A
+source "boards/arm64/qemu/qemu-armv8a/Kconfig"
 endif
 if ARCH_BOARD_IMXRT1020_EVK
 source "boards/arm/imxrt/imxrt1020-evk/Kconfig"

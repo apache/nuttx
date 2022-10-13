@@ -11,12 +11,12 @@ choice
 	default ARCH_CHIP_QEMU
 
 config ARCH_CHIP_QEMU
-	bool "QEMU virt platform (cortex-a53)"
+	bool "QEMU virt platform (ARMv8a)"
 	select ARCH_CORTEX_A53
 	select ARCH_HAVE_ADDRENV
 	select ARCH_NEED_ADDRENV_MAPPING
 	---help---
-		QEMU virt platform (cortex-a53)
+		QEMU virt platform (ARMv8a)
 
 endchoice
 
@@ -29,6 +29,30 @@ config ARCH_ARMV8R
 	default n
 
 config ARCH_CORTEX_A53
+	bool
+	default n
+	select ARCH_ARMV8A
+	select ARM_HAVE_NEON
+	select ARCH_HAVE_TRUSTZONE
+	select ARCH_DCACHE
+	select ARCH_ICACHE
+	select ARCH_HAVE_MMU
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_TESTSET
+
+config ARCH_CORTEX_A57
+	bool
+	default n
+	select ARCH_ARMV8A
+	select ARM_HAVE_NEON
+	select ARCH_HAVE_TRUSTZONE
+	select ARCH_DCACHE
+	select ARCH_ICACHE
+	select ARCH_HAVE_MMU
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_TESTSET
+
+config ARCH_CORTEX_A72
 	bool
 	default n
 	select ARCH_ARMV8A

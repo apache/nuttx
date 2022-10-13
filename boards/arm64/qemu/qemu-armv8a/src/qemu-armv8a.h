@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm64/qemu/qemu-a53/include/board_memorymap.h
+ * boards/arm64/qemu/qemu-armv8a/src/qemu-armv8a.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM64_QEMU_QEMU_A53_INCLUDE_BOARD_MEMORYMAP_H
-#define __BOARDS_ARM64_QEMU_QEMU_A53_INCLUDE_BOARD_MEMORYMAP_H
+#ifndef __BOARDS_ARM64_QEMU_QEMU_ARMV8A_SRC_QEMU_ARMV8A_H
+#define __BOARDS_ARM64_QEMU_QEMU_ARMV8A_SRC_QEMU_ARMV8A_H
 
 /****************************************************************************
  * Included Files
@@ -27,8 +27,10 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
@@ -37,23 +39,21 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions Definitions
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-}
+/****************************************************************************
+ * Name: qemu_bringup
+ *
+ * Description:
+ *   Bring up board features
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
+int qemu_bringup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM64_QEMU_QEMU_A53_INCLUDE_BOARD_MEMORYMAP_H */
+#endif /* __BOARDS_ARM64_QEMU_QEMU_ARMV8A_SRC_QEMU_ARMV8A_H */
