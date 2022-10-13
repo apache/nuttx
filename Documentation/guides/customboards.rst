@@ -14,7 +14,7 @@ as "in-tree" boards) are configured using a standard syntax:
         Refreshing...
 
 Sometimes it is not appropriate, or not wanted, to add a new or custom board to
-the Nuttx boards tree itself. If so, the board can be defined out-of-tree in a
+the NuttX boards tree itself. If so, the board can be defined out-of-tree in a
 custom directory and still be built easily.
 
 ------------------
@@ -25,7 +25,7 @@ The same set of files as provided for in-tree boards is required (i.e. configs,
 Kconfig, scripts, etc.) but these can be placed in a directory of your choice.
 
 In this example, the files are assumed to exist in:
- ``../nuttx/CustomBoards/MyCustomBoardName`` 
+ ``../nuttx/CustomBoards/MyCustomBoardName``
 
     .. code-block:: console
 
@@ -67,5 +67,3 @@ They should be set to suit your board name and directory location.
 .. Note::
    If you subsequently run a ``make distclean`` operation, then these settings will be lost.
    They should be added back before building, and/or before running ``make menuconfig``.
-
-

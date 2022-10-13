@@ -2,7 +2,7 @@
 Custom Apps How-to
 ==================
 
-Nuttx comes with a large number of Apps but, most likely, you will want to add your own.
+NuttX comes with a large number of Apps but, most likely, you will want to add your own.
 
 There are various different options for this depending on your requirements.
 
@@ -23,7 +23,7 @@ the directory ``CustomApps`` as an example.
 -----------------------------------------
 
 The CustomApps directory need only to contain the minimum three files:
-   
+
   * ``Makefile``
   * ``Kconfig``
   * ``CustomHello.c``
@@ -34,74 +34,74 @@ The CustomApps directory need only to contain the minimum three files:
 
 The custom application directory must include a Makefile to make all of the targets
 expected by the NuttX build and must generate an archive called libapps.a in the
-top-level of the custom directory structure. 
+top-level of the custom directory structure.
 
 The Makefile has just those minimum required targets:
 
     .. code-block:: console
 
       APPDIR = ${shell pwd}
- 
+
       -include $(TOPDIR)/Make.defs
- 
+
       # files
- 
+
       CSRCS = CustomHello.c
       COBJS = CustomHello.o
- 
+
       ROOTDEPPATH = --dep-path .
- 
+
       # Build targets
- 
+
       all: libapps.a
       .PHONY: dirlinks context preconfig depend clean clean_context distclean
       .PRECIOUS: libapps$(LIBEXT)
- 
+
       # Compile C Files
- 
+
       $(COBJS): %$(OBJEXT): %.c
       $(call COMPILE, $<, $@)
- 
+
       # Add object files to the apps archive
- 
+
       libapps.a: $(COBJS)
         $(call ARCHIVE, libapps.a, $(COBJS))
- 
+
       # Create directory links
- 
+
       dirlinks:
- 
+
       # Setup any special pre-build context
- 
+
       context:
- 
+
       # Setup any special pre-configuration context
- 
+
       preconfig:
- 
+
       # Make the dependency file, Make.deps
- 
+
       depend: Makefile $(CSRCS)
         $(Q) $(MKDEP) $(ROOTDEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) > Make.dep
- 
+
       # Clean the results of the last build
- 
+
       clean:
         $(call CLEAN)
- 
+
       # Remove the build context and directory links
- 
+
       clean_context:
- 
+
       # Restore the directory to its original state
- 
+
       distclean: clean clean_context
         $(call DELFILE, Make.dep)
- 
+
       # Include dependencies
-     
+
       -include Make.dep
-  
+
 1.2 Kconfig
 -----------
 
@@ -147,7 +147,7 @@ For this "Hello, Custom World!" application ``custom_hello()`` is the applicatio
     .. code-block:: console
 
       #include <stdio.h>
- 
+
       int custom_hello(int argc, char *argv[])
       {
         printf("Hello, Custom World!!\n");
@@ -171,14 +171,14 @@ This can be done by
 * hand-editing the .config file before running make menuconfig, which is rarely a good idea
 * Using ``kconfig-tweak --set-str CONFIG_APPS_DIR ../CustomApps``
 * select the CustomApps directory as a command line option at the time the board is configured:
-  
-      .. code-block:: console  
+
+      .. code-block:: console
 
         ./tools/configure.sh -a ../CustomApps <board>:<config>
 
   or
 
-      .. code-block:: console  
+      .. code-block:: console
 
         .tools/configure.sh -l ../CustomBoards/MyCustomBoardName/MyCustomConfig
 
@@ -193,12 +193,12 @@ Then build as you normally would. When you execute the custom_hello app you shou
 ---------------------------------------------------------------
 
 The collection of apps provided in nuttx-apps can be useful, and this method simply
-extends the directory structure to include your own directory structure. 
+extends the directory structure to include your own directory structure.
 
 The existing /apps makefile automatically checks for the existence of sub-directories
 that contain a ``Makefile`` and ``Make.defs`` file. This example assumes there is likely
 to be more than one custom app, and includes a ``Kconfig`` for the app itself. Inclusion
-of a ``Kconfig`` allows custom App options to be included in the Nuttx configuration
+of a ``Kconfig`` allows custom App options to be included in the NuttX configuration
 system, but is optional.
 
 2.1 Custom Apps Directory
@@ -254,7 +254,7 @@ Create a Makefile in the ``CustomApps/CustomHello`` directory with the following
 
     MAINSRC = CustomHello.c
 
-    include $(APPDIR)/Application.mk   
+    include $(APPDIR)/Application.mk
 
 
 2.6 CustomHello Kconfig
@@ -275,7 +275,7 @@ the purposes of this example, the Kconfig will only cover our single application
 	    default n
 	    ---help---
 		    Enable the Custom Hello App
-		
+
     if CUSTOM_APPS_CUSTOM_HELLO
 
     config CUSTOM_APPS_CUSTOM_HELLO_PROGNAME
@@ -284,7 +284,7 @@ the purposes of this example, the Kconfig will only cover our single application
 	    ---help---
 		    This is the name of the program that will be used when the NSH ELF
 		    program is installed.
-	
+
     config CUSTOM_APPS_CUSTOM_HELLO_PRIORITY
 	    int "Custom Hello task priority"
 	    default 100
@@ -292,7 +292,7 @@ the purposes of this example, the Kconfig will only cover our single application
     config CUSTOM_APPS_CUSTOM_HELLO_STACKSIZE
 	    int "Custom Hello stack size"
 	    default DEFAULT_TASK_STACKSIZE
-  
+
     endif
 
 2.7 Build and Run
@@ -319,7 +319,7 @@ outside of the default trees.
 Create a directory for the custom apps in a location of your choosing. Then create A
 symbolic link in the main nuttx/apps directory.
 
-This example assumes this has been placed below the top Nuttx folder, alongside the
+This example assumes this has been placed below the top NuttX folder, alongside the
 default ``apps`` directory, i.e. ``nuttx/CustomApps``
 
   .. code-block:: console
@@ -343,4 +343,4 @@ default ``apps`` directory, i.e. ``nuttx/CustomApps``
 ------------------
 
 Follow all the steps as in sections 2.2 to 2.7 above, creating the exact same files but
-placing then in the new ``CustomApps`` directory location created as described here. 
+placing then in the new ``CustomApps`` directory location created as described here.
