@@ -251,6 +251,7 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   unzip \
   wget \
   xxd \
+  qemu \
   && rm -rf /var/lib/apt/lists/*
 
 # Configure out base setup for adding python packages
