@@ -16,6 +16,16 @@ config ARCH_CHIP_QEMU_A53
 	select ARCH_HAVE_MULTICPU
 	select ARMV8A_HAVE_GICv3
 
+config ARCH_CHIP_QEMU_A57
+	bool "Qemu virtual Processor (cortex-a57)"
+	select ARCH_HAVE_MULTICPU
+	select ARMV8A_HAVE_GICv3
+
+config ARCH_CHIP_QEMU_A72
+	bool "Qemu virtual Processor (cortex-a72)"
+	select ARCH_HAVE_MULTICPU
+	select ARMV8A_HAVE_GICv3
+
 endchoice # Qemu Chip Selection
 
 endmenu # "Qemu Chip Selection"

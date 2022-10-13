@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm64/qemu/qemu-a53/src/qemu_boardinit.c
+ * boards/arm64/qemu/qemu-armv8a/src/qemu_boardinit.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,7 +25,7 @@
 #include <nuttx/config.h>
 #include <stdint.h>
 #include <nuttx/board.h>
-#include "qemu-a53.h"
+#include "qemu-armv8a.h"
 
 /****************************************************************************
  * Pre-processor Definitions
