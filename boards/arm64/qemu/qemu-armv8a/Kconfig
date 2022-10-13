@@ -3,5 +3,5 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-if ARCH_BOARD_QEMU_A53
+if ARCH_BOARD_QEMU_ARMV8A
 endif

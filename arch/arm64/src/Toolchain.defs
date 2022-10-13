@@ -36,6 +36,10 @@ endif
 
 ifeq ($(CONFIG_ARCH_CORTEX_A53),y)
   ARCHCPUFLAGS += -mtune=cortex-a53
+else ifeq ($(CONFIG_ARCH_CORTEX_A57),y)
+  ARCHCPUFLAGS += -mtune=cortex-a57
+else ifeq ($(CONFIG_ARCH_CORTEX_A72),y)
+  ARCHCPUFLAGS += -mtune=cortex-a72
 endif
 
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)

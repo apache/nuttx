@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm64/qemu/qemu-a53/src/qemu-a53.h
+ * boards/arm64/qemu/qemu-armv8a/include/board_memorymap.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM64_QEMU_QEMU_A53_SRC_QEMU_A53_H
-#define __BOARDS_ARM64_QEMU_QEMU_A53_SRC_QEMU_A53_H
+#ifndef __BOARDS_ARM64_QEMU_QEMU_ARMV8A_INCLUDE_BOARD_MEMORYMAP_H
+#define __BOARDS_ARM64_QEMU_QEMU_ARMV8A_INCLUDE_BOARD_MEMORYMAP_H
 
 /****************************************************************************
  * Included Files
@@ -27,10 +27,8 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-
 /****************************************************************************
- * Public Types
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -39,21 +37,23 @@
 
 #ifndef __ASSEMBLY__
 
-/****************************************************************************
- * Public Functions Definitions
- ****************************************************************************/
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
- * Name: qemu_bringup
- *
- * Description:
- *   Bring up board features
- *
+ * Public Function Prototypes
  ****************************************************************************/
 
-#if defined(CONFIG_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
-int qemu_bringup(void);
+#undef EXTERN
+#if defined(__cplusplus)
+}
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM64_QEMU_QEMU_A53_SRC_QEMU_A53_H */
+#endif /* __BOARDS_ARM64_QEMU_QEMU_ARMV8A_INCLUDE_BOARD_MEMORYMAP_H */

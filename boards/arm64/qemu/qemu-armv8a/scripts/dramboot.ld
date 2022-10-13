@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm64/qemu/qemu-a53/scripts/dramboot.ld
+ * boards/arm64/qemu/qemu-armv8a/scripts/dramboot.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

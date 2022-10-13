@@ -41,4 +41,4 @@
 # with float, disable the cibuild check for MACOS
 # it will be enbaled while new toolchain release
 
-# /arm64/qemu/qemu-a53/configs/nsh_smp
+# /arm64/qemu/qemu-armv8a/configs/nsh_smp

@@ -1,7 +1,7 @@
 README.txt
 ==========
 
-This board configuration will use QEMU to emulate a generic Cortex-A53
+This board configuration will use QEMU to emulate generic ARM64 v8-A series
 hardware platform and provides support for these devices:
 
  - GICv3 interrupt controller
@@ -43,7 +43,7 @@ Getting Started
 3. Configuring and running
   3.1 Single Core
    Configuring NuttX and compile:
-   $ ./tools/configure.sh -l qemu-a53:nsh
+   $ ./tools/configure.sh -l qemu-armv8a:nsh
    $ make
    Running with qemu
    $ qemu-system-aarch64 -cpu cortex-a53 -nographic \
@@ -53,7 +53,7 @@ Getting Started
 
   3.2 SMP
    Configuring NuttX and compile:
-   $ ./tools/configure.sh -l qemu-a53:nsh_smp
+   $ ./tools/configure.sh -l qemu-armv8a:nsh_smp
    $ make
    Runing with qemu
    $ qemu-system-aarch64 -cpu cortex-a53 -smp 4 -nographic \
@@ -69,6 +69,11 @@ Getting Started
 
 Status
 ======
+
+2022-10-13:
+1. Renamed the board configuration name from qemu-a53 to qemu-v8a.
+
+2. Added the configurations for Cortex-A57 and Cortex-A72.
 
 2022-07-01:
 
