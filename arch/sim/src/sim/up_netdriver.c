@@ -78,8 +78,8 @@
 
 /* Net driver worker */
 
-static struct work_s g_avail_work;
-static struct work_s g_recv_work;
+static struct work_s g_avail_work[CONFIG_SIM_NETDEV_NUMBER];
+static struct work_s g_recv_work[CONFIG_SIM_NETDEV_NUMBER];
 
 /* Ethernet peripheral state */
 
@@ -334,9 +334,11 @@ static void netdriver_txavail_work(void *arg)
 
 static int netdriver_txavail(struct net_driver_s *dev)
 {
-  if (work_available(&g_avail_work))
+  int devidx = (intptr_t)dev->d_private;
+  if (work_available(&g_avail_work[devidx]))
     {
-      work_queue(LPWORK, &g_avail_work, netdriver_txavail_work, dev, 0);
+      work_queue(LPWORK, &g_avail_work[devidx], netdriver_txavail_work,
+                 dev, 0);
     }
 
   return OK;
@@ -344,19 +346,22 @@ static int netdriver_txavail(struct net_driver_s *dev)
 
 static void netdriver_txdone_interrupt(void *priv)
 {
-  if (work_available(&g_avail_work))
+  struct net_driver_s *dev = (struct net_driver_s *)priv;
+  int devidx = (intptr_t)dev->d_private;
+  if (work_available(&g_avail_work[devidx]))
     {
-      struct net_driver_s *dev = (struct net_driver_s *)priv;
-      work_queue(LPWORK, &g_avail_work, netdriver_txavail_work, dev, 0);
+      work_queue(LPWORK, &g_avail_work[devidx], netdriver_txavail_work,
+                 dev, 0);
     }
 }
 
 static void netdriver_rxready_interrupt(void *priv)
 {
-  if (work_available(&g_recv_work))
+  struct net_driver_s *dev = (struct net_driver_s *)priv;
+  int devidx = (intptr_t)dev->d_private;
+  if (work_available(&g_recv_work[devidx]))
     {
-      struct net_driver_s *dev = (struct net_driver_s *)priv;
-      work_queue(LPWORK, &g_recv_work, netdriver_recv_work, dev, 0);
+      work_queue(LPWORK, &g_recv_work[devidx], netdriver_recv_work, dev, 0);
     }
 }
 
@@ -427,9 +432,9 @@ void netdriver_loop(void)
   int devidx;
   for (devidx = 0; devidx < CONFIG_SIM_NETDEV_NUMBER; devidx++)
     {
-      if (work_available(&g_recv_work) && netdev_avail(devidx))
+      if (work_available(&g_recv_work[devidx]) && netdev_avail(devidx))
         {
-          work_queue(LPWORK, &g_recv_work, netdriver_recv_work,
+          work_queue(LPWORK, &g_recv_work[devidx], netdriver_recv_work,
                      &g_sim_dev[devidx], 0);
         }
     }
