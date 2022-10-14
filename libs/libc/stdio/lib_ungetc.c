@@ -59,6 +59,13 @@ int ungetc(int c, FAR FILE *stream)
       return EOF;
     }
 
+  /* EOF cannot be unget */
+
+  if (c == EOF)
+    {
+      return EOF;
+    }
+
 #if CONFIG_NUNGET_CHARS > 0
   nungotten = stream->fs_nungotten;
   if (stream->fs_nungotten < CONFIG_NUNGET_CHARS)
