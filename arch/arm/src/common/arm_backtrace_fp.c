@@ -33,8 +33,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_FRAME_POINTER) && !defined(CONFIG_ARM_THUMB)
-
 /****************************************************************************
  * Name: backtrace
  *
@@ -125,7 +123,7 @@ int up_backtrace(struct tcb_s *tcb,
         {
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
 #  ifdef CONFIG_SMP
-          istacklimit = (void *)arm_intstack_top();
+          istacklimit = arm_intstack_top();
 #  else
           istacklimit = g_intstacktop;
 #  endif /* CONFIG_SMP */
@@ -171,4 +169,3 @@ int up_backtrace(struct tcb_s *tcb,
 
   return ret;
 }
-#endif /* CONFIG_FRAME_POINTER && !CONFIG_ARM_THUMB */
