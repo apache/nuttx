@@ -457,6 +457,7 @@ errout_with_newsearch:
 
 int rename(FAR const char *oldpath, FAR const char *newpath)
 {
+  struct stat stat_buf;
   struct inode_search_s olddesc;
   FAR struct inode *oldinode;
   int ret;
@@ -469,6 +470,14 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
       !newpath || *newpath == '\0')
     {
       ret = -EINVAL;
+      goto errout;
+    }
+
+  /* Ensure that oldpath actually exists */
+
+  ret = nx_stat(oldpath, &stat_buf, 0);
+  if (ret < 0)
+    {
       goto errout;
     }
 
