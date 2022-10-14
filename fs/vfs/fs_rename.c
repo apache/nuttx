@@ -397,17 +397,30 @@ next_subdir:
 
                   goto next_subdir;
                 }
-              else if (oldinode->u.i_mops->unlink)
+              else
                 {
-                  /* No.. newrelpath must refer to a regular file.  Attempt
-                   * to remove the file before doing the rename.
-                   *
-                   * NOTE that errors are not handled here.  If we failed to
-                   * remove the file, then the file system 'rename' method
-                   * should check that.
+                  /* No.. newrelpath must refer to a regular file.  Make sure
+                   * that the file at the olrelpath actually exists before
+                   * performing any further actions with newrelpath
                    */
 
-                   oldinode->u.i_mops->unlink(oldinode, newrelpath);
+                  ret = oldinode->u.i_mops->stat(oldinode, oldrelpath, &buf);
+                  if (ret < 0)
+                    {
+                      goto errout_with_newinode;
+                    }
+
+                  if (oldinode->u.i_mops->unlink)
+                    {
+                      /* Attempt to remove the file before doing the rename.
+                       *
+                       * NOTE that errors are not handled here.  If we failed
+                       * to remove the file, then the file system 'rename'
+                       * method should check that.
+                       */
+
+                       oldinode->u.i_mops->unlink(oldinode, newrelpath);
+                    }
                 }
             }
         }
