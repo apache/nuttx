@@ -321,6 +321,8 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
           sndlen = conn->mss;
         }
 
+      conn->rexmit_seq = pstate->snd_isn + pstate->snd_acked;
+
 #ifdef NEED_IPDOMAIN_SUPPORT
       /* If both IPv4 and IPv6 support are enabled, then we will need to
        * select which one to use when generating the outgoing packet.

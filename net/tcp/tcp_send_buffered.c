@@ -572,6 +572,8 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
               continue;
             }
 
+          conn->rexmit_seq = rexmitno;
+
           /* Reconstruct the length of the earliest segment to be
            * retransmitted.
            */
@@ -588,6 +590,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
            */
 
           DEBUGASSERT(TCP_WBSEQNO(wrb) != (unsigned)-1);
+          conn->rexmit_seq = TCP_WBSEQNO(wrb);
 
 #ifdef NEED_IPDOMAIN_SUPPORT
           /* If both IPv4 and IPv6 support are enabled, then we will need to

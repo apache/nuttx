@@ -891,6 +891,11 @@ found:
 
         if ((tcp->flags & TCP_CTL) == TCP_SYN)
           {
+#if !defined(CONFIG_NET_TCP_WRITE_BUFFERS)
+            tcp_setsequence(conn->sndseq, conn->rexmit_seq);
+#else
+            /* REVISIT for the buffered mode */
+#endif
             tcp_synack(dev, conn, TCP_ACK | TCP_SYN);
             return;
           }
