@@ -207,7 +207,7 @@ struct lifreq
     struct mii_ioctl_data_s    lifru_mii_data;       /* MII request data */
     struct can_ioctl_data_s    lifru_can_data;       /* CAN bitrate request data */
     struct can_ioctl_filter_s  lifru_can_filter;     /* CAN filter request data */
-    struct cell_ioctl_data_s   lifru_cell_data;          /* Cellular network data */
+    struct cell_ioctl_data_s   lifru_cell_data;      /* Cellular network data */
   } lifr_ifru;
 };
 
@@ -261,7 +261,7 @@ struct ifreq
     struct mii_ioctl_data_s    ifru_mii_data;       /* MII request data */
     struct can_ioctl_data_s    ifru_can_data;       /* CAN bitrate request data */
     struct can_ioctl_filter_s  ifru_can_filter;     /* CAN filter request data */
-    struct cell_ioctl_data_s   lifru_cell_data;          /* Cellular network data */
+    struct cell_ioctl_data_s   ifru_cell_data;      /* Cellular network data */
   } ifr_ifru;
 };
 

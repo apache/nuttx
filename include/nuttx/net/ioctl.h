@@ -121,7 +121,7 @@
 
 /* Cellular net driver ******************************************************/
 
-#define SIOCSCELLNETDEV  _SIOC(0x0030)  /* Set cellular Netowrk Interface */
+#define SIOCSCELLNETDEV    _SIOC(0x0032)  /* Set cellular Netowrk Interface */
 
 /****************************************************************************
  * Public Type Definitions
