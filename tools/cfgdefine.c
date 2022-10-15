@@ -75,8 +75,8 @@ static const char *dequote_list[] =
 
   /* apps/ definitions */
 
-  "CONFIG_SYSTEM_NSH_SYMTAB_ARRAYNAME",   /* Symbol table array name */
-  "CONFIG_SYSTEM_NSH_SYMTAB_COUNTNAME",   /* Name of the variable holding the number of symbols */
+  "CONFIG_NSH_SYMTAB_ARRAYNAME",          /* Symbol table array name */
+  "CONFIG_NSH_SYMTAB_COUNTNAME",          /* Name of the variable holding the number of symbols */
   NULL                                    /* Marks the end of the list */
 };
 
