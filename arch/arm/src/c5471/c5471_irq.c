@@ -55,7 +55,7 @@ extern up_vector_t _svectors[];
 
 static up_vector_t g_vectorinittab[] =
 {
-  (up_vector_t)NULL,
+  NULL,
   arm_vectorundefinsn,
   arm_vectorsvc,
   arm_vectorprefetch,

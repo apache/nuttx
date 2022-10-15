@@ -1909,7 +1909,7 @@ TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *config)
 #endif
 
     default:
-      return (TIMER_HANDLE)NULL;
+      return NULL;
     }
 
   /* Initialize the state structure */
@@ -1989,7 +1989,7 @@ TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *config)
 #else
       tmrinfo("tiva_gptm_configure:");
       tmrinfo(" Error: alternate clock only available on TM4C129 devices\n");
-      return (TIMER_HANDLE)NULL;
+      return NULL;
 #endif /* CONFIG_ARCH_CHIP_TM4C129 */
     }
   else
@@ -2019,7 +2019,7 @@ TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *config)
           ret = tiva_timer32_configure(priv, &config32->config);
         }
 #else
-       return (TIMER_HANDLE)NULL;
+       return NULL;
 #endif
     }
   else
@@ -2061,13 +2061,13 @@ TIMER_HANDLE tiva_gptm_configure(const struct tiva_gptmconfig_s *config)
                                        TIMER16B);
         }
 #else
-       return (TIMER_HANDLE)NULL;
+       return NULL;
 #endif
     }
 
   /* Return the timer handler if successfully configured */
 
-  return ret < 0 ? (TIMER_HANDLE)NULL : (TIMER_HANDLE)priv;
+  return ret < 0 ? NULL : (TIMER_HANDLE)priv;
 }
 
 /****************************************************************************

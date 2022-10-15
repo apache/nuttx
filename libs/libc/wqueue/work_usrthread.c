@@ -297,8 +297,7 @@ int work_usrstart(void)
   ret = task_create("uwork",
                     CONFIG_LIBC_USRWORKPRIORITY,
                     CONFIG_LIBC_USRWORKSTACKSIZE,
-                    (main_t)work_usrthread,
-                    ((FAR char * const *)NULL));
+                    work_usrthread, NULL);
   if (ret < 0)
     {
       int errcode = get_errno();

@@ -684,10 +684,8 @@ static int ameba_attach(struct uart_dev_s *dev)
 static void ameba_detach(struct uart_dev_s *dev)
 {
   struct ameba_s *priv = (struct ameba_s *)dev->priv;
-  hal_uart_stubs.hal_uart_txtd_hook(&priv->adapter,
-                                    NULL, (uintptr_t)NULL, 0);
-  hal_uart_stubs.hal_uart_rxind_hook(&priv->adapter,
-                                     NULL, (uintptr_t)NULL, 0);
+  hal_uart_stubs.hal_uart_txtd_hook(&priv->adapter, NULL, 0, 0);
+  hal_uart_stubs.hal_uart_rxind_hook(&priv->adapter, NULL, 0, 0);
 }
 
 /****************************************************************************

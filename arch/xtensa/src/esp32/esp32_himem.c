@@ -252,14 +252,14 @@ int esp_himem_init(void)
 
   /* Looks weird; last arg is empty so it expands to 'return ;' */
 
-  HIMEM_CHECK(g_ram_descriptor != NULL, "already initialized", (int) NULL);
+  HIMEM_CHECK(g_ram_descriptor != NULL, "already initialized", 0);
 
-  HIMEM_CHECK(g_range_descriptor != NULL, "already initialized", (int) NULL);
+  HIMEM_CHECK(g_range_descriptor != NULL, "already initialized", 0);
 
   /* need to have some reserved banks */
 
   HIMEM_CHECK(SPIRAM_BANKSWITCH_RESERVE == 0, "No banks reserved for \
-              himem", (int) NULL);
+              himem", 0);
 
   /* Start and end of physical reserved memory. Note it starts slightly under
    * the 4MiB mark as the reserved banks can't have an unity mapping to be

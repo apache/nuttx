@@ -519,7 +519,7 @@ static int vnc_start_server(int display)
 
   ret = kthread_create("vnc_server", CONFIG_VNCSERVER_PRIO,
                        CONFIG_VNCSERVER_STACKSIZE,
-                       (main_t)vnc_server, argv);
+                       vnc_server, argv);
   if (ret < 0)
     {
       gerr("ERROR: Failed to start the VNC server: %d\n", ret);

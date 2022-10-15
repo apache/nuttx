@@ -1712,8 +1712,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
   g_priv = priv;
 
   ret = kthread_create("kbdpoll", CONFIG_HIDKBD_DEFPRIO,
-                       CONFIG_HIDKBD_STACKSIZE, (main_t)usbhost_kbdpoll,
-                       (FAR char * const *)NULL);
+                       CONFIG_HIDKBD_STACKSIZE, usbhost_kbdpoll, NULL);
   if (ret < 0)
     {
       /* Failed to started the poll thread...

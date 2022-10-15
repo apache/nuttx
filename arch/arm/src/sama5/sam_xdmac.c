@@ -1995,7 +1995,7 @@ DMA_HANDLE sam_dmachannel(uint8_t dmacno, uint32_t chflags)
     {
       dmaerr("ERROR: Bad XDMAC number: %d\n", dmacno);
       DEBUGPANIC();
-      return (DMA_HANDLE)NULL;
+      return NULL;
     }
 
   /* Search for an available DMA channel with at least the requested FIFO

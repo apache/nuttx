@@ -606,7 +606,7 @@ static int lpc54_eth_transmit(struct lpc54_ethdriver_s *priv,
       /* Prepare the Tx descriptor for transmission */
 
       txdesc->buffer1 = (uint32_t)buffer;
-      txdesc->buffer2 = (uint32_t)NULL;
+      txdesc->buffer2 = 0;
 
       /* One buffer, no timestamp, interrupt on completion */
 
