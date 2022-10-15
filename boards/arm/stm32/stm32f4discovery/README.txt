@@ -2305,9 +2305,9 @@ Configuration Sub-directories
        CONFIG_EXAMPLES_HELLO=m
        CONFIG_LIBC_EXECFUNCS=y
        CONFIG_NSH_FILE_APPS=y
-       CONFIG_SYSTEM_NSH_SYMTAB=y
-       CONFIG_SYSTEM_NSH_SYMTAB_ARRAYNAME="g_symtab"
-       CONFIG_SYSTEM_NSH_SYMTAB_COUNTNAME="g_nsymbols"
+       CONFIG_NSH_SYMTAB=y
+       CONFIG_NSH_SYMTAB_ARRAYNAME="g_symtab"
+       CONFIG_NSH_SYMTAB_COUNTNAME="g_nsymbols"
 
        Further, the configuration assumes that executable files reside on the
        remotely mounted file system:
