@@ -68,7 +68,7 @@ static int pseudorename(FAR const char *oldpath, FAR struct inode *oldinode,
   FAR char *subdir = NULL;
   int ret;
 
-  /* According to POSIX, any old inode at this path should be removed
+  /* According to POSIX, any new inode at this path should be removed
    * first, provided that it is not a directory.
    */
 
@@ -90,7 +90,7 @@ next_subdir:
         {
           inode_release(newinode);
           ret = OK;
-          goto errout; /* Bad naming, this is not an error case. */
+          goto errout; /* Same name, this is not an error case. */
         }
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
@@ -111,9 +111,16 @@ next_subdir:
       if (newinode->u.i_ops == NULL || newinode->i_child != NULL)
         {
           FAR char *subdirname;
-          FAR char *tmp;
 
           inode_release(newinode);
+
+          /* Free memory may be allocated in previous loop */
+
+          if (subdir != NULL)
+            {
+              kmm_free(subdir);
+              subdir = NULL;
+            }
 
           /* Yes.. In this case, the target of the rename must be a
            * subdirectory of newinode, not the newinode itself.  For
@@ -121,16 +128,7 @@ next_subdir:
            */
 
           subdirname = basename((FAR char *)oldpath);
-          tmp        = subdir;
-          subdir     = NULL;
-
           asprintf(&subdir, "%s/%s", newpath, subdirname);
-
-          if (tmp != NULL)
-            {
-              kmm_free(tmp);
-            }
-
           if (subdir == NULL)
             {
               ret = -ENOMEM;
@@ -244,7 +242,6 @@ errout_with_sem:
 
 errout:
   RELEASE_SEARCH(&newdesc);
-
   if (subdir != NULL)
     {
       kmm_free(subdir);
@@ -291,7 +288,6 @@ static int mountptrename(FAR const char *oldpath, FAR struct inode *oldinode,
    */
 
   SETUP_SEARCH(&newdesc, newpath, true);
-
   ret = inode_find(&newdesc);
   if (ret < 0)
     {
@@ -348,6 +344,14 @@ next_subdir:
                 {
                   FAR char *subdirname;
 
+                  /* Free memory may be allocated in previous loop */
+
+                  if (subdir != NULL)
+                    {
+                       kmm_free(subdir);
+                       subdir = NULL;
+                    }
+
                   /* Yes.. In this case, the target of the rename must be a
                    * subdirectory of newinode, not the newinode itself.  For
                    * example: mv b a/ must move b to a/b.
@@ -359,27 +363,12 @@ next_subdir:
 
                   if (*newrelpath == '\0')
                     {
-                      if (subdir != NULL)
-                        {
-                           kmm_free(subdir);
-                           subdir = NULL;
-                        }
-
                       newrelpath = subdirname;
                     }
                   else
                     {
-                      FAR char *tmp = subdir;
-
-                      subdir = NULL;
                       asprintf(&subdir, "%s/%s", newrelpath,
                                subdirname);
-
-                      if (tmp != NULL)
-                        {
-                          kmm_free(tmp);
-                        }
-
                       if (subdir == NULL)
                         {
                           ret = -ENOMEM;
@@ -446,7 +435,6 @@ errout_with_newinode:
 
 errout_with_newsearch:
   RELEASE_SEARCH(&newdesc);
-
   if (subdir != NULL)
     {
       kmm_free(subdir);
@@ -488,7 +476,6 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
   /* Get an inode that includes the oldpath */
 
   SETUP_SEARCH(&olddesc, oldpath, true);
-
   ret = inode_find(&olddesc);
   if (ret < 0)
     {
