@@ -660,6 +660,7 @@ static ssize_t net_ioctl_ifreq_arglen(int cmd)
       case SIOCDCANEXTFILTER:
       case SIOCACANSTDFILTER:
       case SIOCDCANSTDFILTER:
+      case SIOCSCELLNETDEV:
       case SIOCGIFNAME:
       case SIOCGIFINDEX:
         return sizeof(struct ifreq);
@@ -983,7 +984,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
       case SIOCMIINOTIFY: /* Set up for PHY event notifications */
         if (dev->d_ioctl)
           {
-            struct mii_ioctl_notify_s *notify =
+            FAR struct mii_ioctl_notify_s *notify =
               &req->ifr_ifru.ifru_mii_notify;
             ret = dev->d_ioctl(dev, cmd, (unsigned long)(uintptr_t)notify);
           }
@@ -999,7 +1000,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
       case SIOCSMIIREG: /* Set MII register via MDIO */
         if (dev->d_ioctl)
           {
-            struct mii_ioctl_data_s *mii_data =
+            FAR struct mii_ioctl_data_s *mii_data =
               &req->ifr_ifru.ifru_mii_data;
             ret = dev->d_ioctl(dev, cmd,
                                (unsigned long)(uintptr_t)mii_data);
@@ -1016,7 +1017,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
       case SIOCSCANBITRATE:  /* Set bitrate of a CAN controller */
         if (dev->d_ioctl)
           {
-            struct can_ioctl_data_s *can_bitrate_data =
+            FAR struct can_ioctl_data_s *can_bitrate_data =
               &req->ifr_ifru.ifru_can_data;
             ret = dev->d_ioctl(dev, cmd,
                           (unsigned long)(uintptr_t)can_bitrate_data);
@@ -1035,7 +1036,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
       case SIOCDCANSTDFILTER:  /* Delete a standard-ID filter */
         if (dev->d_ioctl)
           {
-            struct can_ioctl_filter_s *can_filter =
+            FAR struct can_ioctl_filter_s *can_filter =
               &req->ifr_ifru.ifru_can_filter;
             ret = dev->d_ioctl(dev, cmd,
                           (unsigned long)(uintptr_t)can_filter);
@@ -1055,16 +1056,17 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
 
 #if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_CELLULAR)
       case SIOCSCELLNETDEV:  /* set params for cellular network devices */
-        {
-          dev = netdev_findbyname(req->ifr_name);
-          if (dev && dev->d_ioctl)
-            {
-              struct cell_ioctl_data_s *cell_netdev_data =
-                              &req->ifr_ifru.lifru_cell_data;
-              ret = dev->d_ioctl(dev, cmd,
-                              (unsigned long)(uintptr_t)cell_netdev_data);
-            }
-        }
+        if (dev->d_ioctl)
+          {
+            FAR struct cell_ioctl_data_s *cell_netdev_data =
+                            &req->ifr_ifru.ifru_cell_data;
+            ret = dev->d_ioctl(dev, cmd,
+                            (unsigned long)(uintptr_t)cell_netdev_data);
+          }
+        else
+          {
+            ret = -ENOSYS;
+          }
         break;
 #endif
 
