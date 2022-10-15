@@ -149,7 +149,7 @@ int xx3803_watchdog_initialize(void)
   int taskid = kthread_create(CONFIG_XX3803_WDG_THREAD_NAME,
                               CONFIG_XX3803_WDG_THREAD_PRIORITY,
                               CONFIG_XX3803_WDG_THREAD_STACKSIZE,
-                              (main_t)wdog_daemon, (char * const *)NULL);
+                              wdog_daemon, NULL);
 
   DEBUGASSERT(taskid > 0);
   UNUSED(taskid);

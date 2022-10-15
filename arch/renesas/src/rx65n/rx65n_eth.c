@@ -1886,8 +1886,8 @@ static void rx65n_interrupt_work(FAR void *arg)
 
           if (phylinknotification.phandler != NULL)
             {
-              phylinknotification.phandler(irqno, (FAR void *)NULL,
-              (FAR void *)phylinknotification.pclient);
+              phylinknotification.phandler(irqno, NULL,
+                                           phylinknotification.pclient);
               priv->prevlinkstatus = regval;
             }
         }

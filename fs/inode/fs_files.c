@@ -330,7 +330,7 @@ int fs_getfilep(int fd, FAR struct file **filep)
   int ret;
 
   DEBUGASSERT(filep != NULL);
-  *filep = (FAR struct file *)NULL;
+  *filep = NULL;
 
   list = nxsched_get_files();
 
@@ -370,7 +370,7 @@ int fs_getfilep(int fd, FAR struct file **filep)
 
   if (!(*filep)->f_inode)
     {
-      *filep = (FAR struct file *)NULL;
+      *filep = NULL;
       ret = -EBADF;
     }
 

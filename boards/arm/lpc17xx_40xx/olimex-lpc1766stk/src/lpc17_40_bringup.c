@@ -314,7 +314,7 @@ static int nsh_usbhostinitialize(void)
 
       ret = kthread_create("usbhost", CONFIG_LPC1766STK_USBHOST_PRIO,
                            CONFIG_LPC1766STK_USBHOST_STACKSIZE,
-                           (main_t)nsh_waiter, (char * const *)NULL);
+                           nsh_waiter, NULL);
       return ret < 0 ? -ENOEXEC : OK;
     }
 

@@ -212,8 +212,7 @@ int usbmonitor_start(void)
 
       ret = kthread_create("USB Monitor", CONFIG_USBMONITOR_PRIORITY,
                            CONFIG_USBMONITOR_STACKSIZE,
-                           (main_t)usbmonitor_daemon,
-                           (FAR char * const *)NULL);
+                           usbmonitor_daemon, NULL);
       if (ret < 0)
         {
           uerr("ERROR: Failed to start the USB monitor: %d\n",

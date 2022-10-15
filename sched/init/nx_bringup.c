@@ -144,7 +144,7 @@ static inline void nx_pgworker(void)
 
   g_pgworker = kthread_create("pgfill", CONFIG_PAGING_DEFPRIO,
                               CONFIG_PAGING_STACKSIZE,
-                              (main_t)pg_worker, (FAR char * const *)NULL);
+                              pg_worker, NULL);
   DEBUGASSERT(g_pgworker > 0);
 }
 
@@ -353,8 +353,8 @@ static inline void nx_create_initthread(void)
    */
 
   pid = kthread_create("AppBringUp", CONFIG_BOARD_INITTHREAD_PRIORITY,
-                      CONFIG_BOARD_INITTHREAD_STACKSIZE,
-                      (main_t)nx_start_task, (FAR char * const *)NULL);
+                       CONFIG_BOARD_INITTHREAD_STACKSIZE,
+                       nx_start_task, NULL);
   DEBUGASSERT(pid > 0);
   UNUSED(pid);
 #else
