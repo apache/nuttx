@@ -17,7 +17,7 @@ if DISABLE_OS_API
 
 config DISABLE_POSIX_TIMERS
 	bool "Disable POSIX timers"
-	default DEFAULT_SMALL
+	default y if DEFAULT_SMALL
 	---help---
 		Disable support for the the entire POSIX timer family
 		including timer_create(), timer_gettime(), timer_settime(),
@@ -28,15 +28,15 @@ config DISABLE_POSIX_TIMERS
 
 config DISABLE_PTHREAD
 	bool "Disable pthread support"
-	default DEFAULT_SMALL
+	default y if DEFAULT_SMALL
 
 config DISABLE_MQUEUE
 	bool "Disable POSIX message queue support"
-	default DEFAULT_SMALL
+	default y if DEFAULT_SMALL
 
 config DISABLE_ENVIRON
 	bool "Disable environment variable support"
-	default DEFAULT_SMALL
+	default y if DEFAULT_SMALL
 
 endif # DISABLE_OS_API
 
@@ -1598,7 +1598,7 @@ config MQ_MAXMSGSIZE
 
 config DISABLE_MQUEUE_NOTIFICATION
 	bool "Disable POSIX message queue notification"
-	default DEFAULT_SMALL
+	default y if DEFAULT_SMALL
 	---help---
 		Disable POSIX message queue notification
 

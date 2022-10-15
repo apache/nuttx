@@ -66,7 +66,7 @@ config FS_NEPOLL_DESCRIPTORS
 
 config DISABLE_PSEUDOFS_OPERATIONS
 	bool "Disable pseudo-filesystem operations"
-	default DEFAULT_SMALL
+	default y if DEFAULT_SMALL
 	---help---
 		Disable certain operations on pseudo-file systems include mkdir,
 		rmdir, unlink, and rename.  These are necessary for the logical
