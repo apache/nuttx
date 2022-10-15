@@ -180,7 +180,7 @@ config MM_MEMPOOL
 
 config FS_PROCFS_EXCLUDE_MEMPOOL
 	bool "Exclude mempool"
-	default n
+	default DEFAULT_SMALL
 	depends on FS_PROCFS
 
 config MM_KASAN
