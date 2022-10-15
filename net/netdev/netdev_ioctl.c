@@ -660,6 +660,7 @@ static ssize_t net_ioctl_ifreq_arglen(int cmd)
       case SIOCDCANEXTFILTER:
       case SIOCACANSTDFILTER:
       case SIOCDCANSTDFILTER:
+      case SIOCSCELLNETDEV:
       case SIOCGIFNAME:
       case SIOCGIFINDEX:
         return sizeof(struct ifreq);
@@ -1055,16 +1056,17 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
 
 #if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_CELLULAR)
       case SIOCSCELLNETDEV:  /* set params for cellular network devices */
-        {
-          dev = netdev_findbyname(req->ifr_name);
-          if (dev && dev->d_ioctl)
-            {
-              FAR struct cell_ioctl_data_s *cell_netdev_data =
-                              &req->ifr_ifru.ifru_cell_data;
-              ret = dev->d_ioctl(dev, cmd,
-                              (unsigned long)(uintptr_t)cell_netdev_data);
-            }
-        }
+        if (dev->d_ioctl)
+          {
+            FAR struct cell_ioctl_data_s *cell_netdev_data =
+                            &req->ifr_ifru.ifru_cell_data;
+            ret = dev->d_ioctl(dev, cmd,
+                            (unsigned long)(uintptr_t)cell_netdev_data);
+          }
+        else
+          {
+            ret = -ENOSYS;
+          }
         break;
 #endif
 
