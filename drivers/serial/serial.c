@@ -1628,8 +1628,8 @@ static void uart_launch_worker(void *arg)
       nxtask_create(CONFIG_TTY_LAUNCH_ENTRYNAME,
                     CONFIG_TTY_LAUNCH_PRIORITY,
                     CONFIG_TTY_LAUNCH_STACKSIZE,
-                    (main_t)CONFIG_TTY_LAUNCH_ENTRYPOINT,
-                    argv);
+                    CONFIG_TTY_LAUNCH_ENTRYPOINT,
+                    argv, NULL);
 #else
       posix_spawnattr_t attr;
 

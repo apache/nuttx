@@ -224,19 +224,34 @@ static inline void nx_workqueues(void)
 
 static inline void nx_start_application(void)
 {
-#ifdef CONFIG_INIT_ARGS
-  FAR char *const argv[] =
+#ifndef CONFIG_INIT_NONE
+  FAR char * const argv[] =
   {
+#  ifdef CONFIG_INIT_ARGS
     CONFIG_INIT_ARGS,
+#  endif
     NULL,
   };
-#else
-  FAR char *const *argv = NULL;
+
+  FAR char * const envp[] =
+  {
+#  ifdef CONFIG_LIBC_HOMEDIR
+    "PWD=" CONFIG_LIBC_HOMEDIR,
+#  endif
+#  ifdef CONFIG_PATH_INITIAL
+    "PATH=" CONFIG_PATH_INITIAL,
+#  endif
+#  ifdef CONFIG_LDPATH_INITIAL
+    "LD_LIBRARY_PATH=" CONFIG_LDPATH_INITIAL,
+#  endif
+    NULL,
+  };
 #endif
-  int ret;
+
 #ifdef CONFIG_INIT_FILE
   posix_spawnattr_t attr;
 #endif
+  int ret;
 
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
   /* Perform any last-minute, board-specific initialization, if so
@@ -256,28 +271,28 @@ static inline void nx_start_application(void)
 
   sinfo("Starting init thread\n");
 
-#ifdef CONFIG_BUILD_PROTECTED
+#  ifdef CONFIG_BUILD_PROTECTED
   DEBUGASSERT(USERSPACE->us_entrypoint != NULL);
   ret = nxtask_create(CONFIG_INIT_ENTRYNAME, CONFIG_INIT_PRIORITY,
                       CONFIG_INIT_STACKSIZE,
-                      USERSPACE->us_entrypoint, argv);
-#else
+                      USERSPACE->us_entrypoint, argv, envp);
+#  else
   ret = nxtask_create(CONFIG_INIT_ENTRYNAME, CONFIG_INIT_PRIORITY,
                       CONFIG_INIT_STACKSIZE,
-                      (main_t)CONFIG_INIT_ENTRYPOINT, argv);
-#endif
+                      CONFIG_INIT_ENTRYPOINT, argv, envp);
+#  endif
   DEBUGASSERT(ret > 0);
 
 #elif defined(CONFIG_INIT_FILE)
 
-#ifdef CONFIG_INIT_MOUNT
+#  ifdef CONFIG_INIT_MOUNT
   /* Mount the file system containing the init program. */
 
   ret = nx_mount(CONFIG_INIT_MOUNT_SOURCE, CONFIG_INIT_MOUNT_TARGET,
                  CONFIG_INIT_MOUNT_FSTYPE, CONFIG_INIT_MOUNT_FLAGS,
                  CONFIG_INIT_MOUNT_DATA);
   DEBUGASSERT(ret >= 0);
-#endif
+#  endif
 
   /* Start the application initialization program from a program in a
    * mounted file system.  Presumably the file system was mounted as part
@@ -289,10 +304,10 @@ static inline void nx_start_application(void)
   posix_spawnattr_init(&attr);
 
   attr.priority  = CONFIG_INIT_PRIORITY;
-#ifndef CONFIG_ARCH_ADDRENV
+#  ifndef CONFIG_BUILD_KERNEL
   attr.stacksize = CONFIG_INIT_STACKSIZE;
-#endif
-  ret = exec_spawn(CONFIG_INIT_FILEPATH, argv, NULL,
+#  endif
+  ret = exec_spawn(CONFIG_INIT_FILEPATH, argv, envp,
                    CONFIG_INIT_SYMTAB, CONFIG_INIT_NEXPORTS, &attr);
   DEBUGASSERT(ret >= 0);
 #endif
@@ -404,27 +419,6 @@ static inline void nx_create_initthread(void)
 
 int nx_bringup(void)
 {
-#ifndef CONFIG_DISABLE_ENVIRON
-  /* Setup up the initial environment for the idle task.  At present, this
-   * may consist of only the initial PATH variable and/or and init library
-   * path variable.  These path variables are not used by the IDLE task.
-   * However, the environment containing the PATH variable will be inherited
-   * by all of the threads created by the IDLE task.
-   */
-
-#ifdef CONFIG_LIBC_HOMEDIR
-  setenv("PWD", CONFIG_LIBC_HOMEDIR, 1);
-#endif
-
-#ifdef CONFIG_PATH_INITIAL
-  setenv("PATH", CONFIG_PATH_INITIAL, 1);
-#endif
-
-#ifdef CONFIG_LDPATH_INITIAL
-  setenv("LD_LIBRARY_PATH", CONFIG_LDPATH_INITIAL, 1);
-#endif
-#endif
-
   /* Start the page fill worker kernel thread that will resolve page faults.
    * This should always be the first thread started because it may have to
    * resolve page faults in other threads
@@ -444,13 +438,5 @@ int nx_bringup(void)
    */
 
   nx_create_initthread();
-
-#if !defined(CONFIG_DISABLE_ENVIRON) && (defined(CONFIG_PATH_INITIAL) || \
-     defined(CONFIG_LDPATH_INITIAL))
-  /* We an save a few bytes by discarding the IDLE thread's environment. */
-
-  clearenv();
-#endif
-
   return OK;
 }

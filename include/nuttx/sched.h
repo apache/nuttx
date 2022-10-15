@@ -954,6 +954,8 @@ void nxtask_uninit(FAR struct task_tcb_s *tcb);
  *   arg        - A pointer to an array of input parameters.  The array
  *                should be terminated with a NULL argv[] value. If no
  *                parameters are required, argv may be NULL.
+ *   envp       - A pointer to an array of environment strings. Terminated
+ *                with a NULL entry.
  *
  * Returned Value:
  *   Returns the positive, non-zero process ID of the new task or a negated
@@ -962,8 +964,9 @@ void nxtask_uninit(FAR struct task_tcb_s *tcb);
  *
  ****************************************************************************/
 
-int nxtask_create(FAR const char *name, int priority,
-                  int stack_size, main_t entry, FAR char * const argv[]);
+int nxtask_create(FAR const char *name,
+                  int priority, int stack_size, main_t entry,
+                  FAR char * const argv[], FAR char * const envp[]);
 
 /****************************************************************************
  * Name: nxtask_delete
