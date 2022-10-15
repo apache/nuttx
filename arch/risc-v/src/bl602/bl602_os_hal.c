@@ -325,7 +325,7 @@ int bl_os_task_create(const char *name,
                       uint32_t prio,
                       void *task_handle)
 {
-  return nxtask_create(name, prio, stack_depth, entry, (char **)&param);
+  return kthread_create(name, prio, stack_depth, entry, (char **)&param);
 }
 
 /****************************************************************************
