@@ -77,6 +77,9 @@
  *     array of pointers to null-terminated strings. The list is terminated
  *     with a null pointer.
  *
+ *   envp - A pointer to an array of environment strings. Terminated with
+ *     a NULL entry.
+ *
  * Returned Value:
  *   This function will return zero on success. Otherwise, an error number
  *   will be returned as the function return value to indicate the error.
@@ -87,7 +90,7 @@
 
 static int nxtask_spawn_exec(FAR pid_t *pidp, FAR const char *name,
                              main_t entry, FAR const posix_spawnattr_t *attr,
-                             FAR char * const *argv)
+                             FAR char * const *argv, FAR char * const envp[])
 {
   size_t stacksize;
   int priority;
@@ -126,7 +129,7 @@ static int nxtask_spawn_exec(FAR pid_t *pidp, FAR const char *name,
 
   /* Start the task */
 
-  pid = nxtask_create(name, priority, stacksize, entry, argv);
+  pid = nxtask_create(name, priority, stacksize, entry, argv, envp);
   if (pid < 0)
     {
       ret = pid;
@@ -215,7 +218,7 @@ static int nxtask_spawn_proxy(int argc, FAR char *argv[])
 
       ret = nxtask_spawn_exec(g_spawn_parms.pid, g_spawn_parms.u.task.name,
                               g_spawn_parms.u.task.entry, g_spawn_parms.attr,
-                              g_spawn_parms.argv);
+                              g_spawn_parms.argv, g_spawn_parms.envp);
 
 #ifdef CONFIG_SCHED_HAVE_PARENT
       if (ret == OK)
@@ -334,7 +337,7 @@ int task_spawn(FAR const char *name, main_t entry,
   if ((file_actions == NULL || *file_actions == NULL) &&
       (attr == NULL || (attr->flags & POSIX_SPAWN_SETSIGMASK) == 0))
     {
-      ret = nxtask_spawn_exec(&pid, name, entry, attr, argv);
+      ret = nxtask_spawn_exec(&pid, name, entry, attr, argv, envp);
       if (ret < 0)
         {
           return ret;
@@ -403,8 +406,7 @@ int task_spawn(FAR const char *name, main_t entry,
 
   proxy = nxtask_create("nxtask_spawn_proxy", param.sched_priority,
                         CONFIG_POSIX_SPAWN_PROXY_STACKSIZE,
-                        (main_t)nxtask_spawn_proxy,
-                        (FAR char * const *)NULL);
+                        nxtask_spawn_proxy, NULL, NULL);
   if (proxy < 0)
     {
       ret = proxy;
