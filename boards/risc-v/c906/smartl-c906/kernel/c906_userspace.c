@@ -63,10 +63,6 @@ extern uint8_t _ebss[];            /* End+1 of .bss */
 
 extern uint8_t __ld_usram_end[];   /* End+1 of user ram section */
 
-/* This is the user space entry point */
-
-int CONFIG_INIT_ENTRYPOINT(int argc, char *argv[]);
-
 const struct userspace_s userspace locate_data(".userspace") =
 {
   /* General memory map */
