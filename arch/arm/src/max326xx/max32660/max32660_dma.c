@@ -283,7 +283,7 @@ DMA_HANDLE max326_dma_channel(void)
     }
 
   spin_unlock_irqrestore(NULL, flags);
-  return (DMA_HANDLE)NULL;
+  return NULL;
 }
 
 /****************************************************************************

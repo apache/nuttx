@@ -211,7 +211,7 @@ static int nsh_usbhostinitialize(void)
 
       ret = kthread_create("usbhost", CONFIG_USBHOST_DEFPRIO,
                            CONFIG_USBHOST_STACKSIZE,
-                           (main_t)nsh_waiter, (FAR char * const *)NULL);
+                           nsh_waiter, NULL);
       syslog(LOG_INFO, "USBHost: Created pid = %d\n", ret);
       return ret < 0 ? -ENOEXEC : OK;
     }

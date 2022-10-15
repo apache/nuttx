@@ -1819,7 +1819,7 @@ static int cxd56_power_on_aca(uint32_t samplerate)
   uint8_t mic_sel;
   uint8_t i;
 
-  if (fw_as_acacontrol(CXD56_ACA_CTL_CHECK_ID, (uint32_t)NULL) != 0)
+  if (fw_as_acacontrol(CXD56_ACA_CTL_CHECK_ID, 0) != 0)
     {
       return -ENXIO;
     }
@@ -2047,7 +2047,7 @@ static int cxd56_power_on_micbias(FAR struct cxd56_dev_s *dev)
 {
   struct timespec start;
 
-  if (fw_as_acacontrol(CXD56_ACA_CTL_POWER_ON_MICBIAS, (uint32_t)NULL) != 0)
+  if (fw_as_acacontrol(CXD56_ACA_CTL_POWER_ON_MICBIAS, 0) != 0)
     {
       return -EBUSY;
     }
@@ -2535,7 +2535,7 @@ static int cxd56_power_off(FAR struct cxd56_dev_s *dev)
 
   cxd56_audio_clock_disable();
 
-  if (fw_as_acacontrol(CXD56_ACA_CTL_POWER_OFF_COMMON, (uint32_t)NULL) != 0)
+  if (fw_as_acacontrol(CXD56_ACA_CTL_POWER_OFF_COMMON, 0) != 0)
     {
       return -EBUSY;
     }
@@ -2979,7 +2979,7 @@ static int cxd56_stop_dma(FAR struct cxd56_dev_s *priv)
           /* Disable input */
 
           if (fw_as_acacontrol(CXD56_ACA_CTL_POWER_OFF_INPUT,
-                             (uint32_t)NULL) != 0)
+                             0) != 0)
             {
               return -EBUSY;
             }
@@ -3003,7 +3003,7 @@ static int cxd56_stop_dma(FAR struct cxd56_dev_s *priv)
           write_reg(REG_AC_PDN_SMSTR, 1);
 
           if (fw_as_acacontrol(CXD56_ACA_CTL_POWER_OFF_OUTPUT,
-                               (uint32_t)NULL) != 0)
+                               0) != 0)
             {
               return -EBUSY;
             }

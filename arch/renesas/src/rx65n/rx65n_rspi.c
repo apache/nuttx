@@ -457,9 +457,9 @@ dtc_static_transfer_data_cfg_t tx_cfg =
   .response_interrupt = DTC_INTERRUPT_AFTER_ALL_COMPLETE,
   .repeat_block_side = DTC_REPEAT_BLOCK_DESTINATION,
   .dest_addr_mode = DTC_DES_ADDR_FIXED,
-  .source_addr = (uint32_t)NULL, /* This will set dynamically */
-  .dest_addr = (uint32_t)NULL,   /* Set data register address */
-  .transfer_count = 0,           /* This will set dynamically */
+  .source_addr = 0,    /* This will set dynamically */
+  .dest_addr = 0,      /* Set data register address */
+  .transfer_count = 0, /* This will set dynamically */
 #if CONFIG_RX65N_RSPI_BUF_SIZE > 1
   .block_size = CONFIG_RX65N_RSPI_BUF_SIZE, /* Looks like tx fifo size */
 #else
@@ -486,9 +486,9 @@ dtc_static_transfer_data_cfg_t rx_cfg =
   .response_interrupt = DTC_INTERRUPT_AFTER_ALL_COMPLETE,
   .repeat_block_side = DTC_REPEAT_BLOCK_SOURCE,
   .dest_addr_mode = DTC_DES_ADDR_INCR,
-  .source_addr = (uint32_t)NULL,            /* Set data register address */
-  .dest_addr = (uint32_t)NULL,              /* This will set dynamically */
-  .transfer_count = 0,                      /* This will set dynamically */
+  .source_addr = 0,            /* Set data register address */
+  .dest_addr = 0,              /* This will set dynamically */
+  .transfer_count = 0,         /* This will set dynamically */
 #if CONFIG_RX65N_RSPI_BUF_SIZE > 1
   .block_size = CONFIG_RX65N_RSPI_BUF_SIZE, /* Looks like tx fifo size */
 #else

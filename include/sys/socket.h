@@ -258,8 +258,7 @@
   (CMSG_ALIGN(sizeof(struct cmsghdr)) + (len))
 
 #define __CMSG_FIRSTHDR(ctl, len) \
-  ((len) >= sizeof(struct cmsghdr) ? (FAR struct cmsghdr *)(ctl) : \
-   (FAR struct cmsghdr *)NULL)
+  ((len) >= sizeof(struct cmsghdr) ? (FAR struct cmsghdr *)(ctl) : NULL)
 #define CMSG_FIRSTHDR(msg) \
   __CMSG_FIRSTHDR((msg)->msg_control, (msg)->msg_controllen)
 #define CMSG_OK(mhdr, cmsg) ((cmsg)->cmsg_len >= sizeof(struct cmsghdr) && \
@@ -345,7 +344,7 @@ static inline FAR struct cmsghdr *__cmsg_nxthdr(FAR void *__ctl,
     (((FAR char *)__cmsg) + CMSG_ALIGN(__cmsg->cmsg_len));
   if ((unsigned long)((FAR char *)(__ptr + 1) - (FAR char *)__ctl) > __size)
     {
-      return (FAR struct cmsghdr *)NULL;
+      return NULL;
     }
 
   return __ptr;

@@ -226,7 +226,7 @@ int stm32_usbhost_setup(void)
 
       ret = kthread_create("usbhost", CONFIG_OLIMEXP407_USBHOST_PRIO,
                            CONFIG_OLIMEXP407_USBHOST_STACKSIZE,
-                           (main_t)usbhost_waiter, (char * const *)NULL);
+                           usbhost_waiter, NULL);
       return ret < 0 ? -ENOEXEC : OK;
     }
 

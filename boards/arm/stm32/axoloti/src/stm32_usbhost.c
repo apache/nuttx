@@ -252,7 +252,7 @@ int stm32_usbhost_initialize(void)
       uinfo("Start usbhost_waiter\n");
       ret = kthread_create("usbhost", CONFIG_AXOLOTI_USBHOST_PRIO,
                            CONFIG_AXOLOTI_USBHOST_STACKSIZE,
-                           (main_t)usbhost_waiter, (char *const *)NULL);
+                           usbhost_waiter, NULL);
       return ret < 0 ? -ENOEXEC : OK;
     }
 

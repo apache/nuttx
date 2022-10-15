@@ -131,7 +131,7 @@ static void slab_init(uintptr_t start)
 static uintptr_t slab_alloc(void)
 {
   pgalloc_slab_t *slab = (pgalloc_slab_t *)sq_remfirst(&g_free_slabs);
-  return slab ? (uintptr_t)slab->memory : (uintptr_t)NULL;
+  return slab ? (uintptr_t)slab->memory : 0;
 }
 
 /****************************************************************************
