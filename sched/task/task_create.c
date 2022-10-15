@@ -60,6 +60,8 @@
  *   arg        - A pointer to an array of input parameters.  The array
  *                should be terminated with a NULL argv[] value. If no
  *                parameters are required, argv may be NULL.
+ *   envp       - A pointer to an array of environment strings. Terminated
+ *                with a NULL entry.
  *
  * Returned Value:
  *   Returns the positive, non-zero process ID of the new task or a negated
@@ -68,9 +70,9 @@
  *
  ****************************************************************************/
 
-static int nxthread_create(FAR const char *name, uint8_t ttype,
-                           int priority, FAR void *stack_ptr, int stack_size,
-                           main_t entry, FAR char * const argv[])
+static int nxthread_create(FAR const char *name, uint8_t ttype, int priority,
+                           FAR void *stack_ptr, int stack_size, main_t entry,
+                           FAR char * const argv[], FAR char * const envp[])
 {
   FAR struct task_tcb_s *tcb;
   pid_t pid;
@@ -91,8 +93,8 @@ static int nxthread_create(FAR const char *name, uint8_t ttype,
 
   /* Initialize the task */
 
-  ret = nxtask_init(tcb, name, priority, stack_ptr, stack_size, entry, argv,
-                    NULL);
+  ret = nxtask_init(tcb, name, priority, stack_ptr, stack_size,
+                    entry, argv, envp);
   if (ret < OK)
     {
       kmm_free(tcb);
@@ -144,6 +146,8 @@ static int nxthread_create(FAR const char *name, uint8_t ttype,
  *   arg        - A pointer to an array of input parameters.  The array
  *                should be terminated with a NULL argv[] value. If no
  *                parameters are required, argv may be NULL.
+ *   envp       - A pointer to an array of environment strings. Terminated
+ *                with a NULL entry.
  *
  * Returned Value:
  *   Returns the positive, non-zero process ID of the new task or a negated
@@ -152,11 +156,12 @@ static int nxthread_create(FAR const char *name, uint8_t ttype,
  *
  ****************************************************************************/
 
-int nxtask_create(FAR const char *name, int priority,
-                  int stack_size, main_t entry, FAR char * const argv[])
+int nxtask_create(FAR const char *name,
+                  int priority, int stack_size, main_t entry,
+                  FAR char * const argv[], FAR char * const envp[])
 {
-  return nxthread_create(name, TCB_FLAG_TTYPE_TASK, priority,
-                         NULL, stack_size, entry, argv);
+  return nxthread_create(name, TCB_FLAG_TTYPE_TASK, priority, NULL,
+                         stack_size, entry, argv, envp ? envp : environ);
 }
 
 /****************************************************************************
@@ -195,7 +200,7 @@ int nxtask_create(FAR const char *name, int priority,
 int task_create(FAR const char *name, int priority,
                 int stack_size, main_t entry, FAR char * const argv[])
 {
-  int ret = nxtask_create(name, priority, stack_size, entry, argv);
+  int ret = nxtask_create(name, priority, stack_size, entry, argv, NULL);
   if (ret < 0)
     {
       set_errno(-ret);
@@ -236,7 +241,7 @@ int kthread_create_with_stack(FAR const char *name, int priority,
                               main_t entry, FAR char * const argv[])
 {
   return nxthread_create(name, TCB_FLAG_TTYPE_KERNEL, priority,
-                         stack_ptr, stack_size, entry, argv);
+                         stack_ptr, stack_size, entry, argv, NULL);
 }
 
 /****************************************************************************
