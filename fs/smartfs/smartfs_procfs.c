@@ -48,7 +48,7 @@
 #include <arch/irq.h>
 #include "smartfs.h"
 
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_EXCLUDE_SMARTFS)
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -31,7 +31,7 @@ menu "Exclude individual procfs entries"
 
 config FS_PROCFS_EXCLUDE_PROCESS
 	bool "Exclude process information"
-	default n
+	default DEFAULT_SMALL
 	---help---
 		Causes the process information to be excluded from the procfs system.
 		This will reduce code space, but then giving access to process info
@@ -39,7 +39,7 @@ config FS_PROCFS_EXCLUDE_PROCESS
 
 config FS_PROCFS_EXCLUDE_ENVIRON
 	bool "Exclude environment information"
-	default y
+	default DEFAULT_SMALL
 	depends on !FS_PROCFS_EXCLUDE_PROCESS
 	---help---
 		Causes the environment variable information to be excluded from the
@@ -48,14 +48,14 @@ config FS_PROCFS_EXCLUDE_ENVIRON
 config FS_PROCFS_EXCLUDE_MODULE
 	bool "Exclude module information"
 	depends on MODULE
-	default n
+	default DEFAULT_SMALL
 	---help---
 		Causes the module information to be excluded from the procfs system.
 
 config FS_PROCFS_EXCLUDE_BLOCKS
 	bool "Exclude fs/blocks information"
 	depends on !DISABLE_MOUNTPOINT
-	default n
+	default DEFAULT_SMALL
 	---help---
 		Causes the fs block usage information to be excluded from the procfs
 		system.  This procfs file provides the text output for the NSH 'df'
@@ -64,7 +64,7 @@ config FS_PROCFS_EXCLUDE_BLOCKS
 config FS_PROCFS_EXCLUDE_MOUNT
 	bool "Exclude fs/mount information"
 	depends on !DISABLE_MOUNTPOINT
-	default n
+	default DEFAULT_SMALL
 	---help---
 		Causes the mount point information to be excluded from the procfs
 		system.  This procfs file provides the text output for the NSH 'mount'
@@ -73,7 +73,7 @@ config FS_PROCFS_EXCLUDE_MOUNT
 config FS_PROCFS_EXCLUDE_USAGE
 	bool "Exclude fs/usage information"
 	depends on !DISABLE_MOUNTPOINT
-	default n
+	default DEFAULT_SMALL
 	---help---
 		Causes the fs usage information to be excluded from the procfs
 		system.  This procfs file provides the text output for the NSH 'df -h'
@@ -81,64 +81,64 @@ config FS_PROCFS_EXCLUDE_USAGE
 
 config FS_PROCFS_EXCLUDE_UPTIME
 	bool "Exclude uptime"
-	default n
+	default DEFAULT_SMALL
 
 config FS_PROCFS_EXCLUDE_VERSION
 	bool "Exclude version"
-	default n
+	default DEFAULT_SMALL
 
 config FS_PROCFS_EXCLUDE_CPULOAD
 	bool "Exclude CPU load"
-	default n
+	default DEFAULT_SMALL
 	depends on SCHED_CPULOAD
 
 config FS_PROCFS_EXCLUDE_MEMINFO
 	bool "Exclude meminfo"
-	default n
+	default DEFAULT_SMALL
 
 config FS_PROCFS_EXCLUDE_MEMDUMP
 	bool "Exclude memdump"
-	default n
+	default DEFAULT_SMALL
 
 config FS_PROCFS_INCLUDE_PROGMEM
 	bool "Include prog mem"
-	default n
+	default DEFAULT_SMALL
 	depends on ARCH_HAVE_PROGMEM && !FS_PROCFS_EXCLUDE_MEMINFO
 
 config FS_PROCFS_EXCLUDE_IOBINFO
 	bool "Exclude iobinfo"
 	depends on MM_IOB
-	default n
+	default DEFAULT_SMALL
 
 config FS_PROCFS_EXCLUDE_MOUNTS
 	bool "Exclude mounts"
-	default n
+	default DEFAULT_SMALL
 	depends on !DISABLE_MOUNTPOINT
 
 config FS_PROCFS_EXCLUDE_NET
 	bool "Exclude network"
 	depends on NET
-	default n
+	default DEFAULT_SMALL
 
 config FS_PROCFS_EXCLUDE_PARTITIONS
 	bool "Exclude partitions"
 	depends on MTD_PARTITION
-	default n
+	default DEFAULT_SMALL
 
 config FS_PROCFS_EXCLUDE_ROUTE
 	bool "Exclude routing table"
 	depends on !FS_PROCFS_EXCLUDE_NET && NET_ROUTE
-	default n
+	default DEFAULT_SMALL
 
 config FS_PROCFS_EXCLUDE_SMARTFS
 	bool "Exclude fs/smartfs"
 	depends on FS_SMARTFS
-	default n
+	default DEFAULT_SMALL
 
 config FS_PROCFS_EXCLUDE_TCBINFO
 	bool "Exclude tcbinfo procfs"
 	depends on DEBUG_TCBINFO
-	default n
+	default DEFAULT_SMALL
 
 endmenu # Exclude individual procfs entries
 endif # FS_PROCFS
