@@ -61,10 +61,6 @@ extern uint8_t _edata[];           /* End+1 of .data */
 extern uint8_t _sbss[];            /* Start of .bss */
 extern uint8_t _ebss[];            /* End+1 of .bss */
 
-/* This is the user space entry point */
-
-int CONFIG_INIT_ENTRYPOINT(int argc, char *argv[]);
-
 const struct userspace_s userspace locate_data(".userspace") =
 {
   /* General memory map */
