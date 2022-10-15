@@ -230,6 +230,21 @@ HEADOBJ = $(HEADSRC:.c=$(OBJEXT))
 SRCS = $(ASRCS) $(CSRCS) $(HOSTSRCS)
 OBJS = $(AOBJS) $(COBJS) $(HOSTOBJS)
 
+$(foreach lib,$(notdir $(wildcard $(APPDIR)$(DELIM)staging$(DELIM)*$(LIBEXT))), \
+  $(foreach elib,$(EXTRA_LIBS), \
+    $(if $(filter $(notdir $(elib)),$(lib)), \
+      $(eval NAMEFULL_LIBS+=$(elib)), \
+      $(if $(filter $(notdir $(elib)),$(patsubst lib%$(LIBEXT),-l%,$(lib))), \
+        $(eval NAMESPEC_LIBS+=$(elib)) \
+       ) \
+     ) \
+   ) \
+ )
+
+EXTRA_LIBS := $(filter-out $(NAMEFULL_LIBS) $(NAMESPEC_LIBS),$(EXTRA_LIBS))
+EXTRA_LIBS += $(addprefix $(APPDIR)$(DELIM)staging$(DELIM),$(notdir $(NAMEFULL_LIBS)))
+EXTRA_LIBS += $(addprefix $(APPDIR)$(DELIM)staging$(DELIM),$(patsubst -l%,lib%$(LIBEXT),$(NAMESPEC_LIBS)))
+
 # Override in Make.defs if linker is not 'ld'
 
 ifneq ($(CONFIG_HOST_MACOS),y)
