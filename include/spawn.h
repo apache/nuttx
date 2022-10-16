@@ -207,6 +207,7 @@ int posix_spawnattr_setsigmask(FAR posix_spawnattr_t *attr,
  * task_spawn()
  */
 
+#ifndef CONFIG_BUILD_KERNEL
 int task_spawnattr_getstackaddr(FAR const posix_spawnattr_t *attr,
                                 FAR void **stackaddr);
 int task_spawnattr_setstackaddr(FAR posix_spawnattr_t *attr,
@@ -216,6 +217,12 @@ int task_spawnattr_getstacksize(FAR const posix_spawnattr_t *attr,
                                 FAR size_t *stacksize);
 int task_spawnattr_setstacksize(FAR posix_spawnattr_t *attr,
                                 size_t stacksize);
+#else
+#  define task_spawnattr_getstackaddr(fa, addr) (*(addr) = NULL, 0)
+#  define task_spawnattr_setstackaddr(fa) (0)
+#  define task_spawnattr_getstacksize(fa, size) (*(size) = 0, 0)
+#  define task_spawnattr_setstacksize(fa) (0)
+#endif
 
 /* Non standard debug functions */
 
