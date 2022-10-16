@@ -103,7 +103,7 @@ static char g_at25dev[DEVNAME_MAXSIZE];
  *
  ****************************************************************************/
 
-int at25_main(int argc, char *argv)
+int at25_main(int argc, char *argv[])
 {
   struct lib_rawinstream_s rawinstream;
   struct lib_memsostream_s memoutstream;

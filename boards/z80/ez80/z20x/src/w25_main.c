@@ -729,7 +729,7 @@ errout:
  *
  ****************************************************************************/
 
-int w25_main(int argc, char *argv)
+int w25_main(int argc, char *argv[])
 {
   bool disable = false;
   int ret;
