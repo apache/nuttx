@@ -39,7 +39,7 @@
 #include "task/task.h"
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -70,9 +70,9 @@
  *
  ****************************************************************************/
 
-static int nxthread_create(FAR const char *name, uint8_t ttype, int priority,
-                           FAR void *stack_ptr, int stack_size, main_t entry,
-                           FAR char * const argv[], FAR char * const envp[])
+int nxthread_create(FAR const char *name, uint8_t ttype, int priority,
+                    FAR void *stack_ptr, int stack_size, main_t entry,
+                    FAR char * const argv[], FAR char * const envp[])
 {
   FAR struct task_tcb_s *tcb;
   pid_t pid;
@@ -111,10 +111,6 @@ static int nxthread_create(FAR const char *name, uint8_t ttype, int priority,
 
   return (int)pid;
 }
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Name: nxtask_create
