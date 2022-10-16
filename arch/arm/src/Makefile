@@ -99,8 +99,6 @@ $(foreach lib,$(notdir $(wildcard $(APPDIR)$(DELIM)staging$(DELIM)*$(LIBEXT))), 
 EXTRA_LIBS := $(filter-out $(NAMEFULL_LIBS) $(NAMESPEC_LIBS),$(EXTRA_LIBS))
 EXTRA_LIBS += $(wildcard $(APPDIR)$(DELIM)staging$(DELIM)*$(LIBEXT))
 
-LDFLAGS += --allow-multiple-definition
-
 # Override in Make.defs if linker is not 'ld'
 
 ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),)
@@ -122,6 +120,12 @@ else
   LIBRARY_OPT = --library=
   SCRIPT_OPT  = --scatter=
   EXTRA_LIBS += arm_vectors.o
+endif
+
+ifeq ($(LD),$(CC))
+  LDFLAGS += -Xlinker --allow-multiple-definition
+else
+  LDFLAGS += --allow-multiple-definition
 endif
 
 ARCHSCRIPT := $(call CONVERT_PATH,$(ARCHSCRIPT))
