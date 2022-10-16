@@ -6,7 +6,6 @@
 # modifications.
 #
 # CONFIG_AUDIO_FORMAT_MP3 is not set
-# CONFIG_FS_PROCFS_EXCLUDE_ENVIRON is not set
 # CONFIG_LIBC_LONG_LONG is not set
 # CONFIG_MMCSD_HAVE_CARDDETECT is not set
 # CONFIG_MMCSD_HAVE_WRITEPROTECT is not set
