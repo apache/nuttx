@@ -2052,13 +2052,13 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   /* Translate nfsmnt flags -> rpcclnt flags */
 
-  rpc->rc_path        = nmp->nm_path;
-  rpc->rc_name        = &nmp->nm_nam;
-  rpc->rc_sotype      = argp->sotype;
-  rpc->rc_timeo       = nprmt.timeo;
-  rpc->rc_retry       = nprmt.retry;
+  rpc->rc_path   = nmp->nm_path;
+  rpc->rc_name   = &nmp->nm_nam;
+  rpc->rc_sotype = argp->sotype;
+  rpc->rc_timeo  = nprmt.timeo;
+  rpc->rc_retry  = nprmt.retry;
 
-  nmp->nm_rpcclnt     = rpc;
+  nmp->nm_rpcclnt = rpc;
 
   ret = rpcclnt_connect(nmp->nm_rpcclnt);
   if (ret != OK)
@@ -2067,8 +2067,8 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
       goto bad;
     }
 
-  nmp->nm_fhsize      = nmp->nm_rpcclnt->rc_fhsize;
-  nmp->nm_fh          = &nmp->nm_rpcclnt->rc_fh;
+  nmp->nm_fhsize = nmp->nm_rpcclnt->rc_fhsize;
+  nmp->nm_fh     = &nmp->nm_rpcclnt->rc_fh;
 
   /* Get the file system info */
 

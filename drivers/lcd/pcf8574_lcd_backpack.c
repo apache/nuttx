@@ -1662,6 +1662,7 @@ int pcf8574_lcd_backpack_register(FAR const char *devpath,
   if (ret < 0)
     {
       lcdinfo("Failed to register driver: %d\n", ret);
+      nxmutex_destroy(&priv->lock);
       kmm_free(priv);
     }
 

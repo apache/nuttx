@@ -738,6 +738,7 @@ int t67xx_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   return ret;
 
 errout:
+  nxmutex_destroy(&priv->devlock);
   kmm_free(priv);
   return ret;
 }

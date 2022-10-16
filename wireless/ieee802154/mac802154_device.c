@@ -862,11 +862,7 @@ int mac802154dev_register(MACHANDLE mac, int minor)
   if (ret < 0)
     {
       nerr("ERROR: Failed to bind the MAC callbacks: %d\n", ret);
-
-      /* Free memory and return the error */
-
-      kmm_free(dev);
-      return ret;
+      goto errout_with_priv;
     }
 
   /* Create the character device name */

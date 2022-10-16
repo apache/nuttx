@@ -969,6 +969,7 @@ int hdc1008_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
       snerr("ERROR: Failed to register driver: %d\n", ret);
       nxmutex_destroy(&priv->devlock);
       kmm_free(priv);
+      return ret;
     }
 
   sninfo("driver registered\n");

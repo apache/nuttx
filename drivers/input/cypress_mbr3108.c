@@ -1112,6 +1112,7 @@ int cypress_mbr3108_register(FAR const char *devpath,
   ret = register_driver(devpath, &g_mbr3108_fileops, 0666, priv);
   if (ret < 0)
     {
+      nxmutex_destroy(&priv->devlock);
       kmm_free(priv);
       mbr3108_dbg("Error occurred during the driver registering\n");
       return ret;

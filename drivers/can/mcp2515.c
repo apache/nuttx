@@ -2541,6 +2541,8 @@ FAR struct mcp2515_can_s *
   if (canctrl != DEFAULT_CANCTRL_CONFMODE)
     {
       canerr("ERROR: CANCTRL = 0x%02X ! It should be 0x87\n", canctrl);
+      nxmutex_destroy(&priv->lock);
+      kmm_free(priv);
       return NULL;
     }
 

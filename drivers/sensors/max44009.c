@@ -896,6 +896,7 @@ int max44009_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   max44009_dbg("Registered with %d\n", ret);
   if (ret < 0)
     {
+      nxmutex_destroy(&priv->dev_lock);
       kmm_free(priv);
       max44009_dbg("Error occurred during the driver registering\n");
       return ret;

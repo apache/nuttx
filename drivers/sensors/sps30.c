@@ -1082,6 +1082,7 @@ int sps30_register_i2c(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   if (ret < 0)
     {
       sps30_dbg("ERROR: Failed to register driver: %d\n", ret);
+      nxmutex_destroy(&priv->devlock);
       kmm_free(priv);
     }
 

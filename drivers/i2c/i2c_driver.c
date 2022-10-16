@@ -394,6 +394,9 @@ int i2c_register(FAR struct i2c_master_s *i2c, int bus)
            * device.
            */
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+          nxmutex_destroy(&priv->lock);
+#endif
           kmm_free(priv);
           return ret;
         }

@@ -696,6 +696,7 @@ int ws2812_leds_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   if (ret < 0)
     {
       lederr("ERROR: Failed to register driver: %d\n", ret);
+      nxmutex_destroy(&priv->lock);
       kmm_free(priv->tx_buf);
       kmm_free(priv);
     }

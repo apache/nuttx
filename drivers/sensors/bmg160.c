@@ -542,6 +542,8 @@ int bmg160_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   if (ret < 0)
     {
       snerr("ERROR: Failed to attach interrupt\n");
+      nxmutex_destroy(&priv->datalock);
+      kmm_free(priv);
       return ret;
     }
 
@@ -551,8 +553,8 @@ int bmg160_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   if (ret < 0)
     {
       snerr("ERROR: Failed to register driver: %d\n", ret);
-      kmm_free(priv);
       nxmutex_destroy(&priv->datalock);
+      kmm_free(priv);
       return ret;
     }
 

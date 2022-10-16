@@ -389,6 +389,7 @@ ADXL345_HANDLE adxl345_instantiate(FAR struct i2c_master_s *dev,
   if (ret < 0)
     {
       snerr("ERROR: Wrong Device ID!\n");
+      nxmutex_destroy(&priv->lock);
       kmm_free(priv);
       return NULL;
     }

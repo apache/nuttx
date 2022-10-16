@@ -1439,10 +1439,14 @@ static int nrf24l01_unregister(FAR struct nrf24l01_dev_s *dev)
   /* Free memory */
 
 #ifdef CONFIG_WL_NRF24L01_RXSUPPORT
+  nxmutex_destroy(&dev->lock_fifo);
+  nxsem_destroy(&dev->sem_rx);
   kmm_free(dev->rx_fifo);
 #endif
-  kmm_free(dev);
 
+  nxmutex_destroy(&dev->devlock);
+  nxsem_destroy(&dev->sem_tx);
+  kmm_free(dev);
   return OK;
 }
 
@@ -1483,11 +1487,13 @@ int nrf24l01_register(FAR struct spi_dev_s *spi,
 #ifdef CONFIG_WL_NRF24L01_RXSUPPORT
   if ((rx_fifo = kmm_malloc(CONFIG_WL_NRF24L01_RXFIFO_LEN)) == NULL)
     {
+      nxmutex_destroy(&dev->devlock);
+      nxsem_destroy(&dev->sem_tx);
       kmm_free(dev);
       return -ENOMEM;
     }
 
-  dev->rx_fifo         = rx_fifo;
+  dev->rx_fifo = rx_fifo;
 
   nxmutex_init(&dev->lock_fifo);
   nxsem_init(&dev->sem_rx, 0, 0);
