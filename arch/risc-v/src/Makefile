@@ -94,6 +94,8 @@ EXTRA_LIBS := $(filter-out $(NAMEFULL_LIBS) $(NAMESPEC_LIBS),$(EXTRA_LIBS))
 EXTRA_LIBS += $(addprefix $(APPDIR)$(DELIM)staging$(DELIM),$(notdir $(NAMEFULL_LIBS)))
 EXTRA_LIBS += $(addprefix $(APPDIR)$(DELIM)staging$(DELIM),$(patsubst -l%,lib%$(LIBEXT),$(NAMESPEC_LIBS)))
 
+LDFLAGS += --allow-multiple-definition
+
 ARCHSCRIPT := $(call CONVERT_PATH,$(ARCHSCRIPT))
 LDFLAGS += $(addprefix -T,$(ARCHSCRIPT).tmp) $(EXTRALINKCMDS)
 
