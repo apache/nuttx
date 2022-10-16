@@ -193,10 +193,6 @@ static const uint8_t g_procfs_entrycount = sizeof(g_procfs_entries) /
  * Private Function Prototypes
  ****************************************************************************/
 
-/* Helpers */
-
-static void    procfs_enum(FAR struct tcb_s *tcb, FAR void *arg);
-
 /* File system methods */
 
 static int     procfs_open(FAR struct file *filep, FAR const char *relpath,
@@ -697,10 +693,8 @@ static int procfs_readdir(FAR struct inode *mountpt,
   FAR const struct procfs_entry_s *pentry = NULL;
   FAR struct procfs_dir_priv_s *priv;
   FAR struct procfs_level0_s *level0;
-  FAR struct tcb_s *tcb;
   FAR const char *name = NULL;
   unsigned int index;
-  pid_t pid;
   int ret = -ENOENT;
 
   DEBUGASSERT(mountpt && dir);
@@ -719,14 +713,16 @@ static int procfs_readdir(FAR struct inode *mountpt,
       index = priv->index;
       if (index >= priv->nentries)
         {
+          index -= priv->nentries;
+
           /* We must report the next static entry ... no more PID entries.
            * skip any entries with wildcards in the first segment of the
            * directory name.
            */
 
-          while (index < priv->nentries + g_procfs_entrycount)
+          while (index < g_procfs_entrycount)
             {
-              pentry = &g_procfs_entries[index - priv->nentries];
+              pentry = &g_procfs_entries[index];
               name = pentry->pathpattern;
 
               while (*name != '/' && *name != '\0')
@@ -757,11 +753,9 @@ static int procfs_readdir(FAR struct inode *mountpt,
                    *    fs/nxffs
                    */
 
-                  name =
-                    g_procfs_entries[index - priv->nentries].pathpattern;
-
-                  if (!level0->lastlen || (strncmp(name, level0->lastread,
-                      level0->lastlen) != 0))
+                  name = g_procfs_entries[index].pathpattern;
+                  if (!level0->lastlen ||
+                      strncmp(name, level0->lastread, level0->lastlen) != 0)
                     {
                       /* Not a duplicate, return the first segment of this
                        * entry
@@ -780,16 +774,7 @@ static int procfs_readdir(FAR struct inode *mountpt,
 
           /* Test if we are at the end of the directory */
 
-          if (index >= priv->nentries + g_procfs_entrycount)
-            {
-              /* We signal the end of the directory by returning the special
-               * error -ENOENT
-               */
-
-              finfo("Entry %d: End of directory\n", index);
-              ret = -ENOENT;
-            }
-          else
+          if (index < g_procfs_entrycount)
             {
               /* Report the next static entry */
 
@@ -814,7 +799,7 @@ static int procfs_readdir(FAR struct inode *mountpt,
 
               /* Advance to next entry for the next read */
 
-              priv->index = index;
+              priv->index = priv->nentries + index;
               ret = OK;
             }
         }
@@ -823,8 +808,8 @@ static int procfs_readdir(FAR struct inode *mountpt,
         {
           /* Verify that the pid still refers to an active task/thread */
 
-          pid = level0->pid[index];
-          tcb = nxsched_get_tcb(pid);
+          pid_t pid = level0->pid[index];
+          FAR struct tcb_s *tcb = nxsched_get_tcb(pid);
           if (!tcb)
             {
               ferr("ERROR: PID %d is no longer valid\n", (int)pid);
@@ -858,7 +843,9 @@ static int procfs_readdir(FAR struct inode *mountpt,
        * subdirectory are listed in order in the procfs_entry array.
        */
 
-      if (strncmp(g_procfs_entries[level1->base.index].pathpattern,
+      if (level1->base.index < g_procfs_entrycount &&
+          level1->firstindex < g_procfs_entrycount &&
+          strncmp(g_procfs_entries[level1->base.index].pathpattern,
                   g_procfs_entries[level1->firstindex].pathpattern,
                   level1->subdirlen) == 0)
         {
