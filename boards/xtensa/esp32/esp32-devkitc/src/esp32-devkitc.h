@@ -46,6 +46,10 @@
 
 #define GPIO_LED1             2
 
+/* PCNT Quadrature Encoder IDs */
+
+#define PCNT_QE0_ID           0
+
 /* MCP2515 Interrupt pin */
 
 #define GPIO_MCP2515_IRQ      22
