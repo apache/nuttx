@@ -244,11 +244,7 @@ $(foreach lib,$(notdir $(wildcard $(APPDIR)$(DELIM)staging$(DELIM)*$(LIBEXT))), 
 EXTRA_LIBS := $(filter-out $(NAMEFULL_LIBS) $(NAMESPEC_LIBS),$(EXTRA_LIBS))
 EXTRA_LIBS += $(wildcard $(APPDIR)$(DELIM)staging$(DELIM)*$(LIBEXT))
 
-ifeq ($(LD),$(CC))
-  LDFLAGS += -Xlinker --allow-multiple-definition
-else
-  LDFLAGS += --allow-multiple-definition
-endif
+LDFLAGS += -Xlinker --allow-multiple-definition
 
 # Override in Make.defs if linker is not 'ld'
 
