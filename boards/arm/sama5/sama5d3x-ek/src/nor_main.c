@@ -75,7 +75,7 @@ typedef void (*nor_entry_t)(void);
  *
  ****************************************************************************/
 
-int nor_main(int argc, char *argv)
+int nor_main(int argc, char *argv[])
 {
   uint32_t regval;
 
