@@ -1580,6 +1580,7 @@ errout_with_interrupts:
 
 errout_with_lock:
   nxmutex_destroy(&priv->lock);
+  kmm_free(priv);
   return ret;
 }
 

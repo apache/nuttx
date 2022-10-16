@@ -568,6 +568,7 @@ int dhtxx_register(FAR const char *devpath,
   ret = register_driver(devpath, &g_dhtxxfops, 0666, priv);
   if (ret < 0)
     {
+      nxmutex_destroy(&priv->devlock);
       kmm_free(priv);
       snerr("ERROR: Failed to register driver: %d\n", ret);
     }

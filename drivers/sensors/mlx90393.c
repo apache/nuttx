@@ -576,7 +576,9 @@ int mlx90393_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   if (ret < 0)
     {
       snerr("ERROR: Failed to attach interrupt\n");
-      return -ENODEV;
+      nxmutex_destroy(&priv->datalock);
+      kmm_free(priv);
+      return ret;
     }
 
   /* Register the character driver */
@@ -585,9 +587,9 @@ int mlx90393_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   if (ret < 0)
     {
       snerr("ERROR: Failed to register driver: %d\n", ret);
-      kmm_free(priv);
       nxmutex_destroy(&priv->datalock);
-      return -ENODEV;
+      kmm_free(priv);
+      return ret;
     }
 
   /* Since we support multiple MLX90393 devices are supported, we will need

@@ -1480,11 +1480,15 @@ int cc1101_register(FAR const char *path, FAR struct cc1101_dev_s *dev)
   dev->fifo_len  = 0;
   nxmutex_init(&dev->devlock);
   nxmutex_init(&dev->lock_rx_buffer);
-  nxsem_init(&(dev->sem_rx), 0, 0);
-  nxsem_init(&(dev->sem_tx), 0, 0);
+  nxsem_init(&dev->sem_rx, 0, 0);
+  nxsem_init(&dev->sem_tx, 0, 0);
 
   if (cc1101_init2(dev) < 0)
     {
+      nxmutex_destroy(&dev->devlock);
+      nxmutex_destroy(&dev->lock_rx_buffer);
+      nxsem_destroy(&dev->sem_rx);
+      nxsem_destroy(&dev->sem_tx);
       kmm_free(dev);
       wlerr("ERROR: Failed to initialize cc1101_init\n");
       return -ENODEV;

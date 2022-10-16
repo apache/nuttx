@@ -3077,6 +3077,7 @@ static FAR void *video_register(FAR const char *devpath)
   if (ret < 0)
     {
       verr("Failed to register driver: %d\n", ret);
+      nxmutex_destroy(&priv->lock_open_num);
       kmm_free(priv->devpath);
       kmm_free(priv);
       return NULL;

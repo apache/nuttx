@@ -436,6 +436,7 @@ int i2schar_register(FAR struct i2s_dev_s *i2s, int minor)
            * device.
            */
 
+          nxmutex_destroy(&priv->lock);
           kmm_free(priv);
           return ret;
         }
