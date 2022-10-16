@@ -984,9 +984,9 @@ int lis3dh_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   if (ret < 0)
     {
       snerr("ERROR: Failed to register driver: %d\n", ret);
-      kmm_free(priv);
       nxmutex_destroy(&priv->queuelock);
       nxsem_destroy(&priv->readsem);
+      kmm_free(priv);
       return ret;
     }
 

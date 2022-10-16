@@ -1481,6 +1481,7 @@ static int usbclass_classobject(int minor,
   return OK;
 
 exit_free_driver:
+  nxmutex_destroy(&alloc->dev.lock);
   kmm_free(alloc);
   return ret;
 }

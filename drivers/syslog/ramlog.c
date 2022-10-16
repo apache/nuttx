@@ -806,6 +806,10 @@ int ramlog_register(FAR const char *devpath, FAR char *buffer, size_t buflen)
       ret = register_driver(devpath, &g_ramlogfops, 0666, priv);
       if (ret < 0)
         {
+          nxmutex_destroy(&priv->rl_lock);
+#ifndef CONFIG_RAMLOG_NONBLOCKING
+          nxsem_destroy(&priv->rl_waitsem);
+#endif
           kmm_free(priv);
         }
     }

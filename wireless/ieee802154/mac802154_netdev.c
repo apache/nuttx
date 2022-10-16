@@ -1338,6 +1338,7 @@ int mac802154netdev_register(MACHANDLE mac)
   return macnet_ifdown(&priv->md_dev.r_dev);
 
 errout:
+  nxmutex_destroy(&priv->md_lock);
 
   /* Free memory and return the error */
 

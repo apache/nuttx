@@ -379,6 +379,9 @@ int spi_register(FAR struct spi_dev_s *spi, int bus)
            * device.
            */
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+          nxmutex_destroy(&priv->lock);
+#endif
           kmm_free(priv);
           return ret;
         }
