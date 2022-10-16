@@ -57,14 +57,9 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build Linux image
-        uses: docker/build-push-action@v3
-        with:
-          context: tools/ci/docker/linux
-          load: true
-          tags: ${{ env.IMAGE_TAG }}
-
+      - name: Pre-build Disk Stats
+        run: |
+          df -h
       - name: Push Linux image
         uses: docker/build-push-action@v3
         with:
@@ -72,3 +67,7 @@ jobs:
           platforms: linux/amd64
           push: ${{ github.ref == 'refs/heads/master' }}
           tags: ${{ env.IMAGE_TAG }}
+      - name: Post-build Disk Stats
+        if: always()
+        run: |
+          df -h
