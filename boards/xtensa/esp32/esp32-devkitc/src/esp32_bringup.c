@@ -91,6 +91,10 @@
 #  include "esp32_i2s.h"
 #endif
 
+#ifdef CONFIG_ESP32_PCNT_AS_QE
+#  include "board_qencoder.h"
+#endif
+
 #ifdef CONFIG_I2CMULTIPLEXER_TCA9548A
 #  include "esp32_tca9548a.h"
 #endif
@@ -395,6 +399,19 @@ int esp32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_QENCODER
+  /* Initialize and register the qencoder driver */
+
+  ret = board_qencoder_initialize(0, PCNT_QE0_ID);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the qencoder: %d\n",
+             ret);
+      return ret;
     }
 #endif
 
