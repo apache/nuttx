@@ -6,7 +6,6 @@
 # modifications.
 #
 # CONFIG_DEV_CONSOLE is not set
-# CONFIG_FS_PROCFS_EXCLUDE_ENVIRON is not set
 # CONFIG_NSH_ARGCAT is not set
 # CONFIG_NSH_CMDOPT_HEXDUMP is not set
 # CONFIG_NSH_DISABLE_DATE is not set
