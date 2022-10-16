@@ -72,7 +72,7 @@ typedef CODE void (*sram_entry_t)(void);
  *
  ****************************************************************************/
 
-int sd_main(int argc, char *argv)
+int sd_main(int argc, char *argv[])
 {
   int fd;
   int ret;

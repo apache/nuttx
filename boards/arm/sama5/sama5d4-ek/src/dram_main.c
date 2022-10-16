@@ -73,7 +73,7 @@ typedef void (*dram_entry_t)(void);
  *
  ****************************************************************************/
 
-int dram_main(int argc, char *argv)
+int dram_main(int argc, char *argv[])
 {
   /* Here we have a in memory value we can change in the debugger
    * to begin booting in NOR Flash
