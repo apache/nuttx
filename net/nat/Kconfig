@@ -1,0 +1,11 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config NET_NAT
+	bool "Network Address Translation (NAT)"
+	default n
+	depends on NET_IPFORWARD
+	---help---
+		Enable or disable Network Address Translation (NAT) function.

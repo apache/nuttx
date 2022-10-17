@@ -53,6 +53,7 @@
 #define IFF_LOOPBACK       (1 << 5)  /* Is a loopback net */
 #define IFF_POINTOPOINT    (1 << 6)  /* Is point-to-point link */
 #define IFF_NOARP          (1 << 7)  /* ARP is not required for this packet */
+#define IFF_NAT            (1 << 8)  /* NAT is enabled for this interface */
 #define IFF_MULTICAST      (1 << 12) /* Supports multicast. */
 #define IFF_BROADCAST      (1 << 13) /* Broadcast address valid. */
 
@@ -61,6 +62,7 @@
 #define IFF_SET_UP(f)          do { (f) |= IFF_UP; } while (0)
 #define IFF_SET_RUNNING(f)     do { (f) |= IFF_RUNNING; } while (0)
 #define IFF_SET_NOARP(f)       do { (f) |= IFF_NOARP; } while (0)
+#define IFF_SET_NAT(f)         do { (f) |= IFF_NAT; } while (0)
 #define IFF_SET_LOOPBACK(f)    do { (f) |= IFF_LOOPBACK; } while (0)
 #define IFF_SET_POINTOPOINT(f) do { (f) |= IFF_POINTOPOINT; } while (0)
 #define IFF_SET_MULTICAST(f)   do { (f) |= IFF_MULTICAST; } while (0)
@@ -69,6 +71,7 @@
 #define IFF_CLR_UP(f)          do { (f) &= ~IFF_UP; } while (0)
 #define IFF_CLR_RUNNING(f)     do { (f) &= ~IFF_RUNNING; } while (0)
 #define IFF_CLR_NOARP(f)       do { (f) &= ~IFF_NOARP; } while (0)
+#define IFF_CLR_NAT(f)         do { (f) &= ~IFF_NAT; } while (0)
 #define IFF_CLR_LOOPBACK(f)    do { (f) &= ~IFF_LOOPBACK; } while (0)
 #define IFF_CLR_POINTOPOINT(f) do { (f) &= ~IFF_POINTOPOINT; } while (0)
 #define IFF_CLR_MULTICAST(f)   do { (f) &= ~IFF_MULTICAST; } while (0)
@@ -77,6 +80,7 @@
 #define IFF_IS_UP(f)          (((f) & IFF_UP) != 0)
 #define IFF_IS_RUNNING(f)     (((f) & IFF_RUNNING) != 0)
 #define IFF_IS_NOARP(f)       (((f) & IFF_NOARP) != 0)
+#define IFF_IS_NAT(f)         (((f) & IFF_NAT) != 0)
 #define IFF_IS_LOOPBACK(f)    (((f) & IFF_LOOPBACK) != 0)
 #define IFF_IS_POINTOPOINT(f) (((f) & IFF_POINTOPOINT) != 0)
 #define IFF_IS_MULTICAST(f)   (((f) & IFF_MULTICAST) != 0)

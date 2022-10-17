@@ -320,6 +320,7 @@ menuconfig NET_6LOWPAN
 
 source "net/sixlowpan/Kconfig"
 source "net/ipforward/Kconfig"
+source "net/nat/Kconfig"
 
 endmenu # Internet Protocol Selection
 
