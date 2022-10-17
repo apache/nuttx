@@ -102,8 +102,8 @@ int nxmq_alloc_msgq(FAR struct mq_attr *attr,
       msgq->ntpid = INVALID_PROCESS_ID;
 #endif
 
-      dq_init(&msgq->waitfornotempty);
-      dq_init(&msgq->waitfornotfull);
+      dq_init(&msgq->cmn.waitfornotempty);
+      dq_init(&msgq->cmn.waitfornotfull);
     }
   else
     {
