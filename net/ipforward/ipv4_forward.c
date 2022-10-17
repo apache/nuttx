@@ -38,6 +38,7 @@
 #include "utils/utils.h"
 #include "sixlowpan/sixlowpan.h"
 #include "ipforward/ipforward.h"
+#include "nat/nat.h"
 #include "devif/devif.h"
 
 #if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NET_IPv4)
@@ -311,6 +312,18 @@ static int ipv4_dev_forward(FAR struct net_driver_s *dev,
       ret = -EMULTIHOP;
       goto errout_with_iobchain;
     }
+
+#ifdef CONFIG_NET_NAT
+  /* Try NAT outbound, rule matching will be performed in NAT module. */
+
+  ret = ipv4_nat_outbound(fwd->f_dev,
+                          (FAR struct ipv4_hdr_s *)fwd->f_iob->io_data);
+  if (ret < 0)
+    {
+      nwarn("WARNING: Performing NAT outbound failed, dropping!\n");
+      goto errout_with_iobchain;
+    }
+#endif
 
   /* Then set up to forward the packet according to the protocol. */
 
