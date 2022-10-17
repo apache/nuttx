@@ -71,8 +71,8 @@ void nxmq_recover(FAR struct tcb_s *tcb)
     {
       /* Decrement the count of waiters */
 
-      DEBUGASSERT(msgq && msgq->nwaitnotempty > 0);
-      msgq->nwaitnotempty--;
+      DEBUGASSERT(msgq && msgq->cmn.nwaitnotempty > 0);
+      msgq->cmn.nwaitnotempty--;
     }
 
   /* Was the task waiting for a message queue to become non-full? */
@@ -81,7 +81,7 @@ void nxmq_recover(FAR struct tcb_s *tcb)
     {
       /* Decrement the count of waiters */
 
-      DEBUGASSERT(msgq && msgq->nwaitnotfull > 0);
-      msgq->nwaitnotfull--;
+      DEBUGASSERT(msgq && msgq->cmn.nwaitnotfull > 0);
+      msgq->cmn.nwaitnotfull--;
     }
 }

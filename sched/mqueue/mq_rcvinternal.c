@@ -168,7 +168,7 @@ int nxmq_wait_receive(FAR struct mqueue_inode_s *msgq,
 
           rtcb          = this_task();
           rtcb->waitobj = msgq;
-          msgq->nwaitnotempty++;
+          msgq->cmn.nwaitnotempty++;
 
           /* Initialize the 'errcode" used to communication wake-up error
            * conditions.
@@ -277,7 +277,7 @@ ssize_t nxmq_do_receive(FAR struct mqueue_inode_s *msgq,
 
   /* Check if any tasks are waiting for the MQ not full event. */
 
-  if (msgq->nwaitnotfull > 0)
+  if (msgq->cmn.nwaitnotfull > 0)
     {
       /* Find the highest priority task that is waiting for
        * this queue to be not-full in waitfornotfull list.
@@ -285,7 +285,7 @@ ssize_t nxmq_do_receive(FAR struct mqueue_inode_s *msgq,
        * messages can be sent from interrupt handlers.
        */
 
-      btcb = (FAR struct tcb_s *)dq_peek(MQ_WNFLIST(msgq));
+      btcb = (FAR struct tcb_s *)dq_peek(MQ_WNFLIST(msgq->cmn));
 
       /* If one was found, unblock it.  NOTE:  There is a race
        * condition here:  the queue might be full again by the
@@ -299,7 +299,7 @@ ssize_t nxmq_do_receive(FAR struct mqueue_inode_s *msgq,
           wd_cancel(&btcb->waitdog);
         }
 
-      msgq->nwaitnotfull--;
+      msgq->cmn.nwaitnotfull--;
       up_unblock_task(btcb);
     }
 
