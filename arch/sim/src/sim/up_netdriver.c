@@ -73,6 +73,12 @@
 #include "up_internal.h"
 
 /****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static void netdriver_txdone_interrupt(void *priv);
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -289,6 +295,17 @@ static int netdriver_txpoll(struct net_driver_s *dev)
           NETDEV_TXPACKETS(dev);
           netdev_send(devidx, dev->d_buf, dev->d_len);
           NETDEV_TXDONE(dev);
+        }
+      else
+        {
+          /* Calling txdone callback after loopback. NETDEV_TXDONE macro is
+           * already called in devif_loopback.
+           *
+           * TODO: Maybe a unified interface with txdone callback registered
+           * is needed, then we can let devif_loopback call this callback.
+           */
+
+          netdriver_txdone_interrupt(dev);
         }
     }
 
