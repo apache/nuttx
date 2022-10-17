@@ -107,12 +107,6 @@ else
   LDENDGROUP   ?= --end-group
 endif
 
-ifeq ($(LD),$(CC))
-  LDFLAGS += -Xlinker --allow-multiple-definition
-else
-  LDFLAGS += --allow-multiple-definition
-endif
-
 BOARDMAKE = $(if $(wildcard board$(DELIM)Makefile),y,)
 
 LIBPATHS += -L $(call CONVERT_PATH,$(TOPDIR)$(DELIM)staging)

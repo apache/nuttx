@@ -244,8 +244,6 @@ $(foreach lib,$(notdir $(wildcard $(APPDIR)$(DELIM)staging$(DELIM)*$(LIBEXT))), 
 EXTRA_LIBS := $(filter-out $(NAMEFULL_LIBS) $(NAMESPEC_LIBS),$(EXTRA_LIBS))
 EXTRA_LIBS += $(wildcard $(APPDIR)$(DELIM)staging$(DELIM)*$(LIBEXT))
 
-LDFLAGS += -Xlinker --allow-multiple-definition
-
 # Override in Make.defs if linker is not 'ld'
 
 ifneq ($(CONFIG_HOST_MACOS),y)

@@ -122,12 +122,6 @@ else
   EXTRA_LIBS += arm_vectors.o
 endif
 
-ifeq ($(LD),$(CC))
-  LDFLAGS += -Xlinker --allow-multiple-definition
-else
-  LDFLAGS += --allow-multiple-definition
-endif
-
 ARCHSCRIPT := $(call CONVERT_PATH,$(ARCHSCRIPT))
 LDFLAGS += $(addprefix $(SCRIPT_OPT),$(ARCHSCRIPT).tmp) $(EXTRALINKCMDS)
 LIBPATHS += $(LIBPATH_OPT) $(call CONVERT_PATH,$(TOPDIR)$(DELIM)staging)
