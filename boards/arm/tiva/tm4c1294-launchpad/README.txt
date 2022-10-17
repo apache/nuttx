@@ -64,8 +64,8 @@ Where <subdir> is one of the following:
          CONFIG_PTHREAD_STACK_DEFAULT=2048
          CONFIG_POSIX_SPAWN_PROXY_STACKSIZE=1024
          CONFIG_POSIX_SPAWN_DEFAULT_STACKSIZE=2048
-         CONFIG_NSH_TELNETD_DAEMONSTACKSIZE=2048
-         CONFIG_NSH_TELNETD_CLIENTSTACKSIZE=2048
+         CONFIG_SYSTEM_TELNETD_STACKSIZE=2048
+         CONFIG_SYSTEM_TELNETD_SESSION_STACKSIZE=2048
 
     4. This configuration has the network enabled by default.  See the
        paragraph "Using the network with NSH" in the DK-TM4C129X README).
