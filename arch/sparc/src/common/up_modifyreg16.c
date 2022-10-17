@@ -29,7 +29,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-
+#include <nuttx/spinlock.h>
 #include "up_internal.h"
 
 /****************************************************************************
@@ -61,11 +61,11 @@ void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits)
   irqstate_t flags;
   uint16_t   regval;
 
-  flags   = enter_critical_section();
+  flags   = spin_lock_irqsave(NULL);
   regval  = getreg16(addr);
   regval &= ~clearbits;
   regval |= setbits;
   putreg16(regval, addr);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
