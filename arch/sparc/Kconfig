@@ -48,7 +48,6 @@ config ARCH_CHIP
 	default "bm3803"	if ARCH_CHIP_BM3803
 	default "bm3823"	if ARCH_CHIP_BM3823
 
-source arch/sparc/src/common/Kconfig
 source arch/sparc/src/sparc_v8/Kconfig
 source arch/sparc/src/bm3803/Kconfig
 source arch/sparc/src/bm3823/Kconfig
