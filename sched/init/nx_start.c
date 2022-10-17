@@ -227,11 +227,11 @@ const struct tasklist_s g_tasklisttable[NUM_TASK_STATES] =
 #ifndef CONFIG_DISABLE_MQUEUE
   ,
   {                                              /* TSTATE_WAIT_MQNOTEMPTY */
-    (FAR void *)offsetof(struct mqueue_inode_s, waitfornotempty),
+    (FAR void *)offsetof(struct mqueue_inode_s, cmn.waitfornotempty),
     TLIST_ATTR_PRIORITIZED | TLIST_ATTR_OFFSET
   },
   {                                              /* TSTATE_WAIT_MQNOTFULL */
-    (FAR void *)offsetof(struct mqueue_inode_s, waitfornotfull),
+    (FAR void *)offsetof(struct mqueue_inode_s, cmn.waitfornotfull),
     TLIST_ATTR_PRIORITIZED | TLIST_ATTR_OFFSET
   }
 #endif

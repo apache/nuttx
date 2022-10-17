@@ -88,22 +88,32 @@
 # define nxmq_pollnotify(msgq, eventset)
 #endif
 
+# define MQ_WNELIST(cmn)              (&((cmn).waitfornotempty))
+# define MQ_WNFLIST(cmn)              (&((cmn).waitfornotfull))
+
 /****************************************************************************
  * Public Type Declarations
  ****************************************************************************/
+
+/* Common prologue of all message queue structures. */
+
+struct mqueue_cmn_s
+{
+  dq_queue_t waitfornotempty; /* Task list waiting for not empty */
+  dq_queue_t waitfornotfull;  /* Task list waiting for not full */
+  int16_t nwaitnotfull;       /* Number tasks waiting for not full */
+  int16_t nwaitnotempty;      /* Number tasks waiting for not empty */
+};
 
 /* This structure defines a message queue */
 
 struct mqueue_inode_s
 {
+  struct mqueue_cmn_s cmn;    /* Common prologue */
   FAR struct inode *inode;    /* Containing inode */
-  dq_queue_t waitfornotempty; /* Task list waiting for not empty */
-  dq_queue_t waitfornotfull;  /* Task list waiting for not full */
   struct list_node msglist;   /* Prioritized message list */
   int16_t maxmsgs;            /* Maximum number of messages in the queue */
   int16_t nmsgs;              /* Number of message in the queue */
-  int16_t nwaitnotfull;       /* Number tasks waiting for not full */
-  int16_t nwaitnotempty;      /* Number tasks waiting for not empty */
 #if CONFIG_MQ_MAXMSGSIZE < 256
   uint8_t maxmsgsize;         /* Max size of message in message queue */
 #else

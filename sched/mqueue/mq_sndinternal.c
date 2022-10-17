@@ -254,7 +254,7 @@ int nxmq_wait_send(FAR struct mqueue_inode_s *msgq, int oflags)
 
       rtcb          = this_task();
       rtcb->waitobj = msgq;
-      msgq->nwaitnotfull++;
+      msgq->cmn.nwaitnotfull++;
 
       /* Initialize the errcode used to communication wake-up error
        * conditions.
@@ -386,7 +386,7 @@ int nxmq_do_send(FAR struct mqueue_inode_s *msgq,
 
   /* Check if any tasks are waiting for the MQ not empty event. */
 
-  if (msgq->nwaitnotempty > 0)
+  if (msgq->cmn.nwaitnotempty > 0)
     {
       /* Find the highest priority task that is waiting for
        * this queue to be non-empty in waitfornotempty
@@ -395,7 +395,7 @@ int nxmq_do_send(FAR struct mqueue_inode_s *msgq,
        * in this list
        */
 
-      btcb = (FAR struct tcb_s *)dq_peek(MQ_WNELIST(msgq));
+      btcb = (FAR struct tcb_s *)dq_peek(MQ_WNELIST(msgq->cmn));
 
       /* If one was found, unblock it */
 
@@ -406,7 +406,7 @@ int nxmq_do_send(FAR struct mqueue_inode_s *msgq,
           wd_cancel(&btcb->waitdog);
         }
 
-      msgq->nwaitnotempty--;
+      msgq->cmn.nwaitnotempty--;
       up_unblock_task(btcb);
     }
 
