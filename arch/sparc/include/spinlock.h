@@ -44,12 +44,10 @@
 
 /* The Type of a spinlock.
  *
- * This must be a uint32_ becaue it will be set using S32C1I instruction.
- * That instruction atomically stores to a memory location only if its
- * current value is the expected one.  The state register (SCOMPARE1) is
- * used to provide the additional comparison operand. Some implementations
- * also have a state register (ATOMCTL) for further control of the atomic
- * operation in cache and on the PIF bus.
+ * This must be a uint32_ becaue it will be set using CASA instruction.
+ * That instruction atomically Compare the 32-bitvalues in the register
+ * and memory, if its current value is the expected one. swap the values
+ * of second register with the memory.
  */
 
 typedef uint32_t spinlock_t;
