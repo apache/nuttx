@@ -44,7 +44,7 @@
 
 /* The Type of a spinlock.
  *
- * This must be a uint32_ becaue it will be set using CASA instruction.
+ * This must be a uint32_ because it will be set using CASA instruction.
  * That instruction atomically Compare the 32-bitvalues in the register
  * and memory, if its current value is the expected one. swap the values
  * of second register with the memory.
