@@ -128,7 +128,8 @@ Command                Depends on Configuration                    Can Be Disabl
 :ref:`cmdsleep`        .                                           ``CONFIG_NSH_DISABLE_SLEEP``
 ``cmdsource``          ``CONFIG_FILE_STREAM`` &&                   ``CONFIG_NSH_DISABLE_SOURCE``
                        ! ``CONFIG_NSH_DISABLESCRIPT``
-:ref:`cmdtelnetd`      ``CONFIG_NSH_TELNET``                       ``CONFIG_NSH_DISABLE_TELNETD``
+:ref:`cmdtelnetd`      ``CONFIG_NSH_TELNET`` &&
+                       ``CONFIG_SYSTEM_TELNETD``
 :ref:`cmdtest`         !  ``CONFIG_NSH_DISABLESCRIPT``             ``CONFIG_NSH_DISABLE_TEST``
 :ref:`cmdtime`         .                                           ``CONFIG_NSH_DISABLE_TIME``
 :ref:`cmdtruncate`     ! ``CONFIG_DISABLE_MOUNTPOINT``             ``CONFIG_NSH_DISABLE_TRUNCATE``
@@ -402,15 +403,15 @@ CMD                 w/o ``CONFIG_NSH_VARS``               w/``CONFIG_NSH_VARS``
 If Telnet is selected for the NSH console, then we must configure the
 resources used by the Telnet daemon and by the Telnet clients.
 
-======================================  ================================
-Configuration                           Description
-======================================  ================================
-``CONFIG_NSH_TELNETD_PORT``             The telnet daemon will listen on this TCP port number for connections. Default: 23
-``CONFIG_NSH_TELNETD_DAEMONPRIO``       Priority of the Telnet daemon. Default: ``SCHED_PRIORITY_DEFAULT``
-``CONFIG_NSH_TELNETD_DAEMONSTACKSIZE``  Stack size allocated for the Telnet daemon. Default: 2048
-``CONFIG_NSH_TELNETD_CLIENTPRIO``       Priority of the Telnet client. Default: ``SCHED_PRIORITY_DEFAULT``
-``CONFIG_NSH_TELNETD_CLIENTSTACKSIZE``  Stack size allocated for the Telnet client. Default: 2048
-======================================  ================================
+===========================================  ================================
+Configuration                                Description
+===========================================  ================================
+``CONFIG_SYSTEM_TELNETD_PORT``               The telnet daemon will listen on this TCP port number for connections. Default: 23
+``CONFIG_SYSTEM_TELNETD_PRIORITY``           Priority of the Telnet daemon. Default: ``SCHED_PRIORITY_DEFAULT``
+``CONFIG_SYSTEM_TELNETD_STACKSIZE``          Stack size allocated for the Telnet daemon. Default: 2048
+``CONFIG_SYSTEM_TELNETD_SESSION_PRIORITY``   Priority of the Telnet client. Default: ``SCHED_PRIORITY_DEFAULT``
+``CONFIG_SYSTEM_TELNETD_SESSION_STACKSIZE``  Stack size allocated for the Telnet client. Default: 2048
+===========================================  ================================
 
 One or both of ``CONFIG_NSH_CONSOLE`` and ``CONFIG_NSH_TELNET`` must be
 defined. If ``CONFIG_NSH_TELNET`` is selected, then there some other
@@ -422,8 +423,6 @@ Configuration                           Description
 ``CONFIG_NET=y``                        Of course, networking must be enabled.
 ``CONFIG_NET_TCP=y``                    TCP/IP support is required for telnet (as well as various other
                                         TCP-related configuration settings).
-``CONFIG_NSH_IOBUFFER_SIZE``            Determines the size of the I/O buffer to use for sending/ receiving
-                                        TELNET commands/responses
 ``CONFIG_NSH_DHCPC``                    Obtain the IP address via DHCP.
 ``CONFIG_NSH_IPADDR``                   If ``CONFIG_NSH_DHCPC`` is NOT set, then the static IP address must be
                                         provided.

@@ -1547,8 +1547,8 @@ The Telnet daemon may be started either programmatically by calling
 ``nsh_telnetstart()`` or it may be started from the NSH command line
 using this ``telnetd`` command.
 
-Normally this command would be suppressed with
-``CONFIG_NSH_DISABLE_TELNETD`` because the Telnet daemon is
+Normally this command would be suppressed without
+``CONFIG_SYSTEM_TELNETD`` because the Telnet daemon is
 automatically started in ``nsh_main.c``. The exception is when
 ``CONFIG_NSH_NETLOCAL`` is selected. In that case, the network is not
 enabled at initialization but rather must be enabled from the NSH

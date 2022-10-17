@@ -2083,8 +2083,8 @@ Configuration sub-directories
          CONFIG_PTHREAD_STACK_DEFAULT=2048
          CONFIG_POSIX_SPAWN_PROXY_STACKSIZE=1024
          CONFIG_POSIX_SPAWN_DEFAULT_STACKSIZE=2048
-         CONFIG_NSH_TELNETD_DAEMONSTACKSIZE=2048
-         CONFIG_NSH_TELNETD_CLIENTSTACKSIZE=2048
+         CONFIG_SYSTEM_TELNETD_STACKSIZE=2048
+         CONFIG_SYSTEM_TELNETD_SESSION_STACKSIZE=2048
 
     3. NSH built-in applications are supported.  There are, however, not
        enabled built-in applications.
