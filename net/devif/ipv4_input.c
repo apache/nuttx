@@ -103,6 +103,7 @@
 
 #include "ipforward/ipforward.h"
 #include "devif/devif.h"
+#include "nat/nat.h"
 
 /****************************************************************************
  * Private Data
@@ -205,6 +206,16 @@ int ipv4_input(FAR struct net_driver_s *dev)
       nwarn("WARNING: IP fragment dropped\n");
       goto drop;
     }
+
+#ifdef CONFIG_NET_NAT
+  /* Try NAT inbound, rule matching will be performed in NAT module. */
+
+  if (ipv4_nat_inbound(dev, ipv4) < 0)
+    {
+      nwarn("WARNING: Performing NAT inbound failed!\n");
+      goto drop;
+    }
+#endif
 
   /* Get the destination IP address in a friendlier form */
 
