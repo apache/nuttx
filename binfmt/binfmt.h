@@ -95,7 +95,11 @@ int binfmt_dumpmodule(FAR const struct binary_s *bin);
  *
  ****************************************************************************/
 
-FAR char * const *binfmt_copyargv(FAR char * const *argv);
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+int binfmt_copyargv(FAR char * const **copy, FAR char * const *argv);
+#else
+#  define binfmt_copyargv(copy, argv) (*(copy) = (argv), 0)
+#endif
 
 /****************************************************************************
  * Name: binfmt_freeargv
@@ -136,9 +140,9 @@ void binfmt_freeargv(FAR char * const *argv);
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_ENVIRON
-#  define binfmt_copyenv(envp) binfmt_copyargv(envp)
+#  define binfmt_copyenv(copy, envp) binfmt_copyargv(copy, envp)
 #else
-#  define binfmt_copyenv(envp) (envp)
+#  define binfmt_copyenv(copy, envp) (*(copy) = (envp), 0)
 #endif
 
 /****************************************************************************

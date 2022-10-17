@@ -33,7 +33,7 @@
 
 #include "binfmt.h"
 
-#ifndef CONFIG_BINFMT_DISABLE
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_BINFMT_DISABLE)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -66,30 +66,26 @@
  *
  ****************************************************************************/
 
-FAR char * const *binfmt_copyargv(FAR char * const *argv)
+int binfmt_copyargv(FAR char * const **copy, FAR char * const *argv)
 {
-#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   FAR char **argvbuf = NULL;
   FAR char *ptr;
   size_t argvsize;
-  size_t argsize;
-  int nargs;
+  size_t argsize = 0;
+  int nargs = 0;
   int i;
 
   /* Get the number of arguments and the size of the argument list */
 
   if (argv)
     {
-      argsize = 0;
-      nargs   = 0;
-
       for (i = 0; argv[i]; i++)
         {
           /* Increment the size of the allocation with the size of the next
            * string
            */
 
-          argsize += (strlen(argv[i]) + 1);
+          argsize += strlen(argv[i]) + 1;
           nargs++;
 
           /* This is a sanity check to prevent running away with an
@@ -100,13 +96,12 @@ FAR char * const *binfmt_copyargv(FAR char * const *argv)
 
           if (nargs > MAX_EXEC_ARGS)
             {
-              berr("ERROR: Too many arguments: %lu\n",
-                   (unsigned long)argvsize);
-              return NULL;
+              berr("ERROR: Too many arguments: %zu\n", argsize);
+              return -E2BIG;
             }
         }
 
-      binfo("args=%d argsize=%lu\n", nargs, (unsigned long)argsize);
+      binfo("args=%d argsize=%zu\n", nargs, argsize);
 
       /* Allocate the argv array and an argument buffer */
 
@@ -117,7 +112,7 @@ FAR char * const *binfmt_copyargv(FAR char * const *argv)
           if (!ptr)
             {
               berr("ERROR: Failed to allocate the argument buffer\n");
-              return NULL;
+              return -ENOMEM;
             }
 
           /* Copy the argv list */
@@ -138,13 +133,8 @@ FAR char * const *binfmt_copyargv(FAR char * const *argv)
         }
     }
 
-  return (FAR char * const *)argvbuf;
-
-#else
-  /* Just return the caller's argv pointer */
-
-  return argv;
-#endif
+  *copy = argvbuf;
+  return OK;
 }
 
 /****************************************************************************
@@ -161,7 +151,6 @@ FAR char * const *binfmt_copyargv(FAR char * const *argv)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
 void binfmt_freeargv(FAR char * const *argv)
 {
   /* Is there an allocated argument buffer */
@@ -173,6 +162,5 @@ void binfmt_freeargv(FAR char * const *argv)
       kmm_free((FAR char **)argv);
     }
 }
-#endif
 
-#endif /* !CONFIG_BINFMT_DISABLE */
+#endif
