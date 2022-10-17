@@ -188,7 +188,7 @@ static struct esp32_lowerhalf_s *esp32_pcnt2lower(int pcnt);
 
 /* Interrupt handling */
 
-#if 0 /* FIXME: To be implement */
+#if 0 /* FIXME: To be implemented */
 static int esp32_interrupt(int irq, void *context, void *arg);
 #endif
 
@@ -331,14 +331,14 @@ static struct esp32_lowerhalf_s g_pcnt4lower =
 #ifdef CONFIG_ESP32_PCNT_U5_QE
 static const struct esp32_qeconfig_s g_pcnt5config =
 {
-  .pcntid       = 5,
-  .ch0_gpio     = CONFIG_ESP32_PCNT_U5_CH0_EDGE_PIN,
-  .ch1_gpio     = CONFIG_ESP32_PCNT_U5_CH1_LEVEL_PIN,
+  .pcntid        = 5,
+  .ch0_gpio      = CONFIG_ESP32_PCNT_U5_CH0_EDGE_PIN,
+  .ch1_gpio      = CONFIG_ESP32_PCNT_U5_CH1_LEVEL_PIN,
   .ch0_pulse_sig = PCNT_SIG_CH0_IN5_IDX,
   .ch1_pulse_sig = PCNT_SIG_CH1_IN5_IDX,
   .ch0_ctrl_sig  = PCNT_CTRL_CH0_IN5_IDX,
   .ch1_ctrl_sig  = PCNT_CTRL_CH1_IN5_IDX,
-  .filter_thres = CONFIG_ESP32_PCNT_U5_FILTER_THRES,
+  .filter_thres  = CONFIG_ESP32_PCNT_U5_FILTER_THRES,
 };
 
 static struct esp32_lowerhalf_s g_pcnt5lower =
@@ -525,7 +525,7 @@ static struct esp32_lowerhalf_s *esp32_pcnt2lower(int pcnt)
  *
  ****************************************************************************/
 
-#if 0 /* FIXME: To be implement */
+#if 0 /* FIXME: To be implemented */
 static int esp32_interrupt(int irq, void *context, void *arg)
 {
   struct esp32_lowerhalf_s *priv = (struct esp32_lowerhalf_s *)arg;
@@ -686,28 +686,7 @@ static int esp32_position(struct qe_lowerhalf_s *lower, int32_t *pos)
 
 static int esp32_setposmax(struct qe_lowerhalf_s *lower, uint32_t pos)
 {
-#ifdef CONFIG_ESP32_QENCODER_DISABLE_EXTEND16BTIMERS
-  struct esp32_lowerhalf_s *priv = (struct esp32_lowerhalf_s *)lower;
-
-#if defined(HAVE_MIXEDWIDTH_TIMERS)
-  if (priv->config->width == 32)
-    {
-      esp32_putreg32(priv, ESP32_GTIM_ARR_OFFSET, pos);
-    }
-  else
-    {
-      esp32_putreg16(priv, ESP32_GTIM_ARR_OFFSET, pos);
-    }
-#elif defined(HAVE_32BIT_TIMERS)
-  esp32_putreg32(priv, ESP32_GTIM_ARR_OFFSET, pos);
-#else
-  esp32_putreg16(priv, ESP32_GTIM_ARR_OFFSET, pos);
-#endif
-
-  return OK;
-#else
   return -ENOTTY;
-#endif
 }
 
 /****************************************************************************
@@ -731,9 +710,7 @@ static int esp32_reset(struct qe_lowerhalf_s *lower)
 
   flags = spin_lock_irqsave(&priv->lock);
 
-  regval  = getreg32(PCNT_CTRL_REG);
-  regval |= PCNT_CNT_RST_U(priv->config->pcntid);
-  putreg32(regval, PCNT_CTRL_REG);
+  modifyreg32(PCNT_CTRL_REG, 0, PCNT_CNT_RST_U(priv->config->pcntid));
 
   priv->position = 0;
 
