@@ -62,6 +62,10 @@
 #  include "esp32s2_board_wdt.h"
 #endif
 
+#ifdef CONFIG_SENSORS_MAX6675
+#  include "esp32s2_max6675.h"
+#endif
+
 #include "esp32s2-saola-1.h"
 
 /****************************************************************************
@@ -214,6 +218,14 @@ int esp32s2_bringup(void)
     {
       syslog(LOG_ERR,
              "Failed to initialize BMP180 driver for I2C0: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_MAX6675
+  ret = board_max6675_initialize(0, 2);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: MAX6675 initialization failed: %d\n", ret);
     }
 #endif
 
