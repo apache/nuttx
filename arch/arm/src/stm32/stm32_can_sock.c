@@ -2477,11 +2477,11 @@ errout:
 void arm_netinitialize(void)
 {
 #ifdef CONFIG_STM32_CAN1
-  stm32_cansockinitialize(0);
+  stm32_cansockinitialize(1);
 #endif
 
 #ifdef CONFIG_STM32_CAN2
-  stm32_cansockinitialize(1);
+  stm32_cansockinitialize(2);
 #endif
 }
 #endif
