@@ -27,6 +27,6 @@ config MODEM_U_BLOX_DEBUG
 	---help---
 		Allow the u-blox modem driver print debug information.
 
-source "drivers/modem/altair/Kconfig"
+source "drivers/modem/alt1250/Kconfig"
 
 endif # MODEM
