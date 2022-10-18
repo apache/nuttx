@@ -707,7 +707,7 @@ g_intstacktop:
  *  Name: g_fiqstackalloc/g_fiqstacktop
  ****************************************************************************/
 
-#ifdef CONFIG_ARMV7A_DECODEFIQ
+#ifdef CONFIG_ARMV7R_DECODEFIQ
 	.globl	g_fiqstackalloc
 	.type	g_fiqstackalloc, object
 	.globl	g_fiqstacktop
