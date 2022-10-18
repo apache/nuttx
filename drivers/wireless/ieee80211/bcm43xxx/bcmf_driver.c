@@ -1163,12 +1163,6 @@ FAR struct bcmf_dev_s *bcmf_allocate_device(void)
       goto exit_free_priv;
     }
 
-  if ((ret = nxsem_set_protocol(&priv->control_timeout, SEM_PRIO_NONE)) !=
-      OK)
-    {
-      goto exit_free_priv;
-    }
-
   /* Init scan timeout timer */
 
   priv->scan_status = BCMF_SCAN_DISABLED;

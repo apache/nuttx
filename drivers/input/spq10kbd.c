@@ -1005,12 +1005,6 @@ int spq10kbd_register(FAR struct i2c_master_s *i2c,
   nxmutex_init(&priv->lock);   /* Initialize device mutex */
   nxsem_init(&priv->waitsem, 0, 0);
 
-  /* The waitsem semaphore is used for signaling and, hence, should
-   * not have priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
-
   config->clear(config);
   config->enable(config, false);
 

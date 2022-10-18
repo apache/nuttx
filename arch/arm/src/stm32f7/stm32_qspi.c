@@ -2577,13 +2577,7 @@ struct qspi_dev_s *stm32f7_qspi_initialize(int intf)
             }
         }
 
-      /* Initialize the QSPI semaphore that is used to wake up the waiting
-       * thread when the DMA transfer completes.  This semaphore is used for
-       * signaling and, hence, should not have priority inheritance enabled.
-       */
-
       nxsem_init(&priv->dmawait, 0, 0);
-      nxsem_set_protocol(&priv->dmawait, SEM_PRIO_NONE);
 #endif
 
 #ifdef CONFIG_STM32F7_QSPI_INTERRUPTS
@@ -2596,13 +2590,7 @@ struct qspi_dev_s *stm32f7_qspi_initialize(int intf)
           goto errout_with_dmawait;
         }
 
-      /* Initialize the semaphore that blocks until the operation completes.
-       * This semaphore is used for signaling and, hence, should not have
-       * priority inheritance enabled.
-       */
-
       nxsem_init(&priv->op_sem, 0, 0);
-      nxsem_set_protocol(&priv->op_sem, SEM_PRIO_NONE);
 #endif
 
       /* Perform hardware initialization.  Puts the QSPI into an active

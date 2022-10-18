@@ -373,12 +373,7 @@ ssize_t icmp_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   /* Initialize the state structure */
 
-  /* This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
   nxsem_init(&state.snd_sem, 0, 0);
-  nxsem_set_protocol(&state.snd_sem, SEM_PRIO_NONE);
 
   state.snd_result = -ENOMEM;                 /* Assume allocation failure */
   state.snd_toaddr = inaddr->sin_addr.s_addr; /* Address of the peer to send

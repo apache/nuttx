@@ -1137,12 +1137,6 @@ int max11802_register(FAR struct spi_dev_s *spi,
   nxmutex_init(&priv->devlock);     /* Initialize device structure mutex */
   nxsem_init(&priv->waitsem, 0, 0); /* Initialize pen event wait semaphore */
 
-  /* The pen event semaphore is used for signaling and, hence, should not
-   * have priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
-
   /* Make sure that interrupts are disabled */
 
   config->clear(config);

@@ -2016,12 +2016,7 @@ struct spi_dev_s *pic32mz_spibus_initialize(int port)
       spierr("ERROR: Failed to allocate the TX DMA channel\n");
     }
 
-  /* Initialize the SPI semaphore. This semaphore is used for signaling and,
-   * hence, should not have priority inheritance enabled.
-   */
-
   nxsem_init(&priv->dmawait, 0, 0);
-  nxsem_set_protocol(&priv->dmawait, SEM_PRIO_NONE);
 #endif
 
 #ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS

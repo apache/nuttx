@@ -606,12 +606,6 @@ int pwm_register(FAR const char *path, FAR struct pwm_lowerhalf_s *dev)
   nxmutex_init(&upper->lock);
 #ifdef CONFIG_PWM_PULSECOUNT
   nxsem_init(&upper->waitsem, 0, 0);
-
-  /* The wait semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&upper->waitsem, SEM_PRIO_NONE);
 #endif
 
   upper->dev = dev;

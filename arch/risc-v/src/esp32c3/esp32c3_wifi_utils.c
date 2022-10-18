@@ -590,11 +590,5 @@ int esp_wifi_scan_init(void)
       return ret;
     }
 
-  if ((ret = nxsem_set_protocol(&scan_priv->scan_signal,
-                                SEM_PRIO_NONE)) != OK)
-    {
-      wlerr("ERROR: Set semaphore protocol attribute failed: %d\n", ret);
-    }
-
   return ret;
 }

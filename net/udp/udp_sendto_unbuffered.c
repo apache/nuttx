@@ -396,13 +396,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
   net_lock();
   memset(&state, 0, sizeof(struct sendto_s));
-
-  /* This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
   nxsem_init(&state.st_sem, 0, 0);
-  nxsem_set_protocol(&state.st_sem, SEM_PRIO_NONE);
 
   state.st_buflen = len;
   state.st_buffer = buf;

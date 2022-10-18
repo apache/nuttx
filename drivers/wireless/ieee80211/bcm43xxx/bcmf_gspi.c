@@ -875,11 +875,6 @@ static int bcmf_bus_gspi_initialize(FAR struct bcmf_dev_s  *priv,
       goto exit_free_bus;
     }
 
-  if ((ret = nxsem_set_protocol(&gbus->thread_signal, SEM_PRIO_NONE)) != OK)
-    {
-      goto exit_free_bus;
-    }
-
   /* Register sdio bus */
 
   priv->bus  = &gbus->bus;

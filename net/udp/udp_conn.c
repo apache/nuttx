@@ -614,7 +614,6 @@ FAR struct udp_conn_s *udp_alloc(uint8_t domain)
       conn->sndbufs = CONFIG_NET_SEND_BUFSIZE;
 
       nxsem_init(&conn->sndsem, 0, 0);
-      nxsem_set_protocol(&conn->sndsem, SEM_PRIO_NONE);
 #endif
 
 #ifdef CONFIG_NET_UDP_WRITE_BUFFERS

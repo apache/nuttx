@@ -352,7 +352,6 @@ int comp_register(FAR const char *path, FAR struct comp_dev_s *dev)
   nxmutex_init(&dev->ad_lock);
 
   nxsem_init(&dev->ad_readsem, 0, 0);
-  nxsem_set_protocol(&dev->ad_readsem, SEM_PRIO_NONE);
 
   /* Bind the upper-half callbacks to the lower half COMP driver */
 

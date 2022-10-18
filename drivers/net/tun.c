@@ -954,13 +954,6 @@ static int tun_dev_init(FAR struct tun_device_s *priv,
   nxsem_init(&priv->read_wait_sem, 0, 0);
   nxsem_init(&priv->write_wait_sem, 0, 0);
 
-  /* The wait semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&priv->read_wait_sem, SEM_PRIO_NONE);
-  nxsem_set_protocol(&priv->write_wait_sem, SEM_PRIO_NONE);
-
   /* Assign d_ifname if specified. */
 
   if (devfmt)

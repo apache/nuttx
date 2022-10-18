@@ -216,13 +216,7 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   net_lock();
   memset(&state, 0, sizeof(struct send_s));
-
-  /* This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
   nxsem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
-  nxsem_set_protocol(&state.snd_sem, SEM_PRIO_NONE);
 
   state.snd_sock      = psock;                  /* Socket descriptor */
   state.snd_buflen    = msg->msg_iov->iov_len;  /* bytes to send */

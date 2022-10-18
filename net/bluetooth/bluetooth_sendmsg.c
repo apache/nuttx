@@ -302,13 +302,7 @@ static ssize_t bluetooth_sendto(FAR struct socket *psock,
 
   net_lock();
   memset(&state, 0, sizeof(struct bluetooth_sendto_s));
-
-  /* This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
   nxsem_init(&state.is_sem, 0, 0); /* Doesn't really fail */
-  nxsem_set_protocol(&state.is_sem, SEM_PRIO_NONE);
 
   state.is_sock   = psock;          /* Socket descriptor to use */
   state.is_buflen = len;            /* Number of bytes to send */

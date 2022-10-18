@@ -2609,8 +2609,6 @@ static int cxd56_gnss_open(struct file *filep)
           goto err0;
         }
 
-      nxsem_set_protocol(&priv->syncsem, SEM_PRIO_NONE);
-
       /* Prohibit the clock change during loading image */
 
       up_pm_acquire_freqlock(&g_hold_lock);
@@ -3028,8 +3026,6 @@ static int cxd56_gnss_register(const char *devpath)
       gnsserr("Failed to initialize gnss apiwait!\n");
       goto err0;
     }
-
-  nxsem_set_protocol(&priv->apiwait, SEM_PRIO_NONE);
 
   ret = nxmutex_init(&priv->ioctllock);
   if (ret < 0)

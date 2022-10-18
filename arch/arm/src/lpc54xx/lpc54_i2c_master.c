@@ -1212,12 +1212,6 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
   nxmutex_init(&priv->lock);
 #ifndef CONFIG_I2C_POLLED
   nxsem_init(&priv->waitsem, 0, 0);
-
-  /* The waitsem semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 #endif
 
 #ifndef CONFIG_I2C_POLLED

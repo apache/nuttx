@@ -1864,12 +1864,6 @@ int mxt_register(FAR struct i2c_master_s *i2c,
   nxmutex_init(&priv->devlock);     /* Initialize device mutex */
   nxsem_init(&priv->waitsem, 0, 0); /* Initialize event wait semaphore */
 
-  /* The event wait semaphore is used for signaling and, hence, should not
-   * have priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
-
   /* Make sure that interrupts are disabled */
 
   MXT_CLEAR(lower);

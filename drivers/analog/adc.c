@@ -678,12 +678,6 @@ int adc_register(FAR const char *path, FAR struct adc_dev_s *dev)
   nxsem_init(&dev->ad_recv.af_sem, 0, 0);
   nxmutex_init(&dev->ad_closelock);
 
-  /* The receive semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&dev->ad_recv.af_sem, SEM_PRIO_NONE);
-
   /* Reset the ADC hardware */
 
   DEBUGASSERT(dev->ad_ops->ao_reset != NULL);

@@ -208,7 +208,6 @@ int usrsock_setup_request_callback(FAR struct usrsock_conn_s *conn,
   int ret = -EBUSY;
 
   nxsem_init(&pstate->recvsem, 0, 0);
-  nxsem_set_protocol(&pstate->recvsem, SEM_PRIO_NONE);
 
   pstate->conn      = conn;
   pstate->result    = -EAGAIN;

@@ -186,7 +186,6 @@ int cxd56_ge2dinitialize(const char *devname)
 
   nxmutex_init(&g_lock);
   nxsem_init(&g_wait, 0, 0);
-  nxsem_set_protocol(&g_wait, SEM_PRIO_NONE);
 
   ret = register_driver(devname, &g_ge2dfops, 0666, NULL);
   if (ret != 0)

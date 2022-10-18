@@ -1802,13 +1802,7 @@ struct qspi_dev_s *s32k3xx_qspi_initialize(int intf)
           spierr("ERROR: Failed to attach irq %d\n", priv->irq);
         }
 
-      /* Initialize the semaphore that blocks until the operation completes.
-       * This semaphore is used for signaling and, hence, should not have
-       * priority inheritance enabled.
-       */
-
       nxsem_init(&priv->op_sem, 0, 0);
-      nxsem_set_protocol(&priv->op_sem, SEM_PRIO_NONE);
 #endif
 
       /* Perform hardware initialization.  Puts the QSPI into an active
@@ -1841,10 +1835,6 @@ struct qspi_dev_s *s32k3xx_qspi_initialize(int intf)
             {
               nxsem_init(&priv->rxsem, 0, 0);
               nxsem_init(&priv->txsem, 0, 0);
-
-              nxsem_set_protocol(&priv->rxsem, SEM_PRIO_NONE);
-              nxsem_set_protocol(&priv->txsem, SEM_PRIO_NONE);
-
               priv->txdma = s32k3xx_dmach_alloc(priv->txch
                                                 | DMAMUX_CHCFG_ENBL, 0);
               priv->rxdma = s32k3xx_dmach_alloc(priv->rxch

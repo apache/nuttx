@@ -147,7 +147,6 @@ static int keyboard_open(FAR struct file *filep)
 
   nxsem_init(&opriv->waitsem, 0, 0);
   nxmutex_init(&opriv->lock);
-  nxsem_set_protocol(&opriv->waitsem, SEM_PRIO_NONE);
   list_add_tail(&upper->head, &opriv->node);
   filep->f_priv = opriv;
 

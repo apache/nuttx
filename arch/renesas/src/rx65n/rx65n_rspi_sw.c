@@ -1844,13 +1844,7 @@ static void rspi_bus_initialize(FAR struct rx65n_rspidev_s *priv)
   uint16_t regval16;
 
 #ifndef CONFIG_SPI_POLLWAIT
-  /* Initialize the semaphore that is used to wake up the waiting
-   * thread when the transfer completes.  This semaphore is used for
-   * signaling and, hence, should not have priority inheritance enabled.
-   */
-
   nxsem_init(&priv->waitsem, 0, 0);
-  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 #endif
   nxmutex_init(&priv->lock);
 

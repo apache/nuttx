@@ -403,7 +403,6 @@ int fakesensor_init(int type, FAR const char *file_name,
   sensor->file_path = file_name;
 
   nxsem_init(&sensor->wakeup, 0, 0);
-  nxsem_set_protocol(&sensor->wakeup, SEM_PRIO_NONE);
 
   /* Create thread for sensor */
 

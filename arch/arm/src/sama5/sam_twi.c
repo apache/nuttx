@@ -1257,12 +1257,6 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
   nxmutex_init(&priv->lock);
   nxsem_init(&priv->waitsem, 0, 0);
 
-  /* The waitsem semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
-
   /* Perform repeatable TWI hardware initialization */
 
   twi_hw_initialize(priv, frequency);
