@@ -334,7 +334,7 @@ FAR struct tm *gmtime_r(FAR const time_t *timep, FAR struct tm *result)
   result->tm_sec    = (int)sec;
 
   result->tm_wday   = clock_dayoftheweek(day, month, year);
-  result->tm_yday   = day +
+  result->tm_yday   = day - 1 +
                       clock_daysbeforemonth(result->tm_mon,
                                             clock_isleapyear(year));
   result->tm_isdst  = 0;
