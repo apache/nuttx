@@ -336,7 +336,7 @@ static const struct esp32_i2s_config_s esp32_i2s0_config =
   .data_width       = CONFIG_ESP32_I2S0_DATA_BIT_WIDTH,
   .rate             = CONFIG_ESP32_I2S0_SAMPLE_RATE,
   .total_slot       = 2,
-  .mclk_multiple    = I2S_MCLK_MULTIPLE_384,
+  .mclk_multiple    = I2S_MCLK_MULTIPLE_256,
   .tx_en            = I2S0_TX_ENABLED,
   .rx_en            = I2S0_RX_ENABLED,
 #ifdef CONFIG_ESP32_I2S0_MCLK
