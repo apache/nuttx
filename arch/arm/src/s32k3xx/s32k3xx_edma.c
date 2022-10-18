@@ -749,6 +749,7 @@ static int s32k3xx_edma_interrupt(int irq, void *context, void *arg)
   struct s32k3xx_dmach_s *dmach;
 
   uint32_t  regval32;
+  uint32_t  errval32;
   uint8_t   chan;
   int       result;
 
@@ -759,6 +760,29 @@ static int s32k3xx_edma_interrupt(int irq, void *context, void *arg)
 
   chan  = dmach->chan;
   DEBUGASSERT(chan < S32K3XX_EDMA_NCHANNELS && dmach == &g_edma.dmach[chan]);
+
+  /* Get the eDMA Error Status register value. */
+
+  errval32  = getreg32(S32K3XX_EDMA_TCD[chan] +
+                      S32K3XX_EDMA_CH_ES_OFFSET);
+
+  if (errval32 & EDMA_CH_ES_ERR)
+    {
+      DEBUGASSERT(dmach->state == S32K3XX_DMA_ACTIVE);
+
+      /* Clear the error */
+
+      putreg32(EDMA_CH_ES_ERR, S32K3XX_EDMA_TCD[chan] +
+                      S32K3XX_EDMA_CH_ES_OFFSET);
+
+      /* Clear the pending eDMA channel interrupt */
+
+      putreg32(EDMA_CH_INT, S32K3XX_EDMA_TCD[chan] +
+               S32K3XX_EDMA_CH_INT_OFFSET);
+
+      s32k3xx_dmaterminate(dmach, -EIO);
+      return OK;
+    }
 
   /* Check for an eDMA pending interrupt on this channel */
 
@@ -1332,7 +1356,7 @@ int s32k3xx_dmach_start(DMACH_HANDLE handle, edma_callback_t callback,
 
       regval         = getreg32(S32K3XX_EDMA_TCD[chan]
                        + S32K3XX_EDMA_CH_CSR_OFFSET);
-      regval        |= EDMA_CH_CSR_ERQ;
+      regval        |= EDMA_CH_CSR_ERQ | EDMA_CH_CSR_EEI;
       putreg32(regval, S32K3XX_EDMA_TCD[chan] + S32K3XX_EDMA_CH_CSR_OFFSET);
     }
 
