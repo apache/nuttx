@@ -515,20 +515,6 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
       ret = -ret;
     }
 
-  /* Thse semaphore are used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-    if (ret == OK)
-      {
-        ret = nxsem_set_protocol(&pjoin->exit_sem, SEM_PRIO_NONE);
-      }
-
-    if (ret < 0)
-      {
-        ret = -ret;
-      }
-
   /* If the priority of the new pthread is lower than the priority of the
    * parent thread, then starting the pthread could result in both the
    * parent and the pthread to be blocked.  This is a recipe for priority

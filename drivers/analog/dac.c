@@ -503,12 +503,6 @@ int dac_register(FAR const char *path, FAR struct dac_dev_s *dev)
   nxsem_init(&dev->ad_xmit.af_sem, 0, 0);
   nxmutex_init(&dev->ad_closelock);
 
-  /* The transmit semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&dev->ad_xmit.af_sem, SEM_PRIO_NONE);
-
   dev->ad_ops->ao_reset(dev);
 
   return register_driver(path, &dac_fops, 0222, dev);

@@ -1285,13 +1285,7 @@ struct spi_dev_s *imx_spibus_initialize(int port)
   /* Initialize Semaphores */
 
 #ifndef CONFIG_SPI_POLLWAIT
-  /* Initialize the semaphore that is used to wake up the waiting
-   * thread when the DMA transfer completes.  This semaphore is used for
-   * signaling and, hence, should not have priority inheritance enabled.
-   */
-
   nxsem_init(&priv->waitsem, 0, 0);
-  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 #endif
   nxmutex_init(&priv->lock);
 

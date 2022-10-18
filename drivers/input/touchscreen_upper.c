@@ -136,7 +136,6 @@ static int touch_open(FAR struct file *filep)
 
   nxsem_init(&openpriv->waitsem, 0, 0);
   nxmutex_init(&openpriv->lock);
-  nxsem_set_protocol(&openpriv->waitsem, SEM_PRIO_NONE);
   list_add_tail(&upper->head, &openpriv->node);
 
   /* Save the buffer node pointer so that it can be used directly

@@ -665,7 +665,6 @@ static int net_rpmsg_drv_send_recv(FAR struct net_driver_s *dev,
   int ret;
 
   nxsem_init(&cookie.sem, 0, 0);
-  nxsem_set_protocol(&cookie.sem, SEM_PRIO_NONE);
 
   cookie.header   = header;
   header->command = command;

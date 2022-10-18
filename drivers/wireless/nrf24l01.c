@@ -1483,7 +1483,6 @@ int nrf24l01_register(FAR struct spi_dev_s *spi,
 
   nxmutex_init(&dev->devlock);
   nxsem_init(&dev->sem_tx, 0, 0);
-  nxsem_set_protocol(&dev->sem_tx, SEM_PRIO_NONE);
 
 #ifdef CONFIG_WL_NRF24L01_RXSUPPORT
   if ((rx_fifo = kmm_malloc(CONFIG_WL_NRF24L01_RXFIFO_LEN)) == NULL)
@@ -1498,7 +1497,6 @@ int nrf24l01_register(FAR struct spi_dev_s *spi,
 
   nxmutex_init(&dev->lock_fifo);
   nxsem_init(&dev->sem_rx, 0, 0);
-  nxsem_set_protocol(&dev->sem_rx, SEM_PRIO_NONE);
 #endif
 
   /* Configure IRQ pin  (falling edge) */

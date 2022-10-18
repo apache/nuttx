@@ -1611,14 +1611,7 @@ static void stm32_ltdc_irqconfig(void)
   /* Initialize the LTDC mutex that enforces mutually exclusive access */
 
   nxmutex_init(&g_lock);
-
-  /* Initialize the semaphore for interrupt handling.  This waitsem
-   * semaphore is used for signaling and, hence, should not have priority
-   * inheritance enabled.
-   */
-
   nxsem_init(g_interrupt.sem, 0, 0);
-  nxsem_set_protocol(g_interrupt.sem, SEM_PRIO_NONE);
 
   /* Attach LTDC interrupt vector */
 

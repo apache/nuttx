@@ -1319,12 +1319,6 @@ static void cxd56_sdio_sdhci_reset(struct sdio_dev_s *dev)
 
   nxsem_init(&priv->waitsem, 0, 0);
 
-  /* The waitsem semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
-
   /* The next phase of the hardware reset would be to set the SYSCTRL INITA
    * bit to send 80 clock ticks for card to power up and then reset the card
    * with CMD0.  This is done elsewhere.

@@ -482,7 +482,6 @@ static int64_t clk_rpmsg_sendrecv(FAR struct rpmsg_endpoint *ept,
   msg->cookie   = (uintptr_t)&cookie;
 
   nxsem_init(&cookie.sem, 0, 0);
-  nxsem_set_protocol(&cookie.sem, SEM_PRIO_NONE);
   cookie.result  = -EIO;
 
   ret = rpmsg_send_nocopy(ept, msg, len);

@@ -2364,7 +2364,6 @@ stm32_foc_initialize(int inst, struct stm32_foc_board_s *board)
   /* Initialize calibration semaphore */
 
   nxsem_init(&foc_priv->cal_done_sem, 0, 0);
-  nxsem_set_protocol(&foc_priv->cal_done_sem, SEM_PRIO_NONE);
 
   /* Get FOC device */
 

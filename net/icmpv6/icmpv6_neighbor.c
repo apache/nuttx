@@ -249,14 +249,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
       goto errout_with_lock;
     }
 
-  /* Initialize the state structure with the network locked.
-   *
-   * This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
   nxsem_init(&state.snd_sem, 0, 0);        /* Doesn't really fail */
-  nxsem_set_protocol(&state.snd_sem, SEM_PRIO_NONE);
 
   state.snd_retries = 0;                       /* No retries yet */
   net_ipv6addr_copy(state.snd_ipaddr, lookup); /* IP address to query */

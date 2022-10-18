@@ -2855,12 +2855,6 @@ struct sdio_dev_s *sdhc_initialize(int slotno)
 
   nxsem_init(&priv->waitsem, 0, 0);
 
-  /* The waitsem semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
-
   /* In addition to the system clock, the SDHC module needs a clock for the
    * base for the external card clock.  There are four possible sources for
    * this clock, selected by the SIM's SOPT2 register:

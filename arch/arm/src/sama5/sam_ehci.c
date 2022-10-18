@@ -3747,13 +3747,7 @@ static int sam_epalloc(struct usbhost_driver_s *drvr,
   epinfo->maxpacket = epdesc->mxpacketsize;
   epinfo->xfrtype   = epdesc->xfrtype;
   epinfo->speed     = hport->speed;
-
-  /* The endpoint iocsem semaphore is used for signaling and, hence,
-   * should not have priority inheritance enabled.
-   */
-
   nxsem_init(&epinfo->iocsem, 0, 0);
-  nxsem_set_protocol(&epinfo->iocsem, SEM_PRIO_NONE);
 
   /* Success.. return an opaque reference to the endpoint information
    * structure instance
@@ -4831,12 +4825,6 @@ struct usbhost_connection_s *sam_ehci_initialize(int controller)
   nxmutex_init(&g_ehci.lock);
   nxsem_init(&g_ehci.pscsem,  0, 0);
 
-  /* The pscsem semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&g_ehci.pscsem, SEM_PRIO_NONE);
-
   /* Initialize EP0 */
 
   nxsem_init(&g_ehci.ep0.iocsem, 0, 1);
@@ -4873,13 +4861,7 @@ struct usbhost_connection_s *sam_ehci_initialize(int controller)
       rhport->ep0.xfrtype         = USB_EP_ATTR_XFER_CONTROL;
       rhport->ep0.speed           = USB_SPEED_FULL;
       rhport->ep0.maxpacket       = 8;
-
-      /* The endpoint 0 iocsem semaphore is used for signaling and, hence,
-       * should not have priority inheritance enabled.
-       */
-
       nxsem_init(&rhport->ep0.iocsem, 0, 0);
-      nxsem_set_protocol(&rhport->ep0.iocsem, SEM_PRIO_NONE);
 
       /* Initialize the public port representation */
 

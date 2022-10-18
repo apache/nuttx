@@ -433,13 +433,7 @@ int nx_poll(FAR struct pollfd *fds, unsigned int nfds, int timeout)
 
   DEBUGASSERT(nfds == 0 || fds != NULL);
 
-  /* This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
   nxsem_init(&sem, 0, 0);
-  nxsem_set_protocol(&sem, SEM_PRIO_NONE);
-
   ret = poll_setup(fds, nfds, &sem);
   if (ret >= 0)
     {

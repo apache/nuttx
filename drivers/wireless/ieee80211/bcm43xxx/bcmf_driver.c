@@ -972,20 +972,9 @@ FAR struct bcmf_dev_s *bcmf_allocate_device(void)
       goto exit_free_priv;
     }
 
-  if ((ret = nxsem_set_protocol(&priv->control_timeout, SEM_PRIO_NONE)) !=
-      OK)
-    {
-      goto exit_free_priv;
-    }
-
   /* Init authentication signal semaphore */
 
   if ((ret = nxsem_init(&priv->auth_signal, 0, 0)) != OK)
-    {
-      goto exit_free_priv;
-    }
-
-  if ((ret = nxsem_set_protocol(&priv->auth_signal, SEM_PRIO_NONE)) != OK)
     {
       goto exit_free_priv;
     }

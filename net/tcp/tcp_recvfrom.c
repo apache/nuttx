@@ -514,13 +514,7 @@ static void tcp_recvfrom_initialize(FAR struct tcp_conn_s *conn,
   /* Initialize the state structure. */
 
   memset(pstate, 0, sizeof(struct tcp_recvfrom_s));
-
-  /* This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
   nxsem_init(&pstate->ir_sem, 0, 0); /* Doesn't really fail */
-  nxsem_set_protocol(&pstate->ir_sem, SEM_PRIO_NONE);
 
   pstate->ir_buflen    = len;
   pstate->ir_buffer    = buf;

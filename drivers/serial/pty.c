@@ -953,12 +953,6 @@ int pty_register2(int minor, bool susv1)
   nxsem_init(&devpair->pp_slavesem, 0, 0);
   nxmutex_init(&devpair->pp_lock);
 
-  /* The pp_slavesem semaphore is used for signaling and, hence, should not
-   * have priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&devpair->pp_slavesem, SEM_PRIO_NONE);
-
   devpair->pp_susv1             = susv1;
   devpair->pp_minor             = minor;
   devpair->pp_locked            = true;

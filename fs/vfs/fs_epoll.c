@@ -184,7 +184,6 @@ static int epoll_do_create(int size, int flags)
     }
 
   nxsem_init(&eph->sem, 0, 0);
-  nxsem_set_protocol(&eph->sem, SEM_PRIO_NONE);
   eph->size = size;
   eph->data = (FAR epoll_data_t *)(eph + 1);
   eph->poll = (FAR struct pollfd *)(eph->data + reserve);

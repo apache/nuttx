@@ -281,7 +281,6 @@ int vnc_server(int argc, FAR char *argv[])
 
 #ifdef CONFIG_FB_SYNC
   nxsem_init(&session->vsyncsem, 0, 0);
-  nxsem_set_protocol(&session->vsyncsem, SEM_PRIO_NONE);
 #endif
 
   /* Inform any waiter that we have started */

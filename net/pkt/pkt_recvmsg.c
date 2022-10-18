@@ -242,13 +242,7 @@ static void pkt_recvfrom_initialize(FAR struct socket *psock, FAR void *buf,
   /* Initialize the state structure. */
 
   memset(pstate, 0, sizeof(struct pkt_recvfrom_s));
-
-  /* This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
   nxsem_init(&pstate->pr_sem, 0, 0); /* Doesn't really fail */
-  nxsem_set_protocol(&pstate->pr_sem, SEM_PRIO_NONE);
 
   pstate->pr_buflen = len;
   pstate->pr_buffer = buf;

@@ -1846,10 +1846,7 @@ void hciuart_initialize(void)
           /* Initialize signalling semaphores */
 
           nxsem_init(&state->rxwait, 0, 0);
-          nxsem_set_protocol(&state->rxwait, SEM_PRIO_NONE);
-
           nxsem_init(&state->txwait, 0, 0);
-          nxsem_set_protocol(&state->txwait, SEM_PRIO_NONE);
 
           /* Attach and enable the HCI UART IRQ */
 

@@ -86,12 +86,7 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
 
   /* Initialize the TCP state structure */
 
-  /* This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
   nxsem_init(&pstate->tc_sem, 0, 0); /* Doesn't really fail */
-  nxsem_set_protocol(&pstate->tc_sem, SEM_PRIO_NONE);
 
   pstate->tc_conn   = conn;
   pstate->tc_result = -EAGAIN;

@@ -381,7 +381,6 @@ static ssize_t rpmsgdev_write(FAR struct file *filep, const char *buffer,
 
   memset(&cookie, 0, sizeof(cookie));
   nxsem_init(&cookie.sem, 0, 0);
-  nxsem_set_protocol(&cookie.sem, SEM_PRIO_NONE);
 
   while (written < buflen)
     {
@@ -679,7 +678,6 @@ static int rpmsgdev_send_recv(FAR struct rpmsgdev_s *priv,
 
   memset(&cookie, 0, sizeof(cookie));
   nxsem_init(&cookie.sem, 0, 0);
-  nxsem_set_protocol(&cookie.sem, SEM_PRIO_NONE);
 
   if (data != NULL)
     {
@@ -1034,7 +1032,6 @@ int rpmsgdev_register(FAR const char *remotecpu, FAR const char *remotepath,
   dev->remotepath = remotepath;
 
   nxsem_init(&dev->wait, 0, 0);
-  nxsem_set_protocol(&dev->wait, SEM_PRIO_NONE);
 
   /* Register the rpmsg callback */
 

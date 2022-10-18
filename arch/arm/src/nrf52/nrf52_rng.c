@@ -129,8 +129,6 @@ static int nrf52_rng_initialize(void)
   memset(&g_rngdev, 0, sizeof(struct rng_dev_s));
 
   nxsem_init(&g_rngdev.rd_sem, 0, 0);
-  nxsem_set_protocol(&g_rngdev.rd_sem, SEM_PRIO_NONE);
-
   nxmutex_init(&g_rngdev.lock);
 
   _info("Ready to stop\n");

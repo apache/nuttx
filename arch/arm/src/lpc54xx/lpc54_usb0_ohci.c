@@ -2390,14 +2390,7 @@ static int lpc54_epalloc(struct usbhost_driver_s *drvr,
 #endif
 
       uinfo("EP%d CTRL:%08x\n", epdesc->addr, ed->hw.ctrl);
-
-      /* Initialize the semaphore that is used to wait for the endpoint
-       * WDH event. The wdhsem semaphore is used for signaling and, hence,
-       * should not have priority inheritance enabled.
-       */
-
       nxsem_init(&ed->wdhsem, 0, 0);
-      nxsem_set_protocol(&ed->wdhsem, SEM_PRIO_NONE);
 
       /* Link the common tail TD to the ED's TD list */
 
@@ -3834,12 +3827,6 @@ struct usbhost_connection_s *lpc54_usbhost_initialize(int controller)
   nxsem_init(&priv->pscsem,  0, 0);
   nxmutex_init(&priv->lock);
 
-  /* The pscsem semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&priv->pscsem, SEM_PRIO_NONE);
-
 #ifndef CONFIG_OHCI_INT_DISABLE
   priv->ininterval  = MAX_PERINTERVAL;
   priv->outinterval = MAX_PERINTERVAL;
@@ -3923,12 +3910,7 @@ struct usbhost_connection_s *lpc54_usbhost_initialize(int controller)
   memset((void *)TDTAIL, 0, sizeof(struct ohci_gtd_s));
   memset((void *)EDCTRL, 0, sizeof(struct lpc54_ed_s));
 
-  /* The EDCTRL wdhsem semaphore is used for signaling and, hence, should
-   * not have priority inheritance enabled.
-   */
-
   nxsem_init(&EDCTRL->wdhsem, 0, 0);
-  nxsem_set_protocol(&EDCTRL->wdhsem, SEM_PRIO_NONE);
 
   /* Initialize user-configurable EDs */
 

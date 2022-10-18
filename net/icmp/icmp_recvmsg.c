@@ -420,13 +420,7 @@ ssize_t icmp_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       /* Initialize the state structure */
 
       memset(&state, 0, sizeof(struct icmp_recvfrom_s));
-
-      /* This semaphore is used for signaling and, hence, should not have
-       * priority inheritance enabled.
-       */
-
       nxsem_init(&state.recv_sem, 0, 0);
-      nxsem_set_protocol(&state.recv_sem, SEM_PRIO_NONE);
 
       state.recv_sock   = psock;    /* The IPPROTO_ICMP socket instance */
       state.recv_result = -ENOMEM;  /* Assume allocation failure */

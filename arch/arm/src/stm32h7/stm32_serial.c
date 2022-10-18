@@ -2225,7 +2225,6 @@ static int up_dma_setup(struct uart_dev_s *dev)
       priv->txdma = stm32_dmachannel(priv->txdma_channel);
 
       nxsem_init(&priv->txdmasem, 0, 1);
-      nxsem_set_protocol(&priv->txdmasem, SEM_PRIO_NONE);
 
       /* Enable receive Tx DMA for the UART */
 
