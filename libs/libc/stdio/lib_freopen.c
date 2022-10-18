@@ -100,9 +100,16 @@ FAR FILE *freopen(FAR const char *path, FAR const char *mode,
           return NULL;
         }
 
-      /* Flush the stream and duplicate the new fd to it */
+      /* Flush the stream and invalidate the read buffer. */
 
       fflush(stream);
+
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
+      lib_rdflush(stream);
+#endif
+
+      /* Duplicate the new fd to the stream. */
+
       ret = dup2(fd, fileno(stream));
       close(fd);
       if (ret < 0)
