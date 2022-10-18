@@ -50,14 +50,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32f7_can_setup
+ * Name: stm32_can_setup
  *
  * Description:
  *  Initialize CAN and register the CAN device
  *
  ****************************************************************************/
 
-int stm32f7_can_setup(void)
+int stm32_can_setup(void)
 {
 #if defined(CONFIG_STM32F7_CAN1)
   struct can_dev_s *can;

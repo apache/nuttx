@@ -181,6 +181,26 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: stm32_bringup
+ *
+ * Description:
+ *   Perform architecture specific initialization
+ *
+ *   CONFIG_BOARDCTL=y:
+ *     If CONFIG_NSH_ARCHINITIALIZE=y:
+ *       Called from the NSH library (or other application)
+ *     Otherwise, assumed to be called from some other application.
+ *
+ *   Otherwise CONFIG_BOARD_LATE_INITIALIZE=y:
+ *     Called from board_late_initialize().
+ *
+ *   Otherwise, bad news:  Never called
+ *
+ ****************************************************************************/
+
+int stm32_bringup(void);
+
+/****************************************************************************
  * Name: stm32_spidev_initialize
  *
  * Description:
@@ -281,11 +301,27 @@ int stm32_bbsram_int(void);
 #endif
 
 /****************************************************************************
- * Name: stm32F746_qencoder_initialize
+ * Name: stm32_qencoder_initialize
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_QENCODER
-int stm32f7_qencoder_initialize(const char *devpath, int timer);
+int stm32_qencoder_initialize(const char *devpath, int timer);
+#endif
+
+/****************************************************************************
+ * Name: stm32_can_setup
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32F7_CAN
+int stm32_can_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32f7_gpio_initialize
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_GPIO
+int stm32_gpio_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
