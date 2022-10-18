@@ -24,7 +24,7 @@ ifeq ($(CONFIG_MODEM_U_BLOX),y)
 CSRCS += u-blox.c
 endif
 
-include modem/altair/Make.defs
+include modem/alt1250/Make.defs
 
 # Include modem driver build support
 

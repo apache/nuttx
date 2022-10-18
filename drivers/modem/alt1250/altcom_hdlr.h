@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/modem/altair/altmdm_pm_state.h
+ * drivers/modem/alt1250/altcom_hdlr.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,54 +18,55 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_MODEM_ALTAIR_ALTMDM_PM_STATE_H
-#define __DRIVERS_MODEM_ALTAIR_ALTMDM_PM_STATE_H
-
-#if defined(CONFIG_MODEM_ALTMDM)
+#ifndef __DRIVERS_MODEM_ALT1250_ALTCOM_HDLR_H
+#define __DRIVERS_MODEM_ALT1250_ALTCOM_HDLR_H
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Included Files
  ****************************************************************************/
 
-#define MODEM_PM_INTERNAL_STATE_SLEEP          (0)
-#define MODEM_PM_INTERNAL_STATE_GOING_TO_WAKE  (1)
-#define MODEM_PM_INTERNAL_STATE_WAKE           (2)
-#define MODEM_PM_INTERNAL_STATE_GOING_TO_SLEEP (3)
-#define MODEM_PM_INTERNAL_STATE_MAX            (4)
+#include <nuttx/config.h>
+#include <nuttx/modem/alt1250.h>
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: altmdm_pm_getstate
+ * Name: alt1250_composehdlr
  *
  * Description:
- *   Get current modem state.
+ *   Get the function pointer of the compose handler associated with the
+ *   LAPI command ID.
+ *
+ * Input Parameters:
+ *   cmdid   - ID of the LAPI command.
+ *
+ * Returned Value:
+ *   Returns a function pointer for the compose handler. If there is no
+ *   compose handler associated with the LAPI command ID, NULL is returned.
  *
  ****************************************************************************/
 
-uint32_t altmdm_pm_getstate(void);
+compose_handler_t alt1250_composehdlr(uint32_t cmdid);
 
 /****************************************************************************
- * Name: altmdm_pm_getinternalstate
+ * Name: alt1250_parsehdlr
  *
  * Description:
- *   Get internal modem state.
+ *   Get the function pointer of the parse handler associated with the
+ *   ALTCOM command ID.
+ *
+ * Input Parameters:
+ *   altcid   - ID of the ALTCOM command.
+ *   altver   - Version of the ALTCOM command.
+ *
+ * Returned Value:
+ *   Returns a function pointer for the parse handler. If there is no
+ *   parse handler associated with the ALTCOM command ID, NULL is returned.
  *
  ****************************************************************************/
 
-uint32_t altmdm_pm_getinternalstate(void);
+parse_handler_t alt1250_parsehdlr(uint16_t altcid, uint8_t altver);
 
-/****************************************************************************
- * Name: altmdm_pm_setinternalstate
- *
- * Description:
- *   Set internal modem state.
- *
- ****************************************************************************/
-
-void altmdm_pm_setinternalstate(uint32_t state);
-
-#endif
-#endif /* __DRIVERS_MODEM_ALTAIR_ALTMDM_PM_STATE_H */
+#endif  /* __DRIVERS_MODEM_ALT1250_ALTCOM_HDLR_H */

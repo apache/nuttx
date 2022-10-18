@@ -1,5 +1,5 @@
 ############################################################################
-# drivers/modem/altair/Make.defs
+# drivers/modem/alt1250/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -20,16 +20,19 @@
 
 ifeq ($(CONFIG_MODEM),y)
 
-ifeq ($(CONFIG_MODEM_ALTMDM),y)
+ifeq ($(CONFIG_MODEM_ALT1250),y)
+CSRCS += alt1250.c
+CSRCS += altcom_pkt.c
+CSRCS += altcom_hdlr.c
+CSRCS += altcom_lwm2m_hdlr.c
 CSRCS += altmdm.c
+CSRCS += altmdm_event.c
 CSRCS += altmdm_spi.c
-CSRCS += altmdm_pm.c
-CSRCS += altmdm_pm_state.c
-CSRCS += altmdm_sys.c
+CSRCS += altmdm_timer.c
 endif
 
-DEPPATH += --dep-path modem$(DELIM)altair
-VPATH += :modem$(DELIM)altair
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)modem}
+DEPPATH += --dep-path modem$(DELIM)alt1250
+VPATH += :modem$(DELIM)alt1250
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)modem}
 
 endif
