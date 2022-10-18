@@ -1,0 +1,33 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menuconfig MODEM_ALT1250
+	bool "ALT1250 modem support"
+	default n
+	select SPI
+	select NET
+	select NETDEV_MODEM_LTE_IOCTL
+	---help---
+		Enable driver for the ALT1250 modem.
+
+if MODEM_ALT1250
+
+config MODEM_ALT1250_ADDITIONAL_FUNC
+	bool
+	default n
+
+config MODEM_ALT1250_LOG_ACCESS
+	bool "Enable modem log access"
+	default n
+	---help---
+		Enables the feature to access the modem logs.
+
+config MODEM_ALT1250_DEBUG
+	bool "Enable debug mode for ALT1250 modem driver"
+	default n
+	---help---
+		Allow the ALT1250 modem driver print debug information.
+
+endif
