@@ -1607,12 +1607,6 @@ static int spi_portinitialize(struct efm32_spidev_s *priv)
   nxsem_init(&priv->rxdmasem, 0, 0);
   nxsem_init(&priv->txdmasem, 0, 0);
 
-  /* These semaphores are used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&priv->rxdmasem, SEM_PRIO_NONE);
-  nxsem_set_protocol(&priv->txdmasem, SEM_PRIO_NONE);
 #endif
 
   /* Enable SPI */

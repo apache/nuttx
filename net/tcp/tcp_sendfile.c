@@ -508,13 +508,7 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
   conn->sendfile = true;
 #endif
   memset(&state, 0, sizeof(struct sendfile_s));
-
-  /* This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
   nxsem_init(&state.snd_sem, 0, 0);                /* Doesn't really fail */
-  nxsem_set_protocol(&state.snd_sem, SEM_PRIO_NONE);
 
   state.snd_sock    = psock;                       /* Socket descriptor to use */
   state.snd_foffset = offset ? *offset : startpos; /* Input file offset */

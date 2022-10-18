@@ -342,12 +342,6 @@ static int sam_rng_initialize(void)
   nxmutex_init(&g_trngdev.lock);
   nxsem_init(&g_trngdev.waitsem, 0, 0);
 
-  /* The waitsem semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&g_trngdev.waitsem, SEM_PRIO_NONE);
-
   /* Enable clocking to the TRNG */
 
   sam_trng_enableclk();

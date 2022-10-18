@@ -1668,13 +1668,6 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
   nxsem_init(&dev->recvsem,  0, 0);
   nxmutex_init(&dev->polllock);
 
-  /* The recvsem and xmitsem are used for signaling and, hence, should
-   * not have priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&dev->xmitsem, SEM_PRIO_NONE);
-  nxsem_set_protocol(&dev->recvsem, SEM_PRIO_NONE);
-
   /* Register the serial driver */
 
   sinfo("Registering %s\n", path);

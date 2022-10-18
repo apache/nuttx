@@ -345,8 +345,6 @@ static ssize_t timerfd_read(FAR struct file *filep, FAR char *buffer,
 
       timerfd_waiter_sem_t sem;
       nxsem_init(&sem.sem, 0, 0);
-      nxsem_set_protocol(&sem.sem, SEM_PRIO_NONE);
-
       do
         {
           ret = timerfd_blocking_io(dev, &sem, &dev->rdsems);

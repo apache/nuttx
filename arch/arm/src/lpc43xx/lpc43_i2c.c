@@ -533,12 +533,6 @@ struct i2c_master_s *lpc43_i2cbus_initialize(int port)
   nxmutex_init(&priv->lock);
   nxsem_init(&priv->wait, 0, 0);
 
-  /* The wait semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&priv->wait, SEM_PRIO_NONE);
-
   /* Attach Interrupt Handler */
 
   irq_attach(priv->irqid, lpc43_i2c_interrupt, priv);

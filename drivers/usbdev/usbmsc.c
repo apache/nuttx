@@ -1332,13 +1332,6 @@ int usbmsc_configure(unsigned int nluns, void **handle)
   nxmutex_init(&priv->thlock);
   nxsem_init(&priv->thwaitsem, 0, 0);
 
-  /* The thsynch and thwaitsem semaphores are used for signaling and, hence,
-   * should not have priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&priv->thsynch, SEM_PRIO_NONE);
-  nxsem_set_protocol(&priv->thwaitsem, SEM_PRIO_NONE);
-
   sq_init(&priv->wrreqlist);
   priv->nluns = nluns;
 

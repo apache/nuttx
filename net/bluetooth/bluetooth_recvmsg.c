@@ -365,12 +365,7 @@ ssize_t bluetooth_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       return ret;
     }
 
-  /* We will have to wait.  This semaphore is used for signaling and,
-   * hence, should not have priority inheritance enabled.
-   */
-
   nxsem_init(&state.ir_sem, 0, 0); /* Doesn't really fail */
-  nxsem_set_protocol(&state.ir_sem, SEM_PRIO_NONE);
 
   /* Set up the callback in the connection */
 

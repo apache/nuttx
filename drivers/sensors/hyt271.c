@@ -913,7 +913,6 @@ int hyt271_register(int devno, FAR struct i2c_master_s *i2c, uint8_t addr,
   nxmutex_init(&priv->lock_measure_cycle);
 #ifdef CONFIG_SENSORS_HYT271_POLL
   nxsem_init(&priv->run, 0, 0);
-  nxsem_set_protocol(&priv->run, SEM_PRIO_NONE);
 #endif
 
   /* Humidity register */

@@ -1727,7 +1727,6 @@ static ssize_t adb_char_read(FAR struct file *filep, FAR char *buffer,
 
       adb_char_waiter_sem_t sem;
       nxsem_init(&sem.sem, 0, 0);
-      nxsem_set_protocol(&sem.sem, SEM_PRIO_NONE);
 
       do
         {
@@ -1853,7 +1852,6 @@ static ssize_t adb_char_write(FAR struct file *filep,
 
       adb_char_waiter_sem_t sem;
       nxsem_init(&sem.sem, 0, 0);
-      nxsem_set_protocol(&sem.sem, SEM_PRIO_NONE);
 
       do
         {

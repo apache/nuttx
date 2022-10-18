@@ -212,8 +212,6 @@ static FAR struct rpmsg_socket_conn_s *rpmsg_socket_alloc(void)
   nxmutex_init(&conn->recvlock);
   nxsem_init(&conn->sendsem, 0, 0);
   nxsem_init(&conn->recvsem, 0, 0);
-  nxsem_set_protocol(&conn->sendsem, SEM_PRIO_NONE);
-  nxsem_set_protocol(&conn->recvsem, SEM_PRIO_NONE);
 
   conn->crefs = 1;
   return conn;

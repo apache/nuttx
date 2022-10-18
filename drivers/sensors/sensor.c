@@ -592,7 +592,6 @@ static int sensor_open(FAR struct file *filep)
   user->state.interval = ULONG_MAX;
   user->state.esize = upper->state.esize;
   nxsem_init(&user->buffersem, 0, 0);
-  nxsem_set_protocol(&user->buffersem, SEM_PRIO_NONE);
   list_add_tail(&upper->userlist, &user->node);
 
   /* The new user generation, notify to other users */

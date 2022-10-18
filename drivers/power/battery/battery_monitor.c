@@ -165,7 +165,6 @@ static int bat_monitor_open(FAR struct file *filep)
 
   nxmutex_init(&priv->lock);
   nxsem_init(&priv->wait, 0, 0);
-  nxsem_set_protocol(&priv->wait, SEM_PRIO_NONE);
   priv->mask = dev->mask;
   list_add_tail(&dev->flist, &priv->node);
   nxmutex_unlock(&dev->batlock);

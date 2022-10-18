@@ -2981,12 +2981,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
   priv->cs             = cs;
 
 #ifdef CONFIG_SAMA5_NAND_DMA
-  /* The waitsem semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
   nxsem_init(&priv->waitsem, 0, 0);
-  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 #endif
 
   /* Perform one-time, global NFC/PMECC initialization */
@@ -3000,12 +2995,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
 #endif
 
 #ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
-      /* The waitsem semaphore is used for signaling and, hence, should not
-       * have priority inheritance enabled.
-       */
-
       nxsem_init(&g_nand.waitsem, 0, 0);
-      nxsem_set_protocol(&g_nand.waitsem, SEM_PRIO_NONE);
 #endif
 
       /* Enable the NAND FLASH Controller (The NFC is always used) */

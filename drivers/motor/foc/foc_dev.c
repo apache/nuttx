@@ -850,7 +850,6 @@ int foc_register(FAR const char *path, FAR struct foc_dev_s *dev)
 
   nxmutex_init(&dev->closelock);
   nxsem_init(&dev->statesem, 0, 0);
-  nxsem_set_protocol(&dev->statesem, SEM_PRIO_NONE);
 
   /* Register the FOC character driver */
 

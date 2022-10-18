@@ -1224,12 +1224,6 @@ int tsc2007_register(FAR struct i2c_master_s *dev,
   nxmutex_init(&priv->devlock);     /* Initialize device structure mutex */
   nxsem_init(&priv->waitsem, 0, 0); /* Initialize pen event wait semaphore */
 
-  /* The event wait semaphore is used for signaling and, hence, should not
-   * have priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
-
   /* Make sure that interrupts are disabled */
 
   config->clear(config);

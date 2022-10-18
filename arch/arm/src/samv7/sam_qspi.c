@@ -1775,13 +1775,7 @@ struct qspi_dev_s *sam_qspi_initialize(int intf)
             }
         }
 
-      /* Initialize the QSPI semaphore that is used to wake up the waiting
-       * thread when the DMA transfer completes.  This semaphore is used for
-       * signaling and, hence, should not have priority inheritance enabled.
-       */
-
       nxsem_init(&priv->dmawait, 0, 0);
-      nxsem_set_protocol(&priv->dmawait, SEM_PRIO_NONE);
 #endif
 
 #ifdef QSPI_USE_INTERRUPTS

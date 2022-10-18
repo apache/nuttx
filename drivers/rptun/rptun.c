@@ -1284,8 +1284,6 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
       nxsem_init(&priv->semrx, 0, 0);
     }
 
-  nxsem_set_protocol(&priv->semrx, SEM_PRIO_NONE);
-
   snprintf(arg1, sizeof(arg1), "0x%" PRIxPTR, (uintptr_t)priv);
   argv[0] = (void *)RPTUN_GET_CPUNAME(dev);
   argv[1] = arg1;
@@ -1307,7 +1305,6 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
 #endif
 
   nxsem_init(&priv->semtx, 0, 0);
-  nxsem_set_protocol(&priv->semtx, SEM_PRIO_NONE);
 
   return OK;
 

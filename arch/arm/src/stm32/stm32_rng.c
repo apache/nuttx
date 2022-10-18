@@ -241,14 +241,7 @@ static ssize_t stm32_rng_read(struct file *filep, char *buffer,
 
   /* We've got the mutex. */
 
-  /* Initialize the operation semaphore with 0 for blocking until the
-   * buffer is filled from interrupts.  The readsem semaphore is used
-   * for signaling and, hence, should not have priority inheritance
-   * enabled.
-   */
-
   nxsem_init(&g_rngdev.rd_readsem, 0, 0);
-  nxsem_set_protocol(&g_rngdev.rd_readsem, SEM_PRIO_NONE);
 
   g_rngdev.rd_buflen = buflen;
   g_rngdev.rd_buf = buffer;

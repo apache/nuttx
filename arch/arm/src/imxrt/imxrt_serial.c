@@ -1459,7 +1459,6 @@ static int imxrt_dma_setup(struct uart_dev_s *dev)
             }
 
           nxsem_init(&priv->txdmasem, 0, 1);
-          nxsem_set_protocol(&priv->txdmasem, SEM_PRIO_NONE);
         }
 
       /* Enable Tx DMA for the UART */

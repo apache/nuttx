@@ -1285,7 +1285,6 @@ int mac802154netdev_register(MACHANDLE mac)
 
   priv->md_eventpending = false;
   nxsem_init(&priv->md_eventsem, 0, 0);
-  nxsem_set_protocol(&priv->md_eventsem, SEM_PRIO_NONE);
 
   sq_init(&priv->primitive_queue);
 

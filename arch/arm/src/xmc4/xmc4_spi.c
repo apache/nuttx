@@ -2065,14 +2065,7 @@ struct spi_dev_s *xmc4_spibus_initialize(int channel)
       spi->initialized = true;
 
 #ifdef CONFIG_XMC4_SPI_DMA
-
-      /* Initialize the SPI semaphore that is used to wake up the waiting
-       * thread when the DMA transfer completes.  This semaphore is used for
-       * signaling and, hence, should not have priority inheritance enabled.
-       */
-
       nxsem_init(&spics->dmawait, 0, 0);
-      nxsem_set_protocol(&spics->dmawait, SEM_PRIO_NONE);
 #endif
 
       spi_dumpregs(spi, "After initialization");

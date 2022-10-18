@@ -2747,12 +2747,6 @@ struct sdio_dev_s *sdio_initialize(int slotno)
 
   nxsem_init(&priv->waitsem, 0, 0);
 
-  /* The waitsem semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
-
 #ifdef CONFIG_LPC17_40_SDCARD_DMA
   /* Configure the SDCARD DMA request */
 

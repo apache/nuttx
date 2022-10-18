@@ -119,7 +119,6 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
   if (pool->wait && pool->nexpand == 0)
     {
       nxsem_init(&pool->waitsem, 0, 0);
-      nxsem_set_protocol(&pool->waitsem, SEM_PRIO_NONE);
     }
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL

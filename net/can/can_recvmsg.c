@@ -581,13 +581,7 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   /* Initialize the state structure. */
 
   memset(&state, 0, sizeof(struct can_recvfrom_s));
-
-  /* This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
   nxsem_init(&state.pr_sem, 0, 0); /* Doesn't really fail */
-  nxsem_set_protocol(&state.pr_sem, SEM_PRIO_NONE);
 
   state.pr_buflen = msg->msg_iov->iov_len;
   state.pr_buffer = msg->msg_iov->iov_base;

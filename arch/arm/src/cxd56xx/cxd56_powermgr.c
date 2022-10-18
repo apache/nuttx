@@ -837,14 +837,12 @@ int cxd56_pm_initialize(void)
     }
 
   ret = nxsem_init(&g_freqlockwait, 0, 0);
-  nxsem_set_protocol(&g_freqlockwait, SEM_PRIO_NONE);
   if (ret < 0)
     {
       return ret;
     }
 
   ret = nxsem_init(&g_bootsync, 0, 0);
-  nxsem_set_protocol(&g_bootsync, SEM_PRIO_NONE);
   if (ret < 0)
     {
       return ret;

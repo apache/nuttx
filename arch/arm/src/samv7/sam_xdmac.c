@@ -1566,12 +1566,6 @@ void sam_dmainitialize(struct sam_xdmac_s *xdmac)
 
   nxmutex_init(&xdmac->chlock);
   nxsem_init(&xdmac->dsem, 0, SAMV7_NDMACHAN);
-
-  /* The 'dsem' is used for signaling rather than mutual exclusion and,
-   * hence, should not have priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&xdmac->dsem, SEM_PRIO_NONE);
 }
 
 /****************************************************************************

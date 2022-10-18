@@ -1097,14 +1097,7 @@ int stm32_dma2dinitialize(void)
        */
 
       nxmutex_init(&g_lock);
-
-      /* Initialize the semaphore for interrupt handling.  This waitsem
-       * semaphore is used for signaling and, hence, should not have
-       * priority inheritance enabled.
-       */
-
       nxsem_init(g_interrupt.sem, 0, 0);
-      nxsem_set_protocol(g_interrupt.sem, SEM_PRIO_NONE);
 
 #ifdef CONFIG_STM32F7_FB_CMAP
       /* Enable dma2d transfer and clut loading interrupts only */

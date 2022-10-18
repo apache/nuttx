@@ -1443,7 +1443,6 @@ struct sdio_dev_s *sdio_initialize(int slotno)
   mcinfo("slotno: %d\n", slotno);
 
   nxsem_init(&priv->waitsem, 0, 0);
-  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 
   litex_reset(&priv->dev);
   return &g_sdiodev.dev;

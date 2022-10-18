@@ -292,7 +292,6 @@ void cxd56_farapiinitialize(void)
 #endif
   nxmutex_init(&g_farlock);
   nxsem_init(&g_farwait, 0, 0);
-  nxsem_set_protocol(&g_farwait, SEM_PRIO_NONE);
 
   cxd56_iccinit(CXD56_PROTO_MBX);
   cxd56_iccinit(CXD56_PROTO_FLG);

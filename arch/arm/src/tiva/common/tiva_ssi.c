@@ -1599,12 +1599,7 @@ struct spi_dev_s *tiva_ssibus_initialize(int port)
   /* Initialize the state structure */
 
 #ifndef CONFIG_SSI_POLLWAIT
-  /* The xfrsem semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
   nxsem_init(&priv->xfrsem, 0, 0);
-  nxsem_set_protocol(&priv->xfrsem, SEM_PRIO_NONE);
 #endif
   nxmutex_init(&priv->lock);
 
