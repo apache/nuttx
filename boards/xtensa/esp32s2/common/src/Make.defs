@@ -24,6 +24,10 @@ ifeq ($(CONFIG_WATCHDOG),y)
   CSRCS += esp32s2_board_wdt.c
 endif
 
+ifeq ($(CONFIG_SENSORS_MAX6675),y)
+  CSRCS += esp32s2_max6675.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)
