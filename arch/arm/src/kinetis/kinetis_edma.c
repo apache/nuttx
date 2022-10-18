@@ -733,12 +733,6 @@ void weak_function arm_dma_initialize(void)
 #if CONFIG_KINETIS_EDMA_NTCD > 0
   nxsem_init(&g_edma.dsem, 0, CONFIG_KINETIS_EDMA_NTCD);
 
-  /* The 'dsem' is used for signaling rather than mutual exclusion and,
-   * hence, should not have priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&g_edma.dsem, SEM_PRIO_NONE);
-
   /* Initialize the list of free TCDs from the pool of pre-allocated TCDs. */
 
   kinetis_tcd_initialize();

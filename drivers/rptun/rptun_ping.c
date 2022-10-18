@@ -109,7 +109,6 @@ static int rptun_ping_once(FAR struct rpmsg_endpoint *ept,
       msg->cookie = (uintptr_t)&sem;
 
       nxsem_init(&sem, 0, 0);
-      nxsem_set_protocol(&sem, SEM_PRIO_NONE);
 
       ret = rpmsg_send_nocopy(ept, msg, len);
       if (ret >= 0)

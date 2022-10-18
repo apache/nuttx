@@ -2213,26 +2213,13 @@ static void rspi_bus_initialize(FAR struct rx65n_rspidev_s *priv)
 
 #ifdef CONFIG_RX65N_RSPI_SW_DT_MODE
 #ifndef CONFIG_SPI_POLLWAIT
-  /* Initialize the semaphore that is used to wake up the waiting
-   * thread when the transfer completes.  This semaphore is used for
-   * signaling and, hence, should not have priority inheritance enabled.
-   */
-
   nxsem_init(&priv->waitsem, 0, 0);
-  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 #endif
 #elif defined(CONFIG_RX65N_RSPI_DTC_DT_MODE)
   /* Initialize the SPI semaphores that is used to wait for DTC completion */
 
   nxsem_init(&priv->rxsem, 0, 0);
   nxsem_init(&priv->txsem, 0, 0);
-
-  /* These semaphores are used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&priv->rxsem, SEM_PRIO_NONE);
-  nxsem_set_protocol(&priv->txsem, SEM_PRIO_NONE);
 
   /* Prepare Transmit and receive parameter */
 

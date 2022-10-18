@@ -818,7 +818,6 @@ struct spi_dev_s *rp2040_spibus_initialize(int port)
 
 #ifdef CONFIG_RP2040_SPI_DMA
   nxsem_init(&priv->dmasem, 0, 0);
-  nxsem_set_protocol(&priv->dmasem, SEM_PRIO_NONE);
 
   priv->txdmach = rp2040_dmachannel();
   txconf.size = RP2040_DMA_SIZE_BYTE;

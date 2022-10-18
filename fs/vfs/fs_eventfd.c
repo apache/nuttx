@@ -313,8 +313,6 @@ static ssize_t eventfd_do_read(FAR struct file *filep, FAR char *buffer,
 
       eventfd_waiter_sem_t sem;
       nxsem_init(&sem.sem, 0, 0);
-      nxsem_set_protocol(&sem.sem, SEM_PRIO_NONE);
-
       do
         {
           ret = eventfd_blocking_io(dev, &sem, &dev->rdsems);
@@ -398,8 +396,6 @@ static ssize_t eventfd_do_write(FAR struct file *filep,
 
       eventfd_waiter_sem_t sem;
       nxsem_init(&sem.sem, 0, 0);
-      nxsem_set_protocol(&sem.sem, SEM_PRIO_NONE);
-
       do
         {
           ret = eventfd_blocking_io(dev, &sem, &dev->wrsems);

@@ -231,7 +231,6 @@ static inline int cxd56_sphdevinit(const char *devname, int num)
     }
 
   nxsem_init(&priv->wait, 0, 0);
-  nxsem_set_protocol(&priv->wait, SEM_PRIO_NONE);
   priv->id = num;
 
   irq_attach(CXD56_IRQ_SPH0 + num, cxd56_sphirqhandler, NULL);

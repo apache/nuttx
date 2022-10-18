@@ -2831,12 +2831,6 @@ struct sdio_dev_s *lpc54_sdmmc_initialize(int slotno)
 
   nxsem_init(&priv->waitsem, 0, 0);
 
-  /* The waitsem semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
-
   /* Configure GPIOs for 4-bit, wide-bus operation */
 
   lpc54_gpio_config(GPIO_SD_D0);

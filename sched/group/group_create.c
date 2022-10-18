@@ -216,14 +216,9 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
 #endif
 
 #if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
-  /* Initialize the exit/wait semaphores
-   *
-   * This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
+  /* Initialize the exit/wait semaphores */
 
   nxsem_init(&group->tg_exitsem, 0, 0);
-  nxsem_set_protocol(&group->tg_exitsem, SEM_PRIO_NONE);
 #endif
 
   return OK;

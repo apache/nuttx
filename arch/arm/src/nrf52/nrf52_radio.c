@@ -1163,13 +1163,7 @@ nrf52_radio_initialize(int intf, struct nrf52_radio_board_s *board)
   /* Initialize mutex */
 
   nxmutex_init(&dev->lock);
-
-  /* This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
   nxsem_init(&dev->sem_isr, 0, 0);
-  nxsem_set_protocol(&dev->sem_isr, SEM_PRIO_NONE);
 
   /* Connect board-specific data */
 

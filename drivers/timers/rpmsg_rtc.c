@@ -328,7 +328,6 @@ static int rpmsg_rtc_send_recv(FAR struct rpmsg_rtc_lowerhalf_s *lower,
   int ret;
 
   nxsem_init(&cookie.sem, 0, 0);
-  nxsem_set_protocol(&cookie.sem, SEM_PRIO_NONE);
   cookie.msg = msg;
 
   msg->command = command;

@@ -269,7 +269,6 @@ static int ioe_rpmsg_sendrecv(FAR struct rpmsg_endpoint *ept,
     }
 
   nxsem_init(&cookie.sem, 0, 0);
-  nxsem_set_protocol(&cookie.sem, SEM_PRIO_NONE);
 
   msg->command = command;
   msg->result = -ENXIO;

@@ -1475,12 +1475,7 @@ struct spi_dev_s *nrf52_spibus_initialize(int port)
   nxmutex_init(&priv->lock);
 
 #ifdef CONFIG_NRF52_SPI_MASTER_INTERRUPTS
-  /* This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
   nxsem_init(&priv->sem_isr, 0, 0);
-  nxsem_set_protocol(&priv->sem_isr, SEM_PRIO_NONE);
 
   /* Attach SPI interrupt */
 

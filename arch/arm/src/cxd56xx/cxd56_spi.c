@@ -1332,7 +1332,6 @@ void cxd56_spi_dmaconfig(int port, int chtype, DMA_HANDLE handle,
           if (!priv->dmaenable)
             {
               nxsem_init(&priv->dmasem, 0, 0);
-              nxsem_set_protocol(&priv->dmasem, SEM_PRIO_NONE);
               priv->dmaenable = true;
             }
         }
@@ -1346,7 +1345,6 @@ void cxd56_spi_dmaconfig(int port, int chtype, DMA_HANDLE handle,
           if (!priv->dmaenable)
             {
               nxsem_init(&priv->dmasem, 0, 0);
-              nxsem_set_protocol(&priv->dmasem, SEM_PRIO_NONE);
               priv->dmaenable = true;
             }
         }

@@ -112,13 +112,7 @@ FAR struct mld_group_s *mld_grpalloc(FAR struct net_driver_s *dev,
       /* Initialize the non-zero elements of the group structure */
 
       net_ipv6addr_copy(group->grpaddr, addr);
-
-      /* This semaphore is used for signaling and, hence, should not have
-       * priority inheritance enabled.
-       */
-
       nxsem_init(&group->sem, 0, 0);
-      nxsem_set_protocol(&group->sem, SEM_PRIO_NONE);
 
       /* Save the interface index */
 

@@ -1250,7 +1250,6 @@ XBEEHANDLE xbee_init(FAR struct spi_dev_s *spi,
   nxmutex_init(&priv->atquery_lock);
   nxmutex_init(&priv->tx_lock);
   nxsem_init(&priv->txdone_sem, 0, 0);
-  nxsem_set_protocol(&priv->txdone_sem, SEM_PRIO_NONE);
 
   ieee802154_primitivepool_initialize();
 
@@ -1540,8 +1539,6 @@ int xbee_atquery(FAR struct xbee_priv_s *priv, FAR const char *atcommand)
    */
 
   nxsem_init(&priv->atresp_sem, 0, 0);
-  nxsem_set_protocol(&priv->atresp_sem, SEM_PRIO_NONE);
-
   do
     {
       /* There is a note in the XBee datasheet: Once you issue a WR command,

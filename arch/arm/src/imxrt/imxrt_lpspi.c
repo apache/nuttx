@@ -2053,9 +2053,6 @@ struct spi_dev_s *imxrt_lpspibus_initialize(int bus)
           nxsem_init(&priv->rxsem, 0, 0);
           nxsem_init(&priv->txsem, 0, 0);
 
-          nxsem_set_protocol(&priv->rxsem, SEM_PRIO_NONE);
-          nxsem_set_protocol(&priv->txsem, SEM_PRIO_NONE);
-
           priv->txdma = imxrt_dmach_alloc(priv->txch | DMAMUX_CHCFG_ENBL,
                                             0);
           priv->rxdma = imxrt_dmach_alloc(priv->rxch | DMAMUX_CHCFG_ENBL,

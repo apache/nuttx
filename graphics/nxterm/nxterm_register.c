@@ -80,12 +80,7 @@ FAR struct nxterm_state_s *
 #endif
 
 #ifdef CONFIG_NXTERM_NXKBDIN
-  /* The waitsem semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
   nxsem_init(&priv->waitsem, 0, 0);
-  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 #endif
 
   /* Connect to the font cache for the configured font characteristics */

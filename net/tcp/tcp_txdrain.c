@@ -100,7 +100,6 @@ int tcp_txdrain(FAR struct socket *psock, unsigned int timeout)
   /* Initialize the wait semaphore */
 
   nxsem_init(&waitsem, 0, 0);
-  nxsem_set_protocol(&waitsem, SEM_PRIO_NONE);
 
   /* The following needs to be done with the network stable */
 

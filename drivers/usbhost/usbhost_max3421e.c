@@ -4703,14 +4703,6 @@ static inline int max3421e_sw_initialize(FAR struct max3421e_usbhost_s *priv,
 
   nxrmutex_init(&priv->lock);
 
-  /* The pscsem and waitsem semaphores are used for signaling and, hence,
-   * should not have
-   * priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&priv->pscsem, SEM_PRIO_NONE);
-  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
-
   /* Initialize the driver state data */
 
   priv->lower     = lower;

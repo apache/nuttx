@@ -5264,12 +5264,6 @@ static inline void efm32_sw_initialize(struct efm32_usbhost_s *priv)
   nxsem_init(&priv->pscsem,  0, 0);
   nxmutex_init(&priv->lock);
 
-  /* The pscsem semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&priv->pscsem, SEM_PRIO_NONE);
-
   /* Initialize the driver state data */
 
   priv->smstate   = SMSTATE_DETACHED;
@@ -5287,13 +5281,7 @@ static inline void efm32_sw_initialize(struct efm32_usbhost_s *priv)
       struct efm32_chan_s *chan = &priv->chan[i];
 
       chan->chidx = i;
-
-      /* The waitsem semaphore is used for signaling and, hence, should not
-       * have priority inheritance enabled.
-       */
-
       nxsem_init(&chan->waitsem,  0, 0);
-      nxsem_set_protocol(&chan->waitsem, SEM_PRIO_NONE);
     }
 }
 

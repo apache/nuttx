@@ -942,7 +942,6 @@ int cxd56_emmcinitialize(void)
   memset(priv, 0, sizeof(struct cxd56_emmc_state_s));
   nxmutex_init(&priv->lock);
   nxsem_init(&g_waitsem, 0, 0);
-  nxsem_set_protocol(&g_waitsem, SEM_PRIO_NONE);
 
   ret = emmc_hwinitialize();
   if (ret != OK)

@@ -1448,7 +1448,6 @@ static void cmd_queue_init(void)
   DEBUGASSERT(ret >= 0);
 
   nxsem_init(&g_btdev.ncmd_sem, 0, 1);
-  nxsem_set_protocol(&g_btdev.ncmd_sem, SEM_PRIO_NONE);
 
   g_btdev.ncmd = 1;
   ret = kthread_create("BT HCI Tx", CONFIG_BLUETOOTH_TXCMD_PRIORITY,
@@ -1790,7 +1789,6 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
   /* Set up for the wait */
 
   nxsem_init(&sync_sem, 0, 0);
-  nxsem_set_protocol(&sync_sem, SEM_PRIO_NONE);
   buf->u.hci.sync = &sync_sem;
 
   /* Send the frame */

@@ -72,12 +72,7 @@ void arp_wait_setup(in_addr_t ipaddr, FAR struct arp_notify_s *notify)
   notify->nt_ipaddr = ipaddr;
   notify->nt_result = -ETIMEDOUT;
 
-  /* This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
   nxsem_init(&notify->nt_sem, 0, 0);
-  nxsem_set_protocol(&notify->nt_sem, SEM_PRIO_NONE);
 
   /* Add the wait structure to the list with interrupts disabled */
 

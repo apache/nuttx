@@ -1654,13 +1654,7 @@ int sam_tsd_register(struct sam_adc_s *adc, int minor)
   priv->adc     = adc;               /* Save the ADC device handle */
   priv->threshx = INVALID_THRESHOLD; /* Initialize thresholding logic */
   priv->threshy = INVALID_THRESHOLD; /* Initialize thresholding logic */
-
-  /* Initialize pen event wait semaphore.  This semaphore is used for
-   * signaling and, hence, should not have priority inheritance enabled.
-   */
-
   nxsem_init(&priv->waitsem, 0, 0);
-  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 
   /* Register the device as an input device */
 
