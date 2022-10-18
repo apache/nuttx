@@ -193,6 +193,14 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_STM32F7_CAN_SOCKET
+  ret = stm32_cansock_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_cansock_setup failed: %d\n", ret);
+    }
+#endif
+
 #if defined(CONFIG_I2C) && defined(CONFIG_STM32F7_I2C1)
   i2c_bus = 1;
   i2c = stm32_i2cbus_initialize(i2c_bus);
