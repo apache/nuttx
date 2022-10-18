@@ -1182,30 +1182,16 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
         {
           conn->sndcb = tcp_callback_alloc(conn);
 
-#ifdef CONFIG_DEBUG_ASSERTIONS
-          if (conn->sndcb != NULL)
+          /* Test if the callback has been allocated */
+
+          if (conn->sndcb == NULL)
             {
-              conn->sndcb_alloc_cnt++;
+              /* A buffer allocation error occurred */
 
-              /* The callback is allowed to be allocated only once.
-               * This is to catch a potential re-allocation after
-               * conn->sndcb was set to NULL.
-               */
-
-              DEBUGASSERT(conn->sndcb_alloc_cnt == 1);
+              nerr("ERROR: Failed to allocate callback\n");
+              ret = nonblock ? -EAGAIN : -ENOMEM;
+              goto errout_with_lock;
             }
-#endif
-        }
-
-      /* Test if the callback has been allocated */
-
-      if (conn->sndcb == NULL)
-        {
-          /* A buffer allocation error occurred */
-
-          nerr("ERROR: Failed to allocate callback\n");
-          ret = nonblock ? -EAGAIN : -ENOMEM;
-          goto errout_with_lock;
         }
 
       /* Set up the callback in the connection */

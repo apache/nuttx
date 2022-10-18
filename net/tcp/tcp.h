@@ -310,10 +310,6 @@ struct tcp_conn_s
   /* Callback instance for TCP send() */
 
   FAR struct devif_callback_s *sndcb;
-
-#ifdef CONFIG_DEBUG_ASSERTIONS
-  int sndcb_alloc_cnt;    /* The callback allocation counter */
-#endif
 #endif
 
   /* accept() is called when the TCP logic has created a connection
