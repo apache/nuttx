@@ -34,7 +34,10 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   cmake \
   g++ \
   gawk \
-  git
+  git \
+  libglib2.0-dev \
+  libpixman-1-dev \
+  ninja-build
 
 RUN mkdir /tools
 WORKDIR /tools
@@ -67,6 +70,13 @@ RUN mkdir -p $CARGO_HOME \
   && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
   && $CARGO_HOME/bin/rustup target add thumbv6m-none-eabi \
   && $CARGO_HOME/bin/rustup target add thumbv7m-none-eabi
+
+RUN mkdir qemu \
+  && curl -s -L "https://download.qemu.org/qemu-7.1.0.tar.xz" \
+  | tar -C qemu --strip-components 1 -xJ \
+  && cd qemu \
+  && ./configure --prefix=/tools/qemu/bin --target-list=arm-softmmu riscv32-softmmu riscv64-softmmu --disable-user \
+  && make && make install
 
 CMD [ "/bin/bash" ]
 
@@ -251,7 +261,6 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   unzip \
   wget \
   xxd \
-  qemu-system-arm \
   && rm -rf /var/lib/apt/lists/*
 
 # Configure out base setup for adding python packages
@@ -331,6 +340,10 @@ RUN pip3 install esptool
 # Renesas toolchain
 COPY --from=nuttx-toolchain-renesas /tools/renesas-toolchain/rx-elf-gcc/ renesas-toolchain/rx-elf-gcc/
 ENV PATH="/tools/renesas-toolchain/rx-elf-gcc/bin:$PATH"
+
+# qemu 
+COPY --from=nuttx-tools /tools/qemu/bin /tools/qemu/bin
+ENV PATH="/tools/qemu/bin:$PATH"
 
 # MCUboot's tool for image signing and key management
 RUN pip3 install imgtool
