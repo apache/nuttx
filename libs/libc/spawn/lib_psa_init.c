@@ -102,5 +102,9 @@ int posix_spawnattr_init(posix_spawnattr_t *attr)
 
   attr->stacksize           = CONFIG_TASK_SPAWN_DEFAULT_STACKSIZE;
 
+#ifndef CONFIG_BUILD_KERNEL
+  attr->stackaddr           = NULL;
+#endif
+
   return OK;
 }
