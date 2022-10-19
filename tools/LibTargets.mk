@@ -73,6 +73,12 @@ boards$(DELIM)libboards$(LIBEXT): pass2dep
 staging$(DELIM)libboards$(LIBEXT): boards$(DELIM)libboards$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
+$(ARCH_SRC)$(DELIM)board$(DELIM)libboard$(LIBEXT): pass2dep
+	$(Q) $(MAKE) -C $(ARCH_SRC)/board libboard$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
+
+staging$(DELIM)libboard$(LIBEXT): $(ARCH_SRC)$(DELIM)board$(DELIM)libboard$(LIBEXT)
+	$(Q) $(call INSTALL_LIB,$<,$@)
+
 crypto$(DELIM)libcrypto$(LIBEXT): pass2dep
 	$(Q) $(MAKE) -C crypto libcrypto$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
 

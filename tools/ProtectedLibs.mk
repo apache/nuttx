@@ -132,6 +132,12 @@ ifeq ($(CONFIG_OPENAMP),y)
 NUTTXLIBS += staging$(DELIM)libopenamp$(LIBEXT)
 endif
 
+# Add libraries for board common support
+
+ifeq ($(CONFIG_ARCH_BOARD_COMMON),y)
+NUTTXLIBS += staging$(DELIM)libboard$(LIBEXT)
+endif
+
 # Export only the user libraries
 
 EXPORTLIBS = $(USERLIBS)
