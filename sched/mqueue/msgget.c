@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/task/task_recover.c
+ * sched/mqueue/msgget.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,74 +22,63 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <assert.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/wdog.h>
-#include <nuttx/sched.h>
-
-#include "semaphore/semaphore.h"
-#include "wdog/wdog.h"
-#include "mqueue/mqueue.h"
-#include "pthread/pthread.h"
-#include "sched/sched.h"
-#include "task/task.h"
+#include "mqueue/msg.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxtask_recover
+ * Name: msgget
  *
  * Description:
- *   This function is called when a task is deleted via task_delete() or
- *   via pthread_cancel.  I checks checks for semaphores, message queue, and
- *   watchdog timer resources stranded in bad conditions.
+ *   Get a System V message queue identifier
+ *   The msgget() system call returns the System V message queue
+ *   identifier associated with the value of the key argument.  It may
+ *   be used either to obtain the identifier of a previously created
+ *   message queue (when msgflg is zero and key does not have the
+ *   value IPC_PRIVATE), or to create a new set.
  *
  * Input Parameters:
- *   tcb - The TCB of the terminated task or thread
+ *   key    - Key associated with the message queue
+ *   msgflg - Operations and permissions flag
  *
  * Returned Value:
- *   None.
- *
- * Assumptions:
- *   This function is called from task deletion logic in a safe context.
+ *   On success, msgget() returns the message queue identifier (a
+ *   nonnegative integer).  On failure, -1 is returned, and errno is
+ *   set to indicate the error.
  *
  ****************************************************************************/
 
-void nxtask_recover(FAR struct tcb_s *tcb)
+int msgget(key_t key, int msgflg)
 {
-#if !defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
-  /* Recover any mutexes still held by the canceled thread */
+  FAR struct msgq_s *msgq;
+  irqstate_t flags;
+  int ret = OK;
 
-  pthread_mutex_inconsistent(tcb);
-#endif
+  flags = enter_critical_section();
 
-  /* The task is being deleted.  Cancel in pending timeout events. */
-
-  wd_recover(tcb);
-
-  /* If the thread holds semaphore counts or is waiting for a semaphore
-   *  count, then release the counts.
-   */
-
-  nxsem_recover(tcb);
-
-#if !defined(CONFIG_DISABLE_MQUEUE) && !defined(CONFIG_DISABLE_MQUEUE_SYSV)
-  /* Handle cases where the thread was waiting for a message queue event */
-
-  nxmq_recover(tcb);
-#endif
-
-#ifdef CONFIG_SCHED_SPORADIC
-  if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
+  msgq = nxmsg_lookup(key);
+  if (msgq)
     {
-      /* Stop current sporadic scheduling */
-
-      DEBUGVERIFY(nxsched_stop_sporadic(tcb));
+      if ((msgflg & IPC_CREAT) && (msgflg & IPC_EXCL))
+        {
+          ret = -EEXIST;
+        }
     }
-#endif
+  else
+    {
+      ret = (key != IPC_PRIVATE && !(msgflg & IPC_CREAT)) ?
+            -ENOENT : nxmsg_alloc(&msgq);
+    }
+
+  leave_critical_section(flags);
+
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      return ERROR;
+    }
+
+  return msgq->key;
 }
