@@ -33,10 +33,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: task_spawnattr_getstacksize
+ * Name: posix_spawnattr_getstacksize
  *
  * Description:
- *   The task_spawnattr_getstacksize() function will obtain the value of
+ *   The posix_spawnattr_getstacksize() function will obtain the value of
  *   the spawn-stacksize attribute from the attributes object referenced
  *   by attr.
  *
@@ -50,8 +50,8 @@
  *
  ****************************************************************************/
 
-int task_spawnattr_getstacksize(FAR const posix_spawnattr_t *attr,
-                                FAR size_t *stacksize)
+int posix_spawnattr_getstacksize(FAR const posix_spawnattr_t *attr,
+                                 FAR size_t *stacksize)
 {
   DEBUGASSERT(attr && stacksize);
   *stacksize = attr->stacksize;

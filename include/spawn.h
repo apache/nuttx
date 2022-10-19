@@ -38,8 +38,8 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_TASK_SPAWN_DEFAULT_STACKSIZE
-#  define CONFIG_TASK_SPAWN_DEFAULT_STACKSIZE 2048
+#ifndef CONFIG_POSIX_SPAWN_DEFAULT_STACKSIZE
+#  define CONFIG_POSIX_SPAWN_DEFAULT_STACKSIZE 2048
 #endif
 
 /* "The spawn.h header shall define the flags that may be set in a
@@ -203,19 +203,19 @@ int posix_spawnattr_setsigmask(FAR posix_spawnattr_t *attr,
 
 /* Non-standard get/set spawn attributes interfaces */
 
-int task_spawnattr_getstacksize(FAR const posix_spawnattr_t *attr,
-                                FAR size_t *stacksize);
-int task_spawnattr_setstacksize(FAR posix_spawnattr_t *attr,
-                                size_t stacksize);
+int posix_spawnattr_getstacksize(FAR const posix_spawnattr_t *attr,
+                                 FAR size_t *stacksize);
+int posix_spawnattr_setstacksize(FAR posix_spawnattr_t *attr,
+                                 size_t stacksize);
 
 #ifndef CONFIG_BUILD_KERNEL
-int task_spawnattr_getstackaddr(FAR const posix_spawnattr_t *attr,
-                                FAR void **stackaddr);
-int task_spawnattr_setstackaddr(FAR posix_spawnattr_t *attr,
-                                FAR void *stackaddr);
+int posix_spawnattr_getstackaddr(FAR const posix_spawnattr_t *attr,
+                                 FAR void **stackaddr);
+int posix_spawnattr_setstackaddr(FAR posix_spawnattr_t *attr,
+                                 FAR void *stackaddr);
 #else
-#  define task_spawnattr_getstackaddr(attr, addr) (*(addr) = NULL, 0)
-#  define task_spawnattr_setstackaddr(attr, addr) (0)
+#  define posix_spawnattr_getstackaddr(attr, addr) (*(addr) = NULL, 0)
+#  define posix_spawnattr_setstackaddr(attr, addr) (0)
 #endif
 
 /* Non standard debug functions */
