@@ -82,6 +82,11 @@ int psock_socket(int domain, int type, int protocol,
   FAR const struct sock_intf_s *sockif = NULL;
   int ret;
 
+  if (type & ~(SOCK_CLOEXEC | SOCK_NONBLOCK | SOCK_TYPE_MASK))
+    {
+      return -EINVAL;
+    }
+
   /* Initialize the socket structure */
 
   psock->s_domain = domain;
