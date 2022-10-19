@@ -48,7 +48,7 @@ extern "C"
  * Name: esp32_i2c_register
  *
  * Description:
- *   registar an ESP32 I2C interface.
+ *   Register an ESP32 I2C interface.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned

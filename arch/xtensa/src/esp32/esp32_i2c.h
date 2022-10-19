@@ -43,6 +43,14 @@ extern "C"
 #define EXTERN extern
 #endif
 
+#ifdef CONFIG_ESP32_I2C0
+#  define ESP32_I2C0 0
+#endif /* CONFIG_ESP32_I2C0 */
+
+#ifdef CONFIG_ESP32_I2C1
+#  define ESP32_I2C1 1
+#endif /* CONFIG_ESP32_I2C1 */
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
