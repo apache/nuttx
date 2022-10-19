@@ -1809,23 +1809,15 @@ FAR const struct sock_intf_s *
     }
   else
 #endif
-#ifdef NET_UDP_HAVE_STACK
-  if (type == SOCK_DGRAM && (protocol == 0 || protocol == IPPROTO_UDP))
+#if defined(NET_UDP_HAVE_STACK) || defined(NET_TCP_HAVE_STACK)
     {
       return &g_inet_sockif;
     }
-  else
-#endif
-#ifdef NET_TCP_HAVE_STACK
-  if (type == SOCK_STREAM && (protocol == 0 || protocol == IPPROTO_TCP))
-    {
-      return &g_inet_sockif;
-    }
-  else
-#endif
+#else
     {
       return NULL;
     }
+#endif
 }
 
 #endif /* HAVE_INET_SOCKETS */
