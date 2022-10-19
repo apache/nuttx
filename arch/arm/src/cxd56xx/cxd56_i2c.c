@@ -105,7 +105,7 @@ static struct cxd56_i2cdev_s g_i2c0dev =
   .base = CXD56_SCU_I2C0_BASE,
   .irqid = CXD56_IRQ_SCU_I2C0,
   .lock = NXMUTEX_INITIALIZER,
-  .wait = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .wait = SEM_INITIALIZER(0),
   .refs = 0,
 };
 #endif
@@ -116,7 +116,7 @@ static struct cxd56_i2cdev_s g_i2c1dev =
   .base = CXD56_SCU_I2C1_BASE,
   .irqid = CXD56_IRQ_SCU_I2C1,
   .lock = NXMUTEX_INITIALIZER,
-  .wait = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .wait = SEM_INITIALIZER(0),
   .refs = 0,
 };
 #endif
@@ -127,7 +127,7 @@ static struct cxd56_i2cdev_s g_i2c2dev =
   .base = CXD56_I2CM_BASE,
   .irqid = CXD56_IRQ_I2CM,
   .lock = NXMUTEX_INITIALIZER,
-  .wait = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .wait = SEM_INITIALIZER(0),
   .refs = 0,
 };
 #endif

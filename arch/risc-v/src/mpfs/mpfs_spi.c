@@ -233,7 +233,7 @@ static struct mpfs_spi_priv_s g_mpfs_spi0_priv =
   .id                = 0,
   .devid             = 0,
   .lock              = NXMUTEX_INITIALIZER,
-  .sem_isr           = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .sem_isr           = SEM_INITIALIZER(0),
 };
 #endif /* CONFIG_MPFS_SPI0 */
 
@@ -279,7 +279,7 @@ static struct mpfs_spi_priv_s g_mpfs_spi1_priv =
   .id                = 1,
   .devid             = 1,
   .lock              = NXMUTEX_INITIALIZER,
-  .sem_isr           = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .sem_isr           = SEM_INITIALIZER(0),
 };
 
 #endif /* CONFIG_MPFS_SPI1 */

@@ -185,7 +185,7 @@ static struct stm32_1wire_priv_s stm32_1wire1_priv =
   .config     = &stm32_1wire1_config,
   .refs       = 0,
   .lock       = NXMUTEX_INITIALIZER,
-  .sem_isr    = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .sem_isr    = SEM_INITIALIZER(0),
   .msgs       = NULL
 };
 
@@ -206,7 +206,7 @@ static struct stm32_1wire_priv_s stm32_1wire2_priv =
   .config   = &stm32_1wire2_config,
   .refs     = 0,
   .lock     = NXMUTEX_INITIALIZER,
-  .sem_isr  = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .sem_isr  = SEM_INITIALIZER(0),
   .msgs     = NULL
 };
 
@@ -227,7 +227,7 @@ static struct stm32_1wire_priv_s stm32_1wire3_priv =
   .config   = &stm32_1wire3_config,
   .refs     = 0,
   .lock     = NXMUTEX_INITIALIZER,
-  .sem_isr  = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .sem_isr  = SEM_INITIALIZER(0),
   .msgs     = NULL
 };
 
@@ -248,7 +248,7 @@ static struct stm32_1wire_priv_s stm32_1wire4_priv =
   .config   = &stm32_1wire4_config,
   .refs     = 0,
   .lock     = NXMUTEX_INITIALIZER,
-  .sem_isr  = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .sem_isr  = SEM_INITIALIZER(0),
   .msgs     = NULL
 };
 
@@ -269,7 +269,7 @@ static struct stm32_1wire_priv_s stm32_1wire5_priv =
   .config   = &stm32_1wire5_config,
   .refs     = 0,
   .lock     = NXMUTEX_INITIALIZER,
-  .sem_isr  = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .sem_isr  = SEM_INITIALIZER(0),
   .msgs     = NULL
 };
 
@@ -290,7 +290,7 @@ static struct stm32_1wire_priv_s stm32_1wire6_priv =
   .config   = &stm32_1wire6_config,
   .refs     = 0,
   .lock     = NXMUTEX_INITIALIZER,
-  .sem_isr  = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .sem_isr  = SEM_INITIALIZER(0),
   .msgs     = NULL
 };
 
@@ -311,7 +311,7 @@ static struct stm32_1wire_priv_s stm32_1wire7_priv =
   .config   = &stm32_1wire7_config,
   .refs     = 0,
   .lock     = NXMUTEX_INITIALIZER,
-  .sem_isr  = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .sem_isr  = SEM_INITIALIZER(0),
   .msgs     = NULL
 };
 
@@ -332,7 +332,7 @@ static struct stm32_1wire_priv_s stm32_1wire8_priv =
   .config   = &stm32_1wire8_config,
   .refs     = 0,
   .lock     = NXMUTEX_INITIALIZER,
-  .sem_isr  = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .sem_isr  = SEM_INITIALIZER(0),
   .msgs     = NULL
 };
 

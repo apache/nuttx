@@ -131,7 +131,7 @@ static struct nrf52_i2c_priv_s g_nrf52_i2c0_priv =
   .refs    = 0,
   .lock    = NXMUTEX_INITIALIZER,
 #ifndef CONFIG_I2C_POLLED
-  .sem_isr = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .sem_isr = SEM_INITIALIZER(0),
   .irq     = NRF52_IRQ_SPI_TWI_0,
 #endif
   .msgc    = 0,
@@ -156,7 +156,7 @@ static struct nrf52_i2c_priv_s g_nrf52_i2c1_priv =
   .refs    = 0,
   .lock    = NXMUTEX_INITIALIZER,
 #ifndef CONFIG_I2C_POLLED
-  .sem_isr = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .sem_isr = SEM_INITIALIZER(0),
   .irq     = NRF52_IRQ_SPI_TWI_1,
 #endif
   .msgc    = 0,

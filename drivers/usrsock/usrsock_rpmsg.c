@@ -69,7 +69,7 @@ static void usrsock_rpmsg_device_destroy(FAR struct rpmsg_device *rdev,
 
 static struct usrsock_rpmsg_s g_usrsock_rpmsg =
 {
-  NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE)
+  SEM_INITIALIZER(0)
 };
 
 /****************************************************************************

@@ -208,7 +208,7 @@ static struct lc823450_i2c_priv_s lc823450_i2c0_priv =
   .refs     = 0,
   .lock     = NXMUTEX_INITIALIZER,
 #ifndef CONFIG_I2C_POLLED
-  .sem_isr  = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .sem_isr  = SEM_INITIALIZER(0),
 #endif
   .irqstate = IRQSTATE_IDLE,
   .msgc     = 0,
@@ -238,7 +238,7 @@ static struct lc823450_i2c_priv_s lc823450_i2c1_priv =
   .refs     = 0,
   .lock     = NXMUTEX_INITIALIZER,
 #ifndef CONFIG_I2C_POLLED
-  .sem_isr  = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .sem_isr  = SEM_INITIALIZER(0),
 #endif
   .irqstate = IRQSTATE_IDLE,
   .msgc     = 0,

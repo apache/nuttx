@@ -277,7 +277,7 @@ static struct esp32_spi_priv_s esp32_spi2_priv =
   },
   .config  = &esp32_spi2_config,
   .lock    = NXMUTEX_INITIALIZER,
-  .sem_isr = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .sem_isr = SEM_INITIALIZER(0),
 };
 #endif /* CONFIG_ESP32_SPI2 */
 
@@ -353,7 +353,7 @@ static struct esp32_spi_priv_s esp32_spi3_priv =
   },
   .config  = &esp32_spi3_config,
   .lock    = NXMUTEX_INITIALIZER,
-  .sem_isr = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .sem_isr = SEM_INITIALIZER(0),
 };
 #endif /* CONFIG_ESP32_SPI3 */
 

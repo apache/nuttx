@@ -262,8 +262,7 @@ static char g_uart0txbuffer[UART0_TX_BUF_SIZE];
 #ifdef CONFIG_TLSR82_UART0_TXDMA
 static char g_uart0txdmabuf[UART0_TXDMA_BUF_SIZE + DMA_HEAD_LEN] \
 aligned_data(4);
-static sem_t g_uart0txdmasem = NXSEM_INITIALIZER(1,
-                                 PRIOINHERIT_FLAGS_DISABLE);
+static sem_t g_uart0txdmasem = SEM_INITIALIZER(1);
 #endif
 
 #ifdef CONFIG_TLSR82_UART0_RXDMA
