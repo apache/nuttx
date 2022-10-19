@@ -126,14 +126,13 @@ config POSIX_SPAWN_PROXY_STACKSIZE
 		descriptors.  This configuration item specifies the stack size
 		used for the proxy. Default: 1024 bytes.
 
-config TASK_SPAWN_DEFAULT_STACKSIZE
+config POSIX_SPAWN_DEFAULT_STACKSIZE
 	int "Default task_spawn Stack Size"
 	default DEFAULT_TASK_STACKSIZE
-	depends on !ARCH_ADDRENV
 	---help---
 		The actual size to use for the child task's stack can be set with
-		task_spawnattr_setstacksize().  This value specifies the default
-		stack size to use if task_spawnattr_setstacksize() is not used.
+		posix_spawnattr_setstacksize().  This value specifies the default
+		stack size to use if posix_spawnattr_setstacksize() is not used.
 		Default: 2048.
 
 endmenu # Program Execution Options
