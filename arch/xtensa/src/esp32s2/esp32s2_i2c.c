@@ -321,7 +321,7 @@ static struct esp32s2_i2c_priv_s g_esp32s2_i2c0_priv =
   .refs       = 0,
   .lock       = NXMUTEX_INITIALIZER,
 #ifndef CONFIG_I2C_POLLED
-  .sem_isr    = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .sem_isr    = SEM_INITIALIZER(0),
 #endif
   .i2cstate   = I2CSTATE_IDLE,
   .msgv       = NULL,
@@ -357,7 +357,7 @@ static struct esp32s2_i2c_priv_s g_esp32s2_i2c1_priv =
   .refs       = 0,
   .lock       = NXMUTEX_INITIALIZER,
 #ifndef CONFIG_I2C_POLLED
-  .sem_isr    = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .sem_isr    = SEM_INITIALIZER(0),
 #endif
   .i2cstate   = I2CSTATE_IDLE,
   .msgv       = NULL,

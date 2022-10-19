@@ -146,8 +146,7 @@ static struct ramlog_dev_s g_sysdev =
   CONFIG_RAMLOG_BUFSIZE,         /* rl_tail */
   NXMUTEX_INITIALIZER,           /* rl_lock */
 #  ifndef CONFIG_RAMLOG_NONBLOCKING
-  NXSEM_INITIALIZER(0,
-    PRIOINHERIT_FLAGS_DISABLE),  /* rl_waitsem */
+  SEM_INITIALIZER(0),           /* rl_waitsem */
 #  endif
   CONFIG_RAMLOG_BUFSIZE,         /* rl_bufsize */
   g_sysbuffer                    /* rl_buffer */

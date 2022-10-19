@@ -244,7 +244,7 @@ static struct rx65n_i2c_priv_s rx65n_riic0_priv =
   .bus       = 0,
   .lock      = NXMUTEX_INITIALIZER,
 #ifndef CONFIG_I2C_POLLED
-  .sem_isr   = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .sem_isr   = SEM_INITIALIZER(0),
 #endif
   .mode      = RIIC_NONE,
   .dev_sts   = RIIC_STS_NO_INIT,
@@ -279,7 +279,7 @@ static struct rx65n_i2c_priv_s rx65n_riic1_priv =
   .bus       = 1,
   .lock      = NXMUTEX_INITIALIZER,
 #ifndef CONFIG_I2C_POLLED
-  .sem_isr   = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .sem_isr   = SEM_INITIALIZER(0),
 #endif
   .mode      = RIIC_NONE,
   .dev_sts   = RIIC_STS_NO_INIT,
@@ -314,7 +314,7 @@ static struct rx65n_i2c_priv_s rx65n_riic2_priv =
   .bus       = 2,
   .lock      = NXMUTEX_INITIALIZER,
 #ifndef CONFIG_I2C_POLLED
-  .sem_isr   = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .sem_isr   = SEM_INITIALIZER(0),
 #endif
   .mode      = RIIC_NONE,
   .dev_sts   = RIIC_STS_NO_INIT,

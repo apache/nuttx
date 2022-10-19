@@ -191,7 +191,7 @@ static struct kinetis_i2cdev_s g_i2c0_dev =
   .config     = &kinetis_i2c0_config,
   .refs       = 0,
   .lock       = NXMUTEX_INITIALIZER,
-  .wait       = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .wait       = SEM_INITIALIZER(0),
   .state      = STATE_OK,
   .msgs       = NULL,
 };
@@ -214,7 +214,7 @@ static struct kinetis_i2cdev_s g_i2c1_dev =
   .config     = &kinetis_i2c1_config,
   .refs       = 0,
   .lock       = NXMUTEX_INITIALIZER,
-  .wait       = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .wait       = SEM_INITIALIZER(0),
   .state      = STATE_OK,
   .msgs       = NULL,
 };
@@ -237,7 +237,7 @@ static struct kinetis_i2cdev_s g_i2c2_dev =
   .config     = &kinetis_i2c2_config,
   .refs       = 0,
   .lock       = NXMUTEX_INITIALIZER,
-  .wait       = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .wait       = SEM_INITIALIZER(0),
   .state      = STATE_OK,
   .msgs       = NULL,
 };
@@ -260,7 +260,7 @@ static struct kinetis_i2cdev_s g_i2c3_dev =
   .config     = &kinetis_i2c3_config,
   .refs       = 0,
   .lock       = NXMUTEX_INITIALIZER,
-  .wait       = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .wait       = SEM_INITIALIZER(0),
   .state      = STATE_OK,
   .msgs       = NULL,
 };

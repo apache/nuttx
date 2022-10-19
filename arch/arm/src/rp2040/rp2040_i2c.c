@@ -96,7 +96,7 @@ static struct rp2040_i2cdev_s g_i2c0dev =
   .base = RP2040_I2C0_BASE,
   .irqid = RP2040_I2C0_IRQ,
   .lock = NXMUTEX_INITIALIZER,
-  .wait = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .wait = SEM_INITIALIZER(0),
   .refs = 0,
 };
 #endif
@@ -107,7 +107,7 @@ static struct rp2040_i2cdev_s g_i2c1dev =
   .base = RP2040_I2C1_BASE,
   .irqid = RP2040_I2C1_IRQ,
   .lock = NXMUTEX_INITIALIZER,
-  .wait = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .wait = SEM_INITIALIZER(0),
   .refs = 0,
 };
 #endif
