@@ -25,9 +25,15 @@ CSRCS += mq_timedreceive.c mq_rcvinternal.c mq_initialize.c
 CSRCS += mq_msgfree.c mq_msgqalloc.c mq_msgqfree.c mq_recover.c
 CSRCS += mq_setattr.c mq_waitirq.c mq_notify.c mq_getattr.c
 
+endif
+
+ifneq ($(CONFIG_DISABLE_MQUEUE_SYSV),y)
+
+CSRCS += msgctl.c msgget.c msginternal.c msgrcv.c msgsnd.c
+
+endif
+
 # Include mqueue build support
 
 DEPPATH += --dep-path mqueue
 VPATH += :mqueue
-
-endif

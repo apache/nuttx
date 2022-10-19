@@ -48,6 +48,7 @@
 #include "signal/signal.h"
 #include "semaphore/semaphore.h"
 #include "mqueue/mqueue.h"
+#include "mqueue/msg.h"
 #include "clock/clock.h"
 #include "timer/timer.h"
 #include "irq/irq.h"
@@ -575,10 +576,16 @@ void nx_start(void)
 
   nxsig_initialize();
 
-#ifndef CONFIG_DISABLE_MQUEUE
+#if !defined(CONFIG_DISABLE_MQUEUE) && !defined(CONFIG_DISABLE_MQUEUE_SYSV)
   /* Initialize the named message queue facility (if in link) */
 
   nxmq_initialize();
+#endif
+
+#ifndef CONFIG_DISABLE_MQUEUE_SYSV
+  /* Initialize the System V message queue facility (if in link) */
+
+  nxmsg_initialize();
 #endif
 
 #ifdef CONFIG_NET

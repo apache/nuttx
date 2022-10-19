@@ -34,6 +34,12 @@ config DISABLE_MQUEUE
 	bool "Disable POSIX message queue support"
 	default DEFAULT_SMALL
 
+config DISABLE_MQUEUE_SYSV
+	bool "Disable System V message queue support"
+	default DISABLE_MQUEUE
+	---help---
+		Disable System V message queue support
+
 config DISABLE_ENVIRON
 	bool "Disable environment variable support"
 	default DEFAULT_SMALL
@@ -1571,8 +1577,8 @@ config SIG_SIGWORK
 endmenu # Signal Numbers
 endmenu # Signal Configuration
 
-menu "POSIX Message Queue Options"
-	depends on !DISABLE_MQUEUE
+menu "Message Queue Options"
+	depends on !DISABLE_MQUEUE && !DISABLE_MQUEUE_SYSV
 
 config PREALLOC_MQ_MSGS
 	int "Number of pre-allocated messages"
