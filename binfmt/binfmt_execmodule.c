@@ -120,6 +120,7 @@ int exec_module(FAR const struct binary_s *binp,
   save_addrenv_t oldenv;
   FAR void *vheap;
 #endif
+  FAR void *stackaddr = NULL;
   pid_t pid;
   int ret;
 
@@ -189,14 +190,18 @@ int exec_module(FAR const struct binary_s *binp,
 
   /* Initialize the task */
 
+#ifndef CONFIG_BUILD_KERNEL
+  stackaddr = binp->stackaddr;
+#endif
+
   if (argv && argv[0])
     {
-      ret = nxtask_init(tcb, argv[0], binp->priority, NULL,
+      ret = nxtask_init(tcb, argv[0], binp->priority, stackaddr,
                         binp->stacksize, binp->entrypt, &argv[1], envp);
     }
   else
     {
-      ret = nxtask_init(tcb, filename, binp->priority, NULL,
+      ret = nxtask_init(tcb, filename, binp->priority, stackaddr,
                         binp->stacksize, binp->entrypt, argv, envp);
     }
 

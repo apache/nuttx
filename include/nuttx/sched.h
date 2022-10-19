@@ -961,8 +961,8 @@ void nxtask_uninit(FAR struct task_tcb_s *tcb);
  *
  ****************************************************************************/
 
-int nxtask_create(FAR const char *name,
-                  int priority, int stack_size, main_t entry,
+int nxtask_create(FAR const char *name, int priority,
+                  FAR void *stack_addr, int stack_size, main_t entry,
                   FAR char * const argv[], FAR char * const envp[]);
 
 /****************************************************************************

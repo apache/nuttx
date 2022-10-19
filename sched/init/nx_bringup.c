@@ -262,11 +262,11 @@ static inline void nx_start_application(void)
 #  ifdef CONFIG_BUILD_PROTECTED
   DEBUGASSERT(USERSPACE->us_entrypoint != NULL);
   ret = nxtask_create(CONFIG_INIT_ENTRYNAME, CONFIG_INIT_PRIORITY,
-                      CONFIG_INIT_STACKSIZE,
+                      NULL, CONFIG_INIT_STACKSIZE,
                       USERSPACE->us_entrypoint, argv, NULL);
 #  else
   ret = nxtask_create(CONFIG_INIT_ENTRYNAME, CONFIG_INIT_PRIORITY,
-                      CONFIG_INIT_STACKSIZE,
+                      NULL, CONFIG_INIT_STACKSIZE,
                       CONFIG_INIT_ENTRYPOINT, argv, NULL);
 #  endif
   DEBUGASSERT(ret > 0);

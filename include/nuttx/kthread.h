@@ -60,7 +60,7 @@ extern "C"
  * Input Parameters:
  *   name       - Name of the new task
  *   priority   - Priority of the new task
- *   stack_ptr  - Stack buffer of the new task
+ *   stack_addr - Stack buffer of the new task
  *   stack_size - Stack size of the new task
  *   entry      - Entry point of a new task
  *   arg        - A pointer to an array of input parameters.  The array
@@ -75,7 +75,7 @@ extern "C"
  ****************************************************************************/
 
 int kthread_create_with_stack(FAR const char *name, int priority,
-                              FAR void *stack_ptr, int stack_size,
+                              FAR void *stack_addr, int stack_size,
                               main_t entry, FAR char * const argv[]);
 
 /****************************************************************************

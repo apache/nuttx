@@ -98,6 +98,10 @@ struct binary_s
   uint8_t priority;                    /* Task execution priority */
   size_t stacksize;                    /* Size of the stack in bytes (unallocated) */
 
+#ifndef CONFIG_BUILD_KERNEL
+  FAR void *stackaddr;                 /* Task stack address */
+#endif
+
   /* Unload module callback */
 
   CODE int (*unload)(FAR struct binary_s *bin);

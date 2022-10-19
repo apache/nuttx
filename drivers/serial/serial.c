@@ -1604,7 +1604,7 @@ static void uart_launch_worker(void *arg)
 #ifdef CONFIG_TTY_LAUNCH_ENTRY
       nxtask_create(CONFIG_TTY_LAUNCH_ENTRYNAME,
                     CONFIG_TTY_LAUNCH_PRIORITY,
-                    CONFIG_TTY_LAUNCH_STACKSIZE,
+                    NULL, CONFIG_TTY_LAUNCH_STACKSIZE,
                     CONFIG_TTY_LAUNCH_ENTRYPOINT,
                     argv, NULL);
 #else
