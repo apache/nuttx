@@ -1533,7 +1533,7 @@ static int cxd56_gnss_set_signal(struct file *filep, unsigned long arg)
 
 success:
 err:
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
 #endif /* CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0 */
 
   return ret;
@@ -2667,7 +2667,7 @@ err1:
   nxsem_destroy(&priv->syncsem);
 err0:
 success:
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return ret;
 }
 
@@ -2715,7 +2715,7 @@ static int cxd56_gnss_close(struct file *filep)
     }
 
 errout:
-  nxsem_post(&priv->devsem);
+  nxmutex_unlock(&priv->devlock);
   return ret;
 }
 
@@ -3016,7 +3016,7 @@ static int cxd56_gnss_register(const char *devpath)
   ret = nxmutex_init(&priv->devlock);
   if (ret < 0)
     {
-      gnsserr("Failed to initialize gnss devsem!\n");
+      gnsserr("Failed to initialize gnss devlock!\n");
       goto err0;
     }
 
