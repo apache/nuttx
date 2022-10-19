@@ -35,3 +35,27 @@ config NET_USRSOCK_RPMSG_CPUNAME
 endmenu
 
 endif # NET_USRSOCK
+
+config NET_USRSOCK_RPMSG_SERVER
+	bool "RPMSG usrsock"
+	default n
+	depends on NET && RPTUN
+	---help---
+		Enable usrsock through rpmsg channel.
+
+if NET_USRSOCK_RPMSG_SERVER
+
+config NET_USRSOCK_RPMSG_SERVER_NSOCKS
+	int "The maximum number of socket descriptors for usrsock monitoring"
+	default 64
+	---help---
+		The maximum number of socket description for usrsosck monitoring.
+
+config NET_USRSOCK_RPMSG_SERVER_NIOVEC
+	int "The maximum number of I/O vector for reassemble buffer"
+	default 8
+	---help---
+		The maximum number of I/O vector for reassemble buffer.
+
+endif # NET_USRSOCK_RPMSG_SERVER
+

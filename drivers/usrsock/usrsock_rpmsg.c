@@ -25,8 +25,7 @@
 #include <nuttx/net/dns.h>
 #include <nuttx/rptun/openamp.h>
 #include <nuttx/semaphore.h>
-
-#include "usrsock_rpmsg.h"
+#include <nuttx/usrsock/usrsock_rpmsg.h>
 
 /****************************************************************************
  * Private Types
