@@ -186,6 +186,11 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
       ret = -ENXIO;
     }
 
+  if (ret == -EISDIR)
+    {
+      ret = dir_allocate(filep, desc.relpath);
+    }
+
   if (ret < 0)
     {
       goto errout_with_inode;
