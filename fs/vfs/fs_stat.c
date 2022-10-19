@@ -381,9 +381,9 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
 
       /* Determine the type of the inode */
 
-      /* Check for a mountpoint */
+      /* Check for a mountpoint and a pseudo dir */
 
-      if (INODE_IS_MOUNTPT(inode))
+      if (INODE_IS_MOUNTPT(inode) || INODE_IS_PSEUDODIR(inode))
         {
           buf->st_mode |= S_IFDIR;
         }
