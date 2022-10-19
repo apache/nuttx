@@ -407,7 +407,7 @@ static int inet_bind(FAR struct socket *psock,
   if (addrlen < minlen)
     {
       nerr("ERROR: Invalid address length: %d < %d\n", addrlen, minlen);
-      return -EBADF;
+      return -EINVAL;
     }
 
   /* Perform the binding depending on the protocol type */
