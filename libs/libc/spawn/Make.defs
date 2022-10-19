@@ -23,21 +23,17 @@
 CSRCS += lib_psfa_addaction.c lib_psfa_addclose.c lib_psfa_adddup2.c
 CSRCS += lib_psfa_addopen.c lib_psfa_destroy.c lib_psfa_init.c
 
-ifeq ($(CONFIG_DEBUG_FEATURES),y)
-CSRCS += lib_psfa_dump.c
-endif
-
 CSRCS += lib_psa_getflags.c lib_psa_getschedparam.c lib_psa_getschedpolicy.c
 CSRCS += lib_psa_init.c lib_psa_setflags.c lib_psa_setschedparam.c
 CSRCS += lib_psa_setschedpolicy.c lib_psa_getsigmask.c lib_psa_setsigmask.c
+CSRCS += lib_psa_getstackaddr.c lib_psa_setstackaddr.c
 
 ifneq ($(CONFIG_BUILD_KERNEL),y)
-CSRCS += lib_psa_getstackaddr.c lib_psa_setstackaddr.c
 CSRCS += lib_psa_getstacksize.c lib_psa_setstacksize.c
 endif
 
 ifeq ($(CONFIG_DEBUG_FEATURES),y)
-CSRCS += lib_psa_dump.c
+CSRCS += lib_psfa_dump.c lib_psa_dump.c
 endif
 
 # Add the spawn directory to the build
