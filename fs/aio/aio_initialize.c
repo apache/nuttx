@@ -49,8 +49,7 @@ static dq_queue_t g_aioc_free;
 
 /* This counting semaphore tracks the number of free AIO containers */
 
-static sem_t g_aioc_freesem = NXSEM_INITIALIZER(CONFIG_FS_NAIOC,
-                                                PRIOINHERIT_FLAGS_DISABLE);
+static sem_t g_aioc_freesem = SEM_INITIALIZER(CONFIG_FS_NAIOC);
 
 /* This binary lock supports exclusive access to the list of pending
  * asynchronous I/O.  g_aio_holder and a_aio_count support the reentrant

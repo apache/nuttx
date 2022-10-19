@@ -298,7 +298,7 @@ static struct esp32s3_spi_priv_s esp32s3_spi2_priv =
   .refs        = 0,
   .lock        = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_ESP32S3_SPI2_DMA
-  .sem_isr     = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .sem_isr     = SEM_INITIALIZER(0),
   .cpuint      = -ENOMEM,
   .dma_channel = -1,
 #endif

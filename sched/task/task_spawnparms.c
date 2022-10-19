@@ -44,7 +44,7 @@
 
 mutex_t g_spawn_parmlock = NXMUTEX_INITIALIZER;
 #ifndef CONFIG_SCHED_WAITPID
-sem_t g_spawn_execsem = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE);
+sem_t g_spawn_execsem = SEM_INITIALIZER(0);
 #endif
 struct spawn_parms_s g_spawn_parms;
 

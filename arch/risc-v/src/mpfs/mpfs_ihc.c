@@ -178,10 +178,8 @@ static struct rpmsg_device         *g_mpfs_rpmsg_device;
 static struct rpmsg_virtio_device  *g_mpfs_virtio_device;
 
 #ifndef CONFIG_MPFS_OPENSBI
-static sem_t  g_mpfs_ack_sig  = NXSEM_INITIALIZER(0,
-                                                  PRIOINHERIT_FLAGS_DISABLE);
-static sem_t  g_mpfs_rx_sig   = NXSEM_INITIALIZER(0,
-                                                  PRIOINHERIT_FLAGS_DISABLE);
+static sem_t  g_mpfs_ack_sig  = SEM_INITIALIZER(0);
+static sem_t  g_mpfs_rx_sig   = SEM_INITIALIZER(0);
 #endif
 static struct list_node g_dev_list = LIST_INITIAL_VALUE(g_dev_list);
 

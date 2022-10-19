@@ -74,7 +74,7 @@ struct usrsock_req_s
 static struct usrsock_req_s g_usrsock_req =
 {
   NXMUTEX_INITIALIZER,
-  NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  SEM_INITIALIZER(0),
   0,
   0,
   0,

@@ -250,7 +250,7 @@ static struct twi_dev_s g_twi0 =
 {
   .lock       = NXMUTEX_INITIALIZER,
 #ifndef CONFIG_I2C_POLLED
-  .waitsem    = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .waitsem    = SEM_INITIALIZER(0),
 #endif
 };
 #endif
@@ -276,7 +276,7 @@ static struct twi_dev_s g_twi1 =
 {
   .lock       = NXMUTEX_INITIALIZER,
 #ifndef CONFIG_I2C_POLLED
-  .waitsem    = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .waitsem    = SEM_INITIALIZER(0),
 #endif
 };
 #endif
@@ -302,7 +302,7 @@ static struct twi_dev_s g_twi2 =
 {
   .lock       = NXMUTEX_INITIALIZER,
 #ifndef CONFIG_I2C_POLLED
-  .waitsem    = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .waitsem    = SEM_INITIALIZER(0),
 #endif
 };
 #endif

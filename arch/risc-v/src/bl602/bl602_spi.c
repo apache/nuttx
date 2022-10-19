@@ -239,8 +239,8 @@ static struct bl602_spi_priv_s bl602_spi_priv =
   },
   .config     = &bl602_spi_config,
   .lock       = NXMUTEX_INITIALIZER,
-  .sem_isr_tx = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
-  .sem_isr_rx = NXSEM_INITIALIZER(0, PRIOINHERIT_FLAGS_DISABLE),
+  .sem_isr_tx = SEM_INITIALIZER(0),
+  .sem_isr_rx = SEM_INITIALIZER(0),
   .dma_rxchan = -1,
   .dma_txchan = -1,
 };
