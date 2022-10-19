@@ -221,6 +221,9 @@ extern "C"
 #ifndef CONFIG_BUILD_KERNEL
 int    task_create(FAR const char *name, int priority, int stack_size,
                    main_t entry, FAR char * const argv[]);
+int    task_create_with_stack(FAR const char *name, int priority,
+                              FAR void *stack_addr, int stack_size,
+                              main_t entry, FAR char * const argv[]);
 #endif
 int    task_delete(pid_t pid);
 int    task_restart(pid_t pid);

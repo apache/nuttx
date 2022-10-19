@@ -70,6 +70,9 @@ int binfmt_dumpmodule(FAR const struct binary_s *bin)
       binfo("  addrenv:   %p\n", bin->addrenv);
 #endif
       binfo("  stacksize: %zd\n", bin->stacksize);
+#ifndef CONFIG_BUILD_KERNEL
+      binfo("  stackaddr: %p\n", bin->stackaddr);
+#endif
       binfo("  unload:    %p\n", bin->unload);
     }
 

@@ -298,7 +298,7 @@ extern volatile spinlock_t g_cpu_tasklistlock;
  ****************************************************************************/
 
 int nxthread_create(FAR const char *name, uint8_t ttype, int priority,
-                    FAR void *stack_ptr, int stack_size, main_t entry,
+                    FAR void *stack_addr, int stack_size, main_t entry,
                     FAR char * const argv[], FAR char * const envp[]);
 
 /* Task list manipulation functions */
