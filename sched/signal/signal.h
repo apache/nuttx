@@ -163,10 +163,6 @@ _sa_handler_t      nxsig_default(FAR struct tcb_s *tcb, int signo,
 int                nxsig_default_initialize(FAR struct tcb_s *tcb);
 #endif
 
-/* sig_pending.c */
-
-sigset_t           nxsig_pendingset(FAR struct tcb_s *stcb);
-
 /* sig_dispatch.c */
 
 int                nxsig_tcbdispatch(FAR struct tcb_s *stcb,
