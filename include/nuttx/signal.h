@@ -32,6 +32,7 @@
 #include <signal.h>
 
 #include <nuttx/wqueue.h>
+#include <nuttx/sched.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -189,6 +190,24 @@ int nxsig_addset(FAR sigset_t *set, int signo);
  ****************************************************************************/
 
 int nxsig_delset(FAR sigset_t *set, int signo);
+
+/****************************************************************************
+ * Name: nxsig_pendingset
+ *
+ * Description:
+ *   Convert the list of pending signals into a signal set
+ *
+ * Input Parameters:
+ *   stcb - The specific tcb of return pending set.
+ *
+ * Returned Value:
+ *   Return the pending signal set.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+sigset_t nxsig_pendingset(FAR struct tcb_s *stcb);
 
 /****************************************************************************
  * Name: nxsig_procmask
