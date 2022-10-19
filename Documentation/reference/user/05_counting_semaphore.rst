@@ -105,6 +105,12 @@ different thread posts the semaphore. Priority inheritance should
 *never* be used in this signaling case. Subtle, strange behaviors may
 result.
 
+Semaphore does not support priority inheritance by default. If you need to
+use a semaphore as a mutex you need to change its default behavior.
+
+In user space, it is recommended to use pthread_mutex instead of
+semaphore for resource protection
+
 When priority inheritance is enabled with
 ``CONFIG_PRIORITY_INHERITANCE``, the default *protocol* for the
 semaphore will be to use priority inheritance. For signaling semaphores,
