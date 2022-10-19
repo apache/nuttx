@@ -126,7 +126,7 @@ static int nxtask_spawn_exec(FAR pid_t *pidp, FAR const char *name,
         }
 
       priority  = param.sched_priority;
-      stacksize = CONFIG_TASK_SPAWN_DEFAULT_STACKSIZE;
+      stacksize = CONFIG_POSIX_SPAWN_DEFAULT_STACKSIZE;
     }
 
   /* Start the task */
@@ -277,7 +277,7 @@ static int nxtask_spawn_proxy(int argc, FAR char *argv[])
  *   attr - If the value of the 'attr' parameter is NULL, the all default
  *     values for the POSIX spawn attributes will be used.  Otherwise, the
  *     attributes will be set according to the spawn flags.  The
- *     task_spawnattr_t spawn attributes object type is defined in spawn.h.
+ *     posix_spawnattr_t spawn attributes object type is defined in spawn.h.
  *     It will contains these attributes, not all of which are supported by
  *     NuttX:
  *

@@ -33,10 +33,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: task_spawnattr_setstacksize
+ * Name: posix_spawnattr_setstacksize
  *
  * Description:
- *   The task_spawnattr_setstacksize() function shall set the spawn-
+ *   The posix_spawnattr_setstacksize() function shall set the spawn-
  *   stacksize attribute in an initialized attributes object referenced
  *   by attr.
  *
@@ -50,8 +50,8 @@
  *
  ****************************************************************************/
 
-int task_spawnattr_setstacksize(FAR posix_spawnattr_t *attr,
-                                size_t stacksize)
+int posix_spawnattr_setstacksize(FAR posix_spawnattr_t *attr,
+                                 size_t stacksize)
 {
   DEBUGASSERT(attr);
   attr->stacksize = stacksize;

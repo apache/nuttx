@@ -87,9 +87,8 @@ Standard ``posix_spawn`` interfaces:
 Non-standard task control interfaces inspired by ``posix_spawn``:
 
   - :c:func:`task_spawn`
-  - :c:func:`task_spawnattr_getstacksize`
-  - :c:func:`task_spawnattr_setstacksize`
-  - :c:func:`posix_spawn_file_actions_init`
+  - :c:func:`posix_spawnattr_getstacksize`
+  - :c:func:`posix_spawnattr_setstacksize`
 
 Functions
 ---------
@@ -846,9 +845,9 @@ Functions
   **POSIX Compatibility:** This is a non-standard interface inspired by
   ``posix_spawn()``.
 
-.. c:function:: int task_spawnattr_getstacksize(FAR const posix_spawnattr_t *attr, FAR size_t *stacksize)
+.. c:function:: int posix_spawnattr_getstacksize(FAR const posix_spawnattr_t *attr, FAR size_t *stacksize)
 
-  The ``task_spawnattr_getstacksize()`` function will
+  The ``posix_spawnattr_getstacksize()`` function will
   obtain the value of the *spawn-stacksize* attribute from the attributes
   object referenced by ``attr``.
 
@@ -858,9 +857,9 @@ Functions
   :return: On success, this function returns 0; on failure it
     will return an error number from ``<errno.h>``
 
-.. c:function:: int task_spawnattr_setstacksize(FAR posix_spawnattr_t *attr, size_t stacksize)
+.. c:function:: int posix_spawnattr_setstacksize(FAR posix_spawnattr_t *attr, size_t stacksize)
 
-  The ``task_spawnattr_setstacksize()`` function will set
+  The ``posix_spawnattr_setstacksize()`` function will set
   the *spawn-stacksize* attribute in an initialized attributes object
   referenced by ``attr``.
 
