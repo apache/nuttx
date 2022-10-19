@@ -82,7 +82,7 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 
   if (!value)
     {
-      return -EINVAL;
+      return -EFAULT;
     }
 
   /* Process the options always handled locally */
