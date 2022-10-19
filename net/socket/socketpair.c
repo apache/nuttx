@@ -150,6 +150,11 @@ int socketpair(int domain, int type, int protocol, int sv[2])
       oflags |= O_CLOEXEC;
     }
 
+  if (type & SOCK_NONBLOCK)
+    {
+      oflags |= O_NONBLOCK;
+    }
+
   /* Allocate a socket descriptor */
 
   for (; j < 2; j++)
