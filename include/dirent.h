@@ -141,6 +141,7 @@ extern "C"
 
 int        closedir(FAR DIR *dirp);
 FAR DIR   *opendir(FAR const char *path);
+FAR DIR   *fdopendir(int fd);
 FAR struct dirent *readdir(FAR DIR *dirp);
 int        readdir_r(FAR DIR *dirp, FAR struct dirent *entry,
                      FAR struct dirent **result);
