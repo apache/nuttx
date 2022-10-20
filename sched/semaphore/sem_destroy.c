@@ -56,34 +56,29 @@
  *
  ****************************************************************************/
 
-int nxsem_destroy (FAR sem_t *sem)
+int nxsem_destroy(FAR sem_t *sem)
 {
-  /* Assure a valid semaphore is specified */
+  DEBUGASSERT(sem != NULL);
 
-  if (sem != NULL)
+  /* There is really no particular action that we need
+   * take to destroy a semaphore.  We will just reset
+   * the count to some reasonable value (0) and release
+   * ownership.
+   *
+   * Check if other threads are waiting on the semaphore.
+   * In this case, the behavior is undefined.  We will:
+   * leave the count unchanged but still return OK.
+   */
+
+  if (sem->semcount >= 0)
     {
-      /* There is really no particular action that we need
-       * take to destroy a semaphore.  We will just reset
-       * the count to some reasonable value (1) and release
-       * ownership.
-       *
-       * Check if other threads are waiting on the semaphore.
-       * In this case, the behavior is undefined.  We will:
-       * leave the count unchanged but still return OK.
-       */
-
-      if (sem->semcount >= 0)
-        {
-          sem->semcount = 1;
-        }
-
-      /* Release holders of the semaphore */
-
-      nxsem_destroyholder(sem);
-      return OK;
+      sem->semcount = 1;
     }
 
-  return -EINVAL;
+  /* Release holders of the semaphore */
+
+  nxsem_destroyholder(sem);
+  return OK;
 }
 
 /****************************************************************************
@@ -113,6 +108,14 @@ int nxsem_destroy (FAR sem_t *sem)
 int sem_destroy (FAR sem_t *sem)
 {
   int ret;
+
+  /* Assure a valid semaphore is specified */
+
+  if (sem == NULL)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
 
   ret = nxsem_destroy(sem);
   if (ret < 0)
