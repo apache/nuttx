@@ -218,10 +218,10 @@ int task_spawnattr_getstacksize(FAR const posix_spawnattr_t *attr,
 int task_spawnattr_setstacksize(FAR posix_spawnattr_t *attr,
                                 size_t stacksize);
 #else
-#  define task_spawnattr_getstackaddr(fa, addr) (*(addr) = NULL, 0)
-#  define task_spawnattr_setstackaddr(fa) (0)
-#  define task_spawnattr_getstacksize(fa, size) (*(size) = 0, 0)
-#  define task_spawnattr_setstacksize(fa) (0)
+#  define task_spawnattr_getstackaddr(attr, addr) (*(addr) = NULL, 0)
+#  define task_spawnattr_setstackaddr(attr, addr) (0)
+#  define task_spawnattr_getstacksize(attr, size) (*(size) = 0, 0)
+#  define task_spawnattr_setstacksize(attr, size) (0)
 #endif
 
 /* Non standard debug functions */
@@ -232,7 +232,7 @@ void posix_spawn_file_actions_dump(
 void posix_spawnattr_dump(FAR posix_spawnattr_t *attr);
 #else
 #  define posix_spawn_file_actions_dump(fa)
-#  define posix_spawnattr_dump(a)
+#  define posix_spawnattr_dump(attr)
 #endif
 
 #ifdef __cplusplus
