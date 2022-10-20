@@ -163,7 +163,7 @@ void mpu_configure_region(uintptr_t base, size_t size,
    * aligns with the size of the selected region."
    */
 
-  limit = (base + size) & MPU_RLAR_LIMIT_MASK;
+  limit = (base + size - 1) & MPU_RLAR_LIMIT_MASK;
   base &= MPU_RBAR_BASE_MASK;
 
   /* Select the region */
