@@ -196,43 +196,6 @@ static void noteram_record_taskname(pid_t pid, const char *name)
 #endif
 
 /****************************************************************************
- * Name: noteram_remove_taskname
- *
- * Description:
- *   Remove the task name info corresponding to the specified PID
- *
- * Input Parameters:
- *   PID - Task ID
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#if CONFIG_DRIVER_NOTERAM_TASKNAME_BUFSIZE > 0
-static void noteram_remove_taskname(pid_t pid)
-{
-  FAR struct noteram_taskname_info_s *ti;
-  size_t tilen;
-  char *src;
-  int sindex;
-
-  ti = noteram_find_taskname(pid);
-  if (ti == NULL)
-    {
-      return;
-    }
-
-  tilen = ti->size;
-  src = (char *)ti + tilen;
-  sindex = src - g_noteram_taskname.buffer;
-
-  memcpy(ti, src, g_noteram_taskname.buffer_used - sindex);
-  g_noteram_taskname.buffer_used -= tilen;
-}
-#endif
-
-/****************************************************************************
  * Name: noteram_get_taskname
  *
  * Description:
@@ -340,33 +303,6 @@ static inline unsigned int noteram_next(unsigned int ndx,
 }
 
 /****************************************************************************
- * Name: noteram_length
- *
- * Description:
- *   Length of data currently in circular buffer.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Length of data currently in circular buffer.
- *
- ****************************************************************************/
-
-static unsigned int noteram_length(void)
-{
-  unsigned int head = g_noteram_info.ni_head;
-  unsigned int tail = g_noteram_info.ni_tail;
-
-  if (tail > head)
-    {
-      head += CONFIG_DRIVER_NOTERAM_BUFSIZE;
-    }
-
-  return head - tail;
-}
-
-/****************************************************************************
  * Name: noteram_unread_length
  *
  * Description:
@@ -394,70 +330,55 @@ static unsigned int noteram_unread_length(void)
 }
 
 /****************************************************************************
- * Name: noteram_remove
+ * Name: noteram_current_available
  *
  * Description:
- *   Remove the variable length note from the tail of the circular buffer
+ *   Get contiguous unused size in circular buffer
  *
  * Input Parameters:
  *   None
  *
  * Returned Value:
- *   None
+ *   total unused size
  *
  * Assumptions:
  *   We are within a critical section.
  *
  ****************************************************************************/
 
-static void noteram_remove(void)
+static inline unsigned int noteram_current_available(unsigned int size)
 {
-  unsigned int tail;
-  unsigned int length;
+  unsigned int head = g_noteram_info.ni_head;
+  head += size;
 
-  /* Get the tail index of the circular buffer */
-
-  tail = g_noteram_info.ni_tail;
-  DEBUGASSERT(tail < CONFIG_DRIVER_NOTERAM_BUFSIZE);
-
-  /* Get the length of the note at the tail index */
-
-  length = g_noteram_info.ni_buffer[tail];
-  DEBUGASSERT(length <= noteram_length());
-
-#if CONFIG_DRIVER_NOTERAM_TASKNAME_BUFSIZE > 0
-  if (g_noteram_info.ni_buffer[noteram_next(tail, 1)] == NOTE_STOP)
+  if (head >= CONFIG_DRIVER_NOTERAM_BUFSIZE)
     {
-      uint8_t nc_pid[2];
-
-      /* The name of the task is no longer needed because the task is deleted
-       * and the corresponding notes are lost.
-       */
-
-#ifdef CONFIG_SMP
-      nc_pid[0] = g_noteram_info.ni_buffer[noteram_next(tail, 4)];
-      nc_pid[1] = g_noteram_info.ni_buffer[noteram_next(tail, 5)];
-#else
-      nc_pid[0] = g_noteram_info.ni_buffer[noteram_next(tail, 3)];
-      nc_pid[1] = g_noteram_info.ni_buffer[noteram_next(tail, 4)];
-#endif
-
-      noteram_remove_taskname(nc_pid[0] + (nc_pid[1] << 8));
-    }
-#endif
-
-  /* Increment the tail index to remove the entire note from the circular
-   * buffer.
-   */
-
-  if (g_noteram_info.ni_read == g_noteram_info.ni_tail)
-    {
-      /* The read index also needs increment. */
-
-      g_noteram_info.ni_read = noteram_next(tail, length);
+      size = head - CONFIG_DRIVER_NOTERAM_BUFSIZE;
     }
 
-  g_noteram_info.ni_tail = noteram_next(tail, length);
+  return size;
+}
+
+/****************************************************************************
+ * Name: noteram_total_unused
+ *
+ * Description:
+ *   Get the total unused size in circular buffer
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   total unused size
+ *
+ * Assumptions:
+ *   We are within a critical section.
+ *
+ ****************************************************************************/
+
+static inline unsigned int noteram_total_unused(void)
+{
+  return CONFIG_DRIVER_NOTERAM_BUFSIZE - noteram_unread_length();
 }
 
 /****************************************************************************
@@ -481,7 +402,7 @@ static ssize_t noteram_get(FAR uint8_t *buffer, size_t buflen)
 {
   FAR struct note_common_s *note;
   irqstate_t flags;
-  unsigned int remaining;
+  unsigned int real;
   unsigned int read;
   ssize_t notelen;
   size_t circlen;
@@ -523,22 +444,12 @@ static ssize_t noteram_get(FAR uint8_t *buffer, size_t buflen)
       goto errout_with_csection;
     }
 
-  /* Loop until the note has been transferred to the user buffer */
+  /* Read the note to the user buffer */
 
-  remaining = (unsigned int)notelen;
-  while (remaining > 0)
-    {
-      /* Copy the next byte at the read index */
-
-      *buffer++ = g_noteram_info.ni_buffer[read];
-
-      /* Adjust indices and counts */
-
-      read = noteram_next(read, 1);
-      remaining--;
-    }
-
-  g_noteram_info.ni_read = read;
+  g_noteram_info.ni_read = noteram_next(read, notelen);
+  real = noteram_current_available(notelen);
+  memcpy(buffer, &g_noteram_info.ni_buffer[read], real);
+  memcpy(buffer + real, g_noteram_info.ni_buffer, notelen - real);
 
 errout_with_csection:
   leave_critical_section(flags);
@@ -792,9 +703,8 @@ static int noteram_ioctl(struct file *filep, int cmd, unsigned long arg)
 
 void sched_note_add(FAR const void *note, size_t notelen)
 {
-  FAR const char *buf = note;
   unsigned int head;
-  unsigned int next;
+  unsigned int real;
   irqstate_t flags;
 
   flags = up_irq_save();
@@ -832,44 +742,21 @@ void sched_note_add(FAR const void *note, size_t notelen)
   DEBUGASSERT(note != NULL && notelen < CONFIG_DRIVER_NOTERAM_BUFSIZE);
   head = g_noteram_info.ni_head;
 
-  /* Loop until all bytes have been transferred to the circular buffer */
-
-  while (notelen > 0)
+  if (g_noteram_info.ni_overwrite == NOTERAM_MODE_OVERWRITE_DISABLE)
     {
-      /* Get the next head index.  Would it collide with the current tail
-       * index?
-       */
-
-      next = noteram_next(head, 1);
-      if (next == g_noteram_info.ni_tail)
+      unsigned int available = noteram_total_unused();
+      if (notelen > available)
         {
-          if (g_noteram_info.ni_overwrite == NOTERAM_MODE_OVERWRITE_DISABLE)
-            {
-              /* Stop recording if not in overwrite mode */
-
-              g_noteram_info.ni_overwrite = NOTERAM_MODE_OVERWRITE_OVERFLOW;
-
-#ifdef CONFIG_SMP
-              spin_unlock_wo_note(&g_noteram_lock);
-#endif
-              up_irq_restore(flags);
-              return;
-            }
-
-          /* Yes, then remove the note at the tail index */
-
-          noteram_remove();
+          notelen = available;
         }
-
-      /* Save the next byte at the head index */
-
-      g_noteram_info.ni_buffer[head] = *buf++;
-
-      head = next;
-      notelen--;
     }
 
-  g_noteram_info.ni_head = head;
+  /* Read all bytes to the circular buffer */
+
+  g_noteram_info.ni_head = noteram_next(head, notelen);
+  real = noteram_current_available(notelen);
+  memcpy(&g_noteram_info.ni_buffer[head], note, real);
+  memcpy(g_noteram_info.ni_buffer, note + real, notelen - real);
 
 #ifdef CONFIG_SMP
   spin_unlock_wo_note(&g_noteram_lock);
