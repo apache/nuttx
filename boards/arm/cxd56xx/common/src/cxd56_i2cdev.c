@@ -65,7 +65,5 @@ int board_i2cdev_initialize(int port)
       cxd56_i2cbus_uninitialize(i2c);
     }
 
-  cxd56_i2cbus_uninitialize(i2c);
-
   return ret;
 }
