@@ -252,6 +252,7 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   wget \
   xxd \
   qemu-system-arm \
+  qemu-system-misc \
   && rm -rf /var/lib/apt/lists/*
 
 # Configure out base setup for adding python packages
