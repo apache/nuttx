@@ -64,7 +64,7 @@ static int group_continue_handler(pid_t pid, FAR void *arg)
   rtcb = nxsched_get_tcb(pid);
   if (rtcb != NULL)
     {
-      nxsched_continue(rtcb);
+      up_unblock_task(rtcb);
     }
 
   /* Always return zero.  We need to visit each member of the group */
@@ -82,6 +82,7 @@ static int group_continue_handler(pid_t pid, FAR void *arg)
  * Description:
  *   Resume all members of the task group.  This is SIGCONT default signal
  *   action logic.
+ *   Note: this function should used within critical_section
  *
  * Input Parameters:
  *   tcb - TCB of the task to be retained.
