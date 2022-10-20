@@ -189,7 +189,7 @@ static void addentropy(FAR const uint32_t *buf, size_t n, bool inc_new)
 }
 
 /****************************************************************************
- * Name: getentropy
+ * Name: initentropy
  *
  * Description:
  *   Hash entropy pool to BLAKE2s context. This is an internal interface for
@@ -211,7 +211,7 @@ static void addentropy(FAR const uint32_t *buf, size_t n, bool inc_new)
  *
  ****************************************************************************/
 
-static void getentropy(FAR blake2s_state *S)
+static void initentropy(FAR blake2s_state *S)
 {
 #ifdef CONFIG_SCHED_CPULOAD
   struct cpuload_s load;
@@ -281,7 +281,7 @@ static void rng_reseed(void)
 
   /* Initialize with randomness from entropy pool */
 
-  getentropy(&g_rng.blake2xs.ctx);
+  initentropy(&g_rng.blake2xs.ctx);
 
   /* Absorb also the previous root */
 
