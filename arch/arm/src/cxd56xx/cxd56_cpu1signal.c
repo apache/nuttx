@@ -70,13 +70,15 @@ struct cxd56cpu1_info_s
  ****************************************************************************/
 
 static struct cxd56cpu1_info_s g_cpu1_info =
+{
+  INVALID_PROCESS_ID,
+  0,
   {
-    INVALID_PROCESS_ID,
-    0,
     {
       0
     }
-  };
+  }
+};
 
 /****************************************************************************
  * Private Functions
