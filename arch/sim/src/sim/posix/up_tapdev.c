@@ -189,10 +189,7 @@ void tapdev_init(int devidx, void *priv,
   struct ifreq ifr;
   int tapdevfd;
   int ret;
-
-#ifdef CONFIG_SIM_NET_BRIDGE
   int sockfd;
-#endif
 
   /* Open the tap device */
 
@@ -219,7 +216,6 @@ void tapdev_init(int devidx, void *priv,
 
   strncpy(gdevname[devidx], ifr.ifr_name, IFNAMSIZ);
 
-#ifdef CONFIG_SIM_NET_BRIDGE
   /* Get a socket with which to manipulate the tap device; the remaining
    * ioctl calls unfortunately won't work on the tap device fd.
    */
@@ -232,6 +228,7 @@ void tapdev_init(int devidx, void *priv,
       return;
     }
 
+#ifdef CONFIG_SIM_NET_BRIDGE
   /* Assign the tap device to a bridge */
 
   memset(&ifr, 0, sizeof(ifr));
@@ -248,6 +245,10 @@ void tapdev_init(int devidx, void *priv,
       close(tapdevfd);
       return;
     }
+#else
+  memset(&ifr, 0, sizeof(ifr));
+  strncpy(ifr.ifr_name, gdevname[devidx], IFNAMSIZ);
+#endif
 
   ret = ioctl(sockfd, SIOCGIFMTU, &ifr);
   close(sockfd);
@@ -262,7 +263,6 @@ void tapdev_init(int devidx, void *priv,
     {
       netdriver_setmtu(devidx, ifr.ifr_mtu);
     }
-#endif
 
   gtapdevfd[devidx] = tapdevfd;
   g_priv[devidx] = priv;

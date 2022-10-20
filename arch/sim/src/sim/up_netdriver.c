@@ -441,7 +441,7 @@ void netdriver_setmacaddr(int devidx, unsigned char *macaddr)
 
 void netdriver_setmtu(int devidx, int mtu)
 {
-  g_sim_dev[devidx].d_pktsize = mtu;
+  g_sim_dev[devidx].d_pktsize = mtu + ETH_HDRLEN;
 }
 
 void netdriver_loop(void)
