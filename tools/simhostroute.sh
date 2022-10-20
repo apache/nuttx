@@ -68,7 +68,7 @@ else
     ip route delete $IP_NUTTX/32
 
     # delete nat rules to clean up
-    iptables -t nat -A POSTROUTING -o $IF_HOST -j MASQUERADE
+    iptables -t nat -D POSTROUTING -o $IF_HOST -j MASQUERADE
     iptables -D FORWARD -i $IF_HOST -o $IF_BRIDGE -m state --state RELATED,ESTABLISHED -j ACCEPT
     iptables -D FORWARD -i $IF_BRIDGE -o $IF_HOST -j ACCEPT
 
