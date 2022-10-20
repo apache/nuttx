@@ -46,6 +46,7 @@
  *   task that is waiting on a message queue -- either for a queue to
  *   becoming not full (on mq_send and friends) or not empty (on mq_receive
  *   and friends).
+ *   Note: this function should used within critical_section
  *
  * Input Parameters:
  *   wtcb - A pointer to the TCB of the task that is waiting on a message
@@ -61,13 +62,6 @@
 void nxmq_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 {
   FAR struct mqueue_inode_s *msgq;
-  irqstate_t flags;
-
-  /* Disable interrupts.  This is necessary because an interrupt handler may
-   * attempt to send a message while we are doing this.
-   */
-
-  flags = enter_critical_section();
 
   /* It is possible that an interrupt/context switch beat us to the punch and
    * already changed the task's state.  NOTE:  The operations within the if
@@ -75,37 +69,29 @@ void nxmq_wait_irq(FAR struct tcb_s *wtcb, int errcode)
    * nwaitnotempty, and nwaitnotfull fields are modified.
    */
 
-  if (wtcb->task_state == TSTATE_WAIT_MQNOTEMPTY ||
-      wtcb->task_state == TSTATE_WAIT_MQNOTFULL)
+  /* Get the message queue associated with the waiter from the TCB */
+
+  msgq = wtcb->waitobj;
+  DEBUGASSERT(msgq);
+
+  /* Decrement the count of waiters and cancel the wait */
+
+  if (wtcb->task_state == TSTATE_WAIT_MQNOTEMPTY)
     {
-      /* Get the message queue associated with the waiter from the TCB */
-
-      msgq = wtcb->waitobj;
-      DEBUGASSERT(msgq);
-
-      /* Decrement the count of waiters and cancel the wait */
-
-      if (wtcb->task_state == TSTATE_WAIT_MQNOTEMPTY)
-        {
-          DEBUGASSERT(msgq->cmn.nwaitnotempty > 0);
-          msgq->cmn.nwaitnotempty--;
-        }
-      else
-        {
-          DEBUGASSERT(msgq->cmn.nwaitnotfull > 0);
-          msgq->cmn.nwaitnotfull--;
-        }
-
-      /* Mark the error value for the thread. */
-
-      wtcb->errcode = errcode;
-
-      /* Restart the task. */
-
-      up_unblock_task(wtcb);
+      DEBUGASSERT(msgq->cmn.nwaitnotempty > 0);
+      msgq->cmn.nwaitnotempty--;
+    }
+  else
+    {
+      DEBUGASSERT(msgq->cmn.nwaitnotfull > 0);
+      msgq->cmn.nwaitnotfull--;
     }
 
-  /* Interrupts may now be enabled. */
+  /* Mark the error value for the thread. */
 
-  leave_critical_section(flags);
+  wtcb->errcode = errcode;
+
+  /* Restart the task. */
+
+  up_unblock_task(wtcb);
 }
