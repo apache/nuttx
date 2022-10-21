@@ -98,7 +98,7 @@ int can_getsockopt(FAR struct socket *psock, int option,
             ret = -EINVAL;
           }
         else if (*value_len > CONFIG_NET_CAN_RAW_FILTER_MAX *
-                   sizeof(struct can_filter))
+                 sizeof(struct can_filter))
           {
             ret = -EINVAL;
           }
@@ -106,14 +106,14 @@ int can_getsockopt(FAR struct socket *psock, int option,
           {
             int count = conn->filter_count;
 
-          if (*value_len < count * sizeof(struct can_filter))
+            if (*value_len < count * sizeof(struct can_filter))
               {
                 count = *value_len / sizeof(struct can_filter);
               }
-          else
-            {
-              *value_len = count * sizeof(struct can_filter);
-            }
+            else
+              {
+                *value_len = count * sizeof(struct can_filter);
+              }
 
             for (int i = 0; i < count; i++)
               {
