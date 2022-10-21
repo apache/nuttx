@@ -37,7 +37,7 @@ EXTRA_PATH=
 
 case ${os} in
   Darwin)
-    install="arm-gcc-toolchain arm64-gcc-toolchain avr-gcc-toolchain binutils c-cache elf-toolchain gen-romfs kconfig-frontends python-tools riscv-gcc-toolchain rust xtensa-esp32-gcc-toolchain u-boot-tools"
+    install="arm-gcc-toolchain arm64-gcc-toolchain avr-gcc-toolchain binutils bloaty c-cache elf-toolchain gen-romfs kconfig-frontends python-tools riscv-gcc-toolchain rust xtensa-esp32-gcc-toolchain u-boot-tools"
     mkdir -p "${prebuilt}"/homebrew
     export HOMEBREW_CACHE=${prebuilt}/homebrew
     # https://github.com/actions/virtual-environments/issues/2322#issuecomment-749211076
@@ -46,7 +46,7 @@ case ${os} in
     brew update --quiet
     ;;
   Linux)
-    install="arm-clang-toolchain arm-gcc-toolchain arm64-gcc-toolchain c-cache clang_clang-tidy gen-romfs gperf kconfig-frontends mips-gcc-toolchain python-tools riscv-gcc-toolchain rust rx-gcc-toolchain sparc-gcc-toolchain xtensa-esp32-gcc-toolchain"
+    install="arm-clang-toolchain arm-gcc-toolchain arm64-gcc-toolchain bloaty c-cache clang_clang-tidy gen-romfs gperf kconfig-frontends mips-gcc-toolchain python-tools riscv-gcc-toolchain rust rx-gcc-toolchain sparc-gcc-toolchain xtensa-esp32-gcc-toolchain"
     ;;
 esac
 
