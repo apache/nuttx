@@ -46,7 +46,7 @@ case ${os} in
     brew update --quiet
     ;;
   Linux)
-    install="python-tools codechecker clang_clang-tidy gen-romfs gperf kconfig-frontends rust arm-gcc-toolchain arm64-gcc-toolchain mips-gcc-toolchain riscv-gcc-toolchain xtensa-esp32-gcc-toolchain rx-gcc-toolchain sparc-gcc-toolchain c-cache"
+    install="python-tools codechecker clang_clang-tidy gen-romfs gperf kconfig-frontends rust arm-clang-toolchain arm-gcc-toolchain arm64-gcc-toolchain mips-gcc-toolchain riscv-gcc-toolchain xtensa-esp32-gcc-toolchain rx-gcc-toolchain sparc-gcc-toolchain c-cache"
     ;;
 esac
 
@@ -167,6 +167,19 @@ function bloaty {
     cd "${prebuilt}"
     rm -rf bloaty-src
   fi
+}
+
+function arm-clang-toolchain {
+  add_path "${prebuilt}"/clang-arm-none-eabi/bin
+
+  if [ ! -f "${prebuilt}/clang-arm-none-eabi/bin/clang" ]; then
+    cd "${prebuilt}"
+    curl -O -L -s https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-14.0.0/LLVMEmbeddedToolchainForArm-14.0.0-linux.tar.gz
+    tar zxf LLVMEmbeddedToolchainForArm-14.0.0-linux.tar.gz
+    mv LLVMEmbeddedToolchainForArm-14.0.0 clang-arm-none-eabi
+    rm LLVMEmbeddedToolchainForArm-14.0.0-linux.tar.gz
+  fi
+  clang --version
 }
 
 function arm-gcc-toolchain {

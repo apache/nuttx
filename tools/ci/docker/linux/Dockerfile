@@ -87,6 +87,11 @@ RUN mkdir gcc-arm-none-eabi && \
   curl -s -L  "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2" \
   | tar -C gcc-arm-none-eabi --strip-components 1 -xj
 
+# Download the latest ARM clang toolchain prebuilt by ARM
+RUN mkdir clang-arm-none-eabi && \
+  curl -s -L  "https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-14.0.0/LLVMEmbeddedToolchainForArm-14.0.0-linux.tar.gz" \
+  | tar -C clang-arm-none-eabi --strip-components 1 -xz
+
 ###############################################################################
 # Build image for tool required by ARM64 builds
 ###############################################################################
@@ -296,6 +301,9 @@ ENV PATH="/tools/rust/cargo/bin:$PATH"
 # ARM toolchain
 COPY --from=nuttx-toolchain-arm /tools/gcc-arm-none-eabi/ gcc-arm-none-eabi/
 ENV PATH="/tools/gcc-arm-none-eabi/bin:$PATH"
+
+COPY --from=nuttx-toolchain-arm /tools/clang-arm-none-eabi/ clang-arm-none-eabi/
+ENV PATH="/tools/clang-arm-none-eabi/bin:$PATH"
 
 # ARM64 toolchain
 COPY --from=nuttx-toolchain-arm64 /tools/gcc-aarch64-none-elf/ gcc-aarch64-none-elf/
