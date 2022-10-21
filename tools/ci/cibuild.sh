@@ -37,7 +37,7 @@ EXTRA_PATH=
 
 case ${os} in
   Darwin)
-    install="python-tools u-boot-tools elf-toolchain gen-romfs kconfig-frontends rust arm-gcc-toolchain arm64-gcc-toolchain riscv-gcc-toolchain xtensa-esp32-gcc-toolchain avr-gcc-toolchain c-cache binutils"
+    install="arm-gcc-toolchain arm64-gcc-toolchain avr-gcc-toolchain binutils c-cache elf-toolchain gen-romfs kconfig-frontends python-tools riscv-gcc-toolchain rust xtensa-esp32-gcc-toolchain u-boot-tools"
     mkdir -p "${prebuilt}"/homebrew
     export HOMEBREW_CACHE=${prebuilt}/homebrew
     # https://github.com/actions/virtual-environments/issues/2322#issuecomment-749211076
@@ -46,125 +46,13 @@ case ${os} in
     brew update --quiet
     ;;
   Linux)
-    install="python-tools clang_clang-tidy gen-romfs gperf kconfig-frontends rust arm-clang-toolchain arm-gcc-toolchain arm64-gcc-toolchain mips-gcc-toolchain riscv-gcc-toolchain xtensa-esp32-gcc-toolchain rx-gcc-toolchain sparc-gcc-toolchain c-cache"
+    install="arm-clang-toolchain arm-gcc-toolchain arm64-gcc-toolchain c-cache clang_clang-tidy gen-romfs gperf kconfig-frontends mips-gcc-toolchain python-tools riscv-gcc-toolchain rust rx-gcc-toolchain sparc-gcc-toolchain xtensa-esp32-gcc-toolchain"
     ;;
 esac
 
 function add_path {
   PATH=$1:${PATH}
   EXTRA_PATH=$1:${EXTRA_PATH}
-}
-
-function python-tools {
-  # Python User Env
-  PIP_USER=yes
-  export PIP_USER
-  PYTHONUSERBASE=${prebuilt}/pylocal
-  export PYTHONUSERBASE
-  add_path "${PYTHONUSERBASE}"/bin
-  pip3 install CodeChecker
-  pip3 install cxxfilt
-  pip3 install esptool==3.3.1
-  pip3 install pexpect==4.8.0
-  pip3 install pyelftools
-  pip3 install pyserial==3.5
-  pip3 install pytest==6.2.5
-  pip3 install pytest-json==0.4.0
-  pip3 install pytest-ordering==0.6
-  pip3 install pytest-repeat==0.9.1
-
-  # MCUboot's tool for image signing and key management
-  if ! command -v imgtool &> /dev/null; then
-    pip3 install imgtool
-  fi
-}
-
-function clang_clang-tidy {
-  # Install Clang and Clang-Tidy for Ubuntu.
-  apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -qq \
-    -o APT::Immediate-Configure=0 \
-    clang \
-    clang-tidy
-}
-
-function u-boot-tools {
-  if ! type mkimage &> /dev/null; then
-    case ${os} in
-      Darwin)
-        brew install u-boot-tools
-        ;;
-    esac
-  fi
-}
-
-function elf-toolchain {
-  if ! type x86_64-elf-gcc &> /dev/null; then
-    case ${os} in
-      Darwin)
-        brew install x86_64-elf-gcc
-        ;;
-    esac
-  fi
-  x86_64-elf-gcc --version
-}
-
-function gen-romfs {
-  add_path "${prebuilt}"/genromfs/usr/bin
-
-  if [ ! -f "${prebuilt}/genromfs/usr/bin/genromfs" ]; then
-    if [ ! -d "${tools}" ]; then
-      git clone https://bitbucket.org/nuttx/tools.git "${tools}"
-    fi
-    mkdir -p "${prebuilt}"; cd "${tools}"
-    tar zxf genromfs-0.5.2.tar.gz -C "${prebuilt}"
-    cd "${prebuilt}"/genromfs-0.5.2
-    make install PREFIX="${prebuilt}"/genromfs
-    cd "${prebuilt}"
-    rm -rf genromfs-0.5.2
-  fi
-}
-
-function gperf {
-  add_path "${prebuilt}"/gperf/bin
-
-  if [ ! -f "${prebuilt}/gperf/bin/gperf" ]; then
-    cd "${prebuilt}"
-    wget --quiet http://ftp.gnu.org/pub/gnu/gperf/gperf-3.1.tar.gz
-    tar zxf gperf-3.1.tar.gz
-    cd "${prebuilt}"/gperf-3.1
-    ./configure --prefix="${prebuilt}"/gperf; make; make install
-    cd "${prebuilt}"
-    rm -rf gperf-3.1; rm gperf-3.1.tar.gz
-  fi
-}
-
-function kconfig-frontends {
-  add_path "${prebuilt}"/kconfig-frontends/bin
-
-  if [ ! -f "${prebuilt}/kconfig-frontends/bin/kconfig-conf" ]; then
-    cd "${tools}"/kconfig-frontends
-    ./configure --prefix="${prebuilt}"/kconfig-frontends \
-      --disable-kconfig --disable-nconf --disable-qconf \
-      --disable-gconf --disable-mconf --disable-static \
-      --disable-shared --disable-L10n
-    # Avoid "aclocal/automake missing" errors
-    touch aclocal.m4 Makefile.in
-    make install
-    cd "${tools}"; git clean -xfd
-  fi
-}
-
-function bloaty {
-  add_path "${prebuilt}"/bloaty/bin
-  if [ ! -f "${prebuilt}/bloaty/bin/bloaty" ]; then
-    git clone --depth 1 --branch v1.1 https://github.com/google/bloaty bloaty-src
-    cd bloaty-src
-    mkdir -p "${prebuilt}"/bloaty
-    cmake -DCMAKE_SYSTEM_PREFIX_PATH="${prebuilt}"/bloaty
-    make install -j 6
-    cd "${prebuilt}"
-    rm -rf bloaty-src
-  fi
 }
 
 function arm-clang-toolchain {
@@ -228,6 +116,133 @@ function arm64-gcc-toolchain {
   aarch64-none-elf-gcc --version
 }
 
+function avr-gcc-toolchain {
+  if ! type avr-gcc &> /dev/null; then
+    case ${os} in
+      Darwin)
+        brew tap osx-cross/avr
+        brew install avr-gcc
+        ;;
+    esac
+  fi
+}
+
+function binutils {
+  mkdir -p "${prebuilt}"/bintools/bin
+  add_path "${prebuilt}"/bintools/bin
+
+  if ! type objcopy &> /dev/null; then
+    case ${os} in
+      Darwin)
+        brew install binutils
+        # It is possible we cached prebuilt but did brew install so recreate
+        # symlink if it exists
+        rm -f "${prebuilt}"/bintools/bin/objcopy
+        ln -s /usr/local/opt/binutils/bin/objcopy "${prebuilt}"/bintools/bin/objcopy
+        ;;
+    esac
+  fi
+}
+
+function bloaty {
+  add_path "${prebuilt}"/bloaty/bin
+  if [ ! -f "${prebuilt}/bloaty/bin/bloaty" ]; then
+    git clone --depth 1 --branch v1.1 https://github.com/google/bloaty bloaty-src
+    cd bloaty-src
+    mkdir -p "${prebuilt}"/bloaty
+    cmake -DCMAKE_SYSTEM_PREFIX_PATH="${prebuilt}"/bloaty
+    make install -j 6
+    cd "${prebuilt}"
+    rm -rf bloaty-src
+  fi
+}
+
+function c-cache {
+  add_path "${prebuilt}"/ccache/bin
+
+  if ! type ccache &> /dev/null; then
+    case ${os} in
+      Darwin)
+        brew install ccache
+        ;;
+      Linux)
+        cd "${prebuilt}";
+        wget https://github.com/ccache/ccache/releases/download/v3.7.7/ccache-3.7.7.tar.gz
+        tar zxf ccache-3.7.7.tar.gz
+        cd ccache-3.7.7; ./configure --prefix="${prebuilt}"/ccache; make; make install
+        cd "${prebuilt}"; rm -rf ccache-3.7.7; rm ccache-3.7.7.tar.gz
+        ;;
+    esac
+  fi
+
+  ccache --version
+}
+
+function clang_clang-tidy {
+  # Install Clang and Clang-Tidy for Ubuntu.
+  apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -qq \
+    -o APT::Immediate-Configure=0 \
+    clang \
+    clang-tidy
+}
+
+function elf-toolchain {
+  if ! type x86_64-elf-gcc &> /dev/null; then
+    case ${os} in
+      Darwin)
+        brew install x86_64-elf-gcc
+        ;;
+    esac
+  fi
+  x86_64-elf-gcc --version
+}
+
+function gen-romfs {
+  add_path "${prebuilt}"/genromfs/usr/bin
+
+  if [ ! -f "${prebuilt}/genromfs/usr/bin/genromfs" ]; then
+    if [ ! -d "${tools}" ]; then
+      git clone https://bitbucket.org/nuttx/tools.git "${tools}"
+    fi
+    mkdir -p "${prebuilt}"; cd "${tools}"
+    tar zxf genromfs-0.5.2.tar.gz -C "${prebuilt}"
+    cd "${prebuilt}"/genromfs-0.5.2
+    make install PREFIX="${prebuilt}"/genromfs
+    cd "${prebuilt}"
+    rm -rf genromfs-0.5.2
+  fi
+}
+
+function gperf {
+  add_path "${prebuilt}"/gperf/bin
+
+  if [ ! -f "${prebuilt}/gperf/bin/gperf" ]; then
+    cd "${prebuilt}"
+    wget --quiet http://ftp.gnu.org/pub/gnu/gperf/gperf-3.1.tar.gz
+    tar zxf gperf-3.1.tar.gz
+    cd "${prebuilt}"/gperf-3.1
+    ./configure --prefix="${prebuilt}"/gperf; make; make install
+    cd "${prebuilt}"
+    rm -rf gperf-3.1; rm gperf-3.1.tar.gz
+  fi
+}
+
+function kconfig-frontends {
+  add_path "${prebuilt}"/kconfig-frontends/bin
+
+  if [ ! -f "${prebuilt}/kconfig-frontends/bin/kconfig-conf" ]; then
+    cd "${tools}"/kconfig-frontends
+    ./configure --prefix="${prebuilt}"/kconfig-frontends \
+      --disable-kconfig --disable-nconf --disable-qconf \
+      --disable-gconf --disable-mconf --disable-static \
+      --disable-shared --disable-L10n
+    # Avoid "aclocal/automake missing" errors
+    touch aclocal.m4 Makefile.in
+    make install
+    cd "${tools}"; git clean -xfd
+  fi
+}
+
 function mips-gcc-toolchain {
   add_path "${prebuilt}"/pinguino-compilers/linux64/p32/bin
 
@@ -236,6 +251,30 @@ function mips-gcc-toolchain {
     git clone https://github.com/PinguinoIDE/pinguino-compilers
   fi
   p32-gcc --version
+}
+
+function python-tools {
+  # Python User Env
+  PIP_USER=yes
+  export PIP_USER
+  PYTHONUSERBASE=${prebuilt}/pylocal
+  export PYTHONUSERBASE
+  add_path "${PYTHONUSERBASE}"/bin
+  pip3 install CodeChecker
+  pip3 install cxxfilt
+  pip3 install esptool==3.3.1
+  pip3 install pexpect==4.8.0
+  pip3 install pyelftools
+  pip3 install pyserial==3.5
+  pip3 install pytest==6.2.5
+  pip3 install pytest-json==0.4.0
+  pip3 install pytest-ordering==0.6
+  pip3 install pytest-repeat==0.9.1
+
+  # MCUboot's tool for image signing and key management
+  if ! command -v imgtool &> /dev/null; then
+    pip3 install imgtool
+  fi
 }
 
 function riscv-gcc-toolchain {
@@ -260,34 +299,19 @@ function riscv-gcc-toolchain {
   riscv64-unknown-elf-gcc --version
 }
 
-function xtensa-esp32-gcc-toolchain {
-  add_path "${prebuilt}"/xtensa-esp32-elf/bin
+function rust {
+  mkdir -p "${prebuilt}"/rust/bin
+  add_path "${prebuilt}"/rust/bin
 
-  if [ ! -f "${prebuilt}/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc" ]; then
-    cd "${prebuilt}"
+  if ! type rustc &> /dev/null; then
     case ${os} in
       Darwin)
-        wget --quiet https://dl.espressif.com/dl/xtensa-esp32-elf-gcc8_4_0-esp-2021r1-macos.tar.gz
-        tar xzf xtensa-esp32-elf-gcc8_4_0-esp-2021r1-macos.tar.gz
-        rm xtensa-esp32-elf-gcc8_4_0-esp-2021r1-macos.tar.gz
+        brew install rust
         ;;
       Linux)
-        wget --quiet https://dl.espressif.com/dl/xtensa-esp32-elf-gcc8_4_0-esp32-2021r1-linux-amd64.tar.xz
-        xz -d xtensa-esp32-elf-gcc8_4_0-esp32-2021r1-linux-amd64.tar.xz
-        tar xf xtensa-esp32-elf-gcc8_4_0-esp32-2021r1-linux-amd64.tar
-        rm xtensa-esp32-elf-gcc8_4_0-esp32-2021r1-linux-amd64.tar
-        ;;
-    esac
-  fi
-  xtensa-esp32-elf-gcc --version
-}
-
-function avr-gcc-toolchain {
-  if ! type avr-gcc &> /dev/null; then
-    case ${os} in
-      Darwin)
-        brew tap osx-cross/avr
-        brew install avr-gcc
+        # Currently Debian installed rustc doesn't support 2021 edition.
+        export CARGO_HOME=${prebuilt}/rust
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
         ;;
     esac
   fi
@@ -361,78 +385,33 @@ function sparc-gcc-toolchain {
   sparc-gaisler-elf-gcc --version
 }
 
-function c-cache {
-  add_path "${prebuilt}"/ccache/bin
+function xtensa-esp32-gcc-toolchain {
+  add_path "${prebuilt}"/xtensa-esp32-elf/bin
 
-  if ! type ccache &> /dev/null; then
+  if [ ! -f "${prebuilt}/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc" ]; then
+    cd "${prebuilt}"
     case ${os} in
       Darwin)
-        brew install ccache
+        wget --quiet https://dl.espressif.com/dl/xtensa-esp32-elf-gcc8_4_0-esp-2021r1-macos.tar.gz
+        tar xzf xtensa-esp32-elf-gcc8_4_0-esp-2021r1-macos.tar.gz
+        rm xtensa-esp32-elf-gcc8_4_0-esp-2021r1-macos.tar.gz
         ;;
       Linux)
-        cd "${prebuilt}";
-        wget https://github.com/ccache/ccache/releases/download/v3.7.7/ccache-3.7.7.tar.gz
-        tar zxf ccache-3.7.7.tar.gz
-        cd ccache-3.7.7; ./configure --prefix="${prebuilt}"/ccache; make; make install
-        cd "${prebuilt}"; rm -rf ccache-3.7.7; rm ccache-3.7.7.tar.gz
+        wget --quiet https://dl.espressif.com/dl/xtensa-esp32-elf-gcc8_4_0-esp32-2021r1-linux-amd64.tar.xz
+        xz -d xtensa-esp32-elf-gcc8_4_0-esp32-2021r1-linux-amd64.tar.xz
+        tar xf xtensa-esp32-elf-gcc8_4_0-esp32-2021r1-linux-amd64.tar
+        rm xtensa-esp32-elf-gcc8_4_0-esp32-2021r1-linux-amd64.tar
         ;;
     esac
   fi
-
-  ccache --version
-  mkdir -p "${prebuilt}"/ccache/bin/
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/x86_64-elf-gcc
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/x86_64-elf-g++
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/cc
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/c++
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/clang
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/clang++
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/gcc
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/g++
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/arm-none-eabi-gcc
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/arm-none-eabi-g++
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/aarch64-none-elf-gcc
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/aarch64-none-elf-g++
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/p32-gcc
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/riscv64-unknown-elf-gcc
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/riscv64-unknown-elf-g++
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/xtensa-esp32-elf-gcc
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/avr-gcc
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/avr-g++
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/sparc-gaisler-elf-gcc
-  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/sparc-gaisler-elf-g++
+  xtensa-esp32-elf-gcc --version
 }
 
-function binutils {
-  mkdir -p "${prebuilt}"/bintools/bin
-  add_path "${prebuilt}"/bintools/bin
-
-  if ! type objcopy &> /dev/null; then
+function u-boot-tools {
+  if ! type mkimage &> /dev/null; then
     case ${os} in
       Darwin)
-        brew install binutils
-        # It is possible we cached prebuilt but did brew install so recreate
-        # symlink if it exists
-        rm -f "${prebuilt}"/bintools/bin/objcopy
-        ln -s /usr/local/opt/binutils/bin/objcopy "${prebuilt}"/bintools/bin/objcopy
-        ;;
-    esac
-  fi
-}
-
-function rust {
-  mkdir -p "${prebuilt}"/rust/bin
-  add_path "${prebuilt}"/rust/bin
-
-  if ! type rustc &> /dev/null; then
-    case ${os} in
-      Darwin)
-        brew install rust
-        ;;
-      Linux)
-        # Currently Debian installed rustc doesn't support 2021 edition.
-        export CARGO_HOME=${prebuilt}/rust
-        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+        brew install u-boot-tools
         ;;
     esac
   fi
@@ -459,6 +438,30 @@ function enable_ccache {
   ccache -z
   ccache -M 5G;
   ccache -s
+}
+
+function setup_links {
+  mkdir -p "${prebuilt}"/ccache/bin/
+  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/aarch64-none-elf-gcc
+  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/aarch64-none-elf-g++
+  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/arm-none-eabi-gcc
+  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/arm-none-eabi-g++
+  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/avr-gcc
+  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/avr-g++
+  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/cc
+  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/c++
+  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/clang
+  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/clang++
+  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/gcc
+  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/g++
+  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/p32-gcc
+  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/riscv64-unknown-elf-gcc
+  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/riscv64-unknown-elf-g++
+  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/sparc-gaisler-elf-gcc
+  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/sparc-gaisler-elf-g++
+  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/x86_64-elf-gcc
+  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/x86_64-elf-g++
+  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/xtensa-esp32-elf-gcc
 }
 
 function setup_repos {
@@ -488,6 +491,7 @@ function install_tools {
   done
   popd
 
+  setup_links
   echo PATH="${EXTRA_PATH}"/"${PATH}" > "${prebuilt}"/env.sh
 }
 
