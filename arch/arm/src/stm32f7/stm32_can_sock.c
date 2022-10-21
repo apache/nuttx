@@ -1656,7 +1656,7 @@ static void stm32can_sceinterrupt_work(void *arg)
               /* Receive CRC Error */
 
               errbits |= CAN_ERR_PROT;
-              data[3] |= CAN_ERR_PROT_LOC_CRCSEQ;
+              data[3] |= CAN_ERR_PROT_LOC_CRC_SEQ;
             }
         }
 

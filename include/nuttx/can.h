@@ -212,7 +212,7 @@
 
 /* Error class in can_id */
 
-#define CAN_ERR_TXTIMEOUT        (1 << 0) /* Bit 0: TX timeout */
+#define CAN_ERR_TX_TIMEOUT       (1 << 0) /* Bit 0: TX timeout */
 #define CAN_ERR_LOSTARB          (1 << 1) /* Bit 1: Lost arbitration (See CAN_ERR_LOSTARB_* definitions) */
 #define CAN_ERR_CRTL             (1 << 2) /* Bit 2: Controller error (See CAN_ERR_CRTL_* definitions) */
 #define CAN_ERR_PROT             (1 << 3) /* Bit 3: Protocol error (see CAN_ERR_PROT_* definitions) */
@@ -271,10 +271,10 @@
 #define CAN_ERR_PROT_LOC_RES1    0x0b /* Reserved bit 1 */
 #define CAN_ERR_PROT_LOC_DLC     0x0c /* Data length code */
 #define CAN_ERR_PROT_LOC_DATA    0x0d /* Data section */
-#define CAN_ERR_PROT_LOC_CRCSEQ  0x0e /* CRC sequence */
-#define CAN_ERR_PROT_LOC_CRCDEL  0x0f /* CRC delimiter */
+#define CAN_ERR_PROT_LOC_CRC_SEQ 0x0e /* CRC sequence */
+#define CAN_ERR_PROT_LOC_CRC_DEL 0x0f /* CRC delimiter */
 #define CAN_ERR_PROT_LOC_ACK     0x10 /* ACK slot */
-#define CAN_ERR_PROT_LOC_ACKDEL  0x11 /* ACK delimiter */
+#define CAN_ERR_PROT_LOC_ACK_DEL 0x11 /* ACK delimiter */
 #define CAN_ERR_PROT_LOC_EOF     0x12 /* End of frame */
 #define CAN_ERR_PROT_LOC_INTERM  0x13 /* Intermission */
 
