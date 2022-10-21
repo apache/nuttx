@@ -2233,7 +2233,8 @@ static void fdcan_error(struct stm32_fdcan_s *priv, uint32_t status)
               /* Receive CRC Error */
 
               errbits |= CAN_ERR_PROT;
-              data[3] |= (CAN_ERR_PROT_LOC_CRCSEQ | CAN_ERR_PROT_LOC_CRCDEL);
+              data[3] |= (CAN_ERR_PROT_LOC_CRC_SEQ |
+                          CAN_ERR_PROT_LOC_CRC_DEL);
             }
 
           if ((psr & FDCAN_PSR_LEC(FDCAN_PSR_EC_NO_CHANGE)) != 0)
@@ -2298,7 +2299,8 @@ static void fdcan_error(struct stm32_fdcan_s *priv, uint32_t status)
               /* Receive CRC Error */
 
               errbits |= CAN_ERR_PROT;
-              data[3] |= (CAN_ERR_PROT_LOC_CRCSEQ | CAN_ERR_PROT_LOC_CRCDEL);
+              data[3] |= (CAN_ERR_PROT_LOC_CRC_SEQ |
+                          CAN_ERR_PROT_LOC_CRC_DEL);
             }
 
           if ((psr & FDCAN_PSR_DLEC(FDCAN_PSR_EC_NO_CHANGE)) != 0)
@@ -2347,7 +2349,7 @@ static void fdcan_error(struct stm32_fdcan_s *priv, uint32_t status)
     {
       /* Timeout Occurred */
 
-      errbits |= CAN_ERR_TXTIMEOUT;
+      errbits |= CAN_ERR_TX_TIMEOUT;
     }
 
   if ((status & (FDCAN_INT_MRAF | FDCAN_INT_ELO)) != 0)
