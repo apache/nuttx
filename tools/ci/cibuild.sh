@@ -46,7 +46,7 @@ case ${os} in
     brew update --quiet
     ;;
   Linux)
-    install="python-tools codechecker clang_clang-tidy gen-romfs gperf kconfig-frontends rust arm-clang-toolchain arm-gcc-toolchain arm64-gcc-toolchain mips-gcc-toolchain riscv-gcc-toolchain xtensa-esp32-gcc-toolchain rx-gcc-toolchain sparc-gcc-toolchain c-cache"
+    install="python-tools clang_clang-tidy gen-romfs gperf kconfig-frontends rust arm-clang-toolchain arm-gcc-toolchain arm64-gcc-toolchain mips-gcc-toolchain riscv-gcc-toolchain xtensa-esp32-gcc-toolchain rx-gcc-toolchain sparc-gcc-toolchain c-cache"
     ;;
 esac
 
@@ -62,16 +62,21 @@ function python-tools {
   PYTHONUSERBASE=${prebuilt}/pylocal
   export PYTHONUSERBASE
   add_path "${PYTHONUSERBASE}"/bin
-  pip3 install pexpect
+  pip3 install CodeChecker
+  pip3 install cxxfilt
+  pip3 install esptool==3.3.1
+  pip3 install pexpect==4.8.0
+  pip3 install pyelftools
+  pip3 install pyserial==3.5
+  pip3 install pytest==6.2.5
+  pip3 install pytest-json==0.4.0
+  pip3 install pytest-ordering==0.6
+  pip3 install pytest-repeat==0.9.1
 
   # MCUboot's tool for image signing and key management
   if ! command -v imgtool &> /dev/null; then
     pip3 install imgtool
   fi
-}
-
-function codechecker {
-  pip3 install CodeChecker
 }
 
 function clang_clang-tidy {
@@ -274,7 +279,6 @@ function xtensa-esp32-gcc-toolchain {
     esac
   fi
   xtensa-esp32-elf-gcc --version
-  pip3 install esptool==3.3.1
 }
 
 function avr-gcc-toolchain {
