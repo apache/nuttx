@@ -69,8 +69,8 @@ struct bcmf_dev_s
 
   /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s bc_dev;        /* Network interface structure */
-  struct bcmf_frame_s *cur_tx_frame; /* Frame used to interface network layer */
+  struct net_driver_s bc_dev;            /* Network interface structure */
+  FAR struct bcmf_frame_s *cur_tx_frame; /* Frame used to interface network layer */
 
   /* Event registration array */
 
@@ -80,7 +80,7 @@ struct bcmf_dev_s
   sem_t control_timeout;       /* Semaphore to wait for control frame rsp */
   uint16_t control_reqid;      /* Current control request id */
   uint16_t control_rxdata_len; /* Received control frame out buffer length */
-  uint8_t *control_rxdata;     /* Received control frame out buffer */
+  FAR uint8_t *control_rxdata; /* Received control frame out buffer */
   uint32_t control_status;     /* Last received frame status */
 
   /* AP Scan state machine.
@@ -92,10 +92,10 @@ struct bcmf_dev_s
   FAR wl_bss_info_t *scan_result;      /* Temp buffer that holds results */
   unsigned int scan_result_entries;    /* Current entries of temp buffer */
 
-  sem_t *auth_signal;   /* Authentication notification signal */
-  uint32_t auth_status; /* Authentication status */
-  wsec_pmk_t auth_pmk;  /* Authentication pmk */
-  bool auth_pending;    /* Authentication pending */
+  FAR sem_t *auth_signal; /* Authentication notification signal */
+  uint32_t auth_status;   /* Authentication status */
+  wsec_pmk_t auth_pmk;    /* Authentication pmk */
+  bool auth_pending;      /* Authentication pending */
 
 #ifdef CONFIG_IEEE80211_BROADCOM_LOWPOWER
   struct work_s lp_work_ifdown; /* Ifdown work to work queue */
@@ -110,7 +110,8 @@ struct bcmf_dev_s
 struct bcmf_bus_dev_s
 {
   void (*stop)(FAR struct bcmf_dev_s *priv);
-  int (*txframe)(FAR struct bcmf_dev_s *priv, struct bcmf_frame_s *frame,
+  int (*txframe)(FAR struct bcmf_dev_s *priv,
+                 FAR struct bcmf_frame_s *frame,
                  bool control);
   struct bcmf_frame_s *(*rxframe)(FAR struct bcmf_dev_s *priv);
 
@@ -132,9 +133,9 @@ struct bcmf_bus_dev_s
 
 struct bcmf_frame_s
 {
-  uint8_t *base; /* Frame base buffer used by low level layer (SDIO) */
-  uint8_t *data; /* Payload data (Control, data and event messages) */
-  uint16_t len;  /* Frame buffer size */
+  FAR uint8_t *base; /* Frame base buffer used by low level layer (SDIO) */
+  FAR uint8_t *data; /* Payload data (Control, data and event messages) */
+  uint16_t len;      /* Frame buffer size */
 };
 
 /****************************************************************************
@@ -148,7 +149,8 @@ int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv);
 
 /* IOCTLs network interface implementation */
 
-int bcmf_wl_set_mac_address(FAR struct bcmf_dev_s *priv, struct ifreq *req);
+int bcmf_wl_set_mac_address(FAR struct bcmf_dev_s *priv,
+                            FAR struct ifreq *req);
 
 int bcmf_wl_enable(FAR struct bcmf_dev_s *priv, bool enable);
 
@@ -163,36 +165,39 @@ int bcmf_wl_set_country_code(FAR struct bcmf_dev_s *priv,
 
 /* IOCTLs AP scan interface implementation */
 
-int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr);
 
-int bcmf_wl_get_scan_results(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+int bcmf_wl_get_scan_results(FAR struct bcmf_dev_s *priv,
+                             FAR struct iwreq *iwr);
 
 /* IOCTLs authentication interface implementation */
 
-int bcmf_wl_set_auth_param(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+int bcmf_wl_set_auth_param(FAR struct bcmf_dev_s *priv,
+                           FAR struct iwreq *iwr);
 
-int bcmf_wl_set_encode_ext(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+int bcmf_wl_set_encode_ext(FAR struct bcmf_dev_s *priv,
+                           FAR struct iwreq *iwr);
 
-int bcmf_wl_set_mode(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
-int bcmf_wl_get_mode(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+int bcmf_wl_set_mode(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr);
+int bcmf_wl_get_mode(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr);
 
-int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
-int bcmf_wl_get_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr);
+int bcmf_wl_get_ssid(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr);
 
-int bcmf_wl_set_bssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
-int bcmf_wl_get_bssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+int bcmf_wl_set_bssid(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr);
+int bcmf_wl_get_bssid(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr);
 
-int bcmf_wl_get_channel(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+int bcmf_wl_get_channel(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr);
 
-int bcmf_wl_get_rate(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+int bcmf_wl_get_rate(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr);
 
-int bcmf_wl_get_txpower(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+int bcmf_wl_get_txpower(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr);
 
-int bcmf_wl_get_rssi(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+int bcmf_wl_get_rssi(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr);
 
-int bcmf_wl_get_iwrange(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+int bcmf_wl_get_iwrange(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr);
 
-int bcmf_wl_set_country(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
-int bcmf_wl_get_country(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
+int bcmf_wl_set_country(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr);
+int bcmf_wl_get_country(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr);
 
 #endif /* __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_DRIVER_H */

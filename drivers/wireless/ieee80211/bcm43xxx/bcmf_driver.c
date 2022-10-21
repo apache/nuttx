@@ -176,16 +176,19 @@ static int bcmf_driver_download_clm(FAR struct bcmf_dev_s *priv);
 /* FIXME only for debug purpose */
 
 static void bcmf_wl_radio_event_handler(FAR struct bcmf_dev_s *priv,
-                            struct bcmf_event_s *event, unsigned int len);
+                                        FAR struct bcmf_event_s *event,
+                                        unsigned int len);
 
 static void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
-                            struct bcmf_event_s *event, unsigned int len);
+                                       FAR struct bcmf_event_s *event,
+                                       unsigned int len);
 
 static void bcmf_wl_auth_event_handler(FAR struct bcmf_dev_s *priv,
-                            struct bcmf_event_s *event, unsigned int len);
+                                       FAR struct bcmf_event_s *event,
+                                       unsigned int len);
 
 static int bcmf_wl_get_interface(FAR struct bcmf_dev_s *priv,
-                            struct iwreq *iwr);
+                                 FAR struct iwreq *iwr);
 
 /****************************************************************************
  * Private Functions
@@ -232,7 +235,7 @@ int bcmf_wl_set_mac_address(FAR struct bcmf_dev_s *priv, struct ifreq *req)
 
   ret = bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, true,
                               IOVAR_STR_CUR_ETHERADDR,
-                              (uint8_t *)req->ifr_hwaddr.sa_data,
+                              (FAR uint8_t *)req->ifr_hwaddr.sa_data,
                               &out_len);
   if (ret != OK)
     {
@@ -313,7 +316,7 @@ int bcmf_driver_download_clm(FAR struct bcmf_dev_s *priv)
 
       /* CLM header */
 
-      dlhead             = (struct wl_dload_data *)downloadbuff;
+      dlhead             = (FAR struct wl_dload_data *)downloadbuff;
       dlhead->flag       = (DLOAD_HANDLER_VER << DLOAD_FLAG_VER_SHIFT) |
                            dl_flag;
       dlhead->dload_type = DL_TYPE_CLM;
@@ -590,7 +593,7 @@ int bcmf_driver_initialize(FAR struct bcmf_dev_s *priv)
  ****************************************************************************/
 
 void bcmf_wl_radio_event_handler(FAR struct bcmf_dev_s *priv,
-                                 struct bcmf_event_s *event,
+                                 FAR struct bcmf_event_s *event,
                                  unsigned int len)
 {
   wlinfo("Unhandled radio event from <%s>\n", event->src_name);
@@ -601,7 +604,7 @@ void bcmf_wl_radio_event_handler(FAR struct bcmf_dev_s *priv,
  ****************************************************************************/
 
 void bcmf_wl_auth_event_handler(FAR struct bcmf_dev_s *priv,
-                                struct bcmf_event_s *event,
+                                FAR struct bcmf_event_s *event,
                                 unsigned int len)
 {
   bool auth = false;
@@ -1116,7 +1119,7 @@ void bcmf_wl_scan_timeout(wdparm_t arg)
  * Name: bcmf_wl_get_interface
  ****************************************************************************/
 
-int bcmf_wl_get_interface(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
+int bcmf_wl_get_interface(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr)
 {
   /* TODO resolve interface using iwr->ifr_name */
 
@@ -1222,13 +1225,13 @@ int bcmf_wl_enable(FAR struct bcmf_dev_s *priv, bool enable)
  *   Start a WiFi scan.
  ****************************************************************************/
 
-int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
+int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr)
 {
   int ret;
   uint32_t out_len;
   uint32_t value;
   int interface;
-  struct iw_scan_req *req;
+  FAR struct iw_scan_req *req;
   struct wl_escan_params scan_params;
 
   interface = bcmf_wl_get_interface(priv, iwr);
@@ -1256,7 +1259,7 @@ int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
   if (iwr->u.data.pointer && iwr->u.data.length >= sizeof(*req))
     {
-      req = (struct iw_scan_req *)iwr->u.data.pointer;
+      req = (FAR struct iw_scan_req *)iwr->u.data.pointer;
 
       memcpy(&scan_params.params.bssid, req->bssid.sa_data,
              sizeof(scan_params.params.bssid));
@@ -1325,8 +1328,9 @@ int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
   out_len = sizeof(scan_params);
 
   if (bcmf_cdc_iovar_request_unsafe(priv, CHIP_STA_INTERFACE, true,
-                                 IOVAR_STR_ESCAN, (uint8_t *)&scan_params,
-                                 &out_len))
+                                    IOVAR_STR_ESCAN,
+                                    (FAR uint8_t *)&scan_params,
+                                    &out_len))
     {
       ret = -EIO;
       goto exit_sem_post;
@@ -1466,7 +1470,7 @@ int bcmf_wl_set_auth_param(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
           if (bcmf_cdc_iovar_request(priv, interface, true,
                                      "bsscfg:"IOVAR_STR_SUP_WPA,
-                                     (uint8_t *)wpa_version,
+                                     (FAR uint8_t *)wpa_version,
                                      &out_len))
             {
               return -EIO;
@@ -1474,7 +1478,7 @@ int bcmf_wl_set_auth_param(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
           out_len = 4;
           if (bcmf_cdc_ioctl(priv, interface, true, WLC_SET_WPA_AUTH,
-                             (uint8_t *)&auth_mode, &out_len))
+                             (FAR uint8_t *)&auth_mode, &out_len))
             {
               return -EIO;
             }
@@ -1516,7 +1520,8 @@ int bcmf_wl_set_auth_param(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
           out_len = 4;
           if (bcmf_cdc_ioctl(priv, interface, true,
-                             WLC_SET_WSEC, (uint8_t *)&cipher_mode,
+                             WLC_SET_WSEC,
+                             (FAR uint8_t *)&cipher_mode,
                              &out_len))
             {
               return -EIO;
@@ -1526,7 +1531,8 @@ int bcmf_wl_set_auth_param(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
           out_len = 4;
           if (bcmf_cdc_ioctl(priv, interface, true,
-                             WLC_SET_AUTH, (uint8_t *)&wep_auth,
+                             WLC_SET_AUTH,
+                             (FAR uint8_t *)&wep_auth,
                              &out_len))
             {
               return -EIO;
@@ -1575,7 +1581,7 @@ int bcmf_wl_set_mode(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
   value = iwr->u.mode == IW_MODE_INFRA ? 1 : 0;
 
   return bcmf_cdc_ioctl(priv, interface, true,
-                        WLC_SET_INFRA, (uint8_t *)&value, &out_len);
+                        WLC_SET_INFRA, (FAR uint8_t *)&value, &out_len);
 }
 
 /****************************************************************************
@@ -1602,12 +1608,12 @@ int bcmf_wl_get_mode(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
   out_len = sizeof(infra);
   ret = bcmf_cdc_ioctl(priv, interface, false,
-                       WLC_GET_INFRA, (uint8_t *)&infra, &out_len);
+                       WLC_GET_INFRA, (FAR uint8_t *)&infra, &out_len);
   if (ret == OK)
     {
       out_len = sizeof(ap);
       ret = bcmf_cdc_ioctl(priv, interface, false,
-                           WLC_GET_AP, (uint8_t *)&ap, &out_len);
+                           WLC_GET_AP, (FAR uint8_t *)&ap, &out_len);
     }
 
   if (ret == OK)
@@ -1653,12 +1659,12 @@ int bcmf_wl_set_bssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
   out_len = sizeof(ap);
   ret = bcmf_cdc_ioctl(priv, interface, false, WLC_GET_AP,
-                       (uint8_t *)&ap, &out_len);
+                       (FAR uint8_t *)&ap, &out_len);
   if (ret == OK)
     {
       out_len = sizeof(infra);
       ret = bcmf_cdc_ioctl(priv, interface, false, WLC_GET_INFRA,
-                           (uint8_t *)&infra, &out_len);
+                           (FAR uint8_t *)&infra, &out_len);
 
       if (ret == OK)
         {
@@ -1666,7 +1672,8 @@ int bcmf_wl_set_bssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
           ret = bcmf_cdc_ioctl(priv, interface, true,
                                ((ap || !infra) ? WLC_SET_BSSID :
                                                  WLC_REASSOC),
-                               (uint8_t *)iwr->u.ap_addr.sa_data, &out_len);
+                               (FAR uint8_t *)iwr->u.ap_addr.sa_data,
+                               &out_len);
         }
     }
 
@@ -1696,7 +1703,7 @@ int bcmf_wl_get_bssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
   out_len = sizeof(struct ether_addr);
 
   return bcmf_cdc_ioctl(priv, interface, false, WLC_GET_BSSID,
-                        (uint8_t *)iwr->u.ap_addr.sa_data, &out_len);
+                        (FAR uint8_t *)iwr->u.ap_addr.sa_data, &out_len);
 }
 
 /****************************************************************************
@@ -1722,7 +1729,7 @@ int bcmf_wl_get_channel(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
   out_len = sizeof(ci);
   ret = bcmf_cdc_ioctl(priv, interface, false,
-                       WLC_GET_CHANNEL, (uint8_t *)&ci, &out_len);
+                       WLC_GET_CHANNEL, (FAR uint8_t *)&ci, &out_len);
   if (ret == OK)
     {
       iwr->u.freq.m = bcmf_wl_channel_to_frequency(ci.target_channel);
@@ -1754,7 +1761,7 @@ int bcmf_wl_get_rate(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
   out_len = sizeof(rate);
   ret = bcmf_cdc_ioctl(priv, interface, false,
-                       WLC_GET_RATE, (uint8_t *)&rate, &out_len);
+                       WLC_GET_RATE, (FAR uint8_t *)&rate, &out_len);
   if (ret == OK)
     {
       iwr->u.bitrate.value = ((rate / 2) * 1000) + ((rate & 1) ? 500 : 0);
@@ -1787,13 +1794,13 @@ int bcmf_wl_get_txpower(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
   out_len = sizeof(radio);
   ret = bcmf_cdc_ioctl(priv, interface, false,
-                       WLC_GET_RADIO, (uint8_t *)&radio, &out_len);
+                       WLC_GET_RADIO, (FAR uint8_t *)&radio, &out_len);
   if (ret == OK)
     {
       out_len = sizeof(iwr->u.txpower.value);
       ret = bcmf_cdc_iovar_request(priv, interface, false,
                                    IOVAR_STR_QTXPOWER,
-                                   (uint8_t *)&(iwr->u.txpower.value),
+                                   (FAR uint8_t *)&(iwr->u.txpower.value),
                                    &out_len);
       if (ret == OK)
         {
@@ -1842,7 +1849,7 @@ int bcmf_wl_get_iwrange(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
   out_len = sizeof(ci);
   ret = bcmf_cdc_ioctl(priv, interface, false,
-                       WLC_GET_CHANNEL, (uint8_t *)&ci, &out_len);
+                       WLC_GET_CHANNEL, (FAR uint8_t *)&ci, &out_len);
   if (ret == OK)
     {
       range->num_frequency = 1;
@@ -1878,7 +1885,7 @@ int bcmf_wl_get_rssi(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
   out_len = sizeof(rssi);
   ret = bcmf_cdc_ioctl(priv, interface, false,
-                       WLC_GET_RSSI, (uint8_t *)&rssi, &out_len);
+                       WLC_GET_RSSI, (FAR uint8_t *)&rssi, &out_len);
   if (ret == OK)
     {
       iwr->u.sens.value = -rssi.rssi;
@@ -1907,7 +1914,7 @@ int bcmf_wl_set_encode_ext(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
       return -EINVAL;
     }
 
-  ext = (struct iw_encode_ext *)iwr->u.encoding.pointer;
+  ext = (FAR struct iw_encode_ext *)iwr->u.encoding.pointer;
 
   switch (ext->alg)
     {
