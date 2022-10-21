@@ -1231,12 +1231,11 @@ static int stm32can_rxinterrupt_work(struct stm32_can_s *priv, int rxmb)
   if ((regval & CAN_RIR_IDE) != 0)
     {
       frame->can_id  = (regval & CAN_RIR_EXID_MASK) >> CAN_RIR_EXID_SHIFT;
-      frame->can_id &= ~CAN_EFF_FLAG;
+      frame->can_id |= CAN_EFF_FLAG;
     }
   else
     {
       frame->can_id  = (regval & CAN_RIR_STID_MASK) >> CAN_RIR_STID_SHIFT;
-      frame->can_id |= CAN_EFF_FLAG;
     }
 #else
   if ((regval & CAN_RIR_IDE) != 0)
