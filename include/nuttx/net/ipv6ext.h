@@ -124,6 +124,14 @@
 
 #define EXTHDR_LEN(hdrlen)     ((hdrlen + 1) << 3)
 
+/* Fragment header has no length field and has a fixed size */
+
+#define EXTHDR_FRAG_LEN        8
+
+/* More frags flag bits in 16-bit flags in fragment header */
+
+#define FRAGHDR_FRAG_MOREFRAGS 0x0001
+
 /* Values of the Two High-Order Bits in the Hop-to-hop Option Type Field */
 
 #define HOPBYHOP_TYPE_MASK     0xc0
@@ -216,5 +224,19 @@ struct ipv6_router_alert_s
   uint16_t value;     /* Value.  See OPT_RA_* Definitions */
   uint8_t pad[4];     /* Pad to a multiple of 8 bytes */
 };
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: ipv6_exthdr
+ *
+ * Description:
+ *   Return true if the next header value is an IPv6 extension header.
+ *
+ ****************************************************************************/
+
+bool ipv6_exthdr(uint8_t nxthdr);
 
 #endif /* __INCLUDE_NUTTX_NET_IPV6EXT_H */

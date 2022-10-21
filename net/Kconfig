@@ -331,6 +331,7 @@ source "net/sixlowpan/Kconfig"
 source "net/ipforward/Kconfig"
 source "net/nat/Kconfig"
 source "net/netfilter/Kconfig"
+source "net/ipfrag/Kconfig"
 
 endmenu # Internet Protocol Selection
 
