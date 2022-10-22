@@ -8,7 +8,7 @@
 #include <sys/types.h>
 #include <sys/systm.h>
 
-#include "poly1305.h"
+#include <crypto/poly1305.h>
 
 /*
  * poly1305 implementation using 32 bit * 32 bit = 64 bit multiplication

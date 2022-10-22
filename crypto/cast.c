@@ -10,7 +10,7 @@
 #include <sys/types.h>
 #include <sys/systm.h>
 #include <crypto/cast.h>
-#include <crypto/castsb.h>
+#include "castsb.h"
 
 /* Macros to access 8-bit bytes out of a 32-bit word */
 #define U_INT8_Ta(x) ( (u_int8_t) (x>>24) )

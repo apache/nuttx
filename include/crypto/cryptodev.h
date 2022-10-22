@@ -82,35 +82,30 @@
 /* Maximum hash algorithm result length */
 #define AALG_MAX_RESULT_LEN	64 /* Keep this updated */
 
-#define CRYPTO_DES_CBC		1
-#define CRYPTO_3DES_CBC		2
-#define CRYPTO_BLF_CBC		3
-#define CRYPTO_CAST_CBC		4
-#define CRYPTO_MD5_HMAC		6
-#define CRYPTO_SHA1_HMAC	7
-#define CRYPTO_RIPEMD160_HMAC	8
-#define CRYPTO_MD5_KPDK		9
-#define CRYPTO_SHA1_KPDK	10
-#define CRYPTO_RIJNDAEL128_CBC	11 /* 128 bit blocksize */
-#define CRYPTO_AES_CBC		11 /* 128 bit blocksize -- the same as above */
-#define CRYPTO_ARC4		12
-#define CRYPTO_MD5		13
-#define CRYPTO_SHA1		14
-#define CRYPTO_DEFLATE_COMP	15 /* Deflate compression algorithm */
-#define CRYPTO_NULL		16
-#define CRYPTO_LZS_COMP		17 /* LZS compression algorithm */
-#define CRYPTO_SHA2_256_HMAC	18
-#define CRYPTO_SHA2_384_HMAC	19
-#define CRYPTO_SHA2_512_HMAC	20
-#define CRYPTO_AES_CTR		21
-#define CRYPTO_AES_XTS		22
-#define CRYPTO_AES_GCM_16	23
-#define CRYPTO_AES_128_GMAC	24
-#define CRYPTO_AES_192_GMAC	25
-#define CRYPTO_AES_256_GMAC	26
-#define CRYPTO_AES_GMAC		27
-#define CRYPTO_ESN		28 /* Support for Extended Sequence Numbers */
-#define CRYPTO_ALGORITHM_MAX	28 /* Keep updated */
+#define CRYPTO_3DES_CBC		1
+#define CRYPTO_BLF_CBC		2
+#define CRYPTO_CAST_CBC		3
+#define CRYPTO_MD5_HMAC		4
+#define CRYPTO_SHA1_HMAC	5
+#define CRYPTO_RIPEMD160_HMAC	6
+#define CRYPTO_RIJNDAEL128_CBC	7 /* 128 bit blocksize */
+#define CRYPTO_AES_CBC		7 /* 128 bit blocksize -- the same as above */
+#define CRYPTO_DEFLATE_COMP	8 /* Deflate compression algorithm */
+#define CRYPTO_NULL		9
+#define CRYPTO_SHA2_256_HMAC	11
+#define CRYPTO_SHA2_384_HMAC	12
+#define CRYPTO_SHA2_512_HMAC	13
+#define CRYPTO_AES_CTR		14
+#define CRYPTO_AES_XTS		15
+#define CRYPTO_AES_GCM_16	16
+#define CRYPTO_AES_128_GMAC	17
+#define CRYPTO_AES_192_GMAC	18
+#define CRYPTO_AES_256_GMAC	19
+#define CRYPTO_AES_GMAC		20
+#define CRYPTO_CHACHA20_POLY1305	21
+#define CRYPTO_CHACHA20_POLY1305_MAC	22
+#define CRYPTO_ESN		23 /* Support for Extended Sequence Numbers */
+#define CRYPTO_ALGORITHM_MAX	23 /* Keep updated */
 
 /* Algorithm flags */
 #define	CRYPTO_ALG_FLAG_SUPPORTED	0x01 /* Algorithm is supported */
