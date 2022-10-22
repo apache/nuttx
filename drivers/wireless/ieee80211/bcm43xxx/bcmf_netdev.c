@@ -702,7 +702,7 @@ static int bcmf_ifup(FAR struct net_driver_s *dev)
       goto errout_in_wl_active;
     }
 
-  if (strnlen(CONFIG_IEEE80211_BROADCOM_DEFAULT_COUNTRY, 2) == 2)
+  if (CONFIG_IEEE80211_BROADCOM_DEFAULT_COUNTRY[0])
     {
       bcmf_wl_set_country_code(priv, CHIP_STA_INTERFACE,
                                CONFIG_IEEE80211_BROADCOM_DEFAULT_COUNTRY);
