@@ -19,7 +19,6 @@
 #include <sys/systm.h>
 #include <lib/libkern/libkern.h>
 
-#include <crypto/chacha_private.h>
 #include <crypto/poly1305.h>
 #include <crypto/chachapoly.h>
 
@@ -90,7 +89,7 @@ Chacha20_Poly1305_Reinit(void *xctx, const uint8_t *iv, uint16_t ivlen)
 int
 Chacha20_Poly1305_Update(void *xctx, const uint8_t *data, uint16_t len)
 {
-	static const char zeroes[POLY1305_BLOCK_LEN];
+	static const unsigned char zeroes[POLY1305_BLOCK_LEN];
 	CHACHA20_POLY1305_CTX *ctx = xctx;
 	size_t rem;
 
@@ -126,22 +125,22 @@ chacha20poly1305_encrypt(
     const uint8_t key[CHACHA20POLY1305_KEY_SIZE]
 ) {
 	poly1305_state poly1305_ctx;
-	chacha_ctx chacha_ctx;
+	chacha_ctx ctx;
 	union {
 		uint8_t b0[CHACHA20POLY1305_KEY_SIZE];
 		uint64_t lens[2];
 	} b = { { 0 } };
 	uint64_t le_nonce = htole64(nonce);
 
-	chacha_keysetup(&chacha_ctx, key, CHACHA20POLY1305_KEY_SIZE * 8);
-	chacha_ivsetup(&chacha_ctx, (uint8_t *) &le_nonce, NULL);
-	chacha_encrypt_bytes(&chacha_ctx, b.b0, b.b0, sizeof(b.b0));
+	chacha_keysetup(&ctx, key, CHACHA20POLY1305_KEY_SIZE * 8);
+	chacha_ivsetup(&ctx, (uint8_t *) &le_nonce, NULL);
+	chacha_encrypt_bytes(&ctx, b.b0, b.b0, sizeof(b.b0));
 	poly1305_init(&poly1305_ctx, b.b0);
 
 	poly1305_update(&poly1305_ctx, ad, ad_len);
 	poly1305_update(&poly1305_ctx, pad0, (0x10 - ad_len) & 0xf);
 
-	chacha_encrypt_bytes(&chacha_ctx, (uint8_t *) src, dst, src_len);
+	chacha_encrypt_bytes(&ctx, (uint8_t *) src, dst, src_len);
 
 	poly1305_update(&poly1305_ctx, dst, src_len);
 	poly1305_update(&poly1305_ctx, pad0, (0x10 - src_len) & 0xf);
@@ -152,7 +151,7 @@ chacha20poly1305_encrypt(
 
 	poly1305_finish(&poly1305_ctx, dst + src_len);
 
-	explicit_bzero(&chacha_ctx, sizeof(chacha_ctx));
+	explicit_bzero(&ctx, sizeof(chacha_ctx));
 	explicit_bzero(&b, sizeof(b));
 }
 
@@ -167,7 +166,7 @@ chacha20poly1305_decrypt(
     const uint8_t key[CHACHA20POLY1305_KEY_SIZE]
 ) {
 	poly1305_state poly1305_ctx;
-	chacha_ctx chacha_ctx;
+	chacha_ctx ctx;
 	int ret;
 	size_t dst_len;
 	union {
@@ -180,9 +179,9 @@ chacha20poly1305_decrypt(
 	if (src_len < CHACHA20POLY1305_AUTHTAG_SIZE)
 		return 0;
 
-	chacha_keysetup(&chacha_ctx, key, CHACHA20POLY1305_KEY_SIZE * 8);
-	chacha_ivsetup(&chacha_ctx, (uint8_t *) &le_nonce, NULL);
-	chacha_encrypt_bytes(&chacha_ctx, b.b0, b.b0, sizeof(b.b0));
+	chacha_keysetup(&ctx, key, CHACHA20POLY1305_KEY_SIZE * 8);
+	chacha_ivsetup(&ctx, (uint8_t *) &le_nonce, NULL);
+	chacha_encrypt_bytes(&ctx, b.b0, b.b0, sizeof(b.b0));
 	poly1305_init(&poly1305_ctx, b.b0);
 
 	poly1305_update(&poly1305_ctx, ad, ad_len);
@@ -200,9 +199,9 @@ chacha20poly1305_decrypt(
 
 	ret = timingsafe_bcmp(b.mac, src + dst_len, CHACHA20POLY1305_AUTHTAG_SIZE);
 	if (!ret)
-		chacha_encrypt_bytes(&chacha_ctx, (uint8_t *) src, dst, dst_len);
+		chacha_encrypt_bytes(&ctx, (uint8_t *) src, dst, dst_len);
 
-	explicit_bzero(&chacha_ctx, sizeof(chacha_ctx));
+	explicit_bzero(&ctx, sizeof(ctx));
 	explicit_bzero(&b, sizeof(b));
 
 	return !ret;

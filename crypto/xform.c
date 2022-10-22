@@ -66,6 +66,8 @@
 #include <crypto/gmac.h>
 #include <crypto/chachapoly.h>
 
+#include "des_locl.h"
+
 extern void des_ecb3_encrypt(caddr_t, caddr_t, caddr_t, caddr_t, caddr_t, int);
 
 int  des_set_key(void *, caddr_t);
@@ -311,13 +313,13 @@ const struct comp_algo comp_algo_deflate = {
 void
 des3_encrypt(caddr_t key, u_int8_t *blk)
 {
-	des_ecb3_encrypt(blk, blk, key, key + 128, key + 256, 1);
+	des_ecb3_encrypt((caddr_t)blk, (caddr_t)blk, key, key + 128, key + 256, 1);
 }
 
 void
 des3_decrypt(caddr_t key, u_int8_t *blk)
 {
-	des_ecb3_encrypt(blk, blk, key + 256, key + 128, key, 0);
+	des_ecb3_encrypt((caddr_t)blk, (caddr_t)blk, key + 256, key + 128, key, 0);
 }
 
 int

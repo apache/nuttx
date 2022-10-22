@@ -51,7 +51,7 @@
 #include "spr.h"
 
 void
-des_encrypt2(u_int32_t *data, des_key_schedule ks, int encrypt)
+des_encrypt2(u_int32_t *data, caddr_t ks, int encrypt)
 {
 	register u_int32_t l, r, t, u;
 #ifdef DES_USE_PTR

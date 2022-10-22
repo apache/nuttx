@@ -59,9 +59,9 @@ struct csession {
 	u_int32_t	ses;
 
 	u_int32_t	cipher;
-	struct enc_xform *txform;
+	const struct enc_xform *txform;
 	u_int32_t	mac;
-	struct auth_hash *thash;
+	const struct auth_hash *thash;
 
 	caddr_t		key;
 	int		keylen;
@@ -105,8 +105,8 @@ struct	csession *csefind(struct fcrypt *, u_int);
 int	csedelete(struct fcrypt *, struct csession *);
 struct	csession *cseadd(struct fcrypt *, struct csession *);
 struct	csession *csecreate(struct fcrypt *, u_int64_t, caddr_t, u_int64_t,
-    caddr_t, u_int64_t, u_int32_t, u_int32_t, struct enc_xform *,
-    struct auth_hash *);
+    caddr_t, u_int64_t, u_int32_t, u_int32_t, const struct enc_xform *,
+    const struct auth_hash *);
 int	csefree(struct csession *);
 
 int	cryptodev_op(struct csession *, struct crypt_op *, struct proc *);
@@ -143,8 +143,8 @@ cryptof_ioctl(struct file *fp, u_long cmd, caddr_t data, struct proc *p)
 	struct csession *cse;
 	struct session_op *sop;
 	struct crypt_op *cop;
-	struct enc_xform *txform = NULL;
-	struct auth_hash *thash = NULL;
+	const struct enc_xform *txform = NULL;
+	const struct auth_hash *thash = NULL;
 	u_int64_t sid;
 	u_int32_t ses;
 	int error = 0;
@@ -154,9 +154,6 @@ cryptof_ioctl(struct file *fp, u_long cmd, caddr_t data, struct proc *p)
 		sop = (struct session_op *)data;
 		switch (sop->cipher) {
 		case 0:
-			break;
-		case CRYPTO_DES_CBC:
-			txform = &enc_xform_des;
 			break;
 		case CRYPTO_3DES_CBC:
 			txform = &enc_xform_3des;
@@ -168,16 +165,13 @@ cryptof_ioctl(struct file *fp, u_long cmd, caddr_t data, struct proc *p)
 			txform = &enc_xform_cast5;
 			break;
 		case CRYPTO_AES_CBC:
-			txform = &enc_xform_rijndael128;
+			txform = &enc_xform_aes;
 			break;
 		case CRYPTO_AES_CTR:
 			txform = &enc_xform_aes_ctr;
 			break;
 		case CRYPTO_AES_XTS:
 			txform = &enc_xform_aes_xts;
-			break;
-		case CRYPTO_ARC4:
-			txform = &enc_xform_arc4;
 			break;
 		case CRYPTO_NULL:
 			txform = &enc_xform_null;
@@ -189,7 +183,6 @@ cryptof_ioctl(struct file *fp, u_long cmd, caddr_t data, struct proc *p)
 		switch (sop->mac) {
 		case 0:
 			break;
-#if 0
 		case CRYPTO_MD5_HMAC:
 			thash = &auth_hash_hmac_md5_96;
 			break;
@@ -199,13 +192,18 @@ cryptof_ioctl(struct file *fp, u_long cmd, caddr_t data, struct proc *p)
 		case CRYPTO_RIPEMD160_HMAC:
 			thash = &auth_hash_hmac_ripemd_160_96;
 			break;
-		case CRYPTO_MD5:
-			thash = &auth_hash_md5;
+		case CRYPTO_SHA2_256_HMAC:
+			thash = &auth_hash_hmac_sha2_256_128;
 			break;
-		case CRYPTO_SHA1:
-			thash = &auth_hash_sha1;
+		case CRYPTO_SHA2_384_HMAC:
+			thash = &auth_hash_hmac_sha2_384_192;
 			break;
-#endif
+		case CRYPTO_SHA2_512_HMAC:
+			thash = &auth_hash_hmac_sha2_512_256;
+			break;
+		case CRYPTO_AES_128_GMAC:
+			thash = &auth_hash_gmac_aes_128;
+			break;
 		default:
 			return (EINVAL);
 		}
@@ -234,7 +232,7 @@ cryptof_ioctl(struct file *fp, u_long cmd, caddr_t data, struct proc *p)
 		if (thash) {
 			cria.cri_alg = thash->type;
 			cria.cri_klen = sop->mackeylen * 8;
-			if (sop->mackeylen != thash->keysize) {
+			if (sop->mackeylen > thash->keysize) {
 				error = EINVAL;
 				goto bail;
 			}
@@ -660,7 +658,8 @@ cryptoioctl(dev_t dev, u_long cmd, caddr_t data, int flag, struct proc *p)
 {
 	struct file *f;
 	struct fcrypt *fcr;
-	int fd, error;
+	int fd;
+	int error = 0;
 
 	switch (cmd) {
 	case CRIOGET:
@@ -725,7 +724,7 @@ cseadd(struct fcrypt *fcr, struct csession *cse)
 struct csession *
 csecreate(struct fcrypt *fcr, u_int64_t sid, caddr_t key, u_int64_t keylen,
     caddr_t mackey, u_int64_t mackeylen, u_int32_t cipher, u_int32_t mac,
-    struct enc_xform *txform, struct auth_hash *thash)
+    const struct enc_xform *txform, const struct auth_hash *thash)
 {
 	struct csession *cse;
 
@@ -741,6 +740,7 @@ csecreate(struct fcrypt *fcr, u_int64_t sid, caddr_t key, u_int64_t keylen,
 	cse->mac = mac;
 	cse->txform = txform;
 	cse->thash = thash;
+	cse->error = 0;
 	cseadd(fcr, cse);
 	return (cse);
 }

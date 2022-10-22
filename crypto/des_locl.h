@@ -68,7 +68,7 @@ typedef struct des_ks_struct
 #define DES_SCHEDULE_SZ (sizeof(des_key_schedule))
 
 
-void des_encrypt2(u_int32_t *data,des_key_schedule ks, int enc);
+void des_encrypt2(u_int32_t *data,caddr_t ks, int enc);
 
 
 #define ITERATIONS 16

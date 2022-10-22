@@ -28,8 +28,7 @@
 #include <sys/types.h>
 #include <sys/systm.h>
 #include <sys/stdint.h>
-
-#include "aes.h"
+#include <crypto/aes.h>
 
 static inline void
 enc32le(void *dst, uint32_t x)

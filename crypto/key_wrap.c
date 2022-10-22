@@ -61,7 +61,7 @@ aes_key_wrap(aes_key_wrap_ctx *ctx, const u_int8_t *P, size_t n, u_int8_t *C)
 			memcpy(&B[0], A, 8);
 			memcpy(&B[1], R, 8);
 			/* B = AES(K, B) */
-			AES_Encrypt(&ctx->ctx, (caddr_t)B, (caddr_t)B);
+			AES_Encrypt(&ctx->ctx, (uint8_t *)B, (uint8_t *)B);
 			/* MSB(64, B) = MSB(64, B) ^ t */
 			B[0] ^= htobe64(t);
 			/* A = MSB(64, B) */
@@ -96,7 +96,7 @@ aes_key_unwrap(aes_key_wrap_ctx *ctx, const u_int8_t *C, u_int8_t *P, size_t n)
 			/* B = MSB(64, B) | R[i] */
 			memcpy(&B[1], R, 8);
 			/* B = AES-1(K, B) */
-			AES_Decrypt(&ctx->ctx, (caddr_t)B, (caddr_t)B);
+			AES_Decrypt(&ctx->ctx, (uint8_t *)B, (uint8_t *)B);
 			/* A = MSB(64, B) */
 			memcpy(A, &B[0], 8);
 			/* R[i] = LSB(64, B) */
