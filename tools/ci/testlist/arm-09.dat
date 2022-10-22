@@ -1,13 +1,13 @@
-/arm/stm32/olimexino-stm32,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/stm32/olimexino-stm32,CONFIG_ARM_TOOLCHAIN_CLANG
 
-/arm/stm32/omnibusf4,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/stm32/omnibusf4,CONFIG_ARM_TOOLCHAIN_CLANG
 
 /arm/stm32/photon,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 
-/arm/stm32/shenzhou,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/stm32/shenzhou,CONFIG_ARM_TOOLCHAIN_CLANG
 -shenzhou:thttpd
 
-/arm/stm32/stm3210e-eval,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/stm32/stm3210e-eval,CONFIG_ARM_TOOLCHAIN_CLANG
 
 /arm/stm32/stm3220g-eval,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 
