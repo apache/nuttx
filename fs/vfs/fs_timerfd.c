@@ -69,7 +69,7 @@ struct timerfd_priv_s
   struct wdog_s wdog;           /* The watchdog that provides the timing */
   struct work_s work;           /* For deferred timeout operations */
   timerfd_t     counter;        /* timerfd counter */
-  spinlock_t    lock;           /* timerfd counter specific lock */
+  spinlock_t    splock;         /* timerfd counter specific lock */
   unsigned int  minor;          /* timerfd minor number */
   uint8_t       crefs;          /* References counts on timerfd (max: 255) */
 
@@ -164,9 +164,9 @@ static timerfd_t timerfd_get_counter(FAR struct timerfd_priv_s *dev)
   timerfd_t counter;
   irqstate_t intflags;
 
-  intflags = spin_lock_irqsave(&dev->lock);
+  intflags = spin_lock_irqsave(&dev->splock);
   counter = dev->counter;
-  spin_unlock_irqrestore(&dev->lock, intflags);
+  spin_unlock_irqrestore(&dev->splock, intflags);
 
   return counter;
 }
@@ -364,12 +364,12 @@ static ssize_t timerfd_read(FAR struct file *filep, FAR char *buffer,
    * counter to zero
    */
 
-  intflags = spin_lock_irqsave(&dev->lock);
+  intflags = spin_lock_irqsave(&dev->splock);
 
   *(FAR timerfd_t *)buffer = dev->counter;
   dev->counter = 0;
 
-  spin_unlock_irqrestore(&dev->lock, intflags);
+  spin_unlock_irqrestore(&dev->splock, intflags);
 
   nxsem_post(&dev->exclsem);
   return sizeof(timerfd_t);
@@ -486,7 +486,7 @@ static void timerfd_timeout(wdparm_t idev)
    * atomically
    */
 
-  intflags = spin_lock_irqsave(&dev->lock);
+  intflags = spin_lock_irqsave(&dev->splock);
 
   /* Increment timer expiration counter */
 
@@ -501,7 +501,7 @@ static void timerfd_timeout(wdparm_t idev)
       wd_start(&dev->wdog, dev->delay, timerfd_timeout, idev);
     }
 
-  spin_unlock_irqrestore(&dev->lock, intflags);
+  spin_unlock_irqrestore(&dev->splock, intflags);
 }
 
 /****************************************************************************
@@ -649,7 +649,7 @@ int timerfd_settime(int fd, int flags,
    * atomicaly and timeout work is canceled with the same sequence
    */
 
-  intflags = spin_lock_irqsave(&dev->lock);
+  intflags = spin_lock_irqsave(&dev->splock);
 
   /* Disarm the timer (in case the timer was already armed when
    * timerfd_settime() is called).
@@ -671,7 +671,7 @@ int timerfd_settime(int fd, int flags,
 
   if (new_value->it_value.tv_sec <= 0 && new_value->it_value.tv_nsec <= 0)
     {
-      spin_unlock_irqrestore(NULL, intflags);
+      spin_unlock_irqrestore(&dev->splock, intflags);
       return OK;
     }
 
@@ -729,12 +729,12 @@ int timerfd_settime(int fd, int flags,
       ret = wd_start(&dev->wdog, delay, timerfd_timeout, (wdparm_t)dev);
       if (ret < 0)
         {
-          spin_unlock_irqrestore(&dev->lock, intflags);
+          spin_unlock_irqrestore(&dev->splock, intflags);
           goto errout;
         }
     }
 
-  spin_unlock_irqrestore(&dev->lock, intflags);
+  spin_unlock_irqrestore(&dev->splock, intflags);
   return OK;
 
 errout:
