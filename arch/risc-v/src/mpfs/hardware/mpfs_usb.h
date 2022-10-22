@@ -393,8 +393,8 @@ struct mpfs_req_s
 {
   struct usbdev_req_s   req;          /* Standard USB request */
   struct mpfs_req_s    *flink;        /* Supports a singly linked list */
-  uint16_t              inflight;     /* Number of TX bytes tansmitting or
-                                      * number of RX bytes we are waiting */
+  uint16_t              inflight;     /* Number of TX bytes transmitting or
+                                       * number of RX bytes we are waiting */
 };
 
 union wb_u
