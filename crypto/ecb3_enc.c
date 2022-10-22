@@ -50,8 +50,8 @@
 #include "des_locl.h"
 
 void
-des_ecb3_encrypt(des_cblock (*input), des_cblock (*output),
-    des_key_schedule ks1, des_key_schedule ks2, des_key_schedule ks3,
+des_ecb3_encrypt(caddr_t (*input), caddr_t (*output),
+    caddr_t ks1, caddr_t ks2, caddr_t ks3,
     int encrypt)
 {
 	register u_int32_t l0, l1;
