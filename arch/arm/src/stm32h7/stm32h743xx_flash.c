@@ -152,7 +152,7 @@
 #define FLASH_OPTKEY1        0x08192a3b
 #define FLASH_OPTKEY2        0x4c5d6e7f
 #define FLASH_ERASEDVALUE    0xffu
-#define FLASH_ERASEDVALUE_DW 0xffffffff
+#define FLASH_ERASEDVALUE_DW 0xffffffffu
 #define PROGMEM_NBLOCKS      STM32_FLASH_NBLOCKS
 #define FLASH_NPAGES         (STM32_FLASH_SIZE / FLASH_PAGE_SIZE)
 
@@ -186,11 +186,11 @@ static struct stm32h7_flash_priv_s stm32h7_flash_bank1_priv =
 #if STM32_DUAL_BANK
 static struct stm32h7_flash_priv_s stm32h7_flash_bank2_priv =
 {
-  .lock   = NXMUTEX_INITIALIZER,
-  .ifbase = STM32_FLASHIF_BASE + STM32_FLASH_BANK2_OFFSET,
-  .base   = STM32_FLASH_BANK2,
+  .lock    = NXMUTEX_INITIALIZER,
+  .ifbase  = STM32_FLASHIF_BASE + STM32_FLASH_BANK2_OFFSET,
+  .base    = STM32_FLASH_BANK2,
   .stblock = PROGMEM_NBLOCKS / 2,
-  .stpage = FLASH_NPAGES / 2,
+  .stpage  = FLASH_NPAGES / 2,
 };
 #endif
 
@@ -363,7 +363,7 @@ static int stm32h7_israngeerased(size_t startaddress, size_t size)
       count += 4;
     }
 
-  baddr = (uint8_t *)startaddress;
+  baddr = (uint8_t *)addr;
   while (count < size)
     {
       if (getreg8(baddr) != FLASH_ERASEDVALUE)
@@ -407,7 +407,7 @@ static int stm32h7_wait_for_last_operation(struct stm32h7_flash_priv_s
   for (i = 0; i < FLASH_TIMEOUT_VALUE; i++)
     {
       if (!(stm32h7_flash_getreg32(priv, STM32_FLASH_SR1_OFFSET) &
-            (FLASH_SR_QW | FLASH_SR_BSY | FLASH_SR_WBNE)))
+          (FLASH_SR_QW | FLASH_SR_BSY | FLASH_SR_WBNE)))
         {
           timeout = false;
           break;
@@ -796,7 +796,10 @@ ssize_t up_progmem_eraseblock(size_t block)
   stm32h7_flash_modifyreg32(priv, STM32_FLASH_CR1_OFFSET, FLASH_CR_SER, 0);
   stm32h7_flash_modifyreg32(priv, STM32_FLASH_CR1_OFFSET, FLASH_CR_SNB_MASK,
                             0);
+
   ret = 0;
+
+  up_invalidate_dcache(block_address, block_address + FLASH_SECTOR_SIZE);
 
 exit_with_unlock:
   stm32h7_lock_flash(priv);
@@ -824,14 +827,14 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
   struct stm32h7_flash_priv_s *priv;
   uint32_t     *fp;
   uint32_t     *rp;
-  uint32_t     *ll        = (uint32_t *) buf;
+  uint32_t     *ll        = (uint32_t *)buf;
   size_t       faddr;
   size_t       written    = count;
-  int ret;
+  int          ret;
   const size_t pagesize   = up_progmem_pagesize(0); /* 256 bit, 32 bytes per page */
   const size_t llperpage  = pagesize / sizeof(uint32_t);
   size_t       pcount     = count / pagesize;
-  uint32_t sr;
+  uint32_t     sr;
 
   priv = stm32h7_flash_bank(addr);
 
@@ -874,10 +877,10 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
 
   stm32h7_flash_modifyreg32(priv, STM32_FLASH_CR1_OFFSET, 0, FLASH_CR_PG);
 
-  for (ll = (uint32_t *) buf, faddr = addr; pcount;
+  for (ll = (uint32_t *)buf, faddr = addr; pcount;
       pcount -= 1, ll += llperpage, faddr += pagesize)
     {
-      fp = (uint32_t *) faddr;
+      fp = (uint32_t *)faddr;
       rp = ll;
 
       ARM_DSB();
@@ -933,10 +936,10 @@ exit_with_unlock:
 
   if (written > 0)
     {
-      for (ll = (uint32_t *) buf, faddr = addr, pcount = count / pagesize;
+      for (ll = (uint32_t *)buf, faddr = addr, pcount = count / pagesize;
           pcount; pcount -= 1, ll += llperpage, faddr += pagesize)
         {
-          fp = (uint32_t *) faddr;
+          fp = (uint32_t *)faddr;
           rp = ll;
 
           stm32h7_flash_modifyreg32(priv, STM32_FLASH_CCR1_OFFSET,
@@ -975,4 +978,3 @@ uint8_t up_progmem_erasestate(void)
 {
   return FLASH_ERASEDVALUE;
 }
-
