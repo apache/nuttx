@@ -54,6 +54,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
+static int  cs4344_setmclkfrequency(FAR struct cs4344_dev_s *priv);
 static void cs4344_setdatawidth(FAR struct cs4344_dev_s *priv);
 static void cs4344_setbitrate(FAR struct cs4344_dev_s *priv);
 
@@ -154,9 +155,137 @@ static const struct audio_ops_s g_audioops =
   cs4344_release        /* release */
 };
 
+struct mclk_rate_s
+{
+  uint32_t mclk_freq;   /* Master clock frequency (in Hz) */
+  uint32_t sample_rate; /* Sample rate (in Hz) */
+  uint16_t multiple;    /* Multiple of the mclk_freq to the sample_rate */
+};
+
+static const struct mclk_rate_s mclk_rate[] =
+{
+  {
+    8192000,  /* mclk_freq */
+    16000,    /* sample_rate */
+    512,      /* multiple */
+  },
+  {
+    12288000, /* mclk_freq */
+    16000,    /* sample_rate */
+    768,      /* multiple */
+  },
+  {
+    11289600, /* mclk_freq */
+    22050,    /* sample_rate */
+    512,      /* multiple */
+  },
+  {
+    8192000,  /* mclk_freq */
+    32000,    /* sample_rate */
+    256,      /* multiple */
+  },
+  {
+    12288000, /* mclk_freq */
+    32000,    /* sample_rate */
+    384,      /* multiple */
+  },
+  {
+    11289600, /* mclk_freq */
+    44100,    /* sample_rate */
+    256,      /* multiple */
+  },
+  {
+    16934400, /* mclk_freq */
+    44100,    /* sample_rate */
+    384,      /* multiple */
+  },
+  {
+    22579200, /* mclk_freq */
+    44100,    /* sample_rate */
+    512,      /* multiple */
+  },
+  {
+    12288000, /* mclk_freq */
+    48000,    /* sample_rate */
+    256,      /* multiple */
+  },
+  {
+    18432000, /* mclk_freq */
+    48000,    /* sample_rate */
+    384,      /* multiple */
+  },
+  {
+    24576000, /* mclk_freq */
+    48000,    /* sample_rate */
+    512,      /* multiple */
+  },
+};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: cs4344_setmclkfrequency
+ *
+ * Description:
+ *   Set the frequency of the Master Clock (MCLK)
+ *
+ * Input Parameters:
+ *   priv - A reference to the driver state structure
+ *
+ * Returned Value:
+ *   Returns OK or a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int cs4344_setmclkfrequency(FAR struct cs4344_dev_s *priv)
+{
+  int ret = OK;
+  int i;
+
+  priv->mclk_freq = 0;
+
+  for (i = 0; i < ARRAY_SIZE(mclk_rate); i++)
+    {
+      if (mclk_rate[i].sample_rate == priv->samprate)
+        {
+          /* Normally master clock should be multiple of the sample rate
+           * and bclk at the same time. The field mclk_rate_s::multiple
+           * means the multiple of mclk to the sample rate. This value
+           * should be divisible by the size (in bytes) of the sample,
+           * otherwise the ws signal will be inaccurate. For instance,
+           * if data width is 24 bits, in order to keep mclk a multiple
+           * to the bclk, the mclk_rate_s::multiple should be divisible
+           * by the size of the sample, i.e, 24 / 8 = 3.
+           */
+
+          priv->mclk_freq = mclk_rate[i].mclk_freq;
+
+          /* Check if the current master clock frequency is divisible by
+           * the size (in bytes) of the sample. If so, we have a perfect
+           * match. Otherwise, try to find a more suitable value for the
+           * master clock.
+           */
+
+          if (mclk_rate[i].multiple % (priv->bpsamp / 8) == 0)
+            {
+              break;
+            }
+        }
+    }
+
+  if (priv->mclk_freq != 0)
+    {
+      ret = I2S_MCLKFREQUENCY(priv->i2s, priv->mclk_freq);
+    }
+  else
+    {
+      ret = -EINVAL;
+    }
+
+  return ret > 0 ? OK : ret;
+}
 
 /****************************************************************************
  * Name: cs4344_setdatawidth
@@ -407,6 +536,8 @@ cs4344_configure(FAR struct audio_lowerhalf_s *dev,
 
     case AUDIO_TYPE_OUTPUT:
       {
+        ret = OK;
+
         audinfo("  AUDIO_TYPE_OUTPUT:\n");
         audinfo("    Number of channels: %u\n", caps->ac_channels);
         audinfo("    Sample rate:        %u\n", caps->ac_controls.hw[0]);
@@ -414,11 +545,11 @@ cs4344_configure(FAR struct audio_lowerhalf_s *dev,
 
         /* Verify that all of the requested values are supported */
 
-        ret = -ERANGE;
         if (caps->ac_channels != 1 && caps->ac_channels != 2)
           {
             auderr("ERROR: Unsupported number of channels: %d\n",
                    caps->ac_channels);
+            ret = -ERANGE;
             break;
           }
 
@@ -426,6 +557,7 @@ cs4344_configure(FAR struct audio_lowerhalf_s *dev,
           {
             auderr("ERROR: Unsupported bits per sample: %d\n",
                    caps->ac_controls.b[2]);
+            ret = -ERANGE;
             break;
           }
 
@@ -435,13 +567,30 @@ cs4344_configure(FAR struct audio_lowerhalf_s *dev,
         priv->nchannels = caps->ac_channels;
         priv->bpsamp    = caps->ac_controls.b[2];
 
-        /* Reconfigure the FLL to support the resulting number or channels,
-         * bits per sample, and bitrate.
+        /* Reconfigure the master clock to support the resulting number of
+         * channels, data width, and sample rate. However, if I2S lower half
+         * doesn't provide support for setting the master clock, execution
+         * goes on and try just to set the data width and sample rate.
          */
+
+        ret = cs4344_setmclkfrequency(priv);
+        if (ret != OK)
+          {
+            if (ret != -ENOTTY)
+              {
+                auderr("ERROR: Unsupported combination of sample rate and"
+                       "data width\n");
+                break;
+              }
+            else
+              {
+                audwarn("WARNING: MCLK could not be set on lower half\n");
+                priv->mclk_freq = 0;
+              }
+          }
 
         cs4344_setdatawidth(priv);
         cs4344_setbitrate(priv);
-        ret = OK;
       }
       break;
 
@@ -1255,6 +1404,7 @@ static void cs4344_reset(FAR struct cs4344_dev_s *priv)
   priv->samprate   = CS4344_DEFAULT_SAMPRATE;
   priv->nchannels  = CS4344_DEFAULT_NCHANNELS;
   priv->bpsamp     = CS4344_DEFAULT_BPSAMP;
+  priv->mclk_freq  = 0;
 
   /* Configure the FLL and the LRCLK */
 
