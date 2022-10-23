@@ -769,6 +769,12 @@ ssize_t up_progmem_eraseblock(size_t block)
       return (ssize_t)ret;
     }
 
+  /* Flush and invalidate D-Cache for this block */
+
+#ifdef CONFIG_ARMV7M_DCACHE
+  up_flush_dcache(block_address, block_address + FLASH_SECTOR_SIZE);
+#endif
+
   if (stm32h7_wait_for_last_operation(priv))
     {
       ret = -EIO;
