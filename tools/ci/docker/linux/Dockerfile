@@ -248,6 +248,7 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   libpulse-dev libpulse-dev:i386 \
   libpython2.7 \
   libncurses5-dev \
+  libtinfo5 \
   libx11-dev libx11-dev:i386 \
   libxext-dev libxext-dev:i386 \
   linux-libc-dev:i386 \
