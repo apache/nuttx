@@ -1336,7 +1336,7 @@ errout_with_ctrlreq:
   kmm_free(priv->ctrlreq);
 
 errout_with_hub:
-  kmm_free(priv);
+  kmm_free(alloc);
   return NULL;
 }
 
