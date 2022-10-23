@@ -2659,6 +2659,8 @@ static int mmcsd_read_csd(FAR struct mmcsd_state_s *priv)
       return -EPERM;
     }
 
+  memset(buffer, 0, sizeof(buffer));
+
 #if defined(CONFIG_SDIO_DMA) && defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
   /* If we think we are going to perform a DMA transfer, make sure that we
    * will be able to before we commit the card to the operation.
