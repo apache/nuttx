@@ -159,7 +159,7 @@
 "sigtimedwait","signal.h","","int","FAR const sigset_t *","FAR struct siginfo *","FAR const struct timespec *"
 "sigwaitinfo","signal.h","","int","FAR const sigset_t *","FAR struct siginfo *"
 "socket","sys/socket.h","defined(CONFIG_NET)","int","int","int","int"
-"socketpair","sys/socket.h","defined(CONFIG_NET)","int","int","int","int","int *"
+"socketpair","sys/socket.h","defined(CONFIG_NET)","int","int","int","int","int [2]|FAR int *"
 "stat","sys/stat.h","","int","FAR const char *","FAR struct stat *"
 "statfs","sys/statfs.h","","int","FAR const char *","FAR struct statfs *"
 "symlink","unistd.h","defined(CONFIG_PSEUDOFS_SOFTLINKS)","int","FAR const char *","FAR const char *"
