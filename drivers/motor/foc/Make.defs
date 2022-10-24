@@ -30,4 +30,4 @@ endif
 
 DEPPATH += --dep-path motor$(DELIM)foc
 VPATH += :motor$(DELIM)foc
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)motor$(DELIM)foc}
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)motor$(DELIM)foc}
