@@ -43,8 +43,10 @@
 #ifdef CONFIG_PAGING
 # include "paging/paging.h"
 #endif
-# include "wqueue/wqueue.h"
-# include "init/init.h"
+
+#include "sched/sched.h"
+#include "wqueue/wqueue.h"
+#include "init/init.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -353,9 +355,10 @@ static inline void nx_create_initthread(void)
    * execution.
    */
 
-  pid = kthread_create("AppBringUp", CONFIG_BOARD_INITTHREAD_PRIORITY,
-                       CONFIG_BOARD_INITTHREAD_STACKSIZE,
-                       nx_start_task, NULL);
+  pid = nxthread_create("AppBringUp", TCB_FLAG_TTYPE_KERNEL,
+                        CONFIG_BOARD_INITTHREAD_PRIORITY,
+                        NULL, CONFIG_BOARD_INITTHREAD_STACKSIZE,
+                        nx_start_task, NULL, environ);
   DEBUGASSERT(pid > 0);
   UNUSED(pid);
 #else
