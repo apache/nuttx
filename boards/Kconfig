@@ -1494,6 +1494,15 @@ config ARCH_BOARD_NUCLEO_L552ZE
 	---help---
 		STMicro Nucleo STM32L552 board based on the STMicro STM32L552ZET6 MCU.
 
+config ARCH_BOARD_FLIPPERZERO
+	bool "Flipper Zero"
+	depends on ARCH_CHIP_STM32WB55RG
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Flipper Zero device based on the STMicro STM32WB55RGV6 MCU.
+
 config ARCH_BOARD_NUCLEO_WB55RG
 	bool "STM32WB55 Nucleo WB55RG"
 	depends on ARCH_CHIP_STM32WB55RG
@@ -2737,6 +2746,7 @@ config ARCH_BOARD
 	default "steval-stlcs01v1"         if ARCH_BOARD_STEVAL_STLCS01V1
 	default "nucleo-l496zg"            if ARCH_BOARD_NUCLEO_L496ZG
 	default "nucleo-l552ze"            if ARCH_BOARD_NUCLEO_L552ZE
+	default "flipperzero"              if ARCH_BOARD_FLIPPERZERO
 	default "nucleo-wb55rg"            if ARCH_BOARD_NUCLEO_WB55RG
 	default "nucleo-wl55jc"            if ARCH_BOARD_NUCLEO_WL55JC
 	default "nutiny-nuc120"            if ARCH_BOARD_NUTINY_NUC120
@@ -3307,6 +3317,9 @@ source "boards/arm/stm32l4/stm32l4r9ai-disco/Kconfig"
 endif
 if ARCH_BOARD_STM32L562E_DK
 source "boards/arm/stm32l5/stm32l562e-dk/Kconfig"
+endif
+if ARCH_BOARD_FLIPPERZERO
+source "boards/arm/stm32wb/flipperzero/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_WB55RG
 source "boards/arm/stm32wb/nucleo-wb55rg/Kconfig"
