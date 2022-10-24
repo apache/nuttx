@@ -177,6 +177,7 @@ function arm-clang-toolchain {
     curl -O -L -s https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-14.0.0/LLVMEmbeddedToolchainForArm-14.0.0-linux.tar.gz
     tar zxf LLVMEmbeddedToolchainForArm-14.0.0-linux.tar.gz
     mv LLVMEmbeddedToolchainForArm-14.0.0 clang-arm-none-eabi
+    cp /usr/bin/clang-extdef-mapping-10 clang-arm-none-eabi/bin/clang-extdef-mapping
     rm LLVMEmbeddedToolchainForArm-14.0.0-linux.tar.gz
   fi
   clang --version

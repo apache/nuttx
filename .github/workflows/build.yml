@@ -163,7 +163,7 @@ jobs:
             if [ "X${{matrix.boards}}" = "Xcodechecker" ]; then
                 ./cibuild.sh -A -R -c --codechecker testlist/${{matrix.boards}}.dat
             else
-              ./cibuild.sh -A -R -c testlist/${{matrix.boards}}.dat
+                ./cibuild.sh -A -R -c testlist/${{matrix.boards}}.dat
             fi
             ccache -s
 
