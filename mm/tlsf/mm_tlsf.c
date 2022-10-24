@@ -28,8 +28,10 @@
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
+#include <execinfo.h>
 #include <malloc.h>
 #include <sched.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <nuttx/arch.h>
@@ -48,6 +50,10 @@
 #  define MM_PTR_FMT_WIDTH 11
 #elif UINTPTR_MAX <= UINT64_MAX
 #  define MM_PTR_FMT_WIDTH 19
+#endif
+
+#if CONFIG_MM_BACKTRACE >= 0
+#  define ROUND_UP(x, y)    ((((x) + (y) - 1) / (y)) * (y))
 #endif
 
 /****************************************************************************
@@ -102,9 +108,47 @@ struct memdump_info_s
   int   size;
 };
 
+#if CONFIG_MM_BACKTRACE >= 0
+struct memdump_backtrace_s
+{
+  pid_t pid;                                /* The pid for caller */
+#if CONFIG_MM_BACKTRACE > 0
+  FAR void *backtrace[CONFIG_MM_BACKTRACE]; /* The backtrace buffer for caller */
+#endif
+  size_t size;                              /* It should include padding plus
+                                             * memdump_backtrace_s self.
+                                             * Must be the last member of
+                                             * the struct.
+                                             */
+};
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#if CONFIG_MM_BACKTRACE >= 0
+
+/****************************************************************************
+ * Name: memdump_backtrace
+ ****************************************************************************/
+
+static void memdump_backtrace(FAR struct mm_heap_s *heap,
+                              FAR struct memdump_backtrace_s *dump)
+{
+  dump->pid = getpid();
+#  if CONFIG_MM_BACKTRACE > 0
+  if (heap->mm_procfs.backtrace)
+    {
+      int ret = backtrace(dump->backtrace, CONFIG_MM_BACKTRACE);
+      while (ret < CONFIG_MM_BACKTRACE)
+        {
+          dump->backtrace[ret++] = NULL;
+        }
+    }
+#  endif
+}
+#endif
 
 /****************************************************************************
  * Name: mm_add_delaylist
@@ -189,6 +233,26 @@ static void mm_mallinfo_walker(FAR void *ptr, size_t size, int used,
       info->aordblks++;
     }
 }
+
+#if CONFIG_MM_BACKTRACE >= 0
+
+/****************************************************************************
+ * Name: mallinfo_task_walker
+ ****************************************************************************/
+
+static void mallinfo_task_walker(FAR void *ptr, size_t size, int used,
+                                 FAR void *user)
+{
+  FAR struct memdump_backtrace_s *dump = ptr;
+  FAR struct mallinfo_task *info = user;
+
+  if (used && dump->pid == info->pid)
+    {
+      info->aordblks++;
+      info->uordblks += size - dump->size;
+    }
+}
+#endif
 
 /****************************************************************************
  * Name: mm_seminitialize
@@ -307,16 +371,52 @@ static void mm_memdump_walker(FAR void *ptr, size_t size, int used,
                               FAR void *user)
 {
   FAR struct memdump_info_s *info = user;
+#if CONFIG_MM_BACKTRACE >= 0
+  FAR struct memdump_backtrace_s *dump = ptr;
 
-  if (!used && info->pid <= -2)
+  size -= dump->size;
+  ptr += dump->size;
+#endif
+
+  if (used)
     {
-      info->blks++;
-      info->size += size;
+#if CONFIG_MM_BACKTRACE < 0
+      if (info->pid == -1)
+#else
+      if (info->pid == -1 || dump->pid == info->pid)
+#endif
+        {
+#if CONFIG_MM_BACKTRACE < 0
+          syslog(LOG_INFO, "%12zu%*p\n", size, MM_PTR_FMT_WIDTH, ptr);
+#else
+#  if CONFIG_MM_BACKTRACE > 0
+          int i;
+          FAR const char *format = " %0*p";
+#  endif
+          char buf[CONFIG_MM_BACKTRACE * MM_PTR_FMT_WIDTH + 1];
+
+          buf[0] = '\0';
+#  if CONFIG_MM_BACKTRACE > 0
+          for (i = 0; i < CONFIG_MM_BACKTRACE && dump->backtrace[i]; i++)
+            {
+              sprintf(buf + i * MM_PTR_FMT_WIDTH, format,
+                      MM_PTR_FMT_WIDTH - 1, dump->backtrace[i]);
+            }
+#  endif
+
+         syslog(LOG_INFO, "%6d%12zu%*p%s\n",
+                (int)dump->pid, size, MM_PTR_FMT_WIDTH,
+                ptr, buf);
+#endif
+          info->blks++;
+          info->size += size;
+        }
     }
-  else if (info->pid == -1)
+  else if (info->pid <= -2)
     {
       info->blks++;
       info->size += size;
+      syslog(LOG_INFO, "%12zu%*p\n", size, MM_PTR_FMT_WIDTH, ptr);
     }
 }
 
@@ -558,6 +658,10 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
 
   if (mm_takesemaphore(heap))
     {
+#if CONFIG_MM_BACKTRACE >= 0
+      mem -= *(FAR size_t *)(mem - sizeof(size_t));
+#endif
+
       /* Pass, return to the tlsf pool */
 
       tlsf_free(heap->mm_tlsf, mem);
@@ -685,6 +789,9 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   heap->mm_procfs.name = name;
   heap->mm_procfs.heap = heap;
+#  ifdef CONFIG_MM_BACKTRACE_DEFAULT
+  heap->mm_procfs.backtrace = true;
+#  endif
   procfs_register_meminfo(&heap->mm_procfs);
 #endif
 #endif
@@ -732,6 +839,37 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
 
   return OK;
 }
+
+#if CONFIG_MM_BACKTRACE >= 0
+int mm_mallinfo_task(FAR struct mm_heap_s *heap,
+                     FAR struct mallinfo_task *info)
+{
+#if CONFIG_MM_REGIONS > 1
+  int region;
+#else
+#define region 0
+#endif
+
+  DEBUGASSERT(info);
+  info->uordblks = 0;
+  info->aordblks = 0;
+#if CONFIG_MM_REGIONS > 1
+  for (region = 0; region < heap->mm_nregions; region++)
+#endif
+    {
+      /* Retake the semaphore for each region to reduce latencies */
+
+      DEBUGVERIFY(mm_takesemaphore(heap));
+      tlsf_walk_pool(heap->mm_heapstart[region],
+                     mallinfo_task_walker, info);
+      mm_givesemaphore(heap);
+    }
+#undef region
+
+  return OK;
+}
+#endif
+
 /****************************************************************************
  * Name: mm_memdump
  *
@@ -755,7 +893,12 @@ void mm_memdump(FAR struct mm_heap_s *heap, pid_t pid)
   if (pid >= -1)
     {
       syslog(LOG_INFO, "Dump all used memory node info:\n");
+#if CONFIG_MM_BACKTRACE < 0
       syslog(LOG_INFO, "%12s%*s\n", "Size", MM_PTR_FMT_WIDTH, "Address");
+#else
+      syslog(LOG_INFO, "%6s%12s%*s %s\n", "PID", "Size", MM_PTR_FMT_WIDTH,
+            "Address", "Backtrace");
+#endif
     }
   else
     {
@@ -787,7 +930,13 @@ void mm_memdump(FAR struct mm_heap_s *heap, pid_t pid)
 
 size_t mm_malloc_size(FAR void *mem)
 {
+#if CONFIG_MM_BACKTRACE >= 0
+  size_t dumpsize = *(FAR size_t *)(mem - sizeof(size_t));
+
+  return tlsf_block_size(mem - dumpsize) - dumpsize;
+#else
   return tlsf_block_size(mem);
+#endif
 }
 
 /****************************************************************************
@@ -809,6 +958,10 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
   mm_free_delaylist(heap);
 
+#if CONFIG_MM_BACKTRACE >= 0
+  size += sizeof(struct memdump_backtrace_s);
+#endif
+
   /* Allocate from the tlsf pool */
 
   DEBUGVERIFY(mm_takesemaphore(heap));
@@ -817,6 +970,13 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
   if (ret)
     {
+#if CONFIG_MM_BACKTRACE >= 0
+      FAR struct memdump_backtrace_s *dump = ret;
+
+      dump->size = sizeof(struct memdump_backtrace_s);
+      memdump_backtrace(heap, dump);
+      ret += dump->size;
+#endif
       kasan_unpoison(ret, mm_malloc_size(ret));
     }
 
@@ -840,6 +1000,11 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
                       size_t size)
 {
   FAR void *ret;
+#if CONFIG_MM_BACKTRACE >= 0
+  size_t dumpsize = ROUND_UP(sizeof(struct memdump_backtrace_s), alignment);
+
+  size += dumpsize;
+#endif
 
   /* Free the delay list first */
 
@@ -853,6 +1018,16 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 
   if (ret)
     {
+#if CONFIG_MM_BACKTRACE >= 0
+      FAR struct memdump_backtrace_s *dump = ret;
+      FAR size_t *p;
+
+      dump->size = dumpsize;
+      ret += dumpsize;
+      p = ret - sizeof(size_t);
+      *p = dump->size;
+      memdump_backtrace(heap, dump);
+#endif
       kasan_unpoison(ret, mm_malloc_size(ret));
     }
 
@@ -915,11 +1090,37 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
   mm_free_delaylist(heap);
 
+#if CONFIG_MM_BACKTRACE >= 0
+  if (oldmem)
+    {
+      oldmem -= *(FAR size_t *)(oldmem - sizeof(size_t));
+    }
+
+  if (size)
+    {
+      size += sizeof(struct memdump_backtrace_s);
+    }
+
+#endif
+
   /* Allocate from the tlsf pool */
 
   DEBUGVERIFY(mm_takesemaphore(heap));
   newmem = tlsf_realloc(heap->mm_tlsf, oldmem, size);
   mm_givesemaphore(heap);
+
+#if CONFIG_MM_BACKTRACE >= 0
+  if (newmem)
+    {
+      FAR struct memdump_backtrace_s *dump;
+
+      dump = newmem;
+      dump->size = sizeof(struct memdump_backtrace_s);
+      memdump_backtrace(heap, dump);
+      newmem += dump->size;
+    }
+#endif
+
 #endif
 
   return newmem;
