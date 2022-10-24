@@ -209,33 +209,31 @@ typedef struct isx012_dev_s isx012_dev_t;
 
 static uint16_t isx012_getreg(FAR isx012_dev_t *priv,
                               uint16_t regaddr, uint16_t regsize);
-static int     isx012_putreg(isx012_dev_t *priv, uint16_t regaddr,
+static int     isx012_putreg(FAR isx012_dev_t *priv, uint16_t regaddr,
                              uint16_t regval, uint16_t regsize);
-static int     isx012_putreglist(isx012_dev_t *priv,
+static int     isx012_putreglist(FAR isx012_dev_t *priv,
                          FAR const isx012_reg_t *reglist, size_t nentries);
 #ifdef ISX012_CHECK_IN_DETAIL
-static int     isx012_putregs(isx012_dev_t *priv, uint16_t regaddr,
-                              FAR uint8_t *regvals, uint8_t regsize);
 static int     isx012_chipid(FAR struct i2c_master_s *i2c);
 #endif
 
-static int isx012_chk_int_state(isx012_dev_t *priv,
+static int isx012_chk_int_state(FAR isx012_dev_t *priv,
                                 uint8_t  sts, uint32_t delay_time,
                                 uint32_t wait_time, uint32_t timeout);
-static int isx012_set_mode_param(isx012_dev_t *priv,
+static int isx012_set_mode_param(FAR isx012_dev_t *priv,
                                  imgsensor_stream_type_t type,
                                  uint8_t nr_fmt,
                                  FAR imgsensor_format_t *fmt,
                                  FAR imgsensor_interval_t *interval);
-static int isx012_change_camera_mode(isx012_dev_t *priv, uint8_t mode);
-static int isx012_change_device_state(isx012_dev_t *priv,
+static int isx012_change_camera_mode(FAR isx012_dev_t *priv, uint8_t mode);
+static int isx012_change_device_state(FAR isx012_dev_t *priv,
                                       isx012_state_t state);
 static int isx012_replace_frameinterval_to_regval
                 (FAR imgsensor_interval_t *interval);
 static int8_t isx012_get_maximum_fps
                 (uint8_t nr_datafmt,
                  FAR imgsensor_format_t *datafmt);
-static int isx012_set_shd(isx012_dev_t *priv);
+static int isx012_set_shd(FAR isx012_dev_t *priv);
 static bool is_movie_needed(uint8_t fmt, uint8_t fps);
 
 /* image sensor device operations interface */
@@ -708,7 +706,7 @@ static uint16_t isx012_getreg(FAR isx012_dev_t *priv,
   return regval;
 }
 
-static int isx012_putreg(isx012_dev_t *priv,
+static int isx012_putreg(FAR isx012_dev_t *priv,
                          uint16_t regaddr, uint16_t regval, uint16_t regsize)
 {
   struct i2c_config_s config;
@@ -743,7 +741,7 @@ static int isx012_putreg(isx012_dev_t *priv,
   return ret;
 }
 
-static int isx012_putreglist(isx012_dev_t *priv,
+static int isx012_putreglist(FAR isx012_dev_t *priv,
                              FAR const isx012_reg_t *reglist,
                              size_t nentries)
 {
@@ -764,7 +762,7 @@ static int isx012_putreglist(isx012_dev_t *priv,
   return ret;
 }
 
-static int isx012_chk_int_state(isx012_dev_t *priv,
+static int isx012_chk_int_state(FAR isx012_dev_t *priv,
                                 uint8_t sts, uint32_t delay_time,
                                 uint32_t wait_time, uint32_t timeout)
 {
@@ -1133,7 +1131,7 @@ static int isx012_set_mode_param(FAR isx012_dev_t *priv,
  * isx012_change_camera_mode
  ****************************************************************************/
 
-static int isx012_change_camera_mode(isx012_dev_t *priv, uint8_t mode)
+static int isx012_change_camera_mode(FAR isx012_dev_t *priv, uint8_t mode)
 {
   int      ret = 0;
   uint16_t fmt_addr;
@@ -1244,7 +1242,7 @@ static int isx012_change_camera_mode(isx012_dev_t *priv, uint8_t mode)
  * isx012_change_device_state
  ****************************************************************************/
 
-static int isx012_change_device_state(isx012_dev_t *priv,
+static int isx012_change_device_state(FAR isx012_dev_t *priv,
                                       isx012_state_t state)
 {
   int ret = 0;
@@ -1733,9 +1731,9 @@ static int isx012_get_supported_value
              (uint32_t id, FAR imgsensor_supported_value_t *value)
 {
   int ret = OK;
-  imgsensor_capability_range_t *range = &value->u.range;
-  imgsensor_capability_discrete_t *discrete = &value->u.discrete;
-  imgsensor_capability_elems_t *elems = &value->u.elems;
+  FAR imgsensor_capability_range_t *range = &value->u.range;
+  FAR imgsensor_capability_discrete_t *discrete = &value->u.discrete;
+  FAR imgsensor_capability_elems_t *elems = &value->u.elems;
 
   ASSERT(value);
 
@@ -1978,14 +1976,14 @@ static int isx012_get_value(uint32_t id,
                             FAR imgsensor_value_t *value)
 {
   FAR struct isx012_dev_s *priv = &g_isx012_private;
-  uint16_t   readvalue;
-  uint8_t    cnt;
-  uint8_t    threea_enable;
-  uint16_t   read_src;
-  uint16_t   *read_dst;
-  int        ret = OK;
-  uint16_t   exposure_time_lsb;
-  uint16_t   exposure_time_msb;
+  uint16_t      readvalue;
+  uint8_t       cnt;
+  uint8_t       threea_enable;
+  uint16_t      read_src;
+  FAR uint16_t *read_dst;
+  int           ret = OK;
+  uint16_t      exposure_time_lsb;
+  uint16_t      exposure_time_msb;
 
   ASSERT(value);
 
@@ -2350,16 +2348,16 @@ static int set_clip(uint32_t size,
 
 static int isx012_set_value(uint32_t id,
                             uint32_t size,
-                            FAR imgsensor_value_t value)
+                            imgsensor_value_t value)
 {
   FAR struct isx012_dev_s *priv = &g_isx012_private;
-  int       ret = -EINVAL;
-  uint8_t   cnt;
-  uint16_t  *write_src;
-  uint16_t  write_dst;
-  uint16_t  regval;
-  uint16_t  exposure_time_lsb;
-  uint16_t  exposure_time_msb;
+  int           ret = -EINVAL;
+  uint8_t       cnt;
+  FAR uint16_t *write_src;
+  uint16_t      write_dst;
+  uint16_t      regval;
+  uint16_t      exposure_time_lsb;
+  uint16_t      exposure_time_msb;
 
   switch (id)
     {
