@@ -628,6 +628,7 @@ static struct imgsensor_ops_s g_isx012_ops =
   isx012_validate_frame_setting,        /* validate_frame_setting */
   isx012_start_capture,                 /* start_capture */
   isx012_stop_capture,                  /* stop_capture */
+  NULL,                                 /* get_frame_interval */
   isx012_get_supported_value,           /* get_supported_value */
   isx012_get_value,                     /* get_value */
   isx012_set_value                      /* set_value */
