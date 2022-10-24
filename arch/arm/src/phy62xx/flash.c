@@ -43,7 +43,7 @@
 #define SPIF_STATUS_WAIT_IDLE(n)                    \
     do                                              \
     {                                               \
-        while ((AP_SPIF->fcmd &0x02)==0x02);         \
+        while ((AP_SPIF->fcmd &0x02)==0x02)         \
         {                                           \
             volatile int delay_cycle = n;           \
             while (delay_cycle--){;}                \
