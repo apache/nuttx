@@ -104,6 +104,7 @@
 	.align	2
 	.code	16
 	.thumb_func
+	.syntax	unified
 	.type	exception_common, function
 exception_common:
 
@@ -136,8 +137,8 @@ exception_common:
 2:
 	/* Save SP, PRIMASK, and R4-R7 in the context array */
 
-	sub		r1, #SW_XCPT_SIZE			/* R1=Beginning of context array on the stack */
-	mov		r2, #XCPTCONTEXT_SIZE			/* R2=Size of the context array */
+	subs		r1, #SW_XCPT_SIZE			/* R1=Beginning of context array on the stack */
+	movs		r2, #XCPTCONTEXT_SIZE			/* R2=Size of the context array */
 	add		r2, r1					/* R2=MSP/PSP before the interrupt was taken */
 								/* (ignoring the xPSR[9] alignment bit) */
 	mrs		r3, primask				/* R3=Current PRIMASK setting */
@@ -181,7 +182,7 @@ exception_common:
 	 */
 
 	mov		r2, r1					/* Reserve signal context */
-	sub		r2, r2, #XCPTCONTEXT_SIZE
+	subs		r2, r2, #XCPTCONTEXT_SIZE
 	msr		msp, r2					/* We are using the main stack pointer */
 #endif
 
@@ -193,8 +194,8 @@ exception_common:
 
 	/* Recover R8-R11 and EXEC_RETURN (5 registers) */
 
-	mov		r2, #(4*REG_R8)				/* R2=Offset to R8 storage */
-	add		r1, r0, r2				/* R1=Address of R8 storage */
+	movs		r2, #(4*REG_R8)				/* R2=Offset to R8 storage */
+	adds		r1, r0, r2				/* R1=Address of R8 storage */
 #ifdef CONFIG_BUILD_PROTECTED
 	ldmia		r1!, {r2-r6}				/* Recover R8-R11 and R14 (5 registers)*/
 	mov		r8, r2					/* Move to position in high registers */
@@ -215,8 +216,8 @@ exception_common:
 	 */
 
 	ldmia		r0!, {r2-r7}				/* Recover R4-R7 + 2 temp values */
-	mov		r1, #HW_XCPT_SIZE			/* R1=Size of hardware-saved portion of the context array */
-	sub		r1, r2, r1				/* R1=Value of MSP/PSP on exception entry */
+	movs		r1, #HW_XCPT_SIZE			/* R1=Size of hardware-saved portion of the context array */
+	subs		r1, r2, r1				/* R1=Value of MSP/PSP on exception entry */
 
 	/* Restore the stack pointer.  The EXC_RETURN value tells us whether the
 	 * context is on the MSP or PSP.
