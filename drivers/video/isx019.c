@@ -282,6 +282,7 @@ static int isx019_get_value(uint32_t id, uint32_t size,
 static int isx019_set_value(uint32_t id, uint32_t size,
                             imgsensor_value_t value);
 static int initialize_jpg_quality(void);
+static void initialize_wbmode(void);
 static int send_read_cmd(FAR struct i2c_config_s *config,
                          uint8_t cat,
                          uint16_t addr,
@@ -774,7 +775,7 @@ int32_t g_isx019_wbmode[] =
  * Private Functions
  ****************************************************************************/
 
-int fpga_i2c_write(uint8_t addr, FAR uint8_t *data, uint8_t size)
+static int fpga_i2c_write(uint8_t addr, FAR uint8_t *data, uint8_t size)
 {
   struct i2c_config_s config;
   static uint8_t buf[FPGA_I2C_REGSIZE_MAX + FPGA_I2C_REGADDR_LEN];
@@ -1215,6 +1216,7 @@ static int isx019_init(void)
   power_on();
   set_drive_mode();
   fpga_init();
+  initialize_wbmode();
   initialize_jpg_quality();
   store_default_value();
   clk = board_isx019_get_master_clock();
@@ -1427,7 +1429,7 @@ static int activate_clip(imgsensor_stream_type_t type,
 
         break;
 
-      default: /* 640 */
+      case 640:
         if (clip->width == 640)
           {
             /* In this case, clip->height == 360 */
@@ -1453,6 +1455,13 @@ static int activate_clip(imgsensor_stream_type_t type,
                 left = 0;
               }
           }
+
+        break;
+
+      default: /* Otherwise, clear clip setting. */
+        size = FPGA_CLIP_NON;
+        top  = 0;
+        left = 0;
 
         break;
     }
@@ -1516,30 +1525,27 @@ static int isx019_start_capture(imgsensor_stream_type_t type,
     }
 
   switch (fmt[IMGSENSOR_FMT_MAIN].width)
-   {
-     case 1280:
-       regval |= FPGA_SCALE_1280_960;
-       activate_clip(type,
-                     fmt[IMGSENSOR_FMT_MAIN].width,
-                     fmt[IMGSENSOR_FMT_MAIN].height);
-       break;
+    {
+      case 1280:
+        regval |= FPGA_SCALE_1280_960;
+        break;
 
-     case 640:
-       regval |= FPGA_SCALE_640_480;
-       activate_clip(type,
-                     fmt[IMGSENSOR_FMT_MAIN].width,
-                     fmt[IMGSENSOR_FMT_MAIN].height);
-       break;
+      case 640:
+        regval |= FPGA_SCALE_640_480;
+        break;
 
-     case 320:
-       regval |= FPGA_SCALE_320_240;
-       break;
+      case 320:
+        regval |= FPGA_SCALE_320_240;
+        break;
 
-     default: /* 160 */
+      default: /* 160 */
+        regval |= FPGA_SCALE_160_120;
+        break;
+    }
 
-       regval |= FPGA_SCALE_160_120;
-       break;
-   }
+  activate_clip(type,
+                fmt[IMGSENSOR_FMT_MAIN].width,
+                fmt[IMGSENSOR_FMT_MAIN].height);
 
   fpga_i2c_write(FPGA_FORMAT_AND_SCALE, &regval, 1);
 
@@ -1898,16 +1904,6 @@ static int32_t convert_hue_reg2is(int32_t val)
   return (val * 128) / 90;
 }
 
-static int32_t convert_awb_is2reg(int32_t val)
-{
-  return (val == 1) ? 0 : 2;
-}
-
-static int32_t convert_awb_reg2is(int32_t val)
-{
-  return (val == 0) ? 1 : 0;
-}
-
 static int32_t convert_hdr_is2reg(int32_t val)
 {
   int32_t ret = AEWDMODE_AUTO;
@@ -1987,11 +1983,6 @@ static convert_t get_reginfo(uint32_t id, bool is_set,
       case IMGSENSOR_ID_HUE:
         SET_REGINFO(reg, CAT_PICTTUNE, UIHUE, 1);
         cvrt = is_set ? convert_hue_is2reg : convert_hue_reg2is;
-        break;
-
-      case IMGSENSOR_ID_AUTO_WHITE_BALANCE:
-        SET_REGINFO(reg, CAT_CATAWB, AWBMODE, 1);
-        cvrt = is_set ? convert_awb_is2reg : convert_awb_reg2is;
         break;
 
       case IMGSENSOR_ID_EXPOSURE:
@@ -2151,7 +2142,18 @@ static int set_exptime(imgsensor_value_t val)
   return isx019_i2c_write(CAT_CATAE, SHT_PRIMODE, (FAR uint8_t *)&regval, 4);
 }
 
-static int set_wbmode(imgsensor_value_t val)
+static int set_awb_hold(void)
+{
+  uint8_t mode = AWBMODE_HOLD;
+  return isx019_i2c_write(CAT_CATAWB, AWBMODE, &mode, 1);
+}
+
+static void initialize_wbmode(void)
+{
+  g_isx019_private.wb_mode = IMGSENSOR_WHITE_BALANCE_AUTO;
+}
+
+static int update_wbmode_reg(int32_t val)
 {
   /*  AWBMODE     mode0 : auto, mode4 : user defined white balance
    *  AWBUSER_NO  definition number for AWBMODE = mode4
@@ -2179,7 +2181,7 @@ static int set_wbmode(imgsensor_value_t val)
       toggle = true;
     }
 
-  switch (val.value32)
+  switch (val)
     {
       case IMGSENSOR_WHITE_BALANCE_AUTO:
         mode = AWBMODE_AUTO;
@@ -2221,7 +2223,53 @@ static int set_wbmode(imgsensor_value_t val)
   isx019_i2c_write(CAT_CATAWB, AWBUSER_NO, (FAR uint8_t *)&toggle, 1);
   isx019_i2c_write(CAT_CATAWB, AWBMODE, &mode, 1);
 
+  return OK;
+}
+
+static bool is_awb_enable(void)
+{
+  uint8_t mode = AWBMODE_AUTO;
+
+  isx019_i2c_read(CAT_CATAWB, AWBMODE, &mode, 1);
+
+  return mode != AWBMODE_HOLD;
+}
+
+static int set_wbmode(imgsensor_value_t val)
+{
+  /* Update register only if IMGSENSOR_ID_AUTO_WHITE_BALANCE = 1. */
+
+  if (is_awb_enable())
+    {
+      update_wbmode_reg(val.value32);
+    }
+
   g_isx019_private.wb_mode = val.value32;
+  return OK;
+}
+
+static int set_awb(imgsensor_value_t val)
+{
+  /* true  -> false : Update regster to HOLD
+   * false -> true  : Update register
+   *                  with IMGSENSOR_ID_AUTO_N_PRESET_WB setting
+   * otherwise      : Nothing to do
+   */
+
+  if (is_awb_enable())
+    {
+      if (val.value32 == 0)
+        {
+          set_awb_hold();
+        }
+    }
+  else
+    {
+      if (val.value32 == 1)
+        {
+          update_wbmode_reg(g_isx019_private.wb_mode);
+        }
+    }
 
   return OK;
 }
@@ -2648,6 +2696,10 @@ static setvalue_t set_value_func(uint32_t id)
         func = set_exptime;
         break;
 
+      case IMGSENSOR_ID_AUTO_WHITE_BALANCE:
+        func = set_awb;
+        break;
+
       case IMGSENSOR_ID_AUTO_N_PRESET_WB:
         func = set_wbmode;
         break;
@@ -2691,7 +2743,7 @@ static setvalue_t set_value_func(uint32_t id)
   return func;
 }
 
-static int32_t get_flip(uint8_t *flip, uint8_t direction)
+static int32_t get_flip(FAR uint8_t *flip, uint8_t direction)
 {
   DEBUGASSERT(flip);
 
@@ -2782,6 +2834,18 @@ static int get_exptime(FAR imgsensor_value_t *val)
    */
 
   val->value32 = ((regval / g_isx019_private.clock_ratio) + 99) / 100;
+
+  return OK;
+}
+
+static int get_awb(FAR imgsensor_value_t *val)
+{
+  if (val == NULL)
+    {
+      return -EINVAL;
+    }
+
+  val->value32 = is_awb_enable();
 
   return OK;
 }
@@ -3034,6 +3098,10 @@ static getvalue_t get_value_func(uint32_t id)
 
       case IMGSENSOR_ID_EXPOSURE_ABSOLUTE:
         func = get_exptime;
+        break;
+
+      case IMGSENSOR_ID_AUTO_WHITE_BALANCE:
+        func = get_awb;
         break;
 
       case IMGSENSOR_ID_AUTO_N_PRESET_WB:
