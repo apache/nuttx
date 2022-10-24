@@ -148,6 +148,11 @@
 
 #define BW_COLORS_SATURATION (0x00)
 
+/* Definition for calculation of extended frame number */
+
+#define VTIME_PER_FRAME    (30518)
+#define INTERVAL_PER_FRAME (33333)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -267,6 +272,8 @@ static int isx019_start_capture(imgsensor_stream_type_t type,
                                 FAR imgsensor_format_t *datafmts,
                                 FAR imgsensor_interval_t *interval);
 static int isx019_stop_capture(imgsensor_stream_type_t type);
+static int isx019_get_frame_interval(imgsensor_stream_type_t type,
+                                     FAR imgsensor_interval_t *interval);
 static int isx019_get_supported_value(uint32_t id,
                                      FAR imgsensor_supported_value_t *value);
 static int isx019_get_value(uint32_t id, uint32_t size,
@@ -294,6 +301,7 @@ static struct imgsensor_ops_s g_isx019_ops =
   isx019_validate_frame_setting,
   isx019_start_capture,
   isx019_stop_capture,
+  isx019_get_frame_interval,
   isx019_get_supported_value,
   isx019_get_value,
   isx019_set_value,
@@ -1604,6 +1612,86 @@ static int isx019_stop_capture(imgsensor_stream_type_t type)
   fpga_i2c_write(FPGA_DATA_OUTPUT, &regval, 1);
   fpga_activate_setting();
   nxmutex_unlock(&g_isx019_private.fpga_lock);
+  return OK;
+}
+
+static int calc_gcm(int a, int b)
+{
+  int r;
+
+  DEBUGASSERT((a != 0) && (b != 0));
+
+  while ((r = a % b) != 0)
+    {
+      a = b;
+      b = r;
+    }
+
+  return b;
+}
+
+static int isx019_get_frame_interval(imgsensor_stream_type_t type,
+                                     FAR imgsensor_interval_t *interval)
+{
+  uint32_t vtime = VTIME_PER_FRAME;
+  uint32_t frame = 1;
+  uint8_t  fps   = FPGA_FPS_1_1;
+  int decimation = 1;
+  int gcm;
+
+  if (interval == NULL)
+    {
+      return -EINVAL;
+    }
+
+  /* ISX019's base frame interval = 1/30. */
+
+  interval->denominator = 30;
+  interval->numerator = 1;
+
+  /* ISX019 has the frame extension feature, which automatically
+   * exposes longer than one frame in dark environment.
+   * The number of extended frame is calculated from V_TIME register,
+   * which has the value
+   *   VTIME_PER_FRAME + INTERVAL_PER_FRAME * (frame number - 1)
+   */
+
+  isx019_i2c_read(CAT_AESOUT, V_TIME, (FAR uint8_t *)&vtime, 4);
+  frame = 1 + (vtime - VTIME_PER_FRAME) / INTERVAL_PER_FRAME;
+  interval->numerator *= frame;
+
+  /* Also, consider frame decimation by FPGA.
+   * decimation amount is gotten from FPGA register.
+   */
+
+  fpga_i2c_read(FPGA_FPS_AND_THUMBNAIL, &fps, 1);
+  switch (fps & FPGA_FPS_BITS)
+    {
+      case FPGA_FPS_1_1:
+        decimation = 1;
+        break;
+
+      case FPGA_FPS_1_2:
+        decimation = 2;
+        break;
+
+      case FPGA_FPS_1_3:
+        decimation = 3;
+        break;
+
+      default: /* FPGA_FPS_1_4 */
+        decimation = 4;
+        break;
+    }
+
+  interval->numerator *= decimation;
+
+  /* Reduce the fraction. */
+
+  gcm = calc_gcm(30, frame * decimation);
+  interval->denominator /= gcm;
+  interval->numerator   /= gcm;
+
   return OK;
 }
 
