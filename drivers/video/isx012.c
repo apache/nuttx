@@ -2966,3 +2966,24 @@ int isx012_uninitialize(void)
 
   return OK;
 }
+
+#ifdef CONFIG_VIDEO_ISX012_REGDEBUG
+int isx012_read_register(uint16_t addr, FAR uint8_t *buf, uint8_t size)
+{
+  uint16_t buf16;
+
+  if (buf == NULL)
+    {
+      return -EINVAL;
+    }
+
+  if (size > 2)
+    {
+      return -EINVAL;
+    }
+
+  buf16 = isx012_getreg(&g_isx012_private, addr, size);
+  memcpy(buf, &buf16, size);
+  return OK;
+}
+#endif
