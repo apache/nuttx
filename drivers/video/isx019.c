@@ -46,8 +46,9 @@
 
 /* Wait time on power on sequence. */
 
-#define TRANSITION_TIME_TO_STARTUP   (120 * USEC_PER_MSEC) /* unit : usec */
-#define TRANSITION_TIME_TO_STREAMING (30 * USEC_PER_MSEC)  /* unit : usec */
+#define TRANSITION_TIME_TO_STARTUP   (130 * USEC_PER_MSEC) /* unit : usec */
+#define TRANSITION_TIME_TO_STREAMING (40 * USEC_PER_MSEC)  /* unit : usec */
+#define DELAY_TIME_JPEGDQT_SWAP      (35 * USEC_PER_MSEC)  /* unit : usec */
 
 /* For get_supported_value() I/F */
 
@@ -2532,6 +2533,10 @@ static int set_jpg_quality(imgsensor_value_t val)
   set_dqt(FPGA_DQT_LUMA,   FPGA_DQT_CALC_DATA, y_calc);
   set_dqt(FPGA_DQT_CHROMA, FPGA_DQT_CALC_DATA, c_calc);
   fpga_activate_setting();
+
+  /* Wait for swap of non-active side and active side. */
+
+  nxsig_usleep(DELAY_TIME_JPEGDQT_SWAP);
 
   /* Update non-active side in preparation for other activation trigger. */
 
