@@ -283,9 +283,9 @@ static void write_evtbitmapwithlist(FAR struct alt1250_dev_s *dev,
  * Name: is_evtbitmap_avail
  ****************************************************************************/
 
-static int is_evtbitmap_avail(FAR struct alt1250_dev_s *dev)
+static bool is_evtbitmap_avail(FAR struct alt1250_dev_s *dev)
 {
-  int ret;
+  bool ret;
 
   nxmutex_lock(&dev->evtmaplock);
 
