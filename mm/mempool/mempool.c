@@ -27,6 +27,8 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mm/mempool.h>
 
+#include "kasan/kasan.h"
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -41,7 +43,8 @@ static inline void mempool_add_list(FAR sq_queue_t *list, FAR void *base,
     }
 }
 
-static inline FAR void *mempool_malloc(FAR struct mempool_s *pool, size_t size)
+static inline FAR void *mempool_malloc(FAR struct mempool_s *pool,
+                                       size_t size)
 {
   if (pool->alloc != NULL)
     {
@@ -114,6 +117,7 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
       mempool_add_list(&pool->list, (FAR char *)(base + 1) +
                        pool->ninterrupt * pool->bsize,
                        pool->ninitial, pool->bsize);
+      kasan_poison(base + 1, pool->bsize * count);
     }
 
   if (pool->wait && pool->nexpand == 0)
@@ -177,6 +181,7 @@ retry:
                   return NULL;
                 }
 
+              kasan_poison(blk + 1, pool->bsize * pool->nexpand);
               flags = spin_lock_irqsave(&pool->lock);
               sq_addlast(blk, &pool->elist);
               mempool_add_list(&pool->list, blk + 1, pool->nexpand,
@@ -196,7 +201,7 @@ retry:
     }
 
   pool->nused++;
-
+  kasan_unpoison(blk, pool->bsize);
 out_with_lock:
   spin_unlock_irqrestore(&pool->lock, flags);
   return blk;
@@ -241,6 +246,7 @@ void mempool_free(FAR struct mempool_s *pool, FAR void *blk)
     }
 
   pool->nused--;
+  kasan_poison(blk, pool->bsize);
   spin_unlock_irqrestore(&pool->lock, flags);
   if (pool->wait && pool->nexpand == 0)
     {
@@ -323,6 +329,7 @@ int mempool_deinit(FAR struct mempool_s *pool)
 
   while ((blk = sq_remfirst(&pool->elist)) != NULL)
     {
+      kasan_unpoison(blk, mm_malloc_size(blk));
       mempool_mfree(pool, blk);
     }
 
