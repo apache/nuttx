@@ -1228,7 +1228,7 @@ static int isx019_uninit(void)
 static FAR const char *isx019_get_driver_name(void)
 {
 #ifdef CONFIG_VIDEO_ISX019_NAME_WITH_VERSION
-  static char name[16];
+  static char name[20];
   uint8_t f_ver = 0;
   uint16_t is_ver = 0;
 
