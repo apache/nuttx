@@ -150,6 +150,16 @@ config VIDEO_ISX012
 	default n
 	select I2C
 
+if VIDEO_ISX012
+
+config VIDEO_ISX012_REGDEBUG
+	bool "Enable to read registers of ISX012 for test"
+	default n
+	---help---
+		Enable to read registers of ISX012 for test.
+
+endif
+
 config VIDEO_ISX019
 	bool "ISX019 Image sensor"
 	default n
@@ -182,6 +192,20 @@ config VIDEO_ISX019_INITIAL_JPEG_QUALITY
 	range 1 100
 	---help---
 		The initial JPEG quality.
+
+config VIDEO_ISX019_NAME_WITH_VERSION
+	bool "ISX019 Image sensor name with version number"
+	default n
+	---help---
+		ISX019 Camera board has FPGA for encoding JPEG image.
+		This FPGA has a version number for the circuit.
+		This option enables to report FPGA version with driver name.
+
+config VIDEO_ISX019_REGDEBUG
+	bool "Enable to read registers of ISX019 for test"
+	default n
+	---help---
+		Enable to read registers of ISX019 for test.
 
 endif
 
