@@ -144,6 +144,14 @@
 #define ISX012_CHIPID_L (0x0000c460)
 #define ISX012_CHIPID_H (0x00005516)
 
+#define BASE_HSIZE_FOR_CLIP_OFFSET (2592)
+#define BASE_VSIZE_FOR_CLIP_OFFSET (1944)
+
+#define ZOOM_UNIT        (0x0100)
+#define CLIP_OFFSET_UNIT (0x0010)
+#define CLIP_SIZE_UNIT   (8)
+#define RESCALE_FOR_CLIP(v, a, b)  (((v) * (a)) / (b))
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -167,6 +175,16 @@ struct isx012_reg_s
 
 typedef struct isx012_reg_s isx012_reg_t;
 
+struct isx012_rect_s
+{
+  int32_t left;
+  int32_t top;
+  uint32_t width;
+  uint32_t height;
+};
+
+typedef struct isx012_rect_s isx012_rect_t;
+
 struct isx012_dev_s
 {
   mutex_t                 i2c_lock;
@@ -175,6 +193,8 @@ struct isx012_dev_s
   int                     i2c_freq;    /* Frequency */
   isx012_state_t          state;       /* ISX012 status */
   uint8_t                 mode;        /* ISX012 mode */
+  isx012_rect_t           clip_video;  /* Clip information for VIDEO */
+  isx012_rect_t           clip_still;  /* Clip information for STILL */
 };
 
 typedef struct isx012_dev_s isx012_dev_t;
@@ -302,6 +322,7 @@ static const isx012_reg_t g_isx012_def_init[] =
   {FASTMOVE_TIMEOUT,  0x2d, 0x01},
   {YGAMMA_MODE,       0x01, 0x01},
   {INT_QLTY2,         0x50, 0x01},
+  {JPEG_PRED_MODE,    0x00, 0x01},
 };
 
 #define ISX012_RESET_NENTRIES ARRAY_NENTRIES(g_isx012_def_init)
@@ -829,7 +850,134 @@ static bool is_movie_needed(uint8_t fmt, uint8_t fps)
   return need;
 }
 
-static int isx012_set_mode_param(isx012_dev_t *priv,
+static void resize_for_clip(uint8_t nr_fmt,
+                            FAR imgsensor_format_t *fmt,
+                            FAR isx012_rect_t *clip,
+                            FAR uint16_t *w,
+                            FAR uint16_t *h,
+                            FAR uint16_t *s_w,
+                            FAR uint16_t *s_h)
+{
+  ASSERT(fmt && clip && w && h && s_w && s_h);
+
+  *w = (clip->width  == 0) ? fmt[IMGSENSOR_FMT_MAIN].width  : clip->width;
+  *h = (clip->height == 0) ? fmt[IMGSENSOR_FMT_MAIN].height : clip->height;
+
+  if (nr_fmt > 1)
+    {
+      *s_w = fmt[IMGSENSOR_FMT_SUB].width;
+      if (clip->width > 0)
+        {
+          *s_w = (uint32_t)*s_w * clip->width /
+                 fmt[IMGSENSOR_FMT_MAIN].width;
+        }
+
+      *s_h = fmt[IMGSENSOR_FMT_SUB].height;
+      if (clip->height > 0)
+        {
+          *s_h = (uint32_t)*s_h * clip->height /
+                 fmt[IMGSENSOR_FMT_MAIN].height;
+        }
+    }
+}
+
+static void calc_clip_regval(uint16_t pos,
+                             uint16_t clip_sz,
+                             uint16_t frm_sz,
+                             uint16_t basis_sz,
+                             FAR uint32_t *ratio,
+                             FAR int32_t  *offset)
+{
+  DEBUGASSERT(ratio && offset);
+
+  *ratio = ZOOM_UNIT;
+  *offset = 0;
+
+  if (clip_sz != 0)
+    {
+      /* Clip by setting zoom up. */
+
+      *ratio *= frm_sz;
+      *ratio /= clip_sz;
+
+      /* Applications' request pos means position from the upper left corner.
+       * On the other hand, ISX012's register means the center of the image,
+       * which has the maximum size of the sensor.
+       */
+
+      *offset = CLIP_OFFSET_UNIT;
+      *offset *= (int16_t)(pos + (clip_sz / 2) - (frm_sz / 2));
+      *offset *= basis_sz;
+      *offset /= (int32_t)frm_sz;
+    }
+}
+
+static bool is_clipped(FAR isx012_rect_t *clip)
+{
+  DEBUGASSERT(clip);
+
+  if ((clip->left   == 0) &&
+      (clip->top    == 0) &&
+      (clip->width  == 0) &&
+      (clip->height == 0))
+    {
+      return false;
+    }
+
+  return true;
+}
+
+static void activate_clip(FAR isx012_dev_t *priv,
+                          uint16_t w,
+                          uint16_t h,
+                          FAR isx012_rect_t *clip)
+{
+  uint8_t  hvfree = 0;
+  uint32_t r_x    = ZOOM_UNIT;
+  uint32_t r_y    = ZOOM_UNIT;
+  int32_t  x      = 0;
+  int32_t  y      = 0;
+
+  DEBUGASSERT(priv && clip);
+
+  if (is_clipped(clip))
+    {
+      hvfree = 1;
+
+      calc_clip_regval
+        (clip->left, clip->width,  w, BASE_HSIZE_FOR_CLIP_OFFSET, &r_x, &x);
+      calc_clip_regval
+        (clip->top,  clip->height, h, BASE_VSIZE_FOR_CLIP_OFFSET, &r_y, &y);
+
+      if (w * 3 > h * 4)
+        {
+          /* In case that aspect ratio is longer horizontally than 4:3,
+           * re-scaling vertical component setting.
+           */
+
+          r_y = RESCALE_FOR_CLIP(r_y, w * 3, h * 4);
+          y   = RESCALE_FOR_CLIP(y,   h * 4, w * 3);
+        }
+      else if (w * 3 < h * 4)
+        {
+          /* In case that aspect ratio is longer vertically than 4:3,
+           * re-scaling horizontal component setting.
+           */
+
+          r_x = RESCALE_FOR_CLIP(r_x, h * 4, w * 3);
+          x   = RESCALE_FOR_CLIP(x,   w * 3, h * 4);
+        }
+    }
+
+  isx012_putreg(priv, HVFREEZOOM, hvfree, 1);
+  isx012_putreg(priv, EZOOM_MAG,  ZOOM_UNIT,     sizeof(uint16_t));
+  isx012_putreg(priv, EZOOM_HMAG, (uint16_t)r_x, sizeof(uint16_t));
+  isx012_putreg(priv, EZOOM_VMAG, (uint16_t)r_y, sizeof(uint16_t));
+  isx012_putreg(priv, OFFSET_X, (int16_t)x, sizeof(int16_t));
+  isx012_putreg(priv, OFFSET_Y, (int16_t)y, sizeof(int16_t));
+}
+
+static int isx012_set_mode_param(FAR isx012_dev_t *priv,
                                  imgsensor_stream_type_t type,
                                  uint8_t nr_fmt,
                                  FAR imgsensor_format_t *fmt,
@@ -843,8 +991,13 @@ static int isx012_set_mode_param(isx012_dev_t *priv,
   uint16_t smode_addr;
   uint16_t hsize_addr;
   uint16_t vsize_addr;
-  uint8_t  smode;
-  uint8_t  mode;
+  uint8_t smode;
+  uint8_t mode;
+  FAR isx012_rect_t *clip;
+  uint16_t w = 0;
+  uint16_t h = 0;
+  uint16_t s_w = 0;
+  uint16_t s_h = 0;
 
   /* Get register address for type  */
 
@@ -877,6 +1030,8 @@ static int isx012_set_mode_param(isx012_dev_t *priv,
           vsize_addr = VSIZE_MONI;
           mode       = REGVAL_MODESEL_MON;
         }
+
+      clip = &priv->clip_video;
     }
   else
     {
@@ -886,6 +1041,8 @@ static int isx012_set_mode_param(isx012_dev_t *priv,
       hsize_addr = HSIZE_CAP;
       vsize_addr = VSIZE_CAP;
       mode       = REGVAL_MODESEL_CAP;
+
+      clip = &priv->clip_still;
     }
 
   ret = isx012_putreg(priv, fps_addr, fps_val, sizeof(uint8_t));
@@ -925,19 +1082,19 @@ static int isx012_set_mode_param(isx012_dev_t *priv,
       return ret;
     }
 
-  ret = isx012_putreg(priv,
-                      hsize_addr,
-                      fmt[IMGSENSOR_FMT_MAIN].width,
-                      sizeof(uint16_t));
+  resize_for_clip(nr_fmt, fmt, clip, &w, &h, &s_w, &s_h);
+  activate_clip(priv,
+                fmt[IMGSENSOR_FMT_MAIN].width,
+                fmt[IMGSENSOR_FMT_MAIN].height,
+                clip);
+
+  ret = isx012_putreg(priv, hsize_addr, w, sizeof(uint16_t));
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = isx012_putreg(priv,
-                      vsize_addr,
-                      fmt[IMGSENSOR_FMT_MAIN].height,
-                      sizeof(uint16_t));
+  ret = isx012_putreg(priv, vsize_addr, h, sizeof(uint16_t));
   if (ret < 0)
     {
       return ret;
@@ -945,19 +1102,13 @@ static int isx012_set_mode_param(isx012_dev_t *priv,
 
   if (fmt_val == REGVAL_OUTFMT_INTERLEAVE)
     {
-      ret = isx012_putreg(priv,
-                          HSIZE_TN,
-                          fmt[IMGSENSOR_FMT_SUB].width,
-                          sizeof(uint16_t));
+      ret = isx012_putreg(priv, HSIZE_TN, s_w, sizeof(uint16_t));
       if (ret < 0)
         {
           return ret;
         }
 
-      ret = isx012_putreg(priv,
-                          VSIZE_TN,
-                          fmt[IMGSENSOR_FMT_SUB].height,
-                          sizeof(uint16_t));
+      ret = isx012_putreg(priv, VSIZE_TN, s_h, sizeof(uint16_t));
       if (ret < 0)
         {
           return ret;
@@ -2154,6 +2305,49 @@ static int isx012_get_value(uint32_t id,
   return ret;
 }
 
+static bool validate_clip_setting(uint32_t sz, FAR uint32_t *clip)
+{
+  bool ret = false;
+  uint32_t w;
+  uint32_t h;
+
+  DEBUGASSERT(clip);
+
+  if (sz != IMGSENSOR_CLIP_NELEM * sizeof(uint32_t))
+    {
+      return ret;
+    }
+
+  w = clip[IMGSENSOR_CLIP_INDEX_WIDTH];
+  h = clip[IMGSENSOR_CLIP_INDEX_HEIGHT];
+
+  if ((w % CLIP_SIZE_UNIT == 0) && (h % CLIP_SIZE_UNIT == 0))
+    {
+      ret = true;
+    }
+
+  return ret;
+}
+
+static int set_clip(uint32_t size,
+                    FAR uint32_t *val,
+                    FAR isx012_rect_t *target)
+{
+  DEBUGASSERT(target);
+
+  if (!validate_clip_setting(size, val))
+    {
+      return -EINVAL;
+    }
+
+  target->left   = (int32_t)val[IMGSENSOR_CLIP_INDEX_LEFT];
+  target->top    = (int32_t)val[IMGSENSOR_CLIP_INDEX_TOP];
+  target->width  = val[IMGSENSOR_CLIP_INDEX_WIDTH];
+  target->height = val[IMGSENSOR_CLIP_INDEX_HEIGHT];
+
+  return OK;
+}
+
 static int isx012_set_value(uint32_t id,
                             uint32_t size,
                             FAR imgsensor_value_t value)
@@ -2734,6 +2928,16 @@ static int isx012_set_value(uint32_t id,
                             ISX012_REG_JPGQUALITY,
                             value.value32,
                             ISX012_SIZE_JPGQUALITY);
+        break;
+
+      case IMGSENSOR_ID_CLIP_VIDEO:
+        ret = set_clip(size, value.p_u32, &priv->clip_video);
+
+        break;
+
+      case IMGSENSOR_ID_CLIP_STILL:
+        ret = set_clip(size, value.p_u32, &priv->clip_still);
+
         break;
 
       default: /* Unsupported control id */
