@@ -186,6 +186,12 @@ extern "C"
 
 #define VIDIOC_G_SELECTION            _VIDIOC(0x001d)
 
+/* Get the frame interval.
+ * Address pointing to struct v4l2_streamparm
+ */
+
+#define VIDIOC_G_PARM                 _VIDIOC(0x001e)
+
 #define VIDEO_HSIZE_QVGA        (320)   /* QVGA    horizontal size */
 #define VIDEO_VSIZE_QVGA        (240)   /* QVGA    vertical   size */
 #define VIDEO_HSIZE_VGA         (640)   /* VGA     horizontal size */

@@ -333,7 +333,8 @@ struct imgsensor_ops_s
                              FAR imgsensor_format_t *datafmts,
                              FAR imgsensor_interval_t *interval);
   CODE int  (*stop_capture)(imgsensor_stream_type_t type);
-
+  CODE int  (*get_frame_interval)(imgsensor_stream_type_t type,
+                                  FAR imgsensor_interval_t *interval);
   CODE int  (*get_supported_value)(uint32_t id,
                                    FAR imgsensor_supported_value_t *value);
   CODE int  (*get_value)(uint32_t id,
