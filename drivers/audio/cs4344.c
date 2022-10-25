@@ -55,6 +55,7 @@
  ****************************************************************************/
 
 static int  cs4344_setmclkfrequency(FAR struct cs4344_dev_s *priv);
+static void cs4344_settxchannels(FAR struct cs4344_dev_s *priv);
 static void cs4344_setdatawidth(FAR struct cs4344_dev_s *priv);
 static void cs4344_setbitrate(FAR struct cs4344_dev_s *priv);
 
@@ -288,10 +289,25 @@ static int cs4344_setmclkfrequency(FAR struct cs4344_dev_s *priv)
 }
 
 /****************************************************************************
+ * Name: cs4344_settxchannels
+ *
+ * Description:
+ *   Set the number of channels
+ *
+ ****************************************************************************/
+
+static void cs4344_settxchannels(FAR struct cs4344_dev_s *priv)
+{
+  DEBUGASSERT(priv);
+
+  I2S_TXCHANNELS(priv->i2s, priv->nchannels);
+}
+
+/****************************************************************************
  * Name: cs4344_setdatawidth
  *
  * Description:
- *   Set the 8- or 16-bit data modes
+ *   Set the 16 or 24-bit data modes
  *
  ****************************************************************************/
 
@@ -301,13 +317,13 @@ static void cs4344_setdatawidth(FAR struct cs4344_dev_s *priv)
     {
       /* Reset default default setting */
 
-      priv->i2s->ops->i2s_txdatawidth(priv->i2s, 16);
+      I2S_TXDATAWIDTH(priv->i2s, 16);
     }
   else
     {
-      /* This should select 8-bit with no companding */
+      /* This should select 24-bit with no companding */
 
-      priv->i2s->ops->i2s_txdatawidth(priv->i2s, 8);
+      I2S_TXDATAWIDTH(priv->i2s, 24);
     }
 }
 
@@ -320,7 +336,7 @@ static void cs4344_setbitrate(FAR struct cs4344_dev_s *priv)
 {
   DEBUGASSERT(priv);
 
-  priv->i2s->ops->i2s_txsamplerate(priv->i2s, priv->samprate);
+  I2S_TXSAMPLERATE(priv->i2s, priv->samprate);
 
   audinfo("sample rate=%u nchannels=%u bpsamp=%u\n",
           priv->samprate, priv->nchannels, priv->bpsamp);
@@ -553,7 +569,7 @@ cs4344_configure(FAR struct audio_lowerhalf_s *dev,
             break;
           }
 
-        if (caps->ac_controls.b[2] != 8 && caps->ac_controls.b[2] != 16)
+        if (caps->ac_controls.b[2] != 16 && caps->ac_controls.b[2] != 24)
           {
             auderr("ERROR: Unsupported bits per sample: %d\n",
                    caps->ac_controls.b[2]);
@@ -589,6 +605,7 @@ cs4344_configure(FAR struct audio_lowerhalf_s *dev,
               }
           }
 
+        cs4344_settxchannels(priv);
         cs4344_setdatawidth(priv);
         cs4344_setbitrate(priv);
       }
