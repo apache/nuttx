@@ -368,6 +368,15 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
              }
              break;
 
+            /* %R: Shortcut for %H:%M. */
+
+           case 'R':
+             {
+               len = snprintf(dest, chleft, "%02d:%02d",
+                              tm->tm_hour, tm->tm_min);
+             }
+             break;
+
            /* %s: The number of seconds since the Epoch, that is,
             * since 1970-01-01 00:00:00 UTC.
             * Hmmm... mktime argume is not 'const'.
