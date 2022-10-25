@@ -116,7 +116,7 @@ exception_common:
 
 #ifdef CONFIG_BUILD_PROTECTED
 	mov		r0, r14					/* Copy high register to low register */
-	lsl		r0, #(31 - EXC_RETURN_PROCESS_BITNO)	/* Move to bit 31 */
+	lsls		r0, #(31 - EXC_RETURN_PROCESS_BITNO)	/* Move to bit 31 */
 	bmi		1f					/* Test bit 31 */
 	mrs		r1, msp					/* R1=The main stack pointer */
 	b		2f
@@ -225,7 +225,7 @@ exception_common:
 
 #ifdef CONFIG_BUILD_PROTECTED
 	mov		r0, r14					/* Copy high register to low register */
-	lsl		r0, #(31 - EXC_RETURN_PROCESS_BITNO)	/* Move to bit 31 */
+	lsls		r0, #(31 - EXC_RETURN_PROCESS_BITNO)	/* Move to bit 31 */
 	bmi		3f					/* Test bit 31 */
 	msr		msp, r1					/* R1=The main stack pointer */
 	b		4f
