@@ -7,7 +7,7 @@ if ARCH_ARM
 comment "ARM Options"
 
 choice
-	prompt "Toolchain Selection"
+	prompt "ARM Toolchain Selection"
 	default ARM_TOOLCHAIN_GNU_EABI
 
 config ARM_TOOLCHAIN_IAR
@@ -39,7 +39,7 @@ config ARM_TOOLCHAIN_GNU_OABI
 		This option should work for any GNU toolchain.
 
 config ARM_TOOLCHAIN_CLANG
-	bool "Generic Clang toolchain"
+	bool "LLVM Clang toolchain"
 	select ARCH_TOOLCHAIN_CLANG
 
 config ARM_TOOLCHAIN_ARMCLANG
