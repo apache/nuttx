@@ -23,7 +23,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/time.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -31,6 +30,7 @@
 #include <debug.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/signal.h>
+#include <nuttx/clock.h>
 #include <arch/board/board.h>
 #include <nuttx/video/isx019.h>
 #include <nuttx/video/imgsensor.h>
@@ -1086,34 +1086,42 @@ static int set_drive_mode(void)
 static bool try_repeat(int sec, int usec, CODE int (*trial_func)(void))
 {
   int ret;
-  struct timeval start;
-  struct timeval now;
-  struct timeval delta;
-  struct timeval wait;
+  struct timespec start;
+  struct timespec now;
+  struct timespec delta;
 
-  wait.tv_sec = sec;
-  wait.tv_usec = usec;
+  ret = clock_systime_timespec(&start);
+  if (ret < 0)
+    {
+      return false;
+    }
 
-  gettimeofday(&start, NULL);
   while (1)
     {
       ret = trial_func();
-      if (ret != -ENODEV)
+      if (ret >= 0)
         {
-          break;
+          return true;
         }
       else
         {
-          gettimeofday(&now, NULL);
-          timersub(&now, &start, &delta);
-          if (timercmp(&delta, &wait, >))
+          ret = clock_systime_timespec(&now);
+          if (ret < 0)
+            {
+              return false;
+            }
+
+          clock_timespec_subtract(&now, &start, &delta);
+          if ((delta.tv_sec > sec) ||
+              ((delta.tv_sec == sec) &&
+               (delta.tv_nsec > (usec * NSEC_PER_USEC))))
             {
               break;
             }
         }
     };
 
-  return (ret == OK);
+  return false;
 }
 
 static int try_isx019_i2c(void)
