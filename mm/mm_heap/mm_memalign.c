@@ -184,7 +184,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
       /* Reduce the size of the original chunk and mark it not allocated, */
 
       node->size = precedingsize;
-      node->preceding &= ~MM_ALLOC_BIT;
+      node->preceding &= ~MM_MASK_BIT;
 
       /* Fix the preceding size of the next node */
 
