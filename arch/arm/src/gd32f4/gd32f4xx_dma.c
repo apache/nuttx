@@ -212,42 +212,6 @@ static void gd32_dma_clock_enable(uint32_t dmabase)
 }
 
 /****************************************************************************
- * Name: gd32_dma_channel_get
- *
- * Description:
- *   Get the g_dmachan table entry associated with a DMA controller and
- *   a channel number
- ****************************************************************************/
-
-static inline struct gd32_dma_channel_s
-                        *gd32_dma_channel_get(uint32_t channelx,
-                                              uint32_t dma_periph)
-{
-  int index;
-
-  DEBUGASSERT(channelx < DMA0_NCHANNELS);
-
-  DEBUGASSERT(dma_periph == GD32_DMA0_BASE && dma_periph == GD32_DMA1_BASE);
-
-  /* Convert the dma_periph + chan_num based on the fact that there are
-   * 8 channel per dma_periph.
-   */
-
-  if (dma_periph == GD32_DMA0_BASE)
-    {
-      index = channelx;
-    }
-  else
-    {
-      index = channelx + DMA0_NCHANNELS;
-    }
-
-  /* Then return the chan_num structure associated with the chan_num index */
-
-  return &g_dmachan[index];
-}
-
-/****************************************************************************
  * Name: gd32_channel_enable
  *
  * Description:
