@@ -82,29 +82,37 @@
 #define I2S_DMA_CHANNEL_MAX (2)
 
 #ifdef CONFIG_ESP32_I2S0_TX
-  #define I2S0_TX_ENABLED 1
-  #define I2S_HAVE_TX 1
+#  define I2S0_TX_ENABLED 1
+#  define I2S_HAVE_TX 1
 #else
-  #define I2S0_TX_ENABLED 0
+#  define I2S0_TX_ENABLED 0
 #endif
 
 #ifdef CONFIG_ESP32_I2S0_RX
-  #define I2S0_RX_ENABLED 1
+#  define I2S0_RX_ENABLED 1
 #else
-  #define I2S0_RX_ENABLED 0
+#  define I2S0_RX_ENABLED 0
 #endif
 
 #ifdef CONFIG_ESP32_I2S1_TX
-  #define I2S1_TX_ENABLED 1
-  #define I2S_HAVE_TX 1
+#  define I2S1_TX_ENABLED 1
+#  define I2S_HAVE_TX 1
 #else
-  #define I2S1_TX_ENABLED 0
+#  define I2S1_TX_ENABLED 0
 #endif
 
 #ifdef CONFIG_ESP32_I2S1_RX
-  #define I2S1_RX_ENABLED 1
+#  define I2S1_RX_ENABLED 1
 #else
-  #define I2S1_RX_ENABLED 0
+#  define I2S1_RX_ENABLED 0
+#endif
+
+#ifndef MIN
+#  define MIN(a,b) ((a) < (b) ? (a) : (b))
+#endif
+
+#ifndef ALIGN_UP
+#  define ALIGN_UP(num, align) (((num) + ((align) - 1)) & ~((align) - 1))
 #endif
 
 /* Debug ********************************************************************/
@@ -205,6 +213,10 @@ struct esp32_i2s_config_s
   /* WS signal polarity, set true to enable high lever first */
 
   bool ws_pol;
+
+  /* The associated DMA outlink */
+
+  struct esp32_dmadesc_s dma_outlink[I2S_DMADESC_NUM];
 };
 
 struct esp32_buffer_s
@@ -219,7 +231,21 @@ struct esp32_buffer_s
   uint32_t timeout;             /* Timeout value of the DMA transfers */
   void *arg;                    /* Callback's argument */
   struct ap_buffer_s *apb;      /* The audio buffer */
+  uint8_t *buf;                 /* The DMA's descriptor buffer */
+  uint32_t nbytes;              /* The DMA's descriptor buffer size */
   int result;                   /* The result of the transfer */
+};
+
+/* Internal buffer must be aligned to the sample_size. Sometimes,
+ * however, the audio buffer is not aligned and additional bytes must
+ * be copied to be inserted on the next buffer. This structure keeps
+ * track of the bytes that were not written to the internal buffer yet.
+ */
+
+struct esp32_buffer_carry_s
+{
+  uint32_t value;
+  size_t bytes;
 };
 
 /* This structure describes the state of one receiver or transmitter
@@ -232,31 +258,35 @@ struct esp32_transport_s
   sq_queue_t act;               /* A queue of active transfers */
   sq_queue_t done;              /* A queue of completed transfers */
   struct work_s work;           /* Supports worker thread operations */
+
+  /* Bytes to be written at the beginning of the next DMA buffer */
+
+  struct esp32_buffer_carry_s carry;
 };
 
 /* The state of the one I2S peripheral */
 
 struct esp32_i2s_s
 {
-  struct i2s_dev_s  dev;        /* Externally visible I2S interface */
-  sem_t             exclsem;    /* Assures mutually exclusive access */
-  uint32_t          rate;       /* I2S actual configured sample-rate */
-  uint32_t          data_width; /* I2S actual configured data_width */
-  uint32_t          mclk_freq;  /* I2S actual master clock */
-  int               cpuint;     /* I2S interrupt ID */
-  uint8_t           cpu;        /* CPU ID */
-  spinlock_t        lock;       /* Device specific lock. */
+  struct i2s_dev_s  dev;          /* Externally visible I2S interface */
+  sem_t             exclsem;      /* Assures mutually exclusive access */
+  int               cpuint;       /* I2S interrupt ID */
+  uint8_t           cpu;          /* CPU ID */
+  spinlock_t        lock;         /* Device specific lock. */
 
   /* Port configuration */
 
   const struct esp32_i2s_config_s *config;
 
+  uint32_t          mclk_freq;    /* I2S actual master clock */
+  uint32_t          channels;     /* Audio channels (1:mono or 2:stereo) */
+  uint32_t          rate;         /* I2S actual configured sample-rate */
+  uint32_t          data_width;   /* I2S actual configured data_width */
+
 #ifdef I2S_HAVE_TX
   struct esp32_transport_s tx;  /* TX transport state */
 
-  /* Stuff var to fill DMA buffer if not word-aligned */
-
-  uint32_t stuff;
+  bool tx_started;              /* TX channel started */
 #endif /* I2S_HAVE_TX */
 
   /* Pre-allocated pool of buffer containers */
@@ -291,21 +321,27 @@ static int      i2s_bufsem_take(struct esp32_i2s_s *priv);
 static struct esp32_buffer_s *
                 i2s_buf_allocate(struct esp32_i2s_s *priv);
 static void     i2s_buf_free(struct esp32_i2s_s *priv,
-                  struct esp32_buffer_s *bfcontainer);
+                             struct esp32_buffer_s *bfcontainer);
 static int      i2s_buf_initialize(struct esp32_i2s_s *priv);
 
 /* DMA support */
 
 #ifdef I2S_HAVE_TX
-static int      i2s_txdma_setup(struct esp32_i2s_s *priv,
-                                struct esp32_buffer_s *bfcontainer);
-static void     i2s_tx_worker(void *arg);
-static void     i2s_tx_schedule(struct esp32_i2s_s *priv,
-                                struct esp32_dmadesc_s *outlink);
+static IRAM_ATTR int  i2s_txdma_setup(struct esp32_i2s_s *priv,
+                                      struct esp32_buffer_s *bfcontainer);
+static void           i2s_tx_worker(void *arg);
+static void           i2s_tx_schedule(struct esp32_i2s_s *priv,
+                                      struct esp32_dmadesc_s *outlink);
 #endif /* I2S_HAVE_TX */
 
 /* I2S methods (and close friends) */
 
+static uint32_t i2s_set_datawidth(struct esp32_i2s_s *priv);
+static uint32_t i2s_set_clock(struct esp32_i2s_s *priv);
+static void     i2s_tx_channel_start(struct esp32_i2s_s *priv);
+static void     i2s_tx_channel_stop(struct esp32_i2s_s *priv);
+static int      esp32_i2s_txchannels(struct i2s_dev_s *dev,
+                                     uint8_t channels);
 static uint32_t esp32_i2s_mclkfrequency(struct i2s_dev_s *dev,
                                         uint32_t frequency);
 static uint32_t esp32_i2s_txsamplerate(struct i2s_dev_s *dev,
@@ -322,6 +358,7 @@ static int      esp32_i2s_send(struct i2s_dev_s *dev,
 
 static const struct i2s_ops_s g_i2sops =
 {
+  .i2s_txchannels     = esp32_i2s_txchannels,
   .i2s_txsamplerate   = esp32_i2s_txsamplerate,
   .i2s_txdatawidth    = esp32_i2s_txdatawidth,
   .i2s_send           = esp32_i2s_send,
@@ -567,6 +604,8 @@ static void i2s_buf_free(struct esp32_i2s_s *priv,
   flags = spin_lock_irqsave(&priv->lock);
 
   bfcontainer->apb = NULL;
+  bfcontainer->buf = NULL;
+  bfcontainer->nbytes = 0;
   bfcontainer->flink  = priv->bf_freelist;
   priv->bf_freelist = bfcontainer;
 
@@ -599,6 +638,9 @@ static void i2s_buf_free(struct esp32_i2s_s *priv,
 static int i2s_buf_initialize(struct esp32_i2s_s *priv)
 {
   int ret;
+
+  priv->tx.carry.bytes = 0;
+  priv->tx.carry.value = 0;
 
   priv->bf_freelist = NULL;
   ret = nxsem_init(&priv->bufsem, 0, 0);
@@ -700,9 +742,15 @@ static int i2s_txdma_setup(struct esp32_i2s_s *priv,
 {
   struct ap_buffer_s *apb;
   struct esp32_dmadesc_s *outlink;
-  uintptr_t samp;
-  apb_samp_t nbytes;
+  uint8_t *samp;
+  apb_samp_t samp_size;
+  size_t carry_size;
   uint32_t bytes_queued;
+  uint32_t data_copied;
+  uint8_t *buf;
+  uint8_t padding;
+  irqstate_t flags;
+  int ret = OK;
 
   DEBUGASSERT(bfcontainer && bfcontainer->apb);
 
@@ -711,27 +759,110 @@ static int i2s_txdma_setup(struct esp32_i2s_s *priv,
 
   /* Get the transfer information, accounting for any data offset */
 
-  samp   = (uintptr_t)&apb->samp[apb->curbyte];
-  nbytes = apb->nbytes - apb->curbyte;
+  const apb_samp_t sample_size = priv->data_width / 8;
+  samp = &apb->samp[apb->curbyte];
+  samp_size = (apb->nbytes - apb->curbyte) + priv->tx.carry.bytes;
+  carry_size = samp_size % sample_size;
+
+  /* Padding contains the size (in bytes) to be skipped on the
+   * internal buffer do provide 1) the ability to handle mono
+   * audio files and 2) to correctly fill the buffer to 16 or 32-bits
+   * aligned positions
+   */
+
+  padding = priv->channels == 1 ?
+            ((priv->data_width <= I2S_DATA_BIT_WIDTH_16BIT ?
+              I2S_DATA_BIT_WIDTH_16BIT : I2S_DATA_BIT_WIDTH_32BIT) / 8) : 0;
+
+  padding += priv->data_width != I2S_DATA_BIT_WIDTH_16BIT ?
+             (priv->data_width != I2S_DATA_BIT_WIDTH_32BIT ? 1 : 0) : 0;
+
+  /* Copy audio data into internal buffer */
+
+  bfcontainer->buf = (uint8_t *)calloc(bfcontainer->nbytes, 1);
+
+  data_copied = 0;
+  buf = bfcontainer->buf + padding;
+
+  if (priv->tx.carry.bytes)
+    {
+      memcpy(buf, &priv->tx.carry.value, priv->tx.carry.bytes);
+      buf += priv->tx.carry.bytes;
+      data_copied += priv->tx.carry.bytes;
+      memcpy(buf, samp, (sample_size - priv->tx.carry.bytes));
+      buf += (sample_size - priv->tx.carry.bytes + padding);
+      samp += (sample_size - priv->tx.carry.bytes);
+      data_copied += (sample_size - priv->tx.carry.bytes);
+    }
+
+  /* If there is no need to add padding bytes, the memcpy may be done at
+   * once. Otherwise, the operation must add the padding bytes to each
+   * sample in the internal buffer
+   */
+
+  if (padding)
+    {
+      while (data_copied < (samp_size - carry_size))
+        {
+          memcpy(buf, samp, sample_size);
+          buf += (sample_size + padding);
+          samp += sample_size;
+          data_copied += sample_size;
+        }
+    }
+  else
+    {
+      memcpy(buf, samp, samp_size - (data_copied + carry_size));
+      buf += samp_size - (data_copied + carry_size);
+      samp += samp_size - (data_copied + carry_size);
+      data_copied += samp_size - (data_copied + carry_size);
+    }
+
+  /* If the audio buffer's size is not a multiple of the sample size,
+   * it's necessary to carry the remaining bytes that are part of what
+   * would be the last sample on this buffer. These bytes will then be
+   * saved and inserted at the beginning of the next DMA buffer to
+   * rebuild the sample correctly.
+   */
+
+  priv->tx.carry.bytes = carry_size;
+
+  if (priv->tx.carry.bytes)
+    {
+      memcpy((uint8_t *)&priv->tx.carry.value, samp, priv->tx.carry.bytes);
+    }
+
+  /* Release our reference on the audio buffer. This may very likely
+   * cause the audio buffer to be freed.
+   */
+
+  apb_free(bfcontainer->apb);
 
   /* Configure DMA stream */
 
-  bytes_queued = esp32_dma_init_with_padding(outlink, I2S_DMADESC_NUM,
-                                              (uint8_t *)samp, nbytes,
-                                              &priv->stuff);
+  bytes_queued = esp32_dma_init(outlink, I2S_DMADESC_NUM,
+                                bfcontainer->buf, bfcontainer->nbytes);
 
-  if (bytes_queued != nbytes)
+  if (bytes_queued != bfcontainer->nbytes)
     {
       i2serr("Failed to enqueue I2S buffer (%d bytes of %d)\n",
-              bytes_queued, (uint32_t)nbytes);
+             bytes_queued, (uint32_t)bfcontainer->nbytes);
       return bytes_queued;
     }
+
+  flags = spin_lock_irqsave(&priv->lock);
 
   /* Add the buffer container to the end of the TX pending queue */
 
   sq_addlast((sq_entry_t *)bfcontainer, &priv->tx.pend);
 
-  return OK;
+  /* Trigger DMA transfer if no transmission is in progress */
+
+  ret = i2s_txdma_start(priv);
+
+  spin_unlock_irqrestore(&priv->lock, flags);
+
+  return ret;
 }
 #endif /* I2S_HAVE_TX */
 
@@ -891,11 +1022,9 @@ static void i2s_tx_worker(void *arg)
       bfcontainer->callback(&priv->dev, bfcontainer->apb,
                             bfcontainer->arg, bfcontainer->result);
 
-      /* Release our reference on the audio buffer.  This may very likely
-       * cause the audio buffer to be freed.
-       */
+      /* Release the internal buffer used by the DMA outlink */
 
-      apb_free(bfcontainer->apb);
+      free(bfcontainer->buf);
 
       /* And release the buffer container */
 
@@ -947,7 +1076,7 @@ static void i2s_configure(struct esp32_i2s_s *priv)
       esp32_gpiowrite(priv->config->dout_pin, 1);
       esp32_configgpio(priv->config->dout_pin, OUTPUT_FUNCTION_3);
       esp32_gpio_matrix_out(priv->config->dout_pin,
-                              priv->config->dout_outsig, 0, 0);
+                            priv->config->dout_outsig, 0, 0);
     }
 
   /* TODO: repeat above function for RX channel */
@@ -961,7 +1090,7 @@ static void i2s_configure(struct esp32_i2s_s *priv)
           esp32_gpiowrite(priv->config->ws_pin, 1);
           esp32_configgpio(priv->config->ws_pin, INPUT_FUNCTION_3);
           esp32_gpio_matrix_out(priv->config->ws_pin,
-                                  priv->config->ws_out_insig, 0, 0);
+                                priv->config->ws_out_insig, 0, 0);
 
           esp32_gpiowrite(priv->config->bclk_pin, 1);
           esp32_configgpio(priv->config->bclk_pin, INPUT_FUNCTION_3);
@@ -977,12 +1106,12 @@ static void i2s_configure(struct esp32_i2s_s *priv)
           esp32_gpiowrite(priv->config->ws_pin, 1);
           esp32_configgpio(priv->config->ws_pin, INPUT_FUNCTION_3);
           esp32_gpio_matrix_out(priv->config->ws_pin,
-                                  priv->config->ws_in_insig, 0, 0);
+                                priv->config->ws_in_insig, 0, 0);
 
           esp32_gpiowrite(priv->config->bclk_pin, 1);
           esp32_configgpio(priv->config->bclk_pin, INPUT_FUNCTION_3);
           esp32_gpio_matrix_out(priv->config->bclk_pin,
-                                  priv->config->bclk_in_insig, 0, 0);
+                                priv->config->bclk_in_insig, 0, 0);
         }
     }
   else
@@ -1000,22 +1129,22 @@ static void i2s_configure(struct esp32_i2s_s *priv)
 
           esp32_configgpio(priv->config->mclk_pin, OUTPUT_FUNCTION_2);
           esp32_gpio_matrix_out(priv->config->mclk_pin,
-                                  SIG_GPIO_OUT_IDX, 0, 0);
+                                SIG_GPIO_OUT_IDX, 0, 0);
 
           if (priv->config->mclk_pin == 0)
             {
               putreg32(priv->config->is_apll ?
-                        0xfff6 : (is_i2s0 ? 0xfff0 : 0xffff), PIN_CTRL);
+                       0xfff6 : (is_i2s0 ? 0xfff0 : 0xffff), PIN_CTRL);
             }
           else if (priv->config->mclk_pin == 1)
             {
               putreg32(priv->config->is_apll ?
-                        0xf6f6 : (is_i2s0 ? 0xf0f0 : 0xf0ff), PIN_CTRL);
+                       0xf6f6 : (is_i2s0 ? 0xf0f0 : 0xf0ff), PIN_CTRL);
             }
           else
             {
               putreg32(priv->config->is_apll ?
-                        0xff66 : (is_i2s0 ? 0xff00 : 0xff0f), PIN_CTRL);
+                       0xff66 : (is_i2s0 ? 0xff00 : 0xff0f), PIN_CTRL);
             }
         }
 
@@ -1026,12 +1155,12 @@ static void i2s_configure(struct esp32_i2s_s *priv)
           esp32_gpiowrite(priv->config->ws_pin, 1);
           esp32_configgpio(priv->config->ws_pin, OUTPUT_FUNCTION_3);
           esp32_gpio_matrix_out(priv->config->ws_pin,
-                                  priv->config->ws_in_outsig, 0, 0);
+                                priv->config->ws_in_outsig, 0, 0);
 
           esp32_gpiowrite(priv->config->bclk_pin, 1);
           esp32_configgpio(priv->config->bclk_pin, OUTPUT_FUNCTION_3);
           esp32_gpio_matrix_out(priv->config->bclk_pin,
-                                  priv->config->bclk_in_outsig, 0, 0);
+                                priv->config->bclk_in_outsig, 0, 0);
         }
       else
         {
@@ -1081,8 +1210,8 @@ static void i2s_configure(struct esp32_i2s_s *priv)
 
       /* Set TX data width */
 
-      esp32_i2s_txdatawidth((struct i2s_dev_s *)priv,
-                              priv->config->data_width);
+      priv->data_width = priv->config->data_width;
+      i2s_set_datawidth(priv);
 
       /* Set I2S tx chan mode */
 
@@ -1140,10 +1269,191 @@ static void i2s_configure(struct esp32_i2s_s *priv)
                               (priv->config->rate *
                                priv->config->mclk_multiple));
 
-      esp32_i2s_txsamplerate((struct i2s_dev_s *)priv, priv->config->rate);
+      priv->rate = priv->config->rate;
+      i2s_set_clock(priv);
     }
 
   /* TODO: check for rx enabled flag */
+}
+
+/****************************************************************************
+ * Name: i2s_set_datawidth
+ *
+ * Description:
+ *   Set the I2S TX data width.
+ *
+ * Input Parameters:
+ *   priv - Initialized I2S device structure.
+ *
+ * Returned Value:
+ *   Returns the resulting data width
+ *
+ ****************************************************************************/
+
+static uint32_t i2s_set_datawidth(struct esp32_i2s_s *priv)
+{
+  modifyreg32(I2S_SAMPLE_RATE_CONF_REG(priv->config->port),
+              I2S_TX_BITS_MOD_M, FIELD_TO_VALUE(I2S_TX_BITS_MOD,
+              priv->data_width));
+
+  /* Set TX FIFO operation mode */
+
+  modifyreg32(I2S_FIFO_CONF_REG(priv->config->port), I2S_TX_FIFO_MOD_M,
+              priv->data_width <= I2S_DATA_BIT_WIDTH_16BIT ?
+              FIELD_TO_VALUE(I2S_TX_FIFO_MOD, 0 + priv->config->mono_en) :
+              FIELD_TO_VALUE(I2S_TX_FIFO_MOD, 2 + priv->config->mono_en));
+
+  /* I2S TX MSB right enable */
+
+  if (priv->data_width <= I2S_DATA_BIT_WIDTH_16BIT)
+    {
+      modifyreg32(I2S_CONF_REG(priv->config->port), 0, I2S_TX_MSB_RIGHT);
+    }
+  else
+    {
+      modifyreg32(I2S_CONF_REG(priv->config->port), I2S_TX_MSB_RIGHT, 0);
+    }
+
+  return priv->data_width;
+}
+
+/****************************************************************************
+ * Name: i2s_set_clock
+ *
+ * Description:
+ *   Set the I2S TX sample rate by adjusting I2S clock.
+ *
+ * Input Parameters:
+ *   priv - Initialized I2S device structure.
+ *
+ * Returned Value:
+ *   Returns the resulting bitrate
+ *
+ ****************************************************************************/
+
+static uint32_t i2s_set_clock(struct esp32_i2s_s *priv)
+{
+  uint32_t rate;
+  uint32_t bclk;
+  uint32_t mclk;
+  uint16_t bclk_div;
+  uint32_t sclk;
+  uint32_t mclk_div;
+  int ma;
+  int mb;
+  int denominator;
+  int numerator;
+  uint32_t regval;
+  uint32_t freq_diff;
+
+  /* TODO: provide APLL clock support */
+
+  /* Disable APLL clock, I2S module will using PLL_D2_CLK(160M) as source
+   * clock.
+   */
+
+  modifyreg32(I2S_CLKM_CONF_REG(priv->config->port), I2S_CLKA_ENA, 0);
+  sclk = I2S_LL_BASE_CLK;
+
+  /* fmclk = bck_div * fbclk = fsclk / (mclk_div + b / a)
+   * mclk_div is the I2S clock divider's integral value
+   * b is the fraction clock divider's numerator value
+   * a is the fraction clock divider's denominator value
+   */
+
+  if (priv->config->role == I2S_ROLE_MASTER)
+    {
+      bclk = priv->rate * priv->config->total_slot * priv->data_width;
+      mclk = priv->mclk_freq;
+      bclk_div = mclk / bclk;
+    }
+  else
+    {
+      /* For slave mode, mclk >= bclk * 8, so fix bclk_div to 2 first */
+
+      bclk_div = 8;
+      bclk = priv->rate * priv->config->total_slot * priv->data_width;
+      mclk = bclk * bclk_div;
+    }
+
+  /* Calculate the nearest integer value of the I2S clock divider */
+
+  mclk_div = sclk / mclk;
+
+  i2sinfo("Clock division info: [sclk]%"PRIu32" Hz [mdiv] %d "
+          "[mclk] %"PRIu32" Hz [bdiv] %d [bclk] %"PRIu32" Hz\n",
+          sclk, mclk_div, mclk, bclk_div, bclk);
+
+  freq_diff = abs((int)sclk - (int)(mclk * mclk_div));
+
+  ma = 0;
+  mb = 0;
+  denominator = 1;
+  numerator = 0;
+
+  if (freq_diff)
+    {
+      float decimal = freq_diff / (float)mclk;
+
+      /* Carry bit if the decimal is greater than
+       * 1.0 - 1.0 / (63.0 * 2) = 125.0 / 126.0
+       */
+
+      if (decimal > 125.0f / 126.0f)
+        {
+          mclk_div++;
+        }
+      else
+        {
+          uint32_t min = ~0;
+
+          for (int a = 2; a <= I2S_LL_MCLK_DIVIDER_MAX; a++)
+            {
+              int b = (int)(a * (freq_diff / (double)mclk) + 0.5);
+              ma = freq_diff * a;
+              mb = mclk * b;
+              if (ma == mb)
+                {
+                  denominator = a;
+                  numerator = b;
+                  break;
+                }
+
+              if (abs((mb - ma)) < min)
+                {
+                  denominator = a;
+                  numerator = b;
+                  min = abs(mb - ma);
+                }
+            }
+        }
+    }
+
+  i2sinfo("Clock register: [mclk] %"PRIu32" Hz [numerator] %d "
+          "[denominator] %d\n", mclk, numerator, denominator);
+
+  regval = getreg32(I2S_CLKM_CONF_REG(priv->config->port));
+  regval &= ~I2S_CLKM_DIV_NUM_M;
+  regval |= FIELD_TO_VALUE(I2S_CLKM_DIV_NUM, mclk_div);
+  regval &= ~I2S_CLKM_DIV_B_M;
+  regval |= FIELD_TO_VALUE(I2S_CLKM_DIV_B, numerator);
+  regval &= ~I2S_CLKM_DIV_A_M;
+  regval |= FIELD_TO_VALUE(I2S_CLKM_DIV_A, denominator);
+  putreg32(regval, I2S_CLKM_CONF_REG(priv->config->port));
+
+  /* Set I2S tx bck div num */
+
+  modifyreg32(I2S_SAMPLE_RATE_CONF_REG(priv->config->port),
+              I2S_TX_BCK_DIV_NUM_M,
+              FIELD_TO_VALUE(I2S_TX_BCK_DIV_NUM, bclk_div));
+
+  /* Returns the actual sample rate */
+
+  bclk = sclk / (float)((mclk_div + numerator / (float)denominator) *
+                        bclk_div);
+  rate = bclk / (float)(priv->config->total_slot * priv->data_width);
+
+  return rate;
 }
 
 /****************************************************************************
@@ -1163,6 +1473,13 @@ static void i2s_configure(struct esp32_i2s_s *priv)
 #ifdef I2S_HAVE_TX
 static void i2s_tx_channel_start(struct esp32_i2s_s *priv)
 {
+  if (priv->tx_started)
+    {
+      i2swarn("TX channel of port %d was previously started\n",
+              priv->config->port);
+      return;
+    }
+
   /* Reset the TX channel */
 
   modifyreg32(I2S_CONF_REG(priv->config->port), 0, I2S_TX_RESET);
@@ -1178,7 +1495,7 @@ static void i2s_tx_channel_start(struct esp32_i2s_s *priv)
   modifyreg32(I2S_CONF_REG(priv->config->port), 0, I2S_TX_FIFO_RESET);
   modifyreg32(I2S_CONF_REG(priv->config->port), I2S_TX_FIFO_RESET, 0);
 
-  /* Enable DMA interruption */
+  /* Enable DMA interrupt */
 
   up_enable_irq(priv->config->irq);
 
@@ -1193,7 +1510,58 @@ static void i2s_tx_channel_start(struct esp32_i2s_s *priv)
 
   putreg32(0, I2S_OUT_LINK_REG(priv->config->port));
 
+  priv->tx_started = true;
+
   i2sinfo("Started TX channel of port %d\n", priv->config->port);
+}
+#endif /* I2S_HAVE_TX */
+
+/****************************************************************************
+ * Name: i2s_tx_channel_stop
+ *
+ * Description:
+ *   Stop TX channel for the I2S port
+ *
+ * Input Parameters:
+ *   priv - Initialized I2S device structure.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef I2S_HAVE_TX
+static void i2s_tx_channel_stop(struct esp32_i2s_s *priv)
+{
+  if (!priv->tx_started)
+    {
+      i2swarn("TX channel of port %d was previously stopped\n",
+              priv->config->port);
+      return;
+    }
+
+  /* Stop TX channel */
+
+  modifyreg32(I2S_CONF_REG(priv->config->port), I2S_TX_START, 0);
+
+  /* Stop outlink */
+
+  modifyreg32(I2S_OUT_LINK_REG(priv->config->port), I2S_OUTLINK_START,
+              I2S_OUTLINK_STOP);
+
+  /* Disable DMA interrupt */
+
+  modifyreg32(I2S_INT_ENA_REG(priv->config->port), UINT32_MAX, 0);
+
+  /* Disable DMA operation mode */
+
+  modifyreg32(I2S_FIFO_CONF_REG(priv->config->port), I2S_DSCR_EN, 0);
+
+  up_disable_irq(priv->config->irq);
+
+  priv->tx_started = false;
+
+  i2sinfo("Stopped TX channel of port %d\n", priv->config->port);
 }
 #endif /* I2S_HAVE_TX */
 
@@ -1270,6 +1638,34 @@ static uint32_t esp32_i2s_mclkfrequency(struct i2s_dev_s *dev,
 }
 
 /****************************************************************************
+ * Name: esp32_i2s_txchannels
+ *
+ * Description:
+ *   Set the I2S TX number of channels.
+ *
+ * Input Parameters:
+ *   dev  - Device-specific state data
+ *   channels - The I2S numbers of channels
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int esp32_i2s_txchannels(struct i2s_dev_s *dev, uint8_t channels)
+{
+  struct esp32_i2s_s *priv = (struct esp32_i2s_s *)dev;
+
+  if (channels != 1 && channels != 2)
+    {
+      return -EINVAL;
+    }
+
+  priv->channels = channels;
+  return OK;
+}
+
+/****************************************************************************
  * Name: esp32_i2s_txsamplerate
  *
  * Description:
@@ -1290,126 +1686,14 @@ static uint32_t esp32_i2s_mclkfrequency(struct i2s_dev_s *dev,
 static uint32_t esp32_i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
 {
   struct esp32_i2s_s *priv = (struct esp32_i2s_s *)dev;
-  uint32_t bclk;
-  uint32_t mclk;
-  uint16_t bclk_div;
-  uint32_t sclk;
-  uint32_t mclk_div;
-  int ma;
-  int mb;
-  int denominator;
-  int numerator;
-  uint32_t regval;
-  uint32_t freq_diff;
 
-  /* TODO: provide APLL clock support */
-
-  /* Disable APLL clock, I2S module will using PLL_D2_CLK(160M) as source
-   * clock.
-   */
-
-  modifyreg32(I2S_CLKM_CONF_REG(priv->config->port), I2S_CLKA_ENA, 0);
-  sclk = I2S_LL_BASE_CLK;
-
-  /* fmclk = bck_div * fbclk = fsclk / (mclk_div + b / a)
-   * mclk_div is the I2S clock divider's integral value
-   * b is the fraction clock divider's numerator value
-   * a is the fraction clock divider's denominator value
-   */
-
-  if (priv->config->role == I2S_ROLE_MASTER)
-    {
-      bclk = rate * priv->config->total_slot * priv->data_width;
-      mclk = priv->mclk_freq;
-      bclk_div = mclk / bclk;
-    }
-  else
-    {
-      /* For slave mode, mclk >= bclk * 8, so fix bclk_div to 2 first */
-
-      bclk_div = 8;
-      bclk = rate * priv->config->total_slot * priv->data_width;
-      mclk = bclk * bclk_div;
-    }
-
-  /* Calculate the nearest integer value of the I2S clock divider */
-
-  mclk_div = sclk / mclk;
-
-  i2sinfo("Clock division info: [sclk]%"PRIu32" Hz [mdiv] %d "
-          "[mclk] %"PRIu32" Hz [bdiv] %d [bclk] %"PRIu32" Hz\n",
-          sclk, mclk_div, mclk, bclk_div, bclk);
-
-  freq_diff = abs((int)sclk - (int)(mclk * mclk_div));
-
-  ma = 0;
-  mb = 0;
-  denominator = 1;
-  numerator = 0;
-
-  if (freq_diff)
-    {
-      float decimal = freq_diff / (float)mclk;
-
-      /* Carry bit if the decimal is greater than
-       * 1.0 - 1.0 / (63.0 * 2) = 125.0 / 126.0
-       */
-
-      if (decimal > 125.0 / 126.0)
-        {
-          mclk_div++;
-        }
-      else
-        {
-          uint32_t min = ~0;
-
-          for (int a = 2; a <= I2S_LL_MCLK_DIVIDER_MAX; a++)
-            {
-              int b = (int)(a * (freq_diff / (double)mclk) + 0.5);
-              ma = freq_diff * a;
-              mb = mclk * b;
-              if (ma == mb)
-                {
-                  denominator = a;
-                  numerator = b;
-                  break;
-                }
-
-              if (abs((mb - ma)) < min)
-                {
-                  denominator = a;
-                  numerator = b;
-                  min = abs(mb - ma);
-                }
-            }
-        }
-    }
-
-  i2sinfo("Clock register: [mclk] %"PRIu32" Hz [numerator] %d "
-          "[denominator] %d\n", mclk, numerator, denominator);
-
-  regval = getreg32(I2S_CLKM_CONF_REG(priv->config->port));
-  regval &= ~I2S_CLKM_DIV_NUM_M;
-  regval |= FIELD_TO_VALUE(I2S_CLKM_DIV_NUM, mclk_div);
-  regval &= ~I2S_CLKM_DIV_B_M;
-  regval |= FIELD_TO_VALUE(I2S_CLKM_DIV_B, numerator);
-  regval &= ~I2S_CLKM_DIV_A_M;
-  regval |= FIELD_TO_VALUE(I2S_CLKM_DIV_A, denominator);
-  putreg32(regval, I2S_CLKM_CONF_REG(priv->config->port));
-
-  /* Set I2S tx bck div num */
-
-  modifyreg32(I2S_SAMPLE_RATE_CONF_REG(priv->config->port),
-              I2S_TX_BCK_DIV_NUM_M,
-              FIELD_TO_VALUE(I2S_TX_BCK_DIV_NUM, bclk_div));
-
-  /* Returns the actual sample rate */
-
-  bclk = sclk / (float)((mclk_div + numerator / (float)denominator) *
-                        bclk_div);
-  rate = bclk / (float)(priv->config->total_slot * priv->data_width);
+  i2s_tx_channel_stop(priv);
 
   priv->rate = rate;
+
+  rate = i2s_set_clock(priv);
+
+  i2s_tx_channel_start(priv);
 
   return rate;
 }
@@ -1426,7 +1710,7 @@ static uint32_t esp32_i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
  *   width - The I2S data with in bits.
  *
  * Returned Value:
- *   Returns the resulting bitrate
+ *   Returns the resulting data width
  *
  ****************************************************************************/
 
@@ -1434,28 +1718,13 @@ static uint32_t esp32_i2s_txdatawidth(struct i2s_dev_s *dev, int bits)
 {
   struct esp32_i2s_s *priv = (struct esp32_i2s_s *)dev;
 
-  modifyreg32(I2S_SAMPLE_RATE_CONF_REG(priv->config->port),
-              I2S_TX_BITS_MOD_M, FIELD_TO_VALUE(I2S_TX_BITS_MOD, bits));
+  i2s_tx_channel_stop(priv);
 
   priv->data_width = bits;
 
-  /* Set TX FIFO operation mode */
+  i2s_set_datawidth(priv);
 
-  modifyreg32(I2S_FIFO_CONF_REG(priv->config->port), I2S_TX_FIFO_MOD_M,
-              priv->data_width <= I2S_DATA_BIT_WIDTH_16BIT ?
-              FIELD_TO_VALUE(I2S_TX_FIFO_MOD, 0 + priv->config->mono_en) :
-              FIELD_TO_VALUE(I2S_TX_FIFO_MOD, 2 + priv->config->mono_en));
-
-  /* I2S TX MSB right enable */
-
-  if (priv->data_width <= I2S_DATA_BIT_WIDTH_16BIT)
-    {
-      modifyreg32(I2S_CONF_REG(priv->config->port), 0, I2S_TX_MSB_RIGHT);
-    }
-  else
-    {
-      modifyreg32(I2S_CONF_REG(priv->config->port), I2S_TX_MSB_RIGHT, 0);
-    }
+  i2s_tx_channel_start(priv);
 
   return bits;
 }
@@ -1489,14 +1758,39 @@ static int esp32_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 {
   struct esp32_i2s_s *priv = (struct esp32_i2s_s *)dev;
   struct esp32_buffer_s *bfcontainer;
-  irqstate_t flags;
   int ret = OK;
+  uint32_t nbytes;
+  uint32_t nsamp;
 
   /* Check audio buffer data size */
 
-  if ((apb->nbytes - apb->curbyte) >
-      (ESP32_DMA_DATALEN_MAX * (I2S_DMADESC_NUM - 1)))
+  nbytes = (apb->nbytes - apb->curbyte) + priv->tx.carry.bytes;
+
+  /* If data width is 8, it is necessary to use a word of 16 bits;
+   * If data width is 24, it is necessary to a word of 32 bits;
+   */
+
+  nsamp = nbytes / (priv->data_width / 8);
+  nbytes = nsamp *
+           ((priv->data_width <= I2S_DATA_BIT_WIDTH_16BIT ?
+             I2S_DATA_BIT_WIDTH_16BIT : I2S_DATA_BIT_WIDTH_32BIT) / 8);
+
+  /* ESP32's I2S peripheral always consider two channels. If the source is
+   * mono, it is necessary to copy zero-ed data between each sample.
+   */
+
+  nbytes *= priv->channels == 1 ? 2 : 1;
+
+  /* Ensure nbytes is 4-byte aligned */
+
+  nbytes = ALIGN_UP(nbytes, sizeof(uintptr_t));
+
+  if (nbytes > (ESP32_DMA_DATALEN_MAX * I2S_DMADESC_NUM))
     {
+      i2serr("Required buffer size can not be fitted into DMA outlink "
+             "(exceeds in %" PRIu32 " bytes). Try to increase the "
+             "number of the DMA descriptors (CONFIG_I2S_DMADESC_NUM).",
+             nbytes - (ESP32_DMA_DATALEN_MAX * I2S_DMADESC_NUM));
       return -EFBIG;
     }
 
@@ -1519,13 +1813,12 @@ static int esp32_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
   /* Initialize the buffer container structure */
 
-  bfcontainer->callback = (void *)callback;
+  bfcontainer->callback = callback;
   bfcontainer->timeout  = timeout;
   bfcontainer->arg      = arg;
   bfcontainer->apb      = apb;
+  bfcontainer->nbytes   = nbytes;
   bfcontainer->result   = -EBUSY;
-
-  flags = spin_lock_irqsave(&priv->lock);
 
   ret = i2s_txdma_setup(priv, bfcontainer);
 
@@ -1534,20 +1827,10 @@ static int esp32_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
       goto errout_with_buf;
     }
 
-  ret = i2s_txdma_start(priv);
-
-  if (ret != OK)
-    {
-      goto errout_with_buf;
-    }
-
   i2sinfo("Queued %d bytes into DMA buffers\n", apb->nbytes);
   i2s_dump_buffer("Audio pipeline buffer:", &apb->samp[apb->curbyte],
-                    apb->nbytes - apb->curbyte);
+                  apb->nbytes - apb->curbyte);
 
-  /* Trigger DMA transfer */
-
-  spin_unlock_irqrestore(&priv->lock, flags);
   i2s_exclsem_give(priv);
 
   return OK;
@@ -1586,7 +1869,7 @@ static int esp32_i2sdma_setup(struct esp32_i2s_s *priv)
 
   priv->cpu = up_cpu_index();
   priv->cpuint = esp32_setup_irq(priv->cpu, priv->config->periph,
-                                  1, ESP32_CPUINT_LEVEL);
+                                 1, ESP32_CPUINT_LEVEL);
   if (priv->cpuint < 0)
     {
       i2serr("Failed to allocate a CPU interrupt.\n");
@@ -1598,8 +1881,8 @@ static int esp32_i2sdma_setup(struct esp32_i2s_s *priv)
     {
       i2serr("Couldn't attach IRQ to handler.\n");
       esp32_teardown_irq(priv->cpu,
-                          priv->config->periph,
-                          priv->cpuint);
+                         priv->config->periph,
+                         priv->cpuint);
       return ret;
     }
 
@@ -1645,6 +1928,8 @@ struct i2s_dev_s *esp32_i2sbus_initialize(int port)
       default:
         return NULL;
     }
+
+  priv->tx_started = false;
 
   flags = spin_lock_irqsave(&priv->lock);
 
