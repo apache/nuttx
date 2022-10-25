@@ -269,10 +269,10 @@ struct esp32_transport_s
 struct esp32_i2s_s
 {
   struct i2s_dev_s  dev;          /* Externally visible I2S interface */
-  sem_t             exclsem;      /* Assures mutually exclusive access */
+  mutex_t           lock;         /* Ensures mutually exclusive access */
   int               cpuint;       /* I2S interrupt ID */
   uint8_t           cpu;          /* CPU ID */
-  spinlock_t        lock;         /* Device specific lock. */
+  spinlock_t        slock;        /* Device specific lock. */
 
   /* Port configuration */
 
@@ -309,9 +309,6 @@ struct esp32_i2s_s
 #endif
 
 /* Semaphore helpers */
-
-static int      i2s_exclsem_take(struct esp32_i2s_s *priv);
-#define         i2s_exclsem_give(priv) nxsem_post(&priv->exclsem)
 
 static int      i2s_bufsem_take(struct esp32_i2s_s *priv);
 #define         i2s_bufsem_give(priv) nxsem_post(&priv->bufsem)
@@ -488,26 +485,6 @@ static struct esp32_i2s_s esp32_i2s1_priv =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: i2s_exclsem_take
- *
- * Description:
- *   Take the exclusive access semaphore handling any exceptional conditions
- *
- * Input Parameters:
- *   priv - A reference to the i2s peripheral state
- *
- * Returned Value:
- *   Normally OK, but may return -ECANCELED in the rare event that the task
- *   has been canceled.
- *
- ****************************************************************************/
-
-static int i2s_exclsem_take(struct esp32_i2s_s *priv)
-{
-  return nxsem_wait_uninterruptible(&priv->exclsem);
-}
-
-/****************************************************************************
  * Name: i2s_bufsem_take
  *
  * Description:
@@ -565,14 +542,14 @@ static struct esp32_buffer_s *i2s_buf_allocate(struct esp32_i2s_s *priv)
 
   /* Get the buffer from the head of the free list */
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = spin_lock_irqsave(&priv->slock);
   bfcontainer = priv->bf_freelist;
   DEBUGASSERT(bfcontainer);
 
   /* Unlink the buffer from the freelist */
 
   priv->bf_freelist = bfcontainer->flink;
-  spin_unlock_irqrestore(&priv->lock, flags);
+  spin_unlock_irqrestore(&priv->slock, flags);
   return bfcontainer;
 }
 
@@ -601,7 +578,7 @@ static void i2s_buf_free(struct esp32_i2s_s *priv,
 
   /* Put the buffer container back on the free list (circbuf) */
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = spin_lock_irqsave(&priv->slock);
 
   bfcontainer->apb = NULL;
   bfcontainer->buf = NULL;
@@ -609,7 +586,7 @@ static void i2s_buf_free(struct esp32_i2s_s *priv,
   bfcontainer->flink  = priv->bf_freelist;
   priv->bf_freelist = bfcontainer;
 
-  spin_unlock_irqrestore(&priv->lock, flags);
+  spin_unlock_irqrestore(&priv->slock, flags);
 
   /* Wake up any threads waiting for a buffer container */
 
@@ -850,7 +827,7 @@ static int i2s_txdma_setup(struct esp32_i2s_s *priv,
       return bytes_queued;
     }
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = spin_lock_irqsave(&priv->slock);
 
   /* Add the buffer container to the end of the TX pending queue */
 
@@ -860,7 +837,7 @@ static int i2s_txdma_setup(struct esp32_i2s_s *priv,
 
   ret = i2s_txdma_start(priv);
 
-  spin_unlock_irqrestore(&priv->lock, flags);
+  spin_unlock_irqrestore(&priv->slock, flags);
 
   return ret;
 }
@@ -1012,9 +989,9 @@ static void i2s_tx_worker(void *arg)
        * also modified from the interrupt level.
        */
 
-      flags = spin_lock_irqsave(&priv->lock);
+      flags = spin_lock_irqsave(&priv->slock);
       bfcontainer = (struct esp32_buffer_s *)sq_remfirst(&priv->tx.done);
-      spin_unlock_irqrestore(&priv->lock, flags);
+      spin_unlock_irqrestore(&priv->slock, flags);
 
       /* Perform the TX transfer done callback */
 
@@ -1801,7 +1778,7 @@ static int esp32_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
   /* Get exclusive access to the I2S driver data */
 
-  ret = i2s_exclsem_take(priv);
+  ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       goto errout_with_buf;
@@ -1831,12 +1808,12 @@ static int esp32_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   i2s_dump_buffer("Audio pipeline buffer:", &apb->samp[apb->curbyte],
                   apb->nbytes - apb->curbyte);
 
-  i2s_exclsem_give(priv);
+  nxmutex_unlock(&priv->lock);
 
   return OK;
 
 errout_with_buf:
-  i2s_exclsem_give(priv);
+  nxmutex_unlock(&priv->lock);
   i2s_buf_free(priv, bfcontainer);
   return ret;
 }
@@ -1931,9 +1908,9 @@ struct i2s_dev_s *esp32_i2sbus_initialize(int port)
 
   priv->tx_started = false;
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = spin_lock_irqsave(&priv->slock);
 
-  nxsem_init(&priv->exclsem, 0, 1);
+  nxmutex_init(&priv->lock);
 
   i2s_configure(priv);
 
@@ -1957,7 +1934,7 @@ struct i2s_dev_s *esp32_i2sbus_initialize(int port)
   i2s_tx_channel_start(priv);
 #endif /* I2S_HAVE_TX */
 
-  spin_unlock_irqrestore(&priv->lock, flags);
+  spin_unlock_irqrestore(&priv->slock, flags);
 
   /* Success exit */
 
@@ -1968,8 +1945,8 @@ struct i2s_dev_s *esp32_i2sbus_initialize(int port)
   /* Failure exit */
 
 err:
-  spin_unlock_irqrestore(&priv->lock, flags);
-  nxsem_destroy(&priv->exclsem);
+  spin_unlock_irqrestore(&priv->slock, flags);
+  nxmutex_destroy(&priv->lock);
   return NULL;
 }
 
