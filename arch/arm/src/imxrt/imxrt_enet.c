@@ -33,6 +33,7 @@
 #include <assert.h>
 #include <debug.h>
 #include <errno.h>
+#include <endian.h>
 
 #include <arpa/inet.h>
 
@@ -305,8 +306,8 @@ static uint8_t g_buffer_pool[NENET_NBUFFERS * IMXRT_BUF_SIZE]
 static inline uint32_t imxrt_swap32(uint32_t value);
 static inline uint16_t imxrt_swap16(uint16_t value);
 #else
-#  define imxrt_swap32 __builtin_bswap32
-#  define imxrt_swap16 __builtin_bswap16
+#  define imxrt_swap32 swap32
+#  define imxrt_swap16 swap16
 #endif
 #endif
 
