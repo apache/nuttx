@@ -6355,7 +6355,7 @@ config STM32F7_PHYINIT
 		one time before it first uses the PHY.
 
 config STM32F7_PHY_POLLING
-	bool "Support network monitoring by poling the PHY"
+	bool "Support network monitoring by polling the PHY"
 	default n
 	depends on STM32F7_HAVE_PHY_POLLED
 	select ARCH_PHY_POLLED

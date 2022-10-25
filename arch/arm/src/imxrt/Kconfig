@@ -1816,7 +1816,7 @@ config IMXRT_ENET_PHYINIT
 		function one time before it first uses the PHY.
 
 config IMXRT_PHY_POLLING
-	bool "Support network monitoring by poling the PHY"
+	bool "Support network monitoring by polling the PHY"
 	default n
 	depends on IMXRT_ENET
 	select ARCH_PHY_POLLED
