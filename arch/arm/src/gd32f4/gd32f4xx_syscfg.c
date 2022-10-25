@@ -107,7 +107,7 @@ void gd32_syscfg_exmc_swap_config(uint32_t syscfg_exmc_swap)
 void gd32_syscfg_exti_line_config(uint8_t exti_port, uint8_t exti_pin)
 {
   uint32_t regval;
-  uint32_t regaddr;
+  uint32_t regaddr = 0;
 
   switch (exti_pin / SYSCFG_EXTI_SS_JSTEP)
     {
@@ -135,6 +135,7 @@ void gd32_syscfg_exti_line_config(uint8_t exti_port, uint8_t exti_pin)
       regaddr = GD32_SYSCFG_EXTISS3;
       break;
     default:
+      DEBUGASSERT(false);
       break;
     }
 
