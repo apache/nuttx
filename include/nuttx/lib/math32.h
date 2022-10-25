@@ -28,6 +28,36 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <inttypes.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Returns one plus the index of the most significant 1-bit of n,
+ * or if n is zero, returns zero.
+ */
+
+#if UINTPTR_MAX > UINT32_MAX
+#  define FLS(n) ((n) & UINT64_C(0xffffffff00000000) ? 32 + \
+                  FLS32((size_t)(n) >> 32) : FLS32(n))
+#else
+#  define FLS(n) FLS32(n)
+#endif
+
+#define FLS32(n) ((n) & 0xffff0000 ? 16 + FLS16((n) >> 16) : FLS16(n))
+#define FLS16(n) ((n) & 0xff00     ?  8 + FLS8 ((n) >>  8) : FLS8 (n))
+#define FLS8(n)  ((n) & 0xf0       ?  4 + FLS4 ((n) >>  4) : FLS4 (n))
+#define FLS4(n)  ((n) & 0xc        ?  2 + FLS2 ((n) >>  2) : FLS2 (n))
+#define FLS2(n)  ((n) & 0x2        ?  1 + FLS1 ((n) >>  1) : FLS1 (n))
+#define FLS1(n)  ((n) & 0x1        ?  1 : 0)
+
+/* Returns round up and round down value of log2(n). Note: it can be used at
+ * compile time.
+ */
+
+#define LOG2_CEIL(n)  ((n) & (n - 1) ? FLS(n) : FLS(n) - 1)
+#define LOG2_FLOOR(n) (FLS(n) - 1)
 
 /****************************************************************************
  * Public Types
