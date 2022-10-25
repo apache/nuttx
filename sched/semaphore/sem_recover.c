@@ -80,7 +80,8 @@ void nxsem_recover(FAR struct tcb_s *tcb)
    */
 
   flags = enter_critical_section();
-  if (tcb->task_state == TSTATE_WAIT_SEM)
+  if (tcb->task_state == TSTATE_WAIT_SEM ||
+      tcb->task_state == TSTATE_WAIT_MUTEX)
     {
       FAR sem_t *sem = tcb->waitobj;
       DEBUGASSERT(sem != NULL && sem->semcount < 0);

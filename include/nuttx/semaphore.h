@@ -29,6 +29,7 @@
 
 #include <errno.h>
 #include <semaphore.h>
+#include <stdbool.h>
 
 #include <nuttx/clock.h>
 
@@ -141,6 +142,63 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: _nxsem_wait
+ *
+ * Description:
+ *   This function attempts to lock the semaphore referenced by 'sem'.  If
+ *   the semaphore value is (<=) zero, then the calling task will not return
+ *   until it successfully acquires the lock.
+ *
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   sem_wait except that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno value.
+ *
+ * Input Parameters:
+ *   sem      - Semaphore descriptor.
+ *   is_mutex - true if mutex.
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   Possible returned errors:
+ *
+ *   - EINVAL:  Invalid attempt to get the semaphore
+ *   - EINTR:   The wait was interrupted by the receipt of a signal.
+ *
+ ****************************************************************************/
+
+int _nxsem_wait(FAR sem_t *sem, bool is_mutex);
+
+/****************************************************************************
+ * Name: _sem_wait
+ *
+ * Description:
+ *   This function attempts to lock the semaphore referenced by 'sem'.  If
+ *   the semaphore value is (<=) zero, then the calling task will not return
+ *   until it successfully acquires the lock.
+ *
+ *   This is an internal OS interface.
+ *
+ * Input Parameters:
+ *   sem - Semaphore descriptor.
+ *   is_mutex - true if mutex.
+ *
+ * Returned Value:
+ *   This function is a standard, POSIX application interface.  It returns
+ *   zero (OK) if successful.  Otherwise, -1 (ERROR) is returned and
+ *   the errno value is set appropriately.  Possible errno values include:
+ *
+ *   - EINVAL:  Invalid attempt to get the semaphore
+ *   - EINTR:   The wait was interrupted by the receipt of a signal.
+ *
+ ****************************************************************************/
+
+int _sem_wait(FAR sem_t *sem, bool is_mutex);
 
 /****************************************************************************
  * Name: nxsem_init

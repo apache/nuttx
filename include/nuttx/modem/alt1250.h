@@ -323,7 +323,7 @@ typedef struct altcom_fd_set_s altcom_fd_set;
 struct alt_queue_s
 {
   sq_queue_t queue;
-  sem_t lock;
+  mutex_t lock;
 };
 
 struct alt1250_dev_s

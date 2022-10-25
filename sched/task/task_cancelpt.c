@@ -378,7 +378,8 @@ bool nxnotify_cancellation(FAR struct tcb_s *tcb)
            * thread must be unblocked to handle the cancellation.
            */
 
-          if (tcb->task_state == TSTATE_WAIT_SEM)
+          if (tcb->task_state == TSTATE_WAIT_SEM ||
+              tcb->task_state == TSTATE_WAIT_MUTEX)
             {
               nxsem_wait_irq(tcb, ECANCELED);
             }

@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsem_wait
+ * Name: _nxsem_wait
  *
  * Description:
  *   This function attempts to lock the semaphore referenced by 'sem'.  If
@@ -55,7 +55,8 @@
  *   - It does not modify the errno value.
  *
  * Input Parameters:
- *   sem - Semaphore descriptor.
+ *   sem      - Semaphore descriptor.
+ *   is_mutex - true if mutex.
  *
  * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
@@ -68,7 +69,7 @@
  *
  ****************************************************************************/
 
-int nxsem_wait(FAR sem_t *sem)
+int _nxsem_wait(FAR sem_t *sem, bool is_mutex)
 {
   FAR struct tcb_s *rtcb = this_task();
   irqstate_t flags;
@@ -152,7 +153,8 @@ int nxsem_wait(FAR sem_t *sem)
            */
 
           DEBUGASSERT(NULL != rtcb->flink);
-          up_block_task(rtcb, TSTATE_WAIT_SEM);
+          up_block_task(rtcb,
+                        is_mutex ? TSTATE_WAIT_MUTEX : TSTATE_WAIT_SEM);
 
           /* When we resume at this point, either (1) the semaphore has been
            * assigned to this thread of execution, or (2) the semaphore wait
@@ -197,6 +199,39 @@ int nxsem_wait(FAR sem_t *sem)
 }
 
 /****************************************************************************
+ * Name: nxsem_wait
+ *
+ * Description:
+ *   This function attempts to lock the semaphore referenced by 'sem'.  If
+ *   the semaphore value is (<=) zero, then the calling task will not return
+ *   until it successfully acquires the lock.
+ *
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   sem_wait except that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno value.
+ *
+ * Input Parameters:
+ *   sem - Semaphore descriptor.
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   Possible returned errors:
+ *
+ *   - EINVAL:  Invalid attempt to get the semaphore
+ *   - EINTR:   The wait was interrupted by the receipt of a signal.
+ *
+ ****************************************************************************/
+
+int nxsem_wait(FAR sem_t *sem)
+{
+  return _nxsem_wait(sem, false);
+}
+
+/****************************************************************************
  * Name: nxsem_wait_uninterruptible
  *
  * Description:
@@ -229,6 +264,67 @@ int nxsem_wait_uninterruptible(FAR sem_t *sem)
 }
 
 /****************************************************************************
+ * Name: _sem_wait
+ *
+ * Description:
+ *   This function attempts to lock the semaphore referenced by 'sem'.  If
+ *   the semaphore value is (<=) zero, then the calling task will not return
+ *   until it successfully acquires the lock.
+ *
+ *   This is an internal OS interface.
+ *
+ * Input Parameters:
+ *   sem - Semaphore descriptor.
+ *   is_mutex - true if mutex.
+ *
+ * Returned Value:
+ *   This function is a standard, POSIX application interface.  It returns
+ *   zero (OK) if successful.  Otherwise, -1 (ERROR) is returned and
+ *   the errno value is set appropriately.  Possible errno values include:
+ *
+ *   - EINVAL:  Invalid attempt to get the semaphore
+ *   - EINTR:   The wait was interrupted by the receipt of a signal.
+ *
+ ****************************************************************************/
+
+int _sem_wait(FAR sem_t *sem, bool is_mutex)
+{
+  int errcode;
+  int ret;
+
+  /* sem_wait() is a cancellation point */
+
+  if (enter_cancellation_point())
+    {
+#ifdef CONFIG_CANCELLATION_POINTS
+      /* If there is a pending cancellation, then do not perform
+       * the wait.  Exit now with ECANCELED.
+       */
+
+      errcode = ECANCELED;
+      goto errout_with_cancelpt;
+#endif
+    }
+
+  /* Let nxsem_wait() do the real work */
+
+  ret = _nxsem_wait(sem, is_mutex);
+  if (ret < 0)
+    {
+      errcode = -ret;
+      goto errout_with_cancelpt;
+    }
+
+  leave_cancellation_point();
+  return OK;
+
+errout_with_cancelpt:
+  set_errno(errcode);
+  leave_cancellation_point();
+  return ERROR;
+}
+
+/****************************************************************************
  * Name: sem_wait
  *
  * Description:
@@ -251,37 +347,5 @@ int nxsem_wait_uninterruptible(FAR sem_t *sem)
 
 int sem_wait(FAR sem_t *sem)
 {
-  int errcode;
-  int ret;
-
-  /* sem_wait() is a cancellation point */
-
-  if (enter_cancellation_point())
-    {
-#ifdef CONFIG_CANCELLATION_POINTS
-      /* If there is a pending cancellation, then do not perform
-       * the wait.  Exit now with ECANCELED.
-       */
-
-      errcode = ECANCELED;
-      goto errout_with_cancelpt;
-#endif
-    }
-
-  /* Let nxsem_wait() do the real work */
-
-  ret = nxsem_wait(sem);
-  if (ret < 0)
-    {
-      errcode = -ret;
-      goto errout_with_cancelpt;
-    }
-
-  leave_cancellation_point();
-  return OK;
-
-errout_with_cancelpt:
-  set_errno(errcode);
-  leave_cancellation_point();
-  return ERROR;
+  return _sem_wait(sem, false);
 }

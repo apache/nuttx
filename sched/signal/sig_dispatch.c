@@ -434,7 +434,8 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
        * be unblocked when a signal is received.
        */
 
-      if (stcb->task_state == TSTATE_WAIT_SEM)
+      if (stcb->task_state == TSTATE_WAIT_SEM ||
+          stcb->task_state == TSTATE_WAIT_MUTEX)
         {
           nxsem_wait_irq(stcb, EINTR);
         }

@@ -36,7 +36,6 @@
 #include <debug.h>
 
 #include <nuttx/random.h>
-#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/usrsock.h>
@@ -49,7 +48,7 @@
 
 struct usrsock_req_s
 {
-  mutex_t  lock;              /* Request mutex (only one outstanding
+  sem_t    sem;               /* Request semaphore (only one outstanding
                                * request) */
   sem_t    acksem;            /* Request acknowledgment notification */
   uint32_t newxid;            /* New transcation Id */
@@ -73,7 +72,7 @@ struct usrsock_req_s
 
 static struct usrsock_req_s g_usrsock_req =
 {
-  NXMUTEX_INITIALIZER,
+  NXSEM_INITIALIZER(1, PRIOINHERIT_FLAGS_DISABLE),
   SEM_INITIALIZER(0),
   0,
   0,
@@ -641,7 +640,7 @@ int usrsock_do_request(FAR struct usrsock_conn_s *conn,
 
   /* Set outstanding request for daemon to handle. */
 
-  net_lockedwait_uninterruptible(&req->lock);
+  net_lockedwait_uninterruptible(&req->sem);
   if (++req->newxid == 0)
     {
       ++req->newxid;
@@ -668,7 +667,7 @@ int usrsock_do_request(FAR struct usrsock_conn_s *conn,
 
   /* Free request line for next command. */
 
-  nxmutex_unlock(&req->lock);
+  nxsem_post(&req->sem);
   return ret;
 }
 
@@ -700,7 +699,7 @@ void usrsock_abort(void)
        * requests.
        */
 
-      ret = net_timedwait(&req->lock, 10);
+      ret = net_timedwait(&req->sem, 10);
       if (ret < 0)
         {
           if (ret != -ETIMEDOUT && ret != -EINTR)
@@ -711,7 +710,7 @@ void usrsock_abort(void)
         }
       else
         {
-          nxmutex_unlock(&req->lock);
+          nxsem_post(&req->sem);
         }
 
       /* Wake-up pending requests. */

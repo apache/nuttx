@@ -78,7 +78,8 @@ void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode)
    * and already changed the task's state.
    */
 
-  if (wtcb->task_state == TSTATE_WAIT_SEM)
+  if (wtcb->task_state == TSTATE_WAIT_SEM ||
+      wtcb->task_state == TSTATE_WAIT_MUTEX)
     {
       FAR sem_t *sem = wtcb->waitobj;
       DEBUGASSERT(sem != NULL && sem->semcount < 0);
