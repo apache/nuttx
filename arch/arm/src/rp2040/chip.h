@@ -70,7 +70,7 @@
   .macro  setintstack, tmp1, tmp2
   ldr  \tmp1, =RP2040_SIO_CPUID
   ldr  \tmp1, [\tmp1, #0]
-  lsl  \tmp1, \tmp1, #2
+  lsls  \tmp1, \tmp1, #2
   ldr  \tmp2, =g_cpu_intstack_top
   add  \tmp2, \tmp2, \tmp1
   ldr  \tmp2, [\tmp2, #0]
