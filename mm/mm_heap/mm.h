@@ -114,6 +114,7 @@
  */
 
 #define MM_ALLOC_BIT     0x1
+#define MM_MASK_BIT      MM_ALLOC_BIT
 #ifdef CONFIG_MM_SMALL
 # define MMSIZE_MAX      UINT16_MAX
 #else
