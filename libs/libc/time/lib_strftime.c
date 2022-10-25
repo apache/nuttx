@@ -408,6 +408,15 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
              }
              break;
 
+           /* %T: Shortcut for %H:%M:%S. */
+
+           case 'T':
+             {
+               len = snprintf(dest, chleft, "%02d:%02d:%02d",
+                              tm->tm_hour, tm->tm_min, tm->tm_sec);
+             }
+             break;
+
            /* %w: The weekday as a decimal number (range 0 to 6). */
 
            case 'w':
