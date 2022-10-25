@@ -57,6 +57,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <endian.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
@@ -1705,7 +1706,7 @@ static void s32k3xx_lpspi_exchange_nodma(struct spi_dev_s *dev,
 
           if (src)
             {
-              word = __builtin_bswap16(*src++);
+              word = swap16(*src++);
 
               /* read the required number of bytes */
             }
@@ -1722,7 +1723,7 @@ static void s32k3xx_lpspi_exchange_nodma(struct spi_dev_s *dev,
 
           if (dest)
             {
-              *dest++ = __builtin_bswap16(word);
+              *dest++ = swap16(word);
             }
         }
     }
