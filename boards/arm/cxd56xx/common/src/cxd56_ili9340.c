@@ -273,7 +273,7 @@ static int cxd56_ili93404ws_recvparam(struct ili9340_lcd_s *lcd,
   struct ili93404ws_lcd_s *priv = (struct ili93404ws_lcd_s *)lcd;
 
   cxd56_gpio_write(DISPLAY_DC, true);  /* Indicate DATA */
-  *param = (uint8_t)(SPI_SEND(priv->spi, param) & 0xff);
+  SPI_RECVBLOCK(priv->spi, param, 1);
 
   return OK;
 }
