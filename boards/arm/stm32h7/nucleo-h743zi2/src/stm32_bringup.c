@@ -225,6 +225,7 @@ int stm32_bringup(void)
 
 #ifdef CONFIG_STM32H7_TIM3_QE
   ret = stm32_qencoder_initialize("/dev/qe2", 3);
+
   if (ret < 0)
     {
       syslog(LOG_ERR,
