@@ -163,7 +163,7 @@ static void s32k3xx_dumpnvic(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: s32k3xx_nmi, s32k3xx_busfault, s32k3xx_usagefault, s32k3xx_pendsv,
+ * Name: s32k3xx_nmi, s32k3xx_pendsv,
  *       s32k3xx_dbgmonitor, s32k3xx_pendsv, s32k3xx_reserved
  *
  * Description:
@@ -178,22 +178,6 @@ static int s32k3xx_nmi(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! NMI received\n");
-  PANIC();
-  return 0;
-}
-
-static int s32k3xx_busfault(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! Bus fault received\n");
-  PANIC();
-  return 0;
-}
-
-static int s32k3xx_usagefault(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! Usage fault received\n");
   PANIC();
   return 0;
 }
@@ -409,8 +393,8 @@ void up_irqinitialize(void)
 #ifndef CONFIG_ARM_MPU
   irq_attach(S32K3XX_IRQ_MEMFAULT, arm_memfault, NULL);
 #endif
-  irq_attach(S32K3XX_IRQ_BUSFAULT, s32k3xx_busfault, NULL);
-  irq_attach(S32K3XX_IRQ_USAGEFAULT, s32k3xx_usagefault, NULL);
+  irq_attach(S32K3XX_IRQ_BUSFAULT, arm_busfault, NULL);
+  irq_attach(S32K3XX_IRQ_USAGEFAULT, arm_usagefault, NULL);
   irq_attach(S32K3XX_IRQ_PENDSV, s32k3xx_pendsv, NULL);
   irq_attach(S32K3XX_IRQ_DBGMONITOR, s32k3xx_dbgmonitor, NULL);
   irq_attach(S32K3XX_IRQ_RESERVED, s32k3xx_reserved, NULL);

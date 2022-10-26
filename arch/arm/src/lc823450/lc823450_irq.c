@@ -171,7 +171,7 @@ static void lc823450_dumpnvic(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: lc823450_nmi, lc823450_busfault, lc823450_usagefault,
+ * Name: lc823450_nmi,
  *       lc823450_pendsv, lc823450_dbgmonitor, lc823450_pendsv,
  *       lc823450_reserved
  *
@@ -187,22 +187,6 @@ static int lc823450_nmi(int irq, void *context, void *arg)
 {
   enter_critical_section();
   irqinfo("PANIC!!! NMI received\n");
-  PANIC();
-  return 0;
-}
-
-static int lc823450_busfault(int irq, void *context, void *arg)
-{
-  enter_critical_section();
-  irqinfo("PANIC!!! Bus fault received: %08x\n", getreg32(NVIC_CFAULTS));
-  PANIC();
-  return 0;
-}
-
-static int lc823450_usagefault(int irq, void *context, void *arg)
-{
-  enter_critical_section();
-  irqinfo("PANIC!!! Usage fault received: %08x\n", getreg32(NVIC_CFAULTS));
   PANIC();
   return 0;
 }
@@ -532,8 +516,8 @@ void up_irqinitialize(void)
 
 #ifdef CONFIG_DEBUG
   irq_attach(LC823450_IRQ_NMI, lc823450_nmi, NULL);
-  irq_attach(LC823450_IRQ_BUSFAULT, lc823450_busfault, NULL);
-  irq_attach(LC823450_IRQ_USAGEFAULT, lc823450_usagefault, NULL);
+  irq_attach(LC823450_IRQ_BUSFAULT, arm_busfault, NULL);
+  irq_attach(LC823450_IRQ_USAGEFAULT, arm_usagefault, NULL);
   irq_attach(LC823450_IRQ_PENDSV, lc823450_pendsv, NULL);
   irq_attach(LC823450_IRQ_DBGMONITOR, lc823450_dbgmonitor, NULL);
   irq_attach(LC823450_IRQ_RESERVED, lc823450_reserved, NULL);

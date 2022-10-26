@@ -68,7 +68,8 @@ int arm_memfault(int irq, void *context, void *arg)
   mfalert("\tIRQ: %d context: %p\n", irq, context);
   mfalert("\tCFSR: %08x MMFAR: %08x\n",
           getreg32(NVIC_CFAULTS), getreg32(NVIC_MEMMANAGE_ADDR));
-  mfalert("\tBASEPRI: %08x PRIMASK: %08x IPSR: %08x CONTROL: %08x\n",
+  mfalert("\tBASEPRI: %08x PRIMASK: %08x IPSR: %08"
+          PRIx32 " CONTROL: %08" PRIx32 "\n",
           getbasepri(), getprimask(), getipsr(), getcontrol());
 
   mfalert("Memory Management Fault Reason:\n");

@@ -144,7 +144,7 @@ static void kinetis_dumpnvic(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: kinetis_nmi, kinetis_busfault, kinetis_usagefault, kinetis_pendsv,
+ * Name: kinetis_nmi, kinetis_pendsv,
  *       kinetis_dbgmonitor, kinetis_pendsv, kinetis_reserved
  *
  * Description:
@@ -159,22 +159,6 @@ static int kinetis_nmi(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! NMI received\n");
-  PANIC();
-  return 0;
-}
-
-static int kinetis_busfault(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! Bus fault received\n");
-  PANIC();
-  return 0;
-}
-
-static int kinetis_usagefault(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! Usage fault received\n");
   PANIC();
   return 0;
 }
@@ -404,8 +388,8 @@ void up_irqinitialize(void)
 #ifndef CONFIG_ARM_MPU
   irq_attach(KINETIS_IRQ_MEMFAULT, arm_memfault, NULL);
 #endif
-  irq_attach(KINETIS_IRQ_BUSFAULT, kinetis_busfault, NULL);
-  irq_attach(KINETIS_IRQ_USAGEFAULT, kinetis_usagefault, NULL);
+  irq_attach(KINETIS_IRQ_BUSFAULT, arm_busfault, NULL);
+  irq_attach(KINETIS_IRQ_USAGEFAULT, arm_usagefault, NULL);
   irq_attach(KINETIS_IRQ_PENDSV, kinetis_pendsv, NULL);
   irq_attach(KINETIS_IRQ_DBGMONITOR, kinetis_dbgmonitor, NULL);
   irq_attach(KINETIS_IRQ_RESERVED, kinetis_reserved, NULL);

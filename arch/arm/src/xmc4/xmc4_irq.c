@@ -143,7 +143,7 @@ static void xmc4_dump_nvic(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: xmc4_nmi, xmc4_busfault, xmc4_usagefault, xmc4_pendsv,
+ * Name: xmc4_nmi, xmc4_pendsv,
  *       xmc4_dbgmonitor, xmc4_pendsv, xmc4_reserved
  *
  * Description:
@@ -158,22 +158,6 @@ static int xmc4_nmi(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! NMI received\n");
-  PANIC();
-  return 0;
-}
-
-static int xmc4_busfault(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! Bus fault received\n");
-  PANIC();
-  return 0;
-}
-
-static int xmc4_usagefault(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! Usage fault received\n");
   PANIC();
   return 0;
 }
@@ -406,8 +390,8 @@ void up_irqinitialize(void)
 #ifndef CONFIG_ARM_MPU
   irq_attach(XMC4_IRQ_MEMFAULT, arm_memfault, NULL);
 #endif
-  irq_attach(XMC4_IRQ_BUSFAULT, xmc4_busfault, NULL);
-  irq_attach(XMC4_IRQ_USAGEFAULT, xmc4_usagefault, NULL);
+  irq_attach(XMC4_IRQ_BUSFAULT, arm_busfault, NULL);
+  irq_attach(XMC4_IRQ_USAGEFAULT, arm_usagefault, NULL);
   irq_attach(XMC4_IRQ_PENDSV, xmc4_pendsv, NULL);
   irq_attach(XMC4_IRQ_DBGMONITOR, xmc4_dbgmonitor, NULL);
   irq_attach(XMC4_IRQ_RESERVED, xmc4_reserved, NULL);
