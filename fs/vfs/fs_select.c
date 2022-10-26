@@ -79,21 +79,16 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
            FAR fd_set *exceptfds, FAR struct timeval *timeout)
 {
   struct pollfd *pollset = NULL;
-  int errcode = OK;
   int fd;
   int npfds;
   int msec;
   int ndx;
   int ret;
 
-  /* select() is cancellation point */
-
-  enter_cancellation_point();
-
   if (nfds < 0)
     {
-      errcode = EINVAL;
-      goto errout;
+      set_errno(EINVAL);
+      return ERROR;
     }
 
   /* How many pollfd structures do we need to allocate? */
@@ -123,8 +118,8 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
 
       if (pollset == NULL)
         {
-          errcode = ENOMEM;
-          goto errout;
+          set_errno(ENOMEM);
+          return ERROR;
         }
     }
 
@@ -191,13 +186,7 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
 
   /* Then let poll do all of the real work. */
 
-  ret = nx_poll(pollset, npfds, msec);
-  if (ret < 0)
-    {
-      /* poll() failed! Save the errno value */
-
-      errcode = -ret;
-    }
+  ret = poll(pollset, npfds, msec);
 
   /* Now set up the return values */
 
@@ -263,17 +252,5 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
     }
 
   kmm_free(pollset);
-
-  /* Did poll() fail above? */
-
-  if (ret >= 0)
-    {
-      leave_cancellation_point();
-      return ret;
-    }
-
-errout:
-  set_errno(errcode);
-  leave_cancellation_point();
-  return ERROR;
+  return ret;
 }

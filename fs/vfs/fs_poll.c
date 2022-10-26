@@ -410,21 +410,37 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 }
 
 /****************************************************************************
- * Name: nx_poll
+ * Name: poll
  *
  * Description:
- *   nx_poll() is similar to the standard 'poll' interface except that is
- *   not a cancellation point and it does not modify the errno variable.
+ *   poll() waits for one of a set of file descriptors to become ready to
+ *   perform I/O.  If none of the events requested (and no error) has
+ *   occurred for any of  the  file  descriptors,  then  poll() blocks until
+ *   one of the events occurs.
  *
- *   nx_poll() is an internal NuttX interface and should not be called from
- *   applications.
+ * Input Parameters:
+ *   fds  - List of structures describing file descriptors to be monitored
+ *   nfds - The number of entries in the list
+ *   timeout - Specifies an upper limit on the time for which poll() will
+ *     block in milliseconds.  A negative value of timeout means an infinite
+ *     timeout.
  *
  * Returned Value:
- *   Zero is returned on success; a negated value is returned on any failure.
+ *   On success, the number of structures that have non-zero revents fields.
+ *   A value of 0 indicates that the call timed out and no file descriptors
+ *   were ready.  On error, -1 is returned, and errno is set appropriately:
+ *
+ *   EBADF  - An invalid file descriptor was given in one of the sets.
+ *   EFAULT - The fds address is invalid
+ *   EINTR  - A signal occurred before any requested event.
+ *   EINVAL - The nfds value exceeds a system limit.
+ *   ENOMEM - There was no space to allocate internal data structures.
+ *   ENOSYS - One or more of the drivers supporting the file descriptor
+ *     does not support the poll method.
  *
  ****************************************************************************/
 
-int nx_poll(FAR struct pollfd *fds, unsigned int nfds, int timeout)
+int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
 {
   sem_t sem;
   int count = 0;
@@ -432,6 +448,10 @@ int nx_poll(FAR struct pollfd *fds, unsigned int nfds, int timeout)
   int ret;
 
   DEBUGASSERT(nfds == 0 || fds != NULL);
+
+  /* poll() is a cancellation point */
+
+  enter_cancellation_point();
 
   nxsem_init(&sem, 0, 0);
   ret = poll_setup(fds, nfds, &sem);
@@ -508,57 +528,15 @@ int nx_poll(FAR struct pollfd *fds, unsigned int nfds, int timeout)
     }
 
   nxsem_destroy(&sem);
-  return ret < 0 ? ret : count;
-}
+  leave_cancellation_point();
 
-/****************************************************************************
- * Name: poll
- *
- * Description:
- *   poll() waits for one of a set of file descriptors to become ready to
- *   perform I/O.  If none of the events requested (and no error) has
- *   occurred for any of  the  file  descriptors,  then  poll() blocks until
- *   one of the events occurs.
- *
- * Input Parameters:
- *   fds  - List of structures describing file descriptors to be monitored
- *   nfds - The number of entries in the list
- *   timeout - Specifies an upper limit on the time for which poll() will
- *     block in milliseconds.  A negative value of timeout means an infinite
- *     timeout.
- *
- * Returned Value:
- *   On success, the number of structures that have non-zero revents fields.
- *   A value of 0 indicates that the call timed out and no file descriptors
- *   were ready.  On error, -1 is returned, and errno is set appropriately:
- *
- *   EBADF  - An invalid file descriptor was given in one of the sets.
- *   EFAULT - The fds address is invalid
- *   EINTR  - A signal occurred before any requested event.
- *   EINVAL - The nfds value exceeds a system limit.
- *   ENOMEM - There was no space to allocate internal data structures.
- *   ENOSYS - One or more of the drivers supporting the file descriptor
- *     does not support the poll method.
- *
- ****************************************************************************/
-
-int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
-{
-  int ret;
-
-  /* poll() is a cancellation point */
-
-  enter_cancellation_point();
-
-  /* Let nx_poll() do all of the work */
-
-  ret = nx_poll(fds, nfds, timeout);
   if (ret < 0)
     {
       set_errno(-ret);
-      ret = ERROR;
+      return ERROR;
     }
-
-  leave_cancellation_point();
-  return ret;
+  else
+    {
+      return count;
+    }
 }
