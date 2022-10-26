@@ -123,7 +123,7 @@ static void nrf52_dumpnvic(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: nrf52_nmi, nrf52_busfault, nrf52_usagefault, nrf52_pendsv,
+ * Name: nrf52_nmi, nrf52_pendsv,
  *       nrf52_dbgmonitor, nrf52_pendsv, nrf52_reserved
  *
  * Description:
@@ -138,22 +138,6 @@ static int nrf52_nmi(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! NMI received\n");
-  PANIC();
-  return 0;
-}
-
-static int nrf52_busfault(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! Bus fault received\n");
-  PANIC();
-  return 0;
-}
-
-static int nrf52_usagefault(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! Usage fault received\n");
   PANIC();
   return 0;
 }
@@ -371,8 +355,8 @@ void up_irqinitialize(void)
 #ifndef CONFIG_ARM_MPU
   irq_attach(NRF52_IRQ_MEMFAULT, arm_memfault, NULL);
 #endif
-  irq_attach(NRF52_IRQ_BUSFAULT, nrf52_busfault, NULL);
-  irq_attach(NRF52_IRQ_USAGEFAULT, nrf52_usagefault, NULL);
+  irq_attach(NRF52_IRQ_BUSFAULT, arm_busfault, NULL);
+  irq_attach(NRF52_IRQ_USAGEFAULT, arm_usagefault, NULL);
   irq_attach(NRF52_IRQ_PENDSV, nrf52_pendsv, NULL);
   irq_attach(NRF52_IRQ_DBGMONITOR, nrf52_dbgmonitor, NULL);
   irq_attach(NRF52_IRQ_RESERVED, nrf52_reserved, NULL);

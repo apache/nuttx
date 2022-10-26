@@ -136,22 +136,6 @@ static int lpc17_40_nmi(int irq, void *context, void *arg)
   return 0;
 }
 
-static int lpc17_40_busfault(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! Bus fault received\n");
-  PANIC();
-  return 0;
-}
-
-static int lpc17_40_usagefault(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! Usage fault received\n");
-  PANIC();
-  return 0;
-}
-
 static int lpc17_40_pendsv(int irq, void *context, void *arg)
 {
   up_irq_save();
@@ -374,8 +358,8 @@ void up_irqinitialize(void)
 #ifndef CONFIG_ARM_MPU
   irq_attach(LPC17_40_IRQ_MEMFAULT, arm_memfault, NULL);
 #endif
-  irq_attach(LPC17_40_IRQ_BUSFAULT, lpc17_40_busfault, NULL);
-  irq_attach(LPC17_40_IRQ_USAGEFAULT, lpc17_40_usagefault, NULL);
+  irq_attach(LPC17_40_IRQ_BUSFAULT, arm_busfault, NULL);
+  irq_attach(LPC17_40_IRQ_USAGEFAULT, arm_usagefault, NULL);
   irq_attach(LPC17_40_IRQ_PENDSV, lpc17_40_pendsv, NULL);
   irq_attach(LPC17_40_IRQ_DBGMONITOR, lpc17_40_dbgmonitor, NULL);
   irq_attach(LPC17_40_IRQ_RESERVED, lpc17_40_reserved, NULL);

@@ -121,7 +121,7 @@ static void lpc54_dumpnvic(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: lpc54_nmi, lpc54_busfault, lpc54_usagefault, lpc54_pendsv,
+ * Name: lpc54_nmi, lpc54_pendsv,
  *       lpc54_dbgmonitor, lpc54_pendsv, lpc54_reserved
  *
  * Description:
@@ -136,22 +136,6 @@ static int lpc54_nmi(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! NMI received\n");
-  PANIC();
-  return 0;
-}
-
-static int lpc54_busfault(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! Bus fault received\n");
-  PANIC();
-  return 0;
-}
-
-static int lpc54_usagefault(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! Usage fault received\n");
   PANIC();
   return 0;
 }
@@ -367,8 +351,8 @@ void up_irqinitialize(void)
 #ifndef CONFIG_ARM_MPU
   irq_attach(LPC54_IRQ_MEMFAULT, arm_memfault, NULL);
 #endif
-  irq_attach(LPC54_IRQ_BUSFAULT, lpc54_busfault, NULL);
-  irq_attach(LPC54_IRQ_USAGEFAULT, lpc54_usagefault, NULL);
+  irq_attach(LPC54_IRQ_BUSFAULT, arm_busfault, NULL);
+  irq_attach(LPC54_IRQ_USAGEFAULT, arm_usagefault, NULL);
   irq_attach(LPC54_IRQ_PENDSV, lpc54_pendsv, NULL);
   irq_attach(LPC54_IRQ_DBGMONITOR, lpc54_dbgmonitor, NULL);
   irq_attach(LPC54_IRQ_RESERVED, lpc54_reserved, NULL);

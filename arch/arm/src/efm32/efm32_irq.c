@@ -132,7 +132,7 @@ static void efm32_dumpnvic(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: efm32_nmi, efm32_busfault, efm32_usagefault, efm32_pendsv,
+ * Name: efm32_nmi, efm32_pendsv,
  *       efm32_dbgmonitor, efm32_pendsv, efm32_reserved
  *
  * Description:
@@ -147,22 +147,6 @@ static int efm32_nmi(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! NMI received\n");
-  PANIC();
-  return 0;
-}
-
-static int efm32_busfault(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! Bus fault received: %08x\n", getreg32(NVIC_CFAULTS));
-  PANIC();
-  return 0;
-}
-
-static int efm32_usagefault(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! Usage fault received: %08x\n", getreg32(NVIC_CFAULTS));
   PANIC();
   return 0;
 }
@@ -373,8 +357,8 @@ void up_irqinitialize(void)
 #ifndef CONFIG_ARM_MPU
   irq_attach(EFM32_IRQ_MEMFAULT, arm_memfault, NULL);
 #endif
-  irq_attach(EFM32_IRQ_BUSFAULT, efm32_busfault, NULL);
-  irq_attach(EFM32_IRQ_USAGEFAULT, efm32_usagefault, NULL);
+  irq_attach(EFM32_IRQ_BUSFAULT, arm_busfault, NULL);
+  irq_attach(EFM32_IRQ_USAGEFAULT, arm_usagefault, NULL);
   irq_attach(EFM32_IRQ_PENDSV, efm32_pendsv, NULL);
   irq_attach(EFM32_IRQ_DBGMONITOR, efm32_dbgmonitor, NULL);
   irq_attach(EFM32_IRQ_RESERVED, efm32_reserved, NULL);

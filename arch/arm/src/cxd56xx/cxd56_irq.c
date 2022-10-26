@@ -151,7 +151,7 @@ static void cxd56_dumpnvic(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: cxd56_nmi, cxd56_busfault, cxd56_usagefault, cxd56_pendsv,
+ * Name: cxd56_nmi, cxd56_pendsv,
  *       cxd56_dbgmonitor, cxd56_pendsv, cxd56_reserved
  *
  * Description:
@@ -166,22 +166,6 @@ static int cxd56_nmi(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! NMI received\n");
-  PANIC();
-  return 0;
-}
-
-static int cxd56_busfault(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! Bus fault received\n");
-  PANIC();
-  return 0;
-}
-
-static int cxd56_usagefault(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! Usage fault received\n");
   PANIC();
   return 0;
 }
@@ -376,8 +360,8 @@ void up_irqinitialize(void)
 #  ifndef CONFIG_ARM_MPU
   irq_attach(CXD56_IRQ_MEMFAULT, arm_memfault, NULL);
 #  endif
-  irq_attach(CXD56_IRQ_BUSFAULT, cxd56_busfault, NULL);
-  irq_attach(CXD56_IRQ_USAGEFAULT, cxd56_usagefault, NULL);
+  irq_attach(CXD56_IRQ_BUSFAULT, arm_busfault, NULL);
+  irq_attach(CXD56_IRQ_USAGEFAULT, arm_usagefault, NULL);
   irq_attach(CXD56_IRQ_PENDSV, cxd56_pendsv, NULL);
   irq_attach(CXD56_IRQ_DBGMONITOR, cxd56_dbgmonitor, NULL);
   irq_attach(CXD56_IRQ_RESERVED, cxd56_reserved, NULL);
