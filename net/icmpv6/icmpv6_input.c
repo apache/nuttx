@@ -46,9 +46,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IPv6BUF         ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#define ICMPv6BUF        ((FAR struct icmpv6_hdr_s *) \
-                          (&dev->d_buf[NET_LL_HDRLEN(dev)] + iplen))
 #define ICMPv6REPLY      ((FAR struct icmpv6_echo_reply_s *)icmpv6)
 #define ICMPv6SIZE       ((dev)->d_len - iplen)
 
@@ -154,7 +151,7 @@ static uint16_t icmpv6_datahandler(FAR struct net_driver_s *dev,
   /* Copy the new ICMPv6 reply into the I/O buffer chain (without waiting) */
 
   buflen = ICMPv6SIZE;
-  icmpv6 = ICMPv6BUF;
+  icmpv6 = IPBUF(iplen);
 
   ret = iob_trycopyin(iob, (FAR uint8_t *)ICMPv6REPLY, buflen, offset, true);
   if (ret < 0)
@@ -219,7 +216,7 @@ drop:
 void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
 {
   FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
-  FAR struct icmpv6_hdr_s *icmpv6 = ICMPv6BUF;
+  FAR struct icmpv6_hdr_s *icmpv6 = IPBUF(iplen);
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.icmpv6.recv++;

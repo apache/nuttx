@@ -512,7 +512,7 @@ int ipv6_forward_callback(FAR struct net_driver_s *fwddev, FAR void *arg)
        * d_buf.
        */
 
-      ipv6 = (FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)];
+      ipv6 = IPv6BUF;
 
       /* Send the packet asynchrously on the forwarding device. */
 

@@ -56,7 +56,7 @@ void udp_ipv4_select(FAR struct net_driver_s *dev)
 
   /* Set the offset to the beginning of the UDP data payload */
 
-  dev->d_appdata = &dev->d_buf[IPv4UDP_HDRLEN + NET_LL_HDRLEN(dev)];
+  dev->d_appdata = IPBUF(IPv4UDP_HDRLEN);
 }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -77,7 +77,7 @@ void udp_ipv6_select(FAR struct net_driver_s *dev)
 
   /* Set the offset to the beginning of the UDP data payload */
 
-  dev->d_appdata = &dev->d_buf[IPv6UDP_HDRLEN + NET_LL_HDRLEN(dev)];
+  dev->d_appdata = IPBUF(IPv6UDP_HDRLEN);
 }
 #endif /* CONFIG_NET_IPv6 */
 

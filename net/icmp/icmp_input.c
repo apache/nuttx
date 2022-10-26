@@ -68,8 +68,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IPv4BUF      ((FAR struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#define ICMPBUF(hl)  ((FAR struct icmp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + (hl)])
 #define ICMPSIZE(hl) ((dev)->d_len - (hl))
 
 /****************************************************************************
@@ -172,8 +170,7 @@ static uint16_t icmp_datahandler(FAR struct net_driver_s *dev,
   /* Copy the new ICMP reply into the I/O buffer chain (without waiting) */
 
   buflen = ICMPSIZE(iphdrlen);
-  ret = iob_trycopyin(iob, (FAR uint8_t *)ICMPBUF(iphdrlen),
-                      buflen, offset, true);
+  ret = iob_trycopyin(iob, IPBUF(iphdrlen), buflen, offset, true);
   if (ret < 0)
     {
       /* On a failure, iob_copyin return a negated error value but does
@@ -246,7 +243,7 @@ void icmp_input(FAR struct net_driver_s *dev)
 
   /* The ICMP header immediately follows the IP header */
 
-  icmp = ICMPBUF(iphdrlen);
+  icmp = IPBUF(iphdrlen);
 
   /* ICMP echo (i.e., ping) processing. This is simple, we only change the
    * ICMP type from ECHO to ECHO_REPLY and adjust the ICMP checksum before

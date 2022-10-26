@@ -251,7 +251,6 @@
  * header.
  */
 
-#define ETHBUF       ((struct eth_hdr_s *)priv->eth_dev.d_buf)
 #define ETH8021QWBUF ((struct eth_8021qhdr_s *)priv->eth_dev.d_buf)
 
 /****************************************************************************
@@ -934,10 +933,12 @@ static void lpc54_eth_reply(struct lpc54_ethdriver_s *priv)
 
 static void lpc54_eth_rxdispatch(struct lpc54_ethdriver_s *priv)
 {
+  struct net_driver_s *dev = &priv->eth_dev;
+
 #ifdef CONFIG_NET_PKT
   /* When packet sockets are enabled, feed the frame into the tap */
 
-  pkt_input(&priv->eth_dev);
+  pkt_input(dev);
 #endif
 
   /* We only accept IP packets of the configured type and ARP packets */
@@ -946,14 +947,14 @@ static void lpc54_eth_rxdispatch(struct lpc54_ethdriver_s *priv)
   if (ETHBUF->type == HTONS(ETHTYPE_IP))
     {
       ninfo("IPv4 packet\n");
-      NETDEV_RXIPV4(&priv->eth_dev);
+      NETDEV_RXIPV4(dev);
 
       /* Handle ARP on input,
        * then dispatch IPv4 packet to the network layer
        */
 
-      arp_ipin(&priv->eth_dev);
-      ipv4_input(&priv->eth_dev);
+      arp_ipin(dev);
+      ipv4_input(dev);
 
       /* Check for a reply to the IPv4 packet */
 
@@ -965,11 +966,11 @@ static void lpc54_eth_rxdispatch(struct lpc54_ethdriver_s *priv)
   if (ETHBUF->type == HTONS(ETHTYPE_IP6))
     {
       ninfo("IPv6 packet\n");
-      NETDEV_RXIPV6(&priv->eth_dev);
+      NETDEV_RXIPV6(dev);
 
       /* Dispatch IPv6 packet to the network layer */
 
-      ipv6_input(&priv->eth_dev);
+      ipv6_input(dev);
 
       /* Check for a reply to the IPv6 packet */
 
@@ -981,11 +982,11 @@ static void lpc54_eth_rxdispatch(struct lpc54_ethdriver_s *priv)
   if (ETH8021QWBUF->tpid == HTONS(TPID_8021QVLAN))
     {
       ninfo("IEEE 802.1q packet\n");
-      NETDEV_RXQVLAN(&priv->eth_dev);
+      NETDEV_RXQVLAN(dev);
 
       /* Dispatch the 802.1q VLAN packet to the network layer */
 
-      qvlan_input(&priv->eth_dev);
+      qvlan_input(dev);
 
       /* Check for a reply to the 802.1q VLAN packet */
 
@@ -1001,20 +1002,20 @@ static void lpc54_eth_rxdispatch(struct lpc54_ethdriver_s *priv)
 
       /* Dispatch the ARP packet to the network layer */
 
-      arp_arpin(&priv->eth_dev);
-      NETDEV_RXARP(&priv->eth_dev);
+      arp_arpin(dev);
+      NETDEV_RXARP(dev);
 
       /* If the above function invocation resulted in data that should be
        * sent out on the network, d_len field will set to a value > 0.
        */
 
-      if (priv->eth_dev.d_len > 0)
+      if (dev->d_len > 0)
         {
           chan   = lpc54_eth_getring(priv);
           txring = &priv->eth_txring[chan];
 
           (txring->tr_buffers)[txring->tr_supply] =
-            (uint32_t *)priv->eth_dev.d_buf;
+            (uint32_t *)dev->d_buf;
 
           lpc54_eth_transmit(priv, chan);
         }
@@ -1022,7 +1023,7 @@ static void lpc54_eth_rxdispatch(struct lpc54_ethdriver_s *priv)
   else
 #endif
     {
-      NETDEV_RXDROPPED(&priv->eth_dev);
+      NETDEV_RXDROPPED(dev);
     }
 
   /* On entry, d_buf refers to the receive buffer as set by logic in
@@ -1032,13 +1033,13 @@ static void lpc54_eth_rxdispatch(struct lpc54_ethdriver_s *priv)
    * receive buffer and we will need to dispose of it here.
    */
 
-  if (priv->eth_dev.d_buf != NULL)
+  if (dev->d_buf != NULL)
     {
-      lpc54_pktbuf_free(priv, (uint32_t *)priv->eth_dev.d_buf);
+      lpc54_pktbuf_free(priv, (uint32_t *)dev->d_buf);
     }
 
-  priv->eth_dev.d_buf = NULL;
-  priv->eth_dev.d_len = 0;
+  dev->d_buf = NULL;
+  dev->d_len = 0;
 }
 
 /****************************************************************************

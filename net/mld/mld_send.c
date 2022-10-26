@@ -59,20 +59,6 @@
 #define RASIZE      sizeof(struct ipv6_router_alert_s)
 #define MLD_HDRLEN  (IPv6_HDRLEN + RASIZE)
 
-/* Buffer layout */
-
-#define IPv6BUF     ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#define RABUF       ((FAR struct ipv6_router_alert_s *) \
-                     (&dev->d_buf[NET_LL_HDRLEN(dev)] + IPv6_HDRLEN))
-#define QUERYBUF    ((FAR struct mld_mcast_listen_query_s *) \
-                     (&dev->d_buf[NET_LL_HDRLEN(dev)] + MLD_HDRLEN))
-#define V1REPORTBUF ((FAR struct mld_mcast_listen_report_v1_s *) \
-                     (&dev->d_buf[NET_LL_HDRLEN(dev)] + MLD_HDRLEN))
-#define V2REPORTBUF ((FAR struct mld_mcast_listen_report_v2_s *) \
-                     (&dev->d_buf[NET_LL_HDRLEN(dev)] + MLD_HDRLEN))
-#define DONEBUF     ((FAR struct mld_mcast_listen_done_s *) \
-                     (&dev->d_buf[NET_LL_HDRLEN(dev)] + MLD_HDRLEN))
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -237,7 +223,7 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
    * The IPv6 router alert option (type 5) is defined in RFC 2711.
    */
 
-  ra              = RABUF;
+  ra              = IPBUF(IPv6_HDRLEN);
   memset(ra, 0, RASIZE);
 
   ra->hbyh.nxthdr = IP_PROTO_ICMP6;          /* ICMPv6 payload follows extension header */
@@ -253,7 +239,7 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
       case MLD_SEND_GENQUERY:           /* Send General Query */
       case MLD_SEND_MASQUERY:           /* Send Multicast Address Specific (MAS) Query */
         {
-          FAR struct mld_mcast_listen_query_s *query = QUERYBUF;
+          FAR struct mld_mcast_listen_query_s *query = IPBUF(MLD_HDRLEN);
 
           /* Initialize the Query payload.  In a General Query, both the
            * Multicast Address field and the Number of Sources (N)
@@ -322,7 +308,8 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
 
       case MLD_SEND_V1REPORT:           /* Send MLDv1 Report message */
         {
-          FAR struct mld_mcast_listen_report_v1_s *report = V1REPORTBUF;
+          FAR struct mld_mcast_listen_report_v1_s *report =
+                                                   IPBUF(MLD_HDRLEN);
 
           /* Initialize the Report payload */
 
@@ -342,7 +329,8 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
 
       case MLD_SEND_V2REPORT:           /* Send MLDv2 Report message */
         {
-          FAR struct mld_mcast_listen_report_v2_s *report = V2REPORTBUF;
+          FAR struct mld_mcast_listen_report_v2_s *report =
+                                                   IPBUF(MLD_HDRLEN);
           FAR struct mld_mcast_addrec_v2_s *addrec;
 
           /* Initialize the Report payload */
@@ -367,7 +355,7 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
 
       case MLD_SEND_DONE:               /* Send Done message */
         {
-          FAR struct mld_mcast_listen_done_s *done = DONEBUF;
+          FAR struct mld_mcast_listen_done_s *done = IPBUF(MLD_HDRLEN);
 
           /* Initialize the Done payload */
 

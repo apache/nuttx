@@ -34,13 +34,6 @@
 #ifdef CONFIG_NET
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define IPv4BUF ((FAR struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#define IPv6BUF ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -100,7 +93,7 @@ uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto)
 
   /* Sum IP payload data. */
 
-  sum = chksum(sum, &dev->d_buf[iphdrlen + NET_LL_HDRLEN(dev)], upperlen);
+  sum = chksum(sum, IPBUF(iphdrlen), upperlen);
   return (sum == 0) ? 0xffff : HTONS(sum);
 }
 #endif /* CONFIG_NET_ARCH_CHKSUM */
@@ -167,7 +160,7 @@ uint16_t ipv6_upperlayer_chksum(FAR struct net_driver_s *dev,
 
   /* Sum IP payload data. */
 
-  sum = chksum(sum, &dev->d_buf[NET_LL_HDRLEN(dev) + iplen], upperlen);
+  sum = chksum(sum, IPBUF(iplen), upperlen);
   return (sum == 0) ? 0xffff : HTONS(sum);
 }
 #endif /* CONFIG_NET_ARCH_CHKSUM */
@@ -200,7 +193,7 @@ uint16_t ipv4_chksum(FAR struct net_driver_s *dev)
 
   iphdrlen = (ipv4->vhl & IPv4_HLMASK) << 2;
 
-  sum = chksum(0, &dev->d_buf[NET_LL_HDRLEN(dev)], iphdrlen);
+  sum = chksum(0, IPBUF(0), iphdrlen);
   return (sum == 0) ? 0xffff : HTONS(sum);
 }
 #endif /* CONFIG_NET_ARCH_CHKSUM */

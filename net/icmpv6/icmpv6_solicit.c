@@ -40,14 +40,6 @@
 #ifdef CONFIG_NET_ICMPv6
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define IPv6BUF  ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#define ICMPv6SOLICIT \
-  ((FAR struct icmpv6_neighbor_solicit_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -119,7 +111,7 @@ void icmpv6_solicit(FAR struct net_driver_s *dev,
 
   /* Set up the ICMPv6 Neighbor Solicitation message */
 
-  sol           = ICMPv6SOLICIT;
+  sol           = IPBUF(IPv6_HDRLEN);
   sol->type     = ICMPv6_NEIGHBOR_SOLICIT; /* Message type */
   sol->code     = 0;                       /* Message qualifier */
   sol->flags[0] = 0;                       /* flags */
