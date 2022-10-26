@@ -230,32 +230,6 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
 }
 
 /****************************************************************************
- * Name: nx_vfcntl
- ****************************************************************************/
-
-static int nx_vfcntl(int fd, int cmd, va_list ap)
-{
-  FAR struct file *filep;
-  int ret;
-
-  /* Get the file structure corresponding to the file descriptor. */
-
-  ret = fs_getfilep(fd, &filep);
-  if (ret >= 0)
-    {
-      DEBUGASSERT(filep != NULL);
-
-      /* Let file_vfcntl() do the real work.  The errno is not set on
-       * failures.
-       */
-
-      ret = file_vfcntl(filep, cmd, ap);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -298,42 +272,6 @@ int file_fcntl(FAR struct file *filep, int cmd, ...)
 }
 
 /****************************************************************************
- * Name: nx_fcntl
- *
- * Description:
- *   nx_fcntl() is similar to the standard 'fcntl' interface except that is
- *   not a cancellation point and it does not modify the errno variable.
- *
- *   nx_fcntl() is an internal NuttX interface and should not be called
- *   from applications.
- *
- * Returned Value:
- *   Returns a non-negative number on success;  A negated errno value is
- *   returned on any failure (see comments fcntl() for a list of appropriate
- *   errno values).
- *
- ****************************************************************************/
-
-int nx_fcntl(int fd, int cmd, ...)
-{
-  va_list ap;
-  int ret;
-
-  /* Setup to access the variable argument list */
-
-  va_start(ap, cmd);
-
-  /* Let nx_vfcntl() do the real work.  The errno is not set on
-   * failures.
-   */
-
-  ret = nx_vfcntl(fd, cmd, ap);
-
-  va_end(ap);
-  return ret;
-}
-
-/****************************************************************************
  * Name: fcntl
  *
  * Description:
@@ -354,6 +292,7 @@ int nx_fcntl(int fd, int cmd, ...)
 
 int fcntl(int fd, int cmd, ...)
 {
+  FAR struct file *filep;
   va_list ap;
   int ret;
 
@@ -365,13 +304,19 @@ int fcntl(int fd, int cmd, ...)
 
   va_start(ap, cmd);
 
-  /* Let nx_vfcntl() do the real work.  The errno is not set on
-   * failures.
-   */
+  /* Get the file structure corresponding to the file descriptor. */
 
-  ret = nx_vfcntl(fd, cmd, ap);
+  ret = fs_getfilep(fd, &filep);
+  if (ret >= 0)
+    {
+      DEBUGASSERT(filep != NULL);
 
-  va_end(ap);
+      /* Let file_vfcntl() do the real work.  The errno is not set on
+       * failures.
+       */
+
+      ret = file_vfcntl(filep, cmd, ap);
+    }
 
   if (ret < 0)
     {
@@ -379,6 +324,8 @@ int fcntl(int fd, int cmd, ...)
       ret = ERROR;
     }
 
+  va_end(ap);
   leave_cancellation_point();
+
   return ret;
 }
