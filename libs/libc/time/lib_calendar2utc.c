@@ -95,13 +95,13 @@ time_t clock_calendar2utc(int year, int month, int day)
 
   /* Correct year & month ranges.  Shift month into range 1-12 */
 
-  dyear = (month - 1) / 12;
-  month -= 12 * dyear;
+  dyear = (month - 1) / MONSPERYEAR;
+  month -= MONSPERYEAR * dyear;
   year += dyear;
 
   if (month < 1)
     {
-      month += 12;
+      month += MONSPERYEAR;
       year -= 1;
     }
 
@@ -158,11 +158,11 @@ time_t clock_calendar2utc(int year, int month, int day)
 
   /* Years since epoch in units of days (ignoring leap years). */
 
-  days = (year - 1970) * 365;
+  days = (year - EPOCH_YEAR) * DAYSPERNYEAR;
 
   /* Add in the extra days for the leap years prior to the current year. */
 
-  days += (year - 1969) >> 2;
+  days += (year - EPOCH_YEAR - 1) >> 2;
 
   /* Add in the days up to the beginning of this month. */
 
