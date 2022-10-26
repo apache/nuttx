@@ -229,6 +229,7 @@ struct esp32s2_i2s_s
   mutex_t           lock;       /* Assures mutually exclusive access */
   uint32_t          rate;       /* I2S actual configured sample-rate */
   uint32_t          data_width; /* I2S actual configured data_width */
+  uint32_t          mclk_freq;  /* I2S actual master clock */
   int               cpuint;     /* I2S interrupt ID */
   uint8_t           cpu;        /* CPU ID */
 
@@ -288,6 +289,8 @@ static void     i2s_tx_schedule(struct esp32s2_i2s_s *priv,
 
 /* I2S methods (and close friends) */
 
+static uint32_t esp32s2_i2s_mclkfrequency(struct i2s_dev_s *dev,
+                                          uint32_t frequency);
 static uint32_t esp32s2_i2s_txsamplerate(struct i2s_dev_s *dev,
                                          uint32_t rate);
 static uint32_t esp32s2_i2s_txdatawidth(struct i2s_dev_s *dev, int bits);
@@ -302,9 +305,10 @@ static int      esp32s2_i2s_send(struct i2s_dev_s *dev,
 
 static const struct i2s_ops_s g_i2sops =
 {
-  .i2s_txsamplerate = esp32s2_i2s_txsamplerate,
-  .i2s_txdatawidth  = esp32s2_i2s_txdatawidth,
-  .i2s_send         = esp32s2_i2s_send,
+  .i2s_txsamplerate   = esp32s2_i2s_txsamplerate,
+  .i2s_txdatawidth    = esp32s2_i2s_txdatawidth,
+  .i2s_send           = esp32s2_i2s_send,
+  .i2s_mclkfrequency  = esp32s2_i2s_mclkfrequency,
 };
 
 #ifdef CONFIG_ESP32S2_I2S
@@ -319,7 +323,7 @@ static const struct esp32s2_i2s_config_s esp32s2_i2s0_config =
   .data_width       = CONFIG_ESP32S2_I2S_DATA_BIT_WIDTH,
   .rate             = CONFIG_ESP32S2_I2S_SAMPLE_RATE,
   .total_slot       = 2,
-  .mclk_multiple    = I2S_MCLK_MULTIPLE_384,
+  .mclk_multiple    = I2S_MCLK_MULTIPLE_256,
   .tx_en            = I2S_TX_ENABLED,
   .rx_en            = I2S_RX_ENABLED,
 #ifdef CONFIG_ESP32S2_I2S_MCLK
@@ -1016,6 +1020,10 @@ static void i2s_configure(struct esp32s2_i2s_s *priv)
 
       modifyreg32(I2S_FIFO_CONF_REG, 0, I2S_TX_FIFO_MOD_FORCE_EN);
 
+      esp32s2_i2s_mclkfrequency((struct i2s_dev_s *)priv,
+                                (priv->config->rate *
+                                priv->config->mclk_multiple));
+
       esp32s2_i2s_txsamplerate((struct i2s_dev_s *)priv, priv->config->rate);
     }
 
@@ -1108,6 +1116,42 @@ static int esp32s2_i2s_interrupt(int irq, void *context, void *arg)
 }
 
 /****************************************************************************
+ * Name: esp32s2_i2s_mclkfrequency
+ *
+ * Description:
+ *   Set the master clock frequency. Usually, the MCLK is a multiple of the
+ *   sample rate. Most of the audio codecs require setting specific MCLK
+ *   frequency according to the sample rate.
+ *
+ * Input Parameters:
+ *   dev        - Device-specific state data
+ *   frequency  - The I2S master clock's frequency
+ *
+ * Returned Value:
+ *   Returns the resulting master clock or a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static uint32_t esp32s2_i2s_mclkfrequency(struct i2s_dev_s *dev,
+                                          uint32_t frequency)
+{
+  struct esp32s2_i2s_s *priv = (struct esp32s2_i2s_s *)dev;
+
+  /* Check if the master clock frequency is beyond the highest possible
+   * value and return an error.
+   */
+
+  if (frequency >= (I2S_LL_BASE_CLK / 2))
+    {
+      return -EINVAL;
+    }
+
+  priv->mclk_freq = frequency;
+
+  return frequency;
+}
+
+/****************************************************************************
  * Name: esp32s2_i2s_txsamplerate
  *
  * Description:
@@ -1157,7 +1201,7 @@ static uint32_t esp32s2_i2s_txsamplerate(struct i2s_dev_s *dev,
   if (priv->config->role == I2S_ROLE_MASTER)
     {
       bclk = rate * priv->config->total_slot * priv->data_width;
-      mclk = rate * priv->config->mclk_multiple;
+      mclk = priv->mclk_freq;
       bclk_div = mclk / bclk;
     }
   else
