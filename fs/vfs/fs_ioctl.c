@@ -129,28 +129,6 @@ int file_vioctl(FAR struct file *filep, int req, va_list ap)
 }
 
 /****************************************************************************
- * Name: nx_vioctl
- ****************************************************************************/
-
-static int nx_vioctl(int fd, int req, va_list ap)
-{
-  FAR struct file *filep;
-  int ret;
-
-  /* Get the file structure corresponding to the file descriptor. */
-
-  ret = fs_getfilep(fd, &filep);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Let file_vioctl() do the real work. */
-
-  return file_vioctl(filep, req, ap);
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -187,37 +165,6 @@ int file_ioctl(FAR struct file *filep, int req, ...)
 }
 
 /****************************************************************************
- * Name: nx_ioctl
- *
- * Description:
- *   nx_ioctl() is similar to the standard 'ioctl' interface except that is
- *   not a cancellation point and it does not modify the errno variable.
- *
- *   nx_ioctl() is an internal NuttX interface and should not be called from
- *   applications.
- *
- * Returned Value:
- *   Returns a non-negative number on success;  A negated errno value is
- *   returned on any failure (see comments ioctl() for a list of appropriate
- *   errno values).
- *
- ****************************************************************************/
-
-int nx_ioctl(int fd, int req, ...)
-{
-  va_list ap;
-  int ret;
-
-  /* Let nx_vioctl() do the real work. */
-
-  va_start(ap, req);
-  ret = nx_vioctl(fd, req, ap);
-  va_end(ap);
-
-  return ret;
-}
-
-/****************************************************************************
  * Name: ioctl
  *
  * Description:
@@ -247,20 +194,32 @@ int nx_ioctl(int fd, int req, ...)
 
 int ioctl(int fd, int req, ...)
 {
+  FAR struct file *filep;
   va_list ap;
   int ret;
 
-  /* Let nx_vioctl() do the real work. */
+  /* Get the file structure corresponding to the file descriptor. */
+
+  ret = fs_getfilep(fd, &filep);
+  if (ret < 0)
+    {
+      goto err;
+    }
+
+  /* Let file_vioctl() do the real work. */
 
   va_start(ap, req);
-  ret = nx_vioctl(fd, req, ap);
+  ret = file_vioctl(filep, req, ap);
   va_end(ap);
 
   if (ret < 0)
     {
-      set_errno(-ret);
-      ret = ERROR;
+      goto err;
     }
 
   return ret;
+
+err:
+  set_errno(-ret);
+  return ERROR;
 }
