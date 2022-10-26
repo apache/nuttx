@@ -91,47 +91,6 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 }
 
 /****************************************************************************
- * Name: nx_send
- *
- * Description:
- *   The nx_send() call may be used only when the socket is in a
- *   connected state (so that the intended recipient is known).  This is an
- *   internal OS interface.  It is functionally equivalent to send() except
- *   that:
- *
- *   - It is not a cancellation point, and
- *   - It does not modify the errno variable.
- *
- *   See comments with send() for more a more complete description of the
- *   functionality.
- *
- * Input Parameters:
- *   sockfd   Socket descriptor of the socket
- *   buf      Data to send
- *   len      Length of data to send
- *   flags    Send flags
- *
- * Returned Value:
- *   On success, returns the number of characters sent.  On any failure, a
- *   negated errno value is returned (See comments with send() for a list
- *   of the appropriate errno value).
- *
- ****************************************************************************/
-
-ssize_t nx_send(int sockfd, FAR const void *buf, size_t len, int flags)
-{
-  FAR struct socket *psock;
-
-  /* Get the underlying socket structure */
-
-  psock = sockfd_socket(sockfd);
-
-  /* And let psock_send do all of the work */
-
-  return psock_send(psock, buf, len, flags);
-}
-
-/****************************************************************************
  * Name: send
  *
  * Description:
@@ -197,18 +156,23 @@ ssize_t nx_send(int sockfd, FAR const void *buf, size_t len, int flags)
 
 ssize_t send(int sockfd, FAR const void *buf, size_t len, int flags)
 {
+  FAR struct socket *psock;
   ssize_t ret;
 
   /* send() is a cancellation point */
 
   enter_cancellation_point();
 
-  /* Let psock_send() do all of the work */
+  /* Get the underlying socket structure */
 
-  ret = nx_send(sockfd, buf, len, flags);
+  psock = sockfd_socket(sockfd);
+
+  /* And let psock_send do all of the work */
+
+  ret = psock_send(psock, buf, len, flags);
   if (ret < 0)
     {
-      _SO_SETERRNO(sockfd_socket(sockfd), -ret);
+      _SO_SETERRNO(psock, -ret);
       ret = ERROR;
     }
 
