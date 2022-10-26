@@ -27,6 +27,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include <netinet/in.h>
@@ -155,6 +156,24 @@ int ipv4_nat_inbound(FAR struct net_driver_s *dev,
 
 int ipv4_nat_outbound(FAR struct net_driver_s *dev,
                       FAR struct ipv4_hdr_s *ipv4);
+
+/****************************************************************************
+ * Name: ipv4_nat_port_inuse
+ *
+ * Description:
+ *   Check whether a port is currently used by NAT.
+ *
+ * Input Parameters:
+ *   protocol      - The L4 protocol of the packet.
+ *   ip            - The IP bind with the port (in network byte order).
+ *   port          - The port number to check (in network byte order).
+ *
+ * Returned Value:
+ *   True if the port is already used by NAT, otherwise false.
+ *
+ ****************************************************************************/
+
+bool ipv4_nat_port_inuse(uint8_t protocol, in_addr_t ip, uint16_t port);
 
 /****************************************************************************
  * Name: ipv4_nat_inbound_entry_find

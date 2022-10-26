@@ -321,4 +321,34 @@ int ipv4_nat_outbound(FAR struct net_driver_s *dev,
   return OK;
 }
 
+/****************************************************************************
+ * Name: ipv4_nat_port_inuse
+ *
+ * Description:
+ *   Check whether a port is currently used by NAT.
+ *
+ * Input Parameters:
+ *   protocol      - The L4 protocol of the packet.
+ *   ip            - The IP bind with the port (in network byte order).
+ *   port          - The port number to check (in network byte order).
+ *
+ * Returned Value:
+ *   True if the port is already used by NAT, otherwise false.
+ *
+ ****************************************************************************/
+
+bool ipv4_nat_port_inuse(uint8_t protocol, in_addr_t ip, uint16_t port)
+{
+  FAR struct ipv4_nat_entry *entry =
+      ipv4_nat_inbound_entry_find(protocol, port);
+
+  /* Not checking ip is enough for single NAT device, may save external_ip in
+   * entry for multiple device support in future.
+   */
+
+  UNUSED(ip);
+
+  return entry != NULL;
+}
+
 #endif /* CONFIG_NET_NAT && CONFIG_NET_IPv4 */
