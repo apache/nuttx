@@ -258,7 +258,7 @@ SYSCALL_LOOKUP(futimens,                   2)
 #endif
 
 #if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
-  SYSCALL_LOOKUP(nx_pipe,                  3)
+  SYSCALL_LOOKUP(pipe2,                    2)
 #endif
 
 #if defined(CONFIG_PIPES) && CONFIG_DEV_FIFO_SIZE > 0

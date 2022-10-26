@@ -167,26 +167,21 @@ static int pipe_register(size_t bufsize, int flags,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_pipe
+ * Name: pipe2
  *
  * Description:
- *   nx_pipe() creates a pair of file descriptors, pointing to a pipe inode,
+ *   pipe2() creates a pair of file descriptors, pointing to a pipe inode,
  *   and  places them in the array pointed to by 'fd'. fd[0] is for reading,
  *   fd[1] is for writing.
- *
- *   NOTE: nx_pipe is a special, non-standard, NuttX-only interface.  Since
- *   the NuttX FIFOs are based in in-memory, circular buffers, the ability
- *   to control the size of those buffers is critical for system tuning.
  *
  * Input Parameters:
  *   fd[2] - The user provided array in which to catch the pipe file
  *   descriptors
- *   bufsize - The size of the in-memory, circular buffer in bytes.
  *   flags - The file status flags.
  *
  * Returned Value:
- *   0 is returned on success; a negated errno value is returned on a
- *   failure.
+ *   0 is returned on success; -1 (ERROR) is returned on a failure
+ *   with the errno value set appropriately.
  *
  ****************************************************************************/
 
@@ -232,34 +227,33 @@ errout_with_driver:
   return ret;
 }
 
-int nx_pipe(int fd[2], size_t bufsize, int flags)
+int pipe2(int fd[2], int flags)
 {
   char devname[32];
   int ret;
 
   /* Register a new pipe device */
 
-  ret = pipe_register(bufsize, flags, devname, sizeof(devname));
+  ret = pipe_register(CONFIG_DEV_PIPE_SIZE, flags, devname, sizeof(devname));
   if (ret < 0)
     {
-      return ret;
+      set_errno(-ret);
+      return ERROR;
     }
 
   /* Get a write file descriptor */
 
-  fd[1] = nx_open(devname, O_WRONLY | flags);
+  fd[1] = open(devname, O_WRONLY | flags);
   if (fd[1] < 0)
     {
-      ret = fd[1];
       goto errout_with_driver;
     }
 
   /* Get a read file descriptor */
 
-  fd[0] = nx_open(devname, O_RDONLY | flags);
+  fd[0] = open(devname, O_RDONLY | flags);
   if (fd[0] < 0)
     {
-      ret = fd[0];
       goto errout_with_wrfd;
     }
 
@@ -273,7 +267,7 @@ errout_with_wrfd:
 
 errout_with_driver:
   unregister_driver(devname);
-  return ret;
+  return ERROR;
 }
 
 #endif /* CONFIG_DEV_PIPE_SIZE > 0 */
