@@ -209,15 +209,6 @@ enum cxd56_dma_int_e
   CXD56_DMA_INT_CMB  = 0x20
 };
 
-/* Volume setting IDs */
-
-enum cxd56_vol_id_e
-{
-  CXD56_VOL_ID_MIXER_IN1,  /* SDIN1_VOL */
-  CXD56_VOL_ID_MIXER_IN2,  /* SDIN2_VOL */
-  CXD56_VOL_ID_MIXER_OUT   /* DAC_VOL */
-};
-
 enum cxd56_pulco_ser_mode_id_e
 {
   CXD56_SER_MODE_UNKNOWN,
@@ -418,7 +409,7 @@ static void cxd56_set_dma_running(cxd56_dmahandle_t handle, bool running);
 static void cxd56_set_mic_gains(uint8_t gain,
                                 struct cxd56_aca_pwinput_param_s *param);
 static void cxd56_set_mic_out_channel(FAR struct cxd56_dev_s *dev);
-static int cxd56_set_volume(enum cxd56_vol_id_e id, int16_t vol);
+static int cxd56_set_volume(enum cxd56_audio_volid_e id, int16_t vol);
 static void cxd56_swap_buffer_rl(uint32_t addr, uint16_t size);
 static void *cxd56_workerthread(pthread_addr_t pvarg);
 
@@ -1584,7 +1575,7 @@ static void cxd56_enable_irq(bool enable)
     }
 }
 
-static int cxd56_set_volume(enum cxd56_vol_id_e id, int16_t vol)
+static int cxd56_set_volume(enum cxd56_audio_volid_e id, int16_t vol)
 {
   int ret;
 
@@ -1599,13 +1590,13 @@ static int cxd56_set_volume(enum cxd56_vol_id_e id, int16_t vol)
 
   switch (id)
     {
-      case CXD56_VOL_ID_MIXER_IN1:
+      case CXD56_AUDIO_VOLID_MIXER_IN1:
         write_reg(REG_AC_SDIN1_VOL, vol);
         break;
-      case CXD56_VOL_ID_MIXER_IN2:
+      case CXD56_AUDIO_VOLID_MIXER_IN2:
         write_reg(REG_AC_SDIN2_VOL, vol);
         break;
-      case CXD56_VOL_ID_MIXER_OUT:
+      case CXD56_AUDIO_VOLID_MIXER_OUT:
         write_reg(REG_AC_DAC_VOL, vol);
         break;
     }
