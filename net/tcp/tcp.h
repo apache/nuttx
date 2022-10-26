@@ -104,6 +104,11 @@
 
 #define TCP_FAST_RETRANSMISSION_THRESH 3
 
+/* This is a helper pointer for accessing the contents of the tcp header */
+
+#define TCPIPv4BUF ((FAR struct tcp_hdr_s *)IPBUF(IPv4_HDRLEN))
+#define TCPIPv6BUF ((FAR struct tcp_hdr_s *)IPBUF(IPv6_HDRLEN))
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/

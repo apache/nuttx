@@ -56,14 +56,6 @@
 #ifdef CONFIG_NET_ARP
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define ETHBUF ((FAR struct eth_hdr_s *)&dev->d_buf[0])
-#define ARPBUF ((FAR struct arp_hdr_s *)&dev->d_buf[ETH_HDRLEN])
-#define IPBUF  ((FAR struct arp_iphdr_s *)&dev->d_buf[ETH_HDRLEN])
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -140,7 +132,7 @@ void arp_out(FAR struct net_driver_s *dev)
 {
   struct ether_addr ethaddr;
   FAR struct eth_hdr_s *peth = ETHBUF;
-  FAR struct arp_iphdr_s *pip = IPBUF;
+  FAR struct arp_iphdr_s *pip = ARPIPBUF;
   in_addr_t ipaddr;
   in_addr_t destipaddr;
   int ret;

@@ -79,6 +79,11 @@
                                                        &(dev)->d_conncb_tail)
 #define arp_callback_free(dev,cb) devif_dev_callback_free(dev, cb)
 
+/* This is a helper pointer for accessing the contents of the IP header */
+
+#define ARPBUF    ((FAR struct arp_hdr_s *)&dev->d_buf[ETH_HDRLEN])
+#define ARPIPBUF  ((FAR struct arp_iphdr_s *)&dev->d_buf[ETH_HDRLEN])
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

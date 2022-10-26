@@ -109,7 +109,6 @@
 
 /* Buffer access helpers */
 
-#define IPv6BUF(dev)  ((FAR struct ipv6_hdr_s *)((dev)->d_buf))
 #define TCPBUF(dev)   ((FAR struct tcp_hdr_s *)&(dev)->d_buf[IPv6_HDRLEN])
 
 /****************************************************************************
@@ -619,9 +618,13 @@ static int sixlowpan_dispatch(FAR struct radio_driver_s *radio)
   FAR struct sixlowpan_reassbuf_s *reass;
   int ret;
 
+#ifdef CONFIG_NET_6LOWPAN_DUMPBUFFER
+  struct net_driver_s *dev = &radio->r_dev;
+
   sixlowpan_dumpbuffer("Incoming packet",
-                       (FAR const uint8_t *)IPv6BUF(&radio->r_dev),
+                       (FAR const uint8_t *)IPv6BUF,
                        radio->r_dev.d_len);
+#endif
 
 #ifdef CONFIG_NET_PKT
   /* When packet sockets are enabled, feed the frame into the tap */
@@ -726,6 +729,7 @@ static int sixlowpan_dispatch(FAR struct radio_driver_s *radio)
 int sixlowpan_input(FAR struct radio_driver_s *radio,
                     FAR struct iob_s *framelist,  FAR const void *metadata)
 {
+  struct net_driver_s *dev = &radio->r_dev;
   int ret = -EINVAL;
   uint8_t *d_buf_backup;
 
@@ -736,7 +740,7 @@ int sixlowpan_input(FAR struct radio_driver_s *radio,
    * returning
    */
 
-  d_buf_backup = radio->r_dev.d_buf;
+  d_buf_backup = dev->d_buf;
 
   /* Verify that an frame has been provided. */
 
@@ -781,7 +785,7 @@ int sixlowpan_input(FAR struct radio_driver_s *radio,
                * packet.
                */
 
-              if (radio->r_dev.d_len > 0)
+              if (dev->d_len > 0)
                 {
                   FAR struct ipv6_hdr_s *ipv6hdr;
                   FAR uint8_t *buffer;
@@ -794,7 +798,7 @@ int sixlowpan_input(FAR struct radio_driver_s *radio,
                    * layer protocol header.
                    */
 
-                  ipv6hdr = IPv6BUF(&radio->r_dev);
+                  ipv6hdr = IPv6BUF;
 
                   /* Get the IEEE 802.15.4 MAC address of the destination.
                    * This assumes an encoding of the MAC address in the IPv6
@@ -819,7 +823,7 @@ int sixlowpan_input(FAR struct radio_driver_s *radio,
 #ifdef CONFIG_NET_TCP
                       case IP_PROTO_TCP:
                         {
-                          FAR struct tcp_hdr_s *tcp = TCPBUF(&radio->r_dev);
+                          FAR struct tcp_hdr_s *tcp = TCPBUF(dev);
                           uint16_t tcplen;
 
                           /* The TCP header length is encoded in the top 4
@@ -854,22 +858,22 @@ int sixlowpan_input(FAR struct radio_driver_s *radio,
                         }
                     }
 
-                  if (hdrlen > radio->r_dev.d_len)
+                  if (hdrlen > dev->d_len)
                     {
                       nwarn("WARNING: Packet too small: Have %u need >%zu\n",
-                            radio->r_dev.d_len, hdrlen);
+                            dev->d_len, hdrlen);
                       goto drop;
                     }
 
                   /* Convert the outgoing packet into a frame list. */
 
-                  buffer = radio->r_dev.d_buf + hdrlen;
-                  buflen = radio->r_dev.d_len - hdrlen;
+                  buffer = dev->d_buf + hdrlen;
+                  buflen = dev->d_len - hdrlen;
 
                   ret = sixlowpan_queue_frames(radio, ipv6hdr, buffer,
                                                buflen, &destmac);
 drop:
-                  radio->r_dev.d_len = 0;
+                  dev->d_len = 0;
 
                   /* We consumed the frame, so we must return 0. */
 
@@ -881,7 +885,7 @@ drop:
 
   /* Restore the d_buf back to it's original state */
 
-  radio->r_dev.d_buf = d_buf_backup;
+  dev->d_buf = d_buf_backup;
 
   return ret;
 }

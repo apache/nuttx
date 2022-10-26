@@ -61,13 +61,6 @@
 #ifdef CONFIG_NET_IGMP
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define IPv4BUF     ((FAR struct igmp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#define IGMPBUF(hl) ((FAR struct igmp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + (hl)])
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -115,7 +108,7 @@
 
 void igmp_input(struct net_driver_s *dev)
 {
-  FAR struct igmp_iphdr_s *ipv4 = IPv4BUF;
+  FAR struct igmp_iphdr_s *ipv4 = IPBUF(0);
   FAR struct igmp_hdr_s *igmp;
   FAR struct igmp_group_s *group;
   in_addr_t destipaddr;
@@ -132,7 +125,7 @@ void igmp_input(struct net_driver_s *dev)
 
   /* The IGMP header immediately follows the IP header */
 
-  igmp = IGMPBUF(iphdrlen);
+  igmp = IPBUF(iphdrlen);
 
   /* Verify the message length */
 

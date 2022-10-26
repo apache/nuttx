@@ -42,15 +42,6 @@
 #ifdef CONFIG_NET_ICMPv6
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define IPv6BUF  ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-
-#define ICMPv6ADVERTISE \
-  ((FAR struct icmpv6_neighbor_advertise_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -103,7 +94,7 @@ void icmpv6_advertise(FAR struct net_driver_s *dev,
 
   /* Set up the ICMPv6 Neighbor Advertise response */
 
-  adv            = ICMPv6ADVERTISE;
+  adv            = IPBUF(IPv6_HDRLEN);
   adv->type      = ICMPv6_NEIGHBOR_ADVERTISE;  /* Message type */
   adv->code      = 0;                          /* Message qualifier */
   adv->flags[0]  = ICMPv6_NADV_FLAG_S |

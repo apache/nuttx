@@ -28,14 +28,8 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/icmp.h>
 
+#include "icmp/icmp.h"
 #include "utils/utils.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define IPv4BUF     ((FAR struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#define ICMPBUF(hl) ((FAR struct icmp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + (hl)])
 
 /****************************************************************************
  * Public Functions
@@ -62,7 +56,7 @@ uint16_t icmp_chksum(FAR struct net_driver_s *dev, int len)
 
   /* The ICMP header immediately follows the IP header */
 
-  icmp = ICMPBUF(iphdrlen);
+  icmp = IPBUF(iphdrlen);
   return net_chksum((FAR uint16_t *)&icmp->type, len);
 }
 #endif /* CONFIG_NET_ICMP */

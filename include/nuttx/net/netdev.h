@@ -154,6 +154,21 @@
 #  define NETDEV_ERRORS(dev)
 #endif
 
+/* There are some helper pointers for accessing the contents of the Ethernet
+ * headers
+ */
+
+#define ETHBUF ((FAR struct eth_hdr_s *)&dev->d_buf[0])
+
+/* There are some helper pointers for accessing the contents of the IP
+ * headers
+ */
+
+#define IPBUF(hl) ((FAR void *)&dev->d_buf[NET_LL_HDRLEN(dev) + (hl)])
+
+#define IPv4BUF ((FAR struct ipv4_hdr_s *)IPBUF(0))
+#define IPv6BUF ((FAR struct ipv6_hdr_s *)IPBUF(0))
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -456,11 +471,10 @@ typedef CODE int (*devif_poll_callback_t)(FAR struct net_driver_s *dev);
  * Ethernet, you will need to call the network ARP code before calling
  * this function:
  *
- *     #define BUF ((FAR struct eth_hdr_s *)&dev->d_buf[0])
  *     dev->d_len = ethernet_devicedrver_poll();
  *     if (dev->d_len > 0)
  *       {
- *         if (BUF->type == HTONS(ETHTYPE_IP))
+ *         if (ETHBUF->type == HTONS(ETHTYPE_IP))
  *           {
  *             arp_ipin();
  *             ipv4_input(dev);
@@ -470,7 +484,7 @@ typedef CODE int (*devif_poll_callback_t)(FAR struct net_driver_s *dev);
  *                 devicedriver_send();
  *               }
  *           }
- *         else if (BUF->type == HTONS(ETHTYPE_ARP))
+ *         else if (ETHBUF->type == HTONS(ETHTYPE_ARP))
  *           {
  *             arp_arpin();
  *             if (dev->d_len > 0)

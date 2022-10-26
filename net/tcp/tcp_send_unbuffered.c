@@ -67,9 +67,6 @@
 #  define NEED_IPDOMAIN_SUPPORT 1
 #endif
 
-#define TCPIPv4BUF ((FAR struct tcp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv4_HDRLEN])
-#define TCPIPv6BUF ((FAR struct tcp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
