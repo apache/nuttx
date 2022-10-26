@@ -178,48 +178,6 @@ config ESP32S2_FLASH_DETECT
 	---help---
 		Auto detect flash size when flashing.
 
-choice ESP32S2_FLASH_MODE
-	prompt "SPI FLASH mode"
-	default ESP32S2_FLASH_MODE_DIO
-	---help---
-		These options control how many I/O pins are used for communication
-		with the attached SPI flash chip.
-		The option selected here is then used by esptool when flashing.
-
-	config ESP32S2_FLASH_MODE_DIO
-	bool "Dual IO (DIO)"
-
-	config ESP32S2_FLASH_MODE_DOUT
-	bool "Dual Output (DOUT)"
-
-	config ESP32S2_FLASH_MODE_QIO
-	bool "Quad IO (QIO)"
-
-	config ESP32S2_FLASH_MODE_QOUT
-	bool "Quad Output (QOUT)"
-
-endchoice # SPI FLASH mode
-
-choice ESP32S2_FLASH_FREQ
-	prompt "SPI FLASH frequency"
-	default ESP32S2_FLASH_FREQ_40M
-	---help---
-		SPI FLASH frequency
-
-	config ESP32S2_FLASH_FREQ_80M
-	bool "80 MHz"
-
-	config ESP32S2_FLASH_FREQ_40M
-	bool "40 MHz"
-
-	config ESP32S2_FLASH_FREQ_26M
-	bool "26 MHz"
-
-	config ESP32S2_FLASH_FREQ_20M
-	bool "20 MHz"
-
-endchoice # SPI FLASH frequency
-
 config ESP32S2_RUN_IRAM
 	bool "Run from IRAM"
 	default n
@@ -689,7 +647,48 @@ config ESP32S2_I2CTIMEOMS
 endmenu # I2C Configuration
 
 menu "SPI Flash Configuration"
-	depends on ESP32S2_SPIFLASH
+
+choice ESP32S2_FLASH_MODE
+	prompt "SPI Flash mode"
+	default ESP32S2_FLASH_MODE_DIO
+	---help---
+		These options control how many I/O pins are used for communication
+		with the attached SPI Flash chip.
+		The option selected here is then used by esptool when flashing.
+
+	config ESP32S2_FLASH_MODE_DIO
+	bool "Dual IO (DIO)"
+
+	config ESP32S2_FLASH_MODE_DOUT
+	bool "Dual Output (DOUT)"
+
+	config ESP32S2_FLASH_MODE_QIO
+	bool "Quad IO (QIO)"
+
+	config ESP32S2_FLASH_MODE_QOUT
+	bool "Quad Output (QOUT)"
+
+endchoice # ESP32S2_FLASH_MODE
+
+choice ESP32S2_FLASH_FREQ
+	prompt "SPI Flash frequency"
+	default ESP32S2_FLASH_FREQ_40M
+	---help---
+		SPI Flash frequency.
+
+	config ESP32S2_FLASH_FREQ_80M
+	bool "80 MHz"
+
+	config ESP32S2_FLASH_FREQ_40M
+	bool "40 MHz"
+
+	config ESP32S2_FLASH_FREQ_26M
+	bool "26 MHz"
+
+	config ESP32S2_FLASH_FREQ_20M
+	bool "20 MHz"
+
+endchoice # ESP32S2_FLASH_FREQ
 
 if ESP32S2_HAVE_OTA_PARTITION
 

@@ -250,48 +250,6 @@ config ESP32S3_PSRAM_8M
 	bool
 	default n
 
-choice ESP32S3_FLASH_MODE
-	prompt "SPI FLASH mode"
-	default ESP32S3_FLASH_MODE_DIO
-	---help---
-		These options control how many I/O pins are used for communication
-		with the attached SPI flash chip.
-		The option selected here is then used by esptool when flashing.
-
-	config ESP32S3_FLASH_MODE_DIO
-		bool "Dual IO (DIO)"
-
-	config ESP32S3_FLASH_MODE_DOUT
-		bool "Dual Output (DOUT)"
-
-	config ESP32S3_FLASH_MODE_QIO
-		bool "Quad IO (QIO)"
-
-	config ESP32S3_FLASH_MODE_QOUT
-		bool "Quad Output (QOUT)"
-
-endchoice # ESP32S3_FLASH_MODE
-
-choice ESP32S3_FLASH_FREQ
-	prompt "SPI FLASH frequency"
-	default ESP32S3_FLASH_FREQ_40M
-	---help---
-		SPI FLASH frequency
-
-	config ESP32S3_FLASH_FREQ_120M
-		bool "120 MHz"
-
-	config ESP32S3_FLASH_FREQ_80M
-		bool "80 MHz"
-
-	config ESP32S3_FLASH_FREQ_40M
-		bool "40 MHz"
-
-	config ESP32S3_FLASH_FREQ_20M
-		bool "20 MHz"
-
-endchoice # ESP32S3_FLASH_FREQ
-
 config ESP32S3_RUN_IRAM
 	bool "Run from IRAM"
 	default n
@@ -826,7 +784,50 @@ config ESP32S3_SPIFLASH
 	default n
 
 menu "SPI Flash configuration"
-	depends on ESP32S3_SPIFLASH
+
+choice ESP32S3_FLASH_MODE
+	prompt "SPI Flash mode"
+	default ESP32S3_FLASH_MODE_DIO
+	---help---
+		These options control how many I/O pins are used for communication
+		with the attached SPI Flash chip.
+		The option selected here is then used by esptool when flashing.
+
+	config ESP32S3_FLASH_MODE_DIO
+		bool "Dual IO (DIO)"
+
+	config ESP32S3_FLASH_MODE_DOUT
+		bool "Dual Output (DOUT)"
+
+	config ESP32S3_FLASH_MODE_QIO
+		bool "Quad IO (QIO)"
+
+	config ESP32S3_FLASH_MODE_QOUT
+		bool "Quad Output (QOUT)"
+
+endchoice # ESP32S3_FLASH_MODE
+
+choice ESP32S3_FLASH_FREQ
+	prompt "SPI Flash frequency"
+	default ESP32S3_FLASH_FREQ_40M
+	---help---
+		SPI Flash frequency
+
+	config ESP32S3_FLASH_FREQ_120M
+		bool "120 MHz"
+
+	config ESP32S3_FLASH_FREQ_80M
+		bool "80 MHz"
+
+	config ESP32S3_FLASH_FREQ_40M
+		bool "40 MHz"
+
+	config ESP32S3_FLASH_FREQ_20M
+		bool "20 MHz"
+
+endchoice # ESP32S3_FLASH_FREQ
+
+if ESP32S3_SPIFLASH
 
 comment "General storage MTD configuration"
 
@@ -852,6 +853,8 @@ config ESP32S3_STORAGE_MTD_DEBUG
 	---help---
 		If this option is enabled, Storage MTD driver read and write functions
 		will output input parameters and return values (if applicable).
+
+endif # ESP32S3_SPIFLASH
 
 endmenu # SPI Flash configuration
 
