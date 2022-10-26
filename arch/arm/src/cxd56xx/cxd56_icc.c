@@ -495,7 +495,7 @@ int cxd56_iccsignal(int8_t cpuid, int8_t signo, int16_t sigdata,
 {
   struct iccreq_s req;
 
-  if (cpuid <= 2 && cpuid >= 7)
+  if (cpuid <= 2 || cpuid >= 7)
     {
       return -EINVAL;
     }
