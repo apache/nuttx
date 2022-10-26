@@ -25,6 +25,7 @@ ifeq ($(CONFIG_MM_KERNEL_HEAP),y)
 CSRCS += kmm_initialize.c kmm_addregion.c kmm_malloc_size.c
 CSRCS += kmm_brkaddr.c kmm_calloc.c kmm_extend.c kmm_free.c kmm_mallinfo.c
 CSRCS += kmm_malloc.c kmm_memalign.c kmm_realloc.c kmm_zalloc.c kmm_heapmember.c
+CSRCS += kmm_memdump.c
 
 ifeq ($(CONFIG_DEBUG_MM),y)
 CSRCS += kmm_checkcorruption.c

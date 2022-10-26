@@ -100,6 +100,7 @@ extern "C"
 #  define kmm_free(p)            free(p)
 #  define kmm_mallinfo()         mallinfo()
 #  define kmm_heapmember(p)      umm_heapmember(p)
+#  define kmm_memdump(p)         umm_memdump(p)
 
 #else
 /* Otherwise, the kernel-space allocators are declared in
