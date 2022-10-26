@@ -69,6 +69,14 @@ void __stack_overflow_trap(void)
 
   uint32_t regval;
 
+#ifdef CONFIG_ARMV8M_STACKCHECK_BREAKPOINT
+  regval = getreg32(NVIC_DHCSR);
+  if (regval & NVIC_DHCSR_C_DEBUGEN)
+    {
+      __asm("bkpt 1");
+    }
+#endif
+
   /* force hard fault */
 
   regval  = getreg32(NVIC_INTCTRL);
