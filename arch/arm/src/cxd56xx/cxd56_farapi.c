@@ -281,7 +281,7 @@ void cxd56_farapiinitialize(void)
 #ifdef CONFIG_CXD56_FARAPI_VERSION_CHECK
   if (GET_SYSFW_VERSION_BUILD() < FARAPISTUB_VERSION)
     {
-      _alert("Mismatched version: loader(%d) != Self(%d)\n",
+      _alert("Mismatched version: loader(%" PRId32 ") != Self(%d)\n",
              GET_SYSFW_VERSION_BUILD(), FARAPISTUB_VERSION);
       _alert("Please update loader and gnssfw firmwares!!\n");
 #  ifdef CONFIG_CXD56_FARAPI_VERSION_FAILED_PANIC
