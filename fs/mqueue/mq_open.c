@@ -349,7 +349,7 @@ static mqd_t nxmq_vopen(FAR const char *mq_name, int oflags, va_list ap)
       return ret;
     }
 
-  ret = files_allocate(mq.f_inode, mq.f_oflags, mq.f_pos, mq.f_priv, 0);
+  ret = file_allocate(mq.f_inode, mq.f_oflags, mq.f_pos, mq.f_priv, 0);
   if (ret < 0)
     {
       file_mq_close(&mq);

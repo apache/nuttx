@@ -198,7 +198,7 @@ static int epoll_do_create(int size, int flags)
 
   /* Alloc the file descriptor */
 
-  fd = files_allocate(&g_epoll_inode, flags, 0, eph, 0);
+  fd = file_allocate(&g_epoll_inode, flags, 0, eph, 0);
   if (fd < 0)
     {
       nxsem_destroy(&eph->sem);

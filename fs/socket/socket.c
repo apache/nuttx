@@ -165,7 +165,7 @@ int sockfd_allocate(FAR struct socket *psock, int oflags)
 {
   int sockfd;
 
-  sockfd = files_allocate(&g_sock_inode, oflags, 0, psock, 0);
+  sockfd = file_allocate(&g_sock_inode, oflags, 0, psock, 0);
   if (sockfd >= 0)
     {
       inode_addref(&g_sock_inode);
