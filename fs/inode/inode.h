@@ -408,16 +408,20 @@ void inode_release(FAR struct inode *inode);
 int foreach_inode(foreach_inode_t handler, FAR void *arg);
 
 /****************************************************************************
- * Name: files_allocate
+ * Name: file_allocate
  *
  * Description:
  *   Allocate a struct files instance and associate it with an inode
  *   instance.  Returns the file descriptor == index into the files array.
  *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
  ****************************************************************************/
 
-int files_allocate(FAR struct inode *inode, int oflags, off_t pos,
-                   FAR void *priv, int minfd);
+int file_allocate(FAR struct inode *inode, int oflags, off_t pos,
+                  FAR void *priv, int minfd);
 
 /****************************************************************************
  * Name: dir_allocate
