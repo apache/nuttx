@@ -78,42 +78,6 @@ int file_dup(FAR struct file *filep, int minfd)
 }
 
 /****************************************************************************
- * Name: nx_dup
- *
- * Description:
- *   nx_dup() is similar to the standard 'dup' interface except that is
- *   not a cancellation point and it does not modify the errno variable.
- *
- *   nx_dup() is an internal NuttX interface and should not be called from
- *   applications.
- *
- * Returned Value:
- *   The new file descriptor is returned on success; a negated errno value is
- *   returned on any failure.
- *
- ****************************************************************************/
-
-int nx_dup(int fd)
-{
-  FAR struct file *filep;
-  int ret;
-
-  /* Get the file structure corresponding to the file descriptor. */
-
-  ret = fs_getfilep(fd, &filep);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  DEBUGASSERT(filep != NULL);
-
-  /* Let file_dup() do the real work */
-
-  return file_dup(filep, 0);
-}
-
-/****************************************************************************
  * Name: dup
  *
  * Description:
@@ -123,14 +87,30 @@ int nx_dup(int fd)
 
 int dup(int fd)
 {
+  FAR struct file *filep;
   int ret;
 
-  ret = nx_dup(fd);
+  /* Get the file structure corresponding to the file descriptor. */
+
+  ret = fs_getfilep(fd, &filep);
   if (ret < 0)
     {
-      set_errno(-ret);
-      ret = ERROR;
+      goto err;
+    }
+
+  DEBUGASSERT(filep != NULL);
+
+  /* Let file_dup() do the real work */
+
+  ret = file_dup(filep, 0);
+  if (ret < 0)
+    {
+      goto err;
     }
 
   return ret;
+
+err:
+  set_errno(-ret);
+  return ERROR;
 }

@@ -809,24 +809,6 @@ int file_allocate(FAR struct inode *inode, int oflags, off_t pos,
 int file_dup(FAR struct file *filep, int minfd);
 
 /****************************************************************************
- * Name: nx_dup
- *
- * Description:
- *   nx_dup() is similar to the standard 'dup' interface except that is
- *   not a cancellation point and it does not modify the errno variable.
- *
- *   nx_dup() is an internal NuttX interface and should not be called from
- *   applications.
- *
- * Returned Value:
- *   The new file descriptor is returned on success; a negated errno value is
- *   returned on any failure.
- *
- ****************************************************************************/
-
-int nx_dup(int fd);
-
-/****************************************************************************
  * Name: file_dup2
  *
  * Description:
