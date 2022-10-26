@@ -67,7 +67,7 @@ int file_dup(FAR struct file *filep, int minfd)
   /* Then allocate a new file descriptor for the inode */
 
   fd2 = file_allocate(filep2.f_inode, filep2.f_oflags,
-                      filep2.f_pos, filep2.f_priv, minfd);
+                      filep2.f_pos, filep2.f_priv, minfd, false);
   if (fd2 < 0)
     {
       file_close(&filep2);

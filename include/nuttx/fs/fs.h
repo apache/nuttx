@@ -783,7 +783,7 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist);
  ****************************************************************************/
 
 int file_allocate(FAR struct inode *inode, int oflags, off_t pos,
-                  FAR void *priv, int minfd);
+                  FAR void *priv, int minfd, bool addref);
 
 /****************************************************************************
  * Name: file_dup

@@ -246,7 +246,7 @@ static int nx_vopen(FAR const char *path, int oflags, va_list ap)
   /* Allocate a new file descriptor for the inode */
 
   fd = file_allocate(filep.f_inode, filep.f_oflags,
-                     filep.f_pos, filep.f_priv, 0);
+                     filep.f_pos, filep.f_priv, 0, false);
   if (fd < 0)
     {
       file_close(&filep);
