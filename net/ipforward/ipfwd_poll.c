@@ -54,20 +54,19 @@
 static int ipfwd_packet_proto(FAR struct net_driver_s *dev)
 {
   FAR struct ipv6_hdr_s *ipv6;
-  int llhdrlen = NET_LL_HDRLEN(dev);
 
   /* Make sure the there is something in buffer that is at least as large as
    * the IPv6_HDR.
    */
 
-  if (dev->d_len > (IPv6_HDRLEN + llhdrlen))
+  if (dev->d_len > (IPv6_HDRLEN + NET_LL_HDRLEN(dev)))
     {
       if (dev->d_lltype == NET_LL_IEEE802154 ||
           dev->d_lltype == NET_LL_PKTRADIO)
         {
           /* There should be an IPv6 packet at the beginning of the buffer */
 
-          ipv6 = (FAR struct ipv6_hdr_s *)&dev->d_buf[llhdrlen];
+          ipv6 = IPv6BUF;
           if ((ipv6->vtc & IP_VERSION_MASK) == IPv6_VERSION)
             {
               /* Yes.. return the L2 protocol of the packet */

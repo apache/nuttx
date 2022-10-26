@@ -73,6 +73,11 @@
 
 #define _UDP_ISCONNECTMODE(f) (((f) & _UDP_FLAG_CONNECTMODE) != 0)
 
+/* This is a helper pointer for accessing the contents of the udp header */
+
+#define UDPIPv4BUF ((FAR struct udp_hdr_s *)IPBUF(IPv4_HDRLEN))
+#define UDPIPv6BUF ((FAR struct udp_hdr_s *)IPBUF(IPv6_HDRLEN))
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/

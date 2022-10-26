@@ -109,11 +109,6 @@
 
 #define SLIP_WDDELAY   (1*1000000)
 
-/* This is a helper pointer for accessing the contents of the ip header */
-
-#define IPv4BUF        ((FAR struct ipv4_hdr_s *)priv->dev.d_buf)
-#define IPv6BUF        ((FAR struct ipv6_hdr_s *)priv->dev.d_buf)
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -603,6 +598,7 @@ static inline void slip_receive(FAR struct slip_driver_s *priv)
 static int slip_rxtask(int argc, FAR char *argv[])
 {
   FAR struct slip_driver_s *priv;
+  FAR struct net_driver_s *dev;
   unsigned int index = *(argv[1]) - '0';
   int ch;
 
@@ -618,6 +614,7 @@ static int slip_rxtask(int argc, FAR char *argv[])
 
   /* Loop forever */
 
+  dev = &priv->dev;
   for (; ; )
     {
       /* Wait for the next character to be available on the input stream. */

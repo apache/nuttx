@@ -62,8 +62,6 @@
 /* Buffer layout */
 
 #define RASIZE      (4)
-#define IPv4BUF     ((FAR struct igmp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#define IGMPBUF(hl) ((FAR struct igmp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + (hl)])
 
 /****************************************************************************
  * Private Functions
@@ -104,7 +102,7 @@ static uint16_t igmp_chksum(FAR uint8_t *buffer, int buflen)
 void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
                FAR const in_addr_t *destipaddr, uint8_t msgid)
 {
-  FAR struct igmp_iphdr_s *ipv4 = IPv4BUF;
+  FAR struct igmp_iphdr_s *ipv4 = IPBUF(0);
   FAR struct igmp_hdr_s *igmp;
   uint16_t iphdrlen;
 
@@ -113,7 +111,7 @@ void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
   /* The IGMP header immediately follows the IP header */
 
   iphdrlen          = IPv4_HDRLEN + RASIZE;
-  igmp              = IGMPBUF(iphdrlen);
+  igmp              = IPBUF(iphdrlen);
 
   /* The total length to send is the size of the IP and IGMP headers and 4
    * bytes for the ROUTER ALERT (and, eventually, the Ethernet header)

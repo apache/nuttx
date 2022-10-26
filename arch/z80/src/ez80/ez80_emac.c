@@ -247,10 +247,6 @@ extern uint8_t _RAM_ADDR_U_INIT_PARAM[];
 
 #define EMAC_TXTIMEOUT         (60*CLK_TCK)
 
-/* This is a helper pointer for accessing the contents of Ethernet header */
-
-#define ETHBUF ((FAR struct eth_hdr_s *)priv->dev.d_buf)
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/

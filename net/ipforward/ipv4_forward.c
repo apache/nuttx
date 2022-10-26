@@ -376,7 +376,7 @@ int ipv4_forward_callback(FAR struct net_driver_s *fwddev, FAR void *arg)
        * d_buf.
        */
 
-      ipv4 = (FAR struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)];
+      ipv4 = IPv4BUF;
 
       /* Send the packet asynchrously on the forwarding device. */
 

@@ -158,10 +158,6 @@
 
 #define TIVA_TXTIMEOUT (60*CLK_TCK)
 
-/* This is a helper pointer for accessing the contents of Ethernet header */
-
-#define ETHBUF ((struct eth_hdr_s *)priv->ld_dev.d_buf)
-
 #define TIVA_MAX_MDCCLK 2500000
 
 /****************************************************************************
@@ -675,10 +671,11 @@ static int tiva_txpoll(struct net_driver_s *dev)
 
 static void tiva_receive(struct tiva_driver_s *priv)
 {
+  struct net_driver_s *dev = &priv->ld_dev;
   uint32_t regval;
   uint8_t *dbuf;
-  int      pktlen;
-  int      bytesleft;
+  int bytesleft;
+  int pktlen;
 
   /* Loop while there are incoming packets to be processed */
 
@@ -686,13 +683,13 @@ static void tiva_receive(struct tiva_driver_s *priv)
     {
       /* Update statistics */
 
-      NETDEV_RXPACKETS(&priv->ld_dev);
+      NETDEV_RXPACKETS(dev);
 
-      /* Copy the data data from the hardware to priv->ld_dev.d_buf.  Set
-       * amount of data in priv->ld_dev.d_len
+      /* Copy the data data from the hardware to dev->d_buf.  Set
+       * amount of data in dev->d_len
        */
 
-      dbuf = priv->ld_dev.d_buf;
+      dbuf = dev->d_buf;
 
       /* The packet frame length begins in the LS 16-bits of the first
        * word from the FIFO followed by the Ethernet header beginning
@@ -719,7 +716,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
           /* We will have to drop this packet */
 
           nwarn("WARNING: Bad packet size dropped (%d)\n", pktlen);
-          NETDEV_RXERRORS(&priv->ld_dev);
+          NETDEV_RXERRORS(dev);
 
           /* The number of bytes and words left to read is pktlen - 4
            * (including, the final, possibly partial word) because we've
@@ -789,14 +786,14 @@ static void tiva_receive(struct tiva_driver_s *priv)
        * and 4 bytes for the FCS.
        */
 
-      priv->ld_dev.d_len = pktlen - 6;
+      dev->d_len = pktlen - 6;
       tiva_dumppacket("Received packet",
-                      priv->ld_dev.d_buf, priv->ld_dev.d_len);
+                      dev->d_buf, dev->d_len);
 
 #ifdef CONFIG_NET_PKT
       /* When packet sockets are enabled, feed the frame into the tap */
 
-       pkt_input(&priv->ld_dev);
+       pkt_input(dev);
 #endif
 
       /* We only accept IP packets of the configured type and ARP packets */
@@ -805,33 +802,33 @@ static void tiva_receive(struct tiva_driver_s *priv)
       if (ETHBUF->type == HTONS(ETHTYPE_IP))
         {
           ninfo("IPv4 frame\n");
-          NETDEV_RXIPV4(&priv->ld_dev);
+          NETDEV_RXIPV4(dev);
 
           /* Handle ARP on input then give the IPv4 packet to the network
            * layer
            */
 
-          arp_ipin(&priv->ld_dev);
-          ipv4_input(&priv->ld_dev);
+          arp_ipin(dev);
+          ipv4_input(dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, d_len field will set to a value > 0.
            */
 
-          if (priv->ld_dev.d_len > 0)
+          if (dev->d_len > 0)
             {
               /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv6
-              if (IFF_IS_IPv4(priv->ld_dev.d_flags))
+              if (IFF_IS_IPv4(dev->d_flags))
 #endif
                 {
-                  arp_out(&priv->ld_dev);
+                  arp_out(dev);
                 }
 #ifdef CONFIG_NET_IPv6
               else
                 {
-                  neighbor_out(&priv->ld_dev);
+                  neighbor_out(dev);
                 }
 #endif
 
@@ -846,12 +843,12 @@ static void tiva_receive(struct tiva_driver_s *priv)
       if (ETHBUF->type == HTONS(ETHTYPE_IP6))
         {
           ninfo("IPv6 frame\n");
-          NETDEV_RXIPV6(&priv->ld_dev);
+          NETDEV_RXIPV6(dev);
 
           /* Give the IPv6 packet to the network layer */
 
-          arp_ipin(&priv->ld_dev);
-          ipv6_input(&priv->ld_dev);
+          arp_ipin(dev);
+          ipv6_input(dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, d_len field will set to a value > 0.
@@ -862,15 +859,15 @@ static void tiva_receive(struct tiva_driver_s *priv)
               /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv4
-              if (IFF_IS_IPv4(priv->ld_dev.d_flags))
+              if (IFF_IS_IPv4(dev->d_flags))
                 {
-                  arp_out(&priv->ld_dev);
+                  arp_out(dev);
                 }
               else
 #endif
 #ifdef CONFIG_NET_IPv6
                 {
-                  neighbor_out(&priv->ld_dev);
+                  neighbor_out(dev);
                 }
 #endif
 
@@ -885,15 +882,15 @@ static void tiva_receive(struct tiva_driver_s *priv)
       if (ETHBUF->type == HTONS(ETHTYPE_ARP))
         {
           ninfo("ARP packet received (%02x)\n", ETHBUF->type);
-          NETDEV_RXARP(&priv->ld_dev);
+          NETDEV_RXARP(dev);
 
-          arp_arpin(&priv->ld_dev);
+          arp_arpin(dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, d_len field will set to a value > 0.
            */
 
-           if (priv->ld_dev.d_len > 0)
+           if (dev->d_len > 0)
              {
                tiva_transmit(priv);
              }
@@ -903,7 +900,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
         {
           nwarn("WARNING: Unsupported packet type dropped (%02x)\n",
                 HTONS(ETHBUF->type));
-          NETDEV_RXDROPPED(&priv->ld_dev);
+          NETDEV_RXDROPPED(dev);
         }
     }
 }

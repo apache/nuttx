@@ -51,8 +51,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IPv6BUF ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-
 /* The latest drafts declared increase in minimal mtu up to 1280. */
 
 #define ICMPv6_MINMTULEN  1280

@@ -59,11 +59,6 @@
 #  error Worker thread support is required (CONFIG_SCHED_WORKQUEUE)
 #endif
 
-/* This is a helper pointer for accessing the contents of the IP header */
-
-#define IPv4BUF ((FAR struct ipv4_hdr_s *)priv->lo_dev.d_buf)
-#define IPv6BUF ((FAR struct ipv6_hdr_s *)priv->lo_dev.d_buf)
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
