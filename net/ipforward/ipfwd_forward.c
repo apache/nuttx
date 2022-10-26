@@ -92,7 +92,7 @@ static inline void forward_ipselect(FAR struct forward_s *fwd)
 
       /* Set the offset to the beginning of the UDP data payload */
 
-      dev->d_appdata = &dev->d_buf[IPv6_HDRLEN + NET_LL_HDRLEN(dev)];
+      dev->d_appdata = &dev->d_buf[IPv6UDP_HDRLEN + NET_LL_HDRLEN(dev)];
     }
 }
 #endif
