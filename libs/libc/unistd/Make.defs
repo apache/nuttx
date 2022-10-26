@@ -47,10 +47,6 @@ ifneq ($(CONFIG_DISABLE_MOUNTPOINTS),y)
 CSRCS += lib_truncate.c lib_posix_fallocate.c
 endif
 
-ifeq ($(CONFIG_PIPES),y)
-CSRCS += lib_pipe.c lib_pipe2.c
-endif
-
 # Add the unistd directory to the build
 
 DEPPATH += --dep-path unistd

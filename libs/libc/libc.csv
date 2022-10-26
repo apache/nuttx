@@ -142,7 +142,6 @@
 "ntohl","arpa/inet.h","","uint32_t","uint32_t"
 "ntohs","arpa/inet.h","","uint16_t","uint16_t"
 "perror","stdio.h","defined(CONFIG_FILE_STREAM)","void","FAR const char *"
-"pipe","unistd.h","defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0","int","int [2]|FAR int *"
 "preadv","sys/uio.h","","ssize_t","int","FAR const struct iovec *","int","off_t"
 "printf","stdio.h","","int","FAR const IPTR char *","..."
 "pthread_attr_destroy","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_attr_t *"

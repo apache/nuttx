@@ -1422,19 +1422,15 @@ int file_fchstat(FAR struct file *filep, FAR struct stat *buf, int flags);
 int nx_unlink(FAR const char *pathname);
 
 /****************************************************************************
- * Name: nx_pipe
+ * Name: file_pipe
  *
  * Description:
- *   nx_pipe() creates a pair of file descriptors, pointing to a pipe inode,
- *   and  places them in the array pointed to by 'fd'. fd[0] is for reading,
- *   fd[1] is for writing.
- *
- *   NOTE: nx_pipe is a special, non-standard, NuttX-only interface.  Since
- *   the NuttX FIFOs are based in in-memory, circular buffers, the ability
- *   to control the size of those buffers is critical for system tuning.
+ *   file_pipe() creates a pair of file descriptors, pointing to a pipe
+ *   inode, and places them in the array pointed to by 'filep'. filep[0]
+ *   is for reading, filep[1] is for writing.
  *
  * Input Parameters:
- *   fd[2] - The user provided array in which to catch the pipe file
+ *   filep[2] - The user provided array in which to catch the pipe file
  *   descriptors
  *   bufsize - The size of the in-memory, circular buffer in bytes.
  *   flags - The file status flags.
@@ -1447,7 +1443,6 @@ int nx_unlink(FAR const char *pathname);
 
 #if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
 int file_pipe(FAR struct file *filep[2], size_t bufsize, int flags);
-int nx_pipe(int fd[2], size_t bufsize, int flags);
 #endif
 
 /****************************************************************************
