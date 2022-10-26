@@ -157,10 +157,6 @@
 #define CH_STAT_ATIME      (1 << 3)
 #define CH_STAT_MTIME      (1 << 4)
 
-/* nx_umount() is equivalent to nx_umount2() with flags = 0 */
-
-#define umount(t)       umount2(t,0)
-
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
