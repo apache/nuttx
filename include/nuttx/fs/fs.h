@@ -1317,25 +1317,6 @@ int file_ioctl(FAR struct file *filep, int req, ...);
 int file_fcntl(FAR struct file *filep, int cmd, ...);
 
 /****************************************************************************
- * Name: nx_fcntl
- *
- * Description:
- *   nx_fcntl() is similar to the standard 'fcntl' interface except that is
- *   not a cancellation point and it does not modify the errno variable.
- *
- *   nx_fcntl() is an internal NuttX interface and should not be called
- *   from applications.
- *
- * Returned Value:
- *   Returns a non-negative number on success;  A negated errno value is
- *   returned on any failure (see comments fcntl() for a list of appropriate
- *   errno values).
- *
- ****************************************************************************/
-
-int nx_fcntl(int fd, int cmd, ...);
-
-/****************************************************************************
  * Name: file_poll
  *
  * Description:
