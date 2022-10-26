@@ -1375,23 +1375,6 @@ int nx_fcntl(int fd, int cmd, ...);
 int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);
 
 /****************************************************************************
- * Name: nx_poll
- *
- * Description:
- *   nx_poll() is similar to the standard 'poll' interface except that is
- *   not a cancellation point and it does not modify the errno variable.
- *
- *   nx_poll() is an internal NuttX interface and should not be called from
- *   applications.
- *
- * Returned Value:
- *   Zero is returned on success; a negated value is returned on any failure.
- *
- ****************************************************************************/
-
-int nx_poll(FAR struct pollfd *fds, unsigned int nfds, int timeout);
-
-/****************************************************************************
  * Name: file_fstat
  *
  * Description:
