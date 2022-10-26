@@ -34,6 +34,16 @@ config DRVR_MKRD
 		the selecting this option will also enable the BOARDIOC_MKRD
 		command that will support creation of RAM disks from applications.
 
+config BLK_RPMSG
+	bool "RPMSG Block Client Support"
+	default n
+	depends on RPTUN
+
+config BLK_RPMSG_SERVER
+	bool "RPMSG Block Server Support"
+	default n
+	depends on RPTUN
+
 # ARCH needs to support memory access while CPU is running to be able to use
 # the LWL CONSOLE
 

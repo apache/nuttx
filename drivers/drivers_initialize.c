@@ -26,6 +26,7 @@
 #include <nuttx/crypto/crypto.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/drivers/rpmsgdev.h>
+#include <nuttx/drivers/rpmsgblk.h>
 #include <nuttx/fs/loop.h>
 #include <nuttx/input/uinput.h>
 #include <nuttx/mtd/mtd.h>
@@ -167,6 +168,10 @@ void drivers_initialize(void)
 
 #ifdef CONFIG_DEV_RPMSG_SERVER
   rpmsgdev_server_init();
+#endif
+
+#ifdef CONFIG_BLK_RPMSG_SERVER
+  rpmsgblk_server_init();
 #endif
 
 #ifdef CONFIG_RPMSGMTD_SERVER
