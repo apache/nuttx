@@ -665,19 +665,6 @@ static inline void cxd56_cableconnected(bool connected)
 }
 
 /****************************************************************************
- * Name: cxd56_iscableconnected
- *
- * Description:
- *   Return the cable status. (true is connected)
- *
- ****************************************************************************/
-
-static inline bool cxd56_iscableconnected(void)
-{
-  return getreg32(CXD56_TOPREG_USB_VBUS) & VBUS_DET;
-}
-
-/****************************************************************************
  * Name: cxd56_rqdequeue
  *
  * Description:
