@@ -65,9 +65,11 @@ int arm_usagefault(int irq, void *context, void *arg)
 
   ufalert("PANIC!!! Usage Fault:\n");
   ufalert("\tIRQ: %d regs: %p\n", irq, context);
-  ufalert("\tBASEPRI: %08x PRIMASK: %08x IPSR: %08x CONTROL: %08x\n",
+  ufalert("\tBASEPRI: %08x PRIMASK: %08x IPSR: %08"
+          PRIx32 " CONTROL: %08" PRIx32 "\n",
           getbasepri(), getprimask(), getipsr(), getcontrol());
-  ufalert("\tCFSR: %08x HFSR: %08x DFSR: %08x BFAR: %08x AFSR: %08x\n",
+  ufalert("\tCFSR: %08" PRIx32 " HFSR: %08" PRIx32 " DFSR: %08"
+          PRIx32 " BFAR: %08" PRIx32 " AFSR: %08" PRIx32 "\n",
           cfsr, getreg32(NVIC_HFAULTS), getreg32(NVIC_DFAULTS),
           getreg32(NVIC_BFAULT_ADDR), getreg32(NVIC_AFAULTS));
 

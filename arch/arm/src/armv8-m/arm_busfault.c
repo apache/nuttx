@@ -63,9 +63,11 @@ int arm_busfault(int irq, void *context, void *arg)
 
   bfalert("PANIC!!! Bus Fault:\n");
   bfalert("\tIRQ: %d regs: %p\n", irq, context);
-  bfalert("\tBASEPRI: %08x PRIMASK: %08x IPSR: %08x CONTROL: %08x\n",
+  bfalert("\tBASEPRI: %08x PRIMASK: %08x IPSR: %08"
+          PRIx32 " CONTROL: %08" PRIx32 "\n",
           getbasepri(), getprimask(), getipsr(), getcontrol());
-  bfalert("\tCFSR: %08x HFSR: %08x DFSR: %08x BFAR: %08x AFSR: %08x\n",
+  bfalert("\tCFSR: %08" PRIx32 " HFSR: %08" PRIx32 " DFSR: %08"
+          PRIx32 " BFAR: %08" PRIx32 " AFSR: %08" PRIx32 "\n",
           cfsr, getreg32(NVIC_HFAULTS), getreg32(NVIC_DFAULTS),
           getreg32(NVIC_BFAULT_ADDR), getreg32(NVIC_AFAULTS));
 

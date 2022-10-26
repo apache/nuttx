@@ -110,7 +110,7 @@ static void stm32l5_dumpnvic(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: stm32l5_nmi, stm32l5_busfault, stm32l5_usagefault, stm32l5_pendsv,
+ * Name: stm32l5_nmi, stm32l5_pendsv,
  *       stm32l5_dbgmonitor, stm32l5_pendsv, stm32l5_reserved
  *
  * Description:
@@ -125,22 +125,6 @@ static int stm32l5_nmi(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! NMI received\n");
-  PANIC();
-  return 0;
-}
-
-static int stm32l5_busfault(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! Bus fault received: %08x\n", getreg32(NVIC_CFAULTS));
-  PANIC();
-  return 0;
-}
-
-static int stm32l5_usagefault(int irq, void *context, void *arg)
-{
-  up_irq_save();
-  _err("PANIC!!! Usage fault received: %08x\n", getreg32(NVIC_CFAULTS));
   PANIC();
   return 0;
 }
@@ -349,8 +333,8 @@ void up_irqinitialize(void)
 #ifndef CONFIG_ARM_MPU
   irq_attach(STM32L5_IRQ_MEMFAULT, arm_memfault, NULL);
 #endif
-  irq_attach(STM32L5_IRQ_BUSFAULT, stm32l5_busfault, NULL);
-  irq_attach(STM32L5_IRQ_USAGEFAULT, stm32l5_usagefault, NULL);
+  irq_attach(STM32L5_IRQ_BUSFAULT, arm_busfault, NULL);
+  irq_attach(STM32L5_IRQ_USAGEFAULT, arm_usagefault, NULL);
   irq_attach(STM32L5_IRQ_PENDSV, stm32l5_pendsv, NULL);
   irq_attach(STM32L5_IRQ_DBGMONITOR, stm32l5_dbgmonitor, NULL);
   irq_attach(STM32L5_IRQ_RESERVED, stm32l5_reserved, NULL);
