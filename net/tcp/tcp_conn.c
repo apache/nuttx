@@ -68,6 +68,7 @@
 #include "tcp/tcp.h"
 #include "arp/arp.h"
 #include "icmpv6/icmpv6.h"
+#include "nat/nat.h"
 
 /****************************************************************************
  * Private Data
@@ -244,7 +245,12 @@ static int tcp_selectport(uint8_t domain,
 
           portno = HTONS(g_last_tcp_port);
         }
-      while (tcp_listener(domain, ipaddr, portno));
+      while (tcp_listener(domain, ipaddr, portno)
+#if defined(CONFIG_NET_NAT) && defined(CONFIG_NET_IPv4)
+             || (domain == PF_INET &&
+                 ipv4_nat_port_inuse(IP_PROTO_TCP, ipaddr->ipv4, portno))
+#endif
+      );
     }
   else
     {
@@ -252,7 +258,12 @@ static int tcp_selectport(uint8_t domain,
        * connection is using this local port.
        */
 
-      if (tcp_listener(domain, ipaddr, portno))
+      if (tcp_listener(domain, ipaddr, portno)
+#if defined(CONFIG_NET_NAT) && defined(CONFIG_NET_IPv4)
+          || (domain == PF_INET &&
+              ipv4_nat_port_inuse(IP_PROTO_TCP, ipaddr->ipv4, portno))
+#endif
+      )
         {
           /* It is in use... return EADDRINUSE */
 

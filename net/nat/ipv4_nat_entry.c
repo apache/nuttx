@@ -62,7 +62,6 @@ static uint16_t ipv4_nat_select_port(uint8_t protocol, uint16_t local_port)
 {
   /* TODO: Implement this, need to consider local ports and nat ports.
    * TODO: Shall we let the chosen port same as local_port if possible?
-   * TODO: Also need to modify local port number assignment.
    */
 
 # warning Missing logic
