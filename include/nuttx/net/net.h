@@ -68,11 +68,9 @@
  */
 
 #if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
-#  define _NX_SEND(s,b,l,f)         nx_send(s,b,l,f)
 #  define _NX_RECV(s,b,l,f)         nx_recv(s,b,l,f)
 #  define _NX_RECVFROM(s,b,l,f,a,n) nx_recvfrom(s,b,l,f,a,n)
 #else
-#  define _NX_SEND(s,b,l,f)         send(s,b,l,f)
 #  define _NX_RECV(s,b,l,f)         recv(s,b,l,f)
 #  define _NX_RECVFROM(s,b,l,f,a,n) recvfrom(s,b,l,f,a,n)
 #endif
@@ -928,36 +926,6 @@ ssize_t psock_send(FAR struct socket *psock, const void *buf, size_t len,
                    int flags);
 
 /****************************************************************************
- * Name: nx_send
- *
- * Description:
- *   The nx_send() call may be used only when the socket is in a
- *   connected state (so that the intended recipient is known).  This is an
- *   internal OS interface.  It is functionally equivalent to send() except
- *   that:
- *
- *   - It is not a cancellation point, and
- *   - It does not modify the errno variable.
- *
- *   See comments with send() for more a more complete description of the
- *   functionality.
- *
- * Input Parameters:
- *   sockfd   Socket descriptor of the socket
- *   buf      Data to send
- *   len      Length of data to send
- *   flags    Send flags
- *
- * Returned Value:
- *   On success, returns the number of characters sent.  On any failure, a
- *   negated errno value is returned (See comments with send() for a list
- *   of the appropriate errno value).
- *
- ****************************************************************************/
-
-ssize_t nx_send(int sockfd, FAR const void *buf, size_t len, int flags);
-
-/****************************************************************************
  * Name: psock_sendto
  *
  * Description:
@@ -1326,7 +1294,6 @@ int psock_ioctl(FAR struct socket *psock, int cmd, ...);
  ****************************************************************************/
 
 struct pollfd; /* Forward reference -- see poll.h */
-
 int psock_poll(FAR struct socket *psock, struct pollfd *fds, bool setup);
 
 /****************************************************************************
