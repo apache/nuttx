@@ -97,49 +97,6 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 }
 
 /****************************************************************************
- * Name: nx_recvfrom
- *
- * Description:
- *   nx_recvfrom() receives messages from a socket, and may be used to
- *   receive data on a socket whether or not it is connection-oriented.
- *   This is an internal OS interface.  It is functionally equivalent to
- *   recvfrom() except that:
- *
- *   - It is not a cancellation point, and
- *   - It does not modify the errno variable.
- *
- * Input Parameters:
- *   sockfd    Socket descriptor of socket
- *   buf       Buffer to receive data
- *   len       Length of buffer
- *   flags     Receive flags
- *   from      Address of source (may be NULL)
- *   fromlen   The length of the address structure
- *
- * Returned Value:
- *   On success, returns the number of characters received.  If no data is
- *   available to be received and the peer has performed an orderly shutdown,
- *   nx_recvfrom() will return 0.  Otherwise, on any failure, a negated errno
- *   value is returned (see comments with recvfrom() for a list of
- *   appropriate errno values).
- *
- ****************************************************************************/
-
-ssize_t nx_recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
-                    FAR struct sockaddr *from, FAR socklen_t *fromlen)
-{
-  FAR struct socket *psock;
-
-  /* Get the underlying socket structure */
-
-  psock = sockfd_socket(sockfd);
-
-  /* Then let psock_recvfrom() do all of the work */
-
-  return psock_recvfrom(psock, buf, len, flags, from, fromlen);
-}
-
-/****************************************************************************
  * Name: recvfrom
  *
  * Description:
@@ -193,18 +150,23 @@ ssize_t nx_recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
 ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
                  FAR struct sockaddr *from, FAR socklen_t *fromlen)
 {
+  FAR struct socket *psock;
   ssize_t ret;
 
   /* recvfrom() is a cancellation point */
 
   enter_cancellation_point();
 
-  /* Let psock_recvfrom() do all of the work */
+  /* Get the underlying socket structure */
 
-  ret = nx_recvfrom(sockfd, buf, len, flags, from, fromlen);
+  psock = sockfd_socket(sockfd);
+
+  /* Then let psock_recvfrom() do all of the work */
+
+  ret = psock_recvfrom(psock, buf, len, flags, from, fromlen);
   if (ret < 0)
     {
-      _SO_SETERRNO(sockfd_socket(sockfd), -ret);
+      _SO_SETERRNO(psock, -ret);
       ret = ERROR;
     }
 
