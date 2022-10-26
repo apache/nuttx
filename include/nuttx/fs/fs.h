@@ -778,11 +778,11 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist);
  *
  * Description:
  *   Allocate a struct files instance and associate it with an inode
- *   instance.  Returns the file descriptor == index into the files array.
+ *   instance.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
+ *     Returns the file descriptor == index into the files array on success;
+ *     a negated errno value is returned on any failure.
  *
  ****************************************************************************/
 
