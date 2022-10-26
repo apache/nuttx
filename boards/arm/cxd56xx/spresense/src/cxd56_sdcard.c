@@ -125,7 +125,7 @@ static void board_sdcard_enable(void *arg)
 
       /* If not initialize SD slot */
 
-      if (!nx_stat("/dev/mmcsd0", &stat_sdio, 1) == 0)
+      if (nx_stat("/dev/mmcsd0", &stat_sdio, 1) != 0)
         {
           /* Now bind the SDHC interface to the MMC/SD driver */
 
