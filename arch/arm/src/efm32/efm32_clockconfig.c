@@ -746,6 +746,7 @@ static inline uint32_t efm32_lfbclk_config(uint32_t lfbclksel, bool ulfrco,
           case CMU_LFCLKSEL_LFB_LFRCO:
             {
               efm32_enable_lfrco();
+              lfbclk = 0;
             }
             break;
 
