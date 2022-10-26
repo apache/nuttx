@@ -34,7 +34,9 @@
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/nxffs.h>
+#include <nuttx/drivers/ramdisk.h>
 #include <nuttx/drivers/rpmsgdev.h>
+#include <nuttx/drivers/rpmsgblk.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/spi/spi_transfer.h>
 #include <nuttx/rc/lirc_dev.h>
@@ -92,6 +94,9 @@ int sim_bringup(void)
 #endif
 #ifdef CONFIG_RAMMTD
   uint8_t *ramstart;
+#endif
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_BLK_RPMSG_SERVER)
+  uint8_t *ramdiskstart;
 #endif
 #ifdef CONFIG_SIM_I2CBUS
   struct i2c_master_s *i2cbus;
@@ -228,6 +233,16 @@ int sim_bringup(void)
             }
 #endif
         }
+    }
+#endif
+
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_BLK_RPMSG_SERVER)
+  ramdiskstart = (uint8_t *)kmm_malloc(512 * 2048);
+  ret = ramdisk_register(1, ramdiskstart, 2048, 512,
+                         RDFLAG_WRENABLED | RDFLAG_FUNLINK);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to register ramdisk: %d\n", ret);
     }
 #endif
 
@@ -441,6 +456,10 @@ int sim_bringup(void)
   rpmsgdev_register("server", "/dev/console", "/dev/server-console");
   rpmsgdev_register("server", "/dev/null", "/dev/server-null");
   rpmsgdev_register("server", "/dev/ttyUSB0", "/dev/ttyUSB0");
+#endif
+
+#ifdef CONFIG_BLK_RPMSG
+  rpmsgblk_register("server", "/dev/ram1", NULL);
 #endif
 
 #ifdef CONFIG_RPMSGMTD
