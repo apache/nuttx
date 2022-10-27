@@ -41,9 +41,9 @@
  * state from the TCB.
  */
 
-#define up_restorestate(regs) (g_current_regs = regs)
+#define up_restorestate(regs) (CURRENT_REGS = regs)
 
-#define up_savestate(regs)   trap_flush_task(regs, (uint32_t*)g_current_regs)
+#define up_savestate(regs)   trap_flush_task(regs, (uint32_t*)CURRENT_REGS)
 
 /****************************************************************************
  * Public Types

@@ -32,6 +32,19 @@ config ARCH_CHIP_BM3823
 	---help---
 		Microchip BM3823 (ARCH_SPARC_V8)
 
+config ARCH_CHIP_S698PM
+	bool "S698PM"
+	select ARCH_SPARC_V8
+	select ARCH_HAVE_MATH_H
+	select ARCH_HAVE_IRQPRIO
+	select ARCH_VECNOTIRQ
+	select ARCH_HAVE_RAMFUNCS
+	select ARCH_HAVE_MULTICPU
+	select ARCH_HAVE_TESTSET
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Microchip S698PM (ARCH_SPARC_V8)
+
 endchoice
 
 config ARCH_SPARC_V8
@@ -47,9 +60,11 @@ config ARCH_CHIP
 	string
 	default "bm3803"	if ARCH_CHIP_BM3803
 	default "bm3823"	if ARCH_CHIP_BM3823
+	default "s698pm"	if ARCH_CHIP_S698PM
 
 source arch/sparc/src/sparc_v8/Kconfig
 source arch/sparc/src/bm3803/Kconfig
 source arch/sparc/src/bm3823/Kconfig
+source arch/sparc/src/s698pm/Kconfig
 
 endif

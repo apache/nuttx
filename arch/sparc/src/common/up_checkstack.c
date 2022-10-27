@@ -218,10 +218,10 @@ ssize_t up_check_stack_remain(void)
   return up_check_tcbstack_remain(running_task());
 }
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
 size_t up_check_intstack(void)
 {
-  return sparc_stack_check((uintptr_t)g_intstackalloc,
+  return sparc_stack_check((void *)up_intstack_alloc(),
                            STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
 }
 

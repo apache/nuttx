@@ -71,7 +71,7 @@ void up_initial_state(struct tcb_s *tcb)
   if (tcb->pid == IDLE_PROCESS_ID)
     {
       tcb->stack_alloc_ptr = (void *)(g_idle_topstack -
-                                      CONFIG_IDLETHREAD_STACKSIZE);
+                                      (CONFIG_SMP_NCPUS * CONFIG_IDLETHREAD_STACKSIZE));
       tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
       tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
 
