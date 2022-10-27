@@ -229,9 +229,8 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
 int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 {
-  FAR struct socket *psock = sockfd_socket(sockfd);
+  FAR struct socket *psock;
   FAR struct socket *newsock;
-  FAR struct file *filep;
   int errcode;
   int newfd;
   int ret;
@@ -240,24 +239,15 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 
   enter_cancellation_point();
 
+  /* Get the underlying socket structure */
+
+  ret = sockfd_socket(sockfd, &psock);
+
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
-  if (psock == NULL || psock->s_conn == NULL)
+  if (ret < 0)
     {
-      /* It is not a valid socket description.  Distinguish between the cases
-       * where sockfd is a just valid and when it is a valid file descriptor
-       * used in the wrong context.
-       */
-
-      if (fs_getfilep(sockfd, &filep) == 0)
-        {
-          errcode = ENOTSOCK;
-        }
-      else
-        {
-          errcode = EBADF;
-        }
-
+      errcode = -ret;
       goto errout;
     }
 
