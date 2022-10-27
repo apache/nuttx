@@ -162,7 +162,7 @@ time_t clock_calendar2utc(int year, int month, int day)
 
   /* Add in the extra days for the leap years prior to the current year. */
 
-  days += (year - EPOCH_YEAR - 1) >> 2;
+  days += (year - (EPOCH_YEAR - 1)) >> 2;
 
   /* Add in the days up to the beginning of this month. */
 
