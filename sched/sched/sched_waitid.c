@@ -82,10 +82,69 @@ static void exited_child(FAR struct tcb_s *rtcb,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_waitid
+ * Name: waitid
+ *
+ * Description:
+ *   The waitid() function suspends the calling thread until one child of
+ *   the process containing the calling thread changes state. It records the
+ *   current state of a child in the structure pointed to by 'info'. If a
+ *   child process changed state prior to the call to waitid(), waitid()
+ *   returns immediately. If more than one thread is suspended in wait() or
+ *   waitpid() waiting termination of the same process, exactly one thread
+ *   will return the process status at the time of the target process
+ *   termination
+ *
+ *   The idtype and id arguments are used to specify which children waitid()
+ *   will wait for.
+ *
+ *     If idtype is P_PID, waitid() will wait for the child with a process
+ *     ID equal to (pid_t)id.
+ *
+ *     If idtype is P_PGID, waitid() will wait for any child with a process
+ *     group ID equal to (pid_t)id.
+ *
+ *     If idtype is P_ALL, waitid() will wait for any children and id is
+ *     ignored.
+ *
+ *   The options argument is used to specify which state changes waitid()
+ *   will will wait for. It is formed by OR-ing together one or more of the
+ *   following flags:
+ *
+ *     WEXITED - Wait for processes that have exited.
+ *     WSTOPPED - Status will be returned for any child that has stopped
+ *       upon receipt of a signal.
+ *     WCONTINUED - Status will be returned for any child that was stopped
+ *       and has been continued.
+ *     WNOHANG - Return immediately if there are no children to wait for.
+ *     WNOWAIT - Keep the process whose status is returned in 'info' in a
+ *       waitable state. This will not affect the state of the process; the
+ *       process may be waited for again after this call completes.
+ *
+ *   The 'info' argument must point to a siginfo_t structure. If waitid()
+ *   returns because a child process was found that satisfied the conditions
+ *   indicated by the arguments idtype and options, then the structure
+ *   pointed to by 'info' will be filled in by the system with the status of
+ *   the process. The si_signo member will always be equal to SIGCHLD.
+ *
+ * Input Parameters:
+ *   See description.
+ *
+ * Returned Value:
+ *   If waitid() returns due to the change of state of one of its children,
+ *   0 is returned. Otherwise, -1 is returned and errno is set to indicate
+ *   the error.
+ *
+ *   The waitid() function will fail if:
+ *
+ *     ECHILD - The calling process has no existing unwaited-for child
+ *       processes.
+ *     EINTR - The waitid() function was interrupted by a signal.
+ *     EINVAL - An invalid value was specified for options, or idtype and id
+ *       specify an invalid set of processes.
+ *
  ****************************************************************************/
 
-int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
+int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
 {
   FAR struct tcb_s *rtcb = this_task();
   FAR struct tcb_s *ctcb;
@@ -94,7 +153,8 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
   bool retains;
 #endif
   sigset_t set;
-  int ret = OK;
+  int errcode;
+  int ret;
 
   /* MISSING LOGIC:   If WNOHANG is provided in the options, then this
    * function should returned immediately.  However, there is no mechanism
@@ -108,7 +168,8 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
 
   if (idtype != P_PID && idtype != P_ALL)
     {
-      return -ENOSYS;
+      set_errno(ENOSYS);
+      return ERROR;
     }
 
   /* None of the options are supported except for WEXITED (which must be
@@ -118,14 +179,20 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
 
   if ((options & WEXITED) == 0)
     {
-      return -ENOSYS;
+      set_errno(ENOSYS);
+      return ERROR;
     }
 
   if ((options & ~(WEXITED | WNOHANG)) != 0)
     {
-      return -ENOSYS;
+      set_errno(ENOSYS);
+      return ERROR;
     }
 #endif
+
+  /* waitid() is a cancellation point */
+
+  enter_cancellation_point();
 
   /* Create a signal set that contains only SIGCHLD */
 
@@ -157,7 +224,7 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
     {
       /* There are no children */
 
-      ret = -ECHILD;
+      errcode = ECHILD;
       goto errout;
     }
   else if (idtype == P_PID)
@@ -173,7 +240,7 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
 
           if (ctcb->group->tg_ppid != rtcb->pid)
             {
-              ret = -ECHILD;
+              errcode = ECHILD;
               goto errout;
             }
         }
@@ -188,7 +255,7 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
             {
               /* This specific pid is not a child */
 
-              ret = -ECHILD;
+              errcode = ECHILD;
               goto errout;
             }
         }
@@ -200,7 +267,7 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
     {
       /* There are no children */
 
-      ret = -ECHILD;
+      errcode = ECHILD;
       goto errout;
     }
   else if (idtype == P_PID)
@@ -213,7 +280,7 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
 
       if (!ctcb || !ctcb->group || ctcb->group->tg_ppid != rtcb->pid)
         {
-          ret = -ECHILD;
+          errcode = ECHILD;
           goto errout;
         }
     }
@@ -285,7 +352,7 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
                * to reported ECHILD than bogus status.
                */
 
-              ret = -ECHILD;
+              errcode = ECHILD;
               goto errout;
             }
         }
@@ -304,7 +371,7 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
            * Let's return ECHILD.. that is at least informative.
            */
 
-          ret = -ECHILD;
+          errcode = ECHILD;
           goto errout;
         }
 #endif
@@ -330,6 +397,7 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
       ret = nxsig_waitinfo(&set, info);
       if (ret < 0)
         {
+          errcode = -ret;
           goto errout;
         }
 
@@ -390,11 +458,19 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
 
           else /* if (idtype == P_PGID) */
             {
-              ret = -ENOSYS;
+              errcode = ENOSYS;
               goto errout;
             }
         }
     }
+
+#ifdef CONFIG_SMP
+  leave_critical_section(flags);
+#else
+  sched_unlock();
+#endif
+  leave_cancellation_point();
+  return OK;
 
 errout:
 #ifdef CONFIG_SMP
@@ -402,90 +478,9 @@ errout:
 #else
   sched_unlock();
 #endif
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: waitid
- *
- * Description:
- *   The waitid() function suspends the calling thread until one child of
- *   the process containing the calling thread changes state. It records the
- *   current state of a child in the structure pointed to by 'info'. If a
- *   child process changed state prior to the call to waitid(), waitid()
- *   returns immediately. If more than one thread is suspended in wait() or
- *   waitpid() waiting termination of the same process, exactly one thread
- *   will return the process status at the time of the target process
- *   termination
- *
- *   The idtype and id arguments are used to specify which children waitid()
- *   will wait for.
- *
- *     If idtype is P_PID, waitid() will wait for the child with a process
- *     ID equal to (pid_t)id.
- *
- *     If idtype is P_PGID, waitid() will wait for any child with a process
- *     group ID equal to (pid_t)id.
- *
- *     If idtype is P_ALL, waitid() will wait for any children and id is
- *     ignored.
- *
- *   The options argument is used to specify which state changes waitid()
- *   will will wait for. It is formed by OR-ing together one or more of the
- *   following flags:
- *
- *     WEXITED - Wait for processes that have exited.
- *     WSTOPPED - Status will be returned for any child that has stopped
- *       upon receipt of a signal.
- *     WCONTINUED - Status will be returned for any child that was stopped
- *       and has been continued.
- *     WNOHANG - Return immediately if there are no children to wait for.
- *     WNOWAIT - Keep the process whose status is returned in 'info' in a
- *       waitable state. This will not affect the state of the process; the
- *       process may be waited for again after this call completes.
- *
- *   The 'info' argument must point to a siginfo_t structure. If waitid()
- *   returns because a child process was found that satisfied the conditions
- *   indicated by the arguments idtype and options, then the structure
- *   pointed to by 'info' will be filled in by the system with the status of
- *   the process. The si_signo member will always be equal to SIGCHLD.
- *
- * Input Parameters:
- *   See description.
- *
- * Returned Value:
- *   If waitid() returns due to the change of state of one of its children,
- *   0 is returned. Otherwise, -1 is returned and errno is set to indicate
- *   the error.
- *
- *   The waitid() function will fail if:
- *
- *     ECHILD - The calling process has no existing unwaited-for child
- *       processes.
- *     EINTR - The waitid() function was interrupted by a signal.
- *     EINVAL - An invalid value was specified for options, or idtype and id
- *       specify an invalid set of processes.
- *
- ****************************************************************************/
-
-int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
-{
-  int ret;
-
-  /* waitid() is a cancellation point */
-
-  enter_cancellation_point();
-
-  ret = nx_waitid(idtype, id, info, options);
-  if (ret < 0)
-    {
-      set_errno(-ret);
-      ret = ERROR;
-    }
-
   leave_cancellation_point();
-  return ret;
+  set_errno(errcode);
+  return ERROR;
 }
 
 #endif /* CONFIG_SCHED_WAITPID && CONFIG_SCHED_HAVE_PARENT */
