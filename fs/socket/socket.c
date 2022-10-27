@@ -175,9 +175,13 @@ int sockfd_allocate(FAR struct socket *psock, int oflags)
  * Input Parameters:
  *   sockfd - The socket descriptor index to use.
  *
- * Returned Value:
- *   On success, a reference to the socket structure associated with the
- *   the socket descriptor is returned.  NULL is returned on any failure.
+ * Returns zero (OK) on success.  On failure, it returns a negated errno
+ * value to indicate the nature of the error.
+ *
+ *    EBADF
+ *      The file descriptor is not a valid index in the descriptor table.
+ *    ENOTSOCK
+ *      psock is a descriptor for a file, not a socket.
  *
  ****************************************************************************/
 
@@ -192,16 +196,19 @@ FAR struct socket *file_socket(FAR struct file *filep)
   return NULL;
 }
 
-FAR struct socket *sockfd_socket(int sockfd)
+int sockfd_socket(int sockfd, FAR struct socket **socketp)
 {
   FAR struct file *filep;
 
   if (fs_getfilep(sockfd, &filep) < 0)
     {
-      return NULL;
+      *socketp = NULL;
+      return -EBADF;
     }
 
-  return file_socket(filep);
+  *socketp = file_socket(filep);
+
+  return *socketp != NULL ? OK : -ENOTSOCK;
 }
 
 /****************************************************************************

@@ -159,11 +159,15 @@ ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
 
   /* Get the underlying socket structure */
 
-  psock = sockfd_socket(sockfd);
+  ret = sockfd_socket(sockfd, &psock);
 
   /* Then let psock_recvfrom() do all of the work */
 
-  ret = psock_recvfrom(psock, buf, len, flags, from, fromlen);
+  if (ret == OK)
+    {
+      ret = psock_recvfrom(psock, buf, len, flags, from, fromlen);
+    }
+
   if (ret < 0)
     {
       _SO_SETERRNO(psock, -ret);

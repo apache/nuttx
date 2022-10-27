@@ -157,11 +157,15 @@ ssize_t recvmsg(int sockfd, FAR struct msghdr *msg, int flags)
 
   /* Get the underlying socket structure */
 
-  psock = sockfd_socket(sockfd);
+  ret = sockfd_socket(sockfd, &psock);
 
-  /* Then let psock_recvmsg() do all of the work */
+  /* Let psock_recvmsg() do all of the work */
 
-  ret = psock_recvmsg(psock, msg, flags);
+  if (ret == OK)
+    {
+      ret = psock_recvmsg(psock, msg, flags);
+    }
+
   if (ret < 0)
     {
       _SO_SETERRNO(psock, -ret);
