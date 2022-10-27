@@ -251,7 +251,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    * been delivered.
                    */
 
-                  tcb->xcp.sigdeliver       = (FAR void *)sigdeliver;
+                  tcb->xcp.sigdeliver       = (void *)sigdeliver;
                   tcb->xcp.saved_pc         = tcb->xcp.regs[REG_PC];
                   tcb->xcp.saved_npc        = tcb->xcp.regs[REG_NPC];
                   tcb->xcp.saved_status     = tcb->xcp.regs[REG_PSR];
@@ -274,7 +274,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    * trampoline after the signal(s) have been delivered.
                    */
 
-                  tcb->xcp.sigdeliver   = (FAR void *)sigdeliver;
+                  tcb->xcp.sigdeliver   = (void *)sigdeliver;
                   tcb->xcp.saved_pc     = CURRENT_REGS[REG_PC];
                   tcb->xcp.saved_npc    = CURRENT_REGS[REG_NPC];
                   tcb->xcp.saved_status = CURRENT_REGS[REG_PSR];
@@ -330,7 +330,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * trampoline after the signal(s) have been delivered.
            */
 
-          tcb->xcp.sigdeliver       = (FAR void *)sigdeliver;
+          tcb->xcp.sigdeliver       = (void *)sigdeliver;
           tcb->xcp.saved_pc     = CURRENT_REGS[REG_PC];
           tcb->xcp.saved_npc    = CURRENT_REGS[REG_NPC];
           tcb->xcp.saved_status = CURRENT_REGS[REG_PSR];

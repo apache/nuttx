@@ -43,7 +43,7 @@ config ARCH_CHIP_S698PM
 	select ARCH_HAVE_TESTSET
 	select ARCH_HAVE_SERIAL_TERMIOS
 	---help---
-		Microchip S698PM (ARCH_SPARC_V8)
+		ORBITA Sailing S698PM (ARCH_SPARC_V8)
 
 endchoice
 
