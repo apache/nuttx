@@ -132,38 +132,22 @@ int psock_listen(FAR struct socket *psock, int backlog)
 
 int listen(int sockfd, int backlog)
 {
-  FAR struct socket *psock = sockfd_socket(sockfd);
-  FAR struct file *filep;
-  int errcode;
+  FAR struct socket *psock;
   int ret;
 
-  /* Verify that the sockfd corresponds to valid, allocated socket */
+  /* Get the underlying socket structure */
 
-  if (psock == NULL || psock->s_conn == NULL)
-    {
-      /* It is not a valid socket description.  Distinguish between the
-       * cases where sockfd is a just invalid and when it is a valid file
-       * descriptor used in the wrong context.
-       */
-
-      if (fs_getfilep(sockfd, &filep) == 0)
-        {
-          errcode = ENOTSOCK;
-        }
-      else
-        {
-          errcode = EBADF;
-        }
-
-      _SO_SETERRNO(psock, errcode);
-      return ERROR;
-    }
+  ret = sockfd_socket(sockfd, &psock);
 
   /* The let psock_listen to the work. If psock_listen() fails, it will have
    * set the errno variable.
    */
 
-  ret = psock_listen(psock, backlog);
+  if (ret == OK)
+    {
+      ret = psock_listen(psock, backlog);
+    }
+
   if (ret < 0)
     {
       _SO_SETERRNO(psock, -ret);

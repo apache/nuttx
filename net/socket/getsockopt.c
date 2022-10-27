@@ -507,11 +507,15 @@ int getsockopt(int sockfd, int level, int option,
 
   /* Get the underlying socket structure */
 
-  psock = sockfd_socket(sockfd);
+  ret = sockfd_socket(sockfd, &psock);
 
   /* Then let psock_getsockopt() do all of the work */
 
-  ret = psock_getsockopt(psock, level, option, value, value_len);
+  if (ret == OK)
+    {
+      ret = psock_getsockopt(psock, level, option, value, value_len);
+    }
+
   if (ret < 0)
     {
       set_errno(-ret);
