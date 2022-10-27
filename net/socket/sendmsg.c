@@ -94,45 +94,6 @@ ssize_t psock_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 }
 
 /****************************************************************************
- * Name: nx_sendmsg
- *
- * Description:
- *   nx_sendmsg() receives messages from a socket, and may be used to
- *   receive data on a socket whether or not it is connection-oriented.
- *   This is an internal OS interface.  It is functionally equivalent to
- *   sendmsg() except that:
- *
- *   - It is not a cancellation point, and
- *   - It does not modify the errno variable.
- *
- * Input Parameters:
- *   sockfd   Socket descriptor of socket
- *   msg      Buffer to receive the message
- *   flags    Receive flags
- *
- * Returned Value:
- *   On success, returns the number of characters sent.  If no data is
- *   available to be received and the peer has performed an orderly shutdown,
- *   sendmsg() will return 0. Otherwise, on any failure, a negated errno
- *   value is returned (see comments with sendmsg() for a list of appropriate
- *   errno values).
- *
- ****************************************************************************/
-
-ssize_t nx_sendmsg(int sockfd, FAR struct msghdr *msg, int flags)
-{
-  FAR struct socket *psock;
-
-  /* Get the underlying socket structure */
-
-  psock = sockfd_socket(sockfd);
-
-  /* Then let psock_sendmsg() do all of the work */
-
-  return psock_sendmsg(psock, msg, flags);
-}
-
-/****************************************************************************
  * Function: sendmsg
  *
  * Description:
@@ -177,18 +138,23 @@ ssize_t nx_sendmsg(int sockfd, FAR struct msghdr *msg, int flags)
 
 ssize_t sendmsg(int sockfd, FAR struct msghdr *msg, int flags)
 {
+  FAR struct socket *psock;
   ssize_t ret;
 
   /* sendmsg() is a cancellation point */
 
   enter_cancellation_point();
 
-  /* Let psock_sendmsg() do all of the work */
+  /* Get the underlying socket structure */
 
-  ret = nx_sendmsg(sockfd, msg, flags);
+  psock = sockfd_socket(sockfd);
+
+  /* Then let psock_sendmsg() do all of the work */
+
+  ret = psock_sendmsg(psock, msg, flags);
   if (ret < 0)
     {
-      _SO_SETERRNO(sockfd_socket(sockfd), -ret);
+      _SO_SETERRNO(psock, -ret);
       ret = ERROR;
     }
 
