@@ -1392,6 +1392,12 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
             {
               iob_free_chain(iob);
             }
+          else
+            {
+              nerr("ERROR: no IOB available\n");
+              ret = -EAGAIN;
+              goto errout_with_lock;
+            }
         }
 
       /* Dump I/O buffer chain */
