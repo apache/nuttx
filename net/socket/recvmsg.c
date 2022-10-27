@@ -104,45 +104,6 @@ ssize_t psock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 }
 
 /****************************************************************************
- * Name: nx_recvmsg
- *
- * Description:
- *   nx_recvmsg() receives messages from a socket, and may be used to
- *   receive data on a socket whether or not it is connection-oriented.
- *   This is an internal OS interface.  It is functionally equivalent to
- *   recvmsg() except that:
- *
- *   - It is not a cancellation point, and
- *   - It does not modify the errno variable.
- *
- * Input Parameters:
- *   sockfd  - Socket descriptor of socket
- *   msg      Buffer to receive the message
- *   flags   - Receive flags
- *
- * Returned Value:
- *   On success, returns the number of characters received.  If no data is
- *   available to be received and the peer has performed an orderly shutdown,
- *   nx_recvmsg() will return 0.  Otherwise, on any failure, a negated errno
- *   value is returned (see comments with recvmsg() for a list of appropriate
- *   errno values).
- *
- ****************************************************************************/
-
-ssize_t nx_recvmsg(int sockfd, FAR struct msghdr *msg, int flags)
-{
-  FAR struct socket *psock;
-
-  /* Get the underlying socket structure */
-
-  psock = sockfd_socket(sockfd);
-
-  /* Then let psock_recvmsg() do all of the work */
-
-  return psock_recvmsg(psock, msg, flags);
-}
-
-/****************************************************************************
  * Function: recvmsg
  *
  * Description:
@@ -187,18 +148,23 @@ ssize_t nx_recvmsg(int sockfd, FAR struct msghdr *msg, int flags)
 
 ssize_t recvmsg(int sockfd, FAR struct msghdr *msg, int flags)
 {
+  FAR struct socket *psock;
   ssize_t ret;
 
   /* recvmsg() is a cancellation point */
 
   enter_cancellation_point();
 
-  /* Let nx_recvmsg() do all of the work */
+  /* Get the underlying socket structure */
 
-  ret = nx_recvmsg(sockfd, msg, flags);
+  psock = sockfd_socket(sockfd);
+
+  /* Then let psock_recvmsg() do all of the work */
+
+  ret = psock_recvmsg(psock, msg, flags);
   if (ret < 0)
     {
-      _SO_SETERRNO(sockfd_socket(sockfd), -ret);
+      _SO_SETERRNO(psock, -ret);
       ret = ERROR;
     }
 
