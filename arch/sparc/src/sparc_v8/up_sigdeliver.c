@@ -63,6 +63,17 @@ void up_sigdeliver(void)
    * EINTR).
    */
 
+  int saved_errno = get_errno();
+
+#ifdef CONFIG_SMP
+  /* In the SMP case, we must terminate the critical section while the signal
+   * handler executes, but we also need to restore the irqcount when the
+   * we resume the main thread of the task.
+   */
+
+  int16_t saved_irqcount;
+#endif
+
   board_autoled_on(LED_SIGNAL);
 
   sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
@@ -72,6 +83,26 @@ void up_sigdeliver(void)
   /* Save the return state on the stack. */
 
   up_copystate(regs, rtcb->xcp.regs);
+
+#ifdef CONFIG_SMP
+  /* In the SMP case, up_schedule_sigaction(0) will have incremented
+   * 'irqcount' in order to force us into a critical section.  Save the
+   * pre-incremented irqcount.
+   */
+
+  saved_irqcount = rtcb->irqcount - 1;
+  DEBUGASSERT(saved_irqcount >= 0);
+
+  /* Now we need call leave_critical_section() repeatedly to get the irqcount
+   * to zero, freeing all global spinlocks that enforce the critical section.
+   */
+
+  do
+    {
+      leave_critical_section((regs[REG_PSR]));
+    }
+  while (rtcb->irqcount > 0);
+#endif /* CONFIG_SMP */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* Then make sure that interrupts are enabled.  Signal handlers must always
@@ -91,7 +122,27 @@ void up_sigdeliver(void)
    */
 
   sinfo("Resuming\n");
+
+  /* Call enter_critical_section() to disable local interrupts before
+   * restoring local context.
+   *
+   * Here, we should not use up_irq_save() in SMP mode.
+   * For example, if we call up_irq_save() here and another CPU might
+   * have called up_cpu_pause() to this cpu, hence g_cpu_irqlock has
+   * been locked by the cpu, in this case, we would see a deadlock in
+   * later call of enter_critical_section() to restore irqcount.
+   * To avoid this situation, we need to call enter_critical_section().
+   */
+
+#ifdef CONFIG_SMP
+  enter_critical_section();
+#else
   up_irq_save();
+#endif
+
+  /* Restore the saved errno value */
+
+  set_errno(saved_errno);
 
   /* Modify the saved return state with the actual saved values in the
    * TCB.  This depends on the fact that nested signal handling is
@@ -107,6 +158,22 @@ void up_sigdeliver(void)
   regs[REG_NPC]        = rtcb->xcp.saved_npc;
   regs[REG_PSR]        = rtcb->xcp.saved_status;
   rtcb->xcp.sigdeliver = NULL;  /* Allows next handler to be scheduled */
+
+#ifdef CONFIG_SMP
+  /* Restore the saved 'irqcount' and recover the critical section
+   * spinlocks.
+   *
+   * REVISIT:  irqcount should be one from the above call to
+   * enter_critical_section().  Could the saved_irqcount be zero?  That
+   * would be a problem.
+   */
+
+  DEBUGASSERT(rtcb->irqcount == 1);
+  while (rtcb->irqcount < saved_irqcount)
+    {
+      enter_critical_section();
+    }
+#endif
 
   /* Then restore the correct state for this thread of execution. This is an
    * unusual case that must be handled by up_fullcontextresore. This case is

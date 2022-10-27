@@ -92,11 +92,18 @@ static inline uint32_t up_getsp(void)
  * Public Data
  ****************************************************************************/
 
-/* This holds a references to the current interrupt level register storage
- * structure.  If is non-NULL only during interrupt processing.
+/* g_current_regs[] holds a references to the current interrupt level
+ * register storage structure.  If is non-NULL only during interrupt
+ * processing.  Access to g_current_regs[] must be through the macro
+ * CURRENT_REGS for portability.
  */
 
-EXTERN volatile uint32_t *g_current_regs;
+/* For the case of architectures with multiple CPUs, then there must be one
+ * such value for each processor that can receive an interrupt.
+ */
+
+EXTERN volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
+#define CURRENT_REGS (g_current_regs[up_cpu_index()])
 
 /****************************************************************************
  * Public Function Prototypes
@@ -118,7 +125,11 @@ EXTERN volatile uint32_t *g_current_regs;
  *
  ****************************************************************************/
 
-#define up_cpu_index() (0)
+#ifdef CONFIG_SMP
+int up_cpu_index(void);
+#else
+#  define up_cpu_index() (0)
+#endif
 
 /****************************************************************************
  * Inline functions
@@ -133,7 +144,20 @@ EXTERN volatile uint32_t *g_current_regs;
  *
  ****************************************************************************/
 
-#define up_interrupt_context() (g_current_regs != NULL)
+static inline bool up_interrupt_context(void)
+{
+#ifdef CONFIG_SMP
+  irqstate_t flags = up_irq_save();
+#endif
+
+  bool ret = CURRENT_REGS != NULL;
+
+#ifdef CONFIG_SMP
+  up_irq_restore(flags);
+#endif
+
+  return ret;
+}
 
 /****************************************************************************
  * Public Function Prototypes

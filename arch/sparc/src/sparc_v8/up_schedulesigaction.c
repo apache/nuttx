@@ -71,6 +71,7 @@
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SMP
 void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 {
   irqstate_t flags;
@@ -89,8 +90,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
        * being delivered to the currently executing task.
        */
 
-      sinfo("rtcb=%p g_current_regs=%p\n",
-            this_task(), g_current_regs);
+      sinfo("rtcb=%p CURRENT_REGS=%p\n", this_task(), CURRENT_REGS);
 
       if (tcb == this_task())
         {
@@ -98,7 +98,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * a task is signalling itself for some reason.
            */
 
-          if (!g_current_regs)
+          if (!CURRENT_REGS)
             {
               /* In this case just deliver the signal now. */
 
@@ -114,7 +114,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * logic would fail in the strange case where we are in an
            * interrupt handler, the thread is signalling itself, but
            * a context switch to another task has occurred so that
-           * g_current_regs does not refer to the thread of this_task()!
+           * CURRENT_REGS does not refer to the thread of this_task()!
            */
 
           else
@@ -125,17 +125,17 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                */
 
               tcb->xcp.sigdeliver   = sigdeliver;
-              tcb->xcp.saved_pc     = g_current_regs[REG_PC];
-              tcb->xcp.saved_npc    = g_current_regs[REG_NPC];
-              tcb->xcp.saved_status = g_current_regs[REG_PSR];
+              tcb->xcp.saved_pc     = CURRENT_REGS[REG_PC];
+              tcb->xcp.saved_npc    = CURRENT_REGS[REG_NPC];
+              tcb->xcp.saved_status = CURRENT_REGS[REG_PSR];
 
               /* Then set up to vector to the trampoline with interrupts
                * disabled
                */
 
-              g_current_regs[REG_PC]  = (uint32_t)up_sigdeliver;
-              g_current_regs[REG_NPC] = (uint32_t)up_sigdeliver + 4;
-              g_current_regs[REG_PSR] |= SPARC_PSR_ET_MASK;
+              CURRENT_REGS[REG_PC]  = (uint32_t)up_sigdeliver;
+              CURRENT_REGS[REG_NPC] = (uint32_t)up_sigdeliver + 4;
+              CURRENT_REGS[REG_PSR] |= SPARC_PSR_ET_MASK;
 
               /* And make sure that the saved context in the TCB
                * is the same as the interrupt return context.
@@ -175,3 +175,184 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
   leave_critical_section(flags);
 }
+#endif /* !CONFIG_SMP */
+
+#ifdef CONFIG_SMP
+void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
+{
+  irqstate_t flags;
+  int cpu;
+  int me;
+
+  sinfo("tcb=0x%p sigdeliver=0x%p\n", tcb, sigdeliver);
+
+  /* Make sure that interrupts are disabled */
+
+  flags = enter_critical_section();
+
+  /* Refuse to handle nested signal actions */
+
+  if (!tcb->xcp.sigdeliver)
+    {
+      /* First, handle some special cases when the signal is being delivered
+       * to task that is currently executing on any CPU.
+       */
+
+      sinfo("rtcb=0x%p CURRENT_REGS=0x%p\n", this_task(), CURRENT_REGS);
+
+      if (tcb->task_state == TSTATE_TASK_RUNNING)
+        {
+          me  = this_cpu();
+          cpu = tcb->cpu;
+
+          /* CASE 1:  We are not in an interrupt handler and a task is
+           * signaling itself for some reason.
+           */
+
+          if (cpu == me && !CURRENT_REGS)
+            {
+              /* In this case just deliver the signal now.
+               * REVISIT:  Signal handler will run in a critical section!
+               */
+
+              sigdeliver(tcb);
+            }
+
+          /* CASE 2:  The task that needs to receive the signal is running.
+           * This could happen if the task is running on another CPU OR if
+           * we are in an interrupt handler and the task is running on this
+           * CPU.  In the former case, we will have to PAUSE the other CPU
+           * first.  But in either case, we will have to modify the return
+           * state as well as the state in the TCB.
+           */
+
+          else
+            {
+              /* If we signaling a task running on the other CPU, we have
+               * to PAUSE the other CPU.
+               */
+
+              if (cpu != me)
+                {
+                  /* Pause the CPU */
+
+                  up_cpu_pause(cpu);
+
+                  /* Wait while the pause request is pending */
+
+                  while (up_cpu_pausereq(cpu))
+                    {
+                    }
+
+                  /* Now tcb on the other CPU can be accessed safely */
+
+                  /* Copy tcb->xcp.regs to tcp.xcp.saved. These will be
+                   * restored by the signal trampoline after the signal has
+                   * been delivered.
+                   */
+
+                  tcb->xcp.sigdeliver       = (FAR void *)sigdeliver;
+                  tcb->xcp.saved_pc         = tcb->xcp.regs[REG_PC];
+                  tcb->xcp.saved_npc        = tcb->xcp.regs[REG_NPC];
+                  tcb->xcp.saved_status     = tcb->xcp.regs[REG_PSR];
+
+                  /* Then set up vector to the trampoline with interrupts
+                   * disabled.  We must already be in privileged thread mode
+                   * to be here.
+                   */
+
+                  tcb->xcp.regs[REG_PC]     = (uint32_t)up_sigdeliver;
+                  tcb->xcp.regs[REG_NPC]    = (uint32_t)up_sigdeliver + 4;
+                  tcb->xcp.regs[REG_PSR]    |= SPARC_PSR_ET_MASK;
+                }
+              else
+                {
+                  /* tcb is running on the same CPU */
+
+                  /* Save registers that must be protected while the signal
+                   * handler runs. These will be restored by the signal
+                   * trampoline after the signal(s) have been delivered.
+                   */
+
+                  tcb->xcp.sigdeliver   = (FAR void *)sigdeliver;
+                  tcb->xcp.saved_pc     = CURRENT_REGS[REG_PC];
+                  tcb->xcp.saved_npc    = CURRENT_REGS[REG_NPC];
+                  tcb->xcp.saved_status = CURRENT_REGS[REG_PSR];
+
+                  /* Then set up vector to the trampoline with interrupts
+                   * disabled.  The kernel-space trampoline must run in
+                   * privileged thread mode.
+                   */
+
+                  CURRENT_REGS[REG_PC]  = (uint32_t)up_sigdeliver;
+                  CURRENT_REGS[REG_NPC] = (uint32_t)up_sigdeliver + 4;
+                  CURRENT_REGS[REG_PSR] |= SPARC_PSR_ET_MASK;
+
+                  /* And make sure that the saved context in the TCB is the
+                   * same as the interrupt return context.
+                   */
+
+                  up_savestate(tcb->xcp.regs);
+                }
+
+              /* Increment the IRQ lock count so that when the task is
+               * restarted, it will hold the IRQ spinlock.
+               */
+
+              DEBUGASSERT(tcb->irqcount < INT16_MAX);
+              tcb->irqcount++;
+
+              /* NOTE: If the task runs on another CPU(cpu), adjusting
+               * global IRQ controls will be done in the pause handler
+               * on the CPU(cpu) by taking a critical section.
+               * If the task is scheduled on this CPU(me), do nothing
+               * because this CPU already took a critical section
+               */
+
+              /* RESUME the other CPU if it was PAUSED */
+
+              if (cpu != me)
+                {
+                  up_cpu_resume(cpu);
+                }
+            }
+        }
+
+      /* Otherwise, we are (1) signaling a task is not running from an
+       * interrupt handler or (2) we are not in an interrupt handler and the
+       * running task is signaling some other non-running task.
+       */
+
+      else
+        {
+          /* Save registers that must be protected while the signal
+           * handler runs. These will be restored by the signal
+           * trampoline after the signal(s) have been delivered.
+           */
+
+          tcb->xcp.sigdeliver       = (FAR void *)sigdeliver;
+          tcb->xcp.saved_pc     = CURRENT_REGS[REG_PC];
+          tcb->xcp.saved_npc    = CURRENT_REGS[REG_NPC];
+          tcb->xcp.saved_status = CURRENT_REGS[REG_PSR];
+
+          /* Increment the IRQ lock count so that when the task is restarted,
+           * it will hold the IRQ spinlock.
+           */
+
+          DEBUGASSERT(tcb->irqcount < INT16_MAX);
+          tcb->irqcount++;
+
+          /* Then set up to vector to the trampoline with interrupts
+           * disabled.  We must already be in privileged thread mode to be
+           * here.
+           */
+
+          tcb->xcp.regs[REG_PC]     = (uint32_t)up_sigdeliver;
+          tcb->xcp.regs[REG_NPC]    = (uint32_t)up_sigdeliver + 4;
+          tcb->xcp.regs[REG_PSR]    |= SPARC_PSR_ET_MASK;
+        }
+    }
+
+  leave_critical_section(flags);
+}
+#endif /* CONFIG_SMP */
