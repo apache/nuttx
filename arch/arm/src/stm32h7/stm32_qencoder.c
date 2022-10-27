@@ -987,7 +987,8 @@ static int stm32_shutdown(struct qe_lowerhalf_s *lower)
   putreg32(regval, regaddr);
   leave_critical_section(flags);
 
-  sninfo("regaddr: %08x resetbit: %08x\n", regaddr, resetbit);
+  sninfo("regaddr: %08" PRIx32 " resetbit: %08" PRIx32 "\n", \
+          regaddr, resetbit);
   stm32_dumpregs(priv, "After stop");
 
   /* Disable clocking to the timer */
