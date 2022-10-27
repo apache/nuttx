@@ -395,7 +395,7 @@
 
 /* TIM3 */
 
-#define GPIO_TIM3_CH1OUT  GPIO_TIM3_CH1OUT_2    /* PB4  */
+#define GPIO_TIM3_CH1OUT  GPIO_TIM3_CH1OUT_2   /* PB4  */
 #define GPIO_TIM3_CH2OUT  GPIO_TIM3_CH2OUT_2   /* PB5  */
 
 #define GPIO_TIM3_CH1IN GPIO_TIM3_CH1IN_2      /* PA4 */    
