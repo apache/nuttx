@@ -276,6 +276,12 @@
 #define SCM_CREDENTIALS 0x02    /* rw: struct ucred */
 #define SCM_SECURITY    0x03    /* rw: security label */
 
+/* Desired design of maximum size and alignment (see RFC2553) */
+
+#define SS_MAXSIZE      128  /* Implementation specific max size */
+#define SS_ALIGNSIZE    (sizeof(FAR struct sockaddr *))
+                             /* Implementation specific desired alignment */
+
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/
@@ -289,9 +295,10 @@
 
 struct sockaddr_storage
 {
-  sa_family_t ss_family;       /* Address family */
-  char        ss_data[126];    /* 126-bytes of address data */
-};
+  sa_family_t ss_family;     /* Address family */
+  char        ss_data[SS_MAXSIZE - sizeof(sa_family_t)];
+}
+aligned_data(SS_ALIGNSIZE);  /* Force desired alignment */
 
 /* The sockaddr structure is used to define a socket address which is used
  * in the bind(), connect(), getpeername(), getsockname(), recvfrom(), and
