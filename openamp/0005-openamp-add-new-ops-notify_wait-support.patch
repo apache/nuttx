@@ -1,12 +1,11 @@
-From 2bafe51755ef34f34e1a10eb7bbeb0ef0df878b8 Mon Sep 17 00:00:00 2001
+From 00d0f99b49a5647107bc16249a141d1c727ec11e Mon Sep 17 00:00:00 2001
 From: Guiding Li <liguiding1@xiaomi.com>
 Date: Thu, 18 Nov 2021 20:54:45 +0800
-Subject: [PATCH 05/12] openamp: add new ops notify_wait() support
+Subject: [PATCH 2/9] openamp: add new ops notify_wait() support
 
 This can avoid looping check tx buffer
 
 Signed-off-by: Guiding Li <liguiding1@xiaomi.com>
-Signed-off-by: ligd <liguiding1@xiaomi.com>
 ---
  lib/include/openamp/remoteproc.h        | 12 ++++++++++++
  lib/include/openamp/remoteproc_virtio.h |  2 ++
@@ -15,8 +14,8 @@ Signed-off-by: ligd <liguiding1@xiaomi.com>
  lib/include/openamp/virtio.h            |  1 +
  lib/remoteproc/remoteproc.c             | 11 +++++++++++
  lib/remoteproc/remoteproc_virtio.c      | 14 ++++++++++++++
- lib/rpmsg/rpmsg_virtio.c                |  7 +++++++
- 8 files changed, 57 insertions(+)
+ lib/rpmsg/rpmsg_virtio.c                |  5 +++++
+ 8 files changed, 55 insertions(+)
 
 diff --git a/lib/include/openamp/remoteproc.h open-amp/lib/include/openamp/remoteproc.h
 index e9111ff..d276550 100644
@@ -167,10 +166,10 @@ index cbfd966..ef5eef3 100644
  	/*
  	 * We suppose here that the vdev is in a shared memory so that can
 diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
-index d19d3b1..c555101 100644
+index d19d3b1..80bfbf7 100644
 --- a/lib/rpmsg/rpmsg_virtio.c
 +++ open-amp/lib/rpmsg/rpmsg_virtio.c
-@@ -339,6 +339,13 @@ static void *rpmsg_virtio_get_tx_payload_buffer(struct rpmsg_device *rdev,
+@@ -339,6 +339,11 @@ static void *rpmsg_virtio_get_tx_payload_buffer(struct rpmsg_device *rdev,
  		metal_mutex_release(&rdev->lock);
  		if (rp_hdr || !tick_count)
  			break;
@@ -178,8 +177,6 @@ index d19d3b1..c555101 100644
 +		status = rpmsg_virtio_notify_wait(rvdev, rvdev->rvq);
 +		if (status == RPMSG_SUCCESS)
 +			continue;
-+		else if (status != RPMSG_ERR_NXIO)
-+			break;
 +
  		metal_sleep_usec(RPMSG_TICKS_PER_INTERVAL);
  		tick_count--;
