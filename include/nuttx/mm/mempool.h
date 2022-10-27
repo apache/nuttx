@@ -79,6 +79,17 @@ struct mempool_multiple_s
 {
   FAR struct mempool_s *pools;  /* The memory pool array */
   size_t                npools; /* The number of memory pool array elements */
+
+  /* Private data for multiple memory pool */
+
+  /* This delta describes the relationship between the block size of each
+   * mempool in multiple mempool by user initialized. It is automatically
+   * detected by the mempool_multiple_init function. If the delta is not
+   * equal to 0, the block size of the pool in the multiple mempool is an
+   * arithmetic progressions, otherwise it is an increasing progressions.
+   */
+
+  size_t                delta;
 };
 
 struct mempoolinfo_s
@@ -224,6 +235,9 @@ void mempool_procfs_unregister(FAR struct mempool_procfs_entry_s *entry);
  *   in the array, including blocksize, initialsize, expandsize,
  *   interruptsize, wait. These mempool will be initialized by mempool_init.
  *   The name of all mempool are "name".
+ *
+ *   This function will initialize the member delta by detecting the
+ *   relationship between the each block size of mempool in multiple mempool.
  *
  * Input Parameters:
  *   name  - The name of memory pool.
