@@ -52,6 +52,8 @@ ifeq ($(CONFIG_ARCH_CHIP_BM3803),y)
   ARCHCPUFLAGS += -mcpu=leon
 else ifeq ($(CONFIG_ARCH_CHIP_BM3823),y)
   ARCHCPUFLAGS += -mcpu=leon -mflat
+else ifeq ($(CONFIG_ARCH_CHIP_S698PM),y)
+  ARCHCPUFLAGS += -mcpu=leon3
 endif
 
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)

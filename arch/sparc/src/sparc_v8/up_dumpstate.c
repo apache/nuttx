@@ -65,25 +65,27 @@ static void up_stackdump(uint32_t sp, uint32_t stack_base)
 
 static inline void up_registerdump(void)
 {
+  uint32_t *regs = (uint32_t *)CURRENT_REGS; /* Don't need volatile here */
+
   /* Are user registers available from interrupt processing? */
 
-  if (g_current_regs)
+  if (regs)
     {
       _alert("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
             0,
-            g_current_regs[REG_R16], g_current_regs[REG_R17],
-            g_current_regs[REG_R18], g_current_regs[REG_R19],
-            g_current_regs[REG_R20], g_current_regs[REG_R21],
-            g_current_regs[REG_R22], g_current_regs[REG_R23]);
+            regs[REG_R16], regs[REG_R17],
+            regs[REG_R18], regs[REG_R19],
+            regs[REG_R20], regs[REG_R21],
+            regs[REG_R22], regs[REG_R23]);
 
       _alert("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
             8,
-            g_current_regs[REG_R24], g_current_regs[REG_R25],
-            g_current_regs[REG_R26], g_current_regs[REG_R27],
-            g_current_regs[REG_R28], g_current_regs[REG_R29],
-            g_current_regs[REG_R30], g_current_regs[REG_R31]);
+            regs[REG_R24], regs[REG_R25],
+            regs[REG_R26], regs[REG_R27],
+            regs[REG_R28], regs[REG_R29],
+            regs[REG_R30], regs[REG_R31]);
 
-      _alert("SR: %08x\n", g_current_regs[REG_R14]);
+      _alert("SR: %08x\n", regs[REG_R14]);
     }
 }
 
@@ -100,6 +102,12 @@ void up_dumpstate(void)
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
   uint32_t istackbase;
   uint32_t istacksize;
+#endif
+
+#ifdef CONFIG_SMP
+  /* Show the CPU number */
+
+  _alert("CPU%d:\n", up_cpu_index());
 #endif
 
   /* Dump the registers (if available) */
@@ -122,7 +130,7 @@ void up_dumpstate(void)
   /* Get the limits on the interrupt stack memory */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-  istackbase = (uint32_t)g_intstackbase;
+  istackbase = (uint32_t)up_intstack_alloc();
   istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4;
 
   /* Show interrupt stack info */
@@ -145,7 +153,7 @@ void up_dumpstate(void)
 
       up_stackdump(sp, istackbase);
     }
-  else if (g_current_regs)
+  else if (CURRENT_REGS)
     {
       _alert("ERROR: Stack pointer is not within the interrupt stack\n");
       up_stackdump(istackbase - istacksize, istackbase);
@@ -156,9 +164,9 @@ void up_dumpstate(void)
    * pointer (and the above range check should have failed).
    */
 
-  if (g_current_regs)
+  if (CURRENT_REGS)
     {
-      sp = g_current_regs[REG_I6];
+      sp = CURRENT_REGS[REG_I6];
       _alert("sp:     %08x\n", sp);
     }
 

@@ -71,7 +71,7 @@ static void _up_assert(int errorcode)
 
   /* Are we in an interrupt handler or the idle task? */
 
-  if (g_current_regs || running_task()->flink == NULL)
+  if (CURRENT_REGS || running_task()->flink == NULL)
     {
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 1
       board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
