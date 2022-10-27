@@ -1388,8 +1388,6 @@ int nxsched_get_stackinfo(pid_t pid, FAR struct stackinfo_s *stackinfo);
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_WAITPID
-pid_t nx_wait(FAR int *stat_loc);
-int   nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options);
 pid_t nx_waitpid(pid_t pid, FAR int *stat_loc, int options);
 #endif
 
