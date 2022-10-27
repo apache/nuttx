@@ -210,7 +210,6 @@ uintptr_t up_intstack_alloc(void);
 uintptr_t up_intstack_top(void);
 #endif
 
-
 /* Chip-specific functions **************************************************/
 
 /* Chip specific functions defined in arch/sparc/src/<chip> */

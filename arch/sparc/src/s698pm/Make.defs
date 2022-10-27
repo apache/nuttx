@@ -1,0 +1,58 @@
+############################################################################
+# arch/sparc/src/s698pm/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+include common/Make.defs
+
+# The start-up, "head", file
+
+HEAD_ASRC = s698pm_head.S
+
+# Required S698PM files
+
+CHIP_ASRCS = s698pm_exceptions.S
+CHIP_CSRCS = s698pm-lowconsole.c s698pm-lowinit.c s698pm-serial.c s698pm-irq.c s698pm_tim.c
+
+ifeq ($(CONFIG_TIMER),y)
+CHIP_CSRCS += s698pm_tim_lowerhalf.c
+endif
+
+ifeq ($(CONFIG_S698PM_WDG),y)
+CHIP_CSRCS += s698pm_wdg.c
+endif
+
+ifneq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += s698pm-timerisr.c
+else
+CHIP_CSRCS += s698pm_tickless.c
+endif
+
+ifeq ($(CONFIG_S698PM_ONESHOT),y)
+CHIP_CSRCS += s698pm_oneshot.c s698pm_oneshot_lowerhalf.c
+endif
+
+ifeq ($(CONFIG_S698PM_FREERUN),y)
+CHIP_CSRCS += s698pm_freerun.c
+endif
+
+# Configuration-dependent files
+
+ifeq ($(CONFIG_SMP),y)
+CHIP_CSRCS += s698pm_cpuindex.c s698pm_cpustart.c s698pm_cpupause.c s698pm_cpuidlestack.c
+endif

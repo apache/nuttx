@@ -1,0 +1,135 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_S698PM
+comment "S698PM Configuration Options"
+
+menu "S698PM Peripheral Support"
+
+config S698PM_WDG
+	bool "Watchdog timer (WDT)"
+	default n
+	select WATCHDOG
+
+config S698PM_TIM1
+	bool "Timer 1 (T1)"
+	default n
+
+config S698PM_TIM2
+	bool "Timer 2 (T2)"
+	default n
+
+config S698PM_TIM3
+	bool "Timer 3 (T3)"
+	default n
+
+config S698PM_TIM4
+	bool "Timer 4 (T4)"
+	default n
+
+config S698PM_UART1
+	bool "UART1"
+	default n
+	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config S698PM_UART2
+	bool "UART2"
+	default n
+	select UART2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config S698PM_UART3
+	bool "UART3"
+	default n
+	select UART3_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config S698PM_UART4
+	bool "UART4"
+	default n
+	select UART4_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+endmenu # S698PM Peripheral Selections
+
+menuconfig S698PM_GPIOIRQ
+	bool "GPIO Interrupt Support"
+	default n
+	---help---
+		Build in support for interrupts based on GPIO inputs from IOPorts
+
+if S698PM_GPIOIRQ
+
+config S698PM_GPIOIRQ_PORT4
+	bool "I/O PORT4 Interrupt Support"
+	default n
+
+config S698PM_GPIOIRQ_PORT5
+	bool "I/O PORT5 Interrupt Support"
+	default n
+
+config S698PM_GPIOIRQ_PORT6
+	bool "I/O PORT6 Interrupt Support"
+	default n
+config S698PM_GPIOIRQ_PORT7
+	bool "I/O PORT7 Interrupt Support"
+	default n
+
+endif # S698PM_GPIOIRQ
+
+menu "Timer Configuration"
+
+if SCHED_TICKLESS
+
+config S698PM_ONESHOT
+	bool
+	default y
+
+config S698PM_FREERUN
+	bool
+	default y
+
+config S698PM_TICKLESS_ONESHOT
+	int "Tickless one-shot timer channel"
+	default 1
+	range 1 2
+	depends on S698PM_ONESHOT
+	---help---
+		If the Tickless OS feature is enabled, then one clock must be
+		assigned to provide the one-shot timer needed by the OS.
+
+config S698PM_TICKLESS_FREERUN
+	int "Tickless free-running timer channel"
+	default 2
+	range 1 2
+	depends on S698PM_FREERUN
+	---help---
+		If the Tickless OS feature is enabled, then one clock must be
+		assigned to provide the free-running timer needed by the OS.
+
+endif # SCHED_TICKLESS
+
+if !SCHED_TICKLESS
+
+config S698PM_ONESHOT
+	bool "TIM one-shot wrapper"
+	default n
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support one-shot timer.
+
+config S698PM_FREERUN
+	bool "TIM free-running wrapper"
+	default n
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support a free-running timer.
+
+endif # !SCHED_TICKLESS
+
+endmenu # Timer Configuration
+
+endif
