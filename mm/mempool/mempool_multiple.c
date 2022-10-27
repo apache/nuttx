@@ -44,6 +44,13 @@ mempool_multiple_find(FAR struct mempool_multiple_s *mpool, size_t size)
   size_t left = 0;
   size_t mid;
 
+  if (mpool->delta != 0)
+    {
+      left = mpool->pools[0].blocksize;
+      mid = (size - left + mpool->delta - 1) / mpool->delta;
+      return mid < right ? &mpool->pools[mid] : NULL;
+    }
+
   while (left < right)
     {
       mid = (left + right) >> 1;
@@ -79,6 +86,9 @@ mempool_multiple_find(FAR struct mempool_multiple_s *mpool, size_t size)
  *   interruptsize, wait. These mempool will be initialized by mempool_init.
  *   The name of all mempool are "name".
  *
+ *   This function will initialize the member delta by detecting the
+ *   relationship between the each block size of mempool in multiple mempool.
+ *
  * Input Parameters:
  *   name  - The name of memory pool.
  *   mpool - The handle of the multiple memory pool to be used.
@@ -94,6 +104,20 @@ int mempool_multiple_init(FAR struct mempool_multiple_s *mpool,
   size_t i;
 
   DEBUGASSERT(mpool != NULL && mpool->pools != NULL);
+
+  mpool->delta = 0;
+  for (i = 1; i < mpool->npools; i++)
+    {
+      size_t delta = mpool->pools[i].blocksize -
+                     mpool->pools[i - 1].blocksize;
+      if (mpool->delta != 0 && delta != mpool->delta)
+        {
+          mpool->delta = 0;
+          break;
+        }
+
+      mpool->delta = delta;
+    }
 
   for (i = 0; i < mpool->npools; i++)
     {
