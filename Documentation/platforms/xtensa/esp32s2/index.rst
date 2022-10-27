@@ -312,8 +312,8 @@ of flash will not be sufficient to recover most flash contents.
 Prerequisites
 -------------
 
-First of all, we need to install ``imgtool`` (a MCUboot utiliy application to manipulate binary images) and
-``esptool`` (the ESP32-S2 toolkit)::
+First of all, we need to install ``imgtool`` (a MCUboot utility application to manipulate binary
+images) and ``esptool`` (the ESP32-S2 toolkit)::
 
     $ pip install imgtool esptool
 
@@ -336,16 +336,21 @@ respectively, of the compiled project::
 Enabling Secure Boot and Flash Encryption
 -----------------------------------------
 
-To enable Secure Boot for the current project, go to the project's NuttX directory, execute ``make menuconfig`` and the following steps::
+To enable Secure Boot for the current project, go to the project's NuttX directory, execute ``make menuconfig`` and the following steps:
 
-1. Enable experimental features in :menuselection:`Build Setup --> Show experimental options`;
-2. Enable MCUboot in :menuselection:`Application Configuration --> Bootloader Utilities --> MCUboot`;
-3. Change image type to ``MCUboot-bootable format`` in :menuselection:`System Type --> Application Image Configuration --> Application Image Format`;
-4. Enable building MCUboot from the source code by selecting ``Build binaries from source``;
-   in :menuselection:`System Type --> Application Image Configuration --> Source for bootloader binaries`;
-5. Enable Secure Boot in :menuselection:`System Type --> Application Image Configuration --> Enable hardware Secure Boot in bootloader`;
-6. If you want to protect the SPI Bus against data sniffing, you can enable Flash Encryption in
-   :menuselection:`System Type --> Application Image Configuration --> Enable Flash Encryption on boot`.
+   1. Enable experimental features in :menuselection:`Build Setup --> Show experimental options`;
+
+   2. Enable MCUboot in :menuselection:`Application Configuration --> Bootloader Utilities --> MCUboot`;
+
+   3. Change image type to ``MCUboot-bootable format`` in :menuselection:`System Type --> Application Image Configuration --> Application Image Format`;
+
+   4. Enable building MCUboot from the source code by selecting ``Build binaries from source``;
+      in :menuselection:`System Type --> Application Image Configuration --> Source for bootloader binaries`;
+
+   5. Enable Secure Boot in :menuselection:`System Type --> Application Image Configuration --> Enable hardware Secure Boot in bootloader`;
+
+   6. If you want to protect the SPI Bus against data sniffing, you can enable Flash Encryption in
+      :menuselection:`System Type --> Application Image Configuration --> Enable Flash Encryption on boot`.
 
 Now you can design an update and confirm agent to your application. Check the `MCUboot design guide <https://docs.mcuboot.com/design.html>`_ and the
 `MCUboot Espressif port documentation <https://docs.mcuboot.com/readme-espressif.html>`_ for
