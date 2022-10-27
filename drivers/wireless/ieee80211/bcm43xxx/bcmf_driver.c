@@ -1890,7 +1890,8 @@ int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
                        (uint8_t *)&ssid, &out_len);
   if (ret == OK)
     {
-      ret = bcmf_sem_wait(priv->auth_signal, BCMF_AUTH_TIMEOUT_MS);
+      ret = nxsem_tickwait_uninterruptible(priv->auth_signal,
+                                     MSEC2TICK(BCMF_AUTH_TIMEOUT_MS));
     }
 
   priv->auth_signal = NULL;
