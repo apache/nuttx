@@ -131,7 +131,7 @@ static int ipv4_nat_outbound_tcp(FAR struct net_driver_s *dev,
   FAR struct tcp_hdr_s *tcp =
       (FAR struct tcp_hdr_s *)((FAR uint8_t *)ipv4 + iphdrlen);
   FAR struct ipv4_nat_entry *entry = ipv4_nat_outbound_entry_find(
-      IP_PROTO_TCP, net_ip4addr_conv32(ipv4->srcipaddr), tcp->srcport);
+      dev, IP_PROTO_TCP, net_ip4addr_conv32(ipv4->srcipaddr), tcp->srcport);
   if (!entry)
     {
       /* Outbound entry creation failed, should have corresponding entry. */

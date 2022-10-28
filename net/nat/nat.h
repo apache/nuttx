@@ -204,6 +204,7 @@ ipv4_nat_inbound_entry_find(uint8_t protocol, uint16_t external_port,
  *   entry does not exist.
  *
  * Input Parameters:
+ *   dev        - The device on which the packet will be sent.
  *   protocol   - The L4 protocol of the packet.
  *   local_ip   - The local ip of the packet.
  *   local_port - The local port of the packet.
@@ -214,8 +215,8 @@ ipv4_nat_inbound_entry_find(uint8_t protocol, uint16_t external_port,
  ****************************************************************************/
 
 FAR struct ipv4_nat_entry *
-ipv4_nat_outbound_entry_find(uint8_t protocol, in_addr_t local_ip,
-                             uint16_t local_port);
+ipv4_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
+                             in_addr_t local_ip, uint16_t local_port);
 
 #endif /* CONFIG_NET_NAT && CONFIG_NET_IPv4 */
 #endif /* __NET_NAT_NAT_H */

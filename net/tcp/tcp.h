@@ -553,6 +553,27 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
                                         FAR struct tcp_hdr_s *tcp);
 
 /****************************************************************************
+ * Name: tcp_selectport
+ *
+ * Description:
+ *   If the port number is zero; select an unused port for the connection.
+ *   If the port number is non-zero, verify that no other connection has
+ *   been created with this port number.
+ *
+ * Returned Value:
+ *   Selected or verified port number in network order on success, a negated
+ *   errno on failure.
+ *
+ * Assumptions:
+ *   Interrupts are disabled
+ *
+ ****************************************************************************/
+
+int tcp_selectport(uint8_t domain,
+                   FAR const union ip_addr_u *ipaddr,
+                   uint16_t portno);
+
+/****************************************************************************
  * Name: tcp_bind
  *
  * Description:
