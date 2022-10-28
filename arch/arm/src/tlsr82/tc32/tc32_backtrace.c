@@ -81,7 +81,7 @@ static void **g_backtrace_code_regions;
  *
  ****************************************************************************/
 
-nosanitize_address static int getlroffset(uint8_t *lr)
+static int getlroffset(uint8_t *lr)
 {
   lr = (uint8_t *)((uintptr_t)lr & 0xfffffffe);
 
@@ -113,7 +113,7 @@ nosanitize_address static int getlroffset(uint8_t *lr)
  *
  ****************************************************************************/
 
-nosanitize_address static bool in_code_region(void *pc)
+static bool in_code_region(void *pc)
 {
   int i = 0;
 
@@ -161,7 +161,6 @@ nosanitize_address static bool in_code_region(void *pc)
  *
  ****************************************************************************/
 
-nosanitize_address
 static void *backtrace_push_internal(void **psp, void **ppc)
 {
   uint8_t *sp = *psp;
@@ -413,7 +412,7 @@ static int backtrace_branch(void *limit, void *sp,
  *
  ****************************************************************************/
 
-nosanitize_address void up_backtrace_init_code_regions(void **regions)
+void up_backtrace_init_code_regions(void **regions)
 {
   g_backtrace_code_regions = regions;
 }
