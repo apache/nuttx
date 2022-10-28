@@ -82,23 +82,21 @@
      do \
        { \
          FAR struct mm_allocnode_s *tmp = (FAR struct mm_allocnode_s *)(ptr); \
-         kasan_unpoison(tmp, SIZEOF_MM_ALLOCNODE); \
          FAR struct tcb_s *tcb; \
          tmp->pid = gettid(); \
          tcb = nxsched_get_tcb(tmp->pid); \
          if ((heap)->mm_procfs.backtrace || (tcb && tcb->flags & TCB_FLAG_HEAP_DUMP)) \
            { \
              int n = backtrace(tmp->backtrace, CONFIG_MM_BACKTRACE); \
-             if (n < CONFIG_MM_BACKTRACE) \
+             while (n < CONFIG_MM_BACKTRACE) \
                { \
-                 tmp->backtrace[n] = 0; \
+                 tmp->backtrace[n++] = NULL; \
                } \
            } \
          else \
            { \
              tmp->backtrace[0] = 0; \
            } \
-         kasan_poison(tmp, SIZEOF_MM_ALLOCNODE); \
        } \
      while (0)
 #else
