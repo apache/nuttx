@@ -101,7 +101,6 @@ static int backtrace(uintptr_t *base, uintptr_t *limit,
  *
  ****************************************************************************/
 
-nosanitize_address
 int up_backtrace(struct tcb_s *tcb,
                  void **buffer, int size, int skip)
 {

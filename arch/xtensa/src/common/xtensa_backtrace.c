@@ -105,6 +105,7 @@ static void get_window_regs(struct xtensa_windowregs_s *frame)
  ****************************************************************************/
 
 #ifndef __XTENSA_CALL0_ABI__
+nosanitize_address
 static int backtrace_window(uintptr_t *base, uintptr_t *limit,
                             struct xtensa_windowregs_s *frame,
                             void **buffer, int size, int *skip)
@@ -155,6 +156,7 @@ static int backtrace_window(uintptr_t *base, uintptr_t *limit,
  *
  ****************************************************************************/
 
+nosanitize_address
 static int backtrace_stack(uintptr_t *base, uintptr_t *limit,
                            uintptr_t *sp, uintptr_t *ra,
                            void **buffer, int size, int *skip)
