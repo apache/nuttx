@@ -898,13 +898,6 @@ int32_t altcombs_convert_api_edrx_value(lte_edrx_setting_t *api_edrx,
       return -EINVAL;
     }
 
-  if (api_edrx->enable < LTE_DISABLE ||
-      api_edrx->enable > LTE_ENABLE)
-    {
-      m_err("Invalid enable :%d\n", api_edrx->enable);
-      return -EINVAL;
-    }
-
   /* act_type check for version V4 or later */
 
   if (altver == ALTCOM_VER1)
