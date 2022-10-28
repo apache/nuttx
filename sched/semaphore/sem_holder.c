@@ -707,7 +707,7 @@ void nxsem_add_holder_tcb(FAR struct tcb_s *htcb, FAR sem_t *sem)
    * inheritance is effectively disabled.
    */
 
-  if (htcb->flink != NULL && (sem->flags & PRIOINHERIT_FLAGS_ENABLE) != 0)
+  if (!is_idle_task(htcb) && (sem->flags & PRIOINHERIT_FLAGS_ENABLE) != 0)
     {
       /* Find or allocate a container for this new holder */
 

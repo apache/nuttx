@@ -319,7 +319,7 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
            * descheduling that isn't going to end well.
            */
 
-          DEBUGASSERT(NULL != rtcb->flink);
+          DEBUGASSERT(!is_idle_task(rtcb));
           up_block_task(rtcb, TSTATE_WAIT_SIG);
 
           /* We no longer need the watchdog */
@@ -336,7 +336,7 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
            * descheduling that isn't going to end well.
            */
 
-          DEBUGASSERT(NULL != rtcb->flink);
+          DEBUGASSERT(!is_idle_task(rtcb));
           up_block_task(rtcb, TSTATE_WAIT_SIG);
         }
 

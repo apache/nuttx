@@ -56,6 +56,8 @@
 #  define this_task()            (current_task(this_cpu()))
 #endif
 
+#define is_idle_task(t)          ((t)->pid < CONFIG_SMP_NCPUS)
+
 /* This macro returns the running task which may different from this_task()
  * during interrupt level context switches.
  */

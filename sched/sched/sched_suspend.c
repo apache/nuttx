@@ -84,7 +84,7 @@ void nxsched_suspend(FAR struct tcb_s *tcb)
        * descheduling that isn't going to end well.
        */
 
-      DEBUGASSERT(NULL != tcb->flink);
+      DEBUGASSERT(!is_idle_task(tcb));
       up_block_task(tcb, TSTATE_TASK_STOPPED);
     }
 
