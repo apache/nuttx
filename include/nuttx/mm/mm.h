@@ -239,6 +239,12 @@ FAR void *mm_zalloc(FAR struct mm_heap_s *heap, size_t size);
 FAR void *kmm_zalloc(size_t size);
 #endif
 
+/* Functions contained in kmm_memdump.c *************************************/
+
+#ifdef CONFIG_MM_KERNEL_HEAP
+void kmm_memdump(pid_t pid);
+#endif
+
 /* Functions contained in mm_memalign.c *************************************/
 
 FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
@@ -324,6 +330,10 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap);
 /* Functions contained in umm_checkcorruption.c *****************************/
 
 FAR void umm_checkcorruption(void);
+
+/* Functions contained in umm_memdump.c *************************************/
+
+void umm_memdump(pid_t pid);
 
 /* Functions contained in kmm_checkcorruption.c *****************************/
 
