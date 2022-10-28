@@ -589,6 +589,12 @@ config SCHED_WAITPID
 		compliant) and will enable the waitid() and wait() interfaces as
 		well.
 
+config SCHED_DUMP_LEAK
+	bool "Enable catch task memory leak"
+	default n
+	---help---
+		Catch memory leaks when the task exits.
+
 config SCHED_USER_IDENTITY
 	bool "Support per-task User Identity"
 	default n
