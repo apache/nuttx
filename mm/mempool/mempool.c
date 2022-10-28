@@ -35,12 +35,12 @@
 
 static inline void mempool_add_list(FAR struct list_node *list,
                                     FAR void *base, size_t nblks,
-                                    size_t bsize)
+                                    size_t blocksize)
 {
   while (nblks-- > 0)
     {
       list_add_head(list, ((FAR struct list_node *)((FAR char *)base +
-                                                    bsize * nblks)));
+                                                    blocksize * nblks)));
     }
 }
 
@@ -79,7 +79,7 @@ static inline void mempool_mfree(FAR struct mempool_s *pool, FAR void *addr)
  * Description:
  *   Initialize a memory pool.
  *   The user needs to specify the initialization information of mempool
- *   including bsize, ninitial, nexpand, ninterrupt.
+ *   including blocksize, initialsize, expandsize, interruptsize.
  *
  * Input Parameters:
  *   pool - Address of the memory pool to be used.
@@ -93,20 +93,24 @@ static inline void mempool_mfree(FAR struct mempool_s *pool, FAR void *addr)
 int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
 {
   FAR struct list_node *base;
+  size_t ninterrupt;
+  size_t ninitial;
   size_t count;
 
-  DEBUGASSERT(pool != NULL && pool->bsize != 0);
+  DEBUGASSERT(pool != NULL && pool->blocksize != 0);
 
   pool->nused = 0;
   list_initialize(&pool->list);
   list_initialize(&pool->ilist);
   list_initialize(&pool->elist);
 
-  count = pool->ninitial + pool->ninterrupt;
+  ninitial = pool->initialsize / pool->blocksize;
+  ninterrupt = pool->interruptsize / pool->blocksize;
+  count = ninitial + ninterrupt;
   if (count != 0)
     {
       base = mempool_malloc(pool, sizeof(*base) +
-                            pool->bsize * count);
+                            pool->blocksize * count);
       if (base == NULL)
         {
           return -ENOMEM;
@@ -114,14 +118,14 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
 
       list_add_head(&pool->elist, base);
       mempool_add_list(&pool->ilist, base + 1,
-                       pool->ninterrupt, pool->bsize);
+                       ninterrupt, pool->blocksize);
       mempool_add_list(&pool->list, (FAR char *)(base + 1) +
-                       pool->ninterrupt * pool->bsize,
-                       pool->ninitial, pool->bsize);
-      kasan_poison(base + 1, pool->bsize * count);
+                       ninterrupt * pool->blocksize,
+                       ninitial, pool->blocksize);
+      kasan_poison(base + 1, pool->blocksize * count);
     }
 
-  if (pool->wait && pool->nexpand == 0)
+  if (pool->wait && pool->expandsize == 0)
     {
       nxsem_init(&pool->waitsem, 0, 0);
     }
@@ -140,7 +144,7 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
  *   Allocate an block from a specific memory pool.
  *
  *   If there isn't enough memory blocks, This function will expand memory
- *   pool if nexpand isn't zero.
+ *   pool if expandsize isn't zero.
  *
  * Input Parameters:
  *   pool - Address of the memory pool to be used.
@@ -173,20 +177,21 @@ retry:
       else
         {
           spin_unlock_irqrestore(&pool->lock, flags);
-          if (pool->nexpand != 0)
+          if (pool->expandsize != 0)
             {
-              blk = mempool_malloc(pool, sizeof(*blk) + pool->bsize *
-                                   pool->nexpand);
+              size_t nexpand = pool->expandsize / pool->blocksize;
+              blk = mempool_malloc(pool, sizeof(*blk) + pool->blocksize *
+                                   nexpand);
               if (blk == NULL)
                 {
                   return NULL;
                 }
 
-              kasan_poison(blk + 1, pool->bsize * pool->nexpand);
+              kasan_poison(blk + 1, pool->blocksize * nexpand);
               flags = spin_lock_irqsave(&pool->lock);
               list_add_head(&pool->elist, blk);
-              mempool_add_list(&pool->list, blk + 1, pool->nexpand,
-                               pool->bsize);
+              mempool_add_list(&pool->list, blk + 1, nexpand,
+                               pool->blocksize);
               blk = list_remove_head(&pool->list);
             }
           else if (!pool->wait ||
@@ -202,7 +207,7 @@ retry:
     }
 
   pool->nused++;
-  kasan_unpoison(blk, pool->bsize);
+  kasan_unpoison(blk, pool->blocksize);
 out_with_lock:
   spin_unlock_irqrestore(&pool->lock, flags);
   return blk;
@@ -226,13 +231,15 @@ void mempool_free(FAR struct mempool_s *pool, FAR void *blk)
   DEBUGASSERT(pool != NULL && blk != NULL);
 
   flags = spin_lock_irqsave(&pool->lock);
-  if (pool->ninterrupt)
+  if (pool->interruptsize != 0)
     {
       FAR char *base;
+      size_t ninterrupt;
 
       base = (FAR char *)(list_peek_head(&pool->elist) + 1);
+      ninterrupt = pool->interruptsize / pool->blocksize;
       if ((FAR char *)blk >= base &&
-          (FAR char *)blk < base + pool->ninterrupt * pool->bsize)
+          (FAR char *)blk < base + ninterrupt * pool->blocksize)
         {
           list_add_head(&pool->ilist, blk);
         }
@@ -247,9 +254,9 @@ void mempool_free(FAR struct mempool_s *pool, FAR void *blk)
     }
 
   pool->nused--;
-  kasan_poison(blk, pool->bsize);
+  kasan_poison(blk, pool->blocksize);
   spin_unlock_irqrestore(&pool->lock, flags);
-  if (pool->wait && pool->nexpand == 0)
+  if (pool->wait && pool->expandsize == 0)
     {
       int semcount;
 
@@ -285,10 +292,11 @@ int mempool_info(FAR struct mempool_s *pool, FAR struct mempoolinfo_s *info)
   info->ordblks = list_length(&pool->list);
   info->iordblks = list_length(&pool->ilist);
   info->aordblks = pool->nused;
-  info->arena = (pool->nused + info->ordblks + info->iordblks) * pool->bsize;
+  info->arena = (pool->nused + info->ordblks + info->iordblks) *
+                pool->blocksize;
   spin_unlock_irqrestore(&pool->lock, flags);
-  info->sizeblks = pool->bsize;
-  if (pool->wait && pool->nexpand == 0)
+  info->sizeblks = pool->blocksize;
+  if (pool->wait && pool->expandsize == 0)
     {
       int semcount;
 
@@ -334,7 +342,7 @@ int mempool_deinit(FAR struct mempool_s *pool)
       mempool_mfree(pool, blk);
     }
 
-  if (pool->wait && pool->nexpand == 0)
+  if (pool->wait && pool->expandsize == 0)
     {
       nxsem_destroy(&pool->waitsem);
     }
