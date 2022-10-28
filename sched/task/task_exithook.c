@@ -33,6 +33,7 @@
 
 #include <nuttx/sched.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/mm/mm.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -504,6 +505,17 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
   /* Deallocate anything left in the TCB's queues */
 
   nxsig_cleanup(tcb); /* Deallocate Signal lists */
+
+#ifdef CONFIG_SCHED_DUMP_LEAK
+  if ((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+    {
+      kmm_memdump(tcb->pid);
+    }
+  else
+    {
+      umm_memdump(tcb->pid);
+    }
+#endif
 
 #ifdef CONFIG_SMP
   leave_critical_section(flags);
