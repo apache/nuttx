@@ -67,7 +67,7 @@
  * ADC1: {5, 10, 12, 13, 15};
  */
 
-static const uint8_t  g_adc1_chanlist[ADC1_NCHANNELS] =
+static const uint8_t g_adc1_chanlist[ADC1_NCHANNELS] =
 {
   5, 10, 12, 13, 15
 };
