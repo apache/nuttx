@@ -54,13 +54,13 @@ struct mempool_procfs_entry_s
 
 struct mempool_s
 {
-  size_t     bsize;      /* The size for every block in mempool */
-  size_t     ninitial;   /* The initialize number of block in normal mempool */
-  size_t     ninterrupt; /* The number of block in interrupt mempool */
-  size_t     nexpand;    /* The number of expand block every time for mempool */
-  bool       wait;       /* The flag of need to wait when mempool is empty */
-  mempool_alloc_t alloc; /* The alloc function for mempool */
-  mempool_free_t  free;  /* The free function for mempool */
+  size_t     blocksize;     /* The size for every block in mempool */
+  size_t     initialsize;   /* The initialize size in normal mempool */
+  size_t     interruptsize; /* The initialize size in interrupt mempool */
+  size_t     expandsize;    /* The size of expand block every time for mempool */
+  bool       wait;          /* The flag of need to wait when mempool is empty */
+  mempool_alloc_t alloc;    /* The alloc function for mempool */
+  mempool_free_t  free;     /* The free function for mempool */
 
   /* Private data for memory pool */
 
@@ -110,7 +110,7 @@ extern "C"
  * Description:
  *   Initialize a memory pool.
  *   The user needs to specify the initialization information of mempool
- *   including bsize, ninitial, nexpand, ninterrupt.
+ *   including blocksize, initialsize, expandsize, interruptsize.
  *
  * Input Parameters:
  *   pool - Address of the memory pool to be used.
@@ -130,7 +130,7 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name);
  *   Allocate an block from a specific memory pool.
  *
  *   If there isn't enough memory blocks, This function will expand memory
- *   pool if nexpand isn't zero.
+ *   pool if expandsize isn't zero.
  *
  * Input Parameters:
  *   pool - Address of the memory pool to be used.
@@ -221,9 +221,9 @@ void mempool_procfs_unregister(FAR struct mempool_procfs_entry_s *entry);
  * Description:
  *   Initialize multiple memory pool, each element represents a memory pool.
  *   The user needs to specify the initialization information of each mempool
- *   in the array, including bsize, ninitial, nexpand, ninterrupt, wait.
- *   These mempool will be initialized by mempool_init. The name of all
- *   mempool are "name".
+ *   in the array, including blocksize, initialsize, expandsize,
+ *   interruptsize, wait. These mempool will be initialized by mempool_init.
+ *   The name of all mempool are "name".
  *
  * Input Parameters:
  *   name  - The name of memory pool.
