@@ -95,7 +95,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
        * is now the new active task!
        */
 
-      DEBUGASSERT(rtcb->lockcount == 0 && btcb->flink != NULL);
+      DEBUGASSERT(rtcb->lockcount == 0 && !is_idle_task(btcb));
 
       btcb->task_state = TSTATE_TASK_RUNNING;
       btcb->flink->task_state = TSTATE_TASK_READYTORUN;

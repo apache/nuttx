@@ -133,7 +133,7 @@ void pg_miss(void)
    * that isn't going to end well.
    */
 
-  DEBUGASSERT(NULL != ftcb->flink);
+  DEBUGASSERT(!is_idle_task(ftcb));
   up_block_task(ftcb, TSTATE_WAIT_PAGEFILL);
 
   /* Boost the page fill worker thread priority.

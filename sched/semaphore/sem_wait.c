@@ -151,7 +151,7 @@ int nxsem_wait(FAR sem_t *sem)
            * isn't going to end well.
            */
 
-          DEBUGASSERT(NULL != rtcb->flink);
+          DEBUGASSERT(!is_idle_task(rtcb));
           up_block_task(rtcb, TSTATE_WAIT_SEM);
 
           /* When we resume at this point, either (1) the semaphore has been

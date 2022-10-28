@@ -119,7 +119,7 @@ void up_assert(const char *filename, int lineno)
 
   syslog_flush();
 
-  if (CURRENT_REGS || rtcb->flink == NULL)
+  if (CURRENT_REGS || is_idle_task(rtcb))
     {
       /* Exit the simulation */
 

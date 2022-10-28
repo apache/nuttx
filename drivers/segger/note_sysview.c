@@ -319,7 +319,7 @@ void sched_note_resume(FAR struct tcb_s *tcb)
 
   if (!up_interrupt_context())
     {
-      if (tcb->flink == NULL)
+      if (is_idle_task(tcb))
         {
           SEGGER_SYSVIEW_OnIdle();
         }
@@ -354,7 +354,7 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter)
         {
           FAR struct tcb_s *tcb = this_task();
 
-          if (tcb && tcb->flink != NULL)
+          if (tcb && !is_idle_task(tcb))
             {
               SEGGER_SYSVIEW_OnTaskStartExec(tcb->pid);
             }
