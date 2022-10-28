@@ -81,18 +81,19 @@
      do \
        { \
          FAR struct mm_allocnode_s *tmp = (FAR struct mm_allocnode_s *)(ptr); \
-         kasan_unpoison(tmp, SIZEOF_MM_ALLOCNODE); \
          tmp->pid = getpid(); \
          if ((heap)->mm_procfs.backtrace) \
            { \
-             memset(tmp->backtrace, 0, sizeof(tmp->backtrace)); \
-             backtrace(tmp->backtrace, CONFIG_MM_BACKTRACE); \
+             int result = backtrace(tmp->backtrace, CONFIG_MM_BACKTRACE); \
+             while (result < CONFIG_MM_BACKTRACE) \
+               { \
+                 tmp->backtrace[result++] = NULL; \
+               } \
            } \
          else \
            { \
              tmp->backtrace[0] = 0; \
            } \
-         kasan_poison(tmp, SIZEOF_MM_ALLOCNODE); \
        } \
      while (0)
 #else
