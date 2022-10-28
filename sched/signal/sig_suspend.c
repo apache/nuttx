@@ -122,7 +122,7 @@ int sigsuspend(FAR const sigset_t *set)
        * isn't going to end well.
        */
 
-      DEBUGASSERT(NULL != rtcb->flink);
+      DEBUGASSERT(!is_idle_task(rtcb));
       up_block_task(rtcb, TSTATE_WAIT_SIG);
 
       /* We are running again, restore the original sigprocmask */

@@ -83,7 +83,7 @@ int nxsched_select_cpu(cpu_set_t affinity)
            * IDLE task is always the last task in the assigned task list.
            */
 
-          if (rtcb->flink == NULL)
+          if (is_idle_task(rtcb))
             {
               /* The IDLE task should always be assigned to this CPU and have
                * a priority of zero.

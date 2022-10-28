@@ -180,7 +180,7 @@ int nxmq_wait_receive(FAR struct mqueue_inode_s *msgq,
            * isn't going to end well.
            */
 
-          DEBUGASSERT(NULL != rtcb->flink);
+          DEBUGASSERT(!is_idle_task(rtcb));
           up_block_task(rtcb, TSTATE_WAIT_MQNOTEMPTY);
 
           /* When we resume at this point, either (1) the message queue

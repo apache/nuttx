@@ -76,7 +76,7 @@ bool sched_idletask(void)
        * different PIDs in the SMP configuration.
        */
 
-      return (rtcb->flink == NULL);
+      return is_idle_task(rtcb);
     }
 
   /* We must be on the IDLE thread if we are early in initialization */
