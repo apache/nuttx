@@ -50,7 +50,7 @@
 
 int stm32_qencoder_initialize(const char *devpath, int timer)
 {
-  int ret = 0;
+  int ret;
 
   /* Initialize a quadrature encoder interface. */
 
