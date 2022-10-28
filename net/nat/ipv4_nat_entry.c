@@ -31,6 +31,7 @@
 #include <nuttx/queue.h>
 
 #include "nat/nat.h"
+#include "tcp/tcp.h"
 
 #if defined(CONFIG_NET_NAT) && defined(CONFIG_NET_IPv4)
 
@@ -45,12 +46,53 @@ static dq_queue_t g_entries;
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: ipv4_nat_select_port_without_stack
+ *
+ * Description:
+ *   Select an available port number for TCP/UDP protocol, or id for ICMP.
+ *   Used when corresponding stack is disabled.
+ *
+ * Input Parameters:
+ *   protocol   - The L4 protocol of the packet.
+ *   ip         - The IP bind with the port (in network byte order).
+ *   portno     - The local port (in network byte order), as reference.
+ *
+ * Returned Value:
+ *   port number on success; 0 on failure
+ *
+ ****************************************************************************/
+
+#if (defined(CONFIG_NET_TCP) && defined(CONFIG_NET_TCP_NO_STACK)) || \
+    (defined(CONFIG_NET_UDP) && defined(CONFIG_NET_UDP_NO_STACK)) || \
+    (defined(CONFIG_NET_ICMP) && !defined(CONFIG_NET_ICMP_SOCKET))
+
+static uint16_t ipv4_nat_select_port_without_stack(
+    uint8_t protocol, in_addr_t ip, uint16_t portno)
+{
+  uint16_t hport = NTOHS(portno);
+  while (ipv4_nat_port_inuse(protocol, ip, portno))
+    {
+      if (++hport >= 32000) /* TODO: Why we limit to 32000 in net stack? */
+        {
+          hport = 4096;
+        }
+
+      portno = HTONS(hport);
+    }
+
+  return portno;
+}
+
+#endif
+
+/****************************************************************************
  * Name: ipv4_nat_select_port
  *
  * Description:
  *   Select an available port number for TCP/UDP protocol, or id for ICMP.
  *
  * Input Parameters:
+ *   dev        - The device on which the packet will be sent.
  *   protocol   - The L4 protocol of the packet.
  *   local_port - The local port of the packet, as reference.
  *
@@ -59,13 +101,51 @@ static dq_queue_t g_entries;
  *
  ****************************************************************************/
 
-static uint16_t ipv4_nat_select_port(uint8_t protocol, uint16_t local_port)
+static uint16_t ipv4_nat_select_port(FAR struct net_driver_s *dev,
+                                     uint8_t protocol,
+                                     uint16_t local_port)
 {
-  /* TODO: Implement this, need to consider local ports and nat ports.
-   * TODO: Shall we let the chosen port same as local_port if possible?
-   */
+  switch (protocol)
+    {
+#ifdef CONFIG_NET_TCP
+      case IP_PROTO_TCP:
+        {
+#ifndef CONFIG_NET_TCP_NO_STACK
+          /* Try to select local_port first. */
 
-# warning Missing logic
+          int ret = tcp_selectport(PF_INET,
+                        (FAR const union ip_addr_u *)&dev->d_draddr,
+                        local_port);
+
+          /* If failed, try select another unused port. */
+
+          if (ret < 0)
+            {
+              ret = tcp_selectport(PF_INET,
+                        (FAR const union ip_addr_u *)&dev->d_draddr, 0);
+            }
+
+          return ret > 0 ? ret : 0;
+#else
+          return ipv4_nat_select_port_without_stack(IP_PROTO_TCP,
+                                                    dev->d_draddr,
+                                                    local_port);
+#endif
+        }
+#endif
+
+#ifdef CONFIG_NET_UDP
+#     warning Missing logic
+#endif
+
+#ifdef CONFIG_NET_ICMP
+#     warning Missing logic
+#endif
+    }
+
+  /* TODO: Currently select original port for unsupported protocol, maybe
+   * return zero to indicate failure.
+   */
 
   return local_port;
 }
@@ -237,6 +317,7 @@ ipv4_nat_inbound_entry_find(uint8_t protocol, uint16_t external_port,
  *   entry does not exist.
  *
  * Input Parameters:
+ *   dev        - The device on which the packet will be sent.
  *   protocol   - The L4 protocol of the packet.
  *   local_ip   - The local ip of the packet.
  *   local_port - The local port of the packet.
@@ -247,8 +328,8 @@ ipv4_nat_inbound_entry_find(uint8_t protocol, uint16_t external_port,
  ****************************************************************************/
 
 FAR struct ipv4_nat_entry *
-ipv4_nat_outbound_entry_find(uint8_t protocol, in_addr_t local_ip,
-                             uint16_t local_port)
+ipv4_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
+                             in_addr_t local_ip, uint16_t local_port)
 {
   FAR sq_entry_t *p;
   FAR sq_entry_t *tmp;
@@ -283,7 +364,7 @@ ipv4_nat_outbound_entry_find(uint8_t protocol, in_addr_t local_ip,
         "proto=%d, local=%x:%d, try creating one.\n",
         protocol, local_ip, local_port);
 
-  uint16_t external_port = ipv4_nat_select_port(protocol, local_port);
+  uint16_t external_port = ipv4_nat_select_port(dev, protocol, local_port);
   if (!external_port)
     {
       nwarn("WARNING: Failed to find an available port!\n");
