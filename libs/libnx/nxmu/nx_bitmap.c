@@ -102,12 +102,6 @@ int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
       return ret;
     }
 
-  /* The sem_done semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  _SEM_SETPROTOCOL(&sem_done, SEM_PRIO_NONE);
-
   /* Forward the fill command to the server */
 
   ret = nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_bitmap_s));
