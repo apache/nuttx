@@ -63,7 +63,6 @@ static void cs43l22_writereg(FAR struct cs43l22_dev_s *priv, uint8_t regaddr,
                              uint8_t regval);
 
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
-static inline uint16_t cs43l22_scalevolume(uint16_t volume, b16_t scale);
 static void cs43l22_setvolume(FAR struct cs43l22_dev_s *priv,
                               uint16_t volume, bool mute);
 #endif
@@ -342,22 +341,6 @@ cs43l22_writereg(FAR struct cs43l22_dev_s *priv, uint8_t regaddr,
       audinfo("retries=%d regaddr=%02x\n", retries, regaddr);
     }
 }
-
-/****************************************************************************
- * Name: cs43l22_scalevolume
- *
- * Description:
- *   Set the right and left volume values in the CS43L22 device based on the
- *   current volume and balance settings.
- *
- ****************************************************************************/
-
-#ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
-static inline uint16_t cs43l22_scalevolume(uint16_t volume, b16_t scale)
-{
-  return b16toi((b16_t) volume * scale);
-}
-#endif
 
 /****************************************************************************
  * Name: cs43l22_setvolume
