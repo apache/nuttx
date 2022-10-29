@@ -327,10 +327,6 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv);
 
 static inline uint16_t usbhost_getle16(const uint8_t *val);
 static inline void usbhost_putle16(uint8_t *dest, uint16_t val);
-static inline uint32_t usbhost_getle32(const uint8_t *val);
-#if 0 /* Not used */
-static void usbhost_putle32(uint8_t *dest, uint32_t val);
-#endif
 
 /* Transfer descriptor memory management */
 
@@ -1699,54 +1695,6 @@ static void usbhost_putle16(uint8_t *dest, uint16_t val)
   dest[0] = val & 0xff; /* Little endian means LS byte first in byte stream */
   dest[1] = val >> 8;
 }
-
-/****************************************************************************
- * Name: usbhost_getle32
- *
- * Description:
- *   Get a (possibly unaligned) 32-bit little endian value.
- *
- * Input Parameters:
- *   dest - A pointer to the first byte to save the big endian value.
- *   val - The 32-bit value to be saved.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static inline uint32_t usbhost_getle32(const uint8_t *val)
-{
-  /* Little endian means LS halfword first in byte stream */
-
-  return (uint32_t)usbhost_getle16(&val[2]) << 16 |
-         (uint32_t)usbhost_getle16(val);
-}
-
-/****************************************************************************
- * Name: usbhost_putle32
- *
- * Description:
- *   Put a (possibly unaligned) 32-bit little endian value.
- *
- * Input Parameters:
- *   dest - A pointer to the first byte to save the little endian value.
- *   val - The 32-bit value to be saved.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#if 0 /* Not used */
-static void usbhost_putle32(uint8_t *dest, uint32_t val)
-{
-  /* Little endian means LS halfword first in byte stream */
-
-  usbhost_putle16(dest, (uint16_t)(val & 0xffff));
-  usbhost_putle16(dest + 2, (uint16_t)(val >> 16));
-}
-#endif
 
 /****************************************************************************
  * Name: usbhost_tdalloc
