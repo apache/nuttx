@@ -36,10 +36,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define NXRMUTEX_NO_HOLDER     (pid_t)-1
-#define NXMUTEX_INITIALIZER    NXSEM_INITIALIZER(1, 0)
-#define NXRMUTEX_INITIALIZER   {NXSEM_INITIALIZER(1, 0), \
-                                NXRMUTEX_NO_HOLDER, 0}
+#define NXRMUTEX_NO_HOLDER   (pid_t)-1
+#define NXMUTEX_INITIALIZER  NXSEM_INITIALIZER(1, PRIOINHERIT_FLAGS_ENABLE)
+#define NXRMUTEX_INITIALIZER {NXSEM_INITIALIZER(1, PRIOINHERIT_FLAGS_ENABLE), \
+                              NXRMUTEX_NO_HOLDER, 0}
 
 /****************************************************************************
  * Public Type Definitions
