@@ -129,9 +129,9 @@
 /* PWM */
 
 #if defined(CONFIG_STM32H7_TIM1_PWM)
-# define NUCLEOH743ZI2_PWMTIMER 1
+#  define NUCLEOH743ZI2_PWMTIMER 1
 #else
-# define NUCLEOH743ZI2_PWMTIMER 3
+#  define NUCLEOH743ZI2_PWMTIMER 3
 #endif
 
 /****************************************************************************
@@ -216,6 +216,14 @@ int stm32_usbhost_initialize(void);
 #ifdef CONFIG_PWM
 int stm32_pwm_setup(void);
 #endif
+
+/****************************************************************************
+ * Name: stm32_qencoder_initialize
+ *
+ * Description:
+ *   Initialize and register a qencoder
+ * 
+ ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_QENCODER
 int stm32_qencoder_initialize(const char *devpath, int timer);

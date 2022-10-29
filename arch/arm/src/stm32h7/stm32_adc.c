@@ -1478,14 +1478,14 @@ static int adc_setup(struct adc_dev_s *dev)
 
   leave_critical_section(flags);
 
-  ainfo("ISR:   0x%08" PRIx32 " CR:    0x%08" PRIx32 " \
-          CFGR:  0x%08" PRIx32 " CFGR2: 0x%08" PRIx32 "\n",
+  ainfo("ISR:   0x%08" PRIx32 " CR:    0x%08" PRIx32 " "
+        "CFGR:  0x%08" PRIx32 " CFGR2: 0x%08" PRIx32 "\n",
         adc_getreg(priv, STM32_ADC_ISR_OFFSET),
         adc_getreg(priv, STM32_ADC_CR_OFFSET),
         adc_getreg(priv, STM32_ADC_CFGR_OFFSET),
         adc_getreg(priv, STM32_ADC_CFGR2_OFFSET));
-  ainfo("SQR1:  0x%08" PRIx32 " SQR2:  0x%08" PRIx32 " \
-        SQR3:  0x%08" PRIx32 " SQR4:  0x%08" PRIx32 "\n",
+  ainfo("SQR1:  0x%08" PRIx32 " SQR2:  0x%08" PRIx32 " "
+        "SQR3:  0x%08" PRIx32 " SQR4:  0x%08" PRIx32 "\n",
         adc_getreg(priv, STM32_ADC_SQR1_OFFSET),
         adc_getreg(priv, STM32_ADC_SQR2_OFFSET),
         adc_getreg(priv, STM32_ADC_SQR3_OFFSET),
@@ -1856,8 +1856,8 @@ static int adc_interrupt(struct adc_dev_s *dev, uint32_t adcisr)
       value  = adc_getreg(priv, STM32_ADC_DR_OFFSET);
       value &= ADC_DR_MASK;
 
-      awarn("WARNING: Analog Watchdog, Value (0x%03" PRIx32 ") \
-              out of range!\n", value);
+      awarn("WARNING: Analog Watchdog, Value (0x%03" PRIx32 ") "
+            "out of range!\n", value);
 
       /* Stop ADC conversions to avoid continuous interrupts */
 
