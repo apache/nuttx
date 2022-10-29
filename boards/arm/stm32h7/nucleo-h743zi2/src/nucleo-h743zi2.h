@@ -222,7 +222,7 @@ int stm32_pwm_setup(void);
  *
  * Description:
  *   Initialize and register a qencoder
- * 
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_QENCODER
