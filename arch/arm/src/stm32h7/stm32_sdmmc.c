@@ -424,7 +424,6 @@ static void stm32_configwaitints(struct stm32_dev_s *priv, uint32_t waitmask,
                                  sdio_eventset_t wkupevents);
 static void stm32_configxfrints(struct stm32_dev_s *priv, uint32_t xfrmask);
 static void stm32_setpwrctrl(struct stm32_dev_s *priv, uint32_t pwrctrl);
-static inline uint32_t stm32_getpwrctrl(struct stm32_dev_s *priv);
 
 /* Debug Helpers ************************************************************/
 
@@ -887,28 +886,6 @@ static void stm32_setpwrctrl(struct stm32_dev_s *priv, uint32_t pwrctrl)
   regval &= ~STM32_SDMMC_POWER_PWRCTRL_MASK;
   regval |= pwrctrl;
   sdmmc_putreg32(priv, regval, STM32_SDMMC_POWER_OFFSET);
-}
-
-/****************************************************************************
- * Name: stm32_getpwrctrl
- *
- * Description:
- *   Return the current value of the  the PWRCTRL field of the SDIO POWER
- *   register.  This function can be used to see if the SDIO is powered ON
- *   or OFF
- *
- * Input Parameters:
- *   priv  - Instance of the SDMMC private state structure.
- *
- * Returned Value:
- *   The current value of the  the PWRCTRL field of the SDIO POWER register.
- *
- ****************************************************************************/
-
-static inline uint32_t stm32_getpwrctrl(struct stm32_dev_s *priv)
-{
-  return sdmmc_getreg32(priv, STM32_SDMMC_POWER_OFFSET) &
-    STM32_SDMMC_POWER_PWRCTRL_MASK;
 }
 
 /****************************************************************************
