@@ -1455,7 +1455,8 @@ static int validate_frame_setting(enum v4l2_buf_type type,
   convert_to_imgsensorfmt(&vfmt[VIDEO_FMT_SUB], &sf[IMGSENSOR_FMT_SUB]);
   convert_to_imgsensorinterval(interval, &si);
 
-  ret = g_video_sensor_ops->validate_frame_setting(type, nr_fmt, sf, &si);
+  ret = g_video_sensor_ops->validate_frame_setting(
+             type == V4L2_BUF_TYPE_STILL_CAPTURE, nr_fmt, sf, &si);
   if (ret != OK)
     {
       return ret;
