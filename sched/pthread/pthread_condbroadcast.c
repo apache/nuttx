@@ -73,7 +73,7 @@ int pthread_cond_broadcast(FAR pthread_cond_t *cond)
 
       /* Get the current value of the semaphore */
 
-      if (nxsem_get_value((FAR sem_t *)&cond->sem, &sval) != OK)
+      if (nxsem_get_value(&cond->sem, &sval) != OK)
         {
           ret = EINVAL;
         }
@@ -88,7 +88,7 @@ int pthread_cond_broadcast(FAR pthread_cond_t *cond)
                * Only the highest priority waiting thread will get to execute
                */
 
-              ret = pthread_sem_give((FAR sem_t *)&cond->sem);
+              ret = pthread_sem_give(&cond->sem);
 
               /* Increment the semaphore count (as was done by the
                * above post).

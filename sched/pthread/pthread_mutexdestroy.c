@@ -101,7 +101,7 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
                * destruction of the semaphore impossible here.
                */
 
-              status = nxsem_reset((FAR sem_t *)&mutex->sem, 1);
+              status = nxsem_reset(&mutex->sem, 1);
               if (status < 0)
                 {
                   ret = -status;
@@ -122,7 +122,7 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
 
               else
                 {
-                  status = nxsem_destroy((FAR sem_t *)&mutex->sem);
+                  status = nxsem_destroy(&mutex->sem);
                   ret = (status < 0) ? -status : OK;
                 }
             }
@@ -139,7 +139,7 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
            * Perhaps this logic should all nxsem_reset() first?
            */
 
-          status = nxsem_destroy((FAR sem_t *)&mutex->sem);
+          status = nxsem_destroy(&mutex->sem);
           ret = ((status < 0) ? -status : OK);
         }
 
