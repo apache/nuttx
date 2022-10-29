@@ -74,7 +74,7 @@ int stm32_pwm_setup(void)
       /* Get an instance of the PWM interface */
 
       pwm = stm32_pwminitialize(NUCLEOH743ZI2_PWMTIMER);
-      if (!pwm)
+      if (pwm == NULL)
         {
           tmrerr("ERROR: Failed to get the STM32 PWM lower half\n");
           return -ENODEV;
