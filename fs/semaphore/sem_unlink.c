@@ -141,7 +141,7 @@ int sem_unlink(FAR const char *name)
    */
 
   inode_unlock();
-  ret = sem_close((FAR sem_t *)inode->u.i_nsem);
+  ret = sem_close(&inode->u.i_nsem->ns_sem);
   RELEASE_SEARCH(&desc);
   sched_unlock();
   return ret;
