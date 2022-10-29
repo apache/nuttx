@@ -40,6 +40,10 @@ ifeq ($(CONFIG_ESP32_PCNT_AS_QE),y)
   CSRCS += esp32_qencoder.c
 endif
 
+ifeq ($(CONFIG_SENSORS_MAX6675),y)
+  CSRCS += esp32_max6675.c
+endif
+
 ifeq ($(CONFIG_AUDIO_CS4344),y)
   CSRCS += esp32_cs4344.c
 endif

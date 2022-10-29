@@ -143,6 +143,10 @@
 #  include "esp32_lcd_backpack.h"
 #endif
 
+#ifdef CONFIG_SENSORS_MAX6675
+#  include "esp32_max6675.h"
+#endif
+
 #include "esp32-devkitc.h"
 
 /****************************************************************************
@@ -256,6 +260,14 @@ int esp32_bringup(void)
       syslog(LOG_ERR, "ERROR: esp32_pwm_setup() failed: %d\n", ret);
     }
 #endif /* CONFIG_ESP32_LEDC */
+
+#ifdef CONFIG_SENSORS_MAX6675
+  ret = board_max6675_initialize(0, 2);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: MAX6675 initialization failed: %d\n", ret);
+    }
+#endif
 
 #ifdef CONFIG_ESP32_TWAI
 
