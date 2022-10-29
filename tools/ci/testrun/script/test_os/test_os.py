@@ -39,7 +39,7 @@ def test_getprime(p):
     assert ret == 0
 
 
-@pytest.mark.second_to_last
+@pytest.mark.run(order=-2)
 def test_fs_test(p):
     if p.board in do_not_support:
         pytest.skip("unsupported at {}".format(p.board))
@@ -51,7 +51,7 @@ def test_fs_test(p):
     assert ret == 0
 
 
-@pytest.mark.last
+@pytest.mark.run(order=-1)
 def test_psram_test(p):
     if p.board in do_not_support:
         pytest.skip("unsupported at {}".format(p.board))
